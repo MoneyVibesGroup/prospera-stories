@@ -1,0 +1,921 @@
+version: "6.0.0"
+project_name: "prospera"
+project_level: 3
+current_sprint: 5
+sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
+
+# Révision 2026-07-04 : re-cadrage écosystème (voir docs/architecture-prospera-ecosystem-2026-07-04.md).
+# PROSPERA devient un écosystème multi-vertical. Ordre d'extraction : auth-service (IdP, racine)
+# → expert-comptable relying party → kyc-service rebasé → FedaPay. Bus inter-services = Kafka ;
+# jetons RS256/JWKS émis par auth-service ; Redis/BullMQ = jobs internes uniquement.
+# Révision 2026-07-07 : capacités partagées P7/P8 (architecture-{catalog,bilan}-service-2026-07-07.md).
+# Ajout EPIC-007 catalog-service (catalogue + entitlements + topic entitlement.changed) puis
+# EPIC-008 bilan-service (squelette : read-models + gate rejoué + référentiel pluggable ; le
+# fonctionnel comptable = EPIC-009, en attente du PRD/tech-spec Bilan dédié). Séquence complète :
+# auth → EC relying party → kyc rebasé → FedaPay (fin MVP vertical) → catalog → bilan → verticaux futurs.
+# Révision 2026-07-10 (PLAN FINAL — docs/synthese-services-prospera-2026-07-10.md) : re-cadrage programme.
+# Dogfooding interne (Money Vibes Group = client zéro) ; 18 modules → 18 services (voir program_backlog).
+# Décisions actées : NC-1 (catalog-service → platform-catalog-service) ; AD-2 (chaîne KYC d'abord :
+# admin-panel v1 + document-service v1 OCR livrés en 1er, sept. 2026 → décale Bilan +1 mois) ;
+# NB-1 (Bilan v1 par import de balance + prévisionnel = EPIC-009) ; PA-1 (EPIC-004 rescopé :
+# checkout/webhooks → paiement-service PI SPI BCEAO/FedaPay ; plans/abonnement → vertical) ;
+# DG-1 (dogfooding : N/N-1 & routage multi-version différés jusqu'au 1er client externe).
+# Ordre de construction Phase 1/2 : voir program_backlog. Sprints 7+ à re-planifier JIT par module.
+services:
+  - name: "expert-comptable"
+    port: 3000
+    database: "expert_comptable"
+    role: "vertical métier (relying party)"
+  - name: "auth-service"
+    port: 3001
+    database: "auth_service"
+    role: "IdP (émetteur JWT RS256, identité)"
+    status: "in_progress"  # STORY-022→027 done (scaffold+Kafka, identité, RS256/JWKS, vérif e-mail/invitations, users/rôles/seed, événements identity.* + admin orgs). EPIC-005 clos. EPIC-006 clos 2026-07-09 : EC est désormais relying party PUR (STORY-028 JWKS, 029 read-models, 030 cutover) — l'IdP est l'unique propriétaire d'identité
+  - name: "kyc-service"
+    port: 3002
+    database: "kyc_service"
+    role: "capacité partagée KYC (relying party)"
+    status: "in_progress"  # STORY-020 (scaffold + migration KYC) + STORY-021 (events kyc.status.changed via outbox transactionnel + read-model EC + e-mails) done & vérifiés docker bout-en-bout 2026-07-10. KYC event-driven de bout en bout. Reste EPIC-003 : STORY-013 (revue admin → transitions APPROVED/REJECTED, déjà émises par l'outbox), 014 (TenantStateGuard lisant le read-model)
+  - name: "platform-catalog-service"  # ex catalog-service (renommage NC-1, PLAN FINAL 2026-07-10)
+    port: 3003
+    database: "catalog_service"
+    role: "capacité plateforme : catalogue modules/versions/référentiels + entitlements (relying party)"
+    status: "not_started"  # EPIC-007 (STORY-031→034) — architecture-catalog-service-2026-07-07.md
+  - name: "bilan-service"
+    port: 3004
+    database: "bilan_service"
+    role: "capacité partagée : états financiers, moteur pluggable par référentiel (relying party)"
+    status: "not_started"  # EPIC-008 (STORY-035→038, squelette) + EPIC-009 (moteur v1 = import balance + table SYSCOHADA/SFD + états + prévisionnel, NB-1) → PRD Bilan (docs/prd-bilan-service-*.md)
+  - name: "paiement-service"
+    port: 3005
+    database: "paiement_service"
+    role: "capacité plateforme : checkout/webhooks PI SPI BCEAO + FedaPay, abonnements (relying party)"
+    status: "proposed"  # Module 2 (déc. 2026) — EPIC-004 rescopé (PA-1) ; dépend PS-1 (accès SPI, délai admin externe) + décision C8 (M2M) ; PRD paiement à venir
+  - name: "admin-panel"
+    port: 3010
+    database: null
+    role: "BFF admin (AD-2, flux A) : vue agrégée orgs + revue/validation KYC + grants proxifiés — ne possède aucune donnée"
+    status: "proposed"  # Module 0 (sept. 2026) — tech-spec courte docs/tech-spec-admin-panel-*.md
+  - name: "document-service"
+    port: 3006
+    database: "document_service"
+    role: "OCR KYC v1 (AD-2 flux B, DO-1) : consomme kyc.document.uploaded, extraction RCCM/CFE (Tesseract/OcrProvider) → document.extrait"
+    status: "proposed"  # Module 0 (sept. 2026) — tech-spec courte docs/tech-spec-document-service-*.md ; extensions (factures fournisseurs, dossiers Crédit) différées
+
+# ── Programme PLAN FINAL 2026-07-10 : 18 modules → services (ordre de construction) ───────────────
+# Phase 0 (socle) = déjà couverte par les sprints ci-dessus (auth, EC relying party, kyc,
+# platform-catalog, bilan squelette). Phase 1 = dogfooding interne. Chaque module est planifié
+# JIT (1-2 sprints avant) via /bmad:sprint-planning à la sortie de son PRD/tech-spec.
+program_backlog:
+  phase_1:
+    - module: 0
+      name: "Chaîne KYC complète (AD-2)"
+      services: ["admin-panel", "document-service"]
+      target_internal: "2026-09"
+      status: "proposed"
+      spec: "tech-specs courtes (admin-panel v1 BFF ; document-service v1 OCR KYC strict DO-1)"
+    - module: 1
+      name: "Bilan & prévisionnel (NB-1)"
+      services: ["bilan-service"]
+      epic: "EPIC-008 (squelette) + EPIC-009 (moteur v1)"
+      target_internal: "2026-10"
+      status: "proposed"
+      spec: "PRD Bilan (import balance + table SYSCOHADA/SFD + états + prévisionnel)"
+    - module: 2
+      name: "PI SPI (PA-1)"
+      services: ["paiement-service"]
+      epic: "EPIC-004 (rescopé)"
+      target_internal: "2026-12"
+      status: "proposed"
+      spec: "PRD paiement (SpiProvider BCEAO + FedapayProvider) ; dépend PS-1 (délai admin externe) + C8"
+    - module: 3
+      name: "Fiscalité"
+      services: ["fiscal-service"]
+      target_internal: "2027-02"
+      status: "proposed"
+      spec: "PRD fiscal ; décision FI-2 (moteur d'écritures comptabilite-service) à trancher ici"
+    - module: 4
+      name: "Conformité BCEAO & LCB/FT"
+      services: ["conformite-service"]
+      target_internal: "2027-04"
+      status: "proposed"
+      spec: "screening sanctions/PEP, seuils, audit, reporting CENTIF (patron kyc réutilisé)"
+    - module: null
+      name: "notification-service (insertion socle avant module 5)"
+      services: ["notification-service"]
+      status: "proposed"
+      spec: "e-mail/SMS centralisés — socle des modules 5, 11, 17"
+    - module: 5
+      name: "Support client / Relance"
+      services: ["support-service"]
+      target_internal: "2027-06"
+      status: "proposed"
+  phase_2:
+    - { module: 6,  name: "Commercial / Agent terrain", services: ["crm-service"],                status: "proposed" }
+    - { module: 7,  name: "Crédit (cœur IMF)",          services: ["credit-service"],             status: "proposed" }
+    - { module: 8,  name: "Équipe",                     services: ["equipe-service"],             status: "proposed" }
+    - { module: 9,  name: "Dashboard",                  services: ["reporting-service"],          status: "proposed" }
+    - { module: 10, name: "Collecte",                   services: ["collecte-service"],           status: "proposed" }
+    - { module: 11, name: "Recouvrement",               services: ["recouvrement-service"],       status: "proposed" }
+    - { module: 12, name: "Finance (Transactions)",     services: ["tresorerie-service"],         status: "proposed" }
+    - { module: 13, name: "Stock",                      services: ["stock-service"],              status: "proposed" }
+    - { module: 14, name: "Catalogue produits",         services: ["catalogue-produits-service"], status: "proposed" }
+    - { module: 15, name: "Commande",                   services: ["commande-service"],           status: "proposed" }
+    - { module: 16, name: "Facturation",                services: ["facturation-service"],        status: "proposed" }
+    - { module: 17, name: "Marketing",                  services: ["marketing-service"],          status: "proposed" }
+    - { module: 18, name: "Point de vente (PDV)",       services: ["pdv-service"],                status: "proposed" }
+  deferred_foundations:
+    - name: "comptabilite-service (moteur d'écritures)"
+      trigger: "TVA fine (module 3) / 1er client voulant saisir / auto Facturation→compta (FI-2)"
+      status: "deferred"
+    - name: "document-service (extensions : factures fournisseurs, dossiers Crédit)"
+      trigger: "compta/facturation ; module 7 Crédit"
+      status: "deferred"
+    - name: "ia-service (Qwen — anomalies, imputation, analyse, chat)"
+      trigger: "passage équipe 5/7 ou demande client (propositions IA-0…IA-5)"
+      status: "deferred"
+    - name: "verticaux formels (distributeur / microfinance / assurance / Money Vibes App)"
+      trigger: "1er client externe de chaque segment (forme mince : plans, abonnement, provisioning)"
+      status: "deferred"
+
+# Environnement : démarrage exclusivement via Docker. À partir de STORY-022, le docker-compose.yml
+# est au niveau RACINE du dépôt PROSPERA (tous les services + MongoDB replica set + Kafka (KRaft)
+# + Redis + MinIO + Mailhog). Avant STORY-022 : docker-compose.yml dans expert-comptable/.
+runtime: "docker-compose"
+
+sprints:
+  - sprint_number: 1
+    start_date: "2026-07-02"
+    end_date: "2026-07-16"
+    capacity_points: 34
+    committed_points: 33
+    completed_points: 33
+    status: "completed"
+    goal: "Socle technique + CI, inscription tenant, authentification (login/refresh/logout), e-mail vérifié, seed super-admin plateforme."
+    stories:
+      - story_id: "STORY-001"
+        title: "Scaffolding NestJS + config + Swagger + health"
+        epic: "EPIC-000"
+        points: 5
+        status: "completed"
+        doc: "docs/stories/STORY-001.md"
+        completion_date: "2026-07-02"
+        actual_points: 5
+        assigned_to: "vivian"
+      - story_id: "STORY-002"
+        title: "Infra docker-compose + Mongoose/Bull"
+        epic: "EPIC-000"
+        points: 3
+        status: "completed"
+        doc: "docs/stories/STORY-002.md"
+        completion_date: "2026-07-02"
+        actual_points: 3
+        assigned_to: "vivian"
+      - story_id: "STORY-003"
+        title: "Socle transverse (logs, exceptions, contexte) + CI"
+        epic: "EPIC-000"
+        points: 5
+        status: "completed"
+        doc: "docs/stories/STORY-003.md"
+        completion_date: "2026-07-02"
+        actual_points: 5
+        assigned_to: "vivian"
+      - story_id: "STORY-004"
+        title: "Inscription tenant + super-admin"
+        epic: "EPIC-001"
+        points: 5
+        status: "completed"
+        doc: "docs/stories/STORY-004.md"
+        completion_date: "2026-07-02"
+        actual_points: 5
+        assigned_to: "vivian"
+      - story_id: "STORY-005"
+        title: "Auth login/refresh/logout + guards"
+        epic: "EPIC-001"
+        points: 8
+        status: "completed"
+        doc: "docs/stories/STORY-005.md"
+        completion_date: "2026-07-02"
+        actual_points: 8
+        assigned_to: "vivian"
+      - story_id: "STORY-006"
+        title: "Vérification e-mail"
+        epic: "EPIC-001"
+        points: 5
+        status: "completed"
+        doc: "docs/stories/STORY-006.md"
+        completion_date: "2026-07-03"
+        actual_points: 5
+        assigned_to: "vivian"
+      - story_id: "STORY-007"
+        title: "Seed PLATFORM_ADMIN + squelette Admin"
+        epic: "EPIC-001"
+        points: 2
+        status: "completed"
+        doc: "docs/stories/STORY-007.md"
+        completion_date: "2026-07-03"
+        actual_points: 2
+        assigned_to: "vivian"
+
+  - sprint_number: 2
+    start_date: "2026-07-16"
+    end_date: "2026-07-30"
+    capacity_points: 34
+    committed_points: 23
+    completed_points: 23
+    status: "completed"
+    # Sprint 2 clôturé à 23/23. STORY-013/014 dé-committées le 2026-07-03 (extraction KYC),
+    # puis re-scopées à nouveau le 2026-07-04 (re-cadrage écosystème) — cf. sprints 5-6.
+    goal: "Gestion des utilisateurs du tenant avec isolation multi-tenant testée, et socle KYC (soumission RCCM/CFE + statut) au sein d'expert-comptable."
+    stories:
+      - story_id: "STORY-010"
+        title: "Isolation multi-tenant + tests"
+        epic: "EPIC-002"
+        points: 5
+        status: "completed"
+        doc: "docs/stories/STORY-010.md"
+        completion_date: "2026-07-03"
+        actual_points: 5
+        assigned_to: "vivian"
+      - story_id: "STORY-008"
+        title: "Invitation + acceptation"
+        epic: "EPIC-002"
+        points: 5
+        status: "completed"
+        doc: "docs/stories/STORY-008.md"
+        completion_date: "2026-07-03"
+        actual_points: 5
+        assigned_to: "vivian"
+      - story_id: "STORY-009"
+        title: "CRUD utilisateurs + garde-fous"
+        epic: "EPIC-002"
+        points: 5
+        status: "completed"
+        doc: "docs/stories/STORY-009.md"
+        completion_date: "2026-07-03"
+        actual_points: 5
+        assigned_to: "vivian"
+      - story_id: "STORY-011"
+        title: "Stockage S3/MinIO + upload RCCM/CFE"
+        epic: "EPIC-003"
+        points: 5
+        status: "completed"
+        doc: "docs/stories/STORY-011.md"
+        completion_date: "2026-07-03"
+        actual_points: 5
+        assigned_to: "vivian"
+      - story_id: "STORY-012"
+        title: "Statut KYC + machine à états + notifications"
+        epic: "EPIC-003"
+        points: 3
+        status: "completed"
+        doc: "docs/stories/STORY-012.md"
+        completion_date: "2026-07-03"
+        actual_points: 3
+        assigned_to: "vivian"
+
+  # ── Re-cadrage écosystème 2026-07-04 : sprints 3-7 ────────────────────────────
+  - sprint_number: 3
+    start_date: "2026-07-30"
+    end_date: "2026-08-13"
+    capacity_points: 34
+    committed_points: 24
+    completed_points: 24  # STORY-022/023/024 tous done et vérifiés docker bout-en-bout (2026-07-07)
+    status: "completed"
+    goal: "auth-service (IdP) émet des JWT RS256 en standalone : scaffold + compose racine avec Kafka, modèle d'identité (Organizations/Users/Memberships + register), login/refresh/logout + JWKS."
+    stories:
+      - story_id: "STORY-022"
+        title: "Scaffold auth-service + compose racine + Kafka (KRaft)"
+        epic: "EPIC-005"
+        points: 8
+        service: "auth-service"
+        status: "done"  # validé 2026-07-07 : blocage Kafka levé (miroir registry mirror.gcr.io + fix listeners 0.0.0.0→hôte vide) ; round-trip Kafka corrigé (race produce-avant-assignment) et prouvé sur broker réel (« Kafka round-trip OK ») ; stack racine démarré bout-en-bout, :3001/health 200 (mongo+kafka up). lint 0, 133 unit + 13 e2e
+        story_path: "docs/stories/STORY-022.md"
+        assigned_to: null
+      - story_id: "STORY-023"
+        title: "Modèle d'identité : Organizations + Users + Memberships + register atomique"
+        epic: "EPIC-005"
+        points: 8
+        service: "auth-service"
+        status: "done"  # validé 2026-07-07 : register atomique vérifié bout-en-bout sur stack complet (mongo rs0 + kafka healthy) — 201 / doublon 409 générique / DTO 400 ; 6 findings corrigés (throttler, hooks post-commit, abort gardé) ; lint 0, tests 95/95, coverage OK
+        story_path: "docs/stories/STORY-023.md"
+        assigned_to: null
+      - story_id: "STORY-024"
+        title: "Auth RS256 + JWKS + login/refresh rotatif/logout"
+        epic: "EPIC-005"
+        points: 8
+        service: "auth-service"
+        status: "done"  # validé 2026-07-07 : régression `register` (404) restaurée, 7 findings corrigés. Suite e2e verte : 133 unit + 13 e2e. VÉRIF DOCKER BOUT-EN-BOUT RÉALISÉE (blocage Kafka levé) : login → access RS256 décodé (kid + claims) → JWKS → signature vérifiée cryptographiquement (crypto.verify) + token falsifié rejeté → refresh rotatif (réutilisation → 401) → logout (refresh → 401). lint 0, coverage 97.06/80.59/97.67/96.96
+        story_path: "docs/stories/STORY-024.md"
+        assigned_to: vivian
+
+  - sprint_number: 4
+    start_date: "2026-08-13"
+    end_date: "2026-08-27"
+    capacity_points: 34
+    committed_points: 20
+    completed_points: 20  # STORY-025/026/027/028 tous done & vérifiés docker bout-en-bout (2026-07-08) ; EPIC-005 clos + EPIC-006 amorcé (EC valide via JWKS)
+    status: "completed"
+    goal: "auth-service complet (vérif e-mail, invitations, gestion users/rôles, seed admin, événements identity.*) et expert-comptable valide les JWT via JWKS."
+    stories:
+      - story_id: "STORY-025"
+        title: "Vérification e-mail + invitations + file mail interne (BullMQ)"
+        epic: "EPIC-005"
+        points: 5
+        service: "auth-service"
+        status: "done"  # implémentée + vérifiée 2026-07-07 : docker/Mailhog e2e TOUT VERT (register→verify→login emailVerified ; invite→accept→login invité). Revue story↔code → 4 correctifs (isolation d'org resend-invitation ; TTL jetons configurables ; templates .hbs non packagés dans dist ; log des échecs d'envoi). unit 167/167 + e2e 13/13 verts, lint 0, build OK. Reste : /code-review formel + .env.example à confirmer + commit sur demande
+        story_path: "docs/stories/STORY-025.md"
+        assigned_to: null
+      - story_id: "STORY-026"
+        title: "Gestion utilisateurs + rôles + memberships + seed PLATFORM_ADMIN"
+        epic: "EPIC-005"
+        points: 5
+        service: "auth-service"
+        status: "done"  # validé 2026-07-08 : la revue a révélé un P0 (mutations PATCH/DELETE & /users/me cassés — findByUserAndOrg/findActiveByUser ne coerçaient pas string→ObjectId → 404 partout ; invisible aux unit/e2e mockés). Corrigé + garde-fou dernier admin rendu TRANSACTIONNEL (UserManagementService) + login SUSPENDED→401 générique + soft-delete non réversible + couverture dé-maquillée (exclusions users/org controllers + invitation + seed retirées). lint 0, build OK, 207 unit verts, coverage 95.22/80.89/96.62/95.25. VÉRIF DOCKER BOUT-EN-BOUT OK (me/liste/patch/suspend→401/soft-delete/garde-fou 409/isolation 404/RBAC 403/seed PLATFORM_ADMIN roles+org:null). identity.* & admin plateforme = STORY-027. Reste : /code-review formel + commit sur demande
+        story_path: "docs/stories/STORY-026.md"
+        assigned_to: null
+      - story_id: "STORY-027"
+        title: "Événements identity.* (producteur Kafka + outbox) + admin organisations"
+        epic: "EPIC-005"
+        points: 5
+        service: "auth-service"
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-08 : outbox transactionnel (enqueue sous session) + relais polling (SENT/retry, tolérant Kafka down) + contrat identity.* v1 (5 topics) + admin plateforme orgs (list/detail/suspend, inter-org, PLATFORM_ADMIN). Broker réel : register→3 events, invite/patch/suspend→membership.changed+user.suspended, admin suspend→org.updated, Kafka down→PENDING→up→SENT. lint 0, build OK, 237 unit + 13 e2e, cov 96.06/83.09/97.64/96.1 (fichiers story 100%). Reste : /code-review formel + commit sur demande
+        story_path: "docs/stories/STORY-027.md"
+        assigned_to: null
+      - story_id: "STORY-028"
+        title: "expert-comptable valide via JWKS (bascule HS256 → RS256)"
+        epic: "EPIC-006"
+        points: 5
+        service: "expert-comptable"
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-08 : JwtStrategy dual-mode HS256↔RS256/JWKS derrière flag AUTH_MODE (jwks-rsa : cache/rotation kid, RS256 imposé anti algorithm-confusion, iss/aud vérifiés) ; mapping org→tenantId, roles[]→role ; guards inchangés. lint 0, build OK, 258 unit + 94 e2e verts (dont 11 e2e JWKS), jwt.strategy.ts cov 100%. VÉRIF DOCKER (AUTH_MODE=rs256) : login IdP :3001 → JWT RS256 → expert-comptable :3000 /auth/me validé via JWKS (200, org:null→tenantId:null, roles→role PLATFORM_ADMIN) ; sans token/altéré/HS256 forgé → 401 (algorithm-confusion confirmé sur service réel). Runtime restauré en hs256 (défaut legacy) jusqu'au cutover STORY-030. RESTE : /code-review formel + commit sur demande
+        story_path: "docs/stories/STORY-028.md"
+        assigned_to: null
+
+  - sprint_number: 5
+    start_date: "2026-08-27"
+    end_date: "2026-09-10"
+    capacity_points: 34
+    committed_points: 21
+    completed_points: 21  # STORY-029 (8) + STORY-030 (5) + STORY-020 (8) done & vérifiés docker bout-en-bout ; EPIC-006 clos (2026-07-09), kyc-service scaffoldé + KYC extrait (2026-07-10)
+    status: "completed"
+    goal: "expert-comptable devient pleinement relying party (read-models d'identité via Kafka, cutover, retrait des modules d'identité) ; kyc-service scaffoldé dans la nouvelle topologie."
+    stories:
+      - story_id: "STORY-029"
+        title: "Read-models identité + consumer identity.* (Kafka) + provisioning"
+        epic: "EPIC-006"
+        points: 8
+        service: "expert-comptable"
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-08 : 1er consumer Kafka du vertical (client kafkajs @Global + consumer group expert-comptable-identity sur les 5 topics identity.*). Read-models Organization/User/Membership (état absolu + LWW horodaté) + ProcessedIdentityEvent (eventId unique, TTL 30j, transaction) + provisioning OrgProfile (PENDING_DOCUMENTS) + IdentityReadModelService (résolutions admins/destinataires/coupure suspension). /health inclut kafka ; compose EC : KAFKA_BROKERS + depends_on kafka. lint 0, build OK, 285 unit (projection+read-model 100%) + 94 e2e verts, cov 99.44/90/98.55/99.4. VÉRIF DOCKER : register IdP→read-models peuplés + org_profile provisionné ; admin suspend→org read-model SUSPENDED ; rejeu offsets earliest→0 doublon, 25 events dédupliqués. /code-review xhigh passée : 5 constats, 4 corrigés (insert-guard anti read-model partiel, garde ré-entrance consumer `starting`, garde anti-poison occurredAt, LWW `>` strict) + 1 décision conservée (Kafka dans /health, aligné auth-service). Re-vérif docker OK (suspend préserve le name). lint 0, 288 unit + 94 e2e. RESTE : commit sur demande
+        story_path: "docs/stories/STORY-029.md"
+        assigned_to: null
+      - story_id: "STORY-030"
+        title: "Retrait des modules d'identité + cutover + e2e cross-service"
+        epic: "EPIC-006"
+        points: 5
+        service: "expert-comptable"
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-09 : cutover relying party PUR. Retrait émission (AuthService/TokenService/routes register-login-refresh-logout-verify) — reste seul GET /auth/me (écho JWT). JwtStrategy RS256/JWKS-only (branche HS256 retirée → algorithm-confusion éliminé). UsersModule/TenantsModule/seed/PasswordService/bcrypt supprimés ; Role+KycStatus relocalisés en common/enums. KYC ancré sur OrgProfile (OrgProfileService, clé orgId) au lieu de Tenant. Mail → read-model (resolveUserContact). AUTH_JWKS_URI/ISSUER/AUDIENCE requis ; compose sans secrets d'émission. NOUVEAU IdentitySuspensionGuard (coupure org/user SUSPENDED, fail-open sur absence) câblé après RolesGuard — enforce la coupure que STORY-029 n'avait pas branchée (matrice KYC/abonnement complète = STORY-014). lint 0, build OK, 149 unit (28 suites) + 37 e2e (RS256 minté) verts, cov 99.58/88.80/99.20/99.54. VÉRIF DOCKER : register IdP :3001 → RS256 → EC :3000 /auth/me via JWKS (org→tenantId, roles→role) ; identity.* → read-models + org_profile provisionnés ; /kyc/status → 200 (OrgProfile) ; HS256 forgé → 401 ; legacy /auth/login,/auth/register,/users → 404 ; suspend org (IdP) → read-model SUSPENDED → même jeton valide refusé 403 (/kyc/status + /auth/me). Clôt EPIC-006. RESTE : /code-review formel + commit sur demande
+        story_path: "docs/stories/STORY-030.md"
+        assigned_to: null
+      - story_id: "STORY-020"
+        title: "Scaffold kyc-service (compose racine) + migration upload/statut + validation JWKS"
+        epic: "EPIC-003"
+        points: 8
+        service: "kyc-service"
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-10 : nouveau micro-service kyc-service (:3002, base kyc_service) *relying party* PUR RS256/JWKS (calqué auth-service/EC ; socle common/ dupliqué, JwtStrategy validate-only, algorithms:['RS256'], iss/aud). StorageModule (MinIO) + module KYC déplacés depuis EC et RÉ-ANCRÉS sur la collection possédée TenantKycProfile (clé orgId, création lazy upsert) — remplace la dépendance OrgProfile. AUCUN e-mail, AUCUN événement (déférés STORY-021). KafkaModule squelette (health kafka). Bloc kyc-service AJOUTÉ au compose racine existant (+ override hot-reload) ; CI matrice 3 services [expert-comptable, auth-service, kyc-service]. Retraits EC : modules/kyc/, storage/, file-signature.util, MinioConfig, imports app.module ; e2e KYC déplacés dans kyc-service/test/ ; OrgProfile.kycStatus devient read-model pur (figé jusqu'à 021). kyc-service : lint 0, build OK, 102 unit + 21 e2e, cov 99.78/86.4/100/99.76. EC après retraits : lint 0, build OK, 116 unit + 18 e2e. VÉRIF DOCKER (stack 3 apps + mongo rs0 + kafka + minio + mailhog) : register IdP :3001 → verify (Mailhog) → login → JWT RS256 (aud=[expert-comptable,kyc-service]) → :3002 GET /kyc/status PENDING → upload RCCM(pdf)+CFE(jpeg) 201 (magic-bytes, MinIO) → GET /kyc/status UNDER_REVIEW (2 docs) ; sans token/HS256 forgé/RS256 altéré → 401 (algorithm-confusion écartée) ; /auth/me → 404 (aucun endpoint d'auth). RESTE : /code-review formel + STORY-021 (events/read-model/e-mails, à enchaîner) + commit sur demande
+        story_path: "docs/stories/STORY-020.md"
+        assigned_to: null
+
+  - sprint_number: 6
+    start_date: "2026-09-10"
+    end_date: "2026-09-24"
+    capacity_points: 34
+    committed_points: 17
+    completed_points: 15  # STORY-021 (5) + STORY-013 (5) + STORY-014 (5, TenantStateGuard + re-soumission — vérif docker 2026-07-10) done. Reste STORY-015 (plans, 2 pts)
+    status: "in_progress"
+    goal: "KYC extrait de bout en bout (topic Kafka kyc.status.changed, read-model + e-mails, revue admin, TenantStateGuard) ; catalogue de plans FedaPay."
+    stories:
+      - story_id: "STORY-021"
+        title: "Topic kyc.status.changed (Kafka) + consumer read-model + e-mails"
+        epic: "EPIC-003"
+        points: 5
+        service: "both"
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-10. PRODUCTEUR (kyc-service) : transactional outbox (patron STORY-027) — OutboxEvent/OutboxService.enqueue(session)/OutboxRelayService/KafkaProducerService + KycEventsService (contrat KycStatusChangedEventV1 v1) ; KycStatusService rendu TRANSACTIONNEL (transition conditionnelle sur l'état `from` + enqueue outbox dans une même session Mongo ; actorUserId réintroduit) ; TenantKycProfileRepository.transition(session). CONSOMMATEUR (expert-comptable) : KycEventsConsumer (group expert-comptable-kyc) + KycEventsProjectionService (transaction : ProcessedKycEvent unique puis read-model ABSOLU via OrgProfileService.updateKycStatus étendu $set/$unset + kycReviewedBy ajouté ; e-mails submitted(actorUserId)/approved/rejected(org admins) enfilés jobId déterministe). 2 templates hbs + MailerService.sendKycApproved/Rejected + MailProcessor cases. 2 BUGS TROUVÉS EN DOCKER & CORRIGÉS : (1) jobId BullMQ interdit `:` → séparateur `__` ; (2) MailModule ORPHELIN (worker MailProcessor jamais chargé depuis le cutover) + collision de file `mail` avec auth-service sur Redis partagé → MailModule importé par KycEventsModule + files renommées `expert-comptable-mail`/`expert-comptable-system` (unicité inter-services). kyc-service : lint 0, 117 unit + 21 e2e, cov 99.82/88.39/100/99.8. EC : lint 0, 128 unit + 18 e2e, cov 98.9/87.78/98.23/98.79. VÉRIF DOCKER : upload RCCM+CFE (:3002) → transition UNDER_REVIEW → 1 outbox event SENT → EC org_profiles.kycStatus=UNDER_REVIEW (read-model, champs de revue $unset) + ProcessedKycEvent marker + e-mail de soumission délivré (Mailhog, « soumission KYC envoyé »). Lève la régression de STORY-020. RESTE : /code-review formel + commit sur demande
+        story_path: "docs/stories/STORY-021.md"
+        assigned_to: null
+      - story_id: "STORY-013"
+        title: "Revue KYC admin global (kyc-service)"
+        epic: "EPIC-003"
+        points: 5
+        service: "kyc-service"
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-10 (18 assertions OK/0 KO). KycAdminController(@Roles PLATFORM_ADMIN)/KycAdminService (file de revue, détail + URLs présignées, approve/reject 404/409), StorageService.presignedGetUrl, TenantKycProfileRepository.listByStatus, KycStatusService.approve/rejectByAdmin (runTransition→bool). lint 0, build OK, 129 unit + 33 e2e (dont 12 e2e admin), cov ≥ 65/90/90/90. VÉRIF DOCKER : upload→UNDER_REVIEW→file admin→détail+URL présignée téléchargeable(200)→approve→APPROVED ; outbox kyc.status.changed{APPROVED,reviewedBy} SENT ; read-model EC=APPROVED ; e-mail d'approbation (Mailhog) ; re-décision→409 ; 404 inconnu/malformé ; 403/401 RBAC ; flux rejet→REJECTED+motif. RESTE : /code-review + commit/push branche STORY-013
+        story_path: "docs/stories/STORY-013.md"
+        assigned_to: null
+      - story_id: "STORY-014"
+        title: "TenantStateGuard (read-models KYC + identité) + re-soumission"
+        epic: "EPIC-003"
+        points: 5
+        service: "expert-comptable+kyc-service"
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-10. EC : IdentitySuspensionGuard promu en TenantStateGuard (5ᵉ maillon, même position APP_GUARD) = coupure suspension org/user (héritée STORY-030) + matrice déclarative @RequiresTenantState/@RequiresKycApproved lisant OrgProfile.kycStatus (read-model local, aucun appel réseau) ; palier KYC = deny-by-default (preuve positive APPROVED ; profil absent/tenantId null → 403 KYC_NOT_APPROVED) ; palier abonnement PRÉPARÉ (code SUBSCRIPTION_REQUIRED) mais non appliqué (extension point EPIC-004, aucun endpoint ne l'exige). Nouvel endpoint relying-party GET /tenant/state (@AllowUnverified) exposant l'état effectif (emailVerified claim + kycStatus/kycRejectionReason read-model + subscriptionActive=false). KYC-SERVICE : re-soumission — onDocumentSubmitted gère REJECTED→UNDER_REVIEW (transition déjà autorisée) ; TenantKycProfileRepository.transition étendu d'un $unset (purge rejectionReason/reviewedAt/reviewedBy) ; versioning SUPERSEDED STORY-011 réutilisé ; outbox atomique. EC : lint 0, 140 unit + 24 e2e (dont tenant-state.e2e : gate KYC 403 KYC_NOT_APPROVED/200, suspension prime, /tenant/state), cov OK. kyc-service : lint 0, 135 unit + 35 e2e (dont re-soumission REJECTED→UNDER_REVIEW + motif purgé), cov OK. VÉRIF DOCKER (stack racine auth-service+EC+kyc-service+mongo rs0+kafka+minio+mailhog) : register IdP→verify(Mailhog)→login→/tenant/state PENDING(emailVerified true, subscriptionActive false) ; upload RCCM+CFE(:3002)→UNDER_REVIEW→Kafka→/tenant/state UNDER_REVIEW ; rejet admin→REJECTED+motif→/tenant/state REJECTED+kycRejectionReason ; ré-upload→REJECTED→UNDER_REVIEW, motif purgé (kyc-service + read-model EC) ; suspension org (IdP admin)→identity.*→read-model→TenantStateGuard coupe /tenant/state 403 « Accès suspendu » (non-régression du renommage). RESTE : /code-review formel + commit/push branche STORY-014
+        story_path: "docs/stories/STORY-014.md"
+        assigned_to: null
+      - story_id: "STORY-015"
+        title: "Catalogue de plans"
+        epic: "EPIC-004"
+        points: 2
+        service: "expert-comptable"  # reste côté vertical (PA-1 : plans/abonnement ≠ paiement-service)
+        status: "not_started"
+        assigned_to: null
+
+  # ── Phase 1 re-séquencée 2026-07-10 (sprint-planning) : catalog → bilan squelette → Module 0 ──
+  # (chaîne KYC) → Module 1 (Bilan EPIC-009…014) → Module 2 (paiement). Cibles calendaires du PLAN
+  # FINAL (KYC sept. / Bilan oct.) = hypothèse 3 devs/2 flux ; à vélocité historique (~24/sprint,
+  # 1 flux) la séquence s'étire — sprint-plan-phase1-2026-07-10.md.
+  - sprint_number: 7
+    start_date: "2026-09-24"
+    end_date: "2026-10-08"
+    capacity_points: 34
+    committed_points: 21
+    completed_points: 0
+    status: "not_started"
+    goal: "platform-catalog-service (EPIC-007) : catalogue Module/Version/Référentiel + entitlements grant/revoke + topic entitlement.changed. Socle des droits d'usage (P8), prérequis admin-panel + gate Bilan. + amorce Module 0 : kyc-service émet kyc.document.uploaded."
+    stories:
+      - story_id: "STORY-031"
+        title: "Scaffold platform-catalog-service (base catalog_service + relying party JWKS + health)"
+        epic: "EPIC-007"
+        points: 3
+        service: "platform-catalog-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-032"
+        title: "Catalogue : Module/ModuleVersion/ReferentielVersion + admin CRUD (PLATFORM_ADMIN) + garde-fou N/N-1"
+        epic: "EPIC-007"
+        points: 5
+        service: "platform-catalog-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-033"
+        title: "Entitlements : schéma (org × module) + grant/update/revoke + GET réconciliation + validation catalogue"
+        epic: "EPIC-007"
+        points: 5
+        service: "platform-catalog-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-034"
+        title: "Événements entitlement.changed (producteur Kafka + outbox) + auth service-à-service octroi (décision C8)"
+        epic: "EPIC-007"
+        points: 5
+        service: "platform-catalog-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-040"
+        title: "kyc-service : émettre kyc.document.uploaded (outbox) au dépôt de pièce"
+        epic: "EPIC-015"
+        points: 3
+        service: "kyc-service"
+        status: "not_started"  # prérequis document-service (DO-1) ; VÉRIFIER si déjà émis (STORY-020 n'émet que kyc.status.changed)
+        assigned_to: null
+
+  - sprint_number: 8
+    start_date: "2026-10-08"
+    end_date: "2026-10-22"
+    capacity_points: 34
+    committed_points: 21
+    completed_points: 0
+    status: "not_started"
+    goal: "bilan-service squelette (EPIC-008) : scaffold + read-models (entitlement/KYC) + gate @RequiresBilanAccess + ReferentielLoader — prêt à recevoir le moteur (EPIC-009…014). + Module 0 : scaffold document-service + OcrProvider."
+    stories:
+      - story_id: "STORY-035"
+        title: "Scaffold bilan-service (base bilan_service + relying party JWKS + health)"
+        epic: "EPIC-008"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-036"
+        title: "Read-models + consumers Kafka (entitlement.changed + kyc.status.changed) + idempotence"
+        epic: "EPIC-008"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-037"
+        title: "Gate @RequiresBilanAccess (emailVerified + KYC + entitlement, read-models locaux) + tests"
+        epic: "EPIC-008"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-038"
+        title: "ReferentielLoader (artefact + checksum + cache) + interface de référentiel + moteur squelette"
+        epic: "EPIC-008"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-041"
+        title: "Scaffold document-service (:3006, relying party JWKS, health, Kafka) + abstraction OcrProvider (Tesseract) + accès MinIO lecture"
+        epic: "EPIC-015"
+        points: 5
+        service: "document-service"
+        status: "not_started"
+        assigned_to: null
+
+  - sprint_number: 9
+    start_date: "2026-10-22"
+    end_date: "2026-11-05"
+    capacity_points: 34
+    committed_points: 24
+    completed_points: 0
+    status: "not_started"
+    goal: "Module 0 flux B (OCR KYC) : consumer kyc.document.uploaded → extraction RCCM/CFE → comparaison déclaré/lu → document.extrait ; kyc enrichit le dossier. + amorce admin-panel (scaffold + vue agrégée)."
+    stories:
+      - story_id: "STORY-042"
+        title: "document-service : consumer kyc.document.uploaded (idempotent) → lecture pièce (MinIO) → OCR extraction RCCM/CFE"
+        epic: "EPIC-015"
+        points: 5
+        service: "document-service"
+        status: "not_started"  # dépend STORY-040 (event) + STORY-041 (scaffold)
+        assigned_to: null
+      - story_id: "STORY-043"
+        title: "document-service : comparaison déclaré vs lu + détection expiré/illisible → producteur document.extrait (outbox)"
+        epic: "EPIC-015"
+        points: 5
+        service: "document-service"
+        status: "not_started"  # dépend STORY-042
+        assigned_to: null
+      - story_id: "STORY-044"
+        title: "document-service : persistance DocumentExtraction (keyé orgId) + (option) GET consultation extraction"
+        epic: "EPIC-015"
+        points: 3
+        service: "document-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-045"
+        title: "kyc-service : consommer document.extrait → enrichir le dossier de revue KYC (l'OCR assiste, ne décide pas)"
+        epic: "EPIC-015"
+        points: 3
+        service: "kyc-service"
+        status: "not_started"  # dépend STORY-043 ; invariant DO-1
+        assigned_to: null
+      - story_id: "STORY-046"
+        title: "Scaffold admin-panel (BFF :3010, relying party JWKS, RolesGuard PLATFORM_ADMIN, health, sans base, clients HTTP amont)"
+        epic: "EPIC-016"
+        points: 3
+        service: "admin-panel"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-047"
+        title: "admin-panel : vue agrégée des orgs (identité auth + KYC kyc + entitlements catalog) — list + détail, dégradation partielle"
+        epic: "EPIC-016"
+        points: 5
+        service: "admin-panel"
+        status: "not_started"  # dépend STORY-046 + STORY-013 (revue kyc) + STORY-033 (entitlements) + auth admin (026/027)
+        assigned_to: null
+
+  - sprint_number: 10
+    start_date: "2026-11-05"
+    end_date: "2026-11-19"
+    capacity_points: 34
+    committed_points: 22
+    completed_points: 0
+    status: "not_started"
+    goal: "Chaîne KYC complète livrée 🏁 (AD-2) : admin-panel actions proxifiées (revue KYC + grant entitlement) + e2e inscription→upload→OCR→revue→approbation. + Bilan EPIC-009 (import de balance)."
+    stories:
+      - story_id: "STORY-048"
+        title: "admin-panel : actions proxifiées — revue KYC approve/reject (→ kyc) + grant/revoke entitlement (→ catalog), relais du JWT admin"
+        epic: "EPIC-016"
+        points: 5
+        service: "admin-panel"
+        status: "not_started"  # dépend STORY-047 + STORY-013 + STORY-033
+        assigned_to: null
+      - story_id: "STORY-049"
+        title: "e2e chaîne KYC complète (docker) : inscription → upload → OCR (document.extrait) → revue admin-panel → approbation"
+        epic: "EPIC-016"
+        points: 3
+        service: "admin-panel"
+        status: "not_started"  # dépend STORY-045 + STORY-048 ; jalon Module 0
+        assigned_to: null
+      - story_id: "STORY-050"
+        title: "Import de balance Excel/CSV (upload, détection format, parsing, aperçu, stockage keyé orgId+exercice) — FR-001"
+        epic: "EPIC-009"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"  # dépend EPIC-008 (035-038)
+        assigned_to: null
+      - story_id: "STORY-051"
+        title: "Contrôle d'intégrité de la balance (équilibre débits/crédits + soldes, doublons, anomalies bloquantes) — FR-002"
+        epic: "EPIC-009"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-052"
+        title: "Import comparatif N-1 + association N/N-1 — FR-003"
+        epic: "EPIC-009"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-053"
+        title: "Mapping de colonnes assisté + profil d'import réutilisable — FR-004"
+        epic: "EPIC-009"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+
+  - sprint_number: 11
+    start_date: "2026-11-19"
+    end_date: "2026-12-03"
+    capacity_points: 34
+    committed_points: 23
+    completed_points: 0
+    status: "not_started"
+    goal: "Bilan — Référentiels & table de passage (EPIC-010) : interface de référentiel, mapping comptes→postes, paquets SYSCOHADA révisé + SFD-BCEAO, surcharges org."
+    stories:
+      - story_id: "STORY-054"
+        title: "Interface de référentiel + chargement via ReferentielLoader (résolution depuis read-model entitlement) — FR-005"
+        epic: "EPIC-010"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"  # cœur du découplage P7 (risque archi #2) ; dépend STORY-038
+        assigned_to: null
+      - story_id: "STORY-055"
+        title: "Table de passage comptes → postes d'états + gestion des comptes non mappés — FR-006"
+        epic: "EPIC-010"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-056"
+        title: "Paquet référentiel SYSCOHADA révisé (plan de comptes + table de passage, versionné/checksum) — FR-007"
+        epic: "EPIC-010"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-057"
+        title: "Paquet référentiel SFD-BCEAO (plan de comptes + table de passage) — FR-007"
+        epic: "EPIC-010"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-058"
+        title: "Surcharges de mapping par organisation (proposé/validé, tracé) — FR-008"
+        epic: "EPIC-010"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+
+  - sprint_number: 12
+    start_date: "2026-12-03"
+    end_date: "2026-12-17"
+    capacity_points: 34
+    committed_points: 23
+    completed_points: 0
+    status: "not_started"
+    goal: "Bilan — États financiers / liasse OHADA (EPIC-011) : Bilan, Compte de résultat, TFT/TAFIRE, notes annexes, contrôles de cohérence (N/N-1)."
+    stories:
+      - story_id: "STORY-059"
+        title: "Bilan (actif/passif) + colonnes N/N-1 + contrôle actif=passif — FR-009"
+        epic: "EPIC-011"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"  # dépend STORY-055 (mapping) + STORY-052 (N-1)
+        assigned_to: null
+      - story_id: "STORY-060"
+        title: "Compte de résultat + N/N-1 + cohérence résultat (CR = résultat au passif) — FR-010"
+        epic: "EPIC-011"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-061"
+        title: "Tableau des flux de trésorerie (TFT/TAFIRE) depuis Bilan N/N-1 + CR — FR-011"
+        epic: "EPIC-011"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-062"
+        title: "Notes annexes de la liasse (tableaux calculables ; zones « à compléter ») — FR-012"
+        epic: "EPIC-011"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-063"
+        title: "Contrôles de cohérence de la liasse (articulation Bilan↔CR↔TFT) — FR-013"
+        epic: "EPIC-011"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+
+  - sprint_number: 13
+    start_date: "2026-12-17"
+    end_date: "2026-12-31"
+    capacity_points: 34
+    committed_points: 21
+    completed_points: 0
+    status: "not_started"
+    goal: "Bilan — Validation & immutabilité (EPIC-012) + amorce Prévisionnel (EPIC-013) : cycle brouillon→validé, snapshot figé, exercices, audit ; hypothèses."
+    stories:
+      - story_id: "STORY-064"
+        title: "Cycle de vie brouillon → validé (l'humain valide ; gate sur contrôles bloquants) — FR-014"
+        epic: "EPIC-012"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-065"
+        title: "Snapshot figé immuable à la validation (append-only, versions conservées) — FR-015"
+        epic: "EPIC-012"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"  # invariant d'immutabilité (NFR-004)
+        assigned_to: null
+      - story_id: "STORY-066"
+        title: "Gestion des exercices comptables + chaînage N/N-1 + ré-ouverture contrôlée — FR-016"
+        epic: "EPIC-012"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-067"
+        title: "Piste d'audit (import, mapping, validation, export ; append-only) — FR-017"
+        epic: "EPIC-012"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-068"
+        title: "Prévisionnel : hypothèses paramétrables (croissance, marges, BFR, invest., financement) sur base validée — FR-018"
+        epic: "EPIC-013"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"  # dépend STORY-065 (snapshot validé)
+        assigned_to: null
+
+  - sprint_number: 14
+    start_date: "2026-12-31"
+    end_date: "2027-01-14"
+    capacity_points: 34
+    committed_points: 24
+    completed_points: 0
+    status: "not_started"
+    goal: "Bilan livré 🏁 : Prévisionnel (annuel 3 ans + trésorerie mensuel 12 mois + scénarios) & Consultation/Export (EPIC-013/014). Module 1 complet en prod interne MV."
+    stories:
+      - story_id: "STORY-069"
+        title: "Projection annuelle 3 ans (CR + trésorerie + bilan simplifié N+1..N+3) — FR-019"
+        epic: "EPIC-013"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-070"
+        title: "Plan de trésorerie mensuel 12 mois (encaissements/décaissements, échéancier BFR) — FR-020"
+        epic: "EPIC-013"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-071"
+        title: "Scénarios comparés (prudent/central/optimiste) — FR-021"
+        epic: "EPIC-013"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-072"
+        title: "Consultation des états & du prévisionnel (API structurée, N/N-1, gate) — FR-022"
+        epic: "EPIC-014"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-073"
+        title: "Export PDF/Excel de la liasse et du prévisionnel (fidèle au snapshot figé) — FR-023"
+        epic: "EPIC-014"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-074"
+        title: "Comparaison inter-exercices (évolution des postes sur ≥2 exercices validés) — FR-024"
+        epic: "EPIC-014"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
+
+  # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. ──
+  - sprint_number: 15
+    start_date: "2027-01-14"
+    end_date: "2027-01-28"
+    capacity_points: 34
+    committed_points: 24
+    completed_points: 0
+    status: "not_started"
+    goal: "paiement-service (EPIC-004, Module 2) : checkout PI SPI BCEAO + FedaPay, webhook idempotent, historique, dashboard + octroi d'entitlement à l'activation. À re-confirmer au PRD paiement (PS-1/C8)."
+    stories:
+      - story_id: "STORY-016"
+        title: "Checkout (SpiProvider BCEAO + FedapayProvider)"
+        epic: "EPIC-004"
+        points: 5
+        service: "paiement-service"  # rescopé PA-1 (ex expert-comptable)
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-017"
+        title: "Webhook signé + idempotent + activation"
+        epic: "EPIC-004"
+        points: 8
+        service: "paiement-service"  # rescopé PA-1 (ex expert-comptable)
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-018"
+        title: "Historique + expiration + relances"
+        epic: "EPIC-004"
+        points: 3
+        service: "paiement-service"  # rescopé PA-1 (ex expert-comptable)
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-019"
+        title: "Dashboard admin + e2e parcours complet"
+        epic: "EPIC-004"
+        points: 5
+        service: "paiement-service"  # rescopé PA-1 (ex expert-comptable)
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-039"
+        title: "expert-comptable : octroi d'entitlement catalog à l'activation d'abonnement (C8)"
+        epic: "EPIC-007"
+        points: 3
+        service: "expert-comptable"
+        status: "not_started"  # billing→catalog (C5) ; dépend STORY-017 + STORY-034 + C8 ; déplacé en Module 2 (l'octroi manuel via admin-panel couvre le dogfooding avant paiement)
+        assigned_to: null
+
+# ── Bilan fonctionnel : epics du PRD (docs/prd-bilan-service-2026-07-10.md, NB-1) ─────────────────
+# Ces epics détaillent l'ancien placeholder « EPIC-009 (moteur v1) ». Ils s'appuient sur le squelette
+# EPIC-008 (STORY-035→038). DÉCOUPÉS en stories STORY-050→074 et alloués aux sprints 10-14
+# (sprint-planning 2026-07-10 — sprint-plan-phase1-2026-07-10.md). Module 0 = EPIC-015/016 (STORY-040→049).
+bilan_functional_epics:
+  prd: "docs/prd-bilan-service-2026-07-10.md"
+  epics:
+    - id: "EPIC-009"
+      name: "Import & normalisation de balance"
+      frs: "FR-001..FR-004"
+      story_estimate: "4-6"
+      status: "proposed"
+    - id: "EPIC-010"
+      name: "Référentiels & table de passage (SYSCOHADA révisé + SFD-BCEAO)"
+      frs: "FR-005..FR-008"
+      story_estimate: "4-6"
+      status: "proposed"
+    - id: "EPIC-011"
+      name: "États financiers (liasse OHADA : Bilan, CR, TFT/TAFIRE, annexes)"
+      frs: "FR-009..FR-013"
+      story_estimate: "5-8"
+      status: "proposed"
+    - id: "EPIC-012"
+      name: "Validation, clôture & immutabilité (snapshot figé)"
+      frs: "FR-014..FR-017"
+      story_estimate: "4-6"
+      status: "proposed"
+    - id: "EPIC-013"
+      name: "Prévisionnel (mensuel 12 mois + annuel 3 ans)"
+      frs: "FR-018..FR-021"
+      story_estimate: "4-6"
+      status: "proposed"
+    - id: "EPIC-014"
+      name: "Consultation & export (PDF/Excel)"
+      frs: "FR-022..FR-024"
+      story_estimate: "3-5"
+      status: "proposed"
+
+velocity:
+  sprint_1: 33
+  sprint_2: 23
+  sprint_3: 24  # EPIC-005 auth-service (partie 1) — STORY-022/023/024 done (2026-07-07)
+  sprint_4: 20  # EPIC-005 (fin : STORY-025/026/027) + EPIC-006 (début : STORY-028 JWKS) — done 2026-07-08
+  sprint_5: 21  # EPIC-006 (fin : STORY-029/030) + EPIC-003 kyc scaffold+migration (STORY-020) — done 2026-07-10
+  sprint_6: null   # en cours : STORY-021 done (5) ; reste kyc (013/014) + EPIC-004→015 (plans, reste vertical)
+  # ── Re-séquencé 2026-07-10 (sprint-planning Phase 1) ──
+  sprint_7: null   # EPIC-007 platform-catalog-service (socle entitlements) + amorce Module 0 (STORY-040)
+  sprint_8: null   # EPIC-008 bilan-service (squelette) + Module 0 (STORY-041 scaffold document-service)
+  sprint_9: null   # Module 0 flux B : document-service OCR (042-044) + kyc enrichit (045) + admin-panel amorce (046-047)
+  sprint_10: null  # 🏁 chaîne KYC complète (admin-panel 048-049) + Bilan EPIC-009 import (050-053)
+  sprint_11: null  # Bilan EPIC-010 référentiels & table de passage (054-058)
+  sprint_12: null  # Bilan EPIC-011 états financiers / liasse (059-063)
+  sprint_13: null  # Bilan EPIC-012 validation/immutabilité (064-067) + EPIC-013 hypothèses (068)
+  sprint_14: null  # 🏁 Bilan livré : EPIC-013 prévisionnel (069-071) + EPIC-014 consultation/export (072-074)
+  sprint_15: null  # Module 2 EPIC-004 paiement-service (016-019) + STORY-039 — JIT (PS-1/C8/PRD paiement)
+  rolling_average: 27  # (33 + 23 + 24) / 3 ≈ 26.7 ; cible prudente ~24/sprint (1 flux, réf. historique retenue au sprint-planning 2026-07-10)
+
+team:
+  size: 1
+  assistance: "IA (BMAD)"
+  sprint_length_weeks: 2
+  capacity_per_sprint: 34
