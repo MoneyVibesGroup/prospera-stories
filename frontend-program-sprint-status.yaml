@@ -2,7 +2,7 @@ version: "1.0.0"
 project_name: "prospera-frontend-program"
 project_level: 3
 current_sprint: 2
-last_updated: "2026-07-12"
+last_updated: "2026-07-12"  # + Integration Gate (sprint 2.5, FE-INT-0..3) : retrofit backend FE-EPIC-002, bloqué par STORY-075
 
 # ═══════════════════════════════════════════════════════════════════════════════════════
 # TRACKER PROGRAMME FRONTEND (VUE UNIFIÉE) — équivalent frontend de docs/sprint-status.yaml
@@ -69,6 +69,23 @@ sprints:
       - { id: "FE-008", app: "client", title: "Gestion des utilisateurs (liste, rôles, invitation, suspension)", epic: "FE-EPIC-002", points: 5, status: "review", backend_ready: "done", backend_ref: "STORY-008,009,026" }
       - { id: "FE-009", app: "client", title: "Upload documents KYC (RCCM / CFE)", epic: "FE-EPIC-003", points: 5, status: "review", backend_ready: "done", backend_ref: "STORY-011,012,020,021" }
       - { id: "FE-010", app: "client", title: "Bandeau d'onboarding + statut KYC (stepper d'activation)", epic: "FE-EPIC-003", points: 3, status: "review", backend_ready: "done", backend_ref: "STORY-012,014,029" }
+
+  # ── Integration Gate : solder la dette de FE-EPIC-002 AVANT Sprint 3 (décision user 2026-07-12) ──
+  #   FE-001→010 ont été codées contre des contrats SUPPOSÉS (mode miroir). Audit 2026-07-12 : les
+  #   hypothèses visaient la cible mais le front n'a JAMAIS été branché au vrai backend. On rebranche
+  #   les 3 modules (Users/KYC/Onboarding) sur les endpoints réels (direct-par-service, préfixe /api),
+  #   types GÉNÉRÉS depuis OpenAPI, zéro mock. Règle Integration Gate = DoD étendue de chaque epic.
+  #   ⚠️ BLOQUÉ par backend STORY-075 (stack d'intégration dev 3 services rs256) — à tirer avant.
+  - sprint_number: 2.5
+    name: "Integration Gate — retrofit backend FE-EPIC-002 (Users + KYC + Onboarding)"
+    status: "blocked"          # attend STORY-075 (stack dev 3 services) ; prérequis avant Sprint 3
+    committed_points: 12
+    goal: "Brancher réellement l'app cliente sur le backend cible (auth-service :3001 + EC :3000 + kyc-service :3002, /api, rs256). Remplacer les contrats supposés + stub api.d.ts par des types générés ; retirer tout mock miroir."
+    stories:
+      - { id: "FE-INT-0", app: "client", title: "Client API multi-base (direct-par-service) + préfixe /api + génération OpenAPI (amende FE-002)", epic: "FE-EPIC-002", points: 5, status: "backlog", backend_ready: "S7", backend_ref: "STORY-075", note: "BLOQUANT des autres INT ; base par préfixe /auth→3001 /ec→3000 /kyc→3002" }
+      - { id: "FE-INT-1", app: "client", title: "Users sur auth-service (contrat réel : GET /api/users, pageSize→limit)", epic: "FE-EPIC-002", points: 2, status: "backlog", backend_ready: "S7", backend_ref: "STORY-026,075", note: "retrofit FE-008" }
+      - { id: "FE-INT-2", app: "client", title: "KYC sur kyc-service (GET /kyc/status au lieu de /kyc/documents ; :3002)", epic: "FE-EPIC-003", points: 3, status: "backlog", backend_ready: "S7", backend_ref: "STORY-020,021,075", note: "retrofit FE-009" }
+      - { id: "FE-INT-3", app: "client", title: "Onboarding sur GET /tenant/state (forme aplatie ; abonnement dégradé manuel)", epic: "FE-EPIC-003", points: 2, status: "backlog", backend_ready: "S7", backend_ref: "STORY-014,075", note: "retrofit FE-010 ; clôt l'Integration Gate → feu vert Sprint 3" }
 
   # ══════════ SUITE APRÈS FE-010 — SÉQUENCE PRIORISÉE (cabinet ⇄ admin entrelacés) ══════════
 
