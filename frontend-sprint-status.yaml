@@ -4,6 +4,8 @@ project_level: 3
 current_sprint: 1
 sprint_plan_path: "docs/frontend-sprint-plan-expert-comptable-2026-07-08.md"
 last_updated: "2026-07-12"  # Révision v2 : programme multi-frontend, ajout Bilan + entitlements, paiement différé
+# ▶ SÉQUENCE MAÎTRE UNIFIÉE (cabinet + admin entrelacés, priorisée) : docs/frontend-program-sprint-status.yaml
+#   Ce fichier reste la vue de PÉRIMÈTRE de l'app cliente ; l'ordre d'exécution vit dans le tracker programme.
 
 # ═══════════════════════════════════════════════════════════════════════════════════════
 # RÉVISION v2 (2026-07-12) — Programme multi-frontend PROSPERA / Money Vibes

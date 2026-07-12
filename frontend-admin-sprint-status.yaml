@@ -4,6 +4,8 @@ project_level: 3
 current_sprint: 1
 sprint_plan_path: "docs/frontend-sprint-plan-admin-panel-2026-07-12.md"
 last_updated: "2026-07-12"  # Création : tour de contrôle interne Money Vibes (PLATFORM_ADMIN)
+# ▶ SÉQUENCE MAÎTRE UNIFIÉE (cabinet + admin entrelacés, priorisée) : docs/frontend-program-sprint-status.yaml
+#   Ce fichier reste la vue de PÉRIMÈTRE de l'admin-panel ; l'ordre d'exécution vit dans le tracker programme.
 
 # ═══════════════════════════════════════════════════════════════════════════════════════
 # ADMIN-PANEL Money Vibes — console d'administration INTERNE (persona PLATFORM_ADMIN).
