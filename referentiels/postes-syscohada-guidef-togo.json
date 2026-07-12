@@ -1,0 +1,980 @@
+[
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "Réf.",
+  "libelle": "ACTIF",
+  "note": "NOTE"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AD",
+  "libelle": "IMMOBILISATIONS INCORPORELLES",
+  "note": "3"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AE",
+  "libelle": "Frais de développement et de prospection",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AF",
+  "libelle": "Brevets, licences,logiciels et droits similaires",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AG",
+  "libelle": "Fonds commercial et droit au bail",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AH",
+  "libelle": "Autres immobilisations incorporelles",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AI",
+  "libelle": "IMMOBILISATIONS CORPORELLES",
+  "note": "3"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AJ",
+  "libelle": "Terrains (1) dont placement en Net",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AK",
+  "libelle": "Bâtiments (1)  dont placement en Net",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AL",
+  "libelle": "Aménagements, agencements et installations",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AM",
+  "libelle": "Matériel, mobiliers et actifs biologiques",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AN",
+  "libelle": "Matériel de transport",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AP",
+  "libelle": "AVANCES ET ACOMPTES VERSES SUR IMMOBILISATIONS",
+  "note": "3"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AQ",
+  "libelle": "IMMOBILISATIONS FINANCIERES",
+  "note": "4"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AR",
+  "libelle": "Titres de participation",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AS",
+  "libelle": "Autres immobilisations financières",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "AZ",
+  "libelle": "TOTAL ACTIF IMMOBILISE",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BA",
+  "libelle": "ACTIF CIRCULANT HAO",
+  "note": "5"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BB",
+  "libelle": "STOCKS ET EN-COURS",
+  "note": "6"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BG",
+  "libelle": "CREANCES ET EMPLOIS ASSIMILES",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BH",
+  "libelle": "Fournisseurs avances versées",
+  "note": "17"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BI",
+  "libelle": "Clients",
+  "note": "7"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BJ",
+  "libelle": "Autres créances",
+  "note": "8"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BK",
+  "libelle": "TOTAL ACTIF CIRCULANT",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BQ",
+  "libelle": "Titres de placement",
+  "note": "9"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BR",
+  "libelle": "Valeurs à encaisser",
+  "note": "10"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BS",
+  "libelle": "Banques, chèques postaux, caisse et assimilés",
+  "note": "11"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BT",
+  "libelle": "TOTAL TRESORERIE ACTIF",
+  "note": null
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BU",
+  "libelle": "Ecart de conversion-Actif",
+  "note": "12"
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "code": "BZ",
+  "libelle": "TOTAL GENERAL",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "Réf.",
+  "libelle": "PASSIF",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CA",
+  "libelle": "Capital",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CB",
+  "libelle": "Apporteurs capital non appelé (-)",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CD",
+  "libelle": "Primes liées au capital social",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CE",
+  "libelle": "Ecarts de réévaluation",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CF",
+  "libelle": "Réserves indisponibles",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CG",
+  "libelle": "Réserves libres",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CH",
+  "libelle": "Report à nouveau (+ ou -)",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CJ",
+  "libelle": "Résultat net de l'exercice (bénéfice + ou perte -)",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CL",
+  "libelle": "Subventions d'investissement",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CM",
+  "libelle": "Provisions réglémentées",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "CP",
+  "libelle": "TOTAL CAPITAUX PROPRES ET RESSOURCES ASSIMILEES",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DA",
+  "libelle": "Emprunts et dettes financières diverses",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DB",
+  "libelle": "Dettes de location acquisition",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DC",
+  "libelle": "Provisions pour risques et charges",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DD",
+  "libelle": "TOTAL DETTES FINANCIERES ET RESSOURCES ASSIMILEES",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DF",
+  "libelle": "TOTAL RESSOURCES STABLES",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DH",
+  "libelle": "Dettes circulantes HAO",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DI",
+  "libelle": "Clients, avances reçues",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DJ",
+  "libelle": "Fournisseurs d'exploitation",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DK",
+  "libelle": "Dettes fiscales et sociales",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DM",
+  "libelle": "Autres dettes",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DN",
+  "libelle": "Provisions pour risques à court terme",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DP",
+  "libelle": "TOTAL PASSIF CIRCULANT",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DQ",
+  "libelle": "Banques, crédits d'escompte",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DR",
+  "libelle": "Banques, établissements financiers et crédits de trésorerie",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DT",
+  "libelle": "TOTAL TRESORERIE PASSIF",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DV",
+  "libelle": "Ecart de conversion-Passif",
+  "note": null
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "code": "DZ",
+  "libelle": "TOTAL GENERAL",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "Réf",
+  "libelle": "LIBELLES",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TA",
+  "libelle": "Ventes de marchandises                                                                                                      A",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RA",
+  "libelle": "Achats de marchandises",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RB",
+  "libelle": "Variation de stocks de marchandises",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "XA",
+  "libelle": "MARGE COMMERCIALE (Somme TA à RB)",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TB",
+  "libelle": "Ventes de produits fabriqués                                                                                              B",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TC",
+  "libelle": "Travaux,services vendus                                                                                                      C",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TD",
+  "libelle": "Produits accessoires                                                                                                              D",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "XB",
+  "libelle": "CHIFFRE D'AFFAIRES (A+B+C+D)",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TE",
+  "libelle": "Production stockée (ou déstockage)",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TF",
+  "libelle": "Production immobilisée",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TG",
+  "libelle": "Subvention d'exploitation",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TH",
+  "libelle": "Autres  produits",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TI",
+  "libelle": "Transfert de charges d'exploitation",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RC",
+  "libelle": "Achats de matières et fournitures liées",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RD",
+  "libelle": "Variation de stocks de matières premières et fouritures liées",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RE",
+  "libelle": "Autres achats",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RF",
+  "libelle": "Variation de stocks d'autres approvisionnements",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RG",
+  "libelle": "Transports",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RH",
+  "libelle": "Services extérieurs",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RI",
+  "libelle": "Impôts et taxes",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RJ",
+  "libelle": "Autres charges",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "XC",
+  "libelle": "VALEUR AJOUTEE (XB+RA+RB) + (Somme TE à RJ)",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RK",
+  "libelle": "Charges de personnel",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "XD",
+  "libelle": "EXCEDENT BRUT D'EXPLOITATION (XC+RK)",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TJ",
+  "libelle": "Reprises d'amortissements,  provisions et dépréciations",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RL",
+  "libelle": "Dotations aux amortissements,  aux provisions et dépréciations",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "XE",
+  "libelle": "RESULTAT D'EXPLOITATION (XD+TJ+RL)",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TK",
+  "libelle": "Revenus financiers et assimilés",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TL",
+  "libelle": "Reprises de provisions et dépréciations financières",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TM",
+  "libelle": "Transfert de charges financières",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RM",
+  "libelle": "Frais financiers et charges assimilés",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RN",
+  "libelle": "Dotations  aux provisions et aux  dépréciations financières",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "XF",
+  "libelle": "RESULTAT FINANCIER (Somme TK à RN)",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "XG",
+  "libelle": "RESULTAT DES ACTIVITES ORDINAIRES (XE+XF)",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TN",
+  "libelle": "Produits des cessions d'immobilisations",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "TO",
+  "libelle": "Autres produits HAO",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RO",
+  "libelle": "Valeurs comptables des cessions d'immobilisations",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RP",
+  "libelle": "Autres charges HAO",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "XH",
+  "libelle": "RESULTAT HORS ACTIVITES ORDINAIRES (Somme TN à RP)",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RQ",
+  "libelle": "Participation des travailleurs",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "RS",
+  "libelle": "Impôts sur le résultat",
+  "note": null
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "code": "XI",
+  "libelle": "RESULTAT NET (XG+XH+RQ+RS)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "Réf",
+  "libelle": "LIBELLES",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "ZA",
+  "libelle": "Trésorerie nette au 1er janvier (Trésorerie actif N-1-Trésorerie passif N-1)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FA",
+  "libelle": "Capacité d'Autofinancement Global (CAFG)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FB",
+  "libelle": "- Actif circulant HAO (1)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FC",
+  "libelle": "- Variation des stocks",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FD",
+  "libelle": "- Variation des créances",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FE",
+  "libelle": "+ Variation du passif circulant (1)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "ZB",
+  "libelle": "Flux de trésorerie provenant des activités opérationnelles (somme FA à FE)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FF",
+  "libelle": "- Décaissements liés aux acquisitions d'immobilisations incorporelles",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FG",
+  "libelle": "- Décaissements liés aux acquisitions d'immobilisations corporelles",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FH",
+  "libelle": "- Décaissements liés aux acquisitions d'immobilisations financières",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FI",
+  "libelle": "+  Encaissements liés aux cessions d'immobilisations incorporelles et corporelles",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FJ",
+  "libelle": "+ Encaissements liés aux cessions d'immobilisations financières",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "ZC",
+  "libelle": "Flux de trésorerie provenant des opérations d'investissements (somme FF à FJ)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FK",
+  "libelle": "+ Augmentation de capital par apports nouveaux",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FL",
+  "libelle": "+ Subventions d'investissement reçues",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FM",
+  "libelle": "- Prélèvements sur le capital",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FN",
+  "libelle": "- Dividendes versés",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "ZD",
+  "libelle": "Flux de trésorerie provenant des capitaux propres (somme FK à FN)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FO",
+  "libelle": "+ Emprunts",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FP",
+  "libelle": "+ Autres dettes financières",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "FQ",
+  "libelle": "- Remboursements des emprunts et autres dettes financières",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "ZE",
+  "libelle": "Flux de trésorerie provenant des capitaux étrangers (somme FO à FQ)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "ZF",
+  "libelle": "Flux de trésorerie provenant des activités de financement (D+E)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "ZG",
+  "libelle": "VARIATION DE LA TRESORERIE NETTE DE LA PERIODE ( B+C+F)",
+  "note": null
+ },
+ {
+  "etat": "TFT",
+  "code": "ZH",
+  "libelle": "Trésorerie nette au 31 Décembre (G+A)",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "10",
+  "libelle": "BENEFICE NET COMPTABLE ou PERTE NETTE COMPTABLE",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "11",
+  "libelle": "Amortissements exédentaires et autres amortissements non déductibles",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "12",
+  "libelle": "Amortissements réputés différés créés au titre de l'exercice",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "15",
+  "libelle": "Impôts sur le revenu (IR ou IS) ou Minimum Forfaitaire de Perception (MFP), Impôts non payés",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "20",
+  "libelle": "Provisions et charges à payer non déductibles",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "25",
+  "libelle": "Amendes et pénalités de toute nature",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "30",
+  "libelle": "Rémunération du travail de l'exploitant, des associés ou des membres de sociétés des sociéts soumises à  l'impôt sur  le revenu",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "40",
+  "libelle": "Charges et dépenses somptuaires",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "45",
+  "libelle": "Jetons de présence non déductibles",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "50",
+  "libelle": "Quote-part de charges liées aux titres de placement exonérés",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "60",
+  "libelle": "Intérêts excédentaires des comptes courants d'associés et assimilés (article 99 - m du CGI)",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "80",
+  "libelle": "Autres réintégrations (à détailler à la Page 59 : Détail autres réint. )",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "90",
+  "libelle": "Provisions et charges à payer non déductibles, antérieurement taxées et reprises dans les résultats comptables de l'exercice",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "95",
+  "libelle": "Quote-part des revenus des titres de placement exonérés (S.A)",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "100",
+  "libelle": "Plus-values exonérées",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "120",
+  "libelle": "Réduction d'impôt pour investissement de bénéfice",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "125",
+  "libelle": "Autres déductions (à détailler à la page 60 : Détail autres déductions)",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "145",
+  "libelle": "Résultat fiscal avant imputation des déficits reportables et des amortissements réputés différés",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "150",
+  "libelle": "Déficits antérieurs imputés sur le résultat de l'exercice (à détailler à la page 63)",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "155",
+  "libelle": "Amortissements réputés différés antérieurs imputés sur le résutat de l'exercice (à détailler à la page 63)",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "160",
+  "libelle": "RESULTAT FISCAL  DROIT COMMUN  (1)  Bénéficaire / Déficitaire (- / +)",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "165",
+  "libelle": "Déduction :  quote-part du bénéfice exonéré (entités bénéficiant de régime dérogatoire)",
+  "note": null
+ },
+ {
+  "etat": "RESULTAT_FISCAL",
+  "code": "170",
+  "libelle": "RESULTAT FISCAL DEFINITIF (1) Bénéficaire / Déficitaire (- / +)",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "A",
+  "libelle": "Chiffre d'affaires",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "B",
+  "libelle": "Marge ( Produits à marge bloquée)",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "C",
+  "libelle": "Base Minimum forfaitaire de perception (A+B)",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "D",
+  "libelle": "Minimum forfaitaire de perception",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "E",
+  "libelle": "RESULTAT FISCAL DEFINITIF (1) Bénéficaire / Déficitaire (- / +)",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "F",
+  "libelle": "CALCUL DE L'IMPÔT (IS / IR) droit commun",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "G",
+  "libelle": "Impôt dû (max D: F)",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "H",
+  "libelle": "CALCUL DE L'IMPÔT (IS / IR / MFP) régime dérogatoire",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "I",
+  "libelle": "CREDIT D'IMPOT IMPUTABLE AU TITRE DES REVENUS DES CAPITAUX MOBILIERS (R.C.M)",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "J",
+  "libelle": "CREDIT D'IMPOT ACQUIS PAR LES ENTITES BENEFICIANT DE REGIME DEROGATOIRE (A détailler à la page 63 )",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "K",
+  "libelle": "MONTANT DE L'IMPOT NET LIQUIDE",
+  "note": null
+ },
+ {
+  "etat": "LIQUIDATION_IS",
+  "code": "L",
+  "libelle": "PENALITE POUR DEPOT TARDIF",
+  "note": null
+ }
+]

@@ -1,0 +1,97 @@
+{
+  "_meta": {
+    "artefact": "paquet-fiscal",
+    "pays": "TG",
+    "paysLibelle": "Togo",
+    "annee": 2026,
+    "devise": "XOF",
+    "referentielComptable": "syscohada-revise",
+    "source": "CGI et LPF 2026 (Togo) — fourni par l'utilisateur 2026-07-12 (CGI et LPF 2026_ (1).pdf)",
+    "statut": "AMORCE — taux d'en-tête confirmés depuis le CGI ; détails TPU/seuils/retenues à compléter puis à VALIDER par un expert-comptable/fiscaliste",
+    "avertissement": "Les taux changent avec la loi de finances : ce paquet est versionné par pays x année. Ne pas coder en dur dans le moteur."
+  },
+  "tva": {
+    "tauxStandard": 0.18,
+    "type": "taux unique",
+    "base": "chiffre d'affaires HT",
+    "source": "Art. 195 CGI 2026"
+  },
+  "is": {
+    "taux": 0.27,
+    "base": "benefice imposable (resultat fiscal definitif)",
+    "arrondi": "fraction de benefice imposable < 1000 FCFA negligee",
+    "source": "Art. 113 CGI 2026"
+  },
+  "minimumForfaitairePerception": {
+    "code": "MFP",
+    "taux": 0.01,
+    "base": "chiffre d'affaires hors TVA",
+    "regleLiquidation": "impot du = max( MFP , IS droit commun )",
+    "commentaire": "Un minimum est du meme en cas de perte (assis sur le CA). Correspond au poste 'D Minimum forfaitaire de perception' + 'G Impot du (max D:F)' de la liasse GUIDEF.",
+    "source": "Art. 120 CGI 2026 (1% du CA HT)"
+  },
+  "acomptesProvisionnels": {
+    "nombre": 4,
+    "echeances": ["31-01", "31-05", "31-07", "31-10"],
+    "calcul": "chaque acompte = 1/4 des cotisations mises a la charge du contribuable au titre du dernier exercice clos, arrondi au millier de franc inferieur",
+    "source": "Art. 114 CGI 2026"
+  },
+  "resultatFiscal": {
+    "mecanisme": "resultat comptable + reintegrations - deductions - deficits reportables = resultat fiscal definitif",
+    "reintegrations_codes": ["10", "11", "12", "15", "20", "25", "30", "40", "45", "50", "60", "80"],
+    "deductions_codes": ["90", "95", "100", "120", "125"],
+    "reference": "feuilles 'Resultat fiscal' + 'Detail reintegrations/deductions' de la liasse GUIDEF; codes officiels DGI",
+    "reglesNotables": {
+      "interetsComptesCourantsAssocies": "deductibles dans la limite du taux legal + 3 points, plafond 30% (Art. 2405/2420 zone)",
+      "donsDeductibles": "limite 1% (organismes reconnus d'utilite publique)"
+    }
+  },
+  "regimesImposition": {
+    "reel_normal": {
+      "cible": "grandes entreprises",
+      "systemeComptableOHADA": "SN",
+      "seuilIndicatif": "CA HT ou actif brut eleve (seuils exacts a confirmer — zone Art. 2786-2825 mentionne 500 000 000 et 1 000 000 000)",
+      "statut": "a_confirmer"
+    },
+    "reel_simplifie": {
+      "cible": "entreprises moyennes",
+      "systemeComptableOHADA": "SN",
+      "statut": "a_confirmer"
+    },
+    "synthetique_entreprenant_tpu": {
+      "cible": "personnes physiques / entreprises individuelles a faible CA",
+      "impot": "Taxe Professionnelle Unique (TPU) — liberatoire de plusieurs impots/taxes",
+      "composantes": ["regime forfaitaire (collectivites locales)", "regime declaratif (budget Etat)"],
+      "seuilIndicatifCA": 30000000,
+      "systemeComptableOHADA": "SMT",
+      "tauxParTranche": "A COMPLETER (Art. 134 declaratif / Art. 135 forfaitaire)",
+      "source": "Chap. V CGI (Regime fiscal synthetique de l'entreprenant et des entreprises individuelles), Art. 128-135",
+      "statut": "confirme_existence_taux_a_completer"
+    }
+  },
+  "factureNormalisee": {
+    "obligatoire": true,
+    "seuilCommentaire": "regime declaratif et reel dont CA < ~30 000 000 concernes (Art. zone 10243/10960 a preciser)",
+    "statut": "a_confirmer"
+  },
+  "autresImpotsTaxes": {
+    "presentsDansCGI": [
+      "IRPP (bareme progressif, tranche haute 30%)",
+      "TVM (taxe sur les vehicules a moteur)",
+      "TAF (taxe sur les activites financieres)",
+      "TCA (taxe sur les conventions d'assurance) — pertinent futur vertical assurance",
+      "Droits d'accises",
+      "Patente / Taxe fonciere / Taxe d'habitation (TH) — fiscalite locale",
+      "Droits d'enregistrement (loyers, cessions, fusions: 1%)",
+      "Retenues a la source (ex. RSL loyers, RSH honoraires — vues dans la balance Sage)"
+    ],
+    "categorieAutres": "prevoir saisie manuelle d'un taux/montant pour tout impot hors liste (regle utilisateur)"
+  },
+  "aFaire": [
+    "Completer les taux TPU par tranche (Art. 134/135)",
+    "Confirmer les seuils exacts reel normal / reel simplifie / synthetique",
+    "Ajouter les taux TAF, TCA, TVM, droits d'accises si dans le perimetre",
+    "Barème CNSS (source distincte du CGI — a fournir)",
+    "Valider l'ensemble avec un expert-comptable/fiscaliste togolais"
+  ]
+}

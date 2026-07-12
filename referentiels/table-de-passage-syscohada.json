@@ -1,0 +1,1070 @@
+[
+ {
+  "_meta": {
+   "artefact": "table-de-passage",
+   "referentiel": "syscohada-revise (Systeme Normal)",
+   "cible_postes": "GUIDEF Togo (DSF)",
+   "statut": "AMORCE - mapping standard SYSCOHADA au niveau prefixe de compte; a valider par un expert et affiner (sous-comptes, cas particuliers, ventilation debit/credit classes 4 et 5)",
+   "regles": {
+    "NET_ACTIF": "poste actif = somme soldes bruts debiteurs - amortissements(28)/depreciations(29,39,49,59)",
+    "SOLDE_CREDITEUR": "poste passif = somme soldes crediteurs des comptes",
+    "CHARGE": "classe 6/8 (debit)",
+    "PRODUIT": "classe 7/8 (credit)",
+    "classes_4_5": "un meme compte de tiers/tresorerie va a l'ACTIF si solde debiteur, au PASSIF si crediteur - ventilation au solde, pas au numero"
+   },
+   "date": "2026-07-12"
+  }
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AE",
+  "libelle": "Frais de developpement et de prospection",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "211"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AF",
+  "libelle": "Brevets, licences, logiciels et droits similaires",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "212",
+   "213"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AG",
+  "libelle": "Fonds commercial et droit au bail",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "215",
+   "216"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AH",
+  "libelle": "Autres immobilisations incorporelles",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "214",
+   "217",
+   "218"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AD",
+  "libelle": "IMMOBILISATIONS INCORPORELLES (net amort 281x, deprec 291)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "21"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AJ",
+  "libelle": "Terrains (net 292)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "22"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AK",
+  "libelle": "Batiments (net 2831)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "231",
+   "232",
+   "233"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AL",
+  "libelle": "Amenagements, agencements et installations (net 2835)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "234",
+   "235",
+   "238"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AM",
+  "libelle": "Materiel, mobilier et actifs biologiques (net 2841/2844)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "241",
+   "242",
+   "243",
+   "244",
+   "246"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AN",
+  "libelle": "Materiel de transport (net 2845)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "245"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AI",
+  "libelle": "IMMOBILISATIONS CORPORELLES (net classe 28/29)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "22",
+   "23",
+   "24"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AP",
+  "libelle": "Avances et acomptes verses sur immobilisations",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "251",
+   "252"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AR",
+  "libelle": "Titres de participation (net 296)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "26"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AS",
+  "libelle": "Autres immobilisations financieres (net 297)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "27"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "AQ",
+  "libelle": "IMMOBILISATIONS FINANCIERES",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "26",
+   "27"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "BA",
+  "libelle": "ACTIF CIRCULANT HAO (creances HAO, net 498)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "485",
+   "488"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "BB",
+  "libelle": "STOCKS ET EN-COURS (net 39)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "31",
+   "32",
+   "33",
+   "34",
+   "35",
+   "36",
+   "37",
+   "38"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "BH",
+  "libelle": "Fournisseurs, avances versees",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "409"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "BI",
+  "libelle": "Clients (net deprec 491)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "411",
+   "412",
+   "414",
+   "416",
+   "418"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "BJ",
+  "libelle": "Autres creances (soldes DEBITEURS uniquement, net 49x)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "42",
+   "43",
+   "44",
+   "45",
+   "46",
+   "47"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "BQ",
+  "libelle": "Titres de placement (net 590)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "50"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "BR",
+  "libelle": "Valeurs a encaisser (net 591)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "51"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "BS",
+  "libelle": "Banques, cheques postaux, caisse (soldes DEBITEURS, net 592)",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "52",
+   "53",
+   "54",
+   "55",
+   "57",
+   "58"
+  ]
+ },
+ {
+  "etat": "BILAN_ACTIF",
+  "poste": "BU",
+  "libelle": "Ecart de conversion-Actif",
+  "type": "detail",
+  "regle": "NET_ACTIF",
+  "comptes_syscohada": [
+   "478"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "CA",
+  "libelle": "Capital",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "101",
+   "102",
+   "103",
+   "104"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "CB",
+  "libelle": "Apporteurs capital non appele (-)",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "109"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "CD",
+  "libelle": "Primes liees au capital social",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "105"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "CE",
+  "libelle": "Ecarts de reevaluation",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "106"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "CF",
+  "libelle": "Reserves indisponibles",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "111",
+   "112",
+   "113"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "CG",
+  "libelle": "Reserves libres",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "118"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "CH",
+  "libelle": "Report a nouveau (+ ou -)",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "12"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "CJ",
+  "libelle": "Resultat net de l'exercice (+ benefice / - perte)",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "13"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "CL",
+  "libelle": "Subventions d'investissement",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "14"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "CM",
+  "libelle": "Provisions reglementees",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "15"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DA",
+  "libelle": "Emprunts et dettes financieres diverses",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "16",
+   "181",
+   "182",
+   "183",
+   "184",
+   "185",
+   "188"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DB",
+  "libelle": "Dettes de location acquisition",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "17"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DC",
+  "libelle": "Provisions pour risques et charges",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "19"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DH",
+  "libelle": "Dettes circulantes HAO",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "481",
+   "482",
+   "484"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DI",
+  "libelle": "Clients, avances recues",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "419"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DJ",
+  "libelle": "Fournisseurs d'exploitation (soldes CREDITEURS)",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "401",
+   "402",
+   "408"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DK",
+  "libelle": "Dettes fiscales et sociales (soldes CREDITEURS)",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "421",
+   "422",
+   "423",
+   "427",
+   "431",
+   "438",
+   "441",
+   "442",
+   "443",
+   "444",
+   "447",
+   "448"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DM",
+  "libelle": "Autres dettes (soldes CREDITEURS)",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "45",
+   "46",
+   "47"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DN",
+  "libelle": "Provisions pour risques a court terme",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "499",
+   "599"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DQ",
+  "libelle": "Banques, credits d'escompte",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "564",
+   "565"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DR",
+  "libelle": "Banques, ets financiers et credits de tresorerie (+ 52 crediteur)",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "561",
+   "566"
+  ]
+ },
+ {
+  "etat": "BILAN_PASSIF",
+  "poste": "DV",
+  "libelle": "Ecart de conversion-Passif",
+  "type": "detail",
+  "regle": "SOLDE_CREDITEUR",
+  "comptes_syscohada": [
+   "479"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TA",
+  "libelle": "Ventes de marchandises",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "701"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RA",
+  "libelle": "Achats de marchandises",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "601"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RB",
+  "libelle": "Variation de stocks de marchandises",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "6031"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TB",
+  "libelle": "Ventes de produits fabriques",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "702",
+   "703",
+   "704"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TC",
+  "libelle": "Travaux, services vendus",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "705",
+   "706"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TD",
+  "libelle": "Produits accessoires",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "707"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TE",
+  "libelle": "Production stockee (ou destockage)",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "73"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TF",
+  "libelle": "Production immobilisee",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "72"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TG",
+  "libelle": "Subvention d'exploitation",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "71"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TH",
+  "libelle": "Autres produits",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "75"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TI",
+  "libelle": "Transfert de charges d'exploitation",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "781"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RC",
+  "libelle": "Achats de matieres et fournitures liees",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "602"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RD",
+  "libelle": "Variation de stocks de matieres premieres",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "6032"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RE",
+  "libelle": "Autres achats",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "604",
+   "605",
+   "608"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RF",
+  "libelle": "Variation de stocks d'autres approvisionnements",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "6033"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RG",
+  "libelle": "Transports",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "61"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RH",
+  "libelle": "Services exterieurs",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "62",
+   "63"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RI",
+  "libelle": "Impots et taxes",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "64"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RJ",
+  "libelle": "Autres charges",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "65"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RK",
+  "libelle": "Charges de personnel",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "66"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TJ",
+  "libelle": "Reprises d'amortissements, provisions et depreciations",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "791",
+   "798",
+   "799"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RL",
+  "libelle": "Dotations aux amortissements, provisions et depreciations",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "681",
+   "691"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TK",
+  "libelle": "Revenus financiers et assimiles",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "77"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TL",
+  "libelle": "Reprises de provisions et depreciations financieres",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "797"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TM",
+  "libelle": "Transfert de charges financieres",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "787"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RM",
+  "libelle": "Frais financiers et charges assimiles",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "67"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RN",
+  "libelle": "Dotations aux provisions et depreciations financieres",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "687",
+   "697"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TN",
+  "libelle": "Produits des cessions d'immobilisations",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "82"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "TO",
+  "libelle": "Autres produits HAO",
+  "type": "detail",
+  "regle": "PRODUIT",
+  "comptes_syscohada": [
+   "84",
+   "86",
+   "88"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RO",
+  "libelle": "Valeurs comptables des cessions d'immobilisations",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "81"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RP",
+  "libelle": "Autres charges HAO",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "83",
+   "85"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RQ",
+  "libelle": "Participation des travailleurs",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "87"
+  ]
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "RS",
+  "libelle": "Impots sur le resultat",
+  "type": "detail",
+  "regle": "CHARGE",
+  "comptes_syscohada": [
+   "89"
+  ]
+ },
+ {
+  "etat": "BILAN",
+  "poste": "AZ",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "AD+AI+AP+AQ",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "BILAN",
+  "poste": "BG",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "BH+BI+BJ",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "BILAN",
+  "poste": "BK",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "BA+BB+BG",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "BILAN",
+  "poste": "BT",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "BQ+BR+BS",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "BILAN",
+  "poste": "BZ",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "AZ+BK+BT+BU",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "BILAN",
+  "poste": "CP",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "CA+CB+CD+CE+CF+CG+CH+CJ+CL+CM",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "BILAN",
+  "poste": "DD",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "DA+DB+DC",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "BILAN",
+  "poste": "DF",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "CP+DD",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "BILAN",
+  "poste": "DP",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "DH+DI+DJ+DK+DM+DN",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "BILAN",
+  "poste": "DT",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "DQ+DR",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "BILAN",
+  "poste": "DZ",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "DF+DP+DT+DV",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "XA",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "TA+RA+RB",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "XB",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "TA+TB+TC+TD",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "XC",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "XB+RA+RB+(TE..RJ)",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "XD",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "XC+RK",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "XE",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "XD+TJ+RL",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "XF",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "TK+TL+TM+RM+RN",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "XG",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "XE+XF",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "XH",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "TN+TO+RO+RP",
+  "comptes_syscohada": []
+ },
+ {
+  "etat": "COMPTE_RESULTAT",
+  "poste": "XI",
+  "libelle": "(total/solde intermediaire)",
+  "type": "total",
+  "regle": "FORMULE",
+  "formule": "XG+XH+RQ+RS",
+  "comptes_syscohada": []
+ }
+]

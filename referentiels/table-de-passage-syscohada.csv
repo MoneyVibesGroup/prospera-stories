@@ -1,0 +1,100 @@
+etat,poste,libelle,type,regle,comptes_syscohada
+BILAN_ACTIF,AE,Frais de developpement et de prospection,detail,NET_ACTIF,211
+BILAN_ACTIF,AF,"Brevets, licences, logiciels et droits similaires",detail,NET_ACTIF,212;213
+BILAN_ACTIF,AG,Fonds commercial et droit au bail,detail,NET_ACTIF,215;216
+BILAN_ACTIF,AH,Autres immobilisations incorporelles,detail,NET_ACTIF,214;217;218
+BILAN_ACTIF,AD,"IMMOBILISATIONS INCORPORELLES (net amort 281x, deprec 291)",detail,NET_ACTIF,21
+BILAN_ACTIF,AJ,Terrains (net 292),detail,NET_ACTIF,22
+BILAN_ACTIF,AK,Batiments (net 2831),detail,NET_ACTIF,231;232;233
+BILAN_ACTIF,AL,"Amenagements, agencements et installations (net 2835)",detail,NET_ACTIF,234;235;238
+BILAN_ACTIF,AM,"Materiel, mobilier et actifs biologiques (net 2841/2844)",detail,NET_ACTIF,241;242;243;244;246
+BILAN_ACTIF,AN,Materiel de transport (net 2845),detail,NET_ACTIF,245
+BILAN_ACTIF,AI,IMMOBILISATIONS CORPORELLES (net classe 28/29),detail,NET_ACTIF,22;23;24
+BILAN_ACTIF,AP,Avances et acomptes verses sur immobilisations,detail,NET_ACTIF,251;252
+BILAN_ACTIF,AR,Titres de participation (net 296),detail,NET_ACTIF,26
+BILAN_ACTIF,AS,Autres immobilisations financieres (net 297),detail,NET_ACTIF,27
+BILAN_ACTIF,AQ,IMMOBILISATIONS FINANCIERES,detail,NET_ACTIF,26;27
+BILAN_ACTIF,BA,"ACTIF CIRCULANT HAO (creances HAO, net 498)",detail,NET_ACTIF,485;488
+BILAN_ACTIF,BB,STOCKS ET EN-COURS (net 39),detail,NET_ACTIF,31;32;33;34;35;36;37;38
+BILAN_ACTIF,BH,"Fournisseurs, avances versees",detail,NET_ACTIF,409
+BILAN_ACTIF,BI,Clients (net deprec 491),detail,NET_ACTIF,411;412;414;416;418
+BILAN_ACTIF,BJ,"Autres creances (soldes DEBITEURS uniquement, net 49x)",detail,NET_ACTIF,42;43;44;45;46;47
+BILAN_ACTIF,BQ,Titres de placement (net 590),detail,NET_ACTIF,50
+BILAN_ACTIF,BR,Valeurs a encaisser (net 591),detail,NET_ACTIF,51
+BILAN_ACTIF,BS,"Banques, cheques postaux, caisse (soldes DEBITEURS, net 592)",detail,NET_ACTIF,52;53;54;55;57;58
+BILAN_ACTIF,BU,Ecart de conversion-Actif,detail,NET_ACTIF,478
+BILAN_PASSIF,CA,Capital,detail,SOLDE_CREDITEUR,101;102;103;104
+BILAN_PASSIF,CB,Apporteurs capital non appele (-),detail,SOLDE_CREDITEUR,109
+BILAN_PASSIF,CD,Primes liees au capital social,detail,SOLDE_CREDITEUR,105
+BILAN_PASSIF,CE,Ecarts de reevaluation,detail,SOLDE_CREDITEUR,106
+BILAN_PASSIF,CF,Reserves indisponibles,detail,SOLDE_CREDITEUR,111;112;113
+BILAN_PASSIF,CG,Reserves libres,detail,SOLDE_CREDITEUR,118
+BILAN_PASSIF,CH,Report a nouveau (+ ou -),detail,SOLDE_CREDITEUR,12
+BILAN_PASSIF,CJ,Resultat net de l'exercice (+ benefice / - perte),detail,SOLDE_CREDITEUR,13
+BILAN_PASSIF,CL,Subventions d'investissement,detail,SOLDE_CREDITEUR,14
+BILAN_PASSIF,CM,Provisions reglementees,detail,SOLDE_CREDITEUR,15
+BILAN_PASSIF,DA,Emprunts et dettes financieres diverses,detail,SOLDE_CREDITEUR,16;181;182;183;184;185;188
+BILAN_PASSIF,DB,Dettes de location acquisition,detail,SOLDE_CREDITEUR,17
+BILAN_PASSIF,DC,Provisions pour risques et charges,detail,SOLDE_CREDITEUR,19
+BILAN_PASSIF,DH,Dettes circulantes HAO,detail,SOLDE_CREDITEUR,481;482;484
+BILAN_PASSIF,DI,"Clients, avances recues",detail,SOLDE_CREDITEUR,419
+BILAN_PASSIF,DJ,Fournisseurs d'exploitation (soldes CREDITEURS),detail,SOLDE_CREDITEUR,401;402;408
+BILAN_PASSIF,DK,Dettes fiscales et sociales (soldes CREDITEURS),detail,SOLDE_CREDITEUR,421;422;423;427;431;438;441;442;443;444;447;448
+BILAN_PASSIF,DM,Autres dettes (soldes CREDITEURS),detail,SOLDE_CREDITEUR,45;46;47
+BILAN_PASSIF,DN,Provisions pour risques a court terme,detail,SOLDE_CREDITEUR,499;599
+BILAN_PASSIF,DQ,"Banques, credits d'escompte",detail,SOLDE_CREDITEUR,564;565
+BILAN_PASSIF,DR,"Banques, ets financiers et credits de tresorerie (+ 52 crediteur)",detail,SOLDE_CREDITEUR,561;566
+BILAN_PASSIF,DV,Ecart de conversion-Passif,detail,SOLDE_CREDITEUR,479
+COMPTE_RESULTAT,TA,Ventes de marchandises,detail,PRODUIT,701
+COMPTE_RESULTAT,RA,Achats de marchandises,detail,CHARGE,601
+COMPTE_RESULTAT,RB,Variation de stocks de marchandises,detail,CHARGE,6031
+COMPTE_RESULTAT,TB,Ventes de produits fabriques,detail,PRODUIT,702;703;704
+COMPTE_RESULTAT,TC,"Travaux, services vendus",detail,PRODUIT,705;706
+COMPTE_RESULTAT,TD,Produits accessoires,detail,PRODUIT,707
+COMPTE_RESULTAT,TE,Production stockee (ou destockage),detail,PRODUIT,73
+COMPTE_RESULTAT,TF,Production immobilisee,detail,PRODUIT,72
+COMPTE_RESULTAT,TG,Subvention d'exploitation,detail,PRODUIT,71
+COMPTE_RESULTAT,TH,Autres produits,detail,PRODUIT,75
+COMPTE_RESULTAT,TI,Transfert de charges d'exploitation,detail,PRODUIT,781
+COMPTE_RESULTAT,RC,Achats de matieres et fournitures liees,detail,CHARGE,602
+COMPTE_RESULTAT,RD,Variation de stocks de matieres premieres,detail,CHARGE,6032
+COMPTE_RESULTAT,RE,Autres achats,detail,CHARGE,604;605;608
+COMPTE_RESULTAT,RF,Variation de stocks d'autres approvisionnements,detail,CHARGE,6033
+COMPTE_RESULTAT,RG,Transports,detail,CHARGE,61
+COMPTE_RESULTAT,RH,Services exterieurs,detail,CHARGE,62;63
+COMPTE_RESULTAT,RI,Impots et taxes,detail,CHARGE,64
+COMPTE_RESULTAT,RJ,Autres charges,detail,CHARGE,65
+COMPTE_RESULTAT,RK,Charges de personnel,detail,CHARGE,66
+COMPTE_RESULTAT,TJ,"Reprises d'amortissements, provisions et depreciations",detail,PRODUIT,791;798;799
+COMPTE_RESULTAT,RL,"Dotations aux amortissements, provisions et depreciations",detail,CHARGE,681;691
+COMPTE_RESULTAT,TK,Revenus financiers et assimiles,detail,PRODUIT,77
+COMPTE_RESULTAT,TL,Reprises de provisions et depreciations financieres,detail,PRODUIT,797
+COMPTE_RESULTAT,TM,Transfert de charges financieres,detail,PRODUIT,787
+COMPTE_RESULTAT,RM,Frais financiers et charges assimiles,detail,CHARGE,67
+COMPTE_RESULTAT,RN,Dotations aux provisions et depreciations financieres,detail,CHARGE,687;697
+COMPTE_RESULTAT,TN,Produits des cessions d'immobilisations,detail,PRODUIT,82
+COMPTE_RESULTAT,TO,Autres produits HAO,detail,PRODUIT,84;86;88
+COMPTE_RESULTAT,RO,Valeurs comptables des cessions d'immobilisations,detail,CHARGE,81
+COMPTE_RESULTAT,RP,Autres charges HAO,detail,CHARGE,83;85
+COMPTE_RESULTAT,RQ,Participation des travailleurs,detail,CHARGE,87
+COMPTE_RESULTAT,RS,Impots sur le resultat,detail,CHARGE,89
+BILAN,AZ,(total/solde intermediaire),total,FORMULE,
+BILAN,BG,(total/solde intermediaire),total,FORMULE,
+BILAN,BK,(total/solde intermediaire),total,FORMULE,
+BILAN,BT,(total/solde intermediaire),total,FORMULE,
+BILAN,BZ,(total/solde intermediaire),total,FORMULE,
+BILAN,CP,(total/solde intermediaire),total,FORMULE,
+BILAN,DD,(total/solde intermediaire),total,FORMULE,
+BILAN,DF,(total/solde intermediaire),total,FORMULE,
+BILAN,DP,(total/solde intermediaire),total,FORMULE,
+BILAN,DT,(total/solde intermediaire),total,FORMULE,
+BILAN,DZ,(total/solde intermediaire),total,FORMULE,
+COMPTE_RESULTAT,XA,(total/solde intermediaire),total,FORMULE,
+COMPTE_RESULTAT,XB,(total/solde intermediaire),total,FORMULE,
+COMPTE_RESULTAT,XC,(total/solde intermediaire),total,FORMULE,
+COMPTE_RESULTAT,XD,(total/solde intermediaire),total,FORMULE,
+COMPTE_RESULTAT,XE,(total/solde intermediaire),total,FORMULE,
+COMPTE_RESULTAT,XF,(total/solde intermediaire),total,FORMULE,
+COMPTE_RESULTAT,XG,(total/solde intermediaire),total,FORMULE,
+COMPTE_RESULTAT,XH,(total/solde intermediaire),total,FORMULE,
+COMPTE_RESULTAT,XI,(total/solde intermediaire),total,FORMULE,

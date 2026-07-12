@@ -60,7 +60,12 @@ services:
     port: 3006
     database: "document_service"
     role: "OCR KYC v1 (AD-2 flux B, DO-1) : consomme kyc.document.uploaded, extraction RCCM/CFE (Tesseract/OcrProvider) → document.extrait"
-    status: "proposed"  # Module 0 (sept. 2026) — tech-spec courte docs/tech-spec-document-service-*.md ; extensions (factures fournisseurs, dossiers Crédit) différées
+    status: "proposed"  # Module 0 (sept. 2026) — tech-spec courte docs/tech-spec-document-service-*.md ; extensions (factures fournisseurs, dossiers Crédit) différées → activées par balance-service (Atelier)
+  - name: "balance-service"
+    port: 3007
+    database: "balance_service"
+    role: "module AMONT (Atelier Balance) : construit la balance depuis pièces (cahiers/OCR) ou import Sage, + moteur fiscal + conseil ; alimente bilan-service (relying party)"
+    status: "proposed"  # Module 1-bis (déc. 2026-mars 2027) — EPIC-017→024 (STORY-076→100) — PRD docs/prd-atelier-balance-2026-07-12.md ; plan docs/sprint-plan-atelier-balance-2026-07-12.md
 
 # ── Programme PLAN FINAL 2026-07-10 : 18 modules → services (ordre de construction) ───────────────
 # Phase 0 (socle) = déjà couverte par les sprints ci-dessus (auth, EC relying party, kyc,
@@ -81,19 +86,26 @@ program_backlog:
       target_internal: "2026-10"
       status: "proposed"
       spec: "PRD Bilan (import balance + table SYSCOHADA/SFD + états + prévisionnel)"
+    - module: "1b"
+      name: "Atelier Balance & Fiscalité (module amont du Bilan)"
+      services: ["balance-service"]
+      epic: "EPIC-017→EPIC-024 (STORY-076→100)"
+      target_internal: "2027-03"
+      status: "proposed"
+      spec: "PRD docs/prd-atelier-balance-2026-07-12.md + plan docs/sprint-plan-atelier-balance-2026-07-12.md. AMONT du bilan-service : profil société+OCR, référentiels SN+SMT+paquet fiscal, chemin A (cahiers/OCR), import/migration Sage (reprise à-nouveaux), rapprochement bancaire, moteur fiscal (IS=max(MFP,IS)), conseil fiscal. Décisions D1→D12. 2 profils clients (structuré Sage / informel PME)."
     - module: 2
       name: "PI SPI (PA-1)"
       services: ["paiement-service"]
       epic: "EPIC-004 (rescopé)"
-      target_internal: "2026-12"
+      target_internal: "2027-04"  # décalé (Module 1-bis inséré avant) — JIT, sans impact (PS-1/C8)
       status: "proposed"
       spec: "PRD paiement (SpiProvider BCEAO + FedapayProvider) ; dépend PS-1 (délai admin externe) + C8"
     - module: 3
-      name: "Fiscalité"
+      name: "Fiscalité (RE-SCOPÉ)"
       services: ["fiscal-service"]
-      target_internal: "2027-02"
+      target_internal: "2027-05"
       status: "proposed"
-      spec: "PRD fiscal ; décision FI-2 (moteur d'écritures comptabilite-service) à trancher ici"
+      spec: "RE-SCOPÉ 2026-07-12 : le CALCUL fiscal (résultat fiscal, IS=max(MFP,IS), TVA, TPU, conseil) est ANTICIPÉ dans Module 1-bis (balance-service EPIC-023/024). Reste à Module 3 : télédéclaration/dépôt DSF, TVA déclarative périodique avancée, autres impôts. Décision FI-2 (moteur d'écritures comptabilite-service) toujours à trancher ici."
     - module: 4
       name: "Conformité BCEAO & LCB/FT"
       services: ["conformite-service"]
@@ -583,10 +595,15 @@ sprints:
     start_date: "2026-11-05"
     end_date: "2026-11-19"
     capacity_points: 34
-    committed_points: 22
+    committed_points: 29  # chargé (KYC 🏁 8 + balance CORE 21) — split D14 : la balance vient AVANT le Bilan ; rééquilibrable si besoin
     completed_points: 0
     status: "not_started"
-    goal: "Chaîne KYC complète livrée 🏁 (AD-2) : admin-panel actions proxifiées (revue KYC + grant entitlement) + e2e inscription→upload→OCR→revue→approbation. + Bilan EPIC-009 (import de balance)."
+    # ── D14 (2026-07-12) : split CORE/EXTENDED de balance-service. La PRODUCTION + STOCKAGE de la balance
+    # quitte le bilan-service (EPIC-009 SUPERSEDED) et devient le socle CORE de balance-service, séquencé
+    # ICI (sprint 10, AVANT le Bilan) : la balance est stockée d'abord, le bilan-service la consomme ensuite
+    # (sprints 11-14 inchangés → Bilan MV non retardé 🏁). EXTENDED (profil OCR, cahiers/OCR, rapprochement,
+    # fiscal, conseil) reste sprints 15-19. Stories EPIC-009 (050-053) SUPERSEDED par 101/086/098/088.
+    goal: "Chaîne KYC complète livrée 🏁 (AD-2) : admin-panel actions proxifiées + e2e. + Atelier Balance CORE (D14) : contrat de balance canonique + stockage (keyé orgId+exercice) + import Sage + saisie manuelle + handoff → la balance est produite/stockée AVANT le Bilan (bilan-service la consomme dès EPIC-010)."
     stories:
       - story_id: "STORY-048"
         title: "admin-panel : actions proxifiées — revue KYC approve/reject (→ kyc) + grant/revoke entitlement (→ catalog), relais du JWT admin"
@@ -602,33 +619,41 @@ sprints:
         service: "admin-panel"
         status: "not_started"  # dépend STORY-045 + STORY-048 ; jalon Module 0
         assigned_to: null
-      - story_id: "STORY-050"
-        title: "Import de balance Excel/CSV (upload, détection format, parsing, aperçu, stockage keyé orgId+exercice) — FR-001"
-        epic: "EPIC-009"
+      # ── Atelier Balance CORE (D14) — remplace l'ancien EPIC-009 (import bilan) SUPERSEDED ──
+      - story_id: "STORY-076"
+        title: "Scaffold balance-service (:3007, base balance_service, relying party JWKS, health, Kafka)"
+        epic: "EPIC-017"
+        points: 3
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-077"
+        title: "Read-models (entitlement.changed + kyc.status.changed) + gate @RequiresBalanceAccess + idempotence"
+        epic: "EPIC-017"
         points: 5
-        service: "bilan-service"
-        status: "not_started"  # dépend EPIC-008 (035-038)
-        assigned_to: null
-      - story_id: "STORY-051"
-        title: "Contrôle d'intégrité de la balance (équilibre débits/crédits + soldes, doublons, anomalies bloquantes) — FR-002"
-        epic: "EPIC-009"
-        points: 3
-        service: "bilan-service"
+        service: "balance-service"
         status: "not_started"
         assigned_to: null
-      - story_id: "STORY-052"
-        title: "Import comparatif N-1 + association N/N-1 — FR-003"
-        epic: "EPIC-009"
-        points: 3
-        service: "bilan-service"
-        status: "not_started"
+      - story_id: "STORY-101"
+        title: "Contrat de balance CANONIQUE (multi-source, tagué référentiel SN/SMT/SFD-BCEAO) + stockage keyé orgId+exercice + saisie manuelle — pièce maîtresse D13"
+        epic: "EPIC-017"
+        points: 5
+        service: "balance-service"
+        status: "not_started"  # KEYSTONE : rend cabinet/IMF/distributeur interchangeables (hub multi-source D13). À concevoir avec soin dès S10.
         assigned_to: null
-      - story_id: "STORY-053"
-        title: "Mapping de colonnes assisté + profil d'import réutilisable — FR-004"
-        epic: "EPIC-009"
+      - story_id: "STORY-086"
+        title: "Adaptateur import fichier — balance Sage 100 (Excel/CSV prioritaire, PDF secours ; comptes 8 car. alphanum ; blocs N-1/mvts/soldes) → contrat canonique — FR-A12"
+        epic: "EPIC-021"
+        points: 5
+        service: "balance-service"
+        status: "not_started"  # 1er des 3 adaptateurs du hub (import fichier) ; remplace ex-STORY-050
+        assigned_to: null
+      - story_id: "STORY-099"
+        title: "Contrat de sortie & handoff balance normalisée → bilan-service (consommée par EPIC-010/011) — FR-A28"
+        epic: "EPIC-024"
         points: 3
-        service: "bilan-service"
-        status: "not_started"
+        service: "balance-service"
+        status: "not_started"  # la balance stockée est lue par le bilan-service ; ferme la boucle CORE
         assigned_to: null
 
   - sprint_number: 11
@@ -818,10 +843,219 @@ sprints:
         status: "not_started"
         assigned_to: null
 
-  # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. ──
+  # ── Module 1-bis (Atelier Balance) : balance-service, AMONT du Bilan. Inséré 2026-07-12 ────────────
+  # PRD docs/prd-atelier-balance-2026-07-12.md + plan docs/sprint-plan-atelier-balance-2026-07-12.md.
+  # Séquencé APRÈS le cœur Bilan (sprint 14) : le dogfooding MV passe par import Sage→bilan-service ;
+  # l'Atelier sert le marché PME externe + apporte moteur fiscal & conseil. Stories = entrées backlog
+  # (docs .md créés JIT au sprint-planning de chaque sprint, comme les stories 031+). Coordinations : voir §4 du plan.
   - sprint_number: 15
     start_date: "2027-01-14"
     end_date: "2027-01-28"
+    capacity_points: 34
+    committed_points: 18
+    completed_points: 0
+    status: "not_started"
+    goal: "EXTENDED (D14) — le socle 076/077 est déjà livré en CORE (S10). Ici : chargement référentiel/paquet fiscal (EPIC-017/019) + profil société & régime + extraction OCR Statuts/CFE (EPIC-018) : CRUD profil, 2 axes SN/SMT + régime fiscal, OCR pré-remplissage."
+    stories:
+      - story_id: "STORY-078"
+        title: "Chargement référentiel comptable (SN/SMT) + paquet fiscal pays (loader + checksum + cache)"
+        epic: "EPIC-017"
+        points: 5
+        service: "balance-service"
+        status: "not_started"  # consomme packaging platform-catalog (référentiels + paquet fiscal)
+        assigned_to: null
+      - story_id: "STORY-079"
+        title: "Profil société : modèle + CRUD (NIF, RCCM, CNSS, actionnaires, forme juridique, gérant) keyé orgId — FR-A01"
+        epic: "EPIC-018"
+        points: 5
+        service: "balance-service"
+        status: "not_started"  # ownership à confirmer vs auth-service (Q ouverte)
+        assigned_to: null
+      - story_id: "STORY-080"
+        title: "Détermination des 2 axes (système comptable SN/SMT + régime fiscal) proposée selon pays+objet+CA — FR-A03"
+        epic: "EPIC-018"
+        points: 3
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-081"
+        title: "Extraction OCR Statuts + carte CFE → profil pré-rempli éditable (étend document-service) — FR-A02"
+        epic: "EPIC-018"
+        points: 5
+        service: "balance-service+document-service"
+        status: "not_started"  # dépend document-service scaffold (STORY-041) + OcrProvider
+        assigned_to: null
+
+  - sprint_number: 16
+    start_date: "2027-01-28"
+    end_date: "2027-02-11"
+    capacity_points: 34
+    committed_points: 18
+    completed_points: 0
+    status: "not_started"
+    goal: "Construction de balance chemin A (cahiers recettes/dépenses, OCR captures/factures par mois, rattachement plan comptable) — adaptateur #3 du hub (construction, D13). Étend document-service (EPIC-015)."
+    stories:
+      - story_id: "STORY-082"
+        title: "Cahier de recettes (saisie + rangement par mois + rattachement produits classe 7) — FR-A08"
+        epic: "EPIC-020"
+        points: 5
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-083"
+        title: "Cahier de dépenses (catégories éditables + rattachement charges classe 6) — FR-A09"
+        epic: "EPIC-020"
+        points: 5
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-084"
+        title: "OCR captures & factures → montants éditables, par mois (étend document-service) — FR-A10"
+        epic: "EPIC-020"
+        points: 5
+        service: "balance-service+document-service"
+        status: "not_started"  # extension document-service (factures) — deferred_foundations activée
+        assigned_to: null
+      - story_id: "STORY-085"
+        title: "Rattachement au plan comptable (transaction → compte SYSCOHADA) + ventilation — FR-A11"
+        epic: "EPIC-020"
+        points: 3
+        service: "balance-service"
+        status: "not_started"  # compte→poste reste dans bilan-service (STORY-055) — pas de doublon
+        assigned_to: null
+
+  - sprint_number: 17
+    start_date: "2027-02-11"
+    end_date: "2027-02-25"
+    capacity_points: 34
+    committed_points: 21
+    completed_points: 0
+    status: "not_started"
+    goal: "Hub multi-source (D13) : adaptateur #1 = ingestion DIRECTE balance.submitted (verticaux intégrés IMF/distributeur) ; reprise à-nouveaux ; rapprochement bancaire (relevés banque + mobile money → état de rapprochement + situation de compte). [Adaptateur #2 import Sage = livré en CORE S10 (STORY-086).]"
+    stories:
+      - story_id: "STORY-102"
+        title: "Adaptateur ingestion DIRECTE : consumer balance.submitted (verticaux intégrés IMF/distributeur poussent leur balance) → contrat canonique + versioning idempotent (orgId+exercice+source) — D13"
+        epic: "EPIC-021"
+        points: 5
+        service: "balance-service"
+        status: "not_started"  # 1er des 3 adaptateurs du hub ; préféré pour verticaux intégrés (toujours à jour, sans export manuel) ; passe par les mêmes contrôles d'équilibre (FR-A25)
+        assigned_to: null
+      - story_id: "STORY-087"
+        title: "Reprise de balance d'ouverture / à-nouveaux + continuité dans l'Atelier — FR-A13"
+        epic: "EPIC-021"
+        points: 5
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-088"
+        title: "Profil d'import & mapping colonnes réutilisable — FR-A14"
+        epic: "EPIC-021"
+        points: 3
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-089"
+        title: "Import relevés bancaires (banque + mobile money TMoney/Flooz) — FR-A15"
+        epic: "EPIC-022"
+        points: 3
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-090"
+        title: "Rapprochement (relevés ↔ cahiers) + état de rapprochement + situation de compte — FR-A16/A17"
+        epic: "EPIC-022"
+        points: 5
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+
+  - sprint_number: 18
+    start_date: "2027-02-25"
+    end_date: "2027-03-11"
+    capacity_points: 34
+    committed_points: 21
+    completed_points: 0
+    status: "not_started"
+    goal: "Moteur fiscal (EPIC-023) : détermination du résultat fiscal (réintégrations/déductions), liquidation IS=max(MFP,IS)+acomptes, TVA & taxes, intégration des provisions à la balance, régime synthétique/TPU."
+    stories:
+      - story_id: "STORY-091"
+        title: "Détermination du résultat fiscal (réintégrations/déductions, codes DSF) — FR-A18"
+        epic: "EPIC-023"
+        points: 5
+        service: "balance-service"
+        status: "not_started"  # consomme paquet fiscal (STORY-078) ; alimente rendu DSF fiscal bilan-service EPIC-011
+        assigned_to: null
+      - story_id: "STORY-092"
+        title: "Liquidation IS = max(MFP, IS) + 4 acomptes + crédits d'impôt (paquet Togo) — FR-A19"
+        epic: "EPIC-023"
+        points: 5
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-093"
+        title: "TVA (collectée/déductible/due/crédit) + taxes + catégorie « Autres » (taux manuel) — FR-A20"
+        epic: "EPIC-023"
+        points: 5
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-094"
+        title: "Intégration des provisions fiscales à la balance (comptes 44/89) — FR-A21"
+        epic: "EPIC-023"
+        points: 3
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-095"
+        title: "Régime synthétique / TPU (calcul forfaitaire + déclaratif) — FR-A19"
+        epic: "EPIC-023"
+        points: 3
+        service: "balance-service"
+        status: "not_started"  # compléter taux TPU par tranche (Q ouverte)
+        assigned_to: null
+
+  - sprint_number: 19
+    start_date: "2027-03-11"
+    end_date: "2027-03-25"
+    capacity_points: 34
+    committed_points: 18
+    completed_points: 0
+    status: "not_started"
+    goal: "Atelier Balance livré 🏁 : simulation & conseil fiscal (scénarios légaux + dossier de justification + garde-fous) ; contrôles + statut de preuve ; e2e Atelier docker. [Handoff bilan-service = déjà livré en CORE S10 (STORY-099).]"
+    stories:
+      - story_id: "STORY-096"
+        title: "Scénarios d'optimisation fiscale légale (leviers réintégrations/déductions → impact IS, plancher MFP) — FR-A22"
+        epic: "EPIC-024"
+        points: 5
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-097"
+        title: "Comparatif « déposé vs optimisé » + dossier de justification (base légale + pièce) + garde-fous conformité — FR-A23/A24"
+        epic: "EPIC-024"
+        points: 5
+        service: "balance-service"
+        status: "not_started"  # NFR-A04 : traçabilité, immutabilité, aucune minoration non justifiée
+        assigned_to: null
+      - story_id: "STORY-098"
+        title: "Contrôles d'intégrité + cohérence (Actif=Passif, articulation) + statut de preuve de la balance — FR-A25/A26/A27"
+        epic: "EPIC-024"
+        points: 5
+        service: "balance-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-100"
+        title: "e2e Atelier (docker) : cahiers/OCR + Sage → balance → fiscal → handoff bilan-service"
+        epic: "EPIC-024"
+        points: 3
+        service: "balance-service"
+        status: "not_started"  # jalon Module 1-bis
+        assigned_to: null
+
+  # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
+  - sprint_number: 20
+    start_date: "2027-03-25"
+    end_date: "2027-04-08"
     capacity_points: 34
     committed_points: 24
     completed_points: 0
@@ -875,7 +1109,7 @@ bilan_functional_epics:
       name: "Import & normalisation de balance"
       frs: "FR-001..FR-004"
       story_estimate: "4-6"
-      status: "proposed"
+      status: "superseded"  # D14 (2026-07-12) : la production+stockage de la balance quitte bilan-service et devient le CORE de balance-service (STORY-076/077/101/086/099 @ sprint 10). Ex-STORY-050→053 remplacées ; FR-001..004 repris par FR-A12/A25/A03/A14. bilan-service CONSOMME la balance stockée (EPIC-010+).
     - id: "EPIC-010"
       name: "Référentiels & table de passage (SYSCOHADA révisé + SFD-BCEAO)"
       frs: "FR-005..FR-008"
@@ -902,6 +1136,28 @@ bilan_functional_epics:
       story_estimate: "3-5"
       status: "proposed"
 
+# ── Atelier Balance (Module 1-bis) : epics du PRD prd-atelier-balance-2026-07-12.md (D1→D12) ──────
+# balance-service (:3007), AMONT du bilan-service. DÉCOUPÉ en STORY-076→100 (sprints 15-19).
+# Plan : sprint-plan-atelier-balance-2026-07-12.md. Référentiels amorcés : referentiels/.
+atelier_balance_epics:
+  prd: "docs/prd-atelier-balance-2026-07-12.md"
+  service: "balance-service"
+  # D13 (hub multi-source) : contrat de balance canonique (STORY-101) alimenté par 3 adaptateurs —
+  #   #1 ingestion DIRECTE balance.submitted (STORY-102, verticaux intégrés IMF/distributeur, PRÉFÉRÉ),
+  #   #2 import fichier Sage (STORY-086, externe), #3 construction cahiers/OCR (STORY-082..085, PME informelle).
+  # D14 (split core/extended) : CORE @ sprint 10 = 076,077,101,086,099 (contrat+stockage+Sage+saisie+handoff,
+  #   AVANT le Bilan) ; EXTENDED @ sprints 15-19 = profil OCR, cahiers/OCR, rapprochement, fiscal, conseil.
+  keystone: "STORY-101 (contrat de balance canonique) — rend cabinet/IMF/distributeur interchangeables. À concevoir dès S10."
+  epics:
+    - { id: "EPIC-017", name: "Socle balance-service + contrat de balance CANONIQUE (scaffold, gate, read-models, loaders, contrat+stockage)", frs: "infra + FR-A25/A27", stories: "STORY-076,077,101 (CORE S10) ; 078 (S15)", status: "proposed" }
+    - { id: "EPIC-018", name: "Profil société & régime (OCR Statuts/CFE, 2 axes SN/SMT + régime fiscal)", frs: "FR-A01..A03", stories: "STORY-079,080,081", status: "proposed" }
+    - { id: "EPIC-019", name: "Référentiels étendus & paramétrage pays (SMT + paquet fiscal pays + gabarit liasse admin, D12)", frs: "FR-A04..A07", stories: "packaging catalog + STORY-078", status: "proposed" }
+    - { id: "EPIC-020", name: "Adaptateur #3 — construction chemin A (cahiers recettes/dépenses + OCR + rattachement plan comptable)", frs: "FR-A08..A11", stories: "STORY-082..085", status: "proposed" }
+    - { id: "EPIC-021", name: "Hub multi-source — import fichier Sage (086, CORE) + reprise à-nouveaux (087,088) + adaptateur #1 ingestion directe balance.submitted (102)", frs: "FR-A12..A14 + D13", stories: "STORY-086 (CORE S10),087,088,102", status: "proposed" }
+    - { id: "EPIC-022", name: "Rapprochement bancaire (relevés + mobile money)", frs: "FR-A15..A17", stories: "STORY-089,090", status: "proposed" }
+    - { id: "EPIC-023", name: "Moteur fiscal (résultat fiscal, IS=max(MFP,IS), TVA, taxes, provisions)", frs: "FR-A18..A21", stories: "STORY-091..095", status: "proposed" }
+    - { id: "EPIC-024", name: "Simulation & conseil fiscal + contrôles & handoff bilan-service", frs: "FR-A22..A28", stories: "STORY-096,097,098,100 ; 099 (CORE S10)", status: "proposed" }
+
 velocity:
   sprint_1: 33
   sprint_2: 23
@@ -913,12 +1169,18 @@ velocity:
   sprint_7: null   # EPIC-007 platform-catalog-service (socle entitlements) + amorce Module 0 (STORY-040)
   sprint_8: null   # EPIC-008 bilan-service (squelette) + Module 0 (STORY-041 scaffold document-service)
   sprint_9: null   # Module 0 flux B : document-service OCR (042-044) + kyc enrichit (045) + admin-panel amorce (046-047)
-  sprint_10: null  # 🏁 chaîne KYC complète (admin-panel 048-049) + Bilan EPIC-009 import (050-053)
+  sprint_10: null  # 🏁 chaîne KYC (admin-panel 048-049) + Atelier Balance CORE (D14) : 076,077,101(contrat canonique),086(Sage),099(handoff) — balance AVANT le Bilan ; EPIC-009 import SUPERSEDED
   sprint_11: null  # Bilan EPIC-010 référentiels & table de passage (054-058)
   sprint_12: null  # Bilan EPIC-011 états financiers / liasse (059-063)
   sprint_13: null  # Bilan EPIC-012 validation/immutabilité (064-067) + EPIC-013 hypothèses (068)
   sprint_14: null  # 🏁 Bilan livré : EPIC-013 prévisionnel (069-071) + EPIC-014 consultation/export (072-074)
-  sprint_15: null  # Module 2 EPIC-004 paiement-service (016-019) + STORY-039 — JIT (PS-1/C8/PRD paiement)
+  # ── Module 1-bis Atelier Balance EXTENDED (balance-service) — CORE déjà livré @ sprint 10 (D14) ──
+  sprint_15: null  # EXTENDED : loaders référentiel/paquet fiscal (078) + profil société & 2 axes + OCR Statuts/CFE (079-081)
+  sprint_16: null  # EXTENDED : adaptateur #3 construction chemin A — cahiers/OCR + plan comptable (082-085)
+  sprint_17: null  # EXTENDED : adaptateur #1 ingestion directe balance.submitted (102) + reprise à-nouveaux (087-088) + rapprochement bancaire (089-090)
+  sprint_18: null  # EXTENDED : moteur fiscal — résultat fiscal, IS=max(MFP,IS), TVA/taxes, TPU (091-095)
+  sprint_19: null  # 🏁 Atelier livré : conseil fiscal + garde-fous (096-097) + contrôles/statut de preuve (098) + e2e (100)
+  sprint_20: null  # Module 2 EPIC-004 paiement-service (016-019) + STORY-039 — JIT (PS-1/C8/PRD paiement) [ex-sprint 15]
   rolling_average: 27  # (33 + 23 + 24) / 3 ≈ 26.7 ; cible prudente ~24/sprint (1 flux, réf. historique retenue au sprint-planning 2026-07-10)
 
 team:
