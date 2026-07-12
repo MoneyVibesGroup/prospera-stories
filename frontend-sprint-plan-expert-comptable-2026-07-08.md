@@ -6,6 +6,8 @@
 **Périmètre :** Application **cabinet** (personas `TENANT_ADMIN` / `TENANT_USER`)
 **Statut :** Cartographie + backlog (Phase 4 — préalable à `create-story` par story)
 
+> ⚠️ **Révisé le 2026-07-12 — voir l'[Addendum v2](#addendum-v2-2026-07-12--programme-multi-frontend) en bas de document.** Ce plan initial couvrait 2 sprints (auth + KYC + paiement) sur l'ancien périmètre vertical. L'addendum v2 réaligne le frontend sur le PLAN FINAL backend (2026-07-10) : programme **multi-frontend** piloté par l'admin-panel Money Vibes, ajout du **module Bilan** (FE-EPIC-005) et de l'**accès modules/entitlements** (FE-EPIC-006), **re-séquencement du paiement**, et découpage des sprints **FE-3 → FE-7** inséré après FE-010.
+
 > **But de ce document.** Dériver, depuis les stories et exigences **backend** existantes (`docs/stories/`, `docs/prd-expert-comptable-2026-07-02.md`, `docs/architecture-*`), la **structure des stories frontend** de l'app cabinet : epics, story map, traçabilité FR → écran, décisions d'architecture frontend et découpage en sprints. Il joue pour le frontend le rôle que `sprint-plan-expert-comptable-2026-07-02.md` joue pour le backend. Les fichiers stories détaillés (`docs/frontend-stories/FE-xxx.md`) seront produits **une par une** via `create-story`, avec ce plan comme ancre.
 
 ---
@@ -180,4 +182,66 @@ Objectif : parcours d'activation P1 complet côté UI (gestion users, upload KYC
 
 ---
 
-**Document créé avec la méthode BMAD v6 — dérivé des artefacts backend PROSPERA (cabinet expert-comptable).**
+---
+
+## Addendum v2 (2026-07-12) — Programme multi-frontend
+
+> Cet addendum **complète et re-séquence** le plan ci-dessus sans le contredire sur les fondations (stack, gateway, BFF cookie, contrats OpenAPI restent valides). Il l'aligne sur le **PLAN FINAL backend** (`docs/synthese-services-prospera-2026-07-10.md`, `docs/sprint-status.yaml`) et sur les décisions de topologie prises avec le PO le 2026-07-12.
+
+### 1. Le frontend est un programme, pas une app
+
+PROSPERA/Money Vibes est un **écosystème multi-vertical**. Côté frontend, cela donne **trois familles d'interfaces** :
+
+| Interface | Persona | Rôle | Hébergement | Artefacts de suivi |
+|---|---|---|---|---|
+| **admin-panel** (Money Vibes) | `PLATFORM_ADMIN` | **Tour de contrôle interne** : orgs, revue KYC, entitlements, catalogue, dashboard, **provisioning des verticaux** | Hébergé par MV | `frontend-sprint-plan-admin-panel-2026-07-12.md` + `frontend-admin-sprint-status.yaml` |
+| **app cliente** (ce plan) | `TENANT_ADMIN` / `TENANT_USER` | App **config-driven** d'un vertical ; affiche ses modules selon le type de vertical + les **entitlements**. Vertical pilote = **cabinet**. | MV **ou** cloud du client | `frontend-sprint-plan-expert-comptable-*.md` + `frontend-sprint-status.yaml` |
+| **verticaux futurs** (IMF, distributeurs, assurances) | idem | **Mêmes** app cliente et code, déployés en instances isolées + config propre | cloud du client (souvent) | `vertical_backlog` du tracker (placeholder, JIT) |
+
+### 2. Topologie retenue — Option B : « 1 code / N déploiements isolés »
+
+- **Une seule base de code cliente**, configurable : elle n'affiche que les modules du vertical courant + entitlements `ACTIVE`. Un **nouveau vertical = de la configuration + quelques modules**, pas un nouveau projet.
+- **Déploiement isolé par client** : même image **Docker**, paramétrée par **variables d'environnement** (`NEXT_PUBLIC_API_BASE_URL` = gateway de l'instance, `NEXT_PUBLIC_VERTICAL`, branding, locale). L'instance MV/cabinet est hébergée par MV ; une instance externe (ex. IMF) est déployable **sur le cloud du client**.
+- **Contraintes socle** (à garantir dès FE-001/002/003) : app **containerisée**, **100 % configurable par env** (aucune URL ni branding en dur), **modules pilotés par entitlements lus au runtime**, cloud-agnostique.
+- **Résidence des données** (IMF/BCEAO) : le choix du cloud devient celui du client ; l'app reste portable. La question stack **dédiée-vs-mutualisée** par vertical est tranchée **JIT** à l'ouverture du vertical.
+
+### 3. Nouveaux epics frontend
+
+| Epic FE | Nom | Dérive de (backend) | FR / périmètre |
+|---|---|---|---|
+| **FE-EPIC-006** | Accès modules & entitlements | EPIC-007 (`platform-catalog-service`) + `TenantStateGuard` | Home des modules ; le vertical n'affiche que les modules `ACTIVE` ; gates KYC/abonnement/entitlement. **(FE-014)** |
+| **FE-EPIC-005** | Bilan & Prévisionnel | EPIC-009→014 (`bilan-service`, PRD `docs/prd-bilan-service-2026-07-10.md`) | FR-001→FR-024 : import balance → table de passage → liasse OHADA → validation/immutabilité → prévisionnel → consultation/export. **(FE-B00→FE-B15)** |
+
+### 4. Re-séquencement du paiement (PA-1 + DG-1)
+
+- Le checkout/webhooks passent au **`paiement-service`** (Module 2, ~déc. 2026) ; les plans restent au vertical (`STORY-015`).
+- Sous **dogfooding (DG-1)**, l'entitlement est octroyé **manuellement via l'admin-panel** avant tout paiement → le parcours paiement n'est **pas** prioritaire.
+- ⇒ **FE-011/012/013 sortent de FE-2 et rejoignent le sprint FE-7 (JIT)**, aligné sur `paiement-service`. FE-012 devient « Checkout PI SPI BCEAO + FedaPay ».
+
+### 5. Découpage des sprints — inséré **après FE-010** (le frontend suit la dispo backend ~1 sprint)
+
+| Sprint FE | Objectif | Stories | Pts | Backend requis |
+|---|---|---|---|---|
+| **FE-1** | Socle + Auth | FE-001→007 | 24 | auth-service ✅ (livré) |
+| **FE-2** | Users + KYC + Onboarding + **accès modules** | FE-008, FE-009, FE-010, **FE-014** | 18 | kyc-service ✅, `/tenant/state` ✅ |
+| **FE-3** | **Bilan** : exercices + import de balance | FE-B00→FE-B05 | 20 | EPIC-008 (S8) + EPIC-009 (S10) |
+| **FE-4** | **Bilan** : référentiels/mapping + liasse (Bilan, CR, TFT) | FE-B06→FE-B09 | 18 | EPIC-010/011 (S11-12) |
+| **FE-5** | **Bilan** : validation/immutabilité + prévisionnel | FE-B10→FE-B12 | 18 | EPIC-012/013 (S13-14) |
+| **FE-6** | **Bilan** : consultation + export PDF/Excel + durcissement 🏁 | FE-B13→FE-B15 | 13 | EPIC-014 (S14) |
+| **FE-7 (JIT)** | Abonnement & paiement *(différé)* | FE-011, FE-012, FE-013 | 10 | paiement-service (S15) |
+
+Détail des stories (titres, FR, backend_ref, API) : `docs/frontend-sprint-status.yaml` (mis à jour v2).
+
+**Total app cliente : 7 sprints · ~30 stories · ~121 pts.** (dont Bilan = 16 stories / ~59 pts — le gros du chantier, absent du plan initial.)
+
+### 6. Note sur « expert-comptable sans intégration API sérieuse »
+
+L'app cabinet existante (`prospera-frontend-expert-comptable`) est scaffoldée mais **pas réellement câblée aux APIs**. Le socle (FE-001/002/003) **est** justement cette mise à niveau : client API unique sur la gateway, types générés depuis l'**OpenAPI**, BFF cookie httpOnly, refresh RS256, shell **config-driven**. Aucun mock ne doit subsister à la sortie de FE-2 : toutes les données passent par la gateway.
+
+### 7. Piste admin-panel (séparée)
+
+L'admin-panel Money Vibes fait l'objet de **son propre plan** : `frontend-sprint-plan-admin-panel-2026-07-12.md`. Périmètre v1 : **Orgs + revue KYC**, **Entitlements + catalogue**, **Dashboard + provisioning des verticaux**. (Plans/abonnements → plus tard, avec le Module 2.) C'est **depuis là** que sont configurés les modules/entitlements que l'app cliente lit.
+
+---
+
+**Document créé avec la méthode BMAD v6 — dérivé des artefacts backend PROSPERA (cabinet expert-comptable). Addendum v2 : programme multi-frontend aligné PLAN FINAL 2026-07-10.**
