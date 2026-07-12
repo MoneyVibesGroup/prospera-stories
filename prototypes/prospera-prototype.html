@@ -1,0 +1,1755 @@
+<title>Prospera · Maquette FE-010 — Bandeau d'onboarding + statut KYC</title>
+<style>
+  /* =========================================================================
+     PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
+     Cabinet comptable · Orange #FF6633 · Noir #070707 · neutres Stone.
+     Tokens repris de la maquette Connexion validée (cohérence du prototype).
+     Polices : stack système (CDN de polices bloqués dans l'artefact).
+     ========================================================================= */
+
+  :root {
+    --orange-400: #ff824f;
+    --orange-500: #ff6633;
+    --orange-600: #ea580c;
+    --orange-700: #c2410c;
+
+    --neutral-50:  #fafaf9;
+    --neutral-100: #f5f5f4;
+    --neutral-200: #e7e5e4;
+    --neutral-300: #d6d3d1;
+    --neutral-400: #a8a29e;
+    --neutral-500: #78716c;
+    --neutral-600: #57534e;
+    --neutral-700: #44403c;
+    --neutral-800: #292524;
+    --neutral-900: #1c1917;
+    --neutral-950: #070707;
+
+    /* Sémantiques — indépendants du thème (séparés de l'accent orange). */
+    --success: #059669;
+    --success-soft: #d1fae5;
+    --warning: #f59e0b;
+    --warning-soft: #fef3c7;
+    --danger: #dc2626;
+    --danger-soft: #fee2e2;
+
+    /* Rôles de couleur (clair par défaut). */
+    --background: #ffffff;
+    --content-bg: var(--neutral-50);
+    --foreground: var(--neutral-950);
+    --card: #ffffff;
+    --muted-fg: var(--neutral-500);
+    --border: var(--neutral-200);
+    --border-strong: var(--neutral-300);
+    --primary: var(--orange-500);
+    --primary-fg: var(--neutral-950);
+    --link: var(--orange-700);
+    --ring: var(--orange-600);
+    --hover-surface: var(--neutral-100);
+
+    /* Sidebar — TOUJOURS sombre (signature de marque), quel que soit le thème. */
+    --sb-bg: var(--neutral-950);
+    --sb-fg: var(--neutral-300);
+    --sb-muted: var(--neutral-500);
+    --sb-hover: rgb(255 255 255 / 0.06);
+    --sb-border: rgb(255 255 255 / 0.08);
+    --sb-active-fg: #ffffff;
+    --sb-active-bg: rgb(255 102 51 / 0.14);
+
+    --radius: 0.625rem;
+    --shadow-sm: 0 1px 2px rgb(28 25 23 / 0.06), 0 1px 3px rgb(28 25 23 / 0.08);
+    --shadow-lg: 0 12px 28px -6px rgb(28 25 23 / 0.16), 0 6px 10px -6px rgb(28 25 23 / 0.09);
+
+    --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "SFMono-Regular", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: var(--neutral-950);
+      --content-bg: #101010;
+      --foreground: var(--neutral-100);
+      --card: var(--neutral-900);
+      --muted-fg: var(--neutral-400);
+      --border: var(--neutral-800);
+      --border-strong: var(--neutral-700);
+      --link: var(--orange-400);
+      --ring: var(--orange-500);
+      --hover-surface: var(--neutral-800);
+      --success-soft: rgb(5 150 105 / 0.18);
+      --warning-soft: rgb(245 158 11 / 0.18);
+      --danger-soft: rgb(220 38 38 / 0.18);
+    }
+  }
+  :root[data-theme="dark"] {
+    --background: var(--neutral-950);
+    --content-bg: #101010;
+    --foreground: var(--neutral-100);
+    --card: var(--neutral-900);
+    --muted-fg: var(--neutral-400);
+    --border: var(--neutral-800);
+    --border-strong: var(--neutral-700);
+    --link: var(--orange-400);
+    --ring: var(--orange-500);
+    --hover-surface: var(--neutral-800);
+    --success-soft: rgb(5 150 105 / 0.18);
+    --warning-soft: rgb(245 158 11 / 0.18);
+    --danger-soft: rgb(220 38 38 / 0.18);
+  }
+  :root[data-theme="light"] {
+    --background: #ffffff;
+    --content-bg: var(--neutral-50);
+    --foreground: var(--neutral-950);
+    --card: #ffffff;
+    --muted-fg: var(--neutral-500);
+    --border: var(--neutral-200);
+    --border-strong: var(--neutral-300);
+    --link: var(--orange-700);
+    --ring: var(--orange-600);
+    --hover-surface: var(--neutral-100);
+    --success-soft: #d1fae5;
+    --warning-soft: #fef3c7;
+    --danger-soft: #fee2e2;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: var(--content-bg);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  svg { display: block; }
+  button { font: inherit; }
+
+  /* ============================= RUBAN PROTOTYPE ============================ */
+  .ribbon {
+    height: 2.75rem; flex: none;
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0 0.9rem;
+    background: var(--neutral-950); color: var(--neutral-300);
+    border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  }
+  .ribbon .tag {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--neutral-400);
+  }
+  .ribbon .tag .dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--orange-500); }
+  .seg { display: inline-flex; background: rgb(255 255 255 / 0.06); border-radius: 999px; padding: 0.2rem; gap: 0.15rem; }
+  .seg button {
+    border: 0; background: transparent; color: var(--neutral-400); cursor: pointer;
+    font-size: 0.8rem; font-weight: 500; padding: 0.3rem 0.8rem; border-radius: 999px;
+    transition: color .15s, background-color .15s;
+  }
+  .seg button[aria-selected="true"] { background: var(--orange-500); color: var(--neutral-950); font-weight: 600; }
+  .seg button:focus-visible { outline: 2px solid var(--orange-400); outline-offset: 2px; }
+  .ribbon .spacer { flex: 1; }
+  .ribbon .r-toggle {
+    width: 2.1rem; height: 2.1rem; display: grid; place-items: center;
+    border-radius: 0.5rem; border: 1px solid rgb(255 255 255 / 0.12);
+    background: transparent; color: var(--neutral-200); cursor: pointer;
+  }
+  .ribbon .r-toggle:hover { background: rgb(255 255 255 / 0.08); }
+  .ribbon .r-toggle svg { width: 1.05rem; height: 1.05rem; }
+  .i-sun { display: none; }
+  @media (prefers-color-scheme: dark) { .i-sun { display: block; } .i-moon { display: none; } }
+  :root[data-theme="dark"] .i-sun { display: block; } :root[data-theme="dark"] .i-moon { display: none; }
+  :root[data-theme="light"] .i-sun { display: none; } :root[data-theme="light"] .i-moon { display: block; }
+
+  .stage { height: calc(100% - 2.75rem); }
+  body { display: flex; flex-direction: column; }
+  .view { display: none; height: 100%; }
+  .view.active { display: block; }
+
+  /* ================================= LOGO ================================== */
+  .wordmark { display: inline-flex; align-items: center; gap: 0.6rem; }
+  .wordmark .logo-mark { height: 1.9rem; width: auto; }
+  .wordmark-text { font-size: 1.15rem; font-weight: 800; letter-spacing: 0.12em; color: var(--neutral-100); }
+
+  /* ============================== SHELL (APP) ============================== */
+  .app { display: grid; grid-template-columns: 15.5rem 1fr; height: 100%; }
+
+  .sidebar {
+    background: var(--sb-bg); color: var(--sb-fg);
+    display: flex; flex-direction: column; gap: 0.25rem;
+    border-right: 1px solid var(--sb-border);
+    position: relative; z-index: 40;
+  }
+  .sb-head { padding: 1.15rem 1.15rem 0.9rem; }
+  .sb-cabinet {
+    margin-top: 1rem; display: flex; align-items: center; gap: 0.65rem;
+    padding: 0.6rem 0.65rem; border-radius: 0.55rem;
+    background: rgb(255 255 255 / 0.04); border: 1px solid var(--sb-border);
+  }
+  .sb-cabinet .badge {
+    width: 2rem; height: 2rem; flex: none; border-radius: 0.5rem;
+    display: grid; place-items: center; font-weight: 700; font-size: 0.82rem;
+    background: var(--orange-500); color: var(--neutral-950);
+  }
+  .sb-cabinet .meta { min-width: 0; }
+  .sb-cabinet .meta b { display: block; font-size: 0.86rem; color: var(--neutral-100); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sb-cabinet .meta span { font-size: 0.72rem; color: var(--sb-muted); }
+
+  .sb-nav { padding: 0.6rem 0.7rem; display: flex; flex-direction: column; gap: 0.15rem; flex: 1; overflow-y: auto; }
+  .sb-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sb-muted); padding: 0.7rem 0.55rem 0.35rem; }
+  .nav-item {
+    display: flex; align-items: center; gap: 0.7rem; width: 100%;
+    padding: 0.6rem 0.6rem; border-radius: 0.55rem; border: 0;
+    background: transparent; color: var(--sb-fg); cursor: pointer;
+    font-size: 0.9rem; font-weight: 500; text-align: left;
+    border-left: 2.5px solid transparent;
+    transition: background-color .14s, color .14s;
+  }
+  .nav-item svg { width: 1.15rem; height: 1.15rem; flex: none; color: var(--sb-muted); transition: color .14s; }
+  .nav-item .count { margin-left: auto; font-size: 0.72rem; color: var(--sb-muted); background: rgb(255 255 255 / 0.06); padding: 0.05rem 0.45rem; border-radius: 999px; }
+  .nav-item:hover { background: var(--sb-hover); color: var(--neutral-100); }
+  .nav-item:hover svg { color: var(--neutral-200); }
+  .nav-item[aria-current="page"] {
+    background: var(--sb-active-bg); color: var(--sb-active-fg);
+    border-left-color: var(--orange-500); font-weight: 600;
+  }
+  .nav-item[aria-current="page"] svg { color: var(--orange-500); }
+  .nav-item:focus-visible { outline: 2px solid var(--orange-400); outline-offset: -2px; }
+
+  .sb-foot { padding: 0.9rem 1rem; border-top: 1px solid var(--sb-border); font-size: 0.72rem; color: var(--sb-muted); display: flex; align-items: center; justify-content: space-between; }
+  .sb-foot .env { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .sb-foot .env .d { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--success); }
+
+  /* ================================ MAIN ================================== */
+  .main { display: flex; flex-direction: column; min-width: 0; height: 100%; }
+  .topbar {
+    flex: none; height: 3.75rem; display: flex; align-items: center; gap: 0.9rem;
+    padding: 0 1.15rem; background: var(--background); border-bottom: 1px solid var(--border);
+  }
+  .hamburger { display: none; width: 2.4rem; height: 2.4rem; border-radius: 0.5rem; border: 1px solid var(--border); background: var(--card); color: var(--foreground); cursor: pointer; place-items: center; }
+  .hamburger svg { width: 1.2rem; height: 1.2rem; }
+  .topbar .title { min-width: 0; }
+  .topbar .title h1 { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+  .topbar .title p { margin: 0.1rem 0 0; font-size: 0.78rem; color: var(--muted-fg); }
+  .topbar .actions { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+
+  .icon-btn {
+    width: 2.4rem; height: 2.4rem; display: grid; place-items: center;
+    border-radius: 0.55rem; border: 1px solid var(--border); background: var(--card); color: var(--foreground); cursor: pointer;
+    position: relative; transition: background-color .14s;
+  }
+  .icon-btn:hover { background: var(--hover-surface); }
+  .icon-btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .icon-btn svg { width: 1.2rem; height: 1.2rem; }
+  .icon-btn .ping { position: absolute; top: 0.5rem; right: 0.55rem; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--orange-500); border: 2px solid var(--card); }
+
+  /* Menu utilisateur */
+  .usermenu { position: relative; }
+  .usermenu .trigger {
+    display: flex; align-items: center; gap: 0.55rem; padding: 0.3rem 0.55rem 0.3rem 0.35rem;
+    border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--foreground); cursor: pointer;
+    transition: background-color .14s;
+  }
+  .usermenu .trigger:hover { background: var(--hover-surface); }
+  .usermenu .trigger:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .avatar { width: 1.9rem; height: 1.9rem; border-radius: 50%; display: grid; place-items: center; font-size: 0.78rem; font-weight: 700; background: var(--neutral-950); color: #fff; flex: none; }
+  :root[data-theme="dark"] .avatar, :root:not([data-theme]) .avatar { }
+  .usermenu .trigger .who { text-align: left; line-height: 1.15; }
+  .usermenu .trigger .who b { font-size: 0.82rem; font-weight: 600; }
+  .usermenu .trigger .who span { display: block; font-size: 0.7rem; color: var(--muted-fg); }
+  .usermenu .trigger .chev { width: 1rem; height: 1rem; color: var(--muted-fg); }
+  @media (max-width: 30rem) { .usermenu .trigger .who { display: none; } }
+
+  .menu {
+    position: absolute; right: 0; top: calc(100% + 0.5rem); width: 15rem;
+    background: var(--card); border: 1px solid var(--border); border-radius: 0.7rem;
+    box-shadow: var(--shadow-lg); padding: 0.4rem; z-index: 50;
+    opacity: 0; transform: translateY(-6px) scale(0.98); pointer-events: none;
+    transition: opacity .14s, transform .14s;
+  }
+  .menu[data-open="true"] { opacity: 1; transform: none; pointer-events: auto; }
+  .menu .mhead { padding: 0.6rem 0.6rem 0.55rem; display: flex; gap: 0.6rem; align-items: center; border-bottom: 1px solid var(--border); margin-bottom: 0.35rem; }
+  .menu .mhead .meta b { font-size: 0.85rem; }
+  .menu .mhead .meta span { display: block; font-size: 0.74rem; color: var(--muted-fg); font-family: var(--font-mono); }
+  .menu button.mi, .menu a.mi {
+    display: flex; align-items: center; gap: 0.6rem; width: 100%; text-align: left;
+    padding: 0.55rem 0.6rem; border: 0; background: transparent; color: var(--foreground);
+    font-size: 0.86rem; border-radius: 0.5rem; cursor: pointer; text-decoration: none;
+  }
+  .menu button.mi:hover, .menu a.mi:hover { background: var(--hover-surface); }
+  .menu button.mi svg, .menu a.mi svg { width: 1.05rem; height: 1.05rem; color: var(--muted-fg); }
+  .menu .mi.danger { color: var(--danger); }
+  .menu .mi.danger svg { color: var(--danger); }
+  .menu .msep { height: 1px; background: var(--border); margin: 0.35rem 0; }
+
+  /* =============================== CONTENU ================================ */
+  .content { flex: 1; overflow-y: auto; padding: 1.4rem 1.5rem 3rem; }
+  .content-inner { max-width: 64rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  /* Slot bandeau d'onboarding (emplacement FE-010) */
+  .onboarding {
+    display: flex; align-items: center; gap: 0.9rem;
+    padding: 0.85rem 1rem; border-radius: var(--radius);
+    background: color-mix(in srgb, var(--orange-500) 10%, var(--background));
+    border: 1px solid color-mix(in srgb, var(--orange-500) 32%, transparent);
+  }
+  .onboarding .oi { width: 2.2rem; height: 2.2rem; flex: none; border-radius: 0.55rem; display: grid; place-items: center; background: var(--orange-500); color: var(--neutral-950); }
+  .onboarding .oi svg { width: 1.2rem; height: 1.2rem; }
+  .onboarding .otxt { flex: 1; min-width: 0; }
+  .onboarding .otxt b { font-size: 0.9rem; }
+  .onboarding .otxt p { margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--muted-fg); }
+  .onboarding .slotnote { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--orange-700); font-weight: 700; white-space: nowrap; }
+  :root[data-theme="dark"] .onboarding .slotnote { color: var(--orange-400); }
+
+  .card-surface { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+  .panel-head { display: flex; align-items: center; gap: 0.8rem; padding: 1rem 1.15rem; border-bottom: 1px solid var(--border); }
+  .panel-head h2 { margin: 0; font-size: 1rem; font-weight: 650; }
+  .panel-head p { margin: 0.1rem 0 0; font-size: 0.78rem; color: var(--muted-fg); }
+  .panel-head .grow { flex: 1; }
+
+  /* Boutons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; height: 2.4rem; padding: 0 0.9rem; border-radius: calc(var(--radius) - 2px); font-size: 0.86rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: filter .14s, background-color .14s; white-space: nowrap; }
+  .btn svg { width: 1.05rem; height: 1.05rem; }
+  .btn-primary { background: var(--primary); color: var(--primary-fg); }
+  .btn-primary:hover { filter: brightness(0.95); }
+  .btn-ghost { background: var(--card); color: var(--foreground); border-color: var(--border); }
+  .btn-ghost:hover { background: var(--hover-surface); }
+  .btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .btn-sm { height: 2rem; padding: 0 0.65rem; font-size: 0.8rem; }
+
+  /* Segmented (démo états) */
+  .states-demo { display: inline-flex; gap: 0.15rem; background: var(--hover-surface); border: 1px solid var(--border); border-radius: 999px; padding: 0.2rem; }
+  .states-demo button { border: 0; background: transparent; color: var(--muted-fg); font-size: 0.78rem; font-weight: 500; padding: 0.3rem 0.7rem; border-radius: 999px; cursor: pointer; }
+  .states-demo button[aria-selected="true"] { background: var(--card); color: var(--foreground); box-shadow: var(--shadow-sm); font-weight: 600; }
+
+  /* Table utilisateurs */
+  .tbl-wrap { overflow-x: auto; }
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  table.tbl th { text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); font-weight: 600; padding: 0.7rem 1.15rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.tbl td { padding: 0.8rem 1.15rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  table.tbl tr:last-child td { border-bottom: 0; }
+  table.tbl tr:hover td { background: var(--hover-surface); }
+  .u-cell { display: flex; align-items: center; gap: 0.7rem; }
+  .u-cell .avatar { width: 2.1rem; height: 2.1rem; }
+  .u-cell .un b { font-size: 0.86rem; font-weight: 600; }
+  .u-cell .un span { display: block; font-size: 0.76rem; color: var(--muted-fg); font-family: var(--font-mono); }
+
+  .badge { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.74rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 999px; white-space: nowrap; }
+  .badge .d { width: 0.4rem; height: 0.4rem; border-radius: 50%; }
+  .badge-admin { background: color-mix(in srgb, var(--orange-500) 14%, transparent); color: var(--orange-700); }
+  :root[data-theme="dark"] .badge-admin { color: var(--orange-400); }
+  .badge-user { background: var(--hover-surface); color: var(--muted-fg); }
+  .badge-active { background: var(--success-soft); color: var(--success); }
+  .badge-active .d { background: var(--success); }
+  .badge-invited { background: var(--warning-soft); color: #b45309; }
+  :root[data-theme="dark"] .badge-invited { color: var(--warning); }
+  .badge-invited .d { background: var(--warning); }
+  .badge-suspended { background: var(--danger-soft); color: var(--danger); }
+  .badge-suspended .d { background: var(--danger); }
+
+  .row-actions { display: flex; gap: 0.3rem; justify-content: flex-end; }
+  .row-actions button { width: 2rem; height: 2rem; border-radius: 0.45rem; border: 1px solid transparent; background: transparent; color: var(--muted-fg); cursor: pointer; display: grid; place-items: center; }
+  .row-actions button:hover { background: var(--hover-surface); color: var(--foreground); border-color: var(--border); }
+  .row-actions button svg { width: 1.05rem; height: 1.05rem; }
+
+  /* États réutilisables */
+  .state { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.9rem; padding: 3rem 1.5rem; }
+  .state .glyph { width: 3.25rem; height: 3.25rem; border-radius: 0.9rem; display: grid; place-items: center; }
+  .state .glyph svg { width: 1.5rem; height: 1.5rem; }
+  .state h3 { margin: 0; font-size: 1rem; font-weight: 650; }
+  .state p { margin: 0; font-size: 0.86rem; color: var(--muted-fg); max-width: 34ch; }
+  .state.error .glyph { background: var(--danger-soft); color: var(--danger); }
+  .state.empty .glyph { background: var(--hover-surface); color: var(--muted-fg); }
+
+  /* Skeleton (loading) */
+  .sk-row { display: flex; align-items: center; gap: 0.7rem; padding: 0.85rem 1.15rem; border-bottom: 1px solid var(--border); }
+  .sk-row:last-child { border-bottom: 0; }
+  .sk { background: linear-gradient(90deg, var(--hover-surface) 25%, color-mix(in srgb, var(--hover-surface) 55%, var(--border)) 37%, var(--hover-surface) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; border-radius: 0.4rem; }
+  @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+  @media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+  .sk-av { width: 2.1rem; height: 2.1rem; border-radius: 50%; flex: none; }
+  .sk-line { height: 0.7rem; }
+
+  .subgrid { padding: 1.15rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 48rem) { .subgrid { grid-template-columns: 1fr; } }
+  .kyc-drop { border: 1.5px dashed var(--border-strong); border-radius: var(--radius); padding: 1.5rem 1.2rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.6rem; }
+  .kyc-drop .di { width: 2.6rem; height: 2.6rem; border-radius: 0.6rem; background: var(--hover-surface); color: var(--muted-fg); display: grid; place-items: center; }
+  .kyc-drop b { font-size: 0.9rem; }
+  .kyc-drop span { font-size: 0.78rem; color: var(--muted-fg); }
+
+  .plan { padding: 1.15rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .plan .price { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .plan .price small { font-size: 0.85rem; font-weight: 500; color: var(--muted-fg); }
+
+  .helper { font-size: 0.78rem; color: var(--muted-fg); text-align: center; }
+  .helper code { font-family: var(--font-mono); background: var(--hover-surface); padding: 0.05rem 0.35rem; border-radius: 0.3rem; font-size: 0.9em; }
+
+  /* =============================== TOASTS ================================= */
+  .toasts { position: fixed; right: 1.1rem; bottom: 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; z-index: 90; width: min(22rem, calc(100vw - 2rem)); }
+  .toast { display: flex; align-items: flex-start; gap: 0.65rem; padding: 0.8rem 0.9rem; border-radius: 0.6rem; background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-lg); animation: toastin .28s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes toastin { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .toast { animation: none; } }
+  .toast .ti { width: 1.5rem; height: 1.5rem; flex: none; border-radius: 50%; display: grid; place-items: center; margin-top: 0.05rem; }
+  .toast .ti svg { width: 0.95rem; height: 0.95rem; }
+  .toast.success .ti { background: var(--success-soft); color: var(--success); }
+  .toast.error .ti { background: var(--danger-soft); color: var(--danger); }
+  .toast .tb { flex: 1; }
+  .toast .tb b { font-size: 0.85rem; }
+  .toast .tb p { margin: 0.1rem 0 0; font-size: 0.8rem; color: var(--muted-fg); }
+  .toast .tx { border: 0; background: transparent; color: var(--muted-fg); cursor: pointer; padding: 0.1rem; }
+  .toast .tx svg { width: 1rem; height: 1rem; }
+
+  /* ============================ ENVELOPPE PUBLIQUE ======================== */
+  .public { height: 100%; display: grid; place-items: center; padding: 2rem 1.25rem;
+    background:
+      radial-gradient(60% 50% at 50% 0%, color-mix(in srgb, var(--orange-500) 10%, transparent), transparent 70%),
+      var(--content-bg);
+  }
+  .public-card { width: 100%; max-width: 26rem; display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }
+  .public .wordmark .wordmark-text { color: var(--foreground); }
+  .public-slot {
+    width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow-lg); padding: 1.6rem; text-align: center;
+  }
+  .public-slot .placeholder { border: 1.5px dashed var(--border-strong); border-radius: var(--radius); padding: 2.2rem 1rem; color: var(--muted-fg); font-size: 0.86rem; }
+  .public-slot h2 { margin: 0 0 0.4rem; font-size: 1.2rem; }
+  .public-slot .lead { margin: 0 0 1.3rem; font-size: 0.88rem; color: var(--muted-fg); }
+  .public-foot { font-size: 0.78rem; color: var(--muted-fg); }
+  .public-foot a { color: var(--link); text-decoration: none; }
+
+  /* ---- Inscription (FE-004) ---- */
+  .auth-card {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 1.6rem;
+    text-align: left;
+  }
+  .auth-card h2 { margin: 0 0 0.3rem; font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+  .auth-card .lead { margin: 0 0 1.3rem; font-size: 0.9rem; color: var(--muted-fg); }
+  .btn-google {
+    height: 2.7rem; width: 100%; border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 2px); background: var(--card); color: var(--foreground);
+    font: inherit; font-size: 0.9rem; font-weight: 500; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+  }
+  .btn-google:hover { background: var(--hover-surface); }
+  .btn-google svg { width: 1.1rem; height: 1.1rem; }
+  .divider { display: flex; align-items: center; gap: 0.85rem; color: var(--muted-fg); font-size: 0.76rem; margin: 1rem 0; }
+  .divider::before, .divider::after { content: ""; height: 1px; background: var(--border); flex: 1; }
+  .reg-form { display: grid; gap: 0.85rem; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  @media (max-width: 26rem) { .grid-2 { grid-template-columns: 1fr; } }
+  .field { display: grid; gap: 0.35rem; }
+  .field > label { font-size: 0.82rem; font-weight: 500; }
+  .field .control { position: relative; display: flex; align-items: center; }
+  .field .lead-ico { position: absolute; left: 0.75rem; width: 1.05rem; height: 1.05rem; color: var(--muted-fg); pointer-events: none; }
+  .field .sel-chev { position: absolute; right: 0.7rem; width: 1rem; height: 1rem; color: var(--muted-fg); pointer-events: none; }
+  .field input, .field select {
+    width: 100%; height: 2.6rem; border-radius: calc(var(--radius) - 2px);
+    border: 1px solid var(--border); background: var(--background); color: var(--foreground);
+    font: inherit; font-size: 0.9rem; padding: 0 0.85rem 0 2.4rem;
+  }
+  .field select { appearance: none; cursor: pointer; padding-right: 2rem; }
+  .field input::placeholder { color: var(--muted-fg); }
+  .field input:focus-visible, .field select:focus-visible {
+    outline: none; border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 30%, transparent);
+  }
+  .reg-form .btn-primary { width: 100%; margin-top: 0.3rem; }
+  .signup { text-align: center; font-size: 0.88rem; color: var(--muted-fg); margin: 0.1rem 0 0; }
+  .signup a { color: var(--link); text-decoration: none; font-weight: 500; }
+  .signup a:hover { text-decoration: underline; }
+  .done { text-align: center; }
+  .done .done-ico { width: 3rem; height: 3rem; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 1rem; background: var(--success-soft); color: var(--success); }
+  .done .done-ico svg { width: 1.45rem; height: 1.45rem; }
+  .done b { font-family: var(--font-mono); font-weight: 600; }
+  .done-ico.warn { background: color-mix(in srgb, #f59e0b 18%, transparent); color: #b45309; }
+  :root[data-theme="dark"] .done-ico.warn { color: #f59e0b; }
+  .invite-context { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--hover-surface); }
+  .invite-context .ic-avatar { width: 2.4rem; height: 2.4rem; flex: none; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 0.8rem; background: var(--neutral-950); color: #fff; }
+  :root[data-theme="dark"] .invite-context .ic-avatar { background: var(--neutral-700); }
+  .invite-context b { font-size: 0.86rem; font-family: var(--font-mono); }
+  .invite-context > div > span { display: block; font-size: 0.78rem; color: var(--muted-fg); }
+  .role-badge { display: inline-block; font-weight: 600; font-size: 0.72rem; padding: 0.05rem 0.45rem; border-radius: 999px; background: color-mix(in srgb, var(--orange-500) 14%, transparent); color: var(--orange-700); }
+  :root[data-theme="dark"] .role-badge { color: var(--orange-400); }
+  .min-w-0 { min-width: 0; }
+
+  /* ===================== GESTION UTILISATEURS (FE-008) =================== */
+  /* Note RBAC (écran réservé aux administrateurs) */
+  .rbac-note { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.74rem; color: var(--muted-fg); margin-top: 0.25rem; }
+  .rbac-note svg { width: 0.9rem; height: 0.9rem; color: var(--muted-fg); flex: none; }
+
+  .btn-danger { background: var(--danger); color: #fff; border-color: transparent; }
+  .btn-danger:hover { filter: brightness(0.95); }
+
+  /* Pagination */
+  .pagination { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1.15rem; border-top: 1px solid var(--border); font-size: 0.82rem; color: var(--muted-fg); }
+  .pagination .pg-nav { margin-left: auto; display: flex; gap: 0.4rem; }
+  .pagination .pg-nav button { height: 2rem; min-width: 2rem; padding: 0 0.6rem; border-radius: 0.45rem; border: 1px solid var(--border); background: var(--card); color: var(--foreground); cursor: pointer; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+  .pagination .pg-nav button svg { width: 0.95rem; height: 0.95rem; }
+  .pagination .pg-nav button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .pagination .pg-nav button:hover:not(:disabled) { background: var(--hover-surface); }
+  .pagination .pg-nav .pg-cur { border-color: var(--ring); font-weight: 600; color: var(--foreground); }
+
+  /* Menu d'actions par ligne (Dropdown flottant) */
+  .rowmenu { position: fixed; z-index: 85; width: 15.5rem; background: var(--card); border: 1px solid var(--border); border-radius: 0.7rem; box-shadow: var(--shadow-lg); padding: 0.4rem; opacity: 0; transform: scale(0.98); pointer-events: none; transition: opacity .12s, transform .12s; }
+  .rowmenu[data-open="true"] { opacity: 1; transform: none; pointer-events: auto; }
+  .rowmenu button { display: flex; align-items: center; gap: 0.6rem; width: 100%; text-align: left; padding: 0.55rem 0.6rem; border: 0; background: transparent; color: var(--foreground); font: inherit; font-size: 0.86rem; border-radius: 0.5rem; cursor: pointer; }
+  .rowmenu button svg { width: 1.05rem; height: 1.05rem; color: var(--muted-fg); flex: none; }
+  .rowmenu button:hover:not(:disabled) { background: var(--hover-surface); }
+  .rowmenu button.danger { color: var(--danger); } .rowmenu button.danger svg { color: var(--danger); }
+  .rowmenu button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .rowmenu .rm-sep { height: 1px; background: var(--border); margin: 0.35rem 0; }
+  .rowmenu .rm-hint { font-size: 0.73rem; color: var(--muted-fg); line-height: 1.35; padding: 0.4rem 0.6rem 0.2rem; display: flex; gap: 0.4rem; align-items: flex-start; }
+  .rowmenu .rm-hint svg { width: 0.95rem; height: 0.95rem; color: var(--warning); flex: none; margin-top: 0.05rem; }
+  .rowmenu[hidden] { display: none; }
+
+  /* Overlays de dialogue (Dialog / AlertDialog) */
+  .overlay { position: fixed; inset: 0; background: rgb(7 7 7 / 0.55); z-index: 80; display: grid; place-items: center; padding: 1.25rem; opacity: 0; pointer-events: none; transition: opacity .16s; }
+  .overlay[data-open="true"] { opacity: 1; pointer-events: auto; }
+  .dialog { width: 100%; max-width: 27rem; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); transform: translateY(8px) scale(0.98); transition: transform .16s; }
+  .overlay[data-open="true"] .dialog { transform: none; }
+  .dialog-head { padding: 1.2rem 1.3rem 0.4rem; display: flex; gap: 0.85rem; align-items: flex-start; }
+  .dialog-head .dh-ico { width: 2.4rem; height: 2.4rem; flex: none; border-radius: 0.6rem; display: grid; place-items: center; background: color-mix(in srgb, var(--orange-500) 14%, transparent); color: var(--orange-700); }
+  :root[data-theme="dark"] .dialog-head .dh-ico { color: var(--orange-400); }
+  .dialog-head .dh-ico.danger { background: var(--danger-soft); color: var(--danger); }
+  .dialog-head .dh-ico svg { width: 1.25rem; height: 1.25rem; }
+  .dialog-head h3 { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
+  .dialog-head p { margin: 0.25rem 0 0; font-size: 0.85rem; color: var(--muted-fg); line-height: 1.45; }
+  .dialog-body { padding: 0.6rem 1.3rem 0.3rem; display: grid; gap: 0.9rem; }
+  .dialog-foot { padding: 1.1rem 1.3rem 1.3rem; display: flex; justify-content: flex-end; gap: 0.6rem; }
+  @media (max-width: 26rem) { .dialog-foot { flex-direction: column-reverse; } .dialog-foot .btn { width: 100%; } }
+
+  /* Sélecteur de rôle (invitation / changement de rôle) */
+  .role-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+  @media (max-width: 24rem) { .role-pick { grid-template-columns: 1fr; } }
+  .role-pick label { position: relative; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); padding: 0.65rem 0.7rem; cursor: pointer; display: block; }
+  .role-pick input { position: absolute; opacity: 0; pointer-events: none; }
+  .role-pick label:hover { background: var(--hover-surface); }
+  .role-pick label:has(input:checked) { border-color: var(--ring); background: color-mix(in srgb, var(--orange-500) 8%, transparent); box-shadow: 0 0 0 1px var(--ring) inset; }
+  .role-pick .rp-t { font-size: 0.86rem; font-weight: 600; }
+  .role-pick .rp-d { font-size: 0.74rem; color: var(--muted-fg); margin-top: 0.15rem; }
+
+  /* ==================== ACTIVATION / ONBOARDING (FE-010) ================= */
+  .activation-head { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1.15rem 0.2rem; }
+  .activation-head h2 { margin: 0; font-size: 0.98rem; font-weight: 650; }
+  .activation-head .grow { flex: 1; }
+
+  .stepper { display: flex; align-items: flex-start; padding: 0.9rem 1.15rem 1.1rem; gap: 0.2rem; }
+  .step { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; flex: none; width: 8.5rem; text-align: center; }
+  .step .sdot {
+    width: 2.1rem; height: 2.1rem; border-radius: 50%; display: grid; place-items: center;
+    font-size: 0.82rem; font-weight: 700; border: 2px solid var(--border-strong);
+    background: var(--card); color: var(--muted-fg); transition: all .18s;
+  }
+  .step .sdot svg { width: 1.05rem; height: 1.05rem; }
+  .step .sl { font-size: 0.8rem; font-weight: 600; line-height: 1.25; }
+  .step .ss { font-size: 0.72rem; color: var(--muted-fg); }
+  .step-line { flex: 1; height: 2px; background: var(--border-strong); margin-top: 1.05rem; border-radius: 2px; transition: background .18s; min-width: 1rem; }
+
+  .step[data-st="done"] .sdot { background: var(--success); border-color: var(--success); color: #fff; }
+  .step[data-st="current"] .sdot { border-color: var(--orange-500); color: var(--orange-700); background: color-mix(in srgb, var(--orange-500) 10%, var(--card)); }
+  :root[data-theme="dark"] .step[data-st="current"] .sdot { color: var(--orange-400); }
+  .step[data-st="current"] .sl { color: var(--foreground); }
+  .step[data-st="rejected"] .sdot { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+  .step-line[data-st="done"] { background: var(--success); }
+
+  /* Bandeau contextuel (variant enrichi avec CTA) */
+  .onboarding .oi.warn { background: var(--warning); color: var(--neutral-950); }
+  .onboarding .oi.danger { background: var(--danger); color: #fff; }
+  .onboarding .oi.ok { background: var(--success); color: #fff; }
+  .onboarding .cta {
+    display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;
+    height: 2.2rem; padding: 0 0.85rem; border-radius: calc(var(--radius) - 2px);
+    font-size: 0.83rem; font-weight: 600; cursor: pointer; border: 1px solid transparent;
+    background: var(--primary); color: var(--primary-fg);
+  }
+  .onboarding .cta:hover { filter: brightness(0.95); }
+  .onboarding .cta svg { width: 1rem; height: 1rem; }
+  .onboarding.ok { background: color-mix(in srgb, var(--success) 10%, var(--background)); border-color: color-mix(in srgb, var(--success) 32%, transparent); }
+  .onboarding.danger { background: color-mix(in srgb, var(--danger) 9%, var(--background)); border-color: color-mix(in srgb, var(--danger) 32%, transparent); }
+  .onboarding .reason { font-size: 0.8rem; color: var(--danger); margin-top: 0.2rem; }
+
+  @media (max-width: 40rem) {
+    .stepper { overflow-x: auto; }
+    .onboarding { flex-wrap: wrap; }
+    .onboarding .cta { margin-left: auto; }
+  }
+
+  /* ============================ KYC / UPLOAD (FE-009) ==================== */
+  .kyc-banner {
+    display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1.15rem;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--warning) 8%, var(--card));
+  }
+  .kyc-banner .kb-ico { width: 2.1rem; height: 2.1rem; flex: none; border-radius: 0.55rem; display: grid; place-items: center; background: var(--warning-soft); color: #b45309; }
+  :root[data-theme="dark"] .kyc-banner .kb-ico { color: var(--warning); }
+  .kyc-banner .kb-ico svg { width: 1.15rem; height: 1.15rem; }
+  .kyc-banner b { font-size: 0.9rem; }
+  .kyc-banner p { margin: 0.1rem 0 0; font-size: 0.82rem; color: var(--muted-fg); }
+
+  .kyc-grid { padding: 1.15rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 52rem) { .kyc-grid { grid-template-columns: 1fr; } }
+
+  .doc-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.05rem; display: flex; flex-direction: column; gap: 0.8rem; }
+  .doc-head { display: flex; align-items: flex-start; gap: 0.7rem; }
+  .doc-head .di { width: 2.4rem; height: 2.4rem; flex: none; border-radius: 0.55rem; background: var(--hover-surface); color: var(--muted-fg); display: grid; place-items: center; }
+  .doc-head .di svg { width: 1.2rem; height: 1.2rem; }
+  .doc-head .dt { flex: 1; min-width: 0; }
+  .doc-head .dt b { font-size: 0.92rem; }
+  .doc-head .dt span { display: block; font-size: 0.76rem; color: var(--muted-fg); margin-top: 0.1rem; }
+
+  /* Zone de dépôt (état absent) */
+  .dropzone { border: 1.5px dashed var(--border-strong); border-radius: var(--radius); padding: 1.4rem 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.55rem; cursor: pointer; transition: border-color .14s, background-color .14s; }
+  .dropzone:hover, .dropzone.drag { border-color: var(--orange-500); background: color-mix(in srgb, var(--orange-500) 6%, transparent); }
+  .dropzone .dzi { width: 2.4rem; height: 2.4rem; border-radius: 0.6rem; background: var(--hover-surface); color: var(--muted-fg); display: grid; place-items: center; }
+  .dropzone .dzi svg { width: 1.25rem; height: 1.25rem; }
+  .dropzone b { font-size: 0.86rem; }
+  .dropzone span { font-size: 0.76rem; color: var(--muted-fg); }
+
+  /* Fichier présent */
+  .file-row { display: flex; align-items: center; gap: 0.65rem; padding: 0.6rem 0.7rem; border: 1px solid var(--border); border-radius: 0.55rem; background: var(--hover-surface); }
+  .file-row .fi { width: 2rem; height: 2rem; flex: none; border-radius: 0.45rem; display: grid; place-items: center; background: var(--card); border: 1px solid var(--border); color: var(--muted-fg); }
+  .file-row .fi svg { width: 1rem; height: 1rem; }
+  .file-row .fmeta { flex: 1; min-width: 0; }
+  .file-row .fmeta b { font-size: 0.82rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-row .fmeta span { font-size: 0.72rem; color: var(--muted-fg); }
+  .file-row .fx { border: 0; background: transparent; color: var(--muted-fg); cursor: pointer; padding: 0.2rem; border-radius: 0.35rem; }
+  .file-row .fx:hover { background: var(--card); color: var(--danger); }
+  .file-row .fx svg { width: 1rem; height: 1rem; }
+
+  /* Progression */
+  .progress { height: 0.5rem; background: var(--hover-surface); border-radius: 999px; overflow: hidden; }
+  .progress > i { display: block; height: 100%; width: 0; background: var(--orange-500); border-radius: 999px; transition: width .25s ease; }
+  .progress-row { display: flex; align-items: center; gap: 0.6rem; font-size: 0.76rem; color: var(--muted-fg); }
+  .progress-row .progress { flex: 1; }
+
+  /* Motif de rejet */
+  .reject-box { display: flex; gap: 0.6rem; padding: 0.7rem 0.8rem; border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent); background: var(--danger-soft); border-radius: 0.55rem; }
+  .reject-box svg { width: 1rem; height: 1rem; flex: none; color: var(--danger); margin-top: 0.1rem; }
+  .reject-box .rb-t { font-size: 0.78rem; font-weight: 600; color: var(--danger); }
+  .reject-box .rb-b { font-size: 0.78rem; color: var(--foreground); margin-top: 0.1rem; }
+
+  /* Erreur de pré-validation client */
+  .prevalid { display: none; align-items: center; gap: 0.4rem; font-size: 0.76rem; color: var(--danger); }
+  .prevalid.show { display: flex; }
+  .prevalid svg { width: 0.95rem; height: 0.95rem; flex: none; }
+
+  .doc-status { margin-left: auto; }
+
+  /* ============================== RESPONSIVE ============================== */
+  .scrim { display: none; position: fixed; inset: 0; background: rgb(0 0 0 / 0.5); z-index: 35; }
+  @media (max-width: 60rem) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: fixed; top: 2.75rem; bottom: 0; left: 0; width: 16rem; transform: translateX(-100%); transition: transform .22s ease; }
+    .app.nav-open .sidebar { transform: none; }
+    .app.nav-open .scrim { display: block; }
+    .hamburger { display: grid; }
+  }
+  @media (prefers-reduced-motion: reduce) { .sidebar { transition: none; } }
+</style>
+
+<div class="ribbon">
+  <span class="tag"><span class="dot"></span> Maquette · FE-010</span>
+  <div class="seg" role="tablist" aria-label="Vue du prototype">
+    <button role="tab" aria-selected="true" data-view="app">Espace applicatif</button>
+    <button role="tab" aria-selected="false" data-view="public">Enveloppe publique (auth)</button>
+  </div>
+  <span class="spacer"></span>
+  <button class="r-toggle" id="themeToggle" type="button" aria-label="Basculer le thème clair/sombre">
+    <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg>
+  </button>
+</div>
+
+<div class="stage">
+  <!-- ============================== VUE : APP ============================== -->
+  <section class="view active" id="view-app">
+    <div class="app" id="appRoot">
+      <div class="scrim" id="scrim"></div>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar" aria-label="Navigation principale">
+        <div class="sb-head">
+          <div class="wordmark">
+            <svg class="logo-mark" viewBox="0 0 64 64" role="img" aria-label="Prospera">
+              <defs>
+                <linearGradient id="mkA" x1="0" y1="1" x2="0.15" y2="0"><stop offset="0" stop-color="#ffd9c4"/><stop offset="1" stop-color="#ff5a1f"/></linearGradient>
+                <linearGradient id="mkB" x1="0" y1="1" x2="0.15" y2="0"><stop offset="0" stop-color="#fff4ec"/><stop offset="1" stop-color="#ff9264"/></linearGradient>
+              </defs>
+              <g transform="rotate(9 32 32)"><rect x="14" y="15" width="14" height="37" rx="7" fill="url(#mkA)"/><rect x="32" y="9" width="14" height="27" rx="7" fill="url(#mkB)"/></g>
+            </svg>
+            <span class="wordmark-text">PROSPERA</span>
+          </div>
+          <div class="sb-cabinet">
+            <span class="badge">CD</span>
+            <span class="meta"><b>Cabinet Diallo &amp; Associés</b><span>Espace cabinet</span></span>
+          </div>
+        </div>
+
+        <nav class="sb-nav">
+          <span class="sb-label">Cabinet</span>
+          <button class="nav-item" data-page="users" aria-current="page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Utilisateurs <span class="count">5</span>
+          </button>
+          <button class="nav-item" data-page="kyc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/><path d="m9 12 2 2 4-4"/></svg>
+            KYC
+          </button>
+          <button class="nav-item" data-page="billing">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            Abonnement
+          </button>
+        </nav>
+
+        <div class="sb-foot">
+          <span class="env"><span class="d"></span> Cabinet actif</span>
+          <span>v0.1</span>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <div class="main">
+        <header class="topbar">
+          <button class="hamburger" id="hamburger" type="button" aria-label="Ouvrir la navigation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" x2="21" y1="6" y2="6"/><line x1="3" x2="21" y1="12" y2="12"/><line x1="3" x2="21" y1="18" y2="18"/></svg>
+          </button>
+          <div class="title">
+            <h1 id="pageTitle">Utilisateurs</h1>
+            <p id="pageSub">Gérez les accès de votre cabinet</p>
+          </div>
+
+          <div class="actions">
+            <button class="icon-btn" type="button" aria-label="Notifications"><span class="ping"></span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.4 13.9 18 12.4 18 8A6 6 0 0 0 6 8c0 4.4-1.41 5.9-2.74 7.33Z"/></svg>
+            </button>
+            <div class="usermenu">
+              <button class="trigger" id="umTrigger" type="button" aria-haspopup="menu" aria-expanded="false">
+                <span class="avatar">AD</span>
+                <span class="who"><b>Awa Diallo</b><span>Administrateur</span></span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="menu" id="umMenu" role="menu" data-open="false">
+                <div class="mhead">
+                  <span class="avatar">AD</span>
+                  <span class="meta"><b>Awa Diallo</b><span>awa.diallo@cabinet-diallo.tg</span></span>
+                </div>
+                <a class="mi" role="menuitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Mon profil</a>
+                <a class="mi" role="menuitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></svg> Paramètres</a>
+                <div class="msep"></div>
+                <button class="mi danger" role="menuitem" type="button" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> Se déconnecter</button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="content">
+          <div class="content-inner">
+            <!-- ===== FE-010 : Activation du cabinet (stepper + bandeau contextuel) ===== -->
+            <div class="card-surface" id="activationCard">
+              <div class="activation-head">
+                <h2>Activation de votre cabinet</h2>
+                <span class="grow"></span>
+                <div class="states-demo" role="tablist" aria-label="État du cabinet (démo)">
+                  <button role="tab" data-tenant="email" aria-selected="true">E-mail</button>
+                  <button role="tab" data-tenant="kyc" aria-selected="false">KYC</button>
+                  <button role="tab" data-tenant="rejected" aria-selected="false">KYC rejeté</button>
+                  <button role="tab" data-tenant="subscription" aria-selected="false">Abonnement</button>
+                  <button role="tab" data-tenant="active" aria-selected="false">Actif</button>
+                </div>
+              </div>
+              <div class="stepper" id="stepper">
+                <div class="step" data-step="email"><div class="sdot"></div><div><div class="sl">E-mail vérifié</div><div class="ss">Confirmez votre adresse</div></div></div>
+                <div class="step-line" data-line="1"></div>
+                <div class="step" data-step="kyc"><div class="sdot"></div><div><div class="sl">KYC approuvé</div><div class="ss">RCCM &amp; CFE validés</div></div></div>
+                <div class="step-line" data-line="2"></div>
+                <div class="step" data-step="subscription"><div class="sdot"></div><div><div class="sl">Abonnement actif</div><div class="ss">Formule souscrite</div></div></div>
+              </div>
+            </div>
+
+            <!-- Bandeau contextuel : étape à traiter + CTA vers l'écran concerné -->
+            <div class="onboarding" id="onbBanner">
+              <span class="oi" id="onbIcon"></span>
+              <div class="otxt">
+                <b id="onbTitle"></b>
+                <p id="onbBody"></p>
+                <p class="reason" id="onbReason" hidden></p>
+              </div>
+              <button class="cta" id="onbCta" type="button"></button>
+            </div>
+
+            <!-- ===== PAGE : UTILISATEURS ===== -->
+            <section class="page" data-page="users">
+              <div class="card-surface">
+                <div class="panel-head">
+                  <div>
+                    <h2>Utilisateurs du cabinet</h2>
+                    <p>5 membres · rôles et accès</p>
+                    <span class="rbac-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Réservé aux administrateurs</span>
+                  </div>
+                  <span class="grow"></span>
+                  <div class="states-demo" role="tablist" aria-label="Démonstration des états">
+                    <button role="tab" data-state="data" aria-selected="true">Données</button>
+                    <button role="tab" data-state="loading" aria-selected="false">Chargement</button>
+                    <button role="tab" data-state="empty" aria-selected="false">Vide</button>
+                    <button role="tab" data-state="error" aria-selected="false">Erreur</button>
+                  </div>
+                  <button class="btn btn-primary btn-sm" type="button" id="inviteBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg>
+                    Inviter
+                  </button>
+                </div>
+
+                <!-- État: données -->
+                <div class="state-slot" data-state="data">
+                  <div class="tbl-wrap">
+                    <table class="tbl">
+                      <thead><tr><th>Membre</th><th>Rôle</th><th>Statut</th><th style="text-align:right">Actions</th></tr></thead>
+                      <tbody id="usersBody">
+                        <tr data-name="Awa Diallo" data-email="awa.diallo@cabinet-diallo.tg" data-role="admin" data-status="active">
+                          <td><div class="u-cell"><span class="avatar">AD</span><span class="un"><b>Awa Diallo</b><span>awa.diallo@cabinet-diallo.tg</span></span></div></td>
+                          <td class="role-cell"><span class="badge badge-admin">Administrateur</span></td>
+                          <td class="status-cell"><span class="badge badge-active"><span class="d"></span>Actif</span></td>
+                          <td><div class="row-actions"><button class="js-rowmenu" aria-haspopup="menu" aria-label="Actions sur Awa Diallo"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div></td>
+                        </tr>
+                        <tr data-name="Kofi Santos" data-email="kofi.santos@cabinet-diallo.tg" data-role="user" data-status="active">
+                          <td><div class="u-cell"><span class="avatar" style="background:#3f6212">KS</span><span class="un"><b>Kofi Santos</b><span>kofi.santos@cabinet-diallo.tg</span></span></div></td>
+                          <td class="role-cell"><span class="badge badge-user">Collaborateur</span></td>
+                          <td class="status-cell"><span class="badge badge-active"><span class="d"></span>Actif</span></td>
+                          <td><div class="row-actions"><button class="js-rowmenu" aria-haspopup="menu" aria-label="Actions sur Kofi Santos"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div></td>
+                        </tr>
+                        <tr data-name="Mariam Bello" data-email="mariam.bello@cabinet-diallo.tg" data-role="user" data-status="invited">
+                          <td><div class="u-cell"><span class="avatar" style="background:#7c2d12">MB</span><span class="un"><b>Mariam Bello</b><span>mariam.bello@cabinet-diallo.tg</span></span></div></td>
+                          <td class="role-cell"><span class="badge badge-user">Collaborateur</span></td>
+                          <td class="status-cell"><span class="badge badge-invited"><span class="d"></span>Invité</span></td>
+                          <td><div class="row-actions"><button class="js-rowmenu" aria-haspopup="menu" aria-label="Actions sur Mariam Bello"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div></td>
+                        </tr>
+                        <tr data-name="Emmanuel Koffi" data-email="e.koffi@cabinet-diallo.tg" data-role="admin" data-status="active">
+                          <td><div class="u-cell"><span class="avatar" style="background:#155e75">EK</span><span class="un"><b>Emmanuel Koffi</b><span>e.koffi@cabinet-diallo.tg</span></span></div></td>
+                          <td class="role-cell"><span class="badge badge-admin">Administrateur</span></td>
+                          <td class="status-cell"><span class="badge badge-active"><span class="d"></span>Actif</span></td>
+                          <td><div class="row-actions"><button class="js-rowmenu" aria-haspopup="menu" aria-label="Actions sur Emmanuel Koffi"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div></td>
+                        </tr>
+                        <tr data-name="Fatou Adjovi" data-email="fatou.adjovi@cabinet-diallo.tg" data-role="user" data-status="suspended">
+                          <td><div class="u-cell"><span class="avatar" style="background:#6b21a8">FA</span><span class="un"><b>Fatou Adjovi</b><span>fatou.adjovi@cabinet-diallo.tg</span></span></div></td>
+                          <td class="role-cell"><span class="badge badge-user">Collaborateur</span></td>
+                          <td class="status-cell"><span class="badge badge-suspended"><span class="d"></span>Suspendu</span></td>
+                          <td><div class="row-actions"><button class="js-rowmenu" aria-haspopup="menu" aria-label="Actions sur Fatou Adjovi"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="pagination">
+                    <span class="pg-count">1–5 sur 5 · 20 par page</span>
+                    <div class="pg-nav">
+                      <button type="button" disabled aria-label="Page précédente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+                      <button type="button" class="pg-cur" aria-current="page">1</button>
+                      <button type="button" disabled aria-label="Page suivante"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- État: chargement (skeleton) -->
+                <div class="state-slot" data-state="loading" hidden>
+                  <div class="sk-row"><span class="sk sk-av"></span><span class="sk sk-line" style="width:38%"></span><span class="sk sk-line" style="width:14%;margin-left:auto"></span></div>
+                  <div class="sk-row"><span class="sk sk-av"></span><span class="sk sk-line" style="width:30%"></span><span class="sk sk-line" style="width:14%;margin-left:auto"></span></div>
+                  <div class="sk-row"><span class="sk sk-av"></span><span class="sk sk-line" style="width:42%"></span><span class="sk sk-line" style="width:14%;margin-left:auto"></span></div>
+                  <div class="sk-row"><span class="sk sk-av"></span><span class="sk sk-line" style="width:34%"></span><span class="sk sk-line" style="width:14%;margin-left:auto"></span></div>
+                </div>
+
+                <!-- État: vide -->
+                <div class="state-slot" data-state="empty" hidden>
+                  <div class="state empty">
+                    <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"/></svg></span>
+                    <h3>Aucun collaborateur pour l'instant</h3>
+                    <p>Invitez les membres de votre cabinet pour leur donner accès à l'espace.</p>
+                    <button class="btn btn-primary btn-sm" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg> Inviter un membre</button>
+                  </div>
+                </div>
+
+                <!-- État: erreur -->
+                <div class="state-slot" data-state="error" hidden>
+                  <div class="state error">
+                    <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></span>
+                    <h3>Impossible de charger les utilisateurs</h3>
+                    <p>Une erreur est survenue côté serveur. Vérifiez votre connexion et réessayez.</p>
+                    <button class="btn btn-ghost btn-sm" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Réessayer</button>
+                  </div>
+                </div>
+              </div>
+              <p class="helper">Démo des états réutilisables <code>LoadingState</code> · <code>EmptyState</code> · <code>ErrorState</code> — bascule ci-dessus.</p>
+            </section>
+
+            <!-- ===== PAGE : KYC (FE-009) ===== -->
+            <section class="page" data-page="kyc" hidden>
+              <div class="card-surface">
+                <div class="panel-head">
+                  <div>
+                    <h2>Vérification (KYC)</h2>
+                    <p>Téléversez les deux justificatifs légaux de votre cabinet</p>
+                  </div>
+                  <span class="grow"></span>
+                  <div class="states-demo" role="tablist" aria-label="État du document RCCM (démo)">
+                    <button role="tab" data-doc="absent" aria-selected="true">Requis</button>
+                    <button role="tab" data-doc="invalid" aria-selected="false">Non conforme</button>
+                    <button role="tab" data-doc="uploading" aria-selected="false">Envoi</button>
+                    <button role="tab" data-doc="review" aria-selected="false">En revue</button>
+                    <button role="tab" data-doc="rejected" aria-selected="false">Rejeté</button>
+                  </div>
+                </div>
+
+                <div class="kyc-banner">
+                  <span class="kb-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></span>
+                  <div>
+                    <b>Deux documents obligatoires : RCCM et carte CFE</b>
+                    <p>Dès réception des deux, votre cabinet passe automatiquement en revue (l'accès aux modules est débloqué après validation).</p>
+                  </div>
+                </div>
+
+                <div class="kyc-grid">
+                  <!-- ===== Document RCCM (interactif / démo des états) ===== -->
+                  <div class="doc-card" id="rccmCard" data-doc-state="absent">
+                    <div class="doc-head">
+                      <span class="di"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5Z"/><path d="M14 2v6h6"/></svg></span>
+                      <div class="dt"><b>RCCM</b><span>Registre du Commerce · PDF, JPG ou PNG · 10 Mo max</span></div>
+                      <span class="badge badge-user doc-status" id="rccmStatus">Requis</span>
+                    </div>
+
+                    <!-- Absent : zone de dépôt -->
+                    <div class="doc-slot" data-doc-slot="absent">
+                      <label class="dropzone" id="rccmDrop">
+                        <span class="dzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span>
+                        <b>Déposez le fichier ou cliquez</b>
+                        <span>PDF, JPG ou PNG · 10 Mo max</span>
+                      </label>
+                      <p class="prevalid" id="rccmPrevalid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Fichier non conforme : format non supporté ou taille &gt; 10 Mo.</p>
+                    </div>
+
+                    <!-- Envoi en cours : progression -->
+                    <div class="doc-slot" data-doc-slot="uploading" hidden>
+                      <div class="file-row">
+                        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5Z"/><path d="M14 2v6h6"/></svg></span>
+                        <div class="fmeta"><b>rccm-cabinet-diallo.pdf</b><span>2,4 Mo</span></div>
+                      </div>
+                      <div class="progress-row"><div class="progress"><i id="rccmBar"></i></div><span id="rccmPct">0 %</span></div>
+                    </div>
+
+                    <!-- Téléversé : en revue -->
+                    <div class="doc-slot" data-doc-slot="review" hidden>
+                      <div class="file-row">
+                        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5Z"/><path d="M14 2v6h6"/></svg></span>
+                        <div class="fmeta"><b>rccm-cabinet-diallo.pdf</b><span>2,4 Mo · téléversé</span></div>
+                        <button class="fx" type="button" title="Remplacer le document" aria-label="Remplacer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+                      </div>
+                    </div>
+
+                    <!-- Rejeté : motif + re-soumission -->
+                    <div class="doc-slot" data-doc-slot="rejected" hidden>
+                      <div class="file-row">
+                        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5Z"/><path d="M14 2v6h6"/></svg></span>
+                        <div class="fmeta"><b>rccm-v1.pdf</b><span>1,9 Mo · version rejetée</span></div>
+                      </div>
+                      <div class="reject-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <div><div class="rb-t">Document rejeté</div><div class="rb-b">Le scan est partiellement illisible. Merci de re-soumettre un document net et complet.</div></div>
+                      </div>
+                      <button class="btn btn-primary btn-sm" type="button" id="rccmResubmit">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+                        Re-soumettre le document
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- ===== Document CFE (exemple : en revue) ===== -->
+                  <div class="doc-card">
+                    <div class="doc-head">
+                      <span class="di"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5Z"/><path d="M14 2v6h6"/></svg></span>
+                      <div class="dt"><b>Carte CFE</b><span>Centre de Formalités · PDF, JPG ou PNG · 10 Mo max</span></div>
+                      <span class="badge badge-invited doc-status"><span class="d"></span>En revue</span>
+                    </div>
+                    <div class="file-row">
+                      <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5Z"/><path d="M14 2v6h6"/></svg></span>
+                      <div class="fmeta"><b>cfe-cabinet-diallo.jpg</b><span>3,1 Mo · téléversé</span></div>
+                      <button class="fx" type="button" title="Remplacer le document" aria-label="Remplacer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="helper">Le stepper d'activation global (e-mail → KYC → abonnement) est détaillé en <code>FE-010</code>.</p>
+            </section>
+
+            <!-- ===== PAGE : ABONNEMENT ===== -->
+            <section class="page" data-page="billing" hidden>
+              <div class="card-surface">
+                <div class="panel-head"><div><h2>Abonnement</h2><p>Choisissez une formule pour activer les modules</p></div></div>
+                <div class="plan">
+                  <div style="flex:1;min-width:12rem">
+                    <div class="badge badge-admin" style="margin-bottom:0.5rem">Essentiel cabinet</div>
+                    <div class="price">25 000 <small>XOF / mois</small></div>
+                    <p style="margin:0.4rem 0 0;font-size:0.84rem;color:var(--muted-fg)">Jusqu'à 10 collaborateurs · bilans &amp; balance illimités</p>
+                  </div>
+                  <button class="btn btn-primary" type="button">Choisir cette formule</button>
+                </div>
+              </div>
+              <p class="helper">Aperçu d'emplacement — catalogue &amp; paiement livrés en FE-011/012.</p>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ VUE : PUBLIC (auth) ====================== -->
+  <section class="view" id="view-public">
+    <div class="public">
+      <div class="public-card">
+        <div class="wordmark">
+          <svg class="logo-mark" viewBox="0 0 64 64" role="img" aria-label="Prospera">
+            <g transform="rotate(9 32 32)"><rect x="14" y="15" width="14" height="37" rx="7" fill="url(#mkA)"/><rect x="32" y="9" width="14" height="27" rx="7" fill="url(#mkB)"/></g>
+          </svg>
+          <span class="wordmark-text">PROSPERA</span>
+        </div>
+        <div class="states-demo" role="tablist" aria-label="Écrans d'authentification">
+          <button role="tab" aria-selected="true" data-auth="form">Inscription</button>
+          <button role="tab" aria-selected="false" data-auth="done">Confirmation</button>
+          <button role="tab" aria-selected="false" data-auth="verify">Vérif. e-mail</button>
+          <button role="tab" aria-selected="false" data-auth="invite">Invitation</button>
+        </div>
+
+        <!-- FE-004 : Inscription cabinet -->
+        <div class="auth-card" data-auth-panel="form">
+          <h2>Créer votre cabinet</h2>
+          <p class="lead">Ouvrez l'espace de votre cabinet et devenez-en l'administrateur.</p>
+
+          <button class="btn-google" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23Z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88Z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38Z"/></svg>
+            S'inscrire avec Google
+          </button>
+
+          <div class="divider">ou avec votre e-mail</div>
+
+          <form class="reg-form" onsubmit="return false">
+            <div class="field">
+              <label for="r-org">Raison sociale du cabinet</label>
+              <div class="control">
+                <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg>
+                <input id="r-org" type="text" placeholder="Cabinet Diallo & Associés" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="r-country">Pays</label>
+              <div class="control">
+                <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"/></svg>
+                <select id="r-country">
+                  <option>Togo</option>
+                  <option>Bénin</option>
+                  <option>Côte d'Ivoire</option>
+                  <option>Sénégal</option>
+                  <option>Burkina Faso</option>
+                  <option>Mali</option>
+                  <option>Niger</option>
+                  <option>Guinée-Bissau</option>
+                </select>
+                <svg class="sel-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="r-first">Prénom</label>
+                <div class="control">
+                  <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <input id="r-first" type="text" placeholder="Awa" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="r-last">Nom</label>
+                <div class="control">
+                  <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <input id="r-last" type="text" placeholder="Diallo" />
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="r-email">Adresse e-mail</label>
+              <div class="control">
+                <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <input id="r-email" type="email" placeholder="vous@cabinet.fr" />
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field">
+                <label for="r-pass">Mot de passe</label>
+                <div class="control">
+                  <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <input id="r-pass" type="password" placeholder="8 caractères min." />
+                </div>
+              </div>
+              <div class="field">
+                <label for="r-pass2">Confirmation</label>
+                <div class="control">
+                  <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <input id="r-pass2" type="password" placeholder="Répétez le mot de passe" />
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" type="submit" id="regSubmit">
+              Créer le compte
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+
+            <p class="signup">Vous avez déjà un compte ? <a href="#">Se connecter</a></p>
+          </form>
+        </div>
+
+        <!-- État de succès post-inscription (pas de connexion auto : vérif e-mail d'abord) -->
+        <div class="auth-card done" data-auth-panel="done" hidden>
+          <div class="done-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </div>
+          <h2>Compte créé</h2>
+          <p class="lead">Un lien de vérification a été envoyé à <b>vous@cabinet.fr</b>. Confirmez votre adresse pour activer l'espace de votre cabinet.</p>
+          <button class="btn btn-ghost" type="button" style="margin:0 auto">Aller à la connexion</button>
+        </div>
+
+        <!-- FE-006 : Landing de vérification e-mail (/verify-email?token=…) -->
+        <div class="auth-card" data-auth-panel="verify" hidden>
+          <div class="states-demo" role="tablist" aria-label="État du lien de vérification" style="margin-bottom:1.2rem">
+            <button role="tab" aria-selected="true" data-verify="ok">Succès</button>
+            <button role="tab" aria-selected="false" data-verify="ko">Expiré / invalide</button>
+          </div>
+
+          <div class="done" data-verify-panel="ok">
+            <div class="done-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <h2>Adresse e-mail vérifiée</h2>
+            <p class="lead">Votre adresse est confirmée. Vous pouvez maintenant accéder à l'espace de votre cabinet.</p>
+            <button class="btn btn-primary" type="button" style="margin:0 auto">Aller à la connexion</button>
+          </div>
+
+          <div class="done" data-verify-panel="ko" hidden>
+            <div class="done-ico warn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <h2>Lien invalide ou expiré</h2>
+            <p class="lead">Ce lien de vérification n'est plus valide (expiré ou déjà utilisé). Demandez un nouvel e-mail depuis votre espace.</p>
+            <button class="btn btn-ghost" type="button" style="margin:0 auto">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+              Renvoyer l'e-mail
+            </button>
+          </div>
+        </div>
+
+        <!-- FE-007 : Acceptation d'invitation (/accept-invitation?token=…) -->
+        <div class="auth-card" data-auth-panel="invite" hidden>
+          <div class="states-demo" role="tablist" aria-label="État de l'invitation" style="margin-bottom:1.2rem">
+            <button role="tab" aria-selected="true" data-invite="ok">Formulaire</button>
+            <button role="tab" aria-selected="false" data-invite="ko">Expiré / invalide</button>
+          </div>
+
+          <div data-invite-panel="ok">
+            <h2>Rejoindre le cabinet</h2>
+            <p class="lead">Définissez votre mot de passe pour activer votre accès.</p>
+
+            <div class="invite-context">
+              <span class="ic-avatar">MB</span>
+              <div class="min-w-0">
+                <b>mariam.bello@cabinet-diallo.tg</b>
+                <span>Cabinet Diallo &amp; Associés · <span class="role-badge">Collaborateur</span></span>
+              </div>
+            </div>
+
+            <form class="reg-form" onsubmit="return false" style="margin-top:1.1rem">
+              <div class="field">
+                <label for="i-pass">Mot de passe</label>
+                <div class="control">
+                  <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <input id="i-pass" type="password" placeholder="8 caractères minimum" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="i-pass2">Confirmation</label>
+                <div class="control">
+                  <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <input id="i-pass2" type="password" placeholder="Répétez le mot de passe" />
+                </div>
+              </div>
+              <button class="btn btn-primary" type="submit" id="inviteSubmit">
+                Rejoindre le cabinet
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+            </form>
+          </div>
+
+          <div class="done" data-invite-panel="ko" hidden>
+            <div class="done-ico warn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <h2>Invitation expirée ou invalide</h2>
+            <p class="lead">Ce lien d'invitation n'est plus valide (expiré au-delà de 72 h, ou déjà utilisé). Demandez à l'administrateur de votre cabinet de vous renvoyer une invitation.</p>
+            <button class="btn btn-ghost" type="button" style="margin:0 auto">Aller à la connexion</button>
+          </div>
+        </div>
+
+        <p class="public-foot">© 2026 Prospera · <a href="#">Sécurité</a> · <a href="#">Aide</a></p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== FE-008 · Menu d'actions par ligne ==================== -->
+<div class="rowmenu" id="rowMenu" role="menu" data-open="false" hidden></div>
+
+<!-- ==================== FE-008 · Dialog d'invitation ==================== -->
+<div class="overlay" id="inviteOverlay" data-open="false">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="inviteTitle">
+    <div class="dialog-head">
+      <span class="dh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>
+      <div>
+        <h3 id="inviteTitle">Inviter un membre</h3>
+        <p>Un e-mail d'invitation lui sera envoyé pour rejoindre le cabinet.</p>
+      </div>
+    </div>
+    <form class="dialog-body" onsubmit="return false" id="inviteForm">
+      <div class="field">
+        <label for="inv-email">Adresse e-mail</label>
+        <div class="control">
+          <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <input id="inv-email" type="email" placeholder="collaborateur@cabinet.tg" required />
+        </div>
+      </div>
+      <div class="field">
+        <label>Rôle</label>
+        <div class="role-pick">
+          <label>
+            <input type="radio" name="inv-role" value="user" checked />
+            <span class="rp-t">Collaborateur</span>
+            <span class="rp-d">Accès à l'espace de travail du cabinet.</span>
+          </label>
+          <label>
+            <input type="radio" name="inv-role" value="admin" />
+            <span class="rp-t">Administrateur</span>
+            <span class="rp-d">Gère les membres, le KYC et l'abonnement.</span>
+          </label>
+        </div>
+      </div>
+    </form>
+    <div class="dialog-foot">
+      <button class="btn btn-ghost" type="button" data-close-invite>Annuler</button>
+      <button class="btn btn-primary" type="button" id="inviteConfirm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        Envoyer l'invitation
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FE-008 · Dialog de confirmation (AlertDialog) ==================== -->
+<div class="overlay" id="confirmOverlay" data-open="false">
+  <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmDesc">
+    <div class="dialog-head">
+      <span class="dh-ico" id="confirmIco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
+      <div>
+        <h3 id="confirmTitle">Confirmer l'action</h3>
+        <p id="confirmDesc">Cette action modifiera l'accès de l'utilisateur.</p>
+      </div>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn btn-ghost" type="button" data-close-confirm>Annuler</button>
+      <button class="btn btn-primary" type="button" id="confirmAction">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+
+    /* Thème */
+    document.getElementById("themeToggle").addEventListener("click", function () {
+      var cur = root.getAttribute("data-theme");
+      if (!cur) cur = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+    });
+
+    /* Bascule de vue (app / public) */
+    document.querySelectorAll('.seg [data-view]').forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        document.querySelectorAll('.seg [data-view]').forEach(function (t) { t.setAttribute("aria-selected", "false"); });
+        tab.setAttribute("aria-selected", "true");
+        document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
+        document.getElementById("view-" + tab.dataset.view).classList.add("active");
+      });
+    });
+
+    /* Navigation latérale → pages + titre */
+    var titles = {
+      users:   ["Utilisateurs", "Gérez les accès de votre cabinet"],
+      kyc:     ["Vérification KYC", "Justificatifs légaux du cabinet"],
+      billing: ["Abonnement", "Formule et paiement"]
+    };
+    var appRoot = document.getElementById("appRoot");
+    document.querySelectorAll('.nav-item[data-page]').forEach(function (item) {
+      item.addEventListener("click", function () {
+        document.querySelectorAll('.nav-item[data-page]').forEach(function (n) { n.removeAttribute("aria-current"); });
+        item.setAttribute("aria-current", "page");
+        var page = item.dataset.page;
+        document.querySelectorAll('.page[data-page]').forEach(function (p) { p.hidden = (p.dataset.page !== page); });
+        document.getElementById("pageTitle").textContent = titles[page][0];
+        document.getElementById("pageSub").textContent = titles[page][1];
+        appRoot.classList.remove("nav-open");
+      });
+    });
+
+    /* Démo des états réutilisables */
+    document.querySelectorAll('.states-demo [data-state]').forEach(function (b) {
+      b.addEventListener("click", function () {
+        document.querySelectorAll('.states-demo [data-state]').forEach(function (x) { x.setAttribute("aria-selected", "false"); });
+        b.setAttribute("aria-selected", "true");
+        var st = b.dataset.state;
+        document.querySelectorAll('.state-slot[data-state]').forEach(function (s) { s.hidden = (s.dataset.state !== st); });
+      });
+    });
+
+    /* Menu utilisateur */
+    var umTrigger = document.getElementById("umTrigger"), umMenu = document.getElementById("umMenu");
+    function closeMenu() { umMenu.setAttribute("data-open", "false"); umTrigger.setAttribute("aria-expanded", "false"); }
+    umTrigger.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var open = umMenu.getAttribute("data-open") === "true";
+      umMenu.setAttribute("data-open", String(!open));
+      umTrigger.setAttribute("aria-expanded", String(!open));
+    });
+    document.addEventListener("click", function (e) { if (!umMenu.contains(e.target)) closeMenu(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeMenu(); });
+
+    /* Tiroir mobile */
+    var hb = document.getElementById("hamburger"), scrim = document.getElementById("scrim");
+    hb.addEventListener("click", function () { appRoot.classList.toggle("nav-open"); });
+    scrim.addEventListener("click", function () { appRoot.classList.remove("nav-open"); });
+
+    /* Toasts (notifySuccess / notifyError) */
+    var toasts = document.getElementById("toasts");
+    function notify(kind, title, msg) {
+      var t = document.createElement("div");
+      t.className = "toast " + kind;
+      var icon = kind === "success"
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+      t.innerHTML = '<span class="ti">' + icon + '</span><div class="tb"><b>' + title + '</b><p>' + msg + '</p></div>'
+        + '<button class="tx" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
+      t.querySelector(".tx").addEventListener("click", function () { t.remove(); });
+      toasts.appendChild(t);
+      setTimeout(function () { t.remove(); }, 4200);
+    }
+    /* ===================== FE-008 · Gestion des utilisateurs ===================== */
+    var usersBody = document.getElementById("usersBody");
+    var roleLabel = { admin: "Administrateur", user: "Collaborateur" };
+    var statusLabel = { active: "Actif", invited: "Invité", suspended: "Suspendu" };
+
+    function activeAdminCount() {
+      var n = 0;
+      usersBody.querySelectorAll("tr").forEach(function (r) {
+        if (r.dataset.role === "admin" && r.dataset.status === "active") n++;
+      });
+      return n;
+    }
+    function renderRole(tr) {
+      var admin = tr.dataset.role === "admin";
+      tr.querySelector(".role-cell").innerHTML =
+        '<span class="badge ' + (admin ? "badge-admin" : "badge-user") + '">' + roleLabel[tr.dataset.role] + "</span>";
+    }
+    function renderStatus(tr) {
+      var s = tr.dataset.status;
+      var cls = s === "active" ? "badge-active" : s === "invited" ? "badge-invited" : "badge-suspended";
+      tr.querySelector(".status-cell").innerHTML =
+        '<span class="badge ' + cls + '"><span class="d"></span>' + statusLabel[s] + "</span>";
+    }
+
+    /* --- Dialog d'invitation --- */
+    var inviteOverlay = document.getElementById("inviteOverlay");
+    function openInvite() {
+      document.getElementById("inviteForm").reset();
+      inviteOverlay.setAttribute("data-open", "true");
+      setTimeout(function () { document.getElementById("inv-email").focus(); }, 60);
+    }
+    function closeInvite() { inviteOverlay.setAttribute("data-open", "false"); }
+    document.getElementById("inviteBtn").addEventListener("click", openInvite);
+    document.querySelectorAll(".state.empty .btn-primary").forEach(function (b) { b.addEventListener("click", openInvite); });
+    inviteOverlay.querySelectorAll("[data-close-invite]").forEach(function (b) { b.addEventListener("click", closeInvite); });
+    inviteOverlay.addEventListener("click", function (e) { if (e.target === inviteOverlay) closeInvite(); });
+    document.getElementById("inviteConfirm").addEventListener("click", function () {
+      var email = document.getElementById("inv-email").value.trim();
+      if (!email) { document.getElementById("inv-email").focus(); return; }
+      var role = inviteOverlay.querySelector('input[name="inv-role"]:checked').value;
+      var name = email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+      var initials = name.split(" ").slice(0, 2).map(function (w) { return w[0]; }).join("").toUpperCase();
+      var tr = document.createElement("tr");
+      tr.dataset.name = name; tr.dataset.email = email; tr.dataset.role = role; tr.dataset.status = "invited";
+      tr.innerHTML =
+        '<td><div class="u-cell"><span class="avatar" style="background:#3f6212">' + initials + '</span>' +
+        '<span class="un"><b>' + name + '</b><span>' + email + '</span></span></div></td>' +
+        '<td class="role-cell"></td><td class="status-cell"></td>' +
+        '<td><div class="row-actions"><button class="js-rowmenu" aria-haspopup="menu" aria-label="Actions sur ' + name + '">' +
+        '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></button></div></td>';
+      usersBody.appendChild(tr);
+      renderRole(tr); renderStatus(tr);
+      closeInvite();
+      notify("success", "Invitation envoyée", "Un e-mail a été adressé à " + email + ".");
+    });
+
+    /* --- Dialog de confirmation (AlertDialog) --- */
+    var confirmOverlay = document.getElementById("confirmOverlay");
+    var confirmCb = null;
+    function openConfirm(opts) {
+      document.getElementById("confirmTitle").textContent = opts.title;
+      document.getElementById("confirmDesc").textContent = opts.desc;
+      var act = document.getElementById("confirmAction");
+      act.textContent = opts.actionLabel;
+      act.className = "btn " + (opts.danger ? "btn-danger" : "btn-primary");
+      document.getElementById("confirmIco").className = "dh-ico" + (opts.danger ? " danger" : "");
+      confirmCb = opts.onConfirm;
+      confirmOverlay.setAttribute("data-open", "true");
+    }
+    function closeConfirm() { confirmOverlay.setAttribute("data-open", "false"); confirmCb = null; }
+    confirmOverlay.querySelectorAll("[data-close-confirm]").forEach(function (b) { b.addEventListener("click", closeConfirm); });
+    confirmOverlay.addEventListener("click", function (e) { if (e.target === confirmOverlay) closeConfirm(); });
+    document.getElementById("confirmAction").addEventListener("click", function () {
+      if (confirmCb) confirmCb();
+      closeConfirm();
+    });
+
+    /* --- Menu d'actions par ligne (contextuel selon rôle/statut + garde dernier admin) --- */
+    var rowMenu = document.getElementById("rowMenu");
+    var menuRow = null;
+    function closeRowMenu() { rowMenu.setAttribute("data-open", "false"); rowMenu.hidden = true; menuRow = null; }
+    function ic(path) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + path + "</svg>"; }
+
+    function buildRowMenu(tr) {
+      var role = tr.dataset.role, status = tr.dataset.status, name = tr.dataset.name;
+      var lastAdmin = role === "admin" && status === "active" && activeAdminCount() <= 1;
+      var html = "";
+
+      if (status === "invited") {
+        html += '<button data-act="resend">' + ic('<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>') + "Renvoyer l'invitation</button>";
+      }
+      // Changer de rôle
+      var toRole = role === "admin" ? "user" : "admin";
+      var roleDisabled = lastAdmin ? " disabled" : "";
+      html += '<button data-act="role" data-to="' + toRole + '"' + roleDisabled + ">" +
+        ic('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>') +
+        (role === "admin" ? "Passer collaborateur" : "Passer administrateur") + "</button>";
+      // Suspendre / réactiver (pas pour un invité)
+      if (status !== "invited") {
+        if (status === "suspended") {
+          html += '<button data-act="reactivate">' + ic('<path d="M20 6 9 17l-5-5"/>') + "Réactiver l'accès</button>";
+        } else {
+          html += '<button data-act="suspend">' + ic('<circle cx="12" cy="12" r="10"/><path d="M4.9 4.9 19.1 19.1"/>') + "Suspendre l'accès</button>";
+        }
+      }
+      html += '<div class="rm-sep"></div>';
+      var delDisabled = lastAdmin ? " disabled" : "";
+      var delLabel = status === "invited" ? "Annuler l'invitation" : "Supprimer";
+      html += '<button class="danger" data-act="delete"' + delDisabled + ">" +
+        ic('<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>') + delLabel + "</button>";
+      if (lastAdmin) {
+        html += '<div class="rm-hint">' + ic('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>') +
+          "Dernier administrateur actif : impossible de le rétrograder ou de le supprimer.</div>";
+      }
+      rowMenu.innerHTML = html;
+      rowMenu.querySelectorAll("button:not(:disabled)").forEach(function (b) {
+        b.addEventListener("click", function () { onRowAction(b.dataset.act, b.dataset.to); });
+      });
+    }
+    function positionRowMenu(btn) {
+      rowMenu.hidden = false;
+      var r = btn.getBoundingClientRect();
+      var w = rowMenu.offsetWidth, h = rowMenu.offsetHeight;
+      var left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8));
+      var top = r.bottom + 6;
+      if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+      rowMenu.style.left = left + "px";
+      rowMenu.style.top = top + "px";
+    }
+    usersBody.addEventListener("click", function (e) {
+      var btn = e.target.closest(".js-rowmenu");
+      if (!btn) return;
+      e.stopPropagation();
+      var tr = btn.closest("tr");
+      if (menuRow === tr) { closeRowMenu(); return; }
+      menuRow = tr;
+      buildRowMenu(tr);
+      positionRowMenu(btn);
+      rowMenu.setAttribute("data-open", "true");
+    });
+    document.addEventListener("click", function (e) { if (!rowMenu.contains(e.target)) closeRowMenu(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeRowMenu(); closeInvite(); closeConfirm(); } });
+    window.addEventListener("resize", closeRowMenu);
+
+    function onRowAction(act, to) {
+      var tr = menuRow; if (!tr) return;
+      var name = tr.dataset.name;
+      closeRowMenu();
+      if (act === "resend") {
+        notify("success", "Invitation renvoyée", "Un nouvel e-mail a été envoyé à " + name + ".");
+        return;
+      }
+      if (act === "role") {
+        openConfirm({
+          title: "Changer le rôle",
+          desc: "Attribuer le rôle « " + roleLabel[to] + " » à " + name + " ?",
+          actionLabel: "Changer le rôle",
+          onConfirm: function () {
+            // Garde de course : si on retire le dernier admin actif, simuler un 409 backend.
+            if (tr.dataset.role === "admin" && to === "user" && tr.dataset.status === "active" && activeAdminCount() <= 1) {
+              notify("error", "Action refusée (409)", "Impossible de rétrograder le dernier administrateur actif du cabinet.");
+              return;
+            }
+            tr.dataset.role = to; renderRole(tr);
+            notify("success", "Rôle mis à jour", name + " est désormais " + roleLabel[to].toLowerCase() + ".");
+          }
+        });
+        return;
+      }
+      if (act === "suspend") {
+        openConfirm({
+          title: "Suspendre l'accès", danger: true,
+          desc: "Suspendre l'accès de " + name + " ? Il ne pourra plus se connecter jusqu'à réactivation.",
+          actionLabel: "Suspendre",
+          onConfirm: function () { tr.dataset.status = "suspended"; renderStatus(tr); notify("success", "Accès suspendu", name + " ne peut plus se connecter."); }
+        });
+        return;
+      }
+      if (act === "reactivate") {
+        tr.dataset.status = "active"; renderStatus(tr);
+        notify("success", "Accès réactivé", name + " peut de nouveau se connecter.");
+        return;
+      }
+      if (act === "delete") {
+        var invited = tr.dataset.status === "invited";
+        openConfirm({
+          title: invited ? "Annuler l'invitation" : "Supprimer l'utilisateur", danger: true,
+          desc: invited
+            ? "Annuler l'invitation de " + name + " ? Le lien envoyé deviendra invalide."
+            : "Supprimer " + name + " du cabinet ? Cette action est définitive (suppression logique).",
+          actionLabel: invited ? "Annuler l'invitation" : "Supprimer",
+          onConfirm: function () {
+            if (tr.dataset.role === "admin" && tr.dataset.status === "active" && activeAdminCount() <= 1) {
+              notify("error", "Action refusée (409)", "Impossible de supprimer le dernier administrateur actif du cabinet.");
+              return;
+            }
+            tr.remove();
+            notify("success", invited ? "Invitation annulée" : "Utilisateur supprimé", name + (invited ? " ne rejoindra pas le cabinet." : " a été retiré du cabinet."));
+          }
+        });
+        return;
+      }
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", function () {
+      closeMenu();
+      notify("error", "Déconnexion", "Vous allez être redirigé vers la page de connexion.");
+    });
+
+    /* Inscription (FE-004) : sous-bascule formulaire / confirmation */
+    function showAuthPanel(which) {
+      document.querySelectorAll("[data-auth]").forEach(function (tab) {
+        tab.setAttribute("aria-selected", String(tab.dataset.auth === which));
+      });
+      document.querySelectorAll("[data-auth-panel]").forEach(function (panel) {
+        panel.hidden = panel.dataset.authPanel !== which;
+      });
+    }
+    document.querySelectorAll("[data-auth]").forEach(function (tab) {
+      tab.addEventListener("click", function () { showAuthPanel(tab.dataset.auth); });
+    });
+    var regSubmit = document.getElementById("regSubmit");
+    if (regSubmit) regSubmit.addEventListener("click", function () { showAuthPanel("done"); });
+
+    /* Vérification e-mail (FE-006) : bascule succès / expiré */
+    document.querySelectorAll("[data-verify]").forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        document.querySelectorAll("[data-verify]").forEach(function (t) {
+          t.setAttribute("aria-selected", String(t.dataset.verify === tab.dataset.verify));
+        });
+        document.querySelectorAll("[data-verify-panel]").forEach(function (panel) {
+          panel.hidden = panel.dataset.verifyPanel !== tab.dataset.verify;
+        });
+      });
+    });
+
+    /* Acceptation d'invitation (FE-007) : bascule formulaire / expiré */
+    document.querySelectorAll("[data-invite]").forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        document.querySelectorAll("[data-invite]").forEach(function (t) {
+          t.setAttribute("aria-selected", String(t.dataset.invite === tab.dataset.invite));
+        });
+        document.querySelectorAll("[data-invite-panel]").forEach(function (panel) {
+          panel.hidden = panel.dataset.invitePanel !== tab.dataset.invite;
+        });
+      });
+    });
+    var inviteSubmit = document.getElementById("inviteSubmit");
+    if (inviteSubmit) inviteSubmit.addEventListener("click", function () {
+      // Simule l'auto-login post-acceptation → arrivée dans l'espace cabinet.
+      var appTab = document.querySelector('.seg [data-view="app"]');
+      if (appTab) appTab.click();
+    });
+
+    /* ===================== FE-009 · Upload KYC (RCCM/CFE) ===================== */
+    var rccmCard = document.getElementById("rccmCard");
+    if (rccmCard) {
+      var rccmStatus = document.getElementById("rccmStatus");
+      var docStatusMap = {
+        absent: ["Requis", "badge-user"],
+        invalid: ["Requis", "badge-user"],
+        uploading: ["Envoi…", "badge-invited"],
+        review: ["En revue", "badge-invited"],
+        rejected: ["Rejeté", "badge-suspended"],
+      };
+      function setDocState(state) {
+        rccmCard.dataset.docState = state;
+        var slotFor = state === "invalid" ? "absent" : state;
+        rccmCard.querySelectorAll(".doc-slot").forEach(function (s) {
+          s.hidden = s.dataset.docSlot !== slotFor;
+        });
+        document.getElementById("rccmPrevalid").classList.toggle("show", state === "invalid");
+        var m = docStatusMap[state];
+        var dot = m[1] === "badge-invited" || m[1] === "badge-suspended" ? '<span class="d"></span>' : "";
+        rccmStatus.className = "badge doc-status " + m[1];
+        rccmStatus.innerHTML = dot + m[0];
+        document.querySelectorAll(".states-demo [data-doc]").forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.doc === state));
+        });
+      }
+      function simulateUpload() {
+        setDocState("uploading");
+        var bar = document.getElementById("rccmBar"), pct = document.getElementById("rccmPct");
+        var v = 0; bar.style.width = "0%"; pct.textContent = "0 %";
+        var id = setInterval(function () {
+          v = Math.min(100, v + 12 + Math.random() * 10);
+          bar.style.width = v + "%"; pct.textContent = Math.round(v) + " %";
+          if (v >= 100) {
+            clearInterval(id);
+            setTimeout(function () {
+              setDocState("review");
+              notify("success", "Document téléversé", "Votre RCCM est en attente de revue.");
+            }, 350);
+          }
+        }, 260);
+      }
+      document.querySelectorAll(".states-demo [data-doc]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (b.dataset.doc === "uploading") simulateUpload();
+          else setDocState(b.dataset.doc);
+        });
+      });
+      var drop = document.getElementById("rccmDrop");
+      drop.addEventListener("click", function (e) { e.preventDefault(); simulateUpload(); });
+      ["dragover", "dragenter"].forEach(function (ev) {
+        drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("drag"); });
+      });
+      ["dragleave", "drop"].forEach(function (ev) {
+        drop.addEventListener(ev, function (e) {
+          e.preventDefault(); drop.classList.remove("drag");
+          if (ev === "drop") simulateUpload();
+        });
+      });
+      var resubmit = document.getElementById("rccmResubmit");
+      if (resubmit) resubmit.addEventListener("click", simulateUpload);
+    }
+
+    /* ============= FE-010 · Bandeau d'onboarding + stepper d'activation ============= */
+    var stepper = document.getElementById("stepper");
+    if (stepper) {
+      var IC = {
+        mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+        shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/></svg>',
+        card: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>',
+        alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+        check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+        arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>'
+      };
+      var tenantStates = {
+        email: {
+          steps: { email: "current", kyc: "todo", subscription: "todo" }, lines: { 1: "todo", 2: "todo" },
+          banner: { variant: "", oi: "warn", icon: IC.mail, title: "Vérifiez votre adresse e-mail",
+            body: "Un lien a été envoyé à awa.diallo@cabinet-diallo.tg pour finaliser l'activation du cabinet.",
+            cta: "Renvoyer l'e-mail", act: "resend" }
+        },
+        kyc: {
+          steps: { email: "done", kyc: "current", subscription: "todo" }, lines: { 1: "done", 2: "todo" },
+          banner: { variant: "", oi: "warn", icon: IC.shield, title: "KYC en attente de documents",
+            body: "Téléversez le RCCM et la carte CFE pour lancer la vérification de votre cabinet.",
+            cta: "Compléter le KYC", act: "goKyc" }
+        },
+        rejected: {
+          steps: { email: "done", kyc: "rejected", subscription: "todo" }, lines: { 1: "done", 2: "todo" },
+          banner: { variant: "danger", oi: "danger", icon: IC.alert, title: "Un document KYC a été rejeté",
+            body: "Corrigez le justificatif concerné puis re-soumettez-le pour poursuivre la vérification.",
+            reason: "Motif : le scan du RCCM est partiellement illisible.",
+            cta: "Corriger le KYC", act: "goKyc" }
+        },
+        subscription: {
+          steps: { email: "done", kyc: "done", subscription: "current" }, lines: { 1: "done", 2: "done" },
+          banner: { variant: "", oi: "", icon: IC.card, title: "Activez votre abonnement",
+            body: "Choisissez une formule pour débloquer les modules métier (bilans, balance, fiscalité).",
+            cta: "Choisir une formule", act: "goBilling" }
+        },
+        active: {
+          steps: { email: "done", kyc: "done", subscription: "done" }, lines: { 1: "done", 2: "done" },
+          banner: { variant: "ok", oi: "ok", icon: IC.check, title: "Cabinet pleinement actif",
+            body: "Toutes les étapes sont validées — l'accès aux modules est débloqué.", cta: null }
+        }
+      };
+      var stepNum = { email: "1", kyc: "2", subscription: "3" };
+      var banner = document.getElementById("onbBanner");
+
+      function setTenant(state) {
+        var cfg = tenantStates[state];
+        // Steps
+        stepper.querySelectorAll(".step").forEach(function (el) {
+          var st = cfg.steps[el.dataset.step];
+          el.dataset.st = st;
+          var dot = el.querySelector(".sdot");
+          dot.innerHTML = st === "done" ? IC.check : st === "rejected" ? "!" : stepNum[el.dataset.step];
+        });
+        stepper.querySelectorAll(".step-line").forEach(function (el) {
+          el.dataset.st = cfg.lines[el.dataset.line];
+        });
+        // Bandeau
+        var b = cfg.banner;
+        banner.className = "onboarding" + (b.variant ? " " + b.variant : "");
+        document.getElementById("onbIcon").className = "oi" + (b.oi ? " " + b.oi : "");
+        document.getElementById("onbIcon").innerHTML = b.icon;
+        document.getElementById("onbTitle").textContent = b.title;
+        document.getElementById("onbBody").textContent = b.body;
+        var reason = document.getElementById("onbReason");
+        if (b.reason) { reason.textContent = b.reason; reason.hidden = false; } else { reason.hidden = true; }
+        var cta = document.getElementById("onbCta");
+        if (b.cta) { cta.hidden = false; cta.innerHTML = b.cta + IC.arrow; cta.dataset.act = b.act; }
+        else { cta.hidden = true; }
+        // Sync tabs
+        document.querySelectorAll(".states-demo [data-tenant]").forEach(function (t) {
+          t.setAttribute("aria-selected", String(t.dataset.tenant === state));
+        });
+      }
+      document.querySelectorAll(".states-demo [data-tenant]").forEach(function (t) {
+        t.addEventListener("click", function () { setTenant(t.dataset.tenant); });
+      });
+      document.getElementById("onbCta").addEventListener("click", function () {
+        var act = this.dataset.act;
+        if (act === "resend") notify("success", "E-mail renvoyé", "Un nouveau lien de vérification vous a été envoyé.");
+        else if (act === "goKyc") { var n = document.querySelector('.nav-item[data-page="kyc"]'); if (n) n.click(); }
+        else if (act === "goBilling") { var b2 = document.querySelector('.nav-item[data-page="billing"]'); if (b2) b2.click(); }
+      });
+      setTenant("kyc");
+    }
+  })();
+</script>
