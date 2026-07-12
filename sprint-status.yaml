@@ -639,7 +639,8 @@ sprints:
         epic: "EPIC-017"
         points: 5
         service: "balance-service"
-        status: "not_started"  # KEYSTONE : rend cabinet/IMF/distributeur interchangeables (hub multi-source D13). À concevoir avec soin dès S10.
+        status: "ready-for-dev"  # ✅ CRÉÉE 2026-07-12 : schéma TypeScript, validation, idempotence, immutabilité, tests, exemples adaptateurs. Voir docs/stories/STORY-101.md
+        story_path: "docs/stories/STORY-101.md"
         assigned_to: null
       - story_id: "STORY-086"
         title: "Adaptateur import fichier — balance Sage 100 (Excel/CSV prioritaire, PDF secours ; comptes 8 car. alphanum ; blocs N-1/mvts/soldes) → contrat canonique — FR-A12"
