@@ -1,0 +1,104 @@
+# Story FE-B14 : Export PDF / Excel de la liasse et du prévisionnel
+
+Status: ready-for-dev
+
+**Epic :** FE-EPIC-005 — Bilan & Prévisionnel
+**Points :** 5 · **Sprint :** 8 (programme) · **App :** `prospera-frontend-expert-comptable`
+**API :** bilan-service (`/bilan/export`) via gateway · **Backend d'appui :** STORY-073 (export PDF/Excel)
+**Réf. plan :** `docs/frontend-program-sprint-status.yaml` · PRD `docs/prd-bilan-service-2026-07-10.md` (FR-023)
+**Backend prêt :** S14
+**Dépendances :** FE-B13 (consultation), FE-B10 (snapshot validé)
+**Maître Scrum (frontend) :** MightyRaven
+
+---
+
+## Convention Git
+
+- **Une story = une branche.** Branche : `fe-b14`. Commits préfixés `FE-B14`.
+
+---
+
+## Convention Maquette (préalable UI)
+
+- **Maquette validée AVANT implémentation** (déclenchement + suivi d'un export), conforme au Design System Prospera, publiée en Artifact.
+
+---
+
+## User Story
+
+En tant qu'**utilisateur**,
+je veux **exporter en PDF et en Excel la liasse validée et le prévisionnel**,
+afin de **partager et retraiter mes états hors de l'application**.
+
+---
+
+## Contexte
+
+FR-023 : export **PDF** (restitution) et **Excel** (retraitement) reflétant fidèlement le **snapshot figé** (FE-B10). L'export d'un état validé doit reproduire exactement le snapshot (FR-015). La génération est backend ; le frontend déclenche, suit l'avancement et récupère le fichier.
+
+---
+
+## Périmètre
+
+**Inclus :**
+- **Déclenchement d'export** : choix du format (PDF/Excel) et du périmètre (liasse / prévisionnel / version) depuis la consultation (FE-B13).
+- **Suivi/récupération** : gestion synchrone (téléchargement direct) ou asynchrone (job → lien) selon l'API ; feedback de progression.
+- **Fidélité** : l'export porte sur un snapshot validé (indiquer version/exercice) ; pour un brouillon, avertir que l'export n'est pas figé.
+- Gestion des erreurs.
+
+**Hors périmètre :**
+- Mise en page fine côté backend (moteur de rendu = backend).
+- Envoi par e-mail (hors périmètre v1).
+
+---
+
+## Critères d'acceptation
+
+- [ ] Export **PDF** et **Excel** de la liasse et du prévisionnel déclenchables depuis la consultation.
+- [ ] Récupération du fichier (téléchargement direct ou via lien de job) + feedback de progression.
+- [ ] Export d'une version validée = fidèle au snapshot (version/exercice indiqués) ; brouillon → avertissement « non figé ».
+- [ ] Erreurs gérées ; i18n FR ; tests : déclenchement PDF/Excel, récupération, avertissement brouillon.
+
+---
+
+## Notes techniques
+
+| Composant | Fichier (proposé) | Nature |
+|---|---|---|
+| Export | `src/features/bilan/export/api/export.ts` + `hooks/*` | Nouveau |
+| Écran | `src/features/bilan/export/components/ExportDialog.tsx` | Nouveau |
+
+**Décisions & vigilance :**
+- **Sync vs async** : encapsuler la récupération (téléchargement direct vs polling d'un job) pour supporter les deux selon l'API réelle.
+- **Fidélité au snapshot** : toujours rattacher l'export à une version identifiée ; ne pas laisser croire qu'un brouillon est un document officiel.
+- **Fichiers volumineux** : gérer le téléchargement (blob) sans bloquer l'UI.
+
+---
+
+## Tasks / Subtasks
+
+- [ ] `ExportDialog` (format + périmètre) (AC 1)
+- [ ] Déclenchement + récupération (sync/async) + progression (AC 2)
+- [ ] Fidélité snapshot + avertissement brouillon (AC 3)
+- [ ] i18n + tests (AC 4)
+
+---
+
+## Definition of Done
+
+- [ ] Critères d'acceptation validés ; tests verts.
+- [ ] `lint` / `typecheck` / `test` / `build` verts (local + CI).
+- [ ] Statut mis à jour dans les trackers.
+- [ ] Commits sur `fe-b14`, préfixés `FE-B14`.
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+
+### Debug Log References
+
+### Completion Notes List
+
+### File List

@@ -1,0 +1,107 @@
+# Story FE-B01 : Gestion des exercices comptables (CRUD, chaînage N/N-1)
+
+Status: ready-for-dev
+
+**Epic :** FE-EPIC-005 — Bilan & Prévisionnel
+**Points :** 3 · **Sprint :** 5 (programme) · **App :** `prospera-frontend-expert-comptable`
+**API :** bilan-service (`/bilan/exercices`) via gateway · **Backend d'appui :** STORY-066 (exercices)
+**Réf. plan :** `docs/frontend-program-sprint-status.yaml` · PRD `docs/prd-bilan-service-2026-07-10.md` (FR-016)
+**Backend prêt :** S13 · **⚠ Dépendance :** l'import (FR-001, S10) présuppose l'exercice → STORY-066 planifiée backend S13 est à **avancer** (ou exposer un exercice minimal dès EPIC-009)
+**Dépendances :** FE-B00 (shell module)
+**Maître Scrum (frontend) :** MightyRaven
+
+---
+
+## Convention Git
+
+- **Une story = une branche.** Branche : `fe-b01`. Commits préfixés `FE-B01`.
+
+---
+
+## Convention Maquette (préalable UI)
+
+- **Maquette validée AVANT implémentation** (liste + création/édition d'exercice), conforme au Design System Prospera, publiée en Artifact.
+
+---
+
+## User Story
+
+En tant que **comptable interne (Money Vibes)**,
+je veux **déclarer et gérer mes exercices comptables (dates, statut, chaînage N/N-1)**,
+afin de **rattacher mes balances et mes états au bon exercice et disposer du comparatif**.
+
+---
+
+## Contexte
+
+L'exercice est l'**unité de rattachement** de tout le module (balances, états, snapshots). FR-016 : CRUD d'exercice keyé `orgId`, un seul jeu d'états validé « courant » par exercice, chaînage N/N-1 entre exercices consécutifs. Prérequis logique de l'import (FE-B02).
+
+> **Alerte planning :** le backend a placé STORY-066 en sprint 13 alors que l'import (STORY-050, sprint 10) en dépend — signalé au tracker programme ; à réordonner côté backend.
+
+---
+
+## Périmètre
+
+**Inclus :**
+- **CRUD exercice** : création (dates début/fin, libellé), édition, statut (ouvert/clos) ; liste keyée `orgId`.
+- **Sélecteur d'exercice courant** (contexte du module : les écrans suivants opèrent sur l'exercice sélectionné).
+- **Chaînage N/N-1** : association explicite à l'exercice précédent (pour les colonnes comparatives).
+- Validations (dates cohérentes, non-chevauchement) ; garde « exercice clos » (lecture seule).
+
+**Hors périmètre :**
+- Ré-ouverture contrôlée d'un exercice validé (relève de la validation, FE-B10).
+- Import de balance (FE-B02).
+
+---
+
+## Critères d'acceptation
+
+- [ ] CRUD exercice (dates, libellé, statut) keyé `orgId` ; liste affichée.
+- [ ] Sélecteur d'exercice courant qui pilote le contexte du module.
+- [ ] Chaînage N/N-1 (association à l'exercice précédent) visible et modifiable.
+- [ ] Validations : dates cohérentes, non-chevauchement ; exercice clos en lecture seule.
+- [ ] i18n FR ; tests : CRUD, sélection, chaînage, validations.
+
+---
+
+## Notes techniques
+
+| Composant | Fichier (proposé) | Nature |
+|---|---|---|
+| Query/mutations | `src/features/bilan/exercices/api/*` + `hooks/*` | Nouveau |
+| Écrans | `src/features/bilan/exercices/components/{ExercicesList,ExerciceForm,ExerciceSwitcher}.tsx` | Nouveau |
+| Contexte | `src/features/bilan/context/current-exercice.ts` | Nouveau |
+
+**Décisions & vigilance :**
+- **Exercice courant** = contexte partagé du module (import, états, prévisionnel s'y réfèrent) — le centraliser.
+- **N/N-1** : ne jamais inventer un comparatif ; si N-1 absent, l'indiquer (aligné FR-003).
+
+---
+
+## Tasks / Subtasks
+
+- [ ] Query/mutations exercices + contexte courant (AC 1, 2)
+- [ ] `ExercicesList` + `ExerciceForm` + `ExerciceSwitcher` (AC 1, 2)
+- [ ] Chaînage N/N-1 + validations (AC 3, 4)
+- [ ] i18n + tests (AC 5)
+
+---
+
+## Definition of Done
+
+- [ ] Critères d'acceptation validés ; tests verts.
+- [ ] `lint` / `typecheck` / `test` / `build` verts (local + CI).
+- [ ] Statut mis à jour dans les trackers.
+- [ ] Commits sur `fe-b01`, préfixés `FE-B01`.
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+
+### Debug Log References
+
+### Completion Notes List
+
+### File List

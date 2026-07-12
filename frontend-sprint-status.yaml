@@ -86,31 +86,31 @@ development_status:
   fe-009-upload-kyc: "review"
   fe-010-bandeau-onboarding-kyc: "ready-for-dev"
   # EPIC-006 — Accès modules & entitlements (NOUVEAU v2 — shell config-driven)
-  epic-fe-006: "backlog"
-  fe-014-acces-modules-entitlements: "backlog"
+  epic-fe-006: "ready-for-dev"
+  fe-014-acces-modules-entitlements: "ready-for-dev"
   # EPIC-005 — Bilan & Prévisionnel (NOUVEAU v2 — dérivé PRD Bilan, EPIC-009→014 backend)
-  epic-fe-005: "backlog"
-  fe-b00-module-bilan-shell-gate: "backlog"
-  fe-b01-exercices: "backlog"
-  fe-b02-import-balance: "backlog"
-  fe-b03-mapping-colonnes-profil: "backlog"
-  fe-b04-controle-integrite: "backlog"
-  fe-b05-comparatif-n1: "backlog"
-  fe-b06-table-passage-referentiel: "backlog"
-  fe-b07-bilan-actif-passif: "backlog"
-  fe-b08-compte-resultat: "backlog"
-  fe-b09-tft-annexes-coherence: "backlog"
-  fe-b10-validation-immutabilite-audit: "backlog"
-  fe-b11-hypotheses-previsionnel: "backlog"
-  fe-b12-projection-tresorerie-scenarios: "backlog"
-  fe-b13-consultation-comparaison: "backlog"
-  fe-b14-export-pdf-excel: "backlog"
-  fe-b15-e2e-bilan-polish: "backlog"
+  epic-fe-005: "ready-for-dev"
+  fe-b00-module-bilan-shell-gate: "ready-for-dev"
+  fe-b01-exercices: "ready-for-dev"
+  fe-b02-import-balance: "ready-for-dev"
+  fe-b03-mapping-colonnes-profil: "ready-for-dev"
+  fe-b04-controle-integrite: "ready-for-dev"
+  fe-b05-comparatif-n1: "ready-for-dev"
+  fe-b06-table-passage-referentiel: "ready-for-dev"
+  fe-b07-bilan-actif-passif: "ready-for-dev"
+  fe-b08-compte-resultat: "ready-for-dev"
+  fe-b09-tft-annexes-coherence: "ready-for-dev"
+  fe-b10-validation-immutabilite-audit: "ready-for-dev"
+  fe-b11-hypotheses-previsionnel: "ready-for-dev"
+  fe-b12-projection-tresorerie-scenarios: "ready-for-dev"
+  fe-b13-consultation-comparaison: "ready-for-dev"
+  fe-b14-export-pdf-excel: "ready-for-dev"
+  fe-b15-e2e-bilan-polish: "ready-for-dev"
   # EPIC-004 — Abonnement & paiement (DIFFÉRÉ v2 → sprint FE-7 JIT, aligné paiement-service Module 2)
-  epic-fe-004: "backlog"
-  fe-011-catalogue-plans: "backlog"
-  fe-012-checkout-paiement: "backlog"
-  fe-013-abonnement-historique: "backlog"
+  epic-fe-004: "ready-for-dev"
+  fe-011-catalogue-plans: "ready-for-dev"
+  fe-012-checkout-paiement: "ready-for-dev"
+  fe-013-abonnement-historique: "ready-for-dev"
 
 sprints:
   # ── FE-1 : Socle + Authentification (conforme au backend DÉJÀ livré : auth-service) ──
@@ -141,7 +141,7 @@ sprints:
       - { story_id: "FE-008", title: "Gestion des utilisateurs (liste, rôles, invitation, suspension)", epic: "FE-EPIC-002", points: 5, status: "review", backend_ref: "STORY-008, STORY-009, STORY-026", api: "auth-service" }
       - { story_id: "FE-009", title: "Upload documents KYC (RCCM / CFE)", epic: "FE-EPIC-003", points: 5, status: "review", backend_ref: "STORY-011, STORY-012, STORY-020, STORY-021", api: "kyc-service" }
       - { story_id: "FE-010", title: "Bandeau d'onboarding + statut KYC (stepper d'activation)", epic: "FE-EPIC-003", points: 3, status: "ready-for-dev", backend_ref: "STORY-012, STORY-014, STORY-029", api: "expert-comptable (/tenant/state)" }
-      - { story_id: "FE-014", title: "Accès modules & entitlements : home des modules + shell config-driven (le vertical n'affiche que les modules ACTIFS ; gate KYC/abonnement/entitlement)", epic: "FE-EPIC-006", points: 5, status: "backlog", backend_ref: "STORY-014, STORY-033, STORY-034 (entitlement.changed)", api: "expert-comptable / platform-catalog-service" }
+      - { story_id: "FE-014", title: "Accès modules & entitlements : home des modules + shell config-driven (le vertical n'affiche que les modules ACTIFS ; gate KYC/abonnement/entitlement)", epic: "FE-EPIC-006", points: 5, status: "ready-for-dev", backend_ref: "STORY-014, STORY-033, STORY-034 (entitlement.changed)", api: "expert-comptable / platform-catalog-service" }
 
   # ═══ DÉCOUPAGE INSÉRÉ APRÈS FE-010 (v2 2026-07-12) — le frontend suit la dispo backend ═══
 
@@ -154,12 +154,12 @@ sprints:
     goal: "Module Bilan opérationnel côté import : shell + gate d'accès Bilan, gestion des exercices, import de balance N (+ N-1) avec aperçu, mapping de colonnes assisté et contrôle d'intégrité."
     backend_dependency: "bilan-service EPIC-008 (STORY-035→038, squelette) + EPIC-009 (STORY-050→053) — backend sprints 8 & 10"
     stories:
-      - { story_id: "FE-B00", title: "Module Bilan : shell, navigation, gate @RequiresBilanAccess côté UI (lecture entitlement + KYC)", epic: "FE-EPIC-005", points: 3, status: "backlog", backend_ref: "STORY-035, STORY-037", api: "bilan-service" }
-      - { story_id: "FE-B01", title: "Gestion des exercices comptables (CRUD, dates, chaînage N/N-1) — FR-016", epic: "FE-EPIC-005", points: 3, status: "backlog", backend_ref: "STORY-066", api: "bilan-service" }
-      - { story_id: "FE-B02", title: "Import de balance Excel/CSV (upload, détection format, aperçu N lignes) — FR-001", epic: "FE-EPIC-005", points: 5, status: "backlog", backend_ref: "STORY-050", api: "bilan-service" }
-      - { story_id: "FE-B03", title: "Mapping de colonnes assisté + profil d'import réutilisable — FR-004", epic: "FE-EPIC-005", points: 3, status: "backlog", backend_ref: "STORY-053", api: "bilan-service" }
-      - { story_id: "FE-B04", title: "Contrôle d'intégrité de la balance (équilibre, anomalies, blocage validation) — FR-002", epic: "FE-EPIC-005", points: 3, status: "backlog", backend_ref: "STORY-051", api: "bilan-service" }
-      - { story_id: "FE-B05", title: "Import/association comparatif N-1 (colonnes N/N-1) — FR-003", epic: "FE-EPIC-005", points: 3, status: "backlog", backend_ref: "STORY-052", api: "bilan-service" }
+      - { story_id: "FE-B00", title: "Module Bilan : shell, navigation, gate @RequiresBilanAccess côté UI (lecture entitlement + KYC)", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ref: "STORY-035, STORY-037", api: "bilan-service" }
+      - { story_id: "FE-B01", title: "Gestion des exercices comptables (CRUD, dates, chaînage N/N-1) — FR-016", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ref: "STORY-066", api: "bilan-service" }
+      - { story_id: "FE-B02", title: "Import de balance Excel/CSV (upload, détection format, aperçu N lignes) — FR-001", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ref: "STORY-050", api: "bilan-service" }
+      - { story_id: "FE-B03", title: "Mapping de colonnes assisté + profil d'import réutilisable — FR-004", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ref: "STORY-053", api: "bilan-service" }
+      - { story_id: "FE-B04", title: "Contrôle d'intégrité de la balance (équilibre, anomalies, blocage validation) — FR-002", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ref: "STORY-051", api: "bilan-service" }
+      - { story_id: "FE-B05", title: "Import/association comparatif N-1 (colonnes N/N-1) — FR-003", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ref: "STORY-052", api: "bilan-service" }
 
   # ── FE-4 : Bilan — Référentiels/mapping + Liasse OHADA (suit backend EPIC-010/011 S11-12) ──
   - sprint_number: 4
@@ -170,10 +170,10 @@ sprints:
     goal: "Table de passage comptes→postes (arbitrage des comptes non mappés, surcharges org) et restitution de la liasse : Bilan (actif/passif), Compte de résultat, TFT/annexes, contrôles de cohérence — colonnes N/N-1."
     backend_dependency: "bilan-service EPIC-010 (STORY-054→058) + EPIC-011 (STORY-059→063) — backend sprints 11 & 12"
     stories:
-      - { story_id: "FE-B06", title: "Table de passage + arbitrage comptes non mappés + surcharges org + badge référentiel actif — FR-005/006/007/008", epic: "FE-EPIC-005", points: 5, status: "backlog", backend_ref: "STORY-054, STORY-055, STORY-056, STORY-057, STORY-058", api: "bilan-service" }
-      - { story_id: "FE-B07", title: "Bilan (actif/passif) N/N-1 + contrôle actif=passif — FR-009", epic: "FE-EPIC-005", points: 5, status: "backlog", backend_ref: "STORY-059", api: "bilan-service" }
-      - { story_id: "FE-B08", title: "Compte de résultat N/N-1 — FR-010", epic: "FE-EPIC-005", points: 3, status: "backlog", backend_ref: "STORY-060", api: "bilan-service" }
-      - { story_id: "FE-B09", title: "TFT/TAFIRE + notes annexes + contrôles de cohérence de la liasse — FR-011/012/013", epic: "FE-EPIC-005", points: 5, status: "backlog", backend_ref: "STORY-061, STORY-062, STORY-063", api: "bilan-service" }
+      - { story_id: "FE-B06", title: "Table de passage + arbitrage comptes non mappés + surcharges org + badge référentiel actif — FR-005/006/007/008", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ref: "STORY-054, STORY-055, STORY-056, STORY-057, STORY-058", api: "bilan-service" }
+      - { story_id: "FE-B07", title: "Bilan (actif/passif) N/N-1 + contrôle actif=passif — FR-009", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ref: "STORY-059", api: "bilan-service" }
+      - { story_id: "FE-B08", title: "Compte de résultat N/N-1 — FR-010", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ref: "STORY-060", api: "bilan-service" }
+      - { story_id: "FE-B09", title: "TFT/TAFIRE + notes annexes + contrôles de cohérence de la liasse — FR-011/012/013", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ref: "STORY-061, STORY-062, STORY-063", api: "bilan-service" }
 
   # ── FE-5 : Bilan — Validation/immutabilité + Prévisionnel (suit backend EPIC-012/013 S13-14) ──
   - sprint_number: 5
@@ -184,9 +184,9 @@ sprints:
     goal: "Cycle brouillon→validé (l'humain valide), snapshot figé + versions + piste d'audit ; prévisionnel : hypothèses paramétrables, projection 3 ans, plan de trésorerie 12 mois, scénarios comparés."
     backend_dependency: "bilan-service EPIC-012 (STORY-064→067) + EPIC-013 (STORY-068→071) — backend sprints 13 & 14"
     stories:
-      - { story_id: "FE-B10", title: "Cycle brouillon→validé + snapshot immuable/versions + piste d'audit — FR-014/015/017", epic: "FE-EPIC-005", points: 5, status: "backlog", backend_ref: "STORY-064, STORY-065, STORY-067", api: "bilan-service" }
-      - { story_id: "FE-B11", title: "Hypothèses de prévisionnel paramétrables (croissance, marges, BFR, invest., financement) — FR-018", epic: "FE-EPIC-005", points: 5, status: "backlog", backend_ref: "STORY-068", api: "bilan-service" }
-      - { story_id: "FE-B12", title: "Projection annuelle 3 ans + plan de trésorerie mensuel 12 mois + scénarios comparés — FR-019/020/021", epic: "FE-EPIC-005", points: 8, status: "backlog", backend_ref: "STORY-069, STORY-070, STORY-071", api: "bilan-service" }
+      - { story_id: "FE-B10", title: "Cycle brouillon→validé + snapshot immuable/versions + piste d'audit — FR-014/015/017", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ref: "STORY-064, STORY-065, STORY-067", api: "bilan-service" }
+      - { story_id: "FE-B11", title: "Hypothèses de prévisionnel paramétrables (croissance, marges, BFR, invest., financement) — FR-018", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ref: "STORY-068", api: "bilan-service" }
+      - { story_id: "FE-B12", title: "Projection annuelle 3 ans + plan de trésorerie mensuel 12 mois + scénarios comparés — FR-019/020/021", epic: "FE-EPIC-005", points: 8, status: "ready-for-dev", backend_ref: "STORY-069, STORY-070, STORY-071", api: "bilan-service" }
 
   # ── FE-6 : Bilan — Consultation + Export + durcissement (suit backend EPIC-014 S14) 🏁 Module 1 UI ──
   - sprint_number: 6
@@ -197,9 +197,9 @@ sprints:
     goal: "Consultation des états/prévisionnel (N/N-1, versions) + comparaison inter-exercices + export PDF/Excel fidèle au snapshot. Durcissement : e2e du parcours Bilan complet, a11y, i18n. 🏁 Module 1 côté UI."
     backend_dependency: "bilan-service EPIC-014 (STORY-072→074) — backend sprint 14"
     stories:
-      - { story_id: "FE-B13", title: "Consultation des états & prévisionnel (N/N-1, versions) + comparaison inter-exercices — FR-022/024", epic: "FE-EPIC-005", points: 3, status: "backlog", backend_ref: "STORY-072, STORY-074", api: "bilan-service" }
-      - { story_id: "FE-B14", title: "Export PDF / Excel de la liasse et du prévisionnel (fidèle au snapshot) — FR-023", epic: "FE-EPIC-005", points: 5, status: "backlog", backend_ref: "STORY-073", api: "bilan-service" }
-      - { story_id: "FE-B15", title: "e2e parcours Bilan complet (import→validation→export) + a11y + i18n + durcissement", epic: "FE-EPIC-005", points: 5, status: "backlog", backend_ref: "jalon Module 1", api: "bilan-service" }
+      - { story_id: "FE-B13", title: "Consultation des états & prévisionnel (N/N-1, versions) + comparaison inter-exercices — FR-022/024", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ref: "STORY-072, STORY-074", api: "bilan-service" }
+      - { story_id: "FE-B14", title: "Export PDF / Excel de la liasse et du prévisionnel (fidèle au snapshot) — FR-023", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ref: "STORY-073", api: "bilan-service" }
+      - { story_id: "FE-B15", title: "e2e parcours Bilan complet (import→validation→export) + a11y + i18n + durcissement", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ref: "jalon Module 1", api: "bilan-service" }
 
   # ── FE-7 (JIT) : Abonnement & paiement — aligné paiement-service Module 2 (~déc. 2026) ──
   #    Différé (DG-1 dogfooding : entitlements octroyés manuellement via admin-panel avant paiement).
@@ -211,9 +211,9 @@ sprints:
     goal: "Parcours abonnement & paiement côté vertical : catalogue de plans, checkout PI SPI BCEAO + FedaPay, retour de paiement, abonnement courant + historique. À planifier JIT à la sortie du PRD paiement."
     backend_dependency: "expert-comptable STORY-015 (plans) + paiement-service EPIC-004 (STORY-016→018) — backend sprint 15 ; dépend PS-1/C8/PRD paiement"
     stories:
-      - { story_id: "FE-011", title: "Catalogue de plans (garde KYC/entitlement non approuvé)", epic: "FE-EPIC-004", points: 2, status: "backlog", backend_ref: "STORY-015", api: "expert-comptable" }
-      - { story_id: "FE-012", title: "Checkout paiement (PI SPI BCEAO + FedaPay) + retour de paiement (activation asynchrone)", epic: "FE-EPIC-004", points: 5, status: "backlog", backend_ref: "STORY-016, STORY-017", api: "paiement-service" }
-      - { story_id: "FE-013", title: "Abonnement courant + historique des transactions", epic: "FE-EPIC-004", points: 3, status: "backlog", backend_ref: "STORY-018", api: "paiement-service" }
+      - { story_id: "FE-011", title: "Catalogue de plans (garde KYC/entitlement non approuvé)", epic: "FE-EPIC-004", points: 2, status: "ready-for-dev", backend_ref: "STORY-015", api: "expert-comptable" }
+      - { story_id: "FE-012", title: "Checkout paiement (PI SPI BCEAO + FedaPay) + retour de paiement (activation asynchrone)", epic: "FE-EPIC-004", points: 5, status: "ready-for-dev", backend_ref: "STORY-016, STORY-017", api: "paiement-service" }
+      - { story_id: "FE-013", title: "Abonnement courant + historique des transactions", epic: "FE-EPIC-004", points: 3, status: "ready-for-dev", backend_ref: "STORY-018", api: "paiement-service" }
 
 # ── Backlog des verticaux futurs (placeholder — différés jusqu'au 1er client externe, backend deferred) ──
 # Réutilisent LA MÊME app cliente config-driven (Option B) : nouveau vertical = config + modules

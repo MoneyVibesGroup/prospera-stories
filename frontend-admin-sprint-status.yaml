@@ -40,20 +40,20 @@ frontend:
 
 development_status:
   # AP-EPIC-000 — Socle admin & sécurité
-  ap-epic-000: "backlog"
-  ap-01-socle-bff-login-rbac: "backlog"
+  ap-epic-000: "ready-for-dev"
+  ap-01-socle-bff-login-rbac: "ready-for-dev"
   # AP-EPIC-001 — Orgs & revue KYC
-  ap-epic-001: "backlog"
-  ap-02-vue-agregee-orgs: "backlog"
-  ap-03-revue-kyc: "backlog"
+  ap-epic-001: "ready-for-dev"
+  ap-02-vue-agregee-orgs: "ready-for-dev"
+  ap-03-revue-kyc: "ready-for-dev"
   # AP-EPIC-002 — Entitlements & catalogue
-  ap-epic-002: "backlog"
-  ap-04-catalogue-modules-versions-referentiels: "backlog"
-  ap-05-entitlements-grant-revoke: "backlog"
+  ap-epic-002: "ready-for-dev"
+  ap-04-catalogue-modules-versions-referentiels: "ready-for-dev"
+  ap-05-entitlements-grant-revoke: "ready-for-dev"
   # AP-EPIC-003 — Dashboard & provisioning
-  ap-epic-003: "backlog"
-  ap-06-provisioning-vertical: "backlog"
-  ap-07-dashboard-e2e-kyc: "backlog"
+  ap-epic-003: "ready-for-dev"
+  ap-06-provisioning-vertical: "ready-for-dev"
+  ap-07-dashboard-e2e-kyc: "ready-for-dev"
 
 sprints:
   - sprint_number: 1
@@ -64,8 +64,8 @@ sprints:
     goal: "Socle console admin (BFF, login PLATFORM_ADMIN, RBAC strict, layout) + vue agrégée des organisations (identité + KYC + entitlements)."
     backend_dependency: "admin-panel STORY-046 (scaffold BFF) + STORY-047 (vue agrégée) — backend sprint 9"
     stories:
-      - { story_id: "AP-01", title: "Socle admin-panel (BFF, login PLATFORM_ADMIN, RBAC, layout console)", epic: "AP-EPIC-000", points: 5, status: "backlog", backend_ref: "STORY-046, STORY-024, STORY-026", api: "auth-service / admin-panel (BFF)" }
-      - { story_id: "AP-02", title: "Vue agrégée des organisations (identité auth + KYC + entitlements, list + détail, dégradation partielle)", epic: "AP-EPIC-001", points: 5, status: "backlog", backend_ref: "STORY-047, STORY-027, STORY-033", api: "admin-panel (BFF) → auth/kyc/catalog" }
+      - { story_id: "AP-01", title: "Socle admin-panel (BFF, login PLATFORM_ADMIN, RBAC, layout console)", epic: "AP-EPIC-000", points: 5, status: "ready-for-dev", backend_ref: "STORY-046, STORY-024, STORY-026", api: "auth-service / admin-panel (BFF)" }
+      - { story_id: "AP-02", title: "Vue agrégée des organisations (identité auth + KYC + entitlements, list + détail, dégradation partielle)", epic: "AP-EPIC-001", points: 5, status: "ready-for-dev", backend_ref: "STORY-047, STORY-027, STORY-033", api: "admin-panel (BFF) → auth/kyc/catalog" }
 
   - sprint_number: 2
     capacity_points: 34
@@ -75,9 +75,9 @@ sprints:
     goal: "Revue KYC proxifiée (file, détail, documents présignés, approve/reject) + gestion du catalogue (modules/versions/référentiels) + octroi/révocation d'entitlements (le geste qui « allume » un module dans l'app cliente)."
     backend_dependency: "kyc STORY-013 + admin-panel STORY-048 (S10) ; platform-catalog STORY-032/033/034 (S7)"
     stories:
-      - { story_id: "AP-03", title: "Revue KYC (file par statut, détail + URLs présignées, approve/reject + motif, proxifié)", epic: "AP-EPIC-001", points: 5, status: "backlog", backend_ref: "STORY-013, STORY-048", api: "admin-panel (BFF) → kyc-service" }
-      - { story_id: "AP-04", title: "Catalogue : CRUD Module/ModuleVersion/ReferentielVersion + garde-fou N/N-1 + checksum", epic: "AP-EPIC-002", points: 5, status: "backlog", backend_ref: "STORY-032", api: "platform-catalog-service" }
-      - { story_id: "AP-05", title: "Entitlements : grant/update/revoke (module × org × référentiel) + réconciliation + validation catalogue", epic: "AP-EPIC-002", points: 5, status: "backlog", backend_ref: "STORY-033, STORY-034, STORY-048", api: "platform-catalog-service (via BFF)" }
+      - { story_id: "AP-03", title: "Revue KYC (file par statut, détail + URLs présignées, approve/reject + motif, proxifié)", epic: "AP-EPIC-001", points: 5, status: "ready-for-dev", backend_ref: "STORY-013, STORY-048", api: "admin-panel (BFF) → kyc-service" }
+      - { story_id: "AP-04", title: "Catalogue : CRUD Module/ModuleVersion/ReferentielVersion + garde-fou N/N-1 + checksum", epic: "AP-EPIC-002", points: 5, status: "ready-for-dev", backend_ref: "STORY-032", api: "platform-catalog-service" }
+      - { story_id: "AP-05", title: "Entitlements : grant/update/revoke (module × org × référentiel) + réconciliation + validation catalogue", epic: "AP-EPIC-002", points: 5, status: "ready-for-dev", backend_ref: "STORY-033, STORY-034, STORY-048", api: "platform-catalog-service (via BFF)" }
 
   - sprint_number: 3
     capacity_points: 34
@@ -87,8 +87,8 @@ sprints:
     goal: "Provisioning d'un vertical pour une org (type + modules + référentiel → entitlements) + dashboard plateforme + e2e chaîne KYC complète. 🏁 Module 0 côté admin."
     backend_dependency: "admin-panel STORY-049 (e2e chaîne KYC) — backend sprint 10 ; provisioning P8"
     stories:
-      - { story_id: "AP-06", title: "Provisioning d'un vertical pour une org (cabinet/imf/distributeur/assurance → séquence d'entitlements, pré-requis KYC)", epic: "AP-EPIC-003", points: 5, status: "backlog", backend_ref: "STORY-033, STORY-034", api: "platform-catalog-service (via BFF)" }
-      - { story_id: "AP-07", title: "Dashboard plateforme (orgs, KYC en attente, entitlements, santé chaîne) + e2e chaîne KYC bout-en-bout", epic: "AP-EPIC-003", points: 5, status: "backlog", backend_ref: "STORY-049", api: "admin-panel (BFF)" }
+      - { story_id: "AP-06", title: "Provisioning d'un vertical pour une org (cabinet/imf/distributeur/assurance → séquence d'entitlements, pré-requis KYC)", epic: "AP-EPIC-003", points: 5, status: "ready-for-dev", backend_ref: "STORY-033, STORY-034", api: "platform-catalog-service (via BFF)" }
+      - { story_id: "AP-07", title: "Dashboard plateforme (orgs, KYC en attente, entitlements, santé chaîne) + e2e chaîne KYC bout-en-bout", epic: "AP-EPIC-003", points: 5, status: "ready-for-dev", backend_ref: "STORY-049", api: "admin-panel (BFF)" }
 
 # Différé v1 (à ajouter avec le Module 2 paiement-service, ~déc. 2026) :
 deferred:

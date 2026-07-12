@@ -1,0 +1,104 @@
+# Story FE-B15 : e2e parcours Bilan complet + a11y + i18n + durcissement 🏁
+
+Status: ready-for-dev
+
+**Epic :** FE-EPIC-005 — Bilan & Prévisionnel
+**Points :** 5 · **Sprint :** 8 (programme) · **App :** `prospera-frontend-expert-comptable`
+**API :** bilan-service (parcours complet) via gateway · **Backend d'appui :** jalon Module 1 (EPIC-009→014)
+**Réf. plan :** `docs/frontend-program-sprint-status.yaml` · PRD `docs/prd-bilan-service-2026-07-10.md`
+**Backend prêt :** S14
+**Dépendances :** FE-B00→FE-B14 (tout le module Bilan)
+**Maître Scrum (frontend) :** MightyRaven
+
+---
+
+## Convention Git
+
+- **Une story = une branche.** Branche : `fe-b15`. Commits préfixés `FE-B15`.
+
+---
+
+## Convention Maquette (préalable UI)
+
+- Story de **durcissement** (pas de nouvel écran majeur) — revue d'ensemble de la cohérence visuelle du module vs Design System ; ajustements mineurs documentés.
+
+---
+
+## User Story
+
+En tant qu'**équipe Money Vibes**,
+je veux **un parcours Bilan éprouvé de bout en bout, accessible et traduit**,
+afin de **livrer le Module 1 côté UI avec confiance (dogfooding interne)**.
+
+---
+
+## Contexte
+
+Clôture du Module 1 côté frontend (🏁). Vérifie le parcours cœur du PRD de bout en bout : *import balance (+N-1) → contrôle → mapping/arbitrage → liasse (Bilan/CR/TFT) → validation figée → prévisionnel → export*, aligné sur le user flow du PRD et sur la métrique de succès (« liasse produite et validée avant fin oct. 2026 »). Ajoute l'accessibilité, l'i18n complète et le durcissement.
+
+---
+
+## Périmètre
+
+**Inclus :**
+- **e2e Playwright (docker)** du parcours Bilan complet : import → contrôle → mapping → liasse → validation → prévisionnel → export.
+- **Accessibilité (a11y)** : navigation clavier, focus, contrastes (rappel : orange #FF6633 échoue AA sur blanc → texte noir sur boutons ; cf. Design System) ; rôles ARIA sur tableaux financiers.
+- **i18n** : audit du namespace `bilan` (aucune chaîne en dur) ; formats XOF/dates cohérents.
+- **Durcissement** : états d'erreur/vides homogènes, gestion des cas limites (grande balance, N-1 absent, comptes non mappés), performance perçue (NFR-006).
+
+**Hors périmètre :**
+- Nouvelles fonctionnalités métier (tout est couvert par FE-B00→B14).
+
+---
+
+## Critères d'acceptation
+
+- [ ] e2e du parcours Bilan complet vert (docker) : import→contrôle→mapping→liasse→validation→prévisionnel→export.
+- [ ] a11y : parcours clavier complet, focus visibles, contrastes conformes (Design System), tableaux accessibles.
+- [ ] i18n : aucune chaîne en dur dans le module ; formats XOF/dates cohérents.
+- [ ] Cas limites gérés (grande balance, N-1 absent, comptes non mappés) sans casse ; états erreur/vides homogènes.
+- [ ] `lint` / `typecheck` / `test` / `build` verts (local + CI). 🏁 Module 1 UI complet.
+
+---
+
+## Notes techniques
+
+| Composant | Fichier (proposé) | Nature |
+|---|---|---|
+| e2e | `e2e/bilan-parcours.spec.ts` | Nouveau |
+| a11y | audit + corrections transverses `features/bilan/*` | Modif |
+
+**Décisions & vigilance :**
+- **Contraste orange** : re-vérifier tout composant réutilisé (piège `text-primary`/`bg-primary` comme texte sur fond clair — cf. mémoire Design System).
+- **e2e réaliste** : jeux de test comptables de référence (aligné NFR-003/008 backend) pour un parcours crédible.
+- **Perf perçue** : import + génération liasse en temps interactif (NFR-006) — mesurer, pas deviner.
+
+---
+
+## Tasks / Subtasks
+
+- [ ] e2e parcours Bilan complet (docker) (AC 1)
+- [ ] Audit + corrections a11y (AC 2)
+- [ ] Audit i18n + formats (AC 3)
+- [ ] Cas limites + homogénéisation erreurs/vides (AC 4)
+
+---
+
+## Definition of Done
+
+- [ ] Critères d'acceptation validés ; e2e vert ; a11y/i18n audités.
+- [ ] `lint` / `typecheck` / `test` / `build` verts (local + CI).
+- [ ] Statut mis à jour dans les trackers ; Module 1 UI marqué complet. 🏁
+- [ ] Commits sur `fe-b15`, préfixés `FE-B15`.
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+
+### Debug Log References
+
+### Completion Notes List
+
+### File List

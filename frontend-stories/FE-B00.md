@@ -1,0 +1,106 @@
+# Story FE-B00 : Module Bilan — shell, navigation, gate d'accès côté UI
+
+Status: ready-for-dev
+
+**Epic :** FE-EPIC-005 — Bilan & Prévisionnel
+**Points :** 3 · **Sprint :** 5 (programme) · **App :** `prospera-frontend-expert-comptable`
+**API :** bilan-service (`/bilan/*`) via gateway · **Backend d'appui :** STORY-035 (scaffold bilan-service), STORY-037 (gate `@RequiresBilanAccess`)
+**Réf. plan :** `docs/frontend-program-sprint-status.yaml` · PRD `docs/prd-bilan-service-2026-07-10.md`
+**Backend prêt :** S8
+**Dépendances :** FE-014 (accès modules/entitlements), FE-003 (shell)
+**Maître Scrum (frontend) :** MightyRaven
+
+---
+
+## Convention Git
+
+- **Une story = une branche.** Branche : `fe-b00`. Commits préfixés `FE-B00`.
+
+---
+
+## Convention Maquette (préalable UI)
+
+- **Maquette validée AVANT implémentation** (structure du module Bilan : nav interne, écran d'accueil du module, état « accès requis »), conforme au Design System Prospera, publiée en Artifact.
+
+---
+
+## User Story
+
+En tant qu'**utilisateur du cabinet ayant accès au module Bilan**,
+je veux **entrer dans un espace Bilan structuré et clairement gardé**,
+afin de **naviguer entre import, états et prévisionnel, et comprendre si l'accès m'est ouvert**.
+
+---
+
+## Contexte
+
+Pose l'**ossature** du module Bilan avant les fonctionnalités (import FE-B02+). Le module n'est accessible que si l'org satisfait `@RequiresBilanAccess` = `emailVerified` + KYC `APPROVED` + entitlement `bilan` `ACTIVE` (STORY-037). Le frontend **reflète** ce gate (masquage/message d'orientation) sans décider — les 403 backend restent la source de vérité.
+
+---
+
+## Périmètre
+
+**Inclus :**
+- **Route & shell du module** `(app)/bilan/*` : sous-navigation (Exercices, Import, États, Prévisionnel, Export — items déverrouillés au fil des stories).
+- **Gate d'accès UI** : lecture de l'entitlement `bilan` (via FE-014) ; si non ouvert, écran d'orientation (raison + CTA) au lieu du module.
+- **États réutilisables** (chargement/erreur/empty) propres au module.
+- **Client API `/bilan`** (wrapper typé, base gateway) prêt pour les stories suivantes.
+
+**Hors périmètre :**
+- Import et toute logique métier (FE-B01+).
+
+---
+
+## Critères d'acceptation
+
+- [ ] Route `(app)/bilan` + sous-navigation présente (items à venir désactivés/placeholder).
+- [ ] Accès conditionné à l'entitlement `bilan` (reflet UI) ; sans accès → écran d'orientation (raison + CTA), pas d'erreur brute ; un 403 `/bilan/*` est géré (réutilise FE-014/FE-010).
+- [ ] Client API `/bilan` typé opérationnel (base gateway, dev = port direct :3004).
+- [ ] États chargement/erreur/empty du module en place.
+- [ ] i18n FR (namespace `bilan`) ; tests : gate ouvert/fermé, rendu shell.
+
+---
+
+## Notes techniques
+
+| Composant | Fichier (proposé) | Nature |
+|---|---|---|
+| Shell module | `src/app/(app)/bilan/layout.tsx` + `nav` | Nouveau |
+| Gate UI | `src/features/bilan/components/BilanGate.tsx` | Nouveau |
+| Client API | `src/features/bilan/api/client.ts` | Nouveau |
+
+**Décisions & vigilance :**
+- **Affichage ≠ autorisation** : le gate UI est ergonomique ; l'autorité reste `@RequiresBilanAccess` backend.
+- **Cohérence éventuelle** : l'entitlement vient d'un read-model (octroi admin-panel asynchrone) → tolérer un délai après un grant.
+- **Extensibilité** : structurer `features/bilan/` pour accueillir import/états/prévisionnel/export sans refactor.
+
+---
+
+## Tasks / Subtasks
+
+- [ ] Route + shell + sous-nav du module (AC 1)
+- [ ] `BilanGate` (reflet entitlement + orientation) + gestion 403 (AC 2)
+- [ ] Client API `/bilan` typé (AC 3)
+- [ ] États réutilisables + i18n + tests (AC 4, 5)
+
+---
+
+## Definition of Done
+
+- [ ] Critères d'acceptation validés ; tests verts.
+- [ ] Aucune décision d'autorisation côté client.
+- [ ] `lint` / `typecheck` / `test` / `build` verts (local + CI).
+- [ ] Statut mis à jour dans les trackers.
+- [ ] Commits sur `fe-b00`, préfixés `FE-B00`.
+
+---
+
+## Dev Agent Record
+
+### Agent Model Used
+
+### Debug Log References
+
+### Completion Notes List
+
+### File List
