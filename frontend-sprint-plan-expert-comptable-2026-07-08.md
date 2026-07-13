@@ -194,7 +194,7 @@ PROSPERA/Money Vibes est un **écosystème multi-vertical**. Côté frontend, ce
 
 | Interface | Persona | Rôle | Hébergement | Artefacts de suivi |
 |---|---|---|---|---|
-| **admin-panel** (Money Vibes) | `PLATFORM_ADMIN` | **Tour de contrôle interne** : orgs, revue KYC, entitlements, catalogue, dashboard, **provisioning des verticaux** | Hébergé par MV | `frontend-sprint-plan-admin-panel-2026-07-12.md` + `frontend-admin-sprint-status.yaml` |
+| **admin-panel** (Money Vibes) | `PLATFORM_ADMIN` | **Tour de contrôle interne** : orgs, revue KYC, entitlements, catalogue, dashboard, **provisioning des verticaux** | Hébergé par MV | `frontend-sprint-plan-admin-panel-2026-07-12.md` + `frontend-sprint-status.yaml` |
 | **app cliente** (ce plan) | `TENANT_ADMIN` / `TENANT_USER` | App **config-driven** d'un vertical ; affiche ses modules selon le type de vertical + les **entitlements**. Vertical pilote = **cabinet**. | MV **ou** cloud du client | `frontend-sprint-plan-expert-comptable-*.md` + `frontend-sprint-status.yaml` |
 | **verticaux futurs** (IMF, distributeurs, assurances) | idem | **Mêmes** app cliente et code, déployés en instances isolées + config propre | cloud du client (souvent) | `vertical_backlog` du tracker (placeholder, JIT) |
 

@@ -155,7 +155,7 @@ Tableau de bord (orgs par statut, dossiers KYC en attente, entitlements actifs, 
 
 1. Valider ce plan (périmètre v1, découpage AP-1→AP-3).
 2. Arbitrer la capacité front (1 dev) entre **app cliente** (FE-1→) et **admin-panel** (AP-1→) — probablement en alternance selon la dispo backend.
-3. `create-story AP-01` puis enchaîner ; tracker : `docs/frontend-admin-sprint-status.yaml`.
+3. `create-story AP-01` puis enchaîner ; tracker : `docs/frontend-sprint-status.yaml`.
 
 ---
 

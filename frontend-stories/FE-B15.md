@@ -5,7 +5,7 @@ Status: ready-for-dev
 **Epic :** FE-EPIC-005 — Bilan & Prévisionnel
 **Points :** 5 · **Sprint :** 8 (programme) · **App :** `prospera-frontend-expert-comptable`
 **API :** bilan-service (parcours complet) via gateway · **Backend d'appui :** jalon Module 1 (EPIC-009→014)
-**Réf. plan :** `docs/frontend-program-sprint-status.yaml` · PRD `docs/prd-bilan-service-2026-07-10.md`
+**Réf. plan :** `docs/frontend-sprint-status.yaml` · PRD `docs/prd-bilan-service-2026-07-10.md`
 **Backend prêt :** S14
 **Dépendances :** FE-B00→FE-B14 (tout le module Bilan)
 **Maître Scrum (frontend) :** MightyRaven

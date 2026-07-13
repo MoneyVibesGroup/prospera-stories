@@ -5,7 +5,7 @@ Status: ready-for-dev
 **Epic :** FE-EPIC-005 — Bilan & Prévisionnel
 **Points :** 5 · **Sprint :** 6 (programme) · **App :** `prospera-frontend-expert-comptable`
 **API :** bilan-service (`/bilan/etats/tft`, `/bilan/etats/annexes`, `/bilan/etats/controls`) via gateway · **Backend d'appui :** STORY-061 (TFT/TAFIRE), STORY-062 (notes annexes), STORY-063 (contrôles de cohérence)
-**Réf. plan :** `docs/frontend-program-sprint-status.yaml` · PRD `docs/prd-bilan-service-2026-07-10.md` (FR-011/012/013)
+**Réf. plan :** `docs/frontend-sprint-status.yaml` · PRD `docs/prd-bilan-service-2026-07-10.md` (FR-011/012/013)
 **Backend prêt :** S12
 **Dépendances :** FE-B07 (Bilan), FE-B08 (CR)
 **Maître Scrum (frontend) :** MightyRaven
