@@ -40,7 +40,7 @@ services:
     port: 3003
     database: "catalog_service"
     role: "capacité plateforme : catalogue modules/versions/référentiels + entitlements (relying party)"
-    status: "in_progress"  # EPIC-007 (STORY-031→034) — architecture-catalog-service-2026-07-07.md. STORY-031 (scaffold : relying party RS256/JWKS + health + Kafka squelette + whoami) done & vérifié docker 2026-07-13. Reste STORY-032 (catalogue) / 033 (entitlements) / 034 (events entitlement.changed + M2M C8)
+    status: "in_progress"  # EPIC-007 (STORY-031→034) — architecture-catalog-service-2026-07-07.md. STORY-031 (scaffold relying party RS256/JWKS + health + Kafka squelette) + STORY-032 (catalogue Module/ModuleVersion/ReferentielVersion + admin CRUD PLATFORM_ADMIN + garde-fou N/N-1 + machine d'états ; whoami retiré) done & vérifiés docker 2026-07-13. Reste STORY-033 (entitlements (org×module) validés contre le catalogue) / 034 (events entitlement.changed + M2M C8)
   - name: "bilan-service"
     port: 3004
     database: "bilan_service"
@@ -465,8 +465,9 @@ sprints:
         epic: "EPIC-007"
         points: 5
         service: "platform-catalog-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-13. CatalogModule sur le scaffold STORY-031 : 3 schémas orthogonaux (Module code-unique / ModuleVersion axe code index (moduleCode,version)+(moduleCode,status) / ReferentielVersion axe données (code,version) SANS moduleCode, pointeur artifactUri+checksum C3). 3 services : ModulesService (CRUD + ACTIVE↔DEPRECATED), ModuleVersionsService (garde-fou N/N-1 par majeure semver + machine d'états), ReferentielVersionsService ; version-lifecycle.ts (transitions descendantes only, deprecationDate exigée). CatalogAdminController @Roles(PLATFORM_ADMIN) + CatalogReadController (PLATFORM_ADMIN+TENANT_ADMIN, publié hors RETIRED). DTO class-validator (semver/sha256/kebab/enum). whoami+DiagnosticsModule RETIRÉS (remplacés). lint 0, 137 unit + 24 e2e verts, cov 100/100/100/100 sur modules/catalog. VÉRIF DOCKER (auth:3001 + catalog:3003 + mongo rs0 + kafka) : /health 200 ; login PLATFORM_ADMIN → JWT RS256 aud=[expert-comptable,kyc-service,platform-catalog-service] ; sur service+mongo réels → create 201, 2 majeures 201, 3ᵉ 409 (N/N-1), dup 409, semver 400, module fantôme 404, dépréciation 200, 3.0 re-publiée 201, ACTIVE→RETIRED illégal 409, référentiel 201, GET publié 200 (1.2 DEPRECATED masquée en RETIRED-flow, tri version desc) ; sans token 401 ; HS256 forgé 401. RESTE : /code-review formel + push MNV-032/PR + STORY-033
+        story_path: "docs/stories/STORY-032.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-033"
         title: "Entitlements : schéma (org × module) + grant/update/revoke + GET réconciliation + validation catalogue"
         epic: "EPIC-007"
