@@ -236,7 +236,7 @@ export interface KycDocumentUploadedEventV1 {
 3. `kyc_service.outbox_events` (clé `orgId`) = **2× `kyc.document.uploaded`** (RCCM v1, CFE v1) + **1× `kyc.status.changed`** (PENDING_DOCUMENTS→UNDER_REVIEW), **tous `SENT` attempts=0**. Ordre `createdAt` : les 2 `document.uploaded` **précèdent** le `status.changed` ✅. Payloads **sans `declared` ni `originalName`**.
 4. Topic Kafka **`kyc.document.uploaded`** = 2 messages **key=`orgId`**, headers `eventId`/`schemaVersion:1`, payload v1 complet (`documentId`, `type`, `storageKey`, `mimeType`, `size`, `version`, `uploadedBy`, `occurredAt`) — **aucun `declared`, aucun `originalName`, aucun binaire**.
 
-**Reste :** merge de la PR — `MNV-040` (PR #2) est **stackée sur `fix/review-outbox-kyc-submitted`** (PR #1) : merger PR #1 → `dev`, re-cibler PR #2 sur `dev`, puis merger (« Rebase and merge »), comme MNV-034 sur MNV-033.
+**Intégration `dev` — FAITE (2026-07-13).** PR #1 (`fix/review-outbox-kyc-submitted` → `dev`) mergée en « Rebase and merge » (fix devenu `c08a948`), puis MNV-040 rebasée sur le nouveau `dev` (`git rebase --onto origin/dev 8a8cc7e`, retire le commit du fix devenu doublon), PR #2 re-ciblée sur `dev` (MERGEABLE/CLEAN, 3 commits) et mergée en « Rebase and merge ». `dev` linéaire : `c08a948` (fix) → `f0610ee` (feat STORY-040) → `11a6134` (revue #2-#6) → `5c04638` (revue #1). Aucune PR ouverte ; branches mergées supprimées en local. `dev` build OK. **Story livrée et intégrée.**
 
 ---
 
