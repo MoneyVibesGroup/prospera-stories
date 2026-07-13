@@ -218,7 +218,16 @@ export interface KycDocumentUploadedEventV1 {
 - `docs/architecture-kyc-service-2026-07-03.md` — §Contrat d'événements `kyc.document.uploaded` (v1) ajouté (source de vérité).
 - Tests : `kyc-events.service.spec.ts`, `kyc-documents.service.spec.ts`, `tenant-scoped.repository.spec.ts`, e2e `kyc-documents.e2e-spec.ts` (émission/atomicité/supersede) + `kyc-status.e2e-spec.ts` (mock `documentUploaded`).
 
-**Résultats :** `lint` 0 · **145 unit** (26 suites) · **38 e2e** (4 suites) · **couverture 100/100/100/100** sur `kyc-events.ts`, `kyc-events.service.ts`, `outbox.service.ts`, `tenant-scoped.repository.ts`, `kyc-documents.service.ts` · `nest build` OK.
+**Résultats :** `lint` 0 · **147 unit** (26 suites) · **38 e2e** (4 suites) · **couverture 100/100/100/100** sur `kyc-events.ts`, `kyc-events.service.ts`, `outbox.service.ts`, `tenant-scoped.repository.ts`, `kyc-documents.service.ts` · `nest build` OK.
+
+**`/code-review` (xhigh) — 6 constats, corrigés/vérifiés :**
+- **#2** (E11000→409 via `withTransaction`) — **vérifié docker** : 4 tours de double-clic concurrent réel → toujours 1×201 + 1×409 (~0,1 s), aucun 500 ni hang.
+- **#4** cast `created as` → **garde-fou explicite** (`throw` si document indéfini après commit).
+- **#3** `endSession()` en `finally` **absorbe son échec** (`.catch`) pour ne jamais masquer l'erreur/résultat primaire.
+- **#6** commentaires d'ordre corrigés (`kyc-documents.service` + `kyc-events`) : les 2 événements sont sur des **topics différents** → ordre inter-topics ni garanti ni requis (seul l'ordre PAR topic, clé `orgId`, compte).
+- **#5** `KycDocumentType` déplacé `modules/kyc/enums` → **`common/enums`** (aligné `KycStatus`/`Role`) : la couche kafka ne dépend plus du module kyc ; 16 imports mis à jour.
+- **#1** (fenêtre inter-transactions statut/pièce sur crash) — **laissé tel quel** (pré-existant ; correction = fusionner la transition dans la même tx ou job de réconciliation, hors périmètre).
+- 2 tests ajoutés (garde-fou #4, `endSession` qui rejette #3). Commit revue : `97e685a`.
 
 **Vérif docker bout-en-bout (2026-07-13)** — stack racine `auth-service:3001 + kyc-service:3002 + mongo(rs0) + kafka + minio + mailhog` :
 1. `register` IdP → e-mail Mailhog → `verify-email` → `login` → JWT **RS256** (`org`, `roles=[TENANT_ADMIN]`, `aud` incl. `kyc-service`, `emailVerified`).
@@ -226,7 +235,7 @@ export interface KycDocumentUploadedEventV1 {
 3. `kyc_service.outbox_events` (clé `orgId`) = **2× `kyc.document.uploaded`** (RCCM v1, CFE v1) + **1× `kyc.status.changed`** (PENDING_DOCUMENTS→UNDER_REVIEW), **tous `SENT` attempts=0**. Ordre `createdAt` : les 2 `document.uploaded` **précèdent** le `status.changed` ✅. Payloads **sans `declared` ni `originalName`**.
 4. Topic Kafka **`kyc.document.uploaded`** = 2 messages **key=`orgId`**, headers `eventId`/`schemaVersion:1`, payload v1 complet (`documentId`, `type`, `storageKey`, `mimeType`, `size`, `version`, `uploadedBy`, `occurredAt`) — **aucun `declared`, aucun `originalName`, aucun binaire**.
 
-**Reste :** `/code-review` formel ; push `MNV-040`/PR (**stackée sur `fix/review-outbox-kyc-submitted`** — à merger après ce fix de revue, comme MNV-034 sur MNV-033).
+**Reste :** merge de la PR — `MNV-040` (PR #2) est **stackée sur `fix/review-outbox-kyc-submitted`** (PR #1) : merger PR #1 → `dev`, re-cibler PR #2 sur `dev`, puis merger (« Rebase and merge »), comme MNV-034 sur MNV-033.
 
 ---
 
