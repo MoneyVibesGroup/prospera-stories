@@ -40,7 +40,7 @@ services:
     port: 3003
     database: "catalog_service"
     role: "capacité plateforme : catalogue modules/versions/référentiels + entitlements (relying party)"
-    status: "in_progress"  # EPIC-007 (STORY-031→034) — architecture-catalog-service-2026-07-07.md. STORY-031 (scaffold relying party RS256/JWKS + health + Kafka squelette) + STORY-032 (catalogue Module/ModuleVersion/ReferentielVersion + admin CRUD PLATFORM_ADMIN + garde-fou N/N-1 + machine d'états ; whoami retiré) done & vérifiés docker 2026-07-13. Reste STORY-033 (entitlements (org×module) validés contre le catalogue) / 034 (events entitlement.changed + M2M C8)
+    status: "in_progress"  # EPIC-007 (STORY-031→034) — architecture-catalog-service-2026-07-07.md. STORY-031 (scaffold relying party RS256/JWKS + health + Kafka squelette) + STORY-032 (catalogue Module/ModuleVersion/ReferentielVersion + admin CRUD PLATFORM_ADMIN + garde-fou N/N-1 + machine d'états ; whoami retiré) + STORY-033 (entitlements (org×module) : upsert idempotent + validation cohérence contre le catalogue + révocation soft + réconciliation + anti-énumération) done & vérifiés docker 2026-07-13 (MNV-032 mergée dans dev). Reste STORY-034 (events entitlement.changed + outbox + M2M C8)
   - name: "bilan-service"
     port: 3004
     database: "bilan_service"
@@ -473,8 +473,9 @@ sprints:
         epic: "EPIC-007"
         points: 5
         service: "platform-catalog-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-13 (21/21). EntitlementsModule sur le registre STORY-032 : schéma Entitlement (org×module, index unique (organizationId,moduleCode), status ACTIVE|SUSPENDED|REVOKED, grantedBy=sub, source=admin). EntitlementsService = validation de cohérence contre le catalogue via helpers AJOUTÉS à STORY-032 (ModulesService.exists + ModuleVersionsService.findExact + ReferentielVersionsService.findExact ; module/version/référentiel existants ET non RETIRED → 422 ; DEPRECATED accepté ; risque #6) + upsert idempotent findOneAndUpdate $set absolu (201 création/200 rejeu) + révocation soft (DELETE→REVOKED, pas de deleteOne) + GET réconciliation (?status=). Contrôleur PUT/DELETE @Roles(PLATFORM_ADMIN) + GET anti-énumération (TENANT_ADMIN=sa propre org, 403 sinon) ; 201/200 dynamique via @Res passthrough ; orgId non-ObjectId → 400 ; status=REVOKED corps refusé 400 (REVOKED réservé DELETE). PAS de Kafka (bus=STORY-034) ni C8 (service-à-service=STORY-034) : couture de publication laissée après persistance (service retourne l'entité). CatalogModule exportait déjà ses 3 services. lint 0, 169 unit (23 suites) + 43 e2e (3 suites) verts, cov 100/100/100/100 sur entitlements/**. PR MNV-032 mergée dans dev au préalable (prérequis code). VÉRIF DOCKER (auth:3001 + catalog:3003 + mongo rs0 + kafka) : login PLATFORM_ADMIN → JWT RS256 aud incl. platform-catalog-service ; sur Mongo réel (codes frais story033*) → octroi 201, rejeu 200, migration 200, 422 (version 9.9/RETIRED 1.0/référentiel inexistant/module ghost), 400 (REVOKED corps/semver/orgId), DELETE 200→REVOKED, ?status=ACTIVE masque révoqué, DELETE absent 404, sans jeton/bidon 401. RESTE : /code-review formel + push MNV-033/PR + STORY-034
+        story_path: "docs/stories/STORY-033.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-034"
         title: "Événements entitlement.changed (producteur Kafka + outbox) + auth service-à-service octroi (décision C8)"
         epic: "EPIC-007"
