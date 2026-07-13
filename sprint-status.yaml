@@ -402,8 +402,8 @@ sprints:
     end_date: "2026-09-24"
     capacity_points: 34
     committed_points: 17
-    completed_points: 15  # STORY-021 (5) + STORY-013 (5) + STORY-014 (5, TenantStateGuard + re-soumission — vérif docker 2026-07-10) done. Reste STORY-015 (plans, 2 pts)
-    status: "in_progress"
+    completed_points: 17  # STORY-021 (5) + STORY-013 (5) + STORY-014 (5) + STORY-015 (2, catalogue de plans — vérif docker 2026-07-13) done. Sprint 6 complet (17/17 engagés).
+    status: "completed"
     goal: "KYC extrait de bout en bout (topic Kafka kyc.status.changed, read-model + e-mails, revue admin, TenantStateGuard) ; catalogue de plans FedaPay."
     stories:
       - story_id: "STORY-021"
@@ -431,11 +431,12 @@ sprints:
         story_path: "docs/stories/STORY-014.md"
         assigned_to: null
       - story_id: "STORY-015"
-        title: "Catalogue de plans"
+        title: "Catalogue de plans d'abonnement"
         epic: "EPIC-004"
         points: 2
         service: "expert-comptable"  # reste côté vertical (PA-1 : plans/abonnement ≠ paiement-service)
-        status: "not_started"
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-13 (FR-008). Nouveau module `billing` (EC) : collection possédée `Plan` (code unique, amount XOF ENTIER, currency=XOF, interval MONTHLY/ANNUAL, limits, active) + enum `BillingInterval`. GET /billing/plans (relying party @AllowUnverified, pas de gate KYC, actifs triés par montant) ; CRUD admin @Roles(PLATFORM_ADMIN) sur /admin/billing/plans (GET tous, POST 201/409 via index unique E11000, PATCH :code 200/404, PATCH :code/deactivate soft 200/404) ; JAMAIS de hard-delete. Seed idempotent au bootstrap (PlansSeeder OnApplicationBootstrap → PlansService.seedDefaults upsert $setOnInsert par code) : 3 plans amorce (starter/pro-mensuel/pro-annuel, valeurs de travail — tarif définitif = question ouverte PRD #1). lint 0, build OK, 158 unit (billing 100% b/f/l/s) + 38 e2e (dont billing-plans.e2e : 401/200 actifs/@AllowUnverified/403 RBAC/201/409/400 validation+forbidNonWhitelisted/404/désactivation retire de la liste). VÉRIF DOCKER (stack racine auth-service+EC+mongo rs0+kafka+redis+mailhog) : bootstrap EC → « Catalogue de plans amorcé (3 plan(s)) » ; login PLATFORM_ADMIN (auth-service, RS256 aud=[expert-comptable,kyc-service]) → GET /billing/plans = 3 plans seedés (montants XOF entiers) ; 401 sans token ; POST enterprise-annuel→201, doublon→409, montant<0→400, champ inconnu→400 ; PATCH deactivate pro-annuel→200 puis absent de /billing/plans ; PATCH amount 15000→20000→200 ; PATCH inconnu→404 ; RESTART EC → re-seed sans doublon (4 plans, 0 doublon) ET valeurs admin préservées (starter=20000 non réécrit, enterprise conservé, pro-annuel resté inactif) = idempotence $setOnInsert prouvée. Catalogue de dev restauré aux 3 plans canoniques. HORS PÉRIMÈTRE (paiement-service Module 2, PA-1) : checkout/webhooks/souscription (FR-009→011) + enforcement palier abonnement (SUBSCRIPTION_REQUIRED). RESTE : /code-review formel + commit/push branche MNV-015 sur demande
+        story_path: "docs/stories/STORY-015.md"
         assigned_to: null
 
   # ── Phase 1 re-séquencée 2026-07-10 (sprint-planning) : catalog → bilan squelette → Module 0 ──
