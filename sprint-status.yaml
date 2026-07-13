@@ -850,9 +850,22 @@ sprints:
 
   # ── Module 1-bis (Atelier Balance) : balance-service, AMONT du Bilan. Inséré 2026-07-12 ────────────
   # PRD docs/prd-atelier-balance-2026-07-12.md + plan docs/sprint-plan-atelier-balance-2026-07-12.md.
-  # Séquencé APRÈS le cœur Bilan (sprint 14) : le dogfooding MV passe par import Sage→bilan-service ;
-  # l'Atelier sert le marché PME externe + apporte moteur fiscal & conseil. Stories = entrées backlog
-  # (docs .md créés JIT au sprint-planning de chaque sprint, comme les stories 031+). Coordinations : voir §4 du plan.
+  #
+  # ⚠️ ORDRE balance/bilan — POURQUOI CE N'EST PAS "À L'ENVERS" (clarification 2026-07-13) :
+  #   La dépendance de données va TOUJOURS balance → bilan (amont → aval), jamais l'inverse. Le split D14
+  #   coupe balance-service en deux pour la respecter SANS retarder le Bilan de Money Vibes (client zéro) :
+  #     • CORE (sprint 10, AVANT le Bilan) = ce dont le Bilan a besoin pour exister : contrat de balance
+  #       canonique + stockage + import Sage + handoff (STORY-076,077,101,086,099). La balance est donc
+  #       PRODUITE ET STOCKÉE D'ABORD ; bilan-service (S11-14) la CONSOMME ensuite. ✅ amont avant aval.
+  #     • EXTENDED (sprints 15-19, APRÈS le Bilan) = ce dont le Bilan n'a PAS besoin pour son MVP : profil/OCR,
+  #       cahiers PME, rapprochement, moteur fiscal, conseil. Ces briques ENRICHISSENT (elles ne bloquent pas)
+  #       et servent surtout le marché PME externe. MV, lui, fait "import Sage → bilan" avec le seul CORE.
+  #   Donc le seul "retour-arrière" APPARENT (moteur fiscal S18 vs rendu DSF bilan EPIC-011 S12) n'en est pas un :
+  #   voir la note de STORY-091. Réordonnancement complet possible (aucune dép. dure), mais NON retenu (2026-07-13)
+  #   car il retarderait le Bilan MV de ~5 sprints — précisément ce que D14 évite.
+  #
+  # Stories = entrées backlog (docs .md créés JIT au sprint-planning de chaque sprint, comme les stories 031+).
+  # Coordinations balance/bilan : voir §4 du plan.
   - sprint_number: 15
     start_date: "2027-01-14"
     end_date: "2027-01-28"
@@ -988,7 +1001,7 @@ sprints:
         epic: "EPIC-023"
         points: 5
         service: "balance-service"
-        status: "not_started"  # consomme paquet fiscal (STORY-078) ; alimente rendu DSF fiscal bilan-service EPIC-011
+        status: "not_started"  # consomme paquet fiscal (STORY-078). ENRICHIT (ne bloque pas) la section DSF fiscale du bilan-service : EPIC-011 (S12) rend la liasse à partir du mapping de balance et fonctionne SANS ce moteur ; le calcul fiscal détaillé est un apport EXTENDED (marché PME), branché quand il est prêt → pas de dépendance arrière S18→S12
         assigned_to: null
       - story_id: "STORY-092"
         title: "Liquidation IS = max(MFP, IS) + 4 acomptes + crédits d'impôt (paquet Togo) — FR-A19"
