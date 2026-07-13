@@ -226,6 +226,43 @@ Un topic Kafka est lu par autant de **consumer groups** que de services intéres
 
 ---
 
+## Contrat d'événements `kyc.document.uploaded` (v1) — source de vérité
+
+> Ajouté en **STORY-040** (prérequis Module 0 / document-service, décision DO-1). Transport aligné sur `architecture-prospera-ecosystem-2026-07-04.md` § Contrats d'événements : **Apache Kafka**.
+
+**Transport :** **topic Kafka `kyc.document.uploaded`**, partitionné par **clé = `orgId`** (ordre garanti par organisation).
+**Producteur :** kyc-service (unique). **Consommateur (phase 1) :** `document-service` (STORY-041/042) — OCR RCCM/CFE au service de la revue KYC.
+Publié **à chaque dépôt de pièce réussi** (`POST /kyc/documents`), **après** persistance de la pièce (fiabilité : transactional outbox — **même transaction** que la création du `KycDocument`, invariant « pas de pièce sans événement, pas d'événement sans pièce »).
+
+```typescript
+/** Émis à CHAQUE dépôt de pièce KYC réussi. Fait ponctuel (pas un état absolu). */
+export interface KycDocumentUploadedEventV1 {
+  schemaVersion: 1;
+  eventId: string;        // UUID v4 — clé de déduplication côté consommateur
+  orgId: string;          // ObjectId hex de l'organisation (= clé de partition Kafka)
+  documentId: string;     // ObjectId hex du KycDocument créé
+  type: KycDocumentType;  // RCCM | CFE
+  storageKey: string;     // clé objet MinIO (bucket privé) — le consommateur LIT la pièce
+  mimeType: string;       // MIME réel (magic bytes), jamais celui déclaré par le client
+  size: number;           // octets
+  version: number;        // n° de version de la pièce (ré-upload ⇒ +1)
+  uploadedBy: string;     // userId opaque de l'uploadeur
+  occurredAt: string;     // ISO-8601 UTC
+}
+```
+
+**Sémantique Kafka :** clé de message = `orgId` ; livraison **at-least-once** → le consommateur **doit** être idempotent (marqueur `ProcessedEvent { eventId }`). L'`eventId` est la clé de déduplication.
+
+**Découplage de `kyc.status.changed` :** un dépôt de pièce n'implique pas un changement de statut (la bascule `UNDER_REVIEW` n'a lieu qu'une fois **RCCM et CFE** présents). Quand les deux surviennent au même appel, `kyc.document.uploaded` est enfilé **avant** le `kyc.status.changed` correspondant (`createdAt` antérieur) ⇒ publié en premier pour un même `orgId`.
+
+**Exception assumée au patron `kyc.status.changed` (qui ne transporte aucun `storageKey`) :** ce payload porte le `storageKey` car le consommateur **doit** accéder à la pièce (MinIO, **lecture seule**). Il ne transporte **aucun binaire**, aucun nom de fichier client (`originalName`), et **aucune donnée déclarée** (raison sociale, n° RCCM déclaré…).
+
+**Point de coordination — `declared` (comparaison OCR).** L'esquisse consommateur de `tech-spec-document-service-2026-07-10.md` (l.73) prévoyait un champ `declared:{…}`. Il est **écarté du contrat producteur** : depuis le cutover *relying party* (STORY-030), `kyc-service` **ne possède plus l'identité** (propriété de `auth-service`) et le `TenantKycProfile` ne stocke que le statut. La résolution « déclaré ↔ lu » est donc **en aval** : `document-service` la câble via son **propre read-model d'identité** (événements `identity.*`) ou une lecture dédiée (tranché à STORY-042/043). `kyc-service` reste **producteur pur** — invariant DO-1 : l'OCR assiste, il n'approuve jamais (le statut KYC reste piloté par l'humain via `kyc-service`).
+
+**Invariant transactional outbox (implémentation STORY-040) :** `KycDocumentsService.upload()` effectue le `putObject` (MinIO) **avant** la transaction ; puis, **dans une même transaction Mongo**, supersède le `SUBMITTED` précédent + crée le `KycDocument` + enfile `kyc.document.uploaded` (`OutboxService.enqueue` sous session). Un rollback (ex. E11000 double-clic → 409) ⇒ **ni pièce ni événement** ; un commit ⇒ **les deux**. Le relais outbox (topic-agnostique) publie ensuite sur Kafka, clé `orgId`, header `eventId`/`schemaVersion`.
+
+---
+
 ## Authentification inter-services
 
 > Aligné sur `architecture-prospera-ecosystem-2026-07-04.md` § Modèle de jetons. `auth-service` (IdP) est l'émetteur ; kyc-service est *relying party*.
