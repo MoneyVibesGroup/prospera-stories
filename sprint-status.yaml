@@ -40,7 +40,7 @@ services:
     port: 3003
     database: "catalog_service"
     role: "capacité plateforme : catalogue modules/versions/référentiels + entitlements (relying party)"
-    status: "in_progress"  # EPIC-007 (STORY-031→034) — architecture-catalog-service-2026-07-07.md. STORY-031 (scaffold relying party RS256/JWKS + health + Kafka squelette) + STORY-032 (catalogue Module/ModuleVersion/ReferentielVersion + admin CRUD PLATFORM_ADMIN + garde-fou N/N-1 + machine d'états ; whoami retiré) + STORY-033 (entitlements (org×module) : upsert idempotent + validation cohérence contre le catalogue + révocation soft + réconciliation + anti-énumération) done & vérifiés docker 2026-07-13 (MNV-032 mergée dans dev). Reste STORY-034 (events entitlement.changed + outbox + M2M C8)
+    status: "in_progress"  # EPIC-007 (STORY-031→034) TERMINÉ & vérifié docker 2026-07-13 — architecture-catalog-service-2026-07-07.md. STORY-031 (scaffold relying party RS256/JWKS + health + Kafka squelette) + STORY-032 (catalogue Module/ModuleVersion/ReferentielVersion + admin CRUD PLATFORM_ADMIN + garde-fou N/N-1 + machine d'états ; whoami retiré) + STORY-033 (entitlements (org×module) : upsert idempotent + validation cohérence + révocation soft + réconciliation + anti-énumération) + STORY-034 (events entitlement.changed via transactional outbox : upsert/revoke sous withTransaction, état absolu clé orgId, C8 M2M différé STORY-039) done. EPIC-007 CLOS ; le catalog est source de vérité DIFFUSÉE des entitlements (prêt pour bilan-service STORY-036 + admin-panel). Branches poussées : dev + MNV-031 (mergée) + MNV-032 (mergée) + MNV-033 (PR ouverte) + MNV-034 (stackée sur MNV-033). Statut service → passera "done" quand MNV-033+MNV-034 seront mergées dans dev.
   - name: "bilan-service"
     port: 3004
     database: "bilan_service"
@@ -477,12 +477,12 @@ sprints:
         story_path: "docs/stories/STORY-033.md"
         assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-034"
-        title: "Événements entitlement.changed (producteur Kafka + outbox) + auth service-à-service octroi (décision C8)"
+        title: "Événements entitlement.changed (producteur Kafka + transactional outbox) — clôture EPIC-007 ; C8 (octroi service-à-service) différé STORY-039"
         epic: "EPIC-007"
         points: 5
         service: "platform-catalog-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-13. Transactional outbox (src/kafka/outbox/ : OutboxEvent + OutboxService.enqueue(session) + OutboxRelayService PENDING→SENT clé orgId + EntitlementEventsService état absolu, referentiel omis si absent) calqué sur kyc-service STORY-021/auth STORY-027. EntitlementsService.upsert/revoke mis sous connection.startSession()+session.withTransaction : mutation Entitlement ET enqueue outbox dans la MÊME session (rollback⇒0 événement, commit⇒les deux) ; validation cohérence 422 laissée HORS transaction (refus⇒0 événement). Logique STORY-033 (422/201/200/404/400/RBAC/anti-énum) inchangée. Config outbox (relayIntervalMs 2000/batchSize 100, optionnels). C8 (M2M client_credentials) DIFFÉRÉ STORY-039/Module 2 (IdP sans grant client_credentials + seul appelant=billing vertical déc.2026) ; écriture reste PLATFORM_ADMIN ; C9 hors périmètre. lint 0, 184 unit (26 suites) + 46 e2e (3 suites) verts, cov 100/100/100/100 sur kafka/** + entitlements/**. VÉRIF DOCKER (auth:3001 + catalog:3003 + mongo rs0 + kafka) : login PLATFORM_ADMIN → JWT RS256 aud incl. platform-catalog-service ; octroi 2.0 201, rejeu 200, migration 3.0 200, cohérence 9.9 422, révocation 200, sans jeton 401 ; catalog_service.outbox_events = 4 lignes entitlement.changed (clé orgId) toutes SENT attempts:0 (2.0 ACTIVE/2.0 ACTIVE rejeu/3.0 ACTIVE/3.0 REVOKED), le 422 n'a produit AUCUNE ligne (4 pas 5) ; topic Kafka entitlement.changed = 4 messages key=orgId état absolu schemaVersion:1 referentiel inclus (ERROR kafkajs topic-partition transitoire = course auto-création topic, non bloquant, 4 send OK). RESTE : /code-review formel + push MNV-034/PR (stackée sur MNV-033, à merger après STORY-033). CLÔT EPIC-007 (STORY-031→034 done).
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-040"
         title: "kyc-service : émettre kyc.document.uploaded (outbox) au dépôt de pièce"
         epic: "EPIC-015"
