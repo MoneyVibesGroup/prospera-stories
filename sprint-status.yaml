@@ -625,36 +625,40 @@ sprints:
         epic: "EPIC-017"
         points: 3
         service: "balance-service"
-        status: "not_started"
+        status: "ready-for-dev"  # story rédigée 2026-07-12 (relying party PUR : JwtStrategy RS256/JWKS validate-only, PAS de PasswordService)
+        story_path: "stories/STORY-076.md"
         assigned_to: null
       - story_id: "STORY-077"
         title: "Read-models (entitlement.changed + kyc.status.changed) + gate @RequiresBalanceAccess + idempotence"
         epic: "EPIC-017"
         points: 5
         service: "balance-service"
-        status: "not_started"
+        status: "ready-for-dev"  # story rédigée 2026-07-12 (BalanceAccessGuard : palier KYC APPLIQUÉ deny-by-default ; palier abonnement PRÉPARÉ mais NON appliqué avant le paiement/S20 — patron STORY-014)
+        story_path: "stories/STORY-077.md"
         assigned_to: null
       - story_id: "STORY-101"
         title: "Contrat de balance CANONIQUE (multi-source, tagué référentiel SN/SMT/SFD-BCEAO) + stockage keyé orgId+exercice + saisie manuelle — pièce maîtresse D13"
         epic: "EPIC-017"
         points: 5
         service: "balance-service"
-        status: "ready-for-dev"  # ✅ CRÉÉE 2026-07-12 : schéma TypeScript, validation, idempotence, immutabilité, tests, exemples adaptateurs. Voir docs/stories/STORY-101.md
-        story_path: "docs/stories/STORY-101.md"
+        status: "ready-for-dev"  # ⚡ KEYSTONE — story rédigée 2026-07-12 : schéma BalanceCanonique, idempotence (orgId+exercice+source+version), immutabilité post-validation, BalanceRepository, validations FR-A25/A27
+        story_path: "stories/STORY-101.md"
         assigned_to: null
       - story_id: "STORY-086"
-        title: "Adaptateur import fichier — balance Sage 100 (Excel/CSV prioritaire, PDF secours ; comptes 8 car. alphanum ; blocs N-1/mvts/soldes) → contrat canonique — FR-A12"
+        title: "Adaptateur import fichier — balance Sage 100 (Excel/CSV prioritaire, PDF secours ; comptes alphanum ; soldes cumulés) → contrat canonique — FR-A12"
         epic: "EPIC-021"
         points: 5
         service: "balance-service"
-        status: "not_started"  # 1er des 3 adaptateurs du hub (import fichier) ; remplace ex-STORY-050
+        status: "ready-for-dev"  # adaptateur #2 du hub (import fichier) ; remplace ex-STORY-050. Story rédigée 2026-07-12 : dry-run=200 (aucune persistance) / dryRun=false=201 (persiste). ⚠️ fixture Excel/CSV Sage à obtenir (seul un PDF en main)
+        story_path: "stories/STORY-086.md"
         assigned_to: null
       - story_id: "STORY-099"
         title: "Contrat de sortie & handoff balance normalisée → bilan-service (consommée par EPIC-010/011) — FR-A28"
         epic: "EPIC-024"
         points: 3
         service: "balance-service"
-        status: "not_started"  # la balance stockée est lue par le bilan-service ; ferme la boucle CORE
+        status: "ready-for-dev"  # story rédigée 2026-07-12 : SPRINT 10 = côté PRODUCTEUR uniquement (API GET + émission balance.created + doc contrat) ; l'e2e interop réel balance→bilan est DIFFÉRÉ à EPIC-009 (S11-14, quand le consumer bilan-service existe)
+        story_path: "stories/STORY-099.md"
         assigned_to: null
 
   - sprint_number: 11
