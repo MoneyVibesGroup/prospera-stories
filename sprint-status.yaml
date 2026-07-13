@@ -40,7 +40,7 @@ services:
     port: 3003
     database: "catalog_service"
     role: "capacité plateforme : catalogue modules/versions/référentiels + entitlements (relying party)"
-    status: "not_started"  # EPIC-007 (STORY-031→034) — architecture-catalog-service-2026-07-07.md
+    status: "in_progress"  # EPIC-007 (STORY-031→034) — architecture-catalog-service-2026-07-07.md. STORY-031 (scaffold : relying party RS256/JWKS + health + Kafka squelette + whoami) done & vérifié docker 2026-07-13. Reste STORY-032 (catalogue) / 033 (entitlements) / 034 (events entitlement.changed + M2M C8)
   - name: "bilan-service"
     port: 3004
     database: "bilan_service"
@@ -457,8 +457,9 @@ sprints:
         epic: "EPIC-007"
         points: 3
         service: "platform-catalog-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-13. Nouveau service platform-catalog-service (:3003, base catalog_service) calqué sur kyc-service : relying party RS256/JWKS pur (socle common/ dupliqué + JwtStrategy JWKS-only, AUTH_AUDIENCE=platform-catalog-service), /health (mongo+kafka, ni redis ni minio), KafkaModule squelette (aucune publication → entitlement.changed = STORY-034), endpoint diagnostic gardé GET /whoami (@AllowUnverified). Compose racine : bloc catalog ajouté + override hot-reload + .env ; bloc auth-service AUTH_AUDIENCE piloté par env pour stamper platform-catalog-service dans l'aud émis (aucun code auth-service). CI matrice 4 services (+ catalog_service_test). lint 0, 74 unit (15 suites) + 8 e2e (2 suites) verts, cov 99.65/83.11/100/99.61. VÉRIF DOCKER (auth:3001 + catalog:3003 + mongo rs0 + kafka) : /health 200 ; login PLATFORM_ADMIN IdP → JWT RS256 aud=[expert-comptable,kyc-service,platform-catalog-service] → GET :3003/whoami 200 {org:null, role:PLATFORM_ADMIN} ; sans token 401 ; HS256 forgé 401 (algorithm-confusion écartée). Quirk Docker Desktop (image runtime sans dist si attestations) non bloquant : stack tourne via override target base ; CI build runtime sur Linux. POUSSÉ 2026-07-13 sur prospera-platform-catalog-service (Write accordé) : branches dev + MNV-031 (auteurs = vivianMoneyVibesGroupes), .env → 404 distant. RESTE : /code-review formel + STORY-032
+        story_path: "docs/stories/STORY-031.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-032"
         title: "Catalogue : Module/ModuleVersion/ReferentielVersion + admin CRUD (PLATFORM_ADMIN) + garde-fou N/N-1"
         epic: "EPIC-007"
