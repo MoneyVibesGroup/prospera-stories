@@ -226,8 +226,9 @@ export interface KycDocumentUploadedEventV1 {
 - **#3** `endSession()` en `finally` **absorbe son échec** (`.catch`) pour ne jamais masquer l'erreur/résultat primaire.
 - **#6** commentaires d'ordre corrigés (`kyc-documents.service` + `kyc-events`) : les 2 événements sont sur des **topics différents** → ordre inter-topics ni garanti ni requis (seul l'ordre PAR topic, clé `orgId`, compte).
 - **#5** `KycDocumentType` déplacé `modules/kyc/enums` → **`common/enums`** (aligné `KycStatus`/`Role`) : la couche kafka ne dépend plus du module kyc ; 16 imports mis à jour.
-- **#1** (fenêtre inter-transactions statut/pièce sur crash) — **laissé tel quel** (pré-existant ; correction = fusionner la transition dans la même tx ou job de réconciliation, hors périmètre).
-- 2 tests ajoutés (garde-fou #4, `endSession` qui rejette #3). Commit revue : `97e685a`.
+- **#1** (fenêtre inter-transactions statut/pièce sur crash) — **corrigé (fusion transactionnelle)** : la bascule `PENDING/REJECTED → UNDER_REVIEW` (+ `kyc.status.changed`) rejoint la **même transaction** que la persistance de la pièce (+ `kyc.document.uploaded`). `onDocumentSubmitted(session)` s'exécute dans la tx du dépôt (`exists`/`getOrCreate` sous session, read-your-writes ; `runTransition` réutilise la session au lieu d'en ouvrir une). Un crash ne peut plus laisser une pièce sans bascule. Reliquat documenté : deux dépôts **strictement simultanés** des 2 types requis peuvent différer la bascule (isolation snapshot) — rare, même symptôme récupérable, upload séquentiel non concerné. **Vérifié docker** : RCCM → PENDING ; +CFE → une seule tx émet `document.uploaded(CFE)` + `status.changed(UNDER_REVIEW)`, profil `UNDER_REVIEW`.
+
+**Commits revue MNV-040 :** `97e685a` (#2/#3/#4/#5/#6) + `6ffc5fd` (#1 fusion transactionnelle). Couverture **100 %** maintenue (149 unit + 38 e2e).
 
 **Vérif docker bout-en-bout (2026-07-13)** — stack racine `auth-service:3001 + kyc-service:3002 + mongo(rs0) + kafka + minio + mailhog` :
 1. `register` IdP → e-mail Mailhog → `verify-email` → `login` → JWT **RS256** (`org`, `roles=[TENANT_ADMIN]`, `aud` incl. `kyc-service`, `emailVerified`).
