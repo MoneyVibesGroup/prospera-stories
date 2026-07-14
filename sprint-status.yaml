@@ -492,11 +492,12 @@ sprints:
         story_path: "docs/stories/STORY-040.md"
         assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-075"
-        title: "Assemblage stack d'intégration dev (auth+EC-rs256+kyc) + merge branches livrées vers dev"
+        title: "Assemblage + preuve e2e du stack d'intégration dev (rs256, 4 services) + figeage contrat /api/v1"
         epic: "EPIC-006"
-        points: 5
+        points: 3  # révisé 5→3 lors du recadrage 2026-07-14 (la réconciliation de branches, l'essentiel, est déjà faite)
         service: "transverse (auth-service, expert-comptable, kyc-service, compose)"
-        status: "not_started"  # clôture opérationnelle du cutover : les branches STORY-014/020/021/029/030 sont "done" mais NON mergées dans dev ; assemble le stack 3 services rs256 contre lequel le frontend s'intègre (retrofit FE-EPIC-002, FE-INT-0..3). ⚠️ PRÉREQUIS du retrofit front → à tirer EN TÊTE de sprint (avant le catalog EPIC-007). Doc: stories/STORY-075.md
+        status: "done"  # RECADRÉE puis IMPLÉMENTÉE + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-14. Prémisse initiale ("branches 014/020/021/029/030 done mais NON mergées dans dev") OBSOLÈTE : assemblage déjà sur dev (EC via merge MNV-015=4e534c7 ; kyc via MNV-014+MNV-040) + docker-compose.yml racine lance 4 services (EC/auth/kyc/catalog) en rs256/JWKS. Préfixe réel = /api/v1 (setGlobalPrefix('api')+URI versioning v1), PAS /api. AC#1 ✅ PR auth fix/review-outbox-signing-key (#1) mergée « Rebase and merge » → auth dev HEAD 106b977, branche supprimée (les 3 dev propres). AC#2 ✅ /api/v1/health 200 sur :3000/:3001/:3002/:3003 (EC rebâti depuis dev). AC#3 ✅ round-trip RS256 : register→verify(Mailhog)→login → JWT alg=RS256 aud=[expert-comptable,kyc-service,platform-catalog-service] ; MÊME token → EC /tenant/state 200 + kyc /kyc/status 200 ; HS256 forgé ET signature altérée → 401 sur les 2 (JWKS enforced ; sans emailVerified kyc=403 = garde, pas défaut de validation). AC#4 ✅ POST /kyc/documents RCCM+CFE (201/201) → kyc UNDER_REVIEW immédiat → ~1s → EC /tenant/state.kycStatus=UNDER_REVIEW (kyc.status.changed→outbox→Kafka→consumer kyc-events EC). AC#5 ✅ admin suspend org (PLATFORM_ADMIN seed admin@prospera.local) → ~2s → user /tenant/state 200→403 (identity.org.updated→read-model→TenantStateGuard). AC#6 ✅ contrat /api/v1 + JWKS non préfixé /.well-known/jwks.json + Swagger /api/docs figés dans STORY-075.md. AC#7 ✅ /api/docs-json récupéré ×4. AC#8 ~ prémisse+note corrigées, .env.example EC/kyc cohérents ; RELIQUAT 1 ligne auth-service/.env.example (AUTH_AUDIENCE +platform-catalog-service) NON appliqué (sandbox bloque édition .env*, impact nul en dev car compose fournit la valeur) → suivi. Pas de /code-review formel (aucun code applicatif produit). Doc: stories/STORY-075.md
+        story_path: "docs/stories/STORY-075.md"
         assigned_to: null
 
   - sprint_number: 8
