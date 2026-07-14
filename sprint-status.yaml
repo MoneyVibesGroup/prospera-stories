@@ -45,7 +45,7 @@ services:
     port: 3004
     database: "bilan_service"
     role: "capacité partagée : états financiers, moteur pluggable par référentiel (relying party)"
-    status: "not_started"  # EPIC-008 (STORY-035→038, squelette) + EPIC-009 (moteur v1 = import balance + table SYSCOHADA/SFD + états + prévisionnel, NB-1) → PRD Bilan (docs/prd-bilan-service-*.md)
+    status: "in_progress"  # EPIC-008 (STORY-035→038, squelette) TERMINÉ & vérifié docker 2026-07-14 : scaffold 035 + read-models 036 + gate @RequiresBilanAccess 037 + ReferentielLoader/moteur squelette 038 (interface ReferentielPackage P7, artefact embarqué + sha256 + cache, moteur SANS calcul comptable). EPIC-008 CLOS — prêt pour EPIC-009 (moteur v1 = import balance + table SYSCOHADA/SFD + états + prévisionnel, NB-1) → PRD Bilan (docs/prd-bilan-service-*.md). Reste : merge MNV-038 dans dev.
   - name: "paiement-service"
     port: 3005
     database: "paiement_service"
@@ -538,8 +538,9 @@ sprints:
         epic: "EPIC-008"
         points: 5
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-14. CLÔT EPIC-008 (squelette bilan-service complet : scaffold 035 + read-models 036 + gate 037 + loader/moteur 038). BilanModule : ReferentielLoader (résout (code,version) depuis OrgBilanEntitlement → artefact embarqué → sha256 comparé au manifeste → cache keyé code@version + single-flight → REFUS ReferentielIntegrityError si hash≠, B5/NFR-009 ; meta.checksum=hash vérifié injecté) + interface ReferentielPackage (data-only, découplage P7, extensible B8) + port ArtifactSource (BundledArtifactSource ; MinIO différé = seam) + ReferentielRegistry (manifeste, syscohada-revise@2.1 packagé checksum réel 4ced8658…3ef042, sfd-bceao=STORY-057) + BilanEngineService SQUELETTE (resolveReferentielForOrg lit read-model → load ; sans référentiel → ReferentielUnresolvedError ; AUCUN calcul comptable = EPIC-011/B8) + endpoint diag gardé provisoire GET /bilan/referentiel (@RequiresBilanAccess). Erreurs mappées : unresolved→409, integrity→502, notfound/parse→500. Générateur reproductible scripts/referentiels/build.mjs (163 postes/99 mappings) + assets bundelisés nest-cli (présents dans dist). Config REFERENTIEL_SOURCE (défaut bundled). AUCUNE écriture Mongo ni event Kafka ni infra nouvelle ; /health inchangé. lint 0, 128 unit (22 suites, cov GLOBALE 98.6/85.4/97.9/98.4 seuils 90/65/90/90 tenus) + 23 e2e (4 suites) verts. VÉRIF DOCKER (auth:3001+catalog:3003+kyc:3002+bilan:3004+mongo rs0+kafka, bilan redémarré sur MNV-038) : org tenant fraîche register→verify Mailhog→login RS256 + PLATFORM_ADMIN réel (platformRole+membership retirée). (E) KYC APPROVED semé + PUT catalog entitlement bilan 2.0/syscohada-revise@2.1 201 → entitlement.changed(outbox)→projection ACTIVE|syscohada-revise@2.1 ~1s → GET /bilan/referentiel 200 {checksum 4ced8658…,postesCount 163,mappingCount 99,integrity verified,cache miss} ; (F) 2e appel cache hit ; (I) PUT entitlement SANS référentiel (pipeline réel)→projection ACTIVE|NO-REF→GET 409 REFERENTIEL_UNRESOLVED (pas 500) ; (G) sans entitlement→403 (gate) ; (H) sans jeton→401. Référentiel via VRAI pipeline catalog→outbox→Kafka→projection ; sha256 vérifié identique à l'artefact committé. RESTE : /code-review + PR MNV-038→dev (Rebase and merge). Doc: docs/stories/STORY-038.md
+        story_path: "docs/stories/STORY-038.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-041"
         title: "Scaffold document-service (:3006, relying party JWKS, health, Kafka) + abstraction OcrProvider (Tesseract) + accès MinIO lecture"
         epic: "EPIC-015"
