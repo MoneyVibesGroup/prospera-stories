@@ -505,7 +505,7 @@ sprints:
     end_date: "2026-10-22"
     capacity_points: 34
     committed_points: 21
-    completed_points: 8  # STORY-035 (3) + STORY-036 (5)
+    completed_points: 11  # STORY-035 (3) + STORY-036 (5) + STORY-037 (3)
     status: "in_progress"
     goal: "bilan-service squelette (EPIC-008) : scaffold + read-models (entitlement/KYC) + gate @RequiresBilanAccess + ReferentielLoader — prêt à recevoir le moteur (EPIC-009…014). + Module 0 : scaffold document-service + OcrProvider."
     stories:
@@ -530,8 +530,9 @@ sprints:
         epic: "EPIC-008"
         points: 3
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-14. FR-008 rejoué en relying party. BilanAccessGuard (5ᵉ APP_GUARD, no-op hors routes @RequiresBilanAccess — patron RolesGuard) : 3 checks ORDONNÉS emailVerified(claim)→OrgKycStatus==APPROVED→OrgBilanEntitlement==ACTIVE (read-models STORY-036, findOne().lean()), ZÉRO appel réseau (P4/B3), FAIL-CLOSED (read-model absent=refus), tenantId null/invalide(PLATFORM_ADMIN,org null)→BILAN_NOT_ENTITLED sans throw. Codes 403 explicites EMAIL_NOT_VERIFIED/KYC_NOT_APPROVED/BILAN_NOT_ENTITLED via ForbiddenException({message,code}). @RequiresBilanAccess = métadonnée pure (common). AllExceptionsFilter propage {code} (ajout rétro-compatible). Endpoint diagnostic gardé PROVISOIRE GET /whoami/bilan-access (@Roles TENANT_*+@RequiresBilanAccess)→200{access:granted,org}. Guard co-localisé modules/read-models/guards, instancié en contexte AppModule (modèles via exports MongooseModule de ReadModelsModule). lint 0, build OK, 98 unit (16 nouveaux, guard 100% cov, seuils 90/65/90/90 tenus) + 17 e2e (chaîne réelle Jwt→EmailVerified→Roles→BilanAccess + AllExceptionsFilter monté prouvant que le code survit). VÉRIF DOCKER (auth:3001+catalog:3003+kyc:3002+bilan:3004+mongo rs0+kafka, bilan rebâti sur MNV-037) : org tenant fraîche register→verify Mailhog→login RS256 emailVerified=true. (a) sans KYC→403 KYC_NOT_APPROVED ; (b) KYC APPROVED semé (pipeline kyc.status.changed prouvé STORY-036)→403 BILAN_NOT_ENTITLED ; (c) PUT catalog entitlement bilan 2.0/syscohada-revise@2.1→entitlement.changed(outbox)→projection ACTIVE ~1s→200 granted ; (d) DELETE catalog→REVOKED ~2s→403 BILAN_NOT_ENTITLED. Transitions via VRAI pipeline Kafka (catalog outbox→consumer bilan), code présent dans chaque 403. /CODE-REVIEW (high) : 0 bug, 3 constats — #1 emailVerified masqué par EmailVerifiedGuard amont (par conception, défense en profondeur+auto-suffisance) ; #2 EMAIL_NOT_VERIFIED_MESSAGE dupliqué 2 guards (accepté K4) ; #3 ObjectId.isValid laxiste 12 car.→fail-closed (théorique). INTÉGRÉ DANS DEV : PR #3 (MNV-037→dev) « Rebase and merge » (dev HEAD 93d574b, branche supprimée, historique linéaire). DÉBLOQUE opérations métier Bilan (EPIC-009+) + FE-B00. RESTE : —. Doc: stories/STORY-037.md
+        story_path: "docs/stories/STORY-037.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-038"
         title: "ReferentielLoader (artefact + checksum + cache) + interface de référentiel + moteur squelette"
         epic: "EPIC-008"
