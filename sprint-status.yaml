@@ -505,8 +505,8 @@ sprints:
     end_date: "2026-10-22"
     capacity_points: 34
     committed_points: 21
-    completed_points: 0
-    status: "not_started"
+    completed_points: 8  # STORY-035 (3) + STORY-036 (5)
+    status: "in_progress"
     goal: "bilan-service squelette (EPIC-008) : scaffold + read-models (entitlement/KYC) + gate @RequiresBilanAccess + ReferentielLoader — prêt à recevoir le moteur (EPIC-009…014). + Module 0 : scaffold document-service + OcrProvider."
     stories:
       - story_id: "STORY-035"
@@ -514,15 +514,17 @@ sprints:
         epic: "EPIC-008"
         points: 3
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-14. Nouveau service bilan-service (:3004, base bilan_service) calqué sur platform-catalog-service (STORY-031) : relying party RS256/JWKS pur (socle common/ dupliqué + JwtStrategy JWKS-only, AUTH_AUDIENCE=bilan-service), /health (mongo+kafka, ni redis ni minio), KafkaModule squelette CLIENT-SEUL (bilan est consommateur ; KafkaProducerService catalog retiré ; consumers entitlement.changed + kyc.status.changed = STORY-036), endpoint diagnostic gardé GET /whoami (@AllowUnverified). Compose racine : bloc bilan ajouté + override hot-reload + .env ; bloc auth-service AUTH_AUDIENCE piloté par env pour stamper bilan-service dans l'aud émis (aucun code auth-service). CI matrice 5 services (+ bilan_service_test). lint 0, 70 unit (14 suites) + 8 e2e (2 suites) verts, cov 99.63/83.11/100/99.59. VÉRIF DOCKER (auth:3001 + bilan:3004 + mongo rs0 + kafka) : /health 200 ; login PLATFORM_ADMIN IdP → JWT RS256 aud=[expert-comptable,kyc-service,platform-catalog-service,bilan-service] → GET :3004/whoami 200 {org:null, role:PLATFORM_ADMIN} ; sans token 401 ; HS256 forgé 401 ; RS256 altéré 401. POUSSÉ 2026-07-14 sur prospera-bilan-service (git init 1ᵉʳ push : branches dev + MNV-035, auteur vivianMoneyVibesGroupes) ; PR #1 MNV-035→dev « Rebase and merge » (dev HEAD f9fdf15) ; /code-review xhigh = 0 finding. CLÔT la 1ʳᵉ story d'EPIC-008. SUITE : STORY-036 (read-models + consumers entitlement.changed/kyc.status.changed).
+        story_path: "docs/stories/STORY-035.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-036"
         title: "Read-models + consumers Kafka (entitlement.changed + kyc.status.changed) + idempotence"
         epic: "EPIC-008"
         points: 5
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-14. 2 read-models locaux (OrgBilanEntitlement ← entitlement.changed filtré moduleCode==bilan ; OrgKycStatus ← kyc.status.changed) keyés organizationId unique, upsert état absolu ($set présents/$unset referentiel absent). Idempotence : marqueur PARTAGÉ ProcessedEvent{eventId unique, TTL 30j} inséré dans la MÊME transaction Mongo que l'upsert (rejeu même eventId → abort → ignoré). 2 consumers bootstrap (groups bilan-entitlement/bilan-kyc, tolérance panne au boot, validation enveloppe eventId/occurredAt/orgId-ObjectId) → projections (I/O Kafka exclue couverture). Patron expert-comptable KycEventsModule ALLÉGÉ (pas d'e-mail/BullMQ ; bilan = PUR consommateur, aucune outbox). Contrats+enums miroirs (EntitlementStatus, KycStatus). Config KAFKA_ENTITLEMENT_GROUP_ID/KAFKA_KYC_GROUP_ID + compose. lint 0, 82 unit (16 suites) + 8 e2e verts, cov 98.7/86.17/98.66/98.57. VÉRIF DOCKER (auth:3001+catalog:3003+kyc:3002+bilan:3004+mongo rs0+kafka) : grant PLATFORM_ADMIN bilan@2.0 (catalog outbox) → orgbilanentitlements ACTIVE absolu ; PUT bilan@3.0 + DELETE → 1 ligne REVOKED@3.0 ; kyc.status.changed → orgkycstatuses (orgs UNDER_REVIEW) ; module story034bilan IGNORÉ (aucun marqueur) ; eventId dupliqué (ACTIVE puis REVOKED) → 2ᵉ « déjà traité — ignoré », read-model inchangé, marqueur unique. /CODE-REVIEW (high) : 3 constats → #1 poison pill (orgId invalide → BSONError → rejeu Kafka infini bloquant la partition, REPRODUIT docker) CORRIGÉ (garde-fou Types.ObjectId.isValid dans l'enveloppe des 2 consumers) + RE-VÉRIFIÉ docker (message ignoré, partition repart, valides suivants appliqués) ; #2 corps JSON null (accepté, calqué verbatim EC) ; #3 duplication (accepté, K4). POUSSÉ 2026-07-14 : branche MNV-036, PR #2 MNV-036→dev « Rebase and merge ». DÉBLOQUE STORY-037 (gate) + STORY-038 (ReferentielLoader) + FE-B00.
+        story_path: "docs/stories/STORY-036.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-037"
         title: "Gate @RequiresBilanAccess (emailVerified + KYC + entitlement, read-models locaux) + tests"
         epic: "EPIC-008"
