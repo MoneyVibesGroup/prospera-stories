@@ -611,8 +611,10 @@ sprints:
         epic: "EPIC-016"
         points: 3
         service: "admin-panel"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-15. Service admin-panel/ créé (NestJS 11/Node 20, moule document-service) en BFF SANS persistance : PREMIER service de l'écosystème sans Mongoose/Kafka ET premier client HTTP sortant. Relying party PUR RS256/JWKS (JwtStrategy validate-only, algorithms:['RS256'], aud=[admin-panel]), socle common/ dupliqué (guards jwt-auth/email-verified/roles, PAS de tenant-scoped.repository ni password). Chaîne de guards globale Throttler→Jwt→EmailVerified→Roles ; @Roles(PLATFORM_ADMIN) sur le contrôleur admin. UpstreamModule (brique inédite) : HttpModule @nestjs/axios (timeout court, maxRedirects:0) + JwtRelayService (relais du bearer, JAMAIS journalisé — redact pino) + UpstreamClient base (jointure URL/en-tête relais/timeout, helper get testé) + clients typés Auth/Kyc/Catalog résolvant leur base URL — AUCUNE méthode d'agrégation (→047). HealthModule : GET /health PUBLIC vivacité pure (aucune dépendance amont, anti-cascade). Diagnostic provisoire GET /admin/whoami (@Roles PLATFORM_ADMIN, retiré en 047). Compose racine : bloc admin-panel :3010 (depends_on auth-service healthy), IdP AUTH_AUDIENCE += admin-panel, override hot-reload, CI matrice 6→7 services (+URLs amont factices CI). QUALITÉ : lint 0, 62 unit (15 suites) + 9 e2e (2 suites), cov 99.61/84.05/100/99.56 (seuils 65/90/90/90). VÉRIF DOCKER (mongo rs0+redis+kafka+mailhog+auth:3001+admin:3010) : /health 200 (liveness up) ; Swagger /api/docs 200 (« PROSPERA — Admin Panel ») ; login PLATFORM_ADMIN seedé → JWT aud INCLUANT admin-panel → GET /admin/whoami 200 {sub,org:null,roles:[PLATFORM_ADMIN],emailVerified:true} ; sans token / bearer invalide → 401 ; non-admin VÉRIFIÉ (TENANT_ADMIN) → 403 « rôle insuffisant » (prouve RolesGuard) ; auth-service resté healthy (non-régression, seul AUTH_AUDIENCE IdP étendu). Repo prospera-admin-panel-service (nouveau, fourni user). /CODE-REVIEW + push MNV-046 → PR « Rebase and merge » sur dev. DÉBLOQUE STORY-047 (vue agrégée), STORY-048 (actions proxifiées), AP-01 (front). RESTE : —.
+        completed_date: "2026-07-15"
+        story_path: "stories/STORY-046.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-047"
         title: "admin-panel : vue agrégée des orgs (identité auth + KYC kyc + entitlements catalog) — list + détail, dégradation partielle"
         epic: "EPIC-016"
