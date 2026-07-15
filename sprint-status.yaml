@@ -566,7 +566,7 @@ sprints:
     end_date: "2026-11-05"
     capacity_points: 34
     committed_points: 24
-    completed_points: 10  # STORY-042 + STORY-043 done 2026-07-15
+    completed_points: 13  # STORY-042 + STORY-043 + STORY-044 done 2026-07-15
     status: "in_progress"
     goal: "Module 0 flux B (OCR KYC) : consumer kyc.document.uploaded → extraction RCCM/CFE → comparaison déclaré/lu → document.extrait ; kyc enrichit le dossier. + amorce admin-panel (scaffold + vue agrégée)."
     stories:
@@ -593,8 +593,10 @@ sprints:
         epic: "EPIC-015"
         points: 3
         service: "document-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-15. Persiste DocumentExtraction (collection document_extractions, base document_service, keyée organizationId, documentId UNIQUE, minimize:false — même piège que l'OutboxEvent STORY-043 : préserve extracted:{}/declared:{}) DANS la transaction existante (markProcessedPersistAndEmit : marqueur ProcessedEvent + DocumentExtraction + outbox document.extrait ATOMIQUES). Ids en String (comme partitionKey outbox) : isolation par comparaison directe au tenantId + AUCUNE conversion ObjectId dans la tx (anti-poison-pill). Garde documentId ajoutée à consume() (champ requis persisté → neutralise un poison-pill). GET /v1/documents/:documentId/extraction (relying party @Roles PLATFORM_ADMIN/TENANT_ADMIN, isolation orgId → 404 hors-tenant ET pièce inconnue, ne révèle pas l'existence ; e-mail vérifié requis) ; DTO structuré (sans binaire/texte OCR). REMPLACE la sonde whoami (STORY-041) : DiagnosticsModule + whoami.e2e retirés, prouvé par documents.e2e (JWKS 401/HS256/aud + rôle + isolation). Extension SANS réécriture de STORY-042/043 ; DO-1 strict (lecture seule, aucun statut KYC, aucun appel kyc-service). QUALITÉ : lint 0, 186 unit (32 suites) + 17 e2e (4 suites) ; nouveaux fichiers 100% cov ; build OK. /CODE-REVIEW (high) FAIT : 1 constat correctness CORRIGÉ — E11000 à la persistance (unicité documentId) n'était pas traité comme rejeu (seul le marqueur l'était) → propagé → poison-pill (reachable : ProcessedEvent a un TTL 30j alors que DocumentExtraction/OutboxEvent sont permanents ; re-livraison post-purge du marqueur bute sur documentId) → fix : marqueur+persist+enqueue dans un seul try, TOUTE E11000 → abort+skip idempotent (+ test rejeu post-TTL) ; 2 constats LOW tracés (DocumentExtractionRecord~PersistExtractionInput ; organizationId String vs ObjectId du read-model — choix anti-poison-pill assumé). VÉRIF DOCKER (mongo rs0+kafka+minio+auth:3001+kyc:3002+document:3006 override base) : /health 200 ; 2 consumers rejoignent ; route GET mappée, whoami→404 ; register→verify(Mailhog)→login (aud incl. document-service) → upload RCCM+CFE → 2 DocumentExtraction persistées (keyées orgId, extracted:{} PRÉSERVÉ minimize:false, declared résolu {denomination,country:CI} + discrepancies[missing_read] + flags{unreadable:true}, eventId=source) + 2 document.extrait SENT ; GET propriétaire=200 (DTO complet), pièce inconnue=404, cross-tenant (org C sur pièces de A)=404×2 ; REJEU (offset document-ocr→earliest + restart) → tous events ignorés (pré-contrôle « déjà traité »), document_extractions reste 2, outbox document.extrait reste 7 (exactement-une-fois effective) ; AUCUN statut KYC touché. INTÉGRÉ DANS DEV 2026-07-15 : repo prospera-ocr-service, branche MNV-044 (depuis dev, rebasée origin/dev), PR #4 MNV-044(document-service) mergée « Rebase and merge » sur dev (HEAD d044333), branche supprimée. DÉBLOQUE STORY-045 (consultation/audit de l'assistance ; contrat document.extrait déjà livré STORY-043). RESTE : —.
+        completed_date: "2026-07-15"
+        assigned_to: "Claude (BMAD dev-story)"
+        story_path: "docs/stories/STORY-044.md"
       - story_id: "STORY-045"
         title: "kyc-service : consommer document.extrait → enrichir le dossier de revue KYC (l'OCR assiste, ne décide pas)"
         epic: "EPIC-015"
