@@ -566,7 +566,7 @@ sprints:
     end_date: "2026-11-05"
     capacity_points: 34
     committed_points: 24
-    completed_points: 5  # STORY-042 done 2026-07-15
+    completed_points: 10  # STORY-042 + STORY-043 done 2026-07-15
     status: "in_progress"
     goal: "Module 0 flux B (OCR KYC) : consumer kyc.document.uploaded → extraction RCCM/CFE → comparaison déclaré/lu → document.extrait ; kyc enrichit le dossier. + amorce admin-panel (scaffold + vue agrégée)."
     stories:
@@ -584,8 +584,10 @@ sprints:
         epic: "EPIC-015"
         points: 5
         service: "document-service"
-        status: "not_started"  # dépend STORY-042
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-15. Étend ExtractionService (STORY-042) SANS le réécrire. 3 briques : (1) read-model identity.* local (consumer identity.org.created/updated, group document-identity isolé, projection transactionnelle idempotente OrgIdentity keyé orgId — patron bilan-service STORY-036 ; ProcessedEvent partagé) → résout le DÉCLARÉ (dénomination=name + pays) ; (2) IdentityComparator (normalisation NFD/casse/ponctuation anti-bruit OCR → écarts mismatch/missing_read/missing_declared, v1=dénomination) + DocumentFlags (unreadable=confiance<OCR_MIN_CONFIDENCE(déf 40)|aucun champ ; expired best-effort via OCR_DOCUMENT_VALIDITY_MONTHS, déf 0=off, jamais de fausse alerte) ; (3) producteur document.extrait v1 (état absolu P9, clé orgId, eventId dérivé `${eventId}:extrait`) via transactional outbox (OutboxEvent/Service/Relay dupliqués kyc STORY-040 ; 1er producteur Kafka du service, KafkaProducerService) — enqueue DANS la tx du marqueur ProcessedEvent (markProcessedAndEmit : marqueur+émission ATOMIQUES, exactement-une-fois effective). Dégradation gracieuse si org non projetée (declared {}, discrepancies [] — aucun écart fabriqué). DO-1 strict (aucune écriture statut KYC, aucun appel kyc-service). Config : OCR_MIN_CONFIDENCE/OCR_DOCUMENT_VALIDITY_MONTHS, KAFKA_IDENTITY_GROUP_ID(déf document-identity), OUTBOX_RELAY_INTERVAL_MS/BATCH_SIZE (+ bloc compose racine). QUALITÉ : lint 0, 173 unit (31 suites) cov 98.98/91.54/98.44/98.89, 14 e2e. /CODE-REVIEW (high) FAIT : 1 bug HIGH CORRIGÉ — schéma OutboxEvent minimize:false (le minimize Mongoose par défaut AMPUTAIT extracted:{}/declared:{}, champs REQUIS du contrat, du payload persisté → document.extrait non conforme ; DÉCOUVERT en vérif docker) + test de régression (OutboxEventSchema.get('minimize')===false) ; 3 constats LOW différés (normalize non-décomposables ß/ø ; setUTCMonth overflow quand validity>0 ; duplicate-key.util dupliqué K4). VÉRIF DOCKER (mongo rs0+kafka+minio+auth:3001+kyc:3002+document:3006 override base) : /health 200 ; 2 consumers (document-identity + document-ocr) rejoignent leurs groupes après retry transitoire (tolérance panne) ; register (auth) → identity.org.created → org_identities projeté {denomination:'PROSPERA VERIF SARL',country:CI} ; verify Mailhog → login (aud incl. kyc+document) → upload RCCM+CFE → OCR RÉEL tesseract conf 90 → 2 document.extrait ÉMIS via outbox (status SENT, clé orgId, eventId `...:extrait`) portant declared résolu + discrepancies [missing_read] + flags {unreadable:true} + extracted:{} (préservé post-fix) ; DÉGRADÉ (event synthétique orgId non projeté) → declared {} + discrepancies [] (aucun écart fabriqué, écarts=0) ; REJEU (même eventId re-publié) → pré-contrôle 'déjà traité', AUCUNE double émission (outbox 5==5). DÉBLOQUE STORY-044 (persistance DocumentExtraction, même tx étendue) + STORY-045 (kyc consomme document.extrait). INTÉGRÉ DANS DEV 2026-07-15 : repo prospera-ocr-service, branche MNV-043 (depuis dev, rebasée origin/dev), PR #3 MNV-043(document-service) mergée « Rebase and merge » sur dev (HEAD 336ed35), branche supprimée. RESTE : —.
+        completed_date: "2026-07-15"
+        assigned_to: "Claude (BMAD dev-story)"
+        story_path: "docs/stories/STORY-043.md"
       - story_id: "STORY-044"
         title: "document-service : persistance DocumentExtraction (keyé orgId) + (option) GET consultation extraction"
         epic: "EPIC-015"
