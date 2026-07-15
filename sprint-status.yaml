@@ -566,7 +566,7 @@ sprints:
     end_date: "2026-11-05"
     capacity_points: 34
     committed_points: 24
-    completed_points: 13  # STORY-042 + STORY-043 + STORY-044 done 2026-07-15
+    completed_points: 16  # STORY-042 + STORY-043 + STORY-044 + STORY-045 done 2026-07-15 (EPIC-015 chaîne KYC/OCR COMPLÈTE côté production+consommation)
     status: "in_progress"
     goal: "Module 0 flux B (OCR KYC) : consumer kyc.document.uploaded → extraction RCCM/CFE → comparaison déclaré/lu → document.extrait ; kyc enrichit le dossier. + amorce admin-panel (scaffold + vue agrégée)."
     stories:
@@ -602,8 +602,10 @@ sprints:
         epic: "EPIC-015"
         points: 3
         service: "kyc-service"
-        status: "not_started"  # dépend STORY-043 ; invariant DO-1
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-15. Fait de kyc-service son PREMIER consommateur Kafka (jusqu'ici producteur pur) : consomme document.extrait (STORY-043, group kyc-document-extract, DocumentExtraitConsumer bootstrap tolérant panne, fromBeginning) → projette un read-model d'assistance de revue DocumentExtractionAssist (base kyc_service, collection document_extraction_assists, keyée documentId UNIQUE, minimize:false — préserve extracted:{}/declared:{}, leçon STORY-043/044) via markProcessedAndProject : marqueur ProcessedEvent (collection dédiée inbound_processed_events, première dédup ENTRANTE du service) + upsert état absolu ($set keyé documentId) dans UNE seule transaction (atomiques, exactement-une-fois ; E11000 marqueur → abort → skip) → enrichit KycAdminService.getDetail (STORY-013) : jointure par documentId → AdminKycDocumentDto.extraction? (lu/déclaré/écarts/drapeaux/confiance/ocrProvider/occurredAt) + AdminKycOcrSummaryDto {hasDiscrepancies,anyUnreadable,anyExpired,extractedCount} ; dégradation gracieuse (OCR pas encore passé → extraction undefined). Contrat document.extrait CONSOMMÉ dupliqué (K4, kafka/events/document-extrait-events.ts, aucune dépendance vers document-service). Config KAFKA_DOCUMENT_EXTRACT_GROUP_ID (déf kyc-document-extract) + bloc compose racine. INVARIANT DO-1 STRICT : la consommation n'écrit JAMAIS le statut KYC, ne déclenche AUCUNE transition, n'appelle jamais KycStatusService — l'OCR affiche des signaux, l'humain décide (approve/reject STORY-013). QUALITÉ : lint 0, 175 unit (30 suites) + 39 e2e ; nouveaux fichiers couverts (seuils 65/90/90/90 tenus). /CODE-REVIEW (high) FAIT : 0 bug correctness ; 2 constats LOW différés (isDuplicateKeyError ~ check inline kyc-documents.service:175, K4 assumé ; cast payload.type best-effort non surfacé — type de la pièce vient du KycDocument). VÉRIF DOCKER (mongo rs0+kafka+minio+mailhog+auth:3001+kyc:3002+document:3006) : consumer rejoint group kyc-document-extract (document.extrait[0]) après retry (tolérance panne) ; register→emailVerified→login→upload RCCM+CFE → document-service publie 2 document.extrait → kyc-service projette 2 DocumentExtractionAssist (extracted:{} PRÉSERVÉ minimize:false, declared résolu {denomination:'OCR ASSIST SARL…',country:CI}, discrepancies:[{denomination,missing_read}], flags:{unreadable:true,expired:false}, confidence 90) ; GET /admin/kyc/:orgId (PLATFORM_ADMIN) → 2 pièces ENRICHIES (extraction complète) + ocrSummary{hasDiscrepancies:true,anyUnreadable:true,anyExpired:false,extractedCount:2} ; REJEU (offset kyc-document-extract→earliest + restart) → 9 events re-livrés « déjà traité », AUCUNE double projection (document_extraction_assists 9→9, inbound_processed_events 9→9) ; DO-1 : statut resté UNDER_REVIEW de bout en bout (l'OCR n'a jamais changé le statut). INTÉGRÉ DANS DEV 2026-07-15 : repo prospera-kyc-service, branche MNV-045 (depuis dev, rebasée origin/dev), PR #3 MNV-045(kyc-service) mergée « Rebase and merge » sur dev (HEAD 9268877), branche supprimée. DÉBLOQUE STORY-047/048 (admin-panel lit l'enrichissement) + STORY-049 (e2e chaîne KYC complète). RESTE : —.
+        completed_date: "2026-07-15"
+        assigned_to: "Claude (BMAD dev-story)"
+        story_path: "docs/stories/STORY-045.md"
       - story_id: "STORY-046"
         title: "Scaffold admin-panel (BFF :3010, relying party JWKS, RolesGuard PLATFORM_ADMIN, health, sans base, clients HTTP amont)"
         epic: "EPIC-016"
