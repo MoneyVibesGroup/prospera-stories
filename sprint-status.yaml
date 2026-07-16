@@ -630,7 +630,9 @@ sprints:
     end_date: "2026-11-19"
     capacity_points: 34
     committed_points: 28  # KYC 🏁 8 (048 done + 049) + RBAC plateforme 20 ; sous capacité (34), reste 23 à faire. Le balance CORE (21) est parti en S11 — D15
-    completed_points: 10  # STORY-048 (admin-panel actions proxifiées) + STORY-103 (socle RBAC plateforme) done 2026-07-16
+    completed_points: 13  # STORY-048 (actions proxifiées) + STORY-103 (socle RBAC) + STORY-049 (e2e chaîne KYC 🏁) done 2026-07-16
+    # 🏁 EPIC-016 COMPLET (046→049) ⇒ JALON MODULE 0 « chaîne KYC complète » ATTEINT le 2026-07-16 : la chaîne est
+    # livrée ET prouvée rejouable (`npm run test:chain`). Reste du sprint 10 = RBAC plateforme (105 → 104/106).
     status: "in_progress"
     # ── D14 (2026-07-12) : split CORE/EXTENDED de balance-service. La PRODUCTION + STOCKAGE de la balance
     # quitte le bilan-service (EPIC-009 SUPERSEDED) et devient le socle CORE de balance-service. EXTENDED
@@ -675,8 +677,99 @@ sprints:
         epic: "EPIC-016"
         points: 3
         service: "admin-panel"
-        status: "not_started"  # dépend STORY-045 + STORY-048 ; jalon Module 0
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-16. 🏁 JALON MODULE 0 ATTEINT : la chaîne KYC
+        # est livrée ET PROUVÉE REJOUABLE (`npm run test:chain`, 8/8, ~13-26 s). STORY DE TEST PUR : git diff ne touche
+        # AUCUN fichier de src/, AUCUNE dépendance ajoutée (FormData/Blob NATIFS Node 18+ — axios pose la frontière
+        # multipart ; form-data n'est pas une dép directe). 7 fichiers, +775 lignes : test/kyc-chain.chain-spec.ts
+        # (préflight + 5 phases, 8 tests) · test/utils/chain-env.ts (préflight fail-fast, waitUntil, assertNeverDuring,
+        # Mailhog) · test/jest-chain.json (3ᵉ config) · test/fixtures/{rccm,cfe}.png · script test:chain · README.
+        # ISOLATION CI PROUVÉE STACK RÉELLEMENT ÉTEINTE (docker compose stop, admin-panel injoignable au curl) :
+        # npm test → 124/20 suites VERT, npm run test:e2e → 28/3 VERT ; --listTests : config unit = 0 occurrence de
+        # chain-spec, config e2e = les 3 *.e2e-spec.ts seuls, config chain = kyc-chain seul. Couverture INCHANGÉE
+        # 99.76/89.81/100/99.73 (collectCoverageFrom ne porte que sur src → insensible par construction). Lint 0
+        # warning + build OK (codes de sortie vérifiés).
+        # PARCOURS PROUVÉ : inscription → e-mail vérif (Mailhog) → verify-email → login TENANT_ADMIN (org du claim) →
+        # upload RCCM+CFE (201×2) → UNDER_REVIEW → ATTENTE OCR → extractedCount===2 → dossier enrichi (2 pièces
+        # présignées + extraction, sources ok/ok) → DO-1 : statut TOUJOURS UNDER_REVIEW + reviewedBy absent (l'OCR n'a
+        # RIEN décidé — invariant EPIC-015 jamais vérifié qu'à la main) → approve → 200 APPROVED relu PERSISTÉ avec
+        # reviewedBy = sub de l'admin relayé → e-mail d'approbation 🏁 → re-approve → 409 SANS seconde notification.
+        # OCR RÉEL PARFAIT (non assertionné, par choix) : tesseract confiance 92, discrepancies [], flags tout false ;
+        # RCCM {CI-ABJ-2024-B-12345, PROSPERA CHAIN SARL, SARL, 2024-03-15} ; CFE {CI-CFE-2024-778899, NIF
+        # CI2024778899X}. MEILLEUR que la vérif manuelle de STORY-045 (qui sortait missing_read/unreadable). Fixtures
+        # générées SANS dépendance (HTML → qlmanage, one-off ; PNG committé) et ALIGNÉES sur les parseurs 042.
+        # ⚡ CONTRÔLES NÉGATIFS — LA VÉRIFICATION QUI COMPTE (un test de chaîne qui ne peut que passer ne vaut rien) :
+        # (1) préflight : stop expert-comptable → rouge EN SECONDES, nomme le service + la raison + le remède (le 1ᵉʳ
+        # stop a d'ailleurs révélé minio absent + document-service unhealthy) ; (2) CHAÎNE ROMPUE : document-service
+        # stoppé + préflight leurré vers un service sain (= simule un document-service joignable qui ne publie plus
+        # document.extrait, LA divergence K4 que la story existe pour attraper) → phase OCR ROUGE à 180 s avec le
+        # diagnostic exact « Dernier état observé : {...,"extractedCount":0} ». REJOUABILITÉ : 2 runs consécutifs verts
+        # sans aucun nettoyage ni compose down.
+        # /CODE-REVIEW (high) : 3 correctness CORRIGÉS + 3 assumés. 🔴 L'ASSERTION « aucune seconde notification » ÉTAIT
+        # CREUSE (le plus grave) : recomptait à ~80 ms alors qu'un e-mail met ~2 s (Kafka→EC→BullMQ→SMTP) → passait
+        # MÊME AVEC UN DOUBLON EN VOL, soit exactement le cas qu'elle prétend interdire → assertNeverDuring (fenêtre
+        # bornée 10 s ≫ latence mesurée, échec immédiat si doublon) ; le test passe de 85 ms à 10 154 ms = il attend
+        # vraiment. SEULE EXCEPTION assumée à « aucun délai fixe », structurelle : ON NE PEUT PAS SONDER UNE ABSENCE.
+        # 🔴 MOJIBAKE UTF-8 : decodeQuotedPrintable décodait en latin-1 (String.fromCharCode) → « VÃ©rifiez » → le
+        # filtre /v[ée]rifiez/ n'aurait JAMAIS matché ⇒ phase 1 en timeout sur une chaîne saine (masqué tant que le
+        # prédicat portait sur le corps, jeton pur ASCII) → réassemblage octets puis décodage UTF-8. 🔴 String(error) →
+        # « [object Object] »/AggregateError nu → describeError() (le diagnostic EST la raison d'être du harnais).
+        # 🟡 ASSUMÉS : contrats retypés localement (test = client BOÎTE NOIRE ; importer src/ le coupleraient à
+        # l'implémentation vérifiée et MASQUERAIENT une rupture de contrat HTTP — cohérent K4) ; getOrgDetail lève via
+        # expect() dans une sonde (le retry absorbe les 502/503 au démarrage) ; src/app.module.ts:31 commentaire
+        # obsolète sur whoami (retiré en 047) NON corrigé — l'invariant « zéro src/ » prime ; README corrigé, lui.
+        # DETTE : aucune CI n'existe dans le dépôt (0 workflow) → test manuel/nightly, comme prévu.
+        # DEVIENT LE FILET de non-régression de la chaîne KYC pour S11+ (RBAC 105 touche les gardes des amont).
+        # ── STORY DE TEST PUR : zéro ligne de src/ (si le test rougit, c'est un SERVICE qui a un bug, jamais le test à
+        # « ajuster »). Valeur = les JOINTURES, pas les maillons : chaque service a ses tests, RIEN ne prouve qu'ils sont
+        # d'accord ENTRE EUX. Les contrats sont dupliqués par choix (K4) → 2 copies de document.extrait peuvent diverger
+        # avec 100 % des suites au vert. Ce test est le SEUL endroit où ce désaccord devient visible. Les vérifs docker
+        # 040→048 étaient MANUELLES (jouées une fois, consignées en prose, jamais rejouées) → ici : `npm run test:chain`.
+        # POURQUOI MAINTENANT : chaîne complète (048 done 2026-07-16) ET EPIC-025 va TOUCHER les amont (STORY-105 migre
+        # les gardes PLATFORM_ADMIN de kyc + catalog) → écrire le filet AVANT la migration = régression silencieuse
+        # convertie en test rouge immédiat. Après, ce serait de l'archéologie.
+        # DÉCISIONS DE CRÉATION (3 tranchées avec l'user) :
+        # 1. EMPLACEMENT = admin-panel/test/kyc-chain.chain-spec.ts + test/jest-chain.json + npm run test:chain.
+        #    La racine et scripts/ NE SONT PAS des dépôts git → un script y serait perdu, jamais poussé. admin-panel =
+        #    seul foyer versionné + sprint-plan y rattache la story + le BFF EST le point d'entrée du parcours admin.
+        #    Dépôt prospera-e2e dédié = à rouvrir au 2ᵉ e2e cross-service (balance/bilan), pas pour 3 pts.
+        #    ⚠️ ISOLATION CI NON NÉGOCIABLE : le nom `.chain-spec.ts` est choisi pour n'être ramassé par AUCUNE des 2
+        #    autres configs — unit (rootDir:src + `\.spec\.ts$` : hors src ET tiret ≠ point → doublement exclu) et e2e
+        #    (`.e2e-spec.ts$` → pas de match). npm test + test:e2e DOIVENT rester verts STACK ÉTEINTE (à vérifier via
+        #    `npx jest --listTests`). collectCoverageFrom ne porte que sur src → seuils 65/90/90/90 insensibles.
+        # 2. PÉRIMÈTRE = chaîne complète + preuves async : register → verify (Mailhog) → login → upload RCCM+CFE →
+        #    ATTENTE OCR (ocrSummary.extractedCount===2 : UNE assertion valide 6 stories + 2 sauts Kafka + 2 contrats
+        #    dupliqués) → DO-1 (statut TOUJOURS UNDER_REVIEW après OCR : l'OCR n'a JAMAIS rien décidé — invariant
+        #    central d'EPIC-015 jamais vérifié qu'à la main) → GET /admin/orgs/:orgId (2 pièces présignées + extraction,
+        #    sources ok/ok) → approve → 200 APPROVED PERSISTÉ + reviewedBy = sub admin relayé → e-mail Mailhog 🏁 →
+        #    re-approve → 409 (aucun 2ᵉ e-mail).
+        # 3. ASSERTIONS OCR = LA CHAÎNE, PAS LA PRÉCISION : extraction défini / ocrProvider / confidence numérique /
+        #    discrepancies / extractedCount:2 — JAMAIS le texte lu exact. OcrModule câble Tesseract EN DUR (useClass,
+        #    pas d'env) → la stack fait du VRAI OCR ; assertionner le texte relu ferait un test de précision Tesseract
+        #    (flaky selon police/WASM/OS, rouge sans qu'aucun service ne soit cassé → finit désactivé). Un OCR qui lit
+        #    mal → flags.unreadable + discrepancies = résultat VALIDE de la chaîne (le dossier remonte à l'humain avec
+        #    ses signaux, DO-1). La précision appartient aux tests de document-service (042/043).
+        # RAFFINEMENT vs l'option retenue : l'introspection de l'OUTBOX est ABANDONNÉE (l'option mentionnait « outbox
+        # SENT + Mailhog »). Preuve par l'EFFET plutôt que par l'ARTEFACT : l'outbox prouve seulement que kyc a ÉCRIT
+        # qu'il allait publier ; l'e-mail Mailhog prouve publié + transporté + consommé + traité (BullMQ) = preuve
+        # STRICTEMENT PLUS FORTE, sans percer l'encapsulation de kyc NI ajouter un driver mongo à un service qui se
+        # DÉFINIT par son absence de base (invariant STORY-046). Test 100 % HTTP : auth+kyc+admin+Mailhog.
+        # PRÉREQUIS NON ÉVIDENTS : expert-comptable:3000 + redis (l'e-mail final dépend de son consumer kyc.status
+        # .changed + worker BullMQ) et catalog:3003 (sinon sources.entitlements=unavailable ferait échouer l'assert
+        # ok/ok) → le PRÉFLIGHT les vérifie pour transformer un échec tardif en diagnostic en SECONDES.
+        # ZÉRO SLEEP : polling borné waitUntil (2 sauts Kafka + Tesseract WASM + BullMQ = latence non bornée par
+        # construction ; délai fixe = soit flaky soit lent, et les deux avec le temps). Budgets à CALIBRER À LA MESURE :
+        # ~15 s e-mail vérif, ~90 s OCR (Tesseract WASM à froid), ~30 s e-mail approbation.
+        # REJOUABLE SANS NETTOYAGE : e-mail unique par run (chain-<ts>-<rand>@example.test) → org neuve → toujours
+        # UNDER_REVIEW à l'approbation, aucun 409 parasite, aucun compose down. Mailhog filtré PAR DESTINATAIRE (jamais
+        # « le dernier e-mail reçu »). Jeton admin : `npm run seed:admin` puis login — la suppression de membership
+        # n'est PLUS nécessaire (fix issueSession STORY-103) ; n'assert QUE roles[PLATFORM_ADMIN] + aud, AUCUNE
+        # dépendance à perms[] (EPIC-025 en vol).
+        # DETTE EXPLICITE (hors 3 pts) : CI manuel/nightly — 10 conteneurs + ~2 min ralentiraient chaque PR d'un
+        # service qui n'y est pour rien ; le foyer serait une CI d'écosystème, qui n'existe pas (racine non versionnée).
+        # DEVIENT LE FILET de non-régression de la chaîne KYC pour S11+ (RBAC 105, balance-service).
+        completed_date: "2026-07-16"
+        story_path: "stories/STORY-049.md"
+        assigned_to: "Claude (BMAD dev-story)"
       # ── RBAC plateforme (D15, EPIC-025) — délégation d'administration. ORDRE IMPOSÉ : 103 → 105 → 104/106.
       # 103 pose le socle (rien ne tient sans) ; 105 débloque l'usage réel (sans elle les amont renvoient
       # 403) ; 104 et 106 sont la surface utilisateur. Le balance CORE (076/077/101/086/099) est parti au
