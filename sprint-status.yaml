@@ -629,8 +629,8 @@ sprints:
     start_date: "2026-11-05"
     end_date: "2026-11-19"
     capacity_points: 34
-    committed_points: 31  # ⬆️ 28→31 le 2026-07-16 : STORY-105 révisée 5→8 à la rédaction (+auth-service, cf. écarts sous la story). KYC 🏁 8 (048+049) + RBAC plateforme 23 ; toujours SOUS capacité (34), reste 18 à faire. Le balance CORE (21) est parti en S11 — D15
-    completed_points: 21  # STORY-048 + STORY-103 (socle RBAC) + STORY-049 (e2e chaîne KYC 🏁) + STORY-105 (8 — migration des amont vers les permissions, 3 dépôts) done 2026-07-16
+    committed_points: 34  # ⬆️ 31→34 le 2026-07-16 : STORY-104 révisée 5→8 à la rédaction (invitation org-less = 3 blocages en cascade + non-régression d'InvitationService partagé, cf. cadrage sous la story). Après 28→31 (STORY-105 révisée 5→8). KYC 🏁 8 (048+049) + RBAC plateforme 26 ; ⚠️ le sprint est désormais À CAPACITÉ EXACTE (34/34, AUCUNE marge) : reste 13 à faire (104=8 + 106=5). Le balance CORE (21) est parti en S11 — D15
+    completed_points: 29  # STORY-048 + STORY-103 (socle RBAC) + STORY-049 (e2e chaîne KYC 🏁) + STORY-105 (8) + STORY-104 (8 — surface de gestion : les 8 permissions du catalogue ont enfin toutes un guard) done 2026-07-16. Reste 5 (STORY-106, débloquée).
     # 🏁 EPIC-016 COMPLET (046→049) ⇒ JALON MODULE 0 « chaîne KYC complète » ATTEINT le 2026-07-16 : la chaîne est
     # livrée ET prouvée rejouable (`npm run test:chain`). Reste du sprint 10 = RBAC plateforme (105 → 104/106).
     status: "in_progress"
@@ -909,10 +909,105 @@ sprints:
       - story_id: "STORY-104"
         title: "auth-service : CRUD des rôles plateforme + invitation d'un membre plateforme (POST /admin/users, org-less)"
         epic: "EPIC-025"
-        points: 5
+        points: 8  # ⬆️ RÉVISÉ 5→8 à la rédaction (2026-07-16) : le plan supposait l'invitation org-less proche d'un copier-coller — la lecture du code dit l'inverse (3 blocages en cascade + InvitationService PARTAGÉ avec un flux client vivant ⇒ le coût réel est la non-régression). Même mouvement que STORY-105 (5→8).
         service: "auth-service"
-        status: "not_started"  # Surface de gestion. CRUD rôles (créer/éditer/supprimer un rôle NON-système en composant depuis le catalogue) + GET du catalogue de permissions (alimente les cases à cocher du panel, STORY-106). INVITATION PLATEFORME : POST /admin/users — l'équivalent ORG-LESS de l'invitation tenant existante (users.controller.ts:54, aujourd'hui @Roles(TENANT_ADMIN) + org-scopée sur user.tenantId → un PLATFORM_ADMIN a tenantId=null et NE PEUT INVITER PERSONNE : le super admin est aujourd'hui plus démuni qu'un TENANT_ADMIN). ⚠️ le flux accept-invitation actuel crée une Membership → à rendre org-less (vrai travail, pas un copier-coller). Whitelist DTO : on n'invite QU'AVEC un rôle plateforme existant ; règle « on n'accorde que ce qu'on détient » (STORY-103) appliquée ici. DÉPEND STORY-103.
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-16. Surface de gestion du RBAC : CRUD rôles non-système + GET catalogue (8 perms AVEC libellés — le panel 106 a besoin des libellés, pas d'un string[] nu) + INVITATION PLATEFORME org-less (POST /admin/users) + PATCH du rôle d'un opérateur. ⚡ REFERME LA RÈGLE D'OR DE 103 : `user:invite` et `role:manage` étaient les 2 DERNIÈRES permissions sans guard qui les vérifie — les 8 sont désormais vraies. Câble les 2 invariants que 103 avait définis SANS APPELANT : assertCanGrant (anti god-mode) sur les 5 routes d'écriture + assertNotLastPlatformAdmin SOUS LA SESSION DE LA MUTATION (le TOCTOU 🔴 de la revue de 103 est fermé). Le PARADOXE est corrigé : un PLATFORM_ADMIN (tenantId=null) peut enfin inviter. lint 0, build OK, 379 unit (47 suites) + 56 e2e verts, cov 96.72/87.25/98.13/96.75 (100% sur les 5 fichiers neufs).
+        # ── 🔍 3 ÉCARTS TROUVÉS À L'IMPLÉMENTATION (le code ne disait pas tout) :
+        # 1. 🐞 countActiveByPlatformRole (103) NE POUVAIT PAS servir l'anti-suppression : il filtre status:ACTIVE
+        #    — correct pour l'anti-lockout (« reste-t-il un admin OPÉRATIONNEL ? ») mais FAUX pour « ce rôle est-il
+        #    RÉFÉRENCÉ ? » : un porteur INVITED n'est pas compté ⇒ on aurait supprimé le rôle SOUS LES PIEDS d'un
+        #    invité, qui aurait accepté pour atterrir sur perms:[] EN SILENCE. ⇒ 2e compteur countAssignedBy
+        #    PlatformRole (sans filtre de statut) + interface distincte PlatformRoleAssignmentCounter. PROUVÉ en
+        #    docker §11 : suppression refusée alors que le SEUL porteur est INVITED (l'ancien compteur → 0 → OK).
+        # 2. 🐞 FUITE des champs internes Mongo dans la réponse HTTP — INVISIBLE en unitaire, TROUVÉE EN DOCKER :
+        #    PlatformRoleDto faisait Object.assign(this, partial) sur un doc .lean()/.toObject() → _id, __v,
+        #    createdAt, updatedAt partaient dans le corps de GET/POST /admin/roles (champs absents de Swagger que
+        #    le panel 106 aurait vus dans son contrat). ⇒ projection explicite + test figeant les clés exactes.
+        # 3. `name` de rôle VOLONTAIREMENT non éditable : c'est la clé fonctionnelle recopiée dans User.platformRole
+        #    → le renommer ferait pointer tous ses porteurs vers un rôle disparu, et permissionsFor() dégrade un
+        #    rôle inconnu en [] SANS ERREUR = perte totale des droits, en silence. Renommer = créer+réattribuer+
+        #    supprimer (que le garde-fou §11 rend sûr).
+        # ── DÉCISIONS : K4 PRÉSERVÉ (permission.enum.ts reste identique À L'OCTET PRÈS dans les 3 dépôts, `diff -q`
+        #    vérifié + test qui fige ; les libellés vivent dans modules/rbac/permission-catalog.ts, propre à l'IdP) ·
+        #    AUCUNE nouvelle permission (catalogue à 8) · contrôleurs dans AdminModule (RbacModule reste FEUILLE — le
+        #    démarrage réel du conteneur prouve l'absence de cycle) · PATCH /admin/users/:id → 404 sur un compte sans
+        #    platformRole (redistribue un rôle entre opérateurs, ne PROMEUT pas un tenant ; anti-énumération).
+        # ── ✅ VÉRIF DOCKER (mongo rs0 + kafka + redis + mailhog + auth:3001 + EC:3000 + kyc:3002), assertions mongosh :
+        #    §1 login admin → perms:8, org:null · §2 catalogue 8 {value,description} · §3 POST /admin/roles → 5 rôles
+        #    en base, isSystem:false · §3b isSystem:true dans le corps → 400, 0 en base · §4 ANTI GOD-MODE avec un
+        #    acteur RÉEL {role:manage, org:read} : org:read → 201 MAIS entitlement:grant → 403 générique (ne divulgue
+        #    pas la perm manquante), ROLE_ESCALADE en base = 0 · §5 invitation org-less → User(INVITED, platformRole)
+        #    ET memberships = 0 · §6 CONTRAT KAFKA : user.registered = 1 (SENT), membership.changed = 0 · §6b ASSERTION
+        #    NÉGATIVE downstream (EC live, LAG 0) : 2 opérateurs répliqués dans identity_users, identity_memberships = 0,
+        #    org_profiles portant leur id = 0 ⇒ AUCUN OrgProfile fantôme · §7 accept-invitation SANS membership → 200,
+        #    JWT roles:[PLATFORM_KYC_LEAD] org:null perms:3 (LE test qui renvoyait 400 avant cette story) · §8 DÉLÉGATION
+        #    BORNÉE, même jeton : org:read → 200, org:suspend → 403, role:manage → 403, user:invite → 403 · §8b CROSS-
+        #    SERVICE : ce jeton sur kyc-service :3002 → 200 (validé LOCALEMENT via JWKS, aucun appel REST à l'IdP) ·
+        #    §9 ANTI-LOCKOUT (1 seul admin actif) → 409 + platformRole INTACT en base · §10 rôle système : DELETE → 403,
+        #    PATCH → 403, toujours 1 en base · §11 rôle encore porté → 409 · §12 NON-RÉGRESSION TENANT : POST /users →
+        #    201, membership = 1, membership.changed = 1, user.registered = 1, platformRole ABSENT, e-mail « votre
+        #    cabinet » · §12b accept-invitation TENANT → 200, org RENSEIGNÉ, perms:[] (D15).
+        # ── ⚠️ À CONNAÎTRE : (a) HOT-RELOAD TROMPEUR : tsc --watch recompile mais le process node ne redémarre pas
+        #    toujours → une vérif menée juste après une édition teste du CODE PÉRIMÉ (c'est ainsi que la fuite Mongo a
+        #    d'abord semblé non corrigée) ⇒ `docker compose restart <service>` AVANT toute vérif. (b) 🔶 FLAKE DE TEST
+        #    SOUS CHARGE : sur ~12 `npm test`, 2 échecs (1 test, suite non identifiée) survenus PENDANT des builds
+        #    docker concurrents ; 8 runs consécutifs verts à froid ; test fautif non capturé. Plusieurs suites durent
+        #    25-30 s ⇒ sensibilité au timeout sous contention CPU, vraisemblablement PRÉEXISTANTE (aucune suite lente
+        #    n'est neuve). NON CORRIGÉ, tracé. (c) La base de dev porte 7 PLATFORM_ADMIN actifs hérités → l'anti-lockout
+        #    ne se déclenche pas spontanément ; §9 a exigé de ramener temporairement le compte à 1 (restauré ensuite).
+        #    (d) org_profiles 54→55 pendant la vérif = un membership.changed EN BACKLOG Kafka (lag 1) appartenant à
+        #    « Cabinet Verif105 … », org TENANT issue de la vérif de STORY-105 — SANS RAPPORT avec les invitations
+        #    org-less (assertion §6b explicite là-dessus).
+        # ── 🔎 /CODE-REVIEW (high) : 5 constats — 3 CORRIGÉS. (1) 🔴 RÉSURRECTION D'UN INVITÉ SUPPRIMÉ : en retirant
+        #    l'exigence de membership de consume(), un garde-fou est tombé AVEC elle sans que personne l'ait décidé —
+        #    findActiveByUser renvoyait null pour un invité soft-deleté (membership SUSPENDED), ce qui le refusait PAR
+        #    EFFET DE BORD. Sans elle, consume() ne vérifiait plus que hash+expiration ⇒ un collaborateur VIRÉ cliquait
+        #    son ancien lien et RESSUSCITAIT son compte en ACTIVE, deletedAt toujours posé = compte à moitié supprimé
+        #    qui s'authentifie (JWT valide). REPRODUIT sur le service réel en docker, corrigé, re-vérifié (viré → 400
+        #    état inchangé ; invité sain → 200 ; org-less → 200). Le correctif dit enfin l'INVARIANT RÉEL au lieu de le
+        #    laisser dépendre d'un effet de bord : seul un invité EN ATTENTE consomme (indépendant de la membership,
+        #    vaut pour les 2 populations, déjà ce que resend() vérifie). (2) 🔴 fuite _id/__v/timestamps → CORRIGÉ.
+        #    (3) 🔴 countActive inapte à l'anti-suppression → CORRIGÉ. (4) 🟡 TOCTOU étroit (resolveGrantableRole hors
+        #    transaction, invite() ouvre la sienne → un DELETE concurrent laisse un porteur orphelin perms:[]) : NON
+        #    CORRIGÉ, TRACÉ — fenêtre très étroite, AUCUNE élévation (le résultat est une PERTE de droits) ; refermer
+        #    exigerait de faire traverser une ClientSession à InvitationService, code PARTAGÉ avec le flux tenant vivant
+        #    ⇒ au-delà du « strictement additif » de cette story. 🔓 À ARBITRER EN STORY DÉDIÉE. (5) 🟡 isDuplicateKey
+        #    Error dupliqué dans 4 fichiers (le mapping E11000 → 409 générique est un invariant anti-énumération : le
+        #    durcir devra se faire 4 fois) → extraction vers common/utils/ hors périmètre. Final : 381 unit + 56 e2e.
+        # ── 🔓 DETTE : scinder user:read / user:invite SI un persona doit un jour LISTER les opérateurs sans les NOMMER.
+        # RESTE : STORY-106 (débloquée : le panel a enfin des routes à proxifier).
+        # ── CADRAGE ACTÉ À LA RÉDACTION (2026-07-16, lecture du code) :
+        # 1. ⚡ CETTE STORY REFERME LA RÈGLE D'OR DE 103 : `user:invite` et `role:manage` sont les 2 DERNIÈRES
+        #    permissions du catalogue figé SANS consommateur (permission.enum.ts:38-41) — décoratives jusqu'ici.
+        #    Elle câble aussi les 2 invariants que 103 a DÉFINIS SANS APPELANT (platform-roles.service.ts:70-118,
+        #    dont les commentaires disent littéralement « Câblée sur les routes en STORY-104 ») : assertCanGrant
+        #    (anti god-mode) + assertNotLastPlatformAdmin (anti-lockout, ⚠️ à passer SOUS SESSION — c'est le TOCTOU
+        #    🔴 relevé par la revue de 103, qui a ajouté ClientSession à la signature EXPRÈS pour ici).
+        # 2. 🔴 L'INVITATION ORG-LESS = 3 BLOCAGES EN CASCADE (le sprint-status disait « vrai travail », le code
+        #    précise) : (a) consume() EXIGE une membership active (invitation.service.ts:196-199) → un invité
+        #    plateforme cliquerait son lien et lirait « Lien invalide ou expiré » sur un jeton VALIDE, compte
+        #    INVITED à vie ; (b) la Membership ET l'événement membership.changed sont INCONDITIONNELS (:99-124) ;
+        #    (c) l'e-mail est codé en dur sur orgName:'votre cabinet' (:212).
+        # 3. ⚠️ CONTRAT KAFKA NON NÉGOCIABLE : une invitation org-less émet user.registered SEUL. Émettre
+        #    membership.changed avec un orgId vide/bidon PROVISIONNERAIT UN OrgProfile FANTÔME chez
+        #    expert-comptable (consumer identity.*, STORY-029) = corruption silencieuse d'un read-model.
+        #    Vérif docker = assertion NÉGATIVE sur l'outbox ET sur org_profiles.
+        # 4. ✅ acceptInvitation est DÉJÀ prêt (auth.service.ts:356-366 passe user.platformRole à issueSession —
+        #    103 a désamorcé le piège d'avance). À VÉRIFIER, pas à supposer.
+        # 5. 🪤 CYCLE NESTJS À ÉVITER : RbacModule est feuille VOLONTAIREMENT (rbac.module.ts:15-18) — c'est
+        #    pourquoi assertNotLastPlatformAdmin reçoit un counter EN PARAMÈTRE. Mettre les contrôleurs dans
+        #    RbacModule l'obligerait à injecter UsersService → cycle → le conteneur NE DÉMARRE PAS. Solution :
+        #    les contrôleurs vont dans AdminModule (déjà la maison de la surface admin, importé par personne).
+        # 6. ➖ AUCUNE nouvelle permission (catalogue reste à 8) : GET/PATCH /admin/users gouvernés par user:invite
+        #    (inviter et rétrograder = le même acte de délégation ; aucun persona ne demande la scission ; le
+        #    catalogue est dupliqué × 3 dépôts depuis 105). 🔓 Dette tracée : scinder en user:read + user:invite
+        #    SI un jour un persona doit lister sans nommer.
+        # 7. 🔴 LE VRAI RISQUE = RÉGRESSION TENANT : InvitationService est PARTAGÉ avec un flux client vivant →
+        #    retouches ADDITIVES seulement ; AC-20 = les e2e tenant passent SANS modification.
+        # 8. Referme la dette DTO de 103 (platformRole sans validation depuis la levée de l'enum → whitelist ici).
+        completed_date: "2026-07-16"
+        story_path: "stories/STORY-104.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-106"
         title: "admin-panel : guards par permission + proxy de la gestion des membres/rôles plateforme"
         epic: "EPIC-025"
