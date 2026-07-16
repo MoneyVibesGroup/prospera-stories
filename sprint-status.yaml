@@ -629,8 +629,8 @@ sprints:
     start_date: "2026-11-05"
     end_date: "2026-11-19"
     capacity_points: 34
-    committed_points: 28  # KYC 🏁 8 (048 done + 049) + RBAC plateforme 20 ; sous capacité (34), reste 23 à faire. Le balance CORE (21) est parti en S11 — D15
-    completed_points: 13  # STORY-048 (actions proxifiées) + STORY-103 (socle RBAC) + STORY-049 (e2e chaîne KYC 🏁) done 2026-07-16
+    committed_points: 31  # ⬆️ 28→31 le 2026-07-16 : STORY-105 révisée 5→8 à la rédaction (+auth-service, cf. écarts sous la story). KYC 🏁 8 (048+049) + RBAC plateforme 23 ; toujours SOUS capacité (34), reste 18 à faire. Le balance CORE (21) est parti en S11 — D15
+    completed_points: 21  # STORY-048 + STORY-103 (socle RBAC) + STORY-049 (e2e chaîne KYC 🏁) + STORY-105 (8 — migration des amont vers les permissions, 3 dépôts) done 2026-07-16
     # 🏁 EPIC-016 COMPLET (046→049) ⇒ JALON MODULE 0 « chaîne KYC complète » ATTEINT le 2026-07-16 : la chaîne est
     # livrée ET prouvée rejouable (`npm run test:chain`). Reste du sprint 10 = RBAC plateforme (105 → 104/106).
     status: "in_progress"
@@ -834,12 +834,78 @@ sprints:
         story_path: "stories/STORY-103.md"
         assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-105"
-        title: "Migration des amont vers @RequirePermissions (kyc-service + platform-catalog-service), compat roles[] conservée"
+        title: "Migration des amont vers @RequirePermissions (auth-service + kyc-service + platform-catalog-service), compat roles[] conservée"
         epic: "EPIC-025"
-        points: 5
-        service: "kyc-service + platform-catalog-service"  # ⚠️ story MULTI-REPO (exception à la convention 1 story = 1 service) → 2 branches + 2 PR (MNV-105)
-        status: "not_started"  # ⚠️ NON-OPTIONNELLE — c'est ICI qu'est le vrai coût, pas dans le panel. admin-panel RELAIE le bearer de l'utilisateur ; les amont revérifient @Roles(PLATFORM_ADMIN) en dur : kyc-service (kyc-admin.controller.ts:41), platform-catalog-service (entitlements.controller.ts:52/88, catalog-admin.controller.ts:37, catalog-read.controller.ts:27). SANS cette story, un PLATFORM_KYC_OFFICER passe le guard du panel PUIS se prend un 403 de kyc-service → les rôles créés en 103/104 ne servent À RIEN. Contenu : PermissionsGuard + @RequirePermissions + catalogue de permissions DUPLIQUÉ dans chaque service (choix 2026-07-16 : cohérent K4, comme l'enum Role l'est déjà dans 4 services ; divergence assumée, PAS de paquet partagé @prospera/rbac). Compat : un jeton sans perms[] retombe sur roles[] (aucune régression pendant la migration). Les rôles TENANT (TENANT_ADMIN/TENANT_USER) NE SONT PAS TOUCHÉS — périmètre limité aux rôles PLATEFORME pour borner le rayon d'explosion. DÉPEND STORY-103.
-        assigned_to: null
+        points: 8  # ⬆️ RÉVISÉ 5→8 à la rédaction (2026-07-16) : périmètre 2→3 dépôts (cf. status) + la migration traverse JwtStrategy/RolesGuard/un corps de contrôleur, pas seulement des décorateurs
+        service: "auth-service + kyc-service + platform-catalog-service"  # ⚠️ story MULTI-REPO (exception à la convention 1 story = 1 service) → 3 branches + 3 PR (MNV-105)
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT + revue + INTÉGRÉE DANS DEV 2026-07-16. ⚠️ NON-OPTIONNELLE — c'est ICI qu'est le vrai coût, pas dans le panel. admin-panel RELAIE le bearer de l'utilisateur ; les amont revérifient @Roles(PLATFORM_ADMIN) en dur : kyc-service (kyc-admin.controller.ts:41), platform-catalog-service (entitlements.controller.ts:52/88, catalog-admin.controller.ts:37, catalog-read.controller.ts:27). SANS cette story, un PLATFORM_KYC_OFFICER passe le guard du panel PUIS se prend un 403 de kyc-service → les rôles créés en 103/104 ne servent À RIEN. Contenu : PermissionsGuard + @RequirePermissions + catalogue de permissions DUPLIQUÉ dans chaque service (choix 2026-07-16 : cohérent K4, comme l'enum Role l'est déjà dans 4 services ; divergence assumée, PAS de paquet partagé @prospera/rbac). Compat : un jeton sans perms[] retombe sur roles[] (aucune régression pendant la migration). Les rôles TENANT (TENANT_ADMIN/TENANT_USER) NE SONT PAS TOUCHÉS — périmètre limité aux rôles PLATEFORME pour borner le rayon d'explosion. DÉPEND STORY-103.
+        # ── ÉCARTS DE PÉRIMÈTRE ACTÉS À LA RÉDACTION (2026-07-16, lecture du code + arbitrage PO) :
+        # 1. ⬆️ +auth-service (2→3 dépôts, 5→8 pts) : admin-organizations.controller.ts:35 est @Roles(PLATFORM_ADMIN) et
+        #    c'est (a) la source PRIMAIRE NON DÉGRADABLE du panel (org-aggregation.service.ts:110 → mapPrimaryError :
+        #    403 ≠ 404 → 503) ⇒ un PLATFORM_SUPPORT porteur d'org:read prendrait un 503 sur une stack SAINE → org:read
+        #    est INERTE sans cette migration ; (b) POST /admin/organizations/:id/suspend est le SEUL consommateur
+        #    possible d'org:suspend dans TOUT l'écosystème (admin-panel n'expose aucune route de suspension) ⇒ cadrée à
+        #    2 dépôts, la 105 laissait org:suspend DÉCORATIVE = rupture de la règle d'or de 103. Le mettre en 104
+        #    (qui vient APRÈS dans l'ordre imposé) clôturerait 105 avec org:read en 503. Coût marginal faible :
+        #    auth-service a DÉJÀ le catalogue (103) → guard + décorateur + 3 routes, aucune duplication.
+        # 2. ➖ catalog-admin.controller.ts:37 et catalog-read.controller.ts:27 NE SONT PAS MIGRÉS (contrairement à ce
+        #    que listait ce fichier) : aucune permission du catalogue FIGÉ ne les couvre (pas de catalog:manage) et
+        #    catalog-read sert majoritairement les TENANT_ADMIN (perms:[] pour toujours → les gater par permission
+        #    casserait tous les tenants). Migrer = inventer une permission dont aucun persona n'a l'usage = exactement
+        #    ce que la règle d'or interdit. Ils RESTENT sur @Roles (le PLATFORM_ADMIN garde PLATFORM_ADMIN dans roles[]).
+        # ── LIVRÉ (2026-07-16) : PermissionsGuard + @RequirePermissions (sémantique OU) dans les 3 services ; catalogue
+        # DUPLIQUÉ à l'identique (diff à vide) + test de VERROU par service (une divergence K4 échoue au test) ;
+        # JwtStrategy roles[]/perms[] (ROLE_PRECEDENCE et son repli TENANT_USER SUPPRIMÉS) + RolesGuard multi-rôles
+        # (kyc + catalog) ; shim de compat pré-103 dans la stratégie SEULE (absent ≠ vide) + fix du `perms ?? []` de
+        # auth-service ; 11 routes migrées ; assertCanReadOrg → perms.includes(org:read) AVEC reprise explicite de
+        # l'exclusion TENANT_USER. QUALITÉ : 850 tests verts (721 unit + 129 e2e), lint 0 ×3, build ×3, cov
+        # auth 96.24/85.04/97.48/96.26 · kyc 95.81/88.95/94.96/95.69 · catalog 99.86/92.89/100/99.85 (seuils intacts).
+        # 3 DÉCOUVERTES à l'implémentation : (a) 🔴 les harnais e2e n'enregistraient PAS PermissionsGuard → les routes
+        # migrées étaient NON GARDÉES dans les tests (un TENANT_ADMIN obtenait 200 sur GET /admin/kyc — la prod n'a
+        # jamais été exposée, app.module enregistre le guard) → corrigé dans les 3 harnais ; (b) 🔴 la fixture
+        # test/utils/rs256.ts construisait le jeton par LISTE BLANCHE et SUPPRIMAIT `perms` → les personas retombaient
+        # dans le shim : la fixture ne pouvait PAS minter un jeton post-103 → corrigé (propagation conditionnelle,
+        # préserve undefined ≠ []) ; (c) auth-service n'avait AUCUN e2e sur /admin/organizations → créé (15 tests).
+        # VÉRIF DOCKER (personas obtenus par VRAI login, pas de jeton forgé) : §1 admin = non-régression totale des 11
+        # routes (suspend 200, grant 201, revoke 200) ; §2 ⚡ PLATFORM_KYC_OFFICER reject 200 MAIS grant/revoke/suspend
+        # 403 ; §2b persistance RÉELLE : profil KYC → REJECTED avec reviewedBy = l'agent, outbox kyc.status.changed
+        # SENT ; §3 le trou comblé : org:read → 200 sur auth (avant : 403 → 503 via le panel) ; §4 PLATFORM_SUPPORT lit
+        # tout, n'écrit rien ; §5 non-régression tenant réel (perms:[]) ; §6 ⚡ TENANT_USER sur SA PROPRE org → 403
+        # (exclusion préservée) ; §7 catalog-admin/read intacts ; §1b org SUSPENDED + entitlement REVOKED + events SENT.
+        # /CODE-REVIEW (high) : 3 constats, 3 TRAITÉS. (1) 🔴 le @Roles(PLATFORM_ADMIN) retiré était posé sur la
+        # CLASSE = filet DENY-BY-DEFAULT : il protégeait toute route du contrôleur, y compris une FUTURE route dont
+        # l'auteur oublierait le décorateur. Des décorateurs par route seuls = sur un contrôleur d'ADMINISTRATION, une
+        # route non décorée devient accessible à tout utilisateur authentifié (TENANT_USER compris) — latent, mais
+        # l'échec e2e du 1er jet a prouvé le mode de défaillance → CORRIGÉ : plancher @RequirePermissions(ORG_READ) au
+        # niveau classe sur kyc-admin + admin-organizations ; getAllAndOverride([handler, classe]) fait GAGNER le
+        # handler (suspend reste org:suspend), précédence vérifiée en e2e ET en docker réel (officier : lecture 200 /
+        # suspend 403 — une précédence inversée aurait élargi suspend à tout porteur d'org:read). (2) EntitlementsController
+        # ne PEUT PAS recevoir ce plancher (ses lectures servent des tenants à perms:[] → refus au guard avant le corps)
+        # → DOCUMENTÉ au point de danger : toute nouvelle route de lecture DOIT appeler assertCanReadOrg. (3) assertCanReadOrg
+        # construisait l'exception de refus (capture de pile) à CHAQUE lecture légitime d'un tenant puis la jetait
+        # → CORRIGÉ (fabrique). ⚠️ PLATFORM_AUDITOR non testé séparément en docker : perms identiques à PLATFORM_SUPPORT
+        # ({org:read}, vérifié en base) et seules les perms décident → résultat identique par construction, mais l'assertion
+        # directe manque (dit, pas sous-entendu).
+        # INTÉGRÉ DANS DEV 2026-07-16 : 3 dépôts, 3 PR en « Rebase and merge », AUCUN merge commit introduit, branches
+        # supprimées. auth PR#3 (dev=cfa3ad6) · kyc PR#4 (dev=b77316b) · catalog PR#5 (dev=aa5e0f2).
+        # SUITES : STORY-106 débloquée (hook : SourceStatus doit gagner 'forbidden', sinon un 403 reste présenté comme
+        # une panne) ; STORY-104 consommera user:invite + role:manage = les 2 dernières perms sans consommateur.
+        # 🔓 DETTE : story dédiée à arbitrer (kyc:read + sortir les URLs présignées) AVANT usage réel de PLATFORM_SUPPORT.
+        # 3. Lecture KYC (file + détail) mappée sur org:read (ARBITRÉ) : le catalogue figé n'a pas de kyc:read, et
+        #    toute règle plus stricte → sources.kyc='unavailable' EN PERMANENCE pour support/auditeur (upstream-error.ts:42
+        #    mappe TOUT sauf 404 en 'unavailable') = FAUSSE PANNE. 🔓 DETTE TRACÉE : support/auditeur voient donc les URLs
+        #    présignées des pièces d'identité (perms identiques {org:read} → indistinguables). Suite = nouvelle story
+        #    (kyc:read + sortir les URLs présignées), À ARBITRER AVANT tout usage réel de PLATFORM_SUPPORT en prod.
+        # 4. HOOK INERTE POUR 106 (hors 105, le panel n'est pas touché) : classifyUpstreamError confond 403 et panne →
+        #    SourceStatus doit gagner un état 'forbidden', sinon le moindre privilège est indiscernable d'une panne.
+        # 5. 🪤 2 PIÈGES relevés dans le code, documentés dans la story : (a) JwtStrategy.resolveRole replie TOUT rôle
+        #    inconnu sur TENANT_USER → un PLATFORM_KYC_OFFICER est projeté TENANT_USER/tenantId:null ; (b) entitlements
+        #    .controller.ts:143 porte une autorisation DANS LE CORPS (user.role === PLATFORM_ADMIN) → migrer le guard
+        #    sans elle = 403 imprenable. Les deux se composent. + auth-service jwt.strategy.ts:96 fait `perms ?? []`,
+        #    ce qui EFFACE la distinction absent/vide dont dépend le shim de compat → à corriger ici.
+        completed_date: "2026-07-16"
+        story_path: "stories/STORY-105.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-104"
         title: "auth-service : CRUD des rôles plateforme + invitation d'un membre plateforme (POST /admin/users, org-less)"
         epic: "EPIC-025"
