@@ -629,15 +629,37 @@ sprints:
     start_date: "2026-11-05"
     end_date: "2026-11-19"
     capacity_points: 34
-    committed_points: 29  # chargé (KYC 🏁 8 + balance CORE 21) — split D14 : la balance vient AVANT le Bilan ; rééquilibrable si besoin
-    completed_points: 5  # STORY-048 (admin-panel actions proxifiées) done 2026-07-16
+    committed_points: 28  # KYC 🏁 8 (048 done + 049) + RBAC plateforme 20 ; sous capacité (34), reste 23 à faire. Le balance CORE (21) est parti en S11 — D15
+    completed_points: 10  # STORY-048 (admin-panel actions proxifiées) + STORY-103 (socle RBAC plateforme) done 2026-07-16
     status: "in_progress"
     # ── D14 (2026-07-12) : split CORE/EXTENDED de balance-service. La PRODUCTION + STOCKAGE de la balance
-    # quitte le bilan-service (EPIC-009 SUPERSEDED) et devient le socle CORE de balance-service, séquencé
-    # ICI (sprint 10, AVANT le Bilan) : la balance est stockée d'abord, le bilan-service la consomme ensuite
-    # (sprints 11-14 inchangés → Bilan MV non retardé 🏁). EXTENDED (profil OCR, cahiers/OCR, rapprochement,
-    # fiscal, conseil) reste sprints 15-19. Stories EPIC-009 (050-053) SUPERSEDED par 101/086/098/088.
-    goal: "Chaîne KYC complète livrée 🏁 (AD-2) : admin-panel actions proxifiées + e2e. + Atelier Balance CORE (D14) : contrat de balance canonique + stockage (keyé orgId+exercice) + import Sage + saisie manuelle + handoff → la balance est produite/stockée AVANT le Bilan (bilan-service la consomme dès EPIC-010)."
+    # quitte le bilan-service (EPIC-009 SUPERSEDED) et devient le socle CORE de balance-service. EXTENDED
+    # (profil OCR, cahiers/OCR, rapprochement, fiscal, conseil) reste sprints 15-19. Stories EPIC-009
+    # (050-053) SUPERSEDED par 101/086/098/088.
+    # ⚠️ D14 AMENDÉE par D15 (2026-07-16) : le balance CORE était séquencé ICI (sprint 10) ; il glisse au
+    # sprint 11. L'INVARIANT D14 TIENT (la balance reste produite/stockée AVANT que le Bilan la consomme),
+    # seul le calendrier décale d'un sprint.
+    #
+    # ── D15 (2026-07-16) : RBAC plateforme (EPIC-025, STORY-103→106) inséré ICI, AVANT balance-service.
+    # POURQUOI : `admin-panel` n'a aujourd'hui qu'un seul rôle plateforme (PLATFORM_ADMIN, tout-ou-rien,
+    # créé par seed uniquement — aucune voie d'API). Impossible de déléguer la revue KYC à un opérateur
+    # sans lui donner AUSSI les entitlements et la suspension d'organisation. Plus la plateforme grossit,
+    # plus le nombre de services à migrer augmente (déjà 4 copies de l'enum Role) : le RBAC coûte moins
+    # cher maintenant qu'après balance-service.
+    # CONCEPTION : UN SEUL système, pas deux. Les personas (KYC_OFFICER/SUPPORT/AUDITOR) ne sont PAS des
+    # valeurs d'enum mais des RÔLES SYSTÈME SEEDÉS dans la collection `roles`, non supprimables. Ligne de
+    # partage : PERMISSIONS = code (une permission n'existe que si un guard la vérifie → catalogue figé),
+    # RÔLES = données (un rôle n'est qu'un nom donné à un paquet de permissions → composable à chaud).
+    # Le JWT porte `perms[]` EN PLUS de `roles[]` (additif, aucun big-bang ; TTL access 15 min = borne
+    # naturelle de propagation d'un changement de rôle).
+    # CATALOGUE DUPLIQUÉ PAR SERVICE (tranché 2026-07-16) : cohérent K4 (contrats dupliqués, zéro
+    # dépendance inter-services), comme l'enum Role l'est déjà. Divergence assumée ; PAS de paquet partagé
+    # @prospera/rbac (romprait K4 + 1ʳᵉ dépendance partagée de l'écosystème).
+    # COÛT RÉEL = LES AMONT, PAS LE PANEL : admin-panel RELAIE le bearer ; kyc-service (kyc-admin
+    # .controller:41) et platform-catalog-service (entitlements.controller:52/88) revérifient
+    # @Roles(PLATFORM_ADMIN) → sans STORY-105, tout nouveau rôle prend un 403 en amont. STORY-105 est donc
+    # NON-OPTIONNELLE pour que 103/104/106 servent à quelque chose.
+    goal: "Chaîne KYC complète livrée 🏁 (AD-2) : admin-panel actions proxifiées + e2e. + RBAC plateforme (D15, EPIC-025) : catalogue de permissions + rôles système seedés + perms[] dans le JWT + migration des amont + gestion des membres/rôles plateforme depuis admin-panel → la délégation d'administration (agent KYC, support, auditeur) devient possible sans donner les pleins pouvoirs."
     stories:
       - story_id: "STORY-048"
         title: "admin-panel : actions proxifiées — revue KYC approve/reject (→ kyc) + grant/revoke entitlement (→ catalog), relais du JWT admin"
@@ -655,13 +677,116 @@ sprints:
         service: "admin-panel"
         status: "not_started"  # dépend STORY-045 + STORY-048 ; jalon Module 0
         assigned_to: null
-      # ── Atelier Balance CORE (D14) — remplace l'ancien EPIC-009 (import bilan) SUPERSEDED ──
+      # ── RBAC plateforme (D15, EPIC-025) — délégation d'administration. ORDRE IMPOSÉ : 103 → 105 → 104/106.
+      # 103 pose le socle (rien ne tient sans) ; 105 débloque l'usage réel (sans elle les amont renvoient
+      # 403) ; 104 et 106 sont la surface utilisateur. Le balance CORE (076/077/101/086/099) est parti au
+      # sprint 11 pour laisser la place — D15.
+      - story_id: "STORY-103"
+        title: "Fondation RBAC : catalogue de permissions (code, dupliqué K4) + collection roles + seed des rôles système + perms[] dans le JWT + fix issueSession"
+        epic: "EPIC-025"
+        points: 5
+        service: "auth-service"
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-16. ⚡ SOCLE — rien ne tient sans. PERMISSIONS = CODE (catalogue figé : une permission n'existe que si un guard la vérifie ; org:read, org:suspend, kyc:approve, kyc:reject, entitlement:grant, entitlement:revoke, user:invite, role:manage) vs RÔLES = DONNÉES (collection `roles` : nom + permissions[] + isSystem). Seed des 4 rôles système NON SUPPRIMABLES : PLATFORM_ADMIN (toutes), PLATFORM_KYC_OFFICER {kyc:approve,kyc:reject,org:read}, PLATFORM_SUPPORT {org:read}, PLATFORM_AUDITOR {org:read} — les personas sont des LIGNES EN BASE, PAS des valeurs d'enum (sinon 2 systèmes RBAC en parallèle = divergence garantie). JWT : `perms[]` AJOUTÉ à AccessTokenPayload, `roles[]` CONSERVÉ (additif → aucun service cassé, migration progressive). ⚠️ FIX OBLIGATOIRE ICI : issueSession (auth.service.ts:260) fait gagner la membership sur le platformRole → un opérateur plateforme ayant AUSSI une membership perd silencieusement ses droits (c'est déjà pourquoi la recette docker supprime la membership à la main). RÈGLE DE SÉCURITÉ : on ne peut accorder QUE ce qu'on détient (sinon role:manage = god-mode : se créer un rôle avec entitlement:grant et se l'attribuer) + le DERNIER PLATFORM_ADMIN est verrouillé (anti-lockout : sans route de secours il ne reste que le seed en base). TTL access 15 min = borne de propagation. DÉBLOQUE 104/105/106.
+        # ── PRÉCISIONS ISSUES DE LA RÉDACTION (2026-07-16, lecture du code) :
+        # 1. Le fix issueSession NE TIENT PAS DANS issueSession SEUL : jwt.strategy.ts:91 ne lit que `roles[0]`
+        #    → même en émettant [TENANT_ADMIN, PLATFORM_ADMIN], RolesGuard refuserait encore. RAYON RÉEL = 3
+        #    fichiers (auth.service.ts:260 → jwt.strategy.ts:91 → roles.guard.ts:36). Blast radius VÉRIFIÉ =
+        #    roles.guard.ts:36 est le SEUL lecteur de request.user.role (les autres `.role` = membership/DTO).
+        # 2. 🔴 BLOQUANT POUR 104 : user.schema.ts:46 déclare `@Prop({ type: String, enum: Role }) platformRole`
+        #    → Mongoose REJETTERAIT le save d'un PLATFORM_KYC_OFFICER (absent de l'enum Role, ce qui est LE
+        #    principe : personas = données). La contrainte d'enum DOIT sauter en 103 (→ `type: String` libre,
+        #    intégrité référentielle assurée à l'écriture en 104). Index sparse user.schema.ts:57 conservé.
+        # 3. Seed des rôles système = OnApplicationBootstrap (précédent kafka-bootstrap.service.ts:30), PAS un
+        #    npm script : un seed oubliable → perms:[] → PLATFORM_ADMIN silencieusement démuni, sans erreur au
+        #    boot. Upsert par `name`, AUCUN deleteMany (les rôles non-système de 104 sont intouchables).
+        # ── LIVRÉ (2026-07-16) : catalogue figé common/rbac/permission.enum.ts (8 perms, PERMISSION_CATALOG gelé) ;
+        # collection `roles` (name unique + permissions[] VALIDÉES contre le catalogue + isSystem) ; 4 rôles système
+        # seedés au boot (platform-roles-seed.service.ts, OnApplicationBootstrap, upsert par name, AUCUN deleteMany) ;
+        # PLATFORM_ADMIN = PERMISSION_CATALOG *par construction* (une perm livrée ne peut pas lui manquer par oubli) ;
+        # perms[] AJOUTÉ au JWT (roles[] CONSERVÉ → zéro service cassé) ; invariants assertCanGrant + anti-lockout
+        # livrés et TESTÉS (routes = 104). FIX issueSession sur les 3 maillons (auth.service union → jwt.strategy
+        # tableau complet → roles.guard multi-rôles). Enum Mongoose LEVÉ sur User.platformRole (débloque 104).
+        # 3 ÉCARTS vs story rédigée : (a) acceptInvitation portait la MÊME famille de bug (issueSession appelé sans
+        # platformRole) — latent aujourd'hui mais 104 en fait la voie d'entrée des opérateurs → CORRIGÉ ici ;
+        # (b) users.controller.ts:173 lisait bien request.user.role (champ d'AFFICHAGE du contrat public /users/me,
+        # pas une autorisation) → contrat préservé via roles[0] ?? null, qui reproduit EXACTEMENT l'ancienne valeur ;
+        # (c) fichier nommé -seed et non -bootstrap : collectCoverageFrom exclut *bootstrap* → le seed serait sorti
+        # SILENCIEUSEMENT de la couverture. QUALITÉ : 296 tests / 42 suites verts, lint 0, cov 96.16/85.16/97.42/96.18
+        # (seuils 65/90/90/90) ; TOUT le RBAC neuf à 100 % + roles.guard.ts à 100 %. Non-régression de la forme du
+        # payload verrouillée par un toEqual EXACT (échoue si un claim disparaît OU apparaît).
+        # VÉRIF DOCKER : §1 4 rôles système au boot ; §2 login admin → perms = les 8 ; §3 ⚡ LA PREUVE : admin AVEC
+        # membership TENANT_ADMIN active → roles ['TENANT_ADMIN','PLATFORM_ADMIN'] + GET /admin/organizations = 200
+        # (AVANT 103 : 403) → l'étape manuelle « delete membership » de la recette docker-platform-admin-token est
+        # CADUQUE ; §4 platformRole='PLATFORM_KYC_OFFICER' persiste (enum levé) → perms kyc:approve/kyc:reject/org:read
+        # SANS entitlement:grant ; §5 non-régression tenant (perms:[], /me 200 role inchangé, 403 plateforme) ;
+        # §6 non-régression AMONT NON MIGRÉS (lisent roles[]) : admin-panel 200, kyc 200, catalog 200, sans jeton 401 ;
+        # §6b FRONTIÈRE : PLATFORM_KYC_OFFICER → kyc 403 + catalog 403 = LA DÉMONSTRATION que STORY-105 est
+        # NON-OPTIONNELLE ; §7 idempotence 3 boots → 4 rôles système (pas 12), 0 doublon, rôle non-système
+        # (simulation 104) INTACT.
+        # /CODE-REVIEW (high) : 4 constats — 2 CORRIGÉS. (1) 🔴 anti-lockout TOCTOU : assertNotLastPlatformAdmin +
+        # countActiveByPlatformRole n'acceptaient pas de ClientSession → 104 n'aurait PAS pu évaluer l'invariant dans
+        # la transaction de sa mutation (2 rétrogradations parallèles → 0 admin, lockout IRRÉVERSIBLE) ; le dépôt avait
+        # DÉJÀ résolu ce cas exact un cran plus bas (MembershipsService.countActiveAdmins(orgId, session) sous session
+        # dans UserManagementService) → même patron appliqué + test de transmission. (2) 🔴 seed non tolérant au boot
+        # concurrent : 2 instances (scale-up/rolling deploy) → upserts concurrents sur l'index unique `name` → E11000
+        # remonté depuis onApplicationBootstrap → conteneur qui ne démarre pas (invisible en dev, 1 réplique) → rejeu
+        # sur duplicate key, toute AUTRE erreur propage. (3) platformRole sans validation depuis la levée de l'enum :
+        # ACCEPTÉ (levée nécessaire sinon 104 bloquée ; dégradation sûre : rôle inconnu → perms:[], jamais d'élévation ;
+        # whitelist DTO en 104). (4) findByName supprimé (spéculatif, hors ACs). Final : 298 tests / 42 suites verts.
+        # INTÉGRÉ DANS DEV 2026-07-16 : repo prospera-auth-service, branche MNV-103 (depuis dev, rebasée origin/dev),
+        # PR #2 « Rebase and merge » sur dev (HEAD f4eed67), branche supprimée.
+        # RESTE : enchaîner STORY-105 (⚡ non-optionnelle — §6b prouve qu'un PLATFORM_KYC_OFFICER porte kyc:approve
+        # dans son jeton ET se prend quand même un 403 en amont).
+        completed_date: "2026-07-16"
+        story_path: "stories/STORY-103.md"
+        assigned_to: "Claude (BMAD dev-story)"
+      - story_id: "STORY-105"
+        title: "Migration des amont vers @RequirePermissions (kyc-service + platform-catalog-service), compat roles[] conservée"
+        epic: "EPIC-025"
+        points: 5
+        service: "kyc-service + platform-catalog-service"  # ⚠️ story MULTI-REPO (exception à la convention 1 story = 1 service) → 2 branches + 2 PR (MNV-105)
+        status: "not_started"  # ⚠️ NON-OPTIONNELLE — c'est ICI qu'est le vrai coût, pas dans le panel. admin-panel RELAIE le bearer de l'utilisateur ; les amont revérifient @Roles(PLATFORM_ADMIN) en dur : kyc-service (kyc-admin.controller.ts:41), platform-catalog-service (entitlements.controller.ts:52/88, catalog-admin.controller.ts:37, catalog-read.controller.ts:27). SANS cette story, un PLATFORM_KYC_OFFICER passe le guard du panel PUIS se prend un 403 de kyc-service → les rôles créés en 103/104 ne servent À RIEN. Contenu : PermissionsGuard + @RequirePermissions + catalogue de permissions DUPLIQUÉ dans chaque service (choix 2026-07-16 : cohérent K4, comme l'enum Role l'est déjà dans 4 services ; divergence assumée, PAS de paquet partagé @prospera/rbac). Compat : un jeton sans perms[] retombe sur roles[] (aucune régression pendant la migration). Les rôles TENANT (TENANT_ADMIN/TENANT_USER) NE SONT PAS TOUCHÉS — périmètre limité aux rôles PLATEFORME pour borner le rayon d'explosion. DÉPEND STORY-103.
+        assigned_to: null
+      - story_id: "STORY-104"
+        title: "auth-service : CRUD des rôles plateforme + invitation d'un membre plateforme (POST /admin/users, org-less)"
+        epic: "EPIC-025"
+        points: 5
+        service: "auth-service"
+        status: "not_started"  # Surface de gestion. CRUD rôles (créer/éditer/supprimer un rôle NON-système en composant depuis le catalogue) + GET du catalogue de permissions (alimente les cases à cocher du panel, STORY-106). INVITATION PLATEFORME : POST /admin/users — l'équivalent ORG-LESS de l'invitation tenant existante (users.controller.ts:54, aujourd'hui @Roles(TENANT_ADMIN) + org-scopée sur user.tenantId → un PLATFORM_ADMIN a tenantId=null et NE PEUT INVITER PERSONNE : le super admin est aujourd'hui plus démuni qu'un TENANT_ADMIN). ⚠️ le flux accept-invitation actuel crée une Membership → à rendre org-less (vrai travail, pas un copier-coller). Whitelist DTO : on n'invite QU'AVEC un rôle plateforme existant ; règle « on n'accorde que ce qu'on détient » (STORY-103) appliquée ici. DÉPEND STORY-103.
+        assigned_to: null
+      - story_id: "STORY-106"
+        title: "admin-panel : guards par permission + proxy de la gestion des membres/rôles plateforme"
+        epic: "EPIC-025"
+        points: 5
+        service: "admin-panel"
+        status: "not_started"  # La surface demandée : ajouter un utilisateur, lui attribuer un rôle, composer un rôle depuis le catalogue — DEPUIS le panel. Guards : @Roles(PLATFORM_ADMIN) uniforme (6 routes, tout-ou-rien) → @RequirePermissions granulaire, contrôleur par contrôleur (AdminOrgsController lecture = org:read ; AdminOrgActionsController = kyc:approve/kyc:reject/entitlement:grant/entitlement:revoke). Nouveau : proxy des routes de gestion 104 (users/roles/catalogue), même patron que STORY-048 (relais du bearer, traduction fidèle des erreurs, le BFF ne décide/persiste RIEN). Enum Role local (common/enums/role.enum.ts) + ROLE_PRECEDENCE : à faire évoluer vers les permissions. DÉPEND STORY-103 + STORY-105 (sans 105, la granularité du panel est cosmétique : les amont refusent). VÉRIF DOCKER ATTENDUE : un PLATFORM_KYC_OFFICER approuve un KYC (200) MAIS se prend un 403 sur grant entitlement — c'est LE test qui prouve que la délégation marche.
+        assigned_to: null
+
+  - sprint_number: 11
+    start_date: "2026-11-19"
+    end_date: "2026-12-03"
+    capacity_points: 34
+    committed_points: 44  # ⚠️ SURCHARGÉ (44 > 34, vélocité réf. ~27) — À RÉÉQUILIBRER au prochain /bmad:sprint-planning
+    completed_points: 0
+    status: "not_started"
+    # ⚠️ D15 (2026-07-16) : le balance CORE (21 pts) a été déplacé du sprint 10 vers ICI pour laisser passer
+    # le RBAC plateforme (EPIC-025). Le sprint 11 porte donc balance CORE (21) + Bilan EPIC-010 (23) = 44 pts
+    # pour 34 de capacité : CE SPRINT N'EST PAS TENABLE EN L'ÉTAT et doit être arbitré au sprint-planning.
+    # L'INVARIANT D14 EST PRÉSERVÉ (la balance est produite/stockée AVANT que le bilan-service la consomme) :
+    # STORY-101 (keystone) + 086 + 099 restent AVANT les stories EPIC-010 dans la liste ci-dessous. L'arbitrage
+    # le plus probable = pousser EPIC-010 (054→058) au sprint 12 et décaler la chaîne Bilan d'un sprint —
+    # c'est le coût assumé de D15, à trancher explicitement plutôt qu'à subir.
+    goal: "⚠️ À ARBITRER (44/34). Atelier Balance CORE (D14, glissé du S10 par D15) : contrat de balance canonique + stockage (keyé orgId+exercice) + import Sage + saisie manuelle + handoff. + Bilan — Référentiels & table de passage (EPIC-010) : interface de référentiel, mapping comptes→postes, paquets SYSCOHADA révisé + SFD-BCEAO, surcharges org."
+    stories:
+      # ── Atelier Balance CORE (D14) — remplace l'ancien EPIC-009 (import bilan) SUPERSEDED.
+      # Glissé du sprint 10 par D15 (RBAC plateforme inséré avant). Reste EN TÊTE du sprint : l'invariant
+      # D14 exige que la balance soit produite/stockée AVANT que le Bilan (EPIC-010, ci-dessous) la consomme.
       - story_id: "STORY-076"
         title: "Scaffold balance-service (:3007, base balance_service, relying party JWKS, health, Kafka)"
         epic: "EPIC-017"
         points: 3
         service: "balance-service"
-        status: "ready-for-dev"  # story rédigée 2026-07-12 (relying party PUR : JwtStrategy RS256/JWKS validate-only, PAS de PasswordService)
+        status: "ready-for-dev"  # story rédigée 2026-07-12 (relying party PUR : JwtStrategy RS256/JWKS validate-only, PAS de PasswordService). Déplacée S10 → S11 par D15 (2026-07-16)
         story_path: "stories/STORY-076.md"
         assigned_to: null
       - story_id: "STORY-077"
@@ -669,7 +794,7 @@ sprints:
         epic: "EPIC-017"
         points: 5
         service: "balance-service"
-        status: "ready-for-dev"  # story rédigée 2026-07-12 (BalanceAccessGuard : palier KYC APPLIQUÉ deny-by-default ; palier abonnement PRÉPARÉ mais NON appliqué avant le paiement/S20 — patron STORY-014)
+        status: "ready-for-dev"  # story rédigée 2026-07-12 (BalanceAccessGuard : palier KYC APPLIQUÉ deny-by-default ; palier abonnement PRÉPARÉ mais NON appliqué avant le paiement/S20 — patron STORY-014). Déplacée S10 → S11 par D15 (2026-07-16)
         story_path: "stories/STORY-077.md"
         assigned_to: null
       - story_id: "STORY-101"
@@ -677,7 +802,7 @@ sprints:
         epic: "EPIC-017"
         points: 5
         service: "balance-service"
-        status: "ready-for-dev"  # ⚡ KEYSTONE — story rédigée 2026-07-12 : schéma BalanceCanonique, idempotence (orgId+exercice+source+version), immutabilité post-validation, BalanceRepository, validations FR-A25/A27
+        status: "ready-for-dev"  # ⚡ KEYSTONE — story rédigée 2026-07-12 : schéma BalanceCanonique, idempotence (orgId+exercice+source+version), immutabilité post-validation, BalanceRepository, validations FR-A25/A27. Déplacée S10 → S11 par D15 (2026-07-16) ; « à concevoir dès S10 » (atelier_balance_epics.keystone) devient « dès S11 »
         story_path: "stories/STORY-101.md"
         assigned_to: null
       - story_id: "STORY-086"
@@ -685,7 +810,7 @@ sprints:
         epic: "EPIC-021"
         points: 5
         service: "balance-service"
-        status: "ready-for-dev"  # adaptateur #2 du hub (import fichier) ; remplace ex-STORY-050. Story rédigée 2026-07-12 : dry-run=200 (aucune persistance) / dryRun=false=201 (persiste). ⚠️ fixture Excel/CSV Sage à obtenir (seul un PDF en main)
+        status: "ready-for-dev"  # adaptateur #2 du hub (import fichier) ; remplace ex-STORY-050. Story rédigée 2026-07-12 : dry-run=200 (aucune persistance) / dryRun=false=201 (persiste). ⚠️ fixture Excel/CSV Sage à obtenir (seul un PDF en main). Déplacée S10 → S11 par D15 (2026-07-16)
         story_path: "stories/STORY-086.md"
         assigned_to: null
       - story_id: "STORY-099"
@@ -693,19 +818,10 @@ sprints:
         epic: "EPIC-024"
         points: 3
         service: "balance-service"
-        status: "ready-for-dev"  # story rédigée 2026-07-12 : SPRINT 10 = côté PRODUCTEUR uniquement (API GET + émission balance.created + doc contrat) ; l'e2e interop réel balance→bilan est DIFFÉRÉ à EPIC-009 (S11-14, quand le consumer bilan-service existe)
+        status: "ready-for-dev"  # story rédigée 2026-07-12 : côté PRODUCTEUR uniquement (API GET + émission balance.created + doc contrat) ; l'e2e interop réel balance→bilan est DIFFÉRÉ à EPIC-009 (quand le consumer bilan-service existe). Déplacée S10 → S11 par D15 (2026-07-16)
         story_path: "stories/STORY-099.md"
         assigned_to: null
-
-  - sprint_number: 11
-    start_date: "2026-11-19"
-    end_date: "2026-12-03"
-    capacity_points: 34
-    committed_points: 23
-    completed_points: 0
-    status: "not_started"
-    goal: "Bilan — Référentiels & table de passage (EPIC-010) : interface de référentiel, mapping comptes→postes, paquets SYSCOHADA révisé + SFD-BCEAO, surcharges org."
-    stories:
+      # ── Bilan — Référentiels & table de passage (EPIC-010) ──
       - story_id: "STORY-054"
         title: "Interface de référentiel + chargement via ReferentielLoader (résolution depuis read-model entitlement) — FR-005"
         epic: "EPIC-010"
@@ -909,7 +1025,7 @@ sprints:
     committed_points: 18
     completed_points: 0
     status: "not_started"
-    goal: "EXTENDED (D14) — le socle 076/077 est déjà livré en CORE (S10). Ici : chargement référentiel/paquet fiscal (EPIC-017/019) + profil société & régime + extraction OCR Statuts/CFE (EPIC-018) : CRUD profil, 2 axes SN/SMT + régime fiscal, OCR pré-remplissage."
+    goal: "EXTENDED (D14) — le socle 076/077 est déjà livré en CORE (S11, décalé du S10 par D15). Ici : chargement référentiel/paquet fiscal (EPIC-017/019) + profil société & régime + extraction OCR Statuts/CFE (EPIC-018) : CRUD profil, 2 axes SN/SMT + régime fiscal, OCR pré-remplissage."
     stories:
       - story_id: "STORY-078"
         title: "Chargement référentiel comptable (SN/SMT) + paquet fiscal pays (loader + checksum + cache)"
@@ -985,7 +1101,7 @@ sprints:
     committed_points: 21
     completed_points: 0
     status: "not_started"
-    goal: "Hub multi-source (D13) : adaptateur #1 = ingestion DIRECTE balance.submitted (verticaux intégrés IMF/distributeur) ; reprise à-nouveaux ; rapprochement bancaire (relevés banque + mobile money → état de rapprochement + situation de compte). [Adaptateur #2 import Sage = livré en CORE S10 (STORY-086).]"
+    goal: "Hub multi-source (D13) : adaptateur #1 = ingestion DIRECTE balance.submitted (verticaux intégrés IMF/distributeur) ; reprise à-nouveaux ; rapprochement bancaire (relevés banque + mobile money → état de rapprochement + situation de compte). [Adaptateur #2 import Sage = livré en CORE S11 (STORY-086) — décalé du S10 par D15.]"
     stories:
       - story_id: "STORY-102"
         title: "Adaptateur ingestion DIRECTE : consumer balance.submitted (verticaux intégrés IMF/distributeur poussent leur balance) → contrat canonique + versioning idempotent (orgId+exercice+source) — D13"
@@ -1075,7 +1191,7 @@ sprints:
     committed_points: 18
     completed_points: 0
     status: "not_started"
-    goal: "Atelier Balance livré 🏁 : simulation & conseil fiscal (scénarios légaux + dossier de justification + garde-fous) ; contrôles + statut de preuve ; e2e Atelier docker. [Handoff bilan-service = déjà livré en CORE S10 (STORY-099).]"
+    goal: "Atelier Balance livré 🏁 : simulation & conseil fiscal (scénarios légaux + dossier de justification + garde-fous) ; contrôles + statut de preuve ; e2e Atelier docker. [Handoff bilan-service = déjà livré en CORE S11 (STORY-099) — décalé du S10 par D15.]"
     stories:
       - story_id: "STORY-096"
         title: "Scénarios d'optimisation fiscale légale (leviers réintégrations/déductions → impact IS, plancher MFP) — FR-A22"
@@ -1201,7 +1317,7 @@ atelier_balance_epics:
   #   #2 import fichier Sage (STORY-086, externe), #3 construction cahiers/OCR (STORY-082..085, PME informelle).
   # D14 (split core/extended) : CORE @ sprint 10 = 076,077,101,086,099 (contrat+stockage+Sage+saisie+handoff,
   #   AVANT le Bilan) ; EXTENDED @ sprints 15-19 = profil OCR, cahiers/OCR, rapprochement, fiscal, conseil.
-  keystone: "STORY-101 (contrat de balance canonique) — rend cabinet/IMF/distributeur interchangeables. À concevoir dès S10."
+  keystone: "STORY-101 (contrat de balance canonique) — rend cabinet/IMF/distributeur interchangeables. À concevoir dès S11 (était S10 ; décalé par D15, insertion du RBAC plateforme EPIC-025 au S10)."
   epics:
     - { id: "EPIC-017", name: "Socle balance-service + contrat de balance CANONIQUE (scaffold, gate, read-models, loaders, contrat+stockage)", frs: "infra + FR-A25/A27", stories: "STORY-076,077,101 (CORE S10) ; 078 (S15)", status: "proposed" }
     - { id: "EPIC-018", name: "Profil société & régime (OCR Statuts/CFE, 2 axes SN/SMT + régime fiscal)", frs: "FR-A01..A03", stories: "STORY-079,080,081", status: "proposed" }
