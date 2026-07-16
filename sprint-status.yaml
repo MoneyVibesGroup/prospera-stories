@@ -630,8 +630,8 @@ sprints:
     end_date: "2026-11-19"
     capacity_points: 34
     committed_points: 29  # chargé (KYC 🏁 8 + balance CORE 21) — split D14 : la balance vient AVANT le Bilan ; rééquilibrable si besoin
-    completed_points: 0
-    status: "not_started"
+    completed_points: 5  # STORY-048 (admin-panel actions proxifiées) done 2026-07-16
+    status: "in_progress"
     # ── D14 (2026-07-12) : split CORE/EXTENDED de balance-service. La PRODUCTION + STOCKAGE de la balance
     # quitte le bilan-service (EPIC-009 SUPERSEDED) et devient le socle CORE de balance-service, séquencé
     # ICI (sprint 10, AVANT le Bilan) : la balance est stockée d'abord, le bilan-service la consomme ensuite
@@ -644,8 +644,10 @@ sprints:
         epic: "EPIC-016"
         points: 5
         service: "admin-panel"
-        status: "not_started"  # dépend STORY-047 + STORY-013 + STORY-033
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT 2026-07-16. Face ÉCRITURE du BFF admin-panel (STORY-047 = lecture) : 4 routes proxy `@Roles(PLATFORM_ADMIN)` sous /admin/orgs/:orgId qui RELAIENT le bearer de l'admin vers les propriétaires (le BFF ne décide/valide/persiste RIEN) — POST kyc/approve|reject → kyc-service (STORY-013, transition UNDER_REVIEW→APPROVED|REJECTED + outbox kyc.status.changed) ; PUT|DELETE entitlements/:moduleCode → platform-catalog-service (STORY-033, upsert idempotent validé + révocation soft REVOKED). CŒUR = TRADUCTION FIDÈLE (miroir INVERSÉ de la dégradation lecture STORY-047) : UpstreamClient.post/put/delete → UpstreamWriteResult {status,data} (le code d'écriture porte du sens : 201 création vs 200 mise à jour, traversé via @Res passthrough) ; upstream-error.rethrowUpstreamError PRÉSERVE 400/404/409/422 (message générique sûr, aucune fuite amont), 5xx/timeout → 503, JAMAIS de 2xx sur échec (une action non appliquée ne peut PAS renvoyer 200). Clients KycServiceClient.approveKyc/rejectKyc + CatalogServiceClient.grantEntitlement/revokeEntitlement (+ contrats K4 KycDecisionResult, EntitlementUpsert). OrgActionsService + AdminOrgActionsController (contrôleur d'actions SÉPARÉ, AdminOrgsController lecture intact) ; DTOs RejectKyc + GrantEntitlement (miroirs amont, validés AU BORD = défense en profondeur) + KycDecisionResultDto {orgId,status}. reviewedBy/grantedBy dérivés du sub CÔTÉ AMONT du jeton relayé — le BFF ne transmet aucune identité. AUCUNE base/read-model/Kafka/logique de transition côté BFF. QUALITÉ : lint 0, 124 unit (20 suites) + 28 e2e (3 suites, amont mockés fixture RS256/JWKS), cov 99.76/89.81/100/99.73 (seuils 65/90/90/90 ; admin/orgs + upstream à 100 %). /CODE-REVIEW (xhigh) : 2 constats LOW CORRIGÉS (semver du GrantEntitlementDto aligné EXACTEMENT sur SEMVER_PATTERN catalogue ≥2 parts ; req.body.reason ajouté à la redaction pino). VÉRIF DOCKER (mongo rs0+kafka+minio+mailhog+auth:3001+kyc:3002+catalog:3003+document:3006+admin:3010) : login PLATFORM_ADMIN → JWT aud incl admin-panel ; approve org UNDER_REVIEW → 200 APPROVED (statut PERSISTÉ, reviewedBy = sub de l'admin relayé, outbox kyc.status.changed SENT), re-approve → 409, org inconnue → 404 ; reject + motif → 200 REJECTED (rejectionReason persisté, reviewedBy, outbox SENT), motif vide → 400, champ inconnu → 400 (whitelist) ; grant bilan@2.0/syscohada-revise@2.1 → 201 puis replay → 200, version inexistante → 422 (cohérence catalogue), semver invalide → 400 (au bord), status=REVOKED → 400, single-part "2" → 400 au bord (fix) ; revoke → 200 (REVOKED), module absent → 404 ; sans token → 401, TENANT_ADMIN → 403 ; DÉGRADATION : stop kyc-service → approve → 503 (action NON appliquée, JAMAIS 200), start → retour 200. Reads STORY-047 NON-RÉGRESSÉS (74 orgs, sources ok/ok). INTÉGRÉ DANS DEV 2026-07-16 : repo prospera-admin-panel-service, branche MNV-048 (depuis dev, rebasée origin/dev), PR #3 « Rebase and merge » sur dev (HEAD ea19a3b), branche supprimée. DÉBLOQUE STORY-049 (e2e chaîne KYC complète 🏁) + fronts AP-03/AP-04. RESTE : —.
+        completed_date: "2026-07-16"
+        story_path: "stories/STORY-048.md"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-049"
         title: "e2e chaîne KYC complète (docker) : inscription → upload → OCR (document.extrait) → revue admin-panel → approbation"
         epic: "EPIC-016"
