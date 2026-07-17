@@ -1,8 +1,8 @@
-version: "2.0.0"
+version: "3.0.0"
 project_name: "prospera-frontend"
 project_level: 3
-current_sprint: 2
-last_updated: "2026-07-13"  # v2.0.0 : SOURCE UNIQUE (fusion program + admin + client) ; aligné backend réel (arrêt STORY-030) ; D14 répercuté ; paiement S20 ; épic Atelier Balance ajouté
+current_sprint: 3
+last_updated: "2026-07-17"  # v3.0.0 : RE-SÉQUENCEMENT sur l'état backend RÉEL (vérifié sur les origin/dev, pas sur les checkouts locaux qui étaient périmés). Sprint 2.5 fusionné dans le sprint 3 ; sprints 3→6 re-découpés en tranches VERTICALES admin+client ; anciens sprints 5→14 décalés en 7→16 ; AP-08/FE-015/FE-016 ajoutées.
 
 # ═══════════════════════════════════════════════════════════════════════════════════════
 # SOURCE UNIQUE DE VÉRITÉ — SPRINTS FRONTEND (équivalent frontend de sprint-status.yaml)
@@ -14,35 +14,58 @@ last_updated: "2026-07-13"  # v2.0.0 : SOURCE UNIQUE (fusion program + admin + c
 #   • app "client" = prospera-frontend-expert-comptable (app cliente config-driven, vertical cabinet)
 #   • app "admin"  = prospera-admin-panel (console interne Money Vibes, PLATFORM_ADMIN)
 #
-# ─── ÉTAT BACKEND DE RÉFÉRENCE (docs/sprint-status.yaml) ───────────────────────────────
-# ⚠️ Le backend est ACTUELLEMENT ARRÊTÉ À STORY-030 (2026-07-13). Concrètement, LIVRÉ =
-#   auth-service (identité, RS256/JWKS, users/rôles, invitations, events identity.*),
-#   expert-comptable relying party PUR (cutover STORY-030), kyc-service event-driven
-#   (upload/statut, revue admin STORY-013, TenantStateGuard STORY-014). Tout le reste
-#   (catalog S7, bilan-service S8-14, document-service/admin-panel S7-10, balance-service
-#   S10+S15-19, paiement-service S20) N'EST PAS ENCORE CONSTRUIT.
-# Le frontend TRAILE la dispo backend : une story frontend ne démarre qu'une fois son
-#   `backend_ready` atteint. `backend_ready` = sprint backend où l'API existe (done = déjà livré).
+# ─── ÉTAT BACKEND DE RÉFÉRENCE (sprint-status.yaml) — vérifié le 2026-07-17 ────────────
+# ⚠️ La v2.0.0 disait « backend ARRÊTÉ À STORY-030 » : c'est FAUX depuis le 2026-07-14.
+#   Vérification faite en lisant les CONTRÔLEURS sur les branches `origin/dev` de chaque
+#   dépôt (les checkouts locaux étaient périmés — auth-service pointait encore sur STORY-027 ;
+#   c'est le même piège qu'au diagnostic du 2026-07-12 : NE JAMAIS conclure sans `git fetch`).
 #
-# Mapping backend actuel (post-D14, 20 sprints) — pour lever toute ambiguïté :
-#   done : auth (022-030) + kyc (020,021,013,014) + EC relying party
-#   S6   : STORY-015 (catalogue de plans, reste vertical) — not_started
-#   S7   : platform-catalog EPIC-007 (031-034) + STORY-040 + STORY-075 (stack d'intégration dev)
-#   S8   : bilan-service squelette EPIC-008 (035-038) + document-service scaffold (041)
-#   S9   : document-service OCR (042-045) + admin-panel amorce (046-047)
-#   S10  : 🏁 chaîne KYC (admin-panel 048-049) + Atelier Balance CORE (076,077,101,086,099)
-#   S11-14 : bilan-service EPIC-010→014 (054-074)
-#   S15-19 : Atelier Balance EXTENDED (078-098,100,102) — profil/OCR, cahiers, rapprochement, fiscal, conseil
-#   S20  : paiement-service EPIC-004 (016-019,039)  [ex-S15, décalé par insertion Module 1-bis]
+# LIVRÉ ET INTÉGRABLE AUJOURD'HUI (backend_ready: "done") :
+#   auth-service :3001   — /auth/register|login|refresh|logout|verify-email|resend-verification|
+#                          accept-invitation · /users (+ /users/me, /users/:id/resend-invitation)
+#                          · /organizations/me · /admin/organizations · /admin/permissions
+#                          · /admin/roles · /admin/users · /.well-known/jwks.json
+#   kyc-service :3002    — /kyc/status · POST /kyc/documents · /admin/kyc (file, détail, approve, reject)
+#   expert-comptable :3000 — /tenant/state · /auth/me · /billing/plans
+#   platform-catalog :3003 — /catalog/modules · /catalog/referentiels · /catalog/entitlements/:orgId
+#                            (le TENANT_ADMIN lit SA propre org — anti-énumération en place)
+#                            · /catalog/admin/* · PUT|DELETE /catalog/entitlements/:orgId/:moduleCode
+#   admin-panel BFF :3010  — /admin/orgs (+ :orgId) · :orgId/kyc/approve|reject
+#                            · PUT|DELETE :orgId/entitlements/:moduleCode
+#   document-service :3006 — OCR KYC (consomme kyc.document.uploaded → document.extrait :
+#                            comparaison déclaré↔lu ; enrichit la revue KYC)
+#   bilan-service :3004    — SQUELETTE SEUL (scaffold + read-models + gate + ReferentielLoader).
+#                            AUCUN moteur comptable ⇒ rien à afficher ⇒ FE-B00 NON planifiée ici.
+#   ⚡ STORY-075 DONE (2026-07-14) : stack dev 4 services RS256 assemblé + round-trip prouvé.
+#      C'ÉTAIT LE SEUL BLOQUEUR DE L'INTEGRATION GATE. Il n'y a plus rien à attendre.
+#   ⚡ CONTRAT FIGÉ PAR STORY-075 : préfixe global RÉEL = **/api/v1** (setGlobalPrefix('api')
+#      + URI versioning v1) — PAS /api. JWKS non préfixé (/.well-known/jwks.json). Swagger /api/docs.
+#
+# PAS ENCORE LIVRÉ :
+#   STORY-106 (admin-panel : guards par permission + proxy des routes de gestion 104) — 5 pts,
+#     reliquat du sprint 10 backend (29/34). Vérifié : origin/dev de prospera-admin-panel-service
+#     est à MNV-049, zéro `RequirePermissions` dans src/. ⇒ CONDITIONNE AP-08 (pari assumé, cf. S6).
+#   balance-service CORE (076,077,101,086,099) — backend S11 (glissé du S10 par D15)
+#   bilan-service EPIC-010→014 (054-074) — backend S12-14 (décalé de 1 par le glissement du CORE)
+#   Atelier EXTENDED (078-098,100,102) — backend S15-19 · paiement-service (016-019,039) — backend S20
+#
+# Le frontend TRAILE la dispo backend : une story ne démarre qu'une fois son `backend_ready`
+#   atteint. `backend_ready` = sprint backend où l'API existe ("done" = déjà livré).
 #
 # ─── PRINCIPES DE PRIORITÉ (dans l'ordre) ─────────────────────────────────────────────
+#   0. ⚡ TRANCHES VERTICALES admin+client (v3.0.0) — un sprint frontend n'est PAS mono-app.
+#      La boucle dogfooding TRAVERSE les deux apps (l'admin approuve/octroie, le client
+#      s'allume) : découper par app produit des demi-boucles indémontrables. Chaque sprint
+#      ci-dessous se termine donc par UNE démo qui traverse admin ⇄ backend ⇄ client.
 #   1. Backend prêt d'abord (`backend_ready`) — ne pas démarrer avant.
-#   2. Dogfooding DG-1 — la tour de contrôle admin (revue KYC + entitlements + provisioning)
+#   2. Vérité du contrat AVANT toute nouvelle surface — FE-001→010 parlent à des contrats
+#      SUPPOSÉS ; chaque écran ajouté par-dessus agrandit la dette (Integration Gate, S3).
+#   3. Dogfooding DG-1 — la tour de contrôle admin (revue KYC + entitlements + provisioning)
 #      vient AVANT le Bilan : activer l'org MV et « allumer » le module avant qu'il ne serve.
-#   3. Atelier Balance CORE (import Sage + saisie) AVANT le Bilan — miroir du split D14 backend
+#   4. Atelier Balance CORE (import Sage + saisie) AVANT le Bilan — miroir du split D14 backend
 #      (la balance est produite/stockée d'abord ; le Bilan la consomme).
-#   4. Bilan (gros livrable), puis Atelier Balance EXTENDED (cahiers/OCR/fiscal/conseil, marché PME).
-#   5. Paiement — dernier (Module 2, backend S20).
+#   5. Bilan (gros livrable), puis Atelier Balance EXTENDED (cahiers/OCR/fiscal/conseil, marché PME).
+#   6. Paiement — dernier (Module 2, backend S20).
 #
 # STATUTS : backlog | ready-for-dev | in-progress | review | done
 # ═══════════════════════════════════════════════════════════════════════════════════════
@@ -65,13 +88,20 @@ apps:
     shared_socle: "réutilise design system / client API / BFF cookie / shell communs à l'app cliente"
     personas: ["PLATFORM_ADMIN"]
 
-# Décisions transverses (2026-07-09/12, inchangées) :
-#  - Point d'entrée UNIQUE = gateway (préfixes /auth /ec /kyc /catalog /balance /bilan /pay /admin).
-#    En dev, NEXT_PUBLIC_API_BASE_URL bascule vers les ports directs (direct-par-service).
+# Décisions transverses (2026-07-09/12, amendées 2026-07-17) :
+#  - Gateway = OPTION B (décision user 2026-07-12) : PAS de gateway aujourd'hui. Direct-par-service
+#    via env (NEXT_PUBLIC_AUTH_URL:3001 / NEXT_PUBLIC_EC_URL:3000 / NEXT_PUBLIC_KYC_URL:3002 /
+#    NEXT_PUBLIC_CATALOG_URL:3003 / NEXT_PUBLIC_ADMIN_URL:3010). On garde le CONTRAT de préfixes
+#    logiques (/auth /ec /kyc /catalog /admin) stable pour une bascule ultérieure transparente.
+#  - ⚡ Préfixe global réel = **/api/v1** (figé par STORY-075). Le front l'omettait PARTOUT → FE-INT-0.
 #  - Contrats d'API : types TS GÉNÉRÉS depuis l'OpenAPI (aucun type manuel, zéro mock en cible).
+#    Pas d'OpenAPI agrégé (pas de gateway) ⇒ générer PAR SERVICE depuis /api/docs-json.
 #  - Refresh token : cookie httpOnly (Secure/SameSite) via BFF Next.js ; access token en mémoire.
 #  - app cliente « 1 code / N déploiements isolés » ; modules pilotés par entitlements.
-#  - RBAC PLATFORM_ADMIN strict côté admin-panel (actions inter-org).
+#  - ⚡ RBAC admin-panel : « PLATFORM_ADMIN strict, tout-ou-rien » est PÉRIMÉ depuis D15/EPIC-025
+#    (backend 103/104/105 done 2026-07-16). Le JWT porte désormais `perms[]` EN PLUS de `roles[]`,
+#    et les rôles plateforme (KYC_OFFICER, SUPPORT, AUDITOR…) sont des DONNÉES (rôles système
+#    seedés), pas un enum. Le masquage d'UI admin se fait sur `perms[]` — cf. AP-08, qui amende AP-01.
 
 sprints:
 
@@ -94,77 +124,105 @@ sprints:
   - sprint_number: 2
     name: "Utilisateurs + KYC + Onboarding (cabinet)"
     status: "in-progress"      # FE-008/009 review, FE-010 review (PR #7)
-    committed_points: 18
-    goal: "Gestion des utilisateurs, upload KYC (RCCM/CFE), bandeau d'onboarding + statut KYC (stepper), et affichage des modules piloté par les entitlements. ← état actuel."
+    committed_points: 13       # ⬇️ 18→13 (v3.0.0) : FE-014 déplacée au sprint 5, là où l'admin sait ENFIN octroyer l'entitlement qui l'allume
+    goal: "Gestion des utilisateurs, upload KYC (RCCM/CFE), bandeau d'onboarding + statut KYC (stepper). ⚠️ Codées contre des contrats SUPPOSÉS → soldées par l'Integration Gate au sprint 3."
     stories:
       - { id: "FE-008", app: "client", title: "Gestion des utilisateurs (liste, rôles, invitation, suspension)", epic: "FE-EPIC-002", points: 5, status: "review", backend_ready: "done", backend_ref: "STORY-008,009,026" }
       - { id: "FE-009", app: "client", title: "Upload documents KYC (RCCM / CFE)", epic: "FE-EPIC-003", points: 5, status: "review", backend_ready: "done", backend_ref: "STORY-011,012,020,021" }
       - { id: "FE-010", app: "client", title: "Bandeau d'onboarding + statut KYC (stepper d'activation)", epic: "FE-EPIC-003", points: 3, status: "review", backend_ready: "done", backend_ref: "STORY-012,014,029" }
-      - { id: "FE-014", app: "client", title: "Accès modules & entitlements : home des modules + shell config-driven (n'affiche que les modules ACTIFS ; gate KYC/abonnement/entitlement)", epic: "FE-EPIC-006", points: 5, status: "ready-for-dev", backend_ready: "S7", backend_ref: "STORY-014,033,034", note: "gate KYC/sub déjà dispo (/tenant/state) ; volet entitlement complet quand catalog (S7) livré" }
 
-  # ── Integration Gate : solder la dette de FE-EPIC-002 AVANT la suite (décision user 2026-07-12) ──
-  #   FE-001→010 ont été codées contre des contrats SUPPOSÉS (mode miroir). On rebranche les 3 modules
-  #   (Users/KYC/Onboarding) sur les endpoints réels (direct-par-service, /api), types GÉNÉRÉS OpenAPI,
-  #   zéro mock. ⚠️ BLOQUÉ par backend STORY-075 (stack d'intégration dev 3 services rs256, backend S7).
-  - sprint_number: 2.5
-    name: "Integration Gate — retrofit backend FE-EPIC-002 (Users + KYC + Onboarding)"
-    status: "blocked"          # attend STORY-075 (stack dev 3 services)
-    committed_points: 12
-    goal: "Brancher réellement l'app cliente sur le backend cible (auth-service :3001 + EC :3000 + kyc-service :3002, /api, rs256). Types générés OpenAPI ; retirer tout mock miroir."
-    backend_dependency: "STORY-075 (stack d'intégration dev 3 services rs256) — backend S7"
-    stories:
-      - { id: "FE-INT-0", app: "client", title: "Client API multi-base (direct-par-service) + préfixe /api + génération OpenAPI (amende FE-002)", epic: "FE-EPIC-002", points: 5, status: "backlog", backend_ready: "S7", backend_ref: "STORY-075", note: "BLOQUANT des autres INT ; base par préfixe /auth→3001 /ec→3000 /kyc→3002" }
-      - { id: "FE-INT-1", app: "client", title: "Users sur auth-service (contrat réel : GET /api/users, pageSize→limit)", epic: "FE-EPIC-002", points: 2, status: "backlog", backend_ready: "S7", backend_ref: "STORY-026,075", note: "retrofit FE-008" }
-      - { id: "FE-INT-2", app: "client", title: "KYC sur kyc-service (GET /kyc/status au lieu de /kyc/documents ; :3002)", epic: "FE-EPIC-003", points: 3, status: "backlog", backend_ready: "S7", backend_ref: "STORY-020,021,075", note: "retrofit FE-009" }
-      - { id: "FE-INT-3", app: "client", title: "Onboarding sur GET /tenant/state (forme aplatie ; abonnement dégradé manuel)", epic: "FE-EPIC-003", points: 2, status: "backlog", backend_ready: "S7", backend_ref: "STORY-014,075", note: "retrofit FE-010 ; clôt l'Integration Gate → feu vert suite" }
+  # ══════════ SÉQUENCE PRIORISÉE — TRANCHES VERTICALES admin+client (v3.0.0) ══════════
+  #   Chaque sprint combine les DEUX apps et se clôt sur UNE démo qui traverse admin ⇄ backend ⇄ client.
+  #   Base de capacité : ~18 pts/sprint (1 dev partagé) — PAS les 34 de `capacity_per_sprint`, qui est
+  #   la capacité théorique. Cf. velocity.note.
 
-  # ══════════ SÉQUENCE PRIORISÉE (cabinet ⇄ admin ⇄ Atelier entrelacés) ══════════
-
-  # ── FE-3 : Activation — shell modules cabinet + socle admin + revue KYC (backend S7-S10) ──
-  #   Priorité dogfooding : sans revue KYC + vue orgs côté admin, MV ne peut pas s'activer.
+  # ── S3 : la vérité du contrat, partagée par les deux apps ──────────────────────────────
+  #   L'ancien sprint 2.5 (Integration Gate) est FUSIONNÉ ici : son unique bloqueur (STORY-075)
+  #   est levé depuis le 2026-07-14, il n'y a plus de raison de garder un demi-sprint en attente.
+  #   ⚡ POURQUOI AP-01 EST DANS CE SPRINT ET PAS AVANT : FE-INT-0 produit le client API multi-base
+  #   + /api/v1 + les types générés, et AP-01 le RÉUTILISE (socle partagé, cf. apps.admin.shared_socle).
+  #   Faire AP-01 d'abord = rebâtir le socle admin sur la même hypothèse mono-base cassée, puis la
+  #   réparer deux fois. L'ordre FE-INT-0 → AP-01 dans le même sprint est donc une contrainte, pas un
+  #   confort. FE-INT-0 reste bloquant des 3 autres INT.
   - sprint_number: 3
-    name: "Activation : socle admin + vue orgs + revue KYC"
-    status: "not_started"
-    committed_points: 15
-    goal: "L'admin Money Vibes se connecte, voit les organisations et revoit/valide le KYC (tour de contrôle, base du dogfooding)."
-    backend_dependency: "admin-panel STORY-046/047 (backend S9) + revue kyc STORY-013 (done) + STORY-048 (S10)"
+    name: "Un seul contrat, partagé : Integration Gate (client) + socle admin"
+    status: "ready-for-dev"
+    committed_points: 17
+    goal: "L'app cliente parle au VRAI backend (zéro mock, types générés) et la console admin s'authentifie sur le MÊME socle correct. Démo : login cabinet + login PLATFORM_ADMIN, les deux sur le stack docker réel."
+    backend_dependency: "AUCUNE — tout est livré (STORY-075 done 2026-07-14 ; admin-panel BFF STORY-046 done)"
     stories:
-      - { id: "AP-01", app: "admin", title: "Socle admin-panel (BFF, login PLATFORM_ADMIN, RBAC strict, layout console)", epic: "AP-EPIC-000", points: 5, status: "ready-for-dev", backend_ready: "S9", backend_ref: "STORY-046,024,026" }
-      - { id: "AP-02", app: "admin", title: "Vue agrégée des organisations (identité + KYC + entitlements, list + détail, dégradation partielle)", epic: "AP-EPIC-001", points: 5, status: "ready-for-dev", backend_ready: "S9", backend_ref: "STORY-047,027,033" }
-      - { id: "AP-03", app: "admin", title: "Revue KYC (file, détail + URLs présignées, approve/reject + motif)", epic: "AP-EPIC-001", points: 5, status: "ready-for-dev", backend_ready: "S10", backend_ref: "STORY-013(done),048", note: "revue kyc-service dispo (STORY-013 done) ; passage par le BFF admin-panel quand STORY-048 (S10)" }
+      - { id: "FE-INT-0", app: "client", title: "Client API multi-base (direct-par-service) + préfixe /api/v1 + génération OpenAPI par service (amende FE-002)", epic: "FE-EPIC-002", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-075", note: "⚡ BLOQUANT des autres INT **et** d'AP-01 (socle partagé). Base par préfixe /auth→3001 /ec→3000 /kyc→3002 /catalog→3003 /admin→3010. ⚠️ préfixe RÉEL /api/v1 (pas /api) — la story .md a été corrigée le 2026-07-17" }
+      - { id: "FE-INT-1", app: "client", title: "Users sur auth-service (contrat réel : GET /api/v1/users, pageSize→limit)", epic: "FE-EPIC-002", points: 2, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-026,075", note: "retrofit FE-008" }
+      - { id: "FE-INT-2", app: "client", title: "KYC sur kyc-service (GET /kyc/status au lieu de /kyc/documents ; :3002)", epic: "FE-EPIC-003", points: 3, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-020,021,075", note: "retrofit FE-009" }
+      - { id: "FE-INT-3", app: "client", title: "Onboarding sur GET /tenant/state (forme aplatie ; abonnement dégradé manuel)", epic: "FE-EPIC-003", points: 2, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-014,075", note: "retrofit FE-010 ; clôt l'Integration Gate → feu vert suite" }
+      - { id: "AP-01", app: "admin", title: "Socle admin-panel (BFF, login PLATFORM_ADMIN, layout console) — sur le client API de FE-INT-0", epic: "AP-EPIC-000", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-046,024,026", note: "⚠️ le volet « RBAC strict tout-ou-rien » de la story d'origine est PÉRIMÉ (D15) → AP-08 l'amende au S6. Ici : garde PLATFORM_ADMIN simple, sans prétendre à la granularité." }
 
-  # ── FE-4 : Tour de contrôle complète (catalogue + entitlements + provisioning + dashboard) ── 🏁 admin v1
+  # ── S4 : le KYC de bout en bout, des DEUX côtés ────────────────────────────────────────
+  #   La tranche verticale la plus dense : le client dépose, l'admin voit + arbitre, le client voit
+  #   le résultat. Tout existe côté backend (kyc 020/021/013 + document-service OCR 042→045 +
+  #   admin-panel 047/048), et FE-009/010 deviennent RÉELLES juste avant (S3) — donc démontrable.
   - sprint_number: 4
-    name: "Tour de contrôle complète : catalogue + entitlements + provisioning + dashboard 🏁"
-    status: "not_started"
-    committed_points: 20
-    goal: "L'admin gère le catalogue, octroie/révoque les entitlements (allume les modules), provisionne un vertical pour une org, et supervise (dashboard + e2e chaîne KYC). 🏁 admin-panel v1."
-    backend_dependency: "platform-catalog STORY-032/033/034 (S7) + admin-panel STORY-048/049 (S10)"
+    name: "Le KYC de bout en bout, des deux côtés (client ⇄ admin)"
+    status: "ready-for-dev"
+    committed_points: 21  # ⬆️ 18→21 : FE-018 ajoutée par l'audit backend du 2026-07-17. AU-DESSUS de la cible ~18 → FE-018 est le candidat de sortie assumé si le sprint déborde (c'est un confort utilisateur, pas un maillon de la boucle).
+    goal: "DÉMO DE BOUCLE : le cabinet dépose RCCM/CFE (client) → l'admin voit l'org + la comparaison OCR déclaré↔lu → il approuve → kyc.status.changed → read-model EC → le stepper du client passe au vert. Sans un seul mock."
+    backend_dependency: "Livré : kyc (013,020,021), document-service OCR (042→045), admin-panel (047,048). ⚠️ STORY-107 (file de revue dans le BFF) demandée le 2026-07-17 — NON bloquante : AP-03 est livrable sans elle (le détail est servi), seule la file serait fausse au-delà d'une page. À caler avant la mise en service réelle de la revue."
     stories:
-      - { id: "AP-04", app: "admin", title: "Catalogue : CRUD Module/ModuleVersion/ReferentielVersion + garde-fou N/N-1 + checksum", epic: "AP-EPIC-002", points: 5, status: "ready-for-dev", backend_ready: "S7", backend_ref: "STORY-032" }
-      - { id: "AP-05", app: "admin", title: "Entitlements : grant/update/revoke (module × org × référentiel) + réconciliation (allume un module dans l'app cliente)", epic: "AP-EPIC-002", points: 5, status: "ready-for-dev", backend_ready: "S10", backend_ref: "STORY-033,034,048" }
-      - { id: "AP-06", app: "admin", title: "Provisioning d'un vertical pour une org (cabinet/imf/distributeur/assurance → séquence d'entitlements, pré-requis KYC)", epic: "AP-EPIC-003", points: 5, status: "ready-for-dev", backend_ready: "S10", backend_ref: "STORY-033,034" }
-      - { id: "AP-07", app: "admin", title: "Dashboard plateforme + e2e chaîne KYC bout-en-bout 🏁", epic: "AP-EPIC-003", points: 5, status: "ready-for-dev", backend_ready: "S10", backend_ref: "STORY-049" }
+      - { id: "AP-02", app: "admin", title: "Vue agrégée des organisations (identité + KYC + entitlements, list + détail, dégradation partielle)", epic: "AP-EPIC-001", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-047,027,033" }
+      - { id: "AP-03", app: "admin", title: "Revue KYC (file, détail + pièces via URL présignée, comparaison OCR déclaré↔lu, approve/reject + motif)", epic: "AP-EPIC-001", points: 8, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-013,045,048,105,107", note: "⬆️ RÉVISÉE 5→8 : l'enrichissement OCR (STORY-045) n'était pas au périmètre d'origine et c'est le cœur de la valeur — le BFF expose extraction{extracted,declared,discrepancies,flags{expired,unreadable},confidence,ocrProvider} par pièce + ocrSummary{hasDiscrepancies,anyUnreadable,anyExpired,extractedCount} par dossier. ⚠️ INVARIANT DO-1 : l'OCR est une ASSISTANCE, purement informative — l'UI ne doit jamais laisser croire qu'il décide ; l'humain tranche. ✅ CORRECTION 2026-07-17 (ma note précédente était FAUSSE sur 2 points, vérifiés dans le code) : (a) le BFF CONSOMME bien la file (kyc-service.client.listReviewQueue → GET /admin/kyc) et le détail, il ne faut donc rien réclamer de ce côté ; (b) les URLs présignées SONT exposées (KycDocument.url, traversée telle quelle, jamais journalisée) — je les avais dites « à vérifier ». ⚠️ SEUL VRAI ÉCART RESTANT : GET /admin/orgs enrichit chaque ligne d'un kycStatus (AdminOrgListItemDto) mais son filtre `status` porte sur l'IDENTITÉ (IDENTITY_STATUSES = ACTIVE|SUSPENDED), PAS sur le KYC ⇒ pas de filtrage serveur « en attente de revue » : le front devrait filtrer côté client À TRAVERS la pagination (faux dès que le volume croît). ✅ DEMANDE BACKEND FORMULÉE = **STORY-107** (3 pts, sprint 10 backend, à tirer avec 106) : exposer une route de file dans le BFF qui relaie `GET /admin/kyc?status=` (kyc-service SAIT DÉJÀ filtrer) + joint la raison sociale. ⚠️ Ma 1ʳᵉ formulation (« ajouter kycStatus à ListOrgsQueryDto ») était la MAUVAISE FORME : elle inverserait la source de pagination (auth pilote la page, le kycStatus est enrichi APRÈS). SANS 107, AP-03 reste livrable — le DÉTAIL est entièrement servi — mais la file serait fausse au-delà d'une page." }
+      - { id: "FE-015", app: "client", title: "Profil du cabinet (raison sociale, pays, coordonnées) — GET|PATCH /organizations/me", epic: "FE-EPIC-002", points: 3, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-023,026", note: "🆕 2026-07-17 — GAP : /organizations/me existe dans l'IdP depuis le cutover et AUCUNE story ne le couvrait. Complète la vue admin (AP-02 lit ce que le cabinet renseigne ici)." }
+      - { id: "FE-016", app: "client", title: "Renvoi d'invitation à un membre (POST /users/:id/resend-invitation)", epic: "FE-EPIC-002", points: 2, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-008,026", note: "🆕 2026-07-17 — GAP : route livrée par auth-service, non utilisée par FE-008. Petit ajout, forte valeur d'usage (invitation expirée/perdue)." }
+      - { id: "FE-018", app: "client", title: "Le cabinet voit ce que l'OCR a lu de ses pièces (déclaré↔lu) — GET /documents/:id/extraction", epic: "FE-EPIC-003", points: 3, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-044,045", note: "🆕 2026-07-17 (audit des 7 dépôts backend) — GAP : document-service (dépôt `prospera-ocr-service`, :3006) expose GET /api/v1/documents/:documentId/extraction en @Roles(PLATFORM_ADMIN, TENANT_ADMIN) — le cabinet a le droit de lire SA propre extraction (isolation orgId ; 404 si absente OU hors-tenant, l'existence d'une pièce d'une autre org n'est jamais révélée). Le documentId vient de GET /kyc/status (KycDocumentResponseDto.id). Personne n'avait vu cette surface. VALEUR : le cabinet voit les écarts déclaré↔lu AVANT le rejet et corrige son dépôt → casse la boucle rejet→resoumission. ⚠️ INVARIANT DO-1 : informatif, jamais une décision KYC — ne pas laisser croire que l'OCR pré-approuve. Appel DIRECT à :3006 (le BFF admin ne sert que l'admin) ⇒ ajoute NEXT_PUBLIC_DOCUMENT_URL au client multi-base de FE-INT-0."}
 
-  # ── FE-5 : Atelier Balance CORE (cabinet) — import Sage + saisie + contrat (backend S10, split D14) ──
-  #   Miroir du CORE backend : la balance est PRODUITE/STOCKÉE côté UI AVANT le Bilan qui la consomme.
+  # ── S5 : allumer un module — LA boucle qui justifie toute la topologie ─────────────────
+  #   ⚡ POURQUOI AP-05 ET FE-014 SONT DANS LE MÊME SPRINT : l'octroi et l'allumage sont les deux
+  #   moitiés d'UNE seule preuve (admin grant → entitlement.changed → le module apparaît côté client).
+  #   Les séparer = livrer deux demi-fonctionnalités dont aucune n'est démontrable seule. C'est
+  #   l'illustration la plus nette du principe 0.
   - sprint_number: 5
+    name: "Allumer un module : catalogue + entitlements (admin) ⇄ shell config-driven (client)"
+    status: "ready-for-dev"
+    committed_points: 18
+    goal: "DÉMO DE BOUCLE : l'admin octroie l'entitlement `bilan` à l'org Money Vibes → entitlement.changed → l'app cliente affiche le module. C'est la preuve du dogfooding DG-1 ET de la topologie config-driven (Option B)."
+    backend_dependency: "AUCUNE — platform-catalog EPIC-007 (031→034) clos + admin-panel 048 done"
+    stories:
+      - { id: "AP-04", app: "admin", title: "Catalogue : CRUD Module/ModuleVersion/ReferentielVersion + garde-fou N/N-1 + checksum", epic: "AP-EPIC-002", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-032" }
+      - { id: "AP-05", app: "admin", title: "Entitlements : grant/update/revoke (module × org × référentiel) + réconciliation (allume un module dans l'app cliente)", epic: "AP-EPIC-002", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-033,034,048" }
+      - { id: "FE-014", app: "client", title: "Accès modules & entitlements : home des modules + shell config-driven (n'affiche que les modules ACTIFS ; gate KYC/abonnement/entitlement)", epic: "FE-EPIC-006", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-014,033,034", note: "⬅️ déplacée du sprint 2 (v3.0.0). Lit GET /catalog/entitlements/:orgId — le TENANT_ADMIN lit SA propre org, l'anti-énumération est déjà en place côté backend (STORY-033). Gate KYC/sub via /tenant/state (FE-INT-3). Volet abonnement DÉGRADÉ = activation manuelle par l'admin (DG-1, paiement en S16)." }
+      - { id: "FE-017", app: "both", title: "e2e inter-apps : l'admin octroie → le module apparaît côté client (Playwright, stack docker réel)", epic: "FE-EPIC-006", points: 3, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-034,048", note: "🆕 2026-07-17 — première story `app: both`. Fige la boucle dogfooding comme test de non-régression : sans elle, rien ne garantit que le grant admin reste visible côté client après un refactor. Miroir frontend du `npm run test:chain` backend (STORY-049)." }
+
+  # ── S6 : admin-panel v1 🏁 (provisioning + dashboard + délégation RBAC) ────────────────
+  - sprint_number: 6
+    name: "admin-panel v1 🏁 : provisioning + dashboard + RBAC plateforme"
+    status: "not_started"
+    committed_points: 18
+    goal: "L'admin provisionne un vertical pour une org, supervise (dashboard), et DÉLÈGUE : inviter un opérateur, composer un rôle depuis le catalogue de permissions. 🏁 admin-panel v1."
+    backend_dependency: "⚠️ AP-08 dépend de STORY-106 (admin-panel : guards par permission + proxy des routes de gestion 104) — NON LIVRÉE (reliquat sprint 10 backend, 29/34). AP-06/AP-07 n'ont aucune dépendance ouverte."
+    risk: "PARI ASSUMÉ (décision user 2026-07-17) : AP-08 est planifiée ICI en supposant STORY-106 livrée d'ici là. Si elle glisse, ce sprint tombe à 10 pts → replan (candidats de repli : FE-B00 si le moteur bilan a avancé, ou avancer l'Atelier CORE si backend S11 est sorti)."
+    stories:
+      - { id: "AP-06", app: "admin", title: "Provisioning d'un vertical pour une org (cabinet/imf/distributeur/assurance → séquence d'entitlements, pré-requis KYC)", epic: "AP-EPIC-003", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-033,034" }
+      - { id: "AP-07", app: "admin", title: "Dashboard plateforme + e2e chaîne KYC bout-en-bout 🏁", epic: "AP-EPIC-003", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-049" }
+      - { id: "AP-08", app: "admin", title: "RBAC plateforme : membres (invitation org-less + attribution de rôle) + composition de rôles depuis le catalogue de permissions + masquage d'UI sur perms[] (amende AP-01)", epic: "AP-EPIC-000", points: 8, status: "blocked", backend_ready: "S10", backend_ref: "STORY-103,104,105,106", note: "🆕 2026-07-17 — GAP MAJEUR : le backend a livré D15/EPIC-025 (103/104/105 done le 2026-07-16 : catalogue de 8 permissions AVEC libellés, rôles système seedés non supprimables, perms[] dans le JWT, CRUD rôles, invitation plateforme org-less POST /admin/users, PATCH du rôle d'un opérateur) et AUCUNE story frontend ne le couvrait — alors que STORY-104 expose les libellés EXPLICITEMENT pour un panel. ⚠️ BLOQUÉE par STORY-106 : sans le proxy BFF, le front n'a aucune route vers /admin/roles et /admin/users, et le gating perms[] resterait COSMÉTIQUE (le BFF refuse tout non-PLATFORM_ADMIN à sa propre porte). Garde-fous backend à refléter dans l'UI : anti god-mode (on ne peut pas octroyer une permission qu'on n'a pas), anti-lockout (dernier PLATFORM_ADMIN), `name` de rôle non éditable (renommer = créer+réattribuer+supprimer)." }
+
+  # ── S7 : Atelier Balance CORE (cabinet) — import Sage + saisie + contrat (backend S11, split D14) ──
+  #   Miroir du CORE backend : la balance est PRODUITE/STOCKÉE côté UI AVANT le Bilan qui la consomme.
+  - sprint_number: 7
     name: "Atelier Balance CORE (cabinet) : shell + import Sage + saisie manuelle"
     status: "not_started"
     committed_points: 16
     goal: "Module Atelier côté production de balance : shell + gate @RequiresBalanceAccess, import de balance Sage (Excel/CSV, aperçu dry-run), saisie manuelle avec contrôle d'équilibre, consultation + validation (immuable) de la balance canonique."
-    backend_dependency: "balance-service CORE STORY-076/077/101/086/099 — backend S10"
+    backend_dependency: "balance-service CORE STORY-076/077/101/086/099 — backend S11 (glissé du S10 par D15 : insertion du RBAC plateforme EPIC-025)"
     stories:
-      - { id: "FE-A00", app: "client", title: "Module Atelier : shell, navigation, gate @RequiresBalanceAccess (KYC + entitlement) + choix de source (Sage / cahiers / directe)", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S10", backend_ref: "STORY-076,077" }
-      - { id: "FE-A01", app: "client", title: "Import de balance Sage 100 (upload Excel/CSV, détection format, aperçu dry-run, mapping colonnes) — FR-A12", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S10", backend_ref: "STORY-086", note: "remplace l'ancien FE-B02 (STORY-050 EPIC-009 SUPERSEDED par D14)" }
-      - { id: "FE-A02", app: "client", title: "Saisie manuelle de balance + contrôle d'équilibre live (contrat canonique, brouillon/validée) — FR-A25/A27", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S10", backend_ref: "STORY-101" }
-      - { id: "FE-A03", app: "client", title: "Consultation balance stockée + statut de preuve + validation (immuable) + visibilité du handoff bilan-service — FR-A28", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S10", backend_ref: "STORY-099,101" }
+      - { id: "FE-A00", app: "client", title: "Module Atelier : shell, navigation, gate @RequiresBalanceAccess (KYC + entitlement) + choix de source (Sage / cahiers / directe)", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S11", backend_ref: "STORY-076,077" }
+      - { id: "FE-A01", app: "client", title: "Import de balance Sage 100 (upload Excel/CSV, détection format, aperçu dry-run, mapping colonnes) — FR-A12", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S11", backend_ref: "STORY-086", note: "remplace l'ancien FE-B02 (STORY-050 EPIC-009 SUPERSEDED par D14)" }
+      - { id: "FE-A02", app: "client", title: "Saisie manuelle de balance + contrôle d'équilibre live (contrat canonique, brouillon/validée) — FR-A25/A27", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S11", backend_ref: "STORY-101" }
+      - { id: "FE-A03", app: "client", title: "Consultation balance stockée + statut de preuve + validation (immuable) + visibilité du handoff bilan-service — FR-A28", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S11", backend_ref: "STORY-099,101" }
 
-  # ── FE-6 : Bilan — référentiels/mapping + liasse OHADA (cabinet) — CONSOMME la balance (backend S11-12) ──
-  - sprint_number: 6
+  # ── S8 : Bilan — référentiels/mapping + liasse OHADA (cabinet) — CONSOMME la balance (backend S11-12) ──
+  - sprint_number: 8
     name: "Bilan (cabinet) : référentiels/mapping + liasse (Bilan, CR, TFT)"
     status: "not_started"
-    committed_points: 18
+    committed_points: 19  # corrigé 18→19 (v3.0.0) : la somme des stories faisait 19 depuis la v2.0.0
     goal: "Le Bilan CONSOMME la balance produite par l'Atelier. Table de passage comptes→postes (arbitrage non mappés, surcharges) + restitution de la liasse : Bilan, Compte de résultat, TFT/annexes, contrôles de cohérence (N/N-1)."
     backend_dependency: "bilan-service EPIC-010 (STORY-054→058, S11) + EPIC-011 (STORY-059→063, S12)"
     stories:
@@ -174,8 +232,8 @@ sprints:
       - { id: "FE-B07", app: "client", title: "Bilan (actif/passif) N/N-1 + contrôle actif=passif — FR-009", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "S12", backend_ref: "STORY-059" }
       - { id: "FE-B08", app: "client", title: "Compte de résultat N/N-1 — FR-010", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "S12", backend_ref: "STORY-060" }
 
-  # ── FE-7 : Bilan — TFT/annexes + validation/immutabilité + prévisionnel (cabinet) — backend S12-14 ──
-  - sprint_number: 7
+  # ── S9 : Bilan — TFT/annexes + validation/immutabilité + prévisionnel (cabinet) — backend S12-14 ──
+  - sprint_number: 9
     name: "Bilan (cabinet) : TFT/annexes + validation/immutabilité + prévisionnel"
     status: "not_started"
     committed_points: 21
@@ -187,8 +245,8 @@ sprints:
       - { id: "FE-B11", app: "client", title: "Hypothèses de prévisionnel paramétrables (croissance, marges, BFR, invest., financement) — FR-018", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "S13", backend_ref: "STORY-068" }
       - { id: "FE-B12", app: "client", title: "Projection annuelle 3 ans + trésorerie mensuel 12 mois + scénarios comparés — FR-019/020/021", epic: "FE-EPIC-005", points: 8, status: "ready-for-dev", backend_ready: "S14", backend_ref: "STORY-069,070,071" }
 
-  # ── FE-8 : Bilan — consultation + export + durcissement (cabinet) — backend S14 ── 🏁 Module 1 UI
-  - sprint_number: 8
+  # ── S10 : Bilan — consultation + export + durcissement (cabinet) — backend S14 ── 🏁 Module 1 UI
+  - sprint_number: 10
     name: "Bilan (cabinet) : consultation + export PDF/Excel + durcissement 🏁"
     status: "not_started"
     committed_points: 13
@@ -199,11 +257,11 @@ sprints:
       - { id: "FE-B14", app: "client", title: "Export PDF / Excel de la liasse et du prévisionnel (fidèle au snapshot) — FR-023", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "S14", backend_ref: "STORY-073" }
       - { id: "FE-B15", app: "client", title: "e2e parcours Bilan complet (balance→liasse→validation→export) + a11y + i18n + durcissement", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "S14", backend_ref: "jalon Module 1" }
 
-  # ── FE-9 : Atelier Balance EXTENDED — profil société & 2 axes & OCR Statuts/CFE (backend S15) ──
-  - sprint_number: 9
+  # ── S11 : Atelier Balance EXTENDED — profil société & 2 axes & OCR Statuts/CFE (backend S15) ──
+  - sprint_number: 11
     name: "Atelier EXTENDED : profil société + 2 axes + OCR Statuts/CFE"
     status: "not_started"
-    committed_points: 14
+    committed_points: 11  # corrigé 14→11 (v3.0.0) : somme réelle des stories
     goal: "Profil société (identité fiscale complète), détermination des 2 axes (système comptable SN/SMT + régime fiscal), et pré-remplissage du profil par OCR des Statuts + carte CFE."
     backend_dependency: "balance-service EPIC-018/019 (STORY-078,079,080,081) — backend S15 ; OCR étend document-service"
     stories:
@@ -211,8 +269,8 @@ sprints:
       - { id: "FE-A05", app: "client", title: "OCR Statuts + carte CFE → profil pré-rempli éditable — FR-A02", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S15", backend_ref: "STORY-081", note: "consomme l'extension OCR du document-service" }
       - { id: "FE-A06", app: "client", title: "Détermination des 2 axes (système SN/SMT + régime fiscal) proposée selon pays+objet+CA + choix éditable + badge référentiel actif — FR-A03", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S15", backend_ref: "STORY-080,078" }
 
-  # ── FE-10 : Atelier EXTENDED — construction chemin A (cahiers + OCR + rattachement plan comptable) — backend S16 ──
-  - sprint_number: 10
+  # ── S12 : Atelier EXTENDED — construction chemin A (cahiers + OCR + rattachement plan comptable) — backend S16 ──
+  - sprint_number: 12
     name: "Atelier EXTENDED : cahiers recettes/dépenses + OCR pièces + rattachement plan comptable"
     status: "not_started"
     committed_points: 16
@@ -224,11 +282,11 @@ sprints:
       - { id: "FE-A09", app: "client", title: "OCR captures & factures → montants éditables, par mois — FR-A10", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S16", backend_ref: "STORY-084" }
       - { id: "FE-A10", app: "client", title: "Rattachement au plan comptable (transaction → compte SYSCOHADA) + ventilation — FR-A11", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S16", backend_ref: "STORY-085" }
 
-  # ── FE-11 : Atelier EXTENDED — reprise à-nouveaux + profil import + rapprochement bancaire — backend S17 ──
-  - sprint_number: 11
+  # ── S13 : Atelier EXTENDED — reprise à-nouveaux + profil import + rapprochement bancaire — backend S17 ──
+  - sprint_number: 13
     name: "Atelier EXTENDED : reprise à-nouveaux + profil import + rapprochement bancaire"
     status: "not_started"
-    committed_points: 14
+    committed_points: 11  # corrigé 14→11 (v3.0.0) : somme réelle des stories
     goal: "Reprise de balance d'ouverture/à-nouveaux, profil d'import réutilisable, import de relevés (banque + mobile money) et rapprochement (état de rapprochement + situation de compte)."
     backend_dependency: "balance-service EPIC-021 (087,088) + EPIC-022 (089,090) — backend S17. (STORY-102 ingestion directe = consumer backend, pas d'UI)"
     stories:
@@ -236,8 +294,8 @@ sprints:
       - { id: "FE-A12", app: "client", title: "Profil d'import & mapping colonnes réutilisable — FR-A14", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S17", backend_ref: "STORY-088", note: "amende FE-A01 (mapping Sage)" }
       - { id: "FE-A13", app: "client", title: "Import relevés bancaires (banque + mobile money TMoney/Flooz) + rapprochement (relevés ↔ cahiers) + état de rapprochement + situation de compte — FR-A15/A16/A17", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S17", backend_ref: "STORY-089,090" }
 
-  # ── FE-12 : Atelier EXTENDED — moteur fiscal (résultat fiscal, IS, TVA, provisions, TPU) — backend S18 ──
-  - sprint_number: 12
+  # ── S14 : Atelier EXTENDED — moteur fiscal (résultat fiscal, IS, TVA, provisions, TPU) — backend S18 ──
+  - sprint_number: 14
     name: "Atelier EXTENDED : moteur fiscal (résultat fiscal + IS + TVA + provisions + TPU)"
     status: "not_started"
     committed_points: 13
@@ -247,8 +305,8 @@ sprints:
       - { id: "FE-A14", app: "client", title: "Résultat fiscal : réintégrations/déductions (codes DSF) — visualisation + ajustements éditables — FR-A18", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S18", backend_ref: "STORY-091" }
       - { id: "FE-A15", app: "client", title: "Liquidation IS = max(MFP, IS) + acomptes + TVA/taxes + provisions (44/89) + TPU (synthétique) — FR-A19/A20/A21", epic: "FE-EPIC-007", points: 8, status: "ready-for-dev", backend_ready: "S18", backend_ref: "STORY-092,093,094,095" }
 
-  # ── FE-13 : Atelier EXTENDED — conseil fiscal + contrôles/statut de preuve + e2e — backend S19 ── 🏁 Atelier UI
-  - sprint_number: 13
+  # ── S15 : Atelier EXTENDED — conseil fiscal + contrôles/statut de preuve + e2e — backend S19 ── 🏁 Atelier UI
+  - sprint_number: 15
     name: "Atelier EXTENDED : conseil fiscal + contrôles/statut de preuve + e2e 🏁"
     status: "not_started"
     committed_points: 11
@@ -259,9 +317,9 @@ sprints:
       - { id: "FE-A17", app: "client", title: "Contrôles d'intégrité/cohérence (Actif=Passif, articulations) + statut de preuve (badges justifiée/partiellement/estimée + annotations de risque) — FR-A25/A26/A27", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S19", backend_ref: "STORY-098" }
       - { id: "FE-A18", app: "client", title: "e2e Atelier (parcours PME cahiers/OCR + cabinet Sage → balance → fiscal → conseil) + a11y + i18n + durcissement", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S19", backend_ref: "STORY-100" }
 
-  # ── FE-14 (JIT) : Abonnement & paiement (cabinet) — aligné paiement-service Module 2 (backend S20) ──
+  # ── S16 (JIT) : Abonnement & paiement (cabinet) — aligné paiement-service Module 2 (backend S20) ──
   #    Différé (DG-1 : entitlements octroyés manuellement via admin-panel avant paiement).
-  - sprint_number: 14
+  - sprint_number: 16
     name: "Abonnement & paiement (cabinet) — JIT Module 2"
     status: "not_started"
     committed_points: 10
@@ -277,14 +335,14 @@ epics:
   client:
     - { id: "FE-EPIC-000", name: "Fondations frontend (socle, client API/BFF, layout)", stories: "FE-001→003", status: "in-progress" }
     - { id: "FE-EPIC-001", name: "Authentification & comptes", stories: "FE-004→006", status: "review" }
-    - { id: "FE-EPIC-002", name: "Utilisateurs du cabinet (+ Integration Gate FE-INT-0..3)", stories: "FE-007,008 ; FE-INT-0..3", status: "in-progress" }
-    - { id: "FE-EPIC-003", name: "KYC & onboarding", stories: "FE-009,010", status: "review" }
+    - { id: "FE-EPIC-002", name: "Utilisateurs & profil du cabinet (+ Integration Gate FE-INT-0..3)", stories: "FE-007,008,015,016 ; FE-INT-0..3", status: "in-progress" }
+    - { id: "FE-EPIC-003", name: "KYC & onboarding (+ restitution OCR au cabinet)", stories: "FE-009,010,018 ; FE-INT-2,3", status: "in-progress" }
     - { id: "FE-EPIC-004", name: "Abonnement & paiement (JIT, backend S20)", stories: "FE-011,012,013", status: "ready-for-dev" }
     - { id: "FE-EPIC-005", name: "Bilan & Prévisionnel (consomme la balance ; backend bilan-service EPIC-010→014)", stories: "FE-B00,B01,B06→B15", status: "ready-for-dev" }
-    - { id: "FE-EPIC-006", name: "Accès modules & entitlements (shell config-driven)", stories: "FE-014", status: "ready-for-dev" }
+    - { id: "FE-EPIC-006", name: "Accès modules & entitlements (shell config-driven)", stories: "FE-014,017", status: "ready-for-dev" }
     - { id: "FE-EPIC-007", name: "Atelier Balance (amont du Bilan : import Sage/saisie/cahiers/OCR/rapprochement/fiscal/conseil ; backend balance-service EPIC-017→024)", stories: "FE-A00→A18", status: "ready-for-dev" }
   admin:
-    - { id: "AP-EPIC-000", name: "Socle admin & sécurité (BFF, login PLATFORM_ADMIN, RBAC)", stories: "AP-01", status: "ready-for-dev" }
+    - { id: "AP-EPIC-000", name: "Socle admin & sécurité (BFF, login PLATFORM_ADMIN, RBAC plateforme perms[] — D15/EPIC-025)", stories: "AP-01,08", status: "ready-for-dev" }
     - { id: "AP-EPIC-001", name: "Orgs & revue KYC", stories: "AP-02,03", status: "ready-for-dev" }
     - { id: "AP-EPIC-002", name: "Entitlements & catalogue", stories: "AP-04,05", status: "ready-for-dev" }
     - { id: "AP-EPIC-003", name: "Dashboard & provisioning", stories: "AP-06,07", status: "ready-for-dev" }
@@ -301,23 +359,28 @@ deferred:
 
 # ── Récapitulatif ──
 summary:
-  total_stories: 55          # client 44 (FE + FE-INT + FE-B + FE-A) + admin 7 + paiement 3 (dont client)
+  total_stories: 61          # +6 en v3.0.0 : AP-08, FE-015, FE-016, FE-017 (both), FE-018 (audit backend 2026-07-17) — FE-B00 conservée mais NON planifiée
   by_app:
-    client: 48               # FE-001→014 (11) + FE-INT-0..3 (4) + FE-B00,B01,B06→B15 (12) + FE-A00→A18 (19) + FE-011/012/013 (3) — moins doublons de compte
-    admin: 7                 # AP-01→07
+    client: 52               # FE-001→018 (15) + FE-INT-0..3 (4) + FE-B00,B01,B06→B15 (12) + FE-A00→A18 (19) + FE-011/012/013 (3) — moins doublons de compte
+    admin: 8                 # AP-01→08
+    both: 1                  # FE-017 (e2e inter-apps)
   points:
-    done_or_review: 37       # FE-1 + FE-008/009/010 (en revue)
-    remaining: ~200          # FE-2 (reste) → FE-14
+    done_or_review: 37       # sprint 1 (24) + FE-008/009/010 (13) — en revue, à confirmer par l'Integration Gate (S3)
+    actionable_now: 74       # ⚡ S3 (17) + S4 (21) + S5 (18) + S6 (18) — AUCUNE dépendance backend ouverte, sauf AP-08/STORY-106 (pari)
+    remaining: ~200          # S3 → S16
   milestones:
-    - "FE-4 🏁 admin-panel v1 (tour de contrôle : KYC + entitlements + provisioning)"
-    - "FE-5 Atelier Balance CORE (balance produite côté UI, AVANT le Bilan — miroir D14)"
-    - "FE-8 🏁 Module 1 Bilan côté UI (liasse→validation→prévisionnel→export)"
-    - "FE-13 🏁 Atelier Balance côté UI (cahiers/OCR + fiscal + conseil légal NFR-A04)"
-    - "FE-14 (JIT) paiement Module 2 (backend S20)"
+    - "S3 🏁 Integration Gate soldé : zéro mock, types générés, les deux apps sur le même socle"
+    - "S4 🏁 boucle KYC prouvée bout-en-bout (client dépose → admin arbitre avec OCR → client voit)"
+    - "S5 🏁 boucle entitlement prouvée (admin octroie → le module s'allume côté client) = preuve DG-1 + Option B"
+    - "S6 🏁 admin-panel v1 (tour de contrôle : KYC + entitlements + provisioning + délégation RBAC)"
+    - "S7 Atelier Balance CORE (balance produite côté UI, AVANT le Bilan — miroir D14)"
+    - "S10 🏁 Module 1 Bilan côté UI (liasse→validation→prévisionnel→export)"
+    - "S15 🏁 Atelier Balance côté UI (cahiers/OCR + fiscal + conseil légal NFR-A04)"
+    - "S16 (JIT) paiement Module 2 (backend S20)"
 
 velocity:
   reference_backend_velocity: 27   # moyenne mobile backend ; cible prudente frontend ~15-20/sprint (1 dev partagé)
-  note: "Capacité partagée 1 dev entre app cliente et admin-panel — d'où l'entrelacement (FE-3/4 = admin prioritaire, FE-5 Atelier CORE, FE-6→8 Bilan, FE-9→13 Atelier EXTENDED). Le frontend TRAILE le backend : aucune story ne démarre avant son backend_ready. Backend actuellement arrêté à STORY-030 → seuls FE-1/2 (backend_ready=done) sont réellement actionnables aujourd'hui ; le reste attend catalog (S7), bilan (S8+), balance (S10+)."
+  note: "Capacité partagée 1 dev entre app cliente et admin-panel. ⚡ v3.0.0 : l'entrelacement n'est plus « un sprint admin puis un sprint client » mais des TRANCHES VERTICALES (S3 contrat partagé, S4 boucle KYC, S5 boucle entitlement, S6 admin v1 🏁), puis S7 Atelier CORE, S8→S10 Bilan, S11→S15 Atelier EXTENDED, S16 paiement. Le frontend TRAILE le backend : aucune story ne démarre avant son backend_ready. ÉTAT RÉEL 2026-07-17 : le backend a livré jusqu'au sprint 10 (29/34, reliquat STORY-106) ⇒ 71 pts sont actionnables IMMÉDIATEMENT (S3=17, S4=18, S5=18, S6=18 dont AP-08 en pari sur 106). Rien n'est en attente de backend avant le S7 (Atelier CORE, backend S11). ⚠️ capacity_per_sprint: 34 est la capacité THÉORIQUE — la cible réaliste est ~18/sprint (1 dev), et c'est elle qui a servi au découpage."
 
 team:
   size: 1

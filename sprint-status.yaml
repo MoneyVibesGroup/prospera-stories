@@ -629,7 +629,7 @@ sprints:
     start_date: "2026-11-05"
     end_date: "2026-11-19"
     capacity_points: 34
-    committed_points: 34  # ⬆️ 31→34 le 2026-07-16 : STORY-104 révisée 5→8 à la rédaction (invitation org-less = 3 blocages en cascade + non-régression d'InvitationService partagé, cf. cadrage sous la story). Après 28→31 (STORY-105 révisée 5→8). KYC 🏁 8 (048+049) + RBAC plateforme 26 ; ⚠️ le sprint est désormais À CAPACITÉ EXACTE (34/34, AUCUNE marge) : reste 13 à faire (104=8 + 106=5). Le balance CORE (21) est parti en S11 — D15
+    committed_points: 37  # ⬆️ 34→37 le 2026-07-17 : STORY-107 (3, demande frontend prérequis AP-03) ajoutée — ⚠️ DÉPASSE la capacité (37 > 34) ET le sprint 11 est déjà à 44/34 : les DEUX sont à arbitrer au prochain /bmad:sprint-planning. Placée ici et pas en S11 parce qu'elle se tire AVEC STORY-106 (même dépôt, même contrôleur ; 107 dépend des guards de 106) — les séparer coûterait deux passes sur le même code. Historique : ⬆️ 31→34 le 2026-07-16 : STORY-104 révisée 5→8 à la rédaction (invitation org-less = 3 blocages en cascade + non-régression d'InvitationService partagé, cf. cadrage sous la story). Après 28→31 (STORY-105 révisée 5→8). KYC 🏁 8 (048+049) + RBAC plateforme 26 ; ⚠️ le sprint est désormais À CAPACITÉ EXACTE (34/34, AUCUNE marge) : reste 13 à faire (104=8 + 106=5). Le balance CORE (21) est parti en S11 — D15
     completed_points: 29  # STORY-048 + STORY-103 (socle RBAC) + STORY-049 (e2e chaîne KYC 🏁) + STORY-105 (8) + STORY-104 (8 — surface de gestion : les 8 permissions du catalogue ont enfin toutes un guard) done 2026-07-16. Reste 5 (STORY-106, débloquée).
     # 🏁 EPIC-016 COMPLET (046→049) ⇒ JALON MODULE 0 « chaîne KYC complète » ATTEINT le 2026-07-16 : la chaîne est
     # livrée ET prouvée rejouable (`npm run test:chain`). Reste du sprint 10 = RBAC plateforme (105 → 104/106).
@@ -1014,6 +1014,15 @@ sprints:
         points: 5
         service: "admin-panel"
         status: "not_started"  # La surface demandée : ajouter un utilisateur, lui attribuer un rôle, composer un rôle depuis le catalogue — DEPUIS le panel. Guards : @Roles(PLATFORM_ADMIN) uniforme (6 routes, tout-ou-rien) → @RequirePermissions granulaire, contrôleur par contrôleur (AdminOrgsController lecture = org:read ; AdminOrgActionsController = kyc:approve/kyc:reject/entitlement:grant/entitlement:revoke). Nouveau : proxy des routes de gestion 104 (users/roles/catalogue), même patron que STORY-048 (relais du bearer, traduction fidèle des erreurs, le BFF ne décide/persiste RIEN). Enum Role local (common/enums/role.enum.ts) + ROLE_PRECEDENCE : à faire évoluer vers les permissions. DÉPEND STORY-103 + STORY-105 (sans 105, la granularité du panel est cosmétique : les amont refusent). VÉRIF DOCKER ATTENDUE : un PLATFORM_KYC_OFFICER approuve un KYC (200) MAIS se prend un 403 sur grant entitlement — c'est LE test qui prouve que la délégation marche.
+        assigned_to: null
+
+      - story_id: "STORY-107"
+        title: "admin-panel : route de file de revue KYC (proxy GET /admin/kyc?status=) enrichie du nom d'organisation"
+        epic: "EPIC-016"
+        points: 3
+        service: "admin-panel"
+        status: "not_started"  # 🆕 2026-07-17 — DEMANDE FRONTEND (prérequis de AP-03, frontend sprint 4), issue de l'audit des 7 dépôts. À TIRER AVEC STORY-106 (même dépôt, même famille de contrôleurs, et 107 dépend des guards par permission de 106). CONSTAT : kyc-service SAIT DÉJÀ filtrer sa file (GET /admin/kyc?status=, AdminKycQueryDto validé par enum) ; le BFF la consomme (KycServiceClient.listReviewQueue) mais SANS le paramètre status — il s'en sert pour bâtir un index d'enrichissement (Map<orgId,status>), pas pour servir une file. La liste d'orgs NE PEUT PAS servir de file de revue : OrgAggregationService.listOrgs délègue la PAGE à auth (fetchOrganizationsPage) puis enrichit le kycStatus APRÈS COUP, et ListOrgsQueryDto.status porte sur l'IDENTITÉ (ACTIVE|SUSPENDED). ⇒ filtrer côté front à travers la pagination serait FAUX (une page de 20 orgs peut ne contenir aucun UNDER_REVIEW alors que la file n'est pas vide → l'agent croit avoir tout traité). ⚠️ La demande initiale du frontend (« ajouter kycStatus à ListOrgsQueryDto ») était la MAUVAISE FORME : elle obligerait le BFF à rapatrier toutes les orgs, fusionner, filtrer, re-paginer — inversant la source de vérité de la pagination. La bonne forme : pour une file de revue, c'est le KYC qui pilote la liste, et kyc-service sait déjà le faire → il ne reste qu'à l'exposer + joindre la raison sociale (KycReviewItem ne porte qu'un orgId opaque). Dégradation : auth down → file sans les noms (patron STORY-047), kyc down → 503. Questions ouvertes (pagination de la file, forme de la jointure, nom de route) tranchées à la rédaction — cf. stories/STORY-107.md.
+        story_path: "stories/STORY-107.md"
         assigned_to: null
 
   - sprint_number: 11
