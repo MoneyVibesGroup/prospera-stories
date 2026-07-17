@@ -4,7 +4,7 @@
 **Réf. architecture :** `architecture-prospera-ecosystem-2026-07-04.md` § Orchestration (P6 Kafka) ; `.agents/rules/kafka-evenements.md` ; CLAUDE.md § « Les 4 invariants structurants » — invariant **4 (démarrage dégradé)**
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** review
+**Statut :** done
 **Assigné à :** null
 **Créée le :** 2026-07-17
 **Sprint :** 11 (2026-11-19 → 2026-12-03)
@@ -223,6 +223,8 @@ Aucune revue de code ne les aurait attrapés : ils sont dans l'**interaction ave
 - 2026-07-17 : **créée** (`/bmad:create-story`) — statut `defined`. Origine : dette actée à la clôture de STORY-076. ⚠️ Périmètre **réduit à la rédaction** de « auth-service + 4 services à vérifier » à « **auth-service seul** » : `grep -rl "KafkaBootstrap"` ne remonte que `auth-service` et `balance-service` — `expert-comptable` (que le cadrage de STORY-076 désignait explicitement) n'a **jamais eu** de `KafkaBootstrapService`. L'hypothèse du cadrage était fausse ; la note projet `kafka-round-trip-bugs-latents` est à corriger.
 
 - 2026-07-17 : **implémentée** (branche `MNV-108`) — statut `review`.
+- 2026-07-17 : **`/code-review high`** — 5 constats. **3 de documentation, tous corrigés** : (a) AC-10 ne prouve pas le bug ③ ; (b) AC-14 « la couverture doit monter » est faux ; (c) **sévérité du ③ à préciser** — `auth-service` porte un filet `installKafkaUnhandledRejectionGuard` (`main.ts`) que `balance-service` **n'a pas**, d'où le risque qu'un relecteur croie le bug déjà neutralisé ; il ne l'est pas (le filet ne ravale que les erreurs `KafkaJS*` et **re-lève** le reste ; le minuteur rejette un `Error` simple → re-levé → `uncaughtException` → arrêt). **2 assumés** : la connexion admin supplémentaire au boot (prix du correctif ①) et la couture de test `roundTripSettled` — tous deux imposés par l'alignement AC-06 sur `balance-service` ; diverger coûterait plus que le gain.
+- 2026-07-17 : **livrée** — PR #5 `auth-service` (`MNV-108` → `dev`, *Rebase and merge*, branche supprimée) + PR #3 `docs` (→ `main`). Statut `done`.
 
 **Vérification docker réelle — 2026-07-17, stack repartie de ZÉRO (`down -v` → `up --build`)**
 
