@@ -629,8 +629,8 @@ sprints:
     start_date: "2026-11-05"
     end_date: "2026-11-19"
     capacity_points: 34
-    committed_points: 37  # ⬆️ 34→37 le 2026-07-17 : STORY-107 (3, demande frontend prérequis AP-03) ajoutée — ⚠️ DÉPASSE la capacité (37 > 34) ET le sprint 11 est déjà à 44/34 : les DEUX sont à arbitrer au prochain /bmad:sprint-planning. Placée ici et pas en S11 parce qu'elle se tire AVEC STORY-106 (même dépôt, même contrôleur ; 107 dépend des guards de 106) — les séparer coûterait deux passes sur le même code. Historique : ⬆️ 31→34 le 2026-07-16 : STORY-104 révisée 5→8 à la rédaction (invitation org-less = 3 blocages en cascade + non-régression d'InvitationService partagé, cf. cadrage sous la story). Après 28→31 (STORY-105 révisée 5→8). KYC 🏁 8 (048+049) + RBAC plateforme 26 ; ⚠️ le sprint est désormais À CAPACITÉ EXACTE (34/34, AUCUNE marge) : reste 13 à faire (104=8 + 106=5). Le balance CORE (21) est parti en S11 — D15
-    completed_points: 29  # STORY-048 + STORY-103 (socle RBAC) + STORY-049 (e2e chaîne KYC 🏁) + STORY-105 (8) + STORY-104 (8 — surface de gestion : les 8 permissions du catalogue ont enfin toutes un guard) done 2026-07-16. Reste 5 (STORY-106, débloquée).
+    committed_points: 40  # ⬆️ 37→40 le 2026-07-17 (RÉCONCILIATION de deux hausses SIMULTANÉES et INDÉPENDANTES, toutes deux réelles — chacune était passée de 34 à 37 de son côté, mais elles S'ADDITIONNENT) : (a) +3 STORY-107 (demande frontend, prérequis AP-03) ; (b) +3 STORY-106 révisée 5→8 à la rédaction — le TROISIÈME 5→8 CONSÉCUTIF de l'epic (105, 104, 106), même cause à chaque fois : le plan supposait un remplacement de décorateur, la lecture du code disait autre chose (ici : socle RBAC ABSENT du panel, proxy de 8 routes, et le hook `forbidden` de 105 en cachait un second — mapPrimaryError 403→503 sur la source PRIMAIRE). ⚠️ 40 > 34 de capacité, ET le sprint 11 est déjà à 44/34 : les DEUX sont à arbitrer au prochain /bmad:sprint-planning. STORY-107 est placée ici et pas en S11 parce qu'elle se tire AVEC STORY-106 (même dépôt, même contrôleur ; 107 dépend des guards de 106) — les séparer coûterait deux passes sur le même code. ⚡ 37 des 40 sont DÉJÀ LIVRÉS (le dépassement a été absorbé) ; reste 3 = STORY-107. Historique : ⬆️ 31→34 le 2026-07-16 : STORY-104 révisée 5→8 à la rédaction (invitation org-less = 3 blocages en cascade + non-régression d'InvitationService partagé, cf. cadrage sous la story). Après 28→31 (STORY-105 révisée 5→8). KYC 🏁 8 (048+049) + RBAC plateforme 26 ; ⚠️ le sprint est désormais À CAPACITÉ EXACTE (34/34, AUCUNE marge) : reste 13 à faire (104=8 + 106=5). Le balance CORE (21) est parti en S11 — D15
+    completed_points: 37  # STORY-048 + STORY-103 (socle RBAC) + STORY-049 (e2e chaîne KYC 🏁) + STORY-105 (8) + STORY-104 (8) done 2026-07-16, + STORY-106 (8 — 🏁 EPIC-025 CLOS : la délégation d'administration est enfin VISIBLE depuis le panel) done 2026-07-17. ⚠️ Reste 3 (STORY-107, not_started) : le sprint n'est PAS clos — EPIC-025 l'est. 37 livrés pour 34 de capacité ⇒ référence utile pour la vélocité au prochain sprint-planning (3 stories consécutives estimées 5, livrées 8 : cf. rationale de 104/105/106).
     # 🏁 EPIC-016 COMPLET (046→049) ⇒ JALON MODULE 0 « chaîne KYC complète » ATTEINT le 2026-07-16 : la chaîne est
     # livrée ET prouvée rejouable (`npm run test:chain`). Reste du sprint 10 = RBAC plateforme (105 → 104/106).
     status: "in_progress"
@@ -1011,10 +1011,126 @@ sprints:
       - story_id: "STORY-106"
         title: "admin-panel : guards par permission + proxy de la gestion des membres/rôles plateforme"
         epic: "EPIC-025"
-        points: 5
+        points: 8  # ⬆️ RÉVISÉ 5→8 à la rédaction (2026-07-17) — 3ᵉ 5→8 consécutif de l'epic (cf. committed_points du sprint). Le plan résumait 106 en « guards granulaires + proxy » ; le code dit qu'il faut D'ABORD construire le socle RBAC, ABSENT du panel.
         service: "admin-panel"
-        status: "not_started"  # La surface demandée : ajouter un utilisateur, lui attribuer un rôle, composer un rôle depuis le catalogue — DEPUIS le panel. Guards : @Roles(PLATFORM_ADMIN) uniforme (6 routes, tout-ou-rien) → @RequirePermissions granulaire, contrôleur par contrôleur (AdminOrgsController lecture = org:read ; AdminOrgActionsController = kyc:approve/kyc:reject/entitlement:grant/entitlement:revoke). Nouveau : proxy des routes de gestion 104 (users/roles/catalogue), même patron que STORY-048 (relais du bearer, traduction fidèle des erreurs, le BFF ne décide/persiste RIEN). Enum Role local (common/enums/role.enum.ts) + ROLE_PRECEDENCE : à faire évoluer vers les permissions. DÉPEND STORY-103 + STORY-105 (sans 105, la granularité du panel est cosmétique : les amont refusent). VÉRIF DOCKER ATTENDUE : un PLATFORM_KYC_OFFICER approuve un KYC (200) MAIS se prend un 403 sur grant entitlement — c'est LE test qui prouve que la délégation marche.
-        assigned_to: null
+        status: "done"  # implémentée + VÉRIFIÉE DOCKER BOUT-EN-BOUT + revue + INTÉGRÉE DANS DEV 2026-07-17. 🏁 EPIC-025 CLOS — la délégation d'administration est LIVRÉE ET VISIBLE. ⚡ LA PREUVE (§1 docker) : un PLATFORM_KYC_LEAD_106, dont le rôle a été COMPOSÉ AU PANEL 60 s plus tôt, lit les orgs (200), APPROUVE un KYC (200) — décision PERSISTÉE avec reviewedBy = SON userId, outbox SENT — et se prend un 403 sur grant ET revoke. Avant cette story : 403 PARTOUT (repli TENANT_USER). Qualité : lint 0, build OK, 203 unit (25 suites) + 78 e2e (4 suites), cov 99.82/92.12/100/99.8 (seuils 65/90/90/90 ; branches 89.81 → 92.12 ; 100 % sur les 7 fichiers neufs), test:chain 8/8 VERT stack réelle.
+        # ── 🏁 DERNIÈRE STORY D'EPIC-025 — c'est ICI que la délégation devient VISIBLE. 103 a mis perms[] dans le jeton, 105 a fait écouter les amont, 104 a livré la surface de gestion — mais la PORTE D'ENTRÉE de l'opérateur est le panel, et le panel est resté à @Roles(PLATFORM_ADMIN) (105 l'avait explicitement exclu). Aujourd'hui un PLATFORM_KYC_OFFICER se prend un 403 DU BFF avant même d'atteindre kyc-service, qui l'accepterait pourtant (prouvé par la vérif §8b de 104). DÉPEND STORY-103 + STORY-105 (sans 105 la granularité du panel est cosmétique : les amont refusent) + STORY-104 (sans elle, RIEN à proxifier).
+        # ── 🔴 3 DÉCOUVERTES DE LA RÉDACTION (2026-07-17, lecture du code) — elles portent le périmètre de 5 à 8 :
+        # 1. LE SOCLE RBAC EST ABSENT DU PANEL. Pas de src/common/rbac/, pas de permission.enum.ts, pas de
+        #    PermissionsGuard : admin-panel est le SEUL des 4 services à ignorer perms[] (les 3 autres portent la copie
+        #    K4 depuis 105, diff -q à vide). Et le PIÈGE n°1 de 105 y est INTACT : jwt.strategy.ts:91-95 resolveRole +
+        #    ROLE_PRECEDENCE replient TOUT rôle inconnu sur TENANT_USER ⇒ un PLATFORM_KYC_OFFICER est projeté
+        #    « tenant sans organisation ». Donc 4ᵉ copie K4 + guard + décorateur + JwtStrategy roles[]/perms[] + shim
+        #    pré-103 + RolesGuard multi-rôles + AuthenticatedUser {roles[],perms[]} : tout ce que 105 a payé 2×, une
+        #    3ᵉ fois. ✅ Ripple MESURÉ et petit : user.role n'a que 2 consommateurs (current-user.decorator.ts:12 +
+        #    roles.guard.ts:34). ⚠️ NE PAS toucher auth-org.contract.ts:47 (role: string) = rôle de MEMBERSHIP amont,
+        #    homonyme SANS RAPPORT.
+        # 2. LE PROXY EST UN VRAI LOT : 8 routes (GET /admin/permissions, GET|POST /admin/roles, PATCH|DELETE
+        #    /admin/roles/:name, POST|GET /admin/users, PATCH /admin/users/:id) = le DOUBLE de STORY-048, qui valait
+        #    5 pts à elle seule, avec le même appareillage (contrats K4, client, service, contrôleurs, DTOs au bord).
+        # 3. 🪤 LE HOOK `forbidden` DE 105 EN CACHAIT UN SECOND, PLUS GRAVE. Connu : classifyUpstreamError
+        #    (upstream-error.ts:42-46) mappe tout non-404 en 'unavailable' → un 403 devient « momentanément
+        #    indisponible », mensonge sur stack saine. NOUVEAU : mapPrimaryError (org-aggregation.service.ts:157-164)
+        #    transforme un 403 d'auth-service en 503 — le panel S'ACCUSE D'UNE PANNE sur la source PRIMAIRE, celle qui
+        #    décide du code de réponse. + 2 CATCH NUS (:174-181 file KYC, et le compteur d'entitlements) qui n'appellent
+        #    même pas le classifieur. 4 sites au total.
+        # ── ⚡ HONNÊTETÉ SUR `forbidden` (analysé, à ne pas survendre) : après 105, TOUTES les lectures que le panel
+        #    appelle sont gouvernées par org:read (auth admin-organizations, kyc kyc-admin, catalog assertCanReadOrg) et
+        #    le plancher du panel est org:read ⇒ les 2 mappings COÏNCIDENT ⇒ 'forbidden' est INATTEIGNABLE de bout en
+        #    bout aujourd'hui (le panel n'appelle NI catalog-read NI catalog-admin, les 2 contrôleurs restés en
+        #    @Roles(PLATFORM_ADMIN) — vérifié dans catalog-service.client.ts : uniquement /catalog/entitlements/*). À
+        #    livrer QUAND MÊME : (a) détecteur de divergence K4 (4 copies du catalogue = convention, pas garantie — le
+        #    jour où ça dérive, le symptôme doit être « refusé », pas « en panne ») ; (b) la dette kyc:read de 105 le
+        #    rendra atteignable ; (c) mapPrimaryError, LUI, est un bug atteignable. ⇒ PROUVÉ EN UNITAIRE, PAS en docker.
+        #    NE PAS prétendre l'avoir vérifié en docker — aucun parcours ne l'atteint (les perms sont GELÉES dans le
+        #    jeton à l'émission et les 2 côtés lisent le MÊME jeton : changer le rôle en base ne diverge rien).
+        # ── 🪤 2 PIÈGES HÉRITÉS DE 105, MÊME CODE ICI (probabilité HAUTE, tracés dans la story) : (a) test/utils/
+        #    rs256.ts:71 construit le jeton par LISTE BLANCHE (sub/org/roles/emailVerified) → tout perms passé est
+        #    SILENCIEUSEMENT SUPPRIMÉ → les personas retombent dans le shim → 403 → « la story ne marche pas », alors que
+        #    la FIXTURE est incapable de minter un jeton post-103 (propager perms UNIQUEMENT s'il est défini : undefined
+        #    ≠ [] est le cœur du shim) ; (b) les harnais e2e déclarent LEUR PROPRE chaîne d'APP_GUARD (admin-orgs.e2e-
+        #    spec.ts:24 importe RolesGuard) → retirer @Roles sans enregistrer PermissionsGuard rend les routes migrées
+        #    OUVERTES DANS LES TESTS (RolesGuard laisse passer une route sans @Roles). Prod non exposée, mais les e2e
+        #    valideraient des routes béantes. Les 3 harnais doivent enregistrer la chaîne COMPLÈTE.
+        # ── DÉCISIONS : plancher deny-by-default AU NIVEAU CLASSE (leçon de la revue de 105 — @Roles(PLATFORM_ADMIN)
+        #    était un filet protégeant toute route future non décorée) ; sur AdminOrgActionsController le plancher
+        #    org:read est PLUS FAIBLE que l'actuel — arbitrage ASSUMÉ, identique à celui de 105 sur admin-organizations
+        #    (qui porte suspend) : le plancher vise la menace RÉELLE, la population TENANT (perms:[] par construction),
+        #    pas l'opérateur déjà habilité à lire ; mitigeant = test de précédence handler>classe OBLIGATOIRE (une
+        #    précédence inversée ÉLARGIRAIT grant à tout porteur d'org:read) · le mapping du panel est une COPIE de
+        #    celui de l'amont, délibérément : le BFF n'invente AUCUNE règle (une règle plus stricte au panel serait une
+        #    autorisation CACHÉE DANS UN PROXY, invisible pour qui lit l'amont) · AUCUNE nouvelle permission (catalogue
+        #    reste à 8) · AUCUNE route de suspension ajoutée (org:suspend = API directe sur l'IdP — hors périmètre).
+        # ── VÉRIF DOCKER ATTENDUE : ⚡ §1 LA PREUVE — un PLATFORM_KYC_OFFICER approuve un KYC VIA LE PANEL (200) MAIS
+        #    se prend un 403 sur grant entitlement (hier : 403 PARTOUT, replié TENANT_USER) + §1b persistance réelle
+        #    (reviewedBy = l'userId de l'agent relayé, outbox SENT) · §3 boucle complète DEPUIS LE PANEL : catalogue →
+        #    POST /admin/roles → POST /admin/users (org-less) → accept → login → le jeton porte le rôle COMPOSÉ AU PANEL
+        #    → 200 · §3b assertion NÉGATIVE Kafka (user.registered=1, membership.changed=0, org_profiles fantôme=0) ·
+        #    §4 l'amont reste l'autorité (rôle système 403, rôle porté 409, anti-god-mode, anti-lockout 409) · §7 NE PAS
+        #    CONFONDRE dégradation ('unavailable' sur stop kyc) et refus ('forbidden') · §8 npm run test:chain 8/8 VERT
+        #    STACK RÉELLE (filet de non-régression 🏁 de l'epic — la chaîne KYC traverse ces guards).
+        # ── ⚠️ docker compose restart admin-panel AVANT toute vérif (hot-reload trompeur — écart (a) de 104) ; personas
+        #    par VRAI login, jamais par jeton forgé (throttler 5/min : attendre, ne pas contourner).
+        # ── 🔓 DETTES TRACÉES ICI : (a) requireBearer en 4 copies → extraction ; (b) aucune route de suspension au
+        #    panel ; (c) kyc:read (dette de 105, PRIORITAIRE : PLATFORM_SUPPORT voit les URLs présignées des pièces
+        #    d'identité via org:read) ; (d) TOCTOU resolveGrantableRole de 104 (🟡, story dédiée). Après 106, le shim de
+        #    compat pré-103 est RETIRABLE dans les 4 dépôts (~4 lignes chacun).
+        # ── 🔍 2 DÉCOUVERTES À L'IMPLÉMENTATION (au-delà des 3 de la rédaction) :
+        # 1. 🔴 rethrowUpstreamError : 403 ABSENT de WRITE_ERROR_MESSAGES → retombait en 503. La rédaction avait trouvé
+        #    le 403→503 de mapPrimaryError (LECTURE) ; celui-ci frappe l'ÉCRITURE. Inoffensif avant la délégation (le
+        #    panel exigeait PLATFORM_ADMIN et les amont exigeaient la même chose : un 403 amont était INATTEIGNABLE),
+        #    RÉEL dès 106 — l'IdP refuse en 403 l'anti-god-mode (assertCanGrant) et la mutation d'un rôle SYSTÈME. Sans
+        #    le correctif, §4b aurait affiché « Service amont indisponible » sur un refus LÉGITIME. PROUVÉ EN DOCKER :
+        #    POST /admin/roles {entitlement:grant} par un acteur réel → 403 « Action non autorisée. »
+        # 2. 🐞 un `**/` DANS un commentaire /** */ FERME LE BLOC : `roles[]`/**`perms[]`**/`emailVerified` a terminé le
+        #    commentaire de rs256.ts → 12 erreurs TS absurdes (Cannot find name 'Aucune').
+        # ── 🪤 LES 2 PIÈGES DE 105, REPRODUITS VERBATIM (comme la rédaction l'annonçait) : (a) fixture rs256 → perms
+        #    SILENCIEUSEMENT supprimé (fixture incapable de minter un jeton post-103) ; (b) harnais e2e sans
+        #    PermissionsGuard → ⚡ CONSTATÉ EN ROUGE, pas déduit : « expected 403, got 200 » — un TENANT_ADMIN récoltait
+        #    200 sur /admin/orgs et 503 sur les actions (il atteignait le CORPS du handler). Routes BÉANTES DANS LES
+        #    TESTS. Prod jamais exposée (app.module enregistre le guard), mais ces e2e auraient validé des routes
+        #    ouvertes EN VERT. Corrigé dans les 3 harnais.
+        # ── ⚡ HONNÊTETÉ SUR 'forbidden' : LIVRÉ + testé EN UNITAIRE, NON vérifié en docker — AUCUN parcours ne
+        #    l'atteint (plancher du panel org:read ≡ mappings amont de 105 ⇒ qui passe le panel passe les amont).
+        #    Confirmé à l'implémentation. Reste (a) détecteur de divergence K4 et (b) prérequis de la dette kyc:read.
+        #    La table de vérif docker de la story l'EXCLUT explicitement. NE PAS prétendre le contraire.
+        # ── ✅ VÉRIF DOCKER (12 conteneurs healthy ; restart admin-panel AVANT ; personas par VRAI login, jamais forgés) :
+        #    §1 ⚡ LA PREUVE — agent (perms kyc:approve/kyc:reject/org:read) : orgs 200 · detail 200 · APPROVE 200 ·
+        #    grant 403 · revoke 403 (hier : 403 partout) · §1b décision PERSISTÉE, reviewedBy = userId DE L'AGENT (dérivé
+        #    du sub du jeton RELAYÉ, côté amont), outbox kyc.status.changed SENT · §2 non-régression PLATFORM_ADMIN sur
+        #    les 6 routes (grant 201 puis replay 200, revoke 200, reject 200) · §3 BOUCLE COMPLÈTE DEPUIS LE PANEL :
+        #    catalogue 8 libellés → POST /admin/roles 201 (isSystem:false forcé serveur, AUCUNE fuite _id/__v/timestamps)
+        #    → POST /admin/users 201 org-less → e-mail Mailhog → accept → login → LE JETON PORTE LE RÔLE COMPOSÉ AU PANEL
+        #    → 200 · §3b ASSERTION NÉGATIVE Kafka : user.registered=1 SENT, membership.changed=0, memberships=0,
+        #    org_profiles fantômes=0 chez expert-comptable · §4 l'amont reste l'autorité (système 403, porté 409, doublon
+        #    409, inconnu 404 ; 8 rôles, 0 doublon) · §4b ⚡ ANTI-GOD-MODE acteur RÉEL {role:manage,org:read} : {org:read}
+        #    → 201 MAIS {entitlement:grant} → 403, ROLE_ESCALADE en base = 0 · §4c délégation bornée (user:invite 403,
+        #    approve 403) · §5 TENANT_ADMIN réel (perms:[]) → 403 sur les 14 routes, anonyme 401 · §6 traduction fidèle
+        #    (4× 400 AU BORD, aucun appel amont) · §7 stop kyc → sources.kyc='unavailable' + agrégat servi 200, approve
+        #    pendant la panne → 503 JAMAIS 200, start → retour 'ok' · §7b stop auth (source PRIMAIRE) → detail/roles/
+        #    users/roles 503 ET 0 TRACE EN BASE (un échec n'est pas une écriture partielle) · §8 🏁 npm run test:chain
+        #    8/8 VERT stack réelle (le filet de non-régression de l'epic traverse les guards migrés).
+        # ── 🔎 /CODE-REVIEW (high) : 5 constats — 3 CORRIGÉS, 1 documenté, 1 tracé. (1) 🔴 RÉGRESSION INTRODUITE PAR LA
+        #    STORY : en remplaçant le catch NU de buildKycStatusIndex par classifyUpstreamError, un 404 devenait 'absent'
+        #    — dont le contrat dit « rien à afficher, PAS une panne ». Or /admin/kyc est une route de COLLECTION : elle
+        #    n'a pas de « ressource inexistante » (file vide = 200 []). Un 404 y = ROUTE CASSÉE. La liste admin se serait
+        #    affichée SANS AUCUN statut KYC en affirmant que tout va bien → l'opérateur aurait conclu qu'aucun cabinet
+        #    n'a soumis de dossier. Avant le diff : 'unavailable' (honnête). CORRIGÉ : seul le 403 est distingué, tout le
+        #    reste (404 compris) reste 'unavailable' + test qui fige la règle. (2) role.enum.ts documentait les 2
+        #    comportements SUPPRIMÉS par la story (« rôle singulier » + « @Roles sur toutes les routes d'administration »)
+        #    → CORRIGÉ (un lecteur y aurait appris un RBAC mort, ou aurait posé un @Roles rendant une route admin
+        #    inaccessible aux personas délégués). (3) promesse flottante dans un spec → CORRIGÉ. (4) RolesGuard n'a plus
+        #    AUCUN consommateur mais reste enregistré → DOCUMENTÉ (route TENANT future + miroir exact des 3 amont et des
+        #    harnais e2e). (5) 🟡 requireBearer en 4 copies → TRACÉ, hors périmètre.
+        # ── 🔓 DETTES : (a) requireBearer ×4 → extraction ; (b) AUCUNE route de suspension au panel (org:suspend = API
+        #    directe sur l'IdP) ; (c) kyc:read (dette de 105, PRIORITAIRE — support/auditeur voient les URLs présignées
+        #    des pièces d'identité ; la refermer rendra 'forbidden' ATTEIGNABLE) ; (d) TOCTOU resolveGrantableRole (104).
+        # ── ⚡ APRÈS 106 : le shim de compat pré-103 est RETIRABLE DANS LES 4 DÉPÔTS (~4 lignes chacun) dès qu'aucun
+        #    jeton pré-103 ne circule (TTL access = 15 min).
+        # RESTE : — (EPIC-025 clos ; fronts AP-03/AP-04 = consommateurs naturels, hors epic).
+        completed_date: "2026-07-17"
+        story_path: "stories/STORY-106.md"
+        assigned_to: "Claude (BMAD dev-story)"
 
       - story_id: "STORY-107"
         title: "admin-panel : route de file de revue KYC (proxy GET /admin/kyc?status=) enrichie du nom d'organisation"
