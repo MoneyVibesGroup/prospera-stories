@@ -4,8 +4,8 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A01/A25/A27/A28 ; `sprint-plan-atelier-balance-2026-07-12.md` § D13 hub multi-source  
 **Priorité :** Must Have  
 **Story Points :** 5  
-**Statut :** ready-for-dev  
-**Assigné à :** null  
+**Statut :** done ✅ (implémentée + vérifiée docker + revue + intégrée dans `dev` le 2026-07-17)  
+**Assigné à :** Claude (BMAD dev-story)  
 **Créée le :** 2026-07-12  
 **Sprint :** 10 (CORE)  
 **Service :** `balance-service` (:3007)  
@@ -241,7 +241,43 @@ db.balances.createIndex({ etat: 1, horodatageValidation: -1 });
 
 ---
 
-**Status:** ready-for-dev  
+## Progress Tracking
+
+**Status History :**
+- 2026-07-12 : Créée (Scrum Master).
+- 2026-07-17 : Implémentée + revue + intégrée dans `dev` (BMAD dev-story, Claude) — PR #3 `balance-service` (branche `MNV-101`, Rebase and merge, branche supprimée).
+
+**Décisions de mise en œuvre :**
+- **Module** `src/modules/balance/` calqué sur `platform-catalog-service` (upsert transactionnel) et les patrons `balance-service` existants (read-models STORY-077).
+- **Contrat** (`types/balance-canonique.ts`) : types + tables de valeurs `as const` exportés (pas d'enum), 0 `any`, JSDoc par champ.
+- **Montants en unités mineures XOF entières** (× 100) — arithmétique exacte, zéro dérive flottante (cf. §Risques). Une source à 2 décimales se mappe 1:1.
+- **Événement** `balance.created` (`BalanceCreatedEventV1`) : structure + mapper figés/testés ; le câblage outbox Kafka reste **STORY-099** (hook inerte documenté). Renommé depuis `BalanceSubmittedEventV1` de la story pour lever l'ambiguïté avec le topic **entrant** `balance.submitted` (STORY-102).
+- **Immutabilité** : `marquerEtat` (+`findLatest`/`listByOrg`) = **hooks inertes documentés** — aucun endpoint HTTP de mutation en 101 (le workflow métier validation/rejet est le périmètre de 098/099) ; l'invariant est prouvé par les tests unitaires.
+- **JSON Schema Mongo au niveau collection non ajouté** : le schéma Mongoose + `BalanceValidator` (app) + l'index unique portent tous les invariants ; un validateur `$jsonSchema` DB dupliquerait le contrat.
+
+**Revue** `/code-review xhigh` — 3 constats :
+- 🟠 **Corrigé** : le tri des lignes du checksum utilisait `localeCompare` (dépendant de la locale runtime) → tri par **point de code** ⇒ SHA-256 identique entre adaptateur et serveur quelle que soit la locale (comptes à casse mixte).
+- 🟡 **Corrigé** : montants sans borne haute → `Number.isSafeInteger` par ligne **et** sur les totaux agrégés (`validerAgregats`) ⇒ refus 400 au-delà de 2^53 (sinon totaux/équilibre calculés faux).
+- ⚪ **Laissé (défendable)** : `validerStatutPreuve` est redondant sur le POST (le serveur pose lui-même le statut) mais reste utile pour un appel direct du validateur par un adaptateur — défense en profondeur documentée.
+
+**Validation :** lint 0 warning · build OK · **205 unit + 34 e2e** verts · couverture **module balance 100 %** (branches incluses) > seuils 65/90/90/90.
+
+**Vérification docker réelle (bout-en-bout, 14/14)** — stack vivante, jeton RS256 réel de l'IdP + gate `@RequiresBalanceAccess` satisfaite (read-models KYC APPROVED + entitlement `balance` ACTIVE semés) :
+- **Idempotence** : `POST` v1 → **201** ; v1 rejoué → **200** NOP (même `id`) ; v2 → **201**. `db.balances.countDocuments` = **2**, versions **{1,2}** (append-only, **aucun doublon v1**).
+- **Index** : index **UNIQUE** `(orgId, exercice.debut, exercice.fin, source, version)` présent (`getIndexes()`).
+- **Atomicité / FR-A25** : `POST` déséquilibrée → **422** et `count` **inchangé** (2) ⇒ rejet n'écrit **aucun** orphelin.
+- **Intégrité** : checksum falsifié → **400**.
+- **Anti-énumération / org-scoping** : `GET /:id` de l'org → **200** (bon `orgId`) ; `GET` d'un id inexistant → **404**.
+- **Immutabilité** : prouvée par unit (`marquerEtat` sur balance `VALIDÉE` → `AlreadyValidatedBalanceException`) — sans surface HTTP en 101.
+
+**Effort réel :** ~1 séance (implémentation + revue + vérif docker).
+
+**Suite :** enchaînement immédiat **STORY-086** (adaptateur import Sage → contrat canonique).
+
+---
+
+**Status:** done ✅  
 **Created:** 2026-07-12  
+**Completed:** 2026-07-17  
 **Criticité:** ⚡ MAXIMALE — Keystone  
 **Reference:** `prd-atelier-balance-2026-07-12.md` § EPIC-017, `sprint-plan-atelier-balance-2026-07-12.md` § D13 hub multi-source
