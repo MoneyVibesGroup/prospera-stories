@@ -4,7 +4,7 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A28 (contrat de sortie & handoff) ; `sprint-plan-atelier-balance-2026-07-12.md` § D13/D14 (hub multi-source, balance AVANT bilan) + § 4 (coordination balance/bilan)
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** review
+**Statut :** done ✅ (implémentée + vérifiée docker + revue + intégrée dans `dev` le 2026-07-17 — PR #5 `balance-service`, MNV-099, Rebase and merge, branche supprimée)
 **Assigné à :** Claude (BMAD dev-story)
 **Créée le :** 2026-07-12 · **Re-cadrée le :** 2026-07-17 (contre le code réellement livré par STORY-101/086/077/076)
 **Sprint :** 10-11 (CORE — dernière story du socle balance-service)
@@ -218,7 +218,7 @@ GET /api/v1/balances?etat=&source=&limit=&skip=  → réconciliation (snapshot o
 **Status History :**
 - 2026-07-12 : Créée (Scrum Master).
 - 2026-07-17 : **Re-cadrée** (`/bmad:create-story`) contre le code livré par STORY-101/086/077/076 — draft aligné sur le contrat `BalanceCreatedEventV1` figé, l'émission par **transactional outbox** (chemin CREATE, atomique), l'API `/balances` org-scopée, la gate `@RequiresBalanceAccess`.
-- 2026-07-17 : **Implémentée + vérifiée docker** (BMAD dev-story) → statut **review**.
+- 2026-07-17 : **Implémentée + vérifiée docker** (BMAD dev-story), revue, **intégrée dans `dev`** (PR #5 `balance-service`, branche `MNV-099`, Rebase and merge, branche supprimée) → statut **done** ✅.
 
 **Décisions de mise en œuvre :**
 - **Producteur seul** au sprint 10-11 ; consommateur réel + interop e2e **différés à EPIC-009** (bilan-service).
