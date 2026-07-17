@@ -4,8 +4,8 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § Épics AB-04 (import & migration) ; `sprint-plan-atelier-balance-2026-07-12.md` § D13 adaptateurs ; fixture réelle `Balance_des_comptes.pdf` (export Sage ETS RELAXED, 50 comptes)  
 **Priorité :** Must Have  
 **Story Points :** 5  
-**Statut :** ready-for-dev  
-**Assigné à :** null  
+**Statut :** done ✅ (implémentée + vérifiée docker + revue + intégrée dans `dev` le 2026-07-17)  
+**Assigné à :** Claude (BMAD dev-story)  
 **Créée le :** 2026-07-12  
 **Sprint :** 10 (CORE)  
 **Service :** `balance-service` (:3007)  
@@ -265,8 +265,41 @@ Pas de nouveau schéma ; la balance normalisée est stockée directement dans la
 
 ---
 
-**Status:** ready-for-dev  
+## Progress Tracking
+
+**Status History :**
+- 2026-07-12 : Créée (Scrum Master).
+- 2026-07-17 : Implémentée + revue + intégrée dans `dev` (BMAD dev-story, Claude) — PR #4 `balance-service` (branche `MNV-086`, Rebase and merge, branche supprimée).
+
+**Décisions de mise en œuvre :**
+- **Module** `src/modules/balance/sage/` : `SageParserService` (Excel via **exceljs**, CSV maison) → `SageNormalizerService` (→ contrat canonique STORY-101) → `SageImportService` (orchestration dry-run/persist) → `SageImportController` (`multipart` via `FileInterceptor`, borne 50 Mo).
+- **Parsing** : en-tête détecté par la ligne portant **compte + colonne de montant** (ignore la ligne de titre Sage) ; colonnes mappées par libellé **normalisé sans accent**, priorité aux **soldes cumulés** ; montants FR (espaces milliers, virgule décimale) ; lignes de total / sans mouvement ignorées.
+- **Normalisation** : XOF décimaux → **unités mineures entières** (× 100) — unité du contrat 101 ; `source=sage`, `referentiel=SN`, `niveauPreuve=fichier` ; **checksum via l'utilitaire partagé** de 101 (jamais réimplémenté — la story en donnait un exemple avec `localeCompare`, écarté).
+- **Versioning append-only** délégué à `BalanceService.nextVersion` (max+1) ; **dry-run** = `BalanceService.dryRun` (build + valide, aucune écriture). Persist = `submit` (transaction/idempotence 101).
+- **`SageImportProfile`** : schéma d'**amorce** (collection provisionnée) — mapping assisté = **STORY-088** (hook inerte, aucune écriture ici).
+- **Écart assumé** : format de compte canonique **élargi 3-7 → 3-20** caractères (comptes tiers Sage `411FACTURE`/`5211BOA0`) — ajusté dans le contrat 101 (validator + DTO + JSDoc + tests). Nouvelles deps : `exceljs`, `@types/multer` → image `balance-service` **rebâtie**.
+- **PDF hors périmètre** : refus 400 avec aiguillage Excel/CSV (OCR différé à `document-service`).
+
+**Revue** `/code-review xhigh` — 1 constat **HIGH corrigé** : la détection d'en-tête retenait la **première** ligne contenant « compte » ; un export Sage réel débute par un **titre** « Balance des comptes – Periode… » (contient « comptes ») → pris pour l'en-tête → `400` sur tout vrai fichier (non vu car les fixtures démarraient à l'en-tête). Correctif : exiger **compte ET colonne de montant** sur la ligne d'en-tête ; prouvé par un test à ligne de titre + la vérif docker.
+
+**Validation :** lint 0 warning · build OK · **242 unit + 40 e2e** verts · couverture **module balance ~98 % lignes / 88 % branches** > seuils 65/90/90/90.
+
+**Vérification docker réelle (image rebâtie, upload multipart, 15/15)** — stack vivante, jeton RS256 réel + gate satisfaite, **fichier CSV avec ligne de titre Sage réelle** :
+- **Dry-run** → **200** : aperçu 3 lignes, équilibrée, `totalDebiteur = 175000000` (unités mineures) ; warning « sans mouvement » (compte 512 ignoré) ; **`db.balances` inchangée (0)**.
+- **Persist** → **201** : `version 1`, `BROUILLON`, `balanceId` présent ; **1 balance** `2026/sage` en base ; **compte tiers long `411FACTURE` conservé** (format élargi) ; `source=sage`.
+- **Re-import** → **201 version 2** (append-only) ; **2 balances** en base.
+- **PDF** → **400** (aiguillage) ; **déséquilibrée** → **422** sans orphelin (count inchangé) ; collection `sage_import_profiles` **provisionnée**.
+- **Non-régression STORY-101** : 14/14 (contrat canonique intact malgré l'élargissement du format de compte).
+
+**Réserve :** une **fixture Sage Excel/CSV réelle** reste à obtenir (validation faite sur fixtures reconstruites + montage docker ; le vrai fichier confirmera le parser à l'intégration).
+
+**Effort réel :** ~1 séance (implémentation + revue + vérif docker + rebuild image).
+
+---
+
+**Status:** done ✅  
 **Created:** 2026-07-12  
-**Dependencies:** STORY-076 (scaffold), STORY-101 (BalanceRepository persist), STORY-088 (profil d'import mémorisé, future)  
-**Prochaine étape:** STORY-087 (reprise à-nouveaux), STORY-089+ (rapprochement)  
+**Completed:** 2026-07-17  
+**Dependencies:** STORY-076 (scaffold), STORY-101 (contrat canonique + persist) ✅  
+**Prochaine étape:** STORY-087 (reprise à-nouveaux), STORY-089+ (rapprochement), STORY-088 (mapping assisté)  
 **Reference:** `prd-atelier-balance-2026-07-12.md` § AB-04 (import & migration Sage)
