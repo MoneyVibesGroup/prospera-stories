@@ -1233,12 +1233,14 @@ sprints:
         completed_date: "2026-07-18"
         assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-055"
-        title: "Table de passage comptes → postes d'états + gestion des comptes non mappés — FR-006"
+        title: "Table de passage comptes → postes d'états APPLIQUÉE (longest-prefix) + comptes non mappés + traçabilité — FR-006"
         epic: "EPIC-010"
         points: 5
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # ✅ 2026-07-18 — LIVRÉE (PR #6 bilan-service, MNV-055 → dev, Rebase and merge, branche supprimée). Application de la table de passage (FR-006), laissée « chargée non exécutée » par STORY-038. Re-cadrée : bilan-service N'A PAS de balance (handoff 099 producteur seul, consumer différé EPIC-009) → MOTEUR DE RATTACHEMENT pur sur une liste de comptes. TableDePassageService.mapComptes : index préfixe→règle(s) + LONGEST-PREFIX match ; chaque compte → poste(s) (AC-1) ou nonMappes ; classes 4/5 = liste de rattachements candidats (ventilation au solde = EPIC-011, PAS ici) ; traçabilité compte→poste→référentiel + préfixe retenu (AC-3). BilanEngineService.rattacherComptes = résolution (garde ACTIVE 054) + mapComptes. POST /bilan/table-de-passage/dry-run (diagnostic gardé provisoire, 200) ; DTO entrée alphanumérique ^\d[0-9A-Za-z]{1,19}$ (RAFFINEMENT vs story « numérique » : comptes tiers Sage 411FACTURE, aligné STORY-101/086) ; garde tenant factorisée (tenantObjectId). AC-2 (validation liasse sur non-mappés SIGNIFICATIFS = solde) = hook EPIC-011. /code-review high : aucun constat de correction (1 note efficacité index reconstruit/appel = négligeable, acceptée ; validation d'entrée robuste vérifiée : nombres/non-tableau → 400 non 500). Lint 0 · build OK · 149 unit + 28 e2e · cov 98.73/86.07/98.14/98.6 (table-de-passage.service 100%). VÉRIF DOCKER RÉELLE (stack vivante, JWT RS256 réel, référentiel réel syscohada-revise@2.1) : dry-run 211000→BILAN_ACTIF AE (préfixe 211), 411FACTURE (tiers Sage alphanumérique)→BILAN_ACTIF BI (préfixe 411), 401000→BILAN_PASSIF DJ (SOLDE_CREDITEUR, préfixe 401), 999999→nonMappes, referentiel tracé ; 400 invalide/vide ; 403 REVOKED ; /health 200 non-régression. HORS PÉRIMÈTRE respecté : import balance & consumer handoff (EPIC-009), calcul soldes/production états (EPIC-011), surcharges org (058), sfd-bceao (057), affinement fin (B8). Débloque EPIC-011 + STORY-057/058.
+        story_path: "stories/STORY-055.md"
+        completed_date: "2026-07-18"
+        assigned_to: "Claude (BMAD dev-story)"
       - story_id: "STORY-056"
         title: "Paquet référentiel SYSCOHADA révisé (plan de comptes + table de passage, versionné/checksum) — FR-007"
         epic: "EPIC-010"
