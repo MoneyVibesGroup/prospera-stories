@@ -1,6 +1,7 @@
 # Story FE-INT-1 : Brancher la gestion des utilisateurs sur auth-service (contrat réel)
 
-Status: backlog
+Status: review  <!-- 2026-07-19 : livrée en dev continu avec FE-INT-2 sur `fe-int-1-2` → PR #9 fe-int-1-2→dev (rebasée sur dev) ; gates verts -->
+
 
 **Epic :** FE-EPIC-002 — Intégration backend (retrofit de FE-008)
 **Points :** 2 · **Sprint :** Integration Gate (avant Sprint 3) · **App :** `prospera-frontend-expert-comptable`
@@ -13,7 +14,9 @@ Status: backlog
 
 ## Convention Git
 
-- Branche `fe-int-1`, commits `FE-INT-1 …` ; branche depuis `dev` + rebase avant de coder ; PR vers `dev`.
+- ⚡ **DÉROGATION (décision user 2026-07-19)** : FE-INT-1 est développée **en continu avec FE-INT-2** sur **une seule branche `fe-int-1-2`** et **une seule PR → `dev`** (au lieu d'une branche par story). Branche depuis `dev` + rebase avant de coder.
+- Commits préfixés par story : `FE-INT-1 …` pour la partie Users, `FE-INT-2 …` pour la partie KYC, afin de garder la traçabilité par story dans une PR partagée.
+- Les critères d'acceptation des deux stories restent **distincts** et doivent être verts **séparément** avant merge.
 
 ---
 

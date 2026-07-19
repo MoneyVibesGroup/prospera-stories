@@ -1,6 +1,7 @@
 # Story FE-INT-2 : Remodeler le KYC sur kyc-service (`GET /kyc/status`)
 
-Status: backlog
+Status: review  <!-- 2026-07-19 : livrée en dev continu avec FE-INT-1 sur `fe-int-1-2` → PR #9 fe-int-1-2→dev (rebasée sur dev) ; gates verts -->
+
 
 **Epic :** FE-EPIC-003 — KYC (retrofit de FE-009, dans l'Integration Gate FE-EPIC-002)
 **Points :** 3 · **Sprint :** Integration Gate (avant Sprint 3) · **App :** `prospera-frontend-expert-comptable`
@@ -13,7 +14,9 @@ Status: backlog
 
 ## Convention Git
 
-- Branche `fe-int-2`, commits `FE-INT-2 …` ; branche depuis `dev` + rebase avant de coder ; PR vers `dev`.
+- ⚡ **DÉROGATION (décision user 2026-07-19)** : FE-INT-2 est développée **en continu avec FE-INT-1** sur **une seule branche `fe-int-1-2`** et **une seule PR → `dev`** (au lieu d'une branche par story). Branche depuis `dev` + rebase avant de coder.
+- Commits préfixés par story : `FE-INT-2 …` pour la partie KYC, `FE-INT-1 …` pour la partie Users, afin de garder la traçabilité par story dans une PR partagée.
+- Les critères d'acceptation des deux stories restent **distincts** et doivent être verts **séparément** avant merge.
 
 ---
 

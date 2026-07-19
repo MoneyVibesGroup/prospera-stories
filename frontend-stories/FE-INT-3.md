@@ -1,6 +1,17 @@
 # Story FE-INT-3 : Brancher l'onboarding sur `GET /tenant/state` (EC relying party)
 
-Status: backlog
+Status: review  <!-- 2026-07-19 : implémentée sur branche `fe-int-3` (depuis origin/dev = top FE-INT-0) ; gates typecheck/lint/tests(onboarding 16)/build verts. Clôt l'Integration Gate FE-EPIC-002. -->
+
+## Dev Agent Record (FE-INT-3)
+
+- **Agent** : claude-opus-4-8 (Claude Code) · branche `fe-int-3` (base `origin/dev`) · commit `FE-INT-3 — Onboarding sur GET /tenant/state réel (Integration Gate)`.
+- **Contrat confronté** : `GET /ec/tenant` (supposé) → **`GET /ec/tenant/state`** (réel ; préfixe `/ec` retiré par le routeur FE-INT-0 → `:3000/api/v1/tenant/state`). Type miroir remplacé par le DTO généré **`AccessStateDto`** (`src/types/api/ec.ts`) : forme **aplatie** `kycStatus`/`kycRejectionReason`/`subscriptionActive` (au lieu de `kyc:{…}`/`subscription:{…}`).
+- **Abonnement dégradé (AC 3)** : `subscriptionActive` `false` en dur (paiement = Module 2, non livré) → étape stepper **`pending`** (« activation manuelle à venir »), **jamais bloquante**. `complete = emailVerified && kycApproved` (sinon la section ne se masquerait jamais) — FE-011/012 réintégreront l'abonnement à la condition de complétude.
+- **`kycStatus` nullable** (compte sans org / PLATFORM_ADMIN) traité comme non approuvé (bannière `kyc-pending`).
+- **403 conservés (AC hors-scope UI)** : `accessErrorTarget`/`useAccessErrorRedirect` inchangés (mapping `KYC_NOT_APPROVED`→`/kyc`, `SUBSCRIPTION_REQUIRED`→`/billing`).
+- **Invalidation croisée FE-INT-2** : `use-upload-document` invalide déjà `onboardingKeys.all` (présent depuis FE-010) → l'activation se rafraîchit après upload KYC.
+- **Fichiers** : `src/features/onboarding/{api/types.ts,api/get-tenant.ts,lib/activation.ts,components/activation-stepper.tsx}` + tests `lib/activation.test.ts` & `components/onboarding-section.test.tsx` + i18n `src/i18n/messages/fr.json` (étape abonnement « à venir »).
+- **⚠️ Reste** : vérification LIVE contre le stack docker STORY-075 (AC 1/2/4 bout-en-bout) non exécutée dans cet environnement — à confirmer au démarrage du stack. Nettoyage annexe : 3 barrels `index.ts` parasites générés par l'IDE (kyc/api, kyc/hooks, users/schemas — ce dernier cassé) supprimés (non suivis, absents d'origin/dev).
 
 **Epic :** FE-EPIC-003 — KYC & onboarding (retrofit de FE-010, dans l'Integration Gate FE-EPIC-002)
 **Points :** 2 · **Sprint :** Integration Gate (avant Sprint 3) · **App :** `prospera-frontend-expert-comptable`

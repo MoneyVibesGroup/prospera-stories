@@ -1,6 +1,7 @@
 # Story FE-INT-0 : Client API multi-base (direct-par-service) + préfixe `/api/v1` + génération OpenAPI
 
-Status: backlog
+Status: done  <!-- ✅ 2026-07-19 — PR #8 fe-int-0→dev ACCEPTÉE et mergée ; gates verts (132 tests) + AC5 live 200/200/200 -->
+
 
 **Epic :** FE-EPIC-002 — Intégration backend (retrofit / Integration Gate)
 **Points :** 5 · **Sprint :** Integration Gate (avant Sprint 3) · **App :** `prospera-frontend-expert-comptable`

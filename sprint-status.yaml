@@ -21,6 +21,16 @@ sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 # checkout/webhooks → paiement-service PI SPI BCEAO/FedaPay ; plans/abonnement → vertical) ;
 # DG-1 (dogfooding : N/N-1 & routage multi-version différés jusqu'au 1er client externe).
 # Ordre de construction Phase 1/2 : voir program_backlog. Sprints 7+ à re-planifier JIT par module.
+#
+# ⚠️ 2026-07-19 — STORY-109 (CROSS-CUTTING, defined, 3 pts) À SLOTTER D'URGENCE : activer CORS sur
+#   auth/EC/kyc/catalog/document. Découvert à la vérif LIVE navigateur (Playwright) de FE-INT-3 :
+#   AUCUN service n'active CORS → l'app cliente (topologie Option B direct-par-service) ne peut PAS
+#   appeler les services depuis le navigateur (login BFF OK ; /tenant/state & tout appel direct
+#   bloqués au préflight). BLOQUEUR du démo navigateur de tout le gate d'intégration frontend
+#   (FE-INT-1/2/3/4, FE-014). Contrats HTTP OK (curl) ; c'est la topologie navigateur qui manque.
+#   ✅ SLOTTÉE SPRINT 12 (décision user 2026-07-19 ; S12 → 26/34). À faire TÔT (débloque le frontend,
+#   déjà en attente). Fichier : docs/stories/STORY-109.md. Story sœur frontend : FE-INT-4 (register
+#   cabinetName, gap FE-004).
 services:
   - name: "expert-comptable"
     port: 3000
@@ -1273,7 +1283,7 @@ sprints:
     start_date: "2026-12-03"
     end_date: "2026-12-17"
     capacity_points: 34
-    committed_points: 23
+    committed_points: 26  # 23 (EPIC-011) + STORY-109 (3, CROSS-CUTTING CORS, slottée ici 2026-07-19 par décision user — hors thème Bilan mais urgente : débloque le démo navigateur du gate frontend)
     completed_points: 20  # 2026-07-19 : STORY-059 (Bilan) + 060 (CR) + 061 (TFT) + 062 (notes annexes) done — EPIC-011
     status: "in_progress"  # démarré en avance (2026-07-19) — STORY-059 livrée après clôture EPIC-010
     goal: "Bilan — États financiers / liasse OHADA (EPIC-011) : Bilan, Compte de résultat, TFT/TAFIRE, notes annexes, contrôles de cohérence (N/N-1)."
@@ -1320,6 +1330,14 @@ sprints:
         points: 3
         service: "bilan-service"
         status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-109"
+        title: "Activer CORS sur les relying-parties (auth/EC/kyc/catalog/document) — app cliente joignable depuis le navigateur"
+        epic: "transverse / enablement topologie Option B (hors décompte d'epic, cf. STORY-108)"
+        points: 3
+        service: "auth-service, expert-comptable, kyc-service, platform-catalog-service, document-service"
+        story_path: "stories/STORY-109.md"
+        status: "defined"  # 🆕 2026-07-19 — slottée S12 (décision user). CROSS-CUTTING : aucun service n'active CORS → l'app cliente (Option B direct-par-service) ne peut PAS appeler les services depuis le navigateur (login BFF OK ; /tenant/state & tout appel direct bloqués au préflight). Découvert à la vérif LIVE Playwright de FE-INT-3. BLOQUEUR du démo navigateur du gate d'intégration frontend (FE-INT-1/2/3/4, FE-014). Contrats HTTP OK (curl) ; c'est la topologie navigateur qui manque. Story sœur frontend : FE-INT-4 (register cabinetName, gap FE-004). Mémoire : frontend-cors-blocker.
         assigned_to: null
 
   - sprint_number: 13
