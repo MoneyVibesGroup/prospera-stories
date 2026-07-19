@@ -8,7 +8,7 @@
 **Réf. code livré :** STORY-059 (`BilanProductionService` **pur** → `BilanProduit { actif: PosteActif[], passif: PostePassif[], controle }` ; postes d'actif portent `netN`/`netN1`, de passif `montantN`/`montantN1` ; endpoint gardé `POST /bilan/etats/bilan/dry-run` ; `MontantHorsBornesError`) · STORY-060 (`CompteResultatProductionService` + `coherenceResultat` : **précédent exact du hook de cohérence inter-états** ; endpoint jumeau `compte-resultat/dry-run` ; corps `BilanDryRunRequestDto` réutilisé) · STORY-055 (`TableDePassageService`) · STORY-056/057 (référentiels packagés `syscohada-revise@2.1`, `sfd-bceao@1.0` : postes `etat='TFT'` **SYSCOHADA uniquement** ; générateur `scripts/referentiels/build.mjs` + manifeste `ReferentielRegistry`) · STORY-058 (surcharges VALIDATED) · STORY-037/054 (gate `@RequiresBilanAccess` + garde ACTIVE) · STORY-101 balance-service (`BalanceCanonique` : **unités mineures XOF entières**, bornes `Number.isSafeInteger`)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** review (implémentée + vérifiée docker réelle — en attente `/code-review` + intégration `dev`)
+**Statut :** done ✅ (implémentée + vérifiée docker réelle + intégrée dans `dev` le 2026-07-19 — PR #12 bilan-service, MNV-061 rebase-merge ; doc PR #15 prospera-stories)
 **Assigné à :** vivian
 **Créée :** 2026-07-19
 **Sprint :** 12
