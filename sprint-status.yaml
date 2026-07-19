@@ -1,7 +1,7 @@
 version: "6.0.0"
 project_name: "prospera"
 project_level: 3
-current_sprint: 5
+current_sprint: 11  # maj 2026-07-18 : S11 in_progress (Atelier Balance CORE + Bilan EPIC-010) ; S1→10 done, S12 not_started
 sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 
 # Révision 2026-07-04 : re-cadrage écosystème (voir docs/architecture-prospera-ecosystem-2026-07-04.md).
@@ -1274,8 +1274,8 @@ sprints:
     end_date: "2026-12-17"
     capacity_points: 34
     committed_points: 23
-    completed_points: 0
-    status: "not_started"
+    completed_points: 5  # 2026-07-19 : STORY-059 done (ouvre EPIC-011)
+    status: "in_progress"  # démarré en avance (2026-07-19) — STORY-059 livrée après clôture EPIC-010
     goal: "Bilan — États financiers / liasse OHADA (EPIC-011) : Bilan, Compte de résultat, TFT/TAFIRE, notes annexes, contrôles de cohérence (N/N-1)."
     stories:
       - story_id: "STORY-059"
@@ -1283,8 +1283,10 @@ sprints:
         epic: "EPIC-011"
         points: 5
         service: "bilan-service"
-        status: "not_started"  # dépend STORY-055 (mapping) + STORY-052 (N-1)
-        assigned_to: null
+        story_path: "stories/STORY-059.md"
+        status: "done"  # ✅ 2026-07-19 — LIVRÉE (PR #10 bilan-service, MNV-059 → dev, Rebase and merge, branche supprimée). 🚩 OUVRE EPIC-011 (1re story S12). BilanProductionService PUR produisant le Bilan (actif/passif) sur soldes FOURNIS (dry-run gardé POST /bilan/etats/bilan/dry-run) — bilan-service N'A PAS de balance (EPIC-009 superseded, consumer différé). ⚡ RE-CADRAGE P7 EN DEV (lecture des 2 paquets) : la « convention miroir SYSCOHADA » codée en dur VIOLERAIT l'invariant référentiel ET serait FAUSSE pour SFD-BCEAO (son 59 = fonds propres ; règle SOLDE_DEBITEUR propre) → AGRÉGATION PILOTÉE PAR LA regle (NET_ACTIF/SOLDE_DEBITEUR → actif Brut/Amort/Net ; SOLDE_CREDITEUR → passif ; PRODUIT/CHARGE → résultat net), 100% référentiel-agnostique. Ventilation classes 4/5 AU SOLDE ; contrôle ecart = totalActif − (totalPassif + résultat) (identité comptable : le résultat DOIT être reporté au passif sinon toute balance pré-clôture afficherait un faux déséquilibre) ; colonnes N/N-1 (N-1 = 2e jeu, dépendance STORY-052 PÉRIMÉE) ; unités mineures XOF (aligné BalanceCanonique 101) ; bornes safe-integer → 400. HORS PÉRIMÈTRE (hooks/tech-spec B8) : convention miroir amort (rattacher 28xx non mappés), placement du résultat dans un poste (CJ spécifique référentiel), sous-totaux FORMULE officiels, consumer balance réel (EPIC-009 interop), CR détaillé (060). Artefacts 056/057 + services 055/058 INCHANGÉS. lint 0 · build OK · 224 unit + 43 e2e verts · module etats 100% (global 98.6/91/98/98.5 > seuils 65/90/90/90). VÉRIF DOCKER RÉELLE (stack down -v → up --build, 8 services healthy, JWT RS256 réel de l'IdP, read-models semés mongosh) : SYSCOHADA équilibré → equilibre true ecart 0 (checksum e9370b14 = artefact réel, postes AE/BI/BS + CA/DJ) ; VRAI déséquilibre → ecart 100000 ; N-1 renseigné ; SFD-BCEAO agnostique (SOLDE_DEBITEUR BA3, ecart 0) — PREUVE que l'Option A codée en dur aurait échoué ; compte invalide/bornes → 400, sans jeton → 401, entitlement REVOKED → 403 ; NON-RÉGRESSION endpoint 055 + /health 200 sur 8 services. Débloque STORY-060/061/063/064.
+        completed_date: "2026-07-19"
+        assigned_to: "vivian"
       - story_id: "STORY-060"
         title: "Compte de résultat + N/N-1 + cohérence résultat (CR = résultat au passif) — FR-010"
         epic: "EPIC-011"
@@ -1700,7 +1702,7 @@ bilan_functional_epics:
       name: "États financiers (liasse OHADA : Bilan, CR, TFT/TAFIRE, annexes)"
       frs: "FR-009..FR-013"
       story_estimate: "5-8"
-      status: "proposed"
+      status: "in_progress"  # ouvert 2026-07-19 par STORY-059 (Bilan actif/passif FR-009). Moteur de production PUR référentiel-agnostique (agrégation par regle) posé → réutilisé par 060 (CR)/061 (TFT)/063 (articulation). Reste 060/061/062/063.
     - id: "EPIC-012"
       name: "Validation, clôture & immutabilité (snapshot figé)"
       frs: "FR-014..FR-017"
