@@ -1274,7 +1274,7 @@ sprints:
     end_date: "2026-12-17"
     capacity_points: 34
     committed_points: 23
-    completed_points: 15  # 2026-07-19 : STORY-059 (Bilan) + STORY-060 (CR) + STORY-061 (TFT) done — EPIC-011
+    completed_points: 20  # 2026-07-19 : STORY-059 (Bilan) + 060 (CR) + 061 (TFT) + 062 (notes annexes) done — EPIC-011
     status: "in_progress"  # démarré en avance (2026-07-19) — STORY-059 livrée après clôture EPIC-010
     goal: "Bilan — États financiers / liasse OHADA (EPIC-011) : Bilan, Compte de résultat, TFT/TAFIRE, notes annexes, contrôles de cohérence (N/N-1)."
     stories:
@@ -1310,8 +1310,10 @@ sprints:
         epic: "EPIC-011"
         points: 5
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        story_path: "stories/STORY-062.md"
+        completed_date: "2026-07-19"
+        status: "done"  # ✅ 2026-07-19 — LIVRÉE (PR #13 bilan-service, MNV-062 → dev, rebase-merge, branche supprimée). NotesAnnexesProductionService PUR : synthèse calculable des renvois PosteEtat.note (note→postes, montants repris de Bilan 059 + CR 060, total par note, N/N-1) ; libelle=null (titre non fourni → jamais inventé, P7) + detailACompleter=true (détail hook B8) ; poste déclaré non produit → 0 ; SFD (0 renvoi) → notes:[] NON_APPLICABLE. Endpoint POST /bilan/etats/notes-annexes/dry-run ; BilanEngineService.produireNotesAnnexes (Bilan+CR puis notes). AUCUNE modif de référentiel (renvoi note déjà dans le contrat → checksums 056/057 inchangés). lint 0 · build OK · 275 unit + 64 e2e verts · notes service 100% · global 98.04/92.43/97.95/97.86. VÉRIF DOCKER RÉELLE (bilan-service redémarré, JWT RS256 réel org 6a5cbdcd…) : notes SYSCOHADA note 7 (Clients) 500k/N-1 400k + note 11 (Banques) 300k, cross-check bilan/dry-run BI/BS netN concordants ; toutes libelle:null + detailACompleter:true ; SFD → notes:[] NON_APPLICABLE (agnosticisme) ; bornes 400 / sans jeton 401 / REVOKED 403 ; non-régression bilan/CR/tft dry-run 200 + /health 200 sur 8 services. Articulation notes↔états = STORY-063. Reste EPIC-011 : 063.  # 📝 2026-07-19 — CADRÉE (Scrum Master). DÉCOUVERTE : le référentiel ne déclare AUCUNE table d'annexe (pas d'etat ANNEXE/NOTE), seulement des RENVOIS de note (champ PosteEtat.note) — SYSCOHADA 13 renvois (notes 3-12,17, tous BILAN_ACTIF), SFD 0 (agnostique). Tables détaillées OHADA (mouvements immo, antériorité créances, narratif, titres de notes) NON dérivables des soldes NI déclarées → tech-spec B8. FR-012 cadre elle-même le compromis (calculable généré / non déductible à compléter) = patron 061 (CALCULE/A_COMPLETER). PÉRIMÈTRE = SYNTHÈSE CALCULABLE DES RENVOIS : NotesAnnexesProductionService PUR indexe note→postes, reprend les montants des états produits (Bilan 059 netN/montantN + CR 060 montantN, N/N-1), total par note, statut CALCULE ; detailACompleter=true + libelle=null (titre non fourni → jamais inventé, zone à compléter FR-012 AC-2) ; SFD → notes:[] NON_APPLICABLE. Endpoint POST /bilan/etats/notes-annexes/dry-run (corps BilanDryRunRequestDto réutilisé) ; BilanEngineService.produireNotesAnnexes (produit Bilan+CR puis notes). AUCUNE modif de référentiel (renvoi note déjà dans le contrat → checksums 056/057 inchangés) — contrairement à 061. Articulation notes↔états (rapprochement) = STORY-063 (FR-013). Réutilise 059/060/061 INCHANGÉS. Prochaine étape : /bmad:dev-story STORY-062.
+        assigned_to: "vivian"
       - story_id: "STORY-063"
         title: "Contrôles de cohérence de la liasse (articulation Bilan↔CR↔TFT) — FR-013"
         epic: "EPIC-011"
