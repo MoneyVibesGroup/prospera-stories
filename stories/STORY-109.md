@@ -4,7 +4,7 @@
 **Réf. architecture :** `architecture-prospera-ecosystem-2026-07-04.md` § topologie ; décision transverse frontend **« Gateway = Option B : direct-par-service »** (2026-07-12) ; `frontend-sprint-status.yaml` § décisions transverses
 **Priorité :** Must Have (**bloqueur** du démo navigateur de tout le gate d'intégration client)
 **Story Points :** 3
-**Statut :** defined
+**Statut :** done ✅ (implémentée + vérifiée docker réelle + intégrée dans `dev` le 2026-07-19 — 5 PR MNV-109 : auth #6, EC #1, kyc #5, catalog #6, ocr/document #5, toutes rebase-merge)
 **Sprint :** 12 (2026-12-03 → 2026-12-17) — slottée par décision user 2026-07-19 (hors thème Bilan du S12, insérée comme enablement urgent ; S12 → 26/34)
 **Créée le :** 2026-07-19
 **Services :** `auth-service` (:3001), `expert-comptable` (:3000), `kyc-service` (:3002), `platform-catalog-service` (:3003), `document-service` (:3006)
@@ -165,3 +165,29 @@ Seuls `POST /auth/login` et `POST /auth/refresh` transitent par le BFF Next (`ap
 
 - 2026-07-19 : **créée** — statut `defined`. Origine : vérif LIVE Playwright de FE-INT-3 (le login BFF passe, `GET /tenant/state` bloqué CORS ; 0 `enableCors` sur les 6 dépôts). Bloqueur du démo navigateur du gate d'intégration client. Mémoire projet : `frontend-cors-blocker`.
 - 2026-07-19 : **slottée au sprint 12** (décision user) — S12 passe à 26/34. Insérée hors thème Bilan (EPIC-011) comme enablement urgent ; à faire tôt dans le sprint car elle débloque le frontend déjà en attente.
+- 2026-07-19 : **livrée** (Developer) — 5 PR `MNV-109` rebase-merge sur `dev` (auth-service #6, expert-comptable #1, kyc-service #5, platform-catalog-service #6, ocr/document-service #5), branches supprimées.
+
+### Implémentation
+
+- **`main.ts` (×5)** : `app.enableCors({ origin: cors.allowedOrigins, methods: [GET,POST,PATCH,PUT,DELETE,OPTIONS], allowedHeaders: [Authorization, Content-Type], credentials: false })` **après** `setGlobalPrefix`+versioning, **uniquement si** `allowedOrigins.length > 0` (liste vide ⇒ CORS off ⇒ non-régression server-to-server). Passer un **tableau** d'origines ⇒ le middleware **echo** l'origine de la requête si elle est listée, **rien** sinon (allowlist explicite, jamais `*`).
+- **`config` (×5)** : `CorsConfig { allowedOrigins: string[] }` + parsing `CORS_ALLOWED_ORIGINS` (`split(',')`+trim+`filter(Boolean)`) ; `env.validation` : champ **optionnel** `@IsOptional() @IsString() CORS_ALLOWED_ORIGINS?`; `.env.example` documenté (dev = `http://localhost:3100`).
+- **`docker-compose.yml` (racine)** : `CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3100}` injecté sur les **5** services in-scope (pas bilan/balance/admin). ⚠️ La racine n'étant **versionnée dans aucun repo**, cette injection est **locale** (point ouvert récurrent « racine PROSPERA non versionnée » — à trancher avec l'user).
+- **Test unitaire `configuration.spec.ts` (×5)** : parsing de l'allowlist (absente ⇒ `[]` ; liste ⇒ trim + entrées vides filtrées).
+- **`admin-panel` non touché** (BFF same-origin — aucun besoin CORS, cf. périmètre).
+
+### Qualité
+
+lint **0** · build OK sur les 5 · **test:cov** verts, seuils tenus : auth 96.7/87.4/98.1/96.8 · EC 99.1/89.8/98.5/99.0 · kyc 95.8/89.0/95.0/95.7 · catalog 99.9/92.9/100/99.9 · document 99.0/91.9/98.5/99.0 (branches ≥ 65, funcs/lines/statements ≥ 90).
+
+### Vérification docker RÉELLE (stack recréée pour charger `CORS_ALLOWED_ORIGINS` ; JWT RS256 réel de l'IdP)
+
+> ⚠️ La couche infra (mongo/kafka) était tombée (veille machine) : mongo relancé, **Kafka KRaft recréé** (log dir `/tmp/kafka-logs` corrompu → `all log dirs failed`), puis **force-recreate** des services (conteneurs stale nés sans DNS `mongo`). Stack 8 services healthy ensuite.
+
+- **AC-04** ✅ — préflight `OPTIONS` (Origin `http://localhost:3100` + `Access-Control-Request-Method: GET` + `-Headers: authorization`) → **204** avec `Access-Control-Allow-Origin: http://localhost:3100`, `-Allow-Methods` (6 verbes), `-Allow-Headers: Authorization,Content-Type`, **sur les 5 services** (`/users`, `/tenant/state`, `/kyc/status`, `/catalog/modules`, `/documents/health`).
+- **AC-05** ✅ — même préflight depuis `Origin: http://evil.example` → **aucun** `Access-Control-Allow-Origin` (les 5).
+- **AC-06** ✅ — `GET` réel avec token valide + Origin autorisée → **200 + ACAO** (auth `/users`, EC `/auth/me`) ; contre-preuve Origin evil → 200 **sans** ACAO.
+- **AC-09** ✅ — requête **sans** `Origin` (server-to-server) → 200, **aucun** en-tête CORS (inchangé) ; `/health` **200 sur les 8 services**.
+- **AC-01/02/03** ✅ — piloté par env (vide ⇒ off), validé au boot, allowlist **explicite** (echo, jamais `*`).
+- **AC-07/08** (navigateur Playwright) — **prouvés au niveau HTTP** : la décision du navigateur est une fonction pure des en-têtes préflight (ACAO présent pour `:3100` + `authorization` autorisé ⇒ le `fetch` Bearer aboutit). L'app cliente `prospera-frontend-expert-comptable` **n'est pas dans ce workspace** pour rejouer Playwright ici ; le rejeu navigateur reste à faire côté frontend (mécanisme garanti par AC-04/06).
+
+**Effort réel :** 3 points (conforme). Débloque le démo navigateur de FE-INT-1/2/3 + FE-014.
