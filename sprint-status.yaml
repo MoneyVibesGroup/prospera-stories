@@ -1274,7 +1274,7 @@ sprints:
     end_date: "2026-12-17"
     capacity_points: 34
     committed_points: 23
-    completed_points: 5  # 2026-07-19 : STORY-059 done (ouvre EPIC-011)
+    completed_points: 10  # 2026-07-19 : STORY-059 (Bilan) + STORY-060 (CR) done — EPIC-011
     status: "in_progress"  # démarré en avance (2026-07-19) — STORY-059 livrée après clôture EPIC-010
     goal: "Bilan — États financiers / liasse OHADA (EPIC-011) : Bilan, Compte de résultat, TFT/TAFIRE, notes annexes, contrôles de cohérence (N/N-1)."
     stories:
@@ -1292,8 +1292,10 @@ sprints:
         epic: "EPIC-011"
         points: 5
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        story_path: "stories/STORY-060.md"
+        status: "done"  # ✅ 2026-07-19 — LIVRÉE (PR bilan-service, MNV-060 → dev, Rebase and merge, branche supprimée). CompteResultatProductionService PUR produisant le CR (produits/charges + résultat net) sur soldes FOURNIS (dry-run gardé POST /bilan/etats/compte-resultat/dry-run) — mêmes rails que 059. AGRÉGATION PILOTÉE PAR LA regle (PRODUIT montant=C−D / CHARGE montant=D−C → résultat net = produits−charges = Σ_CR(C−D)), 100% référentiel-agnostique. cohérenceResultat CR↔Bilan { resultatNetCR, resultatNetBilan, ecart, coherent } matérialise FR-010 AC-2 (ecart 0 PAR CONSTRUCTION : même agrégation sur mêmes soldes) → hook articulation 063. Colonnes N/N-1 ; unités mineures XOF ; bornes safe-integer → 400. HORS PÉRIMÈTRE (hook/tech-spec B8) : soldes intermédiaires de gestion (postes FORMULE XA..XI) IGNORÉS — formules NON exploitables (texte du libellé, comptesSyscohada vide) ET spécifiques au référentiel (SYSCOHADA 9 SIG, SFD-BCEAO 0) → les coder violerait P7 et casserait SFD. Réutilise engine 059 (BilanProductionService, LigneSoldeDto, MontantHorsBornesError, gate @RequiresBilanAccess) ; 055/056/057/058/059 INCHANGÉS. lint 0 · build OK · 247 unit + 50 e2e verts · module etats 100% (global 99.15/91.9/98.81/99.08 > seuils 65/90/90/90). VÉRIF DOCKER RÉELLE (stack vivante 8 services healthy, JWT RS256 réel de l'IdP, read-models semés mongosh) : CR nominal SYSCOHADA → produits TA=2 000 000, charges RA=1 200 000+RK=300 000, resultatNetN=500 000 ; COHÉRENCE PROUVÉE PAR LES 2 ENDPOINTS (bilan/dry-run resultatNetN=500 000, ecart 0, coherent true) ; SIG X* absents ; N-1 renseigné ; SFD-BCEAO agnostique (RP1/RC1, resultatNet 300 000) — PREUVE que la structure SYSCOHADA n'est pas codée en dur ; compte invalide/borne → 400, sans jeton → 401, entitlement REVOKED → 403 ; NON-RÉGRESSION bilan/dry-run (059) 200 + /health 200 sur 8 services. Débloque STORY-061 (TFT)/063 (articulation).
+        completed_date: "2026-07-19"
+        assigned_to: "vivian"
       - story_id: "STORY-061"
         title: "Tableau des flux de trésorerie (TFT/TAFIRE) depuis Bilan N/N-1 + CR — FR-011"
         epic: "EPIC-011"
