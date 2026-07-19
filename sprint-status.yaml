@@ -1284,8 +1284,8 @@ sprints:
     end_date: "2026-12-17"
     capacity_points: 34
     committed_points: 26  # 23 (EPIC-011) + STORY-109 (3, CROSS-CUTTING CORS, slottée ici 2026-07-19 par décision user — hors thème Bilan mais urgente : débloque le démo navigateur du gate frontend)
-    completed_points: 20  # 2026-07-19 : STORY-059 (Bilan) + 060 (CR) + 061 (TFT) + 062 (notes annexes) done — EPIC-011
-    status: "in_progress"  # démarré en avance (2026-07-19) — STORY-059 livrée après clôture EPIC-010
+    completed_points: 23  # 2026-07-19 : STORY-059 (Bilan) + 060 (CR) + 061 (TFT) + 062 (notes annexes) + 063 (contrôles cohérence) done — EPIC-011 CLÔTURÉ ; reste STORY-109 (CORS, slottée)
+    status: "in_progress"  # démarré en avance (2026-07-19) — EPIC-011 (059→063) intégralement livré ; reste STORY-109 (CORS transverse)
     goal: "Bilan — États financiers / liasse OHADA (EPIC-011) : Bilan, Compte de résultat, TFT/TAFIRE, notes annexes, contrôles de cohérence (N/N-1)."
     stories:
       - story_id: "STORY-059"
@@ -1329,8 +1329,10 @@ sprints:
         epic: "EPIC-011"
         points: 3
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        story_path: "stories/STORY-063.md"
+        completed_date: "2026-07-19"
+        status: "done"  # ✅ 2026-07-19 — LIVRÉE (PR #14 bilan-service, MNV-063 → dev, Rebase and merge, branche supprimée). 🏁 CLÔT EPIC-011 (dernière des 5 stories 059→063). ControlesCoherenceProductionService PUR référentiel-agnostique : consolide en BATTERIE les contrôles DÉJÀ portés par chaque état produit sur les mêmes soldes — EQUILIBRE_BILAN (059, BLOQUANT, seul réellement faillible), COHERENCE_RESULTAT (060, BLOQUANT), VARIATION_TRESORERIE (061, informatif : CALCULE/INDETERMINABLE/NON_APPLICABLE), ARTICULATION_NOTES (062, informatif). Chaque contrôle { code, categorie BLOQUANT|INFORMATIF, statut OK|ANOMALIE|INDETERMINABLE|NON_APPLICABLE, ecart, elements (totaux/postes concernés — FR-013 AC-2 ; JAMAIS le compte fautif → hook B8) } + drapeau `valide` = tous les BLOQUANT OK (gate d'application = STORY-064/FR-014). BilanEngineService.produireControlesCoherence (produit Bilan+CR+cohérence+TFT+notes puis batterie ; facteur commun coherenceResultat extrait). Endpoint POST /bilan/etats/controles/dry-run. AUCUNE modif de référentiel (checksums 056/057 inchangés) ; 059/060/061/062 inchangés. lint 0 · build OK · 300 unit + 71 e2e verts · service 100/100/100/100 · global 98.13/92.81/98.06/97.96. VÉRIF DOCKER RÉELLE (bilan-service redémarré, JWT RS256 réel org 6a5cd6a1…, read-models semés) : équilibrée → 4 contrôles, valide=true, cross-check bilan/dry-run 059 concordant (stamp cb8a7e11) ; déséquilibrée → EQUILIBRE_BILAN ANOMALIE ecart 100000 + elements, valide=false ; N-1 → VARIATION_TRESORERIE CALCULE/OK ; SFD-BCEAO → VARIATION_TRESORERIE/ARTICULATION_NOTES NON_APPLICABLE (agnosticisme) ; bornes 400 / sans jeton 401 / REVOKED 403 ; non-régression dry-run 059/060/061/062 200 + /health 200 sur 8 services. EPIC-011 (liasse OHADA complète : Bilan+CR+TFT+notes+contrôles) LIVRÉ. Débloque EPIC-012 (validation & immutabilité : 064 applique `valide` comme gate).  # 📝 2026-07-19 — CADRÉE (Scrum Master). DERNIÈRE story d'EPIC-011. Cadrée SANS fork P7 : les 3 contrôles d'articulation EXISTENT DÉJÀ, calculés par construction et référentiel-agnostiques → 059 `ControleEquilibre` (actif=passif+résultat, FR-009 AC-2, SEUL réellement faillible sur balance déséquilibrée), 060 `CoherenceResultat` (résultat CR=résultat au passif, ecart 0 par construction), 061 `ControleTresorerie` (variation TFT=variation Bilan, statuts CALCULE/INDETERMINABLE/NON_APPLICABLE), + totaux de note 062. PÉRIMÈTRE = CONSOLIDATION en BATTERIE : `ControlesCoherenceProductionService` PUR consomme Bilan+CoherenceResultat+TFT+notes déjà produits sur les mêmes soldes → liste ordonnée `ControleArticulation[]` { code EQUILIBRE_BILAN/COHERENCE_RESULTAT/VARIATION_TRESORERIE/ARTICULATION_NOTES, categorie BLOQUANT|INFORMATIF, statut OK|ANOMALIE|INDETERMINABLE|NON_APPLICABLE, ecart, elements (totaux/postes concernés — FR-013 AC-2, JAMAIS le compte fautif deviné → hook B8) } + drapeau `valide` = tous les BLOQUANT OK (EQUILIBRE+COHERENCE_RESULTAT bloquants ; VARIATION_TRESORERIE+ARTICULATION_NOTES informatifs → NON_APPLICABLE pour SFD). Endpoint gardé POST /bilan/etats/controles/dry-run (corps BilanDryRunRequestDto réutilisé) ; `BilanEngineService.produireControlesCoherence` (produit les 4 états puis batterie). AUCUNE modif de référentiel (checksums 056/057 inchangés, comme 062). HORS PÉRIMÈTRE : gate d'application du drapeau (bloquer brouillon→validé) = STORY-064/FR-014 ; traçage compte fautif + contrôles réglementaires détaillés = tech-spec B8 ; consumer balance réel EPIC-009. Prochaine étape : /bmad:dev-story STORY-063.
+        assigned_to: "vivian"
       - story_id: "STORY-109"
         title: "Activer CORS sur les relying-parties (auth/EC/kyc/catalog/document) — app cliente joignable depuis le navigateur"
         epic: "transverse / enablement topologie Option B (hors décompte d'epic, cf. STORY-108)"
@@ -1726,7 +1728,7 @@ bilan_functional_epics:
       name: "États financiers (liasse OHADA : Bilan, CR, TFT/TAFIRE, annexes)"
       frs: "FR-009..FR-013"
       story_estimate: "5-8"
-      status: "in_progress"  # ouvert 2026-07-19 par STORY-059 (Bilan actif/passif FR-009). Moteur de production PUR référentiel-agnostique (agrégation par regle) posé → réutilisé par 060 (CR)/061 (TFT)/063 (articulation). Reste 060/061/062/063.
+      status: "done"  # ✅ CLÔTURÉ 2026-07-19 (5 stories 059→063, toutes livrées le même jour). Moteur de production PUR référentiel-agnostique (agrégation pilotée par `regle`, jamais de structure OHADA en dur — invariant P7) : 059 Bilan actif/passif (ControleEquilibre) + 060 CR (CoherenceResultat) + 061 TFT/TAFIRE (ControleTresorerie + marqueur trésorerie) + 062 notes annexes (synthèse des renvois) + 063 contrôles de cohérence (batterie d'articulation Bilan↔CR↔TFT↔notes + drapeau `valide`). Liasse OHADA complète produite sur soldes fournis (dry-run ; bilan-service N'A PAS de balance — EPIC-009 superseded). Détails hors périmètre (sous-totaux FORMULE, SIG, retraitements TFT, tables de note détaillées, traçage compte fautif) → tech-spec B8. Débloque EPIC-012 (064 applique `valide` comme gate de validation).
     - id: "EPIC-012"
       name: "Validation, clôture & immutabilité (snapshot figé)"
       frs: "FR-014..FR-017"
