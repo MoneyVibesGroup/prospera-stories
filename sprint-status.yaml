@@ -1284,8 +1284,8 @@ sprints:
     end_date: "2026-12-17"
     capacity_points: 34
     committed_points: 26  # 23 (EPIC-011) + STORY-109 (3, CROSS-CUTTING CORS, slottée ici 2026-07-19 par décision user — hors thème Bilan mais urgente : débloque le démo navigateur du gate frontend)
-    completed_points: 23  # 2026-07-19 : STORY-059 (Bilan) + 060 (CR) + 061 (TFT) + 062 (notes annexes) + 063 (contrôles cohérence) done — EPIC-011 CLÔTURÉ ; reste STORY-109 (CORS, slottée)
-    status: "in_progress"  # démarré en avance (2026-07-19) — EPIC-011 (059→063) intégralement livré ; reste STORY-109 (CORS transverse)
+    completed_points: 26  # 2026-07-19 : EPIC-011 (059+060+061+062+063 = 23) CLÔTURÉ + STORY-109 (CORS transverse, 3) done → 26/26 committed
+    status: "in_progress"  # démarré en avance (2026-07-19) — EPIC-011 (059→063) + STORY-109 (CORS) livrés ; committed 26/26 atteint (capacité 34)
     goal: "Bilan — États financiers / liasse OHADA (EPIC-011) : Bilan, Compte de résultat, TFT/TAFIRE, notes annexes, contrôles de cohérence (N/N-1)."
     stories:
       - story_id: "STORY-059"
@@ -1339,8 +1339,9 @@ sprints:
         points: 3
         service: "auth-service, expert-comptable, kyc-service, platform-catalog-service, document-service"
         story_path: "stories/STORY-109.md"
-        status: "defined"  # 🆕 2026-07-19 — slottée S12 (décision user). CROSS-CUTTING : aucun service n'active CORS → l'app cliente (Option B direct-par-service) ne peut PAS appeler les services depuis le navigateur (login BFF OK ; /tenant/state & tout appel direct bloqués au préflight). Découvert à la vérif LIVE Playwright de FE-INT-3. BLOQUEUR du démo navigateur du gate d'intégration frontend (FE-INT-1/2/3/4, FE-014). Contrats HTTP OK (curl) ; c'est la topologie navigateur qui manque. Story sœur frontend : FE-INT-4 (register cabinetName, gap FE-004). Mémoire : frontend-cors-blocker.
-        assigned_to: null
+        completed_date: "2026-07-19"
+        status: "done"  # ✅ 2026-07-19 — LIVRÉE (5 PR MNV-109 rebase-merge → dev : auth-service #6, expert-comptable #1, kyc-service #5, platform-catalog-service #6, ocr/document-service #5, branches supprimées). CORS activé via `app.enableCors()` piloté par env CORS_ALLOWED_ORIGINS (allowlist explicite, jamais `*` ; echo de l'origine ; liste vide ⇒ CORS off ⇒ non-régression server-to-server). methods GET/POST/PATCH/PUT/DELETE/OPTIONS ; allowedHeaders Authorization,Content-Type ; credentials:false. CorsConfig + parsing (split/trim/filter) + env.validation optionnel + .env.example ×5 ; test unitaire configuration.spec ×5. admin-panel NON touché (BFF same-origin). ⚠️ docker-compose.yml (racine NON versionnée) : CORS_ALLOWED_ORIGINS injecté localement (défaut dev http://localhost:3100) → point ouvert « racine PROSPERA non versionnée ». lint 0 · build OK ×5 · cov seuils tenus (auth 96.7/87.4/98.1/96.8, EC 99.1/89.8/98.5/99.0, kyc 95.8/89.0/95.0/95.7, catalog 99.9/92.9/100/99.9, doc 99.0/91.9/98.5/99.0). VÉRIF DOCKER RÉELLE (stack recréée ; infra mongo/kafka relancée — Kafka KRaft recréé, log dir corrompu ; JWT RS256 réel) : AC-04 préflight origine autorisée → 204 + ACAO http://localhost:3100 + Authorization sur les 5 ; AC-05 origine evil → aucun ACAO ; AC-06 GET réel token+origine → 200+ACAO, evil → 200 sans ACAO ; AC-09 sans Origin (server-to-server) inchangé + /health 200 sur 8 services. AC-07/08 (navigateur Playwright) prouvés au niveau HTTP (décision navigateur = fonction pure des en-têtes préflight) ; rejeu Playwright = côté frontend (app cliente hors workspace). Débloque démo navigateur FE-INT-1/2/3 + FE-014. Story sœur : FE-INT-4 (frontend, gap FE-004).  # 🆕 2026-07-19 — slottée S12 (décision user). CROSS-CUTTING : aucun service n'activait CORS → app cliente (Option B) bloquée au préflight navigateur. Découvert à la vérif LIVE Playwright de FE-INT-3.
+        assigned_to: "vivian"
 
   - sprint_number: 13
     start_date: "2026-12-17"
