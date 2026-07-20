@@ -53,7 +53,7 @@ Toutes les validations ✔ ci-dessous supposent cette convention (**détail = ma
 | A1 | Logiciel(s) comptable(s) MV | **→ À CONFIRMER PAR MV.** Le PRD suppose **Sage 100 « Balance des comptes »** (dogfooding MV). Merci de confirmer version + éventuels autres outils. |
 | A2 | Structure d'un export de balance | **→ À FOURNIR PAR MV (fichier exemple anonymisé requis — décision bloquante).** Structure Sage 100 attendue : `N° compte (8 car.)`, `Libellé`, puis blocs **Mouvements N-1**, **Mouvements période**, **Soldes cumulés** (colonnes Débit / Crédit). Idéalement export **Excel/CSV** (parser fiable) ; PDF en secours seulement (cf. FR-A12). |
 | A3 | Soldes en valeur ou à calculer | **Proposition : supporter les deux.** Si les colonnes « Soldes cumulés Débit/Crédit » sont présentes → `solde = soldeDébiteur − soldeCréditeur`. Sinon → `solde = Σ débit − Σ crédit` sur les mouvements. Le moteur doit **ignorer les lignes de report** et contrôler par les **totaux** de la balance. → **MV confirme** quelles colonnes sont réellement exportées. |
-| A4 | Plan de comptes standard ou interne | **Mixte, déjà géré.** La validation sur la balance réelle **ETS RELAXED** montre un plan **SYSCOHADA normalisé** avec des **sous-comptes internes alphanumériques** (ex. `5211BOA0`) rattachés **par préfixe** via la table de passage. → Règle : rattachement au **préfixe SYSCOHADA** ; comptes non reconnus listés pour arbitrage (FR-A07). |
+| A4 | Plan de comptes standard ou interne | **Mixte, déjà géré.** La validation sur la balance réelle **ETS RELAXED** montre un plan **SYSCOHADA normalisé** avec des **sous-comptes internes alphanumériques** (ex. `5211BOA0`) rattachés **par préfixe** via la table de passage. → Règle : rattachement au **préfixe SYSCOHADA** ; comptes non reconnus listés pour arbitrage (FR-A07).<br>⚠️ **Décision MV 2026-07-20** : **normaliser les sous-comptes alphanumériques en numérique pur** à l'import — chaque caractère non-chiffre → `0`, **en place**, longueur conservée (`5211BOA0 → 52110000`). **Collision** (deux comptes → même numéro) : **sommer** les soldes sous la clé numérique **+ conserver l'alphanumérique d'origine en libellé** (traçabilité audit + ventilation note 11 « Banques » par établissement). **Home** : `balance-service`, normalisation à l'ingestion (contrat canonique STORY-101 / FR-A07) — **en amont**, sans impact sur B8/EPIC-011B (le mapping par préfixe reste valable : `52110000` → `52`/`5211` → poste `BS`). |
 | A5 | Monnaie / unité | **XOF, exposant ISO 4217 = 0** (pas de sous-unité en circulation). Le système travaille en **unités mineures** → pour le XOF **facteur = 1** (1 XOF = 1 unité mineure), **aucune décimale**. → MV confirme qu'aucune balance n'arrive avec des centimes. |
 
 ---
@@ -191,7 +191,7 @@ Elle est **à compléter** manuellement si elle exige des données **hors balanc
 
 | # | Décision | Statut |
 |---|---|---|
-| 0 | **Convention de signe** (détail = magnitude positive, opérandes signées) | **Proposé — à confirmer** (conditionne B et C) |
+| 0 | **Convention de signe** (détail = magnitude positive, opérandes signées) | **✅ CONFIRMÉ MV 2026-07-20** (conditionne B et C ; = moteur STORY-060) |
 | 1 | **Format de balance + fichier exemple** (A2) | **→ MV doit fournir** |
 | 2 | **Composition des 8 SIG** (section B) | **✔ Fournie** — 7 validées, **XC corrigée** |
 | 3 | **Méthode TFT (indirecte) + CAFG + sources** (section C) | **✔ Fournie** — méthode & sources ; **4 corrections** (FD, FE, FL, FO/FP/FQ) ; lignes ⚠️ dépendantes de données hors balance signalées |
@@ -201,7 +201,7 @@ Elle est **à compléter** manuellement si elle exige des données **hors balanc
 
 ### Ce qui reste à trancher côté MV (non résolu ici)
 1. Confirmer **Sage 100** + fournir un **export balance exemple** (Excel/CSV) — A1, A2.
-2. Valider la **convention de signe** (décision n°0).
+2. ~~Valider la **convention de signe** (décision n°0).~~ ✅ **Confirmé 2026-07-20 : magnitude + opérandes signées.**
 3. Confirmer le **seuil d'arrondi** (F2 : 0 strict ou ±1 XOF).
 4. Désigner l'**expert-comptable** validateur du référentiel et du paquet fiscal (F1, PRD Q7).
 5. Fournir un **jeu d'essai balance + liasse attendue** (F4).

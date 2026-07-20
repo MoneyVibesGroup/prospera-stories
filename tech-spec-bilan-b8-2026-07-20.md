@@ -41,7 +41,7 @@ classe 6 débiteur → montant positif) ; les formules d'agrégat utilisent des 
 > convention retenue, XC doit soustraire RA et RB.** Les libellés GUIDEF « Somme TA à RB » sont une **notation d'affichage** (charges
 > présentées négatives), pas la formule d'opérandes.
 
-**Statut :** proposé — **à confirmer par MV** (récap fiche, décision n°0). Si MV choisit au contraire la convention « somme pure » (charges
+**Statut : ✅ CONFIRMÉ par MV le 2026-07-20** — option **magnitude positive + opérandes signées** (alignée sur le moteur STORY-060, `CHARGE = D−C` ; aucun re-signe à l'import). Les formules B8 ci-dessous, **XC corrigé compris, sont définitives**. *(La discussion « somme pure » ci-après est conservée pour mémoire.)* Si MV choisit au contraire la convention « somme pure » (charges
 stockées négatives), alors c'est **XA/XD/XE/XF/XH/XI** qu'il faudra ré-signer, et XC (tel qu'écrit dans la fiche) redeviendrait juste. **Une
 seule convention, appliquée partout.**
 
@@ -227,7 +227,7 @@ articulations. **Défaut proposé : ±1 XOF** par contrôle (absorbe le cumul d'
 
 | # | Décision | Effet si non tranché |
 |---|---|---|
-| n°0 | Confirmer la convention de signe (§1) | Fige le signe de tout B8 (XC dépend du choix) |
+| ~~n°0~~ | ✅ **Convention de signe — TRANCHÉE 2026-07-20** : magnitude + opérandes signées (§1) | *(résolu — plus un blocker)* |
 | A1/A2 | Confirmer Sage 100 + **fichier balance exemple** (Excel/CSV) | Bloque le parseur d'import réel (amont `balance-service`) |
 | F2 | Seuil d'arrondi (0 strict vs ±1 XOF) | Paramètre des contrôles d'articulation |
 | F1 | **Expert-comptable validateur** (sign-off officiel) | Aucun figement réglementaire sans lui |
