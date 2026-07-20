@@ -4,6 +4,11 @@
 > **Émetteur :** équipe produit PROSPERA · **Référentiel visé :** SYSCOHADA révisé v2.1 (+ SFD-BCEAO)
 > **Rempli par :** Claude (proposition experte, à valider par un expert-comptable OHADA / OTR)
 
+> ⚠️ **REVALIDATION 2026-07-20** — Réponses croisées avec les postes GUIDEF réels du repo (`referentiels/postes-syscohada-guidef-togo.csv`)
+> + algèbre SYSCOHADA. **Verdict : tout confirmé sauf 2 erreurs corrigées** — **XC** (valeur ajoutée, §B, signe RA/RB) et **CAFG** (§C1b,
+> double comptage de TI). Règles figées dans le **tech-spec Bilan B8** ([`tech-spec-bilan-b8-2026-07-20.md`](tech-spec-bilan-b8-2026-07-20.md)),
+> encodées en opérandes du paquet SYSCOHADA (sprint 13 / EPIC-011B). Les corrections sont annotées en ligne ci-dessous.
+
 ---
 
 ## ⚠️ Avertissement & méthode de lecture
@@ -61,7 +66,7 @@ Codes recoupés avec `postes-syscohada-guidef-togo` (état `COMPTE_RESULTAT`). C
 |---|---|---|---|---|
 | **XA** | Marge commerciale | `TA − RA − RB` | **✔ VALIDÉ** | `TA − RA − RB` (ventes marchandises − achats marchandises − variation stocks marchandises). *Officiel GUIDEF « Somme TA à RB » = même chose, RA/RB négatifs.* |
 | **XB** | Chiffre d'affaires | `TA + TB + TC + TD` | **✔ VALIDÉ** | `TA + TB + TC + TD` (A+B+C+D). |
-| **XC** | Valeur ajoutée | `XB + XA(?) + (TE..TI) − (RC..RJ)` | **✏️ CORRIGÉ** | **Retirer le `XA` (double comptage de TA/RA/RB).** Retenir : `XB + RA + RB + (TE+TF+TG+TH+TI) − (RC+RD+RE+RF+RG+RH+RI+RJ)`. *= formule officielle GUIDEF `(XB+RA+RB) + Somme(TE à RJ)`.* Le `XA` de la pressentie était l'erreur. |
+| **XC** | Valeur ajoutée | `XB + XA(?) + (TE..TI) − (RC..RJ)` | **✏️ CORRIGÉ² (voir ⚠️)** | Retirer le `XA` (double comptage) : ✔. Mais la formule retenue `XB + RA + RB + …` est écrite en notation « somme pure » (RA/RB négatifs) — **incohérente avec la décision n°0** (magnitude signée) et avec `XA = TA − RA − RB` de cette même fiche. ⚠️ **Revalidé 2026-07-20 (B8 §3, correction A)** : sous la convention retenue, RA/RB sont des **charges → à soustraire** : **`XC = XB − RA − RB + (TE+TF+TG+TH+TI) − (RC+…+RJ)`**. *(Vérif : TA=1000,RA=600,TB=2000,RC=800 → VA=1600 ; `+RA`→2800 ✗ ; `−RA`→1600 ✓.)* |
 | **XD** | Excédent brut d'exploitation | `XC − RK` | **✔ VALIDÉ** | `XC − RK` (charges de personnel). |
 | **XE** | Résultat d'exploitation | `XD + TJ − RL` | **✔ VALIDÉ** | `XD + TJ − RL` (reprises TJ − dotations RL). |
 | **XF** | Résultat financier | `(TK+TL+TM) − (RM+RN)` | **✔ VALIDÉ** | `TK + TL + TM − RM − RN`. |
@@ -90,7 +95,7 @@ du résultat**). Ces cas sont signalés ⚠️.
 | # | Question | Réponse |
 |---|---|---|
 | C1a | Directe ou indirecte ? | **✔ INDIRECTE.** Le TFT SYSCOHADA révisé démarre de la **CAFG** (méthode indirecte pour l'opérationnel). C'est aussi le seul choix cohérent avec le squelette (ZA→ZH) fourni. |
-| C1b | Formule CAFG (poste FA) | **Méthode soustractive à partir de l'EBE (XD)** — recommandée :<br>`CAFG = XD (EBE) + TI (transferts charges expl.) + TK (revenus financiers) + TM (transferts charges fin.) + TO (autres produits HAO encaissables) − RM (frais financiers) − RP (autres charges HAO décaissables) − RQ (participation) − RS (impôt)`.<br>**Exclure** (non-cash) : dotations `RL`/`RN`, reprises `TJ`/`TL`, production immobilisée `TF`, produits/valeurs de cession `TN`/`RO`, subventions d'investissement.<br>*Vérification :* équivaut à la méthode additive `CAFG = XI + RL + RN − TJ − TL + RO − TN` (mêmes retraitements). **→ à faire valider par l'expert** (le choix des lignes HAO « encaissables/décaissables » mérite confirmation). |
+| C1b | Formule CAFG (poste FA) | **Méthode soustractive à partir de l'EBE (XD)** — recommandée :<br>`CAFG = XD (EBE) + TI (transferts charges expl.) + TK (revenus financiers) + TM (transferts charges fin.) + TO (autres produits HAO encaissables) − RM (frais financiers) − RP (autres charges HAO décaissables) − RQ (participation) − RS (impôt)`.<br>**Exclure** (non-cash) : dotations `RL`/`RN`, reprises `TJ`/`TL`, production immobilisée `TF`, produits/valeurs de cession `TN`/`RO`, subventions d'investissement.<br>*Vérification :* équivaut à la méthode additive `CAFG = XI + RL + RN − TJ − TL + RO − TN` (mêmes retraitements). **→ à faire valider par l'expert** (le choix des lignes HAO « encaissables/décaissables » mérite confirmation).<br>⚠️ **Revalidé 2026-07-20 (B8 §5, correction B)** : les deux formules **NE sont PAS égales** — en développant XI, l'additif = `XD + TK + TM + TO − RM − RP − RQ − RS`, soit le soustractif **moins TI**. Le soustractif **double-compte TI** (transfert de charges d'exploitation), **déjà dans XD/EBE** (GUIDEF `XC = (XB+RA+RB)+Somme TE à RJ`, TI ∈ TE..RJ). **B8 retient l'ADDITIF** `FA = XI + RL + RN − TJ − TL − TN + RO` (canonique, 100 % dérivable du CR). |
 | C1c | Variations = N − N-1 sur postes Bilan ? | **✔ OUI**, sur les valeurs **NET** des postes de bilan (voir C2). Sens : une **hausse d'actif** consomme de la trésorerie (signe −), une **hausse de passif** en dégage (signe +). |
 
 ### C2. Source de chaque ligne

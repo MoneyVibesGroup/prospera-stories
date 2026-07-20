@@ -1,7 +1,7 @@
 version: "6.0.0"
 project_name: "prospera"
 project_level: 3
-current_sprint: 11  # maj 2026-07-18 : S11 in_progress (Atelier Balance CORE + Bilan EPIC-010) ; S1→10 done, S12 not_started
+current_sprint: 13  # maj 2026-07-20 : S12 (EPIC-011) done ; S13 = EPIC-011B (liasse — calcul complet, tech-spec B8) not_started ; renum. S13→14 … S20→21 (insertion EPIC-011B)
 sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 
 # Révision 2026-07-04 : re-cadrage écosystème (voir docs/architecture-prospera-ecosystem-2026-07-04.md).
@@ -1285,7 +1285,7 @@ sprints:
     capacity_points: 34
     committed_points: 26  # 23 (EPIC-011) + STORY-109 (3, CROSS-CUTTING CORS, slottée ici 2026-07-19 par décision user — hors thème Bilan mais urgente : débloque le démo navigateur du gate frontend)
     completed_points: 26  # 2026-07-19 : EPIC-011 (059+060+061+062+063 = 23) CLÔTURÉ + STORY-109 (CORS transverse, 3) done → 26/26 committed
-    status: "in_progress"  # démarré en avance (2026-07-19) — EPIC-011 (059→063) + STORY-109 (CORS) livrés ; committed 26/26 atteint (capacité 34)
+    status: "done"  # ✅ 2026-07-20 CLÔTURÉ (reprogrammation) — EPIC-011 (059→063) + STORY-109 (CORS) livrés le 2026-07-19 ; committed 26/26 (capacité 34). Suite = S13 EPIC-011B (calcul complet, tech-spec B8).
     goal: "Bilan — États financiers / liasse OHADA (EPIC-011) : Bilan, Compte de résultat, TFT/TAFIRE, notes annexes, contrôles de cohérence (N/N-1)."
     stories:
       - story_id: "STORY-059"
@@ -1347,6 +1347,51 @@ sprints:
     start_date: "2026-12-17"
     end_date: "2026-12-31"
     capacity_points: 34
+    committed_points: 24
+    completed_points: 0
+    status: "not_started"  # 🆕 2026-07-20 — INSÉRÉ (reprogrammation post-validation de la fiche comptable). EPIC-011B : transforme le SQUELETTE EPIC-011 (SIG/sous-totaux/TFT/notes = FORMULE vides, renvoyés au tech-spec B8) en LIASSE CALCULÉE. Règles figées et croisées avec les postes GUIDEF réels → docs/tech-spec-bilan-b8-2026-07-20.md (2 CORRECTIONS vs fiche : XC valeur ajoutée sous convention magnitude signée = `XB − RA − RB + (TE..TI) − (RC..RJ)` ; CAFG = additif `XI+RL+RN−TJ−TL−TN+RO`, le soustractif de la fiche double-comptait TI ∈ EBE). Encodage en OPÉRANDES dans le paquet syscohada-revise@2.1 (champ additif MappingRule.operandes? + évaluateur FORMULE générique) — moteur agnostique P7, sfd-bceao INCHANGÉ. Blockers MV (convention n°0, format balance A2, jeu d'essai F4, expert F1) gâtent la PREUVE e2e, pas l'encodage/dry-run.
+    goal: "Bilan — Liasse : calcul complet (tech-spec B8). Transformer le squelette EPIC-011 en liasse calculée : opérandes signées SIG (XC corrigé) + sous-totaux Bilan + retraitements TFT/CAFG (corrigée, statut par ligne) + notes v1 automatables — encodés dans le paquet SYSCOHADA (moteur agnostique P7 ; sfd inchangé)."
+    stories:
+      - story_id: "STORY-110"
+        title: "Modèle d'opérandes (MappingRule.operandes?, additif) + évaluateur FORMULE générique agnostique — socle B8 §2"
+        epic: "EPIC-011B"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"  # extension additive du contrat (patron du champ tresorerie? de STORY-061) ; évaluation ordonnée avec référence inter-postes ; régénère syscohada-revise@2.1 via build.mjs + MAJ checksum ReferentielRegistry ; sfd INCHANGÉ
+        assigned_to: null
+      - story_id: "STORY-111"
+        title: "SIG XA..XI en opérandes signées (XC corrigé) + calcul dans le CR + articulation CJ=XI — FR-010 (complet)"
+        epic: "EPIC-011B"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"  # correction A du tech-spec B8 : XC = XB − RA − RB + (TE+TF+TG+TH+TI) − (RC..RJ) [dépend STORY-110]
+        assigned_to: null
+      - story_id: "STORY-112"
+        title: "Sous-totaux Bilan (AZ, BG, BK, BT, BZ, CP, DD, DF, DP, DT, DZ) en opérandes + contrôle BZ=DZ — FR-009 (complet)"
+        epic: "EPIC-011B"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"  # composition D3 validée (aucune correction) [dépend STORY-110]
+        assigned_to: null
+      - story_id: "STORY-113"
+        title: "TFT retraitements FA..FQ + CAFG (additif corrigé) + Z-sous-totaux, statut par ligne CALCULE/ESTIME/A_COMPLETER — FR-011 (complet)"
+        epic: "EPIC-011B"
+        points: 8
+        service: "bilan-service"
+        status: "not_started"  # lignes FF-FL/FN dépendent de données hors balance N/N-1 → estimées et marquées (statut de preuve FR-A27) ; CAFG additif = correction B ; opérandes mode VARIATION/VALEUR_N_1 [dépend STORY-110/112]
+        assigned_to: null
+      - story_id: "STORY-114"
+        title: "Notes annexes v1 automatables — ventilation de solde par compte (notes 5,6,8,9,10,11,12,17) — FR-012 (complet)"
+        epic: "EPIC-011B"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"  # notes 3/4/7 restent 'à compléter' (mouvements bruts / antériorité hors balance) → trame pré-structurée (E2) ; E1 (notes obligatoires) à trancher MV
+        assigned_to: null
+
+  - sprint_number: 14
+    start_date: "2026-12-31"
+    end_date: "2027-01-14"
+    capacity_points: 34
     committed_points: 21
     completed_points: 0
     status: "not_started"
@@ -1388,9 +1433,9 @@ sprints:
         status: "not_started"  # dépend STORY-065 (snapshot validé)
         assigned_to: null
 
-  - sprint_number: 14
-    start_date: "2026-12-31"
-    end_date: "2027-01-14"
+  - sprint_number: 15
+    start_date: "2027-01-14"
+    end_date: "2027-01-28"
     capacity_points: 34
     committed_points: 24
     completed_points: 0
@@ -1458,9 +1503,9 @@ sprints:
   #
   # Stories = entrées backlog (docs .md créés JIT au sprint-planning de chaque sprint, comme les stories 031+).
   # Coordinations balance/bilan : voir §4 du plan.
-  - sprint_number: 15
-    start_date: "2027-01-14"
-    end_date: "2027-01-28"
+  - sprint_number: 16
+    start_date: "2027-01-28"
+    end_date: "2027-02-11"
     capacity_points: 34
     committed_points: 18
     completed_points: 0
@@ -1496,9 +1541,9 @@ sprints:
         status: "not_started"  # dépend document-service scaffold (STORY-041) + OcrProvider
         assigned_to: null
 
-  - sprint_number: 16
-    start_date: "2027-01-28"
-    end_date: "2027-02-11"
+  - sprint_number: 17
+    start_date: "2027-02-11"
+    end_date: "2027-02-25"
     capacity_points: 34
     committed_points: 18
     completed_points: 0
@@ -1534,9 +1579,9 @@ sprints:
         status: "not_started"  # compte→poste reste dans bilan-service (STORY-055) — pas de doublon
         assigned_to: null
 
-  - sprint_number: 17
-    start_date: "2027-02-11"
-    end_date: "2027-02-25"
+  - sprint_number: 18
+    start_date: "2027-02-25"
+    end_date: "2027-03-11"
     capacity_points: 34
     committed_points: 21
     completed_points: 0
@@ -1579,9 +1624,9 @@ sprints:
         status: "not_started"
         assigned_to: null
 
-  - sprint_number: 18
-    start_date: "2027-02-25"
-    end_date: "2027-03-11"
+  - sprint_number: 19
+    start_date: "2027-03-11"
+    end_date: "2027-03-25"
     capacity_points: 34
     committed_points: 21
     completed_points: 0
@@ -1624,9 +1669,9 @@ sprints:
         status: "not_started"  # compléter taux TPU par tranche (Q ouverte)
         assigned_to: null
 
-  - sprint_number: 19
-    start_date: "2027-03-11"
-    end_date: "2027-03-25"
+  - sprint_number: 20
+    start_date: "2027-03-25"
+    end_date: "2027-04-08"
     capacity_points: 34
     committed_points: 18
     completed_points: 0
@@ -1663,9 +1708,9 @@ sprints:
         assigned_to: null
 
   # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
-  - sprint_number: 20
-    start_date: "2027-03-25"
-    end_date: "2027-04-08"
+  - sprint_number: 21
+    start_date: "2027-04-08"
+    end_date: "2027-04-22"
     capacity_points: 34
     committed_points: 24
     completed_points: 0
@@ -1730,6 +1775,11 @@ bilan_functional_epics:
       frs: "FR-009..FR-013"
       story_estimate: "5-8"
       status: "done"  # ✅ CLÔTURÉ 2026-07-19 (5 stories 059→063, toutes livrées le même jour). Moteur de production PUR référentiel-agnostique (agrégation pilotée par `regle`, jamais de structure OHADA en dur — invariant P7) : 059 Bilan actif/passif (ControleEquilibre) + 060 CR (CoherenceResultat) + 061 TFT/TAFIRE (ControleTresorerie + marqueur trésorerie) + 062 notes annexes (synthèse des renvois) + 063 contrôles de cohérence (batterie d'articulation Bilan↔CR↔TFT↔notes + drapeau `valide`). Liasse OHADA complète produite sur soldes fournis (dry-run ; bilan-service N'A PAS de balance — EPIC-009 superseded). Détails hors périmètre (sous-totaux FORMULE, SIG, retraitements TFT, tables de note détaillées, traçage compte fautif) → tech-spec B8. Débloque EPIC-012 (064 applique `valide` comme gate de validation).
+    - id: "EPIC-011B"
+      name: "États financiers — calcul complet (opérandes SIG/sous-totaux/TFT/notes, tech-spec B8)"
+      frs: "FR-009..FR-013 (complétude calcul)"
+      story_estimate: "5"
+      status: "proposed"  # 🆕 2026-07-20 : fige les règles de calcul renvoyées par EPIC-011 aux hooks B8 (docs/tech-spec-bilan-b8-2026-07-20.md) ; encodage en OPÉRANDES du paquet syscohada-revise@2.1 (moteur agnostique, sfd inchangé) ; INSÉRÉ avant EPIC-012 — valider/figer un squelette immuable serait prématuré. Stories 110-114 @ sprint 13.
     - id: "EPIC-012"
       name: "Validation, clôture & immutabilité (snapshot figé)"
       frs: "FR-014..FR-017"
@@ -1782,15 +1832,16 @@ velocity:
   sprint_10: null  # 🏁 chaîne KYC (admin-panel 048-049) + Atelier Balance CORE (D14) : 076,077,101(contrat canonique),086(Sage),099(handoff) — balance AVANT le Bilan ; EPIC-009 import SUPERSEDED
   sprint_11: null  # Bilan EPIC-010 référentiels & table de passage (054-058)
   sprint_12: null  # Bilan EPIC-011 états financiers / liasse (059-063)
-  sprint_13: null  # Bilan EPIC-012 validation/immutabilité (064-067) + EPIC-013 hypothèses (068)
-  sprint_14: null  # 🏁 Bilan livré : EPIC-013 prévisionnel (069-071) + EPIC-014 consultation/export (072-074)
+  sprint_13: null  # 🆕 EPIC-011B (tech-spec B8) : liasse — calcul complet (opérandes SIG/sous-totaux/TFT/notes) — stories 110-114
+  sprint_14: null  # Bilan EPIC-012 validation/immutabilité (064-067) + EPIC-013 hypothèses (068)
+  sprint_15: null  # 🏁 Bilan livré : EPIC-013 prévisionnel (069-071) + EPIC-014 consultation/export (072-074)
   # ── Module 1-bis Atelier Balance EXTENDED (balance-service) — CORE déjà livré @ sprint 10 (D14) ──
-  sprint_15: null  # EXTENDED : loaders référentiel/paquet fiscal (078) + profil société & 2 axes + OCR Statuts/CFE (079-081)
-  sprint_16: null  # EXTENDED : adaptateur #3 construction chemin A — cahiers/OCR + plan comptable (082-085)
-  sprint_17: null  # EXTENDED : adaptateur #1 ingestion directe balance.submitted (102) + reprise à-nouveaux (087-088) + rapprochement bancaire (089-090)
-  sprint_18: null  # EXTENDED : moteur fiscal — résultat fiscal, IS=max(MFP,IS), TVA/taxes, TPU (091-095)
-  sprint_19: null  # 🏁 Atelier livré : conseil fiscal + garde-fous (096-097) + contrôles/statut de preuve (098) + e2e (100)
-  sprint_20: null  # Module 2 EPIC-004 paiement-service (016-019) + STORY-039 — JIT (PS-1/C8/PRD paiement) [ex-sprint 15]
+  sprint_16: null  # EXTENDED : loaders référentiel/paquet fiscal (078) + profil société & 2 axes + OCR Statuts/CFE (079-081)
+  sprint_17: null  # EXTENDED : adaptateur #3 construction chemin A — cahiers/OCR + plan comptable (082-085)
+  sprint_18: null  # EXTENDED : adaptateur #1 ingestion directe balance.submitted (102) + reprise à-nouveaux (087-088) + rapprochement bancaire (089-090)
+  sprint_19: null  # EXTENDED : moteur fiscal — résultat fiscal, IS=max(MFP,IS), TVA/taxes, TPU (091-095)
+  sprint_20: null  # 🏁 Atelier livré : conseil fiscal + garde-fous (096-097) + contrôles/statut de preuve (098) + e2e (100)
+  sprint_21: null  # Module 2 EPIC-004 paiement-service (016-019) + STORY-039 — JIT (PS-1/C8/PRD paiement) [ex-sprint 15]
   rolling_average: 27  # (33 + 23 + 24) / 3 ≈ 26.7 ; cible prudente ~24/sprint (1 flux, réf. historique retenue au sprint-planning 2026-07-10)
 
 team:
