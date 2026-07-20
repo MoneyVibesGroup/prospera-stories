@@ -1349,7 +1349,7 @@ sprints:
     capacity_points: 34
     committed_points: 24
     completed_points: 0
-    status: "not_started"  # 🆕 2026-07-20 — INSÉRÉ (reprogrammation post-validation de la fiche comptable). EPIC-011B : transforme le SQUELETTE EPIC-011 (SIG/sous-totaux/TFT/notes = FORMULE vides, renvoyés au tech-spec B8) en LIASSE CALCULÉE. Règles figées et croisées avec les postes GUIDEF réels → docs/tech-spec-bilan-b8-2026-07-20.md (2 CORRECTIONS vs fiche : XC valeur ajoutée sous convention magnitude signée = `XB − RA − RB + (TE..TI) − (RC..RJ)` ; CAFG = additif `XI+RL+RN−TJ−TL−TN+RO`, le soustractif de la fiche double-comptait TI ∈ EBE). Encodage en OPÉRANDES dans le paquet syscohada-revise@2.1 (champ additif MappingRule.operandes? + évaluateur FORMULE générique) — moteur agnostique P7, sfd-bceao INCHANGÉ. Blockers MV (convention n°0, format balance A2, jeu d'essai F4, expert F1) gâtent la PREUVE e2e, pas l'encodage/dry-run.
+    status: "not_started"  # 🆕 2026-07-20 — INSÉRÉ (reprogrammation post-validation de la fiche comptable). EPIC-011B : transforme le SQUELETTE EPIC-011 (SIG/sous-totaux/TFT/notes = FORMULE vides, renvoyés au tech-spec B8) en LIASSE CALCULÉE. Règles figées et croisées avec les postes GUIDEF réels → docs/tech-spec-bilan-b8-2026-07-20.md (2 CORRECTIONS vs fiche : XC valeur ajoutée sous convention magnitude signée = `XB − RA − RB + (TE..TI) − (RC..RJ)` ; CAFG = additif `XI+RL+RN−TJ−TL−TN+RO`, le soustractif de la fiche double-comptait TI ∈ EBE). Encodage en OPÉRANDES dans le paquet syscohada-revise@2.1 (champ additif MappingRule.operandes? + évaluateur FORMULE générique) — moteur agnostique P7, sfd-bceao INCHANGÉ. Convention n°0 ✅ TRANCHÉE 2026-07-20 (magnitude + opérandes signées) → STORY-110/111/112 débloquées. Blockers MV restants (format balance A2, jeu d'essai F4, expert F1) gâtent la PREUVE e2e, pas l'encodage/dry-run.
     goal: "Bilan — Liasse : calcul complet (tech-spec B8). Transformer le squelette EPIC-011 en liasse calculée : opérandes signées SIG (XC corrigé) + sous-totaux Bilan + retraitements TFT/CAFG (corrigée, statut par ligne) + notes v1 automatables — encodés dans le paquet SYSCOHADA (moteur agnostique P7 ; sfd inchangé)."
     stories:
       - story_id: "STORY-110"
@@ -1357,8 +1357,9 @@ sprints:
         epic: "EPIC-011B"
         points: 5
         service: "bilan-service"
-        status: "not_started"  # extension additive du contrat (patron du champ tresorerie? de STORY-061) ; évaluation ordonnée avec référence inter-postes ; régénère syscohada-revise@2.1 via build.mjs + MAJ checksum ReferentielRegistry ; sfd INCHANGÉ
-        assigned_to: null
+        status: "done"  # ✅ 2026-07-20 CLÔTURÉE (MNV-110, PR #15 bilan-service, rebase-merge sur dev). SOCLE mécanisme : contrat additif Operande/MappingRule.operandes? (patron tresorerie? de 061) + EvaluateurFormuleService générique agnostique (Σ signe×valeur, cascade ordonnée, modes VALEUR/VARIATION/VALEUR_N_1, etatSource, bornage safe-integer) + passthrough build.mjs + garde de cohérence. AUCUNE opérande SYSCOHADA encodée (→ 111-114) → paquets réels byte-identiques, checksums 056/057/061 INCHANGÉS ; évaluateur livré non-branché (hook pour CR/Bilan/TFT). Lint 0 · build OK · 321 tests · évaluateur 100% · global 98/93/98/98. Docker : stack neuve, bilan HEALTHY, 0 erreur compile, provider résolu au boot, dry-run 059/060/063 → 401 (non-régression). OUVRE EPIC-011B, débloque 111-114.
+        completed_date: "2026-07-20"
+        assigned_to: "vivian"
       - story_id: "STORY-111"
         title: "SIG XA..XI en opérandes signées (XC corrigé) + calcul dans le CR + articulation CJ=XI — FR-010 (complet)"
         epic: "EPIC-011B"
