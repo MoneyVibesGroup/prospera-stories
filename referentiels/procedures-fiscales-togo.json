@@ -1,0 +1,91 @@
+{
+  "_meta": {
+    "artefact": "procedures-fiscales",
+    "pays": "TG",
+    "paysLibelle": "Togo",
+    "annee": 2026,
+    "source": "Livre des Procédures Fiscales (LPF) — OTR, édition 2025 (CODE-GENERAL-DES-IMPOTS-ET-LIVRE-DES-PROCEDURES-FISCALES-OTR-2025.pdf). Dates de dépôt des états financiers fournies par l'utilisateur 2026-07-19.",
+    "statut": "AMORCE — échéances et sanctions principales extraites du LPF ; à compléter et valider par un expert. Alimente le moteur fiscal et la story « conseil fiscal / défendre la liasse » (AB-07).",
+    "usage": "calendrier fiscal, calcul des pénalités/majorations, garde-fous conformité, dossier de justification de la liasse."
+  },
+  "depotEtatsFinanciers": {
+    "commentaire": "Echeances de depot de la DSF / etats financiers selon la nature du contribuable (clôture au 31/12). Fournies par l'utilisateur.",
+    "echeances": [
+      { "typeContribuable": "entreprise individuelle", "dateLimite": "31-03", "note": "TPU declaratif : etats financiers SMT au plus tard le 31 mars (LPF Art. 56)" },
+      { "typeContribuable": "societe", "dateLimite": "30-04", "note": "utilisateur a ecrit 31/04 (avril = 30 jours) ; retenu 30/04 = 4 mois apres cloture, aligne OHADA" },
+      { "typeContribuable": "assurance / banque", "dateLimite": "31-05" }
+    ]
+  },
+  "acomptesIS_IR": {
+    "nombre": 4,
+    "echeances": ["31-01", "31-05", "31-07", "31-10"],
+    "regle": "chaque acompte = 1/4 des cotisations du dernier exercice clos, arrondi au millier inferieur",
+    "dispenseSurRequete": "au moins 15 jours avant l'echeance, aupres du Commissaire des Impots",
+    "source": "Art. 114-116 CGI"
+  },
+  "tpu": {
+    "declaratif": { "depot": "31-03", "support": "etats financiers Systeme Minimal de Tresorerie (SMT)", "source": "LPF Art. 56" },
+    "forfaitaire": { "beneficiaire": "collectivites locales", "note": "paiement selon modalites collectivites (LPF Section Paiement)" }
+  },
+  "versementRetenuesSource": {
+    "prestationsResidents_RSH": "au plus tard le 15 du mois suivant celui du paiement (Art. 99 CGI)",
+    "nonResidents": "dans le mois qui suit celui du paiement des sommes taxables (Art. 98 CGI)",
+    "capitauxMobiliers": "distributions : dans les 6 mois suivant la cloture de l'exercice (Art. 79 CGI)",
+    "cessions": "retenue par le cessionnaire, versee dans le mois suivant le paiement",
+    "note": "les versements donnent droit a des attestations individuelles de retenue a remettre aux beneficiaires"
+  },
+  "premierExercice": {
+    "regle": "societe creee avant le 30 juin : 1er exercice clos au 31/12 de la meme annee. Creee apres le 30 juin : 1er exercice clos au 31/12 de l'annee suivante (lettre d'information a l'administration au plus tard 15 jours avant la date legale de depot).",
+    "cloture": "arret des comptes au 31 decembre (sauf cession/cessation en cours d'annee)",
+    "source": "Art. 96 CGI"
+  },
+  "sanctions": {
+    "defautDeclarationTaxationOffice": {
+      "majorationInitiale": 0.30,
+      "conditionInitiale": "regularisation dans les 15 jours suivant la notification de taxation d'office",
+      "majorationApresDelai": 0.40,
+      "conditionApres": "situation non regularisee a l'expiration du delai",
+      "source": "LPF Art. 121"
+    },
+    "dissimulation": {
+      "majoration": 0.80,
+      "base": "suppléments de droits en cas d'evaluation/rectification d'office suite a dissimulation ; amende egale a 80% des droits reellement exigibles",
+      "solidarite": "a la charge de toutes les parties a l'acte, tenues solidairement",
+      "source": "LPF Art. 120-121"
+    },
+    "defautRetenueSource": {
+      "amende": "egale au montant des retenues non effectuees (ou insuffisamment operees sciemment)",
+      "source": "LPF Art. 131"
+    },
+    "factureNormaliseeEtCaisse": {
+      "defautFactureNormalisee": 100000,
+      "defautImmatriculationFiscale": 50000,
+      "defautAffichageEnseigne": 25000,
+      "defautCaisseEnregistreuse": 2000000,
+      "defautConservationBandesCaisse": 1000000,
+      "unite": "FCFA",
+      "source": "LPF Art. 124-125 zone"
+    },
+    "concoursProfessionnelComptable": {
+      "amendePremiereInfraction": 100000,
+      "cible": "agent d'affaires, expert, expert-comptable, comptable agree ayant apporte son concours a des documents/renseignements inexacts",
+      "note": "aggravation en cas de recidive",
+      "source": "LPF Art. 130"
+    }
+  },
+  "controleEtPrescription": {
+    "commentaire": "Le LPF regit le controle fiscal, le contentieux (Commission administrative, juridictionnel) et les delais de prescription/reprise.",
+    "aExtraire": ["delai de reprise/prescription exact", "delais de reclamation contentieuse", "procedure de controle sur place / sur pieces", "documentation prix de transfert"],
+    "statut": "structure identifiee dans le LPF (Titre VI Contentieux, chapitres controle) — details a extraire au besoin"
+  },
+  "gardeFousConformite": {
+    "commentaire": "Rappels pour la story conseil fiscal (AB-07) : l'optimisation par leviers legaux (provisions, amortissements, report deficits, reductions d'impot investissement) est licite ; la minoration de la realite (recettes reelles minorees, charges fictives) constitue une dissimulation sanctionnee (majoration 80%, LPF Art. 120-121). Chaque retraitement doit etre documente (base legale) pour tenir en cas de controle OTR.",
+    "reference": "coherent avec D11 (garde-fou non negociable) de la memoire atelier-balance-module"
+  },
+  "aFaire": [
+    "Extraire les delais exacts de prescription/reprise et de reclamation contentieuse",
+    "Confirmer la date de depot societe (30/04) et le calendrier TVA mensuel/trimestriel",
+    "Detailler les procedures de controle (sur place / sur pieces) et de documentation prix de transfert",
+    "Validation experte"
+  ]
+}

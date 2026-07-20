@@ -1,0 +1,71 @@
+{
+  "_meta": {
+    "artefact": "postes-liasse",
+    "systemeComptable": "SMT",
+    "systemeComptableLibelle": "Systeme Minimal de Tresorerie (SYSCOHADA revise)",
+    "pays": "TG",
+    "annee": 2026,
+    "source": "LIASSE SYSCOHADA REVISE- SMT-Réf 24-01-19.xlsx (formulaire officiel, feuilles BILAN / COMPTE DE RESULTAT / TABLE DES CODES). Fourni par l'utilisateur 2026-07-19.",
+    "statut": "AMORCE — structure officielle extraite ; base du referentiel SMT (pendant du GUIDEF pour le Systeme Normal). A valider expert.",
+    "usage": "gabarit de liasse pour le regime synthetique/TPU ; cible de la construction de balance par chemin A (cahiers recettes/depenses). Le SMT est une comptabilite de TRESORERIE : recettes - depenses +/- variations - amortissements.",
+    "lienFiscal": "regime TPU (voir paquet-fiscal-togo-2026.json -> synthetique_entreprenant_tpu) ; depot au 31 mars pour l'entreprise individuelle."
+  },
+  "bilan": {
+    "structure": "bilan simplifie a montants significatifs, colonnes EXERCICE N / N-1",
+    "actif": [
+      { "poste": "Immobilisations", "note": "1", "commentaire": "a faire figurer si montants significatifs" },
+      { "poste": "Stocks", "note": "2" },
+      { "poste": "Clients et Debiteurs divers", "note": "3" },
+      { "poste": "Caisse", "note": null },
+      { "poste": "Banque (+/-)", "note": null },
+      { "poste": "TOTAL ACTIF", "note": null, "type": "total" }
+    ],
+    "passif": [
+      { "poste": "Compte de l'exploitant", "note": "1" },
+      { "poste": "Resultat de l'exercice", "note": null },
+      { "poste": "Emprunts", "note": null },
+      { "poste": "Fournisseurs et crediteurs divers", "note": "3" },
+      { "poste": "TOTAL PASSIF", "note": null, "type": "total" }
+    ]
+  },
+  "compteDeResultat": {
+    "logique": "compta de tresorerie : SOLDE = Recettes encaissees - Depenses decaissees, corrige des variations de stocks/creances/dettes et des amortissements",
+    "recettes": [
+      { "poste": "Recettes sur ventes", "note": "4" },
+      { "poste": "Recettes sur prestations de services", "note": "4" },
+      { "poste": "Autres recettes sur activites", "note": "4" },
+      { "poste": "TOTAL DES RECETTES", "code": "A", "type": "total" }
+    ],
+    "depenses": [
+      { "poste": "Depenses sur achats", "note": "4" },
+      { "poste": "Depenses sur loyers", "note": "4" },
+      { "poste": "Depenses sur salaires", "note": "4" },
+      { "poste": "Depenses sur impots et taxes", "note": "4" },
+      { "poste": "Charges d'interets", "note": null },
+      { "poste": "Autres depenses sur activites", "note": "4" },
+      { "poste": "TOTAL DES DEPENSES", "code": "B", "type": "total" }
+    ],
+    "solde": [
+      { "poste": "SOLDE : Excedent (+) ou insuffisance (-) de recettes", "code": "C", "formule": "C = A - B" },
+      { "poste": "Variations des stocks (N - N-1)", "code": "D", "note": "2" },
+      { "poste": "Variations des creances (N - N-1)", "code": "E", "note": "3" },
+      { "poste": "Variations des dettes d'exploitation (N - N-1)", "code": "F", "note": "3" },
+      { "poste": "Dotations aux amortissements", "code": "G" },
+      { "poste": "RESULTAT DE L'EXERCICE", "code": "H", "formule": "H = C + D + E + F - G", "type": "total" }
+    ]
+  },
+  "codesReferentiels": {
+    "regimeFiscal": { "TPU declarative": "2", "TPU forfaitaire": "3" },
+    "codePaysUEMOA": { "Benin": "01", "Burkina": "02", "Cote d'Ivoire": "03", "Guinee Bissau": "04", "Mali": "05", "Niger": "06", "Senegal": "07", "Togo": "08" },
+    "formesJuridiques": ["SA a participation publique", "SA", "SARL", "SCS", "SNC", "SP", "GIE", "Association", "Autre"],
+    "activitesEconomiques": "nomenclature NAEMA (codes 001..044) presente dans la feuille TABLE DES CODES — reutilisable pour le profil societe (secteur d'activite)"
+  },
+  "notesAnnexes": {
+    "presentes": ["NOTE1 (immobilisations)", "NOTE2 (stocks)", "NOTE3 (clients/creances/dettes)", "NOT4 (detail recettes/depenses)", "ETAT COMPLEMENTAIRE", "CA (chiffre d'affaires)", "DETAIL DES CHARGES"],
+    "commentaire": "notes bien plus legeres que les 35 notes du Systeme Normal (GUIDEF) — coherent avec la vocation simplifiee du SMT"
+  },
+  "tableDePassage": {
+    "statut": "A FAIRE — mapping cahiers/comptes -> postes SMT",
+    "note": "Le SMT etant en tresorerie, le mapping part des mouvements de caisse/banque (cahiers recettes/depenses) et non d'un solde de compte comme en Systeme Normal. C'est le pont naturel du chemin A (STORY-082-085)."
+  }
+}

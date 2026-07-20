@@ -6,51 +6,88 @@
     "annee": 2026,
     "devise": "XOF",
     "referentielComptable": "syscohada-revise",
-    "source": "CGI et LPF 2026 (Togo) — fourni par l'utilisateur 2026-07-12 (CGI et LPF 2026_ (1).pdf)",
-    "statut": "AMORCE — taux d'en-tête confirmés depuis le CGI ; détails TPU/seuils/retenues à compléter puis à VALIDER par un expert-comptable/fiscaliste",
-    "avertissement": "Les taux changent avec la loi de finances : ce paquet est versionné par pays x année. Ne pas coder en dur dans le moteur."
+    "source": "Code Général des Impôts + Livre des Procédures Fiscales — OTR (Office Togolais des Recettes), édition 2025 (CODE-GENERAL-DES-IMPOTS-ET-LIVRE-DES-PROCEDURES-FISCALES-OTR-2025.pdf, 361 p.). Barème CNSS fourni par l'utilisateur 2026-07-19 (source distincte : Code de Sécurité Sociale). Dates de dépôt DSF fournies par l'utilisateur.",
+    "statut": "COMPLET (taux extraits du code officiel avec références d'articles) — reste la VALIDATION par un expert-comptable/fiscaliste togolais avant mise en production",
+    "avertissement": "Les taux changent avec la loi de finances : ce paquet est versionné par pays x année. Ne pas coder en dur dans le moteur. Confirmer la loi de finances en vigueur pour l'exercice cible (l'édition OTR 2025 consolide jusqu'à la LF 2023).",
+    "revision": "2026-07-19 — passage AMORCE -> COMPLET depuis le CGI+LPF OTR 2025 : IRPP barème corrigé (35% et non 30%), seuils/taux TPU exacts, TAF/TCA/accises/retenues chiffrés, CNSS ajoutée."
   },
   "tva": {
     "tauxStandard": 0.18,
     "type": "taux unique",
     "base": "chiffre d'affaires HT",
-    "source": "Art. 195 CGI 2026"
+    "mentionSousSeuil": "Les établissements sous le seuil d'assujettissement à la TVA émettent une facture normalisée portant la mention « NE FACTURE PAS LA TVA ».",
+    "source": "Art. 195 CGI (taux unique 18% applicable à toutes activités sauf exonérés Art. 180)"
   },
   "is": {
     "taux": 0.27,
     "base": "benefice imposable (resultat fiscal definitif)",
     "arrondi": "fraction de benefice imposable < 1000 FCFA negligee",
-    "source": "Art. 113 CGI 2026"
+    "source": "Art. 113 CGI"
+  },
+  "irpp": {
+    "type": "bareme progressif par tranches",
+    "arrondi": "produit arrondi a la dizaine de franc inferieure",
+    "tranches": [
+      { "de": 0, "a": 900000, "taux": 0.0, "libelle": "exonere" },
+      { "de": 900001, "a": 3000000, "taux": 0.03 },
+      { "de": 3000001, "a": 6000000, "taux": 0.10 },
+      { "de": 6000001, "a": 9000000, "taux": 0.15 },
+      { "de": 9000001, "a": 12000000, "taux": 0.20 },
+      { "de": 12000001, "a": 15000000, "taux": 0.25 },
+      { "de": 15000001, "a": 20000000, "taux": 0.30 },
+      { "de": 20000001, "a": null, "taux": 0.35, "libelle": "plus de 20 000 000" }
+    ],
+    "correctionAmorce": "L'amorce indiquait a tort une tranche haute a 30% : le maximum reel est 35% au-dela de 20 000 000 FCFA.",
+    "source": "Art. 74 CGI (barème IRPP). S'applique aussi aux rémunérations de gérants/associés Art. 75 et pensions/rentes Art. 76."
   },
   "minimumForfaitairePerception": {
     "code": "MFP",
     "taux": 0.01,
-    "base": "chiffre d'affaires hors TVA",
-    "regleLiquidation": "impot du = max( MFP , IS droit commun )",
-    "commentaire": "Un minimum est du meme en cas de perte (assis sur le CA). Correspond au poste 'D Minimum forfaitaire de perception' + 'G Impot du (max D:F)' de la liasse GUIDEF.",
-    "source": "Art. 120 CGI 2026 (1% du CA HT)"
+    "tauxMajore": {
+      "valeur": 0.02,
+      "cas": "importation en vue de la revente de vehicules d'occasion"
+    },
+    "base": "chiffre d'affaires hors TVA du dernier exercice clos",
+    "regleLiquidation": "impot du = max( MFP , IS ou IRPP-affaires droit commun )",
+    "duEnCasDeDeficit": true,
+    "commentaire": "Du en cas de deficit ou lorsque le resultat fiscal ne permet pas de determiner un impot superieur. Correspond au poste 'D Minimum forfaitaire de perception' + 'G Impot du (max D:F)' de la liasse GUIDEF.",
+    "exonerations": [
+      "societes cooperatives, groupements, unions/federations/confederations (quelle que soit l'activite)",
+      "societes et personnes morales exonerees d'IS",
+      "entreprises nouvelles : 12 premiers mois d'exploitation (hors societes issues de transformation)",
+      "entreprises agreees au titre du code des investissements et regimes derogatoires"
+    ],
+    "source": "Art. 120 CGI (taux) ; Art. 121 CGI (exonerations)"
   },
   "acomptesProvisionnels": {
     "nombre": 4,
     "echeances": ["31-01", "31-05", "31-07", "31-10"],
     "calcul": "chaque acompte = 1/4 des cotisations mises a la charge du contribuable au titre du dernier exercice clos, arrondi au millier de franc inferieur",
-    "source": "Art. 114 CGI 2026"
+    "dispense": "le contribuable estimant que les acomptes verses egalent ou depassent la cotisation finale peut demander une dispense au Commissaire des Impots, au moins 15 jours avant l'echeance (Art. 116)",
+    "excedent": "l'excedent d'acomptes sur l'impot exigible est rembourse sous deduction des autres impots directs dus (Art. 115)",
+    "source": "Art. 114-116 CGI"
   },
   "resultatFiscal": {
     "mecanisme": "resultat comptable + reintegrations - deductions - deficits reportables = resultat fiscal definitif",
     "reintegrations_codes": ["10", "11", "12", "15", "20", "25", "30", "40", "45", "50", "60", "80"],
     "deductions_codes": ["90", "95", "100", "120", "125"],
-    "reference": "feuilles 'Resultat fiscal' + 'Detail reintegrations/deductions' de la liasse GUIDEF; codes officiels DGI",
+    "reference": "feuilles 'Resultat fiscal' + 'Detail reintegrations/deductions' de la liasse GUIDEF; codes officiels DGI/OTR",
     "reglesNotables": {
-      "interetsComptesCourantsAssocies": "deductibles dans la limite du taux legal + 3 points, plafond 30% (Art. 2405/2420 zone)",
-      "donsDeductibles": "limite 1% (organismes reconnus d'utilite publique)"
+      "reportDeficitaire": "deficit deductible dans la limite de 50% du benefice de l'exercice suivant ; solde reportable sans limitation de duree (Art. 101 CGI) — LEVIER conseil fiscal",
+      "amortissements": "lineaire, degressif ou accelere (Art. 100) ; petit outillage/materiel de valeur unitaire HT <= 100 000 FCFA deductible immediatement — LEVIER conseil fiscal",
+      "provisions": "deductibles si pertes/charges nettement precisees rendues probables, constatees en comptabilite et figurant au releve des provisions annexe (Art. 102) — LEVIER conseil fiscal",
+      "interetsComptesCourantsAssocies": "deductibles dans la limite du taux d'interet legal majore de 3 points (Art. 99 m / Art. 102)",
+      "redevancesLicencesBrevetsMarques": "deductibles dans la limite de 5% du chiffre d'affaires HT (Art. 99 k)",
+      "donsDeductibles": "limite 1% (organismes reconnus d'utilite publique)",
+      "chargesSocialesPatronales": "cotisations patronales de securite sociale (CNSS) deductibles au meme titre que les remunerations (Art. 99)",
+      "provisionsCreancesBanques": "banques/etablissements financiers : provisions pour depreciation selon normes prudentielles BCEAO (Art. 102, directive UEMOA 01/2020)"
     }
   },
   "regimesImposition": {
     "reel_normal": {
       "cible": "grandes entreprises",
       "systemeComptableOHADA": "SN",
-      "seuilIndicatif": "CA HT ou actif brut eleve (seuils exacts a confirmer — zone Art. 2786-2825 mentionne 500 000 000 et 1 000 000 000)",
+      "seuilIndicatif": "au-dessus du plafond TPU (60 000 000) ; seuil exact reel normal / reel simplifie a confirmer contre AUDCIF art.13 et CGI",
       "statut": "a_confirmer"
     },
     "reel_simplifie": {
@@ -59,39 +96,188 @@
       "statut": "a_confirmer"
     },
     "synthetique_entreprenant_tpu": {
-      "cible": "personnes physiques / entreprises individuelles a faible CA",
-      "impot": "Taxe Professionnelle Unique (TPU) — liberatoire de plusieurs impots/taxes",
-      "composantes": ["regime forfaitaire (collectivites locales)", "regime declaratif (budget Etat)"],
-      "seuilIndicatifCA": 30000000,
+      "cible": "personnes physiques dont CA annuel <= 60 000 000 FCFA, quelle que soit l'activite",
+      "impot": "Taxe Professionnelle Unique (TPU)",
+      "liberatoireDe": ["IRPP categorie revenus d'affaires", "minimum forfaitaire de perception (MFP)", "patente", "TVA"],
+      "neSappliquePasA": ["personnes relevant des benefices non commerciaux (BNC)", "panificateurs industriels (boulangerie-patisserie)", "personnes physiques effectuant des importations"],
+      "exonerationTemporaire": "non due pendant les 24 premiers mois d'exercice",
       "systemeComptableOHADA": "SMT",
-      "tauxParTranche": "A COMPLETER (Art. 134 declaratif / Art. 135 forfaitaire)",
-      "source": "Chap. V CGI (Regime fiscal synthetique de l'entreprenant et des entreprises individuelles), Art. 128-135",
-      "statut": "confirme_existence_taux_a_completer"
+      "plafondCA": 60000000,
+      "composantes": {
+        "forfaitaire": {
+          "seuilCA": "CA annuel <= 30 000 000 FCFA",
+          "beneficiaire": "collectivites locales",
+          "modeCalcul": "tarifs forfaitaires (bareme par activite/tonnage, ex. transporteurs routiers par CU/tonnage et anciennete)",
+          "source": "Art. 130-131, 135 CGI"
+        },
+        "declaratif": {
+          "seuilCA": "30 000 000 < CA annuel <= 60 000 000 FCFA",
+          "beneficiaire": "budget de l'Etat",
+          "taux": {
+            "productionEtCommerce": 0.02,
+            "prestationsDeServices": 0.08,
+            "montantMinimumAnnuel": 20000
+          },
+          "obligationComptable": "etats financiers Systeme Minimal de Tresorerie (SMT) au plus tard le 31 mars (LPF Art. 56)",
+          "source": "Art. 130-134 CGI ; LPF Art. 56"
+        }
+      },
+      "optionReel": "possibilite d'opter pour le regime du benefice reel avant le 30 novembre (Art. 137)",
+      "depassementSeuil": "le depassement du plafond en cours d'annee entraine denonciation systematique du regime synthetique (Art. 132)",
+      "source": "Chap. V CGI — Regime fiscal synthetique / TPU, Art. 128-139",
+      "statut": "confirme_complet"
     }
+  },
+  "taxeActivitesFinancieres": {
+    "code": "TAF",
+    "taux": 0.10,
+    "base": "montant brut des profits realises sur les operations imposables (taxe elle-meme exclue de la base)",
+    "champ": "operations bancaires, financieres et commerce des valeurs et de l'argent",
+    "faitGenerateur": "encaissement du prix ou de la remuneration",
+    "recouvrement": "memes regles/garanties/sanctions que la TVA",
+    "source": "Art. 213-221 CGI (taux Art. 220)"
+  },
+  "taxeConventionsAssurance": {
+    "code": "TCA",
+    "pertinence": "vertical assurance (futur)",
+    "tauxParNature": {
+      "incendieBiensProfessionnels": 0.20,
+      "assuranceVie": 0.03,
+      "autresAssurances": 0.06
+    },
+    "source": "CGI Chap. III (TCA) — Section 4 Taux"
+  },
+  "retenuesSource": {
+    "capitauxMobiliers": {
+      "revenusVariables": {
+        "revenusDistribues": 0.13,
+        "dividendesCotesCREPMF_personneMorale": 0.07,
+        "dividendesCotesCREPMF_personnePhysique": 0.03,
+        "libératoireIRPP_personnePhysique": 0.13,
+        "meresFiliales": "pas de retenue sur dividendes entre mere/filiale etablies au Togo respectant l'Art. 107",
+        "source": "Art. 79 CGI"
+      },
+      "revenusFixes": {
+        "lotsPayesCreanciers": 0.06,
+        "revenusObligations": 0.06,
+        "obligationsCollectivites_5a10ans": 0.03,
+        "obligationsCollectivites_plus10ans": 0.0,
+        "plusValuesCessionObligations": 0.03,
+        "autresRevenus": 0.06,
+        "libératoireIRPP_personnePhysique": 0.13,
+        "source": "Art. 80 CGI"
+      }
+    },
+    "retenueLoyers_RSL": {
+      "taux": 0.0875,
+      "base": "loyers bruts dus aux proprietaires (location d'immeubles)",
+      "imputation": { "surTaxeFonciere": 0.0375, "surImpotSurLeRevenu": 0.05 },
+      "nature": "credit d'impot deductible de l'IR du beneficiaire",
+      "source": "Art. 100 CGI (revenus locatifs)"
+    },
+    "retenuePrestationsResidents_RSH": {
+      "champ": "sommes versees en remuneration de prestations de services des professions non commerciales (Art. 35), et aux intermediaires en operations de banque/paiement (agents d'assurance, courtiers, commissionnaires, agents d'affaires, mandataires)",
+      "debiteursConcernes": ["PP/PM soumises a IS ou IR revenus d'affaires", "Etat, collectivites, etablissements publics", "ONG", "projets et programmes"],
+      "tauxSelonBeneficiaire": {
+        "avecAttestationRegulariteFiscale": 0.03,
+        "avecNIF": 0.05,
+        "autres": 0.20
+      },
+      "versement": "au plus tard le 15 du mois suivant, au receveur charge du recouvrement",
+      "source": "Art. 99 CGI (Section retenues sur sommes versees a des residents)"
+    },
+    "retenueNonResidents": {
+      "taux": 0.20,
+      "base": "sommes et produits bruts verses a des personnes/societes sans installation professionnelle permanente au Togo (remuneration d'activite, droits d'auteur, propriete industrielle, prestations)",
+      "nature": "s'impute sur l'IR, non restituable",
+      "source": "Art. 98 CGI (sommes versees a des non-residents)"
+    }
+  },
+  "droitsAccises": {
+    "produitsPetroliers_DAPP": {
+      "code": "DAPP",
+      "base": "premieres livraisons de produits petroliers sur le territoire national",
+      "type": "tarif specifique (montant par unite)",
+      "tarifs": [
+        { "produit": "Supercarburant sans plomb", "montant": 57.76, "unite": "FCFA/litre" },
+        { "produit": "Gas-oil / gazole", "montant": 48.06, "unite": "FCFA/litre" },
+        { "produit": "Petrole aviation / carbureacteur", "montant": 59.99, "unite": "FCFA/litre" },
+        { "produit": "Petrole lampant a usage domestique", "montant": 0, "unite": "FCFA/litre" },
+        { "produit": "Fuel / fuel-oil (DDO, leger, lourd 1 et 2)", "montant": 15, "unite": "FCFA/litre" },
+        { "produit": "Huile lubrifiante", "montant": 50, "unite": "FCFA/litre" },
+        { "produit": "Graisse", "montant": 60, "unite": "FCFA/kg" },
+        { "produit": "Gaz de petrole liquefie (butane)", "montant": 0, "unite": "FCFA" },
+        { "produit": "Biocarburant", "montant": 0, "unite": "FCFA" }
+      ],
+      "ajustement": "tarifs ajustables par arrete en cas de fluctuations larges des cours mondiaux",
+      "source": "Art. 240-241 CGI"
+    },
+    "autresProduits_adValorem": {
+      "type": "taux ad valorem",
+      "tauxParProduit": [
+        { "produit": "Boissons non alcoolisees (hors eau)", "taux": 0.05 },
+        { "produit": "Bieres", "taux": 0.20 },
+        { "produit": "Autres boissons alcoolisees", "taux": 0.60 },
+        { "produit": "Tabacs", "taux": 0.50 },
+        { "produit": "Farine de ble", "taux": 0.01 },
+        { "produit": "Huiles et corps gras alimentaires", "taux": 0.01 },
+        { "produit": "Produits de parfumerie et cosmetiques", "taux": 0.15 },
+        { "produit": "Cafe", "taux": 0.10 },
+        { "produit": "The", "taux": 0.10 },
+        { "produit": "Vehicules de tourisme >= 13 CV", "taux": 0.05 },
+        { "produit": "Bouillons alimentaires", "taux": 0.15 },
+        { "produit": "Sachets en matiere plastique", "taux": 0.05 },
+        { "produit": "Pierres et metaux precieux", "taux": 0.15 }
+      ],
+      "source": "Art. 243 CGI"
+    },
+    "statut": "COMPLET (tarifs DAPP + table ad valorem extraits)"
   },
   "factureNormalisee": {
     "obligatoire": true,
-    "seuilCommentaire": "regime declaratif et reel dont CA < ~30 000 000 concernes (Art. zone 10243/10960 a preciser)",
-    "statut": "a_confirmer"
+    "applicabiliteSousSeuilTVA": "obligatoire aussi sous le seuil d'assujettissement TVA, avec mention « NE FACTURE PAS LA TVA »",
+    "sanctions": {
+      "defautFactureNormalisee": 100000,
+      "defautImmatriculationFiscale": 50000,
+      "defautAffichageEnseigne": 25000,
+      "defautCaisseEnregistreuse": 2000000,
+      "defautConservationBandesCaisse": 1000000
+    },
+    "source": "CGI (facture normalisee) ; sanctions Art. 124-125 zone"
+  },
+  "cnss": {
+    "_meta": {
+      "source": "Barème communiqué par l'utilisateur 2026-07-19 — Code de Sécurité Sociale (texte distinct du CGI). À valider vs textes CNSS en vigueur.",
+      "organisme": "CNSS Togo"
+    },
+    "tauxEmployeur": 0.175,
+    "tauxSalarie": 0.04,
+    "tauxTotal": 0.215,
+    "assiette": {
+      "inclus": ["salaire de base", "primes", "gratifications", "commissions", "avantages en nature"],
+      "exclus": ["remboursements de frais professionnels justifies (mission, deplacement)"],
+      "plancher": "l'assiette ne peut etre inferieure au SMIG en vigueur"
+    },
+    "deductibiliteFiscale": "part patronale deductible du resultat fiscal comme charge de personnel",
+    "aCompleter": "plafond eventuel de cotisation, ventilation par branche (prestations familiales / risques professionnels / pensions), valeur SMIG a jour"
   },
   "autresImpotsTaxes": {
     "presentsDansCGI": [
-      "IRPP (bareme progressif, tranche haute 30%)",
+      "IRPP (bareme progressif 8 tranches, tranche haute 35%) — voir bloc irpp",
       "TVM (taxe sur les vehicules a moteur)",
-      "TAF (taxe sur les activites financieres)",
-      "TCA (taxe sur les conventions d'assurance) — pertinent futur vertical assurance",
-      "Droits d'accises",
+      "TAF (taxe sur les activites financieres) 10% — voir bloc taxeActivitesFinancieres",
+      "TCA (taxe sur les conventions d'assurance) — voir bloc taxeConventionsAssurance",
+      "Droits d'accises (DAPP petroliers, tabac, alcool) — voir bloc droitsAccises",
       "Patente / Taxe fonciere / Taxe d'habitation (TH) — fiscalite locale",
-      "Droits d'enregistrement (loyers, cessions, fusions: 1%)",
-      "Retenues a la source (ex. RSL loyers, RSH honoraires — vues dans la balance Sage)"
+      "Droits d'enregistrement (fixes / proportionnels / progressifs — cessions, baux, societes)",
+      "Taxe sur les plus-values de cession (immeubles, actions/parts, titres miniers)"
     ],
     "categorieAutres": "prevoir saisie manuelle d'un taux/montant pour tout impot hors liste (regle utilisateur)"
   },
   "aFaire": [
-    "Completer les taux TPU par tranche (Art. 134/135)",
-    "Confirmer les seuils exacts reel normal / reel simplifie / synthetique",
-    "Ajouter les taux TAF, TCA, TVM, droits d'accises si dans le perimetre",
-    "Barème CNSS (source distincte du CGI — a fournir)",
-    "Valider l'ensemble avec un expert-comptable/fiscaliste togolais"
+    "VALIDATION experte du paquet complet (expert-comptable/fiscaliste togolais)",
+    "Confirmer la loi de finances en vigueur pour l'exercice cible (edition OTR 2025 = jusqu'a LF 2023)",
+    "Confirmer les seuils exacts reel normal / reel simplifie (AUDCIF art.13 + CGI)",
+    "Completer le barème CNSS (plafond, branches, valeur SMIG a jour) — source Code de Securite Sociale"
   ]
 }

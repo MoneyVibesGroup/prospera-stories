@@ -1,0 +1,307 @@
+{
+  "_meta": {
+    "artefact": "corpus-justificatif-fiscal",
+    "pays": "TG",
+    "annee": 2026,
+    "source": "CGI + LPF OTR 2025 (CODE-GENERAL-DES-IMPOTS-ET-LIVRE-DES-PROCEDURES-FISCALES-OTR-2025.pdf). Texte verbatim extrait par article.",
+    "objet": "Base de citation/justification pour l'IA : chaque decision de retraitement du bilan/liasse (deductibilite, amortissement, provision, report deficit, retenue, regime) est adossee au texte legal exact. Alimente la story AB-07 (conseil fiscal / defendre la liasse) et le moteur fiscal.",
+    "avertissement": "Texte extrait automatiquement d'un PDF : verifier le verbatim contre le code officiel avant de l'opposer a l'administration. La numerotation CGI et LPF est INDEPENDANTE (memes numeros dans les deux livres) - toujours preciser le livre.",
+    "statut": "AMORCE - 42 articles cles du bilan/liasse (CGI + LPF) ; extensible a tout le code au besoin. Verbatim a valider par un expert avant usage contentieux."
+  },
+  "articles": [
+    {
+      "livre": "CGI",
+      "article": "Art. 74",
+      "theme": "Bareme IRPP progressif (8 tranches, 0 a 35%)",
+      "usage_bilan": "Justifie le calcul de l'IRPP sur salaires, remunerations de gerants et pensions.",
+      "texte": "Art. 74 : Pour le calcul de l’impôt, le revenu net annuel imposable arrondi au millier de francs inférieur fait l'objet de l'application du barème par tranches de revenu et à taux progressifs ci-après : Tableau 1 : Nouveau Barème par tranches de revenu et taux de 0 A 900 000 exonéré de 900 001 A 3 000 000 3% de 3 000 001 A 6 000 000 10% de 6 000 001 A 9 000 000 15% de 9 000 001 A 12 000 000 20% de 12 000 001 A 15 000 000 25% de 15 000 001 A 20 000 000 30% Plus de 20 000 000 35% Le produit obtenu par application du barème ci-dessus est arrondi à la dizaine de francs inférieure. Abrogé. Paragraphe 2 : Rémunérations allouées aux gérants et aux associés de certaines sociétés"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 79",
+      "theme": "Retenue a la source revenus mobiliers (revenus variables)",
+      "usage_bilan": "Justifie la retenue sur dividendes/distributions (13/7/3%).",
+      "texte": "Art. 79 : Pour les produits de placements à revenus variables, les taux de la retenue sont fixés comme suit : Personne morale : - 13% du montant des revenus distribués ; - 7% du montant des dividendes distribués par les sociétés cotées sur une bourse des valeurs agréées par le Conseil Régional de l’Épargne Publique et des Marchés Financiers (CREPMF) au sein de l’Union Économique et Monétaire Ouest Africaine (UEMOA). En ce qui concerne les sociétés mères et filiales établies au Togo et respectant les conditions fixées à l’article 107 du présent code, ces retenues ne sont pas opérées sur les dividendes distribués. Personne physique : - 13% du montant des revenus distribués ; - 3% du montant des dividendes distribués par les sociétés cotées sur une bourse des valeurs agréées par le Conseil Régional de l’Épargne Publique et des Marchés Financiers (CREPMF) au sein de l’Union Économique et Monétaire Ouest Africaine (UEMOA). Pour les personnes physiques, ces retenues sont libératoires de l’impôt sur le revenu pour les produits auxquels la retenue est appliquée. Le caractère libératoire du prélèvement ne peut être invoqué pour les produits qui sont pris en compte pour la détermination du bénéfice imposable d'une entreprise industrielle, commerciale, artisanale ou agricole ou d'une profession non commerciale."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 80",
+      "theme": "Retenue a la source revenus mobiliers (revenus fixes)",
+      "usage_bilan": "Justifie la retenue sur obligations/lots (0/3/6%).",
+      "texte": "Art. 80 : Pour les produits de placements à revenus fixes les taux de la retenue sont fixés comme suit : Personne morale - 6% pour les lots payés aux créanciers ; - 6% pour les revenus des obligations quel que soit l’émetteur desdites obligations ; - 3% pour les revenus des obligations émises par les collectivités publiques et par leurs démembrements lorsque leur durée est comprise entre cinq (05) et dix (10) ans ; - 0% pour les revenus des obligations émises par les collectivités publiques et par leurs démembrements lorsque leur durée est supérieure à dix (10) ans ; 42 - 3% pour les plus-values de cession des obligations ; - 6% pour les autres revenus. Personne physique - 13% libératoire de l’impôt sur le revenu pour les produits auxquels la retenue est appliquée. Section 13 : Obligations et sanctions"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 82",
+      "theme": "Champ des plus-values de cession",
+      "usage_bilan": "Base des plus-values immobilieres/mobilieres a titre onereux.",
+      "texte": "Art. 82 : Les plus-values immobilières effectivement réalisées par les personnes physiques ou des sociétés de personnes lors de la cession à titre onéreux de biens immeubles ou de droits immobiliers de toute nature sont soumises à titre libératoire à une taxe sur les plus-values. Il en est de même en ce qui concerne : 1. les plus-values réalisées par les personnes physiques ou morales résidentes ou non- résidentes au Togo qui cèdent directement ou indirectement des actions ou parts de sociétés immatriculées au Togo ; 2. les plus-values de cession réalisées par les personnes physiques ou morales qui cèdent directement ou indirectement des titres miniers ou des licences d’exploitations délivrés au Togo."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 96",
+      "theme": "Periode d'imposition et premier exercice",
+      "usage_bilan": "Justifie la date de cloture (31/12) et le calendrier du premier exercice d'une societe nouvelle.",
+      "texte": "Art. 96 : L'impôt est établi chaque année sur les bénéfices réalisés l'année précédente. Les contribuables sont tenus d’arrêter chaque année leurs comptes à la date du 31 décembre, sauf en cas de cession ou de cessation d’activités en cours d’année. Les sociétés nouvelles, créées antérieurement au 30 juin, sont tenues d’arrêter leur premier exercice comptable au 31 décembre de la même année. Celles créées postérieurement au 30 juin sont autorisées à arrêter leur premier exercice comptable au 31 décembre de l’année suivante. Dans ce dernier cas, elles doivent faire parvenir à l’administration fiscale une lettre d’information au plus tard 15 jours avant la date légale prévue pour le dépôt des états financiers. L’impôt est établi sur les bénéfices réalisés au cours de cette période. Paragraphe 2 : Détermination du bénéfice net"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 97",
+      "theme": "Definition du benefice net imposable (variation d'actif net)",
+      "usage_bilan": "Base meme du resultat fiscal : benefice net = variation d'actif net corrigee des apports/prelevements.",
+      "texte": "Art. 97 : 1- Le bénéfice imposable est le bénéfice net déterminé d'après les résultats d'ensemble des opérations de toute nature effectuées par les entreprises, y compris notamment, les produits accessoires, les produits financiers, les plus-values de cessions d'éléments quelconques de l'actif soit en cours, soit en fin d'exploitation et les plus-values de réévaluation libre des bilans ; 2- Le bénéfice net est constitué par la différence entre les valeurs de l’actif net à la clôture et à l’ouverture de la période dont les résultats servent de base à l’impôt, diminuée des suppléments d’apports et augmentée des prélèvements effectués au cours de cette période par le ou les associés. L’actif net s’entend de l’excédent des valeurs d’actif sur le total formé au passif par les créances des tiers, les amortissements et les provisions justifiés. Pour l'application des alinéas ci-dessus, les produits correspondant à des créances sur la clientèle ou à des versements reçus à l'avance en paiement du prix, sont rattachés à l'exercice au cours duquel intervient la livraison des biens pour les ventes ou opérations assimilées et l'achèvement des prestations pour les fournitures de services. Toutefois, ces produits doivent être pris en compte : - pour les prestations continues rémunérées notamment par des intérêts ou des loyers et pour les prestations discontinues, mais à échéances successives échelonnées sur plusieurs exercices, au fur et à mesure de l'exécution ; - pour les travaux d'entreprise donnant lieu à réception complète ou partielle, à la date de cette réception même si elle est seulement provisoire ou faite avec réserves, ou à celle de la mise à disposition du maître de l'ouvrage si elle est antérieure. 51 Pour l'application des dispositions du présent article, les stocks sont évalués au prix de revient ou au cours du jour de la clôture de l'exercice si ce cours est inférieur au prix de revient. Les travaux en cours sont évalués au prix de revient. Les avoirs et dettes en monnaies étrangères, sont évalués à la clôture de chaque exercice d'après, le dernier cours officiellement connu. Les pertes et profits découlant de cette évaluation doivent être rattachés exercice par exercice aux résultats nets de l'entreprise en tant que pertes et profits exceptionnels. Les bénéfices passibles de l'impôt sur les sociétés sont déterminés d'après les règles fixées ci- après. I- Charges dé"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 98",
+      "theme": "Conditions generales de deductibilite des charges",
+      "usage_bilan": "PIVOT : toute charge n'est deductible que si elle remplit ces 5 conditions. A citer pour justifier/rejeter toute charge d'un compte de resultat.",
+      "texte": "Art. 98 : Le bénéfice est établi sous déduction de toutes les charges remplissant les conditions suivantes : - être exposées dans l’intérêt direct de l’entreprise ou se rattacher à la gestion normale de l’entreprise ; - correspondre à une charge effective et être appuyée de justifications suffisantes ; - se traduire par une diminution de l’actif net de l’entreprise ; - être comprises dans les charges de l’exercice au cours duquel elles ont été engagées ; - concourir à la formation d’un produit non exonéré d’impôt sur le bénéfice. Sous les conditions générales ci-dessus et spécifiques ci-après, sont notamment déductibles les charges énumérées aux articles 99 à 102. A- Frais généraux de toute nature"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 99",
+      "theme": "Frais generaux, remunerations, redevances, interets deductibles",
+      "usage_bilan": "Justifie la deductibilite des remunerations (travail effectif, non excessives), redevances licences (<=5% CA), interets CC associes (taux legal +3 pts), dons (1%).",
+      "texte": "Art. 99 : a) Les rémunérations directes ou indirectes y compris les indemnités, allocations, avantages en nature et remboursements de frais alloués par les entreprises ne sont admis en déduction des résultats que dans la mesure où ils correspondent à un travail effectif et ne sont pas excessifs eu égard à l'importance du service rendu et à la condition qu'ils soient justifiés et qu’ils aient donnés lieu aux prélèvements sociaux et fiscaux en vigueur. b) L'indemnité légale pour congés payés revêt, d'un point de vue fiscal, le caractère d'un salaire de substitution qui constitue une charge normale de l'exercice au cours duquel le salarié prend le congé correspondant. c) Les rémunérations allouées aux dirigeants des sociétés anonymes, des sociétés à responsabilité limitée, des sociétés par actions simplifiées, des sociétés de personnes, des sociétés civiles, sont admises en déduction des résultats dans la mesure où elles correspondent à un travail effectif et ne sont pas excessives eu égard à l'importance du service rendu. Il en est ainsi des traitements fixes ou proportionnels, jetons de présence et tantièmes spéciaux alloués au président du conseil d'administration, au directeur général, à l'administrateur provisoirement délégué, aux administrateurs remplissant des fonctions techniques, aux membres du directoire, aux membres du conseil de surveillance, aux gérants majoritaires et minoritaires, aux gérants non associés qu'ils appartiennent ou non à un collège de gérance majoritaire, aux gérants commandités, aux administrateurs de sociétés civiles, aux associés en nom des sociétés en nom 52 collectif, aux commandités des sociétés en commandite simple et aux membres des sociétés en participation. d) Les frais de manœuvres occasionnels embauchés et payés à la tâche et dont le temps d'emploi continu pour une personne n'excède pas un (01) mois, sont déductibles des résultats à condition : - que l'entreprise déclare à la fin de chaque année civile sur un état modèle spécial fourni par l’Administration fiscale, la liste des bénéficiaires avec indication de leurs nom, prénoms, adresse et du montant total payé à chacun; - qu'elle acquitte sur le total de ces frais les cotisations patronales de sécurité sociale y afférentes. e) Les charges sociales accessoires au versement des rémunérations allouées aux salariés sont déductibles au même titre que les rémunérations proprement dite"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 100",
+      "theme": "Amortissements deductibles (lineaire/degressif/accelere)",
+      "usage_bilan": "LEVIER : justifie le mode et la quotite d'amortissement ; petit materiel <100 000 F deductible immediatement.",
+      "texte": "Art. 100 : Les amortissements sont soit linéaires, dégressifs ou accélérés. 55 Les amortissements réellement effectués par l'entreprise dans la limite généralement admise d'après les usages de chaque nature d'industrie, de commerce ou d'exploitation y compris les amortissements qui auraient été différés au cours d'exercices antérieurs déficitaires, à l'exception des amortissements du matériel et mobilier domestiques mis gratuitement à la disposition des dirigeants et membres du personnel. En cas de cession desdits matériels et mobiliers domestiques la plus-value ou la moins-value n'est pas considérée pour la détermination du résultat fiscal. Les entreprises peuvent opter pour un amortissement suivant la méthode des composants conformément au droit comptable OHADA. Les entreprises ont la possibilité de comprendre dans leurs charges déductibles pour la détermination de leur bénéfice imposable, le prix d’acquisition : - du petit outillage et petit matériel, lorsque la valeur unitaire hors taxes n’excède pas cent mille (100 000) francs CFA ; - des petits équipements de bureau, lorsque la valeur unitaire hors taxes n’excède pas cinquante mille (50 000) francs CFA. Pour ces matériels et outillages, le montant de la première annuité d'amortissement calculé d'après leur durée d'utilisation normale peut être doublé, cette durée étant alors réduite d'une (01) année. L’amortissement des matériels et outillages neufs acquis ou fabriqués par les entreprises relevant de l’impôt sur les sociétés, peut être calculé suivant un système d’amortissement dégressif. Le taux dégressif est obtenu par application aux taux d’amortissement linéaire affecté d’un coefficient fixé en fonction de la durée de vie du bien comme ci-après : - 1,5 lorsque la durée normale d’utilisation du bien est de trois (03) ou quatre (04) ans ; - 2 lorsque cette durée normale est de cinq (05) ou six (06) ans ; - 2,5 lorsque cette durée normale est supérieure à six (06) ans. Le point de départ du calcul de l’amortissement dégressif est constitué par le premier jour du mois d’acquisition ou de création du bien. Le montant de la première annuité d’amortissement dégressif est déterminé en appliquant au prix de revient de l’immobilisation le taux utilisable tel que défini ci-dessus. Les annuités suivantes se calculent en appliquant le taux d’amortissement retenu au prix de revient du bien diminué du cumul des annuités pré"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 101",
+      "theme": "Report deficitaire (50% du benefice, duree illimitee)",
+      "usage_bilan": "LEVIER MAJEUR conseil fiscal : justifie l'imputation d'un deficit anterieur (limite 50%/an, report sans limite de duree).",
+      "texte": "Art. 101 : Le déficit subi pendant un exercice est considéré comme une charge de l'exercice suivant et déduit dans la limite de 50% du bénéfice réalisé pendant ledit exercice. Le solde du déficit est reporté sur les exercices suivants sans limitation de durée dans le temps sous les conditions définies à l’alinéa précédent. D- Les provisions"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 102",
+      "theme": "Provisions deductibles",
+      "usage_bilan": "LEVIER : justifie une provision (pertes/charges precises, probables, comptabilisees, au releve des provisions).",
+      "texte": "Art. 102 : 1. Sont déductibles également, les provisions constituées en vue de faire face à des pertes ou charges nettement précisées et que des événements en cours rendent probables à condition qu'elles aient été effectivement constatées dans les écritures comptables de l'exercice et figurent dans le relevé des provisions en annexe de la liasse fiscale. 2. Les banques et établissements financiers peuvent déduire les provisions pour dépréciation de créances constituées en application des normes de prudence édictées par la BCEAO. En application de la directive N°01/2020/CM/UEMOA du 26 juin 2020 portant harmonisation du régime fiscal des pertes sur créances douteuses ou litigieuses comptabilisées par les établissements de crédit, les banques et établissements financiers peuvent déduire les pertes se rapportant aux créances, accordées dans le respect des règles prudentielles de la profession, 10 Loi N°2020-019 du 22 décembre 2020, portant loi de finances, exercice 2021. 58 classées douteuses ou litigieuses, conformément aux dispositions du PCB-R et non recouvrées au terme du cinquième exercice comptable, à compter de leur transfert en créances douteuses ou litigieuses. Ne sont pas concernées les créances sur l’État, les organismes publics et celles accordées aux parties liées au sens de la réglementation bancaire. Les créances jugées irrécouvrables ainsi que celles passées en pertes, conformément aux règles prévues par le PCB-R, doivent faire l’objet d’un état détaillé indiquant l’identité du débiteur, la date d’octroi du prêt ou du crédit, le montant initial, le montant restant à recouvrer, le montant passé en perte, la nature et la valeur de la garantie, la date du transfert de la créance et l’étape de la procédure de recouvrement. L’état détaillé est joint à la déclaration annuelle de résultat. Les pertes portant sur des créances pour lesquelles aucune action de recouvrement n’a été menée, ainsi que celles pour lesquelles les actions de recouvrement bien qu’ayant été entamées ont été abandonnées sans échec constaté par un officier ministériel, soit parce qu’il est survenu un accord de règlement partiel amiable entre le créancier et son débiteur, soit, pour toute autre raison résultant de la volonté délibérée de la banque de mettre un terme aux poursuite, doivent faire l’objet de réintégration dans le résultat imposable à l’impôt sur les sociétés concerné. 3. Les compag"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 113",
+      "theme": "Taux de l'IS (27%)",
+      "usage_bilan": "Justifie le taux applique au resultat fiscal.",
+      "texte": "Art. 113 : Pour le calcul de l’impôt, toute fraction du bénéfice imposable inférieure à mille (1 000) francs CFA est négligée. Le taux de l’impôt sur les sociétés est fixé à 27 % du bénéfice imposable. Les obligations déclaratives et de paiement, le régime des sanctions et les procédures contentieuses et de recouvrement sont ceux prévus par le livre des procédures fiscales. 67 CHAPITRE IV : DISPOSITIONS COMMUNES A L’IRPP ET A L’IS Section 1 : Régimes des acomptes provisionnels et minimum forfaitaire de perception Paragraphe 1 : Régimes des acomptes provisionnels I- Acomptes provisionnels au titre de l’impôt sur les sociétés et de l’impôt sur le revenu des personnes physiques, catégorie des revenus d’affaires / Minimum Forfaitaire de Perception (MFP)"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 114",
+      "theme": "Acomptes provisionnels et MFP (4 acomptes)",
+      "usage_bilan": "Justifie l'echeancier des acomptes (1/4 des cotisations N-1).",
+      "texte": "Art. 114 : L’impôt sur les sociétés et l’impôt sur le revenu des personnes physiques, catégorie des revenus d’affaires ou le minimum forfaitaire de perception en tenant lieu donnent lieu au versement de quatre (04) acomptes chacun arrondi au millier de franc inférieur et égal au quart des cotisations mises à la charge du contribuable au titre du dernier exercice clos."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 115",
+      "theme": "Excedent d'acomptes",
+      "usage_bilan": "Justifie le remboursement/imputation d'un trop-verse d'acomptes.",
+      "texte": "Art. 115 : Lorsque le montant des acomptes payés est supérieur à l’impôt définitivement exigible, l’excédent est remboursé sous déduction des autres impôts, droits et taxes directs éventuellement dus par le contribuable. Il en est de même du minimum forfaitaire de perception prévu à l'article 120 du présent code. 18"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 116",
+      "theme": "Dispense d'acomptes",
+      "usage_bilan": "Justifie une demande de dispense d'acompte.",
+      "texte": "Art. 116 : Le contribuable qui estime que les acomptes déjà versés au titre de l'année d'imposition est égal ou supérieur aux cotisations dont il sera finalement redevable pour ladite année et qui désire être dispensé du versement des autres acomptes, doit présenter une requête dans ce sens au Commissaire des Impôts, lequel, après appréciation, peut lui délivrer une dispense, quinze (15) jours au moins avant la date d'exigibilité des autres versements. Copie de cette dispense est transmise au service chargé du recouvrement. Au moment de la déclaration des résultats, si l’administration constate un paiement différé des droits, les sanctions prévues à l’article 115 du LPF s’appliquent."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 120",
+      "theme": "Minimum forfaitaire de perception (MFP 1%, 2% vehicules d'occasion)",
+      "usage_bilan": "Justifie l'application de l'impot = max(MFP, IS) et le MFP du en cas de deficit.",
+      "texte": "Art. 120 : Les personnes physiques passibles de l’impôt sur le revenu en raison de leurs activités industrielles, commerciales ou non commerciales et les sociétés et autres personnes morales soumises à l’impôt sur les sociétés sont passibles d’un minimum forfaitaire de perception. Il est dû en cas de déficit ou lorsque le résultat fiscal ne permet pas de déterminer un impôt supérieur à celui-ci. Il est fait application d’un taux de 1% du chiffre d’affaires hors taxe sur la valeur ajoutée (TVA), du dernier exercice clos. Ce taux est porté à 2% en ce qui concerne l’importation en vue de la revente, des véhicules d’occasion mis en circulation sur le territoire togolais. En aucun cas, son montant ne peut être inférieur à vingt mille (20 000) francs CFA pour les contribuables qui sont au régime du bénéfice réel d’imposition. Le chiffre d’affaires correspond à celui de l’ensemble des opérations réalisées par le contribuable dans l’exercice de ses activités professionnelles courantes, y compris les produits accessoires au sens du référentiel comptable du SYSCOHADA. S’agissant de l’importation en vue de la revente, des véhicules d’occasion, la base est constituée par la valeur en douane déterminée conformément aux dispositions du Code des douanes national. Toutefois, pour ces mêmes contribuables commercialisant des produits dont la marge brute autorisée est fixée par un acte réglementaire, la base est constituée par cette marge. 21"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 121",
+      "theme": "Exonerations de MFP",
+      "usage_bilan": "Justifie la dispense de MFP (cooperatives, exoneres IS, entreprises nouvelles 12 mois, code des investissements).",
+      "texte": "Art. 121 : Sont toutefois dispensés du versement du minimum forfaitaire de perception : - les sociétés coopératives, les groupements et leurs unions et fédérations, ainsi que les confédérations des sociétés coopératives et des groupements ; quelle que soit leur activité ; - les sociétés et personnes morales exonérées de l'impôt sur les sociétés ; - les entreprises nouvelles pour les douze (12) premiers mois de leur exploitation. Les sociétés issues de transformations d’une autre personne morale ne sont pas considérées comme des entreprises nouvelles ; - les entreprises agréées dans le cadre des dispositions du code des investissements et pendant la période d'exemption d'impôt sur les sociétés ou d’impôt sur le revenu ; - les entreprises ayant cessé toute activité professionnelle antérieurement au 1er janvier de l'année d'imposition et non assujetties à la patente dans les bulletins d’émissions de l'année précédente; - les entreprises ayant pour objet exclusif l'édition, l'imprimerie ou la vente de feuilles périodiques ; - les personnes physiques relevant d’un régime synthétique pour l'imposition de leurs bénéfices industriels, artisanaux, agricoles ou commerciaux ; - les bénéficiaires du régime fiscal des travailleurs à domicile par application de l'article 18 du présent code ; - les entreprises agréées au régime d’incitation des petites et moyennes entreprises prévu aux articles 143 à 153 du présent code. 21 Loi N°2022-022 du 27 décembre 2022 portant Loi de Finances, Exercice 2023 69 Section 2 : Réévaluation des bilans"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 128",
+      "theme": "Institution du regime TPU (synthetique)",
+      "usage_bilan": "Cadre du regime synthetique, non du 24 premiers mois.",
+      "texte": "Art. 128 : Nonobstant les dispositions en matière d’impôt sur le revenu des personnes physiques et de l’impôt sur les sociétés, il est institué un régime d’imposition synthétique dénommé régime de Taxe Professionnelle Unique (TPU). La TPU se compose d’un régime forfaitaire et d’un régime déclaratif. La TPU selon le régime déclaratif est établi pour le budget de l’Etat. La TPU selon le régime forfaitaire est établi au profit des collectivités locales et le produit est réparti conformément aux dispositions de l’article 139 du présent code. Elle n'est pas due, par les personnes physiques assujetties, pour les vingt-quatre premiers mois d’exercice de leurs entreprises, régulièrement enregistrées au Centre de Formalité des Entreprises (CFE). Section 1 : Champ d’application"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 129",
+      "theme": "TPU liberatoire (IRPP-affaires, MFP, patente, TVA) et exclusions",
+      "usage_bilan": "Justifie que la TPU remplace ces impots ; exclut BNC, panificateurs, importateurs.",
+      "texte": "Art. 129 : 1- La taxe professionnelle unique est libératoire des impôts et taxes ci-après, dus par les personnes concernées pour leurs activités professionnelles : - l’impôt sur le revenu des personnes physiques (IRPP) catégorie revenus d’affaires ; - le minimum forfaitaire de perception ; - la patente ; - la taxe sur la valeur ajoutée (TVA). Pour les autres impôts, droits et taxes, le droit commun s’applique. 2 - La TPU ne s’applique pas : - aux personnes physiques relevant des bénéfices non commerciaux (BNC) ; - aux panificateurs industriels (boulangerie pâtisserie) ; - aux personnes physiques qui effectuent des importations et ou des exportations."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 130",
+      "theme": "Assujettissement TPU (CA <= 60 000 000)",
+      "usage_bilan": "Justifie l'eligibilite au regime synthetique/SMT.",
+      "texte": "Art. 130 : Sont assujetties à la Taxe Professionnelle Unique, les personnes physiques dont le chiffre d’affaires annuel est inférieur ou égal à soixante millions (60 000 000) de francs CFA quelle que soit la nature de l’activité."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 131",
+      "theme": "Repartition forfaitaire (<=30M) / declaratif (30-60M)",
+      "usage_bilan": "Justifie le sous-regime TPU applicable.",
+      "texte": "Art. 131 : La TPU se compose d’un régime forfaitaire et d’un régime déclaratif. 1. Sont soumises au régime forfaitaire les personnes physiques dont le chiffre d’affaires annuel est inférieur ou égal à trente millions (30 000 000) de francs CFA. 2. Sont soumises au régime déclaratif les personnes physiques dont le chiffre d’affaires annuel est supérieur à trente millions (30 000 000) de francs CFA et inférieur ou égal à soixante millions (60 000 000) de francs CFA quelle que soit la nature de l’activité. 22 Loi N°2022-022 du 27 décembre 2022 portant Loi de Finances, Exercice 2023 23 Article 10 de la loi n°2019-022 portant loi de finances, gestion 2020 24 Article 10 de la loi n°2019-022 portant loi de finances, gestion 2020 73"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 132",
+      "theme": "Depassement de seuil TPU",
+      "usage_bilan": "Justifie la sortie du regime synthetique en cas de depassement.",
+      "texte": "Art. 132 : Le dépassement de la limite prévue à l’article 131 ci-dessus en cours d’année entraîne une dénonciation systématique par l’Administration fiscale du régime synthétique concerné. Section 2 : Modalités d’imposition"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 133",
+      "theme": "Modalites TPU declaratif (base CA)",
+      "usage_bilan": "Base d'imposition TPU declaratif.",
+      "texte": "Art. 133 : La TPU selon le régime déclaratif est établie et due pour l’année entière sur la base du chiffre d’affaires à partir des déclarations souscrites conformément à l’article 56 du livre des procédures fiscales. La TPU suivant le régime forfaitaire est déterminée conformément à l’article 135 ci-dessous."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 134",
+      "theme": "Taux TPU declaratif (2% commerce/prod, 8% services, min 20 000)",
+      "usage_bilan": "Justifie le calcul de la TPU declarative.",
+      "texte": "Art. 134 : La TPU suivant le régime déclaratif est déterminée par application des taux ci-après à la base d’imposition : - 2% du chiffre d’affaires pour les activités de production et/ou de commerce ; - 8% du chiffre d’affaires pour les activités de prestation de services. Toutefois, pour les contribuables commercialisant des produits dont la marge brute autorisée est fixée à un montant spécifique par quantité ou unité de produit vendu, la base est constituée par cette marge. 26En tout état de cause, le montant annuel dudit impôt ne peut être inférieur à vingt mille (20 000) francs CFA."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 135",
+      "theme": "Tarifs TPU forfaitaire",
+      "usage_bilan": "Bareme forfaitaire par activite/tonnage.",
+      "texte": "Art. 135 : La TPU suivant le régime forfaitaire est déterminée suivant les tarifs ci-après : 1-) : La taxe professionnelle unique des transporteurs routiers de marchandises par trimestre : CU/ Tonnage Année 1 Année 2 Année 3 Année 4 Année 5 A partir de la 6ème année 0 à 2 22 500 18 000 14 625 11 250 6 750 4 390 +2 à 5 33 500 27 000 21 937 16 875 10 125 6 585 +5 à 10 50 625 40 500 31 906 25 312 15 190 9 875 +10 à 15 72 500 58 000 47 125 36 250 21 750 14 140 +15 à 20 90 000 72 000 58 500 45 000 27 000 17 550 +20 à 25 131 250 105 000 85 312 65 625 39 375 25 595 +25 à 30 156 250 125 000 101 562 78 125 46 875 30 475 + de 30 175 000 140 000 113 750 87 500 52 500 34 130 2-) : La taxe professionnelle unique des transporteurs routiers de marchandises par trimestre : sable et autres gravats : Tonnage Tarif (francs CFA) 0 à 10 Tonnes 9 000 11 à 20 Tonnes 11 000 Plus de 20 Tonnes 13 500 25 Article 10 de la loi n°2019-022 portant loi de finances, gestion 2020 26 Loi N°2020-019 du 22 décembre 2020, portant loi de finances, exercice 2021. 74 3-) : La taxe professionnelle unique des transporteurs routiers de personnes par trimestre (en francs CFA) : Nombre de places 1ère Année 2ème Année 3ème Année A partir de la 4ème année 0 à 5 7 500 6 000 5 625 4 500 6 à 9 11 250 9 000 8 440 6 750 10 à 15 16 875 13 500 12 656 10 125 16 à 20 22 500 18 000 16 875 13 500 21 à 30 31 250 25 000 23 437 18 750 31 à 40 41 250 33 000 30 937 24 750 41 à 50 50 000 40 000 37 500 30 000 51 et plus 75 000 60 000 56 250 45 000 4-) : La taxe professionnelle unique des autres transporteurs par trimestre : Type d’activités Lomé Commune/Golfe/Agoè Villes autres Zone rurale Transport des personnes par motocyclettes 1 250 francs CFA par motocyclette 1 250 francs CFA par motocyclette 625 francs CFA par motocyclette Tricycles 6 250 francs CFA pour chaque véhicule 3750 francs CFA pour chaque véhicule 650 francs CFA pour chaque véhicule Autres activités par pirogue 2 500 francs CFA par pirogue 650 francs CFA par pirogue 650 francs CFA par pirogue Autres activités par bateau à moteur 12 500 francs CFA par bateau à moteur - - 5-) : La taxe professionnelle unique pour les activités commerciales et les prestations de service autre que artisanales dont le chiffre d’affaires est inférieur ou égal à trente millions (30 000 000) de francs CFA. N° Tranches d'imposition Montant à payer pour les activités commerciales Montant à payer"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 137",
+      "theme": "Option pour le reel avant le 30 novembre",
+      "usage_bilan": "Justifie un changement de regime vers le reel.",
+      "texte": "Art. 137 : Les contribuables qui remplissent les conditions d’admission au régime de la TPU selon le régime déclaratif peuvent exercer, avant le 30 novembre de l’année, une option pour leur assujettissement au régime du bénéfice réel d’imposition dans les conditions de droit commun. Cette option prend effet à compter du premier janvier de l’année suivante et est irrévocable. Les contribuables qui remplissent les conditions d’admission au régime de la TPU selon le régime forfaitaire peuvent exercer, avant le 30 novembre de l’année, une option pour leur assujettissement au régime de la TPU déclaratif. Cette option prend effet à compter du premier janvier de l’année suivante et est irrévocable. L’option est faite au moyen d’une simple lettre adressée à l’Administration fiscale sur papier timbré à mille (1 000) francs CFA. Le changement de régime d’imposition est également appliqué au contribuable, qui effectue des opérations au profit d’une administration, d’un établissement public, d’un projet public ou de toute autre structure assimilée, ou au profit d’une entreprise au sein de laquelle et sous quelque forme que ce soit l’Etat ou ses démembrements détiennent une participation. 76 Le changement de régime court à compter de la date de réalisation des opérations motivant ce changement. Pour ces contribuables, il est tenu compte, le cas échéant, des cotisations déjà établies au titre de la TPU."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 195",
+      "theme": "Taux de TVA (18% unique)",
+      "usage_bilan": "Justifie le taux de TVA collectee/deductible.",
+      "texte": "Art. 195 : Le taux de la taxe sur la valeur ajoutée est un taux unique de 18% applicable à toutes les activités et à tous les produits à l’exception de ceux exonérés en vertu de l’article 180 du présent code. Pour ce qui concerne les opérations de crédit-bail ou « leasing », le taux à appliquer aux loyers est celui du bien au moment de son achat. 95 Abrogé Paragraphe 3 : Régime de déduction I- Principe du droit à déduction"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 213",
+      "theme": "Institution de la TAF",
+      "usage_bilan": "Cadre de la taxe sur les activites financieres.",
+      "texte": "Art. 213 : Il est créé une taxe spéciale dénommée taxe sur les activités financières (TAF), perçue au profit du budget général. Section 1 : Champ d'application Paragraphe 1 : Opérations et personnes imposables"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 218",
+      "theme": "Base imposable de la TAF",
+      "usage_bilan": "Assiette = montant brut des profits.",
+      "texte": "Art. 218 : La taxe sur les activités financières est assise et liquidée sur le montant brut des profits réalisés à l'occasion des opérations imposables, la taxe elle-même étant exclue de la base d'imposition. Section 3 : Fait générateur et exigibilité"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 220",
+      "theme": "Taux de la TAF (10%)",
+      "usage_bilan": "Justifie le taux TAF.",
+      "texte": "Art. 220 : Le taux de cette taxe est fixé à 10 %."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 240",
+      "theme": "Institution des droits d'accises sur produits petroliers (DAPP)",
+      "usage_bilan": "Cadre des accises petrolieres.",
+      "texte": "Art. 240 : Il est créé un droit spécifique désigné sous le nom de droits d’accises sur les produits pétroliers (DAPP). Son montant est inclus dans le prix de vente des produits pétroliers. Paragraphe 2 : Tarif"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 241",
+      "theme": "Tarifs DAPP par produit",
+      "usage_bilan": "Justifie le tarif specifique par produit petrolier.",
+      "texte": "Art. 241 : Ce droit frappe les premières livraisons sur le territoire national de produits pétroliers aux tarifs suivants : Numéro Types de produits Tarif 1 Supercarburant sans plomb 57,76 FCFA par litre 2 Gas-oil ou gazole 48,06 FCFA par litre 3 Pétrole, d’essence d’aviation et de carburéacteur 59,99 FCFA par litre 4 Pétrole lampant à usage domestique 0 FCFA 5 fuel, fuel-oil domestique (DDO), fuel-oil léger, fuel-oil lourd 1, fuel-oil lourd 2 15 FCFA par litre 6 Huile lubrifiante 50 FCFA par litre 7 Graisse 60 FCFA par kilogramme 8 Gaz de pétrole liquéfié (butane) 0 FCFA 9 Biocarburant 0 FCFA Toutefois, en fonction des fluctuations larges et soudaines des cours mondiaux des produits pétroliers et eu égard à leurs effets déstabilisateurs sur les agents économiques et les finances publiques, le gouvernement est autorisé à modifier ces tarifs par voie réglementaire."
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 243",
+      "theme": "Droits d'accises ad valorem (table de taux)",
+      "usage_bilan": "Justifie le taux d'accise par produit (alcool, tabac, cosmetiques...).",
+      "texte": "Art. 243 : Des droits d’accises sont établis au profit du budget de l’Etat sur les produits ci-dessous énumérés et d'après les taux suivants : 121 N° Produits Taux 1 Boissons non alcoolisées à l’exclusion de l’eau Boissons gazeuses, énergétiques et énergisantes 10% Boissons non alcoolisées sucrées 10% Autres Boissons non alcoolisées à l’exclusion de l’eau 5% 2 Boissons alcoolisées Bières 20% Autres boissons alcoolisées 60% 3 Tabacs 50% 4 Farine de blé 1% 5 Huiles et corps gras alimentaires 1% 6 Produits de parfumerie et cosmétiques 15% 7 Café 10% 8 Thé 10% 9 Les véhicules de tourisme dont la puissance est supérieure ou égale à 13 chevaux 5% 10 Les bouillons alimentaires 15% 11 Les sachets en matière plastique 5% 12 Pierres et métaux précieux 15% Paragraphe 2 : Fait générateur et exigibilité"
+    },
+    {
+      "livre": "CGI",
+      "article": "Art. 244",
+      "theme": "Fait generateur et exigibilite des accises",
+      "usage_bilan": "Determine quand l'accise est due.",
+      "texte": "Art. 244 : Le fait générateur et l’exigibilité des droits d’accises sont constitués de : - la première livraison, par le fabricant local sur le territoire national des produits énumérés à l'article 243 ci-dessus ou du prélèvement de ces mêmes produits par le fabricant sur ses stocks ou sur ses fabrications ; - la mise à la consommation au sens douanier du terme de ces mêmes produits par l'importateur. Paragraphe 3 : Base imposable"
+    },
+    {
+      "livre": "LPF",
+      "article": "Art. 56",
+      "theme": "Depot des etats financiers SMT (TPU declaratif) au 31 mars",
+      "usage_bilan": "Justifie l'echeance de depot SMT/TPU.",
+      "texte": "Art. 56 : Les contribuables soumis à la Taxe Professionnelle Unique (TPU) selon le régime déclaratif sont tenus de souscrire au plus tard le 31 mars auprès de leur service des impôts de rattachement les états financiers selon le système minimal de trésorerie du SYSCOHADA et les états et listes prévus par l’article 138 du Code général des impôts. Elle est établie en cinq (05) exemplaires destinés respectivement à l’Administration fiscale, à la Centrale des bilans et à l’Institut national chargé des statistiques, le greffe du tribunal et au GUDEF. Il en est de même pour les contribuables soumis à la TPU suivant le régime forfaitaire dont l’impôt est déterminé en fonction du chiffre d’affaires. Section 2 : Paiement"
+    },
+    {
+      "livre": "LPF",
+      "article": "Art. 98",
+      "theme": "Retenue a la source sur sommes versees a des non-residents (20%)",
+      "usage_bilan": "Justifie la retenue sur paiements a des non-residents.",
+      "texte": "Art. 98 : Sous réserve de l'application des conventions fiscales internationales, donnent lieu à l'application d'une retenue à la source lorsqu'ils sont payés par un débiteur établi au Togo à des personnes ou des sociétés relevant de l'impôt sur le revenu, qui n'ont pas dans ce pays d'installations professionnelles permanentes : 1. les sommes versées en rémunération d'une activité déployée au Togo ou hors du Togo dans l'exercice d’une activité relevant de la catégorie des bénéfices non commerciaux; 2. les produits perçus par les inventeurs ou au titre de droits d'auteur ainsi que les produits tirés de la propriété industrielle ou commerciale et de droits assimilés ; 3. les sommes payées en rémunération des prestations de toute nature fournies ou utilisées au Togo ou hors du Togo. Le taux de la retenue est fixé à 20 % des sommes et produits bruts ci-dessus. La retenue s'impute sur le montant de l'impôt sur le revenu établi au titre d’une année. Elle n'est pas restituable. Elle est effectuée par le débiteur des sommes versées quelle que soit sa qualité et versée au receveur chargé du recouvrement contre quittance dans le mois qui suit celui au cours duquel les sommes taxables ont été payées. Les versements donnent droit, à des attestations individuelles de retenues que la partie versante est tenue de remettre aux personnes ayant fait l’objet de retenue. Section 2 : Retenues à la source sur les sommes versées à des résidents"
+    },
+    {
+      "livre": "LPF",
+      "article": "Art. 99",
+      "theme": "Retenue a la source sur prestations a des residents (3/5/20%)",
+      "usage_bilan": "Justifie la RSH selon la regularite fiscale du prestataire (attestation/NIF/autres).",
+      "texte": "Art. 99 : Sont soumises à une retenue à la source, les sommes versées en rémunération de prestations de services des professions non commerciales titulaires des revenus tels que définis à l’article 35 du Code général des impôts et utilisées au Togo par des débiteurs établis au Togo à des personnes qui y résident. Sont également soumis à la retenue à la source les sommes versées aux intermédiaires en opération de banque et services de paiement tels que les agents généraux d’assurance, les courtiers, les commissionnaires, les agents d’affaires, les mandataires exclusifs et les mandataires de ces intermédiaires. Sont considérés comme débiteurs établis au Togo : - les personnes physiques et personnes morales soumises à l’impôt sur les sociétés ou à l’impôt sur le revenu catégorie revenus d’affaires ; - l’Etat, les collectivités territoriales et les établissements publics ; - les organisations non gouvernementales ; - les projets et programmes. La retenue est opérée au taux de : - 3 % si le bénéficiaire fait valoir une attestation de régularité fiscale en cours de validité ; 252 - 5 % si le bénéficiaire possède un numéro d’identification fiscale ; - 20% pour les autres. Les retenues effectuées doivent être versées à la caisse du receveur chargé du recouvrement contre quittance au plus tard le 15 du mois suivant. Les versements donnent droit, à des attestations individuelles de retenues que la partie versante est tenue de remettre aux personnes ayant fait l’objet de retenue. Ces dernières peuvent faire valoir ces attestations sur les cotisations d’impôts qui sont à leur charge. Les crédits résiduels sont apurés par compensation dans les conditions définies par l’Administration fiscale. Ces crédits résiduels sont constatés par un certificat de crédit de retenue à la source. Les débiteurs sont tenus de joindre lors du versement des sommes retenues, une annexe indiquant, pour chaque fournisseur ayant subi la retenue de 20%, l'identité complète notamment les nom et prénom(s) pour les personnes physiques, la forme juridique et la raison sociale pour les personnes morales, les adresses géographiques, postales, le numéro de téléphone et le montant total des prestations. Les entreprises individuelles, les membres des sociétés civiles et de personnes désignées à l’article 30 du CGI exerçant des professions non commerciales et qui relèvent de la direction des grandes entreprises ne s"
+    },
+    {
+      "livre": "LPF",
+      "article": "Art. 100",
+      "theme": "Retenue a la source sur loyers (RSL 8,75%)",
+      "usage_bilan": "Justifie la retenue sur loyers (imputee 3,75% foncier + 5% IR).",
+      "texte": "Art. 100 : Sont soumis à une retenue à la source les loyers bruts dus aux propriétaires en raison de la location des immeubles leur appartenant. 61Cette retenue au taux de 8,75 % du montant des loyers bruts est admise sur justification de son acquittement, en déduction des taxes foncières et de l'impôt sur le revenu à payer par ces propriétaires après établissement des bulletins d’émission desdits impôts et taxes. Les imputations s'opèrent de la façon suivante: - 3,75% sur la taxe foncière ; - 5% sur l’impôt sur le revenu Le locataire et le propriétaire restent solidaires pour le paiement de cette retenue. Les redevables légaux, c’est-à-dire les personnes désignées par la loi pour opérer la retenue sont les locataires suivants : - les collectivités publiques ; - les organisations internationales ; - les personnes morales de droit public ou privé ; 60 Article 10 de la loi n°2019-022 portant loi de finances, gestion 2020 61 Ordonnance 2020 – 007 du 26 aout 2020 portant loi de finances rectificative, gestion 2020. 253 - les personnes physiques exerçant une activité artisanale, commerciale ou non commerciale. Les personnes qui supportent effectivement la retenue sont les propriétaires des immeubles baillés. La retenue est faite et reversée au plus tard le 15 du mois suivant la période au titre de laquelle le loyer est payé."
+    },
+    {
+      "livre": "LPF",
+      "article": "Art. 120",
+      "theme": "Amende pour dissimulation (80% des droits)",
+      "usage_bilan": "GARDE-FOU : rappelle la sanction de la dissimulation (fraude) - a opposer a toute minoration de la realite.",
+      "texte": "Art. 120 : Dans les cas de dissimulations définies à l'article 241 du présent livre, il est dû une amende égale à 80% des droits, impôts ou taxes réellement exigibles. Cette amende est à la charge de toutes les parties à l'acte ou à la convention qui en sont tenues solidairement."
+    },
+    {
+      "livre": "LPF",
+      "article": "Art. 121",
+      "theme": "Taxation d'office et majorations (30% / 40% / 80%)",
+      "usage_bilan": "GARDE-FOU : justifie l'interet d'une declaration dans les delais et documentee.",
+      "texte": "Art. 121 : En cas de taxation d'office à défaut de déclaration dans les délais prescrits, les droits mis à la charge du contribuable sont majorés de 30% des droits dus pour chaque période d'imposition si la situation est régularisée dans les quinze (15) jours qui suivent la notification de la taxation d’office par l'Administration fiscale. A l’expiration de ce délai, la majoration est portée à 40% si la situation n'est pas régularisée. Dans le cas d'évaluation ou de rectification d'office des bases d'imposition suite à une dissimulation, les suppléments de droits mis à la charge du contribuable sont assortis d'une majoration de 80%."
+    },
+    {
+      "livre": "LPF",
+      "article": "Art. 130",
+      "theme": "Sanction du concours d'un professionnel comptable (100 000 F)",
+      "usage_bilan": "Responsabilite du cabinet : rappelle le risque de sanction pour concours a des documents inexacts.",
+      "texte": "Art. 130 : Tout agent d'affaires, expert, expert-comptable, comptable agréé ou toute autre personne, association, groupement ou société faisant profession d'organiser, de vérifier, d'apprécier, de redresser les comptabilités ou de tenir ou d'aider à tenir des écritures comptables de plusieurs clients, qui a apporté son concours à l'établissement ou à l'utilisation de documents ou de renseignements reconnus inexacts, est, sans préjudice des peines applicables en vertu des articles 154 à 157 du présent livre, passible d'une amende fiscale fixée à cent mille (100 000) francs CFA pour la première infraction relevée à sa charge. En cas de récidive l’amende est portée à deux cent mille (200 000) francs CFA sans préjudice de sanctions pénales. Cette amende est notifiée par l'Administration fiscale au conseil de l'ordre des experts-comptables et comptables agréés ou au conseil de tout autre organisme similaire. Le contrevenant et son client sont tenus solidairement au paiement de l'amende."
+    },
+    {
+      "livre": "LPF",
+      "article": "Art. 131",
+      "theme": "Amende pour defaut de retenue a la source",
+      "usage_bilan": "Justifie l'obligation d'operer les retenues (RSH/RSL).",
+      "texte": "Art. 131 : Toute personne physique ou morale, toute association ou tout organisme qui s'est abstenu d'opérer les retenues de l'impôt sur le revenu prévues aux articles 26 et suivants du présent livre ou qui, sciemment, n'a opéré que des retenues insuffisantes, est passible d'une amende égale au montant des retenues non effectuées."
+    }
+  ]
+}
