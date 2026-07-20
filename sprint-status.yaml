@@ -1348,8 +1348,8 @@ sprints:
     end_date: "2026-12-31"
     capacity_points: 34
     committed_points: 24
-    completed_points: 13  # STORY-110 (5) + STORY-111 (5) + STORY-112 (3) ✅
-    status: "in_progress"  # 🆕 2026-07-20 — INSÉRÉ (reprogrammation post-validation de la fiche comptable). EPIC-011B : transforme le SQUELETTE EPIC-011 (SIG/sous-totaux/TFT/notes = FORMULE vides, renvoyés au tech-spec B8) en LIASSE CALCULÉE. Règles figées et croisées avec les postes GUIDEF réels → docs/tech-spec-bilan-b8-2026-07-20.md (2 CORRECTIONS vs fiche : XC valeur ajoutée sous convention magnitude signée = `XB − RA − RB + (TE..TI) − (RC..RJ)` ; CAFG = additif `XI+RL+RN−TJ−TL−TN+RO`, le soustractif de la fiche double-comptait TI ∈ EBE). Encodage en OPÉRANDES dans le paquet syscohada-revise@2.1 (champ additif MappingRule.operandes? + évaluateur FORMULE générique) — moteur agnostique P7, sfd-bceao INCHANGÉ. Convention n°0 ✅ TRANCHÉE 2026-07-20 (magnitude + opérandes signées) → STORY-110/111/112 débloquées. Blockers MV restants (format balance A2, jeu d'essai F4, expert F1) gâtent la PREUVE e2e, pas l'encodage/dry-run.
+    completed_points: 24  # ✅ EPIC-011B COMPLET : STORY-110 (5) + 111 (5) + 112 (3) + 113 (8) + 114 (3) — tous done 2026-07-20
+    status: "done"  # ✅ 2026-07-20 CLÔTURÉ — les 5 stories (110→114) done+mergées. La liasse SYSCOHADA est CALCULÉE de bout en bout (SIG XA..XI, sous-totaux AZ..DZ+BZ=DZ, TFT indirect FA..ZH+articulation ZH, notes v1 ventilées/trame). Moteur agnostique P7 (sfd-bceao byte-identique tout du long). Suite = EPIC-012 (validation & immutabilité) sur liasse complète. 🆕 2026-07-20 — INSÉRÉ (reprogrammation post-validation de la fiche comptable). EPIC-011B : transforme le SQUELETTE EPIC-011 (SIG/sous-totaux/TFT/notes = FORMULE vides, renvoyés au tech-spec B8) en LIASSE CALCULÉE. Règles figées et croisées avec les postes GUIDEF réels → docs/tech-spec-bilan-b8-2026-07-20.md (2 CORRECTIONS vs fiche : XC valeur ajoutée sous convention magnitude signée = `XB − RA − RB + (TE..TI) − (RC..RJ)` ; CAFG = additif `XI+RL+RN−TJ−TL−TN+RO`, le soustractif de la fiche double-comptait TI ∈ EBE). Encodage en OPÉRANDES dans le paquet syscohada-revise@2.1 (champ additif MappingRule.operandes? + évaluateur FORMULE générique) — moteur agnostique P7, sfd-bceao INCHANGÉ. Convention n°0 ✅ TRANCHÉE 2026-07-20 (magnitude + opérandes signées) → STORY-110/111/112 débloquées. Blockers MV restants (format balance A2, jeu d'essai F4, expert F1) gâtent la PREUVE e2e, pas l'encodage/dry-run.
     goal: "Bilan — Liasse : calcul complet (tech-spec B8). Transformer le squelette EPIC-011 en liasse calculée : opérandes signées SIG (XC corrigé) + sous-totaux Bilan + retraitements TFT/CAFG (corrigée, statut par ligne) + notes v1 automatables — encodés dans le paquet SYSCOHADA (moteur agnostique P7 ; sfd inchangé)."
     stories:
       - story_id: "STORY-110"
@@ -1392,7 +1392,10 @@ sprints:
         epic: "EPIC-011B"
         points: 3
         service: "bilan-service"
-        status: "not_started"  # notes 3/4/7 restent 'à compléter' (mouvements bruts / antériorité hors balance) → trame pré-structurée (E2) ; E1 (notes obligatoires) à trancher MV
+        status: "done"  # ✅ 2026-07-20 LIVRÉE + VÉRIFIÉE DOCKER BOUT-EN-BOUT + /code-review OK + INTÉGRÉE dans dev (PR #19 bilan-service, MNV-114 « Rebase and merge », HEAD 04fbc20, branche supprimée). CLÔT EPIC-011B (liasse calculée de bout en bout). B8 §6 : notes annexes v1. Comble les 2 zones laissées par 062 (libelle:null, detailACompleter:true). LIVRÉ : NoteMeta additif sur ReferentielPackage (note/libelle/colonnes/mode) + 11 NoteMeta dans notes-syscohada.json → 8 VENTILATION (5,6,8,9,10,11,12,17 : ventilation du solde par compte sous-jacent — NotesAnnexesProductionService reçoit les soldes de bilan-engine + injecte TableDePassageService, MÊME sélection que 059, INVARIANT Σ sous-lignes = montant poste PROUVÉ) + 3 TRAME (3,4,7 : titre + colonnes officielles + lignes vides, JAMAIS de montant inventé, données hors balance). Titres sourcés (plus libelle:null). detailACompleter false (VENTILATION) / true (TRAME). Mode = décision de référentiel sourcée (pas d'heuristique). Moteur d'états (Bilan/CR/TFT/évaluateur) NON modifié. checksum syscohada 2b6ea55e→01b892c0 (4ᵉ octet) ; sfd-bceao BYTE-IDENTIQUE (0509a034, agnosticisme P7 — aucune NoteMeta). QUALITÉ : lint 0 · build OK · 367 unit + 74 e2e verts · notes-annexes-production 97.47/90/100/99.05 · global 98.29/92.11/98.45/98.27 (>65/90/90/90) · garde notes-meta-coherence verte · non-régression 062 (9 tests) + ARTICULATION_NOTES 063 inchangé. DOCKER : SYSCOHADA note 11 VENTILATION ventilation=[521000:300000]=total poste, note 7 TRAME colonnes officielles sans montant inventé ; SFD notes:[] NON_APPLICABLE checksum inchangé ; sans jeton 401. E1 (notes obligatoires 15/16/27/28/3C) = décision MV différée. [dépend STORY-062 ✅ + 110/111/112/113 ✅]
+        story_path: "docs/stories/STORY-114.md"
+        assigned_to: "vivian"
+        completed_date: "2026-07-20"
         assigned_to: null
 
   - sprint_number: 14
@@ -1831,7 +1834,7 @@ bilan_functional_epics:
       name: "États financiers — calcul complet (opérandes SIG/sous-totaux/TFT/notes, tech-spec B8)"
       frs: "FR-009..FR-013 (complétude calcul)"
       story_estimate: "5"
-      status: "proposed"  # 🆕 2026-07-20 : fige les règles de calcul renvoyées par EPIC-011 aux hooks B8 (docs/tech-spec-bilan-b8-2026-07-20.md) ; encodage en OPÉRANDES du paquet syscohada-revise@2.1 (moteur agnostique, sfd inchangé) ; INSÉRÉ avant EPIC-012 — valider/figer un squelette immuable serait prématuré. Stories 110-114 @ sprint 13.
+      status: "done"  # ✅ 2026-07-20 CLÔTURÉ — 5 stories 110→114 done+mergées (24 pts). Liasse SYSCOHADA calculée de bout en bout (SIG/sous-totaux/TFT/notes v1) via opérandes du paquet syscohada-revise@2.1 (checksum cb8a7e11→…→01b892c0, 4 octets) ; moteur agnostique P7, sfd-bceao byte-identique. Ouvre EPIC-012 (validation & immutabilité) sur liasse complète. 🆕 2026-07-20 : fige les règles de calcul renvoyées par EPIC-011 aux hooks B8 (docs/tech-spec-bilan-b8-2026-07-20.md).
     - id: "EPIC-012"
       name: "Validation, clôture & immutabilité (snapshot figé)"
       frs: "FR-014..FR-017"
