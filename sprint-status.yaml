@@ -1756,6 +1756,51 @@ sprints:
         status: "not_started"  # billing→catalog (C5) ; dépend STORY-017 + STORY-034 + C8 ; déplacé en Module 2 (l'octroi manuel via admin-panel couvre le dogfooding avant paiement)
         assigned_to: null
 
+  - sprint_number: 22
+    start_date: "2027-04-22"
+    end_date: "2027-05-06"
+    capacity_points: 34
+    committed_points: 28
+    completed_points: 0
+    status: "not_started"  # 🆕 2026-07-20 — SOCLE EPIC-026 (Assistant IA transverse). Note docs/architecture-assistant-ia-2026-07-20.md. AUCUNE dépendance dure → placé en FIN de backlog par DÉFAUT (zéro renumérotation), mais DÉPLAÇABLE plus tôt : le socle peut démarrer dès après le cœur Bilan (EPIC-011B/012) ; les surfaces à valeur s'attachent à EPIC-013 (prévisionnel) / EPIC-023 (fiscal). Priorité à confirmer au sprint-planning.
+    goal: "Assistant IA transverse — SOCLE (EPIC-026) : service assistant-service (:3011, relying party, base propre) + LlmProvider swappable (dev qwen2.5:3b Ollama/Docker, prod GLM-5 auto-hébergé) + contrat Proposition (l'IA PROPOSE, l'humain valide, le déterministe CALCULE) + RAG corpus CGI/LPF (bge-m3, citation obligatoire) + surface pilote MAPPING comptes (alimente FR-008). OCR reste Tesseract."
+    stories:
+      - story_id: "STORY-115"
+        title: "Scaffold assistant-service (:3011, relying party JWKS, health llm:, base assistant_service, démarrage dégradé)"
+        epic: "EPIC-026"
+        points: 5
+        service: "assistant-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-116"
+        title: "LlmProvider (API OpenAI-compatible) + Ollama dev (qwen2.5:3b) + config swap prod (GLM-5 auto-hébergé)"
+        epic: "EPIC-026"
+        points: 5
+        service: "assistant-service"
+        status: "not_started"  # patron OcrProvider/PaymentProvider ; LLM_BASE_URL + LLM_MODEL = config, zéro code au swap
+        assigned_to: null
+      - story_id: "STORY-117"
+        title: "Contrat Proposition — persistance + cycle PROPOSED→ACCEPTED/REJECTED + audit (prompt/réponse/modèle)"
+        epic: "EPIC-026"
+        points: 5
+        service: "assistant-service"
+        status: "not_started"  # human-in-the-loop ; jamais d'écriture sur données réelles/validées
+        assigned_to: null
+      - story_id: "STORY-118"
+        title: "RAG corpus CGI/LPF + embeddings bge-m3 + règle de citation d'article obligatoire (anti-hallucination)"
+        epic: "EPIC-026"
+        points: 8
+        service: "assistant-service"
+        status: "not_started"  # corpus = donnée versionnée pays×année (NFR-A06) ; sans citation → Proposition 'non sourcée'
+        assigned_to: null
+      - story_id: "STORY-119"
+        title: "Surface pilote — proposition de mapping des comptes non reconnus (alimente le flux FR-008 validé par un humain)"
+        epic: "EPIC-026"
+        points: 5
+        service: "assistant-service"
+        status: "not_started"  # surface la moins risquée ; dépend table de passage (FR-006/008 ✅)
+        assigned_to: null
+
 # ── Bilan fonctionnel : epics du PRD (docs/prd-bilan-service-2026-07-10.md, NB-1) ─────────────────
 # Ces epics détaillent l'ancien placeholder « EPIC-009 (moteur v1) ». Ils s'appuient sur le squelette
 # EPIC-008 (STORY-035→038). DÉCOUPÉS en stories STORY-050→074 et alloués aux sprints 10-14
@@ -1821,6 +1866,19 @@ atelier_balance_epics:
     - { id: "EPIC-023", name: "Moteur fiscal (résultat fiscal, IS=max(MFP,IS), TVA, taxes, provisions)", frs: "FR-A18..A21", stories: "STORY-091..095", status: "proposed" }
     - { id: "EPIC-024", name: "Simulation & conseil fiscal + contrôles & handoff bilan-service", frs: "FR-A22..A28", stories: "STORY-096,097,098,100 ; 099 (CORE S10)", status: "proposed" }
 
+# ── Transverse : Assistant IA (analyse & proposition) — note docs/architecture-assistant-ia-2026-07-20.md ────────
+# Capacité IA TRANSVERSE (décision 2026-07-20). Principe cardinal : l'IA PROPOSE (contrat Proposition, human-in-the-loop) ;
+# les moteurs DÉTERMINISTES (bilan EPIC-011/011B, fiscal EPIC-023) CALCULENT/DÉCIDENT. Service dédié assistant-service (:3011).
+assistant_ia_epics:
+  architecture: "docs/architecture-assistant-ia-2026-07-20.md"
+  service: "assistant-service"
+  epics:
+    - id: "EPIC-026"
+      name: "Assistant IA transverse (analyse & proposition sur données)"
+      frs: "prolonge FR-A22..A24 (conseil fiscal) ; surfaces mapping/fiscal/analyse/notes/KYC"
+      story_estimate: "5 (socle @ S22) + surfaces JIT"
+      status: "proposed"  # 🆕 2026-07-20 (note d'archi). SOCLE = STORY-115→119 (~28 pts, S22) : scaffold assistant-service + LlmProvider (dev qwen2.5:3b Ollama/Docker, prod GLM-5 auto-hébergé, swap sans code) + contrat Proposition + RAG corpus CGI/LPF (bge-m3, citation obligatoire) + surface pilote MAPPING (alimente FR-008). AUCUNE dépendance dure → DÉPLAÇABLE plus tôt. Surfaces à valeur : conseil fiscal ⇐ EPIC-023, analyse financière ⇐ prévisionnel EPIC-013. Confidentialité = modèle auto-hébergé (données tenant dans l'infra MV). OCR reste Tesseract (VLM hébergé plus tard, hors périmètre).
+
 velocity:
   sprint_1: 33
   sprint_2: 23
@@ -1845,6 +1903,7 @@ velocity:
   sprint_19: null  # EXTENDED : moteur fiscal — résultat fiscal, IS=max(MFP,IS), TVA/taxes, TPU (091-095)
   sprint_20: null  # 🏁 Atelier livré : conseil fiscal + garde-fous (096-097) + contrôles/statut de preuve (098) + e2e (100)
   sprint_21: null  # Module 2 EPIC-004 paiement-service (016-019) + STORY-039 — JIT (PS-1/C8/PRD paiement) [ex-sprint 15]
+  sprint_22: null  # 🆕 EPIC-026 socle — Assistant IA transverse (assistant-service :3011, LlmProvider, Proposition, RAG, surface mapping) — stories 115-119 ; DÉPLAÇABLE (aucune dépendance dure)
   rolling_average: 27  # (33 + 23 + 24) / 3 ≈ 26.7 ; cible prudente ~24/sprint (1 flux, réf. historique retenue au sprint-planning 2026-07-10)
 
 team:
