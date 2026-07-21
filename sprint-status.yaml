@@ -1403,8 +1403,8 @@ sprints:
     end_date: "2027-01-14"
     capacity_points: 34
     committed_points: 21
-    completed_points: 3  # STORY-064 done (2026-07-21) ; reste 065/066/067/068 (18 pts)
-    status: "in_progress"  # 🆕 2026-07-21 — EPIC-012 amorcé : STORY-064 (cycle brouillon→validé) done. Suite : 065 snapshot immuable → 066 exercices → 067 audit → 068 hypothèses prévisionnel.
+    completed_points: 8  # STORY-064 + 065 done (2026-07-21) ; reste 066/067/068 (13 pts)
+    status: "in_progress"  # 🆕 2026-07-21 — EPIC-012 : STORY-064 (cycle brouillon→validé) + 065 (snapshot immuable append-only, atomicité prouvée) done. Suite : 066 exercices → 067 audit → 068 hypothèses prévisionnel.
     goal: "Bilan — Validation & immutabilité (EPIC-012) + amorce Prévisionnel (EPIC-013) : cycle brouillon→validé, snapshot figé, exercices, audit ; hypothèses."
     stories:
       - story_id: "STORY-064"
@@ -1421,8 +1421,9 @@ sprints:
         epic: "EPIC-012"
         points: 5
         service: "bilan-service"
-        status: "not_started"  # invariant d'immutabilité (NFR-004)
-        assigned_to: null
+        status: "done"  # ✅ 2026-07-21 LIVRÉE + VÉRIFIÉE DOCKER (ATOMICITÉ PROUVÉE sur Mongo) + auto-revue + INTÉGRÉE dans dev (PR #21 bilan-service, MNV-065 « Rebase and merge », HEAD cb8aa33, branche supprimée). À la validation : fige un snapshot immuable versionné (collection append-only snapshots_liasse : liasse+soldes+référentiel+checksum+moteurVersion+validateur+horodatage) ET bascule VALIDÉ, ATOMIQUEMENT (transaction 2 docs, transactions-mongo.md : abort gardé, endSession finally). Index unique (tenantId,jeuEtatsId,version)→E11000=409. SnapshotLiasseRepository APPEND-ONLY (aucune mutation). Ré-ouverture POST :id/rouvrir (VALIDÉ→BROUILLON, snapshots conservés) → re-valider = nouvelle version. GET :id/versions + GET :id/versions/:version (snapshot figé jamais recalculé). QUALITÉ : lint 0 · build OK · 412 unit + 83 e2e · jeu-etats 98.4/95.6/100/98.3 · snapshot 100% · engine 100% · non-régression 064+059→063. DOCKER (atomicité réelle) : index unique présent ; v1 figé checksum 01b892c0/moteurVersion/validePar ; reproductibilité exacte (live==snapshot) ; rouvrir→BROUILLON snapshots conservés ; re-valider→v2 append-only [1,2] ; ATOMICITÉ : snapshot v2 planté→valider→409 SNAPSHOT_VERSION_CONFLICT, jeu reste BROUILLON, snapshots inchangé=1 (zéro orphelin, transaction annulée en bloc) ; isolation 404. Débloque STORY-066 (versionne par exercice). [dépend STORY-064 ✅]  # invariant d'immutabilité (NFR-004)
+        completed_date: "2026-07-21"
+        assigned_to: vivian
       - story_id: "STORY-066"
         title: "Gestion des exercices comptables + chaînage N/N-1 + ré-ouverture contrôlée — FR-016"
         epic: "EPIC-012"
