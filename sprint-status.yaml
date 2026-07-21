@@ -1,7 +1,7 @@
 version: "6.0.0"
 project_name: "prospera"
 project_level: 3
-current_sprint: 13  # maj 2026-07-20 : S12 (EPIC-011) done ; S13 = EPIC-011B (liasse — calcul complet, tech-spec B8) not_started ; renum. S13→14 … S20→21 (insertion EPIC-011B)
+current_sprint: 15  # maj 2026-07-21 : S13 (EPIC-011B liasse calculée) done ; S14 (EPIC-012 validation/immutabilité/exercices/audit 064→067 + EPIC-013 amorce hypothèses 068) DONE 21/21 ; S15 = EPIC-013 projections (069-071) + EPIC-014 consultation/export (072-074)
 sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 
 # Révision 2026-07-04 : re-cadrage écosystème (voir docs/architecture-prospera-ecosystem-2026-07-04.md).
@@ -1403,8 +1403,9 @@ sprints:
     end_date: "2027-01-14"
     capacity_points: 34
     committed_points: 21
-    completed_points: 16  # STORY-064+065+066+067 done (2026-07-21) ; reste 068 prévisionnel (5 pts)
-    status: "in_progress"  # 🆕 2026-07-21 — EPIC-012 CLOS (064 cycle + 065 snapshot immuable/atomicité + 066 exercices OUVERT/CLOS/chaînage + 067 audit append-only). Reste 068 (EPIC-013 amorce : hypothèses prévisionnel).
+    completed_points: 21
+    completed_date: "2026-07-21"
+    status: "done"  # ✅ 2026-07-21 CLÔTURÉ — les 5 stories 064→068 done+mergées (21/21 pts). EPIC-012 CLOS (064 cycle brouillon→validé + 065 snapshot immuable/atomicité prouvée + 066 exercices OUVERT/CLOS/chaînage N/N-1 + 067 audit append-only) ET amorce EPIC-013 (068 hypothèses prévisionnel sur base validée). bilan-service : la liasse est désormais PERSISTÉE, VALIDÉE (gate humain sur contrôles bloquants), IMMUABLE (snapshot append-only versionné, transaction atomique), ORGANISÉE par exercice (OUVERT/CLOS), TRACÉE (audit), et sert de BASE VALIDÉE au prévisionnel. Suite = EPIC-013 projections (FR-019 annuel 3 ans / FR-020 trésorerie mensuelle 12 mois / FR-021 scénarios) + EPIC-014 consultation/export (sprint 15).
     goal: "Bilan — Validation & immutabilité (EPIC-012) + amorce Prévisionnel (EPIC-013) : cycle brouillon→validé, snapshot figé, exercices, audit ; hypothèses."
     stories:
       - story_id: "STORY-064"
@@ -1445,8 +1446,9 @@ sprints:
         epic: "EPIC-013"
         points: 5
         service: "bilan-service"
-        status: "not_started"  # dépend STORY-065 (snapshot validé)
-        assigned_to: null
+        status: "done"  # ✅ 2026-07-21 LIVRÉE + VÉRIFIÉE DOCKER + auto-revue + INTÉGRÉE dans dev (PR #24 bilan-service, MNV-068 « Rebase and merge », HEAD 344d15e, branche supprimée). AMORCE EPIC-013 (prévisionnel). Agrégat JeuHypotheses (collection jeux_hypotheses, tenant-scoped) : jeu NOMMÉ de paramètres de projection (croissance CA, marges, délais BFR clients/fournisseurs/stocks, invest., financement, remboursements), RATTACHÉ À UNE BASE VALIDÉE (snapshot immuable 065, traçable snapshotId+version+exercice) et VERSIONNÉ (compteur d'éditions). AUCUNE projection calculée (FR-019/020/021 = suite). Création EXIGE un baseJeuEtatsId VALIDÉ (sinon 409 BASE_NON_VALIDEE ; introuvable 404) → capture le dernier snapshot. PUT :id édite + version++ (base figée). Index unique (tenantId, nom) → nom dup=409 HYPOTHESES_EXISTE. Écritures mono-doc. QUALITÉ : lint 0 · build OK · 454 unit + 103 e2e · hypotheses 98.9/100/100/98.8 · non-régression EPIC-012+059→063. DOCKER : index unique présent ; créer sur base validée→201 (base traçable) doc persisté ; éditer→version 2 (base figée) ; BROUILLON→409 ; inconnue→404 ; nom dup→409 ; isolation 404. Débloque FR-019/020/021 (projections). [dépend STORY-065 ✅]
+        completed_date: "2026-07-21"
+        assigned_to: vivian
 
   - sprint_number: 15
     start_date: "2027-01-14"
