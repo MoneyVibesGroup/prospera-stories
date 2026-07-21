@@ -1403,8 +1403,8 @@ sprints:
     end_date: "2027-01-14"
     capacity_points: 34
     committed_points: 21
-    completed_points: 8  # STORY-064 + 065 done (2026-07-21) ; reste 066/067/068 (13 pts)
-    status: "in_progress"  # 🆕 2026-07-21 — EPIC-012 : STORY-064 (cycle brouillon→validé) + 065 (snapshot immuable append-only, atomicité prouvée) done. Suite : 066 exercices → 067 audit → 068 hypothèses prévisionnel.
+    completed_points: 13  # STORY-064 + 065 + 066 done (2026-07-21) ; reste 067/068 (8 pts)
+    status: "in_progress"  # 🆕 2026-07-21 — EPIC-012 : STORY-064 (cycle brouillon→validé) + 065 (snapshot immuable, atomicité prouvée) + 066 (exercices OUVERT/CLOS + chaînage N/N-1) done. Suite : 067 audit → 068 hypothèses prévisionnel.
     goal: "Bilan — Validation & immutabilité (EPIC-012) + amorce Prévisionnel (EPIC-013) : cycle brouillon→validé, snapshot figé, exercices, audit ; hypothèses."
     stories:
       - story_id: "STORY-064"
@@ -1429,8 +1429,9 @@ sprints:
         epic: "EPIC-012"
         points: 5
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # ✅ 2026-07-21 LIVRÉE + VÉRIFIÉE DOCKER + auto-revue + INTÉGRÉE dans dev (PR #22 bilan-service, MNV-066 « Rebase and merge », HEAD 7343548, branche supprimée). Entité Exercice de premier plan (collection exercices, tenant-scoped) : CRUD + machine OUVERT⇄CLOS (ré-ouverture contrôlée) + chaînage N/N-1 (exercicePrecedent). 2 invariants sur JeuEtats : UN SEUL JEU PAR EXERCICE (index unique tenantId+exercice → 2e jeu=409 EXERCICE_A_DEJA_UN_JEU, versions portées par snapshots 065) + VALIDATION INTERDITE si exercice CLOS (garde EXERCICE_CLOS dans valider, levée par rouvrir). ExerciceService (dates→422, E11000→409 EXERCICE_EXISTE, clore/rouvrir gardés). Écritures mono-doc. QUALITÉ : lint 0 · build OK · 430 unit + 91 e2e · exercice 98.9/92.9/100/98.8 · jeu-etats 98.4/95.6/100/98.3 · non-régression 064/065+059→063. DOCKER : index unique jeux_etats présent ; CRUD + chaînage 2025→2026 ; 2e jeu 2025→409 ; valider bloqué CLOS→409 puis OK après rouvrir (v1) ; isolation 404 (inexistant + autre org). Débloque STORY-067 (audit clore/rouvrir/valider). [dépend 064/065 ✅]
+        completed_date: "2026-07-21"
+        assigned_to: vivian
       - story_id: "STORY-067"
         title: "Piste d'audit (import, mapping, validation, export ; append-only) — FR-017"
         epic: "EPIC-012"
