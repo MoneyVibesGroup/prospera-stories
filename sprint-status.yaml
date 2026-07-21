@@ -1501,6 +1501,32 @@ sprints:
         service: "bilan-service"
         status: "not_started"
         assigned_to: null
+      # ── AJOUT 2026-07-21 — extension EPIC-010/FR-007 (multi-référentiel), HORS engagement initial S15.
+      #   Re-analyse de complétude du SFD + décision utilisateur : SFD complété, Zone franche et CIMA
+      #   comme 3 référentiels pluggables distincts. Analyse : docs/analyse-referentiels-sfd-zonefranche-cima-2026-07-21.md.
+      #   INCRÉMENT 1 (paquets JSON + registry + specs de cohérence, verts, non-régression SYSCOHADA/SFD@1.0) LIVRÉ ;
+      #   increment 2 (production moteur + vérif docker + validation experte + PR) restant. committed_points S15 inchangé.
+      - story_id: "STORY-120"
+        title: "SFD-BCEAO complet @2.0 — totaux Bilan + SIG DIMF 2080 (FORMULE), additif à @1.0 — FR-007"
+        epic: "EPIC-010"
+        points: 5
+        service: "bilan-service"
+        status: "in_progress"  # 2026-07-21 : incrément 1 livré (paquet sfd-bceao@2.0 ee9bf014, cohérence CC1..CC4 verte). RESTE : production liasse SFD (SIG) + vérif docker + validation expert SFD + PR MNV-120.
+        assigned_to: vivian
+      - story_id: "STORY-121"
+        title: "Référentiel Zone Franche Togo @1.0 — présentation SYSCOHADA + paquet fiscal dérogatoire — FR-005/FR-007"
+        epic: "EPIC-010"
+        points: 3
+        service: "bilan-service"
+        status: "in_progress"  # 2026-07-21 : incrément 1 livré (paquet zone-franche-togo@1.0 ecbd01e2, présentation=SYSCOHADA + fiscal dégressif). RESTE : consommation barème par prévisionnel EPIC-013 + vérif docker + validation fiscaliste + PR MNV-121.
+        assigned_to: vivian
+      - story_id: "STORY-122"
+        title: "Référentiel CIMA assurances @1.0 (allégé) — plan art. 431 + Bilan/CR technique & net — FR-007"
+        epic: "EPIC-010"
+        points: 5
+        service: "bilan-service"
+        status: "in_progress"  # 2026-07-21 : incrément 1 livré (paquet cima-assurances@1.0 1f36250c, plan classes 0-8, RT/RN FORMULE). RESTE : production liasse CIMA + Vie/Non-Vie + provisions techniques + vérif docker + validation actuaire + PR MNV-122.
+        assigned_to: vivian
 
   # ── Module 1-bis (Atelier Balance) : balance-service, AMONT du Bilan. Inséré 2026-07-12 ────────────
   # PRD docs/prd-atelier-balance-2026-07-12.md + plan docs/sprint-plan-atelier-balance-2026-07-12.md.
