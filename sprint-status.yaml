@@ -1403,8 +1403,8 @@ sprints:
     end_date: "2027-01-14"
     capacity_points: 34
     committed_points: 21
-    completed_points: 0
-    status: "not_started"
+    completed_points: 3  # STORY-064 done (2026-07-21) ; reste 065/066/067/068 (18 pts)
+    status: "in_progress"  # 🆕 2026-07-21 — EPIC-012 amorcé : STORY-064 (cycle brouillon→validé) done. Suite : 065 snapshot immuable → 066 exercices → 067 audit → 068 hypothèses prévisionnel.
     goal: "Bilan — Validation & immutabilité (EPIC-012) + amorce Prévisionnel (EPIC-013) : cycle brouillon→validé, snapshot figé, exercices, audit ; hypothèses."
     stories:
       - story_id: "STORY-064"
@@ -1412,8 +1412,10 @@ sprints:
         epic: "EPIC-012"
         points: 3
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # ✅ 2026-07-21 LIVRÉE + VÉRIFIÉE DOCKER BOUT-EN-BOUT + auto-revue + INTÉGRÉE dans dev (PR #20 bilan-service, MNV-064 « Rebase and merge », HEAD 2fd71b2, branche supprimée). OUVRE EPIC-012. 1er agrégat PERSISTÉ de bilan-service : JeuEtats (collection tenant-scoped jeux_etats) + machine à 2 états BROUILLON→VALIDÉ gardée par le drapeau `valide` (063). Validation = acte HUMAIN (endpoint POST :id/valider distinct), JAMAIS un effet du calcul (invariant NFR-004) ; exige les contrôles BLOQUANT OK → sinon 422 LIASSE_NON_VALIDABLE (anomalies dans message[], AUCUNE transition) ; enregistre validePar+valideAt. VALIDÉ non recalculable (409 JEU_VALIDE_NON_RECALCULABLE / JEU_DEJA_VALIDE). BilanEngineService.produireLiasseComplete (liasse complète en 1 résolution). JeuEtatsRepository.majSiBrouillon (transition gardée par statut). Anti-énum 404 inter-org (TenantScopedRepository). Décision : anomalies portées par message[] (AllExceptionsFilter supprime les champs hors enveloppe). Hooks 065 posés (referentiel+checksum capturés création+validation, écriture de transition isolée). Écritures mono-doc (pas de transaction ; 065 la rendra transactionnelle). QUALITÉ : lint 0 · build OK · 394 unit + 81 e2e · jeu-etats 98.5/96.8/100/98.4 · bilan-engine 100% · global 98.3/92.4/98.6/98.3 · non-régression 059→063/110→114. DOCKER (stack neuve, org 6a5ec161…, JWT RS256 réel, read-models semés) : création→doc jeux_etats BROUILLON persisté (checksum 01b892c0) ; recalcul 200 ; validation PASS→VALIDE validePar/valideAt persistés ; FAIL déséquilibrée→422 jeu resté BROUILLON ; VALIDÉ→recalculer 409 ; autre org→404 ; REVOKED→403 ; sans jeton→401. Débloque STORY-065 (snapshot immuable versionné). [dépend STORY-063 ✅]  # 📝 2026-07-21 — CADRÉE (Scrum Master). docs/stories/STORY-064.md.
+        story_path: "docs/stories/STORY-064.md"
+        completed_date: "2026-07-21"
+        assigned_to: vivian
       - story_id: "STORY-065"
         title: "Snapshot figé immuable à la validation (append-only, versions conservées) — FR-015"
         epic: "EPIC-012"
