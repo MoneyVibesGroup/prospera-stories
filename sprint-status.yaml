@@ -1403,8 +1403,8 @@ sprints:
     end_date: "2027-01-14"
     capacity_points: 34
     committed_points: 21
-    completed_points: 13  # STORY-064 + 065 + 066 done (2026-07-21) ; reste 067/068 (8 pts)
-    status: "in_progress"  # 🆕 2026-07-21 — EPIC-012 : STORY-064 (cycle brouillon→validé) + 065 (snapshot immuable, atomicité prouvée) + 066 (exercices OUVERT/CLOS + chaînage N/N-1) done. Suite : 067 audit → 068 hypothèses prévisionnel.
+    completed_points: 16  # STORY-064+065+066+067 done (2026-07-21) ; reste 068 prévisionnel (5 pts)
+    status: "in_progress"  # 🆕 2026-07-21 — EPIC-012 CLOS (064 cycle + 065 snapshot immuable/atomicité + 066 exercices OUVERT/CLOS/chaînage + 067 audit append-only). Reste 068 (EPIC-013 amorce : hypothèses prévisionnel).
     goal: "Bilan — Validation & immutabilité (EPIC-012) + amorce Prévisionnel (EPIC-013) : cycle brouillon→validé, snapshot figé, exercices, audit ; hypothèses."
     stories:
       - story_id: "STORY-064"
@@ -1437,8 +1437,9 @@ sprints:
         epic: "EPIC-012"
         points: 3
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # ✅ 2026-07-21 LIVRÉE + VÉRIFIÉE DOCKER + auto-revue + INTÉGRÉE dans dev (PR #23 bilan-service, MNV-067 « Rebase and merge », HEAD 11fec11, branche supprimée). CLÔT EPIC-012 (validation/immutabilité/exercices/audit). Journalise chaque action structurante (jeu creer/recalculer/valider/rouvrir ; exercice creer/clore/rouvrir) dans collection append-only audit_events : qui (userId), quoi (type AuditType), cible (collection+id+libellé), quand (horodatage), keyé tenantId. AuditRepository sans mutation. AuditService.journaliser SÛR (échec loggé JAMAIS propagé → ne casse pas l'action). Hooks au niveau contrôleur (signatures services 064/065/066 inchangées). GET /bilan/audit (filtre type) lecture seule. import/export = hooks réservés. QUALITÉ : lint 0 · build OK · 438 unit + 95 e2e · audit 100/100/100/100 · non-régression 064/065/066+059→063. DOCKER : 7 actions→7 événements horodatés+attribués ; GET récent d'abord (qui/quoi/cible/quand) ; filtre type ; isolation inter-org (autre org invisible) ; append-only (DELETE/PUT→404). [dépend 064/065/066 ✅]
+        completed_date: "2026-07-21"
+        assigned_to: vivian
       - story_id: "STORY-068"
         title: "Prévisionnel : hypothèses paramétrables (croissance, marges, BFR, invest., financement) sur base validée — FR-018"
         epic: "EPIC-013"
@@ -1843,7 +1844,7 @@ bilan_functional_epics:
       name: "Validation, clôture & immutabilité (snapshot figé)"
       frs: "FR-014..FR-017"
       story_estimate: "4-6"
-      status: "proposed"
+      status: "done"  # ✅ 2026-07-21 CLÔTURÉ — 4 stories 064→067 done+mergées (16 pts) : 064 cycle brouillon→validé (gate contrôles bloquants, l'humain valide) + 065 snapshot immuable append-only versionné (transaction 2 docs, atomicité prouvée docker) + 066 exercices OUVERT/CLOS + chaînage N/N-1 (un jeu/exercice, validation bloquée si CLOS) + 067 piste d'audit append-only (7 actions journalisées qui/quoi/cible/quand). bilan-service a désormais une LIASSE PERSISTÉE, VALIDÉE, IMMUABLE, TRACÉE. Suite = EPIC-013 (prévisionnel, amorce STORY-068).
     - id: "EPIC-013"
       name: "Prévisionnel (mensuel 12 mois + annuel 3 ans)"
       frs: "FR-018..FR-021"
