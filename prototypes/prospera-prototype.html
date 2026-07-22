@@ -545,6 +545,42 @@
   .me-org-actions { padding: 0 1.15rem 1rem; }
   .me-org-note { padding: 0 1.15rem 1.1rem; text-align: left; margin: 0; }
 
+  /* FE-018 — lecture de la pièce, affichée DANS la carte du document */
+  .ocr-inline {
+    margin-top: 0.8rem; border: 1px solid var(--border); border-radius: 0.6rem;
+    background: var(--hover-surface); overflow: hidden;
+  }
+  .ocr-inline-head { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.75rem 0.85rem; flex-wrap: wrap; }
+  .ocr-inline-head b { font-size: 0.85rem; }
+  .ocr-inline-head p { margin: 0.15rem 0 0; font-size: 0.78rem; color: var(--muted-fg); }
+  .ocr-ico { width: 1.15rem; height: 1.15rem; flex: none; margin-top: 0.15rem; border-radius: 50%; }
+  .ocr-inline[data-ocr-state="pending"] .ocr-ico {
+    border: 2px solid var(--border); border-top-color: var(--orange-500);
+    animation: ocrspin 0.9s linear infinite;
+  }
+  @keyframes ocrspin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .ocr-inline[data-ocr-state="pending"] .ocr-ico { animation: none; } }
+  .ocr-inline[data-ocr-state="diff"] .ocr-ico { background: var(--warning); }
+  .ocr-inline[data-ocr-state="clean"] .ocr-ico { background: var(--success); }
+  .ocr-inline[data-ocr-state="unreadable"] .ocr-ico { background: var(--danger); }
+  .ocr-demo { flex: none; }
+  .ocr-body { border-top: 1px solid var(--border); background: var(--card); }
+  .ocr-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .ocr-table th, .ocr-table td { text-align: left; padding: 0.5rem 0.85rem; }
+  .ocr-table thead th {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted-fg); font-weight: 700; border-bottom: 1px solid var(--border);
+  }
+  .ocr-table tbody tr { border-bottom: 1px solid var(--border); }
+  .ocr-table tbody th { font-weight: 500; }
+  .ocr-table tr.diff td:nth-child(3) { font-weight: 600; color: #b45309; }
+  :root[data-theme="dark"] .ocr-table tr.diff td:nth-child(3) { color: var(--warning); }
+  .ocr-tag { font-size: 0.7rem; font-weight: 600; padding: 0.1rem 0.45rem; border-radius: 999px; white-space: nowrap; }
+  .ocr-tag.ok { background: var(--success-soft); color: var(--success); }
+  .ocr-tag.warn { background: var(--warning-soft); color: #b45309; }
+  :root[data-theme="dark"] .ocr-tag.warn { color: var(--warning); }
+  .ocr-foot { margin: 0; padding: 0.7rem 0.85rem; font-size: 0.78rem; color: var(--muted-fg); }
+
   /* FE-015 — sessions ouvertes */
   .sessions-card { margin-top: 1rem; }
   .sess-list { list-style: none; margin: 0; padding: 0; }
@@ -1255,6 +1291,55 @@
                         <div class="fmeta"><b>rccm-cabinet-diallo.pdf</b><span>2,4 Mo · téléversé</span></div>
                         <button class="fx" type="button" title="Remplacer le document" aria-label="Remplacer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
                       </div>
+
+                      <!-- ═══ FE-018 · lecture de la pièce, DANS la pièce ═══
+                           Le dépôt déclenche l'OCR : le résultat s'affiche ici même, sous le
+                           fichier envoyé — pas dans un écran séparé.
+                           ⚠️ DO-1 : l'OCR assiste, il ne décide pas. -->
+                      <div class="ocr-inline" id="rccmOcr" data-ocr-state="pending">
+                        <div class="ocr-inline-head">
+                          <span class="ocr-ico" aria-hidden="true"></span>
+                          <div class="grow">
+                            <b id="ocrTitle">Analyse de votre pièce en cours…</b>
+                            <p id="ocrSub">Nous lisons le document que vous venez de déposer. Cela prend moins d'une minute.</p>
+                          </div>
+                          <div class="states-demo ocr-demo" role="tablist" aria-label="Résultat de lecture (démo)">
+                            <button role="tab" data-ocr="pending" aria-selected="true">En cours</button>
+                            <button role="tab" data-ocr="diff" aria-selected="false">Écarts</button>
+                            <button role="tab" data-ocr="clean" aria-selected="false">Rien à signaler</button>
+                            <button role="tab" data-ocr="unreadable" aria-selected="false">Illisible</button>
+                          </div>
+                        </div>
+
+                        <div class="ocr-body" data-ocr-slot="diff" hidden>
+                          <table class="ocr-table">
+                            <thead><tr><th>Information</th><th>Vous avez déclaré</th><th>Nous avons lu</th><th></th></tr></thead>
+                            <tbody>
+                              <tr class="diff"><th scope="row">Raison sociale</th><td>Cabinet Diallo &amp; Associés</td><td>Cabinet Diallo et Associes</td><td><span class="ocr-tag warn">Écart</span></td></tr>
+                              <tr class="diff"><th scope="row">Numéro RCCM</th><td>TG-LOM-2019-B-1234</td><td>TG-LOM-2019-B-1284</td><td><span class="ocr-tag warn">Écart</span></td></tr>
+                              <tr><th scope="row">Date d'immatriculation</th><td>14/03/2019</td><td>14/03/2019</td><td><span class="ocr-tag ok">Identique</span></td></tr>
+                              <tr><th scope="row">Gérant</th><td>Awa Diallo</td><td>Awa Diallo</td><td><span class="ocr-tag ok">Identique</span></td></tr>
+                            </tbody>
+                          </table>
+                          <p class="ocr-foot">Vérifiez laquelle des deux sources fait foi : si c'est la pièce, corrigez votre fiche cabinet ; si c'est votre fiche, redéposez la bonne pièce. Un agent examinera votre dossier dans tous les cas.</p>
+                        </div>
+
+                        <div class="ocr-body" data-ocr-slot="clean" hidden>
+                          <table class="ocr-table">
+                            <thead><tr><th>Information</th><th>Vous avez déclaré</th><th>Nous avons lu</th><th></th></tr></thead>
+                            <tbody>
+                              <tr><th scope="row">Raison sociale</th><td>Cabinet Diallo &amp; Associés</td><td>Cabinet Diallo &amp; Associés</td><td><span class="ocr-tag ok">Identique</span></td></tr>
+                              <tr><th scope="row">Numéro RCCM</th><td>TG-LOM-2019-B-1234</td><td>TG-LOM-2019-B-1234</td><td><span class="ocr-tag ok">Identique</span></td></tr>
+                              <tr><th scope="row">Date d'immatriculation</th><td>14/03/2019</td><td>14/03/2019</td><td><span class="ocr-tag ok">Identique</span></td></tr>
+                            </tbody>
+                          </table>
+                          <p class="ocr-foot"><b>Cela ne signifie pas que votre dossier est validé.</b> Un agent Money Vibes l'examine et vous notifiera sa décision.</p>
+                        </div>
+
+                        <div class="ocr-body" data-ocr-slot="unreadable" hidden>
+                          <p class="ocr-foot">Le fichier est trop flou ou trop sombre pour être exploité. Vous pouvez le laisser en l'état — un agent l'examinera manuellement — mais une photo nette accélère le traitement.</p>
+                        </div>
+                      </div>
                     </div>
 
                     <!-- Rejeté : motif + re-soumission -->
@@ -1675,7 +1760,6 @@
 
               <p class="helper">FE-015 — <code>GET /api/v1/users/me</code> (nom, e-mail, rôle, cabinet) + claims de session (e-mail vérifié). Écran accessible aux <b>deux rôles</b>.</p>
             </section>
-
 
             <section class="page" data-page="billing" hidden>
               <div class="card-surface">
@@ -2394,6 +2478,32 @@
         if (nav) nav.click();
       });
     });
+
+    /* FE-018 — la lecture s'affiche DANS la pièce déposée (démo des 4 résultats). */
+    (function () {
+      var box = document.getElementById("rccmOcr");
+      if (!box) return;
+      var titles = {
+        pending: ["Analyse de votre pièce en cours…", "Nous lisons le document que vous venez de déposer. Cela prend moins d'une minute."],
+        diff: ["Deux informations diffèrent de votre déclaration", "Lecture terminée le 22/07/2026 à 09:14"],
+        clean: ["Tout correspond à votre déclaration", "Lecture terminée le 22/07/2026 à 09:14"],
+        unreadable: ["Nous n'arrivons pas à lire cette pièce", "Lecture tentée le 22/07/2026 à 09:14"],
+      };
+      document.querySelectorAll("[data-ocr]").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          var which = tab.dataset.ocr;
+          document.querySelectorAll("[data-ocr]").forEach(function (t) {
+            t.setAttribute("aria-selected", String(t.dataset.ocr === which));
+          });
+          document.querySelectorAll("[data-ocr-slot]").forEach(function (slot) {
+            slot.hidden = slot.dataset.ocrSlot !== which;
+          });
+          box.dataset.ocrState = which;
+          document.getElementById("ocrTitle").textContent = titles[which][0];
+          document.getElementById("ocrSub").textContent = titles[which][1];
+        });
+      });
+    })();
 
     /* Raccourci « Gérer les documents » du profil cabinet → écran KYC (source unique). */
     document.querySelectorAll("[data-goto-kyc]").forEach(function (btn) {
