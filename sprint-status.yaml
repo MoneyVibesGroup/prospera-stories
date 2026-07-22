@@ -1661,6 +1661,16 @@ sprints:
         status: "defined"  # 🆕 2026-07-22 — Dette de CONTRAT, pas de comportement : le frontend DÉRIVE ses types de l'OpenAPI, donc une description fausse se propage en types faux côté client. À glisser avec n'importe quelle story auth du sprint (1 pt). Adhérence naturelle avec STORY-123 (qui vient d'ajouter phone à MeResponseDto) et STORY-126.
         assigned_to: null
 
+      - story_id: "STORY-131"
+        title: "CORS pour bilan-service et balance-service — parité avec le patron STORY-109"
+        epic: "EPIC-024"
+        points: 2
+        service: "bilan-service, balance-service"
+        story_path: "stories/STORY-131.md"
+        status: "done"  # ✅ 2026-07-22 (MNV-131, PRs bilan + balance sur dev, Rebase and merge) — RATTRAPAGE : STORY-109 avait câblé le CORS sur 5 services (auth/EC/kyc/catalog/document) mais bilan-service ET balance-service étaient restés SANS enableCors → un front navigateur (topologie Option B) ne peut pas les appeler en direct. LIVRÉ : patron STORY-109 copié mot pour mot dans les 2 services (CorsConfig typé, CORS_ALLOWED_ORIGINS env optionnelle validée, bloc app.enableCors allowlist explicite jamais `*`, credentials:false, vide⇒off) + .env.example + lignes compose. EN PLUS (a) : défaut compose CORS_ALLOWED_ORIGINS élargi de http://localhost:3100 à la PLAGE 3100→3120 pour les 7 services CORS. Vérif docker : préflight OPTIONS → ACAO = origine autorisée (jamais `*`), origine non listée → aucun ACAO (refus), vide ⇒ CORS off. admin-panel reste SANS CORS (BFF same-origin, décision STORY-109). ⚠️ RÈGLE user 2026-07-22 : le CORS est désormais OBLIGATOIRE au scaffold de tout nouveau module.
+        completed_date: "2026-07-22"
+        assigned_to: "vivianMoneyVibesGroupes"
+
   - sprint_number: 17
     start_date: "2027-02-11"
     end_date: "2027-02-25"
