@@ -6,9 +6,10 @@
 **Réf. code livré :** **STORY-025** (`emailVerificationTokenHash` + TTL + `MAIL_QUEUE`/BullMQ + `MailerService`/Handlebars + Mailhog — **la mécanique à réemployer**) · **STORY-024** (`refreshTokenHash`, `issueSession`) · **STORY-103/104** (`platformRole` = **donnée**, comptes plateforme **org-less**) · **STORY-109** (patron d'allowlist d'origines pilotée par env) · **STORY-123** (validateur de robustesse partagé, révocation de session) · **STORY-124** (`pendingEmail*`)
 **Priorité :** **Must Have** ⚠️
 **Story Points :** 5
-**Statut :** defined 📝
-**Assigné à :** null
+**Statut :** done ✅
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée :** 2026-07-22
+**Terminée :** 2026-07-22
 **Sprint :** 16
 
 ---
@@ -152,7 +153,8 @@ acte volontaire d'inscription, `forgot-password` est un formulaire anonyme à un
 - **Configuration** : `PASSWORD_RESET_URL_TENANT`, `PASSWORD_RESET_URL_PLATFORM`, TTL du token
   (`tokens.passwordReset`, court — **1 h** recommandé, à trancher au dev), validées au démarrage.
 - **Politique de robustesse du nouveau mot de passe** : **exactement** celle de `RegisterDto` — réutiliser le
-  validateur partagé extrait par STORY-123, **jamais** en réécrire une seconde qui divergerait.
+  validateur partagé **déjà livré** par STORY-123 (`src/common/validators/password-policy.decorator.ts`,
+  consommé par `register.dto.ts`), **jamais** en réécrire une seconde qui divergerait.
 
 **Hors périmètre (NE PAS déborder) :**
 
@@ -307,11 +309,14 @@ un écart d'un ordre de grandeur doit échouer).
 + `MailerService` + Mailhog), STORY-103/104 (`platformRole`, comptes plateforme org-less), STORY-109 (patron
 d'allowlist par env).
 
-**Recommandé avant :** **STORY-123** — en extrait le **validateur de robustesse partagé** ; sans elle, il faut
-l'extraire ici (impact mineur, mais alors 115 doit le consommer et non l'inverse).
+**STORY-123** ✅ **livrée** (`done`, 2026-07-22) — a extrait le **validateur de robustesse partagé**
+(`common/validators/password-policy.decorator.ts`) et le hash **leurre** d'`auth.constants.ts`
+(`DUMMY_PASSWORD_HASH`, utilisé par `login`) : les deux briques d'anti-énumération/robustesse sont **prêtes**,
+à consommer telles quelles (ne rien réécrire).
 
-**Adhérence :** **STORY-124** — AC-09 (purge de `pendingEmail*`) n'a de sens qu'une fois 116 livrée ; si 116
-glisse, l'AC devient sans objet (aucun champ à purger), **le reste de la story est intact**.
+**Adhérence :** **STORY-124** (`defined`, même sprint 16) — AC-09 (purge de `pendingEmail*`) n'a de sens
+qu'une fois 124 livrée ; si 124 glisse, l'AC devient sans objet (aucun champ `pendingEmail*` à purger),
+**le reste de la story est intact**.
 
 **Débloque :** **FE-020** (app cliente) et **AP-09** (admin-panel) — les deux écrans du parcours.
 
@@ -365,8 +370,9 @@ vérification sans doubler celui du code.
 
 ## Additional Notes
 
-- **Pourquoi Must Have alors que 115/116 sont Should :** 115 et 116 améliorent le confort ; **117 est le seul
-  filet entre un utilisateur et la perte définitive de son compte**. Pour la plateforme, c'est même une
+- **Pourquoi Must Have alors que 123/124 sont Should :** 123 (mot de passe/profil) et 124 (e-mail) améliorent
+  le confort ; **125 est le seul filet entre un utilisateur et la perte définitive de son compte**. Pour la
+  plateforme, c'est même une
   **impasse d'exploitation** : aucun `PLATFORM_ADMIN` ne peut aujourd'hui débloquer un opérateur, et le seul
   recours serait de rejouer un seed en base, en production, à la main.
 - **Un seul IdP, deux consoles.** C'est ce qui rend la story économique (une implémentation) **et** délicate
@@ -390,6 +396,69 @@ vérification sans doubler celui du code.
   identifiés à la rédaction : (1) le lien doit atterrir sur **le bon frontend** parmi deux, sans jamais laisser
   l'appelant choisir la cible (redirection ouverte) ; (2) **202 invariable** avec temps alignés
   (anti-énumération), en s'appuyant sur le hash leurre déjà utilisé par `login`.
+- 2026-07-22 : Révisée (Scrum Master) après clôture de STORY-123 (`done`). Corrigé les **numéros de story
+  périmés** (ancien triptyque 115/116/117 → **123/124/125** ; 115→119 sont réservés au socle Assistant IA
+  EPIC-026). STORY-123 requalifiée **recommandée → livrée** : le validateur de robustesse partagé
+  (`common/validators/password-policy.decorator.ts`) et le hash leurre `DUMMY_PASSWORD_HASH`
+  (`auth.constants.ts`, consommé par `login` à `auth.service.ts:182`) sont **prêts à consommer**. Périmètre,
+  points (5) et AC inchangés. Statut inchangé : `defined`.
+- 2026-07-22 : **Implémentée + VÉRIFIÉE DOCKER sur les DEUX personas**, `/code-review` + `/security-review`
+  passés, **PR MNV-125 (auth-service) mergée « Rebase and merge » sur `dev`** (branche supprimée) → `done`,
+  `completed_date: 2026-07-22`. Détail ci-dessous.
+
+---
+
+## Implementation Notes (2026-07-22)
+
+**Fichiers.** `user.schema.ts` (+ `passwordResetTokenHash` / `passwordResetExpiresAt`, index `sparse`) ·
+`users.service.ts` (`setPasswordResetToken` / `findByPasswordResetTokenHash` / **`applyPasswordReset`** —
+une seule écriture atomique : `$set` du hash + `$unset` de `passwordReset*`, `refreshTokenHash` **et**
+`pendingEmail*` de STORY-124) · `auth.service.ts` (`forgotPassword` / `resetPassword` + helpers
+`resetUrlFor` / `throttleResetByEmail` / `enqueueMailBestEffort` ; injecte `REDIS_CLIENT`) ·
+`auth.controller.ts` (2 routes `@Public` + `@Throttle 5/60s`) · `forgot-password.dto.ts` /
+`reset-password.dto.ts` (le second réutilise le **validateur partagé** de STORY-123) ·
+`invitation.service.ts` (`resendForRecovery`) · 2 gabarits hbs + `MailerService` + `MailProcessor` ·
+`configuration.ts` / `env.validation.ts` (2 URL **requises** + `PASSWORD_RESET_TTL`, défaut 1 h).
+
+**Décisions de dev tracées dans le code :**
+1. **Le throttle par adresse est compté AVANT la recherche du compte** — c'est ce qui rend le `429`
+   **indépendant de l'existence** du compte (donc non-oracle). Prouvé en docker sur une adresse **inexistante** :
+   202, 202, 202, **429**.
+2. **Fail-open si Redis est indisponible** : on journalise et on continue (le throttle **par IP** reste la
+   garde de base). Transformer une panne Redis en déni de service du reset serait pire que le risque couvert.
+3. **`resetPassword` n'exige pas un compte `ACTIVE`** : un jeton n'est émis qu'aux comptes actifs, et `login`
+   bloque déjà les suspendus. Seul `deletedAt` est refusé explicitement (400 générique).
+4. **`resendForRecovery` déduit tenant/plateforme du `platformRole`** (et non d'un `organizationId` absent en
+   contexte public) : sans cela, un invité **tenant** aurait reçu l'e-mail d'accueil « la plateforme PROSPERA ».
+
+**Qualité.** Lint **0** · build OK · **449 unit** (50 suites) + **108 e2e** (9 suites, dont un spec dédié
+STORY-125) · couverture **96.81 / 88.67 / 98.02 / 96.83** (seuils 90/65/90/90 tenus). Specs e2e montant
+`AuthController` mises à jour (`REDIS_CLIENT` + config `passwordReset`).
+
+## Vérification docker (stack neuve `down -v`, Mailhog, JWT RS256) — **les DEUX personas**
+
+- **AC-01 (cabinet)** — `forgot` **202** → lien lu **dans Mailhog** → `reset` **204** → login **nouveau 200** /
+  **ancien 401** ; en base `passwordReset*` **purgés** et `refreshTokenHash` **absent**.
+- **⚡ AC-02 (plateforme — le scénario jadis SANS ISSUE)** — `PLATFORM_ADMIN` seedé : `forgot` **202** →
+  `reset` **204** → **login console 200**, le JWT reporte **`PLATFORM_ADMIN`**.
+- **⚡ AC-03** — lien **cabinet → `localhost:3100`**, lien **plateforme → `localhost:3110`** (vérifié sur les
+  liens réels extraits de Mailhog). La cible n'est jamais fournie par l'appelant.
+- **AC-04** — corps avec `redirectUrl` → **400** (whitelist, anti-redirection ouverte).
+- **AC-05** — adresse **inconnue** → **202 sans aucun e-mail** ; corps 202 **constant**.
+- **AC-06 (éligibilité)** — `INVITED` → **nouvelle invitation renvoyée** (invitations 1→2), **0** e-mail de
+  reset, **aucun** `passwordResetTokenHash` posé ; `SUSPENDED` → **202 sans e-mail**, aucun token.
+- **AC-07** — **rejeu** du jeton de reset → **400** (usage unique). **AC-08** — refresh émis **avant** le
+  reset → **401** (sessions révoquées).
+- **AC-11** — throttle **par adresse** : 4ᵉ demande → **429** (sur une adresse **inexistante**, donc
+  enumeration-safe). Throttle **par IP** actif sur la route (5/60 s).
+- **AC-12** — e-mail de **confirmation post-reset** reçu.
+- **AC-13** — le service **refuse de démarrer** sans/avec URL malformée : 3 cas unitaires dédiés
+  (`env.validation.spec`) ; démarrage docker **OK** une fois les 2 URL fournies.
+- `/health` **200** sur auth-service et expert-comptable.
+
+⚠️ **Nouvelle configuration à injecter** : `PASSWORD_RESET_URL_TENANT` / `PASSWORD_RESET_URL_PLATFORM` ont été
+ajoutées au `docker-compose.yml` **racine**, qui n'est **versionné nulle part** — même point ouvert que
+STORY-109 (cf. mémoire « racine PROSPERA non versionnée »). À rejouer sur tout autre environnement.
 
 ---
 
