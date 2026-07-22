@@ -6,9 +6,10 @@
 **Réf. code livré :** **STORY-023** (modèle `Organization` + `OrganizationsService.updateProfileAndEmit`, **patron exact à rejouer côté `User`**) · **STORY-026** (`UsersController` : `GET /users/me`, `PATCH /users/:id`, `MeResponseDto`) · **STORY-027** (outbox `identity.*`) · **STORY-024/025** (login/refresh/logout, `refreshTokenHash`, vérification d'e-mail) · `common/security/password.service.ts` (bcrypt cost 12)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** defined 📝
-**Assigné à :** null
+**Statut :** done ✅
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée :** 2026-07-22
+**Terminée :** 2026-07-22
 **Sprint :** 16
 
 ---
@@ -313,6 +314,99 @@ qui touche deux dépôts.
   `PATCH /users/me` et le changement de mot de passe n'existent nulle part dans l'IdP, et le report est tracé
   noir sur blanc dans STORY-009 et STORY-026. Cadrée « rejouer le patron STORY-023 sur `User` », e-mail
   délibérément sorti vers **STORY-124**.
+- 2026-07-22 : Implémentée par **vivianMoneyVibesGroupes** — branche `MNV-123` sur `auth-service`,
+  `expert-comptable` et `docs`.
+- 2026-07-22 : **Vérifiée docker bout-en-bout** puis passée en `done`.
+
+**Effort réel :** 5 points (conforme à l'estimation).
+
+---
+
+### Ce qui a été livré
+
+**`auth-service` (:3001)**
+
+| Élément | Fichier |
+|---|---|
+| `User.phone?` (additif, `trim`, aucune migration) | `modules/users/schemas/user.schema.ts` |
+| `PATCH /users/me` — **aucun `@Roles`**, déclaré **AVANT** `@Patch(':id')` | `modules/users/users.controller.ts` |
+| `POST /users/me/password` — `@Throttle 5/60s`, `204` | `modules/users/users.controller.ts` |
+| `MyProfileService` — `updateProfileAndEmit` (transaction + outbox) et `changePassword` | `modules/users/my-profile.service.ts` |
+| `UpdateMyProfileDto` / `ChangePasswordDto` (whitelist) | `modules/users/dto/` |
+| Politique de mot de passe **partagée** avec `RegisterDto` | `common/validators/password-policy.decorator.ts` |
+| `identity.user.updated` v1 + `IdentityEventsService.userUpdated` | `kafka/outbox/identity-events{,.service}.ts` |
+| `phone` dans `MeResponseDto`, `UserResponseDto` et l'agrégation des membres | `dto/` + `memberships.service.ts` |
+
+**`expert-comptable` (:3000)** — `USER_UPDATED` ajouté à l'enum (donc à `IDENTITY_TOPICS`, l'abonnement est
+dérivé) et **un seul handler `onUserState` pour `user.registered` + `user.updated`** : ils portent le même état
+absolu, les faire diverger serait le vrai risque.
+
+**Deux décisions prises au développement**, toutes deux documentées dans le code :
+
+1. **`phone: ""` vaut effacement (`$unset`)**, jamais une chaîne vide stockée — sinon chaque consommateur devrait
+   distinguer deux représentations de « pas de numéro ». C'est aussi le seul moyen offert au membre de retirer son numéro.
+2. **`AcceptInvitationDto` n'a PAS été rattaché** au validateur partagé : il porte une borne historique différente
+   (pas de `MaxLength`), l'aligner changerait le comportement d'une surface hors périmètre. Divergence connue,
+   tracée dans le décorateur — à traiter par la story qui touchera cette surface.
+
+---
+
+### Qualité
+
+| | `auth-service` | `expert-comptable` |
+|---|---|---|
+| Lint | **0 warning** | **0 warning** |
+| Build | OK | OK |
+| Unitaires | **408** (50 suites) | **163** (28 suites) |
+| e2e | **79** (7 suites) | **38** (5 suites) |
+| Couverture globale | 96,87 / 87,86 / 98,19 / 96,90 — seuils 90/65/90/90 tenus | seuils tenus |
+| Nouveau code | `my-profile.service.ts` **100 %**, `identity-events*` **100 %** | projection couverte |
+
+**🎯 Le test d'AC-02 a été prouvé comme un vrai filet, pas une assurance de façade.** L'ordre des routes a été
+**muté volontairement** (`@Patch('me')` déplacé après `@Patch(':id')`) et la suite e2e est passée de
+**23 verts à 13 rouges**, AC-02 en tête. L'ordre correct a ensuite été restauré (23/23 verts). Sans cette
+mutation, rien ne garantissait que le test détectait quoi que ce soit.
+
+---
+
+### Vérification docker réelle — stack neuve (`down -v`), JWT RS256 réels
+
+> Rappel : les e2e **mockent la couche données** — ils ne prouvent ni la persistance ni l'atomicité.
+> Services : `mongo` (rs0), `kafka`, `redis`, `mailhog`, `auth-service`, `expert-comptable`.
+> ⚠️ Le rebuild d'image a échoué (miroir de registre `mirror.gcr.io` injoignable, DNS) ; la stack a donc démarré
+> sur les images locales **avec `src/` monté en volume et hot-reload** — le code exécuté est bien celui de la branche
+> (`Found 0 errors. Watching for file changes.` dans les logs des deux services).
+
+| # | Vérification | Résultat |
+|---|---|---|
+| A | `/health` des 2 services | **200**, `mongodb`/`redis`/`kafka` **up** |
+| B | Abonnement Kafka réel du consommateur EC | `memberAssignment` contient **`identity.user.updated:[0]`** |
+| C | Parcours réel : register → verify (Mailhog) → invite → accept-invitation → login | jeton **`roles:['TENANT_USER']`** |
+| D | **AC-02** — `TENANT_USER` → `PATCH /users/me` | **200** (jamais 403) + corps `MeResponseDto` complet |
+| E | Persistance (`mongosh auth_service`) | `firstName=Kossi`, `phone=+228 90 11 22 33` |
+| F | **AC-10** — outbox dans la même transaction | `outbox_events` : `identity.user.updated` **SENT**, `partitionKey = userId` |
+| G | Payload — **aucune fuite** | `passwordHash`/`refreshTokenHash`/`phone` **absents** ✅ |
+| H | **AC-11** — traversée jusqu'au read-model EC | `identity_users` : `firstName` **« Kosi » → « Kossi »**, `lastEventAt` = `occurredAt` de l'événement ; **1 marqueur** d'idempotence. L'admin non modifié garde « Kosi » — contraste qui prouve que c'est bien l'événement qui a agi |
+| I | **AC-10** — `PATCH {}` (no-op) | **200**, compteur d'outbox **inchangé** (aucun événement parasite) |
+| J | **AC-03** — `role` / `status` / `platformRole` / `email` dans le corps | **400** ×4 |
+| K | **AC-13** — sans jeton | **401** |
+| L | **AC-07** — mot de passe actuel faux | **401** générique, `refreshTokenHash` **toujours présent** (aucune écriture) |
+| M | **AC-08** — nouveau == actuel / trop court | **400** / **400** |
+| N | **AC-06** — changement nominal | **204**, hash **`$2b$12$`** |
+| O | **AC-06** — login ancien / nouveau | **401** / **200** |
+| P | **AC-09** — refresh émis **avant** le changement | **401** (session révoquée) |
+| Q | **AC-10** — un changement de mdp n'émet pas l'événement | compteur d'outbox **inchangé** |
+| R | Effacement du téléphone (`phone:""`) | **200**, champ **absent** du document (pas de chaîne vide) |
+| S | Cohérence : l'effacement **a bien** émis un 2ᵉ événement | outbox **2 SENT**, EC **2 marqueurs**, read-model convergé, **aucun orphelin** |
+| T | **AC-12** — throttle | **429** au-delà de la limite |
+| U | **AC-05** — `PLATFORM_ADMIN` (sans organisation) | **200**, `organization: null` — aucun `tenantId` exigé |
+| V | **AC-14** — non-régression | `GET /users/me` **200** · `GET /users` **403** (user) / **200** (admin) · `PATCH /users/:id` **403** (user) · `GET /organizations/me` **200** · `phone` remonte dans la liste admin quand il est renseigné |
+
+**Les 7 lignes `ERROR` des logs** sont toutes horodatées **au boot** (avant l'auto-création des topics) : c'est le
+**démarrage dégradé documenté** (invariant n°4) — le consommateur a rejoint le groupe 8 s plus tard. Aucune erreur
+pendant le scénario.
+
+**AC-01 → AC-14 : tous vérifiés en réel.**
 
 ---
 
