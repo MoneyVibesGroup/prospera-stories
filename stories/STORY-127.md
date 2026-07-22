@@ -4,9 +4,11 @@
 **Réf. architecture :** `architecture-kyc-service-2026-07-03.md` § stockage & URL présignées
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** defined 📝
+**Statut :** done ✅
 **Sprint :** 16 (proposé)
 **Créée le :** 2026-07-22
+**Clôturée le :** 2026-07-22
+**Assignée à :** vivianMoneyVibesGroupes
 **Services :** `kyc-service` (:3002)
 **Couvre :** asymétrie de lecture relevée à la conception de FE-015 (retour PO du 2026-07-22)
 
@@ -100,6 +102,43 @@ journalisée, jamais devinable.
 **Status History :**
 - 2026-07-22 : Créée (Scrum Master) — écart trouvé en confrontant `KycDocumentResponseDto` et
   `AdminKycDocumentDto` pendant la conception de la carte « Documents » de FE-015.
+- 2026-07-22 : Développée + revue + revue de sécurité + intégrée sur `dev`
+  (vivianMoneyVibesGroupes) — **done**. PR module [prospera-kyc-service#6] (Rebase and merge).
+
+**Implémentation (MNV-127) :**
+
+- `KycDocumentResponseDto` porte une `url` **optionnelle** (`fromDocument(doc, url?)`), présente
+  **uniquement** sur `GET /kyc/status` — la réponse d'upload (`POST /kyc/documents`) reste inchangée.
+- `KycStatusService` injecte `StorageService` et **présigne chaque pièce au moment de la réponse**
+  (jamais stockée), pour le seul `orgId` du jeton (isolation par `TenantScopedRepository`, fail-closed).
+  Même service de présignature et **même TTL** (300 s) que la revue admin — aucune duplication.
+- **Décision de périmètre (AC-05)** — la requête est **élargie de `SUBMITTED` seul à toutes les
+  versions** (`find({}, { sort: { type: 1, version: -1 } })`) pour que le cabinet compare ses dépôts
+  successifs. Les `SUPERSEDED` remontent donc désormais dans `GET /kyc/status` ; `status`/`version`
+  distinguent la pièce courante des historiques. *Changement de contrat assumé et documenté* (FE-022
+  s'appuie sur `status`/`version`). Hors périmètre inchangé : statut/date de revue par pièce → STORY-128.
+
+**Vérification :**
+
+- Lint 0 warning · build OK · **199 tests** unit+e2e verts · couverture ≥ seuils
+  (`kyc-status.service.ts` et `kyc-document-response.dto.ts` à 100 %).
+- **Mutation-test** (preuve anti-régression) : url vidée ⇒ tests url rouges ; filtre `SUBMITTED`
+  réintroduit ⇒ test AC-05 rouge. Restauré, vert.
+- **Vérif docker réelle (2 organisations)** sur la stack :
+  - **AC-01** — chaque pièce porte une `url` ; `GET` sur l'URL → **200** + `Content-Type` correct
+    (`application/pdf`) pour SUBMITTED **et** SUPERSEDED.
+  - **AC-02** — `X-Amz-Expires=300` (défaut `MINIO_PRESIGNED_TTL`, identique à la revue admin).
+  - **AC-03** — isolation : URLs de A ⊂ `kyc/<orgA>/…`, de B ⊂ `kyc/<orgB>/…`, **ensembles disjoints**,
+    aucune fuite inter-org.
+  - **AC-04** — **0 occurrence** d'URL/signature présignée dans les logs (l'intercepteur ne journalise
+    pas les corps) ; les requêtes `GET /kyc/status 200` sont bien tracées, sans URL.
+  - **AC-05** — RCCM v1 `SUPERSEDED` renvoyée et consultable (**200**) après ré-upload.
+  - **Persistance** (`kyc_service.kycdocuments`) : orgA 3 docs / orgB 2 docs, **0 document ne stocke
+    de champ `url`** (présignée à la volée uniquement).
+- **CORS** — `GET /kyc/status` répond `Access-Control-Allow-Origin` pour l'origine FE autorisée
+  (`http://localhost:3100`) et refuse les autres (câblage STORY-109 inchangé, allowlist explicite).
+
+**Assigné à :** vivianMoneyVibesGroupes
 
 ---
 
