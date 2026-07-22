@@ -1,6 +1,15 @@
 # Story FE-INT-4 : Inscription cabinet sur le contrat réel (`organizationName` → `cabinetName`)
 
-Status: backlog
+Status: review — **PR #11 `fe-int-4` → `dev`** (2026-07-21)
+
+> ✅ **Livrée et VÉRIFIÉE EN NAVIGATEUR** le 2026-07-21 (STORY-109/CORS étant livrée, cf. `MNV-109` sur les 5 relying-parties) :
+> `POST /api/v1/auth/register` avec `cabinetName` → **201** depuis `http://localhost:3100`, zéro erreur CORS,
+> puis `verify-email` → **« Adresse e-mail vérifiée »** → login → **stepper d'onboarding rendu** (E-mail vérifié ✓, KYC en attente).
+> C'est la **première démo navigateur complète du gate client** — FE-INT-1/2/3 n'étaient jusque-là vérifiées qu'au curl.
+>
+> **Deux écarts supplémentaires corrigés dans la même story** (découverts en pilotant le navigateur) :
+> 1. **Port de l'app 3000 → 3100** (`dev`/`start` + `playwright.config.ts`). `:3000` est occupé par **expert-comptable** dans le stack docker racine, et `:3100` est l'origine autorisée par `CORS_ALLOWED_ORIGINS` (STORY-109). Effet de bord grave levé : avec le stack up, le `reuseExistingServer` de Playwright prenait le **backend** pour le serveur de test.
+> 2. **Bug du chemin nominal de FE-006** : `verifyEmail` résolvait `undefined` → TanStack Query v5 met la query **en ERREUR** → l'écran affichait « Lien invalide ou expiré » alors que l'IdP répondait **200**. Corrigé (la fonction renvoie toujours un objet) + test de non-régression sur la **queryFn réelle** — le test existant mockait le hook entier, d'où l'angle mort. Écart backend tracé : l'OpenAPI de l'IdP déclare `content: never` sur le 200 de `verify-email` alors que la réponse porte un corps `{ message }`.
 
 **Epic :** FE-EPIC-001 — Authentification & comptes (retrofit de **FE-004**, dans l'esprit de l'Integration Gate FE-EPIC-002)
 **Points :** 1 · **Sprint :** Integration Gate (S3) · **App :** `prospera-frontend-expert-comptable`
