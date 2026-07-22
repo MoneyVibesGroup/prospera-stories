@@ -1560,7 +1560,7 @@ sprints:
         epic: "EPIC-017"
         points: 5
         service: "balance-service"
-        status: "not_started"  # consomme packaging platform-catalog (référentiels + paquet fiscal)
+        status: "review"  # 2026-07-22 : implémentée + vérifiée docker (branche MNV-078). Lint 0, 355 unit + 58 e2e verts, couverture 98.8/90.2/99.0/99.0. Vérif docker : 200 checksum 01b892c0 (miss→hit), artefact altéré d'un octet → 502 REFERENTIEL_INTEGRITY, org sans référentiel → 409 UNRESOLVED, SMT → 409 NON_PACKAGE. Findings F-078-1 (paquetFiscal embarqué PÉRIMÉ vs autonome : 6 rubriques de moins) / F-078-2 (dérive d'artefacts → registre distant C3) / F-078-3 (PAQUET_FISCAL_PAR_DEFAUT bloquant avant EPIC-021 → STORY-080). Blockers MV : packaging SMT, validation fiscaliste, année LF. Doc créé le même jour : Socle de chargement d'artefacts générique (port ArtifactSource + registres + sha256 + cache single-flight), patron STORY-038 du bilan. 2 AXES : référentiel comptable (SN=syscohada-revise@2.1, SFD-BCEAO@2.0 — octets IDENTIQUES à bilan-service) + paquet fiscal pays×année (togo@2026, registre PROPRE — le champ paquetFiscal embarqué dans le référentiel n'est jamais lu côté balance). SMT résolu mais NON packagé (sources absentes → 409 explicite, blocker MV). Consomme packaging platform-catalog (C3 : pointeur + checksum).
         assigned_to: null
       - story_id: "STORY-079"
         title: "Profil société : modèle + CRUD (NIF, RCCM, CNSS, actionnaires, forme juridique, gérant) keyé orgId — FR-A01"
