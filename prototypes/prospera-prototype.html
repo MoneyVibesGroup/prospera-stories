@@ -515,7 +515,7 @@
   .me-chips svg { width: 0.85rem; height: 0.85rem; }
   .me-chips li.ok { color: var(--success); }
 
-  .me-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; align-items: start; }
+  .me-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr)); gap: 1rem; align-items: start; }
 
   .me-rows { display: grid; }
   .me-row { display: flex; align-items: center; gap: 0.8rem; padding: 0.85rem 1.15rem; }
@@ -544,6 +544,37 @@
   .me-org-txt small { display: block; font-size: 0.78rem; color: var(--muted-fg); margin-top: 0.1rem; }
   .me-org-actions { padding: 0 1.15rem 1rem; }
   .me-org-note { padding: 0 1.15rem 1.1rem; text-align: left; margin: 0; }
+
+  /* FE-015 — sessions ouvertes */
+  .sessions-card { margin-top: 1rem; }
+  .sess-list { list-style: none; margin: 0; padding: 0; }
+  .sess { display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1.15rem; flex-wrap: wrap; }
+  .sess + .sess { border-top: 1px solid var(--border); }
+  .sess-ico {
+    width: 2.3rem; height: 2.3rem; flex: none; display: grid; place-items: center;
+    border-radius: 0.55rem; background: var(--hover-surface); color: var(--muted-fg);
+  }
+  .sess.current .sess-ico { background: var(--success-soft); color: var(--success); }
+  .sess-alert .sess-ico { background: var(--warning-soft); color: #b45309; }
+  :root[data-theme="dark"] .sess-alert .sess-ico { color: var(--warning); }
+  .sess-ico svg { width: 1.1rem; height: 1.1rem; }
+  .sess-main { flex: 1 1 14rem; min-width: 0; }
+  .sess-main b { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.87rem; }
+  .sess-main small { display: block; font-size: 0.77rem; color: var(--muted-fg); margin-top: 0.15rem; }
+  .sess-flag {
+    display: inline-block; margin-left: 0.35rem; padding: 0.05rem 0.4rem; border-radius: 999px;
+    font-size: 0.68rem; font-weight: 600; background: var(--warning-soft); color: #b45309;
+  }
+  :root[data-theme="dark"] .sess-flag { color: var(--warning); }
+  .sess-when { flex: 0 1 15rem; text-align: right; }
+  .sess-when b { display: block; font-size: 0.8rem; font-weight: 500; }
+  .sess-when small { display: block; font-size: 0.74rem; color: var(--muted-fg); margin-top: 0.1rem; font-variant-numeric: tabular-nums; }
+  .sess-act { flex: none; }
+  .sess-hint { font-size: 0.74rem; color: var(--muted-fg); }
+  @media (max-width: 44rem) {
+    .sess-when { flex-basis: 100%; text-align: left; padding-left: 3.15rem; }
+    .sess-act { padding-left: 3.15rem; }
+  }
 
   /* FE-015 — couleur de marque du cabinet */
   .brand-picker { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; padding: 1rem 1.15rem; }
@@ -1545,8 +1576,8 @@
                       <span class="badge badge-active"><span class="d"></span> Vérifiée</span>
                     </div>
                     <div class="me-row">
-                      <span class="mr-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></span>
-                      <span class="mr-txt"><b>Session</b><small>Vous déconnecter de cet appareil</small></span>
+                      <span class="mr-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+                      <span class="mr-txt"><b>Appareils connectés</b><small>3 sessions ouvertes · détail ci-dessous</small></span>
                       <button class="btn btn-ghost btn-sm" type="button">Se déconnecter</button>
                     </div>
                   </div>
@@ -1592,6 +1623,54 @@
                   <p class="helper me-org-note" id="meOrgNote">Seul un administrateur peut modifier la fiche du cabinet.</p>
                 </div>
 
+              </div>
+
+              <!-- ═════ Sessions ouvertes : où, sur quoi, depuis quand ═════ -->
+              <div class="card-surface sessions-card">
+                <div class="panel-head">
+                  <div class="grow">
+                    <h2>Sessions ouvertes</h2>
+                    <p>Les appareils actuellement connectés à votre compte</p>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" type="button">Déconnecter les autres</button>
+                </div>
+
+                <ul class="sess-list">
+                  <li class="sess current">
+                    <span class="sess-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+                    <span class="sess-main">
+                      <b>Chrome 141 sur Windows 11 <span class="badge badge-active"><span class="d"></span> Cet appareil</span></b>
+                      <small>Lomé, Togo · 41.207.14.86</small>
+                    </span>
+                    <span class="sess-when"><b>Actif maintenant</b><small>Connecté le 22/07/2026 à 08:41</small></span>
+                    <span class="sess-act"><span class="sess-hint">Session courante</span></span>
+                  </li>
+
+                  <li class="sess">
+                    <span class="sess-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg></span>
+                    <span class="sess-main">
+                      <b>Safari sur iPhone</b>
+                      <small>Lomé, Togo · 41.207.14.86</small>
+                    </span>
+                    <span class="sess-when"><b>Dernière activité : hier à 18:22</b><small>Connecté le 19/07/2026 à 07:05</small></span>
+                    <span class="sess-act"><button class="btn btn-ghost btn-sm" type="button" data-revoke>Déconnecter</button></span>
+                  </li>
+
+                  <li class="sess sess-alert">
+                    <span class="sess-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+                    <span class="sess-main">
+                      <b>Firefox sur Ubuntu</b>
+                      <small>Abidjan, Côte d'Ivoire · 102.176.9.12 <span class="sess-flag">Lieu inhabituel</span></small>
+                    </span>
+                    <span class="sess-when"><b>Dernière activité : il y a 3 jours</b><small>Connecté le 15/07/2026 à 21:37</small></span>
+                    <span class="sess-act"><button class="btn btn-ghost btn-sm" type="button" data-revoke>Déconnecter</button></span>
+                  </li>
+                </ul>
+
+                <p class="gap-note">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+                  <span><b>À livrer côté backend — et c'est un vrai chantier.</b> L'IdP ne stocke qu'un <code>refreshTokenHash</code> <b>scalaire sur l'utilisateur</b> : il n'existe pas de session, donc rien à lister, et surtout <b>une connexion sur un second appareil invalide silencieusement la première</b>. Il faut une collection de sessions (une par jeton de rafraîchissement, avec agent utilisateur, IP, date de création et de dernière activité) et une révocation ciblée.</span>
+                </p>
               </div>
 
               <p class="helper">FE-015 — <code>GET /api/v1/users/me</code> (nom, e-mail, rôle, cabinet) + claims de session (e-mail vérifié). Écran accessible aux <b>deux rôles</b>.</p>
@@ -2212,7 +2291,6 @@
     (function () {
       var roleSeg = document.getElementById("roleSeg");
       if (!roleSeg) return;
-      var meRole = document.getElementById("meRole");
       var meRoleBadge = document.getElementById("meRoleBadge");
       var meName = document.getElementById("meName");
 
@@ -2224,12 +2302,34 @@
         document.querySelectorAll(".nav-item[data-admin-only]").forEach(function (item) {
           item.hidden = !isAdmin;
         });
-        if (meRole) meRole.textContent = isAdmin ? "Administrateur" : "Collaborateur";
+        /* Une seule personne à l'écran : nom, initiales, e-mail et rôle doivent
+           tous basculer ensemble — sinon la maquette raconte deux identités. */
+        var person = isAdmin
+          ? { name: "Awa Diallo", first: "Awa", last: "Diallo", mail: "awa.diallo@cabinet-diallo.tg", ini: "AD" }
+          : { name: "Kossi Amegan", first: "Kossi", last: "Amegan", mail: "kossi.amegan@cabinet.tg", ini: "KA" };
+        var label = isAdmin ? "Administrateur" : "Collaborateur";
+
+        var set = function (id, value) {
+          var el = document.getElementById(id);
+          if (el) el.textContent = value;
+        };
+        set("meName", person.name);
+        set("meFirst", person.first);
+        set("meLast", person.last);
+        set("meEmail", person.mail);
+        set("meAvatar", person.ini);
+        set("meOrgRole", "Vous y êtes " + label.toLowerCase());
+        document.querySelectorAll('.page[data-page="me"] code').forEach(function (c) {
+          if (/@/.test(c.textContent)) c.textContent = person.mail;
+        });
         if (meRoleBadge) {
-          meRoleBadge.textContent = isAdmin ? "Administrateur" : "Collaborateur";
+          meRoleBadge.textContent = label;
           meRoleBadge.className = "badge " + (isAdmin ? "badge-admin" : "badge-user");
         }
-        if (meName) meName.textContent = isAdmin ? "Awa Diallo" : "Kossi Amegan";
+        var orgActions = document.getElementById("meOrgActions");
+        var orgNote = document.getElementById("meOrgNote");
+        if (orgActions) orgActions.hidden = !isAdmin;
+        if (orgNote) orgNote.hidden = isAdmin;
 
         // Si la page courante vient d'être masquée, replier sur une page autorisée.
         var current = document.querySelector('.nav-item[aria-current="page"]');
@@ -2251,6 +2351,47 @@
         e.preventDefault();
         var tab = document.querySelector('.seg [data-view="public"]');
         if (tab) tab.click();
+      });
+    });
+
+    /* Préférence de thème : le segment de « Mon profil » et le bouton du ruban
+       pilotent la MÊME préférence — deux commandes, un seul état. */
+    (function () {
+      var root = document.documentElement;
+      var seg = document.querySelectorAll("[data-theme-pref]");
+      if (!seg.length) return;
+
+      function sync() {
+        var current = root.getAttribute("data-theme") || "light";
+        seg.forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.themePref === current));
+        });
+      }
+      seg.forEach(function (b) {
+        b.addEventListener("click", function () {
+          root.setAttribute("data-theme", b.dataset.themePref);
+          sync();
+        });
+      });
+      var toggle = document.getElementById("themeToggle");
+      if (toggle) toggle.addEventListener("click", function () { setTimeout(sync, 0); });
+      sync();
+    })();
+
+    /* Révocation d'une session (simulée : aucune route backend ne l'expose encore). */
+    document.querySelectorAll("[data-revoke]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var row = btn.closest(".sess");
+        if (row) row.remove();
+        notify("success", "Session fermée", "L'appareil devra se reconnecter.");
+      });
+    });
+
+    /* Depuis « Mon cabinet » → fiche du cabinet (administrateur seulement). */
+    document.querySelectorAll("[data-goto-profile]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var nav = document.querySelector('.nav-item[data-page="profile"]');
+        if (nav) nav.click();
       });
     });
 
