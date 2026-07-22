@@ -4,7 +4,7 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A04/FR-A05/FR-A06/FR-A07 + NFR-A06 ; `sprint-plan-atelier-balance-2026-07-12.md` § 6 (packaging catalog) ; `architecture-catalog-service-2026-07-07.md` (packaging des référentiels, C3) ; `architecture-bilan-service-2026-07-07.md` §ReferentielLoader (patron d'origine, STORY-038)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** review (implémentée + vérifiée docker le 2026-07-22)
+**Statut :** done ✅ (implémentée, vérifiée docker, revue code + sécurité, intégrée dans `dev` le 2026-07-22)
 **Assigné à :** Claude (BMAD dev-story)
 **Créée le :** 2026-07-12 · **révisée le** 2026-07-22 (cadrage aligné sur le code réellement livrable)
 **Sprint :** 16 (EXTENDED, D14) — *le cadrage initial du 2026-07-12 la plaçait au sprint 15 ; `sprint-status.yaml` fait foi*
@@ -298,6 +298,9 @@ Validé par `class-validator` dans `env.validation.ts` (**le boot échoue** si m
 - 2026-07-12 : cadrée (`ready-for-dev`) avec le lot EXTENDED S15-S16 (commit `a0f8883`).
 - 2026-07-22 : révisée (cadrage aligné sur le livrable réel — voir *Additional Notes*).
 - 2026-07-22 : implémentée (`in_progress` → `review`) — branche `MNV-078`.
+- 2026-07-22 : `/code-review` — 3 défauts corrigés (voir ci-dessous), couverture de branches remontée de 90.00 % (pile sur le seuil) à 90.54 %.
+- 2026-07-22 : `/security-review` — **aucune vulnérabilité exploitable** (path traversal, intégrité sha256, cache inter-tenant, isolation, fuite d'information, journalisation, injection NoSQL, désérialisation).
+- 2026-07-22 : **rebase-mergée dans `dev`** (balance-service #6) et `main` (docs #33) — `review` → `done`.
 
 **Effort réel :** 5 points (conforme à l'estimation).
 
@@ -322,7 +325,7 @@ Câblage : `nest-cli.json` (assets → `dist/`), `PAQUET_FISCAL_PAR_DEFAUT` (env
 |---|---|
 | Lint (`eslint --max-warnings 0`) | **0 warning** |
 | Build (`nest build`) | OK — `dist/modules/referentiel/assets/` peuplé (3 fichiers) |
-| Unitaires + couverture | **366 tests / 45 suites** verts — **98.85 st / 90.13 br / 99.08 fn / 99.07 li** (seuils 65/90/90/90) |
+| Unitaires + couverture | **379 tests / 45 suites** verts — **98.93 st / 90.54 br / 99.08 fn / 99.16 li** (seuils 65/90/90/90) ; module `referentiel` **100 / 93.9 / 100 / 100** |
 | E2E | **58 tests / 6 suites** verts, dont 12 nouveaux sur `GET /api/v1/referentiels/actifs` |
 | Non-régression | suites `balance`, `sage`, `read-models`, `outbox`, `health` inchangées et vertes |
 
@@ -376,3 +379,25 @@ du sha256 à chaque étape (cf. mémoire « vérifier sur stack docker neuve »)
 ---
 
 *Story créée avec la méthode BMAD v6 — Phase 4 (Implementation Planning).*
+
+---
+
+## Revue (2026-07-22)
+
+### `/code-review` — 3 défauts corrigés
+
+1. **Le paquet fiscal ne vérifiait que l'ANNÉE.** Le parse comparait `meta.annee` à la demande puis renvoyait `pays: ref.pays` — le pays **demandé**, jamais celui déclaré par l'artefact. Une entrée de manifeste mal câblée (`benin@2026` → artefact togolais) franchissait checksum **et** année : le service aurait servi des **taux étrangers sous le bon libellé**, sans qu'aucun contrôle ne bronche. Le code ISO attendu est désormais déclaré au manifeste (`EntreePaquetFiscal.paysSource`) et vérifié au parse.
+2. **Tri mort + commentaire faux dans `isCompteValide`.** Le tri des racines n'avait aucun effet sur un `.some()` booléen, et son commentaire promettait une sémantique de spécificité que le code n'implémente pas — piège pour la story qui devra renvoyer la racine rattachée (FR-A07). Remplacé par un `Set` ; l'implémentation devient la **fonction pure exportée** `estCompteRattachable`, la méthode n'en étant qu'une liaison (un paquet chargé n'est donc pas sérialisable — désormais documenté au lieu d'être contredit par l'en-tête « données pures »).
+3. **Couverture de branches à exactement 90.00 %**, soit pile sur le seuil : la PR suivante cassait la CI. Deux tests sur des gardes réelles (locator `..`/`.` arrêté par la borne de répertoire, entrée de manifeste disparue entre fetch et parse) → **90.54 %**.
+
+### `/security-review` — aucune vulnérabilité exploitable
+
+Axes couverts : authentification, autorisation, injection, web, fichiers, cryptographie, infrastructure, logique métier, NestJS.
+
+- **Path traversal** : le `locator` ne provient jamais du client (constante de manifeste) ; les deux gardes sont chacune nécessaire — `..` et `.` franchissent le filtre de caractères et sont arrêtés par la borne de répertoire.
+- **Intégrité sha256** : comparaison **avant** `JSON.parse` et **avant** mise en cache ; ni `has()`, ni le single-flight, ni le `finally` de libération de clé n'ouvrent de brèche.
+- **Cache inter-tenant** : aucune donnée tenant n'y transite ; l'unique voie d'écriture exige un artefact conforme au manifeste ; une clé inconnue lève sans rien mettre en cache.
+- **Isolation** : `organizationId` exclusivement issu du claim `org` du JWT, aucun identifiant adressable (donc pas d'IDOR), contrôle d'entitlement rejoué en défense en profondeur.
+- **Fuite d'information** : hash (502) et chemins de fichiers (503) ne quittent jamais le serveur.
+
+Observations écartées : le paquet fiscal identique pour toutes les orgs (justesse métier, F-078-3) et le motif du 409 SMT (divulgation négligeable, volontaire).
