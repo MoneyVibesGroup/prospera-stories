@@ -6,9 +6,10 @@
 **Réf. code livré :** **STORY-025** (vérification d'e-mail : `emailVerificationTokenHash` + `emailVerificationExpiresAt` + `GET /auth/verify-email` + file `MAIL_QUEUE`/BullMQ + Mailhog — **la mécanique à réemployer**) · **STORY-024** (`refreshTokenHash`, sessions) · **STORY-026** (`UsersController`, `existsByEmail`, index unique `email`) · **STORY-123** (`PATCH /users/me`, service de profil self-service, `identity.user.updated`)
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** defined 📝
-**Assigné à :** null
+**Statut :** done ✅
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée :** 2026-07-22
+**Terminée :** 2026-07-22
 **Sprint :** 16
 
 ---
@@ -154,15 +155,31 @@ vérification initiale, qui servent encore aux comptes non vérifiés.
 
 ### Composants
 
-- **Étendu** : `users/schemas/user.schema.ts` (3 champs + index `sparse`) · `users/users.controller.ts`
+- **Orchestration = `users/my-profile.service.ts`** (livré par STORY-123, statut `done`). Il porte **déjà**
+  toutes les dépendances du flux : `Connection` (transaction), `PasswordService` (preuve du mot de passe),
+  `IdentityEventsService` (outbox), `UsersService`. Ajouter `requestEmailChange` (demande) / `confirmEmailChange`
+  (bascule) / `cancelEmailChange` (annulation) **à ce service** — ne pas recréer un service parallèle, et surtout
+  ne pas mettre la logique dans `users.controller.ts`.
+- **Étendu** : `users/schemas/user.schema.ts` (3 champs + index `sparse`, exactement comme
+  `UserSchema.index({ emailVerificationTokenHash: 1 }, { sparse: true })`) · `users/users.controller.ts`
   (`@Post('me/email')`, `@Delete('me/email')` — **après `@Patch('me')`, avant `@Patch(':id')`**, cf. AC-02 de
-  STORY-123) · `auth/auth.controller.ts` (`@Get('confirm-email-change')`, publique comme `verify-email`) ·
-  `users/users.service.ts` (recherche par `pendingEmailTokenHash`) · `organizations/dto/me-response.dto.ts`
-  (`pendingEmail?`) · `mail/mail.constants.ts` (2 nouveaux types de job : confirmation, alerte).
-- **Créé** : `dto/change-email.dto.ts`, gabarits d'e-mail (confirmation nouvelle adresse / alerte ancienne
-  adresse / alerte adresse déjà prise).
-- **Réutilisés inchangés** : `PasswordService`, `OutboxService`, `MAIL_QUEUE` (BullMQ), `ThrottlerGuard`,
-  `IdentityTopic.USER_UPDATED` (créé par STORY-123).
+  STORY-123) · `auth/auth.controller.ts` (`@Get('confirm-email-change')`, `@Public()` comme `verify-email`) ·
+  `users/users.service.ts` (**miroir** de `setEmailVerificationToken`/`findByEmailVerificationTokenHash` :
+  `setPendingEmail(userId, email, hash, expiresAt)` + `findByPendingEmailTokenHash(hash)` + purge des champs
+  `pendingEmail*`) · `organizations/dto/me-response.dto.ts` (`pendingEmail?`) · `mail/mail.constants.ts`
+  (2 nouveaux jobs + payloads : confirmation, alerte — sur le modèle de `VerificationEmailJobData`).
+- **Créé** : `dto/change-email.dto.ts` (`newEmail` + `currentPassword`), gabarits d'e-mail dans
+  `mail/templates/` (confirmation nouvelle adresse / alerte ancienne adresse / alerte adresse déjà prise) +
+  méthodes `MailerService` associées + branches du `MailProcessor`.
+- **Lien de confirmation** : construit comme `verify-email` — `${mail.publicUrl}/auth/confirm-email-change?token=`
+  (`mail.publicUrl` = `http://localhost:3001/api/v1` en dev). C'est un **GET traité par le backend**, donc la
+  cible unique de `mail.publicUrl` convient (contrairement au reset de mot de passe de STORY-125, qui exige un
+  formulaire front et pose le problème du choix d'app).
+- **Événement** : `IdentityEventsService.userUpdated(session, { userId, email, firstName, lastName, status })`
+  (créé par STORY-123, `IdentityTopic.USER_UPDATED`) — **appelé dans la transaction de bascule** avec le
+  **nouvel** `email` (état absolu, clé de partition `userId`, aucun secret).
+- **Réutilisés inchangés** : `PasswordService`, l'outbox (`IdentityEventsService`/`OutboxService`),
+  `MAIL_QUEUE` (BullMQ), `ThrottlerGuard`, la mécanique token de STORY-025 (`randomBytes` → `hash` → TTL).
 
 ### Anti-énumération — le point vraiment délicat
 
@@ -194,9 +211,11 @@ sérieux. **Aligner les temps de réponse** (faire le travail « à vide » plut
 
 ## Dependencies
 
-**Prérequis :** **STORY-123** (⚠️ **bloquante** — fournit le service de profil self-service, le contrat
-`identity.user.updated` et l'ordre de routes `me` avant `:id`), STORY-024 (sessions), STORY-025 (mécanique de
-token + file d'e-mails + Mailhog), STORY-026 (index unique `email`), STORY-029 (read-models `expert-comptable`).
+**Prérequis :** **STORY-123** ✅ **livrée** (statut `done`, 2026-07-22) — fournit `MyProfileService`
+(transaction + outbox), le contrat `identity.user.updated`/`IdentityTopic.USER_UPDATED`, et **l'ordre de routes
+`@Patch('me')` avant `@Patch(':id')`** (piège n°1, vérifié dans `users.controller.ts:160/255`). STORY-024
+(sessions), STORY-025 (mécanique de token haché + `MAIL_QUEUE` + Mailhog), STORY-026 (index unique `email`),
+STORY-029 (read-models `expert-comptable`, projection `USER_UPDATED` déjà branchée par STORY-123).
 
 **Débloque :** **FE-019** (volet « changer mon e-mail » de l'écran « Mon profil »).
 
@@ -253,6 +272,82 @@ self-service par STORY-123. L'effort réel est **la rigueur du protocole** (ne r
 - 2026-07-22 : Créée (Scrum Master) — extraite de STORY-123 parce que l'e-mail est l'**identifiant de
   connexion** : son changement exige un protocole de preuve (rien n'est écrit avant confirmation) et une
   réponse **indistinguable** sur adresse déjà prise. Mécanique de token/e-mail **réemployée** de STORY-025.
+- 2026-07-22 : Révisée (Scrum Master) après clôture de STORY-123 (`done`). Confronté au code réellement livré :
+  `MyProfileService` désigné comme **home d'orchestration** (il porte déjà `Connection`/`PasswordService`/
+  `IdentityEventsService`/`UsersService`) ; alignement sur les setters/finders miroirs
+  `setEmailVerificationToken`/`findByEmailVerificationTokenHash` ; signature exacte
+  `userUpdated(session, { userId, email, firstName, lastName, status })` ; lien via `mail.publicUrl`
+  (`/auth/confirm-email-change?token=`, GET backend) ; dépendance STORY-123 requalifiée **bloquante → livrée**.
+  Aucun changement de périmètre, de points (3) ni d'AC. Statut inchangé : `defined`.
+- 2026-07-22 : **Implémentée (Developer) + VÉRIFIÉE DOCKER BOUT-EN-BOUT** → statut `review`. Voir *Implementation
+  Notes* et *Vérification docker* ci-dessous.
+- 2026-07-22 : `/code-review` + `/security-review` passés (aucune vulnérabilité, 2 observations non bloquantes :
+  `GET /users/me` reste 403 pour un compte non vérifié = surface STORY-123 hors périmètre ; bord
+  `withTransaction`/commit-inconnu fail-safe conforme au patron du dépôt). **PR MNV-124 (auth-service) mergée
+  « Rebase and merge » sur `dev`** (branche supprimée) → statut `done`, `completed_date: 2026-07-22`.
+  **Aucun changement expert-comptable** : le read-model projette déjà la nouvelle adresse via le handler
+  `USER_UPDATED` livré par STORY-123.
+
+---
+
+## Implementation Notes (2026-07-22)
+
+**Fichiers.** Schéma `User` (+ `pendingEmail` / `pendingEmailTokenHash` / `pendingEmailExpiresAt`, index `sparse`
+sur le hash, aucune migration) · `UsersService` (`setPendingEmail` / `findByPendingEmailTokenHash` /
+`clearPendingEmail`, miroirs de `setEmailVerificationToken`) · `MyProfileService` (**home d'orchestration** :
+`requestEmailChange` / `confirmEmailChange` / `cancelEmailChange` + `enqueueMail` best-effort ; injecte désormais
+`MAIL_QUEUE` + `ConfigService`) · `ChangeEmailDto` (`newEmail` `@IsEmail` + `currentPassword`) · routes
+`POST`/`DELETE /users/me/email` (users.controller, **`@AllowUnverified()`**, `@Throttle 5/60s`, placées avant
+`:id`) + `GET /auth/confirm-email-change` (`@Public()`, auth.controller délègue à `MyProfileService` — export
+ajouté à `UsersModule`) · `MeResponseDto.pendingEmail` (additif) · 3 gabarits hbs + `MailerService` +
+`MailProcessor` (confirmation / alerte ancienne adresse / alerte adresse prise) · config `EMAIL_CHANGE_TTL`
+(défaut `1h`).
+
+**Décisions de dev tracées dans le code :**
+1. **`@AllowUnverified()` sur `POST`/`DELETE /users/me/email`** — choix **délibéré et central**, pas un oubli :
+   le cas d'usage n°1 du changement d'e-mail est l'inscription **avec faute de frappe** — le lien de vérification
+   est parti à une adresse inexistante, l'utilisateur ne pourra **jamais** vérifier et serait **enfermé dehors**
+   si l'on exigeait `emailVerified`. La confirmation sur la nouvelle boîte **vaut** la preuve et pose
+   `emailVerifiedAt` à la bascule (prouvé docker : `verifie: non → oui`).
+2. **`pendingEmail*` toujours écrit, même si l'adresse est déjà prise** — temps de réponse aligné
+   (anti-énumération) ; on ne branche que sur *quel* e-mail partir : confirmation (adresse libre) **vs** alerte au
+   propriétaire (adresse prise). Aucune confirmation vers une adresse prise (AC-05).
+3. **Bascule via `findOneAndUpdate({_id, pendingEmailTokenHash})`** dans une transaction avec émission de
+   `identity.user.updated` : le filtre sur le hash est un garde-fou contre une double confirmation concurrente ;
+   `E11000` (course d'unicité) → abort → purge `pending*` hors transaction → **409**, compte intact (AC-07).
+
+**Qualité.** Lint **0 warning** · `npm run build` OK · **427 unit** (50 suites) + **96 e2e** (8 suites, dont
+**17 e2e dédiés STORY-124**) verts · couverture **96.79 / 88.07 / 97.93 / 96.81** (seuils 90/65/90/90 tenus ;
+`users.service.ts` 100 %, `users.controller.ts` 98.7 %, `my-profile.service.ts` 96.7 %). E2e des 3 specs montant
+`AuthController` mis à jour (provider `MyProfileService`).
+
+## Vérification docker (stack neuve `down -v`, Mailhog, JWT RS256 réels)
+
+Scénario complet auth-service:3001 + expert-comptable:3000 + Mongo rs0 + Kafka + Mailhog. **Tous les AC verts** :
+
+- **AC-01** — après `POST /users/me/email` **202**, `email` **inchangé** en base + `pendingEmail` écrit (mongosh) ;
+  **login ancienne adresse toujours 200** ; `GET /users/me` (compte vérifié) renvoie **200** avec l'ancien `email`
+  + `pendingEmail` renseigné.
+- **AC-02** — lien lu **dans Mailhog** → `GET /auth/confirm-email-change` **200** ; en base : `email` basculé,
+  `pending*` purgés, `refreshTokenHash` **absent**, `emailVerifiedAt` **posé** ; **login nouvelle 200 / ancienne 401**.
+- **AC-03/14** — mot de passe faux **401**, absent **400**, même adresse **400**.
+- **AC-04** — corps avec `redirectUrl` **400** (whitelist, anti-redirection ouverte) ; **202 octet à octet
+  identique** entre cas nominal et « adresse déjà prise ».
+- **AC-05** — adresse déjà prise : **aucun** e-mail de confirmation (Mailhog), **alerte** « Tentative
+  d'utilisation » au propriétaire légitime à la place.
+- **AC-06** — rejeu du token **400**. **AC-08** — refresh émis avant la bascule **401**.
+- **AC-09** — alerte « L'adresse e-mail de votre compte a changé » reçue à l'**ancienne** adresse (Mailhog).
+- **AC-10** — `DELETE /users/me/email` **204** ; `pendingEmail` **purgé**.
+- **AC-11** — `outbox_events` `identity.user.updated` **SENT**, `partitionKey = userId`, **sans** `passwordHash`
+  ni `refreshTokenHash` ; read-model `expert-comptable` `identity_users` porte la **nouvelle** adresse
+  (projeté via le handler `USER_UPDATED` de STORY-123).
+- **AC-12** — sans jeton **401** ; route throttlée (5/60 s, `429` au-delà — fenêtre observée en test).
+- **Edge typo-recovery** — compte **non vérifié** : demande **acceptée** (202) et compte **devenu vérifié**
+  après confirmation.
+- `/health` **200** sur les deux services.
+
+**Reste :** `/code-review` + `/security-review` (demandés) → PR MNV-124 (auth-service + expert-comptable +
+`docs/`) sur demande d'intégration.
 
 ---
 
