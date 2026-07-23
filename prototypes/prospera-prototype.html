@@ -641,6 +641,16 @@
     border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
   }
   .gap-note svg { width: 1rem; height: 1rem; flex: none; margin-top: 0.15rem; color: var(--warning); }
+  /* FE-019 : bloc d'état informatif (demande de changement d'e-mail en cours) */
+  .callout {
+    padding: 0.7rem 0.8rem; border-radius: 0.55rem; font-size: 0.78rem; line-height: 1.55;
+    color: var(--foreground);
+  }
+  .callout-info {
+    background: color-mix(in srgb, #2563eb 9%, transparent);
+    border: 1px solid color-mix(in srgb, #2563eb 30%, transparent);
+  }
+  .callout code { font-family: var(--font-mono); font-size: 0.9em; }
   .gap-note code { font-family: var(--font-mono); font-size: 0.9em; }
 
   .org-form { display: grid; gap: 0.9rem; padding: 1.15rem; }
@@ -1632,33 +1642,84 @@
 
               <div class="me-grid">
 
-                <!-- Informations personnelles -->
+                <!-- Informations personnelles — ÉCRITURE (FE-019, PATCH /users/me livré par STORY-123) -->
                 <div class="card-surface">
-                  <div class="panel-head"><div><h2>Informations personnelles</h2><p>Telles qu'elles apparaissent pour vos collègues</p></div></div>
-                  <dl class="ro-list">
-                    <div><dt>Prénom</dt><dd id="meFirst">Kossi</dd></div>
-                    <div><dt>Nom</dt><dd id="meLast">Amegan</dd></div>
-                    <div><dt>Adresse e-mail</dt><dd><code>kossi.amegan@cabinet.tg</code></dd></div>
-                  </dl>
-                  <p class="gap-note">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
-                    <span><b>À livrer côté backend.</b> L'IdP n'expose que <code>GET /users/me</code> : aucun <code>PATCH</code>. Un membre ne peut pas corriger l'orthographe de son propre nom — seul un administrateur le peut, via la gestion des utilisateurs.</span>
-                  </p>
+                  <div class="panel-head"><div><h2>Informations personnelles</h2><p>Telles qu'elles apparaissent pour vos collègues — modifiables par vous</p></div></div>
+                  <form class="org-form" onsubmit="return false">
+                    <div class="grid-2">
+                      <div class="field">
+                        <label for="me-first">Prénom</label>
+                        <div class="control">
+                          <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>
+                          <input id="me-first" type="text" value="Kossi" />
+                        </div>
+                        <p class="field-err" hidden></p>
+                      </div>
+                      <div class="field">
+                        <label for="me-last">Nom</label>
+                        <div class="control">
+                          <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>
+                          <input id="me-last" type="text" value="Amegan" />
+                        </div>
+                        <p class="field-err" hidden></p>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label for="me-phone">Téléphone</label>
+                      <div class="control">
+                        <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+                        <input id="me-phone" type="tel" value="" placeholder="+228 90 00 00 00" />
+                      </div>
+                    </div>
+                    <p class="helper">Votre adresse e-mail est votre identifiant de connexion — elle se change dans le bloc Sécurité, avec confirmation.</p>
+                    <div style="display:flex; justify-content:flex-end; margin-top:.35rem">
+                      <button class="btn btn-primary" type="button" disabled>Enregistrer</button>
+                    </div>
+                  </form>
                 </div>
 
-                <!-- Sécurité -->
+                <!-- Sécurité — ÉCRITURE (FE-019 : POST /users/me/password [123] + POST|DELETE /users/me/email [124]) -->
                 <div class="card-surface">
                   <div class="panel-head"><div><h2>Sécurité</h2><p>Accès à votre compte</p></div></div>
                   <div class="me-rows">
                     <div class="me-row">
                       <span class="mr-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-                      <span class="mr-txt"><b>Mot de passe</b><small>••••••••••  ·  modifié à l'inscription</small></span>
-                      <button class="btn btn-ghost btn-sm" type="button" disabled>Modifier</button>
+                      <span class="mr-txt"><b>Mot de passe</b><small>••••••••••</small></span>
+                      <button class="btn btn-ghost btn-sm" type="button" aria-expanded="true">Modifier</button>
                     </div>
+                    <form class="org-form" onsubmit="return false" style="padding:.25rem .25rem .6rem 3.1rem">
+                      <div class="field">
+                        <label for="me-pwd-now">Mot de passe actuel</label>
+                        <div class="control"><input id="me-pwd-now" type="password" placeholder="Votre mot de passe actuel" /></div>
+                        <p class="field-err" hidden>Mot de passe incorrect.</p>
+                      </div>
+                      <div class="grid-2">
+                        <div class="field">
+                          <label for="me-pwd-new">Nouveau mot de passe</label>
+                          <div class="control"><input id="me-pwd-new" type="password" placeholder="12 caractères minimum" /></div>
+                        </div>
+                        <div class="field">
+                          <label for="me-pwd-conf">Confirmer</label>
+                          <div class="control"><input id="me-pwd-conf" type="password" placeholder="Répétez le nouveau" /></div>
+                        </div>
+                      </div>
+                      <p class="helper">⚠️ Après le changement, vous serez déconnecté partout et devrez vous reconnecter avec le nouveau mot de passe.</p>
+                      <div style="display:flex; justify-content:flex-end; margin-top:.3rem">
+                        <button class="btn btn-primary btn-sm" type="button">Changer le mot de passe</button>
+                      </div>
+                    </form>
                     <div class="me-row">
                       <span class="mr-ico ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
-                      <span class="mr-txt"><b>Adresse e-mail vérifiée</b><small>Confirmée le 12/07/2026</small></span>
-                      <span class="badge badge-active"><span class="d"></span> Vérifiée</span>
+                      <span class="mr-txt"><b>Adresse e-mail</b><small><code>kossi.amegan@cabinet.tg</code> · vérifiée le 12/07/2026</small></span>
+                      <button class="btn btn-ghost btn-sm" type="button">Changer d'adresse</button>
+                    </div>
+                    <!-- État « demande en cours » (pendingEmail servi par GET /users/me) -->
+                    <div class="callout callout-info" style="margin:.2rem .25rem .5rem 3.1rem">
+                      <b>En attente de confirmation : <code>k.amegan@gmail.com</code></b><br/>
+                      Si cette adresse est disponible, un lien de confirmation y a été envoyé. Votre adresse
+                      actuelle <code>kossi.amegan@cabinet.tg</code> reste votre identifiant de connexion tant que
+                      la nouvelle n'est pas confirmée.
+                      <span style="display:block; margin-top:.4rem"><button class="btn btn-ghost btn-sm" type="button">Annuler la demande</button></span>
                     </div>
                     <div class="me-row">
                       <span class="mr-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
@@ -1666,10 +1727,6 @@
                       <button class="btn btn-ghost btn-sm" type="button">Se déconnecter</button>
                     </div>
                   </div>
-                  <p class="gap-note">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
-                    <span><b>À livrer côté backend.</b> Aucune route de changement de mot de passe ni de mot de passe oublié dans l'IdP (<code>/auth/*</code> = register, login, refresh, logout, verify-email, resend-verification, accept-invitation). Un utilisateur qui perd son mot de passe est aujourd'hui bloqué.</span>
-                  </p>
                 </div>
 
                 <!-- Préférences (réelles, côté client) -->
@@ -1851,6 +1908,11 @@
               </div>
             </div>
 
+            <!-- FE-020 : l'entrée vers la récupération de compte (FE-005 ne l'avait pas — il n'y avait rien derrière) -->
+            <p class="helper" style="text-align:right; margin:0.5rem 0 0">
+              <a href="#" data-goto-forgot>Mot de passe oublié&nbsp;?</a>
+            </p>
+
             <button class="btn btn-primary" type="button" id="loginSubmit" style="width:100%;margin-top:1.1rem">Se connecter</button>
           </form>
 
@@ -1874,6 +1936,71 @@
           <button role="tab" aria-selected="false" data-auth="done">Confirmation</button>
           <button role="tab" aria-selected="false" data-auth="verify">Vérif. e-mail</button>
           <button role="tab" aria-selected="false" data-auth="invite">Invitation</button>
+          <button role="tab" aria-selected="false" data-auth="forgot">Mdp oublié</button>
+          <button role="tab" aria-selected="false" data-auth="reset">Réinitialisation</button>
+        </div>
+
+        <!-- ═════ FE-020 : Mot de passe oublié — écran PUBLIC /mot-de-passe-oublie ═════ -->
+        <div class="auth-card" data-auth-panel="forgot" hidden>
+          <h2>Mot de passe oublié</h2>
+          <p class="lead">Indiquez l'adresse e-mail de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.</p>
+
+          <form class="reg-form" onsubmit="return false">
+            <div class="field">
+              <label for="f-email">Adresse e-mail</label>
+              <div class="control">
+                <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                <input id="f-email" type="email" placeholder="vous@cabinet.tg" />
+              </div>
+            </div>
+            <button class="btn btn-primary" type="button" style="width:100%;margin-top:0.9rem">M'envoyer un lien</button>
+          </form>
+
+          <!-- État APRÈS envoi — le MÊME quel que soit le sort de l'adresse (202 anti-énumération) -->
+          <div class="callout callout-info" style="margin-top:1rem; text-align:left">
+            <b>Si un compte existe pour cette adresse, un lien vient d'y être envoyé.</b><br/>
+            Pensez à vérifier vos courriers indésirables. Le lien expire au bout d'une heure.
+          </div>
+          <p class="helper" style="margin-top:0.9rem">⚠️ Maquette : le message ne confirme NI n'infirme l'existence du compte — même écran, même délai, jamais « e-mail envoyé à… » ni « aucun compte trouvé ».</p>
+
+          <p class="signup">Vous vous en souvenez finalement ? <a href="#">Se connecter</a></p>
+        </div>
+
+        <!-- ═════ FE-020 : Réinitialisation — écran PUBLIC /reinitialiser-mot-de-passe?token=… ═════ -->
+        <div class="auth-card" data-auth-panel="reset" hidden>
+          <h2>Nouveau mot de passe</h2>
+          <p class="lead">Choisissez le nouveau mot de passe de votre compte.</p>
+
+          <form class="reg-form" onsubmit="return false">
+            <div class="field">
+              <label for="rp-new">Nouveau mot de passe</label>
+              <div class="control">
+                <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input id="rp-new" type="password" placeholder="8 caractères minimum" />
+              </div>
+              <p class="field-err" hidden>Mot de passe trop faible (règle du serveur, affichée telle quelle).</p>
+            </div>
+            <div class="field">
+              <label for="rp-conf">Confirmer le nouveau</label>
+              <div class="control">
+                <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <input id="rp-conf" type="password" placeholder="Répétez le nouveau" />
+              </div>
+            </div>
+            <button class="btn btn-primary" type="button" style="width:100%;margin-top:0.9rem">Changer le mot de passe</button>
+          </form>
+
+          <!-- État : token invalide / expiré / déjà utilisé (400) — TOUJOURS une sortie -->
+          <div class="gap-note" style="margin:1rem 0 0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+            <span><b>Ce lien n'est plus valide</b> (expiré ou déjà utilisé). <a href="#">Refaire une demande</a> — jamais une impasse.</span>
+          </div>
+          <!-- État : succès (204) -->
+          <div class="callout callout-info" style="margin-top:0.6rem; text-align:left">
+            <b>Mot de passe modifié.</b> Connectez-vous avec votre nouveau mot de passe.
+            <span style="display:block; margin-top:0.4rem"><button class="btn btn-primary btn-sm" type="button">Se connecter</button></span>
+          </div>
+          <p class="helper" style="margin-top:0.9rem">⚠️ Écran PUBLIC : jamais redirigé vers /login par la garde de routes — sans token dans l'URL, erreur explicite sans appel réseau.</p>
         </div>
 
         <!-- FE-004 : Inscription cabinet -->
@@ -2435,6 +2562,16 @@
         e.preventDefault();
         var tab = document.querySelector('.seg [data-view="public"]');
         if (tab) tab.click();
+      });
+    });
+    // FE-020 : « Mot de passe oublié ? » depuis la connexion → enveloppe publique, écran forgot.
+    document.querySelectorAll('[data-goto-forgot]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        var tab = document.querySelector('.seg [data-view="public"]');
+        if (tab) tab.click();
+        var forgot = document.querySelector('[data-auth="forgot"]');
+        if (forgot) forgot.click();
       });
     });
 
