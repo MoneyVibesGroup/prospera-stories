@@ -10,7 +10,7 @@
 **Statut :** in_progress ⏳ (incrément 1 — paquet allégé + cohérence — livré 2026-07-21 ; ventilation Vie/Non-Vie + provisions techniques + vérif docker + validation actuaire restants)
 **Assigné à :** vivian
 **Créée :** 2026-07-21
-**Sprint :** 15 (ajout hors engagement initial — extension EPIC-010/FR-007)
+**Sprint :** 16 (⏭️ reportée du S15 au S16 le 2026-07-23 — arbitrage de capacité : le S15 portait 37 pts pour 34, et l'ajout de STORY-132 le portait à 40. L'incrément 1 reste livré et mergé ; seul l'incrément 2 glisse. Ajout hors engagement initial — extension EPIC-010/FR-007)
 
 ---
 
