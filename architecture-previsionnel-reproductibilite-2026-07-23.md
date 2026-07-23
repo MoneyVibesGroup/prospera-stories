@@ -190,19 +190,29 @@ inerte est posé depuis 067 ; 073 le consomme. C'est aussi la condition n°2 qui
 | **Nouvelle story — versions d'hypothèses append-only** (~3 pts) | D1. **Prérequis de 073**, pas de 070/071. À insérer avant 073, **jamais après** |
 | **STORY-073** (FR-023, 5 pts) | triplet de reproductibilité + mention de version dans l'export (D1) ; audit `export` (D5) ; trancher (c) figer l'artefact remis |
 
-### ⚠️ Capacité — le sprint 15 est déjà en dépassement
+### Capacité — arbitrage tranché le 2026-07-23
 
-`committed_points: 24` **ne reflète plus la réalité** : le S15 porte aussi STORY-120/121/122 (toutes `in_progress`),
-ajoutées sans remonter le compteur. Le commentaire du S16 l'acte noir sur blanc :
+**Le diagnostic initial était juste, l'issue proposée était fondée sur un second compteur périmé.**
 
-> « le S15 est déjà à **37 pts pour 34 de capacité** (120/121/122 ajoutés sans remonter `committed_points`) »
+`committed_points: 24` ne reflétait pas la réalité du S15 : le sprint portait **37 pts pour 34 de capacité**
+(120/121/122 ajoutés sans remonter le compteur). D1 l'aurait porté à 40. **Mais** le S16, annoncé « sans marge »
+par son propre commentaire (`committed_points: 31`), portait en fait **52 pts de stories dont 39 déjà livrés** :
+il n'avait que **13 pts restants sur 34**. La marge existait, le compteur la cachait.
 
-D1 porterait le sprint à **40 pts pour 34**, avec 3 stories inachevées — et le S16 n'a plus de marge (31 pts, le
-triptyque identité 123/124/125 y a déjà été slotté pour cette raison). L'arbitrage réel, à trancher avec l'user :
+**Décision de l'user (2026-07-23) — alléger le S15 :**
 
-- **sortir du S15** STORY-074 (FR-024, « Could Have », 3 pts) et/ou STORY-122 ;
-- **ou** absorber D1 dans STORY-073 (qui devient ~8 pts) plutôt qu'en story dédiée ;
-- **ou** décaler 120-122 au S16 — au prix d'un S16 lui-même surchargé.
+| Mouvement | Effet |
+|---|---|
+| **+ STORY-132** — versions d'hypothèses append-only (D1), 3 pts | dette FR-018 AC-2, **prérequis de 073** |
+| **− STORY-074** → S16 (3 pts) | seule **Could Have** du lot, `not_started` : sortie en premier |
+| **− STORY-122** → S16 (5 pts) | son **incrément 1 reste livré et mergé** ; seul l'incrément 2 glisse |
 
-Ce qui n'est **pas** une option : livrer 073 sans D1. L'export porterait alors une traçabilité que rien ne soutient,
-et FR-018 AC-2 resterait violé.
+**Résultat : S15 = 32 pts pour 34 ✅** (27 restants, 069 livrée) · **S16 = 21 pts restants sur 34**.
+
+Les deux `committed_points` ont été **réconciliés avec le contenu réel** (S15 : 24 → 32 ; S16 : 31 → 60, dont
+39 livrés).
+
+> ⚠️ **Cause racine, à corriger dans la pratique** : `committed_points` n'est pas remonté quand une story est
+> ajoutée en cours de sprint. Un dépassement de 3 pts est resté invisible sur le S15, et une marge de 21 pts
+> l'est restée sur le S16 — les deux erreurs se compensaient par hasard. Remonter le compteur **à chaque
+> ajout**, sinon le tracker cesse d'être un instrument de décision.

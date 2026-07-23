@@ -1,7 +1,7 @@
 version: "6.0.0"
 project_name: "prospera"
 project_level: 3
-current_sprint: 15  # maj 2026-07-21 : S13 (EPIC-011B liasse calculée) done ; S14 (EPIC-012 validation/immutabilité/exercices/audit 064→067 + EPIC-013 amorce hypothèses 068) DONE 21/21 ; S15 = EPIC-013 projections (069-071) + EPIC-014 consultation/export (072-074)
+current_sprint: 15  # maj 2026-07-21 : S13 (EPIC-011B liasse calculée) done ; S14 (EPIC-012 validation/immutabilité/exercices/audit 064→067 + EPIC-013 amorce hypothèses 068) DONE 21/21 ; S15 = EPIC-013 projections (069-071) + STORY-132 (dette versions d'hypothèses) + EPIC-014 consultation/export (072-073) ; 074 reportée au S16 le 2026-07-23 (arbitrage de capacité)
 sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 
 # Révision 2026-07-04 : re-cadrage écosystème (voir docs/architecture-prospera-ecosystem-2026-07-04.md).
@@ -1454,9 +1454,9 @@ sprints:
     start_date: "2027-01-14"
     end_date: "2027-01-28"
     capacity_points: 34
-    committed_points: 24
-    completed_points: 0
-    status: "not_started"
+    committed_points: 32  # ⬆️ 24→32 le 2026-07-23 (RÉCONCILIATION — le compteur était périmé de 13 pts) : il ne comptait ni 120/121/122 (ajoutés le 2026-07-21 sans le remonter, +13) ni STORY-132. Le sprint portait donc RÉELLEMENT 37 pts pour 34 de capacité sans que rien ne le signale — c'est le commentaire du S16 qui l'a révélé. ARBITRAGE 2026-07-23 (user) : +3 STORY-132 (dette FR-018 AC-2, prérequis de 073) et −8 par report au S16 de STORY-074 (3, seule Could Have du lot) et STORY-122 (5, incrément 2 ; son incrément 1 reste livré). 37 + 3 − 8 = 32 ≤ 34 ✅. ⚠️ Leçon : remonter committed_points À CHAQUE ajout de story, sinon le dépassement devient invisible.
+    completed_points: 5  # STORY-069 (FR-019, projection annuelle 3 ans) livrée le 2026-07-23
+    status: "in_progress"  # 2026-07-23 : STORY-069 done, STORY-070 defined
     goal: "Bilan livré 🏁 : Prévisionnel (annuel 3 ans + trésorerie mensuel 12 mois + scénarios) & Consultation/Export (EPIC-013/014). Module 1 complet en prod interne MV."
     stories:
       - story_id: "STORY-069"
@@ -1488,17 +1488,23 @@ sprints:
         service: "bilan-service"
         status: "not_started"
         assigned_to: null
+      # ── AJOUT 2026-07-23 — DETTE DE CONFORMITÉ de STORY-068, pas un élargissement de scope.
+      #   FR-018 AC-2 exige des hypothèses « éditables ET versionnées » ; 068 a livré un compteur
+      #   d'éditions (le PUT écrase les paramètres en place, aucune version antérieure conservée).
+      #   Conséquence : hypothesesVersion est exposé par la projection 069 SANS être résolvable, et
+      #   un prévisionnel exporté (073) ne serait pas recalculable. PRÉREQUIS DE 073, jamais après.
+      #   Décision D1 : docs/architecture-previsionnel-reproductibilite-2026-07-23.md
+      - story_id: "STORY-132"
+        title: "Versions d'hypothèses append-only (reproductibilité du prévisionnel) — FR-018 AC-2"
+        epic: "EPIC-013"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"
+        assigned_to: null
       - story_id: "STORY-073"
         title: "Export PDF/Excel de la liasse et du prévisionnel (fidèle au snapshot figé) — FR-023"
         epic: "EPIC-014"
         points: 5
-        service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
-      - story_id: "STORY-074"
-        title: "Comparaison inter-exercices (évolution des postes sur ≥2 exercices validés) — FR-024"
-        epic: "EPIC-014"
-        points: 3
         service: "bilan-service"
         status: "not_started"
         assigned_to: null
@@ -1520,13 +1526,6 @@ sprints:
         points: 3
         service: "bilan-service"
         status: "in_progress"  # 2026-07-21 : incrément 1 livré (paquet zone-franche-togo@1.0 ecbd01e2, présentation=SYSCOHADA + fiscal dégressif). RESTE : consommation barème par prévisionnel EPIC-013 + vérif docker + validation fiscaliste + PR MNV-121.
-        assigned_to: vivian
-      - story_id: "STORY-122"
-        title: "Référentiel CIMA assurances @1.0 (allégé) — plan art. 431 + Bilan/CR technique & net — FR-007"
-        epic: "EPIC-010"
-        points: 5
-        service: "bilan-service"
-        status: "in_progress"  # 2026-07-21 : incrément 1 livré (paquet cima-assurances@1.0 1f36250c, plan classes 0-8, RT/RN FORMULE). RESTE : production liasse CIMA + Vie/Non-Vie + provisions techniques + vérif docker + validation actuaire + PR MNV-122.
         assigned_to: vivian
 
   # ── Module 1-bis (Atelier Balance) : balance-service, AMONT du Bilan. Inséré 2026-07-12 ────────────
@@ -1551,8 +1550,8 @@ sprints:
     start_date: "2027-01-28"
     end_date: "2027-02-11"
     capacity_points: 34
-    committed_points: 31  # ⬆️ 18→31 (2026-07-22) : + le TRIPTYQUE IDENTITÉ auth-service STORY-123 (5) + 124 (3) + 125 (5) = 13. Slotté ICI et non en S15 : le S15 est déjà à 37 pts pour 34 de capacité (120/121/122 ajoutés sans remonter committed_points) ; le S16 était le 1ᵉʳ sprint avec de la marge réelle. Hors thème Atelier EXTENDED, comme STORY-108/109 l'étaient du leur.
-    completed_points: 0
+    committed_points: 60  # ⬆️ 31→60 le 2026-07-23 : RÉCONCILIATION (le compteur affichait 31 alors que le sprint portait déjà 52 pts de stories) + 8 par report du S15 (STORY-074 3 + STORY-122 5, arbitrage de capacité — cf. committed_points du S15). ⚠️ Sur ces 60, **39 sont DÉJÀ LIVRÉS** : le « S16 sans marge » qu'annonçait le commentaire ci-dessous était donc faux en pratique — il ne restait que 13 pts à faire sur 34 de capacité, d'où la place pour les 8 reportés (21 restants après report). Historique : ⬆️ 18→31 (2026-07-22) : + le TRIPTYQUE IDENTITÉ auth-service STORY-123 (5) + 124 (3) + 125 (5) = 13. Slotté ICI et non en S15 : le S15 est déjà à 37 pts pour 34 de capacité (120/121/122 ajoutés sans remonter committed_points) ; le S16 était le 1ᵉʳ sprint avec de la marge réelle. Hors thème Atelier EXTENDED, comme STORY-108/109 l'étaient du leur.
+    completed_points: 39  # ⬆️ 0→39 le 2026-07-23 (fiabilisation dans la foulée de la réconciliation de committed_points) : STORY-078(5)+123(5)+124(3)+125(5)+126(8)+127(3)+128(2)+129(5)+130(1)+131(2), toutes done.
     status: "not_started"
     goal: "EXTENDED (D14) — le socle 076/077 est déjà livré en CORE (S11, décalé du S10 par D15). Ici : chargement référentiel/paquet fiscal (EPIC-017/019) + profil société & régime + extraction OCR Statuts/CFE (EPIC-018) : CRUD profil, 2 axes SN/SMT + régime fiscal, OCR pré-remplissage. + AUTONOMIE DU COMPTE dans l'IdP (STORY-123/124/125) : le membre corrige son profil, change son mot de passe et son e-mail, et surtout N'EST PLUS DÉFINITIVEMENT PERDU s'il oublie son mot de passe — cabinet ET plateforme."
     stories:
@@ -1564,6 +1563,25 @@ sprints:
         status: "done" #✅
         completed_date: "2026-07-22"  # MNV-078 rebase-mergée sur dev (balance-service #6, docs #33) après /code-review + /security-review (aucune vulnérabilité). Lint 0, 379 unit + 58 e2e verts, couverture 98.93/90.54/99.08/99.16 (module referentiel 100/93.9/100/100). Vérif docker : 200 checksum 01b892c0 (miss→hit), artefact altéré d'un octet → 502 REFERENTIEL_INTEGRITY, org sans référentiel → 409 UNRESOLVED, SMT → 409 NON_PACKAGE. Revue : le paquet fiscal ne vérifiait que l'ANNÉE (pays désormais contrôlé via paysSource). Findings F-078-1 (paquetFiscal embarqué dans l'artefact comptable PÉRIMÉ : 6 rubriques de moins) / F-078-2 (dérive d'artefacts → registre distant C3) / F-078-3 (PAQUET_FISCAL_PAR_DEFAUT bloquant avant EPIC-021 → STORY-080). Blockers MV : packaging SMT, validation fiscaliste, année LF.
         assigned_to: null
+      # ── REPORT 2026-07-23 — arbitrage de capacité du S15 (option retenue par l'user) : le S15 portait
+      #   37 pts pour 34 de capacité, et l'ajout de STORY-132 (dette FR-018 AC-2, prérequis de 073)
+      #   l'aurait porté à 40. 074 (Could Have) et 122 (incrément 2) descendent ici — le S16 n'avait en
+      #   réalité que 13 pts restants sur 34 (son committed_points de 31 ne comptait pas ses 39 pts déjà
+      #   livrés). Après report : S15 = 32 pts, S16 = 21 pts restants.
+      - story_id: "STORY-074"
+        title: "Comparaison inter-exercices (évolution des postes sur ≥2 exercices validés) — FR-024"
+        epic: "EPIC-014"
+        points: 3
+        service: "bilan-service"
+        status: "not_started"  # 2026-07-23 REPORTÉE du S15 au S16 — arbitrage de capacité (le S15 était à 37 pts pour 34, et l'ajout de STORY-132/D1 le portait à 40). FR-024 est la seule Could Have du lot : sortie en premier. Le S16 a la marge (13 pts restants sur 34, ses 39 autres points étant déjà livrés).
+        assigned_to: null
+      - story_id: "STORY-122"
+        title: "Référentiel CIMA assurances @1.0 (allégé) — plan art. 431 + Bilan/CR technique & net — FR-007"
+        epic: "EPIC-010"
+        points: 5
+        service: "bilan-service"
+        status: "in_progress"  # 2026-07-21 : incrément 1 livré (paquet cima-assurances@1.0 1f36250c, plan classes 0-8, RT/RN FORMULE). RESTE : production liasse CIMA + Vie/Non-Vie + provisions techniques + vérif docker + validation actuaire + PR MNV-122. ⏭️ 2026-07-23 REPORTÉE du S15 au S16 — arbitrage de capacité (cf. STORY-074). L'incrément 1 (paquet cima-assurances@1.0) reste LIVRÉ et mergé ; seul l'incrément 2 (production liasse CIMA + vérif docker + validation actuaire + PR) glisse.
+        assigned_to: vivian
       - story_id: "STORY-079"
         title: "Profil société : modèle + CRUD (NIF, RCCM, CNSS, actionnaires, forme juridique, gérant) keyé orgId — FR-A01"
         epic: "EPIC-018"
@@ -2026,7 +2044,7 @@ velocity:
   sprint_12: null  # Bilan EPIC-011 états financiers / liasse (059-063)
   sprint_13: null  # 🆕 EPIC-011B (tech-spec B8) : liasse — calcul complet (opérandes SIG/sous-totaux/TFT/notes) — stories 110-114
   sprint_14: null  # Bilan EPIC-012 validation/immutabilité (064-067) + EPIC-013 hypothèses (068)
-  sprint_15: null  # 🏁 Bilan livré : EPIC-013 prévisionnel (069-071) + EPIC-014 consultation/export (072-074)
+  sprint_15: null  # 🏁 Bilan livré : EPIC-013 prévisionnel (069-071 + 132) + EPIC-014 consultation/export (072-073 ; 074 reportée au S16)
   # ── Module 1-bis Atelier Balance EXTENDED (balance-service) — CORE déjà livré @ sprint 10 (D14) ──
   sprint_16: null  # EXTENDED : loaders référentiel/paquet fiscal (078) + profil société & 2 axes + OCR Statuts/CFE (079-081)
   sprint_17: null  # EXTENDED : adaptateur #3 construction chemin A — cahiers/OCR + plan comptable (082-085)
