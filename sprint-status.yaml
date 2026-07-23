@@ -1464,8 +1464,8 @@ sprints:
         epic: "EPIC-013"
         points: 5
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "defined"  # 2026-07-23 CADRÉE — projection annuelle 3 ans dérivée PURE de (snapshot validé 065 + hypothèses 068) : CR prévisionnel, plan de trésorerie annuel, bilan simplifié, équilibre ecart=0 par construction. Ancrage référentiel-agnostique (P7) sur 4 agrégats seulement. Aucune persistance. Hors périmètre : FR-020 mensuel, FR-021 scénarios, IS/amortissements.
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-070"
         title: "Plan de trésorerie mensuel 12 mois (encaissements/décaissements, échéancier BFR) — FR-020"
         epic: "EPIC-013"
