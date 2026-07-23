@@ -6,7 +6,7 @@
 **Réf. code livré :** **STORY-068** (`JeuHypotheses` — 9 paramètres + `base` traçable) · **STORY-065** (`SnapshotLiasse` — la base validée figée : `liasse`, `soldesN`) · **STORY-060/061** (`CompteResultatProduit.totalProduitsN` · `TftProduit.tresorerieClotureN`) · **STORY-059** (`ControleEquilibre.totalActifN`)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** defined
+**Statut :** done ✅ (implémentée + vérifiée docker bout-en-bout + revue de code + revue de sécurité + intégrée dans `dev` le 2026-07-23 — PR #26 bilan-service, MNV-069 « Rebase and merge », HEAD `0d2f7bc`, branche supprimée)
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée :** 2026-07-23
 **Sprint :** 15
@@ -42,7 +42,7 @@ modèle n'utilise donc que **4 agrégats déjà produits par le moteur**, tous a
 
 | Ancre | Source dans le snapshot | Agnostique parce que… |
 |---|---|---|
-| `chiffreAffairesBase` | `liasse.compteResultat.totalProduitsN` | somme des postes `regle='PRODUIT'` — pilotée par le référentiel |
+| `produitsBase` | `liasse.compteResultat.totalProduitsN` | somme des postes `regle='PRODUIT'` — pilotée par le référentiel |
 | `chargesBase` | `liasse.compteResultat.totalChargesN` | idem, `regle='CHARGE'` |
 | `resultatBase` | `liasse.compteResultat.resultatNetN` | produits − charges |
 | `totalActifBase` | `liasse.bilan.controle.totalActifN` | total actif **net** direct (059) |
@@ -57,21 +57,21 @@ Pour chaque exercice projeté `n ∈ {1,2,3}` (rang N+n), avec `g = croissanceCa
 
 **1. Compte de résultat prévisionnel**
 ```
-chiffreAffaires(n) = round( chiffreAffaires(n-1) × (1 + g) )      chiffreAffaires(0) = chiffreAffairesBase
-margeBrute(n)      = round( chiffreAffaires(n) × tauxMargePct/100 )
-coutDesVentes(n)   = chiffreAffaires(n) − margeBrute(n)
-chargesExploitation(n) = round( chiffreAffaires(n) × tauxChargesPct/100 )
+produits(n) = round( produits(n-1) × (1 + g) )                    produits(0) = produitsBase
+margeBrute(n)      = round( produits(n) × tauxMargePct/100 )
+coutDesVentes(n)   = produits(n) − margeBrute(n)
+chargesExploitation(n) = round( produits(n) × tauxChargesPct/100 )
 resultatNet(n)     = margeBrute(n) − chargesExploitation(n)
 ```
 
 **2. BFR normatif** (les délais des hypothèses, en jours, sur base **360 jours**)
 ```
 stocks(n)             = round( coutDesVentes(n) × delaiBfrStocksJours / 360 )
-creancesClients(n)    = round( chiffreAffaires(n) × delaiBfrClientsJours / 360 )
+creancesClients(n)    = round( produits(n) × delaiBfrClientsJours / 360 )
 dettesFournisseurs(n) = round( coutDesVentes(n) × delaiBfrFournisseursJours / 360 )
 bfr(n)                = stocks(n) + creancesClients(n) − dettesFournisseurs(n)
 ```
-Le **BFR d'ancrage `bfr(0)`** est calculé avec la **même** formule normative sur `chiffreAffairesBase`
+Le **BFR d'ancrage `bfr(0)`** est calculé avec la **même** formule normative sur `produitsBase`
 (et son coût des ventes normatif) : le modèle est **homogène** d'un bout à l'autre, donc la variation de
 BFR de la 1ʳᵉ année ne mélange pas un BFR réel et un BFR normatif.
 
@@ -114,7 +114,7 @@ ecart(n) = totalActif(n) − totalPassif(n)        equilibre(n) = (ecart(n) === 
 ```
 `ecart(n) = 0` **par construction** (la trésorerie de clôture absorbe exactement les flux ; en développant,
 `Σ fluxNet = Σ resultatNet − (bfr(n) − bfr(0)) − Σ investissements + Σ (financement − remboursements)`),
-**y compris après arrondis** : les 4 seules quantités arrondies (CA, marge, charges d'exploitation, et les
+**y compris après arrondis** : les 4 seules quantités arrondies (produits, marge, charges d'exploitation, et les
 3 composantes de BFR) le sont **avant** que toute l'arithmétique restante ne se fasse en **entiers exacts**.
 Le champ **prouve** donc la cohérence interne du modèle — sur le patron de `CoherenceResultat` /
 `CoherenceSig` / `CoherenceSousTotaux` déjà en place.
@@ -150,21 +150,21 @@ de projection, export (FR-023).
 
 ## Critères d'acceptation
 
-- [ ] `GET /bilan/hypotheses/:id/projection` renvoie **3 exercices** (`rang` 1..3, libellés `N+1`, `N+2`,
+- [x] `GET /bilan/hypotheses/:id/projection` renvoie **3 exercices** (`rang` 1..3, libellés `N+1`, `N+2`,
       `N+3`), chacun avec **compte de résultat prévisionnel**, **plan de trésorerie annuel** et **bilan
       prévisionnel simplifié**.
-- [ ] Les projections **découlent des hypothèses et de la base validée** : le CA du 1ᵉʳ exercice projeté
-      vaut `round(totalProduitsN × (1+g))`, la trésorerie d'ouverture de N+1 vaut la trésorerie de clôture
+- [x] Les projections **découlent des hypothèses et de la base validée** : les produits du 1ᵉʳ exercice projeté
+      valent `round(totalProduitsN × (1+g))`, la trésorerie d'ouverture de N+1 vaut la trésorerie de clôture
       du snapshot, et la réponse **rappelle les ancres** utilisées (traçabilité : `snapshotId`, `version`,
       `exercice` de base + les 4 agrégats d'ancrage).
-- [ ] **Équilibre du bilan simplifié** : `ecart === 0` et `equilibre === true` pour les 3 exercices, y
+- [x] **Équilibre du bilan simplifié** : `ecart === 0` et `equilibre === true` pour les 3 exercices, y
       compris avec des pourcentages produisant des arrondis.
-- [ ] **Agnosticisme P7** : aucune constante de poste (`XI`, `BZ`, `CJ`, `ZH`, `RA`…) dans le code de
+- [x] **Agnosticisme P7** : aucune constante de poste (`XI`, `BZ`, `CJ`, `ZH`, `RA`…) dans le code de
       projection ; un snapshot **sans TFT** (`tresorerieClotureN === null`) projette quand même, avec
       `tresorerieAncree === false` et une ouverture N+1 à `0`.
-- [ ] **Gardes** : jeu d'hypothèses d'une autre org → **404** ; snapshot de base introuvable → **404
+- [x] **Gardes** : jeu d'hypothèses d'une autre org → **404** ; snapshot de base introuvable → **404
       `BASE_INTROUVABLE`** ; gate refusé → **403** ; sans jeton → **401**.
-- [ ] **Déterminisme** : deux appels successifs renvoient une réponse **identique**.
+- [x] **Déterminisme** : deux appels successifs renvoient une réponse **identique**.
 
 ---
 
@@ -196,13 +196,13 @@ FR-021 (STORY-071, scénarios comparés — dérive N jeux), FR-022/023 (consult
 
 ## Definition of Done
 
-- [ ] Lint 0 warning · build OK · couverture ≥ 65/90/90/90 · unit + e2e verts · non-régression EPIC-012/013.
-- [ ] **Mutation-test** sur les critères protecteurs : casser l'équilibre (retirer `−bfr(0)` de l'ancre
+- [x] Lint 0 warning · build OK · couverture ≥ 65/90/90/90 · unit + e2e verts · non-régression EPIC-012/013.
+- [x] **Mutation-test** sur les critères protecteurs : casser l'équilibre (retirer `−bfr(0)` de l'ancre
       résiduelle) et l'agnosticisme (forcer une ancre nulle) doit **virer au rouge**.
-- [ ] **Vérif docker réelle** (jeu validé + snapshot réels en base, projection calculée, `ecart=0` constaté)
+- [x] **Vérif docker réelle** (jeu validé + snapshot réels en base, projection calculée, `ecart=0` constaté)
       consignée dans *Progress Tracking*.
-- [ ] Statut synchronisé (doc / `sprint-status.yaml` / Progress Tracking) + `completed_date`.
-- [ ] Flux git : `MNV-069` sur `dev` + docs sur `main`, PR « Rebase and merge ».
+- [x] Statut synchronisé (doc / `sprint-status.yaml` / Progress Tracking) + `completed_date`.
+- [x] Flux git : `MNV-069` sur `dev` + docs sur `main`, PR « Rebase and merge ».
 
 ---
 
@@ -218,15 +218,92 @@ FR-021 (STORY-071, scénarios comparés — dérive N jeux), FR-022/023 (consult
 
 **Status History :**
 - 2026-07-23 : Créée (Scrum Master) — statut `defined`.
+- 2026-07-23 : Développée (Developer) — dérivation pure `(snapshot figé, hypothèses)` → 3 exercices.
+- 2026-07-23 : Revue de code (fan-out `nestjs-prospera` / `test-prospera` / `architecte-prospera`) —
+  **4 constats retenus et corrigés** dans un commit dédié (dont **2 angles morts de test réels**).
+- 2026-07-23 : Revue de sécurité (PR #26) — **0 vulnérabilité exploitable**.
+- 2026-07-23 : Intégrée dans `dev` (PR #26, MNV-069, « Rebase and merge », HEAD `0d2f7bc`, branche
+  supprimée). Statut **done**.
 
-**Réalisé :** _(à compléter en dev-story)_
+**Réalisé :**
+- **`projection.types.ts`** — contrats purs : `AncresProjection`, `CompteResultatPrevisionnel`,
+  `BfrNormatif`, `TresoreriePrevisionnelle`, `BilanSimplifiePrevisionnel`, `ControleEquilibreProjection`,
+  `ExerciceProjete`, `ProjectionAnnuelle` + `JOURS_ANNEE_COMMERCIALE`, `HORIZON_EXERCICES`,
+  `MODELE_PROJECTION_VERSION`.
+- **`ancrage.ts`** — **frontière d'ancrage** en fonction pure exportée `extraireAncres(liasse)` : le seul
+  module autorisé à connaître `LiasseProduite`. Ne lit que des **agrégats** (totaux du CR, `totalActifN`,
+  `tresorerieClotureN`) — **aucun code de poste**, invariant P7 vérifié par grep en revue.
+- **`ProjectionAnnuelleService.projeter`** — moteur **pur** (0 injection) : CR prévisionnel, BFR normatif
+  (base 360, ancrage par la **même** formule), trésorerie cumulée, bilan simplifié. Arrondi sur les seules
+  quantités multiplicatives ⇒ `ecart = 0` **exact**. `controleEquilibre(ecart)` exportée à part (testable
+  hors du cas nominal). Normalisation `-0` → `0`.
+- **`ProjectionService.projeter(id)`** — orchestration lecture seule : jeu d'hypothèses (404 anti-énum) →
+  snapshot `base.snapshotId` (404 `BASE_INTROUVABLE`) → `extraireAncres` → moteur.
+- **`ProjectionController`** — `GET /bilan/hypotheses/:id/projection`, `@RequiresBilanAccess` + `@Roles`,
+  Swagger complet. DTO rappelant `modeleVersion`, la base traçable et les ancres.
+- **Hooks inertes documentés** : IS/paquet fiscal (`resultatNet` = **avant impôt**), amortissements
+  (`CAF = résultat net`), échéancier non uniforme (FR-020), persistance d'une projection figée (FR-023),
+  marqueur référentiel pour un CA exact.
 
-**Qualité (DoD) :** _(à compléter — lint / build / couverture / unit / e2e / non-régression)_
+**Qualité (DoD) :** lint 0 warning · build OK · **510 unit + 115 e2e** verts · `projection/` (y compris
+`ancrage.ts`) **100 / 100 / 100 / 100**, global **98,46 / 92,69 / 98,88 / 98,42** (seuils 65/90/90/90) ·
+non-régression EPIC-012/013.
 
-**Mutation-test :** _(à compléter — mutations prévues : ancre résiduelle privée de `− bfr(0)` ⇒ `ecart ≠ 0` ;
-ancre trésorerie forcée à `0` ⇒ ouverture N+1 fausse ; base 365 au lieu de 360 ⇒ BFR normatif faux)_
+**Constats de revue traités (commit dédié `e5e42ac`) :**
+1. **`equilibre` codé en dur à `true` franchissait toute la suite** — le modèle ne produit jamais d'écart
+   non nul, donc la relation n'était jamais éprouvée. Dérivation extraite en `controleEquilibre()`
+   exportée, testée sur des écarts non nuls.
+2. **BFR figé sur celui de la base franchissait toute la suite** — l'équilibre ne dépend que de la
+   cohérence interne `variationBfr = bfr(n) − bfr(n−1)`, jamais de la valeur réelle du BFR. Ajout de
+   **valeurs figées indépendantes** (BFR et variations des 3 exercices, recalculées hors du code testé).
+3. **Frontière d'ancrage privée** → promue en unité pure exportée (`ancrage.ts`), pour que 070/071 ne
+   réimplémentent pas leur extraction (point d'entrée le plus probable d'un code de poste en dur).
+4. **Nommage qui mentait** : `totalProduitsN` n'est **pas** le chiffre d'affaires (produits financiers,
+   HAO, reprises inclus) → renommé `produitsBase` / `produits`, approximation documentée.
+   *Ajout* : `MODELE_PROJECTION_VERSION` échoée — une projection n'est reproductible que **pour une
+   version de modèle donnée**.
 
-**Vérification docker réelle :** _(à compléter — jeu validé + snapshot réels, projection calculée,
-`ecart = 0` constaté, aucune écriture)_
+**Mutation-test (preuve que les tests filtrent) — 5 mutations, toutes rouges, toutes restaurées :**
+- ancre résiduelle privée de `− bfr(0)` ⇒ **5 tests rouges** ;
+- ancre de trésorerie forcée à `0` ⇒ **1 unit + 1 e2e rouges** ;
+- base 365 au lieu de 360 ⇒ **1 test rouge** ;
+- `equilibre: true` codé en dur ⇒ **1 test rouge** (invisible avant la correction n°1) ;
+- BFR figé sur la base au lieu des produits projetés ⇒ **2 tests rouges** (invisible avant la n°2).
 
-**Actual Effort :** _(à compléter)_
+**Vérification docker réelle :** stack `docker compose down -v` puis neuve (mongo rs0 + kafka + IdP +
+bilan-service), org réelle créée via `register`/`login` sur l'IdP, **JWT RS256 réel**. Service redémarré
+après les corrections de revue (`Found 0 errors. Watching for file changes.`).
+- Base préparée en base réelle : jeu d'états **VALIDÉ** + `snapshots_liasse` v1 + jeu d'hypothèses
+  `prudent` (croissance 10 %, marge 30 %, charges 20 %, BFR 45/60/30 j, invest. 5 M, fin. 3 M, remb. 1 M).
+- `GET /bilan/hypotheses/:id/projection` → **200**, `modeleVersion = 1.0.0`, **3 exercices** `N+1..N+3`
+  (millésimes `2026`/`2027`/`2028` déduits).
+- **Ancres conformes aux documents Mongo** relus par `mongosh` dans `snapshots_liasse` :
+  `totalProduitsN = 100 000 000`, `totalChargesN = 80 000 000`, `resultatNetN = 20 000 000`,
+  `totalActifN = 250 000 000`, `tresorerieClotureN = 12 000 000`.
+- **Équilibre** : `ecart = 0` / `equilibre = true` sur les 3 exercices
+  (totalActif = totalPassif = 263 000 000 / 277 100 000 / 292 410 000).
+- **BFR variable** par exercice (7 333 334 / 8 066 666 / 8 873 334), variations non nulles
+  (666 668 / 733 332 / 806 668) — conforme au recalcul indépendant.
+- **Déterminisme** : deux appels ⇒ réponses **strictement identiques**.
+- **Gardes** : jeu d'une **autre org** → **404 `HYPOTHESES_INTROUVABLE`** · `base.snapshotId` inconnu →
+  **404 `BASE_INTROUVABLE`** · sans jeton → **401**.
+- **Aucune écriture** : compteurs `jeux_hypotheses` / `snapshots_liasse` / `jeux_etats` / `audit_events`
+  **identiques avant et après** les appels — la projection est bien une dérivation pure.
+- Endpoint présent dans Swagger (`/api/docs-json`).
+
+**Revue de sécurité (PR #26) :** **aucune vulnérabilité exploitable** (confiance ≥ 80). Trois points
+instruits et écartés avec preuve : franchissement de frontière tenant sur `jeu.base.snapshotId`
+(repository tenant-scoped fail-closed + `snapshotId` jamais contrôlable par l'appelant) · `tenantObjectId`
+au retour ignoré (garde décorative, non load-bearing — `BilanAccessGuard` + `TenantContext` fail-closed
+portent le contrôle) · injection NoSQL via `:id` (Express produit toujours une `string` sur `req.params`,
+plus `ObjectId.isValid` en amont).
+
+**Points ouverts remontés pour le cadrage des stories suivantes (hors périmètre 069) :**
+- **FR-023 (export)** : un prévisionnel exporté n'est pas recalculable aujourd'hui — les paramètres
+  d'hypothèses sont **écrasés en place** par `PUT` (068). Voie recommandée : figer les **entrées**
+  (historiser les versions d'hypothèses en append-only, patron 065) plutôt que la sortie.
+- **STORY-071 (scénarios comparés)** : rien n'impose que N jeux comparés partagent le **même**
+  `base.snapshotId` — invariant à porter par 071.
+- **STORY-070/071** : réutiliser `extraireAncres` et le BFR normatif plutôt que de les réimplémenter.
+
+**Actual Effort :** ~5 pts (conforme).
