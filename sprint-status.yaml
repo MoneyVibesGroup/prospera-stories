@@ -1472,8 +1472,8 @@ sprints:
         epic: "EPIC-013"
         points: 5
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "defined"  # 2026-07-23 CADRÉE — 12 mois de N+1 dérivés PUREMENT de (snapshot validé + hypothèses), échéancier par délais BFR + solde cumulé. L'articulation FR-020 AC-2 avec l'annuel N+1 est une IDENTITÉ prouvée (ecartArticulation=0), pas un rapprochement : partition entière exacte + le BFR normatif de 069 est l'état stationnaire de l'échéancier. Inclut le préalable D3 (extraire bfrNormatif/arrondir en pur exporté bfr.ts) + garde P7 en spec exécutable + garde d'incrément MODELE_PROJECTION_VERSION (D4). Cadrage : architecture-previsionnel-reproductibilite-2026-07-23.md. Hors périmètre : N+2/N+3 mensuels, échéancier non uniforme, TVA/IS, FR-021.
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-071"
         title: "Scénarios comparés (prudent/central/optimiste) — FR-021"
         epic: "EPIC-013"
