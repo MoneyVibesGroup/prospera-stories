@@ -1,6 +1,11 @@
 # Story FE-B04 : Contrôle d'intégrité de la balance (équilibre, anomalies, blocage)
 
-Status: ready-for-dev
+Status: SUPERSEDED (2026-07-24) — voir [FE-A02](FE-A02.md)
+
+> ⚠️ **Périmée par la décision D14.** Le contrôle d'équilibre est désormais **intrinsèque au contrat
+> canonique** (`balance-service`, STORY-101 : équilibre live à la saisie + refus 422 côté serveur), pas un
+> endpoint séparé `/bilan/balances/{id}/controls` (STORY-051). Repris dans **[FE-A02 — Saisie manuelle +
+> contrôle d'équilibre live](FE-A02.md)**. Conservée pour l'historique ; **ne pas implémenter.**
 
 **Epic :** FE-EPIC-005 — Bilan & Prévisionnel
 **Points :** 3 · **Sprint :** 5 (programme) · **App :** `prospera-frontend-expert-comptable`

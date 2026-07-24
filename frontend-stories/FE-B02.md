@@ -1,6 +1,12 @@
 # Story FE-B02 : Import de balance Excel/CSV (upload, détection format, aperçu)
 
-Status: ready-for-dev
+Status: SUPERSEDED (2026-07-24) — voir [FE-A01](FE-A01.md)
+
+> ⚠️ **Périmée par la décision D14.** La production de balance a quitté le module Bilan (`bilan-service`,
+> STORY-050) pour le module **Atelier** (`balance-service`, adaptateur Sage STORY-086). Cette story visait
+> `POST /bilan/balances` sur un backend qui n'existe pas sous cette forme. Reprise et actualisée sur le
+> contrat réel dans **[FE-A01 — Import de balance Sage 100](FE-A01.md)**. Conservée pour l'historique ;
+> **ne pas implémenter.**
 
 **Epic :** FE-EPIC-005 — Bilan & Prévisionnel
 **Points :** 5 · **Sprint :** 5 (programme) · **App :** `prospera-frontend-expert-comptable`

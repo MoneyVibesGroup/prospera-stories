@@ -1,6 +1,12 @@
 # Story FE-B05 : Import/association comparatif N-1 (colonnes N/N-1)
 
-Status: ready-for-dev
+Status: SUPERSEDED (2026-07-24) — le comparatif N/N-1 est porté par le Bilan (FE-B07/B08)
+
+> ⚠️ **Périmée par la décision D14.** L'Atelier produit **une balance par exercice** (le versioning est
+> `(orgId, exercice, source, version)`) ; il ne gère pas l'**association N/N-1**, qui appartient aux états
+> comparatifs du module **Bilan** — le bilan actif/passif N/N-1 ([FE-B07](FE-B07.md)) et le compte de
+> résultat N/N-1 ([FE-B08](FE-B08.md)) consomment deux exercices. Il n'y a donc **pas** de story Atelier de
+> remplacement : le besoin est absorbé par l'aval. Conservée pour l'historique ; **ne pas implémenter.**
 
 **Epic :** FE-EPIC-005 — Bilan & Prévisionnel
 **Points :** 3 · **Sprint :** 5 (programme) · **App :** `prospera-frontend-expert-comptable`

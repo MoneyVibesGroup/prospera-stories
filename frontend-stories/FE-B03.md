@@ -1,6 +1,12 @@
 # Story FE-B03 : Mapping de colonnes assisté + profil d'import réutilisable
 
-Status: ready-for-dev
+Status: SUPERSEDED (2026-07-24) — voir [FE-A12](FE-A12.md) *(à rédiger)*
+
+> ⚠️ **Périmée par la décision D14.** Le mapping de colonnes et le profil d'import réutilisable relèvent de
+> l'Atelier (`balance-service`, STORY-088), pas de `bilan-service` (STORY-053). Le tracker les porte en
+> **FE-A12** (S17). ⚠️ **Attention** : `mappingProfile` est aujourd'hui **déclaré mais non consommé** par le
+> service (trou de contrat relevé en [FE-A01](FE-A01.md)) — FE-A12 devra d'abord faire ouvrir la voie
+> backend. Conservée pour l'historique ; **ne pas implémenter.**
 
 **Epic :** FE-EPIC-005 — Bilan & Prévisionnel
 **Points :** 3 · **Sprint :** 5 (programme) · **App :** `prospera-frontend-expert-comptable`

@@ -1,0 +1,163 @@
+# Story FE-A03 : Consultation de la balance stockée + statut de preuve + handoff bilan
+
+Status: ready-for-dev
+
+**Epic :** FE-EPIC-007 — Atelier Balance
+**Points :** 3 · **Sprint :** 7 (programme) · **App :** `prospera-frontend-expert-comptable`
+**API :** balance-service (`:3007`) — `GET /api/v1/balances`, `GET /api/v1/balances/{id}`
+**Backend d'appui :** **STORY-099** (handoff / API de réconciliation) · **STORY-101** (contrat canonique) —
+**done, vérifiées docker**
+**Réf. plan :** `frontend-sprint-status.yaml` S7 · FR-A28
+**Dépendances :** FE-A00 (shell + routage `:3007`) · consomme les balances produites par FE-A01/A02
+**Maître Scrum (frontend) :** MightyRaven
+
+---
+
+## Convention Git
+
+- **Une story = une branche.** Branche : `fe-a03`. Commits préfixés `FE-A03`.
+- Branche depuis `dev` **puis rebase sur `origin/dev`** avant de coder ; PR vers `dev`.
+
+---
+
+## Convention Maquette (préalable UI)
+
+- **Maquette validée AVANT implémentation** : liste des balances (source, exercice, version, état, preuve),
+  détail d'une balance, visibilité du handoff vers le Bilan.
+
+---
+
+## User Story
+
+En tant que **comptable de cabinet**,
+je veux **consulter les balances déjà produites, savoir à quel point elles sont justifiées, et voir où en
+est leur transmission au Bilan**,
+afin de **choisir en confiance celle sur laquelle j'établis les états.**
+
+---
+
+## Contexte
+
+L'Atelier **produit** (FE-A01/A02) ; cette story **restitue**. Elle s'appuie sur l'API de **réconciliation**
+STORY-099, dont le rôle premier est le **handoff vers `bilan-service`** : c'est la même liste que l'aval
+relit pour se resynchroniser. Côté cabinet, elle répond à « quelles balances ai-je, dans quel état, et
+laquelle part au Bilan ? »
+
+Trois notions du contrat canonique deviennent visibles ici : le **statut de preuve** (à quel point la
+balance est justifiée), l'**état** du cycle de vie, et l'**immutabilité** d'une balance validée.
+
+---
+
+## Contrat réel (relevé à la source, `balance-service@dev`)
+
+- `GET /api/v1/balances` — liste **org-scopée**, antéchronologique. Filtres : `etat`
+  (`BROUILLON|VALIDÉE|REJETÉE`), `source` (`sage|direct|ocr`), `limit` (1–200, défaut 100), `skip`. Une
+  balance d'une autre org n'apparaît **jamais**.
+- `GET /api/v1/balances/{id}` — détail. **404** si absente **ou d'une autre org** (isolation).
+- `BalanceResponseDto` : `id, orgId, exercice{debut,fin}, source, referentiel, version, horodatage,
+  checksum, lignes[], sommaire{totalDebiteur,totalCrediteur,estEquilibre,ecartEquilibre}, statutPreuve,
+  annotationRisque?, etat, horodatageValidation?`.
+- `statutPreuve` ∈ `justifiée | partiellement_estimée | majorite_estimée` (dérivé des `niveauPreuve` des
+  lignes). `annotationRisque` : posée quand la balance est majoritairement estimée.
+- `etat` ∈ `BROUILLON | VALIDÉE | REJETÉE` ; `VALIDÉE` est **terminal** (immuable).
+
+---
+
+## Périmètre
+
+**Inclus**
+
+- **Liste** des balances : source, exercice, version, état, statut de preuve, équilibre — avec les filtres
+  `etat`/`source` et la pagination (`limit`/`skip`).
+- **Détail** d'une balance : lignes, sommaire (totaux + écart, en francs depuis les unités mineures),
+  statut de preuve **expliqué**, `annotationRisque` mise en avant quand présente.
+- **Statut de preuve** rendu lisible : ce que signifie « justifiée » vs « majoritairement estimée », et
+  pourquoi (proportion des `niveauPreuve`).
+- **Visibilité du handoff** : dire clairement que cette liste est la source que le Bilan consomme (FR-A28) —
+  voir *Ce qui est visible du handoff*.
+- Isolation : un `id` d'une autre org donne **404**, traité comme « introuvable », jamais comme une fuite.
+- Types **générés** depuis l'OpenAPI de `:3007`.
+
+**Hors périmètre**
+
+- **La validation** d'une balance (`BROUILLON` → `VALIDÉE`) : **aucune route ne l'expose** (cf. *Trou de
+  contrat*). L'action de validation rejoint cette story **quand la route backend existera** ; d'ici là,
+  l'état est **affiché**, pas modifiable.
+
+---
+
+## ⚠️ Ce qui est visible du handoff — et ce qui ne l'est pas
+
+STORY-099 est une **API de réconciliation** (liste org-scopée), pas un flux d'état de transmission. Le
+service **n'expose aucun champ** « transmis au bilan le… » / « consommé par bilan-service ». La propagation
+réelle passe par Kafka (event de balance), **invisible de cette API**.
+
+→ **Ne pas inventer un statut de handoff par balance.** La « visibilité du handoff » (FR-A28) se lit
+honnêtement : « cette balance validée est **disponible** pour le module Bilan » — un fait dérivé de l'`etat`,
+pas un accusé de réception fabriqué. Si un vrai statut de transmission est voulu, c'est un **ticket
+backend** (champ sur le read-model, ou endpoint côté `bilan-service`).
+
+---
+
+## ⚠️ Trou de contrat partagé avec FE-A02
+
+Pas de route de transition d'état (`marquerEtat` non câblé). Tant qu'elle n'existe pas :
+
+- l'`etat` est **lecture seule** dans cette story ;
+- l'**immutabilité** d'une `VALIDÉE` est un fait à **afficher** (badge, pas d'action d'édition), pas à faire
+  respecter côté front ;
+- **ticket backend** (commun à FE-A02) : route de validation/rejet gardée. Quand elle sera livrée, l'action
+  « Valider » atterrira ici.
+
+---
+
+## Critères d'acceptation
+
+1. La liste montre les balances de l'org, antéchronologiques, avec source / exercice / version / état /
+   statut de preuve / équilibre ; les filtres `etat` et `source` et la pagination fonctionnent.
+2. Le détail d'une balance affiche ses lignes et son sommaire, **montants convertis en francs** depuis les
+   unités mineures (division par 100), **sans arithmétique flottante** sur les totaux.
+3. Le **statut de preuve** est expliqué, pas seulement étiqueté ; `annotationRisque`, quand elle existe,
+   est mise en évidence (une balance majoritairement estimée doit se voir comme telle).
+4. Une balance `VALIDÉE` est signalée **immuable** (badge/état), sans action d'édition proposée.
+5. Le handoff est présenté **honnêtement** : « disponible pour le Bilan » dérivé de l'état, jamais un
+   accusé de transmission fabriqué.
+6. Un `id` inexistant **ou d'une autre org** donne **404**, rendu comme « introuvable » — l'écran ne
+   distingue pas les deux cas (pas de fuite d'existence).
+7. Types générés ; zéro mock sur le chemin réel ; tests unitaires + E2E Playwright.
+
+---
+
+## Notes techniques
+
+- **Réutiliser `apiFetch`** (`src/lib/api/api-client.ts`) : ces routes sont de simples `GET` JSON, pas de
+  multipart.
+- **Unités mineures** : cf. FE-A02 §1 — l'affichage divise par 100, la logique ne somme jamais en flottant.
+- **`limit` plafonné à 200** côté serveur : la pagination doit exister dès cette story, pas être ajoutée
+  après coup si une org a beaucoup de versions.
+
+---
+
+## Integration Gate
+
+Consultation confrontée au vrai service, sur des balances **réellement produites** par FE-A01/A02 :
+la liste org-scopée n'expose que les balances de l'appelant, un `id` d'une autre org donne 404, et le
+statut de preuve / l'annotation de risque affichés correspondent à ceux calculés par le backend.
+
+---
+
+## Definition of Done
+
+- [ ] 7 critères d'acceptation validés ; tests verts.
+- [ ] Aucun statut de handoff fabriqué ; aucune action de validation tant que la route n'existe pas.
+- [ ] `lint` / `typecheck` / `test` / `build` verts (local + CI).
+- [ ] Statut mis à jour dans les trackers.
+- [ ] Commits sur `fe-a03`, préfixés `FE-A03`.
+
+---
+
+## Notes
+
+- Créée le 2026-07-24. Contrat relevé à la source (`balance-service@dev`, `3bf4b5f`).
+- Deux trous de contrat (validation d'état, statut de handoff) tracés ici et en FE-A02 — à ouvrir en
+  tickets backend, pas à contourner côté front.
