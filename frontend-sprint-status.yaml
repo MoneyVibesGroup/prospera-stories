@@ -1,8 +1,19 @@
-version: "3.0.0"
+version: "3.1.0"
 project_name: "prospera-frontend"
 project_level: 3
 current_sprint: 3
-last_updated: "2026-07-22"  # 🆕 TRANCHE « AUTONOMIE DU COMPTE » ajoutée au S6 (FE-019 + FE-020 + AP-09 = 7 pts), moitié frontend de STORY-123/124/125 (backend S16). Origine : l'écran « Mon profil » de FE-015 était en lecture seule faute de routes, puis demande PO du 2026-07-22 sur le mot de passe oublié — cabinet ET admin-panel. ⛔ les 3 stories sont `blocked` tant que le backend S16 n'est pas livré. Précédent état : ✅ BLOQUEUR CORS LEVÉ : STORY-109 livrée côté backend (MNV-109, CORS piloté par CORS_ALLOWED_ORIGINS sur auth/EC/kyc/catalog/document) — vérifié sur origin/dev + préflight 204 avec Access-Control-Allow-Origin. FE-INT-0/1/2/3 MERGÉES dans dev. FE-INT-4 → review (PR #11) avec la 1ʳᵉ DÉMO NAVIGATEUR complète du gate client. Reste au S3 : AP-01 (admin).
+last_updated: "2026-07-24"  # 🔤 v3.1.0 — RENUMÉROTATION EN FORMAT PLAT (demande PO) : les tickets FE-A00→A18 (Atelier) et FE-B00→B15 (Bilan) deviennent FE-024→FE-054. Plus aucun ticket ACTIF en format lettré. + les 15 stories Atelier EXTENDED (ex FE-A04→A18) sont désormais RÉDIGÉES (fichiers), + statuts backend RÉ-ANCRÉS sur l'état réel des services (lecture des contrôleurs origin/dev 2026-07-24) : Atelier CORE (FE-024→027) et Bilan CORE (FE-028→035) = backend DONE ; Atelier EXTENDED (FE-040→054) + Bilan tardif (FE-036→039) = backend todo → `blocked`. Voir la TABLE DE CORRESPONDANCE ci-dessous.
+# ═══ TABLE DE CORRESPONDANCE (format lettré → format plat, v3.1.0 du 2026-07-24) ═══════════
+#   Atelier CORE   : FE-A00→024  FE-A01→025  FE-A02→026  FE-A03→027
+#   Bilan          : FE-B00→028  FE-B01→029  FE-B06→030  FE-B07→031  FE-B08→032
+#                    FE-B09→033  FE-B10→034  FE-B11→035  FE-B12→036  FE-B13→037  FE-B14→038  FE-B15→039
+#   Atelier EXT    : FE-A04→040  FE-A05→041  FE-A06→042  FE-A07→043  FE-A08→044  FE-A09→045  FE-A10→046
+#                    FE-A11→047  FE-A12→048  FE-A13→049  FE-A14→050  FE-A15→051  FE-A16→052  FE-A17→053  FE-A18→054
+#   ⚠️ Anciens fichiers FE-B02→B05 = SUPPRIMÉS le 2026-07-24 (SUPERSEDED par D14 ; historique conservé dans git) :
+#      import/mapping/contrôle/N-1 du Bilan sont passés à l'Atelier — voir FE-025 (import Sage),
+#      FE-026 (saisie+équilibre), FE-048 (mapping) ; le comparatif N/N-1 est natif au Bilan (FE-031/FE-032).
+# ─────────────────────────────────────────────────────────────────────────────────────────
+# Précédent (v3.0.0) : 🆕 TRANCHE « AUTONOMIE DU COMPTE » ajoutée au S6 (FE-019 + FE-020 + AP-09 = 7 pts), moitié frontend de STORY-123/124/125 (backend S16). ✅ BLOQUEUR CORS LEVÉ (STORY-109). FE-INT-0/1/2/3 MERGÉES dans dev ; FE-INT-4 → review (PR #11).
 # (v3.0.0) : RE-SÉQUENCEMENT sur l'état backend RÉEL (vérifié sur les origin/dev, pas sur les checkouts locaux qui étaient périmés). Sprint 2.5 fusionné dans le sprint 3 ; sprints 3→6 re-découpés en tranches VERTICALES admin+client ; anciens sprints 5→14 décalés en 7→16 ; AP-08/FE-015/FE-016 ajoutées.
 
 # ═══════════════════════════════════════════════════════════════════════════════════════
@@ -36,7 +47,7 @@ last_updated: "2026-07-22"  # 🆕 TRANCHE « AUTONOMIE DU COMPTE » ajoutée au
 #   document-service :3006 — OCR KYC (consomme kyc.document.uploaded → document.extrait :
 #                            comparaison déclaré↔lu ; enrichit la revue KYC)
 #   bilan-service :3004    — SQUELETTE SEUL (scaffold + read-models + gate + ReferentielLoader).
-#                            AUCUN moteur comptable ⇒ rien à afficher ⇒ FE-B00 NON planifiée ici.
+#                            AUCUN moteur comptable ⇒ rien à afficher ⇒ FE-028 NON planifiée ici.
 #   ⚡ STORY-075 DONE (2026-07-14) : stack dev 4 services RS256 assemblé + round-trip prouvé.
 #      C'ÉTAIT LE SEUL BLOQUEUR DE L'INTEGRATION GATE. Il n'y a plus rien à attendre.
 #   ⚡ CONTRAT FIGÉ PAR STORY-075 : préfixe global RÉEL = **/api/v1** (setGlobalPrefix('api')
@@ -221,10 +232,10 @@ sprints:
     goal: "Module Atelier côté production de balance : shell + gate @RequiresBalanceAccess, import de balance Sage (Excel/CSV, aperçu dry-run), saisie manuelle avec contrôle d'équilibre, consultation + validation (immuable) de la balance canonique."
     backend_dependency: "balance-service CORE STORY-076/077/101/086/099 — backend S11 (glissé du S10 par D15 : insertion du RBAC plateforme EPIC-025)"
     stories:
-      - { id: "FE-A00", app: "client", title: "Module Atelier : shell, navigation, gate @RequiresBalanceAccess (KYC + entitlement) + choix de source (Sage / cahiers / directe)", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S11", backend_ref: "STORY-076,077", note: "📄 Fichier de story RÉDIGÉ 2026-07-24 (frontend-stories/FE-A00.md) — contrat balance-service relevé à la source. ⚠️ ne PAS bâtir le gate sur GET /whoami/balance-access (déclaré provisoire dans le service) : reflet UI sur l'entitlement (FE-014), autorité = 403 des routes métier. Préfixe logique /atelier→:3007 à trancher (collision /whoami avec bilan-service)." }
-      - { id: "FE-A01", app: "client", title: "Import de balance Sage 100 (upload Excel/CSV, détection format, aperçu dry-run, mapping colonnes) — FR-A12", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S11", backend_ref: "STORY-086", note: "📄 Fichier de story RÉDIGÉ 2026-07-24 (FE-A01.md). Remplace l'ancien FE-B02 (STORY-050 EPIC-009 SUPERSEDED par D14). Contrat réel : POST /balance/import/sage multipart, dry-run PAR DÉFAUT (200 aperçu sans persistance) → dryRun=false (201 créée / 200 idempotent). ⚠️ TROU DE CONTRAT : mappingProfile déclaré mais NON consommé par le service → PAS d'UI de mapping ici (c'est FE-A12), ticket backend à ouvrir. Réutiliser uploadMultipart (FE-023)." }
-      - { id: "FE-A02", app: "client", title: "Saisie manuelle de balance + contrôle d'équilibre live (contrat canonique, brouillon/validée) — FR-A25/A27", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S11", backend_ref: "STORY-101", note: "📄 Fichier de story RÉDIGÉ 2026-07-24 (FE-A02.md). POST /balances (contrat canonique). ⚠️ DEUX CONTRAINTES DURES : (1) montants ENTIERS en unités mineures XOF, zéro flottant (le backend refuse non-entier/négatif/>2^53) ; (2) checksum SHA-256 OBLIGATOIRE recalculé serveur → porter computeBalanceChecksum en TS avec test de PARITÉ (tri par point de code, jamais localeCompare). ⚠️ TROU DE CONTRAT : marquerEtat NON câblé → livre un BROUILLON, pas de validation d'état (ticket backend)." }
-      - { id: "FE-A03", app: "client", title: "Consultation balance stockée + statut de preuve + validation (immuable) + visibilité du handoff bilan-service — FR-A28", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S11", backend_ref: "STORY-099,101", note: "📄 Fichier de story RÉDIGÉ 2026-07-24 (FE-A03.md). GET /balances (liste org-scopée, filtres etat/source, pagination limit≤200) + GET /balances/{id} (404 si absente OU autre org). ⚠️ STORY-099 est une API de RÉCONCILIATION, PAS un flux de statut de handoff : ne PAS fabriquer un accusé « transmis au bilan » — « disponible pour le Bilan » dérivé de l'etat. ⚠️ validation d'état = même trou de contrat que FE-A02." }
+      - { id: "FE-024", app: "client", title: "Module Atelier : shell, navigation, gate @RequiresBalanceAccess (KYC + entitlement) + choix de source (Sage / cahiers / directe)", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-076,077", note: "📄 Fichier de story RÉDIGÉ 2026-07-24 (frontend-stories/FE-024.md) — contrat balance-service relevé à la source. ⚠️ ne PAS bâtir le gate sur GET /whoami/balance-access (déclaré provisoire dans le service) : reflet UI sur l'entitlement (FE-014), autorité = 403 des routes métier. Préfixe logique /atelier→:3007 à trancher (collision /whoami avec bilan-service)." }
+      - { id: "FE-025", app: "client", title: "Import de balance Sage 100 (upload Excel/CSV, détection format, aperçu dry-run, mapping colonnes) — FR-A12", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-086", note: "📄 Fichier de story RÉDIGÉ 2026-07-24 (FE-025.md). Remplace l'ancien FE-B02 (STORY-050 EPIC-009 SUPERSEDED par D14). Contrat réel : POST /balance/import/sage multipart, dry-run PAR DÉFAUT (200 aperçu sans persistance) → dryRun=false (201 créée / 200 idempotent). ⚠️ TROU DE CONTRAT : mappingProfile déclaré mais NON consommé par le service → PAS d'UI de mapping ici (c'est FE-048), ticket backend à ouvrir. Réutiliser uploadMultipart (FE-023)." }
+      - { id: "FE-026", app: "client", title: "Saisie manuelle de balance + contrôle d'équilibre live (contrat canonique, brouillon/validée) — FR-A25/A27", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-101", note: "📄 Fichier de story RÉDIGÉ 2026-07-24 (FE-026.md). POST /balances (contrat canonique). ⚠️ DEUX CONTRAINTES DURES : (1) montants ENTIERS en unités mineures XOF, zéro flottant (le backend refuse non-entier/négatif/>2^53) ; (2) checksum SHA-256 OBLIGATOIRE recalculé serveur → porter computeBalanceChecksum en TS avec test de PARITÉ (tri par point de code, jamais localeCompare). ⚠️ TROU DE CONTRAT : marquerEtat NON câblé → livre un BROUILLON, pas de validation d'état (ticket backend)." }
+      - { id: "FE-027", app: "client", title: "Consultation balance stockée + statut de preuve + validation (immuable) + visibilité du handoff bilan-service — FR-A28", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-099,101", note: "📄 Fichier de story RÉDIGÉ 2026-07-24 (FE-027.md). GET /balances (liste org-scopée, filtres etat/source, pagination limit≤200) + GET /balances/{id} (404 si absente OU autre org). ⚠️ STORY-099 est une API de RÉCONCILIATION, PAS un flux de statut de handoff : ne PAS fabriquer un accusé « transmis au bilan » — « disponible pour le Bilan » dérivé de l'etat. ⚠️ validation d'état = même trou de contrat que FE-026." }
 
   # ── S8 : Bilan — référentiels/mapping + liasse OHADA (cabinet) — CONSOMME la balance (backend S11-12) ──
   - sprint_number: 8
@@ -234,11 +245,11 @@ sprints:
     goal: "Le Bilan CONSOMME la balance produite par l'Atelier. Table de passage comptes→postes (arbitrage non mappés, surcharges) + restitution de la liasse : Bilan, Compte de résultat, TFT/annexes, contrôles de cohérence (N/N-1)."
     backend_dependency: "bilan-service EPIC-010 (STORY-054→058, S11) + EPIC-011 (STORY-059→063, S12)"
     stories:
-      - { id: "FE-B00", app: "client", title: "Module Bilan : shell, navigation, gate @RequiresBilanAccess côté UI (entitlement + KYC) + sélection de la balance source (Atelier)", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "S8", backend_ref: "STORY-035,037" }
-      - { id: "FE-B01", app: "client", title: "Gestion des exercices comptables (CRUD, dates, chaînage N/N-1) — FR-016", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "S13", backend_ref: "STORY-066", note: "⚠ la balance est keyée orgId+exercice (STORY-101, S10) mais les exercices bilan (STORY-066) sont backend S13 → exposer un exercice minimal dès l'Atelier CORE, ou avancer STORY-066 côté backend" }
-      - { id: "FE-B06", app: "client", title: "Table de passage + arbitrage comptes non mappés + surcharges org + badge référentiel — FR-005/006/007/008", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "S11", backend_ref: "STORY-054,055,056,057,058" }
-      - { id: "FE-B07", app: "client", title: "Bilan (actif/passif) N/N-1 + contrôle actif=passif — FR-009", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "S12", backend_ref: "STORY-059" }
-      - { id: "FE-B08", app: "client", title: "Compte de résultat N/N-1 — FR-010", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "S12", backend_ref: "STORY-060" }
+      - { id: "FE-028", app: "client", title: "Module Bilan : shell, navigation, gate @RequiresBilanAccess côté UI (entitlement + KYC) + sélection de la balance source (Atelier)", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-035,037", note: "Backend STORY-035/037 done (scaffold + gate @RequiresBilanAccess). ⚠️ BLOCAGE OPÉRATIONNEL : bilan-service ne COMPILE PAS sur origin/dev — le barrel src/modules/bilan/referentiel/index.ts (commit 9ae9b04) réexporte notes-meta-coherence et referentiels-additionnels-coherence qui n'existent qu'en .spec.ts (55 erreurs TS, :3004 ne démarre pas). À corriger (ticket backend) avant gen:api / Integration Gate. Reflet UI du gate ; autorité = 403 backend." }
+      - { id: "FE-029", app: "client", title: "Gestion des exercices comptables (CRUD, dates, chaînage N/N-1) — FR-016", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-066", note: "⚠ la balance est keyée orgId+exercice (STORY-101, S10) mais les exercices bilan (STORY-066) sont backend S13 → exposer un exercice minimal dès l'Atelier CORE, ou avancer STORY-066 côté backend" }
+      - { id: "FE-030", app: "client", title: "Table de passage + arbitrage comptes non mappés + surcharges org + badge référentiel — FR-005/006/007/008", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-054,055,056,057,058", note: "Backend STORY-054-058 done. Table de passage comptes→postes : routes réelles /bilan/mapping-overrides (proposer, :id/valider, :id/rejeter, liste) + diagnostic /bilan/table-de-passage/dry-run. Balance amont produite par l'Atelier (FE-027)." }
+      - { id: "FE-031", app: "client", title: "Bilan (actif/passif) N/N-1 + contrôle actif=passif — FR-009", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-059", note: "Backend STORY-059 done. Bilan actif/passif N/N-1 : dry-run POST /bilan/etats/bilan/dry-run + jeu-etats. Comparatif N/N-1 NATIF (deux exercices chaînés FE-029), plus de story import N-1 séparée." }
+      - { id: "FE-032", app: "client", title: "Compte de résultat N/N-1 — FR-010", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-060", note: "Backend STORY-060 done. Compte de résultat N/N-1 : dry-run POST /bilan/etats/compte-resultat/dry-run + jeu-etats." }
 
   # ── S9 : Bilan — TFT/annexes + validation/immutabilité + prévisionnel (cabinet) — backend S12-14 ──
   - sprint_number: 9
@@ -248,10 +259,10 @@ sprints:
     goal: "TFT/TAFIRE + notes annexes + contrôles de cohérence ; cycle brouillon→validé (l'humain valide) + snapshot figé/versions + audit ; prévisionnel : hypothèses, projection 3 ans, trésorerie 12 mois, scénarios."
     backend_dependency: "bilan-service EPIC-011 (063), EPIC-012 (064→067, S13), EPIC-013 (068→071, S13-14)"
     stories:
-      - { id: "FE-B09", app: "client", title: "TFT/TAFIRE + notes annexes + contrôles de cohérence de la liasse — FR-011/012/013", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "S12", backend_ref: "STORY-061,062,063" }
-      - { id: "FE-B10", app: "client", title: "Cycle brouillon→validé + snapshot immuable/versions + piste d'audit — FR-014/015/017", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "S13", backend_ref: "STORY-064,065,067" }
-      - { id: "FE-B11", app: "client", title: "Hypothèses de prévisionnel paramétrables (croissance, marges, BFR, invest., financement) — FR-018", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "S13", backend_ref: "STORY-068" }
-      - { id: "FE-B12", app: "client", title: "Projection annuelle 3 ans + trésorerie mensuel 12 mois + scénarios comparés — FR-019/020/021", epic: "FE-EPIC-005", points: 8, status: "ready-for-dev", backend_ready: "S16", backend_ref: "STORY-069,070,071" }
+      - { id: "FE-033", app: "client", title: "TFT/TAFIRE + notes annexes + contrôles de cohérence de la liasse — FR-011/012/013", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-061,062,063", note: "Backend STORY-061/062/063 done. TFT/TAFIRE + notes annexes + contrôles de cohérence : dry-run /bilan/etats/tft, /etats/notes-annexes, /etats/controles." }
+      - { id: "FE-034", app: "client", title: "Cycle brouillon→validé + snapshot immuable/versions + piste d'audit — FR-014/015/017", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-064,065,067", note: "Backend STORY-064/065/067 done. Cycle brouillon→validé + snapshot immuable/versions + audit : POST /bilan/etats, :id/recalculer, :id/valider, :id/rouvrir, GET :id/versions, :id/versions/:version + GET /bilan/audit." }
+      - { id: "FE-035", app: "client", title: "Hypothèses de prévisionnel paramétrables (croissance, marges, BFR, invest., financement) — FR-018", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "done", backend_ref: "STORY-068", note: "Backend STORY-068 done. Hypothèses de prévisionnel : POST/GET /bilan/hypotheses, GET/PUT :id." }
+      - { id: "FE-036", app: "client", title: "Projection annuelle 3 ans + trésorerie mensuel 12 mois + scénarios comparés — FR-019/020/021", epic: "FE-EPIC-005", points: 8, status: "blocked", backend_ready: "todo", backend_ref: "STORY-069,070,071", note: "⚠️ BLOQUÉE : projection annuelle 3 ans + trésorerie 12 mois. STORY-069 done (projection GET /bilan/hypotheses/:id/projection existe) MAIS STORY-070 seulement `defined` et STORY-071 SANS fichier de story → contrat incomplet. Débloquer quand 070/071 livrées." }
 
   # ── S10 : Bilan — consultation + export + durcissement (cabinet) — backend S14 ── 🏁 Module 1 UI
   - sprint_number: 10
@@ -261,9 +272,9 @@ sprints:
     goal: "Consultation des états/prévisionnel (N/N-1, versions) + comparaison inter-exercices + export PDF/Excel fidèle au snapshot + e2e parcours Bilan + a11y/i18n. 🏁 Module 1 côté UI."
     backend_dependency: "bilan-service EPIC-014 (STORY-072→074) — backend S14"
     stories:
-      - { id: "FE-B13", app: "client", title: "Consultation des états & prévisionnel (N/N-1, versions) + comparaison inter-exercices — FR-022/024", epic: "FE-EPIC-005", points: 3, status: "ready-for-dev", backend_ready: "S16", backend_ref: "STORY-072,074" }
-      - { id: "FE-B14", app: "client", title: "Export PDF / Excel de la liasse et du prévisionnel (fidèle au snapshot) — FR-023", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "S16", backend_ref: "STORY-073" }
-      - { id: "FE-B15", app: "client", title: "e2e parcours Bilan complet (balance→liasse→validation→export) + a11y + i18n + durcissement", epic: "FE-EPIC-005", points: 5, status: "ready-for-dev", backend_ready: "S16", backend_ref: "jalon Module 1" }
+      - { id: "FE-037", app: "client", title: "Consultation des états & prévisionnel (N/N-1, versions) + comparaison inter-exercices — FR-022/024", epic: "FE-EPIC-005", points: 3, status: "blocked", backend_ready: "todo", backend_ref: "STORY-072,074", note: "⚠️ BLOQUÉE : consultation états & prévisionnel (N/N-1, versions). STORY-072 et STORY-074 SANS fichier de story backend → non spécifiées. À cadrer côté backend d'abord." }
+      - { id: "FE-038", app: "client", title: "Export PDF / Excel de la liasse et du prévisionnel (fidèle au snapshot) — FR-023", epic: "FE-EPIC-005", points: 5, status: "blocked", backend_ready: "todo", backend_ref: "STORY-073", note: "⚠️ BLOQUÉE : export PDF/Excel de la liasse et du prévisionnel. STORY-073 SANS fichier de story backend. C'est aussi le point d'application de logoUrl/brandColor (FE-023) aux exports — à ouvrir quand l'export existera." }
+      - { id: "FE-039", app: "client", title: "e2e parcours Bilan complet (balance→liasse→validation→export) + a11y + i18n + durcissement", epic: "FE-EPIC-005", points: 5, status: "blocked", backend_ready: "todo", backend_ref: "jalon Module 1", note: "⚠️ BLOQUÉE : jalon e2e Bilan complet (balance→liasse→validation→export). Dépend de toute la chaîne Bilan livrée ET de bilan-service qui compile." }
 
   # ── S11 : Atelier Balance EXTENDED — profil société & 2 axes & OCR Statuts/CFE (backend S15) ──
   - sprint_number: 11
@@ -273,9 +284,9 @@ sprints:
     goal: "Profil société (identité fiscale complète), détermination des 2 axes (système comptable SN/SMT + régime fiscal), et pré-remplissage du profil par OCR des Statuts + carte CFE."
     backend_dependency: "balance-service EPIC-018/019 (STORY-078,079,080,081) — backend S15 ; OCR étend document-service"
     stories:
-      - { id: "FE-A04", app: "client", title: "Profil société : CRUD (NIF, RCCM, CNSS, actionnaires, forme juridique, gérant) — FR-A01", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S15", backend_ref: "STORY-079" }
-      - { id: "FE-A05", app: "client", title: "OCR Statuts + carte CFE → profil pré-rempli éditable — FR-A02", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S15", backend_ref: "STORY-081", note: "consomme l'extension OCR du document-service" }
-      - { id: "FE-A06", app: "client", title: "Détermination des 2 axes (système SN/SMT + régime fiscal) proposée selon pays+objet+CA + choix éditable + badge référentiel actif — FR-A03", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S15", backend_ref: "STORY-080,078" }
+      - { id: "FE-040", app: "client", title: "Profil société : CRUD (NIF, RCCM, CNSS, actionnaires, forme juridique, gérant) — FR-A01", epic: "FE-EPIC-007", points: 5, status: "blocked", backend_ready: "todo", backend_ref: "STORY-079", note: "⚠️ BLOQUÉE : profil société CRUD. Backend STORY-079 `ready-for-dev` (non construit)." }
+      - { id: "FE-041", app: "client", title: "OCR Statuts + carte CFE → profil pré-rempli éditable — FR-A02", epic: "FE-EPIC-007", points: 3, status: "blocked", backend_ready: "todo", backend_ref: "STORY-081", note: "consomme l'extension OCR du document-service" }
+      - { id: "FE-042", app: "client", title: "Détermination des 2 axes (système SN/SMT + régime fiscal) proposée selon pays+objet+CA + choix éditable + badge référentiel actif — FR-A03", epic: "FE-EPIC-007", points: 3, status: "blocked", backend_ready: "todo", backend_ref: "STORY-080,078", note: "⚠️ BLOQUÉE : 2 axes (SN/SMT + régime). NUANCE : GET /referentiels/actifs (STORY-078) DÉJÀ livré et consommable ; la PROPOSITION d'axes (STORY-080) non." }
 
   # ── S12 : Atelier EXTENDED — construction chemin A (cahiers + OCR + rattachement plan comptable) — backend S16 ──
   - sprint_number: 12
@@ -285,10 +296,10 @@ sprints:
     goal: "Construction de la balance pour la PME informelle : cahiers de recettes/dépenses (saisie mensuelle + catégories), OCR de captures/factures, rattachement au plan comptable SYSCOHADA."
     backend_dependency: "balance-service EPIC-020 (STORY-082→085) — backend S16 ; OCR étend document-service"
     stories:
-      - { id: "FE-A07", app: "client", title: "Cahier de recettes (saisie + rangement par mois + rattachement produits classe 7) — FR-A08", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S16", backend_ref: "STORY-082" }
-      - { id: "FE-A08", app: "client", title: "Cahier de dépenses (catégories éditables + rattachement charges classe 6) — FR-A09", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S16", backend_ref: "STORY-083" }
-      - { id: "FE-A09", app: "client", title: "OCR captures & factures → montants éditables, par mois — FR-A10", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S16", backend_ref: "STORY-084" }
-      - { id: "FE-A10", app: "client", title: "Rattachement au plan comptable (transaction → compte SYSCOHADA) + ventilation — FR-A11", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S16", backend_ref: "STORY-085" }
+      - { id: "FE-043", app: "client", title: "Cahier de recettes (saisie + rangement par mois + rattachement produits classe 7) — FR-A08", epic: "FE-EPIC-007", points: 5, status: "blocked", backend_ready: "todo", backend_ref: "STORY-082", note: "⚠️ BLOQUÉE : cahier de recettes (classe 7). Backend STORY-082 `ready-for-dev`." }
+      - { id: "FE-044", app: "client", title: "Cahier de dépenses (catégories éditables + rattachement charges classe 6) — FR-A09", epic: "FE-EPIC-007", points: 5, status: "blocked", backend_ready: "todo", backend_ref: "STORY-083", note: "⚠️ BLOQUÉE : cahier de dépenses (classe 6, catégories éditables). Backend STORY-083 `ready-for-dev`." }
+      - { id: "FE-045", app: "client", title: "OCR captures & factures → montants éditables, par mois — FR-A10", epic: "FE-EPIC-007", points: 3, status: "blocked", backend_ready: "todo", backend_ref: "STORY-084", note: "⚠️ BLOQUÉE : OCR captures/factures → cahiers. Backend STORY-084 `ready-for-dev`. Étend document-service." }
+      - { id: "FE-046", app: "client", title: "Rattachement au plan comptable (transaction → compte SYSCOHADA) + ventilation — FR-A11", epic: "FE-EPIC-007", points: 3, status: "blocked", backend_ready: "todo", backend_ref: "STORY-085", note: "⚠️ BLOQUÉE : rattachement plan comptable → balance canonique. Backend STORY-085 `ready-for-dev` (produit une balance source ocr via STORY-101 livré)." }
 
   # ── S13 : Atelier EXTENDED — reprise à-nouveaux + profil import + rapprochement bancaire — backend S17 ──
   - sprint_number: 13
@@ -298,9 +309,9 @@ sprints:
     goal: "Reprise de balance d'ouverture/à-nouveaux, profil d'import réutilisable, import de relevés (banque + mobile money) et rapprochement (état de rapprochement + situation de compte)."
     backend_dependency: "balance-service EPIC-021 (087,088) + EPIC-022 (089,090) — backend S17. (STORY-102 ingestion directe = consumer backend, pas d'UI)"
     stories:
-      - { id: "FE-A11", app: "client", title: "Reprise de balance d'ouverture / à-nouveaux + continuité — FR-A13", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S17", backend_ref: "STORY-087" }
-      - { id: "FE-A12", app: "client", title: "Profil d'import & mapping colonnes réutilisable — FR-A14", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S17", backend_ref: "STORY-088", note: "amende FE-A01 (mapping Sage)" }
-      - { id: "FE-A13", app: "client", title: "Import relevés bancaires (banque + mobile money TMoney/Flooz) + rapprochement (relevés ↔ cahiers) + état de rapprochement + situation de compte — FR-A15/A16/A17", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S17", backend_ref: "STORY-089,090" }
+      - { id: "FE-047", app: "client", title: "Reprise de balance d'ouverture / à-nouveaux + continuité — FR-A13", epic: "FE-EPIC-007", points: 3, status: "blocked", backend_ready: "todo", backend_ref: "STORY-087", note: "⚠️ BLOQUÉE : à-nouveaux / continuité. Backend STORY-087 `ready-for-dev`." }
+      - { id: "FE-048", app: "client", title: "Profil d'import & mapping colonnes réutilisable — FR-A14", epic: "FE-EPIC-007", points: 3, status: "blocked", backend_ready: "todo", backend_ref: "STORY-088", note: "amende FE-025 (mapping Sage)" }
+      - { id: "FE-049", app: "client", title: "Import relevés bancaires (banque + mobile money TMoney/Flooz) + rapprochement (relevés ↔ cahiers) + état de rapprochement + situation de compte — FR-A15/A16/A17", epic: "FE-EPIC-007", points: 5, status: "blocked", backend_ready: "todo", backend_ref: "STORY-089,090", note: "⚠️ BLOQUÉE : import relevés (banque + TMoney/Flooz) + rapprochement. Backends STORY-089/090 `ready-for-dev`." }
 
   # ── S14 : Atelier EXTENDED — moteur fiscal (résultat fiscal, IS, TVA, provisions, TPU) — backend S18 ──
   - sprint_number: 14
@@ -310,8 +321,8 @@ sprints:
     goal: "Restitution du calcul fiscal : résultat fiscal (réintégrations/déductions, codes DSF), liquidation IS=max(MFP,IS) + acomptes, TVA & taxes, provisions fiscales, régime synthétique/TPU."
     backend_dependency: "balance-service EPIC-023 (STORY-091→095) — backend S18"
     stories:
-      - { id: "FE-A14", app: "client", title: "Résultat fiscal : réintégrations/déductions (codes DSF) — visualisation + ajustements éditables — FR-A18", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S18", backend_ref: "STORY-091" }
-      - { id: "FE-A15", app: "client", title: "Liquidation IS = max(MFP, IS) + acomptes + TVA/taxes + provisions (44/89) + TPU (synthétique) — FR-A19/A20/A21", epic: "FE-EPIC-007", points: 8, status: "ready-for-dev", backend_ready: "S18", backend_ref: "STORY-092,093,094,095" }
+      - { id: "FE-050", app: "client", title: "Résultat fiscal : réintégrations/déductions (codes DSF) — visualisation + ajustements éditables — FR-A18", epic: "FE-EPIC-007", points: 5, status: "blocked", backend_ready: "todo", backend_ref: "STORY-091", note: "⚠️ BLOQUÉE : résultat fiscal (réintégrations/déductions codes DSF). Backend STORY-091 `ready-for-dev`. Paquet fiscal (référentiel) déjà résolu via STORY-078." }
+      - { id: "FE-051", app: "client", title: "Liquidation IS = max(MFP, IS) + acomptes + TVA/taxes + provisions (44/89) + TPU (synthétique) — FR-A19/A20/A21", epic: "FE-EPIC-007", points: 8, status: "blocked", backend_ready: "todo", backend_ref: "STORY-092,093,094,095", note: "⚠️ BLOQUÉE : liquidation IS=max(MFP,IS) + acomptes + TVA + provisions + TPU. Backends STORY-092/093/094/095 `ready-for-dev`." }
 
   # ── S15 : Atelier EXTENDED — conseil fiscal + contrôles/statut de preuve + e2e — backend S19 ── 🏁 Atelier UI
   - sprint_number: 15
@@ -321,9 +332,9 @@ sprints:
     goal: "Simulation & conseil fiscal LÉGAL (scénarios d'optimisation, comparatif « déposé vs optimisé », dossier de justification + garde-fous NFR-A04), contrôles d'intégrité/cohérence + statut de preuve affiché honnêtement, e2e Atelier. 🏁 Atelier Balance côté UI."
     backend_dependency: "balance-service EPIC-024 (STORY-096,097,098,100) — backend S19"
     stories:
-      - { id: "FE-A16", app: "client", title: "Conseil fiscal : scénarios d'optimisation légale + comparatif « déposé vs optimisé » + dossier de justification (base légale + pièce) + GARDE-FOUS conformité — FR-A22/A23/A24", epic: "FE-EPIC-007", points: 5, status: "ready-for-dev", backend_ready: "S19", backend_ref: "STORY-096,097", note: "NFR-A04 : afficher la base légale + traçabilité de chaque levier ; jamais présenter une minoration non justifiée — optimiser légalement, jamais frauder" }
-      - { id: "FE-A17", app: "client", title: "Contrôles d'intégrité/cohérence (Actif=Passif, articulations) + statut de preuve (badges justifiée/partiellement/estimée + annotations de risque) — FR-A25/A26/A27", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S19", backend_ref: "STORY-098" }
-      - { id: "FE-A18", app: "client", title: "e2e Atelier (parcours PME cahiers/OCR + cabinet Sage → balance → fiscal → conseil) + a11y + i18n + durcissement", epic: "FE-EPIC-007", points: 3, status: "ready-for-dev", backend_ready: "S19", backend_ref: "STORY-100" }
+      - { id: "FE-052", app: "client", title: "Conseil fiscal : scénarios d'optimisation légale + comparatif « déposé vs optimisé » + dossier de justification (base légale + pièce) + GARDE-FOUS conformité — FR-A22/A23/A24", epic: "FE-EPIC-007", points: 5, status: "blocked", backend_ready: "todo", backend_ref: "STORY-096,097", note: "NFR-A04 : afficher la base légale + traçabilité de chaque levier ; jamais présenter une minoration non justifiée — optimiser légalement, jamais frauder" }
+      - { id: "FE-053", app: "client", title: "Contrôles d'intégrité/cohérence (Actif=Passif, articulations) + statut de preuve (badges justifiée/partiellement/estimée + annotations de risque) — FR-A25/A26/A27", epic: "FE-EPIC-007", points: 3, status: "blocked", backend_ready: "todo", backend_ref: "STORY-098", note: "⚠️ BLOQUÉE : contrôles intégrité/cohérence + statut de preuve. Backend STORY-098 `ready-for-dev` (statutPreuve déjà au contrat STORY-101)." }
+      - { id: "FE-054", app: "client", title: "e2e Atelier (parcours PME cahiers/OCR + cabinet Sage → balance → fiscal → conseil) + a11y + i18n + durcissement", epic: "FE-EPIC-007", points: 3, status: "blocked", backend_ready: "todo", backend_ref: "STORY-100", note: "⚠️ BLOQUÉE : jalon e2e Atelier (cahiers/OCR + Sage → balance → fiscal → handoff). Dépend de toute la chaîne FE-040→053." }
 
   # ── S16 (JIT) : Abonnement & paiement (cabinet) — aligné paiement-service Module 2 (backend S20) ──
   #    Différé (DG-1 : entitlements octroyés manuellement via admin-panel avant paiement).
@@ -346,9 +357,9 @@ epics:
     - { id: "FE-EPIC-002", name: "Utilisateurs & profil du cabinet (+ Integration Gate FE-INT-0..3)", stories: "FE-007,008,015,016 ; FE-INT-0..3", status: "in-progress" }
     - { id: "FE-EPIC-003", name: "KYC & onboarding (+ restitution OCR au cabinet)", stories: "FE-009,010,018 ; FE-INT-2,3", status: "in-progress" }
     - { id: "FE-EPIC-004", name: "Abonnement & paiement (JIT, backend S20)", stories: "FE-011,012,013", status: "ready-for-dev" }
-    - { id: "FE-EPIC-005", name: "Bilan & Prévisionnel (consomme la balance ; backend bilan-service EPIC-010→014)", stories: "FE-B00,B01,B06→B15", status: "ready-for-dev" }
+    - { id: "FE-EPIC-005", name: "Bilan & Prévisionnel (consomme la balance ; backend bilan-service EPIC-010→014)", stories: "FE-028,B01,B06→B15", status: "ready-for-dev" }
     - { id: "FE-EPIC-006", name: "Accès modules & entitlements (shell config-driven)", stories: "FE-014,017", status: "ready-for-dev" }
-    - { id: "FE-EPIC-007", name: "Atelier Balance (amont du Bilan : import Sage/saisie/cahiers/OCR/rapprochement/fiscal/conseil ; backend balance-service EPIC-017→024)", stories: "FE-A00→A18", status: "ready-for-dev" }
+    - { id: "FE-EPIC-007", name: "Atelier Balance (amont du Bilan : import Sage/saisie/cahiers/OCR/rapprochement/fiscal/conseil ; backend balance-service EPIC-017→024)", stories: "FE-024→A18", status: "ready-for-dev" }
   admin:
     - { id: "AP-EPIC-000", name: "Socle admin & sécurité (BFF, login PLATFORM_ADMIN, RBAC plateforme perms[] — D15/EPIC-025)", stories: "AP-01,08", status: "ready-for-dev" }
     - { id: "AP-EPIC-001", name: "Orgs & revue KYC", stories: "AP-02,03", status: "ready-for-dev" }
@@ -367,9 +378,9 @@ deferred:
 
 # ── Récapitulatif ──
 summary:
-  total_stories: 61          # +6 en v3.0.0 : AP-08, FE-015, FE-016, FE-017 (both), FE-018 (audit backend 2026-07-17) — FE-B00 conservée mais NON planifiée
+  total_stories: 61          # +6 en v3.0.0 : AP-08, FE-015, FE-016, FE-017 (both), FE-018 (audit backend 2026-07-17) — FE-028 conservée mais NON planifiée
   by_app:
-    client: 52               # FE-001→018 (15) + FE-INT-0..3 (4) + FE-B00,B01,B06→B15 (12) + FE-A00→A18 (19) + FE-011/012/013 (3) — moins doublons de compte
+    client: 52               # FE-001→018 (15) + FE-INT-0..3 (4) + FE-028,B01,B06→B15 (12) + FE-024→A18 (19) + FE-011/012/013 (3) — moins doublons de compte
     admin: 8                 # AP-01→08
     both: 1                  # FE-017 (e2e inter-apps)
   points:
