@@ -1396,7 +1396,6 @@ sprints:
         story_path: "docs/stories/STORY-114.md"
         assigned_to: "vivian"
         completed_date: "2026-07-20"
-        assigned_to: null
 
   - sprint_number: 14
     start_date: "2026-12-31"
@@ -1455,8 +1454,8 @@ sprints:
     end_date: "2027-01-28"
     capacity_points: 34
     committed_points: 32  # ⬆️ 24→32 le 2026-07-23 (RÉCONCILIATION — le compteur était périmé de 13 pts) : il ne comptait ni 120/121/122 (ajoutés le 2026-07-21 sans le remonter, +13) ni STORY-132. Le sprint portait donc RÉELLEMENT 37 pts pour 34 de capacité sans que rien ne le signale — c'est le commentaire du S16 qui l'a révélé. ARBITRAGE 2026-07-23 (user) : +3 STORY-132 (dette FR-018 AC-2, prérequis de 073) et −8 par report au S16 de STORY-074 (3, seule Could Have du lot) et STORY-122 (5, incrément 2 ; son incrément 1 reste livré). 37 + 3 − 8 = 32 ≤ 34 ✅. ⚠️ Leçon : remonter committed_points À CHAQUE ajout de story, sinon le dépassement devient invisible.
-    completed_points: 10  # STORY-069 (FR-019, projection annuelle 3 ans) le 2026-07-23 + STORY-070 (FR-020, trésorerie mensuelle 12 mois) le 2026-07-24
-    status: "in_progress"  # 2026-07-24 : STORY-069 et STORY-070 done, STORY-071 à cadrer
+    completed_points: 13  # STORY-069 (FR-019, projection annuelle 3 ans) le 2026-07-23 + STORY-070 (FR-020, trésorerie mensuelle 12 mois) + STORY-071 (FR-021, scénarios comparés) le 2026-07-24
+    status: "in_progress"  # 2026-07-24 : STORY-069/070/071 done (071 = dev DeepSeek → revue+correctifs bloquants+vérif docker+sécu+PR #29 mergée). Reste S15 : 072 (consultation), 132 (versions d'hypothèses), 073 (export) + increment 2 de 120/121/122
     goal: "Bilan livré 🏁 : Prévisionnel (annuel 3 ans + trésorerie mensuel 12 mois + scénarios) & Consultation/Export (EPIC-013/014). Module 1 complet en prod interne MV."
     stories:
       - story_id: "STORY-069"
@@ -1464,7 +1463,7 @@ sprints:
         epic: "EPIC-013"
         points: 5
         service: "bilan-service"
-        status: "done"  # 2026-07-23 LIVRÉE — projection annuelle 3 ans dérivée PURE de (snapshot validé 065 + hypothèses 068) : CR prévisionnel, plan de trésorerie annuel, bilan simplifié, équilibre ecart=0 par construction (arrondis inclus). Ancrage référentiel-agnostique (P7) via ancrage.ts, 4 agrégats, zéro code de poste. Aucune persistance, aucune écriture (prouvé en docker). Revue : 4 constats corrigés dont 2 angles morts de test (equilibre codé en dur, BFR figé) ; 5 mutations rouges. Sécurité : 0 vulnérabilité. PR #26 rebase-merge, HEAD 0d2f7bc. Points ouverts remontés : FR-023 exigera de figer les entrées (hypothèses écrasées en place par 068), invariant "même base" à porter par 071.
+        status: "done"  #✅ 2026-07-23 LIVRÉE — projection annuelle 3 ans dérivée PURE de (snapshot validé 065 + hypothèses 068) : CR prévisionnel, plan de trésorerie annuel, bilan simplifié, équilibre ecart=0 par construction (arrondis inclus). Ancrage référentiel-agnostique (P7) via ancrage.ts, 4 agrégats, zéro code de poste. Aucune persistance, aucune écriture (prouvé en docker). Revue : 4 constats corrigés dont 2 angles morts de test (equilibre codé en dur, BFR figé) ; 5 mutations rouges. Sécurité : 0 vulnérabilité. PR #26 rebase-merge, HEAD 0d2f7bc. Points ouverts remontés : FR-023 exigera de figer les entrées (hypothèses écrasées en place par 068), invariant "même base" à porter par 071.
         completed_date: "2026-07-23"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-070"
@@ -1472,7 +1471,7 @@ sprints:
         epic: "EPIC-013"
         points: 5
         service: "bilan-service"
-        status: "done"  # 2026-07-24 LIVRÉE — 12 mois de N+1 dérivés PUREMENT de (snapshot validé + hypothèses), aucune écriture (prouvé en docker). Préalable D3 livré : bfr.ts + millesime.ts extraits en pur exporté, consommés par les DEUX moteurs. REVUE : 3 bloquants + 3 majeurs corrigés avant intégration — (1) l'articulation n'était PAS une identité (l'échéancier subissait l'encours de clôture au lieu de l'imposer : écart non nul sur 792/1260 combinaisons, nul seulement si ⌊dc/30⌋==⌊df/30⌋ ; les 2 jeux d'essai livrés étaient verts par coïncidence) → encours de clôture devenu paramètre imposé ; (2) fluxNet incluait un terme de stocks absent de la réponse → ligne decaissementsStocks publiée, invariant « total = somme des lignes » testé ; (3) e2e rouge (contrôleur manquant dans le module de test) ; (4) garde P7 factice → lit désormais les sources ; (5) garde de version ne figeait pas les 12 périodes ; (6) assertions molles + flux annuel écrit en dur → égalités exactes, le moteur annuel alimente le mensuel. Mutation-test : 6 mutations rouges. Sécurité : 0 vulnérabilité (12 points écartés avec preuve). PR #28 rebase-merge, HEAD d273adf. INCIDENT traité à part : origin/dev était cassé (55 erreurs TS2307, barrels index.ts du commit « dto module ») → PR #27 de retrait. Points ouverts : convention ⌊délai/30⌋ figée par la garde D4 ; échéancier non uniforme et mensuel N+2/N+3 hors périmètre ; 071 devra comparer annuel ET mensuel.
+        status: "done"  #✅ 2026-07-24 LIVRÉE — 12 mois de N+1 dérivés PUREMENT de (snapshot validé + hypothèses), aucune écriture (prouvé en docker). Préalable D3 livré : bfr.ts + millesime.ts extraits en pur exporté, consommés par les DEUX moteurs. REVUE : 3 bloquants + 3 majeurs corrigés avant intégration — (1) l'articulation n'était PAS une identité (l'échéancier subissait l'encours de clôture au lieu de l'imposer : écart non nul sur 792/1260 combinaisons, nul seulement si ⌊dc/30⌋==⌊df/30⌋ ; les 2 jeux d'essai livrés étaient verts par coïncidence) → encours de clôture devenu paramètre imposé ; (2) fluxNet incluait un terme de stocks absent de la réponse → ligne decaissementsStocks publiée, invariant « total = somme des lignes » testé ; (3) e2e rouge (contrôleur manquant dans le module de test) ; (4) garde P7 factice → lit désormais les sources ; (5) garde de version ne figeait pas les 12 périodes ; (6) assertions molles + flux annuel écrit en dur → égalités exactes, le moteur annuel alimente le mensuel. Mutation-test : 6 mutations rouges. Sécurité : 0 vulnérabilité (12 points écartés avec preuve). PR #28 rebase-merge, HEAD d273adf. INCIDENT traité à part : origin/dev était cassé (55 erreurs TS2307, barrels index.ts du commit « dto module ») → PR #27 de retrait. Points ouverts : convention ⌊délai/30⌋ figée par la garde D4 ; échéancier non uniforme et mensuel N+2/N+3 hors périmètre ; 071 devra comparer annuel ET mensuel.
         completed_date: "2026-07-24"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-071"
@@ -1480,8 +1479,9 @@ sprints:
         epic: "EPIC-013"
         points: 3
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # ✅ 2026-07-24 LIVRÉE (dev DeepSeek v4 Flash) + REVUE DE CODE (2 constats bloquants corrigés) + VÉRIFIÉE DOCKER BOUT-EN-BOUT + REVUE DE SÉCURITÉ (0 vulnérabilité) + INTÉGRÉE dans dev (PR #29 bilan-service, MNV-071 « Rebase and merge », HEAD a448383, branche supprimée). Comparaison de 2 à 5 jeux d'hypothèses côte à côte (GET /bilan/previsionnel/comparaison?ids=…), dérivation PURE (aucune écriture, prouvé en docker : compteurs identiques avant/après), indicateurs LUS des moteurs 069/070 et jamais recalculés (résultat + trésorerie de clôture N+1..N+3, plus le POINT BAS mensuel que l'annuel masque : tresorerieMinimale/moisTresorerieMinimale/moisTresorerieNegative) + écarts vs le 1er id (référence). Invariant « même base validée » (D2, forme NUANCÉE) : jeuEtatsId différent → 409 BASES_HETEROGENES ; versions de snapshot divergentes (065 rouvrir/re-valider) → 200 + baseHomogene:false + versions en présence, JAMAIS bloqué. ORDRE DES CONTRÔLES imposé (sécurité) : validation DTO → résolution tenant-scoped (404 générique) → homogénéité (409) → calcul ; préfixe distinct `bilan/previsionnel` (piège d'ordre de routes inter-contrôleurs). Aucune formule modifiée ⇒ MODELE_PROJECTION_VERSION reste 1.0.0 (garde D4). REVUE : 2 bloquants — des TESTS À FAUSSE ASSURANCE (profil identique à la revue de 070) : les mutations AC-4 (min→clôture du mois 12) et AC-7 (409 déplacé avant 404, oracle d'énumération) SURVIVAIENT alors qu'elles figuraient au DoD ; corrigés (tests ajoutés → mutations désormais rouges) + test AC-9. Écart de méthode du dev externe consigné dans AGENTS.md + .agents/rules/qualite-verification.md + agent test-prospera (rejouer la table de mutations, bannir les assertions molles). DÉVIATION assumée AC-5 : 409 générique conservé (AllExceptionsFilter partagé ne surface que {message,code} ; nommer les fautifs toucherait une brique partagée, contre la règle « erreurs génériques »). QUALITÉ : lint 0 · build OK · couverture 98,54/92,72/98,96/98,5 (comparaison.* à 100 %) · 571 unit + 11 e2e verts · non-régression 069/070. DOCKER (JWT RS256 réel, ⚠️ docker restart requis — conteneur figé sur un compile cassé de DeepSeek) : ① homogène→200 baseHomogene:true ordre préservé, prudent min=12229164 au mois 1 < clôture12=19333332 ; ② versions divergentes→200 baseHomogene:false [1,2] ; ③ hétérogène→409 ; ④ anti-énum (autre base + id inconnu)→404 JAMAIS 409 ; ⑤ gardes DTO 400/401 ; ⑥ aucune écriture + déterminisme + Swagger. Hors périmètre (hooks) : rebasage, comparaison inter-versions d'un même jeu (dépend STORY-132/D1), mensuel N+2/N+3, export (073), inter-exercices (FR-024/074). Cadrage : docs/architecture-previsionnel-reproductibilite-2026-07-23.md (D2/D3/D4). [dépend 065/066/068/069/070/037 ✅]
+        completed_date: "2026-07-24"
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-072"
         title: "Consultation des états & du prévisionnel (API structurée, N/N-1, gate) — FR-022"
         epic: "EPIC-014"
