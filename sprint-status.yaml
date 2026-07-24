@@ -1455,8 +1455,8 @@ sprints:
     end_date: "2027-01-28"
     capacity_points: 34
     committed_points: 32  # ⬆️ 24→32 le 2026-07-23 (RÉCONCILIATION — le compteur était périmé de 13 pts) : il ne comptait ni 120/121/122 (ajoutés le 2026-07-21 sans le remonter, +13) ni STORY-132. Le sprint portait donc RÉELLEMENT 37 pts pour 34 de capacité sans que rien ne le signale — c'est le commentaire du S16 qui l'a révélé. ARBITRAGE 2026-07-23 (user) : +3 STORY-132 (dette FR-018 AC-2, prérequis de 073) et −8 par report au S16 de STORY-074 (3, seule Could Have du lot) et STORY-122 (5, incrément 2 ; son incrément 1 reste livré). 37 + 3 − 8 = 32 ≤ 34 ✅. ⚠️ Leçon : remonter committed_points À CHAQUE ajout de story, sinon le dépassement devient invisible.
-    completed_points: 5  # STORY-069 (FR-019, projection annuelle 3 ans) livrée le 2026-07-23
-    status: "in_progress"  # 2026-07-23 : STORY-069 done, STORY-070 defined
+    completed_points: 10  # STORY-069 (FR-019, projection annuelle 3 ans) le 2026-07-23 + STORY-070 (FR-020, trésorerie mensuelle 12 mois) le 2026-07-24
+    status: "in_progress"  # 2026-07-24 : STORY-069 et STORY-070 done, STORY-071 à cadrer
     goal: "Bilan livré 🏁 : Prévisionnel (annuel 3 ans + trésorerie mensuel 12 mois + scénarios) & Consultation/Export (EPIC-013/014). Module 1 complet en prod interne MV."
     stories:
       - story_id: "STORY-069"
@@ -1472,7 +1472,8 @@ sprints:
         epic: "EPIC-013"
         points: 5
         service: "bilan-service"
-        status: "defined"  # 2026-07-23 CADRÉE — 12 mois de N+1 dérivés PUREMENT de (snapshot validé + hypothèses), échéancier par délais BFR + solde cumulé. L'articulation FR-020 AC-2 avec l'annuel N+1 est une IDENTITÉ prouvée (ecartArticulation=0), pas un rapprochement : partition entière exacte + le BFR normatif de 069 est l'état stationnaire de l'échéancier. Inclut le préalable D3 (extraire bfrNormatif/arrondir en pur exporté bfr.ts) + garde P7 en spec exécutable + garde d'incrément MODELE_PROJECTION_VERSION (D4). Cadrage : architecture-previsionnel-reproductibilite-2026-07-23.md. Hors périmètre : N+2/N+3 mensuels, échéancier non uniforme, TVA/IS, FR-021.
+        status: "done"  # 2026-07-24 LIVRÉE — 12 mois de N+1 dérivés PUREMENT de (snapshot validé + hypothèses), aucune écriture (prouvé en docker). Préalable D3 livré : bfr.ts + millesime.ts extraits en pur exporté, consommés par les DEUX moteurs. REVUE : 3 bloquants + 3 majeurs corrigés avant intégration — (1) l'articulation n'était PAS une identité (l'échéancier subissait l'encours de clôture au lieu de l'imposer : écart non nul sur 792/1260 combinaisons, nul seulement si ⌊dc/30⌋==⌊df/30⌋ ; les 2 jeux d'essai livrés étaient verts par coïncidence) → encours de clôture devenu paramètre imposé ; (2) fluxNet incluait un terme de stocks absent de la réponse → ligne decaissementsStocks publiée, invariant « total = somme des lignes » testé ; (3) e2e rouge (contrôleur manquant dans le module de test) ; (4) garde P7 factice → lit désormais les sources ; (5) garde de version ne figeait pas les 12 périodes ; (6) assertions molles + flux annuel écrit en dur → égalités exactes, le moteur annuel alimente le mensuel. Mutation-test : 6 mutations rouges. Sécurité : 0 vulnérabilité (12 points écartés avec preuve). PR #28 rebase-merge, HEAD d273adf. INCIDENT traité à part : origin/dev était cassé (55 erreurs TS2307, barrels index.ts du commit « dto module ») → PR #27 de retrait. Points ouverts : convention ⌊délai/30⌋ figée par la garde D4 ; échéancier non uniforme et mensuel N+2/N+3 hors périmètre ; 071 devra comparer annuel ET mensuel.
+        completed_date: "2026-07-24"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-071"
         title: "Scénarios comparés (prudent/central/optimiste) — FR-021"
