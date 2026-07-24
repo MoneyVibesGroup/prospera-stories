@@ -11,9 +11,10 @@
 **Débloque / alimente :** front **FE-038** · story d'**archivage d'artefact** à créer si le besoin légal apparaît (§[Points ouverts](#points-ouverts--à-trancher-hors-périmètre))
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** in_progress
-**Assigné à :** Unassigned
+**Statut :** done ✅ (dev DeepSeek v4 Flash → **revue de code : 7 constats bloquants + 12 majeurs corrigés d'office** → vérification docker bout-en-bout (fidélité snapshot prouvée, zéro écriture hors audit) → revue de sécurité **0 vulnérabilité** → PR #33 bilan-service « Rebase and merge » sur `dev`, HEAD `e99313d`, branche supprimée — 2026-07-24)
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée :** 2026-07-24
+**Terminée :** 2026-07-24
 **Sprint :** 15
 
 ---
@@ -378,6 +379,20 @@ Le contrôleur est monté sur un préfixe **distinct** `bilan/export` (pas de co
 - [ ] Statut synchronisé **aux 3 endroits** : en-tête de ce document, `docs/sprint-status.yaml` (`status` + commentaire daté + `completed_date`), section *Progress Tracking*.
 - [ ] Branche `MNV-073`, commits `MNV-073(export): …`, PR titrée `MNV-073(export): …`, **rebase-merge** sur `dev`, branche supprimée.
 
+### ⛔ Fin de dev — CE QUE LE DÉVELOPPEUR NE FAIT PAS
+
+**Le développement s'arrête à la branche poussée. Le dev ne merge JAMAIS sur `dev`, et n'intègre aucune PR.**
+
+| Le dev fait | Le dev ne fait **pas** |
+|---|---|
+| brancher `MNV-073` **depuis `dev` à jour**, coder, committer, **pousser la branche** | pousser sur `dev` directement (`git push origin dev`) |
+| ouvrir la PR (ou la laisser à ouvrir) et **s'arrêter là** | cliquer « Merge » / `gh pr merge` — même en « Rebase and merge » |
+| signaler que la branche est prête | supprimer la branche, clôturer la story, passer le statut à `done` |
+
+**Pourquoi c'est bloquant, pas cosmétique.** La revue de code, les **corrections d'office**, la vérification docker et la revue de sécurité s'exécutent **entre** la fin du dev et le merge. Une PR auto-mergée fait entrer dans `dev` du code que personne n'a relu — et les revues des stories 070/071/072/137 ont **toutes** trouvé au moins un constat bloquant, dont des tests à fausse assurance et une écriture hors transaction. Merger soi-même, c'est supprimer la seule porte qui les a attrapés.
+
+> Constaté sur cette story même : la PR #32 a été ouverte **et mergée** par le dev avant toute revue, et le commit a aussi été poussé directement sur `dev`. Les correctifs de revue ont dû être réintégrés après coup, sur une branche distincte.
+
 ---
 
 ## Story Points Breakdown
@@ -410,19 +425,90 @@ Le contrôleur est monté sur un préfixe **distinct** `bilan/export` (pas de co
 
 **Historique de statut :**
 - 2026-07-24 : créée (`defined`) par le Scrum Master — cadrage complet, dépendances vérifiées **toutes livrées**, options D1(c)/sync-async tranchées.
-- 2026-07-24 : `in_progress` — développement (DeepSeek v4 Flash).
-- *(à compléter)* : revue de code + corrections appliquées d'office.
-- *(à compléter)* : vérification docker réelle (7 points).
-- *(à compléter)* : revue de sécurité.
-- *(à compléter)* : PR `MNV-073` rebase-mergée sur `dev` → `done` + `completed_date`.
+- 2026-07-24 : `in_progress` — développement (DeepSeek v4 Flash). ⚠️ Le dev a poussé **directement sur `dev`** et **auto-mergé la PR #32** avant toute revue (cf. §Fin de dev). Les correctifs de revue sont donc passés par une branche `MNV-073` distincte, ouverte depuis `dev`.
+- 2026-07-24 : **revue de code — 7 constats bloquants + 8 majeurs, tous corrigés d'office** (détail ci-dessous).
+- 2026-07-24 : **vérification docker** réelle (stack complète, JWT RS256 réel, 2 organisations).
+- 2026-07-24 : revue de sécurité.
+- 2026-07-24 : PR `MNV-073` rebase-mergée sur `dev` → `done`.
 
-**Résultats de qualité :** *(à compléter — lint / build / couverture / unit / e2e)*
+### Revue de code — constats **bloquants** (corrigés d'office)
 
-**Table de mutations rejouée :** *(à compléter — M1→M12, chacune doit avoir viré au rouge)*
+| # | Constat | Pourquoi c'est bloquant | Correctif |
+|---|---|---|---|
+| **B1** | `empreinteDocument` utilisait `JSON.stringify(doc, Object.keys(doc).sort())`. Le 2ᵉ argument n'est **pas** un ordre de clés mais un **replacer récursif** : tout le contenu imbriqué — colonnes, lignes, **cellules, donc tous les montants** — disparaissait du hachage. | Deux liasses de montants **totalement différents** rendaient la **même** empreinte dès lors qu'elles partageaient leurs titres de sections. La preuve d'audit (D5) ne prouvait rien. | Canonisation **récursive** (clés triées à tous les niveaux, ordre des tableaux préservé) + tests de **sensibilité** (montant, libellé, section) |
+| **B2** | Ligne « Sous-total Passif (**+ résultat**) » valorisée avec `controle.totalPassifN`, qui **exclut** le résultat (le moteur le porte à part). | Chiffre **faux sous un libellé mensonger**, sur un document remis à un banquier : passif affiché 100 000 face à un actif de 122 291,64. | Trois lignes distinctes : postes de passif (hors résultat), résultat de l'exercice, **total résultat inclus** = somme réelle. Équilibre actif/passif désormais visible **sur le document** |
+| **B3** | `Trésorerie ancrée: 'Oui'/'Non'` placé dans une colonne de type `MONTANT`. | `formatMontantPDF('Oui')` → **« NaN,NaN »** dans le PDF, cellule `NaN` dans l'Excel. | Booléen déplacé dans les métadonnées + garde `estMontant` (seul un nombre **fini** est traité comme montant) + test « aucune cellule MONTANT non numérique » |
+| **B4** | Bandeau « BROUILLON — NON FIGÉ » dessiné **une seule fois**, avant le contenu. | AC-5 exige *chaque page* : à partir de la page 2, un brouillon se présentait comme un document figé. | `autoFirstPage: false` + abonnement `pageAdded` **avant** la 1ʳᵉ page ; test comptant les occurrences **par page** |
+| **B5** | `export.service.ts` (205 l.) et `export.controller.ts` (92 l.) à **0 % de couverture**, **aucun e2e**, alors que le message de commit annonçait « e2e verts ». | Orchestration, audit, délégation, gate et nom de fichier n'étaient couverts par **rien** — masqués par la couverture globale (94,98 %, au-dessus des seuils). 3ᵉ récidive du même angle mort. | `export.service.spec.ts` (12 cas), `export.controller.spec.ts` (8 cas), `test/bilan-export.e2e-spec.ts` (14 cas) |
+| **B6** | Tests de rendu réduits à `expect(buffer.length).toBeGreaterThan(0)`. | **Fausse assurance** : aucune fidélité vérifiée (AC-2), aucun type de cellule (AC-4), aucune présence/absence de bandeau (AC-5) — un rendu cassé passait au vert. | Relecture **effective** du XLSX par `exceljs` (valeur, type, `numFmt`) et **extraction du texte** du PDF (fragments hexadécimaux recollés) |
+| **B7** | `new Types.ObjectId(this.tenantContext.tenantId)` sans garde. | `new Types.ObjectId(undefined)` **fabrique un identifiant aléatoire** : l'audit aurait attribué l'export à une organisation et un utilisateur **inventés** ; une chaîne mal formée lève une erreur BSON ⇒ **500** au lieu d'un refus. | Patron maison `@CurrentUser()` + garde `isValid` ⇒ **403 `BILAN_NOT_ENTITLED`**, testée sur 5 cas |
 
-**Vérification docker :** *(à compléter — les 7 points du plan de tests, avec les sorties `mongosh` réelles)*
+### Revue de code — constats **majeurs** (corrigés d'office)
 
-**Effort réel :** TBD
+| # | Constat | Correctif |
+|---|---|---|
+| M1 | Sous-totaux du Bilan (`bilan.sousTotaux`, cascade B8 §4) **non exportés** | section « Bilan — Sous-totaux » |
+| M2 | Actif et passif **fusionnés** dans une table unique, sans séparation quand le référentiel n'a pas de sous-totaux (cas SFD) | deux sections distinctes, invariantes du référentiel |
+| M3 | **Code de poste absent** (seul le libellé était exporté) — retraitement Excel dégradé | colonne `Code` sur toutes les sections d'états |
+| M4 | TFT **sans le statut de ligne** : `A_COMPLETER` (montant `null`) indistinguable d'un zéro | colonne `Statut` publiée |
+| M5 | Notes réduites à leur total : la **ventilation par compte** de STORY-114 était invisible | postes + ventilation + marquage « détail à compléter » |
+| M6 | Prévisionnel : `fluxNet` **non recomposable** (stocks, investissements, financement, remboursements absents) — l'invariant de contrat de 070 ; trésorerie annuelle, bilan simplifié et contrôle d'équilibre **absents** ; `produits = encaissementsClients` mal nommé | 7 sections complètes, mensuel scindé en 2 tables publiant **toutes** les composantes ; test de recomposition |
+| M7 | Mention **« Montants en XOF » absente** des deux formats (AC-4) | ligne `Unité` dans les métadonnées |
+| M8 | `@Controller('bilan/export')` sans `version: '1'`, `@ApiBearerAuth()` absent | aligné sur les 8 autres contrôleurs |
+| M9 | `calculerLargeurs` : répartition en pourcentage fixe ⇒ largeur de libellé dérisoire, voire **négative** au-delà de 5 colonnes ; lignes écrites à `y` absolu ⇒ rangée coupée en deux par un saut de page | largeurs **par type** de colonne + `lineBreak: false` + saut de page contrôlé avant chaque rangée |
+| M10 | Spec de garde AC-3 en `contenu.includes('bfr')` : **faux positif** sur un `bfrBase` simplement **lu** | garde réécrite sur les **instructions d'import** (imports de type admis, imports de valeur interdits) |
+| M11 | Empreinte calculée sur un document **incluant la date de génération** | date ajoutée **après** hachage (`avecDateGeneration`) ⇒ déterminisme réel |
+| M12 | Nom de fichier : `« Scénario » → « Sc-nario »` ; longueur bornée par partie mais pas au total | translittération NFD avant allowlist, longueur totale bornée, repli `export` |
+
+### Résultats de qualité
+
+- **Lint** : 0 warning (`eslint --max-warnings 0`, binaire local) · **Build** : OK
+- **Couverture globale** : **98,38 / 91,98 / 98,42 / 98,36** (seuils 65/90/90/90) — le dossier `export/` passe de **73,2 %** (dont deux fichiers à **0 %**) à **99,5 / 87,77 / 100 / 99,48**
+- **Tests** : **685 unitaires** (74 suites) + **170 e2e** (18 suites), tous verts — non-régression 064/065/067/069/070/072/137 incluse
+
+### Table de mutations **rejouée** — 14/14 rouges
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M1 | division par 100 retirée (`montant.ts`) | ✅ rouge |
+| M2 | version figée servie par le brouillon | ✅ rouge |
+| M3 | bandeau posé une seule fois | ✅ rouge |
+| M4 | journalisation d'audit retirée | ✅ rouge |
+| M5 | audit **avant** génération (donc aussi sur échec) | ✅ rouge |
+| M6 | échec d'audit propagé à l'appelant | ✅ rouge |
+| M7 | assainissement du nom de fichier retiré | ✅ rouge |
+| M8 | `format` rendu optionnel (lecture base avant validation) | ✅ rouge (e2e) |
+| M9 | montant Excel écrit en **texte** | ✅ rouge |
+| M10 | N-1 absent rendu `0` au lieu de vide | ✅ rouge |
+| M11 | import d'un moteur de calcul dans `export/` | ✅ rouge |
+| M12 | date de génération incluse dans l'empreinte | ✅ rouge |
+| M13 | empreinte via le `replacer`-array d'origine (**le bug B1**) | ✅ rouge |
+| M14 | total passif sans le résultat (**le bug B2**) | ✅ rouge |
+
+### Vérification docker (stack complète, JWT RS256 réel, 2 organisations)
+
+Conteneur **redémarré** avant toute conclusion (`nest --watch` peut annoncer « 0 errors » en servant encore l'ancien module) ; `pdfkit` et `exceljs` confirmés présents dans l'image.
+
+| # | Contrôle | Résultat |
+|---|---|---|
+| ① | Export PDF d'une version figée | `200`, `Content-Type: application/pdf`, `Content-Disposition: attachment; filename="liasse-2025-v1.pdf"`, `X-Content-Type-Options: nosniff`, magie `%PDF-1.3`, **3 pages** |
+| ② | **Fidélité au snapshot (AC-2)** | snapshot en base `netN = 12229164` (unités mineures) → cellule XLSX **numérique** `122291.64`, `numFmt "# ##0,00"` ; `Total actif net` idem |
+| ③ | **Équilibre publié (correctif B2)** | sur le document : actif `122 291,64` = passif hors résultat `100 000` + résultat `22 291,64` = **`122 291,64`** |
+| ④ | **Bandeau brouillon (correctif B4)** | brouillon : 2 pages / **2 occurrences** « BROUILLON » ; version figée : 3 pages / **0 occurrence** |
+| ⑤ | **Audit (D5)** | 6 documents `EXPORT_EFFECTUE` avec `tenantId`, `userId`, cible et contexte complet `{format, statut, version, snapshotId, versionHypothesesId, modeleVersion, moteurVersion, empreinte}` — **aucun montant** |
+| ⑥ | **Déterminisme (AC-11)** | deux exports successifs de la même version ⇒ **même empreinte** ; PDF et XLSX du même contenu partagent l'empreinte (elle porte le **contenu**, pas les octets) |
+| ⑦ | **Aucune écriture hors audit** | `jeux_etats` 5→5, `snapshots_liasse` 7→7, `versions_hypotheses` 8→8 ; seul `audit_events` croît (+1 par export réussi). Aucun événement pour un export **en échec** |
+| ⑧ | **Anti-énumération** | jeu de l'org A vu par l'org B → **404** au corps **identique** à celui d'un id inexistant (`JEU_ETATS_INTROUVABLE`) ; idem prévisionnel (`HYPOTHESES_INTROUVABLE`) — jamais 403 |
+| ⑨ | Gardes | `format` absent → **400** · `format=docx` → **400** · `version=99` → **404 `VERSION_INTROUVABLE`** · sans jeton → **401** |
+| ⑩ | Prévisionnel | XLSX `previsionnel-Scenario-central-…-v1.xlsx`, **7 sections**, métadonnées portant le **triplet** `{snapshot, version d'hypothèses (id), version du modèle 1.0.0}` + `Unité` |
+
+### Points remontés (hors périmètre, à trancher plus tard)
+
+- **F1 — libellé du brouillon d'un jeu VALIDÉ.** Sans `?version`, l'export d'un jeu déjà validé porte « Brouillon — non figé ». C'est **exact** (le document n'est pas le snapshot) mais peut surprendre ; un libellé « vue recalculée — non figée » serait plus juste. Décision UX à prendre avec FE-038.
+- **F2 — mise en page.** Le rendu est fidèle et lisible, ce n'est **pas** la trame officielle DSF/CERFA (cf. P1). Blocker MV inchangé : validation du gabarit par un expert-comptable avant tout usage de dépôt.
+- **F3 — pas de test de charge.** AC-12 (< 3 s) n'est vérifié que sur des liasses de démonstration ; à re-mesurer sur une liasse réelle de ~300 postes avec notes ventilées.
+
+**Effort réel :** dev externe + 1 passe de revue/correction (7 bloquants, 12 majeurs), 22 fichiers touchés, +3 fichiers de tests créés.
 
 ---
 
