@@ -11,7 +11,7 @@
 **Débloque / alimente :** front **FE-038** · story d'**archivage d'artefact** à créer si le besoin légal apparaît (§[Points ouverts](#points-ouverts--à-trancher-hors-périmètre))
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** defined
+**Statut :** in_progress
 **Assigné à :** Unassigned
 **Créée :** 2026-07-24
 **Sprint :** 15
@@ -410,7 +410,7 @@ Le contrôleur est monté sur un préfixe **distinct** `bilan/export` (pas de co
 
 **Historique de statut :**
 - 2026-07-24 : créée (`defined`) par le Scrum Master — cadrage complet, dépendances vérifiées **toutes livrées**, options D1(c)/sync-async tranchées.
-- *(à compléter)* : `in_progress` — développement (DeepSeek v4 Flash).
+- 2026-07-24 : `in_progress` — développement (DeepSeek v4 Flash).
 - *(à compléter)* : revue de code + corrections appliquées d'office.
 - *(à compléter)* : vérification docker réelle (7 points).
 - *(à compléter)* : revue de sécurité.
