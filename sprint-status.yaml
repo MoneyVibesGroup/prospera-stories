@@ -1455,7 +1455,7 @@ sprints:
     capacity_points: 34
     committed_points: 32  # ⬆️ 24→32 le 2026-07-23 (RÉCONCILIATION — le compteur était périmé de 13 pts) : il ne comptait ni 120/121/122 (ajoutés le 2026-07-21 sans le remonter, +13) ni STORY-132. Le sprint portait donc RÉELLEMENT 37 pts pour 34 de capacité sans que rien ne le signale — c'est le commentaire du S16 qui l'a révélé. ARBITRAGE 2026-07-23 (user) : +3 STORY-132 (dette FR-018 AC-2, prérequis de 073) et −8 par report au S16 de STORY-074 (3, seule Could Have du lot) et STORY-122 (5, incrément 2 ; son incrément 1 reste livré). 37 + 3 − 8 = 32 ≤ 34 ✅. ⚠️ Leçon : remonter committed_points À CHAQUE ajout de story, sinon le dépassement devient invisible.
     completed_points: 13  # STORY-069 (FR-019, projection annuelle 3 ans) le 2026-07-23 + STORY-070 (FR-020, trésorerie mensuelle 12 mois) + STORY-071 (FR-021, scénarios comparés) le 2026-07-24
-    status: "in_progress"  # 2026-07-24 : STORY-069/070/071 done (071 = dev DeepSeek → revue+correctifs bloquants+vérif docker+sécu+PR #29 mergée). Reste S15 : 072 (consultation), 132 (versions d'hypothèses), 073 (export) + increment 2 de 120/121/122
+    status: "in_progress"  # 2026-07-24 : STORY-069/070/071/072 done (072 = dev DeepSeek → revue 4 correctifs dont 1 bloquant + vérif docker + sécu + PR #30 mergée). Reste S15 : 132 (versions d'hypothèses), 073 (export) + increment 2 de 120/121/122
     goal: "Bilan livré 🏁 : Prévisionnel (annuel 3 ans + trésorerie mensuel 12 mois + scénarios) & Consultation/Export (EPIC-013/014). Module 1 complet en prod interne MV."
     stories:
       - story_id: "STORY-069"
@@ -1487,8 +1487,9 @@ sprints:
         epic: "EPIC-014"
         points: 3
         service: "bilan-service"
-        status: "not_started"
-        assigned_to: null
+        status: "done"  # ✅ 2026-07-24 LIVRÉE — façade de restitution READ-ONLY `/bilan/consultation` clée par exercice (contrat front FE-037) : index (union exercices∪jeux_etats, tri décroissant, compteurs versions/prévisionnels) + détail (liasse DÉLÉGUÉE 064/065 + versions 065 + prévisionnels filtrés base.exercice 068), gate + isolation orgId fail-closed, ZÉRO écriture / ZÉRO recalcul. Dev DeepSeek v4 Flash → revue : 4 constats corrigés dont 1 BLOQUANT (liasse brouillon divergeait de /bilan/etats/:id par 2 clés referentiel/checksum → projection canonique 6 blocs + test AC-3 durci toEqual ; + ?version sans jeu→VERSION_INTROUVABLE, dates epoch→null, Swagger détail câblé) ; mutations rouges (tri/version/filtre/gate). Vérif docker bout-en-bout (JWT RS256 réel, org fraîche + gate semé) : isolation 2 orgs, identité de délégation brouillon ET version prouvée (==True), zéro écriture (compteurs identiques), edges, déterminisme. Sécurité : 0 vulnérabilité. PR #30 rebase-merge, HEAD d747ef0.
+        assigned_to: vivianMoneyVibesGroupes
+        completed_date: "2026-07-24"
       # ── AJOUT 2026-07-23 — DETTE DE CONFORMITÉ de STORY-068, pas un élargissement de scope.
       #   FR-018 AC-2 exige des hypothèses « éditables ET versionnées » ; 068 a livré un compteur
       #   d'éditions (le PUT écrase les paramètres en place, aucune version antérieure conservée).
