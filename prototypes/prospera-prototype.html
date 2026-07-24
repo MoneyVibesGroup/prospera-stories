@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-015 profil du cabinet</title>
+<title>Prospera · Prototype cumulatif — FE-024 Atelier (shell, sources & gate)</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -384,6 +384,91 @@
   .plan .price { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
   .plan .price small { font-size: 0.85rem; font-weight: 500; color: var(--muted-fg); }
 
+  /* FE-014 — accueil : bienvenue */
+  .welcome { overflow: hidden; border-radius: var(--radius); border: 1px solid var(--border); background: var(--card); box-shadow: var(--shadow-sm); margin-bottom: 1.4rem; }
+  .welcome-band {
+    height: 5rem;
+    background:
+      radial-gradient(65% 170% at 10% 0%, color-mix(in srgb, var(--orange-500) 30%, transparent), transparent 70%),
+      radial-gradient(55% 150% at 90% 100%, color-mix(in srgb, var(--orange-500) 14%, transparent), transparent 70%),
+      var(--sb-bg);
+  }
+  .welcome-body { padding: 1.15rem 1.35rem 1.35rem; }
+  .welcome-date { margin: 0; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted-fg); }
+  .welcome-body h2 { margin: 0.35rem 0 0; font-size: 1.75rem; font-weight: 700; letter-spacing: -0.025em; }
+  .welcome-sub { margin: 0.35rem 0 0; font-size: 0.9rem; color: var(--muted-fg); max-width: 46rem; line-height: 1.55; }
+  .welcome-sub b { color: var(--foreground); font-weight: 600; }
+  .welcome-stats { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.15rem; }
+  .wstat {
+    display: flex; align-items: center; gap: 0.65rem; flex: 1 1 11rem;
+    padding: 0.7rem 0.85rem; border: 1px solid var(--border); border-radius: 0.6rem; background: var(--background);
+  }
+  .ws-ico {
+    width: 2.2rem; height: 2.2rem; flex: none; display: grid; place-items: center; border-radius: 0.55rem;
+    background: color-mix(in srgb, var(--orange-500) 12%, var(--card)); color: var(--orange-700);
+  }
+  :root[data-theme="dark"] .ws-ico { color: var(--orange-400); }
+  .ws-ico.warn { background: var(--warning-soft); color: #b45309; }
+  :root[data-theme="dark"] .ws-ico.warn { color: var(--warning); }
+  .ws-ico svg { width: 1.1rem; height: 1.1rem; }
+  .ws-txt b { display: block; font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ws-txt b .of { font-size: 0.8rem; font-weight: 600; color: var(--muted-fg); }
+  .ws-txt small { display: block; font-size: 0.74rem; color: var(--muted-fg); }
+  .welcome-solo .welcome-body { padding-bottom: 1.5rem; }
+
+  /* FE-014 — accueil : cartes de modules */
+  .home-hello { margin-bottom: 1.2rem; }
+  .home-hello h2 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; }
+  .home-hello p { margin: 0.2rem 0 0; font-size: 0.86rem; color: var(--muted-fg); }
+  .home-collab {
+    display: flex; align-items: flex-start; gap: 0.8rem; margin-top: 1rem;
+    padding: 0.9rem 1rem; border-radius: var(--radius);
+    background: var(--card); border: 1px solid var(--border);
+  }
+  .home-collab .hc-ico {
+    width: 2.2rem; height: 2.2rem; flex: none; display: grid; place-items: center;
+    border-radius: 0.55rem; background: var(--hover-surface); color: var(--muted-fg);
+  }
+  .home-collab .hc-ico svg { width: 1.1rem; height: 1.1rem; }
+  .home-collab b { font-size: 0.88rem; }
+  .home-collab p { margin: 0.2rem 0 0; font-size: 0.82rem; color: var(--muted-fg); line-height: 1.5; }
+
+  .mod-intro { display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .mod-intro h2 { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+  .mod-intro p { margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--muted-fg); }
+  .mod-intro .states-demo { margin-left: auto; }
+  .mod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 1rem; }
+  .mod-card {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.05rem; box-shadow: var(--shadow-sm);
+  }
+  .mod-card h3 { margin: 0; font-size: 0.98rem; font-weight: 650; }
+  .mod-card > p { margin: 0; font-size: 0.82rem; color: var(--muted-fg); line-height: 1.5; }
+  .mod-card .btn { margin-top: auto; align-self: flex-start; }
+  .mod-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+  .mod-ico {
+    width: 2.4rem; height: 2.4rem; display: grid; place-items: center; border-radius: 0.6rem;
+    background: color-mix(in srgb, var(--orange-500) 12%, var(--card)); color: var(--orange-700);
+  }
+  :root[data-theme="dark"] .mod-ico { color: var(--orange-400); }
+  .mod-ico svg { width: 1.2rem; height: 1.2rem; }
+  .mod-card.locked { background: var(--hover-surface); }
+  .mod-card.locked .mod-ico { background: var(--card); color: var(--muted-fg); }
+  .mod-card.locked h3 { color: var(--muted-fg); }
+  .mod-ver { font-size: 0.75rem !important; }
+  .mod-why {
+    font-size: 0.78rem !important; color: var(--foreground) !important;
+    background: var(--card); border: 1px solid var(--border); border-radius: 0.45rem; padding: 0.5rem 0.6rem;
+  }
+  .mod-empty {
+    display: flex; align-items: flex-start; gap: 0.7rem; margin: 0 0 1rem;
+    padding: 0.9rem 1rem; border-radius: var(--radius);
+    background: var(--card); border: 1px dashed var(--border-strong);
+    font-size: 0.84rem; line-height: 1.5;
+  }
+  .mod-empty svg { width: 1.1rem; height: 1.1rem; flex: none; margin-top: 0.15rem; color: var(--muted-fg); }
+
   /* FE-015 — profil du cabinet */
 
   /* En-tête d'identité : bandeau de marque + logo + complétude */
@@ -641,16 +726,6 @@
     border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
   }
   .gap-note svg { width: 1rem; height: 1rem; flex: none; margin-top: 0.15rem; color: var(--warning); }
-  /* FE-019 : bloc d'état informatif (demande de changement d'e-mail en cours) */
-  .callout {
-    padding: 0.7rem 0.8rem; border-radius: 0.55rem; font-size: 0.78rem; line-height: 1.55;
-    color: var(--foreground);
-  }
-  .callout-info {
-    background: color-mix(in srgb, #2563eb 9%, transparent);
-    border: 1px solid color-mix(in srgb, #2563eb 30%, transparent);
-  }
-  .callout code { font-family: var(--font-mono); font-size: 0.9em; }
   .gap-note code { font-family: var(--font-mono); font-size: 0.9em; }
 
   .org-form { display: grid; gap: 0.9rem; padding: 1.15rem; }
@@ -678,6 +753,85 @@
 
   .helper { font-size: 0.78rem; color: var(--muted-fg); text-align: center; }
   .helper code { font-family: var(--font-mono); background: var(--hover-surface); padding: 0.05rem 0.35rem; border-radius: 0.3rem; font-size: 0.9em; }
+
+  /* ===================== FE-024 · MODULE ATELIER ==========================
+     Shell du module amont (D13 : hub multi-source). Reprend strictement les
+     tokens & composants existants ; n'ajoute que la mise en page propre au
+     module (sous-nav interne, cartes de source, lecture du référentiel, gate). */
+
+  /* Barre d'aiguillage du gate/états (démo) — même idiome que .states-demo. */
+  .atelier-demo { display: inline-flex; flex-wrap: wrap; gap: 0.35rem; }
+  .atelier-demo .lbl { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-fg); align-self: center; margin-right: 0.15rem; }
+  /* État sélectionné des bascules de démo (boutons .btn-ghost porteurs d'aria-selected). */
+  .atelier-demo .btn[aria-selected="true"] { background: var(--primary); color: var(--primary-fg); border-color: transparent; }
+
+  /* Sous-navigation interne du module (Sources / Balances). */
+  .atl-subnav { display: flex; align-items: center; gap: 0.4rem; padding: 0.7rem 1.15rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .atl-subnav .grow { flex: 1; }
+  .atl-tab {
+    display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid transparent;
+    background: transparent; color: var(--muted-fg); cursor: pointer;
+    font-size: 0.86rem; font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 999px;
+    transition: color .14s, background-color .14s, border-color .14s;
+  }
+  .atl-tab svg { width: 1.05rem; height: 1.05rem; }
+  .atl-tab:hover { background: var(--hover-surface); color: var(--foreground); }
+  .atl-tab[aria-selected="true"] { background: color-mix(in srgb, var(--orange-500) 12%, transparent); color: var(--link); border-color: color-mix(in srgb, var(--orange-500) 30%, transparent); }
+  .atl-tab:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .atl-tab .count { font-size: 0.72rem; color: var(--muted-fg); background: var(--hover-surface); padding: 0.02rem 0.45rem; border-radius: 999px; }
+
+  .atl-body { padding: 1.15rem; display: flex; flex-direction: column; gap: 1.15rem; }
+  .atl-sectitle { margin: 0; font-size: 0.95rem; font-weight: 650; }
+  .atl-secsub { margin: 0.15rem 0 0; font-size: 0.82rem; color: var(--muted-fg); }
+
+  /* Grille des trois sources (sage / direct / ocr). */
+  .src-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.9rem; }
+  .src-card {
+    display: flex; flex-direction: column; gap: 0.6rem; padding: 1rem;
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--card);
+    box-shadow: var(--shadow-sm); transition: border-color .14s, box-shadow .14s, transform .14s;
+  }
+  .src-card.available:hover { border-color: var(--border-strong); box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+  .src-card.soon { background: color-mix(in srgb, var(--muted-fg) 6%, var(--card)); border-style: dashed; }
+  .src-top { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+  .src-ic { width: 2.5rem; height: 2.5rem; border-radius: 0.7rem; display: grid; place-items: center; background: color-mix(in srgb, var(--orange-500) 12%, transparent); color: var(--link); }
+  .src-card.soon .src-ic { background: var(--hover-surface); color: var(--muted-fg); }
+  .src-ic svg { width: 1.3rem; height: 1.3rem; }
+  .src-card h4 { margin: 0; font-size: 0.95rem; font-weight: 650; }
+  .src-card.soon h4 { color: var(--muted-fg); }
+  .src-card p { margin: 0; font-size: 0.82rem; color: var(--muted-fg); line-height: 1.45; }
+  .src-card .src-cta { margin-top: auto; padding-top: 0.2rem; }
+  .badge-soon { background: var(--hover-surface); color: var(--muted-fg); }
+  .badge-avail { background: var(--success-soft); color: var(--success); }
+  .badge-avail .d { background: var(--success); }
+  .src-note { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.76rem; color: var(--muted-fg); }
+  .src-note svg { width: 0.9rem; height: 0.9rem; flex: none; }
+
+  /* Lecture du référentiel actif (GET /referentiels/actifs). */
+  .ref-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-sm); overflow: hidden; }
+  .ref-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+  .ref-head svg { width: 1.05rem; height: 1.05rem; color: var(--muted-fg); flex: none; }
+  .ref-head b { font-size: 0.86rem; font-weight: 650; }
+  .ref-head .grow { flex: 1; }
+  .ref-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+  .ref-item { padding: 0.8rem 1rem; border-top: 1px solid var(--border); }
+  .ref-grid .ref-item:nth-child(-n+2) { border-top: 0; }
+  .ref-k { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-fg); }
+  .ref-v { margin-top: 0.2rem; font-size: 0.9rem; font-weight: 600; }
+  .ref-sum { margin-top: 0.25rem; font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-fg); word-break: break-all; }
+
+  /* Écran d'orientation du gate (accès requis) — variante de .state. */
+  .gate { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.85rem; padding: 3rem 1.5rem; }
+  .gate .glyph { width: 3.25rem; height: 3.25rem; border-radius: 0.9rem; display: grid; place-items: center; background: var(--warning-soft); color: #b45309; }
+  .gate.blocked .glyph { background: var(--hover-surface); color: var(--muted-fg); }
+  .gate .glyph svg { width: 1.5rem; height: 1.5rem; }
+  .gate h3 { margin: 0; font-size: 1.05rem; font-weight: 650; }
+  .gate p { margin: 0; font-size: 0.88rem; color: var(--muted-fg); max-width: 42ch; line-height: 1.5; }
+  .gate .code { font-family: var(--font-mono); font-size: 0.74rem; background: var(--hover-surface); color: var(--muted-fg); padding: 0.15rem 0.5rem; border-radius: 0.35rem; }
+  .authority { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.76rem; color: var(--muted-fg); background: var(--hover-surface); padding: 0.4rem 0.7rem; border-radius: 999px; }
+  .authority svg { width: 0.95rem; height: 0.95rem; flex: none; }
+  :root[data-theme="dark"] .gate.warn .glyph { color: #fbbf24; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .gate.warn .glyph { color: #fbbf24; } }
 
   /* =============================== TOASTS ================================= */
   .toasts { position: fixed; right: 1.1rem; bottom: 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; z-index: 90; width: min(22rem, calc(100vw - 2rem)); }
@@ -996,7 +1150,7 @@
 </style>
 
 <div class="ribbon">
-  <span class="tag"><span class="dot"></span> Maquette · FE-015</span>
+  <span class="tag"><span class="dot"></span> Maquette · FE-014</span>
   <div class="seg" role="tablist" aria-label="Vue du prototype">
     <button role="tab" aria-selected="true" data-view="app">Espace applicatif</button>
     <button role="tab" aria-selected="false" data-view="login">Connexion</button>
@@ -1040,6 +1194,10 @@
 
         <nav class="sb-nav">
           <span class="sb-label">Cabinet</span>
+          <button class="nav-item" data-page="home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M9 22V12h6v10"/></svg>
+            Accueil
+          </button>
           <button class="nav-item" data-page="profile" data-admin-only>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg>
             Profil du cabinet
@@ -1059,6 +1217,14 @@
           <button class="nav-item" data-page="billing">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             Abonnement
+          </button>
+
+          <span class="sb-label">Modules</span>
+          <!-- FE-024 : le module amont (produit la balance que le Bilan consomme).
+               Visible pour les deux rôles — un collaborateur ayant l'accès l'utilise. -->
+          <button class="nav-item" data-page="atelier">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+            Atelier <span class="count">Balance</span>
           </button>
         </nav>
 
@@ -1085,14 +1251,14 @@
             </button>
             <div class="usermenu">
               <button class="trigger" id="umTrigger" type="button" aria-haspopup="menu" aria-expanded="false">
-                <span class="avatar">AD</span>
-                <span class="who"><b>Awa Diallo</b><span>Administrateur</span></span>
+                <span class="avatar" data-hdr-initials>AD</span>
+                <span class="who"><b data-hdr-name>Awa Diallo</b><span data-hdr-role>Administrateur</span></span>
                 <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
               </button>
               <div class="menu" id="umMenu" role="menu" data-open="false">
                 <div class="mhead">
-                  <span class="avatar">AD</span>
-                  <span class="meta"><b>Awa Diallo</b><span>awa.diallo@cabinet-diallo.tg</span></span>
+                  <span class="avatar" data-hdr-initials>AD</span>
+                  <span class="meta"><b data-hdr-name>Awa Diallo</b><span data-hdr-mail>awa.diallo@cabinet-diallo.tg</span></span>
                 </div>
                 <a class="mi" role="menuitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Mon profil</a>
                 <a class="mi" role="menuitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></svg> Paramètres</a>
@@ -1137,6 +1303,120 @@
               </div>
               <button class="cta" id="onbCta" type="button"></button>
             </div>
+
+            <!-- ═════ FE-014 · Accueil : les modules du cabinet ═════
+                 Ce que le cabinet peut ouvrir, et ce qui lui manque pour le reste.
+                 L'affichage REFLÈTE l'état (entitlement + KYC) — il ne décide jamais :
+                 le backend reste l'autorité (403). -->
+            <section class="page" data-page="home" hidden>
+
+              <!-- ═══ Accueil ADMINISTRATEUR : on souhaite la bienvenue, puis on
+                   donne l'état du cabinet en un regard. Les chiffres proviennent
+                   de données RÉELLES (membres, modules ouverts, dossier) — rien
+                   d'inventé pour faire joli. ═══ -->
+              <div class="welcome" id="welcomeAdmin">
+                <div class="welcome-band" aria-hidden="true"></div>
+                <div class="welcome-body">
+                  <p class="welcome-date" id="welcomeDate">Mercredi 22 juillet 2026</p>
+                  <h2 id="welcomeTitle">Bonjour Awa</h2>
+                  <p class="welcome-sub" id="welcomeSub">Bienvenue dans l'espace du <b>Cabinet Diallo &amp; Associés</b>. Voici où en est votre cabinet aujourd'hui.</p>
+
+                  <div class="welcome-stats">
+                    <div class="wstat">
+                      <span class="ws-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></span>
+                      <span class="ws-txt"><b>5</b><small>collaborateurs</small></span>
+                    </div>
+                    <div class="wstat">
+                      <span class="ws-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg></span>
+                      <span class="ws-txt"><b>1 <small class="of">/ 4</small></b><small>modules ouverts</small></span>
+                    </div>
+                    <div class="wstat">
+                      <span class="ws-ico warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/></svg></span>
+                      <span class="ws-txt"><b>En vérification</b><small>dossier du cabinet</small></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ═══ Accueil COLLABORATEUR : on le salue, rien de plus pour le
+                   moment. Les modules du cabinet ne le concernent pas. ═══ -->
+              <div class="welcome welcome-solo" id="welcomeCollab" hidden>
+                <div class="welcome-band" aria-hidden="true"></div>
+                <div class="welcome-body">
+                  <p class="welcome-date" id="welcomeDateCollab">Mercredi 22 juillet 2026</p>
+                  <h2 id="welcomeTitleCollab">Bonjour Kossi</h2>
+                  <p class="welcome-sub">Bienvenue dans l'espace du <b>Cabinet Diallo &amp; Associés</b>. Votre accueil s'enrichira à mesure que des outils vous seront ouverts.</p>
+                </div>
+              </div>
+
+              <div id="homeModules">
+                <div class="mod-intro">
+                  <div>
+                    <h2>Vos modules</h2>
+                    <p>Ce que Money Vibes a activé pour votre cabinet</p>
+                  </div>
+                  <div class="states-demo" role="tablist" aria-label="État des modules (démo)">
+                    <button role="tab" data-mods="mixed" aria-selected="true">Mixte</button>
+                    <button role="tab" data-mods="none" aria-selected="false">Rien d'activé</button>
+                    <button role="tab" data-mods="all" aria-selected="false">Tout ouvert</button>
+                  </div>
+                </div>
+
+                <div class="mod-grid" id="modGrid">
+                  <article class="mod-card open" data-mod="bilan">
+                    <div class="mod-head">
+                      <span class="mod-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span>
+                      <span class="badge badge-active"><span class="d"></span> Ouvert</span>
+                    </div>
+                    <h3>Bilan &amp; états financiers</h3>
+                    <p>Produisez la liasse OHADA à partir de votre balance : bilan, compte de résultat, TFT.</p>
+                    <p class="mod-ver">Version 2.0 · référentiel SYSCOHADA révisé</p>
+                    <button class="btn btn-primary btn-sm" type="button">Ouvrir le module</button>
+                  </article>
+
+                  <article class="mod-card locked" data-mod="atelier">
+                    <div class="mod-head">
+                      <span class="mod-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                      <span class="badge badge-invited"><span class="d"></span> Vérification requise</span>
+                    </div>
+                    <h3>Atelier de balance</h3>
+                    <p>Importez votre balance Sage ou saisissez-la, puis contrôlez son équilibre.</p>
+                    <p class="mod-why">Votre dossier KYC doit être approuvé avant d'ouvrir ce module.</p>
+                    <button class="btn btn-ghost btn-sm" type="button" data-goto-kyc>Compléter mon dossier</button>
+                  </article>
+
+                  <article class="mod-card locked" data-mod="conseil">
+                    <div class="mod-head">
+                      <span class="mod-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7h14"/><path d="m5 7-3 6a4 4 0 0 0 6 0Z"/><path d="m19 7-3 6a4 4 0 0 0 6 0Z"/><path d="M8 21h8"/></svg></span>
+                      <span class="badge badge-user">Non activé</span>
+                    </div>
+                    <h3>Conseil fiscal</h3>
+                    <p>Scénarios d'optimisation légale et dossier de justification pour défendre vos bilans.</p>
+                    <p class="mod-why">Ce module n'est pas encore ouvert pour votre cabinet.</p>
+                    <button class="btn btn-ghost btn-sm" type="button" disabled>Nous contacter</button>
+                  </article>
+
+                  <article class="mod-card locked" data-mod="paiement">
+                    <div class="mod-head">
+                      <span class="mod-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span>
+                      <span class="badge badge-invited"><span class="d"></span> Abonnement requis</span>
+                    </div>
+                    <h3>Déclarations fiscales</h3>
+                    <p>Préparez et suivez vos déclarations à partir des états produits.</p>
+                    <p class="mod-why">Une formule active est nécessaire pour ce module.</p>
+                    <button class="btn btn-ghost btn-sm" type="button" data-goto-billing>Voir les formules</button>
+                  </article>
+                </div>
+
+                <p class="mod-empty" id="modEmpty" hidden>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <span><b>Aucun module n'est encore activé pour votre cabinet.</b> Money Vibes les ouvre une fois votre dossier vérifié — vous serez prévenu dès qu'un module devient disponible.</span>
+                </p>
+
+                <p class="helper">FE-014 — modules déclarés côté client (registre par vertical), ouverture pilotée par <code>GET /api/v1/catalog/entitlements/{orgId}</code> et le gate <code>GET /api/v1/tenant/state</code>. Le masquage est ergonomique : chaque module reste protégé côté serveur.</p>
+              </div>
+            </section>
+
 
             <!-- ===== PAGE : UTILISATEURS ===== -->
             <section class="page" data-page="users">
@@ -1642,84 +1922,33 @@
 
               <div class="me-grid">
 
-                <!-- Informations personnelles — ÉCRITURE (FE-019, PATCH /users/me livré par STORY-123) -->
+                <!-- Informations personnelles -->
                 <div class="card-surface">
-                  <div class="panel-head"><div><h2>Informations personnelles</h2><p>Telles qu'elles apparaissent pour vos collègues — modifiables par vous</p></div></div>
-                  <form class="org-form" onsubmit="return false">
-                    <div class="grid-2">
-                      <div class="field">
-                        <label for="me-first">Prénom</label>
-                        <div class="control">
-                          <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>
-                          <input id="me-first" type="text" value="Kossi" />
-                        </div>
-                        <p class="field-err" hidden></p>
-                      </div>
-                      <div class="field">
-                        <label for="me-last">Nom</label>
-                        <div class="control">
-                          <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>
-                          <input id="me-last" type="text" value="Amegan" />
-                        </div>
-                        <p class="field-err" hidden></p>
-                      </div>
-                    </div>
-                    <div class="field">
-                      <label for="me-phone">Téléphone</label>
-                      <div class="control">
-                        <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
-                        <input id="me-phone" type="tel" value="" placeholder="+228 90 00 00 00" />
-                      </div>
-                    </div>
-                    <p class="helper">Votre adresse e-mail est votre identifiant de connexion — elle se change dans le bloc Sécurité, avec confirmation.</p>
-                    <div style="display:flex; justify-content:flex-end; margin-top:.35rem">
-                      <button class="btn btn-primary" type="button" disabled>Enregistrer</button>
-                    </div>
-                  </form>
+                  <div class="panel-head"><div><h2>Informations personnelles</h2><p>Telles qu'elles apparaissent pour vos collègues</p></div></div>
+                  <dl class="ro-list">
+                    <div><dt>Prénom</dt><dd id="meFirst">Kossi</dd></div>
+                    <div><dt>Nom</dt><dd id="meLast">Amegan</dd></div>
+                    <div><dt>Adresse e-mail</dt><dd><code>kossi.amegan@cabinet.tg</code></dd></div>
+                  </dl>
+                  <p class="gap-note">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+                    <span><b>À livrer côté backend.</b> L'IdP n'expose que <code>GET /users/me</code> : aucun <code>PATCH</code>. Un membre ne peut pas corriger l'orthographe de son propre nom — seul un administrateur le peut, via la gestion des utilisateurs.</span>
+                  </p>
                 </div>
 
-                <!-- Sécurité — ÉCRITURE (FE-019 : POST /users/me/password [123] + POST|DELETE /users/me/email [124]) -->
+                <!-- Sécurité -->
                 <div class="card-surface">
                   <div class="panel-head"><div><h2>Sécurité</h2><p>Accès à votre compte</p></div></div>
                   <div class="me-rows">
                     <div class="me-row">
                       <span class="mr-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-                      <span class="mr-txt"><b>Mot de passe</b><small>••••••••••</small></span>
-                      <button class="btn btn-ghost btn-sm" type="button" aria-expanded="true">Modifier</button>
+                      <span class="mr-txt"><b>Mot de passe</b><small>••••••••••  ·  modifié à l'inscription</small></span>
+                      <button class="btn btn-ghost btn-sm" type="button" disabled>Modifier</button>
                     </div>
-                    <form class="org-form" onsubmit="return false" style="padding:.25rem .25rem .6rem 3.1rem">
-                      <div class="field">
-                        <label for="me-pwd-now">Mot de passe actuel</label>
-                        <div class="control"><input id="me-pwd-now" type="password" placeholder="Votre mot de passe actuel" /></div>
-                        <p class="field-err" hidden>Mot de passe incorrect.</p>
-                      </div>
-                      <div class="grid-2">
-                        <div class="field">
-                          <label for="me-pwd-new">Nouveau mot de passe</label>
-                          <div class="control"><input id="me-pwd-new" type="password" placeholder="12 caractères minimum" /></div>
-                        </div>
-                        <div class="field">
-                          <label for="me-pwd-conf">Confirmer</label>
-                          <div class="control"><input id="me-pwd-conf" type="password" placeholder="Répétez le nouveau" /></div>
-                        </div>
-                      </div>
-                      <p class="helper">⚠️ Après le changement, vous serez déconnecté partout et devrez vous reconnecter avec le nouveau mot de passe.</p>
-                      <div style="display:flex; justify-content:flex-end; margin-top:.3rem">
-                        <button class="btn btn-primary btn-sm" type="button">Changer le mot de passe</button>
-                      </div>
-                    </form>
                     <div class="me-row">
                       <span class="mr-ico ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
-                      <span class="mr-txt"><b>Adresse e-mail</b><small><code>kossi.amegan@cabinet.tg</code> · vérifiée le 12/07/2026</small></span>
-                      <button class="btn btn-ghost btn-sm" type="button">Changer d'adresse</button>
-                    </div>
-                    <!-- État « demande en cours » (pendingEmail servi par GET /users/me) -->
-                    <div class="callout callout-info" style="margin:.2rem .25rem .5rem 3.1rem">
-                      <b>En attente de confirmation : <code>k.amegan@gmail.com</code></b><br/>
-                      Si cette adresse est disponible, un lien de confirmation y a été envoyé. Votre adresse
-                      actuelle <code>kossi.amegan@cabinet.tg</code> reste votre identifiant de connexion tant que
-                      la nouvelle n'est pas confirmée.
-                      <span style="display:block; margin-top:.4rem"><button class="btn btn-ghost btn-sm" type="button">Annuler la demande</button></span>
+                      <span class="mr-txt"><b>Adresse e-mail vérifiée</b><small>Confirmée le 12/07/2026</small></span>
+                      <span class="badge badge-active"><span class="d"></span> Vérifiée</span>
                     </div>
                     <div class="me-row">
                       <span class="mr-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
@@ -1727,6 +1956,10 @@
                       <button class="btn btn-ghost btn-sm" type="button">Se déconnecter</button>
                     </div>
                   </div>
+                  <p class="gap-note">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+                    <span><b>À livrer côté backend.</b> Aucune route de changement de mot de passe ni de mot de passe oublié dans l'IdP (<code>/auth/*</code> = register, login, refresh, logout, verify-email, resend-verification, accept-invitation). Un utilisateur qui perd son mot de passe est aujourd'hui bloqué.</span>
+                  </p>
                 </div>
 
                 <!-- Préférences (réelles, côté client) -->
@@ -1832,6 +2065,217 @@
               </div>
               <p class="helper">Aperçu d'emplacement — catalogue &amp; paiement livrés en FE-011/012.</p>
             </section>
+
+            <!-- ===== PAGE : ATELIER (FE-024) — shell, gate & choix de source ===== -->
+            <section class="page" data-page="atelier" hidden>
+              <div class="card-surface">
+                <div class="panel-head">
+                  <div>
+                    <h2>Atelier — d'où vient votre balance&nbsp;?</h2>
+                    <p>Module amont (D13) : il produit la balance que le Bilan consomme.</p>
+                  </div>
+                  <span class="grow"></span>
+                  <div class="atelier-demo" role="tablist" aria-label="Accès au module (démo)">
+                    <span class="lbl">Accès</span>
+                    <button class="btn btn-ghost btn-sm" role="tab" data-atelier-gate="granted" aria-selected="true">Ouvert</button>
+                    <button class="btn btn-ghost btn-sm" role="tab" data-atelier-gate="EMAIL_NOT_VERIFIED" aria-selected="false">E-mail</button>
+                    <button class="btn btn-ghost btn-sm" role="tab" data-atelier-gate="KYC_NOT_APPROVED" aria-selected="false">KYC</button>
+                    <button class="btn btn-ghost btn-sm" role="tab" data-atelier-gate="BALANCE_NOT_ENTITLED" aria-selected="false">Non octroyé</button>
+                  </div>
+                </div>
+
+                <!-- ===== GATE FERMÉ — écran d'orientation nommant la raison ===== -->
+                <!-- EMAIL_NOT_VERIFIED -->
+                <div class="gate-slot" data-gate-slot="EMAIL_NOT_VERIFIED" hidden>
+                  <div class="gate warn">
+                    <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+                    <h3>Vérifiez d'abord votre adresse e-mail</h3>
+                    <p>L'Atelier reste fermé tant que l'adresse du cabinet n'est pas confirmée. Un lien a été envoyé à <b>awa.diallo@cabinet-diallo.tg</b>.</p>
+                    <span class="code">403 · EMAIL_NOT_VERIFIED</span>
+                    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                      <button class="btn btn-primary btn-sm" type="button" data-gate-act="resend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/></svg> Renvoyer l'e-mail</button>
+                    </div>
+                    <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Le backend reste l'autorité — l'affichage ne fait que refléter l'entitlement.</span>
+                  </div>
+                </div>
+                <!-- KYC_NOT_APPROVED -->
+                <div class="gate-slot" data-gate-slot="KYC_NOT_APPROVED" hidden>
+                  <div class="gate warn">
+                    <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/></svg></span>
+                    <h3>Votre KYC n'est pas encore approuvé</h3>
+                    <p>Les données comptables du cabinet exigent un dossier vérifié. Téléversez le RCCM et la carte CFE pour lancer la vérification.</p>
+                    <span class="code">403 · KYC_NOT_APPROVED</span>
+                    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                      <button class="btn btn-primary btn-sm" type="button" data-gate-act="goKyc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg> Compléter le KYC</button>
+                    </div>
+                    <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Le backend reste l'autorité — l'affichage ne fait que refléter l'entitlement.</span>
+                  </div>
+                </div>
+                <!-- BALANCE_NOT_ENTITLED — non actionnable par le cabinet -->
+                <div class="gate-slot" data-gate-slot="BALANCE_NOT_ENTITLED" hidden>
+                  <div class="gate blocked">
+                    <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                    <h3>Le module Atelier n'a pas été activé pour votre cabinet</h3>
+                    <p>Ce module s'ouvre côté Money&nbsp;Vibes : il n'y a rien à débloquer vous-même. Une fois l'octroi effectué, l'accès peut mettre quelques instants à se propager.</p>
+                    <span class="code">403 · BALANCE_NOT_ENTITLED</span>
+                    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                      <button class="btn btn-ghost btn-sm" type="button" data-gate-act="contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z"/><path d="m22 6-10 7L2 6"/></svg> Contacter Money Vibes</button>
+                    </div>
+                    <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Cohérence différée : ne jamais conclure « pas d'accès » sur une seule lecture fraîche.</span>
+                  </div>
+                </div>
+
+                <!-- ===== GATE OUVERT — le module ===== -->
+                <div class="gate-slot" data-gate-slot="granted">
+                  <div class="atl-subnav" role="tablist" aria-label="Navigation de l'Atelier">
+                    <button class="atl-tab" role="tab" data-atl-tab="sources" aria-selected="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><rect width="18" height="6" x="3" y="15" rx="2"/></svg>
+                      Sources
+                    </button>
+                    <button class="atl-tab" role="tab" data-atl-tab="balances" aria-selected="false">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M3 16v5h5"/><path d="M16 21h5v-5"/><path d="M9 12h6"/></svg>
+                      Balances <span class="count">0</span>
+                    </button>
+                    <span class="grow"></span>
+                    <span class="badge badge-active"><span class="d"></span>Module actif</span>
+                  </div>
+
+                  <!-- --- Onglet SOURCES : choisir d'où vient la balance --- -->
+                  <div class="atl-panel atl-body" data-atl-panel="sources">
+                    <div>
+                      <h3 class="atl-sectitle">Choisir une source</h3>
+                      <p class="atl-secsub">Cabinet, IMF ou distributeur : les trois convergent vers le même contrat canonique de balance (STORY-101).</p>
+                    </div>
+
+                    <div class="src-grid">
+                      <!-- sage : disponible -->
+                      <article class="src-card available">
+                        <div class="src-top">
+                          <span class="src-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h2l1.5 4 2-6 1.5 2h2"/></svg></span>
+                          <span class="badge badge-avail"><span class="d"></span>Disponible</span>
+                        </div>
+                        <h4>Export Sage 100</h4>
+                        <p>Vous partez d'un export Excel/CSV de votre logiciel Sage. La balance est reconstruite à l'identique.</p>
+                        <div class="src-cta"><button class="btn btn-primary btn-sm" type="button" data-src-act="sage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg> Importer un export Sage</button></div>
+                      </article>
+
+                      <!-- direct : disponible -->
+                      <article class="src-card available">
+                        <div class="src-top">
+                          <span class="src-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+                          <span class="badge badge-avail"><span class="d"></span>Disponible</span>
+                        </div>
+                        <h4>Saisie / ingestion directe</h4>
+                        <p>Aucun export à fournir : la balance est saisie ou ingérée directement dans le contrat canonique.</p>
+                        <div class="src-cta"><button class="btn btn-primary btn-sm" type="button" data-src-act="direct"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg> Saisir / ingérer</button></div>
+                      </article>
+
+                      <!-- ocr : à venir, non cliquable, sans promesse de date -->
+                      <article class="src-card soon">
+                        <div class="src-top">
+                          <span class="src-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h2"/><path d="M16 3h2a2 2 0 0 1 2 2v2"/><path d="M20 17v2a2 2 0 0 1-2 2h-2"/><path d="M8 21H6a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg></span>
+                          <span class="badge badge-soon">Bientôt</span>
+                        </div>
+                        <h4>Cahiers &amp; factures (OCR)</h4>
+                        <p>Cahiers de recettes/dépenses et factures numérisés, lus automatiquement. En cours de construction.</p>
+                        <div class="src-cta"><span class="src-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Annoncé, sans promesse de date — jamais un lien mort.</span></div>
+                      </article>
+                    </div>
+
+                    <!-- Référentiel actif — GET /referentiels/actifs -->
+                    <div>
+                      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;flex-wrap:wrap">
+                        <h3 class="atl-sectitle">Paramétrage effectif de l'organisation</h3>
+                        <span class="grow" style="flex:1"></span>
+                        <div class="atelier-demo" role="tablist" aria-label="État du référentiel (démo)">
+                          <button class="btn btn-ghost btn-sm" role="tab" data-ref="ok" aria-selected="true">Résolu</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-ref="ko" aria-selected="false">Indisponible</button>
+                        </div>
+                      </div>
+
+                      <!-- résolu -->
+                      <div class="ref-slot" data-ref-slot="ok">
+                        <div class="ref-card">
+                          <div class="ref-head">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            <b>Référentiel &amp; paquet fiscal appliqués à vos balances</b>
+                            <span class="grow"></span>
+                            <span class="badge badge-active"><span class="d"></span>Résolu</span>
+                          </div>
+                          <div class="ref-grid">
+                            <div class="ref-item">
+                              <div class="ref-k">Référentiel comptable</div>
+                              <div class="ref-v">SYSCOHADA révisé · v2024.1</div>
+                              <div class="ref-sum">sha256:9f2c…a71e</div>
+                            </div>
+                            <div class="ref-item">
+                              <div class="ref-k">Paquet fiscal</div>
+                              <div class="ref-v">Togo — Loi de finances 2025 · v2025.2</div>
+                              <div class="ref-sum">sha256:4b8d…c033</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- indisponible -->
+                      <div class="ref-slot" data-ref-slot="ko" hidden>
+                        <div class="ref-card">
+                          <div class="state error" style="padding:2.2rem 1.5rem">
+                            <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></span>
+                            <h3>Paramétrage non résolu pour votre organisation</h3>
+                            <p>Le référentiel ou le paquet fiscal n'a pas pu être déterminé. Aucune balance ne sera produite tant que ce n'est pas réglé.</p>
+                            <span class="code">409 · REFERENTIEL_UNRESOLVED</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- --- Onglet BALANCES : aucune produite (nominal pour cette story) --- -->
+                  <div class="atl-panel atl-body" data-atl-panel="balances" hidden>
+                    <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Balances produites</h3>
+                        <p class="atl-secsub">L'Atelier pose l'ossature ; la production d'une balance arrive avec l'import Sage et la saisie (FE-025/026).</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <div class="atelier-demo" role="tablist" aria-label="État de la liste (démo)">
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bal="empty" aria-selected="true">Vide</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bal="loading" aria-selected="false">Chargement</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bal="error" aria-selected="false">Erreur</button>
+                      </div>
+                    </div>
+
+                    <div class="ref-card">
+                      <!-- vide -->
+                      <div class="bal-slot" data-bal-slot="empty">
+                        <div class="state empty">
+                          <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M3 16v5h5"/><path d="M16 21h5v-5"/><path d="M9 12h6"/></svg></span>
+                          <h3>Aucune balance pour l'instant</h3>
+                          <p>Choisissez une source dans l'onglet « Sources » pour produire votre première balance.</p>
+                          <button class="btn btn-primary btn-sm" type="button" data-goto-sources><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><rect width="18" height="6" x="3" y="15" rx="2"/></svg> Choisir une source</button>
+                        </div>
+                      </div>
+                      <!-- chargement -->
+                      <div class="bal-slot" data-bal-slot="loading" hidden style="padding:1.15rem">
+                        <div class="sk-row"><span class="sk sk-av"></span><span class="sk sk-line" style="width:40%"></span><span class="sk sk-line" style="width:16%;margin-left:auto"></span></div>
+                        <div class="sk-row"><span class="sk sk-av"></span><span class="sk sk-line" style="width:32%"></span><span class="sk sk-line" style="width:16%;margin-left:auto"></span></div>
+                        <div class="sk-row"><span class="sk sk-av"></span><span class="sk sk-line" style="width:44%"></span><span class="sk sk-line" style="width:16%;margin-left:auto"></span></div>
+                      </div>
+                      <!-- erreur -->
+                      <div class="bal-slot" data-bal-slot="error" hidden>
+                        <div class="state error">
+                          <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></span>
+                          <h3>Impossible de charger les balances</h3>
+                          <p>Le service balance est indisponible pour le moment. Réessayez dans un instant.</p>
+                          <button class="btn btn-ghost btn-sm" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Réessayer</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="helper">FE-024 · l'affichage <b>reflète</b> l'entitlement ; <code>@RequiresBalanceAccess</code> décide côté serveur. Routage <code>/atelier</code> → <code>:3007/api/v1</code>.</p>
+            </section>
           </div>
         </main>
       </div>
@@ -1908,11 +2352,6 @@
               </div>
             </div>
 
-            <!-- FE-020 : l'entrée vers la récupération de compte (FE-005 ne l'avait pas — il n'y avait rien derrière) -->
-            <p class="helper" style="text-align:right; margin:0.5rem 0 0">
-              <a href="#" data-goto-forgot>Mot de passe oublié&nbsp;?</a>
-            </p>
-
             <button class="btn btn-primary" type="button" id="loginSubmit" style="width:100%;margin-top:1.1rem">Se connecter</button>
           </form>
 
@@ -1936,71 +2375,6 @@
           <button role="tab" aria-selected="false" data-auth="done">Confirmation</button>
           <button role="tab" aria-selected="false" data-auth="verify">Vérif. e-mail</button>
           <button role="tab" aria-selected="false" data-auth="invite">Invitation</button>
-          <button role="tab" aria-selected="false" data-auth="forgot">Mdp oublié</button>
-          <button role="tab" aria-selected="false" data-auth="reset">Réinitialisation</button>
-        </div>
-
-        <!-- ═════ FE-020 : Mot de passe oublié — écran PUBLIC /mot-de-passe-oublie ═════ -->
-        <div class="auth-card" data-auth-panel="forgot" hidden>
-          <h2>Mot de passe oublié</h2>
-          <p class="lead">Indiquez l'adresse e-mail de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.</p>
-
-          <form class="reg-form" onsubmit="return false">
-            <div class="field">
-              <label for="f-email">Adresse e-mail</label>
-              <div class="control">
-                <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                <input id="f-email" type="email" placeholder="vous@cabinet.tg" />
-              </div>
-            </div>
-            <button class="btn btn-primary" type="button" style="width:100%;margin-top:0.9rem">M'envoyer un lien</button>
-          </form>
-
-          <!-- État APRÈS envoi — le MÊME quel que soit le sort de l'adresse (202 anti-énumération) -->
-          <div class="callout callout-info" style="margin-top:1rem; text-align:left">
-            <b>Si un compte existe pour cette adresse, un lien vient d'y être envoyé.</b><br/>
-            Pensez à vérifier vos courriers indésirables. Le lien expire au bout d'une heure.
-          </div>
-          <p class="helper" style="margin-top:0.9rem">⚠️ Maquette : le message ne confirme NI n'infirme l'existence du compte — même écran, même délai, jamais « e-mail envoyé à… » ni « aucun compte trouvé ».</p>
-
-          <p class="signup">Vous vous en souvenez finalement ? <a href="#">Se connecter</a></p>
-        </div>
-
-        <!-- ═════ FE-020 : Réinitialisation — écran PUBLIC /reinitialiser-mot-de-passe?token=… ═════ -->
-        <div class="auth-card" data-auth-panel="reset" hidden>
-          <h2>Nouveau mot de passe</h2>
-          <p class="lead">Choisissez le nouveau mot de passe de votre compte.</p>
-
-          <form class="reg-form" onsubmit="return false">
-            <div class="field">
-              <label for="rp-new">Nouveau mot de passe</label>
-              <div class="control">
-                <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <input id="rp-new" type="password" placeholder="8 caractères minimum" />
-              </div>
-              <p class="field-err" hidden>Mot de passe trop faible (règle du serveur, affichée telle quelle).</p>
-            </div>
-            <div class="field">
-              <label for="rp-conf">Confirmer le nouveau</label>
-              <div class="control">
-                <svg class="lead-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <input id="rp-conf" type="password" placeholder="Répétez le nouveau" />
-              </div>
-            </div>
-            <button class="btn btn-primary" type="button" style="width:100%;margin-top:0.9rem">Changer le mot de passe</button>
-          </form>
-
-          <!-- État : token invalide / expiré / déjà utilisé (400) — TOUJOURS une sortie -->
-          <div class="gap-note" style="margin:1rem 0 0">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
-            <span><b>Ce lien n'est plus valide</b> (expiré ou déjà utilisé). <a href="#">Refaire une demande</a> — jamais une impasse.</span>
-          </div>
-          <!-- État : succès (204) -->
-          <div class="callout callout-info" style="margin-top:0.6rem; text-align:left">
-            <b>Mot de passe modifié.</b> Connectez-vous avec votre nouveau mot de passe.
-            <span style="display:block; margin-top:0.4rem"><button class="btn btn-primary btn-sm" type="button">Se connecter</button></span>
-          </div>
-          <p class="helper" style="margin-top:0.9rem">⚠️ Écran PUBLIC : jamais redirigé vers /login par la garde de routes — sans token dans l'URL, erreur explicite sans appel réseau.</p>
         </div>
 
         <!-- FE-004 : Inscription cabinet -->
@@ -2281,14 +2655,16 @@
     /* Pages où l'activation du cabinet (stepper + bandeau KYC) n'a rien à faire :
        ce bloc pilote l'ONBOARDING, pas la consultation d'une fiche. Le répéter
        au-dessus du profil parasitait l'écran (retour PO, 2026-07-22). */
-    var ACTIVATION_HIDDEN_ON = ["profile", "me"];
+    var ACTIVATION_HIDDEN_ON = ["home", "profile", "me"];
 
     var titles = {
+      home:    ["Accueil", "Les modules ouverts pour votre cabinet"],
       profile: ["Profil du cabinet", "Identité et coordonnées de votre cabinet"],
       me: ["Mon profil", "Vos informations personnelles"],
       users:   ["Utilisateurs", "Gérez les accès de votre cabinet"],
       kyc:     ["Vérification KYC", "Justificatifs légaux du cabinet"],
-      billing: ["Abonnement", "Formule et paiement"]
+      billing: ["Abonnement", "Formule et paiement"],
+      atelier: ["Atelier", "Produire une balance exploitable, quelle que soit sa source"]
     };
     var appRoot = document.getElementById("appRoot");
     document.querySelectorAll('.nav-item[data-page]').forEach(function (item) {
@@ -2537,6 +2913,32 @@
           meRoleBadge.textContent = label;
           meRoleBadge.className = "badge " + (isAdmin ? "badge-admin" : "badge-user");
         }
+        /* L'en-tête fait partie de l'identité : le laisser sur « Awa Diallo /
+           Administrateur » pendant qu'on navigue en collaborateur raconterait
+           deux personnes différentes à l'écran. */
+        document.querySelectorAll("[data-hdr-initials]").forEach(function (el) { el.textContent = person.ini; });
+        document.querySelectorAll("[data-hdr-name]").forEach(function (el) { el.textContent = person.name; });
+        document.querySelectorAll("[data-hdr-role]").forEach(function (el) { el.textContent = label; });
+        document.querySelectorAll("[data-hdr-mail]").forEach(function (el) { el.textContent = person.mail; });
+
+        /* FE-014 — deux accueils distincts : l'administrateur pilote le cabinet,
+           le collaborateur est simplement accueilli. Les modules du cabinet ne
+           le concernent pas (décision PO, 2026-07-22). */
+        var welcomeAdmin = document.getElementById("welcomeAdmin");
+        if (welcomeAdmin) {
+          welcomeAdmin.hidden = !isAdmin;
+          document.getElementById("welcomeCollab").hidden = isAdmin;
+          document.getElementById("homeModules").hidden = !isAdmin;
+          document.getElementById("welcomeTitle").textContent = "Bonjour " + person.first;
+          document.getElementById("welcomeTitleCollab").textContent = "Bonjour " + person.first;
+          // Le sous-titre de l'en-tête annonçait des modules à qui n'en voit aucun.
+          if (document.querySelector('.nav-item[aria-current="page"]')?.dataset.page === "home") {
+            document.getElementById("pageSub").textContent = isAdmin
+              ? titles.home[1]
+              : "Bienvenue dans votre espace";
+          }
+        }
+
         var orgActions = document.getElementById("meOrgActions");
         var orgNote = document.getElementById("meOrgNote");
         if (orgActions) orgActions.hidden = !isAdmin;
@@ -2562,16 +2964,6 @@
         e.preventDefault();
         var tab = document.querySelector('.seg [data-view="public"]');
         if (tab) tab.click();
-      });
-    });
-    // FE-020 : « Mot de passe oublié ? » depuis la connexion → enveloppe publique, écran forgot.
-    document.querySelectorAll('[data-goto-forgot]').forEach(function (a) {
-      a.addEventListener('click', function (e) {
-        e.preventDefault();
-        var tab = document.querySelector('.seg [data-view="public"]');
-        if (tab) tab.click();
-        var forgot = document.querySelector('[data-auth="forgot"]');
-        if (forgot) forgot.click();
       });
     });
 
@@ -2641,6 +3033,36 @@
         });
       });
     })();
+
+    /* FE-014 — trois configurations d'entitlements (démo). */
+    (function () {
+      var grid = document.getElementById("modGrid");
+      var empty = document.getElementById("modEmpty");
+      if (!grid) return;
+      document.querySelectorAll("[data-mods]").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+          var which = tab.dataset.mods;
+          document.querySelectorAll("[data-mods]").forEach(function (t) {
+            t.setAttribute("aria-selected", String(t.dataset.mods === which));
+          });
+          grid.hidden = which === "none";
+          empty.hidden = which !== "none";
+          grid.querySelectorAll(".mod-card").forEach(function (card) {
+            var openAll = which === "all";
+            card.classList.toggle("open", openAll || card.dataset.mod === "bilan");
+            card.classList.toggle("locked", !(openAll || card.dataset.mod === "bilan"));
+          });
+        });
+      });
+    })();
+
+    /* Raccourcis des cartes verrouillées vers l'étape à traiter. */
+    document.querySelectorAll("[data-goto-billing]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var nav = document.querySelector('.nav-item[data-page="billing"]');
+        if (nav) nav.click();
+      });
+    });
 
     /* Raccourci « Gérer les documents » du profil cabinet → écran KYC (source unique). */
     document.querySelectorAll("[data-goto-kyc]").forEach(function (btn) {
@@ -3053,5 +3475,80 @@
       });
       setTenant("kyc");
     }
+
+    /* ===================== FE-024 · Module Atelier =======================
+       Gate (reflet de l'entitlement), sous-nav interne, référentiel, balances.
+       L'affichage oriente ; l'autorité reste le 403 du backend. */
+    (function () {
+      var page = document.querySelector('.page[data-page="atelier"]');
+      if (!page) return;
+
+      /* Gate : bascule module ouvert / écran d'orientation par raison. */
+      function setGate(state) {
+        page.querySelectorAll("[data-atelier-gate]").forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.atelierGate === state));
+        });
+        page.querySelectorAll(".gate-slot").forEach(function (s) {
+          s.hidden = s.dataset.gateSlot !== state;
+        });
+      }
+      page.querySelectorAll("[data-atelier-gate]").forEach(function (b) {
+        b.addEventListener("click", function () { setGate(b.dataset.atelierGate); });
+      });
+
+      /* CTA des écrans de gate — orientent vers l'action qui lève la raison. */
+      page.querySelectorAll("[data-gate-act]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var act = b.dataset.gateAct;
+          if (act === "resend") notify("success", "E-mail renvoyé", "Un nouveau lien de vérification a été envoyé à votre cabinet.");
+          else if (act === "goKyc") { var n = document.querySelector('.nav-item[data-page="kyc"]'); if (n) n.click(); }
+          else if (act === "contact") notify("success", "Demande transmise", "Money Vibes est notifié de votre besoin d'accès à l'Atelier.");
+        });
+      });
+
+      /* Sous-navigation interne : Sources / Balances. */
+      function setTab(tab) {
+        page.querySelectorAll("[data-atl-tab]").forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.atlTab === tab));
+        });
+        page.querySelectorAll("[data-atl-panel]").forEach(function (p) {
+          p.hidden = p.dataset.atlPanel !== tab;
+        });
+      }
+      page.querySelectorAll("[data-atl-tab]").forEach(function (b) {
+        b.addEventListener("click", function () { setTab(b.dataset.atlTab); });
+      });
+      var goSources = page.querySelector("[data-goto-sources]");
+      if (goSources) goSources.addEventListener("click", function () { setTab("sources"); });
+
+      /* CTA des sources disponibles — pas encore de page (FE-025/026) : on
+         l'annonce honnêtement plutôt que d'ouvrir un lien mort. */
+      page.querySelectorAll("[data-src-act]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var src = b.dataset.srcAct;
+          if (src === "sage") notify("success", "Bientôt : import Sage", "L'écran d'import d'un export Sage arrive avec FE-025.");
+          else if (src === "direct") notify("success", "Bientôt : saisie directe", "L'écran de saisie / ingestion arrive avec FE-026.");
+        });
+      });
+
+      /* Référentiel actif : résolu / indisponible. */
+      page.querySelectorAll("[data-ref]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          page.querySelectorAll("[data-ref]").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
+          page.querySelectorAll("[data-ref-slot]").forEach(function (s) { s.hidden = s.dataset.refSlot !== b.dataset.ref; });
+        });
+      });
+
+      /* Liste des balances : vide / chargement / erreur. */
+      page.querySelectorAll("[data-bal]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          page.querySelectorAll("[data-bal]").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
+          page.querySelectorAll("[data-bal-slot]").forEach(function (s) { s.hidden = s.dataset.balSlot !== b.dataset.bal; });
+        });
+      });
+
+      setGate("granted");
+      setTab("sources");
+    })();
   })();
 </script>
