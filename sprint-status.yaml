@@ -31,6 +31,16 @@ sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 #   ✅ SLOTTÉE SPRINT 12 (décision user 2026-07-19 ; S12 → 26/34). À faire TÔT (débloque le frontend,
 #   déjà en attente). Fichier : docs/stories/STORY-109.md. Story sœur frontend : FE-INT-4 (register
 #   cabinetName, gap FE-004).
+#
+# ✅ 2026-07-25 — STORY-138 (CROSS-CUTTING, 3 pts) SLOTTÉE SPRINT 17 (décision user ; S17 → 21/34) : aligner le guard e-mail sur
+#   le contrat { message, code } sur les 7 relying-parties navigateur (auth/EC/kyc/catalog/document/
+#   bilan/balance). Découvert à l'Integration Gate de FE-024 : le 403 « e-mail non vérifié » sort SANS
+#   `code`, alors que KYC_NOT_APPROVED / BALANCE_NOT_ENTITLED en portent un → un motif sur trois n'est
+#   pas auto-descriptif. Cause : guard e-mail copié-collé en chaîne nue sur 7 services + filtre
+#   d'exception qui jette `code` sur 5 (balance/bilan le propagent déjà). Priorité Should (PAS un
+#   bloqueur : le front dégrade proprement via le claim `emailVerified`). admin-panel HORS périmètre
+#   (BFF same-origin). Incrément démo décidé (user 2026-07-25) : balance-service d'abord (guard seul).
+#   Fichier : stories/STORY-138.md. Origine : FE-024 (frontend, déjà en review).
 services:
   - name: "expert-comptable"
     port: 3000
@@ -1708,7 +1718,7 @@ sprints:
     start_date: "2027-02-11"
     end_date: "2027-02-25"
     capacity_points: 34
-    committed_points: 18
+    committed_points: 21  # ⬆️ 18→21 le 2026-07-25 : +STORY-138 (3, CROSS-CUTTING dette de contrat guard e-mail, slottée ici par décision user — S15 à capacité, S16 déjà chargé ; S17 a la marge). 21/34 ≤ capacité. Hors thème OCR (082→085), comme STORY-109 l'était du sien.
     completed_points: 0
     status: "not_started"
     goal: "Construction de balance chemin A (cahiers recettes/dépenses, OCR captures/factures par mois, rattachement plan comptable) — adaptateur #3 du hub (construction, D13). Étend document-service (EPIC-015)."
@@ -1740,6 +1750,14 @@ sprints:
         points: 3
         service: "balance-service"
         status: "not_started"  # compte→poste reste dans bilan-service (STORY-055) — pas de doublon
+        assigned_to: null
+      - story_id: "STORY-138"
+        title: "Aligner le guard e-mail sur { message, code } (EMAIL_NOT_VERIFIED) sur les 7 relying-parties navigateur"
+        epic: "transverse / dette de contrat d'API (hors décompte d'epic, cf. STORY-109)"
+        points: 3
+        service: "auth-service, expert-comptable, kyc-service, platform-catalog-service, document-service, bilan-service, balance-service"
+        story_path: "stories/STORY-138.md"
+        status: "not_started"  # 🆕 2026-07-25 slottée S17 (décision user). CROSS-CUTTING, Should (PAS bloqueur : le front dégrade proprement via le claim emailVerified). Origine : Integration Gate de FE-024 — 403 « e-mail non vérifié » SANS `code` alors que KYC_NOT_APPROVED/BALANCE_NOT_ENTITLED en portent un. Correctif = guard e-mail (chaîne nue → {message,code}) ×7 + filtre d'exception étendu ×5 (balance/bilan le propagent déjà). admin-panel HORS périmètre (BFF same-origin). Incrément démo : balance-service d'abord (guard seul). Branches MNV-138(<service>).
         assigned_to: null
 
   - sprint_number: 18
