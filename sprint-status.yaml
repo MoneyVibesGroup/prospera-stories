@@ -1604,8 +1604,9 @@ sprints:
         epic: "EPIC-014"
         points: 3
         service: "bilan-service"
-        status: "not_started"  # 2026-07-23 REPORTÉE du S15 au S16 — arbitrage de capacité (le S15 était à 37 pts pour 34, et l'ajout de STORY-132/D1 le portait à 40). FR-024 est la seule Could Have du lot : sortie en premier. Le S16 a la marge (13 pts restants sur 34, ses 39 autres points étant déjà livrés).
-        assigned_to: null
+        status: "defined"  # 2026-07-25 CADRÉE (create-story escaladé en `opus` — la story tient dans 3 pts de code mais porte des invariants de COMPARABILITÉ : `Complexité : high`). Périmètre : GET /bilan/comparaison/exercices?exercices=… (2 à 5 libellés), source = DERNIER SnapshotLiasse validé de chaque exercice (jamais le brouillon), tableau d'évolution par poste sur 5 familles (actif netN / passif montantN / sous-totaux valeurN / CR montantN+sens / SIG valeurN), variations pas-à-pas + pourcentage. 5 décisions : D1 snapshot figé ; D2 homogénéité BLOQUANTE sur le code de référentiel (409) mais NUANCÉE sur la version (200 + referentielHomogene:false) ; D3 `null` de premier ordre (poste absent ≠ 0, dénominateur nul ⇒ pourcentage null, jamais NaN/Infinity) ; D4 chaque exercice tire sa valeur de SA colonne N — la colonne N-1 d'un snapshot n'est JAMAIS la valeur d'un autre exercice ; D5 variation pas-à-pas (déviation assumée vs la forme « référence + écarts » de 071 : série temporelle ≠ scénarios concurrents). Hors périmètre (hooks inertes) : export, épinglage de version, colonnes brut/amort, TFT/notes, audit de lecture. Historique : 2026-07-23 REPORTÉE du S15 au S16 — arbitrage de capacité (le S15 était à 37 pts pour 34, et l'ajout de STORY-132/D1 le portait à 40). FR-024 est la seule Could Have du lot : sortie en premier. Le S16 a la marge (13 pts restants sur 34, ses 39 autres points étant déjà livrés).
+        doc: "docs/stories/STORY-074.md"
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-122"
         title: "Référentiel CIMA assurances @1.0 (allégé) — plan art. 431 + Bilan/CR technique & net — FR-007"
         epic: "EPIC-010"
