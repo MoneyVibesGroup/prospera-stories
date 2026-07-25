@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-024 Atelier (shell, sources & gate)</title>
+<title>Prospera · Prototype cumulatif — FE-025 Import Sage (dry-run en deux temps)</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -832,6 +832,96 @@
   .authority svg { width: 0.95rem; height: 0.95rem; flex: none; }
   :root[data-theme="dark"] .gate.warn .glyph { color: #fbbf24; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .gate.warn .glyph { color: #fbbf24; } }
+
+  /* ============ IMPORT SAGE (FE-025) — dry-run en deux temps ============== */
+  /* Fil d'Ariane retour Sources → écran d'import. */
+  .imp-back { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--muted-fg); background: none; border: 0; cursor: pointer; padding: 0.2rem 0; }
+  .imp-back:hover { color: var(--foreground); }
+  .imp-back svg { width: 0.95rem; height: 0.95rem; }
+
+  /* Fil d'étapes : « on regarde, puis on décide » rendu explicite. */
+  .imp-steps { display: flex; align-items: center; gap: 0.5rem; margin: 0.2rem 0 0.4rem; }
+  .imp-step { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.8rem; color: var(--muted-fg); }
+  .imp-step .n { width: 1.35rem; height: 1.35rem; border-radius: 50%; display: grid; place-items: center; font-size: 0.72rem; font-weight: 700; background: var(--hover-surface); color: var(--muted-fg); border: 1.5px solid var(--border-strong); }
+  .imp-step.active { color: var(--foreground); font-weight: 600; }
+  .imp-step.active .n { background: var(--orange-500); color: var(--primary-fg); border-color: var(--orange-500); }
+  .imp-step.done .n { background: var(--success); color: #fff; border-color: var(--success); }
+  .imp-steps .sep { flex: 1; height: 1.5px; background: var(--border); max-width: 3rem; }
+
+  /* Fichier retenu — pré-contrôle client, jamais autoritaire. */
+  .imp-file { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 0.85rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+  .imp-file .fi { width: 2.1rem; height: 2.1rem; flex: none; border-radius: 0.5rem; background: var(--success-soft); color: var(--success); display: grid; place-items: center; }
+  .imp-file .fi svg { width: 1.05rem; height: 1.05rem; }
+  .imp-file .fn { flex: 1; min-width: 0; }
+  .imp-file .fn b { display: block; font-size: 0.84rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .imp-file .fn small { font-size: 0.74rem; color: var(--muted-fg); font-variant-numeric: tabular-nums; }
+  .imp-file .fx { background: none; border: 0; color: var(--muted-fg); cursor: pointer; padding: 0.2rem; border-radius: 0.3rem; }
+  .imp-file .fx:hover { background: var(--hover-surface); color: var(--danger); }
+  .imp-file .fx svg { width: 1rem; height: 1rem; }
+
+  /* Bornes d'exercice. */
+  .imp-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.8rem; }
+  .imp-fields label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.76rem; font-weight: 600; color: var(--muted-fg); }
+  .imp-fields input { font: inherit; font-size: 0.86rem; padding: 0.5rem 0.65rem; border: 1px solid var(--border-strong); border-radius: 0.5rem; background: var(--card); color: var(--foreground); }
+  .imp-fields input:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; border-color: var(--ring); }
+
+  /* Barre de progression d'envoi (XHR upload.onprogress). */
+  .imp-prog { height: 0.4rem; border-radius: 999px; background: var(--hover-surface); overflow: hidden; }
+  .imp-prog > span { display: block; height: 100%; width: 0; background: var(--orange-500); transition: width .2s ease; }
+
+  /* Bandeau « dry-run » : rien n'est encore enregistré. */
+  .imp-drybar { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.85rem; border-radius: var(--radius); background: color-mix(in srgb, var(--orange-500) 8%, transparent); border: 1px solid color-mix(in srgb, var(--orange-500) 28%, transparent); font-size: 0.82rem; }
+  .imp-drybar svg { width: 1.05rem; height: 1.05rem; flex: none; color: var(--orange-700); }
+  :root[data-theme="dark"] .imp-drybar svg { color: var(--orange-400); }
+
+  /* Cartouches de synthèse (lignesCount, totaux, verdict). */
+  .imp-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 0.7rem; }
+  .imp-tile { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); padding: 0.75rem 0.85rem; }
+  .imp-tile .k { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); }
+  .imp-tile .v { margin-top: 0.25rem; font-size: 1.15rem; font-weight: 750; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .imp-tile .u { font-size: 0.72rem; font-weight: 600; color: var(--muted-fg); margin-left: 0.2rem; }
+  .imp-tile.bal-ok { border-color: color-mix(in srgb, var(--success) 40%, var(--border)); }
+  .imp-tile.bal-ko { border-color: color-mix(in srgb, var(--danger) 40%, var(--border)); }
+  .imp-verdict { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 650; }
+  .imp-verdict svg { width: 1rem; height: 1rem; }
+  .imp-verdict.ok { color: var(--success); }
+  .imp-verdict.ko { color: var(--danger); }
+
+  /* Avertissements du backend — rendus TELS QUELS, ni filtrés ni reformulés. */
+  .imp-warns { border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--border)); border-radius: var(--radius); background: var(--warning-soft); padding: 0.7rem 0.85rem; }
+  .imp-warns > b { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: #92400e; }
+  :root[data-theme="dark"] .imp-warns > b { color: #fbbf24; }
+  .imp-warns > b svg { width: 0.95rem; height: 0.95rem; }
+  .imp-warns ul { margin: 0.45rem 0 0; padding-left: 1.15rem; display: flex; flex-direction: column; gap: 0.25rem; }
+  .imp-warns li { font-size: 0.8rem; color: var(--foreground); font-family: var(--font-mono); }
+
+  /* Table d'aperçu — 5 lignes que le backend renvoie, jamais davantage. */
+  .imp-table-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .imp-table-cap { padding: 0.5rem 0.85rem; font-size: 0.76rem; color: var(--muted-fg); border-bottom: 1px solid var(--border); background: var(--content-bg); }
+  .imp-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .imp-table th, .imp-table td { padding: 0.5rem 0.85rem; text-align: left; border-top: 1px solid var(--border); }
+  .imp-table thead th { border-top: 0; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); font-weight: 700; background: var(--content-bg); }
+  .imp-table td.num, .imp-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .imp-table td.cpt { font-family: var(--font-mono); font-size: 0.78rem; }
+  .imp-preuve { font-size: 0.68rem; font-weight: 650; padding: 0.1rem 0.4rem; border-radius: 0.3rem; background: var(--hover-surface); color: var(--muted-fg); }
+
+  /* Résultat de persistance (201 créée / 200 déjà présente — jamais une erreur). */
+  .imp-result { display: flex; align-items: flex-start; gap: 0.8rem; padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border); }
+  .imp-result.created { border-color: color-mix(in srgb, var(--success) 40%, var(--border)); background: var(--success-soft); }
+  .imp-result.idem { border-color: var(--border-strong); background: var(--content-bg); }
+  .imp-result .ri { width: 2.4rem; height: 2.4rem; flex: none; border-radius: 0.6rem; display: grid; place-items: center; }
+  .imp-result.created .ri { background: var(--success); color: #fff; }
+  .imp-result.idem .ri { background: var(--hover-surface); color: var(--muted-fg); }
+  .imp-result .ri svg { width: 1.25rem; height: 1.25rem; }
+  .imp-result h4 { margin: 0 0 0.15rem; font-size: 0.92rem; font-weight: 650; }
+  .imp-result p { margin: 0; font-size: 0.82rem; color: var(--muted-fg); }
+  .imp-meta { margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; font-size: 0.76rem; }
+  .imp-meta .m { display: inline-flex; gap: 0.35rem; }
+  .imp-meta .m span { color: var(--muted-fg); }
+  .imp-meta .m b { font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .imp-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .imp-actions .grow { flex: 1; }
 
   /* =============================== TOASTS ================================= */
   .toasts { position: fixed; right: 1.1rem; bottom: 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; z-index: 90; width: min(22rem, calc(100vw - 2rem)); }
@@ -2272,6 +2362,229 @@
                       </div>
                     </div>
                   </div>
+
+                  <!-- ===== Onglet IMPORT SAGE (FE-025) — dry-run en deux temps =====
+                       Atteint par la CTA « Importer un export Sage ». Le front
+                       n'interprète JAMAIS le fichier : il l'envoie, montre ce que
+                       le backend en a compris (dry-run), puis persiste sur action
+                       délibérée. Bascule de démo = les réponses réelles du :3007. -->
+                  <div class="atl-panel atl-body" data-atl-panel="import-sage" hidden>
+                    <button class="imp-back" type="button" data-goto-sources>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                      Retour aux sources
+                    </button>
+
+                    <div style="display:flex;align-items:flex-end;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Importer un export Sage&nbsp;100</h3>
+                        <p class="atl-secsub">On regarde d'abord ce que le système a compris — <b>rien n'est enregistré</b> — puis vous décidez.</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <!-- Bascule de démo : chaque état = une réponse réelle du backend. -->
+                      <div class="atelier-demo" role="tablist" aria-label="Réponse du backend (démo)">
+                        <span class="lbl">Réponse</span>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-imp="ok" aria-selected="true">Aperçu ✓</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-imp="warn" aria-selected="false">Avertis.</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-imp="deseq" aria-selected="false">422</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-imp="format" aria-selected="false">400</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-imp="created" aria-selected="false">Créée 201</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-imp="idem" aria-selected="false">Déjà là 200</button>
+                      </div>
+                    </div>
+
+                    <div class="imp-steps" aria-hidden="true">
+                      <span class="imp-step" data-imp-step="1"><span class="n">1</span> Dépôt</span>
+                      <span class="sep"></span>
+                      <span class="imp-step" data-imp-step="2"><span class="n">2</span> Aperçu</span>
+                      <span class="sep"></span>
+                      <span class="imp-step" data-imp-step="3"><span class="n">3</span> Enregistrement</span>
+                    </div>
+
+                    <!-- ---- ÉTAPE 1 : Dépôt du fichier + bornes d'exercice ---- -->
+                    <div class="ref-card" style="padding:1rem;display:flex;flex-direction:column;gap:0.85rem" data-imp-slot="depot">
+                      <!-- Zone de dépôt (sélection + glisser-déposer). -->
+                      <div class="dropzone" data-imp-drop>
+                        <span class="dzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span>
+                        <b>Déposez l'export Sage, ou cliquez pour choisir</b>
+                        <span>Excel (.xlsx) ou CSV · 50&nbsp;Mo maximum</span>
+                      </div>
+
+                      <!-- Fichier retenu — pré-contrôle client (extension, taille),
+                           JAMAIS autoritaire : le serveur reste seul juge. -->
+                      <div class="imp-file" data-imp-file hidden>
+                        <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg></span>
+                        <span class="fn"><b>balance_2026_cabinet-diallo.xlsx</b><small>2,4 Mo · Excel · pré-contrôle local OK</small></span>
+                        <button class="fx" type="button" aria-label="Retirer le fichier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+                      </div>
+
+                      <div class="imp-fields">
+                        <label>Début d'exercice
+                          <input type="date" value="2026-01-01" aria-label="Début d'exercice">
+                        </label>
+                        <label>Fin d'exercice
+                          <input type="date" value="2026-12-31" aria-label="Fin d'exercice">
+                        </label>
+                      </div>
+
+                      <!-- Progression d'envoi (uploadMultipart → XHR.upload.onprogress). -->
+                      <div class="imp-prog" data-imp-prog hidden><span></span></div>
+
+                      <div class="imp-actions">
+                        <span class="grow"></span>
+                        <button class="btn btn-primary btn-sm" type="button" data-imp-analyze>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                          Analyser (aperçu)
+                        </button>
+                      </div>
+                      <p class="helper" style="margin:0">Cet appel part en <code>dryRun='true'</code> : le backend renvoie un aperçu <b>sans rien enregistrer</b>.</p>
+                    </div>
+
+                    <!-- ---- ÉTAPE 2 : Aperçu dry-run (résultats du backend) ---- -->
+                    <div data-imp-slot="apercu" hidden style="display:flex;flex-direction:column;gap:0.85rem">
+                      <div class="imp-drybar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span><b>Aperçu — rien n'est encore enregistré.</b> Vérifiez, puis enregistrez délibérément à l'étape 3.</span>
+                      </div>
+
+                      <div class="imp-tiles">
+                        <div class="imp-tile">
+                          <div class="k">Lignes retenues</div>
+                          <div class="v" data-imp-count>1&nbsp;284</div>
+                        </div>
+                        <div class="imp-tile">
+                          <div class="k">Total débiteur</div>
+                          <div class="v" data-imp-debit>84&nbsp;250&nbsp;300<span class="u">XOF</span></div>
+                        </div>
+                        <div class="imp-tile">
+                          <div class="k">Total créditeur</div>
+                          <div class="v" data-imp-credit>84&nbsp;250&nbsp;300<span class="u">XOF</span></div>
+                        </div>
+                        <div class="imp-tile" data-imp-baltile>
+                          <div class="k">Équilibre</div>
+                          <div class="v" style="font-size:0.95rem">
+                            <span class="imp-verdict ok" data-imp-verdict>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                              Équilibrée
+                            </span>
+                          </div>
+                          <div class="k" style="margin-top:0.35rem;text-transform:none;letter-spacing:0;font-weight:600">Écart : <span data-imp-ecart>0</span> XOF</div>
+                        </div>
+                      </div>
+
+                      <!-- Avertissements : rendus TELS QUELS (aucune reformulation). -->
+                      <div class="imp-warns" data-imp-warns hidden>
+                        <b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg> Avertissements du backend</b>
+                        <ul data-imp-warnlist></ul>
+                      </div>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">5 premières lignes (aperçu) — le backend n'en renvoie pas davantage.</div>
+                        <table class="imp-table">
+                          <thead>
+                            <tr><th>Compte</th><th>Libellé</th><th class="num">Débit</th><th class="num">Crédit</th><th>Preuve</th></tr>
+                          </thead>
+                          <tbody data-imp-lines>
+                            <tr><td class="cpt">601000</td><td>Achats de marchandises</td><td class="num">15&nbsp;000&nbsp;000</td><td class="num">0</td><td><span class="imp-preuve">fichier</span></td></tr>
+                            <tr><td class="cpt">411000</td><td>Clients</td><td class="num">8&nbsp;420&nbsp;500</td><td class="num">0</td><td><span class="imp-preuve">fichier</span></td></tr>
+                            <tr><td class="cpt">521000</td><td>Banque</td><td class="num">12&nbsp;100&nbsp;000</td><td class="num">0</td><td><span class="imp-preuve">fichier</span></td></tr>
+                            <tr><td class="cpt">401000</td><td>Fournisseurs</td><td class="num">0</td><td class="num">6&nbsp;780&nbsp;300</td><td><span class="imp-preuve">fichier</span></td></tr>
+                            <tr><td class="cpt">701000</td><td>Ventes de marchandises</td><td class="num">0</td><td class="num">28&nbsp;950&nbsp;000</td><td><span class="imp-preuve">fichier</span></td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div class="imp-actions">
+                        <button class="btn btn-ghost btn-sm" type="button" data-imp-restart>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                          Recommencer
+                        </button>
+                        <span class="grow"></span>
+                        <!-- Persistance = SECOND appel dryRun='false', action délibérée. -->
+                        <button class="btn btn-primary btn-sm" type="button" data-imp-persist>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+                          Enregistrer la balance
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- ---- ÉTAPE 2b : Refus backend 422 (déséquilibre) ---- -->
+                    <div data-imp-slot="deseq" hidden style="display:flex;flex-direction:column;gap:0.85rem">
+                      <div class="imp-tiles">
+                        <div class="imp-tile"><div class="k">Lignes retenues</div><div class="v">1&nbsp;284</div></div>
+                        <div class="imp-tile"><div class="k">Total débiteur</div><div class="v">84&nbsp;250&nbsp;300<span class="u">XOF</span></div></div>
+                        <div class="imp-tile"><div class="k">Total créditeur</div><div class="v">84&nbsp;175&nbsp;300<span class="u">XOF</span></div></div>
+                        <div class="imp-tile bal-ko">
+                          <div class="k">Équilibre</div>
+                          <div class="v" style="font-size:0.95rem"><span class="imp-verdict ko"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Déséquilibrée</span></div>
+                          <div class="k" style="margin-top:0.35rem;text-transform:none;letter-spacing:0;font-weight:600">Écart : 75&nbsp;000 XOF</div>
+                        </div>
+                      </div>
+                      <div class="state error" style="padding:1.8rem 1.5rem;border:1px solid color-mix(in srgb, var(--danger) 30%, var(--border));border-radius:var(--radius)">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></span>
+                        <h3>Balance déséquilibrée — refusée par le service</h3>
+                        <p>Débit et crédit ne s'égalisent pas (écart de <b>75&nbsp;000&nbsp;XOF</b>). L'enregistrement est impossible : corrigez la source dans Sage, puis réimportez.</p>
+                        <span class="code">422 · BALANCE_DESEQUILIBREE</span>
+                        <button class="btn btn-ghost btn-sm" type="button" data-imp-restart><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Recommencer avec un autre fichier</button>
+                      </div>
+                    </div>
+
+                    <!-- ---- ÉTAPE 2c : Refus backend 400 (format non supporté) ---- -->
+                    <div data-imp-slot="format" hidden>
+                      <div class="state error" style="padding:2.4rem 1.5rem;border:1px solid color-mix(in srgb, var(--danger) 30%, var(--border));border-radius:var(--radius)">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="m9 15 3 3M12 15l-3 3"/></svg></span>
+                        <h3>Format de fichier non pris en charge</h3>
+                        <p>Le message ci-dessous vient du service, affiché tel quel — le pré-contrôle client évite l'aller-retour quand il peut, sans jamais décider à la place du serveur.</p>
+                        <span class="code">400 · « Format non supporté : attendu .xlsx ou .csv »</span>
+                        <button class="btn btn-ghost btn-sm" type="button" data-imp-restart><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Choisir un autre fichier</button>
+                      </div>
+                    </div>
+
+                    <!-- ---- ÉTAPE 3 : Persistance — CRÉÉE (201) vs DÉJÀ PRÉSENTE (200) ---- -->
+                    <div data-imp-slot="created" hidden style="display:flex;flex-direction:column;gap:0.85rem">
+                      <div class="imp-result created">
+                        <span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <div>
+                          <h4>Balance enregistrée</h4>
+                          <p>Une nouvelle version a été créée à l'état <b>Brouillon</b>. Elle est prête pour le Bilan.</p>
+                          <div class="imp-meta">
+                            <span class="m"><span>Identifiant</span><b data-imp-balid>65f2a9c1e4b0…</b></span>
+                            <span class="m"><span>Version</span><b>1</b></span>
+                            <span class="m"><span>Statut</span><b>BROUILLON</b></span>
+                            <span class="m"><span>Créée le</span><b>25/07/2026 03:14</b></span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="imp-actions">
+                        <button class="btn btn-ghost btn-sm" type="button" data-goto-sources><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> Retour aux sources</button>
+                        <span class="grow"></span>
+                        <button class="btn btn-primary btn-sm" type="button" data-goto-balances><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M3 16v5h5"/><path d="M16 21h5v-5"/><path d="M9 12h6"/></svg> Voir la balance</button>
+                      </div>
+                    </div>
+
+                    <!-- Idempotent : la version existait déjà — NOP, PAS une erreur. -->
+                    <div data-imp-slot="idem" hidden style="display:flex;flex-direction:column;gap:0.85rem">
+                      <div class="imp-result idem">
+                        <span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg></span>
+                        <div>
+                          <h4>Cette version existait déjà</h4>
+                          <p>Un import identique avait déjà produit cette balance : rien de neuf n'a été créé. <b>Ce n'est pas une erreur</b> — une seule balance est stockée.</p>
+                          <div class="imp-meta">
+                            <span class="m"><span>Identifiant</span><b>65f2a9c1e4b0…</b></span>
+                            <span class="m"><span>Version</span><b>1</b></span>
+                            <span class="m"><span>Statut</span><b>BROUILLON</b></span>
+                            <span class="m"><span>Idempotent</span><b>true</b></span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="imp-actions">
+                        <button class="btn btn-ghost btn-sm" type="button" data-goto-sources><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> Retour aux sources</button>
+                        <span class="grow"></span>
+                        <button class="btn btn-primary btn-sm" type="button" data-goto-balances><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M3 16v5h5"/><path d="M16 21h5v-5"/><path d="M9 12h6"/></svg> Voir la balance</button>
+                      </div>
+                    </div>
+
+                    <p class="helper" style="margin-top:0.2rem">FE-025 · le front n'interprète jamais le fichier : <code>POST /balance/import/sage</code> (multipart, 50&nbsp;Mo) fait toute la normalisation. Montants en unités mineures XOF (entiers ÷100 à l'affichage). Le champ <code>mappingProfile</code> est <b>volontairement absent</b> — accepté-mais-ignoré côté backend, il relève de FE-048.</p>
+                  </div>
                 </div>
               </div>
               <p class="helper">FE-024 · l'affichage <b>reflète</b> l'entitlement ; <code>@RequiresBalanceAccess</code> décide côté serveur. Routage <code>/atelier</code> → <code>:3007/api/v1</code>.</p>
@@ -3483,6 +3796,9 @@
       var page = document.querySelector('.page[data-page="atelier"]');
       if (!page) return;
 
+      /* Réinitialise l'écran d'import Sage — réassigné une fois le panneau câblé. */
+      var resetImport = function () {};
+
       /* Gate : bascule module ouvert / écran d'orientation par raison. */
       function setGate(state) {
         page.querySelectorAll("[data-atelier-gate]").forEach(function (b) {
@@ -3521,15 +3837,140 @@
       var goSources = page.querySelector("[data-goto-sources]");
       if (goSources) goSources.addEventListener("click", function () { setTab("sources"); });
 
-      /* CTA des sources disponibles — pas encore de page (FE-025/026) : on
-         l'annonce honnêtement plutôt que d'ouvrir un lien mort. */
+      /* CTA des sources : Sage ouvre son écran d'import (FE-025) ; la saisie
+         directe (FE-026) n'a pas encore de page — annonce honnête. */
       page.querySelectorAll("[data-src-act]").forEach(function (b) {
         b.addEventListener("click", function () {
           var src = b.dataset.srcAct;
-          if (src === "sage") notify("success", "Bientôt : import Sage", "L'écran d'import d'un export Sage arrive avec FE-025.");
+          if (src === "sage") { resetImport(); setTab("import-sage"); }
           else if (src === "direct") notify("success", "Bientôt : saisie directe", "L'écran de saisie / ingestion arrive avec FE-026.");
         });
       });
+
+      /* ===== Import Sage (FE-025) — dry-run en deux temps ===================
+         Le front n'interprète jamais le fichier : il l'envoie, montre ce que le
+         backend en a compris (aperçu), puis persiste sur action délibérée.
+         La bascule de démo rejoue les réponses réelles du :3007. */
+      var impPanel = page.querySelector('[data-atl-panel="import-sage"]');
+      if (impPanel) {
+        var impSlots = impPanel.querySelectorAll("[data-imp-slot]");
+        var impSteps = impPanel.querySelectorAll("[data-imp-step]");
+        var impWarnList = impPanel.querySelector("[data-imp-warnlist]");
+        var impWarnBox = impPanel.querySelector("[data-imp-warns]");
+        var impFileChip = impPanel.querySelector("[data-imp-file]");
+        var impProg = impPanel.querySelector("[data-imp-prog]");
+        var impScenario = "ok";
+
+        /* Avertissements du backend — rendus TELS QUELS, ni filtrés ni reformulés. */
+        var SAGE_WARNINGS = [
+          "Compte 47100 non mappé dans le plan SYSCOHADA — rattaché en « comptes d'attente ».",
+          "3 lignes à montant nul ignorées (lignes 402, 588, 903).",
+        ];
+
+        /* Étapes : 1 Dépôt · 2 Aperçu · 3 Enregistrement. */
+        function setSteps(active) {
+          impSteps.forEach(function (s) {
+            var n = Number(s.dataset.impStep);
+            s.classList.toggle("active", n === active);
+            s.classList.toggle("done", n < active);
+          });
+        }
+
+        var SLOT_STEP = { depot: 1, apercu: 2, deseq: 2, format: 2, created: 3, idem: 3 };
+        function showSlot(slot) {
+          impSlots.forEach(function (s) { s.hidden = s.dataset.impSlot !== slot; });
+          setSteps(SLOT_STEP[slot] || 1);
+        }
+
+        /* Remet l'écran à l'étape 1 (fichier retiré, progression masquée). */
+        function resetImportInner() {
+          if (impFileChip) impFileChip.hidden = true;
+          if (impProg) { impProg.hidden = true; impProg.firstElementChild.style.width = "0"; }
+          showSlot("depot");
+        }
+        resetImport = resetImportInner; // exposé à la CTA Sage
+
+        /* Le fichier « tombe » : on affiche le pré-contrôle client (non autoritaire). */
+        function pickFile() { if (impFileChip) impFileChip.hidden = false; }
+        var impDrop = impPanel.querySelector("[data-imp-drop]");
+        if (impDrop) {
+          impDrop.addEventListener("click", function (e) { e.preventDefault(); pickFile(); });
+          ["dragenter", "dragover"].forEach(function (ev) {
+            impDrop.addEventListener(ev, function (e) { e.preventDefault(); impDrop.classList.add("drag"); });
+          });
+          ["dragleave", "drop"].forEach(function (ev) {
+            impDrop.addEventListener(ev, function (e) { e.preventDefault(); impDrop.classList.remove("drag"); if (ev === "drop") pickFile(); });
+          });
+        }
+        var impRemove = impPanel.querySelector("[data-imp-file] .fx");
+        if (impRemove) impRemove.addEventListener("click", function () { impFileChip.hidden = true; });
+
+        /* Aperçu : peuple les avertissements selon le scénario. */
+        function renderApercu() {
+          var withWarn = impScenario === "warn";
+          if (impWarnBox) impWarnBox.hidden = !withWarn;
+          if (withWarn && impWarnList) {
+            impWarnList.innerHTML = "";
+            SAGE_WARNINGS.forEach(function (w) {
+              var li = document.createElement("li");
+              li.textContent = w; // tel quel, aucune transformation
+              impWarnList.appendChild(li);
+            });
+          }
+        }
+
+        /* La réponse que rejouera l'« Analyser » selon la bascule de démo. */
+        function analyzeTarget() {
+          if (impScenario === "deseq") return "deseq";
+          if (impScenario === "format") return "format";
+          return "apercu"; // ok, warn, created, idem → aperçu d'abord
+        }
+
+        /* « Analyser » = POST dryRun='true'. Simule la progression d'envoi. */
+        var impAnalyze = impPanel.querySelector("[data-imp-analyze]");
+        if (impAnalyze) impAnalyze.addEventListener("click", function () {
+          if (impFileChip && impFileChip.hidden) { pickFile(); }
+          if (!impProg) { renderApercu(); showSlot(analyzeTarget()); return; }
+          impProg.hidden = false;
+          var bar = impProg.firstElementChild, pct = 0;
+          var tick = setInterval(function () {
+            pct = Math.min(100, pct + 14 + Math.random() * 16);
+            bar.style.width = pct + "%";
+            if (pct >= 100) {
+              clearInterval(tick);
+              setTimeout(function () { impProg.hidden = true; bar.style.width = "0"; renderApercu(); showSlot(analyzeTarget()); }, 220);
+            }
+          }, 90);
+        });
+
+        /* « Enregistrer » = SECOND appel dryRun='false', action délibérée. */
+        var impPersist = impPanel.querySelector("[data-imp-persist]");
+        if (impPersist) impPersist.addEventListener("click", function () {
+          showSlot(impScenario === "idem" ? "idem" : "created");
+        });
+
+        /* « Recommencer » — revient au dépôt. */
+        impPanel.querySelectorAll("[data-imp-restart]").forEach(function (b) {
+          b.addEventListener("click", resetImportInner);
+        });
+
+        /* Bascule de démo : chaque onglet = une réponse réelle du backend. */
+        impPanel.querySelectorAll("[data-imp]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            impScenario = b.dataset.imp;
+            impPanel.querySelectorAll("[data-imp]").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
+            if (impScenario === "created" || impScenario === "idem") { showSlot(impScenario); }
+            else if (impScenario === "deseq") { showSlot("deseq"); }
+            else if (impScenario === "format") { showSlot("format"); }
+            else { renderApercu(); showSlot("apercu"); }
+          });
+        });
+
+        /* « Voir la balance » — bascule vers l'onglet Balances. */
+        impPanel.querySelectorAll("[data-goto-balances]").forEach(function (b) {
+          b.addEventListener("click", function () { setTab("balances"); });
+        });
+      }
 
       /* Référentiel actif : résolu / indisponible. */
       page.querySelectorAll("[data-ref]").forEach(function (b) {
