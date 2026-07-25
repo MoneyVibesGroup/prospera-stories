@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-025 Import Sage (dry-run en deux temps)</title>
+<title>Prospera · Prototype cumulatif — FE-026 Saisie manuelle de balance (équilibre live)</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -922,6 +922,100 @@
 
   .imp-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
   .imp-actions .grow { flex: 1; }
+
+  /* ========== SAISIE DIRECTE (FE-026) — libellé + montant + sens, ==========
+     compte assisté PILOTÉ PAR LE RÉFÉRENTIEL (SYSCOHADA / SFD microfinance /
+     CIMA assurance), regroupé par sections familières. On saisit dans un cadre
+     connu ; Prospera range chaque ligne dans le bon compte et bâtit la balance
+     canonique. Réutilise les tokens & idiomes (.imp-tiles, .imp-verdict…). */
+
+  /* Bandeau d'équilibre live — LE CŒUR de l'écran (FR-A25), collant en haut. */
+  .sd-equi { position: sticky; top: 0.5rem; z-index: 6; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-lg); overflow: hidden; }
+  .sd-equi-bar { height: 0.28rem; background: var(--border-strong); transition: background-color .18s; }
+  .sd-equi.ok .sd-equi-bar { background: var(--success); }
+  .sd-equi.ko .sd-equi-bar { background: var(--danger); }
+  .sd-equi-grid { display: grid; grid-template-columns: repeat(3, 1fr) auto; }
+  @media (max-width: 46rem) { .sd-equi-grid { grid-template-columns: 1fr 1fr; } }
+  .sd-equi-cell { padding: 0.7rem 0.95rem; border-right: 1px solid var(--border); }
+  .sd-equi-cell:last-child { border-right: 0; }
+  .sd-equi-cell .k { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); }
+  .sd-equi-cell .v { margin-top: 0.15rem; font-size: 1.2rem; font-weight: 750; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .sd-equi-cell .u { font-size: 0.68rem; font-weight: 600; color: var(--muted-fg); }
+  .sd-equi-cell .v.neg { color: var(--danger); }
+  .sd-verdict { display: flex; flex-direction: column; justify-content: center; gap: 0.3rem; padding: 0.7rem 0.95rem; min-width: 11rem; }
+  @media (max-width: 46rem) { .sd-verdict { grid-column: 1 / -1; border-top: 1px solid var(--border); } }
+  .sd-pill { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 999px; width: fit-content; }
+  .sd-pill svg { width: 1rem; height: 1rem; }
+  .sd-pill.ok { background: var(--success-soft); color: var(--success); }
+  .sd-pill.ko { background: var(--danger-soft); color: var(--danger); }
+  .sd-verdict small { font-size: 0.72rem; color: var(--muted-fg); font-variant-numeric: tabular-nums; }
+
+  /* Sélecteur de référentiel actif — pilote le plan de comptes suggéré. */
+  .sd-ref { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.7rem 0.85rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--hover-surface); }
+  .sd-ref .lbl { font-size: 0.78rem; color: var(--muted-fg); }
+  .sd-ref b { font-size: 0.84rem; }
+  .sd-ref .plan { font-size: 0.72rem; color: var(--muted-fg); }
+  .sd-ref .grow { flex: 1; }
+  .sd-refseg { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; background: var(--card); }
+  .sd-refseg button { border: 0; background: transparent; color: var(--muted-fg); font: inherit; font-size: 0.76rem; font-weight: 600; padding: 0.32rem 0.7rem; cursor: pointer; border-right: 1px solid var(--border); }
+  .sd-refseg button:last-child { border-right: 0; }
+  .sd-refseg button[aria-selected="true"] { background: color-mix(in srgb, var(--orange-500) 14%, transparent); color: var(--link); }
+  .sd-refseg button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Section familière (Achats & charges, Ventes & produits, Trésorerie, Tiers). */
+  .sd-section { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+  .sd-sec-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); background: var(--content-bg); }
+  .sd-sec-ic { width: 1.9rem; height: 1.9rem; flex: none; border-radius: 0.5rem; display: grid; place-items: center; background: color-mix(in srgb, var(--orange-500) 12%, transparent); color: var(--link); }
+  .sd-sec-ic svg { width: 1rem; height: 1rem; }
+  .sd-sec-head b { font-size: 0.86rem; font-weight: 650; }
+  .sd-sec-head .hint { font-size: 0.74rem; color: var(--muted-fg); }
+  .sd-sec-head .grow { flex: 1; }
+  .sd-sec-total { font-size: 0.76rem; color: var(--muted-fg); font-variant-numeric: tabular-nums; }
+  .sd-sec-total b { color: var(--foreground); font-weight: 650; }
+  .sd-sec-body { padding: 0.6rem 0.7rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+  /* Ligne de saisie : libellé + montant + sens + compte assisté + preuve. */
+  .sd-lines-wrap { overflow-x: auto; }
+  .sd-line { display: grid; grid-template-columns: minmax(12rem,1fr) 8.5rem 10rem 7rem 6.5rem 1.9rem; gap: 0.5rem; align-items: center; min-width: 44rem; }
+  .sd-line > * { min-width: 0; }
+  .sd-cap { display: none; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); margin-bottom: 0.2rem; }
+  .sd-heads { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); padding: 0 0.1rem; }
+  .sd-input { width: 100%; height: 2.3rem; border: 1px solid var(--border-strong); border-radius: 0.5rem; background: var(--background); color: var(--foreground); font: inherit; font-size: 0.84rem; padding: 0 0.6rem; }
+  .sd-input:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; border-color: var(--ring); }
+  .sd-input.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .sd-input.err { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 7%, var(--background)); }
+  select.sd-input { appearance: none; cursor: pointer; padding-right: 0.6rem; }
+
+  /* Bascule de sens Débit / Crédit — un montant + un sens (pas deux colonnes). */
+  .sd-sens { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 0.5rem; overflow: hidden; height: 2.3rem; }
+  .sd-sens button { flex: 1; border: 0; background: var(--background); color: var(--muted-fg); font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; padding: 0 0.2rem; }
+  .sd-sens button + button { border-left: 1px solid var(--border-strong); }
+  .sd-sens button[aria-pressed="true"][data-sens="debit"] { background: color-mix(in srgb, var(--orange-500) 16%, transparent); color: var(--link); }
+  .sd-sens button[aria-pressed="true"][data-sens="credit"] { background: var(--success-soft); color: var(--success); }
+
+  /* Compte assisté : deviné depuis le libellé, éditable. */
+  .sd-cpt { position: relative; }
+  .sd-cpt .sd-input { font-family: var(--font-mono); font-size: 0.8rem; padding-right: 1.5rem; }
+  .sd-cpt .mark { position: absolute; right: 0.45rem; top: 50%; transform: translateY(-50%); width: 0.85rem; height: 0.85rem; color: var(--muted-fg); pointer-events: none; }
+  .sd-cpt.auto .mark { color: var(--link); }
+  .sd-cpt .sd-input::placeholder { color: var(--danger); }
+
+  .sd-rm { border: 0; background: transparent; color: var(--muted-fg); cursor: pointer; width: 1.9rem; height: 2.3rem; border-radius: 0.4rem; display: grid; place-items: center; }
+  .sd-rm:hover { background: var(--hover-surface); color: var(--danger); }
+  .sd-rm svg { width: 1rem; height: 1rem; }
+  .sd-addline { display: inline-flex; align-items: center; gap: 0.4rem; align-self: flex-start; margin-top: 0.1rem; border: 1px dashed var(--border-strong); background: transparent; color: var(--foreground); font: inherit; font-size: 0.78rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; cursor: pointer; }
+  .sd-addline:hover { border-color: var(--orange-500); color: var(--link); }
+  .sd-addline svg { width: 0.9rem; height: 0.9rem; }
+
+  /* Statut de preuve anticipé (le serveur le recalcule et fait foi). */
+  .sd-proof { display: flex; align-items: center; gap: 0.55rem; padding: 0.6rem 0.8rem; border-radius: var(--radius); background: var(--hover-surface); font-size: 0.78rem; color: var(--muted-fg); }
+  .sd-proof .tag { font-weight: 650; font-size: 0.72rem; padding: 0.12rem 0.5rem; border-radius: 999px; }
+  .sd-proof.j .tag { background: var(--success-soft); color: var(--success); }
+  .sd-proof.p .tag { background: var(--warning-soft); color: #92400e; }
+  .sd-proof.m .tag { background: var(--danger-soft); color: var(--danger); }
+  :root[data-theme="dark"] .sd-proof.p .tag { color: #fbbf24; }
+
+  .sd-chk { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-fg); background: var(--hover-surface); padding: 0.3rem 0.55rem; border-radius: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 22rem; }
 
   /* =============================== TOASTS ================================= */
   .toasts { position: fixed; right: 1.1rem; bottom: 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; z-index: 90; width: min(22rem, calc(100vw - 2rem)); }
@@ -2585,6 +2679,110 @@
 
                     <p class="helper" style="margin-top:0.2rem">FE-025 · le front n'interprète jamais le fichier : <code>POST /balance/import/sage</code> (multipart, 50&nbsp;Mo) fait toute la normalisation. Montants en unités mineures XOF (entiers ÷100 à l'affichage). Le champ <code>mappingProfile</code> est <b>volontairement absent</b> — accepté-mais-ignoré côté backend, il relève de FE-048.</p>
                   </div>
+
+                  <!-- ===== Onglet SAISIE DIRECTE (FE-026) — libellé + montant + sens =====
+                       Adaptateur « direct » du hub D13 : aucune matière première
+                       numérique. On saisit dans des SECTIONS familières (achats,
+                       ventes, trésorerie, tiers) ; Prospera devine le COMPTE selon
+                       le RÉFÉRENTIEL actif (SYSCOHADA / SFD microfinance / CIMA
+                       assurance) et bâtit la SubmitBalanceDto canonique. L'équilibre
+                       se vérifie à chaque frappe (arithmétique entière) ; le backend
+                       revérifie et refuse un déséquilibre en 422. -->
+                  <div class="atl-panel atl-body" data-atl-panel="saisie-directe" hidden>
+                    <button class="imp-back" type="button" data-goto-sources>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                      Retour aux sources
+                    </button>
+
+                    <div style="display:flex;align-items:flex-end;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Saisir la balance à la main</h3>
+                        <p class="atl-secsub">Pas d'export&nbsp;? Décrivez chaque ligne — <b>un libellé, un montant, un sens</b> — Prospera trouve le compte et vérifie l'équilibre au fur et à mesure.</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <!-- Bascule de démo : chaque état = une réponse réelle du :3007. -->
+                      <div class="atelier-demo" role="tablist" aria-label="Réponse du backend (démo)">
+                        <span class="lbl">Réponse</span>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-sd="auto" aria-selected="true">Auto</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-sd="created" aria-selected="false">Créée 201</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-sd="idem" aria-selected="false">Déjà là 200</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-sd="deseq" aria-selected="false">422</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-sd="forbidden" aria-selected="false">403</button>
+                      </div>
+                    </div>
+
+                    <!-- ---- Bandeau d'équilibre live : le cœur de l'écran (FR-A25) ---- -->
+                    <div class="sd-equi ok" data-sd-equi>
+                      <div class="sd-equi-bar"></div>
+                      <div class="sd-equi-grid">
+                        <div class="sd-equi-cell">
+                          <div class="k">Total débit</div>
+                          <div class="v" data-sd-tdebit>1&nbsp;800&nbsp;000</div>
+                          <span class="u">F CFA</span>
+                        </div>
+                        <div class="sd-equi-cell">
+                          <div class="k">Total crédit</div>
+                          <div class="v" data-sd-tcredit>1&nbsp;800&nbsp;000</div>
+                          <span class="u">F CFA</span>
+                        </div>
+                        <div class="sd-equi-cell">
+                          <div class="k">Écart (débit − crédit)</div>
+                          <div class="v" data-sd-ecart>0</div>
+                          <span class="u">tolérance &lt; 1&nbsp;F</span>
+                        </div>
+                        <div class="sd-verdict">
+                          <span class="sd-pill ok" data-sd-pill>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                            Équilibrée
+                          </span>
+                          <small data-sd-ecartmin>écart 0 unité mineure</small>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- ---- Référentiel actif : pilote le plan de comptes suggéré ---- -->
+                    <div class="sd-ref">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg);flex:none"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                      <div>
+                        <b data-sd-refname>SYSCOHADA révisé</b>
+                        <div class="plan">Plan de comptes appliqué aux comptes devinés — <span data-sd-refcode>SN</span></div>
+                      </div>
+                      <span class="grow"></span>
+                      <!-- Le mapping n'est PAS limité à SYSCOHADA : microfinance & assurance aussi. -->
+                      <div class="sd-refseg" role="tablist" aria-label="Référentiel actif (démo)">
+                        <button role="tab" data-sd-ref="SN" aria-selected="true">SYSCOHADA</button>
+                        <button role="tab" data-sd-ref="SFD-BCEAO" aria-selected="false">Microfinance</button>
+                        <button role="tab" data-sd-ref="CIMA" aria-selected="false" disabled title="Référentiel assurance — bientôt">Assurance ⋯</button>
+                      </div>
+                    </div>
+
+                    <!-- ---- Sections familières : Prospera range chaque ligne ---- -->
+                    <div data-sd-sections style="display:flex;flex-direction:column;gap:0.85rem"></div>
+
+                    <!-- ---- Preuve anticipée + checksum + soumission ---- -->
+                    <div class="sd-proof m" data-sd-proof>
+                      <span class="tag" data-sd-proof-tag>Majoritairement estimée</span>
+                      <span data-sd-proof-text>Lignes saisies à la main — anticipé ; le serveur recalcule le statut et fait foi.</span>
+                    </div>
+
+                    <div class="imp-actions" style="align-items:center">
+                      <span class="sd-chk" data-sd-chk title="SHA-256 recalculé et comparé par le serveur">checksum : …</span>
+                      <span class="grow"></span>
+                      <button class="btn btn-ghost btn-sm" type="button" data-sd-reset>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                        Vider
+                      </button>
+                      <button class="btn btn-primary btn-sm" type="button" data-sd-submit>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+                        Soumettre la balance
+                      </button>
+                    </div>
+
+                    <!-- ---- Zone de retour backend (201/200/422/403) ---- -->
+                    <div data-sd-feedback></div>
+
+                    <p class="helper" style="margin-top:0.2rem">FE-026 · adaptateur <code>direct</code> du hub D13. On assemble une <code>SubmitBalanceDto</code> et on la soumet au contrat canonique : <code>POST /balances</code>. Montants en <b>unités mineures XOF</b> (entiers, ×100), équilibre en <b>arithmétique entière</b> (tolérance &lt;&nbsp;100). Le <code>checksum</code> SHA-256 est recalculé et comparé par le serveur. Le compte est <b>deviné selon le référentiel</b> (SYSCOHADA / SFD / CIMA), jamais codé en dur. Aucune UI de <b>validation d'état</b> ici — pas de route backend (<code>marquerEtat</code> non câblé) → FE-027.</p>
+                  </div>
                 </div>
               </div>
               <p class="helper">FE-024 · l'affichage <b>reflète</b> l'entitlement ; <code>@RequiresBalanceAccess</code> décide côté serveur. Routage <code>/atelier</code> → <code>:3007/api/v1</code>.</p>
@@ -3843,7 +4041,7 @@
         b.addEventListener("click", function () {
           var src = b.dataset.srcAct;
           if (src === "sage") { resetImport(); setTab("import-sage"); }
-          else if (src === "direct") notify("success", "Bientôt : saisie directe", "L'écran de saisie / ingestion arrive avec FE-026.");
+          else if (src === "direct") { setTab("saisie-directe"); }
         });
       });
 
@@ -3970,6 +4168,367 @@
         impPanel.querySelectorAll("[data-goto-balances]").forEach(function (b) {
           b.addEventListener("click", function () { setTab("balances"); });
         });
+      }
+
+      /* ===== Saisie directe (FE-026) — adaptateur « direct » du hub D13 =====
+         On saisit libellé + montant + sens dans des SECTIONS familières ;
+         Prospera devine le COMPTE selon le RÉFÉRENTIEL actif et bâtit la
+         SubmitBalanceDto. L'équilibre est recalculé à chaque frappe en
+         ARITHMÉTIQUE ENTIÈRE (unités mineures) ; le checksum SHA-256 reproduit
+         computeBalanceChecksum (tri par compte, dates toISOString). */
+      var sdPanel = page.querySelector('[data-atl-panel="saisie-directe"]');
+      if (sdPanel) {
+        var TOLERANCE = 100; // unités mineures (< 1 F CFA), comparaison stricte
+        var sdScenario = "auto";
+        var sdRef = "SN";
+
+        /* Sections familières — un cadre connu, pas un plan comptable brut. */
+        var SD_SECTIONS = [
+          { id: "charges",    label: "Achats & charges",       hint: "Ce que le cabinet a dépensé",   sens: "debit"  },
+          { id: "produits",   label: "Ventes & produits",      hint: "Ce que le cabinet a encaissé",  sens: "credit" },
+          { id: "tresorerie", label: "Trésorerie",             hint: "Banque, caisse, mobile money",  sens: "debit"  },
+          { id: "tiers",      label: "Clients & fournisseurs", hint: "Créances et dettes",            sens: "debit"  },
+        ];
+
+        /* Plans de comptes PILOTÉS PAR RÉFÉRENTIEL (illustratif pour la maquette :
+           la vraie table de mapping vit côté serveur, par référentiel). Chaque
+           entrée = fragment de libellé (minuscule) → compte. */
+        var SD_PLANS = {
+          "SN": { name: "SYSCOHADA révisé", map: {
+            "achats de marchandises": "601", "achat": "601", "marchandises": "601",
+            "loyer": "622", "location": "622", "transport": "624", "électricité": "605",
+            "eau": "605", "fournitures": "605", "carburant": "605", "honoraires": "632",
+            "salaires": "661", "salaire": "661", "cotisations sociales": "664",
+            "ventes de marchandises": "701", "vente": "701", "prestations": "706", "services": "706",
+            "banque": "521", "caisse": "571", "mobile money": "585", "momo": "585",
+            "clients": "411", "client": "411", "fournisseurs": "401", "fournisseur": "401",
+            "tva": "445", "matériel": "2441", "immobilisation": "241",
+          }},
+          "SFD-BCEAO": { name: "Plan comptable SFD (BCEAO)", map: {
+            "caisse": "101", "banque": "111", "trésorerie": "101",
+            "crédits à la clientèle": "201", "crédit": "201", "prêts": "201",
+            "dépôts de la clientèle": "251", "dépôt": "251", "épargne": "251",
+            "intérêts sur crédits": "701", "intérêts reçus": "701",
+            "charges d'intérêts": "601", "intérêts sur dépôts": "601",
+            "charges de personnel": "631", "salaires": "631",
+            "provisions": "391", "commissions": "706",
+          }},
+          "CIMA": { name: "Plan CIMA (assurance)", soon: true, map: {
+            "primes émises": "700", "primes": "700", "sinistres": "600",
+            "provisions techniques": "300", "commissions": "620", "placements": "230",
+          }},
+        };
+
+        /* État : lignes saisies. montant en francs (chaîne), sens, compte assisté. */
+        var uid = 0;
+        function seedLines() {
+          return [
+            { id: ++uid, section: "charges",    libelle: "Achats de marchandises", montant: "1500000", sens: "debit",  compte: "601", auto: true, preuve: "saisie" },
+            { id: ++uid, section: "produits",   libelle: "Ventes de marchandises", montant: "1800000", sens: "credit", compte: "701", auto: true, preuve: "saisie" },
+            { id: ++uid, section: "tresorerie", libelle: "Banque",                 montant: "300000",  sens: "debit",  compte: "521", auto: true, preuve: "saisie" },
+          ];
+        }
+        var sdLines = seedLines();
+
+        var groupsFmt = new Intl.NumberFormat("fr-FR");
+
+        /* francs (chaîne) → unités mineures entières ; null si invalide. */
+        function toMineur(v) {
+          if (v === "" || v == null) return 0;
+          var s = String(v).trim().replace(/\s/g, "");
+          if (!/^\d+([.,]\d{1,2})?$/.test(s)) return null;
+          var parts = s.replace(",", ".").split(".");
+          var cents = ((parts[1] || "") + "00").slice(0, 2);
+          return Number(parts[0]) * 100 + Number(cents);
+        }
+        function fmtMineur(m) {
+          var neg = m < 0, abs = Math.abs(m), ent = Math.trunc(abs / 100), c = abs % 100;
+          var out = groupsFmt.format(ent);
+          if (c) out += "," + String(c).padStart(2, "0");
+          return neg ? "-" + out : out;
+        }
+        function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]; }); }
+
+        /* Devine le compte depuis le libellé, selon le référentiel actif. */
+        function suggestCompte(libelle) {
+          var map = (SD_PLANS[sdRef] || {}).map || {};
+          var l = String(libelle || "").toLowerCase().trim();
+          if (!l) return "";
+          if (map[l]) return map[l];
+          var best = "";
+          Object.keys(map).forEach(function (k) {
+            if (l.indexOf(k) !== -1 || k.indexOf(l) !== -1) { if (k.length > best.length) best = k; }
+          });
+          return best ? map[best] : "";
+        }
+
+        var RE_COMPTE = /^[0-9A-Za-z]{3,20}$/;
+
+        var secWrap = sdPanel.querySelector("[data-sd-sections]");
+
+        function render() {
+          secWrap.innerHTML = "";
+          SD_SECTIONS.forEach(function (sec) {
+            var lines = sdLines.filter(function (l) { return l.section === sec.id; });
+            var secTotal = 0;
+            lines.forEach(function (l) { var m = toMineur(l.montant); if (m !== null) secTotal += m; });
+            var sc = document.createElement("div");
+            sc.className = "sd-section";
+            sc.innerHTML =
+              '<div class="sd-sec-head">' +
+                '<span class="sd-sec-ic">' + SEC_ICON(sec.id) + '</span>' +
+                '<div><b>' + sec.label + '</b> <span class="hint">· ' + sec.hint + '</span></div>' +
+                '<span class="grow"></span>' +
+                '<span class="sd-sec-total">Sous-total <b>' + fmtMineur(secTotal) + '</b> F</span>' +
+              '</div>' +
+              '<div class="sd-sec-body"></div>';
+            var body = sc.querySelector(".sd-sec-body");
+            if (lines.length) {
+              var wrap = document.createElement("div");
+              wrap.className = "sd-lines-wrap";
+              var heads = document.createElement("div");
+              heads.className = "sd-line";
+              heads.innerHTML = '<span class="sd-heads">Libellé</span><span class="sd-heads" style="text-align:right">Montant (F CFA)</span><span class="sd-heads">Sens</span><span class="sd-heads">Compte</span><span class="sd-heads">Preuve</span><span></span>';
+              wrap.appendChild(heads);
+              lines.forEach(function (l) { wrap.appendChild(lineRow(l)); });
+              body.appendChild(wrap);
+            }
+            var add = document.createElement("button");
+            add.className = "sd-addline";
+            add.type = "button";
+            add.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg> Ajouter une ligne';
+            add.addEventListener("click", function () {
+              sdLines.push({ id: ++uid, section: sec.id, libelle: "", montant: "0", sens: sec.sens, compte: "", auto: true, preuve: "saisie" });
+              render();
+            });
+            body.appendChild(add);
+            secWrap.appendChild(sc);
+          });
+          recompute();
+        }
+
+        function lineRow(l) {
+          var row = document.createElement("div");
+          row.className = "sd-line";
+          var mErr = toMineur(l.montant) === null;
+          var cErr = l.compte !== "" && !RE_COMPTE.test(l.compte);
+          row.innerHTML =
+            '<input class="sd-input" data-f="libelle" value="' + esc(l.libelle) + '" placeholder="Ex. Achats de marchandises" aria-label="Libellé">' +
+            '<input class="sd-input num' + (mErr ? " err" : "") + '" data-f="montant" value="' + esc(l.montant) + '" inputmode="decimal" aria-label="Montant en francs">' +
+            '<span class="sd-sens">' +
+              '<button type="button" data-sens="debit" aria-pressed="' + (l.sens === "debit") + '">Débit</button>' +
+              '<button type="button" data-sens="credit" aria-pressed="' + (l.sens === "credit") + '">Crédit</button>' +
+            '</span>' +
+            '<span class="sd-cpt ' + (l.auto ? "auto" : "") + '">' +
+              '<input class="sd-input' + (cErr ? " err" : "") + '" data-f="compte" value="' + esc(l.compte) + '" placeholder="à préciser" maxlength="20" aria-label="Compte">' +
+              (l.auto && l.compte ? '<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.5L18 8l-3 3 .8 5-3.8-2.3L8.2 16l.8-5-3-3 4.1-.5z"/></svg>' : '') +
+            '</span>' +
+            '<select class="sd-input" data-f="preuve" aria-label="Niveau de preuve">' +
+              ["saisie", "estimé", "fichier", "ocr"].map(function (p) { return '<option ' + (p === l.preuve ? "selected" : "") + '>' + p + '</option>'; }).join("") +
+            '</select>' +
+            '<button class="sd-rm" type="button" aria-label="Supprimer la ligne"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
+
+          row.querySelector('[data-f="libelle"]').addEventListener("input", function (e) {
+            l.libelle = e.target.value;
+            if (l.auto) { var g = suggestCompte(l.libelle); if (g) { l.compte = g; refreshCompte(row, l); } }
+            recompute();
+          });
+          row.querySelector('[data-f="montant"]').addEventListener("input", function (e) {
+            l.montant = e.target.value; e.target.classList.toggle("err", toMineur(l.montant) === null); recompute();
+          });
+          row.querySelectorAll("[data-sens]").forEach(function (b) {
+            b.addEventListener("click", function () {
+              l.sens = b.dataset.sens;
+              row.querySelectorAll("[data-sens]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+              recompute();
+            });
+          });
+          row.querySelector('[data-f="compte"]').addEventListener("input", function (e) {
+            l.compte = e.target.value.trim(); l.auto = false;
+            row.querySelector(".sd-cpt").classList.remove("auto");
+            var mk = row.querySelector(".sd-cpt .mark"); if (mk) mk.remove();
+            e.target.classList.toggle("err", l.compte !== "" && !RE_COMPTE.test(l.compte));
+            recompute();
+          });
+          row.querySelector('[data-f="preuve"]').addEventListener("change", function (e) { l.preuve = e.target.value; recompute(); });
+          row.querySelector(".sd-rm").addEventListener("click", function () {
+            sdLines = sdLines.filter(function (x) { return x.id !== l.id; }); render();
+          });
+          return row;
+        }
+
+        function refreshCompte(row, l) {
+          var input = row.querySelector('[data-f="compte"]');
+          if (input) input.value = l.compte;
+          var cpt = row.querySelector(".sd-cpt");
+          if (cpt && l.auto) { cpt.classList.add("auto"); if (!cpt.querySelector(".mark") && l.compte) { var s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); s.setAttribute("class", "mark"); s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("fill", "none"); s.setAttribute("stroke", "currentColor"); s.setAttribute("stroke-width", "2.5"); s.innerHTML = '<path d="M12 3l1.9 4.5L18 8l-3 3 .8 5-3.8-2.3L8.2 16l.8-5-3-3 4.1-.5z" stroke-linecap="round" stroke-linejoin="round"/>'; cpt.appendChild(s); } }
+        }
+
+        function SEC_ICON(id) {
+          var P = {
+            charges:    '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',
+            produits:   '<path d="M3 3v18h18"/><path d="m19 15-5-5-4 4-3-3"/>',
+            tresorerie: '<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>',
+            tiers:      '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>',
+          };
+          return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (P[id] || "") + "</svg>";
+        }
+
+        /* Équilibre live — ARITHMÉTIQUE ENTIÈRE (unités mineures). */
+        var elTDebit = sdPanel.querySelector("[data-sd-tdebit]");
+        var elTCredit = sdPanel.querySelector("[data-sd-tcredit]");
+        var elEcart = sdPanel.querySelector("[data-sd-ecart]");
+        var elEcartMin = sdPanel.querySelector("[data-sd-ecartmin]");
+        var elEqui = sdPanel.querySelector("[data-sd-equi]");
+        var elPill = sdPanel.querySelector("[data-sd-pill]");
+        var elChk = sdPanel.querySelector("[data-sd-chk]");
+
+        var ICON_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+        var ICON_KO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
+        function recompute() {
+          var td = 0, tc = 0;
+          sdLines.forEach(function (l) {
+            var m = toMineur(l.montant); if (m === null) return;
+            if (l.sens === "debit") td += m; else tc += m;
+          });
+          var ecart = td - tc, ok = Math.abs(ecart) < TOLERANCE;
+          elTDebit.textContent = fmtMineur(td);
+          elTCredit.textContent = fmtMineur(tc);
+          elEcart.textContent = fmtMineur(ecart);
+          elEcart.classList.toggle("neg", ecart !== 0);
+          var au = Math.abs(ecart);
+          elEcartMin.textContent = "écart " + ecart.toLocaleString("fr-FR") + " unité" + (au > 1 ? "s" : "") + " mineure" + (au > 1 ? "s" : "");
+          elEqui.classList.toggle("ok", ok); elEqui.classList.toggle("ko", !ok);
+          elPill.className = "sd-pill " + (ok ? "ok" : "ko");
+          elPill.innerHTML = (ok ? ICON_OK : ICON_KO) + (ok ? " Équilibrée" : " Déséquilibrée");
+          renderProof();
+          updateChecksum();
+          return { td: td, tc: tc, ecart: ecart, ok: ok };
+        }
+
+        /* Statut de preuve anticipé — miroir de computeStatutPreuve. */
+        var elProof = sdPanel.querySelector("[data-sd-proof]");
+        var elProofTag = sdPanel.querySelector("[data-sd-proof-tag]");
+        var elProofText = sdPanel.querySelector("[data-sd-proof-text]");
+        function renderProof() {
+          var n = sdLines.length, statut = "majorite_estimée";
+          if (n > 0) {
+            var pf = sdLines.filter(function (l) { return l.preuve === "fichier"; }).length / n;
+            var pe = sdLines.filter(function (l) { return l.preuve === "ocr" || l.preuve === "estimé"; }).length / n;
+            if (pf > 0.8) statut = "justifiée";
+            else if (pf < 0.2 || pe > 0.5) statut = "majorite_estimée";
+            else statut = "partiellement_estimée";
+          }
+          var M = {
+            "justifiée": ["j", "Justifiée", "Majorité de lignes sur pièces."],
+            "partiellement_estimée": ["p", "Partiellement estimée", "Mélange de pièces et de saisie."],
+            "majorite_estimée": ["m", "Majoritairement estimée", "Lignes saisies à la main — fiabilité limitée, à corroborer par pièces."],
+          };
+          var v = M[statut];
+          elProof.className = "sd-proof " + v[0];
+          elProofTag.textContent = v[1];
+          elProofText.textContent = v[2] + " Anticipé ; le serveur recalcule et fait foi.";
+        }
+
+        /* Checksum SHA-256 — reproduit computeBalanceChecksum (tri par compte,
+           dates toISOString, contenu métier seul). */
+        function buildBody() {
+          return {
+            exercice: { debut: new Date("2026-01-01").toISOString(), fin: new Date("2026-12-31").toISOString() },
+            source: "direct",
+            referentiel: sdRef === "CIMA" ? "SN" : sdRef,
+            version: 1,
+            lignes: sdLines.map(function (l) {
+              var m = toMineur(l.montant) || 0;
+              return { compte: l.compte, libelle: l.libelle, debit: l.sens === "debit" ? m : 0, credit: l.sens === "credit" ? m : 0, niveauPreuve: l.preuve };
+            }).sort(function (a, b) { return a.compte < b.compte ? -1 : a.compte > b.compte ? 1 : 0; }),
+          };
+        }
+        function updateChecksum() {
+          if (!(window.crypto && crypto.subtle)) { elChk.textContent = "checksum : (calculé côté serveur)"; return; }
+          var enc = new TextEncoder().encode(JSON.stringify(buildBody()));
+          crypto.subtle.digest("SHA-256", enc).then(function (buf) {
+            var h = Array.prototype.map.call(new Uint8Array(buf), function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+            elChk.textContent = "checksum : " + h.slice(0, 24) + "…";
+            elChk.title = "SHA-256 " + h;
+          });
+        }
+
+        /* Référentiel actif : pilote le plan de comptes suggéré (re-devine les
+           comptes en mode auto). Assurance (CIMA) désactivé — mécanisme prêt. */
+        sdPanel.querySelectorAll("[data-sd-ref]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            if (b.disabled) return;
+            sdRef = b.dataset.sdRef;
+            sdPanel.querySelectorAll("[data-sd-ref]").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
+            var plan = SD_PLANS[sdRef] || {};
+            sdPanel.querySelector("[data-sd-refname]").textContent = plan.name || sdRef;
+            sdPanel.querySelector("[data-sd-refcode]").textContent = sdRef;
+            sdLines.forEach(function (l) { if (l.auto) { var g = suggestCompte(l.libelle); if (g) l.compte = g; } });
+            render();
+          });
+        });
+
+        /* Bascule de démo : chaque onglet = une réponse réelle du :3007. */
+        sdPanel.querySelectorAll("[data-sd]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            sdScenario = b.dataset.sd;
+            sdPanel.querySelectorAll("[data-sd]").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
+          });
+        });
+
+        /* Soumission → assemble la DTO, montre l'état de retour correspondant. */
+        var elFeedback = sdPanel.querySelector("[data-sd-feedback]");
+        function feedback(kind, ctx) {
+          ctx = ctx || {};
+          if (!kind) { elFeedback.innerHTML = ""; return; }
+          var F = {
+            field: ["error", ICON_KO, "Lignes incomplètes",
+              "Un montant ou un compte n'est pas valide (compte : 3–20 caractères alphanumériques ; montant : entier ≥ 0). Corrigez les champs en rouge.", ""],
+            created: ["created", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>', "Balance enregistrée",
+              "Version 1 créée à l'état BROUILLON. Le serveur a recalculé le sommaire et accepté le checksum.", "201 · etat: BROUILLON · checksum " + (ctx.checksum || "").slice(0, 16) + "…"],
+            idem: ["idem", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>', "Cette version existait déjà",
+              "Rien n'a été dupliqué (NOP idempotente). Ce n'est pas une erreur. Pour un ajout, incrémentez la version.", "200 · idempotent · version 1"],
+            deseq: ["error", ICON_KO, "Balance refusée — déséquilibrée",
+              "Le serveur revérifie l'équilibre et refuse : écart de " + (ctx.ecart != null ? ctx.ecart.toLocaleString("fr-FR") : "?") + " unités mineures XOF. Rien n'a été enregistré.", "422 · BALANCE_DESEQUILIBREE"],
+            forbidden: ["error", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>', "Accès refusé",
+              "Votre organisation n'a pas l'entitlement « balance » actif (ou e-mail/KYC en attente).", "403 · BALANCE_NOT_ENTITLED"],
+          }[kind];
+          var cls = { created: "imp-result created", idem: "imp-result idem" }[kind];
+          if (cls) {
+            elFeedback.innerHTML =
+              '<div class="' + cls + '"><span class="ri">' + F[1] + '</span><div><h4>' + F[2] + '</h4><p>' + F[3] + '</p>' +
+              '<div class="imp-meta"><span class="m"><span>Retour</span><b>' + F[4] + '</b></span></div></div></div>';
+          } else {
+            elFeedback.innerHTML =
+              '<div class="state error" style="padding:1.4rem 1.2rem;border:1px solid color-mix(in srgb, var(--danger) 30%, var(--border));border-radius:var(--radius)">' +
+              '<span class="glyph">' + F[1] + '</span><h3>' + F[2] + '</h3><p>' + F[3] + '</p>' + (F[4] ? '<span class="code">' + F[4] + '</span>' : "") + '</div>';
+          }
+        }
+
+        sdPanel.querySelector("[data-sd-submit]").addEventListener("click", function () {
+          var r = recompute();
+          var invalid = sdLines.some(function (l) { return toMineur(l.montant) === null || !RE_COMPTE.test(l.compte); });
+          if (invalid) { feedback("field"); return; }
+          var mode = sdScenario;
+          if (mode === "auto") mode = r.ok ? "created" : "deseq";
+          if (window.crypto && crypto.subtle) {
+            var enc = new TextEncoder().encode(JSON.stringify(buildBody()));
+            crypto.subtle.digest("SHA-256", enc).then(function (buf) {
+              var h = Array.prototype.map.call(new Uint8Array(buf), function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+              feedback(mode, { ecart: r.ecart, checksum: h });
+            });
+          } else { feedback(mode, { ecart: r.ecart }); }
+          if (mode === "created") notify("success", "Balance soumise", "Version 1 créée à l'état BROUILLON (201).");
+          else if (mode === "idem") notify("success", "Déjà enregistrée", "Version identique — NOP idempotente (200).");
+        });
+
+        sdPanel.querySelector("[data-sd-reset]").addEventListener("click", function () {
+          sdLines = seedLines(); feedback(""); render();
+        });
+
+        render();
       }
 
       /* Référentiel actif : résolu / indisponible. */
