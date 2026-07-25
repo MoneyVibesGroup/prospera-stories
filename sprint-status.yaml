@@ -1528,8 +1528,9 @@ sprints:
         epic: "EPIC-010"
         points: 5
         service: "bilan-service"
-        status: "in_progress"  # 2026-07-21 : incrément 1 livré (paquet sfd-bceao@2.0 ee9bf014, cohérence CC1..CC4 verte). RESTE : production liasse SFD (SIG) + vérif docker + validation expert SFD + PR MNV-120.
-        assigned_to: vivian
+        status: "done"  # 2026-07-25 : incrément 2 LIVRÉ — BAT/BPT portés par l'état de présentation `BILAN` (+ etat_source) et role=RESULTAT_BILAN sur BP4 ⇒ la liasse SFD est CALCULÉE (BAT=BPT=15 000 000, SIG RSA..RSG, RSG=résultat), VALIDÉE et FIGÉE en snapshot ; le gate refuse désormais une balance déséquilibrée (422 LIASSE_NON_VALIDABLE, 0 orphelin). Correction de DONNÉES seules : aucun fichier de etats/ ni table-de-passage/ touché (P7). Nouveau checksum 07b4ec22… propagé au registre ; SYSCOHADA 01b892c0…, SFD@1.0 0509a034…, zone-franche ecbd01e2…, CIMA 1f36250c… byte-identiques. Qualité : lint 0, build OK, 701 unit + 170 e2e verts, couverture 98.38/91.98/98.42/98.36 ; 4 mutation-tests rouges puis restaurés ; vérif docker réelle consignée. Piège tracé : les sources de référentiel sont en snake_case (etat_source) — un etatSource camelCase est silencieusement ignoré par build.mjs. PR #34 rebase-mergée sur dev (450d7d6 + ae1a948), branche supprimée ; revue de sécurité publiée (0 vulnérabilité). RESTE hors dev : validation expert SFD de la cascade SIG (blocker métier).
+        assigned_to: vivianMoneyVibesGroupes
+        completed_date: "2026-07-25"
       - story_id: "STORY-121"
         title: "Référentiel Zone Franche Togo @1.0 — présentation SYSCOHADA + paquet fiscal dérogatoire — FR-005/FR-007"
         epic: "EPIC-010"
