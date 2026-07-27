@@ -1621,8 +1621,11 @@ sprints:
         epic: "EPIC-018"
         points: 5
         service: "balance-service"
-        status: "not_started"  # ownership à confirmer vs auth-service (Q ouverte)
-        assigned_to: null
+        # 2026-07-27 : ownership TRANCHÉE dans la story §Ownership — balance-service porte le profil
+        # FISCAL métier (NIF/RCCM/CNSS/capital/dirigeants) ; auth-service garde l'identité de compte
+        # (nom/statut de l'Organization), lue via le read-model STORY-077. Aucune duplication.
+        status: "in_progress"  # MNV-079 — cadrage révisé + dev en cours
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-080"
         title: "Détermination des 2 axes (système comptable SN/SMT + régime fiscal) proposée selon pays+objet+CA — FR-A03"
         epic: "EPIC-018"
