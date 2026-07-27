@@ -11,9 +11,10 @@
 **Priorité :** Could Have
 **Story Points :** 3
 **Complexité :** high
-**Statut :** review
+**Statut :** done ✅
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée :** 2026-07-25
+**Terminée :** 2026-07-25
 **Sprint :** 16
 
 > **Pourquoi `Complexité : high` pour 3 points ?** La charge de code est faible (lecture + diff, aucune
@@ -91,7 +92,7 @@ distinct, méta d'homogénéité nuancée, ordre des contrôles imposé.
   "referentielsEnPresence": [           // toujours publié, même homogène
     { "code": "syscohada-revise", "version": "2.1", "checksum": "cb8a…" }
   ],
-  "exercices": [                        // ORDRE CHRONOLOGIQUE CROISSANT — l'axe de lecture
+  "exercices": [                        // ORDRE CROISSANT PAR LIBELLÉ — l'axe de lecture
     { "exercice": "2023", "jeuEtatsId": "…", "snapshotId": "…", "version": 1,
       "valideAt": "2024-03-11T…", "referentiel": { "code": "…", "version": "…" }, "checksum": "…",
       "moteurVersion": "1.0.0" },
@@ -159,7 +160,8 @@ dénominateur est `0` (jamais `Infinity`, jamais `NaN`).
 ## Critères d'acceptation
 
 - **AC-1** — `GET /bilan/comparaison/exercices?exercices=2023,2024,2025` renvoie **200** avec les exercices en
-  **ordre chronologique croissant** (tri sur le libellé), **quel que soit l'ordre de saisie** ; `valeurs` est
+  **ordre croissant de libellé** (chronologique pour la convention `AAAA` ; cf. constat ③ de revue),
+  **quel que soit l'ordre de saisie** ; `valeurs` est
   aligné **index par index** sur `exercices`.
 - **AC-2** — Chaque valeur provient **exclusivement de la colonne N du propre snapshot validé** de son
   exercice. La colonne **N-1** d'un snapshot n'est **jamais** utilisée comme valeur d'un autre exercice (D4).
@@ -287,7 +289,7 @@ Aucune. Pas de Kafka, pas de Redis, pas de MinIO, pas d'appel inter-services.
       constatée en revue de STORY-073.
 - [x] Unit + **e2e** verts (l'e2e est obligatoire : il est le seul à prouver l'ordre des contrôles et les
       codes HTTP), **non-régression** de `/bilan/consultation/*`, `/bilan/etats/*`, `/bilan/previsionnel/*`.
-- [x] **Mutation-test** — **≥ 8 mutations vérifiées rouges**, code restauré à l'identique ensuite
+- [x] **Mutation-test** — **16 mutations vérifiées rouges**, code restauré à l'identique ensuite
       (`git diff` de contrôle vide) :
       | Mutation appliquée au code réel | Garde qui doit rougir |
       |---|---|
@@ -380,7 +382,8 @@ volume de code.
 **Status History :**
 - 2026-07-23 : Reportée du Sprint 15 au Sprint 16 (arbitrage de capacité — seule *Could Have* du lot).
 - 2026-07-25 : Créée (Scrum Master, escalade `opus` — conception des invariants de comparabilité) — statut `defined`, `Complexité : high`.
-- 2026-07-25 : Développée (`opus`, `Complexité : high`), portes DoD franchies, **12/12 mutations rouges**, **vérif docker bout-en-bout** — statut `review`.
+- 2026-07-25 : Développée (`opus`, `Complexité : high`), portes DoD franchies, **vérif docker bout-en-bout** — statut `review`.
+- 2026-07-25 : Revue de code (1 constat **bloquant** + 2 trous de test corrigés d'office) puis revue de sécurité (**0 vulnérabilité**) — **16/16 mutations rouges** — statut `done`.
 
 **Réalisé :** dossier neuf `src/modules/bilan/comparaison-exercices/` — `evolution.ts` (moteur **PUR**, sans injection : extraction des 5 familles par clé de structure, union ordonnée des postes, valeurs `null`-safe, variations pas-à-pas) · `comparaison-exercices.service.ts` (résolution tenant-scoped exercice → jeu → **dernier snapshot figé**, contrôle d'homogénéité, anti-énumération) · `comparaison-exercices.controller.ts` (préfixe dédié `bilan/comparaison`, `@Get('exercices')`, gate + rôles) · DTO query (charset, 2..5, doublons) et DTO réponse Swagger · câblage `BilanModule`. **Aucune écriture, aucune transaction, aucun événement Kafka, aucun appel moteur, aucune collection propre.**
 
@@ -458,6 +461,73 @@ Mongoose**, et la clé est **`organizationId`**, pas `orgId` — les collections
   point ⑥ — d'où cette mesure dédiée.)
 - **⑩ Swagger** : `/api/v1/bilan/comparaison/exercices` présent dans `/api/docs-json`, **distinct** de
   `/api/v1/bilan/previsionnel/comparaison` (STORY-071) — aucune collision de route.
+
+---
+
+### Revue de code — 1 constat BLOQUANT + 2 trous de test, tous corrigés d'office
+
+Fan-out sur les axes touchés (`nestjs-prospera`, `mongo-prospera`, `test-prospera`) puis revue de sécurité
+(`securite-prospera`). `nestjs-prospera` : **aucun écart bloquant** (structure, ordre des routes, chaîne de
+guards, typage des documents conformes aux patrons `consultation/` et `projection/`).
+
+**① BLOQUANT — 500 sur une liasse figée d'ancien format** (`mongo-prospera`). Les extracteurs
+déréférençaient `l.bilan.sousTotaux.map(…)` sans garde. Or `snapshots_liasse` est **append-only et n'est
+jamais migrée** (NFR-004), et `liasse`/`referentiel` y sont des `Object` Mongoose **non validés à la
+relecture** : `sousTotaux` (STORY-112) et `sig` (STORY-111) n'existent pas dans une liasse figée **avant**
+ces stories. Comparer un exercice ancien à un exercice récent étant **précisément** l'objet de FR-024, le
+défaut frappait le cas d'usage central. **Reproduit sur les données réelles** : sur 13 snapshots en base,
+**4 sont d'ancien format** (`liasse.bilan` sans `actif`/`passif`/`sousTotaux` ; `moteurVersion: "1.0.0"`
+contre `bilan-engine@1.0.0` aujourd'hui) et le moteur compilé rejoué sur eux levait
+`TypeError: Cannot read properties of undefined (reading 'map')`.
+**Correctif à deux niveaux sémantiques distincts** — une **famille** absente (`sousTotaux`, `sig`) est
+*normale* sur une liasse ancienne ⇒ postes en `null` pour cet exercice (D3, la lecture juste : le poste
+n'existait pas alors) ; un **snapshot non exploitable** (sans `referentiel`, `valideAt`, `bilan` ou
+`compteResultat`) ⇒ **404 `EXERCICE_NON_COMPARABLE`**, le même corps générique (sans `referentiel`,
+l'homogénéité D2 ne peut pas être jugée — et comparer sans savoir *quoi* l'on compare est exactement ce que
+D2 interdit). Re-vérifié sur les données réelles : les 2 liasses anciennes passent, le couple ancien × récent
+publie `[null, 1000000]` — `null`, pas `0`.
+
+**② Trous de test invisibles derrière le 100 %** (`test-prospera`) — le profil de fausse assurance des
+stories 070/071/073 :
+- **AC-13 n'était pas prouvé dans le cas qui compte.** Les scénarios n'avaient qu'**un seul** snapshot
+  résolu face à un exercice absent — or le 409 y est inatteignable de toute façon (il faut ≥ 2 codes en
+  présence). Une implémentation jugeant l'homogénéité sur le **sous-ensemble déjà résolu** restait verte
+  tout en ouvrant un oracle d'existence inter-organisations. Test ajouté (2 codes différents + 1 introuvable
+  ⇒ 404), mutation **M15 rejouée : rouge**.
+- **`estComparable()` : le terme `liasse?.compteResultat` n'était jamais évalué à `false`** (le test voisin
+  a `bilan` absent ⇒ court-circuit du `&&`). Istanbul compte la branche dès qu'elle est **évaluée**, pas
+  quand elle vaut `false` — d'où un 100 % trompeur. Test ajouté, mutation **M16 rejouée : rouge**.
+
+**③ Promesse d'ordre corrigée** (`securite-prospera`, axe intégrité). La réponse annonçait un « ordre
+**chronologique** » alors que le tri est **lexicographique sur un libellé libre**. Pour la convention `AAAA`
+les deux coïncident, mais une convention `N`/`N-1` trierait `N` **avant** `N-1` et publierait des variations
+**de signe inversé** — exactes dans leur calcul, fausses dans leur lecture. **Choix : corriger la promesse,
+pas fabriquer un ordre.** Trier réellement par date exigerait de lire `exercices`, ce que la résolution évite
+délibérément (D2 de 072) : l'arbitrage revient au produit. Hook documenté = tri sur `Exercice.dateDebut`
+avec repli lexicographique.
+
+**Constats laissés de côté, assumés :** *(a)* `dernier()` hydrate le document complet, `soldesN`/`soldesN1`
+compris, alors que seule la `liasse` est consommée — indolore aujourd'hui (~12 Ko/snapshot mesurés), à
+reprendre en dette quand des balances réelles (jusqu'à 5 000 lignes) circuleront ; corriger exigerait de
+toucher `TenantScopedRepository`, hors périmètre. *(b)* Un jeu **ré-ouvert** continue de servir son dernier
+snapshot sans indicateur : **conforme** à D1/AC-3, l'ajout d'un drapeau `jeuEnCorrection` serait un
+élargissement de périmètre. *(c)* Le charset de comparaison (32 car.) est plus étroit que celui de création
+(64 car.) : durcissement assumé, un exercice nommé `2023.24` sort en 400.
+
+### Revue de sécurité — aucune vulnérabilité exploitable
+
+7 axes couverts (contrôle d'accès, isolation multi-tenant, anti-énumération, injection, fuite
+d'information, déni de service, intégrité comptable). Points saillants vérifiés **dynamiquement** :
+401 sans jeton et `X-RateLimit-Limit: 100` sur l'endpoint · `tenantId` fusionné **en dernier** par
+`TenantScopedRepository` (non écrasable par un filtre appelant, `throw` si le contexte est vide) ·
+les 5 causes d'échec convergent vers une **404 unique** et le 409 n'est évalué qu'**après** résolution de
+tous les snapshots dans le tenant courant ⇒ inatteignable sur une ressource d'autrui · `?exercices[$ne]=x`
+testé **sous la configuration de production** (`enableImplicitConversion`, absente du e2e) ⇒ **400 avant
+tout accès base** · aucun `logger`/`console`, aucun secret manipulé, `AllExceptionsFilter` masque toute
+erreur non-HTTP en 500 générique · `snapshotId`/`jeuEtatsId` publiés pour la reproductibilité jugés **sans
+risque** (identifiants du tenant appelant, toutes les routes qui les consomment étant tenant-scoped).
+
+---
 
 **Observation (hors périmètre, non bloquante)** — sur le jeu d'essai, les sous-totaux du Bilan (`AZ`…`BZ`)
 ressortent à `0` alors que les postes de détail sont valorisés : c'est le **finding F1 déjà tracé**
