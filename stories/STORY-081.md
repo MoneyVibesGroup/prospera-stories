@@ -4,14 +4,69 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A02, NFR-A05 (qualité OCR) · `tech-spec-document-service-*.md` (OcrProvider, DO-1) · STORY-041→044 (`document-service` : scaffold OCR, extraction, `document.extrait`)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 15 (EXTENDED)
 **Service :** `balance-service` (:3007) + `document-service` (:3006)
 **Couvre :** FR-A02 (extraction OCR des Statuts + carte CFE → profil pré-rempli)
 
 > **Première extension de l'OCR au-delà du KYC — et première application de la règle « l'OCR assiste, il ne décide pas ».** `document-service` sait déjà lire un RCCM/CFE pour le **KYC** (EPIC-015, invariant **DO-1** : l'OCR enrichit le dossier, l'humain tranche). Cette story étend la capacité aux **Statuts** et à la **carte CFE** pour **pré-remplir le profil société** (STORY-079). Le résultat n'est **jamais** figé : c'est un **formulaire pré-rempli éditable**, chaque champ portant son **niveau de confiance**. Un profil fiscal issu d'un OCR non relu est une bombe à retardement (un NIF faux = une DSF rejetée).
+
+---
+
+## Conception arrêtée (2026-07-27) — décisions structurantes
+
+> L'analyse du code existant a montré que la formule « réutilise le même moteur, ajoute 2 types + un mapping »
+> **sous-estime** le travail réel : `OcrProvider.extract()` ne rend qu'une **confiance globale** (pas par champ,
+> pas de zone), `document-service` **n'a aucun endpoint d'upload** (accès MinIO **lecture seule** sur le bucket
+> *propriété de `kyc-service`*), et le contrat `document.extrait` est **déjà consommé par `kyc-service`** et
+> **taillé pour le KYC** (`declared`/`discrepancies`, `type ∈ {RCCM,CFE}`). Décisions retenues (arbitrage user) :
+
+**D1 — Contrat SÉPARÉ, pas d'extension du contrat KYC.** Nouveau topic **`document.profil.extrait`** (contrat
+`ProfilDocumentExtraitEventV1`), **produit par `document-service`**, **consommé par `balance-service`**. Le
+contrat KYC `document.extrait` **n'est pas touché** → `kyc-service` reste **BACKWARD par isolation** (il ne
+s'abonne qu'à `document.extrait`, ne voit jamais le nouveau topic). Respecte « un changement de contrat = 2
+dépôts » (producteur `document-service` + consommateur `balance-service`), sans 3ᵉ dépôt.
+
+**D2 — `document-service` gagne un chemin profil PARALLÈLE au chemin KYC** (jamais mélangés) :
+- nouvel enum **`ProfilDocumentType { STATUTS, CARTE_CFE }`** (le `KycDocumentType {RCCM,CFE}` reste inchangé) ;
+- **écriture MinIO** : nouveau *writer* + **bucket dédié `profil-documents`** (config `MINIO_PROFIL_BUCKET`),
+  le chemin KYC restant **lecture seule** sur son bucket ;
+- **endpoint d'upload** `POST /api/v1/profil-extractions` (multipart : `file` + `type` + `orgId`) → `putObject`
+  → crée un `ProfilExtraction` `EN_COURS` → **enqueue un job BullMQ** → **202** `{ extractionId, statut }` ;
+- **traitement asynchrone via BullMQ** (invariant #1 : job **interne** à un service = Redis/BullMQ, **jamais**
+  Kafka ; ajout `RedisModule`+`QueueModule` calqués sur le patron e-mail d'`auth-service`) : le processeur
+  fait l'OCR **par champ**, écrit `ProfilExtraction` `PRETE`/`ECHEC`, **émet `document.profil.extrait`** via
+  l'**outbox transactionnel**.
+
+**D3 — OCR par champ.** `OcrProvider` étendu d'une méthode **`extractDetailed()`** rendant les **mots** avec
+`text` + `confiance` (0-1) + `zone` (bbox), **sans toucher** `extract()` (chemin KYC intact). Les extracteurs
+Statuts/CFE rendent, **par champ** : `{ valeur, confiance, zone?, brut }` (provenance mot(s) source).
+
+**D4 — Corrélation des 2 pièces.** `balance-service` `POST /profil-societe/ocr` génère **un** `extractionId`
+(clé de la `PropositionProfil`), l'envoie comme **`correlationId`** à `document-service` pour **chaque** pièce ;
+`document.profil.extrait` **réécho** ce `correlationId` → le consumer fusionne Statuts+CFE dans **une seule**
+`PropositionProfil` et détecte les **conflits** inter-pièces.
+
+**D5 — `balance-service` inchangé sur la frontière :** aucune écriture profil hors `POST /ocr/:id/appliquer`
+(action humaine, DO-1) ; consumer idempotent (`ProcessedEvent`, patron STORY-077) ; application partielle,
+éditable, tracée (audit append-only, patron STORY-079).
+
+**Répartition branches (2 dépôts, base `dev`, PR chacune) :** `document-service` MNV-081 (D2/D3 + contrat
+produit) · `balance-service` MNV-081 (D4/D5 + contrat consommé). `kyc-service` : **aucune modification**,
+seulement une assertion de non-régression (il ignore toujours ce qu'il ne connaît pas).
+
+**Garde-fous de mise en œuvre (revue `architecte-prospera`, verdict : conforme aux 4 invariants) :**
+1. **Démarrage dégradé (#4) sur 2 nouvelles dépendances** — Redis absent au boot ne tue pas `document-service`
+   (tolérance calquée sur `queue-bootstrap.service.ts` d'`auth-service`) ; `document-service` injoignable ne
+   fait pas planter `balance-service` au boot ni `/health` — seule **l'action d'upload** dégrade (502/erreur claire).
+2. **Aucun recouplage synchrone masqué côté balance** — `/appliquer` et l'affichage des champs lisent le
+   **read-model local** `PropositionProfil` (alimenté par `document.profil.extrait`) ; **jamais** de re-appel
+   HTTP à `document-service` pour relire une extraction. Le seul HTTP autorisé est **l'upload aller** (commande + binaire).
+3. **Credentials MinIO scindés** — le *writer* profil n'a de droit d'écriture que sur `profil-documents` ;
+   le bucket KYC reste en **lecture seule** (pas de client d'écriture à droits élargis sur les deux buckets).
 
 ---
 
@@ -42,14 +97,15 @@ L'OCR est **déjà en place** pour le KYC (`document-service`, EPIC-015 : `OcrPr
 
 **Inclus :**
 
-- **`document-service` (extension)** :
-  - Nouveaux types : `STATUTS`, `CARTE_CFE` (en plus de `RCCM`/`CFE` du KYC).
-  - **Extracteurs dédiés** (patrons/heuristiques par type) → produisent un `DocumentExtraction` avec, **par champ** : `valeur`, `confiance` (0-1), `zone` (bbox, pour surlignage), `brut` (texte source).
-  - Émet **`document.extrait`** (topic existant, EPIC-015) avec le `type` et l'`orgId`.
+- **`document-service` (extension — chemin profil PARALLÈLE au KYC, cf. D2/D3)** :
+  - Nouvel enum `ProfilDocumentType { STATUTS, CARTE_CFE }` (le `KycDocumentType {RCCM,CFE}` reste intact).
+  - **Endpoint d'upload** `POST /api/v1/profil-extractions` (multipart) → *writer* MinIO (bucket `profil-documents`) → job **BullMQ** → **202** `{ extractionId, statut }`.
+  - **Extracteurs dédiés** Statuts/CFE → **par champ** : `valeur`, `confiance` (0-1), `zone` (bbox), `brut` (via `OcrProvider.extractDetailed()`).
+  - Émet **`document.profil.extrait`** (nouveau topic, D1) avec `type`, `orgId`, `correlationId`. **Contrat KYC `document.extrait` non touché.**
   - **Aucune écriture** dans le profil société : `document-service` ne connaît pas le métier balance (séparation des responsabilités).
 - **`balance-service` (consommation)** :
-  - Endpoint `POST /api/v1/profil-societe/ocr` (`@RequiresBalanceAccess`) — upload **Statuts** et/ou **carte CFE** (`multipart/form-data`) → délègue à `document-service` → **202 Accepted** `{ extractionId, statut: 'EN_COURS' }` (traitement asynchrone).
-  - **Consumer `document.extrait`** (groupe `balance-service-documents`, idempotent via `ProcessedEvent` — patron STORY-077) → stocke une **`PropositionProfil`** (brouillon, **jamais** le profil lui-même).
+  - Endpoint `POST /api/v1/profil-societe/ocr` (`@RequiresBalanceAccess`) — upload **Statuts** et/ou **carte CFE** (`multipart/form-data`) → génère un `extractionId`, **proxifie** chaque pièce vers `document-service` (`correlationId`=extractionId, D4) → **202 Accepted** `{ extractionId, statut: 'EN_COURS' }` (traitement asynchrone).
+  - **Consumer `document.profil.extrait`** (groupe `balance-profil-ocr`, idempotent via `ProcessedEvent` — patron STORY-077) → fusionne Statuts+CFE dans une **`PropositionProfil`** (brouillon, **jamais** le profil lui-même).
   - `GET /api/v1/profil-societe/ocr/:extractionId` → **200** `{ statut, champs: [{ champ, valeur, confiance, source: 'STATUTS'|'CARTE_CFE' }], avertissements }`.
   - **`POST /api/v1/profil-societe/ocr/:extractionId/appliquer`** → l'humain **choisit les champs à appliquer** (`champsRetenus: string[]`, valeurs **éditées** possibles) → écrit sur le `ProfilSociete` (STORY-079) + **audit** (`source: OCR`, `confiance`, `valeurBrute`, `valeurRetenue`).
 - **Fusion des deux pièces** : si Statuts **et** CFE donnent la même donnée (ex. raison sociale) et **divergent** → **conflit signalé** (les deux valeurs présentées, aucune choisie automatiquement).
@@ -126,6 +182,40 @@ export interface PropositionProfil {
 }
 ```
 
+### Contrat wire `document.profil.extrait` (D1) — produit `document-service`, consommé `balance-service`
+
+```typescript
+export const DOCUMENT_PROFIL_EXTRAIT_TOPIC = 'document.profil.extrait';
+
+/** Un champ lu sur une pièce profil, avec sa provenance (D3). */
+export interface ChampExtraitProfil {
+  champ: string;          // clé de EtatProfilSociete : 'nif' | 'capitalSocial' | 'raisonSociale' | …
+  valeur: string;         // valeur normalisée lue (brute côté OCR, non typée métier)
+  confiance: number;      // 0..1 (dérivée des mots source)
+  zone?: { x: number; y: number; w: number; h: number }; // bbox, surlignage front (optionnel)
+  brut: string;           // fragment OCR source (traçabilité)
+}
+
+/** État absolu, compat BACKWARD (P9). `correlationId` = extractionId côté balance (D4). */
+export interface ProfilDocumentExtraitEventV1 {
+  schemaVersion: 1;
+  eventId: string;        // déterministe : `${jobId}:profil-extrait`
+  orgId: string;          // clé de partition Kafka
+  correlationId: string;  // regroupe Statuts + CFE d'une même PropositionProfil
+  type: 'STATUTS' | 'CARTE_CFE';
+  champs: ChampExtraitProfil[];
+  confianceGlobale: number; // 0..1, best-effort (drapeau ECHEC si trop bas / illisible)
+  statut: 'PRETE' | 'ECHEC';
+  ocrProvider: string;
+  occurredAt: string;     // ISO-8601 UTC
+}
+```
+
+> **Frontière D1/D2** : `document-service` ne connaît **pas** `ProfilSociete` — il rend des `champs` bruts
+> (clé + valeur + provenance). La transformation en `ChampPropose` (seuil `faibleConfiance`, détection de
+> `conflit` inter-pièces) et l'écriture du profil sont **entièrement** côté `balance-service` (séparation des
+> responsabilités : `document-service` lit, `balance-service` décide du métier, l'humain applique).
+
 ### La règle qui ne se négocie pas
 
 ```typescript
@@ -173,7 +263,7 @@ async appliquer(
 
 ## Definition of Done
 
-- [ ] `document-service` : types `STATUTS`/`CARTE_CFE` + extracteurs + `document.extrait` (confiance par champ)
+- [ ] `document-service` : types `STATUTS`/`CARTE_CFE` + extracteurs + `document.profil.extrait` (confiance par champ)
 - [ ] `balance-service` : `POST /profil-societe/ocr` (202), consumer idempotent, `GET /ocr/:id`, `POST /ocr/:id/appliquer`
 - [ ] **Aucune écriture automatique du profil** (test qui le prouve)
 - [ ] Seuil de confiance + `faibleConfiance` non pré-coché
@@ -185,6 +275,31 @@ async appliquer(
 
 ---
 
-**Status:** ready-for-dev
-**Dependencies:** STORY-079 (profil société — cible de l'application), STORY-077 (gate + patron consumer idempotent), **`document-service`** STORY-041→044 (OcrProvider, `document.extrait` — sprints 8-9) · **question ouverte** : fournisseur OCR (PRD §13)
+## Progress Tracking
+
+> À renseigner au fil du dev (flux APEX-PROSPERA). **Non clôturable en `done`** tant que la vérification
+> docker réelle (persistance + atomicité + idempotence + absence d'orphelin) n'y est pas consignée.
+
+### Dev
+- [ ] `document-service` MNV-081 : upload + writer MinIO + BullMQ + OCR par champ + `document.profil.extrait`
+- [ ] `balance-service` MNV-081 : `POST /ocr` (proxy 202) + consumer idempotent + `PropositionProfil` + `GET /ocr/:id` + `POST /ocr/:id/appliquer` + audit
+
+### Portes de qualité (par service)
+- [ ] Lint 0 warning · build · couverture ≥ 65/90/90/90 · unit + e2e verts
+
+### Vérification docker (obligatoire — story écrit en base)
+- [ ] `PropositionProfil` réellement persistée (mongosh), fusion Statuts+CFE sous un seul `extractionId`
+- [ ] Consumer idempotent : même `eventId` rejoué → aucune proposition dupliquée
+- [ ] `POST /appliquer` : seuls les `champsRetenus` écrits sur `ProfilSociete` ; audit append-only tracé (brut vs retenu)
+- [ ] Conflit Statuts↔CFE capturé en base (deux valeurs, aucune choisie)
+- [ ] Mutation-test : retrait de la garde « écriture auto interdite » / de l'idempotence → test vire au rouge
+
+### Revue / sécurité
+- [ ] Revue de code (opus) — constats traités/laissés
+- [ ] Revue de sécurité (opus) — vulnérabilités ≥ 80 corrigées
+
+---
+
+**Status:** in_progress
+**Dependencies:** STORY-079 (profil société — cible de l'application), STORY-077 (gate + patron consumer idempotent), **`document-service`** STORY-041→044 (OcrProvider, outbox, ProcessedEvent — patrons réutilisés ; le contrat `document.extrait` KYC **n'est pas** réutilisé, cf. D1) · **question ouverte** : fournisseur OCR (PRD §13, on consomme l'abstraction `OcrProvider`)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A02, NFR-A05 · invariant DO-1
