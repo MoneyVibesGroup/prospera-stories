@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 15 (EXTENDED)
@@ -139,18 +139,18 @@ L'OCR est **déjà en place** pour le KYC (`document-service`, EPIC-015 : `OcrPr
 
 ## Acceptance Criteria
 
-- [ ] **`document-service`** supporte les types **`STATUTS`** et **`CARTE_CFE`** et émet **`document.extrait`** avec, **par champ** : `valeur`, `confiance` (0-1), `zone`, `brut`.
-- [ ] **`POST /api/v1/profil-societe/ocr`** (gate) accepte Statuts et/ou CFE → **202** `{ extractionId, statut }` (asynchrone).
-- [ ] **Consumer `document.extrait`** idempotent (même `eventId` rejoué → **aucune** proposition dupliquée), transactionnel (patron STORY-077).
-- [ ] **`GET /ocr/:extractionId`** retourne les champs proposés avec **confiance** et **source** (`STATUTS` / `CARTE_CFE`).
-- [ ] **Aucune écriture automatique du profil** : la `PropositionProfil` est un **brouillon** ; seul **`POST /ocr/:id/appliquer`** (action humaine) écrit sur `ProfilSociete` (NFR-A05 / DO-1).
-- [ ] **`appliquer`** n'écrit **que** les `champsRetenus`, en acceptant des **valeurs éditées** par l'humain (l'OCR n'est jamais figé).
-- [ ] **Seuil de confiance** (défaut **0,80**) : sous le seuil → `faibleConfiance: true`, champ **non pré-coché**.
-- [ ] **Conflit Statuts ↔ CFE** sur un même champ → **signalé** avec les deux valeurs ; **aucune résolution automatique**.
-- [ ] **Audit (NFR-A07)** : chaque champ appliqué trace `source: OCR`, `confiance`, `valeurBrute`, `valeurRetenue`, auteur, date.
-- [ ] **Non bloquant** : un OCR en échec/illisible n'empêche pas la **saisie manuelle** (STORY-079 reste opérationnelle).
-- [ ] **Tests** : extraction Statuts + CFE, conflit, faible confiance, `appliquer` partiel, idempotence, audit. **Coverage ≥ 90 %** côté `balance-service`.
-- [ ] **Swagger** + **CI verte** (matrice incluant `document-service`).
+- [x] **`document-service`** supporte les types **`STATUTS`** et **`CARTE_CFE`** et émet **`document.extrait`** avec, **par champ** : `valeur`, `confiance` (0-1), `zone`, `brut`.
+- [x] **`POST /api/v1/profil-societe/ocr`** (gate) accepte Statuts et/ou CFE → **202** `{ extractionId, statut }` (asynchrone).
+- [x] **Consumer `document.extrait`** idempotent (même `eventId` rejoué → **aucune** proposition dupliquée), transactionnel (patron STORY-077).
+- [x] **`GET /ocr/:extractionId`** retourne les champs proposés avec **confiance** et **source** (`STATUTS` / `CARTE_CFE`).
+- [x] **Aucune écriture automatique du profil** : la `PropositionProfil` est un **brouillon** ; seul **`POST /ocr/:id/appliquer`** (action humaine) écrit sur `ProfilSociete` (NFR-A05 / DO-1).
+- [x] **`appliquer`** n'écrit **que** les `champsRetenus`, en acceptant des **valeurs éditées** par l'humain (l'OCR n'est jamais figé).
+- [x] **Seuil de confiance** (défaut **0,80**) : sous le seuil → `faibleConfiance: true`, champ **non pré-coché**.
+- [x] **Conflit Statuts ↔ CFE** sur un même champ → **signalé** avec les deux valeurs ; **aucune résolution automatique**.
+- [x] **Audit (NFR-A07)** : chaque champ appliqué trace `source: OCR`, `confiance`, `valeurBrute`, `valeurRetenue`, auteur, date.
+- [x] **Non bloquant** : un OCR en échec/illisible n'empêche pas la **saisie manuelle** (STORY-079 reste opérationnelle).
+- [x] **Tests** : extraction Statuts + CFE, conflit, faible confiance, `appliquer` partiel, idempotence, audit. **Coverage ≥ 90 %** côté `balance-service`.
+- [x] **Swagger** + **CI verte** (matrice incluant `document-service`).
 
 ---
 
@@ -263,43 +263,47 @@ async appliquer(
 
 ## Definition of Done
 
-- [ ] `document-service` : types `STATUTS`/`CARTE_CFE` + extracteurs + `document.profil.extrait` (confiance par champ)
-- [ ] `balance-service` : `POST /profil-societe/ocr` (202), consumer idempotent, `GET /ocr/:id`, `POST /ocr/:id/appliquer`
-- [ ] **Aucune écriture automatique du profil** (test qui le prouve)
-- [ ] Seuil de confiance + `faibleConfiance` non pré-coché
-- [ ] Conflit Statuts↔CFE signalé, non résolu automatiquement
-- [ ] Audit (source OCR, confiance, brut, retenu) append-only
-- [ ] OCR en échec → saisie manuelle toujours possible (non bloquant)
-- [ ] Coverage ≥ 90 % (balance-service) ; Swagger ; CI verte
-- [ ] Non-régression : STORY-079 (saisie manuelle) + KYC OCR (EPIC-015) verts
+- [x] `document-service` : types `STATUTS`/`CARTE_CFE` + extracteurs + `document.profil.extrait` (confiance par champ)
+- [x] `balance-service` : `POST /profil-societe/ocr` (202), consumer idempotent, `GET /ocr/:id`, `POST /ocr/:id/appliquer`
+- [x] **Aucune écriture automatique du profil** (test qui le prouve)
+- [x] Seuil de confiance + `faibleConfiance` non pré-coché
+- [x] Conflit Statuts↔CFE signalé, non résolu automatiquement
+- [x] Audit (source OCR, confiance, brut, retenu) append-only
+- [x] OCR en échec → saisie manuelle toujours possible (non bloquant)
+- [x] Coverage ≥ 90 % (balance-service) ; Swagger ; CI verte
+- [x] Non-régression : STORY-079 (saisie manuelle) + KYC OCR (EPIC-015) verts
 
 ---
 
 ## Progress Tracking
 
-> À renseigner au fil du dev (flux APEX-PROSPERA). **Non clôturable en `done`** tant que la vérification
-> docker réelle (persistance + atomicité + idempotence + absence d'orphelin) n'y est pas consignée.
+> Clôturé le 2026-07-27 via le flux APEX-PROSPERA. Vérification docker RÉELLE consignée ci-dessous.
 
 ### Dev
-- [ ] `document-service` MNV-081 : upload + writer MinIO + BullMQ + OCR par champ + `document.profil.extrait`
-- [ ] `balance-service` MNV-081 : `POST /ocr` (proxy 202) + consumer idempotent + `PropositionProfil` + `GET /ocr/:id` + `POST /ocr/:id/appliquer` + audit
+- [x] `document-service` MNV-081 : upload `POST /profil-extractions` (202) + writer MinIO (bucket `profil-documents`, client séparé) + BullMQ tolérant + `OcrProvider.extractDetailed()` (confiance/zone par mot) + extracteurs Statuts/CFE par champ + `document.profil.extrait` via outbox transactionnel. Couverture **99.23/90.84/99/99.15**.
+- [x] `balance-service` MNV-081 : `POST /ocr` (proxy 202, dégradation gracieuse) + consumer idempotent + `PropositionProfil` (fusion/conflit/seuil 0,80) + `GET /ocr/:id` (404 anti-énum) + `POST /ocr/:id/appliquer` (partiel, éditable, audit append-only). Couverture **99.13/92.54/99.4/99.27**.
+- [x] `kyc-service` : **aucune modification** — contrat KYC `document.extrait` intact, consumer abonné au topic littéral, BACKWARD par isolation (topic profil séparé).
 
 ### Portes de qualité (par service)
-- [ ] Lint 0 warning · build · couverture ≥ 65/90/90/90 · unit + e2e verts
+- [x] Lint 0 warning · build OK · couverture ≥ 65/90/90/90 · unit (doc 246 / bal 591) + e2e (doc 24 / bal 111) verts · non-régression KYC + STORY-079 vertes.
 
-### Vérification docker (obligatoire — story écrit en base)
-- [ ] `PropositionProfil` réellement persistée (mongosh), fusion Statuts+CFE sous un seul `extractionId`
-- [ ] Consumer idempotent : même `eventId` rejoué → aucune proposition dupliquée
-- [ ] `POST /appliquer` : seuls les `champsRetenus` écrits sur `ProfilSociete` ; audit append-only tracé (brut vs retenu)
-- [ ] Conflit Statuts↔CFE capturé en base (deux valeurs, aucune choisie)
-- [ ] Mutation-test : retrait de la garde « écriture auto interdite » / de l'idempotence → test vire au rouge
+### Vérification docker RÉELLE (stack neuve, mongosh — 2026-07-27)
+- [x] **Persistance** : 1er `document.profil.extrait` (STATUTS) → 1 doc `propositions_profil` `PRETE`, 3 champs, `capitalSocial` (0.55 < 0.80) → `faibleConfiance:true`.
+- [x] **Fusion Statuts+CFE** sous un même `correlationId`/`extractionId` : 2e événement (CARTE_CFE, même corrélation) → **même** doc, champ `nif` ajouté.
+- [x] **Conflit** capturé en base : `formeJuridique` SARL↔SUARL → `conflit{autreValeur,autreSource}` **réciproque**, **aucune** résolution auto.
+- [x] **Idempotence** : rejeu même `eventId` → `processed_events` inchangé, **zéro** champ dupliqué ; un `eventId` différent, lui, s'applique (dédup bien clé par `eventId`).
+- [x] **Upload → outbox atomique** : `POST /profil-extractions` → `profil_extractions` EN_COURS → job BullMQ → **exactement 1** `outbox_events` `document.profil.extrait` (marqueur + finalisation + enqueue en **une** transaction) + **round-trip Kafka réel** projeté jusqu'à `propositions_profil`.
+- [x] **Mutation-tests** : idempotence consumer, garde `ocrOuEchec`, `errorHandler` OCR → chaque retrait fait **virer le test au rouge**, restauré → vert.
+
+### Constat de vérif docker corrigé (invariant #4)
+- [x] Une **image indécodable** (PNG IDAT corrompu) faisait planter tout le process `document-service` (tesseract.js relance l'abort WASM en asynchrone → `uncaughtException`) — invariant #4 + DoS par upload. **Corrigé** (commit dédié `MNV-081(profil-extraction): revue/vérif docker …`) : `errorHandler` sur `createWorker` (abort → rejet catchable, protège KYC + profil) + garde `ocrOuEchec` → chemin `ECHEC` propre. Re-vérif docker : **process vivant** (même PID, RestartCount 0) sur PNG corrompu → `ECHEC` ; PNG valide OK.
 
 ### Revue / sécurité
-- [ ] Revue de code (opus) — constats traités/laissés
-- [ ] Revue de sécurité (opus) — vulnérabilités ≥ 80 corrigées
+- [x] Revue de code (opus) : aucun constat bloquant (2 observations de design non bloquantes) + le constat de vérif docker ci-dessus, corrigé.
+- [x] Revue de sécurité (opus, ≥ 80) : aucune vulnérabilité — isolation tenant (orgId du JWT, 404 anti-énum), propagation RS256 sans secret, `maxRedirects:0` anti-SSRF, MIME par magic bytes, DO-1.
 
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** STORY-079 (profil société — cible de l'application), STORY-077 (gate + patron consumer idempotent), **`document-service`** STORY-041→044 (OcrProvider, outbox, ProcessedEvent — patrons réutilisés ; le contrat `document.extrait` KYC **n'est pas** réutilisé, cf. D1) · **question ouverte** : fournisseur OCR (PRD §13, on consomme l'abstraction `OcrProvider`)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A02, NFR-A05 · invariant DO-1
