@@ -35,3 +35,19 @@ Croisée avec les **50 comptes réels** de la balance Sage `Balance_des_comptes.
 2. ~~Compléter le paquet fiscal + barème CNSS~~ ✅ **fait** (2026-07-19, depuis OTR 2025 + CNSS) — reste la **validation experte** et la confirmation de la loi de finances en vigueur ; compléter le barème CNSS (plafond/branches/SMIG).
 3. Généraliser le schéma à d'autres pays UEMOA (le paquet est keyé `pays × année` ; le gabarit GUIDEF est géré côté admin — D12).
 4. ~~Prévoir la liasse **SMT**~~ ✅ **obtenue et extraite** (`postes-smt-togo.json`).
+
+## ⚠️ Corriger un paquet en place vs publier une nouvelle version (règle, STORY-122)
+
+Un paquet packagé est identifié par `code@version` **et** garanti par son `checksum` (sha256 de l'artefact, opposé à l'octet réel par le loader → `ReferentielIntegrityError`). Corriger un paquet **sans changer sa version** change donc son checksum : ce n'est anodin que dans un cas précis.
+
+**Correction en place autorisée** tant que le couple `code@version` **n'est pas déclaré en `ReferentielVersion`** dans `platform-catalog-service`. Sans cette déclaration, aucun grant d'entitlement ne peut le référencer (`admin-panel` refuse le grant) : « jamais attribué à une organisation » est alors une propriété **structurelle**, pas une supposition. C'est le cas qui a permis de corriger `cima-assurances@1.0` en place (STORY-122 incrément 2, `1f36250c…` → `7e644ab1…`).
+
+**Nouvelle version obligatoire** dès que le paquet est catalogué — c'est alors un **changement de contrat**, donc 2 dépôts (cf. CLAUDE.md). Précédent : `sfd-bceao@2.0` (STORY-120), créée en additif plutôt que corriger `@1.0`.
+
+Ce qui casse si on corrige en place un paquet déjà catalogué :
+
+1. **Divergence catalogue ↔ registre.** `ReferentielVersion.checksum` (catalog) et le manifeste `ReferentielRegistry` (bilan) portent la même valeur en double. Le loader n'oppose aujourd'hui que le registre local — mais le hook de lecture depuis l'entitlement est annoncé inerte : le jour où il s'active, la divergence devient un `ReferentielIntegrityError` **bloquant à chaud** pour toutes les orgs du vertical.
+2. **Snapshots figés non reproductibles.** `jeux_etats` et `snapshots_liasse` persistent le checksum sans jamais le re-vérifier : un snapshot antérieur ne casse pas, il devient une trace qui désigne un contenu **qui n'existe plus** — ce qui érode exactement la promesse d'immutabilité de STORY-065.
+3. **Comparaison d'exercices faussée.** `comparaison-exercices` dédoublonne par `code@version#checksum` : deux exercices figés de part et d'autre d'une correction sortent `referentielHomogene: false` à code **et** version identiques. Signal faux, non bloquant.
+
+**Garde-fou en place** — les 5 artefacts embarqués ont leur digest **épinglé en littéral** dans `referentiels-additionnels-coherence.spec.ts` (`DIGESTS_EPINGLES`), hors du registre. Comparer l'artefact au seul registre est tautologique : les régresser tous les deux ensemble passerait au vert. Toute évolution d'un paquet doit donc mettre l'épinglage à jour **sciemment**, jamais « pour faire passer la spec ».

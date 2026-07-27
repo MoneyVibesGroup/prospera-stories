@@ -8,7 +8,7 @@
 **Priorité :** Could Have
 **Story Points :** 5
 **Complexité :** high
-**Statut :** review 🔍 (incrément 1 livré 2026-07-21 · **incrément 2 livré 2026-07-27** — liasse CIMA produite, prouvée et vérifiée en docker ; validation actuaire = blocker métier hors livraison technique)
+**Statut :** done ✅ — clôturée le **2026-07-27** (incrément 1 livré 2026-07-21 · **incrément 2 livré, revu et mergé le 2026-07-27** — liasse CIMA produite, prouvée et vérifiée en docker ; validation actuaire = blocker métier hors livraison technique)
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée :** 2026-07-21
 **Sprint :** 16 (⏭️ reportée du S15 au S16 le 2026-07-23 — arbitrage de capacité : le S15 portait 37 pts pour 34, et l'ajout de STORY-132 le portait à 40. L'incrément 1 restait livré et mergé ; seul l'incrément 2 glissait. Ajout hors engagement initial — extension EPIC-010/FR-007)
@@ -164,7 +164,7 @@ Les deux régimes de balance sont couverts **sans branche conditionnelle** :
 
 ⚠️ **Cas de données dégradé à documenter, pas à corriger** : une balance qui porte **à la fois** `88` crédité **et** des classes 6/7 non soldées double-compterait le résultat → `CAT ≠ CPT` et `EQUILIBRE_BILAN` **ANOMALIE**. C'est le comportement voulu (le contrôle rougit sur une balance incohérente) ; énoncé en `_commentaire` dans la source JSON.
 
-Le libellé de `CP1` devient « Capitaux propres (dont résultat de l'exercice) » — sans quoi la présentation cacherait où atterrit le résultat.
+Le libellé de `CP1` reste **« Capitaux propres »**, verbatim de la présentation CIMA. Un libellé « (dont résultat de l'exercice) » avait d'abord été posé puis **retiré en revue** : il aurait été faux avant affectation, où la ligne présentée vaut 6 000 000 pour un résultat de 1 000 000 — le résultat n'est ajouté qu'au **contexte d'évaluation du total**, jamais à la ligne. La mécanique est documentée dans le `_commentaire` de la source, pas dans un libellé qui mentirait une fois sur deux.
 
 ⚠️ Les comptes `87` (Compte général de pertes et profits) et `89` (Bilan) restent **délibérément non rattachés** : ce sont des comptes techniques de **clôture**, les rattacher double-compterait l'intégralité du résultat / du bilan.
 
@@ -186,7 +186,7 @@ Reporter le **nouveau** sha256 de `cima-assurances-1.0.json` dans `referentiel-r
 - [x] AC-1 → AC-6 validés (incrément 1) ; **AC-7 → AC-17** validés (incrément 2), **mutation-tests consignés** (AC-15).
 - [x] Non-régression (checksums des 4 autres paquets intacts).
 - [x] **Vérification docker réelle** collée en *Progress Tracking* (AC-16) — jamais « production vérifiée » sur la foi d'un mock.
-- [x] `/code-review` + `/security-review` + PR `MNV-122` → `dev`.
+- [x] Revue de code + **revue de sécurité (0 vulnérabilité)** + PR **#37** `MNV-122` → `dev` (rebase-merge, branche supprimée).
 - [ ] AC-18 (validation actuaire) — **blocker métier**, suivi hors story.
 
 ---
@@ -198,6 +198,7 @@ Reporter le **nouveau** sha256 de `cima-assurances-1.0.json` dans `referentiel-r
 - 2026-07-21 : **Incrément 1 livré** — `defined → in_progress`.
 - 2026-07-23 : ⏭️ Reportée du S15 au S16 (arbitrage de capacité).
 - 2026-07-27 : **Incrément 2 livré et prouvé** — la liasse CIMA est produite de bout en bout (totaux du Bilan réellement calculés, cascade `RT`/`RN`, contrôles applicables), mutation-tests rouges puis restaurés, portes de qualité vertes, **vérification docker réelle**. `in_progress → review`.
+- 2026-07-27 : **Revue de code** (tests + architecture) — 3 constats corrigés (libellé `CP1` trompeur, non-régression non gardée, règle de correction en place non opposable), aucun bloquant. **Revue de sécurité : 0 vulnérabilité.** PR **#37 rebase-mergée sur `dev`**, branche supprimée. `review → done`.
 
 **Incrément 1 (fait) :** `cima-assurances@1.0` packagé — plan **80** comptes (art. 431, classes 0-8), **25** postes dont RT/RN `FORMULE`, **25** règles. Spec CC1..CC4 + compte `31` → CP3 PASSIF **verts**. Non-régression SYSCOHADA/SFD.
 
@@ -205,7 +206,7 @@ Reporter le **nouveau** sha256 de `cima-assurances-1.0.json` dans `referentiel-r
 
 Diff : **4 fichiers de données/registre + 1 spec**, `git status` à l'appui — `scripts/referentiels/sources/{postes,table-de-passage}-cima.json`, `assets/cima-assurances-1.0.json`, `referentiel-registry.ts`, `etats/cima-assurances-liasse.spec.ts`. **Aucun fichier de `etats/*.service.ts` ni de `table-de-passage/`** (AC-13, invariant P7 : le CIMA se complète en données).
 
-Rebuild déterministe : `cima-assurances@1.0` `1f36250c…` → **`b39d0c7a0c80d0f51aa7f65133f9f01ef6b66795f224f7b782d3507cdf286a83`**. Les 4 autres artefacts restent **byte-identiques** — `git status` ne liste qu'un seul artefact modifié, et `syscohada-revise@2.1` = `01b892c057…` / `sfd-bceao@1.0` = `0509a034…` sont réimprimés à l'identique par `build.mjs` (AC-14).
+Rebuild déterministe : `cima-assurances@1.0` `1f36250c…` → **`7e644ab171cc9da261e951ace1be0f9614ee451232d278d47758859813c3bd4e`**. Les 4 autres artefacts restent **byte-identiques** — `git status` ne liste qu'un seul artefact modifié, et `syscohada-revise@2.1` = `01b892c057…` / `sfd-bceao@1.0` = `0509a034…` sont réimprimés à l'identique par `build.mjs` (AC-14).
 
 Qualité (AC-17) : lint **0 warning** · build OK · **773 tests unitaires** verts (79 suites, 1 skipped) · couverture **98.47 / 92.47 / 98.52 / 98.42** (≥ 65/90/90/90) · **187 e2e** verts (19 suites) · Swagger inchangé.
 
@@ -222,7 +223,7 @@ Chaque mutation altère la **source**, régénère l'artefact **et réaligne le 
 | **M3** | `etat_source` réécrit en **camelCase** `etatSource` | 15 ✕ / 21 | AC-7/AC-8/AC-10 — **le piège documenté est réellement gardé** : `build.mjs` l'ignore en silence et l'évaluateur ne résout plus rien |
 | **M4** | signe de l'opérande `RC1` (sinistres) inversé dans `RT` | 5 ✕ / 21 | AC-9 « RT isole le technique » + `coherenceSig` |
 
-Restauration vérifiée : checksum revenu à `b39d0c7a…` et 21/21 verts.
+Restauration vérifiée : checksum revenu à `7e644ab1…` et 21/21 verts.
 
 ### Vérification docker (AC-16) — stack réelle, requêtes et réponses collées
 
@@ -233,7 +234,7 @@ Stack `prospera-*` saine (`mongo`, `kafka`, `redis`, `auth-service`, `bilan-serv
 **1. Le conteneur sert-il bien le paquet corrigé ?** `GET /api/v1/bilan/referentiel`
 ```json
 { "referentiel": { "code": "cima-assurances", "version": "1.0" },
-  "checksum": "b39d0c7a0c80d0f51aa7f65133f9f01ef6b66795f224f7b782d3507cdf286a83",
+  "checksum": "7e644ab171cc9da261e951ace1be0f9614ee451232d278d47758859813c3bd4e",
   "planCount": 80, "postesCount": 25, "mappingCount": 25,
   "integrity": "verified", "cache": "miss" }
 ```
@@ -313,6 +314,31 @@ jeu 2024 → statut=BROUILLON (inchangé)   ·   snapshots_liasse = 1 (le refus 
 ```
 
 **Embarquement en image** : `nest-cli.json` copie `modules/bilan/referentiel/assets/**/*.json` vers `dist` (`watchAssets`) — l'artefact corrigé est bien dans l'image, pas seulement lu depuis `src` par le watch.
+
+⚠️ La vérification ci-dessus a été **rejouée intégralement** sur l'artefact final `7e644ab1…` après les correctifs de revue (le libellé de `CP1` ayant changé l'octet) : `integrity: verified`, `CP1 = « Capitaux propres » 6 000 000`, `CAT = CPT = 17 500 000`, `RT = 2 200 000`, `RN = 1 000 000`, `coherent = true`, et les deux cas négatifs toujours en `ANOMALIE` (`+200 000` et `−100 000`, `valide = false`). Aucun résultat n'est reporté d'une mesure antérieure au correctif.
+
+---
+
+## Revue de code (2026-07-27)
+
+Fan-out sur les deux axes touchés — tests/couverture et architecture/P7. **Aucun constat bloquant.** L'agent tests a rejoué indépendamment l'arithmétique complète de la balance et **les 4 mutations sur le code réel** (mêmes comptages de rouges), et confirmé 0 assertion molle (`grep` sur `toBeTruthy|toBeDefined|toBeGreaterThan|…` → zéro).
+
+**Constats retenus et corrigés dans cette PR :**
+
+1. **MINEUR — libellé de `CP1` trompeur** (archi). « Capitaux propres (dont résultat de l'exercice) » promettait un contenu que la ligne présentée n'a pas avant affectation (6 000 000 affichés pour 1 000 000 de résultat) : le résultat n'est ajouté qu'au **contexte d'évaluation du total**. Libellé **revenu au verbatim CIMA** ; la mécanique reste dans le `_commentaire` de la source. Nouveau checksum `b39d0c7a…` → **`7e644ab1…`**.
+
+2. **MAJEUR — la non-régression des artefacts n'était pas une porte** (archi). `CC3` compare l'artefact **au registre** : régresser les deux ensemble passait au vert — précisément le « re-commit du checksum pour faire passer la spec » que STORY-120 §3 interdit **par écrit**, sans que rien ne le refuse. Seul SYSCOHADA avait un digest épinglé (STORY-121) ; `sfd-bceao@1.0`/`@2.0` et `zone-franche-togo@1.0` n'en avaient **aucun**. Ajout de `DIGESTS_EPINGLES` (5 littéraux, hors registre) + une porte transverse sur les 5 artefacts, et l'épinglage SYSCOHADA local est remonté dans cette source unique.
+   **Mutation M5** : artefact `sfd-bceao@2.0` altéré d'un octet **et** registre réaligné → **2 ✕** (`CC3` + porte transverse). Avant l'épinglage, ce geste passait **vert**. Restauré, 21/21.
+
+3. **MAJEUR — la règle de correction en place n'était opposable nulle part** (archi). Elle ne vivait que dans un commentaire du registre. Écrite dans [`docs/referentiels/README.md`](../referentiels/README.md) : *correction en place autorisée tant que le couple `code@version` n'est pas déclaré en `ReferentielVersion` au catalogue — au-delà, nouvelle version obligatoire (changement de contrat, 2 dépôts)*, avec les 3 mécanismes qui casseraient (divergence catalogue↔registre quand le hook s'activera, snapshot figé non reproductible, `referentielHomogene` faussé).
+
+**Constats laissés de côté, sciemment :**
+
+- **`CAT`/`CPT` déclarés sous `BILAN_ACTIF`/`BILAN_PASSIF` dans `postes-cima.json`** alors que leurs règles portent `etat: 'BILAN'`. Sans effet (`libellesPostes()` indexe par code, tous états confondus) et **conforme aux 4 autres paquets** : c'est le finding cosmétique déjà tracé par STORY-120, présent sur 4 paquets sur 5. Divergence locale ici = pire que le statu quo → **harmonisation transverse**, story dédiée.
+- **Pas de cas N-1 / surcharges / hors-bornes propres à CIMA.** Mécanismes **génériques** au moteur P7, déjà couverts par les specs SYSCOHADA et SFD@2.0 (même branche de code). À rejouer sur CIMA le jour où l'articulation N/N-1 lui sera spécifiquement demandée (FR-024).
+- **Checksum figé dans `snapshots_liasse` devenu non reproductible** pour un éventuel snapshot CIMA antérieur. Nul en pratique (aucun hors dev) — **coût assumé** de la correction en place, désormais énoncé dans la règle du README.
+
+**Qualité après correctifs de revue** : lint 0 warning · build OK · **774** unit verts (79 suites) · couverture **98.47 / 92.47 / 98.52 / 98.42** · **187** e2e verts.
 
 ---
 
