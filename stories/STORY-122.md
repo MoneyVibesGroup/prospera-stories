@@ -203,7 +203,116 @@ Reporter le **nouveau** sha256 de `cima-assurances-1.0.json` dans `referentiel-r
 
 **Incrément 2 (LIVRÉ 2026-07-27) — les totaux passent de « absents » à « calculés et prouvés ».**
 
-*(détail consigné plus bas — § Vérification docker et § Mutation-tests)*
+Diff : **4 fichiers de données/registre + 1 spec**, `git status` à l'appui — `scripts/referentiels/sources/{postes,table-de-passage}-cima.json`, `assets/cima-assurances-1.0.json`, `referentiel-registry.ts`, `etats/cima-assurances-liasse.spec.ts`. **Aucun fichier de `etats/*.service.ts` ni de `table-de-passage/`** (AC-13, invariant P7 : le CIMA se complète en données).
+
+Rebuild déterministe : `cima-assurances@1.0` `1f36250c…` → **`b39d0c7a0c80d0f51aa7f65133f9f01ef6b66795f224f7b782d3507cdf286a83`**. Les 4 autres artefacts restent **byte-identiques** — `git status` ne liste qu'un seul artefact modifié, et `syscohada-revise@2.1` = `01b892c057…` / `sfd-bceao@1.0` = `0509a034…` sont réimprimés à l'identique par `build.mjs` (AC-14).
+
+Qualité (AC-17) : lint **0 warning** · build OK · **773 tests unitaires** verts (79 suites, 1 skipped) · couverture **98.47 / 92.47 / 98.52 / 98.42** (≥ 65/90/90/90) · **187 e2e** verts (19 suites) · Swagger inchangé.
+
+### Mesure AVANT correction (le constat n'est pas supposé)
+La spec `cima-assurances-liasse.spec.ts` a été écrite **avant** la correction et exécutée sur l'artefact d'origine : **11 échecs / 21**, dont `sousTotaux` = `[]` au lieu de `['CAT','CPT']` et `coherenceSousTotaux.bz/dz` = `null`. Après correction de données : **21/21 verts**. C'est la mesure avant/après exigée par la règle projet, pas une déduction.
+
+### Mutation-tests (AC-15) — exécutés, rouges, puis restaurés
+Chaque mutation altère la **source**, régénère l'artefact **et réaligne le checksum du registre** — sans ce réalignement, `ReferentielIntegrityError` ferait tout rougir et la mutation ne prouverait rien de ciblé.
+
+| # | Mutation | Effet | Spec tuée |
+|---|---|---|---|
+| **M1** | `role: 'RESULTAT_BILAN'` retiré de `CP1` | 8 ✕ / 21 | AC-8 « AVANT affectation », AC-7 (`CPT` amputé du résultat) |
+| **M2** | `CAT` remis sur l'état `BILAN_ACTIF` | 9 ✕ / 21 | AC-7 « produit CAT puis CPT » (`sousTotaux` redevient `[]`) |
+| **M3** | `etat_source` réécrit en **camelCase** `etatSource` | 15 ✕ / 21 | AC-7/AC-8/AC-10 — **le piège documenté est réellement gardé** : `build.mjs` l'ignore en silence et l'évaluateur ne résout plus rien |
+| **M4** | signe de l'opérande `RC1` (sinistres) inversé dans `RT` | 5 ✕ / 21 | AC-9 « RT isole le technique » + `coherenceSig` |
+
+Restauration vérifiée : checksum revenu à `b39d0c7a…` et 21/21 verts.
+
+### Vérification docker (AC-16) — stack réelle, requêtes et réponses collées
+
+Stack `prospera-*` saine (`mongo`, `kafka`, `redis`, `auth-service`, `bilan-service` healthy) ; `bilan-service` **redémarré** avant mesure (le hot-reload peut annoncer « Found 0 errors » en servant encore l'ancien module). Tenant créé par `register` + `login` sur l'IdP, e-mail vérifié en base.
+
+⚠️ Read-models positionnés dans les collections **réellement lues** — `orgkycstatuses` / `orgbilanentitlements` (noms Mongoose par défaut). Les collections `org_kyc_status` / `org_bilan_entitlements` **coexistent en base mais sont MORTES** : y écrire aurait donné un `403 KYC_NOT_APPROVED` muet.
+
+**1. Le conteneur sert-il bien le paquet corrigé ?** `GET /api/v1/bilan/referentiel`
+```json
+{ "referentiel": { "code": "cima-assurances", "version": "1.0" },
+  "checksum": "b39d0c7a0c80d0f51aa7f65133f9f01ef6b66795f224f7b782d3507cdf286a83",
+  "planCount": 80, "postesCount": 25, "mappingCount": 25,
+  "integrity": "verified", "cache": "miss" }
+```
+
+**2. Bilan sur balance d'assurance équilibrée** (`POST /api/v1/bilan/etats/bilan/dry-run`) — 27 comptes, `Σ débit = Σ crédit = 26 550 000` :
+```
+actif   : CA1 10 000 000 · CA2 2 500 000 · CA3 1 800 000 · CA4 3 200 000
+passif  : CP1  6 000 000 · CP2   500 000 · CP3 8 500 000 · CP4 1 500 000
+sousTot : (BILAN, CAT, "TOTAL DE L'ACTIF", 17 500 000) · (BILAN, CPT, "TOTAL DU PASSIF", 17 500 000)
+coherenceSousTotaux: {"bz":17500000,"dz":17500000,"totalActifDirect":17500000,
+                      "totalPassifResultatDirect":17500000,"ecartEquilibre":0,
+                      "equilibre":true,"coherent":true}
+controle: {"totalActifN":17500000,"totalPassifN":16500000,"resultatNetN":1000000,"ecartN":0,"equilibreN":true}
+comptesNonMappes: []
+```
+`bz`/`dz` sont **non nuls** : le contrôle est réellement applicable — c'est le cœur de l'incrément.
+
+**3. Compte de résultat** (`POST …/compte-resultat/dry-run`) :
+```
+sig : RT « Résultat technique (amorce) » = 2 200 000 · RN « RÉSULTAT NET DE L'EXERCICE » = 1 000 000
+resultatNetN = 1 000 000 | totalProduits = 10 050 000 | totalCharges = 9 050 000
+coherenceSig: {"resultatNetSig":1000000,"resultatNetDirect":1000000,"ecart":0,"coherent":true}
+```
+
+**4. Contrôles** (`POST …/controles/dry-run`) :
+```
+EQUILIBRE_BILAN      OK              ecart=0  « Équilibre du Bilan (actif = passif + résultat = BZ = DZ) »
+COHERENCE_RESULTAT   OK              ecart=0
+VARIATION_TRESORERIE NON_APPLICABLE           (le plan CIMA ne prévoit pas de TFT)
+ARTICULATION_NOTES   NON_APPLICABLE           (aucune note packagée)
+VALIDE = true
+```
+Le libellé porte la **variante sous-totaux** — trace observable que `bz`/`dz` existent.
+
+**5. APRÈS affectation** (`88` crédité 1 000 000, classes 6/7 soldées) — le résultat n'est compté **qu'une fois** :
+```
+passif : CP1 7 000 000 (= capital 5 000 000 + réserves 1 000 000 + résultat en instance 1 000 000)
+sousTot: CAT 17 500 000 · CPT 17 500 000 | resultatNetN = 0 | ecartEquilibre = 0
+```
+
+**6. NÉGATIF — balance déséquilibrée** (`15` : 500 000 → 300 000) : le contrôle **rougit vraiment**
+```
+EQUILIBRE_BILAN ANOMALIE ecart=200000
+elements: totalActifN 17 500 000 · totalPassifN 16 300 000 · resultatNetN 1 000 000 · BZ 17 500 000 · DZ 17 300 000
+VALIDE = false
+```
+
+**7. NÉGATIF — limite de l'amorce (AC-12)** : charge d'impôt `85` (hors amorce) 100 000 contre `43` :
+```
+comptesNonMappes: ["85"]        EQUILIBRE_BILAN ANOMALIE ecart=-100000        VALIDE = false
+```
+Le trou de l'amorce est **bruyant**, jamais absorbé en silence — c'est ce qui autorise à livrer une amorce incomplète en attendant l'actuaire (AC-18).
+
+**8. Persistance & immutabilité réelles** — création d'un jeu d'états puis validation (gate STORY-064) :
+```
+POST /api/v1/bilan/etats            → 201, statut BROUILLON
+POST /api/v1/bilan/etats/:id/valider → 200, statut VALIDE, version 1
+```
+Documents réellement écrits (`mongosh`, tenancy par **`tenantId`** — pas `organizationId`) :
+```
+jeux_etats       : 1 doc — exercice=2025 statut=VALIDE referentiel={"code":"cima-assurances","version":"1.0"}
+snapshots_liasse : 1 doc — version=1
+  bilan.sousTotaux FIGÉS = [["CAT",17500000],["CPT",17500000]]
+  coherenceSousTotaux    = {"bz":17500000,"dz":17500000,…,"ecartEquilibre":0,"equilibre":true,"coherent":true}
+  compteResultat.sig     = [["RT",2200000],["RN",1000000]]
+  controles              = [EQUILIBRE_BILAN OK, COHERENCE_RESULTAT OK,
+                            VARIATION_TRESORERIE NON_APPLICABLE, ARTICULATION_NOTES NON_APPLICABLE] valide=true
+audit_events     : JEU_CREE, JEU_VALIDE
+```
+**C'est la démonstration de bout en bout du défaut corrigé** : avant l'incrément 2, ce même snapshot aurait figé une liasse CIMA **sans aucun total**, avec `EQUILIBRE_BILAN` OK par non-applicabilité.
+
+**9. NÉGATIF sur le gate** — un jeu déséquilibré (exercice 2024) ne peut pas être validé :
+```
+POST /api/v1/bilan/etats/:id/valider → HTTP 422
+{"code":"LIASSE_NON_VALIDABLE","message":["EQUILIBRE_BILAN : ANOMALIE (écart 200000)"]}
+jeu 2024 → statut=BROUILLON (inchangé)   ·   snapshots_liasse = 1 (le refus ne fige RIEN)
+```
+
+**Embarquement en image** : `nest-cli.json` copie `modules/bilan/referentiel/assets/**/*.json` vers `dist` (`watchAssets`) — l'artefact corrigé est bien dans l'image, pas seulement lu depuis `src` par le watch.
 
 ---
 
