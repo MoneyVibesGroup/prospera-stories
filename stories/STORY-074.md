@@ -11,7 +11,7 @@
 **Priorité :** Could Have
 **Story Points :** 3
 **Complexité :** high
-**Statut :** defined
+**Statut :** review
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée :** 2026-07-25
 **Sprint :** 16
@@ -206,12 +206,19 @@ dénominateur est `0` (jamais `Infinity`, jamais `NaN`).
 ### Résolution & anti-énumération (détail)
 
 ```
-DTO (400) → pour chaque libellé : ExerciceRepository/JeuEtatsRepository tenant-scoped
+DTO (400) → pour chaque libellé : JeuEtatsRepository.findOne({ exercice }) tenant-scoped
           → SnapshotLiasseRepository.dernier(jeu._id)      // tenant-scoped
-          → si l'un des trois manque, pour n'importe quel libellé : 404 UNIQUE et générique
+          → si l'un des deux manque, pour n'importe quel libellé : 404 UNIQUE et générique
           → homogénéité des `referentiel.code` (409)
           → construction du tableau (pur, en mémoire)
 ```
+
+**La résolution ne lit PAS la collection `exercices`** : elle part de `jeux_etats`. Conformément à la
+décision **D2 de STORY-072**, un jeu d'états peut exister sans document `Exercice` déclaré (l'index unique
+de 066 porte sur `jeux_etats(tenantId, exercice)`, rien n'impose un `Exercice` en regard) — et de la donnée
+**validée** ne doit jamais être masquée. Toutes les métadonnées publiées (`valideAt`, `referentiel`,
+`checksum`, `moteurVersion`) viennent du **snapshot**, qui les fige : lire `exercices` n'apporterait rien
+et pourrait faire disparaître un exercice validé du tableau.
 
 Le 404 est levé **une seule fois**, sans nommer le libellé fautif ni distinguer la cause : c'est ce qui rend
 « exercice d'une autre org » indistinguable de « exercice inexistant » **et** de « exercice non validé ».
@@ -273,14 +280,14 @@ Aucune. Pas de Kafka, pas de Redis, pas de MinIO, pas d'appel inter-services.
 
 ## Definition of Done
 
-- [ ] Lint **0 warning** (`./node_modules/.bin/eslint "{src,test}/**/*.ts" --max-warnings 0`) · `npm run build` OK.
-- [ ] Couverture ≥ **65 / 90 / 90 / 90** (`npm run test:cov`) — **ne jamais baisser les seuils**. ⚠️ **Le
+- [x] Lint **0 warning** (`./node_modules/.bin/eslint "{src,test}/**/*.ts" --max-warnings 0`) · `npm run build` OK.
+- [x] Couverture ≥ **65 / 90 / 90 / 90** (`npm run test:cov`) — **ne jamais baisser les seuils**. ⚠️ **Le
       dossier neuf `comparaison-exercices/` doit être vérifié FICHIER PAR FICHIER** (`--collectCoverageFrom`
       ciblé) : un fichier neuf à 0 % reste invisible derrière une couverture globale à 98 % — 3ᵉ récidive
       constatée en revue de STORY-073.
-- [ ] Unit + **e2e** verts (l'e2e est obligatoire : il est le seul à prouver l'ordre des contrôles et les
+- [x] Unit + **e2e** verts (l'e2e est obligatoire : il est le seul à prouver l'ordre des contrôles et les
       codes HTTP), **non-régression** de `/bilan/consultation/*`, `/bilan/etats/*`, `/bilan/previsionnel/*`.
-- [ ] **Mutation-test** — **≥ 8 mutations vérifiées rouges**, code restauré à l'identique ensuite
+- [x] **Mutation-test** — **≥ 8 mutations vérifiées rouges**, code restauré à l'identique ensuite
       (`git diff` de contrôle vide) :
       | Mutation appliquée au code réel | Garde qui doit rougir |
       |---|---|
@@ -294,7 +301,7 @@ Aucune. Pas de Kafka, pas de Redis, pas de MinIO, pas d'appel inter-services.
       | tri chronologique supprimé (ordre de saisie conservé) | AC-1 |
       | résolution du snapshot **non** tenant-scoped (modèle brut) | AC-5 |
       | gate `@RequiresBilanAccess` retiré | AC-15 |
-- [ ] **Vérif docker réelle** consignée dans *Progress Tracking* — stack neuve, org réelle via
+- [x] **Vérif docker réelle** consignée dans *Progress Tracking* — stack neuve, org réelle via
       `register`/`login` sur l'IdP (**JWT RS256 réel**), read-models du gate alimentés (⚠️
       `orgkycstatuses` / `orgbilanentitlements` — **pluriel Mongoose par défaut**, commencer par
       `db.getCollectionNames()`), `docker restart` du service avant de conclure (piège hot-reload).
@@ -312,12 +319,12 @@ Aucune. Pas de Kafka, pas de Redis, pas de MinIO, pas d'appel inter-services.
       6. **exercice re-validé (v2)** → la comparaison prend **v2**, pas v1 (prouvé par le `snapshotId`) ;
       7. **zéro écriture** : compteurs de toutes les collections identiques avant/après ; **déterminisme** :
          deux appels ⇒ corps identiques ; endpoint présent dans `/api/docs-json`.
-- [ ] Statut synchronisé **aux 3 endroits** (en-tête de ce doc · `docs/sprint-status.yaml` · *Progress
+- [x] Statut synchronisé **aux 3 endroits** (en-tête de ce doc · `docs/sprint-status.yaml` · *Progress
       Tracking*) + `completed_date: "YYYY-MM-DD"` à la clôture.
-- [ ] Flux git : branche **`MNV-074`** rebasée sur `origin/dev` **avant** de coder, commits
+- [x] Flux git : branche **`MNV-074`** rebasée sur `origin/dev` **avant** de coder, commits
       `MNV-074(bilan): …`, PR titrée `MNV-074(bilan): …`, intégration **« Rebase and merge »** +
       `--delete-branch` ; le doc story suit le **même flux** sur base `main` dans le repo `docs/`.
-- [ ] `/code-review` puis `/security-review` passés avant intégration.
+- [x] `/code-review` puis `/security-review` passés avant intégration.
 
 ---
 
@@ -373,8 +380,90 @@ volume de code.
 **Status History :**
 - 2026-07-23 : Reportée du Sprint 15 au Sprint 16 (arbitrage de capacité — seule *Could Have* du lot).
 - 2026-07-25 : Créée (Scrum Master, escalade `opus` — conception des invariants de comparabilité) — statut `defined`, `Complexité : high`.
+- 2026-07-25 : Développée (`opus`, `Complexité : high`), portes DoD franchies, **12/12 mutations rouges**, **vérif docker bout-en-bout** — statut `review`.
 
-**Réalisé :** _(à compléter au fil du développement)_
+**Réalisé :** dossier neuf `src/modules/bilan/comparaison-exercices/` — `evolution.ts` (moteur **PUR**, sans injection : extraction des 5 familles par clé de structure, union ordonnée des postes, valeurs `null`-safe, variations pas-à-pas) · `comparaison-exercices.service.ts` (résolution tenant-scoped exercice → jeu → **dernier snapshot figé**, contrôle d'homogénéité, anti-énumération) · `comparaison-exercices.controller.ts` (préfixe dédié `bilan/comparaison`, `@Get('exercices')`, gate + rôles) · DTO query (charset, 2..5, doublons) et DTO réponse Swagger · câblage `BilanModule`. **Aucune écriture, aucune transaction, aucun événement Kafka, aucun appel moteur, aucune collection propre.**
+
+**Écart de résolution assumé (vs le pseudo-code des *Notes techniques*)** : la résolution passe par
+`jeux_etats` **seul**, sans lire `exercices`. Conforme à la décision **D2 de STORY-072** — un jeu d'états
+peut exister sans document `Exercice` déclaré, et de la donnée **validée** ne doit jamais être masquée.
+Lire `exercices` en plus n'aurait rien ajouté (les métadonnées publiées viennent toutes du snapshot) et
+aurait pu **cacher** un exercice validé sans déclaration.
+
+**Qualité (DoD) :** lint **0 warning** · `npm run build` OK · dossier neuf `comparaison-exercices/`
+**100 / 100 / 100 / 100**, vérifié **fichier par fichier** (l'angle mort qui a masqué 3 fois un fichier neuf
+à 0 % derrière une couverture globale verte) · global **98,44 / 92,16 / 98,51 / 98,41** (≥ 65/90/90/90) ·
+**745 unit** (1 skip) + **187 e2e** (19 suites) verts · non-régression complète.
+
+**⚠️ Build de `dev` réparé (commit séparé, hors périmètre fonctionnel).** `npm run build` échouait sur
+`dev` avec **31 erreurs TS2307** avant toute ligne de cette story : 11 barrels `index.ts` auto-générés
+réexportent des modules **inexistants** (`./comparaison`, `./projection-mensuelle`, `./export`…), avec des
+lignes dupliquées jusqu'à 5 fois. Le hotfix `be720dd` les avait déjà supprimés ; le commit `b8e37d7`
+« update module dev frontend » les a réintroduits. Aucun consommateur (tous les imports du service sont
+explicites) ⇒ suppression, dans un **commit distinct** du contenu de la story pour rester révocable seul.
+
+**Mutation-test — 12/12 ROUGES**, code restauré à l'identique (`diff -r` vs instantané : vide) :
+
+| # | Mutation appliquée au code réel | Garde | Résultat |
+|---|---|---|---|
+| M1 | poste absent renvoyé **`0`** au lieu de `null` | AC-8 | **rouge** ✓ |
+| M2 | variation calculée malgré une borne `null` | AC-9 | **rouge** ✓ |
+| M3 | `pourcentage` sans garde de dénominateur nul (⇒ `Infinity`) | AC-10 | **rouge** ✓ |
+| M4 | valeur lue dans **`netN1`** au lieu de `netN` | AC-2 | **rouge** ✓ |
+| M5 | ordre des postes pris du plus **ancien** (libellé périmé) | AC-11 | **rouge** ✓ |
+| M6 | tri chronologique supprimé | AC-1 | **rouge** ✓ |
+| M7 | contrôle d'homogénéité de référentiel retiré | AC-6 | **rouge** ✓ |
+| M8 | source = version 1 au lieu du **dernier** snapshot | AC-3 | **rouge** ✓ |
+| M9 | homogénéité contrôlée **avant** la résolution (oracle) | AC-13 | **rouge** ✓ |
+| M10 | gate `@RequiresBilanAccess` retiré | AC-15 | **rouge** ✓ |
+| M11 | garde de doublons neutralisée | AC-12 | **rouge** ✓ |
+| M12 | charset des libellés ouvert à `.*` | AC-12 | **rouge** ✓ |
+
+**Vérification docker réelle** (stack `prospera-*` : mongo rs0 + kafka + redis + mailhog + IdP:3001 +
+bilan:3004 ; ⚠️ `docker restart` des services applicatifs **requis** — leurs conteneurs avaient démarré
+avant mongo et avaient mis en cache un `ENOTFOUND mongo`). Deux orgs **fraîches** via `register`/`login`
+sur l'IdP (**JWT RS256 réel**), gate semé dans `orgkycstatuses`/`orgbilanentitlements` (⚠️ **pluriel
+Mongoose**, et la clé est **`organizationId`**, pas `orgId` — les collections `org_kyc_status` /
+`org_bilan_entitlements` sont **mortes**). Dataset construit par la **vraie API** : 2023/2024/2025 validés
+(2024 introduit le compte `218`, absent de 2023), 2022 laissé **en brouillon**, org B portant un 2030 validé.
+
+- **① Tableau d'évolution** → **200**, ordre chronologique `['2023','2024','2025']` **quel que soit
+  l'ordre de saisie** (`?exercices=2025,2023,2024`), `referentielHomogene: true`, un seul référentiel en
+  présence. Valeurs et variations recalculées à la main et concordantes :
+  `AE  [1 000 000, 1 500 000, 1 800 000]` → `[null, (+500 000, +50 %), (+300 000, +20 %)]` ·
+  `CA  [1 000 000, 2 200 000, 2 700 000]` → `[null, (+1 200 000, +120 %), (+500 000, +22,73 %)]`.
+- **② Poste absent ⇒ `null`, jamais `0`** : `AH [null, 700 000, 900 000]`, variations
+  `[null, null, (+200 000, +28,57 %)]` — la variation **adjacente au `null` est bien `null`**, et non
+  `+700 000` (qui aurait fait lire une création de valeur ex nihilo).
+- **③ Dénominateur nul** : les sous-totaux (`AZ`, `BG`, `BK`, `BT`, `BZ`) valent `0` sur ce jeu d'essai et
+  produisent `{absolue: 0, pourcentage: null}` — **jamais `Infinity`/`NaN`**. Contrôle renforcé : aucun
+  littéral `NaN`/`Infinity` dans le JSON brut **et** aucun nombre non fini après parsing (le seul contrôle
+  qui prouve quelque chose : `JSON.stringify` transforme `NaN` en `null` et masque la fuite).
+- **④ Anti-énumération** — les **trois** cas renvoient un corps **strictement identique** (`requestId`
+  exclu) : inexistant (2099), **non validé** (2022, brouillon seul), **exercice d'une autre org** (2030) →
+  **404 `EXERCICE_NON_COMPARABLE`**, jamais 403, aucun oracle.
+- **⑤ Homogénéité** : codes différents (`sfd-bceao` vs `syscohada-revise`) → **409
+  `REFERENTIELS_HETEROGENES`** ; **ordre des contrôles prouvé** — hétérogène **+** exercice inexistant →
+  **404**, jamais 409 (sinon le conflit révélerait l'existence de l'autre exercice). Versions divergentes
+  (`2.0` vs `2.1`) → **200**, `referentielHomogene: false`, les deux versions listées : **jamais bloqué**.
+- **⑥ Re-validation** : `rouvrir` + `valider` sur 2025 ⇒ snapshots `v1, v2` en base ; la comparaison
+  retient **v2** (la plus récente), prouvé par le `version` publié.
+- **⑦ Gardes** : 1 seul exercice / 6 exercices / doublons / `{"$ne":null}` en libellé / libellé de 40
+  caractères / opérateur NoSQL `exercices[$ne]` / paramètre inconnu (whitelist) → **400** ; sans jeton →
+  **401**.
+- **⑧ Déterminisme** : `?exercices=2024,2025` et `?exercices=2025,2024` ⇒ corps **strictement identiques**.
+- **⑨ ZÉRO ÉCRITURE (mesuré isolément)** : **16 appels** de comparaison (8 × 200 + 8 × 404) encadrés par un
+  relevé des **12 collections** de `bilan_service` ⇒ **écarts : AUCUN**. (Le relevé global du scénario
+  complet montrait `+1 snapshots_liasse` et `+2 audit_events`, imputables à la re-validation volontaire du
+  point ⑥ — d'où cette mesure dédiée.)
+- **⑩ Swagger** : `/api/v1/bilan/comparaison/exercices` présent dans `/api/docs-json`, **distinct** de
+  `/api/v1/bilan/previsionnel/comparaison` (STORY-071) — aucune collision de route.
+
+**Observation (hors périmètre, non bloquante)** — sur le jeu d'essai, les sous-totaux du Bilan (`AZ`…`BZ`)
+ressortent à `0` alors que les postes de détail sont valorisés : c'est le **finding F1 déjà tracé**
+(cascade `AMORCE` ne couvrant pas les postes fins du référentiel), **pas** un défaut de cette story — la
+comparaison restitue fidèlement ce que le snapshot contient. Effet secondaire utile : ce sont ces `0` qui
+ont fourni le cas réel de **dénominateur nul** du point ③.
 
 ---
 
