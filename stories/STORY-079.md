@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** high — *isolation multi-tenant fail-closed (NFR-A02) + écriture **multi-documents** (profil + audit append-only) exigeant une transaction Mongo.*
-**Statut :** in_progress
+**Statut :** done ✅ — clôturée le **2026-07-27** (PR #8 rebase-mergée sur `dev`)
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12 · **révisée le** 2026-07-27 (cadrage aligné sur le code réel de `balance-service` — cf. § Écarts de rédaction)
 **Sprint :** 15 (EXTENDED)
@@ -260,9 +260,9 @@ reste **inerte** : il appartient à STORY-080.
 | Développement | ✅ 2026-07-27 | Module `src/modules/profil-societe/` + `PaquetFiscalRegistry.paysSupportes()` |
 | Validation (lint/build/tests) | ✅ 2026-07-27 | lint 0 warning · build OK · **469 unitaires** + **86 e2e** verts · couverture module **100 / 97.14 / 100 / 100** |
 | Vérification docker (persistance + atomicité) | ✅ 2026-07-27 | stack neuve (`down -v`) — voir ci-dessous |
-| Revue de code | ⏳ | |
-| Revue de sécurité | ⏳ | |
-| Intégration `dev` | ⏳ | |
+| Revue de code | ✅ 2026-07-27 | Fan-out persistance/NestJS/tests — **aucun bloquant** ; 5 constats corrigés + 2 documentations rectifiées (voir ci-dessous) |
+| Revue de sécurité | ✅ 2026-07-27 | **0 vulnérabilité** — isolation tenant, anti-énumération, mass assignment, logs, RBAC, throttler tous verts |
+| Intégration `dev` | ✅ 2026-07-27 | **PR #8** rebase-mergée, branche supprimée |
 
 ### Vérification docker — 2026-07-27 (stack neuve, `docker compose down -v`)
 
@@ -286,6 +286,63 @@ d'écriture — l'échec est déclenché **après** que les deux écritures ont 
 
 ---
 
-**Status:** in_progress
+### Revue de code — 2026-07-27 (fan-out persistance / conventions NestJS / tests)
+
+**Aucun constat bloquant.** Les trois axes confirment que l'ossature est saine : `orgId` toujours issu du
+JWT (aucun `@Param`/`@Query` dans le module), fail-closed sur `PLATFORM_ADMIN`, verrou optimiste réellement
+atomique (`findOneAndUpdate` conditionné, pas un read-then-write), collections en `snake_case` explicite,
+index unique réel avec `E11000` mappé, transaction propageant la session à **toutes** les écritures.
+
+**Cinq constats corrigés :**
+
+| # | Constat | Pourquoi ça comptait |
+|---|---|---|
+| 1 | **L'append-only n'était qu'un JSDoc.** Le modèle étant enregistré via `forFeature`, tout futur module (purge RGPD, reprise OCR de 081) pouvait l'injecter et appeler `deleteMany` sans que rien ne rougisse | Effacer une entrée casse **silencieusement** la reconstitution « état en vigueur à la clôture N » : le profil garde sa `version`, mais l'audit qui permettait d'y revenir a disparu, et le `SnapshotLiasse` d'EPIC-012 cite un `(orgId, version)` non reconstituable. Des hooks `pre()` refusent désormais `UPDATE`/`DELETE`, **gardés par une spec dédiée** |
+| 2 | `findOneAndUpdate` **sans `runValidators`** | `min`/`enum`/bornes du schéma étaient morts sur tout le chemin `PATCH`. Sans effet via HTTP (les DTO couvrent), mais le service est `exports`é : un appelant interne (STORY-080) passait à travers |
+| 3 | **Asymétrie `actif`** : il entre dans le diff d'audit mais sortait de la projection d'état | Un profil désactivé ressortait de `reconstituerALaDate` avec `actif: undefined`, qu'un consommateur lit comme « actif ». Écrire et relire doivent porter sur le même jeu de champs |
+| 4 | `reconstituerALaDate` à une date **antérieure à la création** rendait un profil complet | La version 1 n'étant pas historisée, l'état courant était rejoué tel quel : un `SnapshotLiasse` de l'exercice N-1 aurait figé une page de garde **qui n'a jamais existé**. → 404 |
+| 5 | **Index d'audit incomplet** : `listerAudits` trie sur `(le, version)` alors que la clé s'arrêtait à `(orgId, le)` | Tri **en mémoire** (stage `SORT`) sur un dossier suivi plusieurs exercices. `version` ajoutée à la clé |
+
+**Deux documentations rectifiées plutôt que « corrigées »** — le projet interdit les affirmations qu'aucun
+mécanisme ne soutient :
+- le JSDoc du contrôleur invoquait le piège « route littérale avant route paramétrée » alors que ce
+  contrôleur n'a **aucune** route paramétrée : inverser les deux déclarations ne fait rougir aucun test
+  (vérifié). Le commentaire dit désormais que la discipline est préventive, pas qu'elle garde un risque réel ;
+- le `409` de verrou optimiste est en pratique **rare** : sous transaction réelle, deux `PATCH` concurrents
+  produisent un `WriteConflict` que le driver rejoue sur un snapshot frais, et le client reçoit un `200`.
+
+**Mutation-tests des correctifs** (rouges puis restaurés) : hook append-only rendu décoratif → **8 ✕** ;
+garde `createdAt > date` retirée → **1 ✕** ; `actif` retiré de la projection → **1 ✕** ; `runValidators`
+retiré → **1 ✕** (le test assère l'objet d'options exact).
+
+### Vérification docker **rejouée après les correctifs** — 2026-07-27
+
+Les correctifs touchent la persistance (index, hooks de schéma, `runValidators`) : la vérification d'avant
+ne vaut plus, elle est donc **refaite en entier** sur le code final. Aucun résultat n'est reporté.
+
+| Invariant | Preuve mesurée |
+|---|---|
+| Nouvel index créé | `profils_societe_audit` → `{"orgId":1,"le":-1,"version":-1}` ✅ (l'ancien `{orgId,le}` subsiste sur le volume de dev, sans effet — une stack neuve ne crée que le nouveau) |
+| `PATCH` 2 champs sous `runValidators` | `version 1 → 2`, 2 entrées d'audit portant **le même horodatage** (`14:37:40.546Z`) ⇒ une seule unité d'écriture |
+| Aucun orphelin | `audit sans profil = 0` |
+| `actif` historisé | `PATCH { actif: false }` → `version 3`, audit `true → false (v3)` — la symétrie corrigée porte sur un champ réellement audité |
+| Isolation multi-tenant | org B lit `GET /profil-societe` → **404 `PROFIL_SOCIETE_INTROUVABLE`**, jamais le profil de l'org A |
+
+⚠️ La porte append-only agit à la couche **Mongoose** : elle arrête le code applicatif, pas un `deleteMany`
+lancé directement en `mongosh`. C'est le bon niveau (la menace est une future story qui injecterait le
+modèle), mais il ne faut pas la lire comme une protection base de données.
+
+### Revue de sécurité — 2026-07-27 : **0 vulnérabilité**
+
+Isolation multi-tenant (aucun canal d'entrée pour un `orgId` client — pas un seul `@Param`/`@Query` dans le
+module), anti-énumération (profil inexistant et profil d'une autre org indiscernables, `E11000` mappé sur le
+même 409 générique), mass assignment (`whitelist` + `forbidNonWhitelisted` actifs, **plus** une allowlist de
+reconstruction qui n'itère jamais sur les clés client ⇒ ni opérateur Mongo ni `__proto__` ne peut atteindre
+le `$set`), divulgation (mapping explicite, aucune stacktrace, **aucun NIF/CNSS/nom journalisé**), RBAC et
+throttler effectifs sur les 4 routes.
+
+---
+
+**Status:** done
 **Dependencies:** STORY-076 (scaffold), STORY-077 (gate `@RequiresBalanceAccess` + read-models **KYC/entitlement** — *pas* d'identité), **STORY-078** (`PaquetFiscalRegistry`, dont dérive la liste des pays supportés) · **alimente** STORY-080 (régime), STORY-078 (résolution `pays`), STORY-081 (pré-remplissage OCR), `bilan-service` EPIC-011 (page de garde DSF)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A01 · GUIDEF Togo (fiches d'identification)
