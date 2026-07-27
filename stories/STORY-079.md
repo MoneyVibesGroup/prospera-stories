@@ -4,9 +4,10 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A01 · `rapport-bilan-logique-metier-2026-07-12.md` §12 (fiches d'identification de la GUIDEF) · GUIDEF Togo (`1000745307_2025_Definitif.xlsx`, feuilles « Page de garde » / « Identification » / « Dirigeants »)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
-**Créée le :** 2026-07-12
+**Complexité :** high — *isolation multi-tenant fail-closed (NFR-A02) + écriture **multi-documents** (profil + audit append-only) exigeant une transaction Mongo.*
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
+**Créée le :** 2026-07-12 · **révisée le** 2026-07-27 (cadrage aligné sur le code réel de `balance-service` — cf. § Écarts de rédaction)
 **Sprint :** 15 (EXTENDED)
 **Service :** `balance-service` (:3007)
 **Couvre :** FR-A01 (profil société)
@@ -55,7 +56,7 @@ Le profil est donc **une donnée de calcul**, pas seulement de l'état civil. Il
   - Pas de `DELETE` dur (un profil se **désactive**, il ne s'efface pas — piste d'audit NFR-A07).
 - **Validation** (DTO stricte, `ValidationPipe`) :
   - `nif`, `rccm` : format **paramétrable par pays** (le format togolais ≠ ivoirien) → règle lue depuis le **paquet pays** (STORY-078) ou, à défaut, validation de longueur/charset + **avertissement non bloquant**.
-  - `pays` ∈ pays supportés (paquet fiscal disponible) ; sinon **400** explicite.
+  - `pays` ∈ pays supportés (paquet fiscal disponible) ; sinon **400** explicite. ⚠️ Le manifeste de STORY-078 est keyé `togo@2026` (nom en minuscules), pas ISO-2 : la correspondance passe par le champ **`paysSource`** (`TG`) déjà porté par chaque entrée. Ajout minimal `PaquetFiscalRegistry.paysSupportes(): string[]` (codes ISO-2 distincts, dérivés du manifeste) — **lecture seule, aucun taux, aucune ligne de code par pays** (NFR-A06).
   - Somme des `pourcentage` des actionnaires ≈ **100 %** (tolérance 0,01) → sinon **avertissement** (pas bloquant : un profil peut être incomplet en cours de saisie).
   - `capitalSocial ≥ 0`, `dateCreation` passée.
 - **Complétude** : `GET /api/v1/profil-societe/completude` → `{ complet: bool, champsManquants: string[] }` — indique ce qui **bloque** la production de la DSF (ex. NIF absent) vs ce qui est **optionnel**.
@@ -68,6 +69,8 @@ Le profil est donc **une donnée de calcul**, pas seulement de l'état civil. Il
 - **Détermination du régime** (2 axes SN/SMT × réel/TPU) → **STORY-080** (consomme `pays`, `objetSocial`, CA).
 - **Rendu des fiches d'identification dans la liasse** → `bilan-service` (EPIC-011), qui **lira** ce profil.
 - **Gestion des utilisateurs/rôles de l'org** → `auth-service` (déjà livré).
+- **Branchement du `pays` du profil sur `ReferentielResolver.resoudrePaquetFiscal()`** → **STORY-080**. Le hook est déjà posé et documenté par STORY-078 (le pays vient encore de `PAQUET_FISCAL_PAR_DEFAUT`). **079 ne touche pas ce corps** : elle produit la donnée, 080 la consomme. Y toucher ici serait un débordement de périmètre.
+- **Publication d'un événement Kafka** (`profil.societe.*`) : aucun consommateur n'existe. Pas d'outbox dans cette story.
 
 ### Flux
 
@@ -86,10 +89,10 @@ Le profil est donc **une donnée de calcul**, pas seulement de l'état civil. Il
 - [ ] **Modèle `ProfilSociete`** persisté (collection `profils_societe`), **clé unique `orgId`**, avec tous les champs GUIDEF listés (identification, activité, capital/actionnaires, contacts/dirigeants).
 - [ ] **CRUD** protégé par `@RequiresBalanceAccess` : `POST` **201** (409 si doublon), `GET` **200**, `PATCH` **200**. **Pas de suppression dure.**
 - [ ] **Isolation multi-tenant stricte (NFR-A02)** : l'`orgId` provient **du JWT**, **jamais** d'un paramètre client → un utilisateur de l'org A ne peut **pas** lire/modifier le profil de l'org B (test e2e dédié : **404/403**, pas de fuite).
-- [ ] **Validations** : `pays` supporté (sinon **400** explicite) ; `capitalSocial ≥ 0` ; `dateCreation` passée ; somme des parts actionnaires ≈ 100 % (**avertissement**, non bloquant) ; formats NIF/RCCM **paramétrés par pays** (avertissement si non conforme).
+- [ ] **Validations** : `pays` supporté (sinon **400** explicite) ; `capitalSocial ≥ 0` ; `dateCreation` passée ; somme des parts actionnaires ≈ 100 % (**avertissement**, non bloquant) ; formats NIF/RCCM **paramétrés par pays** (**avertissement non bloquant** si non conforme — jamais un rejet).
 - [ ] **`GET /completude`** retourne `{ complet, champsManquants[] }` en distinguant les champs **bloquants** pour la DSF des champs optionnels.
-- [ ] **Historisation** : chaque `PATCH` écrit une entrée d'audit **append-only** (`qui/quand/champ/avant/après`) ; le profil « en vigueur » à une date est reconstituable.
-- [ ] **Aucun champ d'identité dupliqué** depuis `auth-service` (pas de `name`/`status` de l'`Organization` recopiés — seul l'`orgId` est référencé).
+- [ ] **Historisation** : chaque `PATCH` écrit une entrée d'audit **append-only** (`qui/quand/champ/avant/après`) **et incrémente `version`**, dans la **même transaction** que la mise à jour du profil ; le profil « en vigueur » à une date est reconstituable.
+- [ ] **Aucun statut de compte dupliqué** depuis `auth-service` : le `status` de l'`Organization` n'est **jamais** recopié, seul l'`orgId` est référencé. `raisonSociale` **n'est pas** un doublon du `name` de compte — c'est la **dénomination légale déclarée à la DSF**, possédée par `balance-service`, ni synchronisée ni écrasée depuis `identity.*`.
 - [ ] **Tests** : CRUD, 409 doublon, isolation org (e2e), validations, complétude, historisation. **Coverage ≥ 90 %.**
 - [ ] **Swagger** documenté (201/200/400/403/409) ; **CI verte**.
 
@@ -101,7 +104,8 @@ Le profil est donc **une donnée de calcul**, pas seulement de l'état civil. Il
 
 ```typescript
 export interface ProfilSociete {
-  orgId: string;                     // clé unique — vient du JWT, jamais du client
+  orgId: Types.ObjectId;             // clé unique — vient du JWT, jamais du client
+                                     // (ObjectId, comme `Balance.orgId` — cohérence de service)
 
   // Identification (GUIDEF — page de garde)
   raisonSociale: string;
@@ -139,12 +143,24 @@ export interface ProfilSociete {
   regimeFiscal?: 'REEL' | 'SYNTHETIQUE';
 
   actif: boolean;                    // désactivation, pas de suppression dure
+  version: number;                   // monotone, incrémenté À CHAQUE PATCH dans la transaction
+                                     // d'audit. `updatedAt` ne suffit pas : il ne donne pas de
+                                     // discriminant d'ordre citable. C'est ce champ que le
+                                     // `SnapshotLiasse` de bilan-service (EPIC-012) devra citer
+                                     // pour figer « le profil en vigueur à la clôture N », et
+                                     // qui fera de l'événement futur un état absolu versionné.
+                                     // Un champ aujourd'hui = une migration évitée demain.
   createdAt: Date;
   updatedAt: Date;
 }
 
 db.profils_societe.createIndex({ orgId: 1 }, { unique: true });
 ```
+
+> **Une organisation = une société.** L'unicité `orgId` en fait une **porte à sens unique**, assumée : elle
+> est cohérente avec tout l'existant du service (`balances` est unique sur `(orgId, exercice, source,
+> version)` — aucune notion de « dossier »). Un cabinet qui gère 20 clients aura **20 organisations**.
+> La prose « dossier client » de cette story désigne donc l'org du JWT, **pas** un sous-agrégat à inventer.
 
 ### Isolation — le piège à éviter
 
@@ -153,19 +169,26 @@ db.profils_societe.createIndex({ orgId: 1 }, { unique: true });
 @Get('/profil-societe/:orgId')
 async get(@Param('orgId') orgId: string) { /* data leak */ }
 
-// ✅ TOUJOURS : l'orgId vient du JWT validé (TenantContext)
+// ✅ TOUJOURS : l'orgId vient du JWT validé.
+// ⚠️ `@TenantContext()` (décorateur de paramètre) N'EXISTE PAS dans balance-service :
+// `TenantContext` y est un *service* injectable (cls). Le décorateur réellement
+// disponible est `@CurrentUser` — même patron que `BalanceController`.
 @Get('/profil-societe')
+@Roles(Role.TENANT_ADMIN, Role.TENANT_USER)
 @RequiresBalanceAccess()
-async get(@TenantContext() orgId: string) {
-  return this.profilService.getByOrg(orgId);
+async get(@CurrentUser() user: AuthenticatedUser) {
+  return this.profilService.getByOrg(user.tenantId);  // `tenantId` null ⇒ refus fail-closed
 }
 ```
 
-### Historisation (append-only)
+`tenantId` est **`null` pour un `PLATFORM_ADMIN`** : le service doit refuser explicitement
+(pas de `findOne({ orgId: null })` qui renverrait un document au hasard). Fail-closed.
+
+### Historisation (append-only) — écriture **multi-documents** ⇒ transaction
 
 ```typescript
 interface ProfilSocieteAudit {
-  orgId: string;
+  orgId: Types.ObjectId;
   champ: string;          // 'capitalSocial'
   avant: unknown;
   apres: unknown;
@@ -175,6 +198,12 @@ interface ProfilSocieteAudit {
 // Jamais d'UPDATE/DELETE sur cette collection (NFR-A07).
 ```
 
+Un `PATCH` écrit **≥ 2 documents** (le profil + 1..n entrées d'audit) : c'est exactement le
+cas que `.agents/rules/transactions-mongo.md` couvre → `session.withTransaction`, ObjectId
+pré-générés, abort gardé. Un profil modifié **sans** son audit (ou l'inverse) casserait la
+reconstitution « état en vigueur à la clôture N » — l'invariant même de l'AC d'historisation.
+**À prouver en vérif docker**, pas au mock e2e.
+
 ---
 
 ## Risques & Mitigation
@@ -182,7 +211,7 @@ interface ProfilSocieteAudit {
 | Risque | Mitigation |
 |---|---|
 | **Fuite inter-org** (orgId pris du client) | `orgId` **toujours** issu du JWT/`TenantContext` ; test e2e d'isolation obligatoire |
-| Duplication de l'identité `auth-service` | Ne stocker **que** le profil fiscal métier ; référencer l'`orgId` ; nom/statut lus du read-model (STORY-077) |
+| Duplication de l'identité `auth-service` | Ne stocker **que** le profil fiscal métier ; référencer l'`orgId`. ⚠️ **Il n'existe aucun read-model d'identité dans `balance-service`** (STORY-077 n'a projeté que KYC + entitlement) : ne **pas** en inventer un ici, et surtout ne **pas** combler par un appel REST à l'IdP (invariant 3). `raisonSociale` est une donnée propre, pas une réplication |
 | Formats NIF/RCCM variables par pays | Règle **paramétrée** (paquet pays) ; à défaut, **avertissement** non bloquant plutôt qu'un rejet arbitraire |
 | Profil incomplet bloque tout | `GET /completude` distingue **bloquant** (NIF) et **optionnel** ; la saisie reste progressive |
 | Profil modifié après clôture → DSF N incohérente | **Historisation append-only** : l'état « en vigueur à la clôture » est reconstituable |
@@ -196,12 +225,47 @@ interface ProfilSocieteAudit {
 - [ ] Isolation multi-tenant prouvée par **e2e** (org A ≠ org B)
 - [ ] Validations (pays supporté, capital, dates, parts ≈ 100 %, formats NIF/RCCM par pays)
 - [ ] `GET /completude` (bloquant vs optionnel)
-- [ ] Historisation append-only + test de reconstitution
+- [ ] Historisation append-only + `version` monotone + test de reconstitution
+- [ ] **Écriture profil + audit atomique** (transaction Mongo) — **prouvée en vérif docker**, pas au mock
+- [ ] Aucun `status` d'`Organization` recopié ; aucun appel réseau à `auth-service` (grep de non-régression)
 - [ ] Coverage ≥ 90 % ; Swagger ; CI verte
 - [ ] Non-régression : CORE S10 e2e verts
 
 ---
 
-**Status:** ready-for-dev
-**Dependencies:** STORY-076 (scaffold), STORY-077 (gate + read-model identité) · **alimente** STORY-080 (régime), STORY-078 (résolution `pays`), STORY-081 (pré-remplissage OCR), `bilan-service` EPIC-011 (page de garde DSF)
+## Écarts de rédaction (révision 2026-07-27)
+
+Le cadrage du 2026-07-12 précédait la livraison de STORY-077/078. Quatre points recalés sur le code réel,
+**sans changer le périmètre** :
+
+| Rédaction initiale | Code réel | Décision |
+|---|---|---|
+| `@TenantContext() orgId: string` | `TenantContext` est un **service** cls ; le décorateur de paramètre est `@CurrentUser` | Snippet corrigé ; `tenantId` `null` (PLATFORM_ADMIN) ⇒ refus fail-closed explicite |
+| `orgId: string` | `Balance.orgId` est un `Types.ObjectId` | `ObjectId`, par cohérence de service |
+| « `pays` ∈ pays supportés » | Le manifeste est keyé `togo@2026`, pas ISO-2 ; le code ISO vit dans `paysSource` | Ajout `PaquetFiscalRegistry.paysSupportes()` (lecture seule) |
+| Historisation présentée comme un simple `insert` | `PATCH` = profil + audit = **2 documents** | Transaction Mongo explicitée + portée en DoD et en vérif docker |
+| « nom/statut lus du read-model (STORY-077) » | **Aucun read-model d'identité n'existe** dans `balance-service` : 077 n'a projeté que KYC + entitlement | AC reformulé — `raisonSociale` est une **donnée propre** (dénomination DSF), pas une réplication. Interdit maintenu : recopier le `status` d'`Organization`, ou combler par un appel REST à l'IdP |
+| Aucun discriminant d'ordre | `updatedAt` seul ne se cite pas | Champ **`version`** monotone ajouté — requis par le `SnapshotLiasse` de `bilan-service` (EPIC-012) |
+
+Le hook `ReferentielResolver.resoudrePaquetFiscal()` (pays encore lu de `PAQUET_FISCAL_PAR_DEFAUT`)
+reste **inerte** : il appartient à STORY-080.
+
+---
+
+## Progress Tracking
+
+| Phase | Statut | Note |
+|---|---|---|
+| Cadrage (révision) | ✅ 2026-07-27 | Branche `MNV-079` sur `docs/` ; 4 écarts recalés ; `Complexité : high` |
+| Développement | ⏳ | branche `MNV-079` sur `balance-service` |
+| Validation (lint/build/tests) | ⏳ | |
+| Vérification docker (persistance + atomicité) | ⏳ | |
+| Revue de code | ⏳ | |
+| Revue de sécurité | ⏳ | |
+| Intégration `dev` | ⏳ | |
+
+---
+
+**Status:** in_progress
+**Dependencies:** STORY-076 (scaffold), STORY-077 (gate `@RequiresBalanceAccess` + read-models **KYC/entitlement** — *pas* d'identité), **STORY-078** (`PaquetFiscalRegistry`, dont dérive la liste des pays supportés) · **alimente** STORY-080 (régime), STORY-078 (résolution `pays`), STORY-081 (pré-remplissage OCR), `bilan-service` EPIC-011 (page de garde DSF)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A01 · GUIDEF Togo (fiches d'identification)
