@@ -257,12 +257,32 @@ reste **inerte** : il appartient à STORY-080.
 | Phase | Statut | Note |
 |---|---|---|
 | Cadrage (révision) | ✅ 2026-07-27 | Branche `MNV-079` sur `docs/` ; 4 écarts recalés ; `Complexité : high` |
-| Développement | ⏳ | branche `MNV-079` sur `balance-service` |
-| Validation (lint/build/tests) | ⏳ | |
-| Vérification docker (persistance + atomicité) | ⏳ | |
+| Développement | ✅ 2026-07-27 | Module `src/modules/profil-societe/` + `PaquetFiscalRegistry.paysSupportes()` |
+| Validation (lint/build/tests) | ✅ 2026-07-27 | lint 0 warning · build OK · **469 unitaires** + **86 e2e** verts · couverture module **100 / 97.14 / 100 / 100** |
+| Vérification docker (persistance + atomicité) | ✅ 2026-07-27 | stack neuve (`down -v`) — voir ci-dessous |
 | Revue de code | ⏳ | |
 | Revue de sécurité | ⏳ | |
 | Intégration `dev` | ⏳ | |
+
+### Vérification docker — 2026-07-27 (stack neuve, `docker compose down -v`)
+
+Deux organisations réelles créées via l'IdP (`register` + `login`, jetons RS256 distincts), read-models
+`orgkycstatuses`/`orgbalanceentitlements` semés pour ouvrir la gate. Requêtes `mongosh` directes sur
+`balance_service`.
+
+| Invariant | Preuve mesurée |
+|---|---|
+| Persistance réelle | `db.profils_societe.findOne()` → document complet ; collections `profils_societe` + `profils_societe_audit` bien en **snake_case** |
+| Index unique `orgId` | `getIndexes()` → `{"k":{"orgId":1},"u":true}` |
+| 409 sur doublon | 2ᵉ `POST` org A → **409** |
+| **Isolation multi-tenant** | org B lit `GET /profil-societe` → **404** (`PROFIL_SOCIETE_INTROUVABLE`), **jamais** le profil de l'org A. Aucun `orgId` client accepté |
+| `pays` non supporté | `pays: "FR"` → **400** `PAYS_NON_SUPPORTE` (« supportés : TG ») — dérivé de `paysSource`, pas codé en dur |
+| Avertissements non bloquants | parts 70+20 = 90 % + NIF/RCCM hors format → **201** avec 3 avertissements, aucun rejet |
+| Historisation + `version` | `PATCH` de 2 champs → `version 1→2`, **2** entrées d'audit (`champ/avant/après/parUserId/le`), valeurs exactes |
+| **Atomicité (mutation-test)** | `throw` injecté **dans** la transaction, **après** l'écriture du profil ET l'insert des audits → `500` générique, puis en base : `version` **reste 2**, capital **inchangé**, `numeroCnss` **vide**, **0 audit orphelin**. Mutation retirée, `git diff` vide, `PATCH` suivant → `version 3` + 3ᵉ audit ✅ |
+
+Le rollback porte sur les **deux** collections : c'est la transaction qui le produit, pas un hasard d'ordre
+d'écriture — l'échec est déclenché **après** que les deux écritures ont eu lieu.
 
 ---
 
