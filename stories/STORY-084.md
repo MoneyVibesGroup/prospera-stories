@@ -4,8 +4,9 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A10, NFR-A05 · `tech-spec-document-service-*.md` (OcrProvider) · `deferred_foundations` du tracker (« document-service : extensions factures fournisseurs » — **activée ici**) · D4 (OCR dès la v1)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 16 (EXTENDED)
 **Service :** `balance-service` (:3007) + `document-service` (:3006)
@@ -47,7 +48,7 @@ L'observation du terrain (balance Sage réelle, ETS RELAXED) a confirmé la pré
   - Extracteurs dédiés → `DocumentExtraction` avec, **par champ** : `valeur`, `confiance` (0-1), `zone` (bbox), `brut`.
   - **Facture** : extraction **HT / TVA / TTC** + `nifEmetteur` (permet de distinguer une **facture normalisée** — niveau de preuve supérieur).
   - **Capture** : extraction date / montant / **sens** (crédit = entrée, débit = sortie) / tiers / référence.
-  - Émet **`document.extrait`** (topic existant, EPIC-015) avec `type` + `orgId`. **Aucune connaissance du métier balance.**
+  - Émet **`document.piece.extrait`** (topic **dédié**, voir **D-084-1**) avec `type` + `orgId`. **Aucune connaissance du métier balance.**
 - **`balance-service` (consommation)** :
   - `POST /api/v1/pieces/ocr` (`@RequiresBalanceAccess`) — dépôt **multi-fichiers** (`multipart/form-data`, jusqu'à N pièces) + `destination: 'RECETTES' | 'DEPENSES'` → **202 Accepted** `{ lotId, nbPieces }` (asynchrone).
   - **Consumer `document.extrait`** (groupe `balance-service-pieces`, **idempotent** via `ProcessedEvent` — patron STORY-077) → crée des **`LignePreProposee`** (brouillon, **jamais** une ligne de cahier).
@@ -86,7 +87,7 @@ L'observation du terrain (balance Sage réelle, ETS RELAXED) a confirmé la pré
 
 ## Acceptance Criteria
 
-- [ ] **`document-service`** supporte **`CAPTURE_TRANSACTION`** et **`FACTURE`**, et émet **`document.extrait`** avec `valeur`/`confiance`/`zone`/`brut` par champ ; la **facture** expose **HT/TVA/TTC** + `nifEmetteur`.
+- [ ] **`document-service`** supporte **`CAPTURE_TRANSACTION`** et **`FACTURE`**, et émet **`document.piece.extrait`** (D-084-1) avec `valeur`/`confiance`/`zone`/`brut` par champ ; la **facture** expose **HT/TVA/TTC** + `nifEmetteur`.
 - [ ] **`POST /api/v1/pieces/ocr`** (gate) : dépôt **multi-pièces** + `destination` (RECETTES|DEPENSES) → **202** `{ lotId, nbPieces }`.
 - [ ] **Consumer `document.extrait`** **idempotent** (même `eventId` rejoué → aucune ligne dupliquée) et transactionnel.
 - [ ] **Aucune ligne de cahier créée automatiquement** : l'OCR produit des **`LignePreProposee`** ; seul **`POST /:lotId/appliquer`** (action humaine) crée les `LigneRecette`/`LigneDepense` (**NFR-A05 / D4**).
@@ -173,6 +174,90 @@ async appliquer(@TenantContext() orgId, @Param('lotId') lotId, @Body() dto: Appl
 
 ---
 
+## Décisions de conception (D-084-1..10)
+
+### D-084-1 — Topic **dédié** `document.piece.extrait`, et non `document.extrait`
+
+Le périmètre initial disait « émet `document.extrait` (topic existant, EPIC-015) ». **Écart assumé.**
+`document.extrait` est le contrat **KYC** (STORY-043) : son `type` est un `KycDocumentType {RCCM, CFE}`,
+et son payload porte `declared`/`discrepancies`/`flags` — la comparaison déclaré ↔ lu du dossier de revue
+KYC. Y verser des `FACTURE`/`CAPTURE_TRANSACTION` casserait la compatibilité **BACKWARD** pour
+`kyc-service`, qui consomme ce topic et n'a rien à faire d'un reçu TMoney.
+
+C'est exactement le raisonnement de **D1 de STORY-081** (`document.profil.extrait`) : **compatibilité par
+isolation**. Troisième chemin, troisième topic. Le contrat `PieceDocumentExtraitEventV1` est **dupliqué
+byte-identique** dans les deux dépôts (décision K4, pas de lib partagée en phase 1).
+
+### D-084-2 — `document-service` : module `piece-extraction`, parallèle à `profil-extraction`
+
+Nouvel enum `PieceDocumentType {CAPTURE_TRANSACTION, FACTURE}` (le KYC et le profil gardent les leurs),
+bucket MinIO **`piece-documents`**, file BullMQ **`piece-ocr`**, deux parseurs (`CaptureTransactionParser`,
+`FactureParser`) sous un registre par type. Les helpers de *parsing* OCR (`extraireChamp`, `provenance`,
+`normaliserTexte`) sont **génériques** — aucune sémantique profil : ils sont **réutilisés**, pas dupliqués.
+
+Le client MinIO d'écriture reste **séparé du client KYC** (garde-fou #3 : `kyc-documents` demeure en lecture
+seule) ; `MINIO_PIECE_BUCKET` est **optionnel** (défaut `piece-documents`, bucket créé au boot) — c'est un
+nom de bucket que le service possède, pas une configuration que l'exploitant doit fournir.
+
+### D-084-3 — `balance-service` : module `cahiers/pieces-ocr`
+
+Deux collections en `snake_case` explicite : **`lots_pieces_ocr`** (le lot : `lotId`, `destination`,
+`nbPieces`, statut) et **`lignes_pre_proposees`** (le brouillon, clé unique `{orgId, lotId, pieceId}` —
+l'index unique **est** le filet d'idempotence, pas seulement le marqueur `ProcessedEvent`).
+
+### D-084-4 — L'application **réutilise** les services de cahier, elle ne réécrit rien
+
+`POST /:lotId/appliquer` ne parle jamais aux collections `lignes_recettes`/`lignes_depenses` : il construit
+des entrées et appelle `CahiersRecettesService`/`CahiersDepensesService`. Toutes les règles de 082/083
+s'appliquent donc telles quelles — compte de classe 6/7 validé, **déductibilité proposée avant la
+ventilation TVA** (le piège de 083), exercice figé par une balance validée ⇒ **409**, taux et codes issus du
+paquet fiscal. Réécrire ce chemin dans le module OCR aurait fabriqué un **second jeu de règles fiscales**,
+divergent au premier correctif.
+
+Les services de cahier reçoivent pour cela une **origine** et une **trace OCR** : `origine: 'OCR'` (au lieu
+du `MANUELLE` codé en dur) et un sous-document `auditOcr`.
+
+### D-084-5 — L'exercice est porté par la requête d'application, pas deviné
+
+Une `LigneRecette`/`LigneDepense` **exige** son exercice (bornes), et l'OCR ne peut pas l'inventer : le corps
+d'`appliquer` porte `exercice: { debut, fin }`, comme les DTO de lot de 082/083. Une date hors exercice est
+**rejetée ligne à ligne** (règle existante `DateHorsExerciceException`), jamais rangée d'office.
+
+### D-084-6 — Date illisible : rejet **de la ligne**, explicite et rapporté
+
+L'AC dit « application bloquée **pour cette ligne** ». La réponse d'`appliquer` reprend donc la forme des
+lots de 082/083 — `{ creees, rejetees[{ pieceId, code, motif }], soumises }` — et une ligne `dateManquante`
+sans date saisie ressort en `DATE_REQUISE`. **Jamais de rejet silencieux**, et un lot de 60 pièces n'est pas
+renvoyé en bloc parce qu'une seule date manque. Aucun mois par défaut n'est jamais dérivé.
+
+### D-084-7 — Doublon : deux détections, **jamais** bloquantes
+
+`checksum` **sha256 du fichier** (calculé côté `balance-service` à l'upload, avant le proxy) — la même pièce
+redéposée est reconnue **même si l'OCR relit autrement** — **et** heuristique `(date, montant, tiers)` contre
+les lignes **déjà au cahier**. Résultat : `doublonProbable` + avertissement, ligne **non pré-cochée**.
+Jamais un refus : deux achats identiques le même jour chez le même fournisseur sont un cas normal
+(c'est déjà pourquoi 082/083 n'ont **aucun** index unique sur les lignes).
+
+### D-084-8 — Tolérance TVA : **1 XOF = 100 unités mineures**
+
+Tous les montants des cahiers sont en **unités mineures XOF** (D-082-1). La « tolérance 1 XOF » du
+périmètre vaut donc **100** en unités mineures. L'écart `HT + TVA ≠ TTC` produit un **avertissement**
+(`TVA_INCOHERENTE`) ; jamais un recalcul.
+
+### D-084-9 — `niveauPreuve` : `fichier` seulement sur **facture normalisée**
+
+`FACTURE` **avec** un `nifEmetteur` reconnu ⇒ `fichier` (niveau de preuve le plus fort, FR-A27) ; tout le
+reste (capture, facture sans NIF) ⇒ `ocr`. Le rang est déjà posé par `RANG_NIVEAU_PREUVE` (D-083-1) :
+`estimé < ocr < saisie < fichier`.
+
+### D-084-10 — Le consumer ne crée **jamais** de ligne de cahier
+
+Projection idempotente (patron STORY-077 : `ProcessedEvent` inséré **en premier** dans la transaction,
+E11000 ⇒ `abort` + skip). Elle n'écrit que `lignes_pre_proposees`. Cette frontière est l'objet même de la
+story (D4/NFR-A05) : elle est **testée par mutation** — retirer la garde doit faire virer un test au rouge.
+
+---
+
 ## Risques & Mitigation
 
 | Risque | Mitigation |
@@ -203,6 +288,21 @@ async appliquer(@TenantContext() orgId, @Param('lotId') lotId, @Body() dto: Appl
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+| Étape | État | Date |
+|---|---|---|
+| Conception arrêtée (D-084-1..10) | ✅ | 2026-07-28 |
+| Implémentation `document-service` (module `piece-extraction`) | ⏳ | — |
+| Implémentation `balance-service` (module `cahiers/pieces-ocr`) | ⏳ | — |
+| Portes DoD (lint / build / couverture / unit / e2e) | ⏳ | — |
+| Vérification docker (persistance réelle) | ⏳ | — |
+| Revue de code | ⏳ | — |
+| Revue de sécurité | ⏳ | — |
+| Merge sur `dev` (2 dépôts) | ⏳ | — |
+
+---
+
+**Status:** in_progress
 **Dependencies:** STORY-082 (cahier recettes), STORY-083 (cahier dépenses) — cibles de l'application · STORY-077 (patron consumer idempotent) · **`document-service`** STORY-041→044 (OcrProvider) · **question ouverte** : fournisseur OCR (PRD §13)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A10, NFR-A05 · D4 (OCR dès la v1) · `deferred_foundations` (extensions document-service) — **activée par cette story**
