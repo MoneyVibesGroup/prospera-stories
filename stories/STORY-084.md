@@ -5,9 +5,10 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
+**Clôturée le :** 2026-07-28
 **Sprint :** 16 (EXTENDED)
 **Service :** `balance-service` (:3007) + `document-service` (:3006)
 **Couvre :** FR-A10 (OCR des pièces : captures & factures)
@@ -297,9 +298,9 @@ story (D4/NFR-A05) : elle est **testée par mutation** — retirer la garde doit
 | Implémentation `balance-service` (module `cahiers/pieces-ocr`) | ✅ | 2026-07-28 |
 | Portes DoD (lint / build / couverture / unit / e2e) | ✅ | 2026-07-28 |
 | Vérification docker (persistance réelle) | ✅ | 2026-07-28 |
-| Revue de code | ⏳ | — |
-| Revue de sécurité | ⏳ | — |
-| Merge sur `dev` (2 dépôts) | ⏳ | — |
+| Revue de code | ✅ | 2026-07-28 |
+| Revue de sécurité | ✅ | 2026-07-28 |
+| Merge sur `dev` (2 dépôts) | ✅ | 2026-07-28 |
 
 ### Portes DoD
 
@@ -355,8 +356,54 @@ la **persistance, l'atomicité, l'idempotence, l'isolation et les liens entre co
 d'extraction des champs** (TMoney, HT/TVA/TTC, NIF) est couverte par les tests unitaires des parseurs, pas
 par cette vérification.
 
+### Revue de code — un constat bloquant, corrigé avant le merge
+
+**La trace d'audit nommait la mauvaise pièce dès qu'une ligne était rejetée.** Le service de cahier
+**retire** les lignes refusées avant d'insérer : sur `[A, B]` dont A est refusée, il rend `[ligneB]`.
+L'appariement par index attribuait donc `ligneB` à la pièce **A** — la piste d'audit (NFR-A07) désignait la
+mauvaise pièce, et la détection de doublon, qui lit `ligneCreeeId`, aurait ensuite écarté la **mauvaise
+facture**. Les positions retenues se reconstruisent désormais depuis les positions rejetées, seule
+information que le cahier rend. **Vérification docker rejouée sur l'état final** : première pièce refusée
+hors exercice, seconde créée — la trace nomme bien la seconde, la refusée reste sans lien.
+
+Constat de robustesse traité au passage : un dépôt **concurrent** de la même pièce partait en **500** (la
+pré-lecture ne protège pas de deux requêtes qui se recouvrent, le second `create` butant sur l'index
+unique) ; l'extraction gagnante est désormais relue et renvoyée — le dépôt reste idempotent de bout en bout.
+
+Décision explicitée sans changement de comportement : la **ventilation TVA lue** sur une facture n'est
+jamais reportée d'office sur la ligne de cahier — elle entrerait dans une déclaration sans qu'aucun humain
+ne l'ait regardée. Elle est rendue au comptable (avec son drapeau `incoherent`), qui la soumet s'il la valide.
+
+### Revue de sécurité — deux vulnérabilités, corrigées avant le merge
+
+1. **`document-service` — le `correlationId` du client devenait un segment de la clé MinIO** (CWE-22,
+   A01:2021). La clé vaut `<orgId>/<correlationId>/<uuid>` et le champ n'avait **aucune contrainte de
+   charset** : un `..` faisait écrire l'objet **hors du préfixe de l'organisation appelante**, et le
+   cloisonnement du bucket ne tenait plus que par la bonne volonté du client. L'endpoint étant
+   **directement joignable** (il n'est pas réservé à `balance-service`), la contrainte devait vivre là et
+   pas chez l'appelant. `correlationId` et `pieceId` sont désormais des identifiants opaques.
+2. **`balance-service` — dépôt multipart non borné** (CWE-770, A05:2021). `FileFieldsInterceptor` était
+   déclaré sans `limits` : multer **bufferise en mémoire** avant tout code applicatif, soit 200 fichiers de
+   taille arbitraire par requête. Le throttler n'y pouvait rien (le coût est **par requête**) et le plafond
+   de `document-service` non plus (la mémoire est consommée **avant** le proxy). Plafond posé à 10 Mo par
+   fichier et 200 fichiers — refus **avant** allocation.
+
+Comptes rendus publiés sur les deux PR. Points vérifiés et sains : isolation multi-tenant (404 générique,
+prouvé en base), impossibilité de s'attribuer `origine`/`niveauPreuve`/`exercice` par le corps de requête,
+absence d'injection NoSQL, absence de SSRF (URL de configuration, `maxRedirects: 0`), intégrité comptable
+(la projection n'écrit aucune ligne de cahier).
+
+### Intégration
+
+| Dépôt | PR | État |
+|---|---|---|
+| `prospera-ocr-service` | [#7](https://github.com/MoneyVibesGroup/prospera-ocr-service/pull/7) | mergée en **rebase** sur `dev`, branche supprimée |
+| `prospera-balance-service` | [#14](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/14) | mergée en **rebase** sur `dev`, branche supprimée |
+
+Contrat d'événement = 2 dépôts : les deux PR ont été ouvertes et intégrées **ensemble**.
+
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** STORY-082 (cahier recettes), STORY-083 (cahier dépenses) — cibles de l'application · STORY-077 (patron consumer idempotent) · **`document-service`** STORY-041→044 (OcrProvider) · **question ouverte** : fournisseur OCR (PRD §13)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A10, NFR-A05 · D4 (OCR dès la v1) · `deferred_foundations` (extensions document-service) — **activée par cette story**
