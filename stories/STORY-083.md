@@ -423,15 +423,28 @@ Stack **neuve** (`docker compose down -v`), puis `mongo`/`kafka`/`redis`/`auth-s
     identifiant inexistant (anti-énumération) ; rattacher une ligne à une **catégorie de A** ⇒ **404
     `CATEGORIE_INTROUVABLE`** ; les 8 lignes de A intactes, **aucun** document sans `orgId`.
 
-**Observation hors périmètre** — un exercice sans paquet fiscal publié (2027) remonte en **500
-`REFERENTIEL_UNAVAILABLE`** au lieu d'un 4xx explicite. Comportement **identique côté recettes** : il vient
-du mapper d'erreurs de STORY-078, pas de cette story. Signalé, non corrigé (périmètre).
+### Suivi — les deux points laissés ouverts ont été traités (PR balance #13, 2026-07-28)
 
-**Fragilité de test signalée** — le `GET ?mois=` du cahier de **recettes** (STORY-082) est rouge ~1 fois
-sur 6 **en suite complète**, jamais en lançant son fichier seul. Ses `POST` de préparation n'asséraient
-pas leur propre succès : l'échec était avalé et l'assertion finale accusait le filtre mensuel. Les
-assertions ont été ajoutées (la prochaine occurrence nommera la vraie cause) ; **la cause racine n'est pas
-identifiée** et le correctif ne prétend pas la supprimer.
+**1. Exercice sans paquet fiscal publié : 500 → 409.** Deux situations remontaient le même
+`ArtefactNotFoundError` : l'année issue de la **configuration** (serveur mal déployé ⇒ 500 justifié,
+décision de STORY-078 **inchangée**) et l'année issue de l'**exercice demandé par le client** (le serveur va
+bien, c'est la période qui n'est pas couverte). Le 500 sur le second cas fait croire à une panne sur une
+saisie ordinaire, pousse à réessayer, fait sonner l'astreinte — et n'importe quel porteur de jeton peut en
+générer à volonté en demandant une année future. Le mapper accepte désormais un contexte **facultatif**
+`exerciceDemande` ; seuls les deux cahiers l'opt-in et obtiennent un **409 `PAQUET_FISCAL_NON_PUBLIE`**
+nommant l'année. Un référentiel absent ou un paquet illisible restent en 500. Vérifié en docker sur les
+deux cahiers (2027 ⇒ 409, 2026 ⇒ 201).
+
+**2. Instabilité e2e : cause racine identifiée — ce n'était pas le filtre mensuel.** La reproduction (12
+passages complets journalisés) a donné la signature : **57 tests sur 57 rouges d'un coup en 401**, dans la
+même suite, jamais en lançant le fichier seul. La **première** requête authentifiée d'une suite portait
+aussi la **première** résolution JWKS — un point unique de défaillance situé au milieu d'une assertion.
+Sous charge (11 workers jest, chacun avec son serveur HTTP et sa génération de clé RSA), cette résolution
+échoue parfois et la suite entière part en 401 sans rapport avec son objet. `amorcerJwks` fait la
+résolution **une fois, explicitement, hors des assertions**, avec quelques tentatives, et échoue
+**bruyamment** si elle n'aboutit pas. Mesure : **2 échecs sur 12 passages avant, 0 sur 24 après**. Les huit
+autres suites partagent l'exposition mais n'ont jamais été observées en échec (elles sont bien plus
+courtes) ; le helper est partagé et documenté pour elles.
 
 ---
 
