@@ -4,8 +4,9 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A11 · `sprint-plan-atelier-balance-2026-07-12.md` §4.1 (frontière : l'Atelier fait **transaction → compte** ; `bilan-service` fait **compte → poste**) · `referentiels/table-de-passage-syscohada.json` (validée 100 %)
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 16 (EXTENDED)
 **Service :** `balance-service` (:3007)
@@ -173,6 +174,81 @@ async agreger(orgId: string, exercice: DateRange): Promise<BalanceCanonique> {
 
 ---
 
+## Décisions de cadrage (2026-07-28)
+
+**D-085-1 — La balance ne se construit PAS à partir des totaux par compte de 082/083.**
+STORY-082 expose `calculerTotauxParCompte` (classe 7 au crédit, HT) et STORY-083
+`calculerTotauxParCompteCharge` (classe 6 au débit, montant imputé). Ces deux vues sont **justes
+séparément et inéquilibrées ensemble** : `Σ crédit produits ≠ Σ débit charges`, par construction —
+il leur manque toute la trésorerie, la TVA et les tiers. Les réutiliser pour bâtir la balance
+conduirait droit à un déséquilibre systématique qu'on serait tenté de « corriger ».
+085 **ventile ligne à ligne** en écritures équilibrées, puis agrège les écritures. Les fonctions de
+082/083 restent en place : elles servent la **vue de travail du comptable**, pas la balance.
+
+**D-085-2 — L'équilibre est une propriété d'arithmétique, pas un contrôle a posteriori.**
+Chaque transaction produit 2 ou 3 écritures dont `Σ D = Σ C` **par construction entière** :
+
+| | Débit | Crédit |
+|---|---|---|
+| Recette | contrepartie = `montant` (TTC) | produit `7xx` = HT · TVA collectée `443` = TVA |
+| Dépense | charge `6xx` = `montantImpute` · TVA déductible `445` = TVA **si déductible** | contrepartie = `montant` (TTC) |
+
+Côté dépense l'identité tient dans les **deux** branches de D-083-2 : TVA déductible ⇒
+`HT + TVA = TTC` ; TVA non déductible ⇒ `TTC + 0 = TTC` (la TVA non récupérable est **dans** la
+charge, elle ne s'écrit pas en classe 4). C'est **le** piège de cette story : imputer le HT et
+écrire quand même la TVA en `445` sur une ligne non déductible déséquilibrerait la balance **et**
+créerait une créance fiscale inexistante. Le `BalanceValidator` (STORY-101) est appelé quand même —
+il **vérifie**, il ne rattrape pas.
+
+**D-085-3 — Ni compte d'attente, ni ligne d'écart, jamais.** Une transaction sans moyen de paiement
+**et** sans tiers n'est pas ventilable : elle est **exclue** de l'agrégation et **listée** dans
+`VENTILATION_IMPOSSIBLE` (avec `id`, `date`, `libellé`, `montant`). Une balance amputée mais
+équilibrée et une liste explicite valent mieux qu'une balance complète et fausse.
+
+**D-085-4 — La balance porte le solde NET par compte** (`debit = max(0, D−C)`, `credit = max(0, C−D)`,
+l'autre à `0`). Cohérent avec l'adaptateur Sage, qui normalise déjà des **soldes** (`debiteur`/
+`crediteur`), et avec `bilan-service` qui dérive ses postes de soldes. Les mouvements bruts ne sont
+pas perdus : ils restent dans les cahiers, ligne à ligne.
+
+**D-085-5 — Comptes de contrepartie : défauts SYSCOHADA + surcharge par organisation.**
+Nouvelle collection `comptes_ventilation` (un document par org, snake_case). Défauts *structurels*
+lus dans le plan du référentiel — pas de la fiscalité, donc aucune entorse à NFR-A06 :
+`571` caisse · `521` banque · `551` monnaie électronique (**mobile money**, compte `55` du plan
+SYSCOHADA révisé) · `443` TVA facturée · `445` TVA récupérable · `411` clients · `401` fournisseurs.
+Chacun est surchargeable ; chaque compte surchargé est **validé contre le plan** (400 sinon).
+
+**D-085-6 — La surcharge de rattachement porte sur le LIBELLÉ et le TIERS, pas sur la catégorie.**
+Côté **dépenses**, le rattachement passe déjà par la **catégorie**, dont le `compteCharge` est
+éditable et mémorisé par organisation depuis STORY-083 : c'est **déjà** la surcharge
+`(org, catégorie) → compte`. En ajouter une seconde créerait deux sources de vérité qui divergeraient
+au premier remappage. La collection `surcharges_rattachement` porte donc `(orgId, type, valeur) →
+compte`, `type ∈ {LIBELLE, TIERS}`, tracée (`parUserId`, `le`), unique par `(orgId, type, valeur)`.
+Elle s'applique **à la proposition** (chemin de saisie), jamais à l'agrégation : au moment d'agréger,
+le compte porté par la ligne est **la décision du comptable** — la réécrire effacerait sa correction.
+
+**D-085-7 — Le `referentiel` de la balance vient du profil, et n'est jamais deviné.**
+`systemeComptable` (`SN`/`SMT`, STORY-080) → tag de la balance. Profil absent ou système non
+déterminé ⇒ **409 `SYSTEME_COMPTABLE_INDETERMINE`**. Retomber sur `SN` par défaut taguerait une
+balance SMT comme normale et fausserait la liasse en aval, sans la moindre erreur visible.
+
+**D-085-8 — `niveauPreuve` d'un compte = le plus faible de ses écritures**, via `RANG_NIVEAU_PREUVE`
+déjà partagé par les deux cahiers. Les contreparties (trésorerie, TVA, tiers) **héritent** du niveau
+de la transaction qui les engendre : une trésorerie alimentée par une recette estimée n'est pas
+justifiée.
+
+**D-085-9 — Écritures d'inventaire : avertissement explicite, jamais de silence.** La balance des
+cahiers ne porte ni stocks, ni amortissements, ni provisions (hors v1). Le résultat porte
+systématiquement l'avertissement « aucune écriture d'inventaire — à saisir manuellement » : une
+balance équilibrée sans dotations *paraît* complète, et c'est exactement ce qui ferait signer une
+liasse fausse.
+
+**D-085-10 — Pas de gel spécifique à l'agrégation (hook documenté).** Le versioning est append-only :
+relancer sur un exercice dont la balance est déjà VALIDÉE empile une version `N+1`. Les cahiers, eux,
+sont déjà figés par NFR-A07 (STORY-082/083) : la version N+1 sera donc identique. Refuser
+explicitement relève des contrôles STORY-098 — **hors périmètre ici**.
+
+---
+
 ## Risques & Mitigation
 
 | Risque | Mitigation |
@@ -203,7 +279,20 @@ async agreger(orgId: string, exercice: DateRange): Promise<BalanceCanonique> {
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+| Phase | État | Note |
+|---|---|---|
+| Cadrage (décisions D-085-1..10) | ✅ 2026-07-28 | branche `MNV-085` sur `docs/` |
+| Développement | ⏳ | branche `MNV-085` sur `balance-service` |
+| Portes DoD (lint/build/couverture/unit/e2e) | ⏳ | |
+| Vérification docker (persistance + atomicité) | ⏳ | |
+| Revue de code | ⏳ | |
+| Revue de sécurité | ⏳ | |
+
+---
+
+**Status:** in_progress
 **Dependencies:** STORY-082 (recettes), STORY-083 (dépenses), STORY-084 (OCR — optionnel), STORY-078 (plan de comptes), STORY-080 (système comptable → tag `referentiel`), **STORY-101** (contrat + `BalanceValidator` + persistance)
 **Ferme** l'adaptateur #3 du hub (D13) · **Alimente** STORY-090 (rapprochement), STORY-091→095 (moteur fiscal), STORY-098 (contrôles), STORY-099 (handoff)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A11 · `sprint-plan-atelier-balance-2026-07-12.md` §4.1 (frontière transaction→compte vs compte→poste)

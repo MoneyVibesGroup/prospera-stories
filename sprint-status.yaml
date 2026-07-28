@@ -1763,7 +1763,7 @@ sprints:
         epic: "EPIC-020"
         points: 5
         service: "balance-service+document-service"
-        status: "done"  # 2026-07-28 — topic dédié document.piece.extrait (D-084-1) ; 2 PR intégrées ensemble
+        status: "done"  # ✅ 2026-07-28 — topic dédié document.piece.extrait (D-084-1) ; 2 PR intégrées ensemble
         completed_date: "2026-07-28"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-085"
@@ -1771,8 +1771,8 @@ sprints:
         epic: "EPIC-020"
         points: 3
         service: "balance-service"
-        status: "not_started"  # compte→poste reste dans bilan-service (STORY-055) — pas de doublon
-        assigned_to: null
+        status: "in_progress"  # 2026-07-28 — cadrage D-085-1..10 ; compte→poste reste dans bilan-service (STORY-055) — pas de doublon
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-138"
         title: "Aligner le guard e-mail sur { message, code } (EMAIL_NOT_VERIFIED) sur les 7 relying-parties navigateur"
         epic: "transverse / dette de contrat d'API (hors décompte d'epic, cf. STORY-109)"
