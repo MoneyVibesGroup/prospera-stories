@@ -7,7 +7,7 @@
 **Statut :** draft
 **Assigné à :** Unassigned
 **Créée le :** 2026-07-28
-**Sprint :** à planifier
+**Sprint :** 18
 **Services :** `auth-service` (:3001) · `platform-catalog-service` (:3003) — ⚠️ story **multi-repo** (exception assumée à « 1 story = 1 service », précédent : STORY-105) → **2 branches + 2 PR**
 **Branches :** `MNV-140` × 2 dépôts
 

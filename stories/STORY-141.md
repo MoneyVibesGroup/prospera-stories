@@ -7,7 +7,7 @@
 **Statut :** draft
 **Assigné à :** Unassigned
 **Créée le :** 2026-07-28
-**Sprint :** à planifier
+**Sprint :** 18
 **Service :** `platform-catalog-service` (:3003) — 1 dépôt, 1 branche, 1 PR
 **Branche :** `MNV-141`
 

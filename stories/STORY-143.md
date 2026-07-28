@@ -7,7 +7,7 @@
 **Statut :** draft
 **Assigné à :** Unassigned
 **Créée le :** 2026-07-28
-**Sprint :** à planifier
+**Sprint :** 18
 **Service :** `admin-panel` (:3010) — 1 dépôt (`prospera-admin-panel-service`), 1 branche, 1 PR
 **Branche :** `MNV-143`
 
