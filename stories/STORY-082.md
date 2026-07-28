@@ -4,8 +4,9 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A08 · `sprint-plan-atelier-balance-2026-07-12.md` § D13 (adaptateur #3) · `rapport-bilan-logique-metier-2026-07-12.md` §3 (chemin A) · `referentiels/` (plan de comptes SYSCOHADA)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 16 (EXTENDED)
 **Service :** `balance-service` (:3007)
@@ -161,6 +162,54 @@ async modifier(orgId: string, ligneId: string, patch: Partial<LigneRecette>) {
 
 ---
 
+## Décisions de conception (arrêtées au dev)
+
+Cinq points que le cadrage laissait ouverts, tranchés **avant** d'écrire une ligne. Chacun est un
+invariant que les tests protègent.
+
+**D-082-1 — Les montants sont en unités mineures XOF (entiers), comme la balance canonique.**
+`balance-canonique.ts` stocke déjà `debit`/`credit` en unités mineures (« centimes », valeur × 100)
+pour une arithmétique **exacte**. Un cahier qui saisirait en XOF entiers imposerait une conversion au
+moment de l'agrégation (STORY-085) — un point de bascule d'unité de plus, donc un bug de facteur 100
+de plus. Surtout, la ventilation TVA (`HT = TTC / 1,18`) **n'est jamais exacte** : en unités mineures
+l'arrondi vaut ≤ 0,01 XOF, en XOF entiers il vaut ≤ 1 XOF — ce qui contredirait le critère
+« totaux exacts au XOF près ». Conséquence assumée : `montant: 15000000` signifie **150 000 XOF**, et
+c'est écrit dans Swagger sur chaque champ monétaire.
+
+**D-082-2 — L'exercice est un couple de bornes explicites, jamais une année devinée.**
+Tout le service keye sur `Exercice { debut, fin }` (balance, régime, handoff). Le raccourci
+`?exercice=2026` du cadrage reste accepté en lecture — il se **résout** en `2026-01-01 → 2026-12-31`,
+c'est-à-dire uniquement l'exercice **civil**. Un exercice décalé (1ᵉʳ juillet → 30 juin) ne peut pas
+s'exprimer par une année : les deux bornes `exerciceDebut`/`exerciceFin` sont alors obligatoires.
+Deviner un exercice civil pour une PME à exercice décalé rangerait ses recettes dans le mauvais
+exercice **sans erreur visible** — c'est exactement le genre de silence que la story interdit ailleurs.
+
+**D-082-3 — L'immutabilité se lit sur la balance de source `ocr`, pas sur n'importe quelle balance.**
+Les cahiers construisent la branche `ocr` du hub (adaptateur #3, D13). Un import Sage validé
+(`source: 'sage'`) sur le même exercice décrit **une autre source de vérité** et ne doit pas geler la
+saisie du cahier ; inversement, dès que la balance issue des cahiers est `VALIDÉE`, plus aucune ligne
+ne bouge (**409**, NFR-A07). C'est la lecture littérale du garde-fou du cadrage
+(`findLatest(orgId, exercice, 'ocr')`).
+
+**D-082-4 — L'assujettissement TVA se dérive du régime fiscal, et reste surchargeable par ligne.**
+Il n'existe aucun champ `assujettiTva` sur le profil (STORY-079/080) et en créer un déborderait du
+périmètre. Le régime **`REEL`** est assujetti, le régime **`SYNTHETIQUE`** (TPU) ne l'est pas — c'est
+la définition même du seuil d'assujettissement, et le paquet fiscal le dit explicitement (rubrique
+`tva.mentionSousSeuil` : « NE FACTURE PAS LA TVA »). Le taux, lui, vient **toujours** de
+`tva.tauxStandard` du paquet fiscal `(pays, année)` — jamais du code (NFR-A06) — et l'année est celle
+de **clôture de l'exercice traité**, pas l'année courante. Une ligne peut porter `exonere: true`
+(Art. 180 CGI) ou une ventilation HT/TVA saisie à la main, contrôlée pour cohérence (**HT + TVA =
+montant**, sinon 400).
+
+**D-082-5 — Le compte est proposé, jamais imposé ; c'est le refus qui est dur.**
+La proposition (`701` marchandises, `706` services, `707` produits accessoires…) s'appuie sur des
+règles de mots-clés volontairement **pauvres** — le vrai moteur de rattachement est STORY-085. Ce qui
+est **dur**, en revanche : un compte hors classe 7 est **refusé** (400 `COMPTE_HORS_CLASSE_7`), et un
+compte inconnu du plan de comptes de l'org l'est aussi (400 `COMPTE_INCONNU`), la reconnaissance se
+faisant **par préfixe** (`isCompteValide` — une balance réelle porte des comptes subdivisés).
+
+---
+
 ## Risques & Mitigation
 
 | Risque | Mitigation |
@@ -189,6 +238,20 @@ async modifier(orgId: string, ligneId: string, patch: Partial<LigneRecette>) {
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+| Étape | État | Date |
+|---|---|---|
+| Conception arrêtée (D-082-1..5) | ✅ | 2026-07-28 |
+| Implémentation (module `cahiers`) | ⏳ | — |
+| Portes DoD (lint / build / couverture / unit / e2e) | ⏳ | — |
+| Vérification docker (persistance réelle) | ⏳ | — |
+| Revue de code | ⏳ | — |
+| Revue de sécurité | ⏳ | — |
+| Merge sur `dev` | ⏳ | — |
+
+---
+
+**Status:** in_progress
 **Dependencies:** STORY-078 (plan de comptes + taux TVA), STORY-079/080 (profil, régime, assujettissement), STORY-101 (contrat balance, immutabilité) · **alimenté par** STORY-084 (OCR) · **agrégé par** STORY-085 · **confronté par** STORY-090 (rapprochement)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A08 · D6 (chemin A) · D9 (adoption directe par une nouvelle structure)

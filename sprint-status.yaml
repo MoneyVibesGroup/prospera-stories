@@ -1640,7 +1640,7 @@ sprints:
         epic: "EPIC-018"
         points: 5
         service: "balance-service+document-service"
-        status: "done"  # 2026-07-27 : livré + vérif docker réelle (persistance/fusion/conflit/idempotence + round-trip Kafka) ; constat invariant #4 (image indécodable → crash) corrigé ; 2 PR rebase-merge sur dev (ocr #6, balance #10)
+        status: "done"  # ✅ 2026-07-27 : livré + vérif docker réelle (persistance/fusion/conflit/idempotence + round-trip Kafka) ; constat invariant #4 (image indécodable → crash) corrigé ; 2 PR rebase-merge sur dev (ocr #6, balance #10)
         assigned_to: "vivianMoneyVibesGroupes"
         completed_date: "2026-07-27"
       # ── AUTONOMIE DU COMPTE (auth-service) — écart d'identité remonté par le FRONTEND (FE-015), puis
@@ -1747,8 +1747,8 @@ sprints:
         epic: "EPIC-020"
         points: 5
         service: "balance-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-07-28 : conception arrêtée (D-082-1..5 : unités mineures XOF, exercice explicite, immutabilité sur la balance source `ocr`, TVA dérivée du régime + taux du paquet fiscal, compte proposé/refus dur hors classe 7)
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-083"
         title: "Cahier de dépenses (catégories éditables + rattachement charges classe 6) — FR-A09"
         epic: "EPIC-020"
