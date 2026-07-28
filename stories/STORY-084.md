@@ -293,13 +293,67 @@ story (D4/NFR-A05) : elle est **testée par mutation** — retirer la garde doit
 | Étape | État | Date |
 |---|---|---|
 | Conception arrêtée (D-084-1..10) | ✅ | 2026-07-28 |
-| Implémentation `document-service` (module `piece-extraction`) | ⏳ | — |
-| Implémentation `balance-service` (module `cahiers/pieces-ocr`) | ⏳ | — |
-| Portes DoD (lint / build / couverture / unit / e2e) | ⏳ | — |
-| Vérification docker (persistance réelle) | ⏳ | — |
+| Implémentation `document-service` (module `piece-extraction`) | ✅ | 2026-07-28 |
+| Implémentation `balance-service` (module `cahiers/pieces-ocr`) | ✅ | 2026-07-28 |
+| Portes DoD (lint / build / couverture / unit / e2e) | ✅ | 2026-07-28 |
+| Vérification docker (persistance réelle) | ✅ | 2026-07-28 |
 | Revue de code | ⏳ | — |
 | Revue de sécurité | ⏳ | — |
 | Merge sur `dev` (2 dépôts) | ⏳ | — |
+
+### Portes DoD
+
+| Service | Lint | Build | Couverture | Unitaires | E2E |
+|---|---|---|---|---|---|
+| `document-service` | 0 warning | OK | **99,39 / 91,81 / 99,17 / 99,33** | 318 ✅ | 32 ✅ |
+| `balance-service` | 0 warning | OK | **98,59 / 91,05 / 97,83 / 98,64** | 1038 ✅ | 226 ✅ |
+
+Non-régression STORY-082/083 (saisie manuelle) et STORY-081 (OCR profil) : verte.
+
+**Mutation-test** — trois garde-fous mutés volontairement, chacun fait virer un test au rouge, puis restaurés :
+
+| Mutation | Effet attendu | Résultat |
+|---|---|---|
+| dériver un mois « aujourd'hui » quand la date est illisible | rangement dans le mauvais mois | **1 test rouge** ✅ |
+| `niveauPreuve: 'fichier'` dès qu'une pièce est une FACTURE (NIF ignoré) | facture non normalisée promue pièce probante | **1 test rouge** ✅ |
+| garde `DATE_REQUISE` inversée à l'application | ligne sans date entrant au cahier | **9 tests rouges** ✅ |
+
+### Vérification docker — round-trip réel, et deux pannes trouvées
+
+Stack neuve (`down -v`), `mongo + kafka + redis + minio + auth-service + document-service + balance-service`.
+Organisation réelle créée par `register`/`login` (jamais de jeton fabriqué).
+
+**Chaîne prouvée de bout en bout** : `POST /pieces/ocr` (202) → écriture MinIO (`piece-documents`,
+2 objets sous `<orgId>/<lotId>/…`) → `piece_extractions` (`document_service`) → job BullMQ → OCR
+Tesseract → **outbox** → **Kafka `document.piece.extrait`** → consumer `balance-pieces-ocr` →
+**`lignes_pre_proposees`** (2) + lot `EN_COURS → PRET`. Collections aux noms **snake_case attendus**
+(`lots_pieces_ocr`, `lignes_pre_proposees`, `piece_extractions`).
+
+| Invariant | Preuve `mongosh` |
+|---|---|
+| **Aucune ligne de cahier créée par l'OCR seul** | `lignes_depenses = 0` après tout le round-trip |
+| **Idempotence** | 2 événements **remis en `PENDING`** dans l'outbox ⇒ republiés sur Kafka ⇒ brouillons toujours **2**, `updatedAt` **inchangés**, 2 logs « déjà traité — ignoré » |
+| **Date illisible bloquante** | `appliquer` sans date ⇒ `{creees: [], rejetees: [DATE_REQUISE ×2]}` et `lignes_depenses` **reste 0** — aucun orphelin |
+| **Rejet partiel** | 1 pièce datée 2025 hors exercice ⇒ `DATE_HORS_EXERCICE` **réaligné sur la bonne pièce**, l'autre créée |
+| **Traçabilité (NFR-A07)** | ligne créée avec `origine: 'OCR'`, `niveauPreuve: 'ocr'`, `pieceRef`, `auditOcr {lotId, pieceId, confiance, brut}` ; lien croisé brouillon `ligneCreeeId` ↔ `ligne.auditOcr.pieceId` **vérifié** |
+| **Isolation multi-tenant** | org B lit **et** applique sur le lot d'org A ⇒ **404 générique** (jamais 403), `lignes_depenses` d'org B = **0** |
+
+**Deux pannes réelles trouvées ici — invisibles en unitaire et en e2e (couche données mockée)** :
+
+1. **Le dépôt partait systématiquement en 502.** `DocumentPieceClient` ajoutait `orgId` au formulaire, or le
+   DTO de `document-service` tourne en `forbidNonWhitelisted` : **400 « property orgId should not exist »**,
+   donc lot `ECHEC` et 502 pour *chaque* dépôt. Le champ était de toute façon **inutile** (l'organisation
+   vient du JWT) et, envoyé, il aurait été une organisation déclarée par l'appelant. Retiré.
+2. **`auditOcr.brut` disparaissait quand l'OCR ne lisait rien.** Mongoose `minimize` (défaut) **efface les
+   objets vides à l'enregistrement** : le champ, pourtant `required`, était absent en base sur toute pièce
+   illisible — un audit sans lecture brute devenait indiscernable d'un audit jamais écrit. `minimize: false`
+   posé sur `AuditOcrSub`. **Vérification rejouée sur l'état final** : `brut` présent.
+
+**Limite assumée et énoncée** : les pièces de test sont des PNG unis (aucune bibliothèque de rendu de texte
+disponible sur la machine), l'OCR les classe donc `ECHEC` avec `confiance: 0`. La vérification docker prouve
+la **persistance, l'atomicité, l'idempotence, l'isolation et les liens entre collections** — la **qualité
+d'extraction des champs** (TMoney, HT/TVA/TTC, NIF) est couverte par les tests unitaires des parseurs, pas
+par cette vérification.
 
 ---
 
