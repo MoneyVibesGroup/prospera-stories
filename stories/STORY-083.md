@@ -5,9 +5,10 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
+**Clôturée le :** 2026-07-28
 **Sprint :** 16 (EXTENDED)
 **Service :** `balance-service` (:3007)
 **Couvre :** FR-A09 (cahier de dépenses)
@@ -313,9 +314,43 @@ charge**. Cumuler le TTC sur une ligne dont la TVA est déductible gonflerait la
 | Implémentation (module `cahiers`, volet dépenses) | ✅ | 2026-07-28 |
 | Portes DoD (lint / build / couverture / unit / e2e) | ✅ | 2026-07-28 |
 | Vérification docker (persistance réelle) | ✅ | 2026-07-28 |
-| Revue de code | ⏳ | — |
-| Revue de sécurité | ⏳ | — |
-| Merge sur `dev` | ⏳ | — |
+| Revue de code | ✅ | 2026-07-28 |
+| Revue de sécurité | ✅ | 2026-07-28 |
+| Merge sur `dev` | ✅ | 2026-07-28 |
+
+### Revue de code — deux constats bloquants, corrigés avant le merge
+
+1. **Le crédit de TVA fictif revenait par le chemin `PATCH`.** D-083-8 avait fermé la porte à la création,
+   pas à la modification : la ventilation était reconduite telle quelle dès lors que le patch ne touchait
+   ni la TVA, ni le montant, ni le justificatif. **Reclasser** une facture vers « Amendes et pénalités »
+   rendait donc la charge non déductible **tout en gardant une TVA récupérable** — la ligne s'imputait pour
+   son seul HT et le solde rouvrait exactement le crédit qu'on venait de fermer. `categorieId` et
+   `deductible` déclenchent désormais la reventilation. *Corollaire du même constat* : reclasser ne
+   réhéritait pas le compte de la nouvelle catégorie — la synthèse rangeait la ligne sous « Amendes »
+   pendant que la balance la portait encore en « Achats de marchandises ».
+2. **Bombe à retardement datée sur la validation des codes de réintégration.** La validation fabriquait un
+   exercice sur l'**année civile courante**, donc résolvait `togo@<année en cours>`. Au 1ᵉʳ janvier suivant
+   la dernière loi de finances publiée, toute création de catégorie **portant un code** serait partie en
+   **500** — invisible en test jusqu'à l'échéance. Une catégorie n'étant rattachée à aucun exercice, le
+   paquet de référence est désormais celui **configuré par défaut**, qui existe toujours.
+
+Vérification docker **rejouée sur l'état final** après ces correctifs (reclassement ⇒ compte `6581`,
+imputé `11 800 000` TTC, TVA `0` non déductible).
+
+### Revue de sécurité — une vulnérabilité, corrigée avant le merge
+
+**La trace de surcharge attribuait la décision à la mauvaise personne** (Medium, confiance 95,
+CWE-778/CWE-282, OWASP A09). Sur un `PATCH`, `surcharge.parUserId` reprenait le `parUserId` **de la ligne**
+— son auteur d'origine — au lieu de l'identité du JWT courant. La piste d'audit exigée par NFR-A07 sur une
+**décision fiscale** désignait donc un utilisateur qui ne l'avait pas prise, et l'auteur réel pouvait la
+répudier. Aucune élévation de privilège n'était requise : `TENANT_USER` suffisait, sur le chemin nominal.
+`construireEtat` distingue désormais l'auteur de la ligne (conservé) de l'auteur de la décision.
+
+Aucune autre vulnérabilité exploitable : `orgId` toujours issu du JWT et posé **après** l'état, filtre org
+sur chaque requête, IDOR fermé sur `categorieId` (résolu dans le seul périmètre de l'organisation), patchs
+construits champ par champ sans spread du DTO (pas d'injection d'opérateur Mongo), lignes de lot
+revalidées en whitelist stricte, gel lu sur l'exercice **de la ligne en base**, `origine`/`parUserId` non
+patchables, 404 générique anti-énumération.
 
 ### Portes DoD
 
@@ -400,6 +435,6 @@ identifiée** et le correctif ne prétend pas la supprimer.
 
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** STORY-078 (plan de comptes, taux TVA, codes de réintégration), STORY-079/080 (profil, régime), STORY-101 (contrat, immutabilité) · **alimenté par** STORY-084 (OCR factures) · **agrégé par** STORY-085 · **exploité par** STORY-091 (réintégrations) et STORY-093 (TVA déductible)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A09, NFR-A04 · CGI Togo 2026 (charges réintégrables)

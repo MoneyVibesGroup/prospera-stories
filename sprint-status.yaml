@@ -1755,8 +1755,9 @@ sprints:
         epic: "EPIC-020"
         points: 5
         service: "balance-service"
-        status: "review"  # 2026-07-28 : implémenté + portes DoD (937 unit / 207 e2e, couverture 98,92/91,32/99,06/99,01) + vérif docker réelle (semis idempotent 19 catégories, imputation HT vs TTC, atomicité du lot prouvée par E11000 provoqué, gel sage vs ocr, isolation 2 orgs) ; la vérif docker a révélé un crédit de TVA fictif sur charge non déductible (D-083-8), corrigé et rejoué
+        status: "done"  # ✅ 2026-07-28 : livré + vérif docker réelle (semis idempotent 19 catégories filtrées par le plan, imputation HT si TVA déductible / TTC sinon, atomicité du lot prouvée par E11000 provoqué, gel sage vs ocr + piège append-only, isolation 2 orgs) ; 3 défauts trouvés et corrigés avant merge : crédit de TVA fictif sur charge non déductible (vérif docker, D-083-8) puis son retour par le chemin PATCH + bombe à retardement datée sur la validation des codes (revue de code), trace de surcharge attribuée à l'auteur de la ligne et non au décideur (revue sécu, CWE-778) ; 2 bugs latents de 082 corrigés (500 sur exercice absent, ?actif= filtré à l'envers) ; PR #12 rebase-merge sur dev
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-07-28"
       - story_id: "STORY-084"
         title: "OCR captures & factures → montants éditables, par mois (étend document-service) — FR-A10"
         epic: "EPIC-020"
