@@ -1755,8 +1755,8 @@ sprints:
         epic: "EPIC-020"
         points: 5
         service: "balance-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-07-28 : conception arrêtée (D-083-1..7) — montant imputé HT si TVA déductible / TTC sinon, code de réintégration lu du paquet fiscal (motif en enum métier), catégories par défaut semées paresseusement et filtrées par le plan de comptes
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-084"
         title: "OCR captures & factures → montants éditables, par mois (étend document-service) — FR-A10"
         epic: "EPIC-020"

@@ -4,8 +4,9 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A09 · `rapport-bilan-logique-metier-2026-07-12.md` §3 (chemin A) · `referentiels/` (plan de comptes SYSCOHADA, classe 6)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 16 (EXTENDED)
 **Service :** `balance-service` (:3007)
@@ -158,6 +159,108 @@ if (dto.deductible !== proposition.deductible && !dto.motifSurcharge) {
 }
 ```
 
+> ⚠️ **`paquet.codeChargeNonJustifiee` n'existe pas** dans le paquet fiscal réel (`togo@2026`) : la
+> rubrique `resultatFiscal` ne publie qu'une **liste plate de codes sans libellés**
+> (`reintegrations_codes: ["10","11","12","15","20",…]`). Le pseudo-code ci-dessus est donc corrigé par
+> la décision **D-083-3** : le **motif** de réintégration est un enum métier stable, le **code fiscal**
+> reste une donnée du paquet — jamais deviné.
+
+---
+
+## Décisions de conception (arrêtées au dev)
+
+### D-083-1 — Les primitives communes aux deux cahiers sont **factorisées**, pas dupliquées
+
+Résolution d'exercice (D-082-2), `moisDe`/`bornesDuMois` en **UTC**, classe d'un compte, extraction du
+taux de TVA du paquet, ventilation TTC → HT + TVA **par différence**, normalisation de texte : identiques
+pour les recettes et pour les dépenses. Elles migrent dans `cahiers-communs.regles.ts` ;
+`cahiers-recettes.regles.ts` les **réexporte** (aucun import de STORY-082 ne bouge, sa suite de tests sert
+de filet de non-régression). Dupliquer aurait garanti la dérive : deux `resoudreExercice` qui divergent,
+ce sont des recettes et des dépenses rangées dans deux exercices différents.
+
+Sont **repris tels quels** : montants en **unités mineures XOF** (D-082-1) · gel sur l'existence d'une
+balance **de source `ocr`** à l'état `VALIDÉE` (D-082-3, y compris sur la **création**) · assujettissement
+TVA dérivé du **régime fiscal** (D-082-4) · taux du paquet de l'**année de clôture** de l'exercice.
+
+### D-083-2 — Le montant imputé au compte de charge est **HT si la TVA est déductible, TTC sinon**
+
+C'est **le** piège comptable de cette story, et il n'est pas le symétrique de 082. Pour une recette, la
+TVA collectée est toujours une dette (classe 4) : le compte de classe 7 reçoit **toujours** le HT. Pour
+une charge, la TVA **non déductible** n'est récupérable auprès de personne : elle fait partie du **coût**
+et s'impute **avec** la charge, en classe 6.
+
+Conséquence directe : `totauxParCompte` cumule `montantImpute` — `montantHT` quand `tva.deductible`, le
+`montant` TTC sinon (et le TTC aussi quand l'organisation n'est **pas assujettie**, cas de la PME au
+régime synthétique, où la TVA supportée est un coût pur). Imputer systématiquement le HT minorerait les
+charges de la TVA non récupérable, donc **majorerait le résultat imposable** — un impôt payé en trop, en
+silence.
+
+### D-083-3 — Le **code de réintégration** vient du paquet fiscal ; le **motif**, lui, est du code
+
+Le paquet `togo@2026` publie `resultatFiscal.reintegrations_codes` : douze codes **sans libellés**. Rien
+n'y désigne « charges non justifiées ». Écrire `codeReintegration: '30'` dans le code serait exactement ce
+que NFR-A06 interdit — et produirait une **liasse fausse** au premier code qui bouge.
+
+Donc, deux champs distincts :
+
+- **`motifNonDeductible`** — enum **métier stable**, porté par le code :
+  `CHARGE_NON_JUSTIFIEE` | `CATEGORIE_NON_DEDUCTIBLE` | `DECISION_HUMAINE`. Il encode une règle
+  structurelle du CGI (« une charge non justifiée n'est pas déductible »), pas un paramètre annuel.
+- **`codeReintegration`** — **donnée** du paquet fiscal, optionnelle. Fournie par la catégorie ou par la
+  ligne, elle est **validée** contre `reintegrations_codes` du paquet de l'exercice → sinon **400
+  `CODE_REINTEGRATION_INCONNU`**. Le paquet peut publier une correspondance `reintegrations_parMotif`
+  (additive, absente aujourd'hui) ; tant qu'elle manque, la proposition automatique sort **sans code**,
+  avec son motif.
+
+**STORY-091 agrège sur le `motifNonDeductible`** (toujours présent) et cite le `codeReintegration` quand
+il existe. Une charge marquée non déductible sans code reste donc réintégrée : ce qui manque, c'est la
+case de la liasse, pas la réintégration.
+
+### D-083-4 — Le jeu de catégories par défaut est **provisionné paresseusement**, et **filtré par le plan de comptes**
+
+« À la création du dossier » : ce moment n'existe pas dans `balance-service` (aucun événement d'ouverture
+de dossier, aucun consommateur). Le jeu par défaut est donc semé **au premier accès aux catégories de
+l'organisation**, de façon **idempotente** (un `insertMany` en `ordered: false` sur l'index unique
+`(orgId, libelle)` — deux requêtes concurrentes ne créent pas de doublons).
+
+Chaque catégorie par défaut est **validée contre le plan de comptes de l'organisation** avant d'être
+semée : `sfd-bceao@2.0` n'a pas les mêmes comptes de classe 6 que `syscohada-revise@2.1`. Une catégorie
+dont le compte n'est pas rattachable au référentiel de l'org est **omise** — semer un compte inconnu
+créerait une catégorie qui **refuserait toutes ses lignes** (400 `COMPTE_INCONNU`) sans que personne ne
+comprenne pourquoi.
+
+Le jeu par défaut est une **nomenclature de départ éditable**, pas un paramètre fiscal : le poser dans le
+code est cohérent avec la table de rattachement de 082, et NFR-A06 n'est pas en cause (aucun taux, aucun
+seuil, aucun code fiscal).
+
+### D-083-5 — Une catégorie utilisée renvoie **409** sur `DELETE` ; la désactivation est un acte explicite
+
+La story dit « une catégorie utilisée ne se supprime pas → désactivation ». Transformer silencieusement un
+`DELETE` en désactivation ferait croire à une suppression : le client afficherait « supprimée » sur une
+catégorie toujours en base. `DELETE` supprime donc **réellement** une catégorie **inutilisée**, et renvoie
+**409 `CATEGORIE_UTILISEE`** dès qu'au moins une ligne la référence — le client désactive alors par
+`PATCH { actif: false }`, ce qui est la décision qu'il voulait prendre.
+
+Une catégorie **désactivée** ne peut plus être **choisie** par une nouvelle ligne (400), mais les lignes
+existantes qui la portent restent parfaitement valides : désactiver n'est pas réécrire l'histoire.
+
+### D-083-6 — La surcharge de déductibilité est tracée **avec ce dont elle diverge**
+
+`motifSurcharge` seul ne dit pas de quoi l'humain s'est écarté. La ligne porte donc un sous-document
+`surcharge: { motif, proposeDeductible, proposeMotifNonDeductible?, proposeCodeReintegration?, parUserId, le }`.
+Un contrôle fiscal lit alors la trace complète : ce que le système proposait, ce que l'humain a décidé,
+qui et quand. Sans le « proposé », la trace ne prouve rien — la proposition se recalcule depuis une
+catégorie qui a pu être renommée ou remappée depuis.
+
+Le motif est exigé **uniquement** quand `deductible` diverge de la proposition (NFR-A04) : imposer un
+motif sur une confirmation conforme transformerait la garantie en formalité qu'on remplit au hasard.
+
+### D-083-7 — `totalNonDeductible` cumule le **montant imputé**, pas le TTC
+
+Cohérence stricte avec D-083-2 : ce qui sera réintégré en STORY-091, c'est ce qui a été **passé en
+charge**. Cumuler le TTC sur une ligne dont la TVA est déductible gonflerait la réintégration future de
+18 % — l'erreur exacte que la story cherche à éviter, prise par l'autre bout.
+
 ---
 
 ## Risques & Mitigation
@@ -189,6 +292,20 @@ if (dto.deductible !== proposition.deductible && !dto.motifSurcharge) {
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+| Étape | État | Date |
+|---|---|---|
+| Conception arrêtée (D-083-1..7) | ✅ | 2026-07-28 |
+| Implémentation (module `cahiers`, volet dépenses) | ⏳ | — |
+| Portes DoD (lint / build / couverture / unit / e2e) | ⏳ | — |
+| Vérification docker (persistance réelle) | ⏳ | — |
+| Revue de code | ⏳ | — |
+| Revue de sécurité | ⏳ | — |
+| Merge sur `dev` | ⏳ | — |
+
+---
+
+**Status:** in_progress
 **Dependencies:** STORY-078 (plan de comptes, taux TVA, codes de réintégration), STORY-079/080 (profil, régime), STORY-101 (contrat, immutabilité) · **alimenté par** STORY-084 (OCR factures) · **agrégé par** STORY-085 · **exploité par** STORY-091 (réintégrations) et STORY-093 (TVA déductible)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A09, NFR-A04 · CGI Togo 2026 (charges réintégrables)
