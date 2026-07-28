@@ -255,6 +255,19 @@ catégorie qui a pu être renommée ou remappée depuis.
 Le motif est exigé **uniquement** quand `deductible` diverge de la proposition (NFR-A04) : imposer un
 motif sur une confirmation conforme transformerait la garantie en formalité qu'on remplit au hasard.
 
+### D-083-8 — Une charge non déductible **ne récupère pas sa TVA** *(constat de la vérification docker)*
+
+Décision **ajoutée après coup** : elle n'a pas été vue à la conception, la vérification docker l'a
+imposée. Une **amende** — charge non déductible par nature — sortait ventilée
+`HT 2 118 644 + TVA 381 356 « récupérable »` : la ligne n'était réintégrée que pour son **HT**, et le
+solde ouvrait un **crédit de TVA fictif** sur une dépense qui n'en porte pas.
+
+La cause était un **ordre d'opérations** : la ventilation TVA précédait la proposition de déductibilité,
+donc ignorait le sort de la charge. La déductibilité se décide désormais **avant** la ventilation et la
+pilote. Le comptable garde la main : un `tva.deductible: true` **explicite** reste honoré, pour le cas
+rare d'une charge non déductible dont la TVA l'est — la règle protège du défaut silencieux, elle
+n'interdit pas la décision.
+
 ### D-083-7 — `totalNonDeductible` cumule le **montant imputé**, pas le TTC
 
 Cohérence stricte avec D-083-2 : ce qui sera réintégré en STORY-091, c'est ce qui a été **passé en
@@ -296,13 +309,94 @@ charge**. Cumuler le TTC sur une ligne dont la TVA est déductible gonflerait la
 
 | Étape | État | Date |
 |---|---|---|
-| Conception arrêtée (D-083-1..7) | ✅ | 2026-07-28 |
-| Implémentation (module `cahiers`, volet dépenses) | ⏳ | — |
-| Portes DoD (lint / build / couverture / unit / e2e) | ⏳ | — |
-| Vérification docker (persistance réelle) | ⏳ | — |
+| Conception arrêtée (D-083-1..8) | ✅ | 2026-07-28 |
+| Implémentation (module `cahiers`, volet dépenses) | ✅ | 2026-07-28 |
+| Portes DoD (lint / build / couverture / unit / e2e) | ✅ | 2026-07-28 |
+| Vérification docker (persistance réelle) | ✅ | 2026-07-28 |
 | Revue de code | ⏳ | — |
 | Revue de sécurité | ⏳ | — |
 | Merge sur `dev` | ⏳ | — |
+
+### Portes DoD
+
+Lint **0 warning** · build OK · **937 unitaires + 207 e2e** verts · couverture
+**98,92 / 91,32 / 99,06 / 99,01** (seuils 65/90/90/90).
+
+**Mutation-test** — sept mutations volontaires, chacune vérifiée **rouge**, puis restaurées. Un critère
+qu'un code bugué franchit ne prouve rien ; c'est la mutation qui montre qu'il filtre :
+
+| Mutation | Effet |
+|---|---|
+| `montantImpute` toujours en HT (la TVA non déductible cesse de s'imputer) | **4 rouges** |
+| le refus hors classe 6 ne se déclenche plus | 9 unitaires + 3 e2e rouges |
+| le gel après validation ne bloque plus | 4 rouges |
+| le motif de surcharge n'est plus exigé | 1 unitaire + 1 e2e rouges |
+| `estCodeReintegrationAdmis` en fail-**open** | 6 unitaires + 2 e2e rouges |
+| `lister` sans le filtre `orgId` (fuite cross-tenant) | 1 rouge |
+| taux de TVA en dur (18 %) au lieu du paquet fiscal | 1 unitaire + 1 e2e rouges |
+| le semis ne filtre plus par le plan de comptes | 1 rouge |
+| *témoin neutre* (réécriture sans effet) | **vert** — le harnais n'est pas rouge par construction |
+
+⚠️ La première mutation n'a d'abord fait rougir **qu'un seul** test : les cas de synthèse utilisaient des
+lignes non déductibles dont le `montantHT` valait déjà le TTC, si bien que les deux imputations donnaient
+le même chiffre. Les jeux d'essai ont été corrigés (HT **strictement** inférieur au TTC) avant de rejouer
+la mutation.
+
+### Vérification docker (obligatoire — les e2e mockent la couche données)
+
+Stack **neuve** (`docker compose down -v`), puis `mongo`/`kafka`/`redis`/`auth-service`/`balance-service`.
+`/api/v1/health` : `mongodb: up`, `kafka: up`. **Deux organisations réelles** créées via l'IdP
+(register → e-mail vérifié → login RS256), read-models `orgkycstatuses`/`orgbalanceentitlements` projetés
+à APPROVED/ACTIVE, référentiel `syscohada-revise@2.1` attaché à l'entitlement, régime `REEL`.
+
+1. **Semis paresseux réel** — le premier `GET /cahiers/categories` crée **19** catégories dans
+   **`categories_depenses`** (nom explicite en snake_case, vérifié par `db.getCollectionNames()`), toutes
+   validées contre le plan de comptes de l'org. Index `orgId_1_libelle_1` **UNIQUE** posé.
+   **Idempotence prouvée** : second appel ⇒ 19 documents, inchangé.
+2. **Le piège des charges (D-083-2), sur base réelle** — TTC `11 800 000` justifié ⇒ imputé **10 000 000**
+   (HT) ; la même dépense **sans pièce** ⇒ imputée **4 000 000** (TTC), `CHARGE_NON_JUSTIFIEE`, TVA non
+   déductible.
+3. **🔴 Défaut trouvé ici, et corrigé** — une **amende** (catégorie non déductible) sortait ventilée
+   `HT 2 118 644 + TVA 381 356 « récupérable »` : elle n'était réintégrée que pour son HT, le solde
+   ouvrant un **crédit de TVA fictif**. Cause : la ventilation précédait la proposition de déductibilité.
+   Après correctif (**D-083-8**), la même amende sort `imputé 2 500 000`, `TVA 0`, `deductible: false`.
+   Vérification **rejouée sur l'état final**, service redémarré.
+4. **Aucun taux ni code inventé** — `togo@2026` ⇒ `0,18` (`11 800 000` = `10 000 000 + 1 800 000`, HT + TVA
+   = TTC à l'unité) ; code `30` **accepté** car publié, code `999` **refusé** (`CODE_REINTEGRATION_INCONNU`).
+5. **Surcharge motivée et tracée** — sans motif ⇒ **400 `MOTIF_SURCHARGE_REQUIS`** ; avec motif ⇒ 201 et la
+   trace embarque la proposition dont elle diverge (`proposeDeductible: false`,
+   `proposeMotifNonDeductible: CATEGORIE_NON_DEDUCTIBLE`) + auteur + horodatage.
+6. **Rejet partiel du lot** — 6 lignes soumises ⇒ **2 créées, 4 rejetées** avec motifs distincts
+   (`COMPTE_HORS_CLASSE_6`, `DATE_HORS_EXERCICE`, `LIGNE_INVALIDE`, `CATEGORIE_INTROUVABLE`) ; comptage
+   réel **5 → 7**.
+7. **Atomicité du lot, prouvée par un échec provoqué** — index unique temporaire sur `(orgId, pieceRef)`
+   (`partialFilterExpression`), puis lot de 3 lignes **toutes valides** dont deux en collision. Comptage
+   **7 → 7**, et **0 ligne écrite, y compris la troisième**. La transaction avorte bien en bloc.
+8. **Immutabilité, et sa frontière** — une balance **`sage`** VALIDÉE laisse le cahier ouvert
+   (`POST` → 201) ; une balance **`ocr`** VALIDÉE le gèle : `POST`, `PATCH`, `DELETE` → **409
+   `BALANCE_VALIDEE_IMMUABLE`**, base inchangée, ligne intacte. Le piège **append-only** est couvert : une
+   version 2 `BROUILLON` posée après la version 1 `VALIDÉE` ne rouvre **pas** la saisie.
+9. **Cycle de vie des catégories** — catégorie **inutilisée** supprimée (204) ; catégorie **utilisée** ⇒
+   **409 `CATEGORIE_UTILISEE`** (« porte 6 ligne(s) »), toujours en base — aucune suppression déguisée ;
+   libellé en doublon ⇒ **409 `CATEGORIE_EXISTE`** (l'index unique fait foi) ; désactivée ⇒ **400
+   `CATEGORIE_INACTIVE`** sur une nouvelle ligne, et `?actif=false` la retrouve (filtre corrigé).
+10. **Cohérence des agrégats** — Σ charges par mois = Σ par catégorie = total de l'exercice = Σ des débits
+    par compte = **20 532 204** (unités mineures), à l'unité près. `dontNonDeductible` ventilé par compte
+    (`6051` : 4 100 000 · `6581` : 2 500 000).
+11. **Isolation multi-tenant, sur deux organisations réelles** — l'org B voit **0 ligne** et des totaux à
+    zéro ; `PATCH` sur une ligne de A ⇒ **404 `LIGNE_DEPENSE_INTROUVABLE`**, **exactement** la réponse d'un
+    identifiant inexistant (anti-énumération) ; rattacher une ligne à une **catégorie de A** ⇒ **404
+    `CATEGORIE_INTROUVABLE`** ; les 8 lignes de A intactes, **aucun** document sans `orgId`.
+
+**Observation hors périmètre** — un exercice sans paquet fiscal publié (2027) remonte en **500
+`REFERENTIEL_UNAVAILABLE`** au lieu d'un 4xx explicite. Comportement **identique côté recettes** : il vient
+du mapper d'erreurs de STORY-078, pas de cette story. Signalé, non corrigé (périmètre).
+
+**Fragilité de test signalée** — le `GET ?mois=` du cahier de **recettes** (STORY-082) est rouge ~1 fois
+sur 6 **en suite complète**, jamais en lançant son fichier seul. Ses `POST` de préparation n'asséraient
+pas leur propre succès : l'échec était avalé et l'assertion finale accusait le filtre mensuel. Les
+assertions ont été ajoutées (la prochaine occurrence nommera la vraie cause) ; **la cause racine n'est pas
+identifiée** et le correctif ne prétend pas la supprimer.
 
 ---
 
