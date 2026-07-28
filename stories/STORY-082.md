@@ -243,12 +243,64 @@ faisant **par préfixe** (`isCompteValide` — une balance réelle porte des com
 | Étape | État | Date |
 |---|---|---|
 | Conception arrêtée (D-082-1..5) | ✅ | 2026-07-28 |
-| Implémentation (module `cahiers`) | ⏳ | — |
-| Portes DoD (lint / build / couverture / unit / e2e) | ⏳ | — |
-| Vérification docker (persistance réelle) | ⏳ | — |
+| Implémentation (module `cahiers`) | ✅ | 2026-07-28 |
+| Portes DoD (lint / build / couverture / unit / e2e) | ✅ | 2026-07-28 |
+| Vérification docker (persistance réelle) | ✅ | 2026-07-28 |
 | Revue de code | ⏳ | — |
 | Revue de sécurité | ⏳ | — |
 | Merge sur `dev` | ⏳ | — |
+
+### Portes DoD
+
+Lint **0 warning** · build OK · **732 unitaires + 147 e2e** verts · couverture
+**99,15 / 91,69 / 99,5 / 99,26** (seuils 65/90/90/90).
+
+**Mutation-test** — sept mutations volontaires, chacune vérifiée **rouge**, puis restaurées. Un critère
+qu'un code bugué franchit ne prouve rien ; c'est la mutation qui montre qu'il filtre :
+
+| Mutation | Effet |
+|---|---|
+| le refus hors classe 7 ne se déclenche plus | 5 tests rouges |
+| le gel après validation ne bloque plus | 4 unitaires + 2 e2e rouges |
+| totaux par compte cumulés en **TTC** au lieu du HT | 2 rouges |
+| `lister` ciblant une autre organisation | 1 rouge |
+| `existeBalanceValidee` sans le filtre `etat: VALIDÉE` | 1 rouge |
+| **taux de TVA en dur (18 %)** au lieu du paquet fiscal | 2 rouges |
+| *témoin neutre* (réécriture sans effet) | **vert** — le harnais n'est pas rouge par construction |
+
+### Vérification docker (obligatoire — les e2e mockent la couche données)
+
+Stack **neuve** (`docker compose down -v`), puis `mongo`/`kafka`/`redis`/`auth-service`/`balance-service`.
+`/api/v1/health` : `mongodb: up`, `kafka: up`. Organisation réelle créée via l'IdP (register → e-mail
+vérifié → login RS256), read-models `orgkycstatuses`/`orgbalanceentitlements` projetés à APPROVED/ACTIVE.
+
+1. **Persistance réelle** — collection **`lignes_recettes`** (nom explicite en snake_case, vérifié par
+   `db.getCollectionNames()`), deux index posés
+   (`orgId_1_exercice.debut_1_exercice.fin_1_date_1`, `orgId_1_compteProduit_1`). Les documents portent
+   bien `orgId`, `parUserId` et la ventilation.
+2. **Taux réellement lu du paquet fiscal** — `togo@2026` ⇒ **0,18** ; `11 800 000` se ventile en
+   `10 000 000 + 1 800 000`, soit **HT + TVA = TTC à l'unité**. Sans régime déterminé, la même recette
+   sort **non assujettie** (aucune TVA inventée).
+3. **Proposition de compte** — `701` (« Vente de marchandises »), `706` (« Prestation de conseil »),
+   `707` (« Location véhicule »), toutes de classe 7.
+4. **Rejet partiel du lot** — 6 lignes soumises ⇒ **3 créées, 3 rejetées** avec motifs distincts
+   (`COMPTE_HORS_CLASSE_7`, `DATE_HORS_EXERCICE`, `LIGNE_INVALIDE`) ; comptage réel **2 → 5**.
+5. **Atomicité du lot, prouvée par un échec provoqué** — index unique temporaire sur
+   `(orgId, pieceRef)`, puis lot de 3 lignes **toutes valides** dont deux partagent une pièce. `E11000`
+   survient **en cours** d'`insertMany` : comptage **5 → 5**, et **0 ligne écrite, y compris la
+   troisième**. La transaction avorte bien en bloc. *(Observation : cet `E11000` remonte en 500 — aucun
+   index unique n'existe sur `lignes_recettes` en dehors de ce test, et c'est délibéré : deux ventes
+   identiques le même jour sont un cas normal, un « anti-doublon » supprimerait des recettes réelles.)*
+6. **Immutabilité, et sa frontière** — une balance **`sage`** VALIDÉE sur le même exercice laisse le
+   cahier ouvert (`PATCH` → **200**) ; une balance **`ocr`** VALIDÉE le gèle : `PATCH`, `DELETE` **et**
+   `POST` → **409 `BALANCE_VALIDEE_IMMUABLE`**, base inchangée. Le piège **append-only** est couvert :
+   une version 2 en `BROUILLON` posée après la version 1 `VALIDÉE` ne rouvre **pas** la saisie.
+7. **Cohérence des agrégats** — Σ des HT mensuels = total de l'exercice = Σ des crédits par compte =
+   **28 900 000** (unités mineures), à l'unité près.
+8. **Isolation multi-tenant, sur deux organisations réelles** — l'org B voit **0 ligne** et des totaux à
+   zéro ; `PATCH`/`DELETE` sur une ligne de l'org A renvoient **404 `LIGNE_RECETTE_INTROUVABLE`**,
+   **exactement** la réponse d'un identifiant inexistant (anti-énumération) ; la ligne de A est intacte,
+   aucun document sans `orgId`.
 
 ---
 
