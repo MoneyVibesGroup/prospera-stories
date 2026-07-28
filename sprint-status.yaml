@@ -1763,7 +1763,8 @@ sprints:
         epic: "EPIC-020"
         points: 5
         service: "balance-service+document-service"
-        status: "in_progress"  # 2026-07-28 — deferred_foundations activée ; topic dédié document.piece.extrait (D-084-1)
+        status: "done"  # 2026-07-28 — topic dédié document.piece.extrait (D-084-1) ; 2 PR intégrées ensemble
+        completed_date: "2026-07-28"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-085"
         title: "Rattachement au plan comptable (transaction → compte SYSCOHADA) + ventilation — FR-A11"
