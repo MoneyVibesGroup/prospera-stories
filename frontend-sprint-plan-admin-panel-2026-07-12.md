@@ -73,7 +73,7 @@ L'admin-panel **ne possède aucune donnée métier** : c'est un **BFF** (Backend
 |---|---|---|---|
 | **AP-EPIC-000** | Socle admin & sécurité | STORY-046 (scaffold BFF), EPIC-005 (auth admin) | Login PLATFORM_ADMIN, BFF, RBAC, layout console |
 | **AP-EPIC-001** | Orgs & revue KYC | STORY-047 (vue agrégée), STORY-013/048 (revue KYC proxifiée) | Liste/détail orgs, file KYC, approve/reject |
-| **AP-EPIC-002** | Entitlements & catalogue | EPIC-007 (STORY-032/033/034), STORY-048 (grant proxifié) | Catalogue modules/versions/réf., octroi/révocation entitlements |
+| **AP-EPIC-002** | Entitlements & catalogue | EPIC-007 (STORY-032/033/034), STORY-048 (grant proxifié), **EPIC-026 + STORY-140→143** | Catalogue modules/versions/réf., octroi/révocation entitlements, **organisations d'un module (AP-10)**, **Projets (AP-11)** |
 | **AP-EPIC-003** | Dashboard & provisioning | STORY-047/049 (jalon Module 0), P8 provisioning | Tableau de bord plateforme, provisioning vertical, e2e chaîne KYC |
 
 ---
@@ -107,6 +107,25 @@ CRUD `Module` / `ModuleVersion` / `ReferentielVersion` (PLATFORM_ADMIN) ; affich
 **AP-05 — Entitlements (octroi / mise à jour / révocation module × org × référentiel)** · 5 pts
 Pour une org : **grant / update / revoke** d'un entitlement (module + version + référentiel) ; vue de réconciliation (état effectif) ; validation contre le catalogue ; c'est **l'action qui « allume » un module** dans l'app cliente de l'org (via `entitlement.changed`).
 *Backend d'appui :* STORY-033 (entitlements), STORY-034 (event), STORY-048 (grant proxifié). *API :* platform-catalog-service (via BFF).
+⚠️ **Réserve de statut (2026-07-28)** : AP-05 est marquée `ready-for-dev` dans le tracker, mais son
+premier critère — « liste des entitlements d'une org » — **n'a aucune route à appeler**. Vérifié sur
+`origin/dev` de `prospera-admin-panel-service` (`0521258`) : le BFF proxifie l'octroi et la
+révocation, **aucune lecture**. Levée par **STORY-143**.
+
+**AP-10 — Organisations d'un module & version utilisée** · 3 pts · ⏸️ *en attente (cf. `deferred`)*
+Depuis le tiroir d'un module (AP-04) : liste paginée des organisations qui l'utilisent, **version**
+de chacune, répartition par version, filtre par statut d'entitlement. Sert à **mesurer l'impact
+d'une dépréciation N/N-1 avant de la décider**.
+Point d'entrée retenu : **module → organisations**. Le sens inverse (org → modules) appartient à
+AP-05 et n'est pas redondé.
+*Backend d'appui :* STORY-142 (index inverse), STORY-143 (proxy BFF + résolution des noms) — **sprint 18 backend**.
+
+**AP-11 — Projets (onglet catalogue, création, modules)** · 5 pts · ⏸️ *en attente (cf. `deferred`)*
+Quatrième onglet du catalogue (Modules · Versions · Référentiels · **Projets**) : créer un projet
+rattaché à une organisation, y regrouper des modules, archiver.
+Règle structurante : un projet ne référence **que des modules déjà entitlés `ACTIVE`** — sinon il
+devient un second système de vérité face à l'entitlement.
+*Backend d'appui :* STORY-140 (permissions `project:*`), STORY-141 (objet Projet), STORY-143 (proxy BFF) — **sprint 18 backend**.
 
 ### AP-EPIC-003 — Dashboard & provisioning
 
