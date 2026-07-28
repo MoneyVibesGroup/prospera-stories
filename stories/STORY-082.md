@@ -5,9 +5,10 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
+**Clôturée le :** 2026-07-28
 **Sprint :** 16 (EXTENDED)
 **Service :** `balance-service` (:3007)
 **Couvre :** FR-A08 (cahier de recettes)
@@ -84,17 +85,17 @@ Le cahier de recettes, c'est **le chiffre d'affaires**. Sa fiabilité conditionn
 
 ## Acceptance Criteria
 
-- [ ] **Modèle `LigneRecette`** persisté (keyé `orgId` + `exercice`), avec `date`, `libelle`, `montant`, `compteProduit`, `tva?`, `niveauPreuve`, `origine`.
-- [ ] **CRUD** (`@RequiresBalanceAccess`) : création unitaire **201**, **saisie en lot** **201** avec **rapport de rejet partiel** (`{ crees, rejetes: [{ligne, motif}] }` — jamais de rejet silencieux).
-- [ ] **Isolation multi-tenant** : `orgId` **issu du JWT** ; une org ne voit jamais les recettes d'une autre (test e2e).
-- [ ] **Rattachement classe 7** : compte **proposé** puis **validé contre le plan de comptes** (STORY-078) ; un compte **hors classe 7** est **refusé (400)** ; la proposition reste **modifiable**.
-- [ ] **Rangement par mois** : `GET /synthese` retourne les totaux **par mois** (HT, TVA, TTC, nb lignes) + **total exercice**, exacts au XOF près.
-- [ ] **TVA** : taux lu du **paquet fiscal** (STORY-078) — **jamais en dur** ; ventilation HT/TVA calculée et **modifiable** ; **exonération** possible par ligne.
-- [ ] **Niveau de preuve** par ligne (`fichier`/`ocr`/`saisie`/`estimé`) — propagé vers le `statutPreuve` de la balance (FR-A27).
-- [ ] **Immutabilité après validation** : toute `PATCH`/`DELETE` d'une ligne dont la balance de l'exercice est **VALIDÉE** → **409** (NFR-A07, cohérent STORY-101).
-- [ ] **Totaux par compte de classe 7** exposés pour l'agrégation en balance (consommés par STORY-085).
-- [ ] **Tests** : CRUD, lot + rejet partiel, refus hors classe 7, synthèse mensuelle, TVA (paquet + exonération), isolation, édition post-validation refusée. **Coverage ≥ 90 %.**
-- [ ] **Swagger** (201/400/403/409) + **CI verte**.
+- [x] **Modèle `LigneRecette`** persisté (keyé `orgId` + `exercice`), avec `date`, `libelle`, `montant`, `compteProduit`, `tva?`, `niveauPreuve`, `origine`.
+- [x] **CRUD** (`@RequiresBalanceAccess`) : création unitaire **201**, **saisie en lot** **201** avec **rapport de rejet partiel** (`{ crees, rejetes: [{ligne, motif}] }` — jamais de rejet silencieux).
+- [x] **Isolation multi-tenant** : `orgId` **issu du JWT** ; une org ne voit jamais les recettes d'une autre (test e2e).
+- [x] **Rattachement classe 7** : compte **proposé** puis **validé contre le plan de comptes** (STORY-078) ; un compte **hors classe 7** est **refusé (400)** ; la proposition reste **modifiable**.
+- [x] **Rangement par mois** : `GET /synthese` retourne les totaux **par mois** (HT, TVA, TTC, nb lignes) + **total exercice**, exacts au XOF près.
+- [x] **TVA** : taux lu du **paquet fiscal** (STORY-078) — **jamais en dur** ; ventilation HT/TVA calculée et **modifiable** ; **exonération** possible par ligne.
+- [x] **Niveau de preuve** par ligne (`fichier`/`ocr`/`saisie`/`estimé`) — propagé vers le `statutPreuve` de la balance (FR-A27).
+- [x] **Immutabilité après validation** : toute `PATCH`/`DELETE` d'une ligne dont la balance de l'exercice est **VALIDÉE** → **409** (NFR-A07, cohérent STORY-101).
+- [x] **Totaux par compte de classe 7** exposés pour l'agrégation en balance (consommés par STORY-085).
+- [x] **Tests** : CRUD, lot + rejet partiel, refus hors classe 7, synthèse mensuelle, TVA (paquet + exonération), isolation, édition post-validation refusée. **Coverage ≥ 90 %.**
+- [x] **Swagger** (201/400/403/409) + **CI verte**.
 
 ---
 
@@ -208,6 +209,43 @@ est **dur**, en revanche : un compte hors classe 7 est **refusé** (400 `COMPTE_
 compte inconnu du plan de comptes de l'org l'est aussi (400 `COMPTE_INCONNU`), la reconnaissance se
 faisant **par préfixe** (`isCompteValide` — une balance réelle porte des comptes subdivisés).
 
+### Revue de code
+
+Un constat traité, corrigé dans un commit dédié (`4e4cd0a`) et **prouvé par mutation** :
+`GET /synthese` et `GET /totaux-comptes` portaient le DTO de listage, donc **acceptaient `?mois=` et
+l'ignoraient**. Le client recevait un total **annuel** qu'il lisait comme mensuel — un chiffre d'affaires
+faux d'un facteur douze, sans la moindre erreur. C'est exactement le silence que cette story combat
+ailleurs (exercice jamais deviné, rejet jamais muet). Les deux routes portent désormais
+`ExerciceQueryDto`, sans `mois` : la whitelist stricte **refuse** le paramètre (400).
+
+Deux implicites rendus explicites au passage, sans changement de comportement : `origine`/`parUserId`
+sont délibérément hors du patch (corriger le libellé d'une ligne OCR n'en fait pas une saisie manuelle),
+et un champ optionnel absent d'un `PATCH` est **conservé** — il peut être écrasé, pas effacé.
+
+**Laissé de côté, assumé** : `montant` n'est borné que par `@IsInt()`/`@Min(1)`. Un montant proche de
+2⁵³ ferait perdre de la précision aux cumuls. Aucune frontière de sécurité n'est franchie (une
+organisation ne peut abîmer que ses propres chiffres) et aucun montant réel n'en approche ; borner le
+maximum relèverait d'une story de durcissement, pas de celle-ci.
+
+### Revue de sécurité (`opus`, en session)
+
+**Aucune vulnérabilité exploitable.** Compte rendu publié sur la PR
+([#11](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/11#issuecomment-5103034928)).
+Vérifié spécifiquement, cette story ouvrant la première surface d'écriture du module : isolation
+multi-tenant (l'`orgId` ne vient que du JWT, il est posé **après** l'état, 404 indiscernable d'un
+identifiant inexistant), contrôle d'accès (gardes de classe, fail-closed pour les appelants internes),
+injection NoSQL (aucun objet client n'atteint un filtre ; le `$set` est assemblé sur une liste de clés
+fixe ; aucune affectation en masse), endpoint de lot (chaque ligne revalidée sous whitelist stricte,
+taille bornée, throttler global), contournement de période comptable (les **quatre** chemins d'écriture
+passent la même gate, qui lit l'exercice **en base**), intégrité financière (taux jamais supposé,
+`HT + TVA = TTC`, entiers en unités mineures, `origine` imposée par le serveur), et absence de tout
+secret, topic Kafka, usage Redis ou changement Docker.
+
+### Intégration
+
+PR [#11](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/11) intégrée en **rebase-merge**
+sur `dev` (`740afb4` + `4e4cd0a`), branche `MNV-082` supprimée.
+
 ---
 
 ## Risques & Mitigation
@@ -225,16 +263,16 @@ faisant **par préfixe** (`isCompteValide` — une balance réelle porte des com
 
 ## Definition of Done
 
-- [ ] Modèle `LigneRecette` + index (orgId, exercice, date)
-- [ ] CRUD + saisie en lot avec **rapport de rejet partiel**
-- [ ] Rattachement classe 7 proposé, validé (plan de comptes), modifiable ; hors classe 7 → 400
-- [ ] Synthèse **par mois** + total exercice (exacts au XOF)
-- [ ] TVA au taux du **paquet fiscal** + exonération par ligne
-- [ ] `niveauPreuve` propagé vers la balance (FR-A27)
-- [ ] Édition refusée (409) si balance VALIDÉE
-- [ ] Isolation multi-tenant prouvée (e2e)
-- [ ] Coverage ≥ 90 % ; Swagger ; CI verte
-- [ ] Non-régression : CORE S10 + S15 verts
+- [x] Modèle `LigneRecette` + index (orgId, exercice, date)
+- [x] CRUD + saisie en lot avec **rapport de rejet partiel**
+- [x] Rattachement classe 7 proposé, validé (plan de comptes), modifiable ; hors classe 7 → 400
+- [x] Synthèse **par mois** + total exercice (exacts au XOF)
+- [x] TVA au taux du **paquet fiscal** + exonération par ligne
+- [x] `niveauPreuve` propagé vers la balance (FR-A27)
+- [x] Édition refusée (409) si balance VALIDÉE
+- [x] Isolation multi-tenant prouvée (e2e)
+- [x] Coverage ≥ 90 % ; Swagger ; CI verte
+- [x] Non-régression : CORE S10 + S15 verts
 
 ---
 
@@ -246,9 +284,9 @@ faisant **par préfixe** (`isCompteValide` — une balance réelle porte des com
 | Implémentation (module `cahiers`) | ✅ | 2026-07-28 |
 | Portes DoD (lint / build / couverture / unit / e2e) | ✅ | 2026-07-28 |
 | Vérification docker (persistance réelle) | ✅ | 2026-07-28 |
-| Revue de code | ⏳ | — |
-| Revue de sécurité | ⏳ | — |
-| Merge sur `dev` | ⏳ | — |
+| Revue de code | ✅ | 2026-07-28 |
+| Revue de sécurité | ✅ | 2026-07-28 |
+| Merge sur `dev` | ✅ | 2026-07-28 |
 
 ### Portes DoD
 
@@ -304,6 +342,6 @@ vérifié → login RS256), read-models `orgkycstatuses`/`orgbalanceentitlements
 
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** STORY-078 (plan de comptes + taux TVA), STORY-079/080 (profil, régime, assujettissement), STORY-101 (contrat balance, immutabilité) · **alimenté par** STORY-084 (OCR) · **agrégé par** STORY-085 · **confronté par** STORY-090 (rapprochement)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A08 · D6 (chemin A) · D9 (adoption directe par une nouvelle structure)

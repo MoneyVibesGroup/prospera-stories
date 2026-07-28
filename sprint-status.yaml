@@ -1747,8 +1747,9 @@ sprints:
         epic: "EPIC-020"
         points: 5
         service: "balance-service"
-        status: "in_progress"  # 2026-07-28 : conception arrêtée (D-082-1..5 : unités mineures XOF, exercice explicite, immutabilité sur la balance source `ocr`, TVA dérivée du régime + taux du paquet fiscal, compte proposé/refus dur hors classe 7)
+        status: "done"  # ✅ 2026-07-28 : livré + vérif docker réelle (persistance `lignes_recettes`, taux lu du paquet togo@2026, rejet partiel du lot, atomicité prouvée par E11000 provoqué, gel sage vs ocr + piège append-only, isolation 2 orgs) ; constat de revue corrigé (/synthese avalait un ?mois= ignoré) ; revue sécu sans vulnérabilité ; PR #11 rebase-merge sur dev
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-07-28"
       - story_id: "STORY-083"
         title: "Cahier de dépenses (catégories éditables + rattachement charges classe 6) — FR-A09"
         epic: "EPIC-020"
