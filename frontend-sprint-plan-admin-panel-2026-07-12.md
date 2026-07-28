@@ -112,7 +112,7 @@ premier critère — « liste des entitlements d'une org » — **n'a aucune rou
 `origin/dev` de `prospera-admin-panel-service` (`0521258`) : le BFF proxifie l'octroi et la
 révocation, **aucune lecture**. Levée par **STORY-143**.
 
-**AP-10 — Organisations d'un module & version utilisée** · 3 pts · ⏸️ *en attente (cf. `deferred`)*
+**AP-10 — Organisations d'un module & version utilisée** · 3 pts · **Sprint 17**
 Depuis le tiroir d'un module (AP-04) : liste paginée des organisations qui l'utilisent, **version**
 de chacune, répartition par version, filtre par statut d'entitlement. Sert à **mesurer l'impact
 d'une dépréciation N/N-1 avant de la décider**.
@@ -120,7 +120,7 @@ Point d'entrée retenu : **module → organisations**. Le sens inverse (org → 
 AP-05 et n'est pas redondé.
 *Backend d'appui :* STORY-142 (index inverse), STORY-143 (proxy BFF + résolution des noms) — **sprint 18 backend**.
 
-**AP-11 — Projets (onglet catalogue, création, modules)** · 5 pts · ⏸️ *en attente (cf. `deferred`)*
+**AP-11 — Projets (onglet catalogue, création, modules)** · 5 pts · **Sprint 17**
 Quatrième onglet du catalogue (Modules · Versions · Référentiels · **Projets**) : créer un projet
 rattaché à une organisation, y regrouper des modules, archiver.
 Règle structurante : un projet ne référence **que des modules déjà entitlés `ACTIVE`** — sinon il

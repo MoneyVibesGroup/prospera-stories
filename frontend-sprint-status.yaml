@@ -2,7 +2,7 @@ version: "3.1.0"
 project_name: "prospera-frontend"
 project_level: 3
 current_sprint: 3
-last_updated: "2026-07-28"  # 2026-07-28 : +AP-10/AP-11 (console admin : organisations d'un module, Projets) inscrites en `deferred` — rédigées et poussées, mais hors sprint tant que leur backend (STORY-140→143, sprint 18 backend) n'est pas livré et que le S19 frontend n'est pas cadré. ⚠️ Deux incohérences de statut RESTENT à trancher : AP-08 est `blocked` à tort (STORY-106 est LIVRÉE — vérifié sur origin/dev de prospera-admin-panel-service, commit 0521258 : RequirePermissions présent + contrôleurs admin-roles/admin-users) ; AP-05 est `ready-for-dev` à tort (son 1er critère « liste des entitlements d'une org » n'a AUCUNE route à appeler — le BFF ne proxifie aucune lecture d'entitlement, cf. STORY-143). — 🔤 v3.1.0 — RENUMÉROTATION EN FORMAT PLAT (demande PO) : les tickets FE-A00→A18 (Atelier) et FE-B00→B15 (Bilan) deviennent FE-024→FE-054. Plus aucun ticket ACTIF en format lettré. + les 15 stories Atelier EXTENDED (ex FE-A04→A18) sont désormais RÉDIGÉES (fichiers), + statuts backend RÉ-ANCRÉS sur l'état réel des services (lecture des contrôleurs origin/dev 2026-07-24) : Atelier CORE (FE-024→027) et Bilan CORE (FE-028→035) = backend DONE ; Atelier EXTENDED (FE-040→054) + Bilan tardif (FE-036→039) = backend todo → `blocked`. Voir la TABLE DE CORRESPONDANCE ci-dessous.
+last_updated: "2026-07-28"  # 2026-07-28 (2) : CRÉATION DU SPRINT 17 FRONTEND (le tracker s'arrêtait au S16) — AP-10/AP-11 y sont affectées, 8 pts. ⚠️ 17 et non 19 : les numérotations frontend et backend sont INDÉPENDANTES (le S15 frontend dépend du backend S19, le S16 du backend S20) ; le S17 frontend vient après le S18 backend dans le temps. — 2026-07-28 (1) : +AP-10/AP-11 (console admin : organisations d'un module, Projets) inscrites en `deferred` — rédigées et poussées, mais hors sprint tant que leur backend (STORY-140→143, sprint 18 backend) n'est pas livré et que le S19 frontend n'est pas cadré. ⚠️ Deux incohérences de statut RESTENT à trancher : AP-08 est `blocked` à tort (STORY-106 est LIVRÉE — vérifié sur origin/dev de prospera-admin-panel-service, commit 0521258 : RequirePermissions présent + contrôleurs admin-roles/admin-users) ; AP-05 est `ready-for-dev` à tort (son 1er critère « liste des entitlements d'une org » n'a AUCUNE route à appeler — le BFF ne proxifie aucune lecture d'entitlement, cf. STORY-143). — 🔤 v3.1.0 — RENUMÉROTATION EN FORMAT PLAT (demande PO) : les tickets FE-A00→A18 (Atelier) et FE-B00→B15 (Bilan) deviennent FE-024→FE-054. Plus aucun ticket ACTIF en format lettré. + les 15 stories Atelier EXTENDED (ex FE-A04→A18) sont désormais RÉDIGÉES (fichiers), + statuts backend RÉ-ANCRÉS sur l'état réel des services (lecture des contrôleurs origin/dev 2026-07-24) : Atelier CORE (FE-024→027) et Bilan CORE (FE-028→035) = backend DONE ; Atelier EXTENDED (FE-040→054) + Bilan tardif (FE-036→039) = backend todo → `blocked`. Voir la TABLE DE CORRESPONDANCE ci-dessous.
 # ═══ TABLE DE CORRESPONDANCE (format lettré → format plat, v3.1.0 du 2026-07-24) ═══════════
 #   Atelier CORE   : FE-A00→024  FE-A01→025  FE-A02→026  FE-A03→027
 #   Bilan          : FE-B00→028  FE-B01→029  FE-B06→030  FE-B07→031  FE-B08→032
@@ -350,6 +350,16 @@ sprints:
       - { id: "FE-012", app: "client", title: "Checkout paiement (PI SPI BCEAO + FedaPay) + retour de paiement (activation asynchrone)", epic: "FE-EPIC-004", points: 5, status: "ready-for-dev", backend_ready: "S20", backend_ref: "STORY-016,017", note: "paiement-service décalé S15→S20 (insertion Module 1-bis Atelier)" }
       - { id: "FE-013", app: "client", title: "Abonnement courant + historique des transactions", epic: "FE-EPIC-004", points: 3, status: "ready-for-dev", backend_ready: "S20", backend_ref: "STORY-018" }
 
+  - sprint_number: 17
+    name: "Console admin : Projets & lecture des entitlements"
+    status: "not_started"
+    committed_points: 8
+    goal: "Deux lectures qui manquent à la tour de contrôle : savoir QUI utilise un module et dans quelle version (pour décider une dépréciation N/N-1 en connaissance de cause), et décrire ce qu'un client déploie réellement via l'objet Projet. Aucun octroi ici — l'écriture reste AP-05."
+    backend_dependency: "STORY-140 (permissions catalog:*/project:*), STORY-141 (objet Projet), STORY-142 (index inverse des entitlements), STORY-143 (proxy BFF) — **sprint 18 BACKEND**. ⚠️ Numérotations indépendantes : le S17 frontend vient APRÈS le S18 backend dans le temps, comme le S16 frontend dépend du backend S20. ⚡ STORY-143 est SCINDABLE : sa route GET /admin/orgs/:orgId/entitlements ne dépend de rien et débloque AP-05 sans attendre le reste."
+    stories:
+      - { id: "AP-10", app: "admin", title: "Organisations d'un module — qui l'utilise, et dans quelle version", epic: "AP-EPIC-002", points: 3, status: "blocked (backend)", backend_ready: "S18", backend_ref: "STORY-142,143", note: "Point d'entrée retenu : module → organisations (le sens inverse, org → modules, appartient à AP-05 et n'est PAS redondé). Vérifié sur origin/dev de prospera-platform-catalog-service (89d6eb9) : la collection Entitlement n'a d'index que {organizationId,moduleCode} et {organizationId} — aucun index sur moduleCode seul, et AUCUN endpoint ne l'expose. Sert d'abord à mesurer l'impact d'une dépréciation N/N-1 avant de la décider (AP-04)." }
+      - { id: "AP-11", app: "admin", title: "Projets — onglet catalogue, création rattachée à une organisation, modules d'un projet", epic: "AP-EPIC-002", points: 5, status: "blocked (backend)", backend_ready: "S18", backend_ref: "STORY-140,141,143", note: "L'objet Projet n'existe NULLE PART : vérifié sur origin/dev (89d6eb9), les modules du service sont auth/catalog/entitlements et les schémas module/module-version/referentiel-version. Règle structurante posée par STORY-141 : un projet ne référence QUE des modules déjà entitlés ACTIVE — sinon il devient un second système de vérité face à l'entitlement. L'onglet s'ajoute en 4e position du catalogue AP-04 (Modules · Versions · Référentiels · Projets). ⚠️ EPIC-026 (backend, Projets) est nouveau et reste à déclarer." }
+
 # ── Épics frontend (traçabilité) ────────────────────────────────────────────────────────
 epics:
   client:
@@ -375,13 +385,6 @@ vertical_backlog:
   - { vertical: "assurance",    name: "Assurances",                               modules_probables: ["à cadrer"], status: "proposed" }
 
 deferred:
-  # ── Console admin — série « Projets & lecture des entitlements » (2026-07-28, demande PO).
-  # Rédigées et poussées (admin-stories/AP-10.md, AP-11.md) mais VOLONTAIREMENT HORS SPRINT :
-  # leur backend (STORY-140→143) vient d'être affecté au sprint 18 BACKEND, donc rien n'est
-  # traitable ici avant. Déclencheur commun : ouverture du S19 frontend, qui n'existe pas encore
-  # (le tracker s'arrête au S16). À basculer en sprint dès que le S19 est cadré.
-  - { id: "AP-10", app: "admin", title: "Organisations d'un module — qui l'utilise, et dans quelle version", epic: "AP-EPIC-002", points: 3, status: "blocked (backend)", backend_ready: "S18", backend_ref: "STORY-142,143", trigger: "STORY-142 (index inverse) + STORY-143 (proxy BFF) livrées ET S19 frontend cadré", note: "Point d'entrée retenu : module → organisations (le sens inverse, org → modules, appartient à AP-05 et n'est PAS redondé). Vérifié sur origin/dev de prospera-platform-catalog-service (89d6eb9) : la collection Entitlement n'a d'index que {organizationId,moduleCode} et {organizationId} — aucun index sur moduleCode seul, et AUCUN endpoint ne l'expose. Sert d'abord à mesurer l'impact d'une dépréciation N/N-1 avant de la décider (AP-04)." }
-  - { id: "AP-11", app: "admin", title: "Projets — onglet catalogue, création rattachée à une organisation, modules d'un projet", epic: "AP-EPIC-002", points: 5, status: "blocked (backend)", backend_ready: "S18", backend_ref: "STORY-140,141,143", trigger: "STORY-141 (objet Projet) + STORY-143 (proxy BFF) livrées ET S19 frontend cadré", note: "L'objet Projet n'existe NULLE PART : vérifié sur origin/dev (89d6eb9), les modules du service sont auth/catalog/entitlements et les schémas module/module-version/referentiel-version. Règle structurante posée par STORY-141 : un projet ne référence QUE des modules déjà entitlés ACTIVE — sinon il devient un second système de vérité face à l'entitlement. L'onglet s'ajoute en 4e position du catalogue AP-04 (Modules · Versions · Référentiels · Projets). ⚠️ EPIC-026 (backend, Projets) est nouveau et reste à déclarer." }
   - { name: "Gestion multi-instance à distance (verticaux externes isolés, ex. IMF sur cloud client)", trigger: "ouverture du 1er vertical externe (stack dédiée-vs-mutualisée tranchée alors)", status: "deferred" }
 
 # ── Récapitulatif ──
@@ -389,12 +392,12 @@ summary:
   total_stories: 64          # +2 le 2026-07-28 : AP-10, AP-11 (console admin, en attente — cf. deferred). +1 le 2026-07-26 : FE-055 (retrofit contrat STORY-130). +6 en v3.0.0 : AP-08, FE-015, FE-016, FE-017 (both), FE-018 (audit backend 2026-07-17) — FE-028 conservée mais NON planifiée
   by_app:
     client: 53               # FE-001→018 (15) + FE-INT-0..3 (4) + FE-055 (1) + FE-028,B01,B06→B15 (12) + FE-024→A18 (19) + FE-011/012/013 (3) — moins doublons de compte
-    admin: 10                # AP-01→11 (AP-10/11 en attente du S19 frontend)
+    admin: 10                # AP-01→11 (AP-10/11 au sprint 17 frontend)
     both: 1                  # FE-017 (e2e inter-apps)
   points:
     done_or_review: 37       # sprint 1 (24) + FE-008/009/010 (13) — en revue, à confirmer par l'Integration Gate (S3)
     actionable_now: 74       # ⚡ S3 (17) + S4 (21) + S5 (18) + S6 (18) — AUCUNE dépendance backend ouverte, sauf AP-08/STORY-106 (pari)
-    remaining: ~200          # S3 → S16
+    remaining: ~208          # S3 → S17 (+8 : sprint 17 créé le 2026-07-28, console admin)
   milestones:
     - "S3 🏁 Integration Gate soldé : zéro mock, types générés, les deux apps sur le même socle"
     - "S4 🏁 boucle KYC prouvée bout-en-bout (client dépose → admin arbitre avec OCR → client voit)"
@@ -404,6 +407,7 @@ summary:
     - "S10 🏁 Module 1 Bilan côté UI (liasse→validation→prévisionnel→export)"
     - "S15 🏁 Atelier Balance côté UI (cahiers/OCR + fiscal + conseil légal NFR-A04)"
     - "S16 (JIT) paiement Module 2 (backend S20)"
+    - "S17 console admin : qui utilise quel module (AP-10) + objet Projet (AP-11) — backend S18"
 
 velocity:
   reference_backend_velocity: 27   # moyenne mobile backend ; cible prudente frontend ~15-20/sprint (1 dev partagé)
