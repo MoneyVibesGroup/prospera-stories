@@ -1815,7 +1815,7 @@ sprints:
         epic: "EPIC-021"
         points: 5
         service: "balance-service"
-        status: "not_started"
+        status: "defined"  # 2026-07-29 — CADRÉE (Complexité high). Réalise D9 : Sage devient un PONT de migration, Prospera le système primaire. 7 décisions D-087-1..7, dont deux pièges tranchés au cadrage : (1) l'à-nouveaux hérite `source` de N-1 ⇒ en continuité Atelier→Atelier il hérite 'ocr' et GÈLERAIT LE CAHIER DE N avant la première saisie (exigerExerciceModifiable, D-082-3) — l'AC de continuité s'auto-saborde ; le gel ignore désormais les balances `origine: A_NOUVEAUX` ; (2) la tolérance d'affectation écrite `> 1` dans le cadrage vaut UN CENTIME en unités mineures, pas 1 XOF ⇒ utiliser TOLERANCE_EQUILIBRE. Autres : `origine`/`balanceSourceId` en champs OPTIONNELS du contrat canonique (aucun impact checksum ni balance.created ni sur les 3 adaptateurs) ; affectation du résultat = NOUVELLE VERSION append-only, jamais une mutation en place ; agrégat local `exercices_atelier` (jamais l'Exercice de bilan-service — une base par service) ; agrégation 085 devient incrémentale socle⊕mouvements avec l'arithmétique exacte d'agregerEcritures (solde NET, niveauPreuve le plus FAIBLE), inchangée sans à-nouveaux.
         assigned_to: null
       - story_id: "STORY-088"
         title: "Profil d'import & mapping colonnes réutilisable — FR-A14"
