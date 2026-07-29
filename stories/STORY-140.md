@@ -177,9 +177,82 @@ n'était pas une option réelle. La story passe à **3 points** et à **2 permis
 
 | Phase | État |
 |---|---|
-| ① Story ajustée (arbitrage (b), 3 dépôts, conception voie mixte) | ⏳ |
-| ③ Développement | ⏳ |
-| ④ Portes DoD + vérif docker | ⏳ |
+| ① Story ajustée (arbitrage (b), 3 dépôts, conception voie mixte) | ✅ |
+| ③ Développement (3 dépôts) | ✅ |
+| ④ Portes DoD + mutation-tests + vérif docker | ✅ |
 | ⑥ Revue de code | ⏳ |
 | ⑦ Revue de sécurité | ⏳ |
 | ⑧ Rebase-merge | ⏳ |
+
+### ④ Portes DoD (2026-07-29)
+
+| Dépôt | Lint | Build | Couverture (L/F/B) | Unit | e2e |
+|---|---|---|---|---|---|
+| `auth-service` | 0 warning | ✅ | 96,93 / 97,80 / 89,72 | 611 ✅ | 153 ✅ |
+| `platform-catalog-service` | 0 warning | ✅ | 99,86 / 100 / 93,47 | 232 ✅ | 59 ✅ |
+| `kyc-service` | 0 warning | ✅ | 95,37 / 94,08 / 89,89 | 70 ✅ | ✅ |
+
+`AnyOfAccessGuard` : **100 % lignes / branches / fonctions**.
+`diff -q` des 3 copies de `permission.enum.ts` : **identiques** (vérifié après recopie).
+
+### ④ Mutation-tests — la preuve que les tests filtrent
+
+| # | Mutation appliquée | Résultat | Ce que ça prouve |
+|---|---|---|---|
+| M0 | `AnyOfAccessGuard` **absent** de la chaîne `APP_GUARD` des e2e | 🔴 « TENANT_USER sur la lecture du catalogue → 403 » reçoit **200** | Sans ce maillon la lecture n'est gardée par **personne** — constaté pour de vrai avant correction, pas simulé |
+| M1 | `catalog/admin` gardé par la **mauvaise** permission (`org:read`) | 🔴 3 e2e | Le contrôleur exige bien `catalog:manage`, pas « une permission quelconque » |
+| M2 | Guard **fail-open** sur une règle `@RequireAnyOf` vide | 🔴 2 unitaires | Une faute de frappe dans le décorateur ne peut pas ouvrir la route en silence |
+| M3 | `PLATFORM_ACCOUNTANT` reçoit `catalog:manage` au lieu de `catalog:read` | 🔴 1 unitaire | Le sur-privilège d'un rôle métier est détecté |
+
+### ④ Vérification docker — stack neuve (`down -v`), auth-service + platform-catalog-service
+
+**Preuve 1 — le seed a réellement écrit (`mongosh auth_service`, collection `roles`) :** 7 rôles,
+tous `isSystem: true`.
+
+```
+PLATFORM_ACCOUNTANT  ["org:read","catalog:read"]
+PLATFORM_MARKETING   ["org:read","catalog:read"]
+PLATFORM_EXECUTIVE   ["org:read","catalog:read","entitlement:grant","entitlement:revoke"]
+PLATFORM_ADMIN       les 10 permissions (catalogue entier, par construction)
+```
+
+**Preuve 2 — le catalogue sort de l'IdP.** `GET /admin/permissions` → **10** entrées, chacune avec son
+libellé français, `catalog:read` et `catalog:manage` incluses, **aucune** `project:*`.
+
+**Preuve 3 — immuabilité.** `DELETE /admin/roles/PLATFORM_EXECUTIVE` → **403**
+« Ce rôle système ne peut être ni modifié ni supprimé. » · `PATCH /admin/roles/PLATFORM_ACCOUNTANT`
+(tentative d'ajout de `catalog:manage`) → **403**.
+
+**Preuve 4 — idempotence non destructive.** Rôle non-système `RESPONSABLE_CATALOGUE` créé via l'API,
+puis **2 redémarrages** du conteneur : total `8` rôles dont `1` non-système, à l'identique. Le seed
+réaligne les rôles système sans jamais toucher aux rôles composés par les administrateurs.
+
+**Preuve 5 — le critère d'acceptation, sur un jeton `PLATFORM_ACCOUNTANT` réel** (obtenu par login ;
+claims vérifiés : `roles: ["PLATFORM_ACCOUNTANT"]`, `perms: ["org:read","catalog:read"]`, `org: null`) :
+
+| Requête | Attendu | Obtenu |
+|---|---|---|
+| `GET /api/v1/catalog/modules` | 200 | **200** |
+| `GET /api/v1/catalog/referentiels` | 200 | **200** |
+| `POST /api/v1/catalog/admin/modules` | 403 | **403** — « Accès refusé : permission insuffisante. » |
+| `GET /api/v1/catalog/admin/modules` | 403 | **403** |
+
+**Preuve 6 — la délégation, qui est LE point de la story.** Un porteur du rôle **non-système**
+`RESPONSABLE_CATALOGUE` (`perms: ["catalog:read","catalog:manage"]`, **pas** `PLATFORM_ADMIN`) crée un
+module : `POST /catalog/admin/modules` → **201**. C'était impossible avant.
+
+**Preuve 7 — les deux branches du OU, contre le service réel :**
+
+| Porteur | `roles` / `perms` du jeton | `GET /catalog/modules` | `POST /catalog/admin/modules` |
+|---|---|---|---|
+| `TENANT_ADMIN` | `["TENANT_ADMIN"]` / `[]` | **200** (voie *rôle*) | **403** |
+| `PLATFORM_ACCOUNTANT` | `["PLATFORM_ACCOUNTANT"]` / `["org:read","catalog:read"]` | **200** (voie *permission*) | **403** |
+| `TENANT_USER` | `["TENANT_USER"]` / `[]` | **403** — « Accès refusé. » | — |
+| aucun jeton | — | **401** | — |
+
+La 3ᵉ ligne est celle qui compte : le OU refuse bien qui n'a **ni** l'un **ni** l'autre, et le message
+n'énumère ni le rôle ni la permission manquante (anti-énumération).
+
+**Preuve 8 — non-régression `PLATFORM_ADMIN`** : `GET /catalog/modules` → **200**,
+`POST /catalog/admin/modules` → **201**. Il passe désormais par `catalog:read`/`catalog:manage`, que
+son rôle système détient — aucune surface perdue.
