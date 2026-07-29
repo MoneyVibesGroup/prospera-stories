@@ -4,7 +4,8 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A13 · `rapport-bilan-logique-metier-2026-07-12.md` §O1/D9 (Sage = pont de migration ; Prospera = système primaire) · STORY-086 (import Sage)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
+**Complexité :** high
+**Statut :** defined
 **Assigné à :** null
 **Créée le :** 2026-07-12
 **Sprint :** 17 (EXTENDED)
@@ -96,6 +97,18 @@ C'est **exactement** ce qu'un logiciel comptable fait à la clôture, et c'est c
 7. Le client **abandonne Sage** : il saisit désormais ses **cahiers** dans l'Atelier (STORY-082/083, OCR STORY-084).
 8. La balance 2026 = **à-nouveaux + mouvements** (agrégation STORY-085) → contrôles (STORY-098) → handoff `bilan-service` (STORY-099).
 9. **L'année suivante**, la même mécanique repart **d'une balance produite par l'Atelier** (plus de Sage du tout).
+
+### Décisions de conception (arrêtées au cadrage)
+
+| # | Décision | Pourquoi |
+|---|---|---|
+| **D-087-1** | `origine` (`A_NOUVEAUX`) et `balanceSourceId` deviennent des champs **optionnels** du contrat canonique `BalanceCanonique` (STORY-101) et de son schéma. | L'origine d'une balance est une **propriété de la balance**, pas d'un agrégat annexe : c'est ce qui permet à l'agrégation de reconnaître son **socle** et au gel du cahier de **ne pas** se déclencher dessus. Les rendre **optionnels** n'impacte ni les 3 adaptateurs, ni le **checksum** (qui ne couvre que `exercice/source/referentiel/version/lignes`), ni le payload `balance.created` — aucune migration, aucun contrat cassé. |
+| **D-087-2** | L'à-nouveaux **hérite la `source` de N-1** (comme le cadrage le prescrit) **et — c'est le point ajouté — le gel du cahier ignore désormais les balances `origine: A_NOUVEAUX`**. | ⚠️ **Piège qui saborde l'AC de continuité Atelier → Atelier.** Quand N-1 vient de l'Atelier, l'à-nouveaux de N hérite `source: 'ocr'` ; or `exigerExerciceModifiable` gèle le cahier dès qu'**une balance `ocr` VALIDÉE** existe pour l'exercice (D-082-3). Le socle d'ouverture de N **gèlerait donc le cahier de N avant la première saisie**. Latent aujourd'hui (rien ne valide encore de balance), il se déclencherait à STORY-098. Un socle d'ouverture n'est pas « la balance que le cahier justifie » : il ne doit rien geler. |
+| **D-087-3** | L'**affectation du résultat** produit une **nouvelle version** de la balance d'à-nouveaux (append-only) : elle solde `12x` et porte la répartition sur `11x`/`457`. Jamais de mutation en place. | L'immutabilité et le versioning append-only sont l'invariant de STORY-101. Muter la balance d'ouverture effacerait l'état « résultat non encore affecté », qui est précisément ce qu'un contrôle veut pouvoir constater. |
+| **D-087-4** | L'exercice devient un **agrégat local** `exercices_atelier` (une ligne par `(orgId, exercice)`) portant `statut OUVERT\|CLOS`, `origine SAGE\|ATELIER`, `balanceANouveauxId`, `balanceSourceId`. | On ne réutilise **pas** l'`Exercice` de `bilan-service` (STORY-065) : **une base Mongo par service**, aucune requête ni clé étrangère cross-service (invariant #2). Les deux notions portent d'ailleurs des choses différentes — là-bas la clôture d'une **liasse**, ici la bascule d'un **dossier de saisie**. |
+| **D-087-5** | Le **verrouillage de N-1** est porté par `statut: CLOS` et s'applique aux **points de mutation réels** de N-1 dans ce service : cahiers (recettes, dépenses) et construction/soumission de balance pour cet exercice → **409**. | « Toute modification → 409 » n'a de sens qu'appliqué à ce qui est effectivement mutable ici. Le dire précisément évite deux erreurs symétriques : croire l'exercice verrouillé alors qu'un cahier reste ouvert, ou verrouiller des chemins qui n'existent pas. |
+| **D-087-6** | L'agrégation (STORY-085) devient **incrémentale** : `balance N = socle d'à-nouveaux ⊕ soldes des mouvements`, fusionnés **par compte** avec la même arithmétique que `agregerEcritures` (solde **net**, `niveauPreuve` = le **plus faible** des deux). **Sans à-nouveaux pour l'exercice, le comportement de 085 est inchangé** (non-régression). | Le socle est **figé** : il n'est jamais ré-agrégé depuis les transactions. Reprendre la convention exacte de `agregerEcritures` (net, et non cumul) est ce qui garantit que la fusion ne fabrique pas des cumuls incohérents avec le reste de la balance ; prendre le `niveauPreuve` le plus faible évite qu'un mouvement estimé soit « blanchi » par un socle sur pièce. |
+| **D-087-7** | La **tolérance** de l'affectation est celle du contrat — `TOLERANCE_EQUILIBRE` (100 unités mineures = 1 XOF) — et non un `1` codé en dur. | Le cadrage écrit `Math.abs(total - resultat) > 1` avec « tolérance 1 XOF » en commentaire : en **unités mineures XOF**, `1` vaut **un centime**, pas un franc. Reprendre la constante partagée évite un contrôle cent fois plus strict que ce qui est annoncé. |
 
 ---
 
@@ -194,7 +207,20 @@ async affecter(@TenantContext() orgId, @Body() dto: AffectationDto, @CurrentUser
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+| Phase | État | Note |
+|---|---|---|
+| Cadrage (create-story) | ✅ 2026-07-29 | Story préexistante **révisée** : `Complexité: high`, 7 décisions `D-087-1..7`. Deux pièges tranchés au cadrage — (1) l'à-nouveaux hérite `source: 'ocr'` en continuité Atelier→Atelier et **gèlerait le cahier de N avant la première saisie** (l'AC de continuité s'auto-saborde) ; (2) la tolérance d'affectation écrite `> 1` dans le cadrage vaut **un centime**, pas 1 XOF. Statut `not_started` → `defined`. |
+| Développement (dev-story) | ⏳ | |
+| Validation (DoD + vérif docker) | ⏳ | |
+| Revue de code | ⏳ | |
+| Revue de sécurité | ⏳ | |
+| Intégration (rebase-merge `dev`) | ⏳ | |
+
+---
+
+**Status:** defined
 **Dependencies:** **STORY-086** (import Sage — fournit la balance N-1 en migration), **STORY-101** (contrat, validation, immutabilité), **STORY-085** (agrégation incrémentale N = à-nouveaux + mouvements) · **alimente** `bilan-service` (colonnes N-1, STORY-052/059)
 **Réalise D9** : Sage devient un **pont de migration**, Prospera devient le **système primaire**
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A13 · `rapport-bilan-logique-metier-2026-07-12.md` §O1/D9
