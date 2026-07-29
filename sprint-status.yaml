@@ -1771,7 +1771,8 @@ sprints:
         epic: "EPIC-020"
         points: 3
         service: "balance-service"
-        status: "in_progress"  # 2026-07-28 — cadrage D-085-1..10 ; compte→poste reste dans bilan-service (STORY-055) — pas de doublon
+        status: "done"  # ✅ 2026-07-29 — ventilation partie double équilibrée par construction ; compte→poste reste dans bilan-service (STORY-055), pas de doublon
+        completed_date: "2026-07-29"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-138"
         title: "Aligner le guard e-mail sur { message, code } (EMAIL_NOT_VERIFIED) sur les 7 relying-parties navigateur"
