@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 3
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 16 (EXTENDED)
@@ -283,16 +283,110 @@ explicitement relève des contrôles STORY-098 — **hors périmètre ici**.
 
 | Phase | État | Note |
 |---|---|---|
-| Cadrage (décisions D-085-1..10) | ✅ 2026-07-28 | branche `MNV-085` sur `docs/` |
-| Développement | ⏳ | branche `MNV-085` sur `balance-service` |
-| Portes DoD (lint/build/couverture/unit/e2e) | ⏳ | |
-| Vérification docker (persistance + atomicité) | ⏳ | |
-| Revue de code | ⏳ | |
-| Revue de sécurité | ⏳ | |
+| Cadrage (décisions D-085-1..11) | ✅ 2026-07-28 | branche `MNV-085` sur `docs/` |
+| Développement | ✅ 2026-07-29 | branche `MNV-085` sur `balance-service` |
+| Portes DoD (lint/build/couverture/unit/e2e) | ✅ 2026-07-29 | lint 0 warning · build OK · **98,71 / 91,5 / 98,04 / 98,75** (seuils 65/90/90/90) · 1150 unitaires · 240 e2e |
+| Mutation-test | ✅ 2026-07-29 | 4 mutations, 4 rouges (voir ci-dessous) |
+| Vérification docker (persistance + atomicité) | ✅ 2026-07-29 | stack neuve `down -v` (voir ci-dessous) |
+| Revue de code | ✅ 2026-07-29 | 3 constats corrigés (commit dédié), 2 laissés de côté et signalés |
+| Vérification docker **rejouée** après revue | ✅ 2026-07-29 | la forme de `details` avait changé — remesurée sur l'état final |
+| Revue de sécurité | ✅ 2026-07-29 | **aucune vulnérabilité** — commentaire publié sur la PR #15 |
+| PR module | ✅ 2026-07-29 | [#15](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/15) rebase-mergée sur `dev`, branche supprimée |
+
+### Décision complémentaire prise en cours de dev
+
+**D-085-11 — Non ventilable : avertissement en aperçu, refus en persistance.**
+L'AC demandait à la fois « dry-run → **200** avec avertissements » et « déséquilibre → **400** avec le
+détail des transactions non ventilables ». Les deux sont tenus, mais sur des chemins différents, parce
+qu'ils ne répondent pas à la même question :
+
+- **dry-run → 200** : montrer le problème *est* l'objet de l'aperçu. Les transactions écartées sont
+  listées ; la balance présentée reste équilibrée **sans elles**, jamais rattrapée.
+- **persist → 400 `TRANSACTIONS_NON_VENTILABLES`** (avec la liste) : persister une balance amputée mais
+  équilibrée la ferait *paraître* juste, et plus personne ne saurait qu'il manquait des opérations.
+- **déséquilibre réel → 422** du `BalanceValidator` (STORY-101), **non rattrapé**. La ventilation
+  équilibrant par construction, un déséquilibre ne peut venir que d'une donnée corrompue : le masquer
+  derrière un 400 « métier » en ferait un cas normal.
+
+⚠️ **Correctif de contrat d'API induit** : `AllExceptionsFilter` construisait le corps d'erreur par
+**liste blanche** (`statusCode/error/message/code/requestId`) — le détail des transactions n'atteignait
+jamais le client, comme l'a montré la vérification docker. Un champ **`details`, opt-in strict**, a été
+ajouté au filtre : seule une exception qui le pose explicitement le voit propagé. Élargir la liste
+blanche à tout le payload aurait laissé fuir n'importe quel champ interne d'une exception future.
+
+### Mutation-test (`ventilation.regles.ts`)
+
+| Mutation | Test viré au rouge |
+|---|---|
+| charge imputée au HT même quand la TVA n'est pas déductible | « TVA NON déductible : charge au TTC » |
+| TVA portée en `445` même non déductible | « TVA NON déductible : aucune écriture de TVA récupérable » |
+| contrepartie de recette supprimée | 5 tests, dont l'équilibre global |
+| niveau de preuve **le plus fort** retenu au lieu du plus faible | 2 tests de `niveauPreuve` |
+
+### Vérification docker (stack neuve, `docker compose down -v`)
+
+Jeu d'essai réel, org `6a6947b5…`, exercice 2026, `syscohada-revise@2.1` : 3 recettes (vente 118 000 TTC
+banque · facture émise 50 000 tiers `SODIGAZ` *estimé* · vente 20 000 sans contrepartie) + 2 dépenses
+(loyer 75 000 mobile money **TVA déductible** · amende 30 000 espèces **non déductible**).
+
+**Balance persistée (`db.balances`, v1) — 9 comptes, `source: 'ocr'`, `referentiel: 'SN'`**
+
+| Compte | Libellé | Débit | Crédit | Preuve |
+|---|---|---:|---:|---|
+| 411 | Clients | 5 000 000 | | estimé |
+| 443 | État, TVA facturée | | 2 867 797 | estimé |
+| 445 | État, TVA récupérable | 1 144 068 | | saisie |
+| 521 | Banques | 11 800 000 | | saisie |
+| 551 | Monnaie électronique | | 7 500 000 | saisie |
+| 571 | Caisse | | 1 000 000 | saisie |
+| 622 | Services extérieurs A | 6 355 932 | | saisie |
+| 6581 | Autres charges (amende) | 3 000 000 | | saisie |
+| 701 | Ventes de marchandises | | 15 932 203 | estimé |
+| | **Σ** | **27 300 000** | **27 300 000** | **écart 0** |
+
+Ce qui est **prouvé** par ces chiffres, et pas seulement affirmé :
+
+- **`Σ D = Σ C` sur données réelles**, `sommaire.ecartEquilibre = 0` en base ;
+- **le piège des charges (D-083-2) tient** : l'amende non déductible est imputée au **TTC**
+  (`6581 = 3 000 000`) et `445` vaut **exactement** la TVA de la seule dépense déductible
+  (`1 144 068`) — pas un franc de TVA non récupérable ne s'est glissé en classe 4 ;
+- **contrepartie par moyen de paiement** : `521` banque, `571` caisse, `551` mobile money, et `411`
+  pour la facture émise non encaissée ;
+- **`niveauPreuve` le plus faible** : `701`, `443` et `411`, alimentés par la recette *estimée*,
+  ressortent en `estimé` alors que d'autres écritures du même compte sont en `saisie` ;
+- **solde net** (D-085-4) : `571` = 3 000 000 C − 2 000 000 D = **1 000 000 C**.
+
+**Atomicité** — `db.balances` = 1 ⇔ `db.outbox_events` = 1, `payload.balanceId === balance._id`, topic
+`balance.created` : aucun orphelin dans un sens ni dans l'autre.
+
+**Refus et garde-fous, vérifiés en vrai**
+
+| Cas | Résultat observé |
+|---|---|
+| Profil sans `systemeComptable` | **409 `SYSTEME_COMPTABLE_INDETERMINE`**, jamais un `SN` deviné |
+| Dry-run | **200**, `db.balances` reste à **0** — aucune écriture |
+| Persist avec 1 transaction non ventilable | **400 `TRANSACTIONS_NON_VENTILABLES`** + `details.transactions[]` (id, date, libellé, montant, motif) ; `db.balances` reste à **0** |
+| Après correction de la ligne | **201**, balance v1 persistée |
+| Relance | **v2** créée, **v1 conservée** (append-only), 2 événements outbox |
+| Compte de contrepartie hors plan (`ZZZ9`) | **400 `COMPTE_VENTILATION_INCONNU`** |
+| Règle de rattachement vers `622` (classe 6) | **400 `COMPTE_HORS_CLASSE_7`**, rien écrit |
+
+**Rattachement** — règle `TIERS « SoDiGaZ » → 706` enregistrée : clé **normalisée** en base
+(`valeur: 'sodigaz'`, `valeurSaisie: 'SoDiGaZ'`), trace `parUserId` + `le`. La proposition passe de
+`701` (moteur de mots-clés) à `706` (`surcharge: true`), et une recette saisie ensuite chez ce tiers est
+**persistée sur `706`** — la correction faite une fois est bien réutilisée. Rejouer le `PUT` ne
+duplique pas (upsert sur l'index unique).
+
+**Comptes de ventilation** — seul `mobileMoney: '5511'` est écrit en base, le reste reste au défaut
+(D-085-5) ; l'agrégation suivante impute bien la trésorerie mobile money sur `5511`.
+
+**Isolation multi-tenant** — seconde organisation créée : elle voit `[]` de règles, le mobile money **au
+défaut `551`** (pas le `5511` du voisin), aucune transaction de l'org 1, et un `DELETE` sur la règle de
+l'org 1 renvoie **404 générique** sans rien supprimer.
 
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** STORY-082 (recettes), STORY-083 (dépenses), STORY-084 (OCR — optionnel), STORY-078 (plan de comptes), STORY-080 (système comptable → tag `referentiel`), **STORY-101** (contrat + `BalanceValidator` + persistance)
 **Ferme** l'adaptateur #3 du hub (D13) · **Alimente** STORY-090 (rapprochement), STORY-091→095 (moteur fiscal), STORY-098 (contrôles), STORY-099 (handoff)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A11 · `sprint-plan-atelier-balance-2026-07-12.md` §4.1 (frontière transaction→compte vs compte→poste)
