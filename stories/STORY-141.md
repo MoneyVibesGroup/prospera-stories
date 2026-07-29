@@ -5,7 +5,8 @@
 **Priorité :** Must Have
 **Story Points :** 6 *(8 → 6 : `project.changed` n'est pas publié, cf. arbitrage 1)*
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
+**Clôturée le :** 2026-07-29
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
 **Sprint :** 18
@@ -250,9 +251,64 @@ commit qui livre leur guard. Cette story les ajoute donc :
 | ① Story ajustée (5 arbitrages, 4 dépôts) | ✅ |
 | ③ Développement (4 dépôts) | ✅ |
 | ④ Portes DoD + 7 mutation-tests + vérif docker | ✅ **1 bug trouvé par la vérif docker, corrigé** |
-| ⑥ Revue de code | ⏳ |
-| ⑦ Revue de sécurité | ⏳ |
-| ⑧ Rebase-merge | ⏳ |
+| ⑥ Revue de code | ✅ 1 constat, corrigé |
+| ⑦ Revue de sécurité | ✅ aucune vulnérabilité |
+| ⑧ Rebase-merge | ✅ 4 PR, branches supprimées |
+
+### ⑥ Revue de code — constat
+
+**Le contrat OpenAPI annonçait `200` là où le service renvoyait `201`.**
+`POST /projects/:id/modules` : Nest répond **201** par défaut sur un `@Post`, alors que
+`@ApiOkResponse` publiait **200** dans `/api/docs-json`. Or la DoD de cette story exige un OpenAPI à
+jour *parce que le front en génère ses types*, et le BFF de STORY-143 (incrément 3) se cale dessus :
+un client typé sur 200 aurait traité la réponse réelle comme inattendue.
+
+Le défaut était invisible aux tests — les e2e assertaient `201`, c'est-à-dire le **comportement**, pas
+la **concordance avec le contrat publié**. Il n'apparaît qu'en comparant les deux, ce qui a été fait
+contre le service en marche.
+
+Corrigé par `@HttpCode(HttpStatus.OK)`, qui est aussi le code **juste** : la route ne crée aucune
+ressource, elle met à jour un projet existant, et elle est idempotente — un `201` promettrait une
+création à chaque rejeu. **Vérification ④ rejouée sur l'état final** (le correctif touche le contrat) :
+runtime **200**, OpenAPI **200**, concordants.
+
+**Laissé de côté, assumé.** `attachModules` / `detachModule` revalident l'`ObjectId` déjà validé par
+`findByIdOrFail` — redondance sans effet, dont la suppression n'apporterait aucune garantie.
+
+### ⑦ Revue de sécurité — aucune vulnérabilité
+
+Publiée sur les 4 PR. La story étant elle-même un changement d'autorisation, les points ont été
+**vérifiés contre le service en marche**, pas seulement lus :
+
+- **Fail-closed sur les 6 routes**, prouvé sur deux jetons RS256 réels ne portant **qu'une seule
+  permission chacun** : `project:read` seul → 403 sur les 4 écritures ; `project:manage` seul → 403 en
+  lecture ; sans jeton → 401 partout.
+- **Le projet n'est jamais un artefact d'autorisation** — c'est ce qui ferme la classe d'attaques la
+  plus tentante. Il n'accorde aucun accès : l'entitlement reste l'autorité. La fenêtre TOCTOU entre la
+  validation du périmètre et l'écriture ne peut donc produire qu'un projet **affiché comme dégradé**,
+  état déjà nominal du modèle, **jamais un privilège**.
+- **Injection NoSQL testée, pas déduite** : `[$ne]`, `[$gt]`, `[$regex]`, `[$exists]` en query et
+  `{"$ne":null}` dans le corps → **400** dans tous les cas. `$pull` ne reçoit qu'un paramètre de route,
+  donc une chaîne.
+- **Pas de reparentalisation** : `organizationId` absent d'`UpdateProjectDto` → `PATCH` **400**,
+  confirmé en base. Sans cela, on aurait déplacé un projet vers une autre organisation **sans
+  revalider les entitlements** — le contournement le plus direct de la règle métier. `moduleCodes`
+  hors du `PATCH` pour la même raison : un seul chemin d'écriture, donc un seul point de validation.
+- **Mass assignment** : `createdBy` forgé → 400 (il vient du claim `sub`) ; `status` forgé à la
+  création → 400.
+- **Isolation multi-tenant** : `TENANT_ADMIN` → 403 partout (les rôles tenant portent `perms: []` par
+  construction, D15, et n'ont pas `role:manage` pour s'en composer).
+- **Aucune élévation côté IdP** : `project:manage` n'entre dans **aucun** rôle métier ; `assertCanGrant`
+  couvre les 2 nouveaux codes ; la copie K4 du panel **desserre** une liste blanche sans en retirer
+  aucune valeur, et l'IdP reste seul décideur.
+- **Surface infra inchangée** : aucun topic, aucun consumer, aucune transaction, aucun secret, aucun
+  fichier. Throttler global appliqué aux nouvelles routes.
+
+**Point assumé, sous le seuil de signalement** : les deux `409` distinguent « module inconnu » de
+« module non accordé », ce qui permet à un porteur de `project:manage` seul de sonder les entitlements
+d'une organisation. Divulgation jugée non significative (opérateur plateforme explicitement habilité,
+donnée qui est l'objet même de la fonctionnalité) ; fusionner les messages ferait chercher une faute de
+frappe là où il faut un octroi.
 
 ### ④ Portes DoD (2026-07-29)
 
