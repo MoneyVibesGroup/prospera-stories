@@ -4,7 +4,8 @@
 **Réf. architecture :** `sprint-plan-atelier-balance-2026-07-12.md` §0 (D13, tableau des 3 adaptateurs) · `rapport-bilan-logique-metier-2026-07-12.md` §D13 · `prd-atelier-balance-2026-07-12.md` § FR-A25 (contrôle d'équilibre) · `architecture-prospera-ecosystem-2026-07-04.md` (bus Kafka, outbox transactionnel)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
+**Complexité :** high
+**Statut :** defined
 **Assigné à :** null
 **Créée le :** 2026-07-12
 **Sprint :** 17 (EXTENDED)
@@ -89,6 +90,19 @@ Le module compta d'une IMF est la **matérialisation par vertical** du `comptabi
    - **✘ Écart de 1 250 000 XOF** (le cas observé dans prospera-IMF) → **rejetée**, `etat: REJETÉE`, motif enregistré → **`balance.rejected`** émis → **l'IMF est notifiée** et corrige à la source.
 6. Le cabinet consulte `GET /balance/rejets` et voit le motif exact.
 7. L'IMF corrige, re-pousse → **`version: 2`**, l'ancienne est **archivée** (immutabilité, STORY-101).
+
+### Décisions de conception (arrêtées au cadrage, tranchent les ambiguïtés du cahier)
+
+| # | Décision | Pourquoi |
+|---|---|---|
+| **D-102-1** | L'`orgId` **de l'enveloppe** (racine du payload = clé de partition Kafka) fait **autorité** ; `balance.orgId` doit lui être **identique**, sinon **rejet `ORG_NON_AUTORISEE`**. | Le bus a routé sur la clé de partition ; laisser le corps désigner une autre org serait une écriture **cross-tenant** commandée par le payload. Aligne aussi le contrat sur `parseEventEnvelope` (enveloppe commune à tous les topics consommés). |
+| **D-102-2** | Le rejet **n'est pas** un document `Balance` : chaque ingestion (acceptée **et** rejetée) laisse une **trace dédiée** dans la collection **`balance_ingestions`**, portant `etat: 'BROUILLON' \| 'REJETÉE'` + `motifCode` + `motif`. | Trois raisons : (1) une balance `REJETÉE` **consommerait la clé unique** `(org, exercice, source, version)` et la re-soumission **corrigée de la même version** entrerait en collision ; (2) elle polluerait `listByOrg`/`existeBalanceValidee` et donc le handoff aval ; (3) la trace couvre NFR-A07 pour les **deux** issues, là où `Balance` ne parle que des acceptées. |
+| **D-102-3** | La balance ingérée **doit** porter `source: 'direct'` — toute autre valeur est un **rejet `PAYLOAD_INVALIDE`**. | Un vertical qui pousserait `source: 'sage'` écrirait dans l'**espace de versions** de l'adaptateur fichier et masquerait/collisionnerait ses imports. |
+| **D-102-4** | La `version` est **fournie par l'émetteur**. Version déjà ingérée **et même checksum** ⇒ **NOP idempotente** (vrai doublon). Version déjà ingérée **et checksum différent** ⇒ **rejet `VERSION_DEJA_INGEREE`** (« repoussez en `N+1` »). | C'est **le** piège de l'adaptateur : un émetteur qui renvoie éternellement `version: 1` verrait sa correction **avalée en silence** par l'idempotence — exactement le mal que la story combat. Le hub **exige** le `N+1` au lieu de le supposer. |
+| **D-102-5** | L'autorisation rejoue la **politique tenant** de la gate HTTP : **KYC `APPROVED`** *et* **entitlement `balance` `ACTIVE`** (read-models locaux STORY-077), sous le **code unique `ORG_NON_AUTORISEE`** (le `motif` distingue le maillon). En amont, le `sourceSystem` doit figurer dans une **allowlist** de config (`INGESTION_SOURCE_SYSTEMS`) → sinon `SOURCE_SYSTEM_INCONNU`. | Une garde **plus faible que le chemin HTTP** rouvrirait en façade la porte que la gate ferme : la même org pourrait faire entrer par le bus une balance que `POST /balances` lui refuse. L'allowlist est le **repli documenté** de la décision **C8** (auth M2M) : elle borne qui peut pousser, en attendant une identité de service. |
+| **D-102-6** | La route de diagnostic est **`GET /api/v1/balance/rejets`** — chemin racine **distinct** de `balances`, **jamais** `balances/rejets`. | `BalanceController` déclare `@Get(':id')` : `balances/rejets` serait apparié sur `:id` (module déclaré en premier) et rendrait un **404 anti-énumération** au lieu de la liste. Piège d'ordre de routes, invisible à la compilation. |
+| **D-102-7** | L'`auteur` d'une balance ingérée est `{ userId: <sourceSystem>, orgId, role: 'SERVICE' }`. | Une trace de décision doit nommer **qui décide** : ici aucun humain, c'est le vertical émetteur. Le distinguer d'un `TENANT_USER` évite de fabriquer un auteur humain fictif. |
+| **D-102-8** | Idempotence (`ProcessedEvent`), autorisation, **validation**, persistance et **outbox** s'exécutent dans **une seule** transaction Mongo, via un `BalanceService.submitInSession(...)` — le **même** chemin que la voie HTTP et l'adaptateur Sage. | « Les contrôles sont écrits une fois, pas trois » : le consumer ne **réimplémente** rien, il **entre** dans l'orchestrateur de STORY-101 en lui passant sa session. C'est ce qui rend le **test croisé** fichier ↔ événement vrai par construction, et pas par ressemblance. |
 
 ---
 
@@ -211,7 +225,20 @@ private async rejeter(event, motif: string, session) {
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+| Phase | État | Note |
+|---|---|---|
+| Cadrage (create-story) | ✅ 2026-07-29 | Story préexistante **révisée** (jamais réécrite) : `Complexité: high`, 8 décisions de conception (D-102-1..8) tranchant les ambiguïtés du cahier — trace d'ingestion dédiée, `source: 'direct'` imposée, correction jamais avalée en silence, politique tenant alignée sur la gate HTTP, chemin de route sans collision. Statut `not_started` → `defined`. |
+| Développement (dev-story) | ⏳ | |
+| Validation (DoD + vérif docker) | ⏳ | |
+| Revue de code | ⏳ | |
+| Revue de sécurité | ⏳ | |
+| Intégration (rebase-merge `dev`) | ⏳ | |
+
+---
+
+**Status:** defined
 **Dependencies:** **STORY-101** (contrat + `BalanceValidator` + `BalanceRepository`), STORY-077 (read-model `entitlements` + patron idempotence), STORY-099 (émission `balance.created`) · **décision C8** (auth M2M) · **côté émetteur** : `comptabilite-service` du vertical (projet `prospera-IMF`, FI-2)
 **Ferme** l'adaptateur **#1** (préféré) du hub D13 — avec 086 (fichier) et 085 (cahiers), les **3 sources convergent au même contrat**
 **Reference:** `sprint-plan-atelier-balance-2026-07-12.md` §0 (D13) · `prd-atelier-balance-2026-07-12.md` § FR-A25
