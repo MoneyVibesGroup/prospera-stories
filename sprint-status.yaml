@@ -1780,8 +1780,9 @@ sprints:
         points: 3
         service: "auth-service, expert-comptable, kyc-service, platform-catalog-service, document-service, bilan-service, balance-service"
         story_path: "stories/STORY-138.md"
-        status: "in_progress"  # 2026-07-29 — D-138-1 : `error` posé explicitement, sinon régression Forbidden→FORBIDDEN. 🆕 2026-07-25 slottée S17 (décision user). CROSS-CUTTING, Should (PAS bloqueur : le front dégrade proprement via le claim emailVerified). Origine : Integration Gate de FE-024 — 403 « e-mail non vérifié » SANS `code` alors que KYC_NOT_APPROVED/BALANCE_NOT_ENTITLED en portent un. Correctif = guard e-mail (chaîne nue → {message,code}) ×7 + filtre d'exception étendu ×5 (balance/bilan le propagent déjà). admin-panel HORS périmètre (BFF same-origin). Incrément démo : balance-service d'abord (guard seul). Branches MNV-138(<service>).
-        assigned_to: null
+        status: "done"  # ✅ 2026-07-29 — 7 PR mergées. D-138-1 : `error` posé explicitement, sinon régression Forbidden→FORBIDDEN. 🆕 2026-07-25 slottée S17 (décision user). CROSS-CUTTING, Should (PAS bloqueur : le front dégrade proprement via le claim emailVerified). Origine : Integration Gate de FE-024 — 403 « e-mail non vérifié » SANS `code` alors que KYC_NOT_APPROVED/BALANCE_NOT_ENTITLED en portent un. Correctif = guard e-mail (chaîne nue → {message,code}) ×7 + filtre d'exception étendu ×5 (balance/bilan le propagent déjà). admin-panel HORS périmètre (BFF same-origin). Incrément démo : balance-service d'abord (guard seul). Branches MNV-138 (une par dépôt).
+        completed_date: "2026-07-29"
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-139"
         title: "Suggestion de compte à partir d'un libellé libre, pilotée par le référentiel — service de mapping assisté pour la saisie directe"
         epic: "EPIC-020 (Atelier amont — support adaptateur direct, cf. D13)"
