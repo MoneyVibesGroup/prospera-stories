@@ -5,7 +5,8 @@
 **Priorité :** Should Have
 **Story Points :** 3
 **Complexité :** medium
-**Statut :** in_progress
+**Statut :** done
+**Clôturée le :** 2026-07-29
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
 **Sprint :** 18
@@ -138,9 +139,9 @@ Renvoyer `organizationId` nu oblige le front à N appels pour afficher N noms. T
 | ① Story cadrée (garde `org:read`) | ✅ |
 | ③ Développement | ✅ |
 | ④ Portes DoD + 4 mutation-tests + vérif docker | ✅ |
-| ⑥ Revue de code | ⏳ |
-| ⑦ Revue de sécurité | ⏳ |
-| ⑧ Rebase-merge | ⏳ |
+| ⑥ Revue de code | ✅ aucun défaut de correctness ; 2 vérifications manquantes ajoutées |
+| ⑦ Revue de sécurité | ✅ aucune vulnérabilité |
+| ⑧ Rebase-merge | ✅ PR #9, branche supprimée |
 
 ### ③ Choix d'implémentation
 
@@ -231,3 +232,46 @@ distinctes, couverture complète**. C'est ce que le tri total garantit.
 
 Le refus est générique (« Accès refusé : permission insuffisante. ») — il n'indique pas quelle
 permission manque.
+
+### ⑥ Revue de code
+
+**Aucun défaut de correctness.** Ce que la revue a bien produit : deux vérifications que la phase ④
+n'avait pas faites, et qui manquaient à la Definition of Done.
+
+**Preuve 7 — `/summary` aussi passe par l'index.** L'`explain()` de ④ ne couvrait que les `find()` ;
+or `/summary` est la requête la plus lourde des deux (elle balaye tout le module). Vérifié sur le
+pipeline réel : **`IXSCAN` présent, `COLLSCAN` absent**, index `moduleCode_1_status_1` — le `$match`
+en tête de pipeline sait bien l'employer.
+
+**Preuve 8 — OpenAPI réellement à jour** (`GET /api/docs-json` sur le service qui tourne) : les deux
+routes sont publiées, avec leurs paramètres (`moduleCode` requis en chemin ; `status`, `page`,
+`pageSize` optionnels en requête), les réponses **200 / 401 / 403 / 404**, et les 5 schémas
+(`EntitlementsByModulePageDto`, `EntitlementByModuleItemDto`, `EntitlementsByModuleSummaryDto`,
+`VersionCountDto`, `StatusCountDto`).
+
+**Points examinés sans suite** (vérifiés, pas des défauts) :
+- `ModulesService.exists` ne filtre pas sur le statut : un module `DEPRECATED` reste consultable —
+  **correct** pour une vue d'administration, qui doit justement voir qui reste sur un module déprécié.
+- `page` n'a pas de borne haute. Le travail du serveur est borné par le nombre de lignes **du
+  module**, quelle que soit la page demandée : `?page=999999999999` renvoie une page vide (200) sans
+  coûter plus que `page=1`. Aucune amplification, donc aucune borne artificielle ajoutée.
+- Le tri bloquant est traité plus haut, avec sa mesure et son seuil.
+
+### ⑦ Revue de sécurité — aucune vulnérabilité
+
+Publiée sur la PR. Points **vérifiés en exécution** contre le service réel, la story ajoutant deux
+lectures **inter-organisations** :
+
+- **Isolation multi-tenant** : `TENANT_ADMIN` → **403** sur `by-module`, **200** sur sa propre
+  organisation (aucune régression) ; `TENANT_USER` → **403** ; sans jeton → **401**.
+- **Pas d'oracle d'existence de module** : le guard s'exécutant avant le handler, un appelant sans
+  `org:read` reçoit **403** aussi bien sur un module réel que sur un module inexistant — réponses
+  strictement identiques. Le `404` n'est jamais atteint sans la permission.
+- **Injection NoSQL** : `?status[$ne]=`, `?status[$gt]=`, `?page[$ne]=`, `?pageSize[$ne]=` et tout
+  paramètre inconnu → **400**. `moduleCode` est un paramètre de **chemin**, donc toujours une chaîne :
+  la valeur qui atteint le `$match` de l'agrégat ne peut pas être un objet.
+- **Aucun élargissement de privilège** : `org:read` autorisait déjà la lecture des entitlements de
+  n'importe quelle organisation ; l'index inverse rend l'information commode sans ouvrir de classe de
+  donnée nouvelle à ce porteur.
+- **DoS** : `pageSize` plafonné au bord ; `page` invalide → 400 ; `page` non borné mais **non
+  amplifiant** ; throttler actif sur ces routes (constaté : **429** pendant l'amorçage du jeu d'essai).
