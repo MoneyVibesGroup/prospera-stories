@@ -4,7 +4,9 @@
 **Réf. architecture :** `architecture-prospera-ecosystem-2026-07-04.md` § relying-parties ; chaîne de guards STORY-006 (`Throttler → Jwt → EmailVerified → Roles`)
 **Priorité :** Should Have (dette de contrat ; **aucun** blocage fonctionnel — le front dégrade proprement, cf. Contexte)
 **Story Points :** 3
-**Statut :** planned (slottée **Sprint 17**, 2026-07-25 — décision user ; S17 → 21/34)
+**Complexité :** low (répétitif, faible risque — le coût est la cohérence des 7 dépôts, pas la difficulté)
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-25
 **Origine :** Integration Gate de **FE-024** (2026-07-24) — confrontation du gate Atelier au vrai `balance-service`
 **Services :** `auth-service` (:3001), `expert-comptable` (:3000), `kyc-service` (:3002), `platform-catalog-service` (:3003), `document-service` (:3006), `bilan-service` (:3005), `balance-service` (:3007)
@@ -101,6 +103,39 @@ Le 403 sans `code` ne casse rien — il **dégrade proprement**. Cette story sup
 > ⚠️ **Le guard e-mail est un copié-collé, pas un package.** Le corriger sur un seul service **rouvrirait**
 > exactement la divergence que FE-024 a relevée (un service auto-descriptif, six muets). D'où le traitement
 > **groupé** des 7, comme STORY-109 a traité le CORS sur 5 en une passe.
+
+### D-138-1 — Le champ `error` doit être posé EXPLICITEMENT, sinon AC-03 est violé (2026-07-29)
+
+Piège mesuré avant d'écrire la moindre ligne. NestJS ne construit le corps par défaut **que** si on lui
+passe une chaîne :
+
+```
+new ForbiddenException('msg')                    → { message: 'msg', error: 'Forbidden', statusCode: 403 }
+new ForbiddenException({ message, code })        → { message, code }              ← plus de `error` !
+```
+
+Le filtre retombe alors sur `statusName(403)`, qui rend **`'FORBIDDEN'`** (l'énumération `HttpStatus` est en
+majuscules). Appliquer la forme cible telle qu'écrite dans les Notes techniques ferait donc passer le corps
+de `"error":"Forbidden"` à `"error":"FORBIDDEN"` sur les **7** services : ce ne serait plus un ajout
+**additif**, ce serait une **modification silencieuse d'un champ existant** — exactement ce qu'AC-03
+interdit, et un client qui filtrerait sur `error === 'Forbidden'` casserait.
+
+**Forme cible corrigée**, alignée sur les exceptions typées déjà en place dans le programme (qui posent
+toutes `error: 'Bad Request' | 'Conflict' | 'Not Found'` pour cette raison précise) :
+
+```ts
+throw new ForbiddenException({
+  message: EMAIL_NOT_VERIFIED_MESSAGE,
+  error: 'Forbidden',            // ← sans lui, le corps régresse en « FORBIDDEN »
+  code: 'EMAIL_NOT_VERIFIED',
+});
+```
+
+**Divergence résiduelle assumée, hors périmètre** : `KYC_NOT_APPROVED` et `BALANCE_NOT_ENTITLED` sortent
+aujourd'hui avec `"error":"FORBIDDEN"` (leur `deny()` ne pose pas `error`), là où le refus e-mail sortira
+avec `"error":"Forbidden"`. Les aligner supposerait de **changer** le corps de deux motifs que le front
+consomme déjà — l'inverse de ce que cette story promet. C'est une dette voisine mais distincte, à trancher
+séparément.
 
 ---
 
@@ -222,6 +257,13 @@ et le couvre par le reflet local en attendant cette story.
 - 2026-07-25 : **slottée Sprint 17** (décision user) — S17 passe à 21/34. S15 était à capacité (32/34) et
   hors thème ; S16 déjà chargé ; S17 (thème OCR 082→085) a la marge. Insérée hors thème comme enablement
   transverse, à la façon de STORY-109.
+- 2026-07-29 : **in_progress**. État réel des 7 dépôts **revérifié** avant de coder — l'analyse de la story
+  tient exactement : 7 guards en chaîne nue, 5 filtres qui jettent `code`, 2 qui le propagent
+  (`balance`, `bilan`). Décision **D-138-1** ajoutée : le champ `error` doit être posé explicitement, faute
+  de quoi le correctif violerait AC-03 en faisant régresser `"Forbidden"` en `"FORBIDDEN"`.
+- **Convention de branche** : `MNV-138` dans **chaque** dépôt (une story = une branche `MNV-0XX` **par
+  repo**, cf. `.agents/rules/flux-git.md`), et non `MNV-138(<service>)` — le dépôt porte déjà le service,
+  et les parenthèses restent réservées au **scope du commit** (`MNV-138(<service>): …`).
 
 ### Incrément proposé (décision user 2026-07-25)
 `balance-service` d'abord — le service que FE-024 consomme, **guard seul** (son filtre est déjà conforme) —
