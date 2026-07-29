@@ -5,7 +5,8 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** medium
-**Statut :** in_progress
+**Statut :** done
+**Clôturée le :** 2026-07-29
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
 **Sprint :** 18
@@ -323,8 +324,9 @@ pas être mis en liste blanche sans casser chaque nouveau module) — l'écran d
 PR **#7** `MNV-143(admin-panel)` → **rebase-mergée sur `dev`** le 2026-07-29, branche supprimée.
 Commits `afb8cf2` (incrément) + `1698f28` (revue).
 
-**Statut :** incrément 1 **livré**. La story reste **ouverte** pour les incréments 2 et 3, bloqués
-par STORY-142 et STORY-141 respectivement.
+**Statut à la date du 2026-07-29 (matin)** : incrément 1 **livré**, story **ouverte** pour les
+incréments 2 et 3, bloqués par STORY-142 et STORY-141 respectivement. *(Les deux ont été mergées le
+jour même — voir la section suivante.)*
 
 ---
 
@@ -404,3 +406,68 @@ chacun) :
 
 La colonne `project:manage` est celle qui compte : **201 en écriture sans détenir `project:read`** —
 le plancher de classe est bien un plancher surchargé, pas un ET.
+
+### ⑥ Revue de code — aucun constat bloquant nouveau
+
+Le seul défaut matériel de ces incréments a été trouvé **en phase ④, par la vérification docker**
+(garde `catalog:read` décorative), et corrigé avant l'ouverture des PR — la vérification a été
+**rejouée** sur l'état final. La relecture axe par axe du diff n'en a pas ajouté.
+
+Points **activement contrôlés**, et ce qui les rend sûrs :
+
+- **Le `@Transform` de `?ids=`** : `ids` absent ne produit pas `[undefined]` (sinon `@IsMongoId({each})`
+  rejetterait toute liste non filtrée) — prouvé par le test de non-régression `limit: 20, ids: undefined`.
+- **Le plafond dupliqué (100)** existe des deux côtés (`MAX_IDS` amont, `TAILLE_LOT` au BFF) : c'est
+  une duplication K4 assumée, le découpage en lots n'étant qu'un **filet** — le chemin nominal tient
+  toujours en un lot puisqu'une page vaut au plus 100 lignes.
+- **`@Res({ passthrough: true })` sur `POST /admin/projects`** ne court-circuite ni le filtre
+  d'exceptions ni les intercepteurs : le chemin d'erreur `409` traverse bien, prouvé en e2e.
+- **Les trois gardes de forme** (`ModuleCodeParamsDto`, `ProjectParamsDto`, `ProjectModuleParamsDto`)
+  reprennent le patron d'`OrgEntitlementsParamsDto` : liste blanche **au bord**, sans supposer que
+  chaque intermédiaire du trajet traite `%2F` comme Express.
+
+**Laissé de côté, assumé.** La dette tracée par l'incrément 1 — les routes préexistantes
+(`admin/orgs/:orgId`, actions de STORY-048) concatènent leur `orgId` **sans** validation de forme —
+reste ouverte : la traiter ici mélangerait un durcissement transverse à une story de contrat. Le
+patron est désormais appliqué sur **5** fichiers de paramètres, ce qui rend la reprise mécanique.
+
+### ⑦ Revue de sécurité — 0 vulnérabilité
+
+Publiée sur les 2 PR. Points **mesurés contre les services en marche**, pas déduits :
+
+- **SSRF par le chemin** — `moduleCode` et l'`id` de projet sont concaténés dans l'URL amont **et
+  l'appel porte le bearer de l'appelant** : détourner l'hôte le livrerait à un tiers. Fermé **deux
+  fois** (liste blanche au bord **et** `encodeURIComponent`). Six charges testées
+  (`..%2F..`, `http:%2F%2Fevil.tld`, `bilan%2F..%2F..%2Fusers`, `%2E%2E%2F%2E%2E`…) → **400**, et
+  **0 appel amont** déclenché. `baseUrl` ne vient que de la config.
+- **Injection NoSQL par `?ids=`** — le paramètre finit dans un `$in`. Quatre charges testées
+  (`ids[0][$ne]`, `ids[$ne]`, un objet JSON percent-encodé, un id non-ObjectId dans un lot valide)
+  → **400** dans tous les cas. `@IsMongoId({ each: true })` rejette tout non-scalaire.
+- **Pas d'élargissement d'accès par `?ids=`** — le filtre **restreint** une liste déjà servie ; la
+  route reste gardée par `org:read`, qui donne déjà accès au parc entier. Aucune énumération nouvelle.
+- **Isolation multi-tenant** — les 8 routes sont **plateforme**. Un `TENANT_ADMIN` (`perms: []` par
+  construction, D15) reçoit **403** ; matrice RBAC vérifiée sur jetons RS256 réels ne portant qu'une
+  seule permission chacun.
+- **Le BFF n'affaiblit plus l'amont** — c'était le défaut trouvé en ④, et c'est l'axe sécurité de
+  cette PR : `by-module` était gardé plus **faiblement** au panel (`catalog:read`) que chez l'autorité
+  (`org:read`). Aligné, donc plus de « seconde porte plus basse » annoncée en façade.
+- **DoS par paramètre** — `?ids=` plafonné à 100 **et rejeté au-delà** ; `pageSize` plafonné à 100
+  **au bord** (et non seulement en amont), ce qui borne aussi le coût de la **résolution des noms**.
+- **Fuite de données** — projection par liste blanche partout (aucun `_id`/`__v`, prouvé en e2e),
+  refus **génériques** n'énumérant jamais la permission manquante, bearer jamais journalisé.
+- **Relais du `409`** — la seule chaîne amont qui traverse. Bornée : `409` seulement, champ `message`
+  seulement, **type chaîne exigé**, tronquée, repli générique. Les `409` de `catalog` sont des messages
+  métier délibérés, sans état interne.
+
+*Vigilance transmise à AP-11* — mesurée, pas supposée : un **nom de projet est saisi par
+l'utilisateur** (2-80 caractères, sans restriction de jeu de caractères) et **réapparaît dans le
+message `409` relayé** (`Un projet nommé « … » existe déjà`). Le BFF renvoie du **JSON**, où la
+chaîne est échappée par le transport — il n'y a donc aucune injection à son niveau, et l'échapper en
+HTML côté BFF corromprait les noms légitimes. **L'écran devra rendre ce message en texte, jamais en
+HTML** — même consigne que pour `config` (incrément 1). L'auteur du nom est un porteur de
+`project:manage`, donc un acteur privilégié.
+
+### Intégration
+
+PR **auth-service #16** et **admin-panel #10**, rebase-mergées sur `dev` le 2026-07-29, branches
+supprimées. **Story CLÔTURÉE** : les 3 incréments sont livrés.
