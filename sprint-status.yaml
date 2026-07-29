@@ -1845,12 +1845,12 @@ sprints:
       # sprint-planning — soit le goal s'élargit, soit elles migrent.
       # ORDRE IMPOSÉ par les dépendances : 140 → 142 → 141 → 143.
       - story_id: "STORY-140"
-        title: "Extension du catalogue de permissions (catalog:*, project:*) + migration de catalog/admin vers @RequirePermissions + seed des rôles métier Comptable / Marketing / DG"
+        title: "Extension du catalogue de permissions (catalog:*) + migration de catalog/admin vers @RequirePermissions + seed des rôles métier Comptable / Marketing / DG"
         epic: "EPIC-025"
-        points: 5
-        service: "auth-service + platform-catalog-service"  # multi-repo (précédent STORY-105) → 2 branches, 2 PR
-        status: "not_started"  # PREMIÈRE de la série. Découverte à la rédaction : catalog/admin est encore gardé par @Roles(PLATFORM_ADMIN) — oubli de la migration STORY-105. C'est le seul manque de permission ayant un consommateur réel aujourd'hui. ⚠️ project:read/manage n'entrent au catalogue que si STORY-141 sort avec (règle d'or : une permission n'existe que si un guard la vérifie) — sinon les porter dans 141 et cette story tombe à 3 pts.
-        assigned_to: null
+        points: 3  # 5 → 3 le 2026-07-29 : arbitrage (b) retenu, project:* part dans STORY-141
+        service: "auth-service + platform-catalog-service + kyc-service"  # multi-repo (précédent STORY-105) → 3 branches, 3 PR
+        status: "in_progress"  # 2026-07-29 — arbitrage (b) tranché au lancement : STORY-141 étant not_started, project:read/manage n'auraient eu aucun guard → retirés (catalogue 8 → 10, pas 12). 3ᵉ dépôt kyc-service ajouté : le critère « 3 copies identiques » de permission.enum.ts l'impose (recopie de contrat seule, aucun guard). Voie mixte de catalog-read conçue en décorateur unique @RequireAnyOf + AnyOfAccessGuard (empiler @Roles et @RequirePermissions aurait produit un ET, pas un OU).
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-142"
         title: "Index inverse des entitlements : quelles organisations utilisent un module, et dans quelle version (+ index moduleCode)"
         epic: "EPIC-024"
