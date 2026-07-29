@@ -5,8 +5,8 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** high
-**Statut :** defined
-**Assigné à :** null
+**Statut :** done
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 17 (EXTENDED)
 **Service :** `balance-service` (:3007)
@@ -212,15 +212,60 @@ async affecter(@TenantContext() orgId, @Body() dto: AffectationDto, @CurrentUser
 | Phase | État | Note |
 |---|---|---|
 | Cadrage (create-story) | ✅ 2026-07-29 | Story préexistante **révisée** : `Complexité: high`, 7 décisions `D-087-1..7`. Deux pièges tranchés au cadrage — (1) l'à-nouveaux hérite `source: 'ocr'` en continuité Atelier→Atelier et **gèlerait le cahier de N avant la première saisie** (l'AC de continuité s'auto-saborde) ; (2) la tolérance d'affectation écrite `> 1` dans le cadrage vaut **un centime**, pas 1 XOF. Statut `not_started` → `defined`. |
-| Développement (dev-story) | ⏳ | |
-| Validation (DoD + vérif docker) | ⏳ | |
-| Revue de code | ⏳ | |
-| Revue de sécurité | ⏳ | |
-| Intégration (rebase-merge `dev`) | ⏳ | |
+| Développement (dev-story) | ✅ 2026-07-29 | Module `modules/balance/reprise/` : règles pures, `RepriseService`, `ExercicesRepository` + collection `exercices_atelier`, 3 endpoints, contrat canonique étendu de `origine`/`balanceSourceId` (optionnels), agrégation de STORY-085 rendue incrémentale, verrouillage de N-1 dans les deux cahiers. |
+| Validation (DoD + vérif docker) | ✅ 2026-07-29 | Lint 0 warning · build OK · **1353 unit** (module `reprise` **99,6 %** ; global **98,9 / 92,2 / 98,3 / 98,9** > seuils 65/90/90/90) · **290 e2e**. Vérif docker **20/20** détaillée ci-dessous. |
+| Revue de code | ✅ 2026-07-29 | **4 constats, tous corrigés** (2 commits dédiés). Cf. ci-dessous. |
+| Revue de sécurité | ✅ 2026-07-29 | **Aucune vulnérabilité exploitable.** Compte rendu publié en commentaire de la PR #19. |
+| Intégration (rebase-merge `dev`) | ✅ 2026-07-29 | PR **#19** `prospera-balance-service` — *Rebase and merge* sur `dev`, branche `MNV-087` supprimée. |
+
+### Ce que le développement a corrigé du cadrage
+
+| # | Piège | Ce qui se serait passé |
+|---|---|---|
+| **1** | Les numéros de comptes étaient ceux du **PCG français** (`12x` résultat, `11x` réserves/report, `457` dividendes). | En **SYSCOHADA révisé**, `11` = réserves, `12` = **report à nouveau**, `13` = **résultat net** ; en **SFD-BCEAO** le plan est encore autre (`552`/`58`/`592`/`573`), et `457` n'existe dans **aucun** des deux (`45` = organismes internationaux). Le code aurait **lu le résultat dans le report à nouveau** et viré des dividendes sur un compte d'organismes internationaux — **sans jamais déséquilibrer la balance**. Les comptes sont désormais désignés par leur **rôle**, dans une table **exhaustive par référentiel** que le compilateur impose de compléter (dont SFD `592` et non le préfixe `59`, qui balaierait les SIG `593`-`596`). |
+| **2** | « Équilibre du socle **garanti par construction** ». | Vrai d'une clôture **après** détermination du résultat, **faux** si les comptes de gestion sont encore ouverts : les solder retire le résultat qu'ils portent, et le socle s'écarte de sa valeur exacte. Le déterminer est hors périmètre ⇒ refus explicite **`RESULTAT_NON_DETERMINE`**, au lieu d'un 422 d'équilibre désignant le mauvais coupable. |
+| **3** | `Math.abs(total - resultat) > 1`, commenté « tolérance 1 XOF ». | En **unités mineures**, `1` vaut **un centime** : un contrôle cent fois plus strict que l'annonce, refusant des répartitions légitimes. On reprend `TOLERANCE_EQUILIBRE`. |
+| **4** (cadrage) | Le socle hérite la `source` de N-1 — donc `ocr` en continuité Atelier → Atelier. | Le gel du cahier (D-082-3) se déclenche sur toute balance `ocr` validée : le socle **aurait gelé le cahier de N avant la première saisie**, sabordant l'AC de continuité. Le gel ignore désormais `origine: A_NOUVEAUX`. |
+
+### Vérification docker — stack vivante (20/20)
+
+Org réelle via l'IdP, read-models amorcés, clôture 2025 soumise puis validée.
+
+| # | Ce qui est prouvé | Résultat |
+|---|---|---|
+| 1-3 | Aperçu puis persistance du socle | 6 comptes reportés, **2 soldés**, résultat 140 M, équilibré ; **aucune écriture** en aperçu |
+| 4 | **Anti-doublon** | **0** compte de classe 6/7 dans le socle persisté |
+| 5 | Marquage + chaînage | `origine: A_NOUVEAUX`, `balanceSourceId` → la balance 2025 ; **0 socle orphelin** |
+| 6 | Affectation incomplète | **400** `AFFECTATION_INCOMPLETE` avec `details: {resultat, total}` |
+| 7 | Affectation exacte | socle **v2** ; **v1 CONSERVÉE** et portant encore le résultat ; `13` soldé, `118`+`12` crédités ; équilibrée |
+| 8 | Seconde affectation | **409** `RESULTAT_DEJA_AFFECTE` |
+| 9 | Ouverture 2026 | `OUVERT`/`ATELIER` **et** 2025 passé `CLOS`/`MIGRATION` dans la même transaction ; index unique `(orgId, exercice)` présent |
+| 10 | Seconde ouverture | **409** `EXERCICE_DEJA_OUVERT` |
+| 11 | **Verrouillage N-1** | saisie au cahier 2025 ⇒ **409** `EXERCICE_CLOS` ; 2026 reste saisissable |
+| 12 | **Agrégation incrémentale** | `521` = **210 M (socle) + 24 M (mouvement) = 234 M**, en `niveauPreuve: saisie` — le socle sur pièce **ne blanchit pas** le mouvement ; balance équilibrée ; avertissement du socle présent |
+| 13 | **Continuité Atelier → Atelier** | reprise 2026 → 2027 depuis une balance produite par l'Atelier ; socle héritant **`source: ocr`** |
+| 14 | **Contre-épreuve du gel** | socle validé ⇒ cahier **ouvert** ; balance `ocr` **non-socle** validée ⇒ `BALANCE_VALIDEE_IMMUABLE` |
+| 15-17 | Refus | `SOCLE_DEJA_GENERE` · `EXERCICES_CONFONDUS` · `BALANCE_SOURCE_NON_VALIDEE` |
+
+### Deux blocages que seule la vérification docker a révélés
+
+1. **Le contrat interdisait les comptes que ses propres référentiels définissent.** `FORMAT_COMPTE` exigeait **3** à 20 caractères (STORY-101), or `syscohada-revise@2.1` compte **75** comptes à deux caractères — dont `13` Résultat net et `12` Report à nouveau — et `sfd-bceao@2.0` en compte **48**, dont `58`. Une balance ne pouvait donc **pas porter son propre compte de résultat**, et la reprise n'avait aucun compte où affecter. Minimum passé à **2** : strictement permissif, aucune balance déjà acceptée ne cesse de l'être, checksum inchangé. ⚠️ **C'est un ajustement du contrat de STORY-101**, assumé plutôt que d'inventer des sous-comptes absents des artefacts.
+2. **Le 400 d'affectation incomplète ne portait pas les montants** : `AllExceptionsFilter` construit le corps par **liste blanche** et jette les champs additionnels. Passés par l'opt-in `details` ; l'e2e assert désormais sur le **corps HTTP**, seul niveau où le piège est visible.
+
+### Revue de code — 4 constats, tous corrigés
+
+1. **Une course perdue rendait l'écriture d'un AUTRE appelant.** `submit` étant idempotent, il rend la ligne gagnante avec `created: false` ; la réponse annonçait que *son* socle avait été écrit. Côté affectation, pire : `resultatAffecte` du perdant, `lignes` du gagnant — une répartition annoncée qui n'est pas celle qui a été écrite. ⇒ **409**.
+2. **`comptesSoldes` sur-comptait** : calculé par différence, il gonflait du moindre compte de bilan à solde nul — or ce chiffre est exposé comme la **preuve** de l'anti-doublon. Il compte désormais ceux qu'écarte leur **classe**.
+3. **`RESULTAT_NON_DETERMINE` ne nommait que les classes 6 et 7**, alors qu'il vise aussi la **8** (autres charges et produits HAO).
+4. **Une PERTE ne pouvait pas être affectée** (trouvé en sondant l'API pendant la revue de sécurité — la batterie unitaire appelait `appliquerAffectation` en contournant le DTO). `@Min(0)` sur `reportANouveau` interdisait le négatif, or c'est là qu'un déficit s'impute : aucun triplet ne pouvait égaler un résultat négatif, l'API répondait 400 quoi qu'on tente. La borne saute sur ce seul champ ; `reserves` et `dividendes` restent bornés à zéro.
+
+3 mutations vérifiées rouges sur les correctifs 1-2.
+
+**Signalé sans correctif** : le dépôt de pièces OCR reste possible sur un exercice clos — il ne crée aucune écriture comptable, et leur **application** au cahier passe par le chemin gardé (409).
 
 ---
 
-**Status:** defined
+**Status:** done
 **Dependencies:** **STORY-086** (import Sage — fournit la balance N-1 en migration), **STORY-101** (contrat, validation, immutabilité), **STORY-085** (agrégation incrémentale N = à-nouveaux + mouvements) · **alimente** `bilan-service` (colonnes N-1, STORY-052/059)
 **Réalise D9** : Sage devient un **pont de migration**, Prospera devient le **système primaire**
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A13 · `rapport-bilan-logique-metier-2026-07-12.md` §O1/D9
