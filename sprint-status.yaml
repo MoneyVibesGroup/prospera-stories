@@ -1848,9 +1848,10 @@ sprints:
         title: "Extension du catalogue de permissions (catalog:*) + migration de catalog/admin vers @RequirePermissions + seed des rôles métier Comptable / Marketing / DG"
         epic: "EPIC-025"
         points: 3  # 5 → 3 le 2026-07-29 : arbitrage (b) retenu, project:* part dans STORY-141
-        service: "auth-service + platform-catalog-service + kyc-service"  # multi-repo (précédent STORY-105) → 3 branches, 3 PR
-        status: "in_progress"  # 2026-07-29 — arbitrage (b) tranché au lancement : STORY-141 étant not_started, project:read/manage n'auraient eu aucun guard → retirés (catalogue 8 → 10, pas 12). 3ᵉ dépôt kyc-service ajouté : le critère « 3 copies identiques » de permission.enum.ts l'impose (recopie de contrat seule, aucun guard). Voie mixte de catalog-read conçue en décorateur unique @RequireAnyOf + AnyOfAccessGuard (empiler @Roles et @RequirePermissions aurait produit un ET, pas un OU).
+        service: "auth-service + platform-catalog-service + kyc-service + admin-panel"  # multi-repo (précédent STORY-105) → 4 branches, 4 PR
+        status: "done"  # ✅ 2026-07-29 — arbitrage (b) tranché au lancement : STORY-141 étant not_started, project:read/manage n'auraient eu aucun guard → retirés (catalogue 8 → 10, pas 12). 3ᵉ dépôt kyc-service ajouté : le critère « 3 copies identiques » de permission.enum.ts l'impose (recopie de contrat seule, aucun guard). Voie mixte de catalog-read conçue en décorateur unique @RequireAnyOf + AnyOfAccessGuard (empiler @Roles et @RequirePermissions aurait produit un ET, pas un OU). ⚠️ 4ᵉ dépôt admin-panel ajouté EN REVUE : STORY-106 y a créé une 4ᵉ copie K4 de permission.enum.ts, et son DTO valide permissions[] par @IsEnum dessus — restée à 8 codes, elle aurait rejeté catalog:manage en 400 AU BORD, annulant l'objet de la story (les rôles DANS la console). PR #14/#9/#8/#8 mergées en rebase.
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-07-29"
       - story_id: "STORY-142"
         title: "Index inverse des entitlements : quelles organisations utilisent un module, et dans quelle version (+ index moduleCode)"
         epic: "EPIC-024"

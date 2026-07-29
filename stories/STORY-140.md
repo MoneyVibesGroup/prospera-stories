@@ -5,7 +5,8 @@
 **Priorité :** Must Have
 **Story Points :** 3 *(5 → 3 : arbitrage (b) retenu au lancement, cf. §Risque — `project:*` part dans STORY-141)*
 **Complexité :** medium
-**Statut :** in_progress
+**Statut :** done
+**Clôturée le :** 2026-07-29
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
 **Sprint :** 18
@@ -180,9 +181,62 @@ n'était pas une option réelle. La story passe à **3 points** et à **2 permis
 | ① Story ajustée (arbitrage (b), 3 dépôts, conception voie mixte) | ✅ |
 | ③ Développement (3 dépôts) | ✅ |
 | ④ Portes DoD + mutation-tests + vérif docker | ✅ |
-| ⑥ Revue de code | ⏳ |
-| ⑦ Revue de sécurité | ⏳ |
-| ⑧ Rebase-merge | ⏳ |
+| ⑥ Revue de code | ✅ 1 bloquant + 3 mineurs, tous corrigés |
+| ⑦ Revue de sécurité | ✅ aucune vulnérabilité |
+| ⑧ Rebase-merge | ✅ 4 PR, branches supprimées |
+
+### ⑥ Revue de code — constats
+
+**🔴 BLOQUANT — la 4ᵉ copie K4 oubliée par le cadrage.** La story ne visait que 3 copies de
+`permission.enum.ts`. Or **STORY-106 en a créé une quatrième** dans `admin-panel`, dont le spec local
+le documente déjà (« répercutée dans les **4** services »). Et ce n'est pas une copie inerte :
+`CreatePlatformRoleDto` valide `permissions[]` par `@IsEnum(Permission)` **dessus** — « le catalogue
+K4 local tranche », dit déjà le test de rejet voisin.
+
+Laissée à 8 codes, elle aurait rejeté en **400 au bord** la composition d'un rôle portant
+`catalog:manage`, sans que la requête atteigne jamais l'IdP — pendant que les cases à cocher de
+STORY-106, alimentées par `GET /admin/permissions` (10 entrées désormais), les auraient fièrement
+proposées. La story demandait ces rôles **dans la console** : le défaut en annulait l'objet.
+
+→ `admin-panel` devient le **4ᵉ dépôt** de la story. Corrigé, avec un e2e qui envoie des **chaînes
+brutes** et non des membres d'enum : passer par `Permission.CATALOG_MANAGE` aurait couplé le test à
+l'enum *à la compilation*, et la mutation aurait cassé le **build** au lieu de faire virer le test au
+rouge — l'assertion n'aurait alors rien prouvé du comportement au runtime.
+
+| # | Mutation (suite) | Résultat |
+|---|---|---|
+| M4 | copie du panel restée à 8 codes | 🔴 l'e2e reçoit **400** au lieu de 201 |
+
+**Mineurs, corrigés.**
+1. `roles.guard.ts` (catalog) affirmait desservir « les routes plateforme qu'aucune permission ne
+   couvre (`catalog-admin`) » — faux depuis ce ticket.
+2. `permissions.decorator.ts` n'offrait que 3 options (rôle / permission / contextuelle) : un lecteur
+   devant une route servie aux deux populations aurait empilé les deux décorateurs, c'est-à-dire
+   fabriqué le **ET** que ce même commentaire proscrit. La 4ᵉ option y est nommée.
+3. Mentions « 8 permissions » devenues fausses dans `auth-service`, `kyc-service` et `admin-panel` —
+   exactement la dérive que cette story crée.
+
+**Laissé de côté, assumé.** Le shim de compat pré-103 (`resolvePerms`) reste en place dans les
+4 services : sa suppression est tracée par STORY-105 et déborderait le périmètre.
+
+### ⑦ Revue de sécurité — aucune vulnérabilité
+
+Publiée sur les 4 PR. Points **activement vérifiés**, la story étant elle-même un changement
+d'autorisation :
+
+- **Fail-closed** du nouveau guard sur les 3 chemins qui comptent (utilisateur absent, règle vide,
+  jeton sans `roles` ni `perms`) ; comparaisons par égalité exacte, aucune correspondance par préfixe.
+- **Impossible de desserrer l'existant** : le guard est enregistré en dernier et un guard ne peut pas
+  annuler le refus d'un guard amont — l'empilement donnerait un ET, jamais un OU.
+- **Aucune élévation** : l'ensemble des porteurs de `catalog/admin` est inchangé, plus les délégations
+  explicites ; `assertCanGrant` couvre les 2 nouvelles permissions (test dédié). Les 3 rôles métier
+  sont des **définitions** — personne ne les détient sans attribution par un administrateur.
+- **Shim pré-103** : équivalence exacte de l'accès d'avant, et le claim n'est pas retirable (RS256/JWKS,
+  confusion d'algorithme déjà couverte par un e2e).
+- **Anti-énumération** : message générique, champ `error` préservé (exception construite avec une
+  **chaîne**, pas un objet — ce dernier l'écrase silencieusement).
+- **Multi-tenant** : `GET /catalog` expose le catalogue publié **global**, déjà lisible par un
+  `TENANT_ADMIN` avant la PR ; aucun scope `tenantId` contourné.
 
 ### ④ Portes DoD (2026-07-29)
 
