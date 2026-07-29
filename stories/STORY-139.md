@@ -148,10 +148,48 @@ AC-2 est recalé sur un couple **vérifié dans les deux artefacts, exact et uni
 | Phase | État | Note |
 |---|---|---|
 | Cadrage (①) | ✅ 2026-07-29 | Décisions D-139-1 → D-139-7 ; AC-2 recalé sur les artefacts réels ; STORY-058 écartée au profit de `surcharges_rattachement` (invariant « une base par service »). |
-| Développement (③) | ⏳ | |
-| Validation (④) | ⏳ | |
+| Développement (③) | ✅ 2026-07-29 | Module `suggestion` (règles pures + registre mémoïsé + service + contrôleur + DTO), câblé dans `app.module.ts`. Aucun schéma, aucune écriture. |
+| Validation (④) | ✅ 2026-07-29 | Portes DoD + mutation-tests + **vérification docker réelle** (ci-dessous). |
 | Revue de code (⑥) | ⏳ | |
 | Revue de sécurité (⑦) | ⏳ | |
+
+### Portes de qualité (2026-07-29)
+
+`lint` 0 warning · `build` OK · couverture globale **98,76 / 91,72 / 98,13 / 98,80** (seuils 65/90/90/90), module `suggestion` à **100 %** sur les 4 axes · **1 208** unitaires verts · **258** e2e verts (dont 19 pour cette story) · aucune régression.
+
+### Mutation-tests — ce qui prouve que les tests filtrent
+
+Un critère qu'un code bugué franchit ne prouve rien. Sept mutations volontaires, chacune restaurée après contrôle :
+
+| # | Mutation appliquée | Résultat |
+|---|---|---|
+| M1 | la surcharge `LIBELLE` n'est plus consultée (type inversé) | **6 rouges** |
+| M2 | l'ambiguïté est tranchée « le premier venu » | **2 rouges** |
+| M3 | `@RequiresBalanceAccess()` retirée du contrôleur | **e2e KYC rouge** |
+| M3b | `@Roles(TENANT_ADMIN, TENANT_USER)` retiré | **e2e PLATFORM_ADMIN rouge** |
+| M4 | index mémoïsé sur `(code, version)` au lieu du checksum | **1 rouge** |
+| M5 | élagage du pluriel retiré | **6 rouges** |
+| M6 | `SEUIL_APPROCHANT` ramené à `0` | **2 rouges** |
+
+⚠️ **M3b a d'abord été VERT** — aucun test ne prouvait `@Roles`. Le test « PLATFORM_ADMIN porteur d'une org habilitée → 403 » a été **ajouté** pour combler ce trou : le cas `PLATFORM_ADMIN` déjà présent passait pour une autre raison (jeton sans organisation ⇒ refus de la gate d'entitlement), il ne testait donc pas le RBAC.
+
+Note tirée de M3 : retirer la gate ne rend **pas** rouge le cas « entitlement révoqué » — `ReferentielResolver` refuse aussi, en défense en profondeur. C'est le cas **KYC** qui prouve réellement la gate.
+
+### Vérification docker réelle (2026-07-29) — stack neuve après `down -v`
+
+`mongo` + `kafka` + `redis` + `auth-service` + `balance-service`, `/health` à `{mongodb: up, kafka: up}`. Organisation amorcée par `register` sur l'IdP (`6a69b0de…3546`), read-models posés à la main (`orgkycstatuses` / `orgbalanceentitlements` — **noms Mongoose par défaut**, pas de `@Schema({collection})`).
+
+| # | Ce qui est prouvé | Résultat |
+|---|---|---|
+| 1 | **AC-5** avant amorçage : gate fermée | `403 KYC_NOT_APPROVED` |
+| 2 | **AC-1 / AC-4** sur l'artefact SYSCOHADA réel | `Achats de marchandises → 601` (EXACT) · `Banque → 52` (APPROCHANT, pluriel élagué) · `xyzzy → null` · checksum `01b892c0…` + `stamp` complets |
+| 3 | **AC-3** : règle posée par le **vrai** endpoint d'écriture (`PUT /rattachement/surcharges`), document lu en base, puis appliquée | `Travaux de construction → 705` (SURCHARGE), y compris sur la variante `«  TRAVAUX   DE  CONSTRUCTION »` (clé normalisée identique à l'écriture) ; et `Achats de marchandises → 706`, **la règle primant sur la correspondance exacte du plan** |
+| 4 | **AC-2** : bascule du référentiel de l'org en base | `Charges de personnel → 64` en `sfd-bceao@2.0` (checksum `ee9bf014…`), `→ 66` de retour en `syscohada-revise@2.1` (checksum `01b892c0…`) — **même libellé, deux comptes, deux checksums** |
+| 5 | **D-139-5** sur donnée réelle | `Banques et correspondants` en SFD ⇒ `compte: null` + `alternatives: [114, 154]` |
+| 6 | **Isolation tenant** | une 2ᵉ organisation ne voit **aucune** des 2 règles de la 1ʳᵉ (`Travaux de construction → null`, `Achats de marchandises → 601` du plan) ; `surcharges_rattachement` groupé par `orgId` ne porte qu'un seul groupe |
+| 7 | **AC-6** : contrat publié | `/api/docs-json` expose `POST /api/v1/balances/suggest-comptes`, tag `suggestion`, réponses `200/400/403/409/502/503`, schémas `SuggestComptesResponseDto` / `SuggestionCompteDto` |
+| 8 | Bornes du contrat sur la vraie stack | `{}`, `libelles: []`, champ additionnel `referentiel`, `libelles: [123]`, 201 éléments ⇒ **400** ; 200 éléments ⇒ **200** |
+| 9 | **Lecture seule** | comptes de **toutes** les collections identiques avant/après 3 appels — l'endpoint n'écrit rien |
 
 ---
 
