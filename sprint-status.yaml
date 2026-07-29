@@ -1857,8 +1857,8 @@ sprints:
         epic: "EPIC-024"
         points: 3
         service: "platform-catalog-service"
-        status: "not_started"  # aucun index sur moduleCode seul aujourd'hui → une lecture par module ferait un COLLSCAN. Débloque AP-10.
-        assigned_to: null
+        status: "in_progress"  # 2026-07-29 — aucun index sur moduleCode seul aujourd'hui → une lecture par module ferait un COLLSCAN. Débloque AP-10. ⚠️ Arbitrage au lancement : la garde passe de catalog:read à org:read — la donnée renvoyée EST de la donnée d'organisation, et le sens direct (GET /entitlements/:orgId) est déjà gardé par org:read ; garder le sens inverse plus faiblement aurait ouvert une seconde porte, plus basse, sur la même donnée. Les 3 rôles métier de STORY-140 portent tous org:read : aucun persona ne perd l'accès visé.
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-141"
         title: "Objet Projet : modèle, CRUD, organisation propriétaire, association de modules, événement project.changed"
         epic: "EPIC-026"

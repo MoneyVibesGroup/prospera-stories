@@ -4,12 +4,30 @@
 **Réf. architecture :** `architecture-catalog-service-2026-07-07.md` · **STORY-032** (catalogue) · **STORY-033** (entitlements + index `{organizationId, moduleCode}`) · **STORY-140** (`catalog:read`)
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** draft
-**Assigné à :** Unassigned
+**Complexité :** medium
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
 **Sprint :** 18
 **Service :** `platform-catalog-service` (:3003) — 1 dépôt, 1 branche, 1 PR
 **Branche :** `MNV-142`
+
+> **Arbitrage pris au lancement (2026-07-29), avant tout code — la permission de garde.**
+>
+> Le périmètre demandait `catalog:read` sur les deux nouvelles routes. **Retenu : `org:read`.**
+>
+> La donnée renvoyée — *quelles organisations détiennent quel module, dans quelle version, avec quel
+> statut* — **est** de la donnée d'organisation, pas du catalogue. Or le **sens direct** de la même
+> information (`GET /entitlements/:orgId`) est gardé par **`org:read`** via `assertCanReadOrg`. Garder
+> le sens inverse par `catalog:read` aurait créé une **asymétrie d'autorisation sur une donnée
+> identique** : un porteur de `catalog:read` **sans** `org:read` aurait pu énumérer le parc client
+> module par module — précisément ce que le sens direct lui refuse. Un attaquant emprunte toujours la
+> porte la plus faible ; il ne doit pas y en avoir deux.
+>
+> **Le besoin du PO n'en souffre pas** : les 3 rôles métier seedés par STORY-140
+> (`PLATFORM_ACCOUNTANT`, `PLATFORM_MARKETING`, `PLATFORM_EXECUTIVE`) portent **tous** `org:read`, tout
+> comme `PLATFORM_SUPPORT`, `PLATFORM_AUDITOR` et `PLATFORM_KYC_OFFICER`. Aucun persona existant ne
+> perd l'accès visé.
 
 ---
 
@@ -41,7 +59,8 @@ elle le devient avec AP-10.
 
 **Inclus :**
 - **Index** `EntitlementSchema.index({ moduleCode: 1 })`.
-- **Endpoint** `GET /entitlements/by-module/:moduleCode`, permission `catalog:read` (STORY-140) :
+- **Endpoint** `GET /entitlements/by-module/:moduleCode`, permission **`org:read`** (voir l'arbitrage
+  en tête : `catalog:read` aurait été plus faible que le sens direct sur la même donnée) :
   - **paginé** (`page`, `pageSize`, défaut 25, plafond 100) — un module populaire concernera des
     milliers d'organisations ;
   - filtre optionnel `?status=ACTIVE|SUSPENDED|REVOKED`, défaut **toutes** (l'admin veut voir les
@@ -77,8 +96,12 @@ Renvoyer `organizationId` nu oblige le front à N appels pour afficher N noms. T
 - [ ] Un `moduleCode` inexistant au catalogue → **404** (et non une liste vide, qui masquerait une faute de frappe).
 - [ ] `/summary` renvoie la répartition par version et par statut, cohérente avec la liste.
 - [ ] L'index `{ moduleCode: 1 }` existe ; un `explain()` sur la requête montre un **IXSCAN**, pas un COLLSCAN — tracé dans la PR.
-- [ ] Un acteur sans `catalog:read` → **403**.
+- [ ] Un acteur sans `org:read` → **403** (arbitrage en tête de story). En particulier : un porteur de
+      `catalog:read` **seul** est refusé, et un `TENANT_ADMIN` aussi — sinon il énumérerait le parc
+      client, ce que le sens direct lui refuse déjà.
 - [ ] Aucune donnée d'organisation autre que l'`organizationId` n'est renvoyée.
+- [ ] **Mutation-test de l'ordre des routes** : déplacer `by-module/:moduleCode` **après** `:orgId`
+      doit faire virer au rouge le test dédié — sinon ce test ne protège rien.
 
 ---
 
