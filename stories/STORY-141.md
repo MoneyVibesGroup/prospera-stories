@@ -248,8 +248,131 @@ commit qui livre leur guard. Cette story les ajoute donc :
 | Phase | État |
 |---|---|
 | ① Story ajustée (5 arbitrages, 4 dépôts) | ✅ |
-| ③ Développement | ⏳ |
-| ④ Portes DoD + mutation-tests + vérif docker | ⏳ |
+| ③ Développement (4 dépôts) | ✅ |
+| ④ Portes DoD + 7 mutation-tests + vérif docker | ✅ **1 bug trouvé par la vérif docker, corrigé** |
 | ⑥ Revue de code | ⏳ |
 | ⑦ Revue de sécurité | ⏳ |
 | ⑧ Rebase-merge | ⏳ |
+
+### ④ Portes DoD (2026-07-29)
+
+| Dépôt | Lint | Build | Couverture (L/F/B) | Unit | e2e |
+|---|---|---|---|---|---|
+| `platform-catalog-service` | 0 warning | ✅ | 99,88 / 100 / 93,96 | 315 ✅ | 110 ✅ |
+| `auth-service` | 0 warning | ✅ | 96,93 / 97,80 / 89,72 | 612 ✅ | 153 ✅ |
+| `kyc-service` | 0 warning | ✅ | 95,38 / 94,08 / 89,89 | 222 ✅ | 70 ✅ |
+| `admin-panel` | 0 warning | ✅ | 99,83 / 100 / 93,00 | 243 ✅ | 109 ✅ |
+
+Module `projects` : **100 %** lignes / fonctions sur le contrôleur et le schéma, 98,83 / 94,28 sur le
+service. `diff -q` des **4** copies de `permission.enum.ts` : **identiques**.
+
+### 🔴 ④ Le bug que seule la vérification docker pouvait voir
+
+`GET /projects?organizationId=` renvoyait **`total: 0` sur 3 documents réellement présents**, sans la
+moindre erreur — et lint, build, 315 unitaires et 110 e2e étaient **tous verts**.
+
+**Cause.** Dans ce service, `@Prop({ type: Types.ObjectId })` ne produit pas un chemin `ObjectId`
+mais un chemin **`Mixed`** — vérifié, pas supposé :
+`EntitlementSchema.path('organizationId').instance === 'Mixed'`. Un chemin `Mixed` ne caste **rien** :
+ni la valeur écrite, ni le filtre d'une requête. Le schéma déclarait donc un type que Mongoose
+n'appliquait jamais.
+
+L'asymétrie était de mon fait : `create` écrivait `new Types.ObjectId(orgId)` — un vrai `ObjectId` en
+base — tandis que `findAll` filtrait avec la **chaîne** du DTO. Deux représentations du même
+identifiant, aucune conversion entre les deux, zéro résultat.
+
+**Pourquoi aucun test ne le voyait.** Les faux `Model` (unitaires *et* e2e) comparent par `String()`,
+donc les deux formes s'y équivalent. C'est exactement le trou que `CLAUDE.md` décrit : les e2e mockent
+la couche données et ne prouvent **ni** la persistance **ni** le comportement réel des requêtes.
+
+**Correctif.** `organizationId` passe en `@Prop({ type: String })` et le service écrit la chaîne brute
+— comme `Entitlement.organizationId`, qui stocke déjà des chaînes. Bénéfice second : les deux
+collections restent **joignables en `mongosh` sans cast** (vérifié :
+`projects.organizationId === entitlements.organizationId` → `true`). Un `ObjectId` d'un côté et une
+chaîne de l'autre aurait fait échouer en silence toute vérification croisée future.
+
+**Verrous ajoutés** (les deux virent au rouge si le bug revient — mutation M7) :
+`project.schema.spec.ts` asserte `path('organizationId').instance === 'String'`, et
+`projects.service.spec.ts` asserte que l'écriture et le filtre de lecture emploient la **même chaîne**.
+
+### ④ Mutation-tests — la preuve que les tests filtrent
+
+| # | Mutation appliquée | Résultat |
+|---|---|---|
+| M1 | `POST /projects` gardé par `project:read` au lieu de `project:manage` | 🔴 2 e2e |
+| M2 | `$addToSet` → `$push` (association non idempotente) | 🔴 1 unitaire |
+| M3 | statut exigé `ACTIVE` → `SUSPENDED` | 🔴 5 unitaires + 8 e2e |
+| M4 | `PermissionsGuard` neutralisé dans la chaîne `APP_GUARD` de l'e2e | 🔴 4 e2e — sans ce maillon les 6 routes ne sont gardées par **personne** |
+| M5 | plancher deny-by-default de **classe** retiré | 🔴 1 unitaire |
+| M6 | `PLATFORM_ACCOUNTANT` reçoit `project:manage` au lieu de `project:read` | 🔴 2 unitaires (`auth-service`) |
+| M7 | **le bug docker réintroduit** (chemin `ObjectId` + écriture `new Types.ObjectId`) | 🔴 2 unitaires |
+
+### ④ Vérification docker — stack neuve (`down -v`), `auth-service` + `platform-catalog-service`
+
+**Preuve 1 — le seed a réellement écrit (`mongosh auth_service`, collection `roles`)** : 7 rôles, tous
+`isSystem: true`. `project:read` est bien entré dans les 3 rôles métier, **et `project:manage` dans
+aucun d'eux** :
+
+```
+PLATFORM_ACCOUNTANT  ["org:read","catalog:read","project:read"]
+PLATFORM_MARKETING   ["org:read","catalog:read","project:read"]
+PLATFORM_EXECUTIVE   ["org:read","catalog:read","project:read","entitlement:grant","entitlement:revoke"]
+PLATFORM_ADMIN       les 12 permissions (catalogue entier, par construction)
+```
+
+**Preuve 2 — le catalogue sort de l'IdP** : `GET /admin/permissions` → **12** entrées, chacune avec son
+libellé français, `project:read` et `project:manage` incluses, **aucune sans libellé**.
+
+**Preuve 3 — le JWT RS256 réel porte les nouveaux claims.** Jeton `PLATFORM_ADMIN` obtenu par login :
+`perms` contient les 12 codes, `project:read` et `project:manage` compris.
+
+**Preuve 4 — la décision structurante, contre Mongo réel** (org `a…a`, `bilan` + `stock` entitlés `ACTIVE`) :
+
+| Requête | Attendu | Obtenu |
+|---|---|---|
+| `POST /projects` avec `["bilan"]` | 201 | **201** |
+| `POST /projects` avec `["fantome"]` | 409, code nommé | **409** « Le module « fantome » n'existe pas au catalogue. » |
+| `POST /projects` homonyme, **même** org | 409 | **409** |
+| `POST /projects` même nom, **autre** org | 201 | **201** |
+| `GET /projects` **sans** `organizationId` | 400 | **400** |
+| `DELETE /projects/:id` | 404 (verbe inexistant) | **404** |
+
+**Preuve 5 — persistance et invariants (`mongosh catalog_service`)** : collection **`projects`**
+(nommée explicitement), **3 documents**, index `{organizationId, name}` **unique** réellement créé en
+base, `createdBy` renseigné. **Aucun orphelin** : les tentatives refusées en 409 n'ont laissé aucun
+document.
+
+**Preuve 6 — LE critère de la story : la dégradation.** `DELETE /catalog/entitlements/:org/stock`
+(révocation *soft*), puis `GET /projects/:id` :
+
+```
+moduleCodes = ['bilan', 'stock']      ← rien n'a été supprimé
+  bilan → Module bilan | 2.0 | ACTIVE
+  stock → Module stock | 2.0 | REVOKED   ← la dégradation est EXPOSÉE, pas cascadée
+```
+
+Puis `DELETE /projects/:id/modules/stock` → **200**, `moduleCodes = ['bilan']` : on peut nettoyer un
+projet dégradé **sans** entitlement actif — c'est ce qui rend l'arbitrage possible côté admin.
+
+**Preuve 7 — idempotence et archivage.** Association rejouée → `['bilan','stock']` inchangé (pas de
+doublon). Dissociation rejouée → **200**, jamais 404. `PATCH status: ARCHIVED` → **ARCHIVED**, puis
+association sur le projet archivé → **409** « réactivez-le avant d'en modifier le périmètre ».
+
+**Preuve 8 — RBAC sur des jetons réels.** Deux rôles **non-système** composés via l'API
+(`LECTEUR_PROJETS` = `["project:read"]`, `GESTION_PROJETS` = `["project:manage"]`), deux utilisateurs
+plateforme invités, deux logins réels (claims vérifiés : **une seule** permission chacun) :
+
+| Requête | lecteur | gestion | admin | sans jeton |
+|---|---|---|---|---|
+| `GET /projects?organizationId=` | **200** | **403** | 200 | **401** |
+| `GET /projects/:id` | **200** | **403** | 200 | **401** |
+| `POST /projects` | **403** | **201** | 201 | **401** |
+| `PATCH /projects/:id` | **403** | **200** | 200 | **401** |
+
+La colonne `gestion` est celle qui compte : **201 en écriture sans détenir `project:read`** — le
+plancher de classe est bien un plancher surchargé, pas un ET. Message de refus **générique** :
+« Accès refusé : permission insuffisante. », il n'énumère jamais la permission manquante.
+
+**Preuve 9 — le bug corrigé, sur base neuve** : `GET /projects?organizationId=` → `total = 2` (org
+`a…a`) et `total = 1` (org `b…b`) — isolation inter-organisations vérifiée, filtre `status` et
+plafond `pageSize=100` conformes.
