@@ -1807,7 +1807,7 @@ sprints:
         epic: "EPIC-021"
         points: 5
         service: "balance-service"
-        status: "not_started"  # 1er des 3 adaptateurs du hub ; préféré pour verticaux intégrés (toujours à jour, sans export manuel) ; passe par les mêmes contrôles d'équilibre (FR-A25)
+        status: "defined"  # 2026-07-29 — CADRÉE (Complexité high). 1er des 3 adaptateurs du hub ; préféré pour verticaux intégrés (toujours à jour, sans export manuel) ; passe par les mêmes contrôles d'équilibre (FR-A25). 8 décisions D-102-1..8 arrêtées : orgId d'enveloppe fait autorité (rejet si ≠ balance.orgId), trace d'ingestion dédiée `balance_ingestions` (un rejet n'est PAS un document Balance — il consommerait la clé unique et bloquerait la correction), `source: 'direct'` imposée, version déjà ingérée + checksum différent ⇒ rejet VERSION_DEJA_INGEREE (une correction n'est JAMAIS avalée en silence), politique tenant alignée sur la gate HTTP (KYC + entitlement) + allowlist sourceSystem (repli C8), route `balance/rejets` racine distincte (jamais `balances/rejets` — apparié par @Get(':id')), une seule transaction via BalanceService.submitInSession (contrôles écrits une fois).
         assigned_to: null
       - story_id: "STORY-087"
         title: "Reprise de balance d'ouverture / à-nouveaux + continuité dans l'Atelier — FR-A13"
