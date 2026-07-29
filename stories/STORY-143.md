@@ -9,8 +9,48 @@
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
 **Sprint :** 18
-**Service :** `admin-panel` (:3010) — 1 dépôt (`prospera-admin-panel-service`), 1 branche, 1 PR
-**Branche :** `MNV-143`
+**Services :** `admin-panel` (:3010) · `auth-service` (:3001, **filtre `?ids=` ajouté pour l'incrément 2**)
+**Branches :** `MNV-143` (inc. 1, `admin-panel` seul) puis `MNV-143` × **2 dépôts** (inc. 2+3)
+
+> ## Arbitrages des incréments 2 et 3 (2026-07-29)
+>
+> ### 1. `auth-service` gagne un filtre `?ids=` — la story passe à **2 dépôts**
+>
+> Le critère « la résolution des noms se fait en **un appel groupé** » était **inapplicable en
+> l'état** : `GET /admin/organizations` n'accepte que `page`, `limit`, `status`, `q`. Aucun moyen,
+> depuis le BFF seul, de demander « ces 100 organisations-là ».
+>
+> Les deux options à un dépôt étaient toutes deux mauvaises : un appel **par ligne** (le N+1 que le
+> critère interdit), ou le **téléchargement du parc entier** à chaque requête — un « appel groupé »
+> qui ramène toute la table n'en est pas un, c'est un fetch non borné qui se dégrade **précisément
+> quand la plateforme grandit**, et dont le correctif ultérieur aurait été ce même filtre amont plus
+> une réécriture du BFF.
+>
+> `?ids=` est donc ajouté à `auth-service` : tableau d'`ObjectId` validés, `$in`, **plafonné à 100 et
+> rejeté au-delà** (jamais tronqué — une réponse partielle que l'appelant croirait exhaustive
+> afficherait des lignes sans nom sans que rien ne le signale). Coût de la résolution : **borné par
+> la page**, pas par le parc.
+>
+> ### 2. Les routes `by-module` sont gardées par **`org:read`**, pas `catalog:read`
+>
+> Le tableau du périmètre annonce `catalog:read`. Il a été écrit **avant** que STORY-142 ne livre
+> l'amont, qui a tranché l'inverse : ces deux routes y sont gardées par **`org:read`**, au motif que
+> « la donnée renvoyée EST de la donnée d'organisation » et que garder le sens inverse plus
+> faiblement ouvrirait, sur la même donnée, **une seconde porte plus basse**.
+>
+> **Mesuré en vérification docker**, pas déduit : un jeton `catalog:read` **seul** franchissait le
+> panel puis se faisait refuser en `403` par `catalog`. La garde du BFF était donc **décorative** —
+> elle ratait sa seule raison d'être, refuser **tôt** — et elle rouvrait en façade la porte que 142
+> avait fermée. Le panel s'aligne sur l'autorité. Les 3 rôles métier visés portent tous `org:read` :
+> aucun persona ne perd l'accès visé.
+>
+> ### 3. Le `409` amont traverse **avec son message** — exception assumée
+>
+> Partout ailleurs, `rethrowUpstreamError` neutralise le texte amont. Ici le `409` **est**
+> l'information utile : « Le module « stock » n'est pas accordé… » dit **quel** module corriger. Le
+> message générique rendrait AP-11 inutilisable — on saurait que ça échoue, jamais pourquoi. Trois
+> bornes gardent l'exception : **le 409 seulement**, **le champ `message` seulement et seulement s'il
+> est une chaîne**, **tronqué** avec repli générique.
 
 > **⚠️ SCINDÉE EN 3 INCRÉMENTS le 2026-07-29** — l'amont de 8 des 9 routes n'existe pas
 > (STORY-141 et STORY-142 sont `not_started`, vérifié sur `origin/dev` de
@@ -50,15 +90,16 @@ S'y ajoutent les deux besoins nouveaux : la lecture inverse (STORY-142) et la su
 | Route BFF | Amont | Permission |
 |---|---|---|
 | `GET /admin/orgs/:orgId/entitlements` | `GET /entitlements/:orgId` | `org:read` |
-| `GET /admin/modules/:moduleCode/organizations` | `GET /entitlements/by-module/:moduleCode` (139) | `catalog:read` |
-| `GET /admin/modules/:moduleCode/summary` | `.../summary` (139) | `catalog:read` |
+| `GET /admin/modules/:moduleCode/organizations` | `GET /entitlements/by-module/:moduleCode` (**142**) | ~~`catalog:read`~~ → **`org:read`** (arbitrage 2) |
+| `GET /admin/modules/:moduleCode/summary` | `.../summary` (**142**) | ~~`catalog:read`~~ → **`org:read`** (arbitrage 2) |
 
 ### Résolution des noms d'organisation — la valeur ajoutée du BFF
 `platform-catalog` ne renvoie que des `organizationId` opaques (décision assumée, STORY-142 §b).
 Le BFF **compose** : il enrichit chaque ligne avec `{ name, country, status }` lus depuis
 `auth-service`, en **un seul appel groupé** (pas N+1).
 - Si `auth-service` ne répond pas : appliquer le patron **`SourceStatus`** de STORY-047 — la liste
-  est renvoyée avec les identifiants et `organizationSource: "degraded"`, **jamais une erreur 500**.
+  est renvoyée avec les identifiants et `organizationSource: "unavailable"` (⚠️ **pas** `degraded`,
+  qui n'existe pas dans le type — cf. §Notes techniques), **jamais une erreur 500**.
   L'écran AP-10 sait afficher une source dégradée (patron AP-02).
 
 ### Surface Projets
@@ -94,16 +135,20 @@ sur 9 n'est pas écrit. État constaté sur `origin/dev` de `platform-catalog-se
 **Aucune dépendance** : l'amont existe. **Débloque AP-05**, dont le 1ᵉʳ critère d'acceptation
 n'avait aucune route à appeler.
 
-### Incrément 2 — ⛔ bloqué par STORY-142
-`GET /admin/modules/:moduleCode/organizations` + `/summary`, permission `catalog:read`,
-**et** la résolution des noms d'organisation (`organization-resolver.service.ts`, appel groupé,
-dégradation de source). Sans l'index inverse amont, il n'y a rien à proxifier ni à enrichir.
-⚠️ `catalog:read` n'entre au `PERMISSION_CATALOG` **qu'avec** cet incrément (règle d'or : une
-permission n'existe que si un guard la vérifie).
+### Incrément 2 — ✅ livré (2026-07-29), STORY-142 étant mergée
+`GET /admin/modules/:moduleCode/organizations` + `/summary`, **et** la résolution des noms
+d'organisation (`organization-resolver.service.ts`, appel groupé, dégradation de source).
 
-### Incrément 3 — ⛔ bloqué par STORY-141
-Les 6 routes Projets, permissions `project:read` / `project:manage` — mêmes réserves sur
-l'entrée des deux permissions au catalogue.
+⚠️ **Deux points du cadrage ci-dessus sont périmés, corrigés à la livraison :**
+1. **Permission `org:read`, PAS `catalog:read`** (cf. §Arbitrages, point 2). Le cadrage a été écrit
+   avant que STORY-142 ne livre l'amont, qui a tranché l'inverse.
+2. **`catalog:read` était déjà entrée au `PERMISSION_CATALOG`** avec STORY-140 : la réserve sur la
+   règle d'or est sans objet.
+
+### Incrément 3 — ✅ livré (2026-07-29), STORY-141 étant mergée
+Les 6 routes Projets, permissions `project:read` / `project:manage`. Ces deux codes sont entrés au
+`PERMISSION_CATALOG` avec **STORY-141**, dans le commit qui livrait leur guard amont : la réserve
+sur la règle d'or est également sans objet.
 
 > **Ordre recommandé** : 142 → incrément 2, 141 → incrément 3. Les deux incréments restants
 > se rouvrent sur **cette même story** (pas de nouvelle story) : le périmètre, les critères et
@@ -118,16 +163,16 @@ l'entrée des deux permissions au catalogue.
 - [x] **[inc. 1]** `GET /admin/orgs/:orgId/entitlements` renvoie les entitlements de l'org — **AP-05 débloquée**.
 - [x] **[inc. 1]** Filtre `status` **validé au BFF** (`ACTIVE|SUSPENDED|REVOKED`) puis relayé ; une valeur hors énumération → **400** au BFF, sans toucher l'amont.
 - [x] **[inc. 1]** `catalog` est ici la source **primaire** : son `403` reste un **403**, sa panne un **503** — jamais une liste vide présentée comme un succès.
-- [ ] **[inc. 2]** `GET /admin/modules/:moduleCode/organizations` renvoie les organisations **avec leur nom**, paginé, filtre `status` relayé.
-- [ ] **[inc. 2]** La résolution des noms se fait en **un appel groupé** ; un test prouve l'absence de N+1.
-- [ ] **[inc. 2]** `auth-service` indisponible → **200** avec la source d'identité dégradée et les identifiants, jamais 500.
-- [ ] **[inc. 3]** Les 6 routes Projets proxifient correctement ; un **409** amont (module non entitlé) est relayé avec son message.
+- [x] **[inc. 2]** `GET /admin/modules/:moduleCode/organizations` renvoie les organisations **avec leur nom**, paginé, filtre `status` relayé.
+- [x] **[inc. 2]** La résolution des noms se fait en **un appel groupé** ; un test prouve l'absence de N+1. *(a exigé le filtre `?ids=` amont — cf. arbitrage 1)*
+- [x] **[inc. 2]** `auth-service` indisponible → **200** avec la source d'identité dégradée et les identifiants, jamais 500. *(`unavailable`, jamais le `degraded` inexistant)*
+- [x] **[inc. 3]** Les 6 routes Projets proxifient correctement ; un **409** amont (module non entitlé) est relayé avec son message.
 - [x] **[inc. 1]** *(les incréments 2/3 le rejoueront pour leurs routes)* Chaque route porte son `@RequirePermissions` ; un acteur sans la permission → **403** au BFF, avant l'amont.
 - [x] **[inc. 1]** Aucun champ interne Mongo (`_id`, `__v`) ne fuit — le piège trouvé par STORY-104, à re-tester ici. **Renforcé** : le BFF re-projette champ par champ (liste blanche) au lieu de traverser le corps amont, donc une fuite amont ne traverse pas.
 - [x] **[inc. 1]** Non-régression de routage : `/admin/orgs/:orgId/entitlements` n'est **pas** capté par le `@Get(':orgId')` d'`AdminOrgsController` — **prouvé par un test**, pas supposé.
-- [ ] **[inc. 2]** Pagination : plafond appliqué, arrêt de pagination fiable (correctif MNV-107 à ne pas régresser).
+- [x] **[inc. 2]** Pagination : plafond appliqué **au bord** (100), jamais rejeté — correctif MNV-107 non régressé.
 - [x] **[inc. 1]** Vérification docker bout-en-bout : un opérateur porteur d'`org:read` lit `/admin/orgs/:orgId/entitlements` → **200** ; un `TENANT_ADMIN` → **403** au BFF.
-- [ ] **[inc. 2/3]** Vérification docker : un `PLATFORM_ACCOUNTANT` lit `/admin/modules/bilan/organizations` → **200** ; tente `POST /admin/projects` → **403**.
+- [x] **[inc. 2/3]** Vérification docker : un `PLATFORM_ACCOUNTANT` lit `/admin/modules/bilan/organizations` → **200** ; tente `POST /admin/projects` → **403**.
 
 ---
 
@@ -167,13 +212,13 @@ l'entrée des deux permissions au catalogue.
 
 ## Definition of Done
 
-*Portée sur l'**incrément 1** ; les incréments 2/3 la rejoueront à leur livraison.*
+*Rejouée à la livraison des incréments 2 et 3.*
 
-- [ ] Critères d'acceptation validés ; tests verts (unitaires + contrat).
-- [ ] `lint` / `typecheck` / `test` / `build` verts.
-- [ ] OpenAPI à jour — le front génère ses types depuis lui (règle Integration Gate).
-- [ ] Vérification docker bout-en-bout tracée.
-- [ ] Branche `MNV-143`, PR vers `dev`.
+- [x] Critères d'acceptation validés ; tests verts (unitaires + contrat).
+- [x] `lint` / `typecheck` / `test` / `build` verts **sur les 2 dépôts**.
+- [x] OpenAPI à jour — le front génère ses types depuis lui (règle Integration Gate).
+- [x] Vérification docker bout-en-bout tracée.
+- [x] Branches `MNV-143` × 2 dépôts, 2 PR vers `dev`.
 
 ---
 
@@ -280,3 +325,82 @@ Commits `afb8cf2` (incrément) + `1698f28` (revue).
 
 **Statut :** incrément 1 **livré**. La story reste **ouverte** pour les incréments 2 et 3, bloqués
 par STORY-142 et STORY-141 respectivement.
+
+---
+
+## 2026-07-29 — incréments 2 et 3 livrés, story CLÔTURÉE
+
+STORY-142 et STORY-141 ayant été mergées sur `dev`, les deux amont manquants existent. Les deux
+incréments restants sont livrés ensemble, sur **2 dépôts** (cf. arbitrage 1 : `auth-service` gagne le
+filtre `?ids=` sans lequel « un appel groupé » était inapplicable).
+
+### Portes DoD
+
+| Dépôt | Lint | Build | Couverture (S/B/F/L) | Unit | e2e |
+|---|---|---|---|---|---|
+| `admin-panel` | 0 warning | ✅ | 99,64 / 91,05 / **100** / 99,61 | 315 ✅ | 151 ✅ |
+| `auth-service` | 0 warning | ✅ | 96,90 / 89,60 / 97,81 / 96,94 | 615 ✅ | 160 ✅ |
+
+**100 % lignes et fonctions** sur les 5 fichiers neufs du BFF.
+
+### Mutation-tests — 7 mutations, 7 fois rouge
+
+| # | Mutation appliquée | Résultat |
+|---|---|---|
+| M1 | `TAILLE_LOT = 1` (résolution redevenue **N+1**) | 🔴 3 unitaires |
+| M2 | la dégradation d'identité annoncée **`ok`** (le mensonge d'affichage) | 🔴 3 unitaires |
+| M3 | le `409` amont **perd son message** (générique) | 🔴 3 unitaires + 1 e2e |
+| M4 | le message amont relayé **sans filtre de type ni troncature** | 🔴 3 unitaires |
+| M5 | `PermissionsGuard` neutralisé dans la chaîne e2e des Projets | 🔴 4 e2e — les 6 routes deviennent béantes |
+| M6 | `limit` non cadré sur `ids` (résolution **tronquée à 20**) | 🔴 1 e2e (`auth-service`) |
+| M7 | le `$in` reçoit des **chaînes** au lieu d'`ObjectId` (filtre stérile, `200 []` muet) | 🔴 1 unitaire (`auth-service`) |
+
+M7 rejoue délibérément le piège trouvé en STORY-141 : un filtre qui ne caste pas ne matche rien,
+**sans erreur**.
+
+### 🔴 Le défaut trouvé par la vérification docker
+
+Un jeton `catalog:read` **seul** franchissait le panel puis se faisait refuser en **403 par
+`catalog`** : la garde du BFF était **décorative**. Elle ratait sa seule raison d'être — refuser
+**tôt**, sans payer l'aller-retour — et elle rouvrait en façade la « seconde porte plus basse » que
+STORY-142 avait explicitement fermée : le panel annonçait une route à un persona incapable de s'en
+servir. Corrigé (`org:read`), **vérification rejouée** : refus prononcé par le BFF, **0 appel amont**
+déclenché.
+
+### Vérification docker — stack neuve (`down -v`), `auth` + `catalog` + `admin-panel`
+
+Les 8 routes confirmées montées dans les logs. Amorçage **réel** : 2 organisations créées par
+`register` (vrais `ObjectId`, vraies raisons sociales), modules `bilan`/`stock` au catalogue,
+entitlements octroyés — `bilan` chez les deux orgs, `stock` chez la première seulement.
+
+| # | Cas | Attendu | Obtenu |
+|---|---|---|---|
+| 1 | `GET /admin/modules/bilan/organizations` | 200 + **raisons sociales** | **200**, « Cabinet Numéro 1 / 2 », `organizationSource: ok` |
+| 2 | résolution groupée | **1** appel amont pour la page | **1** (tracé dans les logs `auth-service`) |
+| 3 | 🟡 `auth-service` **arrêté** | 200 dégradé, identifiants conservés | **200**, `organizationSource: unavailable`, 2 lignes, `organizationName: null` |
+| 4 | 🔀 **contre-épreuve** : `catalog` **arrêté** | **503**, jamais une page vide | **503** sur `by-module` **et** sur `/admin/projects` |
+| 5 | `POST /admin/projects` (modules entitlés) | 201 | **201** |
+| 6 | `POST /admin/projects` avec `stock` chez l'org **non entitlée** | 409 **nommant le module** | **409** « Le module « stock » n'est pas accordé (entitlement ACTIVE) à cette organisation. » |
+| 7 | module inexistant au catalogue | 409 nommé | **409** « Le module « fantome » n'existe pas au catalogue. » |
+| 8 | révocation puis `GET /admin/projects/:id` | module conservé, `REVOKED` exposé | **`moduleCodes: [bilan, stock]`**, `stock → REVOKED` |
+| 9 | `POST /:id/modules` | **200** (pas le 201 par défaut de Nest) | **200** |
+| 10 | dissociation d'un module **révoqué** | 200 | **200**, périmètre nettoyé |
+| 11 | archivage puis modification du périmètre | 409 **message amont relayé** | **409** « … est archivé : réactivez-le avant… » |
+| 12 | `catalog:read` seul (après correctif) | **403 au BFF**, 0 appel amont | **403**, **0** appel amont |
+| 13 | `PLATFORM_ACCOUNTANT` réel | 200 sur `by-module`, 403 sur `POST /projects` | **200** / **403** — le critère d'acceptation |
+
+**3/4 est le cœur de la vérification** : une seule et même panne, deux comportements **délibérément
+opposés** selon le rôle de la source. Sans la contre-épreuve, le `503` aurait pu venir d'une
+dégradation cassée plutôt que d'un choix de conception.
+
+**Matrice RBAC sur jetons RS256 réels** (rôles non-système composés via l'API, une seule permission
+chacun) :
+
+| Requête (via le BFF) | `project:read` | `project:manage` | `catalog:read` | admin | sans jeton |
+|---|---|---|---|---|---|
+| `GET /admin/modules/bilan/organizations` | 403 | 403 | **403** | 200 | 401 |
+| `GET /admin/projects?organizationId=` | **200** | 403 | 403 | 200 | 401 |
+| `POST /admin/projects` | 403 | **201** | 403 | 201 | 401 |
+
+La colonne `project:manage` est celle qui compte : **201 en écriture sans détenir `project:read`** —
+le plancher de classe est bien un plancher surchargé, pas un ET.
