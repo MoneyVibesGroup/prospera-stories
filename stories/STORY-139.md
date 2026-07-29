@@ -5,7 +5,9 @@
 **Priorité :** Should Have (aide à la saisie ; **aucun blocage** — le front dégrade proprement, cf. Contexte)
 **Story Points :** 5
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
+**Clôturée le :** 2026-07-29
+**Assignée à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-25
 **Origine :** implémentation de **FE-026** (saisie manuelle de balance) — modèle de saisie validé PO le 2026-07-25 : « on saisit le libellé + le montant, Prospera renseigne le compte » et « ne pas se limiter à SYSCOHADA : microfinance et assurance aussi ».
 **Service :** `balance-service` (:3007)
@@ -122,24 +124,24 @@ AC-2 est recalé sur un couple **vérifié dans les deux artefacts, exact et uni
 
 ## Definition of Done
 
-- [ ] 6 critères d'acceptation validés ; tests (résolution par référentiel, surcharge prioritaire, libellé inconnu, ambiguïté non tranchée, gate 403).
-- [ ] Résolution branchée sur les **paquets référentiels versionnés** + **surcharges org**, pas de table ad hoc.
-- [ ] OpenAPI à jour ; ticket de suivi FE-026 pour retirer le dictionnaire client référencé.
-- [ ] `lint` / `build` / `test:cov` (≥ 65/90/90/90) / `test:e2e` verts.
-- [ ] Vérification docker réelle (endpoint appelé sur stack, surcharge posée en base et vue primer sur le paquet).
+- [x] 6 critères d'acceptation validés ; tests (résolution par référentiel, surcharge prioritaire, libellé inconnu, ambiguïté non tranchée, gate 403).
+- [x] Résolution branchée sur les **paquets référentiels versionnés** + **surcharges org**, pas de table ad hoc.
+- [x] OpenAPI à jour ; ticket de suivi FE-026 pour retirer le dictionnaire client référencé.
+- [x] `lint` / `build` / `test:cov` (≥ 65/90/90/90) / `test:e2e` verts.
+- [x] Vérification docker réelle (endpoint appelé sur stack, surcharge posée en base et vue primer sur le paquet).
 
 ---
 
 ## Tasks
 
-- [ ] Règles **pures** de suggestion (`suggestion.regles.ts`) : normalisation, tokens significatifs, index inverse, score, arbitrage d'ambiguïté.
-- [ ] Registre d'index mémoïsé par checksum de paquet.
-- [ ] `SuggestionService` : résolution référentiel de l'org + chargement des surcharges + application des règles.
-- [ ] `SuggestionController` — `POST /api/v1/balances/suggest-comptes`, gardé, DTO whitelistés + Swagger.
-- [ ] `SuggestionModule` câblé dans `app.module.ts`.
-- [ ] Tests unitaires (règles, service, contrôleur) + e2e (contrat HTTP + 403).
-- [ ] Mutation-tests sur les critères qui protègent d'une régression précise.
-- [ ] Ticket de suivi FE-026.
+- [x] Règles **pures** de suggestion (`suggestion.regles.ts`) : normalisation, tokens significatifs, index inverse, score, arbitrage d'ambiguïté.
+- [x] Registre d'index mémoïsé par checksum de paquet.
+- [x] `SuggestionService` : résolution référentiel de l'org + chargement des surcharges + application des règles.
+- [x] `SuggestionController` — `POST /api/v1/balances/suggest-comptes`, gardé, DTO whitelistés + Swagger.
+- [x] `SuggestionModule` câblé dans `app.module.ts`.
+- [x] Tests unitaires (règles, service, contrôleur) + e2e (contrat HTTP + 403).
+- [x] Mutation-tests sur les critères qui protègent d'une régression précise.
+- [x] Ticket de suivi FE-026.
 
 ---
 
@@ -150,8 +152,23 @@ AC-2 est recalé sur un couple **vérifié dans les deux artefacts, exact et uni
 | Cadrage (①) | ✅ 2026-07-29 | Décisions D-139-1 → D-139-7 ; AC-2 recalé sur les artefacts réels ; STORY-058 écartée au profit de `surcharges_rattachement` (invariant « une base par service »). |
 | Développement (③) | ✅ 2026-07-29 | Module `suggestion` (règles pures + registre mémoïsé + service + contrôleur + DTO), câblé dans `app.module.ts`. Aucun schéma, aucune écriture. |
 | Validation (④) | ✅ 2026-07-29 | Portes DoD + mutation-tests + **vérification docker réelle** (ci-dessous). |
-| Revue de code (⑥) | ⏳ | |
-| Revue de sécurité (⑦) | ⏳ | |
+| Revue de code (⑥) | ✅ 2026-07-29 | **3 constats corrigés** (commit dédié `MNV-139(revue)`), vérification docker **rejouée** sur l'état final. |
+| Revue de sécurité (⑦) | ✅ 2026-07-29 | **Aucune vulnérabilité exploitable.** Compte rendu publié sur la PR #17. |
+| Intégration (⑧) | ✅ 2026-07-29 | PR **#17** rebase-mergée sur `dev`, branche supprimée. |
+
+### Revue de code — constats traités
+
+| # | Constat | Correction |
+|---|---|---|
+| R1 | Une règle d'organisation posée sur un libellé de **ponctuation** (« ++ ») n'était **jamais appliquée** : `cleSurcharge` conserve la ponctuation, `normaliserLibelle` la retire, et le garde-fou du libellé vide s'exécutait **avant** la recherche de règle. Reproduit sur la stack docker avant correction. | Le bloc « règle de l'organisation » passe **avant** le garde-fou de vacuité. Revérifié sur la stack : la règle est désormais honorée. |
+| R2 | Deux candidats portant le **même numéro de compte** étaient comptés comme une ambiguïté ⇒ refus d'une proposition pourtant déterminée. Non atteignable sur les artefacts livrés (aucun numéro dupliqué), donc silencieux jusqu'au jour d'un paquet qui le ferait. | Dédoublonnage par numéro **avant** arbitrage. |
+| R3 | La collecte des ex æquo testait la stricte supériorité **avant** l'égalité : un candidat supérieur d'un milliardième au meilleur ne satisfaisait aucune des deux branches et **disparaissait** — on aurait proposé un compte là où deux se valaient, contre D-139-5. | Égalité testée d'abord ; les scores non positifs sont écartés en tête de boucle. |
+
+**Rien n'a été laissé de côté.** 3 tests ajoutés ; couverture du module toujours à 100 %.
+
+### Revue de sécurité — sans vulnérabilité
+
+Périmètre : authentification, autorisation, injection, web, fichiers, cryptographie, infrastructure, logique métier, spécificités NestJS. Points saillants : `orgId` **exclusivement** issu du JWT et aucun DTO n'en accepte ; chaîne de guards complète et **mutation-prouvée** ; aucun libellé soumis n'atteint une requête Mongo (mise en correspondance en mémoire) ; aucun chemin construit depuis une entrée client ; travail borné (`ArrayMaxSize(200)` sous throttler) et cache d'index clé par checksum d'artefact **serveur** ; endpoint en lecture seule ; aucun secret introduit.
 
 ### Portes de qualité (2026-07-29)
 
