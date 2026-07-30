@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 3
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 17 (EXTENDED)
@@ -318,19 +318,100 @@ if (ligne.sens === 'CREDIT') await this.cahierRecettes.creer({ montant: ligne.mo
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — développement en cours (branche `MNV-089`, `balance-service`).
+**Statut : `done`** — livrée le **2026-07-30** (PR #21 `balance-service`, `MNV-089` → `dev`,
+« Rebase and merge », branche supprimée).
 
 | Phase | État |
 |---|---|
 | Cadrage + décisions D-089-1..6 | ✅ |
-| Implémentation | ⏳ |
-| Portes DoD (lint / build / unit / e2e / couverture) | ⏳ |
-| Vérification docker (persistance réelle, atomicité, isolation) | ⏳ |
-| Revue de code | ⏳ |
-| Revue de sécurité | ⏳ |
+| Implémentation | ✅ |
+| Portes DoD (lint / build / unit / e2e / couverture) | ✅ |
+| Mutation-tests | ✅ 32/32 |
+| Vérification docker (persistance réelle, atomicité, isolation) | ✅ 24/24 |
+| Revue de code | ✅ 1 bloquant + 3 mineurs corrigés |
+| Revue de sécurité | ✅ 1 vulnérabilité corrigée |
+
+### Ce qui a été livré
+
+- **`ProfilImport` gagne une cible** (D-089-1) : `cible: BALANCE | RELEVE` (défaut `BALANCE`,
+  les profils de STORY-088 sont inchangés), mapping en union, aiguillage centralisé dans
+  `imports/cible.regles.ts`, détection automatique keyée `(orgId, cible, signature)`, refus
+  `MAPPING_HORS_CIBLE` d'un champ de l'autre cible et `PROFIL_MAUVAISE_CIBLE` à l'import.
+  Règles de relevé pures dans `imports/mapping-releve.regles.ts` (3 conventions de montants,
+  parsing de date `JJ/MM` et ISO).
+- **Module `src/modules/tresorerie/`** : `CompteTresorerie` (`comptes_tresorerie`) + CRUD gardé,
+  `LigneReleve` (`lignes_releve`) + import `POST /tresorerie/:compteId/releves`
+  (dry-run 200 / persist 201) et consultation `GET` (lignes, totaux, solde de fin),
+  parser par profil rejetant **ligne à ligne** plutôt que devinant.
+- **Aucune dépendance vers les cahiers ni `BalanceService`** : l'invariant « un relevé ne crée
+  aucune écriture » est structurel, pas déclaratif.
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **1639 unitaires + 354 e2e** verts ·
+couverture globale **98,9 / 91,96 / 98,1 / 98,9** (module `tresorerie` 98,6 / 84,2 / 96,6 / 98,8 ;
+`imports` 98,3 / 91,3 / 100 / 98,5) — tous au-dessus des seuils 65/90/90/90.
+
+**Mutation-tests : 32/32 rouges.** Notamment : checksum sans rang d'occurrence, rang compté par
+fichier au lieu du tuple, libellé non normalisé, tolérance de continuité élargie, `soldeFin`
+reconstitué par cumul, convention C à une seule liste, sens inconnu tombant dans un défaut,
+date lue en `MM/JJ`, date inexistante décalée, filtre `cible` retiré de la détection, insertion
+hors transaction, tri sans `_id`, garde PDF/exercice clos/compte inactif retirée, borne `au`
+exclusive, `dryRun` booléen naïf, 201 systématique, `orgId` retiré d'un filtre.
+
+⚠️ **Un mutation-test a d'abord échoué à filtrer** : « `chargerPourImport` n'exige plus la bonne
+cible » restait vert, parce que l'e2e vérifiait le **double** de `ProfilsImportService` et non le
+vrai service — exactement la fausse assurance que la discipline cherche. Corrigé par trois tests
+unitaires sur le vrai service (mutation désormais rouge) ; l'e2e porte maintenant un commentaire
+disant explicitement qu'il ne prouve que la **forme HTTP** du refus.
+
+### Vérification docker — stack NEUVE (`down -v`), 24/24
+
+Deux organisations **réelles** amorcées sur l'IdP, gates ouvertes (KYC `APPROVED` + entitlement
+`balance` `ACTIVE` / `syscohada-revise@2.1`).
+
+| # | Contrôle | Résultat |
+|---|---|---|
+| 1 | Stack neuve, `/health` `mongodb: up`, `kafka: up` | ✅ |
+| 2 | Déclaration `BANQUE`/`MOBILE_MONEY`/`CAISSE`, compte comptable repris de la ventilation | ✅ `521` / `551` / `571` |
+| 3 | `POST /imports/analyser` avec `cible=RELEVE` → mapping complet proposé, `manquants: []` | ✅ |
+| 4 | Signature identique **analyse ↔ profil enregistré** | ✅ `c1f2deb8…` |
+| 5 | Champ de l'autre cible refusé | ✅ 400 `MAPPING_HORS_CIBLE` `{champs:["debiteur"]}` |
+| 6 | **Dry-run par défaut** → 200, `lignes_releve` reste à **0** | ✅ |
+| 7 | `dryRun=false` → 201, documents réels (unités mineures, `sens`, `soldeApres`, `NON_RAPPROCHE`, `parUserId`) | ✅ 2 documents |
+| 8 | **Ré-import chevauchant** (janvier→mars sur mars déjà importé) | ✅ 3 lues / **1 nouvelle** / 2 ignorées → **3 lignes, pas 5** |
+| 9 | Ré-import **intégral** | ✅ HTTP **200** (pas 201), 0 création |
+| 10 | **Jumelles** (2 paiements identiques le même jour) | ✅ **2 lignes**, 2 empreintes ; ré-import → 0 nouveauté (rangs stables) |
+| 11 | Mobile money convention C | ✅ `Dépôt`→CREDIT, `Paiement marchand`→DEBIT, `Frais de service` → **`SENS_INDETERMINE` listé** |
+| 12 | Index réellement en base | ✅ `(orgId,compteTresorerieId,checksumLigne)` UNIQUE, `(orgId,libelle)` UNIQUE, `(orgId,cible,signature)` |
+| 13 | **Atomicité** (index unique partiel temporaire, échec en milieu de lot) | ✅ 409, **7 avant / 7 après, 0 orphelin** — la ligne qui précédait l'échec est annulée aussi |
+| 14 | **Aucune écriture comptable** après 5 imports | ✅ `lignes_recettes`=0, `lignes_depenses`=0, `balances`=0, `outbox_events`=0 |
+| 15 | Rupture de la chaîne des soldes | ✅ avertissement daté, **non bloquant** (2 lignes créées) |
+| 16 | PDF | ✅ 400 `RELEVE_PDF_NON_SUPPORTE`, message aiguillant vers CSV/Excel et l'OCR de capture |
+| 17 | **Isolation** : détail / PATCH / DELETE / import / consultation du compte d'une autre org | ✅ **404** partout (jamais 403) |
+| 18 | Isolation : liste de l'org B vide, compte et lignes de l'org A **intacts** ; même libellé possible dans deux orgs | ✅ |
+| 19 | Consultation `du`/`au` — le **dernier jour est inclus** | ✅ 2 lignes du 1ᵉʳ au 5 mars, `soldeFin` 130 000 000 |
+| 20 | **D-089-4** : correction du paramétrage de ventilation (`521`→`5211`) | ✅ le compte **suit** ; champ `compteComptable` **ABSENT** en base |
+| 21 | Compte comptable **fixé** insensible à la correction ; compte hors plan refusé | ✅ `5215` inchangé ; 400 `COMPTE_COMPTABLE_INCONNU` |
+| 22 | **D-089-1** croisé : profil `BALANCE` sur un relevé ; profil sans `cible` | ✅ 409 `PROFIL_MAUVAISE_CIBLE` ; défaut `BALANCE` |
+| 23 | **D-089-6** exercice CLOS ; compte désactivé/réactivé ; `?actif=false` ; suppression gardée | ✅ 409 + 0 écriture ; 409 puis 200 ; liste correcte ; 409 `{lignes:7}` puis 204 |
+| 24 | **Non-régression 086/088** : `/balance/import/sage` 200→201, `/balance/import` générique 201 avec `profilImportId` tracé, ligne « Totaux » écartée (2 lignes), payload `balance.created` **sans fuite** de traçabilité | ✅ |
+
+⚠️ **Piège rencontré pendant la vérification elle-même** — le premier contrôle « exercice clos »
+a été inséré dans `exerciceatelier` (pluriel Mongoose deviné) au lieu de **`exercices_atelier`** :
+`estClos` renvoyait `false`, l'import passait, et le contrôle **paraissait échouer côté code**
+alors que c'était la vérification qui écrivait au mauvais endroit. Le contrôle rejoué sur la
+bonne collection est vert. C'est le piège documenté dans `CLAUDE.md`, payé une fois de plus.
+
+### Risque résiduel assumé
+
+Toute erreur `E11000` levée pendant la transaction d'import est traduite en
+`IMPORT_RELEVE_CONCURRENT`. Le message est exact en production — l'unique index unique de
+`lignes_releve` est celui du `checksumLigne` — mais il serait trompeur si un futur index unique
+était ajouté à la collection sans revoir ce mapping.
 
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** STORY-078 (plan de comptes — validation du compte comptable), **STORY-088** (`ProfilImport` — mapping de colonnes réutilisé), STORY-085 (partage du mapping trésorerie pour la ventilation) · **alimente** **STORY-090** (rapprochement)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A15 · hiérarchie de preuve (bancaire = niveau le plus élevé)
