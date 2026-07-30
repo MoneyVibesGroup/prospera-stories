@@ -4,8 +4,9 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A16, FR-A17 · `rapport-bilan-logique-metier-2026-07-12.md` §4 (hiérarchie de preuve ; règle « tout dépôt = une entrée ») · STORY-089 (relevés), STORY-082/083 (cahiers)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 17 (EXTENDED)
 **Service :** `balance-service` (:3007)
@@ -66,12 +67,13 @@ Le rapprochement produit donc **trois sorties** :
 - **État de rapprochement (FR-A17)** — `GET /api/v1/rapprochement/etat?compteId=&au=` :
   ```
   Solde du relevé au 31/12/2026 .................  1 300 000
-  + Encaissements non encore comptabilisés ......   + 120 000
-  − Décaissements non encore comptabilisés ......   −  45 000
-  = Solde comptable théorique ...................  1 375 000
-  Solde du compte 521 en comptabilité ...........  1 375 000
+  − Encaissements non encore comptabilisés ......   − 120 000
+  + Décaissements non encore comptabilisés ......   +  45 000
+  = Solde comptable théorique ...................  1 225 000
+  Solde du compte 521 en comptabilité ...........  1 225 000
   ÉCART .........................................          0  ✔
   ```
+  ⚠️ **Sens des en-cours corrigé au cadrage technique (D-090-6).** Un encaissement présent au relevé et **absent du cahier** n'a produit aucune écriture : il n'est **pas** dans le solde du compte `521`, qui est donc **plus bas** que le relevé — on le **retranche** pour retrouver la comptabilité. Le signe inverse (esquisse initiale) faisait ressortir un écart de **2 × en-cours** sur un dossier pourtant parfaitement rapproché : l'outil aurait crié au faux écart exactement là où il devait se taire.
   Un **écart non nul** est **affiché**, jamais absorbé.
 - **Situation de compte (FR-A17)** — `GET /api/v1/rapprochement/situation?compteId=&au=` : solde d'ouverture, total entrées, total sorties, solde de clôture, **nb de lignes non rapprochées** — la vue « où en est ce compte ».
 - **Tests** : appariement exact (montant + date ±3j) ; appariement flou → **proposé**, non appliqué ; **ambiguïté (2 candidats) → aucun choisi automatiquement** ; appariement groupé (N↔1) ; appariement manuel ; **élévation du niveau de preuve → `fichier`** et **redescente au dé-rapprochement** ; **encaissement non déclaré détecté** (test central) ; dépense sans décaissement (espèces) → écart **justifiable** ; état de rapprochement **équilibré** ; écart non nul **affiché** ; **aucune écriture créée automatiquement** (test explicite) ; isolation `orgId`.
@@ -94,8 +96,62 @@ Le rapprochement produit donc **trois sorties** :
    - **3 `ENCAISSEMENT_NON_DECLARE`** (dépôts de 250 000, 180 000, 90 000) ⚠️ → le comptable interroge le client : 2 sont des **ventes oubliées** → il **crée** les recettes manquantes (STORY-082) ; 1 est un **apport du gérant** → qualifié **`JUSTIFIE`** (motif : apport en compte courant → compte `462`).
    - **1 `DEPENSE_SANS_DECAISSEMENT`** → payée en **espèces** → qualifiée `JUSTIFIE`.
 6. **Élévation de preuve** : les 71 + 5 lignes de cahier rapprochées passent en **`niveauPreuve: 'fichier'`** → le `statutPreuve` de la balance s'améliore (FR-A27).
-7. **État de rapprochement** : solde relevé **1 300 000** + en-cours = **solde comptable 1 375 000** = compte `521` → **écart 0** ✔ → l'état est la **pièce justificative** de la clôture.
+7. **État de rapprochement** : solde relevé **1 300 000** − en-cours crédit + en-cours débit = **solde comptable théorique 1 225 000** = compte `521` → **écart 0** ✔ → l'état est la **pièce justificative** de la clôture.
 8. La balance (STORY-085) est régénérée avec les recettes ajoutées → contrôles (STORY-098) → handoff (STORY-099).
+
+---
+
+## Décisions de conception
+
+### D-090-1 — Un module `rapprochement/` à part, jamais dans `tresorerie/`
+
+`TresorerieModule` (STORY-089) est une **feuille** : « aucune dépendance vers les cahiers ni vers `BalanceService`, et c'est **structurel** ». Loger le rapprochement dedans y câblerait précisément les deux dépendances que 089 s'interdit — et rendrait possible, au premier correctif pressé, la création automatique d'une ligne de cahier depuis un flux. Le nouveau module `src/modules/rapprochement/` **importe** `TresorerieModule`, `CahiersModule`, `BalanceModule` et `RepriseModule` ; aucun d'eux ne l'importe. C'est exactement le montage d'`AgregationModule` vis-à-vis de `CahiersModule`.
+
+### D-090-2 — Un canal explicitement incompatible exclut le candidat (appariement **automatique** seulement)
+
+Une recette saisie `moyenPaiement: 'ESPECES'` ne peut pas être passée par un relevé **bancaire** : la retenir comme candidate fabriquerait un faux positif à haute confiance. Correspondance : `BANQUE → BANQUE`, `MOBILE_MONEY → MOBILE_MONEY`, `CAISSE → ESPECES`. Une ligne **sans** `moyenPaiement` reste candidate — l'absence d'information n'est pas une information.
+
+⚠️ Le filtre ne s'applique **jamais** à l'appariement **manuel** : le comptable qui relie explicitement un virement à une recette saisie « espèces » corrige justement une erreur de saisie. Lui refuser serait faire primer une donnée douteuse sur une décision humaine.
+
+### D-090-3 — Montant **exact**, aucune tolérance
+
+Les montants sont des **entiers en unités mineures XOF** des deux côtés. Une tolérance de 1 XOF (= 100 unités mineures) laisserait apparier un encaissement de 249 500 avec une recette de 250 000 : les 500 XOF de frais bancaires — une **charge réelle, non déclarée** — seraient absorbés par l'appariement au lieu de ressortir. Un montant qui ne tombe pas juste doit devenir un **écart visible**, pas un rapprochement approximatif. `TOLERANCE_EQUILIBRE` (100) existe pour l'équilibre d'une balance agrégée, jamais pour identifier un paiement.
+
+### D-090-4 — Écarts **dérivés**, qualifications **persistées**
+
+Un écart n'est pas un fait : c'est l'**absence** d'appariement à un instant donné. Le persister figerait un cliché qui devient faux dès que le comptable saisit la recette manquante (STORY-082) — l'écran continuerait d'accuser une recette non déclarée déjà déclarée. `GET /ecarts` **recalcule** donc à chaque appel ; seule la **décision humaine** est stockée (`qualifications_ecart`, clé unique `(orgId, cible, ligneId)`).
+
+Corollaire : les écarts **côté cahier** se calculent contre **tous** les appariements de l'organisation, jamais du seul compte interrogé. Une recette encaissée sur TMoney ne doit pas ressortir « sans encaissement » parce qu'on rapproche le compte BOA.
+
+### D-090-5 — Un appariement est **N↔M**, et l'index unique est le vrai filet
+
+Le document `Appariement` porte `lignesReleve[]` **et** `lignesCahier[]` : un même modèle couvre le 1↔1, la remise globale (1 relevé ↔ N recettes) et le règlement fractionné (N relevés ↔ 1 dépense). Deux index **uniques partiels** (`statut: 'CONFIRME'`) sur `lignesReleve` et sur `lignesCahier.ligneId` garantissent qu'**aucune ligne n'est appariée deux fois**, même sur confirmations concurrentes — un pré-contrôle applicatif ne le garantirait pas (leçon D-089-5). L'`E11000` est traduit en **409 explicite**, jamais en 500.
+
+### D-090-6 — Sens des en-cours de l'état de rapprochement, **corrigé**
+
+Voir le bloc de la § *Périmètre* : `théorique = soldeReleve − enCoursCredit + enCoursDebit`. L'esquisse initiale inversait les signes, ce qui affichait `2 × en-cours` d'écart sur un dossier correctement rapproché.
+
+### D-090-7 — Le `niveauPreuve` monte **à la confirmation**, et le niveau d'origine est **stocké dans l'appariement**
+
+`niveauPreuveOrigine` est copié dans le document d'appariement au moment de la confirmation. Le recalculer au dé-rapprochement (« c'était sûrement `saisie` ») écraserait le niveau réel d'une ligne issue de l'OCR — la trace de la lecture machine disparaîtrait, et avec elle la seule preuve qu'il y a eu relecture (même rationnel que `SurchargeDeductibilite`, D-083-6). Élévation et redescente écrivent **plus d'un document** ⇒ **transaction**.
+
+### D-090-8 — `POST /lancer` applique les **exacts**, propose le reste, et **remplace** ses propositions
+
+Les propositions `PROPOSE` d'un `(compte, exercice)` sont **supprimées puis reconstruites** à chaque lancement : une proposition est une suggestion volatile, pas un fait. Les accumuler ferait grossir la liste à chaque relance avec des doublons que personne ne saurait départager. Les appariements **`CONFIRME` ne sont jamais touchés**.
+
+### D-090-9 — La recherche de groupes est **bornée**, et le dit
+
+Le rapprochement groupé explore les sous-ensembles de `2..4` lignes parmi **au plus 12** candidats de même sens dans la fenêtre de dates (≈ 750 combinaisons au pire). Sans borne, un relevé de 200 lignes face à un cahier de 400 produirait une explosion combinatoire sur un service **mutualisé entre tenants** — le CWE-770 exact rencontré en 089 sur le diagnostic d'import. Au-delà du plafond, la recherche groupée est **annoncée comme non exhaustive** dans les avertissements, jamais silencieusement tronquée.
+
+### D-090-10 — `statutRapprochement` de la ligne de relevé : 3 valeurs, 3 causes
+
+`RAPPROCHE` ← un appariement **CONFIRMÉ** la porte · `ECARTE` ← son écart a été qualifié **`JUSTIFIE`** (apport en compte courant, virement interne…) · `NON_RAPPROCHE` ← tout le reste, y compris le retour en arrière. Les lignes `ECARTE` sortent du vivier d'appariement automatique — l'humain a tranché — mais **restent listées** dans les écarts avec leur qualification : disparaître de l'écran ferait perdre la trace de la décision.
+
+Les lignes de cahier, elles, **ne gagnent aucun champ de statut** : « déjà appariée » se lit dans la collection `appariements`. Un drapeau dupliqué dans deux collections finit toujours par diverger.
+
+### D-090-11 — Exercice **CLOS** : lecture oui, écriture non
+
+`lancer`, `apparier`, `confirmer`, `annuler`, `qualifier` refusent un exercice clos (409, cohérence D-089-6). `ecarts`, `etat`, `situation` restent **lisibles** : un état de rapprochement sert justement à défendre un exercice clos devant l'OTR.
 
 ---
 
@@ -136,8 +192,9 @@ async apparier(orgId: string, compteId: string, periode: DateRange): Promise<Res
 
   for (const r of releve) {
     const candidats = cahiers.filter(c =>
-      Math.abs(c.montant - r.montant) <= 1 &&                       // tolérance 1 XOF
+      c.montant === r.montant &&                                     // EXACT (D-090-3)
       sensCoherent(r.sens, c.type) &&
+      canalCompatible(compte.type, c.moyenPaiement) &&               // D-090-2
       joursEntre(r.date, c.date) <= this.cfg.toleranceJours          // défaut 3
     );
 
@@ -213,7 +270,9 @@ async etatDeRapprochement(orgId, compteId, au: Date): Promise<EtatRapprochement>
   const enCoursDebit  = await this.ecartsRepo.total(orgId, compteId, 'DECAISSEMENT_NON_DECLARE', au);
   const soldeComptable = await this.balanceRepo.soldeCompte(orgId, compteComptable, au);
 
-  const theorique = soldeReleve + enCoursCredit - enCoursDebit;
+  // ⚠️ D-090-6 — un encaissement absent du cahier n'a produit AUCUNE écriture :
+  // il n'est pas dans le 521, qu'il faut donc RETRANCHER du relevé pour y revenir.
+  const theorique = soldeReleve - enCoursCredit + enCoursDebit;
   return {
     soldeReleve, enCoursCredit, enCoursDebit,
     soldeComptableTheorique: theorique,
@@ -222,6 +281,8 @@ async etatDeRapprochement(orgId, compteId, au: Date): Promise<EtatRapprochement>
   };
 }
 ```
+
+⚠️ `soldeReleve` **n'est jamais reconstitué par cumul** (discipline de STORY-089) : c'est le `soldeApres` de la dernière ligne qui en porte un, ou `null`. Sans solde d'ouverture, un cumul de mouvements produirait un nombre qui **ressemble** à un solde bancaire — et l'écart calculé dessus serait une pure fiction. `soldeReleve === null` ⇒ `soldeComptableTheorique` et `ecart` sont `null`, avec un motif explicite. De même, **aucune balance** pour l'exercice ⇒ `soldeComptable: null` : un zéro par défaut ferait passer une absence de comptabilité pour un compte à zéro.
 
 ---
 
@@ -254,7 +315,13 @@ async etatDeRapprochement(orgId, compteId, au: Date): Promise<EtatRapprochement>
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+- **2026-07-30 — `in_progress`.** Cadrage technique relu contre le code livré de STORY-089/082/083/085 : 11 décisions posées (D-090-1 → D-090-11), dont **deux corrections du cadrage initial** — le sens des en-cours de l'état de rapprochement (D-090-6) et la tolérance de montant (D-090-3). Module `src/modules/rapprochement/` à part, `TresorerieModule` reste une feuille.
+
+---
+
+**Status:** in_progress
 **Dependencies:** **STORY-089** (relevés importés), **STORY-082/083** (cahiers), STORY-085 (agrégation — le `niveauPreuve` élevé remonte à la balance), STORY-101 (`statutPreuve`, FR-A27)
 **Ferme** EPIC-022 · **alimente** STORY-098 (contrôles & statut de preuve) et la défense de la liasse (STORY-097)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A16/A17, NFR-A04 · règle « tout dépôt est une entrée »
