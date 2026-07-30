@@ -1841,8 +1841,9 @@ sprints:
         epic: "EPIC-022"
         points: 5
         service: "balance-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-07-30 — cadrage technique relu contre le code de 089/082/083/085 ; 11 décisions D-090-1..11, dont 2 CORRECTIONS du cadrage : sens des en-cours de l'état de rapprochement inversé (D-090-6, faisait ressortir 2× l'en-cours en écart sur un dossier pourtant rapproché) et tolérance de montant supprimée (D-090-3, elle absorbait les frais bancaires — une charge réelle non déclarée). Module `rapprochement/` À PART : TresorerieModule reste une FEUILLE (089 s'interdit structurellement cahiers + BalanceService).
+        story_path: "stories/STORY-090.md"
+        assigned_to: "vivianMoneyVibesGroupes"
 
       # ── Console admin : rôles internes, Projets, lectures d'entitlements ──
       # Ajoutées le 2026-07-28 (demande PO). ⚠️ THÈME DIFFÉRENT du goal de ce
