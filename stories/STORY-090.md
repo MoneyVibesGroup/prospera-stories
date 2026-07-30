@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 17 (EXTENDED)
@@ -319,9 +319,40 @@ async etatDeRapprochement(orgId, compteId, au: Date): Promise<EtatRapprochement>
 
 - **2026-07-30 — `in_progress`.** Cadrage technique relu contre le code livré de STORY-089/082/083/085 : 11 décisions posées (D-090-1 → D-090-11), dont **deux corrections du cadrage initial** — le sens des en-cours de l'état de rapprochement (D-090-6) et la tolérance de montant (D-090-3). Module `src/modules/rapprochement/` à part, `TresorerieModule` reste une feuille.
 
+- **2026-07-30 — développement.** Module `src/modules/rapprochement/` : moteur pur (`rapprochement.regles.ts`), deux collections (`appariements`, `qualifications_ecart`), 9 routes sous `/api/v1/rapprochement`. `RelevesRepository` gagne `listerParOrg` / `trouverUneParOrg` / `trouverParIds` / `marquerStatut` ; les deux dépôts de cahiers gagnent `trouverParIds` / `majNiveauPreuve` (bulkWrite, **un niveau par ligne**) ; `BalanceRepository` gagne `trouverDerniereToutesSources`.
+
+- **2026-07-30 — qualité.** Lint 0 warning · build OK · **1779 unitaires + 381 e2e** verts · couverture **98,95 / 91,08 / 98,31 / 98,99** (seuils 65/90/90/90).
+  **29 mutation-tests, 29 rouges** — sens toujours cohérent, tolérance de montant réintroduite, ambiguïté tranchée, unicité vérifiée d'un seul côté, signes de l'état inversés, `null` remplacé par 0, groupe d'une seule ligne, canal non filtré, écart crédit/débit inversé, plafond de propositions retiré, preuve jamais élevée, redescente recalculée, motif non exigé, écarts non filtrés, montants différents acceptés, propositions non remplacées, confirmation sans garde de statut, motif orphelin conservé, `marquerStatut` non borné, gate d'accès retirée (unit + e2e), ordre des routes inversé, qualification survivant à l'appariement (unit + e2e), `preuvesElevees` annonçant la liste, suppression non org-scopée, plafond d'entrée retiré, dossier tronqué au lieu d'être refusé, bornes `du`/`au` ignorées.
+
+- **2026-07-30 — VÉRIFICATION DOCKER** (stack **neuve**, `down -v`, 2 organisations réelles créées via l'IdP).
+  - **Appariement** : relevé BOA de mars importé par le vrai chemin STORY-089 (5 lignes) + 6 recettes et 1 dépense saisies par l'API. `lancer` ⇒ **2 exacts appliqués**, **2 propositions d'ambiguïté** (aucune choisie), **1 groupe** 6 M + 4 M = 10 M.
+  - **Persistance** : collection `appariements` (2 CONFIRME + 3 PROPOSE), `lignes_releve` 2 RAPPROCHE / 3 NON_RAPPROCHE, `lignes_recettes` 1 `fichier`, `lignes_depenses` 1 `fichier`. **Invariants : 0 ligne RAPPROCHE orpheline, 0 ligne `fichier` orpheline, 0 appariement déséquilibré.**
+  - **Index uniques partiels présents en base** (`orgId_1_lignesReleve_1` et `orgId_1_lignesCahier.ligneId_1`, `partialFilterExpression: { statut: 'CONFIRME' }`) : la confirmation du **second** candidat d'une ambiguïté est refusée **par l'index** ⇒ **409 `LIGNE_DEJA_APPARIEE`**.
+  - **Élévation / redescente** : une recette portée à `ocr` passe à `fichier` à la confirmation (origine `ocr` **gravée** dans l'appariement) et **revient à `ocr`** — pas à `saisie` — au dé-rapprochement.
+  - **Aucune écriture créée** : `lignes_recettes` = 6, `lignes_depenses` = 1, `balances` = 0, `outbox_events` = 0, inchangés de bout en bout ; `qualifier` renvoie `ecritureCreee: false`.
+  - **Écarts** : `ENCAISSEMENT_NON_DECLARE` (dépôt de 180 000 sans recette) + 2 `RECETTE_SANS_ENCAISSEMENT`, totaux par type exacts. `JUSTIFIE` sans motif ⇒ **400** ; avec motif ⇒ persisté dans `qualifications_ecart` (index unique `(orgId, cible, ligneId)`), ligne passée à `ECARTE`, écart **toujours listé** avec sa décision.
+  - **État de rapprochement** : solde relevé 56 000 000 − en-cours crédit 18 000 000 = **38 000 000** ; balance à 38 000 000 ⇒ **écart 0** ; balance à 35 000 000 ⇒ **écart 3 000 000 AFFICHÉ**. Sans balance ⇒ `soldeComptable: null`, `ecart: null` + motif. Un écart **justifié** compte **toujours** dans les en-cours.
+  - **Isolation** : compte/appariement/ligne d'une autre organisation ⇒ **404** dans les deux sens, jamais 403 ; la victime reste intacte.
+  - **Exercice CLOS** : `lancer` ⇒ **409**, `GET /ecarts` et `GET /etat` ⇒ **200** (D-090-11).
+  - **ATOMICITÉ prouvée** par index unique **partiel temporaire** sur `lignes_recettes` : l'élévation échoue au milieu de la transaction ⇒ **0 appariement, 0 ligne marquée, 0 preuve élevée** après l'échec ; la relance nominale repart proprement.
+  - **Non-régression STORY-089** : ré-import du même relevé ⇒ 5 lues / **0 nouvelle** / 5 ignorées, 5 lignes en base (aucun doublon) ; consultation du relevé et des cahiers ⇒ 200.
+
+- **2026-07-30 — revue de code (`opus`, en session).** 5 constats, tous corrigés avant le merge. **Bloquant** : une qualification d'écart **survivait à l'appariement** de sa ligne — le code ne tenait pas la promesse de son propre commentaire (`QualificationLigneApparieeException`), et au dé-rapprochement la ligne revenait à la fois `NON_RAPPROCHE` **et** « justifiée ». `engager` efface désormais les qualifications des lignes engagées, dans la même transaction. Aussi : `preuvesElevees` comptait la liste envoyée et non les mutations réelles ; `totauxParType` référençait `TotalEcartDto` par un `$ref` que Swagger n'émettait pas (**contrat OpenAPI menteur**) ; références de cahier dédoublonnées ; Swagger de `nonRapprochees` précisé. **Vérification docker rejouée** sur l'état final : qualifier → apparier (qualification effacée) → dé-rapprocher → écart `EN_ATTENTE` **sans explication héritée**.
+
+- **2026-07-30 — revue de sécurité (`opus`, en session, non allégée).** **1 vulnérabilité trouvée et corrigée : CWE-770 / CWE-400, déni de service par appariement quadratique.** Le moteur balayait tout le cahier pour **chaque** ligne de relevé — produit cartésien — et re-parsait deux dates en chaîne ISO à chaque comparaison. **Mesuré** : 1 000 × 1 000 lignes bloquaient l'event loop **9,8 s**, 3 000 × 3 000 **82 s**, 6 000 × 6 000 **311 s**. Node étant mono-thread et `balance-service` **mutualisé entre tous les tenants**, une seule requête **authentifiée et nominale** figeait le service pour tout le monde, et rien n'empêchait de la rejouer. Correctifs : index par **montant** (jointure d'égalité), fenêtre de dates par **recherche dichotomique**, écart de jours par **arithmétique pure**. **Re-mesuré** : 130 ms / 0,9 s / 5,8 s (**75× / 89× / 53×**). Le terme quadratique résiduel est borné par `MAX_LIGNES_RAPPROCHEMENT = 5 000` par côté, qui **refuse** (`400 RAPPROCHEMENT_TROP_VOLUMINEUX`) au lieu de tronquer — rapprocher silencieusement une partie du dossier ferait lire « rien à justifier » sur un dossier non examiné —, refus rendu **actionnable** par les bornes `du`/`au` ajoutées à `lancer`. Vérifié en docker : refus au-delà du plafond **sans aucune écriture**, rapprochement mois par mois fonctionnel. Aucun autre constat (isolation multi-tenant, IDOR, injection NoSQL, intégrité comptable, période comptable, secrets).
+
+- **2026-07-30 — `done`.** PR #22 `MNV-090` → `dev` (**Rebase and merge**, branche supprimée). PR `docs/` `MNV-090` → `main`.
+
+### Risques résiduels assumés
+
+- **Le plafond de 5 000 lignes par côté est un compromis** : un dossier plus volumineux exige un rapprochement mois par mois. Le rendre configurable relèverait d'un réglage d'exploitation, hors périmètre.
+- **La recherche groupée n'est pas exhaustive** (12 candidats, 4 lignes par groupe, 3 groupes par ligne) ; elle **le dit** dans les avertissements. Les remises globales restantes s'apparient à la main.
+- **Le seuil de similarité de libellé ne fait qu'ordonner** les propositions floues : il n'en applique aucune, donc un mauvais score ne peut produire qu'un mauvais **ordre**, jamais un mauvais appariement.
+
 ---
 
-**Status:** in_progress
+**Status:** done
+**completed_date:** 2026-07-30
 **Dependencies:** **STORY-089** (relevés importés), **STORY-082/083** (cahiers), STORY-085 (agrégation — le `niveauPreuve` élevé remonte à la balance), STORY-101 (`statutPreuve`, FR-A27)
 **Ferme** EPIC-022 · **alimente** STORY-098 (contrôles & statut de preuve) et la défense de la liasse (STORY-097)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A16/A17, NFR-A04 · règle « tout dépôt est une entrée »
