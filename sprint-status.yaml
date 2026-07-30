@@ -1832,8 +1832,9 @@ sprints:
         epic: "EPIC-022"
         points: 3
         service: "balance-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # ⏳ 2026-07-30 — développement (branche MNV-089, balance-service). Ouvre EPIC-022 : import des relevés bancaires ET mobile money (TMoney/Flooz) — la source de preuve la plus forte de l'Atelier. Décisions de cadrage : D-089-1 le ProfilImport de STORY-088 gagne un discriminant `cible` (BALANCE|RELEVE, défaut BALANCE) plutôt qu'un second magasin de profils, détection par signature FILTRÉE sur la cible ; D-089-2 trois conventions de montants dont une propre au mobile money (montant positif + colonne de type + listes valeursCredit/valeursDebit, valeur inconnue ⇒ ligne REJETÉE, jamais de défaut implicite) ; D-089-3 le checksumLigne porte un RANG D'OCCURRENCE (sans lui, deux paiements TMoney identiques du même jour n'en font qu'un ⇒ trésorerie minorée) ; D-089-4 compteComptable facultatif, défaut relu du paramétrage de ventilation (085) jamais recopié en base ; D-089-5 insertMany en transaction, index unique (orgId,compteTresorerieId,checksumLigne) comme vrai filet (E11000 → 409) ; D-089-6 exercice CLOS ⇒ import refusé.
+        story_path: "stories/STORY-089.md"
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-090"
         title: "Rapprochement (relevés ↔ cahiers) + état de rapprochement + situation de compte — FR-A16/A17"
         epic: "EPIC-022"
