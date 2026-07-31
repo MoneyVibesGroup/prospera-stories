@@ -1,5 +1,17 @@
 # TICKET frontend — retirer le dictionnaire `libellé → compte` codé en dur de FE-026
 
+> ## ➡️ REPRIS le 2026-07-31 par la story **FE-056**
+>
+> Ce ticket avait été écrit côté backend parce que le dépôt frontend **n'était pas dans le workspace**
+> au moment de STORY-139. Il l'est. Son contenu — résolution attendue et DoD — est intégralement
+> repris dans `frontend-stories/FE-056.md`, qui est **slottée au sprint 7 frontend** et donc visible
+> du sprint-planning, ce qu'un fichier de ticket n'était pas.
+>
+> **Source de vérité = FE-056.** Ce fichier est conservé pour la traçabilité de l'origine.
+>
+> *(Renommé et déplacé de `stories/TICKET-fe-026-retrait-dictionnaire-client.md` vers `tickets/`
+> le 2026-07-31 — cf. la convention en tête de `tickets/`.)*
+
 **Type :** dette de contrat (duplication de connaissance métier côté client)
 **Dépôt :** `prospera-frontend-expert-comptable` (**absent du workspace `PROSPERA/`** — d'où ce ticket plutôt qu'un commit)
 **Fichier :** `src/features/atelier/config/plan-comptes.ts` (annoté « INTÉRIMAIRE »)

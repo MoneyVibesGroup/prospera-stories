@@ -1,5 +1,19 @@
 # TICKET backend — `mappingProfile` accepté mais ignoré sur `POST /balance/import/sage`
 
+> ## ✅ RÉSOLU le 2026-07-30 par **STORY-088** — option A retenue
+>
+> `mappingProfile` (déclaré, jamais lu) est **remplacé** par **`profilImportId`** (`@IsMongoId`,
+> réellement consommé) dans `src/modules/balance/sage/dto/import-sage.dto.ts`. Un **identifiant** et
+> non un nom, avec la raison écrite dans le code : « le nom d'un profil est modifiable — un import
+> référencé par nom cesserait de fonctionner à la première correction de libellé, et la trace d'audit
+> portée par la balance ne désignerait plus rien de stable ».
+>
+> **Reste à faire côté front :** régénérer les types de `:3007` — porté par **FE-057**.
+> Ce ticket est conservé pour la traçabilité ; il ne demande plus rien.
+>
+> *(Renommé et déplacé de `stories/TICKET-mappingProfile-accepte-mais-ignore.md` vers `tickets/`
+> le 2026-07-31 — cf. la convention en tête de `tickets/`.)*
+
 **Type :** correctif de contrat (dette d'API)
 **Service :** `balance-service` (:3007)
 **Route :** `POST /api/v1/balance/import/sage` (multipart) — adaptateur Sage, **STORY-086**
