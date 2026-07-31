@@ -1,7 +1,7 @@
 version: "6.0.0"
 project_name: "prospera"
 project_level: 3
-current_sprint: 18  # maj 2026-07-29 : S15, S16 et S17 sont TOUS clôturés (toutes leurs stories `done`) — le compteur était resté bloqué sur 15 alors que trois sprints avaient été livrés. S15 32/32, S16 60/60, S17 26/26. Le prochain sprint à ouvrir est le S18 (hub multi-source D13 + console admin), qui reste `not_started` : sa bascule en `in_progress` relève du sprint-planning, d'autant qu'il porte 42 pts pour 34 de capacité (arbitrage à trancher — cf. son commentaire `committed_points`). Historique : maj 2026-07-21 : S13 (EPIC-011B liasse calculée) done ; S14 (EPIC-012 validation/immutabilité/exercices/audit 064→067 + EPIC-013 amorce hypothèses 068) DONE 21/21 ; S15 = EPIC-013 projections (069-071) + STORY-137 (dette versions d'hypothèses, ex-132) + EPIC-014 consultation/export (072-073) ; 074 reportée au S16 le 2026-07-23 (arbitrage de capacité)
+current_sprint: 19  # maj 2026-07-31 : S18 CLÔTURÉ — ses 9 stories sont `done` (102/087/088/089/090 le 29-30, 140/142/141/143 le 29) et le compteur était resté sur 18 / `not_started` alors que le sprint était intégralement livré. ⚠️ Son committed_points nominal de 42 était PÉRIMÉ : après les ré-estimations à la rédaction (140 5→3, 141 5→6, 143 8→5), la somme réelle des stories est **38**, toutes livrées ⇒ 38/38. L'arbitrage de capacité annoncé (« décaler 140→143 au S19 ») n'a donc jamais eu lieu et n'a plus d'objet. Prochain sprint = S19 (EPIC-023, moteur fiscal 091→095, 21 pts) — `not_started`, aucune story commencée. ⚠️ 5 STORIES ORPHELINES relevées le 2026-07-31 : STORY-133/134/135/136/144 ont un FICHIER dans stories/ mais ne sont référencées dans AUCUN sprint — et pire, **134/135/136 recouvrent le périmètre de 144** (même maquette AP-02, deux passes de rédaction, aucune ne cite les autres ; 136 est même CONTREDITE par 144 sur la revue KYC groupée). Cf. `orphan_stories` en fin de fichier : à trancher AVANT de planifier, pas à slotter en bloc. Historique : maj 2026-07-29 : S15, S16 et S17 sont TOUS clôturés (toutes leurs stories `done`) — le compteur était resté bloqué sur 15 alors que trois sprints avaient été livrés. S15 32/32, S16 60/60, S17 26/26. Le prochain sprint à ouvrir est le S18 (hub multi-source D13 + console admin), qui reste `not_started` : sa bascule en `in_progress` relève du sprint-planning, d'autant qu'il porte 42 pts pour 34 de capacité (arbitrage à trancher — cf. son commentaire `committed_points`). Historique : maj 2026-07-21 : S13 (EPIC-011B liasse calculée) done ; S14 (EPIC-012 validation/immutabilité/exercices/audit 064→067 + EPIC-013 amorce hypothèses 068) DONE 21/21 ; S15 = EPIC-013 projections (069-071) + STORY-137 (dette versions d'hypothèses, ex-132) + EPIC-014 consultation/export (072-073) ; 074 reportée au S16 le 2026-07-23 (arbitrage de capacité)
 sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 
 # Révision 2026-07-04 : re-cadrage écosystème (voir docs/architecture-prospera-ecosystem-2026-07-04.md).
@@ -1797,9 +1797,9 @@ sprints:
     start_date: "2027-02-25"
     end_date: "2027-03-11"
     capacity_points: 34
-    committed_points: 42  # ⚠️ 21 (hub multi-source) + 21 (console admin, ajoutées le 2026-07-28) = 124 % de la capacité. Le tracker note déjà que S10 a fini à 40/34 et que S11 est à 44/34 : ce n'est pas un accident isolé, c'est un motif. À trancher au sprint-planning — décaler la série console admin (140→143) au S19, ou sortir du S18 une partie du hub multi-source.
-    completed_points: 0
-    status: "not_started"
+    committed_points: 38  # ⬇️ 42→38 le 2026-07-31 (RÉCONCILIATION à la clôture) : le 42 additionnait les ESTIMATIONS DE PLAN (21 hub + 21 console admin) et n'a jamais été remonté après les ré-estimations à la rédaction — 140 5→3 (arbitrage (b) : project:* parti dans 141), 141 5→6, 143 8→5. Somme réelle des 9 stories = 5+5+3+3+5+3+3+6+5 = 38. ⚠️ L'alerte de surcharge (« 124 % de la capacité, décaler la série console admin au S19 ») est CADUQUE : l'arbitrage n'a jamais été rendu et le sprint a livré ses 38 pts pour 34 de capacité. Le motif de fond reste vrai (S10 à 40/34, S11 à 44/34) — c'est la 3ᵉ fois qu'un dépassement se règle par la vélocité réelle plutôt que par un arbitrage. Historique : ⚠️ 21 (hub multi-source) + 21 (console admin, ajoutées le 2026-07-28) = 124 % de la capacité.
+    completed_points: 38  # ✅ 2026-07-31 : 38/38, les 9 stories sont `done`. Hub multi-source D13 : 102 (adaptateur #1 ingestion directe) + 087 (à-nouveaux) + 088 (profil d'import) + 089 (relevés banque/mobile money) + 090 (rapprochement, FERME EPIC-022). Console admin : 140 (catalogue de permissions 8→10 + rôles métier Comptable/Marketing/DG) + 142 (index inverse des entitlements) + 141 (objet Projet, catalogue 10→12) + 143 (proxy BFF, 3 incréments).
+    status: "done"  # ✅ CLÔTURÉ 2026-07-31 — le statut n'avait jamais été basculé depuis la création du sprint (même lag qu'au S16, qui l'avait déjà signalé). ⚡ EFFET FRONTEND MAJEUR, non répercuté jusqu'ici : ce sprint DÉBLOQUE 15 stories frontend d'un coup — AP-05 (143 inc.1 : lecture des entitlements proxifiée), AP-10 (142), AP-11 (141) côté console, et FE-047/048/049 (087/088/089/090) côté Atelier EXTENDED. Réancré dans frontend-sprint-status.yaml v3.2.0 le 2026-07-31.
     goal: "Hub multi-source (D13) : adaptateur #1 = ingestion DIRECTE balance.submitted (verticaux intégrés IMF/distributeur) ; reprise à-nouveaux ; rapprochement bancaire (relevés banque + mobile money → état de rapprochement + situation de compte). [Adaptateur #2 import Sage = livré en CORE S11 (STORY-086) — décalé du S10 par D15.]"
     stories:
       - story_id: "STORY-102"
@@ -2163,6 +2163,62 @@ velocity:
   sprint_21: null  # Module 2 EPIC-004 paiement-service (016-019) + STORY-039 — JIT (PS-1/C8/PRD paiement) [ex-sprint 15]
   sprint_22: null  # 🆕 EPIC-026 socle — Assistant IA transverse (assistant-service :3011, LlmProvider, Proposition, RAG, surface mapping) — stories 115-119 ; DÉPLAÇABLE (aucune dépendance dure)
   rolling_average: 27  # (33 + 23 + 24) / 3 ≈ 26.7 ; cible prudente ~24/sprint (1 flux, réf. historique retenue au sprint-planning 2026-07-10)
+
+# ── Stories RÉDIGÉES mais SLOTTÉES NULLE PART (relevé 2026-07-31) ──────────────────────
+# Ces stories ont un fichier dans stories/ et ne figurent dans AUCUN sprint : elles sont
+# invisibles au sprint-planning et à tout comptage de points. Le trou est le même que celui
+# que ce fichier documente deux fois pour les statuts — un artefact écrit à un instant T
+# et jamais confronté à la liste qui fait autorité. À slotter (ou à archiver explicitement)
+# au prochain /bmad:sprint-planning.
+orphan_stories:
+  - story_id: "STORY-133"
+    title: "IP des sessions — trancher le proxy de confiance (X-Forwarded-For), sinon « Sessions ouvertes » affiche l'IP de l'app"
+    service: "auth-service"
+    origine: "FE-021 (livrée) — la carte Sessions affiche l'IP du BFF, pas celle de l'appareil"
+    note: "Seule dette OUVERTE de FE-021, qui est par ailleurs mergée. Non bloquante (l'écran fonctionne, l'IP est simplement fausse) mais elle rend une colonne MENSONGÈRE dans un écran de sécurité — c'est le pire endroit pour une donnée fausse : l'utilisateur y cherche une intrusion."
+  # ⚠️⚠️ RECOUVREMENT À TRANCHER — 134/135/136 vs 144 décrivent LA MÊME SURFACE.
+  # STORY-144 (créée le 2026-07-23, « récupérée et réancrée sur le code le 2026-07-28 ») porte
+  # DÉJÀ, dans son périmètre B et C, le renvoi d'invitation au niveau organisation et les actions
+  # groupées à succès partiel — et elle a l'avantage d'avoir été RÉANCRÉE sur origin/dev (4f452a9).
+  # Aucune des quatre n'est dans un sprint, aucune ne mentionne les autres : c'est une duplication
+  # silencieuse née de deux passes de rédaction sur la même maquette AP-02. NE PAS LES PLANIFIER
+  # TOUTES LES QUATRE. Arbitrage attendu au sprint-planning : garder 144 (la plus récente et la
+  # seule vérifiée contre le code) et marquer 134/135/136 `superseded`, ou l'inverse — mais tranché
+  # explicitement, pas par omission.
+  - story_id: "STORY-134"
+    title: "Renvoi d'invitation admin plateforme (POST /admin/organizations/:orgId/users/:userId/resend-invitation + /admin/users/:userId/resend-invitation)"
+    service: "auth-service"
+    statut_fichier: "ready-for-dev"
+    note: "Pendant côté console du FE-016 déjà livré côté cabinet. Alimente AP-02/AP-08. ⚠️ RECOUVRE le périmètre B de STORY-144, qui note d'ailleurs que `POST /users/:id/resend-invitation` EXISTE DÉJÀ et pose l'arbitrage « niveau utilisateur vs niveau organisation » — arbitrage que cette story-ci ignore."
+  - story_id: "STORY-135"
+    title: "Actions groupées sur organisations (batch suspend + batch resend-invitation) avec succès partiel HTTP 207"
+    service: "auth-service"
+    statut_fichier: "ready-for-dev"
+    note: "⚠️ RECOUVRE le périmètre C de STORY-144 (mêmes routes bulk, même sémantique 207)."
+  - story_id: "STORY-136"
+    title: "Action groupée « ouvrir la revue KYC » (batch mise en revue) avec succès partiel HTTP 207"
+    service: "kyc-service"
+    statut_fichier: "ready-for-dev"
+    note: "⚠️ CONTREDITE par STORY-144, qui met explicitement la revue KYC groupée HORS périmètre backend : « c'est une navigation front vers la file KYC ; le KYC s'examine dossier par dossier, il n'y a pas d'approbation groupée ». Les deux ne peuvent pas être vraies — à trancher AVANT de planifier l'une ou l'autre."
+  - story_id: "STORY-144"
+    title: "Réactivation d'une organisation + renvoi d'invitation au niveau organisation + actions groupées (succès partiel)"
+    service: "auth-service"
+    statut_fichier: "draft — « Sprint : à planifier »"
+    origine: "maquette AP-02 · Organisations. Story rédigée le 2026-07-23 dans un dossier de travail DUPLIQUÉ et NON SUIVI PAR GIT (`frontend-admin-panel - Copie`), récupérée le 2026-07-28."
+    note: "⚡ La plus solide des quatre : périmètre RÉANCRÉ sur origin/dev (4f452a9), avec un découpage A/B/C déjà proposé (A réactivation ~2 pts, B renvoi org, C batch ~2 pts). Son cœur — la RÉACTIVATION d'une organisation — n'est couvert par AUCUNE des trois autres : aujourd'hui la console peut suspendre une organisation sans pouvoir la réactiver. C'est l'impasse d'exploitation à traiter en premier, indépendamment de l'arbitrage sur B et C."
+  # STORY-132 n'est PAS orpheline : renommée STORY-137 (dette versions d'hypothèses), slottée S15 et done.
+
+# ── Trous de contrat OUVERTS, remontés par le frontend et sans story backend ────────────
+# (relevé 2026-07-31 en lisant les contrôleurs — pas les notes)
+open_contract_gaps:
+  - id: "GAP-balance-validation-etat"
+    service: "balance-service (:3007)"
+    constat: "STORY-101 définit `marquerEtat` au CONTRAT canonique et STORY-099 s'y adosse, mais balance.controller.ts n'expose que POST /balances, GET /balances et GET /balances/:id — AUCUNE route ne fait passer une balance de brouillon à validée."
+    consequence: "FE-026 et FE-027 sont livrées SANS aucune action de validation (les deux stories le disent explicitement). L'immutabilité est AFFICHÉE mais jamais ATTEIGNABLE par l'UI : une balance ne peut pas être figée, donc le handoff vers bilan-service ne peut pas être déclenché par un humain."
+    action: "Story backend à créer — c'est le dernier maillon manquant de l'Atelier CORE, et il bloque la démo de bout en bout Atelier → Bilan."
+  - id: "GAP-mappingProfile"
+    service: "balance-service (:3007)"
+    statut: "✅ RÉSOLU par STORY-088 (2026-07-30) — `mappingProfile` (déclaré, jamais lu) est REMPLACÉ par `profilImportId` (@IsMongoId, réellement consommé). Le ticket stories/TICKET-mappingProfile-accepte-mais-ignore.md peut être fermé. ⚠️ RENOMMAGE DE CONTRAT : les types générés de FE-025 sont périmés (elle n'envoyait pas le champ, donc rien n'est cassé) → traité par FE-057."
 
 team:
   size: 1
