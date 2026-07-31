@@ -1889,11 +1889,19 @@ sprints:
     start_date: "2027-03-11"
     end_date: "2027-03-25"
     capacity_points: 34
-    committed_points: 21
+    committed_points: 24  # ⬆️ 21→24 le 2026-07-31 : +STORY-145 (3, surface HTTP de validation/rejet d'une balance). 24/34 ≤ capacité. Hors thème « moteur fiscal » du sprint — comme STORY-109 puis 138/139 l'étaient du leur — mais elle FERME l'Atelier CORE, dont le dernier maillon manquait depuis le S11.
     completed_points: 0
     status: "not_started"
-    goal: "Moteur fiscal (EPIC-023) : détermination du résultat fiscal (réintégrations/déductions), liquidation IS=max(MFP,IS)+acomptes, TVA & taxes, intégration des provisions à la balance, régime synthétique/TPU."
+    goal: "Moteur fiscal (EPIC-023) : détermination du résultat fiscal (réintégrations/déductions), liquidation IS=max(MFP,IS)+acomptes, TVA & taxes, intégration des provisions à la balance, régime synthétique/TPU. + STORY-145 : rendre une balance VALIDABLE (le dernier maillon de l'Atelier CORE, cf. open_contract_gaps)."
     stories:
+      - story_id: "STORY-145"
+        title: "Surface HTTP de validation / rejet d'une balance (`marquerEtat` cesse d'être un hook inerte) — FR-A28"
+        epic: "EPIC-024"
+        points: 3
+        service: "balance-service"
+        status: "ready-for-dev"  # 🆕 CRÉÉE 2026-07-31 (demande user) — ferme GAP-balance-validation-etat. ⚡ TROU NÉ D'UN RENVOI EN BOUCLE, pas d'un oubli : STORY-101 déclare `marquerEtat` « hook inerte, le workflow validation/rejet est le périmètre de 098/099 » ; STORY-099 renvoie à 098 ; et STORY-098 pose une PRÉCONDITION (« validation refusée 409 s'il reste un contrôle bloquant ») sur un acte qu'aucune story ne crée. Vérifié sur origin/dev : balance.controller.ts n'expose que POST /balances, GET /balances, GET /balances/:id. ⚡ 3 PTS ET NON 5 : `BalanceService.marquerEtat()` est DÉJÀ écrit, transactionnel et testé (transition atomique, garde d'immutabilité `AlreadyValidatedBalanceException`, trace de mutation {version,horodatage,auteur,motif}) — il ne manque QUE la surface HTTP et la couture `ValidationGate` où STORY-098 viendra brancher ses contrôles. ⚠️ À LIVRER AVANT STORY-098 : l'ordre inverse obligerait 098 à créer la route « en passant », soit exactement le glissement qui a produit ce trou. ⚠️ Divergence relevée : le fichier STORY-098.md porte « Sprint : 19 » alors que ce tracker la place au S20 — à trancher au sprint-planning. IMPACT FRONT : débloque l'action absente de FE-027 (livrée avec un écran d'immutabilité pour un état inatteignable) et le 1er maillon du jalon e2e FE-039.
+        story_path: "stories/STORY-145.md"
+        assigned_to: null
       - story_id: "STORY-091"
         title: "Détermination du résultat fiscal (réintégrations/déductions, codes DSF) — FR-A18"
         epic: "EPIC-023"
@@ -2213,9 +2221,11 @@ orphan_stories:
 open_contract_gaps:
   - id: "GAP-balance-validation-etat"
     service: "balance-service (:3007)"
+    statut: "✅ PRIS EN CHARGE 2026-07-31 par **STORY-145** (3 pts), créée et slottée **sprint 19**."
     constat: "STORY-101 définit `marquerEtat` au CONTRAT canonique et STORY-099 s'y adosse, mais balance.controller.ts n'expose que POST /balances, GET /balances et GET /balances/:id — AUCUNE route ne fait passer une balance de brouillon à validée."
-    consequence: "FE-026 et FE-027 sont livrées SANS aucune action de validation (les deux stories le disent explicitement). L'immutabilité est AFFICHÉE mais jamais ATTEIGNABLE par l'UI : une balance ne peut pas être figée, donc le handoff vers bilan-service ne peut pas être déclenché par un humain."
-    action: "Story backend à créer — c'est le dernier maillon manquant de l'Atelier CORE, et il bloque la démo de bout en bout Atelier → Bilan."
+    cause_racine: "Un RENVOI EN BOUCLE entre trois stories, pas un oubli : 101 déclare le hook inerte et délègue à « 098/099 » ; 099 délègue à « 098 » ; 098 pose une précondition (409 si contrôle bloquant) sur un acte qu'elle ne crée pas. Chacune était cohérente seule ; l'ensemble ne l'était pas. ⚡ LEÇON : une délégation nominative (« c'est le périmètre de X ») doit être VÉRIFIÉE dans X au moment où on l'écrit — sinon elle se referme sur elle-même sans que personne ne le voie."
+    consequence: "FE-026 et FE-027 sont livrées SANS aucune action de validation (les deux stories le disent explicitement). L'immutabilité est AFFICHÉE mais jamais ATTEIGNABLE par l'UI : une balance ne peut pas être figée, donc le handoff vers bilan-service ne peut pas être déclenché par un humain. Le jalon e2e FE-039 (« balance→liasse→validation→export ») est infranchissable à son PREMIER maillon."
+    action: "✅ FAIT — STORY-145 au S19, à livrer AVANT STORY-098."
   - id: "GAP-mappingProfile"
     service: "balance-service (:3007)"
     statut: "✅ RÉSOLU par STORY-088 (2026-07-30) — `mappingProfile` (déclaré, jamais lu) est REMPLACÉ par `profilImportId` (@IsMongoId, réellement consommé). Le ticket stories/TICKET-mappingProfile-accepte-mais-ignore.md peut être fermé. ⚠️ RENOMMAGE DE CONTRAT : les types générés de FE-025 sont périmés (elle n'envoyait pas le champ, donc rien n'est cassé) → traité par FE-057."
