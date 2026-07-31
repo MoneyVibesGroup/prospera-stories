@@ -5,8 +5,8 @@
 **Priorité :** Must Have
 **Story Points :** 8
 **Complexité :** high
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Statut :** done
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-31
 **Sprint :** 19
 **Service :** `balance-service` (:3007)
@@ -217,3 +217,161 @@ frontend d'amendement de FE-026/FE-027, à ouvrir à la livraison).
   la revue de STORY-101 (le keystone), celle de STORY-086, et six stories d'adaptateurs. Un nom de
   champ n'est pas une documentation — **seul un test qui distingue les deux grandeurs** aurait levé
   l'ambiguïté. L'AC-4 est écrit pour ça.
+
+---
+
+## Progress Tracking
+
+**Statut : `done`** — livrée le 2026-07-31 · PR [`prospera-balance-service#23`](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/23), rebase-mergée sur `dev`, branche `MNV-147` supprimée.
+
+### Décisions
+
+| # | Décision |
+|---|---|
+| **D-147-1** | Renommage **cassant** `debit`/`credit` → `mouvementDebit`/`mouvementCredit`, + ajout `soldeDebiteur`/`soldeCrediteur`. C'est la rupture de compilation qui a forcé la revue de chaque site — et elle **en a corrigé deux qui lisaient la mauvaise grandeur** (cf. « Ce que le renommage a révélé »). |
+| **D-147-2** | **Pas de colonnes à-nouveaux** (arbitrage A de la story confirmé). STORY-087 modélise le socle comme une **balance distincte** (`origine: A_NOUVEAUX` + `balanceSourceId`), avec sa traçabilité et son chaînage propres. Corollaire retenu : **un socle ne porte QUE des soldes**, mouvements à `0` — les mouvements de N-1 appartiennent à N-1, et les remonter les compterait deux fois à la fusion `socle ⊕ mouvements`. |
+| **D-147-3** | Sommaire **imbriqué** : `sommaire.mouvements` / `sommaire.soldes`, chacun `{totalDebit, totalCredit, ecart, estEquilibre}`, plus un `estEquilibre` global qui est leur **conjonction**. Les anciens `totalDebiteur`/`totalCrediteur` disparaissent : ils sommaient des *mouvements* sous un mot (*débiteur*) qui désigne un **solde**. |
+| **D-147-4** | Checksum **versionné**. `v2` scelle les 4 colonnes ; `v1` est conservé en **vérification seule**. Champ `checksumVersion` **sans `default` Mongoose** — un `default` s'applique à l'hydratation, pas aux documents en base, et un filtre dessus ne matcherait aucune balance antérieure (piège payé en STORY-089). Son **absence** vaut `v1`, et toute lecture passe par `?? CHECKSUM_VERSION_HERITEE`. |
+| **D-147-5** | `statutPreuve` pondéré par les **soldes** (recommandation D de la story), avec repli explicite sur les mouvements si tous les soldes sont nuls. ⚠️ **La prémisse de la story était inexacte** : le statut ne pondérait pas « par `debit + credit` », il comptait les **lignes** — d'où le contre-exemple de STORY-098 (« 1 grosse ligne estimée l'emporte sur 50 petites justifiées ») qui, au comptage, donnait *justifiée*. |
+| **D-147-6** | Sage : classification des colonnes **exclusive**, « mouvement » l'emportant sur « cumul ». Le parser **déclare** ce que le fichier portait (`familleColonnes`) ; le normalizer **dérive** la grandeur absente et **le dit** dans un avertissement — jamais en silence. |
+| **D-147-7** | Ingestion directe : les 4 colonnes sont **exigées**. Un payload partiel est **rejeté** (`PAYLOAD_INVALIDE`) : rien ne dirait si les deux montants portés sont des mouvements ou des soldes, et le deviner rejouerait le défaut d'origine — introduit cette fois par nous. |
+| **D-147-8** | `POST /balances` exige les 4 champs, **aucun optionnel, aucun dérivé**. Un client sans à-nouveau envoie le même montant en mouvement et en solde : c'est **sa** décision, écrite dans l'OpenAPI, pas une déduction du serveur. |
+| **D-147-9** | Profil d'import (088) : `debiteur`/`crediteur`/`soldeNet` **gardent leur nom et leur sens** (ils désignent bien des *soldes* — « débiteur/créditeur » qualifie une position, « débit/crédit » un mouvement) ⇒ aucun profil existant ne change de comportement. S'y ajoutent `mouvementDebit`/`mouvementCredit`, facultatifs mais **exigés par paire**. |
+| **D-147-10** | Documents antérieurs : **aucune migration** (« migration = souci de prod, différé »). La **lecture** est rendue tolérante (`versLigne`/`versSommaire`/`lignesNormalisees`, via `toObject()`), et la projection **n'affirme rien** : elle expose la seule valeur connue sans en inventer une seconde, `checksumVersion: v1` disant de ne pas se fier à la distinction. |
+
+### Vecteur de parité `v2` (pour le portage TypeScript du front, FE-026)
+
+```
+6c4a50087ced5290576aaa0b56629cf41ac51c94697092dc49650b9eae049569
+```
+
+Jeu de données exact : `balance.checksum.spec.ts`, `const base` — exercice
+`2025-01-01T00:00:00.000Z` → `2025-12-31T00:00:00.000Z`, `sage`/`SN`/version 1, deux
+lignes (`601` Achats mvt 1000/0 solde 1000/0 · `701` Ventes mvt 0/1000 solde 0/1000),
+toutes `niveauPreuve: fichier`.
+
+⚠️ **Le vecteur `v1` verrouillé côté FE-026 (`1864781c…`) porte une AUTRE fixture.**
+C'est le **couple** (vecteur + jeu de données) publié ici qui doit servir à rejouer la
+parité — pas le vecteur seul. Vecteur `v1` figé côté backend, pour la même fixture :
+`48f74471c3ba7b587dd100a40f45321e8e35ebe28e2f6f2c183d25b887d1f22a`.
+
+### Ce que le renommage a révélé
+
+Le renommage cassant n'a pas seulement propagé un contrat : il a mis au jour **deux
+lectures de la mauvaise grandeur**, invisibles tant que le champ était ambigu.
+
+- **Rapprochement bancaire** — comparait le solde du relevé au **net des mouvements**.
+  Faux du montant de l'à-nouveau sur tout exercice qui n'est pas le premier : l'écart
+  affiché n'était pas l'écart réel.
+- **Chiffre d'affaires du régime fiscal** (STORY-080) — n'était juste que par
+  coïncidence (un compte de gestion n'a pas d'à-nouveau). Le calcul porte désormais
+  explicitement sur les **mouvements** : un CA est un flux de période.
+
+### Vérification docker (stack `down -v`, obligatoire — les e2e mockent la couche données)
+
+| # | Scénario | Résultat |
+|---|---|---|
+| ① | Balance à 4 colonnes | **201** · `checksumVersion: v2` · mouvements **25 000 000** ≠ soldes **15 000 000** — les deux grandeurs vivent bien séparément |
+| ② | Mouvements équilibrés, **soldes déséquilibrés** | **422** « équilibre **des soldes** non satisfait : écart de 2 000 000 » — *le cas que le contrat à 2 colonnes laissait passer en silence* |
+| ③ | Ligne à double solde | **400** « Compte « 411 » à double solde… » |
+| ④ | Balance depuis les **cahiers** | soldes = net des mouvements sur les 3 comptes ; équilibres mvt **13 000 000** / soldes **10 000 000** (le compte de banque est mouvementé des deux côtés) |
+| ⑤ | `balance.submitted` **amputé** | `PAYLOAD_INVALIDE` dans `balance_ingestions`, **0 balance créée** ; le même payload complet est ingéré (`checksumVersion: v2`) |
+| ⑥ | Balance **héritée** (2 colonnes, sans `checksumVersion`) | **200**, montants restitués, exposée `v1`, **checksum v1 recalculé = checksum stocké** |
+| + | **Atomicité** | 1 valide + 1 rejet ⇒ `balances = 1`, `outbox_events = 1` — jamais l'un sans l'autre |
+| + | Sage « **Mouvements cumulés** » (constat de revue) | les colonnes de **solde** sont bien celles qui sont lues, divergences vides |
+| + | **CWE-770** (constat de sécurité) | 250 lignes toutes divergentes ⇒ liste de **100**, total **250**, réponse de **9 Ko** au lieu de croître avec le fichier |
+
+### Défauts trouvés par la vérification docker (invisibles aux tests)
+
+Ni l'unitaire ni l'e2e ne pouvaient les voir : les uns comme les autres manipulent des
+objets simples, jamais des documents Mongoose hydratés.
+
+1. **`checksumVersion` n'était pas persisté.** Le constructeur de
+   `BalanceRepository.insert` est une **liste blanche** : un champ absent est ignoré
+   **sans erreur**. Toute balance neuve était scellée en `v2` puis relue en `v1` — son
+   checksum devenait invérifiable, en silence. *(Même piège que le corps d'erreur de
+   STORY-085.)*
+2. **`{ ...sousDocumentMongoose }`** copie aussi les internes (`$__parent`, `$__`,
+   `_doc`), dont une chaîne qui remonte au `MongoClient` : réponse **non sérialisable**,
+   donc **500** sur une balance pourtant écrite.
+3. **Une balance antérieure faisait un 500, puis s'affichait sans montants.** Deux
+   causes enchaînées : `'mouvements' in sommaire` est **vrai même quand la donnée est
+   absente** (Mongoose hydrate d'après le *schéma*, pas d'après le document) — le
+   discriminant teste désormais la **valeur** ; et les champs hérités ne sont
+   accessibles que via `toObject()`.
+
+### Revue de code — 3 bloquants, tous reproduits avant correction
+
+1. **Le parser Sage réintroduisait le défaut de la story, un cran plus bas.**
+   `MOTS_SOLDE` et `MOTS_MOUVEMENT` n'étaient pas exclusifs : « **Mouvements cumulés**
+   Débit » matchait `mouvement` **et** `cumul`, était retenu comme les deux, et les
+   vraies colonnes de solde n'étaient jamais lues. Le fichier était annoncé
+   `MOUVEMENTS_ET_SOLDES` (donc aucun avertissement), la divergence se comparait à
+   elle-même, et tout compte mouvementé des deux côtés ressortait en **400 « double
+   solde »** — sur un export valide, avec un message accusant la comptabilité.
+2. **Les colonnes de mouvement d'un profil n'allaient pas par paire** (`||` au lieu du
+   `&&` du parser Sage) : un profil à moitié mappé faisait lire `0` de l'autre côté, pris
+   pour une donnée ⇒ **422** à chaque import d'un fichier pourtant correct, sans jamais
+   nommer la colonne manquante.
+3. **Quatre sites internes lisaient les nouveaux noms sur un document Mongoose** —
+   régression du renommage (avant, ils lisaient `debit`/`credit`, présents sur les
+   documents anciens). `undefined ?? 0` publiait des chiffres faux qui ont l'air de
+   chiffres : le **rapprochement** affichait un solde comptable de `0`, donc un écart
+   égal à la totalité du solde bancaire, **à côté de la référence de la balance censée
+   le justifier**.
+
+Qualité : vecteur `v1` **figé** (le test était auto-référentiel — il restait vert si
+l'algorithme dérivait, rendant tout l'existant invérifiable) · divergence exposée aussi
+sur le chemin **persistant** · couverture des branches `familleColonnes` · fixture périmée.
+
+### Revue de sécurité — 1 constat (CWE-770), corrigé
+
+`divergencesSoldes` produisait **une entrée par ligne fautive**, sans plafond, sur les
+deux réponses d'import, et était calculé **avant** `dryRun`/`submit`. Le scénario
+n'exige qu'un tenant légitime : un CSV à lignes appariées, soldes nuls et mouvements non
+nuls, produit une balance **parfaitement valide** (les deux équilibres et l'invariant XOR
+sont satisfaits, le checksum concorde) dont **100 % des lignes divergent**. Sur les 50 Mo
+autorisés : ~2 M d'entrées, réponse de ~150 Mo, OOM du process — indisponibilité pour
+**tous** les tenants. Ironie : cinq lignes plus bas, la version *textuelle* du même
+diagnostic était déjà plafonnée, commentaire CWE-770 à l'appui.
+
+Corrigé sur le patron `MAX_DIAGNOSTIC` des relevés (089) : troncature **à la
+construction** (tronquer après allocation ne protège de rien), plus
+`divergencesSoldesTotal`/`avertissementsTotal` pour que le compte reste **exact**.
+
+Examinés sans constat : downgrade de checksum impossible (`checksumVersion` n'existe dans
+aucun DTO d'entrée, est écrit en dur côté serveur, et le seul contrôle réel appelle
+toujours `v2`) · ingestion Kafka (orgId d'enveloppe faisant autorité, double filet
+d'idempotence, autorisation fail-closed) · tolérance aux documents hérités inatteignable
+par entrée utilisateur (schéma `required`, DTO `@IsInt`) · invariant XOR et double
+équilibre non contournables (sommaire **toujours** recalculé serveur) · isolation tenant.
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **1830 unitaires + 381 e2e** verts · couverture
+**98.76 / 90.97 / 98.01 / 98.78** (seuils 65/90/90/90).
+
+**10 mutation-tests** joués, chacun vire au rouge : conjonction des deux équilibres ·
+contrôle des soldes par le validateur · invariant XOR · pondération du `statutPreuve` ·
+prise en compte du socle dans la divergence · cumul (vs netting) des mouvements ·
+précédence « mouvement » sur « cumul » · exigence de paire des colonnes de mouvement ·
+lecture par `toObject()` · plafond du diagnostic.
+
+### Leçon transverse
+
+**Un double de test qui ne représente pas ce que la production fournit ne prouve rien.**
+Trois vagues de correctifs ont buté sur le même point : les doubles rendaient des objets
+simples là où la production rend des documents Mongoose. Ils portent désormais
+`toObject()` — et un socle se construit **par fonction**, un `{ ...socle, lignes: … }`
+ne surchargeant que `lignes` et laissant `toObject()` rendre les anciennes.
+
+### Périmètre
+
+**Un seul dépôt.** `balance.created` ne transporte pas les lignes et `bilan-service` ne
+lit pas les balances : aucun contrat inter-services n'est touché, pas de PR jumelle.
+En revanche le **contrat HTTP** change de forme (4 colonnes, sommaire à deux équilibres,
+`checksumVersion`) ⇒ les types générés de **FE-024→027** sont périmés, et **FE-026** doit
+rejouer la parité de checksum sur le couple publié ci-dessus.
+
+Restés hors périmètre, comme cadré : les 8 contrôles GUIDEF (**STORY-098**, que cette
+story débloque), les colonnes à-nouveaux (D-147-2), l'UI.
