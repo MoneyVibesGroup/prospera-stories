@@ -4,7 +4,9 @@
 **Réf. architecture :** `architecture-prospera-ecosystem-2026-07-04.md` § relying-parties ; chaîne de guards STORY-006 (`Throttler → Jwt → EmailVerified → Roles`)
 **Priorité :** Should Have (dette de contrat ; **aucun** blocage fonctionnel — le front dégrade proprement, cf. Contexte)
 **Story Points :** 3
-**Statut :** planned (slottée **Sprint 17**, 2026-07-25 — décision user ; S17 → 21/34)
+**Complexité :** low (répétitif, faible risque — le coût est la cohérence des 7 dépôts, pas la difficulté)
+**Statut :** done
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-25
 **Origine :** Integration Gate de **FE-024** (2026-07-24) — confrontation du gate Atelier au vrai `balance-service`
 **Services :** `auth-service` (:3001), `expert-comptable` (:3000), `kyc-service` (:3002), `platform-catalog-service` (:3003), `document-service` (:3006), `bilan-service` (:3005), `balance-service` (:3007)
@@ -101,6 +103,39 @@ Le 403 sans `code` ne casse rien — il **dégrade proprement**. Cette story sup
 > ⚠️ **Le guard e-mail est un copié-collé, pas un package.** Le corriger sur un seul service **rouvrirait**
 > exactement la divergence que FE-024 a relevée (un service auto-descriptif, six muets). D'où le traitement
 > **groupé** des 7, comme STORY-109 a traité le CORS sur 5 en une passe.
+
+### D-138-1 — Le champ `error` doit être posé EXPLICITEMENT, sinon AC-03 est violé (2026-07-29)
+
+Piège mesuré avant d'écrire la moindre ligne. NestJS ne construit le corps par défaut **que** si on lui
+passe une chaîne :
+
+```
+new ForbiddenException('msg')                    → { message: 'msg', error: 'Forbidden', statusCode: 403 }
+new ForbiddenException({ message, code })        → { message, code }              ← plus de `error` !
+```
+
+Le filtre retombe alors sur `statusName(403)`, qui rend **`'FORBIDDEN'`** (l'énumération `HttpStatus` est en
+majuscules). Appliquer la forme cible telle qu'écrite dans les Notes techniques ferait donc passer le corps
+de `"error":"Forbidden"` à `"error":"FORBIDDEN"` sur les **7** services : ce ne serait plus un ajout
+**additif**, ce serait une **modification silencieuse d'un champ existant** — exactement ce qu'AC-03
+interdit, et un client qui filtrerait sur `error === 'Forbidden'` casserait.
+
+**Forme cible corrigée**, alignée sur les exceptions typées déjà en place dans le programme (qui posent
+toutes `error: 'Bad Request' | 'Conflict' | 'Not Found'` pour cette raison précise) :
+
+```ts
+throw new ForbiddenException({
+  message: EMAIL_NOT_VERIFIED_MESSAGE,
+  error: 'Forbidden',            // ← sans lui, le corps régresse en « FORBIDDEN »
+  code: 'EMAIL_NOT_VERIFIED',
+});
+```
+
+**Divergence résiduelle assumée, hors périmètre** : `KYC_NOT_APPROVED` et `BALANCE_NOT_ENTITLED` sortent
+aujourd'hui avec `"error":"FORBIDDEN"` (leur `deny()` ne pose pas `error`), là où le refus e-mail sortira
+avec `"error":"Forbidden"`. Les aligner supposerait de **changer** le corps de deux motifs que le front
+consomme déjà — l'inverse de ce que cette story promet. C'est une dette voisine mais distincte, à trancher
+séparément.
 
 ---
 
@@ -222,6 +257,124 @@ et le couvre par le reflet local en attendant cette story.
 - 2026-07-25 : **slottée Sprint 17** (décision user) — S17 passe à 21/34. S15 était à capacité (32/34) et
   hors thème ; S16 déjà chargé ; S17 (thème OCR 082→085) a la marge. Insérée hors thème comme enablement
   transverse, à la façon de STORY-109.
+- 2026-07-29 : **in_progress**. État réel des 7 dépôts **revérifié** avant de coder — l'analyse de la story
+  tient exactement : 7 guards en chaîne nue, 5 filtres qui jettent `code`, 2 qui le propagent
+  (`balance`, `bilan`). Décision **D-138-1** ajoutée : le champ `error` doit être posé explicitement, faute
+  de quoi le correctif violerait AC-03 en faisant régresser `"Forbidden"` en `"FORBIDDEN"`.
+- **Convention de branche** : `MNV-138` dans **chaque** dépôt (une story = une branche `MNV-0XX` **par
+  repo**, cf. `.agents/rules/flux-git.md`), et non `MNV-138(<service>)` — le dépôt porte déjà le service,
+  et les parenthèses restent réservées au **scope du commit** (`MNV-138(<service>): …`).
+
+### Portes DoD — 7 dépôts (2026-07-29)
+
+| Service | Correctif | Lint | Build | Unit |
+|---|---|---|---|---|
+| `auth-service` | guard + filtre | ✅ | ✅ | 599 |
+| `expert-comptable` | guard + filtre | ✅ | ✅ | 168 |
+| `kyc-service` | guard + filtre | ✅ | ✅ | 221 |
+| `platform-catalog-service` | guard + filtre | ✅ | ✅ | 221 |
+| `document-service` | guard + filtre | ✅ | ✅ | 326 |
+| `bilan-service` | **guard seul** | ✅ | ✅ | 776 (+1 skip) |
+| `balance-service` | **guard seul** | ✅ | ✅ | 1153 |
+
+E2E verts sur les 7 (153 · 38 · 70 · 52 · 37 · 187 · 240). Aucun seuil de couverture franchi.
+
+**Mutation-test** (`kyc-service`, qui porte les deux correctifs) :
+
+| Mutation | Test viré au rouge |
+|---|---|
+| `error: 'Forbidden'` retiré du guard | « conserve error: « Forbidden » — l'ajout du code reste strictement additif » |
+| le filtre re-jette `code` | « propage le code applicatif porté par l'exception » |
+
+La première mutation est **le** test qui compte : sans elle, D-138-1 serait passé inaperçu.
+
+### Vérification docker (stack neuve `down -v`, 7 services + infra)
+
+Compte réel créé sur l'IdP, **e-mail non vérifié**, jeton réel (`emailVerified: false` confirmé en décodant
+le JWT). Route témoin **effectivement gardée** par service (les routes devinées ont d'abord rendu des 404 —
+elles ont été relues dans les contrôleurs, pas supposées).
+
+**AC-04 — refus e-mail auto-descriptif, les 7 services**
+
+| Service | Route témoin | Réponse |
+|---|---|---|
+| `auth-service` | `GET /api/v1/users/me` | 403 · `code=EMAIL_NOT_VERIFIED` · `error=Forbidden` |
+| `expert-comptable` | `GET /api/v1/admin/ping` | 403 · `code=EMAIL_NOT_VERIFIED` · `error=Forbidden` |
+| `kyc-service` | `GET /api/v1/kyc/status` | 403 · `code=EMAIL_NOT_VERIFIED` · `error=Forbidden` |
+| `platform-catalog-service` | `GET /api/v1/catalog/modules` | 403 · `code=EMAIL_NOT_VERIFIED` · `error=Forbidden` |
+| `bilan-service` | `GET /api/v1/bilan/exercices` | 403 · `code=EMAIL_NOT_VERIFIED` · `error=Forbidden` |
+| `document-service` | `GET /api/v1/documents/abc/extraction` | 403 · `code=EMAIL_NOT_VERIFIED` · `error=Forbidden` |
+| `balance-service` | `GET /api/v1/referentiels/actifs` | 403 · `code=EMAIL_NOT_VERIFIED` · `error=Forbidden` |
+
+`error` vaut bien **`Forbidden`** partout, et non `FORBIDDEN` : **D-138-1 tient en réel**, l'ajout est
+strictement additif. Le cas `expert-comptable` prouve en prime l'ordre de la chaîne — la route est
+`@Roles(PLATFORM_ADMIN)` et le jeton est `TENANT_ADMIN`, mais c'est bien le **guard e-mail** qui tranche
+en premier.
+
+**AC-05 — le code disparaît une fois l'e-mail vérifié** (même compte, `emailVerifiedAt` posé, nouveau
+jeton `emailVerified: true`) : plus aucun `EMAIL_NOT_VERIFIED` sur les 7 ; on est passé au maillon suivant
+(`KYC_NOT_APPROVED` sur `bilan`/`balance`, 403 de rôle sur `expert-comptable`, 200 ailleurs). Le code
+n'est donc pas posé à tort.
+
+**AC-06 — non-régression, sur les 5 services au filtre modifié**
+
+| Cas | Résultat |
+|---|---|
+| 401 sans jeton | **aucun** `code` · `error=UNAUTHORIZED` (inchangé) |
+| 404 route inexistante | **aucun** `code` · `error=Not Found` (inchangé) |
+| 400 de validation (`/auth/login`) | **aucun** `code` · `error=Bad Request` · messages inchangés |
+| Autre motif (`KYC_NOT_APPROVED`) | `code` **inchangé**, toujours présent |
+
+**AC-08 — bypass inchangés** : `/health` (`@Public`) → 200 sans `code` ; `/tenant/state`
+(`@AllowUnverified`) avec un jeton **non vérifié** → **200**, aucun `code` ne surgit.
+
+### Écart assumé à AC-03, relevé par la revue de sécurité (2026-07-29)
+
+AC-03 promet qu'« aucun **autre** corps d'erreur ne gagne de `code` par effet de bord ». Tenu sur 4 des 5
+services au filtre modifié — mais **pas** sur `expert-comptable`, et il faut le dire.
+
+Ce dépôt possède un **`TenantStateGuard`** qui lève déjà `ForbiddenException({ code, message })` avec
+`KYC_NOT_APPROVED` et `SUBSCRIPTION_REQUIRED`. Son filtre les **jetait** ; il les publie désormais. Deux
+corps d'erreur gagnent donc un `code` que la story n'avait pas prévu.
+
+**Analysé, et laissé tel quel** — c'est l'effet **recherché**, pas un dommage collatéral :
+
+- les deux codes sont la traduction machine d'un message **déjà renvoyé en clair** (« le KYC de
+  l'organisation n'est pas approuvé », « un abonnement actif est requis ») — aucune information nouvelle ;
+- ils portent sur l'organisation de l'**appelant authentifié**, jamais sur un tiers ;
+- `KYC_NOT_APPROVED` est **déjà** publié à l'identique par `bilan-service` et `balance-service` : le laisser
+  muet ici perpétuerait exactement l'asymétrie que cette story supprime ;
+- les neutraliser supposerait de filtrer sélectivement le `code` du seul guard e-mail — une mécanique
+  fragile qui trahirait l'intention de ces constantes, écrites pour être lues.
+
+L'audit de sécurité a par ailleurs confirmé qu'**aucune** exception à `code` ne se trouve sur un chemin
+non authentifié (login, register, reset) sur les 5 services, et qu'aucune ne recopie d'entrée utilisateur
+dans `code` — les seules valeurs existantes sont des littéraux constants.
+
+### Clôture (2026-07-29)
+
+Les **7 PR** ont été rebase-mergées sur `dev`, branches supprimées :
+
+| Dépôt | PR |
+|---|---|
+| `prospera-auth-service` | #13 |
+| `prospera-expert-comptable` | #3 |
+| `prospera-kyc-service` | #8 |
+| `prospera-platform-catalog-service` | #7 |
+| `prospera-ocr-service` (document) | #8 |
+| `prospera-bilan-service` | #38 |
+| `prospera-balance-service` | #16 |
+
+**Revue de code** — un constat, corrigé sur les 7 : le `try/catch` des nouveaux tests attrapait aussi son
+propre « le guard aurait dû refuser », si bien qu'un guard devenu permissif aurait fait échouer le test sur
+un `TypeError` plutôt que sur son objet. Extrait dans un helper `refusDuGuard()`, mutation-test rejoué sur
+la nouvelle forme.
+
+**Revue de sécurité** — aucune vulnérabilité ; commentaire publié sur les 7 PR. Elle a en revanche relevé
+l'écart à AC-03 documenté ci-dessus.
+
+**Reste à faire, hors périmètre de cette story** : retirer la note « guard e-mail non aligné » de
+`frontend-stories/FE-024.md` (dépôt front, non touché ici).
 
 ### Incrément proposé (décision user 2026-07-25)
 `balance-service` d'abord — le service que FE-024 consomme, **guard seul** (son filtre est déjà conforme) —

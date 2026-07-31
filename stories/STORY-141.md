@@ -1,15 +1,81 @@
-# STORY-141 : `platform-catalog-service` — objet **Projet** (modèle, CRUD, org propriétaire, association de modules, événement `project.changed`)
+# STORY-141 : `platform-catalog-service` — objet **Projet** (modèle, CRUD, org propriétaire, association de modules)
 
 **Epic :** EPIC-026 — Projets (nouveau)
 **Réf. architecture :** `architecture-catalog-service-2026-07-07.md` (C3 = le catalogue ne détient que des entrées de registre ; C8 = octroi service-à-service) · **STORY-032** (catalogue Module/Version/Référentiel) · **STORY-033** (entitlements + réconciliation) · **STORY-034** (`entitlement.changed`) · **STORY-140** (permissions `project:*`)
 **Priorité :** Must Have
-**Story Points :** 8
-**Statut :** draft
-**Assigné à :** Unassigned
+**Story Points :** 6 *(8 → 6 : `project.changed` n'est pas publié, cf. arbitrage 1)*
+**Complexité :** high
+**Statut :** done
+**Clôturée le :** 2026-07-29
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
 **Sprint :** 18
-**Service :** `platform-catalog-service` (:3003) — 1 dépôt, 1 branche, 1 PR
-**Branche :** `MNV-141`
+**Services :** `platform-catalog-service` (:3003, **le domaine**) · `auth-service` (:3001, catalogue + libellés + seed) · `kyc-service` (:3002) · `admin-panel` (:3010) — ⚠️ story **multi-repo** par l'effet K4 (cf. arbitrage 2) → **4 branches + 4 PR**
+**Branches :** `MNV-141` × 4 dépôts
+
+---
+
+> ## Arbitrages pris au lancement (2026-07-29), avant toute ligne de code
+>
+> ### 1. `project.changed` — **NON publié**. Hook inerte, contrat figé ici.
+>
+> Le périmètre le conditionnait explicitement à l'existence d'un abonné : *« si aucun consommateur
+> n'est identifié, ne pas publier »*. Recherche exhaustive sur les 8 dépôts (`grep -rn
+> "project.changed"`) : **zéro occurrence** hors ce document et `sprint-status.yaml`. Les deux
+> consommateurs candidats n'en sont pas :
+> - **STORY-143 incrément 3** est un **BFF REST synchrone** — il proxifie `GET /projects/:id`, il ne
+>   maintient aucun read-model ;
+> - **AP-11** est de l'UI, servie par ce même BFF.
+>
+> Publier maintenant coûterait un topic à maintenir, un contrat à versionner et un relais d'outbox à
+> surveiller, **pour personne**. Le contrat reste écrit ci-dessous et le point d'appel est **nommé en
+> commentaire** dans `projects.service.ts` : le jour où un read-model apparaît, la story qui le crée
+> branche les deux côtés ensemble (règle « un contrat d'événement touche 2 dépôts »).
+>
+> **Conséquence technique heureuse** : sans événement, chaque mutation n'écrit **qu'un seul
+> document** — aucune transaction Mongo n'est requise (`transactions-mongo.md` ne s'applique qu'au
+> delà d'un document). En introduire une « au cas où » simulerait une atomicité qui n'a rien à
+> protéger.
+>
+> ### 2. **4 dépôts**, et non 1 — l'effet K4 sur `permission.enum.ts`
+>
+> La story annonçait « 1 dépôt, 1 branche, 1 PR ». C'est faux dès lors qu'elle fait naître
+> `project:read` / `project:manage` : le catalogue de permissions est **dupliqué à l'octet près dans
+> 4 services** (K4, STORY-103/105/106) et le `diff -q` entre copies est le seul détecteur de
+> divergence. Laisser une copie à 10 codes le rendrait rouge en permanence.
+>
+> | Dépôt | Ce que la branche porte | Pourquoi il est **obligatoire** |
+> |---|---|---|
+> | `platform-catalog-service` | enum + **le module `projects` entier** | C'est le guard qui justifie les 2 permissions (règle d'or) |
+> | `auth-service` | enum + libellés `PERMISSION_DESCRIPTIONS` + `project:read` aux 3 rôles métier | `Record<Permission, string>` ⇒ **la compilation casse** sans libellé ; l'ajout aux 3 rôles était déjà planifié par STORY-140 §Périmètre |
+> | `kyc-service` | recopie de l'enum + verrou de non-divergence | Aucun guard, aucun comportement modifié — contrat dupliqué seul |
+> | `admin-panel` | recopie de l'enum + verrou | `CreatePlatformRoleDto` valide `permissions[]` par `@IsEnum(Permission)` **sur sa copie locale** : restée à 10 codes, elle rejetterait en **400 au bord** la composition d'un rôle portant `project:manage` — exactement le bloquant trouvé en revue de STORY-140 |
+>
+> Le catalogue passe donc de **10 à 12** permissions.
+>
+> ### 3. Autorisation : `@RequirePermissions` **pur**, avec plancher de classe
+>
+> Pas de voie mixte `@RequireAnyOf`, pas de décision contextuelle : les 6 routes servent la
+> **seule population plateforme** (leur unique appelant est le BFF admin de STORY-143). Contrairement
+> à `EntitlementsController` — qui ne *peut pas* poser de plancher parce que ses lectures servent
+> aussi des tenants aux `perms` vides — ce contrôleur porte un `@RequirePermissions` **de classe**
+> `{project:read, project:manage}` : une route qu'on y ajouterait demain **sans** décorateur reste
+> fermée au lieu d'être ouverte à tout porteur de jeton. Le décorateur de handler **surcharge** ce
+> plancher (`getAllAndOverride`), il ne s'y ajoute pas : aucun ET n'est fabriqué.
+>
+> ### 4. `organizationId` **obligatoire** sur `GET /projects`
+>
+> Le filtre est la route, pas une option. Le rendre facultatif ouvrirait, sans que personne l'ait
+> demandé, une énumération paginée du parc projets **toutes organisations confondues** au premier
+> porteur de `project:read`. Absent ⇒ **400**.
+>
+> ### 5. Un module attaché **sans aucun entitlement** ⇒ `entitlementStatus: null`
+>
+> La révocation étant *soft* (STORY-033), le cas normal après révocation est `REVOKED`. Mais rien ne
+> garantit qu'un entitlement existe encore (purge, reprise de données) : la vue de détail renvoie
+> alors `versionCode: null` **et** `entitlementStatus: null` plutôt que d'omettre la ligne. Masquer un
+> module attaché parce qu'on ne sait rien de son droit ferait disparaître de l'écran la donnée
+> exactement au moment où elle devient problématique.
 
 ---
 
@@ -78,7 +144,7 @@ export class Project {
 | Route | Permission | Notes |
 |---|---|---|
 | `POST /projects` | `project:manage` | `{organizationId, name, description?, moduleCodes?}` |
-| `GET /projects?organizationId=` | `project:read` | Liste filtrée, paginée |
+| `GET /projects?organizationId=` | `project:read` | Liste paginée — `organizationId` **obligatoire** (arbitrage 4) |
 | `GET /projects/:id` | `project:read` | Détail + `modules[]` enrichis (nom, version entitlée, `entitlementStatus`) |
 | `PATCH /projects/:id` | `project:manage` | `name`, `description`, `status` |
 | `POST /projects/:id/modules` | `project:manage` | Associe un ou plusieurs `moduleCodes` |
@@ -93,17 +159,25 @@ export class Project {
 - Suppression d'un projet : **pas de `DELETE`** en v1 → `status: ARCHIVED` (les projets sont référencés
   par l'historique client).
 
-### Événement
-- `project.changed` sur le même bus que `entitlement.changed` (STORY-034), même enveloppe :
-  `{ projectId, organizationId, action: created|updated|archived|modules_changed, at }`.
-- **À trancher au lancement :** si aucun consommateur n'est identifié, **ne pas publier** — un
-  événement sans abonné est la version messagerie de la promesse creuse. Le publier seulement si
-  l'app cliente ou le dashboard s'y abonne dans la même release.
+### Événement — **hook inerte** (arbitrage 1 : aucun consommateur ⇒ pas de publication)
+Contrat figé, à câbler par la story qui créera le premier read-model — **des deux côtés à la fois** :
+- topic `project.changed`, même bus et même enveloppe que `entitlement.changed` (STORY-034),
+  clé de partition `organizationId` ;
+- charge utile `{ projectId, organizationId, action: created|updated|archived|modules_changed, at }`.
 
-### Permissions
-- Consomme `project:read` / `project:manage`. Si **STORY-140 option (b)** est retenue, **cette story
-  les ajoute elle-même** au catalogue (+ les 3 copies K4 + le libellé) — c'est ce qui satisfait la
-  règle d'or : la permission naît avec son guard.
+Ce que cette story livre pour cela : **rien d'exécutable**, un commentaire nommant le point d'appel
+dans `projects.service.ts`. Aucun topic déclaré, aucune entrée d'outbox, aucun test — un hook inerte
+est une note, pas du code mort.
+
+### Permissions — **naissance de `project:read` / `project:manage`** (arbitrage 2)
+STORY-140 a tranché en (b) : les deux codes ont été **retirés** de son ticket pour naître ici, dans le
+commit qui livre leur guard. Cette story les ajoute donc :
+- aux **4** copies K4 de `common/rbac/permission.enum.ts` (+ les 4 verrous de non-divergence) ;
+- aux libellés `PERMISSION_DESCRIPTIONS` d'`auth-service` (compilation cassée sinon) ;
+- à `PLATFORM_ACCOUNTANT`, `PLATFORM_MARKETING` et `PLATFORM_EXECUTIVE` — **`project:read`
+  seulement**. Les trois personas *consultent* le parc (`org:read`, `catalog:read`) ; leur donner
+  `project:manage` en même temps que la surface naît serait une élévation que personne n'a demandée.
+  `PLATFORM_ADMIN` reçoit les deux **par construction** (il porte `PERMISSION_CATALOG` entier).
 
 **Hors périmètre :**
 - UI → **AP-11**.
@@ -123,18 +197,27 @@ export class Project {
 - [ ] Associer / dissocier un module → reflété ; associer deux fois le même code est **idempotent**.
 - [ ] Archiver un projet → `ARCHIVED` ; aucun `DELETE` n'est exposé.
 - [ ] Un acteur sans `project:manage` → **403** sur toute écriture ; sans `project:read` → **403** en lecture.
+- [ ] Le catalogue expose **12** permissions, **identiques dans les 4 copies K4** (`diff -q`), chacune avec son libellé français côté IdP.
+- [ ] Un rôle plateforme portant `project:manage` se compose **sans 400 au bord** dans `admin-panel` (le défaut de STORY-140, rejoué).
+- [ ] **Aucune permission orpheline** : un test nomme, pour `project:read` et `project:manage`, le guard qui les vérifie.
+- [ ] `GET /projects` **sans** `organizationId` → **400** (pas d'énumération inter-org).
+- [ ] Un module attaché dont l'entitlement a disparu → `versionCode: null`, `entitlementStatus: null` — la ligne reste visible.
+- [ ] **Mutation-tests** : retirer le plancher de classe, dégrader `project:manage` en `project:read` sur une écriture, et rendre l'association non-idempotente doivent chacun faire **virer un test au rouge**.
 - [ ] Vérification docker bout-en-bout tracée.
 
 ---
 
 ## Notes techniques
 
-| Élément | Fichier (proposé) | Nature |
+| Élément | Fichier | Nature |
 |---|---|---|
-| Schéma | `src/modules/projects/schemas/project.schema.ts` | Nouveau |
-| Service | `src/modules/projects/services/projects.service.ts` | Nouveau |
-| Contrôleur | `src/modules/projects/controllers/projects.controller.ts` | Nouveau |
-| Module Nest | `src/modules/projects/projects.module.ts` | Nouveau |
+| Schéma | `cat/src/modules/projects/schemas/project.schema.ts` | Nouveau |
+| Service | `cat/src/modules/projects/services/projects.service.ts` | Nouveau |
+| Contrôleur | `cat/src/modules/projects/controllers/projects.controller.ts` | Nouveau |
+| Module Nest | `cat/src/modules/projects/projects.module.ts` | Nouveau |
+| Enum K4 | `{auth,kyc,cat,panel}/src/common/rbac/permission.enum.ts` (+ 4 specs) | Modifié |
+| Libellés | `auth/src/modules/rbac/permission-catalog.ts` | Modifié |
+| Seed | `auth/src/modules/rbac/system-roles.ts` | Modifié |
 
 **Vigilance :**
 - **Ne pas dupliquer la logique d'entitlement** : la validation lit `EntitlementsService`, elle ne
@@ -142,13 +225,210 @@ export class Project {
 - **Migration** : collection neuve, aucune donnée existante — pas de script de migration, mais
   l'index unique `{organizationId, name}` doit être créé explicitement.
 - `organizationId` reste **opaque** : ne jamais joindre vers `auth-service`.
+- **Pas de N+1 sur l'enrichissement** : un projet de 12 modules ne doit pas produire 24 requêtes.
+  Deux lectures groupées (`$in` sur les codes) — une au catalogue, une aux entitlements.
+- **Collection nommée explicitement** `projects` (`@Schema({ collection: 'projects' })`) : même nom
+  que le défaut Mongoose, donc aucun risque de divergence, mais la convention `CLAUDE.md` cesse
+  d'être implicite.
 
 ---
 
 ## Definition of Done
 
 - [ ] Critères d'acceptation validés ; tests verts (unitaires + contrat).
-- [ ] `lint` / `typecheck` / `test` / `build` verts.
+- [ ] `lint` / `typecheck` / `test` / `build` verts **sur les 4 dépôts**.
+- [ ] `diff -q` des 4 copies de `permission.enum.ts` : identiques.
 - [ ] OpenAPI à jour (`/api/docs-json`) — le front génère ses types depuis lui.
 - [ ] Vérification docker bout-en-bout tracée.
-- [ ] Branche `MNV-141`, PR vers `dev`.
+- [ ] 4 branches `MNV-141`, 4 PR vers `dev`.
+
+---
+
+## Progress Tracking
+
+| Phase | État |
+|---|---|
+| ① Story ajustée (5 arbitrages, 4 dépôts) | ✅ |
+| ③ Développement (4 dépôts) | ✅ |
+| ④ Portes DoD + 7 mutation-tests + vérif docker | ✅ **1 bug trouvé par la vérif docker, corrigé** |
+| ⑥ Revue de code | ✅ 1 constat, corrigé |
+| ⑦ Revue de sécurité | ✅ aucune vulnérabilité |
+| ⑧ Rebase-merge | ✅ 4 PR, branches supprimées |
+
+### ⑥ Revue de code — constat
+
+**Le contrat OpenAPI annonçait `200` là où le service renvoyait `201`.**
+`POST /projects/:id/modules` : Nest répond **201** par défaut sur un `@Post`, alors que
+`@ApiOkResponse` publiait **200** dans `/api/docs-json`. Or la DoD de cette story exige un OpenAPI à
+jour *parce que le front en génère ses types*, et le BFF de STORY-143 (incrément 3) se cale dessus :
+un client typé sur 200 aurait traité la réponse réelle comme inattendue.
+
+Le défaut était invisible aux tests — les e2e assertaient `201`, c'est-à-dire le **comportement**, pas
+la **concordance avec le contrat publié**. Il n'apparaît qu'en comparant les deux, ce qui a été fait
+contre le service en marche.
+
+Corrigé par `@HttpCode(HttpStatus.OK)`, qui est aussi le code **juste** : la route ne crée aucune
+ressource, elle met à jour un projet existant, et elle est idempotente — un `201` promettrait une
+création à chaque rejeu. **Vérification ④ rejouée sur l'état final** (le correctif touche le contrat) :
+runtime **200**, OpenAPI **200**, concordants.
+
+**Laissé de côté, assumé.** `attachModules` / `detachModule` revalident l'`ObjectId` déjà validé par
+`findByIdOrFail` — redondance sans effet, dont la suppression n'apporterait aucune garantie.
+
+### ⑦ Revue de sécurité — aucune vulnérabilité
+
+Publiée sur les 4 PR. La story étant elle-même un changement d'autorisation, les points ont été
+**vérifiés contre le service en marche**, pas seulement lus :
+
+- **Fail-closed sur les 6 routes**, prouvé sur deux jetons RS256 réels ne portant **qu'une seule
+  permission chacun** : `project:read` seul → 403 sur les 4 écritures ; `project:manage` seul → 403 en
+  lecture ; sans jeton → 401 partout.
+- **Le projet n'est jamais un artefact d'autorisation** — c'est ce qui ferme la classe d'attaques la
+  plus tentante. Il n'accorde aucun accès : l'entitlement reste l'autorité. La fenêtre TOCTOU entre la
+  validation du périmètre et l'écriture ne peut donc produire qu'un projet **affiché comme dégradé**,
+  état déjà nominal du modèle, **jamais un privilège**.
+- **Injection NoSQL testée, pas déduite** : `[$ne]`, `[$gt]`, `[$regex]`, `[$exists]` en query et
+  `{"$ne":null}` dans le corps → **400** dans tous les cas. `$pull` ne reçoit qu'un paramètre de route,
+  donc une chaîne.
+- **Pas de reparentalisation** : `organizationId` absent d'`UpdateProjectDto` → `PATCH` **400**,
+  confirmé en base. Sans cela, on aurait déplacé un projet vers une autre organisation **sans
+  revalider les entitlements** — le contournement le plus direct de la règle métier. `moduleCodes`
+  hors du `PATCH` pour la même raison : un seul chemin d'écriture, donc un seul point de validation.
+- **Mass assignment** : `createdBy` forgé → 400 (il vient du claim `sub`) ; `status` forgé à la
+  création → 400.
+- **Isolation multi-tenant** : `TENANT_ADMIN` → 403 partout (les rôles tenant portent `perms: []` par
+  construction, D15, et n'ont pas `role:manage` pour s'en composer).
+- **Aucune élévation côté IdP** : `project:manage` n'entre dans **aucun** rôle métier ; `assertCanGrant`
+  couvre les 2 nouveaux codes ; la copie K4 du panel **desserre** une liste blanche sans en retirer
+  aucune valeur, et l'IdP reste seul décideur.
+- **Surface infra inchangée** : aucun topic, aucun consumer, aucune transaction, aucun secret, aucun
+  fichier. Throttler global appliqué aux nouvelles routes.
+
+**Point assumé, sous le seuil de signalement** : les deux `409` distinguent « module inconnu » de
+« module non accordé », ce qui permet à un porteur de `project:manage` seul de sonder les entitlements
+d'une organisation. Divulgation jugée non significative (opérateur plateforme explicitement habilité,
+donnée qui est l'objet même de la fonctionnalité) ; fusionner les messages ferait chercher une faute de
+frappe là où il faut un octroi.
+
+### ④ Portes DoD (2026-07-29)
+
+| Dépôt | Lint | Build | Couverture (L/F/B) | Unit | e2e |
+|---|---|---|---|---|---|
+| `platform-catalog-service` | 0 warning | ✅ | 99,88 / 100 / 93,96 | 315 ✅ | 110 ✅ |
+| `auth-service` | 0 warning | ✅ | 96,93 / 97,80 / 89,72 | 612 ✅ | 153 ✅ |
+| `kyc-service` | 0 warning | ✅ | 95,38 / 94,08 / 89,89 | 222 ✅ | 70 ✅ |
+| `admin-panel` | 0 warning | ✅ | 99,83 / 100 / 93,00 | 243 ✅ | 109 ✅ |
+
+Module `projects` : **100 %** lignes / fonctions sur le contrôleur et le schéma, 98,83 / 94,28 sur le
+service. `diff -q` des **4** copies de `permission.enum.ts` : **identiques**.
+
+### 🔴 ④ Le bug que seule la vérification docker pouvait voir
+
+`GET /projects?organizationId=` renvoyait **`total: 0` sur 3 documents réellement présents**, sans la
+moindre erreur — et lint, build, 315 unitaires et 110 e2e étaient **tous verts**.
+
+**Cause.** Dans ce service, `@Prop({ type: Types.ObjectId })` ne produit pas un chemin `ObjectId`
+mais un chemin **`Mixed`** — vérifié, pas supposé :
+`EntitlementSchema.path('organizationId').instance === 'Mixed'`. Un chemin `Mixed` ne caste **rien** :
+ni la valeur écrite, ni le filtre d'une requête. Le schéma déclarait donc un type que Mongoose
+n'appliquait jamais.
+
+L'asymétrie était de mon fait : `create` écrivait `new Types.ObjectId(orgId)` — un vrai `ObjectId` en
+base — tandis que `findAll` filtrait avec la **chaîne** du DTO. Deux représentations du même
+identifiant, aucune conversion entre les deux, zéro résultat.
+
+**Pourquoi aucun test ne le voyait.** Les faux `Model` (unitaires *et* e2e) comparent par `String()`,
+donc les deux formes s'y équivalent. C'est exactement le trou que `CLAUDE.md` décrit : les e2e mockent
+la couche données et ne prouvent **ni** la persistance **ni** le comportement réel des requêtes.
+
+**Correctif.** `organizationId` passe en `@Prop({ type: String })` et le service écrit la chaîne brute
+— comme `Entitlement.organizationId`, qui stocke déjà des chaînes. Bénéfice second : les deux
+collections restent **joignables en `mongosh` sans cast** (vérifié :
+`projects.organizationId === entitlements.organizationId` → `true`). Un `ObjectId` d'un côté et une
+chaîne de l'autre aurait fait échouer en silence toute vérification croisée future.
+
+**Verrous ajoutés** (les deux virent au rouge si le bug revient — mutation M7) :
+`project.schema.spec.ts` asserte `path('organizationId').instance === 'String'`, et
+`projects.service.spec.ts` asserte que l'écriture et le filtre de lecture emploient la **même chaîne**.
+
+### ④ Mutation-tests — la preuve que les tests filtrent
+
+| # | Mutation appliquée | Résultat |
+|---|---|---|
+| M1 | `POST /projects` gardé par `project:read` au lieu de `project:manage` | 🔴 2 e2e |
+| M2 | `$addToSet` → `$push` (association non idempotente) | 🔴 1 unitaire |
+| M3 | statut exigé `ACTIVE` → `SUSPENDED` | 🔴 5 unitaires + 8 e2e |
+| M4 | `PermissionsGuard` neutralisé dans la chaîne `APP_GUARD` de l'e2e | 🔴 4 e2e — sans ce maillon les 6 routes ne sont gardées par **personne** |
+| M5 | plancher deny-by-default de **classe** retiré | 🔴 1 unitaire |
+| M6 | `PLATFORM_ACCOUNTANT` reçoit `project:manage` au lieu de `project:read` | 🔴 2 unitaires (`auth-service`) |
+| M7 | **le bug docker réintroduit** (chemin `ObjectId` + écriture `new Types.ObjectId`) | 🔴 2 unitaires |
+
+### ④ Vérification docker — stack neuve (`down -v`), `auth-service` + `platform-catalog-service`
+
+**Preuve 1 — le seed a réellement écrit (`mongosh auth_service`, collection `roles`)** : 7 rôles, tous
+`isSystem: true`. `project:read` est bien entré dans les 3 rôles métier, **et `project:manage` dans
+aucun d'eux** :
+
+```
+PLATFORM_ACCOUNTANT  ["org:read","catalog:read","project:read"]
+PLATFORM_MARKETING   ["org:read","catalog:read","project:read"]
+PLATFORM_EXECUTIVE   ["org:read","catalog:read","project:read","entitlement:grant","entitlement:revoke"]
+PLATFORM_ADMIN       les 12 permissions (catalogue entier, par construction)
+```
+
+**Preuve 2 — le catalogue sort de l'IdP** : `GET /admin/permissions` → **12** entrées, chacune avec son
+libellé français, `project:read` et `project:manage` incluses, **aucune sans libellé**.
+
+**Preuve 3 — le JWT RS256 réel porte les nouveaux claims.** Jeton `PLATFORM_ADMIN` obtenu par login :
+`perms` contient les 12 codes, `project:read` et `project:manage` compris.
+
+**Preuve 4 — la décision structurante, contre Mongo réel** (org `a…a`, `bilan` + `stock` entitlés `ACTIVE`) :
+
+| Requête | Attendu | Obtenu |
+|---|---|---|
+| `POST /projects` avec `["bilan"]` | 201 | **201** |
+| `POST /projects` avec `["fantome"]` | 409, code nommé | **409** « Le module « fantome » n'existe pas au catalogue. » |
+| `POST /projects` homonyme, **même** org | 409 | **409** |
+| `POST /projects` même nom, **autre** org | 201 | **201** |
+| `GET /projects` **sans** `organizationId` | 400 | **400** |
+| `DELETE /projects/:id` | 404 (verbe inexistant) | **404** |
+
+**Preuve 5 — persistance et invariants (`mongosh catalog_service`)** : collection **`projects`**
+(nommée explicitement), **3 documents**, index `{organizationId, name}` **unique** réellement créé en
+base, `createdBy` renseigné. **Aucun orphelin** : les tentatives refusées en 409 n'ont laissé aucun
+document.
+
+**Preuve 6 — LE critère de la story : la dégradation.** `DELETE /catalog/entitlements/:org/stock`
+(révocation *soft*), puis `GET /projects/:id` :
+
+```
+moduleCodes = ['bilan', 'stock']      ← rien n'a été supprimé
+  bilan → Module bilan | 2.0 | ACTIVE
+  stock → Module stock | 2.0 | REVOKED   ← la dégradation est EXPOSÉE, pas cascadée
+```
+
+Puis `DELETE /projects/:id/modules/stock` → **200**, `moduleCodes = ['bilan']` : on peut nettoyer un
+projet dégradé **sans** entitlement actif — c'est ce qui rend l'arbitrage possible côté admin.
+
+**Preuve 7 — idempotence et archivage.** Association rejouée → `['bilan','stock']` inchangé (pas de
+doublon). Dissociation rejouée → **200**, jamais 404. `PATCH status: ARCHIVED` → **ARCHIVED**, puis
+association sur le projet archivé → **409** « réactivez-le avant d'en modifier le périmètre ».
+
+**Preuve 8 — RBAC sur des jetons réels.** Deux rôles **non-système** composés via l'API
+(`LECTEUR_PROJETS` = `["project:read"]`, `GESTION_PROJETS` = `["project:manage"]`), deux utilisateurs
+plateforme invités, deux logins réels (claims vérifiés : **une seule** permission chacun) :
+
+| Requête | lecteur | gestion | admin | sans jeton |
+|---|---|---|---|---|
+| `GET /projects?organizationId=` | **200** | **403** | 200 | **401** |
+| `GET /projects/:id` | **200** | **403** | 200 | **401** |
+| `POST /projects` | **403** | **201** | 201 | **401** |
+| `PATCH /projects/:id` | **403** | **200** | 200 | **401** |
+
+La colonne `gestion` est celle qui compte : **201 en écriture sans détenir `project:read`** — le
+plancher de classe est bien un plancher surchargé, pas un ET. Message de refus **générique** :
+« Accès refusé : permission insuffisante. », il n'énumère jamais la permission manquante.
+
+**Preuve 9 — le bug corrigé, sur base neuve** : `GET /projects?organizationId=` → `total = 2` (org
+`a…a`) et `total = 1` (org `b…b`) — isolation inter-organisations vérifiée, filtre `status` et
+plafond `pageSize=100` conformes.

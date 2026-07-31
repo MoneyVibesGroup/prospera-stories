@@ -4,8 +4,9 @@
 **Réf. architecture :** `sprint-plan-atelier-balance-2026-07-12.md` §0 (D13, tableau des 3 adaptateurs) · `rapport-bilan-logique-metier-2026-07-12.md` §D13 · `prd-atelier-balance-2026-07-12.md` § FR-A25 (contrôle d'équilibre) · `architecture-prospera-ecosystem-2026-07-04.md` (bus Kafka, outbox transactionnel)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** done
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 17 (EXTENDED)
 **Service :** `balance-service` (:3007) — consomme les événements des **verticaux intégrés**
@@ -89,6 +90,19 @@ Le module compta d'une IMF est la **matérialisation par vertical** du `comptabi
    - **✘ Écart de 1 250 000 XOF** (le cas observé dans prospera-IMF) → **rejetée**, `etat: REJETÉE`, motif enregistré → **`balance.rejected`** émis → **l'IMF est notifiée** et corrige à la source.
 6. Le cabinet consulte `GET /balance/rejets` et voit le motif exact.
 7. L'IMF corrige, re-pousse → **`version: 2`**, l'ancienne est **archivée** (immutabilité, STORY-101).
+
+### Décisions de conception (arrêtées au cadrage, tranchent les ambiguïtés du cahier)
+
+| # | Décision | Pourquoi |
+|---|---|---|
+| **D-102-1** | L'`orgId` **de l'enveloppe** (racine du payload = clé de partition Kafka) fait **autorité** ; `balance.orgId` doit lui être **identique**, sinon **rejet `ORG_NON_AUTORISEE`**. | Le bus a routé sur la clé de partition ; laisser le corps désigner une autre org serait une écriture **cross-tenant** commandée par le payload. Aligne aussi le contrat sur `parseEventEnvelope` (enveloppe commune à tous les topics consommés). |
+| **D-102-2** | Le rejet **n'est pas** un document `Balance` : chaque ingestion (acceptée **et** rejetée) laisse une **trace dédiée** dans la collection **`balance_ingestions`**, portant `etat: 'BROUILLON' \| 'REJETÉE'` + `motifCode` + `motif`. | Trois raisons : (1) une balance `REJETÉE` **consommerait la clé unique** `(org, exercice, source, version)` et la re-soumission **corrigée de la même version** entrerait en collision ; (2) elle polluerait `listByOrg`/`existeBalanceValidee` et donc le handoff aval ; (3) la trace couvre NFR-A07 pour les **deux** issues, là où `Balance` ne parle que des acceptées. |
+| **D-102-3** | La balance ingérée **doit** porter `source: 'direct'` — toute autre valeur est un **rejet `PAYLOAD_INVALIDE`**. | Un vertical qui pousserait `source: 'sage'` écrirait dans l'**espace de versions** de l'adaptateur fichier et masquerait/collisionnerait ses imports. |
+| **D-102-4** | La `version` est **fournie par l'émetteur**. Version déjà ingérée **et même checksum** ⇒ **NOP idempotente** (vrai doublon). Version déjà ingérée **et checksum différent** ⇒ **rejet `VERSION_DEJA_INGEREE`** (« repoussez en `N+1` »). | C'est **le** piège de l'adaptateur : un émetteur qui renvoie éternellement `version: 1` verrait sa correction **avalée en silence** par l'idempotence — exactement le mal que la story combat. Le hub **exige** le `N+1` au lieu de le supposer. |
+| **D-102-5** | L'autorisation rejoue la **politique tenant** de la gate HTTP : **KYC `APPROVED`** *et* **entitlement `balance` `ACTIVE`** (read-models locaux STORY-077), sous le **code unique `ORG_NON_AUTORISEE`** (le `motif` distingue le maillon). En amont, le `sourceSystem` doit figurer dans une **allowlist** de config (`INGESTION_SOURCE_SYSTEMS`) → sinon `SOURCE_SYSTEM_INCONNU`. | Une garde **plus faible que le chemin HTTP** rouvrirait en façade la porte que la gate ferme : la même org pourrait faire entrer par le bus une balance que `POST /balances` lui refuse. L'allowlist est le **repli documenté** de la décision **C8** (auth M2M) : elle borne qui peut pousser, en attendant une identité de service. |
+| **D-102-6** | La route de diagnostic est **`GET /api/v1/balance/rejets`** — chemin racine **distinct** de `balances`, **jamais** `balances/rejets`. | `BalanceController` déclare `@Get(':id')` : `balances/rejets` serait apparié sur `:id` (module déclaré en premier) et rendrait un **404 anti-énumération** au lieu de la liste. Piège d'ordre de routes, invisible à la compilation. |
+| **D-102-7** | L'`auteur` d'une balance ingérée est `{ userId: <sourceSystem>, orgId, role: 'SERVICE' }`. | Une trace de décision doit nommer **qui décide** : ici aucun humain, c'est le vertical émetteur. Le distinguer d'un `TENANT_USER` évite de fabriquer un auteur humain fictif. |
+| **D-102-8** | Idempotence (`ProcessedEvent`), autorisation, **validation**, persistance et **outbox** s'exécutent dans **une seule** transaction Mongo, via un `BalanceService.submitInSession(...)` — le **même** chemin que la voie HTTP et l'adaptateur Sage. | « Les contrôles sont écrits une fois, pas trois » : le consumer ne **réimplémente** rien, il **entre** dans l'orchestrateur de STORY-101 en lui passant sa session. C'est ce qui rend le **test croisé** fichier ↔ événement vrai par construction, et pas par ressemblance. |
 
 ---
 
@@ -211,7 +225,86 @@ private async rejeter(event, motif: string, session) {
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+| Phase | État | Note |
+|---|---|---|
+| Cadrage (create-story) | ✅ 2026-07-29 | Story préexistante **révisée** (jamais réécrite) : `Complexité: high`, 8 décisions de conception (D-102-1..8) tranchant les ambiguïtés du cahier — trace d'ingestion dédiée, `source: 'direct'` imposée, correction jamais avalée en silence, politique tenant alignée sur la gate HTTP, chemin de route sans collision. Statut `not_started` → `defined`. |
+| Développement (dev-story) | ✅ 2026-07-29 | Module `modules/balance/ingestion/` : contrat `BalanceSubmittedEventV1` + `BalanceRejectedEventV1` (`kafka/events/balance-submitted-events.ts`), consumer `balance-service-ingestion`, `IngestionService` (transaction unique), journal `balance_ingestions`, `GET /api/v1/balance/rejets`, `BalanceService.submitInSession` (chemin partagé), 2 JSON Schema publiés, `INTEGRATION.md` §« Comment un vertical pousse sa balance », env `KAFKA_INGESTION_GROUP_ID` + `INGESTION_SOURCE_SYSTEMS` (compose racine). |
+| Validation (DoD + vérif docker) | ✅ 2026-07-29 | Lint 0 warning · build OK · **1277 unit** (module `ingestion` 99,4 % ; global **98,8 / 92,2 / 98,2 / 98,9** > seuils 65/90/90/90) · **272 e2e**. **6 mutations volontaires** : 5 vérifiées **rouges** (garde de version, KYC, entitlement, typage des lignes, chemin de route), la 6ᵉ **refusée par le compilateur** (le narrowing de type *est* la garde). Vérif docker détaillée ci-dessous. |
+| Revue de code | ✅ 2026-07-29 | **1 constat, corrigé** (commit dédié). Cf. ci-dessous. |
+| Revue de sécurité | ✅ 2026-07-29 | **Aucune vulnérabilité exploitable.** Compte rendu publié en commentaire de la PR #18. |
+| Intégration (rebase-merge `dev`) | ✅ 2026-07-29 | PR **#18** `prospera-balance-service` — *Rebase and merge* sur `dev`, branche `MNV-102` supprimée. |
+
+### Vérification docker — stack neuve, publication réelle sur Kafka (15/15)
+
+`docker compose down -v` puis stack complète ; org créée par l'IdP, read-models
+`OrgKycStatus`/`OrgBalanceEntitlement` amorcés ; **10 événements publiés sur
+`balance.submitted`** via `kafka-console-producer`.
+
+| # | Ce qui est prouvé | Résultat |
+|---|---|---|
+| 1 | Démarrage **dégradé** puis reprise | topic absent au boot ⇒ `Démarrage différé`, puis `Consommateur balance.submitted démarré (group balance-service-ingestion)` |
+| 2 | Ingestion nominale IMF / `SFD-BCEAO` | balance `v1` persistée, `etat: BROUILLON`, `estEquilibre: true` |
+| 3 | **Idempotence** — même `eventId` ×3 | **1 seule** balance, **1 seule** trace, 1 `ProcessedEvent` |
+| 4 | Déséquilibre (FR-A25) | `REJETÉE` · `ECART_EQUILIBRE` · motif chiffré « **12 500 XOF** » · **aucune** balance |
+| 5 | Version déjà ingérée, contenu différent | `REJETÉE` · `VERSION_DEJA_INGEREE` · « re-poussez en version 2 » |
+| 6 | Re-soumission en `N+1` | balance `v2` créée, `v1` **conservée** (append-only) |
+| 7 | Émetteur hors allowlist | `REJETÉE` · `SOURCE_SYSTEM_INCONNU` |
+| 8 | `balance.orgId` ≠ `orgId` d'enveloppe | `REJETÉE` · `ORG_NON_AUTORISEE` · trace rattachée à l'org de l'**enveloppe** |
+| 9 | `source: 'sage'` sur la voie directe | `REJETÉE` · `PAYLOAD_INVALIDE` |
+| 10 | **Atomicité** | **0 balance orpheline** · **0 trace `REJETÉE` ayant créé une balance** |
+| 11 | **Boucle de retour réellement sur le bus** | `balance.rejected` ×6 **consommés depuis le topic** (code + `submittedEventId` + motif) |
+| 12 | Handoff aval intact | `balance.created` ×4 consommés (`source: direct`, `SFD-BCEAO`, `statutPreuve: justifiée`) |
+| 13 | **Contrôle avant/après** sur l'autorisation | entitlement `ACTIVE` ⇒ `v3` **acceptée** ; passé `REVOKED`, **même** événement ⇒ `ORG_NON_AUTORISEE`, **aucune** balance de plus |
+| 14 | `GET /api/v1/balance/rejets` | 6 rejets rendus avec code + motif · `orgId` **non exposé** · filtre exercice OK · `limit=999` ⇒ **400** · sans jeton ⇒ **401** |
+| 15 | **Collision de route (D-102-6)** | `GET /api/v1/balances/rejets` ⇒ **404** en conditions réelles, exactement le piège évité |
+
+Index confirmés sur `balance_ingestions` : `{eventId}` **unique**,
+`{orgId, etat, horodatage:-1}`, `{orgId, exercice.debut, exercice.fin}`.
+Vérification **rejouée** sur le code d'après-revue (event `t10`, `v5` acceptée,
+toujours 0 orpheline).
+
+### Revue de code — 1 constat, corrigé avant merge
+
+**Deux ancres d'idempotence de durées de vie différentes.** L'ingestion s'appuie
+sur `ProcessedEvent` (purgé par un **TTL de 30 jours**) *et* sur l'unicité
+`balance_ingestions.eventId` (**perpétuelle**, c'est une preuve d'audit). Un rejeu
+d'un événement plus ancien que le TTL franchit le marqueur et heurte le journal :
+l'`E11000` remontait au consommateur, qui laissait Kafka rejouer — le même message
+échouant au même endroit à chaque tentative, **bloquant la partition** sans
+progression ni alerte. Fenêtre étroite avec la rétention Kafka par défaut
+(7 j < 30 j), mais elle s'ouvre dès qu'une rétention est allongée ou qu'un consumer
+group est réinitialisé, et le mode de panne est **silencieux**. Le doublon est
+désormais traité pour ce qu'il est — un événement déjà traité. Mutation vérifiée
+rouge.
+
+*Rien laissé de côté.*
+
+### Point d'intégration documenté (découvert en vérif docker)
+
+Une enveloppe **cassée** (corps illisible, `eventId` absent, `occurredAt` invalide,
+`orgId` absent/non conforme) est **ignorée sans boucle de retour** : sans `orgId`
+valide il n'existe ni clé de partition sur laquelle notifier, ni organisation à qui
+rattacher une trace — et rejouer un message illisible bloquerait la partition. Ce
+cas ne relève jamais d'une erreur comptable mais d'un **bug d'émission** : consigné
+explicitement dans `INTEGRATION.md`, avec la consigne de surveiller l'absence de
+retour comme une anomalie côté émetteur.
+
+### Note de synchronisation producteur ↔ consommateur
+
+La règle « un changement de contrat d'événement touche **2 dépôts** » est ici
+satisfaite **par publication** : le producteur de `balance.submitted` et le
+consommateur de `balance.rejected` sont les **verticaux intégrés**
+(`prospera-IMF` / `comptabilite-service`, décision **FI-2**), explicitement **hors
+périmètre** de cette story. Le contrat leur est livré sous forme de **JSON Schema
+versionné** (`docs/schemas/balance.submitted.v1.schema.json`,
+`balance.rejected.v1.schema.json`) et de guide d'intégration. Aucun read-model de
+relying party ne peut donc diverger en silence : il n'y a pas encore d'émetteur.
+
+---
+
+**Status:** done
 **Dependencies:** **STORY-101** (contrat + `BalanceValidator` + `BalanceRepository`), STORY-077 (read-model `entitlements` + patron idempotence), STORY-099 (émission `balance.created`) · **décision C8** (auth M2M) · **côté émetteur** : `comptabilite-service` du vertical (projet `prospera-IMF`, FI-2)
 **Ferme** l'adaptateur **#1** (préféré) du hub D13 — avec 086 (fichier) et 085 (cahiers), les **3 sources convergent au même contrat**
 **Reference:** `sprint-plan-atelier-balance-2026-07-12.md` §0 (D13) · `prd-atelier-balance-2026-07-12.md` § FR-A25

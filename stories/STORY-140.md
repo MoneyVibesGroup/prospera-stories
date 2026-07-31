@@ -1,15 +1,29 @@
-# STORY-140 : Extension du catalogue de permissions (`catalog:*`, `project:*`) + migration de `catalog/admin` vers `@RequirePermissions` + seed des rôles métier Comptable / Marketing / DG
+# STORY-140 : Extension du catalogue de permissions (`catalog:*`) + migration de `catalog/admin` vers `@RequirePermissions` + seed des rôles métier Comptable / Marketing / DG
 
 **Epic :** EPIC-025 — RBAC plateforme (D15)
 **Réf. architecture :** `architecture-auth-service-2026-07-04.md` §Données / §Modèle de jetons · `architecture-catalog-service-2026-07-07.md` · **STORY-103** (catalogue figé + règle d'or + `assertCanGrant`) · **STORY-104** (CRUD rôles + libellés) · **STORY-105** (migration des amont, précédent multi-repo)
 **Priorité :** Must Have
-**Story Points :** 5
-**Statut :** draft
-**Assigné à :** Unassigned
+**Story Points :** 3 *(5 → 3 : arbitrage (b) retenu au lancement, cf. §Risque — `project:*` part dans STORY-141)*
+**Complexité :** medium
+**Statut :** done
+**Clôturée le :** 2026-07-29
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
 **Sprint :** 18
-**Services :** `auth-service` (:3001) · `platform-catalog-service` (:3003) — ⚠️ story **multi-repo** (exception assumée à « 1 story = 1 service », précédent : STORY-105) → **2 branches + 2 PR**
-**Branches :** `MNV-140` × 2 dépôts
+**Services :** `auth-service` (:3001) · `platform-catalog-service` (:3003) · `kyc-service` (:3002, **recopie K4 seule**) — ⚠️ story **multi-repo** (exception assumée à « 1 story = 1 service », précédent : STORY-105) → **3 branches + 3 PR**
+**Branches :** `MNV-140` × 3 dépôts
+
+> **Arbitrages pris au lancement (2026-07-29), avant toute ligne de code :**
+>
+> 1. **§Risque tranché en (b).** STORY-141 est `not_started` : `project:read` / `project:manage`
+>    n'auraient aucun guard à la livraison. Ils sont **retirés de ce ticket** et naîtront dans
+>    STORY-141 avec `projects.controller.ts`, dans le même commit. Le catalogue passe donc de **8 à
+>    10** permissions (et non 12), et les 3 rôles métier sont seedés **sans** `project:read`.
+> 2. **3 dépôts, pas 2.** Le critère « les 3 copies de `permission.enum.ts` sont identiques » **impose**
+>    de toucher `kyc-service` : laisser sa copie à 8 codes ferait diverger le contrat dupliqué dès le
+>    merge, et le `diff -q` — seul détecteur K4 — deviendrait rouge en permanence. La branche
+>    `kyc-service` ne porte **que** la recopie de l'enum et de son verrou de non-divergence : aucun
+>    guard, aucun comportement modifié dans ce service.
 
 ---
 
@@ -51,49 +65,64 @@ permissions qui ont un consommateur au moment de la livraison**, et compose les 
 **Inclus :**
 
 ### `auth-service`
-- **4 permissions ajoutées** à `common/rbac/permission.enum.ts` :
+- **2 permissions ajoutées** à `common/rbac/permission.enum.ts` :
   | Code | Consommateur (guard) |
   |---|---|
   | `catalog:read` | `catalog-read.controller.ts` (migration, ce ticket) |
   | `catalog:manage` | `catalog-admin.controller.ts` (migration, ce ticket) |
-  | `project:read` | `projects.controller.ts` — **STORY-141** |
-  | `project:manage` | `projects.controller.ts` — **STORY-141** |
 - **Libellés** dans `modules/rbac/permission-catalog.ts` (`PERMISSION_DESCRIPTIONS`). ⚠️ Le type est
   `Record<Permission, string>` : oublier un libellé **casse la compilation**, c'est le garde-fou.
 - **3 rôles système seedés** (`isSystem: true`, non supprimables) dans `modules/rbac/system-roles.ts` :
   | Rôle | Permissions | Justification |
   |---|---|---|
-  | `PLATFORM_ACCOUNTANT` | `org:read`, `catalog:read`, `project:read` | Le comptable **lit** le parc et l'offre ; il ne modifie ni l'un ni l'autre. |
-  | `PLATFORM_MARKETING` | `org:read`, `catalog:read`, `project:read` | Même lecture. Se distingue par ce qu'on lui ouvrira ensuite, pas aujourd'hui. |
-  | `PLATFORM_EXECUTIVE` | `org:read`, `catalog:read`, `project:read`, `entitlement:grant`, `entitlement:revoke` | Le DG arbitre l'activation commerciale d'un module chez un client. |
+  | `PLATFORM_ACCOUNTANT` | `org:read`, `catalog:read` | Le comptable **lit** le parc et l'offre ; il ne modifie ni l'un ni l'autre. |
+  | `PLATFORM_MARKETING` | `org:read`, `catalog:read` | Même lecture. Se distingue par ce qu'on lui ouvrira ensuite, pas aujourd'hui. |
+  | `PLATFORM_EXECUTIVE` | `org:read`, `catalog:read`, `entitlement:grant`, `entitlement:revoke` | Le DG arbitre l'activation commerciale d'un module chez un client. |
+  *(`project:read` sera ajouté aux 3 par STORY-141, dans le commit qui livre son guard.)*
 - **Duplication K4** : `permission.enum.ts` est recopié **à l'octet près** dans `kyc-service` et
   `platform-catalog-service`. Les 3 copies doivent rester identiques — `diff -q` est le détecteur de
   divergence, il ne vaut que si elles ne divergent pas. Les **libellés restent hors** du fichier
   dupliqué (ils n'appartiennent qu'à l'IdP).
 
+### `kyc-service`
+- **Recopie seule** de `permission.enum.ts` (les 10 codes) + mise à jour de son verrou de
+  non-divergence `permission.enum.spec.ts`. Aucun guard, aucun comportement modifié.
+
 ### `platform-catalog-service`
-- Recopier `permission.enum.ts` (les 12 codes).
+- Recopier `permission.enum.ts` (les 10 codes) + verrou de non-divergence.
 - **Migrer `catalog-admin.controller.ts`** : `@Roles(Role.PLATFORM_ADMIN)` → `@RequirePermissions(Permission.CATALOG_MANAGE)`.
-- **Migrer `catalog-read.controller.ts`** : `@Roles(PLATFORM_ADMIN, TENANT_ADMIN)` → `@RequirePermissions(Permission.CATALOG_READ)` **pour la voie plateforme**, en **conservant** l'accès `TENANT_ADMIN` par `@Roles` (les rôles tenant ne portent aucune permission — borne D15). Voie mixte : documenter le choix dans le contrôleur.
+- **Migrer `catalog-read.controller.ts`** — **voie mixte**, à concevoir : `TENANT_ADMIN` (par rôle,
+  car les rôles tenant ne portent aucune permission — borne D15) **OU** porteur de `catalog:read`
+  (voie plateforme).
+  ⚠️ **Empiler `@Roles(TENANT_ADMIN)` et `@RequirePermissions(CATALOG_READ)` produirait un ET, pas un
+  OU** : les `APP_GUARD` sont chaînés, `RolesGuard` rejetterait le porteur plateforme avant même que
+  `PermissionsGuard` ne s'exécute. `permissions.decorator.ts` interdit d'ailleurs explicitement les
+  « deux guards qui négocient » (l'autorisation dépendrait de l'ordre d'enregistrement).
+  → **Un décorateur unique `@RequireAnyOf({ roles, permissions })`** portant sa propre clé de
+  métadonnée et son guard `AnyOfAccessGuard`, qui exprime le OU **en un seul point de décision**.
+  `RolesGuard` et `PermissionsGuard` ne voient pas cette clé et laissent passer : aucune sémantique
+  existante n'est modifiée.
 
 **Hors périmètre :**
-- Toute permission sans consommateur : `finance:*`, `campaign:*`, `reporting:*` → **refusées**, elles
-  reviendront avec l'écran qui les justifie.
+- Toute permission sans consommateur : `project:*` (→ STORY-141), `finance:*`, `campaign:*`,
+  `reporting:*` → **refusées**, elles reviendront avec l'écran qui les justifie.
 - L'UI de gestion des rôles → **AP-08** (déjà couverte, ne pas redonder).
 - Les rôles TENANT (`TENANT_ADMIN`, `TENANT_USER`) : ils restent gouvernés par l'enum `Role`.
+- Aucun guard nouveau dans `kyc-service` : sa branche est une recopie de contrat.
 
 ---
 
 ## Critères d'acceptation
 
-- [ ] Le catalogue expose **12** permissions ; `GET /admin/permissions` renvoie 12 entrées `{value, description}` **toutes** avec un libellé français.
+- [ ] Le catalogue expose **10** permissions ; `GET /admin/permissions` renvoie 10 entrées `{value, description}` **toutes** avec un libellé français.
 - [ ] Les 3 copies de `permission.enum.ts` (auth, kyc, platform-catalog) sont **identiques** — vérifié par `diff -q` en CI ou à la main, tracé dans la PR.
 - [ ] `catalog/admin` (POST/PATCH modules, versions, référentiels) refuse un acteur sans `catalog:manage` → **403**, et l'accepte avec.
-- [ ] `catalog` (lecture) reste accessible à un `TENANT_ADMIN` **et** à un porteur de `catalog:read`.
+- [ ] `catalog` (lecture) reste accessible à un `TENANT_ADMIN` **et** à un porteur de `catalog:read` ; un acteur qui n'a **ni l'un ni l'autre** → **403**.
 - [ ] Les 3 rôles métier sont seedés `isSystem: true`, apparaissent dans `GET /admin/roles`, et leur suppression est refusée.
 - [ ] **Invariant « on n'accorde que ce qu'on détient »** (`assertCanGrant`) : un acteur `{role:manage, org:read}` ne peut pas composer un rôle contenant `catalog:manage` → refus.
-- [ ] **Aucune permission orpheline** : pour chacune des 4 ajoutées, un test nomme le guard qui la vérifie. `project:read`/`project:manage` **ne rentrent au catalogue que si STORY-141 est livrée dans la même release** — sinon les retirer de ce ticket (cf. §Risque).
+- [ ] **Aucune permission orpheline** : pour chacune des 2 ajoutées, un test nomme le guard qui la vérifie. `project:read`/`project:manage` sont **exclues** de ce ticket (arbitrage (b), cf. §Risque).
 - [ ] Le seed est **idempotent** (rejouable sans écraser les rôles non-système existants).
+- [ ] **Mutation-test** de la voie mixte : retirer le `AnyOfAccessGuard` de la chaîne `APP_GUARD` doit faire **virer au rouge** le test qui refuse l'acteur sans rôle ni permission — sinon le test ne filtre rien.
 - [ ] Vérification docker bout-en-bout : jeton `PLATFORM_ACCOUNTANT` → `GET /catalog/modules` **200**, `POST /catalog/admin/modules` **403**.
 
 ---
@@ -112,6 +141,9 @@ permissions qui ont un consommateur au moment de la livraison**, et compose les 
 laisse chaque permission naître avec son guard dans le même commit. Le seed des 3 rôles métier se
 fait alors sans `project:read` et sera complété par 141.
 
+✅ **Tranché le 2026-07-29 : (b).** STORY-141 est `not_started` — la livrer « dans la même release »
+n'était pas une option réelle. La story passe à **3 points** et à **2 permissions**.
+
 ---
 
 ## Notes techniques
@@ -120,7 +152,8 @@ fait alors sans `project:read` et sera complété par 141.
 |---|---|---|
 | Enum | `auth/src/common/rbac/permission.enum.ts` (+ 2 copies K4) | Modifié |
 | Libellés | `auth/src/modules/rbac/permission-catalog.ts` | Modifié |
-| Seed | `auth/src/modules/rbac/system-roles.ts` + `platform-roles-seed.service.ts` | Modifié |
+| Seed | `auth/src/modules/rbac/system-roles.ts` (`platform-roles-seed.service.ts` inchangé : il itère `SYSTEM_ROLES`) | Modifié |
+| Voie mixte | `catalog/src/common/decorators/require-any-of.decorator.ts` + `catalog/src/common/guards/any-of-access.guard.ts` | **Créé** |
 | Gardes catalogue | `catalog/src/modules/catalog/controllers/catalog-{admin,read}.controller.ts` | Modifié |
 
 **Vigilance :**
@@ -134,7 +167,146 @@ fait alors sans `project:read` et sera complété par 141.
 ## Definition of Done
 
 - [ ] Critères d'acceptation validés ; tests verts (unitaires + contrat).
-- [ ] `lint` / `typecheck` / `test` / `build` verts sur les **2** dépôts.
+- [ ] `lint` / `typecheck` / `test` / `build` verts sur les **3** dépôts.
 - [ ] `diff -q` des 3 copies de l'enum : identiques.
 - [ ] Vérification docker bout-en-bout tracée dans la story.
-- [ ] 2 branches `MNV-140`, 2 PR vers `dev`.
+- [ ] 3 branches `MNV-140`, 3 PR vers `dev`.
+
+---
+
+## Progress Tracking
+
+| Phase | État |
+|---|---|
+| ① Story ajustée (arbitrage (b), 3 dépôts, conception voie mixte) | ✅ |
+| ③ Développement (3 dépôts) | ✅ |
+| ④ Portes DoD + mutation-tests + vérif docker | ✅ |
+| ⑥ Revue de code | ✅ 1 bloquant + 3 mineurs, tous corrigés |
+| ⑦ Revue de sécurité | ✅ aucune vulnérabilité |
+| ⑧ Rebase-merge | ✅ 4 PR, branches supprimées |
+
+### ⑥ Revue de code — constats
+
+**🔴 BLOQUANT — la 4ᵉ copie K4 oubliée par le cadrage.** La story ne visait que 3 copies de
+`permission.enum.ts`. Or **STORY-106 en a créé une quatrième** dans `admin-panel`, dont le spec local
+le documente déjà (« répercutée dans les **4** services »). Et ce n'est pas une copie inerte :
+`CreatePlatformRoleDto` valide `permissions[]` par `@IsEnum(Permission)` **dessus** — « le catalogue
+K4 local tranche », dit déjà le test de rejet voisin.
+
+Laissée à 8 codes, elle aurait rejeté en **400 au bord** la composition d'un rôle portant
+`catalog:manage`, sans que la requête atteigne jamais l'IdP — pendant que les cases à cocher de
+STORY-106, alimentées par `GET /admin/permissions` (10 entrées désormais), les auraient fièrement
+proposées. La story demandait ces rôles **dans la console** : le défaut en annulait l'objet.
+
+→ `admin-panel` devient le **4ᵉ dépôt** de la story. Corrigé, avec un e2e qui envoie des **chaînes
+brutes** et non des membres d'enum : passer par `Permission.CATALOG_MANAGE` aurait couplé le test à
+l'enum *à la compilation*, et la mutation aurait cassé le **build** au lieu de faire virer le test au
+rouge — l'assertion n'aurait alors rien prouvé du comportement au runtime.
+
+| # | Mutation (suite) | Résultat |
+|---|---|---|
+| M4 | copie du panel restée à 8 codes | 🔴 l'e2e reçoit **400** au lieu de 201 |
+
+**Mineurs, corrigés.**
+1. `roles.guard.ts` (catalog) affirmait desservir « les routes plateforme qu'aucune permission ne
+   couvre (`catalog-admin`) » — faux depuis ce ticket.
+2. `permissions.decorator.ts` n'offrait que 3 options (rôle / permission / contextuelle) : un lecteur
+   devant une route servie aux deux populations aurait empilé les deux décorateurs, c'est-à-dire
+   fabriqué le **ET** que ce même commentaire proscrit. La 4ᵉ option y est nommée.
+3. Mentions « 8 permissions » devenues fausses dans `auth-service`, `kyc-service` et `admin-panel` —
+   exactement la dérive que cette story crée.
+
+**Laissé de côté, assumé.** Le shim de compat pré-103 (`resolvePerms`) reste en place dans les
+4 services : sa suppression est tracée par STORY-105 et déborderait le périmètre.
+
+### ⑦ Revue de sécurité — aucune vulnérabilité
+
+Publiée sur les 4 PR. Points **activement vérifiés**, la story étant elle-même un changement
+d'autorisation :
+
+- **Fail-closed** du nouveau guard sur les 3 chemins qui comptent (utilisateur absent, règle vide,
+  jeton sans `roles` ni `perms`) ; comparaisons par égalité exacte, aucune correspondance par préfixe.
+- **Impossible de desserrer l'existant** : le guard est enregistré en dernier et un guard ne peut pas
+  annuler le refus d'un guard amont — l'empilement donnerait un ET, jamais un OU.
+- **Aucune élévation** : l'ensemble des porteurs de `catalog/admin` est inchangé, plus les délégations
+  explicites ; `assertCanGrant` couvre les 2 nouvelles permissions (test dédié). Les 3 rôles métier
+  sont des **définitions** — personne ne les détient sans attribution par un administrateur.
+- **Shim pré-103** : équivalence exacte de l'accès d'avant, et le claim n'est pas retirable (RS256/JWKS,
+  confusion d'algorithme déjà couverte par un e2e).
+- **Anti-énumération** : message générique, champ `error` préservé (exception construite avec une
+  **chaîne**, pas un objet — ce dernier l'écrase silencieusement).
+- **Multi-tenant** : `GET /catalog` expose le catalogue publié **global**, déjà lisible par un
+  `TENANT_ADMIN` avant la PR ; aucun scope `tenantId` contourné.
+
+### ④ Portes DoD (2026-07-29)
+
+| Dépôt | Lint | Build | Couverture (L/F/B) | Unit | e2e |
+|---|---|---|---|---|---|
+| `auth-service` | 0 warning | ✅ | 96,93 / 97,80 / 89,72 | 611 ✅ | 153 ✅ |
+| `platform-catalog-service` | 0 warning | ✅ | 99,86 / 100 / 93,47 | 232 ✅ | 59 ✅ |
+| `kyc-service` | 0 warning | ✅ | 95,37 / 94,08 / 89,89 | 70 ✅ | ✅ |
+
+`AnyOfAccessGuard` : **100 % lignes / branches / fonctions**.
+`diff -q` des 3 copies de `permission.enum.ts` : **identiques** (vérifié après recopie).
+
+### ④ Mutation-tests — la preuve que les tests filtrent
+
+| # | Mutation appliquée | Résultat | Ce que ça prouve |
+|---|---|---|---|
+| M0 | `AnyOfAccessGuard` **absent** de la chaîne `APP_GUARD` des e2e | 🔴 « TENANT_USER sur la lecture du catalogue → 403 » reçoit **200** | Sans ce maillon la lecture n'est gardée par **personne** — constaté pour de vrai avant correction, pas simulé |
+| M1 | `catalog/admin` gardé par la **mauvaise** permission (`org:read`) | 🔴 3 e2e | Le contrôleur exige bien `catalog:manage`, pas « une permission quelconque » |
+| M2 | Guard **fail-open** sur une règle `@RequireAnyOf` vide | 🔴 2 unitaires | Une faute de frappe dans le décorateur ne peut pas ouvrir la route en silence |
+| M3 | `PLATFORM_ACCOUNTANT` reçoit `catalog:manage` au lieu de `catalog:read` | 🔴 1 unitaire | Le sur-privilège d'un rôle métier est détecté |
+
+### ④ Vérification docker — stack neuve (`down -v`), auth-service + platform-catalog-service
+
+**Preuve 1 — le seed a réellement écrit (`mongosh auth_service`, collection `roles`) :** 7 rôles,
+tous `isSystem: true`.
+
+```
+PLATFORM_ACCOUNTANT  ["org:read","catalog:read"]
+PLATFORM_MARKETING   ["org:read","catalog:read"]
+PLATFORM_EXECUTIVE   ["org:read","catalog:read","entitlement:grant","entitlement:revoke"]
+PLATFORM_ADMIN       les 10 permissions (catalogue entier, par construction)
+```
+
+**Preuve 2 — le catalogue sort de l'IdP.** `GET /admin/permissions` → **10** entrées, chacune avec son
+libellé français, `catalog:read` et `catalog:manage` incluses, **aucune** `project:*`.
+
+**Preuve 3 — immuabilité.** `DELETE /admin/roles/PLATFORM_EXECUTIVE` → **403**
+« Ce rôle système ne peut être ni modifié ni supprimé. » · `PATCH /admin/roles/PLATFORM_ACCOUNTANT`
+(tentative d'ajout de `catalog:manage`) → **403**.
+
+**Preuve 4 — idempotence non destructive.** Rôle non-système `RESPONSABLE_CATALOGUE` créé via l'API,
+puis **2 redémarrages** du conteneur : total `8` rôles dont `1` non-système, à l'identique. Le seed
+réaligne les rôles système sans jamais toucher aux rôles composés par les administrateurs.
+
+**Preuve 5 — le critère d'acceptation, sur un jeton `PLATFORM_ACCOUNTANT` réel** (obtenu par login ;
+claims vérifiés : `roles: ["PLATFORM_ACCOUNTANT"]`, `perms: ["org:read","catalog:read"]`, `org: null`) :
+
+| Requête | Attendu | Obtenu |
+|---|---|---|
+| `GET /api/v1/catalog/modules` | 200 | **200** |
+| `GET /api/v1/catalog/referentiels` | 200 | **200** |
+| `POST /api/v1/catalog/admin/modules` | 403 | **403** — « Accès refusé : permission insuffisante. » |
+| `GET /api/v1/catalog/admin/modules` | 403 | **403** |
+
+**Preuve 6 — la délégation, qui est LE point de la story.** Un porteur du rôle **non-système**
+`RESPONSABLE_CATALOGUE` (`perms: ["catalog:read","catalog:manage"]`, **pas** `PLATFORM_ADMIN`) crée un
+module : `POST /catalog/admin/modules` → **201**. C'était impossible avant.
+
+**Preuve 7 — les deux branches du OU, contre le service réel :**
+
+| Porteur | `roles` / `perms` du jeton | `GET /catalog/modules` | `POST /catalog/admin/modules` |
+|---|---|---|---|
+| `TENANT_ADMIN` | `["TENANT_ADMIN"]` / `[]` | **200** (voie *rôle*) | **403** |
+| `PLATFORM_ACCOUNTANT` | `["PLATFORM_ACCOUNTANT"]` / `["org:read","catalog:read"]` | **200** (voie *permission*) | **403** |
+| `TENANT_USER` | `["TENANT_USER"]` / `[]` | **403** — « Accès refusé. » | — |
+| aucun jeton | — | **401** | — |
+
+La 3ᵉ ligne est celle qui compte : le OU refuse bien qui n'a **ni** l'un **ni** l'autre, et le message
+n'énumère ni le rôle ni la permission manquante (anti-énumération).
+
+**Preuve 8 — non-régression `PLATFORM_ADMIN`** : `GET /catalog/modules` → **200**,
+`POST /catalog/admin/modules` → **201**. Il passe désormais par `catalog:read`/`catalog:manage`, que
+son rôle système détient — aucune surface perdue.
