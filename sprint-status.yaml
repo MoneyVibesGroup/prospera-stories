@@ -1889,7 +1889,7 @@ sprints:
     start_date: "2027-03-11"
     end_date: "2027-03-25"
     capacity_points: 34
-    committed_points: 37  # ⚠️⚠️ 21→24 (+145) →37 le 2026-07-31 (+STORY-147 8, +STORY-146 5, demande PO) = **109 % de la capacité**. ARBITRAGE REQUIS AU SPRINT-PLANNING, et il ne peut PAS être « on verra » : 146 et 147 sont des modifications du CONTRAT KEYSTONE (STORY-101), et le thème du sprint (moteur fiscal 091→095) CONSOMME ce contrat. Les livrer après le moteur fiscal obligerait à reprendre le moteur fiscal. ⚡ RECOMMANDATION : décaler **STORY-094 (3) et STORY-095 (3) au S20** → S19 = 31/34, avec l'ordre 147 → 146 → 145 → 091 → 092 → 093. Les provisions (094) et le TPU (095) sont les deux stories fiscales les moins couplées au reste du lot. ⚠️ Le motif de dépassement est connu et récurrent (S10 40/34, S11 44/34, S18 42 nominal) : cette fois il est tranchable AVANT le lancement, pas après.
+    committed_points: 50  # ⛔⛔ 37→50 le 2026-08-01 (décision user) : +STORY-148 (5) et +STORY-149 (8), sorties d'orphelinat parce que **la console les RÉCLAME** (AP-04/AP-05 mergées sur fixtures, AP-12 bloquée). **147 % de la capacité**, dont 42 restants (147 est done). ⚡ CE SPRINT NE PASSE PAS EN L'ÉTAT et l'arbitrage n'est plus reportable. RECOMMANDATION RENOUVELÉE, à appliquer telle quelle : **sortir le moteur fiscal 091→095 (21 pts) du S19** → S19 = 29/34 avec un thème net et unique — « fermer le contrat de balance (147✅/146/145) + débloquer la console (148/149) » — et le moteur fiscal devient le thème du S20. Les deux lots ne se gênent pas : le fiscal CONSOMME le contrat de balance, il gagne à passer après. ⚠️ Sans cet arbitrage, le sprint sortira ses 3 premiers items et reportera le reste, comme S10 (40/34), S11 (44/34) et S18 (42 nominal) — le motif est établi. Historique : ⚠️⚠️ 21→24 (+145) →37 le 2026-07-31 (+STORY-147 8, +STORY-146 5, demande PO) = **109 % de la capacité**. ARBITRAGE REQUIS AU SPRINT-PLANNING, et il ne peut PAS être « on verra » : 146 et 147 sont des modifications du CONTRAT KEYSTONE (STORY-101), et le thème du sprint (moteur fiscal 091→095) CONSOMME ce contrat. Les livrer après le moteur fiscal obligerait à reprendre le moteur fiscal. ⚡ RECOMMANDATION : décaler **STORY-094 (3) et STORY-095 (3) au S20** → S19 = 31/34, avec l'ordre 147 → 146 → 145 → 091 → 092 → 093. Les provisions (094) et le TPU (095) sont les deux stories fiscales les moins couplées au reste du lot. ⚠️ Le motif de dépassement est connu et récurrent (S10 40/34, S11 44/34, S18 42 nominal) : cette fois il est tranchable AVANT le lancement, pas après.
     completed_points: 8  # ⬆️ 0→8 le 2026-07-31 : STORY-147 (contrat de balance à 4 colonnes) done. Le sprint démarre par le CONTRAT, comme l'ordre imposé le prévoit — 147 → 146 → 145 → 091 → 092 → 093.
     status: "in_progress"  # ⬆️ le 2026-07-31 : STORY-147 livrée, le sprint est engagé.
     goal: "⚠️ SPRINT RECADRÉ le 2026-07-31 : le CONTRAT DE BALANCE d'abord (STORY-147 soldes D/C + STORY-146 format de compte + STORY-145 validation), PUIS le moteur fiscal (EPIC-023 : résultat fiscal, IS=max(MFP,IS)+acomptes, TVA & taxes, provisions, TPU). L'inversion est délibérée : le moteur fiscal consomme la balance ; changer le contrat après l'avoir construit reviendrait à le reconstruire. ⚡ ORDRE IMPOSÉ : 147 → 146 → 145 → 091 → 092 → 093 (→ 094, 095 si le sprint le porte)."
@@ -1918,6 +1918,23 @@ sprints:
         service: "balance-service"
         status: "ready-for-dev"  # 🆕 CRÉÉE 2026-07-31 (demande user) — ferme GAP-balance-validation-etat. ⚡ TROU NÉ D'UN RENVOI EN BOUCLE, pas d'un oubli : STORY-101 déclare `marquerEtat` « hook inerte, le workflow validation/rejet est le périmètre de 098/099 » ; STORY-099 renvoie à 098 ; et STORY-098 pose une PRÉCONDITION (« validation refusée 409 s'il reste un contrôle bloquant ») sur un acte qu'aucune story ne crée. Vérifié sur origin/dev : balance.controller.ts n'expose que POST /balances, GET /balances, GET /balances/:id. ⚡ 3 PTS ET NON 5 : `BalanceService.marquerEtat()` est DÉJÀ écrit, transactionnel et testé (transition atomique, garde d'immutabilité `AlreadyValidatedBalanceException`, trace de mutation {version,horodatage,auteur,motif}) — il ne manque QUE la surface HTTP et la couture `ValidationGate` où STORY-098 viendra brancher ses contrôles. ⚠️ À LIVRER AVANT STORY-098 : l'ordre inverse obligerait 098 à créer la route « en passant », soit exactement le glissement qui a produit ce trou. ⚠️ Divergence relevée : le fichier STORY-098.md porte « Sprint : 19 » alors que ce tracker la place au S20 — à trancher au sprint-planning. IMPACT FRONT : débloque l'action absente de FE-027 (livrée avec un écran d'immutabilité pour un état inatteignable) et le 1er maillon du jalon e2e FE-039.
         story_path: "stories/STORY-145.md"
+        assigned_to: null
+      # ── Sorties d'orphelinat le 2026-08-01 (décision user) : les DEUX que la console RÉCLAME ──
+      - story_id: "STORY-148"
+        title: "Le référentiel devient conditionnel au module (`referentielFamilies` au catalogue, référentiel optionnel sur l'entitlement)"
+        epic: "EPIC-024"
+        points: 5
+        service: "platform-catalog-service"
+        status: "ready-for-dev"  # 🔓 SLOTTÉE 2026-08-01 — elle était rédigée depuis le 2026-07-28 et n'était dans AUCUN sprint. Vérifié dans le code le 2026-08-01 : `referentielFamilies` n'a AUCUNE occurrence dans platform-catalog-service ⇒ non implémentée. ⚡ URGENCE RÉELLE : **AP-04 et AP-05 sont déjà MERGÉES** (console, 2026-07-31) et implémentent le comportement cible SUR FIXTURES — AP-05 a même introduit un ÉCART DE CONTRAT ASSUMÉ (`referentielCode`/`referentielVersion` optionnels côté front, exigés côté backend). Sans effet aujourd'hui (les 2 seuls modules octroyables en exigent un), mais l'écart grandit à chaque module ajouté, et AP-INT-0 ne pourra pas brancher la console sur le vrai service tant que les deux contrats divergent. ⚡ MOTIF MÉTIER : sur 18 modules, ONZE n'ont aucune notion de plan comptable — leur imposer un référentiel inscrit dans le droit une norme que personne n'a choisie et qu'un audit lira comme un choix.
+        story_path: "stories/STORY-148.md"
+        assigned_to: null
+      - story_id: "STORY-149"
+        title: "Dépôt d'un paquet de référentiel par la console (upload d'artefact, sha256 calculé côté serveur, publication versionnée)"
+        epic: "EPIC-024"
+        points: 8
+        service: "platform-catalog-service"
+        status: "ready-for-dev"  # 🔓 SLOTTÉE 2026-08-01 (statut de fichier à passer de `draft` à `ready-for-dev`) — rédigée le 2026-07-28, « Sprint : à planifier », dans aucun sprint. Vérifié : aucune route d'upload, aucun `FileInterceptor` dans le service ⇒ non implémentée. ⚠️⚠️ **ELLE HEURTE UNE DÉCISION D'ARCHITECTURE ASSUMÉE** — `catalog.module.ts` déclare « pas de dépôt d'artefacts (C3) : aucun `StorageModule` » et `app.module.ts` « le catalogue ne détient que des pointeurs d'artefacts ». Cette story INTRODUIT donc du stockage dans un service conçu pour n'en pas avoir : à trancher explicitement au lancement (déposer dans MinIO depuis le catalogue, ou déléguer le stockage à document-service et n'y garder que le pointeur — cette 2ᵉ voie préserve C3). ⚡ CONSOMMATEUR EN ATTENTE : AP-04 a livré l'écran de dépôt qui ne dépose rien, et **AP-12** (frontend, créée le 2026-08-01) est `blocked` sur celle-ci. ⚡ POINT DE CONCEPTION : le sha256 doit être calculé PAR LE SERVEUR — AP-04 le calcule dans le navigateur ; un checksum fourni par l'appelant atteste de ce que le client a LU, pas de ce que le service a REÇU, or c'est l'ancre d'intégrité revérifiée au chargement (STORY-038).
+        story_path: "stories/STORY-149.md"
         assigned_to: null
       - story_id: "STORY-091"
         title: "Détermination du résultat fiscal (réintégrations/déductions, codes DSF) — FR-A18"
@@ -1959,11 +1976,36 @@ sprints:
     start_date: "2027-03-25"
     end_date: "2027-04-08"
     capacity_points: 34
-    committed_points: 18
+    committed_points: 27  # ⬆️ 18→27 le 2026-08-01 (décision user) : +STORY-144 (5), +STORY-133 (3) et +STORY-132 (1), sorties d'orphelinat. 26/34 ≤ capacité. Hors thème « conseil fiscal » du sprint, comme STORY-109 puis 138/139 l'étaient du leur — mais ce sont deux dettes d'EXPLOITATION de la console, et l'une d'elles (144) referme une impasse : on peut suspendre une organisation sans pouvoir la réactiver.
     completed_points: 0
     status: "not_started"
     goal: "Atelier Balance livré 🏁 : simulation & conseil fiscal (scénarios légaux + dossier de justification + garde-fous) ; contrôles + statut de preuve ; e2e Atelier docker. [Handoff bilan-service = déjà livré en CORE S11 (STORY-099) — décalé du S10 par D15.]"
     stories:
+      # ── Sorties d'orphelinat le 2026-08-01 (décision user) : qualité d'exploitation de la console ──
+      - story_id: "STORY-144"
+        title: "Réactivation d'une organisation + renvoi d'invitation au niveau organisation + actions groupées (succès partiel 207)"
+        epic: "EPIC-025"
+        points: 5
+        service: "auth-service"
+        status: "ready-for-dev"  # 🔓 SLOTTÉE 2026-08-01 (statut de fichier à passer de `draft` à `ready-for-dev`) — rédigée le 2026-07-23 dans un dossier de travail NON SUIVI PAR GIT, récupérée le 2026-07-28, jamais slottée. ⚡ SON CŒUR EST UNE IMPASSE D'EXPLOITATION, vérifiée dans le code le 2026-08-01 : `POST /admin/organizations/:id/suspend` EXISTE, et **aucune route ne réactive**. Une organisation suspendue ne peut plus revenir — il n'y a pas de chemin de retour, quel que soit le motif de la suspension. ⚡ ABSORBE ET REMPLACE STORY-134/135/136, SUPPRIMÉES le 2026-08-01 : son périmètre B (renvoi d'invitation au niveau organisation) couvre 134, son périmètre C (batch + 207) couvre 135, et elle CONTREDIT 136 en mettant la revue KYC groupée hors périmètre backend (« le KYC s'examine dossier par dossier, il n'y a pas d'approbation groupée » — c'est une navigation front vers la file). 11 pts de doublons éliminés. ⚠️ Découpage proposé dans la story : A réactivation (~2), B renvoi org, C batch (~2) — A est livrable seule et referme l'impasse.
+        story_path: "stories/STORY-144.md"
+        assigned_to: null
+      - story_id: "STORY-132"
+        title: "`SessionResponseDto` — déclarer `userAgent` et `ip` comme des CHAÎNES dans l'OpenAPI"
+        epic: "EPIC-002"
+        points: 1
+        service: "auth-service"
+        status: "ready-for-dev"  # 🔓 SLOTTÉE 2026-08-01 — ⚠️ ELLE ÉTAIT ÉCARTÉE DU RELEVÉ D'ORPHELINES PAR UN COMMENTAIRE FAUX de ce fichier : « STORY-132 n'est PAS orpheline : renommée STORY-137 ». Vérifié le 2026-08-01 : STORY-132 traite de `SessionResponseDto` (auth-service, EPIC-002) et STORY-137 des versions d'hypothèses du prévisionnel (bilan-service, EPIC-013) — **deux stories sans aucun rapport**. Le commentaire a masqué une vraie orpheline pendant 8 jours. ⚡ NON IMPLÉMENTÉE ET LA CONSÉQUENCE EST VISIBLE : les `@ApiProperty` de `userAgent`/`ip` portent `nullable: true` et un `example` mais **aucun `type: String`** ⇒ sur une union `string | null`, la métadonnée TS se réfléchit en `Object` et l'OpenAPI publie un objet informe. Résultat CONSTATÉ dans les types générés du front : `userAgent: Record<string, never> | null` (`src/types/api/auth.ts:705`). C'est le MÊME symptôme que les `paquetFiscal`/`stamp` relevés par FE-024 — donc le même correctif de patron. 1 pt. ⚡ Appariée à STORY-133 : même écran (FE-021 « Sessions ouvertes »), deux dettes distinctes — 132 rend le type utilisable, 133 rend l'IP vraie.
+        story_path: "stories/STORY-132.md"
+        assigned_to: null
+      - story_id: "STORY-133"
+        title: "IP des sessions — trancher le proxy de confiance (X-Forwarded-For), sinon « Sessions ouvertes » affiche l'IP de l'app"
+        epic: "EPIC-025"
+        points: 3
+        service: "auth-service"
+        status: "ready-for-dev"  # 🔓 SLOTTÉE 2026-08-01 — rédigée puis jamais slottée ; seule dette OUVERTE de FE-021, qui est par ailleurs livrée et mergée. Vérifié dans le code : `src/common/utils/client-origin.util.ts` documente EXPLICITEMENT que « `X-Forwarded-For` n'est PAS lu ici, et c'est délibéré », et désigne la résolution — `app.set('trust proxy', <hops|liste>)` au niveau d'Express, pour que `req.ip` reste la source unique de vérité. La DÉCISION est donc déjà écrite dans le code ; ce qui manque, c'est de la TRANCHER (quel proxy est de confiance) et de la configurer. ⚠️ Non bloquante — l'écran fonctionne — mais elle rend une colonne MENSONGÈRE dans un écran de SÉCURITÉ, c'est-à-dire au seul endroit où l'utilisateur va chercher une intrusion. Le BFF masque l'appareil : l'IdP voit « node » et l'IP de l'app.
+        story_path: "stories/STORY-133.md"
+        assigned_to: null
       - story_id: "STORY-096"
         title: "Scénarios d'optimisation fiscale légale (leviers réintégrations/déductions → impact IS, plancher MFP) — FR-A22"
         epic: "EPIC-024"
@@ -2188,66 +2230,29 @@ velocity:
   sprint_21: null  # Module 2 EPIC-004 paiement-service (016-019) + STORY-039 — JIT (PS-1/C8/PRD paiement) [ex-sprint 15]
   sprint_22: null  # 🆕 EPIC-026 socle — Assistant IA transverse (assistant-service :3011, LlmProvider, Proposition, RAG, surface mapping) — stories 115-119 ; DÉPLAÇABLE (aucune dépendance dure)
   rolling_average: 27  # (33 + 23 + 24) / 3 ≈ 26.7 ; cible prudente ~24/sprint (1 flux, réf. historique retenue au sprint-planning 2026-07-10)
+# ── Stories orphelines : SOLDÉ le 2026-08-01 ──────────────────────────────────
+# Huit stories avaient un fichier dans stories/ et ne figuraient dans AUCUN sprint : invisibles
+# du sprint-planning et de tout comptage de points. Toutes ont été confrontées AU CODE le
+# 2026-08-01 — aucune n'était implémentée — puis traitées (décision user) :
+#
+#   STORY-148 → sprint 19   (référentiel conditionnel au module ; la console la RÉCLAME)
+#   STORY-149 → sprint 19   (dépôt d'un paquet ; AP-04 a livré l'écran, AP-12 est bloquée dessus)
+#   STORY-144 → sprint 20   (réactivation d'organisation — impasse d'exploitation avérée)
+#   STORY-133 → sprint 20   (IP des sessions ; seule dette ouverte de FE-021)
+#   STORY-134, 135, 136 → **SUPPRIMÉES** (doublons de STORY-144 ; 136 lui était même contraire
+#     sur la revue KYC groupée). 11 pts de doublons éliminés ; l'historique git les conserve.
+#   STORY-132 → sprint 20   (`SessionResponseDto` typé — 1 pt)
+#     ⚠️ Elle était ÉCARTÉE DU RELEVÉ PAR UN COMMENTAIRE FAUX de ce fichier (« renommée
+#     STORY-137 ») : 132 traite de `SessionResponseDto` (auth-service) et 137 des versions
+#     d'hypothèses du prévisionnel (bilan-service) — aucun rapport. Le commentaire a masqué
+#     une vraie orpheline pendant 8 jours. ⚡ LEÇON : une story écartée du relevé doit l'être
+#     sur PREUVE (ouvrir les deux fichiers), jamais sur une phrase.
+#
+# ⚡ RÈGLE À TENIR pour que la section reste vide : une story RÉDIGÉE est slottée OU
+# explicitement marquée `deferred` dans un sprint — jamais laissée sans sprint. Le contrôle
+# tient en une ligne : comparer les fichiers de stories/ à l'ensemble des `story_id` slottés.
+orphan_stories: []   # ✅ vide au 2026-08-01 — à revérifier à chaque sprint-planning
 
-# ── Stories RÉDIGÉES mais SLOTTÉES NULLE PART (relevé 2026-07-31) ──────────────────────
-# Ces stories ont un fichier dans stories/ et ne figurent dans AUCUN sprint : elles sont
-# invisibles au sprint-planning et à tout comptage de points. Le trou est le même que celui
-# que ce fichier documente deux fois pour les statuts — un artefact écrit à un instant T
-# et jamais confronté à la liste qui fait autorité. À slotter (ou à archiver explicitement)
-# au prochain /bmad:sprint-planning.
-orphan_stories:
-  - story_id: "STORY-133"
-    title: "IP des sessions — trancher le proxy de confiance (X-Forwarded-For), sinon « Sessions ouvertes » affiche l'IP de l'app"
-    service: "auth-service"
-    origine: "FE-021 (livrée) — la carte Sessions affiche l'IP du BFF, pas celle de l'appareil"
-    note: "Seule dette OUVERTE de FE-021, qui est par ailleurs mergée. Non bloquante (l'écran fonctionne, l'IP est simplement fausse) mais elle rend une colonne MENSONGÈRE dans un écran de sécurité — c'est le pire endroit pour une donnée fausse : l'utilisateur y cherche une intrusion."
-  # ⚠️⚠️ RECOUVREMENT À TRANCHER — 134/135/136 vs 144 décrivent LA MÊME SURFACE.
-  # STORY-144 (créée le 2026-07-23, « récupérée et réancrée sur le code le 2026-07-28 ») porte
-  # DÉJÀ, dans son périmètre B et C, le renvoi d'invitation au niveau organisation et les actions
-  # groupées à succès partiel — et elle a l'avantage d'avoir été RÉANCRÉE sur origin/dev (4f452a9).
-  # Aucune des quatre n'est dans un sprint, aucune ne mentionne les autres : c'est une duplication
-  # silencieuse née de deux passes de rédaction sur la même maquette AP-02. NE PAS LES PLANIFIER
-  # TOUTES LES QUATRE. Arbitrage attendu au sprint-planning : garder 144 (la plus récente et la
-  # seule vérifiée contre le code) et marquer 134/135/136 `superseded`, ou l'inverse — mais tranché
-  # explicitement, pas par omission.
-  - story_id: "STORY-134"
-    title: "Renvoi d'invitation admin plateforme (POST /admin/organizations/:orgId/users/:userId/resend-invitation + /admin/users/:userId/resend-invitation)"
-    service: "auth-service"
-    statut_fichier: "ready-for-dev"
-    note: "Pendant côté console du FE-016 déjà livré côté cabinet. Alimente AP-02/AP-08. ⚠️ RECOUVRE le périmètre B de STORY-144, qui note d'ailleurs que `POST /users/:id/resend-invitation` EXISTE DÉJÀ et pose l'arbitrage « niveau utilisateur vs niveau organisation » — arbitrage que cette story-ci ignore."
-  - story_id: "STORY-135"
-    title: "Actions groupées sur organisations (batch suspend + batch resend-invitation) avec succès partiel HTTP 207"
-    service: "auth-service"
-    statut_fichier: "ready-for-dev"
-    note: "⚠️ RECOUVRE le périmètre C de STORY-144 (mêmes routes bulk, même sémantique 207)."
-  - story_id: "STORY-136"
-    title: "Action groupée « ouvrir la revue KYC » (batch mise en revue) avec succès partiel HTTP 207"
-    service: "kyc-service"
-    statut_fichier: "ready-for-dev"
-    note: "⚠️ CONTREDITE par STORY-144, qui met explicitement la revue KYC groupée HORS périmètre backend : « c'est une navigation front vers la file KYC ; le KYC s'examine dossier par dossier, il n'y a pas d'approbation groupée ». Les deux ne peuvent pas être vraies — à trancher AVANT de planifier l'une ou l'autre."
-  - story_id: "STORY-144"
-    title: "Réactivation d'une organisation + renvoi d'invitation au niveau organisation + actions groupées (succès partiel)"
-    service: "auth-service"
-    statut_fichier: "draft — « Sprint : à planifier »"
-    origine: "maquette AP-02 · Organisations. Story rédigée le 2026-07-23 dans un dossier de travail DUPLIQUÉ et NON SUIVI PAR GIT (`frontend-admin-panel - Copie`), récupérée le 2026-07-28."
-    note: "⚡ La plus solide des quatre : périmètre RÉANCRÉ sur origin/dev (4f452a9), avec un découpage A/B/C déjà proposé (A réactivation ~2 pts, B renvoi org, C batch ~2 pts). Son cœur — la RÉACTIVATION d'une organisation — n'est couvert par AUCUNE des trois autres : aujourd'hui la console peut suspendre une organisation sans pouvoir la réactiver. C'est l'impasse d'exploitation à traiter en premier, indépendamment de l'arbitrage sur B et C."
-  # ── Ajoutées au relevé le 2026-08-01 : nées de la console, réclamées par AP-04/AP-05, slottées nulle part ──
-  - story_id: "STORY-148"
-    title: "Le référentiel devient conditionnel au module (`referentielFamilies` au catalogue, référentiel optionnel sur l'entitlement)"
-    service: "platform-catalog-service"
-    statut_fichier: "à vérifier"
-    origine: "AP-04/AP-05 (console, mergées le 2026-07-31) — le front l'a DÉJÀ implémenté sur fixtures"
-    note: "⚠️ AP-05 a introduit un ÉCART DE CONTRAT ASSUMÉ en s'appuyant dessus : `referentielCode`/`referentielVersion` sont devenus OPTIONNELS côté front alors que le backend les EXIGE encore. Sans effet aujourd'hui (les deux seuls modules octroyables en exigent un), mais l'écart grandit à chaque module ajouté. Motif métier solide : sur 18 modules, ONZE n'ont aucune notion de plan comptable — leur imposer un référentiel inscrit dans le droit une norme que personne n'a choisie."
-  - story_id: "STORY-149"
-    title: "Dépôt d'un paquet de référentiel par la console (upload d'artefact, sha256 calculé côté serveur, publication versionnée)"
-    service: "platform-catalog-service"
-    statut_fichier: "draft — « Sprint : à planifier »"
-    origine: "AP-04 (console, mergée) — l'écran de dépôt EXISTE mais ne dépose rien"
-    note: "⚠️ AP-04 a livré l'écran en disant honnêtement qu'il ne téléverse pas (« aucune route de dépôt côté service »). ⇒ story frontend **AP-12** créée le 2026-08-01 pour porter le raccordement — elle est `blocked` tant que celle-ci n'est pas slottée. ⚡ Point de conception à tenir : le sha256 doit être calculé PAR LE SERVEUR (AP-04 le calcule dans le navigateur) — un checksum fourni par l'appelant n'ancre rien, or c'est l'ancre d'intégrité revérifiée au chargement par STORY-038."
-  # STORY-132 n'est PAS orpheline : renommée STORY-137 (dette versions d'hypothèses), slottée S15 et done.
-
-# ── Trous de contrat OUVERTS, remontés par le frontend et sans story backend ────────────
-# (relevé 2026-07-31 en lisant les contrôleurs — pas les notes)
 open_contract_gaps:
   - id: "GAP-balance-validation-etat"
     service: "balance-service (:3007)"
