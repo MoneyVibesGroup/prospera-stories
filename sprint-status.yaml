@@ -2231,6 +2231,19 @@ orphan_stories:
     statut_fichier: "draft — « Sprint : à planifier »"
     origine: "maquette AP-02 · Organisations. Story rédigée le 2026-07-23 dans un dossier de travail DUPLIQUÉ et NON SUIVI PAR GIT (`frontend-admin-panel - Copie`), récupérée le 2026-07-28."
     note: "⚡ La plus solide des quatre : périmètre RÉANCRÉ sur origin/dev (4f452a9), avec un découpage A/B/C déjà proposé (A réactivation ~2 pts, B renvoi org, C batch ~2 pts). Son cœur — la RÉACTIVATION d'une organisation — n'est couvert par AUCUNE des trois autres : aujourd'hui la console peut suspendre une organisation sans pouvoir la réactiver. C'est l'impasse d'exploitation à traiter en premier, indépendamment de l'arbitrage sur B et C."
+  # ── Ajoutées au relevé le 2026-08-01 : nées de la console, réclamées par AP-04/AP-05, slottées nulle part ──
+  - story_id: "STORY-148"
+    title: "Le référentiel devient conditionnel au module (`referentielFamilies` au catalogue, référentiel optionnel sur l'entitlement)"
+    service: "platform-catalog-service"
+    statut_fichier: "à vérifier"
+    origine: "AP-04/AP-05 (console, mergées le 2026-07-31) — le front l'a DÉJÀ implémenté sur fixtures"
+    note: "⚠️ AP-05 a introduit un ÉCART DE CONTRAT ASSUMÉ en s'appuyant dessus : `referentielCode`/`referentielVersion` sont devenus OPTIONNELS côté front alors que le backend les EXIGE encore. Sans effet aujourd'hui (les deux seuls modules octroyables en exigent un), mais l'écart grandit à chaque module ajouté. Motif métier solide : sur 18 modules, ONZE n'ont aucune notion de plan comptable — leur imposer un référentiel inscrit dans le droit une norme que personne n'a choisie."
+  - story_id: "STORY-149"
+    title: "Dépôt d'un paquet de référentiel par la console (upload d'artefact, sha256 calculé côté serveur, publication versionnée)"
+    service: "platform-catalog-service"
+    statut_fichier: "draft — « Sprint : à planifier »"
+    origine: "AP-04 (console, mergée) — l'écran de dépôt EXISTE mais ne dépose rien"
+    note: "⚠️ AP-04 a livré l'écran en disant honnêtement qu'il ne téléverse pas (« aucune route de dépôt côté service »). ⇒ story frontend **AP-12** créée le 2026-08-01 pour porter le raccordement — elle est `blocked` tant que celle-ci n'est pas slottée. ⚡ Point de conception à tenir : le sha256 doit être calculé PAR LE SERVEUR (AP-04 le calcule dans le navigateur) — un checksum fourni par l'appelant n'ancre rien, or c'est l'ancre d'intégrité revérifiée au chargement par STORY-038."
   # STORY-132 n'est PAS orpheline : renommée STORY-137 (dette versions d'hypothèses), slottée S15 et done.
 
 # ── Trous de contrat OUVERTS, remontés par le frontend et sans story backend ────────────
@@ -2257,6 +2270,13 @@ open_contract_gaps:
     cause_racine: "Un nom de champ tenu pour une documentation. Le défaut a traversé la revue de STORY-101 (le keystone), celle de STORY-086, puis six stories d'adaptateurs, sans jamais lever d'erreur : il est SILENCIEUX et passe tous les tests. Seul un test distinguant explicitement les deux grandeurs pouvait le révéler — aucun n'existait."
     consequence: "Aucun consommateur en aval ne peut savoir ce qu'il lit. Et STORY-098 est INÉCRIVABLE correctement : son contrôle n°1 de la GUIDEF, « Actif = Passif », est une égalité de SOLDES. ⚠️ Le solde n'est pas dérivable de debit−credit : (1) solde = à-nouveau + mouvements, donc faux dès le 2ᵉ exercice ; (2) la divergence entre solde annoncé par le fichier et solde recalculé est le meilleur détecteur d'import tronqué ou mal mappé — dériver rend aveugle à l'erreur la plus fréquente d'un import."
     action: "✅ FAIT — STORY-147 au S19, À LIVRER AVANT STORY-146 (elle change la FORME de la ligne, 146 n'en change qu'un champ) ET AVANT STORY-098."
+  - id: "GAP-bff-admin-sans-consommateur"
+    service: "admin-panel BFF (:3010) — prospera-admin-panel-service"
+    statut: "⛔ OUVERT — arbitrage porté par **AP-INT-0**, à rendre AVANT AP-06."
+    constat: "Vérifié dans `frontend-admin-panel/src/lib/api/services.ts` le 2026-08-01 : la table de routage de la console porte `/ec`, `/kyc`, `/catalog`, `/documents`, `/auth`, `/users`, `/organizations` — **aucun préfixe `/admin`, aucun `NEXT_PUBLIC_ADMIN_URL`**. C'est une COPIE de la table de l'app cliente. La console n'appelle donc JAMAIS le BFF :3010, et ses TODO de bascule visent les services individuels (`/kyc/admin/kyc?status=PENDING`, `/catalog/...`)."
+    consequence: "Toute la surface construite sur le BFF pourrait n'avoir AUCUN consommateur : STORY-047 (vue agrégée + SourceStatus), STORY-048 (approve/reject + entitlements en écriture), STORY-106 (guards + proxy roles/users), STORY-107 (file KYC), STORY-143 (lecture entitlements, modules→orgs, projets). ⚠️ En particulier, l'argument « STORY-143 inc.1 débloque AP-05 » — écrit dans le tracker frontend v3.2.0 le 2026-07-31 — SUPPOSE que la console passe par le BFF. Elle n'y passe pas. Le déblocage réel d'AP-05 est venu du code déjà écrit, pas de ce pass-through."
+    cause_racine: "AP-INT-0 le dit : « c'est la TROISIÈME fois que ce programme commande ou justifie une route BFF pour un front qui ne passe pas par le BFF. Le motif est toujours le même : présumer l'architecture du front au lieu d'ouvrir `services.ts`. »"
+    action: "Trancher dans AP-INT-0 : soit la console assume les jointures (elle est déjà l'agrégateur, 2 appels), soit le BFF redevient le chemin et `services.ts` doit y router. ⚠️ Selon l'issue, requalifier STORY-107 et réancrer les `backend_ref` d'AP-02, AP-03, AP-05, AP-08, AP-10 et AP-11."
   - id: "GAP-mappingProfile"
     service: "balance-service (:3007)"
     statut: "✅ RÉSOLU par STORY-088 (2026-07-30) — `mappingProfile` (déclaré, jamais lu) est REMPLACÉ par `profilImportId` (@IsMongoId, réellement consommé). Le ticket stories/TICKET-mappingProfile-accepte-mais-ignore.md peut être fermé. ⚠️ RENOMMAGE DE CONTRAT : les types générés de FE-025 sont périmés (elle n'envoyait pas le champ, donc rien n'est cassé) → traité par FE-057."
