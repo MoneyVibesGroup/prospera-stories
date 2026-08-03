@@ -5,8 +5,8 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** medium
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Statut :** done
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-08-03
 **Sprint :** 20 (proposé)
 **Service :** `balance-service` (:3007)
@@ -217,3 +217,123 @@ un `compteComptable` qui ne matche plus ? Si le parc est vide, le sujet est de p
 - La partie **B** est petite (une ligne de manifeste + des tests) mais **ne doit pas être livrée
   seule** : c'est la même question — « qui décide qu'un compte est déposable » — et la même
   batterie de non-régression.
+
+
+---
+
+## Progress Tracking
+
+**Statut : `done` — clôturée le 2026-08-03.** PR [prospera-balance-service#25](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/25) mergée en rebase sur `dev` (`e3ae1a7`), branche `MNV-172` supprimée.
+
+### Décisions prises au lancement
+
+| Point laissé ouvert par le cadrage | Décision | Motif |
+|---|---|---|
+| `cahiers-depenses.service.ts:931` et `cahiers-recettes.service.ts:580,639` | **inclus** | `ventilation.regles.ts` recopie **littéralement** `ligne.compteCharge` / `ligne.compteProduit` en `compte` de ligne de balance. Ce sont les sites les **plus directs** de tous : les valider plus faiblement que `BalanceValidator` garantissait la divergence. |
+| Les deux **propositions** (`proposerRattachement`) | **incluses**, non prévues au cadrage | Dans `cahiers-recettes.service.ts`, la proposition est **validée deux instructions plus loin** par `validerCompte`. Un prédicat plus faible côté proposition ferait échouer la saisie sur un compte que l'utilisateur **n'a pas choisi** — le symptôme même que la story referme. |
+| Point C : option (a) ou (b) | **(b)**, comme recommandé | `521` **est** un compte de détail valide (3 ≤ 6) : (a) échouerait encore sur l'exemple du DTO. Seule la normalisation commune reste juste quel que soit ce que le comptable a saisi. |
+| Parc réel de comptes de trésorerie non appariants | **base de dev vide** ⇒ le sujet est de **prévention**, pas de rattrapage. Aucune migration. |
+
+**Bilan : 9 sites d'entrée d'un compte** ont été recherchés et traités (6 gardes + 2 propositions + 1 filtre de semis). Les 2 sites laissés sur `isCompteValide` — `comptes-tresorerie.service.ts` (compte de **rattachement**, jamais déposé) et `suggestion.service.ts` (propose sans engager, D-139-4) — portent chacun un commentaire qui **dit pourquoi** (AC-4).
+
+### Portes DoD
+
+lint **0 warning** · build OK · **1932** tests unitaires + **384** e2e verts · couverture **98,77 stmts / 90,95 branches / 97,87 fn / 98,79 lignes** (seuils 65/90/90/90).
+
+### Mutation-tests — 9 mutations, 9 tests rouges (AC-8)
+
+| Mutation appliquée | Résultat |
+|---|---|
+| ventilation → `isCompteValide` | ✅ rouge |
+| `compteCharge` d'une catégorie → `isCompteValide` | ✅ rouge |
+| ligne de dépense → `isCompteValide` | ✅ rouge |
+| ligne de recette → `isCompteValide` | ✅ rouge |
+| surcharge de rattachement → `isCompteValide` | ✅ rouge |
+| **câblage** de `proposerRattachement` (rattachement.service) → `isCompteValide` | ✅ rouge *(rouge seulement après le correctif de revue)* |
+| **câblage** de `proposerRattachement` (cahiers-recettes.service) → `isCompteValide` | ✅ rouge *(idem)* |
+| **filtre du semis** de catégories → `isCompteValide` | ✅ rouge *(idem)* |
+| appariement → égalité stricte · sans normalisation · garde « cible vide » retirée · manifeste SFD sans `longueurCompteDetail` | ✅ rouge (4×) |
+
+⚠️ **Trois de ces mutations sont restées VERTES au premier passage** et n'ont été révélées que par la revue :
+- les deux **câblages** du prédicat passé à `proposerRattachement` — les specs de la fonction pure **injectent** le prédicat, elles ne disent donc rien de celui que le service lui passe. C'est très exactement le motif « le double ne prouve pas la garde » que cette story dénonce ailleurs, reproduit dans ses propres tests ;
+- le **filtre du semis**, dont la mutation est **inobservable** avec les comptes du catalogue par défaut (tous numériques et ≤ 6 caractères ⇒ les deux prédicats y répondent identiquement). Il a fallu **dissocier explicitement** les deux prédicats dans le double pour que ce site soit réellement testé.
+
+⚠️ Un test **existant** d'`agregation.service.spec` (« REFUSE un compte de contrepartie hors plan ») est resté vert au changement de garde : il n'invalidait que `isCompteValide` sur un double dont `isCompteDeDetail` répondait `true`. **Il testait le double, pas la garde.** Les doubles des specs `cahiers` ont été rendus **fidèles** (vrai `estCompteDeDetail`, longueur 6) — c'est précisément leur complaisance qui avait laissé la divergence s'installer sans qu'un seul test bouge.
+
+### Vérification docker (stack réelle — 2 organisations, SN et SFD-BCEAO)
+
+Stack `docker compose` complète (Mongo rs0, Kafka, Redis, auth-service, balance-service), 2 organisations créées via l'IdP, gates KYC + entitlement semées en base (`organizationId` en **ObjectId**, pas en chaîne).
+
+**① Comptes de ventilation (AC-1, AC-2, AC-3)**
+
+| Appel | Résultat |
+|---|---|
+| `PUT /balance/comptes-ventilation` `{banque:"60100000"}` | **400** `COMPTE_VENTILATION_INCONNU` — « … est inconnu du plan de comptes **syscohada-revise@2.1** de cette organisation » |
+| `PUT /balance/comptes-ventilation` `{banque:"521000"}` | **200** |
+| `db.comptes_ventilation.countDocuments({banque:"60100000"})` | **0** — rien n'est écrit pour le compte refusé |
+
+**② Catégories de dépense (AC-3)**
+
+| Appel | Résultat |
+|---|---|
+| `POST /cahiers/categories` `compteCharge:"60100000"` | **400** `COMPTE_INCONNU`, nommant `syscohada-revise@2.1` |
+| `POST /cahiers/categories` `compteCharge:"601000"` | **201** |
+| `db.categories_depenses.countDocuments({compteCharge:"60100000"})` | **0** |
+| semis par défaut | **19 / 19** catégories conservées — le durcissement du filtre n'en perd aucune |
+
+**③ Non-régression SFD sur l'artefact RÉELLEMENT livré (AC-5, AC-6)**
+
+`POST /balances` sur l'organisation SFD-BCEAO, un compte officiel par niveau relevé :
+
+| Comptes | HTTP |
+|---|---|
+| `602511`, `602512` (niveau **6**), `20227`, `25116`, `25316` (5), `1131`, `1011` (4), `10` (2) | **201** — tous acceptés |
+| `60251100` (8 chiffres, logiciel de saisie) | **400**, nommant `sfd-bceao@2.0` |
+| `101BOA` (auxiliaire alphanumérique) | **400** |
+| `999999` (hors plan) | **400** |
+
+`db.balances.countDocuments({orgId:SFD, "lignes.compte":{$in:["60251100","101BOA","999999"]}})` = **0**. Neuf balances SFD persistées, aucune ne porte un compte refusé.
+
+⚠️ C'est un comportement **nouveau** : avant cette story `sfd-bceao@2.0` ne déclarait aucun niveau de détail, donc `60251100` **passait**.
+
+**④ Rapprochement — contrôle AVANT / APRÈS (AC-7)**
+
+Le correctif a été **retiré puis remis dans le conteneur** (`src/` monté en volume), avec `docker restart` pour contourner le hot-reload menteur — la première tentative avait compilé en erreur et servait encore l'ancien module, exactement le piège documenté du dépôt.
+
+Balance post-146 portant `521100` :
+
+| `compteComptable` déclaré | AVANT (égalité stricte) | APRÈS |
+|---|---|---|
+| `521` — **l'exemple du DTO** | **0** ⇒ écart = totalité du solde bancaire | **1 000 000**, apparié sur `521100` |
+| `5211BOA0` — compte Sage, valide avant 146 | **0** ⇒ idem | **1 000 000**, apparié sur `521100` |
+| `521100` | 1 000 000 | 1 000 000 |
+
+**Rejoué sur l'état final** après le correctif de revue (le contrat de `/etat` ayant changé), sur une balance à deux banques — `521100` (BOA, 10 M) + `521200` (Ecobank, 4 M) :
+
+| déclaré | solde publié | comptes appariés | avertissement |
+|---|---|---|---|
+| `521` (racine — **et c'est le défaut**, faute de saisie) | 14 000 000 | `521100`, `521200` | ⚠️ « Le solde comptable agrège 2 comptes de la balance (521100, 521200) : « 521 » est une racine qui les couvre tous… » |
+| `5211BOA0` | 10 000 000 | `521100` | — |
+| `521100` | 10 000 000 | `521100` | — |
+
+Les trois déclarations restent acceptées à la création d'un compte de trésorerie (**201**) : la décision AC-4 tient en production.
+
+**⑤ Bout en bout — la preuve que les deux gardes s'accordent**
+
+profil société → ventilation complète au niveau de détail → catégorie `605400` → recette (`701000`) + dépense → `POST /balance/depuis-cahiers?dryRun=false` ⇒ **201**, balance persistée en `BROUILLON`, **équilibrée** (19 300 000 = 19 300 000), comptes produits `443000 · 445000 · 521000 · 571000 · 605400 · 701000` — tous au niveau de détail, tous acceptés par `BalanceValidator`. C'est tout l'objet de la story : **le refus a migré de l'agrégation vers la configuration**, là où l'utilisateur peut le comprendre.
+
+### Constats de revue traités (commit dédié `54dc31c`)
+
+**① Bloquant — l'appariement agrégeant plusieurs comptes doit se DIRE.** Un `compteComptable` qui est une **racine** n'est pas toujours un choix : faute de saisie il est résolu vers le **défaut de ventilation** (`521`), racine par construction. Une organisation à deux banques voyait donc chacune publier le solde **cumulé** des deux — un chiffre **plausible et faux**, plus dangereux que le `0` que la story venait de supprimer. `/rapprochement/etat` publie désormais `avertissements`, rempli dès que l'appariement retient plus d'une ligne, qui **nomme** les comptes agrégés et dit quoi faire.
+
+**② Trois sites rebranchés sans aucun test** (voir la table de mutations ci-dessus).
+
+**③ Non bloquant** : le JSDoc d'`apparierCompteBalance` était rattaché à `MAX_COMPTES_APPARIES`.
+
+**Revue de sécurité : aucune vulnérabilité.** Le `startsWith` porte sur une valeur utilisateur, mais les lignes viennent d'un dépôt **tenant-scopé** (`orgId` issu du JWT, jamais de la requête) : élargir le préfixe ne franchit aucune frontière d'organisation, et les mêmes soldes sont déjà lisibles via `GET /balances/:id` au même niveau de rôle. CWE-770 traité **y compris par le vecteur indirect** — le message d'avertissement utilise la liste **déjà plafonnée**, la réponse ne croît donc pas avec la balance. Le `try/catch` sur `longueurCompteDetail` n'est **pas** un fail-open : sa dégradation rend l'appariement **strictement moins permissif**, et les chemins d'écriture échouent bruyamment. `isCompteDeDetail` est un **raffinement monotone** de `isCompteValide` (il commence par l'appeler) : la substitution ne peut affaiblir aucun site.
+
+### Ce que la story laisse ouvert — à tracer dans `open_contract_gaps`
+
+1. **L'artefact `sfd-bceao-2.0.json` est TRONQUÉ** : 156 comptes (48×2 + 108×3) contre **372** officiels, niveaux 4/5/6 absents depuis l'extraction de STORY-057. Sans conséquence ici (reconnaissance **par préfixe**, vérifié compte par compte sur l'artefact réellement livré), mais le plan exposé au front et à la suggestion (STORY-139) est amputé de 216 comptes. Enrichir = **2 dépôts** (`build.mjs` de `bilan-service`, D-078-2), 2 checksums ⇒ **story distincte**.
+2. **⚠️ Limite irréductible de l'appariement, en AMONT du rapprochement** : deux auxiliaires d'un même collectif (`5211BOA0`, `5211ECO1`) sont normalisés par l'import **sur la même ligne** `521100`. La balance ne distingue alors plus les deux banques, et **aucun appariement ne peut restituer une position par banque** — l'information n'existe plus dans la donnée. Ce cas rend `nbComptesApparies = 1` sur un solde pourtant cumulé, invisible à l'avertissement. C'est un sujet de **contrat d'import** (STORY-146), pas d'appariement.
+3. Une **surcharge de rattachement antérieure** pointant un compte devenu non déposable est désormais ignorée au profit du moteur de mots-clés. C'est la décision déjà prise en STORY-085 (« la règle reste en base — c'est à l'utilisateur de la corriger, pas au système de la supprimer dans son dos ») ; la proposition rendue porte `surcharge: false` et un motif nommant la règle appliquée, donc le remplacement est **lisible** par l'appelant.
