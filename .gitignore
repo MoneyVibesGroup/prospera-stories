@@ -1,3 +1,9 @@
 
 # Secrets MCP (clés Trello) — ne pas committer
 .mcp.json
+
+# Copies de sauvegarde des trackers — un second fichier qui RESSEMBLE au tracker
+# mais qui est périmé est plus dangereux que pas de sauvegarde du tout : c'est
+# git qui tient l'historique. (« sprint-status ancienne version.yaml » était
+# byte-identique au tracker le 2026-08-03, donc sans valeur, puis a divergé.)
+*ancienne version*.yaml
