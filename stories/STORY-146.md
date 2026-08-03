@@ -5,8 +5,8 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** medium
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Statut :** done
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-31
 **Sprint :** 19
 **Service :** `balance-service` (:3007)
@@ -187,3 +187,204 @@ d'organisation (FR-A07/STORY-058) · le changement de plan d'une organisation en
 - La demande du PO parle de « 6 chiffres ». Cette story la livre **pour SYSCOHADA** et la rend
   **exprimable par référentiel** — parce que SFD-BCEAO et le SMT n'ont pas nécessairement la même
   longueur, et qu'un `6` codé en dur rejouerait exactement le défaut qu'on est en train de corriger.
+
+---
+
+## Progress Tracking
+
+**Statut : `done`** — PR balance-service **#24** rebase-mergée sur `dev` le 2026-08-03.
+Revue de code (3 bloquants corrigés), revue de sécurité (aucune vulnérabilité), vérif
+docker **rejouée sur l'état final** après correctifs.
+
+### Décisions prises au lancement (les deux arbitrages laissés ouverts par le cadrage)
+
+**D-146-1 — deux prédicats, pas un (option (b) du § B).** `isCompteValide` garde la
+reconnaissance **par préfixe** (question du *rattachement* : ventilation STORY-085,
+suggestion STORY-139, compte de rattachement d'un compte de trésorerie). Un prédicat
+**neuf**, `isCompteDeDetail`, répond à l'autre question — « ce compte est-il déposable
+dans une balance ? ». `60100000` reste donc *rattachable* et cesse d'être *déposable*.
+Les fondre aurait obligé chaque futur appelant à trancher au hasard laquelle des deux
+il posait.
+
+**D-146-2 — où vit la « longueur du niveau de détail » : dans le MANIFESTE, pas dans
+l'artefact.** ⚠️ **Écart assumé au § B du cadrage, qui demandait « le paquet déclare »**,
+et voici pourquoi : **l'artefact ne porte aucune donnée de longueur** (vérifié —
+`meta`, `regles`, `planDeComptes`, `postes`, `tableDePassage`, `notes`, `paquetFiscal`),
+et **on ne peut pas la dériver du plan** : le plan normalisé de `syscohada-revise@2.1`
+ne contient **aucun compte à 6 chiffres** (distribution réelle : 75 comptes à 2
+caractères, 96 à 3, 3 à 4). Dériver donnerait **4**, pas 6.
+
+L'y ajouter passe donc par le `build.mjs` de `bilan-service` — **source de vérité unique
+des octets** (D-078-2) — donc par une régénération des deux paquets, **deux nouveaux
+checksums**, les deux manifestes et **deux dépôts** livrés ensemble ; avec un effet de
+bord sur les snapshots de liasse qui référencent le checksum de `syscohada-revise@2.1`.
+Hors périmètre d'une story de 5 points cadrée sur `balance-service`.
+
+La déclaration reste donc **par référentiel**, dans `ReferentielRegistry` — la table de
+données qui porte déjà `locator` et `checksum` et dont le contrat est « ajouter un
+référentiel = une ligne ici + l'artefact, sans une ligne de code métier ». Ce n'est
+**pas** un `6` en dur dans la validation : `syscohada-revise@2.1` déclare `6`,
+`sfd-bceao@2.0` **ne déclare rien** (niveau de détail non sourcé ⇒ aucune exigence
+appliquée, fail-open **déclaré**). ➡️ **Dette tracée** : le jour où l'artefact la
+portera, c'est **une seule ligne** du manifeste qui disparaît — le prédicat ne bouge pas.
+
+**D-146-3 — un compte de plan est un NOMBRE.** Découvert en mutation-testing (M2 restait
+vert) : la seule borne de longueur laissait passer `411X` — rattachable par `411`, plus
+court que 6, et pourtant un **auxiliaire**. `isCompteDeDetail` exige donc aussi
+`/^\d+$/` **quand un niveau de détail est déclaré** : déclarer un niveau de détail *en
+chiffres*, c'est déclarer que les comptes du référentiel sont numériques — et les
+artefacts le confirment (**0 compte non numérique** sur les 174 de SYSCOHADA et les 156
+du SFD).
+
+**D-146-4 — les 5 regex, pas 2.** Le cadrage en citait deux ; il y en avait **cinq** :
+`balance.validator.ts` (`{2,20}`), `submit-balance.dto.ts` (`{2,20}`),
+`agregation.dto.ts` (`{2,20}`), `surcharge-rattachement.dto.ts` (`{2,20}`) et
+`compte-tresorerie.dto.ts` (`{3,20}` — la divergente). Toutes supprimées au profit d'une
+**garde de saisie partagée** (`common/validation/compte.contraintes.ts`) : caractères
+admis + taille maximale, explicitement **pas** une règle de plan. ⚠️ Retirer purement la
+contrainte alphanumérique aurait ouvert un trou — `601;DROP` « commence par 601 » et
+serait passé pour rattachable : la garde est donc appliquée **dans le prédicat lui-même**,
+seul point de passage commun aux trois adaptateurs (l'ingestion Kafka n'a pas de couche
+class-validator).
+
+### Vérification docker (obligatoire — exécutée le 2026-07-31)
+
+Stack : `mongo`, `kafka` (volume recréé — logs corrompus), `redis`, `auth-service`,
+`balance-service` — `/health` `mongodb: up`, `kafka: up`. Deux organisations réelles
+créées via l'IdP, read-models de gate semés (`organizationId` en **ObjectId**, piège
+STORY-090) : l'une sous `syscohada-revise@2.1`, l'autre sous `sfd-bceao@2.0`.
+
+| # | Ce qui est prouvé | Résultat |
+|---|---|---|
+| 1 | `POST /balances` compte **`601000`** (6 chiffres) — org SYSCOHADA | **201**, persistée |
+| 2 | `POST /balances` compte **`60100000`** (8 chiffres) — org SYSCOHADA | **400** : « Compte « 60100000 » **inconnu du plan `syscohada-revise@2.1`** … doit être ramené à son compte de plan » |
+| 3 | `POST /balances` compte **`13`** (Résultat net) — non-régression STORY-087 | **201** |
+| 4 | `POST /balances` compte **`58`** — org SFD-BCEAO | **201** |
+| 5 | **L'autorité est bien l'organisation** : `202` (déclaré par le SFD seul) | **201** sous SFD-BCEAO · **400** sous SYSCOHADA — *la même balance, deux réponses* |
+| 6 | `60100000` sous **SFD-BCEAO** (niveau de détail non sourcé) | **201** — fail-open **déclaré**, pas accidentel |
+| 7 | Import Sage `dryRun` — 6 lignes, comptes 8 chiffres + auxiliaires | **200** : `lignesFichier: 6`, `lignesCount: 4`, `regroupementsTotal: 2`, détail des regroupements (`601000` ← `60100000`+`60100001`, `411000` ← `411DUPOND`+`411MARTIN`), avertissements en clair |
+| 8 | Import Sage persisté | **201** — en base : `601000`, `411000`, `521100`, `701000` ; **libellé du collectif pris au plan** (« Clients », pas « Client Dupond ») |
+| 9 | **AC-7 — l'équilibre survit à l'agrégation** | Σ soldes D = C = **40 000 000** (unités mineures) — identiques au fichier (400 000 XOF) ; `sommaire.soldes.ecart = 0` |
+| 10 | **AC-9 — le parc préexistant n'est ni migré ni recalculé** | 4 balances antérieures inchangées, comptes (`411`, `701`, `601`) et checksums intacts. ⚡ **La question ouverte du § D est tranchée** : aucune balance en base ne porte un compte que la nouvelle règle refuserait — le point était bien **théorique** |
+
+### ⚡ Ce que la vérification docker a corrigé dans les tests
+
+Un test unitaire affirmait « `58` refusé sous SYSCOHADA, accepté sous SFD » et **passait
+au vert** — sur un plan SYSCOHADA **fabriqué** qui omettait `58`. Or `58` existe dans
+**les deux** artefacts (« Régies d'avances » côté SYSCOHADA, « Report à nouveau » côté
+SFD) : le test décrivait une réalité fausse. Remplacé par **`202`**, discriminant
+**vérifié sur les artefacts** puis rejoué en docker. *(Même famille de piège que
+STORY-147 : un double de test ne prouve que ce qu'on y a mis.)*
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **1 886 tests unitaires** + **384 e2e** verts ·
+couverture **98.73 / 91.11 / 97.78 / 98.75** (seuils 65/90/90/90).
+
+**12 mutation-tests, tous rouges à la mutation** : borne de longueur retirée · exigence
+numérique retirée (**restait vert — c'est ce qui a révélé le trou `411X`, test ajouté**) ·
+gardes de saisie retirées · validateur cessant d'interroger le plan · auxiliaire non
+complété · troncature des comptes déjà au plan · regroupement écrasant au lieu de sommer ·
+niveau de preuve le plus **fort** au lieu du plus faible · checksum scellé **avant**
+normalisation · annonce des regroupements repassée dans le lot plafonné · plafond du
+détail supprimé (CWE-770).
+
+### Périmètre — ce qui n'a PAS été fait, et pourquoi
+
+- **La longueur de détail n'est pas remontée dans l'artefact** (D-146-2) : 2 dépôts,
+  régénération et nouveaux checksums. Dette explicitement tracée dans le manifeste.
+- **Le niveau de détail du RCSFD n'est pas déclaré** : non sourcé. Un chiffre inventé
+  rejouerait exactement le défaut que la story corrige. Conséquence assumée et
+  vérifiée (ligne 6 du tableau) : la règle « 6 chiffres » ne vaut aujourd'hui que
+  pour SYSCOHADA — ce que le § Notes du cadrage annonçait déjà.
+- **Aucune migration des balances existantes** (AC-9), conformément au § D.
+- **Aucun contrôle de cohérence entre le tag `referentiel` porté par la balance et le
+  référentiel de l'organisation** : question préexistante, hors périmètre.
+
+### Revue de code — 3 bloquants, tous corrigés (commit `MNV-146(revue)`)
+
+1. ⚡ **Le regroupement sommait les soldes sans les netter.** Un collectif clients portant
+   une **avance reçue** (`411DUPOND` débiteur + `411AVANCE` créditeur — le cas
+   **ordinaire**, pas l'exception) produisait une ligne `411000` à **double solde**, que
+   `BalanceValidator` refuse au titre de l'invariant débiteur-XOR-créditeur de STORY-147 :
+   **l'import entier échouait en 400 sur un export parfaitement valide**, en nommant un
+   compte (`411000`) qui ne figure même pas dans le fichier. Le solde d'un agrégat est
+   désormais **net** (`max(0, ΣD−ΣC)`), comme le fait déjà `quatreColonnes` ; les
+   **mouvements** restent des cumuls non nettés.
+   ⚠️ **L'AC-7 était mal formulé — et le test avec** : ce que l'agrégation conserve
+   exactement, c'est l'**écart** (le netting retranche le même montant des deux totaux),
+   pas les totaux bruts. Une balance équilibrée le reste ; c'est ce que le test prouve
+   maintenant. Le test d'origine passait parce que **toutes** ses lignes regroupées
+   étaient du même côté — « un double de test ne prouve que ce qu'on y a mis », pour la
+   deuxième fois de cette story.
+2. ⚡ **Une erreur de paramétrage devenait un poison pill Kafka.** `submitInSession`
+   résolvait le référentiel **dans** la transaction ; un `409`/`502`/`500` y est relancé
+   par `rejetDepuisErreur` (qui ne codifie que `400`/`422`) ⇒ offset jamais commité,
+   **partition du consumer group rejouée indéfiniment** : l'ingestion de **toutes** les
+   organisations gelée par le paramétrage manquant d'**une seule**. Le référentiel est
+   maintenant résolu **hors transaction** par les points d'entrée, et `IngestionService`
+   codifie son échec en rejet `ORG_NON_AUTORISEE`. Corrige du même coup le coût lourd
+   (lecture Mongo + chargement d'artefact) rejoué à **chaque retry** de `withTransaction`.
+3. ⚡ **La normalisation passe DEVANT `BalanceValidator`** — donc la garde « compte en
+   double » ne l'atteignait plus : deux lignes portant déjà le même `601000` étaient
+   **sommées** au lieu d'être rejetées, avec pour seul signal un avertissement les
+   qualifiant à tort de « comptes auxiliaires regroupés ». Un doublon du fichier est de
+   nouveau un **refus explicite**, qui nomme le compte fautif.
+
+**Constat écarté, tracé pour la suite** : les comptes de **paramétrage** (ventilation,
+catégories de dépenses, surcharges de rattachement) restent validés par `isCompteValide`
+(rattachement par préfixe) alors qu'ils **deviennent des lignes de balance** jugées par
+`isCompteDeDetail`. Un `compteCharge: '60100000'` est donc accepté à la configuration puis
+bloque toute agrégation ultérieure, **loin de la cause**. Hors périmètre (le § A ne vise
+que `BalanceValidator` et le DTO trésorerie) — c'est une divergence que **cette story
+crée**, à refermer par une story de suivi.
+
+### Revue de sécurité — aucune vulnérabilité (confiance ≥ 80)
+
+⚠️ Le **scan délégué** (`prospera-security-review`) a été interrompu par un quota ; la
+revue a été **conduite dans la session, sur `opus`** — jamais allégée, jamais sautée.
+
+Écartés **preuve à l'appui**, pas par principe :
+
+- **Retrait des 5 regex de DTO** — les gardes de **caractères** (`/^[0-9A-Za-z]+$/`) et de
+  taille sont conservées aux **15** points d'usage : la surface d'entrée est **identique**
+  à avant. Aucune injection NoSQL, ReDoS ni XSS réfléchi nouvellement atteignable.
+- **Pollution de prototype** — `normaliserEtRegrouper` indexe par `Map`/`Set`, jamais par
+  objet littéral : `__proto__` y est une clé ordinaire.
+- **Fuite d'information** — le message de refus réfléchit le compte que l'appelant a
+  lui-même soumis (≤ 20 caractères, alphanumérique) et le référentiel de **sa propre**
+  organisation, déjà exposé par le diagnostic STORY-078. Rien de cross-tenant.
+- **`controleurDeCompte` devenu public** — méthode de service, non exposée en HTTP ; sur
+  la voie Kafka elle est appelée **après** `autoriser()` (KYC `APPROVED` **et**
+  entitlement `ACTIVE`), donc aucune gate contournée ; l'`orgId` vient du JWT sur la voie
+  HTTP.
+- **Intégrité comptable** — le netting conserve l'écart (une balance déséquilibrée le
+  reste), le `niveauPreuve` d'un agrégat retient le **plus faible** (aucun blanchiment
+  possible), et le checksum scelle **après** normalisation, donc exactement ce qui est
+  persisté.
+- **CWE-770** — `regroupements` (20) et `comptesSources` (10) plafonnés, totaux exacts
+  rendus à part ; `doublonsFichier` est dédupliqué et seuls 5 éléments atteignent la
+  réponse.
+
+➡️ Le correctif ② est en outre un **gain net de sécurité** : il supprime un déni de
+service par partition, déclenchable par le paramétrage d'un seul tenant.
+
+### Vérification docker REJOUÉE sur l'état final
+
+Les correctifs touchant l'agrégation déjà vérifiée, la phase ④ a été rejouée après
+`docker restart` :
+
+| Ce qui est prouvé | Résultat |
+|---|---|
+| Collectif clients avec **avance reçue** (300 000 D + 100 000 C) | `411000` porte le **net 200 000 au débit**, `soldeCrediteur: 0` — **0 ligne à double solde** |
+| Les **mouvements** ne sont pas nettés | `411000` : `mvtD = 30 000 000`, `mvtC = 10 000 000` — les deux côtés conservés |
+| Équilibre après netting | Σ soldes D = C = **50 000 000**, `sommaire.soldes.ecart = 0` |
+| Doublon de fichier (`601000` deux fois) | **400** : « Compte(s) présent(s) en double dans le fichier : 601000 » |
+
+### Portes finales
+
+Lint **0 warning** · build OK · **1 894 unitaires** + **384 e2e** verts · couverture
+**98.73 / 91.06 / 97.78 / 98.75** (seuils 65/90/90/90) · **18 mutation-tests** au total,
+tous rouges à la mutation — dont **deux restés verts** qui ont fait ajouter les tests
+manquants : le trou `411X` (court, rattachable, et pourtant auxiliaire) et l'**ordre** de
+résolution du référentiel hors transaction.
