@@ -132,15 +132,19 @@ C'est le parcours du §3-bis, rendu possible. **Rien de tout cela ne dépend d'u
 
 | # | Story | Type | Pts | Objet |
 |:--:|---|---|:--:|---|
-| 1 | `STORY-166` | back | 5 | ⚡ **Rôles métier distributeur** au catalogue de permissions — étend `STORY-140`. Sans elle, l'administrateur créé dans la console n'a **aucun rôle** à recevoir |
+| 1 | `STORY-166` | back | **8** | ⚡ **Rôles métier distributeur** au catalogue de permissions — étend `STORY-140`. Sans elle, l'administrateur créé dans la console n'a **aucun rôle** à recevoir. *(5 → 8 le 2026-08-03 : décision Q5, les 14 personas)* |
 | 2 | `STORY-169` | back | 5 | **Créance saisie manuellement** — le chaînon manquant (§3, chemin A). ⚠️ **Déplacée au bloc distributeur différé** — voir §5-bis |
 | 3 | `DI-01` | front | 8 | ⚡ **Socle : l'administrateur se connecte.** Authentification via l'IdP, jeton, garde de rôle, client API, types générés, mise en page. **La première chose qui n'existe pas du tout aujourd'hui** |
 | 4 | `DI-02` | front | 8 | ⚡ **Il configure sa maison.** Profil de l'organisation (pays, devise, identité), **création de ses utilisateurs et attribution de leurs rôles** — le parcours que le PO décrit comme impossible aujourd'hui |
 | 5 | `DI-INT-0` | front | 8 | **Integration Gate** — zéro fixture sur le périmètre livré, types générés du vrai backend |
 
-**34 points.** À l'issue : *Money Vibes crée l'organisation et son administrateur → celui-ci se
-connecte → il crée son équipe et distribue les rôles.* Le produit devient **démontrable** avant même
-d'encaisser quoi que ce soit.
+À l'issue : *Money Vibes crée l'organisation et son administrateur → celui-ci se connecte → il crée
+son équipe et distribue les rôles.* Le produit devient **démontrable** avant même d'encaisser quoi que
+ce soit.
+
+> ⚠️ **Ce tableau est l'inventaire initial, pas le périmètre retenu.** Le socle effectivement slotté
+> est celui du **§5-bis** (45 pts : `166`, `167`, `DI-01`, `DI-02`, `AP-17`, `DI-INT-0`) — `STORY-169`
+> en est sortie vers le bloc distributeur différé.
 
 ### Vague 1 — PI-SPI côté distributeur · **différée** jusqu'à `STORY-150→165` **et** vague 0
 
@@ -231,14 +235,23 @@ au gate qu'une URL présignée était invisible du navigateur.
 
 | Story | Type | Pts | Objet |
 |---|---|:--:|---|
-| `STORY-166` | back | 5 | Rôles métier distributeur — **six rôles système**, extensibles sans migration |
+| `STORY-171` | back | **5** | ⚡ **Le vertical porté par l'organisation** — *créée le 2026-08-03 en appliquant Q5*. `grep -i vertical` sur tout `auth-service@origin/dev` : **zéro occurrence** ; `organization.schema.ts` n'a ni vertical ni type de client. Le mot traverse un an de décisions sans exister comme donnée. **À livrer AVANT `STORY-166`** — son AC 10 et `AP-17` §1 n'ont rien à lire sans elle |
+| `STORY-166` | back | **8** | Rôles métier distributeur — ⚡ **les 14 personas + `DIST_ADMIN`**, avec attribut de couverture, extensibles sans migration *(5 → 8 le 2026-08-03, décision Q5)* |
 | `STORY-167` | back | 8 | **Rôles personnalisés** par organisation + lecture console |
-| `DI-01` | front | 8 | Socle app : authentification, routage direct-par-service, types générés |
+| `DI-01` | front | 8 | Socle app : authentification, routage **direct-par-service** *(Q7)*, types générés |
 | `DI-02` | front | 8 | **Configuration de l'organisation** : profil, membres, rôles, `RoleBuilder` |
-| `AP-17` | front | 5 | Console : attribuer un rôle système, voir les rôles personnalisés |
+| `AP-17` | front | 5 | Console : attribuer un rôle système *(avec sa couverture)*, voir les rôles personnalisés |
 | `DI-INT-0` | front | 8 | Integration Gate — zéro fixture, parcours d'entrée en navigateur réel |
 
-**42 points.**
+**50 points** *(42 + 3 pour la décision Q5 sur `STORY-166`, + 5 pour `STORY-171` découverte en l'appliquant)*.
+
+> ⚡ **Ce que la découverte de `STORY-171` dit du reste du plan.** Elle n'est pas sortie d'une revue :
+> elle est sortie de l'écriture d'**un seul critère d'acceptation** (`STORY-166` AC 10), vérifié dans
+> le code au lieu d'être supposé. Le dépôt a documenté **trois fois** le même motif — une délégation
+> nominative jamais retombée (`GAP-balance-validation-etat`, `GAP-compte-non-valide-par-referentiel`,
+> `GAP-bff-admin-sans-consommateur`). C'est la quatrième, et la première trouvée **avant** d'être
+> payée. Les stories `DI-` et `PY-` en portent d'autres, encore non vérifiées : elles seront ouvertes
+> une par une, et chaque « le backend fournit X » devra être ouvert dans le code avant d'être cru.
 
 ### Stories PI-SPI console — **écrites**
 
@@ -275,14 +288,15 @@ au gate qu'une URL présignée était invisible du navigateur.
 
 | Étape | Contenu | Pts | Ce qu'on peut montrer à la fin |
 |:--:|---|:--:|---|
-| **1** | **Vague 0** — rôles, socle, configuration | **34** | *« Je crée un distributeur, son administrateur se connecte et constitue son équipe. »* |
+| **1** | **Vague 0** — rôles, socle, configuration *(périmètre §5-bis)* | **45** | *« Je crée un distributeur, son administrateur se connecte et constitue son équipe **avec les 14 rôles de sa maison**. »* |
 | **2** | **PI-SPI backend** `STORY-150→165` | 94 | *(déjà écrites)* |
 | **3** | **Vague 1** — encaissement côté distributeur | 41 | *« Il saisit une créance, émet un lien, encaisse, déclare des espèces, valide par la remise, réconcilie. »* |
 | **4** | **Vague 1-bis** — la page publique | 21 | *« Son détaillant paie depuis son téléphone. »* |
 | **5** | **Vague 2** — les vraies données, module par module | ~448 | Le produit complet |
 
-**190 points pour les étapes 1, 3 et 4** — le plus petit chemin vers un produit qui **se configure et
-encaisse**, sans catalogue, sans stock, sans PDV.
+**107 points pour les étapes 1, 3 et 4** *(45 + 41 + 21)* — le plus petit chemin vers un produit qui
+**se configure et encaisse**, sans catalogue, sans stock, sans PDV. Avec le backend PI-SPI de l'étape 2
+*(94 pts)*, **201 points** en tout.
 
 > ⚡ **Ce qui rend cet ordre défendable :** chaque étape produit une démonstration complète, pas une
 > demi-boucle. C'est le principe que le programme s'est déjà donné pour la console et le cabinet
@@ -302,10 +316,15 @@ encaisse**, sans catalogue, sans stock, sans PDV.
 | 3 | Où vit la page publique | ⚡ **Servie par `paiement-service`** — d'où la nouvelle story `PY-00` (durcissement de l'exposition publique) |
 | 4 | Prototype repris ou app réécrite | ⚡ **Réécrite**, avec la règle du §3-ter : **un écran à la fois, quand sa donnée existe** |
 
-### Reste ouvert
+### ✅ Tranché le 2026-08-03 — **plus rien d'ouvert**
 
-| # | Question | Pour qui |
-|:--:|---|---|
-| 5 | **Quels rôles distributeur** retenir au v1 ? Les 14 personas du catalogue commercial, ou le sous-ensemble qui sert l'encaissement (DG, DAF, Comptable, Recouvrement, Commercial, Superviseur) ? | PO — conditionne `STORY-166` |
-| 6 | La **portée d'accès** par zone (Réseau #4) est-elle nécessaire au v1, ou un rôle sans portée suffit-il pour un premier distributeur ? | ⚡ Un distributeur mono-zone n'en a pas besoin ; un multi-zones si |
-| 7 | Le **chemin d'appel** de `prospera-distributeur` vers les services : direct-par-service, ou BFF ? | Architecture — même question qu'`AP-INT-0`, à trancher **avant** `DI-01` |
+| # | Question | Décision | Effet |
+|:--:|---|---|---|
+| 5 | Quels rôles distributeur au v1 ? | ⚡ **Les 14 personas** du catalogue commercial — pas le sous-ensemble encaissement | `STORY-166` **réécrite** : 14 personas + `DIST_ADMIN` = **15 rôles**, **5 → 8 pts**. Huit n'ont aucun écran ⇒ **attribut de couverture** (`servi` / `partiel` / `en_attente_de_module`) porté par la donnée, affiché avant l'attribution (`AP-17`) et expliqué après la connexion (`DI-01`) |
+| 6 | La portée d'accès par zone est-elle nécessaire au v1 ? | **Reportée** — elle viendra avec `Réseau & zones` (#4) | ⚠️ Conséquence assumée : `DIST_SUPERVISEUR` et `DIST_DC` voient **toute** l'organisation. Tenable pour un premier distributeur mono-zone, **à rouvrir avant le premier multi-zones** |
+| 7 | Direct-par-service, ou BFF ? | ⚡ **Direct-par-service**, comme l'app cabinet | ⚠️ Chaque service appelé doit **activer CORS** pour l'origine du distributeur. `STORY-109` a dû le faire en urgence sur cinq services livrés sans, et **le blocage n'apparaît qu'en navigateur réel** — jamais en `curl`. `DI-01` et `DI-INT-0` le portent |
+
+> ⚡ **Ce que la décision Q5 change vraiment.** Livrer six rôles aurait obligé le distributeur à ranger
+> son responsable de stock sous un rôle qui n'est pas le sien, puis à l'en sortir plus tard — une
+> migration de données pour une décision qu'on pouvait prendre tout de suite. Le prix à payer est
+> que huit rôles ne servent encore rien : **on le paie en le disant**, pas en les cachant.
