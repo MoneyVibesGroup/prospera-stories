@@ -2054,6 +2054,56 @@ sprints:
         assigned_to: null
 
   # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
+  - sprint_number: 21
+    start_date: "2027-04-08"
+    end_date: "2027-04-22"
+    capacity_points: 34
+    committed_points: 14
+    completed_points: 0
+    status: "not_started"  # 🆕 CRÉÉ le 2026-08-04 — DETTE DE CONTRAT DE LA CONSOLE, sortie de l'Integration Gate AP-INT-0. ⚠️ Ce sprint MORD SUR LA RÉSERVE FISCALE (S21→S29, cf. `reserved_sprints`) : c'est un choix, pas un oubli. Le S20 était déjà à 48/34, et ces cinq stories débloquent des écrans DÉJÀ ÉCRITS — les laisser dormir derrière neuf sprints de fiscal reviendrait à garder une console qui ment sur cinq points. La réserve fiscale passe donc de 9 à 8 sprints (S22→S29).
+    goal: "Dette de contrat de la console (ticket TICKET-BACKEND-ecarts-releves-par-integration-gate-console.md) : la fenêtre de support N/N-1 devient une règle du service et non une politique d'écran ; les organisations se filtrent par statut KYC ; le BFF unifie le chemin de la revue KYC ; un entitlement porte sa date d'octroi ; l'administrateur plateforme est semé au démarrage."
+    stories:
+      - story_id: "STORY-178"
+        title: "Semer l'administrateur plateforme au démarrage — une stack fraîche est aujourd'hui inutilisable"
+        epic: "EPIC-025"
+        points: 2
+        service: "auth-service"
+        status: "not_started"  # ⚡ À TIRER EN TÊTE DE SPRINT : c'est le moins cher et le plus bloquant. Vérifié le 2026-08-03 sur une base de 49 utilisateurs — `admin@prospera.local` N'EXISTAIT PAS, alors que les variables sont au compose depuis des mois et que les RÔLES, eux, sont semés au boot. Le seed est un script autonome que personne n'appelle ; il est déjà idempotent (upsert), il n'y a qu'à le brancher. ⚠️ Le symptôme est trompeur : l'écran de login répond « identifiants invalides », le message exact d'une faute de frappe.
+        story_path: "stories/STORY-178.md"
+        assigned_to: null
+      - story_id: "STORY-175"
+        title: "Filtrer les organisations par statut KYC — le filtre principal de la console n'a pas de serveur"
+        epic: "EPIC-025"
+        points: 2
+        service: "auth-service"
+        status: "not_started"  # ⚠️ DÉJÀ RELEVÉ LE 2026-07-21 lors de l'audit d'AP-03, puis JAMAIS transformé en demande — il a donc coûté une seconde découverte. `ListOrgsQueryDto.status` porte l'IDENTITÉ (ACTIVE|SUSPENDED), pas le KYC. Le front ne peut pas s'en sortir seul : filtrer côté client casse la pagination (`total` faux, page 2 qui saute des lignes) — la console n'envoie donc AUCUN filtre KYC, et son test le vérifie pour que personne ne « répare » ça côté front.
+        story_path: "stories/STORY-175.md"
+        assigned_to: null
+      - story_id: "STORY-177"
+        title: "Un entitlement porte sa date d'octroi — `updatedAt` n'est pas une date d'octroi"
+        epic: "EPIC-007"
+        points: 2
+        service: "platform-catalog-service"
+        status: "not_started"  # `EntitlementResponseDto` porte `updatedAt` (dernière modification) et AUCUNE date d'octroi : un droit octroyé en janvier puis mis à jour en mars s'affiche « octroyé en mars ». Non réparable côté front — l'information n'existe pas. `grantedBy` est déjà là : le service sait QUI a octroyé, mais plus QUAND.
+        story_path: "stories/STORY-177.md"
+        assigned_to: null
+      - story_id: "STORY-176"
+        title: "Le BFF proxifie la revue KYC pièce par pièce — un acte métier, un chemin"
+        epic: "EPIC-025"
+        points: 3
+        service: "prospera-admin-panel-service"
+        status: "not_started"  # ⚠️ ARBITRAGE À RENDRE AVANT DE CODER (deux issues défendables, écrites dans la story) : proxifier, ou acter le direct et le DIRE dans AP-03. Ce qui ne se défend pas, c'est de laisser la question ouverte — cf. `GAP-bff-admin-sans-consommateur`, trois routes commandées pour un front qui ne passait pas par le BFF. Aujourd'hui la console emprunte DEUX chemins pour un seul acte métier, et la jointure de droits se joue à deux endroits.
+        story_path: "stories/STORY-176.md"
+        assigned_to: null
+      - story_id: "STORY-174"
+        title: "La fenêtre de support N/N-1 devient une règle du service, pas une politique d'écran"
+        epic: "EPIC-007"
+        points: 5
+        service: "platform-catalog-service"
+        status: "not_started"  # ⚡ LE PLUS GRAVE DU TICKET. `CreateModuleVersionDto` = { version, releasedAt? } : le service n'a ni `supersedesMajor` ni notion de fenêtre de support. Le garde-fou « pas de 3ᵉ majeure active sans dépréciation datée », que la console croyait REPRODUIRE du backend, n'existe QUE côté front — il se contourne par un appel direct sans rien signaler, et personne ne peut le découvrir en lisant le service. Second effet : faute de geste atomique, la console déprécie PUIS crée ; si la création échoue, l'ancienne majeure reste dépréciée.
+        story_path: "stories/STORY-174.md"
+        assigned_to: null
+
   # ══════════════════════════════════════════════════════════════════════════════════════════════
   # SPRINTS 30→33 — RÉÉCRITS puis DÉCALÉS le 2026-08-03 (sprint-planning distributeur × PI-SPI).
   # ⚡ DÉCALAGE DE 9 SPRINTS (décision PO) : ce bloc occupait S21→S24 ; le module FISCALITÉ (Module 3 :
@@ -2469,8 +2519,8 @@ orphan_stories: []   # ✅ vide au 2026-08-03 — RE-VÉRIFIÉE ce jour. ⚠️ 
 # re-scopé le 2026-07-12 : la TÉLÉDÉCLARATION et le dépôt de la DSF à l'OTR — ce qui reste une fois
 # le calcul remonté dans l'Atelier. Il n'a ni PRD ni story.
 reserved_sprints:
-  - plage: "S21 → S29"
-    dates: "2027-04-08 → 2027-08-12"
+  - plage: "S22 → S29"   # ⬅️ était S21→S29 ; ⚡ RÉDUITE d'un sprint le 2026-08-04 (décision PO) : le S21 accueille la dette de contrat de la console sortie de l'Integration Gate. La réserve passe de 9 à 8 sprints — et comme elle n'a toujours ni story ni PRD, elle perd une largeur qu'aucun chiffrage ne défendait.
+    dates: "2027-04-22 → 2027-08-12"
     reserve_pour: "Module 3 — fiscal-service (télédéclaration + dépôt de la DSF à l'OTR)"
     decision: "PO, 2026-08-03 — « avant de débuter [le distributeur] il doit avoir les sprints du module fiscalité »"
     stories_ecrites: 0

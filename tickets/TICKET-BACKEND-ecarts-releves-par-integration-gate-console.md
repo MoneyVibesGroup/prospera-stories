@@ -2,7 +2,7 @@
 
 **Cible :** `BACKEND` *(services : `platform-catalog-service`, `auth-service`, `prospera-admin-panel-service`, `kyc-service`)*
 **Origine :** `AP-INT-0` — bascule des quatre clients de la console sur le vrai backend
-**Ouvert le :** 2026-08-03 · **Statut :** ⏳ ouvert, à arbitrer au sprint-planning
+**Ouvert le :** 2026-08-03 · **Statut :** ✅ **REPRIS le 2026-08-04** — les sept écarts sont devenus des stories numérotées, slottées aux **sprints 20 et 21**. Ce ticket devient un état transitoire clos : **les stories font foi**.
 **Méthode :** chaque écart est **confronté à l'OpenAPI vivant** du service (stack docker rebâti sur `origin/dev`), jamais déduit d'un tracker
 
 ---
@@ -27,9 +27,9 @@ la liste soit lisible d'un bloc.
 
 ---
 
-## À arbitrer — pas encore de story
+## Repris en stories — sprint 21
 
-### 🔴 A. L'arbitrage N/N-1 du catalogue n'est **pas** un invariant du système
+### 🔴 A → `STORY-174` (5 pts). L'arbitrage N/N-1 du catalogue n'est **pas** un invariant du système
 
 **Service :** `platform-catalog-service` · **Découvert par :** AP-04
 
@@ -50,7 +50,7 @@ que rien ne rattrape.
 > atomique)*, ou **assumer par écrit** que c'est une politique d'interface. Les deux se défendent —
 > ce qui ne se défend pas, c'est que le front croie appliquer une règle du backend qui n'existe pas.
 
-### 🟠 B. Pas de décompte groupé des entitlements par module
+### 🟠 B → **PAS de story, délibérément**. Pas de décompte groupé des entitlements par module
 
 **Service :** `platform-catalog-service` · **Découvert par :** AP-04
 
@@ -61,7 +61,7 @@ C'est **assumé aujourd'hui** — le catalogue compte une dizaine d'entrées. Ma
 des centaines, la réponse est **une route d'agrégat amont**, pas une boucle plus astucieuse côté
 front. À rouvrir à ce moment-là, pas avant.
 
-### 🟠 C. `GET /admin/organizations` ne filtre pas par statut KYC
+### 🟠 C → `STORY-175` (2 pts). `GET /admin/organizations` ne filtre pas par statut KYC
 
 **Service :** `auth-service` *(et son relais BFF)* · **Découvert par :** AP-02 · ⚠️ **déjà relevé le 2026-07-21, jamais formulé**
 
@@ -75,7 +75,7 @@ casse la pagination : on ne peut pas paginer sur une colonne qu'on filtre après
 > **Demande :** ajouter `kycStatus` à `ListOrgsQueryDto`, et le laisser se combiner avec `status`,
 > `q` et `ids`.
 
-### 🟠 D. Le BFF ne proxifie pas la revue **pièce par pièce**
+### 🟠 D → `STORY-176` (3 pts, ⚠️ arbitrage à rendre avant de coder). Le BFF ne proxifie pas la revue **pièce par pièce**
 
 **Service :** `prospera-admin-panel-service` · **Découvert par :** AP-03
 
@@ -92,7 +92,7 @@ joue à deux endroits.
 > d'AP-INT-0)*, ou acter que la revue par pièce reste en direct — auquel cas il faut le dire dans
 > `AP-03`, pas le découvrir à l'implémentation.
 
-### 🟡 E. `EntitlementResponseDto` n'a pas de date d'octroi
+### 🟡 E → `STORY-177` (2 pts). `EntitlementResponseDto` n'a pas de date d'octroi
 
 **Service :** `platform-catalog-service` · **Découvert par :** AP-05
 
@@ -104,7 +104,7 @@ mars »**. C'est faux, et ce n'est pas réparable côté front : l'information n
 
 > **Demande :** ajouter `grantedAt`, distinct d'`updatedAt`.
 
-### 🟠 F. L'administrateur plateforme n'est **semé par personne**
+### 🟠 F → `STORY-178` (2 pts). L'administrateur plateforme n'est **semé par personne**
 
 **Service :** `auth-service` · **Cible réelle :** `OPS` · **Découvert par :** AP-01, au moment de se connecter
 
@@ -122,7 +122,7 @@ donc inutilisable à l'installation**, et rien ne le dit — l'écran de login r
 > Contournement immédiat, écrit en tête du fichier e2e :
 > `docker compose exec auth-service node dist/seeds/seed-platform-admin.js`
 
-### 🟡 G. `/auth/login` limite le débit — à savoir avant d'écrire des tests
+### 🟡 G → **PAS de story** (traité côté test). `/auth/login` limite le débit — à savoir avant d'écrire des tests
 
 **Service :** `auth-service` · **Découvert par :** la suite e2e d'AP-INT-0
 
@@ -154,6 +154,18 @@ l'écran.
 > été avant d'écrire une ligne de ce fichier.
 
 ---
+
+## Ce qui N'A PAS donné de story, et pourquoi
+
+- **B** *(décompte groupé des entitlements)* : le catalogue compte une dizaine d'entrées, le N+1 est
+  assumé. Ouvrir une story maintenant serait optimiser un problème qui n'existe pas — à rouvrir le
+  jour où il grossit, et par une route d'agrégat, pas par une boucle plus astucieuse côté front.
+- **G** *(limitation de débit sur `/auth/login`)* : ce n'est pas un défaut, la limitation est
+  souhaitable. Traité côté test *(jeton mémoïsé, parcours sérialisés, message d'échec qui distingue
+  le 429)*. Consigné pour que la prochaine suite e2e n'y repasse pas trois quarts d'heure.
+
+> ⚡ **Deux non-stories sur sept écarts, c'est le tri qui donne sa valeur au reste.** Un ticket qui
+> demande tout se fait ignorer en bloc.
 
 ## Inscription au tracker
 
