@@ -9,7 +9,14 @@ applications. Le dossier `admin-stories/` a été supprimé et son contenu dépl
 |---|---|---|
 | `FE-…` | app cliente cabinet (vertical pilote) | `prospera-frontend-expert-comptable` |
 | `AP-…` | console interne Money Vibes (PLATFORM_ADMIN) | `frontend-admin-panel` |
-| `FE-INT-…` / `AP-INT-…` | Integration Gate — la story qui remplace les contrats supposés par les vrais | les deux |
+| `DI-…` | app distributeur *(réécrite sur socle de données — 2026-08-02)* | `prospera-distributeur` |
+| `PY-…` | page publique de paiement — **sans compte, sans session** | ⚡ servie par `paiement-service` |
+| `FE-INT-…` / `AP-INT-…` / `DI-INT-…` | Integration Gate — la story qui remplace les contrats supposés par les vrais | chacune son app |
+
+> ⚠️ **`MB-…` n'est pas ici.** Les stories de l'application terrain **native** vivent dans
+> `mobile-stories/` — voir §*Où vit quoi*. Ce n'est pas du web : autre plateforme, autre chaîne de
+> compilation, autre cycle de publication. Le principe *« un préfixe = une application »* tient ;
+> c'est le **dossier** qui sépare le web du natif.
 
 **Pourquoi un seul dossier.** Le tracker `frontend-sprint-status.yaml` est déjà une source
 unique pour les deux apps : ses sprints sont des **tranches verticales** qui traversent la
@@ -33,7 +40,8 @@ l'identifiant.
 
 | | |
 |---|---|
-| `frontend-stories/` | **les stories frontend** (ce dossier) |
+| `frontend-stories/` | **les stories frontend web** (ce dossier) — `FE-` · `AP-` · `DI-` · `PY-` |
+| `mobile-stories/` | **les stories de l'application terrain native** — `MB-` *(ajouté 2026-08-02)* |
 | `stories/` | les stories **backend** (`STORY-<NNN>.md`) |
 | `tickets/` | les manques découverts **chez l'autre**, en attente de porteur — cf. `tickets/README.md` |
 | `frontend-sprint-status.yaml` | **la** source de vérité des sprints frontend |
