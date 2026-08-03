@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 18 (EXTENDED)
@@ -100,18 +100,18 @@ Deux sources alimentent les retraitements, et c'est ce qui rend le calcul **fiab
 
 ## Acceptance Criteria
 
-- [ ] **Résultat comptable** calculé depuis la balance (`Σ classe 7 − Σ classe 6`) ; **écart** avec le compte `12x` (si présent) **signalé** (articulation).
-- [ ] **Agrégation automatique des réintégrations** depuis les cahiers (STORY-083) : `LigneDepense` avec `deductible: false`, **groupées par `codeReintegration`** — **traçables jusqu'aux lignes sources**.
-- [ ] **Retraitement manuel** : `code` **validé contre le paquet fiscal** (**code inconnu → 400**) ; **`justification` + `baseLegale` OBLIGATOIRES** (sinon **400**) — un retraitement non justifié est indéfendable (NFR-A04).
-- [ ] **Codes lus du paquet fiscal** (`TG@2026` : réintégrations 10-80, déductions 90-170) — **aucun code en dur** (NFR-A06).
-- [ ] **Déficits reportables** : stock suivi par exercice d'origine ; **imputation limitée au disponible** et aux règles du paquet (durée/plafond) — **jamais au-delà**, jamais pour fabriquer un déficit.
-- [ ] **`ResultatFiscalService.calculer()`** applique : `R + Réintégrations − Déductions − Déficits imputés` = **résultat fiscal**.
-- [ ] **Résultat fiscal négatif** → **déficit reportable créé** (alimente le stock) ; **IS de droit commun nul** — **mais la MFP reste due** (plancher, STORY-092) : le moteur ne conclut **pas** « aucun impôt ».
-- [ ] **Tableau des postes DSF** (section « Résultat fiscal » — 23 postes GUIDEF) produit avec **code**, **montant**, **lignes sources**.
-- [ ] **Traçabilité (NFR-A07)** : chaque montant remonte à ses **lignes sources** (cahiers) ou à sa **saisie manuelle** (auteur, date, base légale, pièce).
-- [ ] **Immutabilité** : après validation de la liasse, tout retraitement est **figé** → **409** sur modification.
-- [ ] **Tests** : résultat comptable, agrégation par code, retraitement sans justification (400), code inconnu (400), déficits (limite du stock), résultat négatif → déficit + MFP due, traçabilité, immutabilité, aucun code en dur. **Coverage ≥ 90 %.**
-- [ ] **Swagger** + **CI verte**.
+- [x] **Résultat comptable** calculé depuis la balance (`Σ classe 7 − Σ classe 6`) ; **écart** avec le compte `12x` (si présent) **signalé** (articulation).
+- [x] **Agrégation automatique des réintégrations** depuis les cahiers (STORY-083) : `LigneDepense` avec `deductible: false`, **groupées par `codeReintegration`** — **traçables jusqu'aux lignes sources**.
+- [x] **Retraitement manuel** : `code` **validé contre le paquet fiscal** (**code inconnu → 400**) ; **`justification` + `baseLegale` OBLIGATOIRES** (sinon **400**) — un retraitement non justifié est indéfendable (NFR-A04).
+- [x] **Codes lus du paquet fiscal** (`TG@2026` : réintégrations 10-80, déductions 90-170) — **aucun code en dur** (NFR-A06).
+- [x] **Déficits reportables** : stock suivi par exercice d'origine ; **imputation limitée au disponible** et aux règles du paquet (durée/plafond) — **jamais au-delà**, jamais pour fabriquer un déficit.
+- [x] **`ResultatFiscalService.calculer()`** applique : `R + Réintégrations − Déductions − Déficits imputés` = **résultat fiscal**.
+- [x] **Résultat fiscal négatif** → **déficit reportable créé** (alimente le stock) ; **IS de droit commun nul** — **mais la MFP reste due** (plancher, STORY-092) : le moteur ne conclut **pas** « aucun impôt ».
+- [x] **Tableau des postes DSF** (section « Résultat fiscal » — 23 postes GUIDEF) produit avec **code**, **montant**, **lignes sources**.
+- [x] **Traçabilité (NFR-A07)** : chaque montant remonte à ses **lignes sources** (cahiers) ou à sa **saisie manuelle** (auteur, date, base légale, pièce).
+- [x] **Immutabilité** : après validation de la liasse, tout retraitement est **figé** → **409** sur modification.
+- [x] **Tests** : résultat comptable, agrégation par code, retraitement sans justification (400), code inconnu (400), déficits (limite du stock), résultat négatif → déficit + MFP due, traçabilité, immutabilité, aucun code en dur. **Coverage ≥ 90 %.**
+- [x] **Swagger** + **CI verte**.
 
 ---
 
@@ -244,16 +244,16 @@ dix décisions.
 
 ## Definition of Done
 
-- [ ] `ResultatComptableService` (produits − charges) + écart `12x` signalé
-- [ ] Agrégation automatique des non-déductibles **par code** (traçable aux lignes sources)
-- [ ] Retraitement manuel : code **validé au paquet**, `baseLegale` + `justification` **obligatoires**
-- [ ] Déficits reportables (stock, imputation plafonnée, expiration)
-- [ ] `ResultatFiscalService.calculer()` → base imposable + **tableau des 23 postes DSF**
-- [ ] Résultat négatif → déficit reportable ; **MFP toujours due** (pas de conclusion « zéro impôt »)
-- [ ] Traçabilité complète (NFR-A07) ; immutabilité après validation (409)
-- [ ] Aucun code/taux en dur (NFR-A06)
-- [ ] Coverage ≥ 90 % ; Swagger ; CI verte
-- [ ] Non-régression : STORY-083 (marquage à la saisie), STORY-085 (balance) verts
+- [x] `ResultatComptableService` (produits − charges) + écart `12x` signalé
+- [x] Agrégation automatique des non-déductibles **par code** (traçable aux lignes sources)
+- [x] Retraitement manuel : code **validé au paquet**, `baseLegale` + `justification` **obligatoires**
+- [x] Déficits reportables (stock, imputation plafonnée, expiration)
+- [x] `ResultatFiscalService.calculer()` → base imposable + **tableau des 23 postes DSF**
+- [x] Résultat négatif → déficit reportable ; **MFP toujours due** (pas de conclusion « zéro impôt »)
+- [x] Traçabilité complète (NFR-A07) ; immutabilité après validation (409)
+- [x] Aucun code/taux en dur (NFR-A06)
+- [x] Coverage ≥ 90 % ; Swagger ; CI verte
+- [x] Non-régression : STORY-083 (marquage à la saisie), STORY-085 (balance) verts
 
 ---
 
@@ -281,9 +281,22 @@ dix décisions.
   - **Atomicité** : *sans objet ici* — aucune opération de cette story n'écrit **plus d'un document** (un retraitement, un déficit). Il n'y a donc **aucune transaction** à prouver, et rien n'est déclaré tel. Le filet contre la double déclaration est l'**index unique**, vérifié présent en base ci-dessus.
   - **Non-régression** : STORY-078 (diagnostic `/referentiels/actifs` ⇒ 200, `integrity: verified` sur le **nouveau** checksum), STORY-079/080 (profil + régime `REEL` ⇒ 200), STORY-083 (4 dépenses saisies, déductibilité et code proposés à la saisie), STORY-101 (2 balances soumises, validation ⇒ 200).
 
+- **2026-08-03 — REVUE DE CODE.** 3 constats retenus, **les 3 corrigés** dans un commit dédié (`MNV-091(revue)`).
+  - **F-091-1 (bloquant) — le stock de déficits n'était pas gelé.** `creerRetraitement` était gardé, `declarerDeficit` / `supprimerDeficit` ne l'étaient pas : balance 2026 `VALIDÉE` ⇒ `POST /fiscal/retraitements` refusé **409**, mais `POST /fiscal/deficits` accepté **201** — et la base imposable d'un exercice déposé tombait de 71 950 000 à 35 975 000 par le seul chemin non gardé. Symétriquement, supprimer un déficit déjà imputé l'**augmentait**. D-091-10 énonçait pourtant « retraitements **et** déficits ».
+    **Correctif** : un déficit n'appartenant à **aucun** exercice, la règle est celle de l'**effet** — `BalanceRepository.existeExerciceArreteApres(orgId, N)` refuse dès qu'un exercice **capable de l'imputer** (clôture > `N`, borne `exercice.fin ≥ 1ᵉʳ janvier N+1`, exacte même sur un exercice décalé) est validé. Geler tout le stock à la première clôture aurait interdit à jamais de déclarer les années suivantes : vérifié en docker, l'origine 2026 reste déclarable (**201**) alors que 2022 est refusée (**409**).
+  - **F-091-2 — le stock et le calcul se contredisaient.** `GET /fiscal/deficits` sommait les **non périmés** quand `calculer` borne en base (`$lt`) : un déficit d'origine 2026 s'annonçait imputable sur 2026 sans jamais l'être. `imputableSurExercice` porte désormais l'antériorité, dans la projection **et** dans `imputerDeficits` — la fonction est **exportée**, STORY-092/096 lui passeront un stock construit ailleurs.
+  - **F-091-3 — le `motif` était posé sur les postes CODÉS**, avec celui de la **première** ligne du groupe : deux amendes et un cadeau hors plafond partageant le code `20` s'affichaient tous « amende ». Le DTO documentait déjà l'inverse. Montants inchangés, lecture du poste rétablie.
+  - **6 mutation-tests sur ces correctifs, 6 rouges.** **Vérification docker rejouée sur l'état final** (service redémarré, le hot-reload peut mentir) : gel du stock **409** en déclaration comme en suppression, origine postérieure toujours déclarable **201**, `totalRestant` 25 000 000 = `totalDeficitsImputes` 25 000 000 (le déficit 2026 déclaré à 3 000 000 sort `imputableSurExercice: false` et n'est plus compté), aucun poste codé ne porte de motif.
+  - Portes rejouées : lint 0 warning · build OK · **2083 unitaires + 431 e2e** verts · couverture **98,86 / 91,04 / 97,94 / 98,90**.
+
+- **2026-08-03 — REVUE DE SÉCURITÉ. Aucune vulnérabilité.** Vérifiés : chaîne de guards intacte sur les 6 routes (`@Roles` + `@RequiresBalanceAccess` au niveau **classe**, aucun `@Public`/`@SkipThrottle`) · `orgId` toujours issu du JWT, 10 requêtes Mongo org-scopées y compris les `deleteOne` · anti-énumération **404** dans les deux sens · aucun opérateur Mongo constructible depuis une entrée (littéraux du code sur valeurs déjà typées, `forbidNonWhitelisted` actif, `ObjectId.isValid` avant requête) · **intégrité de l'artefact fiscal** : sha256 recalculé identique au manifeste, sources et assets strictement identiques, le diff est le **seul** hunk `reportDeficitaire` — aucun taux altéré sous couvert de régénération · gel non contournable par des bornes d'exercice forgées (match exact `debut`/`fin`) · `CLOS ⟹ balance VALIDÉE` vérifié, donc pas de trou par la voie « exercice clos sans balance validée » · `E11000 → 409` · aucun secret, aucun log, aucun `process.env` dans le module.
+  Points examinés puis **écartés** (confiance < 80, aucun correctif) : lecture de chaîne de prototype sur `libelles[code]` (lecture seule, écriture à clés de l'artefact vérifié) ; absence de `@Max` sur les montants (conforme aux DTO existants du service) ; TOCTOU gel/insertion (patron préexistant STORY-082/083) ; `POST /retraitements` rejouable sans clé d'idempotence (choix métier documenté D-091, plafonné par le throttler global).
+
+- **2026-08-03 — `done`.** PR `balance-service` **#29 rebase-mergée sur `dev`**, branche supprimée.
+
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** **STORY-078** (paquet fiscal : codes de retraitement, règles de déficits), **STORY-083** (déductibilité posée à la saisie), **STORY-101** (balance → résultat comptable), STORY-080 (régime `REEL` — sinon voir STORY-095/TPU)
 **Alimente** **STORY-092** (liquidation IS), **STORY-096** (simulation d'optimisation — rejoue ce moteur), `bilan-service` EPIC-011 (rendu des états fiscaux de la DSF)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A18, NFR-A04/A06 · GUIDEF section « Résultat fiscal » (23 postes) · CGI Togo 2026
