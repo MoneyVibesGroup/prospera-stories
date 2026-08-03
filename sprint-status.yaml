@@ -1934,8 +1934,8 @@ sprints:
         epic: "EPIC-023"
         points: 5
         service: "balance-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-08-03 — cadrage figé (D-092-1..12) : la grille des 12 postes vient du PAQUET (etatLiasse + code→grandeur), ses libellés du RÉFÉRENTIEL (état LIQUIDATION_IS) ; le CA HT est SOURCÉ du référentiel (poste « Chiffre d'affaires » = XB = TA+TB+TC+TD → comptes 701..707), jamais « 70 » en dur ; taux du paquet, absent ⇒ 409 (jamais 0, qui sous-imposerait) ; types de crédits d'impôt transcrits en structuré depuis retenuesSource (prose) ; échéance invalide écartée, jamais roulée au mois suivant par Date ; théorique N-1 sans récursion. Consomme STORY-091 (résultat fiscal) et STORY-078 (paquet).
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-093"
         title: "TVA (collectée/déductible/due/crédit) + taxes + catégorie « Autres » (taux manuel) — FR-A20"
         epic: "EPIC-023"
