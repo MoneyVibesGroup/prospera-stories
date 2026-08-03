@@ -12,7 +12,7 @@
 **Statut :** À faire
 **Assigné à :** null
 **Créée le :** 2026-08-02
-**Sprint :** à planifier — **incrément 1**
+**Sprint :** **30** — **incrément 1**  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
 **Service :** `paiement-service` (`:3005`) — base Mongo dédiée `paiement_service`
 **Couvre :** FR-P11, FR-P22 *(partiel)*, FR-P61, FR-P62 · NFR-5, NFR-6
 

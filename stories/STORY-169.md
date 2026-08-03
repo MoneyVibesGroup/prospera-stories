@@ -10,7 +10,7 @@
 **Statut :** ⏸ **différée** — bloc PI-SPI distributeur (décision PO 2026-08-02)
 **Assigné à :** null
 **Créée le :** 2026-08-02
-**Sprint :** non slottée — **à ouvrir avec le bloc distributeur**
+**Sprint :** **31** — **à ouvrir avec le bloc distributeur**  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
 **Service :** `paiement-service` (`:3005`)
 
 ---

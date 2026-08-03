@@ -2037,19 +2037,23 @@ sprints:
 
   # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
   # ══════════════════════════════════════════════════════════════════════════════════════════════
-  # SPRINTS 21→24 — RÉÉCRITS le 2026-08-03 (sprint-planning distributeur × PI-SPI).
-  # L'ancien S21 portait STORY-016/017/018/019 + 039 : CINQ TITRES SANS FICHIER, écrits avant que le
+  # SPRINTS 30→33 — RÉÉCRITS puis DÉCALÉS le 2026-08-03 (sprint-planning distributeur × PI-SPI).
+  # ⚡ DÉCALAGE DE 9 SPRINTS (décision PO) : ce bloc occupait S21→S24 ; le module FISCALITÉ (Module 3 :
+  # télédéclaration et dépôt de la DSF) doit être livré avant qu’on ouvre le distributeur. La plage
+  # S21→S29 lui est réservée — voir `reserved_sprints` en fin de fichier. ⚠️ Cette plage ne contient
+  # AUCUNE story à ce jour : c’est une INTENTION de séquencement, pas un plan.
+  # L'ancien sprint paiement portait STORY-016/017/018/019 + 039 : CINQ TITRES SANS FICHIER, écrits avant que le
   # PRD paiement existe. Le PRD `prds/prd-paiement-service-2026-08-02/prd.md` les a remplacés par
   # STORY-150→165 (94 pts, trois incréments). Les cinq sont déplacés en `superseded_stories` avec
   # leur remplaçante — pas supprimés, pour que personne ne les réécrive dans six mois.
   # ORDRE = décision PO du 2026-08-02 (PLAN-DISTRIBUTEUR-PI-SPI §5-bis) : le socle AVANT le PI-SPI,
   # et le PI-SPI de la CONSOLE avant celui du distributeur.
   # ══════════════════════════════════════════════════════════════════════════════════════════════
-  - sprint_number: 21
-    start_date: "2027-04-08"
-    end_date: "2027-04-22"
+  - sprint_number: 30   # ⬅️ ex-S21, DÉCALÉ DE 9 SPRINTS le 2026-08-03 (décision PO) : le module fiscalité (Module 3) doit être livré avant d’ouvrir le distributeur. Cf. `reserved_sprints`.
+    start_date: "2027-08-12"
+    end_date: "2027-08-26"
     capacity_points: 34
-    committed_points: 31   # ⚖️ RÉÉQUILIBRÉ le 2026-08-03 : +STORY-171 (5, prérequis découvert) et −STORY-152 (8, déplacée au S22 où vit déjà son consommateur STORY-168). 34 → 31.
+    committed_points: 31   # ⚖️ RÉÉQUILIBRÉ le 2026-08-03 : +STORY-171 (5, prérequis découvert) et −STORY-152 (8, déplacée au S31 où vit déjà son consommateur STORY-168). 34 → 31.
     completed_points: 0
     status: "not_started"  # 🆕 2026-08-03. RANG 1 de l'ordre PO : le socle. ⚡ Ce sprint débloque à lui seul TOUT le frontend distributeur (DI-01/DI-02/AP-17) — sans lui, l'administrateur créé dans la console n'a aucun rôle à recevoir et ne peut pas entrer dans son application. Les trois stories paiement (150/151/152) sont ici parce que 152 (multi-fournisseur) conditionne STORY-168, elle-même au rang 2.
     goal: "Socle distributeur (EPIC-025) : les 14 personas au catalogue de rôles + les rôles personnalisés par organisation. Amorce paiement-service (:3005) : scaffold relying party + outbox, comptes d'encaissement, PaymentProvider multi-fournisseur routé pays × devise × méthode. À l'issue : Money Vibes crée un distributeur, son administrateur reçoit un rôle, et le service de paiement démarre."
@@ -2090,11 +2094,11 @@ sprints:
         status: "not_started"  # sert AP-13 (console)
         assigned_to: null
 
-  - sprint_number: 22
-    start_date: "2027-04-22"
-    end_date: "2027-05-06"
+  - sprint_number: 31   # ⬅️ ex-S22
+    start_date: "2027-08-26"
+    end_date: "2027-09-09"
     capacity_points: 34
-    committed_points: 34   # ⚖️ 26 → 34 le 2026-08-03 : +STORY-152 déplacée du S21. Pile à la capacité.
+    committed_points: 34   # ⚖️ 26 → 34 le 2026-08-03 : +STORY-152 déplacée du S30. Pile à la capacité.
     completed_points: 0
     status: "not_started"  # 🆕 2026-08-03. RANG 2 : le PI-SPI de la CONSOLE. 🏁 clôture l'incrément 1 du PRD paiement. STORY-169 (créance manuelle) est le « chemin A » du plan : Facturation (#17) est le vrai producteur de créances mais n'a ni PRD ni code — sans 169, l'écran « encaisser » porterait sur un objet inexistant.
     goal: "PI-SPI incrément 1 🏁 : créance projetée, demande de paiement et lien public ; encaissement avec notification signée, idempotence prouvée, paiement partiel et transparence des frais. + Registre plateforme des fournisseurs (activer un pays sans déploiement) et créance saisie manuellement (chemin A, en attendant Facturation)."
@@ -2104,7 +2108,7 @@ sprints:
         epic: "EPIC-004"
         points: 8
         service: "paiement-service"
-        status: "not_started"  # ⬅️ DÉPLACÉE du S21 le 2026-08-03 (rééquilibrage après création de STORY-171). ⚠️ ORDRE INTERNE AU SPRINT : 152 AVANT 168 — 168 (registre plateforme) est sa surface d'administration et ne peut pas être écrite avant elle.
+        status: "not_started"  # ⬅️ DÉPLACÉE du S30 le 2026-08-03 (rééquilibrage après création de STORY-171). ⚠️ ORDRE INTERNE AU SPRINT : 152 AVANT 168 — 168 (registre plateforme) est sa surface d'administration et ne peut pas être écrite avant elle.
         assigned_to: null
       - story_id: "STORY-153"
         title: "Créance projetée, demande de paiement et lien public — la seule surface que voit un détaillant"
@@ -2135,9 +2139,9 @@ sprints:
         status: "not_started"  # dépend de 153. Chemin A (décision PO 2026-08-02) : une créance saisie à la main n'est pas une dette technique, c'est la réalité de distributeurs qui facturent sur papier. Débloque DI-04.
         assigned_to: null
 
-  - sprint_number: 23
-    start_date: "2027-05-06"
-    end_date: "2027-05-20"
+  - sprint_number: 32   # ⬅️ ex-S23
+    start_date: "2027-09-09"
+    end_date: "2027-09-23"
     capacity_points: 34
     committed_points: 34
     completed_points: 0
@@ -2187,9 +2191,9 @@ sprints:
         status: "not_started"
         assigned_to: null
 
-  - sprint_number: 24
-    start_date: "2027-05-20"
-    end_date: "2027-06-03"
+  - sprint_number: 33   # ⬅️ ex-S24
+    start_date: "2027-09-23"
+    end_date: "2027-10-07"
     capacity_points: 34
     committed_points: 26
     completed_points: 0
@@ -2232,9 +2236,9 @@ sprints:
         status: "not_started"  # 🏁 jalon de clôture EPIC-004 ; patron STORY-100
         assigned_to: null
 
-  - sprint_number: 25   # ⬅️ ex-S22, renuméroté le 2026-08-03 (insertion des sprints 22→24 : PI-SPI). Contenu INCHANGÉ.
-    start_date: "2027-06-03"
-    end_date: "2027-06-17"
+  - sprint_number: 34   # ⬅️ ex-S22 puis ex-S25 — décalé deux fois le 2026-08-03. Contenu INCHANGÉ. ⚠️ L’assistant IA n’a AUCUNE dépendance dure et son propre commentaire le dit « déplaçable plus tôt » : le placer ici est un CHOIX de priorité (décision PO 2026-08-03), pas une contrainte technique. Il peut remonter dans la plage réservée S21→S29 si le fiscal ne la remplit pas.
+    start_date: "2027-10-07"
+    end_date: "2027-10-21"
     capacity_points: 34
     committed_points: 28
     completed_points: 0
@@ -2277,9 +2281,9 @@ sprints:
         status: "not_started"  # surface la moins risquée ; dépend table de passage (FR-006/008 ✅)
         assigned_to: null
 
-  - sprint_number: 26
-    start_date: "2027-06-17"
-    end_date: "2027-07-01"
+  - sprint_number: 35   # ⬅️ ex-S26
+    start_date: "2027-10-21"
+    end_date: "2027-11-04"
     capacity_points: 34
     committed_points: 0   # ⚡ 0 ENGAGÉ : ce sprint ne porte qu'une story `deferred`. Il existe pour que STORY-170 ait un sprint plutôt que de redevenir orpheline (règle du dépôt : slottée OU explicitement deferred, jamais sans sprint).
     completed_points: 0
@@ -2398,12 +2402,14 @@ velocity:
   sprint_20: null  # 🏁 Atelier livré : conseil fiscal + garde-fous (096-097) + contrôles/statut de preuve (098) + e2e (100)
   # ⚡ RÉÉCRITS le 2026-08-03 (sprint-planning distributeur × PI-SPI) : l'ancien sprint_21 portait
   # les cinq titres 016-019/039, supersédés par le PRD paiement (cf. `superseded_stories`).
-  sprint_21: null  # Socle distributeur (166/167 = 14 personas + rôles personnalisés) + amorce paiement-service (150/151/152) — 34 pts. ⚡ Débloque à lui seul DI-01, DI-02 et AP-17.
-  sprint_22: null  # PI-SPI incrément 1 🏁 (153/154) + registre fournisseurs (168) + créance manuelle (169) — 26 pts. Rang 2 de l'ordre PO : le PI-SPI de la CONSOLE.
-  sprint_23: null  # PI-SPI incrément 2 — terrain : promesses, espèces, réconciliation, annulation, solde, droits (155→160) — 34 pts
-  sprint_24: null  # PI-SPI incrément 3 🏁 CLÔTURE EPIC-004 — abonnement, entitlements par événement (ex-039), impayé/grâce, devises, e2e (161→165) — 26 pts
-  sprint_25: null  # ⬅️ ex-sprint_22. EPIC-026 socle — Assistant IA transverse (assistant-service :3011, LlmProvider, Proposition, RAG, surface mapping) — stories 115-119 ; DÉPLAÇABLE (aucune dépendance dure)
-  sprint_26: null  # ⛔ BLOC TERRAIN, 0 pt engagé — STORY-170 (TranscriptionProvider) `deferred` : le dépôt prospera-terrain n'existe pas et le choix React Native/Flutter n'est pas tranché
+  # ⚡ Puis DÉCALÉS de 9 sprints le même jour (21→30 … 26→35) : le module fiscalité passe devant.
+  # Les clés sprint_21 → sprint_29 sont volontairement ABSENTES — cf. `reserved_sprints`.
+  sprint_30: null  # Socle distributeur (166/167 = 14 personas + rôles personnalisés) + amorce paiement-service (150/151/152) — 34 pts. ⚡ Débloque à lui seul DI-01, DI-02 et AP-17.
+  sprint_31: null  # PI-SPI incrément 1 🏁 (153/154) + registre fournisseurs (168) + créance manuelle (169) — 26 pts. Rang 2 de l'ordre PO : le PI-SPI de la CONSOLE.
+  sprint_32: null  # PI-SPI incrément 2 — terrain : promesses, espèces, réconciliation, annulation, solde, droits (155→160) — 34 pts
+  sprint_33: null  # PI-SPI incrément 3 🏁 CLÔTURE EPIC-004 — abonnement, entitlements par événement (ex-039), impayé/grâce, devises, e2e (161→165) — 26 pts
+  sprint_34: null  # ⬅️ ex-sprint_22 puis ex-sprint_25. EPIC-026 socle — Assistant IA transverse (assistant-service :3011, LlmProvider, Proposition, RAG, surface mapping) — stories 115-119 ; DÉPLAÇABLE (aucune dépendance dure)
+  sprint_35: null  # ⛔ BLOC TERRAIN, 0 pt engagé — STORY-170 (TranscriptionProvider) `deferred` : le dépôt prospera-terrain n'existe pas et le choix React Native/Flutter n'est pas tranché
   rolling_average: 27  # (33 + 23 + 24) / 3 ≈ 26.7 ; cible prudente ~24/sprint (1 flux, réf. historique retenue au sprint-planning 2026-07-10)
 # ── Stories orphelines : SOLDÉ le 2026-08-01 ──────────────────────────────────
 # Huit stories avaient un fichier dans stories/ et ne figuraient dans AUCUN sprint : invisibles
@@ -2426,7 +2432,37 @@ velocity:
 # ⚡ RÈGLE À TENIR pour que la section reste vide : une story RÉDIGÉE est slottée OU
 # explicitement marquée `deferred` dans un sprint — jamais laissée sans sprint. Le contrôle
 # tient en une ligne : comparer les fichiers de stories/ à l'ensemble des `story_id` slottés.
-orphan_stories: []   # ✅ vide au 2026-08-03 — RE-VÉRIFIÉE ce jour. ⚠️ Elle était FAUSSE entre le 2026-08-02 et le 2026-08-03 : 21 stories backend (STORY-150→170) avaient un fichier et aucun sprint, pendant que cette ligne affirmait « vide ». C'est le pire état possible — un contrôle qui rassure. Slottées le 2026-08-03 aux sprints 21→24 et 26. ⚡ Le contrôle ne se lit pas, il s'exécute : comparer `stories/*.md` à l'ensemble des `story_id` slottés, à chaque sprint-planning.
+orphan_stories: []   # ✅ vide au 2026-08-03 — RE-VÉRIFIÉE ce jour. ⚠️ Elle était FAUSSE entre le 2026-08-02 et le 2026-08-03 : 21 stories backend (STORY-150→170) avaient un fichier et aucun sprint, pendant que cette ligne affirmait « vide ». C'est le pire état possible — un contrôle qui rassure. Slottées le 2026-08-03 aux sprints 30→33 et 35 (décalées de 9 sprints le jour même : le module fiscalité passe devant). ⚡ Le contrôle ne se lit pas, il s'exécute : comparer `stories/*.md` à l'ensemble des `story_id` slottés, à chaque sprint-planning.
+
+# ── Plage de sprints RÉSERVÉE ──────────────────────────────────────────────────────────────────
+# ⚡ Décision PO du 2026-08-03. Le bloc distributeur × PI-SPI, écrit et slotté le jour même en
+# S21→S24, a été DÉCALÉ EN S30→S33 : le module FISCALITÉ doit être livré avant qu'on ouvre le
+# distributeur. La plage S21→S29 lui est réservée.
+#
+# ⚠️ CE QUE CETTE RÉSERVE N'EST PAS. Elle ne contient AUCUNE story, aucun PRD découpé, aucune
+# estimation. C'est une INTENTION DE SÉQUENCEMENT, pas un plan — et il faut la lire comme telle :
+# neuf sprints (≈ 18 semaines) sont posés sur un périmètre qui n'a pas encore été chiffré. Le
+# nombre 9 vient de la date cible, pas d'un découpage. ⚡ Tant qu'aucune story n'y est écrite, la
+# seule chose qu'on sait de cette plage, c'est qu'elle repousse le distributeur de 18 semaines.
+#
+# ⚠️ NE PAS CONFONDRE avec le fiscal DÉJÀ PLANIFIÉ : le moteur fiscal (STORY-091→095, S19) et le
+# conseil fiscal (STORY-096→098/100, S20) appartiennent à l'Atelier Balance (EPIC-023/024) et sont
+# le CALCUL. Ce qui est réservé ici, c'est ce que le cadrage appelle Module 3 `fiscal-service`,
+# re-scopé le 2026-07-12 : la TÉLÉDÉCLARATION et le dépôt de la DSF à l'OTR — ce qui reste une fois
+# le calcul remonté dans l'Atelier. Il n'a ni PRD ni story.
+reserved_sprints:
+  - plage: "S21 → S29"
+    dates: "2027-04-08 → 2027-08-12"
+    reserve_pour: "Module 3 — fiscal-service (télédéclaration + dépôt de la DSF à l'OTR)"
+    decision: "PO, 2026-08-03 — « avant de débuter [le distributeur] il doit avoir les sprints du module fiscalité »"
+    stories_ecrites: 0
+    prd: "aucun"
+    points_estimes: null   # ⚡ délibérément `null` et pas un chiffre rond : personne n'a chiffré ce périmètre
+    a_faire_avant_de_l_ouvrir:
+      - "Écrire le PRD du Module 3 (le cadrage 2026-07-12 l'a re-scopé, il n'a jamais été rédigé)"
+      - "Vérifier ce que le moteur fiscal de l'Atelier couvre DÉJÀ (STORY-091→098) avant de redécouper — sinon on planifie deux fois le même calcul"
+      - "Chiffrer, puis confirmer ou corriger la largeur de 9 sprints"
+    consequence_si_elle_glisse: "Le distributeur glisse d'autant — S30 n'a aucune dépendance technique envers le fiscal, seulement une priorité PO. Si le fiscal prend moins de 9 sprints, le bloc distributeur peut remonter sans rien réécrire (aucune de ses stories ne dépend d'une story fiscale)."
 
 # ── Stories SUPERSÉDÉES ────────────────────────────────────────────────────────────────────────
 # Une story supersédée n'est ni faite ni abandonnée : son OBJET est repris ailleurs, mieux découpé.

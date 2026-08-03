@@ -10,7 +10,7 @@
 **Statut :** À faire
 **Assigné à :** null
 **Créée le :** 2026-08-03
-**Sprint :** 21 — socle distributeur
+**Sprint :** **30** — socle distributeur  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
 **Service :** `auth-service` (`:3001`)
 
 ---

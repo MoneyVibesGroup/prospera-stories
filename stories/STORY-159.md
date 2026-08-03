@@ -11,7 +11,7 @@
 **Statut :** À faire
 **Assigné à :** null
 **Créée le :** 2026-08-02
-**Sprint :** à planifier — **incrément 2** *(story de clôture)*
+**Sprint :** **32** — **incrément 2** *(story de clôture)*  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
 **Service :** `paiement-service` (`:3005`)
 **Couvre :** FR-P37, FR-P40, FR-P64
 

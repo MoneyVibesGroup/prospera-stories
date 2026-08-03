@@ -10,7 +10,7 @@
 **Statut :** À faire
 **Assigné à :** null
 **Créée le :** 2026-08-02
-**Sprint :** à planifier — **bloc terrain**
+**Sprint :** **35** — **bloc terrain**  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
 **Service :** `assistant-service` (`:3011`)
 
 ---

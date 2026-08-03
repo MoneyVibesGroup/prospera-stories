@@ -284,6 +284,31 @@ au gate qu'une URL présignée était invisible du navigateur.
 
 ---
 
+## 5-ter. ⚡ Décalage de 9 sprints — décision PO du 2026-08-03
+
+> *« Backend actuel on est sur le 19. Si c'est possible de décaler le S21 au S24 plutôt sur le S30,
+> vu que normalement avant de le débuter il doit avoir les sprints du module fiscalité. »*
+
+Le bloc, écrit et slotté le 2026-08-02 en backend **S21→S24**, passe en **S30→S33**. L'assistant IA
+suit *(S25 → S34)*, le bloc terrain aussi *(S26 → S35)*. La plage **S21→S29** est **réservée au
+module fiscalité** — `reserved_sprints` dans `sprint-status.yaml`.
+
+| | |
+|---|---|
+| **Ce qui est réservé** | **Module 3 `fiscal-service`** — la **télédéclaration** et le dépôt de la DSF à l'OTR, tels que le cadrage du 2026-07-12 les a re-scopés |
+| ⚠️ **À ne pas confondre** | Le **moteur fiscal** (`STORY-091→095`, S19) et le **conseil fiscal** (`STORY-096→098/100`, S20) sont le **calcul**, appartiennent à l'Atelier Balance et sont **déjà planifiés**. Ce qui est réservé, c'est ce qui reste **une fois le calcul remonté dans l'Atelier** |
+| ⚠️ **Ce que la réserve n'est pas** | **Aucune story, aucun PRD, aucune estimation.** Neuf sprints (≈ 18 semaines) sont posés sur un périmètre **jamais chiffré** — le nombre 9 vient de la date cible, pas d'un découpage |
+
+> ⚡ **La bonne nouvelle, et il faut la dire aussi :** aucune story du bloc distributeur ne dépend
+> techniquement d'une story fiscale. Le décalage est une **priorité**, pas une contrainte. Si le
+> fiscal prend moins de neuf sprints, le bloc remonte **sans rien réécrire**.
+
+**À faire avant d'ouvrir la plage réservée :** rédiger le PRD du Module 3 *(re-scopé en 2026, jamais
+écrit)* · vérifier ce que `STORY-091→098` couvre **déjà** avant de redécouper, sinon on planifie deux
+fois le même calcul · chiffrer, puis confirmer ou corriger la largeur de neuf sprints.
+
+---
+
 ## 6. L'ordre de marche
 
 | Étape | Contenu | Pts | Ce qu'on peut montrer à la fin |

@@ -12,7 +12,7 @@
 **Statut :** À faire
 **Assigné à :** null
 **Créée le :** 2026-08-02
-**Sprint :** à planifier — **incrément 3**
+**Sprint :** **33** — **incrément 3**  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
 **Service :** `paiement-service` (`:3005`)
 **Couvre :** FR-P42, FR-P43 · NFR-1c
 

@@ -10,7 +10,7 @@
 **Statut :** À faire
 **Assigné à :** null
 **Créée le :** 2026-08-02
-**Sprint :** à planifier — **socle distributeur, vague 0**
+**Sprint :** **30** — **socle distributeur, vague 0**  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
 **Service :** `auth-service` (`:3001`)
 **Couvre :** demande PO du 2026-08-02
 
