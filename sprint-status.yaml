@@ -1926,8 +1926,8 @@ sprints:
         epic: "EPIC-023"
         points: 5
         service: "balance-service"
-        status: "not_started"  # consomme paquet fiscal (STORY-078). ENRICHIT (ne bloque pas) la section DSF fiscale du bilan-service : EPIC-011 (S12) rend la liasse à partir du mapping de balance et fonctionne SANS ce moteur ; le calcul fiscal détaillé est un apport EXTENDED (marché PME), branché quand il est prêt → pas de dépendance arrière S18→S12
-        assigned_to: null
+        status: "in_progress"  # 2026-08-03 démarrée (MNV-091). Consomme paquet fiscal (STORY-078). ENRICHIT (ne bloque pas) la section DSF fiscale du bilan-service : EPIC-011 (S12) rend la liasse à partir du mapping de balance et fonctionne SANS ce moteur ; le calcul fiscal détaillé est un apport EXTENDED (marché PME), branché quand il est prêt → pas de dépendance arrière S18→S12
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-092"
         title: "Liquidation IS = max(MFP, IS) + 4 acomptes + crédits d'impôt (paquet Togo) — FR-A19"
         epic: "EPIC-023"
