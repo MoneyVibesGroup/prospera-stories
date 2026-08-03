@@ -265,6 +265,49 @@ moteur travaille en **unités mineures** (× 100). L'exonération de MFP (`exone
 - **2026-08-03 — `in_progress`** : cadrage figé (décisions **D-092-1** à **D-092-12** ci-dessus), branches
   `MNV-092` ouvertes sur `prospera-stories` (base `main`) et `balance-service` (base `dev`).
 
+- **2026-08-03 — développement terminé.** `LiquidationService` + moteur pur `liquidation.regles.ts`,
+  contrôleur `LiquidationController`, collections `acomptes_provisionnels` et `credits_impot`,
+  `ContexteFiscalService` extrait du moteur de STORY-091 (gel de l'exercice + chargement du paramétrage,
+  partagé plutôt que recopié). Paquet `togo@2026` régénéré (rubrique `liquidation` : grille, types de
+  crédits, traitement de l'excédent) — **checksum `aa0c378d…`**. `ReferentielPackageBalance` gagne
+  `postes` et `tableDePassage`, lus **défensivement**.
+
+- **2026-08-03 — portes de qualité (DoD)** : lint **0 warning** · `nest build` OK ·
+  **2 180 tests unitaires** + **460 e2e** verts · couverture **98.87 / 91.12 / 98.08 / 98.97**
+  (seuils 65/90/90/90).
+
+- **2026-08-03 — mutation-tests : 17 mutations, 17 rouges.** Un test qu'un code bugué franchit est une
+  fausse assurance ; chaque critère protecteur a été cassé volontairement, vérifié rouge, puis restauré :
+  plancher MFP supprimé · égalité IS/MFP annoncée « MFP » · IS négatif autorisé · relecture de date
+  retirée (`31-06` roulée au 1ᵉʳ juillet) · poste CA résolu sans exiger de table de passage (deux
+  homonymes) · premier préfixe au lieu du plus long (double comptage du CA) · versement partiel compté
+  comme retard · crédit sans case rangé d'office dans un poste · taux manquant remplacé par `0` ·
+  CA non sourçable remplacé par `0` · échéance non validée contre le paquet · type de crédit non validé ·
+  gel retiré à l'enregistrement · gel contrôlé sur l'exercice **du client** au lieu du document ·
+  404 hors organisation remplacé par une suppression silencieuse · **récursion N−1 rétablie** (la suite
+  meurt en OOM) · `acomptes/:id` renommé sur le segment de STORY-091 (collision de routes).
+
+- **2026-08-03 — vérification docker (stack neuve, `down -v`).** `mongo` + `kafka` + `redis` +
+  `auth-service` + `balance-service`, organisation créée sur l'IdP, read-models KYC/entitlement semés,
+  balance 2026 réelle (CA `701` = 48 000 000, charges `601`, résultat `13`).
+
+  | Contrôle | Résultat mesuré |
+  |---|---|
+  | CA **sourcé du référentiel réel** | poste `XB` / `COMPTE_RESULTAT` → comptes `701`…`707`, montant `4 800 000 000` (unités mineures) |
+  | Taux **du paquet réel** | `tauxIs 0.27`, `tauxMfp 0.01`, checksum `aa0c378d…` publié dans la réponse |
+  | Scénario nominal | IS `140 265 000` > MFP `48 000 000` ⇒ impôt dû **`140 265 000`**, `baseRetenue: IS`, solde **`15 265 000` `A_PAYER`** (= 152 650 XOF, exactement le flux de la story) |
+  | ⚠️ **Cas déficitaire** (balance v2, résultat `−80 000 000`) | IS **`0`**, MFP **`48 000 000` DUE**, impôt dû **`48 000 000` — pas zéro**, `baseRetenue: MFP`, acomptes `120 000 000` ⇒ **`CREDIT` de `77 000 000`** |
+  | Grille des 12 postes | `A`→`L` remplis, **libellés du référentiel** (`Impôt dû (max D: F)`…), `B`/`H`/`L` en `nonCalcule` + `HORS_PERIMETRE_092`, `K` = `G − crédits` |
+  | Persistance réelle (`mongosh`) | `acomptes_provisionnels` : **4 documents**, `orgId`/`exercice`/`parUserId`/`pieceRef` renseignés, Σ = `120 000 000` · `credits_impot` : **1 document** justifié · index `(orgId, exercice.debut, exercice.fin)` présents sur les deux |
+  | Refus **sans orphelin** | `15-03` ⇒ **400 `ECHEANCE_INCONNUE`** · type inventé ⇒ **400 `TYPE_CREDIT_INCONNU`** · après les deux refus : toujours **4 acomptes / 1 crédit**, aucun document parasite |
+  | Invariants en base | aucun acompte sans `orgId`, sans exercice ou de montant ≤ 0 · aucun crédit sans justification · **aucune échéance hors calendrier** · **aucun type hors paquet** |
+  | Immutabilité (balance `VALIDÉE`) | `POST /acomptes` **409** · `POST /credits` **409** · `DELETE /acomptes/:id` **409 `BALANCE_VALIDEE_IMMUABLE`** · `GET /liquidation` **200** (lecture ouverte) · documents inchangés |
+  | Isolation inter-organisations | l'org B supprimant un acompte de l'org A ⇒ **404 `ACOMPTE_INTROUVABLE`** (jamais 403), document **intact** ; son calendrier voit `totalVerse: 0` |
+
+  ⚠️ Le théorique d'acompte sort à `null` avec `motifTheorique: EXERCICE_PRECEDENT_NON_LIQUIDABLE`
+  (aucune balance 2025 dans cette stack) — conforme à **D-092-8** : jamais `0`, qui se lirait
+  « rien à verser ».
+
 ---
 
 **Status:** in_progress
