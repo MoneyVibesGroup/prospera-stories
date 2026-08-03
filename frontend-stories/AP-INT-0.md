@@ -157,6 +157,127 @@ Conséquence à vérifier avant de planifier quoi que ce soit :
 
 ---
 
+## ✅ RÉSULTAT DE L'EXÉCUTION — 2026-08-03
+
+### Les trois bloqueurs : levés
+
+| # | Bloqueur | Ce qui a été fait |
+|:--:|---|---|
+| 1 | Port :3000 partagé avec l'expert-comptable | `dev`/`start` → `-p 3110` ; `playwright.config.ts` `baseURL` **et** `webServer.url` → `:3110`. Attribution figée : **:3000** EC · **:3100** app cliente · **:3110** console |
+| 2 | Origine console absente de CORS | `CORS_ALLOWED_ORIGINS` du compose passe à `http://localhost:3100,http://localhost:3110` sur les **cinq** services. ⚠️ Piège consigné : la variable est **partagée**, la renseigner **remplace** le défaut — en fournir une seule ouvrirait une application **en fermant l'autre**. Vérifié dans le conteneur : `printenv CORS_ALLOWED_ORIGINS` → les deux origines |
+| 3 | `gen:api` sans catalogue | `catalog` ajouté ; **`ec` retiré** (aucun écran de la console n'appelle l'expert-comptable — le générer produisait un fichier que personne n'importe). `NEXT_PUBLIC_EC_URL` reste requis par `env.ts`, le retirer est un autre changement |
+
+**Types générés** contre le stack docker rebâti sur `origin/dev` *(auth `4e6d4f7`, kyc `8dbe43a`, catalog `74b2da8`, BFF `d18a2d3`)* : `auth.ts` (30 chemins), `kyc.ts` (9), `catalog.ts` (17).
+
+### ⚖️ Arbitrage BFF — **le BFF est le chemin**
+
+**Décision : la console passe par `prospera-admin-panel-service` (:3010), pas en direct-par-service.**
+
+L'argument décisif est **AP-02**, et il est technique, pas esthétique :
+
+> Sa liste a besoin de trois sources — `identityStatus` (auth), `kycStatus` (kyc), `activeEntitlements` (catalog). **Une jointure à trois services ne se pagine pas côté client.** Pour afficher la page 2 filtrée par statut KYC, il faudrait charger *toutes* les organisations, *tous* les dossiers KYC et *tous* les entitlements dans le navigateur, puis paginer le résultat — et `total` serait faux. Vérifié : `GET /admin/organizations` d'auth-service ne porte **ni `kycStatus` ni `activeEntitlements`** (`OrganizationAdminDto` = `id, name, slug, phone?, country?, address?, status, memberCount`), et son filtre `status` porte sur l'**identité** (`ACTIVE|SUSPENDED`), **pas** sur le KYC.
+
+Le BFF, lui, sert exactement le besoin — vérifié dans ses DTO :
+- `PaginatedAdminOrgsDto { items, total, page, limit, sources }`
+- `AdminOrgListItemDto { orgId, name, slug, country?, identityStatus, kycStatus?, activeEntitlementsCount? }`
+- ⚡ `AggregateSourcesDto { kyc, entitlements }` — **la dégradation par source, déjà calculée côté serveur.** C'est l'AC3 d'AP-02, que la console a réimplémenté en `Promise.allSettled` côté client.
+
+**Conséquence assumée :** cet arbitrage **sauve** les cinq stories backend construites sur le BFF (`STORY-047`, `048`, `106`, `107`, `143`), qui étaient en passe de n'avoir aucun consommateur. `STORY-107` (file KYC) est **confirmée pertinente**, contrairement à ce que cette story supposait au §Question d'architecture.
+
+### ⛔ Mais le BFF n'est pas empruntable aujourd'hui — `STORY-173` créée
+
+> ⚠️ **Renumérotée.** Cette story est née sous le n° **172**, déjà pris en parallèle par la série
+> `balance-service` poussée sur `origin/main` (comptes de paramétrage & rapprochement bancaire,
+> `done`). **`origin/main` fait foi** — même règle qu'aux n° 145/146/147 le 2026-07-31. Les commits
+> de code et la branche `MNV-172` du dépôt `admin-panel` citent encore le numéro d'origine.
+
+> **`grep -i cors` sur tout `src/` de `prospera-admin-panel-service@origin/dev` : ZÉRO occurrence.**
+> Pas d'`enableCors` dans `main.ts` (helmet, préfixe, versioning, pipes — rien d'autre), et **aucune
+> variable `CORS_ALLOWED_ORIGINS` dans son entrée de compose**, alors que les cinq autres services
+> l'ont depuis `STORY-109`.
+
+**Le BFF n'a jamais été appelé par un navigateur — et son code le prouve.** Ce n'est pas une
+configuration oubliée : la capacité n'existe pas. ⇒ **`STORY-173`** (backend, 3 pts) — miroir de
+`STORY-109` pour `:3010`.
+
+**Preuve empirique** — vrai préflight `OPTIONS` depuis l'origine de la console, contre le stack docker :
+
+```
+OPTIONS <route>  Origin: http://localhost:3110
+                 Access-Control-Request-Method: GET
+                 Access-Control-Request-Headers: authorization
+
+auth-service :3001  →  Access-Control-Allow-Origin: http://localhost:3110   ✅
+kyc-service  :3002  →  Access-Control-Allow-Origin: http://localhost:3110   ✅
+catalog      :3003  →  Access-Control-Allow-Origin: http://localhost:3110   ✅
+BFF-admin    :3010  →  ⛔ AUCUN en-tête Access-Control-Allow-Origin
+```
+
+Ce préflight **est** ce que le navigateur envoie : un `OPTIONS` porteur d'`Origin` et
+d'`Access-Control-Request-*`. Le bloqueur nº2 est donc **prouvé levé** sur les trois services, et
+`STORY-173` **prouvée nécessaire** — pas seulement déduite d'une lecture de code.
+
+#### ⚡ L'allowlist est une **liste stricte**, pas une plage de ports
+
+Question posée en revue : *« l'allowlist n'est-elle pas une plage d'adresses ? »* — si c'était le
+cas, l'ajout au compose aurait été inutile. **Vérifié dans les deux sens, la réponse est non.**
+
+*Dans le code* — `auth-service` et `balance-service`, à l'identique :
+
+```ts
+allowedOrigins: (process.env.CORS_ALLOWED_ORIGINS ?? '')
+  .split(',').map((o) => o.trim()).filter(Boolean)
+```
+
+…puis passé tel quel à `enableCors({ origin })`. **Aucune logique de plage nulle part.**
+
+*À l'exécution* — préflights sur `:3001` :
+
+| Origine | Résultat |
+|---|---|
+| `http://localhost:3110` *(ajoutée par cette story)* | ✅ acceptée |
+| `http://localhost:3115` · `:3120` · `:3121` · `:3099` | ⛔ **toutes refusées** |
+
+⇒ La modification du compose **était nécessaire**. Et le corollaire vaut pour la suite du programme :
+**chaque nouvelle application doit être ajoutée explicitement** — l'app distributeur (`DI-01`) et la
+page publique de paiement (`PY-00`) y passeront aussi. C'est déjà écrit dans `DI-01`.
+
+⚠️ **Ce que ça change pour cette story :** AP-02 ne peut pas être branchée tant que `STORY-173` n'est
+pas livrée. Les trois autres écrans sont **mono-service** et n'ont pas ce problème.
+
+### 🔴 Écarts de contrat relevés — confrontés aux specs vivantes, aucun contourné
+
+| # | Écran | Type écrit à la main | Contrat réel | Verdict |
+|:--:|---|---|---|---|
+| 1 | AP-02 | `Vertical = "Distribution" \| "Finance" \| "Retail" \| "Logistique" \| "Services"` | ⛔ **le champ n'existe nulle part** — ni auth, ni catalog, ni BFF | ⚡ **Le plus grave.** Cinq valeurs **inventées**, qui pilotent un filtre ET la teinte du monogramme. Et elles **contredisent les vraies verticales du produit** (`cabinet`/`distributeur`/`imf-sfd`/`assurance-cima`). ⇒ **`STORY-171`** livre le champ ; la taxonomie de la console est à **remplacer**, pas à mapper |
+| 2 | AP-02 | `pageSize` | `limit` | 🪤 **Exactement le piège de FE-INT-1, rejoué à l'identique** |
+| 3 | AP-02 | `search` | `q` | Renommage |
+| 4 | AP-02 | filtre `kycStatuses[]` | ⛔ **aucun filtre serveur par KYC** (`status` = identité) | Le filtre principal de l'écran n'est pas servi ⇒ demande backend à formuler |
+| 5 | AP-02 | `OrgSummary.activeEntitlements`, `.kycStatus` | absents d'`OrganizationAdminDto` | Servis **uniquement** par le BFF ⇒ argument nº1 de l'arbitrage |
+| 6 | AP-02 | `OrgIdentity.registrationId`, `.memberSince` | absents d'`OrganizationDetailDto` | Inventés |
+| 7 | AP-02 | `OrgMember { id, name, role }` | `OrganizationMemberDto { id, email, firstName, lastName, role, status, lastLoginAt? }` | `name` n'existe pas (deux champs) |
+| 8 | AP-03 | `KycStatus = PENDING \| APPROVED \| REJECTED \| NOT_STARTED` | `PENDING_DOCUMENTS \| UNDER_REVIEW \| APPROVED \| REJECTED` | ⚡ **Deux valeurs sur quatre divergent**, et la console **ignore `UNDER_REVIEW`** — l'état « en cours de revue », dans une console **de revue** |
+| 9 | AP-03 | file avec raison sociale | `AdminKycReviewItemDto { orgId, status, submittedAt?, reviewedAt?, updatedAt }` — **pas de nom** | La jointure est réelle ⇒ confirme la valeur du BFF |
+| 10 | AP-05 | `Entitlement { id, name, referential, status }` | `EntitlementResponseDto { organizationId, moduleCode, versionCode, referentiel?, config, status, source?, grantedBy?, updatedAt? }` | `id`/`name` n'existent pas ; `referential` s'écrit **`referentiel`** (français) dans l'API |
+
+> ⚡ **Ce que ces dix écarts disent.** Aucun n'est un détail de nommage isolé : `vertical` est une
+> **fiction complète**, le filtre KYC d'AP-02 **n'a pas de serveur**, et AP-03 ignore l'état central
+> de son propre métier. Les cinq écrans ont été écrits contre des contrats **imaginés** — ce que le
+> découplage propre (un fichier de bascule par feature) a rendu confortable, et donc invisible.
+> C'est très exactement ce que cette story existait pour découvrir, et la raison de la faire **avant**
+> AP-06→AP-09.
+
+### État à la fin de cette passe
+
+| Fait | Reste |
+|---|---|
+| ✅ 3 bloqueurs levés · types générés et committés · arbitrage BFF rendu et argumenté · 10 écarts tracés · `STORY-171` et `STORY-173` créées | ⛔ **Bascule des 4 clients non faite.** Elle dépend de l'arbitrage qui vient d'être rendu : les clients doivent viser le **BFF**, dont la story de déblocage (`STORY-173`) n'est pas livrée. Brancher maintenant en direct-par-service reviendrait à coder contre le chemin qu'on vient d'écarter — et à le retrofiter une seconde fois |
+
+⇒ **Cette story reste ouverte.** Elle a fait ce qui devait précéder le code : lever les bloqueurs,
+trancher l'architecture, et confronter les contrats. Le câblage s'ouvre à la livraison de `STORY-173`.
+
+---
+
 ## Historique
 
 - **2026-07-31** — créée. Elle formalise le constat posé le jour même en réancrant le tracker sur le code (v3.3.0) : les cinq écrans de la console sont mergés dans `dev` (`111e3b1`) et aucun ne parle à un backend. Aucune story ne couvrait ce passage, alors que son équivalent client (FE-INT-0→4) avait été jugé indispensable au point de suspendre le programme frontend.
