@@ -4,8 +4,9 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A19 · `rapport-bilan-logique-metier-2026-07-12.md` §15 (CGI : **IS 27 %** art. 113 · **MFP 1 % du CA HT** art. 120 · **4 acomptes** art. 114) · `referentiels/paquet-fiscal-togo-2026.json` · GUIDEF section « Liquidation IS » (12 postes)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 18 (EXTENDED)
 **Service :** `balance-service` (:3007)
@@ -201,6 +202,35 @@ it('entreprise DÉFICITAIRE : IS = 0 mais MFP DUE', async () => {
 
 ---
 
+## Décisions de cadrage (D-092-*)
+
+Prises avant d'écrire une ligne, après lecture du paquet `togo@2026`, du référentiel
+`syscohada-revise@2.1` et du moteur de résultat fiscal (STORY-091).
+
+| # | Décision | Pourquoi |
+|---|---|---|
+| **D-092-1** | La liquidation vit dans `FiscalModule`, en **service séparé** (`LiquidationService`) + moteur **pur** (`liquidation.regles.ts`), contrôleur dédié `LiquidationController` (chemins `fiscal/acomptes`, `fiscal/credits`, `fiscal/liquidation` — aucune collision avec les chemins de STORY-091). | Même agrégat fiscal, mais un moteur pur séparé reste **mutable-testable** et **rejouable** par STORY-096. |
+| **D-092-2** | `impotDu = max(IS ; MFP)` ; `baseRetenue = 'MFP'` **seulement si `mfp > is`** (égalité ⇒ `'IS'`). | Le plancher est une **borne inférieure**, pas une alternative. À égalité, l'impôt est bien celui de droit commun. |
+| **D-092-3** | Taux **lus du paquet** (`is.taux`, `minimumForfaitairePerception.taux`). Taux absent ou aberrant ⇒ **409 `TAUX_NON_PACKAGE`**, jamais `0`. | Un taux manquant traité comme `0` **sous-impose en silence** — le redressement que la story prévient. Sur-imposer se corrige, sous-imposer se paie. |
+| **D-092-4** | **CA HT sourcé du référentiel**, jamais en dur : poste dont le libellé normalisé commence par « chiffre d'affaires » **et** qui possède une entrée de table de passage (⇒ `XB` = `TA+TB+TC+TD` = comptes `701`…`707`), opérandes dépliées **récursivement** avec leur signe, puis Σ des soldes **nets créditeurs** de la balance. Non résoluble (ex. `sfd-bceao@2.0`) ⇒ **409 `CA_NON_SOURCE`**. | Même discipline que D-091-13 (le compte `13` est résolu, pas écrit). Écrire `70` en dur marcherait pour SYSCOHADA et **mentirait** pour un plan bancaire. Le nettage par ligne fait tomber juste les `709` (RRR accordés), débiteurs. |
+| **D-092-5** | `ReferentielPackageBalance` gagne `postes` et `tableDePassage`, **optionnels et lus défensivement**. | Ce sont les seules données **sourcées** qui portent le CA et les libellés de la liasse. Leur absence dégrade avec un motif — jamais une supposition. |
+| **D-092-6** | La **grille des 12 postes** est publiée par le paquet (`liquidation.etatLiasse` + `liquidation.postes[] = {code, grandeur}`), ses **libellés** viennent du référentiel (état `LIQUIDATION_IS`). Grandeur inconnue du moteur ou non calculée en 092 (`B` marge bloquée, `H` régime dérogatoire, `L` pénalité de retard) ⇒ `nonCalcule: true`, jamais un zéro muet. | Les « 12 postes » ne sont **jamais** écrits en dur (leçon des « 23 postes » de STORY-091). Un nouveau plan de liasse = un nouveau paquet, zéro ligne de code (NFR-A06). |
+| **D-092-7** | **Types de crédits d'impôt publiés par le paquet** (`liquidation.creditsImpot.types[]`), transcription **structurée** de `retenuesSource` (RCM, RSL, RSH, non-résidents, régime dérogatoire) déjà présente en prose. Paquet muet ⇒ **fail-closed**, tout crédit refusé. Type inconnu ⇒ **400**. | Exactement D-091-7 : la règle existait en prose, on la transcrit — on ne la parse pas à la regex, on ne l'invente pas dans le code. |
+| **D-092-8** | **Acomptes** : calendrier `acomptesProvisionnels.echeances` (`"JJ-MM"`) du paquet. Une échéance **invalide** (`31-06`) est **écartée et signalée**, jamais roulée au mois suivant par `Date`. Théorique = `impôt dû N-1 ÷ nombre` (`Math.floor`) ; **N-1 non liquidable ⇒ `theorique: null` + motif**, jamais `0`. `enRetard` = échéance dépassée **et** aucun versement. | `Date.UTC(2026, 5, 31)` vaut le **1ᵉʳ juillet** sans lever d'erreur : une échéance fantôme décale un retard. `theorique: 0` dirait « rien à verser ». |
+| **D-092-9** | La liquidation N-1 utilisée pour le théorique **ne calcule que l'impôt dû** (CA, IS, MFP) — **aucune récursion** sur les acomptes de N-2. | Sinon régression infinie, invisible en unitaire et fatale en production. |
+| **D-092-10** | `GET /fiscal/liquidation` **n'écrit rien** (prolonge D-091-9). | STORY-096 la rejouera sur des scénarios. |
+| **D-092-11** | **Plusieurs versements par échéance** admis (somme), sans index unique ; correction par suppression. | Un acompte réglé en deux virements est un cas courant ; un index unique obligerait à fusionner deux pièces justificatives en une. |
+| **D-092-12** | `echeance` **validée contre le paquet** (400 sinon) ; `montant` positif ; `justification` obligatoire sur un crédit (400 sinon). Écritures **gelées** par exercice clos ou balance validée (409), lecture toujours ouverte. | Un acompte sur une échéance inexistante et un crédit non justifié sont tous deux indéfendables en contrôle. |
+
+**Hors périmètre, tracé comme hook inerte** : les **arrondis légaux** publiés en **prose** par le paquet
+(`is.arrondi` « fraction de bénéfice imposable < 1000 FCFA négligée », `acomptesProvisionnels.calcul`
+« arrondi au millier de franc inférieur ») ne sont **pas** appliqués en 092 — le cadrage ne les demande pas,
+et leur transcription structurée doit tenir compte du fait que le paquet publie des **francs** quand le
+moteur travaille en **unités mineures** (× 100). L'exonération de MFP (`exonerations`, prose) et la
+**marge à taux bloqué** (poste `B`) sont dans le même cas.
+
+---
+
 ## Risques & Mitigation
 
 | Risque | Mitigation |
@@ -230,7 +260,14 @@ it('entreprise DÉFICITAIRE : IS = 0 mais MFP DUE', async () => {
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+- **2026-08-03 — `in_progress`** : cadrage figé (décisions **D-092-1** à **D-092-12** ci-dessus), branches
+  `MNV-092` ouvertes sur `prospera-stories` (base `main`) et `balance-service` (base `dev`).
+
+---
+
+**Status:** in_progress
 **Dependencies:** **STORY-091** (résultat fiscal = base imposable), **STORY-078** (paquet : taux IS/MFP, calendrier d'acomptes, types de crédits), STORY-082/085 (CA HT), STORY-080 (régime `REEL` — sinon **STORY-095**/TPU)
 **Alimente** **STORY-094** (provision d'IS écrite dans la balance), **STORY-096** (simulation — **le plancher MFP change tout le conseil**), `bilan-service` EPIC-011 (section « Liquidation » de la DSF)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A19 · CGI Togo 2026 (IS art. 113 · MFP art. 120 · acomptes art. 114) · GUIDEF « Liquidation IS » (12 postes)
