@@ -4,8 +4,9 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A18 · `rapport-bilan-logique-metier-2026-07-12.md` §12/§15 (section « Résultat fiscal » de la GUIDEF : 23 postes) · `referentiels/paquet-fiscal-togo-2026.json` (codes de réintégration 10-80, codes de déduction 90-170) · CGI Togo 2026
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 18 (EXTENDED)
 **Service :** `balance-service` (:3007)
@@ -203,6 +204,30 @@ async creer(@Body() dto: RetraitementDto, @TenantContext() orgId, @CurrentUser()
 
 ---
 
+## Décisions techniques (cadrage relu contre le code livré — 2026-08-03)
+
+Le cadrage initial datait du 2026-07-12, avant la livraison de STORY-083/085/087/090/145/146/147. Sa
+relecture contre le code réel corrige **trois erreurs de cadrage** (D-091-2, D-091-5, D-091-11) et fixe
+dix décisions.
+
+| # | Décision |
+|---|---|
+| **D-091-1** | **Module `src/modules/fiscal/` à part**, feuille : il importe `BalanceModule` (soldes), `CahiersModule` (lignes de dépenses, **lecture seule**), `ReferentielModule` (paquet fiscal) et `RepriseModule` (exercice CLOS). Aucun des quatre ne l'importe — même montage qu'`AgregationModule` / `RapprochementModule`. |
+| **D-091-2** | ⚠️ **Correction du cadrage : le compte d'articulation est `13`, pas `12x`.** En SYSCOHADA révisé, `12` = **Report à nouveau** (résultat des exercices *antérieurs*) et `13` = **Résultat net de l'exercice**. Confronter le résultat de N au report à nouveau aurait produit un écart **systématiquement faux**, et d'autant plus crédible qu'il aurait été non nul. |
+| **D-091-3** | **Résultat comptable = Σ (soldeCrediteur − soldeDebiteur) sur les classes 6, 7 et 8**, **netté ligne à ligne**. Les classes viennent des règles publiées par le référentiel (`CHARGE: "classe 6/8 (debit)"`, `PRODUIT: "classe 7/8 (credit)"`) : **omettre la classe 8** (HAO, participation des travailleurs, **impôt sur le résultat `89`**) donnerait un résultat *avant* HAO et *avant* impôt, qui ne s'articulerait jamais avec le compte `13`. Netter est obligatoire (STORY-147/172) : sommer les colonnes séparément double les comptes mouvementés des deux côtés. |
+| **D-091-4** | **Agrégation automatique sur `montantImpute`**, jamais sur `montant` — le **piège des charges** (D-083-2, 6ᵉ occurrence) : la charge imputée en classe 6 vaut le **HT** si la TVA est déductible, le **TTC** sinon. Réintégrer le TTC d'une ligne imputée en HT majorerait la base ; l'inverse la minorerait. |
+| **D-091-5** | ⚠️ **Correction du cadrage : une ligne non déductible SANS `codeReintegration` est quand même réintégrée.** `togo@2026` ne publie **aucune** correspondance `motif → code` (D-083-3) : la quasi-totalité des lignes automatiques sortiront **sans code**. Les grouper par code seul les aurait fait disparaître de l'assiette — exactement la « charge non déductible oubliée ⇒ redressement » du tableau des risques. Elles forment donc des postes groupés **par motif**, comptés dans le total, marqués `codeAbsent: true`. |
+| **D-091-6** | **Codes lus du paquet, fail-closed** : `resultatFiscal.reintegrations_codes` / `deductions_codes`. Paquet muet ⇒ **tout** code manuel refusé (400), comme `estCodeReintegrationAdmis` de STORY-083. Les **libellés** ne sont lus que si le paquet les publie (`*_libelles`, additif et absent aujourd'hui) — jamais inventés : nommer `20` « Amendes et pénalités » dans le code serait écrire du fiscal en dur (NFR-A06). |
+| **D-091-7** | **La règle de report déficitaire est STRUCTURÉE DANS LE PAQUET**, pas dans le code. `togo@2026` ne la publie qu'en **prose** (`reglesNotables.reportDeficitaire`) ; parser « dans la limite de 50 % » à la regex serait un taux en dur avec une étape de plus. La source est ajoutée en `resultatFiscal.reportDeficitaire { plafondPourcentageBenefice: 0.5, dureeReportAnnees: null, source: "Art. 101 CGI" }` — **transcription** d'un fait déjà sourcé dans le même artefact, pas un ajout de doctrine. Le paquet fiscal est **produit par `balance-service`** (`scripts/referentiels/build.mjs`, D-078-2 ne vaut que pour les référentiels comptables) : c'est un changement **mono-dépôt**, checksum régénéré et reporté au manifeste. **Règle absente ⇒ aucune imputation** + motif exposé : sur-imposer se corrige, sous-imposer est un redressement. |
+| **D-091-8** | **Imputation FIFO** (déficit d'origine la plus ancienne d'abord), plafonnée à `plafond% × résultat avant déficits` **et** au stock disponible, **et** au bénéfice lui-même. Résultat avant déficits ≤ 0 ⇒ **aucune** imputation : un déficit ne se crée jamais par imputation (AC « jamais pour fabriquer un déficit »). |
+| **D-091-9** | **`GET /resultat-fiscal` n'écrit RIEN** — l'imputation est **calculée, jamais persistée**. Ce n'est pas une commodité : **STORY-096 rejoue ce moteur sur des scénarios** (« et si je provisionnais ? »). Un calcul qui consommerait le stock corromprait les déficits à chaque simulation. Le stock consommé par les exercices antérieurs est donc une donnée **déclarée** (`montantDejaImpute`), pas un effet de bord de lecture ; sa persistance à l'arrêté relève de **STORY-092**. |
+| **D-091-10** | **Immutabilité** : une balance **VALIDÉE** sur l'exercice (toutes sources, socles d'à-nouveaux exclus) fige retraitements **et** déficits ⇒ **409**, patron `BalanceValideeImmuableException` de STORY-082/083. Un exercice **CLOS** (STORY-087) refuse aussi l'écriture ; la **lecture** reste ouverte (D-090-11). |
+| **D-091-11** | ⚠️ **Correction du cadrage : « 23 postes » n'est pas une constante du code.** Le tableau des postes DSF est **dérivé du paquet** — `togo@2026` en publie **17** (12 réintégrations + 5 déductions). Écrire 23 en dur ferait échouer le premier paquet conforme. Le tableau expose **tous** les codes publiés (montant `0` si non alimenté, la grille de la liasse est fixe) **plus** les postes sans code de D-091-5. |
+| **D-091-12** | **`U` de « CRUD » volontairement non implémenté** : un retraitement se **supprime et se ressaisit**. Un `PATCH` réécrirait en silence une décision auditée (`parUserId`, `le`, `justification`) sans historique — la trace d'un retraitement modifié est le sujet de **STORY-097** (défense en contrôle), pas de celle-ci. Périmètre restreint **et déclaré**, jamais élargi. |
+| **D-091-13** | **Articulation `13` fail-closed** : le compte de résultat net est lu (1) de `regles.COMPTE_RESULTAT_NET` si le référentiel le publie, sinon (2) de **l'unique** entrée de classe 1 du plan dont le libellé normalisé commence par `resultat net` — `13` pour `syscohada-revise@2.1`, **rien** pour `sfd-bceao@2.0` (plan bancaire, sans compte de résultat). Zéro ou plusieurs correspondances ⇒ contrôle **non applicable**, motif exposé — jamais un compte choisi au hasard. |
+
+---
+
 ## Risques & Mitigation
 
 | Risque | Mitigation |
@@ -232,7 +257,13 @@ async creer(@Body() dto: RetraitementDto, @TenantContext() orgId, @CurrentUser()
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+- **2026-08-03 — `in_progress`.** Cadrage relu contre le code livré de STORY-078/083/085/087/090/145/146/147 : 13 décisions posées (D-091-1 → D-091-13), dont **trois corrections du cadrage initial** — le compte d'articulation (`13` et non `12x`, D-091-2), les réintégrations sans code fiscal qui restaient hors assiette (D-091-5) et les « 23 postes » écrits en dur (D-091-11). Module `src/modules/fiscal/` à part, feuille.
+
+---
+
+**Status:** in_progress
 **Dependencies:** **STORY-078** (paquet fiscal : codes de retraitement, règles de déficits), **STORY-083** (déductibilité posée à la saisie), **STORY-101** (balance → résultat comptable), STORY-080 (régime `REEL` — sinon voir STORY-095/TPU)
 **Alimente** **STORY-092** (liquidation IS), **STORY-096** (simulation d'optimisation — rejoue ce moteur), `bilan-service` EPIC-011 (rendu des états fiscaux de la DSF)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A18, NFR-A04/A06 · GUIDEF section « Résultat fiscal » (23 postes) · CGI Togo 2026
