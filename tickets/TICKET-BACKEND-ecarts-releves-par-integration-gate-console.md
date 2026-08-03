@@ -13,7 +13,7 @@ L'Integration Gate a relevé **vingt écarts** entre ce que la console supposait
 services servent. La grande majorité se corrige **côté front** — c'est le travail d'AP-INT-0, et il
 est fait. Ce ticket ne porte que **ce que le front ne peut pas réparer** : ce qui manque au contrat.
 
-Deux d'entre eux sont déjà devenus des stories (`STORY-171`, `STORY-172`) ; ils figurent ici pour que
+Deux d'entre eux sont déjà devenus des stories (`STORY-171`, `STORY-173`) ; ils figurent ici pour que
 la liste soit lisible d'un bloc.
 
 ---
@@ -23,7 +23,7 @@ la liste soit lisible d'un bloc.
 | # | Manque | Story | Sprint |
 |:--:|---|---|:--:|
 | 1 | ⚡ `Organization.vertical` **n'existe nulle part** — ni auth-service, ni catalog, ni BFF. Le mot traverse un an de décisions sans être une donnée | **`STORY-171`** *(5 pts)* | 30 |
-| 2 | ⚡ Le **BFF admin n'a AUCUN CORS** — zéro occurrence de `cors` dans son `src/`, aucune variable dans son compose | **`STORY-172`** *(3 pts)* | 20 |
+| 2 | ⚡ Le **BFF admin n'a AUCUN CORS** — zéro occurrence de `cors` dans son `src/`, aucune variable dans son compose | **`STORY-173`** *(3 pts)* ⚠️ *née sous le n° 172, renumérotée : le 172 était pris en parallèle par `balance-service` — `origin/main` fait foi* | 20 |
 
 ---
 
