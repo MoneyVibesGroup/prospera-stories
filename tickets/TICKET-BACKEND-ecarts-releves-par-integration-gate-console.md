@@ -9,7 +9,7 @@
 
 ## Pourquoi un ticket et pas des stories directes
 
-L'Integration Gate a relevé **dix-huit écarts** entre ce que la console supposait et ce que les
+L'Integration Gate a relevé **vingt écarts** entre ce que la console supposait et ce que les
 services servent. La grande majorité se corrige **côté front** — c'est le travail d'AP-INT-0, et il
 est fait. Ce ticket ne porte que **ce que le front ne peut pas réparer** : ce qui manque au contrat.
 
@@ -103,6 +103,37 @@ affiche « Octroyé le … ».
 mars »**. C'est faux, et ce n'est pas réparable côté front : l'information n'existe pas.
 
 > **Demande :** ajouter `grantedAt`, distinct d'`updatedAt`.
+
+### 🟠 F. L'administrateur plateforme n'est **semé par personne**
+
+**Service :** `auth-service` · **Cible réelle :** `OPS` · **Découvert par :** AP-01, au moment de se connecter
+
+`seedPlatformAdmin` est un **script autonome** (`npm run seed:admin`), pas un hook de démarrage.
+Aucun service ne l'appelle au boot. Vérifié : sur une base contenant **49 utilisateurs** issus de
+campagnes de tests, `admin@prospera.local` **n'existait pas** — alors que `PLATFORM_ADMIN_EMAIL` et
+`PLATFORM_ADMIN_PASSWORD` sont renseignés dans le compose depuis des mois.
+
+**Conséquence :** une stack fraîche démarre sans aucun administrateur plateforme. **La console est
+donc inutilisable à l'installation**, et rien ne le dit — l'écran de login répond simplement
+« identifiants invalides ».
+
+> **Demande :** appeler le seed au démarrage *(idempotent, il l'est déjà : il fait un `upsert` et
+> journalise « créé » ou « mis à jour »)*, ou à défaut le documenter dans le README du compose.
+> Contournement immédiat, écrit en tête du fichier e2e :
+> `docker compose exec auth-service node dist/seeds/seed-platform-admin.js`
+
+### 🟡 G. `/auth/login` limite le débit — à savoir avant d'écrire des tests
+
+**Service :** `auth-service` · **Découvert par :** la suite e2e d'AP-INT-0
+
+Une première version des e2e ouvrait une session **par test** et récoltait des **429**. Ce n'est pas
+un défaut — la limitation est souhaitable — mais elle produit des échecs qui **ressemblent à
+« mauvais mot de passe »**, et font suspecter le seed, puis la configuration, puis le backend, dans
+cet ordre.
+
+Traité côté test *(jeton mémoïsé, parcours navigateur sérialisés, message d'échec qui distingue
+explicitement le 429)*. **Aucune action backend demandée** — c'est consigné pour que la prochaine
+suite e2e n'y repasse pas trois quarts d'heure.
 
 ---
 
