@@ -219,3 +219,75 @@ async autreTaxe(@Body() dto: AutreTaxeDto, @TenantContext() orgId, @CurrentUser(
 **Dependencies:** **STORY-078** (taux TVA, types de taxes, périodicité), **STORY-082** (TVA collectée), **STORY-083** (TVA déductible **et non déductible**), STORY-080 (assujettissement)
 **Alimente** **STORY-094** (écriture des `44x`/`64x` dans la balance), **STORY-091** (taxes non déductibles → réintégration), `bilan-service` EPIC-011 (état TVA de la DSF)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A20 · CGI Togo 2026 (TVA 18 %, art. 195)
+
+---
+
+## Progress Tracking
+
+**Statut : `review` → `done`** (MNV-093, 2026-08-04)
+
+### Décisions de conception
+
+| # | Décision | Pourquoi |
+|---|---|---|
+| **D-093-1** | Le paquet `togo@2026` gagne `tva.declaration` (périodicités, report du crédit, comptes) et une rubrique `taxes` (types + soupape). Régénéré, checksum **`08d4ad81`** | **Rupture assumée avec 091/092** : ces deux blocs ne transcrivent **pas** une prose déjà présente — la périodicité de dépôt et le régime du crédit n'étaient publiés **nulle part**. Ils sortent donc marqués `A_CONFIRMER` et alimentent `aFaire`, plutôt que d'être devinés dans le moteur où ils auraient été invisibles (NFR-A06) |
+| **D-093-2** | `GET /fiscal/tva` **n'écrit rien** : le chaînage du crédit est rejoué depuis la première période à chaque appel | Prolonge D-091-9 / D-092-10. Consommer le stock en base le corromprait à chaque rechargement, et STORY-096 doit pouvoir rejouer |
+| **D-093-3** | Le crédit **hérité de l'exercice précédent** est **déclaré** (`credits_tva_anterieurs`, index unique par exercice) | Même situation que les déficits reportables de 091 : il vient d'exercices que l'outil n'a jamais vus. Le recalculer en remontant les exercices ouvrirait la régression infinie que D-092-9 interdit |
+| **D-093-4** | Le taux du paquet **contrôle**, il ne recalcule pas : `coherenceTaux` publie la collectée théorique et l'écart | La TVA est ventilée **à la saisie** (082/083) et le comptable a pu la corriger. Recalculer écraserait sa correction ; ne rien faire du taux en ferait une donnée morte et l'exigence « taux du paquet » un vœu invérifiable |
+| **D-093-5** | **Deux portes séparées** : `POST /taxes` (le paquet donne compte + déductibilité) et `POST /taxes/autres` (le client donne tout, sous 4 exigences) | Fondues, un client postant un `code` connu **avec** son propre compte aurait silencieusement choisi lequel fait foi |
+| **D-093-6** | RSL/RSH sont publiées en taxes **et** signalées `aussiCreditImpot` | Le paquet les publie déjà comme crédits d'impôt (092) : les enregistrer en charge **et** les déclarer en crédit les compterait **deux fois**. Signalé, non bloqué — c'est le cabinet qui sait si la retenue a été subie ou supportée |
+| **D-093-7** | `compteComptable` et `deductible` sont **persistés**, pas relus du paquet | Un paquet republié ne doit pas changer rétroactivement la déductibilité d'une charge déjà entrée dans une assiette déposée. Le paquet **valide à l'écriture**, le document fait foi ensuite |
+| **D-093-8** | Les montants sont **exposés** (`ecritures[]`), jamais écrits en balance | Hook inerte de **STORY-094**. Un compte non publié ou hors plan sort **sans compte** + motif, jamais une case au hasard |
+
+**Écart documenté au cadrage** : la story décrivait `periode` dans le corps d'une taxe ; l'implémentation porte une **`date` d'exigibilité** validée dans l'exercice. Une date dit strictement la même chose en mieux (c'est ce dont la balance a besoin) et évite un second axe temporel à valider contre une périodicité TVA qui ne gouverne pas la patente.
+
+### Portes de qualité
+
+- Lint **0 warning** · build OK
+- **2 338 tests unitaires** verts (134 suites) — couverture **98.93 / 91.32 / 98.22 / 99.04** (seuils 65/90/90/90)
+- **498 e2e** verts (22 suites), dont `tva-taxes.e2e-spec.ts` (37 tests) sur les **artefacts réels** `togo@2026` + `syscohada-revise@2.1`
+- Non-régression : STORY-082/083 (ventilation à la saisie), 091 (résultat fiscal), 092 (liquidation) verts
+- ⚠️ Un run e2e complet a produit une fois un `Parse Error: Expected HTTP/` sur `fiscal.e2e-spec.ts` — **flake connu** de la suite (non reproductible sur 3 runs consécutifs, suite verte seule). Non introduit par cette story.
+
+### Mutation-tests (11 mutations, toutes rouges puis restaurées)
+
+| # | Mutation | Effet attendu | Résultat |
+|---|---|---|---|
+| M1 | `tva.deductible === true` → `!== false` | la TVA d'une charge **sans marquage** serait déduite | 🔴 1 test |
+| M2 | exonérées non exclues de la collectée | dette envers l'État **majorée** | 🔴 1 test |
+| M3 | stock de crédit réinitialisé à chaque période | crédit **dupliqué** période après période | 🔴 4 tests |
+| M4 | `TVA_DUE` écrit la due **brute** au lieu du « à payer » | crédit antérieur payé **deux fois** | 🔴 3 tests |
+| M5 | garde de déductibilité des taxes inversée | les taxes **déductibles** seraient réintégrées | 🔴 9 tests |
+| M6 | compte « Autres » non validé contre le plan | la soupape devient une **poubelle** | 🔴 2 tests |
+| M7 | déductibilité « Autres » forcée à `true` | base imposable **minorée** en silence | 🔴 1 test |
+| M8 | déductibilité d'une taxe cataloguée non lue du paquet | une pénalité fiscale deviendrait déductible | 🔴 1 test |
+| M9 | montant nul accepté au lieu d'un refus | taxe enregistrée qui ne pèse rien | 🔴 1 test |
+| M10 | plafond de périodes rendu inopérant | allocation non bornée (CWE-770) | 🔴 1 test |
+| M11 | `taxes/:id` déclarée **avant** `taxes/autres` | Nest capterait « autres » comme identifiant | 🔴 1 test |
+
+### Vérification docker (stack réelle, `mongosh` direct)
+
+Organisation `6a71426794d25a1666204f50`, régime **RÉEL** (assujettie TVA), paquet `togo@2026` checksum `08d4ad81`.
+
+**Le scénario de la story, sur données réellement persistées** :
+
+| Grandeur | Attendu | Obtenu | Source tracée |
+|---|---|---|---|
+| TVA collectée | 720 000 | **720 000** | 1 ligne — les **2 ventes exonérées** (180 000 + 90 000) **exclues** ✔ |
+| TVA déductible | 410 000 | **410 000** | 1 ligne de dépense marquée `deductible: true` |
+| **TVA écartée** | 65 000 | **65 000** | ⚠️ TVA de la charge **non déductible** — affichée, **jamais** déduite |
+| TVA due | 310 000 | **310 000** | `720 000 − 410 000` |
+| Crédit antérieur imputé | 90 000 | **90 000** | stock déclaré, imputé sur mars |
+| **À payer** | **220 000** | **220 000** | `310 000 − 90 000`, crédit restant 0 |
+
+- **Taux 18 %** et comptes **443 / 445 / 4441** lus du **paquet réel** (`coherenceTaux.tauxStandard = 0.18`, écart 0, aucun avertissement).
+- **`credits_tva_anterieurs`** : 1 document ; la **seconde** déclaration du même exercice → **409**, index unique `(orgId, exercice.debut, exercice.fin)` **confirmé `unique: true` en base**.
+- **`taxes_fiscales`** : 4 documents (patente 641, RSL 641 + signal `aussiCreditImpot`, taxe communale 646 `horsReferentiel: true`, pénalité 647 non déductible). Registre : total 225 000, écritures agrégées **par compte** (641 : 195 000 · 646 : 30 000).
+- **Aucun document orphelin après échec** : les 3 refus (justification manquante, compte `999999` hors plan, code `TAXE_SALUBRITE` inconnu) n'ont **rien** écrit — le compte en base correspond exactement aux créations réussies. `sans orgId = 0`, `sans exercice = 0`, `sans justification = 0`, `sans compte = 0`.
+- **Couture STORY-091 vérifiée en réel** : `GET /fiscal/resultat-fiscal` remonte deux postes automatiques — la pénalité (45 000, code `20`, `origine: AUTO_TAXES`, `taxesSources` pointant le vrai document) **et** la charge non déductible du cahier (365 000 **TTC**, piège D-083-2 respecté). Résultat comptable 5 195 000 → **résultat fiscal 5 605 000**.
+- Collections en **snake_case explicite** : `taxes_fiscales`, `credits_tva_anterieurs` (le pluriel Mongoose aurait donné `taxefiscales` / `credittvaanterieurs`).
+
+### Hooks inertes posés
+
+- `ecritures[]` sur `GET /fiscal/tva` et `GET /fiscal/taxes` — **STORY-094** les consommera pour écrire les `44x`/`64x` en balance. Rien n'est écrit ici.
+- Le moteur lit `periodicites[].moisParPeriode` sans connaître aucun code : publier une **trimestrielle** dans le paquet suffira, **zéro ligne de code**.
