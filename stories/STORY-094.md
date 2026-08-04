@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 3
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 19
@@ -399,9 +399,102 @@ amorcées, référentiel `syscohada-revise@2.1`, profil `REEL`/`SN`. Balance de 
 `orgkycstatuses`/`orgbalanceentitlements` (exception au snake_case, collections Mongoose par défaut),
 `profils_societe`.
 
+### Revue de code — 3 constats, tous corrigés
+
+**F-094-3 — BLOQUANT · `D-094-8` : la base reprend TOUTE la classe `89x`, l'écriture ne touche que `891`**
+
+`resoudreCompteImpotResultat` dérive **`89`** du plan (`syscohada-revise@2.1` ne publie que la racine), donc
+`calculerChargeImpotComptabilisee` capte `891`, **`892`** (« rappel d'impôts sur résultats antérieurs »),
+`895`… Or le paquet publie `provisions.comptes.chargeImpot = '891'`. Les deux grandeurs étaient **conflées
+sous une seule variable**, et l'écriture nettait donc un **rappel d'impôt antérieur** contre l'IS de
+l'exercice : sur une balance portant `892` D `300 000` et **aucun** `891`, la dette envers l'État sortait
+minorée de `300 000` — sur une balance parfaitement **équilibrée**, donc sans qu'aucun contrôle ne bronche.
+C'est **le même motif que D-094-7** : toutes les fixtures n'utilisaient que `891`, le seul cas où le défaut
+est inobservable.
+
+Correctif — **deux** grandeurs, publiées toutes les deux :
+
+| Grandeur | Portée | À quoi elle sert |
+|---|---|---|
+| `chargeImpotComptabilisee` | **toute** la classe `89x` | reprise dans l'**assiette** (D-094-1) — l'impôt n'est pas déductible, quelle que soit l'année qu'il concerne |
+| `chargeProvisionComptabilisee` | le **seul** compte de charge du paquet (`891`) | delta de l'**écriture** (D-094-7) — un rappel antérieur n'éteint pas l'IS de l'exercice |
+
+**F-094-2 — `IMPOT_NUL_AUCUNE_ECRITURE` annoncé à côté d'une extourne.** L'avertissement se posait sur le
+seul `impotDu <= 0`, sans regarder si une écriture avait été produite : une balance déficitaire portant déjà
+`891` D `900 000` sortait `ecritures = [891 C 900 000 ; 441 D 900 000]` **et** « aucune écriture » dans la
+même réponse. Conditionné désormais sur l'écriture réellement produite. Corrigé au passage :
+`IMPOT_DEJA_PARTIELLEMENT_PROVISIONNE` se déclenchait sur une charge **négative** (une reprise d'impôt), qui
+n'est rien qui ait été « déjà provisionné ».
+
+**F-094-1 — le `200` porte deux corps, le schéma n'en déclarait qu'un.** L'aperçu *et* la NOP idempotente
+d'une persistance sortent en `200`, avec deux formes différentes (`dryRun: false` + `balanceId`/`etat`/
+`createdAt`). `oneOf` posé, patron de STORY-145.
+
+### Vérification docker **rejouée** sur l'état final (le correctif touche l'artefact vérifié)
+
+Organisation neuve, balance Sage v1 portant un **rappel `892` D 300 000** sans aucun `891` :
+
+| Contrôle | Constaté |
+|---|---|
+| Le rappel entre dans l'**assiette** | `resultatComptable` (net) **6 500 000** · `chargeImpotComptabilisee` **300 000** · `resultatComptableAvantImpot` **6 800 000** ⇒ impôt **1 836 000** inchangé |
+| Le rappel n'**éteint pas** l'IS | `chargeProvisionComptabilisee` **0** ⇒ écriture `891` D **1 836 000** (l'impôt **entier**), aucun avertissement « déjà provisionné » |
+| En base | `891` = **1 836 000** · `892` = **300 000** (intact) · `441` = **2 136 000** (les deux dettes) · équilibré |
+| Cas **mixte** (`891` 900 000 **et** `892` 300 000, base v3) | les deux grandeurs **divergent** : `chargeImpotComptabilisee` **1 200 000** vs `chargeProvisionComptabilisee` **900 000** ⇒ écriture `891` D **936 000**, `891` arrive à **1 836 000**, `892` intact |
+| ⚡ Confirmation **inattendue** | la provision bâtie sur la base v3 a le **même contenu** que celle bâtie sur la base v1 ⇒ reconnue **idempotente (200)**. C'est exactement l'invariant que D-094-7/D-094-8 posent : le compte est amené **au** montant dû *quel qu'ait été son point de départ* — l'idempotence l'a prouvé toute seule |
+
+Portes après revue : lint **0**, **2 448 unitaires + 520 e2e** verts, couverture
+**98.97 / 91.59 / 98.26 / 99.06**, **18 mutation-tests** rouges (3 nouveaux : reconfondre les deux grandeurs,
+annoncer « aucune écriture » à côté d'une extourne, traiter une reprise créditrice comme « déjà
+provisionnée »).
+
+### Clôture
+
+**2026-08-04** — statut `review` → **`done`**. PR `balance-service#32` **rebase-mergée sur `dev`**, branche
+supprimée. Quatre commits : la fonctionnalité, le correctif D-094-7 (vérif docker), les 3 constats de revue
+(dont D-094-8), le correctif de la fausse réussite relevée en revue de sécurité.
+
+➡️ **Débloque STORY-099** (handoff vers `bilan-service`) : la balance cédée porte enfin la dette fiscale.
+➡️ **Alimente STORY-095** (TPU) : le régime synthétique écrira sa **taxe unique** par le même chemin —
+`construireEcritureImpot` et le marquage `PROVISIONS_FISCALES` sont réutilisables tels quels.
+⚠️ **Dette tracée** : le jour où une story cadrera un registre de taxes **non comptabilisées** (distinct de
+celui de STORY-093), leur écriture se posera ici — et la **réintégration de 093 devra être revue en même
+temps**, les deux ne peuvent pas être vraies ensemble (D-094-4).
+
+### Revue de sécurité — **0 vulnérabilité exploitable**
+
+Périmètre couvert : authentification (bypass, JWT, fuite de jeton), autorisation (Broken Access Control,
+IDOR, escalade, RBAC, isolation multi-tenant, 403-vs-404), injection (NoSQL, pollution de prototype), web,
+fichiers, secrets & crypto, infra (Kafka/outbox, throttler, désérialisation), **logique métier** (course,
+rejeu, double comptabilisation, intégrité comptable, contournement de période), NestJS (guards, DTO, filtres).
+
+Ce qui a été vérifié et tient : chaîne de guards **intacte** et identique aux trois autres contrôleurs
+fiscaux (aucun `@Public()`) · identité **exclusivement** du JWT · les deux nouvelles requêtes de dépôt sont
+**org-scopées** · org sans balance ⇒ **404**, jamais 403 · le gel n'est **pas** contournable par des bornes
+d'exercice divergentes (`estClos`, `trouverDerniereValidee` et `trouverDerniereBaseFiscale` utilisent les
+**mêmes** bornes en égalité stricte) · aucune valeur de query ni du paquet n'atteint un filtre Mongo ·
+`Map`/objets à clés fixes ⇒ pas de pollution de prototype · **`dryRun` fail-safe dans les deux sens** (chaîne
++ `@IsIn`, le défaut est l'aperçu — le piège `@IsBoolean()` de STORY-093 est évité) · **pas de CWE-770** :
+aucun tableau append-only alimenté ici, réponse bornée (≤ 6 écritures, lignes non renvoyées) · **pas de
+double comptabilisation** : l'index unique tranche la course et `E11000` devient une NOP.
+
+**Une observation sous le seuil de report a néanmoins été corrigée** — elle produisait une **fausse
+réussite**. La balance provisionnée héritant de la `source` de sa base, elle partage la lignée de versions de
+l'adaptateur d'origine : un import concurrent gagnant la version `N+1` faisait rendre à `submit` **sa**
+balance à lui (`created: false`), que le service traduisait en `idempotent: true` avec l'identifiant d'une
+balance **non provisionnée**. Le seul `created: false` acceptable est désormais celui qui rend **exactement
+notre contenu** (comparaison au checksum) ; sinon **409 `VERSION_BALANCE_CONCURRENTE`**, avec l'instruction
+de relancer — la base n'ayant pas changé, les écritures seront identiques.
+
+**Écartée** (patron préexistant, non introduit par cette story) : TOCTOU entre le contrôle du gel et
+l'écriture — partagé par **tous** les endpoints d'écriture fiscaux, impact borné par le versionnement
+append-only (la balance validée reste intacte). À traiter transversalement, pas ici.
+
+Portes finales : lint **0**, **2 450 unitaires + 520 e2e** verts, couverture **98.97 / 91.59 / 98.26 /
+99.06**, **19 mutation-tests** rouges. Vérification docker rejouée sur le chemin nominal après le correctif.
+
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** **STORY-092** (`impotDu`), **STORY-093** (TVA due/crédit, taxes), **STORY-085** (agrégation/régénération de la balance), **STORY-101** (contrat, validation, versioning), STORY-078 (comptes du plan) · **STORY-095** fournira la taxe unique (TPU) à écrire pour le régime synthétique
 **Réalise** la décision de cadrage : **« les impôts font partie de la balance »** (FR-A21)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A21
