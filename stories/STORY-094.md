@@ -350,6 +350,55 @@ it('IDEMPOTENCE : 3 applications → 1 seule provision', async () => {
   (position de TVA, autres taxes). Branches `MNV-094` ouvertes sur `docs/` (base `main`) et `balance-service`
   (base `dev`).
 
+- **2026-08-04** — implémentation livrée. Portes : **lint 0**, build OK, **2 443 unitaires + 519 e2e verts**,
+  couverture **98.97 / 91.57 / 98.26 / 99.06** (seuils 65/90/90/90), **15 mutation-tests** tous rouges à la
+  mutation (dont : retirer `PROVISIONS_FISCALES` de la base de calcul, revenir au résultat **net** comme base
+  imposable, solder la TVA partiellement au lieu de tout-ou-rien, désactiver l'idempotence, écrire l'impôt au
+  **brut** au lieu du delta).
+
+### ⚠️ D-094-7 — défaut trouvé **en vérification docker**, invisible à tous les tests
+
+Sur une balance **importée** qui portait déjà une charge d'IS de `900 000`, le provisionnement écrivait
+l'impôt dû **par-dessus** : `891` sortait à **2 736 000** pour un impôt réel de **1 836 000** — une charge
+**doublée**, sur une balance pourtant parfaitement **équilibrée** (l'écriture l'est par construction), donc
+aucun contrôle ne bronchait. Ni les unitaires ni les e2e ne le voyaient : **toutes leurs fixtures partaient
+d'une base sans `89x`**, c'est-à-dire du seul cas où le défaut est inobservable.
+
+Correctif : l'écriture d'impôt porte le **delta** `impôt dû − charge déjà comptabilisée`, ce qui amène `891`
+**au** montant dû quel qu'ait été son point de départ. Trois cas — complément (`891` D), rien (`delta = 0`,
+la charge est déjà exacte, donc **idempotent face à une base re-soumise**), **extourne** (`891` C) quand la
+charge comptabilisée dépasse l'impôt dû. Deux avertissements nouveaux le disent
+(`IMPOT_DEJA_PARTIELLEMENT_PROVISIONNE`, `IMPOT_SUR_PROVISIONNE`) et `chargeDejaComptabilisee` est publiée :
+sans elle, un comptable ne pourrait pas expliquer pourquoi l'écriture proposée n'égale pas l'impôt dû.
+
+### Vérification docker — stack **neuve** (`down -v` puis `up`), org réelle, Mongo interrogé
+
+Base `balance_service`, collections listées avant toute requête (`db.getCollectionNames()`).
+Organisation `6a71b1a8…` (register + login sur l'IdP), gates `orgkycstatuses`/`orgbalanceentitlements`
+amorcées, référentiel `syscohada-revise@2.1`, profil `REEL`/`SN`. Balance de base `direct` v1 équilibrée
+(CA `10 000 000`, TVA `443` = `720 000` / `445` = `410 000`), cahiers alimentés (recette assujettie
+`720 000` de TVA, dépense à TVA déductible `410 000`, même période).
+
+| Contrôle | Attendu | Constaté |
+|---|---|---|
+| Liquidation avant provision | — | `résultat fiscal 6 800 000` · `IS 1 836 000` · `MFP 100 000` · `impôt dû 1 836 000` (`baseRetenue: IS`) |
+| Dry-run | **200**, aucune écriture | **200** ; `db.balances.countDocuments()` **inchangé** (1) |
+| Écritures proposées | équilibrées | `891` D `1 836 000` · `441` C `1 836 000` · `443` D `720 000` · `445` C `410 000` · `4441` C `310 000` → **ΣD = ΣC = 2 556 000** |
+| Persist | **201**, version N+1 | **201** ; balance **v2**, `origine: PROVISIONS_FISCALES`, `balanceSourceId → v1`, `checksumVersion: v2` |
+| Équilibre après provision | `Σ D = Σ C` | mouvements `16 166 000 = 16 166 000` · soldes `15 036 000 = 15 036 000` · `estEquilibre: true` |
+| `443`/`445` soldés | solde nul, **mouvements conservés** | `443` sD=0 sC=0 (mvt 720 000/720 000) · `445` idem — la ligne reste, son activité doit rester visible |
+| **Idempotence ×3** | **1 seule** provision | appels 2 et 3 → **200 `idempotent: true`**, même `balanceId` ; `countDocuments({origine:'PROVISIONS_FISCALES'})` = **1** ; `891` = `1 836 000`, **jamais** `5 508 000` |
+| **Non-circularité** | impôt **inchangé** | après provisionnement : `résultat fiscal 6 800 000`, `impôt dû 1 836 000` — **identiques** ; la liquidation retient toujours la **base v1**, pas la provision |
+| Base **inchangée** (append-only) | intacte | checksum `288603884210ca43…` inchangé, aucun `89x` ajouté à la v1 |
+| **D-094-1 sur import réel** | base **redressée** | balance Sage portant `891` = `900 000` : `resultatComptable` (net) **5 900 000** · `chargeImpotComptabilisee` **900 000** · `resultatComptableAvantImpot` **6 800 000** · impôt **1 836 000 inchangé** (sans la reprise : assiette `5 900 000` ⇒ IS `1 593 000`, soit **243 000 de sous-imposition silencieuse**) |
+| **D-094-7 après correctif** | `891` **au** montant dû | écriture `891` D **936 000** (= `1 836 000 − 900 000`), avertissement `IMPOT_DEJA_PARTIELLEMENT_PROVISIONNE` ; en base `891` = **1 836 000** (et non `2 736 000` comme avant correctif — constaté sur la v2 fautive) |
+| Immutabilité | **409** | balance provisionnée `VALIDÉE` → persist **409 `BALANCE_VALIDEE_IMMUABLE`** *et* dry-run **409** ; `countDocuments()` inchangé |
+| **Atomicité** | aucun orphelin | balance volontairement déséquilibrée (écart `−500 000` > tolérance 100) → **422** ; `balances` **6 → 6**, `outbox_events` **6 → 6**, `balances` sur l'exercice 2028 = **0**. Les 5 balances écrites portent **chacune exactement 1** `balance.created` : jamais une balance sans événement, jamais l'inverse |
+
+⚠️ Contrôle des noms de collections effectué **avant** toute conclusion : `balances`, `outbox_events`,
+`orgkycstatuses`/`orgbalanceentitlements` (exception au snake_case, collections Mongoose par défaut),
+`profils_societe`.
+
 ---
 
 **Status:** in_progress
