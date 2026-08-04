@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 18 (EXTENDED)
@@ -98,20 +98,20 @@ Le travail est **déjà fait à la saisie** : chaque `LigneRecette` (STORY-082) 
 
 ## Acceptance Criteria
 
-- [ ] **TVA collectée** = `Σ` TVA des recettes **assujetties** ; **les exonérées sont exclues** (test).
-- [ ] **⚠️ TVA déductible** = `Σ` TVA des dépenses marquées **`tva.deductible: true`** uniquement — **la TVA des charges non déductibles n'ouvre PAS droit à déduction** *(test central)*.
-- [ ] **TVA due** = `collectée − déductible` (> 0) ; **crédit de TVA** (< 0).
-- [ ] **Crédit reporté** : imputé sur la période suivante ; **stock de crédit suivi** (jamais perdu, jamais compté deux fois) — test dédié.
-- [ ] **Calcul par période de déclaration** (mensuelle/trimestrielle **selon le paquet**) **et** cumul annuel.
-- [ ] **Taux TVA lu du paquet** (`TG@2026` : **18 %**) — **aucun taux en dur** (NFR-A06).
-- [ ] **Autres taxes** : types **lus du paquet** (patente, foncière, TH, TAF, TCA, accises, enregistrement, RSL/RSH, CNSS) ; **code inconnu → 400** ; montant `base × taux` **ou** saisi ; déductibilité **selon le paquet**.
-- [ ] **⚠️ Catégorie « Autres »** (FR-A20) : permet **tout impôt hors liste** — `libelle` + `montant` + `compteComptable` (**validé**) + `justification` **obligatoires** (**400** sinon) ; entrée **tracée** et **marquée « hors référentiel »** (pour enrichir le paquet côté admin).
-- [ ] **Taxe non déductible** → remonte en **réintégration** (STORY-091).
-- [ ] **Déclaration de TVA** (`GET /fiscal/tva?periode=`) : collectée, déductible (dont **écartée**), due/crédit, crédit antérieur imputé, crédit restant — chaque montant **traçable** à ses lignes sources.
-- [ ] **Montants exposés** pour écriture dans la balance (`443x`, `445x`, `4441`, `4449`, `64x`) → consommés par **STORY-094**.
-- [ ] **Immutabilité** après validation → **409**.
-- [ ] **Tests** : exonérées exclues, **non déductibles écartées**, due, **crédit reporté/imputé**, taux du paquet, code taxe inconnu (400), « Autres » (400 ×2 puis 201 + hors référentiel), taxe non déductible → réintégration, immutabilité. **Coverage ≥ 90 %.**
-- [ ] **Swagger** + **CI verte**.
+- [x] **TVA collectée** = `Σ` TVA des recettes **assujetties** ; **les exonérées sont exclues** (test).
+- [x] **⚠️ TVA déductible** = `Σ` TVA des dépenses marquées **`tva.deductible: true`** uniquement — **la TVA des charges non déductibles n'ouvre PAS droit à déduction** *(test central)*.
+- [x] **TVA due** = `collectée − déductible` (> 0) ; **crédit de TVA** (< 0).
+- [x] **Crédit reporté** : imputé sur la période suivante ; **stock de crédit suivi** (jamais perdu, jamais compté deux fois) — test dédié.
+- [x] **Calcul par période de déclaration** (mensuelle/trimestrielle **selon le paquet**) **et** cumul annuel.
+- [x] **Taux TVA lu du paquet** (`TG@2026` : **18 %**) — **aucun taux en dur** (NFR-A06).
+- [x] **Autres taxes** : types **lus du paquet** (patente, foncière, TH, TAF, TCA, accises, enregistrement, RSL/RSH, CNSS) ; **code inconnu → 400** ; montant `base × taux` **ou** saisi ; déductibilité **selon le paquet**.
+- [x] **⚠️ Catégorie « Autres »** (FR-A20) : permet **tout impôt hors liste** — `libelle` + `montant` + `compteComptable` (**validé**) + `justification` **obligatoires** (**400** sinon) ; entrée **tracée** et **marquée « hors référentiel »** (pour enrichir le paquet côté admin).
+- [x] **Taxe non déductible** → remonte en **réintégration** (STORY-091).
+- [x] **Déclaration de TVA** (`GET /fiscal/tva?periode=`) : collectée, déductible (dont **écartée**), due/crédit, crédit antérieur imputé, crédit restant — chaque montant **traçable** à ses lignes sources.
+- [x] **Montants exposés** pour écriture dans la balance (`443x`, `445x`, `4441`, `4449`, `64x`) → consommés par **STORY-094**.
+- [x] **Immutabilité** après validation → **409**.
+- [x] **Tests** : exonérées exclues, **non déductibles écartées**, due, **crédit reporté/imputé**, taux du paquet, code taxe inconnu (400), « Autres » (400 ×2 puis 201 + hors référentiel), taxe non déductible → réintégration, immutabilité. **Coverage ≥ 90 %.**
+- [x] **Swagger** + **CI verte**.
 
 ---
 
@@ -202,20 +202,20 @@ async autreTaxe(@Body() dto: AutreTaxeDto, @TenantContext() orgId, @CurrentUser(
 
 ## Definition of Done
 
-- [ ] `TvaService` : collectée (exonérées exclues), **déductible stricte**, due/crédit, **report du crédit**
-- [ ] **Test central** : TVA des charges non déductibles **écartée**, jamais déduite
-- [ ] Calcul par **période de déclaration** (du paquet) + cumul annuel
-- [ ] `AutresTaxesService` : types du paquet, code inconnu → 400, déductibilité du paquet
-- [ ] **Catégorie « Autres »** : libellé + montant + compte validé + justification obligatoires ; marquée **hors référentiel**
-- [ ] Taxe non déductible → **réintégration** (STORY-091)
-- [ ] Déclaration TVA traçable (lignes sources) ; montants exposés pour la balance (STORY-094)
-- [ ] Aucun taux en dur ; immutabilité après validation (409)
-- [ ] Coverage ≥ 90 % ; Swagger ; CI verte
-- [ ] Non-régression : STORY-082/083 (ventilation TVA à la saisie) verts
+- [x] `TvaService` : collectée (exonérées exclues), **déductible stricte**, due/crédit, **report du crédit**
+- [x] **Test central** : TVA des charges non déductibles **écartée**, jamais déduite
+- [x] Calcul par **période de déclaration** (du paquet) + cumul annuel
+- [x] `AutresTaxesService` : types du paquet, code inconnu → 400, déductibilité du paquet
+- [x] **Catégorie « Autres »** : libellé + montant + compte validé + justification obligatoires ; marquée **hors référentiel**
+- [x] Taxe non déductible → **réintégration** (STORY-091)
+- [x] Déclaration TVA traçable (lignes sources) ; montants exposés pour la balance (STORY-094)
+- [x] Aucun taux en dur ; immutabilité après validation (409)
+- [x] Coverage ≥ 90 % ; Swagger ; CI verte
+- [x] Non-régression : STORY-082/083 (ventilation TVA à la saisie) verts
 
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** **STORY-078** (taux TVA, types de taxes, périodicité), **STORY-082** (TVA collectée), **STORY-083** (TVA déductible **et non déductible**), STORY-080 (assujettissement)
 **Alimente** **STORY-094** (écriture des `44x`/`64x` dans la balance), **STORY-091** (taxes non déductibles → réintégration), `bilan-service` EPIC-011 (état TVA de la DSF)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A20 · CGI Togo 2026 (TVA 18 %, art. 195)
@@ -224,7 +224,7 @@ async autreTaxe(@Body() dto: AutreTaxeDto, @TenantContext() orgId, @CurrentUser(
 
 ## Progress Tracking
 
-**Statut : `review` → `done`** (MNV-093, 2026-08-04)
+**Statut : `done`** (MNV-093, 2026-08-04) — balance-service PR #31 rebase-mergée sur `dev`
 
 ### Décisions de conception
 
