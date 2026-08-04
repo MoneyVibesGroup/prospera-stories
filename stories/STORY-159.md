@@ -1,3 +1,18 @@
+> # ⛔ STORY REMPLACÉE — NE PAS IMPLÉMENTER
+>
+> **Remplacée le 2026-08-03** (décision PO) par le re-découpage du Module 2 : **STORY-259, STORY-272**.
+>
+> Cette story appartenait au découpage `EPIC-004 (rescopé)` (18 stories, 104 pts). Le découpage en
+> vigueur est **EPIC-035 → EPIC-042 / STORY-237 → STORY-290** (54 stories, 196 pts), sprints 31→38.
+> Le contenu ci-dessous **reste une bonne source de contexte métier** — c'est pour cela qu'il n'est pas
+> supprimé — mais **son périmètre, son estimation et son sprint ne font plus foi**.
+>
+> 📄 Découpage en vigueur : [`epics-paiement-2026-08-03.md`](../epics-paiement-2026-08-03.md)
+> 📐 Architecture : [`ARCHITECTURE-SPINE.md`](../architecture/architecture-paiement-service-2026-08-03/ARCHITECTURE-SPINE.md) (AD-1 → AD-18)
+> 🗂️ Motif détaillé : `superseded_stories` dans [`sprint-status.yaml`](../sprint-status.yaml)
+
+---
+
 # STORY-159 : Le solde d'une créance — **le certain et le déclaré ne se confondent jamais**
 
 **Epic :** EPIC-004 — `paiement-service` (PI-SPI & encaissement)
@@ -8,10 +23,10 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** medium — **c'est une story d'agrégation, et le piège est de simplifier**
-**Statut :** À faire
+**Statut :** ⛔ **superseded (2026-08-03)** — remplacée par STORY-259, STORY-272
 **Assigné à :** null
 **Créée le :** 2026-08-02
-**Sprint :** **32** — **incrément 2** *(story de clôture)*  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
+**Sprint :** ~~aucun~~ — retirée des sprints le 2026-08-03 (elle occupait le S31→S34)
 **Service :** `paiement-service` (`:3005`)
 **Couvre :** FR-P37, FR-P40, FR-P64
 

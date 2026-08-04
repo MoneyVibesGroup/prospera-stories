@@ -1,3 +1,18 @@
+> # ⛔ STORY REMPLACÉE — NE PAS IMPLÉMENTER
+>
+> **Remplacée le 2026-08-03** (décision PO) par le re-découpage du Module 2 : **STORY-254, STORY-255, STORY-256, STORY-257, STORY-258, STORY-259**.
+>
+> Cette story appartenait au découpage `EPIC-004 (rescopé)` (18 stories, 104 pts). Le découpage en
+> vigueur est **EPIC-035 → EPIC-042 / STORY-237 → STORY-290** (54 stories, 196 pts), sprints 31→38.
+> Le contenu ci-dessous **reste une bonne source de contexte métier** — c'est pour cela qu'il n'est pas
+> supprimé — mais **son périmètre, son estimation et son sprint ne font plus foi**.
+>
+> 📄 Découpage en vigueur : [`epics-paiement-2026-08-03.md`](../epics-paiement-2026-08-03.md)
+> 📐 Architecture : [`ARCHITECTURE-SPINE.md`](../architecture/architecture-paiement-service-2026-08-03/ARCHITECTURE-SPINE.md) (AD-1 → AD-18)
+> 🗂️ Motif détaillé : `superseded_stories` dans [`sprint-status.yaml`](../sprint-status.yaml)
+
+---
+
 # STORY-154 : Encaissement — notification signée, **idempotence prouvée**, paiement partiel et transparence des frais
 
 **Epic :** EPIC-004 — `paiement-service` (PI-SPI & encaissement)
@@ -8,10 +23,10 @@
 **Priorité :** Must Have
 **Story Points :** 8
 **Complexité :** high — **l'idempotence sous concurrence est la seule difficulté réelle, et elle est totale**
-**Statut :** À faire
+**Statut :** ⛔ **superseded (2026-08-03)** — remplacée par STORY-254, STORY-255, STORY-256, STORY-257, STORY-258, STORY-259
 **Assigné à :** null
 **Créée le :** 2026-08-02
-**Sprint :** **31** — **incrément 1** *(story de clôture)*  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
+**Sprint :** ~~aucun~~ — retirée des sprints le 2026-08-03 (elle occupait le S31→S34)
 **Service :** `paiement-service` (`:3005`)
 **Couvre :** FR-P19 → FR-P24b, FR-P25 → FR-P27 · NFR-2, NFR-3
 
