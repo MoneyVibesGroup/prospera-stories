@@ -1964,10 +1964,10 @@ sprints:
     start_date: "2027-03-25"
     end_date: "2027-04-08"
     capacity_points: 34
-    committed_points: 48  # ⬆️ 45→48 le 2026-08-04 : +STORY-173 (3, CORS du BFF admin), trouvée en exécutant AP-INT-0. ⚠️ Elle portait le n° 172, déjà pris par la story balance-service ci-dessous — `origin/main` fait foi. Historique : ⬆️ 40→45 le 2026-08-03 (+STORY-172, 5 pts : refermer les angles morts de STORY-146). Historique : ⬆️ 27→40 le 2026-08-01 (décision PO) : +STORY-148 (5) et +STORY-149 (8), déplacées du S19. 118 % de la capacité. ⚠️ CONSÉQUENCE FRONTEND À CONNAÎTRE : **AP-12 (S12 frontend) dépend de STORY-149** et son `backend_dependency disait « slottée sprint 19 » — c'est désormais le S20, donc une marge de moins. Historique : ⬆️ 18→27 le 2026-08-01 (décision user) : +STORY-144 (5), +STORY-133 (3) et +STORY-132 (1), sorties d'orphelinat. 26/34 ≤ capacité. Hors thème « conseil fiscal » du sprint, comme STORY-109 puis 138/139 l'étaient du leur — mais ce sont deux dettes d'EXPLOITATION de la console, et l'une d'elles (144) referme une impasse : on peut suspendre une organisation sans pouvoir la réactiver.
+    committed_points: 64  # 🚨 ⬆️ 48→64 le 2026-08-04 (décision user) : +STORY-179..184 (16 pts), dette AP-INT-1 — ticket `TICKET-BACKEND-ap-int-1-revue-kyc-sans-document.md`. ⚠️⚠️ **188 % DE LA CAPACITÉ (64/34), ET LE SPRINT EST DÉJÀ `in_progress`** : ce n'est pas un plan, c'est un ordre de priorité. L'arbitrage est À RENDRE, il n'est pas rendu ici. ⚡ SI LA CAPACITÉ DOIT ÊTRE TENUE, l'ordre défendable est : garder **179 + 180** (6 pts, indissociables — la revue KYC est aujourd'hui INEXPLOITABLE : l'opérateur ouvre un dossier et ne voit AUCUN document) et décaler 181/182/183/184 (10 pts) au S21, qui est à 14/34 et porte déjà la dette de contrat de la console. ⚠️ 183 et 184 se tirent ENSEMBLE ou pas du tout (un compteur de soumission sans historique pose la question sans y répondre) : les séparer entre deux sprints serait le pire découpage. Historique : ⬆️ 45→48 le 2026-08-04 : +STORY-173 (3, CORS du BFF admin), trouvée en exécutant AP-INT-0. ⚠️ Elle portait le n° 172, déjà pris par la story balance-service ci-dessous — `origin/main` fait foi. Historique : ⬆️ 40→45 le 2026-08-03 (+STORY-172, 5 pts : refermer les angles morts de STORY-146). Historique : ⬆️ 27→40 le 2026-08-01 (décision PO) : +STORY-148 (5) et +STORY-149 (8), déplacées du S19. 118 % de la capacité. ⚠️ CONSÉQUENCE FRONTEND À CONNAÎTRE : **AP-12 (S12 frontend) dépend de STORY-149** et son `backend_dependency disait « slottée sprint 19 » — c'est désormais le S20, donc une marge de moins. Historique : ⬆️ 18→27 le 2026-08-01 (décision user) : +STORY-144 (5), +STORY-133 (3) et +STORY-132 (1), sorties d'orphelinat. 26/34 ≤ capacité. Hors thème « conseil fiscal » du sprint, comme STORY-109 puis 138/139 l'étaient du leur — mais ce sont deux dettes d'EXPLOITATION de la console, et l'une d'elles (144) referme une impasse : on peut suspendre une organisation sans pouvoir la réactiver.
     completed_points: 5  # ⬆️ 0→5 le 2026-08-03 (STORY-172 done)
     status: "in_progress"  # ▶️ démarré le 2026-08-03 avec STORY-172
-    goal: "Atelier Balance livré 🏁 : simulation & conseil fiscal (scénarios légaux + dossier de justification + garde-fous) ; contrôles + statut de preuve ; e2e Atelier docker. [Handoff bilan-service = déjà livré en CORE S11 (STORY-099) — décalé du S10 par D15.]"
+    goal: "Atelier Balance livré 🏁 : simulation & conseil fiscal (scénarios légaux + dossier de justification + garde-fous) ; contrôles + statut de preuve ; e2e Atelier docker. [Handoff bilan-service = déjà livré en CORE S11 (STORY-099) — décalé du S10 par D15.] ⚡ SECOND THÈME AJOUTÉ le 2026-08-04 : rendre la revue KYC EXPLOITABLE (179 pièces affichables + 180 jeu de données de revue), puis solder la dette de contrat qu'elle a révélée (181 fiche typée, 182 concurrence, 183 historique, 184 référence). Hors thème « conseil fiscal », comme l'étaient déjà 144/173 — et pour la même raison : ce sont des dettes d'EXPLOITATION de la console, et celle-ci rend un écran entier inutilisable."
     stories:
       - story_id: "STORY-172"
         title: "Refermer les deux angles morts de STORY-146 : les comptes de PARAMÉTRAGE échappent au niveau de détail, et le SFD-BCEAO n'en déclarait aucun (désormais SOURCÉ : 6 chiffres)"
@@ -1985,6 +1985,57 @@ sprints:
         service: "prospera-admin-panel-service"
         status: "not_started"  # 🆕 CRÉÉE le 2026-08-03 en EXÉCUTANT AP-INT-0, sous le n° 172 — RENUMÉROTÉE 173 le 2026-08-04 : le 172 était déjà pris par la série balance-service poussée sur `origin/main` (comptes de paramétrage, `done`). Même règle que pour les n° 145/146/147 le 2026-07-31 : origin/main fait foi. ⚡ `grep -i cors` sur tout src/ du BFF@origin/dev = ZÉRO occurrence : pas d'`enableCors` dans main.ts, pas de `CORS_ALLOWED_ORIGINS` dans son entrée de compose — alors que les CINQ autres services l'ont depuis STORY-109. PROUVÉ par un vrai préflight OPTIONS depuis l'origine :3110 : auth/kyc/catalog renvoient `Access-Control-Allow-Origin`, le BFF n'en renvoyait AUCUN. ✅ IMPLÉMENTÉE le 2026-08-03 sur la branche `MNV-172` du dépôt admin-panel (à renommer `MNV-173` ou à laisser, les commits citent le n° d'origine) — reste à merger.
         story_path: "stories/STORY-173.md"
+        assigned_to: null
+      # ── ⚡ Dette AP-INT-1 slottée le 2026-08-04 (décision user) : ticket `TICKET-BACKEND-ap-int-1-revue-kyc-sans-document.md` ──
+      # Six manques découverts en RÉPARANT la console, donc invisibles d'AP-INT-0 : tant que l'écran de revue n'atteignait pas
+      # son service (chemin faux, 404 sur tous les dossiers), il ne pouvait rien apprendre de lui. ⚠️ 179 et 180 se tirent ENSEMBLE.
+      - story_id: "STORY-179"
+        title: "Les pièces KYC sont signées sur un hôte que le navigateur ne peut pas joindre"
+        epic: "EPIC-003"
+        points: 3
+        service: "kyc-service"
+        status: "not_started"  # ⚡ LA PLUS BLOQUANTE DU LOT : la revue KYC est inexploitable tant que ce n'est pas fait. `storage.module.ts:19-27` n'instancie QU'UN client MinIO, sur l'endpoint interne ⇒ `presignedGetUrl` signe `http://minio:9000/…`, valide côté serveur et IRRÉSOLUBLE depuis un navigateur. ⚠️ Le patron du correctif EXISTE DÉJÀ : `auth-service` a un `MINIO_PUBLIC_CLIENT` depuis FE-023 (storage.module.ts:41-46 + MINIO_PUBLIC_ENDPOINT au compose:109) — c'est la MÊME leçon, redécouverte sur un second service. Invisible jusqu'ici parce que la console DESSINAIT le document au lieu de l'afficher : le champ était servi, lu par personne, donc juste par défaut. ⚠️ `document-service` porte le même défaut (configuration.ts:242/257/285) — à trancher au lancement, pas à redécouvrir une 3ᵉ fois.
+        story_path: "stories/STORY-179.md"
+        assigned_to: null
+      - story_id: "STORY-180"
+        title: "Semer un dossier KYC en revue — l'écran central d'AP-03 n'est vérifiable par personne"
+        epic: "EPIC-003"
+        points: 3
+        service: "kyc-service"
+        status: "not_started"  # ⚡ À TIRER AVEC 179 : sans elle, on corrige à l'aveugle (rien à afficher) ; sans 179, on sème des pièces qu'on ne peut toujours pas voir. `kyc-service` n'a AUCUN répertoire de seeds ; STORY-178 sème l'administrateur, c'est-à-dire de quoi SE CONNECTER à une console qui n'a RIEN à montrer. Sur stack fraîche, la file UNDER_REVIEW est vide ⇒ l'écran le plus important n'a jamais été vu fonctionner de bout en bout. ⚠️ TROIS `test.skip` dans e2e/integration-gate.spec.ts l'avouent déjà — un test qui se saute n'est pas un test qui passe, et la suite reste verte. ⚠️ Les pièces doivent être RÉELLEMENT dans le bucket : des métadonnées sans objet donneraient le symptôme de 179 sans en être la cause, les deux se confondraient au diagnostic.
+        story_path: "stories/STORY-180.md"
+        assigned_to: null
+      - story_id: "STORY-181"
+        title: "`AdminOrgDetailDto` ne décrit aucun champ — le contrat généré ne protège plus la fiche"
+        epic: "EPIC-016"
+        points: 2
+        service: "prospera-admin-panel-service"
+        status: "not_started"  # Les 3 blocs de la fiche sont déclarés `type: Object` (admin-org-detail.dto.ts:18-39) ⇒ `openapi-typescript` en tire `Record<string, never>`, un type qui n'autorise AUCUNE propriété. La console recaste donc à la main sur LE SEUL écran qui agrège trois services — celui qui a le plus de raisons de bouger. ⚡ TROISIÈME occurrence du même motif : STORY-132 le traite sur `SessionResponseDto`, FE-024 l'avait relevé sur `paquetFiscal`/`stamp`. Ce n'est pas un oubli isolé mais un patron de décorateur — d'où l'audit `grep 'type: Object'` en DoD.
+        story_path: "stories/STORY-181.md"
+        assigned_to: null
+      - story_id: "STORY-182"
+        title: "Deux opérateurs peuvent trancher le même dossier sans que rien ne le dise"
+        epic: "EPIC-003"
+        points: 3
+        service: "kyc-service"
+        status: "not_started"  # ⚠️ ARBITRAGE À RENDRE AVANT DE CODER (2 issues écrites dans la story) : porter la concurrence optimiste, ou acter que le dernier gagne et SUPPRIMER l'écran de conflit du front. Aucune précondition sur `POST /admin/kyc/:orgId/approve|reject` : le dernier appel gagne en silence, et le premier opérateur ne saura jamais que sa décision a été annulée. ⚡ Le front porte DÉJÀ l'écran de conflit, entièrement écrit et INATTEIGNABLE — sa présence laisse croire que le cas est traité. ⚠️ Ce n'est pas théorique : la file est partagée et triée par ancienneté, donc tous les opérateurs sont poussés vers LE MÊME dossier. Écart nº5 d'AP-INT-0, relevé alors et jamais formulé.
+        story_path: "stories/STORY-182.md"
+        assigned_to: null
+      - story_id: "STORY-183"
+        title: "Un dossier KYC n'a ni historique de décisions ni timeline — une resoumission se relit intégralement"
+        epic: "EPIC-003"
+        points: 3
+        service: "kyc-service"
+        status: "not_started"  # `KycFile.history` vaut TOUJOURS `[]` et la timeline de la fiche détail est vide en permanence (les deux écrans existent et n'affichent jamais rien). À la resoumission, l'agent ne voit pas ce qui avait été reproché : il relit tout au lieu de vérifier une correction — le travail exact que la resoumission devait éviter. ⚡ La matière est EN PARTIE LÀ (STORY-128 a livré `reviewStatus`/`reviewedAt` par pièce, les rejets portent un motif) : reste à la conserver au fil des soumissions. ⚠️ À vérifier au lancement : les pièces SUPERSEDED gardent-elles leur verdict, ou sont-elles écrasées ? La réponse change le périmètre.
+        story_path: "stories/STORY-183.md"
+        assigned_to: null
+      - story_id: "STORY-184"
+        title: "Un dossier KYC n'a ni référence communicable ni numéro de soumission"
+        epic: "EPIC-003"
+        points: 2
+        service: "kyc-service"
+        status: "not_started"  # ⚠️ NE SE LIVRE PAS SEULE — à tirer AVEC 183 : « soumission 2 sur 2 » sans dire ce qui s'est passé à la soumission 1 pose la question sans y répondre. Le front rend `ref: orgId` (l'écran affiche « 507f1f… · 507f1f… », redondant mais VRAI) et `attempt/total` codés en dur à 1/1. Conséquence : rien à communiquer au cabinet — un ObjectId n'est ni dictable au téléphone ni recopiable, et il désigne l'ORGANISATION, pas le dossier, donc ne distingue pas deux soumissions. ⚡ Le filigrane des pièces consultées porte cette « référence » : la trace existe, elle désigne le mauvais objet.
+        story_path: "stories/STORY-184.md"
         assigned_to: null
       # ── Sorties d'orphelinat le 2026-08-01 (décision user) : qualité d'exploitation de la console ──
       # ── Déplacées du S19 vers le S20 le 2026-08-01 (décision PO) : le S19 était à 50/34 ──
@@ -3626,6 +3677,14 @@ open_contract_gaps:
     cause_racine: "Cinq écrans écrits contre des contrats SUPPOSÉS, jamais confrontés — le découplage propre (un fichier de bascule par feature, chaque fonction portant son TODO(backend)) a rendu la dette confortable, donc invisible. C'est la répétition exacte de FE-008/009/010 côté cabinet."
     consequence: "⚡ Le plus grave (A) : l'arbitrage N/N-1 du catalogue n'existe QUE côté front — `CreateModuleVersionDto` ne porte ni `supersedesMajor` ni notion de fenêtre de support. La règle tient tant qu'on passe par la console et se contourne par un appel direct SANS RIEN SIGNALER : ce n'est pas un invariant du système, c'est une politique d'interface. Puis (C) `GET /admin/organizations` ne filtre pas par `kycStatus` alors que c'est le filtre PRINCIPAL d'AP-02 — déjà relevé le 2026-07-21 et jamais formulé ; (D) le BFF ne proxifie pas la revue pièce par pièce, donc AP-03 devrait emprunter DEUX chemins pour un seul acte métier ; (E) `EntitlementResponseDto` n'a pas de `grantedAt`, l'écran affiche donc `updatedAt` comme date d'octroi — un droit octroyé en janvier et modifié en mars s'affiche « octroyé en mars » ; (B) pas de décompte groupé des entitlements par module, N+1 assumé tant que le catalogue reste petit."
     action: "Arbitrer A et D au sprint-planning (les deux ont deux issues défendables, ce qui ne se défend pas est de laisser la question ouverte) ; C et E sont des ajouts de champ sans arbitrage ; B se rouvre le jour où le catalogue grossit."
+
+  - id: "GAP-ap-int-1-revue-kyc-sans-document"
+    service: "kyc-service (:3002) · admin-panel BFF (:3010)"
+    statut: "➡️ REPRIS le 2026-08-04 — ticket `tickets/TICKET-BACKEND-ap-int-1-revue-kyc-sans-document.md`, converti le jour même en **STORY-179 à 184** (16 pts), toutes slottées au **S20** (décision user). Les stories font foi ; le ticket est un état transitoire clos. ⚠️ Le S20 passe à 64/34 — arbitrage de capacité à rendre, cf. son `committed_points`."
+    constat: "AP-INT-1 a AUDITÉ puis RÉPARÉ l'intégration de la console. Trois défauts front corrigés, dont un bloquant : l'écran de revue KYC visait `/kyc/admin/kyc/:orgId`, résolu en `:3002/api/v1/**kyc/**admin/kyc/:orgId` — 404 sur TOUS les dossiers, affiché comme « aucun dossier ». En le réparant, six manques backend apparaissent : A URL présignées signées sur l'hôte interne de MinIO (179), B aucun jeu de données de revue (180), C `AdminOrgDetailDto` en `type: Object` (181), D aucune concurrence sur la décision (182), E ni historique ni timeline (183), F ni référence ni n° de soumission (184)."
+    cause_racine: "⚡ UN BUG DE TRANSPORT AVAIT RENDU INVISIBLES TOUS LES MANQUES SITUÉS DERRIÈRE LUI. Tant qu'un écran ne parle pas à son service, il ne peut RIEN apprendre de lui — et ses tests unitaires ne le diront jamais : ils mockent `apiFetch` et n'assertent donc que le chemin LOGIQUE, celui-là même qui était faux. Second facteur : la visionneuse DESSINAIT le document au lieu de l'afficher, donc l'URL présignée était servie, lue par personne, et juste par défaut."
+    consequence: "⚡ Le plus grave (A) : `kyc-service` n'a QU'UN client MinIO, sur l'endpoint interne — l'opérateur ouvre un dossier et ne voit AUCUN document. C'est la leçon de FE-023 (déjà payée sur `auth-service`, qui a un `MINIO_PUBLIC_CLIENT`) redécouverte sur un second service, et `document-service` porte le même défaut. Puis (B) : `kyc-service` n'a aucun seed, donc la file UNDER_REVIEW est vide sur une stack fraîche et TROIS tests e2e se mettent en `test.skip` — l'écran central d'AP-03 n'est vérifiable par personne. A et B se tiennent : sans A l'opérateur ne voit rien, sans B personne ne peut constater que A est réparé."
+    action: "Tirer 179+180 ENSEMBLE en tête de S20 (6 pts) ; arbitrer D (182) avant de coder — le front porte déjà un écran de conflit INATTEIGNABLE, il faut soit produire le signal, soit retirer l'écran ; 183 et 184 se tirent ensemble ou pas du tout. ⚠️ NON RETENUS, écrit dans le ticket : `pieceCount`/`country` de la file (dette FRONT — l'écran doit cesser d'afficher « 0 pièce », pas réclamer la donnée) et `registrationId`/`memberSince`/`verified` (inventions front déjà actées ; leur retour est une décision PO, pas un constat de gate)."
 
   - id: "GAP-mappingProfile"
     service: "balance-service (:3007)"
