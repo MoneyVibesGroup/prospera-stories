@@ -8,7 +8,8 @@
 **Sprint :** à planifier (avant toute mise en production de l'écran)
 **Créée le :** 2026-07-23
 **Origine :** Integration Gate de **FE-021**, en deux contextes navigateur contre le stack docker
-**Services :** `auth-service` (:3001)
+**Services :** `auth-service` (:3001) — **et le `ThrottlerGuard` des 6 relying parties** (voir § Scope,
+ajouté le 2026-08-03)
 
 > **Le trou, en une phrase :** l'IP listée n'est pas celle de l'utilisateur — c'est celle de la machine qui
 > a appelé l'IdP, aujourd'hui l'app Next elle-même.
@@ -56,6 +57,31 @@ prendre ici.
 - Décider si le **BFF de l'app cliente** doit lui-même transmettre l'IP d'origine (il est le premier saut :
   sans lui, l'ingress ne voit que l'app). Si oui, la story frontend correspondante est à créer.
 
+### ⚠️ Ajout du 2026-08-03 — la même décision gouverne le `ThrottlerGuard`, sur **tous** les services
+
+Relevé en revue de sécurité de **STORY-145** (`balance-service`), à un endroit qui n'avait rien à voir
+avec l'écran « Sessions ouvertes ». `trust proxy` n'étant configuré **nulle part**, le tracker par défaut
+du `ThrottlerGuard` retombe lui aussi sur `req.ip`, c'est-à-dire sur l'IP du reverse-proxy :
+
+1. **un seul compteur pour tout le monde.** Toutes les organisations partagent le même seau de jetons —
+   un tenant bruyant (ou une simple boucle de rattrapage) épuise la limite de **tous les autres**. La
+   protection anti-abus devient un vecteur de déni de service entre tenants ;
+2. **et la limite par IP ne veut plus rien dire** : un attaquant distribué n'est pas plus limité qu'un
+   client unique, puisque leurs requêtes tombent de toute façon dans le même compartiment.
+
+C'est la **même** décision de topologie, appliquée à un second consommateur — d'où le rattachement ici
+plutôt qu'une story séparée : trancher deux fois la chaîne de confiance, c'est se garantir deux réponses
+divergentes. Le correctif est le même `app.set('trust proxy', <liste explicite>)`, à porter dans le
+`main.ts` de chaque service.
+
+⚠️ Et le risque de le faire vite est **exactement** celui d'AC-02 : un `trust proxy: true` global rendrait
+le compteur du throttler pilotable par un simple en-tête `X-Forwarded-For` forgé — **contournement complet
+du rate limiting**, une régression bien pire que le compteur partagé qu'il corrige.
+
+**Services concernés** : `expert-comptable` (:3000), `kyc-service` (:3002), `platform-catalog-service`
+(:3003), `bilan-service` (:3004), `document-service` (:3006), `balance-service` (:3007) — plus
+`admin-panel` (:3010) s'il porte un throttler.
+
 **Hors périmètre :** géolocalisation (ville/pays) — reste la question ouverte de STORY-126, distincte de
 celle-ci et à instruire seulement une fois l'IP juste.
 
@@ -73,6 +99,11 @@ celle-ci et à instruire seulement une fois l'IP juste.
 - **AC-04** — Les sessions ouvertes avant le changement gardent leur IP telle quelle (aucune réécriture).
 - **AC-05** — La configuration de confiance est pilotée par l'environnement (rien codé en dur) et
   documentée avec le compose / le manifeste de déploiement.
+- **AC-06** *(ajouté le 2026-08-03)* — Sur au moins un service relying party, **deux organisations
+  distinctes ne partagent plus le compteur du `ThrottlerGuard`** : l'une saturant sa limite, l'autre
+  passe toujours. Et le pendant de falsification, qui est le vrai risque du correctif : un
+  `X-Forwarded-For` forgé depuis une IP **non** listée comme proxy de confiance ne déplace **pas** le
+  compteur — sans ce test, on échange un compteur partagé contre un rate limiting contournable.
 
 ---
 
@@ -81,6 +112,9 @@ celle-ci et à instruire seulement une fois l'IP juste.
 - **Ne bloque pas** FE-021 : l'écran est livrable, il affiche l'IP telle que servie et ne promet rien
   d'autre (la note de bas de carte dit explicitement que l'IP est « celle vue par nos serveurs »).
 - **Bloque** toute promesse de sécurité faite à l'utilisateur autour du lieu de connexion.
+- **Bloque également** *(2026-08-03)* toute promesse d'isolation du rate limiting **entre organisations**
+  sur les relying parties : tant que la chaîne de confiance n'est pas tranchée, le `ThrottlerGuard`
+  compte tous les tenants dans un seul seau.
 
 ---
 

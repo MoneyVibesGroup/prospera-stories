@@ -5,8 +5,9 @@
 **Priorité :** Must Have
 **Story Points :** 3
 **Complexité :** low
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Statut :** done
+**Assigné à :** vivianMoneyVibesGroupes
+**Clôturée le :** 2026-08-03 — PR `balance-service#26` rebase-mergée sur `dev`
 **Créée le :** 2026-07-31
 **Sprint :** 19
 **Service :** `balance-service` (:3007)
@@ -181,3 +182,124 @@ Sur un stack **neuf** (`down -v`), avec une organisation **réelle** KYC-approuv
 - Le versionnement `(orgId, exercice, source, version)` de STORY-101 est ce qui rend l'immutabilité **vivable** :
   figer n'empêche pas de corriger, cela oblige à corriger **au grand jour**, dans une nouvelle version. C'est
   l'argument à tenir si quelqu'un demande une réouverture.
+
+---
+
+## Progress Tracking
+
+**Statut : `done`** — livré le 2026-08-03, PR `balance-service#26` rebase-mergée sur `dev`
+(commits `a2ea3a0` feature · `fe81a2d` revue · `3c14d4b` sécurité).
+
+### Ce qui a été livré
+
+Les deux routes, gardées par `@RequiresBalanceAccess` + `@Roles(TENANT_ADMIN, TENANT_USER)` au niveau
+classe, `200` (rien n'est créé), `motif` obligatoire et **rogné avant validation**, `auteur` dérivé du
+seul JWT en un point unique. La couture `ValidationGate` est fournie par **jeton d'injection**
+(`Symbol`), appelée **dans la transaction** et **seulement pour la transition vers `VALIDÉE`** ;
+STORY-098 substituera un `useClass` sans rouvrir `BalanceService`. La forme du refus
+`CONTROLES_BLOQUANTS` est publiée à l'OpenAPI alors qu'aucune implémentation ne la produit encore.
+
+### Décisions et écarts au cadrage
+
+- **D-145-1 — `BALANCE_ALREADY_VALIDATED` → `BALANCE_DEJA_VALIDEE`.** L'AC-3 nommait un code qui
+  n'existait pas ; le code réel était l'unique écart anglophone du service. Renommage **gratuit
+  aujourd'hui** (hook inerte : aucune route ne l'exposait, aucun client ne l'a jamais reçu), rupture de
+  contrat demain. Vérifié par grep sur les 7 services + `docs/` + `postman/` : zéro consommateur.
+- **D-145-2 — la liste des bloquants passe par `details.bloquants`**, pas par un champ racine
+  `bloquants` comme l'écrivait le § C. `AllExceptionsFilter` construit le corps par **liste blanche** et
+  jetterait le champ en silence (STORY-085). Corps publié :
+  `{ statusCode, error, message, code, details: { bloquants } }`.
+- **D-145-3 — la porte ne s'applique PAS au rejet.** Refuser un rejet parce que des contrôles échouent
+  enfermerait la balance fautive dans le brouillon : les contrôles en échec sont *la raison même* de la
+  rejeter.
+- **D-145-4 — `horodatageValidation` n'est plus posé sur un rejet** (constat de revue). Il l'était
+  inconditionnellement depuis STORY-101 ; invisible tant que `marquerEtat` était inerte, c'est **cette
+  story** qui rend observable une balance `REJETÉE` portant une « date de validation », que FE-027
+  afficherait telle quelle. Écart au « diff minimal » assumé : le laisser, c'était livrer le défaut. La
+  date de la décision reste portée par `mutation.horodatage` dans tous les cas.
+- **D-145-5 — une transition SANS EFFET est refusée** (`409 BALANCE_ETAT_INCHANGE`, constat de sécurité).
+  Voir ci-dessous. `REJETÉE → VALIDÉE` **reste permis**, conformément au § D.
+
+### ⚠️ Trois pièges qui compilent, passent les tests, et se paient en production
+
+1. **Une porte « prudente » aurait rendu invalidable toute balance héritée.** Re-contrôler
+   `sommaire.estEquilibre` semblait une défense en profondeur gratuite. Mongoose n'hydrate que le schéma
+   **courant** : le sommaire plat d'avant STORY-147 y est lu `undefined`, donc falsy. Chaque balance
+   antérieure aurait reçu un `409` accusant un déséquilibre inexistant. L'implémentation par défaut est
+   **passante**, et c'est un choix, pas un oubli.
+2. **« `updateStateAtomic` appelé une fois » ne prouve rien de ce qui est écrit.** Les tests n'assertaient
+   que le *nombre* d'appels : un service posant `motif: ''`, `version: 0` ou un auteur fabriqué compilait
+   et laissait 1943 unitaires + 397 e2e au vert — alors que le contenu de cette entrée **EST** la trace
+   d'imputabilité (AC-1/AC-2). Même angle mort sur l'org-scoping : les e2e d'isolation *stubent* le
+   service, donc prouvent le transport du 404, jamais l'isolation elle-même.
+3. **L'OpenAPI mentait sur le 409 le plus fréquent.** `/valider` renvoie **deux** corps de 409 ; la
+   réponse était typée sur la seule forme `CONTROLES_BLOQUANTS`, celle que la porte par défaut ne produit
+   **jamais**. Le front générait un type promettant `details.bloquants` sur le cas courant (balance déjà
+   figée) où il est absent — et ne pouvait pas discriminer sur `code`, son type n'en connaissant qu'une
+   valeur. Les deux formes sont désormais publiées en `oneOf`.
+
+### 🔒 Revue de sécurité — 1 vulnérabilité trouvée et corrigée
+
+**CWE-770 / A04:2021 — `POST /rejeter` rejouable à l'infini** (confiance 85). `historiqueMutations` est
+append-only et **non plafonné** ; la seule garde étant l'immutabilité de `VALIDÉE`, un utilisateur
+**légitime** du tenant (aucune élévation de privilège) pouvait rejouer le rejet indéfiniment sur la même
+balance : ~700 octets par appel, 100 appels/min autorisés par le throttler ⇒ limite BSON de 16 Mo en
+quelques heures. Passé ce seuil, tout `$push` échoue : la balance devient **définitivement** invalidable
+et irrejetable — immuable *par accident*, l'inverse exact de ce que la story livre. Bien avant ce seuil,
+chaque lecture transfère un document de plusieurs Mo : l'amplification est subie par **tous** les tenants.
+
+**Correctif** : une transition vers l'état déjà en cours est refusée sans écriture ⇒ deux mutations au
+maximum par balance, tableau borné **par construction**. Pas de `$push`/`$slice` : plafonner en tronquant
+supprimerait des entrées d'audit, au prix exact de la défense légale (NFR-A04) que le plafond protège.
+
+**Écarté après instruction** : le scan signalait `REJETÉE → VALIDÉE` comme un contournement de workflow.
+Le rejet n'a **jamais** été une barrière d'autorisation — les 20 contrôleurs du service portent le même
+`@Roles(TENANT_ADMIN, TENANT_USER)`, donc quiconque peut re-valider aurait pu valider directement depuis
+`BROUILLON` : aucune frontière de privilège n'est franchie. Et le § D pose explicitement `REJETÉE` comme
+non terminale. ➡️ **À trancher avec le PO** (séparation préparateur/réviseur), tracé pour STORY-098.
+Également instruits sans défaut : isolation multi-tenant, imputabilité de l'auteur, race sur la double
+validation, contournement de la porte, fuite via `details.bloquants`, injection NoSQL via `motif`,
+throttler.
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **1948 unitaires + 399 e2e** verts · couverture
+**98.77 / 90.97 / 97.88 / 98.80** (seuils 65/90/90/90) · **16 mutation-tests, tous rouges à la mutation** :
+garde d'immutabilité retirée · verdict de la porte ignoré · porte appliquée au rejet · session non
+transmise à la porte · porte déplacée après l'écriture · auteur lu du corps · rognage du motif retiré ·
+`200` devenu `201` · motif altéré à l'écriture · version de mutation figée · auteur fabriqué par le
+service · relecture non org-scopée · `horodatageValidation` reposé sur un rejet · repository réécrivant
+un champ absent du patch · garde de transition sans effet retirée · garde élargie à `!== BROUILLON`.
+
+### Vérification docker (obligatoire — stack neuve `down -v`)
+
+Deux organisations réelles enregistrées sur l'IdP, e-mails vérifiés, read-models `orgkycstatuses`
+(`APPROVED`) et `orgbalanceentitlements` (`ACTIVE` + `syscohada-revise@2.1`) semés en **ObjectId**.
+
+| # | Contrôle | Résultat |
+|---|---|---|
+| 1 | `POST /balances` | `201`, `etat: BROUILLON` |
+| 2 | `POST /:id/valider` | `200`, `etat: VALIDÉE`, `historiqueMutations` portant l'auteur **du JWT** et le motif |
+| 3 | Rejeu `valider` **et** `rejeter` | `409 BALANCE_DEJA_VALIDEE` × 2, document **strictement identique** avant/après |
+| 4 | Org B vise la balance d'org A | `404`, indiscernable d'un id inexistant |
+| 5 | `GET /:id` | renvoie bien `VALIDÉE` — ce que FE-027 affiche déjà |
+| 6 | `motif: "   "` · `auteur` dans le corps | `400` × 2, **aucune écriture**, `etat` toujours `BROUILLON` |
+| 7 | `motif: "  Écarts non justifiés  "` | persisté **rogné** : `Écarts non justifiés` |
+| 8 | `REJETÉE` puis `valider` | `200` — non terminale, historique append-only à 2 entrées |
+| 9 | **Porte rendue refusante en conteneur** | `409 CONTROLES_BLOQUANTS`, `details.bloquants` **survivant au filtre**, zéro écriture, et le **rejet passe malgré tout** |
+| 10 | Rejet → `horodatageValidation` | champ **absent** (pas nul) ; posé sur validation ; récupéré lors d'une revalidation |
+| 11 | `/api/docs-json` | `oneOf` des deux formes de 409, 4 modèles publiés |
+| 12 | **10 rejets consécutifs** sur la même balance | `200` puis **9 × 409**, historique à **1** entrée et non 10 |
+
+⚠️ Le provider `{ provide: VALIDATION_GATE, useClass: ValidationGatePassante }` n'est exercé par **aucun**
+test (aucun spec ne construit `BalanceModule`, tous les e2e mockent `BalanceService`) : un oubli laisserait
+la CI **entièrement verte** et ne se manifesterait qu'au boot. C'est la vérification docker — service
+réellement démarré — qui en tient lieu.
+
+### Ce qui reste ouvert
+
+- **STORY-098** branche ses huit contrôles GUIDEF sur `VALIDATION_GATE` : un `useClass`, rien d'autre.
+- **Amendement de FE-027** : câbler les deux actions, discriminer les trois codes de `409` sur `code`.
+- **Séparation préparateur/réviseur** à arbitrer avec le PO (voir revue de sécurité ci-dessus).
+- Le jour où un `balance.validated` sera nécessaire, il devra passer par **l'outbox transactionnel** de
+  STORY-099 — jamais par une émission directe dans la transaction.
