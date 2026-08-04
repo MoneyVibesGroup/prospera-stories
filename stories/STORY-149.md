@@ -4,10 +4,11 @@
 **Réf. architecture :** `architecture-catalog-service-2026-07-07.md` · **STORY-032** (catalogue admin CRUD) · **STORY-038** (`ReferentielPackage` : pointeur + checksum) · **STORY-105** (RBAC D15, catalogue figé de 8 permissions) · **AP-04** (console : registre des référentiels)
 **Priorité :** Should Have
 **Story Points :** 8
-**Statut :** draft
+**Statut :** À faire
 **Assigné à :** Unassigned
 **Créée le :** 2026-07-28
-**Sprint :** à planifier
+**Sprint :** **20** *(fixé le 2026-08-04 — décision PO. L'en-tête disait encore « à planifier » alors que `sprint-status.yaml` la portait au S20 depuis le 2026-08-01 : deux sources de vérité sur la même story, exactement le défaut que ce dépôt documente. Le tracker faisait foi, l'en-tête est réaligné.)*
+**Débloque :** **AP-12** *(dépôt effectif d'un paquet de référentiel depuis la console)* — `blocked (backend)` tant que cette story n'est pas livrée
 **Service :** `platform-catalog-service` — 1 dépôt, 1 branche, 1 PR
 **Branche :** `MNV-149`
 
