@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 3
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 19
@@ -144,22 +144,22 @@ Le **régime fiscal** est déterminé en **STORY-080** (axe fiscal, indépendant
 
 ## Acceptance Criteria
 
-- [ ] **Aiguillage** selon `regimeFiscal` : `REEL` (ou régime absent, D-095-1) → 091/092/093 ; **`SYNTHETIQUE` → 095**.
-- [ ] **⚠️ Exclusivité opposable** *(tests centraux)* : un dossier `SYNTHETIQUE` ne produit **ni IS, ni MFP, ni TVA** — et les endpoints du réel le **refusent en 409** ; un dossier `REEL` ne produit **pas de TPU** — et les endpoints TPU le **refusent en 409**.
-- [ ] **`TpuService`** : base = **CA sourcé du référentiel** ; **composante** déterminée par le CA contre les seuils **structurés du paquet** ; taux déclaratif selon la **nature d'activité** ; **minimum annuel** en plancher.
-- [ ] **⚠️ Composante forfaitaire ⇒ `BAREME_TPU_INDISPONIBLE` (409)** — jamais le taux déclaratif emprunté, jamais un taux deviné (NFR-A06).
-- [ ] **Nature d'activité absente ⇒ `NATURE_ACTIVITE_TPU_INDETERMINEE` (409)** — jamais 2 % par défaut.
-- [ ] **Plafond du régime (60 M, jamais 30 M)** dépassé ⇒ **avertissement fort** ; **aucun changement automatique de régime**.
-- [ ] **Exonération des 24 premiers mois** : exercice entièrement couvert ⇒ TPU nulle **motivée** ; chevauchement partiel ou `dateCreation` absente ⇒ **avertissement**, aucun prorata.
-- [ ] **Versements** enregistrables (échéance validée **si et seulement si** le paquet publie un calendrier) ; **solde** = `TPU due − Σ versements` → à payer ou crédit.
-- [ ] **`GET /fiscal/tpu?exercice=`** : base, composante, taux, nature, TPU due, versements, solde, avertissements — **traçable** (checksum + version du paquet, référentiel).
-- [ ] **Écriture dans la balance** (094) : TPU en **`64x` (D)** / **`44x` (C)**, **au delta** — **pas** de `891`/`441`, **pas** de `4441`, **aucun soldage de TVA**.
-- [ ] **Indépendance des axes** : le moteur TPU fonctionne en `SMT` **comme** en `SN`.
-- [ ] **F-095-1** : les montants du paquet sont convertis en unités mineures par un helper **unique** ; le lecteur de STORY-080 est corrigé et son test **échoue** sur le code d'avant (mutation-test).
-- [ ] **Traçabilité (NFR-A07)** : composante, taux, nature, version + checksum du paquet, auteur, date.
-- [ ] **Immutabilité** après validation / exercice clos → **409** sur toute saisie TPU.
-- [ ] **Tests** : cf. § Périmètre. **Couverture ≥ seuils** (65/90/90/90), **mutation-tests** sur chaque garde.
-- [ ] **Swagger** + **CI verte**.
+- [x] **Aiguillage** selon `regimeFiscal` : `REEL` (ou régime absent, D-095-1) → 091/092/093 ; **`SYNTHETIQUE` → 095**.
+- [x] **⚠️ Exclusivité opposable** *(tests centraux)* : un dossier `SYNTHETIQUE` ne produit **ni IS, ni MFP, ni TVA** — et les endpoints du réel le **refusent en 409** ; un dossier `REEL` ne produit **pas de TPU** — et les endpoints TPU le **refusent en 409**.
+- [x] **`TpuService`** : base = **CA sourcé du référentiel** ; **composante** déterminée par le CA contre les seuils **structurés du paquet** ; taux déclaratif selon la **nature d'activité** ; **minimum annuel** en plancher.
+- [x] **⚠️ Composante forfaitaire ⇒ `BAREME_TPU_INDISPONIBLE` (409)** — jamais le taux déclaratif emprunté, jamais un taux deviné (NFR-A06).
+- [x] **Nature d'activité absente ⇒ `NATURE_ACTIVITE_TPU_INDETERMINEE` (409)** — jamais 2 % par défaut.
+- [x] **Plafond du régime (60 M, jamais 30 M)** dépassé ⇒ **avertissement fort** ; **aucun changement automatique de régime**.
+- [x] **Exonération des 24 premiers mois** : exercice entièrement couvert ⇒ TPU nulle **motivée** ; chevauchement partiel ou `dateCreation` absente ⇒ **avertissement**, aucun prorata.
+- [x] **Versements** enregistrables (échéance validée **si et seulement si** le paquet publie un calendrier) ; **solde** = `TPU due − Σ versements` → à payer ou crédit.
+- [x] **`GET /fiscal/tpu?exercice=`** : base, composante, taux, nature, TPU due, versements, solde, avertissements — **traçable** (checksum + version du paquet, référentiel).
+- [x] **Écriture dans la balance** (094) : TPU en **`64x` (D)** / **`44x` (C)**, **au delta** — **pas** de `891`/`441`, **pas** de `4441`, **aucun soldage de TVA**.
+- [x] **Indépendance des axes** : le moteur TPU fonctionne en `SMT` **comme** en `SN`.
+- [x] **F-095-1** : les montants du paquet sont convertis en unités mineures par un helper **unique** ; le lecteur de STORY-080 est corrigé et son test **échoue** sur le code d'avant (mutation-test).
+- [x] **Traçabilité (NFR-A07)** : composante, taux, nature, version + checksum du paquet, auteur, date.
+- [x] **Immutabilité** après validation / exercice clos → **409** sur toute saisie TPU.
+- [x] **Tests** : cf. § Périmètre. **Couverture ≥ seuils** (65/90/90/90), **mutation-tests** sur chaque garde.
+- [x] **Swagger** + **CI verte**.
 
 ---
 
@@ -236,22 +236,22 @@ it('RÉEL : aucune TPU, et GET /fiscal/tpu est REFUSÉ (409)', async () => { …
 
 ## Definition of Done
 
-- [ ] Paquet `togo@2026` régénéré (seuils structurés, `exonerationTemporaireMois`, comptes TPU) + sha256 reporté au manifeste
-- [ ] `MoteurFiscalService` : aiguillage + **gardes d'exclusivité sur les deux surfaces**
-- [ ] **Tests d'exclusivité** : SYNTHETIQUE → 0 IS/MFP/TVA + 409 sur le réel ; REEL → 0 TPU + 409 sur la TPU
-- [ ] `TpuService` : CA sourcé du référentiel, composantes du paquet, taux par nature, minimum annuel
-- [ ] `BAREME_TPU_INDISPONIBLE` (forfaitaire) et `NATURE_ACTIVITE_TPU_INDETERMINEE` — aucun taux deviné
-- [ ] Plafond dépassé ⇒ avertissement, **aucune bascule** ; exonération 24 mois selon D-095-9
-- [ ] Versements + solde (à payer / crédit) ; traçabilité (composante, taux, paquet)
-- [ ] Écriture `64x`/`44x` au delta via 094 (ni `891`/`441`, ni `4441`, ni soldage TVA)
-- [ ] Axes orthogonaux respectés (TPU possible en SN comme en SMT)
-- [ ] Immutabilité après validation / exercice clos (409)
-- [ ] **F-095-1** corrigé (convertisseur unique + lecteur de 080)
-- [ ] Lint 0 warning · build OK · couverture ≥ 65/90/90/90 · unit + e2e verts · **mutation-tests rouges à la mutation**
-- [ ] **Vérification docker** de la persistance réelle (paramétrage, versements, balance TPU)
-- [ ] Swagger ; CI verte
-- [ ] **⚠️ Prérequis de mise en production signalé** : compléter le **barème forfaitaire TPU** (PRD §13)
-- [ ] Non-régression : STORY-091/092/093/094 (branche réelle) verts
+- [x] Paquet `togo@2026` régénéré (seuils structurés, `exonerationTemporaireMois`, comptes TPU) + sha256 reporté au manifeste
+- [x] `MoteurFiscalService` : aiguillage + **gardes d'exclusivité sur les deux surfaces**
+- [x] **Tests d'exclusivité** : SYNTHETIQUE → 0 IS/MFP/TVA + 409 sur le réel ; REEL → 0 TPU + 409 sur la TPU
+- [x] `TpuService` : CA sourcé du référentiel, composantes du paquet, taux par nature, minimum annuel
+- [x] `BAREME_TPU_INDISPONIBLE` (forfaitaire) et `NATURE_ACTIVITE_TPU_INDETERMINEE` — aucun taux deviné
+- [x] Plafond dépassé ⇒ avertissement, **aucune bascule** ; exonération 24 mois selon D-095-9
+- [x] Versements + solde (à payer / crédit) ; traçabilité (composante, taux, paquet)
+- [x] Écriture `64x`/`44x` au delta via 094 (ni `891`/`441`, ni `4441`, ni soldage TVA)
+- [x] Axes orthogonaux respectés (TPU possible en SN comme en SMT)
+- [x] Immutabilité après validation / exercice clos (409)
+- [x] **F-095-1** corrigé (convertisseur unique + lecteur de 080)
+- [x] Lint 0 warning · build OK · couverture ≥ 65/90/90/90 · unit + e2e verts · **mutation-tests rouges à la mutation**
+- [x] **Vérification docker** de la persistance réelle (paramétrage, versements, balance TPU)
+- [x] Swagger ; CI verte
+- [x] **⚠️ Prérequis de mise en production signalé** : compléter le **barème forfaitaire TPU** (PRD §13)
+- [x] Non-régression : STORY-091/092/093/094 (branche réelle) verts
 
 ---
 
@@ -316,9 +316,23 @@ Rapport de revue : 6 constats ≥ 80 de confiance. Deux **bloquants**, retenus e
 
 ⚠️ **Un piège rencontré et à retenir** : le premier contrôle du contenu de la balance a été fait avec un `findOne({origine:'PROVISIONS_FISCALES'})` **non scopé sur l'org** — il a rendu la balance d'un dossier de STORY-094, avec ses `891` et ses comptes de TVA, et faisait conclure à un aiguillage cassé. Le parc de vérification n'est jamais vide : **toute requête `mongosh` de contrôle doit porter `orgId`**.
 
+### Revue de sécurité — aucune vulnérabilité
+
+Analyse sur `opus`, **aucun constat de confiance ≥ 80**. Les six points d'attention soumis ressortent tous sains : la branche permissive du `RegimeFiscalGuard` (`tenantId` absent) est **inatteignable** — `BalanceAccessGuard` est global et s'exécute **avant** les guards de contrôleur, et `exigerOrgId()` refuse ensuite dans les 6 méthodes du service ; l'upsert du paramétrage est org-scopé sur la clé unique exacte ; la nature d'activité est fermée par `@IsIn` et retombe sur le taux **le plus élevé** (une corruption sur-imposerait, jamais l'inverse) ; le gel est vérifié **avant** l'aiguillage donc couvre les deux branches ; le paquet est un asset vérifié au sha256 et lu défensivement ; le 404 des versements ne distingue pas « inexistant » de « hors organisation ».
+
+**Une observation sous le seuil, corrigée quand même** parce qu'une règle projet la vise explicitement (« mapper l'erreur `E11000` ») : deux requêtes concurrentes de la **même** organisation sur `PUT /fiscal/tpu/parametrage` — un double-clic suffit — ne trouvaient ni l'une ni l'autre de document, tentaient toutes deux l'insertion, et la seconde butait sur l'index unique en **500**. L'upsert est désormais rejoué ; toute autre erreur remonte telle quelle, pour ne pas masquer une panne réelle derrière une seconde tentative.
+
+### Clôture — 2026-08-04
+
+PR [`prospera-balance-service#33`](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/33) **rebase-mergée sur `dev`** (`4516ef8`), branche supprimée. Portes finales : lint **0 warning** · build OK · **2 600** unit + **547** e2e verts · couverture **98.99 / 91.82 / 98.21 / 99.07** · **14 mutation-tests, 14 rouges**.
+
+⚠️ **Prérequis de mise en production, à porter au suivi** : le **barème forfaitaire TPU** (tarifs par activité et par tonnage, CGI Art. 130-131/135) reste à extraire. Tant qu'il est absent, **tout dossier dont le CA est ≤ 30 M est refusé explicitement** (`BAREME_TPU_INDISPONIBLE`) — c'est-à-dire la part la plus nombreuse des entreprenants. La composante **déclarative** (30 M < CA ≤ 60 M), elle, est complète et calculable. Le hook est publié dans la réponse (`baremeForfaitaireDisponible`) et le moteur lira le barème à `composantes.forfaitaire.bareme` **sans changement de code**.
+
+➡️ **Ouvre STORY-096** (simulation & conseil fiscal) : `MoteurFiscalService` rejoue désormais les deux branches sur des bornes d'exercice arbitraires, sans rien écrire.
+
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** **STORY-080** (`regimeFiscal` — l'aiguillage), **STORY-078** (paquet : seuils, taux, comptes), STORY-082/085 (CA de l'exercice), **STORY-092** (le CA sourcé du référentiel) · **alimente** **STORY-094** (écriture de la TPU dans la balance)
 **⚠️ Question ouverte (PRD §13)** — **réduite de moitié** : la composante **déclarative** est complète et sourcée ; le **barème forfaitaire** (tarifs par activité/tonnage, Art. 130-131/135) reste à extraire — **prérequis de mise en production**, pas de développement
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A19 · CGI Togo 2026, Chap. V (régime de l'entreprenant / TPU, art. 128-139)
