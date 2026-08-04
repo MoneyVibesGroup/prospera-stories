@@ -4,8 +4,9 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A20 · `rapport-bilan-logique-metier-2026-07-12.md` §15 (CGI : **TVA 18 % taux unique**, art. 195 ; autres impôts : TAF, TCA, droits d'accises, patente, foncière, TH, enregistrement, retenues RSL/RSH, CNSS) · `referentiels/paquet-fiscal-togo-2026.json`
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 18 (EXTENDED)
 **Service :** `balance-service` (:3007)
@@ -214,7 +215,7 @@ async autreTaxe(@Body() dto: AutreTaxeDto, @TenantContext() orgId, @CurrentUser(
 
 ---
 
-**Status:** ready-for-dev
+**Status:** in_progress
 **Dependencies:** **STORY-078** (taux TVA, types de taxes, périodicité), **STORY-082** (TVA collectée), **STORY-083** (TVA déductible **et non déductible**), STORY-080 (assujettissement)
 **Alimente** **STORY-094** (écriture des `44x`/`64x` dans la balance), **STORY-091** (taxes non déductibles → réintégration), `bilan-service` EPIC-011 (état TVA de la DSF)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A20 · CGI Togo 2026 (TVA 18 %, art. 195)
