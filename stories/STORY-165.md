@@ -1,3 +1,18 @@
+> # ⛔ STORY REMPLACÉE — NE PAS IMPLÉMENTER
+>
+> **Remplacée le 2026-08-03** (décision PO) par le re-découpage du Module 2 : **STORY-288**.
+>
+> Cette story appartenait au découpage `EPIC-004 (rescopé)` (18 stories, 104 pts). Le découpage en
+> vigueur est **EPIC-035 → EPIC-042 / STORY-237 → STORY-290** (54 stories, 196 pts), sprints 31→38.
+> Le contenu ci-dessous **reste une bonne source de contexte métier** — c'est pour cela qu'il n'est pas
+> supprimé — mais **son périmètre, son estimation et son sprint ne font plus foi**.
+>
+> 📄 Découpage en vigueur : [`epics-paiement-2026-08-03.md`](../epics-paiement-2026-08-03.md)
+> 📐 Architecture : [`ARCHITECTURE-SPINE.md`](../architecture/architecture-paiement-service-2026-08-03/ARCHITECTURE-SPINE.md) (AD-1 → AD-18)
+> 🗂️ Motif détaillé : `superseded_stories` dans [`sprint-status.yaml`](../sprint-status.yaml)
+
+---
+
 # STORY-165 : e2e docker — **le parcours de Kossi, de bout en bout**
 
 **Epic :** EPIC-004 — `paiement-service` (PI-SPI & encaissement) — 🏁 **jalon de clôture**
@@ -8,10 +23,10 @@
 **Priorité :** Must Have
 **Story Points :** 3
 **Complexité :** medium — **la valeur est dans le scénario, pas dans le code**
-**Statut :** À faire
+**Statut :** ⛔ **superseded (2026-08-03)** — remplacée par STORY-288
 **Assigné à :** null
 **Créée le :** 2026-08-02
-**Sprint :** **33** — **incrément 3** *(clôture EPIC-004)*  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
+**Sprint :** ~~aucun~~ — retirée des sprints le 2026-08-03 (elle occupait le S31→S34)
 **Service :** `paiement-service` (`:3005`) + `platform-catalog-service` (`:3003`)
 **Couvre :** l'ensemble — vérification d'intégration
 

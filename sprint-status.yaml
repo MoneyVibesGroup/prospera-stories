@@ -1,7 +1,7 @@
 version: "6.0.0"
 project_name: "prospera"
 project_level: 3
-current_sprint: 19  # maj 2026-07-31 : S18 CLÔTURÉ — ses 9 stories sont `done` (102/087/088/089/090 le 29-30, 140/142/141/143 le 29) et le compteur était resté sur 18 / `not_started` alors que le sprint était intégralement livré. ⚠️ Son committed_points nominal de 42 était PÉRIMÉ : après les ré-estimations à la rédaction (140 5→3, 141 5→6, 143 8→5), la somme réelle des stories est **38**, toutes livrées ⇒ 38/38. L'arbitrage de capacité annoncé (« décaler 140→143 au S19 ») n'a donc jamais eu lieu et n'a plus d'objet. Prochain sprint = S19 (EPIC-023, moteur fiscal 091→095, 21 pts) — `not_started`, aucune story commencée. ⚠️ 5 STORIES ORPHELINES relevées le 2026-07-31 : STORY-133/134/135/136/144 ont un FICHIER dans stories/ mais ne sont référencées dans AUCUN sprint — et pire, **134/135/136 recouvrent le périmètre de 144** (même maquette AP-02, deux passes de rédaction, aucune ne cite les autres ; 136 est même CONTREDITE par 144 sur la revue KYC groupée). Cf. `orphan_stories` en fin de fichier : à trancher AVANT de planifier, pas à slotter en bloc. Historique : maj 2026-07-29 : S15, S16 et S17 sont TOUS clôturés (toutes leurs stories `done`) — le compteur était resté bloqué sur 15 alors que trois sprints avaient été livrés. S15 32/32, S16 60/60, S17 26/26. Le prochain sprint à ouvrir est le S18 (hub multi-source D13 + console admin), qui reste `not_started` : sa bascule en `in_progress` relève du sprint-planning, d'autant qu'il porte 42 pts pour 34 de capacité (arbitrage à trancher — cf. son commentaire `committed_points`). Historique : maj 2026-07-21 : S13 (EPIC-011B liasse calculée) done ; S14 (EPIC-012 validation/immutabilité/exercices/audit 064→067 + EPIC-013 amorce hypothèses 068) DONE 21/21 ; S15 = EPIC-013 projections (069-071) + STORY-137 (dette versions d'hypothèses, ex-132) + EPIC-014 consultation/export (072-073) ; 074 reportée au S16 le 2026-07-23 (arbitrage de capacité)
+current_sprint: 19  # maj 2026-08-03 (sprint-planning PI-SPI) : RE-DECOUPAGE du Module 2. Les 18 stories paiement de EPIC-004 rescope (STORY-150..165, 168, 169 ; 104 pts, ex-S31..S34) sont SUPERSEDED et remplacees par EPIC-035..EPIC-042 / STORY-237..290 (54 stories, 196 pts dont 13 hors service), etalees sur S31..S38. Consequence assumee : l assistant IA (ex-S35) et le bloc terrain (ex-S36) reculent de 4 sprints, en S39 et S40. Le sprint courant reste 19 : rien de ce re-decoupage ne touche aux sprints ouverts. ATTENTION : ce re-decoupage a ete fait le lendemain du precedent — le controle anti-doublon (comparer stories/*.md a l ensemble des story_id slottes) doit tourner AVANT tout nouveau decoupage, pas apres. Historique : maj 2026-07-31 : S18 CLÔTURÉ — ses 9 stories sont `done` (102/087/088/089/090 le 29-30, 140/142/141/143 le 29) et le compteur était resté sur 18 / `not_started` alors que le sprint était intégralement livré. ⚠️ Son committed_points nominal de 42 était PÉRIMÉ : après les ré-estimations à la rédaction (140 5→3, 141 5→6, 143 8→5), la somme réelle des stories est **38**, toutes livrées ⇒ 38/38. L'arbitrage de capacité annoncé (« décaler 140→143 au S19 ») n'a donc jamais eu lieu et n'a plus d'objet. Prochain sprint = S19 (EPIC-023, moteur fiscal 091→095, 21 pts) — `not_started`, aucune story commencée. ⚠️ 5 STORIES ORPHELINES relevées le 2026-07-31 : STORY-133/134/135/136/144 ont un FICHIER dans stories/ mais ne sont référencées dans AUCUN sprint — et pire, **134/135/136 recouvrent le périmètre de 144** (même maquette AP-02, deux passes de rédaction, aucune ne cite les autres ; 136 est même CONTREDITE par 144 sur la revue KYC groupée). Cf. `orphan_stories` en fin de fichier : à trancher AVANT de planifier, pas à slotter en bloc. Historique : maj 2026-07-29 : S15, S16 et S17 sont TOUS clôturés (toutes leurs stories `done`) — le compteur était resté bloqué sur 15 alors que trois sprints avaient été livrés. S15 32/32, S16 60/60, S17 26/26. Le prochain sprint à ouvrir est le S18 (hub multi-source D13 + console admin), qui reste `not_started` : sa bascule en `in_progress` relève du sprint-planning, d'autant qu'il porte 42 pts pour 34 de capacité (arbitrage à trancher — cf. son commentaire `committed_points`). Historique : maj 2026-07-21 : S13 (EPIC-011B liasse calculée) done ; S14 (EPIC-012 validation/immutabilité/exercices/audit 064→067 + EPIC-013 amorce hypothèses 068) DONE 21/21 ; S15 = EPIC-013 projections (069-071) + STORY-137 (dette versions d'hypothèses, ex-132) + EPIC-014 consultation/export (072-073) ; 074 reportée au S16 le 2026-07-23 (arbitrage de capacité)
 sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 
 # Révision 2026-07-04 : re-cadrage écosystème (voir docs/architecture-prospera-ecosystem-2026-07-04.md).
@@ -79,7 +79,7 @@ services:
     port: 3005
     database: "paiement_service"
     role: "capacité plateforme : checkout/webhooks PI SPI BCEAO + FedaPay, abonnements (relying party)"
-    status: "proposed"  # Module 2 (déc. 2026) — EPIC-004 rescopé (PA-1) ; dépend PS-1 (accès SPI, délai admin externe) + décision C8 (M2M) ; PRD paiement à venir
+    status: "proposed"  # Module 2 — EPIC-035→042 (re-découpé le 2026-08-03 ; ex-EPIC-004 rescopé PA-1). PRD ✅ livré (prds/prd-paiement-service-2026-08-02) · architecture ✅ livrée (AD-1→AD-18). ⚡ Ni PS-1 ni C8 ne bloquent plus : v1 en bac à sable par conception (NFR-5) et entitlement par événement (AD-13). ⚠️ DEUX bases requises : `paiement_service` + `paiement_service_audit` (AD-10, privilèges Mongo additifs et sans deny).
   - name: "admin-panel"
     port: 3010
     database: null
@@ -125,10 +125,10 @@ program_backlog:
     - module: 2
       name: "PI SPI (PA-1)"
       services: ["paiement-service"]
-      epic: "EPIC-004 (rescopé)"
-      target_internal: "2027-04"  # décalé (Module 1-bis inséré avant) — JIT, sans impact (PS-1/C8)
+      epic: "EPIC-035 → EPIC-042"   # ⬅️ ex-« EPIC-004 (rescopé) » — RE-DÉCOUPÉ le 2026-08-03 (décision PO). Les 18 stories paiement de l'ancien découpage sont en `superseded_stories`.
+      target_internal: "2027-12"  # ⬅️ ex-2027-04 puis sprints 31→34 : le module fiscalité passe devant (2026-08-03), puis le re-découpage porte le PI-SPI de ~3,5 à 8 sprints (S31→S38). Fin de S38 = 2027-12-02.
       status: "proposed"
-      spec: "PRD paiement (SpiProvider BCEAO + FedapayProvider) ; dépend PS-1 (délai admin externe) + C8"
+      spec: "PRD prds/prd-paiement-service-2026-08-02/prd.md · découpage epics-paiement-2026-08-03.md · architecture architecture/architecture-paiement-service-2026-08-03/ARCHITECTURE-SPINE.md (AD-1→AD-18) + compagnon architecture-paiement-service-2026-08-03.md. ⚡ C8 N'EST PLUS BLOQUANTE : l'octroi d'entitlement passe par ÉVÉNEMENT (AD-13), il n'y a plus d'appel synchrone à authentifier. PS-1 (accès SPI production) n'est plus bloquant non plus : le v1 est en bac à sable PAR CONCEPTION (NFR-5)."
     - module: 3
       name: "Fiscalité (RE-SCOPÉ)"
       services: ["fiscal-service"]
@@ -2121,196 +2121,996 @@ sprints:
   # ORDRE = décision PO du 2026-08-02 (PLAN-DISTRIBUTEUR-PI-SPI §5-bis) : le socle AVANT le PI-SPI,
   # et le PI-SPI de la CONSOLE avant celui du distributeur.
   # ══════════════════════════════════════════════════════════════════════════════════════════════
-  - sprint_number: 30   # ⬅️ ex-S21, DÉCALÉ DE 9 SPRINTS le 2026-08-03 (décision PO) : le module fiscalité (Module 3) doit être livré avant d’ouvrir le distributeur. Cf. `reserved_sprints`.
+
+  # ══════════════════════════════════════════════════════════════════════════════
+  # MODULE FISCALITÉ (`fiscal-service` :3012) — sprints 22 → 30, 279 pts, 58 stories
+  # Créé le 2026-08-03. Le distributeur et l'assistant IA ont été DÉCALÉS DE +1 SPRINT
+  # (ex-30→31 … ex-35→36) : la réserve fiscale demandait 9 sprints et n'en comptait que 8
+  # depuis que la dette de console a pris le S21. Arbitrage PO du 2026-08-03.
+  # ⛔ JALON BLOQUANT `format confirmé` avant EPIC-032 (S29-S30) : aucune story de dépôt ne
+  #    démarre sans pièce réelle — demande formalisée dans demande-pieces-fiscales-2026-08-03.md.
+  # ══════════════════════════════════════════════════════════════════════════════
+  - sprint_number: 22
+    start_date: "2027-04-22"
+    end_date: "2027-05-06"
+    capacity_points: 34
+    committed_points: 34  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    completed_points: 0
+    status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
+    goal: "236 : le contrat de balance porte enfin une dimension d'entité — elle N'EXISTE PAS aujourd'hui (vérifié dans le code, pas dans le tracker) et tout le modèle fiscal s'y branche. Puis le socle fiscal-service : scaffold :3012, deux bases Mongo aux rôles restreints, read-models et gate, chargeur de paquet."
+    stories:
+      - story_id: "STORY-236"
+        title: "Le contrat de balance canonique porte une dimension d'ENTITÉ — vérifié absente dans le code le 2026-08-03"
+        epic: "EPIC-027"
+        points: 8
+        service: "balance-service"
+        status: "not_started"  # ⚡ CRÉÉE le 2026-08-03 au sprint-planning fiscalité, sur un CONSTAT DE CODE et non de tracker : `grep` sur balance-service/src rend ZÉRO occurrence de `societeId`, `entiteId` ou `implantation` — la clé réelle est (orgId, exercice.debut, exercice.fin, source, version). La story censée l'apporter (« STORY-135 » dans une note de mémoire du 2026-07-23) N'A NI FICHIER NI ENTRÉE AU TRACKER : 0 occurrence. L'architecture fiscale (AD-7) supposait qu'il suffisait de RÉINTERPRÉTER un champ existant ; il est à CRÉER. ⚠️ EN TÊTE DE SPRINT, avant STORY-187 et STORY-205 qui s'y branchent — même raisonnement que 147→146→145 avant le moteur fiscal au S19. Service : balance-service, pas fiscal-service.
+        assigned_to: null
+      - story_id: "STORY-179"
+        title: "Scaffold `fiscal-service` (:3012), socle transverse et point de santé"
+        epic: "EPIC-027"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-180"
+        title: "Deux bases MongoDB et rôles restreints (`fiscal`, `fiscal_audit`)"
+        epic: "EPIC-027"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-181"
+        title: "Read-models locaux et gate `@RequiresFiscalAccess`"
+        epic: "EPIC-027"
+        points: 8
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-182"
+        title: "Chargeur de paquet fiscal depuis `catalog-service`"
+        epic: "EPIC-027"
+        points: 8
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+  - sprint_number: 23
+    start_date: "2027-05-06"
+    end_date: "2027-05-20"
+    capacity_points: 34
+    committed_points: 31  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    completed_points: 0
+    status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
+    goal: "Fin du socle (journal d'audit chaîné + outbox, statut de validation du paquet, habilitations) 🏁 EPIC-027, puis ouverture du dossier fiscal et de ses implantations."
+    stories:
+      - story_id: "STORY-184"
+        title: "Journal d'audit chaîné par périmètre et outbox transactionnelle"
+        epic: "EPIC-027"
+        points: 8
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-183"
+        title: "Statut de validation des éléments et rattachement version ↔ exercice"
+        epic: "EPIC-027"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-185"
+        title: "Habilitations graduées et séparation des natures d'accès"
+        epic: "EPIC-027"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-186"
+        title: "Dossier fiscal, attestation de mandat et historisation"
+        epic: "EPIC-028"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-187"
+        title: "Implantations fiscales : création, type d'entité, clôture"
+        epic: "EPIC-028"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-189"
+        title: "Résolution conjointe type d'entité → référentiel et paquet"
+        epic: "EPIC-028"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+  - sprint_number: 24
+    start_date: "2027-05-20"
+    end_date: "2027-06-03"
+    capacity_points: 34
+    committed_points: 32  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    completed_points: 0
+    status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
+    goal: "Le catalogue d'obligations se dérive tout seul 🏁 EPIC-028 — propriétaire unique, trois déclencheurs, clé d'idempotence — et le moteur de familles démarre."
+    stories:
+      - story_id: "STORY-188"
+        title: "Proposition et confirmation des régimes par implantation"
+        epic: "EPIC-028"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-190"
+        title: "Dérivation du catalogue d'obligations"
+        epic: "EPIC-028"
+        points: 8
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-191"
+        title: "Activation et désactivation manuelle d'une obligation"
+        epic: "EPIC-028"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-192"
+        title: "Taxes sectorielles et échéances portées par le type d'entité"
+        epic: "EPIC-028"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-193"
+        title: "Régime dérogatoire et signalement"
+        epic: "EPIC-028"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-194"
+        title: "Agnosticisme de la source de balance"
+        epic: "EPIC-028"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-195"
+        title: "Registre de familles, famille proportionnelle et détail de calcul"
+        epic: "EPIC-029"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+  - sprint_number: 25
+    start_date: "2027-06-03"
+    end_date: "2027-06-17"
+    capacity_points: 34
+    committed_points: 31  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    completed_points: 0
+    status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
+    goal: "Le moteur de calcul est complet et explicable 🏁 EPIC-029 (barèmes, forfaits, pipeline de modificateurs, aiguillage, refus nommé hors périmètre), puis le calendrier s'ouvre."
+    stories:
+      - story_id: "STORY-196"
+        title: "Familles barème par tranches et forfait par tranche"
+        epic: "EPIC-029"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-197"
+        title: "Pipeline de modificateurs ordonné"
+        epic: "EPIC-029"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-198"
+        title: "Aiguillage, y compris sur l'état d'un tiers"
+        epic: "EPIC-029"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-199"
+        title: "Familles hors périmètre : déclarables, non calculables"
+        epic: "EPIC-029"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-200"
+        title: "Calendrier fiscal centralisé, filtres et tri"
+        epic: "EPIC-030"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-201"
+        title: "Calcul des échéances depuis le paquet"
+        epic: "EPIC-030"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-202"
+        title: "Reports d'échéance administratifs"
+        epic: "EPIC-030"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+  - sprint_number: 26
+    start_date: "2027-06-17"
+    end_date: "2027-07-01"
+    capacity_points: 34
+    committed_points: 32  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    completed_points: 0
+    status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
+    goal: "Le calendrier est livré 🏁 EPIC-030 (alertes BullMQ idempotentes, charge par collaborateur) et la chaîne déclarative démarre : alimentation depuis la balance, cycle de vie, rôles."
+    stories:
+      - story_id: "STORY-203"
+        title: "Alertes d'échéance et états de retard"
+        epic: "EPIC-030"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-204"
+        title: "Responsable désigné et vue de charge par collaborateur"
+        epic: "EPIC-030"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-205"
+        title: "Alimentation depuis la balance et blocage motivé"
+        epic: "EPIC-031"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-206"
+        title: "Délégation du calcul au moteur de `balance-service`"
+        epic: "EPIC-031"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-207"
+        title: "Triplet calculé, déclaré, payé"
+        epic: "EPIC-031"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-208"
+        title: "Cycle de vie de l'obligation et rôles"
+        epic: "EPIC-031"
+        points: 8
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-209"
+        title: "Validation du client capturée comme pièce"
+        epic: "EPIC-031"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+  - sprint_number: 27
+    start_date: "2027-07-01"
+    end_date: "2027-07-15"
+    capacity_points: 34
+    committed_points: 31  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    completed_points: 0
+    status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
+    goal: "🏁 EPIC-031 — PREMIER JALON VENDABLE : le cabinet produit, contrôle, valide et versionne ses déclarations, chaque geste laissant une trace inviolable. Puis le règlement s'amorce."
+    stories:
+      - story_id: "STORY-210"
+        title: "Rectificatives versionnées, immuabilité et clôture"
+        epic: "EPIC-031"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-211"
+        title: "Contrôles de cohérence intra-période avec tolérances"
+        epic: "EPIC-031"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-212"
+        title: "Continuité inter-périodes"
+        epic: "EPIC-031"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-213"
+        title: "Anomalies : gravité, blocage et levée motivée"
+        epic: "EPIC-031"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-214"
+        title: "Restitution du chemin d'un montant et historique complet"
+        epic: "EPIC-031"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-225"
+        title: "Montant à régler net d'acomptes, crédits et retenues"
+        epic: "EPIC-033"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-226"
+        title: "Ordre de règlement produit, jamais exécuté"
+        epic: "EPIC-033"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+  - sprint_number: 28
+    start_date: "2027-07-15"
+    end_date: "2027-07-29"
+    capacity_points: 34
+    committed_points: 32  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    completed_points: 0
+    status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
+    goal: "Le règlement est bouclé 🏁 EPIC-033 (rapprochement, déposée ≠ payée, pénalités estimées comme risque) et la base de rémunération s'ouvre, alimentée par import ET par saisie."
+    stories:
+      - story_id: "STORY-227"
+        title: "Rapprochement du règlement et refus d'imputation incohérente"
+        epic: "EPIC-033"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-228"
+        title: "Distinction « déposée » et « payée »"
+        epic: "EPIC-033"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-229"
+        title: "Estimation des pénalités et majorations comme risque"
+        epic: "EPIC-033"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-230"
+        title: "Base de rémunération par salarié et par période"
+        epic: "EPIC-034"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-231"
+        title: "Import d'un fichier de paie, idempotent et versionné"
+        epic: "EPIC-034"
+        points: 8
+        service: "fiscal-service"
+        status: "not_started"  # ⚠️ Dépend de la question ouverte n°2 du PRD : le format d'import de paie n'est pas connu.
+        assigned_to: null
+      - story_id: "STORY-232"
+        title: "Saisie manuelle de la base de rémunération"
+        epic: "EPIC-034"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-233"
+        title: "Calcul des cotisations et des retenues sur salaires"
+        epic: "EPIC-034"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+  - sprint_number: 29
+    start_date: "2027-07-29"
+    end_date: "2027-08-12"
+    capacity_points: 34
+    committed_points: 29  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    completed_points: 0
+    status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
+    goal: "Les obligations sociales rejoignent le calendrier 🏁 EPIC-034, puis le dépôt assisté démarre — ⛔ SOUS RÉSERVE du jalon `format confirmé` (cf. demande-pieces-fiscales-2026-08-03.md)."
+    stories:
+      - story_id: "STORY-234"
+        title: "Obligations sociales dans le calendrier, le cycle et la preuve"
+        epic: "EPIC-034"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-235"
+        title: "Rapprochement des charges sociales et des comptes de personnel"
+        epic: "EPIC-034"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-215"
+        title: "Port de canal asynchrone et production du livrable"
+        epic: "EPIC-032"
+        points: 8
+        service: "fiscal-service"
+        status: "not_started"  # ⛔ BLOQUÉE par le jalon `format confirmé` — aucune pièce réelle de dépôt en main à ce jour.
+        assigned_to: null
+      - story_id: "STORY-216"
+        title: "Format de canal décrit comme donnée du paquet"
+        epic: "EPIC-032"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"  # ⛔ BLOQUÉE par le jalon `format confirmé`.
+        assigned_to: null
+      - story_id: "STORY-217"
+        title: "Guidage de dépôt pas à pas"
+        epic: "EPIC-032"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"  # ⛔ BLOQUÉE par le jalon `format confirmé`.
+        assigned_to: null
+      - story_id: "STORY-218"
+        title: "Capture de l'accusé et qualification du retard"
+        epic: "EPIC-032"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"  # ⛔ BLOQUÉE par le jalon `format confirmé`.
+        assigned_to: null
+  - sprint_number: 30
     start_date: "2027-08-12"
     end_date: "2027-08-26"
     capacity_points: 34
-    committed_points: 31   # ⚖️ RÉÉQUILIBRÉ le 2026-08-03 : +STORY-171 (5, prérequis découvert) et −STORY-152 (8, déplacée au S31 où vit déjà son consommateur STORY-168). 34 → 31.
+    committed_points: 27  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
     completed_points: 0
-    status: "not_started"  # 🆕 2026-08-03. RANG 1 de l'ordre PO : le socle. ⚡ Ce sprint débloque à lui seul TOUT le frontend distributeur (DI-01/DI-02/AP-17) — sans lui, l'administrateur créé dans la console n'a aucun rôle à recevoir et ne peut pas entrer dans son application. Les trois stories paiement (150/151/152) sont ici parce que 152 (multi-fournisseur) conditionne STORY-168, elle-même au rang 2.
-    goal: "Socle distributeur (EPIC-025) : les 14 personas au catalogue de rôles + les rôles personnalisés par organisation. Amorce paiement-service (:3005) : scaffold relying party + outbox, comptes d'encaissement, PaymentProvider multi-fournisseur routé pays × devise × méthode. À l'issue : Money Vibes crée un distributeur, son administrateur reçoit un rôle, et le service de paiement démarre."
+    status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
+    goal: "🏁 EPIC-032 et MODULE FISCALITÉ LIVRÉ : accusé, rejet, archivage, dossier de contrôle, liaison pièce ↔ écriture, base légale verbatim. Le différenciateur du produit."
+    stories:
+      - story_id: "STORY-219"
+        title: "Rejet administratif"
+        epic: "EPIC-032"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"  # ⛔ BLOQUÉE par le jalon `format confirmé`.
+        assigned_to: null
+      - story_id: "STORY-220"
+        title: "Archivage des livrables et accusés"
+        epic: "EPIC-032"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-221"
+        title: "Dossier de contrôle à la demande"
+        epic: "EPIC-032"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"  # ⛔ BLOQUÉE par le jalon `format confirmé`.
+        assigned_to: null
+      - story_id: "STORY-222"
+        title: "Rapprochement des pièces justificatives, granularité annoncée"
+        epic: "EPIC-032"
+        points: 5
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-223"
+        title: "Liaison entre écriture comptable et pièce justificative"
+        epic: "EPIC-032"
+        points: 8
+        service: "fiscal-service"
+        status: "not_started"  # Prérequis de la restitution au niveau de la facture (FR-F54) — la liaison n'existe nulle part.
+        assigned_to: null
+      - story_id: "STORY-224"
+        title: "Base légale citée verbatim sur chaque retraitement"
+        epic: "EPIC-032"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"
+        assigned_to: null
+  # ══════════════════════════════════════════════════════════════════════════════
+  # ⚡ RE-DÉCOUPAGE PI-SPI — sprint-planning du 2026-08-03 (décision PO)
+  # Les 18 stories paiement du découpage EPIC-004 rescopé (STORY-150→165, 168, 169 ; ~103 pts,
+  # ex-sprints 31→34) sont SUPERSEDED et remplacées par EPIC-035→042 / STORY-237→290
+  # (54 stories, 196 pts dont 13 hors service). Découpage : epics-paiement-2026-08-03.md.
+  # Architecture : architecture/architecture-paiement-service-2026-08-03/ARCHITECTURE-SPINE.md (AD-1→AD-18).
+  # ⚠️ CONSÉQUENCE ASSUMÉE : 183 pts imputables au lieu de 103 ⇒ le PI-SPI passe de ~3,5 à 8 sprints,
+  #    et l'assistant IA (ex-S35) + le bloc terrain (ex-S36) reculent de 4 sprints (→ S39, S40).
+  #    Ce n'est PAS une dérive de périmètre : même effet que notification-service, dont l'estimation
+  #    s'était révélée basse de 50 % au découpage réel. Le périmètre livré reste celui du PRD.
+  # ⚠️ STORY-166, 167 et 171 NE SONT PAS superseded : elles portent sur auth-service (rôles
+  #    distributeur) et restent au S31 telles quelles.
+  # ⛔ DEUX PRÉALABLES HORS SERVICE, portés comme des stories et non comme des risques :
+  #    STORY-268 (S36, balance-service : extraction de @prospera/rapprochement + workspace npm —
+  #      AUCUN workspace n'existe au 2026-08-03) bloque l'incrément 2 ;
+  #    STORY-279 (S37, platform-catalog-service : consommer paiement.abonnement.*) bloque l'incrément 3.
+  # ══════════════════════════════════════════════════════════════════════════════
+  - sprint_number: 31   # ⬅️ ex-S21, DÉCALÉ DE 9 SPRINTS le 2026-08-03 (décision PO) : le module fiscalité (Module 3) doit être livré avant d’ouvrir le distributeur.
+    start_date: "2027-08-26"
+    end_date: "2027-09-09"
+    capacity_points: 34
+    committed_points: 29  # ⚖️ RE-COMPOSÉ le 2026-08-03 au re-découpage PI-SPI : les 3 stories auth-service (171/166/167, 21 pts) sont INCHANGÉES ; les 10 pts paiement (ex-150/151) deviennent l'amorce du nouveau socle (237/238/239, 8 pts).
+    completed_points: 0
+    status: "not_started"  # RANG 1 de l'ordre PO : le socle. ⚡ Ce sprint débloque à lui seul TOUT le frontend distributeur (DI-01/DI-02/AP-17) — sans lui, l'administrateur créé dans la console n'a aucun rôle à recevoir.
+    goal: "Socle distributeur (EPIC-025) : les 14 personas au catalogue de rôles + les rôles personnalisés par organisation. Amorce paiement-service (:3005) : scaffold relying party, DEUX bases Mongo aux rôles restreints (le journal d'audit doit être ineffaçable AVANT la première opération d'argent), read-models et gate."
     stories:
       - story_id: "STORY-171"
         title: "Le vertical porté par l'organisation — un champ, quatre consommateurs"
         epic: "EPIC-025"
         points: 5
         service: "auth-service"
-        status: "not_started"  # 🆕 CRÉÉE le 2026-08-03 — ⚡ TROU TROUVÉ EN APPLIQUANT Q5, sur lecture du code : `grep -i vertical` sur tout auth-service@origin/dev src/ = ZÉRO occurrence ; `organization.schema.ts` n'a ni vertical ni type de client ; dans platform-catalog-service, les 3 occurrences sont toutes en COMMENTAIRE. Le mot traverse un an de décisions, de PRD et de trackers sans exister comme donnée. ⚠️ À LIVRER AVANT STORY-166 : son AC 10 (« ne proposer DIST_* qu'aux organisations distributeur ») n'a rien à lire sans elle, et AP-17 §1 non plus. 4ᵉ occurrence du motif « délégation nominative jamais retombée » — cette fois vérifiée AVANT d'être payée.
+        status: "not_started"
         assigned_to: null
       - story_id: "STORY-166"
         title: "Rôles métier distributeur — les 14 personas + DIST_ADMIN, avec attribut de couverture, extensibles sans migration"
         epic: "EPIC-025"
-        points: 8   # ⬆️ 5→8 le 2026-08-03 : décision PO Q5 « les 14 personas » (la rédaction initiale en proposait six) + attribut de couverture servi/partiel/en_attente_de_module
+        points: 8
         service: "auth-service"
-        status: "not_started"  # ⚡ BLOQUE le parcours d'entrée distributeur en entier. Huit des 14 personas n'ont aucun écran → la couverture est portée par la DONNÉE et affichée par AP-17 avant l'attribution, expliquée par DI-01 après la connexion. Q6 (portée par zone) REPORTÉE : un superviseur voit toute l'organisation au v1.
+        status: "not_started"
         assigned_to: null
       - story_id: "STORY-167"
         title: "Rôles personnalisés — le distributeur compose les siens, Money Vibes les voit"
         epic: "EPIC-025"
         points: 8
         service: "auth-service"
-        status: "not_started"  # dépend de 166 ; lecture seule côté console (AP-17) — Money Vibes voit pour accompagner, elle ne modifie pas les rôles d'un client
+        status: "not_started"
         assigned_to: null
-      - story_id: "STORY-150"
-        title: "Scaffold paiement-service — relying party RS256/JWKS, base dédiée, outbox transactionnel, santé par fournisseur"
-        epic: "EPIC-004"
-        points: 5
+      - story_id: "STORY-237"
+        title: "Scaffold `paiement-service` (:3005), socle transverse et point de santé"
+        epic: "EPIC-035"
+        points: 3
         service: "paiement-service"
-        status: "not_started"  # patron établi 5 fois (031/034/076/138) ; la valeur est dans ce qu'on n'oublie pas
+        status: "not_started"  # 🆕 2026-08-03. Remplace l'amorce de l'ex-STORY-150. Port :3005 vérifié LIBRE au docker-compose racine ce jour.
         assigned_to: null
-      - story_id: "STORY-151"
-        title: "Comptes d'encaissement — titulaire obligatoire, vérification avant usage, secrets qui ne ressortent jamais"
-        epic: "EPIC-004"
-        points: 5
+      - story_id: "STORY-238"
+        title: "Deux bases MongoDB et rôles restreints (`paiement_service`, `paiement_service_audit`)"
+        epic: "EPIC-035"
+        points: 2
         service: "paiement-service"
-        status: "not_started"  # sert AP-13 (console)
+        status: "not_started"  # ⚡ EN TÊTE, avant toute opération d'argent. Les privilèges Mongo sont ADDITIFS et sans deny : un readWrite sur la base métier redonnerait `remove` à une simple collection d'audit. Seule la séparation de BASE tient (patron fiscal AD-10). ⚠️ Nommage vérifié dans le docker-compose réel : `<service>_service`, PAS `paiement`/`paiement_audit` comme l'annonçait la spine fiscal-service (non déployée, donc non ratifiée).
         assigned_to: null
-
-  - sprint_number: 31   # ⬅️ ex-S22
-    start_date: "2027-08-26"
-    end_date: "2027-09-09"
-    capacity_points: 34
-    committed_points: 34   # ⚖️ 26 → 34 le 2026-08-03 : +STORY-152 déplacée du S30. Pile à la capacité.
-    completed_points: 0
-    status: "not_started"  # 🆕 2026-08-03. RANG 2 : le PI-SPI de la CONSOLE. 🏁 clôture l'incrément 1 du PRD paiement. STORY-169 (créance manuelle) est le « chemin A » du plan : Facturation (#17) est le vrai producteur de créances mais n'a ni PRD ni code — sans 169, l'écran « encaisser » porterait sur un objet inexistant.
-    goal: "PI-SPI incrément 1 🏁 : créance projetée, demande de paiement et lien public ; encaissement avec notification signée, idempotence prouvée, paiement partiel et transparence des frais. + Registre plateforme des fournisseurs (activer un pays sans déploiement) et créance saisie manuellement (chemin A, en attendant Facturation)."
-    stories:
-      - story_id: "STORY-152"
-        title: "PaymentProvider — plusieurs fournisseurs actifs en même temps, routés par pays × devise × méthode"
-        epic: "EPIC-004"
-        points: 8
+      - story_id: "STORY-239"
+        title: "Read-models locaux et gate `@RequiresPaiementAccess`"
+        epic: "EPIC-035"
+        points: 3
         service: "paiement-service"
-        status: "not_started"  # ⬅️ DÉPLACÉE du S30 le 2026-08-03 (rééquilibrage après création de STORY-171). ⚠️ ORDRE INTERNE AU SPRINT : 152 AVANT 168 — 168 (registre plateforme) est sa surface d'administration et ne peut pas être écrite avant elle.
+        status: "not_started"
         assigned_to: null
-      - story_id: "STORY-153"
-        title: "Créance projetée, demande de paiement et lien public — la seule surface que voit un détaillant"
-        epic: "EPIC-004"
-        points: 8
-        service: "paiement-service"
-        status: "not_started"  # ⚡ débloque PY-00→PY-03 (page publique servie par paiement-service)
-        assigned_to: null
-      - story_id: "STORY-154"
-        title: "Encaissement — notification signée, idempotence prouvée, paiement partiel et transparence des frais"
-        epic: "EPIC-004"
-        points: 8
-        service: "paiement-service"
-        status: "not_started"  # story de clôture de l'incrément 1
-        assigned_to: null
-      - story_id: "STORY-168"
-        title: "Registre plateforme des fournisseurs de paiement — déclarer, configurer, activer par pays"
-        epic: "EPIC-004"
-        points: 5
-        service: "paiement-service"
-        status: "not_started"  # dépend de 152 ; ⚡ priorité PO explicite : « le PI-SPI qui compte aujourd'hui est celui de la console ». Débloque AP-18.
-        assigned_to: null
-      - story_id: "STORY-169"
-        title: "Créance saisie manuellement — le chaînon en attendant Facturation"
-        epic: "EPIC-004"
-        points: 5
-        service: "paiement-service"
-        status: "not_started"  # dépend de 153. Chemin A (décision PO 2026-08-02) : une créance saisie à la main n'est pas une dette technique, c'est la réalité de distributeurs qui facturent sur papier. Débloque DI-04.
-        assigned_to: null
-
-  - sprint_number: 32   # ⬅️ ex-S23
+  - sprint_number: 32   # ⬅️ ex-S22
     start_date: "2027-09-09"
     end_date: "2027-09-23"
     capacity_points: 34
-    committed_points: 34
+    committed_points: 27  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
     completed_points: 0
-    status: "not_started"  # 🆕 2026-08-03. Incrément 2 du PRD paiement — le terrain : espèces, promesses, réconciliation, annulation. ⚡ C'est ici que vit la SÉPARATION DES POUVOIRS (déclarer / valider / annuler sur des rôles distincts) que STORY-166 porte côté catalogue.
-    goal: "PI-SPI incrément 2 : promesse de paiement dont le sort se constate tout seul ; paiement hors Prospera déclaré puis validé par la remise d'espèces ; réconciliation en cascade de trois clés ; annulation constatée jamais initiée ; solde où le certain et le déclaré ne se confondent jamais ; droits et piste d'audit."
+    status: "not_started"  # 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-035.
+    goal: "🏁 EPIC-035 : le journal d'audit chaîné PAR CRÉANCE (jamais global — une chaîne globale sérialiserait tout le service), la séparation des pouvoirs au niveau de l'ACTEUR, et les comptes d'encaissement dont le titulaire est obligatoire — le contrôle qui matérialise NFR-1 dans le modèle de données. Puis l'ouverture du port `PaymentProvider`."
     stories:
-      - story_id: "STORY-155"
-        title: "Promesse de paiement — un engagement daté dont le sort se constate tout seul"
-        epic: "EPIC-004"
+      - story_id: "STORY-240"
+        title: "Journal d'audit chaîné par créance et outbox transactionnelle"
+        epic: "EPIC-035"
         points: 5
         service: "paiement-service"
         status: "not_started"
         assigned_to: null
-      - story_id: "STORY-156"
-        title: "Paiement hors Prospera — déclaré puis validé par la remise d'espèces, jamais l'un sans l'autre"
-        epic: "EPIC-004"
-        points: 8
-        service: "paiement-service"
-        status: "not_started"  # ⚡ exige que `declarer` et `valider` soient portés par des rôles DISTINCTS (STORY-166 §E)
-        assigned_to: null
-      - story_id: "STORY-157"
-        title: "Réconciliation — relevé du fournisseur, cascade de trois clés, et rien qui se perde"
-        epic: "EPIC-004"
-        points: 8
-        service: "paiement-service"
-        status: "not_started"
-        assigned_to: null
-      - story_id: "STORY-158"
-        title: "Annulation — constatée, jamais initiée, contre-passée et jamais effacée"
-        epic: "EPIC-004"
-        points: 5
-        service: "paiement-service"
-        status: "not_started"
-        assigned_to: null
-      - story_id: "STORY-159"
-        title: "Le solde d'une créance — le certain et le déclaré ne se confondent jamais"
-        epic: "EPIC-004"
-        points: 5
-        service: "paiement-service"
-        status: "not_started"  # story de clôture de l'incrément 2
-        assigned_to: null
-      - story_id: "STORY-160"
-        title: "Droits, piste d'audit et console d'exploitation — trois droits qui ne se cumulent pas"
-        epic: "EPIC-004"
+      - story_id: "STORY-241"
+        title: "Catalogue de permissions paiement et séparation des pouvoirs par acteur"
+        epic: "EPIC-035"
         points: 3
         service: "paiement-service"
-        status: "not_started"
+        status: "not_started"  # ⚡ Au niveau de l'ACTEUR sur l'objet, pas du rôle : une org de 3 personnes qui cumule les 3 permissions reste couverte (AD-11). L'ex-STORY-160 s'en remettait aux rôles.
         assigned_to: null
-
-  - sprint_number: 33   # ⬅️ ex-S24
+      - story_id: "STORY-242"
+        title: "Compte d'encaissement : déclaration, titulaire obligatoire, multi-comptes"
+        epic: "EPIC-035"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # ⚡ Porte le test qui matérialise SM-1 : aucun champ du modèle ne représente un solde détenu, un portefeuille, un séquestre ou un reversement (NFR-1b). Le contrôle est dans le modèle, pas dans la vigilance.
+        assigned_to: null
+      - story_id: "STORY-243"
+        title: "Chiffrement des identifiants de fournisseur et non-restitution"
+        epic: "EPIC-035"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # AES-256-GCM, clé maîtresse HORS base. Chaque org a son propre compte marchand donc ses propres clés d'API : c'est la surface de compromission la plus sérieuse du service.
+        assigned_to: null
+      - story_id: "STORY-245"
+        title: "Port `PaymentProvider` et registre de capacités"
+        epic: "EPIC-036"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Port ASYNCHRONE par nature : initier rend une référence, la confirmation arrive comme un fait séparé. Un port synchrone exclurait tout PSP réel.
+        assigned_to: null
+      - story_id: "STORY-246"
+        title: "Adaptateur FedaPay sandbox — checkout par redirection"
+        epic: "EPIC-036"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # fedapay npm 1.2.5 (vérifié 2026-08-03), signature X-FEDAPAY-SIGNATURE. NFR-5 : aucun `si production` dans le code.
+        assigned_to: null
+      - story_id: "STORY-244"
+        title: "Vérification d'un compte par appel de validation au fournisseur"
+        epic: "EPIC-035"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # 🏁 EPIC-035. ⚠️ REPLACÉE APRÈS 245/246 le 2026-08-03 (audit d'ordonnancement) : vérifier un compte passe par un APPEL DE VALIDATION au fournisseur — elle exige donc que le port `PaymentProvider` existe. Elle était ordonnée avant lui. Jamais par transaction de montant symbolique : ça coûte de l'argent et suppose un débit sur un compte pas encore approuvé.
+        assigned_to: null
+  - sprint_number: 33   # ⬅️ ex-S23
     start_date: "2027-09-23"
     end_date: "2027-10-07"
     capacity_points: 34
-    committed_points: 26
+    committed_points: 30
     completed_points: 0
-    status: "not_started"  # 🆕 2026-08-03. Incrément 3 — 🏁 CLÔTURE EPIC-004. ⚡ STORY-162 REMPLACE STORY-039 (octroi d'entitlement à l'activation, tranche C8) : même objet, mais par ÉVÉNEMENT et sans identité de service.
-    goal: "PI-SPI incrément 3 🏁 EPIC-004 : abonnement Prospera (le seul cas où Money Vibes est bénéficiaire) ; octroi d'entitlements par événement (tranche C8) ; impayé, période de grâce et rétablissement ; pays, devises et exactitude monétaire (le XOF n'a pas de décimale) ; e2e docker du parcours complet."
+    status: "not_started"  # 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-036.
+    goal: "🏁 EPIC-036 : les deux modes de checkout, le routage déterministe sans repli implicite, et le registre ADMINISTRABLE (ouvrir un marché sans déploiement). Puis l'ouverture de la créance : montants en unité mineure, upsert idempotent, et la créance saisie à la main — le chemin A, sans quoi l'écran distributeur porte sur un objet inexistant."
     stories:
-      - story_id: "STORY-161"
-        title: "Abonnement Prospera — le seul cas où Money Vibes est bénéficiaire"
-        epic: "EPIC-004"
+      - story_id: "STORY-247"
+        title: "Adaptateur FedaPay — mode checkout API directe"
+        epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "not_started"  # débloque AP-15
+        status: "not_started"  # ⚠️ PORTE LE RISQUE R4. Décision PO du 2026-08-03, RÉAFFIRMÉE après mise en garde explicite : les DEUX modes en v1. Conséquence portée en AD-5 — données de paiement (PAN, PIN, OTP) EN TRANSIT SEULEMENT, aucun champ de schéma ne peut les recevoir. La conformité carte devient un NFR de PREMIER RANG du service. ⛔ À instruire avec le responsable conformité AVANT de démarrer cette story.
         assigned_to: null
-      - story_id: "STORY-162"
-        title: "Octroi d'entitlements à l'encaissement — par événement, sans identité de service (tranche C8)"
-        epic: "EPIC-004"
-        points: 8
-        service: "paiement-service"
-        status: "not_started"  # ⚡ REMPLACE STORY-039 (cf. superseded_stories)
-        assigned_to: null
-      - story_id: "STORY-163"
-        title: "Impayé, période de grâce et rétablissement — la suspension est la règle, la grâce une dérogation"
-        epic: "EPIC-004"
-        points: 5
-        service: "paiement-service"
-        status: "not_started"  # débloque AP-16
-        assigned_to: null
-      - story_id: "STORY-164"
-        title: "Pays, devises et exactitude monétaire — le XOF n'a pas de décimale"
-        epic: "EPIC-004"
-        points: 5
-        service: "paiement-service"
-        status: "not_started"  # même invariant que le contrat de balance : entiers en unités mineures (STORY-101/147)
-        assigned_to: null
-      - story_id: "STORY-165"
-        title: "e2e docker — le parcours de Kossi, de bout en bout"
-        epic: "EPIC-004"
+      - story_id: "STORY-248"
+        title: "Routage ordonné pays × devise × méthode et refus nommé"
+        epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # 🏁 jalon de clôture EPIC-004 ; patron STORY-100
+        status: "not_started"  # Zéro fournisseur éligible ⇒ AUCUN_FOURNISSEUR_ELIGIBLE. Jamais de repli vers « le premier fournisseur actif ».
         assigned_to: null
-
-  - sprint_number: 34   # ⬅️ ex-S22 puis ex-S25 — décalé deux fois le 2026-08-03. Contenu INCHANGÉ. ⚠️ L’assistant IA n’a AUCUNE dépendance dure et son propre commentaire le dit « déplaçable plus tôt » : le placer ici est un CHOIX de priorité (décision PO 2026-08-03), pas une contrainte technique. Il peut remonter dans la plage réservée S21→S29 si le fiscal ne la remplit pas.
+      - story_id: "STORY-249"
+        title: "Démarrage dégradé, santé par fournisseur et réacheminement explicite"
+        epic: "EPIC-036"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Le réacheminement exige la RÉVOCATION PROUVÉE chez le fournisseur d'origine. Un réacheminement automatique d'une demande déjà communiquée au payeur créerait le double encaissement que NFR-3 interdit.
+        assigned_to: null
+      - story_id: "STORY-289"
+        title: "Registre plateforme administrable des fournisseurs"
+        epic: "EPIC-036"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # 🏁 EPIC-036. ⚡ ABSORBE l'ex-STORY-168 (superseded) : le trou qu'elle nommait est réel — 245/248 livrent le contrat et le routage, pas le moyen de déclarer un fournisseur SANS DÉPLOYER. Patron du registre de catalogue (STORY-032). ⚠️ Le registre porte activation, routage et identifiants — JAMAIS les capacités, qui restent déclarées par l'adaptateur (AD-5/AD-6) : sinon une capacité mentirait sur ce que le code sait faire.
+        assigned_to: null
+      - story_id: "STORY-250"
+        title: "Type `Montant` en unité mineure et décimales par devise"
+        epic: "EPIC-037"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # ⚡ EN TÊTE de la chaîne monétaire. Le XOF et le GNF n'ont PAS de décimale : un traitement à deux décimales par défaut produit des montants faux d'un facteur 100 sur le marché principal (R2).
+        assigned_to: null
+      - story_id: "STORY-251"
+        title: "Créance projetée par upsert idempotent"
+        epic: "EPIC-037"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Aucune API de création de créance : la première demande la matérialise, clé (orgId, moduleAppelant, referenceExterne). Un montantOrigine divergent = anomalie tracée, jamais un écrasement.
+        assigned_to: null
+      - story_id: "STORY-290"
+        title: "Créance saisie manuellement — le chaînon en attendant Facturation"
+        epic: "EPIC-037"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # ⚡ ABSORBE l'ex-STORY-169 (superseded). CHEMIN A retenu par le PO le 2026-08-02 : Facturation (#17) n'existe pas, n'a pas de PRD, et est en position 17 sur 29. Origine `SAISIE_MANUELLE` explicite (AD-2) — pour qu'à l'arrivée de Facturation on sache lesquelles ne pas dupliquer. AUCUNE reprise à prévoir : Facturation devient un SECOND émetteur, pas un remplacement.
+        assigned_to: null
+      - story_id: "STORY-252"
+        title: "Demande de paiement, durée de validité et révocation"
+        epic: "EPIC-037"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Validité 30 j par défaut, plafond 90.
+        assigned_to: null
+  - sprint_number: 34   # ⬅️ ex-S24
     start_date: "2027-10-07"
     end_date: "2027-10-21"
+    capacity_points: 34
+    committed_points: 30
+    completed_points: 0
+    status: "not_started"  # 🆕 2026-08-03, re-découpage PI-SPI. LE SPRINT DE L'ARGENT : c'est ici que vivent NFR-3 (non-duplication) et AD-18 (imputation).
+    goal: "La surface que voit Kossi et le ledger qui la soutient : lien opaque server-rendered tenant sur une 3G, frais annoncés AVANT le choix et figés à l'émission, boîte de réception des notifications signées, et le ledger append-only dont l'idempotence est ARBITRÉE PAR LA BASE. Puis les trois montants nommés — seul l'imputé bouge le solde."
+    stories:
+      - story_id: "STORY-253"
+        title: "Jeton opaque, page de lien server-rendered et QR"
+        epic: "EPIC-037"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # ⚡ La SEULE surface non authentifiée du service. Rendu serveur (eta 4.6), HTML minimal — un bundle à hydrater est exactement ce qu'il ne faut pas envoyer sur la 3G d'Agoè (NFR-8). Exige une EXEMPTION JWT ÉNUMÉRÉE à la gateway (jamais un motif large) + plafond de débit par jeton et par IP. Jeton inconnu / expiré / révoqué ⇒ MÊME réponse (anti-énumération).
+        assigned_to: null
+      - story_id: "STORY-254"
+        title: "Politique de frais figée à l'émission et annoncée avant le choix"
+        epic: "EPIC-037"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # Solution PO : le BARÈME DÉCLARÉ fait foi à l'affichage — aucun appel réseau avant d'afficher un prix (NFR-8 préservé). Politique + version de barème FIGÉES dans la demande (FR-P23c).
+        assigned_to: null
+      - story_id: "STORY-255"
+        title: "Simulateur de surcoût de fractionnement, étiqueté estimation"
+        epic: "EPIC-037"
+        points: 2
+        service: "paiement-service"
+        status: "not_started"  # Jamais persisté comme un frais, n'engage rien. CM-2 surveille la désaffection du lien.
+        assigned_to: null
+      - story_id: "STORY-256"
+        title: "Boîte de réception des notifications signées et corps brut"
+        epic: "EPIC-037"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # ⚡ PIÈGE VÉRIFIÉ : FedaPay signe par X-FEDAPAY-SIGNATURE et la vérification exige le CORPS BRUT. Un parseur JSON GLOBAL casse silencieusement la signature et rend NFR-3 invérifiable. Raw body monté UNIQUEMENT sur la route webhook. Miroir entrant de l'outbox.
+        assigned_to: null
+      - story_id: "STORY-257"
+        title: "Ledger append-only, index unique partiel et idempotence prouvée"
+        epic: "EPIC-037"
+        points: 8
+        service: "paiement-service"
+        status: "not_started"  # ⚡ L'INVARIANT LE PLUS COÛTEUX À VIOLER (NFR-3, SM-5) : un double encaissement se voit chez le PAYEUR, pas dans les journaux. La BASE arbitre — index unique PARTIEL (fournisseur, refTransaction) restreint aux encaissements d'origine PSP ; duplicate key = rejeu = SUCCÈS. Aucun verrou applicatif, aucun verrou Redis, aucun `find` préalable. ⚠️ L'index doit être PARTIEL : un encaissement déclaré n'a ni fournisseur ni référence et ferait collisionner toutes les déclarations sur leurs nulls (l'ex-STORY-154 s'en remettait à une clé « dérivée » — réponse plus faible). TEST DANS LA DÉFINITION DE TERMINÉ : rejeu N fois, dans le désordre, en parallèle, après redémarrage ⇒ UN seul encaissement.
+        assigned_to: null
+      - story_id: "STORY-258"
+        title: "Trois montants nommés et imputation par le montant dû"
+        epic: "EPIC-037"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # ⚡ TROUVÉ PAR LA REVUE ADVERSE (AD-18), absent du découpage précédent. Sous la politique « frais au bénéficiaire », ce que le payeur a PAYÉ, ce qui est IMPUTÉ et ce que le bénéficiaire a REÇU sont trois nombres différents — et l'écart est du vrai argent. Seul `montantImpute` bouge le solde, sous TOUTES les politiques. Aucun champ `montant` nu.
+        assigned_to: null
+  - sprint_number: 35   # ⬅️ ex-S25 (le contenu ex-S35 « assistant IA » recule au S39)
+    start_date: "2027-10-21"
+    end_date: "2027-11-04"
+    capacity_points: 34
+    committed_points: 31  # ⚖️ 29 → 31 le 2026-08-03 : +STORY-268 (8, préalable avancé du S36) −STORY-266/267 (6, repoussées au S36).
+    completed_points: 0
+    status: "not_started"  # 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-037 ET l'INCRÉMENT 1 du PRD. Puis EPIC-038 en entier.
+    goal: "⛔ S'OUVRE PAR LE PRÉALABLE STORY-268 (balance-service) — un sprint devant les stories qui s'y branchent. Puis 🏁 INCRÉMENT 1 : un lien émis en bac à sable est payé partiellement puis soldé, sans double encaissement. Et le terrain s'ouvre — les espèces au commercial ne sont PAS le cas marginal en distribution ouest-africaine : un module qui ne les traite pas produit une balance créances fausse."
+    stories:
+      - story_id: "STORY-268"
+        title: "Extraction du noyau `@prospera/rapprochement` et workspace npm"
+        epic: "EPIC-039"
+        points: 8
+        service: "balance-service"
+        status: "not_started"  # ⛔ HORS SERVICE — ⚡ DÉPLACÉE DU S36 VERS LE S35 le 2026-08-03 : un préalable logé dans LE MÊME sprint que ce qu'il débloque fait glisser son consommateur avec lui. Il est désormais UN SPRINT ENTIER devant STORY-269/270 (S36), qui s'y branchent — chantier balance-service (LIVRÉ) + outillage de dépôt. ⚡ EN TÊTE DE SPRINT, avant 269/270 qui s'y branchent. CONSTAT DE CODE du 2026-08-03 : le dépôt n'a AUCUN package.json racine ni workspace npm, et balance-service/src/modules/rapprochement/rapprochement.regles.ts (598 lignes PURES, extractibles sur le principe) est typé sur LigneCahierAApparier / TypeCompteTresorerie / MoyenPaiement — c'est un apparieur cahier↔relevé, pas créance↔mouvement. Décision PO 2026-08-03 : bibliothèque PARTAGÉE mais EXTENSIBLE PAR DOMAINE (l'ex-STORY-157 listait « le patron 089/090 est réécrit » comme un simple risque de revue de conception). Le noyau ne porte que l'agnostique ; aucun type métier n'y remonte.
+        blocked_by: "workspace npm à créer à la racine du dépôt + généralisation des types de balance-service"
+        assigned_to: null
+      - story_id: "STORY-259"
+        title: "Paiement partiel, restants nommés et trop-perçu"
+        epic: "EPIC-037"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # ⚡ Deux restants NOMMÉS (restantCertain / restantAffiche) : « le solde restant » n'existe pas, la question « le déclaré compte-t-il ? » a deux réponses légitimes. + TROP-PERÇU (trouvé par la revue adverse, absent du découpage précédent) : un versement qui dépasse n'est NI rejeté NI tronqué — l'argent est déjà parti chez le payeur.
+        assigned_to: null
+      - story_id: "STORY-260"
+        title: "Machine à états de la demande"
+        epic: "EPIC-037"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-261"
+        title: "Émission du lien via `notification-service`"
+        epic: "EPIC-037"
+        points: 2
+        service: "paiement-service"
+        status: "not_started"  # 🏁 EPIC-037 + INCRÉMENT 1. Ce module ne parle JAMAIS directement au payeur : l'organe de parole est unique (AD-17).
+        assigned_to: null
+      - story_id: "STORY-262"
+        title: "Déclaration manuelle d'encaissement et clé d'idempotence propre"
+        epic: "EPIC-038"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # Clé (orgId, cleDeclaration) fournie par le client : c'est ce qui rend inoffensif un double envoi depuis le téléphone d'un commercial en réseau instable. Auteur de la saisie ≠ encaisseur (deux champs distincts).
+        assigned_to: null
+      - story_id: "STORY-263"
+        title: "Validation d'un encaissement déclaré"
+        epic: "EPIC-038"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Le déclarant ne peut pas valider (AD-11), quels que soient ses droits.
+        assigned_to: null
+      - story_id: "STORY-264"
+        title: "Délai de validation et remontée d'écart"
+        epic: "EPIC-038"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # 48 h OUVRÉES par défaut (calendrier explicite, jamais des heures brutes), plafond 7 j. SM-4 suit la tendance.
+        assigned_to: null
+      - story_id: "STORY-265"
+        title: "Promesse de paiement : enregistrement"
+        epic: "EPIC-038"
+        points: 2
+        service: "paiement-service"
+        status: "not_started"
+        assigned_to: null
+  - sprint_number: 36   # ⬅️ ex-S26 (le contenu ex-S36 « bloc terrain » recule au S40)
+    start_date: "2027-11-04"
+    end_date: "2027-11-18"
+    capacity_points: 34
+    committed_points: 31  # ⚖️ 27 → 31 le 2026-08-03 : −STORY-268 (8, avancée au S35) +STORY-266/267 (6) +STORY-277/278 (6, avancées du S37).
+    completed_points: 0
+    status: "not_started"  # 🆕 2026-08-03, re-découpage PI-SPI. ⛔ S'OUVRE PAR UN PRÉALABLE HORS SERVICE (STORY-268).
+    goal: "🏁 EPIC-038 et EPIC-039 — le rapprochement qui tient la promesse commerciale du bundle Finance & Recouvrement (« rapprochement manuel → 0 », SM-3). Cascade de trois clés dont la troisième est PROPOSÉE et jamais appliquée sans confirmation humaine : un appariement faux est pire qu'un écart — l'écart se voit, le faux appariement enterre la question. Puis l'abonnement s'amorce par son PRODUCTEUR d'événements (277/278), pour que le consommateur du catalogue (279, S37) ait un contrat à consommer."
+    stories:
+      - story_id: "STORY-266"
+        title: "Sort observable d'une promesse, constaté à sa date"
+        epic: "EPIC-038"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # ⚡ Travail BullMQ à clé idempotente qui ÉCRIT le fait. Un fait jamais écrit ne peut pas être PUBLIÉ — Relance (#24) devrait alors sonder ce service, ce qui inverse le sens des dépendances. Aucun setInterval nulle part (AD-12).
+        assigned_to: null
+      - story_id: "STORY-267"
+        title: "Publication des promesses, soldes et candidats vers Relance"
+        epic: "EPIC-038"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # 🏁 EPIC-038. Ce module FOURNIT la promesse et le solde ; il ne décide d'AUCUNE relance (AD-17).
+        assigned_to: null
+      - story_id: "STORY-269"
+        title: "Import du relevé de fournisseur"
+        epic: "EPIC-039"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # Un relevé importé ne crée AUCUN encaissement — c'est un référentiel de comparaison (patron STORY-089). Ré-import chevauchant = cas NORMAL : doublons ignorés, comptés, listés.
+        assigned_to: null
+      - story_id: "STORY-270"
+        title: "Cascade de clés de rapprochement"
+        epic: "EPIC-039"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # (1) réf. transaction fournisseur = certain · (2) réf. demande au libellé = certain · (3) montant + devise + date ±1 j = PROPOSÉ, jamais appliqué sans confirmation humaine. Le reste = écart avec son motif, jamais comblé d'office.
+        assigned_to: null
+      - story_id: "STORY-271"
+        title: "Encaissement orphelin et affectation manuelle"
+        epic: "EPIC-039"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-272"
+        title: "Restitution du solde décomposé et export filtrable"
+        epic: "EPIC-039"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # AUCUN champ unique ne prétend être « le » solde.
+        assigned_to: null
+      - story_id: "STORY-273"
+        title: "Publication des encaissements vers Facturation, Finance et comptabilité"
+        epic: "EPIC-039"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # 🏁 EPIC-039. Le service publie l'événement, il n'écrit AUCUNE écriture comptable.
+        assigned_to: null
+      - story_id: "STORY-277"
+        title: "Abonnement Prospera : contrat, périodicité, échéance"
+        epic: "EPIC-041"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Une échéance d'abonnement EST une créance : le cas C n'a aucune mécanique propre, seul le bénéficiaire change (NFR-1c). Porte le test qui matérialise SM-1 côté cas A.
+        assigned_to: null
+      - story_id: "STORY-278"
+        title: "Échéance encaissée : publication vers le catalogue"
+        epic: "EPIC-041"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # ⚡ AVANCÉE AU S36 le 2026-08-03 : elle PRODUIT les événements que STORY-279 (S37, platform-catalog-service) doit consommer — le producteur passe désormais un sprint devant le consommateur. AUCUN appel à l'API d'entitlement n'existe — ni PUT, ni jeton de service, ni mTLS. C'est ce qui retire la dépendance C8 au lieu de l'attendre (AD-13). Reprend l'objet de l'ex-STORY-162, elle-même déjà substituée à STORY-039.
+        assigned_to: null
+  - sprint_number: 37   # 🆕 créé le 2026-08-03 par le re-découpage PI-SPI
+    start_date: "2027-11-18"
+    end_date: "2027-12-02"
+    capacity_points: 34
+    committed_points: 21  # ⚖️ 27 → 21 le 2026-08-03 : −STORY-277/278 (6, avancées au S36). Sous-engagé : c'est la queue de module, et le tracker documente 5 dépassements consécutifs.
+    completed_points: 0
+    status: "not_started"  # 🆕 2026-08-03. 🏁 clôture EPIC-040 + l'INCRÉMENT 2, puis EPIC-041 en entier. ⛔ Porte le second préalable hors service (STORY-279).
+    goal: "🏁 INCRÉMENT 2 et EPIC-041 : le solde d'une créance est juste alors que la moitié a été payée en espèces. Annulation CONSTATÉE et jamais initiée — ne détenant pas les fonds, le service ne peut pas les rendre. ⛔ Puis le préalable STORY-279 (platform-catalog-service) EN TÊTE, avant l'impayé, la grâce et le rétablissement dont l'effet en dépend."
+    stories:
+      - story_id: "STORY-274"
+        title: "Annulation constatée par contre-passation"
+        epic: "EPIC-040"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Append-only : elle contre-passe, elle ne supprime pas. Aucune initiation de remboursement n'existe dans l'API.
+        assigned_to: null
+      - story_id: "STORY-275"
+        title: "Rôle distinct et publication de l'annulation"
+        epic: "EPIC-040"
+        points: 2
+        service: "paiement-service"
+        status: "not_started"  # Celui qui constate l'entrée ne doit pas pouvoir l'effacer seul — au niveau de l'ACTEUR (AD-11).
+        assigned_to: null
+      - story_id: "STORY-276"
+        title: "Piste d'audit opposable sur toute opération d'argent"
+        epic: "EPIC-040"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # 🏁 EPIC-040 + INCRÉMENT 2. La restauration de paiement_service_audit est un acte tracé HORS application ; les chaînes sont revérifiées après.
+        assigned_to: null
+      - story_id: "STORY-279"
+        title: "`platform-catalog-service` consomme `paiement.abonnement.*`"
+        epic: "EPIC-041"
+        points: 5
+        service: "platform-catalog-service"
+        status: "not_started"  # ⛔ HORS SERVICE — chantier platform-catalog-service. ⚡ EN TÊTE DU SPRINT, avant 280/282 dont l'effet en dépend. Son producteur (STORY-278) est livré au S36, un sprint devant : le contrat d'événement existe donc avant qu'on écrive le consommateur. C'est ce qui REMPLACE la décision C8, ouverte depuis STORY-034 (13 mois). platform-catalog-service reste l'UNIQUE écrivain de l'entitlement — P8 préservé.
+        blocked_by: "platform-catalog-service doit devenir consommateur des topics paiement.abonnement.*"
+        assigned_to: null
+      - story_id: "STORY-280"
+        title: "Impayé, suspension et préavis"
+        epic: "EPIC-041"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Une coupure sans préavis est un DÉFAUT, pas une politique — un test échoue si la suspension précède le préavis. CM-1 surveille : une coupure est une perte de client, pas un succès de recouvrement.
+        assigned_to: null
+      - story_id: "STORY-281"
+        title: "Période de grâce bornée, datée et motivée"
+        epic: "EPIC-041"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Durée maximale OBLIGATOIRE (défaut 30 j, plafond 90) : une grâce sans terme est une suspension qui n'arrive jamais. Q11 (grille commerciale par type de client) reste ouverte — bornée en attendant.
+        assigned_to: null
+      - story_id: "STORY-282"
+        title: "Rétablissement automatique après régularisation"
+        epic: "EPIC-041"
+        points: 2
+        service: "paiement-service"
+        status: "not_started"  # 🏁 EPIC-041. Sans aucune intervention manuelle (FR-P47).
+        assigned_to: null
+  - sprint_number: 38   # 🆕 créé le 2026-08-03 par le re-découpage PI-SPI
+    start_date: "2027-12-02"
+    end_date: "2027-12-16"
+    capacity_points: 34
+    committed_points: 18
+    completed_points: 0
+    status: "not_started"  # 🆕 2026-08-03. 🏁 CLÔTURE EPIC-042, l'INCRÉMENT 3 et LE MODULE 2 (PI-SPI) EN ENTIER. Sous-engagé délibérément : c'est un sprint de clôture et de recette.
+    goal: "🏁 MODULE 2 LIVRÉ : pays et devises en référentiel versionné (ouvrir un marché sans déploiement de code), refus de conversion (convertir serait une activité de change), console d'exploitation BORNÉE, et la recette de bout en bout du parcours de Kossi en bac à sable."
+    stories:
+      - story_id: "STORY-283"
+        title: "Référentiel pays × devise versionné et santé dégradée"
+        epic: "EPIC-042"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # ReferentielVersion de platform-catalog-service (pays-devises-ao@AAAA.N), checksum sha256 vérifié. Un seul registre de versionnement dans le programme (reprend fiscal AD-5/AD-6). Irrésoluble ⇒ service DÉGRADÉ, pas sain.
+        assigned_to: null
+      - story_id: "STORY-284"
+        title: "Refus de conversion et non-compensation entre devises"
+        epic: "EPIC-042"
+        points: 2
+        service: "paiement-service"
+        status: "not_started"  # Aucun taux de change, aucune devise pivot n'existe dans le code. Convertir supposerait un agrément distinct.
+        assigned_to: null
+      - story_id: "STORY-285"
+        title: "Bornes de montant et méthodes lues des capacités"
+        epic: "EPIC-042"
+        points: 2
+        service: "paiement-service"
+        status: "not_started"
+        assigned_to: null
+      - story_id: "STORY-286"
+        title: "Console d'exploitation bornée sur `admin-panel`"
+        epic: "EPIC-042"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Exactement quatre usages. Un réacheminement lancé depuis la console obéit à AD-6 comme partout : la console n'est PAS un chemin d'écriture privilégié.
+        assigned_to: null
+      - story_id: "STORY-287"
+        title: "Fournisseur de candidats pour le moteur de règles de l'assistant"
+        epic: "EPIC-042"
+        points: 3
+        service: "paiement-service"
+        status: "not_started"  # Alimente Relance (#24) et FR-IA03b. Ce module ne relance pas.
+        assigned_to: null
+      - story_id: "STORY-288"
+        title: "Recette de bout en bout en sandbox"
+        epic: "EPIC-042"
+        points: 5
+        service: "paiement-service"
+        status: "not_started"  # 🏁 MODULE 2 LIVRÉ. Rejoue UJ-1 (le parcours de Kossi) intégralement, PLUS le même scénario avec notifications désordonnées et dupliquées. ⚠️ Les cibles NFR-7 y sont MESURÉES ET CONSIGNÉES comme référence à reconfirmer après 30 jours — jamais validées comme un seuil acquis (elles ne dérivent d'aucun usage observé).
+        assigned_to: null
+
+  - sprint_number: 39   # ⬅️ ex-S22, puis ex-S25, puis ex-S35 — RECULÉ DE 4 SPRINTS le 2026-08-03 par le re-découpage PI-SPI (183 pts imputables au lieu de 103). Contenu INCHANGÉ. ⚠️ L’assistant IA n’a AUCUNE dépendance dure et son propre commentaire le dit « déplaçable plus tôt » : le placer ici reste un CHOIX de priorité, pas une contrainte technique.
+    start_date: "2027-12-16"
+    end_date: "2027-12-30"
     capacity_points: 34
     committed_points: 28
     completed_points: 0
@@ -2353,9 +3153,9 @@ sprints:
         status: "not_started"  # surface la moins risquée ; dépend table de passage (FR-006/008 ✅)
         assigned_to: null
 
-  - sprint_number: 35   # ⬅️ ex-S26
-    start_date: "2027-10-21"
-    end_date: "2027-11-04"
+  - sprint_number: 40   # ⬅️ ex-S26, puis ex-S36 — RECULÉ DE 4 SPRINTS le 2026-08-03 par le re-découpage PI-SPI. Contenu INCHANGÉ.
+    start_date: "2027-12-30"
+    end_date: "2028-01-13"
     capacity_points: 34
     committed_points: 0   # ⚡ 0 ENGAGÉ : ce sprint ne porte qu'une story `deferred`. Il existe pour que STORY-170 ait un sprint plutôt que de redevenir orpheline (règle du dépôt : slottée OU explicitement deferred, jamais sans sprint).
     completed_points: 0
@@ -2417,6 +3217,19 @@ bilan_functional_epics:
 # ── Atelier Balance (Module 1-bis) : epics du PRD prd-atelier-balance-2026-07-12.md (D1→D12) ──────
 # balance-service (:3007), AMONT du bilan-service. DÉCOUPÉ en STORY-076→100 (sprints 15-19).
 # Plan : sprint-plan-atelier-balance-2026-07-12.md. Référentiels amorcés : referentiels/.
+fiscalite_epics:
+  # Module 3 — fiscal-service (:3012). Découpage du 2026-08-03. Le CALCUL n'y est pas : il reste
+  # à balance-service (EPIC-023/024), et AD-1 de l'architecture l'interdit à fiscal-service.
+  epics:
+    - { id: "EPIC-027", name: "Socle fiscal-service et gouvernance du paquet fiscal", frs: "FR-F67..F70, F58, F59 + AR-01..AR-08, AR-10", stories: "STORY-179..185 (+236 balance-service)", status: "proposed" }
+    - { id: "EPIC-028", name: "Dossier fiscal, implantations et catalogue d'obligations dérivé", frs: "FR-F01..F10, F57, F71..F78", stories: "STORY-186..194", status: "proposed" }
+    - { id: "EPIC-029", name: "Moteur de familles de calcul (registre de stratégies typées, pas d'interpréteur)", frs: "FR-F11..F15", stories: "STORY-195..199", status: "proposed" }
+    - { id: "EPIC-030", name: "Calendrier fiscal et responsabilité", frs: "FR-F16..F21 + AR-09", stories: "STORY-200..204", status: "proposed" }
+    - { id: "EPIC-031", name: "Chaîne déclarative — alimentation, cycle de vie, contrôles, piste d'audit 🏁 premier jalon vendable", frs: "FR-F22..F26, F33..F38, F51, F56, F62..F66", stories: "STORY-205..214", status: "proposed" }
+    - { id: "EPIC-032", name: "Dépôt assisté, accusé et dossier de contrôle ⛔ jalon `format confirmé`", frs: "FR-F39..F45, F52..F55", stories: "STORY-215..224", status: "proposed" }
+    - { id: "EPIC-033", name: "Règlement de l'impôt (préparation et rapprochement, jamais exécution)", frs: "FR-F46..F50", stories: "STORY-225..229", status: "proposed" }
+    - { id: "EPIC-034", name: "Base de rémunération et obligations sociales (import ET saisie)", frs: "FR-F27..F32", stories: "STORY-230..235", status: "proposed" }
+
 atelier_balance_epics:
   prd: "docs/prd-atelier-balance-2026-07-12.md"
   service: "balance-service"
@@ -2449,6 +3262,45 @@ assistant_ia_epics:
       story_estimate: "5 (socle @ S22) + surfaces JIT"
       status: "proposed"  # 🆕 2026-07-20 (note d'archi). SOCLE = STORY-115→119 (~28 pts, S22) : scaffold assistant-service + LlmProvider (dev qwen2.5:3b Ollama/Docker, prod GLM-5 auto-hébergé, swap sans code) + contrat Proposition + RAG corpus CGI/LPF (bge-m3, citation obligatoire) + surface pilote MAPPING (alimente FR-008). AUCUNE dépendance dure → DÉPLAÇABLE plus tôt. Surfaces à valeur : conseil fiscal ⇐ EPIC-023, analyse financière ⇐ prévisionnel EPIC-013. Confidentialité = modèle auto-hébergé (données tenant dans l'infra MV). OCR reste Tesseract (VLM hébergé plus tard, hors périmètre).
 
+# ── Module 2 — PI-SPI & encaissement (paiement-service :3005) ────────────────────────────────────
+# Découpage du 2026-08-03. REMPLACE le découpage EPIC-004 rescopé (STORY-150→165, 168, 169), passé
+# en `superseded_stories` le même jour. Principe cardinal : PROSPERA NE DÉTIENT JAMAIS LES FONDS —
+# l'interdit vit dans le MODÈLE DE DONNÉES (AD-1), pas dans la vigilance, et SM-1 le mesure à zéro.
+paiement_epics:
+  prd: "prospera-stories/prds/prd-paiement-service-2026-08-02/prd.md"
+  architecture: "prospera-stories/architecture/architecture-paiement-service-2026-08-03/ARCHITECTURE-SPINE.md"
+  companion: "prospera-stories/architecture-paiement-service-2026-08-03.md"
+  decoupage: "prospera-stories/epics-paiement-2026-08-03.md"
+  service: "paiement-service"
+  keystone: "STORY-257 (ledger append-only + index unique PARTIEL) — NFR-3 est l'invariant le plus coûteux à violer : un double encaissement se voit chez le PAYEUR, pas dans les journaux. Son test de rejeu (N fois, désordonné, parallèle, après redémarrage) appartient à la définition de terminé, pas à la recette."
+  # ⚡ RÈGLE DE PLACEMENT (2026-08-03) : un préalable ne se loge JAMAIS dans le même sprint que ce
+  # qu'il débloque — sinon un glissement du préalable entraîne son consommateur dans la même
+  # itération, et le sprint échoue en bloc. Chacun est posé UN SPRINT DEVANT, en tête de sprint.
+  prealables_hors_service:
+    - story: "STORY-268"
+      service: "balance-service"
+      sprint: 35
+      en_tete_de_sprint: true
+      bloque: "STORY-269/270 (S36) — incrément 2, EPIC-039"
+      marge: "un sprint entier"
+      quoi: "Extraire @prospera/rapprochement + CRÉER un workspace npm à la racine — il n'en existe AUCUN au 2026-08-03 (constat de code, pas de tracker)."
+    - story: "STORY-279"
+      service: "platform-catalog-service"
+      sprint: 37
+      en_tete_de_sprint: true
+      bloque: "STORY-280/281/282 (S37, après elle) — incrément 3, EPIC-041"
+      marge: "en tête du sprint ; son producteur STORY-278 est livré au S36, un sprint devant"
+      quoi: "Devenir consommateur des topics paiement.abonnement.* — c'est ce qui remplace la décision C8, ouverte depuis STORY-034. Le contrat d'événement existe avant qu'on écrive le consommateur."
+  epics:
+    - { id: "EPIC-035", name: "Socle paiement-service, comptes d'encaissement et secrets", frs: "FR-P01..P06, P59..P62 + AR-01..AR-05, AR-08, AR-15", stories: "STORY-237..244", points: 27, status: "proposed" }
+    - { id: "EPIC-036", name: "Fournisseurs de paiement interchangeables et simultanés", frs: "FR-P07..P12, P58", stories: "STORY-245..249, 289", points: 24, status: "proposed" }
+    - { id: "EPIC-037", name: "Créance, demande, lien public et encaissement 🏁 incrément 1", frs: "FR-P13..P27, P55 + AR-06, AR-07, AR-10, AR-12", stories: "STORY-250..261, 290", points: 54, status: "proposed" }
+    - { id: "EPIC-038", name: "Paiement hors Prospera et promesses", frs: "FR-P28..P36 + AR-09", stories: "STORY-262..267", points: 19, status: "proposed" }
+    - { id: "EPIC-039", name: "Réconciliation, relevé et restitution ⛔ préalable STORY-268", frs: "FR-P37..P41 + AR-13", stories: "STORY-268..273", points: 27, status: "proposed" }
+    - { id: "EPIC-040", name: "Annulation, contre-passation et audit opposable 🏁 incrément 2", frs: "FR-P49..P53, P61", stories: "STORY-274..276", points: 8, status: "proposed" }
+    - { id: "EPIC-041", name: "Abonnements Prospera et entitlements par événement ⛔ préalable STORY-279", frs: "FR-P42..P48 + AR-14", stories: "STORY-277..282", points: 19, status: "proposed" }
+    - { id: "EPIC-042", name: "Multi-pays, devises, console et recette 🏁 MODULE 2 LIVRÉ", frs: "FR-P54, P56..P58, P63, P64 + AR-11", stories: "STORY-283..288", points: 18, status: "proposed" }
+
 velocity:
   sprint_1: 33
   sprint_2: 23
@@ -2476,12 +3328,22 @@ velocity:
   # les cinq titres 016-019/039, supersédés par le PRD paiement (cf. `superseded_stories`).
   # ⚡ Puis DÉCALÉS de 9 sprints le même jour (21→30 … 26→35) : le module fiscalité passe devant.
   # Les clés sprint_21 → sprint_29 sont volontairement ABSENTES — cf. `reserved_sprints`.
-  sprint_30: null  # Socle distributeur (166/167 = 14 personas + rôles personnalisés) + amorce paiement-service (150/151/152) — 34 pts. ⚡ Débloque à lui seul DI-01, DI-02 et AP-17.
-  sprint_31: null  # PI-SPI incrément 1 🏁 (153/154) + registre fournisseurs (168) + créance manuelle (169) — 26 pts. Rang 2 de l'ordre PO : le PI-SPI de la CONSOLE.
-  sprint_32: null  # PI-SPI incrément 2 — terrain : promesses, espèces, réconciliation, annulation, solde, droits (155→160) — 34 pts
-  sprint_33: null  # PI-SPI incrément 3 🏁 CLÔTURE EPIC-004 — abonnement, entitlements par événement (ex-039), impayé/grâce, devises, e2e (161→165) — 26 pts
-  sprint_34: null  # ⬅️ ex-sprint_22 puis ex-sprint_25. EPIC-026 socle — Assistant IA transverse (assistant-service :3011, LlmProvider, Proposition, RAG, surface mapping) — stories 115-119 ; DÉPLAÇABLE (aucune dépendance dure)
-  sprint_35: null  # ⛔ BLOC TERRAIN, 0 pt engagé — STORY-170 (TranscriptionProvider) `deferred` : le dépôt prospera-terrain n'existe pas et le choix React Native/Flutter n'est pas tranché
+  # ── Module Fiscalité (fiscal-service) — créé le 2026-08-03 ──
+  sprint_22: null  # 236 : le contrat de balance porte enfin une dimension d'entité — elle N'EXISTE PAS aujourd'hui (vérifié dans le code, pas dans le tracker) et tout le 
+  sprint_23: null  # Fin du socle (journal d'audit chaîné + outbox, statut de validation du paquet, habilitations) 🏁 EPIC-027, puis ouverture du dossier fiscal et de ses i
+  sprint_24: null  # Le catalogue d'obligations se dérive tout seul 🏁 EPIC-028 — propriétaire unique, trois déclencheurs, clé d'idempotence — et le moteur de familles déma
+  sprint_25: null  # Le moteur de calcul est complet et explicable 🏁 EPIC-029 (barèmes, forfaits, pipeline de modificateurs, aiguillage, refus nommé hors périmètre), puis 
+  sprint_26: null  # Le calendrier est livré 🏁 EPIC-030 (alertes BullMQ idempotentes, charge par collaborateur) et la chaîne déclarative démarre : alimentation depuis la b
+  sprint_27: null  # 🏁 EPIC-031 — PREMIER JALON VENDABLE : le cabinet produit, contrôle, valide et versionne ses déclarations, chaque geste laissant une trace inviolable
+  sprint_28: null  # Le règlement est bouclé 🏁 EPIC-033 (rapprochement, déposée ≠ payée, pénalités estimées comme risque) et la base de rémunération s'ouvre, alimentée par
+  sprint_29: null  # Les obligations sociales rejoignent le calendrier 🏁 EPIC-034, puis le dépôt assisté démarre — ⛔ SOUS RÉSERVE du jalon `format confirmé` (cf
+  sprint_30: null  # 🏁 EPIC-032 et MODULE FISCALITÉ LIVRÉ : accusé, rejet, archivage, dossier de contrôle, liaison pièce ↔ écriture, base légale verbatim
+  sprint_31: null  # Socle distributeur (166/167 = 14 personas + rôles personnalisés) + amorce paiement-service (150/151/152) — 34 pts. ⚡ Débloque à lui seul DI-01, DI-02 et AP-17.
+  sprint_32: null  # PI-SPI incrément 1 🏁 (153/154) + registre fournisseurs (168) + créance manuelle (169) — 26 pts. Rang 2 de l'ordre PO : le PI-SPI de la CONSOLE.
+  sprint_33: null  # PI-SPI incrément 2 — terrain : promesses, espèces, réconciliation, annulation, solde, droits (155→160) — 34 pts
+  sprint_34: null  # PI-SPI incrément 3 🏁 CLÔTURE EPIC-004 — abonnement, entitlements par événement (ex-039), impayé/grâce, devises, e2e (161→165) — 26 pts
+  sprint_35: null  # ⬅️ ex-sprint_22 puis ex-sprint_25. EPIC-026 socle — Assistant IA transverse (assistant-service :3011, LlmProvider, Proposition, RAG, surface mapping) — stories 115-119 ; DÉPLAÇABLE (aucune dépendance dure)
+  sprint_36: null  # ⛔ BLOC TERRAIN, 0 pt engagé — STORY-170 (TranscriptionProvider) `deferred` : le dépôt prospera-terrain n'existe pas et le choix React Native/Flutter n'est pas tranché
   rolling_average: 27  # (33 + 23 + 24) / 3 ≈ 26.7 ; cible prudente ~24/sprint (1 flux, réf. historique retenue au sprint-planning 2026-07-10)
 # ── Stories orphelines : SOLDÉ le 2026-08-01 ──────────────────────────────────
 # Huit stories avaient un fichier dans stories/ et ne figuraient dans AUCUN sprint : invisibles
@@ -2522,19 +3384,17 @@ orphan_stories: []   # ✅ vide au 2026-08-03 — RE-VÉRIFIÉE ce jour. ⚠️ 
 # le CALCUL. Ce qui est réservé ici, c'est ce que le cadrage appelle Module 3 `fiscal-service`,
 # re-scopé le 2026-07-12 : la TÉLÉDÉCLARATION et le dépôt de la DSF à l'OTR — ce qui reste une fois
 # le calcul remonté dans l'Atelier. Il n'a ni PRD ni story.
-reserved_sprints:
-  - plage: "S22 → S29"   # ⬅️ était S21→S29 ; ⚡ RÉDUITE d'un sprint le 2026-08-04 (décision PO) : le S21 accueille la dette de contrat de la console sortie de l'Integration Gate. La réserve passe de 9 à 8 sprints — et comme elle n'a toujours ni story ni PRD, elle perd une largeur qu'aucun chiffrage ne défendait.
-    dates: "2027-04-22 → 2027-08-12"
-    reserve_pour: "Module 3 — fiscal-service (télédéclaration + dépôt de la DSF à l'OTR)"
-    decision: "PO, 2026-08-03 — « avant de débuter [le distributeur] il doit avoir les sprints du module fiscalité »"
-    stories_ecrites: 0
-    prd: "aucun"
-    points_estimes: null   # ⚡ délibérément `null` et pas un chiffre rond : personne n'a chiffré ce périmètre
-    a_faire_avant_de_l_ouvrir:
-      - "Écrire le PRD du Module 3 (le cadrage 2026-07-12 l'a re-scopé, il n'a jamais été rédigé)"
-      - "Vérifier ce que le moteur fiscal de l'Atelier couvre DÉJÀ (STORY-091→098) avant de redécouper — sinon on planifie deux fois le même calcul"
-      - "Chiffrer, puis confirmer ou corriger la largeur de 9 sprints"
-    consequence_si_elle_glisse: "Le distributeur glisse d'autant — S30 n'a aucune dépendance technique envers le fiscal, seulement une priorité PO. Si le fiscal prend moins de 9 sprints, le bloc distributeur peut remonter sans rien réécrire (aucune de ses stories ne dépend d'une story fiscale)."
+reserved_sprints: []   # ✅ VIDE depuis le 2026-08-03 : la réserve fiscale S22→S29 est CONSOMMÉE.
+# Elle avait été posée sans PRD, sans stories et sans chiffrage — ses trois `a_faire_avant_de_l_ouvrir`
+# sont tous faits : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3, 78 FR + 16 NFR) · découpage
+# epics-fiscalite-2026-08-03.md (EPIC-027→034, STORY-179→235) · architecture
+# architecture-fiscal-service-2026-08-03.md (AD-1→AD-19) · chiffrage 279 pts.
+# ⚡ Le chiffrage a CORRIGÉ la largeur, comme la réserve le demandait : il fallait 9 sprints, pas 8.
+# Le module occupe donc S22→S30 et le distributeur décale de +1 (ex-S30→S31 … ex-S35→S36) —
+# arbitrage PO du 2026-08-03, conforme au `consequence_si_elle_glisse` qui l'avait prévu.
+# ⚡ La 2e vérification demandée (« ce que le moteur fiscal de l'Atelier couvre DÉJÀ ») a bien eu lieu :
+# le CALCUL reste à balance-service (EPIC-023/024) et n'est PAS redécoupé — AD-1 de l'architecture
+# l'interdit explicitement. fiscal-service porte le déclaratif, jamais une règle d'imposition.
 
 # ── Stories SUPERSÉDÉES ────────────────────────────────────────────────────────────────────────
 # Une story supersédée n'est ni faite ni abandonnée : son OBJET est repris ailleurs, mieux découpé.
@@ -2545,37 +3405,176 @@ superseded_stories:
     title: "Checkout (SpiProvider BCEAO + FedapayProvider)"
     epic: "EPIC-004"
     points: 5
-    superseded_by: ["STORY-152", "STORY-153", "STORY-154"]
+    superseded_by: ["STORY-245", "STORY-246", "STORY-248", "STORY-249", "STORY-251", "STORY-252", "STORY-253", "STORY-254", "STORY-257"]   # chaine reparee le 2026-08-03 : pointait vers 152/153/154, elles-memes superseded le meme jour par le re-decoupage PI-SPI.
     date: "2026-08-03"
     raison: "Écrite avant le PRD paiement, comme un TITRE sans fichier. Le PRD (prds/prd-paiement-service-2026-08-02) sépare ce que ce titre confondait : le ROUTAGE multi-fournisseur (152), la DEMANDE et son lien public (153), et l'ENCAISSEMENT avec son idempotence (154)."
   - story_id: "STORY-017"
     title: "Webhook signé + idempotent + activation"
     epic: "EPIC-004"
     points: 8
-    superseded_by: ["STORY-154", "STORY-162"]
+    superseded_by: ["STORY-256", "STORY-257", "STORY-278", "STORY-279"]   # chaine reparee le 2026-08-03 : pointait vers 154/162, elles-memes superseded le meme jour.
     date: "2026-08-03"
     raison: "Confondait deux actes : encaisser (154, notification signée + idempotence prouvée) et octroyer un droit à l'encaissement (162, par événement)."
   - story_id: "STORY-018"
     title: "Historique + expiration + relances"
     epic: "EPIC-004"
     points: 3
-    superseded_by: ["STORY-155", "STORY-159", "STORY-163"]
+    superseded_by: ["STORY-252", "STORY-259", "STORY-265", "STORY-266", "STORY-272", "STORY-280", "STORY-281"]   # chaine reparee le 2026-08-03 : pointait vers 155/159/163, elles-memes superseded le meme jour.
     date: "2026-08-03"
     raison: "« Relances » recouvrait en réalité les promesses de paiement (155), le solde certain/déclaré (159) et la période de grâce sur impayé (163)."
   - story_id: "STORY-019"
     title: "Dashboard admin + e2e parcours complet"
     epic: "EPIC-004"
     points: 5
-    superseded_by: ["STORY-160", "STORY-165", "AP-14"]
+    superseded_by: ["STORY-276", "STORY-286", "STORY-288", "AP-14"]   # chaine reparee le 2026-08-03 : pointait vers 160/165, elles-memes superseded le meme jour. AP-14 (frontend) inchangee.
     date: "2026-08-03"
     raison: "Le « dashboard admin » est une story FRONTEND (AP-14, logs de paiement) — elle n'avait rien à faire dans un sprint backend. Reste la console d'exploitation (160) et l'e2e (165)."
   - story_id: "STORY-039"
     title: "expert-comptable : octroi d'entitlement catalog à l'activation d'abonnement (C8)"
     epic: "EPIC-007"
     points: 3
-    superseded_by: ["STORY-162"]
+    superseded_by: ["STORY-278", "STORY-279"]   # chaine reparee le 2026-08-03 : pointait vers 162, elle-meme superseded le meme jour. Meme tranche C8, par evenement et sans identite de service, mais scindee en producteur (278) et consommateur (279, platform-catalog-service).
     date: "2026-08-03"
     raison: "Même tranche C8, même objet. STORY-162 le fait PAR ÉVÉNEMENT et sans identité de service — ce que STORY-039 laissait ouvert. Et elle vit dans paiement-service, pas dans expert-comptable : c'est l'encaissement qui sait qu'un abonnement est payé."
+
+  # -- RE-DECOUPAGE PI-SPI du 2026-08-03 (decision PO) ------------------------------------------
+  # Les 18 stories `paiement-service` du découpage EPIC-004 rescopé (104 pts, ex-sprints 31→34,
+  # rédigées les 2026-08-02/03) sont remplacées par EPIC-035→042 / STORY-237→290 (54 stories,
+  # 196 pts dont 13 hors service). Motif : granularité (18 → 54 stories), estimation honnête
+  # (104 → 183 pts imputables — même écart de 50 % que notification-service au découpage réel),
+  # et trois trous trouvés par la revue adverse de l'architecture (index unique PARTIEL,
+  # TROP-PERÇU, IMPUTATION AD-18) qu'aucune des 18 ne couvrait.
+  # ⚠️ CE QUI N'EST PAS PERDU : STORY-168 et 169 sont ABSORBÉES (→ 289, 290) ; les décisions justes
+  #   de 159 (solde ventilé) et 162 (entitlement par événement) sont REPRISES et ratifiées par la
+  #   colonne vertébrale — elles n'ont pas été « découvertes » ici, elles étaient déjà prises.
+  # ⚠️ STORY-166, 167 et 171 ne sont PAS concernées : elles portent sur auth-service.
+  # 📄 Découpage : epics-paiement-2026-08-03.md · Architecture : ARCHITECTURE-SPINE.md (AD-1→AD-18).
+  - story_id: "STORY-150"
+    title: "Scaffold paiement-service — relying party RS256/JWKS, base dédiée, outbox transactionnel, santé par fournisseur"
+    epic: "EPIC-004 (rescopé)"
+    points: 5
+    superseded_by: ["STORY-237", "STORY-238", "STORY-239"]
+    date: "2026-08-03"
+    raison: "Le scaffold est éclaté en trois : l'hôte (237), les DEUX bases aux rôles restreints (238 — une seule base dédiée ne rend pas le journal ineffaçable, les privilèges Mongo étant additifs et sans deny) et le gate (239)."
+  - story_id: "STORY-151"
+    title: "Comptes d'encaissement — titulaire obligatoire, vérification avant usage, secrets qui ne ressortent jamais"
+    epic: "EPIC-004 (rescopé)"
+    points: 5
+    superseded_by: ["STORY-242", "STORY-243", "STORY-244"]
+    date: "2026-08-03"
+    raison: "Trois actes distincts que le titre confondait : déclarer un compte (242, qui porte le test SM-1 sur l'absence de solde détenu dans le modèle), chiffrer ses secrets (243) et le vérifier auprès du fournisseur (244)."
+  - story_id: "STORY-152"
+    title: "PaymentProvider — plusieurs fournisseurs actifs en même temps, routés par pays × devise × méthode"
+    epic: "EPIC-004 (rescopé)"
+    points: 8
+    superseded_by: ["STORY-245", "STORY-246", "STORY-248", "STORY-249"]
+    date: "2026-08-03"
+    raison: "Le port et ses capacités (245), le premier adaptateur (246), le routage déterministe (248) et l'exploitation dégradée + réacheminement (249) sont quatre livrables séparément vérifiables. Le mode API directe devient 247, avec son risque de conformité propre."
+  - story_id: "STORY-153"
+    title: "Créance projetée, demande de paiement et lien public — la seule surface que voit un détaillant"
+    epic: "EPIC-004 (rescopé)"
+    points: 8
+    superseded_by: ["STORY-251", "STORY-252", "STORY-253"]
+    date: "2026-08-03"
+    raison: "La créance (251, upsert idempotent), la demande (252) et la surface publique (253, la seule route non authentifiée du service) ont trois natures de risque différentes — la troisième porte à elle seule l'exemption JWT à la gateway et l'anti-énumération."
+  - story_id: "STORY-154"
+    title: "Encaissement — notification signée, idempotence prouvée, paiement partiel et transparence des frais"
+    epic: "EPIC-004 (rescopé)"
+    points: 8
+    superseded_by: ["STORY-254", "STORY-255", "STORY-256", "STORY-257", "STORY-258", "STORY-259"]
+    date: "2026-08-03"
+    raison: "8 points pour NFR-3, les frais ET le partiel : trop dense pour l'invariant le plus coûteux du module. Éclatée en six. ⚡ Deux trous corrigés au passage : son index d'idempotence s'en remettait à une clé « DÉRIVÉE » quand le fournisseur n'en fournit pas — 257 impose un index unique PARTIEL, seule forme qui ne fasse pas collisionner les déclarations manuelles sur leurs nulls ; et l'IMPUTATION (258, AD-18) n'y figurait pas du tout, alors que sous la politique « frais au bénéficiaire » payé/imputé/reçu sont trois nombres différents."
+  - story_id: "STORY-155"
+    title: "Promesse de paiement — un engagement daté dont le sort se constate tout seul"
+    epic: "EPIC-004 (rescopé)"
+    points: 5
+    superseded_by: ["STORY-265", "STORY-266"]
+    date: "2026-08-03"
+    raison: "L'enregistrement (265) et le constat automatique à date par travail BullMQ (266) sont deux mécanismes distincts ; le second est celui qui rend la promesse exploitable par Relance."
+  - story_id: "STORY-156"
+    title: "Paiement hors Prospera — déclaré puis validé par la remise d'espèces, jamais l'un sans l'autre"
+    epic: "EPIC-004 (rescopé)"
+    points: 8
+    superseded_by: ["STORY-262", "STORY-263", "STORY-264"]
+    date: "2026-08-03"
+    raison: "Déclarer (262), valider (263) et constater le délai dépassé (264) sont trois actes portés par trois acteurs différents — c'est précisément là que mord la séparation des pouvoirs."
+  - story_id: "STORY-157"
+    title: "Réconciliation — relevé du fournisseur, cascade de trois clés, et rien qui se perde"
+    epic: "EPIC-004 (rescopé)"
+    points: 8
+    superseded_by: ["STORY-268", "STORY-269", "STORY-270", "STORY-271"]
+    date: "2026-08-03"
+    raison: "⚡ Elle listait « le patron STORY-089/090 est réécrit » comme un simple RISQUE à traiter en revue de conception. La décision PO du 2026-08-03 tranche l'inverse : bibliothèque PARTAGÉE extensible par domaine — d'où 268, un chantier balance-service + workspace npm qui n'existe pas et qui doit précéder l'incrément 2. Puis l'import (269), la cascade (270) et les orphelins (271)."
+  - story_id: "STORY-158"
+    title: "Annulation — constatée, jamais initiée, contre-passée et jamais effacée"
+    epic: "EPIC-004 (rescopé)"
+    points: 5
+    superseded_by: ["STORY-274", "STORY-275"]
+    date: "2026-08-03"
+    raison: "La contre-passation (274) et le rôle distinct + publication (275) ; le second est le contrôle anti-fraude, il mérite son propre critère."
+  - story_id: "STORY-159"
+    title: "Le solde d'une créance — le certain et le déclaré ne se confondent jamais"
+    epic: "EPIC-004 (rescopé)"
+    points: 5
+    superseded_by: ["STORY-259", "STORY-272"]
+    date: "2026-08-03"
+    raison: "Le principe était JUSTE et il est repris intégralement — précisé en deux quantités NOMMÉES, restantCertain et restantAffiche, parce que « le solde restant » a deux réponses légitimes. 259 ajoute le TROP-PERÇU, absent de l'ancien découpage : un versement qui dépasse n'est ni rejeté ni tronqué, l'argent est déjà parti."
+  - story_id: "STORY-160"
+    title: "Droits, piste d'audit et console d'exploitation — trois droits qui ne se cumulent pas"
+    epic: "EPIC-004 (rescopé)"
+    points: 3
+    superseded_by: ["STORY-240", "STORY-241", "STORY-276", "STORY-286"]
+    date: "2026-08-03"
+    raison: "3 points pour le journal d'audit, les droits ET la console : très sous-estimé. ⚡ Son contrôle s'en remettait aux RÔLES ; 241 le déplace au niveau de l'ACTEUR sur l'objet, seule forme qui tienne quand une structure de trois personnes cumule les trois permissions."
+  - story_id: "STORY-161"
+    title: "Abonnement Prospera — le seul cas où Money Vibes est bénéficiaire"
+    epic: "EPIC-004 (rescopé)"
+    points: 5
+    superseded_by: ["STORY-277"]
+    date: "2026-08-03"
+    raison: "Reprise à l'identique, ré-estimée à 3 : une échéance d'abonnement EST une créance, le cas C n'a aucune mécanique propre."
+  - story_id: "STORY-162"
+    title: "Octroi d'entitlements à l'encaissement — par événement, sans identité de service (tranche C8)"
+    epic: "EPIC-004 (rescopé)"
+    points: 8
+    superseded_by: ["STORY-278", "STORY-279"]
+    date: "2026-08-03"
+    raison: "⚡ La DÉCISION est reprise telle quelle et ratifiée par AD-13 — elle était déjà juste. Mais c'était une story à DEUX SERVICES : elle est scindée en ce que paiement-service publie (278) et ce que platform-catalog-service doit consommer (279, hors service), pour que le préalable soit visible au tracker au lieu d'être enfoui dans une story."
+  - story_id: "STORY-163"
+    title: "Impayé, période de grâce et rétablissement — la suspension est la règle, la grâce une dérogation"
+    epic: "EPIC-004 (rescopé)"
+    points: 5
+    superseded_by: ["STORY-280", "STORY-281", "STORY-282"]
+    date: "2026-08-03"
+    raison: "Trois politiques distinctes : le préavis obligatoire avant coupure (280), la grâce bornée dans le temps (281) et le rétablissement sans intervention (282)."
+  - story_id: "STORY-164"
+    title: "Pays, devises et exactitude monétaire — le XOF n'a pas de décimale"
+    epic: "EPIC-004 (rescopé)"
+    points: 5
+    superseded_by: ["STORY-250", "STORY-283", "STORY-284", "STORY-285"]
+    date: "2026-08-03"
+    raison: "⚡ Le type Montant (250) doit venir EN TÊTE de la chaîne monétaire, pas en fin de module : tout le reste s'écrit avec. Le référentiel versionné (283), le refus de conversion (284) et les bornes lues des capacités (285) suivent."
+  - story_id: "STORY-165"
+    title: "e2e docker — le parcours de Kossi, de bout en bout"
+    epic: "EPIC-004 (rescopé)"
+    points: 3
+    superseded_by: ["STORY-288"]
+    date: "2026-08-03"
+    raison: "Reprise, ré-estimée à 5 : elle rejoue aussi le scénario avec notifications désordonnées et dupliquées, et consigne les cibles NFR-7 comme référence à reconfirmer plutôt que comme seuil acquis."
+  - story_id: "STORY-168"
+    title: "Registre plateforme des fournisseurs de paiement — déclarer, configurer, activer par pays"
+    epic: "EPIC-004 (rescopé)"
+    points: 5
+    superseded_by: ["STORY-289"]
+    date: "2026-08-03"
+    raison: "ABSORBÉE telle quelle. Le trou qu'elle nommait est réel et l'ancien découpage avait raison de le nommer : 245/248 livrent le contrat et le routage, pas le moyen de déclarer un fournisseur SANS DÉPLOYER. 289 précise la frontière — le registre porte activation, routage et identifiants, jamais les capacités (AD-5/AD-6)."
+  - story_id: "STORY-169"
+    title: "Créance saisie manuellement — le chaînon en attendant Facturation"
+    epic: "EPIC-004 (rescopé)"
+    points: 5
+    superseded_by: ["STORY-290"]
+    date: "2026-08-03"
+    raison: "ABSORBÉE telle quelle, chemin A du PO (2026-08-02). Sans elle l'écran distributeur porte sur un objet inexistant. 290 ajoute l'origine SAISIE_MANUELLE explicite (AD-2), pour qu'à l'arrivée de Facturation on sache lesquelles ne pas dupliquer."
 
 open_contract_gaps:
   - id: "GAP-balance-validation-etat"
