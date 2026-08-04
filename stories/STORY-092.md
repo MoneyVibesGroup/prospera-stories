@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 18 (EXTENDED)
@@ -108,20 +108,20 @@ Les **acomptes** (Togo : **4**, aux échéances du CGI art. 114, chacun ≈ **1/
 
 ## Acceptance Criteria
 
-- [ ] **⚠️ `Impôt dû = max(IS ; MFP)`** implémenté et testé **dans les deux sens** (IS > MFP → IS ; MFP > IS → MFP).
-- [ ] **⚠️ Résultat fiscal négatif → IS = 0 mais MFP DUE** *(test central — le piège des moteurs naïfs)* ; `baseRetenue: 'MFP'`.
-- [ ] **`baseRetenue`** (`'IS'` | `'MFP'`) **exposée** — le comptable voit laquelle s'applique (information clé pour le conseil, STORY-096).
-- [ ] **IS = tauxIS × résultat fiscal** (plancher 0) ; **MFP = tauxMFP × CA HT** — **taux lus du paquet fiscal** (`TG@2026` : **27 %** / **1 %**), **aucun en dur** (NFR-A06).
-- [ ] **Acomptes** : calendrier **lu du paquet** (Togo : **4** échéances) ; montant théorique **proposé** et **modifiable** ; **retard d'échéance signalé** ; `Σ acomptes` déduite.
-- [ ] **Crédits d'impôt** : types **lus du paquet** (**type inconnu → 400**) ; **justification obligatoire** (**400** sinon) ; `Σ crédits` déduite.
-- [ ] **Solde** = `Impôt dû − Σ acomptes − Σ crédits` : **> 0 → à payer** ; **< 0 → crédit** (à reporter/restituer selon le paquet — **jamais deviné**).
-- [ ] **Acomptes > impôt dû → CRÉDIT** (et non un « solde négatif à payer ») — test dédié.
-- [ ] **CA nul** → IS = 0, MFP = 0 (sauf minimum forfaitaire éventuel **du paquet**).
-- [ ] **Tableau des 12 postes** de la section « Liquidation » de la DSF, chaque poste **traçable** (formule, taux, **version du paquet**).
-- [ ] **Immutabilité** : après validation de la liasse → **409** sur modification (acompte, crédit, liquidation).
-- [ ] **Exercice clos garde son paquet** : une réforme `TG@2027` **ne change pas** la liquidation 2026 (test dédié).
-- [ ] **Tests** : max(IS,MFP) ×2 sens, **déficit → MFP due**, CA nul, acomptes, crédits (400 ×2), acomptes > impôt → crédit, retard signalé, taux du paquet, immutabilité, immutabilité du paquet par exercice. **Coverage ≥ 90 %.**
-- [ ] **Swagger** + **CI verte**.
+- [x] **⚠️ `Impôt dû = max(IS ; MFP)`** implémenté et testé **dans les deux sens** (IS > MFP → IS ; MFP > IS → MFP).
+- [x] **⚠️ Résultat fiscal négatif → IS = 0 mais MFP DUE** *(test central — le piège des moteurs naïfs)* ; `baseRetenue: 'MFP'`.
+- [x] **`baseRetenue`** (`'IS'` | `'MFP'`) **exposée** — le comptable voit laquelle s'applique (information clé pour le conseil, STORY-096).
+- [x] **IS = tauxIS × résultat fiscal** (plancher 0) ; **MFP = tauxMFP × CA HT** — **taux lus du paquet fiscal** (`TG@2026` : **27 %** / **1 %**), **aucun en dur** (NFR-A06).
+- [x] **Acomptes** : calendrier **lu du paquet** (Togo : **4** échéances) ; montant théorique **proposé** et **modifiable** ; **retard d'échéance signalé** ; `Σ acomptes` déduite.
+- [x] **Crédits d'impôt** : types **lus du paquet** (**type inconnu → 400**) ; **justification obligatoire** (**400** sinon) ; `Σ crédits` déduite.
+- [x] **Solde** = `Impôt dû − Σ acomptes − Σ crédits` : **> 0 → à payer** ; **< 0 → crédit** (à reporter/restituer selon le paquet — **jamais deviné**).
+- [x] **Acomptes > impôt dû → CRÉDIT** (et non un « solde négatif à payer ») — test dédié.
+- [x] **CA nul** → IS = 0, MFP = 0 (sauf minimum forfaitaire éventuel **du paquet**).
+- [x] **Tableau des 12 postes** de la section « Liquidation » de la DSF, chaque poste **traçable** (formule, taux, **version du paquet**).
+- [x] **Immutabilité** : après validation de la liasse → **409** sur modification (acompte, crédit, liquidation).
+- [x] **Exercice clos garde son paquet** : une réforme `TG@2027` **ne change pas** la liquidation 2026 (test dédié).
+- [x] **Tests** : max(IS,MFP) ×2 sens, **déficit → MFP due**, CA nul, acomptes, crédits (400 ×2), acomptes > impôt → crédit, retard signalé, taux du paquet, immutabilité, immutabilité du paquet par exercice. **Coverage ≥ 90 %.**
+- [x] **Swagger** + **CI verte**.
 
 ---
 
@@ -248,15 +248,15 @@ moteur travaille en **unités mineures** (× 100). L'exonération de MFP (`exone
 
 ## Definition of Done
 
-- [ ] `LiquidationService.liquider()` : **`max(IS ; MFP)`**, acomptes, crédits, solde
-- [ ] **Test central** : entreprise **déficitaire** → **IS = 0, MFP due**, `baseRetenue: 'MFP'`
-- [ ] Taux, calendrier d'acomptes et types de crédits **lus du paquet** (aucun en dur)
-- [ ] Acomptes (théorique proposé, versé réel, retard signalé) ; crédits (type validé, justification obligatoire)
-- [ ] Solde `A_PAYER` / `CREDIT` (acomptes > impôt → crédit)
-- [ ] **Tableau des 12 postes** « Liquidation » de la DSF, traçable (formule, taux, version du paquet)
-- [ ] Immutabilité après validation (409) ; paquet **immuable par exercice**
-- [ ] Coverage ≥ 90 % ; Swagger ; CI verte
-- [ ] Non-régression : STORY-091 (résultat fiscal) vert
+- [x] `LiquidationService.liquider()` : **`max(IS ; MFP)`**, acomptes, crédits, solde
+- [x] **Test central** : entreprise **déficitaire** → **IS = 0, MFP due**, `baseRetenue: 'MFP'`
+- [x] Taux, calendrier d'acomptes et types de crédits **lus du paquet** (aucun en dur)
+- [x] Acomptes (théorique proposé, versé réel, retard signalé) ; crédits (type validé, justification obligatoire)
+- [x] Solde `A_PAYER` / `CREDIT` (acomptes > impôt → crédit)
+- [x] **Tableau des 12 postes** « Liquidation » de la DSF, traçable (formule, taux, version du paquet)
+- [x] Immutabilité après validation (409) ; paquet **immuable par exercice**
+- [x] Coverage ≥ 90 % ; Swagger ; CI verte
+- [x] Non-régression : STORY-091 (résultat fiscal) vert
 
 ---
 
@@ -308,9 +308,43 @@ moteur travaille en **unités mineures** (× 100). L'exonération de MFP (`exone
   (aucune balance 2025 dans cette stack) — conforme à **D-092-8** : jamais `0`, qui se lirait
   « rien à verser ».
 
+- **2026-08-03 — revue de code : 5 constats, tous traités** (commit dédié, séparé de la feature).
+  **F-092-1 (BLOQUANT)** : un versement dont l'échéance **n'est plus publiée** disparaissait de tous les
+  totaux, sans le moindre signal. L'échéance n'est validée qu'**à l'écriture** ; un paquet republié
+  (`31-05` → `30-05` — ce que cette story vient elle-même de faire sur `togo@2026`) laissait le versement
+  orphelin, et le solde à payer était majoré d'un montant **réellement versé au Trésor**, sans qu'aucun
+  champ n'explique l'écart — alors que `creditsHorsGrille` traite exactement ce risque côté crédits.
+  ⇒ versements orphelins **comptés et signalés** (`acomptesHorsCalendrier`, `echeancesOrphelines`).
+  **F-092-4** : `taux: 1` était lu comme **100 %** ; or le taux MFP **vaut 1 %**, donc `"taux": 1` est une
+  écriture plausible pour 1 % — la lire comme 100 % donnait `MFP = chiffre d'affaires`, retenue par
+  `max(IS ; MFP)`, soit un impôt égal au CA servi sans refus. Tout taux atteignant 100 % est désormais
+  **refusé**. **F-092-5** : `restituable` extrait, typé, publié et lu par personne ⇒ **exposé** et
+  documenté comme **hook inerte**. **F-092-2 / F-092-3** : deux commentaires affirmaient ce que le code ne
+  fait pas (rabais `709` non rattachés au poste par `syscohada-revise@2.1` ; « chaque occurrence compte »
+  contredit par la valorisation, qui ne retient qu'un préfixe par ligne — à dessein, pour ne pas doubler la
+  MFP). **5 mutation-tests supplémentaires, 5 rouges**, dont le bug d'origine rejoué.
+
+- **2026-08-03 — revue de sécurité : aucune vulnérabilité** (confiance ≥ 80). Vecteurs vérifiés et écartés :
+  isolation multi-tenant (`orgId` du JWT dans **les quatre** méthodes de chaque dépôt, y compris le filtre
+  de `deleteOne` — pas de fenêtre entre lecture et suppression) · **404 générique** hors organisation,
+  jamais 403 · injection NoSQL (`echeance` ancrée, `type` persisté depuis le **paquet** et non le DTO,
+  bornes converties en `Date`, `id` validé) · contournement du gel, y compris la variante « bornes décalées
+  d'1 ms » (inerte : toutes les relectures matchent par égalité exacte) · ReDoS · fuite d'information
+  (corps d'erreur en liste blanche, ni `orgId` ni `parUserId` exposés) · détournement de l'acompte N−1 ·
+  chaîne de gardes et ordre des routes · intégrité du paquet régénéré (sha256 réel = manifeste). Une
+  fenêtre TOCTOU et l'absence d'index unique (**D-092-11**, délibérée) ont été examinées puis écartées :
+  acteur légitime sur ses **propres** données déclaratives, patron identique à celui déjà en place pour
+  `retraitements`/`deficits`, non introduit par cette PR.
+
+- **2026-08-03 — `done`.** Vérification docker **rejouée** après `docker restart` sur l'état final : un
+  versement orphelin réel (20 000 000, échéance `30-05`) est bien compté (`totalAcomptes` 140 000 000)
+  **et** signalé. État final : lint 0 · build OK · **2 186 unit** + **461 e2e** verts · couverture
+  **98.87 / 91.12 / 98.09 / 98.97** · **22 mutation-tests rouges**. PR `balance-service` **#30**
+  rebase-mergée sur `dev`, branche supprimée.
+
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** **STORY-091** (résultat fiscal = base imposable), **STORY-078** (paquet : taux IS/MFP, calendrier d'acomptes, types de crédits), STORY-082/085 (CA HT), STORY-080 (régime `REEL` — sinon **STORY-095**/TPU)
 **Alimente** **STORY-094** (provision d'IS écrite dans la balance), **STORY-096** (simulation — **le plancher MFP change tout le conseil**), `bilan-service` EPIC-011 (section « Liquidation » de la DSF)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A19 · CGI Togo 2026 (IS art. 113 · MFP art. 120 · acomptes art. 114) · GUIDEF « Liquidation IS » (12 postes)
