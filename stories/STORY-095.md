@@ -259,6 +259,39 @@ it('RÉEL : aucune TPU, et GET /fiscal/tpu est REFUSÉ (409)', async () => { …
 
 - **2026-08-04** — Story reprise en `in_progress`. **Recadrage majeur** contre les octets du paquet `togo@2026` : le barème supposé (`taux.tpu[]` en tranches) n'existe pas ; le paquet publie **deux composantes** (forfaitaire sans barème / déclarative complète), un **plafond de régime à 60 M** (et non un « seuil à 30 M ») et ses seuils **en prose**. 12 décisions de cadrage posées (D-095-1 → D-095-12), dont un défaut trouvé au cadrage et corrigé (**F-095-1** : facteur 100 entre les montants du paquet et les unités mineures du service, invisible à la suite de tests de STORY-080).
 
+- **2026-08-04 — Portes de qualité.** Lint **0 warning** · build OK · **2 591** tests unitaires + **546** e2e verts · couverture **98.98 / 91.77 / 98.20 / 99.07** (seuils 65/90/90/90). Aucun fichier neuf sous la barre : `tpu.regles` 99 %, `tpu.service` 98.6 %, `tpu.repositories`, `tpu.controller`, `moteur-fiscal.*`, `regime-fiscal.guard` et `montants-paquet` à **100 %** — l'angle mort « fichier neuf à 0 % masqué par la couverture globale » a été refermé explicitement.
+
+- **2026-08-04 — Mutation-tests : 12 mutations, 12 rouges.** Chaque garde a été inversée puis restaurée, et la suite **doit** virer au rouge : ① le convertisseur d'unités privé de son `× 100` (F-095-1) ; ② l'avertissement de bascule branché sur la **frontière interne** au lieu du **plafond** (D-095-3) ; ③ la composante forfaitaire calculée au taux déclaratif (D-095-5) ; ④ nature absente ⇒ 2 % par défaut (D-095-6) ; ⑤ régime absent présumé `SYNTHETIQUE` (D-095-1) ; ⑥ la garde d'exclusivité désarmée ; ⑦ le provisionnement n'aiguillant plus (D-095-11) ; ⑧ l'exonération appliquée à un exercice **à cheval** (D-095-9) ; ⑨ le minimum annuel appliqué **après** l'exonération ; ⑩ l'écriture TPU au montant brut au lieu du delta ; ⑪ l'échéance acceptée sans calendrier publié (D-095-8) ; ⑫ le gel contrôlé sur un exercice **fourni par le client**.
+
+### Vérification docker — persistance réelle (obligatoire, § DoD)
+
+Stack `docker compose` complète, `balance-service` **redémarré** avant toute conclusion (le hot-reload peut annoncer « Found 0 errors » en exécutant l'ancien module). Deux organisations réelles créées via l'IdP, gates KYC/entitlement posées, référentiel `syscohada-revise@2.1` attribué.
+
+**Dossier A — `Entreprenant TPU 095`, régime `SYNTHETIQUE` confirmé, CA 42 000 000 FCFA :**
+
+| Contrôle | Résultat |
+|---|---|
+| **F-095-1 en réel** | la proposition de régime affiche « CA **42 000 000** ≤ plafond TPU **60 000 000** » — les deux grandeurs enfin dans la même unité. Avant le correctif, ce CA était comparé à un plafond cent fois trop bas et proposait `REEL` |
+| TPU sans nature déclarée | **409 `NATURE_ACTIVITE_TPU_INDETERMINEE`**, message nommant les deux valeurs admises |
+| `/fiscal/liquidation`, `/fiscal/tva`, `/fiscal/resultat-fiscal` | **409 `REGIME_INCOMPATIBLE`** sur les trois, message orientant vers `/fiscal/tpu` |
+| `PUT /fiscal/tpu/parametrage` | **200** ; document réel dans **`tpu_parametrages`** (snake_case vérifié), `orgId` + `parUserId` + `natureActivite` persistés |
+| `GET /fiscal/tpu` | composante `DECLARATIF`, taux **0.08**, TPU due **3 360 000 FCFA**, seuils publiés **séparément** (`plafondRegime` 60 M ≠ `forfaitaireCaMax` 30 M), `baremeForfaitaireDisponible: false`, **aucun** `CA_AU_DELA_DU_PLAFOND` (42 M < 60 M — le cadrage initial aurait averti à tort) |
+| versement avec échéance `30-04` | **400 `ECHEANCE_INCONNUE`** (« échéances admises : (aucune publiée) ») et **aucun document orphelin** : `tpu_versements` reste à 0 |
+| versement sans échéance | **201**, document réel dans **`tpu_versements`**, solde recalculé à `A_PAYER 2 360 000` |
+| **écriture en balance** | balance v2 `origine: PROVISIONS_FISCALES`, chaînée à sa base : **`641` D 336 000 000 / `441` C 336 000 000**. **`89x` : 0 ligne. `443`/`445`/`4441`/`4449` : 0 ligne.** Équilibre des soldes exact (D = C = 4 536 000 000) |
+| idempotence | 3 applications ⇒ **1 seule** balance provisionnée, 2 versions au total |
+| gel après validation | `PUT parametrage`, `POST versement` et `DELETE versement` ⇒ **409** ; la nature et le versement en base sont **inchangés** ; `GET /fiscal/tpu` reste **200** (D-090-11) |
+
+**Dossier B — `Cabinet Reel 095`, aucun profil (donc `REEL` par défaut, D-095-1) — la non-régression :**
+
+| Contrôle | Résultat |
+|---|---|
+| `/fiscal/resultat-fiscal`, `/fiscal/liquidation`, `/fiscal/tva` | **200** sur les trois — comportement **identique** à avant STORY-095 |
+| `/fiscal/tpu` | **409 `REGIME_INCOMPATIBLE`**, orienté vers les surfaces du réel |
+| provisionnement | `regime: REEL`, écritures **`891`/`441`** (`source: liquidation`) — **aucun `641`**. La branche réelle est intacte |
+
+⚠️ **Un piège rencontré et à retenir** : le premier contrôle du contenu de la balance a été fait avec un `findOne({origine:'PROVISIONS_FISCALES'})` **non scopé sur l'org** — il a rendu la balance d'un dossier de STORY-094, avec ses `891` et ses comptes de TVA, et faisait conclure à un aiguillage cassé. Le parc de vérification n'est jamais vide : **toute requête `mongosh` de contrôle doit porter `orgId`**.
+
 ---
 
 **Status:** in_progress
