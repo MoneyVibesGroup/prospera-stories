@@ -7,3 +7,4 @@
 # git qui tient l'historique. (« sprint-status ancienne version.yaml » était
 # byte-identique au tracker le 2026-08-03, donc sans valeur, puis a divergé.)
 *ancienne version*.yaml
+sprint-status.yaml.bak-*
