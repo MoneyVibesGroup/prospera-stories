@@ -4,10 +4,11 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A21 · `rapport-bilan-logique-metier-2026-07-12.md` (décision utilisateur : **« les impôts doivent faire partie de la balance »**) · STORY-092 (liquidation IS), STORY-093 (TVA & taxes), STORY-101 (contrat + immutabilité)
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Complexité :** high
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
-**Sprint :** 18 (EXTENDED)
+**Sprint :** 19
 **Service :** `balance-service` (:3007)
 **Couvre :** FR-A21 (les impôts font partie de la balance)
 
@@ -97,6 +98,116 @@ Sans cette story, la balance est **incomplète** : elle montre un résultat **av
 6. **⚠️ Vérification de non-circularité** : il **relance** la liquidation → le résultat comptable **avant impôt** est toujours **6 800 000** (les `89x` sont **exclus** de la base) → **impôt inchangé : 1 402 650** ✔ **Pas de boucle.**
 7. **⚠️ Vérification d'idempotence** : il **réapplique** les provisions → les écritures sont **remplacées**, pas cumulées → la provision reste **1 402 650** (et non 2 805 300) ✔
 8. La balance est complète → contrôles (**STORY-098**) → handoff vers `bilan-service` (**STORY-099**) → liasse avec **bilan, CR et section fiscale cohérents**.
+
+---
+
+## Décisions de cadrage (prises au développement)
+
+### D-094-1 — La base de l'impôt est le **résultat comptable AVANT impôt**, et c'est une grandeur **nouvelle**
+
+Le garde-fou du § *Technical Notes* (« filtrer les `89x` hors des charges ») ne peut **pas** être appliqué
+tel quel : `calculerResultatComptable` somme les classes **6/7/8** (décision **D-091-3**), et la classe 8
+**contient** les `89x`. Les en retirer purement et simplement casserait le **contrôle d'articulation** de
+STORY-091, qui rapproche ce résultat du **compte de résultat net** de la balance (`13`) — lequel est un
+résultat **après** impôt. L'écart affiché accuserait alors la comptabilité d'une erreur qu'elle n'a pas
+commise, ce que D-091-3 existe précisément pour éviter.
+
+Deux grandeurs distinctes sont donc publiées :
+
+| Grandeur | Formule | À quoi elle sert |
+|---|---|---|
+| `resultatComptable` | Σ net créditeur classes **6/7/8** (`89x` **compris**) | articulation avec le compte `13` — **inchangée** |
+| `resultatComptableAvantImpot` | `resultatComptable + chargeImpotComptabilisee` | **base du résultat fiscal** — stable |
+
+`chargeImpotComptabilisee` = Σ `(soldeDebiteur − soldeCrediteur)` sur les comptes rattachés au compte
+d'impôt sur le résultat du référentiel. C'est **exactement** la réintégration classique de l'IS
+(non déductible), écrite comme une base plutôt que comme un poste de retraitement.
+
+⚠️ **Cette décision corrige un défaut latent antérieur à cette story** : une balance importée qui portait
+**déjà** une charge d'IS en `89x` minorait la base imposable du montant de cet impôt, **en silence**. Aucun
+test ne le voyait, parce qu'aucun adaptateur ne produit de `89x` — seul un import réel en aurait porté.
+
+**Le compte d'impôt sur le résultat n'est pas écrit en dur** (NFR-A06) : il est résolu du référentiel selon
+le patron de `resoudreCompteResultatNet` (D-091-13) — `regles.COMPTE_IMPOT_RESULTAT` s'il est publié, sinon
+**l'unique** compte de classe 8 dont le libellé normalisé commence par « impots sur le resultat » (`89` en
+`syscohada-revise@2.1`), sinon `null`. `null` ⇒ rien à ajouter (le plan n'a pas de compte d'impôt : c'est le
+cas de `sfd-bceao@2.0`) pour la **lecture**, mais **409** pour l'**écriture** d'une provision : on ne devine
+jamais où poser une dette d'État.
+
+### D-094-2 — Le garde-fou structurel : le moteur fiscal lit **toujours** la dernière balance NON provisionnée
+
+L'exclusion des `89x` protège d'**un** vecteur de circularité. Elle n'en protège pas d'un second, plus
+large : toute écriture de provision touchant une **classe de gestion** (une charge `64x`, par exemple)
+changerait le résultat comptable au recalcul suivant. Le garde-fou porte donc sur la **source**, pas sur les
+comptes :
+
+> Une balance produite par le provisionnement porte `origine: 'PROVISIONS_FISCALES'`, et une balance portant
+> cette origine n'est **jamais** une base de calcul — ni pour le résultat fiscal, ni pour la liquidation, ni
+> pour le chiffre d'affaires qui fixe la MFP.
+
+Même patron que l'exclusion des socles `A_NOUVEAUX` (D-087-2), pour la même raison : un artefact **dérivé**
+d'une balance n'est pas la balance. C'est ce qui rend l'idempotence vraie **par construction** — réappliquer
+part toujours de la même base, donc reproduit exactement les mêmes écritures.
+
+### D-094-3 — Ce que la story écrit : la **charge d'impôt** et le **soldage de la TVA**. Rien d'autre.
+
+Le principe qui tranche chaque écriture : **n'écrire que ce qui n'est PAS déjà dans la balance.**
+
+| Écriture | Écrite ? | Pourquoi |
+|---|---|---|
+| Charge d'IS `891` D / dette `441` C | **oui** | aucun adaptateur du hub ne produit de `89x` — elle manque toujours |
+| Soldage TVA `443` D / `445` C / `4441` C / `4449` | **oui** | la ventilation (STORY-085) alimente `443`/`445` à la **saisie**, mais **jamais** `4441`/`4449` : la déclaration n'est nulle part en balance |
+| Position TVA (`443` C, `445` D) du hook de 093 | **non** — écart assumé | `443`/`445` **sont déjà** dans la balance ; réécrire la position **doublerait** la TVA collectée. Le hook de STORY-093 est consommé pour ses **montants** et ses **comptes**, pas pour son **sens** |
+| Autres taxes `64x` D / `44x` C | **non** — écart assumé (voir D-094-4) | elles y sont déjà |
+
+### D-094-4 — Écart assumé au cadrage : les **autres taxes ne sont pas réécrites**
+
+Le § *Périmètre* demande d'écrire les autres taxes `64x` (D) / `44x` (C). **Le faire doublerait une charge
+déjà portée par la balance**, et deux faits le prouvent :
+
+1. le cahier de dépenses publie une **catégorie par défaut « Impôts et taxes » → compte `64`**
+   (`categories-depenses.defaut.ts`) : une patente saisie au cahier est ventilée en `64x` et **est** dans la
+   balance ;
+2. surtout, **STORY-093 réintègre déjà les taxes non déductibles** au résultat fiscal
+   (`agregerReintegrationsTaxes`, origine `AUTO_TAXES`). Réintégrer une charge, c'est **présupposer qu'elle a
+   été déduite**, donc qu'elle est dans le résultat comptable. Si les taxes n'y étaient pas, la réintégration
+   de 093 serait fausse — les deux lectures ne peuvent pas être vraies en même temps, et 093 est **livrée**.
+
+Le registre des taxes reste donc ce qu'il est : une **déclaration fiscale** de charges déjà comptabilisées,
+pas un journal en attente d'écriture. Le total est **exposé** dans l'aperçu (`taxesNonEcrites`) avec son
+motif — non écrit ne veut pas dire tu.
+
+**Dette tracée** : le jour où une story cadrera un registre de taxes **non comptabilisées** (distinct de
+celui-ci), leur écriture se posera ici, et la réintégration de 093 devra être revue **en même temps**.
+
+### D-094-5 — Le soldage de TVA est écrit sur le **cumul de l'exercice**, et l'écart au réel est **signalé**
+
+La balance de clôture porte la dette de TVA de l'**exercice entier**, pas d'une période : le soldage
+consomme la synthèse annuelle déjà produite par STORY-093 (`syntheseExercice`). L'écriture est **équilibrée
+par construction** :
+
+```
+443  TVA collectée ..... D  Σ collectée
+445  TVA déductible .... C  Σ déductible
+4441 TVA due ........... C  total à payer
+4449 Crédit de TVA ..... D/C  variation du stock de crédit
+```
+
+(l'identité `Σ collectée + Δcrédit = Σ déductible + total à payer` se démontre période à période :
+`collectée − déductible = due − créditGénéré`.)
+
+⚠️ Si la balance porte sur `443`/`445` des soldes **différents** des cumuls déclarés — cas d'un import Sage,
+ou d'une saisie partielle — le soldage laisse un **résidu**. Il n'est pas corrigé d'office (ce serait écraser
+une comptabilité au profit d'un calcul) mais **signalé** : `SOLDE_TVA_DIVERGENT`, avec les deux montants.
+
+### D-094-6 — Les acomptes versés ne sont **jamais** écrits ; la position nette est **exposée**
+
+L'écriture porte la **charge de l'exercice** (`impotDu`), pas le **solde à payer**. Les acomptes ont été
+**décaissés** : ils sont déjà comptabilisés par le cabinet, et les réécrire ici les compterait deux fois tout
+en faisant diverger la trésorerie. En conséquence `441` ressort **créditeur**, jamais négatif — l'AC « solde
+d'IS créditeur → créance, pas de dette négative » est **tenue par construction** (aucune dette négative n'est
+jamais écrite), et le cas « acomptes > impôt » est **exposé** : l'aperçu publie `positionEtat`
+(`{ montant, sens: 'A_PAYER' | 'CREANCE' }`) et lève l'avertissement `EXCEDENT_ACOMPTES_NON_ECRIT`.
 
 ---
 
@@ -230,7 +341,18 @@ it('IDEMPOTENCE : 3 applications → 1 seule provision', async () => {
 
 ---
 
-**Status:** ready-for-dev
+## Progress Tracking
+
+- **2026-08-04** — statut `not_started` → `in_progress`. Cadrage relu et **six décisions** posées
+  (D-094-1 à D-094-6) : la non-circularité s'obtient par une **grandeur nouvelle**
+  (`resultatComptableAvantImpot`) plus un **garde-fou de source** (`origine: PROVISIONS_FISCALES` jamais base
+  de calcul), et **deux écritures du cadrage ne sont pas écrites** parce qu'elles sont déjà dans la balance
+  (position de TVA, autres taxes). Branches `MNV-094` ouvertes sur `docs/` (base `main`) et `balance-service`
+  (base `dev`).
+
+---
+
+**Status:** in_progress
 **Dependencies:** **STORY-092** (`impotDu`), **STORY-093** (TVA due/crédit, taxes), **STORY-085** (agrégation/régénération de la balance), **STORY-101** (contrat, validation, versioning), STORY-078 (comptes du plan) · **STORY-095** fournira la taxe unique (TPU) à écrire pour le régime synthétique
 **Réalise** la décision de cadrage : **« les impôts font partie de la balance »** (FR-A21)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A21
