@@ -290,6 +290,30 @@ Stack `docker compose` complète, `balance-service` **redémarré** avant toute 
 | `/fiscal/tpu` | **409 `REGIME_INCOMPATIBLE`**, orienté vers les surfaces du réel |
 | provisionnement | `regime: REEL`, écritures **`891`/`441`** (`source: liquidation`) — **aucun `641`**. La branche réelle est intacte |
 
+### Revue de code — 4 constats corrigés, puis vérification docker **rejouée**
+
+Rapport de revue : 6 constats ≥ 80 de confiance. Deux **bloquants**, retenus et corrigés ; deux de documentation ; deux écartés après examen (voir la PR).
+
+| # | Constat | Traitement |
+|---|---|---|
+| **F-095-2** ⛔ | les routes du **registre des autres impôts et taxes** vivaient dans `TvaController`, dont elles héritaient `@RequiresRegime(REEL)`. Or la TPU est libératoire de l'IRPP-affaires, du MFP, de la patente et de la TVA — **et de rien d'autre** : un entreprenant doit toujours sa taxe sur les salaires. Il recevait **409 sur l'enregistrement d'une taxe qu'il doit**, et `taxesNonEcrites` valait toujours `0` dans la branche synthétique, rendant `TAXES_NON_REECRITES` **indéclenchable** alors que ce code le lit | routes sorties dans un **`TaxesController`** sans garde de régime |
+| **F-095-3** ⛔ | la charge de TPU déjà comptabilisée était lue **par préfixe**, comme l'impôt sur le résultat. Mais `891` est un objet fiscal subdivisé alors que **`641` est la RACINE des impôts et taxes directs** : une taxe sur les salaires (`6413`) venait **éteindre une partie de la TPU due**, la dette envers l'État ressortant sous-provisionnée d'autant, sur une balance équilibrée et sans un seul avertissement. ⚠️ Le test qui prétendait couvrir le cas utilisait `645`, une **racine sœur** : il passait au vert quel que soit le comportement sur `641x` | lecture par **égalité stricte** (**D-095-13**) — le compte lu est exactement celui sur lequel on écrit, ce qui rend le delta exact et préserve l'idempotence |
+| **F-095-4** | `supprimerVersement` était la **seule** des six méthodes de `TpuService` sans garde de régime — le motif « posée d'un côté et pas de l'autre » reproduit dans le service qui le dénonce. ⚠️ **La mutation est restée VERTE au premier passage** : aucun test ne le couvrait | garde ajoutée **et** assertion manquante écrite ; mutation rejouée ⇒ rouge |
+| **F-095-5** | Swagger du provisionnement muet sur la branche synthétique (3 codes 409 nouveaux, écritures `64x`/`44x`) ; commentaire d'`exigerRegime` promettant une lecture unique du profil, fausse au niveau HTTP ; contradiction « minimum annuel appliqué » annoncée sur un exercice exonéré à TPU nulle | corrigés |
+
+**Portes après correctifs** : lint 0 · build OK · **2 598** unit + **547** e2e verts · couverture **98.99 / 91.81 / 98.20 / 99.07** · **14 mutation-tests, 14 rouges** (les 2 nouveaux couvrent F-095-3 et F-095-4).
+
+**Vérification docker rejouée** sur l'état final (les correctifs touchent la logique déjà éprouvée) — stack redémarrée, `Found 0 errors`, routes `taxes*` et `tpu*` remappées :
+
+| Contrôle | Résultat |
+|---|---|
+| `GET /fiscal/taxes` sur un dossier `SYNTHETIQUE` | **200** — plus de `REGIME_INCOMPATIBLE` (F-095-2 levé) |
+| `POST /fiscal/taxes/autres` sur ce même dossier | **409 `BALANCE_VALIDEE_IMMUABLE`** — le **gel**, plus le régime : la garde de régime ne s'interpose plus |
+| `GET /fiscal/liquidation` | **409 `REGIME_INCOMPATIBLE`** — l'exclusivité tient toujours |
+| **F-095-3 sur un dossier neuf** : balance portant `6413` = 900 000 F et un CA de 42 M | `chargeProvisionComptabilisee` = **0**, TPU écrite au montant **plein** (`641` D 3 360 000 / `441` C 3 360 000), `6413` **intact** en base. Avant le correctif, la dette envers l'État aurait été **minorée de 900 000 F** |
+
+⚠️ **Incident d'infra pendant la re-vérification** : les conteneurs Mongo/Kafka/Redis/MinIO ont chuté, et Kafka a redémarré en boucle sur `all log dirs in /tmp/kafka-logs have failed` — volume corrompu par l'arrêt brutal. Volume `prospera_kafka-data` recréé (Mongo intact, les dossiers de vérification conservés). Sans rapport avec la story, mais à connaître : un `docker compose restart` sur un Kafka tué de force ne suffit pas.
+
 ⚠️ **Un piège rencontré et à retenir** : le premier contrôle du contenu de la balance a été fait avec un `findOne({origine:'PROVISIONS_FISCALES'})` **non scopé sur l'org** — il a rendu la balance d'un dossier de STORY-094, avec ses `891` et ses comptes de TVA, et faisait conclure à un aiguillage cassé. Le parc de vérification n'est jamais vide : **toute requête `mongosh` de contrôle doit porter `orgId`**.
 
 ---
