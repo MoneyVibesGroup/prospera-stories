@@ -350,3 +350,81 @@ qui n'aurait rien filtré.
 honnête (le service ne prétend pas avoir réussi) et conforme au démarrage dégradé, mais un **503**
 porteur d'un code stable serait plus exploitable par la console. Aucun AC ne l'exige — noté comme
 amélioration, pas fait ici pour ne pas déborder.
+
+---
+
+## Revue de code — 6 constats, aucun bloquant, tous corrigés
+
+| # | Constat | Correctif |
+|---|---|---|
+| ① | **`zone` sur la voie par pointeur n'était couverte par AUCUN test** : supprimer son écriture laissait les 407 tests verts | 2 specs + 3 e2e. ⚠️ `toHaveBeenCalledWith` ne suffisait pas — jest y assimile une clé `undefined` à une clé absente, donc `zone: dto.zone` (qui fait écrire `null`) passait |
+| ② | **Au-delà de 2× le plafond, multer prononçait un 413 générique** (« File too large », anglais, sans `code` ni `limitBytes`) — le contraire de l'AC-5 et de ce que Swagger annonce | Plafond multer devenu une **constante** de mémoire (64 Mo) + `TraduireRefusMulterInterceptor`. Supprime au passage un second défaut : le plafond était lu dans `process.env` **au chargement de la classe**, donc avant `ConfigModule` — il divergeait selon le mode de démarrage |
+| ③ | **`putObject` laissait les métadonnées écraser le `Content-Type`** (spread après), et le test nommé « SANS écraser le Content-Type » ne passait **aucun conflit** : il n'éprouvait jamais l'invariant qu'il nommait, lequel était faux | Spread avant le type + test qui pose réellement un `Content-Type` concurrent |
+| ④ | **Un 6ᵉ commentaire C3 non amendé**, dans un fichier que la story modifie — D-149-2 en recensait 5 | Réécrit : C3 devient une propriété de *cette voie-là*, plus du catalogue |
+| ⑤ | « deux dépôts produisent des clés distinctes » **déposait sur 2.1 puis 2.2** : les clés différaient déjà par la version, remplacer `randomUUID()` par une constante laissait le test vert | Même couple redéposé |
+| ⑥ | **`artifactTooLargeMessage` vit dans un `*.constants.ts`, exclu de la couverture** au même titre que `*bootstrap*` : sa branche était fausse sous le méga (un plafond de 1 024 octets annonçait « **0.0 Mo** », c'est-à-dire zéro) | Unités Mo/Ko/octets + spec dédiée |
+
+⚠️ Ajouter le constructeur de l'intercepteur a **cassé les modules de test** qui instancient le
+contrôleur — le manquement n°1 de `qualite-verification.md`, révélé par `npm run test:e2e` exactement
+comme la règle l'annonce.
+
+---
+
+## Revue de sécurité — 2 constats, tous deux corrigés
+
+### ① CWE-770 · A04:2021 — multipart borné sur la seule taille du fichier
+
+`FileInterceptor` ne recevait que `limits: { fileSize }`. Toutes les autres bornes de busboy restaient
+à **`Infinity`** (`fields`, `parts`, `files`) et `fieldSize` à 1 Mo : une **seule** requête pouvait
+faire accumuler en mémoire autant de champs texte d'un mégaoctet qu'elle voulait.
+`forbidNonWhitelisted` ne l'aurait pas empêché — la `ValidationPipe` s'exécute **après**
+l'intercepteur, c'est-à-dire une fois tout le corps bufferisé — et le throttler ne protège pas d'une
+requête **unique** non bornée. Même motif que les CWE-770 de STORY-145 et STORY-147.
+
+⇒ Bornes complètes calées sur le contrat réel de la route : 1 fichier, 2 champs, 128 octets par champ.
+
+### ② CWE-778 · A09:2021 — le dépôt n'était imputable à personne
+
+Le document ne portait **aucune identité d'auteur**, et les journaux ne compensent pas : le `mixin`
+pino n'émet que `requestId` et `tenantId`, or **`tenantId` vaut `null` pour tout compte plateforme** —
+la seule population qui puisse déposer. Un jeton fuité (15 min) suffisait à publier un paquet altéré,
+immédiatement `ACTIVE` et **immuable**, sans qu'aucune investigation ultérieure ne puisse dire **qui**,
+ni délimiter le périmètre du credential compromis, ni savoir quels **autres** paquets le même acteur
+avait déposés — pour un artefact chargé et exécuté par `bilan-service` chez **tous** les cabinets.
+
+⇒ `publishedBy` persisté depuis le contexte de requête, et **jamais exposé par l'API** : donnée
+d'investigation, pas information de catalogue.
+
+**Écartés avec motif** (examinés, non retenus) : path traversal — regex ancrées, ni `.` ni `/` ni `..`,
+vecteur réellement fermé · route shadowing · escalade via le 13ᵉ code (seul `PLATFORM_ADMIN` reçoit le
+catalogue entier) · NoSQL injection · pollution de prototype (`Map`) · bombe de décompression (aucune
+décompression ; le `catch` de `estObjetJson` absorbe le `RangeError` d'un JSON hyper-imbriqué → 415) ·
+TOCTOU (index unique + ramassage) · énumération par le 409 (l'appelant détient déjà
+`referentiel:publish`) · fuite de l'URI `s3://` (bucket privé, aucune route de lecture) · défauts
+`minioadmin` (patron préexistant, compose racine non versionné).
+
+---
+
+## Vérification docker **rejouée** sur l'état final (après les 8 correctifs)
+
+Stack repartie de zéro (`down -v` → `up --build`), puisque `publishedBy` est un champ persisté neuf.
+
+| Contrôle | Résultat |
+|---|---|
+| dépôt du vrai paquet SYSCOHADA | **201**, `checksum` = `sha256:01b892c0…9c67b` (identique au `shasum` de l'hôte) |
+| **CWE-778 : `publishedBy` en base** | `6a73303572011882449210b2` = **exactement le `sub`** du jeton employé |
+| **CWE-778 : absent de la réponse API** | ✅ le corps ne porte ni `publishedBy` ni `artifactStorageKey` |
+| **CWE-770 : 20 parts × 1 Mo réellement émises** (`Content-Length: 20 092 948`) | **400** dès le premier champ hors borne, **0 document créé**, service toujours `healthy` |
+| 3 champs de trop | **400** « Too many fields » |
+| 1 champ de 1 Mo | **400** « Field value too long » |
+| 1 champ inconnu | **400** `forbidNonWhitelisted` — la stricte validation du corps est **préservée** |
+| immuabilité · empreinte divergente · contenu binaire · 9 Mo · params hors format · sans jeton | **409 · 422 · 415 · 413 · 400 · 401** |
+| le 413 porte toujours sa limite | `code: ARTIFACT_TOO_LARGE`, `limitBytes: 8388608`, message « 8 Mo » |
+| objets ⟷ documents | **4 ⟷ 4**, correspondance exacte, aucun orphelin |
+
+⚡ **Un faux positif de ma propre vérification, qui valait la peine d'être levé.** Le premier essai de
+l'attaque CWE-770 a répondu **201**, ce qui laissait croire que le correctif ne tenait pas. La trace
+curl (`--trace-ascii`) a montré que **zéro** part `bourrage` avait été émise : c'était le harnais de
+test qui était cassé, pas la défense. Rejouée correctement — 20 parts réellement sur le fil,
+20 Mo annoncés — la requête est rejetée en 400. Une protection qu'on croit défaillante sur la foi d'un
+test mal formé se « corrige » en général en l'affaiblissant.
