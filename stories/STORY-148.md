@@ -5,7 +5,7 @@
 **Priorité :** Should Have
 **Story Points :** 5
 **Complexité :** medium — le code est simple ; c'est le **sens du défaut** (module sans famille = non normatif) qui décide si l'absence de migration ouvre une porte ou en ferme une
-**Statut :** in_progress *(démarrée le 2026-08-05)*
+**Statut :** ✅ Terminée *(2026-08-05)*
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
 **Sprint :** 20
@@ -308,3 +308,46 @@ présent sur `bilan`).
 > ⚠️ **Note d'exploitation** : `docker-compose.override.yml` ne monte pas `package.json` — en dev, la
 > migration s'invoque `./node_modules/.bin/ts-node src/migrations/backfill-referentiel-families.ts` dans le
 > conteneur. `npm run migrate:referentiel-families` fonctionne dès que l'image est reconstruite.
+
+### Revue de code — 2 constats, aucun bloquant, les deux corrigés
+
+1. **L'avertissement de la migration annonçait le mauvais refus.** Il promettait « refuseront tout octroi
+   (422 `REFERENTIEL_INCOMPATIBLE`) » ; en réalité une famille **listée mais non déposée** fait tomber
+   l'octroi en 422 « référentiel inexistant ou RETIRED », **sans champ `code`** — la famille *est* listée,
+   donc la règle passe. Et « tout octroi » ne vaut que si **toutes** les familles du module sont inconnues
+   (`facturation`) : `fiscalite` reste octroyable via `syscohada-revise`. Un opérateur qui filtrait ses
+   logs sur `REFERENTIEL_INCOMPATIBLE` ne trouvait rien. Message et docblock corrigés.
+2. **Bloc e2e mal placé** : il s'était intercalé entre le commentaire d'introduction de STORY-140 et le
+   `describe` que ce commentaire documente. Déplacé après.
+
+Constats écartés, avec leur motif : `@ApiOkResponse` (200) sur un `POST` qui renvoie 201 — **préexistant**,
+hors diff ; `npm run migrate:*` inutilisable dans l'image `runtime` — patron **déjà assumé** par
+`auth-service` (`seed:admin`) et migrations différées par `CLAUDE.md` ; ordre 422-avant-404 sur un `PATCH`
+de module inexistant — jugement de conception, aucune règle violée.
+
+### Revue de sécurité — **aucune vulnérabilité** (0 constat ≥ 80)
+
+Six points examinés spécifiquement, tous fermés :
+
+| Point | Conclusion |
+|---|---|
+| Injection Mongo par `referentielFamilies` | `@IsArray` + `@IsString({each})` rejettent tout opérateur (`{"$ne":null}`) en 400, **même sous** `enableImplicitConversion` — la sortie de conversion est revalidée. Regex linéaire, sans `g`/`y` : pas de ReDoS ni de `lastIndex` partagé malgré la constante mutualisée. |
+| Croissance non bornée d'un document rejouable | `PATCH` fait un **remplacement absolu**, pas un `$push` ; plafond dur `ArrayMaxSize(32)` × `MaxLength(64)`. Le piège CWE-770 de STORY-145 ne se reproduit pas. |
+| `distinct('code', { code: { $in: codes } })` | Champ projeté littéral ; les `codes` viennent soit des DTO validés, soit d'une constante. Aucun objet brut n'atteint le `$in`. |
+| `findByCodeOrNull` en remplacement d'`exists()` | Même filtre, même statut, même message qu'avant ; lecture `.lean()` dont seul `referentielFamilies` est consommé — rien de nouveau ne remonte au client. |
+| Divulgation par les nouveaux messages | Routes gardées `catalog:manage` / `entitlement:grant` — populations **plateforme** (les rôles tenant ont `perms: []` par construction, D15). L'information citée est déjà publiée par `GET /catalog/modules`. Aucun oracle inter-tenant, aucun 403 là où un 404 est requis. |
+| Migration | Script à invocation manuelle, sans entrée externe ; `Object.entries` sur une constante (pas de pollution de prototype) ; `updateOne` filtré `$exists: false`, donc sûr en exécution concurrente. |
+
+Point de conception confirmé au passage : `assertReferentielAllowed` est appelée **avant** l'ouverture de la
+session Mongo — un refus n'écrit rien et n'enfile aucun événement, l'invariant « pas d'écriture sans
+événement, pas d'événement sans écriture » tient. `upsert()` est le **seul** chemin d'écriture du champ
+`referentiel`, et son unique appelant est le contrôleur gardé : la règle n'est pas contournable.
+
+### Clôture
+
+PR **#11** rebase-mergée sur `dev`, branche `MNV-148` supprimée. Statut synchronisé aux 3 endroits.
+
+⚠️ **Reste à faire, hors périmètre** : le point 4 de la Definition of Done (« front `frontend-admin-panel`
+rebasculé sur les types générés ») ne peut pas être fait ici — ce dépôt n'est pas présent dans l'espace de
+travail. Le backend expose désormais l'attribut dans l'OpenAPI ; le retrait des commentaires « champ front
+uniquement » relève d'AP-INT-0.
