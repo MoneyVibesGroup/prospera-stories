@@ -210,3 +210,101 @@ Relecture de `platform-catalog-service` avant toute écriture :
 | Contrat `entitlement.changed` | porte déjà `referentiel?` → **aucun changement d'événement, un seul dépôt** |
 | Codes d'erreur dans le corps | `AllExceptionsFilter` propage déjà un `code` (STORY-138) → rien à ajouter côté filtre |
 | Migration | aucune infrastructure de migration ; patron le plus proche = `auth-service/src/seeds/seed-platform-admin.ts` |
+
+### Ce qui a été livré
+
+| Élément | Fichier |
+|---|---|
+| `referentielFamilies` sur le module (`default: undefined`, pas le `[]` implicite) | `catalog/schemas/module.schema.ts` |
+| Écriture gardée par le registre (422 `REFERENTIEL_FAMILY_UNKNOWN`) | `catalog/services/modules.service.ts` |
+| Registre des familles (axe `code`, **sans** filtre de statut) | `catalog/services/referentiel-versions.service.ts` |
+| Règle des 5 cas, **pure** | `entitlements/referentiel-rule.ts` |
+| Câblage dans l'octroi (lecture du module, plus `exists()`) | `entitlements/services/entitlements.service.ts` |
+| Migration idempotente + rapport | `migrations/backfill-referentiel-families.ts` · `npm run migrate:referentiel-families` |
+
+Deux décisions non écrites dans la story et tranchées ici :
+
+- **le registre des familles ne filtre pas le statut.** Une famille dont toutes les versions sont `RETIRED`
+  reste une famille *connue*. Filtrer la ferait disparaître du registre le jour du dernier retrait, et le
+  module basculerait **silencieusement** en « non normatif » — donc octroyable sans plan comptable, le
+  défaut même que la story ferme. Le statut reste contrôlé à l'octroi, sur la **version**.
+- **la règle passe avant la lecture du registre.** Un référentiel fourni à un module non normatif doit
+  s'entendre dire « ce module n'en consomme pas », et non « ce référentiel n'existe pas », qui enverrait
+  chercher au mauvais endroit.
+
+### Portes DoD
+
+| Porte | Résultat |
+|---|---|
+| Lint | 0 warning |
+| Build | OK |
+| Unitaires | **353** verts (35 suites) |
+| e2e | **121** verts (4 suites) |
+| Couverture | **99,8 st / 94,61 br / 100 fn / 99,89 li** — seuils 65/90/90/90 ; `referentiel-rule.ts` et la migration à 100 % partout |
+
+### Mutation-tests — 5 mutations, 5 rougissements
+
+| Mutation | Test qui vire au rouge |
+|---|---|
+| `assertReferentielAllowed` n'est plus appelée dans l'octroi | 4 unitaires + 4 e2e |
+| `default: undefined` retiré du `@Prop` | « un module créé SANS familles n'a pas du tout le champ » |
+| migration sans le filtre `{ $exists: false }` | « n'écrit QUE si le champ est absent » |
+| garde des familles retirée du `PATCH` | 2 unitaires |
+| règle déplacée **après** la lecture du registre | « la règle passe AVANT la lecture du registre » |
+
+⚠️ La 1ʳᵉ mutation est celle qui compte : `referentiel-rule.spec.ts` (9 tests) reste **entièrement vert**
+sous elle. Une fonction pure parfaitement testée ne prouve rien de son câblage — c'est le piège de
+STORY-172, reproduit ici volontairement.
+
+### Vérification docker — contrôle avant/après sur Mongo réel
+
+Stack : `mongo` + `kafka` + `redis` + `auth-service` + `platform-catalog-service`, `health` → `mongodb: up`,
+`kafka: up`. Jeton `PLATFORM_ADMIN` par `seed:admin` + login. Base `catalog_service`.
+
+**① Le défaut, reproduit avant migration.** `bilan` créé sans familles (état pré-migration), octroi
+`{"versionCode":"2.0"}` **sans référentiel** → **201**, document écrit **sans champ `referentiel`**. C'est
+le fail-open que la story ferme, observé en vrai — et non celui qu'elle décrivait.
+
+**② Migration, 1ᵉʳ passage.**
+
+```
+{"modified":["bilan"],"alreadySet":[],
+ "absent":["pi-spi","fiscalite","conformite-bceao","credit","finance-transactions","facturation"],
+ "unknownFamilies":["cima-assurances","zone-franche-togo"]}
+```
+
+En base : `bilan.referentielFamilies = ["syscohada-revise","sfd-bceao","cima-assurances"]`.
+L'avertissement nomme les deux familles à déposer (STORY-149) — écrites quand même, décision assumée.
+
+**③ Idempotence (2ᵉ passage)** : `{"modified":[],"alreadySet":["bilan"],…}` — aucune écriture.
+
+**④ Non-destruction (3ᵉ passage après édition admin)** : `PATCH` restreint `bilan` à `["syscohada-revise"]`,
+migration rejouée → `modified: []`, et la base garde **l'édition admin**. Un seed au démarrage aurait
+rétabli les trois familles à chaque redémarrage : c'est ce qui a fait écarter cette voie.
+
+**⑤ Les 5 règles, contre le vrai Mongo :**
+
+| Cas | Observé |
+|---|---|
+| normatif, sans référentiel | **400** `REFERENTIEL_REQUIRED` — message listant les 3 familles |
+| normatif, famille listée (`sfd-bceao`) | **200** |
+| normatif, famille non listée (`autre-plan`) | **422** `REFERENTIEL_INCOMPATIBLE` |
+| non normatif, sans référentiel | **201** |
+| non normatif, avec référentiel | **422** `REFERENTIEL_NOT_APPLICABLE` |
+
+Les trois `code` sont **dans le corps**, avec un `error` correct (`Bad Request` / `Unprocessable Entity`) —
+le piège de l'exception construite à partir d'un objet est évité.
+
+**⑥ Aucun orphelin.** L'organisation qui n'a essuyé que des refus (`eee…`) compte **0** entitlement ;
+`outbox_events` contient exactement **3** événements, un par écriture réussie — aucun refus n'a émis.
+
+**⑦ Écriture gardée** : `PATCH` avec `famille-fantome` → **422** `REFERENTIEL_FAMILY_UNKNOWN`, message
+nommant la famille fautive, **rien écrit**.
+
+**⑧ OpenAPI** : `referentielFamilies` présent dans `ModuleResponseDto`, `CreateModuleDto` et
+`UpdateModuleDto` de `/api/docs-json`, et rendu par `GET /catalog/modules` (absent du module non normatif,
+présent sur `bilan`).
+
+> ⚠️ **Note d'exploitation** : `docker-compose.override.yml` ne monte pas `package.json` — en dev, la
+> migration s'invoque `./node_modules/.bin/ts-node src/migrations/backfill-referentiel-families.ts` dans le
+> conteneur. `npm run migrate:referentiel-families` fonctionne dès que l'image est reconstruite.
