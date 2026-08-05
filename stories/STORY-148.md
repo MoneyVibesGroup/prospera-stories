@@ -4,12 +4,39 @@
 **Réf. architecture :** `architecture-catalog-service-2026-07-07.md` · **STORY-032** (catalogue admin CRUD) · **STORY-033** (entitlements grant/update/revoke) · **STORY-038** (`ReferentielPackage`) · **AP-04** / **AP-05** (console)
 **Priorité :** Should Have
 **Story Points :** 5
-**Statut :** draft
-**Assigné à :** Unassigned
+**Complexité :** medium — le code est simple ; c'est le **sens du défaut** (module sans famille = non normatif) qui décide si l'absence de migration ouvre une porte ou en ferme une
+**Statut :** in_progress *(démarrée le 2026-08-05)*
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
-**Sprint :** à planifier
+**Sprint :** 20
 **Service :** `platform-catalog-service` — 1 dépôt, 1 branche, 1 PR
 **Branche :** `MNV-148`
+
+---
+
+## ⚠️ Correction du 2026-08-05 (relecture du code au démarrage) — la prémisse était fausse, le défaut est pire
+
+La story affirme ci-dessous que le référentiel est **obligatoire** sur l'entitlement. **C'est faux depuis
+STORY-033** (commit `0872181`, 2026-07-14) : `UpsertEntitlementDto.referentiel` est `@IsOptional()`, le
+`@Prop({ type: Object })` du schéma n'est pas `required`, et le service gère explicitement son absence par
+un `$unset` (commentaire « un module sans référentiel — ex. `stock` »). Le contrat backend accepte donc
+**déjà** un octroi sans référentiel. L'« écart de contrat » qu'AP-05 croyait assumer n'a jamais existé
+dans ce sens-là.
+
+**La conséquence retourne l'urgence, elle ne l'annule pas.** Le vrai défaut n'est pas un 400 qui bloque un
+module non normatif : c'est que **`bilan` peut être octroyé sans plan comptable, aujourd'hui, sans la
+moindre erreur** — et que rien en aval ne le rattrape. La règle conditionnelle de cette story est donc le
+**seul** garde-fou, pas un assouplissement.
+
+Deux conséquences de périmètre :
+
+- le critère « `referentielCode`/`referentielVersion` deviennent optionnels » est **déjà satisfait** — il est
+  constaté, pas réimplémenté. Aucun changement de contrat d'événement (`entitlement.changed` porte déjà
+  `referentiel?`), donc **un seul dépôt** ;
+- l'⚠️ « ordre imposé » du §Migration se lit à l'envers : la fenêtre dangereuse n'est pas *avant* de rendre
+  le champ optionnel (il l'est depuis trois semaines), elle est **entre le déploiement du code et
+  l'exécution de la migration** — et pendant cette fenêtre, un module normatif non migré est traité comme
+  non normatif, donc **fail-open**, exactement l'état d'aujourd'hui. Voir §Migration pour la décision.
 
 ---
 
@@ -17,7 +44,8 @@
 
 **Le modèle actuel suppose que tout module consomme un référentiel comptable. C'est faux.**
 
-`Entitlement` porte `referentielCode` et `referentielVersion` **obligatoires**. L'hypothèse tenait
+`Entitlement` porte `referentielCode` et `referentielVersion` ~~**obligatoires**~~ *(faux — cf. correction
+ci-dessus)*. L'hypothèse tenait
 tant que le catalogue ne contenait que `bilan` et `pi-spi` — deux modules normatifs. Le catalogue
 en compte désormais **18** (AP-04), dont onze qui n'ont aucune notion de plan comptable : point de
 vente, stock, commande, marketing, support client, collecte, recouvrement, équipe, dashboard,
@@ -136,6 +164,15 @@ Valeurs à poser (alignées sur les fixtures de la console, `frontend-admin-pane
 ⚠️ **Ordre imposé** : poser `referentielFamilies` **avant** de rendre le champ optionnel sur
 l'entitlement. L'inverse ouvre une fenêtre où `bilan` peut être octroyé sans plan comptable.
 
+### Décisions de migration prises le 2026-08-05
+
+| Question | Décision | Pourquoi |
+|---|---|---|
+| Script manuel ou seed au boot ? | **Script** `npm run migrate:referentiel-families`, sur le patron de `seed-platform-admin.ts` | Le catalogue est une donnée **d'exploitation**, pas dérivée du code : un seed au boot qui réaligne 18 modules écraserait à chaque redémarrage ce qu'un administrateur a édité. Le projet diffère par ailleurs les migrations (`CLAUDE.md` §Garde-fous). |
+| Idempotence | Écriture **uniquement si le champ est absent** (`referentielFamilies: { $exists: false }`) | Rejouable sans effet **et** non destructif : une édition admin postérieure n'est jamais rétablie de force. Le 2ᵉ passage rapporte `0 modifié`. |
+| Module absent du catalogue | **Ignoré**, compté et rapporté | La table ci-dessus est le mapping *cible* (fixtures console) ; un environnement où `facturation` n'existe pas encore ne doit pas faire échouer la migration des sept autres. |
+| Famille inconnue du registre des référentiels | **Écrite quand même**, avec un **avertissement** nominatif | L'API refuse (422) une famille inexistante — garde-fou contre la faute de frappe d'un opérateur. La migration, elle, porte un mapping **relu et versionné** : refuser laisserait `fiscalite` **fail-open** (octroyable sans plan comptable), alors que l'écrire le rend **fail-closed** (tout octroi refusé tant que la famille n'est pas déposée — STORY-149). Entre une porte ouverte en silence et une porte fermée bruyamment, on ferme. |
+
 ---
 
 ## Permissions
@@ -156,3 +193,20 @@ refait pas, elle en hérite.
 - [ ] OpenAPI publié ; `npm run gen:api` régénère le front sans erreur.
 - [ ] Front `frontend-admin-panel` rebasculé sur les types générés (retrait des commentaires
       « champ front uniquement »).
+
+---
+
+## Progress Tracking
+
+### Démarrage 2026-08-05 — état trouvé dans le code
+
+Relecture de `platform-catalog-service` avant toute écriture :
+
+| Point | État réel |
+|---|---|
+| `referentielFamilies` | **aucune occurrence** — ni schéma, ni DTO, ni service (confirme la note de `sprint-status.yaml`) |
+| `Entitlement.referentiel` | **déjà optionnel** depuis STORY-033 — cf. §Correction en tête de story |
+| Règle conditionnelle | **inexistante** : `assertCatalogCoherence` ne vérifie que l'existence/`RETIRED` du référentiel *quand il est fourni* |
+| Contrat `entitlement.changed` | porte déjà `referentiel?` → **aucun changement d'événement, un seul dépôt** |
+| Codes d'erreur dans le corps | `AllExceptionsFilter` propage déjà un `code` (STORY-138) → rien à ajouter côté filtre |
+| Migration | aucune infrastructure de migration ; patron le plus proche = `auth-service/src/seeds/seed-platform-admin.ts` |
