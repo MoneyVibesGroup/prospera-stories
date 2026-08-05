@@ -284,3 +284,69 @@ Un paquet de référentiel réel est un **JSON unique** produit par `build.mjs`
 | 2026-07-28 | rédaction | `draft`, sprint « à planifier » |
 | 2026-08-01 | slottage | `ready-for-dev`, déplacée S19 → **S20** (décision PO) |
 | 2026-08-05 | lancement | **`in_progress`** — arbitrages D-149-1 (option B) et D-149-2 (MinIO dans le catalogue, C3 amendée) rendus par l'user ; D-149-3 à D-149-6 tranchés au cadrage technique. 4 branches `MNV-149` ouvertes. |
+| 2026-08-05 | développement | Livré sur les 4 dépôts. Portes vertes partout (détail ci-dessous). |
+| 2026-08-05 | vérification docker | ✅ **Concluante** sur stack repartie de zéro (`down -v`). Détail ci-dessous. |
+
+### Portes de qualité (les 4 dépôts)
+
+| Dépôt | Lint | Build | Unit | e2e | Couverture (st/br/fn/li) |
+|---|---|---|---|---|---|
+| `platform-catalog-service` | 0 warning | ✅ | 407 | 143 | **99,82 / 94,73 / 100 / 99,90** |
+| `auth-service` | 0 warning | ✅ | 615 | 160 | 96,90 / 89,60 / 97,81 / 96,94 |
+| `kyc-service` | 0 warning | ✅ | 222 | 70 | 95,52 / 89,89 / 94,08 / 95,38 |
+| `admin-panel` | 0 warning | ✅ | 317 | 158 | 99,64 / 91,05 / 100 / 99,61 |
+
+Seuils : 65 branches / 90 fonctions / 90 lignes / 90 statements — tenus partout.
+
+### Mutation-tests — 10 mutations, 10 rouges
+
+| # | Mutation | Verdict |
+|---|---|---|
+| ① | le filtre cesse de publier `limitBytes` | 🔴 |
+| ② | la garde du dépôt retombe sur `catalog:manage` | 🔴 |
+| ③ | les paramètres de route ne sont plus validés par DTO | 🔴 |
+| ④ | `checksum: dto.expectedChecksum ?? checksum` (l'appelant devient autoritaire) | 🔴 *(après correctif du test — voir ⚡ ci-dessous)* |
+| ⑤ | l'objet n'est plus ramassé quand la base échoue | 🔴 |
+| ⑥ | un type configuré sans validateur passe (fail-**open**) | 🔴 |
+| ⑦ | la taille jugée redevient le `size` annoncé par le client | 🔴 |
+| ⑧ | le pré-contrôle d'immuabilité disparaît | 🔴 |
+| ⑨ | `zone` écrite même absente (`zone: null` en base) | 🔴 |
+| ⑩ | le boot échoue quand MinIO est absent | 🔴 |
+
+⚡ **La mutation ④ est restée VERTE au premier passage — et c'est le constat le plus utile de
+la story.** Le test « enregistre l'empreinte du serveur même quand une empreinte concordante est
+annoncée » était **tautologique** : quand l'annonce concorde, la valeur du client et celle du serveur
+sont *égales*, donc adopter l'une ou l'autre donne le même résultat. Le test protégeait exactement
+l'invariant de la story… sans rien distinguer.
+
+Le témoin qui les sépare est la **casse** : le serveur produit du minuscule (`digest('hex')`),
+l'annonce est acceptée dans les deux casses. Le test déposant désormais une empreinte concordante
+**en majuscules** et exigeant que la valeur écrite soit la minuscule du serveur, la mutation vire au
+rouge. Sans la discipline de mutation, l'invariant central de STORY-149 aurait été gardé par un test
+qui n'aurait rien filtré.
+
+### Vérification docker — stack repartie de ZÉRO (`down -v` → `up --build`)
+
+| # | Contrôle | Résultat |
+|---|---|---|
+| ⓪ | bucket créé au boot | `Bucket MinIO « referentiel-packages » créé.` |
+| ① | **le jeton `PLATFORM_ADMIN` porte `referentiel:publish`** | ✅ 13 `perms[]` dans le JWT réel de l'IdP — la propagation à `auth-service` est prouvée *de bout en bout*, pas seulement compilée |
+| ② | dépôt du **vrai** paquet `syscohada-revise-2.1.json` (90 650 o) | **201** |
+| ③ | empreinte enregistrée = sha256 **réel** du fichier | `sha256:01b892c057fa3d…9c67b` — identique à `shasum -a 256` sur l'hôte |
+| ④ | objet réellement dans MinIO, **octet pour octet** | 90 650 o, sha256 identique, `Content-Type: application/json`, `Content-Disposition: attachment` |
+| ⑤ | re-dépôt sur `syscohada-revise@2.1` | **409** `ARTIFACT_VERSION_EXISTS` |
+| ⑥ | `expectedChecksum` divergent | **422** `ARTIFACT_CHECKSUM_MISMATCH`, **rien écrit** |
+| ⑦ | `expectedChecksum` concordant | **201**, et c'est toujours l'empreinte serveur qui est enregistrée |
+| ⑧ | contenu binaire sous une extension `.json` et un `Content-Type: application/json` crédibles | **415** `ARTIFACT_UNSUPPORTED_TYPE` — le contenu décide, pas l'annonce |
+| ⑨ | paquet de 9 Mo | **413** `ARTIFACT_TOO_LARGE` **avec `limitBytes: 8388608`** — le champ traverse bien la liste blanche du filtre |
+| ⑩ | `code`/`version` hors format (`SYSCOHADA`/`latest`) | **400**, avant toute écriture de clé d'objet |
+| ⑪ | sans jeton | **401** |
+| ⑫ | **aucun orphelin** | 2 documents ⟷ 2 objets, clés en correspondance exacte ; les refus ⑤⑥⑧⑨⑩⑪ n'ont **rien** laissé |
+| ⑬ | **dépôt interrompu** — MinIO arrêté | requête en erreur, **0 document** `cima-assurances` créé : aucune version à moitié publiée |
+| ⑭ | l'IdP publie 13 permissions **avec libellé** | `referentiel:publish \| Déposer et publier le paquet d'une version de référentiel…` |
+| ⑮ | **non-régression** | les **8** services `healthy` simultanément, `/health` 200 sur `:3000 :3001 :3002 :3003 :3004 :3006 :3007 :3010` |
+
+⚠️ **Observation, non corrigée (hors AC) :** MinIO indisponible fait répondre **500** au dépôt. C'est
+honnête (le service ne prétend pas avoir réussi) et conforme au démarrage dégradé, mais un **503**
+porteur d'un code stable serait plus exploitable par la console. Aucun AC ne l'exige — noté comme
+amélioration, pas fait ici pour ne pas déborder.
