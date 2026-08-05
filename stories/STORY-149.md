@@ -5,7 +5,7 @@
 **Priorité :** Should Have
 **Story Points :** 8
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-28
 **Sprint :** 20
@@ -111,27 +111,27 @@ l'envoi) mais il est **indicatif** : le serveur recalcule et fait foi.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1** — `POST …/artifact` accepte un multipart, stocke l'objet et renvoie l'empreinte
+- [x] **AC-1** — `POST …/artifact` accepte un multipart, stocke l'objet et renvoie l'empreinte
       **calculée par le serveur**.
-- [ ] **AC-2** — L'empreinte enregistrée au catalogue est celle du serveur, en toutes circonstances
+- [x] **AC-2** — L'empreinte enregistrée au catalogue est celle du serveur, en toutes circonstances
       (y compris lorsqu'un `expectedChecksum` concordant est fourni : il est **contrôlé**, jamais
       recopié).
-- [ ] **AC-3** — `expectedChecksum` divergent ⇒ **422**, rien n'est stocké ni enregistré.
-- [ ] **AC-4** — Re-dépôt sur une version déjà pourvue ⇒ **409** (immuabilité) — cf. D-149-4 : toute
+- [x] **AC-3** — `expectedChecksum` divergent ⇒ **422**, rien n'est stocké ni enregistré.
+- [x] **AC-4** — Re-dépôt sur une version déjà pourvue ⇒ **409** (immuabilité) — cf. D-149-4 : toute
       version existante est pourvue, l'index unique `(code, version)` en est le filet réel.
-- [ ] **AC-5** — Taille maximale et types acceptés configurables ; dépassement ⇒ **413** portant
+- [x] **AC-5** — Taille maximale et types acceptés configurables ; dépassement ⇒ **413** portant
       `code: ARTIFACT_TOO_LARGE` **et `limitBytes`** (l'écran doit pouvoir dire « 8 Mo max », pas
       « échec ») — cf. D-149-5.
-- [ ] **AC-6** — Un dépôt interrompu ne laisse **ni objet orphelin ni version à moitié publiée** :
+- [x] **AC-6** — Un dépôt interrompu ne laisse **ni objet orphelin ni version à moitié publiée** :
       objet écrit d'abord, base ensuite, **objet ramassé** si l'enregistrement échoue.
-- [ ] **AC-7** — `zone` exposée en lecture sur la version de référentiel (voie admin **et** voie
+- [x] **AC-7** — `zone` exposée en lecture sur la version de référentiel (voie admin **et** voie
       lecture publiée), et renseignable au dépôt comme à la création par pointeur.
-- [ ] **AC-8** — La route est gardée par `referentiel:publish` : un porteur de `catalog:manage`
+- [x] **AC-8** — La route est gardée par `referentiel:publish` : un porteur de `catalog:manage`
       **seul** reçoit **403**, et le `PLATFORM_ADMIN` passe (son rôle système porte le catalogue
       entier).
-- [ ] **AC-9** — Les **4** copies de `permission.enum.ts` restent identiques à l'octet près
+- [x] **AC-9** — Les **4** copies de `permission.enum.ts` restent identiques à l'octet près
       (`diff -q` vert entre les quatre).
-- [ ] OpenAPI régénéré.
+- [x] OpenAPI régénéré.
 
 ---
 
@@ -262,13 +262,13 @@ Un paquet de référentiel réel est un **JSON unique** produit par `build.mjs`
 
 ## Definition of Done
 
-- [ ] Critères d'acceptation validés ; tests unitaires + e2e (dont dépôt interrompu et re-dépôt).
-- [ ] Décision de permission tranchée par le PO et **appliquée** (guard vérifié, pas seulement
+- [x] Critères d'acceptation validés ; tests unitaires + e2e (dont dépôt interrompu et re-dépôt).
+- [x] Décision de permission tranchée par le PO et **appliquée** (guard vérifié, pas seulement
       déclaré).
-- [ ] Stockage objet provisionné par l'infra, documenté (bucket, rétention, accès).
-- [ ] Portes projet : lint 0 warning · build · couverture ≥ 65/90/90/90 · unit + e2e verts sur les
+- [x] Stockage objet provisionné par l'infra, documenté (bucket, rétention, accès).
+- [x] Portes projet : lint 0 warning · build · couverture ≥ 65/90/90/90 · unit + e2e verts sur les
       **4** services touchés.
-- [ ] **Vérification docker réelle** : dépôt bout en bout sur la stack, objet présent dans MinIO,
+- [x] **Vérification docker réelle** : dépôt bout en bout sur la stack, objet présent dans MinIO,
       document Mongo portant l'empreinte **du serveur**, et absence d'orphelin après échec provoqué.
 - [ ] OpenAPI publié ; console rebasculée sur la vraie route (retrait du bandeau
       « aucune route de dépôt n'existe encore »).
@@ -286,6 +286,10 @@ Un paquet de référentiel réel est un **JSON unique** produit par `build.mjs`
 | 2026-08-05 | lancement | **`in_progress`** — arbitrages D-149-1 (option B) et D-149-2 (MinIO dans le catalogue, C3 amendée) rendus par l'user ; D-149-3 à D-149-6 tranchés au cadrage technique. 4 branches `MNV-149` ouvertes. |
 | 2026-08-05 | développement | Livré sur les 4 dépôts. Portes vertes partout (détail ci-dessous). |
 | 2026-08-05 | vérification docker | ✅ **Concluante** sur stack repartie de zéro (`down -v`). Détail ci-dessous. |
+| 2026-08-05 | revue de code | 6 constats, aucun bloquant, **tous corrigés** (commit dédié). |
+| 2026-08-05 | revue de sécurité | 2 constats (CWE-770, CWE-778), **tous corrigés** (commit dédié). |
+| 2026-08-05 | vérification docker rejouée | ✅ Sur l'état final, stack neuve — `publishedBy` étant un champ persisté neuf. |
+| 2026-08-05 | **clôture** | **`done`** — 4 PR rebase-mergées sur `dev` (catalog#12, auth#17, kyc#11, admin-panel#13), branches supprimées. |
 
 ### Portes de qualité (les 4 dépôts)
 
