@@ -130,6 +130,114 @@ quel fichier déposé par un éditeur dans le volume monté peut couper un servi
 
 ---
 
+## 🟠 D. AP-07 — le dashboard n'a **aucun backend**
+
+**Service :** `prospera-admin-panel-service` · **Écran concerné :** AP-07 *(non implémenté)*
+
+La fiche `AP-07` déclare `**API :** admin-panel BFF (/admin/dashboard)`. **Cette route n'existe pas.**
+`grep -i dashboard` sur tout le `src/` du BFF : **zéro occurrence**. Les six contrôleurs montés sont
+`admin`, `admin/kyc-reviews`, `admin/modules`, `admin/orgs`, `admin/projects`, `admin/users`.
+
+Son second appui déclaré, `STORY-049`, est une story de **test e2e** *(« e2e chaîne KYC complète
+(docker) »)*, `done` — **pas un endpoint d'agrégats**.
+
+⚠️ Aucun endpoint ne sert de compteurs plateforme. Composer le dashboard depuis l'existant
+demanderait : un appel `/admin/orgs` par statut *(pour les `total`)*, un `/admin/kyc-reviews`, et
+**une boucle sur les modules** via `entitlements/by-module/:code/summary` — soit un N+1 pour une
+page de supervision.
+
+> **À trancher :** ① une route d'agrégat `/admin/dashboard` sur le BFF *(il est déjà l'agrégateur,
+> c'est son rôle)* ; ou ② acter la composition côté client et **corriger la fiche AP-07**, qui
+> annonce aujourd'hui une API inexistante. ⚠️ Une story `ready-for-dev` dont l'API n'existe pas est
+> le **quatrième** cas de ce motif dans ce programme.
+
+**Et son AC3** *(« e2e chaîne KYC complète : inscription → upload → OCR → revue → approbation »)*
+dépend de `STORY-179` + `STORY-180`, plus `document-service`/OCR — qui ne tournent pas.
+
+---
+
+## 🟡 E. AP-05 — le contrat du catalogue n'est pas typé au Swagger *(jumelle de `STORY-181`)*
+
+**Service :** `platform-catalog-service` · **Écran concerné :** AP-05 *(livrée, en `review`)*
+
+`EntitlementResponseDto` déclare `referentiel` et `config` en `type: Object`. Résultat mesuré dans
+les types générés et committés du front : **six `Record<string, never>` dans `src/types/api/catalog.ts`**,
+dont `EntitlementResponseDto.referentiel` et `EntitlementByModuleItemDto.referentiel`.
+
+Le client d'AP-05 les recaste donc à la main :
+
+```ts
+const referentiel = dto.referentiel as { code?: string; version?: string } | undefined;
+```
+
+C'est **exactement** le motif de `STORY-181` *(qui vise le BFF)*, sur un second service. Le
+référentiel est pourtant la donnée qui décide de la **réconciliation** d'AP-05 — la valeur centrale
+de l'écran.
+
+> **Demande :** typer `referentiel` *(`ReferentielRefDto`, qui existe déjà)* et `config`. À traiter
+> **avec `STORY-181`** : même correctif, même patron de décorateur, deux services.
+
+---
+
+## 📋 Campagne AP-05 → AP-07 — ce qui a été testé, et ce que ça donne
+
+| Story | Code livré ? | Intégration backend | Verdict |
+|---|---|---|---|
+| **AP-05** entitlements | ✅ oui | ✅ **les 4 routes appelées et testées** | ⛔ **inexerçable** — cf. §A |
+| **AP-06** provisioning | ❌ **maquette seule** *(son commit le dit : « sans code applicatif »)* | — | bloquée par §A + `STORY-148` + `STORY-171` |
+| **AP-07** dashboard | ❌ **maquette seule** | — | ⛔ **son API n'existe pas** — cf. §D |
+
+**AP-05, routes mesurées** *(jeton réel)* :
+
+| Route | Mesure |
+|---|---|
+| `GET /catalog/entitlements/:orgId` | 200 `[]` |
+| `GET /catalog/entitlements/:orgId/:moduleCode` | 404 *(message métier explicite)* |
+| `DELETE /catalog/entitlements/:orgId/:moduleCode` | 404 *(testé sur une org sans droit — non destructif)* |
+| `PUT /catalog/entitlements/:orgId/:moduleCode` | **422** — cf. §A |
+
+⚡ **Le 422 valide l'AC4 d'AP-05** *(« validation contre le catalogue : couple inexistant refusé »)* :
+le garde-fou fonctionne. Ce sont les AC2 et AC3 *(octroyer, mettre à jour, révoquer)* qui sont
+inexerçables — faute de matière, pas faute de contrat.
+
+**AP-06** ne peut pas être cadrée tant que §A n'est pas levé : son geste central est une **séquence**
+d'octrois, et un seul octroi est déjà impossible. S'y ajoutent `STORY-148` *(quel module exige quel
+référentiel)* et `STORY-171` *(rien n'enregistre le vertical provisionné)*. ⚠️ Et il n'existe
+**aucun endpoint de provisioning groupé** : la séquence est côté front, sans transaction — un échec
+partiel laisse une organisation à moitié provisionnée. À acter dans la story, pas à découvrir.
+
+---
+
+## ⚠️ Une incohérence de données dev, à ne PAS confondre avec un défaut
+
+Relevée en testant AP-05, et **volontairement pas transformée en demande** — la vérification a
+montré qu'elle n'établit pas ce qu'elle semblait établir.
+
+**Le symptôme :** deux routes du même service se contredisent sur la même donnée.
+`GET /catalog/entitlements/by-module/bilan` voit un droit `ACTIVE` pour l'org `6a6105a9…` ; 
+`GET /catalog/entitlements/6a6105a9…` renvoie `[]` et la lecture ciblée renvoie `404`.
+
+**La mesure** *(profiler Mongo activé le temps d'un appel)* : le service émet
+`filter: {"organizationId": "6a6105a9…"}` — une **chaîne** — alors que le document stocke un
+**`ObjectId`**. `n: 0`. Le code passe `orgId` sans conversion, là où il convertit explicitement
+`grantedBy` *(`new Types.ObjectId(...)`)*.
+
+**Ce qui empêche d'en faire un défaut :** le document porte `source: "verification-fe014"`, alors
+que l'upsert de l'API écrit **toujours** `source: 'admin'`. ⇒ **il a été inséré directement en base
+par un script de vérification** le 2026-07-22, pas produit par l'API. Un document créé par l'API
+serait peut-être stocké en chaîne, et donc parfaitement retrouvé.
+
+> **Question ouverte, à trancher par UN essai :** octroyer un entitlement **par l'API**, puis relire
+> par org. Si le droit est invisible, c'est un défaut majeur *(la réconciliation d'AP-05 et le
+> `activeEntitlementsCount` d'AP-02 sont aveugles)* ; s'il est visible, il n'y a qu'un document
+> orphelin à nettoyer.
+>
+> ⚡ **Cet essai est impossible aujourd'hui** — il exige un octroi, donc une version au catalogue,
+> donc **§A**. C'est la meilleure illustration du coût de ce ticket : un manque de données empêche
+> même de savoir s'il y a un bug.
+
+---
+
 ## Ce qui NE donne PAS de story
 
 - **`entitlements/by-module/:code/summary`** — soupçonnée en `401` lors d'une première passe, elle
