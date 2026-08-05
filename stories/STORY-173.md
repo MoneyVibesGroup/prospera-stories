@@ -7,8 +7,8 @@
 **Priorité :** Must Have — ⚡ **la console entière est derrière**
 **Story Points :** 3
 **Complexité :** low — le patron existe cinq fois ; la valeur est de ne pas le découvrir en direct
-**Statut :** À faire
-**Assigné à :** null
+**Statut :** En cours
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-08-03 *(trouvée en exécutant AP-INT-0)*
 **⚠️ Renumérotée le 2026-08-04 :** portait le n° **172**, déjà pris en parallèle par la série `balance-service` poussée sur `origin/main` (comptes de paramétrage & rapprochement bancaire, `done`). **`origin/main` fait foi** — même règle que pour les n° 145/146/147 le 2026-07-31. Les commits de code qui la citent sous `STORY-172` restent lisibles : la branche backend s'appelle désormais `MNV-173`.
 **Sprint :** 20 — dette d'exploitation de la console
@@ -106,4 +106,34 @@ Le comportement est **déjà spécifié et livré cinq fois**. Le reproduire tel
 
 ## Progress Tracking
 
-*(à remplir à l'implémentation)*
+### Démarrage 2026-08-05 — état trouvé : **le code est mergé, le câblage ne l'est pas**
+
+Le périmètre **A** (code) a été implémenté par le dev externe le 2026-08-03 sur `MNV-172` et
+**rebase-mergé sur `dev`** le 2026-08-04 (PR `admin-panel#11`, `02a738b`) — 4 fichiers,
+`src/main.ts` + `src/config/{configuration,env.validation}.ts` + `configuration.cors.spec.ts`.
+
+⚠️ **Le périmètre B ne l'a pas été.** L'entrée `admin-panel` de `docker-compose.yml`
+(racine, non versionnée) **ne porte pas `CORS_ALLOWED_ORIGINS`** — les sept autres services
+l'ont ligne 28/73/144/192/239/276/381, `admin-panel` non :
+
+```
+$ awk '/^  [a-z0-9-]+:$/{svc=$1} /CORS_ALLOWED_ORIGINS/{print NR": "svc}' docker-compose.yml
+28: expert-comptable    73: auth-service    144: kyc-service    192: platform-catalog-service
+239: bilan-service      276: document-service    381: balance-service
+(admin-panel : aucune)
+```
+
+**Conséquence exacte** : `allowedOrigins` étant alimenté par cette seule variable, le BFF démarre
+dans la stack avec une allowlist **vide** ⇒ `enableCors` n'est jamais appelé ⇒ **le comportement
+observé par la console est rigoureusement celui d'avant la story**. Le code mergé est **inerte**.
+La vérification consignée dans le message de commit (`Origin :3110 → ACAO ✅`) a donc été obtenue
+avec la variable injectée **à la main**, pas par le câblage que la story demande — un résultat
+juste sur un montage que personne ne rejouera. C'est le critère 5, et il est bloquant pour AP-INT-0.
+
+### Ce qui reste à faire ici
+
+- [ ] **B** — entrée de compose `admin-panel` avec le **même défaut** que les sept autres
+- [ ] Vérification docker : préflight `OPTIONS` réel sur la stack telle qu'elle démarre
+- [ ] Portes DoD sur `admin-panel` (lint, build, couverture, unit + e2e)
+- [ ] Revue de code + revue de sécurité du diff mergé (aucune n'a été faite : la PR a été
+      ouverte et mergée par le dev externe le même jour)
