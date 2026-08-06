@@ -69,23 +69,45 @@ et l'erreur **nomme la valeur fautive**. Convention du projet : la configuration
 chaîne de confiance mal orthographiée doit s'entendre au démarrage, pas se découvrir six mois plus tard
 dans une IP falsifiée.
 
-### D-133-4 — Dev docker : `uniquelocal,loopback`
+### D-133-4 — Dev docker : **aucun proxy de confiance** *(amendée en revue de sécurité)*
 
-Dans le compose, le seul saut devant un service est soit la passerelle du bridge docker, soit un autre
-conteneur : deux adresses RFC 1918, couvertes par `uniquelocal` (10/8, 172.16/12, 192.168/16, fc00::/7).
-`loopback` couvre l'appel depuis l'hôte.
+> ⚠️ **Cette décision disait initialement `uniquelocal,loopback` dans le compose. C'était une faute, et
+> la revue de sécurité l'a bloquée avant le merge.** Elle est conservée ici en toutes lettres parce que le
+> raisonnement qui l'avait produite est séduisant et se reproduira.
 
-> ⚠️ **Cette valeur est un choix de dev, pas un défaut à recopier en prod.** Le compose publie les ports
-> sur l'hôte : quiconque atteint la machine depuis un réseau privé peut donc, **en dev**, forger son IP.
-> C'est accepté pour pouvoir observer le comportement ; c'est inacceptable en production, où seul D-133-5
-> s'applique.
+Le raisonnement d'origine : « le seul saut devant un service, dans le compose, est la passerelle du bridge
+docker ou un conteneur voisin — deux adresses RFC 1918, donc `uniquelocal` ». Il est exact sur les faits et
+faux sur la conclusion, pour deux raisons :
 
-### D-133-5 — Production : le **seul** CIDR de l'ingress, injecté au déploiement
+1. **il n'y a aucun reverse-proxy devant les services dans ce compose.** Le navigateur et le BFF tapent
+   directement le port publié. Déclarer un proxy de confiance n'apporte donc **rien** ;
+2. **l'adresse source d'un appel entrant est *toujours* une adresse RFC 1918** — la passerelle du bridge
+   (`192.168.65.1` sur Docker Desktop, `172.17.0.1` sur Linux) ou, en DNAT, l'IP du poste appelant sur le
+   LAN. Autrement dit `uniquelocal` fait de **tout appelant** un proxy de confiance. Le coût est exactement
+   ce que D-133-2 refuse par ailleurs : `X-Forwarded-For` forgeable depuis l'hôte et le LAN, donc IP de
+   session choisie par le client **et rate limiting entièrement contournable** — un seau neuf par valeur
+   d'en-tête.
+
+Un défaut « laxiste mais pratique » a donc réintroduit, par la porte de la configuration, la régression que
+le parseur ferme à grand-peine par la porte du code. **Le compose ne déclare plus aucun proxy de confiance.**
+Pour observer la chaîne en dev, on passe la valeur à la demande :
+
+```bash
+TRUSTED_PROXIES=uniquelocal,loopback docker compose up -d <service>
+```
+
+### D-133-5 — Production : le **seul** CIDR de l'ingress, **et c'est vérifié au boot**
 
 `architecture-gateway-2026-07-07.md` (G6) pose que les services n'ont **aucun port public** : leur unique
 pair réseau est Traefik. `TRUSTED_PROXIES` vaut donc le CIDR du réseau de l'ingress, et rien d'autre —
 pas `uniquelocal`, qui ferait confiance à **tout** le réseau privé du cluster, y compris à un conteneur
 compromis d'un autre workload.
+
+⚡ **Amendement de la revue de sécurité : cette règle ne se contente plus d'être écrite.** Quand
+`NODE_ENV=production`, `parseTrustedProxies` **refuse les sous-réseaux nommés** et fait échouer le
+démarrage en les nommant. Un nom comme `uniquelocal` est la même sur-confiance que le `true` refusé en
+D-133-2, simplement écrite sans le mot ; documenter la différence ne suffisait pas — c'est le mode d'échec
+« livrable inerte » de STORY-173. Un CIDR explicite (`10.244.0.0/16`) passe.
 
 ### D-133-6 — Le BFF de l'app cliente doit transmettre l'IP d'origine *(dépendance frontend, non levée ici)*
 
@@ -102,25 +124,60 @@ Le dépôt frontend n'étant pas dans l'espace de travail, la story correspondan
 demandera au Route Handler d'ajouter le `X-Forwarded-For` du navigateur — de la même façon que FE-021 lui
 a fait reporter le `User-Agent`.
 
-### D-133-7 — `extractClientOrigin` n'est **pas** modifié
+### D-133-7 — `req.ip` reste la source unique… mais il faut **valider que c'en est une**
 
 STORY-126 avait posé l'utilitaire pour que la décision se prenne **ailleurs, une seule fois, au
-démarrage**. Elle se prend ici : `req.ip` devient la bonne valeur et le code de lecture ne change pas
-(seul son docblock est mis à jour, la question qu'il annonçait ouverte étant refermée). Même chose pour le
-`ThrottlerGuard` : **aucun `getTracker` maison** — son défaut lit `req.ip`, qui devient juste.
+démarrage**. Elle se prend ici, et `extractClientOrigin` n'a effectivement pas eu à changer de source :
+il lit toujours `req.ip`.
+
+⚠️ **Mais la revue de sécurité a montré que `req.ip` n'est pas garanti d'être une adresse IP** dès que
+`trust proxy` est déclaré. Express délègue à `proxy-addr`, qui ne valide le format que des maillons qu'il
+teste pour la **confiance** : la valeur finalement retenue est un **jeton brut** de `X-Forwarded-For`,
+découpé sur la virgule et rien de plus. Mesuré :
+
+```
+socket=172.17.0.1  xff="AAAA<script>…"   => req.ip = "AAAA<script>…"
+socket=172.17.0.1  xff=("X" × 300)       => req.ip = ("X" × 300)
+```
+
+Deux dégâts, et le second est le plus grave :
+
+1. l'IP **persistée en session** deviendrait un texte choisi par l'appelant, restitué tel quel dans un
+   écran de sécurité ;
+2. le **compteur du throttler** est keyé sur cette valeur, et le stockage in-memory de `@nestjs/throttler`
+   **ne supprime jamais une entrée** (son minuteur décrémente le compteur, il ne retire pas la clé) : une
+   valeur inédite à chaque requête fait croître le tas **sans borne** (CWE-770), sans authentification,
+   sur n'importe quel endpoint `@Public()`.
+
+D'où deux amendements :
+
+- `normaliserIpCliente` (dans le même utilitaire) ne rend `req.ip` que si `isIP()` le reconnaît, sinon
+  retombe sur l'IP du **socket**, la seule que la pile réseau garantisse ;
+- un **`IpThrottlerGuard`** remplace le `ThrottlerGuard` nu dans les 8 `app.module.ts` : son `getTracker`
+  passe par la même normalisation, et range tout ce qui n'est reconnaissable nulle part dans un
+  compartiment unique (`inconnu`) — fail-closed délibéré, mieux vaut partager un seau que d'en distribuer
+  un par chaîne inventée.
+
+La garde est **indépendante de la chaîne de confiance déclarée** : elle tient même si une plage est trop
+large, ou si un ingress transmet `X-Forwarded-For` au lieu de l'enrichir.
 
 ---
 
 ## Ce que ça donne, service par service
 
-Identique partout (`main.ts`), après `helmet()` et avant l'écoute :
+Identique partout (`main.ts`), juste après la lecture d'`appConfig` et **avant** `helmet()` — c'est un
+réglage de la pile Express, pas un middleware : il doit être posé avant qu'une requête n'atteigne quoi que
+ce soit qui lise `req.ip`.
 
 ```ts
-const trustedProxies = config.getOrThrow<SecurityConfig>('security').trustedProxies;
-if (trustedProxies.length > 0) {
-  app.set('trust proxy', trustedProxies);
-}
+const securityConfig = app
+  .get(ConfigService)
+  .getOrThrow<SecurityConfig>('security');
+configurerProxysDeConfiance(app, securityConfig.trustedProxies);
 ```
+
+La garde « liste vide ⇒ on ne pose pas le réglage » vit **dans** `configurerProxysDeConfiance`, pas ici :
+c'est ce qui la rend testable (`main.ts` est exclu de la couverture).
 
 - variable d'environnement : `TRUSTED_PROXIES` (liste séparée par des virgules) ;
 - parseur + validation : `src/common/utils/trusted-proxies.util.ts` — **volontairement hors de

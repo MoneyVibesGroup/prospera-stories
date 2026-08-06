@@ -107,10 +107,10 @@ celle-ci et à instruire seulement une fois l'IP juste.
 | **D-133-1** | **Aucun proxy de confiance par défaut.** `TRUSTED_PROXIES` vide/absente ⇒ `trust proxy` non appelé ⇒ comportement identique à aujourd'hui. Le défaut de sûreté est l'IP **inutile**, jamais l'IP **falsifiable**. |
 | **D-133-2** | La confiance se déclare en **IP / CIDR** (+ les 3 sous-réseaux nommés de `proxy-addr`). **Jamais `true`** (XFF devient une entrée non authentifiée), **jamais un nombre de sauts** (falsifiable dès qu'un chemin contourne le proxy — et en dev les ports sont publiés sur l'hôte, donc ce chemin existe). |
 | **D-133-3** | Une valeur non reconnue **fait échouer le démarrage**, en nommant la valeur fautive. |
-| **D-133-4** | **Dev docker** : `uniquelocal,loopback` — le seul saut devant un service y est le bridge docker ou un conteneur voisin. Valeur de dev **assumée comme laxiste**, à ne pas recopier en prod. |
-| **D-133-5** | **Prod** : le seul CIDR de l'ingress (G6 : les services n'ont aucun port public, leur unique pair est Traefik). Pas `uniquelocal`, qui ferait confiance à tout le réseau du cluster. |
+| **D-133-4** | **Dev docker : AUCUN proxy de confiance.** ⚠️ *Amendée en revue de sécurité* — elle disait d'abord `uniquelocal,loopback`. Faux : ce compose ne place aucun reverse-proxy devant les services (le navigateur tape le port publié), et l'adresse source d'un appel entrant est **toujours** RFC 1918 ⇒ `uniquelocal` faisait de **tout appelant** un proxy de confiance, donc XFF forgeable depuis l'hôte et le LAN. Valeur passée à la demande pour observer la chaîne. |
+| **D-133-5** | **Prod** : le seul CIDR de l'ingress (G6 : les services n'ont aucun port public, leur unique pair est Traefik). ⚡ *Amendée* : ce n'est plus seulement écrit — en `NODE_ENV=production`, un **sous-réseau nommé est refusé au boot**. |
 | **D-133-6** | Le **BFF de l'app cliente** doit ajouter le XFF du navigateur : c'est le premier saut, et un `fetch` serveur n'ajoute rien de lui-même. **Story frontend à créer** — dépôt absent de l'espace de travail, donc **non levée par cette story** : sur les appels passant par le BFF, l'IP restera celle de l'app. Sur les appels **directs** navigateur → service (topologie Option B, l'essentiel des appels de FE-021 dont `login`), la chaîne est complète dès ici. |
-| **D-133-7** | `extractClientOrigin` **n'est pas modifié** (seul son docblock l'est) et le `ThrottlerGuard` **ne reçoit pas de `getTracker` maison** : tous deux lisent `req.ip`, qui devient juste. C'est exactement la propriété pour laquelle STORY-126 avait isolé l'utilitaire. |
+| **D-133-7** | `req.ip` reste la source unique — mais ⚡ *amendée en revue de sécurité* : **`req.ip` n'est pas garanti d'être une IP** dès que `trust proxy` est posé (`proxy-addr` rend un jeton **brut** de `X-Forwarded-For`). D'où `normaliserIpCliente` (valide, sinon retombe sur le socket) et un **`IpThrottlerGuard`** dont le traceur passe par elle. Sans quoi : texte hostile persisté dans un écran de sécurité, et surtout une clé de compteur arbitraire dans un stockage qui **ne supprime jamais rien** ⇒ croissance du tas sans borne (CWE-770). |
 
 ---
 
@@ -283,6 +283,86 @@ conteneur reste `running` — c'est l'**application** qui n'a pas démarré. Sur
 **4. Non-régression.** Les **8** services démarrent et passent `healthy` avec
 `TRUSTED_PROXIES=uniquelocal,loopback`.
 
+### Revue de code — 4 constats, aucun bloquant, **tous corrigés**
+
+1. ⚡ **`/0` était ACCEPTÉ par le parseur, et le test le certifiait valide.** Or `0.0.0.0/0` est l'écriture
+   CIDR de « je fais confiance à tout le monde », c'est-à-dire le `trust proxy: true` refusé deux lignes
+   plus haut : **refuser le mot et accepter son équivalent en notation réseau** était une passoire ouverte
+   par distraction. Et `proxy-addr` rejette `range <= 0`, donc le boot mourait quand même — sur un
+   `TypeError: invalid range on address` qui ne nomme **ni la variable ni la raison**, à l'opposé de
+   D-133-3.
+2. ⚡ **Le test « nomme TOUTES les valeurs fautives » restait VERT sous la mutation qu'il prétend
+   attraper** : `toContain('true')` passait grâce au **texte statique** du message (« Ni `true` ni un
+   nombre de sauts… »), si bien que n'énumérer que la **dernière** fautive laissait les 4 assertions
+   vertes. L'assertion porte désormais sur la première phrase seule.
+3. **Le câblage `TRUSTED_PROXIES` → `security.trustedProxies` n'était couvert par aucun test**, alors que
+   STORY-109 avait posé ce garde-fou pour CORS dans le même fichier. `configuration.ts` étant exclu de la
+   couverture, une faute de frappe sur le nom de la variable rendait la story **totalement inerte, tous
+   tests verts** — c'est la moitié *testable* de l'angle mort M8. `configuration.spec.ts` créé dans les 3
+   services qui n'en avaient pas.
+4. La note d'architecture décrivait un placement (`après helmet()`) que les 8 `main.ts` ne suivent pas.
+
+Mutations de contrôle : **3 / 3 rouges** (réaccepter `/0` ; ne nommer que la dernière fautive ; lire
+`TRUSTED_PROXY` au lieu de `TRUSTED_PROXIES`).
+
+### Revue de sécurité — 2 vulnérabilités, **la première bloquante**, toutes deux corrigées
+
+#### 🔴 S-1 — Le défaut de dev `uniquelocal,loopback` rendait `X-Forwarded-For` forgeable depuis l'hôte et le LAN
+
+CWE-348 · A05:2021 · confiance 95. **La story se tirait une balle dans le pied par sa propre
+configuration.** `uniquelocal` couvre tout le RFC 1918 — or l'adresse source qu'un conteneur voit pour un
+appel arrivant par un port publié est **toujours** RFC 1918 (passerelle du bridge, ou IP du poste en
+DNAT). Le défaut livré faisait donc de **tout appelant** un proxy de confiance :
+
+- le `@Throttle({ limit: 5 })` du login devenait *une limite par valeur d'en-tête choisie par
+  l'attaquant*, donc **aucune limite** — exactement le « on échange un compteur partagé contre un rate
+  limiting contournable » que l'énoncé de la story met en garde, réintroduit par la porte de la config ;
+- l'IP de session devenait choisie par le client : un attaquant muni d'identifiants volés annonce l'IP
+  habituelle de la victime et sa session est **indiscernable** dans « Sessions ouvertes ».
+
+⚡ **Rien ne justifiait ce défaut** : le compose ne place aucun reverse-proxy devant les services. Défaut
+passé à **vide**, valeur passée à la demande pour observer la chaîne. Et pour que D-133-5 cesse d'être
+décorative, `parseTrustedProxies` **refuse désormais les sous-réseaux nommés quand `NODE_ENV=production`**.
+
+#### 🟠 S-2 — `req.ip` n'est pas garanti d'être une IP ⇒ clé de throttler arbitraire dans un stockage qui ne purge jamais
+
+CWE-770 / CWE-400 · A04:2021 · confiance 90. Deux faits vérifiés dans les dépendances réelles :
+
+```
+socket=172.17.0.1  xff="AAAA<script>…"  => req.ip = "AAAA<script>…"
+socket=172.17.0.1  xff=("X" × 300)      => req.ip = ("X" × 300)
+```
+
+et `@nestjs/throttler`/`throttler.service.js` **ne contient aucun `delete`** : son minuteur décrémente le
+compteur, il ne retire pas la clé. Chaque valeur d'en-tête inédite laisse donc une entrée **définitive**
+dans le tas — croissance non bornée jusqu'à l'OOM, sans authentification, sur n'importe quel endpoint
+`@Public()`.
+
+Corrigé par `normaliserIpCliente` (valide via `isIP`, sinon retombe sur le socket) + un **`IpThrottlerGuard`**
+monté à la place du `ThrottlerGuard` nu dans les 8 `app.module.ts`. La garde tient **indépendamment de la
+chaîne de confiance déclarée**. Conséquence assumée : `extractClientOrigin` **rejette** désormais ce qui
+n'est pas une IP au lieu de le tronquer à 64 caractères — `slice(0, 64)` bornait la **taille**, pas le
+**contenu**, et tronquer une chaîne hostile, c'est encore la persister et l'afficher. Le test de
+STORY-126 a été réécrit en conséquence.
+
+Mutations de contrôle : **S-M1 rouge** (retirer la garde de production), **S-M2 rouge** (ne plus valider
+`req.ip`), **S-M3 🟢 SURVÉCUE** — rebrancher le `ThrottlerGuard` nu dans `app.module.ts` laisse **tout
+vert**, `*.module.ts` étant lui aussi exclu de la couverture et les e2e montant le guard eux-mêmes. Même
+famille que M8, et fermée de la même façon : **en docker** (voir ci-dessous).
+
+### Vérification docker **rejouée** après les correctifs de sécurité
+
+Le compose est un artefact déjà vérifié et il a changé : la phase ④ est reprise sur l'état final.
+
+| Contrôle | Configuration | Résultat mesuré |
+|---|---|---|
+| **A** — le défaut LIVRÉ est sûr | compose tel quel (vide) | XFF `203.0.113.200` ignoré, `ip = ::ffff:172.19.0.1` ; 5 XFF différents ⇒ **429 dès le 5ᵉ** (aucun seau neuf) |
+| **B** — la fonctionnalité marche toujours | `uniquelocal,loopback` | XFF `203.0.113.42` ⇒ `ip = 203.0.113.42` |
+| **D** — **ferme S-M3** | `uniquelocal,loopback` | 6 appels avec une **chaîne poubelle différente** (`poubelle-1..6`) ⇒ **429 au 6ᵉ** : le compteur n'a pas bougé, donc `IpThrottlerGuard` est bien **le guard réellement monté**. Et `X-Forwarded-For: <script>alert(1)</script>` sur un login réussi ⇒ `ip = ::ffff:172.19.0.1`, pas le script |
+| **C** — garde de production | `NODE_ENV=production` + `uniquelocal,loopback` | `✅ REFUSÉ : TRUSTED_PROXIES trop large pour la production : uniquelocal, loopback…` |
+| **C bis** | `NODE_ENV=production` + `10.244.0.0/16` | accepté ⇒ `["10.244.0.0/16"]` |
+| **C ter** | `NODE_ENV=development` + `uniquelocal,loopback` | accepté ⇒ la valeur de dev reste utilisable |
+
 ### ⚠️ Le compose ne vit dans aucun dépôt — bloc recopié ici
 
 La racine PROSPERA n'est versionnée nulle part (leçon STORY-173 : le correctif de compose y avait été
@@ -290,21 +370,30 @@ perdu, rendant la story inerte). Bloc **identique ajouté aux 8 services** de `d
 après leur `CORS_ALLOWED_ORIGINS` :
 
 ```yaml
-      # STORY-133 — chaîne de proxys de confiance (`trust proxy`). Le seul saut
-      # devant un service, dans ce compose, est le bridge docker ou un conteneur
-      # voisin : deux adresses RFC 1918, couvertes par `uniquelocal`. Valeur de
-      # DEV assumée comme laxiste (les ports sont publiés sur l'hôte) — en prod,
-      # le SEUL CIDR de l'ingress (D-133-4/D-133-5).
+      # STORY-133 — chaîne de proxys de confiance (`trust proxy`).
+      # ⚠️ **Défaut VIDE, et c'est délibéré** (corrigé en revue de sécurité) :
+      # ce compose ne place AUCUN reverse-proxy devant les services — le
+      # navigateur et le BFF tapent directement le port publié. Déclarer un
+      # proxy de confiance ici n'apporterait donc rien, et coûterait cher : les
+      # ports sont publiés sur l'hôte, et l'adresse source d'un appel entrant
+      # est TOUJOURS une adresse RFC 1918 (passerelle du bridge, ou IP du poste
+      # en DNAT). Un défaut `uniquelocal` rendrait donc `X-Forwarded-For`
+      # forgeable depuis l'hôte et le LAN ⇒ IP de session choisie par le client
+      # ET rate limiting contournable — exactement la régression que D-133-2
+      # refuse par ailleurs, réintroduite par la porte de la config.
+      # Pour observer la chaîne en dev, passer la valeur à la demande :
+      #   TRUSTED_PROXIES=uniquelocal,loopback docker compose up -d <service>
+      # Prod : le SEUL CIDR de l'ingress (D-133-5) — un sous-réseau nommé y est
+      # désormais refusé au boot.
       # ⚠️ `-` et NON `:-` : sur `${VAR:-défaut}` une variable VIDE réactive le
-      # défaut (piège payé en STORY-173). Ici `TRUSTED_PROXIES=` doit pouvoir
-      # ÉTEINDRE la confiance — c'est le défaut de sûreté D-133-1.
-      TRUSTED_PROXIES: ${TRUSTED_PROXIES-uniquelocal,loopback}
+      # défaut (piège payé en STORY-173).
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES-}
 ```
 
-⚡ Le choix `${VAR-défaut}` (sans `:`) est **délibéré et divergent** du reste du fichier : c'est ce qui a
-rendu le contrôle « avant » ci-dessus possible sans toucher au code. Avec la forme `:-` employée par
-`CORS_ALLOWED_ORIGINS`, vider la variable **réactive** le défaut et le défaut de sûreté D-133-1 devient
-inatteignable depuis l'environnement.
+⚡ Le choix `${VAR-défaut}` (sans `:`) est **délibéré et divergent** du reste du fichier : avec la forme
+`:-` employée par `CORS_ALLOWED_ORIGINS`, vider la variable **réactive** le défaut, et le défaut de sûreté
+D-133-1 deviendrait inatteignable depuis l'environnement. Le défaut étant désormais vide, la forme sert
+surtout à ce que passer une valeur à la demande reste possible sans éditer le fichier.
 
 ### Ce qui reste ouvert
 
