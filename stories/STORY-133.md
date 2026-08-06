@@ -5,9 +5,10 @@
 **Priorité :** Should Have
 **Story Points :** 3
 **Complexité :** high
-**Statut :** in_progress
+**Statut :** done
 **Sprint :** 20
 **Créée le :** 2026-07-23
+**Clôturée le :** 2026-08-06
 **Origine :** Integration Gate de **FE-021**, en deux contextes navigateur contre le stack docker
 **Services :** `auth-service` (:3001) — **et le `ThrottlerGuard` des 7 autres services** (voir § Scope,
 ajouté le 2026-08-03 ; le compte a été corrigé au démarrage : `admin-panel` porte lui aussi un throttler,
