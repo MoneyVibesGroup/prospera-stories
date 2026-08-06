@@ -172,4 +172,148 @@ celle-ci et à instruire seulement une fois l'IP juste.
 
 ## Progress Tracking
 
-*(rempli au fil du développement)*
+### Implémentation (2026-08-06) — branche `MNV-133` sur les 8 dépôts
+
+Identique partout : `src/common/utils/trusted-proxies.util.ts` (parseur + validation +
+`configurerProxysDeConfiance`), appelé par `configuration.ts` (`security.trustedProxies`) et par
+`main.ts` (`app.set('trust proxy', …)`), `TRUSTED_PROXIES` déclarée dans `env.validation.ts` et
+`.env.example`. `NestFactory.create` devient `NestFactory.create<NestExpressApplication>` — sans quoi
+`.set()` n'existe pas au type.
+
+`extractClientOrigin` **n'a pas changé** (auth-service) : seul son docblock, qui annonçait la question
+comme ouverte, est mis à jour. Aucun `getTracker` maison sur le `ThrottlerGuard`.
+
+### Portes DoD — les 8 dépôts
+
+| Service | lint | build | unit (couverture) | e2e |
+|---|---|---|---|---|
+| auth-service | 0 | OK | 703 (97,09 / 90,18 / 97,72 / 97,13) | 187 |
+| expert-comptable | 0 | OK | 208 (99,14 / 90,75 / 98,59 / 99,06) | 41 |
+| kyc-service | 0 | OK | 262 (95,64 / 90,45 / 94,28 / 95,52) | 73 |
+| platform-catalog-service | 0 | OK | 465 (99,82 / 95,34 / 100 / 99,90) | 150 |
+| bilan-service | 0 | OK | 816 (98,49 / 92,57 / 98,53 / 98,43) | 190 |
+| document-service | 0 | OK | 366 (99,40 / 92,21 / 99,19 / 99,35) | 40 |
+| balance-service | 0 | OK | 2 640 (98,99 / 91,85 / 98,21 / 99,07) | 550 |
+| admin-panel | 0 | OK | 357 (99,65 / 91,54 / 100 / 99,62) | 161 |
+
+Ajouts de tests : 40 unitaires (`trusted-proxies.util.spec.ts`, dans **chacun** des 8), 3 e2e
+`throttler-proxy.e2e-spec.ts` (dans chacun des 8) et 7 e2e `trusted-proxies.e2e-spec.ts` (auth-service,
+l'IP des sessions).
+
+⚠️ **Un test e2e a échoué une fois puis est repassé** : `balance-service/test/cahiers-depenses.e2e-spec.ts`,
+sur l'exécution complète de la suite. Rejoué seul (59/59) **et** en suite complète (550/550) : vert les
+deux fois. Instabilité de charge, pas une régression de cette story — la suite ajoutée est isolée (app,
+contrôleur et stockage de throttler qui lui sont propres, aucun état partagé).
+
+### Mutation-tests — 8 mutations, **7 rouges, 1 verte, et la verte est la leçon**
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M1 | retirer la garde `length > 0` de `configurerProxysDeConfiance` | 🔴 |
+| M2 | accepter `true` comme sous-réseau nommé | 🔴 |
+| M3 | supprimer la borne haute du préfixe CIDR (`/33` passerait) | 🔴 |
+| M4 | supprimer le contrôle de forme du préfixe (`/huit`, `/08`) | 🔴 |
+| M5 | faire nommer par le message d'erreur **toutes** les entrées au lieu des fautives | 🔴 |
+| M6 | `app.set('trust proxy', true)` — la falsification devient possible | 🔴 (e2e IP des sessions) |
+| M7 | idem, côté throttler | 🔴 (e2e throttler) |
+| **M8** | **supprimer l'appel `configurerProxysDeConfiance(app, …)` de `main.ts`** | **🟢 SURVÉCUE** |
+
+⚡ **M8 était prévisible et a été prédite avant d'être mesurée.** `main.ts` est exclu de
+`collectCoverageFrom`, et les e2e appellent l'utilitaire **eux-mêmes** pour monter leur app : aucun test
+automatisé ne peut voir que `main.ts` a cessé de le faire. C'est très exactement le motif « les specs
+d'une fonction pure ne prouvent rien du câblage » payé en STORY-172, et le motif « livrable mergé et
+totalement inerte » payé en STORY-173. **La vérification docker ci-dessous n'est donc pas une formalité :
+c'est le seul contrôle qui ferme M8**, et c'est pour ça qu'elle est faite en avant/après sur un même
+conteneur, à code identique, en ne changeant que la variable d'environnement.
+
+### Vérification docker — stack neuve (`down -v`), avant/après sur conteneur réel
+
+Toutes les mesures ci-dessous sont **réelles** : `docker compose`, `curl` depuis l'hôte,
+`mongosh` dans le conteneur. La socket vue par les services depuis l'hôte est `::ffff:192.168.65.1`
+(passerelle Docker Desktop, dans `192.168/16` donc dans `uniquelocal`).
+
+**1. AC-01 / AC-03 / AC-04 — l'IP des sessions (`auth_service.sessions`)**
+
+| Session | `TRUSTED_PROXIES` | `X-Forwarded-For` envoyé | `ip` écrite en base |
+|---|---|---|---|
+| `SondeSTORY133` | *(vide)* | `203.0.113.7` | `::ffff:192.168.65.1` ← **le bug de la story** |
+| `Sonde-203.0.113.7` | `uniquelocal,loopback` | `203.0.113.7` | `203.0.113.7` |
+| `Sonde-198.51.100.4` | `uniquelocal,loopback` | `198.51.100.4` | `198.51.100.4` |
+| `Sonde-sans-xff` | `uniquelocal,loopback` | *(aucun)* | `::ffff:192.168.65.1` |
+| `Sonde-AC02` | `10.255.255.0/24` | `203.0.113.99` | `::ffff:192.168.65.1` ← **AC-02** |
+
+- **AC-03 tenu** : deux clients distincts ⇒ deux IP distinctes. Le constat du 2026-07-23 était l'inverse
+  (deux appareils réels, une seule IP).
+- **AC-02 tenu** : la passerelle docker n'appartient pas à `10.255.255.0/24`, l'en-tête forgé est ignoré.
+- **AC-04 tenu** : la session `SondeSTORY133`, ouverte **avant** le changement, garde son IP telle quelle
+  après le redémarrage — aucune réécriture.
+- **M8 fermée** : même image, même conteneur, même code — seule la variable change, et le résultat
+  change. Le `main.ts` appelle donc bien la configuration.
+
+**2. AC-06 — compteur du `ThrottlerGuard`, sur `expert-comptable` (relying party, limite 100/min)**
+
+| `TRUSTED_PROXIES` | client A #101 | client B #1 | client C #1 |
+|---|---|---|---|
+| *(vide)* | 429 | **429** ← un seul seau pour tous | 429 |
+| `uniquelocal,loopback` | 429 | **200** ← seau propre | 200 |
+
+Et le **pendant de falsification**, celui sans lequel la story serait une régression : avec
+`TRUSTED_PROXIES=10.255.255.0/24` (la passerelle docker n'y est pas), 101 appels annonçant une IP
+**différente à chaque fois** ⇒ le 101ᵉ est **429**. Un en-tête forgé n'offre pas de seau neuf.
+
+Même contraste vérifié sur l'IdP (`POST /auth/login`, limite 5/min) : sans confiance, le 6ᵉ appel de A
+met B et C à 429 immédiatement ; avec confiance, A sature à 6 et B passe encore.
+
+**3. D-133-3 — une valeur invalide tue le démarrage.** `TRUSTED_PROXIES=true` :
+
+```
+ERROR [ExceptionHandler] Error: TRUSTED_PROXIES invalide : true. Attendu : une liste séparée par des
+virgules d'adresses IP, de CIDR (ex. 10.0.0.0/8) ou de sous-réseaux nommés (loopback, linklocal,
+uniquelocal). Ni `true` ni un nombre de sauts ne sont acceptés : ils rendraient l'IP cliente — et donc
+le compteur du throttler — pilotables par un simple en-tête X-Forwarded-For forgé.
+    at parseTrustedProxies (/app/src/common/utils/trusted-proxies.util.ts:85:11)
+    at InstanceWrapper.exports.default (/app/src/config/configuration.ts:177:42)
+```
+
+`/api/v1/health` reste injoignable (`http=000`) et le conteneur ne devient jamais `healthy`.
+⚠️ **Nuance de dev à connaître** : sous `nest start --watch`, le *watcher* survit à l'échec, donc le
+conteneur reste `running` — c'est l'**application** qui n'a pas démarré. Sur l'image de production
+(`target: runtime`, `node dist/main`), le process sort.
+
+**4. Non-régression.** Les **8** services démarrent et passent `healthy` avec
+`TRUSTED_PROXIES=uniquelocal,loopback`.
+
+### ⚠️ Le compose ne vit dans aucun dépôt — bloc recopié ici
+
+La racine PROSPERA n'est versionnée nulle part (leçon STORY-173 : le correctif de compose y avait été
+perdu, rendant la story inerte). Bloc **identique ajouté aux 8 services** de `docker-compose.yml`, juste
+après leur `CORS_ALLOWED_ORIGINS` :
+
+```yaml
+      # STORY-133 — chaîne de proxys de confiance (`trust proxy`). Le seul saut
+      # devant un service, dans ce compose, est le bridge docker ou un conteneur
+      # voisin : deux adresses RFC 1918, couvertes par `uniquelocal`. Valeur de
+      # DEV assumée comme laxiste (les ports sont publiés sur l'hôte) — en prod,
+      # le SEUL CIDR de l'ingress (D-133-4/D-133-5).
+      # ⚠️ `-` et NON `:-` : sur `${VAR:-défaut}` une variable VIDE réactive le
+      # défaut (piège payé en STORY-173). Ici `TRUSTED_PROXIES=` doit pouvoir
+      # ÉTEINDRE la confiance — c'est le défaut de sûreté D-133-1.
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES-uniquelocal,loopback}
+```
+
+⚡ Le choix `${VAR-défaut}` (sans `:`) est **délibéré et divergent** du reste du fichier : c'est ce qui a
+rendu le contrôle « avant » ci-dessus possible sans toucher au code. Avec la forme `:-` employée par
+`CORS_ALLOWED_ORIGINS`, vider la variable **réactive** le défaut et le défaut de sûreté D-133-1 devient
+inatteignable depuis l'environnement.
+
+### Ce qui reste ouvert
+
+- **D-133-6 — le BFF frontend n'ajoute pas encore le `X-Forwarded-For` du navigateur.** Story frontend à
+  créer ; le dépôt n'est pas dans l'espace de travail. Conséquence à ne pas maquiller : **sur les appels
+  passant par le BFF, l'IP reste celle de l'app.** La chaîne est complète sur les appels **directs**
+  navigateur → service (topologie Option B), ce qui couvre `login` et l'essentiel de FE-021.
+- **AC-01/AC-03 « depuis un client réel »** : prouvés au protocole (deux IP annoncées ⇒ deux IP en base),
+  pas avec deux appareils physiques — ce qui exige justement D-133-6.
+- **Géolocalisation** : hors périmètre, inchangé.
+- **Valeur de prod** : `TRUSTED_PROXIES` doit être renseignée au déploiement avec le seul CIDR de
+  l'ingress (D-133-5). Tant qu'elle ne l'est pas, le comportement est celui d'avant — sans risque.
