@@ -5,10 +5,10 @@
 **Priorité :** Should Have
 **Story Points :** 5
 **Complexité :** medium
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-23 · **récupérée et réancrée sur le code le 2026-07-28** · **lancée le 2026-08-06**
-**Sprint :** S20
+**Sprint :** S20 · **clôturée le 2026-08-06**
 **Service :** `auth-service` (:3001) — 1 dépôt, 1 branche, 1 PR
 **Branche :** `MNV-144`
 
@@ -89,9 +89,16 @@ afin de **piloter le cycle de vie des cabinets depuis la console, sans intervent
 d'organisation** (`org: null` dans son jeton) : la console ne peut pas « appeler la route
 utilisateur » — elle recevrait un 403, et à supposer qu'elle passe, `new Types.ObjectId(null)`
 lèverait. La route org-level n'est donc pas un raccourci : c'est le **seul** chemin plateforme.
-Elle délègue bien à `InvitationService.resend(userId, null)` (branche plateforme de STORY-104 :
-`organizationId: null` ⇒ pas de contrôle d'isolation d'org, contrôle « encore `INVITED` » entier),
-l'isolation étant ici assurée en amont par la résolution de l'admin **dans l'org désignée**.
+Elle délègue à `InvitationService.resend`, qui régénère le jeton et remet l'e-mail en file.
+
+⚠️ **Rectifié en revue de code (2026-08-06)** : l'implémentation passait d'abord `resend(userId, **null**)`
+— la branche plateforme de STORY-104 — au motif que le contrôle d'isolation d'org n'avait pas d'objet,
+l'admin ayant déjà été résolu dans l'org désignée. Raisonnement juste sur ce paramètre, **mais
+incomplet** : `organizationId` a un **second rôle**, il choisit le **gabarit de l'e-mail**
+(`null` ⇒ `orgName: 'la plateforme PROSPERA'`). L'administrateur d'un cabinet aurait donc reçu
+« rejoignez **la plateforme PROSPERA** », sur un lien par ailleurs valide — un bug d'accueil invisible
+des tests et parfaitement visible du destinataire. On passe `org._id` : bon gabarit **et** contrôle
+d'isolation rejoué en défense en profondeur.
 
 ### C. Actions groupées
 - `POST /admin/organizations/bulk/suspend`, `POST /admin/organizations/bulk/reactivate`,
@@ -115,17 +122,17 @@ l'isolation étant ici assurée en amont par la résolution de l'admin **dans l'
 
 ## Critères d'acceptation
 
-- [ ] `POST /admin/organizations/:id/reactivate` réactive une organisation suspendue → **200**, accès rétabli.
-- [ ] Réactiver une organisation **non suspendue** → **200 idempotent**, aucun effet, aucune erreur.
-- [ ] Suspension puis réactivation : le login de l'organisation est refusé entre les deux, rétabli après.
-- [ ] Les deux actions sont **auditées** avec l'acteur, la cible et l'horodatage.
-- [ ] `POST /admin/organizations/:id/resend-invitation` sur une org non activée → **202** ; sur une org active → **409 `ALREADY_ACTIVATED`**.
-- [ ] 4ᵉ renvoi dans l'heure pour la même organisation → **429**.
-- [ ] L'ancien token d'invitation est **invalidé** par le renvoi (le lien précédent ne fonctionne plus).
-- [ ] `bulk/*` avec 101 ids → **422** ; avec 100 ids → traité.
-- [ ] **Succès partiel prouvé** : un lot mêlant une org valide, une déjà suspendue et un id inexistant renvoie `ok` / `skipped` / `error` — et la première a bien été traitée.
-- [ ] Un acteur sans `org:suspend` → **403** sur réactivation et sur `bulk/suspend|reactivate` ; sans `user:invite` → **403** sur les renvois.
-- [ ] Vérification docker bout-en-bout tracée.
+- [x] `POST /admin/organizations/:id/reactivate` réactive une organisation suspendue → **200**, accès rétabli.
+- [x] Réactiver une organisation **non suspendue** → **200 idempotent**, aucun effet, aucune erreur.
+- [x] Suspension puis réactivation : le login de l'organisation est refusé entre les deux, rétabli après.
+- [x] Les deux actions sont **auditées** avec l'acteur, la cible et l'horodatage.
+- [x] `POST /admin/organizations/:id/resend-invitation` sur une org non activée → **202** ; sur une org active → **409 `ALREADY_ACTIVATED`**.
+- [x] 4ᵉ renvoi dans l'heure pour la même organisation → **429**.
+- [x] L'ancien token d'invitation est **invalidé** par le renvoi (le lien précédent ne fonctionne plus).
+- [x] `bulk/*` avec 101 ids → **422** ; avec 100 ids → traité.
+- [x] **Succès partiel prouvé** : un lot mêlant une org valide, une déjà suspendue et un id inexistant renvoie `ok` / `skipped` / `error` — et la première a bien été traitée.
+- [x] Un acteur sans `org:suspend` → **403** sur réactivation et sur `bulk/suspend|reactivate` ; sans `user:invite` → **403** sur les renvois.
+- [x] Vérification docker bout-en-bout tracée.
 
 ---
 
@@ -198,11 +205,11 @@ Livrable d'un bloc (5 pts). Si besoin de fractionner :
 
 ## Definition of Done
 
-- [ ] Critères d'acceptation validés ; tests verts (unitaires + contrat).
-- [ ] `lint` / `typecheck` / `test` / `build` verts.
-- [ ] OpenAPI à jour (`/api/docs-json`).
-- [ ] Vérification docker bout-en-bout tracée.
-- [ ] Branche `MNV-144`, PR vers `dev`.
+- [x] Critères d'acceptation validés ; tests verts (unitaires + contrat).
+- [x] `lint` / `typecheck` / `test` / `build` verts.
+- [x] OpenAPI à jour (`/api/docs-json`).
+- [x] Vérification docker bout-en-bout tracée.
+- [x] Branche `MNV-144`, PR vers `dev`.
 
 ---
 
@@ -297,3 +304,49 @@ l'échec du suivant**, ce qu'un tout-ou-rien aurait annulé. `bulk/reactivate` l
 parasite. Le e2e M16 prouve que c'est bien l'ordre des contrôleurs qui l'empêche.
 
 Stack arrêtée (`docker compose stop`) une fois la vérification consignée.
+
+### 2026-08-06 — revue de code (⑥) : 3 constats, tous corrigés (`9aff7bc`)
+
+1. **BLOQUANT — l'e-mail de renvoi accueillait dans « la plateforme PROSPERA ».** Détail ci-dessus
+   (§ périmètre B). Le paramètre `organizationId` de `resend` a **deux** rôles ; n'en regarder qu'un
+   suffisait à envoyer le mauvais accueil. **Revérifié en docker sur le corps réel du message**
+   (Mailhog) : contient « votre cabinet », plus « la plateforme PROSPERA ».
+2. **Le chemin « lot » construisait puis JETAIT le détail complet de chaque organisation.**
+   `buildDetail` déclenche 2 agrégations `$lookup` sur `users` : sur un lot de 100, **200 agrégations**
+   et jusqu'à 100 000 documents membres hydratés, alors que la ligne de rapport ne contient que
+   `{ id, status, reason }`. `setStatus` rend désormais le document ; le détail se construit chez
+   l'appelant unitaire, qui seul en a besoin.
+3. **Le 429 du quota publiait `error: "HttpException"`** — le nom d'une classe TypeScript en guise de
+   code d'erreur d'API. Corps passé en **chaîne** ⇒ `AllExceptionsFilter` retombe sur
+   `exception.name` (le piège déjà consigné en mémoire projet). Corps en objet, `error` et `code`
+   explicites. Revérifié en docker : `{"error":"Too Many Requests","code":"TOO_MANY_RESENDS"}`.
+
+3 mutations de contrôle ajoutées (M17/M18/M19) — **19 mutations au total, 19 rouges**. Non-régression
+du périmètre A rejouée en docker après le refactor de `setStatus` : `200 → 401 (suspendu) → 200
+(réactivé)`, détail unitaire toujours complet (membres inclus).
+
+### 2026-08-06 — revue de sécurité (⑦) : **aucune vulnérabilité**
+
+Vérifié : quota non contournable (`INCR` atomique, compté **après** résolution donc un 404/409 ne le
+consomme pas, et le lot passe par la **même** méthode) · jeton d'invitation `randomBytes(32)` stocké
+en SHA-256, l'ancien réellement écrasé, aucun compte non-`INVITED` relançable · injection NoSQL fermée
+par `@IsMongoId({each:true})` + `forbidNonWhitelisted` + `ObjectId.isValid` · `bulk` non appariable
+comme un `:id` (ordre des contrôleurs **et** `isValid('bulk') === false`) · `actorId` issu du seul
+claim `sub`, donc non forgeable, et audit **fail-closed** (son échec avorte la transaction) · gardes
+au niveau de la route, jamais de l'item · la réactivation ne réveille **aucun** compte suspendu
+individuellement (statuts utilisateur et membership intacts).
+
+⚠️ **CONSTAT HORS PÉRIMÈTRE, À TRACER EN STORY DÉDIÉE** — `AuthService.acceptInvitation`
+(`auth.service.ts`) **n'appelle pas `ensureNotSuspended`** : un administrateur `INVITED` d'une
+organisation **SUSPENDUE** qui accepte son invitation obtient une session de l'IdP, là où `login` et
+`refresh` la lui refuseraient. **Pré-existant et déjà atteignable sans cette story** par la route
+**publique** `POST /auth/forgot-password`, qui régénère une invitation pour un compte `INVITED` sans
+regarder le statut de l'organisation. La route livrée ici n'accorde à son appelant aucun accès qu'il
+n'avait pas (le lien part vers la boîte de l'administrateur, pas vers l'opérateur) — d'où le
+classement hors périmètre plutôt que bloquant.
+
+### 2026-08-06 — clôture
+
+PR `prospera-auth-service#18` **rebase-mergée sur `dev`** (`8433627`), branche `MNV-144` supprimée.
+Portes finales : lint 0 · build OK · **663 unit** (97.06 / 90 / 97.69 / 97.09) · **175 e2e** ·
+**19 mutations, 19 rouges** · vérification docker complète et rejouée après correctifs.
