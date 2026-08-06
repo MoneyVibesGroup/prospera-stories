@@ -216,3 +216,84 @@ Livrable d'un bloc (5 pts). Si besoin de fractionner :
 aller simple**. Les 7 décisions de conception ci-dessus sont arrêtées ; option **(a)** retenue pour
 le périmètre B, pour une raison plus forte que le confort (la route utilisateur est org-scopée et
 inaccessible à un `PLATFORM_ADMIN` sans organisation).
+
+### 2026-08-06 — implémentation + validation
+
+**Portes DoD** : lint 0 warning · build OK · **662 tests unitaires** verts, couverture
+**97.06 / 90 / 97.69 / 97.09** (seuils 65/90/90/90) — `modules/admin` et `modules/audit` à **100 %**
+de lignes · **175 e2e** verts.
+
+**Mutation-testing — 16 mutations, 16 rouges.** Chaque garde qui protège d'une régression précise a
+été volontairement cassée, puis restaurée :
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M1 | table d'audit inversée (réactivation journalisée « suspension ») | 🔴 |
+| M2 | garde d'idempotence retirée | 🔴 |
+| M3 | audit écrit **hors** de la transaction | 🔴 |
+| M4 | `bulk/reactivate` passe `SUSPENDED` | 🔴 |
+| M5 | déduplication du lot retirée | 🔴 |
+| M6 | plafond du lot `>` → `>=` | 🔴 |
+| M7 | quota de renvoi `>` → `>=` | 🔴 |
+| M8 | quota consommé **avant** la résolution de l'admin | 🔴 |
+| M9 | préférence du fondateur (`createdBy`) retirée | 🔴 |
+| M10 | acteur non transmis (journal anonyme) | 🔴 |
+| M11 | audit : identifiants écrits en **chaîne** | 🔴 |
+| M12 | statut `INVITED` non vérifié | 🔴 |
+| M13 | une erreur d'item fait échouer tout le lot | 🔴 |
+| M14 | réactivation ouverte à `org:read` | 🔴 |
+| M15 | renvoi d'invitation ouvert à `org:read` | 🔴 |
+| M16 | ordre des contrôleurs inversé (`bulk` apparié comme `:id`) | 🔴 |
+
+⚠️ **Incident d'outillage à ne pas reproduire** : le premier script de mutation restaurait les
+fichiers par `git checkout --`, ce qui a **effacé les modifications non commitées** de
+`organizations.service.ts` (et fait échouer silencieusement les mutations suivantes, dont les ancres
+n'existaient plus). Restauration désormais **en mémoire**, et commit **avant** toute campagne.
+
+### 2026-08-06 — vérification docker (stack neuve, `down -v`)
+
+Stack : `mongo` (rs0) + `kafka` + `redis` + `mailhog` + `auth-service`. `PLATFORM_ADMIN` seedé,
+3 cabinets créés par `register`. **Les e2e mockent la couche données — rien de ce qui suit n'en
+découle.**
+
+**A — l'impasse est fermée, prouvée par contrôle avant/après :**
+
+| Étape | `organizations.status` | login du cabinet | `admin_audit_logs` |
+|---|---|---|---|
+| avant | `ACTIVE` | **200** | 0 ligne |
+| après `POST :id/suspend` | `SUSPENDED` | **401** | 1 × `ORG_SUSPENDED` |
+| après `POST :id/reactivate` | `ACTIVE` | **200** ⇐ *accès rétabli* | + 1 × `ORG_REACTIVATED` |
+| 2ᵉ `reactivate` (no-op) | `ACTIVE` | 200 | **toujours 2** — aucun bruit |
+
+`audit.actorId` **égale** le `_id` du `PLATFORM_ADMIN` seedé (vérifié par comparaison en base) —
+c'est le champ que `identity.org.updated` ne portera jamais. Collection bien nommée
+`admin_audit_logs` (`db.getCollectionNames()`), index `{ organizationId: 1, at: -1 }` créé.
+`outbox_events` porte les **deux** transitions (`identity.org.updated` en `SUSPENDED` puis `ACTIVE`) :
+statut, événement et audit sont écrits ensemble.
+
+**B — renvoi d'invitation :** `202` ; `invitationTokenHash` **remplacé** (l'ancien lien ne fonctionne
+plus) ; e-mail **réellement reçu par Mailhog** (« Vous êtes invité(e) sur Prospera »). Quota :
+renvois #2 et #3 → `202`, **#4 → `429`** ; compteur Redis `org-invite:resend:<orgId>` = 4, **TTL
+3598 s** (la fenêtre ne se réarme pas). Sur une org dont l'admin est actif :
+`409 { code: "ALREADY_ACTIVATED" }`.
+
+**C — lots, succès partiel réel :**
+
+```
+POST bulk/suspend  [org1 active, org3 déjà suspendue, id fantôme]  → 207
+{"results":[{"id":"…fff3","status":"ok"},
+            {"id":"…0017","status":"skipped","reason":"ALREADY_SUSPENDED"},
+            {"id":"…9099","status":"error","reason":"NOT_FOUND"}]}
+```
+
+En base **après** ce lot : `cabinet-1` = `SUSPENDED` — **l'item valide a bien été traité malgré
+l'échec du suivant**, ce qu'un tout-ou-rien aurait annulé. `bulk/reactivate` les remet toutes deux à
+`ACTIVE`. `bulk/resend-invitation` mêlant une org au quota et une org activée renvoie
+`error/RATE_LIMITED` + `skipped/ALREADY_ACTIVATED`. **101** identifiants distincts → `422`
+(`BULK_TOO_MANY_IDS`), **100** → `207`.
+
+🪤 **Le piège d'ordre de routes ne s'est pas déclenché** : après tous ces appels, la base compte
+**3 organisations** et **6 lignes d'audit** — aucune organisation fantôme nommée `bulk`, aucun audit
+parasite. Le e2e M16 prouve que c'est bien l'ordre des contrôleurs qui l'empêche.
+
+Stack arrêtée (`docker compose stop`) une fois la vérification consignée.
