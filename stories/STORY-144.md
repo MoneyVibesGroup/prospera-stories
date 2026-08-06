@@ -4,10 +4,11 @@
 **Réf. architecture :** `architecture-auth-service-2026-07-04.md` · `tech-spec-admin-panel-2026-07-10.md` · **STORY-006** (resend-verification + rate limit), **STORY-008** (invitation, token 72 h), **STORY-014** (`TenantStateGuard`), **STORY-103/105** (permissions `org:read` / `org:suspend`)
 **Priorité :** Should Have
 **Story Points :** 5
-**Statut :** draft
-**Assigné à :** Unassigned
-**Créée le :** 2026-07-23 · **récupérée et réancrée sur le code le 2026-07-28**
-**Sprint :** à planifier
+**Complexité :** medium
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
+**Créée le :** 2026-07-23 · **récupérée et réancrée sur le code le 2026-07-28** · **lancée le 2026-08-06**
+**Sprint :** S20
 **Service :** `auth-service` (:3001) — 1 dépôt, 1 branche, 1 PR
 **Branche :** `MNV-144`
 
@@ -82,6 +83,16 @@ afin de **piloter le cycle de vie des cabinets depuis la console, sans intervent
 - **(b)** Le besoin est déjà couvert : la console résout l'admin principal côté front et appelle la
   route utilisateur. Alors **retirer B de cette story** (elle tombe à 3 pts).
 
+✅ **TRANCHÉ le 2026-08-06 — option (a), et pas seulement par confort : (b) est INAPPLICABLE.**
+`POST /users/:id/resend-invitation` est gardée `@Roles(Role.TENANT_ADMIN)` et résout sa cible dans
+**l'organisation du porteur du jeton** (`user.tenantId`). Or un `PLATFORM_ADMIN` **n'a pas
+d'organisation** (`org: null` dans son jeton) : la console ne peut pas « appeler la route
+utilisateur » — elle recevrait un 403, et à supposer qu'elle passe, `new Types.ObjectId(null)`
+lèverait. La route org-level n'est donc pas un raccourci : c'est le **seul** chemin plateforme.
+Elle délègue bien à `InvitationService.resend(userId, null)` (branche plateforme de STORY-104 :
+`organizationId: null` ⇒ pas de contrôle d'isolation d'org, contrôle « encore `INVITED` » entier),
+l'isolation étant ici assurée en amont par la résolution de l'admin **dans l'org désignée**.
+
 ### C. Actions groupées
 - `POST /admin/organizations/bulk/suspend`, `POST /admin/organizations/bulk/reactivate`,
   `POST /admin/organizations/bulk/resend-invitation` — corps `{ ids: string[] }`.
@@ -140,6 +151,40 @@ afin de **piloter le cycle de vie des cabinets depuis la console, sans intervent
 
 ---
 
+## Décisions de conception arrêtées au lancement (2026-08-06)
+
+Vérifiées dans le code d'`origin/dev` avant d'écrire une ligne :
+
+1. **Aucune permission nouvelle.** `Permission.ORG_SUSPEND` documente déjà « Suspendre / **réactiver**
+   une organisation » — le catalogue n'est pas ouvert, donc **1 seul dépôt** (K4 ne joue pas ici).
+2. **⚠️ L'audit n'existe nulle part dans `auth-service`.** La suspension d'aujourd'hui n'est tracée
+   que par l'événement `identity.org.updated` — qui porte l'**état**, jamais l'**acteur**. Impossible
+   de répondre à « qui a suspendu ce cabinet, et quand ». La story livre donc la collection
+   `admin_audit_logs` (append-only, `{ actorId, organizationId, action, at, reason? }`) et **l'écrit
+   dans la même transaction** que le changement de statut : un audit écrit hors transaction mentirait
+   dans les deux sens (trace sans effet si le commit échoue, effet sans trace sinon).
+   L'audit ne consigne que les **transitions effectives** — un no-op idempotent ne change rien, donc
+   n'a rien à tracer (et un audit rempli de no-op ne se lit plus).
+3. **Administrateur principal d'une organisation** = le porteur de `organization.createdBy` s'il a
+   encore une membership `TENANT_ADMIN` **active** dans cette org ; **sinon** la plus ancienne
+   membership `TENANT_ADMIN` active. Le repli n'est pas théorique : le fondateur peut avoir été
+   retiré, et une org sans chemin de relance reproduirait exactement l'impasse que la story ferme.
+4. **« Non activée » = admin principal en statut `INVITED`.** Un admin `ACTIVE` dont l'e-mail n'est
+   pas encore vérifié relève de `POST /auth/resend-verification` (STORY-006, route publique déjà
+   livrée) : le confondre avec l'invitation ferait régénérer un jeton d'invitation à un compte qui a
+   déjà un mot de passe. **409 `ALREADY_ACTIVATED`** dans ce cas.
+5. **Plafond du lot : 422, donc contrôlé DANS le handler.** `@ArrayMaxSize(100)` produirait un **400**
+   via le `ValidationPipe` global — le DTO valide la **forme** (tableau non vide d'`ObjectId`), le
+   handler tranche la **taille**. Les ids sont **dédupliqués** (l'appelant qui envoie deux fois le
+   même id ne consomme pas deux fois le quota de renvoi) : `results` est indexé par id unique.
+6. **`207 Multi-Status` systématique** sur les trois routes de lot, y compris quand tout réussit.
+   Alterner 200/207 selon l'issue obligerait chaque client à écrire deux chemins de lecture pour un
+   corps identique ; le rapport par item est **toujours** la réponse.
+7. **Rate limit du renvoi : compteur Redis à fenêtre glissante par organisation**, calqué sur
+   `throttleResetByEmail` (STORY-125) — `@Throttle` compte **par IP**, ce qui ne dit rien d'une
+   organisation. **Fail-open** si Redis est indisponible, comme son modèle : une panne Redis ne doit
+   pas rendre la console inopérante, et le throttle par IP de la route reste la garde de base.
+
 ## Découpage possible
 
 Livrable d'un bloc (5 pts). Si besoin de fractionner :
@@ -158,3 +203,16 @@ Livrable d'un bloc (5 pts). Si besoin de fractionner :
 - [ ] OpenAPI à jour (`/api/docs-json`).
 - [ ] Vérification docker bout-en-bout tracée.
 - [ ] Branche `MNV-144`, PR vers `dev`.
+
+---
+
+## Progress Tracking
+
+### 2026-08-06 — lancement (statut `ready-for-dev` → `in_progress`)
+
+État vérifié sur `origin/dev` avant d'écrire : `admin-organizations.controller.ts` expose
+`GET /admin/organizations`, `GET /admin/organizations/:id`, `POST /admin/organizations/:id/suspend`
+— **et rien d'autre**. Le constat de départ de la story tient toujours : **la suspension reste un
+aller simple**. Les 7 décisions de conception ci-dessus sont arrêtées ; option **(a)** retenue pour
+le périmètre B, pour une raison plus forte que le confort (la route utilisateur est org-scopée et
+inaccessible à un `PLATFORM_ADMIN` sans organisation).
