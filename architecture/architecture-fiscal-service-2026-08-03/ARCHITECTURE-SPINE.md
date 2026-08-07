@@ -148,7 +148,7 @@ strictement descendant, et les retours passent par le bus.
   l'apporter n'existe ni en fichier ni au tracker. La dimension est donc **à créer**, pas à
   réinterpréter.
 - **Condition :** cet AD ne tient que si la dimension d'entité est ajoutée au contrat canonique **avant**
-  que `fiscal-service` ne s'y branche (STORY-187 et STORY-205). C'est un travail sur `balance-service`,
+  que `fiscal-service` ne s'y branche (STORY-302 et STORY-320). C'est un travail sur `balance-service`,
   hors de l'autorité de cette colonne, et il doit être planifié comme tel.
 
 ### AD-8 — L'obligation est matérialisée et re-dérivable

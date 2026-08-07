@@ -33,6 +33,18 @@ et mobile.
 **Série continuée :** épics à partir de **EPIC-043**, stories à partir de **STORY-291**. Dernier
 numéro pris au 2026-08-04 : EPIC-042 / STORY-290 (série PI-SPI), vérifié dans `sprint-status.yaml`.
 
+> ⚠️ **Amendé le 2026-08-07 — démarrer à STORY-351.** Cette série n'avait encore **consommé aucun
+> numéro** (seul le point de départ était annoncé), et deux mouvements l'ont dépassée le même jour :
+>
+> 1. **STORY-292 / STORY-293** — référentiels attribuables mais non servis par `balance-service`,
+>    slottées au sprint 20 (ticket `tickets/TICKET-BACKEND-referentiels-attribuables-mais-non-servis.md`) ;
+> 2. **la série fiscalité a été renumérotée `179→235` ⇒ `294→350`** pour lever une collision de dix
+>    `story_id` avec la dette console/KYC du sprint 20 (voir l'encadré de
+>    `epics-fiscalite-2026-08-03.md`).
+>
+> Le raisonnement est celui déjà appliqué ci-dessus : on ne rouvre pas un numéro pris, on décale le
+> début de série. **Dernier numéro pris au 2026-08-07 : STORY-350.**
+
 ### ⚠️ Avertissement d'estimation
 
 Le PRD a **déjà corrigé une fois** son estimation : la séquence des modules donnait 2 sprints, le

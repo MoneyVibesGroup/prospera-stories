@@ -20,7 +20,27 @@ inputDocuments:
 
 Découpage du PRD Fiscalité v0.3 et de la colonne vertébrale `fiscal-service` (AD-1 → AD-19) en épics et
 stories implémentables. Série continuée : **épics à partir de EPIC-027**, **stories à partir de
-STORY-179**. Périmètre backend uniquement ; le frontend suit sa série `FE-*` dans son tracker propre.
+STORY-294**. Périmètre backend uniquement ; le frontend suit sa série `FE-*` dans son tracker propre.
+
+> ### ⚠️ Renumérotation du 2026-08-07 — `STORY-179→235` est devenu `STORY-294→350`
+>
+> Ce document annonçait initialement sa série « à partir de **STORY-179** ». Le **lendemain** de sa
+> publication, la dette console/KYC (ticket `TICKET-BACKEND-ap-int-1-revue-kyc-sans-document.md`) a été
+> slottée au sprint 20 sur **les mêmes numéros 179→188** : dix `story_id` désignaient deux stories
+> différentes, dans un tracker qui n'en tolère aucun.
+>
+> **C'est la série fiscale qui a été décalée** (+115), sur trois critères : aucune de ses 57 stories
+> n'avait de fichier `stories/STORY-XXX.md` ni n'était démarrée (sprints 22→30) ; ses citations tenaient
+> dans **4 documents** quand celles de la série console essaimaient dans **42 fichiers** (tickets,
+> stories frontend, mobile, les deux trackers) ; et son sprint, lui, est **en cours**. La série reste
+> **continue** : `294 → 350`, dans le même ordre, avec les mêmes épics `EPIC-027 → EPIC-034`.
+>
+> **Table de correspondance :** `nouveau = ancien + 115`. Exemples : `179 → 294` (scaffold),
+> `205 → 320`, `235 → 350`. **`STORY-236` n'a PAS bougé** — elle appartient à `balance-service`, pas à
+> ce module.
+>
+> ⛔ **Conséquence sur la série suivante :** `epics-notification-2026-08-04.md` doit démarrer à
+> **STORY-351**. Son document a été amendé en conséquence.
 
 ## Inventaire des exigences
 
@@ -266,7 +286,7 @@ transverses et portées par les critères d'acceptation des stories concernées,
 
 Le service existe, il est gouverné, et il sait quelle réglementation appliquer.
 
-### STORY-179 — Scaffold `fiscal-service` (:3012), socle transverse et point de santé
+### STORY-294 — Scaffold `fiscal-service` (:3012), socle transverse et point de santé
 
 En tant qu'**équipe plateforme**, je veux un service `fiscal-service` déployé et authentifié, afin que les capacités fiscales aient un hôte conforme aux conventions de l'écosystème. *(AR-01, AR-05, AR-10)*
 
@@ -277,7 +297,7 @@ En tant qu'**équipe plateforme**, je veux un service `fiscal-service` déployé
 - **Étant donné** l'arborescence du service **quand** on inspecte `src/domain/` **alors** aucun import de `@nestjs/*` ni de `mongoose` n'y figure.
 - **Étant donné** un code d'erreur métier **quand** il est rendu **alors** son statut HTTP suit la correspondance fixe des conventions (`409` transition interdite, `502` intégrité d'artefact, `422` règle métier, `400` validation, `404` hors organisation).
 
-### STORY-180 — Deux bases MongoDB et rôles restreints (`fiscal`, `fiscal_audit`)
+### STORY-295 — Deux bases MongoDB et rôles restreints (`fiscal`, `fiscal_audit`)
 
 En tant qu'**expert-comptable**, je veux que le journal de preuve soit techniquement ineffaçable, afin qu'aucune évolution future du code ne puisse en supprimer une trace. *(AR-02, AD-10, AD-19)*
 
@@ -288,7 +308,7 @@ En tant qu'**expert-comptable**, je veux que le journal de preuve soit technique
 - **Étant donné** un environnement de développement **quand** on vérifie les rôles **alors** ils sont identiques à ceux de production ; un environnement où l'applicatif détient `remove` sur `fiscal_audit` est déclaré non conforme par un test.
 - **Étant donné** le compte de maintenance **quand** on inspecte la configuration du service **alors** ses identifiants n'y figurent pas.
 
-### STORY-181 — Read-models locaux et gate `@RequiresFiscalAccess`
+### STORY-296 — Read-models locaux et gate `@RequiresFiscalAccess`
 
 En tant que **membre d'un cabinet habilité**, je veux accéder aux capacités fiscales sans latence d'autorisation, afin que le service reste utilisable même si un service voisin est indisponible. *(AR-03, AR-04, AD-16)*
 
@@ -299,7 +319,7 @@ En tant que **membre d'un cabinet habilité**, je veux accéder aux capacités f
 - **Étant donné** une organisation sans entitlement fiscal `ACTIVE` **quand** elle appelle une opération métier **alors** la réponse est `403 FISCAL_NOT_ENTITLED`.
 - **Étant donné** `auth-service`, `kyc-service` et `catalog-service` arrêtés **quand** un JWT encore valide est présenté **alors** l'autorisation aboutit depuis les read-models seuls.
 
-### STORY-182 — Chargeur de paquet fiscal depuis `catalog-service`
+### STORY-297 — Chargeur de paquet fiscal depuis `catalog-service`
 
 En tant qu'**administrateur plateforme**, je veux que le service charge le paquet publié et en vérifie l'intégrité, afin qu'aucun calcul ne parte d'une donnée réglementaire altérée. *(FR-F67, FR-F68, AR-06, AD-5, AD-6)*
 
@@ -310,7 +330,7 @@ En tant qu'**administrateur plateforme**, je veux que le service charge le paque
 - **Étant donné** un artefact dont la liste de consommateurs déclarés ne nomme pas `fiscal-service` **quand** il est chargé **alors** le chargement est refusé avec un code nommé.
 - **Étant donné** un paquet déjà chargé **quand** il est redemandé **alors** il provient du cache sans nouvel accès au registre.
 
-### STORY-183 — Statut de validation des éléments et rattachement version ↔ exercice
+### STORY-298 — Statut de validation des éléments et rattachement version ↔ exercice
 
 En tant qu'**expert-comptable**, je veux savoir si un montant repose sur une donnée validée par un expert, afin de ne pas déposer sur la foi d'une amorce. *(FR-F69, FR-F70)*
 
@@ -320,7 +340,7 @@ En tant qu'**expert-comptable**, je veux savoir si un montant repose sur une don
 - **Étant donné** un exercice ouvert **quand** une nouvelle version de paquet est publiée en cours d'exercice **alors** l'exercice reste attaché à la version en vigueur à son ouverture **et** aucun recalcul n'a lieu automatiquement.
 - **Étant donné** une déclaration déjà déposée **quand** un recalcul explicite est demandé **alors** il est refusé avec un code nommé.
 
-### STORY-184 — Journal d'audit chaîné par périmètre et outbox transactionnelle
+### STORY-299 — Journal d'audit chaîné par périmètre et outbox transactionnelle
 
 En tant qu'**expert-comptable**, je veux pouvoir démontrer qu'aucune trace n'a disparu, afin que la piste d'audit tienne devant un contrôle. *(AR-07, AR-08, AD-10)*
 
@@ -331,7 +351,7 @@ En tant qu'**expert-comptable**, je veux pouvoir démontrer qu'aucune trace n'a 
 - **Étant donné** une chaîne d'entrées **quand** on la vérifie **alors** chaque empreinte correspond à l'entrée précédente **et** toute rupture est détectée et nommée.
 - **Étant donné** une transition métier qui échoue **quand** la transaction est annulée **alors** aucune entrée d'audit ni aucun message d'outbox ne subsiste.
 
-### STORY-185 — Habilitations graduées et séparation des natures d'accès
+### STORY-300 — Habilitations graduées et séparation des natures d'accès
 
 En tant qu'**administrateur de cabinet**, je veux distribuer des droits par action, afin qu'un collaborateur puisse préparer sans pouvoir déposer. *(FR-F58, FR-F59)*
 
@@ -346,7 +366,7 @@ En tant qu'**administrateur de cabinet**, je veux distribuer des droits par acti
 
 Le cabinet sait **quoi** déclarer, pour chaque client et chaque pays.
 
-### STORY-186 — Dossier fiscal, attestation de mandat et historisation
+### STORY-301 — Dossier fiscal, attestation de mandat et historisation
 
 En tant que **collaborateur de cabinet**, je veux créer le dossier fiscal d'un client, afin de regrouper ses implantations et de tracer que le cabinet le représente. *(FR-F04, FR-F57)*
 
@@ -356,7 +376,7 @@ En tant que **collaborateur de cabinet**, je veux créer le dossier fiscal d'un 
 - **Étant donné** un dossier modifié plusieurs fois **quand** on demande son état à une date passée **alors** il est reconstitué fidèlement depuis l'historique append-only.
 - **Étant donné** un dossier d'une autre organisation **quand** il est demandé **alors** la réponse est `404`, jamais `403`.
 
-### STORY-187 — Implantations fiscales : création, type d'entité, clôture
+### STORY-302 — Implantations fiscales : création, type d'entité, clôture
 
 En tant que **collaborateur de cabinet**, je veux déclarer les implantations d'un client, afin que chaque contexte national ait son identité fiscale et ses obligations propres. *(FR-F01, FR-F02, FR-F05, AD-7)*
 
@@ -367,7 +387,7 @@ En tant que **collaborateur de cabinet**, je veux déclarer les implantations d'
 - **Étant donné** une implantation clôturée pour cessation d'activité **quand** on consulte son historique **alors** ses obligations passées demeurent intactes.
 - **Étant donné** une tentative d'enregistrer un secret d'accès à un portail **quand** elle est soumise **alors** elle est refusée : aucun champ du modèle ne l'accepte.
 
-### STORY-188 — Proposition et confirmation des régimes par implantation
+### STORY-303 — Proposition et confirmation des régimes par implantation
 
 En tant qu'**expert-comptable**, je veux que le système propose les régimes et me demande de confirmer, afin que la responsabilité professionnelle reste humaine. *(FR-F03)*
 
@@ -377,7 +397,7 @@ En tant qu'**expert-comptable**, je veux que le système propose les régimes et
 - **Étant donné** une proposition **quand** je confirme un régime divergent **alors** un motif est obligatoire, sans quoi la réponse est `400`.
 - **Étant donné** un chiffre d'affaires absent ou à moins de 10 % d'un seuil **quand** la proposition est rendue **alors** elle porte un avertissement de confiance dégradée.
 
-### STORY-189 — Résolution conjointe type d'entité → référentiel et paquet
+### STORY-304 — Résolution conjointe type d'entité → référentiel et paquet
 
 En tant qu'**administrateur plateforme**, je veux qu'un dossier microfinance ne puisse jamais être calculé sur le paquet entreprise, afin d'éviter un montant faux et opposable. *(FR-F71, FR-F72, FR-F78, AD-15)*
 
@@ -387,7 +407,7 @@ En tant qu'**administrateur plateforme**, je veux qu'un dossier microfinance ne 
 - **Étant donné** une combinaison incohérente entre type et référentiel comptable **quand** elle est soumise **alors** elle est refusée avec `REFERENTIEL_INCOHERENT`.
 - **Étant donné** un type d'entité sans paquet publié pour son pays et son exercice **quand** on tente une dérivation **alors** la réponse est `PAQUET_NON_PUBLIE`, jamais un repli sur un paquet voisin.
 
-### STORY-190 — Dérivation du catalogue d'obligations
+### STORY-305 — Dérivation du catalogue d'obligations
 
 En tant que **collaborateur de cabinet**, je veux que le système établisse seul la liste des obligations d'un client, afin de ne plus la tenir de mémoire. *(FR-F06, FR-F07, FR-F09, FR-F10, AD-17)*
 
@@ -398,7 +418,7 @@ En tant que **collaborateur de cabinet**, je veux que le système établisse seu
 - **Étant donné** une obligation déjà affectée et en préparation **quand** une re-dérivation survient **alors** échéance et montant attendu sont actualisés **mais** statut, responsable et déclarations sont préservés.
 - **Étant donné** une entrée de catalogue dont une donnée manque au paquet **quand** la dérivation s'exécute **alors** l'obligation est signalée comme non dérivable, jamais omise en silence.
 
-### STORY-191 — Activation et désactivation manuelle d'une obligation
+### STORY-306 — Activation et désactivation manuelle d'une obligation
 
 En tant qu'**expert-comptable**, je veux écarter une obligation qui ne s'applique pas à mon client, afin que le référentiel propose sans décider à ma place. *(FR-F08)*
 
@@ -408,7 +428,7 @@ En tant qu'**expert-comptable**, je veux écarter une obligation qui ne s'appliq
 - **Étant donné** une désactivation motivée **quand** elle est enregistrée **alors** elle est journalisée **et** l'obligation disparaît du calendrier sans être supprimée.
 - **Étant donné** une obligation désactivée **quand** une re-dérivation survient **alors** elle n'est pas réactivée automatiquement.
 
-### STORY-192 — Taxes sectorielles et échéances portées par le type d'entité
+### STORY-307 — Taxes sectorielles et échéances portées par le type d'entité
 
 En tant qu'**expert-comptable d'une institution de microfinance**, je veux que les taxes de mon secteur apparaissent sans configuration, afin de ne rien oublier. *(FR-F73, FR-F74)*
 
@@ -418,7 +438,7 @@ En tant qu'**expert-comptable d'une institution de microfinance**, je veux que l
 - **Étant donné** une implantation de type assurance **quand** le catalogue est dérivé **alors** la taxe sur les conventions d'assurance y figure avec ses taux différenciés par nature.
 - **Étant donné** une entité financière ou d'assurance **quand** l'échéance de dépôt annuel est calculée **alors** elle vaut le 31/05 **et** cette date provient du paquet, pas d'une exception codée.
 
-### STORY-193 — Régime dérogatoire et signalement
+### STORY-308 — Régime dérogatoire et signalement
 
 En tant qu'**expert-comptable**, je veux qu'un dossier sous régime dérogatoire soit visiblement signalé, afin de ne jamais lui appliquer le droit commun par inadvertance. *(FR-F75)*
 
@@ -427,7 +447,7 @@ En tant qu'**expert-comptable**, je veux qu'un dossier sous régime dérogatoire
 - **Étant donné** une implantation en zone franche **quand** son paquet est résolu **alors** c'est le paquet dérogatoire qui s'applique, à la place du paquet de droit commun.
 - **Étant donné** un dossier calculé sous dérogation **quand** on consulte ses obligations **alors** un signalement explicite l'indique.
 
-### STORY-194 — Agnosticisme de la source de balance
+### STORY-309 — Agnosticisme de la source de balance
 
 En tant que **vertical microfinance, assurance ou distributeur**, je veux obtenir les capacités fiscales sans développement spécifique, afin qu'une balance conforme suffise. *(FR-F76, FR-F77, AD-14)*
 
@@ -443,7 +463,7 @@ En tant que **vertical microfinance, assurance ou distributeur**, je veux obteni
 
 Un montant est produit et **explicable**, ou refusé nommément.
 
-### STORY-195 — Registre de familles, famille proportionnelle et détail de calcul
+### STORY-310 — Registre de familles, famille proportionnelle et détail de calcul
 
 En tant qu'**expert-comptable**, je veux voir comment un montant a été obtenu, afin de pouvoir le défendre. *(FR-F11, FR-F15, AD-2)*
 
@@ -454,7 +474,7 @@ En tant qu'**expert-comptable**, je veux voir comment un montant a été obtenu,
 - **Étant donné** des paramètres de paquet non conformes au schéma de la famille **quand** le paquet est chargé **alors** le chargement échoue, jamais au moment du calcul.
 - **Étant donné** le code du moteur **quand** on le fouille **alors** aucune évaluation dynamique d'expression n'y figure.
 
-### STORY-196 — Familles barème par tranches et forfait par tranche
+### STORY-311 — Familles barème par tranches et forfait par tranche
 
 En tant qu'**expert-comptable**, je veux que les impôts progressifs et forfaitaires se calculent depuis le paquet, afin qu'un changement de barème ne demande aucune livraison. *(FR-F11)*
 
@@ -464,7 +484,7 @@ En tant qu'**expert-comptable**, je veux que les impôts progressifs et forfaita
 - **Étant donné** une taxe forfaitaire par tranche de chiffre d'affaires **quand** l'assiette tombe dans une tranche **alors** le montant fixe de cette tranche est rendu.
 - **Étant donné** une assiette exactement égale à une borne **quand** le calcul s'exécute **alors** la tranche retenue est celle que le paquet déclare comme incluant la borne.
 
-### STORY-197 — Pipeline de modificateurs ordonné
+### STORY-312 — Pipeline de modificateurs ordonné
 
 En tant qu'**expert-comptable**, je veux que plancher, taux et minimum s'appliquent toujours dans le même ordre, afin que deux calculs de la même taxe donnent le même montant. *(FR-F12, AD-3)*
 
@@ -475,7 +495,7 @@ En tant qu'**expert-comptable**, je veux que plancher, taux et minimum s'appliqu
 - **Étant donné** une assiette sociale inférieure au salaire minimum **quand** `PLANCHER_ASSIETTE` s'applique **alors** l'assiette retenue vaut le plancher.
 - **Étant donné** un modificateur absent de la liste déclarée **quand** il apparaît dans un paquet **alors** le chargement échoue.
 
-### STORY-198 — Aiguillage, y compris sur l'état d'un tiers
+### STORY-313 — Aiguillage, y compris sur l'état d'un tiers
 
 En tant qu'**expert-comptable**, je veux que le taux applicable se déduise du critère prévu par la loi, afin de ne pas choisir à la main entre trois taux. *(FR-F12, FR-F13)*
 
@@ -485,7 +505,7 @@ En tant qu'**expert-comptable**, je veux que le taux applicable se déduise du c
 - **Étant donné** une retenue dont le taux dépend de la régularité fiscale du prestataire **quand** ce critère n'est pas saisi et daté au dossier **alors** l'obligation est bloquée avec le motif, aucun taux par défaut n'étant appliqué.
 - **Étant donné** le critère saisi et daté **quand** le calcul s'exécute **alors** le taux correspondant est retenu et figure au détail de calcul.
 
-### STORY-199 — Familles hors périmètre : déclarables, non calculables
+### STORY-314 — Familles hors périmètre : déclarables, non calculables
 
 En tant qu'**expert-comptable**, je veux qu'une taxe que le moteur ne sait pas calculer apparaisse quand même à mon calendrier, afin de ne pas l'oublier. *(FR-F14, AD-4)*
 
@@ -501,7 +521,7 @@ En tant qu'**expert-comptable**, je veux qu'une taxe que le moteur ne sait pas c
 
 Le cabinet voit tout son portefeuille : échéances, retards, charge. Le tableur disparaît.
 
-### STORY-200 — Calendrier fiscal centralisé, filtres et tri
+### STORY-315 — Calendrier fiscal centralisé, filtres et tri
 
 En tant qu'**expert-comptable**, je veux voir en une page toutes les obligations de mon portefeuille, afin de savoir ce qui risque d'être en retard. *(FR-F16, FR-F17)*
 
@@ -511,7 +531,7 @@ En tant qu'**expert-comptable**, je veux voir en une page toutes les obligations
 - **Étant donné** un calendrier **quand** je filtre par pays, collaborateur, type d'obligation, période ou statut **alors** le résultat est cohérent et combinable.
 - **Étant donné** un portefeuille de 500 dossiers portant jusqu'à 12 obligations annuelles **quand** le calendrier est demandé **alors** le premier rendu tient sous 2 secondes **et** un filtre s'applique sous 500 ms. *(NFR-F13)*
 
-### STORY-201 — Calcul des échéances depuis le paquet
+### STORY-316 — Calcul des échéances depuis le paquet
 
 En tant qu'**expert-comptable**, je veux que les dates limites viennent de la réglementation et non du code, afin qu'un changement de loi de finances ne demande aucune livraison. *(FR-F18, NFR-F04)*
 
@@ -521,7 +541,7 @@ En tant qu'**expert-comptable**, je veux que les dates limites viennent de la r�
 - **Étant donné** une entreprise individuelle, une société, puis une banque **quand** l'échéance de dépôt annuel est calculée **alors** elle vaut respectivement 31/03, 30/04 et 31/05, toutes trois lues du paquet.
 - **Étant donné** le code du service **quand** on y cherche une date d'échéance en dur **alors** on n'en trouve aucune.
 
-### STORY-202 — Reports d'échéance administratifs
+### STORY-317 — Reports d'échéance administratifs
 
 En tant qu'**expert-comptable**, je veux enregistrer un report accordé par l'administration, afin que mon calendrier reflète la réalité sans perdre la date légale d'origine. *(FR-F20)*
 
@@ -531,7 +551,7 @@ En tant qu'**expert-comptable**, je veux enregistrer un report accordé par l'ad
 - **Étant donné** une obligation dont l'échéance a été reportée **quand** le retard est qualifié **alors** il se calcule sur la date reportée.
 - **Étant donné** un report **quand** il est enregistré **alors** son auteur, sa date et sa portée sont journalisés.
 
-### STORY-203 — Alertes d'échéance et états de retard
+### STORY-318 — Alertes d'échéance et états de retard
 
 En tant que **collaborateur de cabinet**, je veux être alerté avant l'échéance, afin de ne pas découvrir le retard une fois la majoration acquise. *(FR-F19, AR-09, AD-18)*
 
@@ -543,7 +563,7 @@ En tant que **collaborateur de cabinet**, je veux être alerté avant l'échéan
 - **Étant donné** trois obligations distinctes **quand** on consulte leur état **alors** le système distingue « pas encore préparée », « en retard de préparation » et « échéance dépassée ».
 - **Étant donné** le code du service **quand** on le fouille **alors** aucun `setInterval` ni minuterie applicative n'y figure.
 
-### STORY-204 — Responsable désigné et vue de charge par collaborateur
+### STORY-319 — Responsable désigné et vue de charge par collaborateur
 
 En tant qu'**administrateur de cabinet**, je veux savoir qui porte quoi, afin de répartir la charge avant l'échéance et non après. *(FR-F21)*
 
@@ -559,7 +579,7 @@ En tant qu'**administrateur de cabinet**, je veux savoir qui porte quoi, afin de
 
 Le cœur du produit, et le **premier jalon vendable**.
 
-### STORY-205 — Alimentation depuis la balance et blocage motivé
+### STORY-320 — Alimentation depuis la balance et blocage motivé
 
 En tant que **collaborateur de cabinet**, je veux que les bases fiscales viennent des données comptables, afin de ne rien ressaisir. *(FR-F22, FR-F25)*
 
@@ -569,7 +589,7 @@ En tant que **collaborateur de cabinet**, je veux que les bases fiscales viennen
 - **Étant donné** une période sans balance exploitable **quand** je prépare la déclaration **alors** l'obligation est marquée bloquée **et** le message nomme précisément ce qui manque.
 - **Étant donné** une balance en brouillon plutôt que validée **quand** elle alimente une déclaration **alors** la déclaration porte la mention du statut de preuve de sa source.
 
-### STORY-206 — Délégation du calcul au moteur de `balance-service`
+### STORY-321 — Délégation du calcul au moteur de `balance-service`
 
 En tant qu'**équipe plateforme**, je veux que le calcul reste au seul endroit qui en a la charge, afin qu'aucun second moteur fiscal ne diverge. *(FR-F23, AD-1)*
 
@@ -579,7 +599,7 @@ En tant qu'**équipe plateforme**, je veux que le calcul reste au seul endroit q
 - **Étant donné** le code du domaine **quand** on le fouille **alors** aucune règle d'imposition n'y est implémentée.
 - **Étant donné** `balance-service` indisponible **quand** une préparation est tentée **alors** l'échec est explicite et retentable, sans montant partiel enregistré.
 
-### STORY-207 — Triplet calculé, déclaré, payé
+### STORY-322 — Triplet calculé, déclaré, payé
 
 En tant qu'**expert-comptable**, je veux que les trois montants restent distincts, afin de pouvoir expliquer tout écart en contrôle. *(FR-F24)*
 
@@ -589,7 +609,7 @@ En tant qu'**expert-comptable**, je veux que les trois montants restent distinct
 - **Étant donné** un montant déclaré différent du montant calculé **quand** la déclaration est validée **alors** un motif est exigé.
 - **Étant donné** un tel écart **quand** on consulte le dossier de contrôle **alors** l'écart et son motif y figurent.
 
-### STORY-208 — Cycle de vie de l'obligation et rôles
+### STORY-323 — Cycle de vie de l'obligation et rôles
 
 En tant qu'**expert-comptable**, je veux un cheminement unique de la préparation à la clôture, afin que chaque dossier suive la même discipline. *(FR-F33, FR-F34)*
 
@@ -600,7 +620,7 @@ En tant qu'**expert-comptable**, je veux un cheminement unique de la préparatio
 - **Étant donné** une transition quelconque **quand** elle aboutit **alors** l'état et son entrée d'audit sont écrits dans la **même** transaction.
 - **Étant donné** une transition non prévue par le cycle **quand** elle est tentée **alors** la réponse est `409`.
 
-### STORY-209 — Validation du client capturée comme pièce
+### STORY-324 — Validation du client capturée comme pièce
 
 En tant qu'**expert-comptable**, je veux consigner l'accord du client sans lui ouvrir l'application, afin que la validation reste opposable. *(FR-F35)*
 
@@ -610,7 +630,7 @@ En tant qu'**expert-comptable**, je veux consigner l'accord du client sans lui o
 - **Étant donné** une pièce de validation (document signé, courriel, ou mention manuelle) **quand** elle est enregistrée **alors** elle est horodatée et attribuée à celui qui la consigne.
 - **Étant donné** la société cliente **quand** on cherche son accès applicatif **alors** il n'en existe aucun.
 
-### STORY-210 — Rectificatives versionnées, immuabilité et clôture
+### STORY-325 — Rectificatives versionnées, immuabilité et clôture
 
 En tant qu'**expert-comptable**, je veux corriger une déclaration sans effacer la précédente, afin que l'historique tienne devant l'administration. *(FR-F36, FR-F37, FR-F38, AD-9)*
 
@@ -621,7 +641,7 @@ En tant qu'**expert-comptable**, je veux corriger une déclaration sans effacer 
 - **Étant donné** une obligation clôturée **quand** une mutation autre qu'une rectificative est tentée **alors** la réponse est `409 OBLIGATION_CLOTUREE`.
 - **Étant donné** un retour en arrière dans le cycle **quand** il est effectué **alors** un motif est obligatoire.
 
-### STORY-211 — Contrôles de cohérence intra-période avec tolérances
+### STORY-326 — Contrôles de cohérence intra-période avec tolérances
 
 En tant qu'**expert-comptable**, je veux que le système repère les incohérences avant l'administration, afin de ne pas déposer une déclaration qui sera rejetée. *(FR-F62, FR-F63)*
 
@@ -631,7 +651,7 @@ En tant qu'**expert-comptable**, je veux que le système repère les incohérenc
 - **Étant donné** un contrôle **quand** il s'exécute **alors** il n'utilise jamais une égalité stricte : la tolérance vient du paquet, comme la tolérance d'équilibre de la balance.
 - **Étant donné** des acomptes **quand** ils sont contrôlés **alors** ils sont rapprochés du résultat de l'exercice précédent.
 
-### STORY-212 — Continuité inter-périodes
+### STORY-327 — Continuité inter-périodes
 
 En tant qu'**expert-comptable**, je veux que les reports d'une période à l'autre soient vérifiés, afin qu'un crédit de taxe ne disparaisse pas en route. *(FR-F64)*
 
@@ -641,7 +661,7 @@ En tant qu'**expert-comptable**, je veux que les reports d'une période à l'aut
 - **Étant donné** un déficit reportable **quand** il est imputé **alors** l'imputation respecte les règles du paquet.
 - **Étant donné** une rupture de continuité **quand** elle est détectée **alors** une anomalie est levée en nommant les deux périodes concernées.
 
-### STORY-213 — Anomalies : gravité, blocage et levée motivée
+### STORY-328 — Anomalies : gravité, blocage et levée motivée
 
 En tant qu'**expert-comptable**, je veux distinguer ce qui empêche de valider de ce qui mérite un regard, afin de ne pas traiter tout au même niveau. *(FR-F65, FR-F66)*
 
@@ -651,7 +671,7 @@ En tant qu'**expert-comptable**, je veux distinguer ce qui empêche de valider d
 - **Étant donné** une anomalie bloquante non traitée **quand** la validation est tentée **alors** elle est refusée.
 - **Étant donné** une anomalie levée par un utilisateur **quand** aucun motif n'est fourni **alors** la levée est refusée ; **quand** un motif est fourni **alors** elle est journalisée et apparaît au dossier de contrôle.
 
-### STORY-214 — Restitution du chemin d'un montant et historique complet
+### STORY-329 — Restitution du chemin d'un montant et historique complet
 
 En tant qu'**expert-comptable**, je veux remonter d'un montant déclaré jusqu'aux pièces, afin de répondre à un contrôleur sans reconstituer à la main. *(FR-F26, FR-F51, FR-F56)*
 
@@ -667,7 +687,7 @@ En tant qu'**expert-comptable**, je veux remonter d'un montant déclaré jusqu'a
 
 Le différenciateur. ⛔ **Jalon bloquant `format confirmé`** : aucune story de cet épic ne démarre sans pièce réelle en main.
 
-### STORY-215 — Port de canal asynchrone et production du livrable
+### STORY-330 — Port de canal asynchrone et production du livrable
 
 En tant que **collaborateur de cabinet**, je veux obtenir le fichier exact attendu par l'administration, afin de ne pas le reconstituer à la main. *(FR-F39, AD-11, AD-12)*
 
@@ -678,7 +698,7 @@ En tant que **collaborateur de cabinet**, je veux obtenir le fichier exact atten
 - **Étant donné** un dépôt **quand** il est engagé **alors** l'appel rend un identifiant de dépôt **et** l'accusé n'est jamais une valeur de retour : il arrive comme un fait séparé.
 - **Étant donné** le domaine **quand** on le fouille **alors** aucun nom de pays, de portail ou de guichet n'y figure.
 
-### STORY-216 — Format de canal décrit comme donnée du paquet
+### STORY-331 — Format de canal décrit comme donnée du paquet
 
 En tant qu'**administrateur plateforme**, je veux décrire un nouveau canal sans livrer de code, afin qu'un second pays ne coûte que de la donnée. *(FR-F40, NFR-F11)*
 
@@ -688,7 +708,7 @@ En tant qu'**administrateur plateforme**, je veux décrire un nouveau canal sans
 - **Étant donné** un canal dont la description est incomplète **quand** un livrable est demandé **alors** le refus nomme le champ manquant.
 - **Étant donné** deux canaux de nature différente (téléversement de classeur, saisie de formulaire) **quand** ils sont décrits **alors** les deux passent par le même port.
 
-### STORY-217 — Guidage de dépôt pas à pas
+### STORY-332 — Guidage de dépôt pas à pas
 
 En tant que **collaborateur de cabinet**, je veux être guidé écran par écran sur le portail, afin de ne retaper aucun montant. *(FR-F41)*
 
@@ -698,7 +718,7 @@ En tant que **collaborateur de cabinet**, je veux être guidé écran par écran
 - **Étant donné** une étape comportant des valeurs à reporter **quand** je la consulte **alors** chaque valeur est **copiable individuellement**.
 - **Étant donné** un montant déjà connu du système **quand** le guidage le présente **alors** il n'est jamais demandé en saisie.
 
-### STORY-218 — Capture de l'accusé et qualification du retard
+### STORY-333 — Capture de l'accusé et qualification du retard
 
 En tant qu'**expert-comptable**, je veux archiver la preuve du dépôt, afin de pouvoir la produire deux ans plus tard. *(FR-F42, FR-F43)*
 
@@ -709,7 +729,7 @@ En tant qu'**expert-comptable**, je veux archiver la preuve du dépôt, afin de 
 - **Étant donné** une obligation sans accusé **quand** on tente de la passer à « Accusé reçu » **alors** la transition est refusée avec `ACCUSE_REQUIS`.
 - **Étant donné** une date réelle de dépôt postérieure à l'échéance **quand** elle est enregistrée **alors** le retard est qualifié et le risque associé affiché.
 
-### STORY-219 — Rejet administratif
+### STORY-334 — Rejet administratif
 
 En tant qu'**expert-comptable**, je veux traiter un rejet sans perdre l'historique, afin que la reprise reste traçable. *(FR-F44)*
 
@@ -718,7 +738,7 @@ En tant qu'**expert-comptable**, je veux traiter un rejet sans perdre l'historiq
 - **Étant donné** un rejet notifié **quand** je l'enregistre avec son motif et sa date **alors** l'obligation revient dans le cycle sans qu'aucune version antérieure ne soit altérée.
 - **Étant donné** une obligation rejetée puis redéposée **quand** on consulte son dossier de contrôle **alors** le rejet, son motif et le nouveau dépôt y figurent tous les trois.
 
-### STORY-220 — Archivage des livrables et accusés
+### STORY-335 — Archivage des livrables et accusés
 
 En tant qu'**expert-comptable**, je veux retrouver toute pièce depuis l'obligation qu'elle concerne, afin de ne plus fouiller une boîte mail. *(FR-F45)*
 
@@ -727,7 +747,7 @@ En tant qu'**expert-comptable**, je veux retrouver toute pièce depuis l'obligat
 - **Étant donné** un livrable ou un accusé **quand** il est archivé **alors** il l'est dans `document-service`, rattaché au dossier, à l'implantation, à l'obligation et à la période.
 - **Étant donné** une pièce archivée **quand** je la consulte **alors** l'accès passe par une URL présignée à durée limitée, vérifiée depuis le client qui la consomme. *(NFR-F07)*
 
-### STORY-221 — Dossier de contrôle à la demande
+### STORY-336 — Dossier de contrôle à la demande
 
 En tant qu'**expert-comptable**, je veux produire en une action tout ce qu'un contrôleur peut demander, afin d'aborder un contrôle sans reconstitution. *(FR-F52)*
 
@@ -736,7 +756,7 @@ En tant qu'**expert-comptable**, je veux produire en une action tout ce qu'un co
 - **Étant donné** un périmètre choisi (dossier, période, taxe) **quand** je demande le dossier de contrôle **alors** il contient versions, validations, dépôts, accusés, règlements, pièces et bases légales invoquées.
 - **Étant donné** un dossier de contrôle produit **quand** on vérifie les chaînes d'audit qu'il couvre **alors** leur intégrité est attestée.
 
-### STORY-222 — Rapprochement des pièces justificatives, granularité annoncée
+### STORY-337 — Rapprochement des pièces justificatives, granularité annoncée
 
 En tant qu'**expert-comptable**, je veux savoir quelle part d'un montant n'est pas documentée, afin de la traiter avant le contrôle. *(FR-F53)*
 
@@ -746,17 +766,17 @@ En tant qu'**expert-comptable**, je veux savoir quelle part d'un montant n'est p
 - **Étant donné** ce résultat **quand** il est restitué **alors** la granularité est **annoncée explicitement** — compte et période, pas facture individuelle.
 - **Étant donné** aucune pièce rattachée **quand** le rapprochement s'exécute **alors** le résultat le dit, plutôt que de rendre zéro.
 
-### STORY-223 — Liaison entre écriture comptable et pièce justificative
+### STORY-338 — Liaison entre écriture comptable et pièce justificative
 
 En tant qu'**expert-comptable**, je veux relier une écriture à la pièce qui la justifie, afin de descendre au niveau de la facture. *(FR-F54)*
 
 **Critères d'acceptation**
 
 - **Étant donné** une écriture comptable **quand** une pièce lui est rattachée **alors** la liaison est persistée et consultable dans les deux sens.
-- **Étant donné** cette liaison disponible **quand** le rapprochement de STORY-222 s'exécute **alors** il peut descendre au niveau de la pièce.
+- **Étant donné** cette liaison disponible **quand** le rapprochement de STORY-337 s'exécute **alors** il peut descendre au niveau de la pièce.
 - **Étant donné** l'absence de liaison **quand** le rapprochement s'exécute **alors** il retombe sur la granularité compte × période sans échouer.
 
-### STORY-224 — Base légale citée verbatim sur chaque retraitement
+### STORY-339 — Base légale citée verbatim sur chaque retraitement
 
 En tant qu'**expert-comptable**, je veux que chaque retraitement porte son texte de loi, afin de le défendre article en main. *(FR-F55)*
 
@@ -771,7 +791,7 @@ En tant qu'**expert-comptable**, je veux que chaque retraitement porte son texte
 
 Le cycle se boucle. Prospera prépare et rapproche ; il n'exécute jamais.
 
-### STORY-225 — Montant à régler net d'acomptes, crédits et retenues
+### STORY-340 — Montant à régler net d'acomptes, crédits et retenues
 
 En tant qu'**expert-comptable**, je veux connaître le solde réellement dû, afin de ne pas payer deux fois ce qui l'a déjà été. *(FR-F46)*
 
@@ -780,7 +800,7 @@ En tant qu'**expert-comptable**, je veux connaître le solde réellement dû, af
 - **Étant donné** des acomptes versés, des crédits d'impôt, des retenues opérées et des reports antérieurs **quand** le montant à régler est calculé **alors** tous sont déduits.
 - **Étant donné** un excédent de versement **quand** le calcul s'exécute **alors** il est restitué comme excédent, jamais comme un montant dû négatif.
 
-### STORY-226 — Ordre de règlement produit, jamais exécuté
+### STORY-341 — Ordre de règlement produit, jamais exécuté
 
 En tant qu'**expert-comptable**, je veux préparer le règlement sans que l'outil touche aux comptes de mon client, afin que la chaîne financière reste chez lui. *(FR-F47, AD-13)*
 
@@ -790,7 +810,7 @@ En tant qu'**expert-comptable**, je veux préparer le règlement sans que l'outi
 - **Étant donné** le service **quand** on cherche une capacité d'exécution de paiement **alors** il n'en existe aucune, sous aucune forme.
 - **Étant donné** un ordre produit **quand** on l'inspecte **alors** il ne contient aucun identifiant d'accès bancaire.
 
-### STORY-227 — Rapprochement du règlement et refus d'imputation incohérente
+### STORY-342 — Rapprochement du règlement et refus d'imputation incohérente
 
 En tant qu'**expert-comptable**, je veux qu'un règlement s'impute sur la bonne période et la bonne taxe, afin d'éviter l'erreur qui coûte une majoration. *(FR-F48)*
 
@@ -799,7 +819,7 @@ En tant qu'**expert-comptable**, je veux qu'un règlement s'impute sur la bonne 
 - **Étant donné** un règlement **quand** il est rapproché **alors** montant, date, référence et canal sont enregistrés contre la déclaration.
 - **Étant donné** un règlement imputé sur une période ou une taxe incohérente **quand** il est soumis **alors** il est refusé ou signalé, jamais accepté en silence.
 
-### STORY-228 — Distinction « déposée » et « payée »
+### STORY-343 — Distinction « déposée » et « payée »
 
 En tant qu'**expert-comptable**, je veux voir immédiatement ce qui est déposé mais non payé, afin de corriger la croyance « j'ai déclaré donc c'est fini ». *(FR-F49)*
 
@@ -808,7 +828,7 @@ En tant qu'**expert-comptable**, je veux voir immédiatement ce qui est déposé
 - **Étant donné** une obligation déposée sans règlement rapproché **quand** j'ouvre le calendrier **alors** elle est mise en évidence.
 - **Étant donné** les deux états **quand** on les consulte **alors** « déposée » et « payée » sont distincts et ne se déduisent jamais l'un de l'autre.
 
-### STORY-229 — Estimation des pénalités et majorations comme risque
+### STORY-344 — Estimation des pénalités et majorations comme risque
 
 En tant qu'**expert-comptable**, je veux mesurer ce qu'un retard coûterait, afin de prioriser mes rattrapages. *(FR-F50)*
 
@@ -823,7 +843,7 @@ En tant qu'**expert-comptable**, je veux mesurer ce qu'un retard coûterait, afi
 
 Le calendrier social rejoint le calendrier fiscal.
 
-### STORY-230 — Base de rémunération par salarié et par période
+### STORY-345 — Base de rémunération par salarié et par période
 
 En tant que **collaborateur de cabinet**, je veux disposer des rémunérations d'une période, afin de calculer les cotisations et les retenues. *(FR-F27)*
 
@@ -833,7 +853,7 @@ En tant que **collaborateur de cabinet**, je veux disposer des rémunérations d
 - **Étant donné** des remboursements de frais **quand** ils sont présents **alors** ils sont exclus de l'assiette.
 - **Étant donné** une base constituée **quand** elle est modifiée **alors** la version antérieure est conservée.
 
-### STORY-231 — Import d'un fichier de paie, idempotent et versionné
+### STORY-346 — Import d'un fichier de paie, idempotent et versionné
 
 En tant que **collaborateur de cabinet**, je veux importer la sortie de mon outil de paie, afin de ne pas ressaisir chaque mois ce que je possède déjà. *(FR-F28, FR-F29)*
 
@@ -844,7 +864,7 @@ En tant que **collaborateur de cabinet**, je veux importer la sortie de mon outi
 - **Étant donné** un fichier corrigé **quand** il est réimporté **alors** la base est versionnée **et** l'antérieure reste consultable.
 - **Étant donné** un import de 1 000 lignes dont une est invalide **quand** il s'exécute **alors** la période entière est refusée : soit tout est importé, soit rien. *(NFR-F16)*
 
-### STORY-232 — Saisie manuelle de la base de rémunération
+### STORY-347 — Saisie manuelle de la base de rémunération
 
 En tant que **collaborateur de cabinet** dont le client n'a pas d'outil de paie, je veux saisir les rémunérations, afin que ce dossier ne soit pas exclu du calcul social. *(FR-F28)*
 
@@ -853,7 +873,7 @@ En tant que **collaborateur de cabinet** dont le client n'a pas d'outil de paie,
 - **Étant donné** un dossier sans fichier de paie **quand** je saisis les rémunérations **alors** la base est constituée à l'identique de celle issue d'un import.
 - **Étant donné** une base saisie **quand** elle alimente un calcul **alors** son origine (saisie ou import) est tracée.
 
-### STORY-233 — Calcul des cotisations et des retenues sur salaires
+### STORY-348 — Calcul des cotisations et des retenues sur salaires
 
 En tant qu'**expert-comptable**, je veux que les charges sociales et les retenues se calculent depuis le paquet, afin qu'un changement de taux ne demande aucune livraison. *(FR-F30)*
 
@@ -863,7 +883,7 @@ En tant qu'**expert-comptable**, je veux que les charges sociales et les retenue
 - **Étant donné** une assiette inférieure au salaire minimum **quand** le calcul s'exécute **alors** le plancher du paquet s'applique.
 - **Étant donné** un revenu salarial **quand** la retenue d'impôt est calculée **alors** elle suit le barème par tranches du paquet.
 
-### STORY-234 — Obligations sociales dans le calendrier, le cycle et la preuve
+### STORY-349 — Obligations sociales dans le calendrier, le cycle et la preuve
 
 En tant qu'**expert-comptable**, je veux voir mes échéances sociales à côté des fiscales, afin d'avoir un calendrier complet. *(FR-F31)*
 
@@ -872,7 +892,7 @@ En tant qu'**expert-comptable**, je veux voir mes échéances sociales à côté
 - **Étant donné** une obligation sociale dérivée **quand** j'ouvre le calendrier **alors** elle y figure au même titre qu'une obligation fiscale.
 - **Étant donné** une obligation sociale **quand** elle progresse **alors** elle suit le même cycle de vie et produit la même piste d'audit.
 
-### STORY-235 — Rapprochement des charges sociales et des comptes de personnel
+### STORY-350 — Rapprochement des charges sociales et des comptes de personnel
 
 En tant qu'**expert-comptable**, je veux confronter ce que j'ai calculé à ce que la comptabilité enregistre, afin de détecter l'écart avant l'administration. *(FR-F32)*
 

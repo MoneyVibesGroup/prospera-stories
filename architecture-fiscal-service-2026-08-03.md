@@ -436,7 +436,7 @@ d'authentification. L'`orgId` signé fait foi ; il n'est **jamais** lu depuis le
 
 | Risque | Traitement |
 | --- | --- |
-| **AD-7 exige un travail sur `balance-service` qui n'est ni fait ni planifié** — vérifié dans le code le 2026-08-03 : la clé de balance vaut `(orgId, exercice.debut, exercice.fin, source, version)` et ne porte **aucune** dimension d'entité ; `societeId`, `entiteId` et `implantation` y sont introuvables, et la story censée l'apporter n'existe ni en fichier ni au tracker | La dimension est **à créer**, pas à réinterpréter. Elle doit précéder STORY-187 et STORY-205, donc être planifiée en tête du module |
+| **AD-7 exige un travail sur `balance-service` qui n'est ni fait ni planifié** — vérifié dans le code le 2026-08-03 : la clé de balance vaut `(orgId, exercice.debut, exercice.fin, source, version)` et ne porte **aucune** dimension d'entité ; `societeId`, `entiteId` et `implantation` y sont introuvables, et la story censée l'apporter n'existe ni en fichier ni au tracker | La dimension est **à créer**, pas à réinterpréter. Elle doit précéder STORY-302 et STORY-320, donc être planifiée en tête du module |
 | Formats de dépôt inconnus | Jalon bloquant « format confirmé » avant l'incrément I4 (PRD §9) ; le port de canal est conçu pour absorber la découverte |
 | Le paquet fiscal a trois consommateurs | AD-6 : artefact unique, consommateurs déclarés, chargement refusé si le service n'y figure pas |
 | Deux bases pour un service | Coût d'exploitation assumé : c'est le seul montage où l'interdiction d'effacement tient réellement |
