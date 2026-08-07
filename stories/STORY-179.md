@@ -147,3 +147,115 @@ aucune pièce à afficher. STORY-180 n'étant pas tirée, le dossier de revue es
 API réelles** pour cette vérification (organisation, upload d'une pièce réelle dans le bucket, passage en
 `UNDER_REVIEW`). Cela prouve *cette* story ; cela ne remplace pas 180, dont l'objet est de rendre le semis
 **reproductible**.
+
+### Ce qui a été livré
+
+| Fichier | Changement |
+|---|---|
+| `storage.constants.ts` | `MINIO_PUBLIC_CLIENT` + l'interdit explicite : **jamais pour écrire** |
+| `storage.module.ts` | seconde fabrique sur `publicEndPoint`/`publicPort`/`publicUseSSL`, `region` des **deux** côtés |
+| `storage.service.ts` | `presignedGetUrl` signe par le client **public** ; `putObject` reste sur l'interne |
+| `configuration.ts` | `publicEndPoint`/`publicPort`/`publicUseSSL` + `region`, chacun avec **repli sur l'interne** |
+| `env.validation.ts` | 7 variables `MINIO_*` déclarées — il n'y en avait **aucune** — toutes optionnelles, bornes validées |
+| `.env.example` · `docker-compose.yml` | entrée `kyc-service` alignée sur `auth-service` (+ `MINIO_PORT`, absent lui aussi) |
+
+⚡ **`region` n'est pas cosmétique, c'est mesuré** : un client sans `region` fait un **appel réseau** pour
+découvrir la région *avant* de signer. Vérifié hors Nest — `endPoint: 'kyc.prospera.invalid'` sans
+`region` ⇒ `ENOTFOUND` ; avec `region` ⇒ URL signée hors-ligne en quelques millisecondes. Comme l'hôte
+public n'est **pas** joignable depuis le conteneur, l'oublier aurait produit un `ECONNREFUSED` silencieux
+et la pièce aurait disparu de la réponse — le défaut d'origine, remplacé par un autre.
+
+### Portes DoD
+
+`lint` 0 warning · `build` OK · **305 unitaires** (36 suites) à **95.94 / 91.94 / 94.91 / 95.84** — au-dessus
+de 65/90/90/90 · **73 e2e** (5 suites) verts. `storage.service.ts` à 100 % sur les 4 axes.
+
+### Valeur probante — 5 mutations, 5 rouges
+
+| # | Mutation | Test qui vire au rouge | Signature de l'échec |
+|---|---|---|---|
+| M1 | Les deux clients injectés **échangés** ⇒ `presignedGetUrl` signe par l'interne *(le défaut d'origine)* | `storage.service.spec` (6/6) | `Expected "http://localhost:9000/publique"` / `Received "http://minio:9000/interne"` |
+| M2 | La fabrique publique construit sur `minio.endPoint` | `storage.module.spec` | `Expected "console.prospera.invalid"` / `Received "minio"` |
+| M3 | `region` retirée de la fabrique publique | `storage.module.spec` | `getaddrinfo ENOTFOUND console.prospera.invalid` |
+| M4 | Repli **inversé** dans `configuration.ts` (l'interne prime) | `configuration.spec` | `Expected "localhost"` / `Received "minio"` |
+| M5 | `@Max(65535)` retiré sur `MINIO_PUBLIC_PORT` | `env.validation.spec` | port 70000 accepté |
+
+⚠️ **Une première mutation a été écartée parce qu'elle ne prouvait rien.** Écrire directement
+`this.client.presignedGetObject` fait échouer la suite sur `TS6138 — 'publicClient' is declared but its
+value is never read` : **une erreur de compilation, pas une assertion**. Rouge, mais rouge pour la
+mauvaise raison — cela n'aurait dit *rien* du pouvoir discriminant du test. Elle a été rejouée sous une
+forme qui compile (échange des deux paramètres injectés), et c'est cette forme-là qui donne la signature
+du tableau. *(Effet de bord utile à connaître : tant que `publicClient` est injecté, le compilateur refuse
+qu'on cesse de s'en servir.)*
+
+### Vérification docker — stack NEUVE (`down -v`), contrôle avant/après
+
+Stack : `mongo` + `kafka` + `minio` + `auth-service` + `kyc-service`, volumes réinitialisés.
+`Found 0 errors. Watching for file changes.` puis `Bucket MinIO « kyc-documents » créé.`
+
+**Jeu de données réel, créé par les API** (pas de fixture, pas de mock) : cabinet inscrit sur l'IdP →
+e-mail vérifié → login `TENANT_ADMIN` → **2 pièces réellement téléversées** (un PDF `RCCM`, un PNG `CFE`
+décodable par un navigateur). Bascule automatique constatée en base :
+
+```
+kyc_service > db.tenantkycprofiles → [{ status: 'UNDER_REVIEW' }]
+kyc_service > db.kycdocuments      → RCCM  kyc/6a75b18a…/e2af2512-…  SUBMITTED
+                                     CFE   kyc/6a75b18a…/d862abea-…  SUBMITTED
+```
+
+⚠️ **Piège de nommage, à l'envers de la règle habituelle** : ici les collections sont les **pluriels
+Mongoose par défaut** (`tenantkycprofiles`, `kycdocuments`), pas du `snake_case`. Une requête sur
+`tenant_kyc_profiles` renvoie `[]` **sans erreur** — c'est ce qui est arrivé au premier essai. Toujours
+commencer par `db.getCollectionNames()`.
+
+| | **AVANT** *(variables publiques RETIRÉES = comportement d'avant la story)* | **APRÈS** *(compose de la story)* |
+|---|---|---|
+| Hôte des `documents[].url` | `minio:9000` | **`localhost:9000`** |
+| Démarrage du service | ✅ `UP`, aucune erreur — **critère 2** | ✅ `UP` |
+| `curl` depuis l'hôte | `HTTP=000` *(hôte irrésoluble)* | **`HTTP=200`** |
+| Binaire reçu | — | **sha256 identique** à ce qui a été téléversé, des deux côtés |
+
+⚠️ La colonne AVANT a été obtenue en **retirant** les variables (fichier d'override avec `MINIO_PUBLIC_ENDPOINT:`
+sans valeur), **pas en les vidant** : `${VAR:-défaut}` réactive le défaut sur une variable vide — piège
+payé en STORY-173. Elle vaut aussi comme preuve du **critère nº2** : sans les variables, le service
+démarre et se comporte exactement comme avant.
+
+### ⚡ Critère nº5 — preuve NAVIGATEUR, dans les deux sens
+
+Chrome headless, page servie sur **`http://localhost:3110`** — l'origine réelle de la console — chargeant
+la pièce en `<img>` **et** en `fetch()` *(le `fetch` déclenche le CORS ; l'`<img>` non)* :
+
+```
+APRÈS  {"origine":"http://localhost:3110","img":"AFFICHÉE 1x1",
+        "fetchCfe":"200 / image/png / 70 octets","fetchRccm":"200 / application/pdf / 68 octets"}
+AVANT  {"origine":"http://localhost:3110","img":"ÉCHEC DE CHARGEMENT","fetch":"ÉCHEC Failed to fetch"}
+```
+
+Le contrôle **négatif** est ici la moitié qui compte : il reproduit exactement ce que voyait l'opérateur
+— le cadre du document, et rien dedans. *(Ce contrôle négatif en navigateur est précisément celui que
+STORY-173 n'avait pas pu exécuter.)*
+
+### Arbitrage nº2 tranché PAR LA MESURE : rien à ajouter au compose
+
+Préflight `OPTIONS` réel sur l'URL présignée, MinIO sur son défaut :
+
+| `Origin` envoyé | `Access-Control-Allow-Origin` reçu |
+|---|---|
+| `http://localhost:3110` | `http://localhost:3110` |
+| `https://evil.example` | `https://evil.example` |
+| `null` | `null` |
+
+MinIO **reflète l'origine appelante, quelle qu'elle soit** (`204`, `Access-Control-Allow-Credentials: true`,
+`Vary: Origin`). Le `fetch()` de la console passe donc sans configuration : **aucune ligne n'est ajoutée au
+`docker-compose.yml`**, conformément à l'arbitrage. ⚠️ **Constat transmis à la revue de sécurité, pas
+masqué** : ce défaut est *permissif*. Il ne donne rien à qui ne possède pas l'URL signée (l'autorité est
+**dans l'URL**, il n'y a ni cookie ni session sur MinIO — donc pas d'autorité ambiante à voler), mais
+`MINIO_API_CORS_ALLOW_ORIGIN` reste une défense en profondeur légitime, à traiter avec le durcissement
+MinIO de production et non ici.
+
+### Critères nº4 et nº6
+
+- **nº4** — `X-Amz-Expires=300` sur les URLs servies : le TTL (`MINIO_PRESIGNED_TTL`) est **inchangé**.
+- **nº6** — `grep -ciE "X-Amz-Signature|X-Amz-Credential|presigned|kyc-documents/kyc/"` sur tous les
+  journaux du service : **0**. Témoin que le grep n'est pas vide de sens : le même journal contient bien
+  les 8 lignes de l'appel `GET /api/v1/admin/kyc/:orgId 200`, dont l'URL n'est pas journalisée.
