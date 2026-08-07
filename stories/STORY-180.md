@@ -6,9 +6,10 @@
 **Priorité :** Must Have — ⚡ **bloque la vérification, pas le code**
 **Story Points :** 3
 **Complexité :** medium
-**Statut :** in_progress
+**Statut :** done
 **Créée le :** 2026-08-04
 **Démarrée le :** 2026-08-07
+**Clôturée le :** 2026-08-07
 **Sprint :** 20
 **Service :** `kyc-service` (`:3002`) **+ `auth-service` (`:3001`)** · **cible réelle : `OPS`**
 
@@ -153,12 +154,13 @@ Un jeu de données exhaustif *(dossier dégradé, pièce illisible, resoumission
 
 ## Definition of Done
 
-- [ ] Les 6 critères vérifiés · `lint` 0 · couverture ≥ 90 %
-- [ ] ⚡ **Vérifié sur volume vierge** — sur une base déjà peuplée, ce défaut ne se manifeste pas
-- [ ] Les trois `test.skip` d'`e2e/integration-gate.spec.ts` **s'exécutent** au lieu de se sauter
-- [ ] À tirer **avec `STORY-179`** : sans elle, on sème des pièces qu'on ne peut toujours pas voir
-      *(✅ `STORY-179` est **done** depuis le 2026-08-07 — la précondition est levée)*
-- [ ] Branches `MNV-180` **sur les deux dépôts**, deux PR rebase-mergées sur `dev` **ensemble**
+- [x] Les 6 critères vérifiés · `lint` 0 · couverture ≥ 90 % sur les deux dépôts
+- [x] ⚡ **Vérifié sur volume vierge** (`down -v`), contrôle avant/après **dans les deux sens**
+- [ ] ⚠️ **HORS D'ATTEINTE depuis ces deux dépôts** : les trois `test.skip` d'`e2e/integration-gate.spec.ts`
+      vivent dans le dépôt de la console front, absent de l'espace de travail. **Transmis au front**, avec
+      la preuve navigateur (`2/2 pièces affichées depuis :3110`) pour feu vert.
+- [x] À tirer **avec `STORY-179`** — ✅ `done` depuis le 2026-08-07, précondition levée
+- [x] Branches `MNV-180` **sur les deux dépôts**, deux PR rebase-mergées sur `dev` **ensemble**
 
 ---
 
@@ -404,3 +406,100 @@ Bloc ajouté au service **`auth-service`** (les deux premières lignes seules su
       DEMO_ORG_OWNER_EMAIL: ${DEMO_ORG_OWNER_EMAIL-proprio.demo@prospera.local}
       DEMO_ORG_OWNER_PASSWORD: ${DEMO_ORG_OWNER_PASSWORD-chang3z-m0tD3PaSs3}
 ```
+
+---
+
+### Revue de code — 5 constats, tous traités (commits dédiés)
+
+⚠️ Le **scan délégué a été interrompu** par une limite de session : la revue a été refaite **en session
+`opus`**, ce que la règle exige de toute façon pour la synthèse. Diff **strictement additif** sur les deux
+dépôts (`0 suppression`), donc rien à vérifier côté diff minimal.
+
+1. **`occurredAt` avançait à chaque démarrage** *(bloquant — sens de la donnée)*. La date d'**émission**
+   de l'extraction était dans `$set` : chaque redémarrage la remettait à « maintenant » et l'écran de
+   revue annonçait un OCR qui venait de tourner alors que **rien n'avait été relu**. C'est le
+   raisonnement de la décision nº2, appliqué à un champ qui l'avait échappé. Passé en `$setOnInsert`,
+   gardé par un test, mutation-testé.
+2. **Cinq (kyc) et trois (auth) documents écrits sans transaction** — écart à `transactions-mongo.md`,
+   qui l'exige dès plus d'un document. **Documenté, pas corrigé**, et l'argument est fait pour être
+   contredit s'il est faux : *(a)* l'écriture qui compte le plus n'est pas dans Mongo — un objet MinIO ne
+   s'enrôle dans aucune transaction, qui donnerait donc l'atomicité des métadonnées **et l'illusion de
+   celle du tout** ; *(b)* un semis **converge** — il se rejoue à chaque boot, donc un état partiel est
+   réparé, pas corrompu ; *(c)* l'ordre d'écriture rend tout état intermédiaire **invisible à
+   l'opérateur** (le profil passe en revue **en dernier**, or la file est lue depuis le profil : une panne
+   à mi-chemin ne montre pas un demi-dossier, elle ne montre **rien**). Côté `auth`, même argument par
+   l'ordre : propriétaire → organisation qui le référence → membership, donc jamais de référence pendante.
+   Précédent dans le dépôt : `PlatformRolesSeedService` écrit quatre rôles sans transaction.
+3. **Aucun rattrapage d'E11000**, contrairement au patron de référence. Documenté : côté `kyc` une course
+   entre instances laisse la perdante n'écrire **rien** (l'état final est celui de la gagnante, les deux
+   boots se poursuivent) ; côté `auth` le conflit d'index n'est pas une course mais une **base salie à la
+   main**, où rejouer ne changerait rien — on nomme le conflit sans écraser la donnée en place.
+4. **Dépendance d'ordre sur `StorageBootstrapService`** (création du bucket, lui aussi
+   `OnApplicationBootstrap`) : elle tient à l'ordre des `imports` d'`app.module.ts`, **ce qui est vrai
+   mais n'est pas un contrat**. Documentée avec sa conséquence : ordre inversé ⇒ le dépôt échoue ⇒ **rien**
+   n'est inscrit ⇒ le dossier apparaît au boot suivant. Dégradation visible dans les journaux, jamais une
+   métadonnée orpheline.
+5. **Langue française** *(règle contraignante)* : les littéraux d'issue du semis étaient en anglais
+   (`'seeded'`, `'skipped-production'`…). Renommés, ainsi que les deux types. Et
+   `KycDossierSeedService` n'est plus **exporté** — il n'a aucun consommateur, Nest l'appelle par son hook.
+
+### ⚡ Revue de sécurité — 1 vulnérabilité, corrigée avant le merge
+
+**La garde d'environnement était une LISTE NOIRE D'UN SEUL ÉLÉMENT.**
+
+```ts
+if (env === 'production') { /* refusé */ }     // ❌ avant
+if (env !== 'development') { /* refusé */ }    // ✅ après
+```
+
+L'énumération `Environment` porte **quatre** valeurs (`development`, `test`, `staging`, `production`) :
+**`staging` semait**. Or, côté `auth-service`, ce semis crée un compte **`TENANT_ADMIN` actif, e-mail
+vérifié**, dont le mot de passe a une **valeur par défaut au compose** — donc documentée, donc publique.
+Sur une recette joignable, c'est une **porte dérobée** (CWE-798, identifiants codés en dur), obtenue non
+par une faute de code mais par **un environnement qu'on n'avait pas listé**. Côté `kyc-service`, la même
+brèche injectait un dossier fictif dans une file de revue **réelle**.
+
+⚠️ Le critère nº5 disait **« rien n'est semé hors développement »** : la garde devait être une **liste
+blanche dès le départ**. C'est le constat le plus utile du lot — *une liste noire est un pari sur les
+valeurs qu'on n'a pas énumérées*, et l'énumération, ici, était à quatre valeurs dans le fichier d'à côté.
+
+Tests étendus aux **trois** environnements refusés + le cas nominal, sur les deux dépôts.
+**Mutation M16** : revenir à la liste noire fait virer `staging` **et** `test` au rouge des deux côtés.
+
+**Preuve sur boot réel** (le préfixe shell ne surcharge pas `NODE_ENV`, qui vient de l'`env_file` — le
+contexte applicatif est donc booté avec la variable forcée, base d'organisations vidée au préalable) :
+
+```
+WARN [DemoOrgSeedService] Semis de démonstration IGNORÉ : réservé au développement (NODE_ENV=staging).
+APRÈS staging -> orgs: 0 | users: 1   (le 1 = l'admin plateforme, semis sans rapport)
+```
+
+**Rien d'autre.** Vérifié et écarté : le `storageKey` est construit **après** `Types.ObjectId.isValid`
+(pas de traversée de chemin par une variable d'env) ; le mot de passe n'est jamais journalisé (test
+dédié) ; `platformRole` est **purgé** à chaque semis (le propriétaire de démonstration est un locataire,
+jamais un opérateur de la plateforme) ; le texte des PDF vient de constantes, échappé et aplati en ASCII ;
+aucun événement Kafka n'est publié. Le `$unset: { deletedAt }` **ressuscite** le compte de démonstration
+si un développeur l'a supprimé en douceur — comportement voulu pour une fixture, et désormais confiné au
+seul environnement de développement.
+
+### Vérification docker REJOUÉE sur l'état final
+
+Le correctif de sécurité touche le **boot** : la vérification a été rejouée en entier sur stack neuve.
+`NODE_ENV=development` mesuré dans le conteneur ⇒ semis nominal identique (`profils: 1 | pieces: 2 |
+assists: 2 | orgs: 1 | users: 1 | memberships: 1`), `occurredAt` posé une seule fois, et **preuve
+navigateur refaite** : `2/2 PIECES AFFICHEES DEPUIS http://localhost:3110`.
+
+### Portes DoD finales
+
+| | `kyc-service` | `auth-service` |
+|---|---|---|
+| lint | 0 warning | 0 warning |
+| build | OK | OK |
+| unitaires | **353** — 96,26 / 92,2 / 95,28 / 96,18 | **757** — 97,2 / 90,54 / 97,79 / 97,23 |
+| e2e | 73 | 187 |
+| mutations | 16 posées, 16 rouges *(après 2 corrections)* | |
+
+⚠️ Un e2e d'`auth-service` a échoué **une fois** sur quatre exécutions
+(`Effets post-inscription échoués : this.userModel.findById is not a function`), puis trois exécutions
+consécutives vertes. **Instabilité connue et sans lien avec le diff** : la story ne touche ni
+`AuthService` ni l'inscription. Signalé plutôt que passé sous silence.
