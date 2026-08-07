@@ -177,3 +177,230 @@ revues, clôture)*
   patron de référence.
 - La file `UNDER_REVIEW` est donc vide sur toute stack fraîche, et le dossier n'est **ni listable ni
   ouvrable** : les deux moitiés du défaut, dans deux dépôts.
+
+### Ce qui a été livré
+
+**`auth-service`** — `DemoOrgSeedService` (`OnApplicationBootstrap`, patron `PlatformRolesSeedService`) :
+upsert sur des `_id` **fixes** de l'organisation, de son utilisateur propriétaire (e-mail **vérifié**,
+sinon `EmailVerifiedGuard` le bloquerait sur ses propres écrans) et du membership `TENANT_ADMIN`.
+
+**`kyc-service`** — `KycDossierSeedService` : deux PDF **réels** déposés dans le bucket, puis les deux
+pièces `SUBMITTED`, puis leur assistance OCR, puis le dossier `UNDER_REVIEW`. Les PDF sont **générés**
+(`demo-pdf.util`), déterministes, avec une table `xref` aux offsets réellement calculés.
+
+**Compose** — quatre variables sur `auth-service`, deux sur `kyc-service`, en `${VAR-défaut}` et **non**
+`${VAR:-défaut}`, pour que `DEMO_ORG_ID= docker compose up` désactive **réellement** le semis.
+
+### ⚡ Trois décisions prises contre l'énoncé, et pourquoi
+
+1. **L'écart OCR porte sur la DÉNOMINATION, pas sur le numéro d'immatriculation.** Vérifié dans le code
+   du producteur : `IdentityComparator.compare` (`document-service`) ne confronte **que** la dénomination
+   en v1, et `DeclaredFields` ne transporte que `denomination`/`country` — le numéro n'y est pas.
+   ⚠️ Semer un écart sur le numéro aurait fabriqué **une forme que le pipeline réel ne peut pas
+   produire** : une donnée de démonstration qui ment sur le système qu'elle est censée rendre vérifiable.
+   Le numéro **lu** reste dans `extracted` (les parseurs RCCM/CFE le reconnaissent réellement) et il est
+   **imprimé sur la pièce** — l'opérateur lit à l'écran ce que la page affiche.
+2. **Le statut n'est posé qu'à la CRÉATION** (`$setOnInsert`, dossier *et* verdict par pièce). Un
+   opérateur qui approuve le dossier doit le retrouver approuvé après un redémarrage : un semis qui
+   « réaligne » l'état effacerait à chaque boot la décision qu'on cherche justement à démontrer.
+3. **L'objet avant la métadonnée** — pas un ordre d'écriture, un invariant de diagnostic. Si le dépôt
+   MinIO échoue, la pièce n'est pas inscrite, et le dossier ne passe **pas** en revue.
+
+### Portes DoD
+
+| | `kyc-service` | `auth-service` |
+|---|---|---|
+| lint | 0 warning | 0 warning |
+| build | OK | OK |
+| unitaires | **349** — 96,26 / 92,2 / 95,28 / 96,18 | **754** — 97,2 / 90,54 / 97,79 / 97,23 |
+| e2e | 73 | 187 |
+
+`KycDossierSeedService`, `demo-pdf.util` et `DemoOrgSeedService` sont à **100 %** sur les 4 axes.
+
+### Valeur probante — 14 mutations, 14 rouges (après 2 corrections)
+
+| # | Mutation | Test viré au rouge |
+|---|---|---|
+| M1 | garde `NODE_ENV=production` retirée (kyc) | « REFUSE de semer en production » |
+| M2 | métadonnée écrite **avant** l'objet | ordre du journal d'appel + « aucune métadonnée si le dépôt échoue » |
+| M3 | statut du dossier en `$set` au lieu de `$setOnInsert` | « ne RÉALIGNE JAMAIS le statut » |
+| M4 | `declared === read` dans l'écart | « declared et read diffèrent RÉELLEMENT » |
+| M5 | verdict de pièce en `$set` | « le verdict n'est posé qu'à la création » |
+| M6 | offsets `xref` décalés d'un octet | « pointe des offsets xref RÉELS » |
+| M7 | `Tm` remplacé par `Td` | « coordonnées ABSOLUES, jamais relatives » |
+| M8 | garde production retirée (auth) | « REFUSE de semer en production » |
+| M9 | existence lue **après** l'upsert (auth) | « journalise créé sur base vierge » |
+| M10 | `platformRole` non purgé | « n'attribue jamais de rôle plateforme » |
+| M11 | vide traité comme présent | « traite une variable VIDE comme absente » |
+| M12 | existence lue **après** l'upsert (kyc) | « créé puis retrouvé » |
+| M13/M14 | `@IsNotEmpty()` réintroduit (les 2 dépôts) | « ACCEPTE les variables VIDES » |
+
+⚠️ **M5 a d'abord été rouge pour la MAUVAISE raison** : fusionner `$setOnInsert` dans `$set` créait une
+clé en double ⇒ **erreur de compilation**, pas une assertion. Rejouée sous une forme qui compile (les
+deux champs déplacés dans le `$set` existant) ⇒ rouge sur l'assertion. Leçon `STORY-179`, reproduite.
+
+⚡ **M9 a SURVÉCU au premier essai, et c'est le constat le plus instructif du lot.** Déplacer la lecture
+d'existence **après** l'upsert — le défaut exact que `seedPlatformAdmin` documente en tête de fichier
+(« sinon l'existence est toujours vraie après ») — laissait les **18 tests verts**. Cause : le double de
+modèle répondait la **même chose avant et après** l'écriture, donc l'assertion ne distinguait plus
+« créé » de « retrouvé ». *Un double qui ne simule pas l'effet de l'écriture ne peut pas garder une
+règle qui porte sur l'ordre des lectures.* Les deux doubles portent désormais un état (`updateOne` rend
+`exists` positif) ; M9 et M12 virent au rouge.
+
+⚠️ **Le `git checkout --` de restauration a de nouveau emporté un correctif non commité** (incident
+`STORY-144`, reconstaté en `STORY-179`) : le retrait de `@IsNotEmpty()` a été effacé par la restauration
+de M13. Détecté et réappliqué. **Ne mutation-tester qu'un arbre commité** — la consigne existe, elle a
+été suivie pour le code du semis, pas pour un correctif appliqué *pendant* la vérification docker.
+
+---
+
+### ⚡ Vérification docker — le défaut qu'aucun unitaire ne pouvait voir
+
+**Le semis désactivé faisait ÉCHOUER LE BOOT au lieu de ne rien semer.**
+
+```
+auth-service | ERROR [ExceptionHandler] Error: Configuration d'environnement invalide :
+             | DEMO_ORG_ID should not be empty; DEMO_ORG_OWNER_ID should not be empty; …
+prospera-auth-service-1 is unhealthy
+dependency failed to start: admin-panel
+```
+
+`@IsOptional()` de class-validator ne saute la validation que sur `undefined`/`null` — **une chaîne vide
+la subit**. Or `${VAR-défaut}` (choisi exprès contre le piège `${VAR:-défaut}` de `STORY-173`) fait que
+`DEMO_ORG_ID= docker compose up` transmet une chaîne **vide** : la façon documentée de désactiver le
+semis **tuait l'IdP**, et `admin-panel` avec lui.
+
+⚠️ **La règle « vide = absent » existait déjà, et elle était testée** — dans le service, où elle est
+couverte par les seuils. **Une garde posée devant une autre la désarme** (leçon `STORY-146`) : le schéma
+d'environnement s'exécutait avant, et rejetait ce que le service savait traiter. `@IsNotEmpty()` retiré
+des 6 variables ; seul le **type** reste validé au schéma. 6 tests de régression, 2 mutations.
+
+Un semis de confort ne doit **jamais** empêcher un service de démarrer — c'est la même politique que
+Kafka absent au boot et que le bucket MinIO indisponible.
+
+### Contrôle avant / après, sur stack NEUVE (`down -v`) dans les deux sens
+
+**AVANT** — stack neuve, `DEMO_ORG_ID=` … (semis désactivé) :
+
+```
+auth /health HTTP=200   kyc /health HTTP=200   bff /health HTTP=200
+WARN [DemoOrgSeedService]   Semis de démonstration ignoré : variable(s) absente(s) — DEMO_ORG_ID,
+      DEMO_ORG_OWNER_ID, DEMO_ORG_OWNER_EMAIL, DEMO_ORG_OWNER_PASSWORD. Le service démarre
+      normalement, la file de revue KYC restera vide.
+WARN [KycDossierSeedService] Semis du dossier de démonstration ignoré : … DEMO_ORG_ID, DEMO_ORG_OWNER_ID.
+bases : profils 0 | pieces 0 | orgs 0 | users 0
+GET /admin/kyc?status=UNDER_REVIEW              → []
+GET /admin/kyc-reviews?status=UNDER_REVIEW (BFF) → {"items":[],"total":0}
+```
+
+⇒ **critère nº5 prouvé** (démarrage normal + avertissement nommant chaque variable, rien de semé) **et**
+contrôle négatif : c'est exactement l'état que la story décrit.
+
+**APRÈS** — stack neuve, semis actif, **aucune commande de semis** :
+
+```
+LOG [DemoOrgSeedService]   Cabinet de démonstration « Cabinet Démonstration Prospera » créé
+                            (orgId 68a1800000000000000001aa) ; propriétaire « proprio.demo@… » créé.
+LOG [KycDossierSeedService] Dossier KYC de démonstration créé : 2 pièces (RCCM, CFE) déposées,
+                            assistance OCR avec écart.
+```
+
+Base `kyc_service` (⚠️ collections en **pluriel Mongoose**, pas snake_case — `tenantkycprofiles`,
+`kycdocuments` ; seule `document_extraction_assists` est nommée explicitement) :
+
+```
+profils: 1  [{tenantId: 68a18…01aa, status: "UNDER_REVIEW", submittedAt: …}]
+pieces : 2  RCCM  SUBMITTED PENDING kyc/68a18…01aa/demo-rccm.pdf 1154o application/pdf v1
+            CFE   SUBMITTED PENDING kyc/68a18…01aa/demo-cfe.pdf  1147o application/pdf v1
+assists: 2  écart {field:"denomination", declared:"Cabinet Démonstration Prospera",
+                   read:"CABINET DEMONSTRATN PROSPERA", kind:"mismatch"}
+            extracted.registrationNumber = TG-LOM-2019-B-4471 / CFE-2019-LOM-00871
+lien assist -> piece : true   (chaque documentId correspond à une pièce réelle)
+```
+
+Base `auth_service` : org `ACTIVE` + propriétaire `ACTIVE` e-mail **vérifié**, `platformRole` absent,
+membership `TENANT_ADMIN` `ACTIVE`. Bucket MinIO : `demo-rccm.pdf`, `demo-cfe.pdf` **présents**.
+
+**AC-01 / AC-03 — le dossier s'ouvre par le chemin de la console** (`GET /admin/orgs/:id` sur le BFF) :
+
+```
+HTTP=200  identity.name="Cabinet Démonstration Prospera"  kyc.status=UNDER_REVIEW
+2 pièces, chacune avec une url présignée sur http://localhost:9000/… (STORY-179)
+ocrSummary : {hasDiscrepancies: true, anyUnreadable: false, extractedCount: 2}
+```
+
+⚡ **La file porte la raison sociale** (`"name": "Cabinet Démonstration Prospera"`, `sources.identity:
+"ok"`) — c'est l'arbitrage « deux dépôts » qui paie, exactement là où il était prédit.
+
+**AC-03, poussé plus loin que « téléchargeable » : les octets servis sont ceux qui ont été générés.**
+
+```
+piece1 HTTP=200 %PDF-1.4 1154o sha256=2426550dd2ca8a843c8a
+piece2 HTTP=200 %PDF-1.4 1147o sha256=633063212d8d87b09242
+RCCM: genere=2426550dd2ca8a843c8a (1154o) | telecharge=2426550dd2ca8a843c8a | IDENTIQUE=true
+CFE : genere=633063212d8d87b09242 (1147o) | telecharge=633063212d8d87b09242 | IDENTIQUE=true
+```
+
+Et le contenu est **lisible**, pas un octet de remplissage :
+`(Numero d'immatriculation : TG-LOM-2019-B-4471)`, `(Denomination lue sur la piece : CABINET
+DEMONSTRATN PROSPERA)` — le « lu » annoncé par l'assistance est ce que la page affiche.
+
+**AC-02 — rejouable, mesuré deux fois** : `docker compose restart` des deux services ⇒ journaux
+« **retrouvé** » des deux côtés, et `profils: 1 | pieces: 2 | pieces SUBMITTED: 2 | assists: 2 |
+orgs: 1 | memberships: 1`, bucket inchangé (2 objets). Bonus : `npm run seed:admin` instancie un
+contexte applicatif et **rejoue donc les deux semis** — il a lui aussi journalisé « retrouvé », sans
+créer un seul doublon.
+
+### ⚡ Critère nº6 — preuve NAVIGATEUR depuis `:3110`
+
+Page servie sur `http://localhost:3110` (l'origine **réelle** de la console), Chrome headless, sur la
+stack neuve ci-dessus :
+
+```
+origine=http://localhost:3110
+LOGIN 200
+FILE 200 total=1 nom=Cabinet Démonstration Prospera
+DOSSIER 200 kyc=UNDER_REVIEW
+PIECES 2 ecarts=[{"field":"denomination","declared":"Cabinet Démonstration Prospera",
+                  "read":"CABINET DEMONSTRATN PROSPERA","kind":"mismatch"}]
+  RCCM fetch=200 application/pdf 1154o
+  CFE  fetch=200 application/pdf 1147o
+RESULTAT: 2/2 PIECES AFFICHEES DEPUIS http://localhost:3110
+objets PDF rendus dans le DOM : 2
+```
+
+Se connecter → ouvrir la file → **ouvrir un dossier** → **voir ses deux pièces**, sans aucune commande
+manuelle **pour le dossier**.
+
+⚠️ **Deux réserves, dites plutôt que masquées.**
+1. **`npm run seed:admin` reste nécessaire** pour l'administrateur qui regarde l'écran : c'est le
+   périmètre entier de `STORY-178`, délibérément non absorbé ici. Le « sans aucune commande manuelle »
+   du critère vaut donc pour **le dossier**, pas pour l'opérateur.
+2. **Le dépôt de la console front est absent de l'espace de travail** — la page de preuve appelle les
+   **mêmes** endpoints du BFF, depuis la **même** origine, mais ce n'est pas le code de la console. Les
+   trois `test.skip` d'`e2e/integration-gate.spec.ts` restent hors d'atteinte depuis ces deux dépôts :
+   item de DoD **transmis au front**, avec cette preuve pour feu vert.
+
+### ⚠️ Le correctif de compose ne vit dans aucun dépôt — recopié ici in extenso
+
+La racine `PROSPERA/` n'est versionnée nulle part (`docker-compose.yml` compris) : hors CI, hors revue.
+Bloc ajouté au service **`auth-service`** (les deux premières lignes seules sur **`kyc-service`**) :
+
+```yaml
+      # ─── STORY-180 : dossier KYC de DÉMONSTRATION ───────────────────────
+      # ⚡ CES DEUX IDENTIFIANTS SONT LE SEUL LIEN entre le semis de
+      # l'organisation (auth-service) et celui du dossier KYC (kyc-service) :
+      # database-per-service interdit toute requête croisée. Les désaligner
+      # produit un dossier ORPHELIN — listé dans la file de revue, `404` à
+      # l'ouverture depuis la console (le BFF traite `auth` en dépendance dure).
+      # Absents ⇒ aucun semis, démarrage normal avec un avertissement ; jamais
+      # semés en production (refus porté par le code, pas par ce fichier).
+      # ⚠️ `-` et NON `:-` : sur `${VAR:-défaut}` une variable VIDE réactive le
+      # défaut (piège payé en STORY-173, reconstaté en STORY-179). Avec `-`,
+      # `DEMO_ORG_ID= docker compose up` désactive RÉELLEMENT le semis — c'est
+      # ainsi que le critère nº5 se vérifie sans éditer ce fichier.
+      DEMO_ORG_ID: ${DEMO_ORG_ID-68a1800000000000000001aa}
+      DEMO_ORG_OWNER_ID: ${DEMO_ORG_OWNER_ID-68a1800000000000000001bb}
+      DEMO_ORG_OWNER_EMAIL: ${DEMO_ORG_OWNER_EMAIL-proprio.demo@prospera.local}
+      DEMO_ORG_OWNER_PASSWORD: ${DEMO_ORG_OWNER_PASSWORD-chang3z-m0tD3PaSs3}
+```
