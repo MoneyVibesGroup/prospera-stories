@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-027 Consultation des balances (liste · détail · preuve · handoff)</title>
+<title>Prospera · Prototype cumulatif — FE-056 Saisie assistée par le serveur (origine · départage · lot)</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -976,7 +976,8 @@
 
   /* Ligne de saisie : libellé + montant + sens + compte assisté + preuve. */
   .sd-lines-wrap { overflow-x: auto; }
-  .sd-line { display: grid; grid-template-columns: minmax(12rem,1fr) 8.5rem 10rem 7rem 6.5rem 1.9rem; gap: 0.5rem; align-items: center; min-width: 44rem; }
+  .sd-line { display: grid; grid-template-columns: minmax(12rem,1fr) 8.5rem 10rem 11rem 6.5rem 1.9rem; gap: 0.5rem; align-items: start; min-width: 48rem; }
+  .sd-line > .sd-input, .sd-line > .sd-sens { margin-top: 0; }
   .sd-line > * { min-width: 0; }
   .sd-cap { display: none; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); margin-bottom: 0.2rem; }
   .sd-heads { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); padding: 0 0.1rem; }
@@ -993,12 +994,9 @@
   .sd-sens button[aria-pressed="true"][data-sens="debit"] { background: color-mix(in srgb, var(--orange-500) 16%, transparent); color: var(--link); }
   .sd-sens button[aria-pressed="true"][data-sens="credit"] { background: var(--success-soft); color: var(--success); }
 
-  /* Compte assisté : deviné depuis le libellé, éditable. */
-  .sd-cpt { position: relative; }
-  .sd-cpt .sd-input { font-family: var(--font-mono); font-size: 0.8rem; padding-right: 1.5rem; }
-  .sd-cpt .mark { position: absolute; right: 0.45rem; top: 50%; transform: translateY(-50%); width: 0.85rem; height: 0.85rem; color: var(--muted-fg); pointer-events: none; }
-  .sd-cpt.auto .mark { color: var(--link); }
-  .sd-cpt .sd-input::placeholder { color: var(--danger); }
+  /* Compte assisté : proposé PAR LE SERVEUR (FE-056), toujours éditable. */
+  .sd-cpt .sd-input { font-family: var(--font-mono); font-size: 0.8rem; }
+  .sd-cpt .sd-input::placeholder { color: var(--danger); font-family: var(--font-sans, inherit); }
 
   .sd-rm { border: 0; background: transparent; color: var(--muted-fg); cursor: pointer; width: 1.9rem; height: 2.3rem; border-radius: 0.4rem; display: grid; place-items: center; }
   .sd-rm:hover { background: var(--hover-surface); color: var(--danger); }
@@ -1016,6 +1014,96 @@
   :root[data-theme="dark"] .sd-proof.p .tag { color: #fbbf24; }
 
   .sd-chk { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-fg); background: var(--hover-surface); padding: 0.3rem 0.55rem; border-radius: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 22rem; }
+
+  /* ====== FE-056 · SUGGESTION DE COMPTE PILOTÉE PAR LE SERVEUR ============
+     Retrofit de FE-026 : le dictionnaire `plan-comptes.ts` disparaît du
+     navigateur. Le compte vient de POST /balances/suggest-comptes (batch,
+     ordre préservé), résolu SUR LE RÉFÉRENTIEL ACTIF DE L'ORGANISATION.
+     L'UI doit rendre visibles trois choses que le dictionnaire ne portait
+     pas : d'OÙ vient la proposition (origine), sa FORCE (exacte ou
+     approchée), et le fait qu'un DÉPARTAGE appartient à l'humain. */
+
+  /* Bandeau d'état de la suggestion — porte l'enveloppe (referentiel/checksum/
+     stamp) et la PREUVE DU LOT (compteur d'appels réseau). */
+  .sg-bar { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; padding: 0.65rem 0.85rem; border: 1px solid var(--border); border-left: 3px solid var(--success); border-radius: var(--radius); background: var(--hover-surface); }
+  .sg-bar.busy { border-left-color: var(--orange-500); }
+  .sg-bar.err  { border-left-color: var(--danger); background: color-mix(in srgb, var(--danger) 5%, var(--hover-surface)); }
+  .sg-bar .ic { width: 1.9rem; height: 1.9rem; flex: none; border-radius: 0.5rem; display: grid; place-items: center; background: var(--success-soft); color: var(--success); }
+  .sg-bar.busy .ic { background: color-mix(in srgb, var(--orange-500) 14%, transparent); color: var(--link); }
+  .sg-bar.err .ic { background: var(--danger-soft); color: var(--danger); }
+  .sg-bar .ic svg { width: 1rem; height: 1rem; }
+  .sg-bar .t { font-size: 0.82rem; font-weight: 650; }
+  .sg-bar .s { font-size: 0.72rem; color: var(--muted-fg); }
+  .sg-bar .grow { flex: 1; }
+  .sg-env { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .sg-env span { font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted-fg); background: var(--card); border: 1px solid var(--border); padding: 0.16rem 0.44rem; border-radius: 0.35rem; }
+  .sg-env span b { color: var(--foreground); font-weight: 650; }
+  .sg-calls { font-size: 0.68rem; font-weight: 650; color: var(--muted-fg); background: var(--card); border: 1px solid var(--border); padding: 0.2rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+  .sg-calls b { font-variant-numeric: tabular-nums; color: var(--foreground); }
+
+  /* Bloc « qui décide du référentiel » — lecture seule côté front. */
+  .sg-org { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.7rem 0.85rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+  .sg-org .who { display: flex; align-items: center; gap: 0.55rem; }
+  .sg-org .av { width: 2.1rem; height: 2.1rem; flex: none; border-radius: 0.55rem; display: grid; place-items: center; font-size: 0.72rem; font-weight: 750; letter-spacing: 0.02em; background: color-mix(in srgb, var(--orange-500) 14%, transparent); color: var(--link); }
+  .sg-org b { font-size: 0.84rem; }
+  .sg-org .plan { font-size: 0.72rem; color: var(--muted-fg); }
+  .sg-org .lock { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; font-weight: 650; color: var(--muted-fg); background: var(--hover-surface); border: 1px dashed var(--border-strong); padding: 0.22rem 0.5rem; border-radius: 999px; }
+  .sg-org .lock svg { width: 0.8rem; height: 0.8rem; }
+
+  /* Cellule « compte » : la valeur, puis l'ORIGINE en dessous. */
+  .sd-cpt { position: relative; display: flex; flex-direction: column; gap: 0.24rem; }
+  .sd-cpt.strong .sd-input { border-color: color-mix(in srgb, var(--success) 55%, var(--border-strong)); background: color-mix(in srgb, var(--success) 5%, var(--background)); }
+  .sd-cpt.weak .sd-input { border-style: dashed; border-color: var(--warning); background: color-mix(in srgb, var(--warning) 8%, var(--background)); }
+  .sd-cpt.none .sd-input { border-style: dashed; }
+  .sd-cpt.manual .sd-input { border-style: solid; }
+
+  .sg-b { display: inline-flex; align-items: center; gap: 0.24rem; width: fit-content; max-width: 100%; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.015em; padding: 0.1rem 0.42rem; border-radius: 999px; white-space: nowrap; cursor: default; }
+  .sg-b svg { width: 0.68rem; height: 0.68rem; flex: none; }
+  .sg-b.surcharge { background: color-mix(in srgb, var(--orange-500) 16%, transparent); color: var(--link); }
+  .sg-b.exact { background: var(--success-soft); color: var(--success); }
+  .sg-b.approchant { background: var(--warning-soft); color: #92400e; }
+  .sg-b.aucun { background: transparent; color: var(--danger); border: 1px dashed color-mix(in srgb, var(--danger) 45%, var(--border-strong)); }
+  .sg-b.manuel { background: var(--hover-surface); color: var(--muted-fg); }
+  .sg-b.attente { background: var(--hover-surface); color: var(--muted-fg); }
+  :root[data-theme="dark"] .sg-b.approchant { color: #fbbf24; }
+
+  /* Départage : plusieurs comptes se disputent le libellé — l'humain tranche. */
+  .sd-rowwrap { display: flex; flex-direction: column; gap: 0.35rem; min-width: 48rem; }
+  .sg-alt { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0 0 0.15rem 0; padding: 0.5rem 0.7rem; border: 1px solid var(--warning); border-radius: 0.55rem; background: color-mix(in srgb, var(--warning) 8%, var(--card)); }
+  .sg-alt .q { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 650; }
+  .sg-alt .q svg { width: 0.95rem; height: 0.95rem; color: var(--warning); }
+  .sg-alt .why { font-size: 0.7rem; color: var(--muted-fg); }
+  .sg-choice { border: 1px solid var(--border-strong); background: var(--card); color: var(--foreground); font: inherit; font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 0.45rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; }
+  .sg-choice:hover { border-color: var(--orange-500); color: var(--link); }
+  .sg-choice code { font-family: var(--font-mono); font-weight: 700; font-size: 0.74rem; }
+  .sg-choice .lbl { color: var(--muted-fg); font-size: 0.72rem; }
+  .sg-choice:hover .lbl { color: inherit; }
+
+  /* Journal de contrat : ce qui est RÉELLEMENT envoyé (aucun référentiel). */
+  .sg-wire { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+  .sg-wire > summary { cursor: pointer; padding: 0.55rem 0.8rem; font-size: 0.76rem; font-weight: 650; color: var(--muted-fg); list-style: none; display: flex; align-items: center; gap: 0.45rem; }
+  .sg-wire > summary::-webkit-details-marker { display: none; }
+  .sg-wire > summary::before { content: "▸"; font-size: 0.7rem; transition: transform .15s; }
+  .sg-wire[open] > summary::before { transform: rotate(90deg); }
+  .sg-wire .body { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; padding: 0 0.8rem 0.8rem; }
+  @media (max-width: 52rem) { .sg-wire .body { grid-template-columns: 1fr; } }
+  .sg-wire h5 { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); margin: 0 0 0.3rem; }
+  .sg-wire pre { margin: 0; font-family: var(--font-mono); font-size: 0.68rem; line-height: 1.5; background: var(--content-bg); border: 1px solid var(--border); border-radius: 0.45rem; padding: 0.6rem; overflow: auto; max-height: 15rem; white-space: pre; }
+
+  /* Manque backend nommé à l'écran — jamais masqué, jamais contourné. */
+  .sg-gap { display: flex; gap: 0.7rem; padding: 0.8rem 0.9rem; border: 1px solid var(--warning); border-left-width: 3px; border-radius: var(--radius); background: color-mix(in srgb, var(--warning) 7%, var(--card)); }
+  .sg-gap .ic { width: 1.9rem; height: 1.9rem; flex: none; border-radius: 0.5rem; display: grid; place-items: center; background: var(--warning-soft); color: #92400e; }
+  :root[data-theme="dark"] .sg-gap .ic { color: #fbbf24; }
+  .sg-gap .ic svg { width: 1rem; height: 1rem; }
+  .sg-gap b { font-size: 0.84rem; }
+  .sg-gap p { margin: 0.25rem 0 0; font-size: 0.78rem; color: var(--muted-fg); line-height: 1.5; }
+  .sg-gap p.small { font-size: 0.74rem; }
+
+  /* Encart « ce que cette story retire du navigateur ». */
+  .sg-note { display: flex; gap: 0.6rem; padding: 0.65rem 0.8rem; border: 1px dashed var(--border-strong); border-radius: var(--radius); background: var(--hover-surface); font-size: 0.75rem; color: var(--muted-fg); }
+  .sg-note svg { width: 1rem; height: 1rem; flex: none; margin-top: 0.1rem; color: var(--link); }
+  .sg-note b { color: var(--foreground); }
+  .sg-note code { font-family: var(--font-mono); font-size: 0.72rem; }
 
   /* ===================== FE-027 · CONSULTATION DES BALANCES ================
      Restitue ce que l'Atelier a produit : liste org-scopée (GET /balances)
@@ -3077,14 +3165,23 @@
                     <p class="helper" style="margin-top:0.2rem">FE-025 · le front n'interprète jamais le fichier : <code>POST /balance/import/sage</code> (multipart, 50&nbsp;Mo) fait toute la normalisation. Montants en unités mineures XOF (entiers ÷100 à l'affichage). Le champ <code>mappingProfile</code> est <b>volontairement absent</b> — accepté-mais-ignoré côté backend, il relève de FE-048.</p>
                   </div>
 
-                  <!-- ===== Onglet SAISIE DIRECTE (FE-026) — libellé + montant + sens =====
+                  <!-- ===== Onglet SAISIE DIRECTE (FE-026 + retrofit FE-056) =====
                        Adaptateur « direct » du hub D13 : aucune matière première
                        numérique. On saisit dans des SECTIONS familières (achats,
-                       ventes, trésorerie, tiers) ; Prospera devine le COMPTE selon
-                       le RÉFÉRENTIEL actif (SYSCOHADA / SFD microfinance / CIMA
-                       assurance) et bâtit la SubmitBalanceDto canonique. L'équilibre
-                       se vérifie à chaque frappe (arithmétique entière) ; le backend
-                       revérifie et refuse un déséquilibre en 422. -->
+                       ventes, trésorerie, tiers) et Prospera bâtit la
+                       SubmitBalanceDto canonique. L'équilibre se vérifie à chaque
+                       frappe (arithmétique entière) ; le backend revérifie et
+                       refuse un déséquilibre en 422.
+
+                       ⚡ FE-056 déplace la SUGGESTION DE COMPTE côté serveur.
+                       FE-026 la calculait avec un dictionnaire embarqué
+                       (`plan-comptes.ts`) qui ne connaissait qu'un plan : hors
+                       SYSCOHADA il proposait des comptes FAUX, ignorait les
+                       surcharges d'organisation et ne traçait rien. Désormais
+                       POST /balances/suggest-comptes (STORY-139, livrée) résout
+                       sur le référentiel ACTIF DE L'ORGANISATION, en un seul
+                       appel groupé, et rend explicites l'origine, la force de la
+                       proposition et les cas où c'est à l'HUMAIN de trancher. -->
                   <div class="atl-panel atl-body" data-atl-panel="saisie-directe" hidden>
                     <button class="imp-back" type="button" data-goto-sources>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
@@ -3097,14 +3194,25 @@
                         <p class="atl-secsub">Pas d'export&nbsp;? Décrivez chaque ligne — <b>un libellé, un montant, un sens</b> — Prospera trouve le compte et vérifie l'équilibre au fur et à mesure.</p>
                       </div>
                       <span class="grow" style="flex:1"></span>
-                      <!-- Bascule de démo : chaque état = une réponse réelle du :3007. -->
-                      <div class="atelier-demo" role="tablist" aria-label="Réponse du backend (démo)">
-                        <span class="lbl">Réponse</span>
-                        <button class="btn btn-ghost btn-sm" role="tab" data-sd="auto" aria-selected="true">Auto</button>
-                        <button class="btn btn-ghost btn-sm" role="tab" data-sd="created" aria-selected="false">Créée 201</button>
-                        <button class="btn btn-ghost btn-sm" role="tab" data-sd="idem" aria-selected="false">Déjà là 200</button>
-                        <button class="btn btn-ghost btn-sm" role="tab" data-sd="deseq" aria-selected="false">422</button>
-                        <button class="btn btn-ghost btn-sm" role="tab" data-sd="forbidden" aria-selected="false">403</button>
+                      <div style="display:flex;flex-direction:column;gap:0.35rem;align-items:flex-end">
+                        <!-- Bascule de démo : chaque état = une réponse réelle du :3007. -->
+                        <div class="atelier-demo" role="tablist" aria-label="Réponse du backend (démo)">
+                          <span class="lbl">Soumission</span>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-sd="auto" aria-selected="true">Auto</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-sd="created" aria-selected="false">Créée 201</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-sd="idem" aria-selected="false">Déjà là 200</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-sd="deseq" aria-selected="false">422</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-sd="forbidden" aria-selected="false">403</button>
+                        </div>
+                        <!-- FE-056 · états de la route de suggestion. Une panne de
+                             suggestion N'EST PAS une panne de saisie (AC-7). -->
+                        <div class="atelier-demo" role="tablist" aria-label="Suggestion de compte (démo)">
+                          <span class="lbl">Suggestion</span>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-sg="ok" aria-selected="true">Nominale</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-sg="surcharge" aria-selected="false">Surcharge cabinet</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-sg="403" aria-selected="false">403</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-sg="net" aria-selected="false">Réseau HS</button>
+                        </div>
                       </div>
                     </div>
 
@@ -3137,24 +3245,110 @@
                       </div>
                     </div>
 
-                    <!-- ---- Référentiel actif : pilote le plan de comptes suggéré ---- -->
-                    <div class="sd-ref">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg);flex:none"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    <!-- ---- FE-056 · QUI décide du référentiel : le SERVEUR ----
+                         Avant : un segment SYSCOHADA/Microfinance que le front
+                         pilotait, adossé à un dictionnaire embarqué. Après : le
+                         référentiel n'est plus un choix d'écran, c'est une
+                         propriété de l'ORGANISATION connectée, résolue par
+                         :3007. La bascule ci-dessous change d'organisation
+                         (démo) — la requête émise, elle, est identique. -->
+                    <div class="sg-org">
+                      <div class="who">
+                        <span class="av" data-sg-av>CD</span>
+                        <div>
+                          <b data-sg-orgname>Cabinet Diallo &amp; Associés</b>
+                          <div class="plan"><span data-sg-metier>Expertise comptable</span> · référentiel résolu par le serveur — <b data-sd-refname>SYSCOHADA révisé (syscohada-revise@2.1)</b></div>
+                        </div>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <span class="lock" title="Aucun code de référentiel n'est envoyé par le navigateur">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        le front ne choisit pas
+                      </span>
+                      <!-- Les cinq secteurs que la console sait provisionner (packs AP-06).
+                           Deux d'entre eux n'ont PAS de plan servi par balance-service :
+                           l'écran doit le dire, pas le masquer. -->
+                      <div class="sd-refseg" role="tablist" aria-label="Organisation connectée (démo)">
+                        <button role="tab" data-sg-org="cabinet" aria-selected="true">Cabinet</button>
+                        <button role="tab" data-sg-org="distributeur" aria-selected="false">Distributeur</button>
+                        <button role="tab" data-sg-org="imf" aria-selected="false">IMF (SFD)</button>
+                        <button role="tab" data-sg-org="smt" aria-selected="false">TPE (SMT) ⚠</button>
+                        <button role="tab" data-sg-org="assurance" aria-selected="false">Assurance (CIMA) ⚠</button>
+                      </div>
+                    </div>
+
+                    <!-- ⚠️ Manque backend rendu visible plutôt que contourné.
+                         Apparaît quand le référentiel de l'organisation n'est pas
+                         servi par balance-service (409 non packagé / 500 hors
+                         manifeste) : on nomme le contrat qui manque. -->
+                    <div class="sg-gap" data-sg-gap hidden>
+                      <span class="ic">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v5M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+                      </span>
                       <div>
-                        <b data-sd-refname>SYSCOHADA révisé</b>
-                        <div class="plan">Plan de comptes appliqué aux comptes devinés — <span data-sd-refcode>SN</span></div>
+                        <b>À livrer côté backend — <span data-sg-gap-ref></span></b>
+                        <p data-sg-gap-what></p>
+                        <p class="small">La saisie, elle, reste entièrement possible : le comptable renseigne les comptes lui-même et la balance part au contrat canonique. C'est le confort qui manque, pas la fonction.</p>
                       </div>
-                      <span class="grow"></span>
-                      <!-- Le mapping n'est PAS limité à SYSCOHADA : microfinance & assurance aussi. -->
-                      <div class="sd-refseg" role="tablist" aria-label="Référentiel actif (démo)">
-                        <button role="tab" data-sd-ref="SN" aria-selected="true">SYSCOHADA</button>
-                        <button role="tab" data-sd-ref="SFD-BCEAO" aria-selected="false">Microfinance</button>
-                        <button role="tab" data-sd-ref="CIMA" aria-selected="false" disabled title="Référentiel assurance — bientôt">Assurance ⋯</button>
+                    </div>
+
+                    <!-- ---- FE-056 · État de la suggestion + enveloppe + PREUVE DU LOT ----
+                         Le compteur d'appels est là pour être regardé : 40 lignes
+                         saisies ne doivent JAMAIS produire 40 requêtes. -->
+                    <div class="sg-bar" data-sg-bar>
+                      <span class="ic" data-sg-ic>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                      </span>
+                      <div>
+                        <div class="t" data-sg-title>Comptes proposés par le serveur</div>
+                        <div class="s" data-sg-sub>3 libellés résolus en 1 appel groupé — il y a un instant.</div>
                       </div>
+                      <span class="grow" style="flex:1"></span>
+                      <div class="sg-env" data-sg-env hidden>
+                        <span>référentiel <b data-sg-envref>SYSCOHADA-REV</b></span>
+                        <span>version <b data-sg-envver>2025.02</b></span>
+                        <span>checksum <b data-sg-envchk>…</b></span>
+                        <span>stamp <b data-sg-envstamp>…</b></span>
+                      </div>
+                      <span class="sg-calls" title="Requêtes POST /balances/suggest-comptes depuis l'ouverture de l'écran">appels réseau <b data-sg-calls>1</b> · libellés <b data-sg-labels>3</b></span>
+                      <button class="btn btn-ghost btn-sm" type="button" data-sg-retry hidden>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                        Réessayer
+                      </button>
                     </div>
 
                     <!-- ---- Sections familières : Prospera range chaque ligne ---- -->
                     <div data-sd-sections style="display:flex;flex-direction:column;gap:0.85rem"></div>
+
+                    <!-- ---- FE-056 · Ce que le navigateur envoie VRAIMENT ----
+                         Ouvert exprès : c'est la preuve visuelle d'AC-6 (aucun
+                         `referentiel` dans la charge utile) et d'AC-2 (un seul
+                         appel, ordre d'entrée préservé). -->
+                    <details class="sg-wire">
+                      <summary>Contrat vérifié en direct — <code>POST /api/v1/balances/suggest-comptes</code></summary>
+                      <div class="body">
+                        <div>
+                          <h5>Envoyé (dernier lot)</h5>
+                          <pre data-sg-req>—</pre>
+                        </div>
+                        <div>
+                          <h5>Reçu</h5>
+                          <pre data-sg-res>—</pre>
+                        </div>
+                      </div>
+                    </details>
+
+                    <div class="sg-note">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                      <div>
+                        <b>Ce que cette story retire du navigateur.</b>
+                        <code>src/features/atelier/config/plan-comptes.ts</code> est supprimé : plus aucune correspondance
+                        « libellé → compte » n'est codée dans le front. Il ne connaissait qu'un plan — « Charges de personnel »
+                        y valait <code>66</code>, ce qui est <b>faux</b> pour une organisation SFD-BCEAO. Basculez l'organisation
+                        ci-dessus et saisissez ce libellé : la proposition change parce que <b>le référentiel de l'organisation</b>
+                        change, pas parce que l'écran a changé d'avis.
+                      </div>
+                    </div>
 
                     <!-- ---- Preuve anticipée + checksum + soumission ---- -->
                     <div class="sd-proof m" data-sd-proof>
@@ -3165,6 +3359,14 @@
                     <div class="imp-actions" style="align-items:center">
                       <span class="sd-chk" data-sd-chk title="SHA-256 recalculé et comparé par le serveur">checksum : …</span>
                       <span class="grow"></span>
+                      <button class="btn btn-ghost btn-sm" type="button" data-sd-demo title="Charge un jeu équilibré, adapté au métier de l'organisation, couvrant les 4 origines + un départage">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.5L18 8l-3 3 .8 5-3.8-2.3L8.2 16l.8-5-3-3 4.1-.5z"/></svg>
+                        Jeu d'essai (4 origines)
+                      </button>
+                      <button class="btn btn-ghost btn-sm" type="button" data-sd-volume title="241 lignes — un auxiliaire client par point de vente : le lot est découpé, pas multiplié">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                        Volume distributeur (241 lignes)
+                      </button>
                       <button class="btn btn-ghost btn-sm" type="button" data-sd-reset>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
                         Vider
@@ -3178,7 +3380,9 @@
                     <!-- ---- Zone de retour backend (201/200/422/403) ---- -->
                     <div data-sd-feedback></div>
 
-                    <p class="helper" style="margin-top:0.2rem">FE-026 · adaptateur <code>direct</code> du hub D13. On assemble une <code>SubmitBalanceDto</code> et on la soumet au contrat canonique : <code>POST /balances</code>. Montants en <b>unités mineures XOF</b> (entiers, ×100), équilibre en <b>arithmétique entière</b> (tolérance &lt;&nbsp;100). Le <code>checksum</code> SHA-256 est recalculé et comparé par le serveur. Le compte est <b>deviné selon le référentiel</b> (SYSCOHADA / SFD / CIMA), jamais codé en dur. Aucune UI de <b>validation d'état</b> ici — pas de route backend (<code>marquerEtat</code> non câblé) → FE-027.</p>
+                    <p class="helper" style="margin-top:0.2rem">FE-026 · adaptateur <code>direct</code> du hub D13. On assemble une <code>SubmitBalanceDto</code> et on la soumet au contrat canonique : <code>POST /balances</code>. Montants en <b>unités mineures XOF</b> (entiers, ×100), équilibre en <b>arithmétique entière</b> (tolérance &lt;&nbsp;100). Le <code>checksum</code> SHA-256 est recalculé et comparé par le serveur.</p>
+                    <p class="helper" style="margin-top:0.2rem"><b>FE-056</b> (retrofit) · le compte proposé vient de <code>POST /balances/suggest-comptes</code> (STORY-139) — <b>en lot</b>, ordre d'entrée préservé, résolu sur le <b>référentiel actif de l'organisation</b> : le front <b>n'envoie aucun code de référentiel</b>. <code>origine</code> ∈ <code>SURCHARGE</code> (règle du cabinet, prioritaire) · <code>EXACT</code> · <code>APPROCHANT</code> (à vérifier) · <code>AUCUN</code> (« à préciser », rien de pré-rempli) ; <code>alternatives[]</code> est un <b>choix rendu à l'humain</b>, jamais départagé côté client. Une suggestion en échec (403/400/réseau) <b>ne bloque pas la saisie</b> — c'est une assistance, pas un prérequis (DO-1). Le champ <code>referentiel</code> de la soumission est repris de l'<b>enveloppe renvoyée par le serveur</b>. Le serveur reste <b>seul juge</b> du compte à la persistance. Aucune UI de <b>validation d'état</b> ici → FE-027.</p>
+                    <p class="helper" style="margin-top:0.2rem"><b>Les cinq secteurs.</b> Le référentiel est attribué à l'<b>octroi</b>, par la console (pack vertical AP-06), puis lu dans <code>OrgBalanceEntitlement.referentiel</code> : <b>en ajouter un ne demande pas une ligne de code d'écran</b>. Ce que le service sait en faire, en revanche, dépend de son manifeste. <b>Cabinet</b> et <b>distributeur</b> partagent <code>syscohada-revise@2.1</code> — un distributeur ne change pas de plan, il change de <b>vocabulaire</b> (stocks, démarque, transport sur ventes) et surtout de <b>volume</b> : ses auxiliaires par point de vente dépassent la borne de <code>200</code> libellés par lot, alors le front <b>découpe</b> (241 lignes → 2 appels, jamais 241). <b>IMF</b> : <code>sfd-bceao@2.0</code>. <b>TPE au SMT</b> : <code>smt-togo@1.0</code> est <b>déclaré mais non packagé</b> — refus <code>409 REFERENTIEL_NON_PACKAGE</code> avec son motif, et rien à réessayer. <b>Assurance</b> : <code>cima-assurances@1.0</code> existe côté <code>bilan-service</code> (STORY-122) mais <b>ne figure ni au manifeste de balance-service ni au contrat canonique</b> <code>REFERENTIELS_BALANCE</code> (<code>SN</code>&nbsp;|&nbsp;<code>SMT</code>&nbsp;|&nbsp;<code>SFD-BCEAO</code>) ⇒ <code>500 REFERENTIEL_UNAVAILABLE</code>. Dans les deux cas, la <b>saisie reste entière</b> : c'est l'assistance qui manque, pas la fonction.</p>
                   </div>
                 </div>
               </div>
@@ -4567,7 +4771,199 @@
         });
       }
 
-      /* ===== Saisie directe (FE-026) — adaptateur « direct » du hub D13 =====
+      /* ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+         SERVEUR SIMULÉ — balance-service :3007, route de STORY-139.
+         ⚠️ CE BLOC N'A PAS D'ÉQUIVALENT DANS LE DÉPÔT FRONTEND. Il tient lieu,
+         pour la maquette seule, de `POST /api/v1/balances/suggest-comptes` :
+         plans de comptes versionnés, surcharges d'organisation, arbitrage des
+         homonymes. C'est EXACTEMENT la connaissance que FE-056 sort du
+         navigateur — dans l'app, cet écran ne fait qu'un `fetch`.
+         Valeurs reprises des tests de STORY-139 (`suggestion.regles.spec.ts`) :
+         « Charges de personnel » = 66 en SYSCOHADA mais 64 en SFD-BCEAO, et
+         « Banques et correspondants » est un homonyme 114/154 non départageable.
+         Les libellés hors plan retombent volontairement sur AUCUN : la maquette
+         ne devine pas un plan qu'elle n'a pas.
+         ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ */
+      var MOCK_3007 = (function () {
+        var SEUIL_APPROCHANT = 0.5;
+
+        /* Borne du lot, côté serveur : `MAX_LIBELLES_PAR_LOT` (STORY-139). */
+        var MAX_LIBELLES_PAR_LOT = 200;
+
+        /* Le référentiel est une propriété de l'ORGANISATION : le client ne le
+           choisit pas. Il est attribué à l'OCTROI par la console (pack vertical,
+           AP-06), projeté dans `OrgBalanceEntitlement.referentiel`, et c'est là
+           que `ReferentielResolver` le lit. Le nombre de plans n'est donc pas
+           borné à deux — c'est une donnée, pas un `if` dans le code.
+
+           `etat` reflète ce que le REGISTRE de balance-service sait faire de ce
+           code AUJOURD'HUI — et il ne sait pas tout :
+             ok         → paquet packagé, suggestion possible ;
+             nonPackage → code déclaré, artefact délibérément non livré (409) ;
+             absent     → code hors manifeste ⇒ lacune de déploiement (500). */
+        var ORGS = {
+          cabinet:      { nom: "Cabinet Diallo & Associés", av: "CD", metier: "Expertise comptable", plan: "syscohada-revise", version: "2.1", nomPlan: "SYSCOHADA révisé", tag: "SN", checksum: "sha256:01b892c057fa", etat: "ok" },
+          distributeur: { nom: "Sanou Distribution", av: "SD", metier: "Distribution · 14 points de vente", plan: "syscohada-revise", version: "2.1", nomPlan: "SYSCOHADA révisé", tag: "SN", checksum: "sha256:01b892c057fa", etat: "ok" },
+          imf:          { nom: "IMF Kara Microfinance", av: "IK", metier: "Finance décentralisée (SFD)", plan: "sfd-bceao", version: "2.0", nomPlan: "Référentiel comptable SFD (BCEAO)", tag: "SFD-BCEAO", checksum: "sha256:ee9bf014aa21", etat: "ok" },
+          smt:          { nom: "Boutique Adjo", av: "BA", metier: "Très petite entité · Système Minimal de Trésorerie", plan: "smt-togo", version: "1.0", nomPlan: "Système Minimal de Trésorerie (Togo)", tag: "SMT", checksum: null, etat: "nonPackage",
+                          motif: "plan de comptes et table de passage SMT non sourcés — packaging subordonné aux sources officielles et à une validation experte" },
+          assurance:    { nom: "Sahel Assurances", av: "SA", metier: "Assurance · code CIMA", plan: "cima-assurances", version: "1.0", nomPlan: "Plan comptable CIMA (assurances)", tag: null, checksum: null, etat: "absent" },
+        };
+
+        /* Index inverse « libellé du plan → comptes » (plusieurs = homonymes).
+           Extraits des paquets réels — `syscohada-revise-2.1.json` (174 comptes)
+           et `sfd-bceao-2.0.json` (372 comptes) — pas d'un plan réécrit ici. */
+        var PLANS = {
+          "syscohada-revise": [
+            ["Achats de marchandises", "601"], ["Autres achats", "605"],
+            ["Variations des stocks de marchandises", "6031"], ["Marchandises", "31"],
+            ["Transports", "61"], ["Matériel de transport", "245"],
+            ["Locations et charges locatives", "622"],
+            ["Rémunérations d'intermédiaires et de conseils", "632"],
+            ["Charges de personnel", "66"], ["Charges sociales", "664"],
+            ["Personnel, rémunérations dues", "422"],
+            ["Ventes de marchandises", "701"], ["Prestations de services", "706"],
+            ["Banques", "52"], ["Caisse", "57"], ["Valeurs à encaisser", "51"],
+            ["Clients", "411"], ["Clients et comptes rattachés", "41"],
+            ["Clients, effets à recevoir en portefeuille", "412"],
+            ["Créances clients litigieuses ou douteuses", "416"],
+            ["Fournisseurs, dettes en compte", "401"],
+            ["Fournisseurs et comptes rattachés", "40"],
+            ["Fournisseurs, factures non parvenues", "408"],
+            ["Dotations aux amortissements", "681"],
+          ],
+          "sfd-bceao": [
+            ["Charges de personnel", "64"], ["Charges d'intérêts", "60"],
+            ["Banques et correspondants", "114"], ["Banques et correspondants", "154"],
+            ["Caisse", "10"], ["Crédits à la clientèle", "20"],
+            ["Dépôts de la clientèle", "25"], ["Ventes", "71"], ["Ventes", "711"],
+            ["Commissions", "70"], ["Provisions", "39"],
+          ],
+          /* smt-togo et cima-assurances : AUCUN plan ici, volontairement. Le
+             registre de balance-service ne les sert pas — la maquette ne va pas
+             inventer ce que le serveur refuse. */
+        };
+
+        /* Surcharges écrites par l'organisation (STORY-085) : elles PRIMENT. */
+        var SURCHARGES = {
+          cabinet:      [{ libelle: "charges de personnel", compte: "661", type: "LIBELLE" }],
+          distributeur: [{ libelle: "casse et démarque", compte: "6058", type: "LIBELLE" }],
+          imf:          [{ libelle: "charges de personnel", compte: "641", type: "LIBELLE" }],
+        };
+
+        var VIDES = ["de", "des", "du", "d", "la", "le", "les", "l", "et", "en", "aux", "au", "a", "sur", "un", "une"];
+        function normaliser(s) {
+          return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]+/g, " ").trim();
+        }
+        function tokens(s) {
+          return normaliser(s).split(" ").filter(function (t) { return t && VIDES.indexOf(t) === -1; })
+            .map(function (t) { return t.replace(/s$/, ""); }); /* singulier ≈ pluriel */
+        }
+        /* Recouvrement de tokens (Dice) — jamais un « contient » de chaîne. */
+        function recouvrement(a, b) {
+          if (!a.length || !b.length) return 0;
+          var seen = {}, common = 0;
+          b.forEach(function (t) { seen[t] = (seen[t] || 0) + 1; });
+          a.forEach(function (t) { if (seen[t]) { seen[t]--; common++; } });
+          return (2 * common) / (a.length + b.length);
+        }
+        /* Départage : un parent préfixe de tous gagne ; sinon, on ne tranche pas. */
+        function arbitrer(cands) {
+          var uniq = [], vus = {};
+          cands.forEach(function (c) { if (!vus[c.compte]) { vus[c.compte] = 1; uniq.push(c); } });
+          if (uniq.length <= 1) return { retenu: uniq[0] || null, alternatives: [] };
+          uniq.sort(function (x, y) { return x.compte.length - y.compte.length || (x.compte < y.compte ? -1 : 1); });
+          var parent = uniq[0];
+          var tousEnfants = uniq.every(function (c) { return c.compte.indexOf(parent.compte) === 0; });
+          if (tousEnfants) return { retenu: parent, alternatives: [] };
+          return { retenu: null, alternatives: uniq };
+        }
+
+        function suggerer(libelle, orgKey, avecSurcharge) {
+          var org = ORGS[orgKey], plan = PLANS[org.plan] || [];
+          var cle = normaliser(libelle);
+          var base = { libelle: libelle, compte: null, libelleCompte: null, origine: "AUCUN", score: 0, motif: "aucune correspondance dans le plan actif" };
+          if (!cle) return base;
+
+          /* 1. La règle de l'organisation prime sur le plan (D-139-3). */
+          if (avecSurcharge) {
+            var regle = (SURCHARGES[orgKey] || []).filter(function (r) { return r.type === "LIBELLE" && r.libelle === cle; })[0];
+            if (regle) {
+              var auPlan = plan.filter(function (e) { return e[1] === regle.compte; })[0];
+              return { libelle: libelle, compte: regle.compte, libelleCompte: auPlan ? auPlan[0] : null,
+                origine: "SURCHARGE", score: 1, motif: "règle de l'organisation sur « " + libelle.trim() + " »" };
+            }
+          }
+
+          /* 2. Libellé identique à une entrée du plan. */
+          var exacts = plan.filter(function (e) { return normaliser(e[0]) === cle; })
+            .map(function (e) { return { compte: e[1], libelle: e[0] }; });
+          if (exacts.length) {
+            var a = arbitrer(exacts);
+            if (a.retenu) return { libelle: libelle, compte: a.retenu.compte, libelleCompte: a.retenu.libelle,
+              origine: "EXACT", score: 1, motif: "libellé identique au compte " + a.retenu.compte + " du plan" };
+            return { libelle: libelle, compte: null, libelleCompte: null, origine: "AUCUN", score: 0,
+              motif: a.alternatives.length + " comptes portent ce libellé au plan — départage impossible", alternatives: a.alternatives };
+          }
+
+          /* 3. Rapprochement par recouvrement de tokens, au-dessus du seuil. */
+          var tl = tokens(libelle), meilleur = 0, retenus = [];
+          plan.forEach(function (e) {
+            var s = recouvrement(tl, tokens(e[0]));
+            if (s < SEUIL_APPROCHANT) return;
+            if (s > meilleur + 1e-9) { meilleur = s; retenus = [{ compte: e[1], libelle: e[0] }]; }
+            else if (Math.abs(s - meilleur) < 1e-9) retenus.push({ compte: e[1], libelle: e[0] });
+          });
+          if (retenus.length) {
+            var b = arbitrer(retenus);
+            if (b.retenu) return { libelle: libelle, compte: b.retenu.compte, libelleCompte: b.retenu.libelle,
+              origine: "APPROCHANT", score: Math.round(meilleur * 100) / 100,
+              motif: "rapprochement avec « " + b.retenu.libelle + " » (" + Math.round(meilleur * 100) + " %)" };
+            return { libelle: libelle, compte: null, libelleCompte: null, origine: "AUCUN", score: 0,
+              motif: "rapprochements ex æquo — départage impossible", alternatives: b.alternatives };
+          }
+          return base;
+        }
+
+        return {
+          orgs: ORGS,
+          maxParLot: MAX_LIBELLES_PAR_LOT,
+          /* Le VRAI point d'entrée : un lot, une réponse, l'ordre préservé. */
+          post: function (libelles, orgKey, opts) {
+            opts = opts || {};
+            return new Promise(function (resolve, reject) {
+              setTimeout(function () {
+                if (opts.scenario === "net") { reject({ kind: "net" }); return; }
+                if (opts.scenario === "403") { reject({ kind: "403", code: "BALANCE_NOT_ENTITLED" }); return; }
+                var org = ORGS[orgKey];
+                /* Refus de CONFIGURATION — l'appelant ne peut rien réessayer.
+                   Codes et statuts repris de `referentiel-http.mapper.ts`. */
+                if (org.etat === "nonPackage") {
+                  reject({ kind: "409", code: "REFERENTIEL_NON_PACKAGE", ref: org.plan + "@" + org.version, motif: org.motif });
+                  return;
+                }
+                if (org.etat === "absent") {
+                  reject({ kind: "500", code: "REFERENTIEL_UNAVAILABLE", ref: org.plan + "@" + org.version });
+                  return;
+                }
+                if (libelles.length > MAX_LIBELLES_PAR_LOT) {
+                  reject({ kind: "400", code: "VALIDATION", ref: null, max: MAX_LIBELLES_PAR_LOT });
+                  return;
+                }
+                resolve({
+                  referentiel: { code: org.plan, version: org.version },
+                  checksum: org.checksum,
+                  stamp: { code: org.plan, version: org.version, checksum: org.checksum },
+                  suggestions: libelles.map(function (l) { return suggerer(l, orgKey, opts.scenario === "surcharge"); }),
+                });
+              }, 260);
+            });
+          },
+        };
+      })();
+
+      /* ===== Saisie directe (FE-026 + FE-056) — adaptateur « direct » du hub D13 =====
          On saisit libellé + montant + sens dans des SECTIONS familières ;
          Prospera devine le COMPTE selon le RÉFÉRENTIEL actif et bâtit la
          SubmitBalanceDto. L'équilibre est recalculé à chaque frappe en
@@ -4577,7 +4973,17 @@
       if (sdPanel) {
         var TOLERANCE = 100; // unités mineures (< 1 F CFA), comparaison stricte
         var sdScenario = "auto";
-        var sdRef = "SN";
+
+        /* FE-056 — état de la SUGGESTION. `sgOrg` est l'organisation connectée
+           (bascule de démo) : le référentiel s'en déduit CÔTÉ SERVEUR, le front
+           n'en connaît que ce que l'enveloppe lui renvoie. */
+        var sgOrg = "cabinet";
+        var sgScenario = "ok";
+        var sgEnv = null;    // { referentiel:{code,version}, checksum, stamp }
+        var sgErr = null;    // dernière tentative en échec : "403" | "net"
+        var sgCalls = 0;     // appels réseau — affiché : 40 lignes ≠ 40 requêtes
+        var sgTimer = null;
+        var sgSeq = 0;       // garde anti-réponse-périmée
 
         /* Sections familières — un cadre connu, pas un plan comptable brut. */
         var SD_SECTIONS = [
@@ -4587,43 +4993,61 @@
           { id: "tiers",      label: "Clients & fournisseurs", hint: "Créances et dettes",            sens: "debit"  },
         ];
 
-        /* Plans de comptes PILOTÉS PAR RÉFÉRENTIEL (illustratif pour la maquette :
-           la vraie table de mapping vit côté serveur, par référentiel). Chaque
-           entrée = fragment de libellé (minuscule) → compte. */
-        var SD_PLANS = {
-          "SN": { name: "SYSCOHADA révisé", map: {
-            "achats de marchandises": "601", "achat": "601", "marchandises": "601",
-            "loyer": "622", "location": "622", "transport": "624", "électricité": "605",
-            "eau": "605", "fournitures": "605", "carburant": "605", "honoraires": "632",
-            "salaires": "661", "salaire": "661", "cotisations sociales": "664",
-            "ventes de marchandises": "701", "vente": "701", "prestations": "706", "services": "706",
-            "banque": "521", "caisse": "571", "mobile money": "585", "momo": "585",
-            "clients": "411", "client": "411", "fournisseurs": "401", "fournisseur": "401",
-            "tva": "445", "matériel": "2441", "immobilisation": "241",
-          }},
-          "SFD-BCEAO": { name: "Plan comptable SFD (BCEAO)", map: {
-            "caisse": "101", "banque": "111", "trésorerie": "101",
-            "crédits à la clientèle": "201", "crédit": "201", "prêts": "201",
-            "dépôts de la clientèle": "251", "dépôt": "251", "épargne": "251",
-            "intérêts sur crédits": "701", "intérêts reçus": "701",
-            "charges d'intérêts": "601", "intérêts sur dépôts": "601",
-            "charges de personnel": "631", "salaires": "631",
-            "provisions": "391", "commissions": "706",
-          }},
-          "CIMA": { name: "Plan CIMA (assurance)", soon: true, map: {
-            "primes émises": "700", "primes": "700", "sinistres": "600",
-            "provisions techniques": "300", "commissions": "620", "placements": "230",
-          }},
-        };
+        /* ⛔ FE-056 — `plan-comptes.ts` VIVAIT ICI. Il est supprimé : plus aucune
+           correspondance « libellé → compte » n'est codée côté navigateur. La
+           proposition arrive désormais de POST /balances/suggest-comptes. */
 
-        /* État : lignes saisies. montant en francs (chaîne), sens, compte assisté. */
+        /* État : lignes saisies. `sg` porte la dernière suggestion SERVEUR de la
+           ligne (origine/score/motif/alternatives) ; `auto` retombe à false dès
+           que l'utilisateur écrit le compte lui-même — on ne l'écrase jamais. */
         var uid = 0;
+        function mkLine(section, libelle, montant, sens) {
+          return { id: ++uid, section: section, libelle: libelle, montant: montant, sens: sens, compte: "", auto: true, preuve: "saisie", sg: null };
+        }
         function seedLines() {
           return [
-            { id: ++uid, section: "charges",    libelle: "Achats de marchandises", montant: "1500000", sens: "debit",  compte: "601", auto: true, preuve: "saisie" },
-            { id: ++uid, section: "produits",   libelle: "Ventes de marchandises", montant: "1800000", sens: "credit", compte: "701", auto: true, preuve: "saisie" },
-            { id: ++uid, section: "tresorerie", libelle: "Banque",                 montant: "300000",  sens: "debit",  compte: "521", auto: true, preuve: "saisie" },
+            mkLine("charges",    "Achats de marchandises", "1500000", "debit"),
+            mkLine("produits",   "Ventes de marchandises", "1800000", "credit"),
+            mkLine("tresorerie", "Banque",                 "300000",  "debit"),
           ];
+        }
+        /* Jeu d'essai : couvre les 4 origines + un départage, et reste équilibré
+           (1 400 000 au débit comme au crédit). « Charges de personnel » est LE
+           cas que le dictionnaire client traitait faux hors SYSCOHADA. */
+        function demoLines(orgKey) {
+          /* Le distributeur travaille le MÊME plan que le cabinet (SYSCOHADA) :
+             ce qui change, c'est son vocabulaire — stocks, démarque, transport
+             sur ventes, auxiliaires clients par point de vente. */
+          if (orgKey === "distributeur") {
+            return [
+              mkLine("charges",    "Achats de marchandises",               "900000", "debit"),
+              mkLine("charges",    "Variations des stocks de marchandises","100000", "debit"),
+              mkLine("charges",    "Casse et démarque",                     "40000", "debit"),
+              mkLine("charges",    "Transport sur ventes",                  "60000", "debit"),
+              mkLine("tiers",      "Clients",                              "300000", "debit"),
+              mkLine("tresorerie", "Caisse",                               "200000", "debit"),
+              mkLine("produits",   "Ventes de marchandises",              "1600000", "credit"),
+            ];
+          }
+          return [
+            mkLine("charges",    "Charges de personnel",     "800000", "debit"),
+            mkLine("charges",    "Achat marchandise",        "150000", "debit"),
+            mkLine("charges",    "Amortissements",            "50000", "debit"),
+            mkLine("tresorerie", "Banque",                   "200000", "debit"),
+            mkLine("tresorerie", "Banques et correspondants","200000", "debit"),
+            mkLine("produits",   "Ventes de marchandises",   "800000", "credit"),
+            mkLine("produits",   "Prestations de services",  "600000", "credit"),
+          ];
+        }
+        /* Cas du GRAND DISTRIBUTEUR : un auxiliaire client par point de vente,
+           240 lignes. Le serveur borne un lot à 200 ⇒ 2 appels, pas 240. */
+        function volumeLines() {
+          var out = [];
+          for (var i = 1; i <= 240; i++) {
+            out.push(mkLine("tiers", "Client Lomé-" + String(i).padStart(3, "0"), "10000", "debit"));
+          }
+          out.push(mkLine("produits", "Ventes de marchandises", "2400000", "credit"));
+          return out;
         }
         var sdLines = seedLines();
 
@@ -4646,17 +5070,153 @@
         }
         function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]; }); }
 
-        /* Devine le compte depuis le libellé, selon le référentiel actif. */
-        function suggestCompte(libelle) {
-          var map = (SD_PLANS[sdRef] || {}).map || {};
-          var l = String(libelle || "").toLowerCase().trim();
-          if (!l) return "";
-          if (map[l]) return map[l];
-          var best = "";
-          Object.keys(map).forEach(function (k) {
-            if (l.indexOf(k) !== -1 || k.indexOf(l) !== -1) { if (k.length > best.length) best = k; }
+        /* ===================== FE-056 · COUCHE DE SUGGESTION =====================
+           UN appel pour TOUS les libellés en attente. Jamais un appel par ligne :
+           le compteur affiché dans le bandeau est là pour qu'on puisse le vérifier
+           d'un coup d'œil. La charge utile ne porte QUE `libelles` — aucun code de
+           référentiel : c'est le serveur qui sait de quelle organisation il s'agit. */
+        var elSgBar = sdPanel.querySelector("[data-sg-bar]");
+        var elSgIc = sdPanel.querySelector("[data-sg-ic]");
+        var elSgTitle = sdPanel.querySelector("[data-sg-title]");
+        var elSgSub = sdPanel.querySelector("[data-sg-sub]");
+        var elSgEnv = sdPanel.querySelector("[data-sg-env]");
+        var elSgCalls = sdPanel.querySelector("[data-sg-calls]");
+        var elSgLabels = sdPanel.querySelector("[data-sg-labels]");
+        var elSgRetry = sdPanel.querySelector("[data-sg-retry]");
+        var elSgReq = sdPanel.querySelector("[data-sg-req]");
+        var elSgRes = sdPanel.querySelector("[data-sg-res]");
+        var elSgGap = sdPanel.querySelector("[data-sg-gap]");
+        var elSgGapRef = sdPanel.querySelector("[data-sg-gap-ref]");
+        var elSgGapWhat = sdPanel.querySelector("[data-sg-gap-what]");
+        var MAX_PAR_LOT = MOCK_3007.maxParLot;
+
+        var IC_OK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+        var IC_WAIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/></svg>';
+        var IC_WARN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v5M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>';
+
+        function sgBar(state, title, sub, rejouable) {
+          elSgBar.className = "sg-bar" + (state ? " " + state : "");
+          elSgIc.innerHTML = state === "busy" ? IC_WAIT : state === "err" ? IC_WARN : IC_OK;
+          elSgTitle.textContent = title;
+          elSgSub.textContent = sub;
+          /* Un refus de configuration ne se réessaie pas : proposer « Réessayer »
+             sur un 409/500 de manifeste, c'est promettre une issue qui n'existe pas. */
+          elSgRetry.hidden = state !== "err" || rejouable === false;
+          elSgEnv.hidden = state === "err" || !sgEnv;
+          if (sgEnv && state !== "err") {
+            sdPanel.querySelector("[data-sg-envref]").textContent = sgEnv.referentiel.code;
+            sdPanel.querySelector("[data-sg-envver]").textContent = sgEnv.referentiel.version;
+            sdPanel.querySelector("[data-sg-envchk]").textContent = String(sgEnv.checksum).replace("sha256:", "").slice(0, 10) + "…";
+            sdPanel.querySelector("[data-sg-envstamp]").textContent = sgEnv.stamp.code + "@" + sgEnv.stamp.version;
+          }
+          elSgCalls.textContent = String(sgCalls);
+        }
+
+        /* Lignes qui attendent une proposition : libellé non vide ET compte non
+           repris à la main. Une ligne éditée manuellement sort du lot. */
+        function pending() {
+          return sdLines.filter(function (l) { return l.auto && String(l.libelle).trim() !== ""; });
+        }
+
+        /* Débounce : on laisse la frappe se poser, puis UN seul appel groupé. */
+        function scheduleSuggest(delay) {
+          clearTimeout(sgTimer);
+          sgTimer = setTimeout(runSuggest, delay == null ? 450 : delay);
+        }
+
+        function runSuggest() {
+          var cibles = pending();
+          if (!cibles.length) {
+            sgBar("", "Comptes proposés par le serveur", "Rien à proposer — saisissez un libellé.");
+            return;
+          }
+          var libelles = cibles.map(function (l) { return l.libelle; });
+          var seq = ++sgSeq;
+
+          /* Le serveur borne un lot à MAX_LIBELLES_PAR_LOT. Une balance de
+             cabinet tient largement dessous ; un GRAND DISTRIBUTEUR, avec ses
+             auxiliaires par point de vente, non. On découpe donc en lots de
+             taille bornée — ce qui reste l'inverse d'un appel par ligne. */
+          var lots = [];
+          for (var i0 = 0; i0 < libelles.length; i0 += MAX_PAR_LOT) lots.push(libelles.slice(i0, i0 + MAX_PAR_LOT));
+          sgCalls += lots.length;
+          elSgLabels.textContent = String(libelles.length);
+          var motLot = lots.length > 1 ? lots.length + " appels (borne serveur : " + MAX_PAR_LOT + " libellés par lot)" : "1 appel groupé";
+          sgBar("busy", "Résolution en cours…", motLot + " pour " + libelles.length + " libellé" + (libelles.length > 1 ? "s" : "") + ".");
+          /* ⬇️ Dans l'app : fetch("/atelier/balances/suggest-comptes", { method:"POST", body: JSON.stringify(corps) }) */
+          elSgReq.textContent = "POST /api/v1/balances/suggest-comptes" +
+            (lots.length > 1 ? "   (lot 1 / " + lots.length + ")" : "") +
+            "\n\n" + JSON.stringify({ libelles: lots[0] }, null, 2);
+
+          Promise.all(lots.map(function (lot) { return MOCK_3007.post(lot, sgOrg, { scenario: sgScenario }); }))
+            .then(function (reps) {
+            if (seq !== sgSeq) return;             // réponse périmée : on l'ignore
+            var rep = reps[0];
+            var suggestions = reps.reduce(function (acc, r) { return acc.concat(r.suggestions); }, []);
+            sgErr = null;
+            elSgGap.hidden = true;
+            sgEnv = { referentiel: rep.referentiel, checksum: rep.checksum, stamp: rep.stamp };
+            elSgRes.textContent = "200 OK" + (lots.length > 1 ? "   (lot 1 / " + lots.length + ")" : "") +
+              "\n\n" + JSON.stringify(rep, null, 2);
+            /* L'ordre d'entrée est garanti par le contrat ; on ré-apparie tout de
+               même sur le `libelle` ré-émis — l'index n'est pas une preuve. */
+            suggestions.forEach(function (s, i) {
+              var l = cibles[i];
+              if (!l || l.libelle !== s.libelle) {
+                l = cibles.filter(function (x) { return x.libelle === s.libelle && !x._pris; })[0];
+              }
+              if (!l) return;
+              l._pris = true;
+              l.sg = s;
+              l.compte = s.compte || "";           // AUCUN ⇒ rien de pré-rempli
+              paintCompte(l);
+            });
+            cibles.forEach(function (l) { delete l._pris; });
+            var forts = suggestions.filter(function (s) { return s.origine === "EXACT" || s.origine === "SURCHARGE"; }).length;
+            var flous = suggestions.filter(function (s) { return s.origine === "APPROCHANT"; }).length;
+            var vides = suggestions.filter(function (s) { return s.compte === null; }).length;
+            sgBar("", "Comptes proposés par le serveur",
+              libelles.length + " libellé" + (libelles.length > 1 ? "s" : "") + " résolu" + (libelles.length > 1 ? "s" : "") +
+              " en " + motLot.replace("1 appel groupé", "1 appel") + " · " + forts + " sûr" + (forts > 1 ? "s" : "") +
+              " · " + flous + " à vérifier · " + vides + " à préciser.");
+            recompute();
+          }).catch(function (err) {
+            if (seq !== sgSeq) return;
+            /* AC-7 · DO-1 — la suggestion est une ASSISTANCE. Elle tombe, la
+               saisie continue : rien n'est verrouillé, rien n'est effacé.
+               Les refus de CONFIGURATION (409/500) ne se réessaient pas : le
+               bouton disparaît, et l'écran dit qui doit agir. */
+            sgErr = err.kind;
+            var org = MOCK_3007.orgs[sgOrg];
+            var F = {
+              "403": ['403 Forbidden\n\n{ "code": "BALANCE_NOT_ENTITLED" }',
+                "Suggestion refusée (403)",
+                "L'entitlement « balance » n'autorise pas la suggestion."],
+              "409": ['409 Conflict\n\n' + JSON.stringify({ code: "REFERENTIEL_NON_PACKAGE", referentiel: err.ref, motif: err.motif }, null, 2),
+                "Aucune suggestion pour ce référentiel",
+                "Le référentiel « " + (err.ref || "") + " » est déclaré mais son plan de comptes n'est pas livré — " + (err.motif || "") + "."],
+              "500": ['500 Internal Server Error\n\n' + JSON.stringify({ code: "REFERENTIEL_UNAVAILABLE", referentiel: err.ref }, null, 2),
+                "Référentiel inconnu du service de balance",
+                "« " + (err.ref || "") + " » a été attribué à l'organisation mais ne figure pas au manifeste de balance-service : c'est une lacune de déploiement, à traiter côté plateforme."],
+              "400": ['400 Bad Request\n\n{ "code": "VALIDATION", "message": "libelles: au plus ' + MAX_PAR_LOT + ' éléments" }',
+                "Lot trop grand",
+                "Le serveur borne un lot à " + MAX_PAR_LOT + " libellés."],
+            }[err.kind] || ["(aucune réponse — échec réseau)", "Suggestion indisponible",
+                "Le service de suggestion n'a pas répondu."];
+            elSgRes.textContent = F[0];
+            sdLines.forEach(function (l) { if (l.auto && !l.sg) paintCompte(l); });
+            /* Configuration ⇒ rien à réessayer ; panne ⇒ réessai légitime. */
+            var rejouable = err.kind !== "409" && err.kind !== "500";
+            sgBar("err", F[1], F[2] + " Saisissez les comptes à la main — la balance reste soumettable.", rejouable);
+            elSgGap.hidden = !(err.kind === "409" || err.kind === "500");
+            if (!elSgGap.hidden) {
+              elSgGapRef.textContent = org.nomPlan + " — " + (err.ref || "");
+              elSgGapWhat.textContent = err.kind === "409"
+                ? "Livrer le paquet " + err.ref + " (plan de comptes + table de passage), sourcé et validé, puis l'ajouter au manifeste de balance-service."
+                : "Ajouter " + err.ref + " au manifeste de balance-service (l'artefact existe déjà côté bilan-service) ET au contrat canonique REFERENTIELS_BALANCE, qui ne connaît que SN, SMT et SFD-BCEAO.";
+            }
+            recompute();
           });
-          return best ? map[best] : "";
         }
 
         var RE_COMPTE = /^[0-9A-Za-z]{3,20}$/;
@@ -4685,7 +5245,7 @@
               wrap.className = "sd-lines-wrap";
               var heads = document.createElement("div");
               heads.className = "sd-line";
-              heads.innerHTML = '<span class="sd-heads">Libellé</span><span class="sd-heads" style="text-align:right">Montant (F CFA)</span><span class="sd-heads">Sens</span><span class="sd-heads">Compte</span><span class="sd-heads">Preuve</span><span></span>';
+              heads.innerHTML = '<span class="sd-heads">Libellé</span><span class="sd-heads" style="text-align:right">Montant (F CFA)</span><span class="sd-heads">Sens</span><span class="sd-heads">Compte <span style="text-transform:none;font-weight:600">· proposé par le serveur</span></span><span class="sd-heads">Preuve</span><span></span>';
               wrap.appendChild(heads);
               lines.forEach(function (l) { wrap.appendChild(lineRow(l)); });
               body.appendChild(wrap);
@@ -4695,7 +5255,7 @@
             add.type = "button";
             add.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg> Ajouter une ligne';
             add.addEventListener("click", function () {
-              sdLines.push({ id: ++uid, section: sec.id, libelle: "", montant: "0", sens: sec.sens, compte: "", auto: true, preuve: "saisie" });
+              sdLines.push(mkLine(sec.id, "", "0", sec.sens));
               render();
             });
             body.appendChild(add);
@@ -4705,10 +5265,13 @@
         }
 
         function lineRow(l) {
+          /* Un conteneur par ligne : la ligne elle-même, plus — si le serveur n'a
+             PAS pu départager — le bloc de choix rendu à l'utilisateur. */
+          var wrapRow = document.createElement("div");
+          wrapRow.className = "sd-rowwrap";
           var row = document.createElement("div");
           row.className = "sd-line";
           var mErr = toMineur(l.montant) === null;
-          var cErr = l.compte !== "" && !RE_COMPTE.test(l.compte);
           row.innerHTML =
             '<input class="sd-input" data-f="libelle" value="' + esc(l.libelle) + '" placeholder="Ex. Achats de marchandises" aria-label="Libellé">' +
             '<input class="sd-input num' + (mErr ? " err" : "") + '" data-f="montant" value="' + esc(l.montant) + '" inputmode="decimal" aria-label="Montant en francs">' +
@@ -4716,18 +5279,22 @@
               '<button type="button" data-sens="debit" aria-pressed="' + (l.sens === "debit") + '">Débit</button>' +
               '<button type="button" data-sens="credit" aria-pressed="' + (l.sens === "credit") + '">Crédit</button>' +
             '</span>' +
-            '<span class="sd-cpt ' + (l.auto ? "auto" : "") + '">' +
-              '<input class="sd-input' + (cErr ? " err" : "") + '" data-f="compte" value="' + esc(l.compte) + '" placeholder="à préciser" maxlength="20" aria-label="Compte">' +
-              (l.auto && l.compte ? '<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.5L18 8l-3 3 .8 5-3.8-2.3L8.2 16l.8-5-3-3 4.1-.5z"/></svg>' : '') +
+            '<span class="sd-cpt">' +
+              '<input class="sd-input" data-f="compte" value="' + esc(l.compte) + '" placeholder="à préciser" maxlength="20" aria-label="Compte">' +
+              '<span data-sg-badge></span>' +
             '</span>' +
             '<select class="sd-input" data-f="preuve" aria-label="Niveau de preuve">' +
               ["saisie", "estimé", "fichier", "ocr"].map(function (p) { return '<option ' + (p === l.preuve ? "selected" : "") + '>' + p + '</option>'; }).join("") +
             '</select>' +
             '<button class="sd-rm" type="button" aria-label="Supprimer la ligne"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>';
+          wrapRow.appendChild(row);
+          l._row = wrapRow;
 
           row.querySelector('[data-f="libelle"]').addEventListener("input", function (e) {
             l.libelle = e.target.value;
-            if (l.auto) { var g = suggestCompte(l.libelle); if (g) { l.compte = g; refreshCompte(row, l); } }
+            /* Le libellé change : la suggestion précédente ne vaut plus rien.
+               On la retire — et surtout, on ne devine RIEN localement. */
+            if (l.auto) { l.sg = null; l.compte = ""; paintCompte(l); scheduleSuggest(); }
             recompute();
           });
           row.querySelector('[data-f="montant"]').addEventListener("input", function (e) {
@@ -4740,25 +5307,100 @@
               recompute();
             });
           });
+          /* L'utilisateur reprend la main : sa valeur l'emporte, et la ligne sort
+             du lot des suggestions — on ne la réécrira plus jamais. */
           row.querySelector('[data-f="compte"]').addEventListener("input", function (e) {
-            l.compte = e.target.value.trim(); l.auto = false;
-            row.querySelector(".sd-cpt").classList.remove("auto");
-            var mk = row.querySelector(".sd-cpt .mark"); if (mk) mk.remove();
-            e.target.classList.toggle("err", l.compte !== "" && !RE_COMPTE.test(l.compte));
+            l.compte = e.target.value.trim();
+            l.auto = false;
+            l.sg = null;
+            paintCompte(l, true);
             recompute();
           });
           row.querySelector('[data-f="preuve"]').addEventListener("change", function (e) { l.preuve = e.target.value; recompute(); });
           row.querySelector(".sd-rm").addEventListener("click", function () {
             sdLines = sdLines.filter(function (x) { return x.id !== l.id; }); render();
           });
-          return row;
+          paintCompte(l, true);
+          return wrapRow;
         }
 
-        function refreshCompte(row, l) {
-          var input = row.querySelector('[data-f="compte"]');
-          if (input) input.value = l.compte;
+        /* ---- FE-056 · rendu de l'ORIGINE d'une proposition ----------------
+           AC-3 : EXACT/SURCHARGE (proposition FORTE) doivent être visuellement
+           distincts d'APPROCHANT (proposition à vérifier). AC-4 : AUCUN dit
+           « à préciser » et ne pré-remplit rien. AC-5 : alternatives[] est un
+           CHOIX, jamais un départage automatique. */
+        var SG_BADGE = {
+          SURCHARGE:  ["surcharge",  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v6c0 4.4 3.4 7.7 8 8 4.6-.3 8-3.6 8-8V7Z"/></svg>', "règle du cabinet"],
+          EXACT:      ["exact",      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>', "exact"],
+          APPROCHANT: ["approchant", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>', "à vérifier"],
+          AUCUN:      ["aucun",      '', "à préciser"],
+        };
+
+        function paintCompte(l, skipInput) {
+          var wrapRow = l._row;
+          if (!wrapRow) return;
+          var row = wrapRow.querySelector(".sd-line");
           var cpt = row.querySelector(".sd-cpt");
-          if (cpt && l.auto) { cpt.classList.add("auto"); if (!cpt.querySelector(".mark") && l.compte) { var s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); s.setAttribute("class", "mark"); s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("fill", "none"); s.setAttribute("stroke", "currentColor"); s.setAttribute("stroke-width", "2.5"); s.innerHTML = '<path d="M12 3l1.9 4.5L18 8l-3 3 .8 5-3.8-2.3L8.2 16l.8-5-3-3 4.1-.5z" stroke-linecap="round" stroke-linejoin="round"/>'; cpt.appendChild(s); } }
+          var input = row.querySelector('[data-f="compte"]');
+          var badge = row.querySelector("[data-sg-badge]");
+          if (!skipInput) input.value = l.compte;
+          input.classList.toggle("err", l.compte !== "" && !RE_COMPTE.test(l.compte));
+
+          var s = l.sg;
+          var origine = s ? s.origine : null;
+          var force = origine === "EXACT" || origine === "SURCHARGE" ? "strong"
+                    : origine === "APPROCHANT" ? "weak"
+                    : origine === "AUCUN" ? "none" : "";
+          cpt.className = "sd-cpt " + (l.auto ? force : "manual");
+
+          if (!l.auto) {
+            badge.innerHTML = '<span class="sg-b manuel" title="Compte saisi par vous : le serveur ne le remplacera pas">saisi par vous</span>';
+          } else if (!s) {
+            /* Sans réponse du serveur, on ne fait pas semblant : soit on attend,
+               soit on dit que l'assistance manque et que le compte est à saisir. */
+            badge.innerHTML = !String(l.libelle).trim()
+              ? '<span class="sg-b attente">—</span>'
+              : sgErr
+                ? '<span class="sg-b aucun" title="La route de suggestion n\'a pas répondu — le compte est à saisir à la main">à saisir vous-même</span>'
+                : '<span class="sg-b attente">en attente du serveur…</span>';
+          } else {
+            var d = SG_BADGE[s.origine] || SG_BADGE.AUCUN;
+            var titre = s.motif + (s.score ? " · score " + String(s.score).replace(".", ",") : "");
+            var quoi = s.origine === "AUCUN" && s.alternatives && s.alternatives.length
+              ? "départage requis" : d[2];
+            badge.innerHTML = '<span class="sg-b ' + d[0] + '" title="' + esc(titre) + '">' + d[1] + esc(quoi) +
+              (s.libelleCompte ? "" : "") + "</span>";
+          }
+
+          /* Le départage : autant de boutons que de comptes en lice, plus rien. */
+          var old = wrapRow.querySelector(".sg-alt");
+          if (old) old.remove();
+          if (l.auto && s && s.alternatives && s.alternatives.length) {
+            var alt = document.createElement("div");
+            alt.className = "sg-alt";
+            alt.innerHTML =
+              '<span class="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5"/><path d="M12 17h.01"/></svg>' +
+              esc(s.alternatives.length + " comptes portent « " + s.libelle + " » — à vous de trancher") + "</span>" +
+              '<span class="why">' + esc(s.motif) + "</span>";
+            s.alternatives.forEach(function (c) {
+              var b = document.createElement("button");
+              b.type = "button";
+              b.className = "sg-choice";
+              b.innerHTML = "<code>" + esc(c.compte) + '</code><span class="lbl">' + esc(c.libelle) + "</span>";
+              b.addEventListener("click", function () {
+                /* Le choix de l'utilisateur devient SA valeur — pas une suggestion. */
+                l.compte = c.compte;
+                l.auto = false;
+                l.sg = null;
+                var inp = wrapRow.querySelector('[data-f="compte"]');
+                if (inp) inp.value = c.compte;
+                paintCompte(l, true);
+                recompute();
+              });
+              alt.appendChild(b);
+            });
+            wrapRow.appendChild(alt);
+          }
         }
 
         function SEC_ICON(id) {
@@ -4834,7 +5476,10 @@
           return {
             exercice: { debut: new Date("2026-01-01").toISOString(), fin: new Date("2026-12-31").toISOString() },
             source: "direct",
-            referentiel: sdRef === "CIMA" ? "SN" : sdRef,
+            /* FE-056 — le référentiel de la soumission n'est plus un choix
+               d'écran : on reprend celui que l'ENVELOPPE de suggestion a
+               renvoyé. Tant que rien n'a été résolu, on ne prétend rien. */
+            referentiel: sgEnv ? sgEnv.referentiel.code : null,
             version: 1,
             lignes: sdLines.map(function (l) {
               var m = toMineur(l.montant) || 0;
@@ -4852,20 +5497,40 @@
           });
         }
 
-        /* Référentiel actif : pilote le plan de comptes suggéré (re-devine les
-           comptes en mode auto). Assurance (CIMA) désactivé — mécanisme prêt. */
-        sdPanel.querySelectorAll("[data-sd-ref]").forEach(function (b) {
+        /* FE-056 — bascule d'ORGANISATION (démo). Ce n'est PAS un sélecteur de
+           référentiel : on change l'organisation connectée, et c'est le serveur
+           qui en déduit le plan. La requête émise, elle, ne change pas d'un
+           octet — la comparer dans le journal de contrat en est la preuve. */
+        sdPanel.querySelectorAll("[data-sg-org]").forEach(function (b) {
           b.addEventListener("click", function () {
-            if (b.disabled) return;
-            sdRef = b.dataset.sdRef;
-            sdPanel.querySelectorAll("[data-sd-ref]").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
-            var plan = SD_PLANS[sdRef] || {};
-            sdPanel.querySelector("[data-sd-refname]").textContent = plan.name || sdRef;
-            sdPanel.querySelector("[data-sd-refcode]").textContent = sdRef;
-            sdLines.forEach(function (l) { if (l.auto) { var g = suggestCompte(l.libelle); if (g) l.compte = g; } });
+            sgOrg = b.dataset.sgOrg;
+            sdPanel.querySelectorAll("[data-sg-org]").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
+            var org = MOCK_3007.orgs[sgOrg];
+            sdPanel.querySelector("[data-sg-orgname]").textContent = org.nom;
+            sdPanel.querySelector("[data-sg-av]").textContent = org.av;
+            sdPanel.querySelector("[data-sg-metier]").textContent = org.metier;
+            sdPanel.querySelector("[data-sd-refname]").textContent = org.nomPlan + " (" + org.plan + "@" + org.version + ")";
+            /* Les propositions de l'ancienne organisation ne valent plus rien :
+               on les jette au lieu de les laisser mentir à l'écran. */
+            sgEnv = null;
+            sdLines.forEach(function (l) { if (l.auto) { l.sg = null; l.compte = ""; } });
             render();
+            runSuggest();
           });
         });
+
+        /* FE-056 — états de la route de suggestion (démo). */
+        sdPanel.querySelectorAll("[data-sg]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            sgScenario = b.dataset.sg;
+            sdPanel.querySelectorAll("[data-sg]").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
+            sdLines.forEach(function (l) { if (l.auto) { l.sg = null; l.compte = ""; } });
+            render();
+            runSuggest();
+          });
+        });
+
+        elSgRetry.addEventListener("click", function () { runSuggest(); });
 
         /* Bascule de démo : chaque onglet = une réponse réelle du :3007. */
         sdPanel.querySelectorAll("[data-sd]").forEach(function (b) {
@@ -4882,7 +5547,7 @@
           if (!kind) { elFeedback.innerHTML = ""; return; }
           var F = {
             field: ["error", ICON_KO, "Lignes incomplètes",
-              "Un montant ou un compte n'est pas valide (compte : 3–20 caractères alphanumériques ; montant : entier ≥ 0). Corrigez les champs en rouge.", ""],
+              "Un montant ou un compte n'est pas valide (compte : 3–20 caractères alphanumériques ; montant : entier ≥ 0). Les lignes marquées « à préciser » attendent un compte : le serveur n'en a pas trouvé, et Prospera n'en invente pas — c'est à vous de le donner.", ""],
             created: ["created", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>', "Balance enregistrée",
               "Version 1 créée à l'état BROUILLON. Le serveur a recalculé le sommaire et accepté le checksum.", "201 · etat: BROUILLON · checksum " + (ctx.checksum || "").slice(0, 16) + "…"],
             idem: ["idem", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>', "Cette version existait déjà",
@@ -4922,10 +5587,20 @@
         });
 
         sdPanel.querySelector("[data-sd-reset]").addEventListener("click", function () {
-          sdLines = seedLines(); feedback(""); render();
+          sdLines = seedLines(); feedback(""); render(); runSuggest();
+        });
+
+        /* Jeu d'essai FE-056 : les 4 origines + un départage, en un clic. */
+        sdPanel.querySelector("[data-sd-demo]").addEventListener("click", function () {
+          sdLines = demoLines(sgOrg); feedback(""); render(); runSuggest();
+        });
+        /* Le cas du volume : 241 lignes, 2 appels — la borne serveur en action. */
+        sdPanel.querySelector("[data-sd-volume]").addEventListener("click", function () {
+          sdLines = volumeLines(); feedback(""); render(); runSuggest();
         });
 
         render();
+        runSuggest();
       }
 
       /* Référentiel actif : résolu / indisponible. */

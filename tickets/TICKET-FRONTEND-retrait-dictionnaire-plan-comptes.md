@@ -1,5 +1,15 @@
 # TICKET frontend — retirer le dictionnaire `libellé → compte` codé en dur de FE-026
 
+> ## ✅ RÉSOLU le 2026-08-07 par **FE-056** (branche `fe-056`, commit `c1b777f`)
+>
+> `src/features/atelier/config/plan-comptes.ts` et son test sont **supprimés** : plus aucune
+> correspondance « libellé → compte » n'est codée dans le dépôt frontend. La proposition vient de
+> `POST /balances/suggest-comptes`, en lot, sans qu'aucun code de référentiel ne quitte le navigateur.
+> Détail de livraison et **deux constats d'intégration** (types à régénérer par FE-057 ; tag de
+> référentiel non exposé par le backend) dans `frontend-stories/FE-056.md`.
+>
+> ---
+>
 > ## ➡️ REPRIS le 2026-07-31 par la story **FE-056**
 >
 > Ce ticket avait été écrit côté backend parce que le dépôt frontend **n'était pas dans le workspace**

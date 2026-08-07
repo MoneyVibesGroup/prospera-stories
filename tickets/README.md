@@ -34,12 +34,17 @@ TICKET-<CIBLE>-<sujet-en-kebab-case>.md
 maintenu en parallèle de la story. Deux sources de vérité sur le même sujet, c'est précisément le
 défaut que ce dépôt a rencontré trois fois (statuts périmés, stories orphelines, 134/135/136 vs 144).
 
-## État au 2026-07-31
+## État au 2026-08-07
 
 | Ticket | Cible | Ouvert par | État |
 |---|---|---|---|
 | `TICKET-BACKEND-mapping-profile-accepte-mais-ignore.md` | backend | FE-025 (barry thierno alhassane, 25/07) | ✅ **résolu** par STORY-088 — reste la régénération des types, portée par FE-057 |
-| `TICKET-FRONTEND-retrait-dictionnaire-plan-comptes.md` | frontend | STORY-139 (vivianMoneyVibesGroupes, 29/07) | ➡️ **repris** par **FE-056** (source de vérité) |
+| `TICKET-FRONTEND-retrait-dictionnaire-plan-comptes.md` | frontend | STORY-139 (vivianMoneyVibesGroupes, 29/07) | ✅ **résolu** par **FE-056** le 2026-08-07 (commit `c1b777f`) |
+| `TICKET-BACKEND-ecarts-releves-par-integration-gate-console.md` | backend | Integration Gate console (03/08) | ➡️ voir `GAP-integration-gate-console` |
+| `TICKET-BACKEND-ap-int-1-revue-kyc-sans-document.md` | backend | AP-INT-1 (04/08) | ➡️ **repris** par STORY-179→184 (sprint 20) |
+| `TICKET-BACKEND-console-inexercable-faute-de-donnees.md` | backend | console (05/08) | ➡️ voir `GAP-console-inexercable-faute-de-donnees` |
+| `TICKET-BACKEND-referentiels-attribuables-mais-non-servis.md` | backend + console | maquette **FE-056** (barry thierno alhassane, 07/08) | ➡️ **repris** — ① par **STORY-292**, ③ par **STORY-293** (sprint 20) ; ② clos sans action |
+| `TICKET-BACKEND-tag-referentiel-non-expose.md` | backend | **FE-056** à l'intégration (barry thierno alhassane, 07/08) | ⛔ **ouvert** — aucune route ne donne au client le tag `SN\|SMT\|SFD-BCEAO` que `POST /balances` exige |
 
 ### Ce qui a été corrigé le 2026-07-31
 
