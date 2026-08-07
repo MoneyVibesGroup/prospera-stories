@@ -2035,10 +2035,10 @@ sprints:
         title: "Deux opérateurs peuvent trancher le même dossier sans que rien ne le dise"
         epic: "EPIC-003"
         points: 3
-        service: "kyc-service"
-        status: "not_started"  # ⚠️ ARBITRAGE À RENDRE AVANT DE CODER (2 issues écrites dans la story) : porter la concurrence optimiste, ou acter que le dernier gagne et SUPPRIMER l'écran de conflit du front. Aucune précondition sur `POST /admin/kyc/:orgId/approve|reject` : le dernier appel gagne en silence, et le premier opérateur ne saura jamais que sa décision a été annulée. ⚡ Le front porte DÉJÀ l'écran de conflit, entièrement écrit et INATTEIGNABLE — sa présence laisse croire que le cas est traité. ⚠️ Ce n'est pas théorique : la file est partagée et triée par ancienneté, donc tous les opérateurs sont poussés vers LE MÊME dossier. Écart nº5 d'AP-INT-0, relevé alors et jamais formulé.
+        service: "kyc-service + admin-panel"
+        status: "in_progress"  # ARBITRAGE RENDU le 2026-08-07 : issue ① (concurrence optimiste) ; précondition = ETag couvrant l'état OBSERVABLE (profil + pièces courantes) ; If-Match OBLIGATOIRE sur les décisions globales (absent → 428, non concordant → 409), routes PAR PIÈCE hors précondition ; AC-06 → ticket front (dépôt console hors workspace). ⚠️ LA PRÉMISSE DE LA STORY EST PARTIELLEMENT FAUSSE, audit au lancement : `transition()` filtre DÉJÀ sur `{status: from}` ⇒ le second décideur reçoit DÉJÀ un 409. Les 2 défauts RÉELS sont (A) le 409 est MUET — l'écran de conflit est inatteignable faute de quoi le REMPLIR, pas faute de 409 ; (B) un dossier bouge SANS quitter UNDER_REVIEW (dépôt de pièce = no-op sur le profil ; marques par pièce dans une AUTRE collection) ⇒ une précondition sur le seul `profile.updatedAt` RATERAIT exactement le cas visé. ⚡ PÉRIMÈTRE = 2 DÉPÔTS : la console passe par le BFF (STORY-048) — rendre If-Match obligatoire côté kyc SANS toucher admin-panel donnerait 428 sur CHAQUE décision de la console. ⚡ 2 pièges d'inertie identifiés avant de coder : `AllExceptionsFilter` construit le corps par LISTE BLANCHE (un champ `conflit` serait jeté en silence) et `rethrowUpstreamError` remplace le corps amont par un message GÉNÉRIQUE (kyc enrichi, front toujours vide) ; 428 absent de `WRITE_ERROR_MESSAGES` ⇒ un If-Match manquant deviendrait un 503, la faute exacte que STORY-106 a corrigée.
         story_path: "stories/STORY-182.md"
-        assigned_to: null
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-183"
         title: "Un dossier KYC n'a ni historique de décisions ni timeline — une resoumission se relit intégralement"
         epic: "EPIC-003"
