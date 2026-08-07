@@ -5,8 +5,10 @@
 **Découverte par :** AP-INT-1, en auditant les types générés de la console
 **Priorité :** Should Have
 **Story Points :** 2
-**Statut :** À faire
+**Complexité :** low
+**Statut :** in_progress
 **Créée le :** 2026-08-04
+**Démarrée le :** 2026-08-07
 **Sprint :** 20
 **Service :** `prospera-admin-panel-service` (`:3010`)
 
@@ -41,6 +43,59 @@ raisons de bouger.
 > `SessionResponseDto` *(`userAgent`/`ip` réfléchis en `Object`)*, et FE-024 l'avait relevé sur
 > `paquetFiscal`/`stamp`. Ce n'est pas un oubli isolé, c'est un **patron de décorateur** à connaître :
 > dès que le type TS n'est pas une classe que Nest peut réfléchir, le Swagger publie un objet informe.
+
+---
+
+## ⚡ Arbitrages rendus au lancement — 2026-08-07
+
+### ① Le vrai coupable n'est pas `type: Object`, c'est **`type: Object` SANS `additionalProperties`**
+
+L'audit de DoD (`grep 'type: Object' src/`) ramène **5 occurrences**, pas 3 :
+
+| Occurrence | Nature |
+|---|---|
+| `admin-org-detail.dto.ts` ×3 | les cibles de la story — **formes connues**, à typer |
+| `admin-entitlement.dto.ts:49` — `config` | **forme libre assumée**, justifiée par écrit dans le fichier |
+| `grant-entitlement.dto.ts:72` — `config` | idem, en entrée |
+
+Les deux dernières sont « justifiées » au sens du DoD… **et pourtant elles produisent le même
+`Record<string, never>` inutilisable côté console.** Être de forme libre n'excuse pas d'être
+**inexploitable** : `{ type: 'object' }` sans plus se traduit par « objet dont aucune propriété n'est
+permise », alors que `{ type: 'object', additionalProperties: true }` donne l'index signature attendue.
+
+⇒ **Les 5 occurrences sont traitées** : 3 par un vrai type, 2 en gardant la forme libre **et** en la
+rendant utilisable. Le DoD demandait « corrigée **ou** justifiée » ; on peut faire les deux.
+
+### ② `entitlements` réutilise `AdminEntitlementDto`, qui existe déjà
+
+`src/admin/catalog/dto/admin-entitlement.dto.ts` est le miroir exact du contrat `Entitlement`. En créer
+un second serait deux classes à faire diverger. Diff minimal : on l'importe.
+
+### ③ Les feuilles VRAIMENT libres restent libres — et on **trace** au lieu de corriger
+
+`KycExtraction.extracted` / `declared` / `discrepancies` sont des `Record<string, unknown>` **dans le
+contrat du BFF**, parce que l'amont les publie ainsi. Leur donner ici une forme concrète serait
+**inventer une garantie que le BFF ne tient pas** — exactement ce que le hors-périmètre interdit.
+
+⚠️ **Écart tracé, non corrigé** (comme la story le demande) : `kyc-service` **connaît** ces formes —
+`ExtractedFields`, `DeclaredFields` et `FieldDiscrepancy` sont typées dans
+`src/kafka/events/document-extrait-events.ts` — mais son propre `AdminKycExtractionDto` les **efface**
+en `Record<string, unknown>`. Le BFF ne peut pas être plus précis que sa source : c'est **chez l'amont**
+que le contrat se perd, et c'est une story distincte.
+
+### ④ Deux critères sont **hors d'atteinte depuis ce dépôt**
+
+Les critères **nº2** (`npm run gen:api` côté console) et **nº5** (suppression des casts d'`orgs-client.ts`)
+portent sur le dépôt de la **console front**, absent de l'espace de travail — constat déjà posé en
+`STORY-179` puis `STORY-180`. La preuve livrable ici est `/api/docs-json` : c'est **l'entrée** du
+générateur, donc ce qui détermine sa sortie. Le reste est transmis au front avec le schéma mesuré.
+
+### ⑤ Le critère nº4 est **structurellement** garanti, et vérifié quand même
+
+`admin-panel` n'a **ni `ClassSerializerInterceptor`, ni `@Exclude`/`@Expose`, ni
+`excludeExtraneousValues`** (vérifié) ; son `ValidationPipe` ne s'applique qu'aux **entrées**. Un
+`@ApiProperty` est donc purement **descriptif** : il ne peut pas modifier un octet de la réponse. Le
+relevé avant/après est fait malgré tout — une garantie qu'on n'a pas mesurée n'est qu'une conviction.
 
 ---
 
