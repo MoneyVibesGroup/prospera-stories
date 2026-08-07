@@ -3,12 +3,13 @@
 **Epic :** EPIC-003 — KYC (`kyc-service`)
 **Réf. :** ticket §D · **AP-03** · **STORY-013** *(revue admin)* · **STORY-128** *(verdict par pièce)*
 **Découverte par :** AP-INT-1 — écart nº5 d'AP-INT-0, relevé alors et **jamais formulé**
-**Priorité :** Should Have — ⚠️ **arbitrage à rendre avant de coder** *(voir §Décision attendue)*
+**Priorité :** Should Have — ✅ **arbitrage rendu le 2026-08-07** *(voir §Arbitrage rendu)*
 **Story Points :** 3
+**Complexité :** high *(concurrence, contrat HTTP traversant 2 dépôts, corps d'erreur enrichi)*
 **Statut :** À faire
 **Créée le :** 2026-08-04
 **Sprint :** 20
-**Service :** `kyc-service` (`:3002`)
+**Services :** `kyc-service` (`:3002`) **et** `admin-panel` (`:3010`) — *cf. §Arbitrage rendu, point ④*
 
 ---
 
@@ -51,6 +52,55 @@ donne à la relecture l'impression rassurante d'un problème résolu.
 
 ---
 
+## Arbitrage rendu *(2026-08-07)*
+
+### ⚠️ Le constat ci-dessus est **partiellement faux** — audit du code au lancement
+
+`TenantKycProfileRepository.transition()` filtre déjà sur `{ tenantId, status: from }`, et
+`KycStatusService.runTransition()` en tire un `false` → `409`. **Le « dernier gagne en silence » n'est
+donc pas vrai pour la décision globale** : si l'opérateur A approuve, l'appel de B ne matche plus rien
+et reçoit **déjà** un `409` aujourd'hui.
+
+Le défaut réel est ailleurs, et il est double :
+
+| # | Défaut réel | Pourquoi il compte |
+|---|---|---|
+| **A** | **Le `409` est muet** — `'Dossier KYC non soumis à revue (statut différent de UNDER_REVIEW).'`, ni verdict, ni auteur, ni date | L'écran de conflit du front est inatteignable **non pas faute de `409`, mais faute de quoi le remplir** |
+| **B** | Un dossier **bouge sans quitter `UNDER_REVIEW`** : un dépôt de pièce pendant la revue est un **no-op sur le profil** (`markUnderReview` sort si `status !== PENDING_DOCUMENTS && !== REJECTED`), et les marques par pièce (STORY-128) vivent dans une **autre collection** | L'opérateur tranche sur un état périmé et **rien** ne le signale. C'est *là* que la précondition sert |
+
+⚠️ **Conséquence load-bearing du défaut B** : une précondition fondée sur le seul `profile.updatedAt`
+**raterait exactement le cas pour lequel on l'ajoute**. C'est ce qui a écarté l'option `expectedUpdatedAt`.
+
+### Les 4 décisions
+
+| # | Décision | Motif |
+|---|---|---|
+| ① | **Issue ① — concurrence optimiste** | L'écran de conflit reste, et cette story lui livre enfin de quoi s'afficher. Moins coûteux que la story ne le supposait : le socle conditionnel existe déjà, il s'agit d'**enrichir** le `409` et de **couvrir le cas B** |
+| ② | **Précondition = `ETag` couvrant l'état observable du dossier** — profil (`status` + `updatedAt`) **et** pièces courantes (`_id` + `updatedAt`), ordre canonique, `sha256` | Seule forme qui attrape le dépôt de pièce et la marque par pièce. `version` sur le profil a été écarté : il forcerait les écritures de pièces à toucher le profil, couplant deux agrégats |
+| ③ | **`If-Match` obligatoire** sur `approve`/`reject` **globaux** : absent → `428`, non concordant → `409`. Les routes **par pièce** restent hors précondition | `428 Precondition Required` distingue « tu as oublié » de « ton état est périmé » (`409`). Le `409` est conservé pour le désaccord — **pas** `412` — parce que le front mappe déjà `409 → KycConflictError` (AC-2 l'impose) |
+| ④ | **Périmètre = 2 dépôts** : `kyc-service` **et** `admin-panel` | La console **passe par le BFF** (`POST /admin/orgs/:orgId/kyc/approve\|reject` → `kyc`, STORY-048). Rendre `If-Match` obligatoire côté `kyc` **sans** toucher le BFF ⇒ `428` sur **chaque** décision de la console : la revue KYC serait entièrement cassée |
+
+### ⚡ Deux pièges qui rendraient le livrable **inerte**, identifiés avant de coder
+
+1. **`AllExceptionsFilter` construit le corps par LISTE BLANCHE** (`statusCode`, `error`, `message`,
+   `code`, `requestId`) : un champ `conflit` posé sur la `ConflictException` serait **jeté en
+   silence**. Le filtre doit être étendu, sinon AC-2 est décoratif.
+   *(Corollaire déjà connu : une `ConflictException` à payload **objet** perd `error` — le poser explicitement.)*
+2. **`rethrowUpstreamError` du BFF remplace le corps amont par un message générique**
+   *(`"Action impossible dans l'état courant de la ressource."`)*, **par conception** anti-fuite. Sans
+   traversée **explicite et allowlistée** du détail de conflit, la console recevrait un `409` aussi muet
+   qu'aujourd'hui — `kyc` enrichi, front toujours vide. ⚠️ Et `428` **n'est pas** dans
+   `WRITE_ERROR_MESSAGES` : sans l'y ajouter, un `If-Match` manquant devient un **`503`** — soit la faute
+   exacte que STORY-106 a corrigée (un refus légitime présenté comme une panne).
+
+### Ce que cette story **ne** livre **pas**
+
+- **AC-06 (preuve navigateur `:3110`)** et le câblage front : le dépôt de la console **n'est pas dans ce
+  workspace**. Le contrat est consigné dans `AP-03` ; la consommation front est un **ticket dédié**.
+- Le verrou exclusif (déjà hors périmètre ci-dessous).
+
+---
+
 ## Périmètre *(issue ①)*
 
 - Une **précondition** sur la décision globale : l'appelant transmet l'état sur lequel il a fondé son
@@ -80,12 +130,38 @@ risque, plus coûteuse et plus intrusive — à ouvrir séparément si l'optimis
 6. ⚡ **Preuve navigateur depuis `:3110`** : deux sessions, deux onglets, même dossier — le second
    voit l'écran de conflit **au lieu d'écraser** la décision du premier.
 
+### Critères ajoutés par l'arbitrage
+
+7. `GET /admin/kyc/:orgId` publie l'`ETag` du dossier — **en en-tête `ETag`** *(exposé par CORS, sinon
+   illisible depuis un navigateur)* **et dans le corps**, seule forme qui traverse le BFF sans plomberie.
+8. L'`ETag` **change** quand une pièce est déposée ou marquée pendant la revue — c'est le défaut **B**,
+   et c'est ce qui distingue cette précondition d'un `expectedUpdatedAt` décoratif.
+9. `If-Match` absent ou vide → **`428`**, distinct du `409` d'état périmé.
+10. **Le corps enrichi survit au `AllExceptionsFilter`** *(liste blanche)* **et à
+    `rethrowUpstreamError`** *(message générique)* : mesuré sur la réponse **réellement produite**,
+    jamais sur la présence du champ dans le code.
+11. `428` amont → `428` côté BFF, **pas `503`**.
+12. Le cas **B sans décision gagnante** (dossier modifié, toujours `UNDER_REVIEW`) est distingué du cas
+    **A** (décision concurrente) : le premier n'a **aucun** verdict à nommer, et le corps le dit.
+
 ---
 
 ## Definition of Done
 
-- [ ] Arbitrage tranché et **consigné** dans `AP-03` et dans le ticket
-- [ ] Les 6 critères vérifiés *(issue ①)* · `lint` 0 · couverture ≥ 90 %
-- [ ] ⚡ Issue ② retenue ⇒ l'écran de conflit et `KycConflictError` sont **retirés** de la console,
-      et `AP-03` dit que le dernier gagne
-- [ ] Branche `MNV-182`, PR rebase-mergée sur `dev`
+- [x] Arbitrage tranché et **consigné** — dans cette story *(§Arbitrage rendu)* et dans `AP-03`
+- [ ] Critères 1-5 et 7-12 vérifiés *(issue ①)* · `lint` 0 · couverture ≥ seuils · e2e verts
+- [ ] Mutation-test sur chaque garde neuve : `ETag` insensible aux pièces, `If-Match` rendu optionnel,
+      champ enrichi retiré de la liste blanche, `428` retiré de `WRITE_ERROR_MESSAGES`
+- [ ] Vérification docker réelle : deux décisions concurrentes sur une stack vivante, corps mesuré
+- [ ] ~~Issue ② : retrait de l'écran de conflit~~ — **sans objet**, issue ① retenue
+- [ ] AC-06 : **ticket front ouvert** *(dépôt console hors workspace)*, contrat consigné dans `AP-03`
+- [ ] Branches `MNV-182` sur `kyc-service` **et** `admin-panel`, les **deux** PR rebase-mergées sur `dev`
+      **ensemble** — la première seule casserait la console
+
+---
+
+## Progress Tracking
+
+| Date | Phase | État |
+|---|---|---|
+| 2026-08-07 | ① Arbitrage + story | ✅ Issue ① · ETag dossier+pièces · 2 dépôts · AC-06 → ticket front |
