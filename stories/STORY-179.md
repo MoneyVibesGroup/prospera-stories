@@ -5,7 +5,8 @@
 **Découverte par :** AP-INT-1, en affichant enfin le vrai document dans la console
 **Priorité :** Must Have — ⚡ **la revue KYC est inexploitable tant que ce n'est pas fait**
 **Story Points :** 3
-**Statut :** À faire
+**Statut :** 🔄 En cours *(démarrée le 2026-08-07)*
+**Complexité :** low
 **Créée le :** 2026-08-04
 **Sprint :** 20
 **Service :** `kyc-service` (`:3002`)
@@ -57,6 +58,26 @@ message du navigateur plutôt que de ressembler à un bug du front. **Ça ne rem
 | **`document-service` porte le même défaut** *(configuration.ts:242, 257, 285 — `endPoint` interne partout)*. Aucun écran ne le consomme aujourd'hui. | ① Le corriger dans la foulée *(même patron, même heure)* · ② Le tracer en story distincte. ⚠️ Ce qui ne se défend pas : le laisser se redécouvrir une **troisième** fois |
 | **CORS sur MinIO** | Inutile pour un affichage `<iframe>`/`<img>` — **nécessaire** si un client doit `fetch()` la pièce *(l'e2e de la console le fait)*. À trancher ici, pas à l'implémentation |
 
+### ✅ Arbitrages rendus au lancement — 2026-08-07 (décision user)
+
+**① `document-service` ⇒ story distincte, pas dans celle-ci.** Décidé **sur un fait mesuré, pas par
+prudence** : `grep -rn "presigned" document-service/src` rend **zéro occurrence**. Ce service *lit* des
+objets MinIO pour l'OCR, il ne **signe aucune URL** — donc il ne porte pas le défaut, il porte le
+*terrain* du défaut. Y poser un `MINIO_PUBLIC_CLIENT` aujourd'hui produirait un provider **sans aucun
+consommateur** : invisible aux seuils de couverture, non prouvable en docker (rien à afficher), et
+inerte jusqu'au jour où quelqu'un signera — exactement le profil du livrable mergé et mort de
+STORY-173. Ce qui est refusé, c'est l'oubli : l'entrée de story est créée **dans le même commit `docs/`
+que cette clôture**, avec le patron et les 3 lignes à changer, pour qu'une 3ᵉ redécouverte soit
+impossible.
+
+**② CORS MinIO ⇒ mesuré avant d'être configuré.** Le service `minio` du `docker-compose.yml` racine ne
+fixe **aucun** `MINIO_API_CORS_ALLOW_ORIGIN` : il tourne donc sur le défaut de l'image, qui doit être
+**constaté par un préflight `OPTIONS` réel** depuis l'origine de la console (`:3110`) en phase de
+vérification docker — pas supposé. Si MinIO répond déjà, **aucune ligne n'est ajoutée au compose** et le
+résultat est consigné ici ; s'il ne répond pas, l'allowlist est posée dans la foulée. ⚠️ Raison de ne
+pas durcir *a priori* : le compose racine n'est versionné **dans aucun dépôt** — un durcissement y vivrait
+hors de toute CI et hors de toute revue, précisément le piège payé en STORY-173.
+
 ---
 
 ## Périmètre
@@ -99,3 +120,30 @@ rester sur l'endpoint interne. ⚠️ Signer un **upload** avec le client public
 - [ ] ⚡ Le test `e2e/integration-gate.spec.ts` marqué `test.fail()` côté console — « l'URL présignée
       est joignable DEPUIS LE NAVIGATEUR » — **passe au vert et son `test.fail()` est retiré**
 - [ ] Branche `MNV-179`, PR rebase-mergée sur `dev`
+
+---
+
+## Progress Tracking
+
+### Démarrage 2026-08-07 — état trouvé, et ce qui est hors d'atteinte
+
+**Le défaut est confirmé, ligne à ligne** : `kyc-service/src/storage/storage.module.ts` fournit un seul
+provider `MINIO_CLIENT` sur `minio.endPoint`, `storage.service.ts:56` signe avec **ce** client, et
+`configuration.ts:170-180` n'expose ni `publicEndPoint`, ni `publicPort`, ni `publicUseSSL` — **ni même
+`region`**, que le patron d'`auth-service` déclare INDISPENSABLE côté public (sans elle le client SDK va
+découvrir la région **par le réseau** avant de signer, sur un hôte que le conteneur ne peut pas joindre :
+`ECONNREFUSED` silencieux, cf. mémoire STORY-129). `env.validation.ts` ne déclare **aucune** variable
+`MINIO_*`, et l'entrée `kyc-service` du compose n'en porte que 4 (aucun `MINIO_PORT`, aucun
+`MINIO_REGION`), contre 8 côté `auth-service`.
+
+**⚠️ Point de DoD hors d'atteinte depuis ce dépôt** : le retrait du `test.fail()` sur
+`e2e/integration-gate.spec.ts` vit dans le dépôt de la **console front**, qui n'est pas dans cet espace de
+travail (`find` sur les 8 services + `docs/` = fichier introuvable). Ce dépôt-ci ne peut donc pas cocher
+cette case : elle est **transmise au front**, avec la preuve navigateur produite ci-dessous comme feu vert.
+
+**⚠️ Dépendance de vérification, connue et contournée à la main** : le tracker note (GAP
+`console-inexercable-faute-de-donnees`) que 179 « n'est pas vérifiable sans 180 » — sans dossier semé,
+aucune pièce à afficher. STORY-180 n'étant pas tirée, le dossier de revue est créé **à la main par les
+API réelles** pour cette vérification (organisation, upload d'une pièce réelle dans le bucket, passage en
+`UNDER_REVIEW`). Cela prouve *cette* story ; cela ne remplace pas 180, dont l'objet est de rendre le semis
+**reproductible**.
