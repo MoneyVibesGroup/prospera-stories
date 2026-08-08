@@ -2045,9 +2045,10 @@ sprints:
         epic: "EPIC-003"
         points: 3
         service: "kyc-service"
-        status: "not_started"  # `KycFile.history` vaut TOUJOURS `[]` et la timeline de la fiche détail est vide en permanence (les deux écrans existent et n'affichent jamais rien). À la resoumission, l'agent ne voit pas ce qui avait été reproché : il relit tout au lieu de vérifier une correction — le travail exact que la resoumission devait éviter. ⚡ La matière est EN PARTIE LÀ (STORY-128 a livré `reviewStatus`/`reviewedAt` par pièce, les rejets portent un motif) : reste à la conserver au fil des soumissions. ⚠️ À vérifier au lancement : les pièces SUPERSEDED gardent-elles leur verdict, ou sont-elles écrasées ? La réponse change le périmètre.
+        status: "done"  # 2026-08-08 — journal append-only `kyc_dossier_events` : une entrée par transition, écrite DANS la transaction (donc aucune trace pour un acteur qui perd la course ni pour un 409 de précondition). `GET /admin/kyc/:orgId` sert `decisions` + `chronologie` ; le BFF les décrit (sans quoi elles n'existent pas pour la console). ⚠️ SUPERSEDED tranché : les PIÈCES gardent leur verdict — ce qui se perd, c'est la décision AU DOSSIER, purgée par `onDocumentSubmitted`. Semis STORY-180 étendu à un dossier RE-SOUMIS. ⚡ La vérif docker a trouvé un défaut invisible aux 421 unitaires (`status` dans `$set` ET `$setOnInsert` ⇒ conflit Mongo, semis en échec à chaque boot). AC-6 partiel : le dépôt front `:3110` n'est pas dans le workspace — prouvé jusqu'au BFF inclus.
         story_path: "stories/STORY-183.md"
-        assigned_to: null
+        assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-08-08"
       - story_id: "STORY-184"
         title: "Un dossier KYC n'a ni référence communicable ni numéro de soumission"
         epic: "EPIC-003"
