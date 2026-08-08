@@ -3,7 +3,16 @@
 **Cible :** `auth-service` (:3001)
 **Ouvert par :** **AP-20** (barry thierno alhassane, 2026-08-07)
 **Priorité :** Should — rien n'est cassé, mais une question d'exploitation reste sans réponse
-**État :** ⛔ ouvert
+**État :** ➡️ **REPRIS le 2026-08-08 par [STORY-294](../stories/STORY-294.md)** *(sprint 20, 3 pts)* ·
+consommateur frontend **[AP-24](../frontend-stories/AP-24.md)** *(`blocked`, nommé en même temps)*
+
+> ⚠️ **STORY-294 est désormais la source de vérité.** Ce fichier est conservé pour tracer l'origine et
+> **ne se modifie plus** — deux sources de vérité sur le même sujet sont exactement le défaut que ce
+> dépôt a déjà rencontré trois fois.
+>
+> ⚡ **Un TROISIÈME point de conception a été trouvé à la rédaction de la story** et ne figure pas
+> ci-dessous : `AdminAuditLog.reason` existe, est géré par le service et **testé**, mais **aucune route
+> n'accepte de corps** — aucune ligne du journal n'a donc de motif. Voir STORY-294 ③.
 
 ---
 

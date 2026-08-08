@@ -45,7 +45,7 @@ défaut que ce dépôt a rencontré trois fois (statuts périmés, stories orphe
 | `TICKET-BACKEND-console-inexercable-faute-de-donnees.md` | backend | console (05/08) | ➡️ voir `GAP-console-inexercable-faute-de-donnees` |
 | `TICKET-BACKEND-referentiels-attribuables-mais-non-servis.md` | backend + console | maquette **FE-056** (barry thierno alhassane, 07/08) | ➡️ **repris** — ① par **STORY-292**, ③ par **STORY-293** (sprint 20) ; ② clos sans action |
 | `TICKET-BACKEND-tag-referentiel-non-expose.md` | backend | **FE-056** à l'intégration (barry thierno alhassane, 07/08) | ⛔ **ouvert** — aucune route ne donne au client le tag `SN\|SMT\|SFD-BCEAO` que `POST /balances` exige |
-| `TICKET-BACKEND-journal-d-audit-des-organisations-non-lisible.md` | backend | **AP-20** à l'intégration (barry thierno alhassane, 07/08) | ⛔ **ouvert** — inscrit le 08/08 dans `sprint-status.yaml` → `GAP-audit-organisations-non-lisible`. `admin_audit_logs` est écrit transactionnellement par STORY-144, **aucune route ne le relit** ; cible **STORY-294**, 2 arbitrages backend à rendre d'abord |
+| `TICKET-BACKEND-journal-d-audit-des-organisations-non-lisible.md` | backend | **AP-20** à l'intégration (barry thierno alhassane, 07/08) | ➡️ **repris** le 08/08 par **STORY-294** (sprint 20) — consommateur **AP-24** nommé en même temps, pour ne pas rejouer l'orphelinat de STORY-144. `admin_audit_logs` est écrit transactionnellement, **aucune route ne le relit** ; 3 arbitrages portés par la story |
 
 ### Ce qui a été corrigé le 2026-07-31
 
