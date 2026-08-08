@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-056 Saisie assistée par le serveur (origine · départage · lot)</title>
+<title>Prospera · Prototype cumulatif — FE-058 Valider ou rejeter une balance</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -1200,6 +1200,58 @@
   .bal-prooflegend { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 0.74rem; color: var(--muted-fg); }
   .bal-prooflegend .lg { display: inline-flex; align-items: center; gap: 0.35rem; font-variant-numeric: tabular-nums; }
   .bal-prooflegend .sw { width: 0.62rem; height: 0.62rem; border-radius: 0.15rem; flex: none; }
+
+  /* ============= FE-058 · VALIDER / REJETER UNE BALANCE ===================
+     Amendement de FE-027 : l'écran de détail cesse d'être en lecture seule
+     sur une BROUILLON. Deux actions (POST /balances/:id/valider|rejeter,
+     STORY-145), motif obligatoire, confirmation explicite de l'irréversibilité,
+     et les QUATRE formes de refus rendues telles que le contrat les publie —
+     le 409 a DEUX corps discriminés par `code`. Aucune réouverture n'est
+     dessinée : le backend n'en expose aucune. */
+
+  /* Bloc d'action — visible UNIQUEMENT sur une BROUILLON. */
+  .bal-act { display: flex; align-items: flex-start; gap: 0.85rem; flex-wrap: wrap; padding: 0.85rem 0.9rem; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--background); }
+  .bal-act .txt { flex: 1 1 22rem; min-width: 0; }
+  .bal-act .txt b { font-size: 0.88rem; font-weight: 650; }
+  .bal-act .txt p { margin: 0.2rem 0 0; font-size: 0.8rem; color: var(--muted-fg); max-width: 64ch; }
+  .bal-act .btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+  /* Dialogue de décision (motif + confirmation). En prototype il s'ouvre en
+     place, sous le bloc d'action ; dans l'app c'est un Dialog Radix modal. */
+  .bal-dlg { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow-lg); padding: 1rem; }
+  .bal-dlg > .h b { font-size: 0.95rem; font-weight: 650; }
+  .bal-dlg > .h p { margin: 0.2rem 0 0; font-size: 0.82rem; color: var(--muted-fg); }
+  .bal-dlg label.lb { display: block; margin: 0.85rem 0 0.3rem; font-size: 0.8rem; font-weight: 600; }
+  .bal-dlg textarea { width: 100%; min-height: 4.8rem; resize: vertical; font: inherit; font-size: 0.85rem; color: inherit; background: transparent; border: 1px solid var(--border-strong); border-radius: 0.5rem; padding: 0.5rem 0.6rem; }
+  .bal-dlg textarea:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 25%, transparent); }
+  .bal-dlg textarea[aria-invalid="true"] { border-color: var(--danger); }
+  .bal-dlg .cnt { display: flex; justify-content: space-between; gap: 0.6rem; margin-top: 0.25rem; font-size: 0.74rem; color: var(--muted-fg); font-variant-numeric: tabular-nums; }
+  .bal-dlg .cnt .err { color: var(--danger); font-weight: 600; }
+  .bal-dlg .ack { display: flex; align-items: flex-start; gap: 0.5rem; margin-top: 0.8rem; padding: 0.6rem 0.65rem; border-radius: 0.5rem; background: var(--warning-soft); border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--border)); font-size: 0.82rem; }
+  .bal-dlg .ack input { margin-top: 0.15rem; width: 0.95rem; height: 0.95rem; accent-color: var(--orange-600); flex: none; }
+  .bal-dlg .f { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.9rem; flex-wrap: wrap; }
+  .bal-dlg .demo { margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px dashed var(--border); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .bal-dlg .demo > .lbl { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); }
+
+  /* Les quatre refus — reconnus par leur `code`, jamais par leur message. */
+  .bal-refus { display: flex; align-items: flex-start; gap: 0.6rem; margin-top: 0.85rem; padding: 0.7rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--border); font-size: 0.84rem; }
+  .bal-refus svg { width: 1.05rem; height: 1.05rem; flex: none; margin-top: 0.08rem; }
+  .bal-refus b { display: block; font-weight: 650; }
+  .bal-refus p { margin: 0.18rem 0 0; }
+  .bal-refus .bd { min-width: 0; }
+  .bal-refus.ko { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
+  .bal-refus.ko svg { color: var(--danger); }
+  .bal-refus.warn { background: var(--warning-soft); border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); }
+  .bal-refus.warn svg { color: #b45309; }
+  :root[data-theme="dark"] .bal-refus.warn svg { color: #fbbf24; }
+  .bal-refus.info { background: var(--content-bg); border-color: var(--border-strong); }
+  .bal-refus.info svg { color: var(--muted-fg); }
+  /* La liste des bloquants est rendue NOMMÉMENT, jamais résumée en un compte. */
+  .bal-blk { list-style: none; margin: 0.5rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+  .bal-blk li { border: 1px solid var(--border-strong); border-radius: 0.45rem; background: var(--card); padding: 0.45rem 0.55rem; }
+  .bal-blk .cd { display: block; font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted-fg); }
+  .bal-blk .lib { font-size: 0.83rem; font-weight: 600; }
+  .bal-blk .det { margin: 0.12rem 0 0; font-size: 0.78rem; color: var(--muted-fg); }
 
   /* =============================== TOASTS ================================= */
   .toasts { position: fixed; right: 1.1rem; bottom: 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; z-index: 90; width: min(22rem, calc(100vw - 2rem)); }
@@ -2833,12 +2885,77 @@
                         </div>
                       </div>
 
-                      <!-- Handoff HONNÊTE : PAS encore disponible (état non validé), sans reçu inventé. -->
+                      <!-- Handoff HONNÊTE : PAS encore disponible (état non validé), sans reçu inventé.
+                           ⚡ FE-058 : la réserve « la route de validation n'est pas encore livrée »
+                           est LEVÉE (STORY-145) — l'écran offre désormais de quoi trancher. -->
                       <div class="bal-handoff pending">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                         <div class="h">
                           <b>Pas encore disponible pour le Bilan</b>
-                          <p>Seule une balance validée sert de base au Bilan. Cet état est <b>affiché</b>, pas modifiable ici : la route de validation n'est pas encore livrée côté service (trou de contrat partagé avec la saisie).</p>
+                          <p>Seule une balance validée sert de base au Bilan. Vous pouvez arrêter cette balance ou la rejeter ci-dessous.</p>
+                        </div>
+                      </div>
+
+                      <!-- ═══════ FE-058 · BLOC D'ACTION (BROUILLON uniquement) ═══════
+                           Absent d'une VALIDÉE et d'une REJETÉE — pas grisé, ABSENT :
+                           un bouton désactivé laisserait croire qu'il pourrait un jour
+                           s'activer, or aucune réouverture n'existe côté service. -->
+                      <div class="bal-act" data-v58-slot="actions">
+                        <div class="txt">
+                          <b>Arrêter cette balance</b>
+                          <p>La <b>valider</b>, c'est engager votre responsabilité sur ces chiffres et les figer : l'opération est <b>irréversible</b>, une correction passera par une nouvelle version. La <b>rejeter</b>, c'est dire que ce chiffre ne passe pas — une nouvelle version reste possible. Un <b>motif</b> est exigé dans les deux cas, et consigné dans l'historique de la balance.</p>
+                        </div>
+                        <div class="btns">
+                          <button class="btn btn-ghost btn-sm" type="button" data-v58-open="rejeter" style="border:1px solid var(--border-strong);color:var(--foreground)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                            Rejeter
+                          </button>
+                          <button class="btn btn-primary btn-sm" type="button" data-v58-open="valider">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Valider la balance
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- ─── Dialogue de décision (motif obligatoire ≤ 500, confirmation
+                           explicite pour la validation seule). En prototype il s'ouvre
+                           en place ; dans l'app c'est un Dialog modal. ─── -->
+                      <div class="bal-dlg" data-v58-slot="dialog" hidden>
+                        <div class="h">
+                          <b data-v58-title>Valider la balance 2025 · v1 ?</b>
+                          <p data-v58-sub>Vous arrêtez ces chiffres et engagez votre responsabilité dessus.</p>
+                        </div>
+
+                        <label class="lb" for="v58-motif" data-v58-label>Motif de la décision</label>
+                        <textarea id="v58-motif" maxlength="500" data-v58-motif placeholder="Ex. Revue du dossier terminée, comptes arrêtés au 31/12."></textarea>
+                        <div class="cnt">
+                          <span data-v58-hint>Consigné dans l'historique de la balance.</span>
+                          <span data-v58-count>0 / 500</span>
+                        </div>
+
+                        <div class="ack" data-v58-ack>
+                          <input type="checkbox" id="v58-ack">
+                          <label for="v58-ack">Je comprends que cette validation est <b>irréversible</b> : la balance devient immuable, et une correction exigera une nouvelle version.</label>
+                        </div>
+
+                        <!-- Les QUATRE refus, rendus ici même. Le 409 a DEUX corps :
+                             `details.bloquants` est ABSENT du cas le plus fréquent. -->
+                        <div data-v58-refus></div>
+
+                        <div class="f">
+                          <button class="btn btn-ghost btn-sm" type="button" data-v58-cancel>Annuler</button>
+                          <button class="btn btn-primary btn-sm" type="button" data-v58-submit disabled>Figer la balance</button>
+                        </div>
+
+                        <div class="demo">
+                          <span class="lbl">Réponse du service (démo)</span>
+                          <div class="sd-refseg" role="tablist" aria-label="Réponse simulée du service">
+                            <button aria-selected="true" data-v58-case="ok">200 · succès</button>
+                            <button aria-selected="false" data-v58-case="controles">409 · contrôles</button>
+                            <button aria-selected="false" data-v58-case="deja">409 · déjà validée</button>
+                            <button aria-selected="false" data-v58-case="inchange">409 · état inchangé</button>
+                            <button aria-selected="false" data-v58-case="autre">400 / 403 / 404</button>
+                          </div>
                         </div>
                       </div>
 
@@ -2939,7 +3056,8 @@
                       </div>
                     </div>
 
-                    <p class="helper">FE-027 · <code>GET /api/v1/balances</code> (org-scopée, antéchronologique ; filtres <code>etat</code>/<code>source</code>, <code>limit</code>≤200/<code>skip</code>) et <code>GET /balances/{id}</code> (<b>404</b> si absente <b>ou</b> d'une autre org — même rendu, aucune fuite). Montants <b>en francs</b>, convertis des unités mineures (÷100) sans arithmétique flottante. L'<b>état</b> est en lecture seule (pas de route de transition — trou de contrat partagé avec FE-026) ; l'immutabilité d'une <b>VALIDÉE</b> est <b>affichée</b>, pas imposée par le front. Handoff <b>honnête</b> : « disponible pour le Bilan » dérivé de l'état, jamais un accusé de transmission fabriqué (STORY-099 = réconciliation ; la propagation réelle passe par Kafka, invisible de l'API).</p>
+                    <p class="helper">FE-027 · <code>GET /api/v1/balances</code> (org-scopée, antéchronologique ; filtres <code>etat</code>/<code>source</code>, <code>limit</code>≤200/<code>skip</code>) et <code>GET /balances/{id}</code> (<b>404</b> si absente <b>ou</b> d'une autre org — même rendu, aucune fuite). Montants <b>en francs</b>, convertis des unités mineures (÷100) sans arithmétique flottante. L'immutabilité d'une <b>VALIDÉE</b> est <b>affichée</b>, pas imposée par le front. Handoff <b>honnête</b> : « disponible pour le Bilan » dérivé de l'état, jamais un accusé de transmission fabriqué (STORY-099 = réconciliation ; la propagation réelle passe par Kafka, invisible de l'API).</p>
+                    <p class="helper"><b>FE-058</b> (amendement) · l'état cesse d'être en lecture seule sur une <b>BROUILLON</b> : <code>POST /balances/{id}/valider</code> et <code>POST /balances/{id}/rejeter</code> (STORY-145) ferment <code>GAP-balance-validation-etat</code>. <b>Motif obligatoire</b> (≤ 500, espaces seuls refusés côté client), <b>confirmation explicite de l'irréversibilité</b> pour la seule validation. L'<code>auteur</code> n'est <b>jamais</b> envoyé au corps : le serveur le dérive du seul JWT et rejette en <code>400</code> toute charge qui tenterait de l'imposer (whitelist stricte). ⚠️ Le <code>409</code> a <b>deux corps</b> discriminés par <code>code</code> — <code>BALANCE_DEJA_VALIDEE</code> (le plus fréquent, <b>sans</b> <code>details</code>) et <code>CONTROLES_BLOQUANTS</code> (liste rendue <b>nommément</b>, jamais résumée en un compte) ; sur <code>/rejeter</code>, <code>BALANCE_ETAT_INCHANGE</code> est un cas <b>nominal</b>, pas une panne. Le rejet n'est <b>pas</b> gardé par les contrôles — refuser un rejet parce que des contrôles échouent enfermerait la balance fautive. Aucune <b>réouverture</b> n'est dessinée : le service n'en expose aucune, une correction se fait par une <b>nouvelle version</b>.</p>
                   </div>
 
                   <!-- ===== Onglet IMPORT SAGE (FE-025) — dry-run en deux temps =====
@@ -3381,7 +3499,7 @@
                     <div data-sd-feedback></div>
 
                     <p class="helper" style="margin-top:0.2rem">FE-026 · adaptateur <code>direct</code> du hub D13. On assemble une <code>SubmitBalanceDto</code> et on la soumet au contrat canonique : <code>POST /balances</code>. Montants en <b>unités mineures XOF</b> (entiers, ×100), équilibre en <b>arithmétique entière</b> (tolérance &lt;&nbsp;100). Le <code>checksum</code> SHA-256 est recalculé et comparé par le serveur.</p>
-                    <p class="helper" style="margin-top:0.2rem"><b>FE-056</b> (retrofit) · le compte proposé vient de <code>POST /balances/suggest-comptes</code> (STORY-139) — <b>en lot</b>, ordre d'entrée préservé, résolu sur le <b>référentiel actif de l'organisation</b> : le front <b>n'envoie aucun code de référentiel</b>. <code>origine</code> ∈ <code>SURCHARGE</code> (règle du cabinet, prioritaire) · <code>EXACT</code> · <code>APPROCHANT</code> (à vérifier) · <code>AUCUN</code> (« à préciser », rien de pré-rempli) ; <code>alternatives[]</code> est un <b>choix rendu à l'humain</b>, jamais départagé côté client. Une suggestion en échec (403/400/réseau) <b>ne bloque pas la saisie</b> — c'est une assistance, pas un prérequis (DO-1). Le champ <code>referentiel</code> de la soumission est repris de l'<b>enveloppe renvoyée par le serveur</b>. Le serveur reste <b>seul juge</b> du compte à la persistance. Aucune UI de <b>validation d'état</b> ici → FE-027.</p>
+                    <p class="helper" style="margin-top:0.2rem"><b>FE-056</b> (retrofit) · le compte proposé vient de <code>POST /balances/suggest-comptes</code> (STORY-139) — <b>en lot</b>, ordre d'entrée préservé, résolu sur le <b>référentiel actif de l'organisation</b> : le front <b>n'envoie aucun code de référentiel</b>. <code>origine</code> ∈ <code>SURCHARGE</code> (règle du cabinet, prioritaire) · <code>EXACT</code> · <code>APPROCHANT</code> (à vérifier) · <code>AUCUN</code> (« à préciser », rien de pré-rempli) ; <code>alternatives[]</code> est un <b>choix rendu à l'humain</b>, jamais départagé côté client. Une suggestion en échec (403/400/réseau) <b>ne bloque pas la saisie</b> — c'est une assistance, pas un prérequis (DO-1). Le champ <code>referentiel</code> de la soumission est repris de l'<b>enveloppe renvoyée par le serveur</b>. Le serveur reste <b>seul juge</b> du compte à la persistance. La <b>validation d'état</b> ne se fait pas ici mais sur le détail de la balance (onglet Balances) — livrée par <b>FE-058</b>.</p>
                     <p class="helper" style="margin-top:0.2rem"><b>Les cinq secteurs.</b> Le référentiel est attribué à l'<b>octroi</b>, par la console (pack vertical AP-06), puis lu dans <code>OrgBalanceEntitlement.referentiel</code> : <b>en ajouter un ne demande pas une ligne de code d'écran</b>. Ce que le service sait en faire, en revanche, dépend de son manifeste. <b>Cabinet</b> et <b>distributeur</b> partagent <code>syscohada-revise@2.1</code> — un distributeur ne change pas de plan, il change de <b>vocabulaire</b> (stocks, démarque, transport sur ventes) et surtout de <b>volume</b> : ses auxiliaires par point de vente dépassent la borne de <code>200</code> libellés par lot, alors le front <b>découpe</b> (241 lignes → 2 appels, jamais 241). <b>IMF</b> : <code>sfd-bceao@2.0</code>. <b>TPE au SMT</b> : <code>smt-togo@1.0</code> est <b>déclaré mais non packagé</b> — refus <code>409 REFERENTIEL_NON_PACKAGE</code> avec son motif, et rien à réessayer. <b>Assurance</b> : <code>cima-assurances@1.0</code> existe côté <code>bilan-service</code> (STORY-122) mais <b>ne figure ni au manifeste de balance-service ni au contrat canonique</b> <code>REFERENTIELS_BALANCE</code> (<code>SN</code>&nbsp;|&nbsp;<code>SMT</code>&nbsp;|&nbsp;<code>SFD-BCEAO</code>) ⇒ <code>500 REFERENTIEL_UNAVAILABLE</code>. Dans les deux cas, la <b>saisie reste entière</b> : c'est l'assistance qui manque, pas la fonction.</p>
                   </div>
                 </div>
@@ -5643,6 +5761,157 @@
           if (balPanel) balPanel.scrollIntoView({ block: "start", behavior: "smooth" });
         });
       });
+
+      /* ═══════════ FE-058 · valider / rejeter une balance BROUILLON ═══════════
+         Le motif est obligatoire (≤ 500, espaces seuls refusés CÔTÉ CLIENT : le
+         serveur le rogne avant de valider, on n'envoie pas ce qu'on sait faux).
+         La validation exige EN PLUS une confirmation explicite — aucun
+         double-clic ne fige une balance. Les quatre refus sont reconnus par leur
+         `code`, jamais par le texte du message ; `details.bloquants` n'existe que
+         sur CONTROLES_BLOQUANTS, et le lire à l'aveugle produirait un `undefined`
+         sur le refus le plus banal (balance déjà figée). */
+      (function () {
+        var dlg = page.querySelector("[data-v58-slot='dialog']");
+        if (!dlg) return;
+        var actions = page.querySelector("[data-v58-slot='actions']");
+        var motif = dlg.querySelector("[data-v58-motif]");
+        var count = dlg.querySelector("[data-v58-count]");
+        var hint = dlg.querySelector("[data-v58-hint]");
+        var ack = dlg.querySelector("[data-v58-ack]");
+        var ackBox = ack.querySelector("input");
+        var submit = dlg.querySelector("[data-v58-submit]");
+        var refus = dlg.querySelector("[data-v58-refus]");
+        var titre = dlg.querySelector("[data-v58-title]");
+        var sousTitre = dlg.querySelector("[data-v58-sub]");
+        var label = dlg.querySelector("[data-v58-label]");
+        var mode = "valider";
+        var cas = "ok";
+
+        var ICONS = {
+          ko: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+          lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+          info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
+        };
+
+        /* Ce que le service répondrait — corps réels du contrat :3007. */
+        var REFUS = {
+          controles: { tone: "ko", icon: ICONS.ko, titre: "Validation refusée : 2 contrôles bloquants",
+            corps: "La balance reste en brouillon. Corrigez ces points, puis reprenez la validation.",
+            bloquants: [
+              { code: "EQUILIBRE_ACTIF_PASSIF", libelle: "L'actif et le passif ne s'équilibrent pas", detail: "Écart de 1 240 000 F CFA." },
+              { code: "COMPTE_HORS_PLAN", libelle: "Un compte n'appartient pas au plan de l'organisation", detail: "Compte 9999, ligne 14." }
+            ] },
+          deja: { tone: "warn", icon: ICONS.lock, titre: "Cette balance est déjà validée",
+            corps: "Elle est figée et ne peut plus changer d'état. L'écran vient d'être rafraîchi." },
+          inchange: { tone: "info", icon: ICONS.info, titre: "Cette balance est déjà rejetée",
+            corps: "Rien n'a changé — son motif de rejet initial reste celui qui fait foi." },
+          autre: { tone: "ko", icon: ICONS.ko, titre: "Action refusée",
+            corps: "motif must be shorter than or equal to 500 characters" }
+        };
+
+        function motifValide() { return motif.value.trim().length > 0 && motif.value.length <= 500; }
+
+        function refresh() {
+          var n = motif.value.length;
+          count.textContent = n + " / 500";
+          var vide = motif.value.trim().length === 0;
+          motif.setAttribute("aria-invalid", String(vide && n > 0));
+          hint.className = vide && n > 0 ? "err" : "";
+          hint.textContent = vide && n > 0
+            ? "Un motif est obligatoire — des espaces seuls ne suffisent pas."
+            : "Consigné dans l'historique de la balance.";
+          /* ⚠️ Rejeter n'est JAMAIS bridé par l'issue d'une validation : refuser
+             un rejet parce que des contrôles échouent enfermerait la balance. */
+          submit.disabled = !motifValide() || (mode === "valider" && !ackBox.checked);
+        }
+
+        function rendreRefus() {
+          refus.innerHTML = "";
+          var r = REFUS[cas];
+          if (!r) return;
+          var box = document.createElement("div");
+          box.className = "bal-refus " + r.tone;
+          var liste = "";
+          if (r.bloquants) {
+            liste = '<ul class="bal-blk">' + r.bloquants.map(function (b) {
+              return '<li><span class="cd">' + b.code + '</span><span class="lib">' + b.libelle
+                + '</span>' + (b.detail ? '<p class="det">' + b.detail + "</p>" : "") + "</li>";
+            }).join("") + "</ul>";
+          }
+          box.innerHTML = r.icon + '<div class="bd"><b>' + r.titre + "</b><p>" + r.corps + "</p>" + liste + "</div>";
+          refus.appendChild(box);
+        }
+
+        function ouvrir(next) {
+          mode = next;
+          motif.value = "";
+          ackBox.checked = false;
+          refus.innerHTML = "";
+          ack.hidden = mode !== "valider";
+          titre.textContent = mode === "valider"
+            ? "Valider la balance 2025 · v1 ?" : "Rejeter la balance 2025 · v1 ?";
+          sousTitre.textContent = mode === "valider"
+            ? "Vous arrêtez ces chiffres et engagez votre responsabilité dessus."
+            : "Le rejet dit « ce chiffre ne passe pas ». Une nouvelle version reste possible.";
+          label.textContent = mode === "valider" ? "Motif de la décision" : "Motif du rejet";
+          motif.placeholder = mode === "valider"
+            ? "Ex. Revue du dossier terminée, comptes arrêtés au 31/12."
+            : "Ex. Écart de 1 240 000 F sur le compte 411, pièces manquantes.";
+          submit.textContent = mode === "valider" ? "Figer la balance" : "Rejeter la balance";
+          submit.className = "btn btn-sm " + (mode === "valider" ? "btn-primary" : "btn-ghost");
+          if (mode === "rejeter") { submit.style.border = "1px solid var(--danger)"; submit.style.color = "var(--danger)"; }
+          else { submit.style.border = ""; submit.style.color = ""; }
+          dlg.hidden = false;
+          refresh();
+          motif.focus();
+        }
+
+        page.querySelectorAll("[data-v58-open]").forEach(function (b) {
+          b.addEventListener("click", function () { ouvrir(b.dataset.v58Open); });
+        });
+        dlg.querySelector("[data-v58-cancel]").addEventListener("click", function () { dlg.hidden = true; });
+        /* Retour à la liste : la démo repart d'une BROUILLON intacte. */
+        page.querySelectorAll("[data-bal-back]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            dlg.hidden = true;
+            if (actions) actions.hidden = false;
+            var badge = page.querySelector("[data-bal-slot='detail-risk'] .st");
+            if (badge) { badge.className = "st st-brouillon"; badge.innerHTML = '<span class="d"></span>Brouillon'; }
+          });
+        });
+        motif.addEventListener("input", refresh);
+        ackBox.addEventListener("change", refresh);
+        dlg.querySelectorAll("[data-v58-case]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            dlg.querySelectorAll("[data-v58-case]").forEach(function (x) { x.setAttribute("aria-selected", String(x === b)); });
+            cas = b.dataset.v58Case;
+          });
+        });
+
+        submit.addEventListener("click", function () {
+          if (!motifValide()) return;
+          if (cas === "ok") {
+            dlg.hidden = true;
+            if (mode === "valider") {
+              /* L'écran devient immuable, le bloc d'action DISPARAÎT, et la liste
+                 reflète le nouvel état sans rechargement manuel (invalidation du
+                 détail ET de la liste — l'état y est un filtre). */
+              showBalSlot("detail-validee");
+              notify("success", "Balance validée", "Elle est figée, immuable, et disponible pour le Bilan.");
+            } else {
+              /* Rejet : état non terminal côté métier, mais plus aucune action —
+                 on repart d'une nouvelle version, jamais d'une « réouverture ». */
+              if (actions) actions.hidden = true;
+              var badge = page.querySelector("[data-bal-slot='detail-risk'] .st");
+              if (badge) { badge.className = "st st-rejetee"; badge.innerHTML = '<span class="d"></span>Rejetée'; }
+              notify("success", "Balance rejetée", "Le motif est consigné ; une nouvelle version reste possible.");
+            }
+            return;
+          }
+          /* Refus : le dialogue RESTE ouvert, le motif saisi n'est pas perdu. */
+          rendreRefus();
+        });
+      })();
 
       setGate("granted");
       setTab("sources");
