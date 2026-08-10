@@ -7,6 +7,10 @@
 # git qui tient l'historique. (« sprint-status ancienne version.yaml » était
 # byte-identique au tracker le 2026-08-03, donc sans valeur, puis a divergé.)
 *ancienne version*.yaml
-sprint-status.yaml.bak-*
+# ⚡ Élargi le 2026-08-09 : la règle ci-dessus ne visait QUE `sprint-status`, et
+# `epics-fiscalite-...md.bak-2026-08-09` s'est présenté au commit sans être
+# couvert. Le motif ne dépend pourtant pas du fichier sauvegardé — il vaut pour
+# tout doublon horodaté d'un document que git versionne déjà.
+*.bak-*
 PROSPERA_MODULES_ET_ROADMAP.md
 

@@ -34,10 +34,11 @@ TICKET-<CIBLE>-<sujet-en-kebab-case>.md
 maintenu en parallèle de la story. Deux sources de vérité sur le même sujet, c'est précisément le
 défaut que ce dépôt a rencontré trois fois (statuts périmés, stories orphelines, 134/135/136 vs 144).
 
-## État au 2026-08-08
+## État au 2026-08-09
 
 | Ticket | Cible | Ouvert par | État |
 |---|---|---|---|
+| `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` | backend *(+ volet frontend)* | question du PO (barry thierno alhassane, 09/08) | ➡️ **REPRIS le 09/08 par 13 stories `EPIC-043`, toutes au SPRINT 20** (8 créées : 353→360 · 5 **réancrées** : 236 du S22, 301/302/304 du S23, 303 du S24). **73 pts.** Les stories font foi. Décision PO : fermer balance+bilan d'une société **avant** que la fiscalité ne démarre au S22. — Historique : 🟠 décisions D1→D16 prises, découpage suspendu. ⚡ Exception au cycle ci-dessus : ce ticket ne naît pas d'une story mais d'une **décision produit** qui renverse une invariante livrée (« une organisation = une société », `profil-societe.schema.ts`). Il porte **16 blocs** de travail A→P, non numérotés **volontairement**. ⬆️ **2ᵉ entrée du 09/08** — maquette validée : blocs **J** (aucun `GET` n'existe sur les exercices), **K** (vue consolidée + compteurs de portefeuille), **L** (audit du profil **écrit mais illisible** — répétition de STORY-144), **M** (régime non daté par exercice). ⬆️ **3ᵉ entrée du 09/08** — analyse de la partie dossier, 6 décisions D11→D16 : blocs **N** (⚡ `notification-service` **n'existe pas** alors que « l'admin est informé » en dépend), **O** (unicité du NIF société, aucun index aujourd'hui), **P** (échéance au portefeuille — la donnée existe dans le paquet fiscal, aucune route ne la sert). Q3/Q4/Q5 tranchées, **Q6→Q12** ouvertes |
 | `TICKET-BACKEND-mapping-profile-accepte-mais-ignore.md` | backend | FE-025 (barry thierno alhassane, 25/07) | ✅ **résolu** par STORY-088 — reste la régénération des types, portée par FE-057 |
 | `TICKET-FRONTEND-retrait-dictionnaire-plan-comptes.md` | frontend | STORY-139 (vivianMoneyVibesGroupes, 29/07) | ✅ **résolu** par **FE-056** le 2026-08-07 (commit `c1b777f`) |
 | `TICKET-BACKEND-ecarts-releves-par-integration-gate-console.md` | backend | Integration Gate console (03/08) | ➡️ voir `GAP-integration-gate-console` |

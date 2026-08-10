@@ -1,4 +1,4 @@
-version: "6.0.0"
+version: "7.0.0"  # ⬆ 2026-08-09 — EPIC-043 : LE DOSSIER CLIENT DEVIENT L'UNITÉ DE TRAVAIL DU CABINET. Une organisation cabinet porte N dossiers ; Balance et Bilan s'exercent DANS un dossier. Renverse une invariante LIVRÉE et assumée (« une organisation = une société », profil-societe.schema.ts). 13 stories au S20 (73 pts) dont **5 RÉANCRÉES et non créées** : 236 (S22→S20), 301/302/304 (S23→S20), 303 (S24→S20) portaient déjà l'objet des blocs du ticket, mais dans fiscal-service et six sprints trop tard — les dupliquer aurait fabriqué DEUX concepts de client. + EPIC-028 RECADRÉ (il ne crée plus le dossier, il ajoute les implantations multiples : STORY-362 créée pour que la scission de 302 ne soit pas une perte). + DOUBLON RÉSOLU : STORY-294 existait deux fois (auth S20 / scaffold fiscal S22) — le scaffold devient STORY-361, l'autre garde le numéro (elle a un fichier, un ticket et un consommateur frontend). Ticket : tickets/TICKET-BACKEND-dossier-client-entite-de-premier-rang.md
 project_name: "prospera"
 project_level: 3
 current_sprint: 19  # maj 2026-08-03 (sprint-planning PI-SPI) : RE-DECOUPAGE du Module 2. Les 18 stories paiement de EPIC-004 rescope (STORY-150..165, 168, 169 ; 104 pts, ex-S31..S34) sont SUPERSEDED et remplacees par EPIC-035..EPIC-042 / STORY-237..290 (54 stories, 196 pts dont 13 hors service), etalees sur S31..S38. Consequence assumee : l assistant IA (ex-S35) et le bloc terrain (ex-S36) reculent de 4 sprints, en S39 et S40. Le sprint courant reste 19 : rien de ce re-decoupage ne touche aux sprints ouverts. ATTENTION : ce re-decoupage a ete fait le lendemain du precedent — le controle anti-doublon (comparer stories/*.md a l ensemble des story_id slottes) doit tourner AVANT tout nouveau decoupage, pas apres. Historique : maj 2026-07-31 : S18 CLÔTURÉ — ses 9 stories sont `done` (102/087/088/089/090 le 29-30, 140/142/141/143 le 29) et le compteur était resté sur 18 / `not_started` alors que le sprint était intégralement livré. ⚠️ Son committed_points nominal de 42 était PÉRIMÉ : après les ré-estimations à la rédaction (140 5→3, 141 5→6, 143 8→5), la somme réelle des stories est **38**, toutes livrées ⇒ 38/38. L'arbitrage de capacité annoncé (« décaler 140→143 au S19 ») n'a donc jamais eu lieu et n'a plus d'objet. Prochain sprint = S19 (EPIC-023, moteur fiscal 091→095, 21 pts) — `not_started`, aucune story commencée. ⚠️ 5 STORIES ORPHELINES relevées le 2026-07-31 : STORY-133/134/135/136/144 ont un FICHIER dans stories/ mais ne sont référencées dans AUCUN sprint — et pire, **134/135/136 recouvrent le périmètre de 144** (même maquette AP-02, deux passes de rédaction, aucune ne cite les autres ; 136 est même CONTREDITE par 144 sur la revue KYC groupée). Cf. `orphan_stories` en fin de fichier : à trancher AVANT de planifier, pas à slotter en bloc. Historique : maj 2026-07-29 : S15, S16 et S17 sont TOUS clôturés (toutes leurs stories `done`) — le compteur était resté bloqué sur 15 alors que trois sprints avaient été livrés. S15 32/32, S16 60/60, S17 26/26. Le prochain sprint à ouvrir est le S18 (hub multi-source D13 + console admin), qui reste `not_started` : sa bascule en `in_progress` relève du sprint-planning, d'autant qu'il porte 42 pts pour 34 de capacité (arbitrage à trancher — cf. son commentaire `committed_points`). Historique : maj 2026-07-21 : S13 (EPIC-011B liasse calculée) done ; S14 (EPIC-012 validation/immutabilité/exercices/audit 064→067 + EPIC-013 amorce hypothèses 068) DONE 21/21 ; S15 = EPIC-013 projections (069-071) + STORY-137 (dette versions d'hypothèses, ex-132) + EPIC-014 consultation/export (072-073) ; 074 reportée au S16 le 2026-07-23 (arbitrage de capacité)
@@ -1967,10 +1967,10 @@ sprints:
     start_date: "2027-03-25"
     end_date: "2027-04-08"
     capacity_points: 34
-    committed_points: 87  # 🚨 ⬆️ 80→87 le 2026-08-07 (décision user) : +STORY-292 (5) +STORY-293 (2), référentiels attribuables mais non servis — ticket `TICKET-BACKEND-referentiels-attribuables-mais-non-servis.md`. ⚠️ **256 % DE LA CAPACITÉ (87/34)** : l'ajout ne change pas la nature du problème ci-dessous, il l'aggrave. 292 est la seule des deux qui soit `Must` (une org Assurance provisionnée prend un 500) ; 293 est `Should` et se décale sans dommage — `plan.ts` bloque déjà l'octroi. Historique : ⬆️ 48→64 le 2026-08-04 (décision user) : +STORY-179..184 (16 pts), dette AP-INT-1 — ticket `TICKET-BACKEND-ap-int-1-revue-kyc-sans-document.md`. ⚠️⚠️ **188 % DE LA CAPACITÉ (64/34), ET LE SPRINT EST DÉJÀ `in_progress`** : ce n'est pas un plan, c'est un ordre de priorité. L'arbitrage est À RENDRE, il n'est pas rendu ici. ⚡ SI LA CAPACITÉ DOIT ÊTRE TENUE, l'ordre défendable est : garder **179 + 180** (6 pts, indissociables — la revue KYC est aujourd'hui INEXPLOITABLE : l'opérateur ouvre un dossier et ne voit AUCUN document) et décaler 181/182/183/184 (10 pts) au S21, qui est à 14/34 et porte déjà la dette de contrat de la console. ⚠️ 183 et 184 se tirent ENSEMBLE ou pas du tout (un compteur de soumission sans historique pose la question sans y répondre) : les séparer entre deux sprints serait le pire découpage. Historique : ⬆️ 45→48 le 2026-08-04 : +STORY-173 (3, CORS du BFF admin), trouvée en exécutant AP-INT-0. ⚠️ Elle portait le n° 172, déjà pris par la story balance-service ci-dessous — `origin/main` fait foi. Historique : ⬆️ 40→45 le 2026-08-03 (+STORY-172, 5 pts : refermer les angles morts de STORY-146). Historique : ⬆️ 27→40 le 2026-08-01 (décision PO) : +STORY-148 (5) et +STORY-149 (8), déplacées du S19. 118 % de la capacité. ⚠️ CONSÉQUENCE FRONTEND À CONNAÎTRE : **AP-12 (S12 frontend) dépend de STORY-149** et son `backend_dependency disait « slottée sprint 19 » — c'est désormais le S20, donc une marge de moins. Historique : ⬆️ 18→27 le 2026-08-01 (décision user) : +STORY-144 (5), +STORY-133 (3) et +STORY-132 (1), sorties d'orphelinat. 26/34 ≤ capacité. Hors thème « conseil fiscal » du sprint, comme STORY-109 puis 138/139 l'étaient du leur — mais ce sont deux dettes d'EXPLOITATION de la console, et l'une d'elles (144) referme une impasse : on peut suspendre une organisation sans pouvoir la réactiver.
+    committed_points: 165  # ⚡⚡ 165/34 = 485 % — DÉCISION PO DU 2026-08-09, ASSUMÉE ET TRACÉE : +78 pts d'EPIC-043 (socle DOSSIER CLIENT). Motif du PO, mot pour mot : « il faut terminer correctement la partie balance et bilan d'une société avant de débuter la partie fiscalité, c'est pour cela que je mets tout au niveau du S20 pour que cela serve de référence ». ⚠ CE SPRINT N'EST PLUS UN PLAN, C'EST UN ORDRE DE PRIORITÉ — il l'était déjà à 87/34, il l'est maintenant sans ambiguïté. CHIFFRES RÉELS : 46 pts sont DÉJÀ `done`, il reste **119 pts** pour 34 de capacité. L'ordre de tirage d'EPIC-043 est écrit en tête de son bloc ; hors EPIC-043, la dette console (185→188, 292→294) et l'Atelier (096→100) sont les deux ensembles sécables. ⚡ CE QUI A CHANGÉ AILLEURS : 5 stories ont été RÉANCRÉES ici, pas créées — S22 passe 34→26, S23 31→16, S24 32→27. Historique : ⬆ 80→87 le 2026-08-07 (+STORY-292/293) ; ⬆ 48→64 le 2026-08-04 (+STORY-179..184) ; ⬆ 45→48 (+STORY-173) ; ⬆ 40→45 (+STORY-172) ; ⬆ 27→40 le 2026-08-01 (+STORY-148/149).
     completed_points: 29  # ⬆️ 26→29 le 2026-08-07 (STORY-179 done, 3 pts — pièces KYC signées sur l'hôte public ; la revue KYC cesse d'être inexploitable). Historique : ⬆️ 5→8 le 2026-08-05 (STORY-173 done, 3 pts — CORS du BFF admin, dernier verrou d'AP-INT-0). Historique : ⬆️ 0→5 le 2026-08-03 (STORY-172 done)
     status: "in_progress"  # ▶️ démarré le 2026-08-03 avec STORY-172
-    goal: "Atelier Balance livré 🏁 : simulation & conseil fiscal (scénarios légaux + dossier de justification + garde-fous) ; contrôles + statut de preuve ; e2e Atelier docker. [Handoff bilan-service = déjà livré en CORE S11 (STORY-099) — décalé du S10 par D15.] ⚡ SECOND THÈME AJOUTÉ le 2026-08-04 : rendre la revue KYC EXPLOITABLE (179 pièces affichables + 180 jeu de données de revue), puis solder la dette de contrat qu'elle a révélée (181 fiche typée, 182 concurrence, 183 historique, 184 référence). Hors thème « conseil fiscal », comme l'étaient déjà 144/173 — et pour la même raison : ce sont des dettes d'EXPLOITATION de la console, et celle-ci rend un écran entier inutilisable."
+    goal: "🏁 LE DOSSIER CLIENT DEVIENT L'UNITÉ DE TRAVAIL DU CABINET (EPIC-043) — un cabinet porte N dossiers, et Balance comme Bilan s'exercent DANS un dossier, client ou lui-même. Objectif du PO : fermer proprement le couple balance+bilan d'une société AVANT que la fiscalité ne démarre (S22), pour qu'elle serve de référence. Plus la dette de contrat de la console et la fin de l'Atelier."
     stories:
       - story_id: "STORY-172"
         title: "Refermer les deux angles morts de STORY-146 : les comptes de PARAMÉTRAGE échappent au niveau de détail, et le SFD-BCEAO n'en déclarait aucun (désormais SOURCÉ : 6 chiffres)"
@@ -2210,6 +2210,121 @@ sprints:
         story_path: "stories/STORY-294.md"
         assigned_to: null
 
+      # ========== EPIC-043 - DOSSIER CLIENT : l'unite de travail du cabinet ==========
+      # Ticket : tickets/TICKET-BACKEND-dossier-client-entite-de-premier-rang.md (decisions D1->D16, blocs A->P).
+      # DECISION PO 2026-08-09 : TOUT AU S20 - "il faut terminer correctement la partie balance et bilan
+      #   d'une societe AVANT de debuter la fiscalite, pour que cela serve de reference". Le socle dossier
+      #   devient donc le PREALABLE du module Fiscalite (S22+) et non son sous-produit.
+      # CINQ STORIES SONT REANCREES, PAS CREEES : 236 (S22), 301/302/304 (S23), 303 (S24) portaient deja
+      #   l'objet des blocs B/C/E/M, mais dans `fiscal-service` et six sprints trop tard. Les dupliquer aurait
+      #   fabrique DEUX concepts de client a fusionner plus tard sur des donnees reelles - exactement ce que
+      #   le ticket existe pour empecher. Elles gardent leur numero (origin/main fait foi) ; seuls leur
+      #   service, leur epic et leur sprint changent.
+      # EFFET DE BORD ASSUME : EPIC-028 perd 3 de ses 4 stories du S23. Ce n'est pas une perte de perimetre -
+      #   c'est le meme travail, fait plus tot et au bon endroit, dont le module Fiscalite devient CONSOMMATEUR.
+      #   Le bloc H se reduit a supprimer le `dossierId` local de fiscal-service.
+      # ORDRE DE TIRAGE : 301 -> 353 -> 354 -> 304 -> 302 -> 355 -> 356 (migration) -> 236 + 357 + 358 -> 303 -> 359 -> 360.
+
+      - story_id: "STORY-301"
+        title: "Socle `dossier-service` : modèle Dossier, création, attestation de mandat, historisation, « Mon cabinet » auto-créé"
+        epic: "EPIC-043"
+        points: 8  # ⬆ 5->8 au réancrage : elle porte désormais le SCAFFOLD du service (bases, gate, read-models, outbox) en plus du modèle. Le 5 initial supposait un module de plus dans un fiscal-service déjà debout (STORY-294/295/296 du S22).
+        service: "dossier-service"
+        status: "not_started"  # ⚡ RÉANCRÉE le 2026-08-09 : était « Dossier fiscal, attestation de mandat et historisation » (EPIC-028, `fiscal-service`, S23). MÊME OBJET, mauvais propriétaire (D4) et six sprints trop tard. Le dossier n'est pas fiscal : il est l'unité de travail du cabinet, sur laquelle Balance et Bilan s'exercent AVANT toute fiscalité. Porte : modèle `Dossier` (identité fiscale, type d'entité, pays, 2 axes, statut), POST /dossiers + attestation de mandat horodatée et attribuée (D2, sans pièce exigée), historisation append-only, dossier « Mon cabinet » créé AUTOMATIQUEMENT à l'activation (D1, non supprimable, non détachable), événements `dossier.*` en outbox transactionnelle. ⚠ Le mandat reste une LIGNE DE JOURNAL, pas un formulaire - D2 : le client final n'a pas de compte, il ne peut pas se vérifier.
+        assigned_to: null
+      - story_id: "STORY-353"
+        title: "Portée du portefeuille - responsable, contributeurs, « Mon cabinet » et archivage"
+        epic: "EPIC-043"
+        points: 5
+        service: "dossier-service"
+        status: "not_started"  # D6/D9/D11/D13 + Q2. Le RÔLE dit ce qu'on peut faire (existe déjà), l'AFFECTATION dit sur quoi (n'existe nulle part) - les confondre donne soit un collaborateur qui voit tout, soit un admin incapable de reprendre un dossier orphelin. La portée vit DANS LA REQUÊTE Mongo, jamais en filtre applicatif post-lecture (mutation-test dédié). ⚡ D11 : `estLeCabinet` est invisible ET non-affectable pour un TENANT_USER - il porte salaires et résultat du cabinet. D13 : archivage réservé à l'admin, et un test ÉCHOUE si une route DELETE apparaît.
+        story_path: "stories/STORY-353.md"
+        assigned_to: null
+      - story_id: "STORY-354"
+        title: "Deux dossiers ne peuvent pas porter le même NIF de société"
+        epic: "EPIC-043"
+        points: 2
+        service: "dossier-service"
+        status: "not_started"  # D14 (Q5 tranchée). Le seul index posé aujourd'hui est {orgId:1} unique : RIEN n'assure l'unicité d'un NIF - sans conséquence tant qu'une org valait une société. ⚡ L'index doit être PARTIEL (`nifNormalise` de type string) : un index plein interdirait le 2e dossier SANS NIF et casserait la saisie progressive de STORY-079. 409 informatif nommant le dossier existant (un 409 muet fait ressaisir tout le formulaire). AUCUNE contrainte sur le NIF du DIRIGEANT - un même gérant tient plusieurs sociétés (test explicite : c'est la moitié de D14 qu'on oublie).
+        story_path: "stories/STORY-354.md"
+        assigned_to: null
+      - story_id: "STORY-304"
+        title: "Résolution conjointe type d'entité -> référentiel comptable ET paquet fiscal, combinaison incohérente refusée"
+        epic: "EPIC-043"
+        points: 5
+        service: "dossier-service"
+        status: "not_started"  # ⚡ RÉANCRÉE le 2026-08-09 (était EPIC-028, `fiscal-service`, S23) : c'est EXACTEMENT D7, au bon niveau de détail, dans le mauvais service. État actuel vérifié : le referentiel est ENVOYÉ PAR LE CLIENT à chaque balance (@IsIn(['SN','SMT','SFD-BCEAO']), submit-balance.dto.ts:128) - rien n'empêche de calculer une microfinance sur le plan entreprise, et le résultat serait un montant faux et opposable. Entreprise->SYSCOHADA, SFD->SFD-BCEAO, Assurance->CIMA : plan de comptes + table de passage + gabarit de liasse + paquet fiscal RÉSOLUS ENSEMBLE depuis le type d'entité du dossier. + ⚡ GARDE Q3 (tranchée par la maquette) : changer le type d'entité est REFUSÉ dès qu'un exercice est validé - une liasse figée cite son référentiel, le rejouer rétroactivement rendrait faux un document déposé. C'est la SEULE barrière au droit de modification large du collaborateur (D12/Q12).
+        assigned_to: null
+      - story_id: "STORY-302"
+        title: "Type d'entité et pays portés par le dossier (v1 mono-pays) - le multi-implantation viendra par-dessus"
+        epic: "EPIC-043"
+        points: 3  # ⬇ 5->3 : SCINDÉE. Le volet multi-implantation (N pays par dossier) reste au module Fiscalité et sera réécrit à son sprint.
+        service: "dossier-service"
+        status: "not_started"  # ⚡ RÉANCRÉE ET SCINDÉE le 2026-08-09 (était « Implantations fiscales : création, type d'entité, clôture », EPIC-028, S23). D10 : UN SEUL PAYS EN V1 - le dossier porte donc directement pays, typeEntite et identifiantFiscal, sans couche d'implantation. La clé reste (dossier, pays) pour que le multi-implantation du module Fiscalité s'y branche sans migration. ⚠ Ne PAS livrer la couche Implantation ici : elle ferait porter au socle une complexité dont aucun cabinet togolais n'a besoin en v1.
+        assigned_to: null
+      - story_id: "STORY-355"
+        title: "L'exercice appartient au dossier - un seul ouvert, un cycle de vie qui fait foi"
+        epic: "EPIC-043"
+        points: 8
+        service: "dossier-service"
+        status: "not_started"  # ⚡ Q6/Q7/Q8. DEUX MODÈLES D'EXERCICE EXISTENT ET SE CONTREDISENT : ExerciceAtelier (balance, CLOS TERMINAL, clôture en EFFET DE BORD de la reprise, AUCUNE route de lecture) vs Exercice (bilan, STORY-066 livrée, CRUD complet + POST :id/rouvrir). « L'exercice 2023 est-il clos ? » a deux réponses selon le service - rouvrir une liasse laisserait la balance verrouillée, panne silencieuse. Q6 : le DOSSIER fait foi, les deux modèles deviennent des read-models. Q8 : UN SEUL EXERCICE OUVERT à la fois (index unique partiel, pas un pré-contrôle : deux ouvertures concurrentes ne doivent pas passer). Q7 : les exercices antérieurs à l'entrée en portefeuille sont listables en consultation, origine MIGRATION, sans liasse Prospera. + GET /dossiers/:id/exercices - LA LECTURE QUI N'EXISTE NULLE PART AUJOURD'HUI.
+        story_path: "stories/STORY-355.md"
+        assigned_to: null
+      - story_id: "STORY-356"
+        title: "Migration - chaque profil société devient le dossier « Mon cabinet », et `dossierId` devient obligatoire"
+        epic: "EPIC-043"
+        points: 8
+        service: "dossier-service + balance-service + bilan-service"
+        status: "not_started"  # D8/D1. ⚡ C'EST LE SEUL POINT DU PROGRAMME QUI VIEILLIT MAL : la donnée est jeune, chaque semaine ajoute des balances et des liasses à rattacher À LA MAIN. Tout le reste peut attendre sans se dégrader, pas celui-là. Script idempotent et rejouable en 3 phases (créer les dossiers -> rattacher -> VÉRIFIER puis rendre dossierId requis) ; l'ordre est impératif - rendre requis avant vérification bloquerait l'écriture sur une base à moitié migrée SANS marche arrière. Rapport listant les ORPHELINS RESTANTS (un rapport qui ne dit que le succès ne sert à rien) + marche arrière TESTÉE + répétition sur un DUMP RÉEL, pas sur des fixtures. Checksums des liasses figées inchangés.
+        story_path: "stories/STORY-356.md"
+        assigned_to: null
+      - story_id: "STORY-236"
+        title: "Le contrat de balance canonique porte le `dossierId` - dimension d'entité vérifiée absente du code le 2026-08-03"
+        epic: "EPIC-043"
+        points: 8
+        service: "balance-service"
+        status: "not_started"  # ⚡ RÉANCRÉE le 2026-08-09 : était EPIC-027 / S22, EN TÊTE DE SPRINT fiscalité. Son constat d'origine est intact et fait foi : « grep sur balance-service/src rend ZÉRO occurrence de societeId, entiteId ou implantation ; la clé réelle est (orgId, exercice.debut, exercice.fin, source, version) ». La story censée l'apporter (« STORY-135 ») N'A JAMAIS EXISTÉ. ⚠ CE QUI CHANGE AU RÉANCRAGE : elle pose dossierId (identifiant venant de dossier-service) et NON un societeId local - sinon on crée un identifiant maison qu'il faudrait re-scoper ensuite, et ON PAIE DEUX FOIS. Re-scope les familles du 4.2 du ticket : balances, imports, rejets, exercices, reprise, import Sage, agrégation cahiers, comptes-ventilation, cahiers dépenses/recettes/catégories (Q1 : propre au dossier), pieces/ocr, rattachement, fiscal/*.
+        assigned_to: null
+      - story_id: "STORY-357"
+        title: "`bilan-service` se scope sur le dossier - la liasse cesse d'appartenir au cabinet"
+        epic: "EPIC-043"
+        points: 5
+        service: "bilan-service"
+        status: "not_started"  # D5 et sa nuance (on ne re-scope que ce qui porte de la donnée de dossier - vérifié : les 10 familles du Bilan y passent toutes, aucune n'est de niveau cabinet). ⚡ LE VRAI RISQUE N'EST PAS LE PLANTAGE : la comparaison inter-exercices (STORY-074) mélangerait DEUX SOCIÉTÉS en croyant comparer deux années, et rendrait un tableau plausible et FAUX - le pire mode de panne du produit. D'où le 409 COMPARAISON_INTER_DOSSIERS avant même le contrôle d'homogénéité de référentiel. ⚠ PIÈGE D'ORDRE DE ROUTES À DIX ENDROITS (/dossiers/:dossierId/bilan/... introduit un segment paramétré en tête) : un test d'ordre PAR FAMILLE, pas un seul global. À livrer DANS LE MÊME SPRINT que 236, sinon le handoff balance->bilan casse.
+        story_path: "stories/STORY-357.md"
+        assigned_to: null
+      - story_id: "STORY-358"
+        title: "Les pièces se rattachent au dossier - statuts et carte CFE cessent de disparaître"
+        epic: "EPIC-043"
+        points: 3
+        service: "document-service"
+        status: "not_started"  # Rattachement ADDITIF (l'org reste, le dossier s'ajoute) : dossierId OPTIONNEL, parce que les pièces KYC du cabinet n'appartiennent à aucun dossier et ne doivent pas être forcées d'en avoir un - D2 : le KYC ne descend pas au dossier. Aujourd'hui les statuts et la carte CFE déposés à la création sont lus par l'OCR (STORY-081) puis NE SONT PLUS VISIBLES NULLE PART. ⚠ Vérifier l'URL présignée dans un VRAI NAVIGATEUR, pas au curl (leçon FE-023 -> STORY-179 -> STORY-352).
+        story_path: "stories/STORY-358.md"
+        assigned_to: null
+      - story_id: "STORY-303"
+        title: "Les 2 axes sont datés par exercice - un changement vaut à partir de l'exercice ouvert, jamais rétroactivement"
+        epic: "EPIC-043"
+        points: 5
+        service: "dossier-service"
+        status: "not_started"  # ⚡ RÉANCRÉE le 2026-08-09 (était « Proposition et confirmation des régimes par implantation », EPIC-028, `fiscal-service`, S24). Tant qu'on est mono-pays (D10), le couple d'axes appartient au DOSSIER, pas à l'implantation. ⚡ Q9 + CONSTAT DE CODE : systemeComptable et regimeFiscal sont des champs COURANTS du profil (profil-societe.schema.ts:114-118). La maquette promet « un changement d'axe ne rejoue pas les exercices clos » : c'est vrai pour une liasse FIGÉE (snapshot), FAUX POUR TOUT RECALCUL - le moteur fiscal lit la valeur du jour. Changer un axe en 2026 et recalculer 2023 ne rendrait pas le même impôt. Réutilise la proposition + confirmation humaine + motif de surcharge de STORY-080 (livrée), en la datant.
+        assigned_to: null
+      - story_id: "STORY-359"
+        title: "Le portefeuille se lit - pagination, recherche, compteurs et prochaine échéance"
+        epic: "EPIC-043"
+        points: 8
+        service: "dossier-service"
+        status: "not_started"  # D6/D15/D16 + Q11. Deux difficultés distinctes : (1) L'AGRÉGATION - une ligne mêle balance-service, bilan-service et le paquet fiscal ; un fan-out par dossier serait un N+1 sur 500 dossiers => read-models locaux, nombre de requêtes Mongo par page ASSERTÉ. (2) L'ÉCHÉANCE - la donnée EXISTE (echeances dans paquet-fiscal-togo-2026.json) mais grep echeance sur les contrôleurs fiscal ne rend RIEN ; le calendrier complet est au S25 (STORY-315/316). Q11 : échéance MINIMALE dérivée du paquet déjà chargé, calculée À LA LECTURE (aucune persistance => aucune dette le jour du remplacement), marquée source PAQUET_MINIMAL pour que la bascule soit repérable. ⚡ Compteurs SUR LA PORTÉE DE L'APPELANT : un collaborateur qui lit « 5 dossiers » alors qu'il en voit 2 conclut qu'on lui en cache. NFR 500 dossiers : 1er rendu < 2 s, filtre < 500 ms.
+        story_path: "stories/STORY-359.md"
+        assigned_to: null
+      - story_id: "STORY-360"
+        title: "Le journal du dossier devient lisible - et l'administrateur voit qui a modifié quoi"
+        epic: "EPIC-043"
+        points: 5
+        service: "dossier-service"
+        status: "not_started"  # Blocs L+N, D12, Q10(b). ⚡ TROISIÈME OCCURRENCE DU MÊME DÉFAUT : une écriture sans lecture ne se signale nulle part. STORY-144 écrit admin_audit_logs, aucune route ne le relit => STORY-294 (ce sprint). STORY-079 écrit profils_societe_audit ; listerAudits EXISTE mais n'est appelé que pour reconstituer un état passé en interne (profil-societe.service.ts:356) - AUCUN contrôleur ne l'expose. ⚠ notification-service N'EXISTE PAS DANS LE DÉPÔT (architecture cadrée le 2026-08-04, port :3008, ZERO code, aucun sprint) : Q10 tranche l'option (b) - fil d'activité GET /activite réservé à l'admin + compteur de non-lus, la notification poussée viendra quand le service existera (hook INERTE, documenté et testé comme tel - leçon STORY-173). NE JAMAIS rendre un userId brut : la console ne sait pas le résoudre (leçon STORY-294).
+        story_path: "stories/STORY-360.md"
+        assigned_to: null
+
   # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
   - sprint_number: 21
     start_date: "2027-04-08"
@@ -2287,24 +2402,17 @@ sprints:
     start_date: "2027-04-22"
     end_date: "2027-05-06"
     capacity_points: 34
-    committed_points: 34  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    committed_points: 26  # ⬇ 34→26 le 2026-08-09 : **STORY-236 RÉANCRÉE AU S20** (EPIC-043). Elle était EN TÊTE DE CE SPRINT et tout le modèle fiscal s'y branchait — elle reste le préalable, elle est simplement livrée plus tôt et porte désormais `dossierId` (identifiant de `dossier-service`) au lieu d'un `societeId` local. Le socle `fiscal-service` (294/295/296/297) reste ici, inchangé.
     completed_points: 0
     status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
     goal: "236 : le contrat de balance porte enfin une dimension d'entité — elle N'EXISTE PAS aujourd'hui (vérifié dans le code, pas dans le tracker) et tout le modèle fiscal s'y branche. Puis le socle fiscal-service : scaffold :3012, deux bases Mongo aux rôles restreints, read-models et gate, chargeur de paquet."
     stories:
-      - story_id: "STORY-236"
-        title: "Le contrat de balance canonique porte une dimension d'ENTITÉ — vérifié absente dans le code le 2026-08-03"
-        epic: "EPIC-027"
-        points: 8
-        service: "balance-service"
-        status: "not_started"  # ⚡ CRÉÉE le 2026-08-03 au sprint-planning fiscalité, sur un CONSTAT DE CODE et non de tracker : `grep` sur balance-service/src rend ZÉRO occurrence de `societeId`, `entiteId` ou `implantation` — la clé réelle est (orgId, exercice.debut, exercice.fin, source, version). La story censée l'apporter (« STORY-135 » dans une note de mémoire du 2026-07-23) N'A NI FICHIER NI ENTRÉE AU TRACKER : 0 occurrence. L'architecture fiscale (AD-7) supposait qu'il suffisait de RÉINTERPRÉTER un champ existant ; il est à CRÉER. ⚠️ EN TÊTE DE SPRINT, avant STORY-302 et STORY-320 qui s'y branchent — même raisonnement que 147→146→145 avant le moteur fiscal au S19. Service : balance-service, pas fiscal-service.
-        assigned_to: null
-      - story_id: "STORY-294"
+      - story_id: "STORY-361"
         title: "Scaffold `fiscal-service` (:3012), socle transverse et point de santé"
         epic: "EPIC-027"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        status: "not_started"  # ⚡ RENUMÉROTÉE 294→361 le 2026-08-09 : le n° 294 était pris DEUX FOIS — ici (scaffold fiscal, créé au sprint-planning du 03/08) et par la story `auth-service` « le journal d'audit des organisations est écrit et illisible » (S20). C'est CETTE story-ci qui cède le numéro, et non l'inverse : l'autre a un FICHIER (stories/STORY-294.md), un ticket d'origine, un consommateur frontend nommé (AP-24) et elle est dans le sprint EN COURS. Même arbitrage que 172→173 le 2026-08-04 : celle qui est le plus ancrée ailleurs garde son numéro. ⚠ Le bloc du socle fiscal n'est plus contigu (361, 295, 296, 297) — c'est cosmétique et préférable à renuméroter trois stories de plus.
         assigned_to: null
       - story_id: "STORY-295"
         title: "Deux bases MongoDB et rôles restreints (`fiscal`, `fiscal_audit`)"
@@ -2331,7 +2439,7 @@ sprints:
     start_date: "2027-05-06"
     end_date: "2027-05-20"
     capacity_points: 34
-    committed_points: 31  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    committed_points: 16  # ⬇ 31→16 le 2026-08-09 : **STORY-301, 302 et 304 RÉANCRÉES AU S20** (EPIC-043). EPIC-028 perd 3 de ses 4 stories — ce n'est PAS une perte de périmètre : c'est le même travail, fait plus tôt et au bon endroit (le dossier n'est pas fiscal, il est l'unité de travail du cabinet), dont ce module devient CONSOMMATEUR. ⚠ À la rédaction du sprint fiscal, EPIC-028 doit être RECADRÉ : il ne crée plus le dossier, il y ajoute les implantations multiples (D10) et le catalogue d'obligations.
     completed_points: 0
     status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
     goal: "Fin du socle (journal d'audit chaîné + outbox, statut de validation du paquet, habilitations) 🏁 EPIC-027, puis ouverture du dossier fiscal et de ses implantations."
@@ -2357,43 +2465,24 @@ sprints:
         service: "fiscal-service"
         status: "not_started"
         assigned_to: null
-      - story_id: "STORY-301"
-        title: "Dossier fiscal, attestation de mandat et historisation"
-        epic: "EPIC-028"
-        points: 5
-        service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
-      - story_id: "STORY-302"
-        title: "Implantations fiscales : création, type d'entité, clôture"
-        epic: "EPIC-028"
-        points: 5
-        service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
-      - story_id: "STORY-304"
-        title: "Résolution conjointe type d'entité → référentiel et paquet"
-        epic: "EPIC-028"
-        points: 5
-        service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
   - sprint_number: 24
     start_date: "2027-05-20"
     end_date: "2027-06-03"
     capacity_points: 34
-    committed_points: 32  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
+    committed_points: 32  # ⬆ 27→32 le 2026-08-09 : +STORY-362 (5 pts, implantations multiples) — le volet que la scission de STORY-302 avait laissé SANS PORTEUR. Le sprint reste sous la capacité (32/34). Historique : ⬇ 32→27 (STORY-303 réancrée au S20).
     completed_points: 0
     status: "not_started"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. Périmètre : PRD prds/prd-fiscalite-2026-07-31/prd.md (v0.3) · découpage epics-fiscalite-2026-08-03.md · architecture architecture-fiscal-service-2026-08-03.md (AD-1→AD-19).
     goal: "Le catalogue d'obligations se dérive tout seul 🏁 EPIC-028 — propriétaire unique, trois déclencheurs, clé d'idempotence — et le moteur de familles démarre."
     stories:
-      - story_id: "STORY-303"
-        title: "Proposition et confirmation des régimes par implantation"
+      - story_id: "STORY-362"
+        title: "Implantations multiples — un dossier peut être imposé dans plusieurs pays"
         epic: "EPIC-028"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        status: "not_started"  # ⚡ CRÉÉE le 2026-08-09 pour que la SCISSION de STORY-302 ne soit pas une PERTE. 302 portait deux choses de moments différents : (a) le type d'entité et le pays du dossier — préalable absolu, dont dépendent le référentiel, le gabarit de liasse et le paquet fiscal, donc la balance et le bilan ⇒ parti au socle (EPIC-043, S20) avec D10 « un seul pays en v1 » ; (b) la capacité à porter N implantations — enrichissement, qui reste ici. ⚠ SANS CETTE STORY, le multi-implantation disparaîsait du plan sans que personne ne le remarque : c'est le défaut d'ORPHELINE que ce dépôt a déjà documenté trois fois (STORY-133/134/135/136/144). ⚡ PROMOTION SANS MIGRATION : le dossier mono-pays DEVIENT sa première implantation — la clé (dossier, pays) de 302 réancrée a été choisie pour ça. Reprend les AC de 302 restés sans porteur : deux pays sans mélange, clôture préservant l'historique, refus de tout secret de portail au schéma.
+        story_path: "stories/STORY-362.md"
         assigned_to: null
+
       - story_id: "STORY-305"
         title: "Dérivation du catalogue d'obligations"
         epic: "EPIC-028"

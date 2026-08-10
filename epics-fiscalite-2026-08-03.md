@@ -193,12 +193,30 @@ exercice — avec refus explicite si rien n'est publié.
 **Couvre :** FR-F67, FR-F68, FR-F69, FR-F70, FR-F58, FR-F59 · AR-01 à AR-08, AR-10
 **Autonome :** oui — livre un service déployé, authentifié, gaté, avec chargement de paquet vérifié.
 
-### EPIC-028 : Dossier fiscal, implantations et catalogue d'obligations dérivé
+### EPIC-028 : Implantations multiples et catalogue d'obligations dérivé
 
-Le cabinet sait **quoi** déclarer, pour chaque client et chaque pays. Le dossier porte ses implantations,
-chacune avec son type d'entité et ses régimes ; le catalogue en dérive la liste exacte des obligations.
+> ⚡ **RECADRÉ le 2026-08-09.** Cet epic créait le dossier, son mandat, son type d'entité et la
+> résolution de son référentiel. **Ce n'est plus le cas** : le dossier n'est pas fiscal, c'est
+> **l'unité de travail du cabinet**, sur laquelle Balance et Bilan s'exercent bien avant toute
+> fiscalité. Il appartient désormais à `dossier-service` (**EPIC-043**, sprint 20), et le module
+> Fiscalité en devient **consommateur**. Voir
+> `tickets/TICKET-BACKEND-dossier-client-entite-de-premier-rang.md`.
+>
+> **Parties d'ici vers EPIC-043 / S20 :** STORY-301 *(dossier + attestation de mandat)*,
+> STORY-302 *(type d'entité — scindée, son volet multi-implantation revient ici)*,
+> STORY-304 *(résolution type d'entité → référentiel + paquet)*, et STORY-303 depuis le S24
+> *(les 2 axes, datés par exercice)*.
+>
+> **Ce qui reste à EPIC-028 est ce que le socle ne fait délibérément pas** : le socle est
+> **mono-pays** (D10), et il ne dérive aucune obligation.
 
-**Couvre :** FR-F01 à FR-F10, FR-F57, FR-F71 à FR-F78 · AR-11
+Le cabinet sait **quoi** déclarer, pour chaque client et **chaque pays**. Le socle donne un dossier
+avec un pays et un type d'entité ; cet epic lui ajoute ses **implantations multiples** — chacune avec
+son identifiant fiscal et ses régimes propres — puis en **dérive** la liste exacte des obligations.
+
+**Couvre :** FR-F01 à FR-F10 *(sauf le socle du dossier, porté par EPIC-043)*, FR-F71 à FR-F78 · AR-11
+**Ne couvre plus :** FR-F04 *(historisation du dossier)* et FR-F57 *(attestation de mandat)* → EPIC-043.
+**Dépend de :** **EPIC-043** — sans dossier, il n'y a rien à quoi rattacher une implantation.
 **Autonome :** oui — le catalogue est consultable sans qu'aucune déclaration n'existe.
 
 ### EPIC-029 : Moteur de familles de calcul
@@ -257,7 +275,7 @@ base est **importée** depuis l'outil de paie ou **saisie**, les deux étant pri
 
 | Exigences | Épic |
 | --- | --- |
-| FR-F01 → FR-F10 | EPIC-028 — dossier, implantations, catalogue dérivé |
+| FR-F01 → FR-F10 | **EPIC-043** — dossier, type d'entité, pays *(socle, S20)* · EPIC-028 — implantations multiples et catalogue dérivé |
 | FR-F11 → FR-F15 | EPIC-029 — familles de calcul et modificateurs |
 | FR-F16 → FR-F21 | EPIC-030 — calendrier et responsabilité |
 | FR-F22 → FR-F26 | EPIC-031 — alimentation depuis la balance et restitution du chemin |
@@ -267,12 +285,12 @@ base est **importée** depuis l'outil de paie ou **saisie**, les deux étant pri
 | FR-F46 → FR-F50 | EPIC-033 — règlement, rapprochement, pénalités estimées |
 | FR-F51, FR-F56 | EPIC-031 — journal d'audit et historique |
 | FR-F52 → FR-F55 | EPIC-032 — dossier de contrôle, pièces, base légale |
-| FR-F57 | EPIC-028 — attestation de mandat à la création du dossier |
+| FR-F57 | **EPIC-043** — attestation de mandat à la création du dossier *(STORY-301, S20)* |
 | FR-F58, FR-F59 | EPIC-027 — natures d'accès et habilitations graduées |
 | FR-F60, FR-F61 | *retirées en v0.3 — sans objet* |
 | FR-F62 → FR-F66 | EPIC-031 — contrôles de cohérence et anomalies |
 | FR-F67 → FR-F70 | EPIC-027 — publication, intégrité, statut de validation, rattachement à l'exercice |
-| FR-F71 → FR-F78 | EPIC-028 — type d'entité, taxes sectorielles, intégration aux verticaux |
+| FR-F71 → FR-F78 | **EPIC-043** — résolution type d'entité → référentiel + paquet *(STORY-304, S20)* · EPIC-028 — taxes sectorielles, intégration aux verticaux |
 | AR-01 → AR-08, AR-10 | EPIC-027 — socle technique |
 | AR-09 | EPIC-030 — travaux récurrents BullMQ |
 | AR-11 | EPIC-028 — coordination du contrat canonique (hors code) |
@@ -286,7 +304,10 @@ transverses et portées par les critères d'acceptation des stories concernées,
 
 Le service existe, il est gouverné, et il sait quelle réglementation appliquer.
 
-### STORY-294 — Scaffold `fiscal-service` (:3012), socle transverse et point de santé
+### STORY-361 — Scaffold `fiscal-service` (:3012), socle transverse et point de santé
+
+> ⚡ **Renumérotée 294→361 le 2026-08-09** — le n° 294 était pris deux fois. Il reste à la story
+> `auth-service` du sprint 20, qui a un fichier, un ticket d'origine et un consommateur frontend.
 
 En tant qu'**équipe plateforme**, je veux un service `fiscal-service` déployé et authentifié, afin que les capacités fiscales aient un hôte conforme aux conventions de l'écosystème. *(AR-01, AR-05, AR-10)*
 
@@ -362,7 +383,10 @@ En tant qu'**administrateur de cabinet**, je veux distribuer des droits par acti
 
 ---
 
-# EPIC-028 : Dossier fiscal, implantations et catalogue d'obligations dérivé
+# EPIC-028 : Implantations multiples et catalogue d'obligations dérivé
+
+> ⚡ **RECADRÉ le 2026-08-09** — STORY-301, 302, 303 et 304 sont parties à **EPIC-043**
+> (`dossier-service`, sprint 20). Voir la section d'epic ci-dessus pour le motif.
 
 Le cabinet sait **quoi** déclarer, pour chaque client et chaque pays.
 
@@ -376,7 +400,12 @@ En tant que **collaborateur de cabinet**, je veux créer le dossier fiscal d'un 
 - **Étant donné** un dossier modifié plusieurs fois **quand** on demande son état à une date passée **alors** il est reconstitué fidèlement depuis l'historique append-only.
 - **Étant donné** un dossier d'une autre organisation **quand** il est demandé **alors** la réponse est `404`, jamais `403`.
 
-### STORY-302 — Implantations fiscales : création, type d'entité, clôture
+### STORY-362 — Implantations multiples : un dossier imposé dans plusieurs pays
+
+> ⚡ **Ex-STORY-302, scindée le 2026-08-09.** Le **type d'entité et le pays du dossier** sont
+> partis au socle (**EPIC-043**, STORY-302 réancrée, sprint 20) : ils conditionnent le référentiel
+> comptable et le gabarit de liasse, donc la balance et le bilan, bien avant toute fiscalité.
+> Ce qui reste ici est le **multi-implantation** (D10 borne le socle à un seul pays en v1).
 
 En tant que **collaborateur de cabinet**, je veux déclarer les implantations d'un client, afin que chaque contexte national ait son identité fiscale et ses obligations propres. *(FR-F01, FR-F02, FR-F05, AD-7)*
 
