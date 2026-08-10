@@ -5,8 +5,8 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** medium
-**Statut :** ready-for-dev
-**Assigné à :** —
+**Statut :** review
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-08-07
 **Sprint :** 20
 **Service :** `balance-service` (:3007)
@@ -117,3 +117,105 @@ est un ajout pur.
 - `GAP-cima-non-servi-par-balance` (`sprint-status.yaml` → `open_contract_gaps`)
 - Maquette **FE-056** — l'écran rend déjà ce refus et nomme le contrat manquant ; à la livraison de cette
   story, l'encart « À livrer côté backend » disparaît pour le vertical Assurance.
+
+---
+
+## Progress Tracking
+
+**Branche :** `MNV-292` (`balance-service`, base `dev`) · **Statut :** review (2026-08-10)
+
+### Livré
+
+1. **Asset** — `cima-assurances-1.0.json` copié octet pour octet depuis `bilan-service`
+   (sha256 `7e644ab171cc9da261e951ace1be0f9614ee451232d278d47758859813c3bd4e`, vérifié par
+   `diff` + `sha256sum` avant tout commit).
+2. **Manifeste** (`ReferentielRegistry`) — entrée `cima-assurances@1.0` (locator + checksum),
+   `longueurCompteDetail` **omis** (commentaire explicite : non sourcé pour CIMA, cf. §Périmètre).
+3. **Contrat canonique** — `REFERENTIELS_BALANCE = ['SN', 'SMT', 'SFD-BCEAO', 'CIMA']`, `PONT_TAG.CIMA`
+   ajouté (`{ code: 'cima-assurances', version: '1.0' }`), exhaustivité prouvée par compilation
+   **et** par test (`referentiel-registry.spec.ts`).
+4. **Surface HTTP** — aucun `@IsIn` littéral ne double l'énumération (grep vérifié) ; tous les DTO
+   (`submit-balance.dto.ts`, `balance-response.dto.ts`, `rejet-response.dto.ts`,
+   `agregation.dto.ts`) dérivent leur Swagger `enum` de `REFERENTIELS_BALANCE` — CIMA y apparaît
+   sans modification de ces fichiers.
+5. **Régénération des types front** — ticket ouvert : voir §Ticket frontend ci-dessous.
+
+### ⚠️ Angle mort trouvé en cours de dev (absent du cadrage)
+
+`COMPTES_REPRISE` (`reprise.regles.ts`, STORY-087 — reprise d'à-nouveaux) est un **second**
+`Record<ReferentielBalance, ComptesReprise>` **exhaustif par construction**, distinct de `PONT_TAG`
+et non mentionné par la story. Ajouter `CIMA` à `REFERENTIELS_BALANCE` casse la compilation tant que
+cette table n'a pas d'entrée `CIMA` — ce n'est pas optionnel, TypeScript refuse `nest build`.
+
+Le plan CIMA n'isole **aucun** compte de classe 1 dédié au résultat net (`13` y désigne les
+« Réserves réglementaires », pas le résultat, contrairement à SYSCOHADA) ; le résultat semble plutôt
+vivre en classe 8 (`88` « Résultats en instance d'affectation »), mais le trancher sans validation
+actuarielle aurait rejoué **exactement** le défaut que 172 a fermé pour `longueurCompteDetail`
+(inventer une donnée comptable par analogie).
+
+**Décision prise (même patron que `nonPackage` du manifeste)** : `COMPTES_REPRISE` porte un type
+`EntreeComptesReprise = ComptesReprise | { nonSource: string }` ; CIMA y est `nonSource`. Le nouveau
+résolveur `comptesRepriseSources()` (pur, aucune I/O) renvoie `null` pour CIMA ; `RepriseService`
+traduit `null` en `ComptesRepriseNonSourcesException` (409, code `COMPTES_REPRISE_NON_SOURCES`) aux
+deux points d'appel (`genererANouveaux`, `affecterResultat`). La reprise d'à-nouveaux CIMA est donc
+**refusée explicitement**, jamais un socle silencieusement faux — testé unitairement (refus + valeur
+`null`) et en intégration service (deux tests dédiés, un par point d'appel).
+
+### Qualité
+
+- `eslint --max-warnings 0` : 0 warning (après `--fix`, uniquement du formatage prettier).
+- `nest build` : OK.
+- `test:cov` : **148 suites / 2675 tests**, tous verts. Couverture des fichiers touchés : 100 %
+  lignes/fonctions/statements sur `referentiel-registry.ts`, `balance-canonique.ts`,
+  `reprise.exceptions.ts` ; `reprise.regles.ts` et `reprise.service.ts` à 100 % lignes (les deux
+  branches non couvertes — L338 du comparateur de tri, L464 du `catch` générique de
+  `chargerReferentiel` — sont **antérieures** à cette story, hors diff).
+- `test:e2e` : **25 suites / 552 tests**, tous verts, dont les ajouts CIMA (`referentiel.e2e-spec.ts`,
+  `suggestion.e2e-spec.ts`).
+
+### Vérification docker (DoD) — 2026-08-10, stack `docker compose` à la racine (via Portly/PROSPERA/compose)
+
+Deux organisations fraîches enregistrées via l'IdP réel (`POST /auth/register` + `cabinetName`,
+e-mail vérifié en base, JWT RS256 obtenu par `POST /auth/login`), KYC `APPROVED` et entitlement
+`ACTIVE` seedés directement dans les read-models `balance_service.orgkycstatuses` /
+`orgbalanceentitlements` (collections **pluriel Mongoose**, pas snake_case — piège connu).
+
+| Org | `organizationId` | `referentiel` seedé |
+|---|---|---|
+| CIMA | `6a7a44a6bae839101487bd61` | `{ code: 'cima-assurances', version: '1.0' }` |
+| SN | `6a7a44a6bae839101487bd73` | `{ code: 'syscohada-revise', version: '2.1' }` |
+
+**Org CIMA :**
+- `GET /referentiels/actifs` → **200**, `referentiel:{code:'cima-assurances',version:'1.0'}`,
+  `checksum` = celui du manifeste, `integrity:'verified'`, `planCount:80` — **plus de 500
+  REFERENTIEL_UNAVAILABLE**.
+- `POST /balances/suggest-comptes` avec `"Frais de personnel dans le pays concerné"` → compte `61`,
+  `origine:EXACT` — **le plan CIMA**, ni `66` (SYSCOHADA) ni `64` (SFD-BCEAO).
+- `POST /balances` (référentiel `CIMA`, 2 lignes équilibrées, checksum v2 calculé côté script de
+  vérif) → **201**, document réel confirmé par `mongosh` (`db.balances.findOne(...)`) : `referentiel:
+  'CIMA'`, `checksumVersion:'v2'`, un seul document en base.
+- Re-soumission **identique** → **200** (idempotence HTTP **et** un seul document en base après
+  re-soumission — pas de doublon).
+- `GET /balances/:id` → tag `CIMA` conservé à l'identique.
+
+**Org SN — non-régression stricte :**
+- `GET /referentiels/actifs` → `checksum` **inchangé** (`01b892c0…`), `planCount:174`.
+- `POST /balances` (référentiel `SN`) → **201**, valeurs inchangées.
+
+**Cas négatif conservé :** entitlement CIMA basculé en base vers un code hors manifeste
+(`referentiel-fantome@0.0`) → `GET /referentiels/actifs` → **500 REFERENTIEL_UNAVAILABLE** — la
+lacune reste **bruyante**, aucun défaut silencieux introduit.
+
+Stack arrêtée (`docker compose stop`) après vérification, conformément à la convention du projet.
+
+### Ticket frontend ouvert
+
+`docs/tickets/TICKET-FRONTEND-regeneration-types-cima-story-292.md` — régénération des types
+générés depuis `openapi.json` (nouveau tag `CIMA` dans l'enum `ReferentielBalance`).
+
+### Reste à faire
+
+- ⑥ Revue de code (`prospera-code-review`) + synthèse en session.
+- ⑦ Revue de sécurité (`prospera-security-review`) + synthèse en session.
+- ⑧ Push, PR sur `prospera-balance-service`, rebase-merge sur `dev`.
+- ⑨ Clôture : statut `done` + `completed_date`, PR `docs/`.

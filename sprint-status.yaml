@@ -2190,9 +2190,9 @@ sprints:
         epic: "EPIC-017"
         points: 5
         service: "balance-service"
-        status: "ready-for-dev"  # ⛔ Must — une org Assurance provisionnée aujourd'hui prend un 500 REFERENTIEL_UNAVAILABLE à la première balance. L'artefact EXISTE (STORY-122, bilan-service, checksum 7e644ab1) : le coût n'est pas la copie, c'est l'extension de REFERENTIELS_BALANCE = ['SN','SMT','SFD-BCEAO'] — typée, exhaustive par construction (PONT_TAG), et remontant au Swagger + aux types générés du front. Additif : aucune balance existante ne change, AUCUNE migration (@1.0 jamais attribué). ⚠️ `longueurCompteDetail` à OMETTRE — non sourcé pour CIMA ; l'inventer rejouerait le défaut corrigé par STORY-172.
+        status: "review"  # ▶️ Dev + validation faits sur MNV-292, vérifiés en docker (2026-08-10) — passage en revue de code puis de sécurité. ⛔ Must — une org Assurance provisionnée aujourd'hui prend un 500 REFERENTIEL_UNAVAILABLE à la première balance. L'artefact EXISTE (STORY-122, bilan-service, checksum 7e644ab1) : le coût n'est pas la copie, c'est l'extension de REFERENTIELS_BALANCE = ['SN','SMT','SFD-BCEAO'] — typée, exhaustive par construction (PONT_TAG), et remontant au Swagger + aux types générés du front. Additif : aucune balance existante ne change, AUCUNE migration (@1.0 jamais attribué). ⚠️ `longueurCompteDetail` à OMETTRE — non sourcé pour CIMA ; l'inventer rejouerait le défaut corrigé par STORY-172. ⚡ ANGLE MORT TROUVÉ EN COURS DE DEV, absent du cadrage : `COMPTES_REPRISE` (reprise d'à-nouveaux, STORY-087) est UN SECOND `Record<ReferentielBalance,…>` exhaustif — ajouter CIMA casse la compilation, et le plan CIMA n'isole aucun compte de classe 1 pour le résultat net (13 y est « Réserves réglementaires »). Deviner (classe 8) aurait rejoué le défaut que 172 a fermé pour `longueurCompteDetail` : la reprise CIMA est donc REFUSÉE explicitement (`ComptesRepriseNonSourcesException`, 409), jamais un socle deviné. Détail dans le Progress Tracking ci-dessous.
         story_path: "stories/STORY-292.md"
-        assigned_to: null
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-293"
         title: "Le pack Finance de la console attribue sfd-bceao@1.3, une version que personne ne sert"
         epic: "EPIC-025"
