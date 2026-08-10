@@ -213,9 +213,103 @@ Stack arrêtée (`docker compose stop`) après vérification, conformément à l
 `docs/tickets/TICKET-FRONTEND-regeneration-types-cima-story-292.md` — régénération des types
 générés depuis `openapi.json` (nouveau tag `CIMA` dans l'enum `ReferentielBalance`).
 
+### ⑥ Revue de code — 5 constats, 4 corrigés, 1 tracé
+
+Scan via `prospera-code-review` ; **synthèse, filtrage et correctifs en session `opus`** (bascule
+demandée et faite avant traitement, conformément au garde-fou du projet). Correctifs dans un commit
+**dédié** (`MNV-292(revue)`), séparé du commit de feature.
+
+**① BLOQUANT — la garde CIMA était INATTEIGNABLE.** Placée *après* `comptesGestionOuverts`, elle ne
+pouvait jamais s'exécuter sur une balance CIMA réelle : le résultat CIMA vit en `88` (**classe 8**),
+que `comptesGestionOuverts` compte parmi les comptes hors bilan « encore ouverts ». Le cabinet
+recevait donc `RESULTAT_NON_DETERMINE` — *« soldez les classes 6 et 7 »* — un conseil **impossible à
+suivre** (il n'y a rien à solder), qui l'accuse d'une faute inexistante et masque la vraie cause.
+C'est le motif « refus loin de la cause, cause jamais nommée » que STORY-172 a corrigé ailleurs.
+La garde ne dépend que du référentiel ⇒ **déplacée avant**. **Vérifié empiriquement** (`88` et classe
+`0` déclenchent bien `comptesGestionOuverts`) puis **mutation-testé** : ordre remis à l'ancien ⇒ test
+**rouge** sur `Received: "RESULTAT_NON_DETERMINE"`.
+
+**② La fixture du test CIMA était une balance SYSCOHADA** (résultat en `13`, gestion à zéro) : elle
+ne franchissait la garde que dans le **seul cas inobservable en production** et restait **verte**
+alors même que la garde était morte — le motif de fausse assurance de STORY-094, reproduit dans les
+tests de cette story. Remplacée par une **vraie clôture CIMA** (résultat en `88`, classe `0`
+présente). C'est ce qui donne au test son pouvoir de détection, prouvé par la mutation ci-dessus.
+
+**③ Le motif `nonSource` était une donnée morte** — écrit dans la table, lu par personne : seul
+`'nonSource' in entree` était évalué, le texte n'atteignait jamais l'appelant. Il est désormais
+**porté par le type de retour** (`ResolutionComptesReprise`, donc impossible à oublier côté appelant)
+et transite par **`details`** — jamais à la racine, qu'`AllExceptionsFilter` jetterait par liste
+blanche (piège déjà payé par `AffectationIncompleteException`).
+
+**④ TRACÉ, NON CORRIGÉ — `CLASSES_DE_GESTION` ment pour CIMA.** Voir la section dédiée ci-dessous.
+
+**⑤ Assertion d'exhaustivité sans pouvoir de détection** : `not.toBeUndefined()` ne pouvait jamais
+échouer (la fonction rend un objet ou un refus, et le `Record` interdit déjà l'entrée manquante).
+Elle exige maintenant **soit** 4 rôles numériques complets, **soit** un refus **motivé** — jamais un
+entre-deux, qui produirait un socle partiellement affecté.
+
+### ⑦ Revue de sécurité — aucune vulnérabilité
+
+Scan via `prospera-security-review` (analyse en `opus`, jamais dégradée). **Zéro constat ≥ 80.**
+Points vérifiés sur le code réel, pas seulement sur le patch :
+
+- **Anti-énumération préservée** : le 409 est posé *après* les lectures tenant-scopées
+  (`trouverDerniereValidee(orgId, …)`, `trouverSocleANouveaux(orgId, …)`), il n'est donc atteignable
+  que par le propriétaire de la balance et ne crée aucun oracle d'existence inter-tenant.
+  ⚠️ Le correctif ① **déplace** la garde CIMA — mais **en aval de ces deux lectures**, donc la
+  propriété est conservée (revérifié après correctif).
+- **Pas de pollution de prototype** : la clé d'indexation de `COMPTES_REPRISE` est verrouillée par
+  `@IsIn(REFERENTIELS_BALANCE)`, l'`enum` du schéma Mongoose et le typage ; l'accès est en lecture
+  seule. `__proto__`/`constructor` inatteignables.
+- **Fail-closed** : le diff n'ajoute aucun chemin d'écriture, il insère un refus **avant** tout calcul
+  et toute persistance (y compris en `dryRun`). Aucun contrôle existant relâché.
+- **Artefact** : aucune URL, aucun identifiant, aucune donnée personnelle ; le sha256 épinglé est le
+  **contrôle** anti-altération (haché et comparé **avant** `JSON.parse`, seul le vérifié est mis en
+  cache). Aucun `eval`/`new Function`/`vm` dans `src/`.
+
+### ⛔ Angle mort n° 2, TRACÉ et NON corrigé : `CLASSES_DE_GESTION` ment pour CIMA
+
+`CLASSES_DE_GESTION = [6, 7, 8]` est documentée comme **structurelle**. L'admission tenait parce que
+les deux référentiels servis jusqu'ici la vérifiaient — classe 8 de SYSCOHADA **entièrement** HAO
+(`81`→`89`), et **aucune** classe 8 dans SFD-BCEAO. **CIMA est le premier à la casser** : sa classe 8
+mêle gestion réelle (`80`, `82`→`86`) et **trois comptes de regroupement** — `87` Compte général de
+pertes et profits, `88` Résultats en instance d'affectation, `89` Bilan.
+
+⚡ **Mesuré** : sur une balance CIMA dont le résultat de 140 M est porté par `88`,
+`calculerResultatComptable` rend **280 M** — résultat, donc **base imposable**, **exactement doublé**.
+Et le garde-fou qui le pincerait est **inapplicable** : `resoudreCompteResultatNet(cima)` rend `null`,
+donc `articulerResultat` sort `COMPTE_RESULTAT_NON_SOURCE` au lieu de signaler l'écart ⇒ **chiffre
+faux publié sans aucun signal**.
+
+**Pourquoi ce n'est pas corrigé ici** : la correction juste n'est *pas* d'arbitrer les classes dans le
+`.ts` (retirer la classe 8 serait **faux pour SYSCOHADA**, D-091-3). Il faut que le **référentiel
+déclare** ses classes de gestion ⇒ régénération d'artefact via le `build.mjs` de `bilan-service`
+(**2 dépôts**, D-078-2) — exactement la même dette que `longueurCompteDetail`. Hors périmètre de 292,
+qui *transporte* l'artefact et ne le *juge* pas (§ Hors périmètre).
+
+🔒 **Risque latent, pas actif** : aucune organisation CIMA n'existe, le plan CIMA reste suspendu à
+AC-18 (validation actuarielle, blocker non levé), et le provisionnement de STORY-094 **refuse déjà**
+pour CIMA. C'est le résultat fiscal **en lecture** qui est muet.
+
+➡️ **Hook inerte documenté** posé sur la constante (chiffres, mesure, renvoi au ticket) ·
+`GAP-classes-de-gestion-non-sourcees` (`sprint-status.yaml`) ·
+`tickets/TICKET-BACKEND-classes-de-gestion-non-sourcees-par-referentiel.md`.
+
+### Qualité après correctifs de revue
+
+Rejoués intégralement sur l'état final : `eslint --max-warnings 0` → **0 warning** · `nest build` →
+**OK** · `test:cov` → **148 suites / 2675 tests** verts, **100 %** lignes/fonctions/statements sur
+tous les fichiers touchés (`reprise.regles.ts`, `reprise.service.ts`, `reprise.exceptions.ts`,
+`referentiel-registry.ts`, `balance-canonique.ts`, `fiscal.ts`) · `test:e2e` → **25 suites / 552
+tests** verts.
+
+⚠️ **Vérification docker non rejouée, et c'est justifié** : les correctifs de revue ne touchent ni
+l'artefact, ni son checksum, ni aucun chemin vérifié en docker (résolution du référentiel,
+suggestion, soumission, idempotence, non-régression, cas négatif). Ils portent sur la **reprise
+d'à-nouveaux** — endpoint qui **ne faisait pas partie** de la vérification docker — sur des libellés
+d'exception et sur des fixtures de test. Aucun résultat mesuré en ④ n'est invalidé.
+
 ### Reste à faire
 
-- ⑥ Revue de code (`prospera-code-review`) + synthèse en session.
-- ⑦ Revue de sécurité (`prospera-security-review`) + synthèse en session.
-- ⑧ Push, PR sur `prospera-balance-service`, rebase-merge sur `dev`.
-- ⑨ Clôture : statut `done` + `completed_date`, PR `docs/`.
+- ⑧ Rebase-merge de la PR `balance-service#35` sur `dev`.
+- ⑨ Clôture : statut `done` + `completed_date`, PR `docs/` sur `main`.
