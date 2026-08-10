@@ -5,7 +5,7 @@
 **Priorité :** Must Have
 **Story Points :** 5
 **Complexité :** medium
-**Statut :** review
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-08-07
 **Sprint :** 20
@@ -122,7 +122,9 @@ est un ajout pur.
 
 ## Progress Tracking
 
-**Branche :** `MNV-292` (`balance-service`, base `dev`) · **Statut :** review (2026-08-10)
+**Branche :** `MNV-292` (`balance-service`, base `dev`) · **Statut :** ✅ **done** (2026-08-10)
+**PR :** `prospera-balance-service#35`, **rebase-mergée** sur `dev` (`6871bdd` feature + `87c2dd8`
+revue), branche supprimée.
 
 ### Livré
 
@@ -309,7 +311,16 @@ suggestion, soumission, idempotence, non-régression, cas négatif). Ils portent
 d'à-nouveaux** — endpoint qui **ne faisait pas partie** de la vérification docker — sur des libellés
 d'exception et sur des fixtures de test. Aucun résultat mesuré en ④ n'est invalidé.
 
-### Reste à faire
+### ⑧⑨ Clôture
 
-- ⑧ Rebase-merge de la PR `balance-service#35` sur `dev`.
-- ⑨ Clôture : statut `done` + `completed_date`, PR `docs/` sur `main`.
+PR `prospera-balance-service#35` **rebase-mergée** sur `dev` le 2026-08-10, branche `MNV-292`
+supprimée. Statut synchronisé aux **3 endroits** (en-tête de ce document, `sprint-status.yaml`,
+présente section) + `completed_date: "2026-08-10"`.
+
+**Deux tickets ouverts par cette story**, tous deux inscrits dans le tracker (sans quoi ils seraient
+invisibles du sprint-planning) :
+
+| Ticket | Cible | Objet |
+|---|---|---|
+| `TICKET-FRONTEND-regeneration-types-cima-story-292.md` | frontend | régénérer les types depuis l'`openapi.json` (l'enum gagne `CIMA`) |
+| `TICKET-BACKEND-classes-de-gestion-non-sourcees-par-referentiel.md` | backend (2 dépôts) | `CLASSES_DE_GESTION` ment pour CIMA — résultat comptable doublé, en silence |
