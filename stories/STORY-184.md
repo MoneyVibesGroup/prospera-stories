@@ -166,3 +166,81 @@ Aucun contrat d'**événement Kafka** ne bouge : `kyc.status.changed` ne transpo
 - [ ] ⚡ Tirée **avec `STORY-183`** — livrée seule, elle affiche un compteur sans le récit
 - [ ] Côté console : `ref` cesse de recevoir l'`orgId`, `attempt`/`total` cessent d'être codés en dur
 - [ ] Branche `MNV-184`, PR rebase-mergée sur `dev` (3 dépôts)
+
+---
+
+## Progress Tracking
+
+### ⚡ Un défaut RÉEL trouvé par la vérification docker, invisible aux 447 unitaires
+
+Le rattrapage attribuait bien les **références**, et **jamais** les compteurs :
+
+```
+Rattrapage STORY-184 : 2 référence(s) attribuée(s), 0 compteur(s) initialisé(s).
+```
+
+`nombreSoumissions` porte `default: 0` au schéma, et **Mongoose applique les valeurs par défaut à
+l'hydratation** : sur un document lu sans `.lean()`, le champ vaut `0` alors qu'il est **absent en
+base**. La branche d'initialisation était donc **morte**, et un dossier ancien annonçait « 0
+soumission » quand son `submittedAt` prouve le contraire — exactement ce que le plancher existait
+pour empêcher.
+
+Aucun unitaire ne pouvait le voir : un double rend des objets **nus**, sans valeurs par défaut.
+Corrigé par `.lean()`, puis **gardé structurellement** — le double du test n'expose plus `exec` que
+derrière `.lean()`, si bien que retirer l'appel fait échouer les 9 tests du fichier.
+
+### Vérification docker (stack neuve `down -v` — mongo/kafka/redis/minio/mailhog + auth, kyc, admin-panel)
+
+`/api/v1/health` : `mongodb: up`, `kafka: up`.
+
+**Cycle réel** sur une organisation fraîchement inscrite (`6a7b03a9ea348b3af6fdb367`) :
+
+| Acte | Observé en base (`mongosh kyc_service`) |
+|---|---|
+| Dépôt du RCCM (création du profil) | `reference: KYC-0002`, `nombreSoumissions: 0`, séquence `1 → 2` |
+| Dépôt du CFE (1ʳᵉ soumission) | `n = 1`, journal `[SOUMISSION]`, **séquence inchangée (2)** — aucun numéro brûlé par le second dépôt |
+| Rejet motivé par l'admin | `n = 1` **inchangé** (une décision n'est pas une soumission), référence inchangée |
+| Re-dépôt du RCCM (re-soumission) | `n = 2`, journal `[SOUMISSION, DECISION, RESOUMISSION]` ⇒ **compteur = décompte du journal**, référence toujours `KYC-0002` |
+
+**Rattrapage** — deux profils fabriqués sans référence ni compteur, puis redémarrage :
+
+| Dossier | Résultat |
+|---|---|
+| `…ff01` — `APPROVED`, `submittedAt` de juin, journal vide | `KYC-0003`, `nombreSoumissions: 1` (**plancher** : publier 0 contredirait sa date de soumission) |
+| `…ff02` — jamais soumis | `KYC-0004`, `nombreSoumissions: 0` (0 est ici la vérité) |
+
+**Idempotence** — second redémarrage : **aucune** ligne de rattrapage, séquence figée à 4, les
+quatre références inchangées.
+
+**Index unique partiel**, vérifié en écrivant directement en base : un doublon de référence est
+refusé (`E11000`), et deux profils **sans** référence coexistent — sans le filtre `$type: 'string'`,
+l'index refuserait le second et rendrait le rattrapage impossible.
+
+**Chaîne complète** : `GET /admin/kyc/:orgId` et `GET /admin/kyc` (`:3002`), puis
+`GET /admin/kyc-reviews` et `GET /admin/orgs/:orgId` (BFF `:3010`) servent tous `KYC-0002` / `2`.
+
+**AC-5 — preuve navigateur (`:3110`), cette fois faite** *(contrairement à `STORY-183`, le dépôt front
+est dans l'espace de travail)* : e2e Playwright « 4 bis » contre le stack réel — l'en-tête de revue
+affiche la **référence**, l'`orgId` n'y est **plus visible**, et la mention « soumission 2/2 »
+apparaît sur le dossier re-soumis (choisi dans la file par `nombreSoumissions > 1`, jamais codé en
+dur).
+
+### Mutation-testing — 10 mutations, 10 rouges
+
+Chacune vérifiée **compilante** (une mutation rouge par erreur de compilation ne prouve rien) :
+référence absente à la création · référence écrite ≠ référence allouée · numéro brûlé alors que le
+profil existe · `$inc` jamais posé · séquence figée (`$inc: 0`) · une décision comptée comme une
+soumission · rattrapage sur les profils **déjà** référencés · plancher `submittedAt` neutralisé ·
+rattrapage sans garde à l'écriture · référence du détail retombant sur l'`orgId`.
+
+### ⛔ Constat hors périmètre — la console ne peut plus trancher un dossier
+
+Relevé en lançant l'e2e navigateur, **antérieur à cette branche** : `submitDecision` / `rejectFile`
+n'envoient pas d'en-tête `If-Match`, rendu **obligatoire** par `STORY-182` côté amont. Toute décision
+prise depuis la console retourne donc **`428 PRECONDITION_REQUISE`** — vérifié au curl sur le BFF,
+sur du code que cette story ne touche pas. L'étape 5 de `kyc-chain.spec.ts` échoue pour cette raison
+seule.
+
+⇒ **Story de suivi à ouvrir** : la console doit lire l'`etag` déjà servi dans le corps du détail et
+le rejouer en `If-Match`. Non corrigé ici — c'est un autre livrable, et le corriger au passage
+masquerait qu'il n'a jamais eu de test à lui.
