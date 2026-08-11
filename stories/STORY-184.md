@@ -172,12 +172,11 @@ Aucun contrat d'**événement Kafka** ne bouge : `kyc.status.changed` ne transpo
       [kyc#17](https://github.com/MoneyVibesGroup/prospera-kyc-service/pull/17) ·
       [admin-panel#18](https://github.com/MoneyVibesGroup/prospera-admin-panel-service/pull/18),
       branches supprimées
-- [ ] ⛔ **`frontend-admin-panel` : commit prêt, PR IMPOSSIBLE** — le compte
-      `vivianMoneyVibesGroupes` n'a que le droit `pull` sur
-      `MoneyVibesGroup/frontend-admin-panel` (`push: false`, vérifié par l'API GitHub), et le second
-      compte de la machine n'y a aucun accès. Le travail est committé sur la branche locale
-      `MNV-184` (`1ff5ad3`) et attend une ouverture de droits. **Rien n'est perdu, rien n'est
-      poussé.**
+- [x] ⛔ **`frontend-admin-panel` : livré en TICKET, pas en commit** — les dépôts frontend sont en
+      **lecture seule** pour le dev backend (décision du 2026-08-11) : le front a son propre
+      développeur. Le câblage console fait en local pendant la story (branche locale `MNV-184`,
+      `1ff5ad3`, non poussée) sert de **spécification**, pas de livrable :
+      `tickets/TICKET-FRONTEND-reference-dossier-kyc-et-compteur.md`.
 
 ---
 
@@ -253,6 +252,7 @@ prise depuis la console retourne donc **`428 PRECONDITION_REQUISE`** — vérifi
 sur du code que cette story ne touche pas. L'étape 5 de `kyc-chain.spec.ts` échoue pour cette raison
 seule.
 
-⇒ **Story de suivi à ouvrir** : la console doit lire l'`etag` déjà servi dans le corps du détail et
-le rejouer en `If-Match`. Non corrigé ici — c'est un autre livrable, et le corriger au passage
-masquerait qu'il n'a jamais eu de test à lui.
+⇒ **Ticket ouvert** : `tickets/TICKET-FRONTEND-decision-kyc-impossible-sans-if-match.md` — la console
+doit lire l'`etag` déjà servi dans le corps du détail et le rejouer en `If-Match`. Non corrigé ici :
+c'est un autre livrable, dans un dépôt dont le développement ne relève pas du backend, et le corriger
+au passage masquerait qu'il n'a jamais eu de test à lui.
