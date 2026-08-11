@@ -5,7 +5,7 @@
 **Priorité :** Should Have
 **Story Points :** 3
 **Complexité :** low sur le code — **medium sur les arbitrages**, qui sont le vrai objet de la story
-**Statut :** in_progress
+**Statut :** done · **Clôturée le :** 2026-08-11
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-08-08
 **Sprint :** 20
@@ -242,7 +242,114 @@ bascule côté console est déjà en place : l'encart « Historique des décisio
 
 ## Progress Tracking
 
-*(rempli au fil du flux — dev, validation, vérification docker, revues)*
+**2026-08-11 — livrée et mergée.** PR `auth-service` [#22](https://github.com/MoneyVibesGroup/prospera-auth-service/pull/22),
+rebase-mergée sur `dev` (`8a6038d` + `1884463`), branche supprimée.
+
+### Ce qui a été livré
+
+| Livrable | Où |
+|---|---|
+| `GET /admin/organizations/:id/audit` (`org:read`, paginé, plafond 100, plus récent → plus ancien) | `admin-organizations.controller.ts` |
+| Lecture par agrégation : `$match` ObjectId → `$sort {at:-1}` → `$skip/$limit` → `$lookup users` **projeté** → `$unwind` **préservant** | `admin-audit.service.ts::listByOrganization` |
+| Mapping vers le contrat (`actor` à 5 champs, `reason` omis quand absent) | `admin-organizations.service.ts::listAudit` |
+| Corps optionnel `{ reason? }` sur `suspend` **et** `reactivate` | `set-organization-status.dto.ts` |
+| Assainissement du motif **hors du DTO** *(la couverture exclut les `.dto.ts`)* | `common/utils/motif-audit.util.ts` |
+| DTO de réponse + OpenAPI | `dto/organization-audit.dto.ts` |
+
+### Portes de qualité
+
+`lint` 0 warning · `build` OK · **786 unit + 200 e2e** verts · couverture **97,22 / 90,73 / 97,82 / 97,26**
+(seuils 65/90/90/90) — et **100 % par fichier** sur les trois sources neuves ou touchées
+(`motif-audit.util.ts`, `admin-audit.service.ts`, `admin-organizations.service.ts`).
+
+### Mutation-testing — **14 mutations, 14 rouges**
+
+Appliquées au code réel puis restaurées, aucune rouge par erreur de compilation :
+
+| # | Mutation | Ce qu'elle aurait cassé |
+|---|---|---|
+| 1 | `preserveNullAndEmptyArrays` retiré du `$unwind` | les lignes d'acteur disparu s'évaporent de l'historique |
+| 2 | `$sort: { at: 1 }` | journal à l'envers |
+| 3 | `from: 'user'` | jointure muette ⇒ tout le monde « supprimé » |
+| 4 | projection du `$lookup` retirée | le document utilisateur entier entre dans le pipeline |
+| 5 | `deleted: !entry.actor` | une suppression logique passe pour un compte vivant |
+| 6 | `organizationId` retiré de l'item | contrat de la future transverse rompu |
+| 7 | `resolveOrg` retiré | `200 []` sur une organisation inexistante |
+| 8 | `{ actorId }` au lieu de `{ actorId, reason }` | motif accepté, jamais écrit |
+| 9 | `body.reason` non transmis par le contrôleur | idem, un cran plus haut |
+| 10 | route gardée `org:suspend` | la lecture cesse d'être déléguable |
+| 11 | `@Max` retiré | `?limit=1000000` |
+| 12 | motif vide rendu `''` | `reason` vide en base |
+| 13 | caractères de contrôle non assainis | fausses lignes à la relecture |
+| 14 | `@ApiBody` sans `required: false` | corps optionnel annoncé obligatoire |
+
+⚠️ **La mutation 3 n'est rouge que par une assertion-miroir** (le test relit le littéral `'users'`) : ce
+n'est **pas** elle qui prouve que la collection existe — c'est la vérification docker ci-dessous.
+
+### ⚡ Défaut trouvé PAR la vérification docker — corrigé
+
+Nest déclare tout `@Body()` en **`required: true`**. Le corps optionnel `{ reason? }` était donc annoncé
+**obligatoire** dans `/api/docs-json` : la console **dérive ses types** du document (`gen:api`), et ses
+appels **sans** motif — qui existent et fonctionnent — seraient devenus non typables. Serveur correct,
+client cassé : exactement la classe de défaut pour laquelle `openapi-contract.e2e-spec.ts` a été écrit,
+et qu'aucun test HTTP ne pouvait attraper puisque les réponses réelles étaient déjà bonnes.
+⇒ `@ApiBody({ required: false })` sur les deux routes + **garde durable** dans le spec de contrat
+(symétrique de AC-03, côté requête). Vérification docker **rejouée sur l'état final**.
+
+### Vérification docker — stack neuve (`down -v`), 7 lignes réelles
+
+Mongo 7 rs0 + Redis + Kafka + `auth-service`, `PLATFORM_ADMIN` semé, jetons RS256 réels.
+
+- **Écriture** : `suspend` avec `{"reason":"  Impayés\n3 mois  "}` ⇒ document réel portant
+  `reason: 'Impayés 3 mois'` — **trimé et retour à la ligne remplacé** ; `reactivate` avec motif idem ;
+  `suspend` **sans corps** ⇒ document **sans champ** `reason` *(absent, pas `null`)*.
+- **Lecture** : `GET :id/audit` rend les 7 lignes, du plus récent au plus ancien, **avec l'identité
+  réellement jointe** (`admin@prospera.local`, `Admin Plateforme`) — c'est la seule preuve que `users`
+  est le bon nom de collection.
+- **Les trois cas d'acteur, observés en vrai** : présent ⇒ identité + `deleted:false` · **suppression
+  logique** (`deletedAt` posé sur un opérateur inséré pour l'occasion) ⇒ **identité rendue quand même** +
+  `deleted:true` · **document absent** ⇒ `{ id, deleted:true }` seul, **ligne préservée**.
+- **Aucun `passwordHash`** dans le corps de réponse (grep sur le JSON complet).
+- Pagination `?page=2&limit=2` cohérente avec `total: 5` ; `404` sur organisation inconnue **et** sur id
+  non-ObjectId ; `400` au-delà du plafond (`limit must not be greater than 100`) ; `401` sans jeton ;
+  `400` sur motif > 500 caractères et sur champ additionnel ; `200` sans corps (non-régression).
+- **Idempotence STORY-144 préservée** : un `reactivate` sur une organisation déjà `ACTIVE` reste un
+  **no-op 200 sans ligne** de journal.
+- OpenAPI de l'instance : route présente, `$ref: PaginatedAdminAuditDto`, `limit.maximum: 100`,
+  `requestBody.required: false` sur les deux routes.
+
+Stack arrêtée après la vérification (`docker compose stop`).
+
+### Revues
+
+**Revue de code** et **revue de sécurité** conduites **dans la session** (`opus`) : le scan délégué a été
+interrompu par une limite de plateforme, et la règle du dépôt interdit de déléguer — elle n'oblige jamais
+à le faire. **0 constat bloquant, 0 vulnérabilité.** Vérifié pièce à pièce : chaque route du contrôleur
+porte une permission (plancher de classe + décorateur de route), les trois entrées neuves sont bornées
+(`@IsInt/@Min/@Max`, `@IsString/@MaxLength(500)`), aucun secret ni journalisation ajoutés, la projection
+du `$lookup` tient hors du pipeline `passwordHash` et les empreintes de jetons, et un objet passé en
+`reason` ressort **scalaire** (coercition `enableImplicitConversion`) *ou* rejeté par `@IsString` — deux
+gardes, pas une.
+
+### Trois observations, non corrigées
+
+1. **`page` n'a pas de borne haute** — `?page=999999999` produit un `$skip` énorme. Sans effet pratique
+   *(journal par organisation de taille modeste, appelant déjà authentifié et porteur d'`org:read`)* et
+   la borne utile est celle de `limit`, qui existe.
+2. **`actor.deleted` confond « document absent » et « suppression logique »** — délibéré : dans les deux
+   cas le compte n'est plus là, et la distinction n'apporte rien à un lecteur d'audit. L'identité rendue
+   *(ou non)* sépare déjà les deux à l'œil.
+3. ⚠️ **Hors périmètre, trouvé au passage** : `DemoOrgSeedService.upsertOrganisation` place
+   `status: ACTIVE` dans un **`$set`** (et non un `$setOnInsert`) — **chaque redémarrage réactive donc en
+   silence le cabinet de démonstration suspendu**, sans ligne de journal ni événement
+   `identity.org.updated`. Observé pendant la vérification. Relève de STORY-180 ; **non corrigé ici**, à
+   porter en gap.
+
+### Instabilité e2e
+
+**1 échec en 8 exécutions** de la suite e2e complète, non reproduit sur les **6 dernières consécutives**
+et survenu pendant que la stack docker tournait en parallèle. Le nom du test n'a pas été capturé —
+signalé tel quel plutôt que passé sous silence.
 
 ## Liens
 
