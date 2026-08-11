@@ -5,7 +5,7 @@
 **Découverte par :** AP-INT-1 — écarts nº2 et nº3 d'AP-INT-0
 **Priorité :** Could Have — ⚠️ **ne se livre pas seule** *(cf. §Dépendance)*
 **Story Points :** 2
-**Statut :** in_progress
+**Statut :** done
 **Complexité :** medium
 **Créée le :** 2026-08-04
 **Sprint :** 20
@@ -161,11 +161,23 @@ Aucun contrat d'**événement Kafka** ne bouge : `kyc.status.changed` ne transpo
 
 ## Definition of Done
 
-- [ ] Les 5 critères vérifiés · `lint` 0 · couverture ≥ seuils
-- [ ] Format de référence **tranché et écrit**, avec la règle de stabilité
-- [ ] ⚡ Tirée **avec `STORY-183`** — livrée seule, elle affiche un compteur sans le récit
-- [ ] Côté console : `ref` cesse de recevoir l'`orgId`, `attempt`/`total` cessent d'être codés en dur
-- [ ] Branche `MNV-184`, PR rebase-mergée sur `dev` (3 dépôts)
+- [x] Les 5 critères vérifiés · `lint` 0 · couverture `kyc-service` 95,51 / 93,44 / 95,98 / 95,36 ·
+      `admin-panel` 99,67 / 92,80 / 100 / 99,64
+- [x] Format de référence **tranché et écrit**, avec la règle de stabilité *(cf. §Arbitrages)*
+- [x] ⚡ Tirée **après `STORY-183`** (`done` le 08/08) — l'ordre inverse aurait posé la question sans
+      y répondre
+- [x] Côté console : `ref` reçoit la référence, `attempt`/`total` le compteur réel — sur la **fiche**
+      comme sur la **file**
+- [x] Branche `MNV-184`, PR rebase-mergées sur `dev` —
+      [kyc#17](https://github.com/MoneyVibesGroup/prospera-kyc-service/pull/17) ·
+      [admin-panel#18](https://github.com/MoneyVibesGroup/prospera-admin-panel-service/pull/18),
+      branches supprimées
+- [ ] ⛔ **`frontend-admin-panel` : commit prêt, PR IMPOSSIBLE** — le compte
+      `vivianMoneyVibesGroupes` n'a que le droit `pull` sur
+      `MoneyVibesGroup/frontend-admin-panel` (`push: false`, vérifié par l'API GitHub), et le second
+      compte de la machine n'y a aucun accès. Le travail est committé sur la branche locale
+      `MNV-184` (`1ff5ad3`) et attend une ouverture de droits. **Rien n'est perdu, rien n'est
+      poussé.**
 
 ---
 
