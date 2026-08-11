@@ -216,20 +216,40 @@ le relevé complet et le mutation-test exigé de la correction.
 **terminés** ; deux commits prêts sur la branche locale `MNV-293` du dépôt `frontend-admin-panel`
 (`d2f60eb` feature + `97d61e3` correctifs de revue).
 
-⛔ **BLOQUÉ AU PUSH — droit manquant, pas un problème de code.** Le compte
-`vivianMoneyVibesGroupes` n'a que la **lecture** sur `MoneyVibesGroup/frontend-admin-panel` :
+### ⚡ Le code est écrit et prouvé, mais son merge n'appartient PAS à cette story
+
+**Le livrable de STORY-293 est l'ARBITRAGE, et il est rendu** (D-293-1, ci-dessus) — l'en-tête le dit
+depuis sa création : « ⚠️ **cible frontend**, tracée ici parce que l'arbitrage est backend ». Le code de
+la console a été écrit **en plus**, parce que décider `2.0` sans le vérifier de bout en bout aurait été
+une opinion et non une décision.
+
+Ce code ne peut pas être poussé d'ici, et c'est **structurel, pas accidentel** : l'auteur est un
+développeur **backend**, sans droit de modification sur le dépôt de la console. Vérifié au niveau du
+dépôt, jeton forcé à la main (donc ce n'est pas un problème de keychain) :
 
 ```
-frontend-admin-panel          admin=false push=false pull=true
-prospera-balance-service      admin=false push=true  pull=true
-prospera-stories              admin=false push=true  pull=true
+frontend-admin-panel          push=false pull=true    ← lecture seule
+prospera-balance-service      push=true  pull=true
+prospera-stories              push=true  pull=true
 ```
 
-`git push` répond `remote: Write access to repository not granted.` La story ne peut donc pas passer
-`done` : il n'y a ni PR, ni merge. **Action requise de l'user** : accorder le droit d'écriture sur
-`frontend-admin-panel` (ou pousser la branche depuis un compte qui l'a), après quoi il ne reste que
-`git push -u origin MNV-293`, l'ouverture de la PR sur `dev`, le rebase-merge et le passage des trois
-statuts à `done` + `completed_date`.
+`git push` répond `remote: Write access to repository not granted.`
+
+➡️ **La suite est portée par une story frontend : `AP-25`** (`frontend-stories/AP-25.md`, slottée au
+sprint 9 de `frontend-sprint-status.yaml`, `ready-for-dev`, 2 pts, aucune dépendance backend ouverte).
+Elle **n'est pas un cadrage à implémenter** : le contenu exact des deux commits y est reproduit, avec les
+trois pièges à ne pas rejouer. C'est le canal prévu du projet — et ce fichier documente lui-même, trois
+fois, le défaut que ce serait de s'en passer : *une story backend livrée ne déclenche rien tant qu'une
+story frontend ne la nomme pas* (FE-058/STORY-145 · AP-12/STORY-149 · AP-21/STORY-175).
+
+Deux commits prêts, rebasés sur `origin/dev` @ `c691757` : `d2f60eb` (feature) + `97d61e3` (correctifs de
+revue). Un `git bundle` et deux `format-patch` existent en local chez l'auteur (`handoff-MNV-293/`, hors
+dépôt), applicables en trois commandes s'ils peuvent être transmis — sinon AP-25 se suffit à elle-même.
+
+⚠️ **Pourquoi `review` et non `done`** : le périmètre de la story inclut son AC 6 (`lint`/`typecheck`/
+`build`/tests) et son AC 1 (« le pack n'attribue plus… »), qui ne sont vrais **dans `dev`** qu'après le
+merge d'AP-25. Passer `done` maintenant affirmerait un état du dépôt qui n'existe pas. Le statut bascule
+quand AP-25 est mergée.
 
 ⚠️ Le dépôt **`prospera-frontend-admin-panel`** existe aussi dans l'organisation mais il est **vide**
 (`size: 0`, dernier push le 2026-07-12) : le dépôt vivant est bien **`frontend-admin-panel`**
