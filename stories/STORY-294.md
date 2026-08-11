@@ -5,8 +5,8 @@
 **Priorité :** Should Have
 **Story Points :** 3
 **Complexité :** low sur le code — **medium sur les arbitrages**, qui sont le vrai objet de la story
-**Statut :** ready-for-dev
-**Assigné à :** —
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-08-08
 **Sprint :** 20
 **Service :** `auth-service` (:3001)
@@ -73,7 +73,17 @@ journal en sont dépourvues** — un champ prêt pour une information qu'aucun c
 
 ---
 
-## Les arbitrages à rendre — le vrai objet de la story
+## Les arbitrages — **RENDUS le 2026-08-11**
+
+> Les trois verdicts ci-dessous sont le **livrable principal** de la story ; le code en découle. L'analyse
+> qui les précède est conservée telle qu'elle a été posée à la rédaction — c'est ce qui rend le verdict
+> relisable.
+
+| # | Question | **Verdict** |
+|---|---|---|
+| ① | identifiant ou identité de l'acteur ? | **`actorId` + identité résolue À LA LECTURE**, jointure sur `users` ; acteur disparu ⇒ **la ligne reste**, réduite à son identifiant |
+| ② | org-scopée ou transverse ? | **Org-scopée** `GET /admin/organizations/:id/audit`, assumée comme **cas particulier** d'une transverse à venir — dont elle rend **déjà la forme d'item** |
+| ③ | ouvre-t-on la saisie d'un motif ? | **Oui** : corps optionnel `{ reason? }` sur `suspend` **et** `reactivate`, borné à 500 caractères, relu par la lecture. `reason` **reste** au schéma |
 
 ### ① Que rend-on de l'acteur : un identifiant, ou une identité ?
 
@@ -91,6 +101,28 @@ d'annuaire sont org-scopées, et un opérateur plateforme **n'a pas d'organisati
   l'histoire. Plus coûteux *(migration des lignes existantes, ou tolérer deux formes)*, mais c'est la
   seule qui tienne si le journal doit avoir une valeur probante.
 
+> ### ✅ Verdict ① — `actorId` **+ identité résolue à la lecture**
+>
+> **Pourquoi pas la dénormalisation à l'écriture**, alors que c'est la réponse « vrai journal d'audit » :
+> elle exige de **retoucher l'écriture**, que le périmètre de cette story met explicitement hors champ
+> *(« livré par STORY-144, et à ne pas retoucher »)*, **et** une migration des lignes déjà écrites — sans
+> quoi le journal porterait durablement **deux formes** de ligne, dont l'ancienne obligerait de toute
+> façon à écrire la jointure de lecture. On paierait les deux chemins pour n'en utiliser qu'un.
+> La valeur probante est un besoin réel mais **pas celui d'aujourd'hui** : la console veut afficher *qui*,
+> pas opposer une preuve. Il est ouvert en gap ci-dessous plutôt que présumé.
+>
+> **Ce que rend la route** — `actor: { id, email?, firstName?, lastName?, deleted }` :
+>
+> - acteur présent ⇒ identité complète, `deleted: false` ;
+> - acteur en **suppression logique** *(`deletedAt` posé par `softDelete`)* ⇒ **identité rendue quand
+>   même**, `deleted: true`. Masquer son nom effacerait exactement la réponse que le journal existe pour
+>   donner — l'opérateur parti est justement celui qu'on cherche ;
+> - **document d'acteur absent** *(purgé)* ⇒ `{ id, deleted: true }` seul, sans e-mail ni nom.
+>
+> ⚠️ **Dans les trois cas la ligne est rendue.** C'est le point non négociable : `$unwind` sans
+> `preserveNullAndEmptyArrays` ferait **disparaître de l'historique** les actes d'un compte supprimé — un
+> journal qui perd des entrées quand un compte part ne prouve plus rien, et il les perdrait *en silence*.
+
 ### ② Quel périmètre : le journal des organisations, ou celui de l'administration ?
 
 `AdminAuditAction` ne porte aujourd'hui que `ORG_SUSPENDED` et `ORG_REACTIVATED`, et son commentaire
@@ -105,18 +137,56 @@ annonce l'extension *(« On ajoute, on ne renomme pas »)*. Deux formes possible
 consommée** coûte une migration de contrat côté console. Rien n'interdit de livrer l'org-scopée en
 sachant qu'elle est un cas particulier — à condition de le dire ici.
 
+> ### ✅ Verdict ② — **org-scopée**, et **dite** cas particulier : `GET /admin/organizations/:id/audit`
+>
+> C'est le besoin d'aujourd'hui *(AP-24 affiche l'historique **d'une** organisation, sur sa fiche)*, c'est
+> la requête que l'index `{ organizationId: 1, at: -1 }` sert déjà, et une transverse livrée sans écran
+> serait une seconde route sans consommateur — exactement le défaut que cette story répare.
+>
+> **La forme transverse à venir est `GET /admin/audit?organizationId=&action=&actorId=`.** Pour qu'elle ne
+> coûte **pas** de migration de contrat côté console, l'**item** rendu ici est déjà celui qu'elle rendrait :
+> il porte **`organizationId`**, pourtant redondant avec le paramètre de chemin. La console dérive donc
+> dès maintenant le type **définitif** de la ligne de journal ; le jour venu, il n'y aura qu'une route de
+> plus à consommer, pas un type à réécrire. C'est le seul surcoût consenti à l'arbitrage.
+>
+> ⚠️ **Le filtrage (`action=`, `actorId=`) n'est PAS livré ici** : aucun écran ne le demande, et un filtre
+> qu'aucun appelant n'exerce est une surface non couverte. Il appartient à la transverse.
+
 ### ③ Ouvre-t-on la saisie d'un motif ?
 
 Si oui, `POST /:id/suspend` accepte un corps optionnel `{ reason?: string }` *(borné, assaini)* et la
 console le demande dans sa confirmation. **Si non, `reason` doit être retiré du schéma** — un champ
 qu'aucun chemin ne remplit est une promesse que la relecture prendra pour une donnée manquante.
 
+> ### ✅ Verdict ③ — **on ouvre la saisie**. `reason` reste au schéma
+>
+> Le retrait était l'autre réponse cohérente, mais **tout le chemin existe déjà sauf la porte d'entrée** :
+> `AdminAuditService.record` gère `reason` et le teste, et `OrganizationsService.setStatusAndEmit` le
+> transporte jusqu'à l'écriture *(`audit?: { actorId, reason? }`)*. Le champ n'était pas une promesse en
+> l'air — il lui manquait **un `@Body()`**. Et c'est ce qu'un lecteur d'audit cherche en premier : *pourquoi*
+> ce cabinet a été coupé.
+>
+> **Ce qui est livré** : corps **optionnel** `{ reason?: string }` sur `POST /:id/suspend` **et** sur
+> `POST /:id/reactivate` — la symétrie n'est pas du confort, une réactivation sans motif dans un journal
+> qui en porte pour les suspensions serait un trou au milieu de l'historique. Borné à **500 caractères**,
+> **trimé** et **débarrassé des caractères de contrôle** *(un journal est relu dans un terminal autant que
+> dans un navigateur)*. Un motif **vide après trim** est traité comme **absent** — le champ ne doit pas
+> exister à `''` en base.
+>
+> ⚠️ **Pas de troisième état, mais un passé assumé** : les lignes écrites avant cette story n'ont pas de
+> motif et n'en auront jamais. `reason` y est **absent** *(et non vide)* — la lecture l'omet, elle ne rend
+> pas `null`.
+>
+> ⚠️ **Les lots (`POST /admin/organizations/bulk/*`) n'ouvrent PAS la saisie** — hors périmètre assumé :
+> un motif unique appliqué à 100 organisations n'est pas le même objet qu'un motif de décision, et aucun
+> écran ne le demande. Leurs lignes restent sans motif. Consigné en gap.
+
 ---
 
 ## Périmètre
 
 1. **Rendre les trois arbitrages**, et les consigner dans cette story *(ils sont le livrable
-   principal ; le code en découle)*.
+   principal ; le code en découle)* — ✅ faits ci-dessus, le 2026-08-11.
 2. `GET` de lecture du journal, sous **`org:read`** — la lecture d'une trace se délègue à un support ou
    un auditeur ; `org:suspend` reste la permission d'**agir**.
 3. **Paginée**, du plus récent au plus ancien *(l'index existe déjà, il n'y a rien à créer)*, plafond de
@@ -160,6 +230,19 @@ qu'un audit des actions de la console la rattrape et produise AP-20.
 ⇒ **AP-24 est créée en même temps que cette story**, et non « quand la route sortira ». Le point de
 bascule côté console est déjà en place : l'encart « Historique des décisions : à livrer » d'`AccountCard`
 *(`org-detail.tsx`)* est l'emplacement exact du futur journal.
+
+## Gaps ouverts par les arbitrages *(à porter, pas à faire ici)*
+
+| Gap | Ouvert par | Ce qu'il reste à décider |
+|---|---|---|
+| **Valeur probante du journal** | ① | Si le journal doit un jour **opposer** une preuve *(litige, contrôle)*, l'identité de l'acteur doit être **figée à l'écriture** — plus une migration des lignes existantes. Non fait : le besoin d'aujourd'hui est d'**afficher** qui, pas de prouver. |
+| **Forme transverse `GET /admin/audit`** | ② | Filtres `action=` / `actorId=`, et la question de volume qu'ils rendent visible. L'item est déjà à sa forme définitive — il n'y aura pas de migration de contrat. |
+| **Rétention / purge** | ② | Un journal append-only sans politique de rétention est une question d'exploitation réelle. Elle devient pressante avec la forme transverse. |
+| **Motif sur les lots** | ③ | Les lignes produites par `bulk/suspend` et `bulk/reactivate` restent **sans motif**. À rouvrir si un écran de lot demande une confirmation motivée. |
+
+## Progress Tracking
+
+*(rempli au fil du flux — dev, validation, vérification docker, revues)*
 
 ## Liens
 
