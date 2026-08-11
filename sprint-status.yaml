@@ -2065,9 +2065,9 @@ sprints:
         epic: "EPIC-014"
         points: 5
         service: "platform-catalog-service"
-        status: "not_started"  # ⚠️ PRÉALABLE BLOQUANT : trancher A (la clé du pack EST le vertical) vs B (un pack porte un vertical) — la décision conditionne le schéma et appartient au PO. Non bloquante pour AP-06, qui vit avec `vertical-packs.ts` en config ; bloquante pour l'onglet « Plateformes » de la maquette AP-04, qui permet de CRÉER un pack sans qu'aucune route existe.
+        status: "in_progress"  # 2026-08-11 : PRÉALABLE LEVÉ — décision PO = option A (la clé du pack EST la valeur du vertical, unique), clés sur la taxonomie fermée de STORY-171 (`cabinet`, `distributeur`, `imf-sfd`, `assurance-cima`) et NON sur le champ `legacy` du front qui en diverge (`imf`, `assurance`). ⚠️ STORY-171 est encore not_started : cette story ne dépend pas d'elle, elle FIXE la taxonomie que 171 reprendra — aucune contrainte cross-service posée (invariant nº 2).
         story_path: "stories/STORY-185.md"
-        assigned_to: null
+        assigned_to: "vivianMoneyVibesGroupes"
       # ── Ajoutée le 2026-08-06 (décision PO) : découverte par l'e2e chaîne KYC d'AP-07,
       #    lancé pour la 1re fois contre le stack ──
       - story_id: "STORY-186"

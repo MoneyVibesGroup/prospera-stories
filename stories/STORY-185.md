@@ -5,8 +5,10 @@
 **Découverte par :** revue de cohérence maquette ⇄ code du 2026-08-06, après livraison d'AP-06/AP-07
 **Priorité :** Should Have — ⚡ **non bloquante pour AP-06**, qui vit avec une config en dur ; bloquante pour l'écran « Plateformes » de la maquette
 **Story Points :** 5
-**Statut :** À faire
+**Statut :** in_progress
+**Complexité :** medium
 **Créée le :** 2026-08-06
+**Démarrée le :** 2026-08-11
 **Sprint :** 20
 **Service :** `platform-catalog-service` (`:3003`)
 
@@ -83,19 +85,39 @@ confondre ferait du pack une instance et perdrait ce qui en fait la valeur : sa 
 
 ---
 
-## ⚠️ Décision à prendre : `key` ou `Organization.vertical` ?
+## ✅ Décision tranchée : **option A** — la `key` du pack EST la valeur du vertical
 
-`STORY-171` livre `Organization.vertical` sur une **liste fermée** (`cabinet`, `distributeur`,
-`imf-sfd`, `assurance-cima`). Deux options :
+`STORY-171` prévoit `Organization.vertical` sur une **liste fermée** (`cabinet`, `distributeur`,
+`imf-sfd`, `assurance-cima`). Deux options étaient ouvertes :
 
 | Option | Conséquence |
 |---|---|
 | **A — la `key` du pack EST la valeur du vertical** | un vertical = un pack, point. Simple, et interdit deux offres pour un même secteur. |
 | **B — un pack porte un `vertical` en attribut** | plusieurs packs par secteur (« distributeur essentiel » / « distributeur complet »). Ouvre la porte au commercial, complique tout de suite. |
 
-**Recommandation : A**, et B le jour où quelqu'un demande deux offres. Passer de A à B, c'est ajouter
-une colonne ; l'inverse, c'est une migration de données. ⚡ **Cette décision est un préalable à
-l'implémentation** — elle conditionne le schéma, et elle appartient au PO.
+**Décision PO du 2026-08-11 : option A.** B le jour où quelqu'un demande deux offres — passer de A à
+B, c'est ajouter une colonne ; l'inverse, c'est une migration de données. La `key` est donc **unique**
+et porte la taxonomie produit.
+
+**Corollaire tranché en même temps — taxonomie des clés : celle de `STORY-171`**, et non le champ
+`legacy` du fichier front, qui en **diverge** (`imf` vs `imf-sfd`, `assurance` vs `assurance-cima`) :
+
+| `key` du pack | `legacy` front | libellé console |
+|---|---|---|
+| `cabinet` | `cabinet` | Expertise comptable |
+| `distributeur` | `distributeur` | Distribution |
+| `imf-sfd` | ⚠️ `imf` | Finance |
+| `assurance-cima` | ⚠️ `assurance` | Assurance |
+
+⚡ **L'AC 4 se lit donc sur la substance, pas sur la clé** : le seed doit être identique à
+`vertical-packs.ts` sur le **référentiel, la liste de modules et son ordre** ; la clé, elle, suit la
+liste fermée du vertical pour qu'aucune table de correspondance n'ait à être réinventée le jour où
+`STORY-171` sort. Le libellé (`label`) reprend le libellé de console, qui est la clé du `Record` front.
+
+⚠️ **`STORY-171` est `not_started` au moment d'implémenter** : `Organization.vertical` n'existe pas
+encore. Cette story n'en dépend pas — elle **fixe** la taxonomie que 171 reprendra. Aucune contrainte
+d'intégrité référentielle vers l'organisation n'est posée ici (ce serait une frontière cross-service,
+interdite par l'invariant nº 2).
 
 ---
 
@@ -115,7 +137,7 @@ l'implémentation** — elle conditionne le schéma, et elle appartient au PO.
 
 ## Tâches
 
-- [ ] Trancher A vs B *(PO)* — préalable bloquant.
+- [x] Trancher A vs B *(PO)* — **tranché le 2026-08-11 : option A**, clés sur la taxonomie `STORY-171`.
 - [ ] Schéma `VerticalPack` + module `packs` (AC 1, 2)
 - [ ] Validation référentielle contre modules & référentiels (AC 3)
 - [ ] Seed des quatre packs + test de conformité au fichier front (AC 4, 5)
@@ -139,6 +161,20 @@ STORY-179 → 184)*. Ces 5 points le portent à **69**. Le slot en S20 est celui
 n'est pas tenable sans décaler autre chose. Ordre de décalage défendable, si la capacité doit être
 tenue : **garder 179 + 180** *(sans elles, la revue KYC reste inexploitable)*, décaler **181 → 185**
 au S21.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — démarrée le 2026-08-11.
+
+- [x] **① Préalable PO levé** — option **A** (`key` = valeur du vertical, unique), clés sur la
+      taxonomie fermée de `STORY-171`. Cf. § *Décision tranchée*.
+- [ ] ② Schéma `VerticalPack` + module `packs`
+- [ ] ③ Validation référentielle (modules & référentiels) → 422
+- [ ] ④ Seed des quatre packs + test de conformité au fichier front
+- [ ] ⑤ OpenAPI + tests
+- [ ] ⑥ Vérification docker de la persistance réelle
 
 ---
 
