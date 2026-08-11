@@ -5,10 +5,11 @@
 **Découverte par :** revue de cohérence maquette ⇄ code du 2026-08-06, après livraison d'AP-06/AP-07
 **Priorité :** Should Have — ⚡ **non bloquante pour AP-06**, qui vit avec une config en dur ; bloquante pour l'écran « Plateformes » de la maquette
 **Story Points :** 5
-**Statut :** in_progress
+**Statut :** done
 **Complexité :** medium
 **Créée le :** 2026-08-06
 **Démarrée le :** 2026-08-11
+**Clôturée le :** 2026-08-11
 **Sprint :** 20
 **Service :** `platform-catalog-service` (`:3003`)
 
@@ -123,25 +124,25 @@ interdite par l'invariant nº 2).
 
 ## Critères d'acceptation
 
-- [ ] `GET /catalog/packs` rend les packs actifs, triés par `order` ; `catalog:read` exigé.
-- [ ] `POST|PATCH|DELETE /catalog/admin/packs/:key` sous `catalog:manage` ; **403** pour tout autre rôle.
-- [ ] **Un pack référençant un module ou un référentiel inconnu est refusé en 422**, avec le champ fautif.
-- [ ] Les quatre packs actuels sont seedés et **identiques** à `vertical-packs.ts` — vérifié par un test
+- [x] `GET /catalog/packs` rend les packs actifs, triés par `order` ; `catalog:read` exigé.
+- [x] `POST|PATCH|DELETE /catalog/admin/packs/:key` sous `catalog:manage` ; **403** pour tout autre rôle.
+- [x] **Un pack référençant un module ou un référentiel inconnu est refusé en 422**, avec le champ fautif.
+- [x] Les quatre packs actuels sont seedés et **identiques** à `vertical-packs.ts` — vérifié par un test
       qui compare les deux listes, pas par relecture.
-- [ ] Un pack **vide** (aucun module) est valide : une plateforme peut exister avant d'être composée.
+- [x] Un pack **vide** (aucun module) est valide : une plateforme peut exister avant d'être composée.
       *(La console le dit déjà — « Ce pack ne contient encore aucun module ».)*
-- [ ] OpenAPI à jour ; `npm run gen:api` côté console rend les types sans écart.
-- [ ] Tests : lecture, écriture, refus 422, refus 403, seed conforme.
+- [x] OpenAPI à jour ; `npm run gen:api` côté console rend les types sans écart.
+- [x] Tests : lecture, écriture, refus 422, refus 403, seed conforme.
 
 ---
 
 ## Tâches
 
 - [x] Trancher A vs B *(PO)* — **tranché le 2026-08-11 : option A**, clés sur la taxonomie `STORY-171`.
-- [ ] Schéma `VerticalPack` + module `packs` (AC 1, 2)
-- [ ] Validation référentielle contre modules & référentiels (AC 3)
-- [ ] Seed des quatre packs + test de conformité au fichier front (AC 4, 5)
-- [ ] OpenAPI + tests (AC 6, 7)
+- [x] Schéma `VerticalPack` + module `packs` (AC 1, 2)
+- [x] Validation référentielle contre modules & référentiels (AC 3)
+- [x] Seed des quatre packs + test de conformité au fichier front (AC 4, 5)
+- [x] OpenAPI + tests (AC 6, 7)
 
 ---
 
@@ -166,7 +167,7 @@ au S21.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — démarrée le 2026-08-11.
+**Statut : `done`** — démarrée et clôturée le 2026-08-11, PR #14 rebase-mergée sur `dev`.
 
 - [x] **① Préalable PO levé** — option **A** (`key` = valeur du vertical, unique), clés sur la
       taxonomie fermée de `STORY-171`. Cf. § *Décision tranchée*.
@@ -280,6 +281,112 @@ explication. Documenté depuis dans `PacksService.remove` et `PacksSeedService`,
 avec le geste correct : **retirer un pack de départ se fait par
 `PATCH { status: 'DEPRECATED' }`**, qui survit au redémarrage. `DELETE` reste
 juste pour un pack créé à la main par erreur.
+
+---
+
+## Revue de code — ⚡⚡ trois défauts de même racine, dont un qui corrompait la base
+
+Tous **reproduits contre le `ValidationPipe` réel** du service avant correction,
+et **tous invisibles aux unitaires** : les specs appellent le service avec un DTO
+déjà bien formé, elles ne peuvent pas voir ce que le pipe laisse passer.
+
+**La racine commune :** `class-validator` **saute** un `@ValidateNested()` quand
+la valeur est `undefined`, et `@IsOptional()` saute **aussi** sur `null` — pas
+seulement sur `undefined`.
+
+| # | Entrée | Avant | Après |
+|---|---|---|---|
+| 1 | `POST {"key","label"}` sans `referentiel` | **500** (`dto.referentiel.code` → TypeError) | **400** — `@IsDefined()` |
+| 2 | `PATCH {"referentiel": null}` | **500** (`!== undefined` vrai pour `null`) | **400** — `@siPresent()` |
+| 3 | `PATCH {"modules": null}` | **corruption de base + 500 pour TOUS** | **400** |
+
+⚡⚡ **Le troisième est le grave.** Chaîne complète : le `null` passe le pipe →
+`assertModulesExist(null)` le traite comme « rien à valider » (**aucun 422**) →
+`findOneAndUpdate` l'écrit sans jouer les validateurs Mongoose → le pack devient
+`{ modules: null, status: 'ACTIVE' }` → `[...doc.modules]` explose à **chaque**
+lecture. `GET /catalog/packs` rendait alors **500 pour tous les appelants**, pas
+seulement pour le fautif, **jusqu'à réparation manuelle en base** — l'assistant
+de provisioning, consommateur nº 1 de la story, tombait entièrement. Mêmes
+variantes pour `label` (document invalide en silence), `status` (le pack
+**disparaît** de la lecture publiée) et `order`.
+
+**Deux gardes, pas une** : `@siPresent()` (`ValidateIf(v !== undefined)`) sur
+tous les champs d'`UpdatePackDto` ferme la **porte d'entrée** ; le `?? []` de
+`PackResponseDto` est une garde de **lecture** — un document écrit hors API
+(script, correction manuelle, reprise) n'a jamais franchi cette porte, et
+`ModuleResponseDto` portait déjà exactement la même.
+
+⚠️ **L'angle mort qui l'a laissé passer** : `collectCoverageFrom` exclut
+`*.dto.ts`. La logique de `fromDocument` est **invisible aux seuils** — malgré le
+« module `packs` à 100 % ». À ranger à côté de `*bootstrap*.ts` dans la liste des
+endroits où un défaut ne se voit pas.
+
+Aussi traités : `PacksService.findByKey` supprimé (aucun appelant, aucune route,
+hors demande de la story — code mort et 2 tests qui gonflaient la couverture sans
+consommateur) ; `@ApiCreatedResponse` sur le `POST`, qui répond **201** alors
+qu'`@ApiOkResponse` seul le faisait typer 200 par `gen:api` (AC 6 « sans écart »).
+
+**Constat laissé de côté, volontairement** : le même travers `@ApiOkResponse` sur
+un `POST` existe dans `catalog-admin.controller.ts` (3 routes) — **pré-existant et
+hors périmètre**, non corrigé ici.
+
+**3 mutations de plus, 3 rouges** — retrait d'`@IsDefined`, retour à la sémantique
+`@IsOptional`, retrait du `?? []`.
+
+---
+
+## Revue de sécurité — **0 vulnérabilité**, 1 durcissement
+
+Vecteurs audités et fermés : RBAC (`PermissionsGuard` global, garde de classe
+bien vue par `getAllAndOverride`, **aucune route paramétrée d'un autre contrôleur
+ne peut capturer `/catalog/packs`**) · isolation (donnée plateforme, les rôles
+tenant portent `perms: []` par construction, D15) · **injection NoSQL** (`@Param`
+est toujours une chaîne côté Express ; `?status[$ne]=` est coercé puis rejeté par
+`@IsEnum` avant tout accès Mongo) · **ReDoS** (les 4 motifs sont ancrés, linéaires,
+sans quantificateur imbriqué) · **CWE-770** (le `PATCH` fait un `$set`, pas un
+`$push` : l'endpoint rejouable ne peut pas faire croître le document vers la
+limite BSON — le défaut de STORY-145 est fermé) · fuite (`PackResponseDto` est une
+liste blanche : ni `_id`, ni `__v`, ni horodatages) · intégrité du semis (course
+au démarrage arbitrée par l'index unique).
+
+**Le durcissement retenu** — `AllExceptionsFilter` laissait passer `field` sur sa
+**véracité**, là où son voisin `limitBytes` est gardé par son **type**. Ce filtre
+est **global** : sur cette base, un émetteur futur posant `field: { … }` ferait
+recopier l'objet tel quel dans le corps HTTP — vecteur d'exfiltration latent,
+ouvert par un code qui n'aurait rien fait de visiblement fautif. Mutation M16
+(retour à la véracité) : **rouge**.
+
+Deux observations sous le seuil **non traitées**, délibérément : le reflet de la
+`key` dans les 404/409 (réponse JSON + `nosniff`, motif déjà celui des autres
+agrégats) et l'absence de pagination sur la liste des packs (comportement déjà
+retenu pour les modules et les référentiels, et la création exige
+`catalog:manage`). Les changer ici déborderait le périmètre.
+
+---
+
+## Vérification docker rejouée sur l'état final (après correctifs)
+
+Les correctifs de revue changent le comportement d'écriture : la vérification a
+été **refaite en entier** sur stack neuve, jamais reportée depuis la première.
+
+```
+Packs verticaux — créés : 4 (distributeur, imf-sfd, assurance-cima, cabinet)
+
+1. POST sans referentiel   : HTTP 400   (était 500)
+2. PATCH referentiel: null : HTTP 400   (était 500)
+3. PATCH modules: null     : HTTP 400   (corrompait la base)
+   label/status/order null : 400 400 400
+
+cabinet.modules = ["bilan","fiscalite","equipe","support-client","dashboard"]
+documents porteurs d'un champ nul en base : 0
+GET /catalog/packs : HTTP 200 → [distributeur, imf-sfd, assurance-cima, cabinet]
+422 → {"code":"PACK_MODULE_UNKNOWN","field":"modules", …}
+POST valide → HTTP 201
+```
+
+**Bilan final** : lint 0 warning · build OK · **574 unitaires + 177 e2e verts** ·
+module `packs` à **100 %** · **16 mutations, 16 rouges**, aucune par erreur de
+compilation.
 
 ---
 
