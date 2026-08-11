@@ -170,11 +170,116 @@ au S21.
 
 - [x] **① Préalable PO levé** — option **A** (`key` = valeur du vertical, unique), clés sur la
       taxonomie fermée de `STORY-171`. Cf. § *Décision tranchée*.
-- [ ] ② Schéma `VerticalPack` + module `packs`
-- [ ] ③ Validation référentielle (modules & référentiels) → 422
-- [ ] ④ Seed des quatre packs + test de conformité au fichier front
-- [ ] ⑤ OpenAPI + tests
-- [ ] ⑥ Vérification docker de la persistance réelle
+- [x] ② Schéma `VerticalPack` + module `packs`
+- [x] ③ Validation référentielle (modules & référentiels) → 422
+- [x] ④ Seed des quatre packs + test de conformité au fichier front
+- [x] ⑤ OpenAPI + tests
+- [x] ⑥ Vérification docker de la persistance réelle
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **574 tests verts** (49 suites), dont **79** sur
+`packs` et **22** e2e · couverture au-dessus des seuils 65/90/90/90 (module
+`packs` à **100 %** partout).
+
+### Écarts assumés par rapport à la lettre du périmètre
+
+| Écrit dans la story | Livré | Pourquoi |
+|---|---|---|
+| `POST /catalog/admin/packs/:key` | `POST /catalog/admin/packs`, clé **dans le corps** | patron de `CatalogAdminController` (STORY-032). Une clé en segment d'URL sur un `POST` créerait une **seconde grammaire d'écriture** dans le même service, et `gen:api` générerait deux styles d'appel pour deux ressources jumelles. `PATCH`/`DELETE` restent bien sur `:key`. |
+| — | `GET /catalog/admin/packs` (+ `?status=`) ajouté | l'onglet « Plateformes » doit voir les packs `DEPRECATED`, que la lecture publiée masque par construction. Sans cette route, un pack retiré du commerce serait **invisible et inéditable**. |
+| « le couple `(code, version)` doit exister » | existence **seule** — le statut n'est pas filtré | 🪝 **hook inerte documenté** : un référentiel `RETIRED` existe, il passe donc, alors que l'octroi le refusera (STORY-033, risque #6). Élargir ici casserait l'édition d'un pack dont le référentiel vient d'être retiré. À ouvrir quand le besoin sera réel. |
+
+Hors périmètre respecté : ni rattachement à une organisation, ni tarification,
+ni historisation ; **aucun topic Kafka** (un pack n'octroie rien, l'`Entitlement`
+reste l'autorité) ; `tone`/`tag` laissés au front (décisions de maquette).
+
+### Mutation-testing — 12 mutations, 12 rouges, 0 par erreur de compilation
+
+Restauration par **copie de sauvegarde**, jamais `git checkout --` (piège de
+STORY-144). Le script vérifie en plus, par `cmp`, que le fichier a **réellement**
+changé — une mutation non appliquée passerait sinon pour « verte ».
+
+| # | Mutation | Ce qu'elle prouve |
+|---|---|---|
+| M1 | semis `$setOnInsert` → `$set` | l'invariant central : le semis n'écrase jamais une édition |
+| M2 | semis lit `modifiedCount` au lieu d'`upsertedCount` | le rapport ne ment pas sur une base vide |
+| M3 | semis passe la **référence** des modules, pas une copie | la table gelée ne fuit pas dans l'écriture |
+| M4 | lecture publiée ne filtre plus `ACTIVE` | une offre retirée ne peut pas être proposée |
+| M5 | tri publié perd la clé de départage | l'ordre ne dépend pas du plan d'exécution Mongo |
+| M6 | `update` n'appelle plus la validation des modules | le 422 n'est pas gardé qu'à la création |
+| M7 | le 422 perd son `field` | AC 3 « avec le champ fautif » |
+| M8 | `AllExceptionsFilter` cesse de laisser passer `field` | ⚡ **la liste blanche** : sans la déclaration, le champ est jeté **sans erreur** |
+| M9 | le contrôleur de lecture perd `@RequirePermissions` | la garde est bien la sienne, pas celle d'un voisin |
+| M10 | le seed dérive vers la clé `legacy` du front (`imf`) | le test de conformité **n'est pas tautologique** |
+| M11 | `PackResponseDto` « range » les modules (`.sort()`) | l'ordre d'octroi est porteur de sens |
+| M12 | `create` ne valide plus le référentiel | le couple est bien vérifié avant écriture |
+
+### Vérification docker (stack neuve `down -v` — mongo, redis, kafka + `auth-service`, `platform-catalog-service`)
+
+Base `catalog_service`, collection **`vertical_packs`** (snake_case explicite ;
+`db.getCollectionNames()` listé d'abord).
+
+**Semis au démarrage** — log `PacksSeedService` : `créés : 4 (distributeur,
+imf-sfd, assurance-cima, cabinet) · déjà présents, non touchés : 0`. Les 4
+documents sont en base avec le référentiel, les modules **dans l'ordre** et
+`order` 1→4. Index créés : `key_1` **unique** et `status_1_order_1_key_1`. Le
+sous-document `referentiel` **ne porte pas d'`_id`**.
+
+**Écriture réelle** (jeton `PLATFORM_ADMIN` seedé) :
+
+| Appel | HTTP | Base |
+|---|---|---|
+| `POST` pack `zone-test`, modules `["stock","bilan"]` | 201 | écrit, **ordre non alphabétique conservé** |
+| `POST` même clé | **409** | toujours 1 document — index unique opposable |
+| `POST` pack sans modules | 201 | `modules: []` — AC 5 |
+| `PATCH {modules:["bilan"], status:"DEPRECATED"}` | 200 | remplacement **absolu** |
+| `PATCH {modules: []}` | 200 | pack vidé |
+| `DELETE` | 204 puis **404** au rejeu | document réellement supprimé |
+
+**Refus 422 : aucune écriture, aucun orphelin.** Après `POST` avec un module
+inconnu **et** `POST` avec `syscohada-revise@9.9` :
+`count zone-test = 0 | total = 4`. Corps réels reçus — c'est ce qui prouve que
+`field` traverse la liste blanche du filtre, ce qu'aucun e2e mocké ne peut
+montrer :
+
+```json
+{"statusCode":422,"error":"Unprocessable Entity","message":"Module(s) inconnu(s) du catalogue : fantome.","code":"PACK_MODULE_UNKNOWN","field":"modules","requestId":"…"}
+{"statusCode":422,"error":"Unprocessable Entity","message":"Référentiel « syscohada-revise@9.9 » inconnu du registre.","code":"PACK_REFERENTIEL_UNKNOWN","field":"referentiel","requestId":"…"}
+```
+
+Un `PATCH` mêlant un champ valide (`label`) et un module inconnu est refusé
+**en bloc** : relu en base, `label` n'avait pas bougé.
+
+**Visibilité `DEPRECATED`** : absent de `GET /catalog/packs`, présent sur
+`GET /catalog/admin/packs?status=DEPRECATED`. La lecture publiée rend les 4 packs
+**triés par `order`**, sans `_id`, `__v` ni horodatages.
+
+**⚡ L'invariant du semis, prouvé sur un vrai redémarrage.** Pack `cabinet` édité
+via l'API (`label` renommé, `modules: []`), puis `docker restart` :
+
+```
+créés : 0 · déjà présents, non touchés : 4 (distributeur, imf-sfd, assurance-cima, cabinet)
+label=Cabinets comptables (edite) | modules=[] | total packs=4
+```
+
+L'édition **survit**, aucun doublon. C'est le seul endroit où cet invariant se
+prouve : les unitaires assertent la **forme** de l'update, pas son effet.
+
+### ⚠️ Constat trouvé par la vérification docker — supprimer un pack seedé n'est pas définitif
+
+`DELETE cabinet` → 204, 3 packs restants → redémarrage → `créés : 1 (cabinet)` →
+4 packs, **label et modules d'origine** : l'édition faite avant la suppression
+est perdue avec elle.
+
+Ce n'est pas un défaut mais la conséquence directe de « créer si absent » — le
+semis ne peut distinguer « jamais semé » de « semé puis supprimé » sans garder
+une pierre tombale, que la story ne demande pas. Le comportement n'était en
+revanche **écrit nulle part** : un opérateur aurait vu le pack revenir sans
+explication. Documenté depuis dans `PacksService.remove` et `PacksSeedService`,
+avec le geste correct : **retirer un pack de départ se fait par
+`PATCH { status: 'DEPRECATED' }`**, qui survit au redémarrage. `DELETE` reste
+juste pour un pack créé à la main par erreur.
 
 ---
 
