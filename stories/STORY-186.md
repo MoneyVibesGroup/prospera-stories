@@ -5,7 +5,7 @@
 **Découverte par :** l'e2e chaîne KYC d'AP-07, lancé pour la première fois contre le stack le 2026-08-06
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** En cours
+**Statut :** En revue
 **Complexité :** medium
 **Créée le :** 2026-08-06
 **Sprint :** 20
@@ -203,26 +203,26 @@ de cet enum sont **figées** (écrites en base, relues bien après) : on ajoute,
 
 ## Critères d'acceptation
 
-- [ ] `GET /admin/organizations` et `GET /admin/organizations/:id` portent `ownerEmailVerified` et
+- [x] `GET /admin/organizations` et `GET /admin/organizations/:id` portent `ownerEmailVerified` et
       `ownerEmailVerifiedAt` ; contrat déclaré à l'OpenAPI *(pas un `Record<string, never>` — cf. `STORY-181`)*.
-- [ ] Le BFF relaie les deux champs sur `AdminOrgListItemDto` **et** `AdminOrgDetailDto`.
-- [ ] `POST /admin/organizations/:id/resend-verification` renvoie **200** et déclenche un envoi réel ;
+- [x] Le BFF relaie les deux champs sur `AdminOrgListItemDto` **et** `AdminOrgDetailDto`.
+- [x] `POST /admin/organizations/:id/resend-verification` renvoie **200** et déclenche un envoi réel ;
       **403** sans `user:invite` ; **throttlée** au même titre que la route utilisateur.
-- [ ] Relancer une organisation **déjà vérifiée** ne renvoie pas d'erreur brute : réponse explicite
+- [x] Relancer une organisation **déjà vérifiée** ne renvoie pas d'erreur brute : réponse explicite
       « rien à renvoyer », sans divulguer l'existence du compte au-delà de ce que la console sait déjà.
-- [ ] La relance est **tracée** (auteur, cible, horodatage) si le service journalise déjà les actes
+- [x] La relance est **tracée** (auteur, cible, horodatage) si le service journalise déjà les actes
       d'administration ; sinon le noter comme demande, ne pas l'inventer.
-- [ ] Tests : projection des champs, 403 hors permission, throttle, cas « déjà vérifiée ».
+- [x] Tests : projection des champs, 403 hors permission, throttle, cas « déjà vérifiée ».
 
 ---
 
 ## Tâches
 
-- [ ] Trancher A vs B *(PO)* — préalable.
-- [ ] Projeter `ownerEmailVerified(At)` dans les DTO admin `auth-service` (AC 1)
-- [ ] Relayer côté BFF (AC 2)
-- [ ] Route de relance + permission + throttle (AC 3, 4)
-- [ ] OpenAPI + tests (AC 5, 6)
+- [x] Trancher A vs B *(PO)* — préalable.
+- [x] Projeter `ownerEmailVerified(At)` dans les DTO admin `auth-service` (AC 1)
+- [x] Relayer côté BFF (AC 2)
+- [x] Route de relance + permission + throttle (AC 3, 4)
+- [x] OpenAPI + tests (AC 5, 6)
 
 ---
 
@@ -235,12 +235,115 @@ n'est pas tenable sans décaler autre chose. Ordre de décalage défendable : ga
 
 ---
 
+## Progress Tracking
+
+**Statut : `in_progress` → développé, validé, vérifié en docker le 2026-08-12.**
+
+### Portes de qualité
+
+| Dépôt | Lint | Build | Unitaires | Couverture (S/B/F/L) | e2e |
+|---|---|---|---|---|---|
+| `auth-service` | 0 warning | ✅ | **825** verts | 97.8 / 90.88 / 97.91 / 97.91 | **205** verts |
+| `admin-panel` | 0 warning | ✅ | **420** verts | 99.67 / 92.82 / 100 / 99.64 | **189** verts |
+
+### Vérification docker — stack neuve (`down -v`), le 2026-08-12
+
+Rappel du projet : les e2e **mockent la couche données**, ils ne prouvent ni la persistance ni
+l'atomicité. Tout ce qui suit est mesuré sur `mongosh`, Redis et Mailhog réels.
+
+| Ce qui est prouvé | Mesure |
+|---|---|
+| **Projection, cabinet auto-inscrit non vérifié** | liste **et** détail rendent `ownerEmailVerified: false`, `ownerEmailVerifiedAt: null` sur un compte `ACTIVE` sans `emailVerifiedAt` — la population exacte que la story vise |
+| **Projection après vérification** | `true` + date ISO (`2026-08-07T09:12:00.000Z`), traversée sans reformatage |
+| **Aucune contamination entre lignes** | 4 organisations en **un** appel, chacune portant l'état de **son** propriétaire, avec des dates distinctes |
+| ⚡ **N+1 fermé — profileur Mongo** | un appel à `GET /admin/organizations` sur 4 organisations émet **1 requête `memberships` + 1 requête `users`**. Un N+1 en aurait émis 4 + 4 |
+| **Relance : effet réel** | empreinte du jeton passée de `d6d674e9…` à `ce198757…` (**l'ancien lien cesse de fonctionner**), nouvelle expiration à +24 h, **e-mail réellement délivré** (Mailhog) |
+| **Atomicité des 2 documents** | 3 relances réussies ⇒ **exactement 3** lignes `ORG_VERIFICATION_RESENT` ; le 4ᵉ appel (429) n'en écrit **aucune** — aucun orphelin |
+| **Journal relu sans changement** | `GET :id/audit` (STORY-294) rend la nouvelle action avec l'acteur résolu (`admin@prospera.local`), sans un octet de modification de cette route |
+| **Quota par organisation** | 3 relances passent, la 4ᵉ répond **429** `TOO_MANY_VERIFICATION_RESENDS` ; clé Redis `org-verification:resend:<orgId>` bien distincte de celle du renvoi d'invitation |
+| ⚡ **« Déjà vérifiée » court-circuite AVANT le quota** | sur une organisation vérifiée **dont le quota est épuisé** : `200 { sent: false }` — et **aucune** ligne d'audit (3 → 3), **aucune** incrémentation Redis (4 → 4), **aucun** e-mail (4 → 4). Les trois assertions négatives sont mesurées, pas déduites |
+| **Cas dégénéré** | organisation dont le seul admin est suspendu : projection **reste** `false`/`null` (jamais `true`), relance → **409 `NO_ACTIVE_OWNER`**, pas une 500 |
+| **Organisation inconnue** | **404** (anti-énumération) |
+| **BFF — traversée des deux champs** | `GET /admin/orgs` et `GET /admin/orgs/:id` relaient `ownerEmailVerified`/`ownerEmailVerifiedAt` à l'identique, `kyc`/`entitlements` dégradés sans impact (dépendance dure = `auth`) |
+| **BFF — relance proxifiée** | 3 × `200 { sent: true }` puis **429**, lignes d'audit écrites côté `auth` avec le bon acteur |
+| ⚡ **BFF — le 429 reste un 429** | 4ᵉ appel via le BFF : **429**, plus le **503** d'avant correctif |
+
+**Non vérifié en docker, et dit comme tel** : le `403` sans `user:invite`. Le `PLATFORM_ADMIN` détient
+les 13 permissions du catalogue ; le cas est prouvé **en e2e**, avec la chaîne de gardes réelle et un
+jeton non porteur de la permission — pas sur la stack.
+
+### Mutation-testing
+
+Un test qu'un code bugué franchit est une fausse assurance. Cinq garde-fous ont été mutés, chacun
+vérifié rouge puis restauré (restauration par copie de sauvegarde et `diff`, **jamais** un
+`git checkout --` large qui emporterait les modifications non commitées) :
+
+| Mutation | Test viré au rouge |
+|---|---|
+| résolution en lot remplacée par une boucle par organisation | « absence de N+1 » (`toHaveBeenCalledTimes(1)` reçoit 2) |
+| `session` passée à `adminAuditService.record` remplacée par `undefined` | « audite, PUIS met en file après le commit » |
+| court-circuit « déjà vérifié » neutralisé | « `200 { sent: false }` » (`sent` vaut `true`) |
+| champs de la liste BFF remplacés par des constantes en dur | « traversés fidèlement depuis `auth` » |
+| entrée `429` retirée de `WRITE_ERROR_MESSAGES` | « 429 amont → 429, jamais 503 » |
+
+### Écart traité au-delà du cadrage initial
+
+⚡ **Le BFF transformait le 429 amont en 503.** `rethrowUpstreamError` ne portait aucune entrée
+`429` : le quota exigé par l'AC nº 3 aurait été **illisible depuis la console**, qui aurait annoncé
+« service indisponible » sur une stack parfaitement saine — l'opérateur partant chercher une panne
+inexistante, là où le geste correct était d'attendre.
+
+C'est la **troisième occurrence d'un motif que ce fichier documente déjà deux fois** (le `403` de
+STORY-106, le `428` de STORY-182), et cette story est la **première à la rendre atteignable** : la
+relance est la seule action proxifiée dont l'amont impose un quota. Corrigé dans le socle (une
+entrée + un `case`, `error` posé à la main comme l'exige un payload objet), avec son test et sa
+mutation. Ne pas le corriger aurait livré un AC vérifiable en amont et faux en aval.
+
+---
+
 ## Dev Agent Record
 
 ### Agent Model Used
 
-### Debug Log References
+`claude-opus-5` (session : cadrage, conception, correctif du socle BFF, vérification docker, revues) ·
+`sonnet` (implémentation, sur brief — complexité `medium`).
 
 ### Completion Notes List
 
+- Le préalable de la story est tranché : **option A**, le propriétaire — en **réutilisant** la
+  définition d'administrateur principal de STORY-144 plutôt qu'en en écrivant une seconde.
+- Le mécanisme de vérification (jeton, TTL, forme du lien) est **extrait** dans
+  `EmailVerificationService` ; `AuthService` en devient un appelant. Il n'existe plus qu'un seul
+  endroit où change l'URL de vérification.
+- Un défaut **hors cadrage initial** a été corrigé parce que cette story le rendait atteignable : le
+  BFF transformait le `429` amont en `503`, rendant le quota exigé par l'AC nº 3 illisible depuis la
+  console. Cf. § *Écart traité au-delà du cadrage initial*.
+- Le `403` sans `user:invite` est prouvé **en e2e**, pas en docker — le `PLATFORM_ADMIN` détient les
+  13 permissions du catalogue. Dit explicitement plutôt que passé sous silence.
+
 ### File List
+
+**`auth-service`**
+
+- `src/modules/users/email-verification.service.ts` *(neuf)* + son spec — jeton, TTL, lien, mise en file
+- `src/modules/admin/dto/resend-verification-response.dto.ts` *(neuf)* — `{ message, sent }`
+- `src/modules/admin/admin-organizations.service.ts` — résolution du principal factorisée, projection
+  en lot, `resendVerification` (transaction + quota + audit)
+- `src/modules/admin/admin-organizations.controller.ts` — route `POST :id/resend-verification`
+- `src/modules/admin/dto/organization-admin.dto.ts` — les deux champs, liste et détail
+- `src/modules/audit/enums/admin-audit-action.enum.ts` — `ORG_VERIFICATION_RESENT`
+- `src/modules/memberships/memberships.service.ts` — `listActiveAdminsByOrganizations`
+- `src/modules/users/users.service.ts` — `session?` sur le jeton, `listEmailVerificationStates` projetée
+- `src/modules/organizations/organizations.service.ts` — `createdBy` projeté par `listAll`
+- `src/modules/auth/auth.service.ts` — délègue au service extrait
+- `src/modules/users/users.module.ts` — déclare/exporte le service extrait
+
+**`admin-panel`**
+
+- `src/admin/orgs/dto/resend-verification-result.dto.ts` *(neuf)*
+- `src/upstream/contracts/auth-org.contract.ts` — les deux champs + le résultat de relance
+- `src/admin/orgs/dto/admin-org-identity.dto.ts` · `dto/admin-org-list-item.dto.ts` — projections Swagger
+- `src/admin/orgs/org-aggregation.service.ts` — mapping en vue liste
+- `src/upstream/auth-service.client.ts` · `src/admin/orgs/org-actions.service.ts` ·
+  `src/admin/orgs/admin-org-actions.controller.ts` — la relance proxifiée
+- `src/upstream/upstream-error.ts` — **entrée `429`** (le correctif du socle)
