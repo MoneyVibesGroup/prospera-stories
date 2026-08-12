@@ -5,10 +5,12 @@
 **Découverte par :** audit des actions du catalogue de la console, 2026-08-06
 **Priorité :** Must Have — ⚡ **une règle métier contournable n'est pas une règle**
 **Story Points :** 5
-**Statut :** À faire
+**Statut :** in_progress
+**Complexité :** high
 **Créée le :** 2026-08-06
 **Sprint :** 20
 **Service :** `platform-catalog-service` (`:3003`)
+**Assignée à :** `vivianMoneyVibesGroupes`
 
 ---
 
@@ -42,6 +44,33 @@ rien ne rattrape. La console peut le dire à l'écran ; elle ne peut pas l'empê
 
 ---
 
+## ⚡ Vérification de la prémisse au démarrage (2026-08-12) — elle est **à moitié fausse**
+
+Lecture de `module-versions.service.ts` **avant** d'écrire une ligne : le garde-fou **existe déjà côté
+service**. `ModuleVersionsService.assertMajorBudget()` compte les majeures `ACTIVE` du module et refuse
+une troisième — depuis STORY-032. Un appel direct au service **ne la contourne donc pas**.
+
+Ce qui est vrai, et qui reste le cœur de la story :
+
+| Affirmation de la story | Verdict | Ce qui est réellement en cause |
+|---|---|---|
+| « le service accepte une 3ᵉ majeure active sans rien dire » | ❌ **faux** | il refuse — `ConflictException` 409 |
+| « `CreateModuleVersionDto` ne porte que `{version, releasedAt}` » | ✅ vrai | ni `supersedesMajor` ni `deprecationDate` |
+| « aucun geste atomique déprécier + publier » | ✅ vrai | **la seule voie** est PATCH puis POST, non atomique |
+| « le refus ne nomme ni le champ fautif ni les majeures » | ✅ vrai | phrase en français, sans `code`, `field`, ni majeures structurées |
+
+⚡ **Le vrai défaut est plus retors que celui décrit.** Le garde-fou n'est pas absent : il est
+**infranchissable**. N'ayant aucune façon de désigner la sortante dans l'appel de publication, l'admin
+est *obligé* de passer par les deux appels — c'est le refus lui-même qui **impose** la séquence non
+atomique dont la story décrit les dégâts. Le trou de « zéro version active » n'est pas un chemin de
+traverse : c'est **le seul chemin offert**.
+
+La story n'en est pas invalidée, son livrable ne change pas — mais l'AC 1 change de nature : il ne s'agit
+pas d'**ajouter** un refus, il s'agit de le rendre **actionnable** (422 + `code` + `field` + majeures) et
+de lui donner **une issue en un seul appel**.
+
+---
+
 ## Périmètre
 
 **Inclus :**
@@ -72,6 +101,31 @@ rend trois verdicts : rien à faire · arbitrage requis · refus. **C'est la sp�
 cette story** — la porter côté service, c'est la traduire, pas la redécouvrir.
 
 ---
+
+## Décisions de conception (tranchées ici, absentes du cadrage)
+
+1. **Le refus N/N-1 passe de `409` à `422`** — la story l'exige (« échoue en **422** »). C'est un
+   **changement de contrat** : `ApiConflictResponse` de la route perd le motif N/N-1, qui devient un
+   `ApiUnprocessableEntityResponse`. Le `409` reste pour ce qui est **vraiment** un conflit d'état :
+   la version en double. Défendable : « trois majeures actives » n'est pas un conflit de ressource,
+   c'est une **entité non traitable en l'état** — et c'est le statut que le service utilise déjà pour
+   ses autres refus de règle métier porteurs d'un `code` (`REFERENTIEL_FAMILY_UNKNOWN`, STORY-148).
+2. **Trois codes d'erreur stables**, portés **dans le corps** (patron STORY-138/148/185) :
+   `SUPPORT_WINDOW_ARBITRATION_REQUIRED` · `SUPERSEDES_MAJOR_NOT_ACTIVE` · `DEPRECATION_DATE_REQUIRED`.
+3. ⚠️ **Les majeures en cause exigent un champ de plus dans `AllExceptionsFilter`.** Ce corps est
+   construit par **liste blanche** : poser `majors` sur l'exception ne suffit pas, il serait **jeté sans
+   erreur** et l'AC « les majeures en cause » passerait pour satisfait alors que la console ne recevrait
+   rien. C'est la **4ᵉ fois** que ce piège se présente (`code`, `limitBytes`, `field` avant lui).
+4. **`supersedesMajor` est honoré dès qu'il est fourni**, pas seulement quand l'arbitrage est requis :
+   c'est une intention explicite (« celle-ci sort du support »), et elle n'ouvre aucun pouvoir nouveau
+   — le `PATCH` de dépréciation existe déjà et est ouvert à la même permission. Il doit désigner une
+   majeure **`ACTIVE` du module** et **différente** de celle publiée (sinon `422`).
+5. **Toute publication passe par une transaction**, arbitrage ou non. Un second chemin « sans session »
+   pour le cas simple dédoublerait le garde-fou : la règle serait évaluée à deux endroits, et c'est
+   exactement ainsi qu'une des deux copies se met à mentir.
+6. **Mapping `E11000`** de l'index unique `(moduleCode, version)` vers le même `409` que le pré-contrôle.
+   Sans lui, la publication concurrente de la même version répondait **500**. L'index est le vrai filet,
+   le pré-contrôle n'est qu'une amabilité.
 
 ## Critères d'acceptation
 
