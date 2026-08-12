@@ -5,7 +5,8 @@
 **Découverte par :** l'e2e chaîne KYC d'AP-07, lancé pour la première fois contre le stack le 2026-08-06
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** À faire
+**Statut :** En cours
+**Complexité :** medium
 **Créée le :** 2026-08-06
 **Sprint :** 20
 **Service :** `auth-service` (`:3001`) + `admin-panel` BFF (`:3010`)
@@ -111,6 +112,25 @@ projette rien dans les DTO d'organisation.
 
 ---
 
+## ✅ Décision tranchée : quel utilisateur fait foi ? *(2026-08-12)*
+
+**Option A retenue — le propriétaire.**
+
+⚡ **Et « le propriétaire » a déjà une définition dans ce service, il ne faut pas en inventer une
+seconde.** `AdminOrganizationsService.resolvePendingAdmin` (STORY-144) résout l'**administrateur
+principal** : `organization.createdBy` s'il a encore une membership `TENANT_ADMIN` **active**, sinon
+le plus ancien administrateur actif. Ce repli n'est pas cosmétique — un fondateur retiré de son
+organisation laisserait sinon `ownerEmailVerified` collé à `false` **à vie**, et la console
+afficherait « bloqué » sur un cabinet qui ne l'est pas. La story réutilise donc cette résolution
+telle quelle, en la factorisant.
+
+**Organisation sans aucun administrateur actif** (cas dégénéré, possible après suppression) :
+`ownerEmailVerified: false`, `ownerEmailVerifiedAt: null`. Le choix est **volontairement
+conservateur** — rendre `true` ferait dire à la console « ce cabinet peut déposer » alors qu'aucun
+compte ne le peut. Le contraire d'un affichage prudent est ici un mensonge exploitable.
+
+---
+
 ## ⚠️ Décision à prendre : quel utilisateur fait foi ?
 
 Une organisation a plusieurs membres. « L'organisation est-elle vérifiée ? » n'a pas de réponse
@@ -123,6 +143,61 @@ Une organisation a plusieurs membres. « L'organisation est-elle vérifiée ? »
 
 **Recommandation : A.** B décrirait une organisation « vérifiée » qui reste incapable de déposer —
 exactement le mensonge que cette story existe pour supprimer.
+
+---
+
+## Conception retenue *(2026-08-12)*
+
+### 1. La projection n'a pas le droit d'être un N+1
+
+`GET /admin/organizations` rend jusqu'à 100 lignes. Résoudre le propriétaire ligne par ligne
+ferait **2 requêtes × 100** sur la route que le BFF appelle déjà en boucle pour construire son index
+des noms (`buildOrgNameIndex`, jusqu'à 20 pages). La résolution est donc **en lot** : une requête
+memberships sur toute la page (`organizationId ∈ page`, `TENANT_ADMIN`, `ACTIVE`, triée
+`{ organizationId, createdAt, _id }`), une requête users sur les propriétaires ainsi désignés.
+**2 requêtes, quelle que soit la taille de la page.**
+
+🔒 La seconde requête **projette `emailVerifiedAt` et rien d'autre**. C'est la leçon du `$lookup` de
+STORY-294 : sortir le document utilisateur entier de la base fait transiter `passwordHash` et les
+empreintes de jetons jusqu'à la couche de présentation, où une seule sérialisation naïve suffirait à
+les publier. On ne fait pas sortir ce qu'on n'a pas l'intention de rendre.
+
+### 2. La relance écrit DEUX documents — donc une transaction
+
+Relancer, c'est **régénérer le jeton de vérification** (`users`) **et** consigner l'acte
+(`admin_audit_logs`). Deux documents ⇒ transaction, par la règle du projet. Sans elle, le journal
+mentirait dans les deux sens : une trace sans jeton régénéré, ou un jeton régénéré sans trace.
+**L'e-mail est mis en file APRÈS le commit** — la file Bull n'est pas transactionnelle, et un envoi
+déclenché depuis une transaction qui échoue enverrait un lien mort.
+
+### 3. Le mécanisme de vérification est FACTORISÉ, pas recopié
+
+La génération du jeton, son TTL et la forme du lien vivent aujourd'hui dans un `private` d'
+`AuthService` (`enqueueVerificationEmail`). Les recopier côté admin créerait **deux endroits** où
+changer l'URL de vérification — le vecteur de bug le plus banal qui soit. Ils sont extraits dans un
+`EmailVerificationService` (module `users`, exporté), dont `AuthService` devient un appelant comme
+l'admin. C'est la symétrie exacte d'`InvitationService`, déjà en place pour l'autre population.
+
+### 4. Le quota est **par organisation**, pas par IP
+
+Exactement le raisonnement de STORY-144, que la route sœur documente déjà : `@Throttle` compte
+**par IP**, et toute la console sort par la même. Trois relances y épuiseraient le quota de *tout le
+parc*, pendant qu'un appelant depuis des IP tournantes relancerait une même organisation sans
+limite. Compteur Redis keyé sur l'organisation, **3/h**, fail-open si Redis tombe (le throttler
+global de la route reste la garde de base) — et incrémenté **seulement** une fois l'organisation et
+son propriétaire non vérifié résolus : un appel qui finit en 404 n'a rien envoyé.
+
+### 5. `200` avec un discriminant machine
+
+La console doit distinguer « c'est parti » de « rien à renvoyer » (AC nº 4) **sans lire une phrase
+française**. La réponse porte donc `{ message, sent: boolean }` : `sent: false` sur une organisation
+déjà vérifiée. Aucune divulgation — la console connaît déjà `ownerEmailVerified` par les AC 1 et 2.
+
+### 6. Une troisième action au journal, pas un second mécanisme
+
+`AdminAuditAction.ORG_VERIFICATION_RESENT` rejoint `ORG_SUSPENDED` / `ORG_REACTIVATED`. Les valeurs
+de cet enum sont **figées** (écrites en base, relues bien après) : on ajoute, on ne renomme pas.
+`GET /admin/organizations/:id/audit` (STORY-294) la relit **sans un octet de changement**.
 
 ---
 
