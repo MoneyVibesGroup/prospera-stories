@@ -2076,7 +2076,7 @@ sprints:
         epic: "EPIC-016"
         points: 3
         service: "auth-service"
-        status: "done"  # 2026-08-12 — développé + validé (auth 829 unit / 205 e2e ; bff 420 unit / 189 e2e, lint 0, seuils tenus) + vérifié en docker sur stack neuve (N+1 fermé au profileur : 1 requête memberships + 1 users pour 4 orgs ; 3 relances = 3 lignes d'audit, le 429 n'en écrit aucune ; « déjà vérifiée » n'écrit rien et ne consomme pas le quota). ⚡ Écart corrigé hors cadrage : le BFF transformait le 429 amont en 503 (3e occurrence du motif après le 403 de 106 et le 428 de 182), ce qui rendait le quota de l'AC nº3 illisible depuis la console. ⚠️ NE PAS CONFONDRE AVEC STORY-006 (✅ Completed) : celle-là est CÔTÉ CABINET (l'utilisateur se vérifie lui-même). Ici c'est la CONSOLE qui ne peut pas distinguer « n'a pas encore déposé » de « ne PEUT pas déposer » : les deux affichent « Non démarré ». Mesuré le 2026-08-06 sur la base de développement : 20 comptes non vérifiés sur 60 (33 %). ✅ PRÉALABLE TRANCHÉ le 2026-08-12 : option A, le propriétaire — et « propriétaire » réutilise la résolution d'administrateur principal DÉJÀ posée par STORY-144 (createdBy s'il est encore TENANT_ADMIN actif, sinon le plus ancien admin actif), jamais une seconde définition.
+        status: "done"  # ✅ 2026-08-12 — développé + validé (auth 829 unit / 205 e2e ; bff 420 unit / 189 e2e, lint 0, seuils tenus) + vérifié en docker sur stack neuve (N+1 fermé au profileur : 1 requête memberships + 1 users pour 4 orgs ; 3 relances = 3 lignes d'audit, le 429 n'en écrit aucune ; « déjà vérifiée » n'écrit rien et ne consomme pas le quota). ⚡ Écart corrigé hors cadrage : le BFF transformait le 429 amont en 503 (3e occurrence du motif après le 403 de 106 et le 428 de 182), ce qui rendait le quota de l'AC nº3 illisible depuis la console. ⚠️ NE PAS CONFONDRE AVEC STORY-006 (✅ Completed) : celle-là est CÔTÉ CABINET (l'utilisateur se vérifie lui-même). Ici c'est la CONSOLE qui ne peut pas distinguer « n'a pas encore déposé » de « ne PEUT pas déposer » : les deux affichent « Non démarré ». Mesuré le 2026-08-06 sur la base de développement : 20 comptes non vérifiés sur 60 (33 %). ✅ PRÉALABLE TRANCHÉ le 2026-08-12 : option A, le propriétaire — et « propriétaire » réutilise la résolution d'administrateur principal DÉJÀ posée par STORY-144 (createdBy s'il est encore TENANT_ADMIN actif, sinon le plus ancien admin actif), jamais une seconde définition.
         story_path: "stories/STORY-186.md"
         assigned_to: "vivianMoneyVibesGroupes"
         completed_date: "2026-08-12"
@@ -2086,10 +2086,10 @@ sprints:
         title: "La file de revue KYC n'est pas paginée — elle rend tout, et joint tout"
         epic: "EPIC-016"
         points: 3
-        service: "admin-panel"
-        status: "not_started"  # Mesuré le 2026-08-06 : GET /admin/kyc-reviews rend { items, total, sources } — ni page ni limit, et `total` n'est que le compte de ce qui vient d'être renvoyé (items: 2 / total: 2). Chaque ligne est une jointure à 3 services : à 500 dossiers, 500 jointures avant le premier pixel. PIÈGE À ÉVITER : borner la route SANS la paginer ferait plafonner en silence la tuile « Dossiers KYC en attente » d'AP-07, qui compte queue.length.
+        service: "admin-panel + kyc-service"
+        status: "in_progress"  # 2026-08-12 — ⚡ DEUX DÉPÔTS, établi à l'ouverture : `total` réel et pagination sont IMPOSSIBLES au seul BFF (l'amont `kyc GET /admin/kyc` rend un tableau nu, la file entière). L'amont passe à une enveloppe paginée + `countDocuments` séparé. 🪤 Piège nº1 : la MÊME route amont sert aussi `buildKycStatusIndex`, qui lit la file COMPLÈTE pour la colonne kycStatus de GET /admin/orgs — la paginer sans traiter cet appelant viderait la colonne en silence (`sources.kyc: 'ok'`), soit le motif de la story déplacé d'un écran à l'autre. 🪤 Piège nº2 : le tri `{ submittedAt: 1 }` n'est PAS un ordre total (`submittedAt` optionnel, tous les PENDING_DOCUMENTS à `undefined`) — invisible sans pagination, il duplique/saute des lignes avec. Départage par `_id` requis. 📐 Direction du tri : l'AC nº4 dit « décroissante » mais le périmètre dit « reste » — on garde `submittedAt: 1` (FIFO, plus ancien d'abord), l'AC est lu comme portant sur la STABILITÉ. Mesuré le 2026-08-06 : items: 2 / total: 2.
         story_path: "stories/STORY-187.md"
-        assigned_to: null
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-188"
         title: "Le garde-fou N/N-1 n'existe que dans la console — un appel direct au service le contourne"
         epic: "EPIC-014"
