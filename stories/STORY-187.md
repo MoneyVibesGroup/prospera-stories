@@ -5,10 +5,11 @@
 **Découverte par :** audit des filtres et de la pagination de la console, 2026-08-06
 **Priorité :** Should Have — **rien ne casse aujourd'hui**, tout casse à l'échelle
 **Story Points :** 3
-**Statut :** À faire
+**Statut :** in_progress
+**Complexité :** medium
 **Créée le :** 2026-08-06
 **Sprint :** 20
-**Service :** `admin-panel` BFF (`:3010`)
+**Service :** `admin-panel` BFF (`:3010`) **+ `kyc-service` (`:3002`)** — cf. « Deux dépôts » ci-dessous
 
 ---
 
@@ -43,12 +44,56 @@ pagination *(« `total` deviendrait faux et la page 2 sauterait des lignes »)*.
 
 ---
 
+## ⚡ Deux dépôts — établi à l'ouverture (2026-08-12), non écrit au cadrage
+
+La story est cadrée « `admin-panel` », mais **`total` réel et pagination sont impossibles au seul BFF**.
+`kyc GET /admin/kyc` rend `AdminKycReviewItemDto[]` — la file **entière**, sans enveloppe. Paginer dans le
+BFF sur une liste déjà intégralement rapatriée paierait le coût sans le bénéfice : c'est exactement ce que
+`ListKycReviewsQueryDto` documente aujourd'hui pour justifier son absence de `page`. La tâche « paginer la
+requête **amont** » l'admettait déjà à demi-mot ; on l'écrit ici.
+
+**`kyc-service`** : `AdminKycQueryDto` reçoit `page`/`limit`, et `GET /admin/kyc` passe d'un tableau nu à
+`{ items, total, page, limit }` — `total` compté séparément (`countDocuments`), jamais `items.length`.
+**`admin-panel`** : consomme la nouvelle enveloppe et la traverse. Deux branches `MNV-187`, deux PR, mergées
+**ensemble** (le BFF est le **seul** consommateur de cette route — vérifié : `kyc-service` n'est pas exposé).
+
+### 🪤 Piège nº1 — la même route sert AUSSI d'index, et le tronquer serait invisible
+
+`getReviewQueue` a **deux appelants** dans le BFF : la file (`listKycReviews`) et **`buildKycStatusIndex`**,
+qui lit la file **complète, sans filtre**, pour poser la colonne `kycStatus` de `GET /admin/orgs`. Paginer
+l'amont sans traiter cet appelant-là ferait disparaître le statut KYC de toute org hors de la première page
+amont — **une colonne vide, aucune erreur, `sources.kyc: 'ok'`**. C'est le motif même de la story (« le
+compteur mentira en silence »), déplacé d'un écran à l'autre. L'index doit donc **parcourir les pages**,
+comme `buildOrgNameIndex` le fait déjà côté noms, plafond de boucle compris.
+
+### 🪤 Piège nº2 — le tri actuel n'est PAS un ordre total
+
+`listByStatus` trie `{ submittedAt: 1 }`, et **`submittedAt` est optionnel** : tout dossier
+`PENDING_DOCUMENTS` jamais soumis le laisse `undefined`. Sur un tri non-total, Mongo ne garantit **aucun**
+ordre entre ex æquo d'une requête à l'autre — sans pagination ça ne se voyait pas (une seule requête), avec
+pagination ça **duplique et saute** des lignes, ce que l'AC nº4 interdit. Il faut un départage
+déterministe (`_id`) et l'index compound aligné dessus.
+
+### 📐 Direction du tri — ambiguïté de l'AC nº4, tranchée
+
+L'AC nº4 dit « ancienneté **décroissante** », le périmètre dit « le tri par ancienneté **reste** serveur ».
+L'existant est `submittedAt: 1` — **le plus ancien d'abord**, ce qui est l'ordre FIFO d'une file de revue.
+Retenu : **on ne change pas la direction** (« reste » l'emporte, et inverser une file de revue serait un
+changement de comportement qu'aucune ligne de la story ne demande). L'AC nº4 est lu comme portant sur la
+**stabilité**, qui est son objet réel.
+
+---
+
 ## Périmètre
 
 **Inclus :**
 
-- `ListKycReviewsQueryDto` : `page` (défaut 1) et `limit` (défaut, **plafonné** — cf.
+- **`kyc-service`** : `page`/`limit` sur `AdminKycQueryDto`, enveloppe paginée en réponse, `total` compté
+  séparément, tri départagé par `_id` + index compound aligné.
+- **`admin-panel`** : `ListKycReviewsQueryDto` : `page` (défaut 1) et `limit` (défaut, **plafonné** — cf.
   `MAX_PAGE_SIZE` de `module-organizations-query.dto.ts`, valeur supérieure ramenée au plafond sans erreur).
+- **`buildKycStatusIndex` parcourt les pages** (non-régression du piège nº1) — pas une extension de
+  périmètre : sans cela la story *casse* `GET /admin/orgs`.
 - `KycReviewQueueDto` : `page` et `limit` s'ajoutent à `items · total · sources`. **`total` devient le
   total RÉEL**, pas le compte de la page.
 - **Le tri par ancienneté reste serveur.** Ce n'est pas un défaut d'affichage : c'est ce qui fait
