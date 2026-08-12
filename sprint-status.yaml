@@ -2076,9 +2076,9 @@ sprints:
         epic: "EPIC-016"
         points: 3
         service: "auth-service"
-        status: "not_started"  # ⚠️ NE PAS CONFONDRE AVEC STORY-006 (✅ Completed) : celle-là est CÔTÉ CABINET (l'utilisateur se vérifie lui-même). Ici c'est la CONSOLE qui ne peut pas distinguer « n'a pas encore déposé » de « ne PEUT pas déposer » : les deux affichent « Non démarré ». Mesuré le 2026-08-06 sur la base de développement : 20 comptes non vérifiés sur 60 (33 %). ⚡ PRÉALABLE : trancher quel utilisateur fait foi (propriétaire vs au moins un membre) — recommandation A, le propriétaire.
+        status: "in_progress"  # 2026-08-12 — développement lancé. ⚠️ NE PAS CONFONDRE AVEC STORY-006 (✅ Completed) : celle-là est CÔTÉ CABINET (l'utilisateur se vérifie lui-même). Ici c'est la CONSOLE qui ne peut pas distinguer « n'a pas encore déposé » de « ne PEUT pas déposer » : les deux affichent « Non démarré ». Mesuré le 2026-08-06 sur la base de développement : 20 comptes non vérifiés sur 60 (33 %). ✅ PRÉALABLE TRANCHÉ le 2026-08-12 : option A, le propriétaire — et « propriétaire » réutilise la résolution d'administrateur principal DÉJÀ posée par STORY-144 (createdBy s'il est encore TENANT_ADMIN actif, sinon le plus ancien admin actif), jamais une seconde définition.
         story_path: "stories/STORY-186.md"
-        assigned_to: null
+        assigned_to: "vivianMoneyVibesGroupes"
       # ── Ajoutées le 2026-08-06 (décision PO) : audit des filtres, de la pagination
       #    et des actions de la console ──
       - story_id: "STORY-187"
