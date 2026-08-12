@@ -5,7 +5,7 @@
 **Découverte par :** audit des filtres et de la pagination de la console, 2026-08-06
 **Priorité :** Should Have — **rien ne casse aujourd'hui**, tout casse à l'échelle
 **Story Points :** 3
-**Statut :** in_progress
+**Statut :** done
 **Complexité :** medium
 **Créée le :** 2026-08-06
 **Sprint :** 20
@@ -140,8 +140,131 @@ Ordre de décalage défendable : garder **179 + 180**, décaler **181 · 185 · 
 
 ### Agent Model Used
 
-### Debug Log References
+Claude Opus 5 — session unique (aucune délégation hors PR).
+
+### Progress Tracking
+
+**Statut : `done` le 2026-08-12** — développé + validé + vérifié en docker + revue de code
+(3 constats, tous corrigés) + revue de sécurité (0 vulnérabilité). PR
+[`kyc-service#18`](https://github.com/MoneyVibesGroup/prospera-kyc-service/pull/18) et
+[`admin-panel#20`](https://github.com/MoneyVibesGroup/prospera-admin-panel-service/pull/20)
+rebase-mergées sur `dev`, branches supprimées.
+
+#### Portes de qualité
+
+| | `kyc-service` | `admin-panel` |
+|---|---|---|
+| Lint | 0 warning | 0 warning |
+| Build | OK | OK |
+| Unitaires | 453 | 431 |
+| E2E | 99 | 195 |
+| Couverture | 94,84 / 92,17 / 94,71 / 94,81 | 99,68 / 93,02 / 100 / 99,65 |
+
+#### Vérification docker — stack neuve (`down -v` puis `up --build`), 2026-08-12
+
+Base `kyc_service`, collection **`tenantkycprofiles`** (⚠️ pluriel Mongoose, **pas** snake_case).
+Semis : **151** dossiers `UNDER_REVIEW` au `submittedAt` **strictement identique** + **30**
+`PENDING_DOCUMENTS` **sans** `submittedAt` — soit 181 documents dont **tous** sont ex æquo au tri.
+Jeton `PLATFORM_ADMIN` réel (`seed:admin` + login sur l'IdP).
+
+| # | Ce qui est prouvé | Mesure |
+|---|---|---|
+| ① | **AC nº2 — total réel** (amont) | `page=1&limit=10` → `items=10`, **`total=151`** |
+| ② | **AC nº2 — total réel** (BFF) | idem à travers `/admin/kyc-reviews`, `sources.identity="ok"` |
+| ③ | **AC nº3 — plafond sans erreur** | `limit=5000` → **HTTP 200**, `limit=100`, `items=100`, `total=181` |
+| ④ | **AC nº4 — aucun doublon, aucun saut** | 16 pages × 10 → **151 vues / 151 distinctes**, 0 doublon, 0 sauté |
+| ⑤ | **AC nº4 — ordre reproductible** | page 7 relue 5× → **1 seul ordre**, malgré 151 `submittedAt` identiques |
+| ⑥ | Idem sur clé **ABSENTE** | 30 `PENDING_DOCUMENTS` sans `submittedAt` → 30/30, 0 doublon |
+| ⑦ | **Index servant le tri** | plan `["LIMIT","FETCH","SKIP","IXSCAN"]` sur `status_1_submittedAt_1__id_1`, **aucun stage `SORT`**, 10 docs examinés pour 10 rendus |
+| ⑨ | **Non-régression `GET /admin/orgs`** | 3 orgs de **rang 176-178** (page amont 2) → `kycStatus=UNDER_REVIEW` pour les 3, `sources.kyc="ok"` |
+
+**⑧ — La contre-épreuve qui justifie le départage par `_id`.** Le même parcours paginé,
+**sans** `_id` au tri, sur la file **non filtrée** (plan `COLLSCAN + SORT` en mémoire) :
+
+```
+AVEC _id  → vues=181  distinctes=181  doublons=0   sautés=0
+SANS _id  → vues=181  distinctes=126  doublons=55  sautés=55
+```
+
+**55 dossiers perdus sur 181.** Ce n'est pas un risque théorique : c'est exactement le chemin
+qu'emprunte `buildKycStatusIndex` (aucun filtre de statut, paginé). À noter — avec le filtre
+`status`, le défaut **ne se manifeste pas** : Mongo sert alors l'index compound dont `_id` est
+déjà la clé de queue, donc l'ordre y est total *par accident de plan*, pas par contrat. C'est
+précisément pourquoi la garde est écrite dans le `sort` et non déléguée à l'index.
+
+#### ⚡ Écart trouvé PAR la vérification docker (hors cadrage, corrigé)
+
+L'index `{status, submittedAt, _id}` ne sert que la file **filtrée**. Sans filtre de statut,
+`status` cesse d'être un préfixe utilisable et Mongo retombe sur `["SKIP","SORT","COLLSCAN"]` —
+181 documents examinés pour en rendre 10. Or c'est le chemin de `buildKycStatusIndex`, **jusqu'à
+20 pages d'affilée**, et un tri en mémoire est **plafonné à 32 Mo** : passé ce volume la requête
+n'est pas lente, elle **échoue**. Un second index `{submittedAt, _id}` a été ajouté ; le même
+appel repasse en `["LIMIT","FETCH","SKIP","IXSCAN"]` avec 10 documents examinés. Création par le
+service au boot **vérifiée** après `docker restart`.
+
+Stack arrêtée (`docker compose stop`) une fois la vérification consignée.
+
+#### Revue de code — 3 constats, tous corrigés (commit dédié par dépôt)
+
+1. **(97) `kyc-service` — commentaire mensonger.** Le JSDoc d'`AdminKycQueryDto` affirmait que la
+   conversion implicite n'est pas activée sur ce service ; `main.ts:117` pose pourtant
+   `enableImplicitConversion: true`. Le DTO d'aujourd'hui fonctionne (il porte `@Type` explicite) —
+   le risque est le DTO écrit demain sur la foi du commentaire, qui compterait sur un `400` qui ne
+   viendra pas. Raison du `@Type` réécrite : la conversion doit précéder le `@Transform` du plafond.
+2. **(90) `admin-panel` — mauvais étalon d'incomplétude.** La boucle de `buildKycStatusIndex`
+   jugeait « page incomplète » sur sa **constante locale**, copie du plafond de l'autre dépôt, au
+   lieu du `queue.limit` **réellement appliqué** par l'amont. Si `kyc-service` abaissait son plafond
+   à 50 — tuning légitime, tout le design du plafonnement silencieux dit que l'appelant n'a pas à
+   s'en soucier — le BFF lirait « 50 < 100, donc dernière page » sur une page **pleine** et
+   s'arrêterait au premier tour. Couplage invisible : tous les doubles rendaient `limit: 100` en dur.
+3. **(88) `admin-panel` — le plafond de boucle rendait un index tronqué en `ok`.** Le `catch` vide
+   l'index et dégrade la source, en expliquant pourquoi (un `kycStatus` absent se lit « pas de
+   dossier »). La sortie par épuisement des 20 pages faisait l'inverse — et ce chemin est **neuf** :
+   avant la pagination, l'appel unique ramenait toujours tout. Le motif que la story ferme s'y était
+   réinstallé, déplacé de 100 à 2 000. Désormais fail-closed. Le test qui figeait l'ancien
+   comportement a été retourné.
+
+Les deux correctifs de code sont **mutation-vérifiés rouges** (mutations compilantes).
+
+#### Revue de sécurité — 0 vulnérabilité
+
+Axes examinés et écartés **sur mesure, pas au raisonnement** : `page` sans borne supérieure
+(`skip` de 2,5·10²¹ mesuré contre un Mongo 7 réel → `0` document en 7 ms, le coût est borné par la
+taille de la collection, jamais par la valeur demandée) · contournement du plafond `limit`
+(13 vecteurs testés contre le DTO réel dans les deux modes de conversion : négatif, flottant,
+notation exponentielle, `NaN`, `Infinity`, chaîne vide, tableau → tous `400` ou ramenés) · injection
+NoSQL par `status`/`page`/`limit` (`$ne`, tableau, clé imbriquée → `400` par `IsIn`/`IsEnum` +
+`forbidNonWhitelisted`, et Express 5 ne construit pas les objets imbriqués) · amplification 1 → 20
+appels de `buildKycStatusIndex` (non pilotable par l'appelant — elle dépend du volume en base, pas
+d'un paramètre ; throttler câblé des deux côtés à 100 req/60 s/IP ; **et la PR réduit l'exposition
+antérieure**, le pire cas passant d'illimité à 2 000 lignes) · fuite via `total` (strictement moins
+informatif que la liste intégrale servie auparavant aux mêmes rôles) · RBAC, IDOR, isolation tenant,
+relais du bearer, neutralisation des corps d'erreur amont.
+
+⚠️ Un fichier jetable du sous-agent de revue (`tmpcheck/ct-test.ts`) avait été happé par un
+`git add -A` : retiré de la branche avant merge, aucun secret dedans.
 
 ### Completion Notes List
 
+- **La story se joue sur deux dépôts**, ce que le cadrage ne disait pas : `total` réel et
+  pagination sont impossibles au seul BFF, l'amont rendant un tableau nu.
+- **Direction du tri** : l'AC nº4 dit « décroissante », le périmètre dit « reste » — FIFO conservé
+  (`submittedAt: 1`), l'AC lu comme portant sur la stabilité. À confirmer si l'intention était autre.
+- **Un e2e pinnait l'absence de pagination** (`?page=2 → 400` au titre de la whitelist stricte) ;
+  repointé sur un paramètre réellement inconnu.
+- Le double e2e du `Model` **mélange les ex æquo** avant de trier : sans cela il ne prouvait rien
+  de l'AC nº4 (`Array.sort` de V8 est stable, donc le test restait vert sur le code bugué).
+- **Hook inerte** posé, hors périmètre : la file étant bornée à ≤ 100 lignes, l'index des **noms**
+  n'a plus besoin de lire 2 000 organisations pour en résoudre 20 — un `?ids=` en lot côté `auth`
+  (patron STORY-143) serait désormais le bon choix.
+
 ### File List
+
+**`kyc-service`** — `dto/admin-kyc-query.dto.ts` · `dto/admin-kyc-review-item.dto.ts` ·
+`kyc-admin.controller.ts` · `kyc-admin.service.ts` · `tenant-kyc-profile.repository.ts` ·
+`schemas/tenant-kyc-profile.schema.ts` (+ specs, `test/kyc-admin.e2e-spec.ts`)
+
+**`admin-panel`** — `upstream/contracts/kyc.contract.ts` · `upstream/kyc-service.client.ts` ·
+`admin/orgs/dto/list-kyc-reviews-query.dto.ts` · `admin/orgs/dto/kyc-review-list-item.dto.ts` ·
+`admin/orgs/admin-kyc-reviews.controller.ts` · `admin/orgs/org-aggregation.service.ts`
+(+ specs, `test/admin-kyc-reviews.e2e-spec.ts`, `test/admin-orgs.e2e-spec.ts`)
