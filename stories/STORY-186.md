@@ -5,7 +5,7 @@
 **Découverte par :** l'e2e chaîne KYC d'AP-07, lancé pour la première fois contre le stack le 2026-08-06
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** En revue
+**Statut :** Terminée
 **Complexité :** medium
 **Créée le :** 2026-08-06
 **Sprint :** 20
@@ -237,7 +237,7 @@ n'est pas tenable sans décaler autre chose. Ordre de décalage défendable : ga
 
 ## Progress Tracking
 
-**Statut : `in_progress` → développé, validé, vérifié en docker le 2026-08-12.**
+**Statut : `done` le 2026-08-12** — développé, validé, vérifié en docker, revu (code + sécurité), correctifs appliqués et re-vérifiés, mergé en rebase sur `dev` dans les deux dépôts.
 
 ### Portes de qualité
 
@@ -285,6 +285,40 @@ vérifié rouge puis restauré (restauration par copie de sauvegarde et `diff`, 
 | court-circuit « déjà vérifié » neutralisé | « `200 { sent: false }` » (`sent` vaut `true`) |
 | champs de la liste BFF remplacés par des constantes en dur | « traversés fidèlement depuis `auth` » |
 | entrée `429` retirée de `WRITE_ERROR_MESSAGES` | « 429 amont → 429, jamais 503 » |
+
+### Revue de code (⑥) — 3 constats, tous traités
+
+| # | Constat | Traitement |
+|---|---|---|
+| ① **bloquant** | `resolveOwner` ne filtrait que le statut de la **membership**, jamais celui du **compte**. Or `InvitationService` crée un `User(INVITED)` **avec** une membership `ACTIVE` : un invité qui n'a jamais accepté passait la porte et recevait « vérifiez votre adresse » sur un compte **sans mot de passe**. S'il cliquait, `markEmailVerified` posait `emailVerifiedAt` **sans toucher au statut** — la console affichait alors `ownerEmailVerified: true` pour un cabinet incapable de se connecter : la fausse assurance exacte que cette story existe pour supprimer. La description Swagger annonçait par-dessus un `409 NO_ACTIVE_OWNER` **inatteignable**. | Garde de statut + code dédié `OWNER_NOT_ACTIVATED` qui **nomme la route à employer** (`resend-invitation`). Description corrigée. |
+| ② | La propriété centrale du point B n'était gardée par **aucune** assertion : le test « absence de N+1 » compte des appels, mais ses deux organisations partagent le même admin et le même état — faire rendre « la première valeur du lot » à toutes les lignes le laissait **vert**. | Cas ajouté : deux organisations, deux propriétaires **distincts**, deux états **différents**, une assertion **par ligne**. |
+| ③ | L'extraction avait séparé les deux bouts du jeton : émission dans le service neuf, vérification sur une **seconde implémentation** du même SHA-256. Changer l'algorithme d'un côté invalidait **tous** les liens émis, suite verte. | Les deux bouts partagent `hashToken`. ⚠️ **Le premier test écrit pour le prouver était TAUTOLOGIQUE** — il comparait la fonction à elle-même et survivait à la mutation `sha512`. Remplacé par deux gardes réelles : l'**algorithme** épinglé sur une empreinte de référence calculée hors du code, et le **câblage** gardé par un double délibérément distinct d'un SHA-256. |
+
+Cinq mutations appliquées, vérifiées rouges, restaurées par copie de sauvegarde + `diff`.
+
+### Revue de sécurité (⑦) — 0 constat
+
+Périmètre complet (authentification, autorisation, injection, web, secrets/crypto, infrastructure, logique
+métier, NestJS). Explicitement jugés et écartés : pas de sur-projection (`listEmailVerificationStates`
+sort `_id` + `emailVerifiedAt`, rien d'autre) · fail-open Redis atteignable des seuls opérateurs
+plateforme, aligné sur les routes sœurs, avec le throttler global en garde de base · le trio
+404/`NO_ACTIVE_OWNER`/`OWNER_NOT_ACTIVATED` ne franchit aucune frontière de tenant et n'est lisible que
+d'un porteur de `user:invite` · destinataire **lu en base**, jamais fourni par l'appelant ⇒ pas
+d'amplification vers un tiers · `randomBytes(32)`, hash seul stocké, `$set` qui **écrase** l'ancien
+jeton · lien construit sur l'URL de configuration, pas sur un en-tête `Host` ⇒ pas de redirection
+ouverte · BFF : bearer de l'appelant relayé (pas de compte de service, donc pas de *confused deputy*),
+jamais journalisé, message `429` statique.
+
+La revue de sécurité relève par ailleurs que le correctif ① **ferme** la fausse assurance
+`ownerEmailVerified: true` sur un compte sans mot de passe.
+
+### Vérification docker rejouée sur l'état FINAL *(après correctifs)*
+
+| Ce qui est prouvé | Mesure |
+|---|---|
+| Chemin nominal intact | relance sur un cabinet auto-inscrit non vérifié → `200 { sent: true }` |
+| ⚡ **Correctif ① sur la configuration exacte qui passait** | `user.status = INVITED` **avec** `membership.status = ACTIVE` → **409 `OWNER_NOT_ACTIVATED`**, et **rien d'écrit** : lignes d'audit inchangées (7 → 7), compteur Redis inchangé (1 → 1) |
+| ⚡ **Correctif ③ — aller-retour RÉEL du jeton** | jeton extrait de l'e-mail **réellement délivré** (Mailhog) → `GET /auth/verify-email` → **200**, `emailVerifiedAt` posé en base et empreinte purgée. Le refactor du hash n'a pas cassé le lien entre les deux bouts |
 
 ### Écart traité au-delà du cadrage initial
 
