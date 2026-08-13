@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **B** (noyau) · décisions **D1**, **D2**, **D4**, **D10** · risque **1**
 **Priorité :** Must Have
 **Story Points :** 8
-**Statut :** 🚧 En cours (`in_progress`)
+**Statut :** ✅ Terminée (`done`) — 2026-08-13
 **Complexité :** high
 **Créée le :** 2026-08-13
 **Sprint :** 20
@@ -64,7 +64,7 @@ Service NestJS **neuf**, calqué sur `expert-comptable`, sur le port **`:3009`**
 - **CORS** câblé dès le scaffold (`CORS_ALLOWED_ORIGINS`, allowlist explicite, vide ⇒ désactivé) —
   le patron STORY-109, posé **maintenant** et non après coup.
 - **Outbox transactionnelle** + relais (`outbox_events`) et **consumer idempotent**
-  (`processed_events`), au patron déjà en place dans les quatre services producteurs.
+  (`processed_identity_events`), au patron déjà en place dans les quatre services producteurs.
 - Service **inscrit au `docker-compose` racine** et à la matrice **CI** (`.github/workflows/ci.yml`) —
   un service hors CI est un service dont personne ne verra la régression *(leçon STORY-173 :
   un livrable mergé et totalement inerte)*.
@@ -80,7 +80,12 @@ Collection **`dossiers`** (nommage explicite, `snake_case`), portant :
 - **`typeEntite`** (`ENTREPRISE` · `MICROFINANCE` · `ASSURANCE`) et **`pays`** (ISO-2 majuscules) ;
 - les **2 axes** `systemeComptable` / `regimeFiscal`, **courants** à ce stade ;
 - **`statut`** (`ACTIF` | `ARCHIVE`, défaut `ACTIF`), **`estLeCabinet`**, **`version`** (entier
-  monotone, verrou optimiste), `actif`.
+  monotone, verrou optimiste).
+
+⚠️ **Pas de champ `actif`**, contrairement à `ProfilSociete` — retiré en revue de code : `statut`
+porte déjà le cycle de vie, et deux champs pour « ce dossier est-il vivant ? » sont deux sources de
+vérité. STORY-353 archivera en posant `statut: ARCHIVE`, laissant un `actif: true` périmé derrière
+elle ; une lecture filtrant sur le mauvais champ rendrait alors un portefeuille **faux et plausible**.
 
 **Saisie progressive conservée** (STORY-079) : hormis `raisonSociale`, `formeJuridique`, `pays` et
 `typeEntite`, tout est optionnel en base. Refuser un dossier dont le NIF n'est pas encore connu
@@ -221,6 +226,10 @@ fait payer deux fois exactement ce que le ticket existe pour éviter.
       (`POST /dossiers` l'ignore) ni modifié ensuite.
 - [ ] **AC-16** — **Aucune route `DELETE`** n'existe sur `/dossiers` — un test **échoue** si le
       contrôleur en déclare une.
+- [ ] **AC-21** *(ajouté en revue de sécurité)* — `GET /dossiers/:id` est **réservé à
+      `TENANT_ADMIN`** tant que la portée par rôle (D6/D11) n'est pas posée : un `TENANT_USER` →
+      **403**. STORY-353 retirera cette restriction **en même temps** qu'elle pose le filtre de
+      portée dans la requête Mongo — jamais avant.
 
 ### Journal & événements
 
@@ -348,9 +357,9 @@ elles le bloc frontend `FE-EPIC-008` (FE-059 → FE-069), entièrement `blocked`
 | Validation (DoD) | ✅ | lint 0 · build OK · **282 unit + 30 e2e** · couverture **99,18 / 89,67 / 95,68 / 99,11** |
 | Mutation-tests | ✅ | **11 mutations en code, 11 rouges** + 1 mutation **en base réelle** |
 | Vérification docker | ✅ | voir ci-dessous — **1 défaut bloquant trouvé et corrigé** |
-| Revue de code | ⏳ | |
-| Revue de sécurité | ⏳ | |
-| Clôture | ⏳ | |
+| Revue de code | ✅ | **7 constats, 1 bloquant** — tous traités |
+| Revue de sécurité | ✅ | **1 constat** (Broken Access Control) — corrigé fail-closed |
+| Clôture | ✅ | PR `prospera-dossier-service#1` rebase-mergée sur `dev` |
 
 ### ⚡ Défaut bloquant trouvé par la vérification docker — invisible à 312 tests
 
@@ -430,3 +439,93 @@ juste après : `dossiers CLIENT = 0`, `journal = 1` (celui de « Mon cabinet »)
 ⚠️ **Ces trois fichiers vivent à la racine, qui n'est versionnée dans aucun
 dépôt** (dette connue). Ils sont modifiés **sur le poste**, et ne partent donc
 avec aucune PR — à trancher avec le PO.
+
+
+---
+
+## Revue de code — 7 constats, 1 bloquant
+
+⚠️ Le **scan délégué a été coupé par une limite de plateforme** ; les deux revues
+ont donc été faites **dans la session (`opus`)**. La règle interdit de déléguer,
+elle n'oblige pas à le faire (précédent STORY-294).
+
+| # | Constat | Gravité | Conf. | Suite |
+|:--:|---|---|:--:|---|
+| ① | **AC-20 annoncé mais jamais implémenté** — la story affirmait que le caractère inerte du hook `dossier.*` était *testé* ; aucun test ne l'attestait | 🔴 **Bloquant** | 100 | `src/kafka/dossier-events.spec.ts` créé |
+| ② | `dossier.updated` n'a **aucun appelant**, mais son test était **vert** — apparence d'une capacité vérifiée en production | 🟠 | 90 | test renommé + AC-20 le verrouille |
+| ③ | `trouverCabinet` / `listerJournal` : méthodes **sans appelant**, *figées* par un test à liste exacte | 🟠 | 92 | retirées |
+| ④ | `actif` **duplique** `statut` — deux sources de vérité | 🟠 | 88 | champ retiré |
+| ⑤ | `DossiersModule` exporte `DossiersRepository` sans consommateur | 🟡 | 85 | export retiré |
+| ⑥ | `devise` : `@Length(3,3)` acceptait `"1$X"` | 🟡 | 88 | `@Matches` |
+| ⑦ | `aCreer.orgId as Types.ObjectId` : cast non vérifié | 🟡 | 82 | **tracé, non corrigé** |
+
+**② est le plus insidieux** : un auteur de STORY-353 pouvait conclure de ce test
+vert que l'émission de `dossier.updated` était déjà câblée, ne pas la brancher,
+et laisser les read-models des relying parties **diverger en silence**.
+
+**③ est le plus dangereux** : `trouverCabinet` est *exactement* le **pré-contrôle**
+que la conception de D1 rejette — laissé à portée de main de quiconque voudrait
+« sécuriser » la création, et qui **perd toute course concurrente**.
+
+⚡ **Le correctif ⑥ a lui-même introduit un bug**, attrapé et corrigé dans le même
+commit : la regex avait été écrite avec un **dollar échappé** — donc un dollar
+**littéral** au lieu de l'ancre de fin —, si bien que `"XOF"` était **refusé**.
+Rien ne le voyait : aucun e2e n'envoyait `devise`, et la vérification docker
+s'appuyait sur la valeur par défaut. D'où les e2e ajoutés, qui l'ont attrapé.
+
+**⑦ écarté et tracé** : les deux appelants renseignent `orgId` ; le corriger
+demanderait de retyper `aCreer`, hors périmètre.
+
+## Revue de sécurité — 1 constat
+
+**S-1 — Broken Access Control** · A01:2021 · CWE-284 / CWE-359 · **Medium** ·
+confiance **95** · `dossiers.controller.ts` (`@Get(':id')`)
+
+`GET /dossiers/:id` ne portait **aucun `@Roles`** : tout `TENANT_USER`
+authentifié du cabinet pouvait lire **n'importe quel** dossier — le
+`numeroPieceIdentite` des actionnaires, le `nif` des dirigeants, le
+`nifSociete`, le `capitalSocial`, les coordonnées — **et** le dossier
+`estLeCabinet`, qui portera salaires et résultat.
+
+Contredit **D6** et **D11**. La portée par rôle est déférée à STORY-353, mais la
+route part **maintenant** : un défaut par **absence** se lit toujours fail-open
+(leçon STORY-148). L'e2e de la feature l'attestait **en vert**.
+
+**Corrigé fail-closed** : `@Roles(TENANT_ADMIN)` sur la lecture. STORY-353
+**retirera** ce décorateur et ouvrira la lecture aux collaborateurs **avec** le
+filtre de portée dans la requête Mongo — le commentaire du contrôleur le dit.
+Mutation **M17** : `@Roles` retiré ⇒ e2e **rouge** et unitaire **rouge**.
+
+**Aucun autre constat.** Chaîne de guards, `jwt.strategy` et les quatre guards
+**byte-identiques** à `kyc-service` (déjà revu) · JWKS/RS256 requis au boot,
+aucun secret d'émission · pino **redacte** `authorization` et `cookie` (vérifié
+dans les logs docker réels) · anti-énumération `404` et non `403`, prouvée entre
+**deux cabinets réels** · NoSQL impossible (`ObjectId.isValid` puis cast, aucun
+objet utilisateur dans un filtre) · aucune clé dynamique issue de l'entrée (pas
+de pollution de prototype) · CORS en allowlist explicite, jamais `*`,
+`credentials: false` · `TRUSTED_PROXIES` à défaut **vide** (`${VAR-}`) ·
+`/health` public **mais derrière le throttler** · payloads `dossier.*` sans
+secret (liste de clés assertée) · aucun secret dans `.env.example` ni le code.
+
+## Bilan final
+
+**17 mutations, 17 rouges.** lint 0 · build OK · **285 unitaires + 35 e2e** ·
+couverture **99,17 / 89,67 / 95,62 / 99,11**, **100 % par fichier** sur les
+sources livrées.
+
+PR **`prospera-dossier-service#1`** rebase-mergée sur `dev`, branche supprimée.
+
+⛔ **Dépôt créé pour l'occasion** : `MoneyVibesGroup/prospera-dossier-service`
+(privé) n'existait pas — création validée par l'user le 2026-08-13.
+
+## Suites ouvertes
+
+- **STORY-353 est le prérequis d'usage réel** : tant qu'elle n'est pas livrée,
+  la lecture d'un dossier est **réservée à l'administrateur** (correctif S-1).
+  Un cabinet à plusieurs collaborateurs ne peut donc pas encore travailler.
+- **Aucun consommateur de `dossier.*`** — STORY-236 / 357 / 358.
+- ⛔ **Le câblage racine ne part avec aucune PR** : `docker-compose.yml`,
+  `docker-compose.override.yml` et `.github/workflows/ci.yml` vivent à la racine,
+  **versionnée dans aucun dépôt**. L'extension d'`IDP_AUTH_AUDIENCE` à
+  `dossier-service` en fait partie — **sans elle, aucun jeton n'est accepté**.
+  Dette connue, à trancher avec le PO.
