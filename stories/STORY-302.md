@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **C** · décision **D10** *(« un seul pays en v1 », clé conservée `(dossier, pays)`)* · décision **D7** *(le référentiel se déduit du type d'entité)*
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** review
+**Statut :** ✅ Terminée
 **Complexité :** medium
 **Créée le :** 2026-08-13
 **Sprint :** 20
@@ -138,24 +138,24 @@ Le confondre avec le pays d'imposition rendrait la règle fausse **et** bloquant
 
 ## Acceptance Criteria
 
-- [ ] **AC-1** — `POST /dossiers` avec `pays: 'FR'` (forme valide, pays non supporté) rend `400`, code
+- [x] **AC-1** — `POST /dossiers` avec `pays: 'FR'` (forme valide, pays non supporté) rend `400`, code
       `PAYS_NON_SUPPORTE`, et le message **nomme les pays supportés**. Aucun dossier n'est créé,
       aucune entrée de journal, aucune ligne d'outbox.
-- [ ] **AC-2** — `POST /dossiers` avec `pays: 'tg'` (minuscules, espaces) est **normalisé puis
+- [x] **AC-2** — `POST /dossiers` avec `pays: 'tg'` (minuscules, espaces) est **normalisé puis
       accepté** : la normalisation précède le contrôle, sinon la règle refuserait une saisie correcte.
-- [ ] **AC-3** — `POST /dossiers` avec `pays: 'TOGO'` ou `pays: ['TG','BJ']` rend `400` **de forme**
+- [x] **AC-3** — `POST /dossiers` avec `pays: 'TOGO'` ou `pays: ['TG','BJ']` rend `400` **de forme**
       (ISO-2), avant même le contrôle de support.
-- [ ] **AC-4** — La liste des pays supportés apparaît en `enum` sur `pays` dans `/api/docs-json`.
-- [ ] **AC-5** — Une mise à jour qui touche `pays` ou `typeEntite` (`$set`, `$unset`, ou racine)
+- [x] **AC-4** — La liste des pays supportés apparaît en `enum` sur `pays` dans `/api/docs-json`.
+- [x] **AC-5** — Une mise à jour qui touche `pays` ou `typeEntite` (`$set`, `$unset`, ou racine)
       **lève** : aucune écriture n'aboutit. Vérifié sur le hook **tel qu'il est enregistré**, pas sur
       une copie de sa logique.
-- [ ] **AC-6** — Les écritures existantes (affectation, archivage, réactivation, retombée Q2)
+- [x] **AC-6** — Les écritures existantes (affectation, archivage, réactivation, retombée Q2)
       **passent inchangées** : le hook ne les touche pas. Non-régression des 4 chemins.
-- [ ] **AC-7** — « Mon cabinet » se crée **même** si `identity.org.created` porte un pays non
+- [x] **AC-7** — « Mon cabinet » se crée **même** si `identity.org.created` porte un pays non
       supporté, et l'entrée de journal `DOSSIER_CREE` porte `paysSupporte: false`.
-- [ ] **AC-8** — Aucun champ `implantations` n'est acceptable en écriture (`400`, whitelist stricte)
+- [x] **AC-8** — Aucun champ `implantations` n'est acceptable en écriture (`400`, whitelist stricte)
       et aucune route `…/implantations` n'existe (`404` de routage).
-- [ ] **AC-9** — `pays` reste présent dans la charge utile de `dossier.created`/`dossier.updated` —
+- [x] **AC-9** — `pays` reste présent dans la charge utile de `dossier.created`/`dossier.updated` —
       c'est ce qui permettra à STORY-362 de promouvoir le dossier mono-pays en première implantation
       **sans migration**.
 
@@ -199,16 +199,16 @@ sans migration du dossier mono-pays en première implantation)*.
 
 ## Definition of Done
 
-- [ ] Lint 0 warning · build OK · couverture ≥ **65 / 90 / 90 / 90**.
-- [ ] Unit : liste fermée, normalisation avant contrôle, les 3 formes d'écriture du hook, chemin
+- [x] Lint 0 warning · build OK · couverture ≥ **65 / 90 / 90 / 90**.
+- [x] Unit : liste fermée, normalisation avant contrôle, les 3 formes d'écriture du hook, chemin
       « Mon cabinet » non supporté.
-- [ ] e2e : `400 PAYS_NON_SUPPORTE` nommant la liste, `enum` Swagger, verrouillage par la négative
+- [x] e2e : `400 PAYS_NON_SUPPORTE` nommant la liste, `enum` Swagger, verrouillage par la négative
       de la couche Implantation, non-régression des 4 écritures existantes.
-- [ ] Mutation-tests : retirer le contrôle de support · ne couvrir que `$set` dans le hook ·
+- [x] Mutation-tests : retirer le contrôle de support · ne couvrir que `$set` dans le hook ·
       contrôler **avant** la normalisation.
-- [ ] Vérification docker : aucun dossier écrit sur un pays refusé, « Mon cabinet » créé malgré un
+- [x] Vérification docker : aucun dossier écrit sur un pays refusé, « Mon cabinet » créé malgré un
       pays non supporté, écritures existantes inchangées.
-- [ ] Revue de code · revue de sécurité.
+- [x] Revue de code · revue de sécurité.
 
 ---
 
@@ -231,9 +231,38 @@ sans migration du dossier mono-pays en première implantation)*.
 | Validation (DoD) | ✅ | lint 0 · build OK · **473 unit + 83 e2e** · couverture **99,40 / 94,26 / 96,89 / 99,36** |
 | Mutation-tests | ✅ | **8 mutations, 8 rouges** — voir ci-dessous |
 | Vérification docker | ✅ | stack neuve `down -v`, JWT RS256 réels — voir ci-dessous |
-| Revue de code | ⏳ | |
-| Revue de sécurité | ⏳ | |
-| Clôture | ⏳ | |
+| Revue de code | ✅ | **6 constats, 0 bloquant**, tous traités — voir ci-dessous |
+| Revue de sécurité | ✅ | **0 vulnérabilité** — voir ci-dessous |
+| Clôture | ✅ | PR `prospera-dossier-service#5` rebase-mergée sur `dev` (feature `0a902af` + correctifs de revue `b95a980`) |
+
+### Revue de code — 6 constats, 0 bloquant, tous traités
+
+| # | Constat | Traitement |
+|:--:|---|---|
+| ① | L'insertion de `validerPaysSupporte` avait laissé `validerDirigeants` **sans docstring**, et le commentaire « bloc B / entreprise individuelle » coiffait la garde de **pays** | corrigé |
+| ② | Le `warn` de l'arbitrage ③ était émis **avant** l'écriture : sur un rejeu Kafka — « la normale, pas l'anomalie » — il annonçait « créé sur un pays NON SUPPORTÉ » **suivi** de « déjà présent, création ignorée » | déplacé après le succès |
+| ③ | Ce `warn` n'était protégé par **aucun** test : le supprimer laissait 473 unit + 83 e2e au vert, la branche étant *exercée* sans être *assertée* — 100 % de couverture de branche et zéro garantie | 3 tests, dont « n'alerte pas sur un rejeu idempotent », qui verrouille ② |
+| ④ | La garde promettait « aucune mise à jour » mais n'était posée que sur `findOneAndUpdate`/`updateOne` : `updateMany({orgId},{$set:{typeEntite}})` changeait **N dossiers de référentiel comptable sans erreur** | `updateMany` ajouté, `$rename` traité (le champ figé y est une **valeur**, invisible aux 3 autres contrôles), message aligné sur la portée **réelle**, `bulkWrite`/`replaceOne` documentés hors d'atteinte |
+| ⑤ | Le `400` ne nommait pas `PAYS_NON_SUPPORTE` dans Swagger — un code publié seulement sur la **propriété** est introuvable là où le client le cherche | corrigé. ⚡ **Ce correctif a survécu à sa première mutation** : rien ne l'assertait. Test OpenAPI ajouté |
+| ⑥ | L'`enum` est plus strict que le serveur (`« tg »` accepté par `trimUpper`) | **tracé** dans la description plutôt que corrigé : retirer l'`enum` priverait FE-060 de sa seule source de la liste |
+
+### Revue de sécurité — 0 vulnérabilité
+
+Chaque axe examiné et écarté avec motif :
+
+- le `400` divulgue une liste **statique** de configuration produit, déjà publiée dans l'`enum` OpenAPI — **aucun oracle d'énumération**, le refus ne dépend d'aucun état de la base ;
+- le `warn` interpole un `orgId` et un `country` **déjà validés en amont** (`ObjectId.isValid`, `/^[A-Za-z]{2}$/` puis `toUpperCase`) ⇒ pas de CWE-117, et pino sérialise en NDJSON ;
+- l'`Error` brute du hook retombe sur le **500 générique** du filtre, construit par liste blanche : ni nom de champ, ni stack, ni « STORY-302 » ne sortent — **observé en vérification docker** ;
+- `champIdentiteTouche` est en **lecture seule** et utilise `Object.prototype.hasOwnProperty.call` ; `maj` n'est **jamais** dérivé du corps HTTP ⇒ ni pollution de prototype, ni injection NoSQL ;
+- aucun `updateMany` n'existe sur `Dossier` ⇒ la nouvelle garde ne bloque **aucune** opération système ;
+- aucun changement de guard, de rôle, de portée, ni du `404`-jamais-`403`.
+
+⚠️ **Deux mutations ont d'abord rougi par erreur de compilation, et une n'avait pas été appliquée** (motif introuvable après reformatage) : toutes trois rejouées autrement. Un rouge n'est une preuve que s'il vient du **test**.
+
+### Dette ouverte, explicite
+
+- ⛔ La source de vérité des pays servis est le **manifeste des paquets fiscaux de `balance-service`** (D-078-1/2), illisible depuis `dossier-service` ⇒ **ajouter un pays touche 2 dépôts**. Levée par la story qui donnera à `dossier-service` un read-model du catalogue (candidate : **STORY-236**).
+- ⛔ Le **câblage racine** ne part avec aucune PR (`docker-compose.yml`, override, CI versionnés dans aucun dépôt) — dette inchangée depuis STORY-301.
 
 ### Mutation-tests — 8 mutations, 8 rouges
 
