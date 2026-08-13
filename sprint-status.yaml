@@ -2255,9 +2255,9 @@ sprints:
         epic: "EPIC-043"
         points: 2
         service: "dossier-service"
-        status: "not_started"  # D14 (Q5 tranchée). Le seul index posé aujourd'hui est {orgId:1} unique : RIEN n'assure l'unicité d'un NIF - sans conséquence tant qu'une org valait une société. ⚡ L'index doit être PARTIEL (`nifNormalise` de type string) : un index plein interdirait le 2e dossier SANS NIF et casserait la saisie progressive de STORY-079. 409 informatif nommant le dossier existant (un 409 muet fait ressaisir tout le formulaire). AUCUNE contrainte sur le NIF du DIRIGEANT - un même gérant tient plusieurs sociétés (test explicite : c'est la moitié de D14 qu'on oublie).
+        status: "review"  # ⚡ 2026-08-13 — implémentée et vérifiée en docker (branche MNV-354). D14 (Q5 tranchée). Le seul index posé aujourd'hui est {orgId:1} unique : RIEN n'assure l'unicité d'un NIF - sans conséquence tant qu'une org valait une société. ⚡ L'index doit être PARTIEL (`nifNormalise` de type string) : un index plein interdirait le 2e dossier SANS NIF et casserait la saisie progressive de STORY-079. 409 informatif nommant le dossier existant (un 409 muet fait ressaisir tout le formulaire). AUCUNE contrainte sur le NIF du DIRIGEANT - un même gérant tient plusieurs sociétés (test explicite : c'est la moitié de D14 qu'on oublie).
         story_path: "stories/STORY-354.md"
-        assigned_to: null
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-304"
         title: "Résolution conjointe type d'entité -> référentiel comptable ET paquet fiscal, combinaison incohérente refusée"
         epic: "EPIC-043"
