@@ -344,9 +344,89 @@ elles le bloc frontend `FE-EPIC-008` (FE-059 → FE-069), entièrement `blocked`
 | Phase | État | Note |
 |---|---|---|
 | Rédaction | ✅ | 2026-08-13 |
-| Développement | ⏳ | |
-| Validation (DoD) | ⏳ | |
-| Vérification docker | ⏳ | |
+| Développement | ✅ | branche `MNV-301`, 107 fichiers |
+| Validation (DoD) | ✅ | lint 0 · build OK · **282 unit + 30 e2e** · couverture **99,18 / 89,67 / 95,68 / 99,11** |
+| Mutation-tests | ✅ | **11 mutations en code, 11 rouges** + 1 mutation **en base réelle** |
+| Vérification docker | ✅ | voir ci-dessous — **1 défaut bloquant trouvé et corrigé** |
 | Revue de code | ⏳ | |
 | Revue de sécurité | ⏳ | |
 | Clôture | ⏳ | |
+
+### ⚡ Défaut bloquant trouvé par la vérification docker — invisible à 312 tests
+
+`POST /dossiers` rendait **`500`** en conditions réelles :
+
+```
+MongooseError: Cannot call `create()` with a session and multiple documents
+unless `ordered: true` is set
+    at DossiersRepository.ajouterEntreesJournal
+```
+
+**Pourquoi rien ne l'a vu :**
+
+1. Le défaut ne se déclenche qu'avec **plus d'un document** — donc uniquement sur
+   le chemin du dossier **client** (`DOSSIER_CREE` + `MANDAT_ATTESTE`), **jamais**
+   sur « Mon cabinet », qui n'écrit qu'une entrée. Le chemin automatique passait
+   pendant que la fonctionnalité centrale de la story était morte.
+2. Les **e2e doublent le `Model` Mongoose** : ils ne peuvent structurellement pas
+   voir une contrainte du driver. C'est l'illustration exacte de la règle du
+   projet — les e2e prouvent un contrat HTTP, **ni la persistance ni
+   l'atomicité**.
+
+Corrigé (`{ session, ordered: true }`), avec deux gardes de non-régression dans
+`dossiers.repository.spec.ts` — dont une sur le cas à **une seule** entrée,
+puisque c'est sa divergence qui avait masqué le défaut. Vérification **rejouée
+sur l'état final**.
+
+**Effet de bord heureux** : cet échec réel a **prouvé l'atomicité en vrai**. Le
+dossier était inséré, le journal a échoué, la transaction a avorté — mesuré
+juste après : `dossiers CLIENT = 0`, `journal = 1` (celui de « Mon cabinet »).
+**Zéro orphelin**, sur un échec non simulé.
+
+### Vérification docker — stack neuve (`down -v`), JWT RS256 réels
+
+| Contrôle | Résultat |
+|---|---|
+| Boot + `/health` | `mongodb: up`, `kafka: up` |
+| **AC-02 — démarrage dégradé** | ✅ **observé en direct** : `ERROR … Démarrage du consommateur identity.* différé : This server does not host this topic-partition`, **process resté vivant**, HTTP up, consumer joint 5 s plus tard |
+| **AC-13 — « Mon cabinet » (D1)** | `register` → `identity.org.created` → dossier `estLeCabinet: true`, `raisonSociale: 'Cabinet Santos & Associes'`, `pays: 'TG'`, **sans attestation**, journal `DOSSIER_CREE` `parUserId: SYSTEME` |
+| Audience du jeton | `aud` du JWT réel contient bien `dossier-service` (compose de l'IdP amendé) |
+| **AC-05/07/09 — création** | `201`, `orgId` du jeton, `pays` normalisé `tg → TG`, `nifSociete`, `nationalite: 'TG'` et `numeroPieceIdentite` **persistés** |
+| **AC-11 — mandat (D2)** | `MANDAT_ATTESTE` en base : `parUserId` = **vrai userId du JWT**, `le` serveur, `reference` **trimée** (`"  LM-2026-014  " → "LM-2026-014"`), **texte figé** + `texteVersion` |
+| **AC-17 — liens** | 2 entrées de journal pour le dossier client · **0 journal orphelin** · **0 dossier sans journal** |
+| **AC-14 — idempotence D1** | 2ᵉ `identity.org.created` **forgé, `eventId` différent** (donc **hors** table d'idempotence) → toujours **1 seul** « Mon cabinet ». C'est l'**INDEX** qui a tenu, pas le marqueur |
+| **Mutation en base réelle** | `dropIndex('orgId_1')` puis rejeu ⇒ **2 « Mon cabinet »** 🔴. L'index est bien la garantie, pas un pré-contrôle. État restauré, index recréé par Mongoose au boot (`{estLeCabinet:true} unique=true`) |
+| **AC-18/19 — outbox** | 4 `dossier.created` déposés **dans la transaction**, tous passés à `SENT` par le relais ; payload en état absolu, sans secret |
+| **Anti-énumération** | 2ᵉ cabinet **réel** (org distincte) lisant le dossier du 1ᵉʳ → **`404 DOSSIER_INTROUVABLE`**, jamais `403` |
+| **AC-16 / D9** | `DELETE /dossiers/:id` → **`404`** (route inexistante), dossier toujours en base |
+| Refus contractuels | sans jeton `401` · sans attestation `400` · `atteste:false` `400` · `orgId` au corps `400 property orgId should not exist` · `estLeCabinet` au corps `400` · SARL sans dirigeant `400 DIRIGEANT_REQUIS` · **EI sans dirigeant `201`** · `typeEntite: BANQUE` `400` · `pays: TGO` `400` · id malformé `404` |
+
+### Mutation-tests — 11 en code, 11 rouges
+
+| # | Mutation | Verdict |
+|:--:|---|:--:|
+| M1 | `estLeCabinet` lu du corps au lieu d'être écrit en dur | 🔴 |
+| M2 | journal écrit **hors** de la session de transaction | 🔴 |
+| M3 | garde `inTransaction()` retirée (double `abort` masquant la cause) | 🔴 |
+| M4 | `E11000` non traité ⇒ « Mon cabinet » non idempotent | 🔴 |
+| M5 | marqueur d'idempotence écrit **avant** la création | 🔴 |
+| M6 | portée `orgId` retirée de la requête Mongo | 🔴 |
+| M7 | l'EI exigerait un dirigeant (règle uniforme) | 🔴 |
+| M8 | texte d'attestation non figé à l'écriture | 🔴 |
+| M9 | attestation de mandat rendue facultative | 🔴 |
+| M10 | `@Equals(true)` retiré (un `atteste: false` passerait) | 🔴 |
+| M11 | contrainte ISO-2 retirée de `pays` | 🔴 |
+
+### Câblage d'infrastructure
+
+- `docker-compose.yml` : service `dossier-service` (`:3009`), `depends_on` Mongo +
+  Kafka `service_healthy`, healthcheck, CORS, `TRUSTED_PROXIES` à défaut **vide**
+  (`${VAR-}` et non `${VAR:-…}`) ; **`IDP_AUTH_AUDIENCE` de l'IdP étendu à
+  `dossier-service`** — sans quoi aucun jeton n'aurait été accepté.
+- `docker-compose.override.yml` : hot-reload (`src/` monté, `start:dev`).
+- `.github/workflows/ci.yml` : **matrice portée à 9 services** (lint · test+couverture ·
+  build d'image), base `dossier_service_test`, audience CI étendue.
+
+⚠️ **Ces trois fichiers vivent à la racine, qui n'est versionnée dans aucun
+dépôt** (dette connue). Ils sont modifiés **sur le poste**, et ne partent donc
+avec aucune PR — à trancher avec le PO.
