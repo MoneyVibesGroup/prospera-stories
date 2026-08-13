@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **C** · décision **D10** *(« un seul pays en v1 », clé conservée `(dossier, pays)`)* · décision **D7** *(le référentiel se déduit du type d'entité)*
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** in_progress
+**Statut :** review
 **Complexité :** medium
 **Créée le :** 2026-08-13
 **Sprint :** 20
@@ -227,10 +227,66 @@ sans migration du dossier mono-pays en première implantation)*.
 | Phase | État | Note |
 |---|---|---|
 | Rédaction | ✅ | branche `MNV-302` (repo `docs/`) |
-| Développement | ⏳ | |
-| Validation (DoD) | ⏳ | |
-| Mutation-tests | ⏳ | |
-| Vérification docker | ⏳ | |
+| Développement | ✅ | branche `MNV-302` (repo `prospera-dossier-service`), commit `4fc8512` |
+| Validation (DoD) | ✅ | lint 0 · build OK · **473 unit + 83 e2e** · couverture **99,40 / 94,26 / 96,89 / 99,36** |
+| Mutation-tests | ✅ | **8 mutations, 8 rouges** — voir ci-dessous |
+| Vérification docker | ✅ | stack neuve `down -v`, JWT RS256 réels — voir ci-dessous |
 | Revue de code | ⏳ | |
 | Revue de sécurité | ⏳ | |
 | Clôture | ⏳ | |
+
+### Mutation-tests — 8 mutations, 8 rouges
+
+| # | Mutation | Effet |
+|:--:|---|---|
+| M1 | `validerPaysSupporte` accepte tout ISO-2 (la garde reste **appelée** — une mutation qui casse la compilation ne prouve rien, leçon STORY-179) | 🔴 3 unitaires |
+| M2 | le hook ignore `$unset` | 🔴 2 unitaires |
+| M3 | `DossierSchema.pre(…, refuserIdentiteFigee)` **décâblé** | 🔴 3 unitaires |
+| M4 | `@Transform(trimUpper)` retiré de `pays` (le contrôle passe **avant** la normalisation) | 🔴 2 e2e |
+| M5 | l'`enum` OpenAPI publie une liste **divergente** de `PAYS_SUPPORTES` | 🔴 1 e2e |
+| M6 | le journal fige `paysSupporte: true` | 🔴 1 unitaire |
+| M7 | `estPaysSupporte` devient tolérant à la casse | 🔴 1 unitaire |
+| M8 | le hook ignore le `$set` **implicite** (racine) | 🔴 2 unitaires |
+
+### Vérification docker — stack neuve, JWT RS256 réels
+
+⚡ **La preuve centrale a exigé une MUTATION EN DOCKER.** Le hook d'immutabilité est **inerte** : aucune
+route ne l'atteint, donc aucun appel HTTP ne pouvait l'exercer contre un vrai Mongo. J'ai posé
+**temporairement** la route que STORY-079 ouvrira (`PATCH /dossiers/:id/identite` → `$set: { pays }`,
+via le chemin d'écriture réel `mettreAJourSousVersion`), puis je l'ai retirée. Résultat : la garde a
+**arrêté une écriture réelle** — `500` (erreur de programmation, arbitrage ④), message nommant le
+champ dans les logs, et **rien n'a bougé en base** : `pays` toujours `TG`, `version` toujours `4`,
+**5** entrées de journal inchangées, **3** `dossier.updated` en outbox inchangés. La transaction a
+avorté sans laisser ni ligne de journal ni ligne d'outbox orpheline.
+
+🪤 **Le hot-reload a menti** (piège déjà documenté) : `nest --watch` a affiché « Found 0 errors » sans
+avoir monté la route — `PATCH …/identite` rendait `404`. Il a fallu `docker restart` pour que la
+mutation soit réellement exécutée. Conclure sur le `404` aurait fait prendre un **module périmé** pour
+une garde efficace.
+
+**Chemin humain (la route) — AC-1/AC-2**
+- `POST /dossiers` avec `pays: 'FR'` ⇒ **`400 PAYS_NON_SUPPORTE`**, message
+  « Pays « FR » non supporté : aucun paquet fiscal n'est publié pour ce pays (supportés : TG). »
+- **Rien n'a été écrit** : `0` dossier `pays: FR` non-cabinet, `0` dossier `Boulangerie de Paris`,
+  **`1`** seul `MANDAT_ATTESTE` en base (celui du dossier accepté) — l'attestation horodatée que la
+  story existe pour ne pas écrire à vide n'a pas été écrite.
+- `pays: '  tg  '` ⇒ `201`, persisté **`TG`** : la normalisation précède bien le contrôle.
+
+**Chemin système (D1, arbitrage ③) — AC-7**
+Deux cabinets enregistrés sur l'IdP, `country: TG` et `country: FR`, round-trip Kafka complet :
+- les **deux** « Mon cabinet » sont créés — D1 n'est pas violé par un pays hors zone ;
+- journal `DOSSIER_CREE` : `{"pays":"TG","paysSupporte":true}` et `{"pays":"FR","paysSupporte":false}` ;
+- `WARN` observé en logs réels : « « Mon cabinet » créé pour l'organisation … sur un pays NON SUPPORTÉ
+  (FR ; supportés : TG) — aucun calcul fiscal ne sera possible … ».
+
+**Non-régression des écritures existantes — AC-6**
+Le hook est posé sur `findOneAndUpdate`/`updateOne`, **le chemin de toutes les modifications** : le
+risque réel était de les casser. `PATCH …/affectation` → `200`, `POST …/archiver` → `200`,
+`POST …/reactiver` → `200` ; dossier final `version: 4`, `archiveLe` réellement `$unset`, **5** entrées
+de journal dans l'ordre, `pays`/`typeEntite` inchangés. `PATCH`/`PUT`/`DELETE /dossiers/:id` : `404`
+de routage (garde Q3 par absence, intacte).
+
+**Invariants** — `3` dossiers, `0` dossier sans journal, `0` entrée de journal orpheline, outbox
+**intégralement drainée** (`3` `dossier.created` + `3` `dossier.updated`, tous `SENT`), les 6 index
+attendus présents en base dont `unicite_nif_societe {orgId,pays,nifSocieteNormalise}` partiel — la clé
+`(dossier, pays)` que cette story fige.
