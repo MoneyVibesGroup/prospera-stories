@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **O** · décision **D14** · question **Q5** *(tranchée)*
 **Priorité :** Must Have
 **Story Points :** 2
-**Statut :** 🔄 En revue
+**Statut :** ✅ Terminée
 **Complexité :** low
 **Créée le :** 2026-08-09
 **Sprint :** 20
@@ -152,12 +152,12 @@ l'index partiel)*.
 |---|---|---|
 | Rédaction | ✅ | story préexistante (2026-08-09), ajustée : le champ réel est `nifSociete`, pas `nif` |
 | Développement | ✅ | branche `MNV-354` |
-| Validation (DoD) | ✅ | lint 0 · build OK · **437 unit + 69 e2e** · couverture **99,38 / 94,04 / 96,75 / 99,33** |
-| Mutation-tests | ✅ | **7 mutations, 7 rouges** (2 rejouées : une première version virait rouge par erreur de COMPILATION, ce qui ne prouve rien) |
+| Validation (DoD) | ✅ | lint 0 · build OK · **441 unit + 69 e2e** · couverture **99,38 / 94,04 / 96,75 / 99,33** |
+| Mutation-tests | ✅ | **12 mutations, 12 rouges** (3 rejouées : une première version virait rouge par erreur de COMPILATION, ce qui ne prouve rien) |
 | Vérification docker | ✅ | voir ci-dessous — **1 défaut trouvé et corrigé** |
-| Revue de code | ⏳ | |
-| Revue de sécurité | ⏳ | |
-| Clôture | ⏳ | |
+| Revue de code | ✅ | **4 constats, 1 BLOQUANT corrigé** — voir ci-dessous |
+| Revue de sécurité | ✅ | **0 vulnérabilité** (6 axes examinés) ; 1 constat sous seuil vérifié et **écarté comme faux positif** |
+| Clôture | ✅ | PR `prospera-dossier-service#3` rebase-mergée sur `dev` |
 
 ### Ce qui a été livré
 
@@ -275,3 +275,106 @@ supplémentaire. **À vérifier alors** : que le `409` ne nomme pas un dossier
 qui voit déjà tout son portefeuille ; une route ouverte aux `TENANT_USER` ferait
 du corps d'erreur une fuite (D6/D11). C'est écrit dans le code, au-dessus de
 `refuserSiNifDejaUtilise`.
+
+---
+
+## Revue de code — 4 constats, 1 BLOQUANT
+
+### ⚡⚡ Bloquant : le câblage des hooks n'était vérifié par AUCUN test
+
+L'en-tête du spec affirmait tester les fonctions « telles qu'elles sont
+enregistrées sur le schéma ». **C'était faux** : les tests importaient les
+fonctions exportées et les appelaient à la main — donc précisément la *copie*
+que le commentaire disait éviter. Le double du `Model` en e2e appelait lui aussi
+`normaliserNif` directement, sans dépendre du hook réel. **Personne ne touchait
+les deux lignes `DossierSchema.pre(...)`.**
+
+**Mutation exécutée en revue** : les deux lignes commentées ⇒ **161 unitaires +
+67 e2e TOUS VERTS**, alors que le service était intégralement inopérant —
+`nifSocieteNormalise` n'étant plus jamais dérivé, l'index partiel restait vide et
+**tous** les doublons de NIF passaient en `201`. C'est mot pour mot le « désarme
+silencieusement l'index » que le schéma décrit… dans le commentaire au-dessus de
+la ligne non testée.
+
+**Correctif** — un bloc *câblage réel* où c'est **Mongoose** qui déclenche les
+hooks, sur un modèle compilé depuis `DossierSchema`, **sans base** :
+- `doc.validate()` exécute la chaîne `pre('validate')` ;
+- `query.exec()` exécute la chaîne `pre('findOneAndUpdate')` **avant** de rejeter
+  faute de connexion — la mise à jour réécrite reste lisible par `getUpdate()`.
+
+Chaque ligne de câblage a désormais son test qui rougit seul (mutations A/B/C).
+
+### Les 3 autres constats
+
+- **Test tautologique** (`dossiers.repository.spec.ts`) : le double rendait
+  `null` **quel que soit le filtre**, donc une implémentation **sans `orgId`** —
+  c'est-à-dire la fuite inter-cabinet — le franchissait au vert. Le double dépend
+  désormais du filtre reçu, et la mutation « portée élargie » le fait rougir.
+- **Assertion vide** `expect(reussite).toBeDefined()` : portait sur le mock du
+  test, pas sur le code testé — vraie quel que soit le comportement. Remplacée
+  par ce qui rend la reprise **sûre** : l'`_id` est **identique** d'une tentative
+  à l'autre, et un **seul** événement part.
+- **Swagger** : `POST /dossiers` peut rendre `409 CONFLIT_CONCURRENT` depuis la
+  reprise ; les 3 autres routes du contrôleur le documentaient déjà, pas
+  celle-ci.
+
+### Ce que la revue a examiné sans rien retenir
+
+`appliquerNifNormalise` sur toutes les combinaisons `$set`/`$unset`/racine ·
+terminaison et effets rejoués de la boucle de reprise · discrimination des deux
+index uniques dans les deux sens · fidélité du double de `Model` à l'index
+partiel · diff minimal · français partout · un spec par fichier source neuf ·
+aucun module e2e à mettre à jour.
+
+### Lentille *over-engineering* — 2 propositions ÉCARTÉES
+
+- retirer le repli sur le message dans `violeIndexNif` : **gardé**, c'est de la
+  robustesse de chemin d'erreur — la dégrader ferait retomber un conflit métier
+  en `500` ;
+- retirer la branche « `$set` implicite » d'`appliquerNifNormalise` : **gardée**,
+  elle ferme un contournement réel, et sa correction a été **prouvée** (voir
+  ci-dessous).
+
+---
+
+## Revue de sécurité — 0 vulnérabilité
+
+Six axes examinés, tous clos :
+
+1. **Fuite par le corps du `409`** — tous les chemins atteignant le refus sont
+   `@Roles(TENANT_ADMIN)` ; les deux routes sans `@Roles` sont en lecture et
+   n'atteignent aucun entonnoir d'écriture. La portée d'un admin étant `{ orgId }`
+   **nu**, elle couvre déjà les dossiers archivés et « Mon cabinet » :
+   `details` ne porte que des données **déjà lisibles par l'appelant**, ce
+   qu'exige la doctrine du champ `details` d'`AllExceptionsFilter`.
+2. **Injection NoSQL** — les trois contrôles de type rejettent tout objet
+   opérateur ; une chaîne en position de **valeur** est un littéral, et les clés
+   sont écrites en dur. `keyValue` est fabriqué par le serveur Mongo, pas par le
+   client.
+3. **Isolation tenant** — l'`orgId` du filtre vient du JWT (création) ou d'un
+   dossier déjà lu sous portée (modification) ; une collision est
+   structurellement **intra-tenant**.
+4. **Reprise** — ne rejoue que sur les codes garantissant un abandon côté
+   serveur ; `UnknownTransactionCommitResult` n'est **pas** matché, ce qui est le
+   point critique et il est correct. L'`_id` pré-généré fait qu'un rejeu
+   accidentel buterait sur l'index `_id` au lieu de créer un second document.
+5. **Frontière de confiance des hooks** — `nifSocieteNormalise` n'apparaît dans
+   aucun DTO, et les **seuls** accès en écriture à la collection sont `create()`
+   et `findOneAndUpdate()`, tous deux hookés.
+6. **Anti-énumération** — la règle « `E11000` → message générique » vise
+   l'énumération **cross-frontière** ; ici le conflit est intra-tenant et
+   l'appelant a déjà accès en lecture au dossier nommé.
+
+### ⚠️ Un constat sous seuil vérifié, puis ÉCARTÉ
+
+La revue signalait que la branche « `$set` implicite » produirait une mise à jour
+mêlant un champ racine et un opérateur, **rejetée par MongoDB**. **Vérifié
+contre un Mongo réel plutôt que raisonné** : `castUpdate` de Mongoose replie les
+champs de racine **dans** le `$set` déjà posé par le hook, et s'exécute **après**
+les `pre`. Les deux champs sont écrits correctement — la branche fait ce que son
+test affirme. La revue de code est arrivée indépendamment à la même conclusion en
+lisant `castUpdate.js`. **Faux positif.**
+
+⚠️ **Vérification docker NON rejouée** après les correctifs de revue, et c'est
+justifié : hors fichiers de test, le seul changement est un **texte de
+description Swagger** — aucun artefact vérifié en ④ n'est touché.
