@@ -215,10 +215,94 @@ cherche à éviter, créé par la story qui l'interdit.
 | Phase | État | Note |
 |---|---|---|
 | Rédaction | ✅ | 2026-08-13 — 5 arbitrages tracés, dont la **correction de la prémisse de Q2** |
-| Développement | 🚧 | branche `MNV-353` |
-| Validation (DoD) | ⏳ | |
-| Mutation-tests | ⏳ | |
-| Vérification docker | ⏳ | deux collaborateurs réels, JWT RS256 |
+| Développement | ✅ | branche `MNV-353` |
+| Validation (DoD) | ✅ | lint 0 · build OK · **400 unit + 60 e2e** · couverture **99,34 / 93,22 / 96,57 / 99,29** |
+| Mutation-tests | ✅ | **35 mutations, 35 rouges** |
+| Vérification docker | ✅ | voir ci-dessous — **1 défaut trouvé et corrigé** |
 | Revue de code | ⏳ | |
 | Revue de sécurité | ⏳ | l'objet de la story **est** une frontière de sécurité |
 | Clôture | ⏳ | |
+
+
+### ⚡⚡ Défaut trouvé par la vérification docker — invisible à 395 unitaires
+
+Deux administratrices affectant le **même** dossier en même temps rendaient
+**`500`** :
+
+```
+MongoServerError: Write conflict during plan execution and yielding is disabled.
+:: Please retry your operation or multi-document transaction.
+```
+
+**Pourquoi le verrou optimiste ne l'attrapait pas.** Le filtre
+`{ _id, orgId, version: versionAttendue }` devait rendre `null` sur une écriture
+concurrente, donc `409 CONFLIT_CONCURRENT`. Mais sous l'isolation *snapshot* de
+Mongo, la seconde transaction est **avortée par le serveur avant** d'avoir pu
+constater que la version avait bougé : elle n'atteint jamais ce `null`.
+
+**Pourquoi rien ne l'a vu.** Les unitaires doublent la session **et** le `Model` :
+ils n'ont aucun moteur transactionnel, donc structurellement rien pour entrer en
+conflit. Aucun nombre de tests unitaires n'aurait pu le révéler.
+
+Corrigé en mappant le conflit d'écriture (code `112` **ou** label
+`TransientTransactionError`) sur le **même** `409 CONFLIT_CONCURRENT` : c'est le
+même événement métier, il doit rendre la même réponse. **Sans réessai** — la
+`version` ayant été lue avant la transaction, relire pour réessayer écraserait
+silencieusement l'écriture concurrente, soit exactement la perte de mise à jour
+que ce verrou existe pour empêcher. Trois tests de non-régression ajoutés (code,
+label, et les deux cas qui ne sont PAS des conflits).
+
+**Vérification rejouée sur l'état corrigé** : `409` + `200`, une seule écriture
+aboutie, `version` incrémentée une fois, exactement **une** ligne de journal de
+plus.
+
+### Ce que la vérification docker a établi (stack neuve `down -v`, JWT RS256 réels)
+
+Cabinet réel, **un admin et deux collaborateurs**, tous créés par l'IdP.
+
+**Portée (D6/D11)** — 3 dossiers clients + « Mon cabinet » :
+
+| Appelant | `GET /dossiers` |
+|---|---|
+| admin | Boulangerie, **Cabinet Santos & Associés**, Pharmacie, Transport |
+| collab1 (resp. Boulangerie, **contributeur** Transport) | Boulangerie, Transport |
+| collab2 (resp. Pharmacie) | Pharmacie |
+
+`collab1 → dossier de collab2` : **404**. `collab2 → dossier de collab1` : **404**.
+`collab → « Mon cabinet »` : **404**. `admin → « Mon cabinet »` : **200**.
+`collab1 PATCH affectation sur SON dossier` : **403**.
+`PATCH affectation` et `POST archiver` sur « Mon cabinet » : **409
+DOSSIER_CABINET_NON_AFFECTABLE** / **DOSSIER_CABINET_NON_ARCHIVABLE**.
+
+⚡ **La portée est bien celle que MONGO applique, pas l'application** : la requête
+de portée rejouée à la main en `mongosh` rend le **même** ensemble, et
+l'`explain()` montre un `OR` sur les **deux index de portée**
+(`orgId_1_statut_1_responsableUserId_1` et son pendant `contributeursUserIds`) —
+ils sont porteurs, pas décoratifs.
+
+**Archivage (D9/D13)** — archivé par l'admin (`403` pour le collaborateur, même
+responsable), `archiveLe`/`archivePar`/`motifArchivage` peuplés, **responsable
+conservé**, sorti du portefeuille actif, **toujours lisible** (`200`, statut
+`ARCHIVE`), toute écriture refusée (**409 `DOSSIER_ARCHIVE`**), réactivation
+effaçant réellement les trois marqueurs (`$unset` observé en base), réactivation
+d'un dossier actif refusée (**409 `DOSSIER_NON_ARCHIVE`**). `DELETE` : **404 de
+routage**, dossier intact.
+
+**Q2 — départ réel via le round-trip Kafka complet.** `PATCH /users/:id` à
+`SUSPENDED` sur l'IdP → `identity.membership.changed` → read-model `org_members`
+passé à `SUSPENDED` → les 2 dossiers de collab1 repris : responsable rendu à
+l'admin sur l'un, **retiré des contributeurs** sur l'autre. Le dossier de collab2
+est **intact**. 2 lignes `AFFECTATION_MODIFIEE` attribuées à `SYSTEME`, avec
+avant/après et motif.
+
+⚡ **Idempotence prouvée PAR LE FILTRE, pas seulement par l'`eventId`** :
+réintégration (`ACTIVE` — ne déclenche rien, et ne rend **pas** les dossiers)
+puis **second départ**, donc un événement **neuf**, hors table d'idempotence ⇒
+**aucune ligne parasite** au journal. La convergence ne dépend pas du marqueur.
+
+**Invariants mesurés en base** : 1 seul « Mon cabinet », `responsableUserId`
+**absent** dessus (arbitrage ②) · 0 dossier client sans responsable · 0 dossier
+sans journal · 0 entrée de journal orpheline · outbox **intégralement drainée**
+(13 événements `SENT`, dont 7 `dossier.updated` — le hook que STORY-301 avait
+laissé inerte est désormais câblé) · le collaborateur suspendu ne peut plus
+obtenir de jeton (**401**).
