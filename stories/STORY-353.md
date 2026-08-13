@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **B** (volet RBAC) · décisions **D6**, **D9**, **D11**, **D13** · questions **Q2**, **Q4**
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** 🚧 En cours
+**Statut :** ✅ Terminée
 **Complexité :** medium
 **Créée le :** 2026-08-09
 **Sprint :** 20
@@ -71,24 +71,24 @@ afin que **chaque collaborateur travaille sur ses dossiers sans voir ceux des au
 
 ## Acceptance Criteria
 
-- [ ] `Dossier` porte `responsableUserId` (requis) et `contributeursUserIds` (défaut `[]`). Un
+- [x] `Dossier` porte `responsableUserId` (requis) et `contributeursUserIds` (défaut `[]`). Un
       contributeur ne peut pas être le responsable (`400`), et la liste est dédoublonnée côté serveur.
-- [ ] `PATCH /dossiers/:id/affectation` — `TENANT_ADMIN` → **200** ; `TENANT_USER` → **403**, même
+- [x] `PATCH /dossiers/:id/affectation` — `TENANT_ADMIN` → **200** ; `TENANT_USER` → **403**, même
       s'il est le responsable actuel du dossier.
-- [ ] Un `TENANT_USER` appelant `GET /dossiers` ne reçoit **que** ses dossiers (responsable ou
+- [x] Un `TENANT_USER` appelant `GET /dossiers` ne reçoit **que** ses dossiers (responsable ou
       contributeur). Un dossier d'un collègue demandé par son id → **404**, jamais **403**
       (anti-énumération, cohérent avec `profil-societe`).
-- [ ] **D11** : le dossier `estLeCabinet` **n'apparaît jamais** dans la liste d'un `TENANT_USER` ;
+- [x] **D11** : le dossier `estLeCabinet` **n'apparaît jamais** dans la liste d'un `TENANT_USER` ;
       `GET /dossiers/:id` dessus → **404** pour lui ; `PATCH .../affectation` dessus → **409
       DOSSIER_CABINET_NON_AFFECTABLE**, quel que soit l'appelant.
-- [ ] **D13** : `POST /dossiers/:id/archiver` — `TENANT_ADMIN` → **200**, statut `ARCHIVE`,
+- [x] **D13** : `POST /dossiers/:id/archiver` — `TENANT_ADMIN` → **200**, statut `ARCHIVE`,
       `archiveLe`/`archivePar` peuplés ; `TENANT_USER` → **403**. Archiver `estLeCabinet` → **409**.
-- [ ] **D9** : après archivage, `GET /dossiers/:id` répond **200** avec `statut: ARCHIVE` ; toute
+- [x] **D9** : après archivage, `GET /dossiers/:id` répond **200** avec `statut: ARCHIVE` ; toute
       écriture (affectation, identité, ouverture d'exercice) → **409 DOSSIER_ARCHIVE**. Un test
       **échoue** si une route `DELETE /dossiers/:id` apparaît dans le contrôleur.
-- [ ] **Q2** : à la désactivation d'un membre, ses dossiers ont pour responsable l'administrateur de
+- [x] **Q2** : à la désactivation d'un membre, ses dossiers ont pour responsable l'administrateur de
       l'org ; le journal porte la ligne « responsable changé — départ de X » attribuée au **système**.
-- [ ] Un **mutation-test** est rouge quand on remplace la restriction de portée par un filtre
+- [x] Un **mutation-test** est rouge quand on remplace la restriction de portée par un filtre
       applicatif post-lecture (la fuite ne doit pas dépendre du code appelant).
 
 ---
@@ -188,13 +188,13 @@ cherche à éviter, créé par la story qui l'interdit.
 
 ## Definition of Done
 
-- [ ] Lint 0 warning · build OK · couverture ≥ seuils (90/65/90/90), module neuf à 100 %.
-- [ ] e2e : portée admin/collaborateur, 404 anti-énumération, `estLeCabinet` invisible et
+- [x] Lint 0 warning · build OK · couverture ≥ seuils (90/65/90/90), module neuf à 100 %.
+- [x] e2e : portée admin/collaborateur, 404 anti-énumération, `estLeCabinet` invisible et
       non-affectable, archivage réservé à l'admin, écriture refusée après archivage, absence de route
       `DELETE`, retombée à l'admin au départ d'un membre.
-- [ ] Vérification docker bout-en-bout avec **deux collaborateurs réels** et JWT RS256 : chacun ne
+- [x] Vérification docker bout-en-bout avec **deux collaborateurs réels** et JWT RS256 : chacun ne
       voit que ses dossiers, l'admin voit tout, y compris « Mon cabinet ».
-- [ ] `/code-review` + `/security-review` (l'objet de la story **est** une frontière de sécurité).
+- [x] `/code-review` + `/security-review` (l'objet de la story **est** une frontière de sécurité).
 
 ---
 
