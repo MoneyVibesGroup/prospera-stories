@@ -85,14 +85,14 @@ afin de **ne jamais pouvoir calculer une société sur le mauvais plan de compte
 
 ## Acceptance Criteria
 
-- [ ] Un dossier `ENTREPRISE` expose `referentielComptable: 'SYSCOHADA'` en lecture (`POST` et `GET`).
-- [ ] Un dossier `MICROFINANCE` expose `referentielComptable: 'SFD-BCEAO'`.
-- [ ] Un dossier `ASSURANCE` expose `referentielComptable: 'CIMA'`.
-- [ ] `referentielComptable` n'est **acceptable dans aucun corps de requête** — un client qui tente de le
+- [x] Un dossier `ENTREPRISE` expose `referentielComptable: 'SYSCOHADA'` en lecture (`POST` et `GET`).
+- [x] Un dossier `MICROFINANCE` expose `referentielComptable: 'SFD-BCEAO'`.
+- [x] Un dossier `ASSURANCE` expose `referentielComptable: 'CIMA'`.
+- [x] `referentielComptable` n'est **acceptable dans aucun corps de requête** — un client qui tente de le
       poser à la création reçoit `400` (whitelist stricte, comme `estLeCabinet`/`statut`/`version`).
-- [ ] La résolution est **exhaustive à la compilation** : un test canari échoue si `TypeEntite` porte une
+- [x] La résolution est **exhaustive à la compilation** : un test canari échoue si `TypeEntite` porte une
       valeur que le `switch` ne couvre pas.
-- [ ] Aucune route ne permet de modifier `typeEntite` d'un dossier existant (`PATCH`/`PUT` sur l'identité
+- [x] Aucune route ne permet de modifier `typeEntite` d'un dossier existant (`PATCH`/`PUT` sur l'identité
       → `404` de routage, comme pour `DELETE`).
 
 ---
@@ -138,9 +138,9 @@ export function resoudreReferentielComptable(
 
 ## Definition of Done
 
-- [ ] Lint 0 · build OK · couverture ≥ seuils.
-- [ ] Unit : les 3 correspondances D7, canari d'exhaustivité.
-- [ ] e2e : `referentielComptable` exposé et correct par `typeEntite`, refusé en écriture, absence de
+- [x] Lint 0 · build OK · couverture ≥ seuils.
+- [x] Unit : les 3 correspondances D7, canari d'exhaustivité.
+- [x] e2e : `referentielComptable` exposé et correct par `typeEntite`, refusé en écriture, absence de
       route de modification de l'identité.
 - [ ] `/code-review`.
 
@@ -162,9 +162,67 @@ export function resoudreReferentielComptable(
 | Phase | État | Note |
 |---|---|---|
 | Rédaction | ✅ | branche `docs/MNV-304-referentiel-fiscal` |
-| Développement | ✅ | branche `MNV-304` |
-| Validation (DoD) | ⏳ | |
-| Vérification docker | ⏳ | pas d'écriture nouvelle en base — à confirmer (champ calculé, non persisté) |
-| Revue de code | ⏳ | |
-| Revue de sécurité | ⏳ | |
+| Développement | ✅ | branche `MNV-304-referentiel-comptable` |
+| Validation (DoD) | ✅ | lint 0 · build OK · **445 unit + 74 e2e** · couverture **99,38 / 94,08 / 96,79 / 99,34** |
+| Mutation-tests | ✅ | **3 mutations, 3 rouges** — voir ci-dessous |
+| Vérification docker | ➖ | **non applicable** : aucune écriture nouvelle en base (`referentielComptable` est calculé à la réponse, jamais persisté — le schéma `Dossier` n'est pas modifié). La DoD ne l'exige que pour les stories qui écrivent en base. |
+| Revue de code | ✅ | **4 constats, 0 bloquant, tous corrigés** — voir ci-dessous |
+| Revue de sécurité | ✅ | **0 vulnérabilité** ; 1 constat LOW (docstring trompeur) corrigé — voir ci-dessous |
 | Clôture | ⏳ | |
+
+### Revue de sécurité — 0 vulnérabilité
+
+Surface fonctionnelle nouvelle très restreinte (table de correspondance pure, champ dérivé en lecture
+seule, aucune nouvelle route/entrée/requête Mongo) : anti-énumération intacte (le champ ne fait que
+ré-encoder `typeEntite`, déjà retourné au même appelant), whitelist stricte vérifiée récursivement sur
+les 3 DTO d'entrée du module, aucun chemin de mass-assignment vers `typeEntite` (les 3 écritures
+existantes du service posent leurs `$set` champ par champ), aucune fuite dans les commentaires/Swagger.
+
+**1 constat LOW retenu (confiance 85, CWE-1059, A04:2021)** : le docstring de `type-entite.enum.ts`
+affirmait au **passé** que le problème d'intégrité (« rien n'empêchait de calculer une microfinance sur
+le plan entreprise ») était réglé par cette story — **faux** : `balance-service` accepte toujours le
+`referentiel` du client sans le croiser avec `typeEntite` (`submit-balance.dto.ts:128`). Cette story
+**expose** `referentielComptable`, elle ne l'**impose** nulle part — le croisement réel touche 2 dépôts
+et reste une dette ouverte (candidate : STORY-236). Corrigé : le commentaire dit maintenant explicitement
+« EXPOSÉE, pas encore IMPOSÉE ».
+
+### Revue de code — 4 constats, 0 bloquant
+
+① titre `it.each` inversé (`referentielComptable=%s pour typeEntite=%s` alors que le tuple est
+`[typeEntite, attendu]`) — un rapport CI aurait affiché les deux valeurs échangées. Corrigé, aligné sur
+le format du spec unitaire. ② le commentaire Q3 du contrôleur affirmait qu'« un test e2e échoue si une
+route change ce champ », alors que le test ne couvre que le **routage** `PATCH /dossiers/:id` — une
+future route sous-ressource (`PATCH /dossiers/:id/identite`, le nommage le plus probable vu les routes
+existantes) ne serait pas protégée. Reformulé pour ne pas sur-promettre, et le test étendu à `PUT`
+également (l'AC citait les deux verbes, seul `PATCH` était testé). ③ champ `typeEntite` ajouté à
+l'interface `CorpsDossier` des tests mais jamais lu depuis un corps de réponse HTTP (constat
+`ponytail-review`, lentille over-engineering) — retiré. ④ la description Swagger publiée de
+`referentielComptable` ne précisait pas que `SYSCOHADA` est une **famille** (le choix `SN`/`SMT` relève
+de `systemeComptable`, STORY-303) — précisé, pour qu'un futur consommateur (STORY-236) ne mappe pas
+`SYSCOHADA` sur `SN` par défaut.
+
+Suite complète (lint + build + 445 unit + 75 e2e) rejouée au vert après correctifs. Commit dédié
+`1a1b65b`, séparé du commit de feature.
+
+### Ce qui a été livré
+
+- `resoudreReferentielComptable(typeEntite)` — `Record<TypeEntite, ReferentielComptable>` littéral,
+  **exhaustif à la compilation** (`TS2741` si `TypeEntite` gagne une valeur non résolue) ;
+- `referentielComptable` exposé en lecture seule sur `DossierResponseDto`, calculé à
+  `depuisDocument()` — jamais stocké, jamais accepté en écriture (whitelist stricte existante) ;
+- garde **Q3 par absence** : aucune route ne modifie `typeEntite` — documentée sur le contrôleur,
+  l'énumération et le DTO de création, et **prouvée** par mutation (ci-dessous), pas seulement
+  affirmée ;
+- périmètre explicitement délimité par rapport à D-078-1 (paquet fiscal, hors service) et aux stories
+  sœurs STORY-302/303/236, pour éviter tout chevauchement silencieux.
+
+### Mutations exécutées en développement — 3 mutations, 3 rouges
+
+| # | Mutation | Test attendu au rouge | Résultat |
+|---|---|---|---|
+| 1 | Inversion `MICROFINANCE ↔ ASSURANCE` dans la table de résolution | `resolution-referentiel.util.spec.ts` | ✅ 2 tests rouges (`MICROFINANCE`, `ASSURANCE`) |
+| 2 | `DossierResponseDto` recâblé sur une valeur figée (`SYSCOHADA`) au lieu d'appeler le résolveur | `dossiers.e2e-spec.ts` (D7) | ✅ 2 tests rouges (`MICROFINANCE`, `ASSURANCE` — `ENTREPRISE` reste vert par coïncidence, ce qui confirme que le test discrimine bien la vraie résolution) |
+| 3 | Ajout temporaire d'une route `PATCH /dossiers/:id` (pas de logique métier, juste l'existence de la route) | `dossiers.e2e-spec.ts` (Q3) | ✅ 1 test rouge — la garde par absence est bien **vérifiée**, pas seulement vraie par accident |
+
+Les trois mutations ont été restaurées après confirmation ; la suite complète (lint + build + 445 unit
++ 74 e2e) a été rejouée au vert après restauration.
