@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **C** · décision **D7** · question **Q3** *(tranchée)*
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** 🚧 En cours
+**Statut :** ✅ Terminée
 **Complexité :** medium
 **Créée le :** 2026-08-13
 **Sprint :** 20
@@ -168,7 +168,7 @@ export function resoudreReferentielComptable(
 | Vérification docker | ➖ | **non applicable** : aucune écriture nouvelle en base (`referentielComptable` est calculé à la réponse, jamais persisté — le schéma `Dossier` n'est pas modifié). La DoD ne l'exige que pour les stories qui écrivent en base. |
 | Revue de code | ✅ | **4 constats, 0 bloquant, tous corrigés** — voir ci-dessous |
 | Revue de sécurité | ✅ | **0 vulnérabilité** ; 1 constat LOW (docstring trompeur) corrigé — voir ci-dessous |
-| Clôture | ⏳ | |
+| Clôture | ✅ | PR `prospera-dossier-service#4` rebase-mergée sur `dev` (feature f87a74b + correctifs de revue 1a1b65b + correctif de sécurité ac0a0ea) |
 
 ### Revue de sécurité — 0 vulnérabilité
 
