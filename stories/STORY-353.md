@@ -219,9 +219,9 @@ cherche à éviter, créé par la story qui l'interdit.
 | Validation (DoD) | ✅ | lint 0 · build OK · **400 unit + 60 e2e** · couverture **99,34 / 93,22 / 96,57 / 99,29** |
 | Mutation-tests | ✅ | **35 mutations, 35 rouges** |
 | Vérification docker | ✅ | voir ci-dessous — **1 défaut trouvé et corrigé** |
-| Revue de code | ⏳ | |
-| Revue de sécurité | ⏳ | l'objet de la story **est** une frontière de sécurité |
-| Clôture | ⏳ | |
+| Revue de code | ✅ | **2 constats tracés, 0 bloquant** — le seul défaut réel avait été trouvé en vérif docker |
+| Revue de sécurité | ✅ | **0 vulnérabilité** — la frontière est le sujet même de la story |
+| Clôture | ✅ | PR `prospera-dossier-service#2` rebase-mergée sur `dev` |
 
 
 ### ⚡⚡ Défaut trouvé par la vérification docker — invisible à 395 unitaires
@@ -306,3 +306,62 @@ sans journal · 0 entrée de journal orpheline · outbox **intégralement drain�
 (13 événements `SENT`, dont 7 `dossier.updated` — le hook que STORY-301 avait
 laissé inerte est désormais câblé) · le collaborateur suspendu ne peut plus
 obtenir de jeton (**401**).
+
+
+---
+
+## Revue de code — 2 constats, aucun bloquant
+
+Menée **en session `opus`** sur le diff complet (27 fichiers). Le seul défaut de
+correctness de cette story avait déjà été trouvé et corrigé par la vérification
+docker (le `500` sur écritures concurrentes, ci-dessus) — la revue n'en a pas
+trouvé d'autre.
+
+**① Un dossier peut être affecté à un `userId` qui n'est pas membre du cabinet
+— TRACÉ, non corrigé.** `PATCH …/affectation` valide la *forme* de
+l'identifiant (`@IsMongoId`), pas l'*appartenance*. Une administratrice qui colle
+un mauvais identifiant obtient un dossier que plus personne ne voit — sauf elle,
+puisque la portée admin ignore l'affectation. **Aucune fuite** : l'identifiant
+étranger reste sans effet, la portée exigeant d'abord l'`orgId` du jeton.
+
+Non corrigé, et délibérément : le read-model `org_members` est **éventuellement
+cohérent**. Refuser sur sa foi rejetterait l'affectation d'un collaborateur
+fraîchement invité dont l'événement n'est pas encore projeté — un *fail-closed*
+au mauvais endroit, qui casse un geste légitime pour se protéger d'une faute de
+frappe. À traiter avec **STORY-359/360**, quand la console affichera la liste des
+membres et que l'identifiant cessera d'être saisi à la main.
+
+**② `GET /dossiers` n'est pas borné — TRACÉ, assumé.** Ni pagination ni plafond :
+ils appartiennent à **STORY-359**. Un plafond *silencieux* aurait été pire que
+son absence — c'est le défaut « portefeuille faux et parfaitement plausible »
+que ce dépôt a déjà payé. La lecture reste scopée au cabinet, donc bornée par la
+réalité d'un cabinet togolais en v1.
+
+## Revue de sécurité — aucune vulnérabilité
+
+L'objet de la story **est** une frontière d'autorisation : la revue a porté sur
+elle en premier.
+
+- **Isolation multi-tenant** — tout chemin de lecture passe par `filtrePortee`,
+  qui pose toujours l'`orgId` **du jeton** ; tout chemin d'écriture relit d'abord
+  par ce filtre, puis écrit sous `{ _id, orgId, version }`. Aucune route ne prend
+  d'`orgId` ni de portée en paramètre.
+- **Élévation de privilège** — les trois écritures sont `@Roles(TENANT_ADMIN)` ;
+  un collaborateur ne peut pas s'ajouter à un dossier (`403`, prouvé en docker et
+  par les mutations M32/M34). Le retrait du `@Roles` sur la **lecture** est
+  compensé *dans la requête*, et quatre mutations (M01, M03, M06, M33) l'attestent.
+- **Anti-énumération** — `404` et jamais `403` hors de portée, y compris sur
+  `PATCH` et `POST` (vérifié entre deux cabinets réels).
+- **Injection NoSQL** — impossible : `@IsMongoId` sur les identifiants (un
+  `{ $ne: null }` est refusé en `400`), `Types.ObjectId.isValid` sur le paramètre
+  de route, `@IsString` sur le motif.
+- **`org_members` n'est pas une source d'autorisation**, et le code le dit
+  explicitement : l'autorisation reste le JWT RS256 validé localement. Même un
+  read-model empoisonné ne donnerait **aucun accès** — le repreneur désigné ne
+  peut toujours pas lire sans un jeton valide du cabinet.
+- **Ordre des partitions** — `identity.membership.changed` est partitionné par
+  `orgId` chez le producteur : tous les événements d'un cabinet sont ordonnés sur
+  une seule partition, consommée par un seul membre du groupe. L'upsert du
+  read-model ne peut donc pas entrer en course avec lui-même.
+- **Fuite de données** — les événements `dossier.*` ne transportent ni
+  affectation ni donnée personnelle ; le journal ne stocke que des identifiants.
