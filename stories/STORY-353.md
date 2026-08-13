@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **B** (volet RBAC) · décisions **D6**, **D9**, **D11**, **D13** · questions **Q2**, **Q4**
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** 📋 À faire
+**Statut :** 🚧 En cours
 **Complexité :** medium
 **Créée le :** 2026-08-09
 **Sprint :** 20
@@ -116,6 +116,66 @@ afin que **chaque collaborateur travaille sur ses dossiers sans voir ceux des au
 
 ---
 
+## Arbitrages de rédaction (2026-08-13)
+
+### ⚡⚡ ① La prémisse de **Q2** était fausse : `identity.user.updated` ne peut pas porter un départ
+
+La story annonçait « à la consommation de `identity.user.updated` portant un membre désactivé ».
+Vérification faite **chez le producteur** (`auth-service/src/kafka/outbox/identity-events.ts` et
+`identity-events.service.ts:105`), cet événement :
+
+- est émis **uniquement** par `my-profile.service.ts` — la modification **self-service** de son propre
+  profil. Un membre suspendu ne peut plus se connecter : il ne peut donc pas déclencher cet
+  événement. Y brancher la retombée aurait produit une **branche morte** — du code testé au mock,
+  jamais exécuté en production ;
+- ne porte **ni `orgId` ni `role`** (`userId`, `email`, `firstName`, `lastName`, `status`). Impossible
+  d'en déduire *dans quel cabinet* les dossiers doivent retomber, ni *à qui*.
+
+Le signal réel du départ est **`identity.membership.changed` avec `status: 'SUSPENDED'`**, émis sur
+**les deux** chemins de départ d'`auth-service` (`user-management.service.ts:143` désactivation,
+`:217` retrait du membre). Il porte `orgId` **et** `role` — donc à la fois le déclencheur et de quoi
+alimenter le read-model `OrgMembers` que les *Notes techniques* réclament. **C'est lui qui est
+consommé.**
+
+`identity.user.suspended` (émis sur les mêmes chemins) n'est **pas** consommé : sur ces chemins il
+double `membership.changed` sans rien apporter — il ne porte pas d'`orgId`. Un second consommateur
+serait deux chemins de code pour une seule règle.
+
+### ② `responsableUserId` est **absent** sur « Mon cabinet », et c'est D11 qui l'impose
+
+AC-1 le dit « requis ». Mais D11 fait de `estLeCabinet` un dossier qui **refuse toute affectation**
+(`409`, quel que soit l'appelant) : lui inventer un responsable serait écrire une donnée qu'aucun
+chemin ne peut plus corriger. La seule source disponible à la création automatique serait le
+`createdByUserId` de `identity.org.created`, que la validation d'enveloppe de STORY-301 **replie sur
+la chaîne vide** quand il manque — donc pas un `ObjectId`.
+
+Retenu : `responsableUserId` est **optionnel au schéma**, **toujours peuplé sur un dossier client**
+(par construction — posé à la création, jamais effaçable ensuite), et **absent sur « Mon cabinet »**.
+Le rendre `required` au schéma aurait fait échouer la création automatique du dossier du cabinet — la
+règle D1 sacrifiée à la lettre d'un AC.
+
+### ③ À la création, le responsable est **l'administratrice qui crée**
+
+STORY-301 possède le DTO de création et son périmètre est clos. Plutôt que d'y ajouter un champ,
+`POST /dossiers` pose `responsableUserId = userId du jeton` ; `PATCH …/affectation` réaffecte ensuite.
+Aucun dossier client ne naît donc sans responsable, et la surface de STORY-301 est inchangée.
+
+### ④ `GET /dossiers` est livré **sans pagination ni compteurs** (ils restent à STORY-359)
+
+Les AC exigent qu'un `TENANT_USER` appelant `GET /dossiers` ne reçoive que ses dossiers : sans route
+de liste, la portée — l'objet même de la story — ne serait observable nulle part. La liste livrée ici
+est **le portefeuille actif scopé**, trié, sans `page`/`limit`/compteurs : STORY-359 les ajoute
+par-dessus, sans changer le filtre.
+
+### ⑤ L'archivage **ne vide pas** `responsableUserId`
+
+« retire le dossier […] de l'affectation de son responsable » est appliqué **par le statut** : le
+dossier archivé sort de la liste (filtrée sur `ACTIF`), sans perdre la trace de qui en avait la
+charge. Effacer le champ rendrait la **réactivation** orpheline — exactement l'orphelin que Q2
+cherche à éviter, créé par la story qui l'interdit.
+
+---
+
 ## Dépendances
 
 **Prérequises :** **STORY-301** *(modèle `Dossier`, service, journal)* · **STORY-006** *(rôles)* ·
@@ -147,3 +207,18 @@ afin que **chaque collaborateur travaille sur ses dossiers sans voir ceux des au
 - Retombée à l'admin sur départ de membre (consumer) : 0,5 pt
 - Tests e2e + vérification docker à deux collaborateurs : 0,5 pt
 - **Total : 5 points**
+
+---
+
+## Progress Tracking
+
+| Phase | État | Note |
+|---|---|---|
+| Rédaction | ✅ | 2026-08-13 — 5 arbitrages tracés, dont la **correction de la prémisse de Q2** |
+| Développement | 🚧 | branche `MNV-353` |
+| Validation (DoD) | ⏳ | |
+| Mutation-tests | ⏳ | |
+| Vérification docker | ⏳ | deux collaborateurs réels, JWT RS256 |
+| Revue de code | ⏳ | |
+| Revue de sécurité | ⏳ | l'objet de la story **est** une frontière de sécurité |
+| Clôture | ⏳ | |
