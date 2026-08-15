@@ -2,15 +2,19 @@
 title: "PRD — Fiscalité (module Prospera Expert-Comptable)"
 status: draft
 created: 2026-07-31
-updated: 2026-08-03
-version: "0.3"
+updated: 2026-08-15
+version: "0.4"
 ---
 
 # PRD — Fiscalité
 
 **Module** de Prospera Expert-Comptable, aux côtés de l'Atelier Balance et du Bilan.
 **Service candidat :** `fiscal-service` (Module 3, re-scopé le 2026-07-12 puis redéfini ici).
-**Version :** v0.3 — intègre le type d'entité comme dimension de premier rang et les décisions PO du
+**Version :** v0.4 — amende `FR-F27` (« par bénéficiaire ») et `FR-F30` (aiguillage sur le type),
+ajoute `FR-F79` (type de bénéficiaire) et `FR-F80` (refus sourcé, aucun régime de repli), et arrête le
+périmètre v1 du volet social au **sourcing** — arbitrage PO du 2026-08-15, ticket
+`TICKET-BACKEND-dirigeants-et-associes-hors-regime-salarial.md`, repris par STORY-345/348/364.
+La v0.3 intégrait le type d'entité comme dimension de premier rang et les décisions PO du
 2026-08-03. La v0.2 corrigeait les constats de la revue (`review-rubric.md`, `review-adversarial.md`).
 
 > **Identifiants figés depuis la v0.2.** FR-F01→F78 et NFR-F01→F16 ne sont jamais renumérotés ; une
@@ -363,15 +367,58 @@ l'adaptateur d'ingestion directe (`balance.submitted`, D13/STORY-102). Le module
 > `[HYPOTHÈSE H2]` Prospera collecte le strict nécessaire pour déclarer, **sans devenir un logiciel de
 > paie** : ni bulletins, ni congés, ni soldes de tout compte.
 
-- **FR-F27** — Le système gère une base de rémunération par salarié et par période : salaires, primes,
-  gratifications, commissions, avantages en nature, avec exclusion des remboursements de frais.
+> **⚡ Périmètre v1 arrêté le 2026-08-15 (arbitrage PO « IRPP oui, CNSS différée »).** La coupure se
+> fait **au sourcing, pas au bénéficiaire** :
+>
+> | Volet | v1 |
+> | --- | --- |
+> | IRPP salariés (Art. 74) | ✅ |
+> | IRPP gérants et associés (**Art. 75**) | ✅ — **même barème**, donc un aiguillage et non un second moteur |
+> | Affiliation et cotisations **CNSS des gérants** | ⏸️ **hors v1 — non sourcé** |
+> | Retenues sur **revenus distribués** (**Art. 79**) | ⏸️ **hors v1 — non sourcé** |
+>
+> ⚠️ **Ce n'est pas un choix de valeur mais un refus d'inventer.** Le paquet déclare lui-même
+> `cnss.aCompleter` : plafond éventuel de cotisation, ventilation par branche, **valeur SMIG à jour** —
+> tous absents. Les taux de l'Art. 79 sont dans le paquet
+> (`retenuesSource.capitauxMobiliers`) et `FR-F11` cite « retenues sur capitaux » comme exemple de la
+> famille `PROPORTIONNELLE`, mais **l'obligation qui les consommerait n'est pas écrite** et la
+> distribution de dividendes n'est pas encore modélisée.
+> Ce qui n'est pas sourcé sort **bloqué et motivé** (`FR-F80`), jamais approximé.
+
+- **FR-F27** — *(amendé le 2026-08-15)* Le système gère une base de rémunération **par bénéficiaire**
+  et par période : salaires, primes, gratifications, commissions, avantages en nature, avec exclusion
+  des remboursements de frais.
+  > ⚡ **Amendement du 2026-08-15 — « par bénéficiaire », et non plus « par salarié ».** Un gérant
+  > majoritaire n'est pas un salarié : son affiliation à la CNSS n'obéit pas aux mêmes règles, et sa
+  > rémunération relève de l'**Art. 75 CGI**, distinct du régime salarial de l'Art. 74 même lorsque le
+  > barème IRPP est le même. Il est par ailleurs **fréquemment le seul payé d'une TPE togolaise** — la
+  > cible même du produit. Une base « par salarié » l'excluait **par construction et silencieusement** :
+  > aucune erreur, aucun blocage, juste une déclaration sociale incomplète.
+  > Le paquet fiscal, lui, portait déjà la règle : `irpp.source` cite textuellement *« s'applique aussi
+  > aux rémunérations de gérants/associés Art. 75 »*. Le référentiel connaissait l'article ; le PRD ne
+  > l'avait jamais traduit en exigence.
 - **FR-F28** — La base de rémunération est alimentée de **deux façons également prises en charge** :
   **import** d'un fichier issu de l'outil de paie du cabinet ou du client, et **saisie manuelle** dans
   Prospera. L'import est le chemin nominal ; la saisie couvre les dossiers sans outil de paie.
 - **FR-F29** — Un import de rémunération est rejouable et idempotent : réimporter la même période ne
   duplique rien, et un réimport corrigé versionne la base sans effacer l'antérieur.
-- **FR-F30** — Le système calcule les cotisations sociales employeur et salarié et les retenues d'impôt
-  sur les revenus salariaux selon les taux, assiettes, planchers et barèmes du paquet fiscal du pays.
+- **FR-F30** — *(amendé le 2026-08-15)* Le système calcule les cotisations sociales et les retenues
+  d'impôt selon les taux, assiettes, planchers et barèmes du paquet fiscal du pays, **en aiguillant sur
+  le type de bénéficiaire** (`FR-F79`).
+  > L'aiguillage emploie le modificateur **`AIGUILLAGE`** déjà déclaré en `FR-F12` — celui qui sert
+  > au RSH 3 / 5 / 20 % selon l'état du tiers. **Rien de nouveau n'est introduit dans le moteur** : le
+  > type de bénéficiaire est un critère d'aiguillage de plus, pas une seconde famille de calcul.
+- **FR-F79** — *(nouveau, 2026-08-15)* Chaque ligne de la base de rémunération porte un **type de
+  bénéficiaire** appartenant à un ensemble fermé : `SALARIE`, `DIRIGEANT`, `ASSOCIE`. Le type est un
+  **attribut de la ligne**, jamais une collection séparée, et il conditionne le régime applicable.
+- **FR-F80** — *(nouveau, 2026-08-15)* Lorsque le régime social ou fiscal d'un type de bénéficiaire
+  **n'est pas déterminable depuis le paquet fiscal**, l'obligation correspondante est marquée
+  **bloquée** au sens de `FR-F25`, avec l'indication précise de ce qui manque **dans le paquet**.
+  > ⛔ **Le système n'applique JAMAIS un régime de repli.** Traiter un dirigeant au régime salarié
+  > faute de règle produirait une cotisation **fausse et vraisemblable** — la pire des deux issues, et
+  > précisément le silence que `FR-F27` amendé vient de fermer. L'absence se lit **depuis l'artefact**
+  > (`cnss.aCompleter`), jamais codée en dur : compléter le paquet doit débloquer l'obligation **sans
+  > livraison de code**.
 - **FR-F31** — Les obligations sociales apparaissent dans le calendrier, le workflow et la preuve au même
   titre que les obligations fiscales.
 - **FR-F32** — Les charges sociales calculées sont rapprochées des comptes de personnel de la balance ;

@@ -7,9 +7,9 @@ paradigm: 'hexagonal (ports & adaptateurs) sur un noyau métier pur, en relying-
 scope: 'micro-service fiscal-service (Module 3) — dossier fiscal, catalogue d''obligations dérivé, calendrier, cycle de vie déclaratif, dépôt assisté, preuve, règlement'
 status: final
 created: '2026-08-03'
-updated: '2026-08-03'
+updated: '2026-08-15'
 binds:
-  - 'PRD Fiscalité v0.3 — FR-F01→F78, NFR-F01→F16'
+  - 'PRD Fiscalité v0.4 — FR-F01→F80, NFR-F01→F16 (v0.4 : FR-F27/F30 amendés, FR-F79/F80 créés — arbitrage PO du 2026-08-15)'
 sources:
   - 'prospera-stories/prds/prd-fiscalite-2026-07-31/prd.md'
   - 'prospera-stories/prds/prd-fiscalite-2026-07-31/addendum.md'
@@ -264,6 +264,63 @@ strictement descendant, et les retours passent par le bus.
   déclenchée par un chemin applicatif, et la validité des chaînes d'empreintes est revérifiée après
   toute restauration.
 
+### AD-20 — La base de rémunération est un agrégat propre, keyé bénéficiaire × période, et son import est idempotent par nature
+
+*(Ajoutée le 2026-08-15. ⚠️ **Elle comble un vide, elle ne raffine rien** : `application/remuneration`
+n'était nommé qu'une fois dans ce document — dans la ligne I5 de la carte des capacités — et rattaché à
+AD-9 et AD-10, deux décisions qui ne parlent pas de rémunération. Sept stories d'EPIC-034 reposaient
+sur rien.)*
+
+- **Binds:** FR-F27, FR-F28, **FR-F29**, FR-F30, FR-F32, **FR-F79**, **FR-F80**
+- **Prevents:** un réimport qui duplique une période · un import corrigé qui **efface** l'antérieur au
+  lieu de le versionner · un dirigeant traité au régime salarié faute de règle
+- **Rule:** l'agrégat est **`LigneDeRemuneration`**, keyé `(dossier, période, bénéficiaire)`, et porte
+  son **`typeBeneficiaire`** (`SALARIE` | `DIRIGEANT` | `ASSOCIE`, `FR-F79`) comme **attribut** —
+  **jamais** une collection par type. Une base par type fabriquerait trois chemins de calcul là où le
+  moteur n'en a besoin que d'un, aiguillé.
+- **Rule:** l'**idempotence est portée par la clé**, pas par une détection de doublon applicative.
+  `FR-F29` exige qu'un réimport ne duplique rien : c'est un **index unique** sur
+  `(dossier, période, bénéficiaire, versionDeBase)`, pas un `findOne` avant `insert` — qui laisse
+  passer deux imports concurrents, comme la reprise sur `WriteConflict` de `dossier-service` l'a montré.
+- **Rule:** un réimport corrigé **versionne** la base : la version antérieure reste lisible et
+  attribuée. Une déclaration déjà déposée cite **la version de base qui l'a produite**, jamais
+  « la dernière » — sans quoi une correction de paie réécrirait a posteriori le fondement d'un dépôt.
+- **Rule:** **import et saisie manuelle produisent le MÊME agrégat**, par le même chemin
+  d'application. `FR-F28` les déclare « également prises en charge » : deux modèles internes feraient
+  diverger les dossiers sans outil de paie, qui sont précisément ceux qu'on veut ne pas exclure.
+- **Rule:** ⛔ **aucun régime de repli** (`FR-F80`). Un type de bénéficiaire dont le régime n'est pas
+  résolu depuis le paquet produit une obligation **bloquée et motivée**, jamais un montant. L'absence
+  se lit **depuis l'artefact** (`cnss.aCompleter`) ⇒ compléter le paquet débloque **sans livraison de
+  code**, conformément à AD-1 (le noyau ne calcule aucun impôt) et AD-4 (une famille sans stratégie
+  refuse, elle n'approxime jamais). **AD-20 est l'application d'AD-4 au volet social.**
+
+### AD-21 — La rémunération est de la donnée personnelle de tiers, et elle est la seule du service
+
+*(Ajoutée le 2026-08-15.)*
+
+Toutes les autres données de `fiscal-service` décrivent **l'entreprise cliente**. La base de
+rémunération décrit des **personnes physiques qui ne sont pas l'utilisateur** : noms, montants perçus,
+avantages en nature. C'est la seule catégorie du service dont le sujet n'a **aucun compte** et
+**aucun moyen de savoir** que la donnée existe.
+
+- **Binds:** NFR-F08, NFR-F10, AD-10, AD-20
+- **Prevents:** une exposition large de montants individuels dans une réponse pensée pour un agrégat ·
+  une conservation sans terme · un journal d'audit qui recopie les montants qu'il trace
+- **Rule:** **minimisation** — le service ne stocke que ce qui sert à déclarer (`FR-F27`). Aucun
+  identifiant national, aucune coordonnée, aucune donnée de contrat n'entre ici : ce sont des données
+  de **paie**, et `[HYPOTHÈSE H2]` borne le service hors du logiciel de paie.
+- **Rule:** **restriction de lecture** — le détail par bénéficiaire n'est servi qu'aux rôles qui en ont
+  l'usage déclaratif. Les écrans de contrôle et de rapprochement (`FR-F32`) travaillent sur des
+  **totaux par compte de personnel**, jamais sur des lignes nominatives : le rapprochement à la balance
+  n'a pas besoin de savoir qui gagne combien.
+- **Rule:** **conservation bornée et déclarée** — la base de rémunération suit la durée de prescription
+  fiscale de son pays, **lue dans le paquet**, jamais codée en dur. À l'échéance, elle est purgée ou
+  anonymisée sans casser les déclarations déposées, qui restent immuables (AD-9).
+- **Rule:** ⚠️ **le journal d'audit trace l'ACTE, pas la donnée.** Il enregistre « base de la période
+  P importée / corrigée par X », **jamais les montants** — sinon la piste d'audit, qui est
+  délibérément inaltérable et conservée à part (AD-10, AD-19), devient **le contournement de toute
+  règle de conservation posée ici**. C'est le piège central de cette AD.
+
 ## Consistency Conventions
 
 | Concern | Convention |
@@ -387,7 +444,7 @@ fiscal-service/
 | I2 — Calendrier et responsabilité (FR-F16→F21) | `domain/echeances`, `application/calendrier` | AD-8 |
 | I3 — Chaîne déclarative (FR-F22→F26, F33→F38, F51, F56, F62→F66) | `application/declaration`, `adapters/balance` | AD-1, AD-8, AD-9, AD-10, AD-14 |
 | I4 — Dépôt assisté et preuve (FR-F39→F45, F52→F55, F57→F59) | `adapters/canal`, `adapters/document`, `application/preuve` | AD-11, AD-12, AD-13, AD-16 |
-| I5 — Règlement et social (FR-F46→F50, F27→F32) | `application/reglement`, `application/remuneration` | AD-9, AD-10 |
+| I5 — Règlement et social (FR-F46→F50, F27→F32, **F79, F80**) | `application/reglement`, `application/remuneration` | AD-9, AD-10, **AD-20**, **AD-21** |
 
 ## Deferred
 
