@@ -388,6 +388,44 @@ d'accès dans le jeton. Elle ne la contredit pas, et voici la ligne exacte :
 - **Rule:** la croissance de `perms[]` est **surveillée** : chaque module métier ajoute des droits, et
   le jeton voyage à chaque requête. Une borne est à fixer avec la story d'extension.
 
+### ⚡ AD-P16 — Money Vibes peut lire la donnée métier de toute organisation, par une route nommée
+
+*(Arbitrage PO du 2026-08-15, à l'occasion du PRD Catalogue produits. Capacité **programme**.)*
+
+Jusqu'ici, la console plateforme ne voyait que l'**identité**, le **KYC** et les **entitlements** —
+jamais la donnée métier d'un client. Le PO tranche : **un superadmin Money Vibes doit pouvoir avoir un
+œil sur tout**, dans **tous** les modules métier — dossiers, balances, bilans, réseau, catalogue,
+stock, et ceux à venir.
+
+- **Rule:** chaque service métier expose des **routes de lecture plateforme**, réservées à
+  `PLATFORM_ADMIN`, où **l'`orgId` est un PARAMÈTRE EXPLICITE** — ⛔ **jamais tiré du jeton**. Le
+  cloisonnement reste la règle ; l'exception est **nommée, visible et bornée à une organisation à la
+  fois**.
+- **Rule:** **tout accès plateforme à de la donnée métier est journalisé**, avec l'opérateur,
+  l'organisation lue, la date et **le motif**. Un accès sans motif n'est pas un accès autorisé.
+- **Rule:** ⛔ **lecture seule.** Ces routes ne modifient rien. Un correctif sur la donnée d'un client
+  passe par les chemins ordinaires du service, avec ses règles métier.
+- **Rule:** ⛔ **une organisation à la fois.** Pas d'export en masse, pas de balayage inter-org sur ces
+  routes : le rayon d'action d'un compte compromis est borné par ce que l'opérateur a réellement
+  consulté, et le journal le dit.
+- **Rule:** la carte de propriété **ne bouge pas** : la donnée reste chez son service. Ces routes
+  **lisent**, elles ne dupliquent pas — c'est pourquoi ni un read-model plateforme consolidé ni une
+  agrégation permanente côté BFF n'ont été retenus.
+
+#### ⚠️ Ce que cette décision coûte, et qui doit être assumé explicitement
+
+1. **Le rayon d'action s'élargit d'un coup.** Avant AD-P16, un compte plateforme compromis exposait
+   l'identité, le KYC et les droits. Après, il expose **la donnée métier de tous les clients**. Le
+   journal et la limite « une org à la fois » sont les seuls garde-fous — ils ne sont pas décoratifs.
+2. ⚡ **Elle traverse un engagement de confidentialité envers des TIERS.** Dans
+   `catalogue-produits-service`, les prix qu'un commercial indépendant pratique chez ses détaillants
+   sont cachés à la société qui paie l'abonnement (NFR-4). **Le PO a tranché que Money Vibes les voit
+   quand même, sans condition.** ⇒ **`FR-C29d` devient impératif et son périmètre grandit** : le
+   contrat de l'indépendant doit annoncer **non seulement** la révélation au départ, **mais aussi que
+   l'éditeur de la plateforme peut consulter ses prix**. Le freelance confie ici la matière de son
+   fonds de commerce ; il doit savoir qui la voit. *Action produit, hors architecture — mais elle
+   conditionne la légitimité de la garantie.*
+
 ### Nouveaux topics du bus
 
 | Topic | Producteur | Consommé pour |
@@ -442,6 +480,7 @@ Ils appartiennent à d'autres documents ; les corriger ici créerait une seconde
 | 1.1 | 2026-07-07 | vivian | **Modules partagés & versioning par organisation** : `bilan-service` (capacité partagée, 2 axes version de code ⊥ référentiel packagé, gate d'accès en relying party) et `catalog-service` (entitlements `(org × module)`, topic `entitlement.changed`, `admin-panel` BFF pour FR-012). Amende l'ownership map (entitlement → catalog ; abonnement reste vertical) ; ajoute **P7/P8** ; insère catalog + bilan dans la roadmap ; risques N/N-1 & routage multi-version. JWT/A3 inchangés. |
 | 1.2 | 2026-07-07 | vivian | **Couche edge/exécution** : décisions **P9** (schema registry adopté maintenant — compatibilité BACKWARD en CI) et **P10** (mono-repo maintenant, poly-repo différé) ; ajout du doc `architecture-gateway` (validation JWT fail-fast à l'edge + services souverains, routage par préfixe, résolution multi-version, services sans port public). Risque #4 (schema registry) passé de « envisager » à « planifié ». |
 | 1.3 | 2026-07-10 | vivian | **Alignement PLAN FINAL** (`docs/synthese-services-prospera-2026-07-10.md`) : décisions **P11** (dogfooding interne d'abord — Money Vibes = client zéro ; N/N-1 & routage multi-version différés jusqu'au 1er client externe, **DG-1** ; chaîne KYC livrée d'abord, **AD-2**) et **P12** (18 modules → 18 services suivant le moule unique ; **NC-1** `catalog-service` → `platform-catalog-service` ; **NB-1** Bilan par import de balance + prévisionnel ; **PA-1** checkout/webhooks → `paiement-service`). Ordre de construction et backlog des 18 modules → `program_backlog` de `sprint-status.yaml`. Invariants inchangés. |
+| **1.6** | **2026-08-15** | PO + Claude | ⚡ **AD-P16 — Money Vibes peut lire la donnée métier de TOUTE organisation, dans TOUS les modules.** Capacité programme : jusqu'ici la console ne voyait que l'identité, le KYC et les entitlements, jamais la donnée métier d'un client. Mécanisme : **routes de lecture plateforme réservées à `PLATFORM_ADMIN`, `orgId` en PARAMÈTRE EXPLICITE et jamais tiré du jeton**, lecture seule, **une organisation à la fois**, **journalisées avec leur motif**. La carte de propriété ne bouge pas — ces routes lisent, elles ne dupliquent pas (ni read-model consolidé, ni agrégation permanente au BFF). ⚠️ **DEUX COÛTS ASSUMÉS** : ① le rayon d'action d'un compte plateforme compromis passe de l'identité/KYC/droits à **la donnée métier de tous les clients** — le journal et la limite « une org à la fois » sont les seuls garde-fous ; ② elle traverse un **engagement de confidentialité envers des TIERS** — les prix freelance du catalogue, cachés à la société qui paie l'abonnement, sont **vus par Money Vibes sans condition** ⇒ **`FR-C29d` devient impératif et s'élargit** : le contrat de l'indépendant doit annoncer que l'éditeur peut consulter ses prix. |
 | **1.5** | **2026-08-15** | PO + Claude | ⚡ **AD-P15 — le RBAC s'étend au périmètre tenant, et AMENDE D15.** Deux PRD d'affilée (`FR-R28b` réseau, `FR-C48` catalogue) supposaient pouvoir déclarer des droits de tenant dans un catalogue de permissions qui est **plateforme** et rend `perms: []` à tout utilisateur de tenant — besoin systémique, pas erreur de rédaction : stock, commande, facturation et PDV l'auront aussi. ⚡ **Le discriminant du jeton est écrit une fois** : ce n'est PAS « état tiers ou pas » (un rôle change aussi par action tierce, et `roles[]` y est depuis le premier jour) mais **BORNÉ ou NON BORNÉ**. Vocabulaire fermé ⇒ jeton ; ensemble de données du client ⇒ read-model. C'est ce qui rend AD-P15 et **AD-5 de `reseau-service`** cohérentes au lieu de contradictoires. ⚠️ `auth-service` étant livré et central, l'extension passe par une story dédiée avec ses consommateurs nommés, jamais en effet de bord d'un module métier. |
 | **1.4** | **2026-08-15** | PO + Claude | ⚡ **RÉANCRAGE — le document avait six semaines de retard sur le système, alors que les trois spines (fiscal, notification, paiement) en héritent toutes.** Ajout à l'ownership map de **8 propriétaires manquants**, dont deux services **livrés et absents** : `balance-service` (Module 1-bis, en production, **toujours sans architecture propre**) et `dossier-service` (livré les 13-14/08). Deux décisions programme nouvelles : **AD-P13** — le dossier est l'unité de travail, l'organisation ne l'est plus ; le JWT porte l'org, **jamais** le dossier ; hors portée = `404`, jamais `403`. **AD-P14** — l'exercice appartient au dossier (STORY-355) ; `balance-service` et `bilan-service` en deviennent des read-models et **cessent d'être source de vérité sur le statut** ; `ExerciceTopic` séparé de `DossierTopic`. + 2 familles de topics (`dossier.*`, `dossier.exercice.*`), partition par `dossierId`. ⚠️ Trois écarts **constatés sans être corrigés** : `balance-service` sans architecture · `dossier-service` sans gate entitlement/KYC (écart au moule commun, à confirmer par le PO) · la note `Tenant`→`Organization` ignore la seconde clé de portée `dossierId`. ⛔ **La bascule de l'exercice n'est pas terminée** : STORY-356/236/357 `not_started` ⇒ deux écritures possibles pour un même fait. |
 

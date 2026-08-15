@@ -215,7 +215,7 @@ produits achetés en carton**.
 | **FR-C29** | ⚡ **La société ne voit pas les prix pratiqués par un freelance chez ses détaillants.** Ce n'est pas un réglage d'affichage : aucune requête, aucun export, aucun tableau de bord, aucune restitution consolidée ne les expose. |
 | **FR-C29b** | ⚡ **Une seule exception, et elle est encadrée : le départ du freelance.** Ses points de vente restent au distributeur (PRD PDV) ; ses prix lui sont alors **révélés**, pour que le service aux détaillants puisse continuer sans repartir de zéro. |
 | **FR-C29c** | La révélation est un **événement daté, tracé et notifié au freelance** — jamais un accès qui s'ouvre en silence. Elle porte **uniquement les points de vente qui restent** au distributeur, et **uniquement les prix en vigueur au départ**, pas l'historique des négociations. |
-| **FR-C29d** | ⚠️ **L'existence de cette exception doit figurer au contrat de l'indépendant.** Une promesse de confidentialité assortie d'une exception non annoncée n'est pas une promesse — et le freelance confie ici la matière de son fonds de commerce. *Action produit hors PRD.* |
+| **FR-C29d** | *(élargi le 2026-08-15)* ⚠️ **L'existence des exceptions doit figurer au contrat de l'indépendant.** Une promesse de confidentialité assortie d'une exception non annoncée n'est pas une promesse — et le freelance confie ici la matière de son fonds de commerce. ⚡ **IL Y A DÉSORMAIS DEUX EXCEPTIONS, ET LA SECONDE EST PERMANENTE** : ① la **révélation au départ** (FR-C29b/c), ponctuelle, datée et notifiée ; ② **l'éditeur de la plateforme (Money Vibes) peut consulter ses prix sans condition** — décision PO du 2026-08-15, **AD-P16**. La seconde n'est ni ponctuelle ni notifiée : elle est permanente et journalisée côté plateforme. **Le contrat doit annoncer les deux.** *Action produit hors PRD — mais elle conditionne la légitimité de NFR-4.* |
 | **FR-C30** | Un freelance ne voit **que ses propres prix**. Deux indépendants ne se voient pas. |
 | **FR-C31** | La **marge du freelance** est calculée comme l'écart entre son prix client et **le prix société qui lui est effectivement appliqué** — celui que résout sa propre grille, avec sa zone et son volume, pas un prix de référence théorique. Elle est **visible du seul freelance**. |
 | **FR-C32** | La **grille société reste visible** de tous : c'est le prix auquel le freelance achète, et il doit le connaître. La visibilité est **asymétrique par conception**. |
@@ -305,8 +305,14 @@ prix freelance par **aucun** chemin : API, export, agrégat, journal, message d'
 > articleId)`, et **tout accès passe par un dépôt dédié qui EXIGE le `userId` propriétaire** : aucune
 > méthode de lecture sans lui, pas de `findAll`, pas de variante « admin ». L'absence de chemin est
 > **prouvable** en montrant qu'aucun code n'interroge la collection autrement.
-> ⚠️ **`PLATFORM_ADMIN` n'est pas une exception** : l'engagement est de confidentialité envers
-> l'indépendant, et le dépôt ne connaît aucun rôle qui contourne le propriétaire.
+> ⚠️ **`PLATFORM_ADMIN` EST la seule exception** *(décision PO du 2026-08-15, **AD-P16** — cette
+> ligne disait l'inverse le matin même)*. Money Vibes lit les prix freelance **sans condition**, par
+> une route plateforme dédiée : `orgId` explicite, lecture seule, **une organisation à la fois**,
+> **journalisée avec son motif**. ⛔ Aucun autre rôle ne contourne le propriétaire — et surtout pas
+> `TENANT_ADMIN`, destinataire premier de l'étanchéité.
+> ⚡ **NFR-4 reste littéralement vrai** : il vise « un utilisateur **de la société** », et un opérateur
+> Money Vibes n'en est pas un. Mais l'exception doit être **nommée**, pas déduite d'une lecture serrée
+> du texte — et elle **élargit FR-C29d** : le contrat de l'indépendant doit l'annoncer.
 
 ### NFR-5 — Le prix figé prime toujours
 
@@ -384,7 +390,7 @@ confidentialité freelance et le profil qui permet de refuser — et il est le s
 | # | Question | Statut |
 |---|---|---|
 | Q1 | Unité de base : peut-elle changer après création d'un article ? | ✅ **tranchée 2026-08-02 — NON, jamais.** Le changement se fait par article de remplacement (FR-C44). **Motif rendu impératif par le PRD Stock** : tout le stock historique est exprimé dans cette unité ; la changer rendrait **toutes les quantités passées fausses en silence**, sans qu'aucun contrôle ne le signale. La laisser ouverte alors qu'un autre module en dépend serait le motif de défaut déjà relevé trois fois dans ce chantier |
-| Q2 | Un article peut-il relever de plusieurs organisations (catalogue partagé entre distributeurs d'un même groupe) ? | ouverte — FR-C52 pose le cloisonnement strict en attendant |
+| Q2 | Un article peut-il relever de plusieurs organisations (catalogue partagé entre distributeurs d'un même groupe) ? | ✅ **TRANCHÉE le 2026-08-15 — NON.** Pas de catalogue partagé entre distributeurs d'un même groupe : `FR-C52` et l'assumption `A3` (un article = une organisation) deviennent **définitifs**, plus des positions d'attente. ⚡ **MAIS le PO a assorti la réponse d'une capacité distincte, qu'il ne faut pas confondre avec du partage** : *« nous en tant que superadmin on doit pouvoir avoir un œil sur tout cela »*. Ce n'est **pas** une organisation qui voit une autre — c'est **l'éditeur de la plateforme** qui lit, par une route nommée et journalisée. Posé en **AD-P16** (écosystème v1.6) comme **capacité PROGRAMME**, valant pour tous les modules métier, et en **AD-15** de la spine pour son application ici. |
 | Q3 | Les grilles par volume s'appliquent-elles par ligne ou par commande entière ? | ✅ **tranchée — par ligne.** Les FR l'avaient déjà décidé (FR-C14 pose le seuil de volume en condition de grille, FR-C23 prend la quantité en entrée) : la laisser « ouverte » était une contradiction. Ce qui reste ouvert est **Q5**, distinct |
 | **Q5** | Les **remises de pied de commande** (sur le total, tous articles confondus) — dans ce module ou dans Commande (#11) ? | ouverte — mon avis : **Commande**, parce qu'elles ne portent sur aucun article en particulier |
 | Q4 | Le prix freelance est-il plafonné par la société (prix maximum conseillé) ? | ouverte — question commerciale : encadrer un indépendant ou pas |
@@ -397,5 +403,5 @@ confidentialité freelance et le profil qui permet de refuser — et il est le s
 |---|---|---|---|
 | **A1** | Les facteurs de conversion sont des **entiers** — un carton contient un nombre entier d'unités. Les articles vendus au poids ou au volume variable ne sont pas couverts au v1 | FR-C07, FR-C12 | 1ᵉʳ client vendant du vrac |
 | **A2** | La zone est une **référence opaque** fournie par l'appelant tant que le module Réseau & zones (#4) n'existe pas | FR-C14, §9 | PRD Réseau & zones |
-| **A3** | Un article appartient à une seule organisation ; il n'y a pas de catalogue partagé entre distributeurs | FR-C52, Q2 | 1ᵉʳ groupe multi-sociétés |
+| **A3** | Un article appartient à une seule organisation ; il n'y a pas de catalogue partagé entre distributeurs | FR-C52, Q2 | ✅ **CONFIRMÉE DÉFINITIVEMENT le 2026-08-15** — ce n'est plus une assumption en attente d'un 1ᵉʳ groupe multi-sociétés, c'est une décision. Le besoin de vision transverse qui aurait pu la remettre en cause est satisfait autrement, par **AD-P16** (lecture plateforme), sans toucher au cloisonnement |
 | **A4** | L'élasticité prix est **saisie ou héritée d'une famille**, pas mesurée par le système au v1 — la mesure suppose un historique de promotions que les premiers clients n'ont pas | FR-C37 | Module scoring & prévision (différé) |

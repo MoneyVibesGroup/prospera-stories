@@ -5,7 +5,7 @@ purpose: build-substrate
 altitude: feature
 paradigm: 'modules NestJS sur le moule commun Prospera — module du vertical Distributeur, relying-party de l''IdP, producteur d''événements'
 scope: 'micro-service catalogue-produits-service — article, unité de base et conditionnements versionnés, grilles tarifaires société, promotions, résolution de prix explicable, double tarification freelance étanche, profil commercial'
-status: 'final — 4 arbitrages PO du 2026-08-15 ; ils AMENDENT le PRD sur 5 points et imposent 3 stories HORS de ce service'
+status: 'final — 7 arbitrages PO du 2026-08-15 (dont AD-P15 et AD-P16, décisions PROGRAMME) ; ils AMENDENT le PRD sur 7 points et imposent 3 stories HORS de ce service'
 created: '2026-08-15'
 updated: '2026-08-15'
 binds:
@@ -52,6 +52,7 @@ invariants, résout un prix de façon déterministe, et publie des faits.
 | Hérité | Source | Ce qu'il contraint ici |
 | --- | --- | --- |
 | **AD-P15 — le RBAC s'étend au tenant** | `architecture-prospera-ecosystem` v1.5 | Les droits métier de `FR-C48` vivent au catalogue de permissions ⇒ **story hors service** |
+| **AD-P16 — lecture plateforme inter-org** | `architecture-prospera-ecosystem` v1.6 | Money Vibes lit la donnée métier de toute org, **prix freelance compris** ⇒ AD-15, et AD-6 amendée |
 | **Discriminant borné / non borné** | `architecture-prospera-ecosystem` v1.5 | Les droits catalogue sont un **vocabulaire fermé** ⇒ ils vont dans le jeton, contrairement à la portée réseau |
 | Relying-party / JWKS | `architecture-prospera-ecosystem` | Validation locale RS256, aucun appel chaud à `auth-service` |
 | `orgId` du jeton signé | `architecture-prospera-ecosystem` | L'isolation inter-org ne vient jamais du corps. ⚠️ **Elle ne suffit PAS pour NFR-4** — voir AD-6 |
@@ -150,9 +151,18 @@ un modèle de menace inédit ici, et `TenantScopedRepository` n'y répond pas.
   autrement**.
 - **Rule:** ⛔ **aucun agrégat, export, tableau de bord ou restitution consolidée de la société ne lit
   cette collection.** Jamais de jointure. Jamais de `$lookup`.
-- **Rule:** ⚠️ **`PLATFORM_ADMIN` n'est pas une exception.** Un opérateur Money Vibes n'est pas « de la
-  société », mais l'engagement est de confidentialité envers l'indépendant : le dépôt ne connaît pas
-  de rôle qui contourne le propriétaire.
+- **Rule:** ⚠️ **`PLATFORM_ADMIN` EST une exception, et une seule** *(arbitrage PO du 2026-08-15,
+  **AD-P16** — cette règle disait l'inverse le matin même)*. Money Vibes lit les prix freelance **sans
+  condition**, par la route plateforme d'AD-15 : `orgId` explicite, lecture seule, une organisation à
+  la fois, **journalisée avec son motif**. ⛔ **Aucun autre rôle ne contourne le propriétaire** — et
+  surtout pas `TENANT_ADMIN`, qui reste le destinataire premier de l'étanchéité.
+  ⚠️ **`NFR-4` reste littéralement vrai** : il interdit l'accès à « un utilisateur **de la société** »,
+  et un opérateur Money Vibes n'en est pas un. L'exception est donc **compatible avec l'exigence
+  écrite** — mais elle doit être **nommée**, pas déduite d'une lecture serrée du texte.
+  ⚡ **Conséquence hors architecture, et elle est sérieuse :** `FR-C29d` exige que le contrat de
+  l'indépendant annonce l'exception de la révélation au départ. Il doit désormais annoncer **aussi**
+  que l'éditeur de la plateforme peut consulter ses prix. Le freelance confie ici la matière de son
+  fonds de commerce.
 - **Rule:** un prix freelance **sans prix société correspondant est refusé** : on ne peut pas revendre
   ce qu'on n'achète pas.
 - **Rule:** la marge (FR-C31) se calcule contre **le prix société réellement résolu pour ce freelance**
@@ -174,7 +184,8 @@ un modèle de menace inédit ici, et `TenantScopedRepository` n'y répond pas.
   restitution consolidée d'audit devra **se souvenir de ne jamais joindre les deux**. Une vue
   « historique des prix » naïve rouvrirait la fuite que NFR-4 ferme. ⇒ **les deux journaux ne
   partagent ni collection, ni index, ni route de lecture**, et le dépôt du journal freelance suit la
-  même règle qu'AD-6 : aucune lecture sans le `userId` propriétaire.
+  même règle qu'AD-6 : aucune lecture sans le `userId` propriétaire — **à la seule exception de la
+  route plateforme d'AD-15**, qui lit les deux journaux comme elle lit les deux collections.
 - **Rule:** l'auteur est rendu **par son identité**, jamais un `userId` brut.
 - **Rule:** ⚠️ **la route de lecture est livrée par la même story que l'écriture, avec son consommateur
   nommé.** Ce programme a payé **trois fois** l'écriture sans lecture.
@@ -267,6 +278,24 @@ un modèle de menace inédit ici, et `TenantScopedRepository` n'y répond pas.
   topics et collections portent **`Produit`** ou **`CatalogueProduits`** sans exception.
 - **Rule:** même discipline qu'AD-15 de `reseau-service` sur l'homonyme « portée ». Ce programme
   compte désormais **deux homonymes majeurs** ; les nommer coûte moins cher que de les démêler.
+
+### AD-15 — La route plateforme : `orgId` explicite, lecture seule, journalisée [ARBITRÉ PO 2026-08-15]
+
+- **Binds:** **AD-P16** (écosystème v1.6) · **Prevents:** un cloisonnement contourné en silence
+- **Rule:** les routes de lecture plateforme sont réservées à `PLATFORM_ADMIN` et prennent l'**`orgId`
+  en PARAMÈTRE EXPLICITE** — ⛔ **jamais tiré du jeton**. Un opérateur plateforme n'a pas d'org ; lui
+  en inventer une par défaut ferait de l'exception un chemin ordinaire.
+- **Rule:** ⛔ **lecture seule**, ⛔ **une organisation à la fois**. Pas d'export en masse, pas de
+  balayage inter-org : le rayon d'action d'un compte compromis est borné par ce qui a été réellement
+  consulté, et le journal le dit.
+- **Rule:** **tout accès est journalisé** — opérateur, organisation, date, **motif**. Un accès sans
+  motif n'est pas un accès autorisé. Ce journal est **celui de la plateforme**, distinct des deux
+  journaux d'AD-7.
+- **Rule:** ces routes **lisent, elles ne dupliquent pas**. Ni read-model plateforme consolidé, ni
+  agrégation permanente au BFF : la carte de propriété ne bouge pas.
+- **Rule:** ⚠️ ce sont les **seules** routes du service où le gate d'AD-13 ne s'applique pas — un
+  opérateur Money Vibes n'a ni KYC ni entitlement. Elles portent leur propre garde,
+  **`@PlatformReadOnly`**, et rien d'autre du service ne doit l'employer.
 
 ---
 
