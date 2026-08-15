@@ -262,7 +262,20 @@ disposition de l'aval. Trois manières d'y arriver, une seule forme en sortie.
   `dossier-service` fait foi sur l'exercice depuis STORY-355 ; le read-model `exercices_dossier` est
   **posé ici et personne ne le lit encore**, délibérément — la projection doit converger *avant* que
   STORY-357 en dépende.
-- **Rule:** ⛔ **tant que 356/357 ne sont pas livrées, il existe DEUX écritures possibles pour un même
+- **Rule:** ⚡ **MISE À JOUR le 2026-08-15, quelques heures après la rédaction : `STORY-356` a été
+  clôturée** (4 PR rebase-mergées ensemble). ⇒ `dossierId` est désormais porté par **9 schémas de ce
+  service**, **`required: true` au schéma**, avec read-models `dossiers_dossier`, script de migration
+  idempotent et marche arrière testée.
+- **Rule:** ⛔ **ET LES ÉCRITURES SONT GELÉES.** `AC-4` a été livré **à la lettre** : le schéma **exige**
+  `dossierId`, et **aucun chemin d'écriture ne le pose**. ⇒ **`STORY-236` et `STORY-367` ne sont plus
+  des améliorations : ce sont les deux stories qui DÉGÈLENT le service.**
+- **Rule:** ⚠️ **`STORY-356` a rempli LA DONNÉE ; elle n'a touché NI UN INDEX, NI UN FILTRE.** Vérifié
+  dans `@dev` : `BalanceSchema.index({orgId, bornes, source, version}, {unique:true})` et
+  `ExerciceAtelierSchema.index({orgId, bornes}, {unique:true})` sont **inchangés**, et les dépôts de
+  cahiers filtrent toujours sur `orgId` seul. *Rattacher sans filtrer ne change rien de visible.*
+- **Rule:** ⚠️ **une limite documentée et NON corrigée reste ouverte** : *« la marche arrière détache
+  TOUT `dossierId` sans discriminer son origine — à RETIRER OU BORNER à la clôture de 236/357 »*.
+- **Rule:** ⛔ **tant que 236/357 ne sont pas livrées, il existe DEUX écritures possibles pour un même
   fait** : `ExerciceAtelier` vit toujours ici, `POST /bilan/exercices` existe toujours là-bas.
 - **Rule:** ⚠️ **la clé de la balance est encore `(orgId, exercice, source, version)` — SANS
   `dossierId`.** ⇒ un cabinet à N dossiers ne peut pas porter deux balances de **bornes identiques**

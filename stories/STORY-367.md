@@ -24,16 +24,39 @@ maintient l'Atelier mono-société même une fois le contrat corrigé.
 > couvre déjà l'un des points ci-dessous, il en sort — la frontière se règle à l'ouverture, pas à la
 > revue.
 
-## Le constat, vérifié dans le code le 2026-08-15
+## ⚡ RÉANCRÉ le 2026-08-15 après la clôture de STORY-356
 
-`dossierId` n'apparaît **que** dans le read-model d'exercice posé par STORY-355 — **que personne ne
-lit**. Autour de la balance, trois mécanismes restent keyés `orgId` :
+> ⚠️ **La première rédaction de cette story disait « `dossierId` n'apparaît que dans le read-model
+> d'exercice ». C'EST PÉRIMÉ.** `STORY-356` a été livrée le même jour, sur 3 dépôts.
 
-| Mécanisme | État vérifié | Ce que ça impose |
+**Ce que STORY-356 a livré** (vérifié dans `balance-service@dev`) : `dossierId` est porté par
+**9 schémas** du service, **`required: true` au schéma**, plus les read-models `dossiers_dossier` et un
+script de migration idempotent avec marche arrière.
+
+> ⛔ **ET C'EST PRÉCISÉMENT CE QUI REND CETTE STORY URGENTE.** L'arbitrage PO d'`AC-4` a été livré **à
+> la lettre** : le schéma **exige** `dossierId`, et **aucun chemin d'écriture ne le pose** ⇒
+> **LES ÉCRITURES DE L'ATELIER SONT GELÉES** jusqu'à la clôture de **`STORY-236`** et de celle-ci.
+>
+> ⇒ **Cette story ne prépare plus une amélioration : elle DÉGÈLE le service.**
+
+⚠️ **Et la DoD de STORY-356 est laissée volontairement DÉCOCHÉE sur un point** : le parcours
+Atelier→Bilan **en écriture** est *« NON VÉRIFIABLE »* là-bas — *« invisible aux 3646 tests, qui mockent
+TOUS la couche données »*. **Il est à rejouer ici**, en réel.
+
+## Le constat, re-vérifié dans `balance-service@dev` le 2026-08-15
+
+Le champ existe partout ; **rien ne s'en sert**. Autour de la balance, trois mécanismes restent keyés
+`orgId` — **les trois index et filtres sont INCHANGÉS par STORY-356** :
+
+| Mécanisme | État vérifié dans `@dev` | Ce que ça impose |
 | --- | --- | --- |
-| `ExerciceAtelier` | *« une ligne par `(orgId, exercice)` »*, index `(orgId, bornes)` | ⛔ **Un seul exercice d'Atelier pour tout le cabinet**, pas un par client |
-| `existeBalanceValidee(orgId, exercice, source)` | Sert au **gel du cahier** | ⛔ Valider la balance d'un client **gèle les cahiers de tous les autres** |
-| Dépôts cahiers / ventilation / rapprochement | **org-scopés**, `orgId` toujours au filtre | ⛔ Recettes et dépenses de **tous les clients dans un seul seau** |
+| `ExerciceAtelierSchema.index({ orgId, bornes }, { unique: true })` | **inchangé** | ⛔ **Un seul exercice d'Atelier pour tout le cabinet**, pas un par client |
+| `existeBalanceValidee(orgId, exercice, source)` | **inchangé** — sert au **gel du cahier** | ⛔ Valider la balance d'un client **gèle les cahiers de tous les autres** |
+| Dépôts cahiers / ventilation / rapprochement | **inchangés**, `orgId` toujours au filtre, `dossierId` jamais | ⛔ Recettes et dépenses de **tous les clients dans un seul seau** |
+
+⚠️ **La distinction à tenir** : `STORY-356` a rempli **la donnée** ; elle n'a touché **ni un index, ni
+un filtre**. *Rattacher sans filtrer ne change rien de visible* — c'est exactement le partage de
+périmètre annoncé, et c'est ce qui reste à faire.
 
 > ⚡ **Corriger le contrat de balance sans corriger ceci laisse l'Atelier mono-société.** La balance
 > saurait de quel dossier elle parle, et tout ce qui l'entoure continuerait de l'ignorer — **le vertical
@@ -116,5 +139,13 @@ lit**. Autour de la balance, trois mécanismes restent keyés `orgId` :
 - [ ] Aucun dépôt de cahier, de ventilation ou de rapprochement n'accepte une requête **sans
       `dossierId`**.
 - [ ] Un `balance.submitted` sans dossier laisse **une trace de rejet motivée**.
+- [ ] ⚡ **Les écritures sont DÉGELÉES** : un parcours Atelier→Bilan **en écriture réelle** passe de bout
+      en bout. ⚠️ C'est la case que `STORY-356` a **laissée décochée** parce qu'elle n'était pas
+      vérifiable chez elle — *« invisible aux 3646 tests, qui mockent TOUS la couche données »*. ⛔ Elle
+      se coche **en docker**, pas en test unitaire.
+- [ ] ⚠️ **Le sort de la marche arrière est tranché.** `STORY-356` documente une limite qu'elle n'a pas
+      corrigée : *« la marche arrière balance/bilan détache TOUT `dossierId` sans discriminer son
+      origine — correct dans la fenêtre de migration, **à RETIRER OU BORNER à la clôture de
+      236/357** »*. La fenêtre se referme ici : **retirer, borner, ou dire pourquoi on la garde.**
 - [ ] ⚠️ **`AD-10` de la spine `balance-service` est mise à jour** : elle décrit la bascule comme
       *« posée et NON terminée »*. Un document ne doit pas survivre à sa propre péremption.
