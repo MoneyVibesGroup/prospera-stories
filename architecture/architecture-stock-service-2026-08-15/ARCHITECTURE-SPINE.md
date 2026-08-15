@@ -319,6 +319,19 @@ existe pour rendre les sources interchangeables.
 - **Rule:** ⚡ **la vente au détail est une CAPACITÉ, pas une nature** (formulation du PO). Un magasin
   **n'est pas** un entrepôt — il ne fait pas d'éclatement ; un entrepôt **peut** vendre directement.
   ⇒ le modèle porte une **nature** et un **jeu de capacités**, pas deux types rigides.
+- **Rule:** ⛔ **CORRIGÉE le 2026-08-15 par AD-1 de `pdv-service` — le magasin propre était modélisé
+  DEUX FOIS.** Ce service possède un **`PointDeStock`** (la capacité à détenir) ; `pdv-service` possède
+  le **`PointDeVente`** (l'identité commerciale). Un **magasin propre est les deux, liés par
+  identifiant** ; un **entrepôt** est un point de stock **seul** ; un **détaillant partenaire** est un
+  point de vente **seul**. ⛔ **Ce service ne crée jamais de point de vente**, et n'en copie aucun
+  attribut (AD-12 réseau).
+  ⚠️ **Origine du défaut, à ne pas refaire :** `FR-S05b/c` est né **de l'atelier PDV** — la correction
+  a été portée dans ce PRD, puis cette spine a modélisé le magasin propre sans revenir voir que PDV le
+  portait déjà. **Un magasin propre aurait existé deux fois, et l'actif avec lui.**
+- **Rule:** ⚡ **c'est l'EXISTENCE DU LIEN qui fait du lieu un actif**, plus un champ recopié dans deux
+  services. Un champ dupliqué finit par diverger ; un lien ne peut pas. ⇒ un magasin propre enregistré
+  dans `pdv` **avant** que ce service existe est simplement **sans point de stock lié**, donc sans
+  valorisation — et l'ordre des positions (2 puis 7) est respecté.
 - **Rule:** ⛔ **le stock d'un partenaire n'entre dans AUCUNE valorisation, aucune publication
   comptable, aucun total de point de stock.** L'exclusion est structurelle — deux collections, deux
   chemins — pas un filtre qu'on peut oublier. Un filtre oublié produit un actif faux et crédible.

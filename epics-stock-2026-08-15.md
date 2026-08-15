@@ -184,6 +184,10 @@ différés**, **7 NFR sur 7**, **18 AD sur 18**.
   `reseau-service` n'existe pas (`A1`, et AD-12 réseau le confirme).
 - ⚡ **Deux natures, deux régimes** : entrepôt et **magasin propre**, tous deux détenus par
   l'organisation, tous deux valorisés et suivis par **mouvements réels**.
+- ⛔ **CORRIGÉ le 2026-08-15 par AD-1 de `pdv-service`** : cet épic livre un **`PointDeStock`**, pas un
+  point de vente. Le **magasin propre** est un point de stock **lié par identifiant** à un
+  `PointDeVente` détenu par `pdv-service` ; l'entrepôt est un point de stock **seul**. ⚠️ Sans cette
+  correction, le magasin propre existait **dans les deux services** — et l'actif avec lui.
 - ⚡ **La vente au détail est une CAPACITÉ, pas une nature** : un magasin ne fait pas d'éclatement, un
   entrepôt **peut** vendre directement. Le modèle porte une nature **et un jeu de capacités**.
 - ⛔ **L'exclusion du stock partenaire est structurelle**, pas un filtre : le stock d'un détaillant
