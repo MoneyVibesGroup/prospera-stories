@@ -25,16 +25,17 @@ sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 #    AVANT de découper, pas après.
 #
 # ── ÉTAT AU 2026-08-15 ────────────────────────────────────────────────────────────────────────────
-epic_id_high_water_mark: "EPIC-043"   # dernier épic ATTRIBUÉ (dossier-client, S20)
+epic_id_high_water_mark: "EPIC-053"   # dernier épic ATTRIBUÉ — EPIC-044→053 pris le 2026-08-15 par reseau-service (découpage epics-reseau-2026-08-15.md). Historique : EPIC-043 = dossier-client, S20.
 story_id_high_water_mark: "STORY-364" # dernier story_id ATTRIBUÉ
 
 reserved_ranges:
   - range: "EPIC-044 → EPIC-053"
-    status: "LIBRE"
-    note: >-
-      Plage annoncée par le découpage notification du 2026-08-04, LIBÉRÉE le 2026-08-15 lors de sa
-      renumérotation. Jamais attribuée, aucun fichier, aucune référence. Réutilisable — mais
-      inscrivez-la ici le jour où vous la prenez.
+    status: "RÉSERVÉ"
+    owner: "reseau-service (Réseau, agences & zones — capacité PARTAGÉE IMF × Distributeur)"
+    source_doc: "prospera-stories/epics-reseau-2026-08-15.md"
+    reserved_on: "2026-08-15"
+    story_ids: "AUCUN — attribués au slotting"
+    note: "10 épics, 110 pts. Plage prise LE JOUR DU DÉCOUPAGE, comme la règle l'exige — elle figurait LIBRE depuis la renumérotation de notification-service le matin même. NON SLOTTÉ : aucun sprint attribué, `reseau-service` N'EXISTE PAS dans le dépôt (zéro code). ⚠️ 110 pts et non les ~76 du PRD : +13 socle et capacité partagée (AD-10, jamais compté — le PRD ne mentionnait ni entitlement ni gate), +8 versionnement du découpage (FR-R05b porte NFR-3 à lui seul), +13 publication et conformité des consommateurs (NFR-1 est un invariant DISTRIBUÉ : FR-R28 interdit à ce module d'appliquer le filtre). ⛔ DEUX CONTRAINTES D'ORDRE À NE PAS DÉFAIRE AU SLOTTING : EPIC-047 précède EPIC-051 (sans versionnement, les rattachements naissent sans version de découpage, donc un historique faux le jour de sa création) et EPIC-049 précède EPIC-050 (on ne publie pas une portée dont le modèle d'héritage n'est pas arrêté). ⚠️ LE BLOC 2 (EPIC-048/049/050) EST LE PLUS RISQUÉ : son erreur — une portée vide qui ouvre tout — ne se voit PAS en test fonctionnel, seulement en audit. ⚠️ Q3 (affectation multi-branches) à trancher avant EPIC-048."
 
   - range: "EPIC-054 → EPIC-064"
     status: "RÉSERVÉ"
