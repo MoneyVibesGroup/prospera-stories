@@ -99,6 +99,14 @@ Ce principe garantit : autonomie de fonctionnement (un vertical tourne même si 
 | États financiers / bilans (données métier d'une capacité partagée) | **`bilan-service`** | read-model si besoin |
 | `Module`, `ModuleVersion`, `ReferentielVersion` (catalogue) | **`catalog-service`** | — |
 | **Entitlement** `(org × module) → { version_code, référentiel, config, actif }` | **`catalog-service`** | read-model local (service concerné, gateway, admin-panel) |
+| `VerticalPack` (composition d'un vertical : modules + versions + référentiels) | **`platform-catalog-service`** | — · *ajouté 2026-08-15 (STORY-185/293)* |
+| **`Dossier`** (la société cliente : identité, pays, type d'entité, 2 axes, portée, archivage, mandat) | **`dossier-service`** | read-model si besoin · *ajouté 2026-08-15* |
+| **`Exercice`** (bornes, statut, origine `NORMAL`/`MIGRATION`) | **`dossier-service`** | read-model `exercices_dossier` chez **`balance-service`** ET **`bilan-service`** · *ajouté 2026-08-15* |
+| `BalanceCanonique`, référentiels comptables actifs, suggestions de comptes | **`balance-service`** | — · *ajouté 2026-08-15* |
+| `ProfilSociete` (identité fiscale) | **`balance-service`** ⟶ **`dossier-service`** | ⚠️ **MIGRATION EN COURS** — STORY-356/357, `not_started`. Deux propriétaires déclarés tant qu'elle n'est pas faite · *ajouté 2026-08-15* |
+| `Obligation`, `Declaration`, journal d'audit fiscal | **`fiscal-service`** | — · *à naître, spine AD-1→19 écrite* |
+| `Notification`, gabarits, canaux, coût d'envoi | **`notification-service`** | — · *à naître, spine AD-1→19 écrite* |
+| `Creance`, `DemandePaiement`, `Paiement`, fournisseurs PI-SPI | **`paiement-service`** | — · *à naître, spine AD-1→18 écrite* |
 
 > **Séparation abonnement ≠ entitlement.** Le *paiement/abonnement* (FedaPay) reste au **vertical** ; le *droit d'usage + version/référentiel* d'un module appartient à **`catalog-service`**. Un seul déclencheur met à jour l'entitlement (le vertical ou `admin-panel` après paiement) → pas de double source de vérité. Cet amendement remplace l'ancienne ligne « Entitlement → chaque vertical », qui ne tenait que pour un module mono-vertical (cf. **P8**).
 
@@ -281,6 +289,112 @@ Ordre imposé par le graphe de dépendances (l'auth est la racine ; le kyc valid
 
 ---
 
+---
+
+## ⚡ Réancrage du 2026-08-15 — ce document avait six semaines de retard sur le système
+
+> **Pourquoi cette section existe, et pourquoi elle est en évidence.** Ce document est celui dont
+> **toutes** les spines héritent : `fiscal-service`, `notification-service` et `paiement-service`
+> déclarent chacune, dans leur tableau *Inherited Invariants*, hériter d'ici la **carte de
+> propriété**, le **database-per-service**, les **read-models par événements** et le
+> **relying-party / JWKS**.
+>
+> Or il datait du **4 juillet** et ne mentionnait **ni `balance-service`, ni `dossier-service`** — deux
+> services **livrés et en production**. Trois spines s'appuyaient donc sur une carte de propriété qui
+> ignorait le service possédant désormais le dossier et l'exercice. **Un socle faux est pire qu'un
+> socle absent : on construit dessus.**
+
+### Les deux services livrés qui n'y figuraient pas
+
+| Service | Livré | Ce qu'il possède | Pourquoi il manquait |
+| --- | --- | --- | --- |
+| **`balance-service`** *(Module 1-bis, « Atelier »)* | sprints 10-19, en production | Balance canonique, référentiels comptables actifs, profil société *(en migration)* | Créé après la v1.3 ; n'a **jamais eu de document d'architecture propre** — il n'est cité que **depuis** `architecture-fiscal-service`, `architecture-paiement-service` et `architecture-proxy-de-confiance` |
+| **`dossier-service`** | 2026-08-13/14 (STORY-301, 353, 354, 304, 302, 355) | **`Dossier`** et **`Exercice`** | Créé neuf jours avant ce réancrage — et il porte l'invariante la plus structurante du programme |
+
+### ⚡ AD-P13 — Le dossier est l'unité de travail ; l'organisation ne l'est plus
+
+**Une organisation ≠ une société.** Un cabinet qui gère vingt clients avait, dans le modèle initial,
+vingt organisations. C'était faux : il a **une** organisation et **vingt dossiers**.
+
+- La racine de l'espace comptable est le **`Dossier`**, possédé par **`dossier-service`**.
+- Le JWT porte l'**organisation**, **jamais le dossier** — l'inférer du jeton ramènerait
+  « une org = une société » par la porte de derrière. Le dossier vient de l'URL et du contexte
+  applicatif, il est **vérifié contre la portée serveur** à chaque appel.
+- La **portée** distingue l'administratrice (tout le portefeuille, « Mon cabinet » compris) du
+  collaborateur (ses seules affectations). Un dossier hors portée rend **`404`, jamais `403`** : le
+  service refuse délibérément de révéler l'existence du dossier.
+
+⇒ Cette décision **amende la règle d'or ci-dessus** : à côté de l'identité (dans le jeton) et de
+l'état tiers (dans les read-models), il existe désormais un **contexte de travail** qui n'est ni l'un
+ni l'autre, et que le serveur seul arbitre.
+
+### ⚡ AD-P14 — L'exercice appartient au dossier ; balance et bilan en sont des read-models
+
+Jusqu'à STORY-355 (14/08), **deux modèles d'exercice se contredisaient** : `ExerciceAtelier`
+(`balance-service` — `CLOS` terminal, clôture en *effet de bord* de la reprise d'à-nouveaux) et
+`Exercice` (`bilan-service` — CRUD complet + réouverture). *« L'exercice 2023 est-il clos ? »* avait
+**deux réponses selon le service interrogé**.
+
+- **`dossier-service` fait foi.** `balance-service` et `bilan-service` tiennent chacun un read-model
+  `exercices_dossier`, alimenté par `dossier.exercice.ouvert|clos|rouvert`, et **cessent d'être source
+  de vérité sur le statut**.
+- **Un seul exercice ouvert par dossier** — invariant tenu par un **index unique partiel** côté
+  serveur, jamais par un pré-contrôle d'UI.
+- **`ExerciceTopic` est une énumération SÉPARÉE de `DossierTopic`.** Les consommateurs s'abonnent par
+  `Object.values(<Enum>)` : fusionner les deux aurait abonné **automatiquement** tout consommateur de
+  `dossier.*` à une charge utile qui n'a pas la forme de `DossierEtatV1` — produisant un read-model de
+  dossier écrit depuis un exercice, et un portefeuille **faux mais parfaitement plausible**.
+
+⚠️ **La bascule n'est PAS terminée.** `bilan-service` expose toujours `POST /bilan/exercices` et
+`balance-service` garde son `ExerciceAtelier` : les read-models sont posés et **rien ne les lit
+encore**, délibérément — la projection doit converger *avant* que STORY-236 et STORY-357 en dépendent,
+sinon elles démarreraient sur un read-model vide pour tous les dossiers antérieurs. **Tant que
+STORY-356/236/357 ne sont pas livrées, il y a deux écritures possibles pour un même fait.** C'est
+l'écart le plus dangereux du système à cette date.
+
+### Nouveaux topics du bus
+
+| Topic | Producteur | Consommé pour |
+| --- | --- | --- |
+| `dossier.created` / `dossier.updated` | `dossier-service` | read-models de dossier chez les consommateurs |
+| `dossier.exercice.ouvert` / `.clos` / `.rouvert` | `dossier-service` | read-model `exercices_dossier` de `balance-service` et `bilan-service` |
+
+Partition par **`dossierId`** (jamais `orgId` : `orgId` n'ajouterait aucune discrimination et casserait
+l'ordre intra-dossier). Publication par **outbox transactionnelle**, projections **idempotentes** via
+un marqueur `ProcessedEvent` inséré dans la même transaction.
+
+### Familles de services — mise à jour
+
+La liste de la § *Topologie cible* reste juste dans son principe et fausse dans son énumération. À la
+date de ce réancrage :
+
+2. **Capacités partagées** — `kyc-service`, `bilan-service`, `platform-catalog-service`,
+   **`balance-service`**, **`dossier-service`**, `document-service`, `prospera-ocr-service`, et à
+   naître `fiscal-service`, `notification-service`, `paiement-service`.
+   ⚠️ **`catalog-service` s'appelle `platform-catalog-service`** depuis **NC-1** (P12, 10/07) ; le nom
+   court subsiste partout dans ce document et dans les spines qui en héritent.
+
+### ⛔ Trois écarts que ce réancrage constate sans les corriger
+
+Ils appartiennent à d'autres documents ; les corriger ici créerait une seconde source de vérité.
+
+1. **`balance-service` n'a toujours aucune architecture.** ~26 écrans en production, quinze familles
+   d'API, et pas un document. Il est décrit **par ses consommateurs**, jamais par lui-même.
+2. **`dossier-service` n'a pas de gate d'entitlement ni de KYC.** Vérifié dans le code : ses guards
+   sont `jwt-auth`, `roles`, `permissions`, `email-verified`, `ip-throttler` — il ne consomme que
+   `identity.org.created` et `identity.membership.changed`, **ni `kyc.status.changed`, ni
+   `entitlement.changed`**. Tous les autres services métier portent un `@Requires…Access`
+   (`emailVerified` + KYC `APPROVED` + entitlement `ACTIVE`). Est-ce **délibéré** — le dossier étant en
+   amont de tout module, le gater fermerait la porte d'entrée — ou est-ce un **oubli** ? La question
+   n'a pas de réponse écrite, et c'est le seul point où `dossier-service` s'écarte du moule commun.
+   *(Tranché en AD-8 de la spine `dossier-service`, à confirmer par le PO.)*
+3. **La note de vocabulaire `Tenant` → `Organization` est à réécrire.** Elle dit « la clé d'isolation
+   reste `tenantId` (= identifiant d'organisation) ». C'est toujours vrai, mais il existe désormais
+   **une seconde clé de portée**, le `dossierId`, qui n'est pas une clé d'isolation multi-tenant et ne
+   doit pas être confondue avec elle : l'isolation vient du jeton, la portée vient du serveur.
+
+---
+
 ## Historique des révisions
 
 | Version | Date | Auteur | Changements |
@@ -289,6 +403,7 @@ Ordre imposé par le graphe de dépendances (l'auth est la racine ; le kyc valid
 | 1.1 | 2026-07-07 | vivian | **Modules partagés & versioning par organisation** : `bilan-service` (capacité partagée, 2 axes version de code ⊥ référentiel packagé, gate d'accès en relying party) et `catalog-service` (entitlements `(org × module)`, topic `entitlement.changed`, `admin-panel` BFF pour FR-012). Amende l'ownership map (entitlement → catalog ; abonnement reste vertical) ; ajoute **P7/P8** ; insère catalog + bilan dans la roadmap ; risques N/N-1 & routage multi-version. JWT/A3 inchangés. |
 | 1.2 | 2026-07-07 | vivian | **Couche edge/exécution** : décisions **P9** (schema registry adopté maintenant — compatibilité BACKWARD en CI) et **P10** (mono-repo maintenant, poly-repo différé) ; ajout du doc `architecture-gateway` (validation JWT fail-fast à l'edge + services souverains, routage par préfixe, résolution multi-version, services sans port public). Risque #4 (schema registry) passé de « envisager » à « planifié ». |
 | 1.3 | 2026-07-10 | vivian | **Alignement PLAN FINAL** (`docs/synthese-services-prospera-2026-07-10.md`) : décisions **P11** (dogfooding interne d'abord — Money Vibes = client zéro ; N/N-1 & routage multi-version différés jusqu'au 1er client externe, **DG-1** ; chaîne KYC livrée d'abord, **AD-2**) et **P12** (18 modules → 18 services suivant le moule unique ; **NC-1** `catalog-service` → `platform-catalog-service` ; **NB-1** Bilan par import de balance + prévisionnel ; **PA-1** checkout/webhooks → `paiement-service`). Ordre de construction et backlog des 18 modules → `program_backlog` de `sprint-status.yaml`. Invariants inchangés. |
+| **1.4** | **2026-08-15** | PO + Claude | ⚡ **RÉANCRAGE — le document avait six semaines de retard sur le système, alors que les trois spines (fiscal, notification, paiement) en héritent toutes.** Ajout à l'ownership map de **8 propriétaires manquants**, dont deux services **livrés et absents** : `balance-service` (Module 1-bis, en production, **toujours sans architecture propre**) et `dossier-service` (livré les 13-14/08). Deux décisions programme nouvelles : **AD-P13** — le dossier est l'unité de travail, l'organisation ne l'est plus ; le JWT porte l'org, **jamais** le dossier ; hors portée = `404`, jamais `403`. **AD-P14** — l'exercice appartient au dossier (STORY-355) ; `balance-service` et `bilan-service` en deviennent des read-models et **cessent d'être source de vérité sur le statut** ; `ExerciceTopic` séparé de `DossierTopic`. + 2 familles de topics (`dossier.*`, `dossier.exercice.*`), partition par `dossierId`. ⚠️ Trois écarts **constatés sans être corrigés** : `balance-service` sans architecture · `dossier-service` sans gate entitlement/KYC (écart au moule commun, à confirmer par le PO) · la note `Tenant`→`Organization` ignore la seconde clé de portée `dossierId`. ⛔ **La bascule de l'exercice n'est pas terminée** : STORY-356/236/357 `not_started` ⇒ deux écritures possibles pour un même fait. |
 
 ---
 
