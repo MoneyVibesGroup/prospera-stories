@@ -4,6 +4,53 @@ project_level: 3
 current_sprint: 20  # maj 2026-08-11 : S19 CLÔTURÉ (8/8 stories `done`, 37/37 pts, la dernière — STORY-095 — le 04/08) et le S20 tourne depuis le 03/08 (STORY-172). Le compteur était resté sur 19 pendant 8 jours alors que le S20 avait déjà livré 15 stories : c'est la 4e fois que le compteur retarde d'un ou plusieurs sprints (cf. historique 2026-07-29 et 2026-07-31) — le passer en même temps que le `status` du sprint clôturé, pas au sprint-planning suivant. ⚠️ ÉCART DE POINTS OUVERT sur le S20 : `completed_points: 34` alors que la somme des stories `done` du sprint vaut **54** ; l'écart préexiste à ce jour (les incréments notés ne suivent pas les stories ré-slottées 148/149/144/132/133) et reste à arbitrer au sprint-planning — non corrigé ici faute de savoir si ces points sont déjà comptés ailleurs. Historique : maj 2026-08-03 (sprint-planning PI-SPI) : RE-DECOUPAGE du Module 2. Les 18 stories paiement de EPIC-004 rescope (STORY-150..165, 168, 169 ; 104 pts, ex-S31..S34) sont SUPERSEDED et remplacees par EPIC-035..EPIC-042 / STORY-237..290 (54 stories, 196 pts dont 13 hors service), etalees sur S31..S38. Consequence assumee : l assistant IA (ex-S35) et le bloc terrain (ex-S36) reculent de 4 sprints, en S39 et S40. Le sprint courant reste 19 : rien de ce re-decoupage ne touche aux sprints ouverts. ATTENTION : ce re-decoupage a ete fait le lendemain du precedent — le controle anti-doublon (comparer stories/*.md a l ensemble des story_id slottes) doit tourner AVANT tout nouveau decoupage, pas apres. Historique : maj 2026-07-31 : S18 CLÔTURÉ — ses 9 stories sont `done` (102/087/088/089/090 le 29-30, 140/142/141/143 le 29) et le compteur était resté sur 18 / `not_started` alors que le sprint était intégralement livré. ⚠️ Son committed_points nominal de 42 était PÉRIMÉ : après les ré-estimations à la rédaction (140 5→3, 141 5→6, 143 8→5), la somme réelle des stories est **38**, toutes livrées ⇒ 38/38. L'arbitrage de capacité annoncé (« décaler 140→143 au S19 ») n'a donc jamais eu lieu et n'a plus d'objet. Prochain sprint = S19 (EPIC-023, moteur fiscal 091→095, 21 pts) — `not_started`, aucune story commencée. ⚠️ 5 STORIES ORPHELINES relevées le 2026-07-31 : STORY-133/134/135/136/144 ont un FICHIER dans stories/ mais ne sont référencées dans AUCUN sprint — et pire, **134/135/136 recouvrent le périmètre de 144** (même maquette AP-02, deux passes de rédaction, aucune ne cite les autres ; 136 est même CONTREDITE par 144 sur la revue KYC groupée). Cf. `orphan_stories` en fin de fichier : à trancher AVANT de planifier, pas à slotter en bloc. Historique : maj 2026-07-29 : S15, S16 et S17 sont TOUS clôturés (toutes leurs stories `done`) — le compteur était resté bloqué sur 15 alors que trois sprints avaient été livrés. S15 32/32, S16 60/60, S17 26/26. Le prochain sprint à ouvrir est le S18 (hub multi-source D13 + console admin), qui reste `not_started` : sa bascule en `in_progress` relève du sprint-planning, d'autant qu'il porte 42 pts pour 34 de capacité (arbitrage à trancher — cf. son commentaire `committed_points`). Historique : maj 2026-07-21 : S13 (EPIC-011B liasse calculée) done ; S14 (EPIC-012 validation/immutabilité/exercices/audit 064→067 + EPIC-013 amorce hypothèses 068) DONE 21/21 ; S15 = EPIC-013 projections (069-071) + STORY-137 (dette versions d'hypothèses, ex-132) + EPIC-014 consultation/export (072-073) ; 074 reportée au S16 le 2026-07-23 (arbitrage de capacité)
 sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 
+# ══════════════════════════════════════════════════════════════════════════════════════════════════
+# RESERVED_RANGES — créé le 2026-08-15. LIRE AVANT TOUT NOUVEAU DÉCOUPAGE.
+# ══════════════════════════════════════════════════════════════════════════════════════════════════
+# ⛔ RÈGLE : une plage de numéros annoncée dans un document d'épics N'EST PAS RÉSERVÉE.
+#    Seul CE FICHIER fait foi. Un découpage qui cherche un numéro libre lit `sprint-status.yaml` —
+#    il ne lit pas `epics-<module>-<date>.md`. Toute plage que l'on veut protéger AVANT de slotter
+#    doit être inscrite ici, le jour du découpage.
+#
+# ⚠️ POURQUOI CE BLOC EXISTE : la série `notification-service` s'est fait écraser TROIS FOIS pour
+#    cette exact raison (détail dans `epics-notification-2026-08-04.md`, section « Historique des
+#    collisions ») : STORY-150→165 repris par paiement (08-03) ; STORY-291 dépassée par 292/293 et
+#    par la renumérotation fiscale 179→235 ⇒ 294→350 (08-07) ; puis EPIC-043 ET STORY-352→363 pris
+#    par le dossier-client (08-09) — collision restée INVISIBLE 6 jours, parce que la réservation
+#    ne vivait que dans un document d'épics.
+#
+# ⚠️ COROLLAIRE : ne réservez PAS de `story_id` au découpage. Les numéros de story s'attribuent au
+#    SLOTTING, quand la story entre dans ce fichier. Réserver tôt = se faire dépasser (2 fois sur 3).
+#    Le contrôle anti-doublon (comparer `stories/*.md` à l'ensemble des `story_id` slottés) tourne
+#    AVANT de découper, pas après.
+#
+# ── ÉTAT AU 2026-08-15 ────────────────────────────────────────────────────────────────────────────
+epic_id_high_water_mark: "EPIC-043"   # dernier épic ATTRIBUÉ (dossier-client, S20)
+story_id_high_water_mark: "STORY-364" # dernier story_id ATTRIBUÉ
+
+reserved_ranges:
+  - range: "EPIC-044 → EPIC-053"
+    status: "LIBRE"
+    note: >-
+      Plage annoncée par le découpage notification du 2026-08-04, LIBÉRÉE le 2026-08-15 lors de sa
+      renumérotation. Jamais attribuée, aucun fichier, aucune référence. Réutilisable — mais
+      inscrivez-la ici le jour où vous la prenez.
+
+  - range: "EPIC-054 → EPIC-064"
+    status: "RÉSERVÉ"
+    owner: "notification-service (Module 1 — Canaux & notifications)"
+    source_doc: "prospera-stories/epics-notification-2026-08-04.md"
+    reserved_on: "2026-08-15"
+    story_ids: "AUCUN — attribués au slotting"
+    note: >-
+      11 épics, 104 pts (+14 pts reportés en EPIC-063/064). NON SLOTTÉ : aucun sprint attribué, et
+      `notification-service` N'EXISTE PAS dans le dépôt (zéro code). ⚠️ Le doc revendiquait S23→S25,
+      qui appartiennent à la FISCALITÉ (EPIC-027/028/029) — revendication annulée le 2026-08-15, les
+      trois blocs attendent une décision PO. ⛔ CONTRAINTE DURE au slotting : à livrer AVANT le S37,
+      où « Émission du lien via notification-service » (PI-SPI) en dépend, et où STORY-304 porte un
+      hook aujourd'hui INERTE. ⛔ C8 (auth machine-à-machine, décision PROGRAMME) bloque le bloc 2.
+# ══════════════════════════════════════════════════════════════════════════════════════════════════
+
 # Révision 2026-07-04 : re-cadrage écosystème (voir docs/architecture-prospera-ecosystem-2026-07-04.md).
 # PROSPERA devient un écosystème multi-vertical. Ordre d'extraction : auth-service (IdP, racine)
 # → expert-comptable relying party → kyc-service rebasé → FedaPay. Bus inter-services = Kafka ;

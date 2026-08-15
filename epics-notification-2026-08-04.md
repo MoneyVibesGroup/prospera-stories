@@ -30,50 +30,79 @@ STORY-165 (ancien EPIC-004 rescopé) puis les a passées en `superseded_stories`
 créerait une collision avec une table de correspondance déjà publiée et citée par 21 stories frontend
 et mobile.
 
-**Série continuée :** épics à partir de **EPIC-043**, stories à partir de **STORY-291**. Dernier
-numéro pris au 2026-08-04 : EPIC-042 / STORY-290 (série PI-SPI), vérifié dans `sprint-status.yaml`.
+**Série retenue :** épics **EPIC-054 → EPIC-064**. Dernier numéro d'épic réellement pris au
+2026-08-15 : **EPIC-053**, vérifié dans `sprint-status.yaml` **et** enregistré dans son bloc
+`reserved_ranges`.
 
-> ⚠️ **Amendé le 2026-08-07 — démarrer à STORY-351.** Cette série n'avait encore **consommé aucun
-> numéro** (seul le point de départ était annoncé), et deux mouvements l'ont dépassée le même jour :
+**Aucun `story_id` n'est réservé ici.** Les numéros de story sont attribués **au slotting**, quand les
+stories entrent dans `sprint-status.yaml` — pas au découpage. Voir l'historique ci-dessous : c'est
+exactement cette réservation anticipée qui a échoué trois fois.
+
+> ### ⚠️ Historique des collisions — trois fois le même défaut
 >
-> 1. **STORY-292 / STORY-293** — référentiels attribuables mais non servis par `balance-service`,
->    slottées au sprint 20 (ticket `tickets/TICKET-BACKEND-referentiels-attribuables-mais-non-servis.md`) ;
-> 2. **la série fiscalité a été renumérotée `179→235` ⇒ `294→350`** pour lever une collision de dix
->    `story_id` avec la dette console/KYC du sprint 20 (voir l'encadré de
->    `epics-fiscalite-2026-08-03.md`).
+> **1. 2026-08-04.** Le memlog du PRD (2026-08-02) annonçait « 16 stories, STORY-150 à 165 ». Plage
+> reprise entre-temps par le découpage `paiement-service` du 2026-08-03 (ancien EPIC-004 rescopé,
+> puis passées en `superseded_stories`). ⇒ série repoussée à EPIC-043 / STORY-291.
 >
-> Le raisonnement est celui déjà appliqué ci-dessus : on ne rouvre pas un numéro pris, on décale le
-> début de série. **Dernier numéro pris au 2026-08-07 : STORY-350.**
+> **2. 2026-08-07.** STORY-291 dépassée le même jour par deux mouvements : STORY-292/293
+> (référentiels attribuables mais non servis, S20) et la renumérotation fiscale `179→235` ⇒
+> `294→350`. ⇒ série repoussée à STORY-351.
+>
+> **3. 2026-08-09 — non détectée sur le moment, corrigée le 2026-08-15.** Le ticket dossier-client a
+> pris **EPIC-043** (« Le dossier client devient l'unité de travail du cabinet », S20) **et**
+> STORY-352→360, 362, 363. `EPIC-043` désignait donc **deux choses** : le socle notification ici, le
+> socle dossier-client dans `sprint-status.yaml`, un dépôt (`prospera-dossier-service`), une spine
+> (`architecture-dossier-service-2026-08-15`) et onze stories frontend. ⇒ les épics notification
+> sont renumérotés **EPIC-043→053 ⇒ EPIC-054→064**, et la réservation de `story_id` est **supprimée**.
+>
+> **La cause n'est pas l'arithmétique, c'est le lieu.** Une série annoncée dans un document d'épics
+> est invisible : le prochain découpage qui cherche un numéro libre lit `sprint-status.yaml`, pas ce
+> fichier. Une plage non enregistrée dans `sprint-status.yaml` **n'est pas réservée**. D'où le bloc
+> `reserved_ranges` en tête du tracker, créé le 2026-08-15.
+>
+> Corollaire assumé : le coût d'une renumérotation d'épic est nul tant qu'**aucun fichier story
+> n'existe** et que rien n'est slotté — ce qui reste le cas de cette série. Il ne le serait plus après.
 
 ### ⚠️ Avertissement d'estimation
 
 Le PRD a **déjà corrigé une fois** son estimation : la séquence des modules donnait 2 sprints, le
-découpage réel en donne 3 (34 + 34 + 21 = 89 pts, S23 → S25). La spine ajoute ensuite du travail que
+découpage réel en donne 3 (34 + 34 + 21 = 89 pts). La spine ajoute ensuite du travail que
 le PRD ne portait pas — trois files BullMQ séparées, la trace d'audit en base protégée, l'horloge
 courte des variables, l'interception du « STOP », les compteurs pré-agrégés de la vue plateforme.
 
 Le découpage réel donne **118 pts**, soit **+33 %** sur l'estimation du PRD — exactement le même ratio
-que le découpage `paiement-service` (94 estimés → 118 réels). Après le report d'EPIC-052 et EPIC-053
-(décision PO du 2026-08-04), il reste **104 pts sur S23 → S25** :
+que le découpage `paiement-service` (94 estimés → 118 réels). Après le report d'EPIC-063 et EPIC-064
+(décision PO du 2026-08-04), il reste **104 pts sur trois blocs** :
 
-| Sprint | Épics | Pts | Capacité 34 |
+> ⛔ **AUCUN SPRINT N'EST ATTRIBUÉ — corrigé le 2026-08-15.** Ce tableau annonçait « S23 → S25 ».
+> **Ces trois sprints appartiennent à la fiscalité** (EPIC-027, EPIC-028, EPIC-029 — vérifié dans
+> `sprint-status.yaml` le 2026-08-15). Le module n'a donc, à ce jour, **aucune place dans le plan** :
+> il n'est slotté nulle part et `notification-service` n'existe pas dans le dépôt (zéro code).
+> Les colonnes ci-dessous sont des **blocs d'ordonnancement**, pas des sprints — l'attribution est une
+> décision PO.
+>
+> ⚠️ **Contrainte dure à respecter au slotting :** le module doit être livré **avant le sprint 37**,
+> où la story « Émission du lien via `notification-service` » (PI-SPI) en dépend, et où STORY-304
+> porte un hook aujourd'hui **inerte** en attendant le service.
+
+| Bloc | Épics | Pts | Capacité 34 |
 | --- | --- | ---: | --- |
-| **S23** | EPIC-043, 044, 045 | **40** | ⚠️ +6 |
-| **S24** | EPIC-046, 047, 048, 049 | **41** | ⚠️ +7 |
-| **S25** | EPIC-050, 051 | **23** | ✅ −11 |
-| *reporté* | EPIC-052, 053 | *14* | — |
+| **Bloc 1** | EPIC-054, EPIC-055, EPIC-056 | **40** | ⚠️ +6 |
+| **Bloc 2** | EPIC-057, EPIC-058, EPIC-059, EPIC-060 | **41** | ⚠️ +7 |
+| **Bloc 3** | EPIC-061, EPIC-062 | **23** | ✅ −11 |
+| *reporté* | EPIC-063, EPIC-064 | *14* | — |
 
-**Le report solde le total mais pas la répartition** : S23 et S24 dépassent encore la capacité de six
-et sept points. C'est désormais un problème de **sprint planning**, pas de structure d'épics — les
-frontières d'incrément du PRD ne sont pas des frontières de sprint obligatoires, et EPIC-046 (5 pts,
-sans dépendance) comme EPIC-051 (9 pts, sans dépendance amont) se déplacent sans rien casser.
+**Le report solde le total mais pas la répartition** : les blocs 1 et 2 dépassent encore la capacité de
+six et sept points. C'est un problème de **sprint planning**, pas de structure d'épics — les
+frontières d'incrément du PRD ne sont pas des frontières de sprint obligatoires, et EPIC-057 (5 pts,
+sans dépendance) comme EPIC-062 (9 pts, sans dépendance amont) se déplacent sans rien casser.
 
 ### Une story n'est pas du travail sur ce service
 
 **C8 — l'authentification machine-à-machine entre services** est une décision **programme**, portée
 en condition bloquante par AD-2. Sans elle, `auth-service` ne peut pas cesser d'envoyer ses messages
 porteurs de secrets, donc l'incrément 2 ne peut pas se solder. Elle figure dans ce découpage parce
-qu'elle **bloque S24**, pas parce que l'équipe notification la livre.
+qu'elle **bloque le bloc 2**, pas parce que l'équipe notification la livre.
 
 ## Inventaire des exigences
 
@@ -236,98 +265,98 @@ tracker.
 
 | Exigences | Épic |
 | --- | --- |
-| FR-N01 → FR-N08 | EPIC-043 — contact, dédoublonnage normalisé, frontière d'organisation, visibilité par module, import |
-| FR-N09 → FR-N15 | EPIC-044 — modèle, versions immuables, socle surchargeable, langues, segments, rendu d'essai |
-| FR-N16 | EPIC-052 — statut d'approbation, capacité déclarée du fournisseur |
-| FR-N17, FR-N20, FR-N22 | EPIC-045 — port `ChannelProvider`, capacités publiées, démarrage dégradé |
-| FR-N18 | EPIC-045 (e-mail) + EPIC-046 (in-app) + EPIC-052 (SMS, WhatsApp, push) |
-| FR-N19 | EPIC-046 — in-app sans carnet, lu/non lu fiable par construction |
-| FR-N21 | EPIC-052 — chaîne de repli |
-| FR-N23, FR-N25, FR-N26 | EPIC-045 — demande d'envoi, idempotence, régime transactionnel |
-| FR-N24, FR-N27 | EPIC-047 — consumers du bus, migration des trois services, `SM-1 = 0` |
-| FR-N28 → FR-N34 | EPIC-050 — listes, instantané, lots avec reprise, garde-fous, validation |
-| FR-N35 → FR-N40 | EPIC-045 — journal, statut normalisé, certitude, restitution, export, rejeu |
-| FR-N41 → FR-N45 | EPIC-053 — messages entrants, rattachement à certitude, destination par défaut |
-| FR-N46 → FR-N52 | EPIC-048 — consentement, désabonnement opposable, droits des personnes |
-| FR-N53, FR-N54 | EPIC-043 — permissions au catalogue, cloisonnement des passerelles |
-| FR-N55, FR-N56, FR-N56b | EPIC-049 — console bornée, secrets, fournisseur de candidats |
-| FR-N57 → FR-N63 | EPIC-049 — coût figé, unité mineure, par devise, ventilation, vue plateforme |
-| FR-N64 → FR-N68 | EPIC-051 — plafonds opposables, purge tracée, agrégats, résiliation |
-| AR-01, AR-02, AR-03, AR-10, AR-14, AR-18 | EPIC-043 — socle, deux bases, normalisation, secrets, sauvegarde |
-| AR-09, AR-11 | EPIC-044 — substitution sans compilation, calcul de segments |
-| AR-04, AR-07, AR-08, AR-16, AR-17 | EPIC-045 — trois files, boîte de réception, index d'idempotence, schema registry, santé |
-| AR-05, AR-06 | EPIC-047 — deux chemins d'entrée, **C8** (hors service) |
-| AR-13 | EPIC-048 (désabonnement public) + EPIC-053 (webhooks entrants) |
-| AR-12, AR-15 | EPIC-049 — compteurs pré-agrégés, référentiel pays × devise |
-| AR-19 | EPIC-045, EPIC-049, EPIC-050 — les trois tests de la définition de terminé |
-| AR-20 | EPIC-051 — amendement du §9.3 du PRD |
+| FR-N01 → FR-N08 | EPIC-054 — contact, dédoublonnage normalisé, frontière d'organisation, visibilité par module, import |
+| FR-N09 → FR-N15 | EPIC-055 — modèle, versions immuables, socle surchargeable, langues, segments, rendu d'essai |
+| FR-N16 | EPIC-063 — statut d'approbation, capacité déclarée du fournisseur |
+| FR-N17, FR-N20, FR-N22 | EPIC-056 — port `ChannelProvider`, capacités publiées, démarrage dégradé |
+| FR-N18 | EPIC-056 (e-mail) + EPIC-057 (in-app) + EPIC-063 (SMS, WhatsApp, push) |
+| FR-N19 | EPIC-057 — in-app sans carnet, lu/non lu fiable par construction |
+| FR-N21 | EPIC-063 — chaîne de repli |
+| FR-N23, FR-N25, FR-N26 | EPIC-056 — demande d'envoi, idempotence, régime transactionnel |
+| FR-N24, FR-N27 | EPIC-058 — consumers du bus, migration des trois services, `SM-1 = 0` |
+| FR-N28 → FR-N34 | EPIC-061 — listes, instantané, lots avec reprise, garde-fous, validation |
+| FR-N35 → FR-N40 | EPIC-056 — journal, statut normalisé, certitude, restitution, export, rejeu |
+| FR-N41 → FR-N45 | EPIC-064 — messages entrants, rattachement à certitude, destination par défaut |
+| FR-N46 → FR-N52 | EPIC-059 — consentement, désabonnement opposable, droits des personnes |
+| FR-N53, FR-N54 | EPIC-054 — permissions au catalogue, cloisonnement des passerelles |
+| FR-N55, FR-N56, FR-N56b | EPIC-060 — console bornée, secrets, fournisseur de candidats |
+| FR-N57 → FR-N63 | EPIC-060 — coût figé, unité mineure, par devise, ventilation, vue plateforme |
+| FR-N64 → FR-N68 | EPIC-062 — plafonds opposables, purge tracée, agrégats, résiliation |
+| AR-01, AR-02, AR-03, AR-10, AR-14, AR-18 | EPIC-054 — socle, deux bases, normalisation, secrets, sauvegarde |
+| AR-09, AR-11 | EPIC-055 — substitution sans compilation, calcul de segments |
+| AR-04, AR-07, AR-08, AR-16, AR-17 | EPIC-056 — trois files, boîte de réception, index d'idempotence, schema registry, santé |
+| AR-05, AR-06 | EPIC-058 — deux chemins d'entrée, **C8** (hors service) |
+| AR-13 | EPIC-059 (désabonnement public) + EPIC-064 (webhooks entrants) |
+| AR-12, AR-15 | EPIC-060 — compteurs pré-agrégés, référentiel pays × devise |
+| AR-19 | EPIC-056, EPIC-060, EPIC-061 — les trois tests de la définition de terminé |
+| AR-20 | EPIC-062 — amendement du §9.3 du PRD |
 
 **Couverture : 71 exigences fonctionnelles sur 71 mappées, et 20 exigences additionnelles sur 20.**
 Les 7 NFR sont transverses et portées par les critères d'acceptation des stories concernées, pas par
-un épic dédié — sauf **NFR-3**, qui a sa story de preuve dédiée dans EPIC-045 (les trois files), et
-**NFR-2**, prouvée par la story de reprise d'EPIC-050.
+un épic dédié — sauf **NFR-3**, qui a sa story de preuve dédiée dans EPIC-056 (les trois files), et
+**NFR-2**, prouvée par la story de reprise d'EPIC-061.
 
-> **Une exigence reste partielle jusqu'à EPIC-053.** FR-N47 exige un moyen de désabonnement **adapté
-> au canal**. EPIC-048 le livre pour l'e-mail et l'in-app (lien public, AD-17) ; sur les canaux où le
+> **Une exigence reste partielle jusqu'à EPIC-064.** FR-N47 exige un moyen de désabonnement **adapté
+> au canal**. EPIC-059 le livre pour l'e-mail et l'in-app (lien public, AD-17) ; sur les canaux où le
 > refus arrive comme un **message entrant** — « répondez STOP » en SMS et WhatsApp — il exige
-> l'interception d'AD-10, qui vit dans EPIC-053. Tant que ces canaux ne sont pas livrés, l'écart est
-> sans effet ; il redevient bloquant le jour où EPIC-052 est ordonnancé. **Les deux ne se séparent
+> l'interception d'AD-10, qui vit dans EPIC-064. Tant que ces canaux ne sont pas livrés, l'écart est
+> sans effet ; il redevient bloquant le jour où EPIC-063 est ordonnancé. **Les deux ne se séparent
 > pas.**
 
 ## Liste des épics
 
-### EPIC-043 : Socle `notification-service`, carnet de contacts et cloisonnement
+### EPIC-054 : Socle `notification-service`, carnet de contacts et cloisonnement
 
 Le service existe, il est cloisonné, ses preuves sont ineffaçables, et une organisation peut y
 enregistrer **qui elle veut joindre** — dédoublonné, normalisé, et réduit à ce qui sert à joindre.
 *Couvre FR-N01→N08, FR-N53, FR-N54, NFR-5, NFR-7, AR-01, AR-02, AR-03, AR-10, AR-14, AR-18.*
 **~13 pts.**
 
-### EPIC-044 : Modèles versionnés, multilingues, et un rendu qui n'exécute rien
+### EPIC-055 : Modèles versionnés, multilingues, et un rendu qui n'exécute rien
 
 Le message appartient au service, le client peut écrire le sien, et le rendu ne compile jamais rien —
 la substitution de variables déclarées ferme la surface d'exécution qu'ouvrirait FR-N12.
 *Couvre FR-N09→N15, AR-09, AR-11.* **~11 pts.**
 
-### EPIC-045 : Le premier message part — port de canal, e-mail, journal et accusés
+### EPIC-056 : Le premier message part — port de canal, e-mail, journal et accusés
 
 Le cœur de l'incrément 1 : un e-mail part du service avec son journal, son statut normalisé, son
 niveau de certitude et son coût — et il ne fait jamais la queue derrière autre chose.
 *Couvre FR-N17, FR-N18 (e-mail), FR-N20, FR-N22, FR-N23, FR-N25, FR-N26, FR-N35→N40, NFR-1a, NFR-3,
 NFR-4, NFR-6, AR-04, AR-07, AR-08, AR-16, AR-17, AR-19.* **~16 pts.**
 
-### EPIC-046 : Le canal in-app
+### EPIC-057 : Le canal in-app
 
 La cloche applicative — « 3 dossiers à valider ». Le seul canal dont le destinataire est un utilisateur
 authentifié, donc sans carnet, sans passerelle et sans contrat : son état lu/non lu est écrit par le
 service lui-même, ce qui en fait le seul `confirmé` par construction.
 *Couvre FR-N18 (in-app), FR-N19, NFR-1a.* **~5 pts.**
 
-### EPIC-047 : Le service devient l'organe de parole unique
+### EPIC-058 : Le service devient l'organe de parole unique
 
 `auth-service`, `kyc-service` et `expert-comptable` cessent d'envoyer. C'est le motif d'existence du
 module, et son critère de sortie est un nombre : `SM-1 = 0`.
 *Couvre FR-N24, FR-N27, AR-05, AR-06.* **~13 pts.**
 
-### EPIC-048 : Consentement, désabonnement et droits des personnes
+### EPIC-059 : Consentement, désabonnement et droits des personnes
 
 Le refus d'une personne est opposable immédiatement, traçable, et survit à l'effacement de tout le
 reste — y compris à l'effacement qu'elle a elle-même demandé.
 *Couvre FR-N46→N52, NFR-5, AR-13 (surface publique de désabonnement).* **~9 pts.**
 
-### EPIC-049 : Mesure de consommation, multi-devise et console d'exploitation
+### EPIC-060 : Mesure de consommation, multi-devise et console d'exploitation
 
 Savoir qui consomme avant de savoir qui paie — sans jamais additionner des XOF et des NGN, et sans que
 la restitution commerciale devienne la porte par laquelle le cloisonnement tombe.
 *Couvre FR-N55, FR-N56, FR-N56b, FR-N57→N63, NFR-5, AR-12, AR-15, AR-19.* **~14 pts.**
 
-### EPIC-050 : Envoi de masse — listes, lots avec reprise et garde-fous
+### EPIC-061 : Envoi de masse — listes, lots avec reprise et garde-fous
 
 Interrompre à mi-parcours et reprendre sans perdre ni doubler personne. C'est le critère de sortie de
 l'incrément 3, et il se prouve en comptant.
 *Couvre FR-N28→N34, FR-N48 (opposabilité en cours d'exécution), NFR-2, AR-04, AR-19.* **~14 pts.**
 
-### EPIC-051 : Rétention, purge et fin de relation
+### EPIC-062 : Rétention, purge et fin de relation
 
 La politique de conservation cesse d'être déclarative : elle s'exécute, elle se trace, et elle refuse
 ce qui dépasse le plafond au lieu de le ramener en silence.
@@ -335,25 +364,25 @@ ce qui dépasse le plafond au lieu de le ramener en silence.
 
 ---
 
-## Épics reportés au-delà de S25
+## Épics reportés au-delà du bloc 3
 
 **Décision PO du 2026-08-04.** Les passerelles tierces sont reportées : aucun contrat WhatsApp, SMS ou
 push n'est signé (R2), et le PRD lui-même construit l'incrément 1 pour être livrable sans elles. Le
 report est **scindé sur la ligne de la dépendance externe**, pas sur la ligne des épics — le canal
-in-app (EPIC-046) n'en dépend pas et reste au S24.
+in-app (EPIC-057) n'en dépend pas et reste au bloc 2.
 
-### EPIC-052 : Passerelles tierces — SMS, WhatsApp, push et la chaîne de repli
+### EPIC-063 : Passerelles tierces — SMS, WhatsApp, push et la chaîne de repli
 
 Les trois canaux qui coûtent de l'argent et qui exigent un contrat, plus « WhatsApp sinon SMS » qui
 laisse une trace honnête de ce que chaque canal a coûté.
 *Couvre FR-N16, FR-N18 (SMS, WhatsApp, push), FR-N21, NFR-1, NFR-6.* **~8 pts.**
 **Déclencheur d'ordonnancement :** la signature du premier contrat de passerelle.
 
-### EPIC-053 : Réponses entrantes et routage contextuel
+### EPIC-064 : Réponses entrantes et routage contextuel
 
 Ce qui fait qu'une conversation existe dans les deux sens. **Reporté par dépendance, pas par choix :**
-FR-N41 est explicite — « canaux bidirectionnels (WhatsApp au v1) » — donc sans EPIC-052 il n'existe
+FR-N41 est explicite — « canaux bidirectionnels (WhatsApp au v1) » — donc sans EPIC-063 il n'existe
 aucun canal d'où recevoir une réponse.
 *Couvre FR-N41→N45, NFR-1b, AR-13 (webhooks entrants).* **~6 pts.**
-**Dépend de :** EPIC-052. Porte aussi l'**interception du « STOP »** (AD-10), qui complète le
-désabonnement d'EPIC-048 sur les canaux où le refus arrive comme un message entrant.
+**Dépend de :** EPIC-063. Porte aussi l'**interception du « STOP »** (AD-10), qui complète le
+désabonnement d'EPIC-059 sur les canaux où le refus arrive comme un message entrant.
