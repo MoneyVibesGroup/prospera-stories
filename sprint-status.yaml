@@ -25,7 +25,7 @@ sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 #    AVANT de découper, pas après.
 #
 # ── ÉTAT AU 2026-08-15 ────────────────────────────────────────────────────────────────────────────
-epic_id_high_water_mark: "EPIC-053"   # dernier épic ATTRIBUÉ — EPIC-044→053 pris le 2026-08-15 par reseau-service (découpage epics-reseau-2026-08-15.md). Historique : EPIC-043 = dossier-client, S20.
+epic_id_high_water_mark: "EPIC-074"   # dernier épic ATTRIBUÉ — EPIC-065→074 pris le 2026-08-15 par catalogue-produits-service ; EPIC-044→053 le même jour par reseau-service (découpage epics-reseau-2026-08-15.md). Historique : EPIC-043 = dossier-client, S20.
 story_id_high_water_mark: "STORY-364" # dernier story_id ATTRIBUÉ
 
 reserved_ranges:
@@ -36,6 +36,14 @@ reserved_ranges:
     reserved_on: "2026-08-15"
     story_ids: "AUCUN — attribués au slotting"
     note: "10 épics, 110 pts. Plage prise LE JOUR DU DÉCOUPAGE, comme la règle l'exige — elle figurait LIBRE depuis la renumérotation de notification-service le matin même. NON SLOTTÉ : aucun sprint attribué, `reseau-service` N'EXISTE PAS dans le dépôt (zéro code). ⚠️ 110 pts et non les ~76 du PRD : +13 socle et capacité partagée (AD-10, jamais compté — le PRD ne mentionnait ni entitlement ni gate), +8 versionnement du découpage (FR-R05b porte NFR-3 à lui seul), +13 publication et conformité des consommateurs (NFR-1 est un invariant DISTRIBUÉ : FR-R28 interdit à ce module d'appliquer le filtre). ⛔ DEUX CONTRAINTES D'ORDRE À NE PAS DÉFAIRE AU SLOTTING : EPIC-047 précède EPIC-051 (sans versionnement, les rattachements naissent sans version de découpage, donc un historique faux le jour de sa création) et EPIC-049 précède EPIC-050 (on ne publie pas une portée dont le modèle d'héritage n'est pas arrêté). ⚠️ LE BLOC 2 (EPIC-048/049/050) EST LE PLUS RISQUÉ : son erreur — une portée vide qui ouvre tout — ne se voit PAS en test fonctionnel, seulement en audit. ⚠️ Q3 (affectation multi-branches) à trancher avant EPIC-048."
+
+  - range: "EPIC-065 → EPIC-074"
+    status: "RÉSERVÉ"
+    owner: "catalogue-produits-service (Catalogue produits — vertical Distributeur)"
+    source_doc: "prospera-stories/epics-catalogue-produits-2026-08-15.md"
+    reserved_on: "2026-08-15"
+    story_ids: "AUCUN — attribués au slotting"
+    note: "10 épics, 126 pts. Plage prise LE JOUR DU DÉCOUPAGE. NON SLOTTÉ : aucun sprint attribué, `catalogue-produits-service` N'EXISTE PAS dans le dépôt. ⚠️ 126 pts et non les ~89 du PRD : +13 socle et entitlement (jamais compté, même manque que reseau-service), +13 journaux partitionnés (AD-7 — FR-C49 CONTREDISAIT NFR-4, tranché le 15/08 : deux journaux sans collection, index ni route de lecture communs), +11 étanchéité prouvable + conformité + route plateforme (AD-6 exige une collection séparée et un dépôt refusant toute lecture sans le propriétaire ; AD-9 la suite de conformité ; AD-15 la route AD-P16). ⛔ DEUX STORIES HORS SERVICE BLOQUENT EPIC-065 : enregistrer les six modules du pack distributeur au catalogue (gap ouvert le 2026-08-11 par la vérif docker de STORY-293, provisioning à 422, JAMAIS eu de porteur) et renommer `catalogue` -> `catalogue-produits` dans packs.seed-data.ts + vertical-packs.ts. Une 3ème (RBAC tenant, AD-P15, auth-service) bloque EPIC-068. ⛔ CONTRAINTES D'ORDRE : EPIC-067 précède EPIC-068 (un prix est par article ET par unité) ; EPIC-070 précède EPIC-071 (FR-C31 calcule la marge contre le prix société RÉELLEMENT RÉSOLU, pas un prix théorique) ; EPIC-071 précède le volet freelance d'EPIC-073. ⚠️ EPIC-071 EST LE PLUS RISQUÉ : son erreur n'est pas un défaut fonctionnel mais un manquement à un engagement de confidentialité envers des tiers non salariés. ⚠️ Q4 (prix freelance plafonné) à trancher avant EPIC-071, Q5 (remises de pied de commande) avant EPIC-069."
 
   - range: "EPIC-054 → EPIC-064"
     status: "RÉSERVÉ"
