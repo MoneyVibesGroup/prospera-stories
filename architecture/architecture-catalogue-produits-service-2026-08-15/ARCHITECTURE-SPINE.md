@@ -129,6 +129,20 @@ invariants, résout un prix de façon déterministe, et publie des faits.
 - **Rule:** priorités **explicites** entre grilles (FR-C16) et entre promotions (FR-C20) : deux règles
   applicables ne sont **jamais** départagées par un hasard d'implémentation, et **le silence vaut
   non-cumul**.
+- **Rule:** ⚡ *(Q5, tranchée le 2026-08-15)* **la résolution a DEUX formes : par ligne et par PANIER.**
+  La forme panier prend l'ensemble des lignes d'une commande et applique, en plus, les promotions de
+  périmètre **« commande entière »** — les **remises de pied de commande**, qui supposent de connaître
+  le total.
+- **Rule:** ⛔ **le non-cumul de FR-C20 arbitre AUSSI l'interaction ligne × pied de commande**, et cet
+  arbitrage est **rendu dans l'explication**. C'est la raison décisive du choix : une remise de pied
+  appliquée dans `Commande` **éclaterait l'explication du total sur deux modules**, et `NFR-3`
+  tomberait exactement là où elle compte — devant le détaillant à qui le commercial doit justifier un
+  montant.
+- **Rule:** ⚠️ **Ce service est donc sur le chemin de la commande, et il l'était déjà** (`FR-C23` par
+  ligne). Ce n'est pas une entorse au principe « publier plutôt qu'appliquer » — ce principe vaut pour
+  le **profil commercial** (AD-10) et pour le refus, pas pour le prix, dont la résolution est la
+  raison d'être du module. ⇒ une **cible de latence** est due sur la forme panier.
+- **Rule:** ⛔ la résolution par panier **ne crée aucun engagement**. Elle résout ; `FR-C25` fige.
 
 ### AD-6 — L'étanchéité freelance est une isolation INTRA-organisation, portée par un dépôt dédié [ARBITRÉ PO 2026-08-15]
 
@@ -354,6 +368,6 @@ est un manquement à un engagement de confidentialité envers des tiers, pas un 
 | --- | --- | --- |
 | Articles au poids / volume variable | **A1** — facteurs entiers au v1 | 1ᵉʳ client vendant du vrac |
 | Catalogue partagé multi-organisations | **Q2, OUVERTE** — `A3` pose un article = une org. ⚠️ **À verrouiller comme Q1 l'a été** : si elle bascule, c'est un changement de modèle de la même gravité, et elle n'a pas encore de dépendant identifié — **elle en aura un** | Avant l'incrément 1 |
-| Remises de pied de commande | **Q5** — avis PRD : module **Commande** (#11), elles ne portent sur aucun article | PRD Commande |
-| Prix freelance plafonné | **Q4** — question commerciale : encadrer un indépendant ou non | Décision produit |
+
+
 | Élasticité mesurée par le système | **A4** — suppose un historique de promotions que les 1ᵉʳˢ clients n'ont pas | Module scoring & prévision |

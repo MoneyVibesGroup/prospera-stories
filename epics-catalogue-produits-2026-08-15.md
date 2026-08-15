@@ -31,7 +31,7 @@ elle est prise**.
 
 ---
 
-## ⚠️ 126 pts, le PRD en annonçait ~89. Les 37 d'écart sont sourcés.
+## ⚠️ 131 pts, le PRD en annonçait ~89. Les 42 d'écart sont sourcés.
 
 | Source | Pts |
 | --- | ---: |
@@ -39,7 +39,8 @@ elle est prise**.
 | **+ Socle, entitlement et cloisonnement** (EPIC-065) | **+13** |
 | **+ Journaux partitionnés** (dans EPIC-073) | **+13** |
 | **+ Étanchéité prouvable, conformité et route plateforme** (EPIC-071, 074) | **+11** |
-| **Total** | **126** |
+| **+ Remises de pied de commande** *(Q5, tranchée le 2026-08-15 — périmètre `FR-C19` + forme panier `FR-C23`)* | **+5** |
+| **Total** | **131** |
 
 1. **Le socle n'était pas compté** — même manque que pour `reseau-service`. Le PRD ne mentionnait ni
    entitlement ni gate.
@@ -75,7 +76,7 @@ Capacité de référence : **34**. Aucun sprint attribué — l'ordonnancement e
 | Bloc | Épics | Pts | vs 34 |
 | --- | --- | ---: | --- |
 | **1 — L'article existe et se compte** | EPIC-065, EPIC-066, EPIC-067 | **42** | ⚠️ +8 |
-| **2 — Le prix se résout** | EPIC-068, EPIC-069, EPIC-070 | **34** | ✅ pile |
+| **2 — Le prix se résout** | EPIC-068, EPIC-069, EPIC-070 | **39** | ⚠️ +5 |
 | **3 — Le catalogue s'ouvre aux indépendants** | EPIC-071, EPIC-073 | **29** | ✅ −5 |
 | **4 — Le catalogue sert les autres** | EPIC-072, EPIC-074 | **21** | ✅ −13 |
 
@@ -180,25 +181,37 @@ module — il ne se voit qu'à l'inventaire suivant, des mois plus tard.
 - **Priorité explicite** : deux grilles applicables ne sont **jamais** départagées par un hasard
   d'implémentation. Versions : un prix ayant servi reste consultable tel qu'il était.
 
-## EPIC-069 : Promotions · 8 pts
+## EPIC-069 : Promotions, y compris les remises de pied de commande · 10 pts
 
 **Autonome :** oui. **Amont :** EPIC-068.
 
 - **Deux formes, toutes deux nécessaires** : une **remise** appliquée au prix de grille, et un **prix
   promotionnel daté** qui s'y **substitue**.
 - Période, périmètre (articles, catégories, zones, clients), priorité.
+- ⚡ **Périmètre « COMMANDE ENTIÈRE » (Q5, tranchée le 2026-08-15)** : les **remises de pied de
+  commande** ne sont pas un objet nouveau, mais une promotion dont le périmètre n'est pas un article.
+  Elles héritent des quatre mécaniques ci-dessus — période, priorité, plafond, expiration.
 - ⛔ **Deux promotions applicables ne se cumulent JAMAIS implicitement.** La plus prioritaire
   s'applique, ou le cumul est **déclaré autorisé** sur la promotion. **Le silence vaut non-cumul.**
+  ⚡ **Cette règle couvre désormais l'interaction LIGNE × PIED DE COMMANDE** — c'est la raison
+  décisive de Q5 : une remise de pied définie ailleurs se serait cumulée à une promotion de ligne
+  **sans que personne l'ait déclaré**.
 - **Plafonds** : quantité maximale, montant maximal de remise. *Une promotion sans plafond sur un
   produit à forte élasticité peut coûter plus que la marge du mois.*
 - ⚡ **Une promotion expire d'elle-même.** Aucune n'a besoin d'être désactivée à la main pour cesser.
 
-## EPIC-070 : La résolution du prix — déterministe, explicable, figée · 13 pts
+## EPIC-070 : La résolution du prix — par ligne ET par panier, déterministe et explicable · 16 pts
 
 **Autonome :** oui. **Amont :** EPIC-068, EPIC-069. ⛔ **Précède EPIC-071.**
 
-- Le service résout un prix pour un contexte — article, unité, quantité, client, zone, date — et le
-  rend **avec son explication** : quelle grille, quelle promotion, quelle condition remplie.
+- **DEUX formes de résolution**, toutes deux explicables. ① **par ligne** — article, unité, quantité,
+  client, zone, date. ② **par PANIER** *(Q5)* — l'ensemble des lignes d'une commande, seule forme
+  capable d'appliquer une **remise de pied de commande**, qui suppose le total.
+- L'explication rend **l'arbitrage de non-cumul** entre promotions de ligne et remise de pied.
+  ⚡ Appliquer le pied dans `Commande` **éclaterait l'explication du total sur deux modules** et ferait
+  tomber `NFR-3` devant le détaillant. ⚠️ Ce service est donc sur le chemin de la commande — **il
+  l'était déjà** par la forme ligne ⇒ **cible de latence due sur la forme panier**.
+- ⛔ La résolution par panier **ne crée aucun engagement** : elle résout, `FR-C25` fige.
 - **Déterminisme observable** : rejouer 1 000 fois donne 1 000 fois le même résultat **et la même
   explication**.
 - ⛔ **Aucune grille applicable ⇒ « pas de prix ».** Jamais un prix par défaut, jamais zéro, jamais le
@@ -322,7 +335,11 @@ sortie s'exécute **chez des consommateurs qui n'existent pas**.
 
 | # | Question | À trancher avant |
 | --- | --- | --- |
-| **Q5** | Remises de **pied de commande** — ici ou dans Commande (#11) ? *(avis PRD : Commande, elles ne portent sur aucun article)* | **EPIC-069** |
-| **Q4** | Le prix freelance est-il **plafonné** par la société (prix maximum conseillé) ? *(question commerciale : encadrer un indépendant ou non)* | **EPIC-071** |
+**Aucune. Les quatre questions du PRD sont tranchées et intégrées :**
 
-*Q1 (unité de base immuable) et Q2 (pas de catalogue partagé) sont tranchées et intégrées.*
+| # | Réponse |
+| --- | --- |
+| **Q1** | Unité de base **immuable** — changement par article de remplacement (EPIC-067) |
+| **Q2** | **Pas** de catalogue partagé entre distributeurs. Le besoin de vision transverse est satisfait autrement, par **AD-P16** (lecture plateforme, EPIC-074) |
+| **Q4** | Prix freelance **non plafonné** — cohérent : la société ne voit pas ces prix, il aurait été singulier qu'elle les encadre. Seul garde-fou : `FR-C33` (EPIC-071) |
+| **Q5** | Remises de pied de commande **ici**, règle ET résolution — contre l'avis initial du PRD (EPIC-069 + EPIC-070) |
