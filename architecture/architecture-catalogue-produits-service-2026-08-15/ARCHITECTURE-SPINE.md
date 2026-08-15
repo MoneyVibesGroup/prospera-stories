@@ -358,7 +358,7 @@ est un manquement à un engagement de confidentialité envers des tiers, pas un 
 | --- | --- |
 | **FR-C48** | ⛔ Sa prémisse était fausse — le catalogue de permissions est **plateforme** (D15), `perms: []` pour tout tenant. **AD-P15** l'étend au tenant ⇒ FR-C48 devient tenable, **mais conditionnée à une story `auth-service`** |
 | **FR-C49** | ⚠️ **Contredisait NFR-4.** Tranché par **AD-7** : journal **partitionné**, celui du freelance lisible du seul freelance |
-| **NFR-4** | ➕ Mécanisme nommé : **collection séparée + dépôt exigeant le propriétaire** (AD-6). `PLATFORM_ADMIN` **n'est pas une exception** |
+| **NFR-4** | ➕ Mécanisme nommé : **collection séparée + dépôt exigeant le propriétaire** (AD-6). ⚠️ **`PLATFORM_ADMIN` EST une exception, et une seule** — inversé le 2026-08-15 par **AD-P16** ; voir AD-6 et AD-15. `TENANT_ADMIN` reste le destinataire premier de l'étanchéité |
 | **NFR-1** | ➕ Mécanisme nommé : **suite de conformité + registre des consommateurs**, aligné sur `reseau-service` (AD-9) |
 | **§10** | ➕ Le module est octroyé par **entitlement**, code **`catalogue-produits`** (AD-13, AD-14) |
 
