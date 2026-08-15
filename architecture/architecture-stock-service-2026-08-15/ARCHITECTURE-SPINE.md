@@ -211,9 +211,28 @@ existe pour rendre les sources interchangeables.
   service n'écrit aucune écriture comptable et ne connaît aucune contrepartie.
 - **Rule:** la publication passe par **`balance.submitted`**, avec l'enveloppe et le contrat de
   l'adaptateur #1 — l'ingestion journalise **les deux issues**, acceptée et rejetée (`NFR-A07`).
-  ⇒ ⚡ **`SOURCES_BALANCE` doit s'ouvrir à une quatrième valeur `stock`** : l'énumération est
-  **fermée à `['sage', 'direct', 'ocr']` dans un service livré** ⇒ **story hors de ce service** (§ *Ce
-  que cette spine impose ailleurs*).
+- **Rule:** ⚡ **le stock est une troisième `ORIGINE`, PAS une quatrième `SOURCE`** *(arbitrage PO du
+  2026-08-15 — cette règle disait l'inverse plus tôt le même jour)*. Les trois `source` livrées
+  (`sage`, `direct`, `ocr`) sont des **modes d'acquisition d'une balance externe complète** ; les deux
+  `origine` livrées (`A_NOUVEAUX`, `PROVISIONS_FISCALES`) désignent une balance **produite dans la
+  plateforme, partielle, et jamais une base de calcul**. Une contribution de stock est du second type.
+- **Rule:** ⛔ **le danger d'en faire une `source` est nommé** : `existeBalanceValidee(orgId, exercice,
+  source)` sert au **gel du cahier**. Une contribution de stock partielle répondrait *« oui, il existe
+  une balance validée »* — exactement la famille de défaut que les **trois exclusions** documentées
+  d'`origine` existent pour empêcher.
+- **Rule:** ⇒ **le coût s'effondre**, et c'est le docstring d'`ORIGINES_BALANCE` qui l'explique :
+  *« champ optionnel : son absence est le cas courant. Le rendre optionnel est ce qui permet de
+  l'introduire sans toucher au checksum, sans migration et sans changer le contrat `balance.created` »*.
+  ⇒ ⛔ **plus de story hors service** : l'ajout est porté par **EPIC-081**, avec ses trois points
+  d'exclusion et leur raison chacun.
+- **Rule:** ⚠️ **ce que cet arbitrage étire, et qui doit être écrit :** `origine` est définie comme
+  *« dérivée d'une AUTRE BALANCE »*. Le stock ne dérive d'aucune balance — il vient de mouvements
+  physiques. Il **se comporte** comme une `origine` sans **correspondre à sa définition écrite**.
+  ⇒ le premier livrable d'EPIC-081 sur ce point est **la définition élargie**, pas le code.
+- **Rule:** ⚡ **la contribution s'équilibre toute seule**, et c'est ce qui la rend recevable :
+  `FR-A25` impose **deux équilibres bloquants** (mouvements *et* soldes, tolérance < 1 XOF). Débit
+  classe 3 / crédit variation pour le stock, débit pertes / crédit classe 3 pour les sorties — soit
+  exactement les trois grandeurs que `FR-S30` énumère. **Le PRD avait raison sans savoir pourquoi.**
 - **Rule:** **`NFR-4` — le couplage reste à sens unique.** Le module fonctionne **intégralement** sans
   `balance-service` : `FR-S32` (consultation et export) est le chemin nominal en son absence, pas un
   mode dégradé. ⛔ **Aucune fonction du service ne prend `balance-service` pour condition.**
@@ -492,12 +511,17 @@ qu'il n'avait pas.
 
 ---
 
-## ⚡ Ce que cette spine impose AILLEURS — 2 stories hors de ce service
+## ⚡ Ce que cette spine impose AILLEURS — 1 story hors de ce service
 
 | # | Où | Quoi |
 | --- | --- | --- |
-| **1** | `balance-service` | ⚡ **Ouvrir `SOURCES_BALANCE` à une quatrième valeur `stock`** et accepter l'adaptateur #4 (AD-7). L'énumération est **fermée à trois dans un service livré et en production** ; la clé unique `(orgId, exercice, source, version)` et le journal d'ingestion s'appliquent sans modification. ⚠️ Story dédiée, jamais en effet de bord. |
-| **2** | `auth-service` | **Extension du RBAC au périmètre tenant** (AD-P15). ⚠️ **Déjà nommée par les spines réseau et catalogue** — ce n'est pas une nouvelle story, c'est un **troisième dépendant**. Elle bloque maintenant trois modules ; sa charge n'a pas bougé, son urgence si. |
+| **1** | `auth-service` | **Extension du RBAC au périmètre tenant** (AD-P15) ⇒ ✅ **`STORY-365`, créée le 2026-08-15, slottée S21** (épic `EPIC-025`, celle qui a posé D15). ⚠️ **Déjà nommée par les spines réseau et catalogue** — ce n'est pas une nouvelle story, c'est un **troisième dépendant**. |
+
+> ⚡ **La modification de `balance-service` N'EST PLUS une story hors service** *(arbitrage PO du
+> 2026-08-15)*. En devenant une **`origine`** plutôt qu'une **`source`**, elle passe d'un changement du
+> contrat d'ingestion d'un service en production à l'ajout d'une valeur à un **discriminant déjà
+> optionnel** — sans migration, sans checksum touché, sans contrat changé. Elle est **portée par
+> EPIC-081**.
 
 *(Les deux autres stories nommées par la spine catalogue — enregistrement des six modules du pack et
 renommage `catalogue` → `catalogue-produits` — **conditionnent aussi ce module** via AD-17, mais elles

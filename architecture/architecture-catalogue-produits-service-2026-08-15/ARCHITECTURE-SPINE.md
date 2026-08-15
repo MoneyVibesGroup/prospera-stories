@@ -51,7 +51,7 @@ invariants, résout un prix de façon déterministe, et publie des faits.
 
 | Hérité | Source | Ce qu'il contraint ici |
 | --- | --- | --- |
-| **AD-P15 — le RBAC s'étend au tenant** | `architecture-prospera-ecosystem` v1.5 | Les droits métier de `FR-C48` vivent au catalogue de permissions ⇒ **story hors service** |
+| **AD-P15 — le RBAC s'étend au tenant** | `architecture-prospera-ecosystem` v1.5 | Les droits métier de `FR-C48` vivent au catalogue de permissions ⇒ **`STORY-365`** (hors service, créée le 2026-08-15) |
 | **AD-P16 — lecture plateforme inter-org** | `architecture-prospera-ecosystem` v1.6 | Money Vibes lit la donnée métier de toute org, **prix freelance compris** ⇒ AD-15, et AD-6 amendée |
 | **Discriminant borné / non borné** | `architecture-prospera-ecosystem` v1.5 | Les droits catalogue sont un **vocabulaire fermé** ⇒ ils vont dans le jeton, contrairement à la portée réseau |
 | Relying-party / JWKS | `architecture-prospera-ecosystem` | Validation locale RS256, aucun appel chaud à `auth-service` |
@@ -348,7 +348,7 @@ est un manquement à un engagement de confidentialité envers des tiers, pas un 
 
 | # | Où | Quoi |
 | --- | --- | --- |
-| **1** | `auth-service` | **Extension du RBAC au périmètre tenant** (AD-P15). `FR-C48` en dépend entièrement. ⚠️ Service **livré et central** : story dédiée, consommateurs nommés, borne de croissance de `perms[]` fixée. |
+| **1** | `auth-service` | **Extension du RBAC au périmètre tenant** (AD-P15) ⇒ ✅ **`STORY-365`, créée le 2026-08-15, slottée S21** (épic `EPIC-025`, celle qui a posé D15). `FR-C48` en dépend entièrement. ⚠️ Service **livré et central** : consommateurs nommés, borne de croissance de `perms[]` fixée. |
 | **2** | `platform-catalog-service` + `frontend-admin-panel` | **Renommage `catalogue` → `catalogue-produits`** dans `packs.seed-data.ts` et `vertical-packs.ts` (AD-14). Même forme qu'AP-25. |
 | **3** | `platform-catalog-service` | **Enregistrement des six modules du pack distributeur** au catalogue. Le gap existe **indépendamment de ce PRD** : le provisioning rend 422 en vol depuis le 2026-08-11. |
 

@@ -37,26 +37,28 @@ vérifié dans `reserved_ranges` de `sprint-status.yaml`. La plage y est inscrit
 
 ---
 
-## ⚠️ 148 pts, le PRD en annonçait ~97. Les 51 d'écart sont sourcés.
+## ⚠️ 153 pts, le PRD en annonçait ~97. Les 56 d'écart sont sourcés.
 
 | Source | Pts |
 | --- | ---: |
 | Incréments du PRD (1 + 2 + 3) | ~97 |
 | **+ Socle, entitlement, gate et cloisonnement par dossier** (EPIC-075) | **+13** |
 | **+ Adaptateur #4 : publier une balance, pas une valeur** (EPIC-081) | **+18** |
+| **+ Volet `balance-service` : `stock` devient une troisième `origine`** (EPIC-081) | **+5** |
 | **+ Read-model d'exercice et méthode figée par `(dossierId, exerciceId)`** (EPIC-080) | **+8** |
 | **+ Portée réseau et DEUX suites de conformité** (EPIC-084) | **+11** |
 | **+ Route de lecture plateforme** (EPIC-084) | **+3** |
 | **+ Échelle de validation par rôle** (EPIC-082) | **+3** |
 | **− Emplacements et contraintes reportés** *(Q4, tranchée)* | **−5** |
-| **Total** | **148** |
+| **Total** | **153** |
 
 1. **Le socle n'était pas compté** — troisième fois d'affilée, après `reseau-service` et
    `catalogue-produits-service`. Le PRD ne mentionne ni entitlement, ni gate, ni dossier.
 2. ⚡ **Le +18 le plus important n'est pas une charge en plus, c'est un livrable différent.** « Publier
    une valeur » et « soumettre une balance canonique » ne sont pas la même chose : contrat
    `balance.submitted`, rejouabilité prouvée, `checksum`, versions successives, cas de réouverture
-   d'exercice, et une **story hors service** pour ouvrir l'énumération des sources.
+   d'exercice. ⚡ **Le +5 qui l'accompagne a beaucoup baissé** : `stock` devient une **`origine`** et
+   non une **`source`**, donc un champ **déjà optionnel** — plus de story hors service.
 3. **L'exercice n'appartient pas à ce module.** Depuis `AD-P14` il appartient au dossier : il faut le
    read-model `exercices_dossier` que `balance-service` et `bilan-service` tiennent déjà, et le cas de
    la **réouverture**, que le PRD ne traitait pas.
@@ -66,23 +68,35 @@ vérifié dans `reserved_ranges` de `sprint-status.yaml`. La plage y est inscrit
 
 ---
 
-## ⛔ Quatre stories HORS de ce service — deux nouvelles, deux héritées
+## ⛔ Deux stories HORS de ce service — aucune nouvelle
 
-| # | Où | Quoi | Bloque | Nouvelle ? |
-| --- | --- | --- | --- | :--: |
-| **1** | `balance-service` | ⚡ **Ouvrir `SOURCES_BALANCE` à une quatrième valeur `stock`** et accepter l'adaptateur #4. L'énumération est **fermée à `['sage','direct','ocr']` dans un service livré et en production** | ⛔ **EPIC-081** | ✅ **oui** |
-| **2** | `auth-service` | **Étendre le RBAC au périmètre tenant** (AD-P15). `permission.enum.ts` est intégralement plateforme ⇒ `perms: []` pour tout tenant | ⛔ **EPIC-082** (échelle de validation) et le volet droits d'**EPIC-084** | ❌ **déjà ouverte** |
-| **3** | `platform-catalog-service` | **Enregistrer les six modules du pack distributeur** au catalogue. `stock` y figure comme code de pack mais n'existe comme `Module` nulle part ⇒ provisioning à **422 depuis le 2026-08-11** | ⛔ **EPIC-075** | ❌ **déjà ouverte** |
-| **4** | `platform-catalog-service` + `frontend-admin-panel` | Renommage `catalogue` → `catalogue-produits` | — *(n'affecte pas ce module, mais partage sa livraison avec la n°3)* | ❌ **déjà ouverte** |
+| # | Où | Quoi | Bloque | État |
+| --- | --- | --- | --- | --- |
+| **1** | `auth-service` | **Étendre le RBAC au périmètre tenant** (AD-P15). `permission.enum.ts` est intégralement plateforme ⇒ `perms: []` pour tout tenant | ⛔ **EPIC-082** (échelle de validation) et le volet droits d'**EPIC-084** | ✅ **`STORY-365`, créée le 2026-08-15, slottée S21** |
+| **2** | `platform-catalog-service` | **Enregistrer les six modules du pack distributeur** au catalogue. `stock` y figure comme code de pack mais n'existe comme `Module` nulle part ⇒ provisioning à **422 depuis le 2026-08-11** | ⛔ **EPIC-075** | ⬜ ouverte par le découpage catalogue, **toujours sans porteur** |
 
-⚡ **La n°2 bloque maintenant TROIS modules** — `reseau` (`FR-R28b`), `catalogue-produits` (`FR-C48`)
-et `stock` (`FR-S61`/`FR-S62`). Elle est nommée depuis trois spines et **n'existe toujours pas comme
-story**. Sa charge n'a pas bougé ; le nombre de choses qui l'attendent, si.
+⚡ **La n°1 était nommée par TROIS spines** — `reseau` (`FR-R28b`), `catalogue-produits` (`FR-C48`) et
+`stock` (`FR-S61`/`FR-S62`) — **sans exister dans aucun tracker**. Créée le 2026-08-15 sur décision PO,
+dans l'épic **`EPIC-025` — RBAC plateforme (D15)**, celle-là même dont `AD-P15` amende la décision
+fondatrice. ⚠️ **Elle n'est pas tirable avant qu'un des trois modules démarre** ; le S21 est son point
+d'ancrage, pas une urgence.
 
-⚠️ **La n°1 est d'une autre nature que les trois autres.** Elle touche un service **en production qui
-porte la balance canonique de tous les clients existants** — cabinets expert-comptable compris. Ce
-n'est pas une extension de seed, c'est une modification du contrat d'ingestion. Story dédiée, jamais
-en effet de bord d'un module distributeur.
+### ⚡ La modification de `balance-service` n'est PLUS une story hors service
+
+*(arbitrage PO du 2026-08-15 — elle l'était dans la première version de ce découpage.)*
+
+En devenant une **`origine`** plutôt qu'une **`source`**, elle change de catégorie de risque. Les trois
+`source` sont des **modes d'acquisition d'une balance externe complète** ; les deux `origine`
+(`A_NOUVEAUX`, `PROVISIONS_FISCALES`) désignent une balance **produite dans la plateforme, partielle,
+jamais une base de calcul**. Une contribution de stock est du second type.
+
+⛔ **Le danger d'en faire une `source` a un nom :** `existeBalanceValidee(orgId, exercice, source)` sert
+au **gel du cahier**. Une contribution partielle répondrait *« oui, il existe une balance validée »* —
+la famille de défaut exacte que les trois exclusions documentées d'`origine` existent pour empêcher.
+
+⇒ Le docstring d'`ORIGINES_BALANCE` explique le reste : *« champ **optionnel** : son absence est le cas
+courant. Le rendre optionnel est ce qui permet de l'introduire **sans toucher au checksum**, sans
+migration et sans changer le contrat `balance.created` »*. **C'est porté par EPIC-081 (+5 pts).**
 
 ---
 
@@ -94,7 +108,7 @@ Capacité de référence : **34**. Aucun sprint attribué — l'ordonnancement e
 | --- | --- | ---: | --- |
 | **1 — Le socle et le lieu** | EPIC-075, EPIC-076 | **23** | ✅ −11 |
 | **2 — Le stock s'explique** | EPIC-077, EPIC-078 | **34** | ✅ pile |
-| **3 — Le stock vaut quelque chose** | EPIC-079, EPIC-080, EPIC-081 | **47** | ⚠️ +13 |
+| **3 — Le stock vaut quelque chose** | EPIC-079, EPIC-080, EPIC-081 | **52** | ⚠️ +18 |
 | **4 — Le stock se compte, se déplace et parle** | EPIC-082, EPIC-083, EPIC-084 | **44** | ⚠️ +10 |
 
 ### Contraintes d'ordre à ne pas défaire au slotting
@@ -263,15 +277,29 @@ différés**, **7 NFR sur 7**, **18 AD sur 18**.
 - **Pertes valorisées et restituées séparément, par nature** — ce sont elles qui donnent le coût réel
   du stock mort.
 
-## EPIC-081 : Adaptateur #4 — la balance de stock · 18 pts
+## EPIC-081 : Adaptateur #4 — la balance de stock · 23 pts
 
-**Autonome :** ⛔ **non** — bloqué par la story hors service **n°1**. **Amont :** EPIC-080.
+**Autonome :** oui — ⚡ **plus aucune story hors service ne le bloque.** **Amont :** EPIC-080.
 
 > ⚡ **C'est ici que le livrable a changé de nature.** Le module ne publie pas « une valeur » : il
 > **soumet une balance** au hub multi-source, comme Sage, la saisie directe et l'OCR.
 
 - Publication par **`balance.submitted`**, avec l'enveloppe et le contrat de l'adaptateur #1. Le hub
   journalise **les deux issues**, acceptée et rejetée (`NFR-A07`).
+- ⚡ **Volet `balance-service`, porté par cet épic** *(+5 pts, arbitrage PO du 2026-08-15)* : `stock`
+  devient une **troisième `ORIGINE`**, ⛔ **pas une quatrième `source`**. Champ **déjà optionnel** ⇒
+  aucune migration, aucun checksum touché, aucun contrat changé.
+  - ⛔ **Trois points d'exclusion, chacun avec sa raison** — le gel du cahier
+    (`existeBalanceValidee` : une contribution partielle ne doit **jamais** répondre « une balance
+    validée existe »), l'agrégation (STORY-085) et le moteur fiscal (`D-094-2`).
+  - ⚠️ **Premier livrable : la définition, pas le code.** `origine` est écrite comme *« dérivée d'une
+    AUTRE BALANCE »* ; le stock ne dérive d'aucune balance — il vient de mouvements physiques. Il **se
+    comporte** comme une `origine` sans **correspondre à sa définition**. L'élargir explicitement, ou
+    la prochaine extension du hub se décidera encore en lisant le code.
+- ⚡ **La contribution s'équilibre toute seule**, et c'est ce qui la rend recevable : `FR-A25` impose
+  **deux équilibres bloquants** (mouvements *et* soldes, tolérance < 1 XOF). Débit classe 3 / crédit
+  variation, débit pertes / crédit classe 3 — exactement les trois grandeurs de `FR-S30`. **Le PRD
+  avait raison sans savoir pourquoi.**
 - ⚡ **Le service transmet une CATÉGORIE et un LIBELLÉ, jamais un numéro de compte** (AD-8). Le
   rattachement classe 3 appartient à `balance-service`, où `RattachementService`, les surcharges par
   organisation et la suggestion selon le **référentiel actif** sont **déjà livrés**. ⛔ Aucun plan

@@ -62,7 +62,7 @@ elle est prise**.
 | --- | --- | --- | --- |
 | **1** | `platform-catalog-service` | **Enregistrer les six modules du pack distributeur** au catalogue. Aucun n'existe comme `Module` — il n'y a pas de seed, ils se créent par l'API admin ⇒ le provisioning rend **422 en vol** depuis le 2026-08-11 | ⛔ **EPIC-065** — sans module enregistré, pas d'entitlement, donc pas de gate |
 | **2** | `platform-catalog-service` + `frontend-admin-panel` | **Renommer `catalogue` → `catalogue-produits`** dans `packs.seed-data.ts` et `vertical-packs.ts` (AD-14) | ⛔ **EPIC-065** — à faire *avec* la n°1, pas après : renommer un code déjà enregistré coûte une migration |
-| **3** | `auth-service` | **Étendre le RBAC au périmètre tenant** (AD-P15). Le catalogue de permissions est plateforme (D15) et rend `perms: []` à tout tenant | ⛔ **EPIC-068** (droits sur les grilles) — pas EPIC-065 |
+| **3** | `auth-service` | **Étendre le RBAC au périmètre tenant** (AD-P15). Le catalogue de permissions est plateforme (D15) et rend `perms: []` à tout tenant ⇒ ✅ **`STORY-365`, créée le 2026-08-15, slottée S21** (épic `EPIC-025`) | ⛔ **EPIC-068** (droits sur les grilles) — pas EPIC-065 |
 
 ⚠️ **Le gap n°1 existe indépendamment de ce PRD.** Il a été ouvert le 2026-08-11 par la vérification
 docker de STORY-293 et n'a jamais eu de porteur. Ce découpage ne le crée pas, il le rend bloquant.
