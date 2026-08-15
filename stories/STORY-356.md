@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **D** · décisions **D1**, **D8**
 **Priorité :** Must Have
 **Story Points :** 8
-**Statut :** 🔍 En revue
+**Statut :** ✅ Terminée
 **Complexité :** high
 **Créée le :** 2026-08-09
 **Sprint :** 20
@@ -132,7 +132,7 @@ que la donnée existante ne le porte.
       complète redémarre, les 3 services sont `healthy`, les read-models convergent, et la donnée
       migrée est intègre (checksums de liasse inchangés). **Le parcours d'écriture est à rejouer à
       la clôture de STORY-236/357.**
-- [ ] `/code-review` — phase ⑥, à venir.
+- [x] `/code-review` — phase ⑥ : 2 constats (1 bloquant corrigé, 1 limite documentée). Revue de sécurité ⑦ : 0 vulnérabilité.
 
 ---
 
@@ -373,7 +373,7 @@ directement en base). Les deux services partagent bien le **même** vocabulaire 
 `REEL`/`SYNTHETIQUE`) — il n'y a **pas** de divergence de contrat. Mais un fixture invalide a exposé
 un mode de panne parfaitement réel, et c'est lui qui est corrigé.
 
-### ⑤ Statuts et reste à faire (2026-08-14)
+### ⑤ Push et PR (2026-08-14)
 
 Statut `review` aux 3 endroits (en-tête, `sprint-status.yaml`, ici).
 
@@ -383,3 +383,86 @@ Reste à faire :
   ⚠️ un contrat d'événement touche **3 dépôts** : `dossier-service`, `balance-service` et
   `bilan-service` doivent être intégrés **ensemble**.
 - Revue de code ⑥, revue de sécurité ⑦, rebase-merge ⑧, clôture ⑨.
+
+### ⑥ Revue de code (2026-08-14, session `opus`)
+
+**2 constats, 1 correctif de code, 1 limite documentée.**
+
+**⑥-1 — BLOQUANT, corrigé.** `validerProfilConsolide` gardait les listes
+`actionnaires`/`dirigeants` par `typeof x !== 'object' || x === null`. Or un **objet nu** (`{}`)
+satisfait `typeof x === 'object'` et n'est pas `null` : il **traversait** la validation, puis faisait
+lever un `TypeError` sur le `.map()` de la projection. Un `TypeError` n'étant **pas** une
+`ValidationError`, il repartait en rejeu — **exactement le blocage de partition fermé par le défaut
+④, atteint par une autre porte**. Corrigé par `Array.isArray`, au bon endroit : **avant** que la
+charge utile n'atteigne l'écriture.
+
+⚠️ **Le test qui aurait dû l'attraper portait déjà le bon nom.** « refuse des listes
+actionnaires/dirigeants non-tableaux » n'éprouvait que `'x'` (une chaîne) et `null` — deux valeurs
+que l'ancien contrôle rejetait **déjà**. Il décrivait une garantie qu'il ne vérifiait pas. Cas `{}`
+ajouté ; **M15** (retour à `typeof`) le fait rougir.
+
+**⑥-2 — limite documentée, non corrigée.** La marche arrière de `balance-service` et
+`bilan-service` retire le `dossierId` de **tout** document qui en porte un, là où celle de
+`dossier-service` ne supprime que `origine: MIGRATION` + `version: 1`. C'est **correct pendant la
+fenêtre de migration** (aucun chemin d'écriture ne pose `dossierId` aujourd'hui), et cela **cesse de
+l'être avec STORY-236/357**. Le borner maintenant serait spéculatif, le retirer priverait la story
+de sa marche arrière ⇒ **documenté à l'endroit où on le lira**, avec consigne explicite de retirer
+ou borner le script à la clôture de 236/357.
+
+**Écarté après vérification** : l'`eventId` du profil est un `randomUUID()` et non le
+`migration:profil:<orgId>` déterministe annoncé au cadrage ①. Ce n'est **pas** un oubli —
+`OutboxEvent.eventId` est **unique**, un identifiant déterministe ferait donc échouer la **2ᵉ**
+exécution sur un `E11000`, en contradiction directe avec AC-1. Le prix est que chaque exécution
+ré-enrichit les dossiers ; l'effet est idempotent, la seule conséquence réelle étant qu'une édition
+manuelle faite **entre deux exécutions** serait écrasée. Aucun garde-fou ajouté : le seul disponible
+(`version === 1`) priverait de leur identité fiscale tous les dossiers ayant reçu un responsable —
+**pire que le mal**.
+
+### ⑦ Revue de sécurité (2026-08-14, session `opus`) — **0 vulnérabilité**
+
+| Axe | Constat |
+|---|---|
+| Surface HTTP | **aucun** contrôleur, DTO ni endpoint touché dans les 3 dépôts |
+| Auth / RBAC | **aucun** guard, rôle, portée ni règle 404-jamais-403 modifié |
+| Multi-tenant | rattachement keyé **strictement** sur `orgId` issu du read-model ; l'index unique partiel `{orgId} + estLeCabinet` garantit un seul dossier cabinet par org — aucune entrée utilisateur n'atteint la requête |
+| Injection NoSQL | `orgId` validé par `Types.ObjectId.isValid` **avant** usage ; la valeur du `$set` vient du read-model, **jamais** d'un corps HTTP |
+| CWE-117 (log) | le nouveau log `ERROR` interpole un `orgId` déjà validé et le message Mongoose ; pino sérialise en **NDJSON** ⇒ les retours à la ligne sont échappés, pas de forge de log |
+| Secrets | aucun secret introduit, journalisé ni committé |
+| Kafka / Docker | consumer group **isolé** ; le `MigrationCliModule` **réduit** le nombre de consommateurs démarrés par un processus — le correctif ③ est un durcissement |
+| Intégrité comptable | checksums de liasse **identiques bit à bit** après migration **et** après un cycle complet migration → marche arrière → migration |
+
+### ⑧ Vérification docker REJOUÉE sur l'état final (2026-08-14)
+
+Le correctif ⑥-1 touche le chemin de projection déjà vérifié : la vérification est **rejouée**, et
+non reportée depuis une mesure antérieure au correctif.
+
+- Stack redémarrée, 3 services `healthy` ;
+- rejeu de `migrate:dossiers` sur les **deux** services : **0 orphelin**, `aDesOrphelins: false`,
+  **exit 0** ;
+- rattachement complet (balance déjà convergé, bilan ré-attaché après sa marche arrière) ;
+- ⚡ **checksums intacts après un cycle complet** migration → marche arrière → migration —
+  `01b892c0ffee…` et `aaaa1111bbbb…`, `liasse` et `moteurVersion` inchangés. Preuve plus forte que
+  la mesure initiale, qui ne couvrait pas le détachement suivi d'un ré-attachement.
+
+**Table de mutations finale : 15 mutations, 15 rouges** (M15 ajoutée en revue).
+
+### ⑨ Clôture (2026-08-15)
+
+Statut `done` aux 3 endroits + `completed_date: "2026-08-15"`. **4 PR** rebase-mergées
+**ensemble** — un contrat d'événement touche 3 dépôts, les intégrer séparément fait diverger les
+read-models en silence.
+
+**Dette ouverte, transmise à STORY-236/357 :**
+
+- ⛔ **Les écritures sont gelées** tant que 236/357 n'ont pas re-scopé les routes. C'est l'arbitrage
+  assumé d'AC-4, pas un effet de bord découvert.
+- ⛔ **La marche arrière de `balance`/`bilan` doit être retirée ou bornée** à la clôture de 236/357
+  (cf. ⑥-2) : passé ce point, elle détacherait des `dossierId` légitimes.
+- ⛔ **Le parcours Atelier → Bilan en écriture reste à rejouer** à la clôture de 236/357 — la case
+  DoD correspondante est laissée décochée ici, faute d'être tenable.
+- ⛔ **Le read-model `dossiers_dossier` ne se purge pas** : la marche arrière de `dossier-service`
+  supprime le dossier sans publier d'événement, le read-model des relying parties reste donc
+  garni. Sans conséquence dans la fenêtre de migration (le script ne fait que résoudre
+  `orgId → dossierId`), à traiter si la marche arrière survit à 236/357.
+- ⛔ **Le câblage racine ne part toujours avec aucune PR** (`docker-compose.yml`, override, CI
+  versionnés dans aucun dépôt) — dette inchangée depuis STORY-301.
