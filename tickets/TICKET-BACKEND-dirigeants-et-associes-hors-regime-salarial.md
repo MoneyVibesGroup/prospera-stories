@@ -38,8 +38,14 @@ Inscrit au tracker : `sprint-status.yaml` → `open_contract_gaps` → `GAP-diri
 
 ### Reste à faire
 
-- [ ] Amender `FR-F27` et `FR-F30` dans le PRD ; ajouter un FR pour le type de bénéficiaire et son
-      aiguillage.
+- [x] ✅ **FAIT le 2026-08-15** (`398cde8`) — **PRD Fiscalité v0.3 → v0.4** : `FR-F27` amendé
+      (« par bénéficiaire »), `FR-F30` amendé (aiguillage sur le type via le modificateur `AIGUILLAGE`
+      de `FR-F12`, qui existe déjà), **`FR-F79`** créé (type de bénéficiaire, ensemble fermé, attribut
+      de la ligne) et **`FR-F80`** créé (régime non déterminable ⇒ obligation bloquée, aucun régime de
+      repli). Le périmètre v1 du volet social est arrêté sous `[HYPOTHÈSE H2]`, avec son tableau.
+      ⚠️ Numérotation : ce PRD fixe sa propre règle (« une exigence nouvelle prend le numéro libre
+      suivant ») ⇒ F79/F80, **pas** de suffixes — la convention `FR-C10b`/`FR-N57b` de la revue croisée
+      vaut pour d'autres PRD.
 - [x] ✅ **FAIT le 2026-08-15** — EPIC-034 re-découpée : **STORY-345** amendée (la base porte le type
       de bénéficiaire), **STORY-348** amendée (le calcul s'aiguille dessus), **STORY-364** créée (le
       refus sourcé `FR-F25` sur un dirigeant non déterminable, 3 pts, sprint 28). La plage déclarée de
@@ -47,10 +53,21 @@ Inscrit au tracker : `sprint-status.yaml` → `open_contract_gaps` → `GAP-diri
       ⚡ **STORY-364 n'est pas une formalité** : sans elle, l'arbitrage produit le défaut qu'il voulait
       corriger — le gérant entre dans la base, l'IRPP sort, et la cotisation sociale sort à zéro ou au
       régime salarié. Le silence aurait simplement changé d'endroit.
-- [ ] Ouvrir une **AD dans la spine `fiscal-service`** pour l'agrégat de rémunération — elle n'existe
-      toujours pas (constat n°1 ci-dessous), et l'arbitrage ne la crée pas.
-- [ ] Traiter le constat n°2 (donnée personnelle) : il est **indépendant de cet arbitrage** et reste
-      entier.
+- [x] ✅ **FAIT le 2026-08-15** (`398cde8`) — **AD-20** ajoutée à la spine `fiscal-service` : agrégat
+      `LigneDeRemuneration` keyé `(dossier, période, bénéficiaire)`, **idempotence portée par la clé**
+      et non par un `findOne` avant `insert`, versionnement du réimport, import et saisie sur le
+      **même** agrégat, aucun régime de repli. AD-20 est posée comme **l'application d'AD-4 au volet
+      social**. La carte des capacités est corrigée : I5 citait AD-9 et AD-10, deux décisions qui ne
+      parlent pas de rémunération.
+- [x] ✅ **FAIT le 2026-08-15** (`398cde8`) — **AD-21** : la rémunération est la **seule donnée
+      personnelle de tiers** du service, dont le sujet n'a aucun compte et aucun moyen de savoir
+      qu'elle existe. Minimisation, restriction de lecture aux rôles à usage déclaratif, conservation
+      bornée **lue dans le paquet**. ⚠️ Piège central consigné : **le journal d'audit trace l'ACTE,
+      jamais les montants** — sinon la piste d'audit, délibérément inaltérable et conservée à part
+      (AD-10, AD-19), devient le contournement de toute règle de conservation posée par AD-21.
+
+⇒ **Il ne reste plus AUCUNE action documentaire.** Ce ticket attend uniquement le développement de
+STORY-345, STORY-348 et STORY-364 (sprint 28).
 
 ---
 
@@ -115,7 +132,24 @@ manque à la base, pas qu'il faut un module de paie.
 (`nom`, `fonction`, `nif`) depuis STORY-301. Le dirigeant est **connu du système**, il n'est
 simplement **jamais calculé**.
 
-## Résolution attendue
+## ~~Résolution attendue~~ — SECTION HISTORIQUE, D'AVANT L'ARBITRAGE
+
+> ⚠️ **Ce qui suit décrit l'état du 2026-08-15 AU MATIN, avant que le PO tranche. Conservé pour tracer
+> l'origine, PAS maintenu.** Le `README.md` de ce dossier est explicite : « un ticket stampé ne se
+> modifie plus […] deux sources de vérité sur le même sujet, c'est précisément le défaut que ce dépôt
+> a rencontré trois fois ». Cocher ces cases une par une serait maintenir le ticket en parallèle des
+> stories.
+>
+> **Ce qui fait foi désormais :** la section « ARBITRAGE PO » en tête de ce fichier, puis
+> **STORY-345**, **STORY-348** et **STORY-364**.
+>
+> Pour mémoire, l'état réel au 2026-08-15 au soir : l'arbitrage est rendu · `FR-F27` et `FR-F30` sont
+> amendés, `FR-F79` et `FR-F80` créés (PRD v0.4) · EPIC-034 est re-découpée · AD-20 et AD-21 sont dans
+> la spine. **Un seul point de cette liste reste ouvert, et il l'est par DÉCISION** : le FR pour les
+> revenus distribués (Art. 79) n'est pas écrit parce que l'arbitrage l'a placé **hors v1 faute de
+> source**, pas parce qu'il a été oublié. Le garde-fou « ne pas inventer de taux » n'est pas une tâche
+> mais une contrainte permanente : elle est tenue par `FR-F80` et par le test de mutation de
+> STORY-364.
 
 - [ ] **Arbitrage PO d'abord** — la question est de périmètre, pas de technique : la base de
       rémunération porte-t-elle **un type de bénéficiaire** (`SALARIE` | `DIRIGEANT` | `ASSOCIE`), ou
@@ -149,7 +183,12 @@ dépendent pas de l'arbitrage ci-dessus** :
    d'audit (AD-10, AD-19) ; **aucune règle de conservation, de minimisation ou de restriction de
    lecture** sur les données de salariés.
 
-## Definition of Done
+## ~~Definition of Done~~ — SECTION HISTORIQUE
+
+> ⚠️ Même remarque. La DoD qui compte est celle de **STORY-345**, **STORY-348** et **STORY-364**.
+> Le seul critère de cette liste qui survit — « le paquet fiscal ne contient aucun taux inventé,
+> chaque valeur porte sa source » — est repris **textuellement** dans les AC de STORY-364, où il est
+> vérifiable par un test de mutation au lieu d'être une intention.
 
 - [ ] L'arbitrage est écrit dans le PRD (retenu **ou** exclu — et si exclu, la limite est visible du
       cabinet à l'écran, pas seulement dans un document).
