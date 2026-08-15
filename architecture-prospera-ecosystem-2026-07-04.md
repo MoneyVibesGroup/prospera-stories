@@ -352,6 +352,42 @@ sinon elles démarreraient sur un read-model vide pour tous les dossiers antéri
 STORY-356/236/357 ne sont pas livrées, il y a deux écritures possibles pour un même fait.** C'est
 l'écart le plus dangereux du système à cette date.
 
+### ⚡ AD-P15 — Le RBAC s'étend au périmètre tenant, et le jeton porte ce qui est BORNÉ
+
+*(Arbitrage PO du 2026-08-15, à l'occasion du PRD Catalogue produits. **Amende D15.**)*
+
+Jusqu'ici, `perms[]` ne venait **que** du rôle plateforme : *« les rôles TENANT ne sont pas touchés
+par le RBAC (périmètre plateforme, D15) → `perms: []` »*. Deux PRD d'affilée ont buté dessus —
+`FR-R28b` (réseau) et `FR-C48` (catalogue) supposaient tous deux pouvoir y déclarer des droits de
+tenant. Ce n'était pas une erreur de rédaction : **stock, commande, facturation et PDV auront le même
+besoin.** Un distributeur doit pouvoir dire « ce collaborateur gère les promotions, pas les articles ».
+
+- **Rule:** le catalogue de permissions accueille désormais des **droits de tenant**, et `perms[]`
+  cesse d'être vide pour eux. **Un seul mécanisme d'autorisation** pour toute la plateforme.
+- **Rule:** ⚠️ **`auth-service` est un service LIVRÉ et central.** L'extension se fait par une story
+  dédiée, avec ses consommateurs nommés — jamais en effet de bord d'un module métier.
+
+#### ⚡ Le discriminant, à écrire une fois pour ne pas le re-débattre
+
+Cette décision **semble** contredire **AD-5** de `reseau-service`, qui a **refusé** de mettre la portée
+d'accès dans le jeton. Elle ne la contredit pas, et voici la ligne exacte :
+
+| Va dans le jeton | Ne va pas dans le jeton |
+| --- | --- |
+| **Vocabulaire fermé et borné** — `roles[]`, `perms[]` : une liste d'actes connus à l'avance, qui ne croît qu'avec le produit | **Ensemble ouvert et non borné** — une portée réseau est un ensemble de **nœuds**, qui croît avec les données du client |
+| Taille prévisible, indépendante du client | Taille imprévisible : 500 nœuds ne tiennent pas dans un cookie httpOnly de 4 Ko |
+| Révocation tolérable au renouvellement | Révocation devant être immédiate (AD-6 réseau : fail-closed) |
+
+**Ce n'est donc pas « état tiers ou pas » qui décide** — un rôle change aussi par action tierce, et
+`roles[]` est dans le jeton depuis le premier jour. **C'est BORNÉ ou NON BORNÉ.**
+
+- **Rule:** ⛔ **toute extension de `perms[]` reste un vocabulaire fermé.** Le jour où un droit devient
+  une liste d'identifiants de données, il quitte le jeton et passe en read-model — c'est ce qui est
+  arrivé à la portée réseau, et la règle existe pour que ce soit décidé sur ce critère et pas au cas
+  par cas.
+- **Rule:** la croissance de `perms[]` est **surveillée** : chaque module métier ajoute des droits, et
+  le jeton voyage à chaque requête. Une borne est à fixer avec la story d'extension.
+
 ### Nouveaux topics du bus
 
 | Topic | Producteur | Consommé pour |
@@ -406,6 +442,7 @@ Ils appartiennent à d'autres documents ; les corriger ici créerait une seconde
 | 1.1 | 2026-07-07 | vivian | **Modules partagés & versioning par organisation** : `bilan-service` (capacité partagée, 2 axes version de code ⊥ référentiel packagé, gate d'accès en relying party) et `catalog-service` (entitlements `(org × module)`, topic `entitlement.changed`, `admin-panel` BFF pour FR-012). Amende l'ownership map (entitlement → catalog ; abonnement reste vertical) ; ajoute **P7/P8** ; insère catalog + bilan dans la roadmap ; risques N/N-1 & routage multi-version. JWT/A3 inchangés. |
 | 1.2 | 2026-07-07 | vivian | **Couche edge/exécution** : décisions **P9** (schema registry adopté maintenant — compatibilité BACKWARD en CI) et **P10** (mono-repo maintenant, poly-repo différé) ; ajout du doc `architecture-gateway` (validation JWT fail-fast à l'edge + services souverains, routage par préfixe, résolution multi-version, services sans port public). Risque #4 (schema registry) passé de « envisager » à « planifié ». |
 | 1.3 | 2026-07-10 | vivian | **Alignement PLAN FINAL** (`docs/synthese-services-prospera-2026-07-10.md`) : décisions **P11** (dogfooding interne d'abord — Money Vibes = client zéro ; N/N-1 & routage multi-version différés jusqu'au 1er client externe, **DG-1** ; chaîne KYC livrée d'abord, **AD-2**) et **P12** (18 modules → 18 services suivant le moule unique ; **NC-1** `catalog-service` → `platform-catalog-service` ; **NB-1** Bilan par import de balance + prévisionnel ; **PA-1** checkout/webhooks → `paiement-service`). Ordre de construction et backlog des 18 modules → `program_backlog` de `sprint-status.yaml`. Invariants inchangés. |
+| **1.5** | **2026-08-15** | PO + Claude | ⚡ **AD-P15 — le RBAC s'étend au périmètre tenant, et AMENDE D15.** Deux PRD d'affilée (`FR-R28b` réseau, `FR-C48` catalogue) supposaient pouvoir déclarer des droits de tenant dans un catalogue de permissions qui est **plateforme** et rend `perms: []` à tout utilisateur de tenant — besoin systémique, pas erreur de rédaction : stock, commande, facturation et PDV l'auront aussi. ⚡ **Le discriminant du jeton est écrit une fois** : ce n'est PAS « état tiers ou pas » (un rôle change aussi par action tierce, et `roles[]` y est depuis le premier jour) mais **BORNÉ ou NON BORNÉ**. Vocabulaire fermé ⇒ jeton ; ensemble de données du client ⇒ read-model. C'est ce qui rend AD-P15 et **AD-5 de `reseau-service`** cohérentes au lieu de contradictoires. ⚠️ `auth-service` étant livré et central, l'extension passe par une story dédiée avec ses consommateurs nommés, jamais en effet de bord d'un module métier. |
 | **1.4** | **2026-08-15** | PO + Claude | ⚡ **RÉANCRAGE — le document avait six semaines de retard sur le système, alors que les trois spines (fiscal, notification, paiement) en héritent toutes.** Ajout à l'ownership map de **8 propriétaires manquants**, dont deux services **livrés et absents** : `balance-service` (Module 1-bis, en production, **toujours sans architecture propre**) et `dossier-service` (livré les 13-14/08). Deux décisions programme nouvelles : **AD-P13** — le dossier est l'unité de travail, l'organisation ne l'est plus ; le JWT porte l'org, **jamais** le dossier ; hors portée = `404`, jamais `403`. **AD-P14** — l'exercice appartient au dossier (STORY-355) ; `balance-service` et `bilan-service` en deviennent des read-models et **cessent d'être source de vérité sur le statut** ; `ExerciceTopic` séparé de `DossierTopic`. + 2 familles de topics (`dossier.*`, `dossier.exercice.*`), partition par `dossierId`. ⚠️ Trois écarts **constatés sans être corrigés** : `balance-service` sans architecture · `dossier-service` sans gate entitlement/KYC (écart au moule commun, à confirmer par le PO) · la note `Tenant`→`Organization` ignore la seconde clé de portée `dossierId`. ⛔ **La bascule de l'exercice n'est pas terminée** : STORY-356/236/357 `not_started` ⇒ deux écritures possibles pour un même fait. |
 
 ---

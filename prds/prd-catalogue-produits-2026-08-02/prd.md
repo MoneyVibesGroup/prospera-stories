@@ -1,8 +1,8 @@
 ---
 title: "PRD — Catalogue produits (catalogue-produits-service)"
-status: final
+status: final  # amendé le 2026-08-15 par la spine catalogue-produits-service (AD-6, AD-7, AD-9, AD-13, AD-14) — voir FR-C48, FR-C49, NFR-1, NFR-4, §10
 created: 2026-08-02
-updated: 2026-08-02
+updated: 2026-08-15
 project: prospera
 service: catalogue-produits-service
 position_sequence: 3
@@ -253,8 +253,8 @@ Ce groupe est la thèse du module : ce qui permet de **refuser**.
 | **FR-C45c** | Un import est **tout ou rien** : si une ligne échoue, aucune n'est écrite. Un catalogue à moitié importé est plus difficile à réparer qu'un import à refaire. |
 | **FR-C46** | L'import **n'écrase jamais** un prix figé sur un engagement, ni un facteur de conversion historique. |
 | **FR-C47** | Export du catalogue et des grilles, dans un format réimportable. |
-| **FR-C48** | Droits distincts au catalogue de permissions plateforme : gérer les articles, gérer les grilles société, gérer les promotions, gérer son propre tarif freelance, consulter. |
-| **FR-C49** | Toute modification de prix, de grille, de promotion ou de facteur de conversion est **journalisée** : qui, quoi, quand, valeur avant et après. |
+| **FR-C48** | *(amendé le 2026-08-15)* Droits distincts au catalogue de permissions : gérer les articles, gérer les grilles société, gérer les promotions, consulter. ⚡ **SA PRÉMISSE ÉTAIT FAUSSE** — vérifié dans `auth-service` : le catalogue de permissions est **PLATEFORME** (`D15`), ses 12 permissions sont des actes d'opérateur Money Vibes (`org:read`, `kyc:approve`, `entitlement:grant`…), et **`perms: []` pour tout utilisateur de tenant**. ⇒ **AD-P15** (écosystème v1.5) étend le RBAC au périmètre tenant et rend cette exigence tenable — **mais elle est CONDITIONNÉE à une story `auth-service`**, service livré et central. ⚠️ « Gérer son propre tarif freelance » **sort de cette liste** : ce n'est pas une permission mais une **propriété** (la grille lui appartient), portée par AD-6. |
+| **FR-C49** | *(amendé le 2026-08-15)* Toute modification de prix, de grille, de promotion ou de facteur de conversion est **journalisée** : qui, quoi, quand, valeur avant et après — dans **DEUX journaux partitionnés** (AD-7). ⚠️ **CETTE EXIGENCE CONTREDISAIT NFR-4**, qui interdit le **journal** comme chemin d'accès à un prix freelance. Tranché : le journal de la société porte les valeurs des grilles société, promotions et facteurs ; le journal freelance porte les siennes et **n'est lisible que du freelance propriétaire**. ⛔ Les deux ne partagent **ni collection, ni index, ni route de lecture** — une vue « historique des prix » naïve rouvrirait la fuite que NFR-4 ferme. |
 
 ### J — Publication
 
@@ -269,6 +269,12 @@ Ce groupe est la thèse du module : ce qui permet de **refuser**.
 ## 7. Exigences non fonctionnelles (NFR)
 
 ### NFR-1 — Aucune quantité sans unité *(structurante)*
+
+> ⚡ **MÉCANISME NOMMÉ le 2026-08-15 (AD-9).** C'est un **invariant DISTRIBUÉ** : il est tenu par
+> Stock, Commande et Facturation, **dont aucun n'existe**. Même structure que `NFR-1` de
+> `reseau-service`, et **même mécanisme, par cohérence** : ce service publie une **suite de tests de
+> conformité versionnée** et tient un **registre des consommateurs conformes**. Un consommateur absent
+> du registre est un **écart ouvert**, pas une absence d'information.
 
 Aucun nombre représentant une quantité ne circule sans son unité, ni dans l'API, ni dans les
 événements publiés, ni dans les documents. C'est la seule protection contre l'erreur la plus coûteuse
@@ -289,6 +295,18 @@ devant un client est un prix qu'on ne peut pas défendre.
 L'isolation de FR-C29 est vérifiée au niveau des données, pas des écrans. Condition observable : un
 utilisateur de la société, quel que soit son rôle — y compris administrateur — ne peut obtenir un
 prix freelance par **aucun** chemin : API, export, agrégat, journal, message d'erreur.
+
+> ⚡ **MÉCANISME NOMMÉ le 2026-08-15 (AD-6, arbitrage PO) — parce qu'aucune brique existante n'y
+> répondait.** Tout le cloisonnement du programme est **par `orgId`** ; or le freelance et la société
+> sont dans **la MÊME organisation**. NFR-4 exige de cacher un prix **à l'administrateur de sa propre
+> org** — un modèle de menace inédit ici, auquel `TenantScopedRepository` ne répond pas.
+>
+> ⇒ **Collection séparée** `grilles_freelance`, keyée `(orgId, freelanceUserId, pointDeVenteId,
+> articleId)`, et **tout accès passe par un dépôt dédié qui EXIGE le `userId` propriétaire** : aucune
+> méthode de lecture sans lui, pas de `findAll`, pas de variante « admin ». L'absence de chemin est
+> **prouvable** en montrant qu'aucun code n'interroge la collection autrement.
+> ⚠️ **`PLATFORM_ADMIN` n'est pas une exception** : l'engagement est de confidentialité envers
+> l'indépendant, et le dépôt ne connaît aucun rôle qui contourne le propriétaire.
 
 ### NFR-5 — Le prix figé prime toujours
 
@@ -338,7 +356,9 @@ confidentialité freelance et le profil qui permet de refuser — et il est le s
 
 | Dépendance | État | Impact |
 |---|---|---|
-| Identité, isolation, catalogue de permissions | ✅ livré | — |
+| Identité, isolation | ✅ livré | — |
+| **Catalogue de permissions — extension au périmètre tenant** | ⛔ **À LIVRER** — story `auth-service`, née d'**AD-P15** le 2026-08-15 | **Bloquant pour FR-C48.** Le catalogue est plateforme (D15) et rend `perms: []` à tout tenant |
+| **Module au catalogue + entitlement** | ⛔ **À LIVRER** — code **`catalogue-produits`** (AD-14). Aucun des six modules du pack distributeur n'est enregistré ⇒ provisioning à **422** | Renommage `catalogue` → `catalogue-produits` dans `packs.seed-data.ts` et `vertical-packs.ts` |
 | **Stock** (#7) | ⬜ à construire — **après ce module** | Le catalogue ne détient aucune quantité ; il publie les articles que Stock suivra |
 | **Commande** (#11) | ⬜ | Consommateur principal de la résolution de prix |
 | **Approvisionnement** (#13) | ⬜ | Consommateur du profil commercial |
