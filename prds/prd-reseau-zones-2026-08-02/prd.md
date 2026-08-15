@@ -1,8 +1,8 @@
 ---
 title: "PRD — Réseau, agences & zones (reseau-service)"
-status: final
+status: final  # amendé le 2026-08-15 par la spine reseau-service (AD-5, AD-6, AD-10) — voir FR-R28b, FR-R28c, NFR-6, A3, §4
 created: 2026-08-02
-updated: 2026-08-02
+updated: 2026-08-15
 project: prospera
 service: reseau-service
 position_sequence: 4
@@ -94,6 +94,16 @@ Trois propriétés :
 ---
 
 ## 4. Périmètre
+
+> ⚡ **AJOUT DU 2026-08-15 (AD-10 de la spine, arbitrage PO) — `reseau` est une CAPACITÉ PARTAGÉE.**
+> Partagé entre **IMF et Distributeur**, il tombe sous les décisions **P7/P8** de l'écosystème : dès
+> qu'un module est partagé entre verticaux, **plus personne côté vertical ne peut être source de vérité
+> sur qui y a droit**. ⇒ `reseau` est un **module au catalogue** de `platform-catalog-service`, avec
+> **entitlement par organisation**, et un gate local **`@RequiresReseauAccess`** (`emailVerified` +
+> KYC `APPROVED` + entitlement `ACTIVE`) — le moule de `bilan-service`.
+> ⚠️ Décidé **maintenant** et non « à l'ouverture de la seconde verticale » : c'est exactement le
+> raisonnement qui a laissé `dossier-service` sans gate pendant six semaines, découvert par une spine
+> rétroactive et corrigé par STORY-363.
 
 ### 4.1 Dans le périmètre
 
@@ -187,8 +197,8 @@ rôle peut faire** ; il ne dit pas **sur quoi**.
 | **FR-R26** | Une portée peut être **restreinte à un sous-ensemble** de la descendance, sans casser l'héritage général. |
 | **FR-R27** | ⚡ **Une portée vide n'est pas une portée universelle.** L'absence de portée déclarée **refuse l'accès** — elle ne l'ouvre pas. C'est le défaut de conception le plus courant et le plus coûteux de ce type de module. |
 | **FR-R28** | Le module **publie la portée**, il ne l'applique pas lui-même : chaque service filtre ses propres données avec elle. Un module qui garderait le filtrage pour lui deviendrait un point de passage obligé de toutes les lectures. |
-| **FR-R28b** | ⚡ **La portée voyage dans le jeton**, en extension du `perms[]` déjà livré (STORY-140). Aucun appel à ce module sur le chemin de lecture : le service reçoit le jeton, y lit la portée, filtre. C'est le seul des trois mécanismes possibles qui respecte FR-R28 sans créer de copie. |
-| **FR-R28c** | ⚠️ **Conséquence assumée : la révocation d'une portée n'est effective qu'au renouvellement du jeton.** Cette latence est une **propriété connue du système**, pas une surprise : elle est bornée par la durée de vie du jeton, documentée, et une **révocation immédiate** reste possible par invalidation de session pour les cas graves. L'écrire ici évite de la découvrir le jour où l'on retire une portée en urgence. |
+| **FR-R28b** | ⛔ ~~La portée voyage dans le jeton, en extension du `perms[]` déjà livré (STORY-140).~~ **REMPLACÉE le 2026-08-15 par AD-5 de la spine `reseau-service`** (arbitrage PO). **La portée voyage par READ-MODEL** : ce module publie `reseau.portee.changed`, chaque consommateur en tient une projection locale et filtre avec — le patron déjà en place pour `kyc.status.changed` et `entitlement.changed`. ⚡ **DEUX RAISONS, DONT UNE FACTUELLE. ①** La prémisse était fausse : vérifié dans `auth-service/src/modules/auth/auth.service.ts`, « les permissions ne viennent **QUE** du rôle plateforme : les rôles TENANT ne sont pas touchés par le RBAC (périmètre plateforme, **D15**) → `perms: []` ». **`perms[]` est vide pour tout utilisateur de tenant**, or un superviseur d'agence IMF en est un — il n'y avait rien à étendre. **②** Elle contredisait la **règle d'or** de l'écosystème : le JWT porte l'identité, **jamais** l'état qui change par action tierce, et une portée est accordée puis retirée par un administrateur. ⇒ Bénéfices collatéraux : plus de contrainte de taille (une portée de 500 nœuds ne tient pas dans un cookie httpOnly de 4 Ko) et **`auth-service` n'appelle jamais ce service** (sans quoi `reseau-service` indisponible = plus personne ne se connecte, y compris les cabinets expert-comptable). |
+| **FR-R28c** | ⛔ **SANS OBJET depuis le 2026-08-15** (conséquence de FR-R28b amendée). ~~La révocation d'une portée n'est effective qu'au renouvellement du jeton.~~ Avec le read-model, **la révocation est effective à la propagation de l'événement**, pas au renouvellement du jeton. La latence décrite ici n'existe plus. *(Conservée barrée : c'était une propriété assumée du mécanisme abandonné ; la retirer masquerait pourquoi le mécanisme a changé.)* |
 | **FR-R29** | Un **rôle plateforme** peut disposer d'une portée totale, explicitement déclarée comme telle et journalisée — jamais obtenue par l'absence de restriction. |
 | **FR-R30** | Toute modification de portée est **journalisée** avec auteur, motif et périmètre avant/après. Élargir la portée d'un utilisateur est une décision de sécurité. |
 
@@ -242,7 +252,7 @@ niveaux se fait par configuration, sans changement de schéma ni reprise de donn
 
 | Opération | Cible |
 |---|---|
-| **Calcul de la portée à l'émission du jeton** | **P95 < 200 ms** — il est sur le chemin de la connexion, **pas** sur celui de chaque lecture (FR-R28b) |
+| ~~Calcul de la portée à l'émission du jeton~~ | ⛔ **SUPPRIMÉE le 2026-08-15** — il n'y a plus de calcul de portée à l'émission du jeton (AD-5). `auth-service` n'appelle jamais ce service : l'IdP ne dépend d'aucune capacité métier. À la place : **propagation de `reseau.portee.changed`, P95 < 5 s**, sur le chemin de l'événement et non de la connexion |
 | Restitution de la hiérarchie complète | P95 < 1 s |
 | Résolution zone ↔ localité | P95 < 500 ms |
 
@@ -326,5 +336,5 @@ silencieuse. L'incrément 3 sert les autres modules ; il peut venir quand ils ar
 |---|---|---|---|
 | **A1** | Les organisations raisonnent d'abord en **noms de lieux**, pas en polygones ; l'emprise géographique précise est un raffinement | FR-R02, Q4 | 1ᵉʳ client demandant une carte précise |
 | **A2** | Trois niveaux suffisent aux réseaux visés au v1 (agence → secteur → sous-secteur) | FR-R12 | 1ᵉʳ réseau plus profond |
-| **A3** | Les services consommateurs acceptent de **filtrer eux-mêmes** avec la portée publiée plutôt que de déléguer le filtrage | NFR-2, FR-R28 | Architecture |
+| **A3** | Les services consommateurs acceptent de **filtrer eux-mêmes** avec la portée publiée plutôt que de déléguer le filtrage | NFR-2, FR-R28 | ✅ **CONFIRMÉE le 2026-08-15 par la spine `reseau-service`**, comme attendu. Mécanisme retenu (arbitrage PO) : **suite de tests de conformité** publiée et versionnée par ce module, exécutée dans la CI de chaque consommateur, **plus un registre des consommateurs conformes** sur lequel `SM-3` se mesure. ⚠️ Faiblesse connue et acceptée : un service qui n'exécute pas la suite passe entre les mailles — d'où le registre, où une absence est un écart ouvert et non une absence d'information |
 | **A4** | L'agence est un objet **IMF** ; le distributeur raisonne en zones et en lieux de stock, sans agence | §1.1 | 1ᵉʳ distributeur à agences |
