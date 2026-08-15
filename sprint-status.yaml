@@ -2754,11 +2754,11 @@ sprints:
         status: "not_started"
         assigned_to: null
       - story_id: "STORY-345"
-        title: "Base de rémunération par salarié et par période"
+        title: "Base de rémunération par BÉNÉFICIAIRE et par période (salarié, dirigeant, associé)"
         epic: "EPIC-034"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        status: "not_started"  # ⚡ AMENDÉE le 2026-08-15 par l'ARBITRAGE PO « IRPP oui, CNSS différée » (tickets/TICKET-BACKEND-dirigeants-et-associes-hors-regime-salarial.md). FR-F27 disait « par salarié » — un gérant majoritaire n'en est pas un, et il est FRÉQUEMMENT LE SEUL PAYÉ d'une TPE togolaise, la cible même du produit. La base porte désormais un TYPE DE BÉNÉFICIAIRE : SALARIE | DIRIGEANT | ASSOCIE. ⚠️ C'est un CHAMP de la base, pas une collection séparée. ⚡ Le référentiel connaissait déjà la règle : paquet-fiscal-togo-2026.json, bloc irpp.source, cite textuellement « S'applique aussi aux rémunérations de gérants/associés Art. 75 » — le paquet citait l'article, le produit ne l'avait jamais lu. ⚠️ La donnée d'identité EXISTE DÉJÀ : dossier.schema.ts porte dirigeants[] (nom, fonction, nif) depuis STORY-301 ; le dirigeant était connu du système et jamais calculé.
         assigned_to: null
       - story_id: "STORY-346"
         title: "Import d'un fichier de paie, idempotent et versionné"
@@ -2775,11 +2775,19 @@ sprints:
         status: "not_started"
         assigned_to: null
       - story_id: "STORY-348"
-        title: "Calcul des cotisations et des retenues sur salaires"
+        title: "Calcul des cotisations et des retenues, aiguillé sur le type de bénéficiaire"
         epic: "EPIC-034"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
+        status: "not_started"  # ⚡ AMENDÉE le 2026-08-15 par le même arbitrage. Le calcul s'aiguille sur le type de bénéficiaire de STORY-345 via le modificateur AIGUILLAGE de FR-F12 — QUI EXISTE DÉJÀ (il sert au RSH 3/5/20 % selon l'état du tiers) : rien à inventer côté moteur. ✅ v1 : IRPP salariés (Art. 74) ET gérants/associés (Art. 75) — MÊME BARÈME, donc un aiguillage de bénéficiaire et non un second moteur. ⏸️ HORS v1 faute de source : affiliation et cotisations CNSS des gérants, et revenus distribués (Art. 79). ⛔ Le cas « régime non déterminable » n'est PAS traité ici : il est porté par STORY-364, et sans elle cet aiguillage rendrait zéro ou le régime salarié — un chiffre plausible que rien ne pince.
+        assigned_to: null
+      - story_id: "STORY-364"
+        title: "Un dirigeant dont le régime social n'est pas déterminable sort BLOQUÉ, jamais approximé"
+        epic: "EPIC-034"
+        points: 3
+        service: "fiscal-service"
+        status: "not_started"  # NOUVELLE 2026-08-15, née de l'arbitrage PO « IRPP oui, CNSS différée ». L'arbitrage coupe le périmètre AU SOURCING et non au bénéficiaire ⇒ il existe, PAR CONSTRUCTION, une catégorie dont le volet FISCAL se calcule et dont le volet SOCIAL ne se calcule pas. ⚡ SANS CETTE STORY, L'ARBITRAGE PRODUIT LE DÉFAUT QU'IL VOULAIT CORRIGER : le gérant entre dans la base, l'IRPP sort, et la cotisation sociale sort à zéro ou au régime salarié — le silence aurait simplement changé d'endroit. Livre le refus SOURCÉ (FR-F25, mécanisme déjà prévu) : obligation BLOQUÉE nommant ce qui manque DANS LE PAQUET. ⛔ INTERDIT ABSOLU : aucun repli sur le régime salarié par défaut — un test de mutation doit virer au rouge si on l'introduit. ⚠️ L'absence se lit DEPUIS l'artefact (cnss.aCompleter), jamais codée en dur : compléter le paquet doit débloquer SANS livraison de code (leçon STORY-172, qui a refusé d'inventer longueurCompteDetail pour CIMA).
+        story_path: "stories/STORY-364.md"
         assigned_to: null
   - sprint_number: 29
     start_date: "2027-07-29"
@@ -3494,7 +3502,7 @@ fiscalite_epics:
     - { id: "EPIC-031", name: "Chaîne déclarative — alimentation, cycle de vie, contrôles, piste d'audit 🏁 premier jalon vendable", frs: "FR-F22..F26, F33..F38, F51, F56, F62..F66", stories: "STORY-320..329", status: "proposed" }
     - { id: "EPIC-032", name: "Dépôt assisté, accusé et dossier de contrôle ⛔ jalon `format confirmé`", frs: "FR-F39..F45, F52..F55", stories: "STORY-330..339", status: "proposed" }
     - { id: "EPIC-033", name: "Règlement de l'impôt (préparation et rapprochement, jamais exécution)", frs: "FR-F46..F50", stories: "STORY-340..344", status: "proposed" }
-    - { id: "EPIC-034", name: "Base de rémunération et obligations sociales (import ET saisie)", frs: "FR-F27..F32", stories: "STORY-345..350", status: "proposed" }
+    - { id: "EPIC-034", name: "Base de rémunération et obligations sociales (import ET saisie)", frs: "FR-F27..F32", stories: "STORY-345..350 + STORY-364", status: "proposed" }
 
 atelier_balance_epics:
   prd: "docs/prd-atelier-balance-2026-07-12.md"
@@ -3843,6 +3851,20 @@ superseded_stories:
     raison: "ABSORBÉE telle quelle, chemin A du PO (2026-08-02). Sans elle l'écran distributeur porte sur un objet inexistant. 290 ajoute l'origine SAISIE_MANUELLE explicite (AD-2), pour qu'à l'arrivée de Facturation on sache lesquelles ne pas dupliquer."
 
 open_contract_gaps:
+  - id: "GAP-dirigeants-hors-regime-salarial"
+    service: "fiscal-service (PRD + epics + spine)"
+    statut: "➡️ ARBITRÉ PO le 2026-08-15 et REPRIS par 3 stories — STORY-345 (amendée : la base porte le type de bénéficiaire), STORY-348 (amendée : le calcul s'aiguille dessus), STORY-364 (NEUVE : le refus sourcé). Les stories font foi ; le ticket tickets/TICKET-BACKEND-dirigeants-et-associes-hors-regime-salarial.md n'est plus maintenu en parallèle. ⚠️ RESTE HORS STORIES : amender FR-F27/FR-F30 dans le PRD lui-même, et ouvrir une AD dans la spine fiscal-service pour l'agrégat de rémunération — elle n'existe toujours pas."
+    constat: "FR-F27 fonde toute la base sociale « par salarié ». Le mot « dirigeant » n'apparaît dans le PRD Fiscalité que comme CHAMP D'IDENTITÉ (profil société, validation avant dépôt), JAMAIS comme contribuable — zéro occurrence de « gérant majoritaire », « rémunération de gérance », « jetons de présence », « tantièmes », « IRCM » sur le PRD, l'addendum et les epics. Un gérant majoritaire n'est pas affilié à la CNSS dans les mêmes termes et sa rémunération relève de l'Art. 75."
+    cause_racine: "⚡ LE RÉFÉRENTIEL CONNAISSAIT LA RÈGLE, LE PRODUIT NE L'A JAMAIS LUE. paquet-fiscal-togo-2026.json, bloc irpp.source, dit textuellement : « Art. 74 CGI (barème IRPP). S'applique aussi aux rémunérations de gérants/associés Art. 75 et pensions/rentes Art. 76. » Le paquet cite l'article ; aucun FR ne l'a traduit. Même motif pour les revenus distribués (Art. 79) : les taux sont dans le paquet, FR-F11 cite « retenues sur capitaux » comme exemple de la famille PROPORTIONNELLE, et l'obligation qui les consommerait n'a jamais été écrite."
+    consequence: "🔴 Une base « par salarié » exclut le dirigeant PAR CONSTRUCTION ET SILENCIEUSEMENT : aucune erreur, aucun blocage, juste une déclaration sociale incomplète. Or le gérant est fréquemment LE SEUL PAYÉ d'une TPE togolaise — la cible même du produit."
+    action: "✅ FAIT — arbitrage « IRPP oui, CNSS différée » : le périmètre est coupé AU SOURCING et non au bénéficiaire. Art. 74 et Art. 75 en v1 (même barème ⇒ un AIGUILLAGE au sens de FR-F12, qui existe déjà et sert au RSH 3/5/20 %). CNSS des gérants et Art. 79 différés — le paquet déclare lui-même cnss.aCompleter (plafond, ventilation par branche, valeur SMIG absente). ⛔ AUCUN taux ni règle d'affiliation inventé : un dirigeant non déterminable sort en OBLIGATION BLOQUÉE (FR-F25), jamais avec un montant approximatif — c'est STORY-364, et son test de mutation interdit le repli sur le régime salarié."
+  - id: "GAP-remuneration-sans-architecture-ni-regle-de-donnee-personnelle"
+    service: "fiscal-service"
+    statut: "⛔ OUVERT — relevé le 2026-08-15 dans la même revue, INDÉPENDANT de l'arbitrage ci-dessus, qui ne le referme pas."
+    constat: "① EPIC-034 (6 stories, désormais 7) n'a AUCUNE décision d'architecture. La spine fiscal-service porte AD-1 → AD-19 ; `application/remuneration` n'y apparaît QU'UNE SEULE FOIS, dans le tableau des incréments (I5), rattaché à AD-9 (la déclaration est append-only) et AD-10 (le journal d'audit) — deux décisions qui ne parlent pas de rémunération. Rien n'est décidé sur l'agrégat, sur l'idempotence de l'import (POURTANT EXIGÉE par FR-F29), ni sur le format de fichier. ② La paie est de la DONNÉE PERSONNELLE : noms, salaires et avantages en nature de personnes physiques TIERCES — la seule catégorie de donnée du produit qui ne concerne pas l'entreprise cliente. La spine traite les secrets de canal (AD-13) et le journal d'audit (AD-10, AD-19) ; AUCUNE règle de conservation, de minimisation ou de restriction de lecture."
+    cause_racine: "L'architecture fiscal-service a été écrite le 2026-08-03 en couvrant les incréments I1→I4 en profondeur ; I5 (« Règlement et social ») n'a reçu qu'une ligne de table. Le volet social y a été rattaché par proximité, sans qu'une AD lui soit consacrée."
+    consequence: "🟠 Sept stories reposent sur du vide architectural. Et une catégorie de donnée personnelle entre dans le système sans qu'une règle la borde — le genre d'écart qui ne se voit qu'au premier audit, ou à la première demande d'effacement."
+    action: "Ouvrir une AD dans la spine fiscal-service couvrant (a) l'agrégat de rémunération et l'idempotence de son import, (b) le traitement des données personnelles de bénéficiaires : durée de conservation, minimisation, restriction de lecture. À faire AVANT le sprint 28."
   - id: "GAP-balance-validation-etat"
     service: "balance-service (:3007)"
     statut: "✅ FERMÉ le 2026-08-03 par **STORY-145** (3 pts), PR balance-service#26 rebase-mergée sur dev. `POST /balances/:id/valider|rejeter` existent, la couture `VALIDATION_GATE` attend STORY-098 (un `useClass`, rien d'autre). L'immutabilité cesse d'être décorative : elle est désormais ATTEIGNABLE."

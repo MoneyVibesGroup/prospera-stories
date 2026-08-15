@@ -4,7 +4,10 @@
 **Cible :** `prds/prd-fiscalite-2026-07-31/prd.md` (§7.6) · `epics-fiscalite-2026-08-03.md` (EPIC-034) · `architecture/architecture-fiscal-service-2026-08-03/ARCHITECTURE-SPINE.md`
 **Ouvert par :** revue de couverture du module employé, demandée par le PO, 2026-08-15
 **Priorité :** **Must AVANT le découpage en sprints d'EPIC-034** (sprints 22-30). Après, c'est une reprise de modèle.
-**Statut :** ➡️ **ARBITRÉ PAR LE PO le 2026-08-15** — voir ci-dessous. Reste à traduire en FR et en stories.
+**Statut :** ➡️ **REPRIS le 2026-08-15 par STORY-345 (amendée), STORY-348 (amendée) et STORY-364 (neuve).**
+**LES STORIES FONT DÉSORMAIS FOI** — étape 2 du cycle de vie décrit dans `tickets/README.md`. Ce ticket
+n'est plus maintenu en parallèle ; il est conservé pour tracer l'origine.
+Inscrit au tracker : `sprint-status.yaml` → `open_contract_gaps` → `GAP-dirigeants-hors-regime-salarial`.
 
 ---
 
@@ -37,9 +40,13 @@
 
 - [ ] Amender `FR-F27` et `FR-F30` dans le PRD ; ajouter un FR pour le type de bénéficiaire et son
       aiguillage.
-- [ ] Re-découper **EPIC-034** : STORY-345 (base) porte le type ; STORY-348 (calcul) porte
-      l'aiguillage ; **une story neuve** pour le refus sourcé (`FR-F25`) sur un dirigeant non
-      déterminable.
+- [x] ✅ **FAIT le 2026-08-15** — EPIC-034 re-découpée : **STORY-345** amendée (la base porte le type
+      de bénéficiaire), **STORY-348** amendée (le calcul s'aiguille dessus), **STORY-364** créée (le
+      refus sourcé `FR-F25` sur un dirigeant non déterminable, 3 pts, sprint 28). La plage déclarée de
+      l'epic passe de `STORY-345..350` à `STORY-345..350 + STORY-364`.
+      ⚡ **STORY-364 n'est pas une formalité** : sans elle, l'arbitrage produit le défaut qu'il voulait
+      corriger — le gérant entre dans la base, l'IRPP sort, et la cotisation sociale sort à zéro ou au
+      régime salarié. Le silence aurait simplement changé d'endroit.
 - [ ] Ouvrir une **AD dans la spine `fiscal-service`** pour l'agrégat de rémunération — elle n'existe
       toujours pas (constat n°1 ci-dessous), et l'arbitrage ne la crée pas.
 - [ ] Traiter le constat n°2 (donnée personnelle) : il est **indépendant de cet arbitrage** et reste
