@@ -5,7 +5,7 @@ purpose: build-substrate
 altitude: feature
 paradigm: 'modules NestJS sur le moule commun Prospera, en relying-party de l''IdP — producteur d''événements, consommateur d''identité'
 scope: 'micro-service dossier-service — le Dossier (société cliente d''un cabinet) et son Exercice : identité, pays et type d''entité, deux axes, portée du portefeuille, archivage, attestation de mandat, cycle de vie de l''exercice'
-status: 'rétroactive — le service est LIVRÉ, cette spine consigne ce qui a été décidé et nomme ce qui ne l''a pas été'
+status: 'rétroactive — le service est LIVRÉ. AD-8 et AD-9 ARBITRÉES par le PO le 2026-08-15 ; AD-8 exige une story backend non encore créée'
 created: '2026-08-15'
 updated: '2026-08-15'
 binds:
@@ -23,8 +23,10 @@ companions:
 
 > ⚠️ **Spine RÉTROACTIVE.** Le service est en production depuis le 2026-08-13. Ce document ne propose
 > rien : il **consigne** les décisions déjà prises dans le code et les stories, et **nomme
-> explicitement celles qui n'ont jamais été prises**. Un point non tranché est marqué `[À TRANCHER]` —
-> il ne doit pas être lu comme un choix.
+> explicitement celles qui ne l'avaient jamais été**. Les deux points qui n'étaient pas tranchés —
+> le gate d'accès (AD-8) et le verrou optimiste (AD-9) — **l'ont été par le PO le 2026-08-15**.
+> ⚠️ **AD-8 n'est PAS qu'une écriture** : le gate KYC qu'elle décide n'existe pas dans le code et
+> exige une story backend, plus une répercussion sur le sprint 10 frontend. Voir AD-8.
 >
 > Elle est écrite parce que `dossier-service` est devenu **la racine de l'espace comptable** (AD-P13) :
 > le Bilan, l'Atelier et toute la fiscalité en dépendent désormais, et il n'avait pas une ligne
@@ -136,37 +138,56 @@ service**.
 - **Rule:** un exercice repris **ne consomme pas la place de l'exercice courant** — sans quoi reprendre
   trois exercices antérieurs empêcherait d'ouvrir l'exercice en cours.
 
-### AD-8 — `[À TRANCHER]` Le service n'a **aucun** gate d'entitlement ni de KYC
+### AD-8 — Le dossier exige un KYC approuvé, jamais un entitlement [ARBITRÉ PO 2026-08-15]
 
-**Constat de code, pas décision.** Les guards présents sont `jwt-auth`, `roles`, `permissions`,
-`email-verified`, `ip-throttler`. Le service consomme `identity.org.created` et
-`identity.membership.changed` — **ni `kyc.status.changed`, ni `entitlement.changed`**.
+**Décision : `emailVerified` + KYC `APPROVED`. Pas d'entitlement.**
 
-Tous les autres services métier portent un `@Requires…Access` (`emailVerified` + KYC `APPROVED` +
-entitlement `ACTIVE`). C'est **le seul point où `dossier-service` s'écarte du moule commun**.
+Le raisonnement du PO : un cabinet doit être **vérifié** pour constituer un portefeuille de sociétés
+clientes — c'est une responsabilité, pas une fonctionnalité. Mais **le dossier n'est pas un module
+qu'on achète** : le gater sur un entitlement supposerait un « module dossier » au catalogue, qui
+n'existe pas et n'a pas de raison d'exister.
 
-Deux lectures, et aucune n'est écrite nulle part :
+- **Rule:** `@RequiresDossierAccess` = `emailVerified` + KYC `APPROVED`. **Jamais d'entitlement.**
+- **Rule:** ⚠️ **« Mon cabinet » est auto-créé à la création de l'organisation (D1), donc AVANT toute
+  approbation KYC.** Le chemin d'auto-création **ne passe pas par le gate** — sinon aucune
+  organisation ne naîtrait jamais avec son dossier propre. Le gate porte sur les routes appelées par
+  un **humain**, pas sur la réaction à `identity.org.created`.
+- **Rule:** le refus rend un code machine stable (`KYC_NOT_APPROVED`), aligné sur `BALANCE_NOT_ENTITLED`
+  et `EMAIL_NOT_VERIFIED` — jamais un 403 nu.
 
-1. **Délibéré** — le dossier est **en amont de tout module** ; le gater fermerait la porte d'entrée
-   avant que le cabinet ait pu constituer son portefeuille. Le gate appartiendrait alors aux modules
-   consommateurs (`@RequiresBalanceAccess`, `@RequiresBilanAccess`), pas ici.
-2. **Oubli** — le service a été écrit vite, sur six stories en deux jours, et le gate n'a pas suivi.
+#### ⛔ Ce que cette décision COÛTE, et qui n'est pas encore fait
 
-- **Rule provisoire:** ne **rien** ajouter avant l'arbitrage. Poser un gate maintenant fermerait
-  peut-être la seule porte par laquelle un cabinet non encore approuvé constitue son dossier.
-- **⚠️ À confirmer par le PO.** C'est la question ouverte la plus structurante de ce service.
+Ce n'est **pas** une décision de documentation : le gate **n'existe pas dans le code**.
 
-### AD-9 — `[À TRANCHER]` Le verrou optimiste existe en base et n'est exposé par aucune route
+1. **`dossier-service` ne consomme pas `kyc.status.changed`.** Vérifié : ses seuls consumers portent
+   `identity.org.created` et `identity.membership.changed`. Il faut **un read-model `OrgKycStatus` et
+   son consumer** — le patron existe à l'identique dans `bilan-service` et `balance-service`, il est à
+   copier, pas à inventer. ⇒ **une story backend à créer.**
+2. ⚠️ **Le plan frontend en dépend, et il ne le sait pas.** Le sprint **S10** (FE-059a, FE-060,
+   FE-061, FE-062, FE-066) suppose qu'un cabinet ouvre son portefeuille. Avec ce gate, **il lui faut un
+   KYC approuvé** — le semis de développement et l'e2e **FE-069** doivent donc approuver le KYC avant
+   d'ouvrir un dossier, sinon tout le parcours rend `KYC_NOT_APPROVED`.
+   ⇒ **à répercuter dans `frontend-sprint-status.yaml` avant le démarrage du S10.**
+3. **Ordre imposé :** la story backend du gate doit être livrée **avant ou avec** le S10. Livrée après,
+   elle casse des écrans qui marchaient — le motif exact d'AP-26 (`If-Match` durci sans son client).
+
+### AD-9 — Le verrou optimiste reste dormant, et c'est un choix [ARBITRÉ PO 2026-08-15]
 
 Le schéma porte `version` (« entier monotone — verrou optimiste et ordre citable ») et le repository
-sait faire un `updateOne` conditionné à la version lue, avec `$inc`. **Mais aucun contrôleur n'expose
-`If-Match`**, et aucune route n'exige de précondition.
+sait faire un `updateOne` conditionné à la version lue, avec `$inc`. **Aucune route n'expose
+`If-Match`, et aucune ne l'exposera tant qu'un conflit réel ne se sera pas présenté.**
 
-- **⚠️ Précédent coûteux :** `kyc-service` a rendu `If-Match` **obligatoire** (STORY-182) sans que le
-  client suive ⇒ **toutes les décisions KYC ont rendu `428` pendant une semaine**, sans que rien ne le
-  signale. La mécanique est ici **à moitié posée** : le durcir plus tard rejouerait exactement ce
-  scénario si le front n'est pas prévenu **dans la même story**.
-- **Rule:** si la précondition est adoptée, elle l'est **avec son consommateur nommé**, jamais seule.
+- **Rule:** `version` **reste** — il sert l'**ordre citable** et le journal (AD-13), indépendamment de
+  toute précondition HTTP. Le retirer supprimerait une donnée utile pour supprimer une ambiguïté de
+  documentation ; c'est cette spine qui lève l'ambiguïté, pas une migration.
+- **Rule:** **ne pas exposer `If-Match` en avance.** La concurrence réelle sur un dossier est faible :
+  contrairement à une décision KYC — que deux opérateurs plateforme peuvent prendre simultanément sur
+  la même file — un dossier est édité par son cabinet, souvent par une seule personne.
+- **Rule:** ⚠️ **si la précondition est adoptée un jour, elle l'est AVEC son consommateur nommé dans la
+  MÊME story.** Précédent chiffré : `kyc-service` a rendu `If-Match` obligatoire (STORY-182, 07/08)
+  sans que la console suive ⇒ **toutes les décisions KYC ont rendu `428` pendant une semaine**, sans
+  qu'aucun test ne le signale (les tests unitaires mockaient `apiFetch` et n'assertaient que le chemin
+  appelé, jamais les en-têtes). C'est AP-26.
 
 ### AD-10 — Les événements sont publiés par outbox transactionnelle, partitionnés par `dossierId`
 
@@ -269,8 +290,8 @@ entrer en collision** avec le `@Get(':id')` des dossiers.
 | Cycle de vie de l'exercice | `modules/exercices` | AD-6, AD-7 |
 | Propagation vers balance / bilan | `kafka/outbox` | AD-10, AD-11, AD-12 |
 | Traçabilité | `dossiers_journal` | AD-13 |
-| Accès | `common/guards` | **AD-8 `[À TRANCHER]`** |
-| Concurrence | `dossiers.repository` | **AD-9 `[À TRANCHER]`** |
+| Accès | `common/guards` | **AD-8** ⚠️ gate KYC arbitré, **pas encore implémenté** |
+| Concurrence | `dossiers.repository` | AD-9 — dormant, assumé |
 
 ## Deferred
 

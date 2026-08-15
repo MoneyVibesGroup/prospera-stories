@@ -2340,6 +2340,14 @@ sprints:
         status: "not_started"  # Blocs L+N, D12, Q10(b). ⚡ TROISIÈME OCCURRENCE DU MÊME DÉFAUT : une écriture sans lecture ne se signale nulle part. STORY-144 écrit admin_audit_logs, aucune route ne le relit => STORY-294 (ce sprint). STORY-079 écrit profils_societe_audit ; listerAudits EXISTE mais n'est appelé que pour reconstituer un état passé en interne (profil-societe.service.ts:356) - AUCUN contrôleur ne l'expose. ⚠ notification-service N'EXISTE PAS DANS LE DÉPÔT (architecture cadrée le 2026-08-04, port :3008, ZERO code, aucun sprint) : Q10 tranche l'option (b) - fil d'activité GET /activite réservé à l'admin + compteur de non-lus, la notification poussée viendra quand le service existera (hook INERTE, documenté et testé comme tel - leçon STORY-173). NE JAMAIS rendre un userId brut : la console ne sait pas le résoudre (leçon STORY-294).
         story_path: "stories/STORY-360.md"
         assigned_to: null
+      - story_id: "STORY-363"
+        title: "dossier-service exige un KYC approuve - le gate qui manque au seul service sans gate"
+        epic: "EPIC-043"
+        points: 3
+        service: "dossier-service"
+        status: "not_started"  # NOUVELLE 2026-08-15, nee de l'ARBITRAGE PO sur AD-8 de la spine retroactive de dossier-service. Le service est le SEUL service metier du programme sans gate : ses guards sont jwt-auth/roles/permissions/email-verified/ip-throttler, et il ne consomme que identity.org.created + identity.membership.changed - NI kyc.status.changed NI entitlement.changed. Arbitrage : emailVerified + KYC APPROVED, PAS d'entitlement (le dossier n'est pas un module qu'on achete ; le gater sur un entitlement supposerait un module dossier au catalogue, qui n'existe pas). Le read-model + consumer existent A L'IDENTIQUE dans bilan-service et balance-service => a COPIER, pas a concevoir. PIEGE CENTRAL : Mon cabinet est auto-cree sur identity.org.created (D1), donc AVANT toute approbation KYC - ce chemin NE PASSE PAS par le gate, sinon aucune organisation ne naitrait plus avec son dossier propre, et l'echec serait asynchrone donc silencieux. ORDRE IMPOSE : a livrer AVANT ou AVEC le sprint 10 FRONTEND (FE-059a/060/061/062/066 ouvrent un portefeuille et creent des dossiers) - livree apres, elle casse des ecrans qui marchaient, motif exact d'AP-26 (If-Match durci sans son client => 428 sur toutes les decisions KYC pendant une semaine).
+        story_path: "stories/STORY-363.md"
+        assigned_to: null
 
   # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
   - sprint_number: 21

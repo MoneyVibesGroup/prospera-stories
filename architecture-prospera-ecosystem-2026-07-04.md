@@ -380,7 +380,10 @@ Ils appartiennent à d'autres documents ; les corriger ici créerait une seconde
 
 1. **`balance-service` n'a toujours aucune architecture.** ~26 écrans en production, quinze familles
    d'API, et pas un document. Il est décrit **par ses consommateurs**, jamais par lui-même.
-2. **`dossier-service` n'a pas de gate d'entitlement ni de KYC.** Vérifié dans le code : ses guards
+2. ➡️ **`dossier-service` n'a pas de gate d'entitlement ni de KYC** — **ARBITRÉ le 2026-08-15 :
+   `emailVerified` + KYC `APPROVED`, PAS d'entitlement** (le dossier n'est pas un module qu'on achète).
+   ⚠️ Le gate **n'existe pas encore dans le code** : le service ne consomme pas `kyc.status.changed`.
+   Détail et conséquences en AD-8 de la spine `dossier-service`. Constat d'origine : ses guards
    sont `jwt-auth`, `roles`, `permissions`, `email-verified`, `ip-throttler` — il ne consomme que
    `identity.org.created` et `identity.membership.changed`, **ni `kyc.status.changed`, ni
    `entitlement.changed`**. Tous les autres services métier portent un `@Requires…Access`

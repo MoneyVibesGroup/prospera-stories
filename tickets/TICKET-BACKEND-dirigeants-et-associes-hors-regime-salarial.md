@@ -4,6 +4,46 @@
 **Cible :** `prds/prd-fiscalite-2026-07-31/prd.md` (§7.6) · `epics-fiscalite-2026-08-03.md` (EPIC-034) · `architecture/architecture-fiscal-service-2026-08-03/ARCHITECTURE-SPINE.md`
 **Ouvert par :** revue de couverture du module employé, demandée par le PO, 2026-08-15
 **Priorité :** **Must AVANT le découpage en sprints d'EPIC-034** (sprints 22-30). Après, c'est une reprise de modèle.
+**Statut :** ➡️ **ARBITRÉ PAR LE PO le 2026-08-15** — voir ci-dessous. Reste à traduire en FR et en stories.
+
+---
+
+## ⚡ ARBITRAGE PO DU 2026-08-15 — « IRPP oui, CNSS différée »
+
+**Décision : la base de rémunération porte un TYPE DE BÉNÉFICIAIRE** — `SALARIE` | `DIRIGEANT` |
+`ASSOCIE` — et le périmètre est **coupé au sourcing**, pas au bénéficiaire.
+
+| Volet | Décision | Pourquoi |
+| --- | --- | --- |
+| **IRPP salariés (Art. 74)** | ✅ **v1** | déjà couvert |
+| **IRPP gérants / associés (Art. 75)** | ✅ **v1** | **même barème que l'Art. 74** — c'est un aiguillage de bénéficiaire, pas un second moteur de calcul. Le coût est faible et le gérant cesse d'être silencieusement exclu |
+| **Affiliation et cotisations CNSS des gérants** | ⏸️ **différé jusqu'au sourcing** | le paquet déclare lui-même `cnss.aCompleter` : plafond, ventilation par branche, **valeur SMIG à jour** — tous absents. Inventer une règle d'affiliation ici rejouerait ce que STORY-172 a évité pour CIMA |
+| **Revenus distribués (Art. 79)** | ⏸️ **différé jusqu'au sourcing** | les taux sont dans le paquet, mais l'obligation qui les consomme touche la distribution de dividendes — un objet que le produit ne modélise pas encore |
+
+### Ce que l'arbitrage impose, et ce qu'il interdit
+
+- ✅ `FR-F27` est amendé : **« par bénéficiaire »**, plus « par salarié ». Le type est un champ de la
+  base, pas une collection séparée.
+- ✅ `FR-F30` s'aiguille sur le type de bénéficiaire — via le modificateur **`AIGUILLAGE`** de
+  `FR-F12`, **qui existe déjà** (il sert au RSH 3/5/20 % selon l'état du tiers). Rien de nouveau à
+  inventer côté moteur.
+- ⛔ **AUCUN taux CNSS ni règle d'affiliation pour les gérants tant que ce n'est pas sourcé.** Un
+  dirigeant dont le régime social n'est pas déterminable sort en **obligation bloquée**, avec
+  l'indication précise de ce qui manque — c'est exactement ce que `FR-F25` prévoit déjà. **Il ne sort
+  jamais avec un montant approximatif.**
+- ⛔ Ne pas rouvrir le bornage « sans devenir un logiciel de paie ». Il tient.
+
+### Reste à faire
+
+- [ ] Amender `FR-F27` et `FR-F30` dans le PRD ; ajouter un FR pour le type de bénéficiaire et son
+      aiguillage.
+- [ ] Re-découper **EPIC-034** : STORY-345 (base) porte le type ; STORY-348 (calcul) porte
+      l'aiguillage ; **une story neuve** pour le refus sourcé (`FR-F25`) sur un dirigeant non
+      déterminable.
+- [ ] Ouvrir une **AD dans la spine `fiscal-service`** pour l'agrégat de rémunération — elle n'existe
+      toujours pas (constat n°1 ci-dessous), et l'arbitrage ne la crée pas.
+- [ ] Traiter le constat n°2 (donnée personnelle) : il est **indépendant de cet arbitrage** et reste
+      entier.
 
 ---
 
