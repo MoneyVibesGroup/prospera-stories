@@ -18,8 +18,23 @@ inputDocuments:
 
 ## Vue d'ensemble
 
-Découpage du PRD Fiscalité v0.3 et de la colonne vertébrale `fiscal-service` (AD-1 → AD-19) en épics et
-stories implémentables. Série continuée : **épics à partir de EPIC-027**, **stories à partir de
+Découpage du **PRD Fiscalité v0.4** et de la colonne vertébrale `fiscal-service` (AD-1 → **AD-21**) en
+épics et stories implémentables.
+
+> ### ⚡ Réalignement du 2026-08-16 — ce document était resté en v0.3
+>
+> Le PRD a été amendé le **2026-08-15** par l'arbitrage PO *« IRPP oui, CNSS différée »*
+> (`tickets/TICKET-BACKEND-dirigeants-et-associes-hors-regime-salarial.md`), et la spine a reçu
+> **AD-20** et **AD-21** le même jour. **Ce document ne l'avait pas suivi** : il disait encore
+> « par salarié », ignorait `FR-F79` et `FR-F80`, et se déclarait tiré de la v0.3.
+>
+> ⚠️ Le tracker notait *« les stories font foi »* — mais **c'est ce document qu'un développeur ouvre**
+> pour implémenter EPIC-034. Un document d'épics périmé n'est pas une doublure inoffensive du tracker :
+> il **encode l'ancienne vérité et la garde active**. C'est la quatrième fois que ce dépôt le paie
+> (cf. `referentielFamilies`, `If-Match` de STORY-182, statut de ce même gap).
+>
+> **Amendé ici :** l'en-tête · `FR-F27` · `FR-F30` · `FR-F79` et `FR-F80` créés · EPIC-034 ·
+> la carte de couverture · `STORY-345` · `STORY-348` · `STORY-364` ajoutée. Série continuée : **épics à partir de EPIC-027**, **stories à partir de
 STORY-294**. Périmètre backend uniquement ; le frontend suit sa série `FE-*` dans son tracker propre.
 
 > ### ⚠️ Renumérotation du 2026-08-07 — `STORY-179→235` est devenu `STORY-294→350`
@@ -72,10 +87,10 @@ STORY-294**. Périmètre backend uniquement ; le frontend suit sa série `FE-*` 
 - **FR-F24** — Chaque déclaration conserve, distinctement et définitivement : **montant calculé**, **montant déclaré**, **montant payé**. Un écart entre les trois est visible et doit être motivé.
 - **FR-F25** — Toute obligation dont l'assiette ne peut être établie faute de données comptables est marquée bloquée, avec l'indication précise de ce qui manque.
 - **FR-F26** — Le système restitue, pour tout montant déclaré, le chemin complet qui l'a produit : montant → détail de calcul → balance → journal → pièces disponibles.
-- **FR-F27** — Le système gère une base de rémunération par salarié et par période : salaires, primes, gratifications, commissions, avantages en nature, avec exclusion des remboursements de frais.
+- **FR-F27** — *(amendé le 2026-08-15)* Le système gère une base de rémunération **par bénéficiaire** et par période : salaires, primes, gratifications, commissions, avantages en nature, avec exclusion des remboursements de frais. ⚡ **« par bénéficiaire », et non plus « par salarié »** : un gérant majoritaire n'est pas un salarié, sa rémunération relève de l'**Art. 75 CGI**, et il est **fréquemment le seul payé d'une TPE togolaise** — la cible même du produit. Une base « par salarié » l'excluait **par construction et silencieusement**.
 - **FR-F28** — La base de rémunération est alimentée de **deux façons également prises en charge** : **import** d'un fichier issu de l'outil de paie du cabinet ou du client, et **saisie manuelle** dans Prospera. L'import est le chemin nominal ; la saisie couvre les dossiers sans outil de paie.
 - **FR-F29** — Un import de rémunération est rejouable et idempotent : réimporter la même période ne duplique rien, et un réimport corrigé versionne la base sans effacer l'antérieur.
-- **FR-F30** — Le système calcule les cotisations sociales employeur et salarié et les retenues d'impôt sur les revenus salariaux selon les taux, assiettes, planchers et barèmes du paquet fiscal du pays.
+- **FR-F30** — *(amendé le 2026-08-15)* Le système calcule les cotisations sociales et les retenues d'impôt selon les taux, assiettes, planchers et barèmes du paquet fiscal du pays, **en aiguillant sur le type de bénéficiaire** (`FR-F79`). ⚡ L'aiguillage emploie le modificateur **`AIGUILLAGE`** déjà déclaré en `FR-F11`/`FR-F12` — celui du RSH 3 / 5 / 20 % selon l'état du tiers. **Rien de nouveau n'entre dans le moteur** : le type de bénéficiaire est un critère d'aiguillage de plus, pas une seconde famille de calcul.
 - **FR-F31** — Les obligations sociales apparaissent dans le calendrier, le workflow et la preuve au même titre que les obligations fiscales.
 - **FR-F32** — Les charges sociales calculées sont rapprochées des comptes de personnel de la balance ; tout écart au-delà de la tolérance déclarée est signalé.
 - **FR-F33** — Chaque obligation suit un cycle de vie unique et universel : `À préparer → En préparation → À contrôler → À valider → Validée → À déposer → Déposée → Accusé reçu → À payer → Payée → Clôturée`.
@@ -123,7 +138,9 @@ STORY-294**. Périmètre backend uniquement ; le frontend suit sa série `FE-*` 
 - **FR-F75** — Un **régime dérogatoire** (zone franche) est un paquet fiscal à part entière, appliqué à la place du paquet de droit commun, portant ses exonérations et ses taux réduits. Le système signale visiblement qu'un dossier est calculé sous dérogation.
 - **FR-F76** — Le module fiscal consomme la **balance canonique quelle que soit sa source** — atelier du cabinet, import de logiciel comptable, ou ingestion directe d'un vertical (`balance.submitted`). Il ne connaît que le contrat, jamais l'origine.
 - **FR-F77** — Un vertical intégré (microfinance, assurance, distributeur) obtient le module fiscal sans développement spécifique : il lui suffit de soumettre une balance conforme, taguée du bon référentiel, et de disposer d'un paquet fiscal publié pour son type d'entité.
-- **FR-F78** — Un type d'entité sans paquet fiscal publié pour son pays et son exercice produit un refus explicite et nommé, jamais un repli silencieux sur un paquet voisin. ---
+- **FR-F78** — Un type d'entité sans paquet fiscal publié pour son pays et son exercice produit un refus explicite et nommé, jamais un repli silencieux sur un paquet voisin.
+- **FR-F79** — *(nouveau, 2026-08-15)* Chaque ligne de la base de rémunération porte un **type de bénéficiaire** appartenant à un ensemble fermé : `SALARIE`, `DIRIGEANT`, `ASSOCIE`. Le type est un **attribut de la ligne**, ⛔ **jamais une collection séparée**, et il conditionne le régime applicable.
+- **FR-F80** — *(nouveau, 2026-08-15)* Lorsque le régime social ou fiscal d'un type de bénéficiaire **n'est pas déterminable depuis le paquet fiscal**, l'obligation correspondante est marquée **bloquée** au sens de `FR-F25`, avec l'indication précise de ce qui manque **dans le paquet**. ⛔ **Le système n'applique JAMAIS un régime de repli** : traiter un dirigeant au régime salarié faute de règle produirait une cotisation **fausse et vraisemblable**, la pire des deux issues. L'absence se lit **depuis l'artefact** (`cnss.aCompleter`) ⇒ compléter le paquet débloque **sans livraison de code**. ---
 
 ### Exigences non fonctionnelles
 
@@ -266,8 +283,22 @@ et mise en évidence des déclarations déposées mais non payées.
 Les échéances sociales rejoignent le calendrier fiscal, avec leurs cotisations et retenues calculées. La
 base est **importée** depuis l'outil de paie ou **saisie**, les deux étant pris en charge.
 
-**Couvre :** FR-F27 à FR-F32
+**Couvre :** FR-F27 à FR-F32, **FR-F79**, **FR-F80**
+**Spine :** **AD-20** *(l'agrégat `LigneDeRemuneration`, keyé `(dossier, période, bénéficiaire)`)* ·
+**AD-21** *(la rémunération est la seule donnée personnelle de tiers du service)*
 **Autonome :** oui. ⚠️ Dépend de la question ouverte n°2 du PRD (format d'import de paie).
+
+> ⚡ **Périmètre v1 arrêté le 2026-08-15 — la coupure est AU SOURCING, pas au bénéficiaire.**
+>
+> | Volet | v1 |
+> | --- | --- |
+> | IRPP salariés (Art. 74) | ✅ |
+> | IRPP gérants et associés (**Art. 75**) | ✅ — **même barème**, donc un aiguillage, pas un second moteur |
+> | Cotisations CNSS des **salariés** (17,5 % / 4 %) | ✅ — ⛔ **sauf le plancher : la valeur du SMIG est absente du paquet** (voir STORY-348) |
+> | Affiliation et cotisations **CNSS des gérants** | ⏸️ **hors v1 — non sourcé** |
+> | Retenues sur **revenus distribués** (**Art. 79**) | ⏸️ **hors v1 — non sourcé** |
+>
+> Ce qui n'est pas sourcé sort **bloqué et motivé** (`FR-F80`), jamais approximé — c'est `STORY-364`.
 
 ---
 
@@ -279,7 +310,7 @@ base est **importée** depuis l'outil de paie ou **saisie**, les deux étant pri
 | FR-F11 → FR-F15 | EPIC-029 — familles de calcul et modificateurs |
 | FR-F16 → FR-F21 | EPIC-030 — calendrier et responsabilité |
 | FR-F22 → FR-F26 | EPIC-031 — alimentation depuis la balance et restitution du chemin |
-| FR-F27 → FR-F32 | EPIC-034 — base de rémunération et obligations sociales |
+| FR-F27 → FR-F32, **FR-F79**, **FR-F80** | EPIC-034 — base de rémunération et obligations sociales |
 | FR-F33 → FR-F38 | EPIC-031 — cycle de vie, rôles, rectificatives |
 | FR-F39 → FR-F45 | EPIC-032 — livrable, guidage, accusé, rejet, archivage |
 | FR-F46 → FR-F50 | EPIC-033 — règlement, rapprochement, pénalités estimées |
@@ -872,15 +903,22 @@ En tant qu'**expert-comptable**, je veux mesurer ce qu'un retard coûterait, afi
 
 Le calendrier social rejoint le calendrier fiscal.
 
-### STORY-345 — Base de rémunération par salarié et par période
+### STORY-345 — Base de rémunération par **BÉNÉFICIAIRE** et par période (salarié, dirigeant, associé)
 
-En tant que **collaborateur de cabinet**, je veux disposer des rémunérations d'une période, afin de calculer les cotisations et les retenues. *(FR-F27)*
+*(⚡ amendée le 2026-08-15 — le titre disait « par salarié ». Fichier : `stories/STORY-345.md`)*
+
+En tant que **collaborateur de cabinet**, je veux disposer des rémunérations d'une période **pour tous les bénéficiaires, pas seulement les salariés**, afin de calculer les cotisations et les retenues sans exclure le dirigeant. *(FR-F27, FR-F79)*
 
 **Critères d'acceptation**
 
-- **Étant donné** une période **quand** la base est constituée **alors** elle porte, par salarié, salaires, primes, gratifications, commissions et avantages en nature.
+- **Étant donné** une période **quand** la base est constituée **alors** elle porte, **par bénéficiaire**, salaires, primes, gratifications, commissions et avantages en nature.
+- **Étant donné** une ligne de rémunération **quand** elle est créée **alors** elle porte un **`typeBeneficiaire`** parmi `SALARIE` / `DIRIGEANT` / `ASSOCIE`. ⛔ **C'est un attribut de la ligne, jamais une collection par type** — trois collections fabriqueraient trois chemins de calcul là où le moteur n'en a besoin que d'un, aiguillé *(AD-20)*.
+- **Étant donné** une ligne **sans** type de bénéficiaire **quand** elle est soumise **alors** elle est **refusée** ⛔ — pas de valeur par défaut `SALARIE`, qui reproduirait exactement le silence que l'amendement ferme.
 - **Étant donné** des remboursements de frais **quand** ils sont présents **alors** ils sont exclus de l'assiette.
-- **Étant donné** une base constituée **quand** elle est modifiée **alors** la version antérieure est conservée.
+- **Étant donné** une base constituée **quand** elle est modifiée **alors** la version antérieure est conservée **et reste attribuée**.
+- **Étant donné** un dossier dont `dirigeants[]` est renseigné *(déjà porté par `dossier.schema.ts` depuis STORY-301)* **quand** la base est saisie **alors** ces personnes sont **proposées** comme bénéficiaires — le dirigeant était **connu du système et jamais calculé**.
+
+**Mutation-test :** remettre une valeur par défaut `SALARIE` sur une ligne sans type ⇒ le test de refus **doit virer au rouge**.
 
 ### STORY-346 — Import d'un fichier de paie, idempotent et versionné
 
@@ -902,15 +940,35 @@ En tant que **collaborateur de cabinet** dont le client n'a pas d'outil de paie,
 - **Étant donné** un dossier sans fichier de paie **quand** je saisis les rémunérations **alors** la base est constituée à l'identique de celle issue d'un import.
 - **Étant donné** une base saisie **quand** elle alimente un calcul **alors** son origine (saisie ou import) est tracée.
 
-### STORY-348 — Calcul des cotisations et des retenues sur salaires
+### STORY-348 — Calcul des cotisations et des retenues, **aiguillé sur le type de bénéficiaire**
 
-En tant qu'**expert-comptable**, je veux que les charges sociales et les retenues se calculent depuis le paquet, afin qu'un changement de taux ne demande aucune livraison. *(FR-F30)*
+*(⚡ amendée le 2026-08-15. Fichier : `stories/STORY-348.md`)*
+
+En tant qu'**expert-comptable**, je veux que les charges sociales et les retenues se calculent depuis le paquet **selon le type de bénéficiaire**, afin qu'un changement de taux ne demande aucune livraison **et qu'un gérant ne soit pas traité comme un salarié**. *(FR-F30, FR-F79)*
 
 **Critères d'acceptation**
 
-- **Étant donné** une base de rémunération **quand** le calcul s'exécute **alors** les parts employeur et salarié sont produites depuis les taux du paquet.
-- **Étant donné** une assiette inférieure au salaire minimum **quand** le calcul s'exécute **alors** le plancher du paquet s'applique.
+- **Étant donné** une base de rémunération **quand** le calcul s'exécute **alors** les parts employeur et salarié sont produites depuis les taux du paquet (`cnss.tauxEmployeur` 17,5 % / `cnss.tauxSalarie` 4 %), **jamais depuis une constante du code** *(NFR-F04)*.
+- **Étant donné** un bénéficiaire `DIRIGEANT` **quand** l'**IRPP** est calculé **alors** il aboutit au **même barème** que l'Art. 74 — l'Art. 75 est un **aiguillage**, pas un second moteur.
+- **Étant donné** ce même bénéficiaire **quand** la **cotisation CNSS** est calculée **alors** elle sort **`BLOQUÉE`** et non chiffrée ⛔ — c'est `STORY-364`, et sans elle cet aiguillage rendrait zéro ou le régime salarié.
 - **Étant donné** un revenu salarial **quand** la retenue d'impôt est calculée **alors** elle suit le barème par tranches du paquet.
+- ⛔ **Étant donné** une assiette inférieure au SMIG **quand** le calcul s'exécute **alors** l'obligation sort **`BLOQUÉE` avec le motif « valeur du SMIG absente du paquet »** — **et non avec un plancher appliqué**.
+
+> ### ⛔ Le plancher SMIG n'est pas calculable en l'état — constat du 2026-08-16
+>
+> L'AC d'origine disait *« le plancher du paquet s'applique »*. **Il n'existe pas.**
+> `referentiels/paquet-fiscal-togo-2026.json` déclare bien la règle —
+> *« l'assiette ne peut être inférieure au SMIG en vigueur »* — mais son bloc `cnss.aCompleter` dit
+> textuellement : *« plafond éventuel de cotisation, ventilation par branche, **valeur SMIG à jour** »*.
+> **Le mot « SMIG » n'apparaît nulle part dans les référentiels avec une valeur numérique.**
+>
+> ⚡ **Cet AC était donc intenable, et le bon comportement est déjà spécifié** : `FR-F80` et `AD-20`
+> imposent l'obligation bloquée et motivée. Il ne manque **aucune ligne de code** — il manque **une
+> donnée au référentiel** *(voir `GAP-smig-togo-sans-valeur`)*, et le jour où elle y entre,
+> **le déblocage se fait sans livraison**.
+>
+> ⚠️ La règle vaut aussi pour le **plafond** de cotisation : le paquet dit « éventuel », ce qui n'est
+> ni « il n'y en a pas » ni une valeur. Un plafond supposé absent est un **choix codé en dur** déguisé.
 
 ### STORY-349 — Obligations sociales dans le calendrier, le cycle et la preuve
 
@@ -929,3 +987,17 @@ En tant qu'**expert-comptable**, je veux confronter ce que j'ai calculé à ce q
 
 - **Étant donné** des charges sociales calculées **quand** le rapprochement s'exécute **alors** elles sont confrontées aux comptes de personnel de la balance.
 - **Étant donné** un écart supérieur à la tolérance déclarée au paquet **quand** il est détecté **alors** une anomalie est levée en nommant les deux valeurs.
+- ⚠️ **Étant donné** ce rapprochement **quand** il s'affiche **alors** il travaille sur des **totaux par compte de personnel**, ⛔ **jamais sur des lignes nominatives** — *« le rapprochement à la balance n'a pas besoin de savoir qui gagne combien »* **(AD-21)**.
+
+### STORY-364 — Un dirigeant dont le régime social n'est pas déterminable sort **BLOQUÉ**, jamais approximé
+
+*(🆕 créée le 2026-08-15 par l'arbitrage PO. Fichier : `stories/STORY-364.md` — **3 pts**)*
+
+En tant qu'**expert-comptable**, je veux qu'un bénéficiaire dont le régime n'est pas sourcé produise un **refus motivé**, afin de ne jamais déposer une cotisation fausse et vraisemblable. *(FR-F25, FR-F80)*
+
+**Critères d'acceptation** — *le détail fait foi dans le fichier de story ; l'essentiel :*
+
+- **Étant donné** un `DIRIGEANT` **quand** l'IRPP est calculé **alors** il aboutit ; **quand** la CNSS est calculée **alors** elle sort **`BLOQUÉE`**, jamais chiffrée.
+- ⛔ **Aucun repli sur le régime salarié.** C'est le cœur de la story.
+- **Étant donné** le paquet **quand** on y cherche le régime **alors** l'absence est lue depuis `cnss.aCompleter`, **jamais codée en dur** ⇒ compléter le paquet débloque **sans livraison**.
+- **Étant donné** un dossier **100 % salariés** **quand** le calcul s'exécute **alors** **rien ne change** — aucune régression sur le chemin nominal.

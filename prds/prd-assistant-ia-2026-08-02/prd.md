@@ -13,7 +13,19 @@ mode: coaching
 # PRD — Assistant IA socle (`assistant-service`)
 
 **Position 6 de la séquence** · Verticales : **les 5** · Dépend du Bloc 0
-Fondé sur `architecture-assistant-ia-2026-07-20.md` · Décisions tracées dans `.memlog.md`
+Fondé sur `architecture-assistant-ia-2026-07-20.md` — ⛔ **dont ce PRD REMPLACE le principe cardinal
+(§2 ci-dessous)** · Décisions tracées dans `.memlog.md`
+
+> ### ⚠️ Ce PRD n'a **pas** d'architecture à jour — constaté le 2026-08-16
+>
+> `assistant-service` est **le seul des huit PRD sans spine**, et sa seule note d'architecture
+> **précède le PRD de 13 jours**. Elle porte désormais un encadré **DÉPASSÉ** : son contrat
+> `Proposition` s'arrête à `PROPOSED → ACCEPTED / REJECTED` et **ne peut pas exprimer la doctrine du
+> §2** — ni `mode`, ni exécution, ni mandat, ni quota, ni réversibilité.
+>
+> ⚡ **Une partie reste réemployable telle quelle** : `LlmProvider`, le RAG et son corpus déjà livré,
+> l'OCR inchangé, le placement en relying party. **La spine est à écrire depuis ce PRD**, pas à
+> promouvoir depuis la note. Écart tracé : `GAP-assistant-ia-architecture-anterieure-au-prd`.
 
 ---
 
