@@ -5,7 +5,7 @@ purpose: build-substrate
 altitude: feature
 paradigm: 'hexagonal (ports & adaptateurs) sur un noyau sans mémoire métier, en relying-party de l''IdP'
 scope: 'micro-service assistant-service (Module 6 — socle IA) : contrat Proposition, moteur de langage ancré (RAG), moteur de règles, trois modes d''exécution et mandat, file d''arbitrage, journal, mesure et quota d''inférence'
-status: draft
+status: final
 created: '2026-08-16'
 updated: '2026-08-16'
 binds:
@@ -26,9 +26,10 @@ companions:
 
 # Architecture Spine — assistant-service
 
-> **Statut `draft` assumé.** Quatre questions attendent un arbitrage PO (§*Conditions bloquantes*), dont
-> une contradiction du PRD qui décide de la forme de l'incrément 3. La spine est complète et
-> constructible pour les incréments 1 et 2 en l'état.
+> **Quatre arbitrages PO du 2026-08-16 sont intégrés** (§*Arbitrages*) : le transport de la demande
+> d'exécution, l'assiette du plafond de mandat, la portée par dossier, et le portage de l'extension
+> `perms[]`. ⚡ **Le premier amende FR-IA04 du PRD** — à reporter dans le PRD, sans quoi le document
+> amont contredira cette spine.
 
 ## Design Paradigm
 
@@ -181,14 +182,18 @@ le bus ou par la réponse à la demande. Le sens des dépendances est strictemen
 - **Prevents:** « sous plafond » qui redevient de l'autonomie déguisée — et deux évaluations concurrentes
   qui dépassent ensemble un plafond qu'aucune n'a vu franchir
 - **Rule:** un `Mandat` porte : délivreur, périmètre (articles, fournisseurs, règles), **plafond cumulé
-  sur la période** en `(entier d'unité mineure, devise)`, plafond unitaire optionnel, date d'expiration,
-  révocabilité immédiate. *[ASSUMPTION — l'assiette cumulée est une proposition, voir §Conditions
-  bloquantes]*
+  sur la période** en `(entier d'unité mineure, devise)`, **plafond unitaire optionnel**, date
+  d'expiration, révocabilité immédiate. *[ARBITRÉ PO 2026-08-16 — l'assiette est **cumulée**, pas par
+  acte : un plafond par acte ne borne pas l'engagement total, quarante commandes sous plafond
+  l'épuisent sans jamais le franchir.]*
 - **Rule:** la consommation est un **compteur transactionnel** : réservation avant la demande
   d'exécution, confirmation au succès, libération à l'échec. Aucune vérification de plafond en lecture
   seule suivie d'une écriture séparée.
 - **Rule:** l'autorité du délivreur est **vérifiée** (FR-IA36c) : le service **refuse** la délivrance d'un
-  mandat dont le plafond excède celui que le délivreur détient lui-même. ⛔ Dépend d'**AD-P15**.
+  mandat dont le plafond excède celui que le délivreur détient lui-même. Dépend d'**AD-P15**, dont
+  l'extension d'`auth-service` est **portée par cet épic** en tête d'incrément 3 *[ARBITRÉ PO
+  2026-08-16]*. ⛔ **Aucun mandat n'est délivrable avant cette story** : un mandat sans contrôle
+  d'autorité est une délégation que son bénéficiaire s'accorde lui-même.
 - **Rule:** chaque `Execution` sous mandat **cite** le mandat, son plafond et son échéance. Un mandat
   expiré ou révoqué fait retomber ses règles en `VALIDATION` — jamais en silence, avec notification.
 
@@ -248,8 +253,16 @@ le bus ou par la réponse à la demande. Le sens des dépendances est strictemen
   défaire ce qu'il n'a pas fait.
 - **Rule:** toute exécution en `AUTO` ou `AUTO_SOUS_MANDAT` est **notifiée au responsable de la règle**.
   L'autonomie n'est jamais silencieuse.
-- **Rule:** ⛔ le **transport** de cette demande est la seule pièce non tranchée de cette spine — voir
-  §*Conditions bloquantes*, contradiction FR-IA04 / C8.
+- **Rule:** ⚡ **le transport est un événement, pas un appel** *[ARBITRÉ PO 2026-08-16]* : l'assistant
+  publie **`assistant.action.demandee`** par **outbox transactionnelle**, partition `orgId`, dans la
+  transaction qui écrit l'`Execution`. Le module exécutant consomme et répond par son propre événement de
+  résultat. **Un seul topic sortant**, et aucune dépendance à C8.
+- **Rule:** ⚠️ **ceci amende FR-IA04** (« aucun topic Kafka créé »), écrit quand l'assistant ne faisait
+  que proposer. L'invariant qui survit est *aucun **bus** nouveau, aucun topic **entrant** de donnée
+  métier* — AD-7 le tient. **Le PRD est à corriger sur ce point.**
+- **Rule:** une demande d'exécution est **idempotente par la clé** `(executionId)` : un rejeu du
+  consommateur ne produit pas une seconde action. La preuve appartient au module exécutant, pas à la
+  vigilance de l'assistant.
 
 ### AD-11 — Règles, garde-fous et scores sont un vocabulaire fermé et des stratégies typées, jamais un langage
 
@@ -278,6 +291,11 @@ le bus ou par la réponse à la demande. Le sens des dépendances est strictemen
   variables ; il ne compose pas le texte.
 - **Rule:** l'assistant ne stocke ni modèle, ni gabarit de message. Il stocke le **rendu figé** de la
   cible, soumis à l'horloge courte d'AD-16 comme toute donnée personnelle.
+- **Rule:** ⚠️ l'aperçu est le **seul appel synchrone sortant** de ce service — une lecture, sans secret,
+  hors chemin d'autorisation. Tant que **C8** n'est pas tranchée, il **dégrade explicitement** : la cible
+  est produite avec `apercuIndisponible` et la règle **ne peut pas passer en `AUTO`** faute de
+  prévisualisation (FR-IA29). ⛔ **Le repli interdit est de rendre le message localement** : deux moteurs
+  de rendu produiraient un aperçu différent du message réellement envoyé.
 
 ### AD-13 — L'écart entre l'impact annoncé et l'impact recalculé est un fait retourné, agrégé par surface
 
@@ -372,11 +390,16 @@ le bus ou par la réponse à la demande. Le sens des dépendances est strictemen
 - **Rule:** cinq droits **distincts et attribuables séparément**, déclarés au catalogue de permissions :
   créer une règle · **changer son mode** · arbitrer une file · accepter une Proposition · administrer les
   modèles. **Changer un mode est plus restreint qu'arbitrer** : c'est une décision de gouvernance.
-- **Rule:** toute Proposition portant sur un espace comptable porte son **`dossierId`**, vérifié contre la
-  **portée serveur** ; hors portée ⇒ `404`, jamais `403`. Le dossier vient de l'URL, jamais du jeton.
-- **Rule:** ⛔ FR-IA45/IA46 et l'autorité de mandat (AD-6) **dépendent d'AD-P15**, dont la story
-  d'extension d'`auth-service` n'existe pas. `assistant-service` est le **quatrième module** bloqué
-  dessus.
+- **Rule:** ⚡ toute Proposition portant sur un espace comptable porte son **`dossierId`** **dès
+  l'incrément 1** *[ARBITRÉ PO 2026-08-16]*, vérifié contre la **portée serveur** ; hors portée ⇒ `404`,
+  jamais `403`. Le dossier vient de l'URL, jamais du jeton. **Ceci amende FR-IA47**, écrit avant AD-P13 :
+  le cloisonnement est par organisation **et** par dossier. *Le défaut évité n'est pas un refus d'accès,
+  c'est une Proposition affichée sur le mauvais dossier — fausse et parfaitement plausible.*
+- **Rule:** FR-IA45/IA46 et l'autorité de mandat (AD-6) dépendent d'**AD-P15**. `assistant-service` est le
+  **quatrième module** bloqué dessus, et **c'est cet épic qui porte la story d'extension d'`auth-service`**
+  *[ARBITRÉ PO 2026-08-16]* — en tête d'incrément 3, avec ses quatre consommateurs nommés (`reseau`,
+  `catalogue`, `stock`, `assistant`). ⚠️ Elle touche un service **livré et central** : story dédiée,
+  jamais un effet de bord de ce module.
 
 ### AD-20 — Démarrage dégradé, indépendance des moteurs, et un interrupteur lu à l'exécution
 
@@ -551,25 +574,31 @@ assistant-service/
 | --- | --- | --- |
 | **I1 — Le socle propose** (A · B · C · K : FR-IA01→IA15, IA49→IA52) | `domain/proposition`, `ports/llm`, `application/mesure` | AD-1, AD-2, AD-3, AD-7, AD-16, AD-17, AD-18, AD-19, AD-20, **AD-21** |
 | **I2 — Le socle ne ment pas** (D · E : FR-IA16→IA23) | `adapters/rag`, `application/mapping` | AD-13, AD-14, AD-15, **AD-22** |
-| **I3 — Le socle agit** (F · G · H · I · J : FR-IA23b→IA48) | `domain/regle`, `domain/mandat`, `adapters/candidats`, `adapters/executants`, `application/arbitrage` | AD-4, AD-5, AD-6, AD-8, AD-9, AD-10, AD-11, AD-12, AD-19, **AD-23** |
+| **I3 — Le socle agit** (F · G · H · I · J : FR-IA23b→IA48) | `domain/regle`, `domain/mandat`, `adapters/candidats`, `adapters/executants`, `application/arbitrage` — **+ extension `perms[]` dans `auth-service`, en tête d'incrément** | AD-4, AD-5, AD-6, AD-8, AD-9, AD-10, AD-11, AD-12, AD-19, **AD-23** |
 
-## Conditions bloquantes hors de cette colonne
+## Arbitrages du 2026-08-16 et conditions restantes
 
-Quatre points ne sont **pas** dans l'autorité de cette spine. Les trois premiers doivent être tranchés
-avant l'incrément 3 ; le dernier borne ce que le module peut prouver.
+### Tranché par le PO — intégré aux AD
 
-1. ⛔ **Contradiction FR-IA04 ⇄ AD-10 — le transport de la demande d'exécution.** FR-IA04 interdit tout
-   nouveau topic Kafka, mais l'assistant doit demander une exécution à un autre service. Deux voies :
-   **(a)** publier **un** topic `assistant.action.*` par outbox — amende FR-IA04, patron standard du
-   programme ; **(b)** appel machine-à-machine — dépend de **C8**, condition **programme** encore ouverte,
-   déjà nommée bloquante par la spine `notification`. **Recommandation : (a).**
-2. ⛔ **AD-P15 non livrée.** FR-IA45, FR-IA46 et l'autorité de délivrance d'un mandat (FR-IA36c) exigent
-   des droits de tenant dans `perms[]`. `assistant-service` est le **quatrième module** bloqué dessus,
-   après `reseau`, `catalogue` et `stock`.
-3. ⛔ **Obligation croisée sur `bilan-service`** (AD-13) : sans une story qui renvoie l'impact recalculé,
-   SM-7 est immesurable et NFR-1 reste une affirmation.
-4. ⛔ **Q2 — serveur d'inférence** : machine et modèle de production non spécifiés depuis le 2026-07-20.
-   Bloque la qualité mesurable de NFR-3, pas la livraison de l'incrément 1.
+| # | Question | Décision | Où elle vit |
+| --- | --- | --- | --- |
+| 1 | Transport de la demande d'exécution — FR-IA04 interdisait tout topic, AD-10 en exige un | **Un topic `assistant.action.*` par outbox.** ⚡ **Amende FR-IA04** ; aucune dépendance à C8 | AD-10 |
+| 2 | Assiette du plafond de mandat, non dite par le PRD | **Cumulée sur la période**, plafond unitaire optionnel | AD-6 |
+| 3 | FR-IA47 (« par organisation ») écrit avant AD-P13 | **`dossierId` dès l'incrément 1**, vérifié contre la portée serveur. ⚡ **Amende FR-IA47** | AD-19 |
+| 4 | Qui porte l'extension `perms[]` d'AD-P15 | **L'épic Assistant la porte**, en tête d'incrément 3, avec ses quatre consommateurs nommés | AD-6, AD-19 |
+
+⚠️ **Deux amendements remontent au PRD** (FR-IA04 et FR-IA47). Tant qu'ils n'y sont pas portés, le
+document amont contredit cette spine — c'est exactement le défaut qui a rendu la note du 20/07 dangereuse.
+
+### Ce qui reste ouvert — sans bloquer le découpage
+
+1. **Obligation croisée sur `bilan-service`** (AD-13) : sans une story qui renvoie l'impact recalculé,
+   SM-7 est immesurable et NFR-1 reste une affirmation. À créer avec la surface pilote.
+2. **C8 (authentification machine-à-machine)** — n'affecte plus l'exécution (arbitrage 1), seulement
+   l'**aperçu** du message. Dégradation explicite définie en AD-12 ; aucune règle de communication ne
+   passe en `AUTO` sans aperçu.
+3. **Q2 — serveur d'inférence** : machine et modèle de production non spécifiés depuis le 2026-07-20.
+   Borne la **qualité mesurable** de NFR-3, pas la livraison de l'incrément 1.
 
 ## Deferred
 

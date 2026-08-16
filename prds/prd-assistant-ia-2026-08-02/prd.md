@@ -2,7 +2,7 @@
 title: "PRD — Assistant IA socle (assistant-service)"
 status: final
 created: 2026-08-02
-updated: 2026-08-02
+updated: 2026-08-16
 project: prospera
 service: assistant-service
 epic: EPIC-026
@@ -16,16 +16,26 @@ mode: coaching
 Fondé sur `architecture-assistant-ia-2026-07-20.md` — ⛔ **dont ce PRD REMPLACE le principe cardinal
 (§2 ci-dessous)** · Décisions tracées dans `.memlog.md`
 
-> ### ⚠️ Ce PRD n'a **pas** d'architecture à jour — constaté le 2026-08-16
+> ### ✅ Ce PRD a désormais sa spine — et trois de ses exigences sont amendées
 >
-> `assistant-service` est **le seul des huit PRD sans spine**, et sa seule note d'architecture
-> **précède le PRD de 13 jours**. Elle porte désormais un encadré **DÉPASSÉ** : son contrat
-> `Proposition` s'arrête à `PROPOSED → ACCEPTED / REJECTED` et **ne peut pas exprimer la doctrine du
-> §2** — ni `mode`, ni exécution, ni mandat, ni quota, ni réversibilité.
+> **Écrite le 2026-08-16 depuis ce PRD** *(et non promue depuis la note du 2026-07-20, dépassée sur son
+> principe cardinal)* :
+> [`architecture/architecture-assistant-service-2026-08-16/ARCHITECTURE-SPINE.md`](../../architecture/architecture-assistant-service-2026-08-16/ARCHITECTURE-SPINE.md),
+> **AD-1 → AD-23**. Découpage : [`epics-assistant-ia-2026-08-16.md`](../../epics-assistant-ia-2026-08-16.md),
+> **EPIC-095 → EPIC-105, 142 pts**. Écart `GAP-assistant-ia-architecture-anterieure-au-prd` refermé.
 >
-> ⚡ **Une partie reste réemployable telle quelle** : `LlmProvider`, le RAG et son corpus déjà livré,
-> l'OCR inchangé, le placement en relying party. **La spine est à écrire depuis ce PRD**, pas à
-> promouvoir depuis la note. Écart tracé : `GAP-assistant-ia-architecture-anterieure-au-prd`.
+> ⚠️ **Trois exigences de ce document sont amendées par les arbitrages PO du 2026-08-16** — corrigées
+> ci-dessous, en place, avec la marque **`[AMENDÉ 2026-08-16]`** :
+>
+> | Exigence | Ce qui change | Pourquoi |
+> | --- | --- | --- |
+> | **FR-IA04** | Un **topic sortant** `assistant.action.demandee` est autorisé | Sans lui, l'assistant ne peut pas demander une exécution — et l'incrément 3 dépendrait de C8, condition programme ouverte |
+> | **FR-IA47** | Cloisonnement par organisation **et par dossier** | Écrit le 02/08, **avant AD-P13** du 15/08 qui fait du dossier l'unité de travail |
+> | **FR-IA36b** | L'assiette du plafond de mandat est **cumulée sur la période** | Le PRD ne disait pas l'assiette ; un plafond par acte ne borne pas l'engagement total |
+>
+> ⛔ **La note du 2026-07-20 reste dépassée** et ne doit toujours pas servir à cadrer des stories. Ce
+> qu'elle porte encore et qui survit — `LlmProvider`, le RAG et son corpus livré, l'OCR inchangé, le
+> placement en relying party — est **repris dans la spine**, qui fait foi.
 
 ---
 
@@ -178,7 +188,7 @@ services parallèles avec deux audits, deux régimes de validation et deux faço
 | **FR-IA03** | ⚡ Le service **ne détient aucune copie de donnée métier** — ni read-model, ni abonnement au bus pour en constituer un. Il obtient les données de deux façons seulement : **le contexte fourni par l'appelant** (usage interactif), ou **une demande au module détenteur au moment de l'évaluation** (usage automatique). *Décision tranchée 2026-08-02.* |
 | **FR-IA03b** | Tout module dont les données peuvent déclencher une règle expose un **fournisseur de candidats** : un contrat par lequel l'assistant demande « quelles entités remplissent cette condition maintenant ? » et reçoit la liste. Le module reste **seul détenteur** et seul juge de ses données. |
 | **FR-IA03c** | Si le module détenteur est **indisponible** au moment de l'évaluation, la règle **ne s'exécute pas** — et cette non-exécution est **inscrite au journal et visible**, jamais silencieuse. Une règle qui n'a pas tourné et que personne ne voit est pire qu'une règle désactivée. |
-| **FR-IA04** | Aucun nouveau bus : pas de topic Kafka créé. Les traitements différés utilisent une file interne. |
+| **FR-IA04** | ⚡ **[AMENDÉ 2026-08-16]** Aucun **bus** nouveau, et **aucun topic entrant de donnée métier** — l'assistant ne s'abonne à rien pour constituer un read-model (FR-IA03). Il publie en revanche **un** topic sortant, **`assistant.action.demandee`**, par outbox transactionnelle : c'est ainsi qu'il demande une exécution au module compétent (FR-IA12, spine AD-10). *La rédaction d'origine — « pas de topic Kafka créé » — datait du moment où l'assistant ne faisait que proposer ; la maintenir aurait rendu l'incrément 3 dépendant de C8, condition programme encore ouverte.* Les traitements différés utilisent une file interne. |
 
 ### B — Fournisseur de modèle
 
@@ -250,7 +260,7 @@ services parallèles avec deux audits, deux régimes de validation et deux faço
 | **FR-IA34** | **`SUGGESTION`** — l'assistant signale, l'humain décide et agit. Aucune action n'est préparée. |
 | **FR-IA35** | **`VALIDATION`** — l'assistant prépare tout (cible, canal, message) ; **un humain déclenche**. C'est le mode par défaut de toute règle touchant à l'argent, à une remise ou à la réputation. |
 | **FR-IA36** | **`AUTO`** — l'assistant exécute, sous quatre conditions **cumulatives et vérifiées** : l'action est **réversible**, elle **n'engage rien** (§2), un **quota** la borne, et elle est **journalisée**. Une seule condition manquante ⇒ la règle ne peut pas être en `AUTO`. |
-| **FR-IA36b** | ⚡ **`AUTO_SOUS_MANDAT`** — une action **engageante** peut être exécutée sans validation au coup par coup **si et seulement si** un humain a délivré un **mandat** préalable : plafond de montant, périmètre d'articles ou de fournisseurs, **date d'expiration**, révocabilité immédiate. Le mandat est une **délégation de signature**, pas une propriété de l'action : l'assistant n'a rien décidé, il exécute une autorisation humaine bornée. |
+| **FR-IA36b** | ⚡ **`AUTO_SOUS_MANDAT`** — une action **engageante** peut être exécutée sans validation au coup par coup **si et seulement si** un humain a délivré un **mandat** préalable : plafond de montant, périmètre d'articles ou de fournisseurs, **date d'expiration**, révocabilité immédiate. ⚡ **[AMENDÉ 2026-08-16 — l'assiette du plafond]** : le plafond est **cumulé sur la période du mandat**, avec un **plafond unitaire optionnel** en complément. *Un plafond « par acte » ne borne pas l'engagement total — quarante commandes sous plafond l'épuisent sans jamais le franchir.* La consommation est un **compteur réservé avant l'exécution puis confirmé**, sans quoi deux évaluations concurrentes dépassent ensemble un plafond qu'aucune n'a vu franchir (spine AD-6). Le mandat est une **délégation de signature**, pas une propriété de l'action : l'assistant n'a rien décidé, il exécute une autorisation humaine bornée. |
 | **FR-IA36c** | Un mandat est **délivré par quelqu'un qui détient lui-même l'autorité correspondante**. Un responsable stock ne peut pas s'attribuer le plafond d'un directeur financier. Le service refuse la délivrance, il ne la signale pas. |
 | **FR-IA36e** | ⚡ **Le plafond d'un mandat porte sa devise** et suit les règles d'exactitude de la plateforme : entier d'unité mineure, décimales de la devise (⚠️ **le XOF n'en a aucune**). Un mandat de « 3 000 000 » sans devise est un mandat dont personne ne connaît la portée réelle. *Ajouté à la revue croisée.* |
 | **FR-IA36d** | Chaque exécution sous mandat **cite le mandat qui l'autorise** dans son journal, avec son plafond et son échéance. Un mandat **expiré ou révoqué** suspend immédiatement les règles qui s'y adossent — elles retombent en `VALIDATION`, jamais en silence. |
@@ -274,7 +284,7 @@ services parallèles avec deux audits, deux régimes de validation et deux faço
 |---|---|
 | **FR-IA45** | Droits portés par le catalogue de permissions plateforme, distincts : créer une règle, changer son mode, arbitrer une file, accepter une Proposition, administrer les modèles. |
 | **FR-IA46** | **Changer le mode d'une règle est un droit à part** — plus restreint que celui de l'arbitrer. Passer une règle en `AUTO` est une décision de gouvernance, pas une opération quotidienne. |
-| **FR-IA47** | Cloisonnement strict par organisation : Propositions, règles, journaux, corpus surchargés. |
+| **FR-IA47** | ⚡ **[AMENDÉ 2026-08-16]** Cloisonnement strict **par organisation ET par dossier** : Propositions, règles, journaux, corpus surchargés. L'`orgId` vient du **jeton signé**, le `dossierId` de **l'URL** et il est vérifié contre la **portée serveur** à chaque appel ; hors portée ⇒ **`404`, jamais `403`**. *La rédaction d'origine ne connaissait que l'organisation : elle précède de treize jours **AD-P13**, qui fait du dossier l'unité de travail. Le défaut évité n'est pas un refus d'accès, c'est une Proposition affichée sur le mauvais dossier — fausse et parfaitement plausible.* |
 | **FR-IA48** | Le **contexte envoyé au modèle est minimisé** : seules les données nécessaires à la surface, jamais un dossier entier par confort d'implémentation. |
 
 ### K — Consommation d'inférence
@@ -369,6 +379,14 @@ append-only. Un conseil fiscal contesté doit être reconstituable deux ans plus
 basse, comme pour `notification-service`. Le motif est le même : le périmètre réel apparaît au
 découpage, pas au cadrage.
 
+> ⚡ **Et le découpage réel du 2026-08-16 donne 142 pts, pas 92** — la même mécanique a rejoué une
+> troisième fois. Les 50 d'écart sont sourcés dans
+> [`epics-assistant-ia-2026-08-16.md`](../../epics-assistant-ia-2026-08-16.md). Le premier poste est
+> **le socle lui-même — entitlement, gate, cloisonnement — que ce PRD ne mentionne nulle part**, +13 pts,
+> **cinquième omission d'affilée** après `reseau`, `catalogue-produits`, `stock` et `pdv`. Ce n'est plus
+> un oubli de rédaction : c'est un **angle mort du gabarit de PRD**, à corriger dans le gabarit et pas
+> dans ce document.
+
 **Pourquoi cet ordre.** L'incrément 1 est utile seul : le contrat Proposition est ce que les surfaces
 consommeront. L'incrément 2 est celui qui rend le conseil fiscal **écrivable** — il débloque
 `EPIC-024`. L'incrément 3 est le plus vendu et le plus risqué : il vient quand le contrat est éprouvé.
@@ -410,10 +428,10 @@ consommeront. L'incrément 2 est celui qui rend le conseil fiscal **écrivable**
 | Q1 | **Scoring et prévision** (churn, PD, demande, PAR) : quel module, quand, et sur quel historique ? Un premier client arrive avec zéro mois de données | ⏸ **reportée** (décision utilisateur : « arrivé là-bas on va le faire »). Sans effet sur ce PRD — hors périmètre. Reste à traiter avant de vendre ces IA |
 | Q2 | **Serveur d'inférence** : quelle machine, quel modèle de production ? | ⛔ **ouverte** — décision n° 1 de la note d'architecture, jamais tranchée. Bloque la qualité, pas la livraison |
 | Q3 | Nom du service : `assistant-service`, `conseil-service`, `copilote-service` | ouverte — sans conséquence technique |
-| Q4 | Le stockage vectoriel : index simple ou moteur dédié | ouverte — à trancher quand le corpus devient multi-pays |
+| Q4 | Le stockage vectoriel : index simple ou moteur dédié | ✅ **tranchée 2026-08-16 (spine AD-14)** — **index reconstructible tenu en mémoire**, jamais une source : 1 185 articles / ~925 Ko ne justifient pas une dépendance d'exploitation. Un store dédié devient une **conséquence de croissance** (multi-pays), pas un prérequis |
 | Q5 | Qui, chez le client, a le droit de passer une règle en `AUTO` ? | ouverte — décision de gouvernance, à trancher au découpage en stories |
 | Q6 | Comment le moteur de règles atteint-il les données métier sans détenir de copie ? | ✅ **tranchée 2026-08-02** — **le module détenteur expose un fournisseur de candidats** ; aucun abonnement au bus, aucune copie locale (FR-IA03 → IA03c) |
-| Q7 | Qui alimente le **catalogue des types d'action** (FR-IA23b/c) et le valide ? | ouverte — à trancher au découpage en stories. Le défaut strict (non déclaré = engageant) rend l'absence non dangereuse |
+| Q7 | Qui alimente le **catalogue des types d'action** (FR-IA23b/c) et le valide ? | ✅ **tranchée 2026-08-16 (spine AD-4)** — c'est un **référentiel versionné `types-action@AAAA.N` de `platform-catalog-service`**, au patron du paquet fiscal : chaque module exécutant fournit ses entrées, Money Vibes publie la version. ⏳ **Reste à nommer le responsable de la publication.** Le défaut strict (non déclaré = engageant **et irréversible**) rend l'absence non dangereuse |
 
 ---
 

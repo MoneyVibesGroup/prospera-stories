@@ -2,7 +2,7 @@
 
 **Date :** 2026-07-04 (rev 1.3 : 2026-07-10)
 **Architecte :** vivian
-**Version :** 1.3
+**Version :** 1.7  *(⚠️ l'en-tête était resté à **1.3** alors que le corps porte 1.4, 1.5 et 1.6 depuis le 2026-08-15 — corrigé le 2026-08-16)*
 **Type :** Architecture programme (niveau écosystème, au-dessus des architectures de service)
 **Statut :** Draft
 
@@ -478,6 +478,43 @@ Ils appartiennent à d'autres documents ; les corriger ici créerait une seconde
 
 ---
 
+## ⚡ État de la chaîne documentaire — audit du 2026-08-16
+
+Cette section existe parce que la question *« tous les PRD ont-ils une architecture et un
+découpage ? »* se repose à chaque audit, et que la réponse **n'est pas la même selon que le module est
+à construire ou déjà livré**. Elle fixe la règle et l'état, pour que le constat ne soit pas refait à
+chaque fois avec les mêmes doutes.
+
+### La règle
+
+> **Un module à construire** suit la chaîne complète : **PRD → spine → document d'épics → stories**.
+> **Un module déjà livré** ne reçoit **ni PRD ni document d'épics rétroactifs** — ils
+> dupliqueraient le tracker sans rien ajouter, et un doublon non maintenu devient un document faux.
+> Il reçoit une **spine rétroactive** *si et seulement si* il n'a **aucune** architecture **ou** que
+> la sienne est devenue fausse **et** que d'autres modules s'appuient sur lui.
+
+### L'état au 2026-08-16
+
+| Module | PRD | Architecture | Épics |
+| --- | --- | --- | --- |
+| assistant, catalogue-produits, fiscalité, notification, paiement, PDV, réseau, stock | ✅ | ✅ spine | ✅ `epics-*.md` |
+| `balance-service` | ✅ `prd-atelier-balance` | ✅ spine **rétroactive** (15/08) | 🟦 dans le tracker — **livré**, pas de doc |
+| `dossier-service` | 🟦 **`TICKET-BACKEND-dossier-client-entite-de-premier-rang.md`** tient lieu de cadrage — 16 blocs devenus **13 stories sous `EPIC-043`** (S20) ; la spine s'y **lie** (`binds`), le ticket se déclare lui-même « état transitoire clos, les stories font foi » | ✅ spine **rétroactive** (15/08) | 🟦 `EPIC-043` dans le tracker — **livré** |
+| `bilan-service` | ✅ `prd-bilan-service` | ⚠️ note de 07/07 — **réancrée le 16/08** : valide sur son objet, **dépassée sur l'isolation (`AD-P13`) et la propriété de l'`Exercice` (`AD-P14`)** | 🟦 dans le tracker — **livré** |
+| `expert-comptable` | ✅ `prd-expert-comptable` | ⚠️ note de 02/07 — **réancrée le 16/08** : le moule de service survit, **le modèle de tenancy est historique** (`AD-P13`, `AD-P15`, `AD-P16`) | 🟦 dans le tracker — **livré** |
+
+⛔ **Ce que cet audit a réellement trouvé, et qui n'était pas une question de format** : les notes
+`bilan-service` et `expert-comptable` portaient **zéro occurrence du mot « dossier »** et décrivaient
+l'isolation par le seul `orgId`. Elles **encodaient l'ancienne vérité et la gardaient active** — le
+défaut que ce dépôt a payé cinq fois. Le manque n'était pas « pas de spine » : c'était **deux
+documents faux que rien ne signalait**.
+
+⚠️ **Reste ouvert, et c'est le vrai risque** : `bilan-service` expose toujours `POST /bilan/exercices`
+alors que `dossier-service` fait foi (`AD-P14`). **Deux écritures possibles pour un même fait**, tant
+que `STORY-356`/`236`/`357` ne sont pas livrées.
+
+---
+
 ## Historique des révisions
 
 | Version | Date | Auteur | Changements |
@@ -486,6 +523,7 @@ Ils appartiennent à d'autres documents ; les corriger ici créerait une seconde
 | 1.1 | 2026-07-07 | vivian | **Modules partagés & versioning par organisation** : `bilan-service` (capacité partagée, 2 axes version de code ⊥ référentiel packagé, gate d'accès en relying party) et `catalog-service` (entitlements `(org × module)`, topic `entitlement.changed`, `admin-panel` BFF pour FR-012). Amende l'ownership map (entitlement → catalog ; abonnement reste vertical) ; ajoute **P7/P8** ; insère catalog + bilan dans la roadmap ; risques N/N-1 & routage multi-version. JWT/A3 inchangés. |
 | 1.2 | 2026-07-07 | vivian | **Couche edge/exécution** : décisions **P9** (schema registry adopté maintenant — compatibilité BACKWARD en CI) et **P10** (mono-repo maintenant, poly-repo différé) ; ajout du doc `architecture-gateway` (validation JWT fail-fast à l'edge + services souverains, routage par préfixe, résolution multi-version, services sans port public). Risque #4 (schema registry) passé de « envisager » à « planifié ». |
 | 1.3 | 2026-07-10 | vivian | **Alignement PLAN FINAL** (`docs/synthese-services-prospera-2026-07-10.md`) : décisions **P11** (dogfooding interne d'abord — Money Vibes = client zéro ; N/N-1 & routage multi-version différés jusqu'au 1er client externe, **DG-1** ; chaîne KYC livrée d'abord, **AD-2**) et **P12** (18 modules → 18 services suivant le moule unique ; **NC-1** `catalog-service` → `platform-catalog-service` ; **NB-1** Bilan par import de balance + prévisionnel ; **PA-1** checkout/webhooks → `paiement-service`). Ordre de construction et backlog des 18 modules → `program_backlog` de `sprint-status.yaml`. Invariants inchangés. |
+| **1.7** | **2026-08-16** | PO + Claude | ⚡ **AUDIT DE LA CHAÎNE DOCUMENTAIRE** — nouvelle section *« État de la chaîne documentaire »* : elle fixe la **règle** (un module à construire suit PRD → spine → épics → stories ; un module **livré** ne reçoit **ni PRD ni doc d'épics rétroactifs**, seulement une spine rétroactive s'il n'a aucune architecture ou qu'elle est devenue fausse) et l'**état des 11 modules**. ⛔ **Ce que l'audit a trouvé n'était pas un problème de format** : les notes `bilan-service` (07/07) et `expert-comptable` (02/07) portaient **zéro occurrence du mot « dossier »** et décrivaient l'isolation par le seul `orgId` — elles **encodaient l'ancienne vérité et la gardaient active**, six semaines après `AD-P13`. Les deux portent désormais un **encadré de réancrage** distinguant ce qui tombe de ce qui survit (traitement de la note Assistant IA du 20/07). ⚠️ Le vrai risque reste nommé : `bilan-service` expose toujours `POST /bilan/exercices` alors que `dossier-service` fait foi — **deux écritures possibles pour un même fait** tant que STORY-356/236/357 ne sont pas livrées. + en-tête de version corrigée (elle était restée à 1.3). |
 | **1.6** | **2026-08-15** | PO + Claude | ⚡ **AD-P16 — Money Vibes peut lire la donnée métier de TOUTE organisation, dans TOUS les modules.** Capacité programme : jusqu'ici la console ne voyait que l'identité, le KYC et les entitlements, jamais la donnée métier d'un client. Mécanisme : **routes de lecture plateforme réservées à `PLATFORM_ADMIN`, `orgId` en PARAMÈTRE EXPLICITE et jamais tiré du jeton**, lecture seule, **une organisation à la fois**, **journalisées avec leur motif**. La carte de propriété ne bouge pas — ces routes lisent, elles ne dupliquent pas (ni read-model consolidé, ni agrégation permanente au BFF). ⚠️ **DEUX COÛTS ASSUMÉS** : ① le rayon d'action d'un compte plateforme compromis passe de l'identité/KYC/droits à **la donnée métier de tous les clients** — le journal et la limite « une org à la fois » sont les seuls garde-fous ; ② elle traverse un **engagement de confidentialité envers des TIERS** — les prix freelance du catalogue, cachés à la société qui paie l'abonnement, sont **vus par Money Vibes sans condition** ⇒ **`FR-C29d` devient impératif et s'élargit** : le contrat de l'indépendant doit annoncer que l'éditeur peut consulter ses prix. |
 | **1.5** | **2026-08-15** | PO + Claude | ⚡ **AD-P15 — le RBAC s'étend au périmètre tenant, et AMENDE D15.** Deux PRD d'affilée (`FR-R28b` réseau, `FR-C48` catalogue) supposaient pouvoir déclarer des droits de tenant dans un catalogue de permissions qui est **plateforme** et rend `perms: []` à tout utilisateur de tenant — besoin systémique, pas erreur de rédaction : stock, commande, facturation et PDV l'auront aussi. ⚡ **Le discriminant du jeton est écrit une fois** : ce n'est PAS « état tiers ou pas » (un rôle change aussi par action tierce, et `roles[]` y est depuis le premier jour) mais **BORNÉ ou NON BORNÉ**. Vocabulaire fermé ⇒ jeton ; ensemble de données du client ⇒ read-model. C'est ce qui rend AD-P15 et **AD-5 de `reseau-service`** cohérentes au lieu de contradictoires. ⚠️ `auth-service` étant livré et central, l'extension passe par une story dédiée avec ses consommateurs nommés, jamais en effet de bord d'un module métier. |
 | **1.4** | **2026-08-15** | PO + Claude | ⚡ **RÉANCRAGE — le document avait six semaines de retard sur le système, alors que les trois spines (fiscal, notification, paiement) en héritent toutes.** Ajout à l'ownership map de **8 propriétaires manquants**, dont deux services **livrés et absents** : `balance-service` (Module 1-bis, en production, **toujours sans architecture propre**) et `dossier-service` (livré les 13-14/08). Deux décisions programme nouvelles : **AD-P13** — le dossier est l'unité de travail, l'organisation ne l'est plus ; le JWT porte l'org, **jamais** le dossier ; hors portée = `404`, jamais `403`. **AD-P14** — l'exercice appartient au dossier (STORY-355) ; `balance-service` et `bilan-service` en deviennent des read-models et **cessent d'être source de vérité sur le statut** ; `ExerciceTopic` séparé de `DossierTopic`. + 2 familles de topics (`dossier.*`, `dossier.exercice.*`), partition par `dossierId`. ⚠️ Trois écarts **constatés sans être corrigés** : `balance-service` sans architecture · `dossier-service` sans gate entitlement/KYC (écart au moule commun, à confirmer par le PO) · la note `Tenant`→`Organization` ignore la seconde clé de portée `dossierId`. ⛔ **La bascule de l'exercice n'est pas terminée** : STORY-356/236/357 `not_started` ⇒ deux écritures possibles pour un même fait. |

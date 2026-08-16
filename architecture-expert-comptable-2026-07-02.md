@@ -5,7 +5,35 @@
 **Version :** 1.3
 **Type de projet :** API (micro-service NestJS)
 **Niveau de projet :** 3 (12–40 stories)
-**Statut :** Draft
+**Statut :** ⚠️ **HISTORIQUE SUR SON MODÈLE DE TENANCY** *(voir l'encadré de réancrage)* — était : « Draft »
+
+> # ⚠️ Réancrage du 2026-08-16 — le modèle de tenancy de ce document est dépassé
+>
+> Ce document a déjà été révisé trois fois pour suivre le programme (KYC extrait, relying party, Bilan
+> extrait). **Une quatrième révision manquait**, et elle porte sur ce que le document répète partout :
+> **`Tenant` = organisation = société cliente**, isolation par le seul `tenantId`.
+>
+> ⛔ **`AD-P13` (2026-08-15) dit que ce modèle était faux** : *« Une organisation ≠ une société. Un
+> cabinet qui gère vingt clients avait, dans le modèle initial, vingt organisations. C'était faux : il
+> a **une** organisation et **vingt dossiers**. »* Ce document porte **zéro occurrence du mot
+> « dossier »** — vérifié le 2026-08-16.
+>
+> | | Ce document (rév. 1.3) | Ce qui fait foi aujourd'hui |
+> | --- | --- | --- |
+> | Unité de travail | le **tenant/cabinet**, clé `tenantId` sur toutes les requêtes | ⚡ **`AD-P13`** — le **`Dossier`**, possédé par **`dossier-service`** ; le JWT porte l'organisation, **jamais** le dossier ; hors portée ⇒ `404` |
+> | Droits | *« les rôles TENANT ne sont pas touchés par le RBAC »* (**D15**), `perms: []` | ⚡ **`AD-P15`** — le catalogue de permissions accueille des **droits de tenant** ; `perms[]` cesse d'être vide. Extension portée par **`STORY-365`** (S21) |
+> | Lecture plateforme | la console ne voit qu'identité, KYC et entitlements | ⚡ **`AD-P16`** — chaque service métier expose une **route de lecture plateforme** nommée, `orgId` explicite, journalisée |
+>
+> ### ✅ Ce qui reste valide
+>
+> Le **moule de service** que tout le programme recopie depuis : pipeline HTTP, guards, `nestjs-cls`,
+> repository scopé, jobs Bull, stockage objet, read-models par événements, relying party JWKS. Les
+> décisions **D8 → D10** et le journal de révisions restent la trace exacte des extractions successives.
+>
+> ⚠️ **Et son périmètre résiduel est à re-questionner** : ce document décrit encore l'abonnement
+> **FedaPay** comme vivant ici, alors que le module 2 du programme (**`paiement-service`**, PI-SPI) a
+> son PRD, sa spine et son découpage depuis le 2026-08-03. Ce n'est pas corrigé ici — c'est **nommé**,
+> pour que personne ne construise dessus.
 
 > **Révision 1.1 (2026-07-03) — extraction du KYC.** L'EPIC-003 (KYC) est extrait dans un micro-service dédié **`kyc-service`** (documents + machine à états + revue admin, FR-005/FR-006), consommé par plusieurs services PROSPERA. `expert-comptable` devient **consommateur** : il maintient `tenant.kycStatus` comme **read-model** alimenté par les événements KYC, et conserve le `TenantStateGuard` (FR-007). Voir `docs/architecture-kyc-service-2026-07-03.md`. Les sections ci-dessous sont annotées « ⟶ kyc-service » là où la responsabilité a migré.
 >

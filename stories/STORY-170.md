@@ -1,16 +1,24 @@
 # STORY-170 : `TranscriptionProvider` — la **troisième famille de modèle**, et l'audio qui va avec
 
-**Epic :** EPIC-026 — Assistant IA transverse *(extension)*
+**Epic :** ⚡ **EPIC-096 — Le fournisseur de modèle et les gabarits versionnés** *(extension)*
+*(ex-`EPIC-026`, ré-ancrée le **2026-08-16** : l'identifiant `EPIC-026` est abandonné pour ce module — il
+désigne aussi « Projets », `STORY-141`, **livrée** au S18. Le module vit désormais dans
+[`epics-assistant-ia-2026-08-16.md`](../epics-assistant-ia-2026-08-16.md), `EPIC-095` → `EPIC-105`.)*
 **Réf. PRD :** [`prds/prd-assistant-ia-2026-08-02/prd.md`](../prds/prd-assistant-ia-2026-08-02/prd.md) §6 groupe B (FR-IA05→IA09) · groupe C *(contrat Proposition)* · §7 **NFR-4** *(les données ne quittent pas l'infrastructure)*
-**Réf. code livré :** **STORY-116** *(prévue — `LlmProvider`)* · `OcrProvider` (`document-service`, STORY-041/042) · `ChannelProvider` · `PaymentProvider` — **quatre déclinaisons du même patron**
-**Dépend de :** STORY-115 *(scaffold `assistant-service`)*, STORY-117 *(contrat Proposition)*
+**Réf. architecture :** [`architecture/architecture-assistant-service-2026-08-16/ARCHITECTURE-SPINE.md`](../architecture/architecture-assistant-service-2026-08-16/ARCHITECTURE-SPINE.md) — **AD-21** *(le fournisseur de modèle est un port ; changer de modèle est une configuration)*
+**Réf. code livré :** `OcrProvider` (`document-service`, STORY-041/042) · `ChannelProvider` · `PaymentProvider` — **trois déclinaisons livrées du même patron**
+**Dépend de :** ⚡ **EPIC-095** *(socle `assistant-service`)* et **EPIC-097** *(contrat Proposition)* — story_id attribués au slotting.
+⛔ **Corrigé le 2026-08-16 :** cette ligne disait *« dépend de STORY-115 et STORY-117 »*, deux stories
+**supersédées le même jour** (recopie de la note d'architecture du 2026-07-20, dépassée sur son principe
+cardinal). *Une dépendance nommée vers une story supersédée est une dépendance **morte** : elle a l'air
+satisfaite le jour où plus personne ne la lit.*
 **Débloque :** **MB-03** *(voice-to-CRM)*
 **Priorité :** Must Have — **dans le bloc terrain**
 **Story Points :** 8
 **Statut :** À faire
 **Assigné à :** null
 **Créée le :** 2026-08-02
-**Sprint :** **35** — **bloc terrain**  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
+**Sprint :** **40** — **bloc terrain**, `deferred` *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints` — puis **reculé au S40** par le re-découpage PI-SPI du 2026-08-03. ⚠️ Ce fichier annonçait encore le **S35** : écart relevé et corrigé le 2026-08-16, le tracker fait foi.)*
 **Service :** `assistant-service` (`:3011`)
 
 ---

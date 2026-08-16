@@ -26,7 +26,7 @@ sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 #
 # ── ÉTAT AU 2026-08-15 ────────────────────────────────────────────────────────────────────────────
 epic_id_high_water_mark: "EPIC-094"   # dernier épic ATTRIBUÉ — EPIC-085→094 pris le 2026-08-15 par pdv-service ; EPIC-075→084 le même jour par stock-service ; EPIC-065→074 le même jour par catalogue-produits-service ; EPIC-044→053 le même jour par reseau-service. Historique : EPIC-043 = dossier-client, S20.
-story_id_high_water_mark: "STORY-370" # dernier story_id ATTRIBUE — STORY-368/369/370 (ecarts ouverts balance-service) prises le 2026-08-15, slottees S20 ; STORY-367 (portee dossier de l'Atelier) le meme jour, slottee S20 ; STORY-366 (seed du catalogue de modules) le meme jour, slottee S20 ; STORY-365 (RBAC tenant) le meme jour, slottee S21
+story_id_high_water_mark: "STORY-371" # dernier story_id ATTRIBUE — STORY-371 (référentiel types-action + module assistant au catalogue) prise le 2026-08-16 au découpage de assistant-service, slottée S21. AVANT : STORY-368/369/370 (écarts ouverts balance-service) et STORY-367 (portée dossier de l'Atelier) le 2026-08-15, slottées S20 ; STORY-366 (seed du catalogue) ; STORY-365 (RBAC tenant AD-P15), slottée S21. ⚠️ AUCUN story_id n'est réservé pour EPIC-095→EPIC-105 : attribution au slotting, comme la règle l'exige.
 
 reserved_ranges:
   - range: "EPIC-044 → EPIC-053"
@@ -74,6 +74,61 @@ reserved_ranges:
       trois blocs attendent une décision PO. ⛔ CONTRAINTE DURE au slotting : à livrer AVANT le S37,
       où « Émission du lien via notification-service » (PI-SPI) en dépend, et où STORY-304 porte un
       hook aujourd'hui INERTE. ⛔ C8 (auth machine-à-machine, décision PROGRAMME) bloque le bloc 2.
+
+  - range: "EPIC-095 → EPIC-105"
+    status: "RÉSERVÉ"
+    owner: "assistant-service (Assistant IA socle — module #6 de la séquence, LES 5 VERTICALES)"
+    source_doc: "prospera-stories/epics-assistant-ia-2026-08-16.md"
+    reserved_on: "2026-08-16"
+    story_ids: "AUCUN — attribués au slotting"
+    note: >-
+      11 épics, 142 pts. Plage prise LE JOUR DU DÉCOUPAGE. NON SLOTTÉ : aucun sprint attribué,
+      `assistant-service` N'EXISTE PAS dans le dépôt. ⚡ EPIC-026 EST ABANDONNÉ POUR CE MODULE : cet
+      identifiant désigne AUSSI « Projets » (STORY-141, LIVRÉE au S18 sur platform-catalog-service) —
+      deux épics, un numéro, dont un déjà en production. ⛔ STORY-115→119 SONT À SUPERSÉDER, PAS À
+      RÉÉCRIRE : elles recopient le §10 de la note du 2026-07-20, DÉPASSÉE sur son principe cardinal
+      (ni mode, ni règle, ni file d'arbitrage, ni mandat), et le `goal` du sprint 35 dit encore
+      textuellement « l'IA PROPOSE, l'humain valide » — la doctrine que le §2 du PRD REMPLACE.
+      ⚠️ STORY-170 (TranscriptionProvider, deferred S40) dépend de STORY-115/117 : à rattacher au
+      nouveau découpage en même temps. ⚠️ 142 pts et non les ~92 du PRD : +13 socle/entitlement/gate/
+      dossier (JAMAIS COMPTÉ — 5e FOIS D'AFFILÉE après reseau, catalogue, stock et pdv : ce n'est plus
+      un accident de rédaction mais un ANGLE MORT DU GABARIT DE PRD), +6 base d'audit séparée et DEUX
+      HORLOGES (AD-16 — NFR-6 « reconstituable à deux ans » et FR-IA48 « minimisation » se
+      contredisent sur le prompt intégral, qui porte de la donnée métier du client), +5 équité de la
+      file d'inférence et vue plateforme, +5 topic sortant/outbox/idempotence de l'exécution, +5
+      catalogue des types d'action publié comme référentiel (LA DOCTRINE ELLE-MÊME : sans lui FR-IA27/
+      IA36/IA38 et NFR-2 sont inapplicables — la revue du PRD l'avait classé `critical`), +5 volet
+      bilan-service (renvoyer l'impact recalculé, sinon SM-7 immesurable), +5 décideur typé/chaînage/
+      immutabilité, +3 déclaration des six droits, +3 aperçu de message et dégradation explicite.
+      ⛔ TROIS STORIES HORS SERVICE, UNE SEULE NEUVE : (1) RBAC tenant AD-P15 => ✅ STORY-365 EXISTE
+      DÉJÀ (créée 2026-08-15, slottée S21, EPIC-025) — assistant-service en est le CINQUIÈME
+      dépendant ; ⚠️ MAIS elle ne connaît pas les six droits de l'assistant NI l'autorité de
+      délivrance d'un mandat (comparer le plafond du délivreur au plafond délivré) : à vérifier contre
+      son contenu avant de tirer EPIC-104 ; (2) ✅ STORY-371 CRÉÉE LE 2026-08-16 ET SLOTTÉE S21 (EPIC-014,
+      5 pts) — publier le référentiel `types-action@AAAA.N` et enregistrer le module `assistant` au
+      catalogue ; bloque EPIC-095 et EPIC-101 ; (3) volet
+      bilan-service, PORTÉ PAR EPIC-100 et non hors périmètre. ✅ 4 ARBITRAGES PO DU 2026-08-16
+      INTÉGRÉS : (1) l'exécution est DEMANDÉE par un topic `assistant.action.demandee` en outbox — ⚡
+      CE QUI AFFRANCHIT L'INCRÉMENT 3 DE C8, condition programme toujours ouverte, et AMENDE FR-IA04 ;
+      (2) plafond de mandat CUMULÉ sur la période + unitaire optionnel (un plafond par acte ne borne
+      pas l'engagement total) ; (3) dossierId DÈS L'INCRÉMENT 1 — AMENDE FR-IA47, écrit le 02/08 avant
+      AD-P13 du 15/08 ; (4) l'épic porte l'extension perms[] — CORRIGÉ AU DÉCOUPAGE : la story existe,
+      on la NOMME au lieu d'en créer un doublon. ⚠️ DEUX AMENDEMENTS RESTENT À REPORTER DANS LE PRD
+      (FR-IA04 et FR-IA47) — tant qu'ils n'y sont pas, le document amont contredit la spine et ce
+      découpage, DÉFAUT EXACT QUI A RENDU LA NOTE DU 20/07 DANGEREUSE. ⛔ CONTRAINTES D'ORDRE :
+      EPIC-097 précède TOUT (le contrat Proposition est ce que les deux moteurs partagent) ; EPIC-101
+      précède EPIC-102/103/104 (le catalogue est la SEULE source du contrôle de mode — l'écrire après
+      supposerait de revalider toutes les règles déjà configurées) ; EPIC-099 précède EPIC-100 ;
+      EPIC-098 DANS LE BLOC 2 et pas plus tard (la mesure d'inférence se FIGE À L'APPEL : branchée
+      après coup, tout ce qui a été invoqué est définitivement non attribuable) ; EPIC-095 porte le
+      dossierId DÈS SA 1re VERSION alors qu'aucune surface comptable n'existe. ⚠️ EPIC-104 EST LE PLUS
+      RISQUÉ : son erreur NE SE VOIT PAS en test fonctionnel — une règle en AUTO sur une action mal
+      déclarée envoie, journalise et rend la main ; ce qui manque n'apparaît qu'au moment où quelqu'un
+      veut DÉFAIRE. DoD = DEUX tests de mutation (rendre le catalogue permissif doit faire ROUGIR la
+      suite ; supprimer la réservation du compteur de mandat doit faire ROUGIR un test de concurrence).
+      ✅ Q6 et Q7 tranchées ; Q4 tranchée par AD-14 (index reconstructible en mémoire, pas de store
+      dédié pour 925 Ko) ; ⛔ Q2 (serveur d'inférence) OUVERTE DEPUIS LE 2026-07-20 — borne la QUALITÉ
+      mesurable de NFR-3, pas la livraison.
 # ══════════════════════════════════════════════════════════════════════════════════════════════════
 
 # Révision 2026-07-04 : re-cadrage écosystème (voir docs/architecture-prospera-ecosystem-2026-07-04.md).
@@ -2469,7 +2524,7 @@ sprints:
     start_date: "2027-04-08"
     end_date: "2027-04-22"
     capacity_points: 34
-    committed_points: 22
+    committed_points: 27   # ⚡ 22 → 27 le 2026-08-16 : +5 pour STORY-371 (référentiel types-action + module `assistant`), slottée ICI parce que S21 porte déjà STORY-365 — les deux sont des PRÉALABLES CROSS-SERVICE créés AVANT leur consommateur, même motif et même arbitrage.
     completed_points: 0
     status: "not_started"  # 🆕 CRÉÉ le 2026-08-04 — DETTE DE CONTRAT DE LA CONSOLE, sortie de l'Integration Gate AP-INT-0. ⚠️ Ce sprint MORD SUR LA RÉSERVE FISCALE (S21→S29, cf. `reserved_sprints`) : c'est un choix, pas un oubli. Le S20 était déjà à 48/34, et ces cinq stories débloquent des écrans DÉJÀ ÉCRITS — les laisser dormir derrière neuf sprints de fiscal reviendrait à garder une console qui ment sur cinq points. La réserve fiscale passe donc de 9 à 8 sprints (S22→S29).
     goal: "Dette de contrat de la console (ticket TICKET-BACKEND-ecarts-releves-par-integration-gate-console.md) : la fenêtre de support N/N-1 devient une règle du service et non une politique d'écran ; les organisations se filtrent par statut KYC ; le BFF unifie le chemin de la revue KYC ; un entitlement porte sa date d'octroi ; l'administrateur plateforme est semé au démarrage."
@@ -2481,6 +2536,14 @@ sprints:
         service: "auth-service"
         status: "not_started"  # 🆕 CRÉÉE le 2026-08-15 sur décision PO (« la créer maintenant, la slotter au S21 »). ⚡ AD-P15, qui AMENDE D15 — d'où l'épic EPIC-025, celle qui a posé D15. ⚠️ CRÉÉE MAINTENANT ET PAS AU SLOTTING, délibérément : elle est NOMMÉE PAR TROIS SPINES (reseau FR-R28b, catalogue FR-C48, stock FR-S61/S62) et n'existait comme story dans AUCUN tracker — le défaut exact que tickets/README.md décrit. Sa conception ne s'améliorera plus : les trois vocabulaires sont énumérés AUJOURD'HUI, et c'est le seul instant où on peut les regarder ENSEMBLE pour fixer la borne de `perms[]` ; créée plus tard, chaque module aurait déjà déclaré ses droits de son côté et la borne serait posée APRÈS les faits qu'elle doit borner. ⚠️ NON TIRABLE avant que l'un des trois modules démarre — aucun n'existe dans le dépôt ; le S21 est son point d'ancrage, pas une urgence. Fait vérifié : auth.service.ts:400 « les permissions ne viennent QUE du rôle plateforme : les rôles TENANT ne sont pas touchés par le RBAC (périmètre plateforme, D15) → perms: [] ». L'extension est ADDITIVE (perms[] vaut [] pour tout tenant aujourd'hui) donc aucun porteur existant ne peut régresser. ⛔ LE CŒUR N'EST PAS L'OUVERTURE MAIS LA BORNE : le jeton voyage à chaque requête dans un cookie httpOnly de 4 Ko, et le discriminant BORNÉ/NON BORNÉ doit devenir un TEST (tenter d'enregistrer un droit qui serait une liste d'identifiants de données doit virer au rouge) — sans quoi le module suivant remettra une portée dans le jeton, ce qu'AD-5 de reseau-service a précisément refusé.
         story_path: "stories/STORY-365.md"
+        assigned_to: null
+      - story_id: "STORY-371"
+        title: "Le catalogue des types d'action devient un référentiel versionné — et le module `assistant` existe enfin"
+        epic: "EPIC-014"
+        points: 5
+        service: "platform-catalog-service"
+        status: "not_started"  # 🆕 CRÉÉE le 2026-08-16 au découpage de assistant-service. ⚡ AD-4 : le catalogue des types d'action est un ReferentielVersion (types-action@AAAA.N), AU PATRON EXACT DU PAQUET FISCAL — PAS une table locale de l'assistant. Motif FR-IA23c : c'est notification-service qui SAIT qu'un envoi WhatsApp n'est pas rattrapable, pas l'assistant. ⛔ SANS ELLE, LA DOCTRINE DU §2 N'EST QU'UNE INTENTION : la revue du PRD avait classé `critical` le fait que FR-IA27 refuse un mode AUTO sans dire d'où le service tire la nature de l'action. Porte AUSSI l'enregistrement du Module `assistant` au catalogue, sans quoi aucun entitlement n'est octroyable et le gate d'EPIC-095 n'a rien à lire (MÊME FAMILLE DE TROU que les 6 modules du pack distributeur, provisioning à 422 depuis le 2026-08-11). ⚠️ 1er artefact VOLONTAIREMENT MINIMAL : uniquement les types réellement connus (canaux de notification) — aucun type inventé pour un module qui n'existe pas. ⚡ PIÈGE À NE PAS FUSIONNER : `engageant` et `reversible` sont INDÉPENDANTS (un WhatsApp n'engage rien et n'est pas rattrapable ; une commande engage et s'annule sous conditions) — les fondre en un « niveau de risque » détruit la distinction sur laquelle repose tout le §2. BLOQUE EPIC-095 et EPIC-101.
+        story_path: "stories/STORY-371.md"
         assigned_to: null
       - story_id: "STORY-178"
         title: "Semer l'administrateur plateforme au démarrage — une stack fraîche est aujourd'hui inutilisable"
@@ -3507,50 +3570,15 @@ sprints:
         status: "not_started"  # 🏁 MODULE 2 LIVRÉ. Rejoue UJ-1 (le parcours de Kossi) intégralement, PLUS le même scénario avec notifications désordonnées et dupliquées. ⚠️ Les cibles NFR-7 y sont MESURÉES ET CONSIGNÉES comme référence à reconfirmer après 30 jours — jamais validées comme un seuil acquis (elles ne dérivent d'aucun usage observé).
         assigned_to: null
 
-  - sprint_number: 39   # ⬅️ ex-S22, puis ex-S25, puis ex-S35 — RECULÉ DE 4 SPRINTS le 2026-08-03 par le re-découpage PI-SPI (183 pts imputables au lieu de 103). Contenu INCHANGÉ. ⚠️ L’assistant IA n’a AUCUNE dépendance dure et son propre commentaire le dit « déplaçable plus tôt » : le placer ici reste un CHOIX de priorité, pas une contrainte technique.
+  - sprint_number: 39   # ⬅️ ex-S22, puis ex-S25, puis ex-S35. ⚡ VIDÉ LE 2026-08-16 — son contenu (STORY-115→119) était la recopie du §10 de la note d'architecture du 2026-07-20, DÉPASSÉE SUR SON PRINCIPE CARDINAL. Le module est re-découpé en EPIC-095 → EPIC-105 (11 épics, 142 pts) et N'EST PAS SLOTTÉ : l'ordonnancement est une décision PO, comme pour reseau, catalogue, stock et pdv.
     start_date: "2027-12-16"
     end_date: "2027-12-30"
     capacity_points: 34
-    committed_points: 28
+    committed_points: 0   # ⚡ 28 → 0 le 2026-08-16. Ce n'est PAS une désallocation de charge : les 142 pts du module existent, ils vivent dans epics-assistant-ia-2026-08-16.md et attendent d'être slottés. Le sprint est conservé VIDE plutôt que supprimé pour que la trace du recul S22→S25→S35→S39 ne se perde pas.
     completed_points: 0
-    status: "not_started"  # 🆕 2026-07-20 — SOCLE EPIC-026 (Assistant IA transverse). Note docs/architecture-assistant-ia-2026-07-20.md. AUCUNE dépendance dure → placé en FIN de backlog par DÉFAUT (zéro renumérotation), mais DÉPLAÇABLE plus tôt : le socle peut démarrer dès après le cœur Bilan (EPIC-011B/012) ; les surfaces à valeur s'attachent à EPIC-013 (prévisionnel) / EPIC-023 (fiscal). Priorité à confirmer au sprint-planning.
-    goal: "Assistant IA transverse — SOCLE (EPIC-026) : service assistant-service (:3011, relying party, base propre) + LlmProvider swappable (dev qwen2.5:3b Ollama/Docker, prod GLM-5 auto-hébergé) + contrat Proposition (l'IA PROPOSE, l'humain valide, le déterministe CALCULE) + RAG corpus CGI/LPF (bge-m3, citation obligatoire) + surface pilote MAPPING comptes (alimente FR-008). OCR reste Tesseract."
-    stories:
-      - story_id: "STORY-115"
-        title: "Scaffold assistant-service (:3011, relying party JWKS, health llm:, base assistant_service, démarrage dégradé)"
-        epic: "EPIC-026"
-        points: 5
-        service: "assistant-service"
-        status: "not_started"
-        assigned_to: null
-      - story_id: "STORY-116"
-        title: "LlmProvider (API OpenAI-compatible) + Ollama dev (qwen2.5:3b) + config swap prod (GLM-5 auto-hébergé)"
-        epic: "EPIC-026"
-        points: 5
-        service: "assistant-service"
-        status: "not_started"  # patron OcrProvider/PaymentProvider ; LLM_BASE_URL + LLM_MODEL = config, zéro code au swap
-        assigned_to: null
-      - story_id: "STORY-117"
-        title: "Contrat Proposition — persistance + cycle PROPOSED→ACCEPTED/REJECTED + audit (prompt/réponse/modèle)"
-        epic: "EPIC-026"
-        points: 5
-        service: "assistant-service"
-        status: "not_started"  # human-in-the-loop ; jamais d'écriture sur données réelles/validées
-        assigned_to: null
-      - story_id: "STORY-118"
-        title: "RAG corpus CGI/LPF + embeddings bge-m3 + règle de citation d'article obligatoire (anti-hallucination)"
-        epic: "EPIC-026"
-        points: 8
-        service: "assistant-service"
-        status: "not_started"  # corpus = donnée versionnée pays×année (NFR-A06) ; sans citation → Proposition 'non sourcée'
-        assigned_to: null
-      - story_id: "STORY-119"
-        title: "Surface pilote — proposition de mapping des comptes non reconnus (alimente le flux FR-008 validé par un humain)"
-        epic: "EPIC-026"
-        points: 5
-        service: "assistant-service"
-        status: "not_started"  # surface la moins risquée ; dépend table de passage (FR-006/008 ✅)
-        assigned_to: null
+    status: "not_started"  # ⚡ RE-DÉCOUPÉ le 2026-08-16 — spine architecture/architecture-assistant-service-2026-08-16/ARCHITECTURE-SPINE.md (AD-1→AD-23) + découpage epics-assistant-ia-2026-08-16.md (EPIC-095→EPIC-105, plage RÉSERVÉE le jour même). ⛔ EPIC-026 EST ABANDONNÉ POUR CE MODULE : l'identifiant désigne AUSSI « Projets » (STORY-141, LIVRÉE au S18). ⛔ LES 5 STORIES SONT EN superseded_stories, PAS SUPPRIMÉES. ⚠️ AUCUNE DÉPENDANCE DURE reste vrai, mais DEUX AMONTS EXISTENT DÉSORMAIS : STORY-365 (RBAC tenant, S21) pour EPIC-104, et STORY-371 (référentiel types-action + module assistant au catalogue, S21) pour EPIC-095/EPIC-101."
+    goal: "⚡ SPRINT VIDÉ — voir epics-assistant-ia-2026-08-16.md. L'ancien objectif disait « contrat Proposition (l'IA PROPOSE, l'humain valide, le déterministe CALCULE) » : c'est EXACTEMENT la doctrine que le §2 du PRD REMPLACE depuis le 2026-08-02 (« le curseur n'est pas IA ou humain, il est : l'acte est-il réversible et sans engagement ? »). Un objectif de sprint périmé n'est pas une doublure inoffensive du découpage — il encode l'ancienne vérité et la garde active. Le socle réel se lit dans les 11 épics, dont l'incrément 3 (règles, 3 modes, mandat, file d'arbitrage) que l'ancien découpage NE CONTENAIT PAS DU TOUT."
+    stories: []   # ⚡ VIDE ASSUMÉ : les stories seront attribuées au slotting des EPIC-095→105, aucun story_id n'est réservé d'avance (règle du dépôt).
 
   - sprint_number: 40   # ⬅️ ex-S26, puis ex-S36 — RECULÉ DE 4 SPRINTS le 2026-08-03 par le re-découpage PI-SPI. Contenu INCHANGÉ.
     start_date: "2027-12-30"
@@ -3563,11 +3591,11 @@ sprints:
     stories:
       - story_id: "STORY-170"
         title: "TranscriptionProvider — la troisième famille de modèle, et l'audio qui va avec"
-        epic: "EPIC-026"
+        epic: "EPIC-096"   # ⚡ ex-EPIC-026, ré-ancrée le 2026-08-16 : EPIC-096 est « le fournisseur de modèle », dont TranscriptionProvider est la 3e famille
         points: 8
         service: "assistant-service"
-        status: "deferred"  # dépend de STORY-115 + STORY-117 (S25) ET du dépôt mobile ; débloque MB-03 (voice-to-CRM), elle-même deferred
-        blocked_by: "dépôt prospera-terrain à créer + choix React Native/Flutter non tranché"
+        status: "deferred"  # ⚡ DÉPENDANCE RÉ-EXPRIMÉE le 2026-08-16 : elle disait « dépend de STORY-115 + STORY-117 », or ces deux stories sont SUPERSÉDÉES (recopie de la note dépassée du 20/07). Elle dépend désormais d'EPIC-095 (socle) et EPIC-097 (contrat Proposition), dont les story_id seront attribués au slotting. ⚠️ Une dépendance nommée vers une story supersédée est une dépendance MORTE : elle a l'air satisfaite le jour où plus personne ne la lit. Débloque MB-03 (voice-to-CRM), elle-même deferred.
+        blocked_by: "dépôt prospera-terrain à créer + choix React Native/Flutter non tranché ; amonts EPIC-095 et EPIC-097 non slottés"
         assigned_to: null
 
 # ── Bilan fonctionnel : epics du PRD (docs/prd-bilan-service-2026-07-10.md, NB-1) ─────────────────
@@ -3651,15 +3679,27 @@ atelier_balance_epics:
 # ── Transverse : Assistant IA (analyse & proposition) — note docs/architecture-assistant-ia-2026-07-20.md ────────
 # Capacité IA TRANSVERSE (décision 2026-07-20). Principe cardinal : l'IA PROPOSE (contrat Proposition, human-in-the-loop) ;
 # les moteurs DÉTERMINISTES (bilan EPIC-011/011B, fiscal EPIC-023) CALCULENT/DÉCIDENT. Service dédié assistant-service (:3011).
+# Capacité IA TRANSVERSE. ⚡ RE-CADRÉE LE 2026-08-16 : la doctrine n'est plus « l'IA propose, l'humain valide »
+# mais « l'acte est-il RÉVERSIBLE et SANS ENGAGEMENT ? » (§2 du PRD du 2026-08-02). L'IA peut donc AGIR SEULE
+# sur l'acte réversible, sous garde-fous, quota, mandat daté et journal — ce que l'ancienne note interdisait,
+# rendant INVENDABLE le module Automatisations déjà vendu.
 assistant_ia_epics:
-  architecture: "docs/architecture-assistant-ia-2026-07-20.md"
+  prd: "prospera-stories/prds/prd-assistant-ia-2026-08-02/prd.md"
+  architecture: "prospera-stories/architecture/architecture-assistant-service-2026-08-16/ARCHITECTURE-SPINE.md"
+  note_anterieure: "prospera-stories/architecture-assistant-ia-2026-07-20.md"   # ⛔ DÉPASSÉE sur son principe cardinal — conservée pour la trace du raisonnement OCR/RAG, JAMAIS pour cadrer une story
+  decoupage: "prospera-stories/epics-assistant-ia-2026-08-16.md"
   service: "assistant-service"
   epics:
+    - id: "EPIC-095 → EPIC-105"
+      name: "Assistant IA socle (assistant-service :3011) — 11 épics, 142 pts"
+      frs: "FR-IA01 → FR-IA52 + NFR-1 → NFR-7 (les 52 FR et 7 NFR rattachés à au moins une AD) ; débloque EPIC-024 (conseil fiscal), déjà vendu et déjà cadré"
+      story_estimate: "AUCUN story_id réservé — attribution au slotting"
+      status: "ready_for_slotting"  # 🆕 2026-08-16. Plage inscrite dans reserved_ranges le jour du découpage. NON SLOTTÉ : ordonnancement = décision PO. ⛔ 2 AMONTS DURS : STORY-365 (RBAC tenant, S21) pour EPIC-104 ; STORY-371 (référentiel types-action + module assistant au catalogue, S21) pour EPIC-095 et EPIC-101.
     - id: "EPIC-026"
-      name: "Assistant IA transverse (analyse & proposition sur données)"
-      frs: "prolonge FR-A22..A24 (conseil fiscal) ; surfaces mapping/fiscal/analyse/notes/KYC"
-      story_estimate: "5 (socle @ S22) + surfaces JIT"
-      status: "proposed"  # 🆕 2026-07-20 (note d'archi). SOCLE = STORY-115→119 (~28 pts, S22) : scaffold assistant-service + LlmProvider (dev qwen2.5:3b Ollama/Docker, prod GLM-5 auto-hébergé, swap sans code) + contrat Proposition + RAG corpus CGI/LPF (bge-m3, citation obligatoire) + surface pilote MAPPING (alimente FR-008). AUCUNE dépendance dure → DÉPLAÇABLE plus tôt. Surfaces à valeur : conseil fiscal ⇐ EPIC-023, analyse financière ⇐ prévisionnel EPIC-013. Confidentialité = modèle auto-hébergé (données tenant dans l'infra MV). OCR reste Tesseract (VLM hébergé plus tard, hors périmètre).
+      name: "⛔ ABANDONNÉ POUR CE MODULE — l'identifiant désigne « Projets » (STORY-141, LIVRÉE au S18, platform-catalog-service)"
+      frs: "—"
+      story_estimate: "—"
+      status: "superseded"  # ⚡ COLLISION D'IDENTIFIANT tranchée le 2026-08-16 : deux épics portaient EPIC-026, dont un DÉJÀ EN PRODUCTION. L'Assistant IA prend EPIC-095→105 ; « Projets » garde EPIC-026. STORY-115→119 sont en superseded_stories.
 
 # ── Module 2 — PI-SPI & encaissement (paiement-service :3005) ────────────────────────────────────
 # Découpage du 2026-08-03. REMPLACE le découpage EPIC-004 rescopé (STORY-150→165, 168, 169), passé
@@ -3741,7 +3781,7 @@ velocity:
   sprint_32: null  # PI-SPI incrément 1 🏁 (153/154) + registre fournisseurs (168) + créance manuelle (169) — 26 pts. Rang 2 de l'ordre PO : le PI-SPI de la CONSOLE.
   sprint_33: null  # PI-SPI incrément 2 — terrain : promesses, espèces, réconciliation, annulation, solde, droits (155→160) — 34 pts
   sprint_34: null  # PI-SPI incrément 3 🏁 CLÔTURE EPIC-004 — abonnement, entitlements par événement (ex-039), impayé/grâce, devises, e2e (161→165) — 26 pts
-  sprint_35: null  # ⬅️ ex-sprint_22 puis ex-sprint_25. EPIC-026 socle — Assistant IA transverse (assistant-service :3011, LlmProvider, Proposition, RAG, surface mapping) — stories 115-119 ; DÉPLAÇABLE (aucune dépendance dure)
+  sprint_35: null  # ⬅️ ex-sprint_22 puis ex-sprint_25. ⚡ LÉGENDE CORRIGÉE le 2026-08-16 : ce renvoi décrivait le socle par « stories 115-119 », toutes SUPERSÉDÉES le même jour. Le module Assistant IA vit maintenant dans EPIC-095 → EPIC-105 (epics-assistant-ia-2026-08-16.md, 142 pts), NON SLOTTÉ.
   sprint_36: null  # ⛔ BLOC TERRAIN, 0 pt engagé — STORY-170 (TranscriptionProvider) `deferred` : le dépôt prospera-terrain n'existe pas et le choix React Native/Flutter n'est pas tranché
   rolling_average: 27  # (33 + 23 + 24) / 3 ≈ 26.7 ; cible prudente ~24/sprint (1 flux, réf. historique retenue au sprint-planning 2026-07-10)
 # ── Stories orphelines : SOLDÉ le 2026-08-01 ──────────────────────────────────
@@ -3975,10 +4015,46 @@ superseded_stories:
     date: "2026-08-03"
     raison: "ABSORBÉE telle quelle, chemin A du PO (2026-08-02). Sans elle l'écran distributeur porte sur un objet inexistant. 290 ajoute l'origine SAISIE_MANUELLE explicite (AD-2), pour qu'à l'arrivée de Facturation on sache lesquelles ne pas dupliquer."
 
+  - story_id: "STORY-115"
+    title: "Scaffold assistant-service (:3011, relying party JWKS, health llm:, base assistant_service, démarrage dégradé)"
+    epic: "EPIC-026 (abandonné pour ce module)"
+    points: 5
+    superseded_by: ["EPIC-095"]
+    date: "2026-08-16"
+    raison: "ABSORBÉE ET ÉLARGIE. EPIC-095 ajoute ce que la story ignorait : la DEUXIÈME BASE (assistant_service_audit, protégée par le rôle serveur), le CLOISONNEMENT À DEUX CLÉS (orgId du jeton + dossierId de l'URL vérifié contre la portée serveur — AD-P13 date du 2026-08-15, la story du 2026-07-20), les SIX DROITS déclarés au catalogue et la route de lecture plateforme (AD-P16). 5 → 16 pts. ⛔ RECOPIE DU §10 DE LA NOTE D'ARCHITECTURE DU 2026-07-20, DÉPASSÉE SUR SON PRINCIPE CARDINAL. La note disait « l'IA propose, l'humain valide, rien n'est appliqué sans validation humaine » ; le §2 du PRD du 2026-08-02 REMPLACE cette doctrine par « l'acte est-il réversible et sans engagement ? ». Ces 5 stories n'ont NI mode (AUTO/VALIDATION/SUGGESTION), NI état exécuté, NI mandat daté et révocable, NI quota, NI règle d'automatisation, NI file d'arbitrage — UN CONTRAT SANS ÉTAT « EXÉCUTÉ » NE PEUT PAS DÉCRIRE UN ASSISTANT QUI EXÉCUTE. Un développeur les implémentant aurait livré un assistant incapable d'agir seul, et le module Automatisations, DÉJÀ VENDU, serait resté invendable. Re-découpage complet : epics-assistant-ia-2026-08-16.md (EPIC-095→EPIC-105, 11 épics, 142 pts) sur la spine architecture-assistant-service-2026-08-16."
+  - story_id: "STORY-116"
+    title: "LlmProvider (API OpenAI-compatible) + Ollama dev + config swap prod"
+    epic: "EPIC-026 (abandonné pour ce module)"
+    points: 5
+    superseded_by: ["EPIC-096"]
+    date: "2026-08-16"
+    raison: "ABSORBÉE quasi telle quelle — c'est la partie de la note du 20/07 QUI SURVIT (§2). EPIC-096 y ajoute les GABARITS VERSIONNÉS possédés par le service et le figement (modele, versionGabarit) sur chaque invocation, sans quoi aucune régression de qualité n'est diagnosticable (FR-IA08). 5 → 10 pts. ⛔ RECOPIE DU §10 DE LA NOTE D'ARCHITECTURE DU 2026-07-20, DÉPASSÉE SUR SON PRINCIPE CARDINAL. La note disait « l'IA propose, l'humain valide, rien n'est appliqué sans validation humaine » ; le §2 du PRD du 2026-08-02 REMPLACE cette doctrine par « l'acte est-il réversible et sans engagement ? ». Ces 5 stories n'ont NI mode (AUTO/VALIDATION/SUGGESTION), NI état exécuté, NI mandat daté et révocable, NI quota, NI règle d'automatisation, NI file d'arbitrage — UN CONTRAT SANS ÉTAT « EXÉCUTÉ » NE PEUT PAS DÉCRIRE UN ASSISTANT QUI EXÉCUTE. Un développeur les implémentant aurait livré un assistant incapable d'agir seul, et le module Automatisations, DÉJÀ VENDU, serait resté invendable. Re-découpage complet : epics-assistant-ia-2026-08-16.md (EPIC-095→EPIC-105, 11 épics, 142 pts) sur la spine architecture-assistant-service-2026-08-16."
+  - story_id: "STORY-117"
+    title: "Contrat Proposition — persistance + cycle PROPOSED→ACCEPTED/REJECTED + audit"
+    epic: "EPIC-026 (abandonné pour ce module)"
+    points: 5
+    superseded_by: ["EPIC-097"]
+    date: "2026-08-16"
+    raison: "⛔ C'EST LA STORY LA PLUS FAUSSE DES CINQ : son cycle s'arrête à PROPOSED→ACCEPTED/REJECTED. EPIC-097 porte le discriminant origine LANGAGE|REGLE (AD-1 — la thèse « un seul contrat pour deux moteurs »), le DÉCIDEUR TYPÉ HUMAIN|REGLE|MANDAT (AD-2, sans lequel SM-1 et CM-1 sont IMMESURABLES en mode AUTO), l'immutabilité chaînée et l'Exécution comme AGRÉGAT SÉPARÉ. 5 → 14 pts. ⛔ RECOPIE DU §10 DE LA NOTE D'ARCHITECTURE DU 2026-07-20, DÉPASSÉE SUR SON PRINCIPE CARDINAL. La note disait « l'IA propose, l'humain valide, rien n'est appliqué sans validation humaine » ; le §2 du PRD du 2026-08-02 REMPLACE cette doctrine par « l'acte est-il réversible et sans engagement ? ». Ces 5 stories n'ont NI mode (AUTO/VALIDATION/SUGGESTION), NI état exécuté, NI mandat daté et révocable, NI quota, NI règle d'automatisation, NI file d'arbitrage — UN CONTRAT SANS ÉTAT « EXÉCUTÉ » NE PEUT PAS DÉCRIRE UN ASSISTANT QUI EXÉCUTE. Un développeur les implémentant aurait livré un assistant incapable d'agir seul, et le module Automatisations, DÉJÀ VENDU, serait resté invendable. Re-découpage complet : epics-assistant-ia-2026-08-16.md (EPIC-095→EPIC-105, 11 épics, 142 pts) sur la spine architecture-assistant-service-2026-08-16."
+  - story_id: "STORY-118"
+    title: "RAG corpus CGI/LPF + embeddings + règle de citation obligatoire"
+    epic: "EPIC-026 (abandonné pour ce module)"
+    points: 8
+    superseded_by: ["EPIC-099"]
+    date: "2026-08-16"
+    raison: "ABSORBÉE. EPIC-099 précise deux choses que la story laissait ouvertes : le corpus devient un RÉFÉRENTIEL VERSIONNÉ corpus-legal-<pays>@AAAA.N (et non un fichier chargé), et la citation se résout CONTRE LA VERSION DE CORPUS FIGÉE sur la Proposition (AD-15) — sinon une citation valide l'an dernier reste applicable aujourd'hui. 8 → 11 pts. ⛔ RECOPIE DU §10 DE LA NOTE D'ARCHITECTURE DU 2026-07-20, DÉPASSÉE SUR SON PRINCIPE CARDINAL. La note disait « l'IA propose, l'humain valide, rien n'est appliqué sans validation humaine » ; le §2 du PRD du 2026-08-02 REMPLACE cette doctrine par « l'acte est-il réversible et sans engagement ? ». Ces 5 stories n'ont NI mode (AUTO/VALIDATION/SUGGESTION), NI état exécuté, NI mandat daté et révocable, NI quota, NI règle d'automatisation, NI file d'arbitrage — UN CONTRAT SANS ÉTAT « EXÉCUTÉ » NE PEUT PAS DÉCRIRE UN ASSISTANT QUI EXÉCUTE. Un développeur les implémentant aurait livré un assistant incapable d'agir seul, et le module Automatisations, DÉJÀ VENDU, serait resté invendable. Re-découpage complet : epics-assistant-ia-2026-08-16.md (EPIC-095→EPIC-105, 11 épics, 142 pts) sur la spine architecture-assistant-service-2026-08-16."
+  - story_id: "STORY-119"
+    title: "Surface pilote — proposition de mapping des comptes non reconnus"
+    epic: "EPIC-026 (abandonné pour ce module)"
+    points: 5
+    superseded_by: ["EPIC-100"]
+    date: "2026-08-16"
+    raison: "ABSORBÉE ET COMPLÉTÉE PAR CE QUI MANQUAIT : l'ÉCART entre l'impact annoncé et l'impact recalculé (FR-IA12b, créé à la revue du PRD, POSTÉRIEUR à cette story). Sans lui, un utilisateur tranche sur un chiffre qui s'avère faux et ne voit jamais le vrai — SM-7 immesurable et NFR-1 réduit à une affirmation. Porte aussi le volet bilan-service. 5 → 13 pts. ⛔ RECOPIE DU §10 DE LA NOTE D'ARCHITECTURE DU 2026-07-20, DÉPASSÉE SUR SON PRINCIPE CARDINAL. La note disait « l'IA propose, l'humain valide, rien n'est appliqué sans validation humaine » ; le §2 du PRD du 2026-08-02 REMPLACE cette doctrine par « l'acte est-il réversible et sans engagement ? ». Ces 5 stories n'ont NI mode (AUTO/VALIDATION/SUGGESTION), NI état exécuté, NI mandat daté et révocable, NI quota, NI règle d'automatisation, NI file d'arbitrage — UN CONTRAT SANS ÉTAT « EXÉCUTÉ » NE PEUT PAS DÉCRIRE UN ASSISTANT QUI EXÉCUTE. Un développeur les implémentant aurait livré un assistant incapable d'agir seul, et le module Automatisations, DÉJÀ VENDU, serait resté invendable. Re-découpage complet : epics-assistant-ia-2026-08-16.md (EPIC-095→EPIC-105, 11 épics, 142 pts) sur la spine architecture-assistant-service-2026-08-16."
+
 open_contract_gaps:
   - id: "GAP-assistant-ia-architecture-anterieure-au-prd"
     service: "assistant-service (:3011) — documentation"
-    statut: "🆕 OUVERT le 2026-08-16. ⚖️ VERDICT RENDU : la note du 2026-07-20 N'EST PAS PROMOUVABLE EN SPINE — elle est dépassée SUR SON PRINCIPE CARDINAL. La spine est à ÉCRIRE DEPUIS LE PRD, avec réemploi explicite de ce qui survit. ✅ FAIT le 2026-08-16 : encadré DÉPASSÉ en tête de architecture-assistant-ia-2026-07-20.md (avec le partage précis survit/tombe) + réserve ajoutée à l'en-tête du PRD, qui renvoyait ses lecteurs vers la note sans avertissement. ✅ SPINE ÉCRITE le 2026-08-16 (statut `draft`) : architecture/architecture-assistant-service-2026-08-16/ARCHITECTURE-SPINE.md — AD-1→AD-23, les 52 FR et les 7 NFR du PRD rattachés, lint 0. ⏳ RESTE : 4 CONDITIONS BLOQUANTES à arbitrer avant le passage en `final` et avant le découpage en épics — (1) ⛔ CONTRADICTION DU PRD : FR-IA04 interdit tout nouveau topic Kafka alors que l'assistant doit DEMANDER une exécution à un autre service (voies : un topic `assistant.action.*` par outbox, recommandé — ou appel M2M, qui dépend de C8 encore ouverte) ; (2) AD-P15 non livrée — assistant-service est le 4e module bloqué dessus, après réseau/catalogue/stock, et ici c'est l'AUTORITÉ DE DÉLIVRANCE DU MANDAT (FR-IA36c) qui en dépend ; (3) l'assiette du plafond de mandat (par acte ou cumulée) n'est pas dite par le PRD — la spine propose « cumulée sur la période + unitaire optionnel » ; (4) FR-IA47 dit « par organisation » car écrit AVANT AD-P13 — une Proposition de mapping porte sur un DOSSIER. ⚠️ ET LE TRACKER ENCODE ENCORE L'ANCIENNE DOCTRINE : le `goal` du sprint 35 dit littéralement « contrat Proposition (l'IA PROPOSE, l'humain valide) » et STORY-115→119 sont la recopie du §10 de la note dépassée (ni mode, ni règle, ni file d'arbitrage, ni mandat) — à superséder au découpage. ⚠️ COLLISION D'IDENTIFIANT à trancher au même moment : EPIC-026 désigne AUSSI « Projets » (STORY-141, done S18, platform-catalog-service). ⛔ NE PAS SUPPRIMER LA NOTE : elle porte la seule trace du raisonnement OCR et RAG, et le PRD la cite."
+    statut: "🆕 OUVERT le 2026-08-16. ⚖️ VERDICT RENDU : la note du 2026-07-20 N'EST PAS PROMOUVABLE EN SPINE — elle est dépassée SUR SON PRINCIPE CARDINAL. La spine est à ÉCRIRE DEPUIS LE PRD, avec réemploi explicite de ce qui survit. ✅ FAIT le 2026-08-16 : encadré DÉPASSÉ en tête de architecture-assistant-ia-2026-07-20.md (avec le partage précis survit/tombe) + réserve ajoutée à l'en-tête du PRD, qui renvoyait ses lecteurs vers la note sans avertissement. ✅ GAP FERMÉ LE 2026-08-16 — LES TROIS ÉTAGES SONT POSÉS : spine + découpage en épics + les 3 amendements du PRD reportés EN PLACE (FR-IA04 topic sortant, FR-IA47 cloisonnement par dossier, FR-IA36b assiette cumulée du plafond de mandat), et l'encadré d'en-tête du PRD — qui annonçait encore « ce PRD n'a pas d'architecture à jour » — RÉÉCRIT le jour même. ⛔ NETTOYAGE DU TRACKER FAIT : STORY-115→119 passées en superseded_stories (5 entrées motivées), sprint 39 VIDÉ (28 → 0 pts, goal périmé « l'IA PROPOSE, l'humain valide » remplacé), bloc assistant_ia_epics ré-ancré sur la spine et le découpage, légende sprint_35 corrigée, STORY-170 ré-ancrée sur EPIC-096 avec ses dépendances MORTES (STORY-115/117, supersédées) ré-exprimées en EPIC-095/EPIC-097 — et son fichier corrigé, qui annonçait encore le S35 au lieu du S40. DÉTAIL DE LA LIVRAISON : spine architecture/architecture-assistant-service-2026-08-16/ARCHITECTURE-SPINE.md : architecture/architecture-assistant-service-2026-08-16/ARCHITECTURE-SPINE.md — AD-1→AD-23, les 52 FR-IA et les 7 NFR du PRD rattachés à au moins une AD, lint_spine 0 finding. ✅ 4 ARBITRAGES PO RENDUS LE MÊME JOUR ET INTÉGRÉS : (1) le transport de la demande d'exécution est UN topic `assistant.action.demandee` publié par OUTBOX — ⚡ AMENDE FR-IA04, et surtout AFFRANCHIT L'INCRÉMENT 3 DE C8 (qui ne borne plus que l'aperçu du message, avec dégradation explicite en AD-12) ; (2) le plafond de mandat est CUMULÉ sur la période + unitaire optionnel (le PRD ne disait pas l'assiette — un plafond par acte ne borne pas l'engagement total) ; (3) la Proposition porte son `dossierId` DÈS L'INCRÉMENT 1, vérifié contre la portée serveur — ⚡ AMENDE FR-IA47, écrit le 02/08 AVANT AD-P13 du 15/08 ; (4) L'ÉPIC ASSISTANT PORTE LA STORY D'EXTENSION `perms[]` D'AUTH-SERVICE (AD-P15) en tête d'incrément 3, avec ses 4 consommateurs nommés — le 4e module bloqué est celui qui débloque les trois autres (réseau FR-R28b, catalogue FR-C48, stock FR-S61/S62). ⛔ CONSÉQUENCE À TENIR AU DÉCOUPAGE : aucun mandat n'est délivrable avant cette story. ⏳ RESTE, SANS BLOQUER LE DÉCOUPAGE : (a) ⚠️ DEUX AMENDEMENTS À REPORTER DANS LE PRD — FR-IA04 et FR-IA47 ; tant qu'ils n'y sont pas, le document amont contredit la spine, DÉFAUT EXACT QUI A RENDU LA NOTE DU 20/07 DANGEREUSE ; (b) obligation croisée sur bilan-service (AD-13 : renvoyer l'impact recalculé, sinon SM-7 immesurable et NFR-1 reste une affirmation) ; (c) Q2 serveur d'inférence, ouverte depuis le 2026-07-20, qui borne la qualité mesurable de NFR-3 et non la livraison. ⚠️ ET LE TRACKER ENCODE ENCORE L'ANCIENNE DOCTRINE : le `goal` du sprint 35 dit littéralement « contrat Proposition (l'IA PROPOSE, l'humain valide) » et STORY-115→119 sont la recopie du §10 de la note dépassée (ni mode, ni règle, ni file d'arbitrage, ni mandat) — à superséder au découpage. ⚠️ COLLISION D'IDENTIFIANT à trancher au même moment : EPIC-026 désigne AUSSI « Projets » (STORY-141, done S18, platform-catalog-service). ⛔ NE PAS SUPPRIMER LA NOTE : elle porte la seule trace du raisonnement OCR et RAG, et le PRD la cite."
     constat: "assistant-service est LE SEUL DES 8 PRD SANS SPINE, et sa seule architecture (2026-07-20) PRÉCÈDE DE 13 JOURS le PRD (2026-08-02, statut final). Le PRD cite lui-même la note comme l'un de TROIS DOCUMENTS QUI SE CONTREDISENT (note / offre commerciale ~100 IA vendues / prototype à 3 modes) et sa §2 s'intitule textuellement « La doctrine — CE QUI REMPLACE l'IA propose, l'humain valide » — c'est-à-dire la §0 de la note. Aucun épic n'existe non plus pour ce module."
     cause_racine: "La note a été écrite en amont comme PROPOSITION d'architecture (« à valider avant stories »), puis le cadrage produit a tranché DANS L'AUTRE SENS. Personne n'est revenu marquer la note. Le PRD, lui, a continué d'afficher « Fondé sur architecture-assistant-ia-2026-07-20.md » — renvoyant ses lecteurs vers le document qu'il contredit."
     consequence: "🟠 LA CONSÉQUENCE EST STRUCTURELLE, PAS PHILOSOPHIQUE : le contrat Proposition de la note s'arrête à PROPOSED → ACCEPTED/REJECTED. Il n'a NI mode (AUTO/VALIDATION/SUGGESTION), NI état exécuté, NI mandat daté et révocable, NI quota, NI réversibilité. UN CONTRAT SANS ÉTAT « EXÉCUTÉ » NE PEUT PAS DÉCRIRE UN ASSISTANT QUI EXÉCUTE. Un développeur cadrant EPIC-026 sur la note livrerait un assistant qui ne peut RIEN faire seul — et le module Automatisations, DÉJÀ VENDU, resterait invendable. ⚠️ Piège annexe : confiance:number ne doit PAS devenir la vanne d'autonomie, le PRD dit que le critère « ne dépend ni de la confiance dans le modèle, ni du niveau de l'utilisateur »."
