@@ -531,26 +531,48 @@ dossier archivé rendait 409 au lieu de 200 — une lecture que D9 autorise.
 en `dossierId` (2 rouges, index + pré-contrôle) · émission de `rejected` retirée ·
 `dossierId` retiré de l'audit du régime.
 
-**Qualité après correctifs** : lint 0 warning · build OK · **2778 unitaires** · couverture
+**Qualité après correctifs** : lint 0 warning · build OK · **2781 unitaires + 666 e2e** · couverture
 **99 / 91,81 / 98,19 / 99,08**.
 
-**⛔ BLOQUANT OUVERT — LA PORTE E2E N'EST PAS FIABLE.** L'instabilité signalée au round ②
-comme « observée une fois, non reproduite » est en réalité **systématique à ~25-40 % des
-passes complètes** : mesurée **2 échecs sur 4 passes sur le commit de feature seul**
-(`0aca3c0`, avant tout correctif de revue) — elle **préexiste** donc aux correctifs. Un seul
-test échoue à chaque fois, mais **jamais le même ni dans la même suite** (`tva-taxes`,
-`rapprochement`, `cahiers-depenses`, `liquidation`, `tresorerie-releves`), toujours sur un
-statut anormal (400 au lieu de 201, 400 au lieu de 409, **404 sans code d'erreur** là où on
-attend 400 ou 200). Un 404 **sans corps codifié** n'est pas le 404 du guard — c'est un 404 de
-**routage**, donc une requête servie par une application pas (ou plus) prête. Jamais
-reproduit en isolation : **5 passes de la suite fautive seule, 5 vertes**.
-Piste mesurée : la **contention entre workers** (8 workers, chacun montant son app Nest, son
-serveur JWKS et sa génération de clé RSA) — `--maxWorkers=2` donne 3 passes vertes sur 3, mais
-`--maxWorkers=50%` **échoue encore 1 fois sur 4**. Le réglage n'a donc **pas** été figé :
-plafonner les workers **atténue la fréquence sans corriger la cause**, et un flake rendu plus
-rare est plus dangereux qu'un flake visible — c'est exactement la « fausse assurance » que la
-DoD proscrit. **Cause racine non identifiée ; à traiter comme un défaut d'infrastructure de
-test à part entière avant de tenir la porte « e2e verts » pour acquise.**
+**✅ BLOQUANT LEVÉ — LA COURSE QUI RENDAIT 25 À 40 % DES PASSES E2E ROUGES.** L'instabilité
+signalée au round ② comme « observée une fois, non reproduite » était en réalité systématique :
+mesurée **2 échecs sur 4 passes sur le commit de feature seul** (`0aca3c0`) — elle **préexistait**
+donc au re-scopage. Un seul test rouge à chaque fois, **jamais le même ni dans la même suite**
+(`tva-taxes`, `rapprochement`, `cahiers-depenses`, `liquidation`, `tresorerie-releves`,
+`cahiers-recettes`, `tpu`), et **jamais** en isolation.
+
+**Ce qui a permis de la trouver, c'est la FORME du corps de la réponse, pas son statut.** Une sonde
+posée sur `supertest` a capturé les corps réels : le 404 anormal n'était ni celui du routage de Nest
+(`{"statusCode":404,…,"message":"Cannot GET …"}`, **JSON**) ni celui du `DossierScopeGuard` (JSON
+**codifié**), mais la page **HTML** par défaut d'Express — `<!DOCTYPE html>… Cannot GET …`. Or nos
+applications répondent **toujours** en JSON. La réponse ne venait donc **pas de l'application
+visée**.
+
+**La cause.** Aucune suite ne mettait son serveur en écoute : `server = app.getHttpServer()` seul
+laisse `supertest` ouvrir un port éphémère **par requête** puis le refermer — sa méthode
+`serverAddress()` fait `if (!app.address()) this._server = app.listen(0)`, et son `end()` referme
+ce serveur juste après. **Mesuré : 1032 requêtes ⇒ 1032 ports distincts**, sur 8 workers en
+parallèle. Entre la réservation du port `P` et la connexion du client, l'OS peut avoir réattribué
+`P` au listener d'un **autre worker** : la requête part vers l'application d'une **autre suite**,
+qui ne connaît pas la route.
+
+Tout s'explique alors, y compris ce qui résistait : jamais reproductible seule (il faut un
+concurrent pour rafler le port) ; `--maxWorkers` réduit qui **raréfie** la fenêtre sans la fermer
+(50 % échouait encore 1 fois sur 4) ; et une sonde écrivant sur disque à chaque réponse qui faisait
+**disparaître** le symptôme — l'I/O synchrone déplaçait la course. C'est aussi pourquoi plafonner
+les workers avait été **refusé** comme correctif : un flake rendu plus rare est plus dangereux
+qu'un flake visible.
+
+**Correctif** : `test/utils/serveur.ts#ecouter()` met le serveur en écoute **une fois** par suite ;
+`app.address()` n'étant plus nul, supertest réutilise le listener et ne le referme jamais. Port
+stable pour toute la suite, libéré par `app.close()`. Les **25 suites** l'utilisent. Un **invariant
+structurel** (`src/common/serveur-e2e.invariant.spec.ts` — placé sous `src/` parce que c'est le seul
+`rootDir` où les unitaires tournent) **nomme** le fichier qui l'oublierait : le coût d'un oubli est
+payé par **toute** la suite e2e, et se manifeste **ailleurs** que là où il a été introduit.
+Mutation : une suite remise en `getHttpServer()` direct ⇒ invariant **rouge**, nommant le fichier.
+
+**Résultat : 15 passes complètes consécutives vertes** (8 en validation d'hypothèse, 7 après
+correctif) contre ~40 % d'échec auparavant. La suite est par ailleurs plus rapide.
 
 **⛔ NON REJOUÉ** : la vérification docker. Le correctif de l'index d'`appariements` change un
 artefact que le round ② avait vérifié en base (« les 6 index uniques lus en base sont tous
