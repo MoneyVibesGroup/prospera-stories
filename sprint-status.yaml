@@ -25,7 +25,7 @@ sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 #    AVANT de découper, pas après.
 #
 # ── ÉTAT AU 2026-08-15 ────────────────────────────────────────────────────────────────────────────
-epic_id_high_water_mark: "EPIC-094"   # dernier épic ATTRIBUÉ — EPIC-085→094 pris le 2026-08-15 par pdv-service ; EPIC-075→084 le même jour par stock-service ; EPIC-065→074 le même jour par catalogue-produits-service ; EPIC-044→053 le même jour par reseau-service. Historique : EPIC-043 = dossier-client, S20.
+epic_id_high_water_mark: "EPIC-105"   # dernier épic ATTRIBUÉ — EPIC-095→105 pris le 2026-08-16 par assistant-service (découpage Assistant IA, plage RÉSERVÉE le jour même, NON SLOTTÉE) ; EPIC-085→094 pris le 2026-08-15 par pdv-service ; EPIC-075→084 le même jour par stock-service ; EPIC-065→074 le même jour par catalogue-produits-service ; EPIC-044→053 le même jour par reseau-service. Historique : EPIC-043 = dossier-client, S20.
 story_id_high_water_mark: "STORY-371" # dernier story_id ATTRIBUE — STORY-371 (référentiel types-action + module assistant au catalogue) prise le 2026-08-16 au découpage de assistant-service, slottée S21. AVANT : STORY-368/369/370 (écarts ouverts balance-service) et STORY-367 (portée dossier de l'Atelier) le 2026-08-15, slottées S20 ; STORY-366 (seed du catalogue) ; STORY-365 (RBAC tenant AD-P15), slottée S21. ⚠️ AUCUN story_id n'est réservé pour EPIC-095→EPIC-105 : attribution au slotting, comme la règle l'exige.
 
 reserved_ranges:

@@ -28,7 +28,7 @@
 | 3 | Catalogue produits | Dist | OUI | OUI | OUI |
 | 4 | Réseau, agences & zones | IMF · Assur · Dist | OUI | OUI | OUI |
 | 5 | Immobilisations & amortissements | ExpCo · Dist · IMF · Assur | — | — | — |
-| 6 | Assistant IA — socle (LlmProvider, contrat Proposition, RAG CGI/LPF) | les 5 | OUI | OUI | — |
+| 6 | Assistant IA — socle (LlmProvider, contrat Proposition, RAG CGI/LPF) | les 5 | OUI | OUI | OUI |
 | 7 | Stock | Dist | OUI | OUI | OUI |
 | 8 | Support / Service client | Dist · IMF · Assur · MV App | — | — | — |
 | 9 | Commercial / Agent terrain — mobile, offline, GPS | Dist · IMF · Assur | — | — | — |

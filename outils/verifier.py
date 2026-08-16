@@ -70,10 +70,11 @@ ARTEFACTS = {
         'epics-reseau-2026-08-15.md'),
     5: (None, None, None),          # Immobilisations : cadrage seul, arbitre le 2026-08-16
     # Module 6 : la note 2026-07-20 est DEPASSEE (cf. son encadre) ; la spine du
-    # 2026-08-16 la remplace. Statut `draft` : 4 conditions bloquantes avant `final`.
+    # 2026-08-16 la remplace, passee `final` le meme jour apres les 4 arbitrages PO.
+    # Decoupage EPIC-095 -> EPIC-105 (11 epics, 142 pts), NON SLOTTE.
     6: ('prds/prd-assistant-ia-2026-08-02/prd.md',
         'architecture/architecture-assistant-service-2026-08-16/ARCHITECTURE-SPINE.md',
-        None),
+        'epics-assistant-ia-2026-08-16.md'),
     7: ('prds/prd-stock-2026-08-02/prd.md',
         'architecture/architecture-stock-service-2026-08-15/ARCHITECTURE-SPINE.md',
         'epics-stock-2026-08-15.md'),
