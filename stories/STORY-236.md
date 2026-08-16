@@ -574,10 +574,44 @@ Mutation : une suite remise en `getHttpServer()` direct ⇒ invariant **rouge**,
 **Résultat : 15 passes complètes consécutives vertes** (8 en validation d'hypothèse, 7 après
 correctif) contre ~40 % d'échec auparavant. La suite est par ailleurs plus rapide.
 
-**⛔ NON REJOUÉ** : la vérification docker. Le correctif de l'index d'`appariements` change un
-artefact que le round ② avait vérifié en base (« les 6 index uniques lus en base sont tous
-préfixés `dossierId` » — désormais faux pour le côté relevé, **volontairement**). La règle du
-projet impose de rejouer la vérification sur l'état final ; elle reste **à faire**.
+**✅ VÉRIFICATION DOCKER REJOUÉE SUR L'ÉTAT FINAL** (stack neuve `down -v`, JWT RS256 réels,
+**deux cabinets réels** créés via l'IdP, **deux dossiers réels** du même cabinet). Elle était due :
+le correctif de l'index d'`appariements` change un artefact que le round ② avait vérifié en base.
+
+- **AC-5, la preuve centrale, refaite** : « Cabinet Alpha » (Mon cabinet) **et** « Client Alpha
+  SARL », **même exercice civil 2026, même source `sage`, même version 1** ⇒ **deux 201**, **deux
+  balances en base**, chacune avec son `dossierId`. ⚡ **Contrôle décisif rejoué** : recréer
+  l'ancien index unique `{orgId, exercice, source, version}` sur cette donnée **échoue en
+  E11000** — il est *physiquement impossible*, donc avant migration la seconde balance n'aurait
+  **jamais existé**, sans erreur ni trace.
+- **Idempotence intra-dossier préservée** : re-soumission identique ⇒ **200 (NOP)**, toujours **2**
+  documents.
+- **Les 6 index d'unicité lus en base**, avec **l'asymétrie voulue** : `balances`,
+  `exercices_atelier`, `comptes_ventilation`, `categories_depenses`, `qualifications_ecart`
+  préfixés `dossierId` ; `appariements` côté **cahier** `{dossierId, lignesCahier.ligneId}` et
+  côté **relevé** `{orgId, lignesReleve}`, les deux conservant
+  `partialFilterExpression {statut: CONFIRME}`.
+- **AC-7** : les 2 `balance.created` de l'outbox portent le `dossierId` **exact** de leur balance
+  (celui du cabinet pour l'une, celui du client pour l'autre), `schemaVersion` inchangée, **outbox
+  intégralement drainée** (2 SENT, 0 en attente).
+- **AC-2, avec DEUX ORGANISATIONS RÉELLES** : « Cabinet Rival » lisant le dossier d'Alpha (qui
+  **existe**) et lisant un dossier **inexistant** obtiennent des réponses **strictement
+  identiques** — même 404, même code `DOSSIER_INTROUVABLE`, même message, comparaison programmatique
+  des deux corps. Aucun oracle d'énumération.
+- **AC-3** : dossier client archivé via `dossier-service` (la source de vérité), archivage
+  **projeté** dans le read-model ⇒ `GET` **200**, `POST` **409 `DOSSIER_ARCHIVE`**, et **aucun
+  orphelin** écrit après le refus (2 balances avant, 2 après). ⚡ **`HEAD` ⇒ 200** : le correctif
+  du round ③ vérifié contre un vrai serveur — il rendait 409 sur une lecture que D9 autorise.
+- **AC-10** : parcours Atelier en écriture rejoué de bout en bout sur un **dossier client** —
+  balance soumise, **validée** (`etat: VALIDÉE`), `balance.created` publié.
+- **AC-1** : les 7 anciennes routes sans `dossierId` répondent **404**.
+- ⚡⚡ **LE CORRECTIF SWAGGER VÉRIFIÉ SUR LE DOCUMENT RÉELLEMENT PUBLIÉ**, et c'est là qu'un dernier
+  défaut est apparu : sur les **85 opérations nichées** de `/api/docs-json`, 84 portaient le schéma
+  typé du décorateur et **une** un `schema` **vide** — `POST /dossiers/{dossierId}/balances`, seule
+  route ayant gardé un `@ApiParam` local antérieur. `unionWith` de `@nestjs/swagger` retenant la
+  **première** occurrence, c'est la déclaration locale qui gagnait : le client généré aurait eu,
+  pour cette route et elle seule, un argument **non typé**. Déclaration locale retirée ⇒ **85/85
+  uniformes**, re-vérifié après `docker restart` (🪤 le hot-reload sait mentir — leçon STORY-302).
 
 **Constats laissés de côté, tracés** : deux index repointés `dossierId` ne servent plus la
 requête qui les justifiait (`{dossierId, profilImportId}` face à `{orgId, profilImportId}` de
