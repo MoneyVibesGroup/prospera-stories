@@ -387,8 +387,9 @@ e2e rouges) · M2 `estEcriture = false` (le 409 archivé tombe) · M3 validation
 `ObjectId` retirée · M4 les 6 index remis en préfixe `orgId` (7 rouges, un par
 index) · M5 garde du lot OCR retirée · M6 `@RequiresDossierScope()` retiré d'un
 contrôleur (14 e2e rouges) · M7 le même oubli vu par l'invariant structurel, qui
-**nomme le fichier** · M8 `exigerDossierId` rendu fail-open (rouge sur de
-nombreuses suites) · M9 alerte trésorerie supprimée.
+**nomme le fichier** · ~~M8 `exigerDossierId` rendu fail-open (rouge sur de
+nombreuses suites)~~ **⚠️ CONSTAT FAUX, corrigé au round ② ci-dessous : la
+mutation ne rougit RIEN** · M9 alerte trésorerie supprimée.
 ⚠️ **M6 a d'abord rougi PAR ERREUR DE COMPILATION** (`TS6133`, import devenu
 inutilisé) — ce qui ne prouve **rien** : rejouée en retirant aussi l'import, elle
 est alors rouge **par les tests** (leçon STORY-302/179).
@@ -450,3 +451,123 @@ preuve.
 §4.2 — à trancher avec le PO) ; **D6/D11** (visibilité par affectation) ne sont
 **pas** couverts, le read-model `dossiers_dossier` ne portant ni responsable ni
 contributeurs ; `balance.submitted` (entrée externe du hub) reste un point ouvert.
+
+### ③ Second tour de revue en session `opus` (2026-08-16)
+
+Les revues ⑥/⑦ ont été **rejouées** par les skills scopés (`prospera-code-review`,
+`prospera-security-review`), la synthèse restant en session. Elles ont trouvé, au-delà du
+round ②, **cinq défauts réels dont trois d'intégrité** — et surtout **deux affirmations du
+round ② qui ne se vérifient pas**. Le motif commun mérite d'être nommé : *une correction
+annoncée n'est pas une correction vérifiée, et une mutation consignée n'est pas une mutation
+rejouée*.
+
+**⚡⚡ DEUX AFFIRMATIONS DU ROUND ② PRISES EN DÉFAUT.**
+① La factorisation d'`exigerDossierId` (« dix copies privées ⇒ une seule implémentation »)
+n'était appliquée **qu'à moitié** : une **onzième** copie subsistait dans
+`contexte-fiscal.service.ts`, et c'est **elle** — pas la canonique — que les **6 services
+`fiscal/*`** importaient. Le défaut que la correction prétendait fermer était toujours là,
+au même endroit.
+② **La mutation M8 ne se reproduit pas.** Rendre `exigerDossierId` fail-open (`return ''`)
+laisse lint, build, **2765 unitaires et 666 e2e entièrement au vert**. Deux causes cumulées :
+toutes les suites passent un dossier, et le fichier est un `*.decorator.ts`, donc **exclu de
+`collectCoverageFrom`** — la couverture ne pouvait pas signaler le trou. C'est l'angle mort
+documenté du projet (`*bootstrap*`, STORY-076/108) atteint par **une autre porte**. Spec
+dédiée ajoutée ; la mutation rougit désormais **par assertion**.
+
+**⚡⚡ LE SEGMENT `:dossierId` N'ÉTAIT DÉCLARÉ DANS AUCUN DOCUMENT OPENAPI.**
+`@nestjs/swagger` ne dérive **jamais** un paramètre de chemin du gabarit d'URL (vérifié dans
+`dist/explorers/api-parameters.explorer.js`) : il ne lit que les `@ApiParam` explicites et la
+réflexion des `@Param()`. Or les 22 contrôleurs nichés n'ont **ni l'un ni l'autre** — le
+dossier arrive par `@DossierScope()`, un `createParamDecorator` maison sans métadonnée
+Swagger. `/api/docs-json` publiait donc `/dossiers/{dossierId}/…` **sans déclarer
+`dossierId`** : document OpenAPI invalide, et un client généré dont les URL partent avec le
+littéral `%7BdossierId%7D` — **400 sur toute la surface re-scopée**, c'est-à-dire sur
+l'unique raison d'être de la story. Rien ne le voyait : les e2e construisent leurs URL à la
+main (même famille de défaut qu'en STORY-294). Posé une seule fois sur
+`@RequiresDossierScope()` — appliqué à une classe, `@ApiParam` descend sur chaque méthode —
+avec les réponses 404/409 que la DoD réclamait aussi.
+
+**⚡⚡ L'AC-5 ÉTAIT LUI-MÊME FAUTIF SUR UN DES SIX INDEX — la même ligne bancaire pouvait
+être confirmée dans deux dossiers.** Trouvé **deux fois indépendamment** (revue de code et
+revue de sécurité). L'AC mandatait de préfixer `dossierId` les 2 index partiels
+d'`appariements`, au motif que « `lignesReleve`/`ligneId` sont déjà des clés naturelles ».
+Vrai du côté **cahier** (dossier-scopé depuis cette story), **faux du côté relevé** :
+`tresorerie` reste org-keyed (hors §4.2), donc un même relevé est visible depuis **tous** les
+dossiers du cabinet. Descendre l'unicité au dossier supprimait la seule garde empêchant qu'un
+mouvement bancaire unique justifie **deux comptabilités** : une dépense fictive dans le
+dossier B, appariée à une ligne déjà confirmée dans A, ressortait au **niveau de preuve le
+plus fort** et **quittait les « écarts inexpliqués »** — le seul écran qui l'aurait signalée.
+Le commentaire du schéma promettait mot pour mot l'invariant que l'index ne tenait plus. Règle
+retenue : **un index d'unicité ne protège une ligne que s'il porte sur la sphère où cette
+ligne EXISTE** ⇒ côté relevé `{orgId, lignesReleve}`, côté cahier `{dossierId, ligneId}`,
+`lignesConfirmees` scopant chaque côté de même. Le filet « aucun unique org-keyé » garde sa
+force : l'exception est **nommée**, pas exclue en bloc.
+
+**⚡ `balance.submitted` sans dossier « Mon cabinet » perdait la balance en silence.** La
+branche consignait un rejet dont le `dossierId` porte l'`orgId` — donc **inatteignable** par
+`GET /dossiers/:dossierId/balance/rejets` — et **sautait** `balanceEvents.rejected`, alors
+que le docstring de cette méthode pose l'invariant « jamais de rejet consigné sans
+notification ». Le `ProcessedEvent` étant commité, le rejeu était fermé : l'IMF croyait avoir
+transmis, pour seule trace un `warn`. Notification émise dans la **même transaction**, sous un
+code **distinct** (`DOSSIER_CABINET_INDISPONIBLE`) : confondre un retard de projection
+(transitoire, à renvoyer) avec un refus de droits (définitif) ferait abandonner une balance
+valide.
+
+**⚡ `POST /dossiers/:dossierId/profil-societe/regime` écrit à l'échelle de l'ORGANISATION.**
+`ProfilSociete` est keyé `{orgId}` unique : le régime confirmé depuis un dossier client
+s'applique à **tous** les dossiers du cabinet — alors que la proposition est calculée sur le
+CA du **seul dossier courant**. Confirmer depuis un petit dossier bascule le référentiel et le
+paquet fiscal d'un gros. Le re-scopage du profil est **hors périmètre** (STORY-303 ; le module
+est par ailleurs candidat au retrait, l'identité fiscale étant déjà portée par
+`dossier-service`) — mais l'audit ne portait **pas** le dossier d'origine, donc rien ne
+permettait de reconstituer la décision. `dossierId` ajouté au journal et au log, portée
+org-wide énoncée dans Swagger : l'URL cesse de mentir en silence.
+
+Également corrigé : `HEAD` était classé comme **écriture** par le guard, donc un `HEAD` sur un
+dossier archivé rendait 409 au lieu de 200 — une lecture que D9 autorise.
+
+**5 MUTATIONS DE CE TOUR, 5 ROUGES PAR ASSERTION** (aucune par erreur de compilation) :
+`exigerDossierId` fail-open · `@ApiParam` retiré du décorateur (2 rouges) · côté relevé remis
+en `dossierId` (2 rouges, index + pré-contrôle) · émission de `rejected` retirée ·
+`dossierId` retiré de l'audit du régime.
+
+**Qualité après correctifs** : lint 0 warning · build OK · **2778 unitaires** · couverture
+**99 / 91,81 / 98,19 / 99,08**.
+
+**⛔ BLOQUANT OUVERT — LA PORTE E2E N'EST PAS FIABLE.** L'instabilité signalée au round ②
+comme « observée une fois, non reproduite » est en réalité **systématique à ~25-40 % des
+passes complètes** : mesurée **2 échecs sur 4 passes sur le commit de feature seul**
+(`0aca3c0`, avant tout correctif de revue) — elle **préexiste** donc aux correctifs. Un seul
+test échoue à chaque fois, mais **jamais le même ni dans la même suite** (`tva-taxes`,
+`rapprochement`, `cahiers-depenses`, `liquidation`, `tresorerie-releves`), toujours sur un
+statut anormal (400 au lieu de 201, 400 au lieu de 409, **404 sans code d'erreur** là où on
+attend 400 ou 200). Un 404 **sans corps codifié** n'est pas le 404 du guard — c'est un 404 de
+**routage**, donc une requête servie par une application pas (ou plus) prête. Jamais
+reproduit en isolation : **5 passes de la suite fautive seule, 5 vertes**.
+Piste mesurée : la **contention entre workers** (8 workers, chacun montant son app Nest, son
+serveur JWKS et sa génération de clé RSA) — `--maxWorkers=2` donne 3 passes vertes sur 3, mais
+`--maxWorkers=50%` **échoue encore 1 fois sur 4**. Le réglage n'a donc **pas** été figé :
+plafonner les workers **atténue la fréquence sans corriger la cause**, et un flake rendu plus
+rare est plus dangereux qu'un flake visible — c'est exactement la « fausse assurance » que la
+DoD proscrit. **Cause racine non identifiée ; à traiter comme un défaut d'infrastructure de
+test à part entière avant de tenir la porte « e2e verts » pour acquise.**
+
+**⛔ NON REJOUÉ** : la vérification docker. Le correctif de l'index d'`appariements` change un
+artefact que le round ② avait vérifié en base (« les 6 index uniques lus en base sont tous
+préfixés `dossierId` » — désormais faux pour le côté relevé, **volontairement**). La règle du
+projet impose de rejouer la vérification sur l'état final ; elle reste **à faire**.
+
+**Constats laissés de côté, tracés** : deux index repointés `dossierId` ne servent plus la
+requête qui les justifiait (`{dossierId, profilImportId}` face à `{orgId, profilImportId}` de
+`compterBalancesReferentes` ; `{dossierId, lotId}` face à `{orgId, lotId}` de la projection
+OCR) ⇒ COLLSCAN, dont un **dans une transaction sur le chemin chaud d'un consumer** ; le repli
+`?? orgId` alerte dans `releves.service` mais reste **muet** dans `comptes-tresorerie` (même
+racine, même conséquence, traitement incohérent) ; **7 des 22 contrôleurs** n'ont pas le bloc
+e2e AC-2/AC-3/AC-8 que l'AC-2 demande « par famille de route » (dont `RattachementController`,
+sans aucun e2e). **D6/D11** reste la dette majeure : la revue de sécurité la classe *Broken
+Access Control horizontal* (CWE-639, conf. 88) — `dossier-service` restreint un `TENANT_USER`
+à ses dossiers affectés et masque « Mon cabinet », `balance-service` ne réplique que `orgId` et
+ouvre donc **en lecture ET en écriture** toute la matière comptable et fiscale de tous les
+dossiers du cabinet. Dette **documentée** par la story et déférée à STORY-359 — mais une dette
+documentée n'est pas une dette neutralisée : entre le merge et STORY-359, l'écart est
+exploitable. **À arbitrer explicitement par le PO.**
