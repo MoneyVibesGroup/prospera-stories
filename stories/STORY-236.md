@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **E** (§4.2), décision **D5**
 **Priorité :** Must Have
 **Story Points :** 8
-**Statut :** Not Started
+**Statut :** Review
 **Complexité :** high
 **Créée le :** 2026-08-15
 **Sprint :** 20
@@ -180,36 +180,36 @@ cabinet lui-même**.
 
 ## Acceptance Criteria
 
-- [ ] **AC-1** — Toute route des familles listées ci-dessus exige `dossierId` en tête de chemin
+- [x] **AC-1** — Toute route des familles listées ci-dessus exige `dossierId` en tête de chemin
       (`/dossiers/:dossierId/...`) ; l'ancienne route sans `dossierId` (`/balances`, `/exercices`,
       `/cahiers/depenses`…) **n'existe plus**.
-- [ ] **AC-2** — Un `dossierId` qui n'existe pas, ou qui appartient à une **autre** organisation que
+- [x] **AC-2** — Un `dossierId` qui n'existe pas, ou qui appartient à une **autre** organisation que
       celle du JWT appelant, renvoie **404** — jamais 403, jamais 400. *(Un test par famille de route,
       avec deux organisations réelles.)*
-- [ ] **AC-3** — Un `dossierId` valide de l'organisation appelante mais dont le statut est `ARCHIVE`
+- [x] **AC-3** — Un `dossierId` valide de l'organisation appelante mais dont le statut est `ARCHIVE`
       refuse toute **écriture** (`409 DOSSIER_ARCHIVE`) et autorise toute **lecture** (`200`).
-- [ ] **AC-4** — Chaque route d'écriture persiste le `dossierId` résolu sur le document créé (balance,
+- [x] **AC-4** — Chaque route d'écriture persiste le `dossierId` résolu sur le document créé (balance,
       ingestion, exercice atelier, ligne de dépense/recette, catégorie, ventilation, appariement,
       qualification, lot de pièces, ligne fiscale…) — **plus aucune** `ValidationError` sur ces
       chemins (lève le gel posé par STORY-356/AC-4).
-- [ ] **AC-5** — Les 4 index uniques identifiés (`balances`, `exercices_atelier`,
+- [x] **AC-5** — Les 4 index uniques identifiés (`balances`, `exercices_atelier`,
       `comptes_ventilation`, `qualifications_ecart`) et les 2 index partiels d'`appariements` sont
       migrés d'un préfixe `orgId` à un préfixe `dossierId`. *(Preuve par balayage : deux dossiers de
       la même organisation, même exercice civil, même source, version 1 → **deux** balances écrites,
       **deux** exercices ouverts simultanément — pas d'`E11000`, pas de NOP silencieux.)*
-- [ ] **AC-6** — `cahiers/categories` est re-scopé `dossierId` (Q1) ; deux dossiers de la même
+- [x] **AC-6** — `cahiers/categories` est re-scopé `dossierId` (Q1) ; deux dossiers de la même
       organisation peuvent définir une catégorie de même libellé sans collision.
-- [ ] **AC-7** — `BalanceCreatedEventV1` porte `dossierId` ; un test le prouve, et la valeur publiée
+- [x] **AC-7** — `BalanceCreatedEventV1` porte `dossierId` ; un test le prouve, et la valeur publiée
       correspond exactement au `dossierId` de la balance persistée dans la **même transaction
       outbox**. *(Champ additif de cohérence — aucun consommateur ne le lit à ce jour, cf. « Le
       constat ».)*
-- [ ] **AC-8** — Le read-model `dossiers_dossier` (jusqu'ici hook inerte, STORY-356) est effectivement
+- [x] **AC-8** — Le read-model `dossiers_dossier` (jusqu'ici hook inerte, STORY-356) est effectivement
       **lu** par le mécanisme de résolution — un test fait varier son contenu et observe le
       comportement des routes changer en conséquence (pas un simple "ne plante pas").
-- [ ] **AC-9** — Non-régression : toute route déjà couverte par un e2e existant reste testée, adaptée
+- [x] **AC-9** — Non-régression : toute route déjà couverte par un e2e existant reste testée, adaptée
       au nouveau chemin `/dossiers/:dossierId/...` — aucun test simplement supprimé pour faire passer
       la story.
-- [ ] **AC-10** — Vérification docker : parcours **Atelier → Bilan en écriture** (balance soumise,
+- [x] **AC-10** — Vérification docker : parcours **Atelier → Bilan en écriture** (balance soumise,
       validée, `balance.created` publié) rejoué sur un dossier réel, dans une stack neuve —
       **la case laissée décochée par STORY-356 est cochée ici**.
 
@@ -258,19 +258,19 @@ d'événement** : `balance.created` n'a aucun consommateur côté `bilan-service
 
 ## Definition of Done
 
-- [ ] Lint 0 warning · build OK.
-- [ ] Unit + e2e verts, couverture ≥ seuils du projet (65/90/90/90) — **jamais abaissés**.
-- [ ] Les 10 AC ci-dessus prouvées par test, pas affirmées.
-- [ ] **Mutation-test** sur chaque garde annoncée : au minimum, l'anti-énumération (AC-2), l'archivage
+- [x] Lint 0 warning · build OK.
+- [x] Unit + e2e verts, couverture ≥ seuils du projet (65/90/90/90) — **jamais abaissés**.
+- [x] Les 10 AC ci-dessus prouvées par test, pas affirmées.
+- [x] **Mutation-test** sur chaque garde annoncée : au minimum, l'anti-énumération (AC-2), l'archivage
       (AC-3) et chacun des 4+2 index migrés (AC-5) — la preuve est la mutation qui **vire au rouge**,
       pas le test vert.
-- [ ] **Vérification docker réelle** (stack neuve `down -v`) : AC-5 rejouée en base (deux dossiers,
+- [x] **Vérification docker réelle** (stack neuve `down -v`) : AC-5 rejouée en base (deux dossiers,
       même exercice, écriture des deux), AC-7 (événement observé avec `dossierId`), AC-10 (parcours
       Atelier → Bilan en écriture).
-- [ ] Revue de code ⑥ et revue de sécurité ⑦ (session `opus`) — attention particulière à
+- [x] Revue de code ⑥ et revue de sécurité ⑦ (session `opus`) — attention particulière à
       l'anti-énumération et à la frontière `orgId` dans le mécanisme de résolution commun.
-- [ ] Endpoints documentés dans Swagger (nouveau segment `:dossierId`, codes `404`/`409` ajoutés).
-- [ ] Cohérence du patron de route avec STORY-357 consignée (même convention
+- [x] Endpoints documentés dans Swagger (nouveau segment `:dossierId`, codes `404`/`409` ajoutés).
+- [x] Cohérence du patron de route avec STORY-357 consignée (même convention
       `/dossiers/:dossierId/...`, pas de PR à intégrer en même transaction — cf. Dépendances).
 
 ---
@@ -319,3 +319,134 @@ Grounding effectué avant rédaction, directement dans le code de `balance-servi
   par le §4.2 du ticket, et signalé en « Hors périmètre » les familles que le ticket **ne cite pas**
   (`tresorerie`, `suggestion`, `referentiel`, `profils_import`) plutôt que de deviner leur statut.
 - Statut laissé à `Not Started` — le dev n'a pas commencé.
+
+### ② Dev, revue et vérification docker (2026-08-16)
+
+Dev repris en session sur la branche `MNV-236` (le travail était engagé mais
+**non commité** : lint rouge à 334 erreurs, 91 unitaires rouges sur 16 suites, et
+**les 25 fichiers e2e intacts** alors que toutes les routes avaient changé de
+chemin — la suite e2e entière était rouge à 466 échecs).
+
+**Ce que le re-scopage a exigé côté tests.** Les e2e montent chacun leur propre
+`TestingModule` : le `DossierScopeGuard` devait y être câblé 25 fois. Plutôt que
+25 copies, un harnais partagé (`test/utils/dossier-scope.ts`) monte le **guard
+réel** avec un double du read-model qui **applique réellement le filtre reçu** —
+un double qui répondrait « oui » quel que soit le filtre laisserait passer un
+guard cherchant par `dossierId` seul, soit exactement la faille que l'AC-2
+prétend fermer. Deux règles le rendent contraignant : un filtre sans `orgId`
+exploitable ne résout rien, et le dossier « d'une autre organisation » n'est
+résolvable que pour cette organisation-là. Le bloc de tests AC-2/AC-3/AC-8 est
+factorisé (`decrireScopeDossier`) et appelé par **chaque famille de route**, avec
+un garde-fou de garde-fou : un test vérifie que la route sondée **existe** —
+sinon Nest répondrait 404 au *routage*, sans jamais atteindre le guard, et les
+tests d'anti-énumération passeraient au vert sur une garde absente.
+
+**⚡ DEUX TESTS POSÉS LÀ OÙ RIEN NE GARDAIT L'INVARIANT.** ① Les 6 index migrés
+n'étaient **gardés par aucun test** : les remettre en préfixe `orgId` laissait
+lint, build, 2765 unitaires et 666 e2e **entièrement au vert**. C'est précisément
+le « test qu'un code bugué franchit » — la moitié la plus dangereuse de la story
+n'avait aucun filet. ② Le guard est **opt-in** (`@RequiresDossierScope()`) : un
+23ᵉ contrôleur ajouté demain sous `dossiers/:dossierId/...` sans le décorateur
+compilerait, démarrerait, répondrait, et lirait `:dossierId` **sans vérifier
+qu'il appartient à l'organisation appelante** — une écriture cross-tenant, par
+simple absence (leçon STORY-148). Un test structurel balaie les sources et
+**nomme** le fichier fautif.
+
+**⚡ REVUE DE CODE — 3 constats, tous corrigés.**
+① `exigerDossierId` existait en **dix copies privées** identiques, une par
+service. Aucune ne divergeait — mais rien ne les en empêchait, et une seule
+devenue permissive n'aurait fait rougir aucun test (leçon STORY-138/149) ⇒ une
+seule implémentation, à côté du type `DossierScope`. ② Projection OCR :
+`lot.dossierId!` était déréférencé sans garde. Le schéma le rend `required`, mais
+un document mal formé aurait levé un `TypeError` — qui n'est **pas** une
+`ValidationError`, donc **rejoué à l'infini** : la partition se fige sur un seul
+document. C'est la panne fermée par STORY-356, atteinte par une **autre porte**
+⇒ traité comme un lot absent (warn, offset avancé, aucun brouillon inventé).
+③ La docstring de `dossiers_dossier` annonçait encore « HOOK INERTE À CE STADE »
+alors que le guard le lit à chaque requête — une docstring qui ment sur une
+frontière de sécurité est pire qu'absente.
+
+**⚡ REVUE DE SÉCURITÉ — 1 constat, corrigé ; 0 vulnérabilité exploitable.**
+`tresorerie` (hors §4.2, resté org-keyed) retombe sur le dossier « Mon cabinet »
+via `?? orgId`. Ce repli **DÉSARME la garde d'exercice clos** : `estClos`
+interroge alors un dossier inexistant, ne trouve rien, répond `false`, et
+l'import passe **dans un exercice peut-être clos**. Ce n'est pas une fuite
+cross-tenant (le filtre porte toujours l'`orgId` du JWT, et `{orgId: X,
+dossierId: X}` ne matche rien), mais c'est un garde-fou qui cesse de garder en
+silence. Repli **conservé** — un retard de read-model ne doit pas rendre la
+trésorerie indisponible — mais il **alerte** désormais, et deux tests le
+verrouillent (dont « n'alerte pas dans le cas normal »). Par ailleurs : le
+`dossierId` est **toujours** dérivé du param d'URL validé comme `ObjectId`,
+jamais du corps (aucun vecteur de mass-assignment, aucune injection NoSQL — la
+valeur est castée avant toute requête) ; l'absence de tenant (`PLATFORM_ADMIN`)
+rend **404**, jamais 403 ; le read-model n'est **jamais** une source
+d'autorisation à lui seul, le JWT reste seul maître de l'identité.
+
+**9 MUTATIONS, 9 ROUGES** — M1 filtre du guard sans `orgId` (2 unitaires + 61
+e2e rouges) · M2 `estEcriture = false` (le 409 archivé tombe) · M3 validation
+`ObjectId` retirée · M4 les 6 index remis en préfixe `orgId` (7 rouges, un par
+index) · M5 garde du lot OCR retirée · M6 `@RequiresDossierScope()` retiré d'un
+contrôleur (14 e2e rouges) · M7 le même oubli vu par l'invariant structurel, qui
+**nomme le fichier** · M8 `exigerDossierId` rendu fail-open (rouge sur de
+nombreuses suites) · M9 alerte trésorerie supprimée.
+⚠️ **M6 a d'abord rougi PAR ERREUR DE COMPILATION** (`TS6133`, import devenu
+inutilisé) — ce qui ne prouve **rien** : rejouée en retirant aussi l'import, elle
+est alors rouge **par les tests** (leçon STORY-302/179).
+⚠️ **Un `git checkout` sur `tva.controller.ts` a détruit ses modifications de
+story** (le fichier était modifié mais non commité, donc `HEAD` = état
+*pré*-story). Détecté par le build (3 erreurs), reconstruit à l'identique du
+patron de son jumeau `taxes.controller.ts`, diff relu ligne à ligne.
+
+**VÉRIFICATION DOCKER (stack neuve `down -v`, JWT RS256 réels, 2 organisations
+réelles, 2 dossiers réels).**
+- **AC-5, la preuve centrale** : dossier « Mon cabinet » **et** dossier client
+  « Client Alpha SARL » du même cabinet, **même exercice civil 2026, même source
+  `sage`, même version 1** ⇒ **deux 201**, **deux balances en base**, chacune
+  avec son `dossierId`. ⚡ **Contrôle décisif** : recréer l'ancien index unique
+  `{orgId, exercice, source, version}` sur cette donnée **échoue en E11000** — il
+  est *physiquement impossible*, ce qui prouve qu'avant la migration la seconde
+  balance **n'aurait jamais existé**, sans erreur ni trace.
+- **Idempotence intra-dossier préservée** : re-soumission identique sur le même
+  dossier ⇒ **200 (NOP)**, toujours **2** documents.
+- **Les 6 index uniques lus en base** sont tous préfixés `dossierId`, les 2
+  partiels d'`appariements` conservant `partialFilterExpression {statut:
+  CONFIRME}`.
+- **AC-7** : les 2 `balance.created` de l'outbox portent le `dossierId` **exact**
+  de la balance persistée, `schemaVersion` inchangée, **outbox intégralement
+  drainée** (2 SENT, 0 en attente).
+- **AC-2 avec DEUX ORGANISATIONS RÉELLES** : « Cabinet RIVAL » lisant le dossier
+  de l'autre cabinet (qui **existe**) et lisant un dossier **inexistant**
+  obtiennent des réponses **strictement identiques** — même statut 404, même code
+  `DOSSIER_INTROUVABLE`, même message. Aucun oracle d'énumération.
+- **AC-3** : dossier client archivé via `dossier-service`, archivage **projeté**
+  dans le read-model (statut `ARCHIVE`, version 2) ⇒ `GET /balances` et
+  `GET /cahiers/categories` **200**, `POST /balances` et
+  `POST /cahiers/categories` **409 `DOSSIER_ARCHIVE`** — et **aucun orphelin**
+  écrit après les refus.
+- **AC-6** : la catégorie « Carburant motos » créée **sur les deux dossiers**
+  (2×201, 2 documents distincts).
+- **AC-10** : parcours Atelier en écriture rejoué de bout en bout — balance
+  soumise, **validée** (`etat: VALIDÉE`, horodatage serveur), `balance.created`
+  publié. **La case laissée décochée par STORY-356 est cochée.**
+- **AC-1** : les 7 anciennes routes sans `dossierId` (`/balances`, `/exercices`,
+  `/cahiers/depenses`, `/cahiers/categories`, `/fiscal/retraitements`,
+  `/rapprochement/etat`, `/pieces/ocr`) répondent **404** — elles n'existent plus.
+- **AC-8** : le read-model est bien **lu** — l'archivage, seul changement, a fait
+  basculer le comportement des routes ; et les e2e le prouvent en vidant
+  `dossiers_dossier` (404) puis en le rétablissant.
+
+**Qualité** : lint 0 warning · build OK · **2765 unitaires + 666 e2e** ·
+couverture **98,95 / 91,80 / 98,19 / 99,02** (seuils 65/90/90/90, jamais
+abaissés).
+
+⚠️ **Une instabilité e2e observée UNE fois** sur 4 passes complètes
+(`tva-taxes` › « suppression par son organisation ⇒ 204 » rendant 404) ; non
+reproduite en 3 passes complètes ni en 2 passes isolées de la suite. Signalée
+plutôt que tue : non diagnostiquée, elle n'est pas imputée à cette story faute de
+preuve.
+
+**Dettes et points ouverts, inchangés par cette story** : `tresorerie`,
+`suggestion`, `referentiel` et `profils_import` restent **org-keyed** (absents du
+§4.2 — à trancher avec le PO) ; **D6/D11** (visibilité par affectation) ne sont
+**pas** couverts, le read-model `dossiers_dossier` ne portant ni responsable ni
+contributeurs ; `balance.submitted` (entrée externe du hub) reste un point ouvert.
