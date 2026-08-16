@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **E** (§4.2), décision **D5**
 **Priorité :** Must Have
 **Story Points :** 8
-**Statut :** Review
+**Statut :** Done
 **Complexité :** high
 **Créée le :** 2026-08-15
 **Sprint :** 20
@@ -627,3 +627,27 @@ ouvre donc **en lecture ET en écriture** toute la matière comptable et fiscale
 dossiers du cabinet. Dette **documentée** par la story et déférée à STORY-359 — mais une dette
 documentée n'est pas une dette neutralisée : entre le merge et STORY-359, l'écart est
 exploitable. **À arbitrer explicitement par le PO.**
+
+### ④ Clôture (2026-08-16)
+
+**PR `prospera-balance-service#38` rebase-mergée sur `dev`**, branche `MNV-236` supprimée : commit de
+feature `0aca3c0`, quatre commits de revue (`762cf88` implémentation unique d'`exigerDossierId` +
+sa spec · `9f3c9b9` segment `:dossierId` documenté et `HEAD` requalifié · `6dbc16c` unicité, boucle
+de retour et portée rendues conformes · `7f4e39d` déclaration unique et typée du segment) et un
+commit de tests (`da94322` un seul listener par suite e2e).
+
+Statut synchronisé aux trois endroits (en-tête, `sprint-status.yaml` avec
+`completed_date: "2026-08-16"`, ce *Progress Tracking*).
+
+**Ce que ce second tour aura appris, au-delà de la story** : *une correction annoncée n'est pas une
+correction vérifiée, et une mutation consignée n'est pas une mutation rejouée.* Deux affirmations du
+premier tour — la factorisation d'`exigerDossierId` et la mutation M8 — se sont révélées fausses en
+les rejouant, et c'est en les rejouant, pas en les relisant, qu'on l'a su. Le corollaire vaut pour
+la suite : **rejouer les mutations d'une story reprise coûte peu et rend beaucoup.**
+
+**⛔ Reste ouvert, à arbitrer par le PO** : **D6/D11**, que la revue de sécurité classe *Broken
+Access Control horizontal* (CWE-639, confiance 88). `dossier-service` restreint un `TENANT_USER` à
+ses dossiers affectés et lui masque « Mon cabinet » ; `balance-service` ne réplique que `orgId` et
+ouvre donc **en lecture et en écriture** toute la matière comptable et fiscale de **tous** les
+dossiers du cabinet. La story documente la dette et la défère à STORY-359 — mais entre ce merge et
+STORY-359, l'écart est réel.
