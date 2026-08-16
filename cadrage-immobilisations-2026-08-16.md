@@ -37,11 +37,34 @@ déjà affiché**.
 
 ## 3. Deux conséquences qui débordent du module
 
-**① Le résultat fiscal est incomplet sans lui.** `prd-fiscalite` ne contient **aucune** occurrence de
-« déductibilité », « réintégration » ou « charge non déductible » — vérifié le 2026-08-16, une seule
-correspondance et c'est `reproductible` dans `NFR-F03`. Or l'amortissement est **la** charge dont la
-déductibilité se discute (durées fiscales ≠ durées économiques, amortissements différés, biens
-somptuaires). ⚡ **`EPIC-023` calcule un résultat fiscal sur un poste dont personne ne porte la règle.**
+**① Le résultat fiscal — ⚠️ CORRECTION DE LA PREMIÈRE RÉDACTION.**
+
+> Cette note affirmait d'abord : *« `EPIC-023` calcule un résultat fiscal sur un poste dont personne ne
+> porte la règle. »* **C'est faux, et il faut le dire net.** La vérification de `STORY-091` — **livrée**,
+> S19 soldé le 2026-08-04 — montre que le cas est traité **explicitement** :
+>
+> *« Les retraitements de clôture que **rien ne peut déduire d'une ligne de dépense** : **amortissements
+> excédentaires**, provisions non déductibles, déficits reportables… → **saisis explicitement** par le
+> comptable, avec un **code DSF** et une **justification**. »*
+>
+> Avec `justification` **et** `baseLegale` **obligatoires** — `400` sinon. **Rien n'est fabriqué, rien
+> n'est silencieux.** Le nombre est juste ; c'est le comptable qui l'a calculé, ailleurs. ⚡ **Cela
+> affaiblit l'urgence du module 5** et rend le statu quo défendable — c'est ce qui a fondé l'arbitrage 1.
+
+Ce qui reste vrai, et qui est plus précis : **la RÈGLE d'amortissement vit dans la tête du comptable, pas
+dans le système.** Le paquet fiscal porte le **régime** — *« linéaire, dégressif ou accéléré (Art. 100) ;
+petit outillage HT ≤ 100 000 FCFA déductible immédiatement → LEVIER conseil fiscal »* — mais **aucune
+durée par nature de bien**. Le système sait donc **quels modes existent** et **pas combien d'années**.
+
+⚡ **Et la ligne existe déjà, numérotée.** L'état `RESULTAT_FISCAL` de la GUIDEF compte **23 postes**,
+dont **quatre** portent sur l'amortissement : `11` *(excédentaires et autres non déductibles)*, `12` et
+`155` *(réputés différés)*, `145`. Les codes sont **validés contre le paquet** par `STORY-091`.
+
+> ⚠️ **Nit relevé au passage, dans une story livrée :** l'exemple de `STORY-091` écrit *« code `40` —
+> Amortissements excédentaires »*. Le `40`, c'est **charges et dépenses somptuaires** ; l'amortissement
+> excédentaire, c'est le **`11`**. Le code étant validé au runtime contre le paquet, **seul l'exemple
+> est faux** — mais il est dans un document livré, et un exemple faux s'imite. À corriger à la prochaine
+> ouverture du fichier.
 
 **② Le module 5 est le troisième « dérivé » du même patron.** `stock-service` a déjà tranché la
 question de fond *(spine stock, `AD-1`)* : **un dérivé se reconstruit, il n'est jamais une seconde
@@ -63,7 +86,51 @@ source de vérité**, et il **contribue** à la balance comme **origine**, jamai
 | Restitution | **tableau des immobilisations de la liasse** (note annexe) | ⚡ **le consommateur existe déjà** |
 | Rapprochement | fiche ↔ comptes 2x et 28xx de la balance | même patron que `FR-F32` en social |
 
-## 5. Les questions qui doivent être tranchées **avant** d'écrire un PRD
+## 5. ✅ Arbitrages PO du **2026-08-16**
+
+| # | Question | Décision |
+| --- | --- | --- |
+| **1** | Registre ou moteur ? | ✅ **CONTRÔLEUR D'ABORD** — Prospera ne tient **aucune fiche** |
+| **2** | Durées | ✅ **LES DEUX** — économique **et** fiscale |
+| **3** | Placement | ✅ **`balance-service`** — pas de nouveau service |
+| **4** | Rang | ✅ **REPOUSSÉ** — derrière Stock et Assistant IA, rang formel 5 conservé |
+| 5 | Verticales v1 | ⏳ **ouverte, mais plus bloquante** — le contrôleur vaut pour les quatre |
+
+### ⚡ Ce que la combinaison ① + ② implique, et qu'il faut écrire avant de coder
+
+**« Contrôleur » et « les deux durées » ne se contredisent pas — mais leur assemblage n'est évident pour
+personne, et c'est lui qui définit le module :**
+
+> Le module **détient un tableau d'immobilisations** (importé ou saisi) portant **les deux durées par
+> bien**. Il n'en tire **aucune écriture** et **aucune dotation** : il **recalcule l'écart** durée
+> économique ↔ durée fiscale, et **le confronte** au montant que le comptable a saisi en `code 11`
+> *(STORY-091)*. ⛔ **Il propose, il ne remplace pas** — la saisie justifiée reste le chemin qui fait foi.
+
+**Conséquences directes, toutes vérifiables :**
+
+- ⛔ **Aucune contribution à la balance.** Le module ne devient **pas** une quatrième `ORIGINE` — c'était
+  l'hypothèse du §3-②, **elle tombe avec l'arbitrage ①**. `balance-service` reste inchangé côté hub.
+- ⚡ **Le levier fiscal du paquet devient exploitable** : *« petit outillage de valeur unitaire HT
+  ≤ 100 000 FCFA déductible immédiatement »* est déjà déclaré comme **LEVIER conseil fiscal**. Un
+  contrôleur qui voit les valeurs unitaires peut le signaler. **C'est du conseil, pas du calcul** — donc
+  dans le périmètre retenu.
+- ⚠️ **Le contrôle a besoin d'un barème fiscal que le référentiel n'a pas.** Le paquet porte les trois
+  **modes** (linéaire, dégressif, accéléré — Art. 100) mais **aucune durée par nature de bien**. ⇒ même
+  famille de trou que `GAP-smig-togo-sans-valeur`, **troisième du jour**. Demandé en même temps que le
+  SMIG, en priorité 2 : une seule sollicitation de l'expert-comptable, deux données.
+- ⛔ **Sans ce barème, le contrôleur ne contrôle rien** — il afficherait le tableau sans pouvoir
+  recalculer l'écart. **C'est le vrai préalable du module, avant même son PRD.**
+
+### Ce qui reste ouvert
+
+**La verticale.** Le contrôleur fonctionne pour les quatre, mais il **ne ferme pas la boucle** pour le
+distributeur et l'IMF, qui alimentent la balance en direct et **n'ont personne** pour calculer leurs
+amortissements. ⚠️ **L'arbitrage ① les laisse volontairement sans solution** — c'est un choix assumé,
+pas un oubli, et il devra être rouvert le jour où l'un de ces verticaux produit une liasse.
+
+---
+
+## 6. Les questions d'origine *(conservées — elles documentent l'arbitrage)*
 
 1. ⚡ **Registre ou moteur ?** Prospera **tient** le fichier des immobilisations, ou il se contente de
    **contrôler** ce que la balance porte déjà ? Les deux sont défendables ; ils n'ont ni le même coût
@@ -79,7 +146,7 @@ source de vérité**, et il **contribue** à la balance comme **origine**, jamai
    Stock)*, et le module 5 n'a **ni PRD ni spine** quand les autres en ont. **Le tenir au rang 5 est un
    choix, pas une évidence.**
 
-## 6. Ce que cette note ne fait PAS
+## 7. Ce que cette note ne fait PAS
 
 - ⛔ Elle **ne remplace pas un PRD** et ne vaut pas cadrage validé.
 - ⛔ Elle **n'attribue aucune plage d'épics** — *une plage annoncée hors du registre n'est pas réservée ;

@@ -146,6 +146,24 @@ d'entrée en vigueur. Nous avons des valeurs, nous voulons les confirmer et les 
 > mettons la donnée dans le référentiel et le calcul repart. C'est exactement pour ça que nous
 > refusons de la coder en dur.
 
+### 9 bis. Le barème des durées d'amortissement *(ajouté le 2026-08-16)*
+
+Les **durées admises par nature de bien** — bâtiments, matériel, mobilier, véhicules, informatique,
+agencements — avec le **texte qui les fixe**.
+
+> ⚡ **Même visite, deuxième donnée.** Nous avons la même situation que pour le SMIG : notre référentiel
+> porte le **régime** — *« linéaire, dégressif ou accéléré (Art. 100) »*, et *« petit outillage de valeur
+> unitaire HT ≤ 100 000 FCFA déductible immédiatement »* — mais **aucune durée**. Le système sait
+> **quels modes existent** et **pas combien d'années**.
+>
+> **À quoi ça sert :** la ligne **`11` — amortissements excédentaires** du tableau de détermination du
+> résultat fiscal. Aujourd'hui vous la **saisissez à la main**, avec sa justification, et c'est très
+> bien : nous ne prévoyons **pas** de la calculer à votre place. Nous voulons pouvoir **la recontrôler**
+> et vous signaler un écart avant l'administration.
+>
+> **Question associée :** appliquez-vous des durées d'usage différentes des durées fiscales, et si oui,
+> sur quelles natures de biens ? C'est exactement l'écart qui alimente cette ligne.
+
 ---
 
 ## Priorité 3 — par type d'entité
@@ -201,6 +219,7 @@ il vaut mieux le savoir maintenant.
 | 7 | Guide utilisateur du portail | Utile | ☐ |
 | 8 | Export de l'outil de paie | Utile | ☐ |
 | 9 | **Barème social daté — dont ⛔ la VALEUR DU SMIG, le plafond et la ventilation par branche** | **Bloquante** *(promue le 2026-08-16)* | ☐ |
+| 9 bis | **Barème des durées d'amortissement par nature de bien** *(ajouté le 2026-08-16 — à demander avec le n°9)* | Utile | ☐ |
 | 10 | Pièces microfinance | Par type | ☐ |
 | 11 | Pièces assurance | Par type | ☐ |
 | 12 | Pièces régime dérogatoire | Par type | ☐ |
