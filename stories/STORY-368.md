@@ -1,6 +1,6 @@
 # STORY-368 : `sfd-bceao@2.0` — les octets convergent, le plan cesse d'être amputé, et la garde cesse de mentir
 
-Status: in_progress
+Status: review
 
 **Epic :** EPIC-017 — Socle balance-service + contrat de balance canonique
 **Points :** 8 · **Complexité :** high · **Sprint :** 20 (backend) · **Services :** `bilan-service`
@@ -262,6 +262,38 @@ commentaire du schéma l'assume et renvoie à **STORY-357** pour le re-scopage. 
 **aucune liasse ne peut être validée**, quel que soit le référentiel. Signalé, **pas corrigé** —
 déborder ici aurait mêlé deux sujets et une migration à une story d'artefact.
 Contourné pour le contrôle 6 par insertion directe du snapshot en base.
+
+### ⑹ Revue de code — 2 lentilles, 4 constats, 4 traités
+
+Scan par `prospera-code-review` (contexte `haiku` → analyse `opus`) **plus** `ponytail-review`
+(over-engineering). Synthèse, filtrage et correctifs faits **en session `opus`**. Le relecteur a
+**rejoué** la table de mutations au lieu de la relire, et **recalculé** les chiffres annoncés — les
+916 / 190 / 2 784 / 666 et les couvertures sont confirmés indépendamment. Il a aussi rejoué le moteur
+de suggestion sur **les 156 libellés d'avant** : 12 sorties changent, **0 régression** (aucun compte
+retenu ne devient `null`, aucun ne dévie).
+
+| # | Constat | Confiance | Traitement |
+| --- | --- | --- | --- |
+| **C1** | le commentaire `'1011', // niveau 4 — absent de l'artefact` est devenu **faux** — ⚡ il rejouait *dans le diff même de la story* la cause racine qu'elle nomme (« un écart entre la prose et les données ne se voit jamais ») | 95 | **corrigé** |
+| **C2** | ⚡ **la comparaison inter-dépôts redevenait une tautologie muette si le chemin cessait de résoudre** — mesuré : `'bilan-service'` → `'bilan-serviceXX'` donnait **17/17 verts** et un `console.warn` noyé dans 165 suites | 90 | **corrigé** — le `return` anticipé est désormais gardé sur la **racine** du dépôt voisin, et si elle est là, la résolution du chemin des assets est **assertée**. Mutation rejouée : chemin faux ⇒ **rouge** (`resout: false`), restauré ⇒ 17/17 |
+| **C3** | statut désynchronisé (`in_progress` dans l'en-tête vs `review` dans `sprint-status.yaml`) + `assigned_to: null` | 90 | **corrigé** |
+| **P1** | `ponytail` : constante de chemin en 11 lignes de `join(…, '..', '..', …)` | — | **corrigé** — 4 lignes, fusionné dans C2 |
+
+⚠️ **C2 est le constat qui comptait** : sans lui, la story aurait livré une garde vraie *le jour du
+mutation-test* et fausse au premier déplacement de module — exactement la classe de défaut qu'elle
+répare. Le mutation-test de la story prouvait que la comparaison **s'exécutait ce jour-là** ; rien ne
+le maintenait vrai.
+
+**Constats écartés** (doutes levés par vérification, pas par principe) : le `return` anticipé dans le
+cas *déclaré* (dépôt voisin absent) — c'est la branche qu'AD-6 autorise ; un fichier manquant côté
+voisin — **ENOENT rouge**, vérifié, pas de faux vert ; `@1.0` révisé en place — vérifié : aucun tag ne
+le résout, aucun `0509a034…` épinglé hors docs historiques ; `role: 'RESULTAT_BILAN'` arrivé dans la
+copie balance — vérifié **inerte** (0 lecture de `role` côté balance).
+
+> ⚡ **Note opérationnelle du relecteur, retenue pour l'ordre de merge** : la garde lit l'**arbre de
+> travail** de `bilan-service`, pas une révision figée. Entre les deux merges, une machine dont
+> `bilan-service` est sur `dev` verrait la suite `balance-service` **rouge**. ⇒ **`bilan-service`
+> se merge EN PREMIER** — c'est lui qui produit les octets.
 
 ### Portes de qualité
 
