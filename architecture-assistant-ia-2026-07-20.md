@@ -1,6 +1,49 @@
 # Architecture — Assistant IA transverse (analyse & proposition sur données)
 
-> **Date :** 2026-07-20 · **Statut :** proposition d'architecture — à valider avant stories
+> # ⛔ DOCUMENT DÉPASSÉ SUR SON PRINCIPE CARDINAL — ne pas s'en servir pour cadrer des stories
+>
+> **Constaté le 2026-08-16.** Ce document date du **2026-07-20**. Le
+> **PRD `assistant-service` du 2026-08-02** *(`prds/prd-assistant-ia-2026-08-02/prd.md`, statut
+> `final`)* le cite nommément comme **l'un de trois documents qui se contredisent**, et **remplace sa
+> §0**.
+>
+> | | Ce document (20/07) | PRD (02/08), qui fait foi |
+> | --- | --- | --- |
+> | Principe | *« l'IA propose, le déterministe calcule et décide »* · *« rien n'est appliqué sans validation humaine »* | ⚡ **« Le curseur n'est pas IA ou humain. Il est : l'acte est-il réversible et sans engagement ? »** |
+> | Action autonome | ⛔ **interdite partout** — *« l'IA assiste partout ; elle ne décide nulle part »* | ✅ **autorisée pour l'acte réversible et sans engagement**, sous garde-fous, quota et journal |
+> | Le titre du PRD sur ce point | — | *« la note interdit l'action autonome, l'offre et le prototype la vendent »* — et cela **rendait invendable le module Automatisations** |
+>
+> ⛔ **La conséquence est structurelle, pas philosophique.** Le contrat `Proposition` de la §5 ci-dessous
+> **ne peut pas exprimer la doctrine du PRD** : son cycle s'arrête à `PROPOSED → ACCEPTED / REJECTED`,
+> il n'a **ni `mode`** (`AUTO` / `VALIDATION` / `SUGGESTION`), **ni exécution**, **ni mandat daté et
+> révocable**, **ni quota**, **ni réversibilité**. Un contrat qui n'a pas d'état « exécuté » ne peut pas
+> décrire un assistant qui exécute.
+>
+> ⚠️ **Et `confiance: number` ne doit PAS devenir la vanne** : le PRD dit explicitement que le critère
+> *« ne dépend ni de la confiance dans le modèle, ni du niveau de l'utilisateur »*. L'exposer est utile ;
+> en faire le seuil d'autonomie contredirait la doctrine.
+>
+> ### ✅ Ce qui reste valide et se réemploie tel quel
+>
+> §1 placement (`assistant-service`, relying party, base propre) · §2 abstraction **`LlmProvider`** ·
+> §3 **RAG** et corpus CGI/LPF *(déjà livré, 1 185 articles)* · §4 **OCR inchangé, Tesseract reste la
+> baseline** · §7 intégration · §9 invariants écosystème · §11 décisions ouvertes 1, 2 et 5.
+>
+> ### ⛔ Ce qui tombe
+>
+> §0 en entier · la dernière ligne de la §6 · le cycle de la §5 · le découpage de la §10, qui n'a **ni
+> mode, ni règle d'automatisation, ni file d'arbitrage, ni les trois modes** que le PRD exige.
+>
+> **Suite :** une **spine `assistant-service`** écrite **depuis le PRD**, réemployant explicitement la
+> liste ci-dessus. Écart tracé : **`GAP-assistant-ia-architecture-anterieure-au-prd`**.
+>
+> ⚠️ **Pourquoi cet encadré plutôt qu'une suppression :** ce document reste la seule trace du
+> raisonnement OCR et RAG, et le PRD le cite. Le supprimer perdrait de l'information ; le laisser nu
+> **encodait l'ancienne vérité et la gardait active** — exactement le défaut que ce dépôt a payé cinq
+> fois.
+
+> **Date :** 2026-07-20 · **Statut :** ⛔ **DÉPASSÉ** *(voir encadré)* — était : « proposition
+> d'architecture — à valider avant stories »
 > **Périmètre (décidé 2026-07-20) :** capacité IA **transverse** — analyse des données + **propositions**, branchable sur plusieurs surfaces
 > du produit (mapping, conseil fiscal, analyse financière, prévisionnel…), pas une feature isolée.
 > **Fondé sur :** la feature déjà cadrée EPIC-AB-07 / EPIC-024 (« Simulation & conseil fiscal », FR-A22-A24) + D11(b)

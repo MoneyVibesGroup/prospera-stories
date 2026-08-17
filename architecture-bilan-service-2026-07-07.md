@@ -4,8 +4,41 @@
 **Architecte :** vivian
 **Version :** 1.0
 **Type de projet :** API (micro-service NestJS)
-**Statut :** Draft
+**Statut :** ⚠️ **VALIDE SUR SON OBJET, DÉPASSÉ SUR DEUX POINTS STRUCTURELS** *(voir l'encadré)* — était : « Draft »
 **Écosystème :** PROSPERA
+
+> # ⚠️ Réancrage du 2026-08-16 — deux points de ce document sont dépassés
+>
+> **Ce document reste la référence de ce pour quoi il a été écrit** : l'extraction de `bilan-service`
+> en capacité partagée, le moteur paramétré par référentiel, le gate rejoué en relying party, le
+> déploiement multi-version. **Rien de cela n'est remis en cause.**
+>
+> ⛔ **Mais il précède de six semaines `AD-P13` et `AD-P14`**, et il porte **zéro occurrence du mot
+> « dossier »** — vérifié le 2026-08-16.
+>
+> | | Ce document (07/07) | Ce qui fait foi aujourd'hui |
+> | --- | --- | --- |
+> | **Clé d'isolation** | `orgId` seul — *« `BilanRepository extends TenantScopedRepository`, persistance keyée `orgId` »* | ⚡ **`AD-P13`** — le **dossier** est l'unité de travail, l'organisation ne l'est plus. Un cabinet a **une** organisation et **vingt dossiers**. Le dossier vient de **l'URL**, jamais du jeton, et il est vérifié contre la **portée serveur** ; hors portée ⇒ **`404`, jamais `403`** |
+> | **Propriété de l'`Exercice`** | implicite : le service gère ses exercices | ⚡ **`AD-P14`** — **`dossier-service` fait foi**. `bilan-service` tient un read-model `exercices_dossier` alimenté par `dossier.exercice.ouvert\|clos\|rouvert` et **cesse d'être source de vérité sur le statut** |
+>
+> ⛔ **La conséquence n'est pas documentaire.** `AD-P14` le dit sans détour : `bilan-service` **expose
+> toujours `POST /bilan/exercices`**, les read-models sont posés et **rien ne les lit encore** —
+> *« tant que STORY-356/236/357 ne sont pas livrées, il y a **deux écritures possibles pour un même
+> fait**. C'est l'écart le plus dangereux du système à cette date. »* Lire ce document sans cet
+> avertissement conduit à écrire la troisième.
+>
+> ### ✅ Ce qui reste valide et se réemploie tel quel
+>
+> §Périmètre · §Drivers · §Composants *(moteur, `ReferentielLoader`, `AccessGate`)* · §Read-models
+> `OrgBilanEntitlement` et `OrgKycStatus` · §Versioning multi-version *(B6)* · §Gate d'accès *(B4)* ·
+> §Authentification inter-services · §Journal de décisions **B1 → B7**.
+>
+> ⚠️ **Pourquoi un encadré plutôt qu'une spine rétroactive.** Le dépôt en écrit une quand un service
+> livré **n'a aucune architecture** (`balance-service`, `dossier-service`, 2026-08-15). Ce n'est pas le
+> cas ici : le document existe, il est juste **partiellement périmé**. Le traitement correct est celui
+> de la note Assistant IA du 20/07 — **marquer ce qui tombe, préserver ce qui survit**. Une spine
+> deviendra justifiée le jour où la bascule `AD-P14` sera faite, pas avant : elle documenterait sinon
+> un état transitoire.
 
 > **Portée de ce document.** Il cadre l'**architecture d'intégration et de versioning** de `bilan-service` en tant que **capacité partagée** (décisions **P7 / D10**) : extraction, relying party, moteur paramétré par référentiel, gate d'accès rejoué, déploiement multi-version. Le **domaine fonctionnel comptable** (quelles états financiers, quelles règles de calcul, FR détaillés) est **volontairement hors périmètre** — il fera l'objet d'un **PRD/tech-spec Bilan dédié** (cf. `prd-expert-comptable` § Hors périmètre). On peut construire le **squelette** (extraction, read-models, gate, chargement de référentiel, routage) **avant** que ce PRD existe.
 

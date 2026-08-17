@@ -111,10 +111,58 @@ cela il nous faut voir le format de sortie réel.
 
 **Question associée :** quel outil utilisez-vous, et vos confrères ?
 
-### 9. Le barème des cotisations sociales en vigueur
+### 9. Le barème des cotisations sociales en vigueur — ⛔ **PASSÉE BLOQUANTE le 2026-08-16**
 
 Taux employeur et salarié, assiette, plafond éventuel, salaire minimum de référence, avec la date
 d'entrée en vigueur. Nous avons des valeurs, nous voulons les confirmer et les dater.
+
+> ### ⛔ Une pièce précise nous manque **complètement** : la valeur du SMIG
+>
+> Cette demande était classée « utile ». **Elle est bloquante**, et nous ne l'avions pas vu.
+>
+> Notre référentiel porte bien les **taux** (17,5 % employeur / 4 % salarié) et la **règle** du
+> plancher : *« l'assiette ne peut être inférieure au SMIG en vigueur »*. Mais **la valeur du SMIG n'y
+> figure nulle part** — le référentiel le déclare lui-même : *« valeur SMIG à jour »* reste dans sa
+> liste de champs à compléter.
+>
+> ⚡ **Conséquence concrète :** tant que cette valeur manque, toute rémunération proche du minimum sort
+> en **obligation bloquée**, avec le motif « valeur du SMIG absente ». C'est volontaire — nous refusons
+> d'appliquer un plancher que nous ne pouvons pas sourcer. ⛔ **Nous n'irons pas chercher un chiffre en
+> ligne** : un SMIG périmé produirait une assiette **fausse et vraisemblable** sur exactement la
+> population la plus exposée.
+>
+> **Ce dont nous avons besoin, très précisément :**
+>
+> | Élément | Pourquoi |
+> | --- | --- |
+> | **La valeur du SMIG** et **le texte qui la fixe** (décret, date) | c'est le plancher d'assiette |
+> | Le **plafond** de cotisation — **ou la confirmation qu'il n'y en a pas** | notre source dit « éventuel », ce qui ne tranche rien |
+> | La **ventilation par branche** (prestations familiales / risques professionnels / pensions) | le 17,5 % est un total ; les déclarations les demandent parfois séparés |
+>
+> **Question associée :** ces trois éléments changent-ils par décret, et à quelle fréquence ? Nous
+> voulons savoir **à quel rythme cette donnée périme**, pour prévoir qui la surveille.
+>
+> ⚡ Le jour où vous nous les donnez, **le déblocage ne demande aucune livraison de logiciel** — nous
+> mettons la donnée dans le référentiel et le calcul repart. C'est exactement pour ça que nous
+> refusons de la coder en dur.
+
+### 9 bis. Le barème des durées d'amortissement *(ajouté le 2026-08-16)*
+
+Les **durées admises par nature de bien** — bâtiments, matériel, mobilier, véhicules, informatique,
+agencements — avec le **texte qui les fixe**.
+
+> ⚡ **Même visite, deuxième donnée.** Nous avons la même situation que pour le SMIG : notre référentiel
+> porte le **régime** — *« linéaire, dégressif ou accéléré (Art. 100) »*, et *« petit outillage de valeur
+> unitaire HT ≤ 100 000 FCFA déductible immédiatement »* — mais **aucune durée**. Le système sait
+> **quels modes existent** et **pas combien d'années**.
+>
+> **À quoi ça sert :** la ligne **`11` — amortissements excédentaires** du tableau de détermination du
+> résultat fiscal. Aujourd'hui vous la **saisissez à la main**, avec sa justification, et c'est très
+> bien : nous ne prévoyons **pas** de la calculer à votre place. Nous voulons pouvoir **la recontrôler**
+> et vous signaler un écart avant l'administration.
+>
+> **Question associée :** appliquez-vous des durées d'usage différentes des durées fiscales, et si oui,
+> sur quelles natures de biens ? C'est exactement l'écart qui alimente cette ligne.
 
 ---
 
@@ -170,7 +218,8 @@ il vaut mieux le savoir maintenant.
 | 6 | Bordereau de paiement et preuve de règlement | Utile | ☐ |
 | 7 | Guide utilisateur du portail | Utile | ☐ |
 | 8 | Export de l'outil de paie | Utile | ☐ |
-| 9 | Barème des cotisations sociales daté | Utile | ☐ |
+| 9 | **Barème social daté — dont ⛔ la VALEUR DU SMIG, le plafond et la ventilation par branche** | **Bloquante** *(promue le 2026-08-16)* | ☐ |
+| 9 bis | **Barème des durées d'amortissement par nature de bien** *(ajouté le 2026-08-16 — à demander avec le n°9)* | Utile | ☐ |
 | 10 | Pièces microfinance | Par type | ☐ |
 | 11 | Pièces assurance | Par type | ☐ |
 | 12 | Pièces régime dérogatoire | Par type | ☐ |
