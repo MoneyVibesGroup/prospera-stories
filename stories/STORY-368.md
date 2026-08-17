@@ -295,6 +295,61 @@ copie balance — vérifié **inerte** (0 lecture de `role` côté balance).
 > `bilan-service` est sur `dev` verrait la suite `balance-service` **rouge**. ⇒ **`bilan-service`
 > se merge EN PREMIER** — c'est lui qui produit les octets.
 
+### ⑺ Revue de sécurité — **aucune vulnérabilité**, et une preuve qui vaut d'être gardée
+
+Scan par `prospera-security-review` (`haiku` pour l'éligibilité/contexte/résumé → **`opus`** pour
+l'analyse, jamais de downgrade). Synthèse en session `opus`. **0 constat à confiance ≥ 80.**
+
+Les deux angles qui n'allaient **pas** de soi ont été tranchés par le calcul, pas par principe :
+
+**⚡ La frontière de validation ne s'est PAS élargie — démontré.** `estCompteRattachable` accepte un
+compte s'il **commence par** une racine du plan. Passer de 156 à 372 racines pourrait laisser entrer
+ce qui était refusé. Vérification : **chacune des 216 racines ajoutées est elle-même préfixée par une
+racine déjà présente** (0 exception). Or si `R'` commence par `R`, tout compte commençant par `R'`
+commençait déjà par `R` ⇒ **l'ensemble des comptes acceptés est rigoureusement identique avant et
+après**. `longueurCompteDetail` (6) et `/^\d+$/` sont inchangés, et aucune racine ne dépasse 6
+chiffres. Aucune entrée précédemment refusée ne passe désormais.
+
+**Provenance de la donnée ingérée** — 216 entrées viennent d'un PDF **externe**. Scan caractère par
+caractère des 372 entrées et des 3 artefacts : jeu effectif `espace ' ( ) , - 0-9 A-Z a-z` + 6
+lettres accentuées. **Absents** : `< > & " \ ` $ { } [ ] ; =`, tout caractère de contrôle, tout
+caractère **bidirectionnel** (`U+202A-202E`, `U+2066-2069`…), tout résidu d'extraction. Pas de
+`= + - @` en tête (injection de formule CSV) — et aucun sink CSV/HTML/PDF en sortie de toute façon.
+Pas de `\n`/`\r` (injection de journal), et les libellés ne sont jamais journalisés.
+
+**Chaîne d'intégrité intacte** : les **9** entrées de manifeste des deux dépôts ont vu leur sha256
+recalculé et comparé à la constante déclarée — **9/9 exactes** ; le refus reste **avant tout parse et
+avant mise en cache** ; `502 REFERENTIEL_INTEGRITY` ne porte que des empreintes, aucun contenu ; aucun
+checksum périmé ne survit dans un chemin de code (seulement des commentaires et l'historique).
+Lecture de FS hors dépôt (la nouvelle garde) : chemin **constant** dérivé de `__dirname`, aucun
+segment contrôlable, specs exclues de `tsconfig.build.json` et de l'image runtime ⇒ pas de CWE-22.
+Suggestion : **n'engage rien** (aucune écriture), route authentifiée et lot borné.
+
+### ⚠️ Conséquence MESURÉE, écrite ici pour ne pas être découverte
+
+Un plan plus fin rend `libelleDuPlanLePlusSpecifique` plus précis : **188 des 372 comptes** voient leur
+libellé dérivé changer, parce que leur plus long préfixe n'est plus la racine à 3 chiffres mais le
+compte lui-même.
+
+| Compte | Libellé dérivé avant | Après |
+| --- | --- | --- |
+| `1011` | Billets et monnaies | **Billets et monnaies émis par la BCEAO** |
+| `1136` | Centre des Chèques postaux | **Dettes rattachées** |
+| `1147` | Banques et correspondants | **Créances rattachées** |
+
+⚠️ **Deux effets, tous deux assumés :**
+
+1. Certains libellés deviennent **moins parlants hors contexte** (`1136` → « Dettes rattachées ») —
+   c'est la convention du plan officiel, qui réutilise des libellés génériques sous un parent.
+   **L'artefact fait foi** (AD-5) : les rebaptiser serait réinventer du comptable.
+2. L'import Sage **dérive** le libellé du plan **avant** de sceller le checksum
+   (`sage-normalizer.service.ts:116`). Le **même fichier** ré-importé après cette story produit donc
+   un checksum **différent** dès qu'il contient un compte subdivisé. Conséquence concrète et
+   **unique** : ré-ingérer une version **déjà ingérée** rend `VERSION_DEJA_INGEREE` — *« déjà ingérée
+   avec un contenu différent, re-poussez en version N+1 »*. ✅ **Fail-closed, explicite, et il nomme le
+   remède.** Les balances **déjà stockées** ne bougent pas : la re-vérification confronte une balance
+   à **ses propres** lignes stockées, jamais à des libellés fraîchement dérivés — vérifié.
+
 ### Portes de qualité
 
 | | `bilan-service` | `balance-service` |
