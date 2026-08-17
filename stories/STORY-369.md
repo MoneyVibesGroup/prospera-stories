@@ -1,6 +1,6 @@
 # STORY-369 : Les classes de gestion sont publiées par le référentiel, et leur absence REFUSE — jamais `[6,7,8]` par défaut
 
-Status: not_started
+Status: in_progress
 
 **Epic :** EPIC-017 — Socle balance-service + contrat de balance canonique
 **Points :** 8 · **Sprint :** 20 (backend) · **Services :** `bilan-service` (`:3004`) **+**
@@ -97,3 +97,9 @@ retirée en dur.
 - [ ] Un référentiel sans déclaration produit un **refus nommé**, vérifié par un test.
 - [ ] `CLASSES_DE_GESTION` **n'existe plus** dans `src/`.
 - [ ] Les snapshots de liasse impactés par la régénération sont **identifiés et traités**.
+
+## Progress Tracking
+
+▶️ **Démarrée le 2026-08-17** — branches `MNV-369` sur `bilan-service` et `balance-service`
+(+ `docs/`). Amont `STORY-368` **done** le 2026-08-17 : le manifeste de `balance-service` dit
+désormais la vérité sur ses octets, et sa garde inter-dépôts lit réellement l'autre dépôt.
