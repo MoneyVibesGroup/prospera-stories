@@ -5,6 +5,10 @@
 **Causé par :** **STORY-182** (`kyc-service`) — concurrence optimiste des décisions KYC
 **Ouvert par :** STORY-184, 2026-08-11 *(constaté en lançant l'e2e navigateur, hors périmètre)*
 **Priorité :** **Must** — l'acte central de la console est inopérant depuis STORY-182.
+**Statut :** ✅ **RÉSOLU par `AP-26` le 2026-08-17** — branches `ap-26` *(console)* et `MNV-AP-26`
+*(BFF)*, à fusionner **ensemble** *(l'une sans l'autre ne décide rien)*.
+**Preuve sur stack réelle :** `kyc-chain` étape 5 **échoue sur `dev`, passe sur `ap-26`** ; le rejet
+et l'écran de conflit sont couverts par `e2e/kyc-decision.spec.ts` *(2/2)*.
 
 ---
 
@@ -39,7 +43,14 @@ hors précondition (deux opérateurs qui marquent deux pièces différentes ne s
 n'assertent que le chemin logique appelé, jamais les en-têtes ; et l'e2e navigateur n'est pas dans la
 CI backend. La console était verte et inopérante — le même motif qu'AP-INT-0.
 
-## Ce que l'amont met à disposition (déjà servi, rien à livrer côté backend)
+## Ce que l'amont met à disposition (⚠️ « rien à livrer côté backend » était FAUX)
+
+> ⛔ **Corrigé le 2026-08-17.** Le **contrat** était complet, mais le BFF `admin-panel` n'annonçait
+> pas `If-Match` dans son `Access-Control-Allow-Headers`. La console l'appelle en **cross-origin**
+> (`:3110` → `:3010`) : le **préflight** échouait et la décision ne quittait jamais le navigateur.
+> Le `curl` de ce ticket ne pouvait pas le voir — un préflight n'existe qu'au navigateur.
+> ⇒ une ligne dans `admin-panel/src/main.ts`, branche `MNV-AP-26`.
+
 
 `GET /admin/orgs/{orgId}` (BFF) et `GET /kyc-admin/{orgId}` (`kyc-service`) portent **déjà** l'`etag`
 **dans le corps de la réponse** — et non seulement dans l'en-tête HTTP, précisément parce que le BFF
