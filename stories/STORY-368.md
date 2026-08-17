@@ -1,10 +1,10 @@
 # STORY-368 : `sfd-bceao@2.0` — les octets convergent, le plan cesse d'être amputé, et la garde cesse de mentir
 
-Status: not_started
+Status: in_progress
 
 **Epic :** EPIC-017 — Socle balance-service + contrat de balance canonique
-**Points :** 8 · **Sprint :** 20 (backend) · **Services :** `bilan-service` (`:3004`) **+**
-`balance-service` (`:3007`) — ⚠️ **DEUX DÉPÔTS**
+**Points :** 8 · **Complexité :** high · **Sprint :** 20 (backend) · **Services :** `bilan-service`
+(`:3004`) **+** `balance-service` (`:3007`) — ⚠️ **DEUX DÉPÔTS**
 **Gaps repris :** `GAP-sfd-bceao-2-0-octets-divergents` · `GAP-artefact-sfd-tronque`
 **Décision :** **D-078-2** *(les octets de l'artefact sont ceux de `bilan-service`, source de vérité
 unique)* · **AD-5** et **AD-6** de `architecture-balance-service-2026-08-15`
@@ -109,10 +109,168 @@ SFD**.
 
 ## Definition of Done
 
-- [ ] **Un seul sha256** pour `sfd-bceao@2.0` dans les deux dépôts, déclaré dans les deux manifestes.
-- [ ] **Mutation-test de la garde** : remettre l'ancien asset **fait échouer la CI**. ⚠️ Sans lui, la
+- [x] **Un seul sha256** pour `sfd-bceao@2.0` dans les deux dépôts, déclaré dans les deux manifestes.
+- [x] **Mutation-test de la garde** : remettre l'ancien asset **fait échouer la CI**. ⚠️ Sans lui, la
       story reproduit exactement le défaut qu'elle répare.
-- [ ] Le plan porte **372 comptes**, sourcés depuis `rcsfd-bceao-longueur-compte-2026-08-03.md`.
-- [ ] Le comportement du moteur fiscal sur `tableDePassage` est **re-vérifié et écrit**.
-- [ ] Les snapshots de liasse impactés sont **identifiés et traités**.
-- [ ] Les deux gaps passent à **fermé** — ⛔ pas avant que la garde ait prouvé qu'elle détecte.
+- [x] Le plan porte **372 comptes**, sourcés depuis `rcsfd-bceao-longueur-compte-2026-08-03.md`.
+- [x] Le comportement du moteur fiscal sur `tableDePassage` est **re-vérifié et écrit**.
+- [x] Les snapshots de liasse impactés sont **identifiés et traités**.
+- [x] Les deux gaps passent à **fermé** — ⛔ pas avant que la garde ait prouvé qu'elle détecte.
+
+---
+
+## Progress Tracking
+
+### Ce qui a été livré
+
+**`bilan-service` (source de vérité des octets, D-078-2)**
+
+| Fichier | Changement |
+| --- | --- |
+| `scripts/referentiels/sources/plan-comptable-sfd.json` | **156 → 372 comptes**. Les 156 libellés existants conservés **à l'octet** ; 216 ajoutés (22 à 3 chiffres, 178 à 4, 14 à 5, 2 à 6). |
+| `src/modules/bilan/referentiel/assets/sfd-bceao-{1.0,2.0}.json` | régénérés par `build.mjs` |
+| `referentiel-registry.ts` | `sfd-bceao@1.0` `0509a034…` → **`c2e075a2…`** · `sfd-bceao@2.0` `07b4ec22…` → **`8b7b29d8…`** |
+| `referentiels-additionnels-coherence.spec.ts` | digests épinglés mis à jour + **1 test neuf** (répartition par longueur) |
+
+**`balance-service` (copie, AD-6)**
+
+| Fichier | Changement |
+| --- | --- |
+| `assets/sfd-bceao-2.0.json` | octets **recopiés** de `bilan-service` (`8b7b29d8…`) |
+| `referentiel-registry.ts` | checksum `ee9bf014…` → **`8b7b29d8…`** + le commentaire cesse d'annoncer une garantie automatique |
+| `referentiel-assets-coherence.spec.ts` | **la garde cesse de mentir** (§ ci-dessous) |
+| `liquidation.regles.spec.ts` | **1 test neuf** : le moteur fiscal joué sur le **vrai** artefact SFD |
+| `suggestion.regles.spec.ts` · `test/suggestion.e2e-spec.ts` | 3 attentes rectifiées + **1 test neuf** (compte de niveau 4) |
+
+### ⑴ Le plan — extraction rejouée, pas recopiée à la main
+
+`pypdf` sur le PDF officiel (téléchargé depuis `cb-umoa.org`, 201 p.), motif
+`^(\d{2,8})\s*[-–]\s*libellé` sur les **pages 29-42**, continuations de libellé recollées, lignes de
+titre **en capitales** écartées (sans ce filtre, `COMPTES DE CHARGES` se collait au libellé de `692`).
+
+Trois contrôles indépendants confirment que c'est **la même extraction, poursuivie**, et non une
+seconde source :
+
+1. la répartition rendue est **exactement** celle du relevé de STORY-172 — **48 / 130 / 178 / 14 / 2** ;
+2. les 156 comptes existants sont **tous** retrouvés (aucun disparu) ;
+3. l'**ordre** du sous-ensemble commun est identique à celui du fichier livré depuis STORY-057.
+
+⚠️ **`@1.0` bouge aussi, et c'est voulu** : les deux versions partagent `plan-comptable-sfd.json`. La
+« version allégée » de `@1.0` porte sur ses **postes** et sa **table de passage**, jamais sur le plan
+— les deux décrivent le même RCSFD. Révision **en place** légitime : le pont tag → référentiel résout
+`SFD-BCEAO` vers `@2.0`, `@1.0` n'est attribué à aucune organisation ⇒ pas de `@1.1`, pas de migration.
+
+**Non-régression byte-identique prouvée** sur les 3 autres artefacts : `git status` ne liste que les
+deux `sfd-bceao-*.json` (SYSCOHADA `01b892c0…`, zone-franche `ecbd01e2…`, CIMA `7e644ab1…` inchangés).
+Build rejoué → **même hash** (déterminisme).
+
+### ⑵ La garde — ce qu'elle prouve est désormais ÉCRIT (AD-6)
+
+Elle comparait la copie périmée **à elle-même**. Elle a été refaite pour dire **exactement** ce qu'elle
+vérifie, plus une vérification qui lit **réellement** l'autre dépôt :
+
+| Dérive | Détectée ? | Par quoi |
+| --- | --- | --- |
+| l'asset local est modifié / remis à un état antérieur | ✅ **toujours** | empreinte figée (avec sa **date de recopie**) |
+| le manifeste local dérive de l'asset local | ✅ **toujours** | `le manifeste local déclare ces checksums` |
+| `bilan-service` régénère et `balance-service` ne suit pas | ✅ **si les deux dépôts sont côte à côte** | comparaison des **octets réels** de `../bilan-service/…/assets/` |
+| idem, dans la CI d'un dépôt **isolé** | ⛔ **NON** | — **dit, pas tu** (`console.warn` explicite) |
+
+⛔ **La dernière ligne reste ouverte** et n'est **pas** annoncée comme faite : la fermer demande une
+source partagée entre dépôts (submodule ou artefact de CI publié par `bilan-service`) — de
+l'infrastructure, hors du périmètre de cette story. AD-6 autorise explicitement cette branche :
+*« soit la garde lit réellement la source de l'autre dépôt, soit l'invariant cesse d'être ANNONCÉ
+comme vérifié »*. C'est le second terme qui est tenu, **plus** le premier partout où il est atteignable.
+
+### ⑶ Mutation-test — le critère central de la story
+
+`git stash` de l'asset `balance-service` (retour à `ee9bf014…`), puis `npm test` :
+
+```
+✕ sfd-bceao-2.0.json a exactement le sha256 recopié du manifeste bilan (8b7b29d8…, le 2026-08-17)
+✕ octets identiques à ceux de bilan-service — vérifié si le dépôt est présent à côté
+✕ le manifeste local déclare **ces** checksums (pas d’autres)
+✕ SFD-BCEAO se charge avec son propre plan (2ᵉ référentiel, même code)
+✕ SFD-BCEAO déclare 6 chiffres SANS refuser un seul compte officiel (STORY-172/368)
+Tests: 5 failed, 12 passed
+```
+
+⚡ **Le 2ᵉ échec est celui qui compte** : il prouve que la comparaison inter-dépôts **s'exécute**
+réellement (chemin résolu, pas de skip silencieux) — sans lui, la nouvelle garde serait la tautologie
+d'avant sous un autre nom. Restauration → **17/17 verts**.
+
+### ⑷ Moteur fiscal — constaté, pas supposé
+
+La story exigeait de **re-vérifier**, l'artefact remplacé apportant les `etatSource` de l'incrément 2
+que `resoudreComptesDuPoste` suit (`operande.etatSource ?? etat`).
+
+**Constat : `resoudrePosteChiffreAffaires` rend toujours `null`** — épinglé par un test neuf qui joue
+le **vrai** `sfd-bceao-2.0.json` (le cas SFD n'était joué jusqu'ici que sur un paquet **inventé** d'un
+seul poste, ce qui ne prouvait rien de l'artefact livré). Raison écrite : le RCSFD ne publie
+`POSTE_CHIFFRE_AFFAIRES` dans aucune règle et aucun de ses postes ne porte un libellé commençant par
+« chiffre d'affaires » — les `etatSource` ajoutés portent sur les **totaux de bilan** `BAT`/`BPT`, pas
+sur un poste de produits. La liquidation reste donc **refusée** pour un SFD, jamais calculée sur une
+MFP nulle inventée. Le test vérifie **d'abord** que les octets sont bien ceux de l'incrément 2 (sinon
+il constaterait sur le mauvais artefact).
+
+### ⑸ Effet mesuré sur la suggestion de compte (STORY-139)
+
+Trois comportements changent, **tous** conséquence fidèle d'un plan complet :
+
+| Libellé | Avant (plan tronqué) | Après | Pourquoi |
+| --- | --- | --- | --- |
+| `Amortissements` | `AUCUN` | **`4418` EXACT** | le plan officiel porte littéralement ce libellé (amortissements des immobilisations incorporelles) |
+| `Banques et correspondants` | 2 alternatives (`114`, `154`) | **4** (`114`, `154`, `1141`, `1541`) | le RCSFD nomme pareil le collectif **et** son divisionnaire |
+| seuil de rapprochement | testé via `Amortissements` (0,38) | testé via `Dotations aux amortissements du matériel roulant` (**0,42** contre `661`) | l'ancien exemple est devenu une correspondance exacte ⇒ il ne testait plus le **seuil** mais l'absence de candidat |
+
+⚠️ Le 3ᵉ point est un **piège évité** : garder l'ancien exemple aurait laissé un test vert qui ne
+prouvait plus rien de la branche qu'il prétend couvrir.
+
+### ⑹ Vérification docker réelle — stack NEUVE (`down -v`), 2026-08-17
+
+| # | Contrôle | Résultat mesuré |
+| --- | --- | --- |
+| 1 | octets servis **dans les conteneurs**, `src/` **et** `dist/` | `8b7b29d8…` **partout** — `bilan-service` (`src`+`dist`) **et** `balance-service` (`src`+`dist`) ⇒ **AC-1 : les octets convergent** |
+| 2 | `GET /api/v1/referentiels/actifs` (balance, `:3007`) | `checksum 8b7b29d8…` · `planCount` **372** · `integrity: "verified"` |
+| 3 | `GET /api/v1/bilan/referentiel` (bilan, `:3004`) | `checksum 8b7b29d8…` · `planCount` **372** · `postes 31` · `mapping 31` · `integrity: "verified"` |
+| 4 | `POST /api/v1/balances/suggest-comptes` | **niveau 4 proposé** : `Amortissements → 4418` · `Banques et correspondants → 4 alternatives dont 1141/1541` · **niveau 5** : `Intérêts sur comptes ordinaires créditeurs → 60251` ⇒ **AC-4** |
+| 5 | jeu d'états SFD créé | tampon référentiel persisté `8b7b29d8…` — les **nouvelles** productions portent le nouveau checksum |
+| 6 | snapshot portant l'**ANCIEN** checksum (`07b4ec22…`) inséré puis relu par l'API | `GET …/versions` et `…/versions/1` le servent **sans erreur**, checksum d'origine **inchangé** ⇒ **AC-6** |
+
+**Sort des snapshots de liasse — traité, pas découvert.** `SnapshotLiasse.checksum` est une **trace
+append-only** de ce qui a servi, pas une référence à revalider : le réécrire falsifierait la piste
+d'audit. Aucun code ne compare un checksum stocké à l'artefact courant — la **seule** comparaison de
+tout `bilan-service` est `referentiel-loader.service.ts:80`, entre les octets fraîchement lus et
+l'entrée du manifeste. Contrôle 6 ci-dessus le mesure au lieu de le déduire.
+
+⚠️ **Ce que la vérif docker a discriminé** : les contrôles 1-3 échoueraient à l'identique sur l'état
+d'avant (les octets **divergeaient**, `planCount` valait 156) ; le contrôle 4 est **structurellement**
+impossible avant (l'artefact ne contenait **aucun** compte de plus de 3 chiffres — 48×2 + 108×3) ; le
+contrôle 6 discrimine le risque nommé par l'AC (un snapshot antérieur devenu illisible).
+
+### ⛔ Défaut PRÉ-EXISTANT rencontré, non corrigé (hors périmètre)
+
+`POST /api/v1/bilan/etats/:id/valider` rend **500** sur stack neuve :
+
+```
+ValidationError: SnapshotLiasse validation failed: dossierId: Path `dossierId` is required.
+```
+
+**Antérieur à cette story et sans rapport avec elle** : `MNV-356` a posé `dossierId` en
+`required: true` au schéma `SnapshotLiasse` alors qu'**aucun chemin d'écriture ne le renseigne**. Le
+commentaire du schéma l'assume et renvoie à **STORY-357** pour le re-scopage. Conséquence en l'état :
+**aucune liasse ne peut être validée**, quel que soit le référentiel. Signalé, **pas corrigé** —
+déborder ici aurait mêlé deux sujets et une migration à une story d'artefact.
+Contourné pour le contrôle 6 par insertion directe du snapshot en base.
+
+### Portes de qualité
+
+| | `bilan-service` | `balance-service` |
+| --- | --- | --- |
+| lint | **0 warning** | **0 warning** |
+| build | ✅ | ✅ |
+| unitaires | **916 passés** (93 suites) | **2 784 passés** (165 suites) |
+| e2e | **190 passés** (20 suites) | **666 passés** (25 suites) |
+| couverture | 98,67 / **93,11** / 98,59 / 98,62 | 99 / **91,81** / 98,19 / 99,08 |
+
+Seuils 65 / 90 / 90 / 90 — tenus, aucun abaissé.

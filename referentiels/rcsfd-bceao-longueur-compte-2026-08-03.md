@@ -33,11 +33,20 @@ laquelle STORY-146 avait laissé `sfd-bceao@2.0` sans déclaration : la donnée 
 livrets créditeurs). Même valeur que SYSCOHADA révisé, mais **pour une raison propre et vérifiée**, pas par
 analogie.
 
-## ⚠️ Constat annexe : notre artefact embarqué est TRONQUÉ
+## ✅ Constat annexe : notre artefact embarqué était TRONQUÉ — **fermé le 2026-08-17 (STORY-368)**
 
-`balance-service/src/modules/referentiel/assets/sfd-bceao-2.0.json` ne porte que **156 comptes**
-(48 × 2 chiffres + 108 × 3), là où le plan officiel en compte **372** et descend jusqu'à 6 chiffres.
-Les niveaux 4, 5 et 6 sont **absents de l'artefact**.
+> **Fermeture.** L'artefact porte désormais les **372 comptes**, dans les deux dépôts et avec les
+> **mêmes octets** (`8b7b29d8…`). L'extraction a été **rejouée à l'identique** sur le PDF officiel
+> (`pypdf`, motif `^(\d{2,8})\s*[-–]\s*libellé` sur les pages 29-42, continuations de libellé
+> recollées, lignes de titre en capitales écartées) et rend exactement la répartition relevée
+> ci-dessus — **48 / 130 / 178 / 14 / 2**. Les 156 libellés déjà présents ont été conservés **à
+> l'octet** (l'ordre du sous-ensemble commun est identique, ce qui confirme que c'est bien la même
+> extraction, poursuivie). Ni `postes` ni `tableDePassage` n'ont bougé ⇒ **la liasse produite est
+> inchangée**, seul le plan s'enrichit.
+
+Constat d'origine, conservé : `balance-service/src/modules/referentiel/assets/sfd-bceao-2.0.json` ne
+portait que **156 comptes** (48 × 2 chiffres + 108 × 3), là où le plan officiel en compte **372** et
+descend jusqu'à 6 chiffres. Les niveaux 4, 5 et 6 étaient **absents de l'artefact**.
 
 **Conséquence vérifiée — et rassurante** : la reconnaissance étant faite **par préfixe**
 (`estCompteRattachable`), tous les comptes officiels détaillés restent rattachables à une racine que
@@ -45,5 +54,7 @@ l'artefact déclare — contrôlé sur `602511`, `602512`, `20227`, `25116`, `25
 Déclarer `longueurCompteDetail: 6` pour `sfd-bceao@2.0` **ne refuse donc aucun compte officiel**, et refuse
 bien un compte à 8 chiffres d'un logiciel de saisie.
 
-L'enrichissement de l'artefact aux 372 comptes reste un sujet distinct (il passe par le `build.mjs` de
-`bilan-service`, source de vérité unique des octets — décision D-078-2, donc 2 dépôts).
+~~L'enrichissement de l'artefact aux 372 comptes reste un sujet distinct~~ — **fait par STORY-368**
+(2026-08-17), via le `build.mjs` de `bilan-service`, source de vérité unique des octets (décision
+D-078-2, donc 2 dépôts et 2 nouveaux checksums : `sfd-bceao@1.0` → `c2e075a2…`, `sfd-bceao@2.0` →
+`8b7b29d8…`).
