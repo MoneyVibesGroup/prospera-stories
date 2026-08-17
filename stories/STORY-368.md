@@ -1,6 +1,6 @@
 # STORY-368 : `sfd-bceao@2.0` — les octets convergent, le plan cesse d'être amputé, et la garde cesse de mentir
 
-Status: review
+Status: done
 
 **Epic :** EPIC-017 — Socle balance-service + contrat de balance canonique
 **Points :** 8 · **Complexité :** high · **Sprint :** 20 (backend) · **Services :** `bilan-service`
@@ -361,3 +361,16 @@ compte lui-même.
 | couverture | 98,67 / **93,11** / 98,59 / 98,62 | 99 / **91,81** / 98,19 / 99,08 |
 
 Seuils 65 / 90 / 90 / 90 — tenus, aucun abaissé.
+
+### Clôture — 2026-08-17
+
+| Dépôt | PR | Intégration |
+| --- | --- | --- |
+| `bilan-service` | [#42](https://github.com/MoneyVibesGroup/prospera-bilan-service/pull/42) | **rebase-merge** sur `dev` (`e76b441`), branche supprimée |
+| `balance-service` | [#39](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/39) | **rebase-merge** sur `dev` (`ea2604d`), branche supprimée |
+
+⚡ **Ordre de merge tenu — `bilan-service` EN PREMIER.** La garde de `balance-service` lit l'**arbre de
+travail** du dépôt voisin, pas une révision figée : merger `balance-service` d'abord aurait rendu sa
+suite **rouge** sur toute machine dont `bilan-service` était encore sur l'ancien `dev`. Contrôle
+d'intégration rejoué **les deux dépôts sur `dev`** : `octets identiques à ceux de bilan-service` ✅,
+**17/17 verts**.
