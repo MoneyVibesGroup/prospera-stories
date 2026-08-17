@@ -6,6 +6,14 @@
 
 > ⚠️ Ne PAS confondre avec le **PCB** (Plan Comptable Bancaire révisé, décision n°357-11-2016) qui vise les **banques**, pas les SFD.
 
+> ⚡ **MAJ 2026-08-17 (STORY-368) — la prose ci-dessous et les données sont enfin d'accord.** Ce
+> résumé citait des comptes à 4 chiffres (`1011`, `1131`) que le JSON livré ne portait pas :
+> l'extraction de STORY-057 s'était arrêtée aux niveaux 2 et 3 (156 comptes sur 372). *« Un écart
+> entre la prose d'un README et les données qu'il accompagne ne casse rien et ne se voit donc
+> jamais. »* `plan-comptable-sfd-bceao.json` (ici) et
+> `bilan-service/scripts/referentiels/sources/plan-comptable-sfd.json` portent désormais les **372
+> comptes** du plan officiel, jusqu'au niveau 6.
+
 ## Plan de comptes SFD — classes 1 à 7 (états financiers ; classe 8 hors-bilan = hors amorce)
 
 ### CLASSE 1 — Opérations de trésorerie et avec les institutions financières
