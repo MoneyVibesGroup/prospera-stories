@@ -1,12 +1,12 @@
 # Story AP-INT-2 : Lever les vérifications en attente du backend — **le point de rendez-vous unique** des tests bloqués de la console
 
-Status: blocked ⛔ *(attend `STORY-179` → `STORY-184`, backend sprint 20)*
+Status: ready-for-dev *(déclencheur atteint — voir §Déclencheur)*
 
 **Epic :** AP-EPIC-000 — Socle admin & sécurité
 **Points :** 3 · **Sprint :** 9 *(à tirer dès que le backend atterrit — voir §Déclencheur)* · **App :** `frontend-admin-panel`
 **API :** kyc-service (:3002), admin-panel BFF (:3010)
 **Réf. plan :** `frontend-sprint-status.yaml` · **Origine :** `AP-INT-1` · `tickets/TICKET-BACKEND-ap-int-1-revue-kyc-sans-document.md`
-**Backend prêt :** ⛔ **non** — `STORY-179` à `184` sont `not_started` (backend S20)
+**Backend prêt :** ✅ **OUI — vérifié le 2026-08-18.** `STORY-179`, `180`, `181`, `182`, `183` et `184` sont **toutes `done`**. ⚠️ Le périmètre a **rétréci** entre-temps : `STORY-182` a été consommée par **AP-26** *(`If-Match`)* et `STORY-184` par **AP-27** *(référence de dossier)* — vérifier ce qui reste réellement à lever avant de tirer les 3 points.
 **Dépendances :** `AP-INT-1` *(livrée)*
 **Maître Scrum (frontend) :** MightyRaven
 
