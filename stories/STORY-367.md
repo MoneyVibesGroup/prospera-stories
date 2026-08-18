@@ -1,6 +1,6 @@
 # STORY-367 : L'Atelier cesse d'être mono-société — le gel, les cahiers et l'exercice se scopent au dossier
 
-Status: in_progress
+Status: done
 
 **Epic :** EPIC-043 — Dossier client
 **Points :** 5 · **Sprint :** 20 (backend) · **Service :** `balance-service` (`:3007`)
@@ -210,23 +210,23 @@ bornes pour ce dossier ; à défaut seulement, `ExerciceAtelier.statut` répond.
 
 ## Definition of Done
 
-- [ ] **Mutation-test du gel** : remettre `existeBalanceValidee` en portée organisation ⇒ le test « le
+- [x] **Mutation-test du gel** : remettre `existeBalanceValidee` en portée organisation ⇒ le test « le
       cahier du dossier B reste saisissable » **vire au rouge**. Sans lui, la règle centrale n'est
       tenue par rien.
-- [ ] Deux dossiers portent **deux exercices d'Atelier distincts** aux mêmes bornes.
-- [ ] La projection d'exercice est vérifiée **sur les trois topics**, `rouvert` compris.
-- [ ] Aucun dépôt de cahier, de ventilation ou de rapprochement n'accepte une requête **sans
+- [x] Deux dossiers portent **deux exercices d'Atelier distincts** aux mêmes bornes.
+- [x] La projection d'exercice est vérifiée **sur les trois topics**, `rouvert` compris.
+- [x] Aucun dépôt de cahier, de ventilation ou de rapprochement n'accepte une requête **sans
       `dossierId`**.
-- [ ] Un `balance.submitted` sans dossier laisse **une trace de rejet motivée**.
-- [ ] ⚡ **Les écritures sont DÉGELÉES** : un parcours Atelier→Bilan **en écriture réelle** passe de bout
+- [x] Un `balance.submitted` sans dossier laisse **une trace de rejet motivée**.
+- [x] ⚡ **Les écritures sont DÉGELÉES** : un parcours Atelier→Bilan **en écriture réelle** passe de bout
       en bout. ⚠️ C'est la case que `STORY-356` a **laissée décochée** parce qu'elle n'était pas
       vérifiable chez elle — *« invisible aux 3646 tests, qui mockent TOUS la couche données »*. ⛔ Elle
       se coche **en docker**, pas en test unitaire.
-- [ ] ⚠️ **Le sort de la marche arrière est tranché.** `STORY-356` documente une limite qu'elle n'a pas
+- [x] ⚠️ **Le sort de la marche arrière est tranché.** `STORY-356` documente une limite qu'elle n'a pas
       corrigée : *« la marche arrière balance/bilan détache TOUT `dossierId` sans discriminer son
       origine — correct dans la fenêtre de migration, **à RETIRER OU BORNER à la clôture de
       236/357** »*. La fenêtre se referme ici : **retirer, borner, ou dire pourquoi on la garde.**
-- [ ] ⚠️ **`AD-10` de la spine `balance-service` est mise à jour** : elle décrit la bascule comme
+- [x] ⚠️ **`AD-10` de la spine `balance-service` est mise à jour** : elle décrit la bascule comme
       *« posée et NON terminée »*. Un document ne doit pas survivre à sa propre péremption.
 
 ---
@@ -349,3 +349,85 @@ Les 6 collections filtrent sur `(orgId, dossierId)`, les 22 contrôleurs nichés
 `balance-service` a été **retirée** par 236 (celle de `bilan-service` **bornée** par 372/373 : simulation
 par défaut + borne temporelle). ⇒ **La case « sort de la marche arrière » est cochée par constat**, la
 fenêtre de migration est fermée des deux côtés.
+
+## ⑥ Revue de code — 6 constats, dont **1 bloquant** (commit `10984d5`)
+
+⚡⚡ **Le bloquant était une RÉGRESSION introduite par le commit de feature, invisible à la vérification
+docker.** `estClos` faisait gagner le read-model **dès qu'il connaissait l'exercice** — or **deux écrivains
+coexistent** : `dossier-service` publie, et `RepriseService` clôt N-1 dans `exercices_atelier` **sans rien
+publier** (D-087-5 ; `AD-P14` interdit de supprimer ce modèle avant la fin de la bascule).
+
+Les deux causes d'un conflit **se lisent à l'identique** — read-model `OUVERT`, local `CLOS` — et appellent
+l'inverse : une réouverture doit rouvrir, une clôture de reprise doit verrouiller. Ce qui les sépare est
+**l'ordre des faits** ⇒ arbitrage à la date de la dernière transition, fail-closed sans horodatage.
+
+> ⚠️ **Pourquoi la vérif docker ne pouvait pas l'attraper** : `exercices_atelier` est resté **vide** pendant
+> tout le parcours (la reprise n'a pas été exercée), donc le conflit ne s'est jamais produit. Un parcours
+> vert ne prouve que ce qu'il traverse.
+
+| # | Constat | Traitement |
+|---|---|---|
+| F1 | ⛔ **bloquant** — le `CLOS` posé par la reprise était écrasé par un read-model qui l'ignore ⇒ cahier N-1 saisissable alors que ses à-nouveaux sont déjà tirés | **corrigé** — arbitrage à la date de transition + 3 tests + M10/M11 |
+| F2 | sur `DOSSIER_ARCHIVE` le dossier **est** résolu (il existe, il est à l'org) mais n'était pas consigné ⇒ rejet introuvable dans `GET …/balance/rejets`, lecture que le guard autorise pourtant sur un dossier archivé | **corrigé** + M12 |
+| F4 | l'affirmation « `DOSSIER_CABINET_INDISPONIBLE` reste **déclaré** au contrat » était **fausse** : le schéma publié ne l'a **jamais** portée (écart de 236) | **corrigé** — commentaire réaligné ; le code n'est **pas** ajouté au schéma (publier une valeur que rien n'émettra serait l'inverse du même défaut) |
+| F6 | le motif du `forFeature` local dans `RepriseModule` était faux (les modules Nest sont des singletons ; importer `ReadModelsModule` ne réinstancierait aucun consommateur) | **corrigé** — vrai motif : la portée de la dépendance |
+| F3 | les rejets **de forme** (`PAYLOAD_INVALIDE`, `SOURCE_SYSTEM_INCONNU`) ne sont plus visibles dans `GET /dossiers/:dossierId/balance/rejets` — ils portaient avant le dossier du cabinet | **retenu comme conséquence assumée** — ils n'ont, par construction, **aucun dossier résolu**, et consigner un identifiant revendiqué non vérifié est précisément ce que la story interdit. Reste joignable par `balance.rejected` et le journal. ⚠️ **dette ouverte**, à traiter si l'écran de diagnostic en souffre |
+| F5 | `AD-10` de la spine non mise à jour (case de DoD) | **corrigé** — cf. § suivant |
+
+## ⑦ Revue de sécurité — **0 vulnérabilité**, mais un défaut d'intégrité versé à la revue (commit `efc3b23`)
+
+**Aucun constat de confiance ≥ 80.** La revue relève même que la PR **améliore** la posture multi-tenant :
+avant elle, un émetteur allowlisté revendiquant l'`orgId` d'un tiers voyait sa balance rattachée
+**automatiquement** au dossier « Mon cabinet » de cette organisation, **sans avoir à connaître le moindre
+identifiant** ; désormais il doit désigner un `dossierId` vérifié sur `{ dossierId, orgId }` — un ObjectId
+non devinable. Vérifiés puis écartés : injection d'opérateur Mongo dans le filtre (le contrôle de type la
+ferme), sonde d'énumération par différence de code de rejet (`DOSSIER_INCONNU` ne distingue jamais
+« inexistant » d'« autre org »), écriture d'audit cross-tenant, empoisonnement du read-model, fuite dans les
+motifs et les logs.
+
+⚡ **Ce qu'elle a trouvé hors de son périmètre, et qui était réel** : le correctif F1 comparait
+`projete.updatedAt` — posé par `timestamps: true` **au moment de la projection** — à `local.closLe`, un
+horodatage **métier**. **Deux horloges différentes.** Un rejeu du topic `dossier.exercice.*` (marqueur
+`ProcessedEvent` purgé au TTL de 30 jours, ou reset d'offsets du consumer group) réécrit `updatedAt` à
+*maintenant* et **lève le verrou comptable** sans qu'aucune transition n'ait eu lieu.
+
+⇒ Le read-model porte désormais l'`occurredAt` **métier** de l'événement, soumis au même `$unset` que les
+autres optionnels (l'état projeté reste **absolu**). Rejoué, il vaut la **même** valeur : l'arbitrage est
+rejouable comme l'état qu'il lit. Absent (documents projetés avant cette story) ⇒ **fail-closed**.
+
+**14 mutations au total, 14 rouges par assertion** (M10 → M14 pour les correctifs de revue).
+Portes rejouées après correctifs : lint 0 · build OK · **2875 unitaires + 672 e2e** · **99,01 / 91,84 /
+98,21 / 99,09**.
+
+## ⑧ Vérification docker **rejouée sur l'état final** (`docker restart`, `Found 0 errors`)
+
+Les correctifs touchent un artefact déjà vérifié (le read-model gagne un champ, l'arbitrage change) — la
+vérification est donc **rejouée**, jamais reportée depuis la mesure d'avant.
+
+| Rejeu | Résultat |
+|---|---|
+| État **hérité** de l'ancien code (`occurredAt` absent, exercice `OUVERT`) | saisie `201` — la compatibilité ascendante tient |
+| Clôture par `dossier-service` | `statut: CLOS`, **`occurredAt` projeté** (v4) ⇒ saisie **`409`** |
+| Réouverture | `statut: OUVERT` (v5), `occurredAt` **réécrit**, `closLe` **retiré** ⇒ saisie **`201`** |
+| ⚡ Correctif F2, avant/après sur la **même** base | `evt-367-archive` (ancien code) : `dossierId` = marqueur `orgId` · `evt-367-archive-bis` (code final) : `dossierId` = **le dossier résolu** |
+| Journal | 5 ingestions, **4 rejets = 4 `balance.rejected` émis**, **0 orphelin** sur 4 collections, **0** balance créée par un rejet |
+
+## ⑨ Clôture
+
+- **2026-08-18** — ✅ **CLÔTURÉE** : PR `prospera-balance-service#42` rebase-mergée sur `dev`
+  (3 commits : feature `b1a16df`, revue de code `10984d5`, revue de sécurité `efc3b23`). Statut aligné aux
+  3 endroits, `completed_date` posée, `AD-10` de la spine réécrite.
+- ⚡ **Ce que cette story change vraiment** : l'écart que le réancrage du 15/08 qualifiait de **plus
+  dangereux du système** — deux écritures possibles pour un même fait — est refermé **côté lecture** dans
+  `balance-service`. Il reste ouvert côté `bilan-service` (`POST /bilan/exercices`, STORY-357).
+- **Dette ouverte, transmise :**
+  - ⚠️ les rejets **de forme** du hub (`PAYLOAD_INVALIDE`, `SOURCE_SYSTEM_INCONNU`) ne sont plus visibles
+    dans `GET /dossiers/:dossierId/balance/rejets` — ils n'ont aucun dossier résolu, par construction
+    (constat F3 de la revue, retenu comme conséquence assumée) ;
+  - ⚠️ **deux écrivains de l'exercice subsistent** tant que STORY-357 n'a pas retiré
+    `POST /bilan/exercices` : l'arbitrage par date de transition est une **béquille de transition**, pas
+    une architecture cible ;
+  - ⚠️ les **bornes d'exercice non normalisées** envoyées en clair (`exerciceDebut`/`exerciceFin` à un
+    instant autre que minuit UTC) ne matchent pas le read-model et retombent sur le repli local. Le
+    raccourci `?exercice=AAAA` produit bien minuit UTC. Fragilité **antérieure**, rendue plus visible par
+    le nouveau couplage — à traiter si un client l'exerce.
