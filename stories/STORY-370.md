@@ -1,6 +1,6 @@
 # STORY-370 : L'import cesse de fondre deux banques en une — la provenance d'un auxiliaire survit à la normalisation
 
-Status: not_started
+Status: in_progress
 
 **Epic :** EPIC-017 — Socle balance-service + contrat de balance canonique
 **Points :** 5 · **Sprint :** 20 (backend) · **Service :** `balance-service` (`:3007`)
@@ -62,6 +62,43 @@ seraient crédibles.
 ⚡ **Les deux sont acceptables ; ce qui ne l'est pas est de fondre en silence.** La voie retenue est
 écrite **dans la story avant de coder**, pas déduite du diff.
 
+### ✅ Voie retenue à l'ouverture (2026-08-18) — **A, dans sa forme complète**
+
+**La ligne de balance conserve les auxiliaires qui l'ont produite, AVEC leurs montants**, et le
+rapprochement **ventile** — il ne devine rien, il relit ce que le fichier portait.
+
+**Ce qui a été mesuré dans le code avant de trancher**, et qui rend A moins cher que la story ne le
+craignait :
+
+1. ⚡ **Le checksum n'est pas touché.** `v2` ne couvre que
+   `{compte, libelle, mouvementDebit, mouvementCredit, soldeDebiteur, soldeCrediteur, niveauPreuve}`
+   (`balance-canonique.ts`). Un champ **optionnel** hors de cette liste s'introduit exactement comme
+   `origine` l'a été (« son absence est le cas courant […] c'est ce qui permet de l'introduire **sans**
+   toucher au checksum, sans migration et sans changer le contrat `balance.created` »). ⇒ **pas de `v3`,
+   pas de migration, contrat d'événement inchangé.**
+2. ⚡ **La provenance n'est conservée QUE sur le cas visé** — un regroupement dont ≥ 2 sources
+   s'apparient à ≥ 2 **comptes de trésorerie déclarés distincts**. Le collectif `411` d'un fichier à
+   4 000 auxiliaires **ne porte rien** : c'est l'AC-3 (« le comportement actuel est inchangé »), et c'est
+   aussi ce qui empêche le document de croître avec le fichier (CWE-770, même discipline que
+   `MAX_SOURCES_PAR_REGROUPEMENT`).
+3. ⚡ **Ventiler ici n'est pas deviner.** Les montants par auxiliaire **existent dans le fichier** ; ils
+   sont aujourd'hui jetés au moment du netting. Les rendre au rapprochement lui restitue une position par
+   banque **déclarée**, pas fabriquée — la frontière que la story trace au § *Ce qu'il ne faut surtout
+   pas faire* reste tenue : **aucune règle de ventilation n'est inventée**, ni ici ni dans l'appariement.
+
+**Pourquoi pas B.** Le refus est plus sûr sur le contrat, mais le plan comptable du référentiel fait
+**6 caractères** : l'auxiliaire n'y survit pas. Un cabinet à deux banques — le cas courant, pas
+l'exception — **n'a donc aucun chemin de reprise** : il ne peut pas produire deux lignes `5211xx` que le
+plan n'admet pas. B échangerait une fusion silencieuse contre un **blocage sans issue**, et le motif du
+blocage (« déclarez vos comptes autrement ») ne décrit aucune action que le comptable puisse réellement
+faire.
+
+**Pourquoi pas A-minimal** (les noms des sources, sans les montants). Il aurait suffi à satisfaire l'AC-2
+*par le refus de présenter* — le rapprochement dit « solde cumulé sur 2 banques, je ne publie pas de
+position par banque ». C'est honnête, mais ça laisse le cabinet **sans son rapprochement** alors que la
+donnée nécessaire était dans le fichier et qu'on venait de la jeter. Conserver les montants coûte le même
+champ optionnel ; s'en priver, c'est choisir de rester aveugle par économie.
+
 ## Critères d'acceptation
 
 - **Étant donné** un import portant `5211BOA0` et `5211ECO1`, tous deux rattachés à des **comptes de
@@ -93,3 +130,13 @@ seraient crédibles.
 - [ ] **Non-régression** : un import sans auxiliaire de trésorerie produit **exactement** la même
       balance qu'aujourd'hui.
 - [ ] `GAP-auxiliaires-fusionnes-a-l-import` passe à **fermé**.
+
+---
+
+## Progress Tracking
+
+- **2026-08-18** — statut `not_started` → `in_progress`. Branches `MNV-370` ouvertes sur `docs/` (base
+  `main`) et `balance-service` (base `dev`).
+- **2026-08-18** — ✅ **voie tranchée à l'ouverture : A dans sa forme complète** (provenance *et*
+  montants, restreinte au cas trésorerie). Motif complet au § *Voie retenue à l'ouverture*, écrit
+  **avant** la première ligne de code.
