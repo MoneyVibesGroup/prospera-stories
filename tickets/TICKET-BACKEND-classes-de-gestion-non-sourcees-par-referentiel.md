@@ -1,5 +1,18 @@
 # TICKET backend — les classes de gestion sont codées en dur et **mentent** pour CIMA
 
+> ✅ **CLOS le 2026-08-18 par [STORY-369](../stories/STORY-369.md)** — les classes de gestion sont
+> désormais **publiées par l'artefact** (`racinesDeGestion`, émis par le `build.mjs` de `bilan-service`,
+> **D-078-2**), et `CLASSES_DE_GESTION` n'existe plus dans `src/`. Un référentiel qui ne les déclare pas
+> produit un **409 `CLASSES_GESTION_NON_SOURCEES`**, ⛔ jamais un `[6,7,8]` de repli.
+>
+> ⚡ Des **racines**, pas des numéros de classe : une déclaration au niveau de la classe ne saurait pas
+> exclure les `87`/`88`/`89` de CIMA. `cima-assurances@1.0` déclare
+> `["6","7","80","82","83","84","85","86"]` ; SYSCOHADA garde sa classe 8 **entière** (`D-091-3`).
+>
+> Mutation-test à l'appui : `[6,7,8]` rétabli en dur ⇒ 3 tests CIMA rouges ; garde de refus retirée ⇒
+> 2 tests rouges. Mesuré en docker sur le code compilé : **140 M** avec la déclaration de l'artefact,
+> **280 M** avec le repli supprimé. PR `prospera-bilan-service#45` + `prospera-balance-service#40`.
+
 **Type :** défaut d'intégrité comptable **silencieux** (constante structurelle invalidée par un référentiel)
 **Dépôt :** `prospera-balance-service` (:3007) — correction complète = **2 dépôts** (cf. § Résolution)
 **Fichier :** `src/modules/fiscal/types/fiscal.ts` (`CLASSES_DE_GESTION`) + `src/modules/fiscal/fiscal.regles.ts` (`calculerResultatComptable`)

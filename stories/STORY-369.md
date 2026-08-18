@@ -1,6 +1,6 @@
 # STORY-369 : Les classes de gestion sont publiées par le référentiel, et leur absence REFUSE — jamais `[6,7,8]` par défaut
 
-Status: in_progress
+Status: done
 
 **Epic :** EPIC-017 — Socle balance-service + contrat de balance canonique
 **Points :** 8 · **Sprint :** 20 (backend) · **Services :** `bilan-service` (`:3004`) **+**
@@ -204,7 +204,54 @@ Seuils 65/90/90/90 — **aucun n'a été touché**.
 en parallèle sur la même machine (parsing XLSX en mémoire). Rejoué seul : **18/18 verts**. Contention, pas
 régression — dit plutôt que tu.
 
-### ⑸ Ce qui a été laissé de côté, et pourquoi
+### ⑸ Revue de code — 3 constats, 3 traités
+
+| | Constat | Traitement |
+| --- | --- | --- |
+| ① | ⚡ **le `trim()` de `calculerResultatComptable` n'était pinné par AUCUN test** — mesuré : le retirer laissait `tsc` propre et **149/149 verts**. Il n'est pourtant pas décoratif : la voie d'ingestion **Kafka** n'applique pas la regex du DTO HTTP (`ingestion.regles.ts` recopie `l.compte` **verbatim**), et le juge métier qui suit **trime avant de comparer** ⇒ une balance émise avec `" 601 "` est acceptée et persistée telle quelle. Sans le `trim()`, la ligne **sortait du résultat en silence** : base imposable minorée, sans signal | test neuf sur compte espacé ; **mutation ⇒ rouge**, `tsc` propre |
+| ② | le 409 `CLASSES_GESTION_NON_SOURCEES` n'était déclaré dans **aucun** contrat Swagger, alors que les **trois** contrôleurs qui peuvent le lever énumèrent explicitement leurs codes 409 | ajouté aux trois (`fiscal`, `liquidation`, `provisions`) |
+| ③ | le ticket source restait **ouvert** et le diff supprimait le seul pointeur qui y menait (le bloc *HOOK INERTE*) | ticket **clos**, pointeur rétabli dans `types/fiscal.ts` — le lien tient dans les **deux** sens |
+
+**`ponytail-review`** (seconde lentille, over-engineering) : 4 constats, **0 retenu**. Deux visaient des
+**tests** (hors d'atteinte par la DoD, et l'un d'eux garde `D-091-3`) ; le log « ⛔ NON DÉCLARÉES » du build
+est le témoin d'un futur référentiel muet, pas du code mort ; `normRacinesDeGestion` calque
+`normPlan`/`normPostes`/`normMapping`/`normNotes` du même fichier.
+
+### ⑹ Revue de sécurité — **0 vulnérabilité**, et 2 notes sous seuil retenues quand même
+
+Vérifiés et **écartés avec preuve** : le nouveau champ est lu **après** le contrôle sha256 (aucun octet non
+vérifié ne l'atteint, `artifact-loader.ts` inchangé) · le diff des artefacts ne contient **que** l'ajout,
+aucun contenu comptable n'a bougé à la faveur de la rotation de checksum — c'était le risque principal d'un
+ré-ancrage d'intégrité · la garde de refus n'a **qu'un** chemin d'appel (type non optionnel + appelant
+unique, grep exhaustif : aucun job, bootstrap ou consumer) · le 409 n'expose que le `code@version` **déjà**
+rendu à ce même appelant par `/referentiels/actifs`, et il est levé **après** la chaîne de guards — pas
+d'oracle d'énumération · pollution de prototype non atteignable (`JSON.parse` crée `__proto__` en propriété
+**propre**, aucun merge profond) · isolation tenant inchangée (le cache est keyé `code@version`, mais un
+artefact ne porte aucune donnée tenant).
+
+Les **deux notes sous le seuil de 80** ont été retenues : ce sont des variantes du défaut même que la story
+ferme.
+
+| | Note | Traitement |
+| --- | --- | --- |
+| ④ | `resoudreRacinesDeGestion` ne re-filtrait pas les racines vides. Le chargeur est le seul producteur **aujourd'hui**, mais la fonction est **exportée** : une racine `''` rend `startsWith('')` **toujours vrai** ⇒ ⚡ **la balance ENTIÈRE sommée** dans le résultat comptable, en silence | filtre + `trim()` refaits **au point qui décide** (défense en profondeur) ; **mutation ⇒ 2 rouges** ; mesuré en docker : la balance entière donnerait **−220 M** |
+| ⑤ | « aucune racine morte » interdisait de **déclarer** une racine inutile — rien n'interdisait d'en **oublier** une. Les deux n'ont pas le même prix : une racine morte est inerte, un compte de gestion laissé dehors **sous-impose en silence**, et *sur-imposer se corrige, sous-imposer est un redressement* | **garde inverse** côté `bilan-service`, classes **dérivées** des racines (jamais ré-encodées), exclusions **explicites** (`87`/`88`/`89` de CIMA, rien d'autre sur les 5 artefacts) ; **mutation fidèle ⇒ 3 rouges** |
+
+⚠️ La mutation ⑤ a d'abord produit un signal **illisible** : retirer `86` change le checksum, le digest
+épinglé tue le `beforeAll`, et **38 tests sur 39** tombent. Rejouée **fidèlement** — le compte retiré **et**
+les checksums réalignés consciencieusement, comme le ferait le développeur qu'on veut pincer — elle rend
+exactement **3 rouges**, dont la garde neuve.
+
+### ⑺ Vérification docker REJOUÉE sur l'état final
+
+Le correctif ④ touche `resoudreRacinesDeGestion`, c'est-à-dire la fonction **mesurée** en ⑶ : la
+vérification a été **rejouée** plutôt que reportée. Sur le code recompilé, artefacts inchangés
+(`d7d96063…` / `bb319837…` / `13e8fe3f…`) : `['']` ⇒ `null` · `['',' ','6']` ⇒ `['6']` ·
+`[' 6 ','7']` ⇒ `['6','7']` · compte espacé **compté** (60 000) · et le témoin du défaut évité —
+la balance entière sommée vaudrait **−220 M**. Les mesures de ⑶ (140 M / 280 M / 56 M / `null`)
+sont inchangées.
+
+### ⑻ Ce qui a été laissé de côté, et pourquoi
 
 - ⛔ **`CLASSES_DE_GESTION` n'est plus un symbole** ; le nom subsiste **en prose**, dans le bloc de
   commentaire qui documente sa suppression et nomme les deux fausses réparations. C'est délibéré :
