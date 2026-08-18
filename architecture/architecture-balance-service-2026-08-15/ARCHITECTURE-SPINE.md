@@ -60,8 +60,8 @@ disposition de l'aval. Trois manières d'y arriver, une seule forme en sortie.
 
 | Hérité | Source | Ce qu'il contraint ici |
 | --- | --- | --- |
-| **AD-P14 — l'exercice appartient au dossier** | écosystème v1.4 | ⚠️ **Bascule INACHEVÉE** : `ExerciceAtelier` vit toujours ici (AD-10) |
-| **AD-P13 — le dossier est l'unité de travail** | écosystème v1.4 | ⚠️ La clé de la balance est encore `(orgId, exercice, …)` — **sans `dossierId`** (AD-10) |
+| **AD-P14 — l'exercice appartient au dossier** | écosystème v1.4 | ✅ **Le STATUT est lu dans `exercices_dossier`** depuis STORY-367 ; `ExerciceAtelier` vit toujours ici, mais en **repli** et pour ce qu'il est seul à savoir (AD-10) |
+| **AD-P13 — le dossier est l'unité de travail** | écosystème v1.4 | ✅ La clé de la balance porte `dossierId` depuis STORY-236 ; les 6 collections filtrent dessus (AD-10) |
 | **AD-P16 — lecture plateforme inter-org** | écosystème v1.6 | ⛔ **Pas de route `@PlatformReadOnly` ici** — écart ouvert (§ Non couvert) |
 | Capacité partagée · entitlement `(org × module)` | P7/P8 | Code de module **`balance`** ⚠️ voir AD-3 |
 | Relying-party / JWKS · Database-per-service · Outbox | écosystème | Moule commun |
@@ -255,7 +255,51 @@ disposition de l'aval. Trois manières d'y arriver, une seule forme en sortie.
   purement technique), c'est **la preuve d'audit de ce que le vertical a transmis et de ce que le hub
   en a fait**.
 
-### AD-10 — ⚠️ La bascule vers `dossier-service` est POSÉE et NON TERMINÉE
+### AD-10 — ✅ La bascule vers `dossier-service` est FAITE côté lecture ⚠️ *(deux écrivains subsistent)*
+
+> ⚡⚡ **RÉÉCRITE le 2026-08-18 à la clôture de STORY-367.** La version précédente décrivait l'état du
+> 2026-08-15 et est devenue fausse sur **cinq** de ses affirmations en trois jours (STORY-236 le 16,
+> STORY-367 le 18). Elle est conservée en fin de section, datée, parce que la chronologie de cette bascule
+> est ce qui explique les décisions — **pas** parce qu'elle décrit encore le système.
+
+- **Binds:** **AD-P14** · **AD-P13** · STORY-355, STORY-356, **STORY-236**, **STORY-367**
+- **Rule:** ✅ **`balance-service` n'est plus source de vérité sur le statut de l'exercice.**
+  `ExercicesRepository.estClos` — **seul** point de passage de ses 6 appelants — lit le read-model
+  `exercices_dossier` (alimenté par `dossier.exercice.ouvert|clos|rouvert`) et ne retombe sur
+  `ExerciceAtelier` que pour les exercices que **lui seul** connaît.
+- **Rule:** ⚠️ **DEUX ÉCRIVAINS SUBSISTENT, et c'est ce qu'il faut savoir avant de toucher à cette
+  garde.** `RepriseService` clôt N-1 dans `exercices_atelier` **sans rien publier** (D-087-5), et `AD-P14`
+  interdit de supprimer ce modèle avant la fin de la bascule. Les deux sources peuvent donc se
+  contredire, et **la contradiction ne se lève pas sur le seul `statut`** : read-model `OUVERT` + local
+  `CLOS` se lit à l'identique pour une **réouverture** (qui doit rouvrir) et pour une **clôture de
+  reprise** (qui doit verrouiller). ⇒ arbitrage à la **date de la dernière transition**, et
+  **fail-closed** sans horodatage exploitable.
+- **Rule:** ⛔ **L'arbitrage se fait sur `occurredAt`, JAMAIS sur `updatedAt`.** Le second date la
+  *projection* : un rejeu du topic (marqueur `ProcessedEvent` purgé au TTL 30 j, reset d'offsets) le
+  réécrit à *maintenant* et **lèverait un verrou comptable** sans qu'aucune transition n'ait eu lieu.
+  Le read-model porte donc l'horodatage **métier** de l'événement, soumis au même `$unset` que les autres
+  optionnels pour que l'état projeté reste **absolu**.
+- **Rule:** ✅ **Les écritures sont DÉGELÉES** (STORY-236 + STORY-367) : le gel du 15/08 — schéma exigeant
+  `dossierId` sans aucun chemin d'écriture pour le poser — est levé, et le parcours Atelier→Bilan **en
+  écriture réelle** a été vérifié en docker, case que STORY-356 avait laissée décochée.
+- **Rule:** ✅ **La clé de la balance porte `dossierId`** (STORY-236) : un cabinet à N dossiers porte deux
+  balances de bornes identiques pour deux sociétés différentes. Les 6 collections filtrent sur
+  `(orgId, dossierId)`, 22 contrôleurs sont nichés sous `/dossiers/:dossierId` derrière
+  `DossierScopeGuard` (**404**, jamais 403).
+- **Rule:** ✅ **Le hub n'invente plus de rattachement** (STORY-367) : `balance.submitted` porte
+  `balance.dossierId` **requis**, vérifié sur `{ dossierId, orgId }` ; le repli « Mon cabinet » est
+  supprimé — il déposait la balance d'un **client** sur la société du **comptable**, *un chiffre juste sur
+  la mauvaise société, sans signal*. Codes stables `DOSSIER_ABSENT`, `DOSSIER_INCONNU`, `DOSSIER_ARCHIVE`.
+- **Rule:** ✅ **Le sort de la marche arrière est tranché** : celle de `balance-service` a été **retirée**
+  (STORY-236), celle de `bilan-service` **bornée** (STORY-372/373 : simulation par défaut + borne
+  temporelle). La fenêtre de migration est fermée des deux côtés.
+- **Rule:** ⚠️ **Ce qui reste ouvert** : `bilan-service` expose toujours `POST /bilan/exercices`
+  (STORY-357) — la double **écriture** inter-services n'est donc pas encore refermée là-bas, même si la
+  double **lecture** l'est ici.
+
+<details><summary>État antérieur — rédigé le 2026-08-15, conservé pour la chronologie (⛔ PÉRIMÉ)</summary>
+
+#### AD-10 — ⚠️ La bascule vers `dossier-service` est POSÉE et NON TERMINÉE *(version du 15/08)*
 
 - **Binds:** **AD-P14** · STORY-355, STORY-356, STORY-357
 - **Rule:** ⚡ **c'est l'écart le plus dangereux du système à cette date, et il traverse ce service.**
@@ -284,6 +328,8 @@ disposition de l'aval. Trois manières d'y arriver, une seule forme en sortie.
 - **Rule:** ⇒ **toute story qui touche la clé de balance doit trancher ce point**, et
   **`stock-service`, qui porte `dossierId` de bout en bout (AD-6), sera le premier contributeur à s'y
   heurter**.
+
+</details>
 
 ---
 
