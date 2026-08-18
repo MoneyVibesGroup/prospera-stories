@@ -1,9 +1,10 @@
 # STORY-367 : L'Atelier cesse d'être mono-société — le gel, les cahiers et l'exercice se scopent au dossier
 
-Status: not_started
+Status: in_progress
 
 **Epic :** EPIC-043 — Dossier client
 **Points :** 5 · **Sprint :** 20 (backend) · **Service :** `balance-service` (`:3007`)
+**Complexité :** high *(contrat d'événement inter-services, read-model, frontière `dossier-service`)*
 **Décision :** **AD-P13** et **AD-P14** — `architecture-prospera-ecosystem` v1.4 · **AD-10** de
 `architecture-balance-service-2026-08-15`
 **Dépendances :** ⛔ **STORY-356** *(migration — elle rattache les 6 collections)* · ⛔ **STORY-236**
@@ -62,6 +63,35 @@ périmètre annoncé, et c'est ce qui reste à faire.
 > saurait de quel dossier elle parle, et tout ce qui l'entoure continuerait de l'ignorer — **le vertical
 > cabinet est en production**.
 
+## ⚡⚡ RÉANCRAGE À L'OUVERTURE, le 2026-08-18 — `STORY-236` a été clôturée entre-temps
+
+> ⚠️ **Le tableau du constat ci-dessus est PÉRIMÉ sur deux lignes des trois.** Il a été écrit le
+> 2026-08-15 ; `STORY-236` a été **clôturée le 2026-08-16** (PR `prospera-balance-service#38`, feature +
+> 4 commits de revue + 1 de tests, **deux tours de revue**). Re-vérifié dans `balance-service@dev` avant
+> d'écrire la première ligne :
+
+| Point du constat | État réel dans `@dev` le 2026-08-18 | Verdict |
+| --- | --- | --- |
+| `ExerciceAtelierSchema.index({ orgId, bornes }, unique)` | **déjà corrigé** — l'index est `{ dossierId, exercice.debut, exercice.fin }` unique, et le dépôt filtre sur `(orgId, dossierId)` | **livré par 236** |
+| `existeBalanceValidee(orgId, exercice, source)` | **déjà corrigé** — signature `(orgId, dossierId, exercice, source)`, exclusion `A_NOUVEAUX` intacte | **livré par 236** |
+| Dépôts cahiers / ventilation / catégories / surcharges / rapprochement | **déjà corrigés** — les 6 collections filtrent sur `(orgId, dossierId)`, 22 contrôleurs nichés sous `/dossiers/:dossierId` + `DossierScopeGuard` (404, jamais 403) + test structurel d'invariant | **livré par 236** |
+| Marche arrière `migrate:dossiers:rollback` de `balance-service` | **retirée** par 236 (`MigrationModule` le documente) ; celle de `bilan-service` a été **bornée** par STORY-372/373 (simulation par défaut + borne temporelle) | **tranché** |
+
+⛔ **Ce qui ferme le périmètre plutôt que de l'ouvrir** : ② et ③ ci-dessous sont **déjà livrés**. Les
+ré-implémenter serait de la redite ; les déclarer « faits par cette story » serait un mensonge de
+clôture. Cette story **vérifie** qu'ils tiennent (dont le mutation-test du gel, que 236 n'a pas posé) et
+livre **ce qui reste** :
+
+1. **①** — le statut de l'exercice est **lu dans `exercices_dossier`**, jamais plus décidé par le seul
+   `ExerciceAtelier`. C'est là que se referme la double écriture, et c'est intégralement à faire :
+   `grep` le confirme, **rien** ne lit encore ce read-model.
+2. **④** — `balance.submitted` **porte `dossierId`**, et son absence est un **rejet**. Aujourd'hui le
+   hub fait exactement ce que le point ④ interdit : il **résout « Mon cabinet »** (`estLeCabinet: true`)
+   et y rattache la balance. C'est l'arbitrage transitoire assumé de 236 — *« le rattachement propre de
+   `balance.submitted` reste un point ouvert du ticket »* —, et la fenêtre se referme ici.
+3. Les **cases de DoD** que 356 puis 236 ont laissées ouvertes : dégel du parcours Atelier→Bilan **en
+   écriture réelle** (docker), sort de la marche arrière, `AD-10` de la spine.
+
 ## Ce que la story livre
 
 ### ① `ExerciceAtelier` se rebranche sur le read-model
@@ -78,7 +108,11 @@ périmètre annoncé, et c'est ce qui reste à faire.
 - ⛔ **`ExerciceAtelier` n'est pas SUPPRIMÉ, il est rebranché.** Le supprimer laisserait le service
   aveugle entre deux stories — ce qu'`AD-P14` interdit explicitement.
 
-### ② Le gel du cahier ne franchit plus le dossier
+### ② Le gel du cahier ne franchit plus le dossier — ✅ **livré par 236, à ÉPROUVER ici**
+
+> ⚠️ Le code est en place ; **ce que la DoD exige est la preuve qu'il tient**. `existeBalanceValidee`
+> est scopée et l'exclusion `A_NOUVEAUX` est là — reste à établir, **par mutation** (remise en portée
+> `orgId`), qu'un test vire au rouge, et à en écrire un si aucun ne le fait.
 
 - **`existeBalanceValidee` devient scopée au dossier.** Sinon la validation d'**une** balance bloque la
   saisie de **tout le portefeuille**.
@@ -86,7 +120,7 @@ périmètre annoncé, et c'est ce qui reste à faire.
   « la balance que le cahier justifie »*, et le laisser geler l'exercice qu'il vient d'ouvrir rendrait
   la saisie impossible **dès le premier jour**. La scoper au dossier ne doit pas la faire disparaître.
 
-### ③ Les dépôts filtrent sur `(orgId, dossierId)`
+### ③ Les dépôts filtrent sur `(orgId, dossierId)` — ✅ **livré par 236, à CONSTATER ici**
 
 - Cahiers de recettes et de dépenses, comptes de ventilation, catégories, surcharges de rattachement,
   rapprochements.
@@ -129,6 +163,51 @@ périmètre annoncé, et c'est ce qui reste à faire.
 - ⛔ Elle ne scope ni `bilan-service` (`STORY-357`) ni `document-service` (`STORY-358`).
 - ⛔ Elle ne supprime pas `ExerciceAtelier`.
 
+## Décisions tranchées à l'ouverture (2026-08-18), avant la première ligne
+
+### D-367-1 — le read-model **fait foi quand il connaît l'exercice**, `ExerciceAtelier` reste le repli
+
+`AD-P14` dit *« cesse d'être source de vérité »*, et ⛔ interdit de supprimer `ExerciceAtelier`. Les deux
+tiennent ensemble d'une seule façon : **`exercices_dossier` décide dès qu'il porte une ligne aux mêmes
+bornes pour ce dossier ; à défaut seulement, `ExerciceAtelier.statut` répond.**
+
+- ⛔ **Le repli n'est pas une politesse, il est obligatoire** : l'Atelier ouvre et clôt lui-même des
+  exercices (`RepriseService`, STORY-087 — `ouvrir` N, `clore` N-1) **sans rien publier**. Lire
+  uniquement le read-model rendrait `estClos` **faux en sens fail-open** sur exactement ces exercices-là :
+  le N-1 verrouillé par la reprise (D-087-5) redeviendrait saisissable, et le cahier divergerait de la
+  balance de clôture qui a produit les à-nouveaux. On ne remplace pas une double écriture par une
+  régression d'intégrité.
+- ⚡ **Le read-model l'emporte, y compris CONTRE un `CLOS` local** : c'est le cas `rouvert`. Un exercice
+  clos dans l'Atelier puis **rouvert** par `dossier-service` doit redevenir saisissable — l'inverse
+  (`ExerciceAtelier` gagnant) figerait la saisie sur un fait périmé, et il n'y a aucun chemin par lequel
+  l'Atelier apprendrait la réouverture.
+- **Un seul point d'entrée** : `ExercicesRepository.estClos(...)`, déjà l'unique porte des **6**
+  appelants (cahiers ×2, agrégation, rapprochement, trésorerie, fiscal). L'arbitrage y vit, donc le
+  7ᵉ appelant l'hérite **par défaut** — un rebranchement dispersé sur 6 modules serait un fail-open en
+  attente.
+- **La comparaison de statut est `CLOS`/non-`CLOS`, jamais une liste de valeurs autorisées.** Le
+  vocabulaire appartient au producteur (le read-model type `statut` en `string`, délibérément) : un enum
+  local ferait rejeter une valeur qu'il ajouterait.
+
+### D-367-2 — `dossierId` entre dans le contrat `balance.submitted`, **sans repli et sans devinette**
+
+- Le champ est porté par `balance.dossierId` (à côté d'`orgId`), **requis**. Absent, non hexadécimal, ou
+  **hors de l'organisation émettrice** ⇒ rejet `DOSSIER_ABSENT` / `DOSSIER_INCONNU`, tracé au journal
+  d'ingestion **et** notifié par `balance.rejected` dans la même transaction.
+- ⛔ **`DOSSIER_CABINET_INDISPONIBLE` disparaît du chemin nominal** : il n'existait que pour dire que le
+  repli « Mon cabinet » avait échoué. Le **code reste déclaré** (contrat public, un émetteur peut l'avoir
+  programmé) mais plus rien ne l'émet — noté comme tel dans le contrat.
+- ⚠️ **Le dossier est vérifié dans `dossiers_dossier`, pas cru sur parole.** Sans cette lecture, un
+  émetteur compromis écrirait la balance d'un client **sur le dossier d'un autre tenant** : le hub est
+  hors chaîne de guards HTTP, `DossierScopeGuard` ne le protège pas.
+- **Contrat public ⇒ 2 documents à jour dans le même diff** :
+  `balance-service/docs/schemas/balance.submitted.v1.schema.json` et le § *« Comment un vertical pousse
+  sa balance »* d'`INTEGRATION.md`. ⚠️ **Aucun producteur de `balance.submitted` n'existe dans
+  l'écosystème à ce jour** — balayage des 9 dépôts + racine : les seules occurrences de la chaîne vivent
+  dans `balance-service` (consommateur, et éditeur de son propre contrat). Le changement ne casse donc
+  **aucun émetteur vivant**, et `stock-service` (EPIC-081) naîtra avec. C'est ce qui autorise à durcir
+  `v1` plutôt qu'à ouvrir un `v2` — un `schemaVersion: 2` pour zéro émetteur serait de la cérémonie.
+
 ## Definition of Done
 
 - [ ] **Mutation-test du gel** : remettre `existeBalanceValidee` en portée organisation ⇒ le test « le
@@ -149,3 +228,17 @@ périmètre annoncé, et c'est ce qui reste à faire.
       236/357** »*. La fenêtre se referme ici : **retirer, borner, ou dire pourquoi on la garde.**
 - [ ] ⚠️ **`AD-10` de la spine `balance-service` est mise à jour** : elle décrit la bascule comme
       *« posée et NON terminée »*. Un document ne doit pas survivre à sa propre péremption.
+
+---
+
+## Progress Tracking
+
+- **2026-08-18** — statut `not_started` → `in_progress`. Branches `MNV-367` ouvertes sur `docs/` (base
+  `main`) et `balance-service` (base `dev`), **avant** la première ligne de code.
+- **2026-08-18** — ⚡⚡ **réancrage à l'ouverture** : `STORY-236` ayant été clôturée le 2026-08-16, ② et
+  ③ sont **déjà livrés** et le constat du 15/08 est périmé sur 3 lignes sur 4. Périmètre effectif
+  ramené à ① (rebranchement du statut), ④ (`dossierId` dans `balance.submitted`) et aux cases de DoD
+  laissées ouvertes par 356/236. Détail au § *Réancrage à l'ouverture*, écrit **avant** de coder.
+- **2026-08-18** — décisions **D-367-1** (read-model prioritaire, `ExerciceAtelier` en repli) et
+  **D-367-2** (`dossierId` requis au contrat, aucun repli « Mon cabinet ») tranchées et motivées avant
+  implémentation.
