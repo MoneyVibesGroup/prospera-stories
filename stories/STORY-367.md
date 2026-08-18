@@ -242,3 +242,110 @@ bornes pour ce dossier ; à défaut seulement, `ExerciceAtelier.statut` répond.
 - **2026-08-18** — décisions **D-367-1** (read-model prioritaire, `ExerciceAtelier` en repli) et
   **D-367-2** (`dossierId` requis au contrat, aucun repli « Mon cabinet ») tranchées et motivées avant
   implémentation.
+
+### Implémentation (commit `b1a16df`)
+
+**①** `ExercicesRepository.estClos` — seul point de passage des **6** appelants (cahiers ×2, agrégation,
+rapprochement, trésorerie, fiscal) — lit `exercices_dossier` **avant** `ExerciceAtelier`. Read-model
+présent ⇒ il décide (`statut === 'CLOS'`, jamais une liste blanche) ; absent ⇒ repli local. `ExerciceDossier`
+est déclaré par `MongooseModule.forFeature` dans `RepriseModule` plutôt que par un `import` de
+`ReadModelsModule` — celui-ci provisionne aussi 4 consommateurs Kafka, et on ne veut ici qu'un modèle.
+
+**④** `balance.dossierId` **requis** au contrat entrant. `lireSoumission` contrôle la forme
+(`typeof === 'string'` **puis** 24 hexadécimaux — `Types.ObjectId.isValid(42)` rend `true`), puis
+`resoudreDossier` vérifie `{ dossierId, orgId }` dans `dossiers_dossier` et refuse un dossier archivé.
+Trois codes stables : `DOSSIER_ABSENT`, `DOSSIER_INCONNU` (motif muet sur le *pourquoi*),
+`DOSSIER_ARCHIVE` (parité avec le `409` de `DossierScopeGuard`). Le dossier **revendiqué mais non résolu**
+n'est jamais consigné au journal : ce serait un canal d'écriture cross-tenant dans une collection d'audit.
+Le littéral `'ARCHIVE'` est factorisé (`STATUT_DOSSIER_ARCHIVE`) — porte HTTP et porte Kafka refusent
+désormais sur **la même** valeur.
+
+⚠️ **Deux ajouts assumés, hors énoncé strict, tous deux dans le contrat public que la story modifie** :
+`DOSSIER_ARCHIVE` (le bus ne doit pas être une porte plus faible que l'HTTP — même argument que le rejeu
+de KYC/entitlement dans `autoriser()`), et la **correction d'une divergence antérieure** du schéma publié,
+qui décrivait encore 2 colonnes de montant (`debit`/`credit`) là où le hub en exige **4** depuis
+STORY-147 : un émetteur qui suivait la doc était rejeté.
+
+### Portes DoD
+
+lint 0 warning · build OK · **2871 unitaires + 672 e2e** verts · couverture **99,01 / 91,82 / 98,21 /
+99,09** (seuils 65/90/90/90).
+
+**9 mutations, 9 rouges PAR ASSERTION** — les 4 qui ne compilaient pas d'abord ont été reformulées en
+variantes compilables (un rouge par `TS6133` ne prouve rien, leçon STORY-179) :
+
+| # | Mutation | Test qui vire au rouge |
+|---|---|---|
+| M1 | `existeBalanceValidee` remise en **portée organisation** | ⚡ « le cahier du dossier B reste SAISISSABLE » |
+| M2 | le read-model est **ignoré** (retour au seul `ExerciceAtelier`) | « CLOS au read-model ⇒ clos » + « OUVERT ⇒ non clos (`rouvert`) » |
+| M3 | le **repli local supprimé** (read-model seul) | « read-model muet ⇒ repli » + 2 autres |
+| M4 | liste blanche `!== 'OUVERT'` au lieu de `=== 'CLOS'` | « un statut INCONNU du hub n'est pas traité comme clos » |
+| M5 | dossier **non vérifié comme appartenant à l'org** (`orgId` hors du filtre) | « vérifié sur (dossierId, orgId) » |
+| M6 | rejet `DOSSIER_INCONNU` **supprimé** (le hub retombe sur un défaut) | « dossier INCONNU ⇒ DOSSIER_INCONNU » + « jamais consigné » |
+| M7 | dossier **revendiqué** consigné au journal malgré le refus | « le dossier REVENDIQUÉ n'est JAMAIS consigné » |
+| M8 | `dossierId` **absent toléré** | « SANS dossierId ⇒ DOSSIER_ABSENT » (×2 suites) |
+| M9 | contrôle de **type retiré** (`isValid` seul) | « refuse un dossierId qui n'est pas 24 hexadécimaux » (`dossierId: 42`) |
+
+⚠️ **Une affirmation écrite puis corrigée avant commit** : le commentaire justifiant la regex disait que
+`Types.ObjectId.isValid` accepte les chaînes de 12 caractères. **Faux en Mongoose 8** (`isValid('douze-carac.')`
+⇒ `false`). Le vrai piège est ailleurs et il est pire : `isValid(42)` ⇒ **`true`**, un nombre y étant lu comme
+un horodatage. Commentaire et test réalignés sur ce qui est vérifiable.
+
+### ⚡ Vérification docker — stack **neuve** (`down -v`), Mongo `rs0`, Kafka up, 3 services
+
+`auth-service` + `dossier-service` + `balance-service`, code de la branche (volume `src/`,
+`Found 0 errors. Watching for file changes.`). Org réelle créée par `register`, jeton RS256 réel,
+KYC `APPROVED` + entitlement `ACTIVE` posés dans les read-models. **Deux dossiers** : « Mon cabinet »
+(`…3b55`, créé par la projection `dossier.created`) et « Client B SARL » (`…3ba9`, créé par API).
+
+**① Les écritures sont DÉGELÉES** *(la case que STORY-356 a laissée décochée)* :
+
+| Écriture réelle | Résultat |
+|---|---|
+| `POST /dossiers/:id/cahiers/depenses` sur **A** puis **B** | `201` / `201` — 2 documents écrits |
+| `categories_depenses` semées à la 1ʳᵉ lecture | **38** = 19 par dossier — **pas un seau commun** |
+| `POST /dossiers/A/balances` (`ocr`) + `/valider` | `201` puis `200`, `etat: VALIDÉE` |
+| Documents **sans `dossierId`** — 4 collections | **0** |
+
+**② Le gel ne franchit pas le dossier** — le cœur de la story, prouvé contre un vrai Mongo :
+
+| Après validation de la balance de A | Résultat |
+|---|---|
+| saisie au cahier de **A** | **`409 BALANCE_VALIDEE_IMMUABLE`** |
+| saisie au cahier de **B** | ⚡ **`201`** — le portefeuille n'est pas gelé |
+
+**③ Les trois topics, en conditions réelles** — `exercices_atelier` est resté **VIDE** pendant tout le
+parcours : la décision vient donc bien du read-model, et de rien d'autre.
+
+| Séquence sur le dossier B | Read-model | Saisie au cahier |
+|---|---|---|
+| `dossier.exercice.ouvert` | `OUVERT` (v1) | `201` |
+| `dossier.exercice.clos` | `CLOS` (v2) | **`409 EXERCICE_CLOS`** |
+| `dossier.exercice.rouvert` | `OUVERT` (v3), `closPar`/`closLe` **retirés** | ⚡ **`201`** |
+
+**Deux exercices aux mêmes bornes, un par dossier** : `exercices_dossier` porte les deux lignes
+`2026-01-01 → 2026-12-31`, une par `dossierId` ; l'index unique réel de `exercices_atelier` est bien
+`{dossierId, exercice.debut, exercice.fin}` (relu par `getIndexes()`).
+
+**④ Le hub — 4 `balance.submitted` publiés sur Kafka** (producteur console, réseau docker) :
+
+| `eventId` | `balance.dossierId` | `etat` / `motifCode` | `dossierId` consigné |
+|---|---|---|---|
+| `evt-367-sans-dossier` | *(absent)* | `REJETÉE` / **`DOSSIER_ABSENT`** | marqueur `orgId` |
+| `evt-367-dossier-inconnu` | `…439099` (autre) | `REJETÉE` / **`DOSSIER_INCONNU`** | marqueur `orgId` — ⛔ **jamais** le dossier revendiqué |
+| `evt-367-archive` | B, archivé entre-temps | `REJETÉE` / **`DOSSIER_ARCHIVE`** | marqueur `orgId` |
+| `evt-367-ok` | **B** | `BROUILLON` | ⚡ **`…3ba9` = Client B**, *pas* le cabinet |
+
+⛔ **C'est la démonstration du défaut corrigé** : avant cette story, `evt-367-ok` aurait été rattaché à
+« Mon cabinet » (`…3b55`) — les chiffres de Client B sur la société du comptable.
+
+**Atomicité et boucle de retour** : `rejets consignés = 3` et `balance.rejected` émis = **3** (aucun rejet
+muet) ; **0** balance créée par les événements rejetés (aucun orphelin) ; `outbox_events` = 5, tous `SENT`.
+
+### Ce que 236 avait déjà livré — **constaté**, pas re-livré
+
+Les 6 collections filtrent sur `(orgId, dossierId)`, les 22 contrôleurs nichés portent
+`@RequiresDossierScope()` (404 jamais 403) sous un test structurel d'invariant, et la **marche arrière** de
+`balance-service` a été **retirée** par 236 (celle de `bilan-service` **bornée** par 372/373 : simulation
+par défaut + borne temporelle). ⇒ **La case « sort de la marche arrière » est cochée par constat**, la
+fenêtre de migration est fermée des deux côtés.
