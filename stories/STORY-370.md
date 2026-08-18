@@ -1,6 +1,6 @@
 # STORY-370 : L'import cesse de fondre deux banques en une — la provenance d'un auxiliaire survit à la normalisation
 
-Status: in_progress
+Status: done
 
 **Epic :** EPIC-017 — Socle balance-service + contrat de balance canonique
 **Points :** 5 · **Sprint :** 20 (backend) · **Service :** `balance-service` (`:3007`)
@@ -124,12 +124,15 @@ champ optionnel ; s'en priver, c'est choisir de rester aveugle par économie.
 
 ## Definition of Done
 
-- [ ] Le cas **deux banques** est couvert par un test **qui échoue sur la version actuelle**.
-- [ ] La voie retenue (A ou B) est **écrite dans la story** avant l'implémentation, avec son motif.
-- [ ] Le rapprochement **ne peut plus** présenter un solde cumulé comme celui d'un seul compte.
-- [ ] **Non-régression** : un import sans auxiliaire de trésorerie produit **exactement** la même
-      balance qu'aujourd'hui.
-- [ ] `GAP-auxiliaires-fusionnes-a-l-import` passe à **fermé**.
+- [x] Le cas **deux banques** est couvert par un test **qui échoue sur la version actuelle** — 10
+      mutations, 10 rouges **par assertion**.
+- [x] La voie retenue (A) est **écrite dans la story** avant l'implémentation, avec son motif.
+- [x] Le rapprochement **ne peut plus** présenter un solde cumulé comme celui d'un seul compte : il
+      **ventile** quand la provenance le permet, et le **dit** (`cumulNonVentilable`) quand elle ne le
+      permet pas — y compris sur `nbComptesApparies = 1`, le cas précis qui restait muet.
+- [x] **Non-régression** : un import sans compte de trésorerie déclaré produit **exactement** la même
+      balance qu'avant — prouvé en docker sur une **seconde organisation réelle**, checksum identique.
+- [x] `GAP-auxiliaires-fusionnes-a-l-import` passe à **fermé**.
 
 ---
 
@@ -137,6 +140,9 @@ champ optionnel ; s'en priver, c'est choisir de rester aveugle par économie.
 
 - **2026-08-18** — statut `not_started` → `in_progress`. Branches `MNV-370` ouvertes sur `docs/` (base
   `main`) et `balance-service` (base `dev`).
+- **2026-08-18** — ✅ **CLÔTURÉE** : PR `prospera-balance-service#41` rebase-mergée sur `dev`
+  (4 commits : feature, vérif-docker, revue de code, sécurité). Statut aligné aux 3 endroits,
+  `completed_date` posée, `GAP-auxiliaires-fusionnes-a-l-import` **fermé**.
 - **2026-08-18** — ✅ **voie tranchée à l'ouverture : A dans sa forme complète** (provenance *et*
   montants, restreinte au cas trésorerie). Motif complet au § *Voie retenue à l'ouverture*, écrit
   **avant** la première ligne de code.
@@ -194,3 +200,71 @@ omettait bien la clé — son test l'assertait — mais le document persisté po
 dire l'affirmation « rien à séparer » là où la vérité est « on ne sait pas ». `default: undefined` posé,
 garde-fou unitaire ajouté (`balance.schema.spec.ts`, modèle instancié en mémoire), et la vérification
 **rejouée après `docker restart`** — le hot-reload sait mentir.
+
+---
+
+## ⑥ Revue de code — 6 constats, tous corrigés (commit `c291801`)
+
+| # | Constat | Gravité |
+|---|---|---|
+| ① | ⚡⚡ **`fusionnerParCompte` jetait `sources`** — une balance **provisionnée** (STORY-094) est bâtie par cette fusion **et relue par le rapprochement** (`trouverDerniereToutesSources` n'exclut que `A_NOUVEAUX`). Dès le premier provisionnement, la provenance disparaissait et le rapprochement repassait au **cumul** des deux banques — sans même `cumulNonVentilable`, plus aucune source ne subsistant pour le déclencher. **La story se refermait en silence, par la porte de derrière.** | **BLOQUANT** |
+| ② | L'avertissement contenait un exemple **figé** (`ex. « 5211BOA0 »`) ⇒ l'assertion `toContain('5211BOA0')` était satisfaite par le **gabarit**, jamais par la donnée | non-bloquant |
+| ③ | Test **tautologique** « ignore les déclarations vides » — mutation exécutée (filtre retiré) ⇒ **43/43 verts** | non-bloquant |
+| ④ | La troncature se déduisait de `provenances`, **elle-même plafonnée** à 20 ⇒ une ligne tronquée au-delà du 20ᵉ regroupement perdait ses banques **en silence** | non-bloquant |
+| ⑤ | `GET /balances/:id` renvoyait `sources` **sans que Swagger le déclare** (aucune erreur de compilation : une propriété optionnelle en plus reste assignable) | non-bloquant |
+| ⑥ | L'avertissement affirmait « c'est une racine » **sans condition** — faux pour un comptable qui suit le conseil de STORY-172 et déclare `521100`, un compte de **détail** | non-bloquant |
+
+⚡ **La règle retenue pour ①** : la provenance n'est reportée que si le compte a **un seul
+contributeur**. Dès deux, elle est **abandonnée** — un socle d'à-nouveaux apporte un solde que
+*personne n'a ventilé par banque*, et reporter la décomposition des seuls mouvements publierait une
+position **amputée de l'à-nouveau** : le défaut même que STORY-147 a corrigé.
+
+## ⑦ Revue de sécurité — 2 constats, corrigés (commit `a973665`)
+
+⚡⚡ **CONSTAT 1 — CWE-345, A04:2021, Medium, confiance 90.** `sources` était le **seul** champ
+financièrement porteur du contrat à n'être encadré par **aucun** des quatre garde-fous de la ligne
+(plan, XOR, équilibre FR-A25, checksum). Un `TENANT_USER` du cabinet pouvait déposer une balance
+parfaitement équilibrée, au checksum valide, aux lignes légitimes, et n'y falsifier **que la
+ventilation par banque** : le rapprochement — *« la pièce justificative de la clôture »* — publiait le
+montant fabriqué comme la position de **ce** compte, `ecart: 0`, `ventileDepuisProvenance: true`,
+**aucun avertissement**. Falsifier le même chiffre par la ligne aurait cassé l'équilibre et se serait
+vu : **c'est l'asymétrie qui faisait la faille**, et le drapeau d'origine qui privait le lecteur de
+toute raison de s'en méfier.
+
+**Correctif** : une source ne peut nommer qu'un compte de trésorerie **réellement déclaré**.
+
+⛔ **Et PAS le contrôle arithmétique que la revue proposait.** Elle recommandait de borner
+`|Σ sources| ≤ |net de la ligne|` — **vérifié, cela rejetterait des imports légitimes**.
+Contre-exemple : `5211BOA0` +700 et `5211ECO1` +300 déclarés, plus un auxiliaire **non déclaré** à
+−900 ⇒ net de ligne **+100**, Σ des sources **+1000**. Les soldes de l'agrégat étant **nettés** et les
+sources n'en étant qu'un **sous-ensemble déclaré**, aucune relation de borne ni de signe ne tient.
+L'appartenance, elle, tient toujours.
+
+**CONSTAT 2 — CWE-353, Low.** Le sceau ne couvre pas `sources`. Sans conséquence pour un client de
+l'API (le checksum est un contrôle d'altération **en transit**, pas d'authenticité), mais l'écart est
+désormais **documenté** dans `balance.checksum.ts`, avec sa porte de sortie (un `v3`, l'existant
+restant vérifiable en `v2`).
+
+**Durcissement** : le repli du paramétrage trésorerie était **muet** — l'import dit maintenant que la
+provenance **n'a pas pu être évaluée**, au lieu de produire une balance indistinguable d'un dossier
+n'ayant rien à séparer.
+
+**Écartés après vérification** : XSS sur l'avertissement (valeurs contraintes `^[0-9A-Za-z]+$`/20 en
+amont) · isolation multi-tenant de `comptesComptablesDeclares` (`orgId` du JWT, dépôt fail-closed,
+404 jamais 403) · DoS par volume (limite de corps Express 100 kB + `ArrayMaxSize` + volume fonction du
+**paramétrage**, pas du fichier).
+
+## ⑧ Vérification docker **rejouée sur l'état final** (après `docker restart`)
+
+| Contrôle | Résultat |
+|---|---|
+| ① corrigé, **prouvé sur données réelles** | balance `PROVISIONS_FISCALES` v3 créée via l'API : elle **conserve** `sources`, le rapprochement **relit bien cette v3** (confirmant la prémisse du constat) et BOA garde **700 000 000** |
+| ② corrigé | l'avertissement nomme les banques **lues dans la provenance** : « (5211BOA0, 5211ECO1) » |
+| ⑤ corrigé | `GET /balances/:id` rend `sources`, et `LigneView` publie bien **8 propriétés** à l'OpenAPI |
+| ⚡ **la faille est fermée** | `POST /balances` avec une provenance sous `5211FANTOME` (jamais déclaré) ⇒ **400** nommant le compte fautif |
+| non-régression | la même provenance sous des comptes **déclarés** ⇒ **201** ; l'import fichier légitime ⇒ v4, `provenancesTotal: 1` ; AC-2 inchangé (700M / 300M / cumul dit) |
+
+⚠️ **Instabilité e2e observée, et elle PRÉEXISTE** : 5 passes de la suite complète sur `MNV-370` ⇒ 1
+échec ; 2 passes sur `origin/dev` en worktree ⇒ **115 puis 10 échecs**, sur des suites **différentes à
+chaque fois** et toutes vertes en isolation. Ce n'est donc pas une régression de la branche — c'est la
+famille de flake que STORY-236 a réduite sans la fermer. **À ne pas porter au crédit de cette story.**
