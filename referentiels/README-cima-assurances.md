@@ -93,6 +93,22 @@ d'Assurances). Dernière modification structurante : décision du Conseil des Mi
 3. **Réassurance** : comptes de cessionnaires/rétrocessionnaires (18, 39, 40, 75) omniprésents.
 4. **Séparation Vie / Non-Vie** obligatoire pour le compte d'exploitation générale.
 5. **Aucun TFT/TAFIRE** au sens SYSCOHADA dans les états modèles CIMA de base.
+6. ⛔ **La classe 8 n'est PAS entièrement de la gestion** (STORY-369) — c'est la particularité la plus
+   coûteuse, et elle est invisible à l'œil nu. Elle mêle :
+   - de la **gestion réelle** : `80`, `82`, `83`, `84`, `85`, `86` ;
+   - **trois comptes de REGROUPEMENT** : `87` *Compte général de pertes et profits*, `88` *Résultats en
+     instance d'affectation*, `89` *Bilan*. Ils **récapitulent** un résultat déjà porté par les comptes de
+     gestion — les sommer avec eux le compte ⚡ **exactement deux fois**.
+
+   ⚡ **Mesuré** : sur une balance CIMA dont le résultat de 140 M est porté par `88`, un moteur appliquant
+   `[6,7,8]` rend **280 M** — la base imposable est doublée, **sans aucun signal** (le contrôle
+   d'articulation est inapplicable : ce plan n'a pas de compte de résultat net en classe 1).
+
+   ⇒ L'artefact publie donc `racinesDeGestion: ["6","7","80","82","83","84","85","86"]` — des **racines**,
+   pas des numéros de classe, précisément parce qu'une déclaration au niveau de la classe ne saurait pas
+   exclure `87`/`88`/`89`. ⚠️ Pour SYSCOHADA la classe 8 est, elle, **entièrement** HAO/gestion (`81`→`89`) :
+   l'en retirer y produirait un résultat *avant* HAO et *avant* impôt (**D-091-3**). La règle appartient au
+   référentiel **dans les deux sens**.
 
 ## Cadrage de l'amorce `cima-assurances@1.0`
 - Plan de comptes = **liste officielle art. 431** (comptes à 2 chiffres, verbatim).
