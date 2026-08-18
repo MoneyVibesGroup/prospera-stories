@@ -3,8 +3,14 @@
 **Cible :** `auth-service` (:3001)
 **Ouvert par :** **AP-20** (barry thierno alhassane, 2026-08-07)
 **Priorité :** Should — rien n'est cassé, mais une question d'exploitation reste sans réponse
-**État :** ➡️ **REPRIS le 2026-08-08 par [STORY-294](../stories/STORY-294.md)** *(sprint 20, 3 pts)* ·
-consommateur frontend **[AP-24](../frontend-stories/AP-24.md)** *(`blocked`, nommé en même temps)*
+**État :** ✅ **RÉSOLU le 2026-08-18.** La route est livrée par
+[STORY-294](../stories/STORY-294.md) *(`done` le 2026-08-11)* et **consommée** par
+[AP-24](../frontend-stories/AP-24.md) : la fiche organisation affiche le journal, et l'encart
+« Historique des décisions : à livrer » posé par AP-20 a été retiré au même commit.
+Vérifié sur stack vivante le 2026-08-18 : `GET /api/v1/admin/organizations/{id}/audit` → **200**,
+enveloppe `{ items, total, page, limit }`, acteur résolu (`actor.email`), motif consigné par le
+corps optionnel `{ reason }` des routes `suspend` / `reactivate`.
+*Historique : ➡️ REPRIS le 2026-08-08 par STORY-294 (sprint 20, 3 pts).*
 
 > ⚠️ **STORY-294 est désormais la source de vérité.** Ce fichier est conservé pour tracer l'origine et
 > **ne se modifie plus** — deux sources de vérité sur le même sujet sont exactement le défaut que ce
