@@ -140,3 +140,57 @@ champ optionnel ; s'en priver, c'est choisir de rester aveugle par économie.
 - **2026-08-18** — ✅ **voie tranchée à l'ouverture : A dans sa forme complète** (provenance *et*
   montants, restreinte au cas trésorerie). Motif complet au § *Voie retenue à l'ouverture*, écrit
   **avant** la première ligne de code.
+
+### Implémentation (commit `2f9f77d`)
+
+`LigneBalance.sources?` — compte du fichier + 4 colonnes + niveau de preuve, capturés **avant le
+netting** de l'agrégat. Posé **uniquement** quand ≥ 2 auxiliaires du regroupement sont des comptes de
+trésorerie **déclarés** distincts, l'appariement se faisant par **égalité stricte sur le compte brut** :
+un préfixe ferait apparier la racine `521` — le défaut de ventilation faute de saisie — aux **deux**
+auxiliaires, et l'import conclurait à deux banques déclarées là où le cabinet n'en a déclaré aucune.
+Côté rapprochement, `apparierCompteBalance` publie le solde de **la** source déclarée (**relu**, jamais
+calculé) et, quand il ne peut pas séparer, l'annonce par `cumulNonVentilable`.
+
+### Portes DoD
+
+lint 0 warning · build OK · **2845 unitaires + 672 e2e** verts · couverture **99,01 / 91,74 / 98,21 /
+99,09** (seuils 65/90/90/90).
+
+**10 mutations, 10 rouges PAR ASSERTION** — aucune par erreur de compilation (trois tentatives ont dû
+être réécrites pour cette raison précise, cf. STORY-179), et deux mutations **non appliquées** ont été
+détectées avant d'en tirer un faux vert (cf. STORY-368) :
+
+| # | Mutation | Test qui vire au rouge |
+|---|---|---|
+| M1 | `buildCanonique` jette `sources` | *persiste `sources` (sinon la story est INERTE)* |
+| M2 | comparaison au compte déclaré par **préfixe** | *une RACINE ne crée AUCUNE provenance* |
+| M3 | seuil « ≥ 2 banques » ramené à 1 | *n'attache rien quand UNE SEULE banque est fondue* |
+| M4 | l'appariement publie le cumul malgré la ventilation | 6 tests (règles pures **et** service) |
+| M5 | `cumulNonVentilable` jamais posé | *le cumul est DIT alors que nbComptes vaut 1* |
+| M6 | `versLigne` (unique chemin de **lecture**) jette la provenance | 3 tests du service |
+| M7 | garde du validateur *fail-open* | 5 refus de provenance malformée |
+| M8 | le checksum v2 se remet à sceller `sources` | *la provenance NE CHANGE PAS le checksum* |
+| M9 | `sources` perd ses décorateurs (whitelist l'élague) | e2e *ACCEPTE une provenance bien formée* |
+| M10 | `default: undefined` retiré du `@Prop` | *n'écrit AUCUNE clé `sources`* |
+
+### ⚡ Vérification docker — stack **neuve** (`down -v`), Mongo `rs0`, Kafka up
+
+Deux cabinets **réels** (register → e-mail vérifié → login RS256), dossiers « Mon cabinet » **répliqués
+par Kafka** dans `balance_service.dossiers_dossier`, référentiel `syscohada-revise@2.1` actif.
+
+| Contrôle | Mesuré en base / à l'API |
+|---|---|
+| **La ligne porte sa provenance** | `521100` en base : `sources: [5211BOA0 = 700 000 000, 5211ECO1 = 300 000 000]`, montants **avant netting** |
+| **AC-5 — c'est annoncé** | avertissement d'import : « 1 compte(s) du plan regroupent plusieurs comptes de trésorerie déclarés : 521100 (5211BOA0 + 5211ECO1) » |
+| ⚡ **AC-2 — position PAR BANQUE** | BOA ⇒ `soldeComptable = 700 000 000` · Ecobank ⇒ `300 000 000`, `ventileDepuisProvenance: true`. **Avant la story les deux affichaient 1 000 000 000** |
+| ⚡ **Le trou de STORY-172 est fermé** | compte déclaré `521` (racine, le défaut) ⇒ solde `1 000 000 000`, `nbComptesApparies = 1` — donc l'avertissement `nbComptes > 1` reste muet — mais `cumulNonVentilable: true` **et** l'avertissement dédié partent |
+| **AC-3 — non-régression** | **2ᵉ cabinet réel, même fichier, aucun compte déclaré** : `provenancesTotal = 0`, la ligne `521100` ne porte **aucune** clé `sources` |
+| ⚡ **Checksum inchangé** | les **deux** balances (avec et sans provenance) portent le **même** `checksum` et `checksumVersion: v2` ⇒ ni `v3`, ni migration, contrat `balance.created` intact |
+| **Aucun orphelin** | `0` ligne `sources: []` sur toute écriture postérieure au correctif |
+
+⛔ **Un défaut trouvé PAR cette vérification, invisible aux 2842 unitaires et 672 e2e** (commit
+`acb541a`) : Mongoose donne à tout chemin de type tableau un défaut **implicite** `[]`. Le service
+omettait bien la clé — son test l'assertait — mais le document persisté portait `sources: []`, c'est-à-
+dire l'affirmation « rien à séparer » là où la vérité est « on ne sait pas ». `default: undefined` posé,
+garde-fou unitaire ajouté (`balance.schema.spec.ts`, modèle instancié en mémoire), et la vérification
+**rejouée après `docker restart`** — le hot-reload sait mentir.
