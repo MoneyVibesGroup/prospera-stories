@@ -5,7 +5,7 @@
 décision **D5**
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** Not Started
+**Statut :** In Progress
 **Complexité :** high
 **Créée le :** 2026-08-15
 **Sprint :** 20
@@ -253,3 +253,164 @@ Grounding effectué directement dans le code de `bilan-service` et le ticket
   hypothèse de couplage fort avec STORY-236 (via cet événement) qui aurait été fausse ; le lien réel
   entre les deux stories est le patron de route et le read-model, pas un contrat Kafka partagé.
 - Statut laissé à `Not Started` — le dev n'a pas commencé.
+
+### ② Développement (2026-08-18) — branche `MNV-357` de `prospera-bilan-service`
+
+**Le mécanisme, et pourquoi il n'est pas la copie littérale de STORY-236.** La garde
+(`DossierScopeGuard`) et les deux décorateurs (`@RequiresDossierScope`,
+`@DossierScope` + `exigerDossierId`) sont **dupliqués depuis `balance-service`**, à
+l'identique sur l'anti-énumération et l'archivage (décision K4, aucune librairie
+partagée). Le **point d'application**, lui, diffère : `balance-service` fait
+descendre le `dossierId` de main en main du contrôleur au repository (22 contrôleurs
+à tenir) ; `bilan-service` avait déjà la couture que **STORY-372** a construite —
+`DossierScopedRepository`, par où passent **toutes** les écritures des collections
+rattachées. STORY-372 l'annonçait explicitement : *« STORY-357 remplacera la
+résolution »*. C'est ce qui a été fait — le guard pose le dossier gardé dans le
+**contexte de requête** (le même AsyncLocalStorage que `tenantId`), le repository l'y
+lit. Il n'y a donc **aucun site d'écriture à oublier** : il n'y a pas de site, il n'y
+a qu'un repository.
+
+**⚡ Et c'est la LECTURE qui a été le vrai apport.** STORY-372 ne forçait `dossierId`
+qu'à l'écriture. Le `scope()` du repository le fusionne désormais aussi dans **toute
+lecture** — c'est ce qui rend AC-7 structurel plutôt que défensif.
+
+**Décision AC-7 — le 409 `COMPARAISON_INTER_DOSSIERS` est ÉCARTÉ, et documenté comme
+tel.** La story demandait de trancher sans « décider par confort ». Les deux
+arguments qui l'emportent : ① la comparaison ne prend que des **libellés**, aucune
+route du service n'accepte un `jeuEtatsId` brut — le 409 serait **inatteignable** ;
+② un exercice d'un autre dossier n'est pas *refusé*, il est **introuvable**, et sort
+par la 404 générique commune aux trois autres causes. Ajouter un 409 distinct
+**rouvrirait l'oracle d'existence** (« existe ailleurs » ≠ « n'existe pas ») que
+cette 404 unique s'emploie précisément à fermer. Le jour où un endpoint accepterait
+un `jeuEtatsId`, la garde à écrire serait sur **cet endpoint**, pas ici. Test
+correspondant : `comparaison-exercices.cloisonnement.spec.ts`, dernier cas.
+
+**⚡ TROIS index uniques que le cadrage n'avait pas relevés portaient la MÊME
+collision** que `jeux_etats` : `exercices {tenantId, libelle}`, `jeux_hypotheses
+{tenantId, nom}` — et `mapping_overrides {tenantId, compte}`, lui, était bien nommé
+par la story. Les deux premiers sont **hors de la lettre** du périmètre ; les
+laisser au niveau du cabinet aurait livré une story qui ne fait pas ce qu'elle
+annonce — le second dossier d'un cabinet n'aurait pas pu déclarer son exercice
+« 2025 » ni son jeu d'hypothèses « Base ». Corrigés, et la mesure docker ci-dessous
+prouve que la collision était réelle (recréer l'ancien index **échoue** en
+`DuplicateKey`).
+
+**⚠️ Ce qui N'A PAS été re-scopé, et pourquoi.** `snapshots_liasse {tenantId,
+jeuEtatsId, version}` et `versions_hypotheses {tenantId, jeuHypothesesId, version}`
+gardent leur clé : elle porte déjà un identifiant de **document parent**, lui-même
+rattaché à un seul dossier. Y préfixer `dossierId` n'élargirait rien et ferait croire
+à une garde supplémentaire — c'est la leçon **inverse** d'AC-5 de STORY-236, où
+préfixer un index avait *supprimé* la seule garde qui comptait.
+
+**`DossierCabinetResolver` est SUPPRIMÉ** (avec son spec). Le garder aurait laissé à
+portée de main un repli « toujours Mon cabinet » — c'est-à-dire exactement le
+mélange inter-dossiers que la story ferme. `dossierIdCourant()` **refuse** désormais
+quand le contexte est vide (fail-closed, mutation M12).
+
+**Backfill — décision.** `jeux_etats` et `versions_hypotheses` ont été ajoutés au
+script `migrate:dossiers` **et à sa marche arrière**, plutôt que traités par un
+second script ou laissés à « la base repart de zéro ». Raison : sans eux, la phase de
+**vérification** de la migration annonçait « 0 orphelin » sur une base où **aucun**
+jeu d'états n'est rattaché — un rapport qui ne dit que le succès ne sert à rien (AC
+de STORY-356). Les deux côtés ont été modifiés **ensemble** : une marche arrière qui
+ne détacherait pas ce que la migration attache cesserait de restaurer l'état
+antérieur.
+
+**Marche arrière (dette notée par la story) :** rien à retirer — **STORY-373 l'a déjà
+bornée** par l'`_id` (horodatage de migration obligatoire, refus sinon). STORY-357
+n'a fait que confirmer le diagnostic ; le docstring a été mis à jour pour cesser
+d'annoncer une échéance déjà passée.
+
+**Portes DoD :** lint 0 warning · build OK · **993 unit + 259 e2e verts** ·
+couverture **98,62 / 93,02 / 98,27 / 98,57** (seuils 65/90/90/90, jamais abaissés).
+
+**Mutation-test — 13 mutations, 13 ROUGES par assertion, 0 par erreur de
+compilation** (le piège de STORY-179 évité explicitement ; chaque mutation est
+**assertée écrite sur disque** avant lecture de son résultat, et la restauration est
+assertée elle aussi — le piège de STORY-372/373, où une mutation silencieusement non
+appliquée se lisait « verte » et faisait conclure l'inverse) :
+
+| # | Mutation | Cible virée au rouge |
+|---|---|---|
+| M1 | `scope()` sans `dossierId` | `comparaison-exercices.cloisonnement` (AC-7) |
+| M2 | guard : `findOne` sans `orgId` | `dossier-scope.guard` (AC-2) |
+| M3 | guard : archivage jamais bloquant | `dossier-scope.guard` (AC-3) |
+| M4 | guard : `setDossier()` retiré | `dossier-scope.guard` |
+| M5 | `jeux_etats` : index revenu à `{tenantId, exercice}` | `index-dossier.invariant` (AC-4) |
+| M6 | `majSiStatut` sans `dossierId` | `jeu-etats.repository` |
+| M7 | `create` : ordre du spread inversé | `exercice.repository` |
+| M8 | `@RequiresDossierScope()` retiré d'un contrôleur | `dossier-scope.invariant` |
+| M9 | versions : `dossierId` relu du contexte au lieu du parent | `version-hypotheses.repository` (AC-6) |
+| M10 | `@ApiParam` du segment retiré | `dossier-scope.invariant` |
+| M11 | `mapping_overrides` : index revenu à `{tenantId, compte}` | `index-dossier.invariant` (AC-5) |
+| M12 | `dossierIdCourant` fail-**open** (repli au lieu du refus) | `version-hypotheses.repository` |
+| M13 | décorateur retiré ⇒ une famille cesse d'être gardée | e2e `bilan-dossier-scope` |
+
+### ③ Vérification docker (2026-08-18) — stack NEUVE (`down -v`), **40 contrôles, 0 rouge**
+
+Stack : `mongo` (rs0) + `kafka` + `redis` + `mailhog` + `auth-service` +
+`dossier-service` + `bilan-service`. **Deux organisations réelles** inscrites via
+l'IdP, **trois dossiers réels** créés via `dossier-service` et propagés par Kafka
+jusqu'au read-model `dossiers_dossier` de `bilan-service`.
+
+**Passe 1 — la garde et les index (26 contrôles verts) :**
+
+- **AC-1** — les 5 anciennes routes hors dossier (`/bilan/etats`, `/bilan/exercices`,
+  `/bilan/mapping-overrides`, `/bilan/consultation`, `/bilan/audit`) rendent **404**.
+- **AC-2** — le dossier de l'**org B** vu par l'**org A** et un dossier inexistant
+  rendent deux corps **strictement identiques** (comparés programmatiquement, hors
+  `requestId`) : `{"code":"DOSSIER_INTROUVABLE","error":"Not Found","message":
+  "Dossier introuvable pour cette organisation.","statusCode":404}`. `dossierId`
+  malformé → **400 `DOSSIER_ID_INVALIDE`**.
+- **AC-8** — `POST /dossiers/:id/bilan/exercices` rend **201** : le gel de STORY-356
+  est levé, et `mongosh` montre le `dossierId` **écrit**.
+- **AC-4** — deux dossiers du **même cabinet** ouvrent chacun un exercice « 2025 »
+  (201 + 201), et un **second** « 2025 » **dans le même dossier** rend bien **409**.
+- ⚡ **Le contrôle décisif** : recréer l'ancien index `{tenantId, libelle}` en unique
+  **ÉCHOUE** (`DuplicateKey`) ⇒ **le 2ᵉ exercice n'aurait jamais existé** sous
+  l'ancienne clé. La collision n'était pas théorique.
+- Les 4 index de **production** relus en base : `tenantId_1_dossierId_1_exercice_1`,
+  `…_libelle_1`, `…_compte_1`, `…_nom_1`.
+- **AC-5** — la **même** surcharge sur le compte `476200` est **validée** dans les
+  deux dossiers (200 + 200) — `E11000` sous l'ancienne clé.
+- **AC-3** — dossier `ARCHIVE` : lecture **200**, écriture **409** avec le code
+  `DOSSIER_ARCHIVE`.
+- **AC-9** — réaffecter le dossier à une autre `orgId` **dans le read-model** rend la
+  route **404** ; le restaurer la fait répondre **200**. Rien d'autre n'a changé.
+- **Zéro orphelin** sur les 6 collections rattachées, et **0** exercice dont le
+  `dossierId` n'existe pas au read-model.
+
+**Passe 2 — AC-7 sur données réelles (14 contrôles verts) :** quatre jeux d'états
+(2024 + 2025 × deux dossiers du **même** cabinet), tous **validés** (donc quatre
+snapshots figés en transaction).
+
+- Les libellés « 2024 » et « 2025 » **coexistent** dans les deux dossiers.
+- Depuis le dossier A, `GET` **et** `POST :id/rouvrir` sur le jeu de B rendent
+  **404** — et `mongosh` confirme que le jeu B est **resté `VALIDE`** (la transition
+  gardée n'a pas mordu à travers le dossier).
+- ⚡ **AC-7** : `comparaison/exercices?exercices=2024,2025` scopée sur A publie
+  `[1 000 000, 2 000 000]`, scopée sur B `[7 000 000, 9 000 000]` — **aucun jeu
+  d'états commun, aucune valeur commune**. Le tableau plausible et faux est
+  structurellement impossible.
+- `mongosh` : les 4 jeux et les 4 snapshots portent le `dossierId` de **leur**
+  dossier, avec le **même `tenantId`** — c'est bien le **dossier** qui les sépare, et
+  pas l'organisation.
+
+**AC-11 — portée réelle, dite honnêtement.** Le parcours **écriture côté Bilan** est
+rejoué de bout en bout sur des dossiers réels (création de jeu d'états avec soldes →
+validation → snapshot figé et persisté). La moitié **Atelier** appartient à
+`balance-service` et a été vérifiée par STORY-236, close. ⚠️ Il n'existe **aucun
+couplage automatique** entre les deux à vérifier ici : `bilan-service` ne consomme
+pas `balance.created` (revérifié), le moteur travaille sur des soldes **fournis par
+l'appelant**. La case « conjointement avec STORY-236 » est donc cochée pour ce
+qu'elle peut l'être — un lien technique de plus n'existe pas.
+
+⚠️ **Deux pièges d'amorçage rencontrés, sans rapport avec la story** (notés pour la
+prochaine vérif) : le gate `@RequiresBilanAccess` court **avant** le
+`DossierScopeGuard`, donc un KYC non approuvé masque tout le reste par un 403 — il
+faut semer `orgkycstatuses`/`orgbilanentitlements` (clé **`organizationId`**, pas
+`orgId`) **et** le champ `referentiel: {code, version}` de l'entitlement, sans quoi
+tout tombe en 409 `REFERENTIEL_UNRESOLVED`. Et l'index témoin créé par le contrôle
+« l'ancien index est-il recréable ? » **survit à la base** : ne pas le supprimer
+impose l'ancienne contrainte à l'exécution suivante et se lit comme un défaut de la
+story (rencontré une fois, corrigé dans le script).
