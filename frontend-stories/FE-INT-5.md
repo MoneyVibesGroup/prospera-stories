@@ -1,6 +1,6 @@
 # Story FE-INT-5 : Le front atteint `dossier-service` — préfixe logique `/dossiers`, base `:3009`, types générés
 
-Status: ready-for-dev  <!-- créée le 2026-08-17 -->
+Status: review  <!-- créée le 2026-08-17 · livrée le 2026-08-18, branche `fe-int-5` (454e3e8), poussée -->
 
 **Epic :** FE-EPIC-002 — Intégration backend (retrofit / Integration Gate) — **amende FE-INT-0**
 **Points :** 2 · **Sprint :** 10, **EN TÊTE** · **App :** `prospera-frontend-expert-comptable` (`:3100`)
@@ -149,3 +149,38 @@ C'est le symétrique exact du « commentaire d'écart périmé » de FE-017 : l�
 ## Integration Gate
 
 FE-INT-5 est **la porte d'entrée de FE-EPIC-008**, au même titre que FE-INT-0 l'était pour FE-EPIC-002. Aucune story du bloc dossier ne peut être « done » avant elle. Elle en hérite les règles : **types générés, jamais écrits à la main** · **zéro mock sur le chemin réel** · **tout écart tracé en ticket avant la story suivante**.
+
+---
+
+## Livraison — 2026-08-18 (branche `fe-int-5`, commit `454e3e8`, poussée)
+
+**Tous les AC vérifiés.** `resolveApiUrl("/dossiers")` → `:3009/api/v1/dossiers`, préfixe conservé ;
+frontière de **segment** prouvée entre `/documents` (:3006) et `/dossiers` (:3009) ; base absente ⇒
+lève **en nommant `NEXT_PUBLIC_DOSSIER_URL`** (le message générique d'avant obligeait à deviner) ;
+`dossier.ts` committé, **9 chemins** (≥ 6), `DossierResponseDto` et `ExerciceResponseDto` présents.
+
+⚡ **Les 3 tests ont été vérifiés PAR MUTATION** (`strip: true` et message sans variable ⇒ 3 rouges) :
+un test vert ne prouve pas qu'il teste.
+
+**Gates :** `tsc` 0 · `lint` 0 · **510** tests verts · `next build --webpack` OK.
+**Preuve navigateur** (pas curl) : `GET :3009/api/v1/dossiers` → **200** depuis `:3100`, liste non
+vide, **zéro erreur console** ; témoin sans jeton → **401**.
+
+### ⛔ Livrable transmis à FE-063 — les routes mortes de l'Atelier
+
+Produit par **appel réel**, avec les deux témoins qui rendent la mesure lisible
+(`/inexistant-xyz` → **404** ; `/whoami/balance-access` → **401**) :
+
+| appel du front (préfixe `/atelier` retiré) | statut |
+|---|---|
+| `GET /balances/:id` · `GET /balances` · `POST /balances` | **404** ⛔ |
+| `POST /balances/:id/valider` · `POST /balances/:id/rejeter` | **404** ⛔ |
+| `POST /balance/import/sage` | **404** ⛔ |
+| `GET /referentiels/actifs` · `POST /balances/suggest-comptes` | **401** ✅ intacts |
+
+⇒ **6 appels morts** (la fiche en annonçait 5 : `rejeter` s'ajoute à `valider`, tous deux dans
+`marquer-etat.ts`). Leurs équivalents sous `/dossiers/:dossierId/…` répondent **401** : les routes
+existent, seule l'URL du front est périmée.
+
+⚠️ **Cette PR verte NE PROUVE PAS que l'Atelier fonctionne** — c'est précisément ce qu'elle démontre
+impossible à conclure de gates vertes.
