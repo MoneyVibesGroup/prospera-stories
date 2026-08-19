@@ -5,7 +5,7 @@
 décision **D5**
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** In Progress
+**Statut :** Done
 **Complexité :** high
 **Créée le :** 2026-08-15
 **Sprint :** 20
@@ -134,28 +134,28 @@ du champ persisté.
 
 ## Acceptance Criteria
 
-- [ ] **AC-1** — Toute route des 11 familles du §4.2 exige `dossierId` en tête de chemin ; les
+- [x] **AC-1** — Toute route des 11 familles du §4.2 exige `dossierId` en tête de chemin ; les
       anciennes routes sans `dossierId` n'existent plus.
-- [ ] **AC-2** — `dossierId` inexistant ou d'une autre organisation → **404** sur chaque famille.
+- [x] **AC-2** — `dossierId` inexistant ou d'une autre organisation → **404** sur chaque famille.
       *(Deux organisations réelles, un test par famille — pas un seul test générique.)*
-- [ ] **AC-3** — Dossier `ARCHIVE` : lecture `200`, écriture `409 DOSSIER_ARCHIVE`.
-- [ ] **AC-4** — `jeux_etats` porte `dossierId` requis au schéma ; son index unique est
+- [x] **AC-3** — Dossier `ARCHIVE` : lecture `200`, écriture `409 DOSSIER_ARCHIVE`.
+- [x] **AC-4** — `jeux_etats` porte `dossierId` requis au schéma ; son index unique est
       `{tenantId, dossierId, exercice}` — deux dossiers du même cabinet ouvrent chacun un exercice
       de même libellé sans collision. *(Preuve par balayage, pas par jeu d'essai unique.)*
-- [ ] **AC-5** — `mapping_overrides` : deux dossiers du même cabinet valident chacun une surcharge
+- [x] **AC-5** — `mapping_overrides` : deux dossiers du même cabinet valident chacun une surcharge
       sur le **même** numéro de compte sans collision (`E11000`).
-- [ ] **AC-6** — `versions_hypotheses` porte `dossierId`, reporté depuis le `JeuHypotheses` parent.
-- [ ] **AC-7** — La comparaison inter-exercices (`bilan/comparaison/exercices`) ne peut **pas**
+- [x] **AC-6** — `versions_hypotheses` porte `dossierId`, reporté depuis le `JeuHypotheses` parent.
+- [x] **AC-7** — La comparaison inter-exercices (`bilan/comparaison/exercices`) ne peut **pas**
       confronter un exercice du dossier appelé avec un exercice d'un **autre** dossier de la même
       organisation. *(Test positif : deux dossiers, chacun un exercice « 2025 » validé, aux valeurs
       différentes — la comparaison scopée au dossier A ne retourne jamais les valeurs du dossier B.)*
-- [ ] **AC-8** — Toute route d'écriture persiste `dossierId` — plus aucune `ValidationError` sur les
+- [x] **AC-8** — Toute route d'écriture persiste `dossierId` — plus aucune `ValidationError` sur les
       4 collections déjà gardées par STORY-356/AC-4 (lève le gel).
-- [ ] **AC-9** — Le read-model `dossiers_dossier` (hook inerte STORY-356) est effectivement lu — un
+- [x] **AC-9** — Le read-model `dossiers_dossier` (hook inerte STORY-356) est effectivement lu — un
       test fait varier son contenu et observe le comportement des routes changer en conséquence.
-- [ ] **AC-10** — Non-régression : chaque e2e existant adapté au chemin `/dossiers/:dossierId/...`,
+- [x] **AC-10** — Non-régression : chaque e2e existant adapté au chemin `/dossiers/:dossierId/...`,
       aucun supprimé pour faire passer la story.
-- [ ] **AC-11** — Vérification docker : parcours **Atelier → Bilan en écriture** rejoué de bout en
+- [x] **AC-11** — Vérification docker : parcours **Atelier → Bilan en écriture** rejoué de bout en
       bout sur un dossier réel — la case laissée décochée par STORY-356 est cochée ici (conjointement
       avec STORY-236, qui couvre le côté `balance-service` du même parcours).
 
@@ -202,17 +202,17 @@ STORY-359 (portefeuille, agrégation par dossier).
 
 ## Definition of Done
 
-- [ ] Lint 0 warning · build OK.
-- [ ] Unit + e2e verts, couverture ≥ seuils du projet (65/90/90/90) — jamais abaissés.
-- [ ] Les 11 AC ci-dessus prouvées par test.
-- [ ] **Mutation-test** sur chaque garde annoncée, en particulier AC-4 (index `jeux_etats`) et AC-7
+- [x] Lint 0 warning · build OK.
+- [x] Unit + e2e verts, couverture ≥ seuils du projet (65/90/90/90) — jamais abaissés.
+- [x] Les 11 AC ci-dessus prouvées par test.
+- [x] **Mutation-test** sur chaque garde annoncée, en particulier AC-4 (index `jeux_etats`) et AC-7
       (comparaison inter-dossiers) — la preuve est la mutation qui vire au rouge.
-- [ ] **Vérification docker réelle** (stack neuve `down -v`) : AC-4 et AC-5 rejouées en base (deux
+- [x] **Vérification docker réelle** (stack neuve `down -v`) : AC-4 et AC-5 rejouées en base (deux
       dossiers, écritures concurrentes sans collision), AC-7 observée avec deux dossiers réels et
       deux jeux d'états validés, AC-11 (parcours Atelier → Bilan, conjointement avec STORY-236).
-- [ ] Revue de code ⑥ et revue de sécurité ⑦ (session `opus`).
-- [ ] Endpoints documentés dans Swagger (segment `:dossierId`, codes `404`/`409` ajoutés).
-- [ ] Décision sur le backfill de `jeux_etats` consignée (script ou base repartie de zéro).
+- [x] Revue de code ⑥ et revue de sécurité ⑦ (session `opus`).
+- [x] Endpoints documentés dans Swagger (segment `:dossierId`, codes `404`/`409` ajoutés).
+- [x] Décision sur le backfill de `jeux_etats` consignée (script ou base repartie de zéro).
 
 ---
 
@@ -404,6 +404,129 @@ couplage automatique** entre les deux à vérifier ici : `bilan-service` ne cons
 pas `balance.created` (revérifié), le moteur travaille sur des soldes **fournis par
 l'appelant**. La case « conjointement avec STORY-236 » est donc cochée pour ce
 qu'elle peut l'être — un lien technique de plus n'existe pas.
+
+### ④ Revue de code (2026-08-19) — 5 constats, 5 traités
+
+**⚡ ① BLOQUANT — la story était INOPÉRANTE sur toute base non neuve, tout en étant
+verte en CI.** Mongoose en `autoIndex` (la configuration de ce service) **crée**
+l'index déclaré au schéma et **ne supprime jamais** celui qui ne l'est plus :
+`jeux_etats` conservait `tenantId_1_exercice_1` **à côté** de
+`tenantId_1_dossierId_1_exercice_1`. Le second autorise ce que le premier interdit
+toujours ⇒ le 2ᵉ dossier d'un cabinet recevait un `E11000` sur l'**ancienne** clé.
+AC-4 et AC-5 étaient donc **faux en production** : les unitaires ne lisent que la
+déclaration, les e2e mockent la couche données, et la vérification docker tourne sur
+`down -v` — **précisément la seule condition où l'ancien index n'existe pas**. Le
+paragraphe de vérification ci-dessus en portait d'ailleurs l'indice sans le voir
+(« l'index témoin survit à la base »).
+⇒ Phase de **purge ciblée** dans `migrate:dossiers` : comparaison de **clé** et non
+de nom (un index créé à la main porte le nom qu'on veut), **ordre des champs
+discriminant**, idempotente, rapportée. Jamais `syncIndexes()`, qui supprimerait
+aussi l'index qu'un exploitant aurait ajouté pour une requête lente.
+
+**⚡ ② D9 pris à la lettre : la MÉTHODE HTTP n'est pas l'EFFET.** Les six `dry-run`
+de `bilan-diagnostics` sont en `@Post` + `@HttpCode(200)` — leur corps porte les
+soldes, ils ne persistent rien, et leur Swagger dit mot pour mot « lecture, aucune
+persistance ». Classés en écriture par leur seul verbe, ils rendaient **409 sur un
+dossier archivé**, c'est-à-dire exactement la consultation diagnostique que
+l'archivage est censé **préserver**. ⇒ `@LectureSeule()`, qui **nomme** l'effet au
+lieu de le déduire d'un `@HttpCode(200)` (qu'un handler écrivant peut porter) ou du
+suffixe `dry-run` du chemin (qu'un renommage ferait taire en silence).
+
+**⚡ ③ L'URL promettait une portée que la donnée ne tenait pas.** `audit_events`
+restait keyée `tenantId` seul alors que ses routes étaient passées sous
+`/dossiers/:dossierId/` ⇒ `GET /dossiers/D1/bilan/audit` rendait **aussi** les
+événements de D2, avec leur `cible.libelle`, sans erreur ni signal. **Un journal
+plausible et faux — le mode de panne même qu'AC-7 ferme.** La story ne nommait pas
+cette collection ; la corriger n'est pas un débordement mais la condition pour que le
+chemin ne mente pas. ⇒ 7ᵉ collection rattachée, index `{tenantId, dossierId,
+createdAt:-1}`. Le seam `DossierScopedRepository` a rendu le correctif tenu en trois
+lignes.
+
+**④ `@DossierScope()` + `exigerDossierId()` RETIRÉS.** Copiés de `balance-service`
+par souci de parité K4, ils n'avaient **aucun appelant** ici — le dossier passe par
+le contexte de requête, pas de main en main. Non testés, dans un `*.decorator.ts`
+(exclu de `collectCoverageFrom`, donc invisible aux seuils), et introduisant une
+**troisième** convention d'erreur pour le même cas, à côté du 400 du guard et du
+refus interne du repository. L'interface `DossierScope` reste.
+
+**⑤ Contrats périmés.** Deux descriptions **publiées dans `/api/docs-json`**
+affirmaient au client une unicité « par org » que les nouveaux index contredisent
+(`creer-hypotheses.dto.ts`, `creer-exercice.dto.ts`) — un intégrateur front aurait
+dédupliqué au mauvais niveau. Plus cinq docstrings décrivant encore la sphère
+tenant, dont celui de `resoudreSnapshotValide`, **au cœur d'AC-7**.
+
+**7 mutations de revue, 7 ROUGES par assertion** (M14→M20) — dont `@LectureSeule`
+ignoré vu du contrat HTTP, la purge comparant les **noms** au lieu des **clés**, et
+la purge ignorant l'**ordre** des champs. **20/20 sur la story.**
+
+### ⑤ Revue de sécurité (2026-08-19) — 0 vulnérabilité, 1 garde réparée
+
+**0 constat de confiance ≥ 80.** Neuf axes réellement éprouvés, avec ce qui a
+convaincu : guard opt-in (mode d'échec **fail-closed** vérifié jusqu'au repository) ·
+AsyncLocalStorage partagé avec `tenantId` (`cls.run()` par requête, pas d'`enterWith`
+⇒ aucun résidu inter-requêtes ; ordre des guards vérifié, `JwtAuthGuard` #2 pose le
+tenant avant que `DossierScopeGuard` #6 ne cherche quoi que ce soit ; aucun
+consommateur Kafka ni script ne traverse un repository dossier-scopé) ·
+`@LectureSeule()` (les 6 handlers marqués lus intégralement : calcul pur, aucun
+repository, aucun audit ; le décorateur n'est posé sur aucune classe) · chaîne de
+guards (les 11 contrôleurs conservent `@Roles` + `@RequiresBilanAccess`, aucune route
+devenue `@Public()`) · injection NoSQL (`dossierId` vient de `request.params`, donc
+toujours une chaîne, validé puis converti **avant** tout usage ; fusionné **en
+dernier** dans `scope()`, donc écrase toute clé glissée par un appelant ; les 4
+chemins qui contournent `scope()` pour leur `session` portent tous leur filtre) ·
+anti-énumération (un seul `NotFoundException`, identique pour « inexistant », « autre
+organisation » et « pas d'org au JWT ») · suppression d'index (égalité de **longueur**
+de clé ⇒ une clé à 3 champs ne peut pas matcher une clé à 2) · report du `dossierId`
+parent · secrets.
+
+**⚡ Le seul constat actionnable portait sur la garde elle-même** : l'invariant
+structurel balayait `src/modules` alors que `src/health/` et `src/diagnostics/`
+portent aussi des contrôleurs. Un 12ᵉ contrôleur niché placé là aurait échappé au
+**seul** contrôle qui existe pour ce cas. ⇒ racine ramenée à `src/`, et comptage rendu
+**exact** (13 contrôleurs, dont 11 nichés) : un `toBeGreaterThanOrEqual` n'aurait pas
+rougi au rétrécissement. **Mutation M21 : racine ramenée à `src/modules` ⇒ ROUGE.**
+
+**⛔ Deux observations sous seuil, relayées et NON corrigées :**
+① **Le rayon d'impact d'un rejeu Kafka a changé, et c'est cette story qui l'a
+changé.** La projection de `dossiers_dossier` est un `$set` **absolu sans garde de
+version**, et le marqueur `ProcessedEvent` a un TTL de **30 jours** — or ce
+read-model devient ici la frontière d'autorisation de **toute** la surface HTTP. Un
+rejeu d'un `dossier.updated` antérieur, après purge du marqueur, ré-appliquerait
+`statut: ACTIF` sur un dossier archivé (D9 contournée). Exige une rétention Kafka
+> 30 j **et** un reset d'offset ⇒ confiance ~45, artefact de STORY-356, hors
+périmètre. **À rouvrir si la rétention du topic `dossier.*` évolue.**
+② `ExportService` trace un `AuditEvent` depuis un handler `@Get` : cette écriture
+passe donc sur un dossier archivé. Journal append-only, acteur légitime de
+l'organisation — pas un affaiblissement, mais l'asymétrie est notée.
+
+### ⑥ Vérification docker REJOUÉE sur l'état final (2026-08-19) — 12 contrôles, 0 rouge
+
+⚠️ Le correctif ① touche un artefact déjà vérifié (les index) : la vérification est
+rejouée. **Et son contrôle central ne peut PAS se faire sur une stack neuve** — il
+exige une base qui porte **déjà** l'ancien index, c'est-à-dire la situation de toute
+base ayant tourné. La séquence complète, mesurée :
+
+1. Base reconstituée avec l'**ancienne** clé unique **et** la nouvelle côte à côte —
+   exactement ce que laisse Mongoose `autoIndex`.
+2. **Le défaut est reproduit** : exercice « 2025 » sur le dossier A → **201** ; le
+   même sur le dossier B du **même cabinet** → **409**. *Le défaut est réel, pas
+   théorique.*
+3. La migration purge les 5 clés obsolètes (journalisées une par une) ; `mongosh`
+   confirme qu'**aucune ne subsiste**.
+4. **La même requête qui rendait 409 rend 201** — et un 2ᵉ « 2025 » **dans** A reste
+   refusé : la garde n'a pas sauté avec l'index.
+5. **D9** : les six `dry-run` sur un dossier archivé ne rendent **jamais** 409, alors
+   qu'une vraie écriture du même dossier reste refusée (contre-épreuve).
+6. **Audit** : 2 événements par dossier, **aucun commun aux deux journaux**, 0 sans
+   `dossierId`.
+7. **Zéro orphelin** sur les **sept** collections rattachées.
+
+⚠️ **Piège d'exécution rencontré** : `npm run migrate:dossiers` **n'existe pas dans
+le conteneur** — seul `src/` est monté (pas `package.json`), et l'image locale est
+antérieure à STORY-356 qui a ajouté le script. Le `dist/` étant bien recompilé depuis
+les sources montées, la migration se lance par `node dist/migrate-dossiers.bootstrap.js`.
+Un `docker compose up --build` corrigerait l'image ; l'écart est un artefact
+d'environnement, pas du livrable.
 
 ⚠️ **Deux pièges d'amorçage rencontrés, sans rapport avec la story** (notés pour la
 prochaine vérif) : le gate `@RequiresBilanAccess` court **avant** le
