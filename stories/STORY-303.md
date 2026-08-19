@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **M** · question **Q9** *(tranchée)* · constat de code ligne 77
 **Priorité :** Must Have
 **Story Points :** 8 *(⬆️ 5 → 8, voir §Story Points Breakdown — le titre sous-évaluait le périmètre)*
-**Statut :** 🔎 En revue
+**Statut :** ✅ Terminée
 **Complexité :** medium-high
 **Créée le :** 2026-08-09 *(slottée)* · **Rédigée le :** 2026-08-19
 **Sprint :** 20 (backend)
@@ -308,7 +308,7 @@ et sa dette reste ouverte *(STORY-236, « sujet séparé, à trancher avec le PO
 | Vérification docker | ✅ | stack neuve `down -v`, parcours réel sur 3 dossiers d'un même cabinet — **1 défaut trouvé, invisible aux 3 831 tests** |
 | Revue de code | ✅ | **9 constats, 2 bloquants, tous corrigés** — voir ci-dessous |
 | Revue de sécurité | ✅ | `dossier-service` **0 vulnérabilité** · `balance-service` **1 HAUTE (CWE-863)**, corrigée — voir ci-dessous |
-| Clôture | ⏳ | |
+| Clôture | ✅ | PR `prospera-dossier-service#8` **et** `prospera-balance-service#44` rebase-mergées **ensemble** sur `dev` (contrat d'événement = 2 dépôts), producteur d'abord, branches supprimées |
 
 ### ⚡⚡ Ce que la vérification docker a trouvé et que 3 831 tests ne pouvaient pas voir
 
