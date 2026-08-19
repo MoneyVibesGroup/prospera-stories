@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **G** · décision **D5** *(rattachement additif)*
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** 🔄 En cours
+**Statut :** ✅ Terminé
 **Complexité :** low
 **Créée le :** 2026-08-09
 **Sprint :** 20
@@ -111,8 +111,8 @@ public — sans elle, l'URL présignée serait inutilisable au navigateur)*.
 
 ## Definition of Done
 
-- [x] Lint 0 warning · build OK · couverture **99,47 / 93,28 / 99,28 / 99,43** (seuils 65/90/90/90).
-- [x] 501 unitaires + 60 e2e verts ; **12 mutations volontaires, 12 rouges** (§ *Table de mutations*).
+- [x] Lint 0 warning · build OK · couverture **99,47 / 93,25 / 99,27 / 99,43** (seuils 65/90/90/90).
+- [x] 511 unitaires + 60 e2e verts ; **14 mutations volontaires, 14 rouges** (§ *Table de mutations*).
 - [x] Vérification **docker réelle** sur stack neuve (`down -v`) — § *Vérification docker*.
 - [x] Vérification **navigateur réel** de l'URL présignée (pas seulement curl).
 - [x] Revue de code + revue de sécurité.
@@ -310,7 +310,7 @@ prévu.
 
 ---
 
-## Table de mutations — 12 mutations volontaires, 12 rouges
+## Table de mutations — 14 mutations volontaires, 14 rouges
 
 Un test qu'un code bugué franchit est une fausse assurance. Chaque garde de cette story a été **cassée
 volontairement**, le test ciblé rejoué, puis le code restauré. Le script vérifie que le motif de
@@ -331,6 +331,97 @@ et fait conclure l'inverse (leçon STORY-373).
 | M10 | comparateur de tri non total (départage par `_id` retiré) | 🔴 |
 | M11 | TTL de présignature en dur au lieu de la configuration | 🔴 |
 | M12 | garde de lecture retirée de `GET /dossiers/:id/pieces` | 🔴 |
+| M13 | garde de dossier **remise après** la déduplication de rejeu *(correctif de revue)* | 🔴 |
+| M14 | garde relâchée à « 12 ou 24 hexa » = `ObjectId.isValid` *(correctif de sécurité)* | 🔴 |
+
+---
+
+## Revue de code — 3 constats, 0 bloquant
+
+**① La déduplication court-circuitait la garde de dossier** *(pièces comptables, corrigé)*.
+`trouverParPiece` rendait la main **avant** `exigerPourDepot` : un couple `(lot, pièce)` déjà déposé,
+redéposé en annonçant un dossier **archivé** — ou inexistant, ou d'un autre cabinet — recevait **202 +
+l'id existant** au lieu du 409/404 exigé par AC-4 et AC-5. La réponse dépendait de l'**historique du
+couple** et non de l'état du dossier ; côté appelant, un rattachement refusé se lisait comme un succès,
+et le `dossierId` n'était jamais écrit. Le chemin profil n'avait pas ce défaut : **les deux familles
+divergeaient là où les critères les traitent ensemble**.
+La garde passe désormais avant : elle valide la **requête**, la déduplication décide de l'**effet**.
+3 tests ajoutés, dont un qui vérifie que l'idempotence du rejeu **nominal** n'est pas cassée au passage.
+
+**② Test tautologique retiré** *(corrigé)*. `expect(DOSSIER_TOPICS_CONSOMMES).not.toBe(
+Object.values(DossierTopic))` passait **quelle que soit l'implémentation** — `Object.values` rend un
+nouveau tableau à chaque appel — y compris celle qu'elle prétendait interdire. Fausse assurance sur
+l'invariant précis que le projet a déjà payé (topics dérivés d'un enum). Remplacé par ce qui garde
+réellement : l'épinglage des chaînes **en dur**, plus un test d'alignement avec l'enum qui vire au rouge
+le jour où un topic est ajouté d'un seul côté.
+
+**③ `GET /dossiers/:dossierId/pieces` n'est pas borné** — *dette assumée, non corrigée*. Les deux
+collections sont lues intégralement, fusionnées, triées en mémoire, et **une URL présignée est calculée
+par ligne**. Un dossier d'un exercice complet à ~5 000 pièces produirait une réponse de plusieurs Mo et
+5 000 signatures S3 par appel. Le défaut ne se voit ni en unitaire (fixtures à 1–2 lignes) ni en vérif
+docker (3 pièces). **Non corrigé volontairement** : la story ne cadre pas la pagination, et un
+`.limit()` sans pagination **tronquerait en silence** — pire que le problème. À rapprocher de STORY-187
+(file de revue KYC), où l'absence de pagination avait déjà été le sujet. 🪝 **Transmis à la story qui
+fera transmettre le `dossierId` par `balance-service`** : c'est elle qui rendra le volume réel.
+
+Simplification ponytail appliquée : deux mappeurs jumeaux de 24 lignes ne différaient que par un
+littéral ⇒ une fonction `enLigne(doc, famille)`, 12 lignes.
+
+---
+
+## Revue de sécurité — 0 vulnérabilité, 1 asymétrie fermée
+
+**Aucun constat à confiance ≥ 80.** Examinés et écartés avec leur raison : traversée de chemin par le
+segment de clé MinIO (double barrière `@IsMongoId` puis `DossierGate`, et la clé n'est construite
+qu'après) · URL présignée (GET sur un objet unique, jamais un préfixe ni un PUT, TTL borné **des deux
+côtés** et réellement appliqué au boot, jamais journalisée) · empoisonnement du read-model par un
+événement forgé (validation stricte enveloppe + corps, message invalide **ignoré** plutôt que
+bloquant) · IDOR / isolation tenant (`orgId` **toujours** du JWT, jamais du corps ni de l'URL ; les
+deux lectures **refiltrent** sur `orgId` en base) · anti-énumération (même 404, même corps) ·
+`nomOrigine` (jamais une clé, borné, restitué en JSON seulement) · MIME (magic bytes, jamais le
+`Content-Type` client, y compris pour les nouveaux types) · throttler/RBAC (aucun `@Public()` ajouté,
+401 sur jeton HS256 forgé couvert en e2e) · injection NoSQL · secrets.
+
+**⚡ Une asymétrie fermée quand même** — pas une faille, un piège armé.
+`Types.ObjectId.isValid()` est plus **large** qu'il n'en a l'air : il accepte aussi toute chaîne de
+**12 caractères**. `DossierGate` était donc plus **permissive** que le `@IsMongoId` (24 hexadécimaux
+stricts) des DTO qu'elle prolonge — le propriétaire de la règle plus laxiste que son consommateur.
+Rien d'exploitable : le `findOne` ne rend rien sur une telle valeur, et la clé n'est construite
+qu'après. Mais deux choses en faisaient une dette dangereuse : le chemin de **lecture** n'a **aucun
+DTO** (le `dossierId` vient d'un `@Param`, cette expression est la **seule** barrière de format qui
+existe), et il suffisait qu'un jour quelqu'un retire un `@IsMongoId` « puisque la garde valide déjà le
+format ». Remplacé par `/^[0-9a-fA-F]{24}$/` sur les deux identifiants.
+
+**⚡⚡ Et la première version du test ne gardait RIEN — c'est la mutation qui l'a dit.** Relâcher la
+garde à « 12 **ou** 24 hexadécimaux » (le comportement exact de `ObjectId.isValid`) laissait le mutant
+**vert**. Les cas à 12 caractères que j'avais écrits (`'../autre-org'`, `'zzzzzzzzzzzz'`) ne sont **pas
+hexadécimaux** : ils échouent des **deux côtés** de la frontière, donc ils ne la mesurent pas. Seul
+`'507f1f77bcf8'` — 12 caractères **hexadécimaux** — sépare les deux implémentations. Cas ajouté,
+mutation **M14** rejouée ⇒ **rouge**. Un test qui ne franchit pas la frontière qu'il prétend garder est
+une fausse assurance, même écrit après un constat de sécurité.
+
+---
+
+## Vérification docker REJOUÉE sur l'état final (après les deux commits de correctif)
+
+Les correctifs touchent des gardes déjà vérifiées : la vérification est rejouée, jamais reportée depuis
+la mesure d'avant. Code exécuté par le conteneur **confirmé** comme celui de la branche
+(`exigerPourDepot` en ligne 105, **avant** `trouverParPiece` en 108 ; `OBJECT_ID_STRICT` présent) — et
+prouvé **par le comportement**, pas seulement par la lecture du fichier : le 400 sur 12 hexadécimaux
+est une réponse qui **n'existait pas** avant ce commit.
+
+| scénario | attendu | obtenu |
+|---|---|---|
+| `dossierId` de 12 hexa — **lecture** `GET /dossiers/507f1f77bcf8/pieces` | 400 | **400 `DOSSIER_ID_INVALIDE`** |
+| `dossierId` de 12 hexa — **dépôt** | 400 | **400** |
+| 1er dépôt du couple `(lot-rejeu, p9)`, dossier **actif** | 202 | **202** |
+| **rejeu** du même couple en annonçant le dossier **archivé** | 409 | **409 `DOSSIER_ARCHIVE`** |
+| **rejeu** du même couple sur un dossier **inexistant** | 404 | **404 `DOSSIER_INTROUVABLE`** |
+| **rejeu nominal** (dossier toujours actif) | 202, **même id** | **202**, `6a85579c…7df8` — **le même** |
+
+En base : **1 seul** document pour `(lot-rejeu, p9)` malgré **4** dépôts ⇒ l'idempotence du rejeu
+n'a pas été cassée par le correctif. Dans MinIO : `piece-documents` = **1 objet**, `profil-documents`
+= **4** (inchangé) ⇒ ni le 409, ni le 404, ni le 400 n'ont laissé le moindre orphelin.
 
 ---
 
