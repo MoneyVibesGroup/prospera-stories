@@ -306,7 +306,7 @@ et sa dette reste ouverte *(STORY-236, « sujet séparé, à trancher avec le PO
 | Validation (DoD) | ✅ | `dossier-service` : lint 0 · build OK · **688 unit + 148 e2e** · couverture **99,21 / 91,56 / 96,74 / 99,21**<br>`balance-service` : lint 0 · build OK · **2915 unit + 668 e2e** · couverture **99 / 91,86 / 98,22 / 99,09** |
 | Mutation-tests | ✅ | **13 mutations, 13 rouges PAR ASSERTION** — dont une qui a SURVÉCU au premier tour (tableau ci-dessous) |
 | Vérification docker | ✅ | stack neuve `down -v`, parcours réel sur 3 dossiers d'un même cabinet — **1 défaut trouvé, invisible aux 3 831 tests** |
-| Revue de code | ⏳ | |
+| Revue de code | ✅ | **9 constats, 2 bloquants, tous corrigés** — voir ci-dessous |
 | Revue de sécurité | ⏳ | |
 | Clôture | ⏳ | |
 
@@ -380,3 +380,71 @@ test ne bouge.
 - ⛔ **`docker-compose.yml` porte `KAFKA_AXES_GROUP_ID`** — la racine `/PROSPERA` n'étant dans **aucun
   dépôt**, cette ligne n'est couverte par aucune PR ni aucune CI *(leçon STORY-173)*. Le défaut du code
   (`balance-axes`) la rend cependant inoffensive si elle disparaît.
+
+### Revue de code — 9 constats, 2 bloquants, tous corrigés
+
+Les deux dépôts ont été revus séparément, sur leur diff complet.
+
+#### ⚡⚡ Le bloquant : la garde de régime était devenue muette sur TOUTES les écritures
+
+En rendant `RegimeFiscalGuard` conscient du dossier et de l'exercice — ce que la datation exige — je lui
+ai fait chercher les bornes **dans la query**. Or les lectures seules les portent là : **toutes les
+écritures fiscales les portent dans le CORPS** *(leurs DTO étendent `ExerciceFiscalQueryDto`)*, et les
+`DELETE` par identifiant n'en portent aucune. La garde abandonnait donc (`return true`) sur
+`POST /fiscal/acomptes`, `/deficits`, `/retraitements`, `/credits`, `/tva/credit-anterieur` et leurs
+`DELETE`.
+
+⚠️ **Et aucun service du régime réel ne double cette garde** — seul `TpuService` le fait (F-095-4). Un
+acompte d'IS pouvait donc s'écrire sur un dossier au régime `SYNTHETIQUE`, puis **n'être jamais relu ni
+corrigé** : le `GET /fiscal/liquidation` correspondant, lui, restait refusé en `409`, et
+`GET /fiscal/moteur` partait en branche TPU en l'ignorant. C'est la **double imposition** que STORY-095
+avait fermée, rouverte par une régression de cette PR.
+
+**Invisible aux 3 583 tests** : le seul e2e qui prouve la garde sur une écriture porte sur la TPU
+(`tpu.e2e-spec.ts`), et il reste vert parce que c'est le **service** qui y rend le `409`, pas la garde.
+Aucun test n'existait pour un `POST` sur une surface du régime réel avec un régime incompatible.
+
+⇒ Corrigé : query → corps → **aujourd'hui**. Le repli n'est pas une approximation neuve — c'est
+*exactement* ce que la garde faisait avant cette story, quand elle lisait le champ **courant** du profil.
+Il ne s'applique qu'aux routes qui ne nomment aucun exercice et **ne peut rien refuser que l'ancienne
+garde laissait passer**.
+
+#### Le second bloquant : l'AC-8 que je croyais tenu
+
+J'avais corrigé le paragraphe STORY-236 de `regime.controller.ts` — celui que le §④ du constat désigne —
+et **laissé trois autres endroits** annoncer un `POST` que la même PR supprimait : la première phrase du
+docstring de classe, le docstring du `GET` (« tant que le `POST` ne l'a pas confirmée ») et la **Swagger
+publiée** (`RegimeVueDto`, `RegimeEnVigueurDto`, `DecisionRegimeDto`). Un front lisant `/api/docs` câblait
+donc un `404`, ou affichait `enVigueur` — le couple de l'**organisation** — comme étant les axes du
+dossier : le défaut ② ré-exposé par l'écran. Corrigé, avec la partie LEGACY nommée comme telle et
+renvoyant vers `GET /dossiers/:id/axes`.
+
+#### Les sept autres constats
+
+| # | Dépôt | Constat | Traitement |
+|---|---|---|---|
+| ③ | balance | Le vocabulaire d'axe **inconnu** était traité de **trois façons** : refus explicite à l'agrégation, `REEL` + `warn` au moteur, mais **coercition muette en « non assujetti »** dans les 2 cahiers — imputation **TTC au lieu de HT**, aucune TVA déductible extraite, **aucune trace**. Le read-model accepte pourtant délibérément un vocabulaire enrichi par le producteur | Narrowing **partagé** (`versRegimeFiscalConnu`). La valeur reste « non assujetti » — ne jamais inventer une dette fiscale — mais l'inconnu se **journalise** |
+| ④ | balance | Le double e2e triait décroissant puis prenait `[0]` : à date d'effet **égale** il rendait la **première** décision là où la production rend la **dernière écrite**. Un test de correction du même jour aurait été écrit contre un comportement que la production n'a pas | Double rendu fidèle ; la limite `orgId` du double est **documentée** pour la suite qui voudra prouver l'isolation inter-cabinet |
+| ⑤ | balance | `resolveurAxes` exportée **sans aucun appelant**, pendant que la seule suite qui en avait besoin dupliquait son corps | Supprimée — motif « correctif appliqué d'un seul côté » |
+| ⑥ | dossier | ⚡ `GET /dossiers/:id` publiait toujours les axes **courants** : **deux routes du même service** annonçaient deux couples différents du même dossier *(`SN` d'un côté, `SMT` appliqué par le calcul de l'autre)* — le défaut de la story réintroduit par l'**affichage** | Retirés de la réponse ; ils restent **stockés** (source de `migrate:axes`, réécrits par `profil.societe.consolide`), et le schéma le dit |
+| ⑦ | dossier | `outboxDejaPubliees` comptait aussi les lignes **`FAILED`**, qui n'ont **jamais** été publiées : la marche arrière annonçait « partielle » et demandait de vider un read-model qui n'avait rien reçu, pendant que la ligne `FAILED` restait orpheline | Compteur sur `SENT` seul ; tout ce qui n'est pas `SENT` est supprimé avec sa décision |
+| ⑧ | dossier | ⚡ Le **no-op avalait une décision postérieure** : reposter le couple courant — le geste naturel pour annuler une bascule programmée — rendait `200` **avec ce couple**, pendant que la décision future continuait de régir son exercice. La réponse disait l'inverse de ce que le calcul ferait, et l'append-only n'offre aucun `DELETE` | `409 DECISION_POSTERIEURE_EXISTANTE`, qui **nomme la date à viser**. Limité au no-op : sur un vrai changement, décider 2026 alors que 2027 l'est déjà est légitime |
+| ⑨ | dossier | Deux commentaires annonçaient STORY-303 **au futur** sur la branche qui la livre (« STORY-303 les datera », « hook inerte ») — le miroir exact du défaut ④ que la story instruit | Corrigés |
+
+### Mutations des correctifs de revue — 5 de plus, 5 rouges
+
+| # | Mutation | Résultat |
+|---|---|---|
+| M14 | la garde ne lit **que** la query *(le bloquant, remis)* | 🔴 |
+| M15 | la garde **abandonne** faute d'exercice *(repli retiré)* | 🔴 |
+| M16 | narrowing partagé rendu **permissif** *(cahiers redevenus muets)* | 🔴 |
+| M17 | la garde du no-op **ignore** une décision postérieure | 🔴 |
+| M18 | le compteur d'outbox **recompte** les `FAILED` | 🔴 |
+
+**Total : 18 mutations, 18 rouges par assertion.**
+
+⚠️ **Incident de méthode, consigné parce qu'il se reproduira** : le harnais de mutation restaure par
+`git checkout -- <fichier>`, donc **vers `HEAD`**. Lancé sur des correctifs **pas encore commités**, il
+les a **effacés** — les mesures restaient valides (prises avant la restauration) mais le code était
+revenu en arrière, et seul le `build` l'a signalé. Correctifs réappliqués, **commités**, puis mutations
+rejouées.
