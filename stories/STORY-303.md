@@ -307,7 +307,7 @@ et sa dette reste ouverte *(STORY-236, « sujet séparé, à trancher avec le PO
 | Mutation-tests | ✅ | **13 mutations, 13 rouges PAR ASSERTION** — dont une qui a SURVÉCU au premier tour (tableau ci-dessous) |
 | Vérification docker | ✅ | stack neuve `down -v`, parcours réel sur 3 dossiers d'un même cabinet — **1 défaut trouvé, invisible aux 3 831 tests** |
 | Revue de code | ✅ | **9 constats, 2 bloquants, tous corrigés** — voir ci-dessous |
-| Revue de sécurité | ⏳ | |
+| Revue de sécurité | ✅ | `dossier-service` **0 vulnérabilité** · `balance-service` **1 HAUTE (CWE-863)**, corrigée — voir ci-dessous |
 | Clôture | ⏳ | |
 
 ### ⚡⚡ Ce que la vérification docker a trouvé et que 3 831 tests ne pouvaient pas voir
@@ -448,3 +448,77 @@ renvoyant vers `GET /dossiers/:id/axes`.
 les a **effacés** — les mesures restaient valides (prises avant la restauration) mais le code était
 revenu en arrière, et seul le `build` l'a signalé. Correctifs réappliqués, **commités**, puis mutations
 rejouées.
+
+### Revue de sécurité — ⚡⚡ elle a pris en défaut le correctif de la revue de code
+
+**`dossier-service` : 0 vulnérabilité.** Le point chaud — l'autorisation multi-tenant — a été vérifié
+ligne à ligne : l'`orgId` ne vient que du jeton *(aucun DTO ni query ne le porte, et la whitelist stricte
+rend `400` sur une tentative)* ; la portée est appliquée **dans la requête Mongo**, jamais après lecture ;
+un dossier hors portée rend `404` et jamais `403` ; **toutes** les lectures avales sont re-scopées par le
+couple `(orgId, dossierId)` extrait du document **déjà autorisé**, jamais par la chaîne d'URL ; le
+`?exerciceId=` ne distingue pas « inexistant » de « d'un autre cabinet » ; le script CLI ne vole aucun
+consumer group et sa marche arrière ne peut atteindre qu'`origine: MIGRATION`, inatteignable depuis l'API.
+
+**`balance-service` : 1 vulnérabilité HAUTE — `CWE-863 Incorrect Authorization`, confiance 92.**
+
+> **Elle vise le correctif que la revue de code venait de faire poser.** C'est la deuxième fois dans ce
+> projet que la revue de sécurité prend en défaut celui de la revue de code *(cf. STORY-367)* : un
+> correctif n'est pas neutre, il ouvre sa propre surface.
+
+En faisant lire à `RegimeFiscalGuard` « la query **puis** le corps », j'avais rendu **la date de
+l'autorisation choisissable par l'appelant**. Les handlers `@Post` ne lient **aucun** `@Query()` : une
+query string ajoutée à une écriture n'est liée à rien et n'est jamais validée — `forbidNonWhitelisted` ne
+porte que sur les arguments **liés**, et les pipes s'exécutent **après** les guards — mais la garde, elle,
+lisait la requête brute.
+
+```
+POST /api/v1/dossiers/D/fiscal/acomptes?exercice=2023
+{ "exerciceDebut": "2026-01-01", "exerciceFin": "2026-12-31", … }
+```
+
+*Attaquant* : un collaborateur **légitime** du dossier D — aucune frontière de tenant n'est franchie.
+*Situation* : D porte une décision `SYNTHETIQUE` depuis 2024 ; toutes les surfaces IS lui sont interdites.
+*Ce qui se passait* : la garde tranchait sur **2023** — aucune décision avant 2024, donc repli sur le
+**profil du cabinet**, typiquement `REEL` — et autorisait ; le service, lui, lisait le corps et écrivait
+sur **2026**. Un acompte d'IS *(ou un crédit d'impôt, un retraitement, un déficit, un crédit de TVA
+antérieur)* atterrissait sur un exercice au régime synthétique, et **n'était jamais relu ni corrigé**
+puisque le `GET` correspondant, lui, restait refusé. La variante `DELETE …/:id?exercice=…` marchait aussi,
+la suppression ne résolvant aucun exercice côté service.
+
+⚡ **Et mon propre test verrouillait la vulnérabilité** — « préfère la query au corps ». Ce n'était pas un
+oubli : c'était un arbitrage explicite dont la conséquence d'autorisation n'avait pas été vue.
+
+**Correctif — le verbe désigne la source, et c'est une règle d'autorisation, pas une commodité :**
+
+| Verbe | Source lue | Pourquoi |
+|---|---|---|
+| `GET` / `HEAD` | la **query** | les lectures lient `@Query()`, le service lit la query |
+| `POST` / `PUT` / `PATCH` | le **corps** | les écritures lient `@Body()` ; la query n'est liée à **rien** et ne doit donc **rien** influencer |
+| le reste (`DELETE …/:id`) | **aucune** ⇒ « aujourd'hui » | le service supprime par identifiant ; lire la query rendrait la date d'autorisation choisissable sur une route qui n'en utilise aucune |
+
+Les **3 chemins de l'exploit** sont désormais des tests de non-régression, et 2 mutations
+supplémentaires *(M19 : la garde relit la query sur une écriture · M20 : elle la lit sur un `DELETE`)*
+virent au **rouge**.
+
+### Vérification docker REJOUÉE sur l'état final
+
+Un correctif de revue a touché `RegimeFiscalGuard`, qui est **sur le chemin de la preuve nº 7** : celle-ci
+ne vaut plus rien telle qu'elle avait été mesurée. Rejouée sur la stack, code final :
+
+- **preuve nº 7 identique** — dossier A : TPU `409` en 2026 / passe en 2027, liquidation l'inverse ;
+  dossier B, même cabinet, branches opposées ;
+- ⚡ **l'exploit joué en vrai** : `POST …/fiscal/acomptes` sur le dossier B *(synthétique)* rend `409`
+  **avec comme sans** la query `?exercice=2023`, et `acomptes_provisionnels` compte **0 document** —
+  aucune écriture, aucun orphelin.
+
+**Total : 20 mutations, 20 rouges par assertion.**
+
+### Points d'attention signalés, non corrigés
+
+- ⚠️ **La garde de non-rétroactivité s'ancre sur le début de l'exercice OUVERT**, pas sur chaque exercice
+  clos : un exercice `CLOS` dont le début serait *postérieur* à celui de l'ouvert y échapperait. L'état
+  requis est très improbable *(Q8 n'autorise qu'un seul ouvert, et les reprises Q7 portent des périodes
+  passées)* et le geste exige de toute façon un motif tracé — signalé sous le seuil de confiance par la
+  revue de sécurité, consigné ici plutôt que perdu.
+- ⚠️ **Croissance non bornée de `decisions_axes`** *(append-only assumé)* : plafonnée par le throttler
+  global, lecture toujours scopée à un dossier. Disponibilité marginale, pas une vulnérabilité.
