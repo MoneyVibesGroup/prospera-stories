@@ -3,7 +3,8 @@
 Status: not_started
 
 **Epic :** EPIC-043 — Le dossier client, entité de premier rang
-**Points :** 3 · **Sprint :** 20 (backend) · **Service :** `prospera-dossier-service` (`:3013`)
+**Points :** 3 · **Sprint :** 20 (backend) · **Service :** `prospera-dossier-service` (`:3009`)
+⚠️ *Port corrigé le 2026-08-19 : la fiche annonçait `:3013`. Le service écoute bien sur **3009** (`.env.example:9`, `docker compose ps`, et l'OpenAPI vivant `:3009/api/docs-json`). Un port faux envoie à un service qui ne répond pas, et l'échec ne ressemble pas à une erreur de fiche.*
 **Origine :** **AD-8** de `architecture/architecture-dossier-service-2026-08-15/ARCHITECTURE-SPINE.md`, arbitrée par le PO le 2026-08-15
 **Dépendances :** aucune côté backend. ⚠️ **Contrainte d'ORDRE avec le frontend — voir §Ordre.**
 
