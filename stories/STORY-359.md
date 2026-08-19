@@ -3,10 +3,11 @@
 **Epic :** EPIC-043 — Dossier client, unité de travail du cabinet
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — blocs **K** et **P** · décisions **D6**, **D15**, **D16** · question **Q11** *(tranchée)*
 **Priorité :** Must Have
-**Story Points :** 8 → **12** *(amendée le 2026-08-20 — voir « Amendement »)*
-**Statut :** 📋 À faire
+**Story Points :** 8 → **12** *(amendée le 2026-08-20)* → **13 réels** *(cf. § « Ce que le cadrage disait de faux »)*
+**Statut :** ✅ **CLÔTURÉE le 2026-08-20** — trois PR rebase-mergées sur `dev`, **sauf AC-A2 et AC-A5** *(cf. § « Ce que l'amendement demande et qui N'EST PAS livré »)*
 **Complexité :** high
 **Créée le :** 2026-08-09
+**Recadrée le :** 2026-08-19 *(deux prémisses vérifiées fausses — cf. § « Ce que le cadrage disait de faux »)*
 **Sprint :** 20
 **Service :** `dossier-service` + `balance-service` + `bilan-service` *(depuis l'amendement du 2026-08-20)*
 
@@ -112,6 +113,77 @@ Deux difficultés distinctes s'y cachent :
 
 ---
 
+## ⛔ Ce que l'amendement demande et qui N'EST PAS livré
+
+L'amendement du 2026-08-20 a été écrit **pendant** que la story était développée, et les deux dépôts
+ont convergé sans se voir : il conclut aux mêmes deux points que le recadrage du 2026-08-19 (grain
+par exercice, producteurs repliés). Le code livré les satisfait — **sauf deux critères** :
+
+| AC | État | Détail |
+|---|---|---|
+| **AC-A1** — read-models keyés `(dossierId, exercice)`, ligne de portefeuille **dérivée** | ✅ **livré** | Index unique `{dossierId, exercice}` sur les deux collections, la ligne dérive de l'exercice **ouvert**, sans requête supplémentaire (1 seule opération Mongo par page, mesurée au profileur). |
+| **AC-A2** — l'état par exercice est **lisible** (`ExerciceResponseDto` ou champ frère) | ⛔ **NON livré** | Les read-models portent bien le grain, mais **aucune route ne l'expose** : `GET /dossiers/:id/exercices` est inchangé. **FE-066 reste donc bloquée** sur l'écart qu'elle a transmis. |
+| **AC-A3** — émis **à la validation**, jamais à la soumission, avec `dossierId` **et** bornes d'exercice | ✅ **livré**, ⚠️ **sous d'autres noms** | Voir ci-dessous. |
+| **AC-A4** — un exercice sans balance ni liasse rend un état **absent** | ✅ **livré** | Aucune ligne ⇒ champ absent, jamais « vide » ni « en cours ». |
+| **AC-A5** — vérif docker distinguant **deux années** dans l'onglet Exercices | ⛔ **NON livré** | La vérification docker a porté sur **un** exercice par dossier. Elle n'a pas pu couvrir l'onglet, faute d'AC-A2. |
+
+### ⚠️ Les topics ne portent pas les noms de l'AC-A3, et c'est délibéré
+
+| Nom demandé | Nom livré | Pourquoi |
+|---|---|---|
+| `balance.validee` | **`balance.etat.change`** | `marquerEtat` porte **deux** transitions et `REJETÉE → VALIDÉE` reste permis (STORY-145 § D). Un topic nommé d'après une seule valeur n'a aucun endroit où publier l'autre. |
+| `liasse.figee` | **`liasse.etat.change`** | Un jeu validé peut être **rouvert**. Prouvé en docker : la réouverture publie `BROUILLON` en conservant le numéro de version. Sous le nom `liasse.figee`, le portefeuille aurait affiché « déposée » indéfiniment. |
+
+**Ce que l'AC-A3 exige sur le fond est tenu** : émission **à la validation** et jamais à la
+soumission, `dossierId` **et** bornes d'exercice portés. Seul le **nom** diffère, et il diffère pour
+que l'état publié puisse rester **absolu** — l'exigence de `.agents/rules/kafka-evenements.md`.
+
+⚡ **Le contrat va même plus loin que l'amendement ne le demandait** : `balance.etat.change` publie
+l'état de **l'exercice**, pas celui d'un document. Ce domaine autorise plusieurs balances par
+`(dossier, exercice)` ; publier l'état d'un document faisait écraser « la balance Sage est validée »
+par « l'import OCR concurrent vient d'être rejeté ». Le consommateur ne pouvait pas le rattraper.
+
+⇒ **AC-A2 et AC-A5 sont à reprendre dans une story de suite** (voir le § de clôture).
+
+---
+
+## ⚠️ Ce que le cadrage disait de faux — vérifié dans le code le 2026-08-19
+
+Deux prémisses du cadrage initial ne tiennent pas contre le code réel. Elles ne changent pas ce que la
+story doit livrer ; elles changent **combien de dépôts** elle touche, et c'est ce qui a été arbitré.
+
+**① `balance.validee` et `liasse.figee` n'existent nulle part.** Les deux noms n'apparaissent que dans
+cette story. Vérifié :
+
+- `balance-service` n'émet que `balance.created` (à la **création** d'une balance, donc `BROUILLON`) et
+  `balance.rejected` (rejet d'**ingestion** de l'adaptateur #1 — rien à voir avec l'état d'une balance
+  persistée). `BalanceService.marquerEtat`, la transition `BROUILLON → VALIDÉE|REJETÉE` livrée par
+  **STORY-145**, n'émet **aucun** événement ;
+- `bilan-service` **n'a ni outbox, ni relais, ni producteur** : il ne publie **aucun** événement, tout
+  court. `src/kafka/` n'y porte que des contrats **entrants** (`kyc.status.changed`,
+  `entitlement.changed`).
+
+La ligne « Consomme : les événements de STORY-236 et STORY-357 » est donc sans objet : ces deux stories
+ont **re-scopé** leurs services au `dossierId`, elles n'ont ajouté aucun producteur.
+
+⇒ **Les deux producteurs font partie de cette story.** Poser les consommateurs seuls rejouerait
+exactement le défaut de STORY-372 (« une garde posée sans son écrivain ») et de STORY-373 : un
+read-model que personne n'alimente est vert en test et vide en production.
+
+**② La clé `echeances` n'est pas au niveau du paquet.** Elle vit à `acomptesProvisionnels.echeances`, et
+vaut `["31-01", "31-05", "31-07", "31-10"]` — les quatre acomptes d'IS (Art. 114-116 CGI). C'est la
+**seule** donnée datée et structurée du paquet : `tva.declaration` publie une périodicité, jamais une
+date, et sort déjà marquée `A_CONFIRMER`. Conséquence directe absente du cadrage : ces acomptes sont
+**libératoires pour le régime synthétique (TPU)** — un dossier au TPU n'a donc **aucune** échéance à
+servir, et c'est exactement le cas d'absence que l'AC interdit d'inventer.
+
+De plus, `dossier-service` **n'embarque aucun paquet fiscal** : le chargeur, le manifeste et l'artefact
+vivent dans `balance-service`. Le paquet y est donc **embarqué à l'identique** (mêmes octets, même
+checksum, garde de byte-identité — patron STORY-368), comme `bilan-service` le fait déjà pour ses
+propres artefacts. Aucun appel REST sortant n'est introduit.
+
+---
+
 ## User Story
 
 En tant qu'**administratrice de cabinet**,
@@ -122,24 +194,57 @@ afin de **piloter cinquante dossiers sans en ouvrir un seul**.
 
 ## Ce que la story livre
 
+### Dans `dossier-service` — la route et sa lecture
+
 - **`GET /dossiers`** paginé, trié, recherché — **côté serveur** :
-  `?page&size&tri=nom|activite|etat&q=&statut=actifs|archives`. `size` plafonné serveur (défaut 25,
-  max 100). La **portée reste dérivée du jeton** (STORY-353) : `q` filtre, il n'élargit jamais.
-- **Recherche** sur raison sociale, NIF et RCCM, **insensible à la casse et aux accents**, sur le NIF
-  normalisé de STORY-354 (« 1000 745 307 » trouve « 1000745307 »).
-- **Ligne de portefeuille agrégée**, servie sans N+1 : statut du dossier, exercice ouvert, état de la
-  balance, état de la liasse, responsable, prochaine échéance. Alimentée par les **read-models locaux**
-  (`balance.validee`, `liasse.figee`, `dossier.exercice.*`) — aucun appel REST sortant, aucune
-  jointure cross-base.
+  `?page&size&tri=nom|activite|etat&q=&statut=actifs|archives&affectation=moi`. `size` plafonné serveur
+  (défaut 25, max 100). La **portée reste dérivée du jeton** (STORY-353) : `q` filtre, il n'élargit
+  jamais.
+- **Recherche** sur raison sociale, sigle, NIF et RCCM, **insensible à la casse et aux accents**, sur le
+  NIF normalisé de STORY-354 (« 1000 745 307 » trouve « 1000745307 »).
+- **Ligne de portefeuille agrégée**, servie sans N+1 : statut du dossier, exercice ouvert, avancement,
+  état de la balance, état de la liasse, responsable, prochaine échéance. Alimentée par les
+  **read-models locaux** et les collections locales — aucun appel REST sortant, aucune jointure
+  cross-base.
 - **Trois compteurs** calculés **sur la portée de l'appelant**, pas sur l'organisation : `dossiers`,
   `aConfigurer`, `bilansEnCours`. ⚡ Un collaborateur qui lirait « 5 dossiers » alors qu'il en voit 2
   conclurait qu'on lui en cache — un compteur hors périmètre est pire qu'un compteur absent.
-- **Échéance minimale (Q11)** : `prochaineEcheance { code, libelle, date, joursRestants }`, dérivée du
-  **paquet fiscal déjà chargé** pour le pays et le régime du dossier, et de son exercice ouvert.
-  Le champ porte `source: 'PAQUET_MINIMAL'` — pour que le jour où STORY-316 sert le vrai calendrier,
-  le remplacement soit **repérable et sans ambiguïté** au lieu d'être deviné.
+- **Échéance minimale (Q11)** : `prochaineEcheance { code, libelle, date, joursRestants, source }`,
+  dérivée du paquet fiscal **embarqué** pour le pays du dossier, du **régime en vigueur** et de son
+  exercice ouvert. Le champ porte `source: 'PAQUET_MINIMAL'` — pour que le jour où STORY-316 sert le
+  vrai calendrier, le remplacement soit **repérable et sans ambiguïté** au lieu d'être deviné.
 - **Filtre `statut`** : un dossier archivé **ne remonte jamais** dans la vue « actifs », **même
   cherché par son nom** — sinon « archiver » ne veut plus rien dire (D9).
+- **Filtre `affectation=moi`** *(arbitrage PO du 2026-08-19, ticket
+  `TICKET-BACKEND-filtre-mes-dossiers-au-portefeuille.md`, GAP fermé par cette story)* : appliqué
+  **APRÈS** la portée du jeton, jamais à sa place. `TENANT_ADMIN` → restreint à `responsableUserId` ∪
+  `contributeursUserIds` ; `TENANT_USER` → **sans effet, et surtout pas une erreur** (sa portée est déjà
+  celle-là) ; absent → inchangé. Traité **ici** et pas après : la route change de signature une fois,
+  pas deux — et FE-059a ne peut pas l'implémenter honnêtement côté client, la pagination serveur
+  D16 ne filtrant alors que la page courante.
+- **Deux read-models locaux** `etats_balance_dossier` et `etats_liasse_dossier`, alimentés par les deux
+  producteurs ci-dessous via des consumers **idempotents** (`ProcessedEvent`). C'est ce qui rend le
+  portefeuille **résilient** : un service amont arrêté n'empêche pas la page de s'afficher, elle sert un
+  état **daté**.
+
+### Dans `balance-service` — le producteur qui manquait
+
+- Nouveau topic **`balance.etat.change`**, émis **dans la transaction** de
+  `BalanceService.marquerEtat` via l'outbox existante. Contrat à **état absolu** (`VALIDÉE` ou
+  `REJETÉE`), jamais un delta — règle `.agents/rules/kafka-evenements.md`.
+- ⚠️ Le nom `balance.validee` du cadrage est **écarté** : `marquerEtat` porte **deux** transitions, et
+  `REJETÉE → VALIDÉE` reste permis. Un topic qui ne nomme qu'une des deux valeurs oblige à en créer un
+  second au premier rejet, ou à publier une valeur que son nom dément.
+- ⚠️ `BROUILLON` n'est **pas** publié : aucun écran ne distingue « balance en brouillon » de « pas de
+  balance », et `balance.created` existe déjà pour le handoff vers `bilan-service` — le détourner
+  donnerait deux topics pour un seul read-model.
+
+### Dans `bilan-service` — le socle producteur qui n'existait pas
+
+- **Outbox transactionnelle + relais**, calqués sur `dossier-service` (mêmes schéma, mêmes garanties) :
+  le service ne publiait **rien** jusqu'ici.
+- Nouveau topic **`liasse.figee`**, émis **dans la transaction** qui écrit le `SnapshotLiasse` —
+  jamais de liasse figée sans événement, jamais d'événement sans snapshot.
 
 ## Hors périmètre
 
@@ -148,6 +253,11 @@ afin de **piloter cinquante dossiers sans en ouvrir un seul**.
   elle **tient jusqu'à** elles.
 - Les **obligations sociales** dans l'échéance → STORY-349.
 - L'export du portefeuille (CSV/Excel) → non planifié, aucun besoin exprimé.
+- La **persistance de l'échéance** : elle se calcule à la lecture, donc il n'y a **rien à migrer** le
+  jour du remplacement. C'est ce qui rend l'avance jetable *sans dette*.
+- Le **re-scopage `dossierId` des collections encore org-keyed** de `balance-service`
+  (`tresorerie`, `suggestion`, `referentiel`, `profils_import`) et la dette D6/D11 qui va avec : ouverte
+  par STORY-236, elle reste ouverte — cette story lit un état, elle ne change aucune frontière d'accès.
 
 ---
 
@@ -162,8 +272,13 @@ afin de **piloter cinquante dossiers sans en ouvrir un seul**.
 - [ ] **Portée** : le même appel, joué par l'admin et par un collaborateur, rend des ensembles
       différents ; `q` ne fait **jamais** apparaître un dossier hors portée. *(Mutation-test : si `q`
       est appliqué avant le filtre de portée, un test rougit.)*
-- [ ] Les trois compteurs correspondent **exactement** aux lignes que l'appelant peut voir, filtre
-      `statut` compris. *(Test : admin = 5/2/2 ; collaborateur = 2/1/1 sur le même jeu.)*
+- [ ] **`affectation=moi`** restreint le portefeuille d'un `TENANT_ADMIN` à ses seules affectations,
+      **reste sans effet et sans erreur** pour un `TENANT_USER`, et n'ajoute **jamais** un dossier que
+      la portée du jeton n'accordait pas. *(Mutation-test : appliqué à la place de la portée plutôt
+      qu'après elle, un test rougit.)*
+- [ ] Les trois compteurs correspondent **exactement** aux lignes que l'appelant peut voir, **tous
+      filtres compris** (`statut`, `q`, `affectation`) et **sur l'ensemble filtré, pas sur la page** —
+      `dossiers` est donc égal au `total` de la pagination.
 - [ ] Un dossier archivé n'apparaît **pas** avec `statut=actifs`, **même** en le cherchant par son nom
       exact ; il apparaît avec `statut=archives`.
 - [ ] **Aucun N+1** : servir une page de 25 dossiers exécute un **nombre constant** de requêtes Mongo,
@@ -172,56 +287,102 @@ afin de **piloter cinquante dossiers sans en ouvrir un seul**.
       changement de filtre en **< 500 ms** (aligné sur NFR-F13 du PRD Fiscalité).
 - [ ] `prochaineEcheance` porte `source: 'PAQUET_MINIMAL'` et est **absente** (pas nulle, pas zéro)
       quand le paquet du pays n'en fournit pas — un dossier sans échéance connue ne doit pas afficher
-      une date inventée.
+      une date inventée. **Cas nommés** : dossier au régime `SYNTHETIQUE` (TPU, libératoire de l'IS) ;
+      dossier sans exercice ouvert ; pays sans paquet embarqué.
+- [ ] **`balance.etat.change`** est émis **dans la transaction** de `marquerEtat` — une balance validée
+      sans événement en outbox, ou l'inverse, fait rougir un test.
+- [ ] **`liasse.figee`** est émis **dans la transaction** qui écrit le `SnapshotLiasse`.
+- [ ] Les deux consumers sont **idempotents** : rejouer le même `eventId` ne modifie pas le read-model,
+      et un événement **plus ancien** que l'état déjà projeté est **ignoré**.
 
 ---
 
 ## Notes techniques
 
-- **Read-models locaux dans `dossier-service`** : `EtatBalanceDossier` et `EtatLiasseDossier`,
-  alimentés par les événements de `balance-service` et `bilan-service`. C'est ce qui permet la lecture
-  en une requête — et c'est aussi ce qui rend le portefeuille **résilient** : si un service amont est
-  indisponible, le portefeuille s'affiche avec un état daté, il ne tombe pas.
-- Index de lecture : `{ orgId: 1, statut: 1, raisonSociale: 1 }`, `{ orgId: 1, statut: 1, majLe: -1 }`
-  et un index **texte** sur `(raisonSociale, nifNormalise, rccm)` — les trois tris et la recherche
-  doivent tous être servis par un index, sinon le NFR des 500 dossiers tombe au premier tri.
-- L'échéance minimale se calcule à la **lecture**, depuis le paquet déjà en cache
-  (`chargerPaquetFiscal`, STORY-078) : aucune persistance, donc aucune donnée à migrer le jour où
-  STORY-316 la remplace. C'est ce qui rend l'avance jetable **sans dette**.
+- **Read-models locaux dans `dossier-service`** : `EtatBalanceDossier` et `EtatLiasseDossier`, clés
+  `(orgId, dossierId, exercice.debut, exercice.fin)`, portant l'état **et son horodatage** — c'est
+  l'horodatage qui permet d'afficher un état *daté* quand l'amont est tombé, au lieu de mentir ou de
+  faire tomber la page.
+- **Une seule requête Mongo par page**, et c'est l'assertion anti-N+1 : `$match` (portée + statut +
+  recherche + affectation) → `$sort` servi par index → `$lookup` (exercice ouvert, décision d'axes en
+  vigueur, état de balance, état de liasse) → `$addFields` (avancement) → `$facet` { lignes paginées,
+  compteurs }. Les compteurs sortent **du même pipeline** que les lignes : deux requêtes séparées
+  peuvent diverger sous écriture concurrente, et un compteur qui contredit la liste est pire qu'absent.
+- **Avancement**, dérivé et jamais stocké : `A_CONFIGURER` (aucun exercice ouvert **ou** aucune décision
+  d'axes en vigueur à l'ouverture de cet exercice) · `BALANCE_ATTENDUE` (configuré, aucune balance
+  validée) · `BILAN_EN_COURS` (balance validée, liasse non figée) · `LIASSE_FIGEE`. Les compteurs
+  `aConfigurer` et `bilansEnCours` comptent respectivement le premier et le troisième — `BALANCE_ATTENDUE`
+  n'entre dans aucun des deux, et c'est délibéré : la maquette ne lui donne pas de compteur, l'inventer
+  ferait mentir la somme.
+- **Recherche** : champ dérivé `rechercheNormalisee` (minuscules, accents dépliés NFD, espaces
+  normalisés — raison sociale + sigle + RCCM), écrit par des **hooks de schéma** comme
+  `nifSocieteNormalise` l'est déjà (STORY-354) : le dériver dans le service laisserait ouverts tous les
+  autres chemins d'écriture. La requête est un `$or` entre un motif sur `rechercheNormalisee` et, si `q`
+  porte des chiffres, un motif sur `nifSocieteNormalise` — c'est ce second terme qui fait que
+  « 1000 745 307 » trouve « 1000745307 » là où un index **texte** échouerait (il découperait la saisie
+  en trois jetons dont aucun n'est le NIF).
+  ⚠️ Le motif est **échappé** avant d'entrer dans la requête : une saisie utilisateur qui arrive telle
+  quelle dans un `$regex` est à la fois une injection et un ReDoS.
+- **Index de lecture** : `{ orgId, statut, raisonSociale, _id }`, `{ orgId, statut, updatedAt, _id }`,
+  `{ orgId, statut, rechercheNormalisee }`. ⚠️ **Ce que le troisième fait, et ce qu'il ne fait pas** :
+  un motif **non ancré** ne permet aucun *seek*, mais Mongo peut balayer l'index restreint à
+  `(orgId, statut)` et y filtrer **sans aller lire les documents**. C'est un balayage d'index, pas une
+  recherche indexée — le dire autrement ferait croire à une garantie qui n'existe pas.
+- **L'échéance minimale se calcule à la lecture**, depuis le paquet fiscal **embarqué à l'identique**
+  dans `dossier-service` (mêmes octets, même checksum que celui de `balance-service` — garde de
+  byte-identité, patron STORY-368). Aucune persistance, donc **aucune donnée à migrer** le jour où
+  STORY-316 la remplace.
+- **Contrats d'événement** : `état absolu`, `eventId` (idempotence), `schemaVersion`, publication
+  **après persistance** par outbox, clé de partition `orgId`.
 
 ---
 
 ## Dépendances
 
 **Prérequises :** **STORY-301** *(dossier)* · **STORY-353** *(portée — c'est elle qui définit ce que
-compte un compteur)* · **STORY-355** *(exercice ouvert)*.
-**Consomme :** `dossier.exercice.*` de **STORY-355**. ⚠️ **Et PRODUIT elle-même `balance.validee` et
-`liasse.figee`** — ni STORY-236 ni STORY-357 ne les émettent *(vérifié le 2026-08-20)*, ils sont repliés
-dans cette story par la décision PO du jour. Ordre imposé : **producteurs d'abord, consommateur ensuite**.
-**Débloque :** **FE-066** *(l'état par exercice, écart transmis à sa livraison)* · **FE-059**.
+compte un compteur)* · **STORY-355** *(exercice ouvert)* · **STORY-303** *(décision d'axes datée)* ·
+**STORY-145** *(transition d'état de balance — le point d'émission)* · **STORY-065** *(snapshot de
+liasse — le second point d'émission)*.
+**Consomme :** `dossier.exercice.*` de **STORY-355**. ⚠️ **Et PRODUIT elle-même** les deux topics
+d'état d'amont — ni STORY-236 ni STORY-357 ne les émettaient *(vérifié indépendamment le 2026-08-19
+et le 2026-08-20)*, ils sont repliés dans cette story par la décision PO du jour. Ordre imposé :
+**producteurs d'abord, consommateur ensuite** — respecté au merge.
+**Ferme le GAP :** `GAP-filtre-mes-dossiers-portefeuille` *(ticket
+`TICKET-BACKEND-filtre-mes-dossiers-au-portefeuille.md`)*.
+**Débloque :** **FE-071** *(filtre « mes dossiers »)* · **FE-059**. ⚠️ **FE-066 reste bloquée** sur
+l'AC-A2, non livré — voir le § dédié.
 **Sera remplacée en partie par :** **STORY-315 / 316** *(calendrier fiscal complet, sprint 25)*.
 
 ---
 
 ## Definition of Done
 
-- [ ] Lint 0 · build OK · couverture ≥ seuils.
+- [ ] Lint 0 · build OK · couverture ≥ seuils, **sur les trois dépôts**.
 - [ ] e2e : pagination, plafond de `size`, trois tris déterministes, recherche accents/casse/NIF
-      normalisé, portée admin vs collaborateur, compteurs exacts, archivés exclus de la recherche.
+      normalisé, portée admin vs collaborateur, `affectation=moi`, compteurs exacts, archivés exclus de
+      la recherche.
 - [ ] **Test de charge léger** : 500 dossiers semés, mesure de la première page et d'un changement de
       filtre, chiffres consignés dans la PR.
 - [ ] Assertion **explicite** du nombre de requêtes Mongo par page (anti-N+1).
-- [ ] Vérification docker : portefeuille servi avec des états venus de deux services distincts, puis
+- [ ] **Mutation-test** sur les gardes de la story : `q`/`affectation` appliqués avant la portée,
+      plafond de `size` retiré, tri privé de son départage par `_id`, garde de fraîcheur du consumer
+      retirée — chacune doit faire **rougir** un test nommé.
+- [ ] Vérification docker : portefeuille servi avec des états venus de **deux services distincts**, puis
       **un service amont arrêté** — le portefeuille répond toujours, avec un état daté.
 - [ ] `/code-review` + `/security-review` (la portée est une frontière).
+- [ ] **Trois PR ouvertes et intégrées ensemble** — un contrat d'événement à moitié livré fait diverger
+      le read-model en silence.
 
 ---
 
 ## Story Points Breakdown
 
-- `GET /dossiers` paginé/trié/recherché + index + déterminisme : 2 pts
-- Read-models `EtatBalanceDossier` / `EtatLiasseDossier` + consumers : 2,5 pts
-- Compteurs scopés + filtre actifs/archivés : 1 pt
-- Échéance minimale depuis le paquet fiscal (+ `source`, + absence assumée) : 1,5 pt
+- `GET /dossiers` paginé/trié/recherché + `affectation=moi` + index + déterminisme : 2 pts
+- Read-models `EtatBalanceDossier` / `EtatLiasseDossier` + consumers idempotents : 2,5 pts
+- Compteurs scopés + filtre actifs/archivés + avancement dérivé : 1 pt
+- Échéance minimale depuis le paquet fiscal embarqué (+ `source`, + absence assumée) : 1,5 pt
 - Tests NFR 500 dossiers, anti-N+1, résilience amont : 1 pt
-- **Total : 8 points**
+- **Total initial : 8 points**
+- ⚠️ **+5 pts de recadrage** *(2026-08-19)* : producteur `balance.etat.change` dans `balance-service`
+  (1 pt — l'outbox y existe déjà) et **socle outbox + relais + producteur `liasse.figee`** dans
+  `bilan-service` (4 pts — le service ne publiait rien). **Total réel : 13 points, 3 dépôts.**
