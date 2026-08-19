@@ -2506,10 +2506,10 @@ sprints:
         title: "Les pièces se rattachent au dossier - statuts et carte CFE cessent de disparaître"
         epic: "EPIC-043"
         points: 3
-        service: "document-service"
-        status: "not_started"  # Rattachement ADDITIF (l'org reste, le dossier s'ajoute) : dossierId OPTIONNEL, parce que les pièces KYC du cabinet n'appartiennent à aucun dossier et ne doivent pas être forcées d'en avoir un - D2 : le KYC ne descend pas au dossier. Aujourd'hui les statuts et la carte CFE déposés à la création sont lus par l'OCR (STORY-081) puis NE SONT PLUS VISIBLES NULLE PART. ⚠ Vérifier l'URL présignée dans un VRAI NAVIGATEUR, pas au curl (leçon FE-023 -> STORY-179 -> STORY-352).
+        service: "document-service + balance-service"
+        status: "in_progress"  # 🔄 EN COURS 2026-08-19 - dev terminé, portes DoD vertes, vérification docker consignée ; revue de code + revue de sécurité en cours. Rattachement ADDITIF (l'org reste, le dossier s'ajoute) : dossierId OPTIONNEL, parce que les pièces KYC du cabinet n'appartiennent à aucun dossier - D2 : le KYC ne descend pas au dossier.
         story_path: "stories/STORY-358.md"
-        assigned_to: null
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-303"
         title: "Les 2 axes sont datés par exercice - un changement vaut à partir de l'exercice ouvert, jamais rétroactivement"
         epic: "EPIC-043"
