@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — bloc **M** · question **Q9** *(tranchée)* · constat de code ligne 77
 **Priorité :** Must Have
 **Story Points :** 8 *(⬆️ 5 → 8, voir §Story Points Breakdown — le titre sous-évaluait le périmètre)*
-**Statut :** 📋 À faire
+**Statut :** 🔎 En revue
 **Complexité :** medium-high
 **Créée le :** 2026-08-09 *(slottée)* · **Rédigée le :** 2026-08-19
 **Sprint :** 20 (backend)
@@ -190,6 +190,39 @@ description du `POST` ne le contredit plus.
 
 ---
 
+## Écarts assumés avec la rédaction — décidés à l'implémentation
+
+Quatre points de la rédaction ont été **ajustés en écrivant le code**, chacun pour une raison
+vérifiée dans le dépôt. Ils sont listés ici plutôt que corrigés en silence : une story dont
+l'implémentation diverge sans le dire est une story qui ment à la suivante.
+
+1. **La route d'écriture est `POST /dossiers/{id}/axes` sur `dossier-service`**, et non le
+   `POST …/profil-societe/regime` de `balance-service` que le §C demandait de « corriger ». Le §A pose
+   `dossier-service` comme **propriétaire** du couple daté ; faire écrire cette donnée par son
+   **consommateur** aurait violé l'invariant #2 (une base par service) et créé deux écritures possibles
+   pour un même fait — exactement la contradiction que Q6 a fermée pour l'exercice. C'est aussi la route
+   que **FE-065 déclare** *(`POST /api/v1/dossiers/:id/axes`)*. L'ancien `POST` est **retiré** : il
+   n'avait aucun client *(FE-042 est `blocked`, FE-060 n'affiche aucun axe)*, et le laisser aurait laissé
+   vivante la contamination org-wide du défaut ③.
+2. **Le motif est exigé sur TOUT changement**, pas seulement sur une divergence de la proposition.
+   STORY-080 vérifiait la divergence en **recalculant la proposition côté serveur** — précisément pour que
+   le client ne puisse pas mentir dessus. `dossier-service` ne peut pas la recalculer *(elle exige le CA
+   d'une balance et les seuils du paquet fiscal)*, et croire un drapeau `divergent` transmis dans le corps
+   rouvrirait ce contournement. La règle appliquée est donc **strictement plus forte** et vérifiable
+   localement. La **proposition** (`GET …/profil-societe/regime`) reste servie par `balance-service`.
+3. **`effetADater` de la reprise = la plus ANCIENNE de trois candidates locales** *(date de création
+   légale, début du plus ancien exercice, `createdAt`)*, et non le `createdAt` du profil : ce champ
+   **n'existe pas** dans le contrat `profil.societe.consolide` *(vérifié — il porte `dateCreation` et
+   `version`)*, et l'y ajouter aurait été un changement de contrat sur deux dépôts pour une donnée dont on
+   n'a besoin que d'une **borne inférieure**.
+4. ⛔ **Le garde-fou « index unique sur base non neuve » est INAPPLICABLE ici**, et le dire vaut mieux que
+   le cocher : les deux collections (`decisions_axes`, `axes_dossier`) sont **neuves**, aucune clé
+   existante n'est re-keyée, et `ProfilSocieteSchema.index({orgId:1})` n'est **pas** touché — le profil
+   reste org-keyé (§Hors périmètre). Il n'y a donc aucun index obsolète à purger. La vérification a tout
+   de même été rejouée sur une base **déjà peuplée** *(migration exécutée après le parcours HTTP)*.
+
+---
+
 ## Notes techniques
 
 ⚠️ **DEUX DÉPÔTS, ET L'ORDRE COMPTE.** `dossier-service` produit, `balance-service` consomme. Livrer
@@ -260,3 +293,90 @@ contradiction que Q6 a fermée pour l'exercice.
 
 ⚠️ **Ce qui n'est PAS dans ces 8 points** : le démantèlement de `profil-societe`. Il reste org-keyé,
 et sa dette reste ouverte *(STORY-236, « sujet séparé, à trancher avec le PO »)*.
+
+---
+
+## Progress Tracking
+
+| Phase | État | Note |
+|---|---|---|
+| Rédaction | ✅ | branche `docs/MNV-303` — story écrite le 2026-08-19 par le dev externe, **ajustée** (§Écarts assumés) à l'implémentation |
+| Branches (2 dépôts) | ✅ | `MNV-303` posée sur `prospera-dossier-service` **et** `prospera-balance-service` **avant** la première ligne |
+| Développement | ✅ | producteur d'abord, consommateur ensuite |
+| Validation (DoD) | ✅ | `dossier-service` : lint 0 · build OK · **688 unit + 148 e2e** · couverture **99,21 / 91,56 / 96,74 / 99,21**<br>`balance-service` : lint 0 · build OK · **2915 unit + 668 e2e** · couverture **99 / 91,86 / 98,22 / 99,09** |
+| Mutation-tests | ✅ | **13 mutations, 13 rouges PAR ASSERTION** — dont une qui a SURVÉCU au premier tour (tableau ci-dessous) |
+| Vérification docker | ✅ | stack neuve `down -v`, parcours réel sur 3 dossiers d'un même cabinet — **1 défaut trouvé, invisible aux 3 831 tests** |
+| Revue de code | ⏳ | |
+| Revue de sécurité | ⏳ | |
+| Clôture | ⏳ | |
+
+### ⚡⚡ Ce que la vérification docker a trouvé et que 3 831 tests ne pouvaient pas voir
+
+**`AgregationModule` n'importait pas `ReadModelsModule`.** `AxesResolver` a été câblé dans
+`CahiersModule` et `FiscalModule` — mais `AgregationService` vit dans **son propre module**. Au premier
+démarrage réel :
+
+```
+Nest can't resolve dependencies of the AgregationService (…, ?, …).
+Please make sure that the argument AxesResolver at index [5] is available
+in the AgregationModule module.
+```
+
+⚠️ **Ni les 2 915 unitaires ni les 668 e2e ne pouvaient l'attraper** : les uns construisent le service
+au constructeur, les autres montent un `TestingModule` où le provider est fourni **à la main**. Le
+graphe de dépendances réel n'est assemblé qu'au boot. C'est le mode de défaut exact que la
+vérification docker existe pour fermer — et il aurait rendu `balance-service` **entièrement mort au
+démarrage**, pas seulement l'agrégation.
+
+### Preuves docker — stack neuve (`down -v`), cabinet réel, 3 dossiers
+
+| # | Ce qui est prouvé | Comment |
+|---|---|---|
+| 1 | **AC-4 — la décision ne touche QUE le dossier du chemin** | 2 dossiers clients du **même cabinet**, décidés l'un après l'autre : `decisions_axes` contient **2 lignes, une par `dossierId`**, couples différents. Avant la story, la seconde confirmation écrasait la première *(profil unique par organisation)* |
+| 2 | **Les 3 refus n'écrivent RIEN** | `MOTIF_AXES_REQUIS` (400), `EFFET_A_DATER_RETROACTIF` (400, message nommant l'exercice ouvert), no-op sur couple identique (rend la décision existante) → `countDocuments` **inchangé**, aucun orphelin |
+| 3 | **Le journal porte l'état REMPLACÉ** | `dossiers_journal` : `systemeComptableAvant`/`regimeFiscalAvant` + `exerciceOuvertId`, avec l'auteur réel |
+| 4 | **Index réellement créés** | `unicite_decision_migration` = `{dossierId:1}` **unique + partialFilterExpression `{origine:'MIGRATION'}`** ; lecture `{orgId,dossierId,effetADater:-1,_id:-1}` |
+| 5 | **Round-trip Kafka complet** | outbox `SENT` (partitionKey = `dossierId`) → `axes_dossier` de `balance_service` **convergé**, 4/4 décisions, index `decisionId` unique |
+| 6 | ⚡ **Q9 — le même dossier, trois exercices, trois réponses** | `GET …/axes?exerciceId=` → **2027 : SMT/SYNTHETIQUE** · **2026 : SN/REEL** *(inchangé par la décision de 2027)* · **2023 : AUCUN**. Le changement de 2027 **n'a pas réécrit** 2026 |
+| 7 | ⚡⚡ **Le MOTEUR FISCAL suit les axes datés — par dossier ET par exercice** | Dossier A : `/fiscal/tpu` **409 REGIME_INCOMPATIBLE en 2026** *(REEL)* mais **404 BALANCE_INTROUVABLE en 2027** *(SYNTHETIQUE — la garde laisse passer)* ; `/fiscal/liquidation` exactement l'inverse. Dossier B, **même cabinet, même exercice** : branches opposées à A. **C'est la promesse de la maquette, mesurée sur le calcul et non sur l'écho d'une écriture** |
+| 8 | **AC-6 — migration idempotente** | 1ʳᵉ exécution : `1 créée` · 2ᵉ : `0 créée, 1 déjà migré` *(index partiel, jamais un pré-contrôle)*. Décision datée **2019-06-15** = la plus ancienne candidate, pas le jour de la migration |
+| 9 | **AC-6 — marche arrière ciblée et HONNÊTE** | Supprime la seule décision `MIGRATION` + son entrée de journal ; les **3 décisions `CABINET` intactes**. Rapport : `outboxDejaPubliees: 1` avec un `warn` explicite — **une marche arrière ne dépublie pas**, et le compteur l'annonce au lieu de promettre une réversibilité fausse |
+| 10 | **Le module ressuscité fonctionne** | Après correctif, `POST /dossiers/:id/balance/depuis-cahiers` traverse l'injection et atteint la règle métier (`EXERCICE_CLOS` / `REFERENTIEL_UNRESOLVED`) — plus aucune erreur d'assemblage |
+
+### Mutations exécutées — 13 mutations, 13 rouges
+
+| # | Mutation | Dépôt | Résultat |
+|---|---|---|---|
+| M1 | `decisionEnVigueur` : comparaison **large → stricte** | dossier | 🔴 la décision est exclue de son propre exercice |
+| M2 | départage par `_id` retiré *(tri non total)* | dossier | 🔴 deux décisions de même date d'effet rendent un résultat dépendant de l'ordre de lecture |
+| M3 | garde de **non-rétroactivité** retirée | dossier | 🔴 |
+| M4 | `axesChangent` → `false` *(motif jamais exigé)* | dossier | 🔴 |
+| M5 | reprise datée de la **plus récente** candidate | dossier | 🔴 |
+| M6 | `partitionKey` = `orgId` au lieu de `dossierId` | dossier | 🔴 |
+| M7 | `$lte` → `$lt` dans la résolution | balance | 🔴 |
+| M8 | cascade **inversée** *(profil avant la décision datée)* | balance | 🔴 |
+| M9 | résolution sur la **fin** de l'exercice | balance | 🔴 |
+| M10 | retour d'une lecture d'axe sur le profil *(5ᵉ site)* | balance | 🔴 **la garde AC-2 le voit** |
+| M11 | narrowing du référentiel rendu **permissif** | balance | ⚠️ **🟢 SURVIVANTE au 1ᵉʳ tour** — aucun test ne soumettait une valeur d'axe inconnue à l'agrégation. Test ajouté, mutation rejouée : 🔴 |
+| M12 | régime daté inconnu **replié sur le profil du cabinet** | balance | 🔴 |
+| M13 | garde du `RegimeFiscalGuard` sans dossier ni exercice | balance | 🔴 |
+
+⚠️ **M11 est la plus instructive** : le narrowing fail-closed existait, il était **écrit et non
+prouvé**. Sans la mutation, il aurait pu être affaibli par n'importe quelle story ultérieure sans qu'un
+test ne bouge.
+
+### Ce qui reste ouvert — dettes explicites
+
+- ⛔ **`profil-societe` n'est pas démantelé** *(§Hors périmètre)* : `dateCreation` — dont dépend
+  l'exonération de début d'activité — reste lue sur un profil **org-keyé**. La story déplace les 2 axes,
+  pas l'identité fiscale.
+- ⛔ **La marche `PROFIL_COURANT` de la cascade porte encore le défaut d'origine** : tant qu'un dossier
+  n'a **aucune** décision datée, le régime du cabinet lui est appliqué. C'est le prix de la
+  non-régression *(la reprise converge par Kafka)*, et la vérification docker montre qu'un dossier
+  décidé n'y tombe plus. Elle est transitoire par nature.
+- ⛔ **`dossier-service` n'a aucune gate KYC** *(STORY-363)* : les axes se lisent derrière
+  `@RequiresBalanceAccess()` côté `balance-service` et derrière la seule chaîne JWT/portée côté
+  `dossier-service`. Asymétrie **connue**, fermée pour tout le service par STORY-363.
+- ⛔ **`docker-compose.yml` porte `KAFKA_AXES_GROUP_ID`** — la racine `/PROSPERA` n'étant dans **aucun
+  dépôt**, cette ligne n'est couverte par aucune PR ni aucune CI *(leçon STORY-173)*. Le défaut du code
+  (`balance-axes`) la rend cependant inoffensive si elle disparaît.
