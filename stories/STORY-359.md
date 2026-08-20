@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — blocs **K** et **P** · décisions **D6**, **D15**, **D16** · question **Q11** *(tranchée)*
 **Priorité :** Must Have
 **Story Points :** 8 → **12** *(amendée le 2026-08-20)* → **13 réels** *(cf. § « Ce que le cadrage disait de faux »)*
-**Statut :** ✅ **CLÔTURÉE le 2026-08-20** — trois PR rebase-mergées sur `dev`, **sauf AC-A2 et AC-A5** *(cf. § « Ce que l'amendement demande et qui N'EST PAS livré »)*
+**Statut :** ✅ **CLÔTURÉE le 2026-08-20** — **quatre** PR rebase-mergées sur `dev`, **AC-A2 et AC-A5 compris**
 **Complexité :** high
 **Créée le :** 2026-08-09
 **Recadrée le :** 2026-08-19 *(deux prémisses vérifiées fausses — cf. § « Ce que le cadrage disait de faux »)*
@@ -71,19 +71,19 @@ faux, et invisible.
 
 ### Ce que l'amendement ajoute aux Acceptance Criteria
 
-- [ ] **AC-A1** — `EtatBalanceDossier` et `EtatLiasseDossier` sont keyés `(dossierId, exercice)` ; un
+- [x] **AC-A1** — `EtatBalanceDossier` et `EtatLiasseDossier` sont keyés `(dossierId, exercice)` ; un
       dossier à 3 exercices porte **3 lignes** de chaque, et la ligne de portefeuille en **dérive**
       (exercice ouvert), sans requête supplémentaire.
-- [ ] **AC-A2** — L'état par exercice est **lisible** : il rejoint `ExerciceResponseDto` (ou un champ
+- [x] **AC-A2** — L'état par exercice est **lisible** : il rejoint `ExerciceResponseDto` (ou un champ
       frère de `GET /dossiers/{id}/exercices`), **sans appel sortant** et **sans dépendre de
       l'entitlement Atelier** — c'est tout l'intérêt de le servir depuis `dossier-service`.
-- [ ] **AC-A3** — `balance.validee` est émis par `balance-service` **à la validation** (jamais à la
+- [x] **AC-A3** — `balance.validee` est émis par `balance-service` **à la validation** (jamais à la
       soumission) et `liasse.figee` par `bilan-service` **au figeage**, tous deux portant
       `dossierId` **et** `exercice { debut, fin }`.
-- [ ] **AC-A4** — Un exercice **sans** balance et **sans** liasse rend un état **absent**, jamais un
+- [x] **AC-A4** — Un exercice **sans** balance et **sans** liasse rend un état **absent**, jamais un
       état « vide » ou « en cours ». *(Même règle que `prochaineEcheance` : ne pas inventer une
       donnée qu'on n'a pas — un « 0 % » se lit comme un fait mesuré.)*
-- [ ] **AC-A5** — Vérification docker : valider une balance sur 2024, figer la liasse 2024, ouvrir
+- [x] **AC-A5** — Vérification docker : valider une balance sur 2024, figer la liasse 2024, ouvrir
       2025 ⇒ l'onglet Exercices distingue les deux années. ⚠️ **Attendre une CONDITION, jamais un
       délai.**
 
@@ -113,19 +113,21 @@ Deux difficultés distinctes s'y cachent :
 
 ---
 
-## ⛔ Ce que l'amendement demande et qui N'EST PAS livré
+## ✅ Ce que l'amendement demande — et où il a été livré
 
 L'amendement du 2026-08-20 a été écrit **pendant** que la story était développée, et les deux dépôts
 ont convergé sans se voir : il conclut aux mêmes deux points que le recadrage du 2026-08-19 (grain
-par exercice, producteurs repliés). Le code livré les satisfait — **sauf deux critères** :
+par exercice, producteurs repliés). Les trois premières PR en satisfaisaient trois critères sur cinq ;
+**AC-A2 et AC-A5 ont été livrés dans une quatrième PR** (`prospera-dossier-service#10`), sur le même
+numéro de story :
 
 | AC | État | Détail |
 |---|---|---|
 | **AC-A1** — read-models keyés `(dossierId, exercice)`, ligne de portefeuille **dérivée** | ✅ **livré** | Index unique `{dossierId, exercice}` sur les deux collections, la ligne dérive de l'exercice **ouvert**, sans requête supplémentaire (1 seule opération Mongo par page, mesurée au profileur). |
-| **AC-A2** — l'état par exercice est **lisible** (`ExerciceResponseDto` ou champ frère) | ⛔ **NON livré** | Les read-models portent bien le grain, mais **aucune route ne l'expose** : `GET /dossiers/:id/exercices` est inchangé. **FE-066 reste donc bloquée** sur l'écart qu'elle a transmis. |
+| **AC-A2** — l'état par exercice est **lisible** (`ExerciceResponseDto` ou champ frère) | ✅ **livré (PR #10)** | `GET /dossiers/:id/exercices` porte `etatBalance` et `etatLiasse` **par exercice**, servis depuis les read-models **locaux** : aucun appel sortant, **aucune dépendance à l'entitlement Atelier**. **FE-066 est débloquée.** |
 | **AC-A3** — émis **à la validation**, jamais à la soumission, avec `dossierId` **et** bornes d'exercice | ✅ **livré**, ⚠️ **sous d'autres noms** | Voir ci-dessous. |
 | **AC-A4** — un exercice sans balance ni liasse rend un état **absent** | ✅ **livré** | Aucune ligne ⇒ champ absent, jamais « vide » ni « en cours ». |
-| **AC-A5** — vérif docker distinguant **deux années** dans l'onglet Exercices | ⛔ **NON livré** | La vérification docker a porté sur **un** exercice par dossier. Elle n'a pas pu couvrir l'onglet, faute d'AC-A2. |
+| **AC-A5** — vérif docker distinguant **deux années** dans l'onglet Exercices | ✅ **livré (PR #10)** | Balance validée sur **2027**, liasse figée sur **2026**, même dossier : `2027 OUVERT balance=VALIDÉE liasse=—` / `2026 CLOS balance=— liasse=FIGEE`. Round-trip Kafka réel. |
 
 ### ⚠️ Les topics ne portent pas les noms de l'AC-A3, et c'est délibéré
 
@@ -143,7 +145,20 @@ l'état de **l'exercice**, pas celui d'un document. Ce domaine autorise plusieur
 `(dossier, exercice)` ; publier l'état d'un document faisait écraser « la balance Sage est validée »
 par « l'import OCR concurrent vient d'être rejeté ». Le consommateur ne pouvait pas le rattraper.
 
-⇒ **AC-A2 et AC-A5 sont à reprendre dans une story de suite** (voir le § de clôture).
+### Ce que la quatrième PR a livré
+
+- **`EtatsAmontLecteur`** — lecture des états d'amont **par exercice**, exportée du module
+  Portefeuille. ⚠️ **Deux requêtes pour toute la liste, jamais deux par exercice** : un dossier à dix
+  exercices coûte autant qu'un dossier à un seul, sinon l'onglet Exercices rejouerait le N+1 que
+  `GET /dossiers` ferme. **4 opérations Mongo** mesurées au profileur pour l'onglet entier (dossier +
+  exercices + les deux read-models), constant.
+- ⚠️ **`orgId` est dans la requête, pas seulement `dossierId`** — même raisonnement que pour le
+  `$filter` du portefeuille : la garantie devient **locale** au lieu d'être dérivée des producteurs.
+  Un e2e le prouve avec une ligne d'état rattachée à un autre cabinet.
+- **`etatBalance` / `etatLiasse` absents** — jamais « vides », jamais « en cours » (AC-A4).
+
+**Mutations de cette PR** : `M33` le lecteur cesse de scoper par `orgId` · `M34` l'état interrogé
+**par** exercice (N+1 réintroduit) · `M35` une version nulle publiée telle quelle — **3 rouges**.
 
 ---
 
@@ -349,8 +364,8 @@ et le 2026-08-20)*, ils sont repliés dans cette story par la décision PO du jo
 **producteurs d'abord, consommateur ensuite** — respecté au merge.
 **Ferme le GAP :** `GAP-filtre-mes-dossiers-portefeuille` *(ticket
 `TICKET-BACKEND-filtre-mes-dossiers-au-portefeuille.md`)*.
-**Débloque :** **FE-071** *(filtre « mes dossiers »)* · **FE-059**. ⚠️ **FE-066 reste bloquée** sur
-l'AC-A2, non livré — voir le § dédié.
+**Débloque :** **FE-071** *(filtre « mes dossiers »)* · **FE-059** · **FE-066** *(l'état par exercice,
+AC-A2 livré en PR #10)*.
 **Sera remplacée en partie par :** **STORY-315 / 316** *(calendrier fiscal complet, sprint 25)*.
 
 ---
@@ -746,7 +761,7 @@ sans erreur).
 | e2e | **175** | **668** | **267** |
 | couverture | seuils tenus | seuils tenus | seuils tenus |
 
-**Total : 32 mutations sur l'ensemble du flux, 31 rouges par assertion.** La 32ᵉ
+**Total : 35 mutations sur l'ensemble du flux, 34 rouges par assertion.** La 32ᵉ
 (M19 — appliquer `affectation=moi` aussi à un `TENANT_USER`) est **équivalente** :
 sa portée étant déjà `responsable ∪ contributeur`, la clause est redondante et
 l'ensemble rendu identique. Aucun test ne peut l'en distinguer, et il n'y a rien à
