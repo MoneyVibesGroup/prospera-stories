@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — blocs **L** et **N** · décision **D12** · question **Q10** *(tranchée : option b)* · **STORY-294** *(le même défaut sur le journal des organisations)* · **STORY-144** *(l'écriture sans lecture)*
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** 🔍 **En revue** — `MNV-360` (`dossier-service`) poussée, portes vertes et vérification docker consignée
+**Statut :** ✅ **CLÔTURÉE le 2026-08-20** — deux PR rebase-mergées, branches supprimées
 **Complexité :** medium
 **Créée le :** 2026-08-09
 **Sprint :** 20
@@ -147,7 +147,7 @@ portée de la route, motif)*.
 
 ## Progress Tracking
 
-**Statut :** ✅ **Développée et validée** — `MNV-360` (`dossier-service`), en attente de revue.
+**Statut :** ✅ **CLÔTURÉE le 2026-08-20** — `MNV-360` rebase-mergée sur `dev` (PR #11), branche supprimée.
 
 ### Ce qui a été livré
 
