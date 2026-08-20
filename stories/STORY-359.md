@@ -391,7 +391,7 @@ l'AC-A2, non livré — voir le § dédié.
 
 ## Progress Tracking
 
-**Statut :** 🚧 En cours — dev terminé, portes DoD franchies, vérification docker consignée ci-dessous.
+**Statut :** ✅ Revues passées, correctifs appliqués, vérification docker **rejouée** sur l'état final.
 
 ### Ce qui a été livré, par dépôt
 
@@ -551,3 +551,203 @@ laissé à découvrir.
 `IXSCAN` sur `{orgId, statut, raisonSociale, _id}`, **505 clés pour 505
 documents**, et **aucune étape `SORT`** — l'index porte l'ordre, il n'est pas
 décoratif.
+
+---
+
+## Revue de code et revue de sécurité
+
+### Revue de sécurité — **aucune vulnérabilité de confiance ≥ 80**
+
+Elle a **vérifié empiriquement** les deux points les plus à risque, au lieu de
+raisonner sur le code :
+
+- **Injection NoSQL par `q`** : le `ValidationPipe` réel du service a été instancié
+  contre le DTO. `?q[$ne]=` et `?q[$regex]=.*` sont aplatis en `"[object Object]"`
+  (`enableImplicitConversion` coerce vers le `design:type` `String`, il n'est donc
+  **pas** l'angle mort qu'on pouvait craindre) ; `?q[]=a&q[]=b`, `?statut[$ne]=`,
+  `?tri[a]=1`, `?page[$ne]=1` rendent **400**.
+- **Collision de `$or`** : structurellement impossible — `q` et `affectation` ne
+  contribuent que des éléments de `$and`, le seul `$or` racine est celui de la
+  portée, et rien d'autre n'écrit cette clé.
+
+Elle a aussi remonté la chaîne jusqu'aux **deux producteurs** pour la jointure des
+read-models, et confirmé que le chemin est fermé à la source (`@RequiresDossierScope`
+et `DossierScopeGuard` résolvent le dossier par `{dossierId, orgId}`).
+
+Ses **deux réserves hors périmètre** ont été traitées ici comme des défauts réels
+(voir ① et ② ci-dessous).
+
+### Revue de code — 9 constats retenus, tous corrigés
+
+| # | Constat | Où |
+|:--:|---|---|
+| ① | `page` n'était borné que par le bas : `@IsInt()` accepte `1e20`, et le `$skip` rendait **500** là où la route annonce « une page hors bornes rend une liste vide, jamais une erreur » | `dossier-service` |
+| ② | La jointure des read-models n'était scopée que par `dossierId` — garantie *dérivée des producteurs*, à re-démontrer chez tout producteur futur. Devenue **locale au consommateur** | `dossier-service` |
+| ③ | `appelantUserId` **fabriquait** un `ObjectId` n'appartenant à personne, qui traversait jusqu'à la couche requête | `dossier-service` |
+| ④ | Le hook de recherche n'était pas posé sur `updateMany` — le chemin exact de la reprise du premier déploiement sur base non vide | `dossier-service` |
+| ⑤ | `enrichirCabinet` enfreignait le contrat qu'`appliquerRecherche` s'impose : il retirait `sigle`/`rccm` du champ de recherche **sans les retirer du dossier** | `dossier-service` |
+| ⑥ | **Deux des quatre jointures n'avaient aucun index utilisable** : les index à préfixe `dossierId` d'`exercices` et `decisions_axes` sont **partiels**, et Mongo n'élit pas un index partiel dont la requête n'est pas un sous-ensemble | `dossier-service` |
+| ⑦ | L'aiguillage `topic → validateur → projection` vivait dans un `*bootstrap*`, **exclu de `collectCoverageFrom`** | `dossier-service` |
+| ⑧ | **La porte e2e de `bilan-service` était ROUGE** — une suite entière, 10 tests | `bilan-service` |
+| ⑨ | **`balance.etat.change` publiait l'état d'un DOCUMENT** là où le read-model d'aval est keyé `(dossierId, exercice)` | `balance-service` |
+
+Deux constats supplémentaires portaient sur des **commentaires qui promettaient
+plus que leur code** (`appliquerRecherche` « l'ancienne valeur sinon », `version`
+« verrou optimiste monotone ») et sur **deux index morts** dont le commentaire
+annonçait servir une jointure qu'ils ne peuvent pas servir. Corrigés aussi : un
+commentaire faux est un piège pour la story suivante.
+
+### ⚡⚡ Les deux constats qui n'étaient pas des détails
+
+**⑧ — la porte e2e de `bilan-service` était rouge, et je ne l'avais pas lancée.**
+`JeuEtatsService` gagne deux dépendances ; le module e2e n'en fournissait qu'une.
+`Nest can't resolve dependencies … LiasseEventsService at index [3]` — 10 tests,
+précisément ceux qui couvrent le contrat HTTP de `valider` et `rouvrir`, les deux
+méthodes que la story modifie. La DoD dit « unit + e2e verts » : lint, build et
+unitaires ne la tiennent pas.
+
+**⑨ — l'événement publiait l'état d'une BALANCE, pas celui de l'EXERCICE.** Ce
+domaine autorise **plusieurs** balances pour un même `(dossier, exercice)` — la
+clé d'unicité porte `source` **et** `version`. Le read-model d'aval, lui, est keyé
+`(dossierId, exercice)` et retient le message le plus frais. Publier l'état d'un
+document faisait donc écraser « la balance Sage de cet exercice est validée » par
+« l'import OCR concurrent vient d'être rejeté » : le dossier quittait le compteur
+`bilansEnCours` alors que `bilan-service` pouvait produire sa liasse.
+
+⚠️ **Le consommateur ne pouvait PAS le rattraper** — l'information n'était pas
+dans le payload. C'est le producteur qui devait trancher, et il publie désormais
+la grandeur que le portefeuille affiche réellement. Un socle d'à-nouveaux
+(`origine: A_NOUVEAUX`) ne publie plus rien : `POST /balances/:id/valider` ne
+filtre pas sur `origine`, et le valider aurait annoncé « balance validée » sur un
+exercice où rien n'a été saisi.
+
+### ⚠️ Le constat de méthode : les tests du pipeline gardaient sa FORME, pas son RÉSULTAT
+
+La revue a **mesuré** le trou plutôt que de le supposer : elle a appliqué deux
+mutations à `construirePipeline` — l'exercice `OUVERT` devenant `CLOS` dans le
+`$filter`, puis l'interversion des branches `LIASSE_FIGEE` / `BILAN_EN_COURS` —
+et les **26 tests du pipeline sont restés verts**. Aucun test n'exécute
+l'agrégation : ils assertent le `from` des jointures, le `sortBy` du `$sortArray`,
+les clés du `$group`.
+
+⇒ **Les deux mutations ont été rejouées EN DOCKER, sur la vraie base**, et elles y
+sont rattrapées (§ *Vérification docker rejouée*). C'est donc la vérification
+docker qui est le filet de la règle centrale de cette story — pas les unitaires.
+C'est écrit ici pour que la prochaine story qui touche ce pipeline le sache.
+
+### Passe de mutation sur les correctifs — 9 mutations, 9 rouges *après* correction
+
+| # | Mutation | Effet |
+|:--:|---|---|
+| M24 | publier l'état du **document** au lieu de celui de l'**exercice** | rouge |
+| M25 | publier aussi les socles d'à-nouveaux | rouge |
+| M26 | interroger l'exercice **hors session** (lirait l'état d'avant) | rouge |
+| M27 | garde `orgId` retirée de la jointure d'état | 2 rouges |
+| M28 | plafond de `page` retiré | rouge |
+| M29 | les deux branches d'aiguillage **interverties** | 3 rouges |
+| M30 | garde `dossierId` du jeu d'états rendue passante | rouge |
+| M31 | `enrichirCabinet` cesse de retirer les sources absentes | rouge *(a **survécu** au premier tour → 2 tests ajoutés)* |
+| M32 | hook de recherche retiré d'`updateMany` | rouge *(a **survécu** au premier tour → 1 test ajouté)* |
+
+⚠️ **M31 et M32 ont survécu à leur première exécution** : les correctifs étaient
+justes, et **rien ne les gardait**. C'est exactement le « test écrit après coup qui
+passe au vert sans rien prouver » — les trois tests manquants ont été ajoutés, et
+les deux mutations rougissent désormais.
+
+---
+
+## Vérification docker rejouée — sur l'état final, stack redémarrée
+
+⚠️ **Le hot-reload a menti une fois de plus**, et c'est consigné : la première
+mutation appliquée n'a **rien changé à la réponse** alors que le journal annonçait
+`Found 0 errors`. Toutes les mutations ci-dessous ont donc été jouées avec un
+`docker restart` **forcé** — c'est la seule façon d'être sûr de mesurer le code
+qu'on croit mesurer.
+
+### ⚡ Les deux mutations que les unitaires laissaient passer sont rattrapées
+
+| Mutation | Sain | Sous mutation |
+|---|---|---|
+| exercice `OUVERT` → `CLOS` dans le `$filter` | `aConfigurer: 503`, `bilansEnCours: 1`, échéance servie | **`aConfigurer: 505`**, **`bilansEnCours: 0`**, `exerciceOuvert` **absent**, échéance **absente** |
+| branches `LIASSE_FIGEE` / `BILAN_EN_COURS` interverties | KOSSI `LIASSE_FIGEE`, `bilansEnCours: 1` | KOSSI **`BILAN_EN_COURS`** avec sa liasse `FIGEE`, **`bilansEnCours: 2`** |
+
+### ⚡ La garde `orgId` de la jointure est PORTEUSE — prouvé par contre-épreuve
+
+Une ligne d'état a été **forgée en base** : bon `dossierId`, `orgId` d'un autre
+cabinet, `version: 42`.
+
+- **Avec** la garde : ignorée — `PHARMA` reste `BILAN_EN_COURS`, `etatLiasse` absent.
+- **Sans** la garde (retirée, service redémarré) : servie — `PHARMA` passe
+  `LIASSE_FIGEE` avec la `version: 42` **du cabinet étranger**.
+
+### ⚡ Le contrat d'exercice, prouvé sur deux balances réelles du même exercice
+
+Dossier « Pharmacie du Golfe », exercice 2026 :
+1. balance `sage` **rejetée** puis **validée** → événement `VALIDÉE` ;
+2. seconde balance `ocr`, **même exercice**, **rejetée** → événement publié :
+   **`VALIDÉE`**, pas `REJETÉE`.
+
+Le portefeuille garde `BILAN_EN_COURS`. Avant le correctif, ce rejet aurait fait
+retomber le dossier en `BALANCE_ATTENDUE` et l'aurait sorti du compteur.
+
+### Les index morts ne partent pas tout seuls
+
+⚠️ Retirer un index du schéma ne le retire **pas** d'une base existante — Mongoose
+ne supprime jamais un index (leçon STORY-357). Vérifié : les deux
+`{orgId, dossierId}` étaient toujours là après le correctif. Les collections ont
+été **recréées** pour prouver l'état cible : `etats_balance_dossier` et
+`etats_liasse_dossier` ne portent plus que leur index unique
+`{dossierId, exercice}` — celui qui sert réellement la jointure.
+
+Les deux index de jointure manquants, eux, sont bien créés :
+`exercices {dossierId, statut}` et `decisions_axes {dossierId, effetADater:-1, _id:-1}`.
+
+### Anti-N+1 et NFR — remesurés après les index
+
+| taille de page | opérations Mongo | `millis` | `docsExamined` |
+|:--:|:--:|--:|--:|
+| 1 | **1** | 112 | 511 |
+| 25 | **1** | 121 | 511 |
+| 100 | **1** | 109 | 511 |
+
+⚡ **`docsExamined` passe de 2 527 à 511** grâce aux deux index de jointure : la
+jointure examinait ~4 documents par dossier là où elle en examine désormais ~0,01.
+Le constat ⑥ n'était pas théorique.
+
+| requête (médiane sur 5, 505 dossiers) | avant index | après index |
+|---|--:|--:|
+| 1re page (défaut) | 165 ms | **166 ms** |
+| `tri=activite` | 289 ms | **135 ms** |
+| `tri=etat` | 248 ms | **129 ms** |
+| `q=boulangerie` | 38 ms | **22 ms** |
+| `affectation=moi` | 187 ms | **125 ms** |
+| `page=20&size=25` | 205 ms | **140 ms** |
+| `size=100` | 244 ms | **139 ms** |
+| `statut=archives` | 12 ms | **9 ms** |
+
+**NFR tenu avec de la marge** : 1re page **166 ms** (seuil 2 s) · changement de
+filtre **9 à 140 ms** de médiane, **190 ms au pire** (seuil 500 ms).
+
+### Bornes et non-régression finales
+
+`?page=1e20` et `?page=100000000000` → **400** ; `?page=10000` (le plafond) →
+**200**. Portée admin 505 (505/503/1) *vs* collaborateur 2 (2/0/1). `q=menuiserie`
+et `q=cabinet` : trouvés par l'admin, **0** pour le collaborateur. `.*` et `(a+)+$`
+→ **0**. `affectation=moi` : admin 505 → 503, collaborateur 2 → 2 (sans effet,
+sans erreur).
+
+### Portes de qualité — état final
+
+| | `dossier-service` | `balance-service` | `bilan-service` |
+|---|---|---|---|
+| lint | 0 warning | 0 warning | 0 warning |
+| build | OK | OK | OK |
+| unitaires | **831** | **2 936** | **1 028** (+1 ignoré) |
+| e2e | **175** | **668** | **267** |
+| couverture | seuils tenus | seuils tenus | seuils tenus |
+
+**Total : 32 mutations sur l'ensemble du flux, 31 rouges par assertion.** La 32ᵉ
+(M19 — appliquer `affectation=moi` aussi à un `TENANT_USER`) est **équivalente** :
+sa portée étant déjà `responsable ∪ contributeur`, la clause est redondante et
+l'ensemble rendu identique. Aucun test ne peut l'en distinguer, et il n'y a rien à
+distinguer.
