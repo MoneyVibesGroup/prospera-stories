@@ -386,3 +386,168 @@ l'AC-A2, non livré — voir le § dédié.
 - ⚠️ **+5 pts de recadrage** *(2026-08-19)* : producteur `balance.etat.change` dans `balance-service`
   (1 pt — l'outbox y existe déjà) et **socle outbox + relais + producteur `liasse.figee`** dans
   `bilan-service` (4 pts — le service ne publiait rien). **Total réel : 13 points, 3 dépôts.**
+
+---
+
+## Progress Tracking
+
+**Statut :** 🚧 En cours — dev terminé, portes DoD franchies, vérification docker consignée ci-dessous.
+
+### Ce qui a été livré, par dépôt
+
+| Dépôt | Branche | Contenu |
+|---|---|---|
+| `dossier-service` | `MNV-359` | route paginée/triée/recherchée + `affectation=moi`, compteurs, avancement dérivé, échéance minimale, 2 read-models + consumer idempotent, 3 index de lecture, champ dérivé `rechercheNormalisee` |
+| `balance-service` | `MNV-359` | topic **`balance.etat.change`** émis dans la transaction de `marquerEtat` |
+| `bilan-service` | `MNV-359` | **socle outbox + relais + producteur** (le service ne publiait rien) et topic **`liasse.etat.change`** |
+
+### Portes de qualité
+
+| | `dossier-service` | `balance-service` | `bilan-service` |
+|---|---|---|---|
+| lint | 0 warning | 0 warning | 0 warning |
+| build | OK | OK | OK |
+| unitaires | 813 | 2 933 | 1 028 (+1 ignoré) |
+| e2e | 172 | — | — |
+| couverture | 99,09 / 92,09 / 96,17 / 99,17 | seuils tenus (sortie 0) | 98,65 / 93,28 / 98,33 / 98,60 |
+
+### Mutation-testing — 21 mutations, 20 rouges **par assertion**
+
+Aucune n'a rougi par erreur de compilation (leçon STORY-179 : une mutation qui ne
+compile pas ne prouve rien — trois tentatives ont été réécrites pour cette raison).
+
+| # | Mutation | Effet |
+|:--:|---|---|
+| M1 | recherche/affectation posées **à la racine** au lieu de `$and` (le `$or` écrase la portée) | 1 e2e rouge |
+| M2 | plafond de `size` relevé | 1 rouge |
+| M3 | tri privé de son départage par `_id` | 2 rouges |
+| M4 | échappement du motif de recherche neutralisé | 6 rouges |
+| M5 | garde de fraîcheur sortie du filtre d'upsert | 1 rouge |
+| M6 | version figée effacée au retour au brouillon | 1 rouge |
+| M7 | garde `$ne [debut, null]` retirée du rapprochement des axes | 1 rouge |
+| M8 | régime **non décidé** se voit servir une échéance | 1 rouge |
+| M9 | garde de débordement de date retirée (31 février → 3 mars) | 6 rouges |
+| M10 | hook de recherche **décâblé** du schéma | 1 rouge |
+| M11 | hook de recherche décâblé de la mise à jour par requête | 1 rouge |
+| M12 | index de recherche retiré | 1 rouge |
+| M13 | émission `balance.etat.change` déplacée **avant** les gardes | 2 rouges |
+| M14 | émission `balance.etat.change` retirée | 2 rouges |
+| M15 | émission `liasse.etat.change` retirée de `valider` | 2 rouges |
+| M16 | réouverture cesse d'être transactionnelle | 1 rouge |
+| M17 | `dossierId` du contexte remplacé par la chaîne vide | 1 rouge |
+| M18 | une balance **REJETÉE** comptée comme un bilan en cours | 1 rouge |
+| M20 | porteur non identifiable retombe sur « pas de filtre » (*fail-open*) | 1 rouge |
+| M21 | compteurs calculés sur **la page** au lieu de l'ensemble filtré | 1 rouge |
+| M22 | clause NIF appliquée à toute saisie | 3 rouges |
+
+⚠️ **M19 a survécu, et c'est une mutation ÉQUIVALENTE, pas un trou de test** :
+appliquer la clause `affectation=moi` **aussi** à un `TENANT_USER` produit
+l'ensemble **exactement identique** — sa portée est déjà `responsable ∪
+contributeur`, la clause n'est que redondante. Aucun test ne peut distinguer les
+deux, et il n'y aurait rien à distinguer. Le `return []` reste, pour ne pas
+payer une seconde clause pour rien.
+
+### Vérification docker — stack neuve (`down -v`), 4 services, 2 cabinets d'événements
+
+**⚡ Le round-trip Kafka entier, sur DEUX producteurs distincts.**
+Balance soumise puis **validée** dans `balance-service` → `balance.etat.change`
+en outbox (`PENDING` → `SENT`) → consommé par `dossier-service` → ligne
+`etats_balance_dossier` avec le libellé **dérivé** `2026`. Jeu d'états créé puis
+**validé** dans `bilan-service` → `liasse.etat.change` → `etats_liasse_dossier`.
+La même ligne de portefeuille porte alors les deux états, **venus de deux
+services** : `avancement: LIASSE_FIGEE`.
+
+**⚡ L'état absolu prouvé par la RÉOUVERTURE.** Jeu rouvert → second
+`liasse.etat.change` à `etat: BROUILLON`, **`version: 1` conservée**, avancement
+retombé à `BILAN_EN_COURS`. Un topic nommé `liasse.figee` — celui du cadrage —
+n'aurait eu **aucun endroit où publier ce retour** : le portefeuille aurait
+affiché « déposée » indéfiniment.
+
+**⚡ Une balance REJETÉE ne compte pas.** Balance de « Pharmacie du Golfe »
+soumise puis rejetée → la ligne existe dans le read-model, l'avancement reste
+`BALANCE_ATTENDUE` et `bilansEnCours` vaut toujours 1. C'est la branche
+`$eq VALIDÉE`, pas « une ligne existe » (mutation M18).
+
+**⚡⚡ La garde de FRAÎCHEUR prouvée là où l'`eventId` ne peut rien.** Un
+événement **périmé** (`etat: REJETÉE`, `occurredAt: 2020`) republié avec un
+`eventId` **neuf** — donc invisible à la table d'idempotence — a bien été livré
+et **n'a pas écrasé** l'état : `VALIDÉE` intact, log
+`balance.etat.change … périmé — ignoré`. Puis, séparément, **idempotence par
+`eventId`** : le même `payload.eventId` rejoué ne crée aucune ligne ni aucun
+marqueur supplémentaire (2 lignes / 5 marqueurs, inchangés).
+
+**⚡ Résilience amont.** `balance-service` **et** `bilan-service` arrêtés
+(`HTTP 000` sur leur `/health`) : le portefeuille répond en **190 ms**, avec les
+deux états **datés** (`depuis: 2026-08-19T22:18:04Z` / `22:22:00Z`). C'est la
+raison d'être des read-models locaux.
+
+**Recherche, sur vraie base.** `kossi`, `KOSSI`, `1000 745 307` (NIF espacé),
+`TG-LOM-2019` (RCCM) trouvent tous « Ets Kossi Distribution » ; `épargne` trouve
+« Mutuelle d'Épargne Bè ». `.*`, `(a+)+$` et `^ets` rendent **0** — le motif est
+échappé, l'injection et le ReDoS sont fermés.
+
+**Portée et filtres**, admin *vs* collaborateur réels (JWT RS256, `TENANT_USER`
+responsable d'un dossier et contributeur d'un autre) : admin 5 dossiers
+(5/3/1), collaborateur 2 (2/0/1) — **les compteurs sont exactement ce que
+chacun voit**. `q=menuiserie` et `q=cabinet` : 1 pour l'admin, **0** pour le
+collaborateur — `q` ne révèle rien hors portée, « Mon cabinet » compris (D11).
+`affectation=moi` : admin 5 → 3, collaborateur 2 → 2 (**sans effet, sans
+erreur**).
+
+**Archivage.** Dossier archivé : `total=0` en « actifs » **même cherché par son
+nom exact**, `total=1` en « archivés ». Les compteurs suivent le filtre.
+
+**Échéance minimale.** « Ets Kossi Distribution » (régime `REEL`, exercice 2026
+ouvert) → `2026-10-31`, `source: PAQUET_MINIMAL` — le 3ᵉ acompte, le prochain
+au 19/08. « Pharmacie du Golfe » (régime `SYNTHETIQUE`, TPU) → **champ absent**,
+l'IS lui étant libératoire. Les 500 dossiers semés sans exercice → absent aussi.
+
+### Anti-N+1 et NFR — mesurés sur **505 dossiers**
+
+**Nombre de requêtes Mongo par page, relevé au profileur (`profilingLevel: 2`) :**
+
+| taille de page | opérations Mongo |
+|:--:|:--:|
+| 1 | **1** |
+| 25 | **1** |
+| 100 | **1** |
+
+*(La seule autre opération vue au profileur est le sondage 2 s du relais d'outbox,
+étranger à la requête.)*
+
+**⚡ Un défaut de performance trouvé par cette mesure, et corrigé.** La première
+implémentation joignait les quatre sources par `$lookup` **à sous-pipeline
+corrélé** — forme correcte, mais qui s'exécute **une fois par document
+d'entrée** : 505 dossiers × 4 = 2 020 exécutions. Mesuré en base réelle sur le
+même jeu : `$match`+`$sort`+`$facet` seuls = **10 ms** ; + 4 sous-pipelines =
+**302 ms** ; + 4 jointures `localField`/`foreignField` = **139 ms**. Le NFR de la
+story (**changement de filtre < 500 ms**) **tombait** avec la première forme —
+médianes relevées : `tri=activite` 491 ms, `affectation=moi` **922 ms**. Réécrit
+en jointures indexées + `$filter`/`$sortArray` dans le document.
+
+| requête (médiane sur 5, 505 dossiers) | avant | après |
+|---|--:|--:|
+| 1re page (défaut) | 682 ms | **165 ms** |
+| `tri=activite` | 491 ms | **289 ms** |
+| `tri=etat` | 887 ms | **248 ms** |
+| `q=boulangerie` | 157 ms | **38 ms** |
+| `affectation=moi` | 922 ms | **187 ms** |
+| `page=20&size=25` | 391 ms | **205 ms** |
+| `size=100` | 685 ms | **244 ms** |
+| `statut=archives` | 9 ms | **12 ms** |
+
+**NFR tenu** : 1re page **165 ms** (seuil 2 s) ; changement de filtre **12 à
+289 ms** de médiane, **482 ms au pire** (seuil 500 ms). Plancher de la chaîne
+HTTP mesuré à 17 ms (`/health`), lecture unitaire `GET /dossiers/:id` à 12 ms.
+
+⚠️ **La limite à connaître** : la jointure ramène **toutes** les lignes liées du
+dossier, et c'est `$filter` qui choisit ensuite. Les volumes le permettent (un
+dossier porte quelques exercices, quelques décisions d'axes, et **au plus une**
+ligne d'état par exercice — index unique). Un dossier qui les ferait exploser
+exigerait de revenir à une jointure bornée : c'est écrit dans le pipeline, pas
+laissé à découvrir.
+
+**Le plan est bien celui qu'on croit** : `explain("executionStats")` montre un
+`IXSCAN` sur `{orgId, statut, raisonSociale, _id}`, **505 clés pour 505
+documents**, et **aucune étape `SORT`** — l'index porte l'ordre, il n'est pas
+décoratif.
