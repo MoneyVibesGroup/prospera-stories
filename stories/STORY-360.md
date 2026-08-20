@@ -290,3 +290,87 @@ sur la correction, seulement de l'espace. Nettoyage en prod, à faire une fois :
 ```
 db.dossiers_journal.dropIndex('dossierId_1_le_-1'); db.dossiers_journal.dropIndex('orgId_1_le_-1');
 ```
+
+---
+
+## Revue de code (⑥) et revue de sécurité (⑦)
+
+**Revue de sécurité : 0 constat de confiance ≥ 80.** Les pistes instruites puis écartées, avec leur
+raison, sont listées ci-dessous — elles valent autant que des constats.
+
+### Revue de code — 3 constats, tous corrigés avant le merge (commit dédié)
+
+**① BLOQUANT — l'état d'après d'`IDENTITE_MODIFIEE` annonçait un effacement qui n'a pas lieu.**
+`numeroCnss`, `systemeComptable` et `regimeFiscal` ne sont posés par la mise à jour d'enrichissement
+que s'ils sont **présents** dans le profil, et ne sont **jamais** `$unset` — seuls `sigle` et `rccm`
+le sont. Lire l'état d'après dans `params` faisait donc écrire `null` pour une valeur que la base
+**conserve**. Dans une piste append-only, cette fausse ligne est **incorrigible** ; et l'écart étant
+permanent, le garde-fou « rien n'a changé ⇒ aucune entrée » ne pouvait **plus jamais** se déclencher
+pour ce dossier : chaque consolidation suivante ajoutait une entrée de plus au fil d'activité de
+l'administratrice. L'état d'après est désormais dérivé de **`maj`** — ce que la base portera, pas ce
+que le profil contient. *(Corrigé, testé, prouvé par mutation, et **revérifié en docker** ci-dessous.)*
+
+**② BLOQUANT — `projeterUtilisateur` n'était exercé par AUCUN test.** Le double `IdentityUsersService`
+avait été injecté sans qu'un seul cas ne traverse le handler ; le rapport **par fichier** le montrait
+(lignes non couvertes recouvrant exactement le corps de la méthode). Le seul autre code neuf du
+chemin — l'aiguillage `USER_REGISTERED || USER_UPDATED` du consommateur — vit dans un fichier
+`*bootstrap*`, **exclu de `collectCoverageFrom`**. Le chemin Kafka → read-model était donc
+intégralement non testé : la configuration exacte qui a masqué les trois bugs du round-trip Kafka de
+STORY-076/108. 4 tests ajoutés (projection + marqueur, idempotence, marqueur **non** écrit si la
+projection échoue, aucun effet de bord) ; le fichier repasse à **100 %**.
+
+**③ NON BLOQUANT — `findOneAndReplace` manquait à la table append-only.** La liste garde 8 opérations,
+la table n'en testait que 7 : retirer `findOneAndReplace` d'`OPERATIONS_INTERDITES` laissait les
+10 tests **verts**. La garde pouvait donc disparaître en silence, dans une liste dont le JSDoc
+explique précisément qu'une garde partielle « se lit comme une garde ».
+
+⚡ **Une assertion s'est révélée vacante au mutation-test et a été corrigée** : « `apres.sigle` vaut
+`null` » passait **aussi** sans la branche `$unset`, le cabinet de la fixture ne portant pas de sigle.
+La fixture lui en donne un désormais.
+
+### Constats écartés, et pourquoi
+
+| Piste | Raison de l'écart |
+|---|---|
+| `lirePage` : 2 requêtes (page + total) au lieu d'un `$facet` — le JSDoc les justifie par « l'ajout se fait en tête », ce qui est **faux** depuis cette story (une entrée de migration s'insère au milieu) | Conséquence réelle nulle : les deux requêtes sont en `Promise.all`, l'écart ne fait varier que `total`, de ±1, transitoirement |
+| `acquitter` : `E11000` possible sur deux acquittements concurrents | Le filtre correspond **exactement** aux champs de l'index unique — mitigation documentée par MongoDB ; confiance < 80 |
+| Anciens index `{dossierId:1, le:-1}` / `{orgId:1, le:-1}` jamais supprimés par Mongoose | Non uniques et redondants : espace, aucune correction en jeu (commande de nettoyage donnée plus haut) |
+| Refactor d'`exigerTenant` hors des 3 contrôleurs — élargissement du périmètre | Justifié et documenté ; `portee.util.ts` reste à 100 % ; aucun comportement modifié |
+| Garde LWW sans **borne haute** sur `occurredAt` : un événement daté du futur (dérive d'horloge du producteur) figerait définitivement le nom affiché d'un auteur | Signalé par la revue de sécurité à **confiance ~40** : Kafka n'expose aucun port hôte et le bus est zone de confiance interne ; l'exploitation suppose une compromission préalable. Et une borne haute ferait **rejeter** un événement légitime sur une horloge légèrement en avance — le remède serait pire |
+| Isolation tenant d'`identity_users` (aucun `orgId`), RBAC de `/activite`, anti-énumération 404, absence de corps sur `POST /activite/lu`, ordre de déclaration des routes, throttler, CORS/CSRF, injection d'opérateur Mongo via `page`/`size`, DoS par `$skip` géant, fuite par `details`, chemin d'effacement du journal hors CLI, empoisonnement du read-model par message forgé | **Instruits par la revue de sécurité et tous écartés** — voir le détail ci-dessus. La portée vit bien **dans** la requête Mongo, le 403 d'`/activite` porte sur une capacité et non sur une ressource identifiée, et `resoudre()` n'est jamais appelée avec des identifiants venus du client |
+
+---
+
+## ⚠️ Défaut PRÉEXISTANT trouvé par la vérification — hors périmètre, tâche ouverte
+
+**La migration du profil peut BLOQUER sa partition Kafka, et donc la migration de tous les autres
+cabinets.** `enrichirCabinet` écrit `nifSociete` sur « Mon cabinet » ; si un **autre** dossier du même
+cabinet et du même pays porte déjà ce NIF, l'index unique `unicite_nif_societe` rend un `E11000` que
+**ce chemin ne mappe pas**. L'erreur remonte au consommateur, qui rejoue **indéfiniment** — observé en
+docker, boucle d'erreurs toutes les ~500 ms, `profil.societe.consolide` arrêté pour **toutes** les
+organisations.
+
+Ce n'est **pas** un défaut de STORY-360 : le comportement est identique avant et après le passage en
+transaction. Il appartient à **STORY-356**, qui traite déjà le cas voisin de la `ValidationError`
+comme un « poison pill **visible** » (journaliser fort, marquer traité, ne pas bloquer les autres) —
+il suffit d'étendre ce traitement à l'`E11000` de l'**enrichissement**, sans toucher à celui de la
+**création**, qui est correctement avalé comme succès idempotent. Une tâche a été ouverte.
+
+---
+
+## Vérification docker ② — rejouée sur l'état FINAL, après les correctifs de revue
+
+Le correctif ① touche le chemin `IDENTITE_MODIFIEE`, qui n'avait pas été traversé par la première
+vérification (aucun `profil.societe.consolide` n'avait été publié). Il a donc été vérifié **pour la
+première fois et sur l'état final**, en publiant de vrais événements sur le bus.
+
+| Vérification | Résultat |
+|---|---|
+| Publication d'un `profil.societe.consolide` réel sur Kafka → 10ᵉ acte écrit | **1 entrée `IDENTITE_MODIFIEE`**, `parUserId: SYSTEME`, `avant`/`apres` complets sur les 8 champs d'identité |
+| **AC-8 — date d'ORIGINE** | `le: 2025-03-14T08:30:00.000Z` (l'`occurredAt` du profil), **pas** le 2026-08-20 de l'exécution |
+| Place chronologique dans `/activite` | l'entrée de 2025 sort **en dernier**, à sa vraie place — pas en tête le jour de la migration |
+| **Convergence** — rejeu du même profil sous un `eventId` neuf | toujours **1** entrée : aucune ligne fantôme |
+| **Le correctif ①** — profil publié **sans** `numeroCnss` sur un cabinet qui en porte un | `numeroCnss` **conservé en base** (`CNSS-4242`) et **aucune entrée** écrite. Avant le correctif, ce cas écrivait une ligne annonçant un effacement inexistant, à **chaque** événement |
+
+Portes après correctifs : lint **0** · build **OK** · **921 unitaires + 203 e2e** verts · couverture
+**99,23 / 92,96 / 96,58 / 99,26** · **23 mutations** au total, **22 rouges et probantes**.
