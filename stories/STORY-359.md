@@ -391,7 +391,7 @@ l'AC-A2, non livré — voir le § dédié.
 
 ## Progress Tracking
 
-**Statut :** ✅ Revues passées, correctifs appliqués, vérification docker **rejouée** sur l'état final.
+**Statut :** ✅ **CLÔTURÉE le 2026-08-20** — trois PR rebase-mergées sur `dev`, branches supprimées.
 
 ### Ce qui a été livré, par dépôt
 
