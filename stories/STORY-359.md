@@ -3,12 +3,94 @@
 **Epic :** EPIC-043 — Dossier client, unité de travail du cabinet
 **Réf. :** ticket `TICKET-BACKEND-dossier-client-entite-de-premier-rang.md` — blocs **K** et **P** · décisions **D6**, **D15**, **D16** · question **Q11** *(tranchée)*
 **Priorité :** Must Have
-**Story Points :** 8
+**Story Points :** 8 → **12** *(amendée le 2026-08-20 — voir « Amendement »)*
 **Statut :** 📋 À faire
 **Complexité :** high
 **Créée le :** 2026-08-09
 **Sprint :** 20
-**Service :** `dossier-service`
+**Service :** `dossier-service` + `balance-service` + `bilan-service` *(depuis l'amendement du 2026-08-20)*
+
+---
+
+## ⚡ Amendement du 2026-08-20 — le GRAIN, et deux producteurs qui n'existent pas
+
+> **Rien n'est encore écrit** (`📋 À faire`). Les deux points ci-dessous ne coûtent presque rien
+> maintenant et deviennent coûteux dès la première ligne de code : l'un demanderait de **re-keyer un
+> read-model et de rejouer les événements**, l'autre de découvrir en cours de route que la story
+> consomme du vide.
+
+### A. Les read-models sont keyés par DOSSIER ; il leur faut le grain de l'EXERCICE
+
+`EtatBalanceDossier` et `EtatLiasseDossier` sont pensés pour **une ligne de portefeuille par
+dossier**. C'est le bon besoin — mais ce n'est pas le seul, et l'autre est déjà tombé :
+
+⛔ **FE-066 a dû renoncer à un élément de son périmètre faute de cette donnée.** Son §1 demandait
+« l'**état de la balance et de la liasse par exercice** » dans l'onglet Exercices.
+`ExerciceResponseDto` ne publie rien de tel, et le reconstituer côté client coûtait deux dépendances
+qu'aucun AC ne demandait — dont `balance-service`, **derrière `@RequiresBalanceAccess`** : un cabinet
+sans entitlement Atelier aurait vu un onglet **d'exercices** en erreur. L'écart a été transmis ici.
+
+⇒ **Keyer les deux read-models `(dossierId, exercice)`** et faire de la ligne de portefeuille une
+**projection de l'exercice ouvert**, pas l'inverse. Le sens compte : descendre du grain fin vers
+l'agrégat est une lecture ; remonter de l'agrégat vers le grain fin est une reprise de données.
+
+⚡ **La clé de jointure existe déjà, il n'y a rien à inventer** : `BalanceSoumiseV1` porte
+`exercice: { debut, fin }`, `dossier-service` ramène ses bornes à **minuit UTC** avant de les écrire,
+et son index unique `(orgId, dossierId, bornes.debut, bornes.fin)` garantit qu'un couple de bornes
+désigne au plus un exercice.
+
+⚠️ **Ne pas keyer par `exerciceId`** : les événements de balance ne le portent pas — ils portent les
+bornes. Un `exerciceId` obligerait `balance-service` à connaître les identifiants de
+`dossier-service`, c'est-à-dire à recréer le couplage que D5 vient de défaire.
+
+### B. `balance.validee` et `liasse.figee` n'existent pas — cette story les crée
+
+Le périmètre initial disait « alimentée par les read-models locaux (`balance.validee`, `liasse.figee`,
+`dossier.exercice.*`) ». Vérifié le 2026-08-20 :
+
+| Topic attendu | Réalité |
+| --- | --- |
+| `dossier.exercice.*` | ✅ existe — `EXERCICE_TOPICS`, produit par STORY-355 |
+| `balance.validee` | ⛔ **n'existe pas** — `balance-service` émet `balance.submitted` et `balance.rejected` |
+| `liasse.figee` | ⛔ **n'existe pas** — `bilan-service/src/kafka/events/` n'a **aucun** topic de liasse |
+
+**Décision PO du 2026-08-20 : les deux producteurs sont repliés DANS cette story.** Elle passe donc
+de **8 à 12 points** et devient **cross-service** (`dossier-service` + `balance-service` +
+`bilan-service`).
+
+⚠️ **Conséquence à assumer dès le découpage** : la story ne peut plus être mergée d'un bloc. L'ordre
+imposé est **producteurs d'abord, consommateur ensuite** — brancher les projections sur des topics
+vides ferait démarrer les read-models sur un portefeuille intégralement « à configurer », c'est-à-dire
+l'alerte généralisée que STORY-303/FE-061 a déjà payée une fois.
+
+⚠️ **`balance.validee` n'est pas `balance.submitted` renommé.** *Soumise* et *validée* sont deux faits
+distincts (FE-058 : la validation est un acte explicite, avec ses contrôles bloquants). Émettre le
+mauvais ferait afficher « balance validée » sur une balance déposée mais jamais contrôlée — plausible,
+faux, et invisible.
+
+### Ce que l'amendement ajoute aux Acceptance Criteria
+
+- [ ] **AC-A1** — `EtatBalanceDossier` et `EtatLiasseDossier` sont keyés `(dossierId, exercice)` ; un
+      dossier à 3 exercices porte **3 lignes** de chaque, et la ligne de portefeuille en **dérive**
+      (exercice ouvert), sans requête supplémentaire.
+- [ ] **AC-A2** — L'état par exercice est **lisible** : il rejoint `ExerciceResponseDto` (ou un champ
+      frère de `GET /dossiers/{id}/exercices`), **sans appel sortant** et **sans dépendre de
+      l'entitlement Atelier** — c'est tout l'intérêt de le servir depuis `dossier-service`.
+- [ ] **AC-A3** — `balance.validee` est émis par `balance-service` **à la validation** (jamais à la
+      soumission) et `liasse.figee` par `bilan-service` **au figeage**, tous deux portant
+      `dossierId` **et** `exercice { debut, fin }`.
+- [ ] **AC-A4** — Un exercice **sans** balance et **sans** liasse rend un état **absent**, jamais un
+      état « vide » ou « en cours ». *(Même règle que `prochaineEcheance` : ne pas inventer une
+      donnée qu'on n'a pas — un « 0 % » se lit comme un fait mesuré.)*
+- [ ] **AC-A5** — Vérification docker : valider une balance sur 2024, figer la liasse 2024, ouvrir
+      2025 ⇒ l'onglet Exercices distingue les deux années. ⚠️ **Attendre une CONDITION, jamais un
+      délai.**
+
+### Ce que l'amendement ajoute au découpage de points
+
+- Grain `(dossierId, exercice)` sur les deux read-models + dérivation de la ligne : **+1 pt**
+- Producteur `balance.validee` (`balance-service`) : **+1,5 pt**
+- Producteur `liasse.figee` (`bilan-service`) : **+1,5 pt**
 
 ---
 
@@ -113,7 +195,10 @@ afin de **piloter cinquante dossiers sans en ouvrir un seul**.
 
 **Prérequises :** **STORY-301** *(dossier)* · **STORY-353** *(portée — c'est elle qui définit ce que
 compte un compteur)* · **STORY-355** *(exercice ouvert)*.
-**Consomme :** les événements de **STORY-236** *(balance)* et **STORY-357** *(liasse)*.
+**Consomme :** `dossier.exercice.*` de **STORY-355**. ⚠️ **Et PRODUIT elle-même `balance.validee` et
+`liasse.figee`** — ni STORY-236 ni STORY-357 ne les émettent *(vérifié le 2026-08-20)*, ils sont repliés
+dans cette story par la décision PO du jour. Ordre imposé : **producteurs d'abord, consommateur ensuite**.
+**Débloque :** **FE-066** *(l'état par exercice, écart transmis à sa livraison)* · **FE-059**.
 **Sera remplacée en partie par :** **STORY-315 / 316** *(calendrier fiscal complet, sprint 25)*.
 
 ---
