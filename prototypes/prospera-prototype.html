@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-058 Valider ou rejeter une balance</title>
+<title>Prospera · Prototype cumulatif — FE-028 Module Bilan</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -832,6 +832,64 @@
   .authority svg { width: 0.95rem; height: 0.95rem; flex: none; }
   :root[data-theme="dark"] .gate.warn .glyph { color: #fbbf24; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .gate.warn .glyph { color: #fbbf24; } }
+
+  /* ============ FE-028 · MODULE BILAN — shell, gate, balance source ========
+     Le Bilan réutilise TOUT le vocabulaire de l'Atelier (.atl-subnav, .atl-tab,
+     .gate, .state, .st-*, .pf) : deux modules qui se ressemblent à l'écran ne
+     doivent pas se ressembler « à peu près ». Seule la SÉLECTION DE LA BALANCE
+     SOURCE est propre au Bilan — c'est le geste que l'Atelier n'a pas. */
+
+  /* Onglet de sous-nav pas encore livré : visible, désactivé, et il DIT quand. */
+  .atl-tab[disabled] { opacity: 0.55; cursor: not-allowed; }
+  .atl-tab[disabled]:hover { background: transparent; color: var(--muted-fg); }
+  .atl-tab .soon { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); background: var(--hover-surface); padding: 0.05rem 0.4rem; border-radius: 999px; }
+
+  /* Liste de choix de la balance source — des lignes RADIO, pas un tableau :
+     on ne consulte pas, on ÉLIT. */
+  .bsrc-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .bsrc-item {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.9rem;
+    padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--card); cursor: pointer; transition: border-color .14s, box-shadow .14s, background-color .14s;
+  }
+  .bsrc-item:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+  .bsrc-item[data-selected="true"] { border-color: color-mix(in srgb, var(--orange-500) 45%, var(--border)); background: color-mix(in srgb, var(--orange-500) 7%, var(--card)); box-shadow: var(--shadow-sm); }
+  .bsrc-item[data-eligible="false"] { cursor: not-allowed; background: color-mix(in srgb, var(--muted-fg) 5%, var(--card)); border-style: dashed; }
+  .bsrc-item[data-eligible="false"]:hover { border-color: var(--border); box-shadow: none; }
+  .bsrc-rad { width: 1.15rem; height: 1.15rem; border-radius: 50%; border: 2px solid var(--border-strong); display: grid; place-items: center; flex: none; }
+  .bsrc-item[data-selected="true"] .bsrc-rad { border-color: var(--orange-500); }
+  .bsrc-item[data-selected="true"] .bsrc-rad::after { content: ""; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--orange-500); }
+  .bsrc-item[data-eligible="false"] .bsrc-rad { border-style: dashed; opacity: 0.6; }
+  .bsrc-main { min-width: 0; }
+  .bsrc-t { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.92rem; font-weight: 650; }
+  .bsrc-meta { margin: 0.25rem 0 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted-fg); }
+  .bsrc-meta .sep { opacity: 0.5; }
+  .bsrc-why { margin: 0.35rem 0 0; font-size: 0.78rem; color: var(--muted-fg); display: flex; align-items: center; gap: 0.4rem; }
+  .bsrc-why svg { width: 0.9rem; height: 0.9rem; flex: none; }
+  .bsrc-why a, .bsrc-why button { color: var(--link); background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-decoration: underline; }
+  .bsrc-right { text-align: right; font-size: 0.74rem; color: var(--muted-fg); font-family: var(--font-mono); white-space: nowrap; }
+
+  /* Bandeau « balance retenue » — le contrat de travail du module, toujours visible. */
+  .bsrc-retenue {
+    display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
+    padding: 0.85rem 1rem; border-radius: var(--radius);
+    border: 1px solid color-mix(in srgb, var(--success) 32%, var(--border));
+    background: color-mix(in srgb, var(--success) 8%, var(--card));
+  }
+  .bsrc-retenue .ic { width: 2.2rem; height: 2.2rem; border-radius: 0.6rem; display: grid; place-items: center; background: var(--success-soft); color: var(--success); flex: none; }
+  .bsrc-retenue .ic svg { width: 1.15rem; height: 1.15rem; }
+  .bsrc-retenue .t { min-width: 0; flex: 1 1 16rem; }
+  .bsrc-retenue .t b { font-size: 0.9rem; font-weight: 650; }
+  .bsrc-retenue .t p { margin: 0.15rem 0 0; font-size: 0.78rem; color: var(--muted-fg); }
+  .bsrc-retenue .t code { font-family: var(--font-mono); font-size: 0.72rem; }
+
+  /* Aucune balance retenue : le module ne calcule rien, et il le dit. */
+  .bsrc-vide {
+    display: flex; align-items: flex-start; gap: 0.65rem; padding: 0.8rem 0.95rem;
+    border: 1px dashed var(--border-strong); border-radius: var(--radius);
+    background: var(--hover-surface); font-size: 0.82rem; color: var(--muted-fg);
+  }
+  .bsrc-vide svg { width: 1.05rem; height: 1.05rem; flex: none; margin-top: 0.1rem; }
 
   /* ============ IMPORT SAGE (FE-025) — dry-run en deux temps ============== */
   /* Fil d'Ariane retour Sources → écran d'import. */
@@ -1937,6 +1995,12 @@
           <button class="nav-item" data-page="atelier">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
             Atelier <span class="count">Balance</span>
+          </button>
+          <!-- FE-028 : le module AVAL — il consomme la balance validée que
+               l'Atelier produit. Placé après lui, dans l'ordre du travail réel. -->
+          <button class="nav-item" data-page="bilan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
+            Bilan <span class="count">Liasse</span>
           </button>
         </nav>
 
@@ -4572,6 +4636,333 @@
               </div>
               <p class="helper">FE-024 · l'affichage <b>reflète</b> l'entitlement ; <code>@RequiresBalanceAccess</code> décide côté serveur. Routage <code>/atelier</code> → <code>:3007/api/v1</code>.</p>
             </section>
+
+            <!-- ==================== FE-028 · MODULE BILAN ====================
+                 Shell du module, gate d'accès (reflet de @RequiresBilanAccess) et
+                 SÉLECTION DE LA BALANCE SOURCE — dossier-scopée dès la première ligne.
+
+                 ⚡ Ce module NAÎT scopé au dossier (re-spécification du 2026-08-14) :
+                 il n'y a jamais eu de version « pour le cabinet » à re-scoper — c'est
+                 exactement ce qui a supprimé FE-067. Le GATE, lui, reste au niveau
+                 ORGANISATION : l'entitlement et le KYC sont des propriétés du cabinet,
+                 pas du client ouvert. Ne pas le déplacer sur le dossier par symétrie. -->
+            <section class="page" data-page="bilan" hidden>
+
+              <!-- Bandeau de contexte — identique à l'Atelier, et c'est voulu :
+                   les deux modules travaillent DANS le même dossier. -->
+              <div class="onboarding" style="background:var(--card);border-color:var(--border)">
+                <span class="oi" style="background:color-mix(in srgb, var(--orange-500) 14%, var(--card));color:var(--link)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+                </span>
+                <div class="otxt">
+                  <b>Dossier : Ets Kossi Distribution · exercice 2025</b>
+                  <p>Système Normal · régime réel (IS) · SYSCOHADA révisé — la liasse produite ici appartient à ce dossier, et à aucun autre.</p>
+                </div>
+                <button class="btn btn-ghost btn-sm" type="button" data-goto-page="dossiers">Changer de dossier</button>
+              </div>
+
+              <div class="card-surface">
+                <div class="panel-head">
+                  <div>
+                    <h2>Bilan &amp; états financiers</h2>
+                    <p>La liasse (Bilan, compte de résultat, TFT, notes) se construit sur une balance <b>validée</b> de ce dossier.</p>
+                  </div>
+                  <span class="grow"></span>
+                  <div class="atelier-demo" role="tablist" aria-label="Accès au module (démo)">
+                    <span class="lbl">Accès</span>
+                    <button class="btn btn-ghost btn-sm" role="tab" data-bilan-gate="granted" aria-selected="true">Ouvert</button>
+                    <button class="btn btn-ghost btn-sm" role="tab" data-bilan-gate="EMAIL_NOT_VERIFIED" aria-selected="false">E-mail</button>
+                    <button class="btn btn-ghost btn-sm" role="tab" data-bilan-gate="KYC_NOT_APPROVED" aria-selected="false">KYC</button>
+                    <button class="btn btn-ghost btn-sm" role="tab" data-bilan-gate="BILAN_NOT_ENTITLED" aria-selected="false">Non octroyé</button>
+                  </div>
+                </div>
+
+                <!-- ===== GATE FERMÉ — l'écran d'orientation NOMME la raison ===== -->
+                <div class="gate-slot" data-bilan-slot="EMAIL_NOT_VERIFIED" hidden>
+                  <div class="gate warn">
+                    <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+                    <h3>Vérifiez d'abord votre adresse e-mail</h3>
+                    <p>Le Bilan reste fermé tant que l'adresse du cabinet n'est pas confirmée. Un lien a été envoyé à <b>awa.diallo@cabinet-diallo.tg</b>.</p>
+                    <span class="code">403 · EMAIL_NOT_VERIFIED</span>
+                    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                      <button class="btn btn-primary btn-sm" type="button" data-bilan-act="resend"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/></svg> Renvoyer l'e-mail</button>
+                    </div>
+                    <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <code>@RequiresBilanAccess</code> décide côté serveur — l'écran ne fait que rendre la décision compréhensible.</span>
+                  </div>
+                </div>
+
+                <div class="gate-slot" data-bilan-slot="KYC_NOT_APPROVED" hidden>
+                  <div class="gate warn">
+                    <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+                    <h3>Votre dossier KYC n'est pas encore approuvé</h3>
+                    <p>Établir une liasse engage le cabinet : le dossier de vérification doit être approuvé avant d'ouvrir le module.</p>
+                    <span class="code">403 · KYC_NOT_APPROVED</span>
+                    <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                      <button class="btn btn-primary btn-sm" type="button" data-bilan-act="goKyc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg> Compléter mon dossier KYC</button>
+                    </div>
+                    <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> L'ordre d'évaluation copie celui du serveur : e-mail → KYC → entitlement.</span>
+                  </div>
+                </div>
+
+                <!-- BILAN_NOT_ENTITLED — rien à débloquer soi-même : aucune action proposée. -->
+                <div class="gate-slot" data-bilan-slot="BILAN_NOT_ENTITLED" hidden>
+                  <div class="gate blocked">
+                    <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                    <h3>Le module Bilan n'est pas activé pour votre cabinet</h3>
+                    <p>Ce module s'ouvre côté Money&nbsp;Vibes : il n'y a rien à débloquer de votre côté. Proposer une action ici serait une impasse.</p>
+                    <span class="code">403 · BILAN_NOT_ENTITLED</span>
+                    <p class="bsrc-vide" style="max-width:46ch;text-align:left">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                      <span>Cohérence différée : après un octroi, l'entitlement met un instant à se propager (Kafka → read-model). Rechargez la page dans un moment.</span>
+                    </p>
+                    <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Ne jamais conclure « pas d'accès » sur une seule lecture fraîche.</span>
+                  </div>
+                </div>
+
+                <!-- ===== GATE OUVERT — le module ===== -->
+                <div class="gate-slot" data-bilan-slot="granted">
+
+                  <!-- Sous-navigation du module. Les items à venir sont VISIBLES et
+                       désactivés : masquer la suite ferait croire que le module se
+                       résume à une page. Chacun nomme la story qui l'ouvrira.
+                       ⚠️ « Exercices » n'y figure PAS : Q6 a tranché que le DOSSIER
+                       fait foi sur l'exercice (FE-066, onglet de la fiche dossier).
+                       Le rouvrir ici recréerait les deux modèles contradictoires. -->
+                  <div class="atl-subnav" role="tablist" aria-label="Navigation du Bilan">
+                    <button class="atl-tab" role="tab" data-bil-tab="source" aria-selected="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m6.08 9.5-3.5 1.6a1 1 0 0 0 0 1.81l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9a1 1 0 0 0 0-1.83l-3.5-1.59"/></svg>
+                      Balance source
+                    </button>
+                    <button class="atl-tab" role="tab" data-bil-tab="passage" aria-selected="false" disabled title="FE-030 — table de passage et arbitrage des comptes non mappés">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M7 12h10"/></svg>
+                      Table de passage <span class="soon">FE-030</span>
+                    </button>
+                    <button class="atl-tab" role="tab" data-bil-tab="etats" aria-selected="false" disabled title="FE-031 → FE-034 — bilan, compte de résultat, TFT, notes, validation">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
+                      États <span class="soon">FE-031+</span>
+                    </button>
+                    <button class="atl-tab" role="tab" data-bil-tab="previsionnel" aria-selected="false" disabled title="FE-035 / FE-036 — hypothèses, projection 3 ans, trésorerie 12 mois">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>
+                      Prévisionnel <span class="soon">FE-035</span>
+                    </button>
+                    <button class="atl-tab" role="tab" data-bil-tab="export" aria-selected="false" disabled title="FE-038 — export PDF / Excel fidèle au snapshot">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+                      Export <span class="soon">FE-038</span>
+                    </button>
+                  </div>
+
+                  <!-- ===== PANNEAU : choix de la balance source ===== -->
+                  <div class="atl-panel atl-body" data-bil-panel="source">
+                    <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Sur quelle balance établir la liasse&nbsp;?</h3>
+                        <p class="atl-secsub">Le Bilan ne calcule rien tant qu'une balance source n'est pas retenue. Seules les balances <b>validées</b> de <b>ce dossier</b> peuvent servir de base : une balance en brouillon est encore modifiable, une liasse ne l'est pas.</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <div class="atelier-demo" role="tablist" aria-label="État de la liste (démo)">
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="servi" aria-selected="true">Servi</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="loading" aria-selected="false">Chargement</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="error" aria-selected="false">Erreur</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="none-validee" aria-selected="false">Aucune validée</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="empty" aria-selected="false">Aucune balance</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="dossier-404" aria-selected="false">Dossier introuvable</button>
+                      </div>
+                    </div>
+
+                    <!-- ---------- SERVI : la liste, et le choix ---------- -->
+                    <div class="bil-slot" data-bil-slot="servi">
+
+                      <!-- Contrat de travail du module — toujours en tête, jamais enfoui. -->
+                      <div class="bsrc-retenue" data-bsrc-retenue>
+                        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <div class="t">
+                          <b data-bsrc-titre>Balance retenue : exercice 2025 · Sage 100 · v3</b>
+                          <p data-bsrc-sous>Validée le 18/07/2026 à 14:32 · justifiée · équilibrée · <code>sha256:4f2a…c19b</code></p>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" type="button" data-bsrc-clear>Changer de balance</button>
+                        <button class="btn btn-primary btn-sm" type="button" disabled title="FE-030 — table de passage">
+                          Continuer vers la table de passage
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
+                      </div>
+
+                      <!-- Aucune retenue : dit ce que ça empêche, sans dramatiser. -->
+                      <div class="bsrc-vide" data-bsrc-aucune hidden>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span>Aucune balance source retenue — les onglets <b>Table de passage</b>, <b>États</b> et <b>Export</b> resteront fermés tant qu'une balance validée n'est pas choisie ci-dessous.</span>
+                      </div>
+
+                      <div class="bal-filters" style="margin-top:0.2rem">
+                        <span class="bal-count"><b>4</b> balances dans ce dossier · <b>2</b> validées, donc éligibles</span>
+                        <span class="grow" style="flex:1"></span>
+                        <button class="btn btn-ghost btn-sm" type="button" data-goto-page="atelier">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                          Produire une nouvelle balance dans l'Atelier
+                        </button>
+                      </div>
+
+                      <div class="bsrc-list" role="radiogroup" aria-label="Balance source de la liasse">
+
+                        <div class="bsrc-item" role="radio" tabindex="0" aria-checked="true" data-bsrc="b3" data-eligible="true" data-selected="true"
+                             data-titre="Balance retenue : exercice 2025 · Sage 100 · v3"
+                             data-sous="Validée le 18/07/2026 à 14:32 · justifiée · équilibrée · sha256:4f2a…c19b">
+                          <span class="bsrc-rad" aria-hidden="true"></span>
+                          <div class="bsrc-main">
+                            <span class="bsrc-t">
+                              Exercice 2025 · Sage 100 · v3
+                              <span class="st st-validee"><span class="d"></span>Validée</span>
+                              <span class="pf j">Justifiée</span>
+                            </span>
+                            <p class="bsrc-meta">
+                              <span>01/01/2025 → 31/12/2025</span><span class="sep">·</span>
+                              <span>1 284 lignes</span><span class="sep">·</span>
+                              <span class="bal-eq ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Équilibrée</span><span class="sep">·</span>
+                              <span>SYSCOHADA révisé (SN)</span>
+                            </p>
+                          </div>
+                          <span class="bsrc-right">validée le<br/>18/07/2026</span>
+                        </div>
+
+                        <div class="bsrc-item" role="radio" tabindex="0" aria-checked="false" data-bsrc="b2" data-eligible="true" data-selected="false"
+                             data-titre="Balance retenue : exercice 2024 · Sage 100 · v2"
+                             data-sous="Validée le 04/02/2026 à 09:11 · justifiée · équilibrée · sha256:9c07…31ea">
+                          <span class="bsrc-rad" aria-hidden="true"></span>
+                          <div class="bsrc-main">
+                            <span class="bsrc-t">
+                              Exercice 2024 · Sage 100 · v2
+                              <span class="st st-validee"><span class="d"></span>Validée</span>
+                              <span class="pf j">Justifiée</span>
+                            </span>
+                            <p class="bsrc-meta">
+                              <span>01/01/2024 → 31/12/2024</span><span class="sep">·</span>
+                              <span>1 197 lignes</span><span class="sep">·</span>
+                              <span class="bal-eq ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Équilibrée</span><span class="sep">·</span>
+                              <span>SYSCOHADA révisé (SN)</span>
+                            </p>
+                            <p class="bsrc-why">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                              Exercice antérieur — utile pour établir ou recalculer la liasse&nbsp;N-1.
+                            </p>
+                          </div>
+                          <span class="bsrc-right">validée le<br/>04/02/2026</span>
+                        </div>
+
+                        <!-- NON éligible — et la raison est écrite, avec le geste pour la lever. -->
+                        <div class="bsrc-item" role="radio" tabindex="-1" aria-checked="false" aria-disabled="true" data-bsrc="b4" data-eligible="false" data-selected="false">
+                          <span class="bsrc-rad" aria-hidden="true"></span>
+                          <div class="bsrc-main">
+                            <span class="bsrc-t">
+                              Exercice 2025 · Saisie directe · v2
+                              <span class="st st-brouillon"><span class="d"></span>Brouillon</span>
+                              <span class="pf p">Partiellement estimée</span>
+                            </span>
+                            <p class="bsrc-meta">
+                              <span>01/01/2025 → 31/12/2025</span><span class="sep">·</span>
+                              <span>312 lignes</span><span class="sep">·</span>
+                              <span class="bal-eq ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Équilibrée</span>
+                            </p>
+                            <p class="bsrc-why">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+                              Encore modifiable : une liasse bâtie dessus cesserait d'être opposable. <button type="button" data-goto-page="atelier">La valider dans l'Atelier</button>
+                            </p>
+                          </div>
+                          <span class="bsrc-right">modifiée le<br/>21/08/2026</span>
+                        </div>
+
+                        <div class="bsrc-item" role="radio" tabindex="-1" aria-checked="false" aria-disabled="true" data-bsrc="b1" data-eligible="false" data-selected="false">
+                          <span class="bsrc-rad" aria-hidden="true"></span>
+                          <div class="bsrc-main">
+                            <span class="bsrc-t">
+                              Exercice 2024 · Sage 100 · v1
+                              <span class="st st-rejetee"><span class="d"></span>Rejetée</span>
+                              <span class="pf p">Partiellement estimée</span>
+                            </span>
+                            <p class="bsrc-meta">
+                              <span>01/01/2024 → 31/12/2024</span><span class="sep">·</span>
+                              <span>1 190 lignes</span><span class="sep">·</span>
+                              <span class="bal-eq ko"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>Déséquilibrée · écart 412 300 F</span>
+                            </p>
+                            <p class="bsrc-why">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+                              Rejetée à la revue — remplacée par la v2 ci-dessus.
+                            </p>
+                          </div>
+                          <span class="bsrc-right">rejetée le<br/>29/01/2026</span>
+                        </div>
+                      </div>
+
+                      <p class="bsrc-vide">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+                        <span><b>Le choix appartient au dossier.</b> Changer de dossier ne « garde » pas la balance retenue : elle est oubliée, parce qu'une balance de <i>Ets Kossi</i> n'a rien à faire dans la liasse de <i>Sodifab</i>. C'est le risque n°2 (des chiffres plausibles et faux) traité à la racine.</span>
+                      </p>
+                    </div>
+
+                    <!-- ---------- CHARGEMENT ---------- -->
+                    <div class="bil-slot" data-bil-slot="loading" hidden>
+                      <div class="imp-table-wrap">
+                        <div class="sk-row"><span class="sk sk-av"></span><span class="sk sk-line" style="flex:1"></span><span class="sk sk-line" style="width:5rem"></span></div>
+                        <div class="sk-row"><span class="sk sk-av"></span><span class="sk sk-line" style="flex:1"></span><span class="sk sk-line" style="width:5rem"></span></div>
+                        <div class="sk-row"><span class="sk sk-av"></span><span class="sk sk-line" style="flex:1"></span><span class="sk sk-line" style="width:5rem"></span></div>
+                      </div>
+                      <p class="helper" style="margin-top:0.8rem">Lecture des balances du dossier — <code>GET /dossiers/{dossierId}/balances</code> sur <code>:3007</code>.</p>
+                    </div>
+
+                    <!-- ---------- ERREUR ---------- -->
+                    <div class="bil-slot" data-bil-slot="error" hidden>
+                      <div class="state error" style="border:1px solid color-mix(in srgb, var(--danger) 30%, var(--border));border-radius:var(--radius)">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
+                        <h3>Les balances de ce dossier n'ont pas pu être lues</h3>
+                        <p>Le module Bilan est ouvert : c'est la lecture des balances qui a échoué. Rien n'est perdu, réessayez.</p>
+                        <button class="btn btn-primary btn-sm" type="button" data-bil-retry>Réessayer</button>
+                      </div>
+                    </div>
+
+                    <!-- ---------- AUCUNE VALIDÉE (il y a des balances, aucune éligible) ---------- -->
+                    <div class="bil-slot" data-bil-slot="none-validee" hidden>
+                      <div class="state empty" style="border:1px dashed var(--border-strong);border-radius:var(--radius)">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11h6"/><circle cx="12" cy="12" r="10"/></svg></span>
+                        <h3>Aucune balance validée dans ce dossier</h3>
+                        <p style="max-width:44ch">Ce dossier compte <b>3 balances</b>, toutes en brouillon ou rejetées. Une liasse ne se bâtit pas sur une balance encore modifiable — validez-en une dans l'Atelier.</p>
+                        <button class="btn btn-primary btn-sm" type="button" data-goto-page="atelier">Ouvrir l'Atelier de ce dossier</button>
+                      </div>
+                    </div>
+
+                    <!-- ---------- AUCUNE BALANCE DU TOUT ---------- -->
+                    <div class="bil-slot" data-bil-slot="empty" hidden>
+                      <div class="state empty" style="border:1px dashed var(--border-strong);border-radius:var(--radius)">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></span>
+                        <h3>Ce dossier n'a pas encore de balance</h3>
+                        <p style="max-width:44ch">Le Bilan consomme ce que l'Atelier produit. Importez un export Sage, saisissez la balance à la main, ou partez des cahiers de recettes et de dépenses.</p>
+                        <button class="btn btn-primary btn-sm" type="button" data-goto-page="atelier">Aller à l'Atelier</button>
+                      </div>
+                    </div>
+
+                    <!-- ---------- REFUS DE DOSSIER (404 DOSSIER_INTROUVABLE) ---------- -->
+                    <div class="bil-slot" data-bil-slot="dossier-404" hidden>
+                      <div class="state empty" style="border:1px dashed var(--border-strong);border-radius:var(--radius)">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="m9.5 12.5 5 5"/><path d="m14.5 12.5-5 5"/></svg></span>
+                        <h3>Dossier introuvable</h3>
+                        <p style="max-width:46ch">Ce dossier n'existe pas, ou ne fait pas partie de votre portefeuille — nous ne faisons pas la différence, par sécurité.</p>
+                        <button class="btn btn-primary btn-sm" type="button" data-goto-page="dossiers">Retour au portefeuille</button>
+                      </div>
+                      <p class="helper" style="margin-top:0.8rem">Un <code>404 DOSSIER_INTROUVABLE</code> n'est <b>pas</b> un refus du module : le gate est ouvert, c'est le <i>dossier</i> qui est refusé. Les confondre enverrait chercher un accès qu'on a déjà.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ═══ Ce que valide cette maquette, et ce qu'elle n'invente pas ═══ -->
+              <div class="card-surface" style="padding:1.15rem;display:flex;flex-direction:column;gap:0.8rem">
+                <div class="dc-note"><b>Ce que valide cette maquette (FE-028).</b> L'<b>ossature</b> du module Bilan : sa place dans la navigation, sa sous-navigation (les 4 onglets à venir sont montrés désactivés, chacun nommant sa story), le <b>gate d'accès</b> avec ses trois motifs nommés, les états chargement / erreur / vide, et le <b>choix de la balance source</b> — restreint aux balances <b>validées du dossier ouvert</b>. Aucun calcul comptable : les états eux-mêmes arrivent à partir de FE-030.</div>
+
+                <div class="dc-note dc-gap"><b>⚠️ Le gate est de niveau CABINET, la balance de niveau DOSSIER.</b> <code>@RequiresBilanAccess</code> vérifie <code>emailVerified</code> + KYC <code>APPROVED</code> + entitlement <code>bilan</code> <code>ACTIVE</code> — trois propriétés de l'<b>organisation</b>. Les déplacer sur le dossier « par symétrie » avec la balance ferait redemander un octroi par client. La sélection de la balance, elle, est bien dossier-scopée : elle disparaît au changement de dossier.</div>
+
+                <div class="dc-note dc-gap"><b>⚠️ Ce que le backend ne sait pas encore faire.</b> <code>bilan-service</code> <b>ne connaît aucun <code>balanceId</code></b> : <code>POST /dossiers/{id}/bilan/etats</code> attend un tableau de <code>soldesN</code> bruts, sans référence à la balance dont ils viennent. Conséquences, assumées et écrites plutôt que masquées : ① la balance retenue est un <b>contexte de travail côté client</b>, pas un lien serveur ; ② une liasse produite <b>ne peut pas dire de quelle balance elle sort</b> (ni version, ni checksum) ; ③ le serveur ne peut pas refuser une balance non validée — seul l'écran le fait. <b>Ticket ouvert</b> : <code>TICKET-BACKEND-bilan-ne-reference-pas-sa-balance-source</code>.</div>
+
+                <p class="helper">FE-028 · routage <code>/bilan</code> → <code>:3004/api/v1/dossiers/{dossierId}/bilan/*</code> · le gate reflète, <code>@RequiresBilanAccess</code> décide.</p>
+              </div>
+            </section>
+
           </div>
         </main>
       </div>
@@ -4961,7 +5352,8 @@
       users:   ["Utilisateurs", "Gérez les accès de votre cabinet"],
       kyc:     ["Vérification KYC", "Justificatifs légaux du cabinet"],
       billing: ["Abonnement", "Formule et paiement"],
-      atelier: ["Atelier", "Produire une balance exploitable, quelle que soit sa source"]
+      atelier: ["Atelier", "Produire une balance exploitable, quelle que soit sa source"],
+      bilan:   ["Bilan", "Établir la liasse du dossier, sur une balance validée"]
     };
     var appRoot = document.getElementById("appRoot");
     document.querySelectorAll('.nav-item[data-page]').forEach(function (item) {
@@ -4990,7 +5382,10 @@
        Il n'est visible que sur les pages scopées à un dossier, et il porte le nom
        du dossier ouvert. Cliquer dessus ramène au portefeuille : changer de dossier
        change tout le contexte, c'est le geste central du produit. */
-    var DOSSIER_SCOPED = ["dossiers", "atelier"];
+    /* FE-028 : le Bilan rejoint les pages scopées — il travaille DANS un dossier,
+       au même titre que l'Atelier. L'oublier ici masquerait le sélecteur sur le
+       seul écran où le contexte décide de ce qu'on établit. */
+    var DOSSIER_SCOPED = ["dossiers", "atelier", "bilan"];
     var dossierActif = document.getElementById("dossierActif");
     function dcSyncTopbar(page) {
       if (!dossierActif) { return; }
@@ -6113,6 +6508,133 @@
       });
       setTenant("kyc");
     }
+
+
+    /* ===================== FE-028 · Module Bilan ==========================
+       Shell, gate (reflet de @RequiresBilanAccess) et CHOIX DE LA BALANCE
+       SOURCE — dossier-scopé dès la première ligne.
+
+       Trois choses que cette maquette doit rendre indiscutables :
+        1. le gate NOMME sa raison et n'offre une action que s'il en existe une ;
+        2. seule une balance VALIDÉE du dossier ouvert est éligible ;
+        3. changer de dossier OUBLIE la balance retenue. */
+    (function () {
+      var page = document.querySelector('.page[data-page="bilan"]');
+      if (!page) return;
+
+      /* ── Gate : module ouvert / écran d'orientation par raison ───────────── */
+      function setGate(state) {
+        page.querySelectorAll("[data-bilan-gate]").forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.bilanGate === state));
+        });
+        page.querySelectorAll("[data-bilan-slot]").forEach(function (s) {
+          s.hidden = s.dataset.bilanSlot !== state;
+        });
+      }
+      page.querySelectorAll("[data-bilan-gate]").forEach(function (b) {
+        b.addEventListener("click", function () { setGate(b.dataset.bilanGate); });
+      });
+
+      /* CTA des écrans de gate. BILAN_NOT_ENTITLED n'en a AUCUN : l'octroi
+         appartient à Money Vibes, proposer un geste au cabinet serait une impasse. */
+      page.querySelectorAll("[data-bilan-act]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var act = b.dataset.bilanAct;
+          if (act === "resend") notify("success", "E-mail renvoyé", "Un nouveau lien de vérification a été envoyé à votre cabinet.");
+          else if (act === "goKyc") { var n = document.querySelector('.nav-item[data-page="kyc"]'); if (n) n.click(); }
+        });
+      });
+
+      /* ── Sous-navigation : seul « Balance source » est livré (FE-028) ────── */
+      page.querySelectorAll("[data-bil-tab]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (b.disabled) return;
+          page.querySelectorAll("[data-bil-tab]").forEach(function (t) {
+            t.setAttribute("aria-selected", String(t === b));
+          });
+          page.querySelectorAll("[data-bil-panel]").forEach(function (p) {
+            p.hidden = p.dataset.bilPanel !== b.dataset.bilTab;
+          });
+        });
+      });
+
+      /* ── États de la lecture des balances (démo) ─────────────────────────── */
+      function setState(state) {
+        page.querySelectorAll("[data-bil-state]").forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.bilState === state));
+        });
+        page.querySelectorAll("[data-bil-slot]").forEach(function (s) {
+          s.hidden = s.dataset.bilSlot !== state;
+        });
+      }
+      page.querySelectorAll("[data-bil-state]").forEach(function (b) {
+        b.addEventListener("click", function () { setState(b.dataset.bilState); });
+      });
+      var retry = page.querySelector("[data-bil-retry]");
+      if (retry) retry.addEventListener("click", function () { setState("loading"); window.setTimeout(function () { setState("servi"); }, 700); });
+
+      /* ── Choix de la balance source ──────────────────────────────────────
+         Une balance NON éligible ne se sélectionne pas, et le clic ne « ne fait
+         rien » : il redit pourquoi. Un contrôle muet se lit comme une panne. */
+      var retenue = page.querySelector("[data-bsrc-retenue]");
+      var aucune = page.querySelector("[data-bsrc-aucune]");
+      var titre = page.querySelector("[data-bsrc-titre]");
+      var sous = page.querySelector("[data-bsrc-sous]");
+
+      function rendreRetenue(item) {
+        if (!retenue || !aucune) return;
+        var choisie = Boolean(item);
+        retenue.hidden = !choisie;
+        aucune.hidden = choisie;
+        if (choisie && titre && sous) {
+          titre.textContent = item.dataset.titre || "Balance retenue";
+          sous.textContent = item.dataset.sous || "";
+        }
+      }
+
+      function choisir(item) {
+        if (item.dataset.eligible === "false") {
+          notify("error", "Balance non éligible", "Seule une balance VALIDÉE peut servir de base à la liasse — celle-ci est encore modifiable ou a été rejetée.");
+          return;
+        }
+        page.querySelectorAll("[data-bsrc]").forEach(function (i) {
+          var actif = i === item;
+          i.dataset.selected = String(actif);
+          i.setAttribute("aria-checked", String(actif));
+        });
+        rendreRetenue(item);
+        notify("success", "Balance source retenue", "La liasse de ce dossier sera établie sur " + (item.dataset.titre || "cette balance").replace("Balance retenue : ", "") + ".");
+      }
+
+      page.querySelectorAll("[data-bsrc]").forEach(function (item) {
+        item.addEventListener("click", function (ev) {
+          /* Le lien « La valider dans l'Atelier » vit DANS une ligne non
+             éligible : sans ça, il déclencherait aussi le refus au passage. */
+          if (ev.target.closest("[data-goto-page]")) return;
+          choisir(item);
+        });
+        item.addEventListener("keydown", function (ev) {
+          if (ev.key === " " || ev.key === "Enter") { ev.preventDefault(); choisir(item); }
+        });
+      });
+
+      var clear = page.querySelector("[data-bsrc-clear]");
+      if (clear) clear.addEventListener("click", function () {
+        page.querySelectorAll("[data-bsrc]").forEach(function (i) {
+          i.dataset.selected = "false";
+          i.setAttribute("aria-checked", "false");
+        });
+        rendreRetenue(null);
+      });
+
+      /* ⚡ Changer de dossier OUBLIE la balance retenue. C'est le point le plus
+         important de la story, et il ne se voit que si on le joue : garder la
+         sélection ferait établir la liasse d'un client sur la balance d'un autre
+         — plausible, faux, et invisible. */
+      document.querySelectorAll('.nav-item[data-page="dossiers"]').forEach(function (n) {
+        n.addEventListener("click", function () { if (clear) clear.click(); });
+      });
+    })();
 
     /* ===================== FE-024 · Module Atelier =======================
        Gate (reflet de l'entitlement), sous-nav interne, référentiel, balances.
