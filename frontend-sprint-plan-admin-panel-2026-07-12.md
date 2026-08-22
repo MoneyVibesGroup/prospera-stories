@@ -73,7 +73,7 @@ L'admin-panel **ne possède aucune donnée métier** : c'est un **BFF** (Backend
 |---|---|---|---|
 | **AP-EPIC-000** | Socle admin & sécurité | STORY-046 (scaffold BFF), EPIC-005 (auth admin) | Login PLATFORM_ADMIN, BFF, RBAC, layout console |
 | **AP-EPIC-001** | Orgs & revue KYC | STORY-047 (vue agrégée), STORY-013/048 (revue KYC proxifiée) | Liste/détail orgs, file KYC, approve/reject |
-| **AP-EPIC-002** | Entitlements & catalogue | EPIC-007 (STORY-032/033/034), STORY-048 (grant proxifié), **EPIC-026 + STORY-140→143** | Catalogue modules/versions/réf., octroi/révocation entitlements, **organisations d'un module (AP-10)**, **Projets (AP-11)** |
+| **AP-EPIC-002** | Entitlements & catalogue | EPIC-007 (STORY-032/033/034), STORY-048 (grant proxifié), **EPIC-026 + STORY-140→143** | Catalogue modules/versions/réf., octroi/révocation entitlements, **organisations d'un module (AP-10)**, ~~Projets (AP-11)~~ ⛔ *annulée le 2026-08-22* |
 | **AP-EPIC-003** | Dashboard & provisioning | STORY-047/049 (jalon Module 0), P8 provisioning | Tableau de bord plateforme, provisioning vertical, e2e chaîne KYC |
 
 ---
@@ -120,7 +120,10 @@ Point d'entrée retenu : **module → organisations**. Le sens inverse (org → 
 AP-05 et n'est pas redondé.
 *Backend d'appui :* STORY-142 (index inverse), STORY-143 (proxy BFF + résolution des noms) — **sprint 18 backend**.
 
-**AP-11 — Projets (onglet catalogue, création, modules)** · 5 pts · **Sprint 17**
+**~~AP-11 — Projets (onglet catalogue, création, modules)~~** · ⛔ **ANNULÉE le 2026-08-22 (décision PO)**
+> « Retire l'onglet projet, j'ai pas besoin de cela. » Abandonnée en revue de maquette, avant
+> toute ligne de code. Le backend d'appui (STORY-140/141/143, sprint 18) reste livré et sans
+> consommateur. Description d'origine conservée ci-dessous.
 Quatrième onglet du catalogue (Modules · Versions · Référentiels · **Projets**) : créer un projet
 rattaché à une organisation, y regrouper des modules, archiver.
 Règle structurante : un projet ne référence **que des modules déjà entitlés `ACTIVE`** — sinon il
