@@ -4,7 +4,26 @@
 **Ouvert par :** **FE-059a** à l'intégration (2026-08-18)
 **Consommateur frontend nommé :** **FE-071** *(nommé en même temps, pour ne pas rejouer l'orphelinat
 de STORY-144 : une story backend livrée ne déclenche rien tant qu'une story frontend ne la nomme pas)*
-**État :** ⛔ **OUVERT — et il demande un arbitrage PO avant tout code**
+**État :** ✅ **FERMÉ le 2026-08-20** — livré par **STORY-359** (PR `prospera-dossier-service#9`,
+*rebase-mergée*), puis **consommé par FE-071** le 2026-08-23.
+
+> ⚠️ **Ce ticket est resté marqué « OUVERT » trois jours après sa fermeture**, pendant que
+> `sprint-status.yaml` l'annonçait fermé et FE-071 débloquée. C'est le défaut que la note de FE-068
+> nomme : *un `blocked` daté et « revérifié » se relit le moins*. Le corriger ici n'est pas de la
+> tenue de dossier — la fiche FE-071 s'appuyait dessus pour rester bloquée.
+
+**Arbitrage PO (2026-08-19) — la recommandation de ce ticket, retenue telle quelle :**
+
+| # | Question | Décision |
+|:--:|---|---|
+| **Q1** | Maintenir ou retirer le sélecteur ? | **Maintenu.** |
+| **Q2** | « mes dossiers » = responsable seul, ou + contributeur ? | **Responsable ∪ contributeur.** |
+| **Q3** | Le choix survit-il au rechargement ? | **Oui — porté par l'URL.** |
+
+**Ce qui est servi :** `GET /api/v1/dossiers?affectation=moi`, appliqué **après** la portée du jeton
+et jamais à sa place — en `$and`, et pas à la racine : la portée d'un collaborateur utilise déjà un
+`$or`, et un second `$or` dans le même objet de requête Mongo aurait **écrasé** le premier
+(défaut silencieux et *fail-open*, rattrapé par la mutation M1 de STORY-359).
 
 ---
 
@@ -81,9 +100,9 @@ sa place. Par exemple `?affectation=moi`, servi ainsi :
 cette même route : ajouter le filtre ensuite obligerait à retoucher la même signature deux fois, et
 laisserait entre-temps un écran qui ne peut pas l'implémenter honnêtement.
 
-## Arbitrage PO demandé
+## Arbitrage PO demandé — **tranché le 2026-08-19** (voir l'en-tête)
 
-| # | Question | Pourquoi elle bloque |
+| # | Question | Pourquoi elle bloquait |
 |:--:|---|---|
 | **Q1** | Le filtre « Mes dossiers » est-il **maintenu** au produit, ou **retiré de la maquette** ? | S'il est retiré, ce ticket se ferme sans code et FE-071 disparaît. La maquette est validée : seul le PO peut la corriger. |
 | **Q2** | S'il est maintenu : « mes dossiers » = **responsable uniquement**, ou **responsable + contributeur** ? | Les deux se défendent. « Responsable » est ce dont je réponds ; « + contributeur » est ce sur quoi je travaille. Le second est cohérent avec la portée d'un `TENANT_USER`, qui inclut déjà les deux. |
@@ -94,9 +113,9 @@ serveur applique déjà pour un collaborateur, en réutiliser une seconde évite
 « mes dossiers » dans le même produit — et **porter le choix dans l'URL** (Q3), pour qu'un lien
 partagé montre la même chose à son auteur.
 
-## Impact tant que c'est ouvert
+## Impact tant que c'était ouvert
 
-Aucun blocage : le portefeuille est livré et utilisable. Un administrateur de cabinet voit
-l'intégralité de son portefeuille actif et dispose de la **recherche** pour retrouver un dossier
-précis. Ce qui manque est le **tri rapide « ce dont je réponds »**, sur un cabinet à plusieurs
-collaborateurs.
+Aucun blocage : le portefeuille était livré et utilisable. Un administrateur de cabinet voyait
+l'intégralité de son portefeuille actif et disposait de la **recherche** pour retrouver un dossier
+précis. Ce qui manquait était le **tri rapide « ce dont je réponds »**, sur un cabinet à plusieurs
+collaborateurs — livré par **FE-071**.

@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-028 Module Bilan</title>
+<title>Prospera · Prototype cumulatif — FE-068 v2 Journal &amp; fil d'activité en table</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -1792,6 +1792,120 @@
     font-size: 0.75rem; color: var(--muted-fg); background: var(--content-bg); }
   .dc-exo-foot svg { width: 0.95rem; height: 0.95rem; flex: none; margin-top: 0.15rem; }
 
+
+  /* ═══════════════ FE-068 v2 · JOURNAL & FIL D'ACTIVITÉ — EN TABLE ═══════════════
+     ⚡ **v1 rendait une CARTE par acte, et le PO l'a rejetée pour la bonne raison :**
+     « j'ai plusieurs modifications, je vais faire suivant, fatigué ». Une carte est
+     faite pour être REGARDÉE une par une ; un journal se BALAYE. Sur un portefeuille
+     réel, l'administratrice cherche « qu'est-ce qui a bougé chez Kossi », pas « lis
+     mes 128 actes dans l'ordre ».
+
+     La table répond aux deux : même hauteur pour tous les actes ⇒ 4 à 5 fois plus de
+     lignes à l'écran, colonnes alignées ⇒ l'œil descend une seule colonne, et la
+     recherche remplace la pagination pour la question qu'on se pose vraiment.
+
+     ⚠️ **Ce qui NE change pas : l'avant/après reste champ par champ** (AC-3). Il est
+     rangé dans sa colonne, compact — jamais résumé en « modifié ». Un journal qui dit
+     « identité modifiée » sans dire quoi ne répond à aucune des questions pour
+     lesquelles on l'ouvre. */
+
+  /* ── Barre d'outils : recherche, filtre, compteur ── */
+  .jr-tools { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 0.85rem; }
+  .jr-tools .grow { flex: 1 1 auto; }
+  .jr-search { position: relative; flex: 0 1 22rem; min-width: 13rem; }
+  .jr-search svg { position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%);
+    width: 0.95rem; height: 0.95rem; color: var(--muted-fg); pointer-events: none; }
+  .jr-search input { width: 100%; padding: 0.44rem 0.7rem 0.44rem 2.05rem; font: inherit; font-size: 0.82rem;
+    color: var(--foreground); background: var(--card); border: 1px solid var(--border-strong);
+    border-radius: 0.5rem; }
+  .jr-search input::placeholder { color: var(--muted-fg); }
+  .jr-search input:focus-visible { outline: 2px solid var(--ring); outline-offset: -1px; border-color: transparent; }
+
+  /* Filtre par nature d'acte — des puces, pas un menu déroulant : on veut voir
+     d'un coup ce qu'on peut isoler, et combien il y en a. */
+  .jr-chips { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .jr-chip { border: 1px solid var(--border-strong); background: var(--card); color: var(--muted-fg);
+    border-radius: 999px; padding: 0.22rem 0.6rem; font-size: 0.74rem; font-weight: 600; cursor: pointer; }
+  .jr-chip:hover { background: var(--hover-surface); color: var(--foreground); }
+  .jr-chip[aria-pressed="true"] { border-color: var(--primary); color: var(--link);
+    background: color-mix(in srgb, var(--orange-500) 10%, var(--card)); }
+
+  .jr-unread { display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 999px;
+    padding: 0.24rem 0.62rem; background: var(--orange-500); color: #fff; font-size: 0.74rem; font-weight: 700; }
+  .jr-unread .d { width: 0.42rem; height: 0.42rem; border-radius: 999px; background: #fff; }
+
+  /* ── La table ── */
+  .jr-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow-sm); overflow: hidden; }
+  .jr-scroll { overflow-x: auto; }
+  table.jr { border-collapse: collapse; width: 100%; min-width: 54rem; font-size: 0.8rem; }
+  table.jr th { position: sticky; top: 0; z-index: 1; text-align: left; white-space: nowrap;
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 700;
+    color: var(--muted-fg); background: var(--content-bg); padding: 0.5rem 0.85rem;
+    border-bottom: 1px solid var(--border); }
+  table.jr td { padding: 0.5rem 0.85rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.jr tbody tr:hover td { background: var(--hover-surface); }
+  table.jr tbody tr:last-child td { border-bottom: 0; }
+
+  /* Séparateur de journée : il RESTE dans la table, donc les colonnes ne se
+     décalent pas. Un titre hors table aurait cassé l'alignement à chaque jour. */
+  tr.jr-day td { background: var(--content-bg); padding: 0.34rem 0.85rem;
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.07em;
+    font-weight: 700; color: var(--muted-fg); border-bottom: 1px solid var(--border); }
+
+  /* Non lu : un LISERÉ, pas un fond. Un fond teinté sur 20 lignes redevient du
+     bruit ; un liseré se lit en périphérie et laisse la table respirer. */
+  tr.jr-unread-row td:first-child { box-shadow: inset 3px 0 0 var(--orange-500); }
+  tr.jr-unread-row td { background: color-mix(in srgb, var(--orange-500) 3%, transparent); }
+
+  .jr-when { white-space: nowrap; color: var(--muted-fg); font-variant-numeric: tabular-nums; }
+  .jr-when b { display: block; color: var(--foreground); font-weight: 600; }
+  .jr-acte { white-space: nowrap; font-weight: 600; }
+  .jr-acte .dot { display: inline-block; width: 0.45rem; height: 0.45rem; border-radius: 999px;
+    margin-right: 0.42rem; background: var(--neutral-400); vertical-align: middle; }
+  .jr-acte.t-ident   .dot { background: var(--orange-500); }
+  .jr-acte.t-affect  .dot { background: #6366f1; }
+  .jr-acte.t-exo     .dot { background: var(--success); }
+  .jr-acte.t-axes    .dot { background: #0891b2; }
+  .jr-acte.t-archive .dot { background: var(--danger); }
+  .jr-acte.t-origine .dot { background: var(--neutral-500); }
+  .jr-dossier a { color: var(--link); font-weight: 600; text-decoration: none; cursor: pointer; }
+  .jr-dossier a:hover { text-decoration: underline; }
+  .jr-qui { white-space: nowrap; }
+  .jr-qui .sys { color: var(--muted-fg); font-style: italic; }
+  .jr-qui .moi { margin-left: 0.28rem; font-size: 0.66rem; color: var(--muted-fg);
+    border: 1px solid var(--border-strong); border-radius: 999px; padding: 0 0.32rem; }
+  .jr-qui .parti { display: block; font-size: 0.66rem; color: var(--muted-fg); font-style: italic; }
+
+  /* ── Avant / après, champ par champ, DANS la colonne (AC-3) ── */
+  .jr-fields { display: grid; gap: 0.14rem; }
+  .jr-f { display: flex; align-items: baseline; gap: 0.4rem; flex-wrap: wrap; line-height: 1.45; }
+  .jr-f .k { color: var(--muted-fg); font-size: 0.74rem; min-width: 8.5rem; }
+  .jr-f .a { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted-fg); text-decoration: line-through; }
+  .jr-f .arrow { color: var(--neutral-400); }
+  .jr-f .b { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; color: var(--foreground);
+    background: color-mix(in srgb, var(--success) 11%, transparent); border-radius: 0.25rem; padding: 0 0.28rem; }
+  .jr-f .vide { font-family: var(--font-sans); font-style: italic; text-decoration: none; }
+  .jr-motif { margin-top: 0.2rem; font-size: 0.72rem; color: var(--muted-fg); font-style: italic; }
+
+  /* ── Pied : pagination + portée de la recherche ── */
+  .jr-foot { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    padding: 0.6rem 0.85rem; border-top: 1px solid var(--border); background: var(--content-bg);
+    font-size: 0.74rem; color: var(--muted-fg); }
+  .jr-foot .grow { flex: 1 1 auto; }
+  .jr-empty { padding: 2.2rem 1rem; text-align: center; color: var(--muted-fg); font-size: 0.82rem; }
+  .jr-note { display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.6rem 0.85rem;
+    border-top: 1px solid var(--border); font-size: 0.73rem; color: var(--muted-fg); }
+  .jr-note svg { width: 0.9rem; height: 0.9rem; flex: none; margin-top: 0.12rem; }
+
+  /* ── Bandeau de dernière modification, sur la fiche ── */
+  .dc-lastmod { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin-top: 0.55rem;
+    padding: 0.45rem 0.7rem; border-radius: 0.5rem; background: var(--content-bg);
+    border: 1px solid var(--border); font-size: 0.76rem; color: var(--muted-fg); }
+  .dc-lastmod > svg { width: 0.95rem; height: 0.95rem; flex: none; }
+  .dc-lastmod b { color: var(--foreground); }
+  .dc-lastmod .grow { flex: 1 1 auto; }
+
   .dc-mods { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
   .dc-mod { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 0.7rem; }
   .dc-mod .m-top { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
@@ -1978,6 +2092,18 @@
           <button class="nav-item" data-page="billing">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
             Abonnement
+          </button>
+
+          <!-- FE-068 · Q10 option (b) — le fil d'activité tient le rôle de la
+               notification tant que `notification-service` n'existe pas (architecture
+               cadrée le 2026-08-04, port :3008, aucun code). ADMIN SEUL, et ABSENT
+               plutôt que vide pour un collaborateur : un flux vide se lirait
+               « personne ne travaille », pas « ce n'est pas pour vous ».
+               ⛔ Aucune cloche : promettre une notification qui ne partira pas est
+               pire que ne rien promettre. -->
+          <button class="nav-item" data-page="activite" data-admin-only>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            Fil d'activité <span class="count" id="faNavCount">3</span>
           </button>
 
           <span class="sb-label">Clients</span>
@@ -2867,6 +2993,195 @@
               <p class="helper">Aperçu d'emplacement — catalogue &amp; paiement livrés en FE-011/012.</p>
             </section>
 
+
+
+            <!-- ═════════════════════════════════════════════════════════════════════════
+                 PAGE : FIL D'ACTIVITÉ DU PORTEFEUILLE (FE-068 · STORY-360 · D12 · Q10-b)
+                 ─────────────────────────────────────────────────────────────────────────
+                 D12 accorde au collaborateur un droit d'écriture LARGE et assumé — pas de
+                 liste de champs interdits (le PO l'a explicitement écartée). Ce qui
+                 l'encadre n'est donc pas une restriction d'écran : c'est cette page.
+
+                 ⚡ **v2 — LA TABLE REMPLACE LES CARTES, ET C'EST UN RETOUR PO DIRECT :**
+                 « j'ai plusieurs modifications, je vais faire suivant, fatigué ». Une
+                 carte se REGARDE, un journal se BALAYE. Même hauteur pour tous les actes,
+                 colonnes alignées, et surtout une RECHERCHE PAR DOSSIER OU CLIENT — parce
+                 que la question réelle n'est pas « lis mes 128 actes » mais « qu'est-ce
+                 qui a bougé chez Kossi ».
+
+                 ⛔ AUCUNE CLOCHE, AUCUN TEMPS RÉEL. Q10 option (b) : `notification-service`
+                 (spine du 2026-08-04, port :3008) n'a aucun code ; préfigurer une cloche
+                 qui ne sonnera pas serait pire que ne rien promettre.
+                 ═════════════════════════════════════════════════════════════════════════ -->
+            <section class="page" data-page="activite" hidden>
+
+              <div class="jr-tools">
+                <!-- La recherche, EN PREMIER : c'est le geste le plus fréquent. -->
+                <div class="jr-search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                  <input type="search" id="faSearch" placeholder="Rechercher un dossier ou un client…" aria-label="Rechercher un dossier ou un client">
+                </div>
+
+                <!-- Filtrer par nature d'acte : des puces, pas un menu déroulant — on
+                     veut voir d'un coup ce qu'on peut isoler. -->
+                <div class="jr-chips" role="group" aria-label="Filtrer par nature d'acte">
+                  <button class="jr-chip" type="button" aria-pressed="true"  data-fa-filtre="tous">Tous</button>
+                  <button class="jr-chip" type="button" aria-pressed="false" data-fa-filtre="ident">Identité</button>
+                  <button class="jr-chip" type="button" aria-pressed="false" data-fa-filtre="affect">Affectation</button>
+                  <button class="jr-chip" type="button" aria-pressed="false" data-fa-filtre="exo">Exercices</button>
+                  <button class="jr-chip" type="button" aria-pressed="false" data-fa-filtre="axes">Axes</button>
+                  <button class="jr-chip" type="button" aria-pressed="false" data-fa-filtre="cycle">Cycle de vie</button>
+                </div>
+
+                <span class="grow"></span>
+
+                <!-- Le compteur est SERVEUR (curseur `derniereLectureLe` par
+                     administrateur) : il survit au rechargement, et deux onglets ouverts
+                     ne le désynchronisent pas. À zéro, il DISPARAÎT — un « 0 non lu »
+                     affiché se relit comme une panne. -->
+                <span class="jr-unread" id="faUnread"><span class="d"></span><span id="faUnreadTxt">3 non lus</span></span>
+                <button class="btn btn-ghost btn-sm" type="button" id="faAck">Tout marquer comme lu</button>
+              </div>
+
+              <div class="jr-wrap">
+                <div class="jr-scroll">
+                  <table class="jr">
+                    <thead>
+                      <tr>
+                        <th style="width:8.5rem">Quand</th>
+                        <th style="width:12rem">Dossier</th>
+                        <th style="width:13rem">Acte</th>
+                        <th style="width:10rem">Par</th>
+                        <th>Ce qui a changé</th>
+                      </tr>
+                    </thead>
+                    <tbody id="faBody">
+                      <tr class="jr-day"><td colspan="5">Aujourd'hui — 22 août 2026</td></tr>
+
+                      <tr class="jr-unread-row" data-fa-row data-dossier="Ets Kossi Distribution" data-type="ident">
+                        <td class="jr-when"><b>14:22</b>22 août</td>
+                        <td class="jr-dossier"><a data-fa-open>Ets Kossi Distribution</a></td>
+                        <td class="jr-acte t-ident"><span class="dot"></span>Identité fiscale modifiée</td>
+                        <td class="jr-qui">Kofi Santos</td>
+                        <td>
+                          <!-- AC-3 : champ par champ. « Identité modifiée » sans dire QUOI
+                               ne répond à aucune des questions pour lesquelles on ouvre un
+                               journal. La table le range, elle ne le résume pas. -->
+                          <div class="jr-fields">
+                            <div class="jr-f"><span class="k">N° CNSS</span><span class="a vide">non renseigné</span><span class="arrow">→</span><span class="b">084512</span></div>
+                            <div class="jr-f"><span class="k">RCCM</span><span class="a">TG-LOM-2019-A-1204</span><span class="arrow">→</span><span class="b">TG-LOM-2019-B-1204</span></div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr class="jr-unread-row" data-fa-row data-dossier="Boulangerie du Golfe" data-type="exo">
+                        <td class="jr-when"><b>11:08</b>22 août</td>
+                        <td class="jr-dossier"><a data-fa-open>Boulangerie du Golfe</a></td>
+                        <td class="jr-acte t-exo"><span class="dot"></span>Exercice ouvert</td>
+                        <td class="jr-qui">Fatou Adjovi</td>
+                        <td>
+                          <div class="jr-fields">
+                            <div class="jr-f"><span class="k">Exercice</span><span class="b">2026</span></div>
+                            <div class="jr-f"><span class="k">Période</span><span class="b">01/01/2026 → 31/12/2026 (365 j)</span></div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr class="jr-unread-row" data-fa-row data-dossier="Ets Kossi Distribution" data-type="axes">
+                        <td class="jr-when"><b>09:30</b>22 août</td>
+                        <td class="jr-dossier"><a data-fa-open>Ets Kossi Distribution</a></td>
+                        <td class="jr-acte t-axes"><span class="dot"></span>Axes comptable et fiscal décidés</td>
+                        <td class="jr-qui">Kofi Santos</td>
+                        <td>
+                          <div class="jr-fields">
+                            <div class="jr-f"><span class="k">Système comptable</span><span class="a">SMT</span><span class="arrow">→</span><span class="b">SN</span></div>
+                            <div class="jr-f"><span class="k">Régime fiscal</span><span class="a">TPU</span><span class="arrow">→</span><span class="b">REEL_IS</span></div>
+                            <div class="jr-f"><span class="k">Effet à dater du</span><span class="b">01/01/2026</span></div>
+                          </div>
+                          <p class="jr-motif">Motif : CA 2026 franchit le plafond TPU (72 M &gt; 60 M) — bascule confirmée par le client.</p>
+                        </td>
+                      </tr>
+
+                      <tr class="jr-day"><td colspan="5">Hier — 21 août 2026</td></tr>
+
+                      <tr data-fa-row data-dossier="Ets Kossi Distribution" data-type="affect">
+                        <td class="jr-when"><b>16:40</b>21 août</td>
+                        <td class="jr-dossier"><a data-fa-open>Ets Kossi Distribution</a></td>
+                        <td class="jr-acte t-affect"><span class="dot"></span>Affectation modifiée</td>
+                        <!-- Un acte de l'administratrice : présent dans le fil, jamais
+                             compté comme non lu — on n'est pas notifié de ce qu'on vient
+                             de faire. -->
+                        <td class="jr-qui">Awa Diallo <span class="moi">vous</span></td>
+                        <td>
+                          <div class="jr-fields">
+                            <div class="jr-f"><span class="k">Responsable</span><span class="a">Awa Diallo</span><span class="arrow">→</span><span class="b">Kofi Santos</span></div>
+                            <div class="jr-f"><span class="k">Contributeurs</span><span class="a vide">aucun</span><span class="arrow">→</span><span class="b">Fatou Adjovi</span></div>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr data-fa-row data-dossier="SARL Vieux Comptoir" data-type="cycle">
+                        <td class="jr-when"><b>10:12</b>21 août</td>
+                        <td class="jr-dossier"><a data-fa-open>SARL Vieux Comptoir</a></td>
+                        <td class="jr-acte t-archive"><span class="dot"></span>Dossier archivé</td>
+                        <td class="jr-qui">Awa Diallo <span class="moi">vous</span></td>
+                        <td><p class="jr-motif">Motif : fin de mission au 31/12/2026, non renouvelée.</p></td>
+                      </tr>
+
+                      <tr data-fa-row data-dossier="Cabinet Diallo Mon cabinet" data-type="ident">
+                        <td class="jr-when"><b>03:00</b>21 août</td>
+                        <td class="jr-dossier"><a data-fa-open>Cabinet Diallo</a> <span class="dc-badge info">Mon cabinet</span></td>
+                        <td class="jr-acte t-ident"><span class="dot"></span>Identité fiscale modifiée</td>
+                        <!-- `SYSTEME` n'est pas « un utilisateur qu'on n'a pas su
+                             résoudre » : le service pose un drapeau exprès pour que
+                             l'écran ne confonde pas une décision automatique avec une
+                             réplication en retard. Aucun nom n'est inventé. -->
+                        <td class="jr-qui"><span class="sys">système</span></td>
+                        <td><p class="jr-motif">Identité fiscale reprise de l'ancien profil société (migration).</p></td>
+                      </tr>
+
+                      <tr class="jr-day"><td colspan="5">14 mars 2025</td></tr>
+
+                      <tr data-fa-row data-dossier="Ets Kossi Distribution" data-type="cycle">
+                        <td class="jr-when"><b>08:30</b>14 mars 2025</td>
+                        <td class="jr-dossier"><a data-fa-open>Ets Kossi Distribution</a></td>
+                        <td class="jr-acte t-origine"><span class="dot"></span>Dossier créé</td>
+                        <!-- AC-2 : Yao a quitté le cabinet. Il reste NOMMÉ — l'historique
+                             appartient au dossier, pas à l'employé (Q2), et le read-model
+                             d'identité ne réplique aucun statut, précisément pour ça. -->
+                        <td class="jr-qui">Yao Amegan <span class="parti">a quitté le cabinet</span></td>
+                        <td>
+                          <div class="jr-fields">
+                            <div class="jr-f"><span class="k">Raison sociale</span><span class="b">Ets Kossi Distribution</span></div>
+                            <div class="jr-f"><span class="k">Forme juridique</span><span class="b">SARL</span></div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <p class="jr-empty" id="faEmpty" hidden>Aucun acte ne correspond à cette recherche.</p>
+
+                <div class="jr-foot">
+                  <span id="faCount">7 actes sur 128 · page 1 sur 6</span>
+                  <span class="grow"></span>
+                  <button class="btn btn-ghost btn-sm" type="button" disabled>Précédent</button>
+                  <button class="btn btn-ghost btn-sm" type="button">Suivant</button>
+                </div>
+
+                <div class="jr-note">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  <span>
+                    Vos collaborateurs modifient librement les dossiers qui leur sont affectés : c'est
+                    <b>ce fil</b> qui vous le fait savoir, pas une restriction d'écran. <b>Vos propres actes ne
+                    comptent jamais comme non lus</b>, mais ils restent dans le fil — une piste qui masquerait
+                    des lignes selon qui la lit ne serait plus une piste.
+                  </span>
+                </div>
+              </div>
+            </section>
+
             <!-- ═════════════════════════════════════════════════════════════════════════
                  PAGE : DOSSIERS CLIENTS (FE-D00 portefeuille · FE-D01 assistant)
                  ─────────────────────────────────────────────────────────────────────────
@@ -3095,6 +3410,18 @@
                   <div class="dc-mandat">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 8.5C8 19.5 5 16.5 5 12V6Z"/><path d="m9 12 2 2 4-4"/></svg>
                     <span><b>Mandat attesté</b> le 12 janvier 2024 à 09:41 par <b>Awa Diallo</b> — le cabinet déclare représenter ce client.</span>
+                  </div>
+
+                  <!-- FE-068 · bandeau de dernière modification (bloc L).
+                       ⚠️ Il ne vient PAS du dossier : `DossierResponseDto` porte bien un
+                       `version`, mais ni l'auteur ni la date du dernier ACTE. La source
+                       est la première ligne du journal (`GET /dossiers/{id}/journal`,
+                       antéchronologique) — donc l'auteur y est déjà NOMMÉ, et il n'y a
+                       aucun `userId` à résoudre ici. -->
+                  <div class="dc-lastmod">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 2"/></svg>
+                    <span>Dernière modification le <b>22 août 2026 à 14:22</b> par <b>Kofi Santos</b> — <b>Identité fiscale modifiée</b></span>
+                    <span class="dc-badge mute">version 4</span>
                     <span class="grow"></span>
                     <button class="btn btn-ghost btn-sm" type="button" data-dc-edit="journal">Voir le journal</button>
                   </div>
@@ -3133,23 +3460,118 @@
                   </div>
                 </div>
 
+                <!-- ═══ FE-068 v2 · JOURNAL DU DOSSIER (bloc L, STORY-360) ═══
+                     ⚡ **Même table que le fil du portefeuille, moins la colonne
+                     « Dossier » — on est DANS le dossier.** Un rendu partagé n'est pas
+                     une économie : deux implémentations divergeraient à la première
+                     évolution, et c'est toujours le journal du dossier, moins regardé,
+                     qui deviendrait le parent pauvre.
+
+                     ⚡ Le pavé « le journal est écrit mais aucune route ne le relit » a
+                     DISPARU, et son retrait est un livrable : `GET /dossiers/{id}/journal`
+                     existe depuis STORY-360 (mergée le 2026-08-20). Garder l'ancien
+                     avertissement encoderait une vérité expirée et la garderait active. -->
                 <div class="dc-panel-edit dc-panel-solo" data-dc-panel-edit="journal" hidden>
-                  <div class="dc-edit-lbl">Journal du dossier <span style="font-weight:400;color:var(--muted-fg)">— append-only, jamais modifiable</span></div>
-                  <div class="scroll-x">
-                    <table class="dc-tbl">
-                      <thead><tr><th>Quand</th><th>Qui</th><th>Quoi</th><th>Détail</th></tr></thead>
+                  <div class="jr-tools" style="padding:0.85rem 0.9rem 0;margin-bottom:0.7rem">
+                    <div class="dc-edit-lbl" style="margin:0">Journal du dossier</div>
+                    <span class="dc-badge mute">23 actes</span>
+                    <span class="grow"></span>
+                    <div class="jr-search" style="flex:0 1 17rem">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                      <input type="search" placeholder="Rechercher un acte, un auteur…" aria-label="Rechercher dans le journal">
+                    </div>
+                  </div>
+
+                  <div class="jr-scroll" style="border-top:1px solid var(--border)">
+                    <table class="jr" style="min-width:42rem">
+                      <thead>
+                        <tr>
+                          <th style="width:9rem">Quand</th>
+                          <th style="width:13rem">Acte</th>
+                          <th style="width:10rem">Par</th>
+                          <th>Ce qui a changé</th>
+                        </tr>
+                      </thead>
                       <tbody>
-                        <tr><td>02/08/2026 14:22</td><td>Kofi Santos</td><td>Identité modifiée</td><td>N° CNSS : — → 084512 <span class="dc-badge mute">v4</span></td></tr>
-                        <tr><td>18/03/2026 10:05</td><td>Awa Diallo</td><td>Responsable changé</td><td>Awa Diallo → Kofi Santos</td></tr>
-                        <tr><td>09/01/2025 08:12</td><td>Kofi Santos</td><td>Exercice ouvert</td><td>2025, à-nouveaux repris de 2024</td></tr>
-                        <tr><td>12/01/2024 09:41</td><td>Awa Diallo</td><td>Mandat attesté</td><td>Création du dossier <span class="dc-badge ok">origine</span></td></tr>
+                        <tr>
+                          <td class="jr-when"><b>14:22</b>22 août 2026</td>
+                          <td class="jr-acte t-ident"><span class="dot"></span>Identité fiscale modifiée</td>
+                          <td class="jr-qui">Kofi Santos</td>
+                          <td>
+                            <div class="jr-fields">
+                              <div class="jr-f"><span class="k">N° CNSS</span><span class="a vide">non renseigné</span><span class="arrow">→</span><span class="b">084512</span></div>
+                              <div class="jr-f"><span class="k">RCCM</span><span class="a">TG-LOM-2019-A-1204</span><span class="arrow">→</span><span class="b">TG-LOM-2019-B-1204</span></div>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="jr-when"><b>16:40</b>21 août 2026</td>
+                          <td class="jr-acte t-affect"><span class="dot"></span>Affectation modifiée</td>
+                          <td class="jr-qui">Awa Diallo</td>
+                          <td>
+                            <div class="jr-fields">
+                              <div class="jr-f"><span class="k">Responsable</span><span class="a">Awa Diallo</span><span class="arrow">→</span><span class="b">Kofi Santos</span></div>
+                              <div class="jr-f"><span class="k">Contributeurs</span><span class="a vide">aucun</span><span class="arrow">→</span><span class="b">Fatou Adjovi</span></div>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="jr-when"><b>08:12</b>9 janvier 2025</td>
+                          <td class="jr-acte t-exo"><span class="dot"></span>Exercice ouvert</td>
+                          <td class="jr-qui">Kofi Santos</td>
+                          <td>
+                            <div class="jr-fields">
+                              <div class="jr-f"><span class="k">Exercice</span><span class="b">2025</span></div>
+                              <div class="jr-f"><span class="k">Période</span><span class="b">01/01/2025 → 31/12/2025 (365 j)</span></div>
+                              <div class="jr-f"><span class="k">Origine</span><span class="b">Tenu dans Prospera</span></div>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <!-- D2 — l'attestation de mandat EST cette ligne de journal :
+                               pas un formulaire, pas une pièce. Le texte attesté est FIGÉ
+                               à l'écriture (contrairement au libellé de l'acte, résolu à
+                               la lecture) parce qu'il est l'acte lui-même, pas son
+                               étiquette. -->
+                          <td class="jr-when"><b>09:41</b>12 janvier 2024</td>
+                          <td class="jr-acte t-origine"><span class="dot"></span>Mandat attesté</td>
+                          <td class="jr-qui">Awa Diallo</td>
+                          <td>
+                            <div class="jr-fields">
+                              <div class="jr-f"><span class="k">Qualité du signataire</span><span class="b">Gérant</span></div>
+                              <div class="jr-f"><span class="k">Référence</span><span class="b">LM-2024-018</span></div>
+                              <div class="jr-f"><span class="k">Texte attesté</span><span class="b">v1 — figé à l'écriture</span></div>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="jr-when"><b>09:41</b>12 janvier 2024</td>
+                          <td class="jr-acte t-origine"><span class="dot"></span>Dossier créé</td>
+                          <td class="jr-qui">Awa Diallo</td>
+                          <td>
+                            <div class="jr-fields">
+                              <div class="jr-f"><span class="k">Raison sociale</span><span class="b">Ets Kossi Distribution</span></div>
+                              <div class="jr-f"><span class="k">Forme juridique</span><span class="b">SARL</span></div>
+                              <div class="jr-f"><span class="k">Pays</span><span class="b">TG</span></div>
+                            </div>
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>
-                  <div class="dc-edit-foot">
-                    <span class="dc-edit-note">⚠️ Le journal est <b>écrit</b> par le backend depuis STORY-079 — mais <b>aucune route ne le relit</b> aujourd'hui (bloc L du ticket).</span>
+
+                  <div class="jr-foot">
+                    <span>5 actes sur 23 · page 1 sur 5</span>
                     <span class="grow"></span>
-                    <button class="btn btn-ghost btn-sm" type="button" data-dc-edit-cancel>Fermer</button>
+                    <button class="btn btn-ghost btn-sm" type="button" disabled>Précédent</button>
+                    <button class="btn btn-ghost btn-sm" type="button">Suivant</button>
+                  </div>
+
+                  <!-- ⚠️ Un SEUL bouton de fermeture : la v1 en avait deux (celui du
+                       bandeau et celui du pied), pour la même action. -->
+                  <div class="jr-note">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                    <span>Append-only : aucune ligne ne peut être modifiée ni supprimée — <b>le schéma le refuse</b>, pas seulement la convention. Le journal reste lisible sur un dossier <b>archivé</b> (D9) : l'historique demeure opposable.</span>
                   </div>
                 </div>
 
@@ -5342,7 +5764,7 @@
     /* Pages où l'activation du cabinet (stepper + bandeau KYC) n'a rien à faire :
        ce bloc pilote l'ONBOARDING, pas la consultation d'une fiche. Le répéter
        au-dessus du profil parasitait l'écran (retour PO, 2026-07-22). */
-    var ACTIVATION_HIDDEN_ON = ["home", "profile", "me", "dossiers"];
+    var ACTIVATION_HIDDEN_ON = ["home", "profile", "me", "dossiers", "activite"];
 
     var titles = {
       home:    ["Accueil", "Les modules ouverts pour votre cabinet"],
@@ -5352,6 +5774,7 @@
       users:   ["Utilisateurs", "Gérez les accès de votre cabinet"],
       kyc:     ["Vérification KYC", "Justificatifs légaux du cabinet"],
       billing: ["Abonnement", "Formule et paiement"],
+      activite: ["Fil d'activité", "Ce que vos collaborateurs ont modifié, et sur quel dossier"],
       atelier: ["Atelier", "Produire une balance exploitable, quelle que soit sa source"],
       bilan:   ["Bilan", "Établir la liasse du dossier, sur une balance validée"]
     };
@@ -5439,6 +5862,121 @@
         if (target) { target.click(); }
       });
     });
+
+
+    /* ═══════════════ FE-068 v2 · FIL D'ACTIVITÉ ═══════════════
+       Trois comportements, et les trois répondent au même retour PO : « j'ai
+       plusieurs modifications, je vais faire suivant, fatigué ».
+
+       ① **La recherche par dossier ou par client** — la vraie question n'est pas
+          « lis mes 128 actes dans l'ordre », c'est « qu'est-ce qui a bougé chez
+          Kossi ». Elle filtre les LIGNES, et masque les en-têtes de journée
+          devenues vides : un « Hier » suivi de rien se lit comme une panne.
+       ② **Le filtre par nature d'acte**, qui se combine à la recherche.
+       ③ **L'acquittement**, dont le compteur est SERVEUR (`POST /activite/lu`
+          pose le curseur de lecture de CET administrateur à l'instant serveur).
+          La maquette montre la seule chose que l'écran décide : ce qui se passe
+          quand la réponse revient.
+
+       ⚠️ On NE retire PAS les lignes acquittées. « Lu » n'est pas « traité » : un
+       fil qui se vide à la lecture obligerait à tout retenir de mémoire, et la
+       piste cesserait d'être opposable.
+
+       ⚠️ Aucun rafraîchissement serré n'est simulé, et c'est le point : le vrai
+       écran ne relit le compteur qu'à l'ouverture puis sur intervalle LONG
+       (≥ 60 s). FE-017 a documenté un quota IdP global par IP de 100 requêtes /
+       60 s dont l'épuisement s'affiche comme « Identifiants invalides ». */
+    (function () {
+      var page = document.querySelector('.page[data-page="activite"]');
+      if (!page) { return; }
+
+      var recherche = page.querySelector("#faSearch");
+      var vide = page.querySelector("#faEmpty");
+      var compte = page.querySelector("#faCount");
+      var ack = page.querySelector("#faAck");
+      var pastille = page.querySelector("#faUnread");
+      var pastilleTxt = page.querySelector("#faUnreadTxt");
+      var navCount = document.getElementById("faNavCount");
+      var lignes = Array.prototype.slice.call(page.querySelectorAll("[data-fa-row]"));
+      var filtre = "tous";
+
+      function appliquer() {
+        var q = (recherche.value || "").trim().toLowerCase();
+        var visibles = 0;
+
+        lignes.forEach(function (tr) {
+          var surDossier = !q || tr.dataset.dossier.toLowerCase().indexOf(q) !== -1;
+          var surType = filtre === "tous" || tr.dataset.type === filtre;
+          var montre = surDossier && surType;
+          tr.hidden = !montre;
+          if (montre) { visibles++; }
+        });
+
+        /* Une en-tête de journée sans ligne se MASQUE : « Hier » suivi de rien se
+           lit comme une panne, pas comme un filtre qui a fait son travail. */
+        page.querySelectorAll("tr.jr-day").forEach(function (jour) {
+          var suivant = jour.nextElementSibling, garde = false;
+          while (suivant && !suivant.classList.contains("jr-day")) {
+            if (!suivant.hidden) { garde = true; break; }
+            suivant = suivant.nextElementSibling;
+          }
+          jour.hidden = !garde;
+        });
+
+        var filtré = q || filtre !== "tous";
+        vide.hidden = visibles > 0;
+        compte.textContent = filtré
+          ? visibles + (visibles > 1 ? " actes trouvés" : " acte trouvé") + " sur cette page"
+          : "7 actes sur 128 · page 1 sur 6";
+      }
+
+      recherche.addEventListener("input", appliquer);
+
+      page.querySelectorAll("[data-fa-filtre]").forEach(function (chip) {
+        chip.addEventListener("click", function () {
+          filtre = chip.dataset.faFiltre;
+          page.querySelectorAll("[data-fa-filtre]").forEach(function (c) {
+            c.setAttribute("aria-pressed", String(c === chip));
+          });
+          appliquer();
+        });
+      });
+
+      function rendreCompteur(nonLus) {
+        if (nonLus > 0) {
+          pastille.hidden = false;
+          pastilleTxt.textContent = nonLus + (nonLus > 1 ? " non lus" : " non lu");
+          ack.hidden = false;
+          if (navCount) { navCount.hidden = false; navCount.textContent = String(nonLus); }
+          return;
+        }
+        /* Zéro non-lu : la pastille DISPARAÎT plutôt que d'afficher « 0 non lu » —
+           un compteur à zéro qu'on affiche quand même se relit comme une panne, et
+           le bouton qui l'accompagne serait une action sans effet. */
+        pastille.hidden = true;
+        ack.hidden = true;
+        if (navCount) { navCount.hidden = true; }
+      }
+
+      ack.addEventListener("click", function () {
+        page.querySelectorAll("tr.jr-unread-row").forEach(function (tr) {
+          tr.classList.remove("jr-unread-row");
+        });
+        rendreCompteur(0);
+        notify("success", "Fil marqué comme lu", "Le repère est enregistré côté serveur : il tiendra au rechargement.");
+      });
+
+      /* Ouvrir le dossier depuis une ligne : le fil répond « qui a fait quoi », le
+         dossier répond « et alors ». Sans ce lien, l'administratrice lirait une
+         alerte sans pouvoir agir dessus. */
+      page.querySelectorAll("[data-fa-open]").forEach(function (a) {
+        a.addEventListener("click", function () {
+          var nav = document.querySelector('.nav-item[data-page="dossiers"]');
+          if (nav) { nav.click(); }
+          dcShow("open");
+        });
+      });
+    })();
 
     /* ═══ PORTÉE DU PORTEFEUILLE (D6) ═══
        L'admin voit tout et peut se restreindre à ses dossiers ; le collaborateur
@@ -5588,9 +6126,17 @@
     /* ═══ Configuration du dossier : ouverture en place ═══
        Un seul panneau ouvert à la fois — deux formulaires simultanés sur la même
        fiche invitent à enregistrer l'un en croyant enregistrer l'autre. */
+    /* ⚠️ **Le libellé d'origine est MÉMORISÉ, il n'est plus reconstitué.** La
+       version précédente remettait « Modifier » sur TOUS les déclencheurs à la
+       fermeture — ce qui allait tant qu'ils s'appelaient tous ainsi. Le bouton
+       « Voir le journal » (FE-068) se serait donc renommé « Modifier » après une
+       première ouverture, sur un panneau qu'on ne peut précisément PAS modifier. */
+    document.querySelectorAll('[data-dc-edit]').forEach(function (b) {
+      b.dataset.dcLabel = b.textContent.trim();
+    });
     function dcCloseEdits() {
       document.querySelectorAll('[data-dc-panel-edit]').forEach(function (p) { p.hidden = true; });
-      document.querySelectorAll('[data-dc-edit]').forEach(function (b) { b.textContent = "Modifier"; });
+      document.querySelectorAll('[data-dc-edit]').forEach(function (b) { b.textContent = b.dataset.dcLabel; });
     }
     document.querySelectorAll('[data-dc-edit]').forEach(function (btn) {
       btn.addEventListener("click", function () {
