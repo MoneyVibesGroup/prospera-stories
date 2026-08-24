@@ -1,6 +1,6 @@
 # STORY-375 : les codes de refus deviennent un contrat, pas de la prose — un code ajouté doit casser la compilation du client
 
-Status: review
+Status: done
 
 **Epic :** EPIC-043 — Le dossier client devient l'unité de travail du cabinet
 **Points :** 3 · **Complexité :** low · **Sprint :** 20 (backend) · **Service :** `dossier-service`
@@ -320,3 +320,34 @@ Stack arrêtée (`docker compose stop`).
 | e2e | ✅ **214** / 6 suites |
 | Couverture | **99,25 / 93,22 / 96,47 / 99,27** |
 | Mutations | **7** au total, toutes rouges comme attendu |
+
+
+### ⑩ Clôture
+
+- **2026-08-24** — ✅ **CLÔTURÉE**. PR `prospera-dossier-service#13` rebase-mergée sur `dev`, 3 commits
+  (`58ec125` feature, `4bddd7e` revue de code, `1ee0714` revue de sécurité). Branche supprimée. Statut
+  aligné aux 3 endroits, `completed_date` posée.
+- ⚡ **Ce que cette story change vraiment** : un code de refus ajouté au serveur **casse la compilation
+  du client** au lieu de tomber en silence dans le message générique. Et l'inventaire ne peut plus
+  dériver : il est gardé des **deux** côtés — par le type à l'écriture, par le balayage à l'exécution
+  des tests.
+- **Le patron est posé, pas généralisé** : `balance-service` et ses 78 chemins restent hors périmètre
+  (décision de la story). Chaque service le reprend quand il touche déjà son contrat — le kit tient en
+  trois fichiers : `common/erreurs/refus.ts`, un `<mod>.codes.ts`, un `Refus<Mod>Dto`.
+- ⚡ **La leçon la plus réutilisable, et elle a été payée deux fois ici** : *un inventaire par
+  **balayage** et un inventaire par **typage** ne voient pas les mêmes choses.* Le typage a trouvé deux
+  codes passés en **paramètre** (invisibles à tout `grep`) ; le balayage a trouvé un inventaire qui
+  publiait ce que personne ne lève. La story demandait de prouver les deux mécanismes par mutation —
+  c'est **en les prouvant** qu'on a vu pourquoi il en faut deux.
+- **Dette ouverte, transmise :**
+  - ⚠️ **`npm run gen:api -- dossier` n'a pas pu être rejoué** : le dépôt frontend de FE-066 n'est pas
+    cloné ici (seul `frontend-admin-panel` l'est, sans cible `dossier`). L'équivalent serveur est
+    prouvé — les cinq `enum` sont des **schémas nommés de littéraux**, ce que `openapi-typescript`
+    transforme mécaniquement en union — mais la **note à FE-066** reste à porter : sa
+    `MESSAGES_REFUS` passe en `Record<CodeRefusExercice, string>` en une ligne, et **c'est cette
+    ligne qui livre la valeur de la story**.
+  - ⚠️ **`details` n'est toujours pas typé par code** (hors périmètre assumé) : sa forme dépend du
+    code, et le typer demanderait une union discriminée dans l'OpenAPI.
+  - ⚠️ **Les 3 `ForbiddenException` nus subsistent** (`roles.guard`, `permissions.guard`) : c'est
+    voulu — leur inventer un code fabriquerait des synonymes d'une même chose. `RefusGardeDto` publie
+    donc `code` en **optionnel**, ce qui décrit fidèlement les deux moitiés de la chaîne de guards.
