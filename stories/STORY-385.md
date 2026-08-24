@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-064** *(les pièces du dossier)*, 2026-08-23 — prolonge **STORY-358**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** in_progress
+**Statut :** done
 **Complexité :** low
 **Sprint :** 20
 **Service :** `document-service` (`:3006`)
@@ -122,8 +122,8 @@ types qu'il ne peut rien faire lire.
 | Mutation-test | ✅ 2026-08-24 | **6 mutations, 6 rouges** (voir table ci-dessous) |
 | Vérification docker | ✅ 2026-08-24, **rejouée sur l'état final** | stack neuve, 4 pièces réellement déposées, 4 états prouvés en base **et** sur le fil |
 | Revue de code | ✅ 2026-08-24 | **1 constat retenu** (non-bloquant, confiance 90) + 2 coupes over-engineering + 1 JSDoc orphelin — tous corrigés |
-| Revue de sécurité | ⏳ | — |
-| Merge | ⏳ | — |
+| Revue de sécurité | ✅ 2026-08-24 | **0 vulnérabilité**, argument exécutable (voir ci-dessous) |
+| Merge | ✅ 2026-08-24 | PR [ocr-service#14](https://github.com/MoneyVibesGroup/prospera-ocr-service/pull/14), **rebase-merge**, branche supprimée |
 
 ### Ce qui a été livré
 
@@ -177,6 +177,25 @@ pas encore indexé, donc `checkout` l'a ramené à `dev`, pas à mon état. ⇒ 
 | 10 | Non-régression pré-STORY-358 (`nomOrigine`/`deposePar`/`createdAt` retirés) : la ligne reste rendue, **aucune valeur `null`**, les clés sont simplement absentes | ✅ |
 | 11 | **D2** — `document_extractions` (KYC) intouchée, aucun document n'y porte de `dossierId` | ✅ |
 | 12 | Ni `brut` *(fragment OCR source)* ni `zone` n'apparaissent **nulle part** dans la réponse entière | ✅ |
+
+### Revue de sécurité — 0 vulnérabilité, et l'argument est EXÉCUTABLE
+
+Le point qui porte tout le reste : **le plafond de divulgation était déjà atteint avant cette story.** La
+réponse publiait **déjà** `urlConsultation` — une URL MinIO **présignée** sur le document **original**,
+servie à *chaque* ligne depuis STORY-358. `champsLus` est donc un **sous-ensemble strict, dérivé par
+regex, de ce que le même appelant pouvait déjà télécharger en entier, dans la même réponse HTTP, sous la
+même garde**. Le plancher de permission ajouté est **vide** — ce n'est pas une opinion, c'est vérifiable
+en ouvrant l'URL que la ligne d'à côté porte déjà.
+
+Corollaire, et il compte : la limite connue « un `TENANT_USER` de l'organisation **non affecté** au dossier
+passe » (STORY-236/357) **n'est pas aggravée**. Cet utilisateur-là obtient déjà le PDF des statuts.
+
+Instruit et écarté par ailleurs : `correlationId` n'ouvre rien *(la route d'aval de `balance-service` est
+org-keyed et exige `@RequiresBalanceAccess`, et il n'entre dans aucune clé MinIO devinable — l'UUID
+terminal reste)* · `zone` et `brut` ne fuient nulle part *(mapping explicite par déstructuration, aucun
+spread, aucun `ClassSerializerInterceptor`)* · `DossierGate`, le refiltrage `orgId` en base et les codes
+d'erreur sont **intacts** · aucune matière OCR en journal *(`autoLogging: false`, l'intercepteur n'écrit
+que méthode/URL/statut/durée)*.
 
 ### Revue de code — 1 constat retenu, et il portait sur ce que j'avais ÉCRIT, pas sur ce que le code FAIT
 
