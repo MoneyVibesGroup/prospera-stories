@@ -1,6 +1,6 @@
 # STORY-375 : les codes de refus deviennent un contrat, pas de la prose — un code ajouté doit casser la compilation du client
 
-Status: ready-for-dev
+Status: review
 
 **Epic :** EPIC-043 — Le dossier client devient l'unité de travail du cabinet
 **Points :** 3 · **Complexité :** low · **Sprint :** 20 (backend) · **Service :** `dossier-service`
@@ -155,3 +155,114 @@ ligne)* · **FE-065**, **FE-061** *(mêmes tables, mêmes angles morts)*.
 - `enum` + `RefusResponseDto` + branchement des `@ApiResponse` des 4 modules : 1,5 pt
 - Garde d'exhaustivité serveur + preuve par mutation dans les deux sens : 1 pt
 - Vérification de non-régression des réponses (AC-4) + `gen:api` côté front : 0,5 pt
+
+
+---
+
+## Progress Tracking
+
+### ① Ce que le dispositif comporte — trois pièces, dont deux qui ne voient pas la même chose
+
+| Pièce | Rôle | Ce qu'elle ne voit pas |
+|---|---|---|
+| **L'inventaire** `CODES_REFUS_<MODULE>` (`as const`) | source unique, reprise **par composition** depuis `CODES_REFUS_TRANSVERSES` | rien par elle-même — un `as const` ne garde aucune exhaustivité (leçon **FE-070**) |
+| **La garde de TYPE** — `fabriqueRefus<CodeRefusX>()` | `refus.conflit('CODE_INVENTE', …)` **ne compile pas** | un code que personne ne lève plus (code mort dans l'inventaire) |
+| **La garde d'EXHAUSTIVITÉ** — un test qui confronte **deux inventaires** | l'égalité des ensembles, dans les deux sens | un code passé en **paramètre**… *(cf. ② — c'est le fait le plus utile de cette story)* |
+
+Le corps de refus devient **déclaré** : `RefusResponseDto` (abstraite) + un `Refus<Module>Dto` par module
+qui redéclare **`code`** avec `@ApiProperty({ enum, enumName })`. C'est ce `code` qui traverse
+`openapi-typescript` et atterrit en union de littéraux.
+
+### ② ⚡⚡ La garde de type a trouvé deux codes que l'inventaire avait manqués
+
+`DOSSIER_CABINET_NON_AFFECTABLE` et `DOSSIER_CABINET_NON_ARCHIVABLE` **ne sont écrits nulle part** sous
+la forme `code: '…'` : ils sont passés en **paramètre** à `refuserSiCabinet(dossier, code, message)`. Un
+balayage textuel — celui que l'AC-2 décrit, et celui que j'avais écrit — ne peut pas les voir. C'est
+`tsc` qui a refusé de compiler.
+
+⇒ **Deux conséquences, appliquées** :
+1. le paramètre est typé **`CodeRefusDossier`**, pas `string` — c'était le seul refus du module dont le
+   code arrive par argument, donc le seul endroit où la garde de type n'aurait rien gardé ;
+2. le balayage de la garde d'exhaustivité couvre désormais **trois** formes d'écriture : la fabrique,
+   le `new XxxException({code})` hérité, et le code passé à une garde `refuser*`.
+
+⇒ **Et une leçon** : *un inventaire par balayage et un inventaire par typage ne voient pas les mêmes
+choses.* La story demandait de prouver les deux (AC-3) ; c'est en les prouvant qu'on a vu pourquoi.
+
+### ③ Une correction de l'AC-2 : l'égalité stricte par module était **fausse**
+
+Le premier jet du test a rougi sur `exercices` : il publiait `DOSSIER_ARCHIVE`, `DOSSIER_INTROUVABLE`,
+`ORGANISATION_REQUISE` et `PORTEUR_NON_IDENTIFIABLE` sans les lever. **Le test avait raison et l'AC était
+imprécis** : ces codes **sortent** bel et bien d'une route d'exercices, mais ils sont levés par ses
+**collaborateurs** (`DossiersService.refuserSiArchive`, `portee.util`). Les exiger dans le module aurait
+rendu le test faux ; ne pas les publier aurait laissé le client sans message pour un refus réel.
+
+⇒ La garde est donc **trois** assertions, pas une :
+
+| Assertion | Ce qu'elle attrape |
+|---|---|
+| égalité des codes **propres** (transverses exclus) | inventaire en retard **et** code mort — les deux sens |
+| tout code **levé** dans le module est **publié** par son inventaire | le défaut exact de FE-066 : un code qui sort sans être déclaré |
+| chaque **transverse** est levé quelque part dans le service | un transverse mort, que les 4 inventaires publieraient en chœur |
+
+### ④ Mutation-test — **5 mutations, dans les deux sens** (AC-3)
+
+| Mutation | Attendu | Mesuré |
+|---|---|---|
+| Retirer `EXERCICE_MIGRATION_NON_REOUVRABLE` de l'inventaire | test rouge **et** build rouge | ✅ **2 tests rouges** + `tsc` : `Found 1 error` |
+| Ajouter `CODE_FANTOME` que personne ne lève | test rouge | ✅ **1 rouge** |
+| `throw refus.conflit('CODE_INVENTE_A_LA_VOLEE', …)` | **ne compile pas** | ✅ `TS2345` |
+| `error` omis par la fabrique | test rouge | ✅ **5 rouges** |
+| `details: {}` posé même vide | test rouge | ✅ **5 rouges** |
+
+⚠️ **Piège rencontré et à retenir** : `npm run build \| grep -c "error TS"` a rendu **0** sur une
+mutation qui échouait bel et bien — les séquences ANSI de `nest build` coupent le motif. C'est un
+comptage faussé qui aurait fait conclure « la garde de type ne mord pas ». Lire `Found N error(s)`.
+
+### ⑤ Portes de qualité
+
+| | `dossier-service` |
+|---|---|
+| Lint (`--max-warnings 0`) | ✅ 0 |
+| Build | ✅ |
+| Unitaires | ✅ **985** / 76 suites |
+| e2e | ✅ **214** / 6 suites |
+| Couverture | **99,24 / 93,22 / 96,47 / 99,26** · `refus.ts` et les 4 `*.codes.ts` à **100 %** |
+
+⚡ **AC-4, la preuve la plus forte, et elle est gratuite** : **34 sites de `throw` réécrits, et pas un
+seul test existant modifié.** Les 985 unitaires et 214 e2e — qui assertent `code`, `details`, statuts et
+messages — passent tels quels.
+
+### ⑥ Vérification docker — l'`enum` traverse, et **rien** ne change à l'exécution
+
+**AC-1 — les inventaires sont des schémas OpenAPI nommés**, lus sur `/api/docs-json` du service vivant :
+
+| Schéma | Littéraux |
+|---|---|
+| `CodeRefusExercice` | **12** — dont `EXERCICE_MIGRATION_NON_REOUVRABLE` **en littéral d'enum**, plus en fragment de commentaire |
+| `CodeRefusDossier` | **13** — dont les 2 trouvés par la garde de type |
+| `CodeRefusAxes` | **11** |
+| `CodeRefusJournal` | **6** |
+| Réponses `4xx` typées `Refus*` | **28** — aucune réponse 4xx sans schéma, hors `403` |
+
+**AC-4 — diff des réponses `dev` → `MNV-375`, sur le service réel** : les **10** refus provoqués (les 8
+d'`exercices` + `DOSSIER_INTROUVABLE` + un `400` de validation), capturés **deux fois** sur la **même
+base** en basculant la branche sous le volume `src/` (`Found 0 errors` à chaque recompilation),
+`requestId` normalisé :
+
+```
+diff avant375.txt apres375.txt  →  ZÉRO différence
+```
+
+Statuts, `error` *(y compris la casse `Conflict` / `Bad Request`)*, `message`, `code`, `details` :
+identiques. Y compris `EXERCICE_DEJA_OUVERT`, le seul refus qui porte un `details`.
+
+Stack arrêtée (`docker compose stop`).
+
+### Écarts de périmètre relevés — et ce qui en a été fait
+
+| Constat | Décision |
+|---|---|
+| La story annonce **4 modules**, mais **6** émettent des codes : `portefeuille` (`PORTEUR_NON_IDENTIFIABLE`) et `acces` (`ORGANISATION_REQUISE`) en émettent aussi | **Périmètre tenu à la lettre** — les deux ne lèvent que des codes **transverses**, désormais déclarés une fois et publiés par les 4 inventaires. Aucun code propre à eux n'est laissé hors contrat |
+| `ACOMPTE_IS` apparaît dans un `grep "code: '"` de `portefeuille` | **Faux positif** : c'est un code d'**échéance fiscale** (une donnée), pas un refus. La garde d'exhaustivité ne balaye que les `code:` **dans un throw** ou passés à une garde `refuser*` |
+| La DoD demande de rejouer `npm run gen:api -- dossier` **depuis le dépôt frontend** | ⛔ **Non exécutable ici** : le seul dépôt frontend présent est `frontend-admin-panel`, qui n'a ni `dossier.ts` ni cible `dossier` — FE-066 vit dans un dépôt non cloné. L'équivalent **serveur** est prouvé à la place (⑥ ci-dessus) : l'`enum` est un schéma nommé de littéraux, ce que `openapi-typescript` transforme mécaniquement en union. La note reste à porter au frontend |
