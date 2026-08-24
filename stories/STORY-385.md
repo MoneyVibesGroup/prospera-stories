@@ -117,9 +117,66 @@ types qu'il ne peut rien faire lire.
 | Phase | État | Preuve |
 |---|---|---|
 | Cadrage / branche | ✅ 2026-08-24 | branche `MNV-385` sur `docs/` et sur `prospera-ocr-service` |
-| Développement | ⏳ | — |
-| Portes DoD | ⏳ | — |
-| Vérification docker | ⏳ | — |
+| Développement | ✅ 2026-08-24 | 1 dépôt (`document-service`), aucun contrat d'événement touché |
+| Portes DoD | ✅ 2026-08-24 | lint 0 warning · build OK · **594 unit** (99,14 % st. / 92,46 br. / 98,13 fn. / 99,18 li.) · **90 e2e** |
+| Mutation-test | ✅ 2026-08-24 | **6 mutations, 6 rouges** (voir table ci-dessous) |
+| Vérification docker | ✅ 2026-08-24 | stack neuve, 4 pièces réellement déposées, 3 états prouvés en base **et** sur le fil |
 | Revue de code | ⏳ | — |
 | Revue de sécurité | ⏳ | — |
 | Merge | ⏳ | — |
+
+### Ce qui a été livré
+
+- `type` et `statutOcr` publiés en **enum OpenAPI**, dérivés par `Object.values` de l'**union** des deux
+  familles que la liste fusionne — `TypePieceDossier` ∪ `PieceDocumentType` (6 valeurs) et
+  `ProfilExtractionStatut` ∪ `PieceExtractionStatut` (4 valeurs). **Dédoublonnées** : `EN_COURS`, `PRETE` et
+  `ECHEC` existent des **deux** côtés, et un `enum` JSON Schema doublonné est invalide.
+- `correlationId` publié sur la réponse (obligatoire : les deux schémas le portent depuis STORY-081/084).
+- `champsLus: [{ champ, valeurLue, confiance }]` — **absent** tant que la pièce n'a pas été lue.
+
+### ⚡ Le point qui ne se voyait qu'en base : `finaliser` écrit `champs` AUSSI en `ECHEC`
+
+Publier `doc.champs` tel quel aurait rendu **`[]`** pour une pièce illisible — c'est-à-dire exactement la
+forme qui signifie « lu, rien trouvé ». C'est le **statut** qui décide, jamais la présence du tableau. Les
+trois faits sont désormais distincts, et la distinction est prouvée sur données réelles (lecture 1 / 2
+ci-dessous).
+
+### Mutation-test — 6 mutations, 6 rouges
+
+| # | Mutation | Effet attendu | Constaté |
+|---|---|---|---|
+| M1 | union de `type` amputée à 2 valeurs sur 6 | e2e OpenAPI rouge | 1 échec / 7 |
+| M2 | `estLue` rend toujours vrai *(sans casser la compilation)* | unit rouge | 6 échecs / 30 |
+| M3 | `new Set` du dédoublonnage des statuts retiré | unit **et** e2e rouges | 1/30 puis 1/7 |
+| M4 | garde de statut **inversée** dans `champsLus()` | unit rouge | 8 échecs / 30 |
+| M5 | `correlationId` ne traverse plus la projection | unit rouge | 2 échecs / 30 |
+| M6 | `type: [ChampLuDto]` retiré *(→ `object` opaque)* | e2e OpenAPI rouge | 3 échecs / 7 |
+
+🪤 **Deux mutations ont d'abord viré au rouge PAR ERREUR DE COMPILATION** (import devenu inutilisé) — ce qui
+ne prouve rien, leçon STORY-179. Elles ont été rejouées sous une forme qui **compile** (M2 : `estLue` rend
+vrai en gardant `STATUTS_LUS` utilisé ; M4 : garde inversée plutôt que supprimée). C'est seulement à ce
+moment-là que le rouge a eu une valeur.
+
+🪤 Et une `git checkout <fichier>` de restauration après mutation a **effacé le DTO** — le fichier n'était
+pas encore indexé, donc `checkout` l'a ramené à `dev`, pas à mon état. ⇒ **committer avant de muter**.
+
+### Vérification docker — stack neuve (`down -v`), parcours réel
+
+| # | Point vérifié | Résultat |
+|---|---|---|
+| 1 | Cabinet créé via l'IdP, JWT RS256 `TENANT_ADMIN`, dossier du cabinet **projeté par Kafka** dans `document_service.dossiers_dossier` | ✅ 1 doc |
+| 2 | **4 pièces réellement déposées**, les deux familles : `STATUTS` (PNG) → `PRETE`, `STATUTS` (PDF) → `ECHEC`, `LETTRE_MISSION` → `SANS_OCR`, `FACTURE` → `PRETE` | ✅ |
+| 3 | En base, la pièce `ECHEC` porte bien **`champs: []`** — le cas piège existe pour de vrai | ✅ |
+| 4 | Réponse HTTP : `type` porte les valeurs des **deux** familles (`STATUTS`, `LETTRE_MISSION`, `FACTURE`) | ✅ |
+| 5 | Réponse HTTP : `correlationId` présent sur **les 4** lignes | ✅ |
+| 6 | `champsLus` = **7 champs réels lus par Tesseract** sur les 2 pièces `PRETE` *(`raisonSociale`, `capitalSocial`, `dirigeant`… / `montantTTC`, `nifEmetteur`…)* | ✅ |
+| 7 | `champsLus` **ABSENT** pour `SANS_OCR` **et** pour `ECHEC` — malgré `champs: []` en base | ✅ |
+| 8 | `PRETE` forcé avec `champs: []` → `champsLus: []` : « lu, rien trouvé » ≠ « illisible » ≠ « pas encore lu » | ✅ |
+| 9 | `/api/docs-json` **vivant** : `type` = 6 valeurs, `statutOcr` = 4 valeurs sans doublon, `champsLus` = `array` de `$ref ChampLuDto`, **hors** de `required` | ✅ |
+| 10 | Non-régression pré-STORY-358 (`nomOrigine`/`deposePar`/`createdAt` retirés) : la ligne reste rendue, **aucune valeur `null`**, les clés sont simplement absentes | ✅ |
+| 11 | **D2** — `document_extractions` (KYC) intouchée, aucun document n'y porte de `dossierId` | ✅ |
+
+⚠️ **Écart d'infrastructure rencontré, hors périmètre** : dans l'image docker, l'OCR d'un **PDF** échoue sur
+`Cannot find module '@napi-rs/canvas'` (`pdf-page-renderer`). La dépendance est bien déclarée mais absente de
+l'image. Sans effet sur cette story — le chemin PNG fonctionne, et l'échec a même **fourni** le cas `ECHEC`
+réel dont la story avait besoin — mais **le rendu PDF est mort en docker** : à ouvrir séparément.
