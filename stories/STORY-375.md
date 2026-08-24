@@ -266,3 +266,57 @@ Stack arrêtée (`docker compose stop`).
 | La story annonce **4 modules**, mais **6** émettent des codes : `portefeuille` (`PORTEUR_NON_IDENTIFIABLE`) et `acces` (`ORGANISATION_REQUISE`) en émettent aussi | **Périmètre tenu à la lettre** — les deux ne lèvent que des codes **transverses**, désormais déclarés une fois et publiés par les 4 inventaires. Aucun code propre à eux n'est laissé hors contrat |
 | `ACOMPTE_IS` apparaît dans un `grep "code: '"` de `portefeuille` | **Faux positif** : c'est un code d'**échéance fiscale** (une donnée), pas un refus. La garde d'exhaustivité ne balaye que les `code:` **dans un throw** ou passés à une garde `refuser*` |
 | La DoD demande de rejouer `npm run gen:api -- dossier` **depuis le dépôt frontend** | ⛔ **Non exécutable ici** : le seul dépôt frontend présent est `frontend-admin-panel`, qui n'a ni `dossier.ts` ni cible `dossier` — FE-066 vit dans un dépôt non cloné. L'équivalent **serveur** est prouvé à la place (⑥ ci-dessus) : l'`enum` est un schéma nommé de littéraux, ce que `openapi-typescript` transforme mécaniquement en union. La note reste à porter au frontend |
+
+
+### ⑦ Revue de code — 2 constats, dont un sur **mon propre test**
+
+Scan délégué **impossible** (`529 Overloaded` sur deux tentatives) : la revue a été faite **dans la
+session**, en `opus` — le mode par défaut du projet. Vérifications **outillées**, pas à l'œil :
+extraction mécanique des triplets *(statut, code, message)* de `dev` **et** de la branche, puis
+comparaison.
+
+| # | Constat | Traitement |
+|---|---|---|
+| **R1 — BLOQUANT** | ⚡ **La prémisse « le `403` reste nu » est vraie d'un guard sur deux.** `RolesGuard`/`PermissionsGuard` lèvent bien un `ForbiddenException` nu, mais `EmailVerifiedGuard` et `DossierAccessGuard` en lèvent un **codifié** — les **15** réponses `403` du service nomment `EMAIL_NOT_VERIFIED` et `KYC_NOT_APPROVED`, **en prose**. C'est le trou exact que la story ferme ailleurs, et l'écran doit distinguer « vérifiez votre e-mail » de « KYC en attente » | **Corrigé** — `CODES_REFUS_GARDE` + `RefusGardeDto`, `code` **optionnel** (un `403` de rôle n'en porte aucun : le publier obligatoire serait un mensonge de contrat dans l'autre sens). Les deux guards passent par la fabrique typée ; `DossierAccessGuard` reçoit son code en **paramètre** — comme `refuserSiCabinet`, l'endroit même où un `string` n'aurait rien gardé |
+| **R2 — non-bloquant, valeur probante** | ⚡ **La garde d'exhaustivité pouvait devenir vacante sans rougir** : elle lit `__dirname`. Depuis `dist`, ou ce spec déplacé, `fichiersTs` ne rend plus aucun `.ts` ⇒ « aucun code levé n'échappe » passe **trivialement** sur un ensemble vide | **Corrigé** — le balayage doit avoir trouvé ≥ 1 code par module. Mutations : racine inexistante ⇒ **17 rouges**, filtre `.ts` cassé ⇒ **9 rouges** |
+
+**Vérifié sans constat** : les 34 refus conservent leur *(statut, code)* **et** leur message
+(comparaison mécanique `dev` ↔ branche, **0 écart**) · aucune `@ApiResponse` `4xx` sans `type` · aucun
+`*.codes.ts` ne matche ses propres motifs de balayage · les appels multi-lignes sont bien captés.
+
+### ⑧ Revue de sécurité — **0 vulnérabilité**, et un **troisième code dans le même trou**
+
+| Piste | Pourquoi elle ne tient pas |
+|---|---|
+| Anti-énumération changée par le refactoring | Correspondance **1:1** vérifiée : 18 `conflit`, 10 `requeteInvalide`, 4 `introuvable`, 4 `interdit` — aucun `404` devenu `403` ni l'inverse. `DOSSIER_INTROUVABLE` confond toujours « hors portée » et « inexistant » |
+| `details` recopié tel quel | Aucun appelant ne le construit depuis une entrée utilisateur ; les deux cas porteurs d'identifiants (`DOSSIER_NIF_DEJA_UTILISE`, `EXERCICE_DEJA_OUVERT`) restent **dans la portée déjà visible** de l'appelant, et un `details` vide n'est jamais émis |
+| Chaîne de guards réécrite | Même endroit, même ordre, même statut, même corps. Les objets levés restent de **vraies** instances (`new ForbiddenException`) : tout `instanceof` amont matche encore |
+| ⚡ Interaction avec les `catch` de transaction | `estConflitDEcriture()`/`estDuplicata()` lisent `erreur.code` au **premier niveau** ; le code applicatif vit dans `getResponse().code` — un refus métier levé dans un `try` ne peut donc pas être **reclassé** en conflit d'écriture. Identique à `dev` |
+| Inventaires publiés dans un Swagger non authentifié | Antérieur à la PR, et sans objet : ces mêmes codes figuraient **déjà en prose** dans les `description` des mêmes réponses, sur la même page. Un code de refus nomme un motif que l'appelant obtient en déclenchant le refus — jamais l'existence d'une ressource hors portée |
+
+⚡ **Le constat qu'elle a rapporté, hors sécurité mais dans le mille** :
+`PORTEUR_NON_IDENTIFIABLE` appartient **aux deux familles** — transverse (400/404/409 des modules)
+**et** de garde (**403** du portefeuille). Publié par les inventaires de module, **absent du DTO du
+403** : un `GET /dossiers` pouvait rendre un code que le client ne couvrait pas. **Ajouté**, et le
+dernier `throw` codifié qui contournait encore la fabrique (`portefeuille.service.ts`) y passe.
+
+### ⑨ Vérification docker **rejouée sur l'état final**
+
+| Rejeu | Résultat |
+|---|---|
+| Diff des 10 refus, avant/après les 2 commits de revue | **ZÉRO différence** — les correctifs n'ont rien changé aux corps |
+| Schémas d'enum publiés | **5** : `CodeRefusExercice` (12), `CodeRefusDossier` (13), `CodeRefusAxes` (11), `CodeRefusJournal` (6), **`CodeRefusGarde` (3)** |
+| Réponses `4xx` typées `Refus*` | **43** *(28 avant la revue — les 15 `403` s'y ajoutent)*, **0** sans schéma |
+| `403` réel, e-mail dé-vérifié en base | `{"statusCode":403,"error":"Forbidden","message":"Adresse e-mail non vérifiée…","code":"EMAIL_NOT_VERIFIED"}` — le code sort bien, et il est désormais **déclaré** |
+
+Stack arrêtée (`docker compose stop`).
+
+### Portes après revue
+
+| | `dossier-service` |
+|---|---|
+| Lint / build | ✅ 0 / ✅ |
+| Unitaires | ✅ **996** / 77 suites |
+| e2e | ✅ **214** / 6 suites |
+| Couverture | **99,25 / 93,22 / 96,47 / 99,27** |
+| Mutations | **7** au total, toutes rouges comme attendu |
