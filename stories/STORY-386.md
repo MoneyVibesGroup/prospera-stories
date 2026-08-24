@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-047** *(reprise d'à-nouveaux / continuité N-1)*, 2026-08-23 — prolonge **STORY-087**, même défaut que **STORY-375**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** review
+**Statut :** done
 **Complexité :** low
 **Sprint :** 20
 **Service :** `balance-service` (`:3007`)
@@ -125,8 +125,8 @@ tranche côté architecture avant d'être codée.
 
 ## Progress Tracking
 
-**Statut : `review`** — implémentée le 2026-08-24 sur `MNV-386` (`balance-service`), portes vertes,
-vérification docker réelle faite.
+**Statut : `done`** — implémentée, revue, sécurisée et mergée le 2026-08-24.
+`balance-service` PR **#49** rebase-mergée sur `dev` (`7e31ab0`), branche supprimée.
 
 ### Décision d'architecture — volet B : **voie 1 retenue**
 
@@ -204,3 +204,47 @@ Amorçage : compte `verif386@…` (org `6a8cc540…2059`), `emailVerifiedAt` pos
 annonce : sur le cas #4 il vaut `1` en désignant `AB12`, qui n'est pas un compte de gestion. Écart
 **préexistant** à cette story et atteignable seulement sur ce même cas historique ; le corriger ici
 déborderait le périmètre (aucun AC ne le porte). Noté pour qu'il ne se redécouvre pas deux fois.
+
+### Revue de code (⑥)
+
+**1 constat**, non bloquant, confiance 95 — **corrigé** (`690e13a`, commit dédié).
+
+La garde OpenAPI `le référence depuis TOUTE route qui peut le rendre` **dérivait sa liste du
+document** : elle rassemblait les routes qui *déclarent* un `422`. Une route d'écriture ajoutée
+demain **sans** son `422` n'y serait donc jamais entrée, et l'égalité serait restée verte — alors que
+le commentaire affirmait mot pour mot l'inverse.
+
+⚡ Le correctif n'est **pas** un durcissement de l'assertion, et c'est le point : un document OpenAPI
+ne peut pas dire qu'un `422` **manque**, faute de savoir quelles routes traversent `BalanceValidator`.
+Ce qui se corrigeait, c'était la **promesse**. Le test énonce désormais ce qu'il attrape (perte du
+`422`, 8ᵉ route qui en déclare un, mauvais `$ref` — donc toute **régression** du contrat publié) et
+nomme ce qu'il ne peut pas attraper, en désignant la liste tenue à la main comme seul filet.
+
+Constats écartés, pour qu'ils ne se redécouvrent pas : `ImportSagePreviewDto` et `AgregationApercuDto`
+portent **les mêmes trois champs vrais par vacuité** que ceux dénoncés ici sur `ANouveauxResponseDto`
+— préexistant, et aucun AC ne les porte.
+
+### Revue de sécurité (⑦)
+
+**0 vulnérabilité.** Vérifié et écarté explicitement :
+
+- le `details` ne publie **rien de neuf** : les quatre grandeurs étaient déjà dans le message français
+  de l'ancien refus, inchangé ici. Elles sont dérivées de `sommaire`, lui-même construit sur une
+  balance N-1 lue via `trouverDerniereValidee(orgId, dossierId, …)` — donc derrière
+  `@RequiresBalanceAccess` + `@RequiresDossierScope` (404 anti-énumération) ;
+- l'aperçu à 200 ne contourne **aucune** garde : `ExerciceClosException` est une `ConflictException`
+  levée **avant** `buildCanonique`, donc jamais avalée ; les cinq refus de la reprise sont levés
+  **avant** le `try` ; l'aperçu n'appelle jamais `submit` ; la course concurrente sort toujours en
+  `409 SOCLE_DEJA_GENERE` ; et le socle rendu, re-soumis, repart en `422` ;
+- le `catch` est typé sur la **classe fille** — plus étroit que `UnprocessableEntityException` — et
+  `BalanceDesequilibreeException` n'a aucune sous-classe : il ne peut pas avaler un autre refus ;
+- voie Kafka intacte : `rejetDepuisErreur` teste `instanceof UnprocessableEntityException`, dont la
+  nouvelle classe **hérite**, et relit l'écart dans `sommaire` — jamais dans le message.
+
+### ⚠️ Coordination frontend — le contournement de FE-047 doit être retiré
+
+FE-047 rend aujourd'hui la rupture de continuité **sur le refus**. Depuis ce merge, l'aperçu
+déséquilibré ne refuse plus : il répond **201** avec `estEquilibre: false`, l'écart signé et le 3ᵉ
+avertissement. **Tant que le contournement n'est pas retiré, l'écran d'aperçu n'affichera plus rien
+sur ce cas.** Le `422` structuré reste, lui, sur la **persistance** — et c'est là que le `code` et le
+`details` remplacent le parsing de texte.
