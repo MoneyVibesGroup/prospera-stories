@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-048 Profils d'import</title>
+<title>Prospera · Prototype cumulatif — FE-043 Cahier de recettes</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -813,6 +813,85 @@
   .pm-champ small { font-size: 0.7rem; color: var(--muted-fg); }
   .pm-arrow { color: var(--muted-fg); font-family: var(--font-mono); }
   .pm-flag { font-size: 0.68rem; font-weight: 700; white-space: nowrap; }
+  /* ═══ FE-043 — cahier de recettes (STORY-082) ═══════════════════════════
+     Réutilise tout le vocabulaire de l'Atelier (.imp-table, .imp-tile,
+     .prof-note, .gate). Ne sont définis ici que les objets que le cahier
+     introduit vraiment : le RUBAN DES MOIS et la LIGNE DE SAISIE. */
+  .cah-ctx { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.65rem 0.85rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+  .cah-ctx label { font-size: 0.76rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); }
+  .cah-ctx select { font: inherit; font-size: 0.86rem; padding: 0.4rem 0.6rem; border: 1px solid var(--border-strong); border-radius: 0.5rem; background: var(--card); color: var(--foreground); }
+
+  /* Le ruban des mois : la « vue de travail » du comptable. Un mois SANS
+     ligne n'affiche pas 0 — il affiche « — » (voir la note de l'écran). */
+  .cah-mois { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.2rem, 1fr)); gap: 0.4rem; }
+  .cah-m { display: flex; flex-direction: column; gap: 0.1rem; padding: 0.45rem 0.55rem; border: 1px solid var(--border); border-radius: 0.55rem; background: var(--card); cursor: pointer; text-align: left; font: inherit; color: inherit; }
+  .cah-m:hover { background: var(--hover-surface); }
+  .cah-m[aria-selected="true"] { border-color: color-mix(in srgb, var(--orange-500) 45%, transparent); background: color-mix(in srgb, var(--orange-500) 10%, transparent); }
+  .cah-m .mn { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); }
+  .cah-m .mv { font-size: 0.92rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cah-m .mc { font-size: 0.68rem; color: var(--muted-fg); font-variant-numeric: tabular-nums; }
+  .cah-m.vide .mv { color: var(--muted-fg); font-weight: 600; }
+
+  /* La ligne de saisie — même grille que la table, pour que l'œil suive. */
+  .cah-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); gap: 0.6rem; padding: 0.85rem; border: 1px dashed var(--border-strong); border-radius: var(--radius); background: var(--content-bg); }
+  .cah-form label { display: flex; flex-direction: column; gap: 0.28rem; font-size: 0.74rem; font-weight: 600; color: var(--muted-fg); min-width: 0; }
+  .cah-form input, .cah-form select { font: inherit; font-size: 0.85rem; padding: 0.45rem 0.6rem; border: 1px solid var(--border-strong); border-radius: 0.5rem; background: var(--card); color: var(--foreground); min-width: 0; }
+  .cah-form input:focus-visible, .cah-form select:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; border-color: var(--ring); }
+  .cah-form .err input, .cah-form .err select { border-color: #dc2626; background: color-mix(in srgb, #dc2626 7%, var(--card)); }
+  .cah-form .fe { font-size: 0.72rem; font-weight: 600; color: #dc2626; }
+  .cah-form .fh { font-size: 0.7rem; font-weight: 500; color: var(--muted-fg); }
+  .cah-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .cah-lig { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-fg); }
+  /* FE-043 (suite) — le bandeau « qui tient un cahier », la barre du mois,
+     et tout ce qui rend LA PREUVE visible (vignettes, confiance, motif). */
+  .cah-qui { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.75rem 0.9rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+  .cah-qui-ic { width: 2.4rem; height: 2.4rem; flex: none; display: grid; place-items: center; border-radius: 0.6rem; background: color-mix(in srgb, var(--orange-500) 12%, var(--card)); color: var(--orange-700); }
+  :root[data-theme="dark"] .cah-qui-ic { color: var(--orange-400); }
+  .cah-qui-ic svg { width: 1.2rem; height: 1.2rem; }
+  .cah-qui-txt { min-width: 12rem; }
+  .cah-qui-txt b { font-size: 0.9rem; }
+  .cah-qui-txt p { margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--muted-fg); }
+
+  /* La barre du MOIS CHOISI : c'est de là que part l'import (revue PO). */
+  .cah-bar { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.75rem 0.9rem; border-radius: var(--radius); border: 1px solid color-mix(in srgb, var(--orange-500) 30%, transparent); background: color-mix(in srgb, var(--orange-500) 8%, transparent); }
+  .cah-bar b { font-size: 0.95rem; }
+  .cah-bar .sub { font-size: 0.8rem; color: var(--muted-fg); }
+
+  .cah-kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.6rem; }
+  .cah-kind { padding: 0.65rem 0.8rem; border: 1px solid var(--border); border-radius: 0.6rem; background: var(--card); }
+  .cah-kind b { display: block; font-size: 0.84rem; }
+  .cah-kind span { display: block; margin-top: 0.2rem; font-size: 0.76rem; color: var(--muted-fg); }
+
+  /* LA PREUVE — la vignette cliquable, dans la relecture ET dans le cahier. */
+  .cah-vign { width: 3rem; height: 3rem; flex: none; padding: 0; border: 1px solid var(--border-strong); border-radius: 0.4rem; background: var(--hover-surface); overflow: hidden; cursor: pointer; display: grid; place-items: center; position: relative; }
+  .cah-vign:hover { border-color: var(--orange-500); }
+  .cah-vign:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+  .cah-vign .pg { width: 2rem; height: 2.4rem; background: #fff; border: 1px solid var(--neutral-200); border-radius: 0.12rem; display: grid; align-content: start; gap: 0.16rem; padding: 0.22rem 0.2rem; }
+  .cah-vign .pg i { display: block; height: 0.16rem; border-radius: 999px; background: var(--neutral-300); }
+  .cah-vign .zoom { position: absolute; inset: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--neutral-950) 55%, transparent); color: #fff; opacity: 0; transition: opacity .14s; }
+  .cah-vign .zoom svg { width: 0.95rem; height: 0.95rem; }
+  .cah-vign:hover .zoom, .cah-vign:focus-visible .zoom { opacity: 1; }
+  .cah-vign.absente { border-style: dashed; cursor: default; color: var(--muted-fg); font-size: 0.62rem; text-align: center; line-height: 1.1; padding: 0.2rem; }
+  .cah-vign.absente:hover { border-color: var(--border-strong); }
+
+  .cah-piece { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-fg); }
+  .cah-motif { display: block; font-size: 0.68rem; color: var(--muted-fg); font-family: var(--font-sans); }
+  .cah-conf { font-size: 0.7rem; font-weight: 650; padding: 0.1rem 0.45rem; border-radius: 999px; white-space: nowrap; }
+  .cah-conf.ok { background: var(--success-soft); color: var(--success); }
+  .cah-conf.warn { background: var(--warning-soft); color: #b45309; }
+  :root[data-theme="dark"] .cah-conf.warn { color: var(--warning); }
+  .cah-conf.bad { background: var(--danger-soft); color: var(--danger); }
+  .cah-inline { font: inherit; font-size: 0.8rem; padding: 0.25rem 0.4rem; border: 1px solid #dc2626; border-radius: 0.35rem; background: var(--card); color: var(--foreground); }
+  .imp-table tr.cah-warn td { background: color-mix(in srgb, var(--warning) 7%, transparent); }
+
+  /* Le repli de saisie manuelle — présent, mais replié (revue PO). */
+  .cah-repli { border: 1px dashed var(--border-strong); border-radius: var(--radius); background: var(--content-bg); padding: 0.2rem 0.85rem; }
+  .cah-repli > summary { cursor: pointer; padding: 0.6rem 0; font-size: 0.86rem; font-weight: 600; }
+  .cah-repli > summary span { font-weight: 400; color: var(--muted-fg); }
+  .cah-repli .cah-form { border: 0; background: transparent; padding: 0.3rem 0 0.6rem; }
+
+  /* `.code` n'existe que dans `.gate` — on l'étend aux bandeaux de refus. */
+  .prof-note .code, .helper .code { font-family: var(--font-mono); font-size: 0.72rem; background: var(--hover-surface); color: var(--muted-fg); padding: 0.1rem 0.4rem; border-radius: 0.35rem; white-space: nowrap; }
   .pm-flag.need { color: #dc2626; }
   .pm-flag.sugg { color: #2563eb; }
   .pm-flag.warn { color: #b45309; }
@@ -4157,6 +4236,15 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>
                       Profils d'import <span class="count">3</span>
                     </button>
+                    <!-- FE-043 — le cahier n'est PAS une 4ᵉ source : c'est la
+                         matière première de la source `ocr` (D13), saisie à la
+                         main mois par mois. Son onglet est à part parce qu'on y
+                         revient tous les jours, alors qu'on choisit une source
+                         une fois. -->
+                    <button class="atl-tab" role="tab" data-atl-tab="cahiers" aria-selected="false">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7"/><path d="M9 11h7"/></svg>
+                      Cahiers <span class="count">Recettes</span>
+                    </button>
                     <span class="grow"></span>
                     <span class="badge badge-active"><span class="d"></span>Module actif</span>
                   </div>
@@ -4191,15 +4279,23 @@
                         <div class="src-cta"><button class="btn btn-primary btn-sm" type="button" data-src-act="direct"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg> Saisir / ingérer</button></div>
                       </article>
 
-                      <!-- ocr : à venir, non cliquable, sans promesse de date -->
-                      <article class="src-card soon">
+                      <!-- ocr : disponible depuis FE-043 — mais l'écran ne couvre
+                           QUE le cahier de recettes. `supported` (le backend sait
+                           traiter) et `href` (l'écran existe) restent deux choses
+                           différentes ; ici les deux sont vraies, et la troisième
+                           — « tout le chemin cahiers » — ne l'est pas encore. Elle
+                           est dite, pas sous-entendue. -->
+                      <article class="src-card available">
                         <div class="src-top">
                           <span class="src-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h2"/><path d="M16 3h2a2 2 0 0 1 2 2v2"/><path d="M20 17v2a2 2 0 0 1-2 2h-2"/><path d="M8 21H6a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg></span>
-                          <span class="badge badge-soon">Bientôt</span>
+                          <span class="badge badge-avail"><span class="d"></span>Disponible</span>
                         </div>
-                        <h4>Cahiers &amp; factures (OCR)</h4>
-                        <p>Cahiers de recettes/dépenses et factures numérisés, lus automatiquement. En cours de construction.</p>
-                        <div class="src-cta"><span class="src-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Annoncé, sans promesse de date — jamais un lien mort.</span></div>
+                        <h4>Cahiers &amp; factures</h4>
+                        <p>Vous ne tenez aucun logiciel comptable&nbsp;: vos recettes se saisissent mois par mois, et se rattachent aux comptes de produits.</p>
+                        <div class="src-cta">
+                          <button class="btn btn-primary btn-sm" type="button" data-src-act="ocr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Tenir le cahier de recettes</button>
+                          <span class="src-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Le cahier de <b>dépenses</b> et la lecture des <b>factures</b> arrivent ensuite — sans promesse de date.</span>
+                        </div>
                       </article>
                     </div>
 
@@ -4945,6 +5041,561 @@
                         reconnu, le diagnostic du serveur porte sur <b>SON</b> mapping, pas sur la suggestion renvoyée à côté. Les afficher ensemble
                         ferait lire «&nbsp;il manque le compte&nbsp;» sous une suggestion qui, elle, l'a trouvé.
                       </p>
+                    </div>
+                  </div>
+
+
+                  <!-- ═════════════ Onglet CAHIERS (FE-043 · STORY-082 + 084 · FR-A08) ═════════════
+                       LA PORTE D'ENTRÉE DE LA PME SANS SAGE.
+
+                       ⚡ REVUE PO du 2026-08-24 — quatre corrections, et elles décident
+                       l'ordre même de l'écran :
+                       ① « pour les commerçants ce sont des CAHIERS, donc on doit encore passer
+                          par OCR » ⇒ le chemin nominal est la PHOTO DU CAHIER, pas la frappe.
+                       ② « je choisis un mois et j'importe ; si j'ai les images j'importe tout »
+                          ⇒ LE MOIS EST LE POINT D'ENTRÉE. Le ruban des mois est PERMANENT, au-
+                          dessus de tout, et c'est du mois choisi que part l'import — en lot,
+                          toutes les images d'un coup.
+                       ③ « pour le compte, normalement ça doit être AUTOMATIQUE » ⇒ le compte de
+                          produits n'est plus un champ à remplir : proposé par le serveur, AFFICHÉ
+                          avec son motif, corrigeable au clic. Le champ libre est le rattrapage.
+                       ④ « il faut que la PREUVE je puisse la voir de façon claire » ⇒ chaque
+                          ligne porte la VIGNETTE de la pièce qui l'a produite, cliquable.
+
+                       ⚠️ Et c'est la correction ④ qui a trouvé le trou : voir le bandeau rouge de
+                       l'onglet « Cahier ». La preuve EXISTE en base et l'image EST stockée, mais
+                       TROIS chaînons manquent au contrat pour relier l'une à l'autre. -->
+                  <div class="atl-panel atl-body" data-atl-panel="cahiers" hidden>
+
+                    <div style="display:flex;align-items:flex-end;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Cahier de recettes</h3>
+                        <p class="atl-secsub">Choisissez un mois, importez les photos du cahier&nbsp;: les recettes sont lues, rangées et rattachées à vos comptes de produits. Vous relisez, vous corrigez, vous appliquez.</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <div class="atelier-demo" role="tablist" aria-label="Parcours (démo)">
+                        <span class="lbl">Parcours</span>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="import" aria-selected="true">Import</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="lecture" aria-selected="false">Lecture</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="relecture" aria-selected="false">Relecture</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="applique" aria-selected="false">Appliqué</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="cahier" aria-selected="false">Cahier</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="synthese" aria-selected="false">Synthèse</button>
+                      </div>
+                      <div class="atelier-demo" role="tablist" aria-label="Refus (démo)">
+                        <span class="lbl">Refus</span>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="refus" aria-selected="false">400</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="axes" aria-selected="false">Axes</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="clos" aria-selected="false">Clos</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="figee" aria-selected="false">Figé</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-cah="vide" aria-selected="false">Vide</button>
+                      </div>
+                    </div>
+
+                    <!-- ═════════ QUI TIENT UN CAHIER ? Le DOSSIER le dit — l'écran ne le suppose pas.
+                         `typeEntite`, `formeJuridique` et l'axe `systemeComptable` (SN/SMT) sont
+                         tous trois servis. SMT = Système Minimal de Trésorerie : le système
+                         SYSCOHADA de ceux qui tiennent des cahiers, précisément. ═════════ -->
+                    <div class="cah-qui">
+                      <div class="cah-qui-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg></div>
+                      <div class="cah-qui-txt">
+                        <b>Kossi Distribution — Entreprenant, commerce de détail</b>
+                        <p>Système <b>minimal de trésorerie (SMT)</b> · régime <b>synthétique (TPU)</b> · Togo. Ce client ne tient aucune comptabilité informatisée&nbsp;: <b>son cahier est un cahier papier</b>.</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <span class="badge badge-active"><span class="d"></span>Chemin cahiers</span>
+                    </div>
+                    <p class="helper" style="text-align:left">
+                      ⚠️ <b>C'est le dossier qui décide, pas l'écran.</b> <code>typeEntite</code> (ENTREPRISE&nbsp;/&nbsp;MICROFINANCE&nbsp;/&nbsp;ASSURANCE), <code>formeJuridique</code>
+                      (dont <b>EI</b>, l'entreprenant) et l'axe daté <code>systemeComptable</code> (<b>SN</b>&nbsp;/&nbsp;<b>SMT</b>) viennent tous de <code>:3009</code>.
+                      Un dossier en <b>SN</b> — comptabilité complète — voit ce même onglet, mais l'écran lui dit d'abord que sa matière première est <b>un export Sage</b> ou
+                      <b>la saisie directe</b>&nbsp;: proposer le cahier en premier à un client qui tient un grand livre l'enverrait ressaisir ce qu'il possède déjà.
+                    </p>
+
+                    <!-- ═════════ LE CONTEXTE : l'exercice, servi par le DOSSIER ═════════ -->
+                    <div class="cah-ctx">
+                      <label for="cahExo">Exercice</label>
+                      <select id="cahExo">
+                        <option>2026 — 01/01/2026 → 31/12/2026</option>
+                        <option>2025 — 01/01/2025 → 31/12/2025 (clos)</option>
+                      </select>
+                      <span class="badge badge-active"><span class="d"></span>Ouvert</span>
+                      <span class="grow" style="flex:1"></span>
+                      <span class="cah-lig">GET /dossiers/{id}/exercices → :3009</span>
+                    </div>
+
+                    <!-- ═════════ ② LE RUBAN DES MOIS — PERMANENT. C'est le point d'entrée.
+                         Il ne vit dans AUCUN slot : quel que soit l'état de l'écran, on voit
+                         où l'on en est dans l'année et on change de mois d'un clic. ═════════ -->
+                    <div class="cah-mois" role="tablist" aria-label="Mois de l'exercice">
+                      <button class="cah-m" role="tab" aria-selected="false" type="button"><span class="mn">Janvier</span><span class="mv">1 240 000</span><span class="mc">8 recettes</span></button>
+                      <button class="cah-m" role="tab" aria-selected="false" type="button"><span class="mn">Février</span><span class="mv">985 000</span><span class="mc">6 recettes</span></button>
+                      <button class="cah-m" role="tab" aria-selected="true" type="button"><span class="mn">Mars</span><span class="mv">1 275 000</span><span class="mc">4 recettes</span></button>
+                      <button class="cah-m vide" role="tab" aria-selected="false" type="button"><span class="mn">Avril</span><span class="mv">—</span><span class="mc">rien d'importé</span></button>
+                      <button class="cah-m vide" role="tab" aria-selected="false" type="button"><span class="mn">Mai</span><span class="mv">—</span><span class="mc">rien d'importé</span></button>
+                      <button class="cah-m vide" role="tab" aria-selected="false" type="button"><span class="mn">Juin</span><span class="mv">—</span><span class="mc">rien d'importé</span></button>
+                    </div>
+                    <p class="helper" style="text-align:left">
+                      ⚠️ Un mois sans ligne affiche «&nbsp;<b>—</b>&nbsp;», <b>jamais 0</b>. Le serveur ne renvoie pas les mois vides, et pour cause&nbsp;:
+                      «&nbsp;0&nbsp;F&nbsp;» se lit «&nbsp;j'ai importé, il n'y a rien eu&nbsp;», alors que la vérité est «&nbsp;je n'ai pas encore importé ce mois&nbsp;».
+                      ⚠️ Et le mois d'une recette n'est <b>jamais saisi</b>&nbsp;: il est <b>dérivé de la date lue</b> par le serveur. Choisir «&nbsp;mars&nbsp;» ici ne force
+                      rien — une pièce datée du 2 avril ira dans avril, et l'écran le dira.
+                    </p>
+
+                    <!-- La barre du mois choisi : c'est d'ICI que part l'import. -->
+                    <div class="cah-bar">
+                      <div>
+                        <b>Mars 2026</b>
+                        <div class="sub">4 recettes · 1 275 000 F encaissés · dernier import le 22/03</div>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <button class="btn btn-ghost btn-sm" type="button" data-cah-goto="cahier">Voir les 4 recettes</button>
+                      <button class="btn btn-primary btn-sm" type="button" data-cah-goto="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></svg> Importer les images de mars</button>
+                    </div>
+
+                    <!-- ═════════════ ÉTAPE 1 · IMPORTER LES IMAGES DU MOIS ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="import">
+                      <div class="imp-steps" aria-hidden="true">
+                        <span class="imp-step active" data-cah-step="1"><span class="n">1</span> Importer</span>
+                        <span class="sep"></span>
+                        <span class="imp-step" data-cah-step="2"><span class="n">2</span> Relire</span>
+                        <span class="sep"></span>
+                        <span class="imp-step" data-cah-step="3"><span class="n">3</span> Appliquer</span>
+                      </div>
+
+                      <div class="dropzone">
+                        <span class="dzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+                        <b>Déposez toutes les images de mars 2026 — d'un seul coup</b>
+                        <p>Les pages du cahier, les reçus, les captures Mobile Money, les factures. Un <b>lot entier</b> part à la lecture&nbsp;;
+                        <b>rien n'entre au cahier à ce stade</b> — on lit d'abord, vous décidez ensuite.</p>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                          <button class="btn btn-primary btn-sm" type="button" data-cah-goto="lecture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg> Choisir les images</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-cah-goto="lecture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></svg> Prendre une photo</button>
+                        </div>
+                        <span class="src-note">Jusqu'à 50 pièces par lot · JPEG, PNG, PDF</span>
+                      </div>
+
+                      <div class="cah-kinds">
+                        <div class="cah-kind">
+                          <b>Pages de cahier &amp; reçus</b>
+                          <span>Photos de votre cahier, tickets, reçus manuscrits. Déposés en <code>captures</code>.</span>
+                        </div>
+                        <div class="cah-kind">
+                          <b>Captures Mobile Money</b>
+                          <span>SMS et écrans TMoney&nbsp;/&nbsp;Flooz. Le <b>sens</b> (entrée&nbsp;/&nbsp;sortie) est lu&nbsp;: une sortie déposée dans les recettes est signalée, jamais rangée en silence.</span>
+                        </div>
+                        <div class="cah-kind">
+                          <b>Factures normalisées</b>
+                          <span>Déposées en <code>factures</code> — leur HT&nbsp;/&nbsp;TVA et le NIF de l'émetteur sont extraits, et la ligne vaut alors preuve <b>fichier</b>.</span>
+                        </div>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Le type de pièce est DÉCLARÉ, jamais deviné du format.</b> Une facture photographiée en JPEG partirait au lecteur de reçus et y perdrait
+                        son HT&nbsp;/&nbsp;TVA et son NIF — d'où deux dépôts distincts, et non un seul tas de fichiers.
+                      </p>
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span>Une recette sans pièce&nbsp;? <button class="linklike" type="button" data-cah-goto="cahier">Ajoutez-la à la main depuis le cahier</button> — le repli reste ouvert, il n'est simplement pas le chemin normal.</span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ÉTAPE 1bis · LECTURE EN COURS (202 → EN_COURS) ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="lecture" hidden>
+                      <div class="imp-steps" aria-hidden="true">
+                        <span class="imp-step done" data-cah-step="1"><span class="n">1</span> Importer</span>
+                        <span class="sep"></span>
+                        <span class="imp-step active" data-cah-step="2"><span class="n">2</span> Relire</span>
+                        <span class="sep"></span>
+                        <span class="imp-step" data-cah-step="3"><span class="n">3</span> Appliquer</span>
+                      </div>
+                      <div class="imp-drybar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        <span><b>Lecture des 12 images de mars en cours.</b> Vous pouvez quitter cet écran&nbsp;: le lot vous attendra, et <b>rien n'aura été écrit</b> au cahier.</span>
+                      </div>
+                      <div class="imp-prog"><span style="width:55%"></span></div>
+                      <div class="cah-actions">
+                        <button class="btn btn-primary btn-sm" type="button" data-cah-goto="relecture">Voir le résultat</button>
+                        <span class="grow" style="flex:1"></span>
+                        <span class="cah-lig">POST …/pieces/ocr → 202 · GET …/pieces/ocr/{lotId} → EN_COURS | PRET | ECHEC</span>
+                      </div>
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Si la lecture est indisponible, l'écran le dit et ouvre le repli.</b> Le service répond alors <span class="code">502 · DOCUMENT_SERVICE_INJOIGNABLE</span> — c'est précisément
+                        la panne pour laquelle la saisie manuelle existe, et la seule raison de la garder.</span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ÉTAPE 2 · RELECTURE — la preuve EN FACE de ce qui a été lu ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="relecture" hidden>
+                      <div class="imp-steps" aria-hidden="true">
+                        <span class="imp-step done" data-cah-step="1"><span class="n">1</span> Importer</span>
+                        <span class="sep"></span>
+                        <span class="imp-step active" data-cah-step="2"><span class="n">2</span> Relire</span>
+                        <span class="sep"></span>
+                        <span class="imp-step" data-cah-step="3"><span class="n">3</span> Appliquer</span>
+                      </div>
+
+                      <div class="imp-drybar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span><b>12 images lues, rien n'est encore entré au cahier.</b> <b>Chaque ligne montre l'image dont elle sort</b> — cliquez la vignette pour l'agrandir et vérifier le chiffre.</span>
+                      </div>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Lot <code>PRET</code> — montants, dates et comptes <b>éditables</b>. Le <b>compte est proposé automatiquement</b>&nbsp;: vous ne le saisissez que pour le corriger.</div>
+                        <div class="tbl-wrap">
+                          <table class="imp-table">
+                            <thead>
+                              <tr><th style="width:2.2rem"></th><th>Preuve</th><th>Date</th><th>Libellé lu</th><th class="num">Montant</th><th>Compte proposé</th><th>Confiance</th></tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td><input type="checkbox" checked aria-label="Retenir cette pièce"></td>
+                                <td><button class="cah-vign" type="button" aria-label="Agrandir la page 3 du cahier"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></span></button><span class="cah-piece">page 3</span></td>
+                                <td>14/03/2026</td>
+                                <td>Vente marchandises — Kodjo</td>
+                                <td class="num">150 000</td>
+                                <td class="cpt"><b>701</b><span class="cah-motif">libellé «&nbsp;vente&nbsp;»</span></td>
+                                <td><span class="cah-conf ok">96&nbsp;%</span></td>
+                              </tr>
+                              <tr>
+                                <td><input type="checkbox" checked aria-label="Retenir cette pièce"></td>
+                                <td><button class="cah-vign" type="button" aria-label="Agrandir la capture TMoney"><span class="pg"><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></span></button><span class="cah-piece">TMoney</span></td>
+                                <td>18/03/2026</td>
+                                <td>Paiement reçu — Mairie de Kara</td>
+                                <td class="num">750 000</td>
+                                <td class="cpt"><b>706</b><span class="cah-motif">règle du cabinet · «&nbsp;Mairie&nbsp;»</span></td>
+                                <td><span class="cah-conf ok">93&nbsp;%</span></td>
+                              </tr>
+                              <tr class="cah-warn">
+                                <td><input type="checkbox" aria-label="Retenir cette pièce"></td>
+                                <td><button class="cah-vign" type="button" aria-label="Agrandir la page 4 du cahier"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></span></button><span class="cah-piece">page 4</span></td>
+                                <td><input class="cah-inline" type="date" aria-label="Date manquante"></td>
+                                <td>Vente au comptoir</td>
+                                <td class="num">300 000</td>
+                                <td class="cpt"><b>701</b><span class="cah-motif">libellé «&nbsp;vente&nbsp;»</span></td>
+                                <td><span class="cah-conf bad">date illisible</span></td>
+                              </tr>
+                              <tr class="cah-warn">
+                                <td><input type="checkbox" aria-label="Retenir cette pièce"></td>
+                                <td><button class="cah-vign" type="button" aria-label="Agrandir la capture Flooz"><span class="pg"><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></span></button><span class="cah-piece">Flooz</span></td>
+                                <td>21/03/2026</td>
+                                <td>Transfert — SODIGAZ</td>
+                                <td class="num">48 000</td>
+                                <td class="cpt">—</td>
+                                <td><span class="cah-conf bad">sortie d'argent</span></td>
+                              </tr>
+                              <tr class="cah-warn">
+                                <td><input type="checkbox" aria-label="Retenir cette pièce"></td>
+                                <td><button class="cah-vign" type="button" aria-label="Agrandir la page 4 bis"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></span></button><span class="cah-piece">page 4 bis</span></td>
+                                <td>14/03/2026</td>
+                                <td>Vente marchandises — Kodjo</td>
+                                <td class="num">150 000</td>
+                                <td class="cpt"><b>701</b></td>
+                                <td><span class="cah-conf warn">doublon probable</span></td>
+                              </tr>
+                              <tr>
+                                <td><input type="checkbox" checked aria-label="Retenir cette pièce"></td>
+                                <td><button class="cah-vign" type="button" aria-label="Agrandir la facture 2026-031"><span class="pg"><i></i><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></span></button><span class="cah-piece">FAC 2026-031</span></td>
+                                <td>29/03/2026</td>
+                                <td>Loyer local Adidogomé — M. Amegan</td>
+                                <td class="num">75 000</td>
+                                <td class="cpt"><b>7073</b><span class="cah-motif">libellé «&nbsp;loyer&nbsp;»</span></td>
+                                <td><span class="cah-conf ok">preuve fichier</span></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <div class="imp-warns">
+                        <b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> 3 images demandent votre décision — elles ne sont pas cochées</b>
+                        <ul>
+                          <li>DATE_MANQUANTE — page 4 : la date est illisible. <b>Aucun mois par défaut n'est déduit</b> : tant qu'elle n'est pas saisie, la ligne ne peut pas être appliquée.</li>
+                          <li>SENS_CONTRAIRE — Flooz du 21/03 : la capture porte une <b>sortie</b> d'argent, importée dans les <b>recettes</b>. C'est probablement une dépense.</li>
+                          <li>DOUBLON_PROBABLE — page 4 bis : même date, même montant, même tiers qu'une image déjà retenue. Photographier deux fois la même page arrive.</li>
+                        </ul>
+                      </div>
+
+                      <div class="cah-actions">
+                        <button class="btn btn-primary btn-sm" type="button" data-cah-goto="applique"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Appliquer les 3 images retenues</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-cah-goto="import">Ajouter des images</button>
+                        <span class="grow" style="flex:1"></span>
+                        <span class="cah-lig">POST …/pieces/ocr/{lotId}/appliquer</span>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Une image sous le seuil de confiance n'est PAS pré-cochée</b>, et c'est le sens même de l'écran&nbsp;: la machine propose, elle ne décide pas.
+                        Pré-cocher «&nbsp;pour aller plus vite&nbsp;» ferait entrer au cahier des montants que personne n'a lus — dans un document opposable.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════ ÉTAPE 3 · APPLIQUÉ — le rapport ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="applique" hidden>
+                      <div class="imp-steps" aria-hidden="true">
+                        <span class="imp-step done" data-cah-step="1"><span class="n">1</span> Importer</span>
+                        <span class="sep"></span>
+                        <span class="imp-step done" data-cah-step="2"><span class="n">2</span> Relire</span>
+                        <span class="sep"></span>
+                        <span class="imp-step active" data-cah-step="3"><span class="n">3</span> Appliquer</span>
+                      </div>
+                      <div class="imp-result created">
+                        <span class="ri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <div>
+                          <b>3 recettes entrées au cahier de mars 2026</b>
+                          <p class="atl-secsub" style="margin:0.15rem 0 0">975&nbsp;000&nbsp;F encaissés, rattachés aux comptes 701, 706 et 7073. Chaque ligne garde la trace de l'image qui l'a produite.</p>
+                        </div>
+                      </div>
+                      <div class="imp-warns">
+                        <b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> 1 image retenue n'est PAS entrée — et on vous dit laquelle</b>
+                        <ul>
+                          <li>DATE_REQUISE — page 4 : la date n'a pas été saisie. L'image reste dans le lot, elle n'est pas perdue.</li>
+                        </ul>
+                      </div>
+                      <div class="cah-actions">
+                        <button class="btn btn-primary btn-sm" type="button" data-cah-goto="cahier">Voir le cahier de mars</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-cah-goto="relecture">Corriger l'image restante</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-cah-goto="import">Importer le mois suivant</button>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        <b>Jamais de rejet silencieux.</b> Une recette avalée sans trace, c'est un chiffre d'affaires minoré que personne ne voit — et c'est exactement
+                        ce qu'un contrôle cherche. Le rapport dit ce qui est entré <i>et</i> ce qui ne l'est pas, avec son motif.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════ LE CAHIER DU MOIS — et LA PREUVE sur chaque ligne ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="cahier" hidden>
+
+                      <div class="imp-tiles">
+                        <div class="imp-tile"><div class="k">Mars — HT</div><div class="v">1 080 508<span class="u">F</span></div></div>
+                        <div class="imp-tile"><div class="k">Mars — TVA collectée</div><div class="v">194 492<span class="u">F</span></div></div>
+                        <div class="imp-tile"><div class="k">Mars — TTC encaissé</div><div class="v">1 275 000<span class="u">F</span></div></div>
+                        <div class="imp-tile"><div class="k">Exercice — HT cumulé</div><div class="v">3 813 559<span class="u">F</span></div><div class="u">22 recettes</div></div>
+                      </div>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Recettes de <b>mars 2026</b> — 4 lignes. <b>La colonne « preuve » ouvre l'image</b> qui a produit la ligne.</div>
+                        <div class="tbl-wrap">
+                          <table class="imp-table">
+                            <thead>
+                              <tr><th>Preuve</th><th>Date</th><th>Libellé</th><th>Tiers</th><th>Encaissé par</th><th>Compte</th><th class="num">HT</th><th class="num">TVA</th><th class="num">TTC</th><th></th></tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td><button class="cah-vign" type="button" aria-label="Voir la page 3 du cahier"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
+                                <td>14/03/2026</td><td>Vente de marchandises — Kodjo</td><td>SARL Kodjo &amp; Fils</td><td>Mobile money</td>
+                                <td class="cpt">701</td><td class="num">127 119</td><td class="num">22 881</td><td class="num">150 000</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td>
+                              </tr>
+                              <tr>
+                                <td><button class="cah-vign" type="button" aria-label="Voir la capture TMoney"><span class="pg"><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
+                                <td>18/03/2026</td><td>Paiement reçu — Mairie de Kara</td><td>Mairie de Kara</td><td>Mobile money</td>
+                                <td class="cpt">706</td><td class="num">635 593</td><td class="num">114 407</td><td class="num">750 000</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td>
+                              </tr>
+                              <tr>
+                                <td><span class="cah-vign absente" aria-hidden="true">saisie<br>à la main</span></td>
+                                <td>22/03/2026</td><td>Vente au comptoir</td><td>—</td><td>Espèces</td>
+                                <td class="cpt">701</td><td class="num">254 237</td><td class="num">45 763</td><td class="num">300 000</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td>
+                              </tr>
+                              <tr>
+                                <td><button class="cah-vign" type="button" aria-label="Voir la facture 2026-031"><span class="pg"><i></i><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
+                                <td>29/03/2026</td><td>Loyer local Adidogomé</td><td>M. Amegan</td><td>Chèque</td>
+                                <td class="cpt">7073</td><td class="num">63 559</td><td class="num">11 441</td><td class="num">75 000</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        <b>Une ligne sans vignette n'est pas un oubli d'affichage&nbsp;: c'est une recette saisie à la main</b>, sans pièce. La distinction n'est pas cosmétique —
+                        une balance construite sur des lignes justifiées ne se défend pas comme une balance de mémoire, et ce niveau de preuve remonte jusqu'à la liasse.
+                      </p>
+
+                      <!-- ⚠️ LE TROU. Trouvé en câblant la demande PO « voir la preuve clairement ». -->
+                      <div class="prof-note bad">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>⛔ Écart de contrat — cette colonne n'est PAS servable aujourd'hui, et c'est le plus gros manque de la story.</b>
+                        La preuve existe en base (<code>auditOcr = {lotId, pieceId, confiance, brut}</code>) et l'image est bien stockée&nbsp;: <b>trois chaînons manquent</b> pour
+                        les relier. ① <code>LigneRecetteResponseDto</code> <b>ne publie pas <code>auditOcr</code></b> — depuis le cahier, aucun moyen de nommer la pièce ;
+                        ② <code>LignePreProposeeDto</code> porte un <code>pieceId</code> mais <b>aucune URL d'image</b> ;
+                        ③ <code>GET /dossiers/{id}/pieces</code> (:3006) porte bien l'<code>urlConsultation</code> présignée navigateur, mais <b>ne publie ni <code>pieceId</code>
+                        ni <code>correlationId</code></b> — la jointure est donc impossible dans les deux sens.
+                        ⇒ L'image est <b>listable</b> (onglet «&nbsp;Pièces&nbsp;» du dossier, FE-064), <b>jamais rattachable à sa ligne</b>. ⇒ écart tracé pour le backend.</span>
+                      </div>
+
+                      <!-- Le REPLI : la saisie manuelle. Présente, mais repliée (revue PO ②). -->
+                      <details class="cah-repli">
+                        <summary>Ajouter une recette à la main <span>— quand l'image manque</span></summary>
+                        <div class="cah-form">
+                          <label>Date<input type="date" value="2026-03-31"><span class="fh">range le mois</span></label>
+                          <label style="grid-column:span 2">Libellé<input type="text" placeholder="Vente de marchandises"></label>
+                          <label>Tiers<input type="text" placeholder="SARL Kodjo &amp; Fils"></label>
+                          <label>Encaissé par<select><option>—</option><option>Espèces</option><option>Mobile money</option><option>Virement</option><option>Chèque</option><option>Carte</option></select></label>
+                          <label>Montant encaissé (TTC)<input type="text" inputmode="decimal" placeholder="150 000"><span class="fh">en francs</span></label>
+                        </div>
+                        <div class="cah-actions">
+                          <button class="btn btn-primary btn-sm" type="button">Ajouter la recette</button>
+                          <label style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.82rem"><input type="checkbox"> Opération exonérée de TVA</label>
+                          <span class="grow" style="flex:1"></span>
+                          <span class="cah-lig">origine MANUELLE · preuve « saisie »</span>
+                        </div>
+                        <p class="helper" style="text-align:left">
+                          <b>Aucun champ «&nbsp;compte&nbsp;» ici — et c'est délibéré (revue PO ③).</b> Le compte est <b>déduit du libellé et du tiers</b>&nbsp;: d'abord par les règles
+                          de votre cabinet, ensuite par le moteur de mots-clés. Il s'affiche sur la ligne créée, avec son motif, et se corrige d'un clic si la déduction est fausse.
+                        </p>
+                      </details>
+
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Écart de contrat — corriger un compte reste une saisie libre.</b> Vérifié route par route sur l'OpenAPI de <code>:3007</code>&nbsp;:
+                        <b>aucune route n'énumère les comptes de classe 7</b> du plan de l'organisation. La correction se fait donc au clavier, et c'est le serveur qui refuse
+                        (<span class="code">400 · COMPTE_HORS_CLASSE_7</span> / <span class="code">COMPTE_INCONNU</span>). Sur le chemin nominal cela ne se voit pas — le compte est
+                        proposé — mais le jour où il faut le corriger, l'écran ne peut offrir <b>aucune</b> liste. ⇒ écart tracé pour le backend.</span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ LA SYNTHÈSE DE L'EXERCICE ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="synthese" hidden>
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Synthèse de l'exercice <b>2026</b> — <code>GET …/cahiers/recettes/synthese</code>. Les mois sont ceux que le serveur renvoie&nbsp;: <b>l'écran n'en fabrique aucun</b>.</div>
+                        <div class="tbl-wrap">
+                          <table class="imp-table">
+                            <thead><tr><th>Mois</th><th class="num">HT</th><th class="num">TVA collectée</th><th class="num">TTC</th><th class="num">Recettes</th></tr></thead>
+                            <tbody>
+                              <tr><td>Janvier 2026</td><td class="num">1 050 847</td><td class="num">189 153</td><td class="num">1 240 000</td><td class="num">8</td></tr>
+                              <tr><td>Février 2026</td><td class="num">834 745</td><td class="num">150 255</td><td class="num">985 000</td><td class="num">6</td></tr>
+                              <tr><td>Mars 2026</td><td class="num">1 080 508</td><td class="num">194 492</td><td class="num">1 275 000</td><td class="num">4</td></tr>
+                              <tr><td>Juillet 2026</td><td class="num">847 458</td><td class="num">152 542</td><td class="num">1 000 000</td><td class="num">4</td></tr>
+                            </tbody>
+                            <tfoot>
+                              <tr><th>Exercice 2026</th><th class="num">3 813 558</th><th class="num">686 442</th><th class="num">4 500 000</th><th class="num">22</th></tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      </div>
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>Avril, mai et juin n'apparaissent pas — c'est voulu.</b> Ils ne sont pas à zéro&nbsp;: <b>rien n'y a été importé</b>. Intercaler une ligne «&nbsp;0&nbsp;F&nbsp;»
+                        transformerait un trou d'import en chiffre d'affaires nul.</span>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        Ce total HT est le <b>chiffre d'affaires</b> qui servira au régime fiscal (le seuil de la TPU s'y lit) et à la balance. Les montants affichés sont en
+                        <b>francs</b>&nbsp;; le contrat, lui, ne circule qu'en <b>unités mineures entières</b> — aucune division flottante entre les deux.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════ REFUS 400 — la correction porte sur le champ fautif ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="refus" hidden>
+                      <p class="atl-secsub" style="margin:0">Chaque refus se pose <b>sur le champ qui l'a causé</b>, qu'il vienne d'une image relue ou d'une saisie de repli. Un bandeau global obligerait à relire toute la ligne pour trouver le mot fautif.</p>
+                      <div class="cah-form">
+                        <label class="err">Date<input type="date" value="2027-01-04"><span class="fe">Hors de l'exercice 2026 (01/01 → 31/12).</span></label>
+                        <label style="grid-column:span 2">Libellé<input type="text" value="Vente de ciment"></label>
+                        <label class="err">Montant encaissé (TTC)<input type="text" value="0"><span class="fe">Un montant doit être supérieur à zéro.</span></label>
+                        <label class="err">Compte (corrigé à la main)<input type="text" value="601"><span class="fe">Le compte 601 n'est pas un compte de produits — une recette ne s'impute pas à une charge.</span></label>
+                      </div>
+                      <div class="prof-note bad">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                        <span><b>La TVA lue sur la facture ne tombe pas juste.</b> HT (100&nbsp;000) + TVA (25&nbsp;000) = 125&nbsp;000, alors que l'encaissement vaut 150&nbsp;000. La ligne n'est pas enregistrée&nbsp;: sinon le total HT du mois serait faux, et personne ne le verrait. <span class="code">400 · VENTILATION_TVA_INCOHERENTE</span></span>
+                      </div>
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Aucun taux de TVA n'est publié pour votre paquet fiscal.</b> La ventilation ne peut pas se faire&nbsp;: un taux ne s'invente pas dans le code — une TVA calculée au jugé est une déclaration fausse. <span class="code">400 · TAUX_TVA_INTROUVABLE</span></span>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Six refus, comptés sur les <code>throw</code> du service et non sur les puces de la fiche&nbsp;:</b>
+                        <code>DATE_HORS_EXERCICE</code> · <code>COMPTE_HORS_CLASSE_7</code> · <code>COMPTE_INCONNU</code> ·
+                        <code>VENTILATION_TVA_INCOHERENTE</code> · <code>TAUX_TVA_INTROUVABLE</code> · <code>EXERCICE_INDETERMINE</code>.
+                        Aucun ne se confond avec un autre&nbsp;: ils appellent des corrections différentes.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════ 409 SYSTEME_COMPTABLE_INDETERMINE ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="axes" hidden>
+                      <div class="gate warn">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/></svg></span>
+                        <h3>Le système comptable de ce dossier n'est pas décidé</h3>
+                        <p>Le cahier s'importe malgré tout, mais <b>la balance qui en sortira ne pourra pas être étiquetée</b> : <b>SN</b> et <b>SMT</b> ne produisent pas la même liasse,
+                        et retomber sur l'un par défaut donnerait le mauvais document, sans erreur visible. Décidez les deux axes du dossier.</p>
+                        <span class="code">409 · SYSTEME_COMPTABLE_INDETERMINE</span>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                          <button class="btn btn-primary btn-sm" type="button">Décider les axes du dossier</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-cah-goto="import">Continuer à importer</button>
+                        </div>
+                        <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Ce refus ne vient PAS du cahier : il vient de l'agrégation en balance. Le cahier, lui, reste ouvert.</span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ 409 EXERCICE_CLOS ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="clos" hidden>
+                      <div class="gate warn">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                        <h3>L'exercice 2025 est clos</h3>
+                        <p>Le cahier de cet exercice n'accepte plus rien — ni image appliquée, ni ligne saisie. Si une recette y manque, <b>rouvrez l'exercice depuis la fiche du dossier</b> — l'acte est motivé et tracé.</p>
+                        <span class="code">409 · EXERCICE_CLOS</span>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                          <button class="btn btn-primary btn-sm" type="button">Ouvrir la fiche du dossier</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-cah-goto="import">Revenir à l'exercice ouvert</button>
+                        </div>
+                        <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Un exercice REPRIS (antérieur à l'entrée en portefeuille) ne se rouvre pas — le bouton n'apparaît alors pas.</span>
+                      </div>
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Écart de contrat — ce refus n'est documenté nulle part.</b> Le contrôleur de <code>:3007</code> n'annonce qu'un seul <code>409</code>
+                        (<code>BALANCE_VALIDEE_IMMUABLE</code>) alors que le service en lève <b>deux</b>, et teste <code>EXERCICE_CLOS</code> <b>en premier</b>. Un écran qui
+                        n'aurait lu que le Swagger aurait envoyé le comptable créer une nouvelle version de balance — <b>le geste opposé</b> de celui qui débloque.
+                        ⇒ écart tracé pour le backend.</span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ 409 BALANCE_VALIDEE_IMMUABLE ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="figee" hidden>
+                      <div class="gate warn">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                        <h3>Ce cahier justifie une balance déjà validée</h3>
+                        <p>La balance 2026 construite depuis ce cahier est <b>validée</b>&nbsp;: le cahier qui la justifie est figé avec elle. Le modifier après coup ferait
+                        diverger la balance de sa propre justification. Repartez d'une <b>nouvelle version de balance</b>.</p>
+                        <span class="code">409 · BALANCE_VALIDEE_IMMUABLE</span>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                          <button class="btn btn-primary btn-sm" type="button">Voir la balance validée</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-cah-goto="synthese">Consulter le cahier</button>
+                        </div>
+                        <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Le gel porte aussi sur l'AJOUT, pas seulement sur la modification — appliquer une image après validation fait diverger autant que corriger.</span>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Deux 409, deux gestes opposés, deux écrans.</b> «&nbsp;L'exercice est clos&nbsp;» se règle sur la <b>fiche du dossier</b>&nbsp;;
+                        «&nbsp;la balance est validée&nbsp;» se règle dans les <b>balances</b>. Les fondre dans un message unique aurait envoyé une fois sur deux au mauvais endroit.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════ CAHIER VIDE ═════════════ -->
+                    <div class="cah-slot" data-cah-slot="vide" hidden>
+                      <div class="state empty" style="padding:2.4rem 1.5rem">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+                        <h3>Rien n'est encore importé pour l'exercice 2026</h3>
+                        <p>Choisissez un mois dans le ruban ci-dessus, puis importez toutes ses images d'un coup. Les dates, les montants et les comptes vous seront proposés&nbsp;; vous n'aurez qu'à relire.</p>
+                        <button class="btn btn-primary btn-sm" type="button" data-cah-goto="import">Importer les images de janvier</button>
+                      </div>
+                    </div>
+
+                    <!-- Ce que cette maquette valide, et ce qu'elle laisse dehors. -->
+                    <div class="dc-note dc-gap">
+                      <b>Ce que valide cette maquette (FE-043, revue PO du 24/08).</b> Le <b>chemin nominal du commerçant</b>&nbsp;: choisir un mois → importer toutes ses images
+                      d'un coup → relire, <b>l'image en face du chiffre</b> → appliquer les pièces retenues. Puis le cahier&nbsp;: <b>rangement par mois</b> (dérivé de la date lue,
+                      jamais saisi), <b>rattachement automatique</b> au compte de produits (proposé avec son motif, corrigeable), <b>totaux mensuels et cumulés</b>, <b>preuve
+                      visible ligne à ligne</b>, et les <b>trois refus de contexte</b> (axes non décidés, exercice clos, balance validée). La saisie manuelle existe, <b>repliée</b>,
+                      pour la panne d'OCR et la recette sans pièce.
+                    </div>
+                    <div class="dc-note">
+                      <b>Partage de périmètre avec FE-045.</b> Le dépôt OCR est servi par <code>STORY-084</code>, que la fiche FE-043 rangeait en «&nbsp;hors périmètre&nbsp;».
+                      La revue PO l'a ramené dedans&nbsp;: <b>pour un commerçant, il n'y a pas d'autre porte d'entrée</b> — le cahier est un objet physique. FE-043 livre donc le
+                      chemin <b>recettes</b> de bout en bout&nbsp;; FE-045 garde ce qui lui reste en propre&nbsp;: les <b>factures fournisseurs</b> et le versant <b>dépenses</b>,
+                      qui dépendent de FE-044.
+                    </div>
+                    <div class="dc-note">
+                      <b>Une route servie que cet écran n'appelle pas — délibérément.</b> <code>POST …/cahiers/recettes/lot</code> écrit tout un mois d'un coup depuis un corps JSON.
+                      Le chemin par les images (<code>…/pieces/ocr/{lotId}/appliquer</code>) fait le même travail <b>en gardant la trace de la pièce</b> et le niveau de preuve&nbsp;;
+                      passer par <code>/lot</code> produirait les mêmes lignes <b>sans leur justification</b>, ce qui est exactement ce que l'Atelier existe pour éviter.
                     </div>
                   </div>
 
@@ -7607,6 +8258,39 @@
           profShow(b.dataset.profGoto);
         });
       });
+
+      /* ═══ FE-043 — les etats du panneau « Cahier de recettes » ═══
+         Meme idiome que `profShow` : un groupe `data-cah` pilote des
+         `[data-cah-slot]`, et les actions de l'ecran (`data-cah-goto`) rejouent
+         le MEME aiguillage. Enregistre une seule fois, au niveau du module —
+         le poser dans `setTab` rebrancherait les ecouteurs a chaque onglet.
+
+         Le ruban des mois se comporte comme un vrai `tablist` : selectionner un
+         mois est le geste de travail du comptable, pas une bascule de demo. */
+      function cahShow(etat) {
+        page.querySelectorAll("[data-cah-slot]").forEach(function (el) {
+          el.hidden = el.dataset.cahSlot !== etat;
+        });
+        page.querySelectorAll("[data-cah]").forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.cah === etat));
+        });
+      }
+      page.querySelectorAll("[data-cah]").forEach(function (b) {
+        b.addEventListener("click", function () { cahShow(b.dataset.cah); });
+      });
+      page.querySelectorAll("[data-cah-goto]").forEach(function (b) {
+        b.addEventListener("click", function (e) {
+          e.preventDefault();
+          cahShow(b.dataset.cahGoto);
+        });
+      });
+      var cahMois = page.querySelectorAll(".cah-m");
+      cahMois.forEach(function (m) {
+        m.addEventListener("click", function () {
+          cahMois.forEach(function (o) { o.setAttribute("aria-selected", String(o === m)); });
+        });
+      });
+
       /* Le lien « Gerer les profils d'import » de l'ecran d'import ouvre l'onglet. */
       page.querySelectorAll("[data-goto-profils]").forEach(function (a) {
         a.addEventListener("click", function (e) {
@@ -7616,13 +8300,15 @@
         });
       });
 
-      /* CTA des sources : Sage ouvre son écran d'import (FE-025) ; la saisie
-         directe (FE-026) n'a pas encore de page — annonce honnête. */
+      /* CTA des sources : chacune des TROIS sources de D13 ouvre desormais son
+         ecran — Sage (FE-025), saisie directe (FE-026) et, depuis FE-043, les
+         cahiers. Aucune carte ne reste sans porte. */
       page.querySelectorAll("[data-src-act]").forEach(function (b) {
         b.addEventListener("click", function () {
           var src = b.dataset.srcAct;
           if (src === "sage") { resetImport(); setTab("import-sage"); }
           else if (src === "direct") { setTab("saisie-directe"); }
+          else if (src === "ocr") { setTab("cahiers"); }
         });
       });
 
