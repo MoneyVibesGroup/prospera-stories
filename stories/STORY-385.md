@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-064** *(les pièces du dossier)*, 2026-08-23 — prolonge **STORY-358**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** not_started
+**Statut :** in_progress
 **Complexité :** low
 **Sprint :** 20
 **Service :** `document-service` (`:3006`)
@@ -109,3 +109,17 @@ restitution « déclaré ↔ lu » attend cette story)*, et **FE-018** dont le c
 Remontée par **FE-064**. Les deux manques sont regroupés **délibérément** : ils portent sur le même
 DTO, et l'un sans l'autre laisserait le front avec des champs lus qu'il ne peut pas typer, ou des
 types qu'il ne peut rien faire lire.
+
+---
+
+## Progress Tracking
+
+| Phase | État | Preuve |
+|---|---|---|
+| Cadrage / branche | ✅ 2026-08-24 | branche `MNV-385` sur `docs/` et sur `prospera-ocr-service` |
+| Développement | ⏳ | — |
+| Portes DoD | ⏳ | — |
+| Vérification docker | ⏳ | — |
+| Revue de code | ⏳ | — |
+| Revue de sécurité | ⏳ | — |
+| Merge | ⏳ | — |
