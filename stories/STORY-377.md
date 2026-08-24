@@ -6,7 +6,7 @@
 **Priorité :** Should Have
 **Story Points :** 3
 **Complexité :** low
-**Statut :** review
+**Statut :** done
 **Créée le :** 2026-08-20
 **Service :** `auth-service` (`:3001`) + `admin-panel` BFF (`:3010`)
 
@@ -211,3 +211,53 @@ Stack arrêtée (`docker compose stop`), jeu de données nettoyé.
 | Unitaires | ✅ **834** / 65 suites | ✅ **435** / 37 suites |
 | e2e | ✅ **210** / 14 suites | ✅ **201** / 11 suites |
 | Couverture | **97,81 / 90,82 / 97,91 / 97,91** | **99,68 / 93,07 / 100 / 99,65** |
+
+### ⑦ Revue de code — 1 constat, corrigé
+
+| Constat | Traitement |
+|---|---|
+| ⚠️ **Le `$sort` portait les tableaux de jointure.** Avec le filtre, il s'applique **après** les deux `$lookup` : il triait donc des documents portant tous leurs admins et leur principal. Un `$sort` en mémoire est **plafonné à 100 Mo** sans `allowDiskUse` — sur un gros parc, l'agrégation **échoue** au lieu de rendre une page, et c'est précisément le parc grandissant que cette story existe pour servir | **Corrigé** — `$unset` des deux tableaux dès que `ownerVerifie` est calculé. Mutation vérifiée : retirer l'`$unset` fait rougir le test qui garde sa position **avant** le `$sort` |
+
+Documenté au passage, parce qu'un lecteur pouvait le croire gratuit : le chemin filtré est **le seul** à
+payer les deux jointures *(sans le paramètre, le pipeline est exactement celui d'avant)* · les `$lookup`
+s'appuient sur des index existants *(`memberships {organizationId, role}`, `users {_id}`)* · la seconde
+passe de comptage est **assumée** plutôt qu'un `$facet`, qui interdirait l'usage d'un index pour le
+`$sort`/`$limit` de la branche « items ».
+
+### ⑧ Revue de sécurité — **0 vulnérabilité**, et un **deuxième commentaire faux**
+
+La seule surface du diff est la **valeur du `$match`** : un opérateur Mongo qui l'atteindrait rendrait le
+filtre pilotable depuis l'URL. Deux gardes l'en empêchent — **et j'en nommais une pour l'autre.**
+
+| Requête | Refus réel | Mécanisme |
+|---|---|---|
+| `?ownerEmailVerified=oui` | 400 *« must be a boolean value »* | `@IsBoolean` ferme la **valeur** |
+| `?ownerEmailVerified[$ne]=x` | 400 *« property ownerEmailVerified[$ne] should not exist »* | **`forbidNonWhitelisted`** ferme la **clé** |
+
+⚠️ Le parseur de query d'Express **ne fabrique pas d'objet** ici : la clé reste littérale, et le
+`@Transform` **n'est même pas atteint** *(sondé)*. Mon commentaire attribuait ce refus à `@IsBoolean`.
+Les deux gardes comptent, à des endroits différents — les nommer correctement est ce qui permet à la
+prochaine story de savoir laquelle elle ne doit pas retirer. **2 e2e** gardent désormais les deux refus.
+
+**Vérifié sans constat** : la route reste gouvernée par `org:read` *(le filtre restreint une liste déjà
+autorisée, il n'ouvre aucune surface)* · la valeur du `$match` est un booléen validé, jamais une clé ni
+un opérateur · le filtre **s'intersecte** avec `ids`/`status`/`q`, il ne les remplace pas · le BFF relaie
+`String(boolean)`, jamais une valeur brute.
+
+⚡ **Deuxième fois dans cette story qu'une vérification corrige ma documentation plutôt que mon code**
+*(après `obj` vs `value`)*. Le code était juste les deux fois ; c'est ce que j'en **disais** qui
+promettait plus qu'il ne tenait.
+
+### ⑨ Clôture
+
+- **2026-08-24** — ✅ **CLÔTURÉE**. Deux PR rebase-mergées : `prospera-auth-service#24` *(3 commits :
+  feature, revue, sécurité)* et `prospera-admin-panel-service#22`. Branches supprimées.
+- ⚠️ **Un flake observé et tracé** : un run de `test:cov` d'`auth-service` a rendu `1 failed` sans nommer
+  le test ; **3 runs consécutifs** ensuite verts *(835/835)*, plus `jest` seul vert. Non lié au diff
+  *(aucun des tests ajoutés n'est temporel)*, mais **consigné plutôt que tu**.
+- ⚡ **Ce que ça débloque** : la console obtient son chiffre exact en une requête *(`limit=1` + filtre,
+  `total`)* au lieu de scanner 100 organisations. Le `≥ n` de la tuile disparaît.
+- ⚠️ **Et ça ne se fera pas tout seul** — la story le disait, et c'est le troisième rappel en une
+  semaine : **une story backend livrée ne déclenche rien tant qu'une story frontend ne la nomme pas.**
+  Le rebranchement *(une ligne : `pageSize: 1` + le filtre, `countBlocked` → `total`)* doit être inscrit
+  au périmètre d'**AP-21**, qui porte déjà celui du filtre `kycStatus` de STORY-175 sur la même route.
