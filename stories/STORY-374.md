@@ -348,3 +348,66 @@ read-model (`countDocuments → 0`) ⇒ **`201`**. L'effet de la story est bien 
 | `GET /dossiers/:id/bilan/exercices` | **200** | `[]` — la lecture vit |
 
 Stack arrêtée (`docker compose stop`) après consignation.
+
+### ⑥ Revue de code — 7 constats, **tous traités**
+
+Scan par `prospera-code-review` (contexte `haiku` + analyse `opus`), seconde lentille
+`ponytail-review` (over-engineering), synthèse et correctifs **dans la session**.
+
+| # | Constat | Traitement |
+|---|---|---|
+| ① **BLOQUANT** (conf. 90) | `ConsultationService` était le **seul autre** lecteur d'`ExerciceRepository`. La story laissait `exercices` **sans aucun écrivain** ⇒ `GET /bilan/consultation` annonçait `OUVERT` (dossier migré) ou `null` (dossier neuf) pendant que `valider` rendait `409 EXERCICE_CLOS` ; et `detail` rendait **404** sur un exercice ouvert au dossier mais sans jeu — le cas **nominal** depuis cette story | **Corrigé.** `ExercicesDossierRepository` devient le **point de lecture unique** du read-model : le statut **affiché** et le statut **appliqué** ne peuvent plus diverger. Le local ne complète plus que ce qu'il ignore — dont `exercicePrecedent`, seule grandeur où les deux sources se **complètent** au lieu de se remplacer |
+| ③ (conf. 88) | `dryRun` n'avait pas la garde, alors que trois de ses cinq appelants n'ont aucun `estClos` en amont et que le code promet « mêmes contrôles que la persistance ». Un aperçu vert suivi d'un `409` au clic d'après | **Corrigé** — garde ajoutée à `dryRun`, mutation vérifiée (1 rouge) |
+| ④ (conf. 88) | Contrat OpenAPI des 3 routes neutralisées : `@ApiCreatedResponse`/`@ApiOkResponse` annonçaient un succès **impossible**, et `@ApiBody` publiait des contraintes que le `ValidationPipe` n'applique plus (le corps n'est plus lu) | **Corrigé** — `@ApiOperation({ deprecated: true })`, plus aucune réponse de succès publiée, plus de `requestBody`. Vérifié sur `/api/docs-json` |
+| ⑦ (conf. 82) | ⚡ `test/bilan-dossier-scope` prenait `POST /bilan/exercices` comme **témoin d'écriture réelle** du `DossierScopeGuard`. Cette route rendant désormais `409` en permanence, son `not.toBe(409)` était devenu **infalsifiable** : vert grâce au double, faux en production | **Corrigé** — témoin déplacé sur `POST /bilan/etats/:id/rouvrir` (vraie écriture, transaction 2 documents). Mutation du guard : **6 rouges** |
+| ⑤ (conf. 95) | Deux docstrings « **HOOK INERTE** — rien ne lit encore cette collection » que ce commit même infirmait (bilan **et** balance, ce dernier renvoyant à STORY-236 qui a rebranché autre chose) | **Corrigé dans les deux services.** C'est le mécanisme **exact** qui a produit STORY-374 : la règle est réécrite dans le docstring lui-même |
+| ⑥ (conf. 95) | JSDoc d'`exigerDossierDuJeu` détachée de sa fonction par l'insertion d'une constante | **Corrigé** — la constante a déménagé dans le repository |
+| ② (conf. 85) | L'annonce « ne mord que sur un exercice connu **du read-model** » est inexacte : `estClos` retombe sur `exercices_atelier`, qui porte les clôtures que la reprise inscrit **sans publier** (D-087-5). Une balance re-déposée sur un N-1 dont le socle est tiré est donc refusée, alors qu'elle passait | **Documenté, pas modifié** — c'est exactement ce que les six autres gardes refusent déjà sur ce même exercice ; l'assouplir ferait diverger les à-nouveaux de N. La formulation est corrigée dans le code et ici |
+
+**Ponytail (over-engineering)** : `net: −2 lignes` — une double assertion redondante dans
+`exercice.service.spec`. `ExercicesModule` **conservé** : le cycle `RepriseModule → BalanceModule` est réel,
+et réenregistrer les modèles dans `BalanceModule` aurait dupliqué l'arbitrage à deux écrivains.
+
+### ⑦ Revue de sécurité — **0 vulnérabilité**
+
+Scan par `prospera-security-review` (`opus`, aucun downgrade). Examiné et écarté, avec la raison :
+
+| Piste | Pourquoi elle ne tient pas |
+|---|---|
+| Isolation tenant/dossier du nouveau `findOne` | `jeu` vient **toujours** de `chargerParId` → `DossierScopedRepository.scope()`, qui fusionne `{tenantId, dossierId}` **en dernier**. Un document sans `dossierId` n'est jamais chargé : le filtre élargi est **inatteignable** |
+| Injection NoSQL par `libelle` / les bornes | `jeu.exercice` est `@IsString()` sur un chemin Mongoose `String` ; les bornes passent par `new Date()` avant le filtre — jamais un objet |
+| Contournement du verrou par rejeu / idempotence | La garde précède le raccourci d'idempotence : la répétition ne transforme pas un refus en `200`. Seul `submitInSession` (voie **Kafka**, sans port hôte) reste hors garde — omission motivée et documentée |
+| Fenêtre du permissif D-374-1 | Le rejeu ne peut pas **lever** un verrou : la projection écrit un `$set` **absolu** keyé `exerciceId`, l'ordre est garanti intra-partition, et l'arbitrage lit `occurredAt` (fait métier) et non `updatedAt` (projection) |
+| Perte de l'`AuditService` sur les 3 routes | `journaliser` ne traçait que des **actes réussis** ; aucun acte n'ayant plus lieu, il n'y a pas de perte de traçabilité |
+| Anti-énumération du `409` | Le refus est prononcé **sans rien lire** ⇒ réponse rigoureusement identique pour un `:id` existant, inexistant ou d'un autre tenant : **aucun oracle**. Un `404` conditionnel aurait été *pire* |
+| ⚠️ Faux positif écarté | « `ConflictException` sans champ `error` » (piège connu du projet) : la réponse réelle mesurée en docker porte bien `"error":"CONFLICT"` — le filtre global le calcule |
+
+### ⑧ Vérification docker **rejouée sur l'état final** (`docker restart`, `Found 0 errors`)
+
+Les correctifs touchent des artefacts déjà vérifiés (le statut **lu**, la garde de l'**aperçu**) — la
+vérification est donc **rejouée**, jamais reportée depuis la mesure d'avant.
+
+| Rejeu, sur la même base | Résultat |
+|---|---|
+| `exercices` (local bilan) | **0 document** — tout ce qui suit ne peut venir que du read-model |
+| Exercice 2026 **clos** ⇒ `GET /bilan/consultation` | ⚡ `statutExercice: "CLOS"`, bornes correctes — l'ancien code rendait **`null`** |
+| `GET /bilan/consultation/2026` | `200`, `statut: CLOS` |
+| Exercice **2027** ouvert au dossier, **sans jeu ni ligne locale** ⇒ `GET …/consultation/2027` | ⚡ **`200`** — l'ancien code rendait **`404 EXERCICE_INTROUVABLE`** |
+| Aperçu Sage (`dryRun=true`) sur 2026 **clos** | ⚡ **`409 EXERCICE_CLOS`** — l'aperçu refuse désormais ce que la soumission refuse |
+| Aperçu Sage sur 2027 **ouvert** | **`200`**, 2 lignes prévisualisées — aucune régression |
+| `POST /bilan/exercices` · `:id/clore` · `:id/rouvrir` | **409 `EXERCICE_NON_INSCRIPTIBLE_ICI`** ×3 |
+| `GET /bilan/exercices` | **200** |
+| `POST /dossiers/:id/balances` sur 2026 clos | **409 `EXERCICE_CLOS`** |
+| Jeu rouvert puis validé sur 2026 clos | **409 `EXERCICE_CLOS`** |
+| `/api/docs-json` | les 3 routes `deprecated: true`, **aucune** réponse de succès, **aucun** `requestBody` |
+
+Stack arrêtée (`docker compose stop`).
+
+### Portes après revue
+
+| | `balance-service` | `bilan-service` |
+|---|---|---|
+| Lint / build | ✅ 0 / ✅ | ✅ 0 / ✅ |
+| Unitaires | ✅ **2942** | ✅ **1039** (+ le spec du repository neuf, 100 % couvert) |
+| e2e | ✅ **669** | ✅ **270** |
+| Couverture | **98,97 / 91,81 / 98,16 / 99,06** | **98,62 / 93,24 / 98,34 / 98,57** |
