@@ -1,6 +1,6 @@
 # STORY-374 : le dossier fait foi *aussi* sur le chemin d'écriture — les gardes d'exercice lisent le read-model
 
-Status: review
+Status: done
 
 **Epic :** EPIC-043 — Le dossier client devient l'unité de travail du cabinet
 **Points :** 5 · **Complexité :** medium · **Sprint :** 20 (backend) · **Services :** `balance-service`
@@ -411,3 +411,36 @@ Stack arrêtée (`docker compose stop`).
 | Unitaires | ✅ **2942** | ✅ **1039** (+ le spec du repository neuf, 100 % couvert) |
 | e2e | ✅ **669** | ✅ **270** |
 | Couverture | **98,97 / 91,81 / 98,16 / 99,06** | **98,62 / 93,24 / 98,34 / 98,57** |
+
+### ⑨ Clôture
+
+- **2026-08-24** — ✅ **CLÔTURÉE**. Deux PR rebase-mergées sur `dev`, 2 commits chacune (feature + revue) :
+  `prospera-balance-service#46` (`980b5cd`, `c2e982e`) et `prospera-bilan-service#48` (`129694b`,
+  `4c25355`). Branches supprimées. Statut aligné aux 3 endroits, `completed_date` posée.
+- ⚡ **Ce que cette story change vraiment** : clore un exercice devient un **acte opposable**. Les
+  **sept** écritures d'Atelier et la validation de liasse refusent désormais un exercice clos **dans le
+  dossier** — y compris sur un dossier neuf, où `exercices_atelier` est vide et où les gardes étaient
+  donc *ouvertes en permanence*. Et la question « 2023 est-il clos ? » n'a plus qu'**une** réponse :
+  `bilan-service` a rendu son droit d'écrire.
+- **Débloque** : **FE-066**, AC-8, moitié « l'Atelier refuse d'écrire sur l'exercice clos », jouable
+  **depuis la saisie directe** grâce à D-374-2 — sans attendre FE-047.
+- **Règle confirmée, et elle vaut au-delà de cette story** : ⚡ **une mesure citée dans une story a une
+  date.** Le `grep → 0` du 2026-08-20 était périmé par STORY-367 (livrée le 18/08) : la moitié du
+  périmètre était déjà faite, et AC-4 aurait cassé D-367-1 s'il avait été appliqué à la lettre. **Rejouer
+  la mesure avant de coder**, pas la recopier.
+- **Dette ouverte, transmise :**
+  - ⚠️ **`submitInSession` (voie Kafka) reste sans garde d'exercice**, et c'est motivé : une
+    `ConflictException` dans la transaction d'ingestion n'est codifiée par aucun `catch`
+    (`rejetDepuisErreur` ne traduit que 400/422 et **relance** le reste) ⇒ offset jamais commité,
+    partition rejouée indéfiniment. Le verrou de l'ingestion exige son **propre chemin de rejet
+    codifié** — story à part.
+  - ⚠️ **La jointure reste par libellé (bilan) et par bornes exactes (balance)** : un libellé ou des
+    bornes qui ne concordent pas rendent l'exercice « inconnu » ⇒ permissif. C'est `EXERCICE_NON_OUVERT`,
+    explicitement **hors périmètre** (D-374-1) — changement de contrat sur des routes livrées + migration.
+  - ⚠️ **`origine: MIGRATION` du read-model n'est toujours pas lu** (Q7) : refuser l'écriture sur un
+    exercice antérieur à l'entrée en portefeuille reste à porter. Le docstring ne promet plus qu'une story
+    le fera — c'est précisément la promesse morte qui a créé STORY-374.
+  - ⚠️ **`exercices` (bilan) et `exercices_atelier` (balance) survivent sans écrivain de statut.**
+    `exercices` ne sert plus qu'au chaînage N/N-1 et au repli de l'existant ; `exercices_atelier` garde le
+    socle d'à-nouveaux. Leur suppression demande une story dédiée — et surtout le déplacement de
+    `exercicePrecedent` vers le producteur.
