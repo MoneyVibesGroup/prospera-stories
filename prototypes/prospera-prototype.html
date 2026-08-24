@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-043 Cahier de recettes</title>
+<title>Prospera · Prototype cumulatif — FE-044 Cahier de dépenses</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -889,6 +889,26 @@
   .cah-repli > summary { cursor: pointer; padding: 0.6rem 0; font-size: 0.86rem; font-weight: 600; }
   .cah-repli > summary span { font-weight: 400; color: var(--muted-fg); }
   .cah-repli .cah-form { border: 0; background: transparent; padding: 0.3rem 0 0.6rem; }
+
+  /* ═══ FE-044 — cahier de dépenses (STORY-083) ═════════════════════════
+     Le cahier de dépenses réutilise TOUT le vocabulaire de FE-043 (.cah-mois,
+     .cah-m, .cah-form, .cah-bar, .cah-conf, .imp-table). Ne sont ajoutés ici que
+     les deux objets qu'il introduit vraiment : le SÉLECTEUR DE LIVRE (recettes
+     vs dépenses) et la tuile « part non déductible », qui n'est ni un succès ni
+     une erreur — c'est une somme à réintégrer, et elle doit se lire comme telle. */
+  .cah-livres { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .cah-livre { display: flex; align-items: baseline; gap: 0.4rem; padding: 0.5rem 0.85rem; border: 1px solid var(--border); border-radius: 999px; background: var(--card); cursor: pointer; font: inherit; font-size: 0.88rem; font-weight: 650; color: var(--muted-fg); }
+  .cah-livre svg { width: 0.95rem; height: 0.95rem; align-self: center; }
+  .cah-livre .sub { font-size: 0.72rem; font-weight: 500; color: var(--muted-fg); }
+  .cah-livre:hover { background: var(--hover-surface); }
+  .cah-livre[aria-selected="true"] { border-color: color-mix(in srgb, var(--orange-500) 45%, transparent); background: color-mix(in srgb, var(--orange-500) 10%, transparent); color: var(--foreground); }
+  .cah-livre[aria-selected="true"] .sub { color: var(--orange-700); }
+  :root[data-theme="dark"] .cah-livre[aria-selected="true"] .sub { color: var(--orange-400); }
+  .dep-slot { display: flex; flex-direction: column; gap: 0.75rem; }
+  /* ⚠️ AMBRE, pas rouge : une part non déductible n'est pas une anomalie de
+     saisie — c'est une réintégration à venir, parfaitement régulière. */
+  .imp-tile.dep-attn { border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); background: color-mix(in srgb, var(--warning) 7%, var(--card)); }
+  .imp-table tr.tot td { border-top: 2px solid var(--border-strong); background: var(--hover-surface); }
 
   /* `.code` n'existe que dans `.gate` — on l'étend aux bandeaux de refus. */
   .prof-note .code, .helper .code { font-family: var(--font-mono); font-size: 0.72rem; background: var(--hover-surface); color: var(--muted-fg); padding: 0.1rem 0.4rem; border-radius: 0.35rem; white-space: nowrap; }
@@ -4243,7 +4263,7 @@
                          une fois. -->
                     <button class="atl-tab" role="tab" data-atl-tab="cahiers" aria-selected="false">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7"/><path d="M9 11h7"/></svg>
-                      Cahiers <span class="count">Recettes</span>
+                      Cahiers <span class="count">Recettes · Dépenses</span>
                     </button>
                     <span class="grow"></span>
                     <span class="badge badge-active"><span class="d"></span>Module actif</span>
@@ -4279,22 +4299,21 @@
                         <div class="src-cta"><button class="btn btn-primary btn-sm" type="button" data-src-act="direct"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg> Saisir / ingérer</button></div>
                       </article>
 
-                      <!-- ocr : disponible depuis FE-043 — mais l'écran ne couvre
-                           QUE le cahier de recettes. `supported` (le backend sait
-                           traiter) et `href` (l'écran existe) restent deux choses
-                           différentes ; ici les deux sont vraies, et la troisième
-                           — « tout le chemin cahiers » — ne l'est pas encore. Elle
-                           est dite, pas sous-entendue. -->
+                      <!-- ocr : disponible depuis FE-043, COMPLÉTÉE par FE-044 — les deux
+                           cahiers sont là. Ce qui reste dehors est nommé, pas sous-entendu :
+                           la lecture des FACTURES FOURNISSEURS (FE-045), qui n'est pas un
+                           détail d'OCR mais un écran de relecture à part — une pièce de
+                           dépense exige une CATÉGORIE, que la pré-proposition ne porte pas. -->
                       <article class="src-card available">
                         <div class="src-top">
                           <span class="src-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h2"/><path d="M16 3h2a2 2 0 0 1 2 2v2"/><path d="M20 17v2a2 2 0 0 1-2 2h-2"/><path d="M8 21H6a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg></span>
                           <span class="badge badge-avail"><span class="d"></span>Disponible</span>
                         </div>
                         <h4>Cahiers &amp; factures</h4>
-                        <p>Vous ne tenez aucun logiciel comptable&nbsp;: vos recettes se saisissent mois par mois, et se rattachent aux comptes de produits.</p>
+                        <p>Vous ne tenez aucun logiciel comptable&nbsp;: vos <b>recettes</b> et vos <b>dépenses</b> se tiennent mois par mois, et se rattachent seules aux comptes de produits et de charges.</p>
                         <div class="src-cta">
-                          <button class="btn btn-primary btn-sm" type="button" data-src-act="ocr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Tenir le cahier de recettes</button>
-                          <span class="src-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Le cahier de <b>dépenses</b> et la lecture des <b>factures</b> arrivent ensuite — sans promesse de date.</span>
+                          <button class="btn btn-primary btn-sm" type="button" data-src-act="ocr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Tenir mes cahiers</button>
+                          <span class="src-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> La lecture des <b>factures fournisseurs</b> arrive ensuite — sans promesse de date.</span>
                         </div>
                       </article>
                     </div>
@@ -5067,6 +5086,26 @@
                        TROIS chaînons manquent au contrat pour relier l'une à l'autre. -->
                   <div class="atl-panel atl-body" data-atl-panel="cahiers" hidden>
 
+                    <!-- ═══════════ FE-044 — LE LIVRE OUVERT : recettes ou dépenses ═══════════
+                         Deux cahiers, un seul onglet. Ce ne sont PAS deux sources (D13 n'en
+                         connaît que trois) : c'est la même source `ocr`, dont les deux moitiés
+                         alimentent les deux côtés de la balance — classe 7 d'un côté, classe 6
+                         de l'autre. Les séparer en deux onglets de module aurait suggéré deux
+                         chemins indépendants, alors que c'est le MÊME dossier, le MÊME exercice
+                         et le MÊME ruban de mois. -->
+                    <div class="cah-livres" role="tablist" aria-label="Cahier ouvert">
+                      <button class="cah-livre" role="tab" aria-selected="true" type="button" data-cah-livre="recettes">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+                        Recettes <span class="sub">ce qui entre — classe 7</span>
+                      </button>
+                      <button class="cah-livre" role="tab" aria-selected="false" type="button" data-cah-livre="depenses">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                        Dépenses <span class="sub">ce qui sort — classe 6</span>
+                      </button>
+                    </div>
+
+                    <div data-cah-livre-panel="recettes">
+
                     <div style="display:flex;align-items:flex-end;gap:0.6rem;flex-wrap:wrap">
                       <div>
                         <h3 class="atl-sectitle">Cahier de recettes</h3>
@@ -5589,14 +5628,587 @@
                     <div class="dc-note">
                       <b>Partage de périmètre avec FE-045.</b> Le dépôt OCR est servi par <code>STORY-084</code>, que la fiche FE-043 rangeait en «&nbsp;hors périmètre&nbsp;».
                       La revue PO l'a ramené dedans&nbsp;: <b>pour un commerçant, il n'y a pas d'autre porte d'entrée</b> — le cahier est un objet physique. FE-043 livre donc le
-                      chemin <b>recettes</b> de bout en bout&nbsp;; FE-045 garde ce qui lui reste en propre&nbsp;: les <b>factures fournisseurs</b> et le versant <b>dépenses</b>,
-                      qui dépendent de FE-044.
+                      chemin <b>recettes</b> de bout en bout&nbsp;; <b>FE-044</b> livre le cahier de <b>dépenses</b>, ses catégories <b>et son import de pièces</b> (images et PDF),
+                      colonne «&nbsp;Poste&nbsp;» comprise. ⇒ <b>FE-045 est vidée de sa substance et doit être re-cadrée</b>&nbsp;: son périmètre initial («&nbsp;dépôt de
+                      captures/factures, montants éditables, affectation au mois&nbsp;») est servi deux fois. Ce qui lui resterait de propre est à trancher par le PO —
+                      candidat le plus net&nbsp;: l'exploitation du <b>HT/TVA/NIF</b> extrait d'une facture normalisée, aujourd'hui lu par le serveur mais jamais montré
+                      ni corrigeable à l'écran.
                     </div>
                     <div class="dc-note">
                       <b>Une route servie que cet écran n'appelle pas — délibérément.</b> <code>POST …/cahiers/recettes/lot</code> écrit tout un mois d'un coup depuis un corps JSON.
                       Le chemin par les images (<code>…/pieces/ocr/{lotId}/appliquer</code>) fait le même travail <b>en gardant la trace de la pièce</b> et le niveau de preuve&nbsp;;
                       passer par <code>/lot</code> produirait les mêmes lignes <b>sans leur justification</b>, ce qui est exactement ce que l'Atelier existe pour éviter.
                     </div>
+                    </div><!-- /livre recettes -->
+
+                    <!-- ═══════════════════════════════════════════════════════════════════════
+                         FE-044 — LE CAHIER DE DÉPENSES (STORY-083, FR-A09)
+                         ═══════════════════════════════════════════════════════════════════════
+                         Symétrique du cahier de recettes, et PLUS PIÉGEUX. Une recette mal
+                         rangée fausse le chiffre d'affaires ; une dépense mal marquée fausse le
+                         RÉSULTAT FISCAL : une charge non déductible passée en déduction, c'est
+                         un redressement ; une charge déductible oubliée, c'est un impôt payé en
+                         trop. Trois objets que le cahier de recettes n'a pas :
+
+                         ① LA CATÉGORIE, éditable, qui porte le compte de classe 6. C'est elle
+                            qu'on saisit — jamais le compte. Même doctrine PO qu'en FE-043
+                            (« pour le compte, ça doit être automatique »), servie autrement :
+                            côté recettes le serveur DÉDUIT le compte du libellé ; côté dépenses
+                            c'est la NOMENCLATURE DU CABINET qui le porte, une fois pour toutes.
+
+                         ② LA DÉDUCTIBILITÉ, décidée à la saisie. Elle est PROPOSÉE (catégorie +
+                            justificatif) et modifiable — mais jamais en silence : diverger exige
+                            un MOTIF, et la trace conserve ce dont on a divergé.
+
+                         ③ LE MONTANT IMPUTÉ ≠ LE MONTANT DÉCAISSÉ. La TVA non récupérable fait
+                            partie du COÛT et s'impute avec la charge (D-083-2). C'est pourquoi
+                            la table porte DEUX colonnes de montant, toutes deux nommées. -->
+                    <div data-cah-livre-panel="depenses" hidden>
+
+                    <div style="display:flex;align-items:flex-end;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Cahier de dépenses</h3>
+                        <p class="atl-secsub">Vos catégories, votre langage&nbsp;: «&nbsp;Électricité CEET&nbsp;», «&nbsp;Carburant motos&nbsp;». Le compte de charges suit tout seul, la déductibilité se décide à la saisie, et rien ne se réintègre en silence.</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <div class="atelier-demo" role="tablist" aria-label="Parcours dépenses (démo)">
+                        <span class="lbl">Parcours</span>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-dep="cahier" aria-selected="true">Cahier</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-dep="import">Import</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-dep="categories" aria-selected="false">Catégories</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-dep="synthese" aria-selected="false">Synthèse</button>
+                      </div>
+                      <div class="atelier-demo" role="tablist" aria-label="Refus dépenses (démo)">
+                        <span class="lbl">Refus</span>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-dep="motif" aria-selected="false">Motif</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-dep="inactive" aria-selected="false">Inactive</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-dep="utilisee" aria-selected="false">Utilisée</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-dep="classe6" aria-selected="false">Classe 6</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-dep="vide" aria-selected="false">Vide</button>
+                      </div>
+                    </div>
+
+                    <!-- Le MÊME dossier, le MÊME exercice que les recettes : le cahier de
+                         dépenses n'est pas un autre client, c'est l'autre moitié du même. -->
+                    <div class="cah-ctx">
+                      <label for="depExo">Exercice</label>
+                      <select id="depExo">
+                        <option>2026 — 01/01/2026 → 31/12/2026</option>
+                        <option>2025 — 01/01/2025 → 31/12/2025 (clos)</option>
+                      </select>
+                      <span class="badge badge-active"><span class="d"></span>Ouvert</span>
+                      <span class="grow" style="flex:1"></span>
+                      <span class="cah-lig">GET /dossiers/{id}/exercices → :3009</span>
+                    </div>
+
+                    <!-- ═════════ LE RUBAN — PERMANENT, comme côté recettes ═════════
+                         ⚠️ Le chiffre affiché est le DÉCAISSÉ (TTC), pas la charge imputée :
+                         c'est ce que le commerçant reconnaît — l'argent sorti de la caisse.
+                         La charge, elle, est nommée dans les tuiles, où l'écart s'explique. -->
+                    <div class="cah-mois" role="tablist" aria-label="Mois de l'exercice (dépenses)">
+                      <button class="cah-m" role="tab" aria-selected="false" type="button"><span class="mn">Janvier</span><span class="mv">612 000</span><span class="mc">9 dépenses</span></button>
+                      <button class="cah-m" role="tab" aria-selected="false" type="button"><span class="mn">Février</span><span class="mv">498 500</span><span class="mc">7 dépenses</span></button>
+                      <button class="cah-m" role="tab" aria-selected="true" type="button"><span class="mn">Mars</span><span class="mv">842 500</span><span class="mc">6 dépenses</span></button>
+                      <button class="cah-m vide" role="tab" aria-selected="false" type="button"><span class="mn">Avril</span><span class="mv">—</span><span class="mc">rien de saisi</span></button>
+                      <button class="cah-m vide" role="tab" aria-selected="false" type="button"><span class="mn">Mai</span><span class="mv">—</span><span class="mc">rien de saisi</span></button>
+                      <button class="cah-m vide" role="tab" aria-selected="false" type="button"><span class="mn">Juin</span><span class="mv">—</span><span class="mc">rien de saisi</span></button>
+                    </div>
+                    <p class="helper" style="text-align:left">
+                      ⚠️ Un mois sans ligne affiche «&nbsp;<b>—</b>&nbsp;», <b>jamais 0</b> — la synthèse ne renvoie pas les mois vides, et «&nbsp;0&nbsp;F de charges&nbsp;»
+                      se lit «&nbsp;ce mois n'a rien coûté&nbsp;», ce qui n'arrive jamais dans une PME qui tourne. ⚠️ Et le mois d'une dépense n'est <b>jamais saisi</b>&nbsp;:
+                      il est <b>dérivé de la date</b> par le serveur. Choisir «&nbsp;mars&nbsp;» ici ne force rien.
+                    </p>
+
+                    <div class="cah-bar">
+                      <div>
+                        <b>Mars 2026</b>
+                        <div class="sub">6 dépenses · 842 500 F décaissés · <b>810 771 F</b> imputés en charges</div>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <button class="btn btn-ghost btn-sm" type="button" data-dep-goto="categories"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M7 12h14"/><path d="M11 18h10"/></svg> Mes catégories</button>
+                      <button class="btn btn-ghost btn-sm" type="button" data-dep-goto="cahier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg> Saisir à la main</button>
+                      <button class="btn btn-primary btn-sm" type="button" data-dep-goto="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></svg> Importer les pièces de mars</button>
+                    </div>
+
+                    <!-- ═════════════════ LE CAHIER DU MOIS ═════════════════ -->
+                    <div class="dep-slot" data-dep-slot="cahier">
+
+                      <div class="imp-tiles">
+                        <div class="imp-tile"><div class="k">Décaissé (TTC)</div><div class="v">842 500<span class="u">F · sorti de la caisse</span></div></div>
+                        <div class="imp-tile"><div class="k">Imputé en charges</div><div class="v">810 771<span class="u">F · classe 6</span></div></div>
+                        <div class="imp-tile"><div class="k">TVA déductible</div><div class="v">31 729<span class="u">F · récupérable</span></div></div>
+                        <div class="imp-tile dep-attn"><div class="k">Part non déductible</div><div class="v">345 000<span class="u">F · à réintégrer</span></div></div>
+                      </div>
+
+                      <!-- ⚡ LA NOTE QUI JUSTIFIE DEUX COLONNES DE MONTANT. -->
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Décaissé et imputé ne sont pas le même chiffre, et l'écart n'est pas toujours la TVA.</b> Quand la TVA est <b>récupérable</b>, la charge vaut le
+                        <b>HT</b> — la TVA part en créance sur l'État. Quand elle ne l'est <b>pas</b> (organisation non assujettie, ligne sans facture), elle fait partie du
+                        <b>coût</b> et s'impute <b>avec la charge</b>, en TTC. Imputer systématiquement le HT minorerait les charges de toute la TVA non récupérable —
+                        donc <b>majorerait le résultat imposable</b>, en silence. D'où deux colonnes, toutes deux nommées.
+                      </p>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Dépenses de <b>mars 2026</b> — 6 lignes. <code>GET …/cahiers/depenses?mois=2026-03</code>. Les totaux ci-dessus viennent du serveur&nbsp;: <b>l'écran ne resomme jamais la liste affichée</b>.</div>
+                        <table class="imp-table">
+                          <thead>
+                            <tr>
+                              <th>Preuve</th><th>Date</th><th>Libellé</th><th>Fournisseur</th><th>Catégorie</th><th>Compte</th>
+                              <th class="num">Décaissé</th><th class="num">Imputé</th><th>Déductible</th><th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td><button class="cah-vign" type="button" aria-label="Agrandir la facture CEET"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
+                              <td>14/03/2026</td>
+                              <td>Facture CEET mars 2026</td>
+                              <td>CEET</td>
+                              <td><span class="badge badge-active"><span class="d"></span>Électricité CEET</span></td>
+                              <td><code>6051</code></td>
+                              <td class="num">118 000</td>
+                              <td class="num"><b>100 000</b><span class="cah-motif">HT — TVA 18 000 récupérable</span></td>
+                              <td><span class="cah-conf ok">déductible</span></td>
+                              <td><button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la dépense « Facture CEET mars 2026 »"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td>
+                            </tr>
+                            <tr>
+                              <td><span class="cah-vign absente">saisie<br>à la main</span></td>
+                              <td>05/03/2026</td>
+                              <td>Loyer boutique — mars</td>
+                              <td>SCI Adjovi</td>
+                              <td><span class="badge badge-active"><span class="d"></span>Loyer boutique</span></td>
+                              <td><code>6221</code></td>
+                              <td class="num">250 000</td>
+                              <td class="num"><b>250 000</b><span class="cah-motif">aucune TVA ventilée</span></td>
+                              <td><span class="cah-conf ok">déductible</span></td>
+                              <td><button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la dépense « Loyer boutique — mars »"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td>
+                            </tr>
+                            <tr>
+                              <td><button class="cah-vign" type="button" aria-label="Agrandir le reçu Total"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
+                              <td>18/03/2026</td>
+                              <td>Carburant motos livraison</td>
+                              <td>Station Total Bè</td>
+                              <td><span class="badge badge-active"><span class="d"></span>Carburant motos</span></td>
+                              <td><code>6055</code></td>
+                              <td class="num">90 000</td>
+                              <td class="num"><b>76 271</b><span class="cah-motif">HT — TVA 13 729 récupérable</span></td>
+                              <td><span class="cah-conf ok">déductible</span></td>
+                              <td><button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la dépense « Carburant motos livraison »"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td>
+                            </tr>
+                            <tr class="cah-warn">
+                              <td><span class="cah-vign absente">saisie<br>à la main</span></td>
+                              <td>22/03/2026</td>
+                              <td>Amende de stationnement</td>
+                              <td>Trésor public</td>
+                              <td><span class="badge badge-invited"><span class="d"></span>Amendes &amp; pénalités</span></td>
+                              <td><code>6581</code></td>
+                              <td class="num">25 000</td>
+                              <td class="num"><b>25 000</b><span class="cah-motif">TTC — aucune TVA récupérable</span></td>
+                              <td><span class="cah-conf bad">non déductible</span><span class="cah-motif">catégorie non déductible · code <b>30</b></span></td>
+                              <td><button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la dépense « Amende de stationnement »"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td>
+                            </tr>
+                            <tr class="cah-warn">
+                              <td><span class="cah-vign absente">saisie<br>à la main</span></td>
+                              <td>28/03/2026</td>
+                              <td>Achat marchandises — marché</td>
+                              <td>Marché d'Adawlato</td>
+                              <td><span class="badge badge-active"><span class="d"></span>Achats de marchandises</span></td>
+                              <td><code>601</code></td>
+                              <td class="num">320 000</td>
+                              <td class="num"><b>320 000</b><span class="cah-motif">TTC — sans facture</span></td>
+                              <td><span class="cah-conf bad">non déductible</span><span class="cah-motif">charge non justifiée · <b>aucun code</b> publié</span></td>
+                              <td><button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la dépense « Achat marchandises — marché »"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td>
+                            </tr>
+                            <tr>
+                              <td><span class="cah-vign absente">saisie<br>à la main</span></td>
+                              <td>30/03/2026</td>
+                              <td>Réparation groupe électrogène</td>
+                              <td>Atelier Koffi</td>
+                              <td><span class="badge badge-active"><span class="d"></span>Entretien &amp; réparations</span></td>
+                              <td><code>6152</code></td>
+                              <td class="num">39 500</td>
+                              <td class="num"><b>39 500</b><span class="cah-motif">TTC — aucune TVA ventilée</span></td>
+                              <td><span class="cah-conf ok">déductible</span></td>
+                              <td><button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la dépense « Réparation groupe électrogène »"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Les deux lignes ambrées ne sont pas des erreurs de saisie</b>&nbsp;: ce sont les <b>futures réintégrations</b>. Le motif est nommé —
+                        «&nbsp;catégorie non déductible&nbsp;», «&nbsp;charge non justifiée&nbsp;» — parce que c'est <b>lui</b> que la liasse agrégera, pas le code fiscal,
+                        qui peut manquer. Une charge marquée non déductible <b>sans code</b> reste réintégrée&nbsp;: ce qui manque, c'est la case de la DSF, pas la réintégration.
+                      </p>
+
+                      <!-- ⚡ LA SAISIE — dépliée, et non repliée comme côté recettes.
+                           Ce n'est PAS une incohérence avec la revue PO du 24/08 : côté recettes,
+                           le chemin nominal est la photo du cahier, la saisie est le repli. Côté
+                           dépenses, la facture fournisseur porte une TVA et une déductibilité que
+                           l'OCR ne DÉCIDE pas — il ne peut même pas proposer de catégorie (le
+                           contrat de STORY-084 n'en publie aucune). L'humain tranche, toujours. -->
+                      <details class="cah-repli" open>
+                        <summary>Saisir une dépense de mars <span>— la catégorie porte le compte, vous ne le tapez jamais</span></summary>
+                        <div class="cah-form">
+                          <label>Date<input type="date" value="2026-03-24"></label>
+                          <label>Libellé<input type="text" value="Facture téléphone Moov"></label>
+                          <label>Fournisseur<input type="text" value="Moov Africa Togo"></label>
+                          <label>Catégorie
+                            <select>
+                              <option>Téléphone &amp; internet — 6281</option>
+                              <option>Achats de marchandises — 601</option>
+                              <option>Électricité CEET — 6051</option>
+                              <option>Loyer boutique — 6221</option>
+                              <option>Amendes &amp; pénalités — 6581 (non déductible)</option>
+                            </select>
+                            <span class="fh">le compte suit la catégorie</span>
+                          </label>
+                          <label>Payé par
+                            <select><option>Mobile money</option><option>Espèces</option><option>Banque</option></select>
+                          </label>
+                          <label>Montant décaissé (TTC)<input type="text" value="35 400"><span class="fh">en francs</span></label>
+                        </div>
+                        <div class="cah-actions" style="padding:0.2rem 0 0.9rem">
+                          <label class="pm-check" style="display:flex;align-items:center;gap:0.4rem;font-size:0.84rem"><input type="checkbox" checked> J'ai la pièce justificative</label>
+                          <span class="cah-conf ok">proposé&nbsp;: déductible</span>
+                          <span class="grow" style="flex:1"></span>
+                          <button class="btn btn-primary btn-sm" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg> Ajouter la dépense</button>
+                        </div>
+                        <p class="helper" style="text-align:left;margin-top:0">
+                          ⚠️ <b>Aucun champ «&nbsp;compte&nbsp;», et aucun champ «&nbsp;HT&nbsp;/&nbsp;TVA&nbsp;».</b> Le compte vient de la <b>catégorie</b>&nbsp;; la ventilation
+                          vient du <b>paquet fiscal</b> de l'exercice, jamais d'un taux écrit dans l'écran. La seule chose que l'écran demande, c'est ce que le comptable est
+                          seul à savoir&nbsp;: <b>a-t-il la pièce&nbsp;?</b> — et cette case pilote à elle seule la déductibilité proposée.
+                        </p>
+                      </details>
+                    </div>
+
+                    <!-- ═════════════ IMPORT DES PIÈCES — IMAGES **ET** PDF ═════════════
+                         Ajouté à la revue PO du 2026-08-24 : « au niveau des cahiers de
+                         dépenses c'est aussi un import de fichier image ou PDF ». Le contrat
+                         le sert déjà (`destination: DEPENSES`) — ce qui manquait, c'était
+                         l'écran. Une seule différence de fond avec les recettes, et elle est
+                         structurante : une ligne de dépense EXIGE une catégorie, que l'OCR
+                         ne pré-propose pas. D'où la colonne « Poste » à la relecture. -->
+                    <div class="dep-slot" data-dep-slot="import" hidden>
+                      <div class="imp-steps" aria-hidden="true">
+                        <span class="imp-step active" data-dep-step="1"><span class="n">1</span> Importer</span>
+                        <span class="sep"></span>
+                        <span class="imp-step" data-dep-step="2"><span class="n">2</span> Relire &amp; rattacher</span>
+                        <span class="sep"></span>
+                        <span class="imp-step" data-dep-step="3"><span class="n">3</span> Appliquer</span>
+                      </div>
+
+                      <div class="dropzone">
+                        <span class="dzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+                        <b>Déposez toutes les pièces de mars 2026 — d'un seul coup</b>
+                        <p>Photos, scans, <b>PDF</b>. Les factures fournisseurs, les reçus, les pages du cahier.
+                        <b>Rien n'entre au cahier à ce stade</b> — on lit d'abord, vous décidez ensuite.</p>
+                      </div>
+
+                      <div class="cah-kinds">
+                        <div class="cah-kind">
+                          <b>Factures fournisseurs</b>
+                          <span>PDF ou photo. Leur <b>HT</b>, leur <b>TVA</b> et le NIF de l'émetteur sont extraits&nbsp;: la ligne vaut alors preuve «&nbsp;fichier&nbsp;», et sa TVA devient récupérable.</span>
+                        </div>
+                        <div class="cah-kind">
+                          <b>Pages de cahier &amp; reçus</b>
+                          <span>Photos du cahier, tickets, reçus manuscrits, captures Mobile Money. Déposés en <code>captures</code>.</span>
+                        </div>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Le type de pièce est DÉCLARÉ, jamais deviné du format.</b> Une facture photographiée en JPEG partirait au lecteur de reçus et y perdrait
+                        son HT, sa TVA et son NIF — donc sa déductibilité de TVA <b>et</b> son niveau de preuve. C'est pour ça que l'écran demande <i>quoi</i> vous déposez
+                        plutôt que de le déduire de l'extension.
+                      </p>
+
+                      <!-- ═══════ LA RELECTURE — avec LA colonne que les recettes n'ont pas ═══════ -->
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <div><b>6 pièces lues, rien n'est encore entré au cahier.</b> Corrigez ce qui est faux, <b>choisissez le poste de chaque dépense</b>, puis appliquez.</div>
+                      </div>
+
+                      <!-- ⚡⚡ LE BANDEAU DE LA PAGE MIXTE — la réponse à la question du PO.
+                           `destination` est une propriété du LOT, jamais de la ligne : le
+                           serveur écrit tout un lot vers UN cahier. Mais l'OCR lit le SENS de
+                           chaque pièce (`sens: ENTREE|SORTIE`) et lève `SENS_CONTRAIRE`. On
+                           montre donc ces lignes, non cochées, et on renvoie à l'autre cahier. -->
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+                        <div>
+                          <b>2 pièces de cette page appartiennent à l'autre cahier.</b> La machine y a lu une <b>entrée d'argent</b> alors que vous importez des dépenses —
+                          c'est le cas courant d'une page de cahier où les ventes et les achats se suivent. Elles ne sont <b>pas cochées</b>&nbsp;:
+                          <button class="linklike" type="button" data-cah-livre-goto="recettes">redéposez la même image dans le cahier de recettes</button>, elles y seront proposées.
+                          <b>Rien n'est perdu, rien n'entre deux fois</b>, et la pièce reste justifiée des deux côtés.
+                        </div>
+                      </div>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Relecture du lot — <code>GET …/pieces/ocr/{lotId}</code>. Une pièce sous le seuil de confiance <b>n'est pas pré-cochée</b>&nbsp;: la machine propose, elle ne décide pas.</div>
+                        <table class="imp-table">
+                          <thead><tr><th></th><th>Preuve</th><th>Date</th><th>Libellé lu</th><th class="num">Montant</th><th>Poste (catégorie)</th><th>Ce que la lecture signale</th></tr></thead>
+                          <tbody>
+                            <tr>
+                              <td><input type="checkbox" checked aria-label="Retenir la pièce 1"></td>
+                              <td><button class="cah-vign" type="button" aria-label="Agrandir la pièce 1"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
+                              <td>14/03/2026</td>
+                              <td>CEET — facture mars</td>
+                              <td class="num">118 000</td>
+                              <td><select><option>Électricité CEET — 6051</option><option>Achats de marchandises — 601</option></select></td>
+                              <td><span class="cah-conf ok">confiance 96 %</span></td>
+                            </tr>
+                            <tr>
+                              <td><input type="checkbox" checked aria-label="Retenir la pièce 2"></td>
+                              <td><button class="cah-vign" type="button" aria-label="Agrandir la pièce 2"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
+                              <td>18/03/2026</td>
+                              <td>Station Total Bè</td>
+                              <td class="num">90 000</td>
+                              <td><select><option>Carburant motos — 6055</option><option>Achats de marchandises — 601</option></select></td>
+                              <td><span class="cah-conf ok">confiance 91 %</span></td>
+                            </tr>
+                            <tr class="cah-warn">
+                              <td><input type="checkbox" aria-label="Retenir la pièce 3"></td>
+                              <td><button class="cah-vign" type="button" aria-label="Agrandir la pièce 3"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
+                              <td>14/03/2026</td>
+                              <td>Vente comptoir — page 3</td>
+                              <td class="num">42 000</td>
+                              <td><span class="cah-piece">—</span></td>
+                              <td><span class="cah-conf warn">appartient au cahier de <b>recettes</b></span><span class="cah-motif">entrée d'argent lue sur une page importée en dépenses</span></td>
+                            </tr>
+                            <tr class="cah-warn">
+                              <td><input type="checkbox" aria-label="Retenir la pièce 4"></td>
+                              <td><button class="cah-vign" type="button" aria-label="Agrandir la pièce 4"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
+                              <td>15/03/2026</td>
+                              <td>Vente comptoir — page 3</td>
+                              <td class="num">18 500</td>
+                              <td><span class="cah-piece">—</span></td>
+                              <td><span class="cah-conf warn">appartient au cahier de <b>recettes</b></span></td>
+                            </tr>
+                            <tr class="cah-warn">
+                              <td><input type="checkbox" aria-label="Retenir la pièce 5"></td>
+                              <td><button class="cah-vign" type="button" aria-label="Agrandir la pièce 5"><span class="pg"><i></i><i></i><i></i><i></i></span><span class="zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span></button></td>
+                              <td><input class="cah-inline" type="date" value=""></td>
+                              <td>Reçu manuscrit — illisible</td>
+                              <td class="num"><input class="cah-inline" type="text" value="" style="width:6rem;text-align:right"></td>
+                              <td><select><option>Choisir un poste…</option><option>Achats de marchandises — 601</option></select></td>
+                              <td><span class="cah-conf bad">date illisible</span><span class="cah-motif">saisissez-la pour pouvoir appliquer</span></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div class="cah-actions">
+                        <button class="btn btn-primary btn-sm" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Appliquer les 2 pièces retenues</button>
+                        <span class="cah-lig">POST …/pieces/ocr/{lotId}/appliquer</span>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Le bouton reste bloqué tant qu'une pièce retenue n'a pas de poste.</b> <code>categorieId</code> est <b>obligatoire</b> sur une ligne de dépense, et
+                        la pré-proposition d'une pièce <b>n'en porte aucun</b> — l'OCR lit un montant et un fournisseur, il ne sait pas si «&nbsp;Total&nbsp;» est du carburant
+                        ou un achat de marchandises. Laisser partir enverrait 5 pièces pour recevoir 5 rejets, sur un écran qui avait l'air complet.
+                        ⚠️ Et <b>aucun poste n'est pré-sélectionné</b>&nbsp;: choisir «&nbsp;le premier de la liste&nbsp;» rangerait des charges au hasard dans un document opposable.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════════ LES CATÉGORIES — LA NOMENCLATURE DU CABINET ═════════════════ -->
+                    <div class="dep-slot" data-dep-slot="categories" hidden>
+                      <div class="prof-note">
+                        <b>Vos catégories, pas un plan comptable imposé.</b> Chaque PME a ses postes. La liste ci-dessous a été <b>semée au premier accès</b> avec un jeu par
+                        défaut, <b>filtré par votre plan de comptes</b> — puis elle vous appartient&nbsp;: renommez, remappez, désactivez, ajoutez.
+                      </div>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Catégories du dossier — <code>GET …/cahiers/categories</code>. Le libellé est <b>unique dans le dossier</b>&nbsp;: deux «&nbsp;Loyer&nbsp;», ce seraient les mêmes charges éclatées sur deux lignes de synthèse.</div>
+                        <table class="imp-table">
+                          <thead><tr><th>Catégorie</th><th>Compte de charges</th><th>Déductible par défaut</th><th>Code liasse</th><th>Lignes</th><th>État</th><th></th></tr></thead>
+                          <tbody>
+                            <tr><td><b>Achats de marchandises</b></td><td><code>601</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">14</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Électricité CEET</b></td><td><code>6051</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">3</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Loyer boutique</b></td><td><code>6221</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">3</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Carburant motos</b></td><td><code>6055</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">8</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Amendes &amp; pénalités</b></td><td><code>6581</code></td><td><span class="cah-conf bad">non</span></td><td><code>30</code></td><td class="num">1</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Frais de représentation</b></td><td><code>6281</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">0</td><td><span class="badge"><span class="d"></span>Désactivée</span></td><td><button class="btn btn-ghost btn-sm" type="button">Réactiver</button></td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div class="cah-form">
+                        <label>Nouvelle catégorie<input type="text" value="Téléphone &amp; internet"><span class="fh">le mot de votre cabinet</span></label>
+                        <label>Compte de charges
+                          <input type="text" value="6281">
+                          <span class="fh">proposé par le serveur d'après le libellé — corrigeable</span>
+                        </label>
+                        <label>Déductible par défaut
+                          <select><option>Oui — charge normale</option><option>Non — amendes, pénalités, dons…</option></select>
+                        </label>
+                      </div>
+                      <div class="cah-actions" style="padding-top:0.55rem">
+                        <button class="btn btn-primary btn-sm" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5v14"/></svg> Créer la catégorie</button>
+                        <span class="cah-lig">POST …/cahiers/categories · le compte est revalidé côté serveur (classe 6 + plan de comptes)</span>
+                      </div>
+
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Le compte n'est pas deviné par l'écran</b>&nbsp;: il est proposé par <code>POST /balances/suggest-comptes</code>, qui connaît le référentiel
+                        <b>de l'organisation</b> — celui d'une SFD n'est pas celui d'une SARL. FE-026 embarquait un dictionnaire dans le navigateur&nbsp;; FE-056 l'a supprimé,
+                        et on ne le réintroduit pas ici par la petite porte.
+                      </p>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Renommer ou remapper une catégorie ne réécrit JAMAIS les lignes déjà saisies.</b> Chacune a figé son compte et sa déductibilité au moment de la
+                        saisie. Remapper «&nbsp;Loyer&nbsp;» de <code>622</code> à <code>6221</code> ne doit pas déplacer rétroactivement des charges d'un exercice déjà arrêté&nbsp;:
+                        ce serait deux résultats fiscaux changés d'un coup, sans qu'aucune écriture ne le dise.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════════ SYNTHÈSE — PAR MOIS ET PAR CATÉGORIE ═════════════════ -->
+                    <div class="dep-slot" data-dep-slot="synthese" hidden>
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Synthèse de l'exercice <b>2026</b> — <code>GET …/cahiers/depenses/synthese</code>. Les mois sont ceux que le serveur renvoie&nbsp;: <b>l'écran n'en fabrique aucun</b>.</div>
+                        <table class="imp-table">
+                          <thead><tr><th>Mois</th><th class="num">Décaissé</th><th class="num">Charges</th><th class="num">TVA déductible</th><th class="num">Non déductible</th><th class="num">Lignes</th></tr></thead>
+                          <tbody>
+                            <tr><td>Janvier 2026</td><td class="num">612 000</td><td class="num">572 881</td><td class="num">39 119</td><td class="num">0</td><td class="num">9</td></tr>
+                            <tr><td>Février 2026</td><td class="num">498 500</td><td class="num">470 890</td><td class="num">27 610</td><td class="num">45 000</td><td class="num">7</td></tr>
+                            <tr><td>Mars 2026</td><td class="num">842 500</td><td class="num">810 771</td><td class="num">31 729</td><td class="num">345 000</td><td class="num">6</td></tr>
+                            <tr class="tot"><td><b>Exercice</b></td><td class="num"><b>1 953 000</b></td><td class="num"><b>1 854 542</b></td><td class="num"><b>98 458</b></td><td class="num"><b>390 000</b></td><td class="num"><b>22</b></td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Par <b>catégorie</b> — triées par charge décroissante&nbsp;: <b>ce qui pèse d'abord</b>. C'est la vue dans laquelle le cabinet raisonne, pas le plan de comptes.</div>
+                        <table class="imp-table">
+                          <thead><tr><th>Catégorie</th><th>Compte</th><th class="num">Charges</th><th class="num">dont non déductible</th><th class="num">Lignes</th></tr></thead>
+                          <tbody>
+                            <tr><td><b>Achats de marchandises</b></td><td><code>601</code></td><td class="num">980 000</td><td class="num">320 000</td><td class="num">14</td></tr>
+                            <tr><td><b>Loyer boutique</b></td><td><code>6221</code></td><td class="num">750 000</td><td class="num">0</td><td class="num">3</td></tr>
+                            <tr><td><b>Carburant motos</b></td><td><code>6055</code></td><td class="num">228 813</td><td class="num">45 000</td><td class="num">8</td></tr>
+                            <tr><td><b>Électricité CEET</b></td><td><code>6051</code></td><td class="num">300 000</td><td class="num">0</td><td class="num">3</td></tr>
+                            <tr><td><b>Amendes &amp; pénalités</b></td><td><code>6581</code></td><td class="num">25 000</td><td class="num">25 000</td><td class="num">1</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Une catégorie sans ligne n'apparaît pas</b>, comme un mois sans ligne. Et une catégorie <b>supprimée</b> laisse malgré tout ses charges dans la
+                        synthèse&nbsp;: la ligne reste rattachée, jamais orpheline — c'est pour ça que la suppression d'une catégorie <b>utilisée</b> est refusée.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════════ REFUS · LA SURCHARGE SANS MOTIF (400) ═════════════════ -->
+                    <div class="dep-slot" data-dep-slot="motif" hidden>
+                      <div class="cah-form">
+                        <label>Date<input type="date" value="2026-03-28"></label>
+                        <label>Libellé<input type="text" value="Achat marchandises — marché"></label>
+                        <label>Catégorie<select><option>Achats de marchandises — 601</option></select></label>
+                        <label>Montant décaissé (TTC)<input type="text" value="320 000"></label>
+                        <label class="err">Motif de la surcharge
+                          <input type="text" placeholder="Pourquoi cette charge reste-t-elle déductible ?">
+                          <span class="fe">Obligatoire&nbsp;: vous déclarez déductible une charge que le système propose de réintégrer.</span>
+                        </label>
+                      </div>
+                      <div class="cah-actions" style="padding:0.55rem 0">
+                        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.84rem"><input type="checkbox"> J'ai la pièce justificative</label>
+                        <span class="cah-conf bad">proposé&nbsp;: non déductible</span>
+                        <span class="cah-conf warn">votre choix&nbsp;: déductible</span>
+                      </div>
+                      <div class="prof-note bad">
+                        <b>400 · <code>MOTIF_SURCHARGE_REQUIS</code> — diverger est permis, jamais en silence.</b>
+                        Le système propose «&nbsp;non déductible&nbsp;» parce que la ligne est <b>sans pièce</b>. Vous pouvez passer outre — c'est votre responsabilité de
+                        professionnel — mais la décision doit porter un <b>motif écrit</b>. Une surcharge silencieuse, c'est une réintégration qui disparaît sans que personne
+                        ne puisse dire <b>qui</b> l'a décidée ni <b>pourquoi</b>&nbsp;: exactement ce qu'un contrôle cherche.
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>La trace conserve ce dont vous avez divergé</b>, pas seulement votre motif&nbsp;: la proposition d'origine, son motif de non-déductibilité, son code
+                        de liasse, votre identifiant et l'horodatage. Sans cela, la proposition se recalculerait depuis une catégorie <b>renommée ou remappée depuis</b>, et la
+                        trace ne dirait plus rien.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════════ REFUS · CATÉGORIE DÉSACTIVÉE (400) ═════════════════ -->
+                    <div class="dep-slot" data-dep-slot="inactive" hidden>
+                      <div class="prof-note bad">
+                        <b>400 · <code>CATEGORIE_INACTIVE</code> — «&nbsp;Frais de représentation&nbsp;» est désactivée.</b>
+                        Elle ne peut plus recevoir de <b>nouvelle</b> dépense. Ses lignes existantes, elles, restent parfaitement valides&nbsp;: désactiver n'est pas réécrire
+                        l'histoire.
+                      </div>
+                      <div class="cah-actions">
+                        <button class="btn btn-primary btn-sm" type="button" data-dep-goto="categories">Réactiver la catégorie</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-dep-goto="cahier">Choisir une autre catégorie</button>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Une catégorie désactivée ne doit pas apparaître dans le sélecteur de saisie.</b> L'offrir puis refuser après le clic est exactement le mode de panne
+                        que FE-066 a corrigé sur les exercices&nbsp;: le geste se retire, il ne se propose pas pour être refusé.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════════ REFUS · CATÉGORIE UTILISÉE (409) ═════════════════ -->
+                    <div class="dep-slot" data-dep-slot="utilisee" hidden>
+                      <div class="prof-note bad">
+                        <b>409 · <code>CATEGORIE_UTILISEE</code> — «&nbsp;Achats de marchandises&nbsp;» porte 14 lignes.</b>
+                        Elle ne peut pas être supprimée. Le serveur <b>ne transforme pas</b> la suppression en désactivation&nbsp;: l'écran afficherait «&nbsp;supprimée&nbsp;»
+                        sur une catégorie toujours en base, et les 14 lignes continueraient de la citer.
+                      </div>
+                      <div class="cah-actions">
+                        <button class="btn btn-primary btn-sm" type="button" data-dep-goto="categories">Désactiver la catégorie</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-dep-goto="synthese">Voir ses 14 lignes</button>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Supprimer et désactiver ne sont pas deux formulations du même geste.</b> La suppression n'est offerte que sur une catégorie <b>à zéro ligne</b>&nbsp;;
+                        partout ailleurs, l'écran propose la désactivation — <b>acte explicite</b>, et le seul qui laisse les charges déjà saisies là où elles sont.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════════ REFUS · COMPTE HORS CLASSE 6 (400) ═════════════════ -->
+                    <div class="dep-slot" data-dep-slot="classe6" hidden>
+                      <div class="cah-form">
+                        <label>Nouvelle catégorie<input type="text" value="Ventes accessoires"></label>
+                        <label class="err">Compte de charges
+                          <input type="text" value="701">
+                          <span class="fe">Le compte «&nbsp;701&nbsp;» n'appartient pas à la classe 6.</span>
+                        </label>
+                      </div>
+                      <div class="prof-note bad">
+                        <b>400 · <code>COMPTE_HORS_CLASSE_6</code> — une dépense est une charge.</b>
+                        Ranger une dépense sur un compte de <b>produits</b> gonflerait le chiffre d'affaires <b>et</b> minorerait les charges&nbsp;: le résultat serait faux
+                        <b>deux fois</b>, et l'erreur se compenserait assez bien pour passer une relecture rapide.
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ Deux contrôles distincts, deux refus distincts&nbsp;: <code>COMPTE_HORS_CLASSE_6</code> (mauvaise classe) et <code>COMPTE_INCONNU</code> (absent du plan
+                        de comptes de <b>votre</b> référentiel). Les fondre en un seul message enverrait chercher un compte qui existe.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════════ CAHIER VIDE ═════════════════ -->
+                    <div class="dep-slot" data-dep-slot="vide" hidden>
+                      <div class="state empty" style="padding:2.4rem 1.5rem">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M7 12h14"/><path d="M11 18h10"/></svg></span>
+                        <h3>Aucune dépense pour l'exercice 2026</h3>
+                        <p>Commencez par vos <b>catégories</b>&nbsp;: ce sont elles qui portent les comptes de charges. Un jeu par défaut vous attend déjà, filtré par votre plan de comptes — renommez-le, il est à vous.</p>
+                        <button class="btn btn-primary btn-sm" type="button" data-dep-goto="categories">Voir mes catégories</button>
+                      </div>
+                    </div>
+
+                    <!-- ═══════ CE QUE VALIDE CETTE MAQUETTE, ET CE QU'ELLE LAISSE DEHORS ═══════ -->
+                    <div class="dc-note dc-gap">
+                      <b>Ce que valide cette maquette (FE-044).</b> La <b>saisie rangée par mois</b> (mois dérivé de la date, jamais saisi)&nbsp;; les <b>catégories éditables</b>
+                      — créer, renommer, remapper, désactiver, supprimer si inutilisée — avec le <b>compte proposé par le serveur</b>&nbsp;; le <b>rattachement à un compte de
+                      classe 6</b> hérité de la catégorie&nbsp;; les <b>totaux par mois et par catégorie</b>, servis par le serveur&nbsp;; et les <b>quatre refus propres aux
+                      dépenses</b> — motif de surcharge, catégorie inactive, catégorie utilisée, compte hors classe 6 — auxquels s'ajoutent les gels déjà rendus côté recettes.
+                    </div>
+                    <div class="dc-note">
+                      <b>Ce que la revue PO du 24/08 a AJOUTÉ, et ce qui reste dehors.</b> ✅ <b>L'import d'images et de PDF entre dans le périmètre</b> — la première rédaction
+                      le rangeait en «&nbsp;hors périmètre, voir FE-045&nbsp;», et c'était une erreur de lecture du persona&nbsp;: la facture fournisseur et la page de cahier sont
+                      des <b>objets physiques</b>, exactement comme côté recettes. Ce qui l'avait fait écarter reste vrai, mais ne justifiait pas de l'écarter&nbsp;: la
+                      pré-proposition d'une pièce <b>ne porte aucune catégorie</b>, alors que <code>categorieId</code> est <b>obligatoire</b> sur une ligne de dépense ⇒ d'où la
+                      <b>colonne «&nbsp;Poste&nbsp;» par pièce</b> à la relecture, que le cahier de recettes n'a pas. ⛔ <b>Reste dehors&nbsp;: la ventilation HT/TVA à la
+                      main</b> — le contrat l'accepte, mais le taux vient du <b>paquet fiscal</b> et la saisir soi-même n'a de sens que sur une facture atypique&nbsp;: un écran
+                      de rattrapage, pas le chemin de tous les jours.
+                    </div>
+                    <div class="dc-note">
+                      <b>Un écart de contrat que cette maquette rend visible.</b> Le <b>code de réintégration</b> d'une catégorie est validé contre les codes publiés par le
+                      paquet fiscal (<code>togo@2026</code> en publie douze) — mais <b>aucune route ne les énumère</b>, et le paquet les publie <b>sans libellés</b>. L'écran ne
+                      peut donc offrir ni liste ni aide&nbsp;: le comptable taperait un code à l'aveugle pour recevoir un <code>400</code>. Le champ reste donc <b>absent du
+                      formulaire de création</b> et n'apparaît qu'en <b>lecture</b> sur les catégories qui en portent déjà un. ⇒ écart ouvert, à instruire côté backend.
+                    </div>
+
+                    </div><!-- /livre depenses -->
                   </div>
 
                   <div class="atl-panel atl-body" data-atl-panel="import-sage" hidden>
@@ -8284,10 +8896,59 @@
           cahShow(b.dataset.cahGoto);
         });
       });
-      var cahMois = page.querySelectorAll(".cah-m");
-      cahMois.forEach(function (m) {
-        m.addEventListener("click", function () {
-          cahMois.forEach(function (o) { o.setAttribute("aria-selected", String(o === m)); });
+      /* ⚠️ Le ruban se selectionne DANS SON PROPRE tablist. Depuis FE-044 il y en
+         a deux (recettes, depenses) : iterer sur tous les `.cah-m` de la page
+         deselectionnerait le mois de l'autre cahier au premier clic — invisible
+         tant qu'un seul livre est ouvert, faux des qu'on y revient. */
+      page.querySelectorAll(".cah-mois").forEach(function (ruban) {
+        var mois = ruban.querySelectorAll(".cah-m");
+        mois.forEach(function (m) {
+          m.addEventListener("click", function () {
+            mois.forEach(function (o) { o.setAttribute("aria-selected", String(o === m)); });
+          });
+        });
+      });
+
+      /* ═══ FE-044 — les etats du panneau « Cahier de depenses » ═══
+         Prefixe `data-dep` DISTINCT de `data-cah` : `cahShow` masque tous les
+         `[data-cah-slot]` qui ne correspondent pas, et un slot de depenses ecrit
+         avec le meme prefixe aurait ete referme par un clic sur l'autre cahier. */
+      function depShow(etat) {
+        page.querySelectorAll("[data-dep-slot]").forEach(function (el) {
+          el.hidden = el.dataset.depSlot !== etat;
+        });
+        page.querySelectorAll("[data-dep]").forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.dep === etat));
+        });
+      }
+      page.querySelectorAll("[data-dep]").forEach(function (b) {
+        b.addEventListener("click", function () { depShow(b.dataset.dep); });
+      });
+      page.querySelectorAll("[data-dep-goto]").forEach(function (b) {
+        b.addEventListener("click", function (e) {
+          e.preventDefault();
+          depShow(b.dataset.depGoto);
+        });
+      });
+
+      /* Le LIVRE ouvert : recettes ou depenses. Deux moities du meme onglet. */
+      function ouvrirLivre(livre) {
+        page.querySelectorAll("[data-cah-livre-panel]").forEach(function (el) {
+          el.hidden = el.dataset.cahLivrePanel !== livre;
+        });
+        page.querySelectorAll("[data-cah-livre]").forEach(function (o) {
+          o.setAttribute("aria-selected", String(o.dataset.cahLivre === livre));
+        });
+      }
+      page.querySelectorAll("[data-cah-livre]").forEach(function (b) {
+        b.addEventListener("click", function () { ouvrirLivre(b.dataset.cahLivre); });
+      });
+      /* Le renvoi « redeposez dans l'autre cahier » de la page MIXTE : il doit
+         VRAIMENT basculer, sinon la maquette montre une issue qu'elle n'ouvre pas. */
+      page.querySelectorAll("[data-cah-livre-goto]").forEach(function (b) {
+        b.addEventListener("click", function (e) {
+          e.preventDefault();
+          ouvrirLivre(b.dataset.cahLivreGoto);
         });
       });
 
