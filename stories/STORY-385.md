@@ -120,8 +120,8 @@ types qu'il ne peut rien faire lire.
 | Développement | ✅ 2026-08-24 | 1 dépôt (`document-service`), aucun contrat d'événement touché |
 | Portes DoD | ✅ 2026-08-24 | lint 0 warning · build OK · **594 unit** (99,14 % st. / 92,46 br. / 98,13 fn. / 99,18 li.) · **90 e2e** |
 | Mutation-test | ✅ 2026-08-24 | **6 mutations, 6 rouges** (voir table ci-dessous) |
-| Vérification docker | ✅ 2026-08-24 | stack neuve, 4 pièces réellement déposées, 3 états prouvés en base **et** sur le fil |
-| Revue de code | ⏳ | — |
+| Vérification docker | ✅ 2026-08-24, **rejouée sur l'état final** | stack neuve, 4 pièces réellement déposées, 4 états prouvés en base **et** sur le fil |
+| Revue de code | ✅ 2026-08-24 | **1 constat retenu** (non-bloquant, confiance 90) + 2 coupes over-engineering + 1 JSDoc orphelin — tous corrigés |
 | Revue de sécurité | ⏳ | — |
 | Merge | ⏳ | — |
 
@@ -148,7 +148,7 @@ ci-dessous).
 | M1 | union de `type` amputée à 2 valeurs sur 6 | e2e OpenAPI rouge | 1 échec / 7 |
 | M2 | `estLue` rend toujours vrai *(sans casser la compilation)* | unit rouge | 6 échecs / 30 |
 | M3 | `new Set` du dédoublonnage des statuts retiré | unit **et** e2e rouges | 1/30 puis 1/7 |
-| M4 | garde de statut **inversée** dans `champsLus()` | unit rouge | 8 échecs / 30 |
+| M4 | garde de statut **inversée** dans `champsLus()` | unit rouge | 8 échecs / 30, **9 / 31** après le renfort de la revue |
 | M5 | `correlationId` ne traverse plus la projection | unit rouge | 2 échecs / 30 |
 | M6 | `type: [ChampLuDto]` retiré *(→ `object` opaque)* | e2e OpenAPI rouge | 3 échecs / 7 |
 
@@ -167,6 +167,7 @@ pas encore indexé, donc `checkout` l'a ramené à `dev`, pas à mon état. ⇒ 
 | 1 | Cabinet créé via l'IdP, JWT RS256 `TENANT_ADMIN`, dossier du cabinet **projeté par Kafka** dans `document_service.dossiers_dossier` | ✅ 1 doc |
 | 2 | **4 pièces réellement déposées**, les deux familles : `STATUTS` (PNG) → `PRETE`, `STATUTS` (PDF) → `ECHEC`, `LETTRE_MISSION` → `SANS_OCR`, `FACTURE` → `PRETE` | ✅ |
 | 3 | En base, la pièce `ECHEC` porte bien **`champs: []`** — le cas piège existe pour de vrai | ✅ |
+| 3 bis | **Rejoué après revue** : `ECHEC` **sous-seuil** (confiance 0,19) portant en base **2 champs LUS** (`nif=1O00l23456`, `raisonSociale=ACNE SARI`) → `champsLus` **toujours absent** du fil | ✅ |
 | 4 | Réponse HTTP : `type` porte les valeurs des **deux** familles (`STATUTS`, `LETTRE_MISSION`, `FACTURE`) | ✅ |
 | 5 | Réponse HTTP : `correlationId` présent sur **les 4** lignes | ✅ |
 | 6 | `champsLus` = **7 champs réels lus par Tesseract** sur les 2 pièces `PRETE` *(`raisonSociale`, `capitalSocial`, `dirigeant`… / `montantTTC`, `nifEmetteur`…)* | ✅ |
@@ -175,8 +176,39 @@ pas encore indexé, donc `checkout` l'a ramené à `dev`, pas à mon état. ⇒ 
 | 9 | `/api/docs-json` **vivant** : `type` = 6 valeurs, `statutOcr` = 4 valeurs sans doublon, `champsLus` = `array` de `$ref ChampLuDto`, **hors** de `required` | ✅ |
 | 10 | Non-régression pré-STORY-358 (`nomOrigine`/`deposePar`/`createdAt` retirés) : la ligne reste rendue, **aucune valeur `null`**, les clés sont simplement absentes | ✅ |
 | 11 | **D2** — `document_extractions` (KYC) intouchée, aucun document n'y porte de `dossierId` | ✅ |
+| 12 | Ni `brut` *(fragment OCR source)* ni `zone` n'apparaissent **nulle part** dans la réponse entière | ✅ |
+
+### Revue de code — 1 constat retenu, et il portait sur ce que j'avais ÉCRIT, pas sur ce que le code FAIT
+
+**C1 (non-bloquant, confiance 90)** — mon commentaire affirmait « `finaliser` écrit `champs` aussi sur une
+extraction `ECHEC` *(une pièce illisible rend une liste vide)* », et le test ne montait que cette
+forme-là : `champs: []`. **Faux pour le chemin d'échec le plus courant.** Vérifié dans les deux
+processeurs :
+
+```ts
+const champs = this.parsers.parse(this.resolveType(data.type), ocr);
+const statut = ocr.confiance < SEUIL_CONFIANCE_ECHEC ? ECHEC : PRETE;   // seuil = 0,3
+await this.finaliser(eventId, data, champs, ocr.confiance, statut);
+```
+
+Une photo floue à 0,22 de confiance est finalisée **`ECHEC` avec les champs que le parseur a quand même
+produits** — un NIF lu `1O00l23456` est bel et bien en base. Le code était **juste** *(c'est le statut qui
+décide)* ; c'est la **preuve** qui était faible et la **prose** qui était fausse. Corrigé : le test monte
+désormais des champs non vides *(l'échec dur garde son propre test)*, le commentaire dit ce que la garde
+protège vraiment — **ne pas afficher au cabinet une valeur que le système vient lui-même de juger non
+fiable** — et le point 3 bis de la vérification docker le prouve sur données réelles.
+
+**Lentille over-engineering** *(seconde passe, report-only)* — 5 coupes proposées, **2 appliquées** :
+interface à un seul usage inlinée, `map` déstructurée. **3 déclinées et pourquoi** : le `new Set` sur les
+*types* *(prospectif assumé — `TypePieceDossier` est déclaré comme un sur-ensemble qui grossit, et un `enum`
+JSON Schema doublonné casse les générateurs de client)* ; `estLue` réduit à une comparaison littérale *(la
+version courte suppose que les deux familles nommeront toujours leur succès `PRETE` — le jour où l'une
+renomme, la comparaison cesse de reconnaître cette famille-là, sans erreur nulle part)* ; le test « aucune
+valeur étrangère » *(il rougirait si quelqu'un recopiait la liste à la main plutôt que de la dériver —
+c'est précisément la récidive que la story empêche)*.
 
 ⚠️ **Écart d'infrastructure rencontré, hors périmètre** : dans l'image docker, l'OCR d'un **PDF** échoue sur
 `Cannot find module '@napi-rs/canvas'` (`pdf-page-renderer`). La dépendance est bien déclarée mais absente de
 l'image. Sans effet sur cette story — le chemin PNG fonctionne, et l'échec a même **fourni** le cas `ECHEC`
-réel dont la story avait besoin — mais **le rendu PDF est mort en docker** : à ouvrir séparément.
+réel dont la story avait besoin — mais **le rendu PDF est mort en docker** : ouvert en **STORY-396** *(la panne y est instruite pour ce
+qu'elle est vraiment — un défaut de SERVICE rendu au cabinet sous le statut d'un défaut de PIÈCE)*.
