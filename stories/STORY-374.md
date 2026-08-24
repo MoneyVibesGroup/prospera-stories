@@ -1,6 +1,6 @@
 # STORY-374 : le dossier fait foi *aussi* sur le chemin d'écriture — les gardes d'exercice lisent le read-model
 
-Status: ready-for-dev
+Status: review
 
 **Epic :** EPIC-043 — Le dossier client devient l'unité de travail du cabinet
 **Points :** 5 · **Complexité :** medium · **Sprint :** 20 (backend) · **Services :** `balance-service`
@@ -243,3 +243,108 @@ saisie directe**, donc **dans FE-066 même**, sans attendre FE-047.
 - 7ᵉ garde sur `submit`, **avant** l'idempotence : 1 pt
 - `bilan-service` : garde `jeu-etats` + neutralisation des 3 écritures du CRUD : 1,5 pt
 - Vérification docker bout en bout sur deux services, par condition : 1 pt
+
+
+---
+
+## Progress Tracking
+
+### ⓪ Ce que le code disait déjà — **une prémisse de la story était périmée**
+
+⚡ **`balance-service` lisait DÉJÀ `exercices_dossier`.** La mesure du 2026-08-20 (`grep
+"ExerciceDossier" | grep -v read-models/ → 0`) datait d'**avant STORY-367**, livrée le 2026-08-18 :
+`ExercicesRepository.estClos` interroge le read-model **en premier** depuis `AD-P14` / **D-367-1**, et
+ne retombe sur `exercices_atelier` que si le read-model est **muet** sur ces bornes. La moitié
+« bascule d'`estClos` » du périmètre était donc **déjà faite**, et les 6 gardes déjà correctes.
+
+⛔ **AC-4 est amendé, et c'est une décision, pas un oubli.** Il exige que `exercices_atelier` ne soit
+« plus lu pour un statut nulle part ». Retirer ce repli **casserait D-367-1** : `RepriseService` clôt
+N-1 dans `exercices_atelier` **sans rien publier** (STORY-087, D-087-5), et cette clôture est ce qui
+protège N-1 après que ses à-nouveaux ont été tirés. Le repli est conservé **avec son arbitrage à la
+date de transition** — le plus récent gagne. La **preuve par l'inverse** qu'AC-4 demande est rendue et
+vérifiée en docker (⑦ ci-dessous) : atelier `CLOS` + dossier `OUVERT` **postérieur** ⇒ **écrivable**.
+Côté `bilan-service`, où il n'y a **aucun second écrivain** une fois le CRUD neutralisé, le read-model
+tranche **seul** dès qu'il connaît le libellé — AC-4 y est appliqué à la lettre.
+
+### ① `balance-service` — la 7ᵉ garde (D-374-2)
+
+| Livré | Détail |
+|---|---|
+| `BalanceService.submit` refuse `409 EXERCICE_CLOS` | **avant l'idempotence**, avant le référentiel, avant toute transaction |
+| Portée réelle | `submit` est le point de passage de **5 appelants** : contrôleur (saisie directe), import Sage, reprise d'à-nouveaux, agrégation de cahiers, provisions fiscales |
+| ⚠️ **PAS** sur `submitInSession` | c'est le chemin de l'**ingestion Kafka** : une `ConflictException` levée dans la transaction n'est codifiée par aucun `catch` de l'ingestion (elle ne traduit que 400/422 et **relance** le reste) ⇒ offset jamais commité, **partition rejouée indéfiniment**. Le verrou de la voie événementielle est un autre sujet, avec son propre chemin de rejet |
+| `ExercicesModule` | `ExercicesRepository` + ses 2 schémas en sortent de `RepriseModule`, **qui importe `BalanceModule`** : l'injecter tel quel fermait un cycle, et réenregistrer les modèles dans `BalanceModule` aurait **dupliqué l'arbitrage à deux écrivains** — le seul endroit qui sait trancher. `RepriseModule` le ré-exporte : les 5 modules qui l'importaient ne changent pas |
+
+### ② `bilan-service` — le statut se lit chez son propriétaire, le CRUD cesse d'écrire
+
+| Livré | Détail |
+|---|---|
+| `refuserSiExerciceClos` | lit `exercices_dossier` sur `(orgId, dossierId, libelle)` **du document**, pas du contexte de requête |
+| Le read-model connaît le libellé | il tranche **seul**, y compris pour dire « ouvert » (AC-4) |
+| Il l'ignore | **repli** sur `exercices` local (l'existant de la migration STORY-356), puis permissif (D-374-1) |
+| `POST` / `:id/clore` / `:id/rouvrir` | **`409 EXERCICE_NON_INSCRIPTIBLE_ICI`**, message nommant `POST /api/v1/dossiers/{dossierId}/exercices` |
+| Les `GET` | intacts — l'existant reste consultable |
+| Retiré au passage | `transitionner`, le corps de `creer`, l'`AuditService` du contrôleur : il n'y a plus d'acte d'exercice à journaliser ici, `dossier-service` le trace avec l'événement qui va avec |
+
+### ③ Portes de qualité — **les deux services**
+
+| | `balance-service` | `bilan-service` |
+|---|---|---|
+| Lint (`--max-warnings 0`) | ✅ 0 | ✅ 0 |
+| Build | ✅ | ✅ |
+| Unitaires | ✅ **2941** / 171 suites | ✅ **1030** / 104 suites |
+| e2e | ✅ **668** / 25 suites | ✅ **270** / 21 suites |
+| Couverture | **98,97 / 91,81 / 98,16 / 99,06** | **98,67 / 93,41 / 98,32 / 98,62** |
+
+### ④ Mutation-test — ce qui prouve que les tests filtrent
+
+| Mutation appliquée | Résultat attendu | Mesuré |
+|---|---|---|
+| Garde `submit` **déplacée après** le `findByKey` d'idempotence | AC-5 rougit | ✅ **1 rouge** — « refuse une RE-soumission… » |
+| Garde `submit` neutralisée (`false &&`) | plusieurs rouges | ✅ **4 rouges** |
+| `bilan` : repli local **reprend la main** (`\|\|` au lieu de la priorité au read-model) | AC-4 rougit | ✅ **1 rouge** — « CLOS en local mais OUVERT dans le dossier » |
+| `bilan` : garde `if (clos)` neutralisée | plusieurs rouges | ✅ **3 rouges** |
+
+### ⑤ Vérification docker — **stack neuve (`down -v`), bout en bout, sur les deux services** (AC-7)
+
+`auth-service` + `dossier-service` + `balance-service` + `bilan-service` + `kyc` + `catalog`, Mongo
+`rs0`, Kafka up. Org réelle créée par `register`, jeton RS256 réel, KYC `APPROVED` + entitlements
+`ACTIVE` posés dans les read-models. Dossier « Cabinet 374 » (`…6f10`) créé par la projection
+`dossier.created`. **Attente par CONDITION** (`until` sur le statut projeté), jamais un `sleep` —
+leçon STORY-303/355.
+
+⚡ **`exercices_atelier` est resté VIDE** et **`exercices` (local bilan) est resté VIDE** pendant tout
+le parcours : les refus ne peuvent venir **que** du read-model. C'est la preuve que la source a changé.
+
+**Exercice « 2026 » ouvert via `POST /dossiers/:id/exercices` → projeté (`v1`, `OUVERT`) dans les deux
+services**, puis :
+
+| Étape | `balance-service` | `bilan-service` |
+|---|---|---|
+| Exercice **OUVERT** | dépense `201` · balance v1 `201` | jeu d'états `201` |
+| Exercice **CLOS** (projeté `v2`) | dépense **`409 EXERCICE_CLOS`** · balance v2 **`409`** | validation **`409 EXERCICE_CLOS`** |
+| **AC-5** — balance v1 **re-soumise** (déjà en base) | **`409`**, jamais `200 déjà présente` | — |
+| **AC-5** — 2ᵉ re-soumission identique | **`409`** — la garde n'est pas contournable par répétition | — |
+| Documents écrits pendant la clôture | **0** (1 balance, 1 dépense, celles d'avant) | **0 snapshot** |
+| Exercice **ROUVERT** (projeté) | dépense `201` · balance v2 `201` · balance v1 re-soumise **`200`** (idempotence rétablie) | validation **`200`** |
+
+**AC-3 / D-374-1 — bornes inconnues ⇒ permissif** : balance sur l'exercice **2025**, absent du
+read-model (`countDocuments → 0`) ⇒ **`201`**. L'effet de la story est bien **strictement additif**.
+
+**AC-4 — la preuve par l'inverse, et l'arbitrage D-367-1 dans les deux sens** :
+
+| `exercices_atelier` | `exercices_dossier` | Écriture |
+|---|---|---|
+| `CLOS`, `closLe` **antérieur** à la réouverture | `OUVERT` (`occurredAt` postérieur) | ⚡ **`201`** — le dossier a le dernier mot |
+| `CLOS`, `closLe` **postérieur** | `OUVERT` | **`409`** — la clôture de reprise (D-367-1) tient |
+
+**AC-6 — le CRUD d'exercice de `bilan-service`, en réel** :
+
+| Route | Code | Corps |
+|---|---|---|
+| `POST /dossiers/:id/bilan/exercices` | **409** | `EXERCICE_NON_INSCRIPTIBLE_ICI` + `POST /api/v1/dossiers/{dossierId}/exercices` |
+| `POST :id/clore` | **409** | idem |
+| `POST :id/rouvrir` | **409** | idem |
+| `GET /dossiers/:id/bilan/exercices` | **200** | `[]` — la lecture vit |
+
+Stack arrêtée (`docker compose stop`) après consignation.
