@@ -119,4 +119,10 @@ affecte toujours compte par compte.
 - ⚠️ **Recouvrement avec STORY-381** (`bilan-service` ne connaît aucune balance) : la
   piste ② de la couverture en dépend. La piste ① n'en dépend pas — c'est un argument pour
   elle.
-- Consommateur nommé : **FE-030**.
+- ⚡ **SECOND CONSOMMATEUR, RELEVÉ LE 2026-08-25 : FE-046** (rattachement du plan comptable, Atelier).
+  Le même piège y a été retrouvé sur une **racine de produits** (`70`) : proposée, acceptée, validée,
+  puis sans effet. Deux modules différents, deux services différents, le même mode de panne — ce
+  n'est donc pas une particularité du Bilan mais **la sémantique de la surcharge elle-même**.
+  ⇒ Ce qui change pour cette story : elle cesse d'être une commodité d'un écran pour devenir un
+  **correctif de contrat**, et sa garde front doit être posée **dans les deux écrans**.
+- Consommateurs nommés : **FE-030**, **FE-046**.
