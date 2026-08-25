@@ -13,7 +13,7 @@ dossier**. Absorbé ici plutôt que fiché à part : c'est le même trou, vu par
 **Réf. :** **STORY-099** *(handoff `balance.created`, producteur livré)* · **STORY-101** *(contrat de
 balance canonique)* · **STORY-064/065** *(jeu d'états, snapshot immuable)* · **STORY-357** *(le Bilan
 se scope sur le dossier)* · **STORY-375** *(les codes de refus deviennent un enum OpenAPI)*
-**Status :** `in_progress` *(2026-08-25 — arbitrage rendu : voie A′)*
+**Status :** `done` *(2026-08-25 — voie A′ livrée sur 2 dépôts, revues traitées)*
 
 > ### Pourquoi ce numéro
 > `STORY-379` est prise (fiche créée par la revue PO de la maquette FE-011, le 2026-08-21) et
@@ -211,42 +211,42 @@ dossier, lui, porte déjà un `libelle` unique et opposable.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1 — La création de liasse NOMME sa balance.** `POST …/bilan/etats` accepte (voie B) ou
+- [x] **AC-1 — La création de liasse NOMME sa balance.** `POST …/bilan/etats` accepte (voie B) ou
       résout (voie A) un `balanceId` du **dossier gardé**. Le champ est **requis** : une liasse sans
       provenance ne doit plus pouvoir être créée.
-- [ ] **AC-2 — La provenance est FIGÉE dans le snapshot.** `SnapshotResponseDto` porte
+- [x] **AC-2 — La provenance est FIGÉE dans le snapshot.** `SnapshotResponseDto` porte
       `balanceId`, `balanceVersion` et `balanceChecksum` (+ `checksumVersion`, STORY-147). Prouvé en
       base : revalider après une nouvelle version de balance ne réécrit pas le snapshot antérieur.
-- [ ] **AC-3 — Le serveur refuse ce que l'écran refusait seul**, avec des `code` **distincts** :
+- [x] **AC-3 — Le serveur refuse ce que l'écran refusait seul**, avec des `code` **distincts** :
       - balance `BROUILLON` ou `REJETÉE` → **409 `BALANCE_NON_VALIDEE`** ;
       - balance d'un **autre dossier** → **404** (jamais 403 : l'anti-énumération de STORY-357 ne se
         rouvre pas ici) ;
       - balance introuvable → **404**, réponse **identique** à la précédente.
-- [ ] **AC-4 — Les codes sont PUBLIÉS, pas documentés en prose.** Enum OpenAPI, dans la forme posée
+- [x] **AC-4 — Les codes sont PUBLIÉS, pas documentés en prose.** Enum OpenAPI, dans la forme posée
       par **STORY-375** : `openapi-typescript` ne fait qu'un commentaire d'une `description`, et un
       client ne peut alors écrire qu'un `Record<string, …>` qui accepte tout et n'exige rien.
       *Vérification par mutation : retirer un code doit CASSER la compilation du client.*
-- [ ] **AC-5 — Le recalcul conserve la provenance.** `POST …/etats/:id/recalculer` ne peut pas
+- [x] **AC-5 — Le recalcul conserve la provenance.** `POST …/etats/:id/recalculer` ne peut pas
       changer de balance en silence : soit il exige la même, soit il exige un `balanceId` explicite et
       **journalise** le changement (`AuditType`, STORY-067).
-- [ ] **AC-6 — La comparaison inter-exercices reste scopée.** Aucun chemin nouveau ne doit permettre
+- [x] **AC-6 — La comparaison inter-exercices reste scopée.** Aucun chemin nouveau ne doit permettre
       d'atteindre un `jeuEtatsId` ou un `balanceId` hors du dossier gardé (invariant STORY-357,
       AC-7 : deux dossiers du même cabinet, aucune valeur en commun).
-- [ ] ⬆️ **AC-8 — La balance NOMME son exercice du dossier.** `BalanceResponseDto` porte un
+- [x] ⬆️ **AC-8 — La balance NOMME son exercice du dossier.** `BalanceResponseDto` porte un
       `exerciceId` (et, à défaut de résolution serveur, le `libelle` de l'exercice) pointant vers
       `ExerciceResponseDto` de `dossier-service` — l'autorité posée par Q6 / STORY-355. ⛔ **Le
       couple `{debut, fin}` seul ne suffit pas** : deux bornes égales au jour près ne sont pas une
       référence, et rapprocher par dates fait décider au client ce que le serveur ne dit pas.
       *Vérification : deux exercices adjacents du même dossier, chacun avec sa balance — chaque
       balance rend l'`exerciceId` de la sienne, sans qu'aucune date ne soit comparée.*
-- [ ] ⬆️ **AC-9 — Le libellé d'exercice d'une liasse CESSE D'ÊTRE LIBRE.** `CreerJeuEtatsDto.exercice`
+- [x] ⬆️ **AC-9 — Le libellé d'exercice d'une liasse CESSE D'ÊTRE LIBRE.** `CreerJeuEtatsDto.exercice`
       est résolu depuis l'exercice du dossier (ou validé contre lui), et non plus saisi. ⚡ **C'est
       une clé d'adressage, pas un intitulé** : `GET …/bilan/comparaison/exercices` retrouve les
       exercices **par ce libellé** et rend `404 EXERCICE_NON_COMPARABLE` sur ce qu'il ne reconnaît
       pas — `"2025"` et `"Exercice 2025"` y sont deux exercices distincts.
       *Vérification : créer deux liasses du même exercice par deux chemins, puis les confronter via
       `…/comparaison/exercices` — elles doivent être vues comme le MÊME exercice.*
-- [ ] **AC-7 — Voie A seulement — le consumer est PROUVÉ VIVANT.** Poison-pill : un message à
+- [x] **AC-7 — Voie A seulement — le consumer est PROUVÉ VIVANT.** Poison-pill : un message à
       `balanceId` malformé ne doit pas bloquer la partition. Garde-fou `Types.ObjectId.isValid` dans
       l'enveloppe, comme STORY-036, et rejeu vérifié en docker.
       *(Un consommateur peut mourir définitivement dans un conteneur `healthy` — 22 messages bloqués
@@ -273,12 +273,12 @@ dossier, lui, porte déjà un `libelle` unique et opposable.
 
 ## Definition of Done
 
-- [ ] AC validés ; **vérifié docker bout-en-bout**, pas seulement en test.
-- [ ] `lint` / `build` / unit / e2e verts, seuils de couverture tenus.
-- [ ] OpenAPI régénéré et **relu** : les nouveaux codes sortent en `enum`, pas en commentaire.
-- [ ] Ticket d'origine stampé « résolu par STORY-381 ».
-- [ ] Trackers à jour (`sprint-status.yaml`, `tickets/README.md`).
-- [ ] **Renvoi au frontend** : signaler que `balanceId` devient requis — une story backend livrée ne
+- [x] AC validés ; **vérifié docker bout-en-bout**, pas seulement en test.
+- [x] `lint` / `build` / unit / e2e verts, seuils de couverture tenus.
+- [x] OpenAPI régénéré et **relu** : les nouveaux codes sortent en `enum`, pas en commentaire.
+- [x] Ticket d'origine stampé « résolu par STORY-381 ».
+- [x] Trackers à jour (`sprint-status.yaml`, `tickets/README.md`).
+- [x] **Renvoi au frontend** : signaler que `balanceId` devient requis — une story backend livrée ne
       déclenche rien tant qu'une story frontend ne la nomme pas. ⬆️ **(2026-08-25)** Destinataires
       corrigés : **FE-031** *(livrée — sa clé de cache porte le `balanceId` PARCE QUE le serveur ne
       le connaît pas ; l'AC-8 lui permettra de DÉSIGNER le comparatif au lieu de le faire désigner
