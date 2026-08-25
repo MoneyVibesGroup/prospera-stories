@@ -1,11 +1,15 @@
 # STORY-381 : La liasse déclare la balance dont elle sort — et le serveur refuse celles qui ne peuvent pas la porter
 
 **Epic :** EPIC-043 — Le dossier client, unité de travail du cabinet
-**Service :** `bilan-service` *(lecture d'un contrat de `balance-service`)*
-**Sprint :** 20 · **Story Points :** 5 · **Complexité :** medium
+**Service :** `bilan-service` **et** `balance-service` ⬆️ *(2026-08-25 : le second n'était plus
+seulement lu, il doit publier — voir §« La seconde moitié du même trou »)*
+**Sprint :** 20 · **Story Points :** 5 → **7** ⬆️ *(2026-08-25)* · **Complexité :** medium
 **Priorité :** Must Have
 **Ticket d'origine :** `tickets/TICKET-BACKEND-bilan-ne-reference-pas-sa-balance-source.md`
 **Découverte par :** **FE-028** *(module Bilan — shell, gate, choix de la balance source)*, le 2026-08-22
+**Élargie par :** ⬆️ **FE-031** *(Bilan actif/passif N/N-1)*, le **2026-08-25** — en cherchant comment
+désigner l'exercice comparatif, et en constatant que **rien ne relie une balance à un exercice du
+dossier**. Absorbé ici plutôt que fiché à part : c'est le même trou, vu par l'autre bout.
 **Réf. :** **STORY-099** *(handoff `balance.created`, producteur livré)* · **STORY-101** *(contrat de
 balance canonique)* · **STORY-064/065** *(jeu d'états, snapshot immuable)* · **STORY-357** *(le Bilan
 se scope sur le dossier)* · **STORY-375** *(les codes de refus deviennent un enum OpenAPI)*
@@ -99,6 +103,60 @@ serveur refuse. Seule la façon de **connaître** la balance diffère.
 
 ---
 
+## ⬆️ La seconde moitié du même trou (relevée par FE-031, le 2026-08-25)
+
+Le constat ci-dessus dit que **la liasse ne nomme pas sa balance**. En câblant le Bilan
+actif/passif, FE-031 a buté sur le symétrique : **la balance ne nomme pas son exercice** — pas
+celui du dossier, en tout cas, qui est pourtant le seul qui fasse foi.
+
+### Ce que chacun publie
+
+```ts
+// balance-service — BalanceResponseDto
+exercice: { debut: string; fin: string };   // ⛔ ANONYME : ni id, ni libellé
+
+// dossier-service — ExerciceResponseDto (l'AUTORITÉ, depuis Q6)
+{ id, dossierId, libelle, debut, fin, statut, origine, etatBalance?, etatLiasse?, … }
+```
+
+⛔ **Le read-model ne référence pas l'autorité.** `STORY-355` a retiré à `bilan-service` et à
+`balance-service` le dernier mot sur les exercices — *« ils cessent d'être la source de vérité sur
+le statut »* — mais leur vue n'a jamais reçu la clé qui pointe vers celui qui l'a pris.
+Rapprocher une balance de l'exercice du dossier se fait donc **par comparaison de dates**, côté
+client, sur deux bornes qui n'ont aucune raison contractuelle de coïncider au jour près.
+
+### ⚡ Et le `libellé libre` déjà relevé plus haut devient une CLÉ D'ADRESSAGE
+
+Le constat d'origine notait, sans en tirer de conséquence :
+
+```ts
+class CreerJeuEtatsDto {
+  exercice!: string;          // libellé libre, ex. "2025"
+```
+
+Or `GET /dossiers/{id}/bilan/comparaison/exercices` (**FR-024**) adresse les exercices **par ce
+libellé** :
+
+> *« Libellés des exercices (2 à 5, séparés par des virgules). […] réponse triée par libellé
+> croissant. »* — et `404 EXERCICE_NON_COMPARABLE` sur ce qu'il ne retrouve pas.
+
+⇒ **Deux liasses du même exercice créées avec `"2025"` et `"Exercice 2025"` sont deux exercices
+différents pour la comparaison.** Un libellé libre n'est pas un défaut d'ergonomie : c'est une clé
+primaire de fait, saisie à la main, sur une route qui refuse ce qu'elle ne reconnaît pas. Le
+dossier, lui, porte déjà un `libelle` unique et opposable.
+
+### Ce que ça coûte aujourd'hui, concrètement
+
+- **FE-031 (livrée)** : le comparatif N-1 se **désigne à la main**, par dates, parce que rien ne
+  dit qu'une balance est le N-1 d'une autre. C'est honnête — l'écran ne devine rien — mais c'est un
+  rapprochement que l'utilisateur fait à la place du système.
+- **FE-076 (`blocked`)** : appellera `…/comparaison/exercices` avec des **libellés**. S'ils
+  divergent de ceux du dossier, la route rendra `404` sur des exercices qui existent.
+- **Le lien manquant est le même dans les deux cas**, ce qui est la raison d'absorber ici plutôt
+  que de ficher une story voisine qui marcherait sur les mêmes DTO.
+
+---
+
 ## Critères d'acceptation
 
 - [ ] **AC-1 — La création de liasse NOMME sa balance.** `POST …/bilan/etats` accepte (voie B) ou
@@ -122,6 +180,20 @@ serveur refuse. Seule la façon de **connaître** la balance diffère.
 - [ ] **AC-6 — La comparaison inter-exercices reste scopée.** Aucun chemin nouveau ne doit permettre
       d'atteindre un `jeuEtatsId` ou un `balanceId` hors du dossier gardé (invariant STORY-357,
       AC-7 : deux dossiers du même cabinet, aucune valeur en commun).
+- [ ] ⬆️ **AC-8 — La balance NOMME son exercice du dossier.** `BalanceResponseDto` porte un
+      `exerciceId` (et, à défaut de résolution serveur, le `libelle` de l'exercice) pointant vers
+      `ExerciceResponseDto` de `dossier-service` — l'autorité posée par Q6 / STORY-355. ⛔ **Le
+      couple `{debut, fin}` seul ne suffit pas** : deux bornes égales au jour près ne sont pas une
+      référence, et rapprocher par dates fait décider au client ce que le serveur ne dit pas.
+      *Vérification : deux exercices adjacents du même dossier, chacun avec sa balance — chaque
+      balance rend l'`exerciceId` de la sienne, sans qu'aucune date ne soit comparée.*
+- [ ] ⬆️ **AC-9 — Le libellé d'exercice d'une liasse CESSE D'ÊTRE LIBRE.** `CreerJeuEtatsDto.exercice`
+      est résolu depuis l'exercice du dossier (ou validé contre lui), et non plus saisi. ⚡ **C'est
+      une clé d'adressage, pas un intitulé** : `GET …/bilan/comparaison/exercices` retrouve les
+      exercices **par ce libellé** et rend `404 EXERCICE_NON_COMPARABLE` sur ce qu'il ne reconnaît
+      pas — `"2025"` et `"Exercice 2025"` y sont deux exercices distincts.
+      *Vérification : créer deux liasses du même exercice par deux chemins, puis les confronter via
+      `…/comparaison/exercices` — elles doivent être vues comme le MÊME exercice.*
 - [ ] **AC-7 — Voie A seulement — le consumer est PROUVÉ VIVANT.** Poison-pill : un message à
       `balanceId` malformé ne doit pas bloquer la partition. Garde-fou `Types.ObjectId.isValid` dans
       l'enveloppe, comme STORY-036, et rejeu vérifié en docker.
@@ -133,8 +205,15 @@ serveur refuse. Seule la façon de **connaître** la balance diffère.
 ## Hors périmètre
 
 - **Tout écran.** FE-028 est livrée et reste valable : la balance retenue passe de contexte client à
-  lien serveur **sans que la maquette bouge**. Le volet frontend (envoyer `balanceId`, lire les refus)
-  appartient à **FE-030/FE-031**, qui créent la première liasse.
+  lien serveur **sans que la maquette bouge**.
+  ⚠️ ⬆️ **CORRECTION (2026-08-25) — cette ligne disait que FE-030/FE-031 « créent la première
+  liasse ». C'est FAUX, et les deux sont livrées.** Les deux appellent des **`dry-run`**, qui ne
+  persistent rien : `…/table-de-passage/dry-run` et `…/etats/bilan/dry-run`. **Aucune story
+  frontend ne crée encore de liasse** — la persistance est STORY-064/065, sans consommateur
+  frontend fiché. ⇒ Le volet « envoyer `balanceId`, lire les refus » appartient donc à **la story
+  qui livrera la création d'une liasse**, laquelle **reste à ficher**. Ne pas la supposer couverte.
+- ⬆️ **La refonte du modèle d'exercice** (`dossier-service`) : AC-8/AC-9 demandent de **référencer**
+  l'autorité, pas de la déplacer. Q6 n'est pas rouverte.
 - **Reprise de données** : aucune liasse n'est produite depuis un écran à ce jour.
 - Le calcul comptable lui-même (EPIC-011/011B, `done`).
 
@@ -147,5 +226,10 @@ serveur refuse. Seule la façon de **connaître** la balance diffère.
 - [ ] OpenAPI régénéré et **relu** : les nouveaux codes sortent en `enum`, pas en commentaire.
 - [ ] Ticket d'origine stampé « résolu par STORY-381 ».
 - [ ] Trackers à jour (`sprint-status.yaml`, `tickets/README.md`).
-- [ ] **Renvoi au frontend** : signaler à FE-030/FE-031 que `balanceId` devient requis — une story
-      backend livrée ne déclenche rien tant qu'une story frontend ne la nomme pas.
+- [ ] **Renvoi au frontend** : signaler que `balanceId` devient requis — une story backend livrée ne
+      déclenche rien tant qu'une story frontend ne la nomme pas. ⬆️ **(2026-08-25)** Destinataires
+      corrigés : **FE-031** *(livrée — sa clé de cache porte le `balanceId` PARCE QUE le serveur ne
+      le connaît pas ; l'AC-8 lui permettra de DÉSIGNER le comparatif au lieu de le faire désigner
+      par l'utilisateur)*, **FE-076** *(`blocked` — appellera `…/comparaison/exercices` par
+      libellés, que l'AC-9 rend fiables)*, et **la story de création de liasse, qui reste à
+      ficher**.
