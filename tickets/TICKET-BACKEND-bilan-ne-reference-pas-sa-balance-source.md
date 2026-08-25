@@ -1,7 +1,20 @@
 # TICKET-BACKEND — la liasse ne référence pas la balance dont elle sort
 
-> ➡️ **REPRIS le 2026-08-22 par [STORY-381](../stories/STORY-381.md), slottée au sprint 20 backend.**
-> La story fait foi. Ce fichier est conservé pour tracer l'origine et ne se modifie plus.
+> ✅ **RÉSOLU par [STORY-381](../stories/STORY-381.md), clôturée le 2026-08-25** — PR
+> `prospera-balance-service`#55 + `prospera-bilan-service`#50 rebase-mergées **ensemble** sur `dev`
+> (changement de contrat d'événement ⇒ 2 dépôts).
+>
+> Les trois conséquences décrites plus bas sont fermées : la liasse **déclare** sa balance
+> (`balanceId` requis, figé au snapshot avec `balanceVersion`/`balanceChecksum`), le serveur **refuse**
+> ce que seul l'écran refusait (`409 BALANCE_NON_VALIDEE`, `404 BALANCE_INTROUVABLE` sur un autre
+> dossier), et le libellé d'exercice **cesse d'être libre** (résolu depuis l'exercice du dossier).
+>
+> ⚠️ **Une limite subsiste, nommée dans la story** : la provenance est *déclarée puis vérifiée*, jamais
+> *recalculée* — le sceau prouve **quelle balance a été déclarée**, pas que les soldes en sortent. Le
+> rapprochement réel demande un `soldesChecksum` publié par `balance-service` : story à ficher.
+>
+> ➡️ **REPRIS le 2026-08-22** par cette même story. Ce fichier est conservé pour tracer l'origine et ne
+> se modifie plus.
 
 **Cible :** backend (`bilan-service`, accessoirement `balance-service`)
 **Ouvert par :** **FE-028** (module Bilan — shell, gate et choix de la balance source),
