@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-journal-affectation-userids-bruts.md` · **STORY-360** *(le journal devient lisible)* · **STORY-294** *(le même piège, côté organisations)* · décision **D12** · question **Q2**
 **Priorité :** Should Have
 **Story Points :** 2
-**Statut :** `review`
+**Statut :** `done`
 **Complexité :** low
 **Créée le :** 2026-08-22 — **par FE-068**, qui a consommé le journal pour la première fois
 **Sprint :** 20
@@ -137,7 +137,7 @@ empêche l'écran d'afficher un identifiant nu sans le dire.
 
 ## Progress Tracking
 
-**Statut :** `review` — implementee, portes DoD vertes, persistance et non-regression prouvees en docker.
+**Statut :** `done` — clôturée le 2026-08-25, PR `dossier-service#14` rebase-mergée sur `dev`.
 **Branche :** `MNV-382` (`dossier-service`) - **developpee le** 2026-08-25.
 
 ### Ce qui a ete livre
@@ -237,3 +237,158 @@ Stack arretee (`docker compose stop`) apres consignation.
 
 **FE-068 peut retirer son repli client** (`CHAMPS_UTILISATEUR`, `estIdentifiantBrut` dans
 `journal-presentation.ts`) : le service resout desormais ce que l'annuaire `GET /users` ne peut pas.
+
+---
+
+## Revue de code — 3 constats, 3 corriges (commit `MNV-382(revue)`)
+
+### 1. ⚡ Le contrat annoncait un code de motif QUI N EXISTE PAS
+
+Le Swagger que la story avait ecrit disait que `partant` apparait « sur une reprise apres depart
+(`motif = DEPART_COLLABORATEUR`) ». **Cette valeur n existe nulle part.** Le seul producteur
+(`dossiers.service.ts`, retombee de depart) ecrit `MOTIF_DEPART_COLLABORATEUR`, qui vaut la phrase :
+
+> « Depart du collaborateur — retombee automatique a l administrateur du cabinet (Q2). »
+
+Le dump de la verification docker le montrait deja, ligne par ligne — je ne l avais pas relu contre ce
+que j avais publie.
+
+**Scenario reel** : FE-068, le consommateur nomme par la story, ecrit
+`if (details.motif === 'DEPART_COLLABORATEUR')`. La condition est **fausse a jamais** : la reprise
+automatique s affiche comme une reaffectation manuelle ordinaire, et le bloc « qui a repris le dossier
+de qui » — **le cas exact que la story sert** — n est jamais mis en avant.
+
+**Aggravant** : les deux fixtures de test reprenaient le meme litteral inexistant, donc aucun test ne
+pouvait rougir dessus. `expect(details.motif).toBe('DEPART_COLLABORATEUR')` n assertait que le
+passe-plat de sa propre fixture.
+
+**Corrige** : le contrat dit que `motif` est du **texte libre** et que le discriminant est la
+**PRESENCE de `partant`** ; les fixtures importent `MOTIF_DEPART_COLLABORATEUR`.
+
+### 2. `contributeurs` dependait d un champ VOISIN
+
+La sortie anticipee « rien a habiller » rendait `contributeurs` present ou absent selon qu une **autre
+face** de la meme entree citait quelqu un. Une cle dont la presence depend d un champ voisin n est
+descriptible dans aucun contrat, et un client qui ecrit `avant.contributeurs.length` tombe sur un
+`TypeError`. Le cas n est pas atteignable aujourd hui (`responsableUserId` est toujours ecrit) — il l
+est desormais **par construction**. Sortie anticipee supprimee, un test fige l uniformite.
+
+### 3. Deux traversees des memes cles, sans rien qui les y contraigne
+
+`identifiantsCites()` construit le lot, `detailsHabilles()` produit les personnes : deux enumerations
+distinctes. Une story future qui journaliserait un `validateurUserId` et ne l ajouterait qu a
+l habillage rendrait une personne **jamais resolue** — un identifiant nu a l ecran, sans erreur, sans
+log, sans test rouge. Plutot qu une indirection en production, un invariant **derive de la SORTIE** :
+toute personne rendue, ou qu elle soit dans la charge utile, doit etre dans le lot. Il attrape n
+importe quelle cle future, dans les deux sens.
+
+---
+
+## Revue de securite — 1 constat, moyenne, confiance 90 (commit `MNV-382(securite)`)
+
+**CWE-359 (exposition de donnees personnelles) + CWE-639 (autorisation contournee par cle controlee
+par l utilisateur) — OWASP A01, Broken Access Control.**
+
+### ⚠️⚠️ La PR transformait une faiblesse sans impact en FUITE D IDENTITE INTER-CABINET
+
+`identity_users` est keye par utilisateur, **sans `orgId`** : alimente par
+`identity.user.registered` pour **toute inscription de la plateforme**, il porte les noms de **tous les
+cabinets**. Tant que seul `parUserId` y etait resolu, l isolation tenait **en amont** — cette valeur
+est posee par le serveur depuis le jeton, donc l auteur a necessairement agi dans ce cabinet. Le
+commentaire d `IdentityUsersService.resoudre()` le disait explicitement.
+
+**La PR invalidait cette premisse.** `PATCH /dossiers/:id/affectation` **n exige pas** que le
+`responsableUserId` ni les `contributeursUserIds` soient membres du cabinet (le DTO ne pose qu un
+`@IsMongoId()`). **La portee garde le CONTENANT, pas les identifiants que l appelant y a lui-meme
+deposes.**
+
+**Exploitation**, en `TENANT_ADMIN` d un cabinet legitime (e-mail verifie, KYC approuve) :
+
+1. creer un dossier client ordinaire ;
+2. `PATCH .../affectation` avec 50 identifiants etrangers dans `contributeursUserIds` — **accepte** ;
+3. `GET /dossiers/:id/journal` — le dossier est dans sa portee, l entree lui est rendue ;
+4. il lit 50 prenoms/noms d utilisateurs d autres cabinets, et repete a volonte.
+
+Deux dommages : **divulgation de donnees personnelles inter-tenant**, et surtout **oracle d existence
+de compte a l echelle de la plateforme** (nom rendu ⇒ le compte existe) — exactement l anti-enumeration
+que `securite.md` classe CRITICAL, elargie de son tenant a toute la base d utilisateurs.
+
+### Le correctif
+
+`OrgMembersService.membresDe(orgId, lot)` filtre les identifiants **CITES** sur `org_members`,
+read-model local deja alimente par `identity.membership.changed`.
+
+| Decision | Pourquoi |
+|---|---|
+| **Aucun filtre de statut** | ⚡ C est l AC CENTRAL (Q2). `org_members` n efface jamais une ligne : un depart arrive en `SUSPENDED` et l `updateOne` conserve l appartenance. Ajouter `statut: 'ACTIVE'` « par prudence » aurait anonymise precisement les lignes qui parlent d un collaborateur parti — tout l objet de la story |
+| **L AUTEUR n y passe PAS** | Son identifiant vient du jeton. Le soumettre a un read-model qui peut etre en retard l anonymiserait sans rien proteger, et casserait STORY-360 |
+| **Les 3 lectures restent PARALLELES** | Filtrer le lot avant `resoudre()` aurait serialise deux allers-retours. Le nom d un non-membre est eventuellement lu, il ne quitte jamais le processus |
+| **Fail-closed** | Un identifiant absent de `org_members` — meme par simple retard de projection — retombe sur le patron « personne non resolue » deja teste : identifiant nu, ligne rendue |
+
+⚠️ **La RACINE n est pas corrigee ici** : `modifierAffectation` accepte toujours n importe quel
+`MongoId`. Hors perimetre de cette story ⇒ **STORY-404 ouverte**.
+
+---
+
+## Mutation-testing — 13 mutations au total, 13 rouges
+
+Les 4 dernieres (correctif de securite) ont ete verifiees avec `npm run build` a **0 erreur TS** : une
+mutation rouge par erreur de compilation ne prouve rien *(lecon STORY-179)*.
+
+| Mutation | Ce qui rougit |
+|---|---|
+| ⑧ Une cle habillee mais retiree du lot | 3 tests, dont l invariant de synchronisation |
+| ⑨ La sortie anticipee revient | « rend `contributeurs` meme quand l entree ne cite PERSONNE » |
+| ⑩ Tout identifiant demande repute membre *(la fuite revient)* | les 2 tests d isolation, unitaire **et** e2e |
+| ⑪ L auteur soumis au filtre d appartenance | 2 tests |
+| ⑫ `statut: 'ACTIVE'` ajoute au filtre | « nomme l ancien responsable meme s il a QUITTE le cabinet » |
+| ⑬ `orgId` neutralise dans le filtre | 2 tests |
+
+⚠️ **Piege rencontre deux fois** : `npm test -- <chemin>` a rendu `Tests: 0 total` et
+`40 passed` alors qu une **suite entiere echouait a compiler**. Le compte de tests verts ne dit rien
+d une suite qui n a pas tourne — lire `Test Suites:` et `failed to run`.
+
+## Portes, sur l etat FINAL (apres les deux commits de correction)
+
+| Porte | Resultat |
+|---|---|
+| Lint | **0 warning** |
+| Build | **OK** |
+| Unitaires | **1012 verts** / 77 suites |
+| e2e | **216 verts** / 6 suites |
+| Couverture globale | **99,26 st - 93,48 br - 96,56 fn - 99,28 li** (seuils 65/90/90/90) |
+| `journal.service.ts` / `org-members.service.ts` | **100 / 100 / 100 / 100** |
+
+⚠️ **Constat honnete** : une execution e2e a echoue **une fois** (1 test sur 216) en cours de session,
+**non reproduite sur 10 executions completes** consecutives ensuite ; le nom du test n a pas ete
+capture. Signale plutot que passe sous silence.
+
+## Verification docker REJOUEE sur l etat final — second cabinet reel
+
+Stack redemarree, container `dossier-service` **redemarre explicitement** (le hot-reload peut mentir),
+`Found 0 errors` confirme.
+
+Un **second cabinet** a ete inscrit pour de vrai. L identifiant de son gerant, **connu d
+`identity_users`** (`{prenom: "Yao", nom: "Adjo"}`) mais absent d `org_members` du cabinet A, a ete
+depose par l administratrice du cabinet A dans `contributeursUserIds` :
+
+- le `PATCH` rend **`200`** — *l injection existe bel et bien, c est STORY-404* ;
+- le journal rend `{"userId": "…61c2", "systeme": false}` — **aucun nom**, la fuite est fermee ;
+- la ligne de retombee rend `{"userId": "…b629", "prenom": "Ama", "nom": "Kouassi"}` alors que
+  `org_members` porte `{"userId": "…b629", "statut": "SUSPENDED"}` — **l AC central Q2 tient**.
+
+| Ce qui est prouve | Preuve |
+|---|---|
+| Isolation inter-cabinet a la resolution | filtre `org_members` : `{"orgId": "…b608", "userId": {"$in": [3 identifiants]}}` |
+| Le partant reste nomme | `statut: SUSPENDED` en base, nom rendu |
+| Nombre de requetes borne | **2** lectures constantes et paralleles par page (`identity_users` + `org_members`), jamais une par ligne |
+| Rien n est reecrit | **0** operation d ecriture profilee sur `dossiers_journal` |
+
+Stack arretee (`docker compose stop`).
+
+## Suivi ouvert
+
+- **STORY-404** — `modifierAffectation` doit refuser un identifiant hors cabinet (racine du constat de
+  securite). ⚠️ Son refus devra etre **anti-enumerant** : ne pas distinguer « inconnu » de « autre
+  cabinet », sinon la validation redevient l oracle que cette story vient de fermer.
+- **FE-068** peut retirer son repli client (`CHAMPS_UTILISATEUR`, `estIdentifiantBrut`).
