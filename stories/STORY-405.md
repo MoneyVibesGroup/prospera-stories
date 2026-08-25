@@ -4,7 +4,7 @@
 **Réf. :** **STORY-404** *(qui l'a trouvé, et l'a laissé hors de son périmètre)* · règle `securite.md`
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** `ready-for-dev`
+**Statut :** `review`
 **Complexité :** medium
 **Créée le :** 2026-08-25 — **par la revue de sécurité de STORY-404**
 **Sprint :** 20
@@ -114,3 +114,168 @@ oublié ne rende pas un 500 non plus.
 - Propagation aux 6 autres dépôts (mécanique, mais 6 PR) : 1 pt
 - Inventaire des `@Param('id')` non validés : 0,5 pt
 - **Total : 3 points**
+
+---
+
+## Décisions de dev (D-405-x)
+
+### D-405-1 — Deux prémisses de la story étaient fausses, la mesure les corrige
+
+Le tableau *« Forme retenue »* avance qu'`Types.ObjectId.isValid()` **accepte les chaînes de 12
+caractères**. C'était vrai avant `bson` 5 ; avec le `bson` embarqué par `mongoose` 8.24 du dépôt,
+c'est **faux** :
+
+```
+"abcdefghijkl"            isValid = false     new Types.ObjectId(…) → BSONError
+"../autre-org"            isValid = false
+12          (un nombre)   isValid = true      new Types.ObjectId(12) → 0000000cedfc1d172cb485ab
+```
+
+Ce qu'`isValid()` accepte réellement de trop, ce sont les **nombres**. La conclusion de la story tient
+donc — `isValid()` seul ne suffit pas — mais **pas pour la raison écrite**, et un aller-retour
+`toHexString() === v.toLowerCase()` **lèverait** sur un nombre avant de pouvoir le refuser
+(`v.toLowerCase` n'existe pas sur un `number`).
+
+**Forme retenue** : un motif, `^[0-9a-fA-F]{24}$`, appliqué à une valeur dont on a d'abord vérifié
+qu'elle est une **chaîne**. Équivalent à l'aller-retour sur une chaîne, mais il ne dépend d'aucune
+brique Mongo — ce qui est **obligatoire** pour `admin-panel`, BFF sans base, qui n'a ni `mongoose` ni
+`bson` en dépendance. `document-service` portait déjà exactement ce motif dans `DossierGate` : il
+n'en porte plus qu'une définition, importée du validateur commun.
+
+### D-405-2 — Le filet doit reconnaître DEUX exceptions, pas une
+
+La story ne nomme que `BSONError`. La mesure montre qu'un identifiant mal formé emprunte **deux**
+chemins distincts, qui ne lèvent pas la même chose :
+
+| Chemin | Exception |
+|---|---|
+| `new Types.ObjectId('0x…')` — conversion explicite | `BSONError` |
+| `find({ _id: '0x…' })` — la valeur part en **filtre** | `CastError`, `kind: 'ObjectId'` |
+
+Le second est celui des `@Param('id')` non validés — c'est-à-dire précisément la classe de chemin que
+le filet doit couvrir. Ne mapper que `BSONError` l'aurait troué là où il sert le plus.
+
+⚠️ **Restreint à `kind === 'ObjectId'`** : un `CastError` sur un champ `Number` ou `Date` reste un
+`500`. Ces champs sont typés par les DTO ; un échec de cast y signale une incohérence interne, pas une
+saisie. Élargir le filet à tous les `kind` masquerait ces bugs-là derrière un `400`.
+
+⚠️ **Reconnaissance par `name`, pas par `instanceof`** : `bson` est une dépendance *transitive* de
+`mongoose`, l'importer la déclarerait de fait, et un `instanceof` casse dès que deux copies du paquet
+coexistent. `BSONTypeError` (nom d'avant `bson` 5) est reconnu aussi.
+
+### D-405-3 — Le validateur n'est PAS un `*.decorator.ts`
+
+`collectCoverageFrom` exclut `!**/*.decorator.ts` dans les **7** dépôts. Y placer la règle l'aurait
+rendue invisible aux seuils — l'angle mort qui a caché trois bugs en STORY-076/108. Le fichier est
+`src/common/validation/identifiant-mongo.ts`, et il est couvert à **100 %** partout.
+
+### D-405-4 — « un code stable » : ce qui est livré, et ce qui ne l'est pas
+
+- **Chemin décorateur** (le champ est couvert par un DTO) : `400` porté par le `ValidationPipe`, avec
+  le message *« <champ> doit être un identifiant Mongo (24 caractères hexadécimaux) »* — il **nomme le
+  champ fautif**, ce que le filet ne peut pas faire.
+- **Chemin filet** (aucun DTO ne couvre la valeur) : `400` générique portant
+  `code: "IDENTIFIANT_MALFORME"`.
+
+⛔ **Un `code` sur les 400 du `ValidationPipe` n'est PAS livré** : il exigerait un `exceptionFactory`
+global, qui changerait le corps de **toutes** les réponses 400 de validation des 7 services. Hors
+périmètre, et à traiter comme une story à part si le front en a besoin.
+
+### D-405-5 — Inventaire des `@Param` : le filet, pas 60 signatures
+
+Les identifiants passés en `@Param` n'ont aucun DTO. L'inventaire montre qu'ils sont **déjà** couverts
+sur le chemin dominant :
+
+| Dépôt | Ce qui garde les `@Param` d'identifiant aujourd'hui |
+|---|---|
+| tous (6 avec base) | `TenantScopedRepository.findByIdFor` : `if (!Types.ObjectId.isValid(id)) return null` ⇒ **404**, jamais 500 |
+| `dossier-service` | + `exigerTenant` (STORY-363) sur l'`org` du jeton, + `DossiersRepository.trouverParId`, `axes`/`journal`/`exercices.repository` |
+| `document-service` | + `DossierGate` (motif strict, désormais `estObjectId`) |
+
+⇒ **Aucun chemin `@Param` atteignable ne rend 500 aujourd'hui.** Poser un `ParseObjectIdPipe` sur
+~60 signatures de contrôleur aurait été du bruit ; le filet couvre les chemins **futurs** qui
+oublieraient la garde, ce qu'un inventaire figé ne fait pas.
+
+### D-405-6 — `admin-panel` : le décorateur seul, jamais le filet
+
+Le BFF n'a ni `mongoose` ni `bson` : il ne convertit aucun identifiant, il les **relaie**. Un
+`BSONError` ne peut pas y naître, la branche du filtre y serait du **code mort**. Le validateur y est
+donc livré **amputé du filet**, et les e2e assertent `not.toHaveBeenCalled()` sur le client amont —
+un `expect(400)` nu resterait vert si l'amont était appelé et répondait 400, c'est-à-dire dans le cas
+exact que la story élimine.
+
+---
+
+## Progress Tracking
+
+**Statut : `review`** — 7 dépôts, 7 branches `MNV-405`, 7 PR.
+
+### Portes DoD, par dépôt
+
+| Dépôt | Lint | Build | Couverture (br/fn/li/st) | Unitaires | e2e |
+|---|---|---|---|---|---|
+| `dossier-service` | 0 | ✅ | 93,59 / 96,64 / 99,29 / 99,27 | 1 059 | 229 |
+| `document-service` | 0 | ✅ | 92,40 / 98,16 / 99,14 / 99,10 | 627 | 95 |
+| `balance-service` | 0 | ✅ | 91,78 / 98,17 / 99,05 / 98,97 | 3 016 | 714 |
+| `bilan-service` | 0 | ✅ | 93,20 / 98,36 / 98,55 / 98,60 | 1 071 | 275 |
+| `platform-catalog-service` | 0 | ✅ | 96,19 / 100 / 99,84 / 99,78 | 639 | 191 |
+| `auth-service` | 0 | ✅ | 90,80 / 97,94 / 97,89 / 97,79 | 867 | 218 |
+| `admin-panel` | 0 | ✅ | 93,25 / 100 / 99,66 / 99,69 | 469 | 214 |
+
+`identifiant-mongo.ts` est à **100 / 100 / 100 / 100** dans les 7.
+
+### Mutations — ce qui prouve que les tests filtrent
+
+| # | Mutation | Attendu | Mesuré |
+|---|---|---|---|
+| A | `@EstObjectId()` → `@IsMongoId()` (`dossier-service`) | e2e `0x/0X/0h` rouges | 🔴 3 échecs |
+| B | branche du filet retirée de `AllExceptionsFilter` | spec du filtre rouge | 🔴 2 échecs *(1er essai : rouge par `TS6192`, **ne prouvait rien** — refait en retirant AUSSI l'import)* |
+| C | filet élargi à **tous** les `kind` de `CastError` | « un `CastError` d'un autre type reste un 500 » rouge | 🔴 2 échecs |
+| D | idem A sur `document-service` | 3 rouges | 🔴 |
+| E | idem A sur `balance-service` | 3 rouges | 🔴 *(1er essai rouge par erreur de compilation — refait)* |
+| F | idem A sur `auth-service` | 3 rouges | 🔴 |
+| G | idem A sur `platform-catalog-service` | 3 rouges | 🔴 |
+| H | idem A sur `admin-panel` | 4 rouges | 🔴 |
+| I | idem A sur `bilan-service` | 4 rouges | 🟢 **puis 🔴 après renforcement** |
+
+⚡⚡ **La mutation I est le résultat le plus instructif de la story.** Elle est restée **verte** : les
+e2e de `bilan-service` montent le filtre global, si bien que `0x…` traversait `@IsMongoId()`, levait
+un `BSONError` dans `ComparaisonService`, et **le filet rendait 400** — le même statut que le
+décorateur. Le test ne discriminait donc rien. Il assertait le **statut** ; il asserte désormais le
+**message de validation**, seul élément qui dit *lequel des deux rideaux a répondu*.
+
+⚠️ **Corollaire mesuré et non prévu** : les e2e de `dossier-service` **ne montent PAS**
+`AllExceptionsFilter` (leur `Test.createTestingModule` ne déclare pas `CommonModule` ni `APP_FILTER`).
+Toute affirmation « 400 plutôt que 500 » lue dans ces e2e-là ne reflète que le gestionnaire par défaut
+de Nest — c'est pourquoi le filet a dû être prouvé en docker, et pas seulement en e2e.
+
+### Vérification docker — stack réelle, `dossier-service` + `auth-service` + Mongo/Kafka/Redis
+
+Parcours : `register` → e-mail vérifié en base → `login` → KYC `APPROVED` posé dans
+`orgkycstatuses` → `POST /dossiers` (201) → `PATCH /dossiers/:id/affectation`.
+
+**Les trois états, mesurés sur le même dossier :**
+
+| État du code | `0x` + 22 hex |
+|---|---|
+| **Avant la story** — `@IsMongoId()`, pas de filet | **`500`** `{"message":"Une erreur interne est survenue."}` |
+| **Filet seul** — décorateur retiré | **`400`** `{"code":"IDENTIFIANT_MALFORME"}` ← **AC-4 prouvé** |
+| **Livré** — décorateur + filet | **`400`** `["responsableUserId doit être un identifiant Mongo (24 caractères hexadécimaux)"]` |
+
+**AC-1/AC-2 — les 7 formes, toutes en `400`, aucune en `500`** : `0x`+22hex · `0X`+22hex · `0h`+22hex ·
+12 caractères · un nombre · un tableau · `0x` **dans** `contributeursUserIds` (message
+`each value in contributeursUserIds …`).
+
+**AC-3 — non-régression STORY-404** : l'identifiant d'un membre actif en **MAJUSCULES** rend `200`, et
+la base porte la forme **canonique minuscule** (`ObjectId('6a8d7ce84006c108ea6be59a')`).
+
+**Rien n'a été écrit par les refus** : `version` du dossier = 3 (création + 2 affectations légitimes),
+4 entrées de journal, `contributeursUserIds: []`. Et sur toute la collection :
+`dossiers à responsableUserId NON canonique = 0` — ce qui confirme le *hors périmètre* de la story :
+aucune valeur invalide n'a jamais pu être **écrite**, la levée précède l'écriture.
+
+⚠️ **Piège rencontré, et payé** : le premier passage de la mutation en docker a rendu le message du
+**nouveau** décorateur alors que le `dist/` du conteneur portait déjà `IsMongoId`. `nest --watch` avait
+recompilé (`Found 0 errors`) **sans redémarrer le process**. Chaque état ci-dessus a donc été mesuré
+après un `docker compose restart` explicite et un `/health` à 200 — jamais sur la foi du seul
+« Found 0 errors » (leçon `hot-reload-ment-verif-docker`).
