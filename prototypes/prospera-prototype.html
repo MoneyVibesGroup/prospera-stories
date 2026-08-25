@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-044 Cahier de dépenses</title>
+<title>Prospera · Prototype cumulatif — FE-030 Table de passage</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -983,6 +983,8 @@
   /* Onglet de sous-nav pas encore livré : visible, désactivé, et il DIT quand. */
   .atl-tab[disabled] { opacity: 0.55; cursor: not-allowed; }
   .atl-tab[disabled]:hover { background: transparent; color: var(--muted-fg); }
+  /* FE-074 — groupe d'export dans l'en-tete du detail de balance. */
+  .bal-export { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; }
   .atl-tab .soon { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); background: var(--hover-surface); padding: 0.05rem 0.4rem; border-radius: 999px; }
 
   /* Liste de choix de la balance source — des lignes RADIO, pas un tableau :
@@ -1031,6 +1033,169 @@
     background: var(--hover-surface); font-size: 0.82rem; color: var(--muted-fg);
   }
   .bsrc-vide svg { width: 1.05rem; height: 1.05rem; flex: none; margin-top: 0.1rem; }
+
+
+  /* ============ FE-030 · TABLE DE PASSAGE & ARBITRAGE ====================
+     Le 2ᵉ onglet du Bilan. Il répond à UNE question : « chaque compte de la
+     balance retenue sait-il dans quel poste d'état il tombe ? » — et il rend
+     VISIBLE le seul cas qui coûte cher : celui où la réponse est non.
+
+     ⚠️ Trois choix de forme, tous dictés par le contrat réel :
+      1. les comptes NON MAPPÉS passent AVANT la table, parce que la table est
+         longue (1 200 lignes) et que l'exception s'y noierait ;
+      2. chaque rattachement porte son ORIGINE (référentiel / surcharge) — sans
+         elle, une surcharge validée est indiscernable du paquet packagé, et
+         personne ne peut vérifier que son arbitrage a pris effet ;
+      3. la liste des postes cibles est déclarée PARTIELLE, parce qu'elle l'est :
+         aucune route n'énumère les postes du référentiel (STORY-399). */
+
+  /* Synthèse — des CHIFFRES, pas un verdict. Le verdict appartient au serveur. */
+  .tdp-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.7rem; }
+  .tdp-tile { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); padding: 0.8rem 0.9rem; }
+  .tdp-tile .k { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted-fg); }
+  .tdp-tile .v { margin-top: 0.25rem; font-size: 1.25rem; font-weight: 680; font-variant-numeric: tabular-nums; }
+  .tdp-tile .s { margin: 0.15rem 0 0; font-size: 0.74rem; color: var(--muted-fg); }
+  .tdp-tile[data-ton="alerte"] { border-color: color-mix(in srgb, var(--warning) 40%, var(--border)); background: color-mix(in srgb, var(--warning) 7%, var(--card)); }
+  .tdp-tile[data-ton="alerte"] .v { color: #b45309; }
+  :root[data-theme="dark"] .tdp-tile[data-ton="alerte"] .v { color: #fbbf24; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tdp-tile[data-ton="alerte"] .v { color: #fbbf24; } }
+
+  /* Ce que les comptes non mappés empêchent VRAIMENT — voir la note de maquette. */
+  .tdp-garde { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.85rem 1rem; border-radius: var(--radius);
+    border: 1px solid color-mix(in srgb, var(--warning) 35%, var(--border)); background: color-mix(in srgb, var(--warning) 8%, var(--card)); }
+  .tdp-garde.ok { border-color: color-mix(in srgb, var(--success) 32%, var(--border)); background: color-mix(in srgb, var(--success) 8%, var(--card)); }
+  .tdp-garde .ic { width: 2.1rem; height: 2.1rem; border-radius: 0.6rem; display: grid; place-items: center; flex: none; background: var(--warning-soft); color: #b45309; }
+  .tdp-garde.ok .ic { background: var(--success-soft); color: var(--success); }
+  .tdp-garde .ic svg { width: 1.1rem; height: 1.1rem; }
+  .tdp-garde b { font-size: 0.88rem; font-weight: 650; }
+  .tdp-garde p { margin: 0.2rem 0 0; font-size: 0.8rem; color: var(--muted-fg); line-height: 1.55; }
+
+  /* Comptes non mappés : une LIGNE DE TRAVAIL, avec le geste au bout. */
+  .tdp-un { display: flex; flex-direction: column; gap: 0.55rem; }
+  .tdp-unrow { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 0.85rem;
+    padding: 0.75rem 0.9rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+  .tdp-unrow[data-solde="nul"] { background: color-mix(in srgb, var(--muted-fg) 4%, var(--card)); border-style: dashed; }
+  .tdp-unrow .cpt { font-family: var(--font-mono); font-size: 0.86rem; font-weight: 650; }
+  .tdp-unrow .lib { min-width: 0; font-size: 0.84rem; }
+  .tdp-unrow .lib small { display: block; margin-top: 0.15rem; font-size: 0.74rem; color: var(--muted-fg); }
+  .tdp-unrow .mnt { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 0.84rem; font-weight: 620; white-space: nowrap; text-align: right; }
+  .tdp-unrow .mnt small { display: block; font-weight: 500; font-size: 0.7rem; color: var(--muted-fg); }
+  .tdp-unrow[data-solde="nul"] .mnt { color: var(--muted-fg); font-weight: 500; }
+  .tdp-attente { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 600;
+    color: var(--muted-fg); background: var(--hover-surface); border-radius: 999px; padding: 0.15rem 0.55rem; white-space: nowrap; }
+
+  /* Origine d'un rattachement — le seul témoin qu'un arbitrage a pris effet. */
+  .tdp-orig { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.03em; text-transform: uppercase; border-radius: 999px; padding: 0.1rem 0.5rem; white-space: nowrap; }
+  .tdp-orig[data-o="referentiel"] { background: var(--hover-surface); color: var(--muted-fg); }
+  .tdp-orig[data-o="surcharge"] { background: color-mix(in srgb, var(--orange-500) 14%, transparent); color: #c2410c; }
+  :root[data-theme="dark"] .tdp-orig[data-o="surcharge"] { color: #fdba74; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tdp-orig[data-o="surcharge"] { color: #fdba74; } }
+
+  .tdp-poste { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 650; }
+  .tdp-etat { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); }
+
+  /* Surcharges : le JOURNAL du geste (auteur, dates, ancien → nouveau, motif). */
+  .tdp-sc { display: flex; flex-direction: column; gap: 0.55rem; }
+  .tdp-scrow { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); padding: 0.8rem 0.9rem; }
+  .tdp-schead { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .tdp-schead .cpt { font-family: var(--font-mono); font-size: 0.88rem; font-weight: 650; }
+  .tdp-schead .grow { flex: 1; }
+  .tdp-flow { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.45rem; font-size: 0.8rem; }
+  .tdp-flow .from { color: var(--muted-fg); text-decoration: line-through; font-family: var(--font-mono); }
+  .tdp-flow .none { color: var(--muted-fg); font-style: italic; }
+  .tdp-flow svg { width: 0.9rem; height: 0.9rem; color: var(--muted-fg); flex: none; }
+  .tdp-flow .to { font-family: var(--font-mono); font-weight: 650; }
+  .tdp-scmeta { margin: 0.5rem 0 0; display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; font-size: 0.75rem; color: var(--muted-fg); }
+  .tdp-scmeta .sep { opacity: 0.5; }
+  .tdp-motif { margin: 0.45rem 0 0; font-size: 0.79rem; color: var(--muted-fg); border-left: 2px solid var(--border-strong); padding-left: 0.6rem; }
+  .tdp-scact { display: flex; align-items: center; gap: 0.4rem; }
+  .tdp-nonadmin { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.74rem; color: var(--muted-fg); }
+  .tdp-nonadmin svg { width: 0.9rem; height: 0.9rem; flex: none; }
+
+  .st-proposed { background: var(--warning-soft); color: #b45309; }
+  .st-validated { background: var(--success-soft); color: var(--success); }
+  .st-rejected { background: var(--hover-surface); color: var(--muted-fg); }
+
+  /* Choix du poste cible : une liste PARTIELLE assumée + une saisie libre. */
+  .tdp-pick { display: flex; flex-direction: column; gap: 0.5rem; max-height: 14rem; overflow-y: auto; padding-right: 0.2rem; }
+  .tdp-pickitem { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.7rem; padding: 0.55rem 0.7rem;
+    border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); cursor: pointer; text-align: left; font: inherit; }
+  .tdp-pickitem:hover { border-color: var(--border-strong); }
+  .tdp-pickitem[data-selected="true"] { border-color: color-mix(in srgb, var(--orange-500) 45%, var(--border)); background: color-mix(in srgb, var(--orange-500) 7%, var(--card)); }
+  .tdp-pickitem .code { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 650; }
+  .tdp-pickitem .lib { font-size: 0.81rem; min-width: 0; }
+  .tdp-libre { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .tdp-avert { display: flex; align-items: flex-start; gap: 0.55rem; padding: 0.7rem 0.85rem; border: 1px dashed var(--border-strong);
+    border-radius: var(--radius); background: var(--hover-surface); font-size: 0.78rem; color: var(--muted-fg); }
+  .tdp-avert svg { width: 1rem; height: 1rem; flex: none; margin-top: 0.1rem; }
+  @media (max-width: 720px) {
+    .tdp-unrow { grid-template-columns: 1fr auto; }
+    .tdp-libre { grid-template-columns: 1fr; }
+  }
+
+
+  /* ---- FE-030 (refonte de révision) : la liasse se lit PAR POSTE ----------
+     Le premier jet lisait compte → poste. C'est la vue du paramétreur. Celui
+     qui RÉVISE part du repère de liasse (« qu'est-ce qui alimente BX ? ») et
+     rapproche son total de la balance. Les deux vues sortent de la MÊME
+     réponse — `mappes[]` porte déjà l'état, le poste et son libellé — donc le
+     manque était d'affichage, pas de contrat. */
+
+  /* Bascule de vue. Ce n'est pas un filtre : ce sont deux lectures du même jeu. */
+  .tdp-vues { display: inline-flex; gap: 0.25rem; padding: 0.2rem; border: 1px solid var(--border); border-radius: 999px; background: var(--card); }
+  .tdp-vues button { border: 0; background: none; font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--muted-fg);
+    padding: 0.3rem 0.8rem; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; }
+  .tdp-vues button svg { width: 0.9rem; height: 0.9rem; }
+  .tdp-vues button[aria-selected="true"] { background: var(--hover-surface); color: var(--foreground); }
+
+  /* Un état de la liasse (Bilan actif, Compte de résultat…) et ses postes. */
+  .tdp-etatgrp { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+  .tdp-etatgrp + .tdp-etatgrp { margin-top: 0.7rem; }
+  .tdp-etathead { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.95rem; border-bottom: 1px solid var(--border); background: var(--hover-surface); }
+  .tdp-etathead b { font-size: 0.84rem; font-weight: 680; letter-spacing: 0.02em; }
+  .tdp-etathead .grow { flex: 1; }
+  .tdp-etathead .n { font-size: 0.75rem; color: var(--muted-fg); font-variant-numeric: tabular-nums; }
+
+  /* Un poste : repliable, parce qu'on ne déplie que celui qu'on conteste. */
+  .tdp-poste-d { border-bottom: 1px solid var(--border); }
+  .tdp-poste-d:last-child { border-bottom: 0; }
+  .tdp-poste-d > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center;
+    gap: 0.75rem; padding: 0.6rem 0.95rem; }
+  .tdp-poste-d > summary::-webkit-details-marker { display: none; }
+  .tdp-poste-d > summary:hover { background: var(--hover-surface); }
+  .tdp-poste-d > summary .chev { width: 0.85rem; height: 0.85rem; color: var(--muted-fg); transition: transform .15s; }
+  .tdp-poste-d[open] > summary .chev { transform: rotate(90deg); }
+  .tdp-poste-d > summary .lib { font-size: 0.84rem; min-width: 0; }
+  .tdp-poste-d > summary .n { font-size: 0.74rem; color: var(--muted-fg); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .tdp-poste-d > summary .tot { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 0.85rem; font-weight: 650; white-space: nowrap; }
+  .tdp-comptes { padding: 0.15rem 0.95rem 0.7rem 2.5rem; display: flex; flex-direction: column; gap: 0.1rem; }
+  .tdp-cline { display: grid; grid-template-columns: 5.5rem 1fr auto auto; align-items: center; gap: 0.75rem; padding: 0.32rem 0; font-size: 0.8rem; border-top: 1px dotted var(--border); }
+  .tdp-cline:first-child { border-top: 0; }
+  .tdp-cline .c { font-family: var(--font-mono); font-weight: 620; }
+  .tdp-cline .l { color: var(--muted-fg); min-width: 0; }
+  .tdp-cline .m { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* Comptes à ventiler : DEUX postes candidats, et l'arbitrage n'a pas eu lieu. */
+  .tdp-vent { margin-top: 0.7rem; border: 1px dashed var(--border-strong); border-radius: var(--radius); background: var(--hover-surface); padding: 0.85rem 0.95rem; }
+  .tdp-ventline { display: grid; grid-template-columns: 5.5rem 1fr auto; align-items: center; gap: 0.75rem; padding: 0.4rem 0; font-size: 0.8rem; border-top: 1px dotted var(--border-strong); }
+  .tdp-ventline:first-of-type { border-top: 0; }
+  .tdp-ventline .c { font-family: var(--font-mono); font-weight: 620; }
+  .tdp-ventline .cands { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+  .tdp-cand { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.72rem; border: 1px solid var(--border-strong); border-radius: 999px; padding: 0.08rem 0.5rem; background: var(--card); }
+  .tdp-cand code { font-family: var(--font-mono); font-weight: 650; }
+  .tdp-ventline .m { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* Sous-total de classe dans la vue par compte : on révise classe par classe. */
+  table.tbl tr.tdp-classe td { background: var(--hover-surface); font-weight: 650; font-size: 0.78rem; letter-spacing: 0.02em; }
+  table.tbl tr.tdp-classe td .m { float: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  table.tbl td.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* Deux gestes sur un compte non affecté — « rattacher » n'est pas toujours le bon. */
+  .tdp-gestes { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end; }
+
+  /* Identifiant technique affiché faute de nom — jamais maquillé en personne. */
+  .tdp-uid { font-family: var(--font-mono); font-size: 0.72rem; background: var(--hover-surface); border-radius: 0.3rem; padding: 0.05rem 0.35rem; }
 
   /* ============ IMPORT SAGE (FE-025) — dry-run en deux temps ============== */
   /* Fil d'Ariane retour Sources → écran d'import. */
@@ -4243,7 +4408,7 @@
                   <div class="atl-subnav" role="tablist" aria-label="Navigation de l'Atelier">
                     <button class="atl-tab" role="tab" data-atl-tab="sources" aria-selected="true">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><rect width="18" height="6" x="3" y="15" rx="2"/></svg>
-                      Sources
+                      D’où viennent vos chiffres
                     </button>
                     <button class="atl-tab" role="tab" data-atl-tab="balances" aria-selected="false">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M3 16v5h5"/><path d="M16 21h5v-5"/><path d="M9 12h6"/></svg>
@@ -4264,6 +4429,51 @@
                     <button class="atl-tab" role="tab" data-atl-tab="cahiers" aria-selected="false">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7"/><path d="M9 11h7"/></svg>
                       Cahiers <span class="count">Recettes · Dépenses</span>
+                    </button>
+                    <!-- ═══ FE-047 (LIVREE) — l'onglet qui MANQUAIT au prototype ═══
+                         L'app sert /atelier/reprise depuis le 2026-08-23 ; la barre
+                         d'onglets du prototype n'en portait aucune trace. Une maquette
+                         qui montre 4 onglets quand le produit en a 5 fait juger un
+                         module qui n'existe plus. La reprise n'est PAS une source
+                         (D13 en connait trois) : elle ne fabrique aucune matiere
+                         premiere, elle reporte une balance deja validee. -->
+                    <button class="atl-tab" role="tab" data-atl-tab="reprise" aria-selected="false">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                      À-nouveaux
+                    </button>
+
+                    <!-- ═════ FE-073 — CE QUI VIENT EST NOMME, PAS MASQUE ═════
+                         Le comptable venant de Sage cherche Journaux / Grand livre /
+                         Tiers / Rapprochement, et rien ne lui dit s'ils n'existent pas
+                         encore ou s'il cherche mal. Le module BILAN a deja resolu ca
+                         (Etats FE-031+, Previsionnel FE-035, Export FE-038) : on
+                         transpose son patron, on n'en invente pas un second.
+                         ⚠ Chaque item cite SA STORY, jamais une date : « FE-046 » se
+                         verifie au tracker, « bientot » ne se verifie pas, et
+                         « septembre » devient faux sans que personne ne le voie.
+                         ⚠ TROIS items, pas quatre : FE-050 et FE-051 sont deux stories
+                         d'UN MEME ecran fiscal. Leur donner deux onglets promettrait
+                         deux destinations la ou il y en aura une, et l'un des deux
+                         devrait disparaitre a la livraison — ce qui se lit comme une
+                         regression. D'ou « FE-050+ », comme le Bilan ecrit « FE-031+ ».
+                         ⛔ Journaux / Grand livre / Tiers N'Y SONT PAS, et c'est la
+                         decision la plus contre-intuitive de la story : un item
+                         desactive PROMET une story datable. Ces trois-la dependent de
+                         `comptabilite-service`, fondation DIFFEREE sans rang de
+                         sequence ni PRD. Les mettre ici les rendrait indiscernables
+                         d'un travail planifie. ⇒ ils sont dits en toutes lettres dans
+                         le panneau « D'ou viennent vos chiffres », sans lien ni date. -->
+                    <button class="atl-tab" role="tab" data-atl-tab="rattachement" aria-selected="false" disabled title="FE-046 — transaction vers compte SYSCOHADA, regles du cabinet, verification. Backend deja servi (STORY-085).">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
+                      Rattachement <span class="soon">FE-046</span>
+                    </button>
+                    <button class="atl-tab" role="tab" data-atl-tab="rapprochement" aria-selected="false" disabled title="FE-049 — releves bancaires et mobile money, appariement, ecarts. Backend deja servi (STORY-089/090).">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="m9 12 2 2 4-4"/></svg>
+                      Rapprochement <span class="soon">FE-049</span>
+                    </button>
+                    <button class="atl-tab" role="tab" data-atl-tab="fiscal" aria-selected="false" disabled title="FE-050 puis FE-051 — resultat fiscal (reintegrations / deductions), puis liquidation IS = max(MFP, IS), acomptes, TVA, provisions, TPU. Backend deja servi (STORY-091 a 095).">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
+                      Fiscal <span class="soon">FE-050+</span>
                     </button>
                     <span class="grow"></span>
                     <span class="badge badge-active"><span class="d"></span>Module actif</span>
@@ -4364,6 +4574,36 @@
                         </div>
                       </div>
                     </div>
+
+                      <!-- ══════ FE-073 · D3 — DIRE CE QU'ON NE FAIT PAS ══════
+                           La reponse aux TROIS menus que le comptable cherche et qui ne
+                           sont PAS dans la barre d'onglets. Ici, et pas la-haut, parce
+                           qu'un onglet desactive promet une story datable alors que
+                           `comptabilite-service` est une fondation DIFFEREE, sans rang
+                           de sequence. Dire qu'on ne fait pas quelque chose est une
+                           information ; laisser croire qu'on le fera bientot est une
+                           promesse. ⇒ AUCUN lien, AUCUNE date, AUCUN bouton.
+                           ⚠ Q3 tranchee « n'existe pas encore » et NON « pas ouvert pour
+                           votre cabinet » : la seconde laisse croire a un entitlement
+                           achetable, et le support recoit l'appel. -->
+                      <div class="ref-card" style="margin-top:1.1rem">
+                        <div class="ref-head">
+                          <span class="ref-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
+                          <b>Ce que l’Atelier ne fait pas</b>
+                        </div>
+                        <p class="atl-secsub" style="margin:0.55rem 0 0">
+                          L’Atelier <b>reconstruit une balance à partir de pièces</b>&nbsp;: un export de votre
+                          logiciel, vos cahiers photographiés, ou une saisie directe. Il <b>ne tient pas de
+                          journaux</b> et <b>n’enregistre pas d’écritures</b>. La saisie au journal, le
+                          grand&nbsp;livre et les comptes de tiers (clients, fournisseurs, lettrage) relèvent
+                          d’un module de comptabilité qui <b>n’existe pas encore</b>.
+                        </p>
+                        <p class="atl-secsub" style="margin:0.5rem 0 0">
+                          Si vous tenez déjà une comptabilité complète, votre matière première est
+                          l’<b>export</b> ci-dessus&nbsp;: le grand livre reste dans votre logiciel, et la balance
+                          qu’il produit devient ici <b>justifiable ligne à ligne</b>.
+                        </p>
+                      </div>
                   </div>
 
                   <!-- ===== Onglet BALANCES (FE-027) — consultation des balances stockées =====
@@ -4372,6 +4612,131 @@
                        détail d'une balance (lignes + sommaire EN FRANCS + statut de
                        preuve EXPLIQUÉ), immutabilité d'une VALIDÉE affichée (pas
                        d'édition), handoff Bilan HONNÊTE, « introuvable » sans fuite. -->
+                  <!-- ══════ Onglet À-NOUVEAUX (FE-047 · STORY-087 · FR-A19) ══════
+                       LE MOMENT OU SAGE DEVIENT UN PONT ET NON PLUS UNE BEQUILLE.
+                       Les soldes de cloture N-1 deviennent la balance d'ouverture de N,
+                       les comptes de gestion sont soldes, et le resultat attend sa
+                       decision d'assemblee.
+                       ➕ AJOUTE AU PROTOTYPE LE 2026-08-25 : l'ecran est livre depuis le
+                       2026-08-23 et n'avait jamais ete integre ici. Une maquette qui
+                       montre 4 onglets quand le produit en a 5 fait juger un module qui
+                       n'existe plus — c'est la regle « l'ecran se juge DANS le produit ».
+                       ✒ VOCABULAIRE CORRIGE PAR FE-073 §2 : « balance d'ouverture »
+                       remplace « socle » partout dans les LIBELLES. Le titre de l'ecran
+                       disait deja correctement « Reprise d'a-nouveaux », puis le bouton
+                       basculait sur un mot maison — le geste le plus definitif de
+                       l'ecran portait le mot le moins compris.
+                       ⛔ CE QUE CET ECRAN N'APPELLE PAS, ET POURQUOI : `balance-service`
+                       publie POST .../exercices/:exercice/ouvrir (« mode continuite »),
+                       qui ouvre N et CLOT N-1 EN EFFET DE BORD. STORY-355 a rendu la
+                       cloture explicite et propriete du DOSSIER (FE-066 la sert deja) :
+                       l'appeler ici remettrait deux services en desaccord sur « 2025
+                       est-il clos ? », la contradiction Q6 que FE-066 vient de fermer. -->
+                  <div class="atl-panel atl-body" data-atl-panel="reprise" hidden>
+                    <div>
+                      <h3 class="atl-sectitle">Reprise d’à-nouveaux</h3>
+                      <p class="atl-secsub">Les soldes de bilan de l’exercice repris deviennent la balance d’ouverture de l’exercice suivant. Les comptes de gestion sont soldés&nbsp;: ils appartiennent à l’exercice qu’ils ont servi.</p>
+                    </div>
+
+                    <!-- Deux exercices, JAMAIS des dates saisies a la main : ils viennent
+                         du DOSSIER, qui fait foi (Q6). Un dossier qui n'en a qu'un ne peut
+                         rien reprendre, et l'ecran le DIT avec le geste (« ouvrez
+                         l'exercice suivant depuis la fiche du dossier ») plutot que de
+                         laisser un selecteur vide que personne ne comprend. -->
+                    <div class="ref-card" style="margin-top:1.1rem">
+                      <div class="ref-head"><b>Exercices</b></div>
+                      <div class="ref-grid" style="margin-top:0.7rem">
+                        <div class="ref-item">
+                          <div class="ref-k">Exercice repris (N-1)</div>
+                          <div class="ref-v">2024 — 01/01/2024 → 31/12/2024 · clos</div>
+                          <div class="ref-sum">Dernière balance validée de cet exercice&nbsp;: version&nbsp;2, source Sage&nbsp;100 — validée le 04/02/2026</div>
+                        </div>
+                        <div class="ref-item">
+                          <div class="ref-k">Exercice ouvert (N)</div>
+                          <div class="ref-v">2025 — 01/01/2025 → 31/12/2025 · ouvert</div>
+                          <div class="ref-sum">La balance d’ouverture sera rattachée à cet exercice.</div>
+                        </div>
+                      </div>
+                      <!-- ⚠ Le front ne voit PAS `origine` (STORY-388) : il ne peut donc
+                           pas reproduire le 4e critere de selection du serveur, qui ecarte
+                           les balances d'a-nouveaux. D'ou « derniere balance validee de cet
+                           exercice » — vrai de ce que le front voit — plutot que « celle
+                           qui sera reprise », qu'il ne peut pas garantir. -->
+                      <p class="atl-secsub" style="margin:0.7rem 0 0">C’est le service qui retient lui-même la balance à reprendre&nbsp;: cet écran nomme celle qu’il voit, il ne la choisit pas.</p>
+                    </div>
+
+                    <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-top:1rem">
+                      <button class="btn btn-primary btn-sm" type="button">Prévisualiser la balance d’ouverture</button>
+                      <span class="atl-secsub">L’aperçu n’écrit rien.</span>
+                    </div>
+
+                    <!-- APERCU (dryRun) : aucune ecriture. C'est le temps 2 sur 3, et
+                         c'est ce que Sage ne fait pas — la generation des A-N y est un
+                         traitement qu'on lance en aveugle et qu'on verifie apres. -->
+                    <div class="ref-card" style="margin-top:1.1rem">
+                      <div class="ref-head">
+                        <b>Continuité</b>
+                        <span class="grow"></span>
+                        <span class="badge">Aperçu — rien n’est encore enregistré</span>
+                      </div>
+                      <div class="ref-grid" style="margin-top:0.7rem">
+                        <div class="ref-item">
+                          <div class="ref-k">Comptes reportés</div>
+                          <div class="ref-v">312</div>
+                          <div class="ref-sum">classes 1 à 5</div>
+                        </div>
+                        <div class="ref-item">
+                          <div class="ref-k">Comptes soldés</div>
+                          <div class="ref-v">188</div>
+                          <div class="ref-sum">classes de gestion — absents de la balance d’ouverture</div>
+                        </div>
+                        <div class="ref-item">
+                          <div class="ref-k">Résultat à affecter</div>
+                          <div class="ref-v">14 250 000 F CFA</div>
+                          <div class="ref-sum">non réparti — voir ci-dessous</div>
+                        </div>
+                        <div class="ref-item">
+                          <div class="ref-k">Masse reprise</div>
+                          <div class="ref-v">85 400 000 F CFA</div>
+                          <div class="ref-sum">au débit, 85 400 000 au crédit</div>
+                        </div>
+                      </div>
+                      <p class="atl-secsub" style="margin:0.7rem 0 0">L’équilibre a été vérifié par le service <b>avant</b> restitution&nbsp;: une rupture aurait été refusée, pas rendue ici.</p>
+                      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-top:0.9rem">
+                        <button class="btn btn-primary btn-sm" type="button">Enregistrer la balance d’ouverture</button>
+                        <span class="atl-secsub"><b>L’enregistrement est définitif</b>&nbsp;: une balance d’ouverture ne se regénère pas.</span>
+                      </div>
+                    </div>
+
+                    <!-- AFFECTATION DU RESULTAT — le point le plus juste de l'ecran, et
+                         celui qu'un expert-comptable reconnait immediatement : RIEN n'est
+                         propose par defaut. Une affectation est une DECISION D'ASSEMBLEE ;
+                         la pre-remplir ferait signer a l'ecran ce que seuls les associes
+                         decident. -->
+                    <div class="ref-card" style="margin-top:1.1rem">
+                      <div class="ref-head"><b>Affectation du résultat</b></div>
+                      <p class="atl-secsub" style="margin:0.55rem 0 0">Résultat non affecté&nbsp;: <b>14 250 000 F CFA</b>. Tant qu’il n’est pas réparti, il reste au compte de résultat de la balance d’ouverture. <b>L’affectation est une décision d’assemblée&nbsp;: rien n’est proposé par défaut.</b></p>
+                      <div class="ref-grid" style="margin-top:0.8rem">
+                        <div class="ref-item">
+                          <div class="ref-k">Réserves</div>
+                          <div class="ref-v">—</div>
+                        </div>
+                        <div class="ref-item">
+                          <div class="ref-k">Report à nouveau</div>
+                          <div class="ref-v">—</div>
+                          <div class="ref-sum">Seul champ qui accepte un montant <b>négatif</b>&nbsp;: c’est là que s’impute une perte.</div>
+                        </div>
+                        <div class="ref-item">
+                          <div class="ref-k">Dividendes</div>
+                          <div class="ref-v">—</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- ⚠ ECART OUVERT (STORY-387) : les montants des messages de refus
+                         sortent en UNITES MINEURES, et le geste manque sur le seul refus
+                         dont la cause est ailleurs. A ne pas redecouvrir. -->
+                  </div>
                   <div class="atl-panel atl-body" data-atl-panel="balances" hidden>
                     <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
                       <div>
@@ -4507,6 +4872,30 @@
                         <div class="t">
                           <h3>Balance 2025 · Sage 100 · v3</h3>
                           <p class="sub">Exercice du 01/01/2025 au 31/12/2025 · SYSCOHADA révisé (SN) · validée le 18/07/2026 à 14:32</p>
+                        </div>
+                        <!-- ═══════ FE-074 — SORTIR LA BALANCE ═══════
+                             `bilan-service` a un export.controller.ts ; `balance-service`
+                             n'a AUCUNE route de sortie sur ses 60+ chemins. ⇒ genere cote
+                             CLIENT (option A) : GET /balances/:id rend TOUTES les lignes en
+                             une seule reponse, l'ecran detient deja le fichier.
+                             ⚠ CSV « ; » + UTF-8 AVEC BOM, non negociables : Excel
+                             francophone ouvre un CSV a virgules en UNE colonne et affiche
+                             « Ã© » sans BOM. Symetrie exacte de FE-048, qui gere deja
+                             separateur et encodage A L'IMPORT.
+                             ⚠ L'export NE RECHARGE RIEN : on exporte ce qui est a l'ecran,
+                             ou rien — sinon le fichier peut differer de ce qui a ete relu.
+                             ⚠ La colonne `niveauPreuve` PART dans l'export (Q2) : c'est la
+                             valeur differenciante du produit ; la masquer reviendrait a ne
+                             la montrer qu'a celui qui la connait deja. -->
+                        <div class="bal-export">
+                          <button class="btn btn-ghost btn-sm" type="button" title="CSV — separateur « ; », UTF-8 avec BOM, ouvrable directement dans Excel francophone. Colonnes de l'ecran + niveau de preuve + checksum en en-tete.">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+                            Exporter (CSV)
+                          </button>
+                          <button class="btn btn-ghost btn-sm" type="button" title="Feuille de travail : en-tete repete a chaque page, pieds pagines (n / N), totaux et verdict d'equilibre en fin. Le navigateur propose « Enregistrer en PDF ».">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/><path d="M6 9V2h12v7"/></svg>
+                            Imprimer
+                          </button>
                         </div>
                         <span class="bal-immut">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -5189,6 +5578,10 @@
                       </div>
                       <span class="grow" style="flex:1"></span>
                       <button class="btn btn-ghost btn-sm" type="button" data-cah-goto="cahier">Voir les 4 recettes</button>
+                      <!-- FE-074 — le cahier du MOIS sort, pas l'exercice entier (Q3) :
+                           12 mois = 12 requetes, c'est un autre geste et une autre attente.
+                           ⚠ Le nom du fichier porte LE MOIS, jamais la date du jour. -->
+                      <button class="btn btn-ghost btn-sm" type="button" title="CSV du mois affiche — separateur « ; », UTF-8 avec BOM. Le fichier porte le mois, pas la date du jour.">Exporter mars (CSV)</button>
                       <button class="btn btn-primary btn-sm" type="button" data-cah-goto="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></svg> Importer les images de mars</button>
                     </div>
 
@@ -6769,9 +7162,9 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m6.08 9.5-3.5 1.6a1 1 0 0 0 0 1.81l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9a1 1 0 0 0 0-1.83l-3.5-1.59"/></svg>
                       Balance source
                     </button>
-                    <button class="atl-tab" role="tab" data-bil-tab="passage" aria-selected="false" disabled title="FE-030 — table de passage et arbitrage des comptes non mappés">
+                    <button class="atl-tab" role="tab" data-bil-tab="passage" aria-selected="false">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M7 12h10"/></svg>
-                      Table de passage <span class="soon">FE-030</span>
+                      Table de passage
                     </button>
                     <button class="atl-tab" role="tab" data-bil-tab="etats" aria-selected="false" disabled title="FE-031 → FE-034 — bilan, compte de résultat, TFT, notes, validation">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
@@ -6816,7 +7209,7 @@
                           <p data-bsrc-sous>Validée le 18/07/2026 à 14:32 · justifiée · équilibrée · <code>sha256:4f2a…c19b</code></p>
                         </div>
                         <button class="btn btn-ghost btn-sm" type="button" data-bsrc-clear>Changer de balance</button>
-                        <button class="btn btn-primary btn-sm" type="button" disabled title="FE-030 — table de passage">
+                        <button class="btn btn-primary btn-sm" type="button" data-bil-goto="passage">
                           Continuer vers la table de passage
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                         </button>
@@ -6825,7 +7218,7 @@
                       <!-- Aucune retenue : dit ce que ça empêche, sans dramatiser. -->
                       <div class="bsrc-vide" data-bsrc-aucune hidden>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                        <span>Aucune balance source retenue — les onglets <b>Table de passage</b>, <b>États</b> et <b>Export</b> resteront fermés tant qu'une balance validée n'est pas choisie ci-dessous.</span>
+                        <span>Aucune balance source retenue — la <b>table de passage</b>, les <b>états</b> et l'<b>export</b> n'ont aucun compte à traiter tant qu'une balance validée n'est pas choisie ci-dessous.</span>
                       </div>
 
                       <div class="bal-filters" style="margin-top:0.2rem">
@@ -6984,6 +7377,635 @@
                       <p class="helper" style="margin-top:0.8rem">Un <code>404 DOSSIER_INTROUVABLE</code> n'est <b>pas</b> un refus du module : le gate est ouvert, c'est le <i>dossier</i> qui est refusé. Les confondre enverrait chercher un accès qu'on a déjà.</p>
                     </div>
                   </div>
+
+                  <!-- ═════════ PANNEAU : TABLE DE PASSAGE & ARBITRAGE (FE-030) ═════════
+                       Le module cesse ici d'être une ossature : c'est le premier écran
+                       qui LIT le référentiel et le confronte à la balance retenue.
+
+                       ⚡ REFONTE APRÈS REVUE MÉTIER (expert-comptable venant de Sage).
+                       Le premier jet était un écran de PARAMÉTRAGE : une table
+                       compte → poste, sans montants, à plat, avec un seul geste. Celui
+                       qui RÉVISE ne travaille pas comme ça — il part du repère de
+                       liasse, rapproche un total, et descend au compte quand le total
+                       le surprend. Cinq corrections, toutes servies par la MÊME réponse
+                       (le manque était d'affichage, pas de contrat) :
+
+                        1. la vue par POSTE devient la vue principale ;
+                        2. les MONTANTS entrent dans la table (sans eux c'est une liste
+                           de paramétrage, pas un document de travail) ;
+                        3. la vue par compte est groupée par CLASSE, avec sous-totaux ;
+                        4. les comptes à VENTILER (classes 4/5, deux postes candidats)
+                           sont montrés comme tels — c'est la question qu'on pose en
+                           revue, et l'arbitrage appartient au moteur, pas à l'écran ;
+                        5. un compte d'attente ne se RATTACHE pas, il se SOLDE : le
+                           second geste renvoie à l'Atelier.
+
+                       ⚠️ L'ordre des blocs reste l'ordre de lecture : synthèse, puis
+                       exception, puis la liasse. Mettre la liasse en tête noierait
+                       13 comptes non affectés dans 1 284 lignes. -->
+                  <div class="atl-panel atl-body" data-bil-panel="passage" hidden>
+                    <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Affectation des comptes aux postes de la liasse</h3>
+                        <p class="atl-secsub">Le référentiel <b>propose</b> un poste pour chaque compte de la balance retenue. Les comptes qu'il ne reconnaît pas ne sont jamais ignorés&nbsp;: ils sont listés, et c'est <b>vous</b> qui tranchez. Un arbitrage n'écrit rien dans le référentiel&nbsp;— il pose une <b>surcharge locale à ce dossier</b>.</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <div class="atelier-demo" role="tablist" aria-label="État de l'écran (démo)">
+                        <button class="btn btn-ghost btn-sm" role="tab" data-tdp-state="servi" aria-selected="true">Servi</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-tdp-state="complet" aria-selected="false">Tout affecté</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-tdp-state="loading" aria-selected="false">Chargement</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-tdp-state="sans-balance" aria-selected="false">Aucune balance retenue</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-tdp-state="ref-ko" aria-selected="false">Référentiel non résolu</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-tdp-state="contrat-ko" aria-selected="false">Contrat inattendu</button>
+                      </div>
+                    </div>
+
+                    <!-- ─────────────────────── SERVI ─────────────────────── -->
+                    <div data-tdp-slot="servi">
+
+                      <!-- Le référentiel effectif — AC-1. Affiché ici et sur tous les
+                           onglets du module : un état produit sous un autre référentiel
+                           ne se compare pas au précédent, et cette phrase doit être
+                           lisible sans changer d'écran. -->
+                      <div class="ref-card" style="margin-bottom:1.15rem">
+                        <div class="ref-head">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                          <b>Référentiel appliqué à cette liasse</b>
+                          <span class="grow"></span>
+                          <span class="badge badge-active"><span class="d"></span>Intégrité vérifiée</span>
+                        </div>
+                        <div class="ref-grid">
+                          <div class="ref-item">
+                            <div class="ref-k">Référentiel actif</div>
+                            <div class="ref-v">SYSCOHADA révisé · <span data-tdp-refver>syscohada-revise@2.1</span></div>
+                            <div class="ref-sum">sha256:9f2c8b41…a71e</div>
+                          </div>
+                          <div class="ref-item">
+                            <div class="ref-k">Ce que le paquet contient</div>
+                            <div class="ref-v">918 comptes · 214 postes · 371 règles</div>
+                            <div class="ref-sum">chargé depuis le cache</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Rappel du contrat de travail : sur QUOI porte tout ce qui suit. -->
+                      <div class="bsrc-retenue" style="margin-bottom:1.15rem">
+                        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <div class="t">
+                          <b>Balance retenue : exercice 2025 · Sage 100 · v3</b>
+                          <p>1 284 comptes distincts · équilibrée · validée le 18/07/2026</p>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" type="button" data-tdp-goto="source">Changer de balance</button>
+                      </div>
+
+                      <!-- ── Synthèse : des CHIFFRES, jamais un verdict ───────── -->
+                      <div class="tdp-sum">
+                        <div class="tdp-tile">
+                          <div class="k">Comptes traités</div>
+                          <div class="v">1 284</div>
+                          <p class="s">comptes distincts de la balance</p>
+                        </div>
+                        <div class="tdp-tile">
+                          <div class="k">Affectés</div>
+                          <div class="v">1 271</div>
+                          <p class="s">dont <b>1</b> par une surcharge de ce dossier</p>
+                        </div>
+                        <div class="tdp-tile" data-ton="alerte">
+                          <div class="k">Non affectés</div>
+                          <div class="v" data-tdp-nb>13</div>
+                          <p class="s"><b>3</b> portent un solde non nul</p>
+                        </div>
+                        <div class="tdp-tile" data-ton="alerte">
+                          <div class="k">Montant hors liasse</div>
+                          <div class="v">8 450 000</div>
+                          <p class="s">F CFA écartés des états · écart net <b>3 750 000</b> au débit</p>
+                        </div>
+                      </div>
+
+                      <!-- ⚡ LE BLOC LE PLUS FACILE À ÉCRIRE FAUX. Voir la note de
+                           maquette : le serveur ne bloque PAS la validation sur les
+                           comptes non affectés. Ce qu'on annonce ici est un montant
+                           calculable, et une conséquence qui se démontre. -->
+                      <div class="tdp-garde" style="margin-top:1.15rem" data-tdp-garde="alerte">
+                        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></span>
+                        <div>
+                          <b>3 comptes à solde non nul ne sont affectés à aucun poste</b>
+                          <p><b>6 100 000&nbsp;F</b> au débit et <b>2 350 000&nbsp;F</b> au crédit sont <b>écartés de tous les états</b>. Le débit et le crédit écartés ne se compensent pas&nbsp;: il en reste <b>3 750 000&nbsp;F</b>. Comme la balance retenue est équilibrée, ce qui reste ne peut plus l'être — et c'est <b>ce déséquilibre</b>, non l'affectation manquante, qui fera échouer le contrôle <code>EQUILIBRE_BILAN</code> à la validation (FE-034).</p>
+                        </div>
+                      </div>
+                      <div class="tdp-garde ok" style="margin-top:1.15rem" data-tdp-garde="ok" hidden>
+                        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <div>
+                          <b>Tous les comptes portant un solde sont affectés</b>
+                          <p>Aucun montant de la balance n'est écarté des états. Les comptes non affectés restants sont à solde nul&nbsp;: leur absence ne déplace aucun total.</p>
+                        </div>
+                      </div>
+
+                      <!-- ── L'EXCEPTION D'ABORD : les comptes à traiter ─────── -->
+                      <div style="margin-top:1.6rem">
+                        <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                          <div>
+                            <h3 class="atl-sectitle">Comptes non reconnus par le référentiel</h3>
+                            <p class="atl-secsub">Triés par montant décroissant&nbsp;: ce sont ceux du haut qui déplacent les états. Les comptes à solde nul restent listés — les masquer laisserait croire qu'ils sont affectés.</p>
+                          </div>
+                          <span class="grow" style="flex:1"></span>
+                          <span class="bal-count"><b data-tdp-nb2>13</b> à traiter</span>
+                        </div>
+
+                        <div class="tdp-un" style="margin-top:0.9rem" data-tdp-liste>
+                          <div class="tdp-unrow" data-tdp-un data-compte="476200" data-libelle="Charges constatées d'avance — régularisation" data-solde="non-nul">
+                            <span class="cpt">476200</span>
+                            <span class="lib">Charges constatées d'avance — régularisation<small>Hors plan packagé&nbsp;: aucun préfixe du référentiel ne couvre 4762</small></span>
+                            <span class="mnt">4 200 000<small>débiteur</small></span>
+                            <span class="tdp-gestes">
+                              <button class="btn btn-primary btn-sm" type="button" data-tdp-arbitrer>Affecter à un poste</button>
+                            </span>
+                          </div>
+                          <div class="tdp-unrow" data-tdp-un data-compte="181500" data-libelle="Comptes de liaison inter-agences" data-solde="non-nul">
+                            <span class="cpt">181500</span>
+                            <span class="lib">Comptes de liaison inter-agences<small>Hors plan packagé&nbsp;: aucun préfixe du référentiel ne couvre 1815</small></span>
+                            <span class="mnt">2 350 000<small>créditeur</small></span>
+                            <span class="tdp-gestes">
+                              <button class="btn btn-primary btn-sm" type="button" data-tdp-arbitrer>Affecter à un poste</button>
+                            </span>
+                          </div>
+                          <!-- ⚡ LE COMPTE D'ATTENTE : le geste juste n'est PAS de
+                               l'affecter. L'affecter maquillerait une écriture qui
+                               manque. Le premier bouton devient donc secondaire, et
+                               l'écran nomme la vraie sortie. -->
+                          <div class="tdp-unrow" data-tdp-un data-compte="999999" data-libelle="Compte d'attente d'imputation (Sage)" data-solde="non-nul">
+                            <span class="cpt">999999</span>
+                            <span class="lib">Compte d'attente d'imputation (Sage)<small>Un compte d'attente se <b>solde</b>&nbsp;: l'affecter à un poste ferait entrer une imputation manquante dans la liasse.</small></span>
+                            <span class="mnt">1 900 000<small>débiteur</small></span>
+                            <span class="tdp-gestes">
+                              <button class="btn btn-ghost btn-sm" type="button" data-tdp-arbitrer>Affecter quand même</button>
+                              <button class="btn btn-primary btn-sm" type="button" data-goto-page="atelier">Corriger dans l'Atelier</button>
+                            </span>
+                          </div>
+                          <div class="tdp-unrow" data-tdp-un data-compte="47C001" data-libelle="Compte technique de reprise d'à-nouveaux" data-solde="nul">
+                            <span class="cpt">47C001</span>
+                            <span class="lib">Compte technique de reprise d'à-nouveaux<small>Solde nul&nbsp;: l'affecter ne déplacerait aucun total</small></span>
+                            <span class="mnt">0<small>solde nul</small></span>
+                            <span class="tdp-gestes">
+                              <button class="btn btn-ghost btn-sm" type="button" data-tdp-arbitrer>Affecter</button>
+                            </span>
+                          </div>
+                          <div class="tdp-unrow" data-tdp-un data-compte="899000" data-libelle="Comptes d'ordre — bilan d'ouverture" data-solde="nul">
+                            <span class="cpt">899000</span>
+                            <span class="lib">Comptes d'ordre — bilan d'ouverture<small>Solde nul&nbsp;: l'affecter ne déplacerait aucun total</small></span>
+                            <span class="mnt">0<small>solde nul</small></span>
+                            <span class="tdp-gestes">
+                              <button class="btn btn-ghost btn-sm" type="button" data-tdp-arbitrer>Affecter</button>
+                            </span>
+                          </div>
+                        </div>
+                        <p class="helper" style="margin-top:0.7rem">8 autres comptes à solde nul ne sont pas listés ici pour la lisibilité de la maquette&nbsp;; à l'écran la liste est complète et paginée. <b>Une affectation porte toujours sur un compte réellement présent dans cette balance</b> — jamais sur une racine saisie à la main&nbsp;: le serveur rattache par <b>égalité exacte</b>, et une racine serait acceptée, validée, puis <b>sans effet</b> (STORY-400).</p>
+                      </div>
+
+                      <!-- ── LA LIASSE : deux lectures du même jeu ────────────── -->
+                      <div style="margin-top:1.6rem">
+                        <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                          <div>
+                            <h3 class="atl-sectitle">La liasse, telle que le référentiel la remplit</h3>
+                            <p class="atl-secsub">Deux lectures du <b>même</b> rattachement. <b>Par poste</b> pour rapprocher un repère de liasse de sa balance&nbsp;; <b>par compte</b> pour vérifier où tombe un compte précis.</p>
+                          </div>
+                          <span class="grow" style="flex:1"></span>
+                          <div class="tdp-vues" role="tablist" aria-label="Lecture du rattachement">
+                            <button type="button" role="tab" data-tdp-vue="poste" aria-selected="true">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
+                              Par poste
+                            </button>
+                            <button type="button" role="tab" data-tdp-vue="compte" aria-selected="false">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+                              Par compte
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- ····· VUE PAR POSTE — la vue de révision ············· -->
+                        <div style="margin-top:0.9rem" data-tdp-vueslot="poste">
+
+                          <div class="tdp-etatgrp">
+                            <div class="tdp-etathead">
+                              <b>BILAN — ACTIF</b>
+                              <span class="grow"></span>
+                              <span class="n">38 postes servis · 412 comptes</span>
+                            </div>
+
+                            <details class="tdp-poste-d" open>
+                              <summary>
+                                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                <span class="tdp-poste">AE</span>
+                                <span class="lib">Frais de développement et de prospection</span>
+                                <span class="n">2 comptes</span>
+                                <span class="tot">3 100 000</span>
+                              </summary>
+                              <div class="tdp-comptes">
+                                <div class="tdp-cline"><span class="c">211000</span><span class="l">Frais de développement</span><span class="m">2 800 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">211200</span><span class="l">Frais de prospection</span><span class="m">300 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                              </div>
+                            </details>
+
+                            <details class="tdp-poste-d">
+                              <summary>
+                                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                <span class="tdp-poste">BX</span>
+                                <span class="lib">Créances clients</span>
+                                <span class="n">3 comptes</span>
+                                <span class="tot">12 450 000</span>
+                              </summary>
+                              <div class="tdp-comptes">
+                                <div class="tdp-cline"><span class="c">411000</span><span class="l">Clients</span><span class="m">11 900 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">411800</span><span class="l">Clients — effets à recevoir</span><span class="m">400 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">411FACTURE</span><span class="l">Clients divers (compte de tiers Sage)</span><span class="m">150 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                              </div>
+                            </details>
+
+                            <details class="tdp-poste-d">
+                              <summary>
+                                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                <span class="tdp-poste">BJ</span>
+                                <span class="lib">Autres créances</span>
+                                <span class="n">9 comptes</span>
+                                <span class="tot">2 780 000</span>
+                              </summary>
+                              <div class="tdp-comptes">
+                                <div class="tdp-cline"><span class="c">445100</span><span class="l">TVA récupérable sur achats</span><span class="m">1 950 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">447000</span><span class="l">État — autres créances</span><span class="m">830 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline" style="color:var(--muted-fg)"><span class="c">…</span><span class="l">7 autres comptes</span><span class="m"></span><span></span></div>
+                              </div>
+                            </details>
+                          </div>
+
+                          <div class="tdp-etatgrp">
+                            <div class="tdp-etathead">
+                              <b>BILAN — PASSIF</b>
+                              <span class="grow"></span>
+                              <span class="n">31 postes servis · 288 comptes</span>
+                            </div>
+
+                            <details class="tdp-poste-d">
+                              <summary>
+                                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                <span class="tdp-poste">DJ</span>
+                                <span class="lib">Fournisseurs d'exploitation</span>
+                                <span class="n">4 comptes</span>
+                                <span class="tot">8 940 000</span>
+                              </summary>
+                              <div class="tdp-comptes">
+                                <div class="tdp-cline"><span class="c">401000</span><span class="l">Fournisseurs — dettes en compte</span><span class="m">8 200 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">401800</span><span class="l">Fournisseurs — effets à payer</span><span class="m">740 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                              </div>
+                            </details>
+
+                            <!-- ⚡ LE POSTE QUI PORTE UNE SURCHARGE. C'est ici qu'un
+                                 arbitrage validé devient VISIBLE : sans la pastille
+                                 « Surcharge », valider n'aurait rien changé à l'écran. -->
+                            <details class="tdp-poste-d">
+                              <summary>
+                                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                <span class="tdp-poste">DK</span>
+                                <span class="lib">Autres dettes</span>
+                                <span class="n">6 comptes</span>
+                                <span class="tot">3 620 000</span>
+                              </summary>
+                              <div class="tdp-comptes">
+                                <div class="tdp-cline"><span class="c">476100</span><span class="l">Produits constatés d'avance</span><span class="m">1 500 000</span><span class="tdp-orig" data-o="surcharge">Surcharge</span></div>
+                                <div class="tdp-cline"><span class="c">448000</span><span class="l">État — charges à payer</span><span class="m">1 320 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">466000</span><span class="l">Créditeurs divers</span><span class="m">800 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                              </div>
+                            </details>
+                          </div>
+
+                          <div class="tdp-etatgrp">
+                            <div class="tdp-etathead">
+                              <b>COMPTE DE RÉSULTAT</b>
+                              <span class="grow"></span>
+                              <span class="n">42 postes servis · 501 comptes</span>
+                            </div>
+                            <details class="tdp-poste-d">
+                              <summary>
+                                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                                <span class="tdp-poste">RA</span>
+                                <span class="lib">Achats de marchandises</span>
+                                <span class="n">12 comptes</span>
+                                <span class="tot">41 380 000</span>
+                              </summary>
+                              <div class="tdp-comptes">
+                                <div class="tdp-cline"><span class="c">601000</span><span class="l">Achats de marchandises</span><span class="m">38 900 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">601100</span><span class="l">Achats — groupe A</span><span class="m">2 480 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline" style="color:var(--muted-fg)"><span class="c">…</span><span class="l">10 autres comptes</span><span class="m"></span><span></span></div>
+                              </div>
+                            </details>
+                          </div>
+
+                          <!-- ⚡ LES COMPTES À VENTILER — la question qu'on pose en revue.
+                               Le référentiel leur donne DEUX postes candidats (actif ET
+                               passif) ; c'est le SENS DU SOLDE qui départage, et cette
+                               décision appartient au moteur, à la production des états.
+                               L'écran ne la prend pas : il montre les deux candidats et
+                               le dit. Les attribuer ici ferait de cet écran un SECOND
+                               arbitre, avec sa propre règle — donc deux vérités. -->
+                          <div class="tdp-vent">
+                            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1rem;height:1rem;color:var(--muted-fg)"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+                              <b style="font-size:0.84rem">14 comptes à ventiler — non compris dans les totaux ci-dessus</b>
+                            </div>
+                            <div class="tdp-ventline">
+                              <span class="c">421000</span>
+                              <span class="cands"><span style="color:var(--muted-fg)">Personnel — rémunérations dues</span>
+                                <span class="tdp-cand"><code>BJ</code> Bilan actif</span>
+                                <span class="tdp-cand"><code>DN</code> Bilan passif</span>
+                              </span>
+                              <span class="m">1 240 000 <small style="color:var(--muted-fg)">créditeur</small></span>
+                            </div>
+                            <div class="tdp-ventline">
+                              <span class="c">521000</span>
+                              <span class="cands"><span style="color:var(--muted-fg)">Banques locales</span>
+                                <span class="tdp-cand"><code>BT</code> Trésorerie actif</span>
+                                <span class="tdp-cand"><code>DV</code> Trésorerie passif</span>
+                              </span>
+                              <span class="m">6 780 000 <small style="color:var(--muted-fg)">débiteur</small></span>
+                            </div>
+                            <p class="helper" style="text-align:left;margin-top:0.6rem">Un compte de classe 4 ou 5 peut alimenter l'actif <b>ou</b> le passif&nbsp;: c'est le <b>sens de son solde</b> qui tranche, au moment où les états sont produits. Cet écran ne l'attribue pas — il montre les deux candidats. Les totaux définitifs arrivent avec le Bilan <b>(FE-031)</b>, et il n'y aura qu'un seul endroit où ils sont calculés.</p>
+                          </div>
+
+                          <p class="helper" style="margin-top:0.8rem">Les totaux par poste additionnent les soldes des comptes <b>sans ambiguïté d'affectation</b>. Ce ne sont <b>pas</b> les montants de la liasse&nbsp;: les règles de solde (net d'amortissement, sens créditeur…) sont appliquées par le moteur, pas ici. C'est un outil de <b>rapprochement</b>, pas un état.</p>
+                        </div>
+
+                        <!-- ····· VUE PAR COMPTE — groupée par classe ············ -->
+                        <div style="margin-top:0.9rem" data-tdp-vueslot="compte" hidden>
+                          <div class="bal-filters" style="margin-bottom:0.7rem">
+                            <div class="dc-search" style="min-width:16rem">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                              <input type="search" placeholder="Compte, racine (476), libellé ou code de poste…" data-tdp-q />
+                            </div>
+                            <span class="grow" style="flex:1"></span>
+                            <span class="bal-count">1 271 comptes affectés · <b>9</b> affichés dans la maquette</span>
+                          </div>
+
+                          <div class="card-surface" style="overflow:hidden">
+                            <div class="tbl-wrap">
+                              <table class="tbl">
+                                <thead>
+                                  <tr>
+                                    <th>Compte</th>
+                                    <th>Libellé (balance)</th>
+                                    <th style="text-align:right">Solde</th>
+                                    <th>État</th>
+                                    <th>Poste</th>
+                                    <th>Libellé du poste</th>
+                                    <th>Origine</th>
+                                    <th>Racine retenue</th>
+                                  </tr>
+                                </thead>
+                                <tbody data-tdp-tbody>
+                                  <tr class="tdp-classe" data-tdp-classe><td colspan="8">Classe 2 — Immobilisations · 96 comptes<span class="m">18 420 000</span></td></tr>
+                                  <tr>
+                                    <td style="font-family:var(--font-mono);font-weight:650">211000</td>
+                                    <td>Frais de développement</td>
+                                    <td class="num">2 800 000</td>
+                                    <td><span class="tdp-etat">Bilan actif</span></td>
+                                    <td><span class="tdp-poste">AE</span></td>
+                                    <td>Frais de développement et de prospection</td>
+                                    <td><span class="tdp-orig" data-o="referentiel">Référentiel</span></td>
+                                    <td style="font-family:var(--font-mono);color:var(--muted-fg)">211</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="font-family:var(--font-mono);font-weight:650">241000</td>
+                                    <td>Matériel et outillage industriel</td>
+                                    <td class="num">15 620 000</td>
+                                    <td><span class="tdp-etat">Bilan actif</span></td>
+                                    <td><span class="tdp-poste">AI</span></td>
+                                    <td>Matériel, mobilier et actifs biologiques</td>
+                                    <td><span class="tdp-orig" data-o="referentiel">Référentiel</span></td>
+                                    <td style="font-family:var(--font-mono);color:var(--muted-fg)">241</td>
+                                  </tr>
+
+                                  <tr class="tdp-classe" data-tdp-classe><td colspan="8">Classe 4 — Tiers · 305 comptes<span class="m">27 930 000</span></td></tr>
+                                  <tr>
+                                    <td style="font-family:var(--font-mono);font-weight:650">401000</td>
+                                    <td>Fournisseurs — dettes en compte</td>
+                                    <td class="num">8 200 000</td>
+                                    <td><span class="tdp-etat">Bilan passif</span></td>
+                                    <td><span class="tdp-poste">DJ</span></td>
+                                    <td>Fournisseurs d'exploitation</td>
+                                    <td><span class="tdp-orig" data-o="referentiel">Référentiel</span></td>
+                                    <td style="font-family:var(--font-mono);color:var(--muted-fg)">401</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="font-family:var(--font-mono);font-weight:650">411000</td>
+                                    <td>Clients</td>
+                                    <td class="num">11 900 000</td>
+                                    <td><span class="tdp-etat">Bilan actif</span></td>
+                                    <td><span class="tdp-poste">BX</span></td>
+                                    <td>Créances clients</td>
+                                    <td><span class="tdp-orig" data-o="referentiel">Référentiel</span></td>
+                                    <td style="font-family:var(--font-mono);color:var(--muted-fg)">411</td>
+                                  </tr>
+                                  <!-- Un compte à ventiler occupe DEUX lignes de poste :
+                                       les fondre en une obligerait l'écran à choisir. -->
+                                  <tr data-tdp-cle="421000 personnel rémunérations dues bj dn bilan actif passif autres créances dettes sociales fiscales 421">
+                                    <td style="font-family:var(--font-mono);font-weight:650" rowspan="2">421000</td>
+                                    <td rowspan="2">Personnel — rémunérations dues</td>
+                                    <td class="num" rowspan="2">1 240 000</td>
+                                    <td><span class="tdp-etat">Bilan actif</span></td>
+                                    <td><span class="tdp-poste">BJ</span></td>
+                                    <td>Autres créances</td>
+                                    <td><span class="tdp-attente">Candidat</span></td>
+                                    <td style="font-family:var(--font-mono);color:var(--muted-fg)">421</td>
+                                  </tr>
+                                  <tr data-tdp-cle="421000 personnel rémunérations dues bj dn bilan actif passif autres créances dettes sociales fiscales 421">
+                                    <td><span class="tdp-etat">Bilan passif</span></td>
+                                    <td><span class="tdp-poste">DN</span></td>
+                                    <td>Dettes sociales et fiscales</td>
+                                    <td><span class="tdp-attente">Candidat</span></td>
+                                    <td style="font-family:var(--font-mono);color:var(--muted-fg)">421</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="font-family:var(--font-mono);font-weight:650">476100</td>
+                                    <td>Produits constatés d'avance</td>
+                                    <td class="num">1 500 000</td>
+                                    <td><span class="tdp-etat">Bilan passif</span></td>
+                                    <td><span class="tdp-poste">DK</span></td>
+                                    <td>Autres dettes</td>
+                                    <td><span class="tdp-orig" data-o="surcharge">Surcharge</span></td>
+                                    <td style="font-family:var(--font-mono);color:var(--muted-fg)">476100</td>
+                                  </tr>
+
+                                  <tr class="tdp-classe" data-tdp-classe><td colspan="8">Classe 6 — Charges · 214 comptes<span class="m">52 110 000</span></td></tr>
+                                  <tr>
+                                    <td style="font-family:var(--font-mono);font-weight:650">601000</td>
+                                    <td>Achats de marchandises</td>
+                                    <td class="num">38 900 000</td>
+                                    <td><span class="tdp-etat">Compte de résultat</span></td>
+                                    <td><span class="tdp-poste">RA</span></td>
+                                    <td>Achats de marchandises</td>
+                                    <td><span class="tdp-orig" data-o="referentiel">Référentiel</span></td>
+                                    <td style="font-family:var(--font-mono);color:var(--muted-fg)">601</td>
+                                  </tr>
+                                  <tr>
+                                    <td style="font-family:var(--font-mono);font-weight:650">661000</td>
+                                    <td>Rémunérations directes versées au personnel</td>
+                                    <td class="num">13 210 000</td>
+                                    <td><span class="tdp-etat">Compte de résultat</span></td>
+                                    <td><span class="tdp-poste">RD</span></td>
+                                    <td>Charges de personnel</td>
+                                    <td><span class="tdp-orig" data-o="referentiel">Référentiel</span></td>
+                                    <td style="font-family:var(--font-mono);color:var(--muted-fg)">661</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                          <p class="helper" style="margin-top:0.7rem">La <b>racine retenue</b> est le préfixe le plus long du référentiel qui a produit l'affectation — <code>411</code> pour <code>411000</code>. Sur une <b>surcharge</b>, c'est le <b>compte entier</b>&nbsp;: le rattachement est exact, il ne se propage pas aux comptes voisins.</p>
+                        </div>
+                      </div>
+
+                      <!-- ── LES SURCHARGES : le journal du geste ─────────────── -->
+                      <div style="margin-top:1.6rem">
+                        <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                          <div>
+                            <h3 class="atl-sectitle">Surcharges de ce dossier</h3>
+                            <p class="atl-secsub">Une surcharge est <b>proposée</b>, puis <b>validée ou rejetée</b> par un administrateur du cabinet. Tant qu'elle n'est pas validée, elle ne s'applique pas&nbsp;: les deux vues ci-dessus l'ignorent.</p>
+                          </div>
+                          <span class="grow" style="flex:1"></span>
+                          <div class="atelier-demo" role="tablist" aria-label="Rôle de l'utilisateur (démo)">
+                            <button class="btn btn-ghost btn-sm" role="tab" data-tdp-role="admin" aria-selected="true">Administrateur</button>
+                            <button class="btn btn-ghost btn-sm" role="tab" data-tdp-role="user" aria-selected="false">Collaborateur</button>
+                          </div>
+                        </div>
+
+                        <div class="tdp-sc" style="margin-top:0.9rem">
+                          <!-- PROPOSED — le seul état sur lequel un geste existe. -->
+                          <div class="tdp-scrow">
+                            <div class="tdp-schead">
+                              <span class="cpt">476200</span>
+                              <span class="st st-proposed">Proposée</span>
+                              <span class="grow"></span>
+                              <div class="tdp-scact" data-tdp-admin>
+                                <button class="btn btn-ghost btn-sm" type="button" data-tdp-decider="rejeter">Rejeter</button>
+                                <button class="btn btn-primary btn-sm" type="button" data-tdp-decider="valider">Valider</button>
+                              </div>
+                              <span class="tdp-nonadmin" data-tdp-user hidden>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                Un administrateur du cabinet doit trancher
+                              </span>
+                            </div>
+                            <div class="tdp-flow">
+                              <span class="none">non affecté par le référentiel</span>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                              <span class="to">Bilan passif · DK</span>
+                              <span style="color:var(--muted-fg);font-size:0.78rem">Autres dettes</span>
+                            </div>
+                            <p class="tdp-scmeta">Proposée par <span class="tdp-uid">665f2a1c9b4e7d0012ab0002</span> <span class="sep">·</span> 24/08/2026 à 09:14</p>
+                            <p class="tdp-motif">Compte de régularisation reclassé au passif par décision interne, conformément à la note de clôture 2025.</p>
+                          </div>
+
+                          <!-- VALIDATED — l'ancien poste est capturé À LA VALIDATION. -->
+                          <div class="tdp-scrow">
+                            <div class="tdp-schead">
+                              <span class="cpt">476100</span>
+                              <span class="st st-validated">Validée</span>
+                              <span class="grow"></span>
+                              <span class="tdp-orig" data-o="surcharge">Appliquée</span>
+                            </div>
+                            <div class="tdp-flow">
+                              <span class="from">Bilan passif · DL</span>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                              <span class="to">Bilan passif · DK</span>
+                              <span style="color:var(--muted-fg);font-size:0.78rem">Autres dettes</span>
+                            </div>
+                            <p class="tdp-scmeta">Proposée par <span class="tdp-uid">665f2a1c9b4e7d0012ab0002</span> le 21/08/2026 <span class="sep">·</span> validée par <span class="tdp-uid">665f2a1c9b4e7d0012ab0001</span> le 22/08/2026 à 11:02</p>
+                          </div>
+
+                          <!-- REJECTED — conservée : un refus tracé vaut une décision. -->
+                          <div class="tdp-scrow">
+                            <div class="tdp-schead">
+                              <span class="cpt">999999</span>
+                              <span class="st st-rejected">Rejetée</span>
+                              <span class="grow"></span>
+                            </div>
+                            <div class="tdp-flow">
+                              <span class="none">non affecté par le référentiel</span>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                              <span class="to" style="text-decoration:line-through;color:var(--muted-fg)">Bilan actif · BZ</span>
+                            </div>
+                            <p class="tdp-scmeta">Proposée par <span class="tdp-uid">665f2a1c9b4e7d0012ab0002</span> le 20/08/2026 <span class="sep">·</span> rejetée le 20/08/2026</p>
+                            <p class="tdp-motif">Le compte d'attente doit être soldé dans la balance, pas reclassé dans la liasse.</p>
+                          </div>
+                        </div>
+                        <p class="helper" style="margin-top:0.7rem">⚠️ <b>Le service ne publie que des identifiants techniques</b> (<code>proposePar</code>, <code>validePar</code> sont des <code>userId</code> bruts). Afficher « Kossi&nbsp;A. » ici serait inventer une donnée que personne n'envoie — le journal du dossier a rencontré exactement ce manque (STORY-382). <b>Demande&nbsp;: STORY-402.</b> Une surcharge <b>rejetée</b> reste visible&nbsp;: la reproposer sans savoir qu'elle a déjà été écartée ferait tourner le cabinet en rond.</p>
+                      </div>
+                    </div>
+
+                    <!-- ──────────────── TOUT AFFECTÉ ──────────────── -->
+                    <div data-tdp-slot="complet" hidden>
+                      <div class="tdp-garde ok">
+                        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <div>
+                          <b>Les 1 284 comptes de cette balance sont affectés</b>
+                          <p>Aucun montant n'est écarté des états. Les deux lectures de la liasse et le journal des surcharges restent consultables&nbsp;: « rien à arbitrer » n'est pas « rien à vérifier ».</p>
+                        </div>
+                      </div>
+                      <p class="helper" style="margin-top:0.9rem">Cet état ne fait <b>pas</b> disparaître la liasse&nbsp;: une affectation peut être juste au sens du référentiel et fausse au sens du dossier — c'est précisément ce que la surcharge sert à corriger.</p>
+                    </div>
+
+                    <!-- ──────────────── CHARGEMENT ──────────────── -->
+                    <div data-tdp-slot="loading" hidden>
+                      <div class="state">
+                        <div class="sk-row"><span class="sk sk-line" style="width:36%"></span></div>
+                        <div class="sk-row"><span class="sk sk-line" style="width:72%"></span></div>
+                        <div class="sk-row"><span class="sk sk-line" style="width:58%"></span></div>
+                      </div>
+                      <p class="helper" style="margin-top:0.6rem">Affectation des 1 284 comptes de la balance au référentiel du cabinet…</p>
+                    </div>
+
+                    <!-- ──────── AUCUNE BALANCE RETENUE ────────
+                         ⚠️ Ce n'est PAS un état vide : c'est une précondition non
+                         remplie. L'affectation se demande AVEC une liste de comptes ;
+                         sans balance, il n'y a littéralement rien à envoyer. -->
+                    <div data-tdp-slot="sans-balance" hidden>
+                      <div class="state empty" style="border:1px dashed var(--border-strong);border-radius:var(--radius)">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m6.08 9.5-3.5 1.6a1 1 0 0 0 0 1.81l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9a1 1 0 0 0 0-1.83l-3.5-1.59"/></svg></span>
+                        <h3>Aucune balance source retenue</h3>
+                        <p style="max-width:48ch">L'affectation se calcule <b>sur les comptes d'une balance</b>. Sans balance retenue, il n'y a aucun compte à confronter au référentiel — et afficher une liasse vide laisserait croire que le référentiel ne reconnaît rien.</p>
+                        <button class="btn btn-primary btn-sm" type="button" data-tdp-goto="source">Choisir la balance source</button>
+                      </div>
+                    </div>
+
+                    <!-- ──────── RÉFÉRENTIEL NON RÉSOLU ────────
+                         L'entitlement Bilan est ACTIF (le gate est passé) mais aucun
+                         référentiel n'est attribué au cabinet : ce n'est ni un refus
+                         d'accès, ni une panne — c'est un paramétrage manquant, et il
+                         se règle côté Money Vibes. -->
+                    <div data-tdp-slot="ref-ko" hidden>
+                      <div class="state error" style="border:1px solid var(--border);border-radius:var(--radius)">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></span>
+                        <h3>Aucun référentiel n'est attribué à votre cabinet</h3>
+                        <p style="max-width:48ch">Le module Bilan vous est ouvert, mais aucun référentiel comptable n'y est rattaché&nbsp;: rien ne peut être affecté ni calculé tant que ce paramétrage n'est pas fait. Il appartient à Money&nbsp;Vibes — il n'y a rien à débloquer de votre côté.</p>
+                        <span class="code">409 · REFERENTIEL_UNRESOLVED</span>
+                      </div>
+                      <p class="helper" style="margin-top:0.7rem">Quatre autres refus de référentiel existent et ne se confondent pas&nbsp;: <code>503 REFERENTIEL_UNAVAILABLE_TRANSIENT</code> (registre momentanément injoignable — <b>réessayable</b>), <code>502 REFERENTIEL_INTEGRITY</code> (artefact altéré — aucun état ne sera calculé dessus), <code>500 REFERENTIEL_UNAVAILABLE</code> (paquet non embarqué côté serveur) et <code>403 BILAN_NOT_ENTITLED</code> (défense en profondeur du gate).</p>
+                    </div>
+
+                    <!-- ──────── CONTRAT INATTENDU ────────
+                         ⚡ Le serveur a répondu 200 et la forme n'est pas celle qu'il
+                         produit. Ce n'est NI une panne réseau NI un dossier vide : les
+                         confondre ferait proposer « Réessayer » sur un problème que
+                         réessayer ne corrige pas, ou afficher « aucun compte » sur une
+                         balance de 1 284 lignes. -->
+                    <div data-tdp-slot="contrat-ko" hidden>
+                      <div class="state error" style="border:1px solid var(--border);border-radius:var(--radius)">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></span>
+                        <h3>L'affectation n'est pas exploitable</h3>
+                        <p style="max-width:50ch">Le service a répondu, mais la forme de sa réponse n'est pas celle qu'il produit d'habitude. Rien n'est affiché plutôt qu'une liasse partielle&nbsp;: une table incomplète se lirait comme complète, et vous croiriez non affectés des comptes qui sont simplement illisibles.</p>
+                        <span class="code">200 · forme inattendue de <code>mappes</code></span>
+                      </div>
+                      <p class="helper" style="margin-top:0.7rem">Aucun bouton « Réessayer »&nbsp;: le serveur a répondu correctement, c'est son <b>contrat</b> qui a bougé. <code>RattachementResultDto.mappes</code> n'est pas décrit par l'OpenAPI (il y sort en <code>string[]</code> alors que ce sont des objets)&nbsp;: le front <b>vérifie la forme à l'exécution</b> plutôt que de la supposer, et le dit quand elle ne tient pas. <b>Demande&nbsp;: STORY-398.</b></p>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
@@ -6995,7 +8017,30 @@
 
                 <div class="dc-note dc-gap"><b>⚠️ Ce que le backend ne sait pas encore faire.</b> <code>bilan-service</code> <b>ne connaît aucun <code>balanceId</code></b> : <code>POST /dossiers/{id}/bilan/etats</code> attend un tableau de <code>soldesN</code> bruts, sans référence à la balance dont ils viennent. Conséquences, assumées et écrites plutôt que masquées : ① la balance retenue est un <b>contexte de travail côté client</b>, pas un lien serveur ; ② une liasse produite <b>ne peut pas dire de quelle balance elle sort</b> (ni version, ni checksum) ; ③ le serveur ne peut pas refuser une balance non validée — seul l'écran le fait. <b>Ticket ouvert</b> : <code>TICKET-BACKEND-bilan-ne-reference-pas-sa-balance-source</code>.</div>
 
-                <p class="helper">FE-028 · routage <code>/bilan</code> → <code>:3004/api/v1/dossiers/{dossierId}/bilan/*</code> · le gate reflète, <code>@RequiresBilanAccess</code> décide.</p>
+
+                <div class="dc-note dc-gap"><b>Ce que valide cette maquette (FE-030).</b> Le 2<sup>e</sup> onglet du Bilan&nbsp;: le <b>badge du référentiel effectif</b>, la liasse lue <b>par poste</b> (rapprochement d'un repère avec sa balance) <b>et</b> par compte (groupée par classe, avec sous-totaux), l'<b>origine</b> de chaque affectation, les <b>comptes à ventiler</b> montrés comme tels, la liste des <b>comptes non reconnus</b> triée par montant avec <b>deux</b> gestes, l'<b>arbitrage</b> d'un compte, et le <b>journal des surcharges</b> avec ses trois états et la décision réservée à l'administrateur. Le référentiel packagé n'est jamais modifié&nbsp;: une surcharge est une donnée du dossier, à côté du paquet.</div>
+
+                <div class="dc-note dc-gap"><b>⚡ REFONTE APRÈS REVUE MÉTIER — le premier jet était un écran de PARAMÉTRAGE.</b> Relu par un expert-comptable habitué à Sage, il ne tenait pas&nbsp;: une table <code>compte → poste</code>, <b>sans montants</b>, à plat sur 1 271 lignes, avec un seul verbe. Or on ne révise pas une liasse comme on la paramètre — on part du <b>repère</b>, on rapproche un <b>total</b>, et on descend au compte quand le total surprend. Cinq corrections, <b>toutes servies par la même réponse</b> (le manque était d'affichage, pas de contrat)&nbsp;: ① la vue <b>par poste</b> devient principale ; ② les <b>montants</b> entrent dans les deux vues ; ③ la vue par compte est groupée <b>par classe</b> avec sous-totaux, et la recherche accepte une <b>racine</b> ; ④ les <b>comptes à ventiler</b> (classes 4/5, deux postes candidats) sont montrés comme tels ; ⑤ un compte d'attente ne s'affecte pas, il se <b>solde</b> — d'où un second geste vers l'Atelier.</div>
+
+                <div class="dc-note dc-gap"><b>⛔ CE QUE CET ÉCRAN REFUSE DE CALCULER, ET POURQUOI.</b> Pas de <b>total actif / total passif</b>. Techniquement, sommer les soldes par état est trivial&nbsp;; comptablement, ce serait faux&nbsp;: les règles de solde (net d'amortissement, sens créditeur…) et surtout la <b>ventilation des classes 4/5</b> appartiennent au moteur, à la production des états. Un total calculé ici ferait de cet écran un <b>second arbitre</b>, avec sa propre règle — donc deux vérités selon l'écran ouvert, le défaut même que Q6 a supprimé sur les exercices. Les totaux par poste affichés n'additionnent que les comptes <b>sans ambiguïté d'affectation</b>, et l'écran l'écrit&nbsp;: c'est un outil de <b>rapprochement</b>, pas un état. Les états arrivent en <b>FE-031</b>, et il n'y aura qu'un seul endroit où ils sont calculés.</div>
+
+                <div class="dc-note dc-gap"><b>⚡ LA PHRASE QUE LA FICHE DEMANDAIT ÉTAIT FAUSSE, ET ELLE EST CORRIGÉE ICI.</b> L'AC-4 d'origine voulait annoncer que «&nbsp;des comptes significatifs non mappés <b>bloquent la validation</b>&nbsp;». <b>Aucun contrôle du serveur ne fait cela.</b> La batterie bloquante en compte quatre — <code>EQUILIBRE_BILAN</code>, <code>COHERENCE_RESULTAT</code>, <code>VARIATION_TRESORERIE</code>, <code>ARTICULATION_NOTES</code> — et pas un seul ne regarde les comptes non affectés&nbsp;; le service l'écrit lui-même (« la significativité = solde, indisponible ici → hook »). Un bandeau «&nbsp;la validation sera bloquée&nbsp;» aurait donc été <b>démenti par le serveur au premier essai</b>. L'écran dit ce qui est vrai et <b>démontrable</b>&nbsp;: les soldes non affectés sont écartés des totaux, le débit et le crédit écartés <b>ne se compensent pas</b>, et comme la balance retenue est équilibrée, ce qui reste ne peut plus l'être. Un montant, une conséquence, pas une menace. <b>Demande&nbsp;: STORY-401.</b></div>
+
+                <div class="dc-note dc-gap"><b>⛔ ON N'AFFECTE PAS UNE RACINE, ET UNE RACINE SAISIE SERAIT UN PIÈGE SILENCIEUX.</b> Un compte d'attente n'existe jamais au singulier&nbsp;: <code>476200</code>, <code>476210</code>, <code>476220</code>… Sur Sage on affecte <code>4762</code> une fois. Ici <code>POST /mapping-overrides</code> prend <b>un compte exact</b> — <code>chargerSurchargesActives</code> construit un <code>Map(compte → cible)</code> et <code>mapComptes</code> fait un <code>.get(compte)</code> strict. Donc 40 comptes = <b>40 propositions et 40 validations d'administrateur</b>. ⚡ Et pire&nbsp;: <code>4762</code> <b>passe le format</b> (<code>^\\d[0-9A-Za-z]{1,19}$</code>), la validation du serveur ne porte que sur la <b>cible</b>, jamais sur le compte ⇒ la surcharge est <b>acceptée, validée, affichée « Validée », et sans aucun effet</b>. ⇒ <b>Garde posée tout de suite</b>&nbsp;: le dialogue n'a pas de champ « compte », il porte celui de la ligne d'où l'on vient. <b>Demande&nbsp;: STORY-400.</b></div>
+
+                <div class="dc-note dc-gap"><b>⚠️ Aucune route n'énumère les postes du référentiel — 3<sup>e</sup> occurrence du même angle mort.</b> <code>GET …/bilan/referentiel</code> publie <code>postesCount: 214</code> et jamais la liste&nbsp;; <code>POST …/mapping-overrides</code> <b>valide</b> pourtant le couple <code>(état, poste)</code> contre ces 214 postes et refuse en <code>422 POSTE_INCONNU</code>. Le comptable tape donc à l'aveugle pour se faire refuser — exactement STORY-394 (comptes de classe 7) et STORY-397 (codes de réintégration). La maquette fait ce qu'elle peut&nbsp;: elle propose les <b>postes observés dans cette balance</b>, <b>déclare la liste partielle</b>, et laisse la saisie libre. <b>Demande&nbsp;: STORY-399.</b></div>
+
+                <div class="dc-note dc-gap"><b>⚠️ «&nbsp;Surcharge <i>org</i>&nbsp;» est une formulation périmée, et l'écran ne la reprend pas.</b> Le service la documente encore comme <code>(orgId, compte) → poste</code>&nbsp;; depuis <b>STORY-357</b> le repository et l'index d'unicité portent <code>(tenantId, <b>dossierId</b>, compte)</code>. Une surcharge appartient donc au <b>dossier</b>, pas au cabinet — et c'est heureux&nbsp;: un plan de comptes est propre à chaque société. L'écran écrit «&nbsp;surcharges <b>de ce dossier</b>&nbsp;». Reprendre le libellé de la fiche aurait fait croire à un paramétrage de cabinet, et fait hésiter à arbitrer par peur de toucher les autres clients.</div>
+
+                <div class="dc-note dc-gap"><b>⚠️ Ce que l'OpenAPI ne dit pas — et le cas où il dit FAUX.</b> ① <code>RattachementResultDto.mappes</code> est un tableau d'<b>objets</b> côté serveur et sort en <code>string[]</code> dans les types générés (le <code>@ApiProperty</code> n'a pas de <code>type</code>)&nbsp;: c'est <b>pire</b> qu'un objet vide, parce qu'un type faux <b>compile</b>. ② <code>referentiel {code, version}</code>, <code>cible</code>, <code>validePar</code>, <code>valideAt</code>, <code>ancienPoste</code>, <code>motif</code> sortent en <code>Record&lt;string, never&gt;</code> — le patron déjà relevé pour <code>balance-service</code>. Le front ne <b>caste</b> pas&nbsp;: il <b>vérifie à l'exécution</b>, et quand la forme ne tient pas il l'<b>affiche</b> (état « contrat inattendu », <b>sans</b> bouton « Réessayer » — le serveur a bien répondu). <b>Demande&nbsp;: STORY-398.</b></div>
+
+                <div class="dc-note dc-gap"><b>⚠️ Le journal des surcharges ne peut nommer personne.</b> <code>proposePar</code> et <code>validePar</code> sortent en <code>userId</code> bruts (<code>doc.proposePar.toString()</code>), sans nom ni e-mail. L'écran affiche donc l'identifiant tel quel plutôt que d'inventer «&nbsp;Kossi&nbsp;A.&nbsp;» — c'est laid, c'est vrai, et c'est exactement le manque que le journal du dossier a rencontré (STORY-382). <b>Demande&nbsp;: STORY-402.</b></div>
+
+                <div class="dc-note dc-gap"><b>⚠️ Proposer n'est pas valider, et un collaborateur doit lire pourquoi.</b> <code>POST …/mapping-overrides</code> est ouvert au <code>TENANT_USER</code>&nbsp;; <code>…/valider</code> et <code>…/rejeter</code> sont réservés au <code>TENANT_ADMIN</code>. Basculez le sélecteur de rôle&nbsp;: les deux boutons ne deviennent pas grisés, ils <b>disparaissent au profit d'une phrase</b>. Un bouton désactivé et muet se lit comme une panne&nbsp;; ici l'attente a un responsable nommé.</div>
+
+                <div class="dc-note dc-gap"><b>◻︎ Non retenu à ce tour, et tracé pour ne pas être redécouvert&nbsp;:</b> ① l'<b>export</b> de la liste des comptes non affectés (on la transmet au collaborateur ou au client&nbsp;; sans export elle se recopie) — à trancher, l'onglet <b>Export</b> de FE-038 porte la liasse, pas les documents de travail ; ② le <b>vocabulaire</b> — l'onglet garde «&nbsp;table de passage&nbsp;» (le terme du PRD, FR-006) tandis que les gestes disent «&nbsp;affecter&nbsp;», le mot qu'emploie un utilisateur de Sage&nbsp;; la recherche accepte les deux.</div>
+
+                <p class="helper">FE-028 · FE-030 — routage <code>/bilan</code> → <code>:3004/api/v1/dossiers/{dossierId}/bilan/*</code> · le gate reflète, <code>@RequiresBilanAccess</code> décide · le rattachement propose, l'humain arbitre.</p>
               </div>
             </section>
 
@@ -7290,6 +8335,100 @@
 <div class="rowmenu" id="rowMenu" role="menu" data-open="false" hidden></div>
 
 <!-- ==================== FE-008 · Dialog d'invitation ==================== -->
+<!-- ══════════ FE-030 · ARBITRER UN COMPTE NON MAPPÉ ══════════
+     ⚠️ CE DIALOGUE PORTE LE SEUL AVEU DE L'ÉCRAN, et il est en haut, pas en bas :
+     **aucune route n'énumère les postes du référentiel**. `GET …/bilan/referentiel`
+     en donne le NOMBRE (214), jamais la liste. La liste proposée ci-dessous est donc
+     celle des postes **observés dans cette balance** — utile, mais incomplète par
+     construction : le poste dont on a besoin pour un compte inhabituel est justement
+     celui qu'aucun autre compte n'a atteint. D'où la saisie libre, et le refus
+     serveur rendu tel quel. Demande ouverte : STORY-399. -->
+<div class="overlay" id="tdpOverlay" data-open="false">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="tdpTitle">
+    <div class="dialog-head">
+      <span class="dh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M7 12h10"/></svg></span>
+      <div>
+        <h3 id="tdpTitle">Affecter le compte <span data-tdp-dlg-compte>476200</span></h3>
+        <p data-tdp-dlg-lib>Charges constatées d'avance — régularisation</p>
+      </div>
+    </div>
+    <form class="dialog-body" onsubmit="return false" id="tdpForm">
+
+      <div class="tdp-avert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span><b>L’affectation porte sur ce compte exact, et il n’est pas saisissable.</b> Le serveur rattache par <b>égalité stricte</b>&nbsp;: saisir la racine <code>4762</code> pour couvrir <code>476200</code>, <code>476210</code>… serait <b>accepté, validé, et sans aucun effet</b>. Le compte vient donc de la ligne d’où vous arrivez, jamais d’un champ. L’affectation par racine est demandée&nbsp;: <b>STORY-400</b>.</span>
+      </div>
+
+      <div class="tdp-avert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span><b>Cette liste est partielle, et elle le dit.</b> Le référentiel compte <b>214 postes</b>&nbsp;; seuls les <b>18</b> déjà atteints par un compte de cette balance sont proposés ici. Aucune route ne publie la liste complète — si votre poste n'y figure pas, saisissez-le. Le serveur vérifie, et refuse un code inconnu.</span>
+      </div>
+
+      <div class="field">
+        <label>Postes déjà utilisés par cette balance</label>
+        <div class="tdp-pick" role="radiogroup" aria-label="Poste d'état cible">
+          <button type="button" class="tdp-pickitem" data-tdp-poste data-etat="BILAN_PASSIF" data-code="DK" data-selected="false">
+            <span class="code">DK</span>
+            <span class="lib">Autres dettes</span>
+            <span class="tdp-etat">Bilan passif</span>
+          </button>
+          <button type="button" class="tdp-pickitem" data-tdp-poste data-etat="BILAN_PASSIF" data-code="DL" data-selected="false">
+            <span class="code">DL</span>
+            <span class="lib">Risques provisionnés</span>
+            <span class="tdp-etat">Bilan passif</span>
+          </button>
+          <button type="button" class="tdp-pickitem" data-tdp-poste data-etat="BILAN_ACTIF" data-code="BX" data-selected="false">
+            <span class="code">BX</span>
+            <span class="lib">Créances clients</span>
+            <span class="tdp-etat">Bilan actif</span>
+          </button>
+          <button type="button" class="tdp-pickitem" data-tdp-poste data-etat="BILAN_ACTIF" data-code="BJ" data-selected="false">
+            <span class="code">BJ</span>
+            <span class="lib">Autres créances</span>
+            <span class="tdp-etat">Bilan actif</span>
+          </button>
+          <button type="button" class="tdp-pickitem" data-tdp-poste data-etat="COMPTE_RESULTAT" data-code="RA" data-selected="false">
+            <span class="code">RA</span>
+            <span class="lib">Achats de marchandises</span>
+            <span class="tdp-etat">Compte de résultat</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>…ou saisir un poste du référentiel</label>
+        <div class="tdp-libre">
+          <div class="control"><input type="text" placeholder="État (ex. BILAN_PASSIF)" data-tdp-etat-libre /></div>
+          <div class="control"><input type="text" placeholder="Code de poste (ex. DK)" data-tdp-code-libre /></div>
+        </div>
+        <p class="helper" style="text-align:left;margin-top:0.35rem">Les deux valeurs sont vérifiées <b>par le serveur</b> contre les postes du référentiel actif. Un couple inconnu est refusé — l'écran ne devine rien.</p>
+      </div>
+
+      <div class="field">
+        <label for="tdp-motif">Motif <span style="color:var(--muted-fg);font-weight:400">(facultatif, 500 caractères)</span></label>
+        <textarea id="tdp-motif" rows="2" placeholder="Pourquoi ce compte va dans ce poste — la personne qui validera lira ceci."></textarea>
+      </div>
+
+      <!-- Refus serveur, rendu VERBATIM : un code de poste inconnu n'est pas une
+           faute de frappe à deviner, c'est une réponse du référentiel. -->
+      <div class="bal-refus warn" data-tdp-refus hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+        <div>
+          <b>Poste cible inconnu du référentiel de votre organisation</b>
+          <p>Le couple saisi ne correspond à aucun poste de <code>syscohada-revise@2.1</code>. Vérifiez le code auprès de la liasse officielle&nbsp;: la liste complète n'est pas encore publiée par le service.</p>
+          <span class="code">422 · POSTE_INCONNU</span>
+        </div>
+      </div>
+
+      <p class="helper" style="text-align:left;margin:0">Vous <b>proposez</b> — la surcharge ne s'appliquera qu'une fois <b>validée par un administrateur</b> du cabinet. Le référentiel packagé n'est jamais modifié.</p>
+    </form>
+    <div class="dialog-foot">
+      <button class="btn btn-ghost btn-sm" type="button" data-tdp-close>Annuler</button>
+      <button class="btn btn-primary btn-sm" type="button" data-tdp-proposer>Proposer l’affectation</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="inviteOverlay" data-open="false">
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="inviteTitle">
     <div class="dialog-head">
@@ -8794,6 +9933,301 @@
       document.querySelectorAll('.nav-item[data-page="dossiers"]').forEach(function (n) {
         n.addEventListener("click", function () { if (clear) clear.click(); });
       });
+    })();
+
+
+    /* ============ FE-030 · Table de passage & arbitrage ====================
+       Le 2ᵉ onglet du Bilan. Quatre choses que cette maquette doit rendre
+       indiscutables, et qui ne se voient QU'EN JOUANT :
+
+        1. **la précondition** — sans balance retenue, l'onglet ne montre pas une
+           table vide : il dit qu'il n'a aucun compte à confronter (abandonner la
+           balance depuis l'onglet précédent bascule cet onglet en direct) ;
+        2. **l'origine d'un rattachement** — « Surcharge » sur une ligne est le
+           SEUL témoin qu'un arbitrage a pris effet ; sans elle, valider une
+           surcharge ne change rien de visible ;
+        3. **le rôle** — proposer est ouvert à tous, VALIDER ne l'est pas, et un
+           collaborateur doit lire pourquoi plutôt que voir un bouton grisé ;
+        4. **la liste partielle des postes** — elle est déclarée telle, et la
+           saisie libre existe pour la contourner. Le refus 422 est joué.
+
+       ⚠️ Ancré au NIVEAU DE PORTÉE de la page Bilan (`page`), comme FE-028 : le
+       dialogue, lui, vit au niveau document (les overlays y sont tous). */
+    (function () {
+      var page = document.querySelector('.page[data-page="bilan"]');
+      if (!page) return;
+
+      /* ── États de l'écran (démo) ────────────────────────────────────────── */
+      function setTdp(state) {
+        page.querySelectorAll("[data-tdp-state]").forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.tdpState === state));
+        });
+        page.querySelectorAll("[data-tdp-slot]").forEach(function (s) {
+          s.hidden = s.dataset.tdpSlot !== state;
+        });
+      }
+      page.querySelectorAll("[data-tdp-state]").forEach(function (b) {
+        b.addEventListener("click", function () { setTdp(b.dataset.tdpState); });
+      });
+
+      /* Aller d'un onglet à l'autre — le CTA « Continuer vers la table de
+         passage » et le retour « Choisir la balance source » ne sont pas des
+         liens décoratifs : c'est le parcours réel. */
+      function ouvrirOnglet(nom) {
+        var tab = page.querySelector('[data-bil-tab="' + nom + '"]');
+        if (tab) tab.click();
+      }
+      page.querySelectorAll("[data-bil-goto]").forEach(function (b) {
+        b.addEventListener("click", function () { ouvrirOnglet(b.dataset.bilGoto); });
+      });
+      page.querySelectorAll("[data-tdp-goto]").forEach(function (b) {
+        b.addEventListener("click", function () { ouvrirOnglet(b.dataset.tdpGoto); });
+      });
+
+      /* ⚡ ABANDONNER LA BALANCE FERME LE TRAVAIL DE CET ONGLET, et il faut le
+         VOIR. Laisser la table affichée après un « Changer de balance » la
+         ferait lire comme le rattachement de la nouvelle balance — plausible,
+         faux, et invisible. Même famille de piège que la bascule de dossier. */
+      var clear = page.querySelector("[data-bsrc-clear]");
+      if (clear) clear.addEventListener("click", function () { setTdp("sans-balance"); });
+      page.querySelectorAll("[data-bsrc]").forEach(function (item) {
+        item.addEventListener("click", function () {
+          if (item.dataset.eligible !== "false") setTdp("servi");
+        });
+      });
+
+      /* ── Rôle (démo) : proposer ≠ valider ───────────────────────────────── */
+      function setRole(role) {
+        page.querySelectorAll("[data-tdp-role]").forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.tdpRole === role));
+        });
+        page.querySelectorAll("[data-tdp-admin]").forEach(function (e) { e.hidden = role !== "admin"; });
+        page.querySelectorAll("[data-tdp-user]").forEach(function (e) { e.hidden = role === "admin"; });
+      }
+      page.querySelectorAll("[data-tdp-role]").forEach(function (b) {
+        b.addEventListener("click", function () { setRole(b.dataset.tdpRole); });
+      });
+
+      /* ── Décision sur une surcharge PROPOSED (administrateur) ───────────── */
+      page.querySelectorAll("[data-tdp-decider]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var ligne = b.closest(".tdp-scrow");
+          var acte = b.dataset.tdpDecider;
+          var st = ligne ? ligne.querySelector(".st") : null;
+          var actions = ligne ? ligne.querySelector("[data-tdp-admin]") : null;
+          if (st) {
+            st.className = "st " + (acte === "valider" ? "st-validated" : "st-rejected");
+            st.textContent = acte === "valider" ? "Validée" : "Rejetée";
+          }
+          if (actions) actions.remove();
+          if (acte === "valider") {
+            notify("success", "Surcharge validée",
+              "Le compte est désormais rattaché par surcharge — la table de passage porte l'origine « Surcharge » sur sa ligne.");
+          } else {
+            notify("success", "Surcharge rejetée",
+              "Elle reste au journal : une décision tracée évite qu'on la repropose sans savoir qu'elle a déjà été refusée.");
+          }
+        });
+      });
+
+      /* ── Bascule PAR POSTE / PAR COMPTE ──────────────────────────────────
+         ⚡ Ce n'est pas un filtre, ce sont DEUX LECTURES DU MÊME JEU, et c'est
+         la correction la plus importante de la refonte : celui qui révise part
+         du repère de liasse (« qu'est-ce qui alimente BX ? ») et descend au
+         compte quand le total le surprend. Les deux vues sortent de la même
+         réponse — `mappes[]` porte déjà l'état, le poste et son libellé — donc
+         n'offrir que compte → poste était un manque d'AFFICHAGE, pas de
+         contrat. La vue par poste est le défaut. */
+      function setVue(vue) {
+        page.querySelectorAll("[data-tdp-vue]").forEach(function (b) {
+          b.setAttribute("aria-selected", String(b.dataset.tdpVue === vue));
+        });
+        page.querySelectorAll("[data-tdp-vueslot]").forEach(function (s) {
+          s.hidden = s.dataset.tdpVueslot !== vue;
+        });
+      }
+      page.querySelectorAll("[data-tdp-vue]").forEach(function (b) {
+        b.addEventListener("click", function () { setVue(b.dataset.tdpVue); });
+      });
+
+      /* ── Filtre de la vue par compte ─────────────────────────────────────
+         Cherche aussi par RACINE (« 476 » sort tous les 476xxx) — c'est le
+         geste réel du comptable, qui pense en racines, pas en comptes.
+
+         ⚠️ Deux subtilités que le filtre naïf ratait :
+          1. un compte à VENTILER occupe deux lignes, et la seconde ne porte ni
+             son numéro ni son libellé ⇒ les deux partagent `data-tdp-cle` ;
+          2. un en-tête de CLASSE sans ligne visible sous lui laisserait un
+             sous-total orphelin, qui se lirait comme un total filtré. */
+      var q = page.querySelector("[data-tdp-q]");
+      var tbody = page.querySelector("[data-tdp-tbody]");
+      if (q && tbody) {
+        q.addEventListener("input", function () {
+          var v = q.value.trim().toLowerCase();
+          var lignes = Array.prototype.slice.call(tbody.querySelectorAll("tr"));
+          lignes.forEach(function (tr) {
+            if (tr.classList.contains("tdp-classe")) return;
+            var texte = (tr.dataset.tdpCle || tr.textContent).toLowerCase();
+            tr.hidden = v !== "" && texte.indexOf(v) === -1;
+          });
+          /* Un en-tête de classe ne survit que s'il lui reste une ligne. */
+          lignes.forEach(function (tr, i) {
+            if (!tr.classList.contains("tdp-classe")) return;
+            var reste = false;
+            for (var j = i + 1; j < lignes.length; j++) {
+              if (lignes[j].classList.contains("tdp-classe")) break;
+              if (!lignes[j].hidden) { reste = true; break; }
+            }
+            tr.hidden = !reste;
+          });
+        });
+      }
+
+      /* ── Le dialogue d'arbitrage ────────────────────────────────────────── */
+      var overlay = document.getElementById("tdpOverlay");
+      if (!overlay) return;
+      var dlgCompte = overlay.querySelector("[data-tdp-dlg-compte]");
+      var dlgLib = overlay.querySelector("[data-tdp-dlg-lib]");
+      var refus = overlay.querySelector("[data-tdp-refus]");
+      var etatLibre = overlay.querySelector("[data-tdp-etat-libre]");
+      var codeLibre = overlay.querySelector("[data-tdp-code-libre]");
+      var motif = overlay.querySelector("#tdp-motif");
+      var courant = null;
+
+      /* Postes RÉELLEMENT connus de la maquette = ceux de la liste partielle.
+         Tout autre couple joue le 422 — c'est le contrat, pas une facilité. */
+      function posteConnu(etat, code) {
+        return Array.prototype.some.call(
+          overlay.querySelectorAll("[data-tdp-poste]"),
+          function (p) { return p.dataset.etat === etat && p.dataset.code === code; },
+        );
+      }
+
+      function selection() {
+        var choisi = overlay.querySelector('[data-tdp-poste][data-selected="true"]');
+        if (choisi) return { etat: choisi.dataset.etat, code: choisi.dataset.code, libre: false };
+        var e = (etatLibre.value || "").trim().toUpperCase();
+        var c = (codeLibre.value || "").trim().toUpperCase();
+        if (!e || !c) return null;
+        return { etat: e, code: c, libre: true };
+      }
+
+      function fermer() {
+        overlay.dataset.open = "false";
+        refus.hidden = true;
+      }
+
+      overlay.querySelectorAll("[data-tdp-poste]").forEach(function (p) {
+        p.addEventListener("click", function () {
+          var deja = p.dataset.selected === "true";
+          overlay.querySelectorAll("[data-tdp-poste]").forEach(function (o) { o.dataset.selected = "false"; });
+          p.dataset.selected = deja ? "false" : "true";
+          /* Choisir dans la liste VIDE la saisie libre : deux cibles renseignées
+             en même temps laisseraient l'écran décider laquelle envoyer. */
+          if (!deja) { etatLibre.value = ""; codeLibre.value = ""; }
+          refus.hidden = true;
+        });
+      });
+      [etatLibre, codeLibre].forEach(function (i) {
+        i.addEventListener("input", function () {
+          overlay.querySelectorAll("[data-tdp-poste]").forEach(function (o) { o.dataset.selected = "false"; });
+          refus.hidden = true;
+        });
+      });
+
+      page.querySelectorAll("[data-tdp-arbitrer]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          courant = b.closest("[data-tdp-un]");
+          if (!courant) return;
+          dlgCompte.textContent = courant.dataset.compte;
+          dlgLib.textContent = courant.dataset.libelle;
+          overlay.querySelectorAll("[data-tdp-poste]").forEach(function (o) { o.dataset.selected = "false"; });
+          etatLibre.value = ""; codeLibre.value = ""; motif.value = "";
+          refus.hidden = true;
+          overlay.dataset.open = "true";
+        });
+      });
+
+      overlay.querySelectorAll("[data-tdp-close]").forEach(function (b) {
+        b.addEventListener("click", fermer);
+      });
+      overlay.addEventListener("click", function (ev) { if (ev.target === overlay) fermer(); });
+
+      overlay.querySelector("[data-tdp-proposer]").addEventListener("click", function () {
+        var cible = selection();
+        if (!cible) {
+          notify("error", "Aucun poste cible",
+            "Choisissez un poste dans la liste, ou saisissez le couple état + code du référentiel.");
+          return;
+        }
+        /* Le refus du serveur est rendu DANS le dialogue, pas en toast : la
+           correction se fait ici, à côté du champ fautif. */
+        if (!posteConnu(cible.etat, cible.code)) { refus.hidden = false; return; }
+
+        var compte = courant ? courant.dataset.compte : "";
+        var liste = page.querySelector("[data-tdp-liste]");
+        if (courant && liste) {
+          /* Le compte quitte les « à arbitrer » : une proposition en attente
+             n'est plus un compte sur lequel il reste un geste à faire. */
+          courant.remove();
+          var restants = liste.querySelectorAll("[data-tdp-un]").length + 8;
+          page.querySelectorAll("[data-tdp-nb], [data-tdp-nb2]").forEach(function (n) {
+            n.textContent = String(restants);
+          });
+        }
+        ajouterSurchargeProposee(compte, cible, motif.value.trim());
+        fermer();
+        notify("success", "Surcharge proposée",
+          "Elle ne s'applique pas encore : un administrateur du cabinet doit la valider. Jusque-là, le compte reste hors des états.");
+      });
+
+      /* Une proposition neuve rejoint le journal, dans l'état PROPOSED — avec
+         ses actions si l'utilisateur courant est administrateur. */
+      function ajouterSurchargeProposee(compte, cible, texte) {
+        var hote = page.querySelector(".tdp-sc");
+        if (!hote) return;
+        var estAdmin = page.querySelector('[data-tdp-role="admin"]').getAttribute("aria-selected") === "true";
+        var row = document.createElement("div");
+        row.className = "tdp-scrow";
+        row.innerHTML =
+          '<div class="tdp-schead"><span class="cpt"></span>' +
+          '<span class="st st-proposed">Proposée</span><span class="grow"></span>' +
+          '<div class="tdp-scact" data-tdp-admin><button class="btn btn-ghost btn-sm" type="button" data-tdp-decider="rejeter">Rejeter</button>' +
+          '<button class="btn btn-primary btn-sm" type="button" data-tdp-decider="valider">Valider</button></div>' +
+          '<span class="tdp-nonadmin" data-tdp-user hidden>Un administrateur du cabinet doit trancher</span></div>' +
+          '<div class="tdp-flow"><span class="none">non rattaché par le référentiel</span>' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>' +
+          '<span class="to"></span></div>' +
+          '<p class="tdp-scmeta">Proposée par <b>vous</b> · à l’instant</p>';
+        row.querySelector(".cpt").textContent = compte;
+        row.querySelector(".to").textContent = cible.etat + " · " + cible.code;
+        if (texte) {
+          var m = document.createElement("p");
+          m.className = "tdp-motif";
+          m.textContent = texte;
+          row.appendChild(m);
+        }
+        row.querySelector("[data-tdp-admin]").hidden = !estAdmin;
+        row.querySelector("[data-tdp-user]").hidden = estAdmin;
+        row.querySelectorAll("[data-tdp-decider]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            var acte = b.dataset.tdpDecider;
+            var st = row.querySelector(".st");
+            st.className = "st " + (acte === "valider" ? "st-validated" : "st-rejected");
+            st.textContent = acte === "valider" ? "Validée" : "Rejetée";
+            row.querySelector("[data-tdp-admin]").remove();
+            notify("success", acte === "valider" ? "Surcharge validée" : "Surcharge rejetée",
+              acte === "valider"
+                ? "Le rattachement est appliqué : la ligne de ce compte porte désormais l'origine « Surcharge »."
+                : "Elle reste au journal — une décision tracée, pas une disparition.");
+          });
+        });
+        hote.insertBefore(row, hote.firstChild);
+      }
+
+      setRole("admin");
+      setVue("poste");
+      setTdp("servi");
     })();
 
     /* ===================== FE-024 · Module Atelier =======================
