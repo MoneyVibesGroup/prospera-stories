@@ -4,7 +4,7 @@
 **Réf. :** **STORY-353** *(l'affectation, qui a posé le défaut)* · **STORY-382** *(qui l'a rendu exploitable, puis en a fermé la retombée)* · décision **D6** · question **Q2**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** `ready-for-dev`
+**Statut :** `in_progress`
 **Complexité :** medium
 **Créée le :** 2026-08-25 — **par la revue de sécurité de STORY-382**
 **Sprint :** 20
@@ -54,7 +54,7 @@ read-model local `org_members` (`{ orgId, userId }`), **avant** d'écrire.
 | Point | Décision attendue |
 |---|---|
 | Read-model consulté | `org_members` — **local**, alimenté par `identity.membership.changed`. ⛔ Jamais d'appel synchrone à l'IdP (invariant P3) |
-| Statut exigé | à trancher : `ACTIVE` seul, ou toute appartenance connue. ⚠️ Exiger `ACTIVE` **empêche de réaffecter à un suspendu**, ce qui est probablement voulu ici — c'est l'inverse de STORY-382, où le filtre porte sur une **lecture d'historique** et ne doit surtout pas exclure les partants |
+| Statut exigé | **TRANCHÉ le 2026-08-25 : `ACTIVE` seul.** Affecter un dossier à un membre suspendu recrée exactement l'incohérence que la story ferme — un responsable qui ne verra jamais le dossier (l'IdP n'émet plus de jeton pour lui) — et contredirait la retombée automatique de Q2, qui venait de lui retirer ses dossiers. ⚠️ C'est l'**inverse** de STORY-382, où le filtre porte sur une **lecture d'historique** et ne doit surtout pas exclure les partants : `membresDe()` reste donc **sans filtre de statut**, et la validation d'écriture passe par une méthode **distincte** — jamais un drapeau sur la première |
 | Code de refus | nouveau code stable, nommé dans Swagger, du type `MEMBRE_HORS_CABINET` (400) |
 | Anti-énumération | ⚠️ Le refus ne doit **pas** distinguer « cet identifiant n'existe pas » de « il existe mais hors de votre cabinet » : **un seul message**, sinon la validation redevient l'oracle que STORY-382 vient de fermer |
 
@@ -110,3 +110,24 @@ STORY-382).
 - Anti-énumération (message unique) et son test : 0,5 pt
 - Tests (unit, e2e, mutation) + vérif docker : 1 pt
 - **Total : 3 points**
+
+---
+
+## Progress Tracking
+
+**Statut :** `in_progress` — prise en dev le 2026-08-25.
+**Branche :** `MNV-404` (`dossier-service`), branchée sur `dev` **avant** la première ligne de code.
+
+### Décision de conception, prise avant d'écrire
+
+**Le filtre de statut est `ACTIVE`, et il vit dans une méthode DISTINCTE de `membresDe()`.**
+
+`membresDe()` (STORY-382) est documenté comme **volontairement sans filtre de statut** : il sert une
+**lecture d'historique**, où le collaborateur parti doit rester nommé. Y ajouter un drapeau
+`{ actifsSeulement?: boolean }` mettrait les deux exigences opposées sur la même signature — un
+*boolean trap* dont la valeur par défaut déciderait, à chaque appel futur, laquelle des deux stories on
+casse. La validation d'écriture appelle donc `membresActifsDe()`, qui porte sa propre raison d'être.
+
+**Seuls les identifiants FOURNIS PAR LE DTO sont validés**, jamais l'affectation déjà en base. Valider
+l'existant rendrait **immodifiable** un dossier déjà porteur d'un identifiant étranger — exactement les
+dossiers que la story veut pouvoir réparer, et dont la réparation rétroactive est hors périmètre.
