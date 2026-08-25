@@ -4,7 +4,7 @@
 **Réf. :** **STORY-404** *(qui l'a trouvé, et l'a laissé hors de son périmètre)* · règle `securite.md`
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** `review`
+**Statut :** `done`
 **Complexité :** medium
 **Créée le :** 2026-08-25 — **par la revue de sécurité de STORY-404**
 **Sprint :** 20
@@ -92,21 +92,21 @@ oublié ne rende pas un 500 non plus.
 
 ## Acceptance Criteria
 
-- [ ] `0x` + 22 hex sur un champ d'identifiant rend **400**, avec un code stable, et **jamais 500**.
-- [ ] `0h` + 22 hex, une chaîne de **12 caractères**, un nombre et un tableau rendent **400** eux aussi.
-- [ ] Un identifiant valide en **MAJUSCULES** reste **accepté** *(non-régression STORY-404)*.
-- [ ] Un `BSONError` qui remonterait malgré tout sort en **400 générique**, pas en 500 — vérifié en
+- [x] `0x` + 22 hex sur un champ d'identifiant rend **400**, avec un code stable, et **jamais 500**.
+- [x] `0h` + 22 hex, une chaîne de **12 caractères**, un nombre et un tableau rendent **400** eux aussi.
+- [x] Un identifiant valide en **MAJUSCULES** reste **accepté** *(non-régression STORY-404)*.
+- [x] Un `BSONError` qui remonterait malgré tout sort en **400 générique**, pas en 500 — vérifié en
       neutralisant le décorateur sur une route.
-- [ ] Les 7 dépôts sont traités, chacun avec sa branche et sa PR ; aucun ne reste avec `@IsMongoId()` sur
+- [x] Les 7 dépôts sont traités, chacun avec sa branche et sa PR ; aucun ne reste avec `@IsMongoId()` sur
       un champ ensuite converti en `ObjectId`.
 
 ## Definition of Done
 
-- [ ] Lint 0 · build OK · couverture ≥ seuils, **par dépôt**.
-- [ ] e2e : `0x…` → 400 sur au moins une route de chaque dépôt.
-- [ ] **Mutation** : revenir à `@IsMongoId()` fait rougir le test `0x…` ; retirer le filtre d'exception
+- [x] Lint 0 · build OK · couverture ≥ seuils, **par dépôt**.
+- [x] e2e : `0x…` → 400 sur au moins une route de chaque dépôt.
+- [x] **Mutation** : revenir à `@IsMongoId()` fait rougir le test `0x…` ; retirer le filtre d'exception
       fait rougir le test de repli.
-- [ ] `/code-review` + `/security-review`.
+- [x] `/code-review` + `/security-review`.
 
 ## Story Points Breakdown
 
@@ -366,3 +366,32 @@ et **0 dossier à `responsableUserId` non canonique** sur toute la collection.
 | `dossier-service` | 2 (dont les commentaires) | 1 | 1 |
 | `document-service` · `balance-service` · `bilan-service` · `platform-catalog-service` · `auth-service` | 1 | 1 | 1 |
 | `admin-panel` | 1 | 1 | **aucun** — son validateur est amputé du filet (ni `mongoose` ni `bson`), le constat de sécurité y est **sans objet** |
+
+---
+
+## Clôture
+
+**Statut `done` — 2026-08-25.** 7 dépôts, 7 branches `MNV-405`, **7 PR rebase-mergées sur `dev`**,
+branches supprimées :
+
+| Dépôt | PR |
+|---|---|
+| `dossier-service` | [#16](https://github.com/MoneyVibesGroup/prospera-dossier-service/pull/16) |
+| `document-service` | [#15](https://github.com/MoneyVibesGroup/prospera-ocr-service/pull/15) |
+| `balance-service` | [#54](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/54) |
+| `bilan-service` | [#49](https://github.com/MoneyVibesGroup/prospera-bilan-service/pull/49) |
+| `platform-catalog-service` | [#16](https://github.com/MoneyVibesGroup/prospera-platform-catalog-service/pull/16) |
+| `auth-service` | [#25](https://github.com/MoneyVibesGroup/prospera-auth-service/pull/25) |
+| `admin-panel` | [#24](https://github.com/MoneyVibesGroup/prospera-admin-panel-service/pull/24) |
+
+### Ce que la story laisse derrière elle
+
+- ⛔ **Aucun `code` applicatif sur les 400 du `ValidationPipe`** (D-405-4) : il exigerait un
+  `exceptionFactory` global qui changerait le corps de **toutes** les réponses 400 de validation des 7
+  services. À traiter comme une story à part si le front en a besoin.
+- ⛔ **Le troisième chemin du filet** — cast à l'écriture, `CastError` enfoui dans une `ValidationError`
+  mongoose — reste **non couvert et documenté comme tel** (D-405-2, constat ⑧). Le bon geste, le jour où
+  une route l'atteint, est d'appeler `estObjectId` **avant** l'écriture.
+- ⚠️ **Les e2e de `dossier-service` ne montent pas `AllExceptionsFilter`** (constat ③) : toute lecture
+  « 400 plutôt que 500 » dans ces suites-là ne reflète que le gestionnaire par défaut de Nest. Vaut pour
+  toute story future qui voudrait y prouver un comportement de filtre global.
