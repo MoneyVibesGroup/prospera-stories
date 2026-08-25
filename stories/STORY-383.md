@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-activite-filtre-par-dossier.md` · **STORY-360** *(le fil existe)* · **STORY-144** *(le défaut du résultat partiel)* · décision **D12** · question **Q10-b**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** `ready-for-dev`
+**Statut :** `done`
 **Complexité :** medium
 **Créée le :** 2026-08-22 — **par FE-068 v2**, sur retour PO direct
 **Sprint :** 20
@@ -126,3 +126,204 @@ résultat partiel de se lire comme un fait.
 - Cohérence de `total` / `nonLus` sous filtre : 0,5 pt
 - Tests (e2e, plan d'exécution, injection) : 0,5 pt
 - **Total : 3 points**
+
+
+---
+
+## Progress Tracking
+
+**Statut :** `done` — **clôturée le 2026-08-25**. PR **`dossier-service#17`** rebase-mergée sur `dev`
+(feature + correctif d'index + commit de revue), branche `MNV-383` supprimée.
+**Dépôt unique** — aucun contrat d'événement touché.
+
+### Ce qui a été livré
+
+`GET /activite` accepte deux paramètres **facultatifs et cumulables**, portés par un
+**DTO à part** (`LireActiviteQueryDto`) :
+
+| Paramètre | Validation | Chemin |
+|---|---|---|
+| `dossierId` | `@EstObjectId()` (STORY-405 — `@IsMongoId()` accepte `0x` et le 400 sortirait en 500) | `dossiers.find({portée, _id})` |
+| `q` | `@IsString()` + `@MaxLength(120)` + `trim`, motif **échappé** | `dossiers.find({portée, statut: $in[tous], rechercheNormalisee: /…/})` |
+
+Les deux se résolvent **d'abord sur `dossiers`** — les raisons sociales n'existent pas dans
+`dossiers_journal` — puis le journal est filtré par `dossierId: { $in: [...] }`.
+
+⚡ **Aucun index nouveau** : `{ dossierId: 1, le: -1, _id: -1 }` (STORY-360) et
+`{ orgId: 1, statut: 1, rechercheNormalisee: 1 }` (STORY-359) existaient déjà.
+
+### Les trois décisions qui portent la story
+
+1. **`undefined` (aucun filtre) et `[]` (filtre sans correspondance) sont des réponses
+   OPPOSÉES.** Les confondre — un `if (ids.length === 0)` qui laisserait tomber la clause —
+   ferait rendre **l'historique entier du cabinet** en réponse à `?q=inconnu` : le défaut que
+   cette story ferme, redonné par l'autre bout. `$in: []` atteint donc Mongo tel quel.
+2. **`nonLus` NE SUIT PAS le filtre**, et le contrat le publie (`ActiviteResponseDto.nonLus`).
+   La story autorisait « suivre le filtre **ou** déclarer qu'on ne le suit pas » ; c'est le
+   second, pour une raison décisive : `POST /activite/lu` ne connaît **aucun** filtre — il pose
+   un curseur unique par administrateur. Un compteur filtré à `2` suivi d'un acquittement
+   éteindrait les `12` non-lus réels, et dix actes jamais vus disparaîtraient sans trace. Faire
+   suivre le filtre au compteur exigerait un curseur **par recherche**. `total`, lui, suit le
+   filtre (même filtre que la page).
+3. **Aucune exclusion des dossiers ARCHIVÉS.** Le fil non filtré montre leurs actes (il lit
+   `{ orgId }` sur le journal, et D9 archive sans effacer) : les exclure ferait qu'une recherche
+   par nom **cache** des lignes que la même page rend sans filtre.
+
+Les filtres vivent sur `LireActiviteQueryDto`, **jamais** sur `LireJournalQueryDto` : le journal
+d'un dossier rend `400` dessus (`forbidNonWhitelisted`) plutôt que de les accepter **sans
+effet** — un paramètre qu'on peut envoyer et qui ne filtre rien se lit comme un filtre appliqué.
+
+### Portes de qualité
+
+- Lint **0 warning** · build OK.
+- **1 101 unitaires** + **253 e2e** verts (dont **51** sur `journal.e2e-spec.ts`, +24 pour cette story).
+- Couverture **99,28 / 93,59 / 96,68 / 99,3** — `modules/journal` à **100 %** sur les 4 axes.
+
+### Mutations éprouvées — 14, chacune rouge sur son test
+
+| # | Mutation | Test qui rougit |
+|---|---|---|
+| 1 | `$in: []` traité comme « pas de filtre » | 8 e2e (hors portée, inexistant, `q` sans correspondance, motifs) |
+| 2 | `echapperRegex` neutralisé | e2e `.*`, `^`, `.+`, `kossi|mensah` |
+| 3 | `filtrePortee` → `orgId` nu | unit « part de la PORTÉE » |
+| 4 | `dossierId` ignoré à la résolution | 6 e2e |
+| 5 | intersection → `$or` | e2e « les deux filtres se CROISENT » |
+| 6 | `nonLus` « harmonisé » avec la liste | e2e « `nonLus` reste le compteur du CABINET » |
+| 7 | saisie non normalisée | e2e accents (`SOCIÉTÉ`, `Société`) |
+| 8 | résolution excluant les archivés | e2e « dossier ARCHIVÉ » |
+| 9 | `orgId` retiré du filtre journal | 2 unit repository *(vert en e2e — la garde est de la défense en profondeur)* |
+| 10 | sortie anticipée « aucun filtre » retirée | 2 unit service |
+| 11 | filtres remontés dans `LireJournalQueryDto` | 2 unit DTO |
+| 12 | prédicat acceptant `0x` | e2e « 400, pas 500 » |
+| 13 | borne d'index en sous-ensemble (`[ACTIF]`) | e2e « dossier ARCHIVÉ » |
+| 14 | borne recopiée `['ACTIF','ARCHIVE']` | ⚠️ **aucun** — cf. ci-dessous |
+
+⚠️ **Deux constats de la mutation, consignés parce qu'ils corrigent une illusion :**
+
+- Un cas de `it.each` s'est révélé **VACANT** : `(a+)+$` ne correspond à aucune raison sociale,
+  échappé ou non — il restait **vert** sous un motif non échappé. Déplacé là où l'assertion porte
+  sur la valeur **réellement transmise** à Mongo (`journal.repository.spec.ts`).
+- La mutation 14 est **indistinguable** par la valeur : `['ACTIF','ARCHIVE']` recopié à la main
+  égale la liste dérivée tant que l'énumération en compte deux. Le test le **dit** au lieu de
+  laisser croire à une garde qu'il n'a pas ; c'est le commentaire de `TOUS_LES_STATUTS` qui porte
+  la règle.
+
+### Vérification docker — `dossier_service`, stack réelle
+
+Cabinet de vérification : **531 dossiers**, **3 010 actes** de journal, un dossier **archivé**.
+
+**Comportement observé** (`GET /api/v1/activite`) :
+
+| Appel | `total` | `nonLus` | Dossiers rendus |
+|---|---|---|---|
+| sans filtre | 3 010 | 3 001 | les 3 |
+| `?dossierId=<Kossi>` | 103 | **3 001** | Kossi seul |
+| `?q=societe` *(sans accent)* | 103 | 3 001 | « Société Générale du Bè » |
+| `?q=SOCIÉTÉ` *(maj. accentuées)* | 103 | 3 001 | idem |
+| `?q=mensah` *(dossier **ARCHIVÉ**)* | 103 | 3 001 | « Garage Mensah » |
+| `?dossierId=<Kossi>&q=kossi` | 103 | 3 001 | Kossi *(intersection non vide)* |
+| `?dossierId=<Kossi>&q=mensah` | **0** | 3 001 | — *(intersection vide, pas un `$or`)* |
+| `?q=inconnu` | **0** | 3 001 | — |
+| `?q=.*` | **0** | 3 001 | — *(motif échappé)* |
+
+`nonLus` **immobile à 3 001** sous tous les filtres : le choix n° 2 est vérifié en base, pas
+seulement affirmé.
+
+**Refus** : `dossierId` d'un **autre cabinet** → `200` + liste vide *(jamais 403/404)* ·
+`dossierId=pas-un-id` → `400` · `dossierId=0xaaaaaaaaaaaaaaaaaaaaaa` → `400` *(pas 500)* ·
+`q[$ne]=x` → `400` · `dossierId[$ne]=null` → `400` · `?q=` sur le journal d'un dossier → `400`.
+
+**AC « pas de `COLLSCAN` » — plans lus au profiler Mongo sur la vraie base :**
+
+| Requête | Plan retenu | Docs lus | Rendus |
+|---|---|---|---|
+| fil non filtré, page 1 | `IXSCAN {orgId, le, _id}` | 25 | 25 |
+| un dossier (`$in` de 1) | `IXSCAN {dossierId, le, _id}` | 25 | 25 |
+| deux dossiers (`$in` de 2) | `SORT_MERGE` sur `{dossierId, le, _id}` | 25 | 25 |
+| `$in: []` | `IXSCAN {dossierId, le, _id}` | 0 | 0 |
+
+**Aucun `COLLSCAN`**, et **aucun tri en mémoire** sauf sur le `$in` vide — où trier zéro document
+est gratuit (0 clé lue, 0 document lu). Le `countDocuments` du fil **non filtré** parcourt les
+3 009 clés de l'organisation : c'est le comportement **pré-existant** de STORY-360, et il descend
+à 103 dès qu'un filtre est posé.
+
+### ⚡⚡ Un défaut trouvé PAR la vérification docker, invisible au HTTP
+
+La recherche rendait le **bon résultat** en **lisant tous les dossiers du cabinet** : sans clause
+sur `statut`, l'index `{orgId, statut, rechercheNormalisee}` est inutilisable — sa 3ᵉ composante
+n'est atteignable que si la 2ᵉ est bornée — et Mongo retombait sur `{orgId, statut}` avec un
+FETCH par dossier.
+
+| Filtre émis | Index retenu | Documents **lus** |
+|---|---|---|
+| `{orgId, rechercheNormalisee}` | `{orgId, statut}` | **531** |
+| `{orgId, statut: $in[tous], rechercheNormalisee}` | `{orgId, statut, rechercheNormalisee}` | **1** |
+
+La clause énumère **tous** les statuts : elle ne sélectionne rien de moins, elle donne seulement
+ses bornes à l'index — et elle est **dérivée de l'énumération**, jamais recopiée.
+
+🪤 **Et la première mesure du correctif était FAUSSE** : `nest --watch` n'avait pas repris
+l'édition, si bien que le service exécutait encore l'ancien code. Le résultat HTTP étant
+**identique dans les deux cas** — seul le plan change —, rien ne le signalait. C'est le
+**profiler Mongo** qui a montré le filtre réellement émis (sans `statut`, 531 documents lus) ;
+la mesure consignée ci-dessus est celle d'**après redémarrage** du conteneur.
+
+### Revue de code et revue de sécurité
+
+**Revue de code** — aucun constat bloquant. Trois faiblesses de **test** corrigées dans un commit
+dédié, dont deux mesurées vertes sous un code fauté :
+
+1. `expect(RECHERCHE_MAX).toBe(RECHERCHE_MAX_PORTEFEUILLE)` était `expect(x).toBe(x)` — le DTO
+   ré-exportait sa propre importation, donc les deux membres étaient le **même binding**. Mesuré : en
+   remplaçant l'import par un littéral `120`, les 13 tests restaient **verts**. La borne du
+   portefeuille est désormais **exercée** sur le DTO ; le ré-export, dont l'unique consommateur était
+   ce test, disparaît avec lui.
+2. `expect(typeof dto.q === 'string' || dto.q === undefined).toBe(true)` — une disjonction accepte
+   deux mondes opposés. La valeur est mesurable, donc assérée ; et un cas manquait (un `q` **répété**
+   arrive comme tableau et doit être **refusé**, pas concaténé en motif « a,b »).
+3. `expect(reponse.status).toBeLessThan(500)` suivi d'un `if (status === 200)` — vert dans les deux
+   mondes. Assertion ferme sur `400`, étendue à `q[$regex]` et `dossierId[$ne]`.
+
+Une assertion **supprimée sans remplacement** : `not.toHaveBeenCalledWith(…, 4ᵉ argument)` est
+**inatteignable** (`toHaveBeenCalledWith` compare la liste complète). La garde réelle contre « passer
+le filtre au compteur de non-lus » est le **typage** — la mutation ne compile pas.
+
+⚠️ **Un constat de la revue ÉCARTÉ, avec son argument** : « hisser `curseur` dans le premier `await`
+pour économiser un aller-retour » (confiance 88). Vérifié : les deux formes ont **3 couches
+sérialisées** sur le chemin filtré (`T_d + max(T_j, T_c)` contre `max(T_d, T_c) + T_j`, et
+`T_c < T_j`), tandis que la proposition en **ajoute une** au chemin **non filtré** — le plus fréquent,
+qui passerait de 2 à 3. Le correctif dégraderait le cas courant pour un gain nul sur le cas rare.
+
+**Revue de sécurité** — **aucune vulnérabilité** de confiance ≥ 80. Les surfaces ont été éprouvées
+contre les versions réellement installées : le parser de requête d'**Express 5 est `simple`**, donc
+`q[$ne]` n'est pas une structure imbriquée mais une **clé littérale** que `forbidNonWhitelisted`
+refuse ; `enableImplicitConversion` traite `Array.isArray` **avant** la coercition primitive, donc un
+tableau reste un tableau et se fait rejeter ; `echapperRegex` couvre **tous** les métacaractères PCRE
+hors classe, et une saisie de ≤ 120 caractères sans quantificateur constructible exclut le
+backtracking catastrophique. La portée vit bien **dans les deux requêtes**, et un dossier étranger
+comme un dossier inexistant rendent le **même** `200` + liste vide — aucun oracle.
+
+### ⚡ Un défaut PRÉ-EXISTANT relevé et ÉCARTÉ → **STORY-406**
+
+`?q=%00abc` rend **500** — `BadValue | Regular expression cannot contain an embedded null byte`. Ni
+`normaliserPourRecherche` ni `echapperRegex` ne connaissent les caractères de **contrôle**.
+
+Écarté de cette PR à dessein : le défaut date de **STORY-359** et vit sur une route **plus large**
+(`GET /dossiers?q=`, ouverte à `TENANT_USER`, quand `/activite` est réservé à `TENANT_ADMIN`). Ce
+n'est pas une injection — la valeur reste une valeur — mais un `400` documenté qui sort en `500`,
+**exactement le patron de STORY-405** à une entrée près. Vérifié sur les deux routes, et porté par
+**STORY-406** (2 pts), qui exige le correctif dans la fonction **partagée** (3 appelants) plutôt que
+chez chacun.
+
+### Hors périmètre — respecté
+
+Aucun filtre par **auteur** *(énumération d'identifiants)* · aucune recherche **plein texte** dans
+les valeurs d'un diff · le journal d'un dossier (`GET /dossiers/:id/journal`) **inchangé**, et il
+**refuse** désormais explicitement les deux paramètres.
+
+### Pour le consommateur FE-068
+
+Le contrat est en place : `useActivite(page, { recherche, dossierId })` peut passer côté serveur,
+**la mention « sur cette page » de `JournalPied` doit disparaître** — c'est le vrai livrable — et
+`TAILLE_PAGE_FIL` peut redescendre de 100 à 25. ⚠️ Le compteur de non-lus n'est **pas** un
+compteur de résultats : afficher « n actes trouvés » se lit sur **`total`**, jamais sur `nonLus`.
