@@ -267,6 +267,53 @@ l'édition, si bien que le service exécutait encore l'ancien code. Le résultat
 **profiler Mongo** qui a montré le filtre réellement émis (sans `statut`, 531 documents lus) ;
 la mesure consignée ci-dessus est celle d'**après redémarrage** du conteneur.
 
+### Revue de code et revue de sécurité
+
+**Revue de code** — aucun constat bloquant. Trois faiblesses de **test** corrigées dans un commit
+dédié, dont deux mesurées vertes sous un code fauté :
+
+1. `expect(RECHERCHE_MAX).toBe(RECHERCHE_MAX_PORTEFEUILLE)` était `expect(x).toBe(x)` — le DTO
+   ré-exportait sa propre importation, donc les deux membres étaient le **même binding**. Mesuré : en
+   remplaçant l'import par un littéral `120`, les 13 tests restaient **verts**. La borne du
+   portefeuille est désormais **exercée** sur le DTO ; le ré-export, dont l'unique consommateur était
+   ce test, disparaît avec lui.
+2. `expect(typeof dto.q === 'string' || dto.q === undefined).toBe(true)` — une disjonction accepte
+   deux mondes opposés. La valeur est mesurable, donc assérée ; et un cas manquait (un `q` **répété**
+   arrive comme tableau et doit être **refusé**, pas concaténé en motif « a,b »).
+3. `expect(reponse.status).toBeLessThan(500)` suivi d'un `if (status === 200)` — vert dans les deux
+   mondes. Assertion ferme sur `400`, étendue à `q[$regex]` et `dossierId[$ne]`.
+
+Une assertion **supprimée sans remplacement** : `not.toHaveBeenCalledWith(…, 4ᵉ argument)` est
+**inatteignable** (`toHaveBeenCalledWith` compare la liste complète). La garde réelle contre « passer
+le filtre au compteur de non-lus » est le **typage** — la mutation ne compile pas.
+
+⚠️ **Un constat de la revue ÉCARTÉ, avec son argument** : « hisser `curseur` dans le premier `await`
+pour économiser un aller-retour » (confiance 88). Vérifié : les deux formes ont **3 couches
+sérialisées** sur le chemin filtré (`T_d + max(T_j, T_c)` contre `max(T_d, T_c) + T_j`, et
+`T_c < T_j`), tandis que la proposition en **ajoute une** au chemin **non filtré** — le plus fréquent,
+qui passerait de 2 à 3. Le correctif dégraderait le cas courant pour un gain nul sur le cas rare.
+
+**Revue de sécurité** — **aucune vulnérabilité** de confiance ≥ 80. Les surfaces ont été éprouvées
+contre les versions réellement installées : le parser de requête d'**Express 5 est `simple`**, donc
+`q[$ne]` n'est pas une structure imbriquée mais une **clé littérale** que `forbidNonWhitelisted`
+refuse ; `enableImplicitConversion` traite `Array.isArray` **avant** la coercition primitive, donc un
+tableau reste un tableau et se fait rejeter ; `echapperRegex` couvre **tous** les métacaractères PCRE
+hors classe, et une saisie de ≤ 120 caractères sans quantificateur constructible exclut le
+backtracking catastrophique. La portée vit bien **dans les deux requêtes**, et un dossier étranger
+comme un dossier inexistant rendent le **même** `200` + liste vide — aucun oracle.
+
+### ⚡ Un défaut PRÉ-EXISTANT relevé et ÉCARTÉ → **STORY-406**
+
+`?q=%00abc` rend **500** — `BadValue | Regular expression cannot contain an embedded null byte`. Ni
+`normaliserPourRecherche` ni `echapperRegex` ne connaissent les caractères de **contrôle**.
+
+Écarté de cette PR à dessein : le défaut date de **STORY-359** et vit sur une route **plus large**
+(`GET /dossiers?q=`, ouverte à `TENANT_USER`, quand `/activite` est réservé à `TENANT_ADMIN`). Ce
+n'est pas une injection — la valeur reste une valeur — mais un `400` documenté qui sort en `500`,
+**exactement le patron de STORY-405** à une entrée près. Vérifié sur les deux routes, et porté par
+**STORY-406** (2 pts), qui exige le correctif dans la fonction **partagée** (3 appelants) plutôt que
+chez chacun.
+
 ### Hors périmètre — respecté
 
 Aucun filtre par **auteur** *(énumération d'identifiants)* · aucune recherche **plein texte** dans
