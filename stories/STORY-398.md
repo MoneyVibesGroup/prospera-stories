@@ -4,9 +4,12 @@ Status: ready-for-dev
 
 **Épic :** EPIC-010 — Référentiels & table de passage (FR-005..FR-008)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/dto`, `modules/bilan/mapping-override/dto`
-**Points :** 2 · **Sprint :** S20
+**Points :** 2 → **3** ⬆️ *(2026-08-25 : périmètre étendu aux DTO de liasse, voir §③)*
+· **Sprint :** S20
 **Origine :** remontée le **2026-08-24** par **FE-030**, en câblant la table de passage —
 c'est-à-dire en essayant de **consommer** `POST …/bilan/table-de-passage/dry-run`.
+**Étendue le 2026-08-25 par FE-031**, qui a livré le consommateur que cette story attendait
+pour traiter les DTO de liasse — son hors-périmètre d'origine les y renvoyait nommément.
 
 ---
 
@@ -53,6 +56,44 @@ libellé, la règle de solde, le préfixe retenu et — surtout — la `source`
 | `SurchargeResponseDto` | `validePar` / `valideAt` / `motif` | `string` \| `null` |
 | `JeuEtatsResponseDto` · `LiasseDto` · `JeuEtatsSommaireDto` | 20+ autres | — |
 
+### ③ ⬆️ ÉTENDU LE 2026-08-25 — `BilanDto` : **six propriétés sur huit**, dont **trois FAUSSES**
+
+⚡ **Cette extension est celle que la story avait elle-même prévue.** Son hors-périmètre disait :
+*« les 20+ objets non typés des DTO de liasse […] **reviendront avec FE-031→034** ; les traiter ici
+ferait une story sans consommateur »*. **FE-031 est livrée le 2026-08-25** — le consommateur
+existe, la condition est remplie.
+
+⛔ **Et le cas est PIRE que celui de `mappes`.** Là où le rattachement avait *un* champ faux,
+`BilanDto` en a **trois**, et ce sont **les tableaux qui SONT l'écran** :
+
+| Propriété | Type publié | Forme réelle (relevée sur l'`example` et le moteur) |
+|---|---|---|
+| `actif` | **`string[]`** | `{ etat, poste, libelle, brutN, amortN, netN, netN1 }[]` |
+| `passif` | **`string[]`** | `{ etat, poste, libelle, montantN, montantN1 }[]` |
+| `sousTotaux` | **`string[]`** | `{ etat, poste, libelle, valeurN, valeurN1 }[]` |
+| `controle` | `Record<string, never>` | `{ totalActifN, totalPassifN, resultatNetN, ecartN, equilibreN, …N1 }` |
+| `coherenceSousTotaux` | `Record<string, never>` | `{ bz, dz, totalActifDirect, totalPassifResultatDirect, ecartEquilibre, equilibre, coherent }` ou `null` |
+| `referentiel` / `stamp` | `Record<string, never>` | `{ code, version }` / `{ code, version, checksum }` |
+
+⛔ **`controle` en `Record<string, never>` interdit d'écrire `controle.ecartN`** — c'est-à-dire de
+lire **l'objet même de FE-031**. Le contrôle d'équilibre, la question que tout expert-comptable
+pose en ouvrant une liasse, n'est **pas atteignable par le type généré**.
+
+⚠️ **Deux nuances que le correctif doit préserver, sous peine d'en créer une pire :**
+
+1. **Les comparatifs N-1 valent `null`, jamais `undefined`** — et `null` ≠ `0`. « Ce poste
+   n'existait pas en N-1 » et « il valait zéro » mènent à des décisions différentes. Les schémas
+   doivent déclarer `nullable: true`, pas rendre les champs optionnels.
+2. **`coherenceSousTotaux` peut valoir `null`** en toute légitimité (« non applicable sans
+   sous-total » — SFD-BCEAO n'en déclare aucun). Ce `null`-là est une **réponse**, pas une absence
+   de donnée : le distinguer d'un échec de lecture est ce qui a obligé le front à envelopper ses
+   lectures dans un `{ valeur }`.
+
+⇒ Coût actuel côté front : **7 lecteurs supplémentaires** dans `api/lecture-contrat.ts`
+(`lireActif`, `lirePassif`, `lireSousTotaux`, `lireControleEquilibre`, `lireCoherenceSousTotaux`,
+`lireStamp`, + les primitives `lireNombreOuNul` / `lireBooleen`), **44 tests unitaires** qui ne
+prouvent qu'une chose : que le front **refuse** ce que le serveur ne garantit pas.
+
 ---
 
 ## Ce que ça coûte, concrètement
@@ -90,11 +131,25 @@ champ, personne ne le sait.
   `mapComptes` le pose systématiquement (`rattachementSurcharge` comme `rattacher`) :
   l'exemple est à corriger en même temps, sinon il continuera de désinformer.
 
+**Inclus — volet liasse, ajouté le 2026-08-25 (consommateur : FE-031)**
+
+- Déclarer les classes de DTO qui manquent à `BilanDto` : `PosteActifDto`, `PostePassifDto`,
+  `SousTotalDto`, `ControleEquilibreDto`, `CoherenceSousTotauxDto` — et donner un `type` à
+  `actif`, `passif`, `sousTotaux`, `controle`, `coherenceSousTotaux`, `referentiel`, `stamp`.
+- **`nullable: true`** sur tous les comparatifs N-1 (`netN1`, `montantN1`, `valeurN1`,
+  `totalActifN1`, `totalPassifN1`, `resultatNetN1`, `ecartN1`, `equilibreN1`) et sur
+  `coherenceSousTotaux` lui-même. ⛔ **Ne pas les rendre `optional`** : `null` porte un fait
+  (« pas de comparatif »), `undefined` n'en porte aucun.
+- `etat` déclaré en **enum** (`BILAN_ACTIF` | `BILAN_PASSIF` | `BILAN`), même patron que `type` et
+  `source` ci-dessus : une valeur ajoutée doit **casser la compilation** du client.
+
 **Hors périmètre**
 
-- Les 20+ objets non typés des DTO de **liasse** (`LiasseDto`, `JeuEtatsResponseDto`) —
-  aucun écran ne les consomme encore ; ils reviendront avec FE-031→034. Les traiter ici
-  ferait une story sans consommateur, c'est-à-dire STORY-144 une fois de plus.
+- Les DTO des **trois autres états** — compte de résultat, TFT, notes annexes — et
+  `JeuEtatsResponseDto` / `LiasseDto`. Leurs consommateurs (**FE-032/033/034**) ne sont pas
+  livrés ; les traiter ici rejouerait exactement l'orphelinat que ce hors-périmètre existe pour
+  éviter. ⚠️ **Ils reviendront de la même façon** : à la livraison du premier écran qui les
+  consomme.
 
 ---
 
@@ -109,6 +164,15 @@ champ, personne ne le sait.
 4. Un test de contrat compare le **document OpenAPI généré** à la forme réellement
    renvoyée par la route — pas deux descriptions parallèles.
 5. Les `example` restants sont cohérents avec les schémas (`source` présent).
+6. ⬆️ **(2026-08-25)** `POST /dossiers/{id}/bilan/etats/bilan/dry-run` publie `actif`, `passif` et
+   `sousTotaux` comme des tableaux d'objets **complètement décrits** — jamais en `string[]` — et
+   `controle`, `coherenceSousTotaux`, `referentiel`, `stamp` avec leurs propriétés.
+7. ⬆️ **(2026-08-25)** Les comparatifs N-1 sortent **`nullable`**, pas optionnels ; un test de
+   contrat vérifie qu'un dry-run **sans `soldesN1`** rend bien `null` (et non `0`, ni le champ
+   absent) sur `netN1`, `montantN1`, `valeurN1` et les quatre champs `…N1` de `controle`.
+8. ⬆️ **(2026-08-25)** Un dry-run sur un référentiel **sans cascade** (SFD-BCEAO) rend
+   `sousTotaux: []` et `coherenceSousTotaux: null` — les deux déclarés comme tels au contrat, pour
+   qu'aucun client ne les lise comme une erreur.
 
 ---
 
@@ -121,5 +185,15 @@ champ, personne ne le sait.
   celle-ci publie un type **faux**.
 - ⚠️ Après livraison, le front doit **régénérer** (`npm run gen:api -- bilan`) *et*
   **retirer** `api/lecture-contrat.ts` : laisser les deux en place ferait vivre deux
-  descriptions du même contrat. Consommateur nommé : **FE-030**, pour ne pas rejouer
-  l'orphelinat de STORY-144.
+  descriptions du même contrat. Consommateurs nommés : **FE-030** *(table de passage)* et
+  ⬆️ **FE-031** *(Bilan actif/passif)*, pour ne pas rejouer l'orphelinat de STORY-144.
+- ⬆️ **(2026-08-25)** ⚠️ **Le retrait de `lecture-contrat.ts` devient une opération à deux
+  temps** : FE-032/033/034 en écriront d'autres pour les DTO restés hors périmètre. Ne retirer
+  que les lecteurs dont le schéma est effectivement publié, et vérifier par **mutation** (casser
+  un champ, exiger un rouge) plutôt qu'en se fiant à la régénération — `gen:api` régénère tous les
+  services sans dire lequel a changé.
+- ⬆️ **(2026-08-25)** ⚠️ **Le défaut a un coût qui se répète, et il se chiffre** : 2 stories
+  frontend ont dû écrire, tester et documenter un contrat serveur (FE-030 : 208 lignes + 156 de
+  tests ; FE-031 : ~300 lignes + 256 de tests). C'est le troisième service touché par le même
+  patron `@ApiProperty` sans `type` (après `balance-service` et ceux de STORY-376 / 389) ⇒
+  **candidat à une règle d'architecture**, pas à une n-ième story de rattrapage.
