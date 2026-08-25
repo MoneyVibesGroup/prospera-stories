@@ -279,3 +279,90 @@ aucune valeur invalide n'a jamais pu être **écrite**, la levée précède l'é
 recompilé (`Found 0 errors`) **sans redémarrer le process**. Chaque état ci-dessus a donc été mesuré
 après un `docker compose restart` explicite et un `/health` à 200 — jamais sur la foi du seul
 « Found 0 errors » (leçon `hot-reload-ment-verif-docker`).
+
+---
+
+## Revue de code (⑥) et revue de sécurité (⑦)
+
+**8 constats en revue de code (0 bloquant) · 1 constat en revue de sécurité (Low, confiance 85).** Tous
+traités : aucun laissé de côté.
+
+### Revue de code — ce qui a été corrigé, et pourquoi
+
+| # | Constat | Traitement |
+|---|---|---|
+| ① | ⚡⚡ **Le seul test qui gardait le placement du filet était VACANT.** Il déguisait une `NotFoundException` en `CastError` **sans poser `kind`** : le prédicat rendait `false` de toute façon, si bien que déplacer le filet AVANT la branche `HttpException` laissait la suite **entièrement verte**. Le commentaire de production défendait pourtant cette décision d'ordre. | Le déguisement est rendu **efficace**, et le test l'**assert lui-même** (`expect(estErreurIdentifiantMalforme(refus)).toBe(true)`) avant de conclure — sans quoi il pourrait redevenir vacant en silence. |
+| ② | **Le filet n'était éprouvé que dans 1 dépôt sur 6.** Mesuré à la couverture : la ligne `return { statusCode: 400 … }` était **non couverte** dans les 5 autres. Le retirer n'y faisait rougir personne. | Le bloc de tests du filtre est posé dans les **6**. |
+| ③ | **Un commentaire d'e2e affirmait une propriété que le harnais rend impossible** (« si la garde disparaissait, le filet prendrait le relais et ce test resterait vert »). | Corrigé : le `TestingModule` de `dossiers.e2e-spec` n'importe pas `CommonModule` et ne pose aucun `APP_FILTER` — le filtre global **n'y est pas monté**. |
+| ④ | `document-service` affirmait **A et ¬A à deux fichiers d'écart** : la story corrigeait la prémisse « `isValid()` accepte toute chaîne de 12 caractères » dans `dossier.gate.ts` et la laissait dans `dossier.gate.spec.ts`, dont elle avait pourtant édité le même bloc. | Corrigé, avec la mesure. |
+| ⑤ | **JSDoc orpheline** : les 26 lignes qui documentaient `OBJECT_ID_STRICT` flottaient après la suppression de la constante. | Devient la note d'import d'`estObjectId`. |
+| ⑥ | **Le message rendu au client était mi-anglais dès `{ each: true }`** : `buildMessage` de `class-validator` préfixe le littéral `'each value in '`. La règle projet « tout en français » porte explicitement sur les messages. | Message construit à la main, préfixe **« chaque valeur de »**. Asserté — aucun test ne le faisait, c'est ainsi qu'il avait échappé. |
+| ⑦ | `BSONError` reconnu **en bloc** là où `CastError` est restreint. | ⇒ **fusionné avec le constat de sécurité**, voir ci-dessous. |
+| ⑧ | Un **troisième chemin** existe — le cast à l'**écriture**, dont le `CastError` est enfoui dans une `ValidationError` mongoose que le prédicat ne reconnaît pas. | **Documenté comme limite assumée, pas couvert** : aucune route vivante n'y mène, et l'élargir serait exactement ce que la revue de sécurité reproche par ailleurs au filet. Le bon geste, le jour venu, est d'appeler `estObjectId` **avant** l'écriture. |
+
+### Revue de sécurité — le constat, et ce qu'il a changé
+
+**`name === 'BSONError'` ne veut pas dire « identifiant mal formé »** (Low · confiance 85 · CWE-778 ·
+A09:2021). `BSONError` est la **classe de base** de `bson` : **126 sites de levée** la portent, dont
+quatre seulement concernent un `ObjectId`. Mesuré avec le `bson` du dépôt :
+
+```
+new Types.ObjectId('0x…')       BSONError | input must be a 24 character hex string, …
+ObjectId.createFromHexString    BSONError | hex string must be 24 characters
+serialize({ 'a\0b': 1 })        BSONError | key a b must not contain null bytes
+serialize({ $gt: 1 })           BSONError | key $gt must not start with '$'
+serialize(circulaire)           BSONError | Cannot convert circular structure to BSON
+```
+
+Les trois derniers sont des **défauts serveur** — dont les **garde-fous de dernier rideau de `bson`
+contre l'injection de clés de document**. Le filet les requalifiait en `400`, ce qui les sortait du
+budget d'erreur 5xx ; et comme le filtre ne journalisait la pile qu'au-delà de 500, il ne restait plus
+qu'un `warn` portant un message **constant** : aucune trace de ce qui avait réellement échoué.
+
+⚡ **Le scénario exhibé est reproductible** : `PUT /catalog/entitlements/:orgId/:moduleCode` accepte un
+`config?: Record<string, unknown>` dont **les clés sont choisies par l'appelant**. Une clé portant un
+octet NUL fait lever `bson` à l'écriture.
+
+**Deux gestes, indépendants, tous deux livrés :**
+
+1. **La branche `BSONError` est resserrée comme `CastError` l'était déjà**, aux deux seuls messages que
+   la lecture d'un ObjectId produit. Le code posait déjà ce principe pour `kind === 'ObjectId'` — il ne
+   l'appliquait qu'à une branche sur deux. ⚠️ Filtrer sur un message est fragile, **et c'est assumé** :
+   une reformulation de `bson` ferait retomber sur le `500` d'avant la story, **jamais** sur un faux
+   `400`, et le spec — qui produit un **vrai** `BSONError` — virerait au rouge.
+2. **Le niveau de log suit désormais la NATURE de l'exception, plus son statut.** Une exception qui
+   n'était pas une `HttpException` reste journalisée en `error`, **avec sa pile**, même requalifiée
+   en 400.
+
+### Mutations sur les correctifs
+
+| Mutation | Attendu | Mesuré |
+|---|---|---|
+| Filet placé **avant** la branche `HttpException` | le test d'ordre rougit | 🔴 2 échecs |
+| `BSONError` reconnu **en bloc** (état pré-sécurité) | « un BSONError de sérialisation reste un 500 » rougit | 🔴 3 échecs |
+| Niveau de log **recouplé** au statut | « journalise en erreur, avec la pile » rougit | 🔴 1 échec |
+| `buildMessage` restauré (préfixe anglais) | « le message de *each* est en français » rougit | 🔴 1 échec |
+
+### Vérification docker REJOUÉE sur l'état final
+
+Le correctif de sécurité touche le filet, déjà mesuré en phase ④ : la vérification a donc été **rejouée**
+sur l'état final (stack redémarrée, `/health` à 200 avant chaque mesure).
+
+| Cas | Résultat |
+|---|---|
+| `0x` · `0h` · un nombre | `400`, message nommant `responsableUserId` |
+| `0x` **dans** `contributeursUserIds` | `400`, **« chaque valeur de contributeursUserIds… »** — le préfixe anglais a bien disparu |
+| identifiant valide en **MAJUSCULES** | `200` (non-régression STORY-404) |
+| **filet seul** (décorateur neutralisé), après resserrement | `400 IDENTIFIANT_MALFORME` — le resserrement **n'a pas cassé le filet** |
+| **la trace**, sur ce même appel | `ERROR` + `BSONError: input must be a 24 character hex string, …` — là où l'état précédent ne laissait qu'un `warn` sans pile |
+
+Base inchangée par les refus : `version = 4` (création + 3 affectations légitimes), `contributeursUserIds: []`,
+et **0 dossier à `responsableUserId` non canonique** sur toute la collection.
+
+### Commits par dépôt
+
+| Dépôt | feature | revue | securite |
+|---|---|---|---|
+| `dossier-service` | 2 (dont les commentaires) | 1 | 1 |
+| `document-service` · `balance-service` · `bilan-service` · `platform-catalog-service` · `auth-service` | 1 | 1 | 1 |
+| `admin-panel` | 1 | 1 | **aucun** — son validateur est amputé du filet (ni `mongoose` ni `bson`), le constat de sécurité y est **sans objet** |
