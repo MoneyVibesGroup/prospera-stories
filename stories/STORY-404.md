@@ -4,7 +4,7 @@
 **Réf. :** **STORY-353** *(l'affectation, qui a posé le défaut)* · **STORY-382** *(qui l'a rendu exploitable, puis en a fermé la retombée)* · décision **D6** · question **Q2**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** `in_progress`
+**Statut :** `done`
 **Complexité :** medium
 **Créée le :** 2026-08-25 — **par la revue de sécurité de STORY-382**
 **Sprint :** 20
@@ -115,7 +115,7 @@ STORY-382).
 
 ## Progress Tracking
 
-**Statut :** `in_progress` — prise en dev le 2026-08-25.
+**Statut :** `done` — clôturée le 2026-08-25, PR `dossier-service#15` rebase-mergée sur `dev`.
 **Branche :** `MNV-404` (`dossier-service`), branchée sur `dev` **avant** la première ligne de code.
 
 ### Décision de conception, prise avant d'écrire
@@ -215,3 +215,34 @@ identifiant.
 retombée automatique (`SYSTEME` réaffecte le dossier à l'administratrice), **puis** la tentative de le
 lui réaffecter a été refusée. C'est exactement l'arbitrage `ACTIVE` — la garde et la retombée disent la
 même chose.
+
+### Revues ⑥ et ⑦
+
+**Revue de code — 2 constats, non bloquants, corrigés dans un commit dédié :** le JSDoc de
+`dedoublonner` avait été **orphelinisé** par l'insertion de `validerAppartenance` (deux blocs consécutifs
+devant la nouvelle méthode, rien devant l'ancienne — invisible à `tsc` comme à eslint) ; et
+`sousEnsemble()` acceptait un `FilterQuery<OrgMember>` étalé **après** `orgId`/`userId`, qu'un futur
+appelant aurait pu **écraser** sans cesser de compiler. La signature n'accepte plus qu'un **statut**.
+
+**Revue de sécurité — 0 constat** au seuil de confiance ≥ 80. Instruit : l'anti-énumération (les deux
+causes convergent sur **une seule** requête, et l'index `{orgId,userId}` étant préfixé par `orgId`, les
+deux cas produisent le même IXSCAN sans FETCH — **pas de canal temporel**) ; les 5 chemins d'écriture
+d'affectation (les 4 autres posent un identifiant venu du **jeton** ou de `trouverAdministrateur`) ;
+l'injection NoSQL (tout transite par `new Types.ObjectId(...).toHexString()`) ; l'origine du `orgId` ; le
+`logger.warn` ; le câblage d'`OrgMembersModule` ; la non-régression de STORY-382 ; et le *fail-closed* du
+filtre `ACTIVE`, **vérifié chez le producteur** — l'enveloppe `identity.membership.changed` valide
+`status` contre une liste fermée.
+
+### Ce qui a été laissé de côté
+
+- ⛔ **`@IsMongoId()` accepte le préfixe `0x`** (`isHexadecimal = /^(0x|0h)?[0-9A-F]+$/i`) : `0x` + 22 hex
+  fait 24 caractères, franchit la validation, puis `new Types.ObjectId()` lève un `BSONError` ⇒ **500** là
+  où un **400** est documenté. Vérifié empiriquement. **Strictement pré-existant** — l'appel qui lève est
+  `dossiers.service.ts:764` sur `dev`, *en amont* de la nouvelle garde. ⇒ **STORY-405 ouverte.**
+- ⛔ Un **JSDoc orphelin pré-existant** dans `org-members.service.ts` (celui de `trouverAdministrateur`,
+  collé devant `membresDe` depuis STORY-382) : même défaut que celui corrigé ici, mais hors périmètre —
+  la story ne touche pas cette zone.
+- ⚠️ **Intermittence e2e signalée, non attribuée** : 1 exécution sur 5 a rendu un échec isolé
+  (`exercices`, puis 4 passes vertes ; le scan de revue en avait vu un autre, dans `dossiers`). Deux
+  fichiers différents, jamais deux fois le même test — instabilité d'exécution parallèle des 6 suites,
+  sans lien établi avec cette PR.
