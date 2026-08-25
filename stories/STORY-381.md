@@ -13,7 +13,7 @@ dossier**. Absorbé ici plutôt que fiché à part : c'est le même trou, vu par
 **Réf. :** **STORY-099** *(handoff `balance.created`, producteur livré)* · **STORY-101** *(contrat de
 balance canonique)* · **STORY-064/065** *(jeu d'états, snapshot immuable)* · **STORY-357** *(le Bilan
 se scope sur le dossier)* · **STORY-375** *(les codes de refus deviennent un enum OpenAPI)*
-**Status :** `ready-for-dev`
+**Status :** `in_progress` *(2026-08-25 — arbitrage rendu : voie A′)*
 
 > ### Pourquoi ce numéro
 > `STORY-379` est prise (fiche créée par la revue PO de la maquette FE-011, le 2026-08-21) et
@@ -100,6 +100,58 @@ Deux voies, et elles n'ont pas le même coût. **Le PO / l'architecte tranche ; 
 
 ⚠️ **Quelle que soit la voie, l'AC-2 et l'AC-3 ne changent pas** : la liasse porte la référence, et le
 serveur refuse. Seule la façon de **connaître** la balance diffère.
+
+---
+
+## ⚖️ ARBITRAGE RENDU — **voie A′** (PO, le 2026-08-25, avant dev-story)
+
+**Ni A ni B tels que fichés : `A′` — read-model de MÉTADONNÉES alimenté par Kafka, sans client HTTP
+sortant.** Le tableau ci-dessus a été instruit sur le code réel des deux dépôts avant l'arbitrage, et
+deux constats en ont déplacé les termes.
+
+### ⚡ Constat 1 — la voie B ne peut PAS tenir l'AC-3, et ce n'est pas une question d'effort
+
+La voie B fait vérifier au serveur une **empreinte que le client lui fournit lui-même**. Or l'AC-3
+exige de refuser une balance `BROUILLON`/`REJETÉE` et une balance d'**un autre dossier** : deux faits
+que `bilan-service` ne détient pas et que le corps de la requête ne peut pas prouver. Retenir B
+supposait donc d'assouplir l'AC-3 — que la story déclare intangible. **Écartée.**
+
+### ⚡ Constat 2 — `balance.etat.change` porte l'état de l'EXERCICE, pas celui du DOCUMENT
+
+Le contrat existant (`balance-etat-events.ts`, STORY-359) l'écrit noir sur blanc, et **interdit**
+explicitement d'indexer un read-model sur son `balanceId` :
+
+> *« `etat` est l'état de L'EXERCICE, pas celui du document `balanceId` […] Un consommateur qui
+> indexerait son read-model sur `balanceId` reconstruirait précisément le défaut que ce contrat
+> ferme. »*
+
+⇒ **Un consumer branché sur les topics d'aujourd'hui ne peut pas répondre « CETTE balance est-elle
+validée ? »** — ce que l'AC-3 demande. La voie A telle que fichée le contourne par une **relecture
+HTTP**, qui donnerait à `bilan-service` son **premier client sortant** et un couplage synchrone sur
+le chemin chaud. Coût réel, pour une donnée qui tient en dix champs.
+
+⛔ **Et le trou n'est pas comblable par un simple champ additif sur `balance.etat.change`** :
+`publierEtatExercice` **s'abstient de publier** sur `origine: A_NOUVEAUX` (délibérément — un socle
+d'à-nouveaux n'est pas la balance de travail de l'exercice). Greffer l'état du document sur ce
+message-là lui ferait hériter de ce silence, et le read-model d'aval croirait `BROUILLON` une balance
+validée — sans que rien ne rougisse. Le canal « état du document » a donc **son propre topic**.
+
+### ✅ Ce que A′ pose
+
+| | |
+|---|---|
+| `balance-service` | ① `Balance.exerciceId` **résolu serveur** au dépôt, depuis `exercices_dossier`, par la **même clé exacte `{orgId, dossierId, debut, fin}` qu'`estClos`** — une seule règle de rapprochement dans le service, jamais deux · ② `BalanceResponseDto.exerciceId` (**AC-8**) · ③ `balance.created` gagne `exerciceId` + `checksumVersion` (additifs, `schemaVersion` inchangé — comme `dossierId` en STORY-236) · ④ **nouveau topic `balance.etat.document.change`**, publié **inconditionnellement** dans la transaction de `marquerEtat`, `A_NOUVEAUX` compris |
+| `bilan-service` | ⑤ read-model `balances_balance` keyé `balanceId` (métadonnées seules — **aucune ligne de balance dupliquée**), consumer group `bilan-balance`, `fromBeginning` · ⑥ les **soldes continuent d'être envoyés par le client**, exactement comme aujourd'hui · ⑦ les gardes AC-3/AC-5 lisent ce read-model, scopé `{orgId, dossierId}` |
+
+**Ce que ça coûte, dit franchement** : la provenance est **déclarée puis vérifiée** (`balanceId`
+existe, appartient au dossier gardé, est `VALIDÉE`), elle n'est pas **recalculée** — `bilan-service`
+ne re-scelle pas les soldes reçus. Recalculer le checksum côté consommateur, c'est précisément le
+piège que la story prête à la voie B (`checksumVersion`, STORY-147) : deux algorithmes qui divergent
+sans que personne ne le voie. Le `balanceChecksum` figé au snapshot est donc **celui que
+`balance-service` a scellé**, relu du read-model — jamais un calcul local.
+
+**AC-7 s'applique** (la voie retenue est événementielle) : garde-fou d'enveloppe + `estObjectId`
+dans un fichier **couvert**, consumer réduit à un tuyau, rejeu prouvé en docker.
 
 ---
 
@@ -233,3 +285,86 @@ dossier, lui, porte déjà un `libelle` unique et opposable.
       par l'utilisateur)*, **FE-076** *(`blocked` — appellera `…/comparaison/exercices` par
       libellés, que l'AC-9 rend fiables)*, et **la story de création de liasse, qui reste à
       ficher**.
+
+---
+
+## Progress Tracking
+
+- **2026-08-25** — arbitrage d'architecture rendu par le PO **avant** dev-story : **voie A′**
+  (read-model de métadonnées alimenté par Kafka, sans client HTTP sortant). Voies A et B écartées,
+  motifs consignés au § *ARBITRAGE RENDU*. Branches `MNV-381` ouvertes sur `docs/` (base `main`),
+  `bilan-service` et `balance-service` (base `dev`).
+
+### Dev — voie A′ livrée sur 2 dépôts (2026-08-25)
+
+**`balance-service`** — `Balance.exerciceId` résolu **serveur** au dépôt depuis `exercices_dossier`, sur la
+**même clé exacte `{orgId, dossierId, debut, fin}` qu'`estClos`** (une seule règle de rapprochement dans le
+service) · `BalanceResponseDto.exerciceId` · `balance.created` gagne `exerciceId` + `checksumVersion`
+(additifs, `schemaVersion` inchangé) · **nouveau topic `balance.etat.document.change`**, publié
+**inconditionnellement** dans la transaction de `marquerEtat`, pré-créé au boot.
+
+**`bilan-service`** — read-model `balances_balance` (métadonnées seules, **aucune ligne dupliquée**),
+consumer group dédié `bilan-balance`, `fromBeginning`, validation d'enveloppe dans un fichier **couvert**
+(`balance-payload.util.ts`, jamais dans le `*bootstrap*`) · `BalancesDossierRepository` scopé
+`{orgId, dossierId}` · `CreerJeuEtatsDto` : `balanceId` **requis**, `exercice` **supprimé** ·
+`RecalculerJeuEtatsDto.balanceId` requis et **identique** · provenance figée sur le jeu **et** le snapshot ·
+`CODES_REFUS_JEU_ETATS` publié en `enum` OpenAPI (`enumName: CodeRefusJeuEtats`, forme STORY-375).
+
+#### ⚡⚡ Le point de conception qui a décidé de tout : `balance.created` n'ÉCRASE PAS l'état
+
+Deux topics alimentent **une même clé** de read-model, et l'un d'eux porte un état de **naissance**. Posé par
+un `$set` ordinaire, un **rejeu** de la création — marqueur `ProcessedEvent` purgé au TTL, reset d'offsets,
+`fromBeginning` sur un group neuf — **dé-validerait** une balance déjà validée, et `bilan-service` refuserait
+alors `409 BALANCE_NON_VALIDEE` une liasse parfaitement légitime, **sans qu'aucune erreur ne soit levée nulle
+part**. D'où `$setOnInsert` pour l'état de naissance et `$max` pour `occurredAt` (l'horloge métier ne recule
+pas). *Prouvé en docker ci-dessous.*
+
+### Portes de qualité
+
+| | `bilan-service` | `balance-service` |
+|---|---|---|
+| lint | 0 warning | 0 warning |
+| build | OK | OK |
+| unit | **1 131** verts (1 skipped) | **3 044** verts |
+| e2e | **284** verts (21 suites) | **714** verts (26 suites) |
+| couverture | 98,69 st / 93,68 br / 98,39 fn / 98,64 li | 98,98 st / 91,84 br / 98,18 fn / 99,06 li |
+
+### 🪤 Mutation-testing — 10 mutations, chacune vérifiée ROUGE puis restaurée
+
+| # | Mutation | Test qui rougit |
+|---|---|---|
+| M1 | `etatDocumentChange` hérite du silence `A_NOUVEAUX` | `⚡ publie QUAND MÊME l'état du DOCUMENT pour un socle d'à-nouveaux` |
+| M2 | l'`exerciceId` résolu n'atteint plus `buildCanonique` | `⚡ résout l'exercice…` + `⚡ le handoff porte la balance ESTAMPILLÉE` |
+| M3 | `exerciceId` retiré de la **liste blanche** de `repo.insert` | `insert construit le document…` |
+| M4 | `$setOnInsert` → `$set` sur l'état de naissance | `⚡ balance.created pose BROUILLON en $setOnInsert` |
+| M5 | `dossierId` retiré du filtre de `BalancesDossierRepository` | `filtre sur (org, dossier, balance)` |
+| M6 | la garde d'état `VALIDÉE` désarmée | 3 unitaires + 2 e2e `BALANCE_NON_VALIDEE` |
+| M7 | la garde de provenance passe **après** la production de la liasse | `⛔ ne produit même PAS la liasse quand la provenance est refusée` |
+| M8 | `balanceId` retiré du payload de `snapshots.creer` | 1 unitaire + 1 e2e `AC-2` |
+| M9 | `refuserSiAutreBalance` désarmée | 1 unitaire + 1 e2e `BALANCE_DIFFERENTE` |
+| M10 | `estObjectId` → `Types.ObjectId.isValid` | `⚡ refuse un balanceId NUMÉRIQUE` |
+
+⚠️ **Deux premières tentatives de M1/M2 écartées** : elles rendaient `Tests: 0 total` — un **échec de
+compilation**, qui ne prouve rien (leçon STORY-179/STORY-385). Reformulées pour compiler et n'altérer que
+le comportement.
+
+### ✅ Vérification docker — stack NEUVE (`down -v`), bout en bout, 2026-08-25
+
+Chaîne réelle : `auth-service` → `dossier-service` (dossier + exercice) → `balance-service` (dépôt +
+validation) → Kafka → `bilan-service` (read-model + liasse). KYC/entitlements amorcés en base.
+
+| Preuve | Résultat mesuré |
+|---|---|
+| **AC-8** — la balance nomme son exercice | `balances.exerciceId = ObjectId('6a8e13ae…45a6')` = l'`_id` de l'exercice ouvert dans `dossier-service`. **Aucune date comparée.** |
+| **Round-trip `balance.created`** | `bilan_service.balances_balance` : `{balanceId, dossierId, exerciceId, etat:'BROUILLON', version:1, checksum, checksumVersion:'v2', source:'direct'}` — le consommateur que STORY-099 annonçait et qu'EPIC-009 avait emporté |
+| **AC-3a** — balance `BROUILLON` | `409 BALANCE_NON_VALIDEE` (l'écran n'est plus seul à refuser) |
+| **Nouveau topic `balance.etat.document.change`** | après `POST /balances/:id/valider` → read-model `etat:'VALIDÉE'`, `occurredAt` avancé de `22:15:15` à `22:15:50` |
+| **AC-1 + AC-9** | liasse créée : `exercice:'2025'` **résolu du dossier** (jamais saisi), `exerciceId`, `balanceId`, `balanceVersion:1`, `balanceChecksumVersion:'v2'` |
+| **AC-6** — balance d'un **autre dossier** | `404 BALANCE_INTROUVABLE`, corps **identique** à celui d'une balance inexistante (`requestId` mis à part) |
+| **AC-5** — recalcul sur une autre balance | `409 BALANCE_DIFFERENTE` |
+| **AC-2** — provenance figée | `snapshots_liasse` v1 : `balanceId`, `balanceVersion:1`, `balanceChecksum:'68c59940…'`, `balanceChecksumVersion:'v2'`, `exerciceId` — **distinct** du `checksum` du paquet de référentiel (`d7d96063…`) |
+| **AC-2 — immutabilité** | balance **v2** déposée, puis jeu rouvert + re-validé ⇒ snapshots `[v1, v2]`, **tous deux** sur `balanceVersion: 1`. Le snapshot v1 est **inchangé** ; la v2 de la balance ne s'est pas substituée en silence |
+| **AC-7 — poison-pill** | 2 messages empoisonnés publiés sur le topic (`balanceId` malformé, puis JSON illisible) → `WARN … ignoré` ×2, `balances_balance = 2` (aucun fantôme), `processed_events{eventId:'poison-381'} = 0`. Le message **valide publié APRÈS** a été consommé ⇒ **la partition n'était pas bloquée** |
+| ⚡⚡ **Rejeu de `balance.created` sur une balance DÉJÀ VALIDÉE** | `eventId` neuf (= marqueur purgé) : `etat` reste **`VALIDÉE`** et `occurredAt` **ne recule pas** (`22:15:50`, pas `22:15:15`). C'est la preuve du `$setOnInsert` + `$max` — en `$set`, la balance aurait été dé-validée |
+
+Stack arrêtée (`docker compose stop`) après consignation.
