@@ -4,7 +4,7 @@
 **Réf. :** ticket `TICKET-BACKEND-activite-filtre-par-dossier.md` · **STORY-360** *(le fil existe)* · **STORY-144** *(le défaut du résultat partiel)* · décision **D12** · question **Q10-b**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** `review`
+**Statut :** `done`
 **Complexité :** medium
 **Créée le :** 2026-08-22 — **par FE-068 v2**, sur retour PO direct
 **Sprint :** 20
@@ -132,8 +132,9 @@ résultat partiel de se lire comme un fait.
 
 ## Progress Tracking
 
-**Statut :** `review` — implémentée, portes vertes, vérification docker faite. *(2026-08-25)*
-**Branche :** `MNV-383` sur `dossier-service` · **dépôt unique** (aucun contrat d'événement touché).
+**Statut :** `done` — **clôturée le 2026-08-25**. PR **`dossier-service#17`** rebase-mergée sur `dev`
+(feature + correctif d'index + commit de revue), branche `MNV-383` supprimée.
+**Dépôt unique** — aucun contrat d'événement touché.
 
 ### Ce qui a été livré
 
