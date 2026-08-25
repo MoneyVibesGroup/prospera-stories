@@ -1,4 +1,19 @@
-# STORY-406 : `GET …/rapprochement/ecarts` sans `compteId` lit les relevés de TOUTE l'organisation
+# STORY-411 : `GET …/rapprochement/ecarts` sans `compteId` lit les relevés de TOUTE l'organisation
+
+> ⛔ **RENUMÉROTÉE 406 → 411 le 2026-08-25, à la fusion.** **Collision d'id réelle** : deux stories
+> différentes ont pris « STORY-406 » le même jour, dans deux sessions concurrentes qui ne
+> partageaient aucun commit — (a) celle-ci, ouverte en instruisant la maquette FE-049
+> (`balance-service`), et (b) « Un octet nul dans la recherche rend `500` » (`dossier-service`),
+> ouverte à la revue de sécurité de STORY-383. Le `git log -S` de chaque session voyait l'id libre,
+> et le `git fetch` du jour avait échoué faute de réseau.
+>
+> ⇒ **Règle appliquée — l'id publié gagne.** (b) était déjà sur `origin/main` **et déjà clôturée**
+> (`b0a5760`) : elle **garde 406**. Celle-ci était locale, non poussée : elle devient **STORY-411**.
+> C'est la **deuxième** collision du même genre après STORY-396 → STORY-403.
+>
+> ⚠️ **Ce que ça enseigne, au-delà de la règle** : un `git fetch` qui **échoue** ne rend pas la
+> vérification « faite en local » — il la rend **impossible**. Quand le réseau manque, l'id pris
+> est un **pari**, et il faut l'écrire comme tel dans le tracker pour que la fusion le rejoue.
 
 Status: ready-for-dev
 

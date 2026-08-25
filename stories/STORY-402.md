@@ -115,7 +115,7 @@ l'est, lui, dès aujourd'hui.
   ⇒ Le relevé complet vaut mieux que la découverte au coup par coup : c'est **la troisième fois**
   qu'un écran frontend découvre un survivant org-keyé en essayant de le consommer.
 - ⚠️ **Deux voisines, ouvertes le même jour par la même lecture, et qui ne se recouvrent pas** :
-  **STORY-406** (les écarts sans `compteId` lisent les relevés de toute l'organisation — un appel
+  **STORY-411** (les écarts sans `compteId` lisent les relevés de toute l'organisation — un appel
   org-large *à l'intérieur* d'un service dossier-scopé, qui survivra à ce re-scopage s'il n'est pas
   nommément corrigé) et **STORY-407** (aucune route ne retire un relevé importé — ce qui rend
   l'erreur de compte que cette portée rend probable **définitive**).
