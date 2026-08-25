@@ -1,137 +1,124 @@
-# STORY-396 : Une page de cahier porte les DEUX sens — la destination doit devenir une propriété de la ligne, pas du lot
+# STORY-396 : Une panne d'infrastructure est rendue au cabinet comme « votre pièce est illisible »
 
-Status: ready-for-dev
-
-**Épic :** EPIC-020 — Cahiers & pièces (Atelier Balance)
-**Service :** `balance-service` (`:3007`) — module `cahiers/pieces-ocr`
-**Points :** 5 · **Sprint :** S20
-**Origine :** exigence PO du **2026-08-24**, posée à la revue de la maquette FE-044 :
-> *« dans certains cas comme dans les cahiers des commerçants, les dépenses et les recettes sont mélangées sur une même image — comment tu gères cela ? »*
+**Epic :** EPIC-020 — Pièces justificatives & OCR
+**Réf. :** écart trouvé à la **vérification docker de STORY-385**, 2026-08-24
+**Priorité :** Should Have
+**Story Points :** 3
+**Statut :** not_started
+**Complexité :** medium
+**Sprint :** 20
+**Service :** `document-service` (`:3006`)
 
 ---
 
-## Le fait, relevé à la source
+## Le constat — un défaut du SERVEUR se présente comme un défaut de la PIÈCE
 
-`POST /dossiers/{id}/pieces/ocr` prend une **`destination` de LOT** (`RECETTES | DEPENSES`),
-et l'application branche le lot **entier** :
+Le processeur d'extraction traduit **toute** erreur synchrone du pipeline OCR en un `ECHEC` métier :
 
 ```ts
-// pieces-ocr.service.ts
-const resultat =
-  lot.destination === 'RECETTES'
-    ? await this.recettes.creerLotOcr(user, dossier, exercice, aEcrire)
-    : await this.depenses.creerLotOcr(user, dossier, exercice, aEcrire);
+// profil-extraction.processor.ts
+// Pièce **indécodable/corrompue** : l'OCR a échoué (le worker n'a rien pu
+// reconnaître). On la traite comme une pièce inexploitable → ECHEC
+await this.finaliser(eventId, data, [], 0, ProfilExtractionStatut.ECHEC);
 ```
 
-⚡ **L'extraction, elle, connaît déjà le sens de CHAQUE pièce.** `LignePreProposeeDto`
-publie `sens?: 'ENTREE' | 'SORTIE'`, et `pieces-ocr.regles.ts` lève
-`SENS_CONTRAIRE` quand il contredit la destination du lot :
+Le commentaire annonce le cas qu'il vise — « ex. PNG au chunk IDAT invalide » — et il a raison pour
+celui-là. Mais le `catch` ne distingue **pas** ce que l'erreur dit :
 
-```ts
-export function sensContredit(sens: SensPiece | undefined, destination: DestinationLot): boolean {
-  if (!sens) return false;
-  return destination === 'RECETTES' ? sens === 'SORTIE' : sens === 'ENTREE';
-}
+| Erreur attrapée | Ce que c'est vraiment | Ce que le cabinet lit |
+|---|---|---|
+| chunk PNG invalide | la pièce est corrompue | « illisible » ✅ |
+| `Cannot find module '@napi-rs/canvas'` | **le serveur n'a pas son rasteriseur** | « illisible » ❌ |
+| `tessdata` absent, OOM du worker, disque plein | **le serveur** | « illisible » ❌ |
+
+**Observé en vrai** le 2026-08-24 : un PDF parfaitement valide, déposé sur une stack docker, est ressorti
+`ECHEC` avec `champs: []`. Cause réelle dans les logs : `Cannot find module '@napi-rs/canvas'
+Require stack: /app/dist/ocr/pdf-page-renderer.js`. Rien, **nulle part**, ne disait au collaborateur que la
+panne était de notre côté :
+
+- `/api/v1/health` répond **`ok`** *(mongodb up, kafka up, minio up)* — la santé du service ne couvre
+  aucune dépendance du pipeline OCR ;
+- la liste des pièces affiche `statutOcr: ECHEC`, que STORY-385 vient précisément de définir comme
+  **« illisible »** ;
+- le seul geste que l'écran propose alors est de **re-scanner** — c'est-à-dire de refaire, indéfiniment,
+  ce qui ne peut pas marcher.
+
+⚠️ **STORY-385 rend ce défaut plus coûteux, pas moins** : elle a fait de `ECHEC` une valeur d'enum au
+contrat, opposée à `PRETE` + liste vide (« lu, rien trouvé ») et à `EN_COURS` (« pas encore lu »). Le
+contrat est désormais précis — et il **affirme une contre-vérité** dès que la panne est nôtre.
+
+### Comment l'écart a été trouvé (et ce que ça dit du dev)
+
+La stack avait été démarrée par `docker compose up -d` **sans `--build`** : l'image portait un
+`node_modules` **antérieur** au commit `bugfix(ocr)` qui a introduit `@napi-rs/canvas`. Vérifié :
+
+```bash
+docker compose run --rm --no-deps --entrypoint sh document-service \
+  -c 'node -e "console.log(require(\"/app/package.json\").dependencies[\"@napi-rs/canvas\"])"'
+# → undefined
 ```
 
-⇒ **Le service VOIT la ligne qui appartient à l'autre cahier, et n'a aucun moyen de
-l'y écrire.** C'est le seul avertissement de la liste qui ne désigne pas un défaut de
-lecture (date illisible, montant illisible, faible confiance, doublon, TVA incohérente)
-mais une **limite du contrat d'écriture**.
+La dépendance est **bien** déclarée sur `dev` et le `package-lock.json` porte les binaires linux : un
+`--build` répare l'exécution. **Ce n'est donc pas un défaut de code** — et c'est exactement ce qui rend
+l'écart intéressant : une image périmée est un incident d'exploitation **banal**, et le système l'a
+converti en un mensonge métier durable, écrit en base, sans qu'aucun signal ne rougisse.
 
 ---
 
-## Pourquoi ce n'est pas un cas limite
+## User Story
 
-C'est le **cas nominal du persona**. Un commerçant tient **un** cahier, pas deux : la
-page du 14 mars porte « vendu 12 000 » à la ligne 3 et « acheté carburant 5 000 » à la
-ligne 4. Le découpage recettes / dépenses est une catégorie **comptable**, pas une
-catégorie **physique** — et c'est précisément parce que le client ne fait pas ce
-découpage que le cabinet existe.
-
-⚠️ **Le risque n'est pas l'échec, c'est le résultat faux.** Une dépense rangée dans les
-recettes gonfle le chiffre d'affaires **et** minore les charges : le résultat est faux
-**deux fois**, et les deux erreurs se compensent assez bien pour survivre à une
-relecture rapide. C'est exactement ce que `CompteHorsClasse6Exception` protège côté
-saisie manuelle — et que le chemin OCR ne peut aujourd'hui pas protéger, faute de
-pouvoir aiguiller.
+En tant que **collaborateur de cabinet**,
+je veux **savoir quand une lecture a échoué à cause du système et non de ma pièce**,
+afin de **ne pas re-scanner indéfiniment un document qui n'a jamais eu de problème**.
 
 ---
 
-## Contournement en place (FE-044), et ce qu'il coûte
+## Ce que la story doit livrer
 
-Livré, honnête, et **sans changement backend** : la même image se dépose **deux fois**,
-une fois par cahier. Chaque passage :
-
-- ne **pré-coche pas** les pièces marquées `SENS_CONTRAIRE` — elles appartiennent à
-  l'autre cahier ;
-- l'annonce en toutes lettres (« *n pièces de cette page appartiennent à l'autre
-  cahier* ») et renvoie vers lui.
-
-**Ce que ça donne de bon** : rien n'est perdu, rien n'entre en double, et la pièce reste
-justifiée des deux côtés (elle est stockée sous deux `pieceId`).
-
-**Ce que ça coûte, et qui ne se règle pas côté écran** :
-
-1. **l'OCR tourne deux fois** sur la même image — coût réel chez `document-service`,
-   et deux `piece_extractions` pour une seule page physique ;
-2. **le comptable relit deux fois la même page** ;
-3. **la preuve est dédoublée** : deux `pieceId` pour une image, ce qui rend
-   `STORY-392` (jointure ligne ↔ image) et `STORY-395` (pièces par exercice)
-   plus bruyantes qu'elles ne devraient l'être ;
-4. **rien n'empêche d'oublier le second passage** : la moitié dépenses d'une page
-   disparaît alors sans trace côté serveur — seul l'écran l'avait signalée.
+- **Séparer, au moment du `catch`, la panne de PIÈCE de la panne de SERVICE.** Une erreur qui n'est pas
+  imputable au contenu déposé (module absent, `tessdata` introuvable, worker tué, écriture impossible) ne
+  doit pas produire le même état terminal qu'une pièce corrompue.
+- **Un état distinct, terminal ou non**, pour la panne de service — à trancher à la conception : soit une
+  5ᵉ valeur de statut *(⚠️ contrat de lecture : elle entre dans l'enum publié par STORY-385, et **casse la
+  compilation** des clients — c'est voulu)*, soit un `ECHEC` **requalifiable** assorti d'un motif. La
+  différence porte sur une question métier : **la pièce doit-elle être rejouée automatiquement** quand le
+  service est réparé ? Si oui, l'état ne peut pas être terminal.
+- **`/api/v1/health` couvre les dépendances du pipeline OCR** — au minimum le rasteriseur PDF et les
+  `tessdata` : un service qui ne sait plus lire un PDF n'est pas `ok`. C'est le seul signal qui aurait
+  transformé 20 minutes d'enquête en une ligne.
+- ⚠️ **Aucun changement de contrat d'ÉVÉNEMENT sans arbitrage** : `document.profil.extrait` et
+  `document.piece.extrait` publient `statut: 'PRETE' | 'ECHEC'`. Une 5ᵉ valeur les touche, donc **2 dépôts**
+  (`document-service` producteur, `balance-service` consommateur) — à cadrer avant, pas à découvrir pendant.
 
 ---
 
-## Périmètre
+## Acceptance Criteria
 
-**Inclus**
-
-- `LigneRetenueDto` gagne une **`destination?: 'RECETTES' | 'DEPENSES'`** — omise, elle
-  reprend celle du lot (aucune migration, aucun client cassé).
-- `PiecesOcrService.appliquer` **partitionne** les lignes retenues par destination
-  effective et appelle `recettes.creerLotOcr` **et** `depenses.creerLotOcr`.
-- Le rapport (`AppliquerLotResponseDto`) distingue les lignes créées **par cahier** :
-  un « 6 lignes créées » qui ne dirait pas où elles sont entrées serait invérifiable.
-- `SENS_CONTRAIRE` cesse d'être levé quand la ligne porte une `destination` explicite
-  qui **s'accorde** avec son sens : l'avertissement doit désigner ce qui reste douteux,
-  pas ce que l'humain vient de trancher.
-
-**Hors périmètre**
-
-- **Deviner** la destination depuis le sens sans confirmation humaine. `sens` est une
-  lecture machine ; l'invariant D4 / NFR-A05 (*l'humain seul crée des lignes de
-  cahier*) ne se négocie pas, et un montant rangé du mauvais côté par déduction
-  automatique est exactement l'erreur que cette story existe pour empêcher.
-  ⇒ `destination` par ligne est **pré-remplie** depuis `sens` à l'écran, **jamais**
-  appliquée sans que la pièce soit cochée.
-- La déduplication d'une image déposée deux fois (le contournement reste licite).
+- [ ] Une erreur **non imputable à la pièce** simulée dans le pipeline OCR ne produit **pas** l'état qui
+      signifie « illisible » — vérifié par mutation *(retirer la distinction ⇒ le test rougit)*.
+- [ ] Une pièce réellement corrompue produit **toujours** l'état « illisible » — la distinction n'élargit
+      rien.
+- [ ] `/api/v1/health` passe **`down`** quand le rasteriseur PDF est absent, et le dit nommément.
+- [ ] Le motif de la panne de service est **consultable** (journalisé et, si l'arbitrage le retient, publié
+      sur la lecture des pièces) — jamais seulement dans les logs du conteneur.
+- [ ] Non-régression : le chemin **PNG/JPEG**, qui ne passe pas par le rasteriseur, est inchangé.
+- [ ] Si un état s'ajoute au contrat d'événement : la story est **livrée sur 2 dépôts**, PR ouvertes et
+      intégrées ensemble.
 
 ---
 
-## Critères d'acceptation
+## Dépendances
 
-1. Un lot déposé en `DEPENSES` dont deux pièces portent `sens: 'ENTREE'` peut être
-   appliqué en **une seule requête** et produit **2 lignes de recettes** + le reste en
-   dépenses.
-2. Une ligne retenue **sans** `destination` explicite entre dans le cahier du lot —
-   comportement d'aujourd'hui, **inchangé** (test de non-régression).
-3. Le rapport nomme, **par cahier**, ce qui est entré et ce qui a été rejeté.
-4. Une ligne dirigée vers `DEPENSES` **sans `categorieId`** est rejetée **par ligne**,
-   avec son motif — jamais un échec global du lot.
-5. `SENS_CONTRAIRE` n'est plus levé sur une ligne dont la `destination` explicite
-   s'accorde avec son `sens`.
-6. Tests unitaires sur la partition, **et** un test qui couvre explicitement la page
-   mixte de bout en bout.
+**Prérequise :** **STORY-385** ✅ *(c'est elle qui a fait de `ECHEC` une valeur de contrat explicite,
+donc qui rend la contre-vérité lisible)*.
+**Touche potentiellement :** `balance-service` *(consommateur des deux contrats d'extraction)*.
 
 ---
 
-## Notes
+## Note de provenance
 
-- Créée le **2026-08-24** par **FE-044**, sur question directe du PO. Le contrat a été
-  relevé à la source (`pieces-ocr.service.ts`, `pieces-ocr.regles.ts`,
-  `appliquer-lot.dto.ts`) **avant** rédaction — l'avertissement `SENS_CONTRAIRE`
-  existait déjà et prouve que le besoin avait été **vu** côté serveur, sans être servi.
-- ⚠️ **Recouvrement à surveiller avec STORY-392 / STORY-395** : les trois touchent la
-  traçabilité d'une pièce. Celle-ci est la seule qui change une **écriture**.
+Trouvée à la **vérification docker de STORY-385**, pas en lisant le code : le PDF de test devait servir à
+produire une pièce `PRETE`, il est ressorti `ECHEC`. ⚡ **L'échec a rendu service deux fois** — il a fourni
+à STORY-385 le cas `ECHEC` réel dont sa table de vérification avait besoin *(une pièce `ECHEC` porte bien
+`champs: []` en base, et c'est ce qui prouve que le statut doit décider, pas le tableau)*, et il a exposé
+ce défaut-ci.

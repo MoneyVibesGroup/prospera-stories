@@ -6,7 +6,7 @@
 **Priorité :** Should Have
 **Story Points :** 3
 **Complexité :** low
-**Statut :** ready-for-dev
+**Statut :** done
 **Créée le :** 2026-08-20
 **Service :** `auth-service` (`:3001`) + `admin-panel` BFF (`:3010`)
 
@@ -114,3 +114,150 @@ porte déjà le rebranchement du filtre `kycStatus` de STORY-175 sur la même ro
 ### Completion Notes List
 
 ### File List
+
+
+---
+
+## Progress Tracking
+
+### ① `auth-service` — le filtre s'applique **en base**, avant la pagination
+
+`GET /admin/organizations?ownerEmailVerified=true|false`. Les étapes de résolution du propriétaire
+(`$lookup` memberships `TENANT_ADMIN`/`ACTIVE` triées par ancienneté → choix du principal → `$lookup`
+users → `ownerVerifie`) sont insérées **avant** `$sort/$skip/$limit`, et `total` passe par une seconde
+agrégation `$count` sur le **même** filtre.
+
+| Décision | Pourquoi elle n'est pas cosmétique |
+|---|---|
+| Résolution **avant** `$skip` | après, on filtrerait **la page** : la page 1 rendrait 3 lignes sur 20 demandées, la page 2 en sauterait, `total` serait sans rapport |
+| `total` par `$count`, jamais `countDocuments` | sinon un chiffre juste dans `items` et **faux** dans `total` — et une pagination qui promet des pages vides |
+| `false` **inclut** les organisations sans admin actif | c'est le repli conservateur de STORY-186 : les exclure ferait se contredire **la liste et la fiche** sur la même organisation |
+
+⚠️ **La règle du « propriétaire résolu » est reproduite en agrégation — même règle, autre langage, pas
+une seconde définition.** Deux implémentations peuvent diverger en silence : c'est la vérification
+docker qui prouve leur concordance, organisation par organisation (⑤).
+
+### ② `admin-panel` — déclaré, relayé, jamais réinterprété
+
+`ListOrgsQueryDto.ownerEmailVerified` + sérialisation amont. Le BFF ne repagine ni ne recompte.
+
+🪤 **Le piège attrapé par un test** : `if (query.ownerEmailVerified)` au lieu de `!== undefined`
+**perd le `false`** — or `false` est exactement la valeur que la tuile demande. La mutation fait rougir
+le test de sérialisation.
+
+### ③ ⚡ Ce que la mutation a corrigé dans **ma propre documentation**
+
+J'avais écrit que la transformation devait lire `obj` **et pas** `value`, sous peine que
+`enableImplicitConversion` livre un booléen déjà faussé. **La mutation `obj → value` n'a pas rougi.**
+
+Sondé plutôt que supposé : `value` reçoit **`"false"`, `typeof string`** — la conversion implicite
+n'a **pas** lieu avant un `@Transform`. Ce qui est vrai, et **mesuré** :
+
+- **le `@Transform` est indispensable** — le retirer fait rougir **3 e2e** (`Boolean('false')` vaut
+  `true`, et le filtre rendrait le complément exact de ce qu'il annonce) ;
+- **`obj` vs `value` est indifférent ici** — `obj` est conservé par cohérence avec le patron du projet,
+  et le commentaire le dit désormais ainsi.
+
+⇒ Un commentaire qui promet plus que le code ne tient est une dette : la mutation est ce qui l'a
+révélé, exactement comme elle révèle un test qui ne garde rien.
+
+### ④ Mutation-test
+
+| Mutation | Attendu | Mesuré |
+|---|---|---|
+| `$match` du propriétaire déplacé **après** `$skip` | rouge | ✅ 1 rouge |
+| `total` recalculé par `countDocuments` | rouge | ✅ 2 rouges |
+| `$match: { ownerVerifie: true }` en dur | rouge | ✅ 1 rouge |
+| `if (query.ownerEmailVerified)` (le `false` est perdu) | rouge | ✅ 1 rouge |
+| `@Transform` retiré du DTO | rouge | ✅ 3 rouges |
+| `@Transform` lisant `value` au lieu d'`obj` | *(supposé rouge)* | ⚠️ **VERT** — voir ③ |
+
+### ⑤ Vérification docker — la seule preuve du pipeline
+
+Les unitaires mockent `model.aggregate` : ils gardent la **forme** du pipeline, pas son **résultat**
+*(leçon STORY-359)*. Jeu de données réel de **5 organisations**, choisi pour couvrir ce que la règle du
+propriétaire décide vraiment :
+
+| Cas | Attendu | Rendu par l'API |
+|---|---|---|
+| **A** fondateur vérifié | `true` | ✅ `true` |
+| **B** fondateur non vérifié | `false` | ✅ `false` |
+| **C** fondateur **retiré** (`REVOKED`, non vérifié) + plus ancien admin actif vérifié | `true` | ✅ `true` — c'est le cas qui distingue « fondateur » de « plus ancien admin actif » |
+| **D** **aucun** admin actif | `false` | ✅ `false` *(AC-3)* |
+| **E** fondateur vérifié mais `TENANT_USER` + admin actif non vérifié | `false` | ✅ `false` |
+
+| Critère | Mesure |
+|---|---|
+| **AC-2** complémentarité | sans filtre **7** · `true` **4** · `false` **3** · somme **7** ✅ |
+| ⚡ **Concordance** pipeline ↔ projection | **7/7** organisations, **aucun écart** — chaque organisation apparaît dans **exactement une** des deux listes. C'est ce qui interdit aux deux implémentations de diverger |
+| **AC-4** pagination `limit=2` | 3 lignes parcourues, 3 distinctes, `total` annoncé 3 — **ni doublon ni saut** |
+| **AC-4** combiné `false` + `status` + `q` | `total=3`, les 3 attendues |
+| **AC-1** valeur invalide | `400` — jamais un filtre deviné |
+
+**Le gain, mesuré de bout en bout sur le BFF :**
+
+| Geste | Lignes transportées | `total` |
+|---|---|---|
+| Aujourd'hui — `limit=100`, comptage **en mémoire** | **7** | 7 *(et `3` recompté côté client)* |
+| ⚡ Avec le filtre — `limit=1` | **1** | **3**, exact |
+
+Stack arrêtée (`docker compose stop`), jeu de données nettoyé.
+
+### ⑥ Portes
+
+| | `auth-service` | `admin-panel` |
+|---|---|---|
+| Lint / build | ✅ 0 / ✅ | ✅ 0 / ✅ |
+| Unitaires | ✅ **834** / 65 suites | ✅ **435** / 37 suites |
+| e2e | ✅ **210** / 14 suites | ✅ **201** / 11 suites |
+| Couverture | **97,81 / 90,82 / 97,91 / 97,91** | **99,68 / 93,07 / 100 / 99,65** |
+
+### ⑦ Revue de code — 1 constat, corrigé
+
+| Constat | Traitement |
+|---|---|
+| ⚠️ **Le `$sort` portait les tableaux de jointure.** Avec le filtre, il s'applique **après** les deux `$lookup` : il triait donc des documents portant tous leurs admins et leur principal. Un `$sort` en mémoire est **plafonné à 100 Mo** sans `allowDiskUse` — sur un gros parc, l'agrégation **échoue** au lieu de rendre une page, et c'est précisément le parc grandissant que cette story existe pour servir | **Corrigé** — `$unset` des deux tableaux dès que `ownerVerifie` est calculé. Mutation vérifiée : retirer l'`$unset` fait rougir le test qui garde sa position **avant** le `$sort` |
+
+Documenté au passage, parce qu'un lecteur pouvait le croire gratuit : le chemin filtré est **le seul** à
+payer les deux jointures *(sans le paramètre, le pipeline est exactement celui d'avant)* · les `$lookup`
+s'appuient sur des index existants *(`memberships {organizationId, role}`, `users {_id}`)* · la seconde
+passe de comptage est **assumée** plutôt qu'un `$facet`, qui interdirait l'usage d'un index pour le
+`$sort`/`$limit` de la branche « items ».
+
+### ⑧ Revue de sécurité — **0 vulnérabilité**, et un **deuxième commentaire faux**
+
+La seule surface du diff est la **valeur du `$match`** : un opérateur Mongo qui l'atteindrait rendrait le
+filtre pilotable depuis l'URL. Deux gardes l'en empêchent — **et j'en nommais une pour l'autre.**
+
+| Requête | Refus réel | Mécanisme |
+|---|---|---|
+| `?ownerEmailVerified=oui` | 400 *« must be a boolean value »* | `@IsBoolean` ferme la **valeur** |
+| `?ownerEmailVerified[$ne]=x` | 400 *« property ownerEmailVerified[$ne] should not exist »* | **`forbidNonWhitelisted`** ferme la **clé** |
+
+⚠️ Le parseur de query d'Express **ne fabrique pas d'objet** ici : la clé reste littérale, et le
+`@Transform` **n'est même pas atteint** *(sondé)*. Mon commentaire attribuait ce refus à `@IsBoolean`.
+Les deux gardes comptent, à des endroits différents — les nommer correctement est ce qui permet à la
+prochaine story de savoir laquelle elle ne doit pas retirer. **2 e2e** gardent désormais les deux refus.
+
+**Vérifié sans constat** : la route reste gouvernée par `org:read` *(le filtre restreint une liste déjà
+autorisée, il n'ouvre aucune surface)* · la valeur du `$match` est un booléen validé, jamais une clé ni
+un opérateur · le filtre **s'intersecte** avec `ids`/`status`/`q`, il ne les remplace pas · le BFF relaie
+`String(boolean)`, jamais une valeur brute.
+
+⚡ **Deuxième fois dans cette story qu'une vérification corrige ma documentation plutôt que mon code**
+*(après `obj` vs `value`)*. Le code était juste les deux fois ; c'est ce que j'en **disais** qui
+promettait plus qu'il ne tenait.
+
+### ⑨ Clôture
+
+- **2026-08-24** — ✅ **CLÔTURÉE**. Deux PR rebase-mergées : `prospera-auth-service#24` *(3 commits :
+  feature, revue, sécurité)* et `prospera-admin-panel-service#22`. Branches supprimées.
+- ⚠️ **Un flake observé et tracé** : un run de `test:cov` d'`auth-service` a rendu `1 failed` sans nommer
+  le test ; **3 runs consécutifs** ensuite verts *(835/835)*, plus `jest` seul vert. Non lié au diff
+  *(aucun des tests ajoutés n'est temporel)*, mais **consigné plutôt que tu**.
+- ⚡ **Ce que ça débloque** : la console obtient son chiffre exact en une requête *(`limit=1` + filtre,
+  `total`)* au lieu de scanner 100 organisations. Le `≥ n` de la tuile disparaît.
+- ⚠️ **Et ça ne se fera pas tout seul** — la story le disait, et c'est le troisième rappel en une
+  semaine : **une story backend livrée ne déclenche rien tant qu'une story frontend ne la nomme pas.**
+  Le rebranchement *(une ligne : `pageSize: 1` + le filtre, `countBlocked` → `total`)* doit être inscrit
+  au périmètre d'**AP-21**, qui porte déjà celui du filtre `kycStatus` de STORY-175 sur la même route.

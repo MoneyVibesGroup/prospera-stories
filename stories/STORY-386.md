@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-047** *(reprise d'à-nouveaux / continuité N-1)*, 2026-08-23 — prolonge **STORY-087**, même défaut que **STORY-375**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** not_started
+**Statut :** done
 **Complexité :** low
 **Sprint :** 20
 **Service :** `balance-service` (`:3007`)
@@ -120,3 +120,131 @@ tranche côté architecture avant d'être codée.
   (`balance-service` 0/0 vs `origin/dev`).
 - Le front n'attend pas cette story pour livrer : FE-047 rend le message du serveur **tel quel**, avec
   son statut et son code. Le contournement se retire quand cette story est livrée, **pas avant**.
+
+---
+
+## Progress Tracking
+
+**Statut : `done`** — implémentée, revue, sécurisée et mergée le 2026-08-24.
+`balance-service` PR **#49** rebase-mergée sur `dev` (`7e31ab0`), branche supprimée.
+
+### Décision d'architecture — volet B : **voie 1 retenue**
+
+L'aperçu d'à-nouveaux **rend** le socle déséquilibré au lieu de le refuser ; la **persistance**
+continue de refuser. Deux raisons, dans cet ordre :
+
+1. `dryRun` existe pour montrer ce qui cloche **avant** d'écrire. Le `422` donne l'écart, il ne donne
+   **pas les lignes** : refuser l'aperçu prive le cabinet de la seule vue où l'écart se localise.
+2. C'est ce qui rend leur sens aux trois champs. La voie 2 (documenter l'invariant) aurait figé dans
+   le contrat un indicateur incapable de rougir — la « garde vraie par vacuité » de FE-063.
+
+⚠️ **Le déséquilibre est réellement atteignable**, ce n'est pas une branche de laboratoire : un compte
+dont le numéro ne commence pas par un chiffre échappe **aux deux** filtres de la reprise
+(`estCompteReporte` ne le reporte pas, `comptesGestionOuverts` ne le voit pas — `classeDuCompte` rend
+`null`). Avant STORY-146, `BalanceValidator` jugeait les comptes sur `/^[0-9A-Za-z]{2,20}$/` : une
+balance N-1 **validée** à cette époque peut en porter un. C'est le cas rejoué en docker ci-dessous.
+
+⚠️ **Portée du `try/catch`** : seul `BalanceDesequilibreeException` est intercepté. Checksum faux,
+compte hors plan, exercice clos restent des **refus** d'aperçu — on ne rend un socle que lorsqu'il est
+intégralement valide **sauf** son équilibre.
+
+### Ce qui a été livré
+
+| | |
+|---|---|
+| `balance-desequilibree.exception.ts` | `code: BALANCE_DESEQUILIBREE` + `details: { grandeur, ecart, totalDebit, totalCredit }`, par **`details`** (liste blanche du filtre) et `error` posé explicitement. **Message inchangé au caractère près** (STORY-387 pour ce qu'il devrait dire). |
+| `GRANDEURS_EQUILIBRE` | `['mouvements','soldes']` — `validerEquilibre` **itère dessus** et `sommaire` porte exactement ces clés : l'ordre testé, l'ordre publié et `details.grandeur` ne peuvent plus diverger. |
+| `BalanceDesequilibreeResponseDto` | `code` en `enum`, `grandeur` en `enum` **nommé** (`GrandeurEquilibre`, donc union de littéraux côté client). Référencé par les **7** routes d'écriture qui traversent `BalanceValidator` — 2 ne le documentaient qu'en prose, 5 pas du tout. |
+| `ANouveauxResponseDto` | la voie retenue est **écrite dans le DTO**, champ par champ. |
+| `RepriseService` | l'aperçu rend le déséquilibre ; l'avertissement de rupture est **dérivé de `sommaire.estEquilibre`**, jamais d'un drapeau d'appelant — il ne peut donc pas contredire le chiffre rendu. |
+
+### Portes de qualité
+
+`eslint --max-warnings 0` **0** · `nest build` **OK** · `test:cov` **2 958 / 2 958**, couverture
+**98,98 st / 91,81 br / 98,16 fn / 99,06 li** (seuils 65/90/90/90 ; `balance.validator.ts` et
+`exceptions/` à 100 %) · `test:e2e` **678 / 678**.
+
+### Table de mutations exécutée (chacune restaurée)
+
+| Mutation | Test attendu rouge | Constat |
+|---|---|---|
+| `details` retiré de l'exception | validator ×3 + e2e reprise ×1 | 🔴 4 rouges |
+| `GRANDEURS_EQUILIBRE` inversé (`soldes` d'abord) | AC-2 + contrat OpenAPI | 🔴 2 rouges |
+| `error: 'Unprocessable Entity'` retiré | « ne change ni le message ni la casse » | 🔴 1 rouge |
+| le `catch` relaie au lieu de rendre le socle | volet B ×2 | 🔴 2 rouges |
+| avertissement de rupture non poussé | « avertit que le socle est DÉSÉQUILIBRÉ » | 🔴 1 rouge |
+| `type:` du 422 remplacé par un autre DTO | « le référence depuis TOUTE route » | 🔴 1 rouge |
+
+🪤 **Une septième mutation a d'abord rougi POUR LA MAUVAISE RAISON** : neutraliser l'`instanceof` rendait
+l'import inutilisé ⇒ `TS6133`, donc « rouge » sans qu'aucune assertion n'ait jugé quoi que ce soit.
+Rejouée en gardant l'`instanceof` et en relayant depuis le corps du `catch` — rouge, cette fois sur les
+deux tests du volet B, `tsc --noEmit` muet. *(Même piège qu'en STORY-179 et STORY-385.)*
+
+### Vérification docker réelle — stack neuve (`down -v`), 2026-08-24
+
+`mongo` + `kafka` + `redis` + `auth-service` + `balance-service` reconstruits ; `/api/v1/health` →
+`{"mongodb":"up","kafka":"up"}` ; logs `Found 0 errors. Watching for file changes.`
+Amorçage : compte `verif386@…` (org `6a8cc540…2059`), `emailVerifiedAt` posé en base, read-models
+`orgkycstatuses` `APPROVED`, `orgbalanceentitlements` `ACTIVE` + `referentiel: syscohada-revise@2.1`,
+`dossiers_dossier` `ACTIF`.
+
+| # | Appel | HTTP | Ce qui est prouvé |
+|---|---|---|---|
+| 1 | `POST /dossiers/{d}/balances` — soldes rompus (5 000 / 3 000), mouvements équilibrés | **422** | corps = `code: BALANCE_DESEQUILIBREE` **et** `details: { grandeur: "soldes", ecart: 2000, totalDebit: 5000, totalCredit: 3000 }` ⇒ **`details` franchit la liste blanche d'`AllExceptionsFilter`** — le seul niveau où le piège d'`AffectationIncompleteException` est visible |
+| 2 | idem, mouvements rompus (9 000 / 5 000), soldes équilibrés | **422** | `details.grandeur: "mouvements"`, `ecart: 4000` ⇒ la grandeur **discrimine** |
+| 3 | après 1 et 2 | — | `balances=0`, `outbox_events=0`, `balance_ingestions=0` ⇒ **aucun document orphelin** |
+| 4 | `POST /balance/a-nouveaux` (aperçu) sur la clôture N-1 portant `AB12` | **201** | `estEquilibre: false`, `equilibreSoldes: { totalDebit: 320 000 000, totalCredit: 640 000 000, ecart: -320 000 000 }`, `equilibreMouvements` satisfait, lignes rendues `['211','101','13']`, **3ᵉ avertissement** = rupture de continuité ⇒ **voie 1 opérante** |
+| 5 | idem avec `dryRun: false` | **422** | même corps structuré (`ecart: -320 000 000`) ⇒ la **persistance refuse toujours** |
+| 6 | après 5 | — | `socles A_NOUVEAUX=0`, `outbox_events=0`, `exercices_atelier=0` ⇒ **rien d'écrit sur le refus** |
+| 7 | non-régression : clôture N-1 **équilibrée**, aperçu puis `dryRun: false` | **201** / **201** | aperçu `estEquilibre: true`, **2** avertissements (pas de rupture) ; socle persisté `origine: A_NOUVEAUX`, `balanceSourceId` chaîné à sa source, `outbox_events=1` |
+
+### Observation hors périmètre (non corrigée, délibérément)
+
+`comptesSoldes` compte **tout compte non reporté**, pas seulement les classes 6/7 que sa description
+annonce : sur le cas #4 il vaut `1` en désignant `AB12`, qui n'est pas un compte de gestion. Écart
+**préexistant** à cette story et atteignable seulement sur ce même cas historique ; le corriger ici
+déborderait le périmètre (aucun AC ne le porte). Noté pour qu'il ne se redécouvre pas deux fois.
+
+### Revue de code (⑥)
+
+**1 constat**, non bloquant, confiance 95 — **corrigé** (`690e13a`, commit dédié).
+
+La garde OpenAPI `le référence depuis TOUTE route qui peut le rendre` **dérivait sa liste du
+document** : elle rassemblait les routes qui *déclarent* un `422`. Une route d'écriture ajoutée
+demain **sans** son `422` n'y serait donc jamais entrée, et l'égalité serait restée verte — alors que
+le commentaire affirmait mot pour mot l'inverse.
+
+⚡ Le correctif n'est **pas** un durcissement de l'assertion, et c'est le point : un document OpenAPI
+ne peut pas dire qu'un `422` **manque**, faute de savoir quelles routes traversent `BalanceValidator`.
+Ce qui se corrigeait, c'était la **promesse**. Le test énonce désormais ce qu'il attrape (perte du
+`422`, 8ᵉ route qui en déclare un, mauvais `$ref` — donc toute **régression** du contrat publié) et
+nomme ce qu'il ne peut pas attraper, en désignant la liste tenue à la main comme seul filet.
+
+Constats écartés, pour qu'ils ne se redécouvrent pas : `ImportSagePreviewDto` et `AgregationApercuDto`
+portent **les mêmes trois champs vrais par vacuité** que ceux dénoncés ici sur `ANouveauxResponseDto`
+— préexistant, et aucun AC ne les porte.
+
+### Revue de sécurité (⑦)
+
+**0 vulnérabilité.** Vérifié et écarté explicitement :
+
+- le `details` ne publie **rien de neuf** : les quatre grandeurs étaient déjà dans le message français
+  de l'ancien refus, inchangé ici. Elles sont dérivées de `sommaire`, lui-même construit sur une
+  balance N-1 lue via `trouverDerniereValidee(orgId, dossierId, …)` — donc derrière
+  `@RequiresBalanceAccess` + `@RequiresDossierScope` (404 anti-énumération) ;
+- l'aperçu à 200 ne contourne **aucune** garde : `ExerciceClosException` est une `ConflictException`
+  levée **avant** `buildCanonique`, donc jamais avalée ; les cinq refus de la reprise sont levés
+  **avant** le `try` ; l'aperçu n'appelle jamais `submit` ; la course concurrente sort toujours en
+  `409 SOCLE_DEJA_GENERE` ; et le socle rendu, re-soumis, repart en `422` ;
+- le `catch` est typé sur la **classe fille** — plus étroit que `UnprocessableEntityException` — et
+  `BalanceDesequilibreeException` n'a aucune sous-classe : il ne peut pas avaler un autre refus ;
+- voie Kafka intacte : `rejetDepuisErreur` teste `instanceof UnprocessableEntityException`, dont la
+  nouvelle classe **hérite**, et relit l'écart dans `sommaire` — jamais dans le message.
+
+### ⚠️ Coordination frontend — le contournement de FE-047 doit être retiré
+
+FE-047 rend aujourd'hui la rupture de continuité **sur le refus**. Depuis ce merge, l'aperçu
+déséquilibré ne refuse plus : il répond **201** avec `estEquilibre: false`, l'écart signé et le 3ᵉ
+avertissement. **Tant que le contournement n'est pas retiré, l'écran d'aperçu n'affichera plus rien
+sur ce cas.** Le `422` structuré reste, lui, sur la **persistance** — et c'est là que le `code` et le
+`details` remplacent le parsing de texte.
