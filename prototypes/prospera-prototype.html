@@ -7166,9 +7166,9 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M7 12h10"/></svg>
                       Table de passage
                     </button>
-                    <button class="atl-tab" role="tab" data-bil-tab="etats" aria-selected="false" disabled title="FE-031 → FE-034 — bilan, compte de résultat, TFT, notes, validation">
+                    <button class="atl-tab" role="tab" data-bil-tab="etats" aria-selected="false" title="FE-031 — Bilan actif/passif N/N-1 + contrôle équilibre">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
-                      États <span class="soon">FE-031+</span>
+                      États <span class="badge badge-new">FE-031</span>
                     </button>
                     <button class="atl-tab" role="tab" data-bil-tab="previsionnel" aria-selected="false" disabled title="FE-035 / FE-036 — hypothèses, projection 3 ans, trésorerie 12 mois">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>
@@ -8004,6 +8004,255 @@
                       </div>
                       <p class="helper" style="margin-top:0.7rem">Aucun bouton « Réessayer »&nbsp;: le serveur a répondu correctement, c'est son <b>contrat</b> qui a bougé. <code>RattachementResultDto.mappes</code> n'est pas décrit par l'OpenAPI (il y sort en <code>string[]</code> alors que ce sont des objets)&nbsp;: le front <b>vérifie la forme à l'exécution</b> plutôt que de la supposer, et le dit quand elle ne tient pas. <b>Demande&nbsp;: STORY-398.</b></p>
                     </div>
+                  </div>
+
+                  <!-- ═════════ PANNEAU : BILAN (États) (FE-031) ═════════ -->
+                  <div class="atl-panel atl-body" data-bil-panel="etats" hidden>
+                    <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Bilan de votre exercice</h3>
+                        <p class="atl-secsub">État financier structuré, colonnes officielles (Brut / Amort / Net), comparatif N-1 facultatif. L'équilibre (Actif = Passif + Résultat) se lit ici de <b>deux façons</b>&nbsp;: par la somme des postes, et par la cascade de sous-totaux du référentiel (<code>BZ = DZ</code>). <b>Lecture seule</b>&nbsp;: toute correction se fait à la table de passage.</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <div class="atelier-demo" role="tablist" aria-label="État du Bilan (démo)">
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="equilibre" aria-selected="true">Équilibré</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="desequilibre" aria-selected="false">Déséquilibré</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="avec-non-mappes" aria-selected="false">Comptes non mappés</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="loading" aria-selected="false">Chargement</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="error" aria-selected="false">Erreur</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-bil-state="sans-balance" aria-selected="false">Aucune balance</button>
+                      </div>
+                    </div>
+
+                    <!-- BILAN ÉQUILIBRÉ - CAS NOMINAL -->
+                    <div data-bil-bilan-slot="equilibre">
+                      <div class="ref-card" style="margin-bottom:1.15rem">
+                        <div class="ref-head">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                          <b>Référentiel appliqué à cette liasse</b>
+                          <span class="grow"></span>
+                          <span class="badge badge-active"><span class="d"></span>Intégrité vérifiée</span>
+                        </div>
+                        <div class="ref-grid">
+                          <div class="ref-item">
+                            <div class="ref-k">Référentiel actif</div>
+                            <div class="ref-v">SYSCOHADA révisé · syscohada-revise@2.1</div>
+                            <div class="ref-sum">sha256:e9370b14…a71e</div>
+                          </div>
+                          <div class="ref-item">
+                            <div class="ref-k">Ce que le paquet contient</div>
+                            <div class="ref-v">918 comptes · 214 postes · 371 règles</div>
+                            <div class="ref-sum">chargé depuis le cache</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="bsrc-retenue" style="margin-bottom:1.15rem">
+                        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <div class="t">
+                          <b>Balance retenue : exercice 2025 · Sage 100 · v3</b>
+                          <p>1 284 comptes · équilibrée · validée le 18/07/2026</p>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" type="button" data-bil-goto="source">Changer</button>
+                      </div>
+
+                      <div class="ctrl-card" style="margin-bottom:1.15rem;background:rgba(5, 150, 105, 0.08);border:1px solid rgba(5, 150, 105, 0.2);border-radius:var(--radius);padding:0.85rem">
+                        <div style="display:flex;align-items:center;gap:0.6rem">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:#059669"><path d="M20 6 9 17l-5-5"/></svg>
+                          <div style="flex:1">
+                            <b style="color:#047857">Bilan équilibré pour N et N-1</b>
+                            <p style="font-size:0.84rem;color:var(--muted-fg);margin-top:0.2rem">Actif = Passif + Résultat Net · écart nul</p>
+                          <p style="font-size:0.84rem;color:var(--muted-fg);margin-top:0.2rem">Cascade du référentiel cohérente&nbsp;: <b>BZ</b> (total général actif) = <b>DZ</b> (total général passif) · tous les postes couverts</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style="margin-bottom:1.15rem">
+                        <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem">ACTIF (Brut, Amort-Dépréc, Net N/N-1)</h4>
+                        <div class="card-surface" style="overflow:hidden">
+                          <div class="tbl-wrap" style="max-height:400px;overflow-y:auto">
+                            <table class="tbl" style="font-size:0.9rem">
+                              <thead>
+                                <tr style="position:sticky;top:0;z-index:10;background:var(--content-bg)">
+                                  <th style="width:6rem">Code</th><th>Libellé</th><th style="text-align:right;width:7rem">Brut</th><th style="text-align:right;width:8rem">Amort</th><th style="text-align:right;width:7rem">Net(N)</th><th style="text-align:right;width:7rem">Net(N-1)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr><td><b>AD</b></td><td>Immobilisations corporelles</td><td class="num">5 000 000</td><td class="num">1 000 000</td><td class="num"><b>4 000 000</b></td><td class="num" style="color:var(--muted-fg)">4 200 000</td></tr>
+                                <tr><td><b>AE</b></td><td>Immobilisations incorporelles</td><td class="num">500 000</td><td class="num">0</td><td class="num"><b>500 000</b></td><td class="num" style="color:var(--muted-fg)">600 000</td></tr>
+                                <tr><td><b>AF</b></td><td>Placements financiers</td><td class="num">1 000 000</td><td class="num">0</td><td class="num"><b>1 000 000</b></td><td class="num" style="color:var(--muted-fg)">1 100 000</td></tr>
+                                <tr><td><b>BA</b></td><td>Créances clients</td><td class="num">200 000</td><td class="num">0</td><td class="num"><b>200 000</b></td><td class="num" style="color:var(--muted-fg)">150 000</td></tr>
+                                <tr style="font-weight:600;background:var(--hover-surface)"><td colspan="2">Total Actif</td><td class="num">6 700 000</td><td class="num">1 000 000</td><td class="num" style="color:#047857"><u>5 700 000</u></td><td class="num" style="color:var(--muted-fg)">6 050 000</td></tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style="margin-bottom:1.15rem">
+                        <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem">PASSIF (Montant N/N-1)</h4>
+                        <div class="card-surface" style="overflow:hidden">
+                          <div class="tbl-wrap" style="max-height:300px;overflow-y:auto">
+                            <table class="tbl" style="font-size:0.9rem">
+                              <thead>
+                                <tr style="position:sticky;top:0;z-index:10;background:var(--content-bg)">
+                                  <th style="width:6rem">Code</th><th>Libellé</th><th style="text-align:right;width:7rem">Montant(N)</th><th style="text-align:right;width:7rem">Montant(N-1)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr><td><b>CA</b></td><td>Capitaux propres</td><td class="num">4 000 000</td><td class="num" style="color:var(--muted-fg)">3 800 000</td></tr>
+                                <tr><td><b>CP</b></td><td>Dettes long terme</td><td class="num">900 000</td><td class="num" style="color:var(--muted-fg)">950 000</td></tr>
+                                <tr><td><b>CS</b></td><td>Dettes court terme</td><td class="num">600 000</td><td class="num" style="color:var(--muted-fg)">500 000</td></tr>
+                                <tr style="font-weight:600;background:var(--hover-surface)"><td colspan="2">Total Passif</td><td class="num" style="color:#047857"><u>5 500 000</u></td><td class="num" style="color:var(--muted-fg)">5 250 000</td></tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style="margin-bottom:1.15rem;padding:0.85rem;background:var(--content-bg);border-radius:var(--radius)">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem">
+                          <div><span style="font-size:0.78rem;color:var(--muted-fg);text-transform:uppercase">Résultat Net N</span><div style="font-size:1.3rem;font-weight:600;margin-top:0.3rem">200 000 €</div></div>
+                          <div><span style="font-size:0.78rem;color:var(--muted-fg);text-transform:uppercase">Résultat Net N-1</span><div style="font-size:1.3rem;font-weight:600;margin-top:0.3rem" style="color:var(--muted-fg)">800 000 €</div></div>
+                        </div>
+                      </div>
+
+                      <div style="margin-bottom:1.15rem;display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.7rem 0.9rem;border:1px dashed var(--border);background:var(--content-bg);border-radius:var(--radius);font-size:0.82rem">
+                        <b>Calcul non enregistré</b>
+                        <span style="color:var(--muted-fg)">Ce Bilan est recalculé à chaque ouverture&nbsp;; il ne crée aucune liasse et ne fige rien. L'enregistrement arrive avec STORY-064.</span>
+                        <span style="color:var(--muted-fg)">· Dernière liasse enregistrée du dossier&nbsp;: aucune</span>
+                      </div>
+
+                      <div style="margin-bottom:1.15rem;display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap">
+                        <label style="font-size:0.85rem;font-weight:600" for="proto-comparatif">Comparatif N-1</label>
+                        <select id="proto-comparatif" class="btn btn-ghost btn-sm" style="padding-right:1.6rem">
+                          <option>Exercice du 1 janv. 2024 au 31 déc. 2024</option>
+                          <option>Aucun comparatif</option>
+                        </select>
+                        <p style="flex-basis:100%;font-size:0.78rem;color:var(--muted-fg);margin:0">
+                          ℹ️ Colonnes N-1 servies par l'exercice désigné. Une cellule vide (<b>·</b>) signifie que le poste <b>n'existait pas</b> en N-1&nbsp;; un «&nbsp;<b>0</b>&nbsp;» signifie qu'il existait et valait zéro. <b>Ce ne sont pas la même chose.</b>
+                        </p>
+                      </div>
+
+                      <div style="margin-bottom:1.15rem;padding:1.15rem;border:1px solid rgba(5, 150, 105, 0.3);background:rgba(5, 150, 105, 0.06);border-radius:var(--radius)">
+                        <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:0.8rem">⚖️ Équation comptable</h4>
+                        <div style="display:flex;align-items:center;gap:1rem;font-size:0.95rem;flex-wrap:wrap">
+                          <div style="padding:0.6rem 0.9rem;background:var(--background);border-radius:calc(var(--radius) - 2px);border:1px solid var(--border)"><div style="font-size:0.75rem;color:var(--muted-fg);margin-bottom:0.2rem">Actif Total</div><div style="font-weight:600">5 700 000 €</div></div>
+                          <div style="font-weight:600;color:var(--muted-fg)">=</div>
+                          <div style="padding:0.6rem 0.9rem;background:var(--background);border-radius:calc(var(--radius) - 2px);border:1px solid var(--border)"><div style="font-size:0.75rem;color:var(--muted-fg);margin-bottom:0.2rem">Passif</div><div style="font-weight:600">5 500 000 €</div></div>
+                          <div style="font-weight:600;color:var(--muted-fg)">+</div>
+                          <div style="padding:0.6rem 0.9rem;background:var(--background);border-radius:calc(var(--radius) - 2px);border:1px solid var(--border)"><div style="font-size:0.75rem;color:var(--muted-fg);margin-bottom:0.2rem">Résultat</div><div style="font-weight:600">200 000 €</div></div>
+                          <div style="font-weight:600;color:#047857">✅</div>
+                        </div>
+                        <div style="margin-top:0.8rem;padding:0.6rem;background:rgba(5, 150, 105, 0.1);border-radius:calc(var(--radius) - 2px);text-align:center"><span style="font-size:0.85rem;font-weight:600;color:#047857">Écart = 0 € · Bilan équilibré</span></div>
+
+                        <div style="margin-top:0.8rem;padding:0.75rem;background:var(--background);border:1px solid var(--border);border-radius:calc(var(--radius) - 2px)">
+                          <div style="font-size:0.78rem;color:var(--muted-fg);margin-bottom:0.4rem">Seconde expression&nbsp;: la cascade que le référentiel déclare</div>
+                          <div style="display:flex;align-items:center;gap:0.9rem;flex-wrap:wrap;font-size:0.9rem">
+                            <div><span style="font-size:0.75rem;color:var(--muted-fg);display:block">TOTAL GENERAL ACTIF (BZ)</span><b>5 700 000 €</b></div>
+                            <div style="font-weight:600;color:var(--muted-fg)">=</div>
+                            <div><span style="font-size:0.75rem;color:var(--muted-fg);display:block">TOTAL GENERAL PASSIF (DZ)</span><b>5 700 000 €</b></div>
+                            <span style="font-weight:600;color:#047857">✅</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style="margin-bottom:1.15rem">
+                        <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem">Comptes non mappés</h4>
+                        <div style="padding:1rem;text-align:center;background:var(--content-bg);border-radius:var(--radius);color:var(--muted-fg)">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.8rem;height:1.8rem;margin:0 auto 0.4rem;opacity:0.5"><path d="M20 6 9 17l-5-5"/></svg>
+                          <p style="font-size:0.9rem"><b>Aucun compte écarté</b></p>
+                          <p style="font-size:0.8rem;margin-top:0.3rem">Tous les comptes de la balance sont rattachés à un poste de la liasse</p>
+                        </div>
+                      </div>
+
+                      <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+                        <button class="btn btn-primary" type="button" data-bil-goto="passage">Corriger à la table de passage</button>
+                        <button class="btn btn-ghost" type="button">Télécharger (PDF/Excel)</button>
+                      </div>
+                    </div>
+
+                    <!-- BILAN DÉSÉQUILIBRÉ -->
+                    <div data-bil-bilan-slot="desequilibre" hidden>
+                      <div class="ctrl-card" style="margin-bottom:1.15rem;background:rgba(220, 38, 38, 0.08);border:1px solid rgba(220, 38, 38, 0.2);border-radius:var(--radius);padding:0.85rem">
+                        <div style="display:flex;align-items:flex-start;gap:0.6rem">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:0.15rem;color:#dc2626"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                          <div style="flex:1">
+                            <b style="color:#991b1b">Bilan déséquilibré — Écart détecté</b>
+                            <p style="font-size:0.84rem;color:var(--muted-fg);margin-top:0.4rem"><b>Montant de l'écart : 412 300 €</b></p>
+                            <p style="font-size:0.8rem;color:var(--muted-fg);margin-top:0.3rem">Total Actif (5 700 000 €) ≠ Total Passif (5 287 700 €) + Résultat</p>
+                            <p style="font-size:0.8rem;color:var(--muted-fg);margin-top:0.5rem"><b>→ Cause probable :</b> comptes non affectés à la table de passage, ou surcharge incorrecte. Retournez à l'onglet « Table de passage » pour corriger.</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+                        <button class="btn btn-ghost" type="button" data-bil-goto="passage">Aller à la Table de passage</button>
+                      </div>
+                    </div>
+
+                    <!-- AVEC COMPTES NON MAPPÉS -->
+                    <div data-bil-bilan-slot="avec-non-mappes" hidden>
+                      <div class="ctrl-card" style="margin-bottom:1.15rem;background:rgba(245, 158, 11, 0.08);border:1px solid rgba(245, 158, 11, 0.2);border-radius:var(--radius);padding:0.85rem">
+                        <div style="display:flex;align-items:center;gap:0.6rem">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:#f59e0b"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                          <div style="flex:1">
+                            <b style="color:#92400e">Bilan équilibré, mais comptes non affectés détectés</b>
+                            <p style="font-size:0.84rem;color:var(--muted-fg);margin-top:0.2rem">2 comptes portent un solde non nul et ne sont pas affectés à la liasse · Total : 125 000 €</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div style="margin-bottom:1.15rem">
+                        <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem">Comptes non mappés (2 à traiter)</h4>
+                        <div class="card-surface">
+                          <div class="tdp-un">
+                            <div class="tdp-unrow">
+                              <span class="cpt">4765</span>
+                              <span class="lib">Compte non reconnu<small>Aucun préfixe du référentiel ne couvre 4765</small></span>
+                              <span class="mnt">125 000<small>débiteur</small></span>
+                              <span class="tdp-gestes"><button class="btn btn-primary btn-sm" type="button" data-bil-goto="passage">Affecter</button></span>
+                            </div>
+                            <div class="tdp-unrow">
+                              <span class="cpt">6258</span>
+                              <span class="lib">Compte temporaire<small>Compte créé après le référentiel</small></span>
+                              <span class="mnt">34 500<small>créditeur</small></span>
+                              <span class="tdp-gestes"><button class="btn btn-primary btn-sm" type="button" data-bil-goto="passage">Affecter</button></span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+                        <button class="btn btn-ghost" type="button" data-bil-goto="passage">Aller à la Table de passage</button>
+                      </div>
+                    </div>
+
+                    <!-- CHARGEMENT -->
+                    <div data-bil-bilan-slot="loading" hidden>
+                      <div class="state"><div class="sk-row"><span class="sk sk-line" style="width:30%"></span></div><div class="sk-row"><span class="sk sk-line" style="width:100%"></span></div><div class="sk-row"><span class="sk sk-line" style="width:100%"></span></div><div class="sk-row"><span class="sk sk-line" style="width:60%"></span></div></div>
+                      <p class="helper" style="margin-top:0.6rem">Calcul du Bilan en cours…</p>
+                    </div>
+
+                    <!-- ERREUR -->
+                    <div data-bil-bilan-slot="error" hidden>
+                      <div class="state error" style="border:1px solid color-mix(in srgb, var(--danger) 30%, var(--border));border-radius:var(--radius)"><span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span><h3>Le Bilan n'a pas pu être calculé</h3><p>Vérifiez que votre balance source est valide et que le référentiel est accessible.</p><button class="btn btn-primary btn-sm" type="button">Réessayer</button></div>
+                      <p class="helper" style="margin-top:0.6rem">⚠️ <b>Un contrat inattendu a son propre écran, SANS ce bouton.</b> Quand <code>:3004</code> répond 200 dans une forme que le front ne reconnaît pas, réessayer ne changerait rien&nbsp;: le serveur a répondu. Confondre les deux ferait attendre l'utilisateur trois tentatives pour rien.</p>
+                    </div>
+
+                    <!-- AUCUNE BALANCE -->
+                    <div data-bil-bilan-slot="sans-balance" hidden>
+                      <div class="state empty" style="border:1px dashed var(--border-strong);border-radius:var(--radius)"><span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/></svg></span><h3>Aucune balance source retenue</h3><p style="max-width:48ch">Le Bilan se calcule sur les comptes d'une balance validée. Sans balance retenue, il n'y a aucun compte à transformer en postes.</p><button class="btn btn-primary btn-sm" type="button" data-bil-goto="source">Choisir une balance</button></div>
+                    </div>
+
+                    <div class="dc-note dc-gap"><b>⛔ AUCUN BOUTON «&nbsp;VALIDER LE BILAN&nbsp;» SUR CET ÉCRAN, ET CE N'EST PAS UN OUBLI.</b> Une version de travail en portait un, activé «&nbsp;si équilibré <b>et</b> aucun compte non mappé&nbsp;». Trois choses le rendaient intenable. <b>①</b> <b>Aucune route ne le sert&nbsp;:</b> <code>valider</code> porte sur un jeu d'états <b>persisté</b> (<code>POST …/bilan/etats/{id}/valider</code>), et la persistance est hors périmètre de FE-031 (STORY-064/065) — le bouton aurait cliqué dans le vide. <b>②</b> <b>Les comptes écartés ne bloquent AUCUNE validation&nbsp;:</b> c'est exactement l'AC-4 que FE-030 a dû amender, aucun des quatre contrôles bloquants ne les regarde. <b>③</b> <code>422 LIASSE_NON_VALIDABLE</code> a ses critères propres, servis par <code>…/etats/controles/dry-run</code> que cet écran ne lit pas — annoncer «&nbsp;validable&nbsp;» sans les avoir lus, c'est promettre à la place du serveur. Le geste servi est <b>«&nbsp;Corriger à la table de passage&nbsp;»</b>.</div>
+
+                    <div class="dc-note dc-gap"><b>⛔ UN ÉQUILIBRE N'EST PAS UNE PREUVE D'EXACTITUDE, et l'avertissement reste donc affiché EN VERT.</b> Autant de débit que de crédit écartés se <b>compensent</b>&nbsp;: l'équation tombe juste et la liasse est fausse (FE-030, branche <code>compense</code>). Masquer l'alerte dès que le vert s'allume l'effacerait <b>exactement quand elle est le seul témoin restant</b>. Deux messages distincts selon qu'un écart existe ou non — «&nbsp;malgré l'équilibre&nbsp;» n'est pas «&nbsp;pour expliquer l'écart&nbsp;».</div>
+
+                    <div class="dc-note dc-gap"><b>⚡ L'ÉQUILIBRE A DEUX EXPRESSIONS, ET ELLES PEUVENT DIVERGER.</b> Le service publie <code>controle</code> (somme des postes) <b>et</b> <code>coherenceSousTotaux</code> (la cascade du référentiel, <code>BZ = DZ</code>). Une liasse peut être <code>equilibre: true</code> et <code>coherent: false</code>&nbsp;: elle s'équilibre, <b>mais pas par le chemin que le référentiel décrit</b>. N'afficher que la première cacherait au comptable que sa liasse déposée présentera des sous-totaux qui ne mènent pas au total général. ⚠️ Une cascade <b>vide</b> est normale (SFD-BCEAO n'en déclare aucune), pas une anomalie.</div>
+
+                    <div class="dc-note dc-gap"><b>⚡ LE COMPARATIF N-1 SE DÉSIGNE, IL NE SE DEVINE PAS.</b> Rien dans le contrat ne dit qu'une balance est le N-1 d'une autre&nbsp;: <code>ExerciceView</code> ne porte que <code>{debut, fin}</code>, et Q6 a donné le dernier mot sur les exercices au <b>dossier</b>. Un comparatif deviné contre le mauvais exercice ne rougirait nulle part — il s'afficherait comme un fait, et les variations calculées dessus se liraient comme des anomalies de gestion. ⚠️ La fiche renvoyait à <code>…/bilan/comparaison/…</code>&nbsp;: cette route rend une table d'<b>évolution</b> sur 2 à 5 exercices <b>validés</b> (FR-024), sans <code>brutN</code>/<code>amortN</code>/<code>netN</code> — ce n'est pas un Bilan, et elle répondrait <code>404</code> sur tout dossier qui n'a rien validé. Les colonnes N-1 du Bilan viennent de <code>soldesN1</code>, calculées par le <b>serveur</b>. <b>Écart transmis&nbsp;: FR-024 mérite sa propre story.</b></div>
+
+                    <div class="dc-note dc-gap"><b>⛔ AUCUN TOTAL N'EST RECALCULÉ PAR L'ÉCRAN.</b> Une version de la fiche demandait des totaux «&nbsp;calculés côté client par sommation (validation)&nbsp;». Le serveur en publie déjà deux jeux (<code>controle</code> et <code>sousTotaux</code>)&nbsp;: en ajouter un troisième donnerait <b>trois nombres pour une même question</b>, et le jour où ils divergent, c'est l'écran qui aurait tort <b>sans le dire</b>. C'est le refus explicite posé par FE-030 — «&nbsp;ferait de cet écran un SECOND ARBITRE&nbsp;» — et il vaut ici davantage, puisque c'est <b>ici</b> que le chiffre fait foi.</div>
+
+                    <div class="dc-note dc-gap"><b>⚡ CE QUE LA LIASSE NE PUBLIE PAS SUR LES COMPTES ÉCARTÉS.</b> <code>comptesNonMappes</code> est un <code>string[]</code>&nbsp;: de simples <b>numéros de compte</b>, sans libellé, sans montant, sans motif. Les libellés et les soldes affichés ici viennent de la <b>balance retenue</b> — un rapprochement, jamais une invention. Les afficher nus laisserait le comptable devant une liste de matricules sans moyen d'en juger le poids&nbsp;; les présenter comme venant du calcul serait faux.</div>
                   </div>
 
                 </div>
@@ -11554,6 +11803,72 @@
           /* Refus : le dialogue RESTE ouvert, le motif saisi n'est pas perdu. */
           rendreRefus();
         });
+      })();
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      // FE-031 — Navigation Bilan (SIMPLE & ROBUSTE)
+      // ═══════════════════════════════════════════════════════════════════════════
+
+      (function() {
+        var bilModule = document.querySelector('[data-module="bilan"]');
+        if (!bilModule) return;
+
+        console.log('✅ Module Bilan détecté, initialisation…');
+
+        // ───── ONGLETS BILAN ─────
+        var tabs = bilModule.querySelectorAll('[data-bil-tab]');
+        var panels = bilModule.querySelectorAll('[data-bil-panel]');
+
+        function switchTab(tabName) {
+          console.log('Changement tab:', tabName);
+          tabs.forEach(function(t) {
+            t.setAttribute('aria-selected', t.dataset.bilTab === tabName);
+          });
+          panels.forEach(function(p) {
+            p.hidden = p.dataset.bilPanel !== tabName;
+          });
+        }
+
+        tabs.forEach(function(tab) {
+          tab.addEventListener('click', function() {
+            switchTab(tab.dataset.bilTab);
+          });
+        });
+
+        // ───── ÉTATS BILAN (démo) ─────
+        var bilStates = bilModule.querySelectorAll('[data-bil-state]');
+        var bilSlots = bilModule.querySelectorAll('[data-bil-bilan-slot]');
+
+        function switchBilanState(stateName) {
+          console.log('Changement état bilan:', stateName);
+          bilStates.forEach(function(s) {
+            s.setAttribute('aria-selected', s.dataset.bilState === stateName);
+          });
+          bilSlots.forEach(function(slot) {
+            slot.hidden = slot.dataset.bilBilanSlot !== stateName;
+          });
+        }
+
+        bilStates.forEach(function(state) {
+          state.addEventListener('click', function() {
+            switchBilanState(state.dataset.bilState);
+          });
+        });
+
+        // ───── BOUTONS DE NAVIGATION ─────
+        bilModule.querySelectorAll('[data-bil-goto]').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var target = btn.dataset.bilGoto;
+            console.log('Navigation:', target);
+            switchTab(target);
+          });
+        });
+
+        // Initialiser avec tab Source
+        switchTab('source');
+        switchBilanState('equilibre');
+
+        console.log('✅ FE-031 prêt');
       })();
 
       setGate("granted");
