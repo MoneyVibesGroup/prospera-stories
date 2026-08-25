@@ -68,6 +68,14 @@ l'est, lui, dès aujourd'hui.
   lequel choisir. Une org à **un seul** dossier se migre sans ambiguïté ; une org à plusieurs
   demande un arbitrage — à trancher à la conception, et à **écrire**, jamais à deviner en script.
 - L'index d'unicité suit la nouvelle clé.
+- ⚡ **La garde d'exercice clos de l'import**, qui est le dégât CONCRET de cette portée et qui
+  s'est révélé en instruisant la maquette FE-049 : `releves.service.ts` ne connaît pas de dossier,
+  il résout donc « Mon cabinet » et retombe sur l'`orgId` s'il ne le trouve pas
+  (`const dossierId = dossierCabinet ?? orgId;`). ⇒ **un relevé s'importe dans un exercice CLOS du
+  client**, alors que le pointage (dossier-scopé, lui) le refuse en `EXERCICE_CLOS`. Deux gardes
+  du même service disent le contraire l'une de l'autre sur la même période, et c'est la
+  permissive qui écrit. Le re-scopage la referme mécaniquement — **à condition qu'un test le
+  prouve**, sans quoi rien ne dira qu'elle a jamais été ouverte.
 
 **Hors périmètre**
 
@@ -106,4 +114,9 @@ l'est, lui, dès aujourd'hui.
   au dossier ; `tresorerie` (2 contrôleurs) et `profil-societe` (2 contrôleurs) ne le sont pas.
   ⇒ Le relevé complet vaut mieux que la découverte au coup par coup : c'est **la troisième fois**
   qu'un écran frontend découvre un survivant org-keyé en essayant de le consommer.
+- ⚠️ **Deux voisines, ouvertes le même jour par la même lecture, et qui ne se recouvrent pas** :
+  **STORY-406** (les écarts sans `compteId` lisent les relevés de toute l'organisation — un appel
+  org-large *à l'intérieur* d'un service dossier-scopé, qui survivra à ce re-scopage s'il n'est pas
+  nommément corrigé) et **STORY-407** (aucune route ne retire un relevé importé — ce qui rend
+  l'erreur de compte que cette portée rend probable **définitive**).
 - Consommateur nommé : **FE-049**.

@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-030 Table de passage</title>
+<title>Prospera · Prototype cumulatif — FE-049 Rapprochement</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -919,6 +919,105 @@
   @media (max-width: 640px) {
     .prof-map-row { grid-template-columns: 1fr; gap: 0.35rem; }
     .pm-arrow { display: none; }
+  }
+
+  /* ═══ FE-049 — rapprochement relevés ↔ cahiers (STORY-089 · STORY-090) ═══
+     Le panneau réutilise TOUT le vocabulaire de l'Atelier (.imp-table, .imp-tile,
+     .prof-note, .ref-card, .gate, .cah-mois). Ne sont définis ici que les quatre
+     objets que le rapprochement introduit VRAIMENT, et qui n'existent nulle part
+     ailleurs dans le produit :
+
+       ① le COMPTE DE TRÉSORERIE (banque / mobile money / caisse) ;
+       ② la PAIRE — deux colonnes qui se regardent, la règle au milieu ;
+       ③ l'ÉQUATION de l'état de rapprochement, qui se lit de haut en bas comme
+          sur le papier que l'expert-comptable signe ;
+       ④ le PLATEAU d'appariement manuel, avec ses deux sommes.
+
+     Aucune couleur en dur hors des trois teintes sémantiques déjà employées par
+     `.prof-note` : le panneau suit le thème clair/sombre comme le reste. */
+
+  .rap-comptes { display: grid; grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr)); gap: 0.7rem; }
+  .rap-compte { display: flex; flex-direction: column; gap: 0.4rem; padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: 0.7rem; background: var(--card); }
+  .rap-compte:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+  .rap-compte[data-selected="true"] { border-color: color-mix(in srgb, var(--orange-500) 45%, var(--border)); background: color-mix(in srgb, var(--orange-500) 7%, var(--card)); }
+  .rap-compte.off { background: var(--hover-surface); }
+  .rap-compte.off .rap-c-head b { color: var(--muted-fg); }
+  .rap-c-head { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .rap-c-head b { font-size: 0.9rem; }
+  .rap-c-meta { display: flex; flex-wrap: wrap; gap: 0.15rem 0.9rem; font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted-fg); }
+  .rap-c-note { font-size: 0.74rem; color: var(--muted-fg); line-height: 1.4; }
+
+  /* Le canal n'est pas décoratif : c'est lui qui dit quel moyen de paiement est
+     compatible côté cahier (BANQUE↔BANQUE, MOBILE_MONEY↔MOBILE_MONEY,
+     CAISSE↔ESPÈCES) — donc quelles lignes le moteur s'autorise à apparier. */
+  .rap-canal { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.08rem 0.45rem; border-radius: 999px; background: var(--hover-surface); color: var(--muted-fg); white-space: nowrap; }
+  .rap-canal.bq { background: color-mix(in srgb, #2563eb 13%, transparent); color: #2563eb; }
+  .rap-canal.mm { background: color-mix(in srgb, #7c3aed 15%, transparent); color: #7c3aed; }
+  .rap-canal.cs { background: var(--warning-soft); color: #b45309; }
+  :root[data-theme="dark"] .rap-canal.cs { color: var(--warning); }
+
+  /* ② LA PAIRE — relevé à gauche, cahier à droite, la règle au milieu. */
+  .rap-pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 0.8rem; padding: 0.75rem 0.85rem; border: 1px solid var(--border); border-radius: 0.7rem; background: var(--card); }
+  .rap-pair.prop { border-color: color-mix(in srgb, #2563eb 34%, transparent); background: color-mix(in srgb, #2563eb 6%, transparent); }
+  .rap-side { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+  .rap-side .k { font-size: 0.64rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); }
+  .rap-line { display: flex; align-items: baseline; gap: 0.5rem; font-size: 0.81rem; }
+  .rap-line .d { font-family: var(--font-mono); font-size: 0.71rem; color: var(--muted-fg); flex: none; }
+  .rap-line .l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rap-line .m { font-variant-numeric: tabular-nums; font-weight: 650; flex: none; }
+  .rap-mid { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3rem; padding: 0 0.2rem; }
+  .rap-mid svg { width: 1.15rem; height: 1.15rem; color: var(--muted-fg); }
+  .rap-regle { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); text-align: center; }
+  .rap-acts { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; margin-top: 0.55rem; }
+
+  /* ③ L'ÉQUATION — l'état de rapprochement se lit de haut en bas, comme sur le
+        papier. L'écart est la DERNIÈRE ligne : c'est lui qu'on cherche. */
+  .rap-eq { display: flex; flex-direction: column; }
+  .rap-eq-row { display: grid; grid-template-columns: 1.3rem minmax(0, 1fr) auto; gap: 0.6rem; align-items: baseline; padding: 0.5rem 0; border-bottom: 1px dashed var(--border); font-size: 0.85rem; }
+  .rap-eq-row:last-child { border-bottom: 0; }
+  .rap-eq-row .op { font-family: var(--font-mono); font-weight: 700; color: var(--muted-fg); text-align: center; }
+  .rap-eq-row .v { font-variant-numeric: tabular-nums; font-weight: 650; white-space: nowrap; }
+  .rap-eq-row .sub { display: block; margin-top: 0.1rem; font-size: 0.72rem; font-weight: 400; color: var(--muted-fg); line-height: 1.4; }
+  .rap-eq-row.sum { border-top: 2px solid var(--border-strong); border-bottom: 0; margin-top: 0.2rem; padding-top: 0.6rem; }
+  .rap-eq-row.sum .v { font-size: 1rem; font-weight: 750; }
+  .rap-eq-row.ecart .v { font-size: 1.1rem; font-weight: 800; }
+  .rap-eq-row.ecart.ok .v { color: var(--success); }
+  .rap-eq-row.ecart.ko .v { color: var(--danger); }
+  .rap-eq-row.ecart.nul .v { color: var(--muted-fg); font-size: 0.95rem; }
+
+  /* ④ LE PLATEAU — deux paniers, deux sommes, un verdict. Le bouton reste
+        désactivé tant que les deux sommes diffèrent : c'est le 400 du serveur
+        (APPARIEMENT_MONTANTS_DIFFERENTS) rendu impossible à provoquer. */
+  .rap-tray { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 0.7rem; }
+  .rap-basket { border: 1px dashed var(--border-strong); border-radius: 0.7rem; background: var(--content-bg); padding: 0.7rem 0.85rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  .rap-basket .k { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); }
+  .rap-basket .tot { display: flex; justify-content: space-between; align-items: baseline; gap: 0.6rem; margin-top: 0.25rem; padding-top: 0.45rem; border-top: 1px solid var(--border); font-size: 0.86rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+  .rap-verdict { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.8rem; border-radius: 0.6rem; font-size: 0.82rem; font-weight: 600; }
+  .rap-verdict svg { width: 1rem; height: 1rem; flex: none; }
+  .rap-verdict.ko { background: var(--danger-soft); color: var(--danger); }
+  .rap-verdict.ok { background: var(--success-soft); color: var(--success); }
+
+  /* Les QUATRE écarts. Chaque tuile porte sa lecture métier : un chiffre sans
+     lecture n'aide personne, et ce sont ces quatre lectures — pas les
+     appariements — qui font découvrir quelque chose. */
+  .rap-ecs { display: grid; grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr)); gap: 0.7rem; }
+  .rap-ec { padding: 0.8rem 0.9rem; border: 1px solid var(--border); border-radius: 0.7rem; background: var(--card); display: flex; flex-direction: column; gap: 0.25rem; }
+  .rap-ec.grave { border-color: color-mix(in srgb, var(--danger) 40%, var(--border)); background: color-mix(in srgb, var(--danger) 6%, var(--card)); }
+  .rap-ec.attn { border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); background: color-mix(in srgb, var(--warning) 7%, var(--card)); }
+  .rap-ec .n { font-size: 1.15rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+  .rap-ec .t { font-size: 0.8rem; font-weight: 700; }
+  .rap-ec .m { font-size: 0.76rem; color: var(--muted-fg); font-variant-numeric: tabular-nums; }
+  .rap-ec .why { margin-top: 0.15rem; font-size: 0.74rem; color: var(--muted-fg); line-height: 1.45; }
+  .rap-qual { display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center; }
+  .rap-slot { display: flex; flex-direction: column; gap: 0.95rem; }
+  .rap-sect { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+  .rap-sect h4 { margin: 0; font-size: 0.9rem; font-weight: 700; }
+  .rap-sect .c { font-size: 0.76rem; color: var(--muted-fg); }
+  .imp-table tr.rap-ok td { background: color-mix(in srgb, var(--success) 6%, transparent); }
+
+  @media (max-width: 720px) {
+    .rap-pair { grid-template-columns: 1fr; }
+    .rap-mid { flex-direction: row; }
   }
 
   .atl-body { padding: 1.15rem; display: flex; flex-direction: column; gap: 1.15rem; }
@@ -4467,9 +4566,9 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
                       Rattachement <span class="soon">FE-046</span>
                     </button>
-                    <button class="atl-tab" role="tab" data-atl-tab="rapprochement" aria-selected="false" disabled title="FE-049 — releves bancaires et mobile money, appariement, ecarts. Backend deja servi (STORY-089/090).">
+                    <button class="atl-tab" role="tab" data-atl-tab="rapprochement" aria-selected="false" title="FE-049 — releves bancaires et mobile money, appariement, ecarts, etat de rapprochement.">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="m9 12 2 2 4-4"/></svg>
-                      Rapprochement <span class="soon">FE-049</span>
+                      Rapprochement <span class="count">Banque · Mobile money</span>
                     </button>
                     <button class="atl-tab" role="tab" data-atl-tab="fiscal" aria-selected="false" disabled title="FE-050 puis FE-051 — resultat fiscal (reintegrations / deductions), puis liquidation IS = max(MFP, IS), acomptes, TVA, provisions, TPU. Backend deja servi (STORY-091 a 095).">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
@@ -4737,6 +4836,810 @@
                          sortent en UNITES MINEURES, et le geste manque sur le seul refus
                          dont la cause est ailleurs. A ne pas redecouvrir. -->
                   </div>
+                  <!-- ═════════════ Onglet RAPPROCHEMENT (FE-049 · STORY-089 + 090 · FR-A15/A16/A17) ═════════════
+                       Relevé de banque et de mobile money, appariement relevé↔cahiers,
+                       écarts, état de rapprochement. C'est le contrôle qui transforme une
+                       balance DÉCLARATIVE en balance DÉFENDABLE : le relevé vient d'un
+                       tiers, pas du client.
+
+                       ⚠ Ce panneau a été dessiné en se plaçant DERRIÈRE L'ÉCRAN d'un
+                       expert-comptable togolais qui tient plusieurs dossiers et qui vient
+                       de Sage. Quatre choses qu'il fait tous les mois — et qu'aucun écran
+                       du produit ne savait faire — commandent la mise en page :
+
+                       ① il rapproche UN COMPTE, sur UNE PÉRIODE, jamais « le dossier ».
+                          D'où le compte AVANT tout le reste, et le mois plutôt que
+                          l'exercice (le service refuse au-delà de 5 000 lignes, et sa
+                          sortie documentée est justement `du`/`au`) ;
+                       ② il POINTE, il ne « lance pas un traitement ». La machine applique
+                          l'exact, PROPOSE le reste, et un PROPOSÉ n'a aucun effet tant
+                          qu'il n'est pas confirmé — l'écran doit rendre ces deux mondes
+                          impossibles à confondre ;
+                       ③ ce qu'il cherche, ce sont LES ÉCARTS, pas les appariements. Les
+                          quatre types portent chacun une lecture métier (produit non
+                          déclaré / charge oubliée / créance ou espèces / charge fictive) ;
+                       ④ il termine par L'ÉTAT DE RAPPROCHEMENT, la pièce qu'il signe.
+                          Solde relevé ± en-cours = solde comptable théorique, confronté à
+                          la balance. Un écart nul ne prouve rien — l'écran le dit.
+
+                       ⛔ TROIS choses que cet écran REFUSE de faire, et ce sont des
+                          décisions, pas des manques :
+                          — il ne crée AUCUNE écriture. Qualifier « justifié » n'est pas
+                            passer une OD : le contrat publie `ecritureCreee: false` et
+                            l'écran le répète, parce que c'est exactement ce qu'un
+                            utilisateur de Sage attend du lettrage et qu'il n'aura pas ;
+                          — il ne pré-coche aucune proposition ;
+                          — il n'affiche jamais 0 à la place d'un écart non calculable. -->
+                  <div class="atl-panel atl-body" data-atl-panel="rapprochement" hidden>
+
+                    <div style="display:flex;align-items:flex-end;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Rapprochement — banque &amp; mobile money</h3>
+                        <p class="atl-secsub">Le relevé vient d'un <b>tiers</b>&nbsp;: la banque, TMoney, Flooz. C'est la pièce la plus probante du dossier. On lui confronte ce que le client a déclaré dans ses cahiers&nbsp;: <b>ce qui ne s'apparie pas est exactement ce qui compte</b>.</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <div class="atelier-demo" role="tablist" aria-label="État de l'écran (démo)">
+                        <span class="lbl">État</span>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rap="comptes" aria-selected="true">Comptes</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rap="import" aria-selected="false">Import</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rap="apercu" aria-selected="false">Aperçu</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rap="table" aria-selected="false">Pointage</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rap="ecarts" aria-selected="false">Écarts</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rap="etat" aria-selected="false">État</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rap="refus" aria-selected="false">Refus</button>
+                      </div>
+                    </div>
+
+                    <!-- ⛔ LA PORTÉE, DITE EN TOUTES LETTRES — le patron retenu par FE-048
+                         pour les profils d'import, appliqué ici à un objet où l'enjeu est
+                         bien plus lourd. Relevé à la source sur `origin/dev` :
+                         `/tresorerie/comptes` et `/tresorerie/{compteId}/releves` n'ont
+                         AUCUN segment `{dossierId}` et `CompteTresorerieResponseDto` ne
+                         publie aucun `dossierId` — donc rien à filtrer côté client, et
+                         c'est pour ça que l'écran le DIT au lieu de le corriger. -->
+                    <div class="prof-note warn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                      <span><b>Vos comptes de trésorerie appartiennent au cabinet, pas au dossier ouvert.</b> Déclaré ici, un compte apparaît dans <b>tous</b> vos dossiers clients&nbsp;: nommez-le avec le nom du client. Le <b>rapprochement</b>, lui, est bien celui de <b>Kossi Distribution</b> — ce sont ses cahiers qui sont confrontés. <span class="code">écart ouvert · ticket backend</span></span>
+                    </div>
+
+                    <!-- ═════════════ ÉTAT 1 · LES COMPTES ═════════════ -->
+                    <div class="rap-slot" data-rap-slot="comptes">
+                      <div class="rap-sect">
+                        <h4>Sur quel compte&nbsp;?</h4>
+                        <span class="c">On rapproche un compte à la fois — jamais «&nbsp;le dossier&nbsp;».</span>
+                      </div>
+
+                      <div class="rap-comptes">
+                        <div class="rap-compte" data-selected="true">
+                          <div class="rap-c-head">
+                            <b>BOA — courant Kossi</b>
+                            <span class="rap-canal bq">Banque</span>
+                            <span class="grow" style="flex:1"></span>
+                            <span class="badge badge-active"><span class="d"></span>Actif</span>
+                          </div>
+                          <div class="rap-c-meta"><span>TG53 0100 1234 5678 90</span><span>XOF</span></div>
+                          <div class="rap-c-note">Rattaché au compte <b>521100</b> — <b>saisi</b> sur ce compte, il ne bougera pas si le paramétrage de ventilation change.</div>
+                          <div class="rap-acts">
+                            <button class="btn btn-primary btn-sm" type="button" data-rap-goto="import">Rapprocher ce compte</button>
+                          </div>
+                        </div>
+
+                        <div class="rap-compte" data-selected="false">
+                          <div class="rap-c-head">
+                            <b>TMoney gérant</b>
+                            <span class="rap-canal mm">Mobile money</span>
+                            <span class="grow" style="flex:1"></span>
+                            <span class="badge badge-active"><span class="d"></span>Actif</span>
+                          </div>
+                          <div class="rap-c-meta"><span>+228 90 00 00 00</span><span>XOF</span></div>
+                          <!-- compteComptableParDefaut: true — et la conséquence est
+                               DITE ici, pas découverte trois écrans plus loin dans un
+                               avertissement de l'état de rapprochement. -->
+                          <div class="rap-c-note">Rattaché au compte <b>521</b> — <b>repris du paramétrage</b> de ventilation. C'est une <b>racine</b>&nbsp;: l'état de rapprochement additionnera toutes les banques qui s'y rattachent. <button class="linklike" type="button" data-rap-goto="etat">Voir l'effet</button></div>
+                          <div class="rap-acts">
+                            <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="import">Rapprocher ce compte</button>
+                          </div>
+                        </div>
+
+                        <div class="rap-compte" data-selected="false">
+                          <div class="rap-c-head">
+                            <b>Flooz boutique</b>
+                            <span class="rap-canal mm">Mobile money</span>
+                            <span class="grow" style="flex:1"></span>
+                            <span class="badge badge-active"><span class="d"></span>Actif</span>
+                          </div>
+                          <div class="rap-c-meta"><span>+228 79 12 34 56</span><span>XOF</span></div>
+                          <div class="rap-c-note">Rattaché au compte <b>521</b> — repris du paramétrage.</div>
+                          <div class="rap-acts">
+                            <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="import">Rapprocher ce compte</button>
+                          </div>
+                        </div>
+
+                        <!-- La CAISSE est déclarable, mais son « relevé » ne vient pas d'un
+                             tiers : c'est le brouillard tenu par le client. L'écran le dit
+                             AVANT qu'on s'en serve — sinon on rapproche le client avec
+                             lui-même et on appelle ça une preuve. -->
+                        <div class="rap-compte off">
+                          <div class="rap-c-head">
+                            <b>Caisse boutique</b>
+                            <span class="rap-canal cs">Caisse</span>
+                            <span class="grow" style="flex:1"></span>
+                            <span class="badge badge-soon">Sans relevé de tiers</span>
+                          </div>
+                          <div class="rap-c-meta"><span>571000</span><span>XOF</span></div>
+                          <div class="rap-c-note"><b>Une caisse n'a pas de relevé de banque.</b> Ce qu'on y importerait serait le <b>brouillard tenu par le client</b> — la même main que les cahiers. Le rapprochement reste possible, mais il ne prouve pas la même chose&nbsp;: <b>c'est un contrôle de cohérence interne, pas une preuve externe</b>.</div>
+                          <div class="rap-acts">
+                            <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="import">Rapprocher quand même</button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <details class="cah-repli">
+                        <summary>Déclarer un compte de trésorerie <span>— banque, mobile money ou caisse</span></summary>
+                        <div class="cah-form">
+                          <label>Libellé
+                            <input type="text" placeholder="Ecobank — courant Sodifab" value="">
+                            <span class="fh">Mettez le nom du client&nbsp;: la liste est celle du cabinet.</span>
+                          </label>
+                          <label>Canal
+                            <select><option>Banque</option><option>Mobile money</option><option>Caisse</option></select>
+                            <span class="fh"><b>Non modifiable ensuite</b> — il détermine la nature comptable des flux passés.</span>
+                          </label>
+                          <label>N° de compte / téléphone
+                            <input type="text" placeholder="+228 …" value="">
+                          </label>
+                          <label>Compte comptable
+                            <input type="text" placeholder="521100" value="">
+                            <span class="fh">Laissé vide&nbsp;: repris du paramétrage de ventilation (une racine). <b>Le renseigner ici est ce qui rend l'état de rapprochement lisible.</b></span>
+                          </label>
+                        </div>
+                        <div class="cah-actions" style="padding:0 0 0.7rem">
+                          <button class="btn btn-primary btn-sm" type="button">Déclarer le compte</button>
+                          <span class="helper" style="text-align:left">Un compte qui porte des lignes de relevé ne se supprime plus&nbsp;: il se <b>désactive</b>.</span>
+                        </div>
+                      </details>
+                    </div>
+
+                    <!-- ═════════════ ÉTAT 2 · IMPORTER LE RELEVÉ ═════════════ -->
+                    <div class="rap-slot" data-rap-slot="import" hidden>
+                      <div class="imp-steps" aria-hidden="true">
+                        <span class="imp-step active" data-imp-step="1"><span class="n">1</span> Fichier</span>
+                        <span class="sep"></span>
+                        <span class="imp-step" data-imp-step="2"><span class="n">2</span> Aperçu</span>
+                        <span class="sep"></span>
+                        <span class="imp-step" data-imp-step="3"><span class="n">3</span> Import</span>
+                      </div>
+
+                      <div class="cah-bar">
+                        <div>
+                          <b>BOA — courant Kossi</b>
+                          <span class="sub">Exercice <b>2026</b> · 01/01/2026 → 31/12/2026 — <b>lu sur le dossier</b>, pas saisi ici.</span>
+                        </div>
+                        <span class="grow" style="flex:1"></span>
+                        <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="comptes">Changer de compte</button>
+                      </div>
+
+                      <!-- ⚠ CE QUI EST REFUSÉ EST DIT AVANT LE DÉPÔT, PAS APRÈS.
+                           Au Togo, la banque envoie un PDF : le service le refuse
+                           (RELEVE_PDF_NON_SUPPORTE) et l'opérateur mobile envoie un SMS ou
+                           une capture, qui relève des PIÈCES (STORY-084), pas d'ici.
+                           Laisser découvrir ça sur un refus après un dépôt de 3 Mo, c'est
+                           faire perdre le geste ET la confiance. -->
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>CSV ou Excel uniquement — le PDF de votre banque sera refusé.</b> Demandez l'<b>export</b> (espace en ligne BOA / Ecobank / UTB, «&nbsp;télécharger au format CSV&nbsp;»). Pour TMoney et Flooz&nbsp;: l'<b>export opérateur</b> se dépose ici&nbsp;; une <b>capture d'écran ou un SMS</b> n'est pas un relevé — il part dans <button class="linklike" type="button" data-rap-goto="capture">les pièces du cahier</button>.</span>
+                      </div>
+
+                      <div class="ref-card" style="padding:1rem;display:flex;flex-direction:column;gap:0.85rem">
+                        <div>
+                          <b>Le fichier du relevé</b>
+                          <p class="atl-secsub" style="margin:0.2rem 0 0">Déposez l'export tel que la banque le donne&nbsp;: aucune colonne à retirer, aucune ligne à supprimer.</p>
+                        </div>
+                        <div class="dropzone">
+                          <span class="dzi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></span>
+                          <b>releve-boa-mars-2026.csv</b>
+                          <span>84&nbsp;Ko · CSV · pré-contrôle local OK</span>
+                        </div>
+
+                        <!-- Le profil est un PRÉ-REQUIS DUR de l'import (`profilImportId`
+                             est obligatoire au multipart) et il doit être de cible RELEVE.
+                             FE-048 n'a servi que la cible BALANCE : sans cette liste, AC-1
+                             de la story est intenable. -->
+                        <label style="display:flex;flex-direction:column;gap:0.3rem;font-size:0.78rem;font-weight:600;color:var(--muted-fg)">Profil de lecture (relevé)
+                          <select style="font:inherit;font-size:0.86rem;padding:0.45rem 0.6rem;border:1px solid var(--border-strong);border-radius:0.5rem;background:var(--card);color:var(--foreground)">
+                            <option>Relevé BOA — CSV «&nbsp;;&nbsp;» utf-8 · débit/crédit</option>
+                            <option>Export TMoney — CSV «&nbsp;,&nbsp;» utf-8 · montant + type</option>
+                            <option>Relevé Ecobank — XLSX · montant signé</option>
+                          </select>
+                        </label>
+                        <p class="helper" style="text-align:left">
+                          Le profil dit <b>quelle colonne porte la date, le libellé, le montant et le sens</b>. Il appartient au cabinet et se réutilise tous les mois.
+                          <button class="linklike" type="button" data-rap-goto="profil-releve">Aucun profil de relevé&nbsp;? En créer un</button>
+                        </p>
+
+                        <div class="imp-actions">
+                          <button class="btn btn-primary btn-sm" type="button" data-rap-goto="apercu">Voir l'aperçu — rien ne sera enregistré</button>
+                          <span class="grow"></span>
+                        </div>
+                      </div>
+
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span><b>Un relevé importé ne crée aucune écriture comptable.</b> C'est un référentiel de flux réels&nbsp;: rien n'entre au cahier, rien n'entre en balance. Il sert à <b>confronter</b>.</span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ÉTAT 2bis · LA CAPTURE MOBILE MONEY N'EST PAS UN RELEVÉ ═════════════
+                         Atteignable par le parcours normal (le lien du bandeau d'import) :
+                         c'est le mauvais geste le plus probable de tout l'écran. -->
+                    <div class="rap-slot" data-rap-slot="capture" hidden>
+                      <div class="gate warn">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></span>
+                        <h3>Une capture TMoney n'est pas un relevé</h3>
+                        <p>Une image ne porte ni colonnes ni sens&nbsp;: elle ne peut pas être confrontée à un cahier. Elle a sa place — mais comme <b>pièce</b>, dans le cahier, où elle est lue et où la recette qui en sort garde sa vignette.</p>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                          <button class="btn btn-primary btn-sm" type="button" data-goto-cahiers>Déposer dans les pièces du cahier</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="import">Revenir à l'import</button>
+                        </div>
+                        <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> L'export opérateur, lui, se dépose bien ici&nbsp;: c'est un fichier de colonnes.</span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ÉTAT 2ter · LE PROFIL DE RELEVÉ — LE VOCABULAIRE DE L'OPÉRATEUR ═════════════
+                         ⚠ LE POINT LE PLUS SOUS-ESTIMÉ DE LA STORY. Un relevé de banque
+                         porte deux colonnes débit/crédit : l'heuristique du serveur les
+                         trouve seule. Un export TMoney/Flooz porte UN montant positif et
+                         une colonne « Type » — et AUCUNE heuristique ne peut deviner que
+                         « Cash-in » est une entrée et « Paiement marchand » une sortie.
+                         Le serveur EXIGE donc les deux listes (`valeursCredit` /
+                         `valeursDebit`) dès qu'une colonne de sens est mappée, et refuse
+                         qu'une seule soit fournie — sinon la valeur inattendue tomberait
+                         dans le sens par défaut et fausserait la trésorerie sans signal.
+                         ⛔ ÉCART : `POST /imports/analyser` ne rend que 5 lignes d'aperçu
+                         et NE PUBLIE PAS les valeurs distinctes de cette colonne. On ne
+                         peut donc pas classer le vocabulaire avant le premier import : on
+                         l'apprend par les REJETS (`SENS_INDETERMINE`). L'écran assume ce
+                         va-et-vient au lieu de le masquer. -->
+                    <div class="rap-slot" data-rap-slot="profil-releve" hidden>
+                      <div class="rap-sect">
+                        <h4>Profil de lecture d'un relevé</h4>
+                        <span class="c">cible <code>RELEVE</code> — distincte de celle d'une balance, et non modifiable après coup.</span>
+                      </div>
+
+                      <div class="prof-grid">
+                        <div class="prof-map-row prof-ok">
+                          <div class="pm-champ"><b>Date</b><small>obligatoire</small></div>
+                          <span class="pm-arrow">→</span>
+                          <select><option>Date opération</option></select>
+                          <span class="pm-flag">détecté</span>
+                        </div>
+                        <div class="prof-map-row prof-ok">
+                          <div class="pm-champ"><b>Libellé</b><small>obligatoire</small></div>
+                          <span class="pm-arrow">→</span>
+                          <select><option>Description</option></select>
+                          <span class="pm-flag">détecté</span>
+                        </div>
+                        <div class="prof-map-row prof-ok">
+                          <div class="pm-champ"><b>Montant</b><small>toujours positif ici</small></div>
+                          <span class="pm-arrow">→</span>
+                          <select><option>Montant</option></select>
+                          <span class="pm-flag">détecté</span>
+                        </div>
+                        <div class="prof-map-row sugg">
+                          <div class="pm-champ"><b>Colonne de sens</b><small>c'est elle qui dit entrée / sortie</small></div>
+                          <span class="pm-arrow">→</span>
+                          <select><option>Type d'opération</option></select>
+                          <span class="pm-flag sugg">proposé</span>
+                        </div>
+                        <div class="prof-map-row">
+                          <div class="pm-champ"><b>Solde après</b><small>facultatif — mais voir ci-dessous</small></div>
+                          <span class="pm-arrow">→</span>
+                          <select><option>Solde</option><option>— aucune —</option></select>
+                          <span class="pm-flag warn">recommandé</span>
+                        </div>
+                      </div>
+
+                      <div class="ref-card" style="padding:0.95rem">
+                        <b style="font-size:0.88rem">Le vocabulaire de l'opérateur — à classer à la main</b>
+                        <p class="atl-secsub" style="margin:0.25rem 0 0.7rem">Aucune machine ne sait que «&nbsp;Cash-in&nbsp;» est une entrée. <b>Les deux listes sont obligatoires</b>&nbsp;: une valeur non classée fait <b>rejeter la ligne</b> plutôt que la ranger dans le mauvais sens.</p>
+                        <div class="rap-tray">
+                          <div class="rap-basket">
+                            <span class="k">Entrées (crédit)</span>
+                            <div class="rap-qual">
+                              <span class="badge badge-avail"><span class="d"></span>Dépôt</span>
+                              <span class="badge badge-avail"><span class="d"></span>Cash-in</span>
+                              <span class="badge badge-avail"><span class="d"></span>Transfert reçu</span>
+                            </div>
+                          </div>
+                          <div class="rap-basket">
+                            <span class="k">Sorties (débit)</span>
+                            <div class="rap-qual">
+                              <span class="badge">Retrait</span>
+                              <span class="badge">Cash-out</span>
+                              <span class="badge">Paiement marchand</span>
+                              <span class="badge">Frais</span>
+                            </div>
+                          </div>
+                        </div>
+                        <p class="helper" style="text-align:left;margin-top:0.7rem">
+                          ⚠️ <b>Cette liste ne se devine pas depuis l'aperçu.</b> L'analyse du fichier ne rend que <b>5 lignes</b>&nbsp;: les valeurs rares («&nbsp;Frais&nbsp;», «&nbsp;Annulation&nbsp;») apparaîtront au premier import, en <b>lignes rejetées</b>. C'est normal, et c'est là qu'on complète.
+                        </p>
+                        <div class="imp-actions" style="margin-top:0.7rem">
+                          <button class="btn btn-primary btn-sm" type="button" data-rap-goto="import">Enregistrer le profil</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="import">Annuler</button>
+                        </div>
+                      </div>
+
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Sans colonne «&nbsp;solde&nbsp;», l'état de rapprochement ne pourra pas conclure.</b> Le solde de fin n'est <b>jamais reconstitué par cumul</b> — un faux solde serait pire que pas de solde. <button class="linklike" type="button" data-rap-goto="refus">Voir ce que ça donne</button></span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ÉTAT 3 · L'APERÇU (dry-run, 200, aucune persistance) ═════════════ -->
+                    <div class="rap-slot" data-rap-slot="apercu" hidden>
+                      <div class="imp-steps" aria-hidden="true">
+                        <span class="imp-step done" data-imp-step="1"><span class="n">1</span> Fichier</span>
+                        <span class="sep"></span>
+                        <span class="imp-step active" data-imp-step="2"><span class="n">2</span> Aperçu</span>
+                        <span class="sep"></span>
+                        <span class="imp-step" data-imp-step="3"><span class="n">3</span> Import</span>
+                      </div>
+
+                      <div class="cah-bar">
+                        <div>
+                          <b>Aperçu de <code>releve-boa-mars-2026.csv</code></b>
+                          <span class="sub"><b>Rien n'est enregistré à ce stade.</b> Vous voyez ce que l'import <i>ferait</i>.</span>
+                        </div>
+                        <span class="grow" style="flex:1"></span>
+                        <span class="badge">Aperçu</span>
+                      </div>
+
+                      <div class="imp-tiles">
+                        <div class="imp-tile"><div class="k">Lues</div><div class="v">240</div><div class="u">lignes exploitables</div></div>
+                        <div class="imp-tile bal-ok"><div class="k">Nouvelles</div><div class="v">156</div><div class="u">seront créées</div></div>
+                        <div class="imp-tile"><div class="k">Déjà présentes</div><div class="v">84</div><div class="u">ignorées</div></div>
+                        <div class="imp-tile dep-attn"><div class="k">Rejetées</div><div class="v">3</div><div class="u">non lisibles</div></div>
+                      </div>
+
+                      <p class="helper" style="text-align:left">
+                        <b>Le chevauchement est le cas normal.</b> Le relevé d'avril reprend souvent la fin de mars&nbsp;: ces 84 lignes portent la même empreinte que celles déjà en base et sont <b>ignorées, jamais dupliquées</b>. Réimporter le même fichier deux fois est sans effet.
+                      </p>
+
+                      <div class="imp-tiles">
+                        <div class="imp-tile"><div class="k">Entrées</div><div class="v">64 000 000</div><div class="u">F CFA</div></div>
+                        <div class="imp-tile"><div class="k">Sorties</div><div class="v">51 000 000</div><div class="u">F CFA</div></div>
+                        <div class="imp-tile"><div class="k">Variation nette</div><div class="v">+13 000 000</div><div class="u">F CFA</div></div>
+                        <div class="imp-tile"><div class="k">Solde au 31/03</div><div class="v">130 000 000</div><div class="u">F CFA · lu sur la dernière ligne</div></div>
+                      </div>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Les <b>5 premières lignes nouvelles</b>, telles qu'elles seraient créées.</div>
+                        <table class="imp-table">
+                          <thead><tr><th>Date</th><th>Libellé</th><th class="num">Entrée</th><th class="num">Sortie</th><th class="num">Solde après</th></tr></thead>
+                          <tbody>
+                            <tr><td class="cpt">02/03/2026</td><td>VIR RECU SODIGAZ FACT 2026-114</td><td class="num">25 000 000</td><td class="num">—</td><td class="num">142 300 000</td></tr>
+                            <tr><td class="cpt">05/03/2026</td><td>CHEQUE 0041782 FOURNISSEUR ADJO</td><td class="num">—</td><td class="num">8 500 000</td><td class="num">133 800 000</td></tr>
+                            <tr><td class="cpt">09/03/2026</td><td>FRAIS TENUE DE COMPTE MARS</td><td class="num">—</td><td class="num">15 000</td><td class="num">133 785 000</td></tr>
+                            <tr><td class="cpt">12/03/2026</td><td>VIR RECU SODIGAZ FACT 2026-118</td><td class="num">6 400 000</td><td class="num">—</td><td class="num">140 185 000</td></tr>
+                            <tr><td class="cpt">18/03/2026</td><td>REMISE CHEQUES 3 EFFETS</td><td class="num">12 500 000</td><td class="num">—</td><td class="num">152 685 000</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <!-- Les rejets sont GROUPÉS PAR CAUSE, avec le geste qui les lève.
+                           Une liste de 3 lignes numérotées n'apprend rien ; « ce mot n'est
+                           pas classé, allez le classer » se répare en 20 secondes. -->
+                      <div class="rap-sect"><h4>Ce qui n'a pas pu être lu</h4><span class="c">3 lignes sur 240 — le fichier n'est pas rejeté pour autant.</span></div>
+                      <div class="prof-note bad">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                        <span><b>2 lignes&nbsp;: sens indéterminé.</b> «&nbsp;<b>Frais</b>&nbsp;» ne figure ni dans vos entrées ni dans vos sorties. Ces lignes <b>ne sont pas devinées</b> — une sortie rangée en entrée fausserait la trésorerie en silence. <button class="linklike" type="button" data-rap-goto="profil-releve">Classer «&nbsp;Frais&nbsp;» dans le profil</button> <span class="code">SENS_INDETERMINE</span></span>
+                      </div>
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                        <span><b>1 ligne datée du 28/12/2025</b>, hors de l'exercice 2026&nbsp;: elle appartient à l'exercice précédent et n'y sera pas rangée de force. <span class="code">DATE_HORS_EXERCICE</span></span>
+                      </div>
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/></svg>
+                        <span><b>Rupture de la chaîne des soldes entre le 12/03 et le 13/03.</b> Le solde après opération ne s'enchaîne pas&nbsp;: <b>il manque probablement des lignes</b> dans l'export. Non bloquant — mais c'est ce qui fera un écart inexplicable tout à l'heure.</span>
+                      </div>
+
+                      <div class="imp-actions">
+                        <button class="btn btn-primary btn-sm" type="button" data-rap-goto="table">Importer les 156 lignes</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="import">Changer de fichier</button>
+                        <span class="grow"></span>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Un relevé importé ne se retire pas.</b> Aucun écran, aucune route ne supprime des lignes de relevé&nbsp;: si vous vous trompez de compte ou de client, les lignes restent. <b>Vérifiez le compte en haut de l'écran avant de valider.</b>
+                      </p>
+                    </div>
+
+                    <!-- ═════════════ ÉTAT 4 · LE POINTAGE ═════════════ -->
+                    <div class="rap-slot" data-rap-slot="table" hidden>
+                      <!-- LE MOIS D'ABORD. Le service refuse au-delà de 5 000 lignes
+                           examinées de chaque côté et sa sortie documentée est `du`/`au` :
+                           proposer l'exercice entier par défaut, c'est fabriquer le refus. -->
+                      <div class="cah-bar">
+                        <div>
+                          <b>BOA — courant Kossi · mars 2026</b>
+                          <span class="sub">On rapproche <b>mois par mois</b>&nbsp;: c'est la maille du contrôle, et celle que le service accepte.</span>
+                        </div>
+                        <span class="grow" style="flex:1"></span>
+                        <label style="display:flex;align-items:center;gap:0.45rem;font-size:0.78rem;color:var(--muted-fg)">Tolérance de date
+                          <select style="font:inherit;font-size:0.84rem;padding:0.3rem 0.5rem;border:1px solid var(--border-strong);border-radius:0.45rem;background:var(--card);color:var(--foreground)">
+                            <option>3 jours</option><option>0 jour</option><option>7 jours</option><option>31 jours (maximum)</option>
+                          </select>
+                        </label>
+                        <button class="btn btn-primary btn-sm" type="button">Lancer le pointage</button>
+                      </div>
+
+                      <div class="cah-mois" role="tablist" aria-label="Mois rapproché">
+                        <button class="cah-m" role="tab" aria-selected="false"><span class="mn">Jan</span><span class="mv">100&nbsp;%</span><span class="mc">78 lignes</span></button>
+                        <button class="cah-m" role="tab" aria-selected="false"><span class="mn">Fév</span><span class="mv">100&nbsp;%</span><span class="mc">81 lignes</span></button>
+                        <button class="cah-m" role="tab" aria-selected="true"><span class="mn">Mar</span><span class="mv">92&nbsp;%</span><span class="mc">84 lignes</span></button>
+                        <button class="cah-m vide" role="tab" aria-selected="false"><span class="mn">Avr</span><span class="mv">—</span><span class="mc">pas de relevé</span></button>
+                        <button class="cah-m vide" role="tab" aria-selected="false"><span class="mn">Mai</span><span class="mv">—</span><span class="mc">pas de relevé</span></button>
+                        <button class="cah-m vide" role="tab" aria-selected="false"><span class="mn">Juin</span><span class="mv">—</span><span class="mc">pas de relevé</span></button>
+                      </div>
+                      <p class="helper" style="text-align:left">Un mois sans relevé affiche «&nbsp;—&nbsp;», jamais «&nbsp;0&nbsp;%&nbsp;»&nbsp;: <b>rien à rapprocher</b> et <b>tout à rapprocher</b> ne se ressemblent pas.</p>
+
+                      <div class="imp-tiles">
+                        <div class="imp-tile bal-ok"><div class="k">Pointés d'office</div><div class="v">71</div><div class="u">montant exact, sens cohérent, date dans la tolérance</div></div>
+                        <div class="imp-tile"><div class="k">À trancher</div><div class="v">6</div><div class="u">proposés — sans effet tant que vous n'avez pas confirmé</div></div>
+                        <div class="imp-tile"><div class="k">Preuves élevées</div><div class="v">71</div><div class="u">lignes de cahier passées en «&nbsp;fichier&nbsp;»</div></div>
+                        <div class="imp-tile dep-attn"><div class="k">Restent en écart</div><div class="v">11</div><div class="u"><button class="linklike" type="button" data-rap-goto="ecarts">les examiner</button></div></div>
+                      </div>
+
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>Seul l'exact est appliqué sans vous.</b> Même montant, même sens, date dans la tolérance&nbsp;: c'est la seule combinaison que la machine s'autorise. <b>Tout le reste est proposé et n'a aucun effet</b> — ni statut de ligne, ni niveau de preuve — tant que vous ne l'avez pas confirmé.</span>
+                      </div>
+
+                      <div class="rap-sect"><h4>À trancher</h4><span class="c">6 propositions · rien n'est pré-coché</span></div>
+
+                      <div class="rap-pair prop">
+                        <div class="rap-side">
+                          <span class="k">Relevé — BOA</span>
+                          <div class="rap-line"><span class="d">12/03</span><span class="l">VIR RECU SODIGAZ FACT 2026-118</span><span class="m">6 400 000</span></div>
+                        </div>
+                        <div class="rap-mid">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
+                          <span class="rap-regle">Date décalée</span>
+                          <span class="cah-conf warn">Moyenne</span>
+                        </div>
+                        <div class="rap-side">
+                          <span class="k">Cahier de recettes</span>
+                          <div class="rap-line"><span class="d">06/03</span><span class="l">Vente SODIGAZ — facture 2026-118</span><span class="m">6 400 000</span></div>
+                        </div>
+                        <div class="rap-acts" style="grid-column:1/-1">
+                          <span class="helper" style="text-align:left;flex:1">Montant identique, <b>6 jours d'écart</b> (au-delà de la tolérance de 3 j) et libellés proches. Un virement encaissé quelques jours après la facture&nbsp;: probable, pas certain.</span>
+                          <button class="btn btn-primary btn-sm" type="button">Confirmer</button>
+                          <button class="btn btn-ghost btn-sm" type="button">Rejeter</button>
+                        </div>
+                      </div>
+
+                      <div class="rap-pair prop">
+                        <div class="rap-side">
+                          <span class="k">Relevé — BOA</span>
+                          <div class="rap-line"><span class="d">18/03</span><span class="l">REMISE CHEQUES 3 EFFETS</span><span class="m">12 500 000</span></div>
+                        </div>
+                        <div class="rap-mid">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
+                          <span class="rap-regle">Remise groupée</span>
+                          <span class="cah-conf warn">Moyenne</span>
+                        </div>
+                        <div class="rap-side">
+                          <span class="k">Cahier de recettes — 3 lignes</span>
+                          <div class="rap-line"><span class="d">14/03</span><span class="l">Vente comptoir — chèque AGBO</span><span class="m">4 500 000</span></div>
+                          <div class="rap-line"><span class="d">15/03</span><span class="l">Vente comptoir — chèque MENSAH</span><span class="m">5 000 000</span></div>
+                          <div class="rap-line"><span class="d">16/03</span><span class="l">Vente comptoir — chèque DOSSEH</span><span class="m">3 000 000</span></div>
+                        </div>
+                        <div class="rap-acts" style="grid-column:1/-1">
+                          <span class="helper" style="text-align:left;flex:1">Une remise en banque contre <b>trois</b> encaissements du cahier&nbsp;: la somme tombe juste au franc près. C'est le cas que le pointage manuel de Sage oblige à faire à la main.</span>
+                          <button class="btn btn-primary btn-sm" type="button">Confirmer</button>
+                          <button class="btn btn-ghost btn-sm" type="button">Rejeter</button>
+                        </div>
+                      </div>
+
+                      <p class="helper" style="text-align:left">
+                        «&nbsp;Rejeter&nbsp;» écarte la proposition et ne touche à rien d'autre. <b>C'est «&nbsp;Confirmer&nbsp;» qui engage</b>&nbsp;: les deux côtés passent en <i>rapproché</i> et la ligne de cahier monte au niveau de preuve «&nbsp;fichier&nbsp;».
+                      </p>
+
+                      <div class="rap-sect"><h4>Déjà pointés</h4><span class="c">71 appariements · le pointage se défait aussi</span></div>
+                      <div class="imp-table-wrap">
+                        <table class="imp-table">
+                          <thead><tr><th>Date</th><th>Relevé</th><th class="num">Montant</th><th>Cahier</th><th>Règle</th><th></th></tr></thead>
+                          <tbody>
+                            <tr class="rap-ok"><td class="cpt">02/03</td><td>VIR RECU SODIGAZ FACT 2026-114</td><td class="num">25 000 000</td><td>Recette du 02/03</td><td><span class="cah-conf ok">Exact</span></td><td><button class="btn btn-ghost btn-sm" type="button">Dé-pointer</button></td></tr>
+                            <tr class="rap-ok"><td class="cpt">05/03</td><td>CHEQUE 0041782 FOURNISSEUR ADJO</td><td class="num">8 500 000</td><td>Dépense du 05/03</td><td><span class="cah-conf ok">Exact</span></td><td><button class="btn btn-ghost btn-sm" type="button">Dé-pointer</button></td></tr>
+                            <tr class="rap-ok"><td class="cpt">21/03</td><td>PRLV CEET ELECTRICITE</td><td class="num">340 000</td><td>Dépense du 21/03</td><td><span class="cah-conf ok">Exact</span></td><td><button class="btn btn-ghost btn-sm" type="button">Dé-pointer</button></td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Dé-pointer fait redescendre le niveau de preuve</b> de la ligne de cahier à ce qu'il était avant. La preuve n'est pas acquise à vie&nbsp;: c'est l'appariement qui la porte.
+                      </p>
+
+                      <!-- L'APPARIEMENT MANUEL — le geste que le comptable connaît par cœur
+                           et qu'aucune machine ne remplace. Deux contraintes du serveur
+                           sont rendues VISIBLES ici plutôt que subies en 400 :
+                           les deux sommes doivent être ÉGALES, et 4 lignes au plus par côté. -->
+                      <div class="rap-sect"><h4>Relier à la main</h4><span class="c">quand la machine n'a rien proposé</span></div>
+                      <div class="rap-tray">
+                        <div class="rap-basket">
+                          <span class="k">Relevé — 2 lignes choisies</span>
+                          <div class="rap-line"><span class="d">23/03</span><span class="l">PRLV ASSURANCE NSIA T1</span><span class="m">450 000</span></div>
+                          <div class="rap-line"><span class="d">24/03</span><span class="l">PRLV ASSURANCE NSIA T1 (2/2)</span><span class="m">300 000</span></div>
+                          <div class="tot"><span>Total relevé</span><span>750 000</span></div>
+                        </div>
+                        <div class="rap-basket">
+                          <span class="k">Cahier — 1 ligne choisie</span>
+                          <div class="rap-line"><span class="d">20/03</span><span class="l">Prime assurance NSIA — 1er trimestre</span><span class="m">750 000</span></div>
+                          <div class="tot"><span>Total cahier</span><span>750 000</span></div>
+                        </div>
+                      </div>
+                      <div class="rap-verdict ok">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        Les deux totaux sont égaux — l'appariement est possible.
+                      </div>
+                      <div class="rap-acts">
+                        <button class="btn btn-primary btn-sm" type="button">Apparier ces lignes</button>
+                        <span class="helper" style="text-align:left">Un règlement fractionné&nbsp;: <b>2 lignes de relevé pour 1 dépense</b>. <b>4 lignes au maximum de chaque côté</b> — au-delà, ce n'est plus une remise, c'est du lettrage de compte de tiers.</span>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        L'appariement manuel <b>ignore volontairement</b> le moyen de paiement déclaré&nbsp;: relier un virement à une recette saisie «&nbsp;espèces&nbsp;», c'est corriger une erreur de saisie — et votre décision prime sur une donnée douteuse.
+                      </p>
+                    </div>
+
+                    <!-- ═════════════ ÉTAT 5 · LES ÉCARTS ═════════════ -->
+                    <div class="rap-slot" data-rap-slot="ecarts" hidden>
+                      <div class="rap-sect">
+                        <h4>Les écarts de mars 2026</h4>
+                        <span class="c">11 au total — c'est ici que se trouve la valeur du contrôle.</span>
+                      </div>
+
+                      <!-- ⚠ LES DEUX CÔTÉS N'ONT PAS LA MÊME PORTÉE, et le taire ferait
+                           courir après des écarts qui n'en sont pas. Relevé the source :
+                           le service filtre les lignes de RELEVÉ sur le compte demandé,
+                           mais charge les lignes de CAHIER de tout le dossier. -->
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>Les deux colonnes n'ont pas la même portée.</b> Côté <b>relevé</b>&nbsp;: seulement BOA. Côté <b>cahier</b>&nbsp;: <b>tout le dossier</b>, toutes caisses et téléphones confondus — sinon une recette encaissée sur TMoney ressortirait «&nbsp;sans encaissement&nbsp;» simplement parce que vous rapprochez la banque. <b>Rapprochez vos trois comptes avant de conclure.</b></span>
+                      </div>
+
+                      <div class="rap-ecs">
+                        <div class="rap-ec grave">
+                          <span class="n">3</span>
+                          <span class="t">Encaissements non déclarés</span>
+                          <span class="m">5 200 000 F CFA</span>
+                          <span class="why">De l'argent est <b>entré en banque</b> sans recette au cahier. C'est un <b>produit potentiellement non déclaré</b> — TVA et impôt sur les sociétés en dépendent. Le plus lourd des quatre.</span>
+                        </div>
+                        <div class="rap-ec attn">
+                          <span class="n">2</span>
+                          <span class="t">Décaissements non déclarés</span>
+                          <span class="m">1 355 000 F CFA</span>
+                          <span class="why">De l'argent est <b>sorti</b> sans dépense au cahier&nbsp;: frais bancaires, prélèvements. <b>Charge oubliée</b> — l'impôt est payé en trop.</span>
+                        </div>
+                        <div class="rap-ec">
+                          <span class="n">4</span>
+                          <span class="t">Recettes sans encaissement</span>
+                          <span class="m">3 100 000 F CFA</span>
+                          <span class="why">Déclarées, jamais vues en banque. <b>Normal</b> si c'est de l'espèce ou une créance client encore due.</span>
+                        </div>
+                        <div class="rap-ec">
+                          <span class="n">2</span>
+                          <span class="t">Dépenses sans décaissement</span>
+                          <span class="m">890 000 F CFA</span>
+                          <span class="why">Normal si payé en espèces ou encore dû au fournisseur. Sinon&nbsp;: <b>charge fictive</b>.</span>
+                        </div>
+                      </div>
+                      <p class="helper" style="text-align:left">Ces quatre chiffres restent <b>exacts</b> même si la liste ci-dessous est plafonnée&nbsp;: c'est la liste qui se tronque, jamais le compte.</p>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Chaque écart attend <b>votre</b> décision. Aucun n'est tranché d'office.</div>
+                        <table class="imp-table">
+                          <thead><tr><th>Date</th><th>Origine</th><th>Libellé</th><th class="num">Montant</th><th>Décision</th></tr></thead>
+                          <tbody>
+                            <tr>
+                              <td class="cpt">07/03</td><td>Relevé</td><td>VERSEMENT ESPECES GUICHET</td><td class="num">3 500 000</td>
+                              <td><div class="rap-qual"><button class="btn btn-ghost btn-sm" type="button" data-rap-goto="qualifier">Justifier</button><button class="btn btn-ghost btn-sm" type="button">À corriger</button></div></td>
+                            </tr>
+                            <tr>
+                              <td class="cpt">09/03</td><td>Relevé</td><td>FRAIS TENUE DE COMPTE MARS</td><td class="num">15 000</td>
+                              <td><div class="rap-qual"><button class="btn btn-ghost btn-sm" type="button" data-rap-goto="qualifier">Justifier</button><button class="btn btn-ghost btn-sm" type="button">À corriger</button></div></td>
+                            </tr>
+                            <tr>
+                              <td class="cpt">11/03</td><td>Recette</td><td>Vente comptoir — espèces</td><td class="num">1 200 000</td>
+                              <td><span class="cah-conf ok">Justifié</span> <span class="cah-motif">Encaissé en espèces, non déposé — motif saisi le 22/03</span></td>
+                            </tr>
+                            <tr>
+                              <td class="cpt">26/03</td><td>Dépense</td><td>Achat marchandises ADJO — à crédit</td><td class="num">890 000</td>
+                              <td><span class="cah-conf ok">Justifié</span> <span class="cah-motif">Dette fournisseur au 31/03</span></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <!-- ⚠ LA PHRASE LA PLUS IMPORTANTE DE L'ÉCRAN pour quelqu'un qui
+                           vient de Sage : le lettrage n'écrit rien. Le contrat publie
+                           `ecritureCreee: false` sur chaque qualification — l'écran le
+                           répète en clair plutôt que de laisser l'habitude décider. -->
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Qualifier un écart ne crée aucune écriture.</b> Ce n'est pas une OD&nbsp;: c'est votre décision, datée et signée de votre nom. Un écart <b>«&nbsp;à corriger&nbsp;»</b> se répare en <b>saisissant la ligne manquante dans le cahier</b> — <button class="linklike" type="button" data-goto-cahiers>ouvrir le cahier de mars</button>.</span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ÉTAT 5bis · QUALIFIER — LE MOTIF EST OBLIGATOIRE ═════════════ -->
+                    <div class="rap-slot" data-rap-slot="qualifier" hidden>
+                      <div class="ref-card" style="padding:1rem;display:flex;flex-direction:column;gap:0.8rem">
+                        <div>
+                          <b style="font-size:0.9rem">Justifier un écart</b>
+                          <p class="atl-secsub" style="margin:0.2rem 0 0"><b>VERSEMENT ESPECES GUICHET</b> — 07/03/2026 · <b>3 500 000 F CFA</b> · entrée en banque sans recette au cahier.</p>
+                        </div>
+                        <div class="cah-form" style="grid-template-columns:1fr">
+                          <label>Motif
+                            <input type="text" value="Apport en compte courant du gérant — non imposable" >
+                            <span class="fh"><b>Obligatoire pour «&nbsp;justifié&nbsp;»</b>&nbsp;: «&nbsp;justifié&nbsp;» sans motif est une case cochée, pas une justification. C'est ce texte qui sera relu dans six mois, par vous ou par le vérificateur.</span>
+                          </label>
+                        </div>
+                        <div class="imp-actions">
+                          <button class="btn btn-primary btn-sm" type="button" data-rap-goto="ecarts">Enregistrer la décision</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="ecarts">Annuler</button>
+                        </div>
+                        <span class="authority"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Enregistrer n'écrit <b>aucune</b> écriture comptable — seulement votre décision, votre nom et la date.</span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ÉTAT 6 · L'ÉTAT DE RAPPROCHEMENT ═════════════ -->
+                    <div class="rap-slot" data-rap-slot="etat" hidden>
+                      <div class="rap-sect">
+                        <h4>État de rapprochement au 31/03/2026</h4>
+                        <span class="c">BOA — courant Kossi · la pièce que vous versez au dossier de révision.</span>
+                      </div>
+
+                      <div class="ref-card" style="padding:1rem">
+                        <div class="rap-eq">
+                          <div class="rap-eq-row"><span class="op"></span><span>Solde du relevé au 31/03<span class="sub">Lu sur la dernière ligne qui en porte un — <b>jamais</b> reconstitué par cumul.</span></span><span class="v">130 000 000</span></div>
+                          <div class="rap-eq-row"><span class="op">−</span><span>Encaissements non encore comptabilisés<span class="sub">Crédits du relevé non appariés — dans le compte, pas encore dans les cahiers.</span></span><span class="v">12 000 000</span></div>
+                          <div class="rap-eq-row"><span class="op">+</span><span>Décaissements non encore comptabilisés<span class="sub">Débits du relevé non appariés.</span></span><span class="v">4 500 000</span></div>
+                          <div class="rap-eq-row sum"><span class="op">=</span><span><b>Solde comptable théorique</b></span><span class="v">122 500 000</span></div>
+                          <div class="rap-eq-row"><span class="op"></span><span>Solde du compte <b>521100</b> dans la balance<span class="sub">Balance <b>version 3</b> · source <i>cahiers (OCR)</i> · <b>brouillon</b> — 1 ligne appariée.</span></span><span class="v">122 500 000</span></div>
+                          <div class="rap-eq-row ecart ok"><span class="op">Δ</span><span><b>Écart</b></span><span class="v">0</span></div>
+                        </div>
+                      </div>
+
+                      <!-- ⚠ FE-031 a établi la règle et elle vaut ici mot pour mot :
+                           UN ÉQUILIBRE NE PROUVE PAS L'EXACTITUDE. Un écart nul dit que
+                           les deux colonnes se rejoignent, pas que les chiffres sont
+                           bons — et c'est sur cette phrase-là que le cabinet signe. -->
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>Un écart nul ne prouve pas que la comptabilité est juste.</b> Il dit que le relevé et la balance se rejoignent <b>après</b> avoir mis de côté 11 écarts. Ce sont eux le contrôle&nbsp;: <button class="linklike" type="button" data-rap-goto="ecarts">3 encaissements non déclarés restent ouverts</button>.</span>
+                      </div>
+
+                      <!-- Le cas qui rend un état de rapprochement bancaire INUTILISABLE
+                           tel quel — et qu'aucun écran ne signalait : le compte de
+                           rattachement est une RACINE, donc plusieurs banques sont
+                           additionnées dans un seul solde. -->
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Sur TMoney gérant, ce même état ne serait pas lisible.</b> Ce compte est rattaché à la <b>racine 521</b>&nbsp;: le solde comptable y additionnerait <b>TMoney, Flooz et la banque</b> sans pouvoir les séparer. <b>Un état de rapprochement se fait banque par banque</b> — donnez à chaque compte son propre numéro (521100, 521200…) <button class="linklike" type="button" data-rap-goto="comptes">depuis la fiche du compte</button>.</span>
+                      </div>
+
+                      <div class="rap-sect"><h4>Situation du compte</h4><span class="c">01/01/2026 → 31/03/2026 — «&nbsp;où en est ce compte&nbsp;»</span></div>
+                      <div class="imp-tiles">
+                        <div class="imp-tile"><div class="k">Solde d'ouverture</div><div class="v">100 000 000</div><div class="u">F CFA</div></div>
+                        <div class="imp-tile"><div class="k">Entrées</div><div class="v">64 000 000</div><div class="u">F CFA</div></div>
+                        <div class="imp-tile"><div class="k">Sorties</div><div class="v">51 000 000</div><div class="u">F CFA</div></div>
+                        <div class="imp-tile"><div class="k">Solde de clôture</div><div class="v">130 000 000</div><div class="u">F CFA</div></div>
+                        <div class="imp-tile dep-attn"><div class="k">Reste à pointer</div><div class="v">7</div><div class="u">lignes sur 243</div></div>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        Les écarts que vous avez <b>justifiés</b> ne comptent plus dans le «&nbsp;reste à pointer&nbsp;»&nbsp;: vous avez tranché, ils ne sont plus du travail en attente.
+                      </p>
+
+                      <!-- ⛔ MANQUE ASSUMÉ, dessiné mais non servi : aucune route ne rend
+                           l'état en PDF/Excel. Le dire ici plutôt que de laisser croire
+                           que le bouton viendra tout seul. -->
+                      <div class="imp-actions">
+                        <button class="btn btn-ghost btn-sm" type="button" disabled aria-disabled="true">Exporter l'état (PDF)</button>
+                        <span class="helper" style="text-align:left">Pas encore servi&nbsp;: <b>aucune route ne rend l'état en PDF ou Excel</b>. L'état se lit à l'écran. L'export au dossier de révision est fiché — <b>FE-077</b>.</span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ÉTAT 7 · LES REFUS ═════════════ -->
+                    <div class="rap-slot" data-rap-slot="refus" hidden>
+                      <div class="rap-sect"><h4>Ce qui peut refuser, et ce qu'il faut faire</h4><span class="c">chaque refus porte son geste — jamais seulement son code.</span></div>
+
+                      <div class="gate warn" style="padding:1.6rem 1.2rem">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="10"/></svg></span>
+                        <h3>Trop de lignes pour un seul pointage</h3>
+                        <p>Ce dossier dépasse <b>5 000 lignes</b> à examiner. Le pointage n'est <b>pas tronqué</b> — il est refusé&nbsp;: un rapprochement à moitié fait qui s'annoncerait complet vous ferait signer «&nbsp;plus rien à justifier&nbsp;».</p>
+                        <span class="code">400 · RAPPROCHEMENT_TROP_VOLUMINEUX</span>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                          <button class="btn btn-primary btn-sm" type="button" data-rap-goto="table">Pointer mars seulement</button>
+                        </div>
+                      </div>
+
+                      <div class="gate warn" style="padding:1.6rem 1.2rem">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                        <h3>L'exercice 2025 est clos</h3>
+                        <p>Plus rien ne s'y pointe et plus aucun écart ne s'y qualifie. <b>La lecture, elle, reste ouverte</b>&nbsp;: c'est même à ce moment-là que l'état de rapprochement sert à défendre le dossier.</p>
+                        <span class="code">409 · EXERCICE_CLOS</span>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                          <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="etat">Consulter l'état de 2025</button>
+                        </div>
+                      </div>
+
+                      <div class="gate warn" style="padding:1.6rem 1.2rem">
+                        <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="m9 15 3 3 3-3"/></svg></span>
+                        <h3>Ce relevé est un PDF</h3>
+                        <p>Un PDF ne porte pas de colonnes&nbsp;: on ne peut pas savoir laquelle contient le montant. Demandez à votre banque l'<b>export CSV ou Excel</b> — il existe dans tous les espaces en ligne.</p>
+                        <span class="code">400 · RELEVE_PDF_NON_SUPPORTE</span>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center">
+                          <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="import">Déposer un autre fichier</button>
+                        </div>
+                      </div>
+
+                      <!-- ⚠ CE N'EST PAS UN REFUS HTTP — c'est un « je ne peux pas
+                           conclure ». Et c'est le plus dangereux des sept, parce qu'un 0
+                           à la place de ce message se lirait comme une réconciliation
+                           parfaite. Le contrat rend `ecart: null` + `motifNonCalculable`,
+                           et l'écran affiche « — », jamais 0. -->
+                      <div class="ref-card" style="padding:1rem">
+                        <div class="rap-eq">
+                          <div class="rap-eq-row"><span class="op"></span><span>Solde du relevé au 31/03<span class="sub">Votre profil de lecture ne désigne <b>aucune colonne de solde</b>.</span></span><span class="v">—</span></div>
+                          <div class="rap-eq-row sum"><span class="op">=</span><span><b>Solde comptable théorique</b></span><span class="v">—</span></div>
+                          <div class="rap-eq-row ecart nul"><span class="op">Δ</span><span><b>Écart</b><span class="sub">Non calculable.</span></span><span class="v">non calculable</span></div>
+                        </div>
+                        <p class="helper" style="text-align:left;margin-top:0.7rem">
+                          <b>«&nbsp;—&nbsp;», pas «&nbsp;0&nbsp;».</b> Un zéro ici se lirait comme un rapprochement parfait alors qu'il n'y a simplement pas de donnée. <button class="linklike" type="button" data-rap-goto="profil-releve">Ajouter la colonne «&nbsp;solde&nbsp;» au profil</button>
+                        </p>
+                      </div>
+
+                      <div class="prof-note bad">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                        <span><b>Les deux côtés doivent faire la même somme.</b> 750 000 contre 700 000&nbsp;: l'écran <b>désactive</b> le bouton plutôt que d'envoyer un appariement que le serveur refusera. <span class="code">400 · APPARIEMENT_MONTANTS_DIFFERENTS</span></span>
+                      </div>
+
+                      <div class="prof-note bad">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                        <span><b>Ce profil lit des balances, pas des relevés.</b> Les deux ne portent pas les mêmes colonnes et la cible d'un profil ne se change pas&nbsp;: créez-en un de cible <i>relevé</i>. <span class="code">409 · PROFIL_MAUVAISE_CIBLE</span></span>
+                      </div>
+
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="10"/></svg>
+                        <span><b>Un pointage est déjà en cours sur ce compte.</b> Deux pointages simultanés apparieraient deux fois les mêmes lignes. Attendez la fin du premier. <span class="code">409 · RAPPROCHEMENT_CONCURRENT</span></span>
+                      </div>
+                    </div>
+
+                    <!-- ⛔ ÉCARTS DE CONTRAT RELEVÉS À LA SOURCE PENDANT CETTE MAQUETTE —
+                         à ne pas redécouvrir, ils sont fichés :
+                         ① `/tresorerie/comptes` et `/tresorerie/{id}/releves` sont
+                            ORG-keyed : un cabinet de 20 clients n'a qu'UNE liste de
+                            comptes, et `CompteTresorerieResponseDto` ne publie aucun
+                            `dossierId` à filtrer côté client ;
+                         ② la garde « exercice clos » de l'IMPORT s'évalue sur le dossier
+                            « Mon cabinet », pas sur le client : un relevé s'importe dans
+                            un exercice clos du client, alors que le POINTAGE, lui, le
+                            refuse. Deux gardes qui disent le contraire l'une de l'autre ;
+                         ③ `GET …/rapprochement/ecarts` SANS `compteId` liste les lignes de
+                            relevé de TOUTE L'ORGANISATION (`listerParOrg`) : les écarts du
+                            dossier ouvert contiendraient des lignes des autres clients.
+                            ⇒ le front envoie TOUJOURS `compteId`, et un test le garde ;
+                         ④ aucune route ne retire un relevé importé (mauvais compte,
+                            mauvais client) ;
+                         ⑤ `POST /imports/analyser` ne publie pas les valeurs distinctes de
+                            la colonne de sens ⇒ la convention mobile money ne peut pas se
+                            paramétrer avant le premier import ;
+                         ⑥ un « relevé » de CAISSE vient du client, pas d'un tiers, et
+                            élève pourtant au même niveau de preuve `fichier` ;
+                         ⑦ pas d'export de l'état de rapprochement ;
+                         ⑧ la doc du DTO dit « écarts côté cahier calculés sur toute
+                            l'organisation » alors que le code les charge PAR DOSSIER. -->
+                  </div>
+
                   <div class="atl-panel atl-body" data-atl-panel="balances" hidden>
                     <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
                       <div>
@@ -10526,6 +11429,41 @@
       });
       var goSources = page.querySelector("[data-goto-sources]");
       if (goSources) goSources.addEventListener("click", function () { setTab("sources"); });
+      /* ═══ FE-049 — les etats du panneau « Rapprochement » ═══
+         Meme idiome que FE-048 : un groupe de boutons `data-rap` pilote des
+         `[data-rap-slot]`, et les actions DE L'ECRAN (`data-rap-goto`) rejouent le
+         MEME aiguillage — parcourir l'ecran normalement et cliquer la bascule de
+         demo menent au meme etat. C'est ce qui distingue une maquette d'une
+         planche d'etats : chaque ecran est ATTEIGNABLE par le geste reel.
+
+         ⚠️ Ce bloc vit au niveau du module, PAS dans `setTab` : les ecouteurs
+         s'enregistrent une fois. Les poser dans `setTab` les aurait rebranches a
+         chaque changement d'onglet — un clic aurait fini par declencher N fois
+         (piege paye en FE-048). */
+      function rapShow(etat) {
+        page.querySelectorAll("[data-rap-slot]").forEach(function (el) {
+          el.hidden = el.dataset.rapSlot !== etat;
+        });
+        page.querySelectorAll("[data-rap]").forEach(function (b) {
+          /* Les etats atteints par le parcours (capture, profil-releve,
+             qualifier) n'ont PAS de bouton de bascule : aucun onglet de demo ne
+             doit alors paraitre selectionne, sinon la barre ment sur l'ecran
+             affiche. */
+          b.setAttribute("aria-selected", String(b.dataset.rap === etat));
+        });
+      }
+      page.querySelectorAll("[data-rap]").forEach(function (b) {
+        b.addEventListener("click", function () { rapShow(b.dataset.rap); });
+      });
+      page.querySelectorAll("[data-rap-goto]").forEach(function (b) {
+        b.addEventListener("click", function () { rapShow(b.dataset.rapGoto); });
+      });
+      /* Le seul renvoi qui SORT du panneau : une capture mobile money et un ecart
+         « a corriger » se traitent dans le cahier, pas ici. */
+      page.querySelectorAll("[data-goto-cahiers]").forEach(function (b) {
+        b.addEventListener("click", function () { setTab("cahiers"); });
+      });
+
 
       /* ═══ FE-048 — les etats du panneau « Profils d'import » ═══
          Meme idiome que les autres bascules de demo : un groupe de boutons
