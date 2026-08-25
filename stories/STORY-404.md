@@ -131,3 +131,87 @@ casse. La validation d'écriture appelle donc `membresActifsDe()`, qui porte sa 
 **Seuls les identifiants FOURNIS PAR LE DTO sont validés**, jamais l'affectation déjà en base. Valider
 l'existant rendrait **immodifiable** un dossier déjà porteur d'un identifiant étranger — exactement les
 dossiers que la story veut pouvoir réparer, et dont la réparation rétroactive est hors périmètre.
+
+### Ce qui a été livré
+
+| Fichier | Ce qui change |
+|---|---|
+| `src/modules/identity/org-members.service.ts` | `membresActifsDe()` — même read-model, filtre `statut: 'ACTIVE'` ; corps commun factorisé en `sousEnsemble()` |
+| `src/modules/identity/org-members.module.ts` | **nouveau** — le read-model extrait d'`IdentityModule` pour que `DossiersModule` puisse l'importer **sans cycle** |
+| `src/modules/dossiers/dossiers.service.ts` | `validerAppartenance()`, appelée **en dernier** dans `modifierAffectation` — après tous les refus syntaxiques, avant toute écriture |
+| `src/modules/dossiers/dossiers.codes.ts` | `MEMBRE_HORS_CABINET` (400), donc publié en `enum` OpenAPI par `RefusDossierDto` (STORY-375) |
+| `dossiers.controller.ts` · `modifier-affectation.dto.ts` | Swagger : la règle, le code, et le fait que le refus **ne distingue pas** ses deux causes |
+| specs + `test/dossiers.e2e-spec.ts` | 10 unitaires + 5 e2e ; `exercices`/`axes` reçoivent un double vide (aucune n'emprunte ce chemin) |
+
+**Trois décisions, et leur raison :**
+
+1. **`membresActifsDe()` est une méthode distincte, pas un drapeau sur `membresDe()`.** Les deux exigences
+   sont opposées **et le resteront** : ici on refuse un suspendu, là (STORY-382) on doit le nommer. Un
+   `actifsSeulement?: boolean` mettrait les deux sur la même signature, où c'est la **valeur par défaut**
+   qui déciderait, à chaque appel futur, laquelle des deux stories on casse — en silence.
+2. **`OrgMembersModule` extrait d'`IdentityModule`.** Ce dernier **importe** `DossiersModule` (la
+   projection `identity.org.created` y crée « Mon cabinet », D1) : l'importer en retour aurait fermé un
+   cycle, à résoudre par un `forwardRef()` réciproque dont l'ordre d'initialisation est un piège
+   permanent. Le nouveau module ne dépend que de Mongoose ; `IdentityModule` le **ré-exporte**, donc
+   `JournalModule` et `MigrationModule` ne changent pas d'une ligne.
+3. **Comparaison sur l'hexadécimal canonique.** `@IsMongoId()` accepte les **majuscules**, alors que
+   `org_members.userId` porte l'écriture minuscule du producteur. Comparer la chaîne reçue aurait refusé
+   un membre parfaitement légitime — un *fail-closed* qui ressemble à une faille de données.
+
+### Portes DoD
+
+Lint **0 warning** · build OK · **1022 unitaires** + **221 e2e** verts · couverture **99,27 / 93,51 /
+96,60 / 99,28** (`dossiers.service.ts` 100/90,36/100/100, `org-members.service.ts` **100/100/100/100**).
+
+### Valeur probante — 7 mutations, 7 rouges
+
+Chaque mutation a été **vérifiée appliquée** (comptage d'occurrences) et **compilée** (`tsc --noEmit`
+vide) avant d'être jouée : une mutation silencieusement non appliquée, ou rouge par erreur de
+compilation, ne prouve rien — les deux pièges sont documentés par STORY-373/376 et STORY-179.
+
+| # | Mutation | Ce qui rougit |
+|---|---|---|
+| 1 | l'appel à `validerAppartenance()` disparaît | 5 unitaires |
+| 2 | `{ statut: 'ACTIVE' }` → `{}` | 1 unitaire + l'e2e **SUSPENDED** |
+| 3 | le message **cite les identifiants fautifs** | l'anti-énumération, unitaire **et** e2e |
+| 4 | on valide **aussi** l'affectation déjà en base | 5 unitaires |
+| 5 | comparaison sur la chaîne reçue (sans hex canonique) | l'unitaire **MAJUSCULES** |
+| 6 | une lecture **par identifiant** au lieu d'une par lot | l'unitaire de bornage |
+| 7 | ne refuser que si **tous** sont étrangers | « un seul intrus », unitaire **et** e2e |
+
+⚠️ Une 8ᵉ tentative (`String(objectId)` au lieu de `.toHexString()`) est **neutre** — les deux rendent le
+même hexadécimal canonique. Elle est notée ici parce qu'une mutation neutre qui reste verte se lit
+facilement comme « le test ne filtre pas », alors qu'elle ne mute rien.
+
+### Vérification docker — stack NEUVE (`down -v`), le scénario de STORY-382 rejoué
+
+Deux cabinets réels créés dans l'IdP, projetés dans `org_members` par `identity.membership.changed`
+(cabinet A : 1 admin + 3 collaborateurs ; cabinet B : 1 gérant).
+
+| # | Appel | Avant (STORY-382) | Mesuré |
+|---|---|---|---|
+| ① | contributeur = gérant du **cabinet B** | **200** | **400** `MEMBRE_HORS_CABINET` |
+| ② | responsable = gérant du cabinet B | 200 | **400**, réponse **identique à ③** |
+| ③ | identifiant **inconnu** de la plateforme | — | **400**, corps identique à ② |
+| ④ | lot **mixte** : 1 légitime + 1 étranger | — | **400**, aucune affectation partielle |
+| ⑤ | affectation **légitime** | 200 | **200** — AC-04 tenu |
+| ⑥ | contributeur = le responsable **actuel** | — | **400** `CONTRIBUTEUR_EST_RESPONSABLE` *(refus d'amont, inchangé)* |
+| ⑥bis | membre actif en **MAJUSCULES** hexadécimales | — | **200**, écrit en minuscules |
+| ⑦ | réaffecter au collaborateur **SUSPENDED** | — | **400** — le filtre `ACTIVE` en réel |
+
+**Rien n'est écrit sur un refus** — mesuré après ①②③ : `version: 1` inchangée, responsable inchangé,
+`contributeursUserIds: []`, **0** entrée `AFFECTATION_MODIFIEE`, **0** ligne d'outbox `dossier.updated`.
+
+**Aucun identifiant étranger nulle part**, en fin de parcours : `dossiers` portant le gérant B → **0** ·
+`dossiers_journal` le citant → **0** · `outbox_events` le citant → **0**. Le journal porte **4**
+`AFFECTATION_MODIFIEE` (3 humaines + **1 par `SYSTEME`**), pour **6 refus** qui n'ont laissé aucune trace.
+
+**AC-05 — bornage prouvé au profileur Mongo** (`setProfilingLevel(2)`), sur une affectation portant
+1 responsable + 3 contributeurs dont un doublon : **1 seule** requête `org_members`, filtre
+`{ orgId, userId: { $in: [3 ids] }, statut: 'ACTIVE' }`, `docsExamined: 3`. Jamais une lecture par
+identifiant.
+
+⚡ **Le chaînage Q2 a été traversé en entier au passage** : suspendre le responsable a déclenché la
+retombée automatique (`SYSTEME` réaffecte le dossier à l'administratrice), **puis** la tentative de le
+lui réaffecter a été refusée. C'est exactement l'arbitrage `ACTIVE` — la garde et la retombée disent la
+même chose.
