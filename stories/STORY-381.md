@@ -368,3 +368,90 @@ validation) → Kafka → `bilan-service` (read-model + liasse). KYC/entitlement
 | ⚡⚡ **Rejeu de `balance.created` sur une balance DÉJÀ VALIDÉE** | `eventId` neuf (= marqueur purgé) : `etat` reste **`VALIDÉE`** et `occurredAt` **ne recule pas** (`22:15:50`, pas `22:15:15`). C'est la preuve du `$setOnInsert` + `$max` — en `$set`, la balance aurait été dé-validée |
 
 Stack arrêtée (`docker compose stop`) après consignation.
+
+### ⚠️ Conséquence assumée de l'option retenue pour l'AC-5 — à ficher
+
+L'AC-5 offrait deux formes : *« soit il exige la même [balance], soit il exige un `balanceId` explicite et
+**journalise** le changement »*. **La première a été retenue** — la plus simple, et celle qui ne peut pas
+mentir sur la provenance. Il faut nommer ce qu'elle ferme, plutôt que de le laisser se découvrir en
+production :
+
+> **Une liasse est liée à sa balance de façon définitive.** `recalculer` refuse une autre balance
+> (`409 BALANCE_DIFFERENTE`), l'index unique `(tenantId, dossierId, exercice)` refuse une seconde liasse
+> sur le même exercice (`409 EXERCICE_A_DEJA_UN_JEU`), et **aucune route ne supprime un jeu d'états**
+> (`grep -n "@Delete" jeu-etats.controller.ts` ⇒ 0). ⇒ **La première balance qui produit une liasse pour un
+> exercice la produit pour toujours** : déposer une balance corrigée (v2) puis vouloir en tirer la liasse
+> n'a aucun chemin.
+
+⚠️ **Le contournement apparent est pire que le blocage** : `recalculer` accepte n'importe quels `soldesN`
+tant que le `balanceId` ne bouge pas. On peut donc y coller les chiffres de la v2 — et la liasse porterait
+alors une provenance qui **dément** ses propres nombres. C'est le seul cas où la provenance figée par
+l'AC-2 deviendrait fausse, et il vient de là.
+
+⇒ **Story à ficher (numéro non attribué ici — le PO tranche) : « une liasse peut suivre une nouvelle version
+de sa balance »**, dans la seconde forme de l'AC-5 : `recalculer` accepte un `balanceId` différent **s'il
+désigne une balance `VALIDÉE` du même dossier ET du même `exerciceId`**, met à jour la provenance et
+**journalise** le changement (`AuditType`, STORY-067). Un `balanceId` d'un autre exercice doit rester refusé
+— sinon le libellé du jeu, et l'index d'unicité qui porte dessus, deviendraient faux.
+
+Rien n'est bloqué **aujourd'hui** : *Hors périmètre* le rappelle, aucune story frontend ne crée encore de
+liasse. Ce n'est donc pas un correctif à empiler ici, c'est un manque à **ficher avant** la story qui livrera
+la création d'une liasse depuis un écran.
+
+### ⑥⑦ Revues de code et de sécurité — 9 constats, 7 corrigés, 2 fichés
+
+Scans délégués (`prospera-code-review` ⑥ + `prospera-security-review` ⑦), **fusion, filtrage, correctifs et
+décision de merge conduits en session `opus`**.
+
+#### Corrigés — commit de revue dédié
+
+| # | Constat | Ce qu'il cassait | Correctif |
+|---|---|---|---|
+| **S2** ⛔ | `required: true` sur 4 champs de `SnapshotLiasse` | `SnapshotLiasseRepository.creer` passe par `model.create()`, **qui exécute les validateurs**. Un jeu d'états créé AVANT la story ne porte aucune provenance ⇒ `POST …/etats/:id/valider` rendait **500**, **définitivement**, sur **tout jeu déjà en base** — sur le chemin même qui produit le livrable comptable | `@Prop()` optionnels (le vrai filet est sur `JeuEtats`, écrit à chaque création) + `snapshot-liasse.schema.spec.ts` qui éprouve le **vrai** schéma Mongoose |
+| **C1** ⛔ | `refuserSiAutreBalance` comparait `jeu.balanceId.toString()` à la chaîne brute du corps | `ObjectId.toString()` rend **toujours** des minuscules ; `@EstObjectId()` accepte **délibérément** les MAJUSCULES (STORY-405). La **même** balance recopiée d'un export était refusée `409 BALANCE_DIFFERENTE`, avec un geste qui aurait créé un doublon | `.equals()` + test unitaire **et** e2e sur un identifiant en majuscules |
+| **C2** ⛔ | `CODES_REFUS_JEU_ETATS` s'annonçait exhaustif et omettait **7 codes** atteignables (`DOSSIER_ID_INVALIDE`, `DOSSIER_INTROUVABLE`, `DOSSIER_ARCHIVE`, les 4 `REFERENTIEL_*`) | Le contrat **déclarait** fermé ce qui ne l'était pas : un client écrivant `Record<CodeRefusJeuEtats, string>` recevait des valeurs hors de son union — le défaut exact que l'AC-4 existe pour fermer | inventaire complété **et** `jeu-etats.codes.exhaustivite.spec.ts` qui **balaie les sources** et rougit sur tout code émis non inscrit (l'angle mort des codes posés par constante y est **déclaré**, pas subi) |
+| **C7** | `BALANCE_SANS_EXERCICE` fondait deux causes | Pour la seconde — la balance NOMME un exercice que ce service n'a pas encore projeté — le geste « ouvrir l'exercice, puis re-déposer » est **faux** : l'exercice est déjà ouvert, le rouvrir est un no-op | code distinct **`EXERCICE_NON_PROJETE`** (geste : réessayer) |
+| **C4** | `valider` ne revérifiait pas la provenance, `recalculer` si | asymétrie non expliquée sur le chemin qui rend la liasse **opposable** | garde ajoutée à `valider` — et ⚠️ **les deux commentaires corrigés** : `VALIDÉE` est **terminal** chez le producteur (mesuré : `409 BALANCE_DEJA_VALIDEE`), ces gardes sont **défensives**, pas vivantes. Le motif écrit d'abord (« elle a pu être REJETÉE entre-temps ») était faux |
+| **C5** | « Lu dans la session » alors que `resoudreExerciceId` n'accepte aucune `session` | affirmation fausse qui se lit comme une garantie | commentaire corrigé (lecture hors session, et pourquoi c'est légitime) |
+| **C6** | `recalculer` pouvait rendre `404 BALANCE_INTROUVABLE` non déclaré | le client n'a pas de branche pour un read-model en rattrapage | `@ApiNotFoundResponse` + descriptions complétées sur `creer`, `recalculer` **et** `valider` |
+| **S1** | La prose disait « SHA-256 de la balance source » | Le sceau prouve **quelle balance a été déclarée**, pas **que les soldes en sortent** — dans la voie A′ les soldes viennent du corps de la requête. Sur un artefact dit « opposable », l'écart compte | `MENTION_PORTEE_DU_SCEAU`, publiée dans le contrat OpenAPI et reprise dans les docstrings |
+
+Plus, de la lentille anti-sur-ingénierie : alias `ETAT_A_LA_NAISSANCE` (deux noms pour une valeur) et type
+`BalanceTopic` (exporté, jamais lu) supprimés ; `balance-events.spec.ts` ajouté — il fige les **deux
+littéraux de topic** et interdit `balance.etat.change` dans l'abonnement (le contrat à 2 dépôts n'a que ces
+chaînes pour se tenir).
+
+#### Écartés, motif consigné
+
+- **Rapprochement réel soldes ↔ balance** (fond du constat S1) : exige un `soldesChecksum` publié par
+  `balance-service` ⇒ **2 dépôts, un contrat d'événement de plus**. Hors périmètre de cette story ; à ficher
+  avec le manque AC-5 ci-dessus.
+- **`refuserSiExerciceClos` s'adresse encore par libellé** alors que `jeu.exerciceId` existe désormais :
+  faiblesse **pré-existante** que cette story **réduit** (le libellé cesse d'être libre, donc la jointure ne
+  peut plus rater) sans l'aggraver. Durcissement possible, pas un correctif dû ici.
+
+#### Mutations supplémentaires (11 → 14), chacune vérifiée rouge puis restaurée
+
+| # | Mutation | Test qui rougit |
+|---|---|---|
+| M11 | `required: true` remis sur `SnapshotLiasse.balanceId` | `⚡ accepte un snapshot SANS provenance` |
+| M12 | retour à `toString() !== balanceId` | `⚡ recalcul sur la MÊME balance écrite en MAJUSCULES` |
+| M13 | un code retiré de l'inventaire | `⚡ tout code émis par les sources figure dans l'inventaire` |
+| M14 | garde de provenance retirée de `valider` | `⚡ balance REJETÉE depuis la création → 409` |
+
+### ✅ Vérification docker REJOUÉE sur l'état final (les correctifs touchaient un chemin déjà mesuré)
+
+⚠️ Le hot-reload peut annoncer « Found 0 errors » en exécutant l'ancien module : la première mesure prouve
+donc que **le nouveau code tourne**.
+
+| Preuve | Résultat |
+|---|---|
+| **AC-4 sur l'OpenAPI RÉEL** (pas la source) | `GET /api/docs-json` → `enum CodeRefusJeuEtats` = **26 codes**, dont `DOSSIER_ARCHIVE`, `REFERENTIEL_UNRESOLVED`, `EXERCICE_NON_PROJETE` |
+| **Constat C1 fermé** | recalcul avec le **même** `balanceId` en MAJUSCULES → **200** (rendait `409 BALANCE_DIFFERENTE` avant) |
+| **AC-3 rejoué** | balance `BROUILLON` → `409 BALANCE_NON_VALIDEE` |
+| **AC-1 / AC-9 rejoués** | 2ᵉ dossier, exercice ouvert, balance déposée+validée → liasse créée, `exercice: '2025'` **résolu**, provenance publiée |
+| **AC-2 rejoué sur le code final** | `valider` (qui revérifie désormais la provenance) → `200`, snapshot figé avec `balanceId`/`balanceVersion`/`balanceChecksumVersion`/`exerciceId` |
+| **AC-6 au niveau des données** | les 3 snapshots des 2 dossiers ne partagent **aucune** valeur : `balanceId` et `exerciceId` distincts par dossier |
+| ⚡ **Atteignabilité de la garde C4, mesurée** | `POST /balances/:id/rejeter` sur une balance `VALIDÉE` → **`409 BALANCE_DEJA_VALIDEE`** ⇒ `VALIDÉE` est **terminal**, la garde est **défensive**. Écrit tel quel dans le code, plutôt que de lui prêter une menace vivante |
+
+Stack arrêtée après consignation.
