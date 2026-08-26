@@ -5168,7 +5168,7 @@
                       <span class="badge badge-active"><span class="d"></span>Ouvert</span>
                       <span class="grow" style="flex:1"></span>
                       <span class="cah-lig">Kossi Distribution · règles propres à CE dossier</span>
-                      <span class="cah-lig" title="Chaque encart « écart ouvert » de cet écran nomme le ticket qui le traite.">8 écarts ouverts · STORY-418 → 425</span>
+                      <span class="cah-lig" title="Chaque encart « écart ouvert » de cet écran nomme le ticket qui le traite.">7 écarts ouverts + 1 arbitré (STORY-424, voie B) · STORY-418 → 425</span>
                     </div>
 
                     <!-- RETOUR EC (2026-08-26) — « tous les comptes doivent être sur
@@ -5187,9 +5187,9 @@
                          ⇒ La maquette montre la CIBLE (8 caracteres, le plan de travail du
                          cabinet) et ANNONCE l ecart, selon la regle « dessiner la cible
                          meme sans backend, mais le dire ». -->
-                    <div class="prof-note warn">
+                    <div class="prof-note info">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                      <span><b>Les comptes de cet écran sont à 8 caractères — votre plan de travail.</b> ⛔ <b>Le service les refuse aujourd&rsquo;hui&nbsp;:</b> le référentiel <code>syscohada-revise@2.1</code> déclare un niveau de détail de <b>6 caractères</b>, et tout ce qui dépasse est rejeté (<span class="code">400 · COMPTE_INCONNU</span>) avec le message «&nbsp;<i>un compte du logiciel de saisie (8 chiffres) doit être ramené à son compte de plan</i>&nbsp;». ⚠️ <b>Et ramener n&rsquo;est pas neutre</b>&nbsp;: sur une balance cliente réelle, passer à 6 caractères fond <code>44280001</code> «&nbsp;Droit d&rsquo;enregistrement&nbsp;» et <code>44280002</code> «&nbsp;TH 2023&nbsp;» en un seul <code>442800</code> — <b>5 comptes réduits à 2</b>. <span class="code">écart ouvert · <b>STORY-424</b> · ticket backend</span></span>
+                      <span><b>Les comptes de cet écran sont à 8 caractères — votre plan de travail, et c&rsquo;est désormais la cible retenue.</b> ✅ <b>Arbitré le 26/08 (voie B)</b>&nbsp;: la plateforme cesse de <b>jeter</b> le compte du cabinet. Le compte à 8 caractères devient une donnée de premier rang — <b>accepté à la saisie</b>, <b>conservé</b> et <b>publié</b> à côté du compte de plan dont il dérive. ⚠️ <b>Le compte de plan reste l&rsquo;identité de la balance</b>&nbsp;: c&rsquo;est lui que l&rsquo;administration reconnaît sur la liasse — rien ne change de ce côté. ⛔ <b>Non encore livré</b>&nbsp;: aujourd&rsquo;hui le service refuse toujours au-delà de 6 caractères (<span class="code">400 · COMPTE_INCONNU</span>). Ce que ça coûte, mesuré sur une balance cliente réelle&nbsp;: ramener à 6 fond <code>44280001</code> «&nbsp;Droit d&rsquo;enregistrement&nbsp;» et <code>44280002</code> «&nbsp;TH 2023&nbsp;» en un seul <code>442800</code> — <b>5 comptes réduits à 2</b>. <span class="code">arbitré · <b>STORY-424</b> · voie B · à livrer</span></span>
                     </div>
 
                     <!-- ═════════════ ① CE QUI DÉCIDE ═════════════ -->
@@ -5370,7 +5370,7 @@
                           <div class="por"><span class="c">—</span><span class="u">inapplicable</span>
                             <button class="btn btn-primary btn-sm" type="button">Corriger le compte</button>
                           </div>
-                          <div class="tr"><b>Ce compte est refusé par le référentiel, et c&rsquo;est le conflit annoncé en haut de cet écran.</b> <code>70780000</code> est reconnu par sa racine <code>707</code>, mais <code>syscohada-revise@2.1</code> s&rsquo;arrête à <b>6 caractères</b>&nbsp;: il n&rsquo;est pas <b>imputable</b>. Le serveur <b>ignore la règle sans le dire</b> et retombe sur le moteur — les 4 lignes concernées sont parties en <code>70700000</code>. ⛔ <b>Ce n&rsquo;est donc pas une règle mal écrite&nbsp;: c&rsquo;est votre plan de comptes qui n&rsquo;est pas admis.</b> Tant que le niveau de détail n&rsquo;est pas porté à 8, <b>toutes</b> les règles de cet écran tombent dans ce cas — celle-ci est simplement la première à l&rsquo;avoir montré.</div>
+                          <div class="tr"><b>Ce compte est refusé par le référentiel — et c&rsquo;est ce que la voie B corrige.</b> <code>70780000</code> est reconnu par sa racine <code>707</code>, mais <code>syscohada-revise@2.1</code> s&rsquo;arrête à <b>6 caractères</b>&nbsp;: il n&rsquo;est pas <b>imputable</b>. Le serveur <b>ignore la règle sans le dire</b> et retombe sur le moteur — les 4 lignes concernées sont parties en <code>70700000</code>. ✅ <b>Après STORY-424, ce cas disparaît</b>&nbsp;: le compte saisi est accepté et conservé, et c&rsquo;est le compte de plan qui en sera <b>dérivé</b> pour la balance. En attendant, <b>toutes</b> les règles de cet écran tombent dans ce cas.</div>
                         </div>
                       </div>
 
@@ -5420,7 +5420,7 @@
                              empêcherait le cabinet de travailler à son niveau de détail. -->
                         <div class="prof-note info" style="margin:0.4rem 0 0.6rem">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                          <span><b>La liste vient du plan packagé, qui ne compte que 174 têtes.</b> Vos subdivisions de travail (<code>70730000</code>, <code>70720000</code>) n&rsquo;y figurent pas&nbsp;: elles sont reconnues par leur <b>racine</b>, mais <b>refusées</b> tant que le niveau de détail du référentiel reste à 6 caractères. ⇒ <b>La liste est un point de départ, pas votre plan.</b> C&rsquo;est l&rsquo;objet de l&rsquo;écart signalé en haut de l&rsquo;écran.</span>
+                          <span><b>La liste vient du plan packagé, qui ne compte que 174 têtes.</b> Vos subdivisions de travail (<code>70730000</code>, <code>70720000</code>) n&rsquo;y figurent pas. ✅ <b>Voie B</b>&nbsp;: elles seront <b>saisissables et conservées</b>, la liste restant le repère de ceux qui ne connaissent pas leur plan par cœur. ⛔ Tant que <b>STORY-424</b> n&rsquo;est pas livrée, elles sont <b>refusées</b>.</span>
                         </div>
                         <!-- LA PORTÉE AVANT L'ENREGISTREMENT — le seul moment où une règle
                              morte se voit encore. Elle se calcule côté client, sur les

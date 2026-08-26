@@ -1,128 +1,137 @@
-# STORY-424 : Le plan de travail d'un cabinet fait 8 caractères — le service en accepte 6, et ramener n'est pas neutre
+# STORY-424 : Le compte de travail du cabinet (8 caractères) devient une donnée de premier rang, à côté du compte de plan
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
-**Service :** `balance-service` (`:3007`) — `modules/referentiel`, `modules/balance/sage`
-**Points :** — *(à chiffrer après arbitrage)* · **Sprint :** S20
-**Origine :** **retour direct d'un expert-comptable**, transmis par le PO le **2026-08-26** à la revue de la maquette FE-046 : *« tous les comptes qui doivent être présents sur la plateforme doivent être sur 8 chiffres »*.
+**Service :** `balance-service` (`:3007`) — `modules/referentiel`, `modules/balance`, `modules/cahiers`
+**Points :** 8 · **Sprint :** S20
+**Origine :** **retour direct d'un expert-comptable**, transmis par le PO le **2026-08-26** : *« tous les comptes qui doivent être présents sur la plateforme doivent être sur 8 chiffres »*.
+
+---
+
+## ✅ ARBITRAGE PO DU 2026-08-26 — **VOIE B**
+
+> **« Je prends la voie B. »**
+
+**L'identité canonique d'une ligne de balance reste le compte de plan (≤ 6).** La liasse ne
+bouge pas, `bilan-service` ne bouge pas, le contrat canonique (STORY-101) ne bouge pas.
+
+**Ce qui change** : la plateforme cesse de *jeter* le compte du cabinet. Le compte à
+**8 caractères** devient une donnée de premier rang — **accepté à la saisie**, **conservé**, et
+**publié** à côté du compte de plan dont il dérive.
+
+⚠️ **La voie B au sens strict (affichage seul) ne débloque pas FE-046** : sans acceptation à la
+saisie, un comptable ne peut toujours pas écrire `44280002` dans une règle de rattachement ni
+dans une catégorie de dépense. L'extension à la saisie faisait partie de la recommandation
+présentée au PO avec la voie B ; elle est donc dans le périmètre. *(Si l'intention était
+l'affichage seul, retirer les AC-3 et AC-4 et repasser à 5 points.)*
+
+**Écartées :** la voie A (le compte de travail devient l'identité canonique) — trop invasive,
+elle rouvre STORY-101 et `bilan-service` ; la voie C (`longueurCompteDetail: 8`) — **fausse** :
+plus rien ne serait regroupé et la liasse recevrait des comptes que l'administration ne
+reconnaît pas.
 
 ---
 
 ## Le fait, mesuré sur une balance cliente réelle
 
-Fichier : `Balance_des_comptes.pdf` — **ETS RELAXED**, Sage 100 Comptabilité i7 8.50, exercice
-01/01/23 → 31/12/23, balance complète.
+`Balance_des_comptes.pdf` — **ETS RELAXED**, Sage 100 Comptabilité i7 8.50, exercice 2023.
 
 | relevé | valeur |
 |---|---|
 | comptes de la balance | **51** |
 | comptes à **8 chiffres** | **51** — soit **100 %** |
-| classes présentes | 1, 2, 3, 4, 5, 6, 7 |
 
-Extrait : `10300000 CAPITAL PERSONNEL`, `41110000 CLIENTS`, `44280001 DROIT D'ENREGISTREMENT`,
-`44280002 TH 2023`, `44490000 ETAT CREDIT DE TVA A REPORTER`.
-
-**Le plan de travail du cabinet fait 8 caractères. Sans exception.**
-
----
-
-## Ce que le service en fait aujourd'hui
-
-```ts
-// referentiel-registry.ts — manifeste
-'syscohada-revise@2.1', { …, longueurCompteDetail: 6 }
-
-// referentiel-loader.service.ts — estCompteDeDetail
-if (!estCompteRattachable(racines, compte)) return false;
-if (longueurDetail === undefined) return true;
-return normalise.length <= longueurDetail && /^\d+$/.test(normalise);
-```
-
-⇒ **Tout compte à 8 caractères est refusé.** Et le message du validateur l'assume :
-
-> *« Compte « X » inconnu du plan … **Un compte du logiciel de saisie (8 chiffres, compte
-> auxiliaire) doit être ramené à son compte de plan.** »*
-
-C'est une **décision** (STORY-146/172), pas un oubli : la liasse se dépose sur des comptes de
-plan, et l'administration ne connaît pas `44280002`.
-
----
-
-## ⛔ Mais « ramener » perd de l'information, et c'est mesurable
-
-La normalisation de l'import Sage ramène puis **regroupe les homonymes**
-(`normalisation-comptes.ts`). Appliquée au fichier ci-dessus :
+Et « ramener au compte de plan » n'est pas neutre :
 
 | ramené à 6 | comptes fondus | ce qui disparaît |
 |---|---|---|
-| `442800` | `44280001` **Droit d'enregistrement** + `44280002` **TH 2023** | deux impôts distincts deviennent une ligne |
-| `447800` | `44780000` + `44780001` + `44780002` | trois comptes deviennent une ligne |
+| `442800` | `44280001` **Droit d'enregistrement** + `44280002` **TH 2023** | deux impôts distincts, une seule ligne |
+| `447800` | `44780000` + `44780001` + `44780002` | trois comptes, une seule ligne |
 
-**5 comptes réduits à 2 sur une seule balance.** Le regroupement est *tracé* (`Regroupement`,
-`sourcesTotal`) — donc honnête — mais le comptable perd la ventilation qu'il a lui-même
-construite, et il ne la retrouvera nulle part dans le produit.
+**5 comptes réduits à 2 sur une seule balance.**
 
 ---
 
-## Les deux besoins, et ils ne sont pas le même
+## Ce qui est demandé
 
-| | compte de **travail** | compte de **plan** |
+### ① Publier les comptes d'origine sur la ligne de balance
+
+L'information **existe déjà** côté import Sage (`normalisation-comptes.ts`) : `Regroupement`
+porte `compte`, `comptesSources` et `sourcesTotal`. Elle est rendue à l'appelant **au moment de
+l'import**, puis perdue. Elle doit vivre **sur la ligne** :
+
+```ts
+// LigneBalanceApercuDto / la ligne canonique
+@ApiProperty({ type: [String], description:
+  'Comptes du plan de travail du cabinet (8 caractères) qui alimentent cette ligne. ' +
+  'Vide quand le compte saisi est déjà un compte de plan.' })
+comptesSources!: string[];
+@ApiProperty({ description: 'Nombre exact de comptes sources, même si la liste est plafonnée.' })
+sourcesTotal!: number;
+```
+
+⚠️ **Plafonner la liste, jamais le compteur** (patron déjà retenu par STORY-370) : une ligne
+`411…` peut fondre des centaines d'auxiliaires ; `sourcesTotal` doit rester exact.
+
+### ② Produire la même information sur le chemin **cahiers**
+
+Aujourd'hui `comptesSources` n'existe que sur le chemin Sage. Une balance construite depuis les
+cahiers doit porter le compte **tel que le comptable l'a saisi**, même quand il est ramené.
+
+### ③ Accepter 8 caractères **à la saisie**
+
+Les six portes gardées par `isCompteDeDetail` acceptent le compte du cabinet, **conservent le
+compte saisi** et **dérivent** le compte de plan :
+
+| porte | aujourd'hui | après |
 |---|---|---|
-| forme | 8 caractères (`44280002`) | ≤ 6 (`442800`) |
-| sert à | tenir, contrôler, expliquer au client | **déposer la liasse** |
-| qui l'exige | le cabinet | l'administration |
+| saisie de recette (`compteProduit`) | refus > 6 | accepté, `compteSaisi` conservé |
+| saisie de dépense (`compteCharge`) | refus > 6 | idem |
+| règle de rattachement (`surcharges`) | refus > 6 | idem |
+| catégorie de dépense (`compteCharge`) | refus > 6 | idem |
+| comptes de contrepartie | refus > 6 | idem |
+| soumission de balance | refus > 6 | accepté, ramené + `comptesSources` |
 
-Le produit n'en garde **qu'un**, et c'est le second. ⇒ **La bonne réponse n'est pas de faire
-passer `longueurCompteDetail` à 8** — ça casserait la projection vers la liasse. C'est de
-**porter les deux**.
+⚠️ **La dérivation est celle qui existe déjà** — `normalisation-comptes.ts`, plus long préfixe
+du plan. **Ne pas en écrire une seconde** : deux normalisations divergeraient, et l'écart ne se
+verrait qu'à la liasse.
 
-⚡ **Et l'amorce existe déjà** : `SourceLigneBalance` / `Regroupement.comptesSources` conservent
-la provenance côté import Sage. L'information n'est pas à créer, elle est à **rendre**, et à
-étendre au chemin cahiers.
+### ④ Ce qui ne change PAS, et il faut le tester
 
----
-
-## Ce qui doit être tranché (PO + architecture)
-
-**Q1 — Quel compte est l'identité d'une ligne ?**
-
-- **Voie A** — le compte de travail (8) devient l'identité, le compte de plan est une
-  **projection** calculée au moment de la liasse. Le plus juste métier ; c'est un changement du
-  **contrat canonique** (STORY-101) et il touche `bilan-service`.
-- **Voie B** — l'identité reste le compte de plan, mais la ligne **porte** ses comptes d'origine
-  (`comptesSources`, déjà présent côté Sage) et **l'écran les affiche**. Moins invasif ; le
-  cabinet voit son plan sans que la liasse bouge.
-- **Voie C** — porter `longueurCompteDetail` à **8** pour SYSCOHADA. Le plus simple, et
-  probablement **faux** : plus rien ne serait regroupé, et la liasse recevrait des comptes que
-  l'administration ne reconnaît pas.
-
-**Q2 — Le chemin cahiers doit-il aussi accepter 8 caractères ?** Aujourd'hui la saisie d'une
-recette, une règle de rattachement et un compte de contrepartie sont tous validés par
-`isCompteDeDetail` ⇒ un cabinet ne peut pas y écrire son propre plan. ⚠️ **C'est ce qui rend
-l'écran FE-046 inutilisable en l'état** pour un cabinet équipé.
-
-**Q3 — Le référentiel doit-il déclarer sa longueur, ou l'organisation la sienne ?**
-`longueurCompteDetail` vit dans le **manifeste** du service, et le commentaire de STORY-146
-admet déjà que sa place est **dans l'artefact**. Un cabinet à 8 et un autre à 6 sont deux
-paramétrages légitimes du même référentiel.
+- Le **tag** et le **format** de la balance canonique (STORY-101) ;
+- ce que reçoit `bilan-service` — la liasse continue de se déposer sur des comptes de plan ;
+- l'invariant d'équilibre et les deux contrôles (STORY-147).
 
 ---
 
-## Ce qui est FAIT en attendant
+## Critères d'acceptation
 
-La maquette **FE-046** affiche désormais **tous ses comptes à 8 caractères** — la cible — et
-porte en tête un encart qui **annonce le refus actuel**, avec le chiffrage ci-dessus.
-⛔ **Aucune ligne de code frontend ne doit être écrite sur la saisie de compte avant
-l'arbitrage** : les trois voies ne donnent ni le même champ, ni la même validation.
+1. `LigneBalanceApercuDto` publie `comptesSources` et `sourcesTotal`, sur les **trois**
+   adaptateurs (cahiers, Sage, saisie directe).
+2. Une balance importée dont deux comptes fondent rend les **deux** numéros d'origine sur la
+   ligne — testé sur le cas réel `44280001` + `44280002` → `442800`.
+3. Une recette saisie sur `70730000` est **acceptée**, et la ligne de balance produite porte
+   `compte: '707300'` (ou le compte de plan dérivé) **et** `comptesSources: ['70730000']`.
+4. Une règle de rattachement sur un compte à 8 caractères est **acceptée** et **s'applique** —
+   c'est-à-dire que `estCompteDeDetail` cesse d'être la garde de saisie (elle reste celle de la
+   **soumission au plan**).
+5. `bilan-service` reçoit exactement ce qu'il recevait avant — testé par comparaison d'une
+   balance produite avant/après.
+6. Aucune seconde implémentation de la normalisation : un test d'architecture ou une revue le
+   constate.
+7. OpenAPI régénéré ; types du front régénérés.
 
 ---
 
 ## Notes
 
-- ⚠️ **Ne pas traiter cette story comme « un paramètre à changer »** : `longueurCompteDetail`
-  est lu par `estCompteDeDetail`, qui garde **la saisie de recette, la saisie de dépense, la
-  règle de rattachement, le compte de contrepartie, le compte de trésorerie et la soumission de
-  balance**. Six portes, un seul chiffre.
-- Voir [[FE-046]], `stories/STORY-146.md`, `stories/STORY-172.md`, `stories/STORY-086.md`
-  (import Sage & normalisation), `stories/STORY-101.md` (contrat canonique).
+- ⚡ **La donnée décisive était déjà dans le dépôt** : `Balance_des_comptes.pdf` dormait à la
+  racine de `MoneyVibes_Apps` et n'avait jamais été ouvert. Il a tranché la question de format
+  en une commande. ⇒ **avant d'arbitrer un format métier, chercher un fichier client réel.**
+- ⚠️ **Q3 reste ouverte et n'est pas bloquante** : `longueurCompteDetail` vit dans le
+  **manifeste du service** alors que le commentaire de STORY-146 admet que sa place est dans
+  **l'artefact**. Un cabinet à 8 et un autre à 6 sont deux paramétrages légitimes du même
+  référentiel. À traiter quand un second cabinet le demandera, pas avant.
+- Consommateur nommé : **FE-046**. Voir `stories/STORY-146.md`, `stories/STORY-172.md`,
+  `stories/STORY-086.md`, `stories/STORY-370.md`, `stories/STORY-101.md`.
