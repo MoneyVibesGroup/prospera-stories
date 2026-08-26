@@ -4653,9 +4653,9 @@
                          desactive A L'INTERIEUR du panneau, la ou il sera. On ne rouvre
                          donc pas la question de la navigation a la livraison de FE-050 :
                          c'est une sous-section qui s'allume, pas un onglet qui apparait. -->
-                    <button class="atl-tab" role="tab" data-atl-tab="fiscal" aria-selected="false" title="FE-051 — liquidation IS = max(MFP, IS), acomptes, credits, TVA, autres taxes, provisions a la balance, TPU. Le resultat fiscal (reintegrations / deductions) reste a venir : FE-050.">
+                    <button class="atl-tab" role="tab" data-atl-tab="fiscal" aria-selected="false" title="FE-051 — Impots et taxes : liquidation IS = max(MFP, IS), acomptes, credits, TVA, autres taxes, provisions a la balance, TPU. (Q2 tranchee par le PO le 2026-08-26 : « Fiscal » nommait un module, « Impots et taxes » nomme ce qu on y fait. `data-atl-tab` INCHANGE.) Le resultat fiscal (reintegrations / deductions) reste a venir : FE-050.">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
-                      Fiscal
+                      Impôts et taxes
                     </button>
                     <span class="grow"></span>
                     <span class="badge badge-active"><span class="d"></span>Module actif</span>
@@ -5796,7 +5796,7 @@
 
                     <div style="display:flex;align-items:flex-end;gap:0.6rem;flex-wrap:wrap">
                       <div>
-                        <h3 class="atl-sectitle">Fiscal — liquider l'impôt du dossier</h3>
+                        <h3 class="atl-sectitle">Impôts et taxes — liquider l'impôt du dossier</h3>
                         <p class="atl-secsub">Ce que votre client doit à l'OTR au titre de l'exercice&nbsp;: l'impôt sur les bénéfices, la TVA, les autres taxes — et la provision qui les porte en balance.</p>
                       </div>
                       <span class="grow" style="flex:1"></span>
@@ -6311,6 +6311,59 @@
                         </div>
                       </div>
 
+                      <!-- ═══ Q1 — TRANCHEE PAR LE PO LE 2026-08-26 ═══
+                           « Un seul ecran, deux portes d'entree. » Le comptable au reel
+                           vit au MOIS, mais la TVA n'est pas une donnee du cahier : c'est
+                           une DECLARATION, et elle se prepare la ou vivent le credit
+                           reporte, le controle de taux et le cumul qui alimente la
+                           liquidation. La sortir dans les cahiers en ferait une SECONDE
+                           SOURCE DE VERITE sur la MEME route — le doublon que la revue
+                           d'usage a evite quatre fois.
+                           ⇒ Ce qui manquait n'etait pas un ecran, c'etait un FOCUS et un
+                           RENVOI : le ruban des mois (meme geste que les cahiers) ici, et
+                           les deux tuiles TVA des cahiers qui menent ICI, positionnees sur
+                           le mois ouvert (`?periode=YYYY-MM`). Une route, un ecran, deux
+                           entrees, AUCUNE story de plus.
+                           ⚠ Le mois selectionne ne CHARGE rien : `GET …/fiscal/tva` sert
+                           deja TOUTES les periodes chainees en une reponse. Le ruban
+                           met en avant, il ne re-interroge pas — sinon on paierait douze
+                           allers-retours pour une donnee deja recue. -->
+                      <div class="fis-sect">
+                        <h4>La déclaration du mois</h4>
+                        <span class="c">c'est le rythme réel du dossier&nbsp;: la TVA se déclare tous les mois, le bilan une fois l'an</span>
+                      </div>
+                      <div class="cah-mois" role="tablist" aria-label="Période de déclaration">
+                        <button class="cah-m" role="tab" type="button" aria-selected="false" data-tva-mois="0" data-long="Janvier 2024" data-bornes="du 01/01 au 31/01 inclus" data-coll="620 000" data-nc="34 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="480 000" data-nd="31 lignes de dépenses ouvrant droit à déduction." data-ecar="40 000" data-imp="90 000" data-rest="0" data-pay="50 000"><span class="mn">Janv.</span><span class="mv">50 000</span><span class="mc">à payer</span></button>
+                        <button class="cah-m" role="tab" type="button" aria-selected="false" data-tva-mois="1" data-long="Février 2024" data-bornes="du 01/02 au 29/02 inclus" data-coll="700 000" data-nc="38 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="390 000" data-nd="26 lignes de dépenses ouvrant droit à déduction." data-ecar="55 000" data-imp="0" data-rest="0" data-pay="310 000"><span class="mn">Févr.</span><span class="mv">310 000</span><span class="mc">à payer</span></button>
+                        <button class="cah-m" role="tab" type="button" aria-selected="true" data-tva-mois="2" data-long="Mars 2024" data-bornes="du 01/03 au 31/03 inclus" data-coll="810 000" data-nc="42 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="350 000" data-nd="28 lignes de dépenses ouvrant droit à déduction." data-ecar="90 000" data-imp="0" data-rest="0" data-pay="460 000"><span class="mn">Mars</span><span class="mv">460 000</span><span class="mc">à payer</span></button>
+                        <button class="cah-m vide" role="tab" type="button" aria-selected="false" data-tva-mois="3" data-long="Avril 2024" data-bornes="du 01/04 au 30/04 inclus" data-coll="640 000" data-nc="33 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="700 000" data-nd="47 lignes de dépenses ouvrant droit à déduction." data-ecar="120 000" data-imp="0" data-rest="60 000" data-pay="0"><span class="mn">Avril</span><span class="mv">—</span><span class="mc">crédit 60 000</span></button>
+                        <button class="cah-m" role="tab" type="button" aria-selected="false" data-tva-mois="4" data-long="Mai 2024" data-bornes="du 01/05 au 31/05 inclus" data-coll="750 000" data-nc="40 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="410 000" data-nd="29 lignes de dépenses ouvrant droit à déduction." data-ecar="45 000" data-imp="60 000" data-rest="0" data-pay="280 000"><span class="mn">Mai</span><span class="mv">280 000</span><span class="mc">à payer</span></button>
+                        <button class="cah-m" role="tab" type="button" aria-selected="false" data-tva-mois="5" data-long="Juin 2024" data-bornes="du 01/06 au 30/06 inclus" data-coll="690 000" data-nc="36 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="380 000" data-nd="25 lignes de dépenses ouvrant droit à déduction." data-ecar="60 000" data-imp="0" data-rest="0" data-pay="310 000"><span class="mn">Juin</span><span class="mv">310 000</span><span class="mc">à payer</span></button>
+                        <button class="cah-m" role="tab" type="button" aria-selected="false" data-tva-mois="6" data-long="Juillet 2024" data-bornes="du 01/07 au 31/07 inclus" data-coll="730 000" data-nc="39 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="420 000" data-nd="30 lignes de dépenses ouvrant droit à déduction." data-ecar="70 000" data-imp="0" data-rest="0" data-pay="310 000"><span class="mn">Juil.</span><span class="mv">310 000</span><span class="mc">à payer</span></button>
+                        <button class="cah-m" role="tab" type="button" aria-selected="false" data-tva-mois="7" data-long="Août 2024" data-bornes="du 01/08 au 31/08 inclus" data-coll="580 000" data-nc="29 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="360 000" data-nd="24 lignes de dépenses ouvrant droit à déduction." data-ecar="35 000" data-imp="0" data-rest="0" data-pay="220 000"><span class="mn">Août</span><span class="mv">220 000</span><span class="mc">à payer</span></button>
+                        <button class="cah-m" role="tab" type="button" aria-selected="false" data-tva-mois="8" data-long="Septembre 2024" data-bornes="du 01/09 au 30/09 inclus" data-coll="800 000" data-nc="43 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="450 000" data-nd="32 lignes de dépenses ouvrant droit à déduction." data-ecar="80 000" data-imp="0" data-rest="0" data-pay="350 000"><span class="mn">Sept.</span><span class="mv">350 000</span><span class="mc">à payer</span></button>
+                        <button class="cah-m" role="tab" type="button" aria-selected="false" data-tva-mois="9" data-long="Octobre 2024" data-bornes="du 01/10 au 31/10 inclus" data-coll="760 000" data-nc="41 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="400 000" data-nd="28 lignes de dépenses ouvrant droit à déduction." data-ecar="50 000" data-imp="0" data-rest="0" data-pay="360 000"><span class="mn">Oct.</span><span class="mv">360 000</span><span class="mc">à payer</span></button>
+                        <button class="cah-m" role="tab" type="button" aria-selected="false" data-tva-mois="10" data-long="Novembre 2024" data-bornes="du 01/11 au 30/11 inclus" data-coll="820 000" data-nc="45 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="340 000" data-nd="23 lignes de dépenses ouvrant droit à déduction." data-ecar="65 000" data-imp="0" data-rest="0" data-pay="480 000"><span class="mn">Nov.</span><span class="mv">480 000</span><span class="mc">à payer</span></button>
+                        <button class="cah-m" role="tab" type="button" aria-selected="false" data-tva-mois="11" data-long="Décembre 2024" data-bornes="du 01/12 au 31/12 inclus" data-coll="740 000" data-nc="37 lignes de recettes assujetties — <b>exonérées exclues</b>." data-ded="240 000" data-nd="18 lignes de dépenses ouvrant droit à déduction." data-ecar="70 000" data-imp="0" data-rest="0" data-pay="500 000"><span class="mn">Déc.</span><span class="mv">500 000</span><span class="mc">à payer</span></button>
+                      </div>
+
+                      <div class="ref-card">
+                        <div class="ref-head"><b data-tva-long>Mars 2024</b><span class="grow"></span><span class="badge" data-tva-bornes>du 01/03 au 31/03 inclus</span></div>
+                        <div class="ref-grid">
+                          <div class="ref-item"><div class="ref-k">TVA collectée</div><div class="ref-v"><span data-tva-coll>810 000</span> F</div><div class="ref-sum" data-tva-nc>42 lignes de recettes assujetties — <b>exonérées exclues</b>.</div></div>
+                          <div class="ref-item"><div class="ref-k">TVA déductible</div><div class="ref-v"><span data-tva-ded>350 000</span> F</div><div class="ref-sum" data-tva-nd>28 lignes de dépenses ouvrant droit à déduction.</div></div>
+                          <div class="ref-item"><div class="ref-k">Crédit antérieur imputé</div><div class="ref-v"><span data-tva-imp>0</span> F</div><div class="ref-sum" data-tva-impnote>Aucun crédit en attente à l'entrée de ce mois.</div></div>
+                          <div class="ref-item"><div class="ref-k" data-tva-solde-k>À payer</div><div class="ref-v"><span data-tva-pay>460 000</span> F</div><div class="ref-sum" data-tva-paynote>810 000 − 350 000. <b>90 000 F de TVA écartée</b> ne sont pas déduits&nbsp;: charges non déductibles.</div></div>
+                        </div>
+                        <div style="padding:0.8rem 1rem;border-top:1px solid var(--border)">
+                          <p class="atl-secsub" style="margin:0">Chaque montant est traçable jusqu'à la <b>ligne de cahier</b> qui l'a produit&nbsp;: on remonte à la recette ou à la dépense, et à sa pièce.</p>
+                        </div>
+                      </div>
+
+                      <div class="fis-sect">
+                        <h4>Toutes les périodes de l'exercice</h4>
+                        <span class="c">le crédit court de l'une à l'autre — c'est la chaîne, pas douze calculs indépendants</span>
+                      </div>
                       <div class="imp-table-wrap fis-wide">
                         <div class="imp-table-cap">Le <b>crédit court d'une période à l'autre</b>&nbsp;: il n'est pas recalculé chaque mois, il est chaîné. Un crédit déclaré à l'ouverture de l'exercice s'impute en premier.</div>
                         <table class="imp-table">
@@ -12633,6 +12686,44 @@
         fisPanel.querySelectorAll("[data-acp]").forEach(function (b) {
           b.addEventListener("click", function () { acpShow(b.dataset.acp); });
         });
+        /* ═══ Q1 — le ruban des mois de la TVA ═══
+           Le mois se CHOISIT au clic : une planche d'etats n'est pas une
+           maquette. Les chiffres vivent en `data-*` sur chaque bouton parce que
+           `GET …/fiscal/tva` sert TOUTES les periodes en UNE reponse — le ruban
+           met en avant, il ne re-interroge pas. Douze allers-retours pour une
+           donnee deja recue seraient un cout invente. */
+        var tvaMois = function (btn) {
+          fisPanel.querySelectorAll("[data-tva-mois]").forEach(function (b) {
+            b.setAttribute("aria-selected", String(b === btn));
+          });
+          var d = btn.dataset;
+          var poser = function (sel, html) {
+            var el = fisPanel.querySelector(sel);
+            if (el) el.innerHTML = html;
+          };
+          poser("[data-tva-long]", d.long);
+          poser("[data-tva-bornes]", d.bornes);
+          poser("[data-tva-coll]", d.coll);
+          poser("[data-tva-nc]", d.nc);
+          poser("[data-tva-ded]", d.ded);
+          poser("[data-tva-nd]", d.nd);
+          poser("[data-tva-imp]", d.imp);
+          poser("[data-tva-impnote]", d.imp === "0"
+            ? "Aucun crédit en attente à l'entrée de ce mois."
+            : "Crédit né d'une période antérieure, imputé ici.");
+          /* ⚠ Un mois en credit ne s'ecrit JAMAIS « −60 000 a payer » : le sens
+             est porte par le LIBELLE, comme le fait le contrat (`sens`). */
+          var enCredit = d.pay === "0" && d.rest !== "0";
+          poser("[data-tva-solde-k]", enCredit ? "Crédit reporté" : "À payer");
+          poser("[data-tva-pay]", enCredit ? d.rest : d.pay);
+          poser("[data-tva-paynote]", enCredit
+            ? "Les achats ont dépassé les ventes&nbsp;: rien à payer, le crédit s'impute sur la période suivante."
+            : d.coll + " − " + d.ded + ". <b>" + d.ecar + " F de TVA écartée</b> ne sont pas déduits&nbsp;: charges non déductibles.");
+        };
+        fisPanel.querySelectorAll("[data-tva-mois]").forEach(function (b) {
+          b.addEventListener("click", function () { tvaMois(b); });
+        });
+
         /* Etat initial coherent : regime reel, benefice, N−1 liquidable. */
         fisRegime("REEL");
         liqShow("is");
