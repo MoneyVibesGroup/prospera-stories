@@ -48,6 +48,78 @@ ni le taux de MFP, ni le montant du minimum forfaitaire — il porte seulement
 
 ---
 
+## ⚖️ AVIS D'EXPERT-COMPTABLE (2026-08-26, demandé par le PO)
+
+### ① Sur le droit : **l'imputation n'est pas facultative — il n'y a probablement rien à borner**
+
+Formulation transcrite dans le paquet `togo@2026`, `reglesNotables.reportDeficitaire` :
+
+> *« déficit **imputable dans la limite de 50 %** du bénéfice de l'exercice ; solde reportable
+> **sans limitation de durée** » — Art. 101 CGI*
+
+**« Imputable dans la limite de » décrit un PLAFOND, pas une option.** Le déficit reporté est
+traité, dans toute la zone, comme **une charge de l'exercice suivant** : le contribuable ne
+choisit pas de le « garder ». Et la structure même de la règle le confirme — si l'on pouvait
+déjà décider de ne pas imputer, **le plafond de 50 % et le report illimité du solde n'auraient
+aucun objet** : ils existent précisément parce que l'imputation s'impose et qu'il faut donc
+l'étaler.
+
+⚠️ **À faire confirmer par un fiscaliste**, pour une seule raison : le paquet étiquette la règle
+*« LEVIER conseil fiscal »*. Ma lecture est que le levier est le **pilotage du résultat**, pas le
+choix d'imputer — mais c'est un avis, pas une certitude, et il porte sur du droit.
+
+### ② Ce qui ne dépend d'AUCUN arbitrage : le chiffre exact de la perte
+
+Le tracker dit « 1 000 000 dépensés pour 60 000 ». **C'est en dessous de la vérité.** Le montant
+réellement gaspillé se calcule, et il est plus précis :
+
+> **L'imputation cesse de servir dès que l'IS passe sous le plancher**, c'est-à-dire dès que le
+> résultat fiscal descend sous **`MFP / taux IS`**.
+
+Sur l'exemple du paquet (IS 27 %, MFP 1 %, CA 48 000 000, résultat avant déficits 2 000 000) :
+
+| | montant |
+|---|---|
+| MFP (1 % du CA HT) | **480 000** |
+| **seuil = MFP / 27 %** | **1 777 778** |
+| imputation **faite** (plafond légal 50 %) | 1 000 000 |
+| imputation **utile** | **222 222** |
+| **report consommé pour rien** | **777 778** |
+| valeur de ce gaspillage au taux plein | **210 000 F d'impôt futur** |
+
+Vérification : `max(540 000 ; 480 000) = 540 000` sans imputation, `max(270 000 ; 480 000) =
+480 000` avec. **L'économie de 60 000 F est intégralement obtenue avec 222 222 F de report. Les
+777 778 F restants ne rapportent rien.**
+
+⇒ **Que l'imputation soit obligatoire ou non, l'expert-comptable DOIT connaître ce chiffre**,
+parce qu'il change trois choses : la valeur de l'actif d'impôt différé dans les comptes, le
+conseil donné au client, et — si l'imputation était optionnelle — l'engagement de sa propre
+responsabilité pour ne pas l'avoir dit.
+
+### ③ Le vrai levier n'est pas l'imputation, c'est le résultat
+
+Dans la **zone `0 < résultat fiscal < MFP / taux`**, chaque franc de report est gaspillé, et
+aucun réglage de l'imputation n'y changera rien. Le conseil est de **sortir de cette zone** —
+timing des produits, des charges déductibles, des amortissements (le paquet étiquette d'ailleurs
+`amortissements` « LEVIER conseil fiscal » pour la même raison). Un produit qui offrirait un
+curseur d'imputation sans montrer cette zone donnerait le mauvais levier.
+
+### ④ Découpage recommandé — **ne pas laisser la question de droit bloquer la moitié qui n'en dépend pas**
+
+- **417a — RENDRE LA PERTE VISIBLE** · `ready-for-dev`, **3 pts**. Publier le **seuil**,
+  l'**imputation utile** et le **report consommé sans effet**, avec sa valeur au taux plein.
+  Zéro question juridique, valeur immédiate, et c'est le préalable à toute décision.
+  ⛔ **Le vrai contenu technique est là** : `ResultatFiscalResponseDto` ne porte **ni le CA, ni le
+  taux, ni la MFP** — le moteur du résultat fiscal **ne peut pas voir le plancher**. Il faut donc
+  faire remonter la MFP (ou le seuil) dans sa réponse, ou l'assumer comme un croisement de deux
+  appels côté écran. C'est ce choix-là qui est à faire, et il est technique, pas juridique.
+- **417b — BORNER L'IMPUTATION** · `needs-po-decision`, non chiffrée. À ne coder **que si** un
+  avis fiscal établit que l'imputation est facultative. ⚠️ Et si elle l'est : **paramètre de
+  LECTURE, jamais un état persisté** — le calcul doit rester pur et rejouable (STORY-096).
+  **Pronostic : 417b sera fermée sans être développée.**
+
+---
+
 ## La question qui commande tout — à trancher AVANT de chiffrer
 
 ⛔ **L'imputation d'un déficit reportable est-elle FACULTATIVE au regard de
