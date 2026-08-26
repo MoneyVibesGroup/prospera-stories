@@ -5170,6 +5170,27 @@
                       <span class="cah-lig">Kossi Distribution · règles propres à CE dossier</span>
                     </div>
 
+                    <!-- RETOUR EC (2026-08-26) — « tous les comptes doivent être sur
+                         8 chiffres ». VERIFIE, et c est le blocage n°1 de cette story.
+                         Preuve prise sur la balance REELLE d un client (Sage 100 i7,
+                         `Balance_des_comptes.pdf`) : 51 comptes, 51 a 8 chiffres.
+                         Or `syscohada-revise@2.1` declare `longueurCompteDetail: 6` et
+                         `estCompteDeDetail` refuse tout ce qui depasse ⇒ le service
+                         REFUSE aujourd hui chacun des comptes de cet ecran.
+                         Et la normalisation qui existe (import Sage) n est pas neutre :
+                         sur ce meme fichier, ramener a 6 caracteres FOND
+                         `44280001 Droit d enregistrement` et `44280002 TH 2023` sur un
+                         seul `442800`, et `44780000/1/2` sur un seul `447800` — 5 comptes
+                         reduits a 2. Ce n est pas un detail d affichage : c est de
+                         l information comptable perdue.
+                         ⇒ La maquette montre la CIBLE (8 caracteres, le plan de travail du
+                         cabinet) et ANNONCE l ecart, selon la regle « dessiner la cible
+                         meme sans backend, mais le dire ». -->
+                    <div class="prof-note warn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                      <span><b>Les comptes de cet écran sont à 8 caractères — votre plan de travail.</b> ⛔ <b>Le service les refuse aujourd&rsquo;hui&nbsp;:</b> le référentiel <code>syscohada-revise@2.1</code> déclare un niveau de détail de <b>6 caractères</b>, et tout ce qui dépasse est rejeté (<span class="code">400 · COMPTE_INCONNU</span>) avec le message «&nbsp;<i>un compte du logiciel de saisie (8 chiffres) doit être ramené à son compte de plan</i>&nbsp;». ⚠️ <b>Et ramener n&rsquo;est pas neutre</b>&nbsp;: sur une balance cliente réelle, passer à 6 caractères fond <code>44280001</code> «&nbsp;Droit d&rsquo;enregistrement&nbsp;» et <code>44280002</code> «&nbsp;TH 2023&nbsp;» en un seul <code>442800</code> — <b>5 comptes réduits à 2</b>. <span class="code">écart ouvert · ticket backend</span></span>
+                    </div>
+
                     <!-- ═════════════ ① CE QUI DÉCIDE ═════════════ -->
                     <div class="rat-slot" data-rat-slot="decide">
 
@@ -5201,8 +5222,8 @@
                         <div class="rat-step">
                           <span class="n">3</span>
                           <div>
-                            <b>Le moteur de mots-clés — puis, à défaut, <span class="rat-src defaut">701 par défaut</span></b>
-                            <p>Le moteur cherche « vente », « prestation », « travaux », « loyer »… dans le libellé, puis dans <b>l'activité déclarée</b> du dossier. S'il ne trouve rien, il rend <b>701 Ventes de marchandises</b> — et la balance sera parfaitement équilibrée avec un chiffre d'affaires mal ventilé.</p>
+                            <b>Le moteur de mots-clés — puis, à défaut, <span class="rat-src defaut">70100000 par défaut</span></b>
+                            <p>Le moteur cherche « vente », « prestation », « travaux », « loyer »… dans le libellé, puis dans <b>l'activité déclarée</b> du dossier. S'il ne trouve rien, il rend <b>70100000 Ventes de marchandises</b> — et la balance sera parfaitement équilibrée avec un chiffre d'affaires mal ventilé.</p>
                           </div>
                         </div>
                       </div>
@@ -5223,7 +5244,7 @@
                            un 400 dont la formulation (« hors classe 7 ») n'aidera pas. -->
                       <div class="prof-note info">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                        <span><b>Ici, on ne règle que les <u>recettes</u> — la classe 7.</b> Les <b>dépenses</b> ne se rattachent pas par une règle mais par leur <b>catégorie</b> («&nbsp;Loyer boutique&nbsp;»&nbsp;→&nbsp;<code>622</code>, «&nbsp;Électricité CEET&nbsp;»&nbsp;→&nbsp;<code>6051</code>), qui porte déjà le compte de charge et sa déductibilité. <button class="linklike" type="button" data-goto-cahiers>Les catégories se gèrent dans le cahier de dépenses</button> — <b>volontairement une seule source</b>&nbsp;: deux réglages du même compte finiraient par diverger, et le résultat fiscal dépendrait du chemin emprunté.</span>
+                        <span><b>Ici, on ne règle que les <u>recettes</u> — la classe 7.</b> Les <b>dépenses</b> ne se rattachent pas par une règle mais par leur <b>catégorie</b> («&nbsp;Loyer boutique&nbsp;»&nbsp;→&nbsp;<code>62200000</code>, «&nbsp;Électricité CEET&nbsp;»&nbsp;→&nbsp;<code>60510000</code>), qui porte déjà le compte de charge et sa déductibilité. <button class="linklike" type="button" data-goto-cahiers>Les catégories se gèrent dans le cahier de dépenses</button> — <b>volontairement une seule source</b>&nbsp;: deux réglages du même compte finiraient par diverger, et le résultat fiscal dépendrait du chemin emprunté.</span>
                       </div>
 
                       <!-- ══════ L'ESSAI — le geste qui rend l'écran interactif dès l'entrée.
@@ -5293,7 +5314,7 @@
                             <span class="rat-type lib">Libellé</span>
                             <b>«&nbsp;loyer local adidogomé&nbsp;»</b>
                             <span style="color:var(--muted-fg)">→</span>
-                            <span class="cible">7073</span>
+                            <span class="cible">70730000</span>
                             <span style="font-size:0.78rem;color:var(--muted-fg)">Produits accessoires</span>
                           </div>
                           <div class="por"><span class="c">11</span><span class="u">lignes prises</span>
@@ -5307,7 +5328,7 @@
                             <span class="rat-type">Tiers</span>
                             <b>«&nbsp;Mairie de Kara&nbsp;»</b>
                             <span style="color:var(--muted-fg)">→</span>
-                            <span class="cible">706</span>
+                            <span class="cible">70600000</span>
                             <span style="font-size:0.78rem;color:var(--muted-fg)">Services vendus</span>
                           </div>
                           <div class="por"><span class="c">7</span><span class="u">lignes prises</span>
@@ -5324,7 +5345,7 @@
                             <span class="rat-type">Tiers</span>
                             <b>«&nbsp;SODIGAZ&nbsp;»</b>
                             <span style="color:var(--muted-fg)">→</span>
-                            <span class="cible">707</span>
+                            <span class="cible">70700000</span>
                             <span style="font-size:0.78rem;color:var(--muted-fg)">Produits accessoires</span>
                           </div>
                           <div class="por"><span class="c">0</span><span class="u">ligne prise</span>
@@ -5343,12 +5364,12 @@
                             <b>«&nbsp;commission de change&nbsp;»</b>
                             <span style="color:var(--muted-fg)">→</span>
                             <span class="cible">70780000</span>
-                            <span class="badge badge-soon">Format Sage — 8 chiffres</span>
+                            <span class="badge badge-soon">Refusé — plan limité à 6</span>
                           </div>
                           <div class="por"><span class="c">—</span><span class="u">inapplicable</span>
                             <button class="btn btn-primary btn-sm" type="button">Corriger le compte</button>
                           </div>
-                          <div class="tr"><b>Ce compte vient de votre plan Sage, et il est trop détaillé pour ce référentiel.</b> <code>70780000</code> est bien reconnu par sa racine <code>707</code>, mais le plan <code>syscohada-revise@2.1</code> s'arrête à <b>6 caractères</b>&nbsp;: il n'est donc plus <b>imputable</b>. Le serveur <b>ignore la règle sans le dire</b> et retombe sur le moteur de mots-clés — les 4 lignes concernées sont parties en <code>707</code>. ⚠️ <b>Elle était valide quand vous l'avez posée</b>&nbsp;: c'est la règle du niveau de détail qui a été resserrée depuis. Écrivez <code>7078</code>.</div>
+                          <div class="tr"><b>Ce compte est refusé par le référentiel, et c&rsquo;est le conflit annoncé en haut de cet écran.</b> <code>70780000</code> est reconnu par sa racine <code>707</code>, mais <code>syscohada-revise@2.1</code> s&rsquo;arrête à <b>6 caractères</b>&nbsp;: il n&rsquo;est pas <b>imputable</b>. Le serveur <b>ignore la règle sans le dire</b> et retombe sur le moteur — les 4 lignes concernées sont parties en <code>70700000</code>. ⛔ <b>Ce n&rsquo;est donc pas une règle mal écrite&nbsp;: c&rsquo;est votre plan de comptes qui n&rsquo;est pas admis.</b> Tant que le niveau de détail n&rsquo;est pas porté à 8, <b>toutes</b> les règles de cet écran tombent dans ce cas — celle-ci est simplement la première à l&rsquo;avoir montré.</div>
                         </div>
                       </div>
 
@@ -5376,16 +5397,16 @@
                                (« le champ se tape de mémoire ») : elle est PÉRIMÉE. -->
                           <label>Compte de produits
                             <select data-rat-f-cpt>
-                              <option>701 — Ventes de marchandises</option>
-                              <option>702 — Ventes de produits finis</option>
-                              <option>703 — Ventes de produits intermédiaires</option>
-                              <option>704 — Ventes de produits résiduels</option>
-                              <option>705 — Travaux facturés</option>
-                              <option selected>706 — Services vendus</option>
-                              <option>707 — Produits accessoires</option>
-                              <option>71 — Subventions d'exploitation</option>
-                              <option>75 — Autres produits</option>
-                              <option>77 — Revenus financiers et produits assimilés</option>
+                              <option>70100000 — Ventes de marchandises</option>
+                              <option>70200000 — Ventes de produits finis</option>
+                              <option>70300000 — Ventes de produits intermédiaires</option>
+                              <option>70400000 — Ventes de produits résiduels</option>
+                              <option>70500000 — Travaux facturés</option>
+                              <option selected>70600000 — Services vendus</option>
+                              <option>70700000 — Produits accessoires</option>
+                              <option>71000000 — Subventions d'exploitation</option>
+                              <option>75000000 — Autres produits</option>
+                              <option>77000000 — Revenus financiers et produits assimilés</option>
                               <option value="autre">Autre compte — le saisir…</option>
                             </select>
                             <span class="fh"><b>21 comptes de classe 7</b> au plan <code>syscohada-revise@2.1</code>.</span>
@@ -5398,7 +5419,7 @@
                              empêcherait le cabinet de travailler à son niveau de détail. -->
                         <div class="prof-note info" style="margin:0.4rem 0 0.6rem">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                          <span><b>La liste ne contient que les têtes du plan.</b> Votre <code>7073</code> ou votre <code>7072</code> n'y figure pas et reste pourtant <b>accepté</b>&nbsp;: un compte est reconnu par sa <b>racine</b>. Choisissez dans la liste, ou saisissez votre subdivision — les deux marchent, mais <b>seule la liste vous garantit un compte qui existe</b>.</span>
+                          <span><b>La liste vient du plan packagé, qui ne compte que 174 têtes.</b> Vos subdivisions de travail (<code>70730000</code>, <code>70720000</code>) n&rsquo;y figurent pas&nbsp;: elles sont reconnues par leur <b>racine</b>, mais <b>refusées</b> tant que le niveau de détail du référentiel reste à 6 caractères. ⇒ <b>La liste est un point de départ, pas votre plan.</b> C&rsquo;est l&rsquo;objet de l&rsquo;écart signalé en haut de l&rsquo;écran.</span>
                         </div>
                         <!-- LA PORTÉE AVANT L'ENREGISTREMENT — le seul moment où une règle
                              morte se voit encore. Elle se calcule côté client, sur les
@@ -5446,7 +5467,7 @@
 
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>620&nbsp;000&nbsp;F sont en <code>701</code> parce que rien n'a été trouvé, pas parce que c'est une vente de marchandises.</b> Ces 14 lignes portent des libellés qui ne disent rien au moteur («&nbsp;Facture n°&nbsp;12&nbsp;», «&nbsp;Règlement&nbsp;», «&nbsp;Versement&nbsp;»). <b>La balance sera équilibrée quand même</b> — c'est bien pour ça qu'il faut les regarder <b>ici</b>. <button class="linklike" type="button" data-rat-goto="regles">Poser une règle</button> ou <button class="linklike" type="button" data-goto-cahiers>corriger les lignes dans le cahier</button>.</span>
+                        <span><b>620&nbsp;000&nbsp;F sont en <code>70100000</code> parce que rien n'a été trouvé, pas parce que c'est une vente de marchandises.</b> Ces 14 lignes portent des libellés qui ne disent rien au moteur («&nbsp;Facture n°&nbsp;12&nbsp;», «&nbsp;Règlement&nbsp;», «&nbsp;Versement&nbsp;»). <b>La balance sera équilibrée quand même</b> — c'est bien pour ça qu'il faut les regarder <b>ici</b>. <button class="linklike" type="button" data-rat-goto="regles">Poser une règle</button> ou <button class="linklike" type="button" data-goto-cahiers>corriger les lignes dans le cahier</button>.</span>
                       </div>
 
                       <div class="imp-table-wrap">
@@ -5454,27 +5475,27 @@
                         <div class="tbl-wrap">
                           <table class="imp-table">
                             <thead>
-                              <tr><th>Compte</th><th>Libellé au plan</th><th class="fis-n">Total HT</th><th class="fis-n">Part</th><th>Provenance dominante</th></tr>
+                              <tr><th>Compte</th><th>Libellé au plan</th><th class="fis-n">Mouvement crédit</th><th class="fis-n">Solde créditeur</th><th class="fis-n">Part</th><th>Provenance dominante</th></tr>
                             </thead>
                             <tbody>
                               <tr class="rat-adefaut">
-                                <td class="fis-case">701</td><td>Ventes de marchandises</td><td class="fis-n">1 985 000</td><td class="fis-n">56,7&nbsp;%</td>
+                                <td class="fis-case">70100000</td><td>Ventes de marchandises</td><td class="fis-n">1 985 000</td><td class="fis-n">1 985 000</td><td class="fis-n">56,7&nbsp;%</td>
                                 <td><span class="rat-src motcle">mot-clé «&nbsp;vente&nbsp;»</span> <span class="rat-src defaut">14 lignes par défaut</span></td>
                               </tr>
                               <tr>
-                                <td class="fis-case">706</td><td>Services vendus</td><td class="fis-n">1 050 000</td><td class="fis-n">30,0&nbsp;%</td>
+                                <td class="fis-case">70600000</td><td>Services vendus</td><td class="fis-n">1 050 000</td><td class="fis-n">1 050 000</td><td class="fis-n">30,0&nbsp;%</td>
                                 <td><span class="rat-src regle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> règle «&nbsp;Mairie de Kara&nbsp;»</span></td>
                               </tr>
                               <tr>
-                                <td class="fis-case">7073</td><td>Produits accessoires <span class="fis-motif">le plan s'arrête à <code>707</code> — <code>7073</code> est reconnu par sa racine</span></td><td class="fis-n">320 000</td><td class="fis-n">9,1&nbsp;%</td>
+                                <td class="fis-case">70730000</td><td>Produits accessoires <span class="fis-motif">le plan s'arrête à <code>70700000</code> — <code>70730000</code> est reconnu par sa racine</span></td><td class="fis-n">320 000</td><td class="fis-n">320 000</td><td class="fis-n">9,1&nbsp;%</td>
                                 <td><span class="rat-src regle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> règle «&nbsp;loyer local adidogomé&nbsp;»</span></td>
                               </tr>
                               <tr>
-                                <td class="fis-case">707</td><td>Produits accessoires <span class="fis-motif">⚠️ <b>même libellé que <code>7073</code> ci-dessus</b> — et ici, contrairement aux dépenses, <b>aucune catégorie</b> ne porte le nom du cabinet</span></td><td class="fis-n">145 000</td><td class="fis-n">4,2&nbsp;%</td>
+                                <td class="fis-case">70700000</td><td>Produits accessoires <span class="fis-motif">⚠️ <b>même libellé que <code>70730000</code> ci-dessus</b> — et ici, contrairement aux dépenses, <b>aucune catégorie</b> ne porte le nom du cabinet</span></td><td class="fis-n">145 000</td><td class="fis-n">145 000</td><td class="fis-n">4,2&nbsp;%</td>
                                 <td><span class="rat-src motcle">mot-clé «&nbsp;transport&nbsp;»</span></td>
                               </tr>
                               <tr class="fis-cle">
-                                <td colspan="2">Total des produits de l'exercice</td><td class="fis-n">3 500 000</td><td class="fis-n">100&nbsp;%</td><td></td>
+                                <td colspan="2">Total des produits de l'exercice</td><td class="fis-n">3 500 000</td><td class="fis-n">3 500 000</td><td class="fis-n">100&nbsp;%</td><td></td>
                               </tr>
                             </tbody>
                           </table>
@@ -5486,20 +5507,20 @@
                         <div class="tbl-wrap">
                           <table class="imp-table">
                             <thead>
-                              <tr><th>Compte</th><th>Votre catégorie</th><th>Libellé au plan</th><th class="fis-n">Total imputé</th><th>Déductible</th></tr>
+                              <tr><th>Compte</th><th>Votre catégorie</th><th>Libellé au plan</th><th class="fis-n">Mouvement débit</th><th class="fis-n">Solde débiteur</th><th>Déductible</th></tr>
                             </thead>
                             <tbody>
-                              <tr><td class="fis-case">601</td><td>Achats de marchandises</td><td>Achats de marchandises</td><td class="fis-n">500 000</td><td><span class="cah-conf ok">oui</span></td></tr>
+                              <tr><td class="fis-case">60100000</td><td>Achats de marchandises</td><td>Achats de marchandises</td><td class="fis-n">500 000</td><td class="fis-n">500 000</td><td><span class="cah-conf ok">oui</span></td></tr>
                               <!-- ⚠️ DEUX CATÉGORIES DIFFÉRENTES, UN SEUL LIBELLÉ AU PLAN.
                                    `libelleDuCompte` résout par le PLUS LONG PRÉFIXE : 6051 et
                                    6055 retombent tous deux sur `605 Autres achats`. Sans la
                                    colonne « votre catégorie », la balance produite serait
                                    illisible pour celui-là même qui l'a saisie. -->
-                              <tr><td class="fis-case">6051</td><td>Électricité CEET</td><td>Autres achats <span class="fis-motif">libellé de la racine <code>605</code></span></td><td class="fis-n">240 000</td><td><span class="cah-conf ok">oui</span></td></tr>
-                              <tr><td class="fis-case">6055</td><td>Carburant motos</td><td>Autres achats <span class="fis-motif">même racine <code>605</code> — <b>deux comptes, un seul libellé</b></span></td><td class="fis-n">385 000</td><td><span class="cah-conf ok">oui</span></td></tr>
-                              <tr><td class="fis-case">622</td><td>Loyer boutique</td><td>Services extérieurs A <span class="fis-motif">racine <code>62</code></span></td><td class="fis-n">900 000</td><td><span class="cah-conf ok">oui</span></td></tr>
-                              <tr class="fis-attn"><td class="fis-case">6581</td><td>Amendes &amp; pénalités</td><td>Autres charges <span class="fis-motif">racine <code>65</code></span></td><td class="fis-n">120 000</td><td><span class="cah-conf bad">non — réintégrée</span></td></tr>
-                              <tr class="fis-cle"><td colspan="3">Total des charges de l'exercice</td><td class="fis-n">2 145 000</td><td></td></tr>
+                              <tr><td class="fis-case">60510000</td><td>Électricité CEET</td><td>Autres achats <span class="fis-motif">libellé de la racine <code>60500000</code></span></td><td class="fis-n">240 000</td><td class="fis-n">240 000</td><td><span class="cah-conf ok">oui</span></td></tr>
+                              <tr><td class="fis-case">60550000</td><td>Carburant motos</td><td>Autres achats <span class="fis-motif">même racine <code>60500000</code> — <b>deux comptes, un seul libellé</b></span></td><td class="fis-n">385 000</td><td class="fis-n">385 000</td><td><span class="cah-conf ok">oui</span></td></tr>
+                              <tr><td class="fis-case">62200000</td><td>Loyer boutique</td><td>Services extérieurs A <span class="fis-motif">racine <code>62</code></span></td><td class="fis-n">900 000</td><td class="fis-n">900 000</td><td><span class="cah-conf ok">oui</span></td></tr>
+                              <tr class="fis-attn"><td class="fis-case">65810000</td><td>Amendes &amp; pénalités</td><td>Autres charges <span class="fis-motif">racine <code>65</code></span></td><td class="fis-n">120 000</td><td class="fis-n">120 000</td><td><span class="cah-conf bad">non — réintégrée</span></td></tr>
+                              <tr class="fis-cle"><td colspan="3">Total des charges de l'exercice</td><td class="fis-n">2 145 000</td><td class="fis-n">2 145 000</td><td></td></tr>
                             </tbody>
                           </table>
                         </div>
@@ -5507,7 +5528,7 @@
 
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>À livrer côté backend — le libellé de la balance est celui de la <u>racine</u>, pas du compte.</b> <code>libelleDuCompte</code> résout par le plus long préfixe du plan&nbsp;: <code>6051</code> et <code>6055</code> ressortent tous deux «&nbsp;Autres achats&nbsp;», et <code>6581</code> «&nbsp;Autres charges&nbsp;». Le repli est <b>juste</b> (un plan normalisé ne liste pas les subdivisions), mais la balance livrée devient <b>illisible pour celui qui l'a saisie</b> — deux lignes homonymes de montants différents. Le cabinet possède pourtant le bon libellé&nbsp;: c'est le <code>libelle</code> de sa <b>catégorie de dépense</b>. <b>Demandé&nbsp;: reporter le libellé de la catégorie sur la ligne de balance</b> (ou le publier à côté). <span class="code">écart ouvert · ticket backend</span></span>
+                        <span><b>À livrer côté backend — le libellé de la balance est celui de la <u>racine</u>, pas du compte.</b> <code>libelleDuCompte</code> résout par le plus long préfixe du plan&nbsp;: <code>60510000</code> et <code>60550000</code> ressortent tous deux «&nbsp;Autres achats&nbsp;», et <code>65810000</code> «&nbsp;Autres charges&nbsp;». Le repli est <b>juste</b> (un plan normalisé ne liste pas les subdivisions), mais la balance livrée devient <b>illisible pour celui qui l'a saisie</b> — deux lignes homonymes de montants différents. Le cabinet possède pourtant le bon libellé&nbsp;: c'est le <code>libelle</code> de sa <b>catégorie de dépense</b>. <b>Demandé&nbsp;: reporter le libellé de la catégorie sur la ligne de balance</b> (ou le publier à côté). <span class="code">écart ouvert · ticket backend</span></span>
                       </div>
                     </div>
 
@@ -5519,18 +5540,87 @@
                     <div class="rat-slot" data-rat-slot="contreparties" hidden>
 
                       <div class="rat-sect">
-                        <h4>L'autre moitié de l'écriture</h4>
-                        <span class="c">Votre client note un encaissement&nbsp;; la balance exige deux lignes. Voici d'où vient la seconde.</span>
+                        <h4>Chaque opération porte deux comptes</h4>
+                        <span class="c">Un compte <b>débité</b>, un compte <b>crédité</b> — et le sens dépend de votre position.</span>
+                      </div>
+
+                      <!-- ⛔⛔ RETOUR EC (2026-08-26) — « quelle que soit recette ou dépense,
+                           une opération est liée à DEUX comptes, celui du débiteur et celui
+                           du créditeur, en fonction de ma position ». C'est la remarque la
+                           plus structurante reçue sur cet écran, et elle était juste : le
+                           produit stocke UN compte par ligne de cahier (`compteProduit` ou
+                           `compteCharge`) et DÉDUIT l'autre au moment de ventiler. L'écran
+                           montrait cette déduction dans un encart de démonstration, en bas
+                           de panneau — comme si c'était une curiosité. C'est la forme
+                           NORMALE de lecture d'une opération, et elle passe donc en tête.
+                           ⚠️ Le même compte de trésorerie est DÉBITÉ sur une recette et
+                           CRÉDITÉ sur une dépense : c'est ça, « en fonction de ma
+                           position ». Une seule ligne du tableau suffit à le montrer, et
+                           sans elle on croit que le sens est attaché au compte. -->
+                      <div class="imp-table-wrap fis-wide">
+                        <div class="imp-table-cap">Les opérations de mars, telles qu'elles entreront en balance. <b>Les deux comptes sont reconstitués</b>&nbsp;: le cahier n'en porte qu'un — l'autre vient du <b>moyen de paiement</b> ou du <b>tiers</b>.</div>
+                        <div class="tbl-wrap">
+                          <table class="imp-table">
+                            <thead>
+                              <tr><th>Date</th><th>Libellé</th><th>Règlement</th><th class="fis-n">Montant</th><th>Compte débité</th><th>Compte crédité</th></tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td>14/03</td><td>Vente marchandises — Kodjo</td><td>Espèces</td><td class="fis-n">150 000</td>
+                                <td><b class="fis-case">57100000</b><span class="fis-motif">Caisse — <b>l'argent entre</b></span></td>
+                                <td><b class="fis-case">70100000</b><span class="fis-motif">Ventes de marchandises</span></td>
+                              </tr>
+                              <tr>
+                                <td>18/03</td><td>Paiement reçu — Mairie de Kara</td><td>Mobile money</td><td class="fis-n">750 000</td>
+                                <td><b class="fis-case">55110000</b><span class="fis-motif">Monnaie électronique</span></td>
+                                <td><b class="fis-case">70600000</b><span class="fis-motif">Services vendus — <span class="rat-src regle">règle</span></span></td>
+                              </tr>
+                              <!-- ⚠️ LA LIGNE QUI PORTE TOUT LE PROPOS : même compte de
+                                   trésorerie que la 1re ligne, et il est CRÉDITÉ, parce
+                                   que c'est une dépense. Le sens n'appartient pas au
+                                   compte, il appartient à l'opération. -->
+                              <tr>
+                                <td>12/03</td><td>Électricité CEET</td><td>Espèces</td><td class="fis-n">40 000</td>
+                                <td><b class="fis-case">60510000</b><span class="fis-motif">Autres achats — <b>catégorie</b> «&nbsp;Électricité CEET&nbsp;»</span></td>
+                                <td><b class="fis-case">57100000</b><span class="fis-motif">Caisse — <b>l'argent sort</b> · <b>le même compte qu'en ligne 1, à l'autre sens</b></span></td>
+                              </tr>
+                              <tr>
+                                <td>29/03</td><td>Loyer local Adidogomé</td><td>Virement</td><td class="fis-n">75 000</td>
+                                <td><b class="fis-case">52100000</b><span class="fis-motif">Banques</span></td>
+                                <td><b class="fis-case">70730000</b><span class="fis-motif">Produits accessoires — <span class="rat-src regle">règle</span></span></td>
+                              </tr>
+                              <tr class="fis-attn">
+                                <td>05/03</td><td>Facture n° 12 — SODIFAB</td><td><b>—</b></td><td class="fis-n">420 000</td>
+                                <td><b class="fis-case">41100000</b><span class="fis-motif">⚠️ Clients — <b>déduit du tiers, faute de règlement</b>. Si elle a été encaissée, c'est faux.</span></td>
+                                <td><b class="fis-case">70100000</b><span class="fis-motif"><span class="rat-src defaut">défaut</span></span></td>
+                              </tr>
+                              <tr class="fis-retard">
+                                <td>05/02</td><td>Vente au comptoir</td><td><b>—</b></td><td class="fis-n">90 000</td>
+                                <td><b class="fis-vide">indéterminable</b><span class="fis-motif">ni règlement, ni tiers — <b>l'opération est écartée</b>, pas rangée en compte d'attente</span></td>
+                                <td><b class="fis-case">70100000</b><span class="fis-motif">connu, mais seul</span></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Le sens n'appartient pas au compte, il appartient à l'opération.</b> <code>57100000 Caisse</code> est <b>débité</b> quand vous encaissez et <b>crédité</b> quand vous payez —
+                        c'est la même caisse. Un compte n'est «&nbsp;débiteur&nbsp;» ou «&nbsp;créditeur&nbsp;» qu'<b>une fois tous ses mouvements cumulés</b>, et c'est ce que dit la colonne <b>Solde</b> de la balance.
+                      </p>
+
+                      <div class="rat-sect" style="margin-top:0.3rem">
+                        <h4>D'où vient le second compte</h4>
+                        <span class="c">Votre client note un encaissement&nbsp;; la balance exige deux lignes. Voici comment la seconde est déduite.</span>
                       </div>
 
                       <div class="rat-cpts">
-                        <div class="rat-cpt"><span class="k">Espèces</span><span class="v">571</span><span class="w">Caisse — défaut SYSCOHADA</span></div>
-                        <div class="rat-cpt"><span class="k">Virement / chèque</span><span class="v">521</span><span class="w">Banques — défaut SYSCOHADA</span></div>
-                        <div class="rat-cpt surcharge"><span class="k">Mobile money</span><span class="v">5511</span><span class="w"><b>Paramétré sur ce dossier</b> — le défaut est <code>551</code>. Un compte par opérateur se règle ici.</span></div>
-                        <div class="rat-cpt"><span class="k">TVA collectée</span><span class="v">443</span><span class="w">État, TVA facturée</span></div>
-                        <div class="rat-cpt"><span class="k">TVA récupérable</span><span class="v">445</span><span class="w">État, TVA récupérable</span></div>
-                        <div class="rat-cpt"><span class="k">Recette non encaissée</span><span class="v">411</span><span class="w">Clients — créance</span></div>
-                        <div class="rat-cpt"><span class="k">Dépense non payée</span><span class="v">401</span><span class="w">Fournisseurs — dette</span></div>
+                        <div class="rat-cpt"><span class="k">Espèces</span><span class="v">57100000</span><span class="w">Caisse — défaut SYSCOHADA</span></div>
+                        <div class="rat-cpt"><span class="k">Virement / chèque</span><span class="v">52100000</span><span class="w">Banques — défaut SYSCOHADA</span></div>
+                        <div class="rat-cpt surcharge"><span class="k">Mobile money</span><span class="v">55110000</span><span class="w"><b>Paramétré sur ce dossier</b> — le défaut est <code>55100000</code>. Un compte par opérateur se règle ici.</span></div>
+                        <div class="rat-cpt"><span class="k">TVA collectée</span><span class="v">44300000</span><span class="w">État, TVA facturée</span></div>
+                        <div class="rat-cpt"><span class="k">TVA récupérable</span><span class="v">44500000</span><span class="w">État, TVA récupérable</span></div>
+                        <div class="rat-cpt"><span class="k">Recette non encaissée</span><span class="v">41100000</span><span class="w">Clients — créance</span></div>
+                        <div class="rat-cpt"><span class="k">Dépense non payée</span><span class="v">40100000</span><span class="w">Fournisseurs — dette</span></div>
                       </div>
                       <div class="cah-actions">
                         <button class="btn btn-ghost btn-sm" type="button">Modifier les contreparties</button>
@@ -5561,12 +5651,12 @@
                         <div class="rat-ecr">
                           <div class="rat-ecr-head"><b>14/03/2026</b> · Vente marchandises — Kodjo · espèces<span class="m">150 000 F</span></div>
                           <div class="rat-ecr-cols"><span>Compte</span><span>Libellé</span><span>Débit</span><span>Crédit</span></div>
-                          <div class="rat-ecr-row"><span class="c">571</span><span>Caisse <span class="fis-motif">contrepartie — moyen de paiement «&nbsp;espèces&nbsp;»</span></span><span class="n">150 000</span><span class="n off">—</span></div>
-                          <div class="rat-ecr-row"><span class="c">701</span><span>Ventes de marchandises <span class="fis-motif">compte de la ligne — <span class="rat-src motcle">mot-clé «&nbsp;vente&nbsp;»</span></span></span><span class="n off">—</span><span class="n">150 000</span></div>
+                          <div class="rat-ecr-row"><span class="c">57100000</span><span>Caisse <span class="fis-motif">contrepartie — moyen de paiement «&nbsp;espèces&nbsp;»</span></span><span class="n">150 000</span><span class="n off">—</span></div>
+                          <div class="rat-ecr-row"><span class="c">70100000</span><span>Ventes de marchandises <span class="fis-motif">compte de la ligne — <span class="rat-src motcle">mot-clé «&nbsp;vente&nbsp;»</span></span></span><span class="n off">—</span><span class="n">150 000</span></div>
                           <div class="rat-ecr-row tot"><span></span><span>Totaux</span><span class="n">150 000</span><span class="n">150 000</span></div>
                         </div>
                         <p class="helper" style="text-align:left">
-                          <b>Deux lignes, et aucune ligne de TVA à zéro.</b> Une entreprise au régime synthétique ne facture pas la TVA&nbsp;: écrire <code>443</code> pour 0&nbsp;F
+                          <b>Deux lignes, et aucune ligne de TVA à zéro.</b> Une entreprise au régime synthétique ne facture pas la TVA&nbsp;: écrire <code>44300000</code> pour 0&nbsp;F
                           encombrerait la balance d’un compte qui ne dit rien.
                         </p>
                       </div>
@@ -5575,9 +5665,9 @@
                         <div class="rat-ecr">
                           <div class="rat-ecr-head"><b>14/03/2026</b> · Vente marchandises — Kodjo · espèces<span class="m">150 000 F TTC</span></div>
                           <div class="rat-ecr-cols"><span>Compte</span><span>Libellé</span><span>Débit</span><span>Crédit</span></div>
-                          <div class="rat-ecr-row"><span class="c">571</span><span>Caisse <span class="fis-motif">contrepartie — le <b>TTC</b>, c’est ce qui est entré en caisse</span></span><span class="n">150 000</span><span class="n off">—</span></div>
-                          <div class="rat-ecr-row"><span class="c">701</span><span>Ventes de marchandises <span class="fis-motif">le <b>HT</b> — <code>150 000 / 1,18</code>, arrondi</span></span><span class="n off">—</span><span class="n">127 119</span></div>
-                          <div class="rat-ecr-row"><span class="c">443</span><span>État, TVA facturée <span class="fis-motif">le reste — <b>calculé par différence</b>, jamais par HT&nbsp;×&nbsp;taux</span></span><span class="n off">—</span><span class="n">22 881</span></div>
+                          <div class="rat-ecr-row"><span class="c">57100000</span><span>Caisse <span class="fis-motif">contrepartie — le <b>TTC</b>, c’est ce qui est entré en caisse</span></span><span class="n">150 000</span><span class="n off">—</span></div>
+                          <div class="rat-ecr-row"><span class="c">70100000</span><span>Ventes de marchandises <span class="fis-motif">le <b>HT</b> — <code>150 000 / 1,18</code>, arrondi</span></span><span class="n off">—</span><span class="n">127 119</span></div>
+                          <div class="rat-ecr-row"><span class="c">44300000</span><span>État, TVA facturée <span class="fis-motif">le reste — <b>calculé par différence</b>, jamais par HT&nbsp;×&nbsp;taux</span></span><span class="n off">—</span><span class="n">22 881</span></div>
                           <div class="rat-ecr-row tot"><span></span><span>Totaux</span><span class="n">150 000</span><span class="n">150 000</span></div>
                         </div>
                         <p class="helper" style="text-align:left">
@@ -5615,8 +5705,8 @@
                       <div class="rat-ecr">
                         <div class="rat-ecr-head"><b>05/03/2026</b> · Facture n° 12 — SODIFAB · <b>moyen de paiement non renseigné</b><span class="m">420 000 F</span></div>
                         <div class="rat-ecr-cols"><span>Compte</span><span>Libellé</span><span>Débit</span><span>Crédit</span></div>
-                        <div class="rat-ecr-row"><span class="c">411</span><span>Clients <span class="fis-motif">contrepartie — <b>aucun moyen de paiement, mais un tiers nommé</b></span></span><span class="n">420 000</span><span class="n off">—</span></div>
-                        <div class="rat-ecr-row"><span class="c">701</span><span>Ventes de marchandises <span class="fis-motif">compte de la ligne — <span class="rat-src defaut">défaut, faute d'indice</span></span></span><span class="n off">—</span><span class="n">420 000</span></div>
+                        <div class="rat-ecr-row"><span class="c">41100000</span><span>Clients <span class="fis-motif">contrepartie — <b>aucun moyen de paiement, mais un tiers nommé</b></span></span><span class="n">420 000</span><span class="n off">—</span></div>
+                        <div class="rat-ecr-row"><span class="c">70100000</span><span>Ventes de marchandises <span class="fis-motif">compte de la ligne — <span class="rat-src defaut">défaut, faute d'indice</span></span></span><span class="n off">—</span><span class="n">420 000</span></div>
                         <div class="rat-ecr-row tot"><span></span><span>Totaux</span><span class="n">420 000</span><span class="n">420 000</span></div>
                       </div>
                       <div class="prof-note warn">
@@ -5624,7 +5714,7 @@
                         <span><b>Un oubli de moyen de paiement se transforme en créance client, et rien ne le signale.</b> Le système ne connaît pas d'état «&nbsp;à crédit&nbsp;»&nbsp;: il déduit la contrepartie du <b>moyen de paiement</b>, et à défaut — si un tiers est nommé — conclut à un <b>compte de tiers</b>. Une vente au comptant dont on a oublié de cocher «&nbsp;espèces&nbsp;» ressort donc en <code>411 Clients</code>&nbsp;: <b>la balance est équilibrée, la trésorerie est sous-évaluée, et le bilan porte une créance qui n'existe pas</b>. <b>3 lignes de l'exercice sont dans ce cas</b> (420 000 F). <button class="linklike" type="button" data-goto-cahiers>Les compléter dans le cahier</button>. <span class="code">écart ouvert · ticket backend — l'aperçu ne détaille pas ses contreparties</span></span>
                       </div>
                       <p class="helper" style="text-align:left">
-                        ⚠️ <b>Et ces comptes de tiers ne se lettrent pas.</b> Le solde de <code>411</code> est un <b>cumul</b>, pas une liste de factures pointées&nbsp;: rien ne dit quelle vente reste due ni depuis quand.
+                        ⚠️ <b>Et ces comptes de tiers ne se lettrent pas.</b> Le solde de <code>41100000</code> est un <b>cumul</b>, pas une liste de factures pointées&nbsp;: rien ne dit quelle vente reste due ni depuis quand.
                         Le <button class="linklike" type="button" data-rat-goto-rapprochement>rapprochement</button> traite la <b>banque</b> et le <b>mobile money</b>, pas les tiers. ⇒ un solde client anormal se remonte <b>à la main</b>, en relisant le cahier.
                       </p>
                       <p class="helper" style="text-align:left">
@@ -5680,31 +5770,36 @@
                         <div class="imp-tile dep-attn"><div class="k">Statut de preuve</div><div class="v" style="font-size:0.95rem">partiellement estimée</div><div class="k" style="margin-top:0.2rem;text-transform:none;letter-spacing:0;font-weight:500">7 lignes reposent sur une estimation</div></div>
                       </div>
 
-                      <div class="imp-table-wrap">
-                        <div class="imp-table-cap">Balance canonique de l'exercice — <b>4 colonnes</b>, unités entières XOF. Version <b>3</b> si elle est enregistrée (les versions s'ajoutent, rien n'est écrasé).</div>
+                      <div class="imp-table-wrap fis-wide">
+                        <div class="imp-table-cap">Balance canonique de l'exercice, unités entières XOF. Version <b>3</b> si elle est enregistrée (les versions s'ajoutent, rien n'est écrasé). <b>Six colonnes de montants</b>, comme la balance que sort votre logiciel.</div>
                         <div class="tbl-wrap">
                           <table class="imp-table">
                             <thead>
-                              <tr><th>Compte</th><th>Libellé</th><th class="fis-n">Mouv. débit</th><th class="fis-n">Mouv. crédit</th><th class="fis-n">Solde débiteur</th><th class="fis-n">Solde créditeur</th><th>Preuve</th></tr>
+                              <tr><th>Compte</th><th>Libellé</th><th class="fis-n">À-nouveau débit</th><th class="fis-n">À-nouveau crédit</th><th class="fis-n">Mouv. débit</th><th class="fis-n">Mouv. crédit</th><th class="fis-n">Solde débiteur</th><th class="fis-n">Solde créditeur</th><th>Preuve</th></tr>
                             </thead>
                             <tbody>
-                              <tr><td class="fis-case">401</td><td>Fournisseurs, dettes en compte</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td><span class="cah-conf ok">fichier</span></td></tr>
-                              <tr><td class="fis-case">411</td><td>Clients</td><td class="fis-n">420 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">420 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf warn">saisie</span></td></tr>
-                              <tr><td class="fis-case">5511</td><td>Instruments de monnaie électronique</td><td class="fis-n">1 180 000</td><td class="fis-n">620 000</td><td class="fis-n">560 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
-                              <tr><td class="fis-case">571</td><td>Caisse</td><td class="fis-n">1 900 000</td><td class="fis-n">1 025 000</td><td class="fis-n">875 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf warn">estimé</span></td></tr>
-                              <tr><td class="fis-case">601</td><td>Achats de marchandises</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
-                              <tr><td class="fis-case">6051</td><td>Autres achats</td><td class="fis-n">240 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">240 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
-                              <tr><td class="fis-case">6055</td><td>Autres achats</td><td class="fis-n">385 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">385 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
-                              <tr><td class="fis-case">622</td><td>Services extérieurs A</td><td class="fis-n">900 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">900 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
-                              <tr><td class="fis-case">6581</td><td>Autres charges</td><td class="fis-n">120 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">120 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
-                              <tr><td class="fis-case">701</td><td>Ventes de marchandises</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 985 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 985 000</td><td><span class="cah-conf warn">estimé</span></td></tr>
-                              <tr><td class="fis-case">706</td><td>Services vendus</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 050 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 050 000</td><td><span class="cah-conf ok">ocr</span></td></tr>
-                              <tr><td class="fis-case">707</td><td>Produits accessoires</td><td class="fis-n fis-vide">—</td><td class="fis-n">145 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">145 000</td><td><span class="cah-conf ok">ocr</span></td></tr>
-                              <tr><td class="fis-case">7073</td><td>Produits accessoires</td><td class="fis-n fis-vide">—</td><td class="fis-n">320 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">320 000</td><td><span class="cah-conf ok">fichier</span></td></tr>
-                              <tr class="fis-cle"><td colspan="2">Totaux</td><td class="fis-n">5 645 000</td><td class="fis-n">5 645 000</td><td class="fis-n">4 000 000</td><td class="fis-n">4 000 000</td><td></td></tr>
+                              <tr><td class="fis-case">40100000</td><td>Fournisseurs, dettes en compte</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td><span class="cah-conf ok">fichier</span></td></tr>
+                              <tr><td class="fis-case">41100000</td><td>Clients</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">420 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">420 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf warn">saisie</span></td></tr>
+                              <tr><td class="fis-case">55110000</td><td>Instruments de monnaie électronique</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 180 000</td><td class="fis-n">620 000</td><td class="fis-n">560 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
+                              <tr><td class="fis-case">57100000</td><td>Caisse</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 900 000</td><td class="fis-n">1 025 000</td><td class="fis-n">875 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf warn">estimé</span></td></tr>
+                              <tr><td class="fis-case">60100000</td><td>Achats de marchandises</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
+                              <tr><td class="fis-case">60510000</td><td>Autres achats</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">240 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">240 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
+                              <tr><td class="fis-case">60550000</td><td>Autres achats</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">385 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">385 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
+                              <tr><td class="fis-case">62200000</td><td>Services extérieurs A</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">900 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">900 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
+                              <tr><td class="fis-case">65810000</td><td>Autres charges</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">120 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">120 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
+                              <tr><td class="fis-case">70100000</td><td>Ventes de marchandises</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 985 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 985 000</td><td><span class="cah-conf warn">estimé</span></td></tr>
+                              <tr><td class="fis-case">70600000</td><td>Services vendus</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 050 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 050 000</td><td><span class="cah-conf ok">ocr</span></td></tr>
+                              <tr><td class="fis-case">70700000</td><td>Produits accessoires</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">145 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">145 000</td><td><span class="cah-conf ok">ocr</span></td></tr>
+                              <tr><td class="fis-case">70730000</td><td>Produits accessoires</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">320 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">320 000</td><td><span class="cah-conf ok">fichier</span></td></tr>
+                              <tr class="fis-cle"><td colspan="2">Totaux</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">5 645 000</td><td class="fis-n">5 645 000</td><td class="fis-n">4 000 000</td><td class="fis-n">4 000 000</td><td></td></tr>
                             </tbody>
                           </table>
                         </div>
+                      </div>
+
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Les à-nouveaux sont à «&nbsp;—&nbsp;» parce qu'aucune balance d'ouverture n'est chaînée à cet exercice</b>, pas parce qu'ils valent zéro. ⛔ <b>Et quand il y en aura, le contrat ne les publiera pas</b>&nbsp;: <code>LigneBalanceApercuDto</code> ne rend que <b>quatre</b> montants, et documente le solde comme «&nbsp;à-nouveau&nbsp;+&nbsp;mouvements&nbsp;» — la composante d'ouverture est donc <b>repliée dans le solde</b>, et le contrôle <code>solde = à-nouveau + mouvements</code> que vous faites ligne à ligne devient <b>invérifiable</b>. <span class="code">écart ouvert · ticket backend</span></span>
                       </div>
 
                       <!-- DEUX contrôles d'équilibre, pas un. Les fondre en un seul « ✓ »
@@ -5881,7 +5976,7 @@
                             <span class="badge badge-active"><span class="d"></span>Actif</span>
                           </div>
                           <div class="rap-c-meta"><span>TG53 0100 1234 5678 90</span><span>XOF</span></div>
-                          <div class="rap-c-note">Rattaché au compte <b>521100</b> — <b>saisi</b> sur ce compte, il ne bougera pas si le paramétrage de ventilation change.</div>
+                          <div class="rap-c-note">Rattaché au compte <b>52110000</b> — <b>saisi</b> sur ce compte, il ne bougera pas si le paramétrage de ventilation change.</div>
                           <div class="rap-acts">
                             <button class="btn btn-primary btn-sm" type="button" data-rap-goto="import">Rapprocher ce compte</button>
                           </div>
@@ -5898,7 +5993,7 @@
                           <!-- compteComptableParDefaut: true — et la conséquence est
                                DITE ici, pas découverte trois écrans plus loin dans un
                                avertissement de l'état de rapprochement. -->
-                          <div class="rap-c-note">Rattaché au compte <b>521</b> — <b>repris du paramétrage</b> de ventilation. C'est une <b>racine</b>&nbsp;: l'état de rapprochement additionnera tous les comptes qui s'y rattachent. <button class="linklike" type="button" data-rap-goto="etat">Voir l'effet</button></div>
+                          <div class="rap-c-note">Rattaché au compte <b>52100000</b> — <b>repris du paramétrage</b> de ventilation. C'est une <b>racine</b>&nbsp;: l'état de rapprochement additionnera tous les comptes qui s'y rattachent. <button class="linklike" type="button" data-rap-goto="etat">Voir l'effet</button></div>
                           <div class="rap-c-note"><b>Aucun opérateur de mobile money ne publie d'export de compte aujourd'hui.</b> Il n'y a donc <b>pas de relevé à importer</b> ici&nbsp;: la preuve d'un encaissement mobile reste la <b>capture ou le SMS</b>, déposé dans <button class="linklike" type="button" data-goto-cahiers>les pièces du cahier</button>. Déclarer le compte garde son intérêt — il porte son compte comptable, et les cahiers s'y réfèrent.</div>
                           <div class="rap-acts">
                             <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="import">Rapprocher quand même</button>
@@ -5913,7 +6008,7 @@
                             <span class="badge badge-soon">Sans export d'opérateur</span>
                           </div>
                           <div class="rap-c-meta"><span>+228 79 12 34 56</span><span>XOF</span></div>
-                          <div class="rap-c-note">Rattaché au compte <b>521</b> — repris du paramétrage.</div>
+                          <div class="rap-c-note">Rattaché au compte <b>52100000</b> — repris du paramétrage.</div>
                           <div class="rap-c-note"><b>Sans export d'opérateur</b> — même raison que ci-dessus.</div>
                           <div class="rap-acts">
                             <button class="btn btn-ghost btn-sm" type="button" data-rap-goto="import">Rapprocher quand même</button>
@@ -6480,7 +6575,7 @@
                           <div class="rap-eq-row"><span class="op">−</span><span>Encaissements non encore comptabilisés<span class="sub">Crédits du relevé non appariés — dans le compte, pas encore dans les cahiers.</span></span><span class="v">12 000 000</span></div>
                           <div class="rap-eq-row"><span class="op">+</span><span>Décaissements non encore comptabilisés<span class="sub">Débits du relevé non appariés.</span></span><span class="v">4 500 000</span></div>
                           <div class="rap-eq-row sum"><span class="op">=</span><span><b>Solde comptable théorique</b></span><span class="v">122 500 000</span></div>
-                          <div class="rap-eq-row"><span class="op"></span><span>Solde du compte <b>521100</b> dans la balance<span class="sub">Balance <b>version 3</b> · source <i>cahiers (OCR)</i> · <b>brouillon</b> — 1 ligne appariée.</span></span><span class="v">122 500 000</span></div>
+                          <div class="rap-eq-row"><span class="op"></span><span>Solde du compte <b>52110000</b> dans la balance<span class="sub">Balance <b>version 3</b> · source <i>cahiers (OCR)</i> · <b>brouillon</b> — 1 ligne appariée.</span></span><span class="v">122 500 000</span></div>
                           <div class="rap-eq-row ecart ok"><span class="op">Δ</span><span><b>Écart</b></span><span class="v">0</span></div>
                         </div>
                       </div>
@@ -6500,7 +6595,7 @@
                            additionnées dans un seul solde. -->
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>Sur un compte rattaché à une RACINE, ce même état ne serait pas lisible.</b> Deux comptes de la démo pointent sur <b>521</b>&nbsp;: le solde comptable y additionnerait tout ce qui s'y rattache <b>sans pouvoir le séparer</b>. <b>Un état de rapprochement se signe compte par compte</b> — donnez à chacun son propre numéro (521100, 521200…) <button class="linklike" type="button" data-rap-goto="comptes">depuis la fiche du compte</button>. ⚠️ Le piège se déclenchera au <b>second compte bancaire</b>, pas sur la mobile money&nbsp;: celle-ci n'ayant pas de relevé, elle ne produira jamais d'état — la racine y est sans effet visible, et c'est justement ce qui la rend facile à laisser en place.</span>
+                        <span><b>Sur un compte rattaché à une RACINE, ce même état ne serait pas lisible.</b> Deux comptes de la démo pointent sur <b>52100000</b>&nbsp;: le solde comptable y additionnerait tout ce qui s'y rattache <b>sans pouvoir le séparer</b>. <b>Un état de rapprochement se signe compte par compte</b> — donnez à chacun son propre numéro (521100, 521200…) <button class="linklike" type="button" data-rap-goto="comptes">depuis la fiche du compte</button>. ⚠️ Le piège se déclenchera au <b>second compte bancaire</b>, pas sur la mobile money&nbsp;: celle-ci n'ayant pas de relevé, elle ne produira jamais d'état — la racine y est sans effet visible, et c'est justement ce qui la rend facile à laisser en place.</span>
                       </div>
 
                       <div class="rap-sect"><h4>Situation du compte</h4><span class="c">01/01/2026 → 31/03/2026 — «&nbsp;où en est ce compte&nbsp;»</span></div>
@@ -8685,7 +8780,7 @@
                     </div>
 
                     <p class="helper">FE-027 · <code>GET /api/v1/balances</code> (org-scopée, antéchronologique ; filtres <code>etat</code>/<code>source</code>, <code>limit</code>≤200/<code>skip</code>) et <code>GET /balances/{id}</code> (<b>404</b> si absente <b>ou</b> d'une autre org — même rendu, aucune fuite). Montants <b>en francs</b>, convertis des unités mineures (÷100) sans arithmétique flottante. L'immutabilité d'une <b>VALIDÉE</b> est <b>affichée</b>, pas imposée par le front. Handoff <b>honnête</b> : « disponible pour le Bilan » dérivé de l'état, jamais un accusé de transmission fabriqué (STORY-099 = réconciliation ; la propagation réelle passe par Kafka, invisible de l'API).</p>
-                    <p class="helper"><b>FE-058</b> (amendement) · l'état cesse d'être en lecture seule sur une <b>BROUILLON</b> : <code>POST /balances/{id}/valider</code> et <code>POST /balances/{id}/rejeter</code> (STORY-145) ferment <code>GAP-balance-validation-etat</code>. <b>Motif obligatoire</b> (≤ 500, espaces seuls refusés côté client), <b>confirmation explicite de l'irréversibilité</b> pour la seule validation. L'<code>auteur</code> n'est <b>jamais</b> envoyé au corps : le serveur le dérive du seul JWT et rejette en <code>400</code> toute charge qui tenterait de l'imposer (whitelist stricte). ⚠️ Le <code>409</code> a <b>deux corps</b> discriminés par <code>code</code> — <code>BALANCE_DEJA_VALIDEE</code> (le plus fréquent, <b>sans</b> <code>details</code>) et <code>CONTROLES_BLOQUANTS</code> (liste rendue <b>nommément</b>, jamais résumée en un compte) ; sur <code>/rejeter</code>, <code>BALANCE_ETAT_INCHANGE</code> est un cas <b>nominal</b>, pas une panne. Le rejet n'est <b>pas</b> gardé par les contrôles — refuser un rejet parce que des contrôles échouent enfermerait la balance fautive. Aucune <b>réouverture</b> n'est dessinée : le service n'en expose aucune, une correction se fait par une <b>nouvelle version</b>.</p>
+                    <p class="helper"><b>FE-058</b> (amendement) · l'état cesse d'être en lecture seule sur une <b>BROUILLON</b> : <code>POST /balances/{id}/valider</code> et <code>POST /balances/{id}/rejeter</code> (STORY-145) ferment <code>GAP-balance-validation-etat</code>. <b>Motif obligatoire</b> (≤ 500, espaces seuls refusés côté client), <b>confirmation explicite de l'irréversibilité</b> pour la seule validation. L'<code>auteur</code> n'est <b>jamais</b> envoyé au corps : le serveur le dérive du seul JWT et rejette en <code>400</code> toute charge qui tenterait de l'imposer (whitelist stricte). ⚠️ Le <code>40900000</code> a <b>deux corps</b> discriminés par <code>code</code> — <code>BALANCE_DEJA_VALIDEE</code> (le plus fréquent, <b>sans</b> <code>details</code>) et <code>CONTROLES_BLOQUANTS</code> (liste rendue <b>nommément</b>, jamais résumée en un compte) ; sur <code>/rejeter</code>, <code>BALANCE_ETAT_INCHANGE</code> est un cas <b>nominal</b>, pas une panne. Le rejet n'est <b>pas</b> gardé par les contrôles — refuser un rejet parce que des contrôles échouent enfermerait la balance fautive. Aucune <b>réouverture</b> n'est dessinée : le service n'en expose aucune, une correction se fait par une <b>nouvelle version</b>.</p>
                   </div>
 
                   <!-- ===== Onglet IMPORT SAGE (FE-025) — dry-run en deux temps =====
@@ -8924,11 +9019,11 @@
                           <table class="tbl" style="font-size:0.78rem">
                             <thead><tr><th>Cpte</th><th>Désignation</th><th>Solde</th><th>Mvt débit</th><th>Mvt crédit</th></tr></thead>
                             <tbody>
-                              <tr><td>101000</td><td>Capital social</td><td>-5 000 000,00</td><td>0,00</td><td>5 000 000,00</td></tr>
+                              <tr><td>10100000</td><td>Capital social</td><td>-5 000 000,00</td><td>0,00</td><td>5 000 000,00</td></tr>
                               <tr><td>411KOSSI</td><td>Client Kossi</td><td>1 750 000,00</td><td>1 750 000,00</td><td>0,00</td></tr>
                               <tr><td>5211BOA0</td><td>Banque BOA</td><td>3 250 000,00</td><td>4 000 000,00</td><td>750 000,00</td></tr>
-                              <tr><td>601000</td><td>Achats de marchandises</td><td>890 000,00</td><td>890 000,00</td><td>0,00</td></tr>
-                              <tr><td>701000</td><td>Ventes de marchandises</td><td>-890 000,00</td><td>0,00</td><td>890 000,00</td></tr>
+                              <tr><td>60100000</td><td>Achats de marchandises</td><td>890 000,00</td><td>890 000,00</td><td>0,00</td></tr>
+                              <tr><td>70100000</td><td>Ventes de marchandises</td><td>-890 000,00</td><td>0,00</td><td>890 000,00</td></tr>
                             </tbody>
                           </table>
                         </div>
@@ -9209,7 +9304,7 @@
                                 <td>14/03/2026</td>
                                 <td>Vente marchandises — Kodjo</td>
                                 <td class="num">150 000</td>
-                                <td class="cpt"><b>701</b><span class="cah-motif">libellé «&nbsp;vente&nbsp;»</span></td>
+                                <td class="cpt"><b>70100000</b><span class="cah-motif">libellé «&nbsp;vente&nbsp;»</span></td>
                                 <td><span class="cah-conf ok">96&nbsp;%</span></td>
                               </tr>
                               <tr>
@@ -9218,7 +9313,7 @@
                                 <td>18/03/2026</td>
                                 <td>Paiement reçu — Mairie de Kara</td>
                                 <td class="num">750 000</td>
-                                <td class="cpt"><b>706</b><span class="cah-motif">règle du cabinet · «&nbsp;Mairie&nbsp;»</span></td>
+                                <td class="cpt"><b>70600000</b><span class="cah-motif">règle du cabinet · «&nbsp;Mairie&nbsp;»</span></td>
                                 <td><span class="cah-conf ok">93&nbsp;%</span></td>
                               </tr>
                               <tr class="cah-warn">
@@ -9227,7 +9322,7 @@
                                 <td><input class="cah-inline" type="date" aria-label="Date manquante"></td>
                                 <td>Vente au comptoir</td>
                                 <td class="num">300 000</td>
-                                <td class="cpt"><b>701</b><span class="cah-motif">libellé «&nbsp;vente&nbsp;»</span></td>
+                                <td class="cpt"><b>70100000</b><span class="cah-motif">libellé «&nbsp;vente&nbsp;»</span></td>
                                 <td><span class="cah-conf bad">date illisible</span></td>
                               </tr>
                               <tr class="cah-warn">
@@ -9245,7 +9340,7 @@
                                 <td>14/03/2026</td>
                                 <td>Vente marchandises — Kodjo</td>
                                 <td class="num">150 000</td>
-                                <td class="cpt"><b>701</b></td>
+                                <td class="cpt"><b>70100000</b></td>
                                 <td><span class="cah-conf warn">doublon probable</span></td>
                               </tr>
                               <tr>
@@ -9254,7 +9349,7 @@
                                 <td>29/03/2026</td>
                                 <td>Loyer local Adidogomé — M. Amegan</td>
                                 <td class="num">75 000</td>
-                                <td class="cpt"><b>7073</b><span class="cah-motif">libellé «&nbsp;loyer&nbsp;»</span></td>
+                                <td class="cpt"><b>70730000</b><span class="cah-motif">libellé «&nbsp;loyer&nbsp;»</span></td>
                                 <td><span class="cah-conf ok">preuve fichier</span></td>
                               </tr>
                             </tbody>
@@ -9496,7 +9591,7 @@
                       </div>
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-                        <span><b>Écart de contrat — ce refus n'est documenté nulle part.</b> Le contrôleur de <code>:3007</code> n'annonce qu'un seul <code>409</code>
+                        <span><b>Écart de contrat — ce refus n'est documenté nulle part.</b> Le contrôleur de <code>:3007</code> n'annonce qu'un seul <code>40900000</code>
                         (<code>BALANCE_VALIDEE_IMMUABLE</code>) alors que le service en lève <b>deux</b>, et teste <code>EXERCICE_CLOS</code> <b>en premier</b>. Un écran qui
                         n'aurait lu que le Swagger aurait envoyé le comptable créer une nouvelle version de balance — <b>le geste opposé</b> de celui qui débloque.
                         ⇒ écart tracé pour le backend.</span>
@@ -9680,7 +9775,7 @@
                               <td>Facture CEET mars 2026</td>
                               <td>CEET</td>
                               <td><span class="badge badge-active"><span class="d"></span>Électricité CEET</span></td>
-                              <td><code>6051</code></td>
+                              <td><code>60510000</code></td>
                               <td class="num">118 000</td>
                               <td class="num"><b>100 000</b><span class="cah-motif">HT — TVA 18 000 récupérable</span></td>
                               <td><span class="cah-conf ok">déductible</span></td>
@@ -9692,7 +9787,7 @@
                               <td>Loyer boutique — mars</td>
                               <td>SCI Adjovi</td>
                               <td><span class="badge badge-active"><span class="d"></span>Loyer boutique</span></td>
-                              <td><code>6221</code></td>
+                              <td><code>62210000</code></td>
                               <td class="num">250 000</td>
                               <td class="num"><b>250 000</b><span class="cah-motif">aucune TVA ventilée</span></td>
                               <td><span class="cah-conf ok">déductible</span></td>
@@ -9704,7 +9799,7 @@
                               <td>Carburant motos livraison</td>
                               <td>Station Total Bè</td>
                               <td><span class="badge badge-active"><span class="d"></span>Carburant motos</span></td>
-                              <td><code>6055</code></td>
+                              <td><code>60550000</code></td>
                               <td class="num">90 000</td>
                               <td class="num"><b>76 271</b><span class="cah-motif">HT — TVA 13 729 récupérable</span></td>
                               <td><span class="cah-conf ok">déductible</span></td>
@@ -9716,7 +9811,7 @@
                               <td>Amende de stationnement</td>
                               <td>Trésor public</td>
                               <td><span class="badge badge-invited"><span class="d"></span>Amendes &amp; pénalités</span></td>
-                              <td><code>6581</code></td>
+                              <td><code>65810000</code></td>
                               <td class="num">25 000</td>
                               <td class="num"><b>25 000</b><span class="cah-motif">TTC — aucune TVA récupérable</span></td>
                               <td><span class="cah-conf bad">non déductible</span><span class="cah-motif">catégorie non déductible · code <b>30</b></span></td>
@@ -9728,7 +9823,7 @@
                               <td>Achat marchandises — marché</td>
                               <td>Marché d'Adawlato</td>
                               <td><span class="badge badge-active"><span class="d"></span>Achats de marchandises</span></td>
-                              <td><code>601</code></td>
+                              <td><code>60100000</code></td>
                               <td class="num">320 000</td>
                               <td class="num"><b>320 000</b><span class="cah-motif">TTC — sans facture</span></td>
                               <td><span class="cah-conf bad">non déductible</span><span class="cah-motif">charge non justifiée · <b>aucun code</b> publié</span></td>
@@ -9740,7 +9835,7 @@
                               <td>Réparation groupe électrogène</td>
                               <td>Atelier Koffi</td>
                               <td><span class="badge badge-active"><span class="d"></span>Entretien &amp; réparations</span></td>
-                              <td><code>6152</code></td>
+                              <td><code>61520000</code></td>
                               <td class="num">39 500</td>
                               <td class="num"><b>39 500</b><span class="cah-motif">TTC — aucune TVA ventilée</span></td>
                               <td><span class="cah-conf ok">déductible</span></td>
@@ -9935,12 +10030,12 @@
                         <table class="imp-table">
                           <thead><tr><th>Catégorie</th><th>Compte de charges</th><th>Déductible par défaut</th><th>Code liasse</th><th>Lignes</th><th>État</th><th></th></tr></thead>
                           <tbody>
-                            <tr><td><b>Achats de marchandises</b></td><td><code>601</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">14</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
-                            <tr><td><b>Électricité CEET</b></td><td><code>6051</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">3</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
-                            <tr><td><b>Loyer boutique</b></td><td><code>6221</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">3</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
-                            <tr><td><b>Carburant motos</b></td><td><code>6055</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">8</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
-                            <tr><td><b>Amendes &amp; pénalités</b></td><td><code>6581</code></td><td><span class="cah-conf bad">non</span></td><td><code>30</code></td><td class="num">1</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
-                            <tr><td><b>Frais de représentation</b></td><td><code>6281</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">0</td><td><span class="badge"><span class="d"></span>Désactivée</span></td><td><button class="btn btn-ghost btn-sm" type="button">Réactiver</button></td></tr>
+                            <tr><td><b>Achats de marchandises</b></td><td><code>60100000</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">14</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Électricité CEET</b></td><td><code>60510000</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">3</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Loyer boutique</b></td><td><code>62210000</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">3</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Carburant motos</b></td><td><code>60550000</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">8</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Amendes &amp; pénalités</b></td><td><code>65810000</code></td><td><span class="cah-conf bad">non</span></td><td><code>30</code></td><td class="num">1</td><td><span class="badge badge-active"><span class="d"></span>Active</span></td><td><button class="btn btn-ghost btn-sm" type="button">Modifier</button></td></tr>
+                            <tr><td><b>Frais de représentation</b></td><td><code>62810000</code></td><td><span class="cah-conf ok">oui</span></td><td>—</td><td class="num">0</td><td><span class="badge"><span class="d"></span>Désactivée</span></td><td><button class="btn btn-ghost btn-sm" type="button">Réactiver</button></td></tr>
                           </tbody>
                         </table>
                       </div>
@@ -9967,7 +10062,7 @@
                       </p>
                       <p class="helper" style="text-align:left">
                         ⚠️ <b>Renommer ou remapper une catégorie ne réécrit JAMAIS les lignes déjà saisies.</b> Chacune a figé son compte et sa déductibilité au moment de la
-                        saisie. Remapper «&nbsp;Loyer&nbsp;» de <code>622</code> à <code>6221</code> ne doit pas déplacer rétroactivement des charges d'un exercice déjà arrêté&nbsp;:
+                        saisie. Remapper «&nbsp;Loyer&nbsp;» de <code>62200000</code> à <code>62210000</code> ne doit pas déplacer rétroactivement des charges d'un exercice déjà arrêté&nbsp;:
                         ce serait deux résultats fiscaux changés d'un coup, sans qu'aucune écriture ne le dise.
                       </p>
                     </div>
@@ -9992,11 +10087,11 @@
                         <table class="imp-table">
                           <thead><tr><th>Catégorie</th><th>Compte</th><th class="num">Charges</th><th class="num">dont non déductible</th><th class="num">Lignes</th></tr></thead>
                           <tbody>
-                            <tr><td><b>Achats de marchandises</b></td><td><code>601</code></td><td class="num">980 000</td><td class="num">320 000</td><td class="num">14</td></tr>
-                            <tr><td><b>Loyer boutique</b></td><td><code>6221</code></td><td class="num">750 000</td><td class="num">0</td><td class="num">3</td></tr>
-                            <tr><td><b>Carburant motos</b></td><td><code>6055</code></td><td class="num">228 813</td><td class="num">45 000</td><td class="num">8</td></tr>
-                            <tr><td><b>Électricité CEET</b></td><td><code>6051</code></td><td class="num">300 000</td><td class="num">0</td><td class="num">3</td></tr>
-                            <tr><td><b>Amendes &amp; pénalités</b></td><td><code>6581</code></td><td class="num">25 000</td><td class="num">25 000</td><td class="num">1</td></tr>
+                            <tr><td><b>Achats de marchandises</b></td><td><code>60100000</code></td><td class="num">980 000</td><td class="num">320 000</td><td class="num">14</td></tr>
+                            <tr><td><b>Loyer boutique</b></td><td><code>62210000</code></td><td class="num">750 000</td><td class="num">0</td><td class="num">3</td></tr>
+                            <tr><td><b>Carburant motos</b></td><td><code>60550000</code></td><td class="num">228 813</td><td class="num">45 000</td><td class="num">8</td></tr>
+                            <tr><td><b>Électricité CEET</b></td><td><code>60510000</code></td><td class="num">300 000</td><td class="num">0</td><td class="num">3</td></tr>
+                            <tr><td><b>Amendes &amp; pénalités</b></td><td><code>65810000</code></td><td class="num">25 000</td><td class="num">25 000</td><td class="num">1</td></tr>
                           </tbody>
                         </table>
                       </div>
@@ -11124,8 +11219,8 @@
                                 <span class="tot">3 100 000</span>
                               </summary>
                               <div class="tdp-comptes">
-                                <div class="tdp-cline"><span class="c">211000</span><span class="l">Frais de développement</span><span class="m">2 800 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
-                                <div class="tdp-cline"><span class="c">211200</span><span class="l">Frais de prospection</span><span class="m">300 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">21100000</span><span class="l">Frais de développement</span><span class="m">2 800 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">21120000</span><span class="l">Frais de prospection</span><span class="m">300 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
                               </div>
                             </details>
 
@@ -11138,8 +11233,8 @@
                                 <span class="tot">12 450 000</span>
                               </summary>
                               <div class="tdp-comptes">
-                                <div class="tdp-cline"><span class="c">411000</span><span class="l">Clients</span><span class="m">11 900 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
-                                <div class="tdp-cline"><span class="c">411800</span><span class="l">Clients — effets à recevoir</span><span class="m">400 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">41100000</span><span class="l">Clients</span><span class="m">11 900 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">41180000</span><span class="l">Clients — effets à recevoir</span><span class="m">400 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
                                 <div class="tdp-cline"><span class="c">411FACTURE</span><span class="l">Clients divers (compte de tiers Sage)</span><span class="m">150 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
                               </div>
                             </details>
@@ -11153,8 +11248,8 @@
                                 <span class="tot">2 780 000</span>
                               </summary>
                               <div class="tdp-comptes">
-                                <div class="tdp-cline"><span class="c">445100</span><span class="l">TVA récupérable sur achats</span><span class="m">1 950 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
-                                <div class="tdp-cline"><span class="c">447000</span><span class="l">État — autres créances</span><span class="m">830 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">44510000</span><span class="l">TVA récupérable sur achats</span><span class="m">1 950 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">44700000</span><span class="l">État — autres créances</span><span class="m">830 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
                                 <div class="tdp-cline" style="color:var(--muted-fg)"><span class="c">…</span><span class="l">7 autres comptes</span><span class="m"></span><span></span></div>
                               </div>
                             </details>
@@ -11176,8 +11271,8 @@
                                 <span class="tot">8 940 000</span>
                               </summary>
                               <div class="tdp-comptes">
-                                <div class="tdp-cline"><span class="c">401000</span><span class="l">Fournisseurs — dettes en compte</span><span class="m">8 200 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
-                                <div class="tdp-cline"><span class="c">401800</span><span class="l">Fournisseurs — effets à payer</span><span class="m">740 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">40100000</span><span class="l">Fournisseurs — dettes en compte</span><span class="m">8 200 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">40180000</span><span class="l">Fournisseurs — effets à payer</span><span class="m">740 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
                               </div>
                             </details>
 
@@ -11193,9 +11288,9 @@
                                 <span class="tot">3 620 000</span>
                               </summary>
                               <div class="tdp-comptes">
-                                <div class="tdp-cline"><span class="c">476100</span><span class="l">Produits constatés d'avance</span><span class="m">1 500 000</span><span class="tdp-orig" data-o="surcharge">Surcharge</span></div>
-                                <div class="tdp-cline"><span class="c">448000</span><span class="l">État — charges à payer</span><span class="m">1 320 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
-                                <div class="tdp-cline"><span class="c">466000</span><span class="l">Créditeurs divers</span><span class="m">800 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">47610000</span><span class="l">Produits constatés d'avance</span><span class="m">1 500 000</span><span class="tdp-orig" data-o="surcharge">Surcharge</span></div>
+                                <div class="tdp-cline"><span class="c">44800000</span><span class="l">État — charges à payer</span><span class="m">1 320 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">46600000</span><span class="l">Créditeurs divers</span><span class="m">800 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
                               </div>
                             </details>
                           </div>
@@ -11215,8 +11310,8 @@
                                 <span class="tot">41 380 000</span>
                               </summary>
                               <div class="tdp-comptes">
-                                <div class="tdp-cline"><span class="c">601000</span><span class="l">Achats de marchandises</span><span class="m">38 900 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
-                                <div class="tdp-cline"><span class="c">601100</span><span class="l">Achats — groupe A</span><span class="m">2 480 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">60100000</span><span class="l">Achats de marchandises</span><span class="m">38 900 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
+                                <div class="tdp-cline"><span class="c">60110000</span><span class="l">Achats — groupe A</span><span class="m">2 480 000</span><span class="tdp-orig" data-o="referentiel">Réf.</span></div>
                                 <div class="tdp-cline" style="color:var(--muted-fg)"><span class="c">…</span><span class="l">10 autres comptes</span><span class="m"></span><span></span></div>
                               </div>
                             </details>
@@ -11235,7 +11330,7 @@
                               <b style="font-size:0.84rem">14 comptes à ventiler — non compris dans les totaux ci-dessus</b>
                             </div>
                             <div class="tdp-ventline">
-                              <span class="c">421000</span>
+                              <span class="c">42100000</span>
                               <span class="cands"><span style="color:var(--muted-fg)">Personnel — rémunérations dues</span>
                                 <span class="tdp-cand"><code>BJ</code> Bilan actif</span>
                                 <span class="tdp-cand"><code>DN</code> Bilan passif</span>
@@ -11243,7 +11338,7 @@
                               <span class="m">1 240 000 <small style="color:var(--muted-fg)">créditeur</small></span>
                             </div>
                             <div class="tdp-ventline">
-                              <span class="c">521000</span>
+                              <span class="c">52100000</span>
                               <span class="cands"><span style="color:var(--muted-fg)">Banques locales</span>
                                 <span class="tdp-cand"><code>BT</code> Trésorerie actif</span>
                                 <span class="tdp-cand"><code>DV</code> Trésorerie passif</span>
@@ -11381,7 +11476,7 @@
                               </table>
                             </div>
                           </div>
-                          <p class="helper" style="margin-top:0.7rem">La <b>racine retenue</b> est le préfixe le plus long du référentiel qui a produit l'affectation — <code>411</code> pour <code>411000</code>. Sur une <b>surcharge</b>, c'est le <b>compte entier</b>&nbsp;: le rattachement est exact, il ne se propage pas aux comptes voisins.</p>
+                          <p class="helper" style="margin-top:0.7rem">La <b>racine retenue</b> est le préfixe le plus long du référentiel qui a produit l'affectation — <code>41100000</code> pour <code>41100000</code>. Sur une <b>surcharge</b>, c'est le <b>compte entier</b>&nbsp;: le rattachement est exact, il ne se propage pas aux comptes voisins.</p>
                         </div>
                       </div>
 
@@ -11798,7 +11893,7 @@
 
                 <div class="dc-note dc-gap"><b>⚡ LA PHRASE QUE LA FICHE DEMANDAIT ÉTAIT FAUSSE, ET ELLE EST CORRIGÉE ICI.</b> L'AC-4 d'origine voulait annoncer que «&nbsp;des comptes significatifs non mappés <b>bloquent la validation</b>&nbsp;». <b>Aucun contrôle du serveur ne fait cela.</b> La batterie bloquante en compte quatre — <code>EQUILIBRE_BILAN</code>, <code>COHERENCE_RESULTAT</code>, <code>VARIATION_TRESORERIE</code>, <code>ARTICULATION_NOTES</code> — et pas un seul ne regarde les comptes non affectés&nbsp;; le service l'écrit lui-même (« la significativité = solde, indisponible ici → hook »). Un bandeau «&nbsp;la validation sera bloquée&nbsp;» aurait donc été <b>démenti par le serveur au premier essai</b>. L'écran dit ce qui est vrai et <b>démontrable</b>&nbsp;: les soldes non affectés sont écartés des totaux, le débit et le crédit écartés <b>ne se compensent pas</b>, et comme la balance retenue est équilibrée, ce qui reste ne peut plus l'être. Un montant, une conséquence, pas une menace. <b>Demande&nbsp;: STORY-401.</b></div>
 
-                <div class="dc-note dc-gap"><b>⛔ ON N'AFFECTE PAS UNE RACINE, ET UNE RACINE SAISIE SERAIT UN PIÈGE SILENCIEUX.</b> Un compte d'attente n'existe jamais au singulier&nbsp;: <code>476200</code>, <code>476210</code>, <code>476220</code>… Sur Sage on affecte <code>4762</code> une fois. Ici <code>POST /mapping-overrides</code> prend <b>un compte exact</b> — <code>chargerSurchargesActives</code> construit un <code>Map(compte → cible)</code> et <code>mapComptes</code> fait un <code>.get(compte)</code> strict. Donc 40 comptes = <b>40 propositions et 40 validations d'administrateur</b>. ⚡ Et pire&nbsp;: <code>4762</code> <b>passe le format</b> (<code>^\\d[0-9A-Za-z]{1,19}$</code>), la validation du serveur ne porte que sur la <b>cible</b>, jamais sur le compte ⇒ la surcharge est <b>acceptée, validée, affichée « Validée », et sans aucun effet</b>. ⇒ <b>Garde posée tout de suite</b>&nbsp;: le dialogue n'a pas de champ « compte », il porte celui de la ligne d'où l'on vient. <b>Demande&nbsp;: STORY-400.</b></div>
+                <div class="dc-note dc-gap"><b>⛔ ON N'AFFECTE PAS UNE RACINE, ET UNE RACINE SAISIE SERAIT UN PIÈGE SILENCIEUX.</b> Un compte d'attente n'existe jamais au singulier&nbsp;: <code>47620000</code>, <code>47621000</code>, <code>47622000</code>… Sur Sage on affecte <code>47620000</code> une fois. Ici <code>POST /mapping-overrides</code> prend <b>un compte exact</b> — <code>chargerSurchargesActives</code> construit un <code>Map(compte → cible)</code> et <code>mapComptes</code> fait un <code>.get(compte)</code> strict. Donc 40 comptes = <b>40 propositions et 40 validations d'administrateur</b>. ⚡ Et pire&nbsp;: <code>47620000</code> <b>passe le format</b> (<code>^\\d[0-9A-Za-z]{1,19}$</code>), la validation du serveur ne porte que sur la <b>cible</b>, jamais sur le compte ⇒ la surcharge est <b>acceptée, validée, affichée « Validée », et sans aucun effet</b>. ⇒ <b>Garde posée tout de suite</b>&nbsp;: le dialogue n'a pas de champ « compte », il porte celui de la ligne d'où l'on vient. <b>Demande&nbsp;: STORY-400.</b></div>
 
                 <div class="dc-note dc-gap"><b>⚠️ Aucune route n'énumère les postes du référentiel — 3<sup>e</sup> occurrence du même angle mort.</b> <code>GET …/bilan/referentiel</code> publie <code>postesCount: 214</code> et jamais la liste&nbsp;; <code>POST …/mapping-overrides</code> <b>valide</b> pourtant le couple <code>(état, poste)</code> contre ces 214 postes et refuse en <code>422 POSTE_INCONNU</code>. Le comptable tape donc à l'aveugle pour se faire refuser — exactement STORY-394 (comptes de classe 7) et STORY-397 (codes de réintégration). La maquette fait ce qu'elle peut&nbsp;: elle propose les <b>postes observés dans cette balance</b>, <b>déclare la liste partielle</b>, et laisse la saisie libre. <b>Demande&nbsp;: STORY-399.</b></div>
 
@@ -12128,7 +12223,7 @@
 
       <div class="tdp-avert">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span><b>L’affectation porte sur ce compte exact, et il n’est pas saisissable.</b> Le serveur rattache par <b>égalité stricte</b>&nbsp;: saisir la racine <code>4762</code> pour couvrir <code>476200</code>, <code>476210</code>… serait <b>accepté, validé, et sans aucun effet</b>. Le compte vient donc de la ligne d’où vous arrivez, jamais d’un champ. L’affectation par racine est demandée&nbsp;: <b>STORY-400</b>.</span>
+        <span><b>L’affectation porte sur ce compte exact, et il n’est pas saisissable.</b> Le serveur rattache par <b>égalité stricte</b>&nbsp;: saisir la racine <code>47620000</code> pour couvrir <code>47620000</code>, <code>47621000</code>… serait <b>accepté, validé, et sans aucun effet</b>. Le compte vient donc de la ligne d’où vous arrivez, jamais d’un champ. L’affectation par racine est demandée&nbsp;: <b>STORY-400</b>.</span>
       </div>
 
       <div class="tdp-avert">
@@ -14297,23 +14392,23 @@
            `hors` = compte absent du plan actif : le serveur IGNORE alors la regle
            et retombe sur le moteur, sans jamais le dire. */
         var RAT_REGLES = [
-          { type: "LIBELLE", cle: "loyer local adidogome", saisie: "loyer local Adidogomé", compte: "7073" },
+          { type: "LIBELLE", cle: "loyer local adidogome", saisie: "loyer local Adidogomé", compte: "70730000" },
           { type: "LIBELLE", cle: "commission de change", saisie: "commission de change", compte: "70780000", hors: true },
-          { type: "TIERS", cle: "mairie de kara", saisie: "Mairie de Kara", compte: "706" },
-          { type: "TIERS", cle: "sodigaz", saisie: "SODIGAZ", compte: "707" }
+          { type: "TIERS", cle: "mairie de kara", saisie: "Mairie de Kara", compte: "70600000" },
+          { type: "TIERS", cle: "sodigaz", saisie: "SODIGAZ", compte: "70700000" }
         ];
 
         /* Table de STORY-082, dans SON ordre : la premiere regle qui matche gagne,
            du plus specifique au plus generique. La recopier fidelement est ce qui
            rend l'essai credible — une table inventee ferait mentir la maquette. */
         var RAT_MOTS = [
-          { compte: "706", libelle: "Services vendus", mots: ["prestation", "service", "honoraire", "consultation", "conseil", "reparation", "maintenance", "formation"] },
-          { compte: "705", libelle: "Travaux facturés", mots: ["travaux", "chantier", "construction", "maconnerie"] },
-          { compte: "707", libelle: "Produits accessoires", mots: ["location", "loyer", "commission", "redevance", "transport"] },
-          { compte: "702", libelle: "Ventes de produits finis", mots: ["production", "produit fini", "fabrication", "atelier"] },
-          { compte: "71", libelle: "Subventions d'exploitation", mots: ["subvention"] },
-          { compte: "77", libelle: "Revenus financiers", mots: ["interet", "dividende", "placement", "financier"] },
-          { compte: "701", libelle: "Ventes de marchandises", mots: ["vente", "marchandise", "boutique", "revente", "article"] }
+          { compte: "70600000", libelle: "Services vendus", mots: ["prestation", "service", "honoraire", "consultation", "conseil", "reparation", "maintenance", "formation"] },
+          { compte: "70500000", libelle: "Travaux facturés", mots: ["travaux", "chantier", "construction", "maconnerie"] },
+          { compte: "70700000", libelle: "Produits accessoires", mots: ["location", "loyer", "commission", "redevance", "transport"] },
+          { compte: "70200000", libelle: "Ventes de produits finis", mots: ["production", "produit fini", "fabrication", "atelier"] },
+          { compte: "71000000", libelle: "Subventions d'exploitation", mots: ["subvention"] },
+          { compte: "77000000", libelle: "Revenus financiers", mots: ["interet", "dividende", "placement", "financier"] },
+          { compte: "70100000", libelle: "Ventes de marchandises", mots: ["vente", "marchandise", "boutique", "revente", "article"] }
         ];
 
         var ratProposer = function (libelle, tiers) {
@@ -14334,7 +14429,7 @@
                 }
                 return {
                   compte: r.compte, src: "regle",
-                  libelle: r.compte === "7073" ? "Produits accessoires" : "Services vendus",
+                  libelle: r.compte === "70730000" ? "Produits accessoires" : "Services vendus",
                   motif: "règle de l'organisation sur le " + (r.type === "LIBELLE" ? "libellé" : "tiers") + " « " + r.saisie + " »"
                 };
               }
@@ -14356,7 +14451,7 @@
             }
           }
           return {
-            compte: "701", src: "defaut", libelle: "Ventes de marchandises",
+            compte: "70100000", src: "defaut", libelle: "Ventes de marchandises",
             motif: "aucun indice dans la ligne ni dans l’activité — défaut « ventes de marchandises »"
           };
         };
