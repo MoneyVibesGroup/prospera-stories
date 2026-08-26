@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-043** *(cahier de recettes)*, 2026-08-24 — prolonge **STORY-078**, **STORY-085** et **STORY-139**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** review
+**Statut :** done
 **Complexité :** medium
 **Sprint :** 20
 **Service :** `balance-service` (`:3007`)
@@ -87,8 +87,10 @@ l'écran ne peut offrir **aucune** liste. Le contournement se retire quand cette
 
 ## Progress Tracking
 
-**Statut :** `review` — dev + revue de code + revue de sécurité faits sur `MNV-394`
-(`balance-service`), portes DoD rejouées vertes sur l'état **final**.
+**Statut :** `done` — clôturée le **2026-08-26** (branche `MNV-394`, `balance-service` + `docs/`).
+
+**PR** : [prospera-balance-service#59](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/59)
+— rebase-mergée sur `dev`, branche supprimée.
 
 ### ③④ Développement, portes DoD
 
@@ -114,7 +116,7 @@ prouvé sur les données réelles. `comparerComptes` reste inchangé dans `sugge
 (son usage — départager des candidats à égalité pour un même libellé — n'a jamais cette
 pathologie) ; aucune extraction croisée n'était donc justifiée.
 
-**Table de mutations — 5 mutations, 5 rouges** (`git diff` de contrôle après restauration) :
+**Table de mutations — 6 mutations, 6 rouges** (`git diff` de contrôle après restauration) :
 
 | # | mutation | test qui rougit |
 |---|---|---|
