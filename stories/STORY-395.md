@@ -4,7 +4,7 @@
 **Réf. :** exigence PO du 2026-08-24 à la validation de la maquette **FE-043** — *« n'oublie pas de bien garder les images qui sont les preuves et de bien les horodater par exercice, pour que demain, dans le cas d'un contrôle, ce soit beaucoup plus facile »*
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** not_started
+**Statut :** review
 **Complexité :** medium
 **Sprint :** 20
 **Service :** `document-service` (`:3006`) — **avec un versant `balance-service`** (cf. « Qui écrit »)
@@ -106,3 +106,141 @@ FE-043 affiche la preuve **par mois**, en s'appuyant sur la date de la **ligne d
 elle, est bien dans le bon exercice. La **pièce**, en revanche, reste non filtrable par exercice :
 l'onglet « Pièces » du dossier montre une pile triée par dépôt. Le contournement se retire quand
 cette story est livrée.
+
+---
+
+## Décision d'architecture — le rattachement passe par Kafka, pas par un PATCH HTTP
+
+La story laissait le choix à l'archi entre « une route interne idempotente » et « la consommation
+d'un événement ». **Kafka a été retenu**, et la raison est le mode de panne, pas la préférence :
+
+| | route `PATCH` synchrone | événement `cahier.piece.rattachee` (retenu) |
+|---|---|---|
+| Chemin d'appel | sur l'**écriture comptable** (`appliquer`) | hors chemin chaud |
+| `document-service` indisponible | rattachement **perdu en silence**, ou 500 sur une écriture déjà commitée | rejoué par l'outbox (*at-least-once*) |
+| Invariant #1 / garde-fou #2 | second couplage synchrone sortant | conforme : le seul HTTP sortant reste l'upload aller |
+| Identité d'appel | exigerait de propager le bearer jusqu'à `appliquer` | aucune |
+
+Un rattachement perdu en silence, c'est **exactement** la fausse assurance que cette story existe
+pour fermer : l'image resterait conservée, et introuvable pour son exercice.
+
+⚠️ **`eventId` aléatoire, jamais dérivé de `(lot, pièce)`.** Un identifiant déterministe buterait
+sur l'unicité de l'outbox à la seconde application du même lot, avorterait la transaction de trace
+et rendrait **500** une écriture comptable déjà commitée. L'idempotence de l'**effet** (AC4) est
+portée par le **consommateur** — filtre `dateOperation: { $exists: false }`, premier rattachement
+gagnant — jamais par un doublon côté producteur.
+
+## Progress Tracking
+
+**Statut : `review`** — implémentée, validée, vérifiée en docker sur stack neuve. Deux dépôts.
+
+### Livré
+
+**`balance-service` (producteur)**
+- `src/kafka/events/cahier-piece-events.ts` — contrat `cahier.piece.rattachee` v1 + mapper figé
+  (`lotId`, `pieceId`, `exerciceDebut`, `exerciceFin`, `dateOperation`, `ligneCahierId`,
+  `dossierId`, `occurredAt`). **Byte-identique** avec la copie de `document-service` (K4).
+- `src/kafka/outbox/cahier-events.service.ts` — `CahierEventsService.pieceRattachee`, partition
+  `orgId`, exporté par `OutboxModule` (`@Global`).
+- `PiecesOcrService.tracerApplication` — devient **transactionnelle** : `marquerAppliquee` (N docs)
+  + `outbox.enqueue` (N docs) dans **une** session, abort **gardé**. `dateOperation` vient de
+  `creees[i].date` — la date **retenue par le comptable**, jamais celle du brouillon OCR.
+- `CahiersRecettesService`/`CahiersDepensesService.creerLotOcr` rendent désormais l'`exercice`
+  **résolu** (`exigerExercice`) : une seule vérité, jamais re-dérivée par l'appelant.
+
+**`document-service` (consommateur)**
+- 4 champs **facultatifs** sur `PieceExtraction` : `exerciceDebut`, `exerciceFin`, `dateOperation`,
+  `ligneCahierId` — posés **ensemble** ou pas du tout.
+- Index partiel `(orgId, dossierId, dateOperation, _id)` — voir *Plan de requête* ci-dessous.
+- `CahierPieceConsumer` (group **isolé** `document-cahier`, `KAFKA_CAHIER_GROUP_ID`, tolérant panne)
+  → `lireEvenementCahierPiece` (fichier **couvert**) → `PieceRattachementProjectionService`
+  (transaction `ProcessedEvent` + rattachement).
+- `PieceExtractionRepository.rattacherExercice` — **premier rattachement gagnant**
+  (`dateOperation: { $exists: false }`).
+- `GET /dossiers/:id/pieces?exerciceDebut=&exerciceFin=` — bornes **par paire**, **incluses**,
+  portant sur `dateOperation` ; tri par date d'opération décroissante, **dépôt en repli** ; les 4
+  champs publiés sur `PieceDossierResponseDto`.
+- **Politique de conservation écrite et testée** (`piece-conservation.spec.ts`).
+
+### Portes de qualité
+
+| | `balance-service` | `document-service` |
+|---|---|---|
+| Lint | 0 warning | 0 warning |
+| Build | OK | OK |
+| Unitaires | 3 083 | 745 |
+| e2e | 739 | 116 |
+| Couverture | 99,13 / 92,07 / 98,55 / 99,22 | 99,19 / 93,34 / 98,21 / 99,23 |
+
+**28 mutations jouées, 27 rouges.** La 28ᵉ (`creerLotOcr` rendant `new Date(brut)` au lieu de
+l'exercice résolu) est une mutation **équivalente** — sur ce chemin `resoudreExercice` fait
+littéralement `new Date` — et a été remplacée par deux mutations non équivalentes (bornes rendues
+en **chaînes**), toutes deux rouges.
+
+⚠️ **Deux tests écrits par mes soins étaient VACANTS, et seule la mutation l'a montré :**
+1. le test « cas du persona » du tri utilisait une fixture où **les deux tris donnaient le même
+   ordre** — trier par `createdAt` le laissait **vert**. Refait avec des dates volontairement en
+   ordre inverse l'une de l'autre ;
+2. la garde « aucune propriété ne porte `expires` » testait `'expires' in options`. Mesuré :
+   **Mongoose pose cette clé — à `undefined` — sur TOUT chemin `Date`**, `createdAt` compris. Le
+   test aurait été rouge en permanence sur un schéma sain, et la seule façon de le « réparer »
+   aurait été de le désarmer. C'est la **valeur** qui dit s'il y a un TTL.
+
+### Vérification docker (stack neuve, `down -v`)
+
+Parcours réel : `register` → dossier (`dossier-service`) → dépôt de 3 pièces via le proxy OCR de
+`balance-service` → application des lots → lecture par `document-service`.
+
+- **⚡ Le cas du persona, mesuré en base** : pièce déposée le **2026-08-26**, rattachée à
+  l'opération du **2026-03-14**. `createdAt` et `dateOperation` divergent de cinq mois, et c'est la
+  seconde qui range la preuve.
+- **Round-trip Kafka complet** : `outbox_events` (balance) `SENT` → `piece_extractions`
+  (document) portant les 4 champs.
+- **AC4 — idempotence prouvée sur DEUX messages distincts** : réapplication du même lot avec une
+  autre date (2026-09-01) et une autre ligne ⇒ second événement bien émis, rattachement **inchangé**
+  (2026-03-14, première ligne). Journal du consommateur : *« Rattachement … sans effet : pièce
+  inconnue ou déjà rattachée »*.
+- **Lien inter-services non orphelin** : chaque `ligneCahierId` pointe une `lignes_recettes` réelle,
+  à la **même date** que `dateOperation`, `origine: OCR`. 0 rattachement partiel, 0 orphelin.
+- **AC3 / AC6, 7 requêtes** : sans filtre → 3 pièces (dont la non appliquée, rangée sur son dépôt en
+  repli) · exercice 2026 → 2 pièces triées par opération décroissante · 2025 → 0 · T1 2026 → 1 ·
+  bornes incluses pile sur l'opération → 1 · une seule borne → **400** · horodatage sans fuseau →
+  **400**.
+- **AC5 — conservation** : `getIndexes()` sur `piece_extractions` ⇒ **aucun index TTL**.
+- **Démarrage dégradé** confirmé : `Démarrage du consommateur cahier.piece.rattachee différé : This
+  server does not host this topic-partition`, puis adhésion au group — le boot HTTP n'a jamais
+  échoué.
+
+#### Plan de requête — l'index a été corrigé PAR la mesure
+
+L'`explain()` de la requête du contrôle a **infirmé** une première rédaction : un index s'arrêtant à
+`dateOperation` ne sert **pas** le tri, parce que la lecture départage les ex æquo par `_id`.
+
+| tri demandé | index | étape racine | `SORT` bloquant |
+|---|---|---|---|
+| `{ createdAt, _id }` | `(org, dossier, dateOperation)` | `SORT` | **oui** |
+| `{ dateOperation, _id }` | `(org, dossier, dateOperation)` | `SORT` | **oui** |
+| `{ dateOperation, _id }` | `(org, dossier, dateOperation, _id)` | `FETCH` | **non** |
+
+⇒ l'index porte `_id` en quatrième clé : il garde le **départage total** (leçon STORY-187 : un tri
+non total ne se voit qu'en pagination) **et** supprime le tri en mémoire sur un dossier qui peut
+compter des milliers de pièces.
+
+⚠️ **Index obsolète confirmé** : la version à 3 clés déployée en cours de vérification est restée en
+base après le changement de schéma — **Mongoose ne supprime jamais un index obsolète** (leçon
+STORY-357). Retiré à la main, puis redémarrage : le schéma seul ne recrée que l'index voulu.
+
+### Hors périmètre (hooks inertes, documentés)
+
+- **Aucune reprise rétroactive** des pièces déjà appliquées avant cette story : elles restent sans
+  exercice et continuent de sortir sur la lecture non filtrée (AC6). Migration = souci de prod,
+  différé (règle projet).
+- **`profil_extractions` n'est pas rattachable à un exercice** : une pièce de constitution ne
+  justifie aucune opération. Le filtre l'exclut explicitement plutôt qu'en silence.
+- **Pas de pagination** sur `GET /dossiers/:id/pieces` — inchangé depuis STORY-358. L'index porte
+  déjà `_id`, donc le jour où elle arrivera, le tri sera total.
+
+### Front
+
+Le contournement de **FE-043** (affichage par mois via la date de la *ligne de cahier*) peut être
+retiré : l'onglet « Pièces » sait désormais se filtrer par exercice.
