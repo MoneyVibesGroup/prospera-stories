@@ -1081,6 +1081,14 @@
   .imp-table tr.fis-retard td { background: color-mix(in srgb, var(--danger) 6%, transparent); }
   .imp-table tr.fis-attn td { background: color-mix(in srgb, var(--warning) 7%, transparent); }
 
+  /* ⚠️ `.imp-table-wrap` est `overflow: hidden` et sert TOUT l'Atelier : le
+     changer globalement toucherait 8 panneaux deja livres. Les deux tableaux
+     fiscaux (TVA 8 colonnes, taxes 10) sont les plus larges du document —
+     ils prennent leur propre defilement, pour que le CORPS DE PAGE ne defile
+     jamais lateralement. */
+  .imp-table-wrap.fis-wide { overflow-x: auto; }
+  .imp-table-wrap.fis-wide .imp-table { min-width: 46rem; }
+
   .fis-slot { display: flex; flex-direction: column; gap: 1.05rem; }
   .fis-sect { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
   .fis-sect h4 { margin: 0; font-size: 0.9rem; font-weight: 700; }
@@ -6303,7 +6311,7 @@
                         </div>
                       </div>
 
-                      <div class="imp-table-wrap">
+                      <div class="imp-table-wrap fis-wide">
                         <div class="imp-table-cap">Le <b>crédit court d'une période à l'autre</b>&nbsp;: il n'est pas recalculé chaque mois, il est chaîné. Un crédit déclaré à l'ouverture de l'exercice s'impute en premier.</div>
                         <table class="imp-table">
                           <thead>
@@ -6400,7 +6408,7 @@
                         <span class="fis-chip">PATENTE</span><span class="fis-chip">TAXE_FONCIERE</span><span class="fis-chip">TAXE_VEHICULES</span><span class="fis-chip">TAXE_SALAIRES</span><span class="fis-chip">TAXE_APPRENTISSAGE</span><span class="fis-chip">DROITS_ACCISES</span><span class="fis-chip">RSL</span>
                       </div>
 
-                      <div class="imp-table-wrap">
+                      <div class="imp-table-wrap fis-wide">
                         <table class="imp-table">
                           <thead>
                             <tr><th>Code</th><th>Libellé</th><th>Date</th><th class="fis-n">Base</th><th class="fis-n">Taux</th><th class="fis-n">Montant</th><th>Compte</th><th>Déductible</th><th>Justification</th><th></th></tr>
