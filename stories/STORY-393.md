@@ -141,3 +141,74 @@ export const DESCRIPTION_409_GEL =
 
 ⇒ la famille cahiers reçoit **la même mécanique**, pas une rédaction ad hoc route par route :
 une seule constante, cinq points d'usage, et l'ordre écrit une fois pour toutes.
+
+### ③④ Développement, portes DoD et vérification docker
+
+**Correctif.** `DESCRIPTION_409_GEL_CAHIERS` (`cahiers-communs.exceptions.ts`), sur le modèle de
+`DESCRIPTION_409_GEL` côté fiscal et **dérivée des enums de codes** ; posée sur les 8 routes
+d'écriture des deux cahiers et sur `POST …/pieces/ocr/{lotId}/appliquer`. `POST …/balance/depuis-cahiers`
+reçoit `EXERCICE_CLOS` seul — **pas** `BALANCE_VALIDEE_IMMUABLE`, vérifié absent de ce chemin.
+
+**⚡ Le défaut de cette story, retourné contre son propre correctif — trouvé par la mutation, pas par la revue.**
+
+`@RequiresDossierScope()` pose son `ApiConflictResponse` au niveau de la **classe**. Un
+`@ApiConflictResponse` de **méthode** ne s'y ajoute pas : il le **remplace**. Poser le décorateur de
+gel sur la route OCR — la seule de la famille qui n'en avait aucun — y a donc **effacé du contrat le
+`DOSSIER_ARCHIVE` publié**, un refus bien réel, au moment même où l'on prétendait compléter le contrat.
+Ni la garde d'ordre ni celle de non-régression ne pouvaient le voir : elles ne regardent que les deux
+codes de gel. ⇒ les trois codes sont désormais portés ensemble, et un **filet dédié** le garde.
+
+**⚡ Et la garde de non-vacuité était VIDE.** Elle exigeait « un `409` est publié » — or ces routes en
+publient un **quoi qu'il arrive** (celui de la classe). Elle serait restée verte sur une route dont le
+décorateur de gel a **entièrement disparu**. C'est la mutation M3 qui l'a prise en défaut, pas la
+lecture. Elle exige désormais que la route **existe**, ce qu'elle voulait dire.
+
+**🪤 Piège de méthode rencontré, et qui a failli faire conclure l'inverse.** Le `git checkout --` de
+restauration entre deux mutations a **effacé le correctif `DOSSIER_ARCHIVE` non encore commité** : la
+suite complète est repassée au rouge après une batterie annoncée « tout vert », et le rouge « inexpliqué »
+de la mutation M5 s'est révélé être un **vrai positif** mal attribué. ⇒ commiter **avant** de muter.
+
+**Batterie de mutation — 7 mutations, 7 rouges, chacune après un `build` OK** (un rouge par erreur de
+compilation ne prouve rien) :
+
+| # | mutation | test qui rougit |
+|---|---|---|
+| M1 | ordre inversé dans la constante partagée | `…EXERCICE_CLOS EN PREMIER` |
+| M2 | une route de cahier revient à l'ancienne description | ordre + « aucune autre » |
+| M3 | la route OCR reperd son décorateur de gel | ordre + « aucune autre » |
+| M4 | `DOSSIER_ARCHIVE` retiré de la constante | filet anti-écrasement |
+| M5 | l'agrégation s'aligne « par symétrie » sur `BALANCE_VALIDEE_IMMUABLE` | asymétrie voulue |
+| M6 | le gel déclaré sur une **lecture** de cahier | « aucune autre » (branche morte) |
+| M7 | ordre **d'exécution** inversé dans `exigerExerciceModifiable` | les 2 tests HTTP d'ordre |
+
+**Portes DoD** — lint 0 warning · build OK · **3 052** unitaires + **729** e2e verts ·
+couverture **98,98 / 91,87 / 98,18 / 99,07** (seuils 65/90/90/90).
+
+**Vérification docker** (stack `mongo`+`kafka`+`redis`+`balance-service`, conteneur exécutant bien le
+code de la branche — `Found 0 errors. Watching for file changes.`), sur `/api/docs-json` **réellement
+servi** par `:3007`, 103 routes publiées :
+
+- **AC-1 a)** les **9** routes à deux verrous nomment les 3 codes, `EXERCICE_CLOS` **avant**
+  `BALANCE_VALIDEE_IMMUABLE` — 9/9 ✅ ;
+- **AC-1 b)** `…/balance/depuis-cahiers` : `EXERCICE_CLOS` ✅, `SYSTEME_COMPTABLE_INDETERMINE` ✅,
+  `DOSSIER_ARCHIVE` préservé ✅, `BALANCE_VALIDEE_IMMUABLE` **absent** ✅ ;
+- **AC-1 c)** les **12** autres routes de la famille (lectures, dépôt/lecture de lot OCR) : **0**
+  annonce `EXERCICE_CLOS` ✅ — aucune branche morte ;
+- **AC-2** prouvé au niveau **HTTP** (le `code` que le client lit sort du filtre d'exception, pas du
+  `throw`) : exercice clos **et** balance validée → `EXERCICE_CLOS` sur `POST`, `PATCH` et `DELETE` ;
+- **AC-3** aucun message, aucun code, aucun statut modifié — et `DOSSIER_ARCHIVE`, un instant perdu,
+  restauré.
+
+### ⛔ Deux écarts MESURÉS, laissés HORS PÉRIMÈTRE (stories suivantes)
+
+Relevés en appliquant la règle de cette story — *compter les `throw`* — au-delà de la famille cahiers.
+**Non corrigés ici** : autre famille, autres consommateurs, et le périmètre se respecte à la lettre.
+
+1. **4 routes lèvent `EXERCICE_CLOS` et ne le déclarent pas** — `submit`/`dryRun` de `BalanceService`
+   le lèvent **inconditionnellement, en tête de méthode** :
+   `POST …/balance/a-nouveaux` (publie `SOCLE_DEJA_GENERE`) · `POST …/balance/affectation-resultat`
+   (`RESULTAT_DEJA_AFFECTE`) · `POST …/balance/import` (`PROFIL_INACTIF`) · `POST …/balance/import/sage`.
+   C'est **exactement** le défaut de STORY-393, dans la famille des adaptateurs #1/#2.
+2. **45 routes** sous `/dossiers/{dossierId}` publient un `409` **sans** `DOSSIER_ARCHIVE` : leur
+   `@ApiConflictResponse` de méthode masque celui de `@RequiresDossierScope()`. Défaut **de mécanisme**,
+   pas d'oubli — il se reproduira à chaque route d'écriture ajoutée tant que le masquage n'est pas traité.
