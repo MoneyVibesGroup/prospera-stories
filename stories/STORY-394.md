@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-043** *(cahier de recettes)*, 2026-08-24 — prolonge **STORY-078**, **STORY-085** et **STORY-139**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** not_started
+**Statut :** defined
 **Complexité :** medium
 **Sprint :** 20
 **Service :** `balance-service` (`:3007`)
@@ -82,3 +82,9 @@ non le comptable de cabinet — doit trancher un compte.
 FE-043 laisse le champ **libre** et affiche le compte **proposé par le serveur** avec son motif.
 Sur le chemin nominal, cela ne se voit pas : le compte est juste. Le jour où il faut le corriger,
 l'écran ne peut offrir **aucune** liste. Le contournement se retire quand cette story est livrée.
+
+---
+
+## Progress Tracking
+
+**Statut :** `defined` — branche `MNV-394` ouverte (`docs/`), story confirmée sans réécriture.
