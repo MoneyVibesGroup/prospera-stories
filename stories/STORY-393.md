@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-043** *(cahier de recettes)*, 2026-08-24 — prolonge **STORY-082**, **STORY-083**, **STORY-087** et **STORY-374**
 **Priorité :** Must Have
 **Story Points :** 1
-**Statut :** not_started
+**Statut :** in_progress
 **Complexité :** low
 **Sprint :** 20
 **Service :** `balance-service` (`:3007`)
@@ -98,3 +98,46 @@ chose**, dans l'autre sens — sauf qu'elle donne l'illusion rassurante que le t
 ⇒ Cette story reste entière. Elle coûte 1 point, elle débloque un écran, et le jour où la
 mécanique de STORY-375 est **étendue aux cahiers**, elle devient vérifiable par le compilateur
 plutôt que par une relecture.
+
+---
+
+## Progress Tracking
+
+**Statut :** `in_progress` — démarré le 2026-08-26 (branche `MNV-393`, `balance-service` + `docs/`).
+
+### ① Audit à la source — les prémisses de la story, vérifiées et non supposées
+
+Relevé sur `origin/dev` (`e711048`), en **comptant les `throw`**, jamais les puces :
+
+| ce que la story affirme | vérifié | preuve |
+|---|---|---|
+| `exigerExerciceModifiable` lève **deux** 409, `estClos` **en premier** | ✅ | `cahiers-recettes.service.ts:812-833` · `cahiers-depenses.service.ts:1108-1129` — code **identique** dans les deux |
+| les 4 routes d'écriture recettes n'annoncent que `BALANCE_VALIDEE_IMMUABLE` | ✅ | `cahiers-recettes.controller.ts:109,145,261,286` |
+| idem dépenses | ✅ | `cahiers-depenses.controller.ts:117,153,276,301` |
+| `POST …/pieces/ocr/{lotId}/appliquer` traverse le même verrou | ✅ | `pieces-ocr.controller.ts:218` → `pieces-ocr.service.ts:268-269` → `creerLotOcr` → `exigerExerciceModifiable` |
+| `AgregationController` lève aussi `ExerciceClosException` *(point 2 — à vérifier)* | ✅ **confirmé** | `agregation.service.ts:118`, **avant tout autre contrôle** ; son `@ApiConflictResponse` (`agregation.controller.ts:81`) ne nomme que `SYSTEME_COMPTABLE_INDETERMINE` |
+
+### ⚡ Deux écarts que la story n'énonçait pas — relevés par l'audit
+
+1. **La route OCR `appliquer` n'a AUCUN `@ApiConflictResponse`** — elle ne manque pas
+   `EXERCICE_CLOS`, elle manque **les deux codes**. N'y déclarer que `EXERCICE_CLOS` recréerait
+   à l'identique, en miroir, le mode de panne que cette story existe pour fermer. ⇒ le décorateur
+   est **créé** avec les deux, dans l'ordre d'évaluation.
+2. **Le reste du service documente déjà `EXERCICE_CLOS`** — `balance.controller.ts:107`,
+   `rapprochement.controller.ts` (5 routes), `releves.controller.ts:120`, et toute la famille
+   fiscale via la constante partagée `DESCRIPTION_409_GEL` (`fiscal.controller.ts:58`). **Le trou
+   est exactement la famille cahiers**, ni plus ni moins : l'AC-1 est donc atteignable dans le
+   périmètre de la story, sans déborder.
+
+### 🔁 Réutilisation plutôt que réinvention
+
+`fiscal.controller.ts:58` porte déjà le patron exact que cette story demande — une constante
+partagée qui nomme les deux codes **dans l'ordre d'évaluation** :
+
+```ts
+export const DESCRIPTION_409_GEL =
+  'EXERCICE_CLOS | BALANCE_VALIDEE_IMMUABLE — après validation, tout retraitement est figé.';
+```
+
+⇒ la famille cahiers reçoit **la même mécanique**, pas une rédaction ad hoc route par route :
+une seule constante, cinq points d'usage, et l'ordre écrit une fois pour toutes.
