@@ -66,6 +66,71 @@ deux moitiés sous les yeux en même temps.
 
 ---
 
+## ⚖️ RECOMMANDATION (2026-08-26, demandée par le PO) — **VOIE A, avec le refus de la voie B comme garde-fou**
+
+### Le fait qui tranche : un même numéro ne désigne pas la même chose
+
+Comparaison des deux artefacts packagés, racine par racine (`syscohada-revise@2.1`, 174 comptes ;
+`sfd-bceao@2.0`, 372 comptes) :
+
+**44 racines à deux chiffres existent dans les DEUX plans. Les 44 divergent. Aucune ne concorde.**
+
+| racine | SYSCOHADA (SN) | SFD-BCEAO (microfinance) |
+|---|---|---|
+| `10` | **Capital** | Valeurs en caisse |
+| `41` | **Clients et comptes rattachés** | Immobilisations financières |
+| `52` | **Banques** | Provisions réglementées |
+| `57` | **Caisse** | **Capital social** |
+| `64` | Impôts et taxes | **Charges de personnel** |
+| `70` | **Ventes** | Produits d'exploitation financière |
+
+⇒ Valider les comptes d'un dossier **microfinance** contre le plan **SYSCOHADA** ne « marche pas
+à peu près » : **tout passe**, parce que les racines existent des deux côtés — et **tout est
+faux**. Un `57…` d'une IMF est son **capital social** ; la plateforme le reconnaît comme
+**Caisse**, l'utilise comme contrepartie de trésorerie, et le bilan présente du capital en
+disponibilités.
+
+**C'est le mode de panne le plus grave du programme : aucun refus, aucun déséquilibre, aucun
+signal — et des états financiers faux.**
+
+### Pourquoi A, et pas B ni C
+
+1. **Le référentiel n'est pas un réglage d'affichage : c'est le cadre comptable de l'entité
+   tenue.** Il appartient au **dossier**, jamais au cabinet. Un cabinet tient une SARL
+   commerciale, une IMF et une compagnie d'assurance ; ces trois-là n'ont pas le même plan, et
+   ce n'est pas négociable.
+2. **STORY-303 a déjà tranché cette question — pour l'autre moitié.** Le tag venait du profil du
+   **cabinet** ; on l'a fait venir des axes du **dossier**, et le commentaire du code le dit :
+   *« la balance d'un client était taguée du système comptable du CABINET »*. **STORY-422 est le
+   même défaut, dans la moitié qu'on n'a pas corrigée.** Choisir autre chose que A, c'est
+   maintenir volontairement l'incohérence que 303 est venue supprimer.
+3. **L'objection de sécurité se traite DANS la voie A, elle ne s'y oppose pas.** La crainte
+   légitime — *« lire le plan d'un référentiel auquel l'organisation n'a pas droit »* — se règle
+   en posant une question **plus stricte** qu'aujourd'hui : *l'organisation est-elle habilitée au
+   référentiel de CE dossier ?* Si non, ce n'est pas un cas à valider contre un autre plan,
+   c'est un cas à **refuser** (`409`). Un cabinet non habilité au RCSFD n'a pas à tenir une IMF
+   dans l'outil. ⇒ **A absorbe B**, au bon endroit.
+4. **Bénéfice collatéral : le cas SMT cesse d'être bancal.** Sous A, un dossier `SMT` reçoit un
+   `409 REFERENTIEL_NON_PACKAGE` **explicite** au lieu de la substitution silencieuse d'un plan
+   SYSCOHADA qui n'est pas le sien.
+5. **C est la pire pour un praticien.** Publier « vos comptes ont été contrôlés contre un
+   référentiel autre que celui de votre dossier » n'est pas une information exploitable : c'est
+   un aveu, et la faute continue de se produire.
+
+### Ce que A coûte, honnêtement
+
+- **Ne touche pas** le contrat canonique (STORY-101), ni la liasse, ni `bilan-service`.
+- `GET /referentiels/plan-comptes` devient `GET /dossiers/{id}/referentiels/plan-comptes`.
+- `chargerReferentiel(orgId)` devient `chargerReferentiel(orgId, dossierId)` — **6 points
+  d'appel** (agrégation, rattachement, cahiers recettes, cahiers dépenses, comptes de
+  ventilation, soumission de balance).
+- Le read-model d'entitlement doit répondre « cette org a-t-elle droit à ce référentiel ? ».
+  ⚠️ **C'est le seul vrai inconnu**, et il conditionne le chiffrage.
+
+**Estimation si l'entitlement porte déjà l'information : 5 pts. S'il faut l'étendre : 8 à 13.**
+
+---
+
 ## Ce qui doit être tranché (PO + architecture)
 
 **Q1 — Le plan de comptes doit-il devenir dépendant du DOSSIER ?**
