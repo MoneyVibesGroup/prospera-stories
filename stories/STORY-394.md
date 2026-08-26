@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-043** *(cahier de recettes)*, 2026-08-24 — prolonge **STORY-078**, **STORY-085** et **STORY-139**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** in_progress
+**Statut :** review
 **Complexité :** medium
 **Sprint :** 20
 **Service :** `balance-service` (`:3007`)
@@ -87,7 +87,8 @@ l'écran ne peut offrir **aucune** liste. Le contournement se retire quand cette
 
 ## Progress Tracking
 
-**Statut :** `in_progress` — développement terminé sur `MNV-394` (`balance-service`), portes DoD vertes.
+**Statut :** `review` — dev + revue de code + revue de sécurité faits sur `MNV-394`
+(`balance-service`), portes DoD rejouées vertes sur l'état **final**.
 
 ### ③④ Développement, portes DoD
 
@@ -122,10 +123,13 @@ pathologie) ; aucune extraction croisée n'était donc justifiée.
 | M3 | filtre `isCompteDeDetail` retiré | unitaire « exclut hors niveau de détail » |
 | M4 | `@Max(9)` → `@Max(19)` sur `classe` | e2e `classe hors 1..9 -> 400` (`?classe=10`) |
 | M5 | filtre `prefixe` neutralisé | unitaire filtre préfixe |
+| M6 | branche fail-open `longueurDetail === undefined` ⇒ `false` (plan CIMA **vide**) | e2e AC-2 **après** correctif de revue — et **verte avant**, cf. ⑥ |
 
-**Portes DoD** — lint 0 warning · build OK · **3061** unitaires (+21 nouveaux : 7 service,
-2 controller, 12 e2e) + **738** e2e verts · couverture **98,99 / 91,87 / 98,18 / 99,07**
-(seuils 65/90/90/90) · `referentiel.service.ts`/`referentiel.controller.ts` à 100 % lignes/fonctions/statements.
+**Portes DoD** — lint 0 warning · build OK · **3061** unitaires (**+18** nouveaux : 7 service,
+2 controller, 9 e2e — décompte recompté sur le diff, cf. constat de revue ⑤) + **738** e2e verts ·
+couverture **98,99 / 91,90 / 98,18 / 99,07** (seuils 65/90/90/90 — mesurée sur l'état **final**,
+après les correctifs de revue) · `referentiel.service.ts`/`referentiel.controller.ts` à 100 %
+lignes/fonctions/statements.
 
 ### Vérification docker — non applicable (pas d'écriture)
 
@@ -136,6 +140,62 @@ règle *« toute story qui écrit en base »* de `qualite-verification.md` ne s'
 ici. Preuve équivalente apportée par l'e2e : **vrais artefacts embarqués** (pas de mock du
 chargement/checksum), sur le plan SYSCOHADA réel (21 comptes classe 7) **et** CIMA (pour
 prouver AC-2 : deux référentiels ⇒ deux plans différents, même jeton).
+
+### ⑥⑦ Revue de code, revue de sécurité
+
+**Revue de code — 6 constats, 3 retenus et corrigés** (commit de revue dédié `03e1c2d`) :
+
+1. ⚡⚡ **La garde de l'AC-2 était VACANTE, et la mutation l'a prouvé.** Elle assertait
+   `expect(corpsCima.comptes).not.toEqual(corpsSyscohada.comptes)` — or `[] !== [21 comptes]` est
+   **vrai** : un CIMA rendant une liste **vide** laissait le test **vert** tout en cassant l'AC
+   qu'il prétendait garder. Et le risque n'est pas théorique : `cima-assurances@1.0` est le
+   **seul** référentiel packagé sans `longueurCompteDetail` (omis au manifeste depuis STORY-292),
+   donc le **seul** à emprunter la branche fail-open `if (longueurDetail === undefined) return true`
+   d'`estCompteDeDetail` — une régression sur cette unique branche vide sa liste. **Mesuré dans
+   les deux sens** : mutation `return true` → `return false` ⇒ nouvelle assertion **rouge**
+   (`Expected length: 9, Received: 0`), ancienne assertion **VERTE** sous la *même* mutation.
+   Chaque plan est désormais asserté **par sa valeur** (21 SYSCOHADA / 9 CIMA, numéros listés).
+2. `toBeGreaterThan(100)` sur un plan **déterministe** (174 comptes, checksum vérifié) ne
+   discriminait rien : une régression perdant 70 comptes serait restée verte. Comptage exact
+   (`toHaveLength(174)`, `toHaveLength(21)`), et **titre du test aligné** sur ce qu'il prouve —
+   il annonçait « comptes de détail uniquement », que le filtre ne peut pas démontrer sur les
+   artefacts réels (aucun compte n'y dépasse 4 chiffres pour un `longueurCompteDetail` de 6 :
+   le filtre y est un *no-op*, et seul l'unitaire à paquet mocké garde réellement cette règle).
+3. Titre du `describe` e2e, qui couvre désormais **deux** routes.
+
+**Ponytail (lentille over-engineering) — 1 constat, appliqué** : les 3 `.filter()` chaînés sur le
+même tableau deviennent **un seul prédicat** (`isCompteDeDetail` ET les deux filtres facultatifs).
+
+**Revue de sécurité — 0 vulnérabilité.** L'axe à charge était l'**isolation multi-tenant** : un
+appelant peut-il lire le plan d'une autre organisation, ou d'un référentiel auquel la sienne n'a
+pas droit ? **Non, et c'est structurel** — `orgId` vient de `payload.org` (JWT RS256), le DTO ne
+porte **aucun** champ `referentiel`/`org`, et `forbidNonWhitelisted` rejette en **400** tout
+paramètre surnuméraire (un `?referentiel=…` ne passe pas en silence). `classe`/`prefixe` ne
+filtrent qu'un tableau **déjà en mémoire** : ni l'un ni l'autre ne remonte vers le resolver, la
+clé de cache ou Mongo. Également vérifié et écarté : ReDoS sur `CARACTERES_COMPTE`
+(`/^[0-9A-Za-z]+$/`, ancrée, sans ambiguïté de backtracking) ; injection NoSQL (`prefixe`
+n'atteint jamais Mongo, `startsWith` littéral) ; confusion de type sur la query
+(`?prefixe[]=a&b` ⇒ 400 dans les deux modes du pipe) ; collision de routing (les deux routes
+sont **littérales**, aucun `@Get(':id')` sur le préfixe `referentiels`).
+
+### ⛔ Deux écarts MESURÉS, laissés HORS PÉRIMÈTRE
+
+Relevés par la revue, **non corrigés ici** — le périmètre se respecte à la lettre, et chacun est
+un arbitrage PO, pas un défaut d'implémentation.
+
+1. **`?classe=0` rend 400, alors que `cima-assurances@1.0` porte 8 comptes de classe 0** —
+   `00, 01, 03, 05, 06, 07, 08, 09` (engagements hors bilan), **mesurés dans l'artefact**. Ils
+   ressortent bien de la route **sans filtre**, mais sont inatteignables par `?classe=`. L'AC-5
+   dit littéralement `1..9` : la garde est donc **conforme à la story**, mais plus étroite que le
+   référentiel qu'elle sert. Contournement en place : `?prefixe=0`. ⇒ à trancher avec le PO
+   (élargir à `0..9` ?) avant que FE-046/FE-030 ne construisent une liste de classes.
+2. **Un paramètre VIDE (`?prefixe=`, `?classe=`) rend 400, pas « pas de filtre »** —
+   `@IsOptional()` ne neutralise que `null`/`undefined`. ⚠️ **Délibérément laissé tel quel** :
+   c'est **exactement** le comportement de tous les DTO de query frères du service
+   (`ListerRecettesQueryDto.mois`, `ListerDepensesQueryDto.mois`, même idiome
+   `@IsOptional() + @Matches()`). « Corriger » ici aurait rendu `plan-comptes` **seul** tolérant
+   aux paramètres vides — une incohérence de service bien plus piégeuse pour le front qu'une
+   sévérité uniforme. Le jour où le patron change, il change **partout**, pas sur une route.
 
 ### Portée hors périmètre (rappel de la story)
 
