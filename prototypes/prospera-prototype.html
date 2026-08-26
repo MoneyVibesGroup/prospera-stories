@@ -5342,13 +5342,13 @@
                             <span class="rat-type lib">Libellé</span>
                             <b>«&nbsp;commission de change&nbsp;»</b>
                             <span style="color:var(--muted-fg)">→</span>
-                            <span class="cible">7078</span>
-                            <span class="badge badge-soon">Hors du plan actif</span>
+                            <span class="cible">70780000</span>
+                            <span class="badge badge-soon">Format Sage — 8 chiffres</span>
                           </div>
                           <div class="por"><span class="c">—</span><span class="u">inapplicable</span>
                             <button class="btn btn-primary btn-sm" type="button">Corriger le compte</button>
                           </div>
-                          <div class="tr"><b>Le compte <code>7078</code> n'appartient pas au plan <code>syscohada-revise@2.1</code> de ce dossier.</b> Le serveur <b>ignore cette règle sans le dire</b> et retombe sur le moteur de mots-clés&nbsp;: les 4 lignes concernées sont parties en <code>701</code>. Corrigez la cible, ou supprimez la règle.</div>
+                          <div class="tr"><b>Ce compte vient de votre plan Sage, et il est trop détaillé pour ce référentiel.</b> <code>70780000</code> est bien reconnu par sa racine <code>707</code>, mais le plan <code>syscohada-revise@2.1</code> s'arrête à <b>6 caractères</b>&nbsp;: il n'est donc plus <b>imputable</b>. Le serveur <b>ignore la règle sans le dire</b> et retombe sur le moteur de mots-clés — les 4 lignes concernées sont parties en <code>707</code>. ⚠️ <b>Elle était valide quand vous l'avez posée</b>&nbsp;: c'est la règle du niveau de détail qui a été resserrée depuis. Écrivez <code>7078</code>.</div>
                         </div>
                       </div>
 
@@ -5470,7 +5470,7 @@
                                 <td><span class="rat-src regle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> règle «&nbsp;loyer local adidogomé&nbsp;»</span></td>
                               </tr>
                               <tr>
-                                <td class="fis-case">707</td><td>Produits accessoires</td><td class="fis-n">145 000</td><td class="fis-n">4,2&nbsp;%</td>
+                                <td class="fis-case">707</td><td>Produits accessoires <span class="fis-motif">⚠️ <b>même libellé que <code>7073</code> ci-dessus</b> — et ici, contrairement aux dépenses, <b>aucune catégorie</b> ne porte le nom du cabinet</span></td><td class="fis-n">145 000</td><td class="fis-n">4,2&nbsp;%</td>
                                 <td><span class="rat-src motcle">mot-clé «&nbsp;transport&nbsp;»</span></td>
                               </tr>
                               <tr class="fis-cle">
@@ -5585,6 +5585,17 @@
                           sans arrondi qui se perd. ⚠️ Et le taux vient <b>toujours du paquet fiscal</b> de l’exercice — aucun taux n’est écrit dans le code.
                         </p>
                       </div>
+                      <!-- ⚠️ LE 2e RÉFLEXE DE QUELQU'UN QUI VIENT DE SAGE, devant deux
+                           colonnes débit/crédit : « quel journal ? quel n° de pièce ? ».
+                           Le produit n'a PAS de journaux — `comptabilite-service` est une
+                           fondation différée, sans rang de séquence (dit en toutes lettres
+                           dans « D'où viennent vos chiffres », FE-073). Mais il a bien une
+                           PIÈCE. Ne pas le dire ici ferait lire un oubli. -->
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>Ces écritures n'ont pas de journal, et c'est voulu&nbsp;: il n'y a pas de comptabilité générale ici.</b> Pas de VE, AC, BQ, OD — la balance est <b>reconstituée</b> à partir des cahiers, elle n'est pas la synthèse d'écritures saisies. <b>Ce qui existe, en revanche, c'est la pièce</b>&nbsp;: chaque ligne remonte à la page de cahier, au reçu ou à la capture dont elle sort, et c'est ce que porte la colonne <b>Preuve</b> de la balance. ⛔ Journaux, grand livre et comptes de tiers dépendent d'une fondation <b>différée</b>&nbsp;: elle n'est ni datée, ni planifiée, et l'Atelier ne la promet nulle part.</span>
+                      </div>
+
                       <p class="helper" style="text-align:left">
                         ⚠️ Dans les deux cas, <b>le produit reçoit le HT — jamais le TTC</b>. Créditer le TTC en classe&nbsp;7 gonflerait le chiffre d’affaires de 18&nbsp;%,
                         donc l’IS <b>et</b> la MFP, qui se calcule précisément sur le <b>CA HT</b>.
@@ -5612,6 +5623,10 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
                         <span><b>Un oubli de moyen de paiement se transforme en créance client, et rien ne le signale.</b> Le système ne connaît pas d'état «&nbsp;à crédit&nbsp;»&nbsp;: il déduit la contrepartie du <b>moyen de paiement</b>, et à défaut — si un tiers est nommé — conclut à un <b>compte de tiers</b>. Une vente au comptant dont on a oublié de cocher «&nbsp;espèces&nbsp;» ressort donc en <code>411 Clients</code>&nbsp;: <b>la balance est équilibrée, la trésorerie est sous-évaluée, et le bilan porte une créance qui n'existe pas</b>. <b>3 lignes de l'exercice sont dans ce cas</b> (420 000 F). <button class="linklike" type="button" data-goto-cahiers>Les compléter dans le cahier</button>. <span class="code">écart ouvert · ticket backend — l'aperçu ne détaille pas ses contreparties</span></span>
                       </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ <b>Et ces comptes de tiers ne se lettrent pas.</b> Le solde de <code>411</code> est un <b>cumul</b>, pas une liste de factures pointées&nbsp;: rien ne dit quelle vente reste due ni depuis quand.
+                        Le <button class="linklike" type="button" data-rat-goto-rapprochement>rapprochement</button> traite la <b>banque</b> et le <b>mobile money</b>, pas les tiers. ⇒ un solde client anormal se remonte <b>à la main</b>, en relisant le cahier.
+                      </p>
                       <p class="helper" style="text-align:left">
                         ⚠️ Et <b>sans tiers ni moyen de paiement</b>, la transaction n'est pas rangée dans un compte d'attente&nbsp;: elle est <b>écartée</b> et listée. <b>Aucune ligne d'écart n'est jamais ajoutée pour faire tomber les totaux</b> —
                         une balance amputée et honnête vaut mieux qu'une balance complète et fausse. <button class="linklike" type="button" data-rat-goto="balance">Voir les transactions écartées</button>
@@ -5643,6 +5658,19 @@
                       <div class="prof-note warn">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
                         <span><b>Cette balance ne porte aucune écriture d'inventaire.</b> Ni <b>variation de stocks</b>, ni <b>amortissements</b>, ni <b>provisions</b>&nbsp;: elles restent à saisir. Pour un commerçant en achat-revente, <b>la marge est calculée sur les achats et non sur le coût des marchandises vendues</b> — le résultat est donc faux tant que le stock de clôture n'est pas passé. <b>Elle est équilibrée, ce qui ne veut pas dire qu'elle est complète.</b></span>
+                      </div>
+
+                      <!-- ⛔ CE QUE LE COMPTABLE VENANT DE SAGE VOIT EN PREMIER, et que
+                           l'avertissement d'inventaire ne disait PAS : il n'y a ici
+                           **aucun compte de classe 1, 2 ni 3**. Un cahier ne produit que
+                           des flux — charges, produits, trésorerie, tiers. Ni capital, ni
+                           immobilisations, ni stocks. Une « balance » sans capitaux
+                           propres n'est pas une balance de clôture : c'est une balance de
+                           MOUVEMENTS. Et le produit a déjà la réponse — l'onglet
+                           À-nouveaux (FE-047) — que cet écran ne citait pas. -->
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>Il n'y a ici aucun compte de classe 1, 2 ou 3 — c'est normal, et ce n'est pas suffisant.</b> Un cahier n'enregistre que des <b>flux</b>&nbsp;: charges, produits, trésorerie, tiers. Ni <b>capital</b>, ni <b>immobilisations</b>, ni <b>stocks</b> — ils ne se déduisent d'aucune recette. Tant qu'aucune <b>balance d'ouverture</b> n'est chaînée à l'exercice, ceci est une <b>balance de mouvements</b>, pas une balance de clôture, et <b>aucun bilan ne peut en sortir</b>. <button class="linklike" type="button" data-rat-goto-reprise>Reprendre les à-nouveaux de l'exercice précédent</button> — c'est le geste qui manque, et il existe.</span>
                       </div>
 
                       <div class="imp-tiles">
@@ -14245,6 +14273,16 @@
         ratPanel.querySelectorAll("[data-rat-goto-balances]").forEach(function (b) {
           b.addEventListener("click", function () { setTab("balances"); });
         });
+        /* 2e passe « expert-comptable » : deux renvois de plus, vers les deux
+           gestes que l'écran NOMME sans pouvoir les rendre lui-meme — reprendre
+           les a-nouveaux (sans quoi la balance reste une balance de mouvements)
+           et rapprocher la tresorerie. */
+        ratPanel.querySelectorAll("[data-rat-goto-reprise]").forEach(function (b) {
+          b.addEventListener("click", function () { setTab("reprise"); });
+        });
+        ratPanel.querySelectorAll("[data-rat-goto-rapprochement]").forEach(function (b) {
+          b.addEventListener("click", function () { setTab("rapprochement"); });
+        });
 
         /* `normaliserTexte` du service : sans accents, en minuscules, espaces
            reduits. Deux saisies qui n'en different que par la casse designent la
@@ -14260,7 +14298,7 @@
            et retombe sur le moteur, sans jamais le dire. */
         var RAT_REGLES = [
           { type: "LIBELLE", cle: "loyer local adidogome", saisie: "loyer local Adidogomé", compte: "7073" },
-          { type: "LIBELLE", cle: "commission de change", saisie: "commission de change", compte: "7078", hors: true },
+          { type: "LIBELLE", cle: "commission de change", saisie: "commission de change", compte: "70780000", hors: true },
           { type: "TIERS", cle: "mairie de kara", saisie: "Mairie de Kara", compte: "706" },
           { type: "TIERS", cle: "sodigaz", saisie: "SODIGAZ", compte: "707" }
         ];
@@ -14345,7 +14383,7 @@
           var txt = '<b style="color:var(--foreground)">' + p.libelle + "</b> — motif rendu par le serveur : « " + p.motif + " ».";
           if (p.ignoree) {
             txt += '<br><b style="color:var(--foreground)">⚠️ Une règle existait pourtant</b> — « ' + p.ignoree.saisie +
-              " » → <code>" + p.ignoree.compte + "</code>. Son compte n'est plus au plan actif : " +
+              " » → <code>" + p.ignoree.compte + "</code>. Ce compte est <b>trop détaillé</b> pour le plan de ce dossier (8 chiffres, format Sage&nbsp;; le plan s'arrête à 6) : " +
               "<b>le serveur l'ignore sans le dire</b> et retombe sur le moteur.";
           }
           if (opt.dataset.depense === "1") {
