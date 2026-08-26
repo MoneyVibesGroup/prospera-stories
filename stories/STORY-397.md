@@ -33,7 +33,42 @@ n'expose `reintegrations_codes`, ni aucune autre rubrique du paquet.
 ⛔ **Et le paquet les publie SANS LIBELLÉS.** `togo@2026` porte
 `reintegrations_codes: ["10","11","12",…]` — douze chaînes nues. Même en les exposant
 telles quelles, rien ne dit lequel désigne « charges non justifiées » ou « amendes et
-pénalités ».
+pénalités ». ⇒ fiché séparément le 2026-08-26 : **STORY-415**.
+
+---
+
+## ⚡ AMENDEMENT du 2026-08-26 — la portée de cet écart était SURESTIMÉE
+
+Relevé en construisant la maquette **FE-050**. La phrase « **aucune** route ne publie la
+liste » est vraie de `referentiel` et de `cahiers` — et **fausse du module fiscal** :
+
+```ts
+// fiscal-response.dto.ts — ResultatFiscalResponseDto
+postesDsf!: PosteRetraitementResponseDto[];
+// « Grille complète de la liasse : TOUS les codes du paquet, à 0 quand rien ne les
+//   alimente, plus les postes sans code. » (D-091-11)
+```
+
+`construireTableauDsf` parcourt `codes.reintegrations` **puis** `codes.deductions` et pousse
+un poste **pour chaque code publié**, avec son `sens`. Autrement dit
+`GET /dossiers/{id}/fiscal/resultat-fiscal` **publie déjà la liste complète des codes admis
+et leur sens**, dans une réponse que l'écran fiscal reçoit de toute façon.
+
+**Deux conséquences, et elles vont en sens inverse :**
+
+1. **FE-050 n'est PAS bloquée par cette story.** Son sélecteur de code se remplit de
+   `postesDsf` — zéro appel supplémentaire, zéro code inventé, et le `sens` dérivé du code
+   plutôt que choisi (ce qui rend aussi `SENS_INCOHERENT` inatteignable par construction).
+   Laisser croire l'inverse aurait retardé une story qui était actionnable.
+2. **Cette story reste entièrement nécessaire pour l'écran des CAHIERS** (FE-044), qui
+   n'appelle pas `resultat-fiscal` — et ne devrait pas l'appeler pour ça : ce calcul peut
+   refuser (`409 PAQUET_FISCAL_NON_PACKAGE`, `409 CLASSES_GESTION_NON_SOURCEES`,
+   `404 BALANCE_INTROUVABLE`) pour des raisons étrangères à la saisie d'une catégorie de
+   dépense. **Une liste de référence ne doit pas dépendre d'un calcul.**
+
+⇒ Le périmètre ci-dessous ne change pas. Ce qui change, c'est le **consommateur** : FE-044,
+pas FE-050. Et la leçon générale : *un écart se vérifie module par module — « aucune route »
+veut souvent dire « aucune route que j'ai regardée ».*
 
 ---
 

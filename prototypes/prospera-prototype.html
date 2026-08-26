@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-051 Liquidation de l'impôt</title>
+<title>Prospera · Prototype cumulatif — FE-050 Résultat fiscal</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -1088,6 +1088,40 @@
      jamais lateralement. */
   .imp-table-wrap.fis-wide { overflow-x: auto; }
   .imp-table-wrap.fis-wide .imp-table { min-width: 46rem; }
+
+  /* ═══ FE-050 — le résultat fiscal : réintégrations / déductions en codes DSF ═══
+     (STORY-091 — `resultat-fiscal`, `retraitements`, `deficits`)
+
+     L'écran réutilise TOUT le vocabulaire déjà posé (.imp-table, .imp-tile,
+     .ref-card, .cah-form, .fis-*). Deux ajouts seulement, et chacun répare une
+     confusion que la réutilisation aurait produite :
+
+       ① `.rfi-zero` — une case de la liasse **à zéro** est CALCULÉE : rien ne
+          l'alimente. `.fis-nc` dit l'inverse (« non calculée ») et les deux vues
+          cohabitent dans le même panneau : leur donner la même teinte inverserait
+          le sens de l'une des deux. `.rfi-zero` atténue le TEXTE, sans le fond
+          gris qui signe le « non calculé » ;
+
+       ② `.imp-tile.rfi-cle` — la grandeur que porte l'écran. Ni `bal-ok` ni
+          `bal-ko` : un résultat fiscal n'est pas un solde en votre faveur ni une
+          dette. Vert/rouge y liraient une bonne ou une mauvaise nouvelle là où il
+          n'y a qu'une **assiette**.
+
+     `.cah-form textarea` : la justification est plafonnée à 2 000 caractères au
+     contrat — un `input` d'une ligne inviterait à écrire « non déductible », et
+     c'est précisément la justification qui rend la liasse défendable. */
+  .imp-table tr.rfi-zero td { color: var(--muted-fg); }
+  /* ③ Le SENS d'un retraitement n'est ni un succès ni une erreur : c'est une
+     direction. `.cah-conf.bad/.ok` (rouge / vert) y liraient « anomalie » et
+     « bonne nouvelle » sur des écritures parfaitement régulières. Ambre sur la
+     réintégration — elle AUGMENTE l'assiette, c'est ce qu'il faut remarquer ;
+     neutre sur la déduction. */
+  .rfi-sens { display: inline-flex; align-items: center; font-size: 0.7rem; font-weight: 650; padding: 0.1rem 0.45rem; border-radius: 999px; white-space: nowrap; background: var(--hover-surface); color: var(--muted-fg); }
+  .rfi-sens.plus { background: color-mix(in srgb, var(--warning) 18%, transparent); color: #b45309; }
+  :root[data-theme="dark"] .rfi-sens.plus { color: var(--warning); }
+  .imp-tile.rfi-cle { border-color: color-mix(in srgb, var(--orange-500) 50%, var(--border)); background: color-mix(in srgb, var(--orange-500) 8%, var(--card)); }
+  .cah-form textarea { font: inherit; font-size: 0.85rem; padding: 0.45rem 0.6rem; border: 1px solid var(--border-strong); border-radius: 0.5rem; background: var(--card); color: var(--foreground); min-width: 0; resize: vertical; }
+  .cah-form textarea:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; border-color: var(--ring); }
 
   .fis-slot { display: flex; flex-direction: column; gap: 1.05rem; }
   .fis-sect { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
@@ -4646,14 +4680,14 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="m9 12 2 2 4-4"/></svg>
                       Rapprochement <span class="count">Banque · Mobile money</span>
                     </button>
-                    <!-- ═══ FE-051 — L'ONGLET S'OUVRE ═══
+                    <!-- ═══ FE-051 puis FE-050 — L'ONGLET S'OUVRE, PUIS SE COMPLETE ═══
                          Il etait `disabled` depuis FE-073, qui le nommait « FE-050+ »
-                         parce que DEUX stories font UN SEUL ecran fiscal. FE-051 en
-                         livre la moitie qui LIQUIDE ; « Resultat fiscal » (FE-050) reste
-                         desactive A L'INTERIEUR du panneau, la ou il sera. On ne rouvre
-                         donc pas la question de la navigation a la livraison de FE-050 :
-                         c'est une sous-section qui s'allume, pas un onglet qui apparait. -->
-                    <button class="atl-tab" role="tab" data-atl-tab="fiscal" aria-selected="false" title="FE-051 — Impots et taxes : liquidation IS = max(MFP, IS), acomptes, credits, TVA, autres taxes, provisions a la balance, TPU. (Q2 tranchee par le PO le 2026-08-26 : « Fiscal » nommait un module, « Impots et taxes » nomme ce qu on y fait. `data-atl-tab` INCHANGE.) Le resultat fiscal (reintegrations / deductions) reste a venir : FE-050.">
+                         parce que DEUX stories font UN SEUL ecran fiscal. FE-051 a livre
+                         la moitie qui LIQUIDE ; FE-050 livre celle qui ETABLIT LA BASE.
+                         La prevision de FE-073 s'est verifiee a la lettre : la navigation
+                         n'a PAS ete rouverte a la seconde livraison — c'est une
+                         sous-section qui s'est allumee, pas un onglet qui est apparu. -->
+                    <button class="atl-tab" role="tab" data-atl-tab="fiscal" aria-selected="false" title="FE-051 — Impots et taxes : liquidation IS = max(MFP, IS), acomptes, credits, TVA, autres taxes, provisions a la balance, TPU. (Q2 tranchee par le PO le 2026-08-26 : « Fiscal » nommait un module, « Impots et taxes » nomme ce qu on y fait. `data-atl-tab` INCHANGE.) Le resultat fiscal (reintegrations / deductions) est livre par FE-050, en premiere section du panneau.">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg>
                       Impôts et taxes
                     </button>
@@ -5827,18 +5861,622 @@
                       </div>
                     </div>
 
-                    <!-- ⚠ « Résultat fiscal » est DÉSACTIVÉ : c'est FE-050, l'autre
-                         moitié du même écran, non livrée. Un onglet actif sans panneau
-                         viderait la section au clic (piège payé en FE-073) — un bouton
-                         `disabled` n'émet aucun événement. -->
+                    <!-- ═══ FE-050 — « Résultat fiscal » S'ALLUME, et passe DEVANT ═══
+                         Il etait `disabled` depuis FE-051, qui livrait l'autre moitie du
+                         meme ecran. Il devient la section PAR DEFAUT, et ce n'est pas un
+                         detail d'ergonomie : on ne liquide pas un impot avant d'avoir
+                         etabli sa base. L'ordre des onglets est l'ordre du travail.
+                         ⚠ `fisRegime()` retombe sur la premiere section VISIBLE quand la
+                           section active disparait avec le regime. « Resultat fiscal »
+                           etant `data-fis-only="REEL"`, un dossier au SYNTHETIQUE ouvre
+                           donc sur la TPU, pas sur une section vide. -->
                     <div class="fis-nav" role="tablist" aria-label="Sections fiscales">
-                      <button class="fis-t" role="tab" data-fis-tab="resultat" data-fis-only="REEL" disabled title="FE-050 — réintégrations, déductions, imputation des déficits reportables, articulation avec le compte de résultat. Backend déjà servi (STORY-091).">Résultat fiscal <span class="soon">FE-050</span></button>
-                      <button class="fis-t" role="tab" data-fis-tab="liquidation" data-fis-only="REEL" aria-selected="true">Liquidation de l'impôt</button>
+                      <button class="fis-t" role="tab" data-fis-tab="resultat" data-fis-only="REEL" aria-selected="true" title="FE-050 — réintégrations, déductions, imputation des déficits reportables, articulation avec le compte de résultat (STORY-091).">Résultat fiscal</button>
+                      <button class="fis-t" role="tab" data-fis-tab="liquidation" data-fis-only="REEL" aria-selected="false">Liquidation de l'impôt</button>
                       <button class="fis-t" role="tab" data-fis-tab="tva" data-fis-only="REEL" aria-selected="false">TVA</button>
                       <button class="fis-t" role="tab" data-fis-tab="tpu" data-fis-only="SYNTHETIQUE" aria-selected="false" hidden>Taxe professionnelle unique</button>
                       <button class="fis-t" role="tab" data-fis-tab="taxes" aria-selected="false">Autres impôts et taxes</button>
                       <button class="fis-t" role="tab" data-fis-tab="provisions" aria-selected="false">Provisions à la balance</button>
                     </div>
+
+                    <!-- ══════════════ SECTION : RÉSULTAT FISCAL (FE-050) ══════════════
+                         STORY-091 · FR-A18 · `GET …/fiscal/resultat-fiscal`,
+                         `GET · POST · DELETE …/fiscal/retraitements`,
+                         `GET · POST · DELETE …/fiscal/deficits`.
+
+                         ⚡ LA CHAINE QUE CET ECRAN RESTITUE, et rien d'autre :
+                              resultat comptable NET
+                            + charge d'impot deja comptabilisee (89x)
+                            = resultat comptable AVANT IMPOT      ← l'assiette
+                            + reintegrations − deductions
+                            = resultat avant deficits
+                            − deficits imputes (plafond du paquet)
+                            = RESULTAT FISCAL                     ← ce que FE-051 liquide
+
+                         ⛔ LA MARCHE QU'UNE MAQUETTE NAIVE SAUTE — et c'est la plus
+                            chere : « resultat comptable → resultat fiscal » n'est PAS
+                            une soustraction en deux temps. Le contrat publie DEUX
+                            grandeurs comptables (`resultatComptable` NET et
+                            `resultatComptableAvantImpot`) et c'est la SECONDE qui fonde
+                            l'assiette, parce que l'impot sur le resultat n'est pas
+                            deductible et doit etre REPRIS avant de calculer la base.
+                            Un ecran qui partirait du resultat NET sous-estimerait la
+                            base de toute la charge d'impot deja passee — ici
+                            1 200 000 F, soit 324 000 F d'IS. Et rien ne paraitrait
+                            anormal : les deux nombres sont justes, c'est le point de
+                            depart qui serait faux.
+                            ⇒ les deux sont affichees, l'une SOUS l'autre, la reprise
+                            entre elles.
+
+                         ⛔ LE CODE DECIDE DU SENS, PAS LE COMPTABLE
+                            (`validerRetraitementManuel`, refus n°2 `SENS_INCOHERENT`) :
+                            saisir `20` en DEDUCTION inverserait le signe dans l'assiette
+                            sans qu'aucun total ne paraisse anormal. Le formulaire
+                            n'offre donc AUCUN choix de sens : il l'AFFICHE, derive du
+                            code choisi.
+
+                         ⚡ LA LISTE DES CODES EST SERVIE — mais pas par la route qu'on
+                            croit. STORY-397 (ready-for-dev) dit vrai : aucune route ne
+                            publie `reintegrations_codes`. Mais `GET /resultat-fiscal`
+                            rend `postesDsf` = la GRILLE COMPLETE du paquet, tous les
+                            codes, a 0 quand rien ne les alimente, chacun avec son
+                            `sens`. Le selecteur se remplit donc de la reponse que
+                            l'ecran a DEJA recue — zero appel de plus, zero code invente.
+                            ⇒ FE-050 n'est PAS bloquee par STORY-397, qui reste
+                            necessaire pour l'ecran des CAHIERS (il n'appelle pas
+                            `resultat-fiscal`).
+
+                         ⛔ CE QUE LE PAQUET NE PUBLIE PAS : les LIBELLES. `togo@2026`
+                            porte 12 + 5 codes NUS et `CodesRetraitement.libelles` sort
+                            VIDE. Nommer `20` « Amendes et penalites » dans l'ecran
+                            serait ecrire du fiscal en dur (NFR-A06), et faux au premier
+                            code qui bouge. ⇒ la colonne « Ce qui est retraite » ne
+                            montre JAMAIS un libelle invente : elle montre la
+                            JUSTIFICATION ecrite par le comptable, le MOTIF pour les
+                            postes agreges, le TYPE DE TAXE pour le registre. Le manque
+                            est dit a l'ecran et fiche (STORY-415).
+
+                         ⛔ AUCUN `PATCH` : un retraitement se SUPPRIME et se RESSAISIT
+                            (D-091-12). L'ecran n'offre aucun champ editable en place.
+                            Et seuls les postes MANUELS se suppriment ici : un poste
+                            agrege n'appartient pas a cet ecran, il appartient au cahier
+                            ou au registre qui l'a produit. Offrir « Supprimer » dessus
+                            promettrait un geste que le contrat n'a pas.
+
+                         ⚠ DEUX TABLEAUX QUI NE DISENT PAS LA MEME CHOSE, et les fondre
+                           serait l'erreur : le DETAIL (`reintegrations`/`deductions`)
+                           liste les postes PAR SOURCE — le code 20 y apparait DEUX fois,
+                           une par origine ; la GRILLE (`postesDsf`) est la liasse — le
+                           code 20 y est FUSIONNE en une case, origine `MIXTE`. Un seul
+                           tableau ferait perdre soit la tracabilite, soit la case. -->
+                    <div class="fis-slot" data-fis-panel="resultat">
+
+                      <div class="fis-sect">
+                        <h4>Du résultat comptable au résultat fiscal</h4>
+                        <span class="c">réintégrations et déductions, <b>par code de la liasse</b></span>
+                        <span class="grow" style="flex:1"></span>
+                        <!-- MEME bascule que la liquidation : `liqShow` pilote tous les
+                             `[data-liq-slot]` du panneau fiscal. Les deux moities du
+                             meme ecran ne peuvent donc PAS diverger — changer la
+                             situation ici la change la-bas. -->
+                        <div class="atelier-demo" role="tablist" aria-label="Situation du dossier (démo)">
+                          <span class="lbl">Situation (démo)</span>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-liq="is" aria-selected="true">Bénéfice</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-liq="mfp" aria-selected="false">Déficit</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-liq="refus" aria-selected="false">Paramétrage incomplet</button>
+                        </div>
+                      </div>
+
+                      <!-- ═══ REFUS 409 · CLASSES_GESTION_NON_SOURCEES ═══
+                           Le referentiel du dossier ne declare pas les racines de
+                           comptes qui portent le resultat. Le service REFUSE plutot que
+                           de retomber sur [6,7,8] — et ce refus repare un defaut
+                           MESURE : sur un referentiel d'assurance, le repli doublait
+                           exactement la base imposable, SANS aucun signal. -->
+                      <div data-liq-slot="refus" hidden>
+                        <div class="ref-card">
+                          <div class="state error" style="padding:2.2rem 1.5rem">
+                            <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></span>
+                            <h3>Le résultat comptable n'a pas pu être établi</h3>
+                            <p>Le référentiel de ce dossier ne déclare pas les <b>racines de comptes qui portent le résultat</b>. Sans elles, pas d'assiette&nbsp;: le service refuse plutôt que de retomber sur les classes 6-7-8 par défaut.</p>
+                            <p class="atl-secsub" style="max-width:44rem;margin:0.6rem auto 0">Ce repli a déjà été mesuré sur un référentiel d'assurance dont la classe 8 mêle comptes de gestion et comptes de <b>regroupement</b>&nbsp;: la base imposable ressortait <b>exactement doublée</b>, et aucun contrôle ne s'en apercevait — le calcul était juste, sa source ne l'était pas.</p>
+                            <span class="code" style="margin-top:0.8rem;display:inline-block">409 · CLASSES_GESTION_NON_SOURCEES</span>
+                            <p class="atl-secsub" style="margin-top:0.7rem"><b>Le geste n'est pas le vôtre</b>&nbsp;: le référentiel est packagé par Money&nbsp;Vibes. Les mêmes causes se lisent aussi <span class="code">409 · PAQUET_FISCAL_NON_PACKAGE</span> <span class="code">409 · REFERENTIEL_UNRESOLVED</span>, et une balance absente <span class="code">404 · BALANCE_INTROUVABLE</span>.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div data-liq-calc>
+
+                        <!-- ═══ LE CHIFFRE D'ABORD, LA DEMONSTRATION DESSOUS ═══ -->
+                        <div class="imp-tiles" data-liq-slot="is">
+                          <div class="imp-tile"><div class="k">Résultat comptable avant impôt</div><div class="v">5 440 000<span class="u">F</span></div><div class="atl-secsub" style="margin-top:0.2rem">l'assiette de départ</div></div>
+                          <div class="imp-tile dep-attn"><div class="k">Réintégrations</div><div class="v">+ 5 850 000<span class="u">F</span></div><div class="atl-secsub" style="margin-top:0.2rem">8 postes · 3 saisis, 5 agrégés</div></div>
+                          <div class="imp-tile"><div class="k">Déductions</div><div class="v">− 900 000<span class="u">F</span></div><div class="atl-secsub" style="margin-top:0.2rem">2 postes, tous saisis</div></div>
+                          <div class="imp-tile rfi-cle"><div class="k">Résultat fiscal</div><div class="v">5 195 000<span class="u">F</span></div><div class="atl-secsub" style="margin-top:0.2rem">après 5 195 000 F de déficits imputés</div></div>
+                        </div>
+                        <div class="imp-tiles" data-liq-slot="mfp" hidden>
+                          <div class="imp-tile"><div class="k">Résultat comptable avant impôt</div><div class="v">− 8 350 000<span class="u">F</span></div><div class="atl-secsub" style="margin-top:0.2rem">l'assiette de départ</div></div>
+                          <div class="imp-tile dep-attn"><div class="k">Réintégrations</div><div class="v">+ 5 850 000<span class="u">F</span></div><div class="atl-secsub" style="margin-top:0.2rem">8 postes · 3 saisis, 5 agrégés</div></div>
+                          <div class="imp-tile"><div class="k">Déductions</div><div class="v">− 900 000<span class="u">F</span></div><div class="atl-secsub" style="margin-top:0.2rem">2 postes, tous saisis</div></div>
+                          <div class="imp-tile rfi-cle dep-attn"><div class="k">Résultat fiscal</div><div class="v">− 3 400 000<span class="u">F</span></div><div class="atl-secsub" style="margin-top:0.2rem">déficit reportable, <b>pas «&nbsp;zéro impôt&nbsp;»</b></div></div>
+                        </div>
+
+                        <!-- ⚠ `mfpToujoursDue` vaut TOUJOURS `true` dans la reponse : ce
+                             n'est pas un verdict sur ce dossier, c'est une regle du
+                             moteur. L'ecran l'ecrit donc comme une REGLE, et ne la met
+                             en avant que la ou elle se joue — sur un deficit, ou la
+                             conclusion intuitive (« en perte, donc rien a payer ») est
+                             precisement celle qui coute un redressement. -->
+                        <div class="prof-note bad" data-liq-slot="mfp" hidden style="margin-top:0.85rem">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                          <div>
+                            <b>Résultat fiscal négatif ne veut pas dire «&nbsp;aucun impôt&nbsp;».</b> Le <b>minimum forfaitaire de perception</b> se calcule sur le chiffre d'affaires, pas sur le résultat&nbsp;: il reste dû. Ce déficit alimente le <b>stock reportable</b>, il n'éteint rien.
+                            <br><span class="atl-secsub">Le moteur ne conclut jamais «&nbsp;zéro impôt&nbsp;»&nbsp;: <span class="code">mfpToujoursDue: true</span> est <b>constant</b> dans la réponse — une règle, pas un verdict sur ce dossier. Le montant réellement dû est établi par <button class="btn btn-ghost btn-sm" type="button" data-fis-goto="liquidation" style="padding:0.1rem 0.45rem">Liquidation de l'impôt</button>.</span>
+                          </div>
+                        </div>
+
+                        <!-- ═══ LA CASCADE — chaque ligne porte sa formule ═══
+                             Meme exigence qu'en liquidation : un montant sans sa formule
+                             est un chiffre qu'il faut croire. Ici il se refait a la main,
+                             ligne a ligne, du solde de balance a la base imposable. -->
+                        <div class="fis-sect" style="margin-top:1.05rem">
+                          <h4>La chaîne, ligne à ligne</h4>
+                          <span class="c">le front <b>ne recalcule rien</b>&nbsp;: il restitue le calcul du service</span>
+                        </div>
+
+                        <div class="imp-table-wrap" data-liq-slot="is">
+                          <div class="imp-table-cap"><b>Deux grandeurs comptables, pas une.</b> Le résultat <b>net</b> est celui que la balance comptabilise&nbsp;; le résultat <b>avant impôt</b> est celui qui fonde l'assiette. Partir du net minorerait la base de toute la charge d'impôt déjà passée.</div>
+                          <table class="imp-table">
+                            <thead><tr><th>Étape</th><th class="fis-n">Montant</th><th>D'où il vient</th></tr></thead>
+                            <tbody>
+                              <tr><td>Résultat comptable <b>net</b> de l'exercice</td><td class="fis-n">4 240 000</td><td class="cah-piece">Σ (crédit − débit) sur les racines de gestion publiées par le référentiel — en SYSCOHADA révisé&nbsp;: classes 6, 7 et 8, HAO et impôt compris</td></tr>
+                              <tr class="fis-attn"><td>+ Charge d'impôt déjà comptabilisée <span class="fis-motif">comptes 89x — l'impôt n'est pas déductible, il est repris</span></td><td class="fis-n">+ 1 200 000</td><td class="cah-piece">891 provision de l'exercice 900 000 + 892 rappel antérieur 300 000</td></tr>
+                              <tr class="fis-cle"><td>= Résultat comptable <b>avant impôt</b></td><td class="fis-n">5 440 000</td><td class="cah-piece">4 240 000 + 1 200 000 — <b>stable</b> : provisionner l'impôt ne la déplace pas</td></tr>
+                              <tr><td>+ Réintégrations</td><td class="fis-n">+ 5 850 000</td><td class="cah-piece">8 postes — détail ci-dessous</td></tr>
+                              <tr><td>− Déductions</td><td class="fis-n">− 900 000</td><td class="cah-piece">2 postes — détail ci-dessous</td></tr>
+                              <tr class="fis-cle"><td>= Résultat avant imputation des déficits</td><td class="fis-n">10 390 000</td><td class="cah-piece">5 440 000 + 5 850 000 − 900 000</td></tr>
+                              <tr><td>− Déficits reportables imputés</td><td class="fis-n">− 5 195 000</td><td class="cah-piece">plafonné à 50 % du bénéfice — le stock disponible est de 8 000 000</td></tr>
+                              <tr class="tot fis-cle"><td><b>= Résultat fiscal</b> <span class="fis-motif">la base que liquide «&nbsp;Liquidation de l'impôt&nbsp;»</span></td><td class="fis-n"><b>5 195 000</b></td><td class="cah-piece">10 390 000 − 5 195 000</td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <div class="imp-table-wrap" data-liq-slot="mfp" hidden>
+                          <div class="imp-table-cap"><b>Deux grandeurs comptables, pas une.</b> Le résultat <b>net</b> est celui que la balance comptabilise&nbsp;; le résultat <b>avant impôt</b> est celui qui fonde l'assiette. Partir du net minorerait la base de toute la charge d'impôt déjà passée.</div>
+                          <table class="imp-table">
+                            <thead><tr><th>Étape</th><th class="fis-n">Montant</th><th>D'où il vient</th></tr></thead>
+                            <tbody>
+                              <tr><td>Résultat comptable <b>net</b> de l'exercice</td><td class="fis-n">− 9 550 000</td><td class="cah-piece">Σ (crédit − débit) sur les racines de gestion publiées par le référentiel — en SYSCOHADA révisé&nbsp;: classes 6, 7 et 8, HAO et impôt compris</td></tr>
+                              <tr class="fis-attn"><td>+ Charge d'impôt déjà comptabilisée <span class="fis-motif">comptes 89x — l'impôt n'est pas déductible, il est repris</span></td><td class="fis-n">+ 1 200 000</td><td class="cah-piece">891 provision de l'exercice 900 000 + 892 rappel antérieur 300 000</td></tr>
+                              <tr class="fis-cle"><td>= Résultat comptable <b>avant impôt</b></td><td class="fis-n">− 8 350 000</td><td class="cah-piece">− 9 550 000 + 1 200 000</td></tr>
+                              <tr><td>+ Réintégrations</td><td class="fis-n">+ 5 850 000</td><td class="cah-piece">8 postes — détail ci-dessous</td></tr>
+                              <tr><td>− Déductions</td><td class="fis-n">− 900 000</td><td class="cah-piece">2 postes — détail ci-dessous</td></tr>
+                              <tr class="fis-cle"><td>= Résultat avant imputation des déficits</td><td class="fis-n">− 3 400 000</td><td class="cah-piece">− 8 350 000 + 5 850 000 − 900 000</td></tr>
+                              <tr class="rfi-zero"><td>− Déficits reportables imputés <span class="fis-motif">aucune imputation — et le motif est publié, jamais un zéro muet</span></td><td class="fis-n">0</td><td class="cah-piece">AUCUN_BENEFICE — un déficit ne s'impute pas sur un déficit</td></tr>
+                              <tr class="tot fis-cle"><td><b>= Résultat fiscal</b> <span class="fis-motif">déficit généré : 3 400 000 F, qui rejoint le stock reportable</span></td><td class="fis-n"><b>− 3 400 000</b></td><td class="cah-piece">− 3 400 000 − 0</td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <!-- ═══ L'ARTICULATION — signalee, JAMAIS bloquante ═══
+                             Le resultat recalcule depuis les racines de gestion doit
+                             egaler le solde du compte de RESULTAT NET (13 en SYSCOHADA
+                             revise — et non 12, « report a nouveau », qui porte le
+                             resultat des exercices ANTERIEURS : l'ecart aurait ete
+                             systematiquement faux, et d'autant plus credible qu'il
+                             aurait ete non nul).
+                             ⚠ C'est le SEUL controle de cet ecran, et il ne bloque rien :
+                               une balance dont le compte de resultat n'est pas encore
+                               solde est un cas de travail normal, pas une anomalie. -->
+                        <div class="ref-card" style="margin-top:1.05rem" data-liq-slot="is">
+                          <div class="ref-head">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+                            <b>Articulation avec la balance</b><span class="grow"></span><span class="cah-conf ok">Concordant</span>
+                          </div>
+                          <div class="ref-grid">
+                            <div class="ref-item"><div class="ref-k">Compte de résultat net</div><div class="ref-v">13</div><div class="ref-sum">Résolu du référentiel, jamais codé en dur.</div></div>
+                            <div class="ref-item"><div class="ref-k">Solde comptabilisé</div><div class="ref-v">4 240 000 F</div><div class="ref-sum">Ce que la balance porte au compte 13.</div></div>
+                            <div class="ref-item"><div class="ref-k">Résultat recalculé</div><div class="ref-v">4 240 000 F</div><div class="ref-sum">Le résultat net ci-dessus, celui qui s'articule — pas l'avant-impôt.</div></div>
+                            <div class="ref-item"><div class="ref-k">Écart</div><div class="ref-v">0 F</div><div class="ref-sum">Recalculé − comptabilisé.</div></div>
+                          </div>
+                        </div>
+
+                        <div class="ref-card" style="margin-top:1.05rem" data-liq-slot="mfp" hidden>
+                          <div class="ref-head">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                            <b>Articulation avec la balance</b><span class="grow"></span><span class="cah-conf warn">Écart signalé</span>
+                          </div>
+                          <div class="ref-grid">
+                            <div class="ref-item"><div class="ref-k">Compte de résultat net</div><div class="ref-v">13</div><div class="ref-sum">Résolu du référentiel, jamais codé en dur.</div></div>
+                            <div class="ref-item"><div class="ref-k">Solde comptabilisé</div><div class="ref-v">0 F</div><div class="ref-sum">La balance importée n'a pas encore soldé le compte 13.</div></div>
+                            <div class="ref-item"><div class="ref-k">Résultat recalculé</div><div class="ref-v">− 9 550 000 F</div><div class="ref-sum">Le résultat net ci-dessus, celui qui s'articule — pas l'avant-impôt.</div></div>
+                            <div class="ref-item"><div class="ref-k">Écart</div><div class="ref-v">− 9 550 000 F</div><div class="ref-sum">Recalculé − comptabilisé.</div></div>
+                          </div>
+                        </div>
+                        <div class="prof-note info" data-liq-slot="mfp" hidden>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                          <div>
+                            <b>Un écart d'articulation ne bloque pas le calcul, et n'invalide pas le résultat fiscal.</b> Une balance dont le compte de résultat n'est pas encore soldé est un cas de travail normal&nbsp;: le moteur recalcule le résultat depuis les comptes de gestion et le dit. Ce qui serait fautif, c'est de le taire.
+                            <br><span class="atl-secsub">Deux cas où le contrôle ne s'applique pas du tout, et ils sont nommés plutôt que rendus par un écart de 0&nbsp;: <span class="code">COMPTE_RESULTAT_NON_SOURCE</span> (le référentiel ne désigne pas le compte) et <span class="code">COMPTE_RESULTAT_ABSENT_BALANCE</span> (le compte existe au plan, aucune ligne ne le porte).</span>
+                          </div>
+                        </div>
+
+                        <!-- ═══════════ LE DETAIL DES RETRAITEMENTS ═══════════
+                             ⚠ CE TABLEAU EST PAR SOURCE, pas par case : le code 20 y
+                               figure DEUX fois (registre des taxes + cahier de
+                               depenses). C'est la grille de la liasse, plus bas, qui les
+                               fusionne. Perdre cette distinction, c'est perdre la
+                               tracabilite d'un des deux montants.
+                             ⚠ COLONNE « Ce qui est retraite » : jamais un libelle de
+                               code (le paquet n'en publie aucun) — la justification
+                               ecrite, le motif agrege, ou le type de taxe. -->
+                        <div class="fis-sect" style="margin-top:1.05rem">
+                          <h4>Le détail des retraitements</h4>
+                          <span class="c">par <b>source</b> — un code peut être alimenté deux fois</span>
+                          <span class="grow" style="flex:1"></span>
+                          <span class="fis-chip">+ 5 850 000 réintégré</span>
+                          <span class="fis-chip">− 900 000 déduit</span>
+                        </div>
+
+                        <div class="imp-table-wrap fis-wide">
+                          <div class="imp-table-cap"><b>Aucun montant n'est orphelin.</b> Chaque poste remonte soit à ses <b>lignes sources</b> (agrégation automatique), soit à sa <b>saisie</b> — auteur, date, base légale, justification. C'est cette colonne qui rend la liasse défendable en contrôle.</div>
+                          <table class="imp-table">
+                            <thead>
+                              <tr><th>Code</th><th>Sens</th><th>Ce qui est retraité</th><th class="fis-n">Montant</th><th>Origine</th><th>Base légale</th><th></th></tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td class="fis-case">40</td>
+                                <td><span class="rfi-sens plus">+ Réintégration</span></td>
+                                <td>Intérêts du compte courant de M.&nbsp;Santos au-delà du taux légal majoré de 3 points<span class="fis-motif">saisi par Kofi Santos le 12/03/2025 · pièce CC-2024-07</span></td>
+                                <td class="fis-n">1 800 000</td>
+                                <td><span class="fis-chip">Saisie</span></td>
+                                <td class="cah-piece">CGI TG, art. 99 m</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td>
+                              </tr>
+                              <tr>
+                                <td class="fis-case">45</td>
+                                <td><span class="rfi-sens plus">+ Réintégration</span></td>
+                                <td>Redevance de marque versée au groupe, part excédant 5 % du chiffre d'affaires HT<span class="fis-motif">saisi par Kofi Santos le 12/03/2025 · pièce FACT-2024-0412</span></td>
+                                <td class="fis-n">950 000</td>
+                                <td><span class="fis-chip">Saisie</span></td>
+                                <td class="cah-piece">CGI TG, art. 99 k</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td>
+                              </tr>
+                              <tr>
+                                <td class="fis-case">30</td>
+                                <td><span class="rfi-sens plus">+ Réintégration</span></td>
+                                <td>Provision pour litige prud'homal, non nettement précisée et absente du relevé annexe<span class="fis-motif">saisi par Ama Doe le 14/03/2025</span></td>
+                                <td class="fis-n">620 000</td>
+                                <td><span class="fis-chip">Saisie</span></td>
+                                <td class="cah-piece">CGI TG, art. 102</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td>
+                              </tr>
+                              <tr>
+                                <td class="fis-case">20</td>
+                                <td><span class="rfi-sens plus">+ Réintégration</span></td>
+                                <td>Pénalités, amendes et majorations fiscales<span class="fis-motif">1 entrée du registre des impôts et taxes</span></td>
+                                <td class="fis-n">120 000</td>
+                                <td><span class="fis-chip">Registre des taxes</span></td>
+                                <td class="cah-piece fis-vide">— porté par le registre</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button" data-fis-goto="taxes">Voir le registre</button></td>
+                              </tr>
+                              <tr>
+                                <td class="fis-case">20</td>
+                                <td><span class="rfi-sens plus">+ Réintégration</span></td>
+                                <td>Contraventions routières refacturées, catégorie non déductible<span class="fis-motif">3 lignes du cahier de dépenses</span></td>
+                                <td class="fis-n">260 000</td>
+                                <td><span class="fis-chip">Cahier de dépenses</span></td>
+                                <td class="cah-piece fis-vide">— porté par la catégorie</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button" data-goto-cahiers="1">Voir les lignes</button></td>
+                              </tr>
+                              <tr class="fis-attn">
+                                <td class="fis-case">65 <span class="fis-motif">⚠ hors paquet</span></td>
+                                <td><span class="rfi-sens plus">+ Réintégration</span></td>
+                                <td>Cadeaux à la clientèle au-delà du plafond<span class="fis-motif">2 lignes du cahier de dépenses</span></td>
+                                <td class="fis-n">280 000</td>
+                                <td><span class="fis-chip">Cahier de dépenses</span></td>
+                                <td class="cah-piece fis-vide">— porté par la catégorie</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button" data-goto-cahiers="1">Voir les lignes</button></td>
+                              </tr>
+                              <tr>
+                                <td class="fis-vide">—</td>
+                                <td><span class="rfi-sens plus">+ Réintégration</span></td>
+                                <td>Charges sans pièce justificative<span class="fis-motif">motif CHARGE_NON_JUSTIFIEE · 14 lignes</span></td>
+                                <td class="fis-n">1 340 000</td>
+                                <td><span class="fis-chip">Cahier de dépenses</span></td>
+                                <td class="cah-piece fis-vide">— portée par la ligne du cahier</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button" data-goto-cahiers="1">Voir les lignes</button></td>
+                              </tr>
+                              <tr>
+                                <td class="fis-vide">—</td>
+                                <td><span class="rfi-sens plus">+ Réintégration</span></td>
+                                <td>Lignes marquées non déductibles à la revue<span class="fis-motif">motif DECISION_HUMAINE · 3 lignes</span></td>
+                                <td class="fis-n">480 000</td>
+                                <td><span class="fis-chip">Cahier de dépenses</span></td>
+                                <td class="cah-piece fis-vide">— portée par la ligne du cahier</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button" data-goto-cahiers="1">Voir les lignes</button></td>
+                              </tr>
+                              <tr class="tot"><td colspan="3">Total des réintégrations</td><td class="fis-n">5 850 000</td><td colspan="3" class="atl-secsub">dont <b>3 370 000 F saisis</b> et <b>2 480 000 F agrégés</b> · <b>1 820 000 F sans case de liasse</b></td></tr>
+                              <tr>
+                                <td class="fis-case">90</td>
+                                <td><span class="rfi-sens">− Déduction</span></td>
+                                <td>Dividendes reçus de la filiale Sodifab Kara — régime mère-filiale<span class="fis-motif">saisi par Kofi Santos le 12/03/2025</span></td>
+                                <td class="fis-n">620 000</td>
+                                <td><span class="fis-chip">Saisie</span></td>
+                                <td class="cah-piece">CGI TG, art. 107</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td>
+                              </tr>
+                              <tr>
+                                <td class="fis-case">100</td>
+                                <td><span class="rfi-sens">− Déduction</span></td>
+                                <td>Reprise de la provision pour litige 2023, réintégrée à sa dotation<span class="fis-motif">saisi par Ama Doe le 14/03/2025</span></td>
+                                <td class="fis-n">280 000</td>
+                                <td><span class="fis-chip">Saisie</span></td>
+                                <td class="cah-piece">CGI TG, art. 102</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td>
+                              </tr>
+                              <tr class="tot"><td colspan="3">Total des déductions</td><td class="fis-n">900 000</td><td colspan="3" class="atl-secsub">une provision réintégrée à sa dotation <b>doit</b> être déduite à sa reprise — sinon elle est imposée deux fois</td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <!-- LE POINT LE PLUS MAL COMPRIS DU TABLEAU, et il coute une
+                             base imposable : une ligne SANS code reste dans l'assiette. -->
+                        <div class="prof-note warn">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                          <div>
+                            <b>1 820 000 F sont réintégrés sans case de liasse&nbsp;: le montant est dans l'assiette, la case reste à trouver.</b>
+                            Le paquet fiscal ne publie <b>aucune correspondance motif → code</b>. Écarter ces lignes faute de code <b>minorerait la base imposable</b> — c'est exactement le redressement que cet écran prévient. Elles sont donc comptées, et signalées&nbsp;: au dépôt de la DSF, ces montants seront à ventiler à la main.
+                            <br><span class="atl-secsub">Même logique pour le code <b>65</b>&nbsp;: il n'est plus publié par le paquet de l'exercice (artefact republié depuis la saisie). Le montant reste dans l'assiette, la case est dite <b>introuvable</b> plutôt que choisie au hasard.</span>
+                          </div>
+                        </div>
+
+                        <!-- ═══════════ LA SAISIE ═══════════
+                             ⛔ TROIS REFUS, et le formulaire est dessine pour qu'on n'en
+                                rencontre AUCUN par accident :
+                                ① CODE_RETRAITEMENT_INCONNU → le code se CHOISIT dans la
+                                  liste tiree de `postesDsf`, il ne se tape pas ;
+                                ② SENS_INCOHERENT → le sens est AFFICHE, derive du code ;
+                                ③ JUSTIFICATION_REQUISE → base legale et justification
+                                  sont marquees obligatoires, et les blancs ne comptent
+                                  pas (le service trime avant de valider). -->
+                        <details class="cah-repli" style="margin-top:1.05rem">
+                          <summary>Saisir un retraitement de clôture <span>— ce qu'aucune ligne de dépense ne peut porter</span></summary>
+                          <div class="cah-form">
+                            <label>Code de la liasse
+                              <select>
+                                <option value="">— choisir un code —</option>
+                                <optgroup label="Réintégrations (12 codes)">
+                                  <option>10 — case vide</option>
+                                  <option>11 — case vide</option>
+                                  <option>12 — case vide</option>
+                                  <option>15 — case vide</option>
+                                  <option>20 — 380 000 F déjà portés</option>
+                                  <option>25 — case vide</option>
+                                  <option>30 — 620 000 F déjà portés</option>
+                                  <option selected>40 — 1 800 000 F déjà portés</option>
+                                  <option>45 — 950 000 F déjà portés</option>
+                                  <option>50 — case vide</option>
+                                  <option>60 — case vide</option>
+                                  <option>80 — case vide</option>
+                                </optgroup>
+                                <optgroup label="Déductions (5 codes)">
+                                  <option>90 — 620 000 F déjà portés</option>
+                                  <option>95 — case vide</option>
+                                  <option>100 — 280 000 F déjà portés</option>
+                                  <option>120 — case vide</option>
+                                  <option>125 — case vide</option>
+                                </optgroup>
+                              </select>
+                              <span class="fh">Les 17 codes du paquet fiscal <b>de l'exercice</b>, tels que la grille de la liasse les publie. <b>Le paquet n'en publie pas les libellés</b>&nbsp;: le montant déjà porté sur ce dossier est le seul repère que l'outil peut donner sans en inventer un.</span>
+                            </label>
+                            <label>Sens
+                              <input type="text" value="Réintégration" readonly>
+                              <span class="fh"><b>Déterminé par le code, pas par vous.</b> Saisir un code de réintégration en déduction inverserait le signe dans l'assiette sans qu'aucun total ne paraisse anormal&nbsp;: le service refuse.</span>
+                            </label>
+                            <label>Montant
+                              <input type="text" placeholder="1 800 000" value="">
+                              <span class="fh">En francs CFA, <b>toujours positif</b>&nbsp;— le signe est porté par le sens.</span>
+                            </label>
+                            <label>Base légale <span style="color:#dc2626">*</span>
+                              <input type="text" placeholder="CGI TG, art. 99 m" value="">
+                              <span class="fh"><b>Obligatoire.</b> Un retraitement sans article invoqué est indéfendable en contrôle.</span>
+                            </label>
+                            <label style="grid-column:1 / -1">Justification <span style="color:#dc2626">*</span>
+                              <textarea rows="2" placeholder="Intérêts du compte courant d'associé au-delà du taux légal majoré de 3 points."></textarea>
+                              <span class="fh"><b>Obligatoire.</b> C'est aussi ce que le tableau affichera à la place du libellé que le paquet ne publie pas — écrivez-la pour un lecteur qui ne connaît pas le dossier.</span>
+                            </label>
+                            <label>Référence de pièce
+                              <input type="text" placeholder="FACT-2024-0412" value="">
+                              <span class="fh">Facultatif, mais c'est la pièce que le vérificateur demandera en premier.</span>
+                            </label>
+                          </div>
+                          <div class="cah-actions" style="padding:0 0 0.7rem">
+                            <button class="btn btn-primary btn-sm" type="button">Enregistrer le retraitement</button>
+                            <span class="helper" style="text-align:left">Un retraitement <b>ne se modifie pas</b>&nbsp;: il se supprime et se ressaisit. Réécrire une décision auditée sans en garder l'historique la rendrait indéfendable.</span>
+                          </div>
+                        </details>
+
+                        <!-- ═══════════ LES DEFICITS REPORTABLES ═══════════
+                             ⚠ `montantDejaImpute` est DECLARE, pas derive : les exercices
+                               qui l'ont consomme sont le plus souvent anterieurs a
+                               l'outil. Et `GET /resultat-fiscal` N'ECRIT RIEN — il
+                               n'entame pas le stock, sinon chaque simulation le
+                               corromprait.
+                             ⚠ `imputableSurExercice` n'est PAS « non perime » : un
+                               deficit d'origine 2024 ne s'impute jamais sur 2024. Le
+                               total du stock somme cette grandeur-la — sans quoi le
+                               stock et le calcul se contrediraient sur le meme
+                               parametre. -->
+                        <div class="fis-sect" style="margin-top:1.05rem">
+                          <h4>Déficits reportables</h4>
+                          <span class="c">déclarés par le cabinet — le calcul <b>ne les consomme pas</b></span>
+                          <span class="grow" style="flex:1"></span>
+                          <button class="btn btn-ghost btn-sm" type="button">Déclarer un déficit antérieur</button>
+                        </div>
+
+                        <div class="imp-table-wrap fis-wide">
+                          <div class="imp-table-cap">Règle publiée par le paquet fiscal de l'exercice&nbsp;: imputable dans la limite de <b>50 % du bénéfice</b> de l'exercice, solde reportable <b>sans limitation de durée</b> — <span class="cah-piece">Art. 101 CGI</span>. La colonne <b>«&nbsp;déjà imputé&nbsp;»</b> est <b>déclarée par le cabinet</b>, pas déduite&nbsp;: les exercices qui ont consommé ces déficits sont, le plus souvent, antérieurs à l'outil. <b>Un déficit par exercice d'origine</b> — une seconde déclaration est refusée plutôt que d'ajouter au stock.</div>
+                          <table class="imp-table">
+                            <thead>
+                              <tr><th>Exercice d'origine</th><th class="fis-n">Montant</th><th class="fis-n">Déjà imputé</th><th class="fis-n">Restant</th><th>Expire après</th><th>Imputable sur 2024</th><th class="fis-n">Imputé ici</th><th></th></tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td>2022</td><td class="fis-n">8 000 000</td><td class="fis-n">0</td><td class="fis-n">8 000 000</td>
+                                <td class="fis-vide">— <span class="fis-motif">report illimité</span></td>
+                                <td><span class="cah-conf ok">Oui</span></td>
+                                <td class="fis-n"><span data-liq-slot="is">5 195 000</span><span data-liq-slot="mfp" hidden>0</span></td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td>
+                              </tr>
+                              <!-- ⚠ CE QUE CETTE LIGNE MONTRE : `imputableSurExercice`
+                                   n'est PAS « non perime ». Un deficit d'origine 2024 ne
+                                   s'impute jamais sur 2024, meme frais, meme entier.
+                                   Le service ACCEPTE pourtant de le declarer (il borne
+                                   l'origine a l'annee CIVILE courante, pas a l'exercice
+                                   calcule) : c'est donc bien a l'ecran de le dire.
+                                   ⚠ Son montant suit la SITUATION : en deficit, c'est le
+                                   deficit que l'exercice GENERE. Le figer contredirait le
+                                   `deficitGenere` affiche deux blocs plus haut. -->
+                              <tr class="rfi-zero">
+                                <td>2024</td>
+                                <td class="fis-n"><span data-liq-slot="is">1 500 000</span><span data-liq-slot="mfp" hidden>3 400 000</span></td>
+                                <td class="fis-n">0</td>
+                                <td class="fis-n"><span data-liq-slot="is">1 500 000</span><span data-liq-slot="mfp" hidden>3 400 000</span></td>
+                                <td class="fis-vide">— <span class="fis-motif">report illimité</span></td>
+                                <td><span class="cah-conf warn">Non</span><span class="fis-motif">origine non antérieure — imputable à partir de 2025</span></td>
+                                <td class="fis-n">0</td>
+                                <td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td>
+                              </tr>
+                              <tr class="tot">
+                                <td colspan="3">Stock <b>imputable sur l'exercice 2024</b></td>
+                                <td class="fis-n">8 000 000</td>
+                                <td colspan="2" class="atl-secsub">le déficit d'origine 2024 <b>n'y figure pas</b>&nbsp;: un déficit ne s'impute jamais sur l'exercice qui l'a généré</td>
+                                <td class="fis-n"><b><span data-liq-slot="is">5 195 000</span><span data-liq-slot="mfp" hidden>0</span></b></td>
+                                <td></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <div class="prof-note info" data-liq-slot="is">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                          <div>
+                            <b>Le plafond mord&nbsp;: 5 195 000 F imputés sur 8 000 000 F disponibles.</b> La règle plafonne l'imputation à 50 % du bénéfice de l'exercice (10 390 000 F)&nbsp;; les <b>2 805 000 F</b> restants demeurent reportables, sans limitation de durée.
+                            <br><span class="atl-secsub"><b>Consulter cet écran n'entame pas le stock.</b> Le calcul est pur et rejouable&nbsp;: il n'écrit rien. Le stock ne bouge que lorsque le cabinet <b>déclare</b> l'imputation d'un exercice.</span>
+                          </div>
+                        </div>
+                        <div class="prof-note warn" data-liq-slot="mfp" hidden>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                          <div>
+                            <b>Aucun déficit imputé, et la raison est publiée&nbsp;: <span class="code">AUCUN_BENEFICE</span>.</b> Un déficit ne s'impute pas sur un déficit — il s'y ajouterait sans rien réduire. Le stock imputable reste à 8 000 000 F.
+                            <br><b>Les 3 400 000 F générés par 2024 ne rejoignent pas le stock tout seuls</b>&nbsp;: le calcul <b>n'écrit rien</b>. Ici ils ont été déclarés (ligne 2024 ci-dessus) et deviendront imputables <b>à partir de l'exercice 2025</b>. Sans ce geste, le report serait perdu — et rien, l'an prochain, ne dirait qu'il a existé.
+                            <br><span class="atl-secsub">Trois autres motifs peuvent apparaître ici, jamais un zéro muet&nbsp;: <span class="code">AUCUN_DEFICIT_DISPONIBLE</span> <span class="code">PLAFOND_ATTEINT</span> <span class="code">REGLE_REPORT_NON_PACKAGEE</span> — ce dernier signifie que le paquet ne publie pas la règle de report&nbsp;: <b>aucune imputation n'est alors tentée</b>, parce que sur-imposer se corrige et sous-imposer se redresse.</span>
+                          </div>
+                        </div>
+
+                        <!-- ⛔ LE CONSTAT DE CONSEIL LE PLUS LOURD DE LA REVUE METIER.
+                             L'imputation est AUTOMATIQUE et PLAFONNEE, et le contrat
+                             n'offre AUCUN moyen de la refuser : ni parametre, ni route.
+                             Or l'impot du est `max(MFP ; IS)`. Des que la MFP l'emporte,
+                             chaque franc de deficit impute fait baisser un IS DEJA
+                             ECARTE : le report est consomme, le montant du ne bouge pas.
+                             ⇒ le moteur du resultat fiscal ne CONNAIT PAS la MFP (elle
+                               est calculee par STORY-092, l'autre moitie de l'ecran) ;
+                               il ne peut donc pas arbitrer. L'ecran, lui, a les deux
+                               chiffres sous les yeux : il le DIT.
+                             ⇒ Fiche : STORY-417. -->
+                        <div class="prof-note warn" data-liq-slot="is">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                          <div>
+                            <b>L'imputation est automatique&nbsp;: elle ne se refuse pas, et ce n'est pas toujours à votre avantage.</b>
+                            L'impôt dû est <span class="code">max(MFP ; IS)</span>. Tant que le <b>minimum forfaitaire</b> l'emporte, imputer un déficit fait baisser un IS <b>déjà écarté</b>&nbsp;: le report est consommé, le montant dû ne bouge pas d'un franc.
+                            <br><span class="atl-secsub"><b>Sur ce dossier, l'imputation est utile</b>&nbsp;: elle ramène l'IS de 2 805 300 F à 1 402 650 F, très au-dessus du minimum forfaitaire de 480 000 F — 5 195 000 F de report consommés pour 1 402 650 F d'impôt évité. Vérifiez ce rapport dans <button class="btn btn-ghost btn-sm" type="button" data-fis-goto="liquidation" style="padding:0.1rem 0.45rem">Liquidation de l'impôt</button> avant de conclure&nbsp;: le moteur du résultat fiscal <b>ne connaît pas la MFP</b> et ne peut donc pas arbitrer à votre place. ⚠ <b>Et différer l'imputation n'est pas proposé ici parce que ce n'est pas acquis</b>&nbsp;: le paquet fiscal ne dit pas si l'article 101 la rend obligatoire sur le premier exercice bénéficiaire. Le savoir se joue avant de conseiller.</span>
+                          </div>
+                        </div>
+
+                        <!-- ═══════════ LA GRILLE DE LA LIASSE ═══════════
+                             `postesDsf` : TOUS les codes du paquet, a 0 quand rien ne les
+                             alimente, plus les postes hors grille. C'est la vue qu'on
+                             recopie sur la DSF — les zeros sont le contrat, pas du bruit :
+                             une case absente du tableau se lit « je l'ai oubliee », une
+                             case a 0 se lit « rien ne l'alimente ».
+                             ⚠ C'est ICI que le code 20 est FUSIONNE (registre + cahier)
+                               et sort en `MIXTE` : la case de la liasse porte UN montant,
+                               le detail en porte deux. -->
+                        <div class="fis-sect" style="margin-top:1.05rem">
+                          <h4>La grille de la liasse</h4>
+                          <span class="c"><b>17 cases</b> du paquet + ce qui n'entre dans aucune — les zéros compris</span>
+                        </div>
+
+                        <div class="imp-table-wrap fis-wide">
+                          <div class="imp-table-cap">Une case à <b>0</b> n'est pas une case oubliée&nbsp;: c'est une case que <b>rien n'alimente</b>. Les afficher toutes est ce qui permet de recopier la liasse sans se demander ce qui manque. — Ceci est la feuille <b>«&nbsp;Détail réintégrations / déductions&nbsp;»</b> (cases numérotées)&nbsp;; la feuille <b>«&nbsp;Résultat fiscal&nbsp;»</b> de la liasse (cases <b>D</b> à <b>L</b>) est celle de la <button class="btn btn-ghost btn-sm" type="button" data-fis-goto="liquidation" style="padding:0.1rem 0.45rem">Liquidation de l'impôt</button>.</div>
+                          <table class="imp-table">
+                            <thead><tr><th>Case</th><th>Sens</th><th class="fis-n">Montant</th><th>Origine</th><th>Ce qui l'alimente</th></tr></thead>
+                            <tbody>
+                              <tr class="rfi-zero"><td class="fis-case">10</td><td>Réintégration</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr class="rfi-zero"><td class="fis-case">11</td><td>Réintégration</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr class="rfi-zero"><td class="fis-case">12</td><td>Réintégration</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr class="rfi-zero"><td class="fis-case">15</td><td>Réintégration</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr class="fis-cle"><td class="fis-case">20</td><td>Réintégration</td><td class="fis-n">380 000</td><td><span class="fis-chip">Mixte</span></td><td class="atl-secsub"><b>1 entrée du registre des taxes + 3 lignes du cahier</b> — deux origines, une seule case</td></tr>
+                              <tr class="rfi-zero"><td class="fis-case">25</td><td>Réintégration</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr><td class="fis-case">30</td><td>Réintégration</td><td class="fis-n">620 000</td><td><span class="fis-chip">Saisie</span></td><td class="atl-secsub">provision pour litige non déductible</td></tr>
+                              <tr><td class="fis-case">40</td><td>Réintégration</td><td class="fis-n">1 800 000</td><td><span class="fis-chip">Saisie</span></td><td class="atl-secsub">intérêts de compte courant au-delà du plafond</td></tr>
+                              <tr><td class="fis-case">45</td><td>Réintégration</td><td class="fis-n">950 000</td><td><span class="fis-chip">Saisie</span></td><td class="atl-secsub">redevance de marque au-delà de 5 % du CA</td></tr>
+                              <tr class="rfi-zero"><td class="fis-case">50</td><td>Réintégration</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr class="rfi-zero"><td class="fis-case">60</td><td>Réintégration</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr class="rfi-zero"><td class="fis-case">80</td><td>Réintégration</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr><td class="fis-case">90</td><td>Déduction</td><td class="fis-n">620 000</td><td><span class="fis-chip">Saisie</span></td><td class="atl-secsub">dividendes — régime mère-filiale</td></tr>
+                              <tr class="rfi-zero"><td class="fis-case">95</td><td>Déduction</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr><td class="fis-case">100</td><td>Déduction</td><td class="fis-n">280 000</td><td><span class="fis-chip">Saisie</span></td><td class="atl-secsub">reprise de provision antérieurement réintégrée</td></tr>
+                              <tr class="rfi-zero"><td class="fis-case">120</td><td>Déduction</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr class="rfi-zero"><td class="fis-case">125</td><td>Déduction</td><td class="fis-n">0</td><td class="fis-vide">—</td><td class="atl-secsub">rien</td></tr>
+                              <tr class="fis-attn"><td class="fis-case">65 <span class="fis-motif">⚠ hors paquet</span></td><td>Réintégration</td><td class="fis-n">280 000</td><td><span class="fis-chip">Cahier de dépenses</span></td><td class="atl-secsub"><b>ce code n'est plus publié par le paquet de l'exercice</b> — le montant reste dans l'assiette, la case est introuvable</td></tr>
+                              <tr class="fis-attn"><td class="fis-vide">—</td><td>Réintégration</td><td class="fis-n">1 340 000</td><td><span class="fis-chip">Cahier de dépenses</span></td><td class="atl-secsub">charges sans pièce justificative — <b>aucune case de liasse</b>, à ventiler à la main au dépôt</td></tr>
+                              <tr class="fis-attn"><td class="fis-vide">—</td><td>Réintégration</td><td class="fis-n">480 000</td><td><span class="fis-chip">Cahier de dépenses</span></td><td class="atl-secsub">lignes marquées non déductibles à la revue — <b>aucune case de liasse</b></td></tr>
+                              <tr class="tot"><td colspan="2">Contrôle</td><td class="fis-n">5 850 000 / 900 000</td><td colspan="2" class="atl-secsub">la grille totalise <b>exactement</b> le détail — réintégrations 5 850 000 F, déductions 900 000 F</td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <!-- ⚡ ECART DE CONTRAT — DESSINE, ANNONCE, NON SERVI.
+                             Un comptable qui a la grille sous les yeux veut l'emporter
+                             dans sa liasse. Aucune route ne rend cet ecran exportable
+                             (ni CSV, ni PDF, ni la grille pre-remplie) : la seule sortie
+                             servie est l'export du BILAN (FE-038), qui ne porte pas les
+                             retraitements. ⇒ STORY-416. -->
+                        <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-top:0.85rem">
+                          <button class="btn btn-ghost btn-sm" type="button" disabled>Exporter la grille</button>
+                          <span class="fis-chip" style="border-style:dashed">non servi par l'API</span>
+                          <span class="atl-secsub">Aucune route ne rend cette grille exportable&nbsp;; l'export du Bilan ne porte pas les retraitements.</span>
+                        </div>
+
+                        <!-- ═══════════ CE QUI A PRODUIT CE CALCUL ═══════════
+                             Un resultat fiscal lu sans savoir de QUELLE balance et de
+                             QUEL paquet il a ete tire ne vaut rien en controle. -->
+                        <div class="ref-card" style="margin-top:1.05rem">
+                          <div class="ref-head">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>
+                            <b>Ce qui a produit ce calcul</b><span class="grow"></span><span class="badge badge-user">traçabilité</span>
+                          </div>
+                          <div class="ref-grid">
+                            <div class="ref-item"><div class="ref-k">Exercice</div><div class="ref-v">1ᵉʳ janvier → 31 décembre 2024</div><div class="ref-sum">Bornes résolues par le service, jamais devinées.</div></div>
+                            <div class="ref-item"><div class="ref-k">Balance retenue</div><div class="ref-v">version 3 · import Sage · brouillon</div><div class="ref-sum">Un résultat fiscal sans sa balance — version et état — ne vaut rien en contrôle.</div></div>
+                            <div class="ref-item"><div class="ref-k">Paquet fiscal</div><div class="ref-v">togo@2024</div><div class="ref-sum">aa0c378d…</div></div>
+                            <div class="ref-item"><div class="ref-k">Ce que le calcul a écrit</div><div class="ref-v">rien</div><div class="ref-sum">Calcul pur et rejouable&nbsp;: il ne consomme aucun stock de déficits.</div></div>
+                          </div>
+                        </div>
+
+                        <p class="atl-secsub" style="margin-top:0.9rem">
+                          ⚠️ <b>Un exercice clos ou une balance validée fige les retraitements</b>&nbsp;: ni saisie, ni suppression
+                          (<span class="code">409 · EXERCICE_CLOS</span> <span class="code">409 · BALANCE_VALIDEE_IMMUABLE</span>).
+                          Le <b>stock de déficits</b> obéit à une règle voisine mais distincte&nbsp;: il se fige dès qu'un exercice <b>capable de l'imputer</b> est arrêté — déclarer un déficit après cet arrêté diminuerait rétroactivement une base déjà déposée.
+                        </p>
+
+                      </div><!-- /data-liq-calc -->
+                    </div><!-- /panel resultat -->
 
                     <!-- ══════════════════ SECTION : LIQUIDATION ══════════════════ -->
                     <div class="fis-slot" data-fis-panel="liquidation">
@@ -6458,7 +7096,7 @@
 
                       <div class="fis-chips">
                         <span class="atl-secsub" style="align-self:center;margin-right:0.2rem">Types publiés par le paquet&nbsp;:</span>
-                        <span class="fis-chip">PATENTE</span><span class="fis-chip">TAXE_FONCIERE</span><span class="fis-chip">TAXE_VEHICULES</span><span class="fis-chip">TAXE_SALAIRES</span><span class="fis-chip">TAXE_APPRENTISSAGE</span><span class="fis-chip">DROITS_ACCISES</span><span class="fis-chip">RSL</span>
+                        <span class="fis-chip">PATENTE</span><span class="fis-chip">FONCIERE</span><span class="fis-chip">TH</span><span class="fis-chip">TVM</span><span class="fis-chip">TAF</span><span class="fis-chip">TCA</span><span class="fis-chip">ACCISES</span><span class="fis-chip">ENREGISTREMENT</span><span class="fis-chip">CNSS_PATRONALE</span><span class="fis-chip">PENALITES_FISCALES</span><span class="fis-chip">RSL</span><span class="fis-chip">RSH</span>
                       </div>
 
                       <div class="imp-table-wrap fis-wide">
@@ -6468,8 +7106,8 @@
                           </thead>
                           <tbody>
                             <tr><td class="fis-case">PATENTE</td><td>Patente</td><td>15/03/2024</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">195 000</td><td class="fis-case">641</td><td><span class="cah-conf ok">Oui</span></td><td>Avis de patente OTR n°2024-00412</td><td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td></tr>
-                            <tr><td class="fis-case">TAXE_FONCIERE</td><td>Taxe foncière</td><td>30/06/2024</td><td class="fis-n">5 000 000</td><td class="fis-n">3 %</td><td class="fis-n">150 000</td><td class="fis-case">641</td><td><span class="cah-conf ok">Oui</span></td><td>Avis d'imposition foncière — dépôt de Bè</td><td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td></tr>
-                            <tr class="fis-attn"><td class="fis-case">TAXE_VEHICULES</td><td>Taxe sur les véhicules de tourisme</td><td>12/09/2024</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">120 000</td><td class="fis-case">646</td><td><span class="cah-conf bad">Non</span><span class="fis-motif">réintégration code 20</span></td><td>Vignettes 2024 — 2 véhicules de direction</td><td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td></tr>
+                            <tr><td class="fis-case">FONCIERE</td><td>Taxe foncière</td><td>30/06/2024</td><td class="fis-n">5 000 000</td><td class="fis-n">3 %</td><td class="fis-n">150 000</td><td class="fis-case">641</td><td><span class="cah-conf ok">Oui</span></td><td>Avis d'imposition foncière — dépôt de Bè</td><td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td></tr>
+                            <tr class="fis-attn"><td class="fis-case">PENALITES_FISCALES</td><td>Pénalités, amendes et majorations fiscales</td><td>12/09/2024</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">120 000</td><td class="fis-case">647</td><td><span class="cah-conf bad">Non</span><span class="fis-motif">réintégration code 20</span></td><td>Majorations de retard TVA — avis OTR n°2024-01188</td><td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td></tr>
                             <tr class="fis-attn"><td class="fis-case">RSL</td><td>Retenue sur loyers</td><td>31/12/2024</td><td class="fis-n">1 200 000</td><td class="fis-n">8,75 %</td><td class="fis-n">105 000</td><td class="fis-case">641</td><td><span class="cah-conf ok">Oui</span></td><td>Retenues opérées sur les loyers du magasin de Kara<span class="fis-motif">⚠ ce code est <b>aussi</b> un crédit d'impôt</span></td><td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td></tr>
                             <tr><td class="fis-vide">—<span class="fis-motif">catégorie «&nbsp;Autres&nbsp;»</span></td><td>Taxe communale d'enlèvement des ordures</td><td>04/11/2024</td><td class="fis-n fis-vide">—</td><td class="fis-n fis-vide">—</td><td class="fis-n">45 000</td><td class="fis-case">641</td><td><span class="cah-conf ok">Oui</span></td><td>Quittance mairie de Lomé n°2024-8871</td><td><button class="btn btn-ghost btn-sm" type="button">Supprimer</button></td></tr>
                             <tr class="tot"><td colspan="5">Total des impôts et taxes de l'exercice</td><td class="fis-n">615 000</td><td colspan="4" class="atl-secsub">dont <b>495 000 F déductibles</b> et <b>120 000 F à réintégrer</b> · <b>1 entrée hors référentiel</b></td></tr>
@@ -6493,7 +7131,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                         <div>
                           <b>Une entrée «&nbsp;Autres&nbsp;» n'est pas un fourre-tout&nbsp;: c'est une demande d'enrichissement.</b> La taxe communale d'enlèvement des ordures ne figure pas au paquet fiscal&nbsp;; elle est enregistrée <b>et remontée à Money&nbsp;Vibes</b> pour que le paquet la publie. Sans cette soupape, le comptable saisirait une patente à la place — et la réintégration deviendrait fausse.
-                          <br><b>Une taxe non déductible remonte en réintégration</b> au résultat fiscal, avec le code que le paquet publie. Ici&nbsp;: <span class="fis-chip">code 20</span> pour la taxe sur les véhicules de tourisme.
+                          <br><b>Une taxe non déductible remonte en réintégration</b> au résultat fiscal, avec le code que le paquet publie — et un seul type en porte un ici&nbsp;: <span class="fis-chip">code 20</span> pour les <b>pénalités, amendes et majorations fiscales</b>. Les 120 000 F se retrouvent tels quels dans <button class="btn btn-ghost btn-sm" type="button" data-fis-goto="resultat" style="padding:0.1rem 0.45rem">Résultat fiscal</button>. <b>La déductibilité n'est jamais supposée</b>&nbsp;: elle est publiée type par type. La taxe sur les véhicules à moteur, par exemple, est déductible au paquet togolais — la réintégrer «&nbsp;par prudence&nbsp;» majorerait la base imposable.
                         </div>
                       </div>
                     </div><!-- /panel taxes -->
@@ -12682,6 +13320,13 @@
         });
         fisPanel.querySelectorAll("[data-liq]").forEach(function (b) {
           b.addEventListener("click", function () { liqShow(b.dataset.liq); });
+        });
+        /* FE-050 — les renvois DANS le contenu (« Voir le registre », « Liquidation
+           de l'impot ») rejouent le MEME aiguillage que la barre de sections. Un
+           attribut distinct de `data-fis-tab` : sinon `fisSection` poserait
+           `aria-selected` sur des boutons qui ne sont pas des onglets. */
+        fisPanel.querySelectorAll("[data-fis-goto]").forEach(function (b) {
+          b.addEventListener("click", function () { fisSection(b.dataset.fisGoto); });
         });
         fisPanel.querySelectorAll("[data-acp]").forEach(function (b) {
           b.addEventListener("click", function () { acpShow(b.dataset.acp); });
