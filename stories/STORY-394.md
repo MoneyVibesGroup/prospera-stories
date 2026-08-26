@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-043** *(cahier de recettes)*, 2026-08-24 — prolonge **STORY-078**, **STORY-085** et **STORY-139**
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** defined
+**Statut :** in_progress
 **Complexité :** medium
 **Sprint :** 20
 **Service :** `balance-service` (`:3007`)
@@ -87,4 +87,57 @@ l'écran ne peut offrir **aucune** liste. Le contournement se retire quand cette
 
 ## Progress Tracking
 
-**Statut :** `defined` — branche `MNV-394` ouverte (`docs/`), story confirmée sans réécriture.
+**Statut :** `in_progress` — développement terminé sur `MNV-394` (`balance-service`), portes DoD vertes.
+
+### ③④ Développement, portes DoD
+
+`GET /api/v1/referentiels/plan-comptes?classe=&prefixe=` ajouté à `ReferentielController`
+(`referentiel.controller.ts`) + `ReferentielService.planComptes` (`referentiel.service.ts`),
+sur le **même** patron que `diagnostic()`/`suggest-comptes` : `orgId` du JWT uniquement,
+`chargerReferentiel` réutilisé tel quel, erreurs traduites par `versHttpDepuisErreurReferentiel`
+(**aucun refus nouveau**, AC-3). Filtrage : `isCompteDeDetail` (comptes de détail uniquement,
+AC-1, piège STORY-172) puis `classe`/`prefixe` (`?classe=` borné `1..9` par `class-validator`,
+`?prefixe=` gardé par `CARACTERES_COMPTE`/`LONGUEUR_MAX_COMPTE` déjà partagés — AC-5). Réponse
+`{ referentiel: {code, version}, comptes: [{compte, libelle}] }`, typée dans l'OpenAPI
+(`type: [CompteDuPlanDto]`, leçon STORY-389) et vérifiée par `openapi-contract.e2e-spec.ts`
+(balayage des `object` opaques, contrôleur inclus).
+
+**⚡ Piège trouvé et évité avant livraison — le tri « par numéro » n'est pas ce qu'on croit.**
+Un premier réflexe a été de réutiliser `comparerComptes` (déjà partagé côté suggestion,
+tri « le plus court d'abord »). Vérifié contre le **vrai** plan SYSCOHADA (`syscohada-revise-2.1.json`,
+21 comptes de classe 7, têtes à 2 chiffres entrelacées avec des détails à 3/4) : ce comparateur
+regroupe **toutes** les têtes avant **tous** les détails (`70,71,...,79,701,702,...`) au lieu de
+l'ordre naturel `70,701,...,707,71,72,...`. La numérotation comptable est hiérarchique **par
+préfixe** : un tri lexicographique **simple** (sans priorité de longueur) la respecte déjà,
+prouvé sur les données réelles. `comparerComptes` reste inchangé dans `suggestion.regles.ts`
+(son usage — départager des candidats à égalité pour un même libellé — n'a jamais cette
+pathologie) ; aucune extraction croisée n'était donc justifiée.
+
+**Table de mutations — 5 mutations, 5 rouges** (`git diff` de contrôle après restauration) :
+
+| # | mutation | test qui rougit |
+|---|---|---|
+| M1 | tri remplacé par `comparerComptes` (priorité longueur) | unitaire tri + e2e ordre 70/701/706/71 |
+| M2 | filtre `classe` retiré | unitaire filtre classe + e2e `?classe=7` (compte hors classe 7 présent) |
+| M3 | filtre `isCompteDeDetail` retiré | unitaire « exclut hors niveau de détail » |
+| M4 | `@Max(9)` → `@Max(19)` sur `classe` | e2e `classe hors 1..9 -> 400` (`?classe=10`) |
+| M5 | filtre `prefixe` neutralisé | unitaire filtre préfixe |
+
+**Portes DoD** — lint 0 warning · build OK · **3061** unitaires (+21 nouveaux : 7 service,
+2 controller, 12 e2e) + **738** e2e verts · couverture **98,99 / 91,87 / 98,18 / 99,07**
+(seuils 65/90/90/90) · `referentiel.service.ts`/`referentiel.controller.ts` à 100 % lignes/fonctions/statements.
+
+### Vérification docker — non applicable (pas d'écriture)
+
+Cette story **ne modifie aucune écriture en base** : `GET /referentiels/plan-comptes` réutilise
+tel quel le chemin de lecture déjà vérifié en docker par STORY-078 (résolution `read-model`
+d'entitlement → artefact vérifié par checksum) et aucun schéma/repository n'est touché. La
+règle *« toute story qui écrit en base »* de `qualite-verification.md` ne s'applique donc pas
+ici. Preuve équivalente apportée par l'e2e : **vrais artefacts embarqués** (pas de mock du
+chargement/checksum), sur le plan SYSCOHADA réel (21 comptes classe 7) **et** CIMA (pour
+prouver AC-2 : deux référentiels ⇒ deux plans différents, même jeton).
+
+### Portée hors périmètre (rappel de la story)
+
+FE-044 (classe 6), FE-046 (comptes non mappés) et FE-030 (table de passage) partagent la même
+absence mais restent **hors périmètre** — cette story ne livre que la route de lecture.
