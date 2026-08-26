@@ -12,6 +12,28 @@
 > Story **jumelle de STORY-391** (`balance-service`). Celle-ci rend la pièce **retrouvable** ;
 > l'autre la rend **nommable** depuis la ligne. **Aucune des deux ne produit d'écran seule.**
 
+> ⛔ **CORRECTION DE PRÉMISSE, posée le 2026-08-26 en instruisant STORY-391.** Le constat ci-dessous
+> dit que `GET /dossiers/{id}/pieces` « fait déjà PRESQUE tout : il agrège les pièces COMPTABLES ».
+> C'est vrai du **code**, et c'était **faux des données** : `listerParDossier` filtre sur
+> `{ orgId, dossierId }`, et `document-piece.client.ts` (`balance-service`) **ne propageait pas
+> `dossierId`** au dépôt d'une pièce de cahier — alors que le chemin ne s'ouvre que sous
+> `/dossiers/:dossierId/pieces/ocr`, donc que le dossier est **toujours** connu. **Aucune pièce de
+> cahier n'entrait dans cette liste** : mesuré en docker, dépôt `dev` ⇒ `dossierId` absent,
+> `storageKey = {org}/{lot}/{uuid}`, pièce introuvable dans la liste. Le filtre `?pieceId=` que
+> cette story ajoute aurait donc filtré **un ensemble vide**. ⇒ **Corrigé par STORY-391**
+> (`MNV-391`, `balance-service`) : le dépôt propage `dossierId`, la pièce est listée, son
+> `urlConsultation` charge l'image depuis un navigateur. **Cette story dépend de ce correctif** —
+> l'implémenter avant que `MNV-391` soit sur `dev` la rendrait verte et inopérante.
+>
+> ⛔ **PÉRIMÈTRE ÉLARGI — `apercuUrl` arrive ici.** STORY-391 demandait un `apercuUrl` sur
+> `LignePreProposeeDto` (`balance-service`) : **non livrable dans ce dépôt-là** — `balance-service`
+> n'a aucun client MinIO, l'événement `document.piece.extrait` ne porte pas de `storageKey`, et le
+> garde-fou #2 de STORY-084 interdit explicitement tout re-appel HTTP à `document-service` depuis
+> `lire`. **Voie C, tranchée par l'user le 2026-08-26** : l'écran de relecture d'un lot obtient son
+> image par **cette** story, en appelant `GET /dossiers/{id}/pieces?pieceId=…` — la route qui signe
+> **déjà**, avec le patron `PieceUrlSigner` prouvé en navigateur réel (FE-064). Rien de neuf à
+> inventer côté signature ; c'est le filtre `?pieceId=` déjà au périmètre qui le sert.
+
 ---
 
 ## Le constat
