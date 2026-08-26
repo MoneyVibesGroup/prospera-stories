@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-050 Résultat fiscal</title>
+<title>Prospera · Prototype cumulatif — FE-046 Rattachement au plan comptable</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -1129,6 +1129,117 @@
   .fis-sect .c { font-size: 0.76rem; color: var(--muted-fg); }
   .fis-chips { display: flex; gap: 0.35rem; flex-wrap: wrap; }
   .fis-chip { font-family: var(--font-mono); font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--muted-fg); }
+
+  /* ═══ FE-046 — le rattachement au plan comptable (STORY-085 · 101 · 394) ═══
+     `/dossiers/{id}/rattachement/*`, `/referentiels/plan-comptes`,
+     `/cahiers/{livre}/totaux-comptes`, `/balance/comptes-ventilation`,
+     `POST /balance/depuis-cahiers`.
+
+     Le panneau réutilise TOUT le vocabulaire de l'Atelier (.imp-table, .imp-tile,
+     .ref-card, .prof-note, .cah-form, .cah-repli, .rap-eq, .atelier-demo). Ne sont
+     définis ici que les TROIS objets que le rattachement introduit vraiment :
+
+       ① LA PROVENANCE d'un compte proposé. C'est l'objet central de l'écran, et il
+          n'existe nulle part ailleurs : le même « 701 » vaut décision du cabinet
+          quand une règle l'a posé, indice quand un mot-clé l'a trouvé, et
+          RIEN DU TOUT quand c'est le défaut faute d'indice. Les trois s'affichent
+          aujourd'hui à l'identique — un compte, un motif en prose. Les distinguer
+          visuellement est la seule chose qui fasse relire les bonnes lignes ;
+
+       ② LA RÈGLE avec sa PORTÉE. Une surcharge se compare par ÉGALITÉ STRICTE sur
+          la clé normalisée (`resoudreSurcharge`) alors que le moteur de mots-clés,
+          lui, compare par `includes`. Une règle « SODIGAZ » ne prend donc pas
+          « SODIGAZ SA ». Rien au contrat ne le dit ⇒ le compte de lignes réellement
+          prises est porté par la règle elle-même, et zéro se voit ;
+
+       ③ L'ÉCRITURE EN PARTIE DOUBLE. Le comptable qui vient de Sage veut voir les
+          deux (ou trois) lignes que produit UNE transaction — c'est le seul endroit
+          du produit où la partie double est visible, et c'est ce qui rend l'équilibre
+          de la balance vérifiable au lieu d'être affirmé.
+
+     Aucune couleur en dur hors des teintes sémantiques déjà employées par
+     `.prof-note` : le panneau suit le thème clair/sombre comme le reste. */
+
+  /* ① LA PROVENANCE — trois degrés de confiance, jamais vert/rouge : aucune des
+        trois n'est une erreur, et deux d'entre elles sont parfaitement normales. */
+  .rat-src { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.02em; padding: 0.1rem 0.45rem; border-radius: 999px; white-space: nowrap; background: var(--hover-surface); color: var(--muted-fg); }
+  .rat-src svg { width: 0.75rem; height: 0.75rem; flex: none; }
+  /* Décidé par un humain, tracé, daté : la seule provenance qui n'appelle aucune
+     relecture. Teinte de marque, comme tout ce que le cabinet a lui-même posé. */
+  .rat-src.regle { background: color-mix(in srgb, var(--orange-500) 16%, transparent); color: var(--orange-700); }
+  :root[data-theme="dark"] .rat-src.regle { color: var(--orange-400); }
+  /* Trouvé dans le texte de la ligne : plausible, à confirmer. Neutre. */
+  .rat-src.motcle { background: color-mix(in srgb, #2563eb 12%, transparent); color: #2563eb; }
+  /* ⚠️ LE DÉFAUT — aucun indice, ni dans la ligne ni dans l'activité : le moteur
+     rend `701` et la balance sera parfaitement ÉQUILIBRÉE avec un chiffre
+     d'affaires mal ventilé. C'est le seul cas qui doit accrocher l'œil. */
+  .rat-src.defaut { background: color-mix(in srgb, var(--warning) 20%, transparent); color: #b45309; }
+  :root[data-theme="dark"] .rat-src.defaut { color: var(--warning); }
+  .imp-table tr.rat-adefaut td { background: color-mix(in srgb, var(--warning) 7%, transparent); }
+
+  /* L'échelle de décision, montrée UNE fois en tête de panneau : c'est elle qui
+     explique tout le reste, y compris pourquoi une règle peut ne rien changer. */
+  .rat-prio { display: flex; flex-direction: column; gap: 0.45rem; }
+  .rat-step { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr); gap: 0.65rem; align-items: start; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 0.6rem; background: var(--card); }
+  .rat-step .n { display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 999px; background: var(--hover-surface); font-size: 0.75rem; font-weight: 750; color: var(--muted-fg); }
+  .rat-step.on .n { background: color-mix(in srgb, var(--orange-500) 20%, transparent); color: var(--orange-700); }
+  :root[data-theme="dark"] .rat-step.on .n { color: var(--orange-400); }
+  .rat-step b { font-size: 0.85rem; }
+  .rat-step p { margin: 0.15rem 0 0; font-size: 0.76rem; color: var(--muted-fg); line-height: 1.45; }
+
+  /* ② LA RÈGLE — clé, cible, portée, trace. La portée est à droite parce que
+        c'est la colonne qu'on balaie pour trouver les règles mortes. */
+  .rat-regles { display: flex; flex-direction: column; gap: 0.5rem; }
+  .rat-regle { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem 0.9rem; align-items: center; padding: 0.65rem 0.85rem; border: 1px solid var(--border); border-radius: 0.65rem; background: var(--card); }
+  .rat-regle .cle { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; min-width: 0; }
+  .rat-regle .cle b { font-size: 0.86rem; }
+  .rat-regle .cible { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; }
+  .rat-regle .tr { grid-column: 1 / -1; font-size: 0.72rem; color: var(--muted-fg); line-height: 1.45; }
+  .rat-regle .por { display: flex; align-items: center; gap: 0.5rem; }
+  .rat-regle .por .c { font-size: 0.95rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+  .rat-regle .por .u { font-size: 0.7rem; color: var(--muted-fg); }
+  /* Une règle qui ne prend AUCUNE ligne n'est pas en erreur — elle est inutile, et
+     c'est très exactement ce que le contrat ne dit pas. */
+  .rat-regle.vide { border-color: color-mix(in srgb, var(--warning) 45%, var(--border)); background: color-mix(in srgb, var(--warning) 6%, var(--card)); }
+  .rat-regle.vide .por .c { color: #b45309; }
+  :root[data-theme="dark"] .rat-regle.vide .por .c { color: var(--warning); }
+  /* Pire cas : la règle vise un compte qui n'est plus au plan. Le serveur
+     l'IGNORE et retombe sur le moteur (`proposerRattachement`), sans jamais le
+     dire — elle s'affiche « enregistrée » et ne s'applique à rien. */
+  .rat-regle.inerte { border-color: color-mix(in srgb, var(--danger) 40%, var(--border)); background: color-mix(in srgb, var(--danger) 6%, var(--card)); }
+  .rat-type { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.08rem 0.45rem; border-radius: 999px; background: var(--hover-surface); color: var(--muted-fg); white-space: nowrap; }
+  .rat-type.lib { background: color-mix(in srgb, #7c3aed 14%, transparent); color: #7c3aed; }
+
+  /* ③ L'ÉCRITURE — une transaction, deux ou trois lignes, deux colonnes qui
+        tombent juste. C'est une DÉMONSTRATION, pas un tableau de saisie. */
+  .rat-ecr { border: 1px solid var(--border); border-radius: 0.7rem; background: var(--card); overflow: hidden; }
+  .rat-ecr-head { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); background: var(--content-bg); font-size: 0.8rem; }
+  .rat-ecr-head .m { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .rat-ecr-row { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) 7rem 7rem; gap: 0.6rem; align-items: baseline; padding: 0.45rem 0.85rem; border-bottom: 1px dashed var(--border); font-size: 0.82rem; }
+  .rat-ecr-row .c { font-family: var(--font-mono); font-weight: 700; }
+  .rat-ecr-row .n { font-variant-numeric: tabular-nums; text-align: right; }
+  .rat-ecr-row .n.off { color: var(--muted-fg); }
+  .rat-ecr-row.tot { border-bottom: 0; border-top: 2px solid var(--border-strong); font-weight: 750; background: var(--content-bg); }
+  .rat-ecr-cols { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) 7rem 7rem; gap: 0.6rem; padding: 0.3rem 0.85rem; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted-fg); }
+  .rat-ecr-cols span:nth-child(3), .rat-ecr-cols span:nth-child(4) { text-align: right; }
+
+  /* Les 7 comptes de contrepartie — défaut SYSCOHADA vs paramétrage du dossier. */
+  .rat-cpts { display: grid; grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr)); gap: 0.6rem; }
+  .rat-cpt { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.65rem 0.8rem; border: 1px solid var(--border); border-radius: 0.6rem; background: var(--card); }
+  .rat-cpt .k { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); }
+  .rat-cpt .v { font-family: var(--font-mono); font-size: 1rem; font-weight: 750; }
+  .rat-cpt .w { font-size: 0.72rem; color: var(--muted-fg); line-height: 1.4; }
+  .rat-cpt.surcharge { border-color: color-mix(in srgb, var(--orange-500) 45%, var(--border)); background: color-mix(in srgb, var(--orange-500) 7%, var(--card)); }
+
+  .rat-slot { display: flex; flex-direction: column; gap: 1.05rem; }
+  .rat-sect { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+  .rat-sect h4 { margin: 0; font-size: 0.9rem; font-weight: 700; }
+  .rat-sect .c { font-size: 0.76rem; color: var(--muted-fg); }
+
+  @media (max-width: 720px) {
+    .rat-ecr-row, .rat-ecr-cols { grid-template-columns: 3.6rem minmax(0, 1fr) 5rem 5rem; }
+    .rat-regle { grid-template-columns: minmax(0, 1fr); }
+  }
 
   .atl-body { padding: 1.15rem; display: flex; flex-direction: column; gap: 1.15rem; }
   .atl-sectitle { margin: 0; font-size: 0.95rem; font-weight: 650; }
@@ -4672,9 +4783,22 @@
                          sequence ni PRD. Les mettre ici les rendrait indiscernables
                          d'un travail planifie. ⇒ ils sont dits en toutes lettres dans
                          le panneau « D'ou viennent vos chiffres », sans lien ni date. -->
-                    <button class="atl-tab" role="tab" data-atl-tab="rattachement" aria-selected="false" disabled title="FE-046 — transaction vers compte SYSCOHADA, regles du cabinet, verification. Backend deja servi (STORY-085).">
+                    <!-- ═══ FE-046 — LE DERNIER ONGLET ANNONCE PAR FE-073 S'OUVRE ═══
+                         Les TROIS items nommes-mais-desactives de FE-073 ont desormais
+                         atterri : Rapprochement (FE-049), Impots et taxes (FE-051 puis
+                         FE-050), et celui-ci. La barre ne porte plus AUCUN `disabled` —
+                         et c'est le moment de rappeler pourquoi Journaux / Grand livre /
+                         Tiers n'y sont toujours PAS : ils dependent de
+                         `comptabilite-service`, fondation differee sans rang de sequence.
+                         Les ajouter maintenant que la barre est « complete » les rendrait
+                         indiscernables d'un travail planifie.
+                         ⚠ Le libelle dit « Rattachement », mais l'onglet ne regle que la
+                         CLASSE 7 : les depenses se rattachent par leur categorie, dans le
+                         cahier (D-085-6). Le panneau le dit en toutes lettres des sa
+                         premiere section — le titre, lui, reste court. -->
+                    <button class="atl-tab" role="tab" data-atl-tab="rattachement" aria-selected="false" title="FE-046 — ce qui choisit le compte SYSCOHADA d une recette, les regles du dossier, le controle compte par compte et la balance produite depuis les cahiers (STORY-085 / 101 / 394).">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
-                      Rattachement <span class="soon">FE-046</span>
+                      Rattachement <span class="count">Recettes · classe 7</span>
                     </button>
                     <button class="atl-tab" role="tab" data-atl-tab="rapprochement" aria-selected="false" title="FE-049 — releves bancaires et mobile money, appariement, ecarts, etat de rapprochement.">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="m9 12 2 2 4-4"/></svg>
@@ -4987,6 +5111,700 @@
                             utilisateur de Sage attend du lettrage et qu'il n'aura pas ;
                           — il ne pré-coche aucune proposition ;
                           — il n'affiche jamais 0 à la place d'un écart non calculable. -->
+                  <!-- ═══════════ FE-046 — LE RATTACHEMENT AU PLAN COMPTABLE ═══════════
+                       STORY-085 (proposition + règles du dossier) · STORY-101 (contrat
+                       canonique) · STORY-394 (énumération du plan, mergée le 2026-08-26).
+
+                       ⛔ CE QUE CET ÉCRAN N'EST PAS, ET LA DÉCISION LA PLUS STRUCTURANTE
+                          DE LA STORY : **ce n'est pas une bannette de transactions « non
+                          rattachées ».** Cet écran-là ne peut pas exister — le contrat ne
+                          sait pas stocker une transaction SANS compte : `POST …/recettes`
+                          dit « le compte de classe 7 est proposé s'il est omis », et la
+                          ligne part en base avec. Il n'y a donc aucun état « en attente de
+                          rattachement » à lister, et en dessiner un aurait promis un écran
+                          que le backend ne servira jamais.
+
+                          Le rattachement ligne à ligne existe déjà, et il est LIVRÉ : c'est
+                          la colonne « Compte proposé » de la relecture du cahier (FE-043 /
+                          FE-044). Ce que cet onglet apporte, c'est ce qui MANQUE autour :
+                          **ce qui décide**, **les règles qui font décider autrement**, **ce
+                          que ça a donné compte par compte**, et **la balance qui en sort**.
+
+                       ⚠️ Portée réelle du module `rattachement` : **la classe 7 seulement**.
+                          `EnregistrerSurchargeDto.compte` est validé par `estCompteDeProduits`
+                          (`400 COMPTE_HORS_CLASSE_7`). Les DÉPENSES se rattachent par un tout
+                          autre objet — le `compteCharge` d'une **catégorie de dépense**
+                          (STORY-083, décision D-085-6, « pas deux sources de vérité ») — qui
+                          vit dans l'onglet Cahiers. L'écran le DIT au lieu de laisser le
+                          comptable écrire une règle « SODIGAZ → 6051 » et recevoir un refus
+                          qu'il ne pourra pas relier à sa cause. -->
+                  <div class="atl-panel atl-body" data-atl-panel="rattachement" hidden>
+
+                    <div style="display:flex;align-items:flex-end;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Rattachement au plan comptable</h3>
+                        <p class="atl-secsub">Chaque ligne de cahier porte un <b>compte SYSCOHADA</b>. Ici, on regarde <b>qui l'a choisi</b>, on pose les <b>règles du dossier</b> pour que le bon compte soit proposé la prochaine fois, et on transforme le tout en <b>balance</b>.</p>
+                      </div>
+                      <span class="grow" style="flex:1"></span>
+                      <div class="atelier-demo" role="tablist" aria-label="État de l'écran (démo)">
+                        <span class="lbl">État</span>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rat="decide" aria-selected="true">Ce qui décide</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rat="regles" aria-selected="false">Règles</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rat="controle" aria-selected="false">Contrôle</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rat="contreparties" aria-selected="false">Contreparties</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rat="balance" aria-selected="false">Balance</button>
+                        <button class="btn btn-ghost btn-sm" role="tab" data-rat="refus" aria-selected="false">Refus</button>
+                      </div>
+                    </div>
+
+                    <!-- Le contexte est PERMANENT : le dossier et l'exercice décident de
+                         tout ce qui suit, et les règles sont propres au dossier (STORY-236). -->
+                    <div class="cah-ctx">
+                      <label for="ratExo">Exercice</label>
+                      <select id="ratExo">
+                        <option>2026 — 01/01/2026 → 31/12/2026</option>
+                        <option>2025 — 01/01/2025 → 31/12/2025 (clos)</option>
+                      </select>
+                      <span class="badge badge-active"><span class="d"></span>Ouvert</span>
+                      <span class="grow" style="flex:1"></span>
+                      <span class="cah-lig">Kossi Distribution · règles propres à CE dossier</span>
+                    </div>
+
+                    <!-- ═════════════ ① CE QUI DÉCIDE ═════════════ -->
+                    <div class="rat-slot" data-rat-slot="decide">
+
+                      <div class="rat-sect">
+                        <h4>Trois choses peuvent choisir le compte — dans cet ordre</h4>
+                        <span class="c">Et la troisième n'est pas un choix.</span>
+                      </div>
+
+                      <!-- L'ordre n'est pas décoratif : `resoudreSurcharge` essaie LIBELLE
+                           puis TIERS, et `proposerRattachement` n'appelle le moteur de
+                           mots-clés qu'après. Rien au contrat ne publie cet ordre — il se
+                           lit dans le code. Le montrer ici est ce qui rend compréhensible
+                           qu'une règle sur le tiers puisse ne jamais s'appliquer. -->
+                      <div class="rat-prio">
+                        <div class="rat-step on">
+                          <span class="n">1</span>
+                          <div>
+                            <b>Une règle de ce dossier, sur le <span class="rat-type lib">libellé</span></b>
+                            <p>Écrite par une personne, datée, traçable. Le libellé décrit <b>l'opération</b> — il passe donc <b>avant</b> le tiers&nbsp;: un même fournisseur peut vendre du gaz et louer une citerne.</p>
+                          </div>
+                        </div>
+                        <div class="rat-step on">
+                          <span class="n">2</span>
+                          <div>
+                            <b>Une règle de ce dossier, sur le <span class="rat-type">tiers</span></b>
+                            <p>Le client ou le fournisseur. ⚠️ <b>Si une règle de libellé a déjà pris la ligne, celle-ci ne s'applique pas</b> — et rien ne vous le dira côté serveur.</p>
+                          </div>
+                        </div>
+                        <div class="rat-step">
+                          <span class="n">3</span>
+                          <div>
+                            <b>Le moteur de mots-clés — puis, à défaut, <span class="rat-src defaut">701 par défaut</span></b>
+                            <p>Le moteur cherche « vente », « prestation », « travaux », « loyer »… dans le libellé, puis dans <b>l'activité déclarée</b> du dossier. S'il ne trouve rien, il rend <b>701 Ventes de marchandises</b> — et la balance sera parfaitement équilibrée avec un chiffre d'affaires mal ventilé.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- ⚠️ L'ASYMÉTRIE QUI PIÈGE LE COMPTABLE VENANT DE SAGE, et elle est
+                           à l'envers de ce qu'on attend : la MACHINE cherche « contient »
+                           (`ligne.includes(mot)`), l'HUMAIN doit tomber sur l'ÉGALITÉ
+                           EXACTE de la clé normalisée (`s.valeur === candidat.cle`). Une
+                           règle délibérée est donc PLUS stricte qu'une devinette. -->
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Une règle prend le texte <u>en entier</u>, pas un morceau.</b> «&nbsp;SODIGAZ&nbsp;» ne prend <b>pas</b> «&nbsp;SODIGAZ SA&nbsp;» ni «&nbsp;Facture SODIGAZ&nbsp;»&nbsp;: la comparaison est <b>exacte</b>, une fois les accents, la casse et les espaces doubles neutralisés. Le moteur de mots-clés, lui, cherche bien «&nbsp;contient&nbsp;» — <b>votre règle est donc plus stricte que sa devinette</b>. C'est pour ça que l'écran vous montre, avant d'enregistrer, <b>combien de lignes elle prendrait vraiment</b>.</span>
+                      </div>
+
+                      <!-- ⛔ LA PORTÉE, DITE AVANT QU'ON LA CHERCHE — patron FE-048/FE-049.
+                           Le module `rattachement` ne connaît que la classe 7. Ne pas le
+                           dire, c'est laisser écrire une règle « CEET → 6051 » qui reçoit
+                           un 400 dont la formulation (« hors classe 7 ») n'aidera pas. -->
+                      <div class="prof-note info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        <span><b>Ici, on ne règle que les <u>recettes</u> — la classe 7.</b> Les <b>dépenses</b> ne se rattachent pas par une règle mais par leur <b>catégorie</b> («&nbsp;Loyer boutique&nbsp;»&nbsp;→&nbsp;<code>622</code>, «&nbsp;Électricité CEET&nbsp;»&nbsp;→&nbsp;<code>6051</code>), qui porte déjà le compte de charge et sa déductibilité. <button class="linklike" type="button" data-goto-cahiers>Les catégories se gèrent dans le cahier de dépenses</button> — <b>volontairement une seule source</b>&nbsp;: deux réglages du même compte finiraient par diverger, et le résultat fiscal dépendrait du chemin emprunté.</span>
+                      </div>
+
+                      <!-- ══════ L'ESSAI — le geste qui rend l'écran interactif dès l'entrée.
+                           `GET …/rattachement/proposition?libelle=&tiers=` ne prend QUE ces
+                           deux champs : ni montant, ni date, ni moyen de paiement. On peut
+                           donc l'essayer à blanc, sans toucher au cahier. ══════ -->
+                      <div class="ref-card" style="padding:1rem;display:flex;flex-direction:column;gap:0.85rem">
+                        <div class="rat-sect">
+                          <h4>Essayer, sans rien écrire au cahier</h4>
+                          <span class="c">La proposition n'engage rien tant qu'aucune ligne n'est enregistrée.</span>
+                        </div>
+                        <div class="cah-form">
+                          <label>Libellé de la ligne
+                            <select data-rat-essai>
+                              <option value="mairie" data-tiers="Mairie de Kara">Paiement reçu — Mairie de Kara</option>
+                              <option value="vente" data-tiers="Kodjo">Vente marchandises — Kodjo</option>
+                              <option value="loyer" data-tiers="M. Amegan">Loyer local Adidogomé</option>
+                              <option value="facture" data-tiers="SODIFAB">Facture n° 12</option>
+                              <option value="change" data-tiers="Ecobank">Commission de change</option>
+                              <option value="ceet" data-tiers="CEET" data-depense="1">Électricité CEET</option>
+                            </select>
+                            <span class="fh">Texte libre dans le produit — liste ici pour la démo.</span>
+                          </label>
+                          <label>Tiers <span style="font-weight:400">(facultatif)</span>
+                            <input type="text" value="Mairie de Kara" data-rat-essai-tiers>
+                            <span class="fh">Client ou fournisseur, tel qu'il est écrit sur la ligne.</span>
+                          </label>
+                        </div>
+                        <div class="rat-ecr">
+                          <div class="rat-ecr-head">
+                            <b>Compte proposé</b>
+                            <span class="grow" style="flex:1"></span>
+                            <span class="cible" style="font-family:var(--font-mono);font-weight:750;font-size:1rem" data-rat-essai-compte>706</span>
+                            <span data-rat-essai-src><span class="rat-src regle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Règle du dossier</span></span>
+                          </div>
+                          <div style="padding:0.6rem 0.85rem;font-size:0.8rem;color:var(--muted-fg)" data-rat-essai-motif>
+                            <b style="color:var(--foreground)">Services vendus</b> — motif rendu par le serveur&nbsp;: «&nbsp;règle de l'organisation sur le tiers «&nbsp;Mairie de Kara&nbsp;»&nbsp;».
+                          </div>
+                        </div>
+                        <p class="helper" style="text-align:left">
+                          <b>Une proposition muette s'accepte sans réfléchir</b> — c'est pourquoi le serveur renvoie toujours son <b>motif</b>. Ce que l'écran ajoute&nbsp;:
+                          il traduit ce motif en <b>provenance</b>, parce qu'une phrase se lit, mais ne se trie pas.
+                        </p>
+                      </div>
+
+                      <!-- ÉCART — relevé à la source, pas supposé. -->
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>À livrer côté backend — la provenance est aujourd'hui une phrase en français.</b> <code>PropositionRattachementDto</code> publie <code>compte</code>, <code>motif</code> (prose) et <code>surcharge</code> (booléen). On sait donc si c'est une règle&nbsp;; on ne sait <b>pas</b> distinguer «&nbsp;mot-clé du libellé&nbsp;», «&nbsp;activité de l'organisation&nbsp;» et «&nbsp;<b>défaut, faute d'indice</b>&nbsp;» sans <b>analyser du texte français</b> — fragile, et intraduisible. <b>Demandé&nbsp;: <code>origine: 'REGLE' | 'MOT_CLE' | 'ACTIVITE' | 'DEFAUT'</code></b>, typé, à côté du motif. <span class="code">écart ouvert · ticket backend</span></span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ② LES RÈGLES DU DOSSIER ═════════════ -->
+                    <div class="rat-slot" data-rat-slot="regles" hidden>
+
+                      <div class="rat-sect">
+                        <h4>Les règles de ce dossier</h4>
+                        <span class="c">4 règles · <b>propres à Kossi Distribution</b>, jamais partagées avec vos autres clients.</span>
+                      </div>
+
+                      <div class="rat-regles">
+                        <!-- Ordre d'affichage = ordre d'application. Trier par date de
+                             création montrerait une liste dont on ne peut pas déduire
+                             laquelle gagne. -->
+                        <div class="rat-regle">
+                          <div class="cle">
+                            <span class="rat-type lib">Libellé</span>
+                            <b>«&nbsp;loyer local adidogomé&nbsp;»</b>
+                            <span style="color:var(--muted-fg)">→</span>
+                            <span class="cible">7073</span>
+                            <span style="font-size:0.78rem;color:var(--muted-fg)">Produits accessoires</span>
+                          </div>
+                          <div class="por"><span class="c">11</span><span class="u">lignes prises</span>
+                            <button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la règle">Supprimer</button>
+                          </div>
+                          <div class="tr">Posée par <b>A. Mensah</b> le 12/02/2026 · clé comparée&nbsp;: <code>loyer local adidogome</code></div>
+                        </div>
+
+                        <div class="rat-regle">
+                          <div class="cle">
+                            <span class="rat-type">Tiers</span>
+                            <b>«&nbsp;Mairie de Kara&nbsp;»</b>
+                            <span style="color:var(--muted-fg)">→</span>
+                            <span class="cible">706</span>
+                            <span style="font-size:0.78rem;color:var(--muted-fg)">Services vendus</span>
+                          </div>
+                          <div class="por"><span class="c">7</span><span class="u">lignes prises</span>
+                            <button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la règle">Supprimer</button>
+                          </div>
+                          <div class="tr">Posée par <b>A. Mensah</b> le 12/02/2026 · clé comparée&nbsp;: <code>mairie de kara</code></div>
+                        </div>
+
+                        <!-- ⚠️ LA RÈGLE QUI NE PREND RIEN — cas le plus fréquent, et il est
+                             INVISIBLE au contrat : elle est bien enregistrée, bien listée,
+                             et ne s'applique jamais parce que la comparaison est exacte. -->
+                        <div class="rat-regle vide">
+                          <div class="cle">
+                            <span class="rat-type">Tiers</span>
+                            <b>«&nbsp;SODIGAZ&nbsp;»</b>
+                            <span style="color:var(--muted-fg)">→</span>
+                            <span class="cible">707</span>
+                            <span style="font-size:0.78rem;color:var(--muted-fg)">Produits accessoires</span>
+                          </div>
+                          <div class="por"><span class="c">0</span><span class="u">ligne prise</span>
+                            <button class="btn btn-ghost btn-sm" type="button" aria-label="Supprimer la règle">Supprimer</button>
+                          </div>
+                          <div class="tr"><b>Aucune ligne ne porte exactement ce tiers.</b> Vos 9 lignes SODIGAZ sont écrites «&nbsp;SODIGAZ SA&nbsp;» (6) et «&nbsp;Sodigaz Lomé&nbsp;» (3). <b>Cette règle est enregistrée et ne sert à rien</b> — il en faut une par écriture exacte. <button class="linklike" type="button" data-rat-goto="regles">Créer les deux règles manquantes</button></div>
+                        </div>
+
+                        <!-- ⛔ LE CAS QUE LE SERVEUR TRAITE EN SILENCE : `proposerRattachement`
+                             n'applique une surcharge que si `compteDeposable(compte)` — sinon
+                             il RETOMBE sur le moteur de mots-clés, sans rien signaler. La
+                             règle reste en base, s'affiche « enregistrée », et n'agit plus. -->
+                        <div class="rat-regle inerte">
+                          <div class="cle">
+                            <span class="rat-type lib">Libellé</span>
+                            <b>«&nbsp;commission de change&nbsp;»</b>
+                            <span style="color:var(--muted-fg)">→</span>
+                            <span class="cible">7078</span>
+                            <span class="badge badge-soon">Hors du plan actif</span>
+                          </div>
+                          <div class="por"><span class="c">—</span><span class="u">inapplicable</span>
+                            <button class="btn btn-primary btn-sm" type="button">Corriger le compte</button>
+                          </div>
+                          <div class="tr"><b>Le compte <code>7078</code> n'appartient pas au plan <code>syscohada-revise@2.1</code> de ce dossier.</b> Le serveur <b>ignore cette règle sans le dire</b> et retombe sur le moteur de mots-clés&nbsp;: les 4 lignes concernées sont parties en <code>701</code>. Corrigez la cible, ou supprimez la règle.</div>
+                        </div>
+                      </div>
+
+                      <!-- Création — le PUT est idempotent : rejouer la même clé remplace la
+                           cible et met à jour la trace. Ce n'est donc jamais un doublon. -->
+                      <details class="cah-repli" data-rat-form>
+                        <summary>Poser une règle <span>— pour que ce compte soit proposé la prochaine fois</span></summary>
+                        <div class="cah-form">
+                          <label>La règle porte sur
+                            <select data-rat-f-type>
+                              <option value="LIBELLE">Le libellé de la ligne</option>
+                              <option value="TIERS">Le tiers (client / fournisseur)</option>
+                            </select>
+                            <span class="fh">Le libellé <b>passe avant</b> le tiers.</span>
+                          </label>
+                          <label>Texte exact
+                            <input type="text" placeholder="SODIGAZ SA" data-rat-f-val>
+                            <span class="fh">Comparé sans accents ni casse — mais <b>en entier</b>.</span>
+                          </label>
+                          <!-- ⚡ LE GAIN DE STORY-394 (mergée le 2026-08-26) : jusque-là,
+                               ce champ était un INPUT que le comptable remplissait DE
+                               MÉMOIRE pour recevoir un 400. `GET /referentiels/plan-comptes
+                               ?classe=7` énumère enfin les comptes de produits du plan actif,
+                               avec leurs libellés. La fiche FE-046 annonce encore l'inverse
+                               (« le champ se tape de mémoire ») : elle est PÉRIMÉE. -->
+                          <label>Compte de produits
+                            <select data-rat-f-cpt>
+                              <option>701 — Ventes de marchandises</option>
+                              <option>702 — Ventes de produits finis</option>
+                              <option>703 — Ventes de produits intermédiaires</option>
+                              <option>704 — Ventes de produits résiduels</option>
+                              <option>705 — Travaux facturés</option>
+                              <option selected>706 — Services vendus</option>
+                              <option>707 — Produits accessoires</option>
+                              <option>71 — Subventions d'exploitation</option>
+                              <option>75 — Autres produits</option>
+                              <option>77 — Revenus financiers et produits assimilés</option>
+                              <option value="autre">Autre compte — le saisir…</option>
+                            </select>
+                            <span class="fh"><b>21 comptes de classe 7</b> au plan <code>syscohada-revise@2.1</code>.</span>
+                          </label>
+                        </div>
+                        <!-- ⚠️ ET POURQUOI LA SAISIE LIBRE RESTE : le plan packagé est un
+                             plan de TÊTES (174 comptes). `7073`, `7072`, `6055` n'y sont
+                             pas — et sont pourtant ACCEPTÉS, parce que le rattachement se
+                             fait par PRÉFIXE (`estCompteRattachable`). Une liste seule
+                             empêcherait le cabinet de travailler à son niveau de détail. -->
+                        <div class="prof-note info" style="margin:0.4rem 0 0.6rem">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                          <span><b>La liste ne contient que les têtes du plan.</b> Votre <code>7073</code> ou votre <code>7072</code> n'y figure pas et reste pourtant <b>accepté</b>&nbsp;: un compte est reconnu par sa <b>racine</b>. Choisissez dans la liste, ou saisissez votre subdivision — les deux marchent, mais <b>seule la liste vous garantit un compte qui existe</b>.</span>
+                        </div>
+                        <!-- LA PORTÉE AVANT L'ENREGISTREMENT — le seul moment où une règle
+                             morte se voit encore. Elle se calcule côté client, sur les
+                             transactions déjà chargées : aucune route ne la sert. -->
+                        <div class="imp-drybar" data-rat-portee>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                          <span>Saisissez un texte pour voir <b>combien de lignes de l'exercice</b> cette règle prendrait.</span>
+                        </div>
+                        <div class="cah-actions" style="padding:0 0 0.7rem">
+                          <button class="btn btn-primary btn-sm" type="button" data-rat-f-ok disabled>Enregistrer la règle</button>
+                          <span class="grow" style="flex:1"></span>
+                          <span class="cah-lig">PUT …/rattachement/surcharges — idempotent</span>
+                        </div>
+                        <p class="helper" style="text-align:left">
+                          ⚠️ Une règle <b>ne réécrit jamais le passé</b>&nbsp;: les lignes déjà saisies gardent leur compte, qui est <b>la décision du comptable</b>. Elle change ce qui sera <b>proposé</b> ensuite.
+                        </p>
+                      </details>
+
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>À livrer côté backend — «&nbsp;0 ligne prise&nbsp;» et «&nbsp;inapplicable&nbsp;» sont calculés ici, pas servis.</b> <code>SurchargeRattachementDto</code> ne publie <b>ni</b> le nombre de lignes que la règle prend, <b>ni</b> si son compte appartient encore au plan actif — alors que le serveur, lui, le sait&nbsp;: c'est exactement le test <code>compteDeposable()</code> qu'il applique avant d'ignorer la règle. L'écran le reconstitue en croisant <code>GET /referentiels/plan-comptes</code> et les lignes de l'exercice&nbsp;: <b>ça marche, mais c'est une vérité recalculée par chaque client</b>. <b>Demandé&nbsp;: <code>applicable: boolean</code> et <code>lignesPrises: number</code></b> sur la règle. <span class="code">écart ouvert · ticket backend</span></span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ③ LE CONTRÔLE PAR COMPTE ═════════════
+                         `GET …/cahiers/{recettes|depenses}/totaux-comptes`. C'est LE geste
+                         de l'expert-comptable : il ne relit pas 300 lignes, il regarde si
+                         son chiffre d'affaires se ventile de façon plausible. Un cahier
+                         entier tombé en `701` se voit ici en deux secondes, et nulle part
+                         ailleurs — surtout pas sur la balance, qui sera équilibrée. -->
+                    <div class="rat-slot" data-rat-slot="controle" hidden>
+
+                      <div class="rat-sect">
+                        <h4>Ce que le rattachement a donné</h4>
+                        <span class="c">Exercice 2026 · les deux livres · <b>avant</b> de construire la balance.</span>
+                      </div>
+
+                      <!-- Le seul contrôle qui attrape le défaut silencieux. -->
+                      <div class="imp-tiles">
+                        <div class="imp-tile"><div class="k">Recettes rattachées</div><div class="v">3 500 000<span class="u">F</span></div></div>
+                        <div class="imp-tile"><div class="k">Comptes de produits utilisés</div><div class="v">4</div></div>
+                        <div class="imp-tile dep-attn"><div class="k">Dont proposé par défaut</div><div class="v">620 000<span class="u">F</span></div><div class="k" style="margin-top:0.2rem;text-transform:none;letter-spacing:0;font-weight:500">17,7&nbsp;% du chiffre d'affaires</div></div>
+                        <div class="imp-tile"><div class="k">Dépenses rattachées</div><div class="v">2 145 000<span class="u">F</span></div></div>
+                      </div>
+
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>620&nbsp;000&nbsp;F sont en <code>701</code> parce que rien n'a été trouvé, pas parce que c'est une vente de marchandises.</b> Ces 14 lignes portent des libellés qui ne disent rien au moteur («&nbsp;Facture n°&nbsp;12&nbsp;», «&nbsp;Règlement&nbsp;», «&nbsp;Versement&nbsp;»). <b>La balance sera équilibrée quand même</b> — c'est bien pour ça qu'il faut les regarder <b>ici</b>. <button class="linklike" type="button" data-rat-goto="regles">Poser une règle</button> ou <button class="linklike" type="button" data-goto-cahiers>corriger les lignes dans le cahier</button>.</span>
+                      </div>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap"><b>Recettes — classe 7.</b> <code>GET …/cahiers/recettes/totaux-comptes</code> · montants <b>HT</b>, prêts pour l'agrégation.</div>
+                        <div class="tbl-wrap">
+                          <table class="imp-table">
+                            <thead>
+                              <tr><th>Compte</th><th>Libellé au plan</th><th class="fis-n">Total HT</th><th class="fis-n">Part</th><th>Provenance dominante</th></tr>
+                            </thead>
+                            <tbody>
+                              <tr class="rat-adefaut">
+                                <td class="fis-case">701</td><td>Ventes de marchandises</td><td class="fis-n">1 985 000</td><td class="fis-n">56,7&nbsp;%</td>
+                                <td><span class="rat-src motcle">mot-clé «&nbsp;vente&nbsp;»</span> <span class="rat-src defaut">14 lignes par défaut</span></td>
+                              </tr>
+                              <tr>
+                                <td class="fis-case">706</td><td>Services vendus</td><td class="fis-n">1 050 000</td><td class="fis-n">30,0&nbsp;%</td>
+                                <td><span class="rat-src regle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> règle «&nbsp;Mairie de Kara&nbsp;»</span></td>
+                              </tr>
+                              <tr>
+                                <td class="fis-case">7073</td><td>Produits accessoires <span class="fis-motif">le plan s'arrête à <code>707</code> — <code>7073</code> est reconnu par sa racine</span></td><td class="fis-n">320 000</td><td class="fis-n">9,1&nbsp;%</td>
+                                <td><span class="rat-src regle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> règle «&nbsp;loyer local adidogomé&nbsp;»</span></td>
+                              </tr>
+                              <tr>
+                                <td class="fis-case">707</td><td>Produits accessoires</td><td class="fis-n">145 000</td><td class="fis-n">4,2&nbsp;%</td>
+                                <td><span class="rat-src motcle">mot-clé «&nbsp;transport&nbsp;»</span></td>
+                              </tr>
+                              <tr class="fis-cle">
+                                <td colspan="2">Total des produits de l'exercice</td><td class="fis-n">3 500 000</td><td class="fis-n">100&nbsp;%</td><td></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap"><b>Dépenses — classe 6.</b> Le compte vient de la <b>catégorie</b> de la ligne, pas d'une règle&nbsp;: <code>GET …/cahiers/depenses/totaux-comptes</code>.</div>
+                        <div class="tbl-wrap">
+                          <table class="imp-table">
+                            <thead>
+                              <tr><th>Compte</th><th>Votre catégorie</th><th>Libellé au plan</th><th class="fis-n">Total imputé</th><th>Déductible</th></tr>
+                            </thead>
+                            <tbody>
+                              <tr><td class="fis-case">601</td><td>Achats de marchandises</td><td>Achats de marchandises</td><td class="fis-n">500 000</td><td><span class="cah-conf ok">oui</span></td></tr>
+                              <!-- ⚠️ DEUX CATÉGORIES DIFFÉRENTES, UN SEUL LIBELLÉ AU PLAN.
+                                   `libelleDuCompte` résout par le PLUS LONG PRÉFIXE : 6051 et
+                                   6055 retombent tous deux sur `605 Autres achats`. Sans la
+                                   colonne « votre catégorie », la balance produite serait
+                                   illisible pour celui-là même qui l'a saisie. -->
+                              <tr><td class="fis-case">6051</td><td>Électricité CEET</td><td>Autres achats <span class="fis-motif">libellé de la racine <code>605</code></span></td><td class="fis-n">240 000</td><td><span class="cah-conf ok">oui</span></td></tr>
+                              <tr><td class="fis-case">6055</td><td>Carburant motos</td><td>Autres achats <span class="fis-motif">même racine <code>605</code> — <b>deux comptes, un seul libellé</b></span></td><td class="fis-n">385 000</td><td><span class="cah-conf ok">oui</span></td></tr>
+                              <tr><td class="fis-case">622</td><td>Loyer boutique</td><td>Services extérieurs A <span class="fis-motif">racine <code>62</code></span></td><td class="fis-n">900 000</td><td><span class="cah-conf ok">oui</span></td></tr>
+                              <tr class="fis-attn"><td class="fis-case">6581</td><td>Amendes &amp; pénalités</td><td>Autres charges <span class="fis-motif">racine <code>65</code></span></td><td class="fis-n">120 000</td><td><span class="cah-conf bad">non — réintégrée</span></td></tr>
+                              <tr class="fis-cle"><td colspan="3">Total des charges de l'exercice</td><td class="fis-n">2 145 000</td><td></td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>À livrer côté backend — le libellé de la balance est celui de la <u>racine</u>, pas du compte.</b> <code>libelleDuCompte</code> résout par le plus long préfixe du plan&nbsp;: <code>6051</code> et <code>6055</code> ressortent tous deux «&nbsp;Autres achats&nbsp;», et <code>6581</code> «&nbsp;Autres charges&nbsp;». Le repli est <b>juste</b> (un plan normalisé ne liste pas les subdivisions), mais la balance livrée devient <b>illisible pour celui qui l'a saisie</b> — deux lignes homonymes de montants différents. Le cabinet possède pourtant le bon libellé&nbsp;: c'est le <code>libelle</code> de sa <b>catégorie de dépense</b>. <b>Demandé&nbsp;: reporter le libellé de la catégorie sur la ligne de balance</b> (ou le publier à côté). <span class="code">écart ouvert · ticket backend</span></span>
+                      </div>
+                    </div>
+
+                    <!-- ═════════════ ④ LES CONTREPARTIES ═════════════
+                         D-085-5. C'est la moitié de la balance que le comptable n'a JAMAIS
+                         saisie : il a noté « 150 000 reçus de Kodjo », pas « débit 571,
+                         crédit 701 ». La partie double est reconstituée — et c'est le seul
+                         écran du produit où elle se voit. -->
+                    <div class="rat-slot" data-rat-slot="contreparties" hidden>
+
+                      <div class="rat-sect">
+                        <h4>L'autre moitié de l'écriture</h4>
+                        <span class="c">Votre client note un encaissement&nbsp;; la balance exige deux lignes. Voici d'où vient la seconde.</span>
+                      </div>
+
+                      <div class="rat-cpts">
+                        <div class="rat-cpt"><span class="k">Espèces</span><span class="v">571</span><span class="w">Caisse — défaut SYSCOHADA</span></div>
+                        <div class="rat-cpt"><span class="k">Virement / chèque</span><span class="v">521</span><span class="w">Banques — défaut SYSCOHADA</span></div>
+                        <div class="rat-cpt surcharge"><span class="k">Mobile money</span><span class="v">5511</span><span class="w"><b>Paramétré sur ce dossier</b> — le défaut est <code>551</code>. Un compte par opérateur se règle ici.</span></div>
+                        <div class="rat-cpt"><span class="k">TVA collectée</span><span class="v">443</span><span class="w">État, TVA facturée</span></div>
+                        <div class="rat-cpt"><span class="k">TVA récupérable</span><span class="v">445</span><span class="w">État, TVA récupérable</span></div>
+                        <div class="rat-cpt"><span class="k">Recette non encaissée</span><span class="v">411</span><span class="w">Clients — créance</span></div>
+                        <div class="rat-cpt"><span class="k">Dépense non payée</span><span class="v">401</span><span class="w">Fournisseurs — dette</span></div>
+                      </div>
+                      <div class="cah-actions">
+                        <button class="btn btn-ghost btn-sm" type="button">Modifier les contreparties</button>
+                        <span class="grow" style="flex:1"></span>
+                        <span class="cah-lig">GET / PUT …/balance/comptes-ventilation — validé contre le plan à l'écriture</span>
+                      </div>
+
+                      <!-- ⚠️ LE NOMBRE DE LIGNES DÉPEND DU RÉGIME, ET C'EST UNE BASCULE,
+                           PAS UNE AFFIRMATION. `ventilerTva` rend `taux: 0` pour un non
+                           assujetti, et `pousser()` n'écrit AUCUNE écriture de montant nul :
+                           la même recette produit donc 2 lignes ici et 3 là. L'écran ne
+                           décide pas du régime — il vient du profil et de l'exercice — mais
+                           il doit montrer les deux, sinon on lit un oubli de TVA. -->
+                      <div style="display:flex;align-items:flex-end;gap:0.6rem;flex-wrap:wrap;margin-top:0.3rem">
+                        <div class="rat-sect">
+                          <h4>Une recette encaissée en espèces</h4>
+                          <span class="c">Le régime de TVA décide du <b>nombre de lignes</b>.</span>
+                        </div>
+                        <span class="grow" style="flex:1"></span>
+                        <div class="atelier-demo" role="tablist" aria-label="Régime de TVA (démo)">
+                          <span class="lbl">Régime</span>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-rat-tva="non" aria-selected="true">Non assujetti</button>
+                          <button class="btn btn-ghost btn-sm" role="tab" data-rat-tva="oui" aria-selected="false">Assujetti (18&nbsp;%)</button>
+                        </div>
+                      </div>
+
+                      <div data-rat-tva-slot="non">
+                        <div class="rat-ecr">
+                          <div class="rat-ecr-head"><b>14/03/2026</b> · Vente marchandises — Kodjo · espèces<span class="m">150 000 F</span></div>
+                          <div class="rat-ecr-cols"><span>Compte</span><span>Libellé</span><span>Débit</span><span>Crédit</span></div>
+                          <div class="rat-ecr-row"><span class="c">571</span><span>Caisse <span class="fis-motif">contrepartie — moyen de paiement «&nbsp;espèces&nbsp;»</span></span><span class="n">150 000</span><span class="n off">—</span></div>
+                          <div class="rat-ecr-row"><span class="c">701</span><span>Ventes de marchandises <span class="fis-motif">compte de la ligne — <span class="rat-src motcle">mot-clé «&nbsp;vente&nbsp;»</span></span></span><span class="n off">—</span><span class="n">150 000</span></div>
+                          <div class="rat-ecr-row tot"><span></span><span>Totaux</span><span class="n">150 000</span><span class="n">150 000</span></div>
+                        </div>
+                        <p class="helper" style="text-align:left">
+                          <b>Deux lignes, et aucune ligne de TVA à zéro.</b> Une entreprise au régime synthétique ne facture pas la TVA&nbsp;: écrire <code>443</code> pour 0&nbsp;F
+                          encombrerait la balance d’un compte qui ne dit rien.
+                        </p>
+                      </div>
+
+                      <div data-rat-tva-slot="oui" hidden>
+                        <div class="rat-ecr">
+                          <div class="rat-ecr-head"><b>14/03/2026</b> · Vente marchandises — Kodjo · espèces<span class="m">150 000 F TTC</span></div>
+                          <div class="rat-ecr-cols"><span>Compte</span><span>Libellé</span><span>Débit</span><span>Crédit</span></div>
+                          <div class="rat-ecr-row"><span class="c">571</span><span>Caisse <span class="fis-motif">contrepartie — le <b>TTC</b>, c’est ce qui est entré en caisse</span></span><span class="n">150 000</span><span class="n off">—</span></div>
+                          <div class="rat-ecr-row"><span class="c">701</span><span>Ventes de marchandises <span class="fis-motif">le <b>HT</b> — <code>150 000 / 1,18</code>, arrondi</span></span><span class="n off">—</span><span class="n">127 119</span></div>
+                          <div class="rat-ecr-row"><span class="c">443</span><span>État, TVA facturée <span class="fis-motif">le reste — <b>calculé par différence</b>, jamais par HT&nbsp;×&nbsp;taux</span></span><span class="n off">—</span><span class="n">22 881</span></div>
+                          <div class="rat-ecr-row tot"><span></span><span>Totaux</span><span class="n">150 000</span><span class="n">150 000</span></div>
+                        </div>
+                        <p class="helper" style="text-align:left">
+                          <b>La TVA est calculée par différence</b> (<code>TTC − HT</code>) et non par <code>HT × taux</code>&nbsp;: c’est ce qui garantit <code>HT + TVA = TTC</code> <b>à l’unité près</b>,
+                          sans arrondi qui se perd. ⚠️ Et le taux vient <b>toujours du paquet fiscal</b> de l’exercice — aucun taux n’est écrit dans le code.
+                        </p>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ Dans les deux cas, <b>le produit reçoit le HT — jamais le TTC</b>. Créditer le TTC en classe&nbsp;7 gonflerait le chiffre d’affaires de 18&nbsp;%,
+                        donc l’IS <b>et</b> la MFP, qui se calcule précisément sur le <b>CA HT</b>.
+                      </p>
+
+                      <!-- ⛔ LE PIÈGE QUE L'EXPERT-COMPTABLE CHERCHERA : `resoudreContrepartie`
+                           n'a pas de cas « à crédit ». Elle regarde le MOYEN DE PAIEMENT ;
+                           s'il est ABSENT et qu'un tiers est nommé, elle conclut à une
+                           CRÉANCE. Un encaissement dont on a juste oublié de cocher le
+                           moyen de paiement devient donc un « client qui doit ». La balance
+                           tombe juste, la trésorerie est sous-évaluée et le bilan porte une
+                           créance qui n'existe pas. -->
+                      <div class="rat-sect" style="margin-top:0.3rem">
+                        <h4>La même recette, <b>sans moyen de paiement</b></h4>
+                        <span class="c">Un tiers est nommé&nbsp;: le système en conclut une <b>créance</b>.</span>
+                      </div>
+                      <div class="rat-ecr">
+                        <div class="rat-ecr-head"><b>05/03/2026</b> · Facture n° 12 — SODIFAB · <b>moyen de paiement non renseigné</b><span class="m">420 000 F</span></div>
+                        <div class="rat-ecr-cols"><span>Compte</span><span>Libellé</span><span>Débit</span><span>Crédit</span></div>
+                        <div class="rat-ecr-row"><span class="c">411</span><span>Clients <span class="fis-motif">contrepartie — <b>aucun moyen de paiement, mais un tiers nommé</b></span></span><span class="n">420 000</span><span class="n off">—</span></div>
+                        <div class="rat-ecr-row"><span class="c">701</span><span>Ventes de marchandises <span class="fis-motif">compte de la ligne — <span class="rat-src defaut">défaut, faute d'indice</span></span></span><span class="n off">—</span><span class="n">420 000</span></div>
+                        <div class="rat-ecr-row tot"><span></span><span>Totaux</span><span class="n">420 000</span><span class="n">420 000</span></div>
+                      </div>
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Un oubli de moyen de paiement se transforme en créance client, et rien ne le signale.</b> Le système ne connaît pas d'état «&nbsp;à crédit&nbsp;»&nbsp;: il déduit la contrepartie du <b>moyen de paiement</b>, et à défaut — si un tiers est nommé — conclut à un <b>compte de tiers</b>. Une vente au comptant dont on a oublié de cocher «&nbsp;espèces&nbsp;» ressort donc en <code>411 Clients</code>&nbsp;: <b>la balance est équilibrée, la trésorerie est sous-évaluée, et le bilan porte une créance qui n'existe pas</b>. <b>3 lignes de l'exercice sont dans ce cas</b> (420 000 F). <button class="linklike" type="button" data-goto-cahiers>Les compléter dans le cahier</button>. <span class="code">écart ouvert · ticket backend — l'aperçu ne détaille pas ses contreparties</span></span>
+                      </div>
+                      <p class="helper" style="text-align:left">
+                        ⚠️ Et <b>sans tiers ni moyen de paiement</b>, la transaction n'est pas rangée dans un compte d'attente&nbsp;: elle est <b>écartée</b> et listée. <b>Aucune ligne d'écart n'est jamais ajoutée pour faire tomber les totaux</b> —
+                        une balance amputée et honnête vaut mieux qu'une balance complète et fausse. <button class="linklike" type="button" data-rat-goto="balance">Voir les transactions écartées</button>
+                      </p>
+                    </div>
+
+                    <!-- ═════════════ ⑤ LA BALANCE PRODUITE ═════════════ -->
+                    <div class="rat-slot" data-rat-slot="balance" hidden>
+
+                      <div class="imp-steps" aria-hidden="true">
+                        <span class="imp-step done"><span class="n">1</span> Rattacher</span>
+                        <span class="sep"></span>
+                        <span class="imp-step active"><span class="n">2</span> Aperçu</span>
+                        <span class="sep"></span>
+                        <span class="imp-step"><span class="n">3</span> Enregistrer</span>
+                      </div>
+
+                      <div class="imp-drybar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span><b>Aperçu — rien n'est écrit.</b> C'est le comportement <b>par défaut</b> du service&nbsp;: il faut demander explicitement l'enregistrement. Le même calcul, les mêmes contrôles, aucune balance créée.</span>
+                      </div>
+
+                      <!-- ⛔ L'AVERTISSEMENT SYSTÉMATIQUE (D-085-9) EST EN TÊTE, PAS EN NOTE.
+                           Le service le renvoie dans `avertissements[]`, une liste de
+                           chaînes ; le reléguer en bas de page en ferait une mention
+                           légale. Pour un commerçant en achat-revente, l'absence de
+                           variation de stocks ne « manque » pas un peu : elle rend le
+                           RÉSULTAT faux, sur une balance parfaitement équilibrée. -->
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>Cette balance ne porte aucune écriture d'inventaire.</b> Ni <b>variation de stocks</b>, ni <b>amortissements</b>, ni <b>provisions</b>&nbsp;: elles restent à saisir. Pour un commerçant en achat-revente, <b>la marge est calculée sur les achats et non sur le coût des marchandises vendues</b> — le résultat est donc faux tant que le stock de clôture n'est pas passé. <b>Elle est équilibrée, ce qui ne veut pas dire qu'elle est complète.</b></span>
+                      </div>
+
+                      <div class="imp-tiles">
+                        <div class="imp-tile"><div class="k">Transactions lues</div><div class="v">61</div></div>
+                        <div class="imp-tile"><div class="k">Écritures produites</div><div class="v">122</div></div>
+                        <div class="imp-tile"><div class="k">Comptes en balance</div><div class="v">13</div></div>
+                        <div class="imp-tile dep-attn"><div class="k">Statut de preuve</div><div class="v" style="font-size:0.95rem">partiellement estimée</div><div class="k" style="margin-top:0.2rem;text-transform:none;letter-spacing:0;font-weight:500">7 lignes reposent sur une estimation</div></div>
+                      </div>
+
+                      <div class="imp-table-wrap">
+                        <div class="imp-table-cap">Balance canonique de l'exercice — <b>4 colonnes</b>, unités entières XOF. Version <b>3</b> si elle est enregistrée (les versions s'ajoutent, rien n'est écrasé).</div>
+                        <div class="tbl-wrap">
+                          <table class="imp-table">
+                            <thead>
+                              <tr><th>Compte</th><th>Libellé</th><th class="fis-n">Mouv. débit</th><th class="fis-n">Mouv. crédit</th><th class="fis-n">Solde débiteur</th><th class="fis-n">Solde créditeur</th><th>Preuve</th></tr>
+                            </thead>
+                            <tbody>
+                              <tr><td class="fis-case">401</td><td>Fournisseurs, dettes en compte</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td><span class="cah-conf ok">fichier</span></td></tr>
+                              <tr><td class="fis-case">411</td><td>Clients</td><td class="fis-n">420 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">420 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf warn">saisie</span></td></tr>
+                              <tr><td class="fis-case">5511</td><td>Instruments de monnaie électronique</td><td class="fis-n">1 180 000</td><td class="fis-n">620 000</td><td class="fis-n">560 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
+                              <tr><td class="fis-case">571</td><td>Caisse</td><td class="fis-n">1 900 000</td><td class="fis-n">1 025 000</td><td class="fis-n">875 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf warn">estimé</span></td></tr>
+                              <tr><td class="fis-case">601</td><td>Achats de marchandises</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">500 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
+                              <tr><td class="fis-case">6051</td><td>Autres achats</td><td class="fis-n">240 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">240 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
+                              <tr><td class="fis-case">6055</td><td>Autres achats</td><td class="fis-n">385 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">385 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">ocr</span></td></tr>
+                              <tr><td class="fis-case">622</td><td>Services extérieurs A</td><td class="fis-n">900 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">900 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
+                              <tr><td class="fis-case">6581</td><td>Autres charges</td><td class="fis-n">120 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">120 000</td><td class="fis-n fis-vide">—</td><td><span class="cah-conf ok">fichier</span></td></tr>
+                              <tr><td class="fis-case">701</td><td>Ventes de marchandises</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 985 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 985 000</td><td><span class="cah-conf warn">estimé</span></td></tr>
+                              <tr><td class="fis-case">706</td><td>Services vendus</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 050 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">1 050 000</td><td><span class="cah-conf ok">ocr</span></td></tr>
+                              <tr><td class="fis-case">707</td><td>Produits accessoires</td><td class="fis-n fis-vide">—</td><td class="fis-n">145 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">145 000</td><td><span class="cah-conf ok">ocr</span></td></tr>
+                              <tr><td class="fis-case">7073</td><td>Produits accessoires</td><td class="fis-n fis-vide">—</td><td class="fis-n">320 000</td><td class="fis-n fis-vide">—</td><td class="fis-n">320 000</td><td><span class="cah-conf ok">fichier</span></td></tr>
+                              <tr class="fis-cle"><td colspan="2">Totaux</td><td class="fis-n">5 645 000</td><td class="fis-n">5 645 000</td><td class="fis-n">4 000 000</td><td class="fis-n">4 000 000</td><td></td></tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <!-- DEUX contrôles d'équilibre, pas un. Les fondre en un seul « ✓ »
+                           masquerait le cas où les mouvements tombent juste et les soldes
+                           non — ce qui arrive dès qu'un socle d'à-nouveaux est chaîné. -->
+                      <div class="rat-sect"><h4>Les deux équilibres</h4><span class="c">Le service en publie <b>deux</b>&nbsp;: une balance n'est «&nbsp;équilibrée&nbsp;» que si les deux tombent.</span></div>
+                      <div class="rap-eq">
+                        <div class="rap-eq-row"><span class="op">Σ</span><span>Mouvements débit<span class="sub">tout ce qui a été porté au débit sur l'exercice</span></span><span class="v">5 645 000</span></div>
+                        <div class="rap-eq-row"><span class="op">Σ</span><span>Mouvements crédit</span><span class="v">5 645 000</span></div>
+                        <div class="rap-eq-row ecart nul"><span class="op">=</span><span>Écart sur les mouvements</span><span class="v">0</span></div>
+                        <div class="rap-eq-row"><span class="op">Σ</span><span>Soldes débiteurs<span class="sub">à-nouveaux + mouvements. <b>Aucun socle d'à-nouveaux n'est chaîné à cet exercice</b> — les soldes valent donc le net des mouvements.</span></span><span class="v">4 000 000</span></div>
+                        <div class="rap-eq-row"><span class="op">Σ</span><span>Soldes créditeurs</span><span class="v">4 000 000</span></div>
+                        <div class="rap-eq-row ecart ok sum"><span class="op">=</span><span>Écart sur les soldes</span><span class="v">0</span></div>
+                      </div>
+
+                      <!-- ⛔ LA MARCHE QUI CASSE : en aperçu, une transaction écartée
+                           AVERTIT ; à l'enregistrement, UNE SEULE REFUSE tout (400
+                           TRANSACTIONS_NON_VENTILABLES). Laisser le bouton actif ferait
+                           découvrir le refus après le geste. Il est donc désactivé, et
+                           l'écran dit ce qu'il faut faire pour l'activer. -->
+                      <div class="imp-warns">
+                        <b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> 2 transactions sont écartées — elles ne sont pas dans les totaux ci-dessus</b>
+                        <div class="tbl-wrap">
+                          <table class="imp-table">
+                            <thead><tr><th>Date</th><th>Sens</th><th>Libellé</th><th class="fis-n">Montant</th><th>Pourquoi</th><th></th></tr></thead>
+                            <tbody>
+                              <tr class="fis-retard">
+                                <td>05/02/2026</td><td>Recette</td><td>Vente au comptoir</td><td class="fis-n">90 000</td>
+                                <td><b>Contrepartie indéterminable</b><span class="fis-motif">ni moyen de paiement, ni tiers — impossible de savoir <b>où</b> l'argent est entré</span></td>
+                                <td><button class="btn btn-ghost btn-sm" type="button" data-goto-cahiers>Compléter</button></td>
+                              </tr>
+                              <tr class="fis-retard">
+                                <td>17/02/2026</td><td>Dépense</td><td>Achat divers — marché</td><td class="fis-n">45 000</td>
+                                <td><b>Ventilation TVA incohérente</b><span class="fis-motif">HT&nbsp;+&nbsp;TVA ≠ montant sur la ligne stockée — <b>donnée corrompue</b>, pas une saisie à compléter</span></td>
+                                <td><button class="btn btn-ghost btn-sm" type="button" data-goto-cahiers>Ouvrir la ligne</button></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      <div class="rap-verdict ko" data-rat-verdict>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                        <span><b>Cette balance ne peut pas encore être enregistrée.</b> En aperçu, une transaction écartée <b>avertit</b>&nbsp;; à l'enregistrement, <b>une seule refuse tout</b> — une balance équilibrée mais amputée paraîtrait juste. Traitez les 2 lignes ci-dessus.</span>
+                      </div>
+
+                      <div class="cah-actions">
+                        <button class="btn btn-primary btn-sm" type="button" disabled data-rat-enreg>Enregistrer la balance</button>
+                        <button class="btn btn-ghost btn-sm" type="button" data-rat-fix>Démo&nbsp;: les 2 lignes ont été corrigées</button>
+                        <span class="grow" style="flex:1"></span>
+                        <span class="cah-lig">POST …/balance/depuis-cahiers?dryRun=false → 201 (ou 200 si la version existe déjà)</span>
+                      </div>
+
+                      <p class="helper" style="text-align:left">
+                        Une fois enregistrée, la balance est un <b>BROUILLON</b> comme toutes les autres&nbsp;: elle se relit, se valide et se consulte
+                        <button class="linklike" type="button" data-rat-goto-balances>dans l'onglet Balances</button>, au même format qu'une balance venue d'un export Sage. <b>C'est tout l'objet du chemin cahiers.</b>
+                      </p>
+                    </div>
+
+                    <!-- ═════════════ ⑥ LES REFUS ═════════════ -->
+                    <div class="rat-slot" data-rat-slot="refus" hidden>
+                      <div class="rat-sect">
+                        <h4>Ce que le service refuse, et comment l'écran l'évite</h4>
+                        <span class="c">Chaque refus est typé — aucun n'est un message générique.</span>
+                      </div>
+
+                      <div class="rap-ecs">
+                        <div class="rap-ec attn">
+                          <span class="t">Compte hors classe 7</span>
+                          <span class="m"><code>400 · COMPTE_HORS_CLASSE_7</code></span>
+                          <span class="why">Une règle de rattachement ne vise que des <b>produits</b>. Évité&nbsp;: la liste ne propose que la classe&nbsp;7, et l'écran dit d'emblée que les dépenses passent par leurs <b>catégories</b>.</span>
+                        </div>
+                        <div class="rap-ec attn">
+                          <span class="t">Compte inconnu au plan</span>
+                          <span class="m"><code>400 · COMPTE_INCONNU</code></span>
+                          <span class="why">Le compte n'est rattachable à <b>aucune racine</b> du plan actif. Évité&nbsp;: le choix se fait dans une liste servie par le plan lui-même&nbsp;; la saisie libre reste possible pour les subdivisions et se contrôle avant l'envoi.</span>
+                        </div>
+                        <div class="rap-ec attn">
+                          <span class="t">Clé de règle vide</span>
+                          <span class="m"><code>400 · SURCHARGE_VALEUR_VIDE</code></span>
+                          <span class="why">Un texte réduit à des espaces ou des accents seuls donne une clé vide. Évité&nbsp;: le bouton d'enregistrement reste <b>désactivé</b> tant que la clé normalisée est vide.</span>
+                        </div>
+                        <div class="rap-ec grave">
+                          <span class="t">Transactions non ventilables</span>
+                          <span class="m"><code>400 · TRANSACTIONS_NON_VENTILABLES</code></span>
+                          <span class="why">Au moins une transaction sans contrepartie déterminable. <b>Ne bloque pas l'aperçu, bloque l'enregistrement</b> — c'est la marche la plus traître du parcours, d'où le bouton désactivé et la raison affichée.</span>
+                        </div>
+                        <div class="rap-ec">
+                          <span class="t">Aucune transaction</span>
+                          <span class="m"><code>400 · AUCUNE_TRANSACTION</code></span>
+                          <span class="why">Les deux cahiers sont vides sur l'exercice. Évité&nbsp;: l'écran renvoie vers l'import du cahier plutôt que de proposer une construction impossible.</span>
+                        </div>
+                        <div class="rap-ec">
+                          <span class="t">Système comptable indéterminé</span>
+                          <span class="m"><code>409 · SYSTEME_COMPTABLE_INDETERMINE</code></span>
+                          <span class="why">Le dossier ne déclare <b>ni SN, ni SMT</b> à la date de l'exercice. Le service <b>refuse plutôt que de deviner</b> un plan de comptes à la place du cabinet.</span>
+                        </div>
+                        <div class="rap-ec">
+                          <span class="t">Exercice clos · dossier archivé</span>
+                          <span class="m"><code>409 · EXERCICE_CLOS</code> · <code>DOSSIER_ARCHIVE</code></span>
+                          <span class="why">Vérifié <b>avant tout autre contrôle</b>. Évité&nbsp;: l'exercice clos est marqué dans le sélecteur, et l'action de construction disparaît.</span>
+                        </div>
+                        <div class="rap-ec">
+                          <span class="t">Référentiel non livré</span>
+                          <span class="m"><code>409 · REFERENTIEL_NON_PACKAGE</code></span>
+                          <span class="why">Le plan de comptes <b>SMT</b> n'est pas encore sourcé (décision assumée&nbsp;: le packager reviendrait à inventer du comptable). L'écran affiche le <b>motif exact rendu par le serveur</b>, pas «&nbsp;une erreur est survenue&nbsp;».</span>
+                        </div>
+                        <div class="rap-ec grave">
+                          <span class="t">Balance déséquilibrée</span>
+                          <span class="m"><code>422 · BALANCE_DESEQUILIBREE</code></span>
+                          <span class="why">Ne devrait <b>jamais</b> arriver&nbsp;: la ventilation équilibre par construction. Si ce refus tombe, il signale une <b>donnée corrompue</b> — et <b>aucune ligne d'écart n'est ajoutée</b> pour le masquer.</span>
+                        </div>
+                      </div>
+
+                      <!-- ⛔ L'ÉCART QUI N'EXISTE QU'À LA MAQUETTE — il naît de la JONCTION
+                           de deux stories justes, mises côte à côte sur un seul écran :
+                             · STORY-394 / STORY-078 : le plan de comptes est celui de
+                               l'ORGANISATION (read-model d'entitlement, aucun `dossierId`) ;
+                             · STORY-303 : le tag `referentiel` de la balance vient des AXES
+                               DU DOSSIER, à la date de l'exercice.
+                           Ni la revue de l'une ni celle de l'autre ne pouvait le voir. -->
+                      <div class="prof-note warn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span><b>À trancher côté backend — la balance est étiquetée avec le référentiel du <u>dossier</u>, mais ses comptes sont validés contre celui de l'<u>organisation</u>.</b> Ce sont deux sources différentes&nbsp;: le <b>tag</b> (<code>SN</code>&nbsp;/&nbsp;<code>SMT</code>&nbsp;/&nbsp;<code>SFD-BCEAO</code>&nbsp;/&nbsp;<code>CIMA</code>) vient des <b>axes du dossier</b> à la date de l'exercice&nbsp;; le <b>plan</b> qui valide chaque compte — et que cet écran énumère — vient du <b>read-model d'entitlement de l'organisation</b>, sans aucun <code>dossierId</code>. Rien ne force les deux à concorder&nbsp;: un dossier déclaré <b>SMT</b> produit une balance <b>tagguée SMT</b> dont tous les comptes ont été contrôlés contre <b>SYSCOHADA SN</b> — et la liste de comptes proposée ici est la même pour tous les dossiers du cabinet, quel que soit leur système comptable. <span class="code">écart ouvert · question backend</span></span>
+                      </div>
+                    </div>
+                  </div>
+
                   <div class="atl-panel atl-body" data-atl-panel="rapprochement" hidden>
 
                     <div style="display:flex;align-items:flex-end;gap:0.6rem;flex-wrap:wrap">
@@ -13375,6 +14193,269 @@
         acpShow("ok");
       }
 
+
+      /* ═══ FE-046 — les etats du panneau « Rattachement » ═══
+         Meme idiome que `rapShow` / `fisSection` / `profShow` : un groupe de
+         boutons `data-rat` pilote des `[data-rat-slot]`, et les actions DE
+         L'ECRAN (`data-rat-goto`) rejouent le MEME aiguillage.
+
+         ⚠️ Ce bloc vit au niveau du module, PAS dans `setTab` : les ecouteurs
+         s'enregistrent une fois (piege paye en FE-048).
+
+         ⚡ CE QUI SE JOUE ICI N'EST PAS QU'UNE BASCULE D'ETATS. Deux morceaux du
+         panneau REJOUENT LE MOTEUR DU SERVEUR, parce que c'est la seule facon de
+         montrer ce que le contrat cache :
+
+           ① `ratProposer` reproduit `proposerRattachement` — regle du dossier
+              d'abord (LIBELLE puis TIERS, egalite EXACTE sur la cle normalisee),
+              moteur de mots-cles ensuite (`includes`), defaut `701` en dernier.
+              C'est ce qui rend palpable l'asymetrie : la devinette de la machine
+              est plus large que la regle deliberee de l'humain ;
+
+           ② `ratPortee` compte, AVANT d'enregistrer, les lignes que la regle
+              prendrait VRAIMENT — et celles qui CONTIENNENT le texte sans etre
+              prises. Aucune route ne sert ce chiffre ; sans lui, une regle morte
+              ne se voit jamais. */
+      var ratPanel = page.querySelector('[data-atl-panel="rattachement"]');
+      if (ratPanel) {
+        var ratShow = function (etat) {
+          ratPanel.querySelectorAll("[data-rat-slot]").forEach(function (el) {
+            el.hidden = el.dataset.ratSlot !== etat;
+          });
+          ratPanel.querySelectorAll("[data-rat]").forEach(function (b) {
+            b.setAttribute("aria-selected", String(b.dataset.rat === etat));
+          });
+        };
+        ratPanel.querySelectorAll("[data-rat]").forEach(function (b) {
+          b.addEventListener("click", function () { ratShow(b.dataset.rat); });
+        });
+        ratPanel.querySelectorAll("[data-rat-goto]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            ratShow(b.dataset.ratGoto);
+            /* Le renvoi « creer les deux regles manquantes » doit OUVRIR le
+               formulaire, sinon on atterrit sur une liste et il faut deviner. */
+            if (b.dataset.ratGoto === "regles") {
+              var f = ratPanel.querySelector("[data-rat-form]");
+              if (f) f.open = true;
+            }
+          });
+        });
+        /* Le seul renvoi qui SORT du panneau : une balance se relit dans l'onglet
+           Balances, au meme format qu'une balance venue d'un export Sage. */
+        ratPanel.querySelectorAll("[data-rat-goto-balances]").forEach(function (b) {
+          b.addEventListener("click", function () { setTab("balances"); });
+        });
+
+        /* `normaliserTexte` du service : sans accents, en minuscules, espaces
+           reduits. Deux saisies qui n'en different que par la casse designent la
+           MEME regle — sinon l'utilisateur en creerait des variantes invisibles. */
+        var ratNorm = function (t) {
+          return (t || "")
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase().trim().replace(/\s+/g, " ");
+        };
+
+        /* Les regles de CE dossier (STORY-236), dans leur ordre d'application.
+           `hors` = compte absent du plan actif : le serveur IGNORE alors la regle
+           et retombe sur le moteur, sans jamais le dire. */
+        var RAT_REGLES = [
+          { type: "LIBELLE", cle: "loyer local adidogome", saisie: "loyer local Adidogomé", compte: "7073" },
+          { type: "LIBELLE", cle: "commission de change", saisie: "commission de change", compte: "7078", hors: true },
+          { type: "TIERS", cle: "mairie de kara", saisie: "Mairie de Kara", compte: "706" },
+          { type: "TIERS", cle: "sodigaz", saisie: "SODIGAZ", compte: "707" }
+        ];
+
+        /* Table de STORY-082, dans SON ordre : la premiere regle qui matche gagne,
+           du plus specifique au plus generique. La recopier fidelement est ce qui
+           rend l'essai credible — une table inventee ferait mentir la maquette. */
+        var RAT_MOTS = [
+          { compte: "706", libelle: "Services vendus", mots: ["prestation", "service", "honoraire", "consultation", "conseil", "reparation", "maintenance", "formation"] },
+          { compte: "705", libelle: "Travaux facturés", mots: ["travaux", "chantier", "construction", "maconnerie"] },
+          { compte: "707", libelle: "Produits accessoires", mots: ["location", "loyer", "commission", "redevance", "transport"] },
+          { compte: "702", libelle: "Ventes de produits finis", mots: ["production", "produit fini", "fabrication", "atelier"] },
+          { compte: "71", libelle: "Subventions d'exploitation", mots: ["subvention"] },
+          { compte: "77", libelle: "Revenus financiers", mots: ["interet", "dividende", "placement", "financier"] },
+          { compte: "701", libelle: "Ventes de marchandises", mots: ["vente", "marchandise", "boutique", "revente", "article"] }
+        ];
+
+        var ratProposer = function (libelle, tiers) {
+          var candidats = [];
+          if (ratNorm(libelle) !== "") candidats.push({ type: "LIBELLE", cle: ratNorm(libelle) });
+          if (ratNorm(tiers) !== "") candidats.push({ type: "TIERS", cle: ratNorm(tiers) });
+          for (var i = 0; i < candidats.length; i++) {
+            for (var j = 0; j < RAT_REGLES.length; j++) {
+              var r = RAT_REGLES[j];
+              if (r.type === candidats[i].type && r.cle === candidats[i].cle) {
+                /* ⛔ Le point que le contrat ne publie pas : une regle dont le
+                   compte n'est plus au plan est IGNOREE, et on retombe sur le
+                   moteur. On le reproduit — et on l'AFFICHE. */
+                if (r.hors) {
+                  var repli = ratMoteur(libelle, tiers);
+                  repli.ignoree = r;
+                  return repli;
+                }
+                return {
+                  compte: r.compte, src: "regle",
+                  libelle: r.compte === "7073" ? "Produits accessoires" : "Services vendus",
+                  motif: "règle de l'organisation sur le " + (r.type === "LIBELLE" ? "libellé" : "tiers") + " « " + r.saisie + " »"
+                };
+              }
+            }
+          }
+          return ratMoteur(libelle, tiers);
+        };
+
+        var ratMoteur = function (libelle, tiers) {
+          var ligne = ratNorm(libelle + " " + (tiers || ""));
+          for (var i = 0; i < RAT_MOTS.length; i++) {
+            for (var j = 0; j < RAT_MOTS[i].mots.length; j++) {
+              if (ligne.indexOf(RAT_MOTS[i].mots[j]) !== -1) {
+                return {
+                  compte: RAT_MOTS[i].compte, src: "motcle", libelle: RAT_MOTS[i].libelle,
+                  motif: "libellé de la ligne (« " + RAT_MOTS[i].mots[j] + " »)"
+                };
+              }
+            }
+          }
+          return {
+            compte: "701", src: "defaut", libelle: "Ventes de marchandises",
+            motif: "aucun indice dans la ligne ni dans l’activité — défaut « ventes de marchandises »"
+          };
+        };
+
+        var RAT_PASTILLE = {
+          regle: '<span class="rat-src regle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Règle du dossier</span>',
+          motcle: '<span class="rat-src motcle">Mot-clé du libellé</span>',
+          defaut: '<span class="rat-src defaut">Défaut, faute d’indice</span>'
+        };
+
+        var ratEssaiLib = ratPanel.querySelector("[data-rat-essai]");
+        var ratEssaiTiers = ratPanel.querySelector("[data-rat-essai-tiers]");
+        var ratEssai = function (majTiers) {
+          if (!ratEssaiLib || !ratEssaiTiers) return;
+          var opt = ratEssaiLib.options[ratEssaiLib.selectedIndex];
+          if (majTiers) ratEssaiTiers.value = opt.dataset.tiers || "";
+          var p = ratProposer(opt.textContent, ratEssaiTiers.value);
+          var poser = function (sel, html) {
+            var el = ratPanel.querySelector(sel);
+            if (el) el.innerHTML = html;
+          };
+          poser("[data-rat-essai-compte]", p.compte);
+          poser("[data-rat-essai-src]", RAT_PASTILLE[p.src]);
+          var txt = '<b style="color:var(--foreground)">' + p.libelle + "</b> — motif rendu par le serveur : « " + p.motif + " ».";
+          if (p.ignoree) {
+            txt += '<br><b style="color:var(--foreground)">⚠️ Une règle existait pourtant</b> — « ' + p.ignoree.saisie +
+              " » → <code>" + p.ignoree.compte + "</code>. Son compte n'est plus au plan actif : " +
+              "<b>le serveur l'ignore sans le dire</b> et retombe sur le moteur.";
+          }
+          if (opt.dataset.depense === "1") {
+            txt += '<br><b style="color:var(--foreground)">⚠️ C\'est une dépense.</b> Cette route ne connaît que la <b>classe 7</b> : ' +
+              "elle propose un compte de produits même pour une charge. Une dépense se rattache par sa <b>catégorie</b>, dans le cahier.";
+          }
+          poser("[data-rat-essai-motif]", txt);
+        };
+        if (ratEssaiLib) ratEssaiLib.addEventListener("change", function () { ratEssai(true); });
+        if (ratEssaiTiers) ratEssaiTiers.addEventListener("input", function () { ratEssai(false); });
+
+        /* ② LA PORTEE D'UNE REGLE, AVANT DE L'ENREGISTRER.
+           Les lignes de l'exercice sont deja chargees par l'ecran ; le comptage se
+           fait donc en local, sans aucun appel. Ce que le chiffre repare : une
+           regle acceptee (200) qui ne prendra jamais rien. */
+        var RAT_LIGNES = [
+          { lib: "Loyer local Adidogomé", tiers: "M. Amegan", n: 11 },
+          { lib: "Paiement reçu — Mairie de Kara", tiers: "Mairie de Kara", n: 7 },
+          { lib: "Vente marchandises — Kodjo", tiers: "Kodjo", n: 5 },
+          { lib: "Livraison gaz", tiers: "SODIGAZ SA", n: 6 },
+          { lib: "Livraison gaz", tiers: "Sodigaz Lomé", n: 3 },
+          { lib: "Facture n° 12", tiers: "SODIFAB", n: 3 },
+          { lib: "Vente au comptoir", tiers: "", n: 8 }
+        ];
+        var ratFType = ratPanel.querySelector("[data-rat-f-type]");
+        var ratFVal = ratPanel.querySelector("[data-rat-f-val]");
+        var ratFOk = ratPanel.querySelector("[data-rat-f-ok]");
+        var ratBar = ratPanel.querySelector("[data-rat-portee]");
+        var ratPortee = function () {
+          if (!ratFType || !ratFVal || !ratBar || !ratFOk) return;
+          var cle = ratNorm(ratFVal.value);
+          /* Le bouton reste desactive tant que la cle normalisee est vide : c'est
+             le 400 `SURCHARGE_VALEUR_VIDE` rendu impossible a provoquer. */
+          ratFOk.disabled = cle === "";
+          var msg = ratBar.querySelector("span");
+          if (cle === "") {
+            msg.innerHTML = "Saisissez un texte pour voir <b>combien de lignes de l'exercice</b> cette règle prendrait.";
+            ratBar.classList.remove("ko");
+            return;
+          }
+          var exact = 0, contient = 0;
+          RAT_LIGNES.forEach(function (l) {
+            var champ = ratNorm(ratFType.value === "LIBELLE" ? l.lib : l.tiers);
+            if (champ === cle) exact += l.n;
+            else if (champ !== "" && champ.indexOf(cle) !== -1) contient += l.n;
+          });
+          if (exact === 0) {
+            msg.innerHTML = "<b>0 ligne prise.</b> " + (contient > 0
+              ? contient + " ligne(s) <b>contiennent</b> ce texte sans l'écrire exactement — " +
+                "la comparaison est <b>exacte</b>, il faut donc une règle par écriture."
+              : "Aucune ligne de l'exercice ne porte ce texte. La règle sera enregistrée et <b>restera sans effet</b>.");
+          } else {
+            msg.innerHTML = "<b>" + exact + " ligne(s) prises</b> sur les " + RAT_LIGNES.reduce(function (s, l) { return s + l.n; }, 0) +
+              " de l'exercice" + (contient > 0
+                ? ". ⚠️ <b>" + contient + " autre(s)</b> contiennent ce texte sans l'écrire exactement : elles ne seront <b>pas</b> prises."
+                : ".");
+          }
+        };
+        if (ratFType) ratFType.addEventListener("change", ratPortee);
+        if (ratFVal) ratFVal.addEventListener("input", ratPortee);
+
+        /* ⛔ LA MARCHE QUI CASSE, rendue impossible a rater : en apercu une
+           transaction ecartee AVERTIT, a l'enregistrement UNE SEULE refuse tout
+           (400 TRANSACTIONS_NON_VENTILABLES). Le bouton ne s'active donc qu'une
+           fois les ecarts traites — la bascule de demo joue ce moment. */
+        var ratFix = ratPanel.querySelector("[data-rat-fix]");
+        if (ratFix) {
+          ratFix.addEventListener("click", function () {
+            var corrige = ratFix.dataset.on !== "1";
+            ratFix.dataset.on = corrige ? "1" : "0";
+            ratFix.textContent = corrige
+              ? "Démo : remettre les 2 transactions écartées"
+              : "Démo : les 2 lignes ont été corrigées";
+            var warns = ratPanel.querySelector(".imp-warns");
+            if (warns) warns.hidden = corrige;
+            var verdict = ratPanel.querySelector("[data-rat-verdict]");
+            if (verdict) {
+              verdict.className = "rap-verdict " + (corrige ? "ok" : "ko");
+              verdict.querySelector("span").innerHTML = corrige
+                ? "<b>Toutes les transactions de l'exercice sont ventilées.</b> La balance peut être enregistrée : elle arrivera en <b>BROUILLON</b>, version 3, et <b>rien n'écrase la version précédente</b>."
+                : "<b>Cette balance ne peut pas encore être enregistrée.</b> En aperçu, une transaction écartée <b>avertit</b> ; à l'enregistrement, <b>une seule refuse tout</b> — une balance équilibrée mais amputée paraîtrait juste. Traitez les 2 lignes ci-dessus.";
+            }
+            var enreg = ratPanel.querySelector("[data-rat-enreg]");
+            if (enreg) enreg.disabled = !corrige;
+          });
+        }
+
+        /* La bascule de REGIME : la meme recette en 2 ou 3 lignes. Ce n'est pas un
+           choix de l'utilisateur dans le produit — le regime vient du profil et de
+           l'exercice — mais ne montrer qu'un seul cas ferait lire un oubli de TVA. */
+        var ratTva = function (etat) {
+          ratPanel.querySelectorAll("[data-rat-tva-slot]").forEach(function (el) {
+            el.hidden = el.dataset.ratTvaSlot !== etat;
+          });
+          ratPanel.querySelectorAll("[data-rat-tva]").forEach(function (b) {
+            b.setAttribute("aria-selected", String(b.dataset.ratTva === etat));
+          });
+        };
+        ratPanel.querySelectorAll("[data-rat-tva]").forEach(function (b) {
+          b.addEventListener("click", function () { ratTva(b.dataset.ratTva); });
+        });
+
+        /* Etat initial coherent : on entre par « ce qui decide », et l'essai
+           affiche deja un resultat — un ecran de demonstration vide n'apprend
+           rien a celui qui l'ouvre. */
+        ratEssai(true);
+        ratPortee();
+        ratTva("non");
+        ratShow("decide");
+      }
 
       /* ═══ FE-048 — les etats du panneau « Profils d'import » ═══
          Meme idiome que les autres bascules de demo : un groupe de boutons
