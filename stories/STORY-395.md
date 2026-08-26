@@ -4,7 +4,7 @@
 **Réf. :** exigence PO du 2026-08-24 à la validation de la maquette **FE-043** — *« n'oublie pas de bien garder les images qui sont les preuves et de bien les horodater par exercice, pour que demain, dans le cas d'un contrôle, ce soit beaucoup plus facile »*
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** review
+**Statut :** done
 **Complexité :** medium
 **Sprint :** 20
 **Service :** `document-service` (`:3006`) — **avec un versant `balance-service`** (cf. « Qui écrit »)
@@ -132,7 +132,12 @@ gagnant — jamais par un doublon côté producteur.
 
 ## Progress Tracking
 
-**Statut : `review`** — implémentée, validée, vérifiée en docker sur stack neuve. Deux dépôts.
+**Statut : `done`** — implémentée, validée, vérifiée en docker sur stack neuve, revue (code + sécurité),
+mergée sur `dev` dans les **deux** dépôts. Clôturée le **2026-08-26**.
+
+**PR** : `prospera-ocr-service` **#17** (consommateur, mergée en premier — il écoute un topic que
+personne ne publiait encore) puis `prospera-balance-service` **#60** (producteur). 4 commits côté
+`document-service` : feature, revue de code, revue over-engineering, revue de sécurité.
 
 ### Livré
 
@@ -244,3 +249,100 @@ STORY-357). Retiré à la main, puis redémarrage : le schéma seul ne recrée q
 
 Le contournement de **FE-043** (affichage par mois via la date de la *ligne de cahier*) peut être
 retiré : l'onglet « Pièces » sait désormais se filtrer par exercice.
+
+---
+
+## Revue de code — 3 constats, dont 1 bloquant
+
+### ⛔ BLOQUANT — une borne d'exercice **impossible** franchissait la garde de forme
+
+`BORNE_EXERCICE` ne validait que la **forme**. Deux modes de panne derrière la même faille, et le
+second est le pire :
+
+| entrée | ce qui se passait |
+|---|---|
+| `?exerciceDebut=2026-13-45` | `new Date` rend une `Invalid Date` — **truthy** — qui descend en critère Mongo. Le `CastError` de `kind: 'date'` n'est pas attrapé par le filtre global (restreint aux `ObjectId` depuis STORY-405) ⇒ **500**, quand le contrat OpenAPI annonce un 400. |
+| `?exerciceDebut=2026-02-30` | `new Date` l'**absorbe** en **2026-03-02** sans lever. La fenêtre du contrôle fiscal glisse de deux jours **en silence**, et rend une liste fausse que rien ne signale. |
+
+⚡ **La même faille existait sur la garde Kafka**, et la revue ne l'avait pas regardée sous cet
+angle : `enDate` testait la forme puis `Number.isNaN`, or `2026-02-30T00:00:00.000Z` franchit les
+deux. Une pièce aurait été rangée deux jours plus loin que ce que le producteur a publié.
+
+⇒ **trois gardes, dont aucune ne remplace les deux autres** : la *forme* (refuse `le 14 mars` et
+l'horodatage sans fuseau), la *convertibilité* (refuse `2026-13-45`), le **calendrier** (refuse
+`2026-02-30`). Plus une ceinture dans `bornesExercice` : une `Invalid Date` y **refuse** plutôt que
+d'élargir la fenêtre en ignorant un critère illisible.
+
+### ⚠️ Deux tests d'`abort` gardé étaient VACANTS
+
+Le double de session laissait `inTransaction()` à `true` après un `commitTransaction` échoué, alors
+que le driver a **déjà avorté** à ce moment-là. La garde était donc **franchie par le test même qui
+prétendait la prouver** — mutation « retirer la garde » ⇒ 6 tests verts.
+
+⚡ En corrigeant le double, l'assertion s'est révélée dire **l'inverse de son intitulé** :
+`toHaveBeenCalledTimes(1)` là où la garde doit précisément **empêcher** le second abort. C'est le
+test jumeau de `balance-service` — qui forçait explicitement `inTransaction → false` — qui a servi
+d'étalon.
+
+### ⚠️ `KAFKA_CAHIER_GROUP_ID` absent du compose
+
+Les trois autres consumer groups du service sont pilotables par variable ; le quatrième ne l'était
+pas. Rien ne cassait (le défaut s'applique), mais repartir de l'offset zéro pour rattraper des
+rattachements perdus — le geste opérationnel standard sur ce topic — aurait exigé d'éditer le
+compose. Famille STORY-173. Ajouté.
+
+### Seconde lentille — over-engineering
+
+- `delete:` le test « le schéma ne déclare aucun TTL global ». **Mesuré** :
+  `@Schema({ expireAfterSeconds })` pose la clé dans `options` mais ne crée **aucun index TTL** —
+  l'option est inerte. Ce test ne pouvait donc pas attraper une vraie purge et se serait alarmé sur
+  du code sans effet : de la fausse assurance dans le fichier même dont c'est le sujet.
+- `shrink:` la forme du rattachement était déclarée deux fois (interface + type inline de 7 champs).
+
+## Revue de sécurité — 0 vulnérabilité introduite, 1 durcissement
+
+Vérifié en **lisant et mesurant**, pas en supposant : isolation multi-tenant (le filtre de
+`rattacherExercice` porte `orgId`, le `$set` ne peut pas réécrire le triplet identifiant) · injection
+NoSQL fermée (express 5 en `query parser: simple` ⇒ `?exerciceDebut[$gt]=` devient la propriété
+inconnue littérale, refusée par `forbidNonWhitelisted`) · ReDoS écarté (les deux nouvelles regex sont
+ancrées, à quantificateurs **tous bornés** ; mesuré sur 16 Ko d'entrées adverses) · contrôle d'accès
+inchangé · anti-énumération tenue (la garde du dossier passe **avant** la validation des bornes,
+aucun oracle) · intégrité comptable : `rattacherExercice` est le **seul** écrivain des quatre champs.
+
+⛔ **Le durcissement touche la DISPONIBILITÉ.** `eventId` était la **seule** valeur du message à
+traverser sans contrôle de type. Un corps portant `"eventId": {"$ne": null}` — sans en-tête — était
+déclaré **valide** ; l'objet descendait dans `processedModel.create`, dont l'erreur de cast Mongoose
+n'est **pas** un doublon : elle remonte, `eachMessage` échoue, et la partition se **bloque pour
+toutes les organisations** du topic. Le fichier annonce pourtant en tête qu'un message invalide n'est
+jamais une exception.
+
+⚡ **Et en écrivant le test, un second défaut est apparu** : `eventIdEntete ?? corps` retenait un
+en-tête **vide** (`??` ne retombe que sur `null`/`undefined`), puis le refusait — le message partait
+en poison pill, offset avancé, **rattachement perdu définitivement** sur une donnée opposable. Un
+en-tête vide n'est pas une clé, c'est une clé absente : il retombe désormais sur le corps. Un en-tête
+**présent mais aberrant**, lui, reste retenu et refusé — on ne substitue pas en douce une autre clé
+d'idempotence à celle que le producteur a publiée.
+
+**Pré-existant, écarté du périmètre** : `read-models/dossier-payload.util.ts` porte exactement la
+même absence de contrôle de type sur `eventId`, sur le consommateur `dossier.*`.
+
+## Vérification docker REJOUÉE sur l'état final
+
+Un correctif de revue touchait la garde Kafka déjà vérifiée — une régression y aurait fait tomber
+**tous** les rattachements en silence. Parcours complet rejoué : dépôt le **2026-08-26** → application
+→ `dateOperation: 2026-06-18` posée en base, les 4 champs présents. Et le nouveau comportement HTTP
+mesuré : `2026-13-45` et `2026-02-30` rendent désormais **400 « ce jour n'existe pas au calendrier »**
+au lieu d'un 500 et d'un glissement muet.
+
+## Portes finales
+
+| | `balance-service` | `document-service` |
+|---|---|---|
+| Lint | 0 warning | 0 warning |
+| Build | OK | OK |
+| Unitaires | 3 083 | 763 |
+| e2e | 739 | 116 |
+| Couverture | 99,13 / 92,07 / 98,55 / 99,22 | 99,14 / 93,45 / 98,21 / 99,18 |
+
+**36 mutations jouées au total, 35 rouges** — la 36ᵉ identifiée comme **équivalente** et remplacée
+par deux mutations non équivalentes, rouges toutes deux.
