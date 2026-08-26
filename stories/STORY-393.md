@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-043** *(cahier de recettes)*, 2026-08-24 — prolonge **STORY-082**, **STORY-083**, **STORY-087** et **STORY-374**
 **Priorité :** Must Have
 **Story Points :** 1
-**Statut :** in_progress
+**Statut :** done
 **Complexité :** low
 **Sprint :** 20
 **Service :** `balance-service` (`:3007`)
@@ -103,7 +103,7 @@ plutôt que par une relecture.
 
 ## Progress Tracking
 
-**Statut :** `in_progress` — démarré le 2026-08-26 (branche `MNV-393`, `balance-service` + `docs/`).
+**Statut :** `done` — clôturée le **2026-08-26** (branche `MNV-393`, `balance-service` + `docs/`).
 
 ### ① Audit à la source — les prémisses de la story, vérifiées et non supposées
 
@@ -212,3 +212,44 @@ Relevés en appliquant la règle de cette story — *compter les `throw`* — au
 2. **45 routes** sous `/dossiers/{dossierId}` publient un `409` **sans** `DOSSIER_ARCHIVE` : leur
    `@ApiConflictResponse` de méthode masque celui de `@RequiresDossierScope()`. Défaut **de mécanisme**,
    pas d'oubli — il se reproduira à chaque route d'écriture ajoutée tant que le masquage n'est pas traité.
+
+### ⑥⑦ Revue de code, revue de sécurité, vérification rejouée
+
+**Revue de code — 4 constats, tous corrigés** (commit de revue dédié) :
+
+1. ⚡ **La garde du versant « et sur aucune autre » avait un trou, et la revue l'a MESURÉ.** Le filtre
+   « famille cahiers » (`/cahiers/`, `/pieces/ocr`, `/balance/depuis-cahiers`) excluait **deux
+   contrôleurs du module** : `RattachementController` et `ComptesVentilationController`, dont le chemin
+   ne porte aucun de ces trois littéraux. Poser le décorateur de gel sur `PUT …/rattachement/surcharges`
+   — route qui n'appelle **jamais** `exigerExerciceModifiable` — publiait donc exactement la branche
+   morte que l'AC-1 interdit, **en laissant 729/729 e2e verts**. C'est le défaut typique d'un ensemble
+   défini par ce qu'on **croit** qu'il contient. Filtre élargi aux 5 contrôleurs, plancher de
+   non-vacuité relevé 15 → 25, mutation rejouée : **rouge**.
+2. ⚡ **« `EXERCICE_CLOS` évalué en premier » était FAUX.** `DossierScopeGuard` est le 6ᵉ `APP_GUARD`
+   **global** : sur un dossier archivé il répond `DOSSIER_ARCHIVE` **avant même d'entrer dans le
+   contrôleur**. L'affirmation reproduisait, d'un cran plus haut, la confusion que cette story ferme —
+   le geste attendu est alors un **troisième** (désarchiver), sur un **troisième** écran.
+3. `DOSSIER_ARCHIVE` était un **littéral recopié** quand le docblock revendiquait « dérivée des enums ».
+   Il vient désormais de `DOSSIER_SCOPE_CODE`. ⚠️ **Et le filet assertait lui aussi un littéral** : il
+   aurait rougi sur un simple **renommage**, pourtant cohérent de bout en bout. Il lit la constante —
+   renommage **vert**, effacement **rouge**, ce qu'il doit discriminer. *(Mesuré : `DOSSIER_ARCHIVE_V2`
+   laissait la version littérale verte par sous-chaîne ; `ARCHIVE_DU_DOSSIER` la faisait rougir.)*
+4. Le marqueur `NFR-A07`, perdu sur les 8 routes en passant à la constante partagée, restauré.
+
+**Revue de sécurité — 0 vulnérabilité.** L'axe à charge était l'**oracle d'existence** : un `409`
+différencié permet-il d'énumérer les ressources d'un autre tenant ? **Non, et c'est structurel** —
+`DossierScopeGuard` résout par `findOne({ dossierId, orgId })` et lève un **404 générique avant** tout
+`409` ; `estClos` et `existeBalanceValidee` filtrent tous deux sur `orgId`. Vérifié **dans le code**,
+puis recontrôlé en session. Également écarté : le double `estClos` rendu pilotable n'affaiblit aucun
+e2e existant (`exercicesClos` vide au `beforeEach` ⇒ comportement par défaut identique au `false` en dur).
+
+**Vérification ④ REJOUÉE sur l'état final** — les correctifs de revue changent le contrat déjà mesuré :
+9/9 routes conformes dans l'**ordre réel des gardes**, asymétrie de l'agrégation tenue, **0** branche
+morte sur les 18 autres routes de la famille élargie.
+
+**🪤 Piège de méthode, rencontré DEUX FOIS.** Le `git checkout --` de restauration entre deux mutations
+efface un correctif **non encore commité** : la suite est repassée au rouge après une batterie annoncée
+« tout vert », et un rouge « inexpliqué » s'est révélé être un **vrai positif** mal attribué.
+⇒ **commiter avant de muter**, sans exception.
+
+**PR** : [prospera-balance-service#58](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/58) — rebase-mergée sur `dev`, branche supprimée.
