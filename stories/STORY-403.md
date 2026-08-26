@@ -1,6 +1,6 @@
 # STORY-403 : Une page de cahier porte les DEUX sens — la destination doit devenir une propriété de la ligne, pas du lot
 
-Status: ready-for-dev
+Status: in_progress
 
 > ⛔ **RENUMÉROTÉE 396 → 403 le 2026-08-25, à la fusion des branches — le contenu n'a pas changé d'un mot.**
 >
@@ -152,3 +152,10 @@ justifiée des deux côtés (elle est stockée sous deux `pieceId`).
   existait déjà et prouve que le besoin avait été **vu** côté serveur, sans être servi.
 - ⚠️ **Recouvrement à surveiller avec STORY-392 / STORY-395** : les trois touchent la
   traçabilité d'une pièce. Celle-ci est la seule qui change une **écriture**.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — développement démarré le **2026-08-26**, branche `MNV-403` sur
+`prospera-balance-service` (base `dev`).
