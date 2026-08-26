@@ -4,7 +4,7 @@
 **Réf. :** écart remonté par **FE-043** *(cahier de recettes)*, 2026-08-24 — prolonge **STORY-082**, **STORY-083** et **STORY-084**
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** review
+**Statut :** done
 **Complexité :** medium
 **Sprint :** 20
 **Service :** `balance-service` (`:3007`)
@@ -102,7 +102,7 @@ se fait à l'œil. Le contournement se retire quand cette story **et** STORY-392
 
 ## Progress Tracking
 
-**Statut : `review`** — implémentée, vérifiée en docker sur la stack complète, en attente des deux revues.
+**Statut : `done`** — implémentée, vérifiée en docker, revue, sécurisée et mergée le 2026-08-26.
 
 ### Arbitrage de périmètre — D-391-1 : la **voie C**, tranchée par l'user
 
@@ -224,3 +224,85 @@ un **manque de l'image de développement**, pas un défaut de cette story : la c
 Noté pour que ce ne soit pas relu comme une régression.
 
 ### Revue de code (⑥)
+
+Scan par `prospera-code-review` (`haiku` contexte + `opus` analyse), synthèse en session. **2 constats
+retenus, tous deux corrigés** (commit dédié `MNV-391(revue)`), aucun bloquant.
+
+#### ⚡ La garde du champ multipart ne gardait qu'à MOITIÉ
+
+Le test de propagation posait **deux `toContain` indépendants** — `name="dossierId"` d'un côté, la
+valeur de l'autre. C'est le motif hérité du client jumeau (STORY-384), et il ne distingue **pas**
+« la valeur est **sous** ce nom » de « la valeur traîne quelque part dans le corps » — précisément
+ce que le commentaire que j'avais écrit prétendait exclure.
+
+**Vérifié par la mutation que le constat décrivait**, plutôt que pris pour argent comptant :
+échanger les deux `append` (`pieceId` ↔ `dossierId`) laisse **54 tests verts** — 4 unitaires du
+client, 25 du service, 25 e2e. En production, chaque dépôt aurait envoyé le **sha256** comme
+`dossierId` ; `@EstObjectId()` le refuse en 400, donc **tout lot serait parti en `ECHEC` + 502**.
+La mutation M5 de ma propre table (changer le **nom** du champ) rougissait, et c'est ce qui m'avait
+fait croire la garde solide : elle ne couvrait qu'un des deux échanges possibles.
+
+⇒ ancrage sur le **couple nom→valeur**, dans les **deux sens** (dossier *et* pièce) : sans la
+seconde ancre, l'échange inverse restait muet. Mutation rejouée : 🔴.
+
+#### Trois descriptions publiées promettaient une jointure qui n'existe pas encore
+
+« C'est `auditOcr.pieceId` qui permet de retrouver l'image côté `document-service` » et « c'est
+**sous ce nom** que `document-service` conserve l'image » sont **faux au présent** :
+
+- `GET /dossiers/:id/pieces` ne **publie pas** `pieceId` et n'accepte **pas** `?pieceId=` — c'est
+  exactement le périmètre de STORY-392 ;
+- l'image est stockée sous `dossiers/{orgId}/{dossierId}/{uuid}`, jamais sous le sha256, qui n'est
+  que la 3ᵉ colonne de la clé unique `(orgId, correlationId, pieceId)`.
+
+Un front généré depuis ce contrat n'aurait eu que `lotId` à apparier — donc le **lot entier**,
+c'est-à-dire le contournement « à l'œil » que la story elle-même décrit comme insuffisant. C'est
+mot pour mot la classe de défaut du commit précédent de ce dépôt
+(`MNV-381(revue): un commentaire affirmait une garantie que la méthode n'offre pas`), et
+STORY-392 aurait été cadrée d'après ce texte.
+
+⇒ promesse **conditionnée**, et distinction « **connaît** la pièce » / « **stocke** l'image »
+rétablie aux trois endroits.
+
+#### Constat écarté
+
+Le nouveau mode de panne — le dépôt déclenche désormais `DossierGate` chez `document-service`, donc
+un retard de projection rend 404 ⇒ lot `ECHEC` + 502 — est une **décision documentée et mesurée**
+(acte 11 de la vérification docker). Le cas « archivé » est de toute façon intercepté en amont par
+le `DossierScopeGuard` (409, un POST est une écriture), et le client jumeau expose la même surface
+depuis STORY-384.
+
+### Revue de sécurité (⑦)
+
+Scan par `prospera-security-review` (`opus`, aucun downgrade), synthèse en session.
+**Aucune vulnérabilité de confiance ≥ 80 — 0 constat, 0 correctif.** Les points instruits, chacun
+par la chaîne d'appel réelle :
+
+| Question | Réponse établie |
+|---|---|
+| Le contrat élargi expose-t-il plus que le périmètre d'accès existant ? | **Non.** Même chaîne de guards (`@Roles` + `@RequiresBalanceAccess` + `@RequiresDossierScope`), mêmes filtres `{orgId, dossierId}`. Et `brut` était **déjà** publié au même public par `GET …/pieces/ocr/:lotId` depuis STORY-084 : la PR le rend disponible **plus longtemps**, pas à **plus de monde**. |
+| `brut` est un `Mixed` issu d'un fichier utilisateur — pollution de prototype ? | **Non**, et c'est **mesuré**. Les **clés** ne viennent jamais du texte OCR : les 11 clés possibles sont des littéraux codés en dur dans les deux parseurs ; seules les **valeurs** dérivent du fichier. Et même une clé `__proto__` serait inerte — `Object.fromEntries` emploie `CreateDataProperty`, pas `Set`, et le désérialiseur `bson` du dépôt fait de même : propriété **propre**, aucun prototype touché. |
+| Traversée de chemin / rattachement cross-tenant via `dossierId` ? | **Non.** `dossierId` sort d'un `ObjectId.toString()` (24 hex), est re-validé par `@EstObjectId()` (motif strict, pas `isValid` qui accepte les nombres), puis **re-prouvé indépendamment** par `DossierGate` contre le read-model de `document-service` — **avant** le `putObject`. Une divergence entre les deux read-models donne un **refus**, jamais un accès. |
+| Le champ neuf casse-t-il `forbidNonWhitelisted` ? | **Non** — `CreerPieceExtractionDto` déclare `dossierId` depuis STORY-358. Mesuré en exécutant la validation réelle : valeur valide ⇒ accepté ; `"../autre-org"`, tableau (champ **dupliqué** dans le multipart), nombre ⇒ **refusés**. Le garde-fou MNV-084 tient toujours : un `orgId` ajouté au formulaire reste refusé. |
+| `pieceId` (sha256) publié est-il sensible ? | **Non**, et **ce n'est même pas un ajout** : `construireEntree` pose déjà `pieceRef: brouillon.pieceId`, publié par les deux DTO depuis STORY-084. ⚡ Ce que la story change n'est donc pas l'**exposition** de la valeur mais sa **dicibilité** — sous `pieceRef`, un champ dont le contrat annonce « référence de pièce » (`FAC-2026-031`) et qu'un humain saisit lui-même, le front ne pouvait pas deviner qu'il lit un sha256 sur une ligne OCR. Aucune route ne prend de `pieceId` : le connaître ne donne **rien**. |
+| Intégrité comptable — `auditOcr` devenu lisible peut-il être **forgé** ? | **Non.** `construireEtat` ne lit `auditOcr` que depuis `options`, alimenté par `creerLotOcr` à partir du brouillon **en base** ; et `validerLigneBrute` tourne en `forbidNonWhitelisted`, donc un `auditOcr` — ou un `origine: 'OCR'` — glissé dans le corps de `/appliquer` fait **rejeter la ligne**. |
+
+**Relevé positif** : la projection Kafka **ignore délibérément** le `dossierId` porté par l'événement
+et n'emploie que celui du **lot local** — la valeur venue du bus n'est jamais une source d'autorité.
+
+**Pré-existants, hors périmètre, signalés sans correction** :
+
+1. **Portée = l'organisation, pas le portefeuille** — un `TENANT_USER` non affecté au dossier lit les
+   cahiers et, désormais, les pièces. Limite identique et assumée en STORY-236 / 357 / 358 (le
+   contrat `dossier.*` v1 ne diffuse pas l'affectation). La PR fait passer les images de
+   « invisibles à tous » à « visibles par tout membre de l'org » : c'est l'objet même de la story
+   (NFR-A07), **à l'intérieur** de la frontière d'autorisation existante.
+2. **`POST /piece-extractions` directement joignable** avec un `correlationId` arbitraire : un membre
+   peut injecter un brouillon dans un lot de sa **propre** organisation. Aucune escalade (il peut
+   déjà écrire au cahier), aucun chemin inter-org. Inchangé par la PR.
+3. **Couplage de déploiement** — un `document-service` **antérieur à STORY-358** face à ce
+   `balance-service` refuserait le champ `dossierId` en 400 ⇒ 502 sur tout dépôt. Ce n'est pas une
+   faille (pas d'attaquant), mais c'est le seul risque opérationnel de la PR. Non bloquant ici :
+   STORY-358 est sur `dev` depuis le 2026-08-20, et les deux services se déploient du **même**
+   `docker-compose`.
+
