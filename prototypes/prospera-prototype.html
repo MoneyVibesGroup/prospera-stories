@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-032 Compte de résultat</title>
+<title>Prospera · Prototype cumulatif — FE-033 Flux de trésorerie, notes annexes et contrôles</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -1611,6 +1611,128 @@
 
   @media (max-width: 860px) {
     .crs-note, .crs-sens { display: none; }
+  }
+
+  /* ═══════════════ FE-033 · TFT/TAFIRE · NOTES ANNEXES · CONTRÔLES ═══════════════
+     Trois écrans, une seule idée : la liasse ne se lit pas état par état, elle
+     s'ARTICULE. D'où trois choix de forme :
+     ① le TFT garde la mise en page du formulaire DÉPOSÉ (rubriques, ligne de BF,
+        ligne de contrôle en pied) — c'est là que le comptable vérifie ;
+     ② chaque ligne porte son STATUT DE PREUVE (calculé / estimé / à compléter) :
+        un montant estimé qui ressemble à un montant calculé est un piège ;
+     ③ les contrôles ont leur propre onglet parce que FE-034 s'en sert comme
+        d'un feu — et un feu ne se cherche pas au fond d'un tableau. */
+
+  /* La puce « écart ouvert · STORY-xxx » vaut pour les quatre états. */
+  [data-bil-etat-slot] .code { font-family: var(--font-mono); font-size: 0.72rem; background: var(--hover-surface); color: var(--muted-fg); padding: 0.1rem 0.4rem; border-radius: 0.35rem; white-space: nowrap; }
+
+  /* Sous-ligne d'un poste agrégé du Bilan (AF sous AD, AJ..AN sous AI). */
+  .bil-sub .crs-lib { padding-left: 1.1rem; color: var(--muted-fg); }
+  .bil-sub .crs-ref { font-weight: 500; color: var(--muted-fg); }
+  /* La ligne CJ : le chiffre qui sera DÉPOSÉ, et que FE-079 réclame. */
+  table.crs tr.bil-cj td { background: color-mix(in srgb, var(--success) 10%, var(--card)); font-weight: 650; }
+
+  /* ── TFT ─────────────────────────────────────────────────────────────────── */
+  .crs-st { width: 6.4rem; }
+  .tft-b { display: inline-block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.03em; padding: 0.1rem 0.45rem; border-radius: 999px; white-space: nowrap; }
+  .tft-b.ok { background: var(--success-soft); color: var(--success); }
+  .tft-b.est { background: color-mix(in srgb, #f59e0b 18%, transparent); color: #92400e; }
+  .tft-b.todo { background: var(--hover-surface); color: var(--muted-fg); border: 1px dashed var(--border-strong); }
+  /* Une rubrique du formulaire : elle ne porte pas de montant, elle ORGANISE. */
+  table.crs tr.tft-rub td { background: var(--content-bg); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); }
+  table.crs tr.tft-bf td { font-style: italic; color: var(--muted-fg); font-size: 0.78rem; }
+  table.crs tr.tft-cloture td { background: var(--hover-surface); }
+  /* La ligne de contrôle du formulaire déposé, et l'écart qu'elle révèle. */
+  table.crs tr.tft-ctrl td { background: color-mix(in srgb, var(--danger) 8%, var(--card)); font-weight: 650; border-top: 1px solid var(--border-strong); }
+  table.crs tr.tft-ecart td { background: color-mix(in srgb, var(--danger) 14%, var(--card)); font-weight: 750; color: var(--danger); border-bottom: 0; }
+  .tft-src { display: block; font-weight: 400; font-size: 0.72rem; color: var(--muted-fg); margin-top: 0.15rem; }
+  /* Un montant NON DÉRIVABLE ne s'écrit pas « 0 » : zéro est une valeur. */
+  .tft-null { font-family: var(--font-sans); font-size: 0.72rem; font-style: italic; color: var(--muted-fg); }
+  /* Colonne N-1 entière non servie par le contrat — la colonne reste VISIBLE
+     (elle existe sur le formulaire) mais ne ment pas sur son contenu. */
+  .tft-noN1 { color: var(--muted-fg); opacity: 0.5; }
+  .tft-legend { display: flex; gap: 0.9rem; flex-wrap: wrap; font-size: 0.74rem; color: var(--muted-fg); }
+  .tft-legend span b { color: var(--foreground); }
+
+  /* Décomposition d'un écart : un nombre rouge sans son origine ne se corrige pas. */
+  .tft-why { border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border)); border-radius: var(--radius); background: color-mix(in srgb, var(--danger) 6%, var(--card)); overflow: hidden; }
+  .tft-why > .h { display: flex; align-items: center; gap: 0.55rem; padding: 0.7rem 0.95rem; border-bottom: 1px solid color-mix(in srgb, var(--danger) 22%, var(--border)); }
+  .tft-why > .h b { font-size: 0.86rem; }
+  .tft-why .rows { display: grid; gap: 0; }
+  .tft-why .r { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.8rem; padding: 0.5rem 0.95rem; font-size: 0.79rem; border-bottom: 1px solid var(--border); }
+  .tft-why .r:last-child { border-bottom: 0; }
+  .tft-why .r.sum { background: var(--hover-surface); font-weight: 700; }
+  .tft-why .r .n { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ── NOTES ANNEXES ───────────────────────────────────────────────────────── */
+  .nte-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.7rem; }
+  .nte { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+  .nte + .nte { margin-top: 0.6rem; }
+  .nte-h { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; padding: 0.6rem 0.9rem; background: var(--hover-surface); border-bottom: 1px solid var(--border); }
+  .nte-h b { font-family: var(--font-mono); font-size: 0.8rem; }
+  .nte-t { font-size: 0.83rem; font-weight: 600; }
+  .nte-h .grow { flex: 1; }
+  .nte-m { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.03em; padding: 0.12rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+  .nte-m.vent { background: var(--success-soft); color: var(--success); }
+  .nte-m.trame { background: var(--hover-surface); color: var(--muted-fg); border: 1px dashed var(--border-strong); }
+  .nte-b { padding: 0.55rem 0.9rem 0.75rem; }
+  table.nte-tbl { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  table.nte-tbl th { text-align: left; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-fg); font-weight: 700; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); }
+  table.nte-tbl th.r { text-align: right; }
+  table.nte-tbl td { padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--border); }
+  table.nte-tbl td code { font-family: var(--font-mono); font-size: 0.72rem; }
+  table.nte-tbl tr.nte-c td { color: var(--muted-fg); font-size: 0.76rem; padding-left: 1.5rem; }
+  .nte-cpt { font-family: var(--font-mono); font-size: 0.72rem; }
+  table.nte-tbl tr.nte-tot td { font-weight: 700; background: var(--content-bg); border-bottom: 0; }
+  .nte-trame { margin-top: 0.6rem; border: 1px dashed var(--border-strong); border-radius: calc(var(--radius) - 2px); padding: 0.55rem 0.7rem; background: var(--content-bg); }
+  .nte-trame-h { font-size: 0.73rem; color: var(--muted-fg); margin-bottom: 0.35rem; }
+
+  /* ── CONTRÔLES DE COHÉRENCE ──────────────────────────────────────────────── */
+  .coh-verdict { display: flex; align-items: flex-start; gap: 0.8rem; padding: 0.95rem 1.05rem; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--card); }
+  .coh-verdict .flag { font-size: 1.5rem; line-height: 1; }
+  .coh-verdict h4 { margin: 0; font-size: 0.98rem; }
+  .coh-verdict p { margin: 0.3rem 0 0; font-size: 0.8rem; color: var(--muted-fg); line-height: 1.55; }
+  .coh-verdict.go { border-color: color-mix(in srgb, var(--success) 40%, var(--border)); background: color-mix(in srgb, var(--success) 7%, var(--card)); }
+  .coh-verdict.stop { border-color: color-mix(in srgb, var(--danger) 40%, var(--border)); background: color-mix(in srgb, var(--danger) 7%, var(--card)); }
+
+  .coh { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+  .coh > .h { display: flex; align-items: center; gap: 0.55rem; padding: 0.7rem 0.95rem; background: var(--hover-surface); border-bottom: 1px solid var(--border); }
+  .coh > .h b { font-size: 0.85rem; }
+  .coh > .h .grow { flex: 1; }
+  .coh-row { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr) 6.6rem auto; gap: 0.7rem; align-items: start; padding: 0.7rem 0.95rem; border-bottom: 1px solid var(--border); }
+  .coh-row:last-child { border-bottom: 0; }
+  .coh-row .ic { width: 1.5rem; height: 1.5rem; border-radius: 50%; display: grid; place-items: center; font-size: 0.8rem; font-weight: 800; }
+  .coh-row.ok .ic { background: var(--success-soft); color: var(--success); }
+  .coh-row.ko .ic { background: var(--danger-soft); color: var(--danger); }
+  .coh-row.warn .ic { background: color-mix(in srgb, #f59e0b 20%, transparent); color: #92400e; }
+  .coh-row.na .ic { background: var(--hover-surface); color: var(--muted-fg); border: 1px dashed var(--border-strong); }
+  /* ⚠️ Le `>` est OBLIGATOIRE : sans lui, chaque <b> d'emphase d'un
+     paragraphe passe en display:block et hache le texte en colonnes d'un mot. */
+  .coh-row .t > b { font-size: 0.83rem; font-weight: 650; display: block; }
+  .coh-row .t code { font-family: var(--font-mono); font-size: 0.72rem; }
+  .coh-row .t p { margin: 0.2rem 0 0; font-size: 0.76rem; color: var(--muted-fg); line-height: 1.55; }
+  .coh-row .t .el { margin-top: 0.3rem; display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .coh-row .t .el i { font-style: normal; font-family: var(--font-mono); font-size: 0.7rem; background: var(--content-bg); border: 1px solid var(--border); border-radius: 0.3rem; padding: 0.06rem 0.35rem; color: var(--muted-fg); }
+  .coh-cat { font-size: 0.64rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.12rem 0.45rem; border-radius: 999px; white-space: nowrap; align-self: start; }
+  .coh-cat.blk { background: var(--danger-soft); color: var(--danger); }
+  .coh-cat.inf { background: var(--hover-surface); color: var(--muted-fg); }
+  .coh-row .val { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 0.78rem; white-space: nowrap; color: var(--muted-fg); }
+  .coh-row .val b { display: block; font-size: 0.85rem; color: var(--foreground); }
+
+  /* Les 8 contrôles que l'ADMINISTRATION applique au dépôt — pas les 4 du moteur. */
+  table.otr { width: 100%; border-collapse: collapse; font-size: 0.79rem; }
+  table.otr th { text-align: left; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-fg); font-weight: 700; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border-strong); }
+  table.otr td { padding: 0.42rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.otr td.n { font-family: var(--font-mono); width: 2rem; color: var(--muted-fg); }
+  .otr-b { font-size: 0.66rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 999px; white-space: nowrap; }
+  .otr-b.y { background: var(--success-soft); color: var(--success); }
+  .otr-b.t { background: color-mix(in srgb, #f59e0b 18%, transparent); color: #92400e; }
+  .otr-b.n { background: var(--danger-soft); color: var(--danger); }
+
+  @media (max-width: 860px) {
+    .crs-st { display: none; }
+    .coh-row { grid-template-columns: 1.5rem minmax(0, 1fr); }
+    .coh-row .val, .coh-cat { grid-column: 2; text-align: left; }
   }
 
   /* ============ IMPORT SAGE (FE-025) — dry-run en deux temps ============== */
@@ -10881,7 +11003,7 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/><path d="M7 12h10"/></svg>
                       Table de passage
                     </button>
-                    <button class="atl-tab" role="tab" data-bil-tab="etats" aria-selected="false" title="FE-031 Bilan actif/passif · FE-032 Compte de résultat — N/N-1, contrôles d'articulation">
+                    <button class="atl-tab" role="tab" data-bil-tab="etats" aria-selected="false" title="FE-031 Bilan · FE-032 Compte de résultat · FE-033 Flux de trésorerie, notes annexes et contrôles">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
                       États <span class="badge badge-new">FE-031</span>
                     </button>
@@ -11732,8 +11854,9 @@
                     <div class="liasse-nav" role="tablist" aria-label="État de la liasse">
                       <button class="liasse-t" type="button" role="tab" data-bil-etat="bilan" aria-selected="true">Bilan actif&nbsp;/&nbsp;passif</button>
                       <button class="liasse-t" type="button" role="tab" data-bil-etat="resultat" aria-selected="false">Compte de résultat <span class="soon" style="background:var(--success-soft);color:var(--success)">FE-032</span></button>
-                      <button class="liasse-t" type="button" role="tab" data-bil-etat="tft" aria-selected="false" disabled title="FE-033 — Tableau des flux de trésorerie">Flux de trésorerie <span class="soon">FE-033</span></button>
-                      <button class="liasse-t" type="button" role="tab" data-bil-etat="notes" aria-selected="false" disabled title="FE-033 — Notes annexes">Notes annexes <span class="soon">FE-033</span></button>
+                      <button class="liasse-t" type="button" role="tab" data-bil-etat="tft" aria-selected="false" title="FE-033 — Tableau des flux de trésorerie (TFT/TAFIRE)">Flux de trésorerie <span class="soon" style="background:var(--success-soft);color:var(--success)">FE-033</span></button>
+                      <button class="liasse-t" type="button" role="tab" data-bil-etat="notes" aria-selected="false" title="FE-033 — Notes annexes">Notes annexes <span class="soon" style="background:var(--success-soft);color:var(--success)">FE-033</span></button>
+                      <button class="liasse-t" type="button" role="tab" data-bil-etat="controles" aria-selected="false" title="FE-033 — Contrôles de cohérence de la liasse">Contrôles de cohérence <span class="soon" style="background:var(--danger-soft);color:var(--danger)">1 anomalie</span></button>
                     </div>
 
                     <div data-bil-etat-slot="bilan">
@@ -11788,7 +11911,7 @@
 
                       <div class="ctrl-card" style="margin-bottom:1.15rem;background:rgba(5, 150, 105, 0.08);border:1px solid rgba(5, 150, 105, 0.2);border-radius:var(--radius);padding:0.85rem">
                         <div style="display:flex;align-items:center;gap:0.6rem">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:#059669"><path d="M20 6 9 17l-5-5"/></svg>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;width:1.15rem;height:1.15rem;color:#059669"><path d="M20 6 9 17l-5-5"/></svg>
                           <div style="flex:1">
                             <b style="color:#047857">Bilan équilibré pour N et N-1</b>
                             <p style="font-size:0.84rem;color:var(--muted-fg);margin-top:0.2rem">Actif = Passif + Résultat Net · écart nul</p>
@@ -11798,46 +11921,72 @@
                       </div>
 
                       <div style="margin-bottom:1.15rem">
-                        <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem">ACTIF (Brut, Amort-Dépréc, Net N/N-1)</h4>
+                        <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem">ACTIF <span style="font-weight:400;color:var(--muted-fg)">— Brut / Amortissements-Dépréciations / Net 2025 / Net 2024</span></h4>
                         <div class="card-surface" style="overflow:hidden">
-                          <div class="tbl-wrap" style="max-height:400px;overflow-y:auto">
-                            <table class="tbl" style="font-size:0.9rem">
-                              <thead>
-                                <tr style="position:sticky;top:0;z-index:10;background:var(--content-bg)">
-                                  <th style="width:6rem">Code</th><th>Libellé</th><th style="text-align:right;width:7rem">Brut</th><th style="text-align:right;width:8rem">Amort</th><th style="text-align:right;width:7rem">Net(N)</th><th style="text-align:right;width:7rem">Net(N-1)</th>
-                                </tr>
-                              </thead>
+                          <div class="crs-scroll" style="max-height:24rem">
+                            <table class="crs">
+                              <thead><tr><th style="width:3.2rem">R&eacute;f</th><th>Libell&eacute;s</th><th style="width:3rem">Note</th><th class="r">Brut</th><th class="r">Amort.&nbsp;/&nbsp;Dépréc.</th><th class="r">Net 2025</th><th class="r">Net 2024</th></tr></thead>
                               <tbody>
-                                <tr><td><b>AD</b></td><td>Immobilisations corporelles</td><td class="num">5 000 000</td><td class="num">1 000 000</td><td class="num"><b>4 000 000</b></td><td class="num" style="color:var(--muted-fg)">4 200 000</td></tr>
-                                <tr><td><b>AE</b></td><td>Immobilisations incorporelles</td><td class="num">500 000</td><td class="num">0</td><td class="num"><b>500 000</b></td><td class="num" style="color:var(--muted-fg)">600 000</td></tr>
-                                <tr><td><b>AF</b></td><td>Placements financiers</td><td class="num">1 000 000</td><td class="num">0</td><td class="num"><b>1 000 000</b></td><td class="num" style="color:var(--muted-fg)">1 100 000</td></tr>
-                                <tr><td><b>BA</b></td><td>Créances clients</td><td class="num">200 000</td><td class="num">0</td><td class="num"><b>200 000</b></td><td class="num" style="color:var(--muted-fg)">150 000</td></tr>
-                                <tr style="font-weight:600;background:var(--hover-surface)"><td colspan="2">Total Actif</td><td class="num">6 700 000</td><td class="num">1 000 000</td><td class="num" style="color:#047857"><u>5 700 000</u></td><td class="num" style="color:var(--muted-fg)">6 050 000</td></tr>
+                                <tr><td class="crs-ref">AD</td><td class="crs-lib">IMMOBILISATIONS INCORPORELLES</td><td class="crs-note">3</td><td class="crs-n">900 000</td><td class="crs-n">600 000</td><td class="crs-n">300 000</td><td class="crs-n n1">380 000</td></tr>
+                                <tr class="bil-sub"><td class="crs-ref">AF</td><td class="crs-lib">Brevets, licences,logiciels et droits similaires</td><td class="crs-note"></td><td class="crs-n">900 000</td><td class="crs-n">600 000</td><td class="crs-n">300 000</td><td class="crs-n n1">380 000</td></tr>
+                                <tr><td class="crs-ref">AI</td><td class="crs-lib">IMMOBILISATIONS CORPORELLES</td><td class="crs-note">3</td><td class="crs-n">6 325 000</td><td class="crs-n">3 125 000</td><td class="crs-n">3 200 000</td><td class="crs-n n1">3 500 000</td></tr>
+                                <tr class="bil-sub"><td class="crs-ref">AJ</td><td class="crs-lib">Terrains (1) dont placement en Net</td><td class="crs-note"></td><td class="crs-n">1 500 000</td><td class="crs-n">0</td><td class="crs-n">1 500 000</td><td class="crs-n n1">1 500 000</td></tr>
+                                <tr class="bil-sub"><td class="crs-ref">AK</td><td class="crs-lib">Bâtiments (1)  dont placement en Net</td><td class="crs-note"></td><td class="crs-n">3 400 000</td><td class="crs-n">2 200 000</td><td class="crs-n">1 200 000</td><td class="crs-n n1">1 540 000</td></tr>
+                                <tr class="bil-sub"><td class="crs-ref">AM</td><td class="crs-lib">Matériel, mobiliers et actifs biologiques</td><td class="crs-note"></td><td class="crs-n">1 025 000</td><td class="crs-n">700 000</td><td class="crs-n">325 000</td><td class="crs-n n1">50 000</td></tr>
+                                <tr class="bil-sub"><td class="crs-ref">AN</td><td class="crs-lib">Matériel de transport</td><td class="crs-note"></td><td class="crs-n">400 000</td><td class="crs-n">225 000</td><td class="crs-n">175 000</td><td class="crs-n n1">410 000</td></tr>
+                                <tr><td class="crs-ref">AP</td><td class="crs-lib">AVANCES ET ACOMPTES VERSES SUR IMMOBILISATIONS</td><td class="crs-note">3</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                                <tr><td class="crs-ref">AQ</td><td class="crs-lib">IMMOBILISATIONS FINANCIERES</td><td class="crs-note">4</td><td class="crs-n">250 000</td><td class="crs-n">0</td><td class="crs-n">250 000</td><td class="crs-n n1">250 000</td></tr>
+                                <tr class="bil-sub"><td class="crs-ref">AS</td><td class="crs-lib">Autres immobilisations financières</td><td class="crs-note"></td><td class="crs-n">250 000</td><td class="crs-n">0</td><td class="crs-n">250 000</td><td class="crs-n n1">250 000</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">AZ</td><td class="crs-lib">TOTAL ACTIF IMMOBILISE</td><td class="crs-note"></td><td class="crs-n"><span class="tft-noN1">−</span></td><td class="crs-n"><span class="tft-noN1">−</span></td><td class="crs-n">3 750 000</td><td class="crs-n n1">4 130 000</td></tr>
+                                <tr><td class="crs-ref">BA</td><td class="crs-lib">ACTIF CIRCULANT HAO</td><td class="crs-note">5</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                                <tr><td class="crs-ref">BB</td><td class="crs-lib">STOCKS ET EN-COURS</td><td class="crs-note">6</td><td class="crs-n">620 000</td><td class="crs-n">0</td><td class="crs-n">620 000</td><td class="crs-n n1">370 000</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">BG</td><td class="crs-lib">CREANCES ET EMPLOIS ASSIMILES</td><td class="crs-note"></td><td class="crs-n"><span class="tft-noN1">−</span></td><td class="crs-n"><span class="tft-noN1">−</span></td><td class="crs-n">480 000</td><td class="crs-n n1">750 000</td></tr>
+                                <tr class="bil-sub"><td class="crs-ref">BH</td><td class="crs-lib">Fournisseurs avances versées</td><td class="crs-note">17</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                                <tr class="bil-sub"><td class="crs-ref">BI</td><td class="crs-lib">Clients</td><td class="crs-note">7</td><td class="crs-n">430 000</td><td class="crs-n">0</td><td class="crs-n">430 000</td><td class="crs-n n1">690 000</td></tr>
+                                <tr class="bil-sub"><td class="crs-ref">BJ</td><td class="crs-lib">Autres créances</td><td class="crs-note">8</td><td class="crs-n">50 000</td><td class="crs-n">0</td><td class="crs-n">50 000</td><td class="crs-n n1">60 000</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">BK</td><td class="crs-lib">TOTAL ACTIF CIRCULANT</td><td class="crs-note"></td><td class="crs-n"><span class="tft-noN1">−</span></td><td class="crs-n"><span class="tft-noN1">−</span></td><td class="crs-n">1 100 000</td><td class="crs-n n1">1 120 000</td></tr>
+                                <tr><td class="crs-ref">BQ</td><td class="crs-lib">Titres de placement</td><td class="crs-note">9</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                                <tr><td class="crs-ref">BR</td><td class="crs-lib">Valeurs à encaisser</td><td class="crs-note">10</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                                <tr><td class="crs-ref">BS</td><td class="crs-lib">Banques, chèques postaux, caisse et assimilés</td><td class="crs-note">11</td><td class="crs-n">850 000</td><td class="crs-n">0</td><td class="crs-n">850 000</td><td class="crs-n n1">800 000</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">BT</td><td class="crs-lib">TOTAL TRESORERIE ACTIF</td><td class="crs-note"></td><td class="crs-n"><span class="tft-noN1">−</span></td><td class="crs-n"><span class="tft-noN1">−</span></td><td class="crs-n">850 000</td><td class="crs-n n1">800 000</td></tr>
+                                <tr><td class="crs-ref">BU</td><td class="crs-lib">Ecart de conversion-Actif</td><td class="crs-note">12</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">BZ</td><td class="crs-lib">TOTAL GENERAL</td><td class="crs-note"></td><td class="crs-n"><span class="tft-noN1">−</span></td><td class="crs-n"><span class="tft-noN1">−</span></td><td class="crs-n">5 700 000</td><td class="crs-n n1">6 050 000</td></tr>
                               </tbody>
                             </table>
                           </div>
                         </div>
+                        <p style="font-size:0.78rem;color:var(--muted-fg);margin:0.5rem 0 0">ℹ️ Les colonnes <b>Brut</b> et <b>Amort.&nbsp;/&nbsp;Dépréc.</b> des <b>sous-totaux</b> (<code>AZ</code>, <code>BG</code>, <code>BK</code>, <code>BT</code>, <code>BZ</code>) portent «&nbsp;—&nbsp;» et non zéro&nbsp;: <code>sousTotaux</code> ne publie qu'<b>une</b> valeur par poste (<code>valeurN</code>&nbsp;/&nbsp;<code>valeurN1</code>), c'est-à-dire le <b>Net</b>. Le formulaire déposé, lui, totalise les trois colonnes. <span class="code">écart ouvert · <b>STORY-438</b></span><br>ℹ️ La colonne <b>Note</b> renvoie à l'onglet <b>Notes annexes</b>. <b>Onze postes de l'actif</b> en portent une&nbsp;; <b>aucun poste du passif, aucun poste du compte de résultat</b> — voir l'écart <span class="code">STORY-437</span>.</p>
                       </div>
 
                       <div style="margin-bottom:1.15rem">
-                        <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem">PASSIF (Montant N/N-1)</h4>
+                        <h4 style="font-size:0.9rem;font-weight:600;margin-bottom:0.6rem">PASSIF <span style="font-weight:400;color:var(--muted-fg)">— Montant 2025 / Montant 2024</span></h4>
                         <div class="card-surface" style="overflow:hidden">
-                          <div class="tbl-wrap" style="max-height:300px;overflow-y:auto">
-                            <table class="tbl" style="font-size:0.9rem">
-                              <thead>
-                                <tr style="position:sticky;top:0;z-index:10;background:var(--content-bg)">
-                                  <th style="width:6rem">Code</th><th>Libellé</th><th style="text-align:right;width:7rem">Montant(N)</th><th style="text-align:right;width:7rem">Montant(N-1)</th>
-                                </tr>
-                              </thead>
+                          <div class="crs-scroll" style="max-height:24rem">
+                            <table class="crs">
+                              <thead><tr><th style="width:3.2rem">R&eacute;f</th><th>Libell&eacute;s</th><th class="r">Montant 2025</th><th class="r">Montant 2024</th></tr></thead>
                               <tbody>
-                                <tr><td><b>CA</b></td><td>Capitaux propres</td><td class="num">4 000 000</td><td class="num" style="color:var(--muted-fg)">3 800 000</td></tr>
-                                <tr><td><b>CP</b></td><td>Dettes long terme</td><td class="num">900 000</td><td class="num" style="color:var(--muted-fg)">950 000</td></tr>
-                                <tr><td><b>CS</b></td><td>Dettes court terme</td><td class="num">600 000</td><td class="num" style="color:var(--muted-fg)">500 000</td></tr>
-                                <tr style="font-weight:600;background:var(--hover-surface)"><td colspan="2">Total Passif</td><td class="num" style="color:#047857"><u>5 500 000</u></td><td class="num" style="color:var(--muted-fg)">5 250 000</td></tr>
+                                <tr><td class="crs-ref">CA</td><td class="crs-lib">Capital</td><td class="crs-n">3 000 000</td><td class="crs-n n1">3 000 000</td></tr>
+                                <tr><td class="crs-ref">CH</td><td class="crs-lib">Report à nouveau (+ ou -)</td><td class="crs-n">1 000 000</td><td class="crs-n n1">200 000</td></tr>
+                                <tr class="bil-cj"><td class="crs-ref">CJ</td><td class="crs-lib">Résultat net de l'exercice (bénéfice + ou perte -)</td><td class="crs-n">200 000</td><td class="crs-n n1">800 000</td></tr>
+                                <tr><td class="crs-ref">CL</td><td class="crs-lib">Subventions d'investissement</td><td class="crs-n">150 000</td><td class="crs-n n1">180 000</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">CP</td><td class="crs-lib">TOTAL CAPITAUX PROPRES ET RESSOURCES ASSIMILEES</td><td class="crs-n">4 350 000</td><td class="crs-n n1">4 180 000</td></tr>
+                                <tr><td class="crs-ref">DA</td><td class="crs-lib">Emprunts et dettes financières diverses</td><td class="crs-n">700 000</td><td class="crs-n n1">900 000</td></tr>
+                                <tr><td class="crs-ref">DB</td><td class="crs-lib">Dettes de location acquisition</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                                <tr><td class="crs-ref">DC</td><td class="crs-lib">Provisions pour risques et charges</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">DD</td><td class="crs-lib">TOTAL DETTES FINANCIERES ET RESSOURCES ASSIMILEES</td><td class="crs-n">700 000</td><td class="crs-n n1">900 000</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">DF</td><td class="crs-lib">TOTAL RESSOURCES STABLES</td><td class="crs-n">5 050 000</td><td class="crs-n n1">5 080 000</td></tr>
+                                <tr><td class="crs-ref">DJ</td><td class="crs-lib">Fournisseurs d'exploitation</td><td class="crs-n">420 000</td><td class="crs-n n1">600 000</td></tr>
+                                <tr><td class="crs-ref">DK</td><td class="crs-lib">Dettes fiscales et sociales</td><td class="crs-n">230 000</td><td class="crs-n n1">270 000</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">DP</td><td class="crs-lib">TOTAL PASSIF CIRCULANT</td><td class="crs-n">650 000</td><td class="crs-n n1">870 000</td></tr>
+                                <tr><td class="crs-ref">DR</td><td class="crs-lib">Banques, établissements financiers et crédits de trésorerie</td><td class="crs-n">0</td><td class="crs-n n1">100 000</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">DT</td><td class="crs-lib">TOTAL TRESORERIE PASSIF</td><td class="crs-n">0</td><td class="crs-n n1">100 000</td></tr>
+                                <tr><td class="crs-ref">DV</td><td class="crs-lib">Ecart de conversion-Passif</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">DZ</td><td class="crs-lib">TOTAL GENERAL</td><td class="crs-n">5 700 000</td><td class="crs-n n1">6 050 000</td></tr>
                               </tbody>
                             </table>
                           </div>
                         </div>
+                        <p style="font-size:0.78rem;color:var(--muted-fg);margin:0.5rem 0 0">✅ La ligne <b><code>CJ</code> Résultat net de l'exercice</b> est <b>le chiffre qui sera déposé</b> — c'est elle que le contrôle nº 2 de l'administration compare au compte de résultat. Elle était absente de la première version de cet écran&nbsp;: <span class="code">FE-079</span>.</p>
                       </div>
 
                       <div style="margin-bottom:1.15rem;padding:0.85rem;background:var(--content-bg);border-radius:var(--radius)">
@@ -12483,6 +12632,619 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
                     ⚠️ Au passage&nbsp;: les montants du <b>Bilan</b> (FE-031) portaient un «&nbsp;€&nbsp;» — corrigé en
                     <b>F&nbsp;CFA</b> sur cette branche, un état OHADA ne se libelle pas en euros.</div>
                     </div><!-- /data-bil-etat-slot="resultat" -->
+
+                    <!-- ═════════════ PANNEAU : FLUX DE TRÉSORERIE — TFT/TAFIRE (FE-033) ═════════════
+                         Le TFT n'est pas « un état de plus » : c'est le seul qui se VÉRIFIE
+                         tout seul. Son avant-dernière ligne (ZH) doit retomber sur la
+                         trésorerie du Bilan, et le formulaire déposé porte lui-même la ligne
+                         de contrôle en pied. La maquette garde donc la mise en page du
+                         formulaire — rubriques comprises — et affiche l'écart au lieu de le
+                         noyer. Tous les montants sont produits en rejouant les `operandes`
+                         du paquet (voir la 1re note de conception en pied de panneau). -->
+                    <div data-bil-etat-slot="tft" hidden>
+                      <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                        <div>
+                          <h3 class="atl-sectitle">Tableau des flux de trésorerie</h3>
+                          <p class="atl-secsub">La méthode <b>indirecte</b> SYSCOHADA&nbsp;: de la <b>CAFG</b> (<code>FA</code>) à la
+                          <b>trésorerie de clôture</b> (<code>ZH</code>), par les trois familles de flux — exploitation, investissement,
+                          financement. Chaque ligne porte son <b>statut de preuve</b>&nbsp;: ce que la balance <b>démontre</b>, ce qu'elle
+                          <b>estime</b>, et ce qu'elle <b>ne sait pas</b>. <b>Lecture seule</b>.</p>
+                          <p style="margin:0.45rem 0 0"><span class="badge badge-invited"><span class="d"></span>6 écarts ouverts &middot; STORY-433 → 436 &middot; STORY-440 &middot; FE-080</span></p>
+                        </div>
+                        <span style="flex:1"></span>
+                        <div class="atelier-demo" role="tablist" aria-label="État du TFT (démo)">
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-tft-state="nominal" aria-selected="true">Servi</button>
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-tft-state="sans-n1" aria-selected="false">Sans N-1</button>
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-tft-state="sfd" aria-selected="false">Référentiel sans TFT</button>
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-tft-state="loading" aria-selected="false">Chargement</button>
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-tft-state="error" aria-selected="false">Erreur</button>
+                        </div>
+                      </div>
+
+                      <div data-bil-tft-slot="nominal">
+                        <div class="crs-src">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+                          <span class="grow"><b>Même balance que le Bilan et le compte de résultat</b> — exercice 2025 · Sage 100 · v3, validée le 18/07/2026<br>
+                          <span class="mono">syscohada-revise@2.1 · sha256:e9370b14…a71e · <b>les quatre tampons concordent</b></span></span>
+                          <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="bilan">Voir le Bilan</button>
+                          <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="resultat">Voir le compte de résultat</button>
+                        </div>
+
+                        <div class="crs-kpis">
+                          <div class="crs-kpi">
+                            <span class="k">Trésorerie d'ouverture <code>ZA</code></span>
+                            <span class="v">700&nbsp;000</span>
+                            <span class="p">= <code>BT</code> &minus; <code>DT</code> au 31/12/2024</span>
+                          </div>
+                          <div class="crs-kpi">
+                            <span class="k">Flux opérationnels <code>ZB</code></span>
+                            <span class="v">605&nbsp;000</span>
+                            <span class="p">dont CAFG 805&nbsp;000</span>
+                          </div>
+                          <div class="crs-kpi">
+                            <span class="k">Variation reconstituée <code>ZG</code></span>
+                            <span class="v" style="color:var(--danger)">1&nbsp;055&nbsp;000</span>
+                            <span class="p">le Bilan dit 150&nbsp;000</span>
+                          </div>
+                          <div class="crs-kpi final">
+                            <span class="k">Trésorerie de clôture — <b>Bilan</b></span>
+                            <span class="v">850&nbsp;000</span>
+                            <span class="p"><code>ZH</code> reconstitué&nbsp;: 1&nbsp;755&nbsp;000</span>
+                          </div>
+                        </div>
+
+                        <div class="tft-why">
+                          <div class="h">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem;color:var(--danger)"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                            <b>L'écart de 905&nbsp;000 n'est pas un mystère — il se décompose exactement</b>
+                            <span class="grow"></span>
+                            <span class="badge badge-invited"><span class="d"></span>écart ouvert · STORY-434</span>
+                          </div>
+                          <div class="rows">
+                            <div class="r"><span><code>FF</code> et <code>FG</code> sont bâties sur la <b>variation du NET</b> des immobilisations. Or le net a déjà absorbé la <b>dotation aux amortissements</b> — que la CAFG (<code>FA</code>) vient de rajouter. <b>Comptée deux fois</b>&nbsp;: la dotation de l'exercice (<code>RL</code> du compte de résultat).</span><span class="n">860&nbsp;000</span></div>
+                            <div class="r"><span>Le net a aussi absorbé la <b>valeur comptable des cessions</b> — que <code>FA</code> rajoute également. <b>Comptée deux fois</b> (<code>RO</code>).</span><span class="n">45&nbsp;000</span></div>
+                            <div class="r sum"><span>Total = l'écart <code>ZH</code> &minus; trésorerie du Bilan</span><span class="n">905&nbsp;000</span></div>
+                            <div class="r"><span style="color:var(--success)"><b>Avec les mouvements BRUTS</b> (525&nbsp;000 d'acquisitions corporelles, 300&nbsp;000 de prix de cession — c'est-à-dire la <b>note 3A</b>), <code>ZC</code> vaudrait <b>&minus;225&nbsp;000</b> et <code>ZG</code> <b>150&nbsp;000</b> — <b>exactement la variation du Bilan</b>. Le TFT retombe au franc près.</span><span class="n" style="color:var(--success)">écart&nbsp;0</span></div>
+                          </div>
+                        </div>
+
+                        <div class="crs-art">
+                          <div class="h">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 3v18"/><path d="m5 8 7-5 7 5"/><path d="M3 21h18"/></svg>
+                            <b>Articulation du tableau des flux</b>
+                            <span class="grow"></span>
+                            <span class="badge badge-invited"><span class="d"></span>1 contrôle calculé, et il ne passe pas</span>
+                          </div>
+                          <div class="crs-artline ko"><span class="ic">!</span><span class="t"><b>La variation reconstituée par les flux ≠ la variation de trésorerie du Bilan</b><p>C'est le contrôle <code>controleTresorerie</code>, et — contrairement à <code>coherenceResultat</code> du compte de résultat — <b>ce n'en est pas un faux</b>&nbsp;: <code>variationTft</code> vient de la <b>cascade des flux</b> (<code>ZG</code>), <code>variationBilan</code> de la <b>trésorerie des postes marqués</b>. Deux chemins indépendants, donc un écart possible — et ici il vaut 905&nbsp;000, soit <b>604&nbsp;%</b> de la variation réelle.</p></span><span class="val"><b>1&nbsp;055&nbsp;000</b>≠ 150&nbsp;000</span></div>
+                          <div class="crs-artline na"><span class="ic">i</span><span class="t"><b>…et ce contrôle est <b>INFORMATIF</b>&nbsp;: la liasse reste <code>valide: true</code></b><p><code>ControlesCoherenceProductionService</code> classe <code>VARIATION_TRESORERIE</code> en <code>INFORMATIF</code>&nbsp;; seuls <code>EQUILIBRE_BILAN</code> et <code>COHERENCE_RESULTAT</code> sont bloquants. Un TFT faux de 905&nbsp;000 ne retient donc <b>rien</b>. Le choix se défend (les lignes <b>estimées</b> peuvent créer un écart légitime) — mais il doit être <b>dit à l'écran</b>, sinon un vert global couvre un rouge local. <span class="code">à trancher · <b>STORY-440</b></span></p></span><span class="val"><b>informatif</b>n'empêche rien</span></div>
+                          <div class="crs-artline ok"><span class="ic">✓</span><span class="t"><b>L'ouverture <code>ZA</code> = trésorerie nette de clôture N-1</b><p>Servi&nbsp;: <code>ZA = BT(N-1) &minus; DT(N-1)</code>, sous-totaux du référentiel en mode <code>VALEUR_N_1</code>. C'est la même trésorerie que celle lue au Bilan sur les postes marqués <code>tresorerie</code> — <b>l'ancrage du haut du tableau tient</b>, c'est le bas qui décroche.</p></span><span class="val"><b>700&nbsp;000</b>= 700&nbsp;000</span></div>
+                          <div class="crs-artline na"><span class="ic">?</span><span class="t"><b>Quatre lignes du formulaire ne sont <b>pas dérivables</b> d'une balance, et rien ne permet de les saisir</b><p><code>FJ</code> cessions financières, <code>FM</code> prélèvements sur le capital, <code>FN</code> <b>dividendes versés</b>, <code>FQ</code> <b>remboursements d'emprunts</b>&nbsp;: ces mouvements ne laissent pas de solde, seulement une trace en <b>journal</b>. Le service les rend à <code>null</code> — ce qui est <b>juste</b> — mais aucune route n'accepte de les compléter. <b>Tant que ces quatre cases restent vides, la liasse n'est pas déposable.</b> <span class="code">écart ouvert · <b>STORY-436</b> · <b>FE-080</b></span></p></span><span class="val"><b>4 lignes</b>non saisissables</span></div>
+                        </div>
+
+                        <div class="card-surface" style="overflow:hidden">
+                          <div class="crs-scroll">
+                            <table class="crs">
+                              <thead><tr><th style="width:3.2rem">R&eacute;f</th><th>Libell&eacute;s</th><th style="width:3rem">Note</th><th style="width:6.4rem">Preuve</th><th class="r">Exercice 2025<span class="sub">clos le 31/12 &middot; 12 mois &middot; F CFA</span></th><th class="r">Exercice 2024<span class="sub">colonne du formulaire &middot; <b>non servie</b> &middot; STORY-433</span></th></tr></thead>
+                              <tbody>
+                                <tr class="crs-sig"><td class="crs-ref">ZA</td><td class="crs-lib">Trésorerie nette au 1er janvier (Trésorerie actif N-1-Trésorerie passif N-1)</td><td class="crs-note">A</td><td class="crs-st"><span class="tft-b ok">Calculé</span></td><td class="crs-n">700 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="tft-rub"><td class="crs-ref"></td><td class="crs-lib" colspan="5">Flux de trésorerie provenant des activités opérationnelles</td></tr>
+                                <tr><td class="crs-ref">FA</td><td class="crs-lib">Capacité d'Autofinancement Global (CAFG)</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b ok">Calculé</span></td><td class="crs-n">805 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FB</td><td class="crs-lib">- Actif circulant HAO (1)</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b ok">Calculé</span></td><td class="crs-n">0</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FC</td><td class="crs-lib">- Variation des stocks</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b ok">Calculé</span></td><td class="crs-n">−250 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FD</td><td class="crs-lib">- Variation des créances</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b ok">Calculé</span></td><td class="crs-n">270 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FE</td><td class="crs-lib">+ Variation du passif circulant (1)</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b ok">Calculé</span></td><td class="crs-n">−220 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="tft-bf"><td class="crs-ref"></td><td class="crs-lib">Variation du BF lié aux activités opérationnelles (FB+FC+FD+FE)</td><td class="crs-note"></td><td class="crs-st"></td><td class="crs-n">−200 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">ZB</td><td class="crs-lib">Flux de trésorerie provenant des activités opérationnelles (somme FA à FE)</td><td class="crs-note">B</td><td class="crs-st"><span class="tft-b ok">Calculé</span></td><td class="crs-n">605 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="tft-rub"><td class="crs-ref"></td><td class="crs-lib" colspan="5">Flux de trésorerie provenant des activités d'investissements</td></tr>
+                                <tr><td class="crs-ref">FF</td><td class="crs-lib">- Décaissements liés aux acquisitions d'immobilisations incorporelles</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">80 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FG</td><td class="crs-lib">- Décaissements liés aux acquisitions d'immobilisations corporelles</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">300 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FH</td><td class="crs-lib">- Décaissements liés aux acquisitions d'immobilisations financières</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">0</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FI</td><td class="crs-lib">+  Encaissements liés aux cessions d'immobilisations incorporelles et corporelles</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">300 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FJ</td><td class="crs-lib">+ Encaissements liés aux cessions d'immobilisations financières</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b todo">À compléter</span></td><td class="crs-n"><span class="tft-null">non dérivable</span></td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">ZC</td><td class="crs-lib">Flux de trésorerie provenant des opérations d'investissements (somme FF à FJ)</td><td class="crs-note">C</td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">680 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="tft-rub"><td class="crs-ref"></td><td class="crs-lib" colspan="5">Flux de trésorerie provenant du financement par les capitaux propres</td></tr>
+                                <tr><td class="crs-ref">FK</td><td class="crs-lib">+ Augmentation de capital par apports nouveaux</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">0</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FL</td><td class="crs-lib">+ Subventions d'investissement reçues</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b ok">Calculé</span></td><td class="crs-n">−30 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FM</td><td class="crs-lib">- Prélèvements sur le capital</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b todo">À compléter</span></td><td class="crs-n"><span class="tft-null">non dérivable</span></td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FN</td><td class="crs-lib">- Dividendes versés</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b todo">À compléter</span></td><td class="crs-n"><span class="tft-null">non dérivable</span></td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">ZD</td><td class="crs-lib">Flux de trésorerie provenant des capitaux propres (somme FK à FN)</td><td class="crs-note">D</td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">−30 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="tft-rub"><td class="crs-ref"></td><td class="crs-lib" colspan="5">Trésorerie provenant du financement par les capitaux étrangers</td></tr>
+                                <tr><td class="crs-ref">FO</td><td class="crs-lib">+ Emprunts</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">−200 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FP</td><td class="crs-lib">+ Autres dettes financières</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">0</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr><td class="crs-ref">FQ</td><td class="crs-lib">- Remboursements des emprunts et autres dettes financières</td><td class="crs-note"></td><td class="crs-st"><span class="tft-b todo">À compléter</span></td><td class="crs-n"><span class="tft-null">non dérivable</span></td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">ZE</td><td class="crs-lib">Flux de trésorerie provenant des capitaux étrangers (somme FO à FQ)</td><td class="crs-note">E</td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">−200 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">ZF</td><td class="crs-lib">Flux de trésorerie provenant des activités de financement (D+E)</td><td class="crs-note">F</td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">−230 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="crs-sig"><td class="crs-ref">ZG</td><td class="crs-lib">VARIATION DE LA TRESORERIE NETTE DE LA PERIODE ( B+C+F)</td><td class="crs-note">G</td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">1 055 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="crs-sig tft-cloture"><td class="crs-ref">ZH</td><td class="crs-lib">Trésorerie nette au 31 Décembre (G+A)</td><td class="crs-note">H</td><td class="crs-st"><span class="tft-b est">Estimé</span></td><td class="crs-n">1 755 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="tft-ctrl"><td class="crs-ref"></td><td class="crs-lib">Contrôle&nbsp;: Trésorerie actif N &minus; Trésorerie passif N <span class="tft-src">ligne du formulaire déposé — <b>absente du référentiel</b> <span class="code">écart ouvert · <b>STORY-435</b></span></span></td><td class="crs-note"></td><td class="crs-st"></td><td class="crs-n">850 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                                <tr class="tft-ecart"><td class="crs-ref"></td><td class="crs-lib" colspan="3">Écart <code>ZH</code> &minus; contrôle — la clôture reconstituée ne retombe pas sur la trésorerie du Bilan</td><td class="crs-n">905 000</td><td class="crs-n n1"><span class="tft-noN1">−</span></td></tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        <p style="font-size:0.76rem;color:var(--muted-fg);margin:0.5rem 0 0;line-height:1.55">
+                          <b>(1)</b> «&nbsp;<i>À l'exclusion des variations des créances et dettes liées aux activités d'investissement
+                          (variation des créances sur cession d'immobilisation et des dettes sur acquisition ou production
+                          d'immobilisation) et de financement (par exemple variation des créances sur subventions
+                          d'investissements reçues).</i>&nbsp;» — renvoi de bas de page du formulaire déposé, appelé par
+                          <code>FB</code> et <code>FE</code>. ⚠️ <b>Le paquet porte l'appel «&nbsp;(1)&nbsp;» dans le libellé mais pas le
+                          renvoi</b>&nbsp;: sans lui, deux lignes de l'état renvoient à une note qui n'existe pas — et la règle
+                          qu'il énonce est précisément celle que <code>FD</code>/<code>FE</code> ne peuvent pas appliquer, puisqu'elles
+                          somment les sous-totaux <code>BG</code>/<code>DP</code> <b>en entier</b>. <span class="code">écart ouvert · <b>STORY-435</b></span>
+                        </p>
+
+                        <div class="tft-legend">
+                          <span><span class="tft-b ok">Calculé</span> <b>dérivé</b> des soldes N/N-1 — la balance le démontre</span>
+                          <span><span class="tft-b est">Estimé</span> déduit d'une <b>variation nette</b>, faute de mouvements bruts</span>
+                          <span><span class="tft-b todo">À compléter</span> <b>hors balance</b> — jamais inventé, jamais mis à zéro</span>
+                        </div>
+
+                        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.7rem 0.9rem;border:1px dashed var(--border);background:var(--content-bg);border-radius:var(--radius);font-size:0.82rem">
+                          <b>Calcul non enregistré</b>
+                          <span style="color:var(--muted-fg)">Ce TFT est recalculé à chaque ouverture (<code>POST …/bilan/etats/tft/dry-run</code>, <b>200</b>, aucune persistance). Il ne crée aucune liasse et ne fige rien. L'enregistrement arrive avec STORY-064.</span>
+                        </div>
+
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+                          <button class="btn btn-primary" type="button" data-bil-etat-go="controles">Voir les contrôles de cohérence</button>
+                          <button class="btn btn-ghost" type="button" data-bil-etat-go="notes">Voir les notes annexes</button>
+                          <button class="btn btn-ghost" type="button" data-bil-goto="passage">Corriger à la table de passage</button>
+                        </div>
+
+                        <div class="dc-note dc-gap"><b>⚡ TOUS LES MONTANTS DE CE TABLEAU SONT PRODUITS, PAS ÉCRITS.</b> Un générateur rejoue les <code>operandes</code> du paquet <code>syscohada-revise@2.1</code> — mêmes modes que le serveur (<code>VARIATION</code>, <code>VALEUR_N_1</code>, <code>etatSource</code>) — puis <b>assère</b> les jointures&nbsp;: <code>XI = 200&nbsp;000</code> (le résultat du compte de résultat voisin), <code>CJ = 200&nbsp;000</code> (le résultat porté au passif du Bilan voisin), <code>BZ = DZ = 5&nbsp;700&nbsp;000</code>, <code>ZA = BT(N-1) &minus; DT(N-1)</code>, et <code>ZG &minus; variation Bilan = RL + RO</code>. Une <b>garde d'ordre</b> vérifie que les 25 lignes sortent dans l'ordre de <code>pkg.postes</code> — l'ordre légal ne vit <b>que</b> là, jamais dans <code>tableDePassage</code> (défaut payé par FE-032).</div>
+
+                        <div class="dc-note dc-gap"><b>⛔ TROIS LIGNES DU FORMULAIRE DÉPOSÉ N'EXISTENT PAS DANS LE RÉFÉRENTIEL — ET L'UNE D'ELLES EST LE CONTRÔLE.</b> La feuille <i>« TFT »</i> de la DSF déposée <code>1000745307_2025_Definitif&nbsp;(1).xlsx</code> porte&nbsp;: <b>①</b> quatre <b>intitulés de rubrique</b> (« Flux de trésorerie provenant des activités opérationnelles »…), <b>②</b> la ligne <b>« Variation du BF lié aux activités opérationnelles (FB+FC+FD+FE) »</b>, <b>③</b> la ligne <b>« Contrôle&nbsp;: Trésorerie actif N &minus; Trésorerie passif N »</b> en pied — et <b>④</b> les renvois <code>A</code>…<code>H</code> sur les huit lignes <code>Z</code>, sans lesquels les libellés du paquet (« <i>somme FA à FE</i> », « <i>B+C+F</i> », « <i>G+A</i> ») ne sont <b>pas lisibles</b>. Les 26 postes <code>etat: 'TFT'</code> du paquet n'en portent <b>aucune</b> et leur champ <code>note</code> vaut <code>null</code> sur les 26. Elles sont dessinées ici <b>d'après le formulaire</b>, pas d'après le contrat. <span class="code">écart ouvert · <b>STORY-435</b></span> — même famille que STORY-427 (le compte de résultat).</div>
+
+                        <div class="dc-note dc-gap"><b>⛔ TROIS LIGNES AFFICHENT UN MONTANT DE SENS CONTRAIRE À LEUR PROPRE LIBELLÉ.</b> «&nbsp;<code>FO</code> <b>+ Emprunts</b>&nbsp;» vaut <b>&minus;200&nbsp;000</b> (l'emprunt a été <b>remboursé</b>) pendant que «&nbsp;<code>FQ</code> <b>&minus; Remboursements</b>&nbsp;» reste vide&nbsp;; «&nbsp;<code>FF</code> <b>&minus; Décaissements</b>&nbsp;» vaut <b>+80&nbsp;000</b>&nbsp;; «&nbsp;<code>FL</code> <b>+ Subventions reçues</b>&nbsp;» vaut <b>&minus;30&nbsp;000</b> (c'est la <b>reprise</b> annuelle de la subvention, pas un encaissement). Cause unique&nbsp;: une <b>variation nette signée</b> posée sur une ligne à <b>sens fixe</b>. Sur un état déposé, un remboursement rangé sous «&nbsp;+ Emprunts&nbsp;» n'est pas une approximation — c'est une <b>ligne fausse</b>. L'écran les laisse visibles, avec leur statut <b>Estimé</b>, plutôt que de les corriger en douce&nbsp;: ce n'est pas au front d'arbitrer. <span class="code">écart ouvert · <b>STORY-434</b></span></div>
+
+                        <div class="dc-note dc-gap"><b>⚠️ LA RÉPONSE PORTE DEUX CLÔTURES DIFFÉRENTES, ET IL FAUT LES AFFICHER TOUTES LES DEUX.</b> <code>postes[ZH]</code> vaut <b>1&nbsp;755&nbsp;000</b> (la cascade), <code>tresorerieClotureN</code> vaut <b>850&nbsp;000</b> (l'ancre lue au Bilan) — même charge utile, même appel. N'en montrer qu'une donnerait un tableau qui a l'air juste&nbsp;; les montrer toutes deux, c'est exactement la <b>ligne de contrôle</b> que le formulaire déposé porte en pied. ⚠️ <b>Et le commentaire du contrat est périmé&nbsp;:</b> <code>tft.types.ts</code> annonce encore «&nbsp;<i>ecart = 0 par construction</i>&nbsp;» (héritage de STORY-061, quand le TFT n'était qu'un squelette). Depuis STORY-113 la cascade est calculée et l'écart est <b>réel</b> — un lecteur qui croit le commentaire câblerait un voyant qui ne peut pas rougir, exactement le piège de <code>coherenceResultat</code>.</div>
+
+                        <div class="dc-note dc-gap"><b>⛔ LA COLONNE «&nbsp;EXERCICE 2024&nbsp;» EST VIDE PARCE QUE LE CONTRAT NE LA SERT PAS.</b> <code>PosteTft</code> ne publie qu'un <code>montantN</code>&nbsp;: <b>il n'existe aucun <code>montantN1</code></b>, alors que le formulaire déposé a bien ses deux colonnes et que le corps de la requête <b>envoie déjà</b> <code>soldesN1</code>. La colonne reste <b>affichée</b> — elle existe sur l'état légal — mais ne porte aucun zéro&nbsp;: un «&nbsp;0&nbsp;» dirait «&nbsp;le flux a été nul&nbsp;», ce qui serait faux (convention posée par FE-031). <span class="code">écart ouvert · <b>STORY-433</b></span></div>
+                      </div>
+
+                      <div data-bil-tft-slot="sans-n1" hidden>
+                        <div class="ctrl-card" style="margin-bottom:1.15rem;background:rgba(245, 158, 11, 0.08);border:1px solid rgba(245, 158, 11, 0.2);border-radius:var(--radius);padding:0.85rem">
+                          <div style="display:flex;align-items:flex-start;gap:0.6rem">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:0.15rem;color:#f59e0b"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                            <div style="flex:1">
+                              <b style="color:#92400e">Aucun exercice N-1 désigné — le tableau des flux ne peut pas exister</b>
+                              <p style="font-size:0.84rem;color:var(--muted-fg);margin-top:0.4rem">Un flux est une <b>différence entre deux dates</b>. Sans balance N-1, <code>ZA</code> (trésorerie d'ouverture) est inconnue, les onze lignes en mode <code>VARIATION</code> valent zéro, et le contrôle passe en <code>INDETERMINABLE</code> — <b>pas en anomalie</b>&nbsp;: rien n'est faux, rien n'est vérifiable.</p>
+                              <p style="font-size:0.8rem;color:var(--muted-fg);margin-top:0.5rem">⚠️ C'est le cas <b>le plus dangereux du lot</b>&nbsp;: <code>coherent: false</code> mais <code>ecart: null</code>. Un écran qui peindrait « non cohérent » en rouge ferait chercher une erreur qui n'existe pas ; un écran qui masquerait le cas laisserait déposer un TFT à zéro.</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="crs-src">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+                          <span class="grow"><b>Le geste qui manque existe déjà dans le produit</b> — désignez l'exercice comparatif depuis l'onglet <b>Sources</b>, puis revenez ici.</span>
+                          <button class="btn btn-primary btn-sm" type="button" data-bil-goto="source">Désigner l'exercice N-1</button>
+                        </div>
+                        <div class="dc-note dc-gap"><b>⚡ « NON VÉRIFIABLE » N'EST PAS « FAUX », ET LE CONTRAT LES DISTINGUE — L'ÉCRAN AUSSI.</b> <code>ControleTresorerie.statut</code> a trois valeurs&nbsp;: <code>CALCULE</code>, <code>INDETERMINABLE</code> (N-1 absent) et <code>NON_APPLICABLE</code> (référentiel sans TFT). Seul <code>coherent</code> est un booléen — et il vaut <code>false</code> dans le cas <code>INDETERMINABLE</code>. <b>Lire <code>coherent</code> seul, c'est afficher une anomalie là où il n'y a qu'une absence.</b> Troisième occurrence du motif après <code>coherenceSousTotaux</code> (FE-031) et <code>coherenceResultat</code> (FE-032)&nbsp;: <b>un booléen de cohérence se lit toujours avec son statut.</b></div>
+                      </div>
+
+                      <div data-bil-tft-slot="sfd" hidden>
+                        <div class="state empty" style="border:1px dashed var(--border-strong);border-radius:var(--radius)"><span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><h3>Le référentiel de ce dossier ne comporte pas de tableau des flux</h3><p style="max-width:56ch"><b>SFD-BCEAO</b> ne déclare aucun poste <code>etat: 'TFT'</code> et aucun marqueur de trésorerie. La réponse est <code>postes: []</code>, contrôle <code>NON_APPLICABLE</code>, <code>coherent: true</code> — <b>rien à réconcilier</b>. Ce n'est ni une erreur ni un manque du produit&nbsp;: c'est le référentiel de l'entité.</p><button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="bilan">Revenir au Bilan</button></div>
+                        <div class="dc-note dc-gap"><b>⚠️ UN ONGLET QUI DISPARAÎT EST PIRE QU'UN ONGLET VIDE.</b> Le réflexe serait de masquer « Flux de trésorerie » pour un référentiel qui n'en a pas. Mais un utilisateur qui a vu l'onglet hier et ne le voit plus aujourd'hui cherche <b>ce qu'il a cassé</b>. L'onglet reste, et il <b>explique</b> — c'est aussi ce qui distingue « votre référentiel n'en a pas » de « le calcul a échoué ».</div>
+                      </div>
+
+                      <div data-bil-tft-slot="loading" hidden>
+                        <div class="state"><div class="sk-row"><span class="sk sk-line" style="width:30%"></span></div><div class="sk-row"><span class="sk sk-line" style="width:100%"></span></div><div class="sk-row"><span class="sk sk-line" style="width:100%"></span></div><div class="sk-row"><span class="sk sk-line" style="width:55%"></span></div></div>
+                        <p class="helper" style="margin-top:0.6rem">Reconstitution des flux de trésorerie…</p>
+                      </div>
+
+                      <div data-bil-tft-slot="error" hidden>
+                        <div class="state error" style="border:1px solid color-mix(in srgb, var(--danger) 30%, var(--border));border-radius:var(--radius)"><span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span><h3>Le tableau des flux n'a pas pu être calculé</h3><p style="max-width:52ch">Une somme de trésorerie a dépassé les bornes d'entier sûr (<code>400 MONTANT_HORS_BORNES</code>), ou le référentiel n'a pas pu être chargé.</p><button class="btn btn-primary btn-sm" type="button" data-bil-tft-retry>Réessayer</button></div>
+                      </div>
+                    </div><!-- /data-bil-etat-slot="tft" -->
+
+                    <!-- ═════════════ PANNEAU : NOTES ANNEXES (FE-033) ═════════════
+                         Une note annexe n'est pas un tableau de plus : c'est la PREUVE
+                         d'un poste. D'où l'ordre de lecture retenu — le poste d'abord,
+                         son détail ensuite — et le partage explicite entre ce que la
+                         balance produit et ce qu'aucun solde ne saura jamais dire. -->
+                    <div data-bil-etat-slot="notes" hidden>
+                      <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                        <div>
+                          <h3 class="atl-sectitle">Notes annexes</h3>
+                          <p class="atl-secsub">Pour chaque <b>renvoi de note</b> déclaré par le référentiel&nbsp;: ses <b>postes contributeurs</b>,
+                          leur montant repris des états produits, et un <b>total</b> N/N-1. Deux régimes&nbsp;: la note se
+                          <b>ventile par compte</b> depuis la balance, ou elle n'a qu'une <b>trame officielle à compléter</b>.
+                          <b>Lecture seule en v1.</b></p>
+                          <p style="margin:0.45rem 0 0"><span class="badge badge-invited"><span class="d"></span>3 écarts ouverts &middot; STORY-437 &middot; STORY-438 &middot; FE-080</span></p>
+                        </div>
+                        <span style="flex:1"></span>
+                        <div class="atelier-demo" role="tablist" aria-label="État des notes annexes (démo)">
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-nte-state="nominal" aria-selected="true">Servi</button>
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-nte-state="sfd" aria-selected="false">Aucun renvoi déclaré</button>
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-nte-state="loading" aria-selected="false">Chargement</button>
+                        </div>
+                      </div>
+
+                      <div data-bil-nte-slot="nominal">
+                        <div class="nte-sum">
+                          <div class="crs-kpi">
+                            <span class="k">Notes produites</span>
+                            <span class="v">11</span>
+                            <span class="p">sur les <b>35</b> de la liasse déposée</span>
+                          </div>
+                          <div class="crs-kpi">
+                            <span class="k">Ventilées par compte</span>
+                            <span class="v">8</span>
+                            <span class="p">détail exploitable produit</span>
+                          </div>
+                          <div class="crs-kpi">
+                            <span class="k">Trames à compléter</span>
+                            <span class="v">3</span>
+                            <span class="p">notes 3, 4 et 7 · hors balance</span>
+                          </div>
+                          <div class="crs-kpi">
+                            <span class="k">États d'origine couverts</span>
+                            <span class="v" style="color:var(--danger)">1<span style="font-size:0.8rem;font-weight:600"> / 3</span></span>
+                            <span class="p">Bilan actif seul — <b>ni passif ni CR</b></span>
+                          </div>
+                        </div>
+
+                        <div class="crs-art">
+                          <div class="h">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                            <b>Ce que ces onze notes ne couvrent pas</b>
+                            <span class="grow"></span>
+                            <span class="badge badge-invited"><span class="d"></span>2 écarts ouverts</span>
+                          </div>
+                          <div class="crs-artline ko"><span class="ic">!</span><span class="t"><b>Les renvois affichés par le compte de résultat ne mènent nulle part</b><p>L'écran voisin imprime les notes <code>21</code>, <code>22</code>, <code>23</code>, <code>24</code>, <code>25</code>, <code>26</code>, <code>27</code>, <code>28</code>, <code>29</code>, <code>30</code> dans sa colonne « Note » — relevées sur la <b>liasse déposée</b>. Or <b>aucun</b> poste <code>COMPTE_RESULTAT</code> du paquet ne porte de champ <code>note</code>, et <b>aucun</b> poste du <b>passif</b> non plus&nbsp;: les onze notes produites sortent <b>toutes</b> du Bilan actif. Un comptable qui clique sur « note 27 » (charges de personnel) ne trouvera rien. ⚠️ <b>Et la numérotation elle-même n'est pas celle du dépôt</b>&nbsp;: la DSF compte <b>44 feuilles</b> pour 35 numéros (<code>3A</code>, <code>3B</code>, <code>3C</code>, <code>3D</code>, <code>3E</code>, <code>8A</code>, <code>15A/B</code>, <code>16A/B/Bbis/C</code>, <code>23-24</code>, <code>27A/B</code>) — la «&nbsp;note 3&nbsp;» du paquet en recouvre <b>cinq</b> à elle seule. <span class="code">écart ouvert · <b>STORY-437</b></span></p></span><span class="val"><b>24 notes</b>non déclarées</span></div>
+                          <div class="crs-artline ko"><span class="ic">!</span><span class="t"><b>Les notes 3, 6 et 7 totalisent des valeurs <b>NETTES</b> là où le formulaire attend le <b>BRUT</b>, les <b>dépréciations</b>, puis le net</b><p>La trame officielle demande « <i>Valeurs brutes à l'ouverture / Augmentations / Diminutions / Valeurs brutes à la clôture</i> ». Le total produit vaut <b>3&nbsp;500&nbsp;000</b> — c'est le <b>net</b>, parce que <code>PosteNote.montantN</code> reprend <code>netN</code>. Le brut de ces trois postes vaut <b>7&nbsp;225&nbsp;000</b>. Les notes <b>6</b> (stocks) et <b>7</b> (clients) déposées ont la même structure&nbsp;: <i>TOTAL BRUT</i>, <i>Dépréciations</i>, <i>TOTAL NET</i> — et le produit n'en rend que la dernière ligne. <b>Même racine que l'écart du TFT</b>&nbsp;: seule la colonne <b>Net</b> franchit la frontière du moteur. <span class="code">écart ouvert · <b>STORY-438</b></span></p></span><span class="val"><b>3&nbsp;500&nbsp;000</b>brut&nbsp;: 7&nbsp;225&nbsp;000</span></div>
+                          <div class="crs-artline na"><span class="ic">i</span><span class="t"><b>Une note « ventilée » l'est <b>par numéro de compte</b>, pas par la ligne officielle</b><p>La note 6 déposée porte huit lignes normées (« <i>Marchandises</i> », « <i>Matières premières et fournitures liées</i> », « <i>Produits en cours</i> »…) et une ligne « <i>Dépréciations des stocks</i> ». Le produit rend la ventilation des <b>comptes</b> rattachés au poste <code>BB</code>. C'est <b>juste</b> et c'est <b>utile en révision</b> — ce n'est simplement <b>pas la note à déposer</b>. Le rapprochement compte → ligne officielle n'est déclaré nulle part.</p></span><span class="val"><b>par compte</b>≠ trame OHADA</span></div>
+                        </div>
+
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 3</b><span class="nte-t">Immobilisations (incorporelles, corporelles, avances/acomptes)</span><span class="grow"></span><span class="nte-m trame">Trame officielle · à compléter</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>AD</code> IMMOBILISATIONS INCORPORELLES</td><td class="crs-n">300 000</td><td class="crs-n n1">380 000</td></tr>
+                        <tr><td><code>AI</code> IMMOBILISATIONS CORPORELLES</td><td class="crs-n">3 200 000</td><td class="crs-n n1">3 500 000</td></tr>
+                        <tr><td><code>AP</code> AVANCES ET ACOMPTES VERSES SUR IMMOBILISATIONS</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">3 500 000</td><td class="crs-n n1">3 880 000</td></tr>
+                        </tbody></table>
+                        <div class="nte-trame"><div class="nte-trame-h">Colonnes officielles de la trame — <b>aucune ligne n'est dérivable de la balance</b></div><table class="nte-tbl"><thead><tr><th>Rubrique</th><th class="r">Valeurs brutes à l'ouverture</th><th class="r">Augmentations</th><th class="r">Diminutions</th><th class="r">Valeurs brutes à la clôture</th></tr></thead><tbody>
+                        <tr><td><code>AD</code> IMMOBILISATIONS INCORPORELLES</td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td></tr>
+                        <tr><td><code>AI</code> IMMOBILISATIONS CORPORELLES</td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td></tr>
+                        <tr><td><code>AP</code> AVANCES ET ACOMPTES VERSES SUR IMMOBILISATIONS</td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td></tr>
+                        </tbody></table></div>
+                        </div></div>
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 4</b><span class="nte-t">Immobilisations financières</span><span class="grow"></span><span class="nte-m trame">Trame officielle · à compléter</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>AQ</code> IMMOBILISATIONS FINANCIERES</td><td class="crs-n">250 000</td><td class="crs-n n1">250 000</td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">250 000</td><td class="crs-n n1">250 000</td></tr>
+                        </tbody></table>
+                        <div class="nte-trame"><div class="nte-trame-h">Colonnes officielles de la trame — <b>aucune ligne n'est dérivable de la balance</b></div><table class="nte-tbl"><thead><tr><th>Rubrique</th><th class="r">Montant brut à l'ouverture</th><th class="r">Augmentations</th><th class="r">Diminutions</th><th class="r">Montant brut à la clôture</th></tr></thead><tbody>
+                        <tr><td><code>AQ</code> IMMOBILISATIONS FINANCIERES</td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td></tr>
+                        </tbody></table></div>
+                        </div></div>
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 5</b><span class="nte-t">Actif circulant HAO</span><span class="grow"></span><span class="nte-m vent">Ventilation par compte</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>BA</code> ACTIF CIRCULANT HAO</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        <tr class="nte-c"><td colspan="3"><i>Aucun compte de la balance rattaché à ce poste — la note se dépose à zéro.</i></td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        </tbody></table>
+                        </div></div>
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 6</b><span class="nte-t">Stocks et en-cours</span><span class="grow"></span><span class="nte-m vent">Ventilation par compte</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>BB</code> STOCKS ET EN-COURS</td><td class="crs-n">620 000</td><td class="crs-n n1">370 000</td></tr>
+                        <tr class="nte-c"><td><span class="nte-cpt">311000</span> Marchandises</td><td class="crs-n">620 000</td><td class="crs-n n1">370 000</td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">620 000</td><td class="crs-n n1">370 000</td></tr>
+                        </tbody></table>
+                        </div></div>
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 7</b><span class="nte-t">Clients (antériorité des créances)</span><span class="grow"></span><span class="nte-m trame">Trame officielle · à compléter</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>BI</code> Clients</td><td class="crs-n">430 000</td><td class="crs-n n1">690 000</td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">430 000</td><td class="crs-n n1">690 000</td></tr>
+                        </tbody></table>
+                        <div class="nte-trame"><div class="nte-trame-h">Colonnes officielles de la trame — <b>aucune ligne n'est dérivable de la balance</b></div><table class="nte-tbl"><thead><tr><th>Rubrique</th><th class="r">Montant brut</th><th class="r">Créances non échues</th><th class="r">Créances échues</th><th class="r">Dépréciations</th></tr></thead><tbody>
+                        <tr><td><code>BI</code> Clients</td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td><td class="crs-n"><span class="tft-null">à compléter</span></td></tr>
+                        </tbody></table></div>
+                        </div></div>
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 8</b><span class="nte-t">Autres créances</span><span class="grow"></span><span class="nte-m vent">Ventilation par compte</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>BJ</code> Autres créances</td><td class="crs-n">50 000</td><td class="crs-n n1">60 000</td></tr>
+                        <tr class="nte-c"><td><span class="nte-cpt">445100</span> État, TVA récupérable sur achats</td><td class="crs-n">50 000</td><td class="crs-n n1">60 000</td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">50 000</td><td class="crs-n n1">60 000</td></tr>
+                        </tbody></table>
+                        </div></div>
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 9</b><span class="nte-t">Titres de placement</span><span class="grow"></span><span class="nte-m vent">Ventilation par compte</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>BQ</code> Titres de placement</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        <tr class="nte-c"><td colspan="3"><i>Aucun compte de la balance rattaché à ce poste — la note se dépose à zéro.</i></td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        </tbody></table>
+                        </div></div>
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 10</b><span class="nte-t">Valeurs à encaisser</span><span class="grow"></span><span class="nte-m vent">Ventilation par compte</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>BR</code> Valeurs à encaisser</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        <tr class="nte-c"><td colspan="3"><i>Aucun compte de la balance rattaché à ce poste — la note se dépose à zéro.</i></td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        </tbody></table>
+                        </div></div>
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 11</b><span class="nte-t">Banques, chèques postaux, caisse et assimilés</span><span class="grow"></span><span class="nte-m vent">Ventilation par compte</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>BS</code> Banques, chèques postaux, caisse et assimilés</td><td class="crs-n">850 000</td><td class="crs-n n1">800 000</td></tr>
+                        <tr class="nte-c"><td><span class="nte-cpt">521000</span> Banque régionale — compte courant</td><td class="crs-n">785 000</td><td class="crs-n n1">742 000</td></tr>
+                        <tr class="nte-c"><td><span class="nte-cpt">571000</span> Caisse siège</td><td class="crs-n">65 000</td><td class="crs-n n1">58 000</td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">850 000</td><td class="crs-n n1">800 000</td></tr>
+                        </tbody></table>
+                        </div></div>
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 12</b><span class="nte-t">Écart de conversion-Actif</span><span class="grow"></span><span class="nte-m vent">Ventilation par compte</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>BU</code> Ecart de conversion-Actif</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        <tr class="nte-c"><td colspan="3"><i>Aucun compte de la balance rattaché à ce poste — la note se dépose à zéro.</i></td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        </tbody></table>
+                        </div></div>
+                        <div class="nte">
+                        <div class="nte-h"><b>Note 17</b><span class="nte-t">Fournisseurs, avances versées</span><span class="grow"></span><span class="nte-m vent">Ventilation par compte</span></div>
+                        <div class="nte-b">
+                        <table class="nte-tbl"><thead><tr><th>Poste contributeur</th><th class="r">Exercice 2025</th><th class="r">Exercice 2024</th></tr></thead><tbody>
+                        <tr><td><code>BH</code> Fournisseurs avances versées</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        <tr class="nte-c"><td colspan="3"><i>Aucun compte de la balance rattaché à ce poste — la note se dépose à zéro.</i></td></tr>
+                        <tr class="nte-tot"><td>Total de la note</td><td class="crs-n">0</td><td class="crs-n n1">0</td></tr>
+                        </tbody></table>
+                        </div></div>
+
+                        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.7rem 0.9rem;border:1px dashed var(--border);background:var(--content-bg);border-radius:var(--radius);font-size:0.82rem">
+                          <b>Calcul non enregistré</b>
+                          <span style="color:var(--muted-fg)">Notes recalculées à chaque ouverture (<code>POST …/bilan/etats/notes-annexes/dry-run</code>, <b>200</b>). Les zones « à compléter » <b>ne sont pas éditables en v1</b> — et c'est ce qui empêche le dépôt. <span class="code">écart ouvert · <b>FE-080</b></span></span>
+                        </div>
+
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+                          <button class="btn btn-primary" type="button" data-bil-etat-go="controles">Voir les contrôles de cohérence</button>
+                          <button class="btn btn-ghost" type="button" data-bil-etat-go="tft">Voir le tableau des flux</button>
+                          <button class="btn btn-ghost" type="button" data-bil-etat-go="bilan">Voir les postes au Bilan</button>
+                        </div>
+
+                        <div class="dc-note dc-gap"><b>⚡ UNE NOTE SANS TITRE NE S'INVENTE PAS — ET LE PRODUIT A RAISON DE LE REFUSER.</b> <code>NoteAnnexe.libelle</code> vaut <code>null</code> tant que le référentiel ne déclare pas de <code>NoteMeta</code>&nbsp;: le service <b>ne fabrique pas</b> « Note 7 » à partir du numéro. Les onze titres affichés ici viennent de <code>pkg.notes</code>, sourcés. Un référentiel sans métadonnée (SFD-BCEAO) rendrait onze cartes <b>numérotées et sans titre</b> — laid, mais <b>honnête</b>. L'écran ne comble pas ce vide.</div>
+
+                        <div class="dc-note dc-gap"><b>⚠️ « À COMPLÉTER » NE VEUT PAS DIRE « VIDE » — LA DISTINCTION EST DANS LE CONTRAT, PAS DANS L'INTUITION.</b> <code>detailACompleter</code> vaut <code>false</code> pour une note <code>VENTILATION</code> (le détail <b>est</b> produit) et <code>true</code> pour une <code>TRAME</code> (mouvements, antériorité&nbsp;: <b>hors balance</b>). Peindre les deux du même gris ferait chercher une saisie là où le travail est déjà fait — et l'inverse, croire terminé un tableau d'immobilisations qui n'a jamais été renseigné.</div>
+                      </div>
+
+                      <div data-bil-nte-slot="sfd" hidden>
+                        <div class="state empty" style="border:1px dashed var(--border-strong);border-radius:var(--radius)"><span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><h3>Ce référentiel ne déclare aucun renvoi de note</h3><p style="max-width:56ch">Le service répond <code>notes: []</code>, statut <code>NON_APPLICABLE</code>. Comme pour le tableau des flux, ce n'est pas un manque du produit&nbsp;: <b>SFD-BCEAO</b> ne porte pas d'annexes de ce type. Le contrôle <code>ARTICULATION_NOTES</code> passe alors en <code>NON_APPLICABLE</code>, jamais en anomalie.</p></div>
+                      </div>
+
+                      <div data-bil-nte-slot="loading" hidden>
+                        <div class="state"><div class="sk-row"><span class="sk sk-line" style="width:38%"></span></div><div class="sk-row"><span class="sk sk-line" style="width:100%"></span></div><div class="sk-row"><span class="sk sk-line" style="width:88%"></span></div></div>
+                        <p class="helper" style="margin-top:0.6rem">Synthèse des renvois de note…</p>
+                      </div>
+                    </div><!-- /data-bil-etat-slot="notes" -->
+
+                    <!-- ═════════════ PANNEAU : CONTRÔLES DE COHÉRENCE (FE-033) ═════════════
+                         C'est le panneau que FE-034 interrogera pour autoriser — ou non —
+                         la validation. Il porte donc DEUX listes, et l'écart entre les deux
+                         est tout le sujet : les 4 contrôles que le MOTEUR calcule, et les
+                         8 contrôles que l'ADMINISTRATION applique au dépôt. -->
+                    <div data-bil-etat-slot="controles" hidden>
+                      <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                        <div>
+                          <h3 class="atl-sectitle">Contrôles de cohérence de la liasse</h3>
+                          <p class="atl-secsub">La batterie d'articulation entre états, restituée comme une <b>liste d'anomalies avant validation</b>&nbsp;:
+                          chaque contrôle avec sa <b>cible</b>, son <b>écart</b> et sa <b>catégorie</b> (bloquant / informatif). C'est
+                          <b>ce panneau</b> — et lui seul — que la validation (FE-034) consultera.</p>
+                          <p style="margin:0.45rem 0 0"><span class="badge badge-invited"><span class="d"></span>5 écarts ouverts &middot; STORY-430 &middot; STORY-432 &middot; STORY-439 &middot; STORY-440 &middot; FE-078</span></p>
+                        </div>
+                        <span style="flex:1"></span>
+                        <div class="atelier-demo" role="tablist" aria-label="État des contrôles (démo)">
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-coh-state="nominal" aria-selected="true">Validable</button>
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-coh-state="bloquant" aria-selected="false">Bloquant</button>
+                          <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-coh-state="sfd" aria-selected="false">Référentiel réduit</button>
+                        </div>
+                      </div>
+
+                      <div data-bil-coh-slot="nominal">
+                        <div class="coh-verdict go">
+                          <span class="flag">✅</span>
+                          <div style="flex:1">
+                            <h4>Liasse validable — <code>valide: true</code></h4>
+                            <p>Les deux contrôles <b>bloquants</b> passent. <b>Et pourtant le tableau des flux est faux de 905&nbsp;000&nbsp;F&nbsp;CFA</b>, et l'un des deux contrôles bloquants ne peut pas échouer. Ce voyant dit «&nbsp;<b>rien ne s'oppose techniquement à l'enregistrement</b>&nbsp;» — il ne dit <b>pas</b> «&nbsp;la liasse est juste&nbsp;», et encore moins «&nbsp;elle passera au dépôt&nbsp;».</p>
+                          </div>
+                        </div>
+
+                        <div class="coh">
+                          <div class="h">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                            <b>Les 4 contrôles que le moteur calcule</b>
+                            <span class="grow"></span>
+                            <span class="badge badge-invited"><span class="d"></span>1 anomalie · 1 tautologie</span>
+                          </div>
+
+                          <div class="coh-row ok">
+                            <span class="ic">✓</span>
+                            <span class="t"><b><code>EQUILIBRE_BILAN</code> — Équilibre du Bilan (actif = passif + résultat = <code>BZ</code> = <code>DZ</code>)</b>
+                              <p><b>Le seul contrôle réellement faillible de la liste.</b> Il tombe dès qu'un compte non mappé porte un solde non nul et n'a pas de contrepartie écartée. Le verdict reste piloté par <code>equilibreN</code>&nbsp;; <code>BZ</code>/<code>DZ</code> sont exposés en traçabilité.</p>
+                              <span class="el"><i>BZ = 5 700 000</i><i>DZ = 5 700 000</i></span>
+                            </span>
+                            <span class="coh-cat blk">Bloquant</span>
+                            <span class="val"><b>écart 0</b>OK</span>
+                          </div>
+
+                          <div class="coh-row warn">
+                            <span class="ic">=</span>
+                            <span class="t"><b><code>COHERENCE_RESULTAT</code> — Cohérence du résultat (CR = résultat au passif = <code>XI</code>)</b>
+                              <p><b>Bloquant, mais à moitié tautologique.</b> Le volet <code>CR = passif</code> compare deux nombres issus du <b>même</b> calcul, dans le <b>même</b> appel&nbsp;: <code>ecart = 0</code> quoi qu'il arrive (STORY-426). Le volet ajouté par STORY-111 — <code>XI</code> (cascade des SIG) = résultat direct — <b>est</b>, lui, un vrai contrôle&nbsp;: il vérifie l'encodage des opérandes du paquet. Il prouve que le <b>moteur</b> est juste, pas que la <b>liasse</b> l'est.</p>
+                              <span class="el"><i>resultatNetCR = 200 000</i><i>resultatNetBilan = 200 000</i><i>XI = 200 000</i></span>
+                            </span>
+                            <span class="coh-cat blk">Bloquant</span>
+                            <span class="val"><b>écart 0</b>par construction</span>
+                          </div>
+
+                          <div class="coh-row ko">
+                            <span class="ic">!</span>
+                            <span class="t"><b><code>VARIATION_TRESORERIE</code> — Variation de trésorerie (TFT = Bilan)</b>
+                              <p><b>Anomalie réelle, et sans effet sur la validation.</b> La variation reconstituée par les flux (1&nbsp;055&nbsp;000) ne retombe pas sur celle du Bilan (150&nbsp;000)&nbsp;: <b>905&nbsp;000</b> d'écart, décomposés à l'onglet <b>Flux de trésorerie</b>. Le service le classe <code>INFORMATIF</code> parce qu'un écart peut être <b>légitime</b> quand des lignes sont <b>estimées</b> — mais ici il ne l'est pas&nbsp;: il est <b>systématique</b>.</p>
+                              <span class="el"><i>variationTft = 1 055 000</i><i>variationBilan = 150 000</i></span>
+                            </span>
+                            <span class="coh-cat inf">Informatif</span>
+                            <span class="val"><b>905 000</b>anomalie</span>
+                          </div>
+
+                          <div class="coh-row na">
+                            <span class="ic">=</span>
+                            <span class="t"><b><code>ARTICULATION_NOTES</code> — Articulation des notes annexes (Σ postes = total de note)</b>
+                              <p><b>Nul par construction, le service l'écrit lui-même&nbsp;:</b> <i>« l'écart est nul par construction (062 bâtit le total depuis ces mêmes postes) »</i>. Le contrôle qui compterait est ailleurs&nbsp;: <b>total de la note 3A brut = brut du Bilan</b>, <b>note 3C = colonne Amortissements</b>, <b>note 7 = poste <code>BI</code></b>. Aucun n'est calculé — et le premier ne <b>peut</b> pas l'être tant que le brut ne franchit pas la frontière du moteur. <span class="code">écart ouvert · <b>STORY-439</b></span></p>
+                              <span class="el"><i>11 notes · Σ = total, toujours</i></span>
+                            </span>
+                            <span class="coh-cat inf">Informatif</span>
+                            <span class="val"><b>écart 0</b>ne peut pas rougir</span>
+                          </div>
+                        </div>
+
+                        <div class="coh">
+                          <div class="h">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
+                            <b>Ce que la batterie ne regarde pas — et qui peut rendre une liasse verte parfaitement fausse</b>
+                            <span class="grow"></span>
+                            <span class="badge badge-invited"><span class="d"></span>4 angles morts</span>
+                          </div>
+                          <div class="coh-row warn">
+                            <span class="ic">!</span>
+                            <span class="t"><b>Les comptes écartés de la liasse</b>
+                              <p><b>Aucun des quatre contrôles ne les regarde.</b> Un compte non rattaché qui porte 125&nbsp;000&nbsp;F au débit fait tomber l'équilibre — mais s'il en existe un autre, créditeur, du même montant, <b>les deux se compensent</b>&nbsp;: l'équation retombe juste, <code>valide: true</code>, et 250&nbsp;000&nbsp;F sont <b>absents de la liasse déposée</b>. C'est l'AC que FE-030 a dû amender ; l'avertissement du Bilan reste donc affiché <b>même en vert</b>.</p>
+                            </span>
+                            <span class="coh-cat inf">Non couvert</span>
+                            <span class="val"><b>FE-030</b>AC-4 amendé</span>
+                          </div>
+                          <div class="coh-row warn">
+                            <span class="ic">!</span>
+                            <span class="t"><b>L'identité de l'exercice comparé</b>
+                              <p><code>soldesN1</code> est <b>posté par l'écran</b>&nbsp;: le serveur ne vérifie ni l'ordre des exercices, ni leur <b>durée</b>. Comparer un exercice de 12 mois à un exercice de 9, ou 2025 à 2022, ne rougirait <b>nulle part</b> — et toutes les <b>variations</b> du TFT en découlent. <span class="code">écart ouvert · <b>STORY-430</b></span></p>
+                            </span>
+                            <span class="coh-cat inf">Non couvert</span>
+                            <span class="val"><b>STORY-430</b>ouvert</span>
+                          </div>
+                          <div class="coh-row warn">
+                            <span class="ic">!</span>
+                            <span class="t"><b>Une balance déjà soldée des comptes de gestion</b>
+                              <p>Sur une balance <b>après détermination du résultat</b>, les classes 6 et 7 sont à zéro&nbsp;: le compte de résultat sort <b>entièrement vide</b>, la CAFG vaut le seul résultat, et <b>les quatre contrôles restent verts</b>. Cas courant en reprise de dossier. <span class="code">écart ouvert · <b>STORY-432</b></span></p>
+                            </span>
+                            <span class="coh-cat inf">Non couvert</span>
+                            <span class="val"><b>STORY-432</b>ouvert</span>
+                          </div>
+                          <div class="coh-row warn">
+                            <span class="ic">!</span>
+                            <span class="t"><b>L'accord entre une note annexe et le poste qu'elle justifie</b>
+                              <p>Total brut de la <b>note 3A</b> = colonne <b>Brut</b> du Bilan&nbsp;; <b>note 3C</b> = colonne <b>Amortissements</b>&nbsp;; <b>note 7</b> = poste <code>BI</code>. Ce sont les rapprochements qu'un réviseur fait <b>en premier</b> — et aucun n'est calculé. <span class="code">écart ouvert · <b>STORY-439</b></span></p>
+                            </span>
+                            <span class="coh-cat inf">Non couvert</span>
+                            <span class="val"><b>STORY-439</b>ouvert</span>
+                          </div>
+                        </div>
+
+                        <div class="coh">
+                          <div class="h">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M3 3v18h18"/><path d="m7 12 4-4 4 4 5-5"/></svg>
+                            <b>Les 8 contrôles intermontants que l'administration applique au dépôt</b>
+                            <span class="grow"></span>
+                            <span class="badge badge-invited"><span class="d"></span>1 réellement calculé sur 8</span>
+                          </div>
+                          <div style="padding:0.6rem 0.95rem 0.85rem">
+                            <p style="font-size:0.78rem;color:var(--muted-fg);margin:0 0 0.55rem">Relevés sur la feuille <i>« Type de Contôles »</i> de la DSF déposée <code>1000745307_2025_Definitif&nbsp;(1).xlsx</code> — une entité togolaise réelle, Système Normal 2025. <b>Sur ce dépôt-là, 6 sur 8 passaient.</b></p>
+                            <div style="overflow-x:auto">
+                            <table class="otr">
+                              <thead><tr><th class="n">Nº</th><th>Contrôle</th><th>Couvert par Prospera&nbsp;?</th></tr></thead>
+                              <tbody>
+                                <tr><td class="n">1</td><td>Égalité Actif du Bilan et Passif du Bilan en N</td><td><span class="otr-b y">Oui</span> <code>EQUILIBRE_BILAN</code></td></tr>
+                                <tr><td class="n">2</td><td>Égalité Résultat Net Comptable au CR et au Passif du Bilan en N</td><td><span class="otr-b t">Tautologie</span> le compte <code>13</code> (poste <code>CJ</code>) n'est comparé à rien <span class="code">STORY-426</span></td></tr>
+                                <tr><td class="n">3</td><td>Égalité Résultat Net Comptable au CR et à la Détermination du Résultat Fiscal</td><td><span class="otr-b n">Non</span> les deux grandeurs sont servies, rien ne les joint <span class="code">FE-078</span></td></tr>
+                                <tr><td class="n">4</td><td>Égalité Résultat Fiscal à la Détermination et à la Liquidation IR</td><td><span class="otr-b n">Non</span> interne à <code>fiscal-service</code> <span class="code">FE-078</span></td></tr>
+                                <tr><td class="n">5</td><td>Égalité CA (CR) et CA (Liquidation IS/IR/MP)</td><td><span class="otr-b n">Non</span> — et c'est ce CA qui fixe le <b>minimum forfaitaire</b> <span class="code">FE-078</span></td></tr>
+                                <tr><td class="n">6</td><td>Égalité CA (Liquidation IS/IR/MP) et CA (Liquidation DP)</td><td><span class="otr-b n">Non</span> interne à <code>fiscal-service</code></td></tr>
+                                <tr><td class="n">7</td><td>Un numéro de compte bancaire est renseigné</td><td><span class="otr-b n">Non</span> donnée d'identification, hors moteur d'états</td></tr>
+                                <tr><td class="n">8</td><td>Équivalence effectifs « nº de compte » et « identité banque »</td><td><span class="otr-b n">Non</span> donnée d'identification, hors moteur d'états</td></tr>
+                              </tbody>
+                            </table>
+                            </div>
+                            <p style="font-size:0.78rem;color:var(--muted-fg);margin:0.6rem 0 0">⚠️ Aucun de ces huit contrôles ne regarde le <b>tableau des flux</b>&nbsp;: le classer <code>INFORMATIF</code> est donc <b>défendable</b>. Ce qui ne l'est pas, c'est qu'un <code>valide: true</code> laisse croire au comptable qu'il en a fini.</p>
+                          </div>
+                        </div>
+
+                        <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;padding:0.7rem 0.9rem;border:1px dashed var(--border);background:var(--content-bg);border-radius:var(--radius);font-size:0.82rem">
+                          <b>Aucun bouton « Valider la liasse » sur cet écran</b>
+                          <span style="color:var(--muted-fg)">Le drapeau <code>valide</code> est <b>produit</b> ici (STORY-063)&nbsp;; le <b>gate</b> qui l'applique — passage brouillon → validé, <code>422 LIASSE_NON_VALIDABLE</code> — est <b>STORY-064 / FE-034</b>. Annoncer « validée » depuis un <i>dry-run</i> qui ne persiste rien laisserait partir un comptable en croyant son travail enregistré (précédent FE-031).</span>
+                        </div>
+
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+                          <button class="btn btn-ghost" type="button" data-bil-etat-go="tft">Voir le tableau des flux</button>
+                          <button class="btn btn-ghost" type="button" data-bil-etat-go="bilan">Voir le Bilan</button>
+                          <button class="btn btn-primary" type="button" data-bil-goto="passage">Corriger à la table de passage</button>
+                        </div>
+
+                        <div class="dc-note dc-gap"><b>⛔ L'AC-3 DEMANDE « CIBLE, SÉVÉRITÉ, BLOQUANT » — LE CONTRAT N'EN PORTE QUE DEUX.</b> <code>ControleArticulation</code> publie <code>categorie</code> (<code>BLOQUANT</code>/<code>INFORMATIF</code>) et <code>elements[]</code>&nbsp;; il n'existe <b>aucune sévérité</b>. Et la « cible » est un <code>ControleElement.ref</code> <b>textuel</b> — <code>'totalActifN'</code>, <code>'note 7'</code>, <code>'variationTft'</code> — non un pointeur vers un poste, un compte ou un écran. Le front peut <b>afficher</b> ces repères (c'est ce que fait la ligne « éléments » ci-dessus) ; il ne peut pas <b>y renvoyer</b> sans câbler une table de correspondance de son côté, c'est-à-dire sans devenir un second arbitre. <span class="code">écart ouvert · <b>STORY-440</b></span></div>
+
+                        <div class="dc-note dc-gap"><b>⚡ UN CONTRÔLE SE VÉRIFIE EN REMONTANT À SES DEUX SOURCES — RÈGLE ACQUISE, APPLIQUÉE ICI AUX QUATRE.</b> <code>EQUILIBRE_BILAN</code>&nbsp;: deux agrégations d'une même balance <b>par des chemins différents</b> ⇒ <b>vrai contrôle</b>. <code>COHERENCE_RESULTAT</code>&nbsp;: volet CR↔passif <b>même calcul</b> ⇒ tautologie, volet <code>XI</code>↔direct <b>deux chemins</b> ⇒ vrai. <code>VARIATION_TRESORERIE</code>&nbsp;: cascade des flux vs postes marqués <b>trésorerie</b> ⇒ <b>vrai contrôle</b> (et il échoue). <code>ARTICULATION_NOTES</code>&nbsp;: total rebâti depuis ses propres composants ⇒ <b>tautologie</b>. <b>Deux sur quatre.</b> Peindre les quatre en vert de la même façon effacerait cette distinction — c'est elle que le comptable doit voir.</div>
+
+                        <div class="dc-note dc-gap"><b>⚠️ CINQ APPELS, CINQ TAMPONS — ET RIEN NE GARANTIT QU'ILS PARLENT DU MÊME RÉFÉRENTIEL.</b> Bilan, compte de résultat, TFT, notes et contrôles sont <b>cinq <code>POST … /dry-run</code> distincts</b>, chacun portant à nouveau la balance entière et rendant son propre <code>stamp</code> <code>{code, version, checksum}</code>. Une mise à jour du paquet entre le premier et le cinquième appel produirait une liasse <b>composite</b>, sans que rien ne rougisse. L'écran compare donc les cinq tampons et le <b>dit</b> (bandeau de source, « les quatre tampons concordent »). ⚠️ Ce n'est pas un verrou&nbsp;: c'est un <b>constat</b> — le verrou serait un appel unique côté serveur.</div>
+                      </div>
+
+                      <div data-bil-coh-slot="bloquant" hidden>
+                        <div class="coh-verdict stop">
+                          <span class="flag">⛔</span>
+                          <div style="flex:1">
+                            <h4>Liasse non validable — <code>valide: false</code></h4>
+                            <p>Un contrôle <b>bloquant</b> est en anomalie. La validation (FE-034) répondra <code>422 LIASSE_NON_VALIDABLE</code> tant qu'il n'est pas levé. <b>Le geste n'est pas ici</b>&nbsp;: un Bilan déséquilibré se corrige à la <b>table de passage</b>, jamais sur l'état.</p>
+                          </div>
+                        </div>
+                        <div class="coh">
+                          <div class="h"><b>Les 4 contrôles que le moteur calcule</b><span class="grow"></span><span class="badge badge-invited"><span class="d"></span>1 bloquant en anomalie</span></div>
+                          <div class="coh-row ko">
+                            <span class="ic">!</span>
+                            <span class="t"><b><code>EQUILIBRE_BILAN</code> — Équilibre du Bilan</b>
+                              <p>Actif ≠ Passif + Résultat. <b>Cause la plus fréquente</b>&nbsp;: des comptes non rattachés à la liasse qui portent un solde. ⚠️ <b>Et l'inverse est vrai aussi</b>&nbsp;: autant de débit que de crédit écartés se <b>compensent</b>, l'équation tombe juste et la liasse reste fausse — c'est pourquoi l'avertissement sur les comptes écartés reste affiché <b>même en vert</b> (règle posée par FE-030/FE-031).</p>
+                              <span class="el"><i>totalActifN = 5 700 000</i><i>totalPassifN = 5 287 700</i><i>resultatNetN = 200 000</i><i>BZ = 5 700 000</i><i>DZ = 5 287 700</i></span>
+                            </span>
+                            <span class="coh-cat blk">Bloquant</span>
+                            <span class="val"><b>412 300</b>anomalie</span>
+                          </div>
+                          <div class="coh-row ok"><span class="ic">✓</span><span class="t"><b><code>COHERENCE_RESULTAT</code></b><p>Passe — et passerait <b>même sur cette liasse déséquilibrée</b>, puisque ses deux nombres sortent du même calcul.</p></span><span class="coh-cat blk">Bloquant</span><span class="val"><b>écart 0</b>OK</span></div>
+                          <div class="coh-row ko"><span class="ic">!</span><span class="t"><b><code>VARIATION_TRESORERIE</code></b><p>Toujours en anomalie — et toujours sans effet sur le drapeau.</p></span><span class="coh-cat inf">Informatif</span><span class="val"><b>905 000</b>anomalie</span></div>
+                          <div class="coh-row ok"><span class="ic">✓</span><span class="t"><b><code>ARTICULATION_NOTES</code></b><p>Nul par construction.</p></span><span class="coh-cat inf">Informatif</span><span class="val"><b>écart 0</b>OK</span></div>
+                        </div>
+                        <div style="display:flex;gap:0.6rem;flex-wrap:wrap">
+                          <button class="btn btn-primary" type="button" data-bil-goto="passage">Aller à la table de passage</button>
+                        </div>
+                      </div>
+
+                      <div data-bil-coh-slot="sfd" hidden>
+                        <div class="coh-verdict go">
+                          <span class="flag">✅</span>
+                          <div style="flex:1">
+                            <h4>Liasse validable — <code>valide: true</code>, sur <b>un seul</b> contrôle réellement exécuté</h4>
+                            <p>Pour un référentiel réduit (<b>SFD-BCEAO</b>&nbsp;: ni TFT, ni renvoi de note), deux des quatre contrôles passent en <code>NON_APPLICABLE</code> et <code>coherent: true</code> — <b>« rien à réconcilier » compte comme un succès</b>. Le drapeau vert repose alors sur l'équilibre du Bilan et une tautologie. <b>C'est correct, et c'est exactement ce qu'il faut afficher</b>&nbsp;: sinon un vert identique recouvre deux situations très inégales.</p>
+                          </div>
+                        </div>
+                        <div class="coh">
+                          <div class="h"><b>Les 4 contrôles</b><span class="grow"></span><span class="badge badge-invited"><span class="d"></span>2 non applicables</span></div>
+                          <div class="coh-row ok"><span class="ic">✓</span><span class="t"><b><code>EQUILIBRE_BILAN</code></b><p>Vrai contrôle, exécuté. ⚠️ <code>coherenceSousTotaux</code> est <b>vide</b> pour SFD-BCEAO (aucune cascade déclarée) — <code>BZ</code>/<code>DZ</code> ne sont donc pas exposés, et le libellé du contrôle change de lui-même. Une cascade vide n'est <b>pas</b> une anomalie.</p></span><span class="coh-cat blk">Bloquant</span><span class="val"><b>écart 0</b>OK</span></div>
+                          <div class="coh-row warn"><span class="ic">=</span><span class="t"><b><code>COHERENCE_RESULTAT</code></b><p>Sans SIG déclarés, il ne reste que le volet tautologique <code>CR = CJ</code>. <b>Zéro contrôle réel.</b></p></span><span class="coh-cat blk">Bloquant</span><span class="val"><b>écart 0</b>par construction</span></div>
+                          <div class="coh-row na"><span class="ic">–</span><span class="t"><b><code>VARIATION_TRESORERIE</code></b><p><code>NON_APPLICABLE</code> — aucun poste <code>TFT</code>, aucun marqueur de trésorerie.</p></span><span class="coh-cat inf">Informatif</span><span class="val"><b>—</b>non applicable</span></div>
+                          <div class="coh-row na"><span class="ic">–</span><span class="t"><b><code>ARTICULATION_NOTES</code></b><p><code>NON_APPLICABLE</code> — aucun renvoi de note déclaré.</p></span><span class="coh-cat inf">Informatif</span><span class="val"><b>—</b>non applicable</span></div>
+                        </div>
+                      </div>
+                    </div><!-- /data-bil-etat-slot="controles" -->
+
                   </div>
 
                 </div>
@@ -16648,6 +17410,59 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
         /* ── 4. État initial ───────────────────────────────────────────────── */
         ouvrirEtat('bilan');
         setCr('nominal');
+      })();
+
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      // FE-033 — TFT/TAFIRE, notes annexes, contrôles de cohérence : les bascules
+      // de démo des trois nouveaux états de la liasse.
+      // ⚠️ CLOISONNEMENT (leçon FE-032) : chaque famille de bascules a SON attribut
+      //    (`data-bil-tft-state`, `data-bil-nte-state`, `data-bil-coh-state`) et ne
+      //    pilote QUE ses propres slots. Un attribut partagé entre deux panneaux
+      //    vide le panneau voisin au premier clic — le défaut que FE-031 a payé.
+      // ⚠️ RACINE (même leçon) : le conteneur d'un module du prototype est
+      //    `.page[data-page="…"]`. Aucun autre sélecteur racine.
+      // ═══════════════════════════════════════════════════════════════════════════
+      (function () {
+        var mod = document.querySelector('.page[data-page="bilan"]');
+        if (!mod) return;
+
+        /* Un seul câblage pour les trois familles : même forme, mêmes invariants. */
+        function bascule(attrBouton, attrSlot, defaut) {
+          var btns = mod.querySelectorAll('[' + attrBouton + ']');
+          var slots = mod.querySelectorAll('[' + attrSlot + ']');
+          if (!btns.length || !slots.length) return null;
+          var cleB = attrBouton.replace(/^data-/, '').replace(/-([a-z])/g, function (m, c) { return c.toUpperCase(); });
+          var cleS = attrSlot.replace(/^data-/, '').replace(/-([a-z])/g, function (m, c) { return c.toUpperCase(); });
+          function ouvrir(nom) {
+            btns.forEach(function (b) {
+              b.setAttribute('aria-selected', String(b.dataset[cleB] === nom));
+            });
+            slots.forEach(function (sl) {
+              sl.hidden = sl.dataset[cleS] !== nom;
+            });
+          }
+          btns.forEach(function (b) {
+            b.addEventListener('click', function () { ouvrir(b.dataset[cleB]); });
+          });
+          ouvrir(defaut);
+          return ouvrir;
+        }
+
+        var setTft = bascule('data-bil-tft-state', 'data-bil-tft-slot', 'nominal');
+        bascule('data-bil-nte-state', 'data-bil-nte-slot', 'nominal');
+        bascule('data-bil-coh-state', 'data-bil-coh-slot', 'nominal');
+
+        /* « Réessayer » d'une erreur de calcul : le seul cas où réessayer a un sens
+           (le serveur n'a PAS répondu 200 dans une forme inattendue — cf. la note
+           de l'état Erreur du Bilan). */
+        var retry = mod.querySelector('[data-bil-tft-retry]');
+        if (retry && setTft) {
+          retry.addEventListener('click', function () {
+            setTft('loading');
+            window.setTimeout(function () { setTft('nominal'); }, 700);
+          });
+        }
       })();
 
       setGate("granted");
