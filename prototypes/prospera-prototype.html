@@ -1,4 +1,4 @@
-<title>Prospera · Prototype cumulatif — FE-034 Validation, versions et piste d'audit</title>
+<title>Prospera · Prototype cumulatif — FE-035 Hypothèses de prévisionnel</title>
 <style>
   /* =========================================================================
      PROSPERA — Prototype cumulatif · FE-003 (Shell applicatif + layouts)
@@ -1822,6 +1822,67 @@
   .vatt { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.7rem 0.8rem; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--content-bg); }
   .vatt input { margin-top: 0.15rem; width: 1rem; height: 1rem; flex-shrink: 0; }
   .vatt label { font-size: 0.8rem; line-height: 1.55; }
+
+  /* ══════════════ FE-035 · Hypothèses de prévisionnel ══════════════
+     ⚠️ `.code` n'a AUCUNE règle globale dans ce prototype : elle est stylée
+     conteneur par conteneur (`.gate .code`, `[data-bil-etat-slot] .code`…).
+     Le panneau Validation de FE-034 l'utilise pour ses « écart ouvert ·
+     STORY-xxx » — donc ces marqueurs y sont rendus en texte nu depuis leur
+     écriture. La règle ci-dessous couvre les DEUX panneaux, et répare le
+     précédent au passage. */
+  [data-bil-hyp-slot] .code, [data-bil-val-slot] .code, #hypOverlay .code { font-family: var(--font-mono); font-size: 0.72rem; background: var(--hover-surface); color: var(--muted-fg); padding: 0.1rem 0.4rem; border-radius: 0.35rem; white-space: nowrap; }
+  [data-bil-hyp-slot] { display: flex; flex-direction: column; gap: 1.05rem; }
+  .btn .soon { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.04em; padding: 0.05rem 0.4rem; border-radius: 999px; background: var(--hover-surface); color: var(--muted-fg); }
+
+  .hyp-form-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); overflow: hidden; }
+  .hyp-form-h { display: flex; align-items: flex-start; gap: 0.6rem; flex-wrap: wrap; padding: 0.75rem 0.95rem; border-bottom: 1px solid var(--border); background: var(--hover-surface); }
+  .hyp-form-h > div { flex: 1; min-width: 16rem; }
+  .hyp-form-h b { font-size: 0.88rem; display: block; }
+  .hyp-form-h > div > span { display: block; font-size: 0.76rem; color: var(--muted-fg); line-height: 1.5; margin-top: 0.15rem; }
+  .hyp-grp { padding: 0.75rem 0.95rem 0.35rem; }
+  .hyp-grp + .hyp-grp { border-top: 1px dashed var(--border); }
+  .hyp-grp-h { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+  .hyp-grp-h b { font-size: 0.8rem; font-weight: 700; }
+  .hyp-grp-h span { font-size: 0.74rem; color: var(--muted-fg); }
+  .hyp-grp .cah-form { border: 0; background: transparent; padding: 0; }
+  .hyp-grp .cah-form label i, .hyp-form-card .cah-form label i { font-style: normal; font-weight: 500; color: var(--muted-fg); }
+  .hyp-form-card .cah-form .fh b { white-space: nowrap; }
+
+  .hyp-tab { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .hyp-tab th, .hyp-tab td { padding: 0.45rem 0.95rem; border-bottom: 1px solid var(--border); text-align: left; }
+  .hyp-tab thead th { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-fg); background: var(--content-bg); font-weight: 700; }
+  .hyp-tab thead th:not(:first-child) { text-align: right; }
+  .hyp-tab tbody th { font-weight: 600; }
+  .hyp-tab tbody th small { display: block; font-weight: 400; font-size: 0.7rem; color: var(--muted-fg); }
+  /* ⚠️ Vu seulement à l'écran : `.hyp-tab td` (0,1,1) l'emporte sur `.hyp-n`
+     (0,1,0), donc les montants restaient alignés à GAUCHE sous des en-têtes
+     alignés à droite. Il faut la classe SUR le sélecteur de cellule. */
+  .hyp-tab td.hyp-n { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .hyp-tab thead th:first-child, .hyp-tab tbody th { width: 34%; }
+  .hyp-n.neg { color: var(--danger); font-weight: 700; }
+  .hyp-pied { padding: 0.6rem 0.95rem; border-top: 1px solid var(--border); font-size: 0.76rem; color: var(--muted-fg); line-height: 1.55; }
+  .hyp-alerte { margin: 0 0.95rem 0.85rem; padding: 0.55rem 0.75rem; border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--border)); background: color-mix(in srgb, var(--danger) 7%, var(--card)); border-radius: var(--radius); font-size: 0.78rem; line-height: 1.55; }
+
+  .hyp-jeu { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.35fr) auto; gap: 0.7rem; align-items: center; padding: 0.6rem 0.95rem; border-bottom: 1px solid var(--border); }
+  .hyp-jeu[data-hyp-actif="true"] { background: color-mix(in srgb, var(--orange-500) 6%, var(--card)); }
+  .hyp-jeu-n b { font-size: 0.84rem; }
+  .hyp-jeu-n small { display: block; font-size: 0.72rem; color: var(--muted-fg); margin-top: 0.1rem; }
+  .hyp-jeu-n .badge { margin-left: 0.4rem; }
+  .hyp-jeu-p { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .hyp-jeu-p i { font-style: normal; font-family: var(--font-mono); font-size: 0.68rem; background: var(--content-bg); border: 1px solid var(--border); border-radius: 0.3rem; padding: 0.06rem 0.35rem; color: var(--muted-fg); white-space: nowrap; }
+  .hyp-jeu-a { display: flex; gap: 0.35rem; flex-wrap: wrap; justify-content: flex-end; }
+  .hyp-warn { color: var(--danger); font-weight: 600; }
+
+  .hyp-triplet { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.55rem 0.85rem; border: 1px dashed var(--border-strong); border-radius: var(--radius); background: var(--content-bg); font-size: 0.76rem; }
+  .hyp-triplet > b { font-size: 0.78rem; }
+  .hyp-triplet .el { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  .hyp-triplet .el i { font-style: normal; font-family: var(--font-mono); font-size: 0.68rem; background: var(--card); border: 1px solid var(--border); border-radius: 0.3rem; padding: 0.06rem 0.35rem; color: var(--muted-fg); }
+  .hyp-triplet > span:last-child { flex: 1; min-width: 18rem; color: var(--muted-fg); line-height: 1.5; }
+
+  @media (max-width: 860px) {
+    .hyp-jeu { grid-template-columns: minmax(0, 1fr); }
+    .hyp-jeu-a { justify-content: flex-start; }
+  }
 
   @media (max-width: 860px) {
     .vjrn-row { grid-template-columns: minmax(0, 1fr); gap: 0.25rem; }
@@ -11104,9 +11165,9 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/><path d="M3 12a9 9 0 0 1 9-9"/></svg>
                       Validation <span class="badge badge-new">FE-034</span>
                     </button>
-                    <button class="atl-tab" role="tab" data-bil-tab="previsionnel" aria-selected="false" disabled title="FE-035 / FE-036 — hypothèses, projection 3 ans, trésorerie 12 mois">
+                    <button class="atl-tab" role="tab" data-bil-tab="previsionnel" aria-selected="false" title="FE-035 — hypothèses paramétrables sur base validée · FE-036 projection 3 ans et trésorerie 12 mois">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>
-                      Prévisionnel <span class="soon">FE-035</span>
+                      Prévisionnel <span class="badge badge-new">FE-035</span>
                     </button>
                     <button class="atl-tab" role="tab" data-bil-tab="export" aria-selected="false" disabled title="FE-038 — export PDF / Excel fidèle au snapshot">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
@@ -14275,6 +14336,858 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
 
                 </div>
               </div>
+                  <!-- ═══════════ FE-035 · PRÉVISIONNEL — HYPOTHÈSES ═══════════
+                       Le 5ᵉ onglet du Bilan. Ce que cette maquette doit rendre
+                       indiscutable, et qui ne se voit QU'EN JOUANT :
+
+                        1. **la précondition** — sans liasse VALIDÉE il n'y a pas
+                           de formulaire du tout, pas un formulaire grisé ;
+                        2. **la base est figée, les hypothèses ne le sont pas** —
+                           éditer crée une version de plus et l'ancienne reste,
+                           mais le `snapshotId` ne bouge JAMAIS ;
+                        3. **ce que le modèle ne calcule pas** — impôt, dotations,
+                           intérêts, TVA — chiffré sur le jeu affiché, parce
+                           qu'un dirigeant qui lit « résultat net » croit lire son
+                           avenir, pas un modèle simplifié ;
+                        4. **l'impasse du nom** — ni suppression, ni renommage,
+                           ni rebasage : trois routes qui n'existent pas.
+
+                       ⚠️ Tous les montants de ce panneau sont PRODUITS par le
+                       moteur réel (`projection-annuelle.service.ts` + `bfr.ts`)
+                       rejoué sur des ancres RELUES dans les écrans FE-032/033/034
+                       — la jointure est prouvée, pas affirmée. -->
+                  <div class="atl-panel atl-body" data-bil-panel="previsionnel" hidden>
+                    <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Hypothèses de prévisionnel</h3>
+                        <p class="atl-secsub">Le moment où la liasse cesse de raconter le passé pour servir de <b>socle à une projection</b>. Un jeu d'hypothèses est <b>nommé</b>, <b>rattaché à une liasse validée</b> — un snapshot immuable, jamais un brouillon — et <b>versionné</b>&nbsp;: éditer n'écrase rien, l'ancienne version reste rejouable. La projection elle-même, ses trois exercices et sa trésorerie mensuelle, sont l'écran <b>FE-036</b>.</p>
+                        <p style="margin:0.45rem 0 0"><span class="badge badge-invited"><span class="d"></span>16 écarts ouverts &middot; STORY-457 → 472 &middot; écran FE-035</span></p>
+                      </div>
+                      <span style="flex:1"></span>
+                      <div class="atelier-demo" role="tablist" aria-label="Moment du jeu d'hypothèses (démo)">
+                        <span class="lbl">Le même dossier, moment par moment</span>
+                        <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-hyp-state="sans-base" aria-selected="true">Sans base validée</button><button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-hyp-state="nouveau" aria-selected="false">Base figée · premier jeu</button><button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-hyp-state="v1" aria-selected="false">Prudent · version 1</button><button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-hyp-state="v2" aria-selected="false">Prudent · version 2</button><button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-hyp-state="duplique" aria-selected="false">Optimiste · dupliqué</button><button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-hyp-state="impasse" aria-selected="false">Nom fautif · impasse</button>
+                      </div>
+                    </div>
+
+<div data-bil-hyp-slot="sans-base" data-hyp-base="—" data-hyp-jeu="—" data-hyp-version="—" data-hyp-jeux="0">
+<div class="vfr"><span class="vfr-s stop"><span class="n">1</span>Base figée</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">2</span>Jeu d'hypothèses nommé</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">3</span>Projection 3 ans</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Scénarios comparés</span><span style="flex:1"></span><span class="code">les étapes 3 et 4 sont l'écran <b>FE-036</b> — cet onglet s'arrête aux hypothèses</span></div>
+<div class="coh-verdict stop">
+  <span class="flag">⛔</span>
+  <div style="flex:1">
+    <h4>Aucun prévisionnel possible — la liasse 2025 n'a jamais été validée</h4>
+    <p>Le prévisionnel part d'un <b>snapshot immuable</b>, jamais d'un brouillon&nbsp;: un plan bâti sur des états encore recalculables changerait sous les pieds de celui qui le signe. Tant qu'aucune version n'est figée, <code>POST …/bilan/hypotheses</code> répond <code>409 BASE_NON_VALIDEE</code> — <b>le formulaire n'est donc pas affiché en grisé, il n'est pas affiché du tout</b>.</p><p>Le geste qui débloque existe déjà dans le produit&nbsp;: c'est la <b>validation</b> de la liasse, à l'onglet voisin.</p>
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>La précondition, telle que le serveur la vérifie</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>1 condition · non remplie</span>
+  </div>
+  <div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b><code>BASE_NON_VALIDEE</code> — le jeu d'états doit être <code>VALIDE</code> <b>et</b> porter un snapshot</b>
+    <p>Le service charge le jeu d'états de base, exige <code>statut === VALIDE</code>, puis capture son <b>dernier</b> snapshot. <b>Les deux</b> conditions sont nécessaires&nbsp;: un jeu validé sans snapshot serait refusé du même code. Un jeu inconnu — ou d'un autre dossier — répond <code>404 BASE_INTROUVABLE</code>, jamais 403&nbsp;: ne pas révéler qu'un dossier existe.</p>
+    <span class="el"><i>statut = BROUILLON</i><i>snapshots = 0</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>409</b>refusé</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">La liasse d'Ets Kossi Distribution est en <b>brouillon</b> depuis le 12/07/2026, et un contrôle bloquant est en anomalie&nbsp;: c'est là qu'il faut aller, pas ici.</div>
+</div>
+<div class="vact">
+  <div class="txt"><b>Valider la liasse d'abord</b><p>Une fois la version 1 figée, ce formulaire s'ouvre — et la base du prévisionnel sera <b>ce snapshot-là</b>, pour toujours.</p></div>
+  <div class="go"><button class="btn btn-primary" type="button" data-bil-goto="validation">Aller à la validation de la liasse</button><button class="btn btn-ghost" type="button" disabled title="Aucune base validée">Créer un jeu d'hypothèses</button></div>
+</div>
+
+</div>
+<div data-bil-hyp-slot="nouveau" hidden data-hyp-base="2" data-hyp-jeu="—" data-hyp-version="—" data-hyp-jeux="0">
+<div class="vfr"><span class="vfr-s done"><span class="n">1</span>Base figée</span><span class="vfr-a">→</span><span class="vfr-s now"><span class="n">2</span>Jeu d'hypothèses nommé</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">3</span>Projection 3 ans</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Scénarios comparés</span><span style="flex:1"></span><span class="code">les étapes 3 et 4 sont l'écran <b>FE-036</b> — cet onglet s'arrête aux hypothèses</span></div>
+<div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+    <b>La base du prévisionnel — ce que les hypothèses vont faire varier</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>BASE FIGÉE — version 2</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Snapshot de liasse</div><div class="ref-v">Exercice 2025 · version 2</div><div class="ref-sum">snapshotId 6a41c8e2…4b19 · figée le 22/07/2026</div><div class="ref-txt">Le prévisionnel ne lit <b>jamais</b> le brouillon en cours&nbsp;: il part d'un <b>snapshot immuable</b>, et cette base reste <b>figée</b> même quand les hypothèses changent.</div></div>
+    <div class="ref-item"><div class="ref-k">Assiette de la croissance</div><div class="ref-v">16&nbsp;375&nbsp;000</div><div class="ref-sum">ancres.produitsBase</div><div class="ref-txt">⚠️ C'est le <b>total des produits</b> — produits financiers, HAO et reprises compris — <b>pas le chiffre d'affaires</b>. Le paramètre s'appelle pourtant <code>croissanceCaPct</code>&nbsp;: appliquer une croissance commerciale à des reprises de provisions n'a pas de sens. <span class="code">écart ouvert · <b>STORY-457</b></span></div></div>
+    <div class="ref-item"><div class="ref-k">Trésorerie d'ouverture de N+1</div><div class="ref-v">850&nbsp;000</div><div class="ref-sum">tft.tresorerieClotureN · ancrée</div><div class="ref-txt">L'ancre est la trésorerie <b>lue au Bilan</b>, et non le poste <code>ZH</code> de la cascade du TFT (<b>1&nbsp;755&nbsp;000</b>)&nbsp;: la réponse porte les deux, et c'est la première qui sert de point de départ.</div></div>
+    <div class="ref-item"><div class="ref-k">Structure constatée en 2025</div><div class="ref-v">200&nbsp;000 · 1,22&nbsp;% des produits</div><div class="ref-sum">produits 16&nbsp;375&nbsp;000 − charges 16&nbsp;175&nbsp;000</div><div class="ref-txt">Le <b>seul</b> repère auquel confronter vos taux&nbsp;: les ancres publient les deux totaux et le résultat, <b>jamais la marge brute</b>. On peut donc vérifier <code>marge − charges</code>, pas <code>marge</code> seule. <span class="code">écart ouvert · <b>STORY-462</b></span></div></div>
+  </div>
+</div>
+<div class="coh-verdict go">
+  <span class="flag">🟢</span>
+  <div style="flex:1">
+    <h4>Base disponible — le prévisionnel peut commencer</h4>
+    <p>La version <b>2</b> de la liasse 2025 est figée depuis le 22/07/2026&nbsp;: c'est elle, et non le brouillon rouvert par-dessus, qui servira de base. <b>Ce rattachement se fait une fois, à la création, et ne bouge plus</b> — éditer les hypothèses ne rebase jamais.</p>
+  </div>
+</div>
+<div class="hyp-form-card">
+  <div class="hyp-form-h">
+    <div><b>Nouveau jeu d'hypothèses</b><span>Neuf paramètres, un nom. Les valeurs proposées ci-dessous <b>ne sont pas des valeurs par défaut du produit</b>&nbsp;: le serveur n'en fournit aucune — c'est l'écran qui part de la structure constatée en 2025 pour éviter la page blanche.</span></div>
+    <span class="badge badge-invited"><span class="d"></span>aucun jeu pour ce dossier</span>
+  </div>
+  <div class="cah-form" style="border:0;background:transparent;padding:0 0 0.6rem">
+    <label style="grid-column:1 / -1"><span>Nom du jeu <i>(unique par dossier, 1 à 64 caractères)</i></span><input type="text" placeholder="ex. Prudent 2026" data-hyp-nom-saisi /><span class="fh">⚠️ Ce nom ne pourra <b>ni être changé, ni être libéré</b>&nbsp;: aucune route de renommage ni de suppression n'existe. <b>STORY-464</b></span></label>
+  </div>
+  <div class="hyp-grp"><div class="hyp-grp-h"><b>Activité</b><span>Ce que l'entreprise vend et ce que ça lui coûte</span></div><div class="cah-form"><label><span>Croissance des produits <i>(%)</i></span><input type="text" value="8" data-hyp-champ="croissanceCaPct" /><span class="fh">s'applique au <b>total des produits</b>, pas au seul CA · <b>STORY-457</b></span></label><label><span>Taux de marge brute <i>(% des produits)</i></span><input type="text" value="18" data-hyp-champ="tauxMargePct" /><span class="fh">coût des ventes = produits × (1 − taux) — assiette des stocks et des fournisseurs</span></label><label><span>Taux de charges d'exploitation <i>(% des produits)</i></span><input type="text" value="16,5" data-hyp-champ="tauxChargesPct" /><span class="fh">⚠️ dotations aux amortissements comprises&nbsp;? Le modèle n'en a pas · <b>STORY-459</b></span></label></div></div><div class="hyp-grp"><div class="hyp-grp-h"><b>Besoin en fonds de roulement</b><span>Les trois délais, appliqués sur une <b>année commerciale de 360 jours</b></span></div><div class="cah-form"><label><span>Délai clients <i>(jours)</i></span><input type="text" value="45" data-hyp-champ="delaiBfrClientsJours" /><span class="fh">créances = produits × j/360 — <b>sur des montants HT</b>, alors qu'une créance est TTC · <b>STORY-469</b></span></label><label><span>Délai fournisseurs <i>(jours)</i></span><input type="text" value="60" data-hyp-champ="delaiBfrFournisseursJours" /><span class="fh">dettes = coût des ventes × j/360, base 360</span></label><label><span>Délai de stocks <i>(jours)</i></span><input type="text" value="75" data-hyp-champ="delaiBfrStocksJours" /><span class="fh">stocks = coût des ventes × j/360, base 360</span></label></div></div><div class="hyp-grp"><div class="hyp-grp-h"><b>Investissement &amp; financement</b><span>Montants <b>annuels récurrents</b> — le modèle ne connaît pas d'échéancier</span></div><div class="cah-form"><label><span>Investissements <i>(F CFA / an)</i></span><input type="text" value="1 200 000" data-hyp-champ="investissements" /><span class="fh">⚠️ appliqué à <b>chaque</b> exercice — 3× sur l'horizon · <b>STORY-460</b></span></label><label><span>Financement (apports, emprunts) <i>(F CFA / an)</i></span><input type="text" value="2 000 000" data-hyp-champ="financement" /><span class="fh">⚠️ <b>récurrent</b> lui aussi — et sans <b>aucune charge d'intérêt</b> · <b>STORY-467</b></span></label><label><span>Remboursements d'emprunt <i>(F CFA / an)</i></span><input type="text" value="600 000" data-hyp-champ="remboursements" /><span class="fh">sort de la trésorerie, ne passe <b>jamais</b> par le compte de résultat</span></label></div></div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Ce que l'écran peut vérifier avant d'envoyer</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>1 contrôle possible · 8 bornes de DTO</span>
+  </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b>Structure de résultat — <code>tauxMarge − tauxCharges</code> confronté au constaté</b>
+    <p>Vos taux impliquent un résultat de <b>1,5&nbsp;%</b> des produits&nbsp;; l'exercice 2025 a réalisé <b>1,22&nbsp;%</b>. Soit <b>0,28 point</b> au-dessus. <b>C'est le seul contrôle possible</b>&nbsp;: pris isolément, ni le taux de marge ni le taux de charges n'a de constaté auquel se comparer.</p>
+    <span class="el"><i>marge 18 %</i><i>charges 16,5 %</i><i>⇒ 1,5 %</i><i>constaté 1,22 %</i></span>
+  </span>
+  <span class="coh-cat inf">Écran</span>
+  <span class="val"><b>+0,28 pt</b>vs 2025</span>
+</div><div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b>Les bornes du serveur — larges, et volontairement</b>
+    <p>Pourcentages de <b>−100</b> à <b>10&nbsp;000</b>, délais entiers de <b>0</b> à <b>3&nbsp;650</b> jours, montants entiers <b>≥ 0</b> en francs CFA. Une croissance de 4&nbsp;000&nbsp;% et un délai clients de <b>dix ans</b> passent la validation. <b>C'est à l'écran de poser les garde-fous métier</b> — le serveur ne défend que l'intégrité, jamais la vraisemblance.</p>
+    <span class="el"><i>@Min(-100) @Max(10000)</i><i>@IsInt @Max(3650)</i><i>montants ≥ 0</i></span>
+  </span>
+  <span class="coh-cat inf">Contrat</span>
+  <span class="val"><b>400</b>hors bornes</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">Les montants sont en <b>francs CFA entiers</b>. Le contrat les appelle «&nbsp;unités mineures XOF&nbsp;» par alignement sur la balance canonique — <b>le franc CFA n'a pas de subdivision</b>, un franc est un franc.</div>
+</div>
+<div class="vact">
+  <div class="txt"><b>Créer le jeu d'hypothèses</b><p>La création capture la base <b>maintenant</b>&nbsp;: le <code>snapshotId</code> et sa version sont copiés dans le jeu et n'en bougeront plus.</p></div>
+  <div class="go"><button class="btn btn-primary" type="button" data-hyp-open="creer">Créer le jeu d'hypothèses</button></div>
+</div>
+
+</div>
+<div data-bil-hyp-slot="v1" hidden data-hyp-base="2" data-hyp-jeu="Prudent 2026" data-hyp-version="1" data-hyp-jeux="1">
+<div class="vfr"><span class="vfr-s done"><span class="n">1</span>Base figée</span><span class="vfr-a">→</span><span class="vfr-s now"><span class="n">2</span>Jeu d'hypothèses nommé</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">3</span>Projection 3 ans</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Scénarios comparés</span><span style="flex:1"></span><span class="code">les étapes 3 et 4 sont l'écran <b>FE-036</b> — cet onglet s'arrête aux hypothèses</span></div>
+<div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+    <b>La base du prévisionnel — ce que les hypothèses vont faire varier</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>BASE FIGÉE — version 2</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Snapshot de liasse</div><div class="ref-v">Exercice 2025 · version 2</div><div class="ref-sum">snapshotId 6a41c8e2…4b19 · figée le 22/07/2026</div><div class="ref-txt">Le prévisionnel ne lit <b>jamais</b> le brouillon en cours&nbsp;: il part d'un <b>snapshot immuable</b>, et cette base reste <b>figée</b> même quand les hypothèses changent.</div></div>
+    <div class="ref-item"><div class="ref-k">Assiette de la croissance</div><div class="ref-v">16&nbsp;375&nbsp;000</div><div class="ref-sum">ancres.produitsBase</div><div class="ref-txt">⚠️ C'est le <b>total des produits</b> — produits financiers, HAO et reprises compris — <b>pas le chiffre d'affaires</b>. Le paramètre s'appelle pourtant <code>croissanceCaPct</code>&nbsp;: appliquer une croissance commerciale à des reprises de provisions n'a pas de sens. <span class="code">écart ouvert · <b>STORY-457</b></span></div></div>
+    <div class="ref-item"><div class="ref-k">Trésorerie d'ouverture de N+1</div><div class="ref-v">850&nbsp;000</div><div class="ref-sum">tft.tresorerieClotureN · ancrée</div><div class="ref-txt">L'ancre est la trésorerie <b>lue au Bilan</b>, et non le poste <code>ZH</code> de la cascade du TFT (<b>1&nbsp;755&nbsp;000</b>)&nbsp;: la réponse porte les deux, et c'est la première qui sert de point de départ.</div></div>
+    <div class="ref-item"><div class="ref-k">Structure constatée en 2025</div><div class="ref-v">200&nbsp;000 · 1,22&nbsp;% des produits</div><div class="ref-sum">produits 16&nbsp;375&nbsp;000 − charges 16&nbsp;175&nbsp;000</div><div class="ref-txt">Le <b>seul</b> repère auquel confronter vos taux&nbsp;: les ancres publient les deux totaux et le résultat, <b>jamais la marge brute</b>. On peut donc vérifier <code>marge − charges</code>, pas <code>marge</code> seule. <span class="code">écart ouvert · <b>STORY-462</b></span></div></div>
+  </div>
+</div>
+<div class="coh-verdict go">
+  <span class="flag">📌</span>
+  <div style="flex:1">
+    <h4>« Prudent 2026 » — version 1</h4>
+    <p>Le jeu est créé et rattaché à la base. <b>Les hypothèses sont éditables&nbsp;; la base ne l'est pas.</b> C'est la distinction qui rend le prévisionnel rejouable&nbsp;: on change d'avis sur l'avenir, jamais sur le passé qu'on a arrêté.</p>
+  </div>
+</div>
+<div class="hyp-triplet">
+  <b>Triplet de reproductibilité</b>
+  <span class="el"><i>snapshotId 6a41c8e2…4b19</i><i>versionHypotheses 1</i><i>modeleVersion 1.0.0</i></span>
+  <span>Ces trois identifiants — et eux seuls — déterminent la projection. Rejouer une <b>formule</b> ancienne reste impossible&nbsp;: <code>MODELE_PROJECTION_VERSION</code> <b>identifie</b> le modèle, elle ne l'<b>archive</b> pas.</span>
+</div>
+<div class="hyp-form-card">
+  <div class="hyp-form-h">
+    <div><b>Prudent 2026</b><span>version 1 · créé le 24/07/2026 · base : snapshot v2 de l'exercice 2025</span></div>
+    <span class="badge badge-active"><span class="d"></span>VERSION COURANTE</span>
+  </div>
+  <div class="hyp-grp"><div class="hyp-grp-h"><b>Activité</b><span>Ce que l'entreprise vend et ce que ça lui coûte</span></div><div class="cah-form"><label><span>Croissance des produits <i>(%)</i></span><input type="text" value="8" data-hyp-champ="croissanceCaPct" /><span class="fh">s'applique au <b>total des produits</b>, pas au seul CA · <b>STORY-457</b></span></label><label><span>Taux de marge brute <i>(% des produits)</i></span><input type="text" value="18" data-hyp-champ="tauxMargePct" /><span class="fh">coût des ventes = produits × (1 − taux) — assiette des stocks et des fournisseurs</span></label><label><span>Taux de charges d'exploitation <i>(% des produits)</i></span><input type="text" value="16,5" data-hyp-champ="tauxChargesPct" /><span class="fh">⚠️ dotations aux amortissements comprises&nbsp;? Le modèle n'en a pas · <b>STORY-459</b></span></label></div></div><div class="hyp-grp"><div class="hyp-grp-h"><b>Besoin en fonds de roulement</b><span>Les trois délais, appliqués sur une <b>année commerciale de 360 jours</b></span></div><div class="cah-form"><label><span>Délai clients <i>(jours)</i></span><input type="text" value="45" data-hyp-champ="delaiBfrClientsJours" /><span class="fh">créances = produits × j/360 — <b>sur des montants HT</b>, alors qu'une créance est TTC · <b>STORY-469</b></span></label><label><span>Délai fournisseurs <i>(jours)</i></span><input type="text" value="60" data-hyp-champ="delaiBfrFournisseursJours" /><span class="fh">dettes = coût des ventes × j/360, base 360</span></label><label><span>Délai de stocks <i>(jours)</i></span><input type="text" value="75" data-hyp-champ="delaiBfrStocksJours" /><span class="fh">stocks = coût des ventes × j/360, base 360</span></label></div></div><div class="hyp-grp"><div class="hyp-grp-h"><b>Investissement &amp; financement</b><span>Montants <b>annuels récurrents</b> — le modèle ne connaît pas d'échéancier</span></div><div class="cah-form"><label><span>Investissements <i>(F CFA / an)</i></span><input type="text" value="1 200 000" data-hyp-champ="investissements" /><span class="fh">⚠️ appliqué à <b>chaque</b> exercice — 3× sur l'horizon · <b>STORY-460</b></span></label><label><span>Financement (apports, emprunts) <i>(F CFA / an)</i></span><input type="text" value="2 000 000" data-hyp-champ="financement" /><span class="fh">⚠️ <b>récurrent</b> lui aussi — et sans <b>aucune charge d'intérêt</b> · <b>STORY-467</b></span></label><label><span>Remboursements d'emprunt <i>(F CFA / an)</i></span><input type="text" value="600 000" data-hyp-champ="remboursements" /><span class="fh">sort de la trésorerie, ne passe <b>jamais</b> par le compte de résultat</span></label></div></div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Ce que l'écran peut vérifier</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>1 contrôle possible</span>
+  </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b>Structure de résultat — <code>tauxMarge − tauxCharges</code> confronté au constaté</b>
+    <p>Vos taux impliquent un résultat de <b>1,5&nbsp;%</b> des produits&nbsp;; l'exercice 2025 a réalisé <b>1,22&nbsp;%</b>. Soit <b>0,28 point</b> au-dessus. <b>C'est le seul contrôle possible</b>&nbsp;: pris isolément, ni le taux de marge ni le taux de charges n'a de constaté auquel se comparer.</p>
+    <span class="el"><i>marge 18 %</i><i>charges 16,5 %</i><i>⇒ 1,5 %</i><i>constaté 1,22 %</i></span>
+  </span>
+  <span class="coh-cat inf">Écran</span>
+  <span class="val"><b>+0,28 pt</b>vs 2025</span>
+</div>
+  
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>
+    <b>Aperçu — ce que ces hypothèses produiraient</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>lecture seule · le détail est l'écran FE-036</span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="hyp-tab">
+      <thead><tr><th>&nbsp;</th><th>N+1 · 2026</th><th>N+2 · 2027</th><th>N+3 · 2028</th></tr></thead>
+      <tbody><tr><th>Produits</th><td class="hyp-n">17&nbsp;685&nbsp;000</td><td class="hyp-n">19&nbsp;099&nbsp;800</td><td class="hyp-n">20&nbsp;627&nbsp;784</td></tr><tr><th>Résultat <b>avant impôt</b><small>aucun impôt n'est calculé</small></th><td class="hyp-n">265&nbsp;275</td><td class="hyp-n">286&nbsp;497</td><td class="hyp-n">309&nbsp;417</td></tr><tr><th>Variation du BFR<small>BFR normatif, pas le BFR réel</small></th><td class="hyp-n">208&nbsp;509</td><td class="hyp-n">225&nbsp;189</td><td class="hyp-n">243&nbsp;203</td></tr><tr><th>Trésorerie de clôture</th><td class="hyp-n">1&nbsp;106&nbsp;766</td><td class="hyp-n">1&nbsp;368&nbsp;074</td><td class="hyp-n">1&nbsp;634&nbsp;288</td></tr></tbody>
+    </table>
+  </div>
+  <div class="hyp-pied">
+    <span><b>BFR normatif de l'exercice de base : 2&nbsp;606&nbsp;354</b> — soit <b>57 jours</b> de produits (stocks 2&nbsp;797&nbsp;396 + clients 2&nbsp;046&nbsp;875 − fournisseurs 2&nbsp;237&nbsp;917). Il <b>remplace</b> le BFR réel du bilan dès l'exercice de base, pour que la variation de la 1ʳᵉ année soit homogène&nbsp;; le BFR réellement constaté n'est publié nulle part. <span class="code">écart ouvert · <b>STORY-461</b></span></span>
+  </div>
+  
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+    <b>Ce que ce prévisionnel ne dit pas — la lecture d'un expert-comptable</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>8 manques, tous chiffrés sur CE jeu</span>
+  </div>
+  <div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>L'impôt n'est ni calculé, ni décaissé — et au Togo ce n'est pas 27&nbsp;% du résultat</b>
+    <p><code>resultatNet</code> est un résultat <b>avant impôt</b>, et le plan de trésorerie ne sort jamais un franc d'impôt. Or l'impôt dû est <code>max(IS&nbsp;;&nbsp;MFP)</code> — <b>IS 27&nbsp;%</b> du bénéfice (Art.&nbsp;113 CGI) contre <b>minimum forfaitaire de perception 1&nbsp;%</b> du <b>CA HT du dernier exercice clos</b>, <b>dû même en déficit</b> (Art.&nbsp;120 CGI). Sur ce dossier, en N+1&nbsp;: IS <b>71&nbsp;624</b>, MFP <b>163&nbsp;750</b> ⇒ dû <b>163&nbsp;750</b> — <b>le minimum l'emporte</b>. <b>531&nbsp;598</b> sur trois ans, absents du plan&nbsp;: la trésorerie de N+3 n'est pas 1&nbsp;634&nbsp;288 mais <b>1&nbsp;102&nbsp;690</b>. <span class="code">écart ouvert · <b>STORY-458</b></span></p>
+    <span class="el"><i>résultat avant impôt 265&nbsp;275</i><i>IS 27 % = 71&nbsp;624</i><i>MFP 1 % = 163&nbsp;750</i><i>dû 163&nbsp;750</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>531&nbsp;598</b>3 ans, hors plan</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Aucune dotation aux amortissements — et la CAF est prise pour le résultat</b>
+    <p>3&nbsp;600&nbsp;000 investis sur l'horizon gonflent l'actif immobilisé net de <b>2&nbsp;243&nbsp;646</b> à <b>5&nbsp;843&nbsp;646</b> <b>sans jamais être amortis</b>&nbsp;; et <code>capaciteAutofinancement = resultatNet</code>, sans réintégration. Les deux erreurs <b>ne se compensent pas</b>&nbsp;: si le comptable loge la dotation dans <code>tauxChargesPct</code>, le résultat devient juste mais la trésorerie est <b>sous-évaluée d'autant</b>&nbsp;; s'il ne l'y loge pas, le résultat est <b>surévalué</b> et l'actif ne se déprécie jamais. <span class="code">écart ouvert · <b>STORY-459</b></span></p>
+    <span class="el"><i>investi 3 ans 3&nbsp;600&nbsp;000</i><i>dotations 0</i><i>CAF = résultat</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>3&nbsp;600&nbsp;000</b>jamais amortis</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Investissement, financement et remboursement sont <b>récurrents</b> — rien ne le dit</b>
+    <p>Les trois montants sont appliqués <b>à chaque exercice projeté</b>. Saisir «&nbsp;1&nbsp;200&nbsp;000&nbsp;» pour un véhicule acheté <b>une fois</b> en fait <b>3&nbsp;600&nbsp;000</b> sur l'horizon. C'est la ligne du contrat qui trompe le plus vite un comptable, et elle n'apparaît <b>ni dans le DTO, ni dans un libellé</b> — seulement dans un commentaire du service. Le hook «&nbsp;échéancier non uniforme&nbsp;» est documenté dans <code>projection.types.ts</code>, il n'est pas livré. <span class="code">écart ouvert · <b>STORY-460</b></span></p>
+    <span class="el"><i>investissements ×3</i><i>financement ×3</i><i>remboursements ×3</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>×3</b>sur l'horizon</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Le BFR se calcule sur des montants <b>HT</b>, alors qu'une créance et une dette sont <b>TTC</b></b>
+    <p>Le délai clients d'un cabinet se calcule <code>créances TTC / CA TTC × 360</code>. Ici les deux plus gros postes du BFR sont assis sur des montants <b>hors taxes</b>&nbsp;: à TVA 18&nbsp;% (taux unique, Art.&nbsp;195 CGI), les créances clients projetées sont minorées d'environ <b>368&nbsp;438</b> et les dettes fournisseurs d'environ <b>402&nbsp;825</b>. Et le <b>crédit ou la dette de TVA</b> lui-même n'existe pas dans le modèle. <span class="code">écart ouvert · <b>STORY-469</b></span></p>
+    <span class="el"><i>créances HT 2&nbsp;046&nbsp;875</i><i>≈ TTC 2&nbsp;415&nbsp;313</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>≈ 18 %</b>sous-évalué</span>
+</div><div class="coh-row warn">
+  <span class="ic">!</span>
+  <span class="t"><b>Un emprunt ne coûte rien&nbsp;: aucune hypothèse de <b>taux d'intérêt</b></b>
+    <p><code>financement</code> entre en trésorerie et <code>remboursements</code> en sort&nbsp;; <b>aucune charge financière</b> ne rejoint jamais le compte de résultat. Le résultat d'un plan financé par emprunt est donc identique à celui d'un plan financé par apport — ce qu'aucun banquier ne signerait. <code>tauxChargesPct</code> ne peut pas y suppléer&nbsp;: il porte sur les <b>produits</b>, pas sur l'encours de dette. <span class="code">écart ouvert · <b>STORY-467</b></span></p>
+  </span>
+  <span class="coh-cat inf">Contrat</span>
+  <span class="val"><b>0</b>charge d'intérêt</span>
+</div><div class="coh-row warn">
+  <span class="ic">!</span>
+  <span class="t"><b>L'ancre des emplois durables peut devenir <b>négative</b>, et rien ne l'interdit</b>
+    <p>L'actif immobilisé de départ n'est pas lu&nbsp;: c'est un <b>solde</b>, <code>totalActif − BFR(0) − trésorerie</code> = <b>2&nbsp;243&nbsp;646</b> ici. Il devient <b>négatif dès 95 jours</b> de délai clients sur ce dossier — un actif immobilisé net négatif, donc un bilan prévisionnel impossible. Le contrôle <code>ecart&nbsp;=&nbsp;0</code> ne peut pas le voir&nbsp;: il est nul <b>par construction</b>, exactement comme <code>coherenceResultat</code> dans la liasse. <span class="code">écart ouvert · <b>STORY-463</b></span></p>
+    <span class="el"><i>ancre 2&nbsp;243&nbsp;646</i><i>délai clients saisi 45 j</i><i>bascule à 95 j</i></span>
+  </span>
+  <span class="coh-cat inf">Contrat</span>
+  <span class="val"><b>95 j</b>seuil de bascule</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Aucune charge n'est <b>fixe</b> — le levier d'exploitation est inexprimable</b>
+    <p>Marge et charges sont toutes deux un <b>pourcentage des produits</b>&nbsp;: il n'existe aucune charge de structure — ni loyer, ni masse salariale, ni assurance. Conséquence directe, lisible dans le tableau au-dessus&nbsp;: le résultat croît de <b>8&nbsp;%</b> quand les produits croissent de <b>8&nbsp;%</b> — <b>exactement le même taux</b>. Or c'est précisément l'inverse qu'un prévisionnel sert à montrer&nbsp;: qu'au-delà d'un point mort, la croissance profite plus que proportionnellement. Un plan sans charges fixes n'a <b>ni point mort, ni seuil de rentabilité</b> — les deux nombres qu'un banquier cherche en premier. <span class="code">écart ouvert · <b>STORY-472</b></span></p>
+    <span class="el"><i>produits +8 %</i><i>résultat +8 %</i><i>point mort : non calculable</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>0</b>charge fixe</span>
+</div><div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b>La <b>durée</b> de l'exercice de base n'est publiée nulle part</b>
+    <p>La DSF porte une colonne «&nbsp;Durée (en mois)&nbsp;»&nbsp;: un premier exercice, ou un changement de date de clôture, donne couramment un exercice de <b>18</b> ou de <b>6</b> mois. Appliquer une croissance annuelle à des produits qui ne couvrent pas douze mois fausse tout l'horizon, et <b>ni <code>AncresProjection</code> ni <code>HypothesesBase</code> ne portent la durée</b> — l'écran ne peut même pas prévenir. <span class="code">écart ouvert · <b>STORY-468</b></span></p>
+  </span>
+  <span class="coh-cat inf">Contrat</span>
+  <span class="val"><b>—</b>non publiée</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    Aucun de ces huit points n'est un défaut de l'écran&nbsp;: ce sont les <b>frontières assumées du modèle 1.0.0</b>, dont trois sont explicitement annoncées comme des <i>hooks</i> dans <code>projection.types.ts</code>. Ce qui n'est pas défendable, c'est de <b>rendre un prévisionnel sans les afficher</b> — un dirigeant qui lit «&nbsp;résultat net&nbsp;» et «&nbsp;trésorerie de clôture&nbsp;» croit lire son avenir, pas un modèle simplifié.
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+    <b>Versions du jeu «&nbsp;Prudent 2026&nbsp;» — append-only</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>1 version · courante : 1</span>
+  </div>
+  <div class="vjrn-row">
+  <span class="vjrn-ts">24/07/2026 à 10:22</span>
+  <span class="vjrn-t ">version 1 · courante</span>
+  <span class="vjrn-q">Création du jeu sur la base figée v2<small>document courant</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="`versions_hypotheses` ne stocke NI userId NI motif — contrairement au journal de la liasse, qui porte au moins un userId">Auteur non tracé</b><code>versionHypothesesId 5f0d…a913 (le jeu)</code></span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    Éditer <b>n'écrase pas</b>&nbsp;: la version sortante est insérée dans l'historique <b>puis</b> le document courant bascule, <b>dans une transaction</b>. C'est ce qui rend le triplet <code>(snapshotId, versionHypothesesId, modeleVersion)</code> rejouable — et c'est ici qu'il se constitue. <b>Ce que l'API ne sert pas</b>&nbsp;: ni l'auteur, ni le motif de l'édition, ni la comparaison de deux versions.
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+    <b>Qui peut le faire, et qui le saura — la gouvernance du jeu d'hypothèses</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>2 manques &middot; aucun n'est visible dans le contrat</span>
+  </div>
+  <div class="coh-row ko">
+    <span class="ic">!</span>
+    <span class="t"><b>Un <b>collaborateur</b> crée et modifie seul les hypothèses — sans aucun second regard</b>
+      <p><code>POST</code> et <code>PUT</code> sont ouverts au <code>TENANT_USER</code> comme au <code>TENANT_ADMIN</code>, et il n'existe <b>aucun geste de validation</b> d'un jeu d'hypothèses. Comparez avec les deux écrans voisins&nbsp;: à la <b>table de passage</b>, proposer une surcharge est ouvert à tous mais la <b>valider</b> est réservé à l'administrateur&nbsp;; la <b>liasse</b> ne se fige que sur un acte explicite. Ici, un prévisionnel remis à une banque peut voir sa croissance passer de 5 à 15&nbsp;% sans que personne d'autre n'ait à le savoir. <span class="code">écart ouvert · <b>STORY-470</b></span></p>
+      <span class="el"><i>@Roles(TENANT_ADMIN, TENANT_USER)</i><i>aucun /valider</i></span>
+    </span>
+    <span class="coh-cat blk">Bloquant métier</span>
+    <span class="val"><b>2 rôles</b>mêmes droits</span>
+  </div>
+  <div class="coh-row ko">
+    <span class="ic">!</span>
+    <span class="t"><b>Rien n'est <b>tracé</b>&nbsp;: ni auteur, ni motif, ni événement de journal</b>
+      <p><code>AuditType</code> compte huit actes — <code>JEU_CREE</code>, <code>JEU_VALIDE</code>, <code>EXERCICE_CLOS</code>, <code>EXPORT_EFFECTUE</code>… — et <b>aucun ne concerne les hypothèses</b>&nbsp;; <code>JeuHypothesesController</code> n'injecte même pas <code>AuditService</code>. La collection <code>versions_hypotheses</code> ne stocke <b>ni <code>userId</code> ni motif</b> — moins que le journal de la liasse, qui porte au moins un identifiant. L'historique dit donc <i>ce qui</i> a changé, jamais <b>qui</b> ni <b>pourquoi</b>&nbsp;: six mois plus tard, personne ne peut expliquer pourquoi la croissance est passée de 8 à 5&nbsp;%. <span class="code">écart ouvert · <b>STORY-471</b></span></p>
+      <span class="el"><i>versions_hypotheses : tenantId, dossierId, jeuHypothesesId, version, hypotheses, base, createdAt</i></span>
+    </span>
+    <span class="coh-cat blk">Bloquant métier</span>
+    <span class="val"><b>0</b>événement</span>
+  </div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    Ces deux manques ne se voient <b>pas dans le contrat</b>, qui est parfaitement cohérent&nbsp;: ils n'apparaissent qu'en mettant l'écran fini à côté de ses voisins. Un prévisionnel est un document <b>remis à un tiers</b> — il engage le cabinet autant qu'une liasse, et il est aujourd'hui le seul objet du module que <b>n'importe qui peut changer sans laisser de trace</b>.
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+    <b>Jeux d'hypothèses de ce dossier</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>1 jeu · nom unique par dossier</span>
+  </div>
+  <div class="hyp-jeu" data-hyp-actif="true">
+  <span class="hyp-jeu-n"><b>Prudent 2026</b><span class="badge badge-active"><span class="d"></span>courant</span><small>version 1 · base : snapshot v2 de l'exercice 2025</small></span>
+  <span class="hyp-jeu-p"><i>croissance 8 %</i><i>marge 18 %</i><i>charges 16,5 %</i><i>clients 45 j</i><i>invest. 1&nbsp;200&nbsp;000/an</i></span>
+  <span class="hyp-jeu-a"><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="dupliquer">Dupliquer</button><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="supprimer" title="Aucune route de suppression n'existe">Supprimer</button></span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    <b>«&nbsp;Dupliquer&nbsp;» et «&nbsp;Supprimer&nbsp;» n'existent pas côté serveur.</b> Le contrôleur expose <code>POST</code> / <code>GET</code> / <code>GET&nbsp;:id</code> / <code>GET&nbsp;:id/versions</code> / <code>PUT&nbsp;:id</code>, et rien d'autre. Dupliquer ne peut être qu'un <code>POST</code> de plus — qui <b>recapture le dernier snapshot</b> au lieu de reprendre la base de l'original <span class="code">écart ouvert · <b>STORY-465</b></span> — et supprimer est <b>impossible</b> <span class="code">écart ouvert · <b>STORY-464</b></span>. Une route <code>POST&nbsp;…/:id/dupliquer</code> n'existe pas davantage <span class="code">écart ouvert · <b>STORY-466</b></span>.
+  </div>
+</div>
+<div class="vact">
+  <div class="txt"><b>Modifier les hypothèses</b><p>Chaque enregistrement crée une <b>version de plus</b>&nbsp;: la version 1 restera consultable telle quelle, et la base restera la v2 du snapshot.</p></div>
+  <div class="go"><button class="btn btn-primary" type="button" data-hyp-open="editer">Enregistrer une nouvelle version</button><button class="btn btn-ghost" type="button" disabled title="FE-036">Voir la projection 3 ans <span class="soon">FE-036</span></button></div>
+</div>
+
+</div>
+<div data-bil-hyp-slot="v2" hidden data-hyp-base="2" data-hyp-jeu="Prudent 2026" data-hyp-version="2" data-hyp-jeux="1">
+<div class="vfr"><span class="vfr-s done"><span class="n">1</span>Base figée</span><span class="vfr-a">→</span><span class="vfr-s now"><span class="n">2</span>Jeu d'hypothèses nommé</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">3</span>Projection 3 ans</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Scénarios comparés</span><span style="flex:1"></span><span class="code">les étapes 3 et 4 sont l'écran <b>FE-036</b> — cet onglet s'arrête aux hypothèses</span></div>
+<div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+    <b>La base du prévisionnel — ce que les hypothèses vont faire varier</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>BASE FIGÉE — version 2</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Snapshot de liasse</div><div class="ref-v">Exercice 2025 · version 2</div><div class="ref-sum">snapshotId 6a41c8e2…4b19 · figée le 22/07/2026</div><div class="ref-txt">Le prévisionnel ne lit <b>jamais</b> le brouillon en cours&nbsp;: il part d'un <b>snapshot immuable</b>, et cette base reste <b>figée</b> même quand les hypothèses changent.</div></div>
+    <div class="ref-item"><div class="ref-k">Assiette de la croissance</div><div class="ref-v">16&nbsp;375&nbsp;000</div><div class="ref-sum">ancres.produitsBase</div><div class="ref-txt">⚠️ C'est le <b>total des produits</b> — produits financiers, HAO et reprises compris — <b>pas le chiffre d'affaires</b>. Le paramètre s'appelle pourtant <code>croissanceCaPct</code>&nbsp;: appliquer une croissance commerciale à des reprises de provisions n'a pas de sens. <span class="code">écart ouvert · <b>STORY-457</b></span></div></div>
+    <div class="ref-item"><div class="ref-k">Trésorerie d'ouverture de N+1</div><div class="ref-v">850&nbsp;000</div><div class="ref-sum">tft.tresorerieClotureN · ancrée</div><div class="ref-txt">L'ancre est la trésorerie <b>lue au Bilan</b>, et non le poste <code>ZH</code> de la cascade du TFT (<b>1&nbsp;755&nbsp;000</b>)&nbsp;: la réponse porte les deux, et c'est la première qui sert de point de départ.</div></div>
+    <div class="ref-item"><div class="ref-k">Structure constatée en 2025</div><div class="ref-v">200&nbsp;000 · 1,22&nbsp;% des produits</div><div class="ref-sum">produits 16&nbsp;375&nbsp;000 − charges 16&nbsp;175&nbsp;000</div><div class="ref-txt">Le <b>seul</b> repère auquel confronter vos taux&nbsp;: les ancres publient les deux totaux et le résultat, <b>jamais la marge brute</b>. On peut donc vérifier <code>marge − charges</code>, pas <code>marge</code> seule. <span class="code">écart ouvert · <b>STORY-462</b></span></div></div>
+  </div>
+</div>
+<div class="coh-verdict go">
+  <span class="flag">🧾</span>
+  <div style="flex:1">
+    <h4>« Prudent 2026 » — version 2</h4>
+    <p>Le banquier n'a pas accordé la ligne de crédit&nbsp;: <code>financement</code> repasse à <b>0</b>, la croissance à <b>5 %</b> et le délai clients à <b>60 jours</b>. <b>La version 1 n'a pas été écrasée</b> — elle est insérée dans l'historique <b>avant</b> que le document courant ne bascule, dans une transaction. Et la <b>base reste la v2 du snapshot</b>&nbsp;: éditer les hypothèses ne rebase jamais.</p>
+  </div>
+</div>
+<div class="hyp-triplet">
+  <b>Triplet de reproductibilité</b>
+  <span class="el"><i>snapshotId 6a41c8e2…4b19</i><i>versionHypotheses 2</i><i>modeleVersion 1.0.0</i></span>
+  <span>Ces trois identifiants — et eux seuls — déterminent la projection. Rejouer une <b>formule</b> ancienne reste impossible&nbsp;: <code>MODELE_PROJECTION_VERSION</code> <b>identifie</b> le modèle, elle ne l'<b>archive</b> pas.</span>
+</div>
+<div class="hyp-form-card">
+  <div class="hyp-form-h">
+    <div><b>Prudent 2026</b><span>version 2 · modifié le 26/07/2026 · base : snapshot v2 de l'exercice 2025 <b>(inchangée)</b></span></div>
+    <span class="badge badge-active"><span class="d"></span>VERSION COURANTE</span>
+  </div>
+  <div class="hyp-grp"><div class="hyp-grp-h"><b>Activité</b><span>Ce que l'entreprise vend et ce que ça lui coûte</span></div><div class="cah-form"><label><span>Croissance des produits <i>(%)</i></span><input type="text" value="5" data-hyp-champ="croissanceCaPct" /><span class="fh">s'applique au <b>total des produits</b>, pas au seul CA · <b>STORY-457</b></span></label><label><span>Taux de marge brute <i>(% des produits)</i></span><input type="text" value="18" data-hyp-champ="tauxMargePct" /><span class="fh">coût des ventes = produits × (1 − taux) — assiette des stocks et des fournisseurs</span></label><label><span>Taux de charges d'exploitation <i>(% des produits)</i></span><input type="text" value="16,2" data-hyp-champ="tauxChargesPct" /><span class="fh">⚠️ dotations aux amortissements comprises&nbsp;? Le modèle n'en a pas · <b>STORY-459</b></span></label></div></div><div class="hyp-grp"><div class="hyp-grp-h"><b>Besoin en fonds de roulement</b><span>Les trois délais, appliqués sur une <b>année commerciale de 360 jours</b></span></div><div class="cah-form"><label><span>Délai clients <i>(jours)</i></span><input type="text" value="60" data-hyp-champ="delaiBfrClientsJours" /><span class="fh">créances = produits × j/360 — <b>sur des montants HT</b>, alors qu'une créance est TTC · <b>STORY-469</b></span></label><label><span>Délai fournisseurs <i>(jours)</i></span><input type="text" value="60" data-hyp-champ="delaiBfrFournisseursJours" /><span class="fh">dettes = coût des ventes × j/360, base 360</span></label><label><span>Délai de stocks <i>(jours)</i></span><input type="text" value="75" data-hyp-champ="delaiBfrStocksJours" /><span class="fh">stocks = coût des ventes × j/360, base 360</span></label></div></div><div class="hyp-grp"><div class="hyp-grp-h"><b>Investissement &amp; financement</b><span>Montants <b>annuels récurrents</b> — le modèle ne connaît pas d'échéancier</span></div><div class="cah-form"><label><span>Investissements <i>(F CFA / an)</i></span><input type="text" value="1 200 000" data-hyp-champ="investissements" /><span class="fh">⚠️ appliqué à <b>chaque</b> exercice — 3× sur l'horizon · <b>STORY-460</b></span></label><label><span>Financement (apports, emprunts) <i>(F CFA / an)</i></span><input type="text" value="0" data-hyp-champ="financement" /><span class="fh">⚠️ <b>récurrent</b> lui aussi — et sans <b>aucune charge d'intérêt</b> · <b>STORY-467</b></span></label><label><span>Remboursements d'emprunt <i>(F CFA / an)</i></span><input type="text" value="600 000" data-hyp-champ="remboursements" /><span class="fh">sort de la trésorerie, ne passe <b>jamais</b> par le compte de résultat</span></label></div></div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Ce que l'écran peut vérifier</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>1 contrôle possible</span>
+  </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b>Structure de résultat — <code>tauxMarge − tauxCharges</code> confronté au constaté</b>
+    <p>Vos taux impliquent un résultat de <b>1,8&nbsp;%</b> des produits&nbsp;; l'exercice 2025 a réalisé <b>1,22&nbsp;%</b>. Soit <b>0,58 point</b> au-dessus. <b>C'est le seul contrôle possible</b>&nbsp;: pris isolément, ni le taux de marge ni le taux de charges n'a de constaté auquel se comparer.</p>
+    <span class="el"><i>marge 18 %</i><i>charges 16,2 %</i><i>⇒ 1,8 %</i><i>constaté 1,22 %</i></span>
+  </span>
+  <span class="coh-cat inf">Écran</span>
+  <span class="val"><b>+0,58 pt</b>vs 2025</span>
+</div>
+  
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>
+    <b>Aperçu — ce que ces hypothèses produiraient</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>lecture seule · le détail est l'écran FE-036</span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="hyp-tab">
+      <thead><tr><th>&nbsp;</th><th>N+1 · 2026</th><th>N+2 · 2027</th><th>N+3 · 2028</th></tr></thead>
+      <tbody><tr><th>Produits</th><td class="hyp-n">17&nbsp;193&nbsp;750</td><td class="hyp-n">18&nbsp;053&nbsp;438</td><td class="hyp-n">18&nbsp;956&nbsp;110</td></tr><tr><th>Résultat <b>avant impôt</b><small>aucun impôt n'est calculé</small></th><td class="hyp-n">309&nbsp;487</td><td class="hyp-n">324&nbsp;962</td><td class="hyp-n">341&nbsp;210</td></tr><tr><th>Variation du BFR<small>BFR normatif, pas le BFR réel</small></th><td class="hyp-n">164&nbsp;432</td><td class="hyp-n">172&nbsp;654</td><td class="hyp-n">181&nbsp;287</td></tr><tr><th>Trésorerie de clôture</th><td class="hyp-n neg">&minus;804&nbsp;945</td><td class="hyp-n neg">&minus;2&nbsp;452&nbsp;637</td><td class="hyp-n neg">&minus;4&nbsp;092&nbsp;714</td></tr></tbody>
+    </table>
+  </div>
+  <div class="hyp-pied">
+    <span><b>BFR normatif de l'exercice de base : 3&nbsp;288&nbsp;646</b> — soit <b>72 jours</b> de produits (stocks 2&nbsp;797&nbsp;396 + clients 2&nbsp;729&nbsp;167 − fournisseurs 2&nbsp;237&nbsp;917). Il <b>remplace</b> le BFR réel du bilan dès l'exercice de base, pour que la variation de la 1ʳᵉ année soit homogène&nbsp;; le BFR réellement constaté n'est publié nulle part. <span class="code">écart ouvert · <b>STORY-461</b></span></span>
+  </div>
+  <div class="hyp-alerte"><b>⚠️ Trésorerie négative dès N+1 (&minus;804&nbsp;945)</b> — le modèle la porte à l'<b>actif</b> du bilan simplifié comme un montant négatif&nbsp;; un découvert est une <b>ressource au passif</b>. L'équilibre reste arithmétiquement vrai, la lecture ne l'est pas.</div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+    <b>Ce que ce prévisionnel ne dit pas — la lecture d'un expert-comptable</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>8 manques, tous chiffrés sur CE jeu</span>
+  </div>
+  <div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>L'impôt n'est ni calculé, ni décaissé — et au Togo ce n'est pas 27&nbsp;% du résultat</b>
+    <p><code>resultatNet</code> est un résultat <b>avant impôt</b>, et le plan de trésorerie ne sort jamais un franc d'impôt. Or l'impôt dû est <code>max(IS&nbsp;;&nbsp;MFP)</code> — <b>IS 27&nbsp;%</b> du bénéfice (Art.&nbsp;113 CGI) contre <b>minimum forfaitaire de perception 1&nbsp;%</b> du <b>CA HT du dernier exercice clos</b>, <b>dû même en déficit</b> (Art.&nbsp;120 CGI). Sur ce dossier, en N+1&nbsp;: IS <b>83&nbsp;561</b>, MFP <b>163&nbsp;750</b> ⇒ dû <b>163&nbsp;750</b> — <b>le minimum l'emporte</b>. <b>516&nbsp;222</b> sur trois ans, absents du plan&nbsp;: la trésorerie de N+3 n'est pas &minus;4&nbsp;092&nbsp;714 mais <b>&minus;4&nbsp;608&nbsp;936</b>. <span class="code">écart ouvert · <b>STORY-458</b></span></p>
+    <span class="el"><i>résultat avant impôt 309&nbsp;487</i><i>IS 27 % = 83&nbsp;561</i><i>MFP 1 % = 163&nbsp;750</i><i>dû 163&nbsp;750</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>516&nbsp;222</b>3 ans, hors plan</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Aucune dotation aux amortissements — et la CAF est prise pour le résultat</b>
+    <p>3&nbsp;600&nbsp;000 investis sur l'horizon gonflent l'actif immobilisé net de <b>1&nbsp;561&nbsp;354</b> à <b>5&nbsp;161&nbsp;354</b> <b>sans jamais être amortis</b>&nbsp;; et <code>capaciteAutofinancement = resultatNet</code>, sans réintégration. Les deux erreurs <b>ne se compensent pas</b>&nbsp;: si le comptable loge la dotation dans <code>tauxChargesPct</code>, le résultat devient juste mais la trésorerie est <b>sous-évaluée d'autant</b>&nbsp;; s'il ne l'y loge pas, le résultat est <b>surévalué</b> et l'actif ne se déprécie jamais. <span class="code">écart ouvert · <b>STORY-459</b></span></p>
+    <span class="el"><i>investi 3 ans 3&nbsp;600&nbsp;000</i><i>dotations 0</i><i>CAF = résultat</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>3&nbsp;600&nbsp;000</b>jamais amortis</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Investissement, financement et remboursement sont <b>récurrents</b> — rien ne le dit</b>
+    <p>Les trois montants sont appliqués <b>à chaque exercice projeté</b>. Saisir «&nbsp;1&nbsp;200&nbsp;000&nbsp;» pour un véhicule acheté <b>une fois</b> en fait <b>3&nbsp;600&nbsp;000</b> sur l'horizon. C'est la ligne du contrat qui trompe le plus vite un comptable, et elle n'apparaît <b>ni dans le DTO, ni dans un libellé</b> — seulement dans un commentaire du service. Le hook «&nbsp;échéancier non uniforme&nbsp;» est documenté dans <code>projection.types.ts</code>, il n'est pas livré. <span class="code">écart ouvert · <b>STORY-460</b></span></p>
+    <span class="el"><i>investissements ×3</i><i>financement ×3</i><i>remboursements ×3</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>×3</b>sur l'horizon</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Le BFR se calcule sur des montants <b>HT</b>, alors qu'une créance et une dette sont <b>TTC</b></b>
+    <p>Le délai clients d'un cabinet se calcule <code>créances TTC / CA TTC × 360</code>. Ici les deux plus gros postes du BFR sont assis sur des montants <b>hors taxes</b>&nbsp;: à TVA 18&nbsp;% (taux unique, Art.&nbsp;195 CGI), les créances clients projetées sont minorées d'environ <b>491&nbsp;250</b> et les dettes fournisseurs d'environ <b>402&nbsp;825</b>. Et le <b>crédit ou la dette de TVA</b> lui-même n'existe pas dans le modèle. <span class="code">écart ouvert · <b>STORY-469</b></span></p>
+    <span class="el"><i>créances HT 2&nbsp;729&nbsp;167</i><i>≈ TTC 3&nbsp;220&nbsp;417</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>≈ 18 %</b>sous-évalué</span>
+</div><div class="coh-row warn">
+  <span class="ic">!</span>
+  <span class="t"><b>Un emprunt ne coûte rien&nbsp;: aucune hypothèse de <b>taux d'intérêt</b></b>
+    <p><code>financement</code> entre en trésorerie et <code>remboursements</code> en sort&nbsp;; <b>aucune charge financière</b> ne rejoint jamais le compte de résultat. Le résultat d'un plan financé par emprunt est donc identique à celui d'un plan financé par apport — ce qu'aucun banquier ne signerait. <code>tauxChargesPct</code> ne peut pas y suppléer&nbsp;: il porte sur les <b>produits</b>, pas sur l'encours de dette. <span class="code">écart ouvert · <b>STORY-467</b></span></p>
+  </span>
+  <span class="coh-cat inf">Contrat</span>
+  <span class="val"><b>0</b>charge d'intérêt</span>
+</div><div class="coh-row warn">
+  <span class="ic">!</span>
+  <span class="t"><b>L'ancre des emplois durables peut devenir <b>négative</b>, et rien ne l'interdit</b>
+    <p>L'actif immobilisé de départ n'est pas lu&nbsp;: c'est un <b>solde</b>, <code>totalActif − BFR(0) − trésorerie</code> = <b>1&nbsp;561&nbsp;354</b> ici. Il devient <b>négatif dès 95 jours</b> de délai clients sur ce dossier — un actif immobilisé net négatif, donc un bilan prévisionnel impossible. Le contrôle <code>ecart&nbsp;=&nbsp;0</code> ne peut pas le voir&nbsp;: il est nul <b>par construction</b>, exactement comme <code>coherenceResultat</code> dans la liasse. <span class="code">écart ouvert · <b>STORY-463</b></span></p>
+    <span class="el"><i>ancre 1&nbsp;561&nbsp;354</i><i>délai clients saisi 60 j</i><i>bascule à 95 j</i></span>
+  </span>
+  <span class="coh-cat inf">Contrat</span>
+  <span class="val"><b>95 j</b>seuil de bascule</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Aucune charge n'est <b>fixe</b> — le levier d'exploitation est inexprimable</b>
+    <p>Marge et charges sont toutes deux un <b>pourcentage des produits</b>&nbsp;: il n'existe aucune charge de structure — ni loyer, ni masse salariale, ni assurance. Conséquence directe, lisible dans le tableau au-dessus&nbsp;: le résultat croît de <b>5&nbsp;%</b> quand les produits croissent de <b>5&nbsp;%</b> — <b>exactement le même taux</b>. Or c'est précisément l'inverse qu'un prévisionnel sert à montrer&nbsp;: qu'au-delà d'un point mort, la croissance profite plus que proportionnellement. Un plan sans charges fixes n'a <b>ni point mort, ni seuil de rentabilité</b> — les deux nombres qu'un banquier cherche en premier. <span class="code">écart ouvert · <b>STORY-472</b></span></p>
+    <span class="el"><i>produits +5 %</i><i>résultat +5 %</i><i>point mort : non calculable</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>0</b>charge fixe</span>
+</div><div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b>La <b>durée</b> de l'exercice de base n'est publiée nulle part</b>
+    <p>La DSF porte une colonne «&nbsp;Durée (en mois)&nbsp;»&nbsp;: un premier exercice, ou un changement de date de clôture, donne couramment un exercice de <b>18</b> ou de <b>6</b> mois. Appliquer une croissance annuelle à des produits qui ne couvrent pas douze mois fausse tout l'horizon, et <b>ni <code>AncresProjection</code> ni <code>HypothesesBase</code> ne portent la durée</b> — l'écran ne peut même pas prévenir. <span class="code">écart ouvert · <b>STORY-468</b></span></p>
+  </span>
+  <span class="coh-cat inf">Contrat</span>
+  <span class="val"><b>—</b>non publiée</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    Aucun de ces huit points n'est un défaut de l'écran&nbsp;: ce sont les <b>frontières assumées du modèle 1.0.0</b>, dont trois sont explicitement annoncées comme des <i>hooks</i> dans <code>projection.types.ts</code>. Ce qui n'est pas défendable, c'est de <b>rendre un prévisionnel sans les afficher</b> — un dirigeant qui lit «&nbsp;résultat net&nbsp;» et «&nbsp;trésorerie de clôture&nbsp;» croit lire son avenir, pas un modèle simplifié.
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+    <b>Versions du jeu «&nbsp;Prudent 2026&nbsp;» — append-only</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>2 versions · courante : 2</span>
+  </div>
+  <div class="vjrn-row">
+  <span class="vjrn-ts">24/07/2026 à 10:22</span>
+  <span class="vjrn-t ">version 1 · figée</span>
+  <span class="vjrn-q">Création du jeu sur la base figée v2<small>collection <code>versions_hypotheses</code> — append-only</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="`versions_hypotheses` ne stocke NI userId NI motif — contrairement au journal de la liasse, qui porte au moins un userId">Auteur non tracé</b><code>versionHypothesesId b7f2…41c8</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">26/07/2026 à 16:05</span>
+  <span class="vjrn-t ">version 2 · courante</span>
+  <span class="vjrn-q">Croissance ramenée de 8 à 5 %, délai clients porté à 60 j, financement remis à 0<small>document courant</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="`versions_hypotheses` ne stocke NI userId NI motif — contrairement au journal de la liasse, qui porte au moins un userId">Auteur non tracé</b><code>versionHypothesesId 5f0d…a913 (le jeu)</code></span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    Éditer <b>n'écrase pas</b>&nbsp;: la version sortante est insérée dans l'historique <b>puis</b> le document courant bascule, <b>dans une transaction</b>. C'est ce qui rend le triplet <code>(snapshotId, versionHypothesesId, modeleVersion)</code> rejouable — et c'est ici qu'il se constitue. <b>Ce que l'API ne sert pas</b>&nbsp;: ni l'auteur, ni le motif de l'édition, ni la comparaison de deux versions.
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+    <b>Qui peut le faire, et qui le saura — la gouvernance du jeu d'hypothèses</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>2 manques &middot; aucun n'est visible dans le contrat</span>
+  </div>
+  <div class="coh-row ko">
+    <span class="ic">!</span>
+    <span class="t"><b>Un <b>collaborateur</b> crée et modifie seul les hypothèses — sans aucun second regard</b>
+      <p><code>POST</code> et <code>PUT</code> sont ouverts au <code>TENANT_USER</code> comme au <code>TENANT_ADMIN</code>, et il n'existe <b>aucun geste de validation</b> d'un jeu d'hypothèses. Comparez avec les deux écrans voisins&nbsp;: à la <b>table de passage</b>, proposer une surcharge est ouvert à tous mais la <b>valider</b> est réservé à l'administrateur&nbsp;; la <b>liasse</b> ne se fige que sur un acte explicite. Ici, un prévisionnel remis à une banque peut voir sa croissance passer de 5 à 15&nbsp;% sans que personne d'autre n'ait à le savoir. <span class="code">écart ouvert · <b>STORY-470</b></span></p>
+      <span class="el"><i>@Roles(TENANT_ADMIN, TENANT_USER)</i><i>aucun /valider</i></span>
+    </span>
+    <span class="coh-cat blk">Bloquant métier</span>
+    <span class="val"><b>2 rôles</b>mêmes droits</span>
+  </div>
+  <div class="coh-row ko">
+    <span class="ic">!</span>
+    <span class="t"><b>Rien n'est <b>tracé</b>&nbsp;: ni auteur, ni motif, ni événement de journal</b>
+      <p><code>AuditType</code> compte huit actes — <code>JEU_CREE</code>, <code>JEU_VALIDE</code>, <code>EXERCICE_CLOS</code>, <code>EXPORT_EFFECTUE</code>… — et <b>aucun ne concerne les hypothèses</b>&nbsp;; <code>JeuHypothesesController</code> n'injecte même pas <code>AuditService</code>. La collection <code>versions_hypotheses</code> ne stocke <b>ni <code>userId</code> ni motif</b> — moins que le journal de la liasse, qui porte au moins un identifiant. L'historique dit donc <i>ce qui</i> a changé, jamais <b>qui</b> ni <b>pourquoi</b>&nbsp;: six mois plus tard, personne ne peut expliquer pourquoi la croissance est passée de 8 à 5&nbsp;%. <span class="code">écart ouvert · <b>STORY-471</b></span></p>
+      <span class="el"><i>versions_hypotheses : tenantId, dossierId, jeuHypothesesId, version, hypotheses, base, createdAt</i></span>
+    </span>
+    <span class="coh-cat blk">Bloquant métier</span>
+    <span class="val"><b>0</b>événement</span>
+  </div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    Ces deux manques ne se voient <b>pas dans le contrat</b>, qui est parfaitement cohérent&nbsp;: ils n'apparaissent qu'en mettant l'écran fini à côté de ses voisins. Un prévisionnel est un document <b>remis à un tiers</b> — il engage le cabinet autant qu'une liasse, et il est aujourd'hui le seul objet du module que <b>n'importe qui peut changer sans laisser de trace</b>.
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+    <b>Jeux d'hypothèses de ce dossier</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>1 jeu · nom unique par dossier</span>
+  </div>
+  <div class="hyp-jeu" data-hyp-actif="true">
+  <span class="hyp-jeu-n"><b>Prudent 2026</b><span class="badge badge-active"><span class="d"></span>courant</span><small>version 2 · base : snapshot v2 de l'exercice 2025</small></span>
+  <span class="hyp-jeu-p"><i>croissance 5 %</i><i>marge 18 %</i><i>charges 16,2 %</i><i>clients 60 j</i><i>invest. 1&nbsp;200&nbsp;000/an</i></span>
+  <span class="hyp-jeu-a"><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="dupliquer">Dupliquer</button><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="supprimer" title="Aucune route de suppression n'existe">Supprimer</button></span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    <b>«&nbsp;Dupliquer&nbsp;» et «&nbsp;Supprimer&nbsp;» n'existent pas côté serveur.</b> Le contrôleur expose <code>POST</code> / <code>GET</code> / <code>GET&nbsp;:id</code> / <code>GET&nbsp;:id/versions</code> / <code>PUT&nbsp;:id</code>, et rien d'autre. Dupliquer ne peut être qu'un <code>POST</code> de plus — qui <b>recapture le dernier snapshot</b> au lieu de reprendre la base de l'original <span class="code">écart ouvert · <b>STORY-465</b></span> — et supprimer est <b>impossible</b> <span class="code">écart ouvert · <b>STORY-464</b></span>. Une route <code>POST&nbsp;…/:id/dupliquer</code> n'existe pas davantage <span class="code">écart ouvert · <b>STORY-466</b></span>.
+  </div>
+</div>
+<div class="vact">
+  <div class="txt"><b>Comparer deux scénarios</b><p>Un second jeu d'hypothèses sur la <b>même base</b> permettra de lire l'écart comme un effet des hypothèses, et de rien d'autre.</p></div>
+  <div class="go"><button class="btn btn-primary" type="button" data-hyp-open="dupliquer">Dupliquer en un second scénario</button></div>
+</div>
+
+</div>
+<div data-bil-hyp-slot="duplique" hidden data-hyp-base="2" data-hyp-jeu="Optimiste 2026" data-hyp-version="1" data-hyp-jeux="2">
+<div class="vfr"><span class="vfr-s done"><span class="n">1</span>Base figée</span><span class="vfr-a">→</span><span class="vfr-s now"><span class="n">2</span>Jeu d'hypothèses nommé</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">3</span>Projection 3 ans</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Scénarios comparés</span><span style="flex:1"></span><span class="code">les étapes 3 et 4 sont l'écran <b>FE-036</b> — cet onglet s'arrête aux hypothèses</span></div>
+<div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+    <b>La base du prévisionnel — ce que les hypothèses vont faire varier</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>BASE FIGÉE — version 2</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Snapshot de liasse</div><div class="ref-v">Exercice 2025 · version 2</div><div class="ref-sum">snapshotId 6a41c8e2…4b19 · figée le 22/07/2026</div><div class="ref-txt">Le prévisionnel ne lit <b>jamais</b> le brouillon en cours&nbsp;: il part d'un <b>snapshot immuable</b>, et cette base reste <b>figée</b> même quand les hypothèses changent.</div></div>
+    <div class="ref-item"><div class="ref-k">Assiette de la croissance</div><div class="ref-v">16&nbsp;375&nbsp;000</div><div class="ref-sum">ancres.produitsBase</div><div class="ref-txt">⚠️ C'est le <b>total des produits</b> — produits financiers, HAO et reprises compris — <b>pas le chiffre d'affaires</b>. Le paramètre s'appelle pourtant <code>croissanceCaPct</code>&nbsp;: appliquer une croissance commerciale à des reprises de provisions n'a pas de sens. <span class="code">écart ouvert · <b>STORY-457</b></span></div></div>
+    <div class="ref-item"><div class="ref-k">Trésorerie d'ouverture de N+1</div><div class="ref-v">850&nbsp;000</div><div class="ref-sum">tft.tresorerieClotureN · ancrée</div><div class="ref-txt">L'ancre est la trésorerie <b>lue au Bilan</b>, et non le poste <code>ZH</code> de la cascade du TFT (<b>1&nbsp;755&nbsp;000</b>)&nbsp;: la réponse porte les deux, et c'est la première qui sert de point de départ.</div></div>
+    <div class="ref-item"><div class="ref-k">Structure constatée en 2025</div><div class="ref-v">200&nbsp;000 · 1,22&nbsp;% des produits</div><div class="ref-sum">produits 16&nbsp;375&nbsp;000 − charges 16&nbsp;175&nbsp;000</div><div class="ref-txt">Le <b>seul</b> repère auquel confronter vos taux&nbsp;: les ancres publient les deux totaux et le résultat, <b>jamais la marge brute</b>. On peut donc vérifier <code>marge − charges</code>, pas <code>marge</code> seule. <span class="code">écart ouvert · <b>STORY-462</b></span></div></div>
+  </div>
+</div>
+<div class="coh-verdict go">
+  <span class="flag">⚖️</span>
+  <div style="flex:1">
+    <h4>Deux scénarios sur la même base — c'est la condition de la comparaison</h4>
+    <p>«&nbsp;Optimiste 2026&nbsp;» reprend les paramètres de «&nbsp;Prudent 2026&nbsp;» et les ouvre&nbsp;: croissance <b>15 %</b>, marge <b>20 %</b>, délai clients ramené à <b>30 jours</b>, et un investissement de <b>3 000 000</b>. <b>Les deux jeux pointent le même <code>snapshotId</code></b> — sans quoi l'écart lu ne serait pas imputable aux hypothèses.</p><p>⚠️ <b>Rien dans le produit ne garantit cette homogénéité.</b> «&nbsp;Dupliquer&nbsp;» n'existe pas côté serveur&nbsp;: c'est un <code>POST</code> de plus, et un <code>POST</code> capture le <b>dernier</b> snapshot du jeu d'états. Si la liasse avait été rouverte puis re-validée entre les deux créations, la copie serait partie sur une <b>autre base que l'original</b>, sans que rien ne le dise. <span class="code">écart ouvert · <b>STORY-465</b></span></p>
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+    <b>Jeux d'hypothèses de ce dossier</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>2 jeux · nom unique par dossier</span>
+  </div>
+  <div class="hyp-jeu">
+  <span class="hyp-jeu-n"><b>Prudent 2026</b><small>version 2 · base : snapshot v2 de l'exercice 2025</small></span>
+  <span class="hyp-jeu-p"><i>croissance 5 %</i><i>marge 18 %</i><i>charges 16,2 %</i><i>clients 60 j</i><i>invest. 1&nbsp;200&nbsp;000/an</i></span>
+  <span class="hyp-jeu-a"><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="dupliquer">Dupliquer</button><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="supprimer" title="Aucune route de suppression n'existe">Supprimer</button></span>
+</div><div class="hyp-jeu" data-hyp-actif="true">
+  <span class="hyp-jeu-n"><b>Optimiste 2026</b><span class="badge badge-active"><span class="d"></span>courant</span><small>version 1 · base : snapshot v2 de l'exercice 2025</small></span>
+  <span class="hyp-jeu-p"><i>croissance 15 %</i><i>marge 20 %</i><i>charges 16,5 %</i><i>clients 30 j</i><i>invest. 3&nbsp;000&nbsp;000/an</i></span>
+  <span class="hyp-jeu-a"><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="dupliquer">Dupliquer</button><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="supprimer" title="Aucune route de suppression n'existe">Supprimer</button></span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    <b>«&nbsp;Dupliquer&nbsp;» et «&nbsp;Supprimer&nbsp;» n'existent pas côté serveur.</b> Le contrôleur expose <code>POST</code> / <code>GET</code> / <code>GET&nbsp;:id</code> / <code>GET&nbsp;:id/versions</code> / <code>PUT&nbsp;:id</code>, et rien d'autre. Dupliquer ne peut être qu'un <code>POST</code> de plus — qui <b>recapture le dernier snapshot</b> au lieu de reprendre la base de l'original <span class="code">écart ouvert · <b>STORY-465</b></span> — et supprimer est <b>impossible</b> <span class="code">écart ouvert · <b>STORY-464</b></span>. Une route <code>POST&nbsp;…/:id/dupliquer</code> n'existe pas davantage <span class="code">écart ouvert · <b>STORY-466</b></span>.
+  </div>
+</div>
+<div class="hyp-form-card">
+  <div class="hyp-form-h">
+    <div><b>Optimiste 2026</b><span>version 1 · créé le 26/07/2026 par duplication · base : snapshot v2 de l'exercice 2025</span></div>
+    <span class="badge badge-active"><span class="d"></span>VERSION COURANTE</span>
+  </div>
+  <div class="hyp-grp"><div class="hyp-grp-h"><b>Activité</b><span>Ce que l'entreprise vend et ce que ça lui coûte</span></div><div class="cah-form"><label><span>Croissance des produits <i>(%)</i></span><input type="text" value="15" data-hyp-champ="croissanceCaPct" /><span class="fh">s'applique au <b>total des produits</b>, pas au seul CA · <b>STORY-457</b></span></label><label><span>Taux de marge brute <i>(% des produits)</i></span><input type="text" value="20" data-hyp-champ="tauxMargePct" /><span class="fh">coût des ventes = produits × (1 − taux) — assiette des stocks et des fournisseurs</span></label><label><span>Taux de charges d'exploitation <i>(% des produits)</i></span><input type="text" value="16,5" data-hyp-champ="tauxChargesPct" /><span class="fh">⚠️ dotations aux amortissements comprises&nbsp;? Le modèle n'en a pas · <b>STORY-459</b></span></label></div></div><div class="hyp-grp"><div class="hyp-grp-h"><b>Besoin en fonds de roulement</b><span>Les trois délais, appliqués sur une <b>année commerciale de 360 jours</b></span></div><div class="cah-form"><label><span>Délai clients <i>(jours)</i></span><input type="text" value="30" data-hyp-champ="delaiBfrClientsJours" /><span class="fh">créances = produits × j/360 — <b>sur des montants HT</b>, alors qu'une créance est TTC · <b>STORY-469</b></span></label><label><span>Délai fournisseurs <i>(jours)</i></span><input type="text" value="75" data-hyp-champ="delaiBfrFournisseursJours" /><span class="fh">dettes = coût des ventes × j/360, base 360</span></label><label><span>Délai de stocks <i>(jours)</i></span><input type="text" value="60" data-hyp-champ="delaiBfrStocksJours" /><span class="fh">stocks = coût des ventes × j/360, base 360</span></label></div></div><div class="hyp-grp"><div class="hyp-grp-h"><b>Investissement &amp; financement</b><span>Montants <b>annuels récurrents</b> — le modèle ne connaît pas d'échéancier</span></div><div class="cah-form"><label><span>Investissements <i>(F CFA / an)</i></span><input type="text" value="3 000 000" data-hyp-champ="investissements" /><span class="fh">⚠️ appliqué à <b>chaque</b> exercice — 3× sur l'horizon · <b>STORY-460</b></span></label><label><span>Financement (apports, emprunts) <i>(F CFA / an)</i></span><input type="text" value="2 000 000" data-hyp-champ="financement" /><span class="fh">⚠️ <b>récurrent</b> lui aussi — et sans <b>aucune charge d'intérêt</b> · <b>STORY-467</b></span></label><label><span>Remboursements d'emprunt <i>(F CFA / an)</i></span><input type="text" value="600 000" data-hyp-champ="remboursements" /><span class="fh">sort de la trésorerie, ne passe <b>jamais</b> par le compte de résultat</span></label></div></div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Ce que l'écran peut vérifier</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>1 contrôle possible</span>
+  </div>
+  <div class="coh-row warn">
+  <span class="ic">!</span>
+  <span class="t"><b>Structure de résultat — <code>tauxMarge − tauxCharges</code> confronté au constaté</b>
+    <p>Vos taux impliquent un résultat de <b>3,5&nbsp;%</b> des produits&nbsp;; l'exercice 2025 a réalisé <b>1,22&nbsp;%</b>. Soit <b>2,28 points</b> au-dessus. <b>C'est le seul contrôle possible</b>&nbsp;: pris isolément, ni le taux de marge ni le taux de charges n'a de constaté auquel se comparer.</p>
+    <span class="el"><i>marge 20 %</i><i>charges 16,5 %</i><i>⇒ 3,5 %</i><i>constaté 1,22 %</i></span>
+  </span>
+  <span class="coh-cat inf">Écran</span>
+  <span class="val"><b>+2,28 pt</b>vs 2025</span>
+</div>
+  
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>
+    <b>Aperçu — « Optimiste 2026 », et l'effet qui surprend</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>lecture seule · le détail est l'écran FE-036</span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="hyp-tab">
+      <thead><tr><th>&nbsp;</th><th>N+1 · 2026</th><th>N+2 · 2027</th><th>N+3 · 2028</th></tr></thead>
+      <tbody><tr><th>Produits</th><td class="hyp-n">18&nbsp;831&nbsp;250</td><td class="hyp-n">21&nbsp;655&nbsp;938</td><td class="hyp-n">24&nbsp;904&nbsp;329</td></tr><tr><th>Résultat <b>avant impôt</b><small>aucun impôt n'est calculé</small></th><td class="hyp-n">659&nbsp;094</td><td class="hyp-n">757&nbsp;958</td><td class="hyp-n">871&nbsp;652</td></tr><tr><th>Variation du BFR<small>BFR normatif, pas le BFR réel</small></th><td class="hyp-n">122&nbsp;813</td><td class="hyp-n">141&nbsp;235</td><td class="hyp-n">162&nbsp;420</td></tr><tr><th>Trésorerie de clôture</th><td class="hyp-n neg">&minus;213&nbsp;719</td><td class="hyp-n neg">&minus;1&nbsp;196&nbsp;996</td><td class="hyp-n neg">&minus;2&nbsp;087&nbsp;764</td></tr></tbody>
+    </table>
+  </div>
+  <div class="hyp-pied">
+    <span><b>BFR normatif de l'exercice de base : 818&nbsp;749</b> — soit <b>18 jours</b> de produits (stocks 2&nbsp;183&nbsp;333 + clients 1&nbsp;364&nbsp;583 − fournisseurs 2&nbsp;729&nbsp;167). Il <b>remplace</b> le BFR réel du bilan dès l'exercice de base, pour que la variation de la 1ʳᵉ année soit homogène&nbsp;; le BFR réellement constaté n'est publié nulle part. <span class="code">écart ouvert · <b>STORY-461</b></span></span>
+  </div>
+  <div class="hyp-alerte"><b>⚠️ Trésorerie négative dès N+1 (&minus;213&nbsp;719)</b> — le modèle la porte à l'<b>actif</b> du bilan simplifié comme un montant négatif&nbsp;; un découvert est une <b>ressource au passif</b>. L'équilibre reste arithmétiquement vrai, la lecture ne l'est pas.</div>
+</div>
+<div class="coh-verdict stop">
+  <span class="flag">⚠️</span>
+  <div style="flex:1">
+    <h4>Le scénario <b>optimiste</b> est celui qui creuse le plus la trésorerie — et ce n'est pas un paradoxe</h4>
+    <p>Croissance et marge sont meilleures, le résultat avant impôt triple&nbsp;— et pourtant la trésorerie tombe à <b>&minus;2 087 764</b> en N+3. La cause est entière dans <b>une</b> ligne du contrat&nbsp;: l'investissement de 3 000 000 est <b>récurrent</b>, donc appliqué <b>trois fois</b> (9 000 000), et il n'est financé qu'à hauteur de 1 400 000 nets par an. Un comptable qui saisit le prix d'<b>un</b> camion obtient le prix de <b>trois</b>. <span class="code">écart ouvert · <b>STORY-460</b></span></p>
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+    <b>Ce que ce prévisionnel ne dit pas — la lecture d'un expert-comptable</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>8 manques, tous chiffrés sur CE jeu</span>
+  </div>
+  <div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>L'impôt n'est ni calculé, ni décaissé — et au Togo ce n'est pas 27&nbsp;% du résultat</b>
+    <p><code>resultatNet</code> est un résultat <b>avant impôt</b>, et le plan de trésorerie ne sort jamais un franc d'impôt. Or l'impôt dû est <code>max(IS&nbsp;;&nbsp;MFP)</code> — <b>IS 27&nbsp;%</b> du bénéfice (Art.&nbsp;113 CGI) contre <b>minimum forfaitaire de perception 1&nbsp;%</b> du <b>CA HT du dernier exercice clos</b>, <b>dû même en déficit</b> (Art.&nbsp;120 CGI). Sur ce dossier, en N+1&nbsp;: IS <b>177&nbsp;955</b>, MFP <b>163&nbsp;750</b> ⇒ dû <b>177&nbsp;955</b>. <b>617&nbsp;950</b> sur trois ans, absents du plan&nbsp;: la trésorerie de N+3 n'est pas &minus;2&nbsp;087&nbsp;764 mais <b>&minus;2&nbsp;705&nbsp;714</b>. <span class="code">écart ouvert · <b>STORY-458</b></span></p>
+    <span class="el"><i>résultat avant impôt 659&nbsp;094</i><i>IS 27 % = 177&nbsp;955</i><i>MFP 1 % = 163&nbsp;750</i><i>dû 177&nbsp;955</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>617&nbsp;950</b>3 ans, hors plan</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Aucune dotation aux amortissements — et la CAF est prise pour le résultat</b>
+    <p>9&nbsp;000&nbsp;000 investis sur l'horizon gonflent l'actif immobilisé net de <b>4&nbsp;031&nbsp;251</b> à <b>13&nbsp;031&nbsp;251</b> <b>sans jamais être amortis</b>&nbsp;; et <code>capaciteAutofinancement = resultatNet</code>, sans réintégration. Les deux erreurs <b>ne se compensent pas</b>&nbsp;: si le comptable loge la dotation dans <code>tauxChargesPct</code>, le résultat devient juste mais la trésorerie est <b>sous-évaluée d'autant</b>&nbsp;; s'il ne l'y loge pas, le résultat est <b>surévalué</b> et l'actif ne se déprécie jamais. <span class="code">écart ouvert · <b>STORY-459</b></span></p>
+    <span class="el"><i>investi 3 ans 9&nbsp;000&nbsp;000</i><i>dotations 0</i><i>CAF = résultat</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>9&nbsp;000&nbsp;000</b>jamais amortis</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Investissement, financement et remboursement sont <b>récurrents</b> — rien ne le dit</b>
+    <p>Les trois montants sont appliqués <b>à chaque exercice projeté</b>. Saisir «&nbsp;3&nbsp;000&nbsp;000&nbsp;» pour un véhicule acheté <b>une fois</b> en fait <b>9&nbsp;000&nbsp;000</b> sur l'horizon. C'est la ligne du contrat qui trompe le plus vite un comptable, et elle n'apparaît <b>ni dans le DTO, ni dans un libellé</b> — seulement dans un commentaire du service. Le hook «&nbsp;échéancier non uniforme&nbsp;» est documenté dans <code>projection.types.ts</code>, il n'est pas livré. <span class="code">écart ouvert · <b>STORY-460</b></span></p>
+    <span class="el"><i>investissements ×3</i><i>financement ×3</i><i>remboursements ×3</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>×3</b>sur l'horizon</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Le BFR se calcule sur des montants <b>HT</b>, alors qu'une créance et une dette sont <b>TTC</b></b>
+    <p>Le délai clients d'un cabinet se calcule <code>créances TTC / CA TTC × 360</code>. Ici les deux plus gros postes du BFR sont assis sur des montants <b>hors taxes</b>&nbsp;: à TVA 18&nbsp;% (taux unique, Art.&nbsp;195 CGI), les créances clients projetées sont minorées d'environ <b>245&nbsp;625</b> et les dettes fournisseurs d'environ <b>491&nbsp;250</b>. Et le <b>crédit ou la dette de TVA</b> lui-même n'existe pas dans le modèle. <span class="code">écart ouvert · <b>STORY-469</b></span></p>
+    <span class="el"><i>créances HT 1&nbsp;364&nbsp;583</i><i>≈ TTC 1&nbsp;610&nbsp;208</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>≈ 18 %</b>sous-évalué</span>
+</div><div class="coh-row warn">
+  <span class="ic">!</span>
+  <span class="t"><b>Un emprunt ne coûte rien&nbsp;: aucune hypothèse de <b>taux d'intérêt</b></b>
+    <p><code>financement</code> entre en trésorerie et <code>remboursements</code> en sort&nbsp;; <b>aucune charge financière</b> ne rejoint jamais le compte de résultat. Le résultat d'un plan financé par emprunt est donc identique à celui d'un plan financé par apport — ce qu'aucun banquier ne signerait. <code>tauxChargesPct</code> ne peut pas y suppléer&nbsp;: il porte sur les <b>produits</b>, pas sur l'encours de dette. <span class="code">écart ouvert · <b>STORY-467</b></span></p>
+  </span>
+  <span class="coh-cat inf">Contrat</span>
+  <span class="val"><b>0</b>charge d'intérêt</span>
+</div><div class="coh-row warn">
+  <span class="ic">!</span>
+  <span class="t"><b>L'ancre des emplois durables peut devenir <b>négative</b>, et rien ne l'interdit</b>
+    <p>L'actif immobilisé de départ n'est pas lu&nbsp;: c'est un <b>solde</b>, <code>totalActif − BFR(0) − trésorerie</code> = <b>4&nbsp;031&nbsp;251</b> ici. Il devient <b>négatif dès 119 jours</b> de délai clients sur ce dossier — un actif immobilisé net négatif, donc un bilan prévisionnel impossible. Le contrôle <code>ecart&nbsp;=&nbsp;0</code> ne peut pas le voir&nbsp;: il est nul <b>par construction</b>, exactement comme <code>coherenceResultat</code> dans la liasse. <span class="code">écart ouvert · <b>STORY-463</b></span></p>
+    <span class="el"><i>ancre 4&nbsp;031&nbsp;251</i><i>délai clients saisi 30 j</i><i>bascule à 119 j</i></span>
+  </span>
+  <span class="coh-cat inf">Contrat</span>
+  <span class="val"><b>119 j</b>seuil de bascule</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b>Aucune charge n'est <b>fixe</b> — le levier d'exploitation est inexprimable</b>
+    <p>Marge et charges sont toutes deux un <b>pourcentage des produits</b>&nbsp;: il n'existe aucune charge de structure — ni loyer, ni masse salariale, ni assurance. Conséquence directe, lisible dans le tableau au-dessus&nbsp;: le résultat croît de <b>15&nbsp;%</b> quand les produits croissent de <b>15&nbsp;%</b> — <b>exactement le même taux</b>. Or c'est précisément l'inverse qu'un prévisionnel sert à montrer&nbsp;: qu'au-delà d'un point mort, la croissance profite plus que proportionnellement. Un plan sans charges fixes n'a <b>ni point mort, ni seuil de rentabilité</b> — les deux nombres qu'un banquier cherche en premier. <span class="code">écart ouvert · <b>STORY-472</b></span></p>
+    <span class="el"><i>produits +15 %</i><i>résultat +15 %</i><i>point mort : non calculable</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant métier</span>
+  <span class="val"><b>0</b>charge fixe</span>
+</div><div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b>La <b>durée</b> de l'exercice de base n'est publiée nulle part</b>
+    <p>La DSF porte une colonne «&nbsp;Durée (en mois)&nbsp;»&nbsp;: un premier exercice, ou un changement de date de clôture, donne couramment un exercice de <b>18</b> ou de <b>6</b> mois. Appliquer une croissance annuelle à des produits qui ne couvrent pas douze mois fausse tout l'horizon, et <b>ni <code>AncresProjection</code> ni <code>HypothesesBase</code> ne portent la durée</b> — l'écran ne peut même pas prévenir. <span class="code">écart ouvert · <b>STORY-468</b></span></p>
+  </span>
+  <span class="coh-cat inf">Contrat</span>
+  <span class="val"><b>—</b>non publiée</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    Aucun de ces huit points n'est un défaut de l'écran&nbsp;: ce sont les <b>frontières assumées du modèle 1.0.0</b>, dont trois sont explicitement annoncées comme des <i>hooks</i> dans <code>projection.types.ts</code>. Ce qui n'est pas défendable, c'est de <b>rendre un prévisionnel sans les afficher</b> — un dirigeant qui lit «&nbsp;résultat net&nbsp;» et «&nbsp;trésorerie de clôture&nbsp;» croit lire son avenir, pas un modèle simplifié.
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+    <b>Qui peut le faire, et qui le saura — la gouvernance du jeu d'hypothèses</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>2 manques &middot; aucun n'est visible dans le contrat</span>
+  </div>
+  <div class="coh-row ko">
+    <span class="ic">!</span>
+    <span class="t"><b>Un <b>collaborateur</b> crée et modifie seul les hypothèses — sans aucun second regard</b>
+      <p><code>POST</code> et <code>PUT</code> sont ouverts au <code>TENANT_USER</code> comme au <code>TENANT_ADMIN</code>, et il n'existe <b>aucun geste de validation</b> d'un jeu d'hypothèses. Comparez avec les deux écrans voisins&nbsp;: à la <b>table de passage</b>, proposer une surcharge est ouvert à tous mais la <b>valider</b> est réservé à l'administrateur&nbsp;; la <b>liasse</b> ne se fige que sur un acte explicite. Ici, un prévisionnel remis à une banque peut voir sa croissance passer de 5 à 15&nbsp;% sans que personne d'autre n'ait à le savoir. <span class="code">écart ouvert · <b>STORY-470</b></span></p>
+      <span class="el"><i>@Roles(TENANT_ADMIN, TENANT_USER)</i><i>aucun /valider</i></span>
+    </span>
+    <span class="coh-cat blk">Bloquant métier</span>
+    <span class="val"><b>2 rôles</b>mêmes droits</span>
+  </div>
+  <div class="coh-row ko">
+    <span class="ic">!</span>
+    <span class="t"><b>Rien n'est <b>tracé</b>&nbsp;: ni auteur, ni motif, ni événement de journal</b>
+      <p><code>AuditType</code> compte huit actes — <code>JEU_CREE</code>, <code>JEU_VALIDE</code>, <code>EXERCICE_CLOS</code>, <code>EXPORT_EFFECTUE</code>… — et <b>aucun ne concerne les hypothèses</b>&nbsp;; <code>JeuHypothesesController</code> n'injecte même pas <code>AuditService</code>. La collection <code>versions_hypotheses</code> ne stocke <b>ni <code>userId</code> ni motif</b> — moins que le journal de la liasse, qui porte au moins un identifiant. L'historique dit donc <i>ce qui</i> a changé, jamais <b>qui</b> ni <b>pourquoi</b>&nbsp;: six mois plus tard, personne ne peut expliquer pourquoi la croissance est passée de 8 à 5&nbsp;%. <span class="code">écart ouvert · <b>STORY-471</b></span></p>
+      <span class="el"><i>versions_hypotheses : tenantId, dossierId, jeuHypothesesId, version, hypotheses, base, createdAt</i></span>
+    </span>
+    <span class="coh-cat blk">Bloquant métier</span>
+    <span class="val"><b>0</b>événement</span>
+  </div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    Ces deux manques ne se voient <b>pas dans le contrat</b>, qui est parfaitement cohérent&nbsp;: ils n'apparaissent qu'en mettant l'écran fini à côté de ses voisins. Un prévisionnel est un document <b>remis à un tiers</b> — il engage le cabinet autant qu'une liasse, et il est aujourd'hui le seul objet du module que <b>n'importe qui peut changer sans laisser de trace</b>.
+  </div>
+</div>
+<div class="vact">
+  <div class="txt"><b>Comparer les deux scénarios</b><p>La comparaison est l'écran <b>FE-036</b>. Elle refusera en <code>409 BASES_HETEROGENES</code> deux jeux ancrés sur des <b>exercices</b> différents, et acceptera avec un avertissement <code>baseHomogene: false</code> deux jeux ancrés sur deux <b>versions</b> du même exercice.</p></div>
+  <div class="go"><button class="btn btn-primary" type="button" disabled title="FE-036 — comparaison de scénarios">Comparer Prudent / Optimiste <span class="soon">FE-036</span></button></div>
+</div>
+
+</div>
+<div data-bil-hyp-slot="impasse" hidden data-hyp-base="2" data-hyp-jeu="Optismiste 2026" data-hyp-version="1" data-hyp-jeux="3">
+<div class="vfr"><span class="vfr-s done"><span class="n">1</span>Base figée</span><span class="vfr-a">→</span><span class="vfr-s now"><span class="n">2</span>Jeu d'hypothèses nommé</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">3</span>Projection 3 ans</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Scénarios comparés</span><span style="flex:1"></span><span class="code">les étapes 3 et 4 sont l'écran <b>FE-036</b> — cet onglet s'arrête aux hypothèses</span></div>
+<div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+    <b>La base du prévisionnel — ce que les hypothèses vont faire varier</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>BASE FIGÉE — version 2</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Snapshot de liasse</div><div class="ref-v">Exercice 2025 · version 2</div><div class="ref-sum">snapshotId 6a41c8e2…4b19 · figée le 22/07/2026</div><div class="ref-txt">Le prévisionnel ne lit <b>jamais</b> le brouillon en cours&nbsp;: il part d'un <b>snapshot immuable</b>, et cette base reste <b>figée</b> même quand les hypothèses changent.</div></div>
+    <div class="ref-item"><div class="ref-k">Assiette de la croissance</div><div class="ref-v">16&nbsp;375&nbsp;000</div><div class="ref-sum">ancres.produitsBase</div><div class="ref-txt">⚠️ C'est le <b>total des produits</b> — produits financiers, HAO et reprises compris — <b>pas le chiffre d'affaires</b>. Le paramètre s'appelle pourtant <code>croissanceCaPct</code>&nbsp;: appliquer une croissance commerciale à des reprises de provisions n'a pas de sens. <span class="code">écart ouvert · <b>STORY-457</b></span></div></div>
+    <div class="ref-item"><div class="ref-k">Trésorerie d'ouverture de N+1</div><div class="ref-v">850&nbsp;000</div><div class="ref-sum">tft.tresorerieClotureN · ancrée</div><div class="ref-txt">L'ancre est la trésorerie <b>lue au Bilan</b>, et non le poste <code>ZH</code> de la cascade du TFT (<b>1&nbsp;755&nbsp;000</b>)&nbsp;: la réponse porte les deux, et c'est la première qui sert de point de départ.</div></div>
+    <div class="ref-item"><div class="ref-k">Structure constatée en 2025</div><div class="ref-v">200&nbsp;000 · 1,22&nbsp;% des produits</div><div class="ref-sum">produits 16&nbsp;375&nbsp;000 − charges 16&nbsp;175&nbsp;000</div><div class="ref-txt">Le <b>seul</b> repère auquel confronter vos taux&nbsp;: les ancres publient les deux totaux et le résultat, <b>jamais la marge brute</b>. On peut donc vérifier <code>marge − charges</code>, pas <code>marge</code> seule. <span class="code">écart ouvert · <b>STORY-462</b></span></div></div>
+  </div>
+</div>
+<div class="coh-verdict stop">
+  <span class="flag">⛔</span>
+  <div style="flex:1">
+    <h4>Un jeu créé sur une faute de frappe reste là — pour toujours</h4>
+    <p>«&nbsp;Optismiste 2026&nbsp;» a été créé à 09 h 12. Le nom est faux. <b>Il n'y a rien à faire</b>&nbsp;: le contrôleur n'expose ni <code>DELETE</code>, ni renommage — <code>PUT :id</code> ne prend qu'un objet <code>hypotheses</code>, jamais le <code>nom</code>. Le jeu fautif restera dans toutes les listes du dossier, et il <b>confisque son nom</b>&nbsp;: l'index unique porte sur un libellé <b>saisi à la main</b>.</p><p>C'est exactement l'incident déjà relevé sur le brouillon de liasse — <b>même famille, deuxième occurrence</b>&nbsp;: un objet métier créé par erreur doit pouvoir être annulé tant que rien ne s'y rattache. <span class="code">écart ouvert · <b>STORY-464</b></span></p>
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+    <b>Jeux d'hypothèses de ce dossier</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>3 jeux · nom unique par dossier</span>
+  </div>
+  <div class="hyp-jeu">
+  <span class="hyp-jeu-n"><b>Prudent 2026</b><small>version 2 · base : snapshot v2 de l'exercice 2025</small></span>
+  <span class="hyp-jeu-p"><i>croissance 5 %</i><i>marge 18 %</i><i>charges 16,2 %</i><i>clients 60 j</i><i>invest. 1&nbsp;200&nbsp;000/an</i></span>
+  <span class="hyp-jeu-a"><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="dupliquer">Dupliquer</button><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="supprimer" title="Aucune route de suppression n'existe">Supprimer</button></span>
+</div><div class="hyp-jeu">
+  <span class="hyp-jeu-n"><b>Optimiste 2026</b><small>version 1 · base : snapshot v2 de l'exercice 2025</small></span>
+  <span class="hyp-jeu-p"><i>croissance 15 %</i><i>marge 20 %</i><i>charges 16,5 %</i><i>clients 30 j</i><i>invest. 3&nbsp;000&nbsp;000/an</i></span>
+  <span class="hyp-jeu-a"><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="dupliquer">Dupliquer</button><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="supprimer" title="Aucune route de suppression n'existe">Supprimer</button></span>
+</div><div class="hyp-jeu" data-hyp-actif="true">
+  <span class="hyp-jeu-n"><b>Optismiste 2026</b><span class="badge badge-active"><span class="d"></span>courant</span><small>version 1 · base : snapshot v2 de l'exercice 2025</small></span>
+  <span class="hyp-jeu-p"><i>croissance 15 %</i><i>marge 20 %</i><i>charges 16,5 %</i><i>clients 30 j</i><i>invest. 3&nbsp;000&nbsp;000/an</i></span>
+  <span class="hyp-jeu-a"><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="dupliquer">Dupliquer</button><button class="btn btn-ghost btn-sm" type="button" data-hyp-act="supprimer" title="Aucune route de suppression n'existe">Supprimer</button></span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">
+    <b>«&nbsp;Dupliquer&nbsp;» et «&nbsp;Supprimer&nbsp;» n'existent pas côté serveur.</b> Le contrôleur expose <code>POST</code> / <code>GET</code> / <code>GET&nbsp;:id</code> / <code>GET&nbsp;:id/versions</code> / <code>PUT&nbsp;:id</code>, et rien d'autre. Dupliquer ne peut être qu'un <code>POST</code> de plus — qui <b>recapture le dernier snapshot</b> au lieu de reprendre la base de l'original <span class="code">écart ouvert · <b>STORY-465</b></span> — et supprimer est <b>impossible</b> <span class="code">écart ouvert · <b>STORY-464</b></span>. Une route <code>POST&nbsp;…/:id/dupliquer</code> n'existe pas davantage <span class="code">écart ouvert · <b>STORY-466</b></span>.
+  </div>
+</div>
+<div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Les trois refus que cet écran doit savoir rendre</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>3 codes · aucun n'est un 500</span>
+  </div>
+  <div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b><code>409 HYPOTHESES_EXISTE</code> — le nom est déjà pris dans ce dossier</b>
+    <p>Recréer «&nbsp;Optimiste 2026&nbsp;» avec la bonne orthographe se heurte au jeu déjà correct&nbsp;; recréer «&nbsp;Optismiste 2026&nbsp;» se heurte au fautif. <b>Le nom est unique par dossier</b>, et il n'y a aucun moyen de le libérer. L'erreur remonte d'un <code>E11000</code> Mongo traduit en 409 — le message ne nomme donc <b>pas</b> le jeu en conflit, et l'écran doit le retrouver dans sa propre liste.</p>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>409</b>nom pris</span>
+</div><div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b><code>409 HYPOTHESES_CONFLIT_VERSION</code> — deux éditions concurrentes</b>
+    <p>Deux collaborateurs ouvrent le même jeu, modifient chacun un taux, enregistrent. Le second perd&nbsp;: l'index unique de l'historique <code>(dossier, jeu, version)</code> refuse la deuxième insertion de la même version. <b>C'est un conflit, pas une panne</b> — l'écran doit proposer de <b>recharger</b> pour voir ce que l'autre a écrit, et surtout <b>ne pas perdre la saisie</b>. Rien dans la réponse ne dit <i>qui</i> a gagné ni <i>ce qui</i> a changé.</p>
+    <span class="el"><i>version attendue 2</i><i>version en base 3</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>409</b>conflit</span>
+</div><div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b><code>404 HYPOTHESES_INTROUVABLE</code> — y compris pour un jeu d'un autre dossier</b>
+    <p>Un jeu d'un autre dossier du même cabinet, ou d'une autre organisation, répond <b>404 et non 403</b>&nbsp;: le service ne révèle pas l'existence de ce qu'on n'a pas le droit de voir. L'écran ne doit donc jamais écrire «&nbsp;accès refusé&nbsp;» sur un 404 — il ne sait pas lequel des deux cas s'est produit.</p>
+  </span>
+  <span class="coh-cat inf">Anti-énumération</span>
+  <span class="val"><b>404</b>volontaire</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);font-size:0.76rem;color:var(--muted-fg)">Aucun de ces trois refus n'est reformulé par l'écran&nbsp;: le code du serveur est affiché tel quel, avec la phrase qui le rend actionnable. C'est la règle posée par la table de passage et reprise par la validation.</div>
+</div>
+<div class="vact">
+  <div class="txt"><b>Ce qui manquerait pour s'en sortir</b><p>Trois routes, toutes absentes&nbsp;: <b>supprimer</b> un jeu sans version exploitée, <b>renommer</b> un jeu, et <b>rebaser</b> un jeu sur le dernier snapshot de son exercice. Les trois sont ouvertes en écarts.</p></div>
+  <div class="go"><button class="btn btn-ghost" type="button" disabled title="Aucune route de suppression">Supprimer «&nbsp;Optismiste 2026&nbsp;»</button><button class="btn btn-ghost" type="button" disabled title="Aucune route de renommage">Renommer</button><button class="btn btn-ghost" type="button" disabled title="Aucune route de rebasage">Rebaser sur le dernier snapshot</button></div>
+</div>
+
+</div>
+                  </div>
+
 
               <!-- ═══ Ce que valide cette maquette, et ce qu'elle n'invente pas ═══ -->
               <div class="card-surface" style="padding:1.15rem;display:flex;flex-direction:column;gap:0.8rem">
@@ -14610,6 +15523,63 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
      construction : le poste dont on a besoin pour un compte inhabituel est justement
      celui qu'aucun autre compte n'a atteint. D'où la saisie libre, et le refus
      serveur rendu tel quel. Demande ouverte : STORY-399. -->
+
+<!-- ══════════ FE-035 · CRÉER / DUPLIQUER UN JEU D'HYPOTHÈSES ══════════
+     ⚠️ Ce dialogue LIT le moment ouvert (`slotCourant()`), il ne récite pas des
+     nombres : le nom proposé, la version de base et la version d'hypothèses
+     visée viennent des `data-*` du slot visible. Un dialogue statique afficherait
+     « version 2 » depuis un dossier qui n'a aucun jeu — plausible, faux, et
+     invisible à tout test de structure (leçon FE-034). -->
+<div class="overlay" id="hypOverlay" data-open="false">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="hypTitle">
+    <div class="dialog-head">
+      <span class="dh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></span>
+      <div>
+        <h3 id="hypTitle" data-hyp-dlg-titre>Créer un jeu d'hypothèses</h3>
+        <p>Ets Kossi Distribution · base&nbsp;: snapshot <b data-hyp-dlg-base>2</b> de l'exercice 2025</p>
+      </div>
+    </div>
+    <form class="dialog-body" onsubmit="return false" id="hypForm">
+      <div class="tdp-avert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span><b>La base est capturée maintenant, et pour de bon.</b> Le <code>snapshotId</code> du <b>dernier</b> snapshot validé est copié dans le jeu&nbsp;: éditer les hypothèses ne le changera jamais, et <b>aucune route ne permet de rebaser</b>. Si la liasse est re-validée demain, ce jeu continuera de projeter sur la base d'aujourd'hui. <span class="code">écart ouvert · <b>STORY-465</b></span></span>
+      </div>
+
+      <div class="tdp-avert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span><b>Le nom est définitif.</b> Il est <b>unique par dossier</b> et ne peut être ni changé ni libéré&nbsp;: <code>PUT&nbsp;…/:id</code> ne prend qu'un objet <code>hypotheses</code>, et il n'existe aucun <code>DELETE</code>. Un jeu créé sur une faute de frappe restera dans la liste. <span class="code">écart ouvert · <b>STORY-464</b></span></span>
+      </div>
+
+      <div class="field">
+        <label for="hypNom">Nom du jeu d'hypothèses</label>
+        <div class="control"><input type="text" id="hypNom" data-hyp-dlg-nom placeholder="ex. Prudent 2026" autocomplete="off" /></div>
+      </div>
+      <p class="helper" style="text-align:left;margin:0">Le bouton reste inactif tant que le nom est vide&nbsp;: <code>@Length(1,&nbsp;64)</code> et <code>@Matches(/\S/)</code> le refuseraient en <code>400</code>, et faire porter au comptable un aller-retour serveur pour un champ vide n'a pas de sens.</p>
+
+      <div class="field">
+        <label>Ce qui sera enregistré</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(11.5rem,1fr));gap:0.5rem">
+          <div class="ref-item"><div class="ref-k">Base figée</div><div class="ref-v" data-hyp-dlg-base2>2</div><div class="ref-sum">snapshotId 6a41c8e2…4b19</div></div>
+          <div class="ref-item"><div class="ref-k">Version d'hypothèses</div><div class="ref-v" data-hyp-dlg-version>1</div><div class="ref-txt">insérée dans <code>versions_hypotheses</code> — append-only</div></div>
+          <div class="ref-item"><div class="ref-k">Modèle de projection</div><div class="ref-v">1.0.0</div><div class="ref-txt">échoée dans la réponse de projection</div></div>
+        </div>
+      </div>
+
+      <div class="bal-refus warn" data-hyp-dlg-refus hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+        <div>
+          <b>Un jeu d'hypothèses porte déjà ce nom</b>
+          <p>Le refus vient d'un <code>E11000</code> traduit en 409&nbsp;: il ne nomme pas le jeu en conflit. C'est à l'écran de le retrouver dans sa propre liste — et il n'existe aucun moyen de libérer le nom.</p>
+          <span class="code">409 · HYPOTHESES_EXISTE</span>
+        </div>
+      </div>
+    </form>
+    <div class="dialog-foot">
+      <button class="btn btn-ghost btn-sm" type="button" data-hyp-dlg-close>Annuler</button>
+      <button class="btn btn-primary btn-sm" type="button" data-hyp-dlg-confirm disabled>Créer le jeu</button>
+    </div>
+  </div>
+</div>
 <div class="overlay" id="tdpOverlay" data-open="false">
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="tdpTitle">
     <div class="dialog-head">
@@ -18745,5 +19715,158 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
       setGate("granted");
       setTab("sources");
     })();
+
+    /* ============ FE-035 · Prévisionnel — hypothèses paramétrables ==========
+       Le 5ᵉ onglet du Bilan, et le premier écran qui ÉCRIT dans le module.
+
+       ⚠️ CLOISONNEMENT. `[data-bil-…-state]` existe déjà dans les panneaux
+       « Balance source » et « États ». Toutes les requêtes de ce bloc sont donc
+       préfixées par `[data-bil-panel="previsionnel"]` : sans ça, une bascule
+       d'ici viderait le panneau d'en face — le défaut exact relevé en FE-032.
+       Racine du module : `.page[data-page="bilan"]`, jamais autre chose. */
+    (function () {
+      var page = document.querySelector('.page[data-page="bilan"]');
+      if (!page) return;
+      var panneau = page.querySelector('[data-bil-panel="previsionnel"]');
+      if (!panneau) return;
+
+      /* ── 1. Les six moments ──────────────────────────────────────────────
+         Un cycle de vie se dessine en MOMENTS, dans l'ordre où ils arrivent :
+         l'historique des versions et la liste des jeux CROISSENT d'un moment au
+         suivant, ce qu'une planche d'états ne peut structurellement pas montrer. */
+      function ouvrirMoment(nom) {
+        panneau.querySelectorAll('[data-bil-hyp-state]').forEach(function (b) {
+          b.setAttribute('aria-selected', String(b.dataset.bilHypState === nom));
+        });
+        panneau.querySelectorAll('[data-bil-hyp-slot]').forEach(function (s) {
+          s.hidden = s.dataset.bilHypSlot !== nom;
+        });
+      }
+      panneau.querySelectorAll('[data-bil-hyp-state]').forEach(function (b) {
+        b.addEventListener('click', function () { ouvrirMoment(b.dataset.bilHypState); });
+      });
+
+      function slotCourant() {
+        return panneau.querySelector('[data-bil-hyp-slot]:not([hidden])');
+      }
+
+      /* ── 2. Le dialogue — il LIT le moment ouvert ─────────────────────────
+         Le nom déjà pris, la version de base et la version visée viennent des
+         `data-*` du slot visible. Un dialogue qui récite des constantes affiche
+         des chiffres justes ailleurs et faux ici, sans qu'aucun test le voie. */
+      var ov = document.getElementById('hypOverlay');
+      var champNom = document.querySelector('[data-hyp-dlg-nom]');
+      var confirmer = document.querySelector('[data-hyp-dlg-confirm]');
+      var refus = document.querySelector('[data-hyp-dlg-refus]');
+      var titreDlg = document.querySelector('[data-hyp-dlg-titre]');
+
+      function ouvrir(o) { if (o) o.dataset.open = 'true'; }
+      function fermer(o) { if (o) o.dataset.open = 'false'; }
+      function poser(sel, valeur) {
+        document.querySelectorAll(sel).forEach(function (n) { n.textContent = valeur; });
+      }
+      function nomsPris() {
+        var sl = slotCourant();
+        if (!sl) return [];
+        return Array.prototype.map.call(
+          sl.querySelectorAll('.hyp-jeu-n > b'),
+          function (b) { return b.textContent.trim().toLowerCase(); }
+        );
+      }
+      function majConfirmer() {
+        if (!confirmer || !champNom) return;
+        var v = champNom.value.trim();
+        confirmer.disabled = v.length === 0;
+        if (refus && v.length === 0) refus.hidden = true;
+      }
+      if (champNom) champNom.addEventListener('input', majConfirmer);
+
+      panneau.querySelectorAll('[data-hyp-open]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var sl = slotCourant();
+          if (!sl) return;
+          var mode = b.dataset.hypOpen;
+          if (refus) refus.hidden = true;
+          poser('[data-hyp-dlg-base]', sl.dataset.hypBase);
+          poser('[data-hyp-dlg-base2]', sl.dataset.hypBase);
+          if (mode === 'editer') {
+            if (titreDlg) titreDlg.textContent = 'Enregistrer une nouvelle version — ' + sl.dataset.hypJeu;
+            poser('[data-hyp-dlg-version]', String(Number(sl.dataset.hypVersion) + 1));
+            if (champNom) { champNom.value = sl.dataset.hypJeu; champNom.readOnly = true; }
+            if (confirmer) confirmer.textContent = 'Enregistrer la version ' + (Number(sl.dataset.hypVersion) + 1);
+          } else {
+            if (titreDlg) titreDlg.textContent = mode === 'dupliquer' ? 'Dupliquer en un second scénario' : 'Créer un jeu d\'hypothèses';
+            poser('[data-hyp-dlg-version]', '1');
+            if (champNom) { champNom.value = mode === 'dupliquer' ? 'Optimiste 2026' : ''; champNom.readOnly = false; }
+            if (confirmer) confirmer.textContent = 'Créer le jeu';
+          }
+          majConfirmer();
+          ouvrir(ov);
+        });
+      });
+
+      document.querySelectorAll('[data-hyp-dlg-close]').forEach(function (b) {
+        b.addEventListener('click', function () { fermer(ov); });
+      });
+
+      if (confirmer) confirmer.addEventListener('click', function () {
+        var sl = slotCourant();
+        if (!sl || !champNom) return;
+        var v = champNom.value.trim();
+        /* Le 409 est JOUÉ : recréer un nom déjà présent dans la liste du moment
+           courant rend le refus tel que le serveur le rendrait, sans le
+           reformuler — et sans fermer le dialogue, la saisie n'est pas perdue. */
+        if (!champNom.readOnly && nomsPris().indexOf(v.toLowerCase()) !== -1) {
+          if (refus) refus.hidden = false;
+          return;
+        }
+        fermer(ov);
+        if (champNom.readOnly) {
+          notify('success', 'Version ' + (Number(sl.dataset.hypVersion) + 1) + ' enregistrée',
+            'La version sortante est insérée dans l’historique AVANT la bascule du document courant, dans une transaction. La base reste figée.');
+          ouvrirMoment('v2');
+        } else if (sl.dataset.bilHypSlot === 'v2' || sl.dataset.bilHypSlot === 'duplique') {
+          notify('success', 'Jeu « ' + v + ' » créé',
+            'Créé par un POST : il capture le DERNIER snapshot validé, pas forcément celui de l’original.');
+          ouvrirMoment('duplique');
+        } else {
+          notify('success', 'Jeu « ' + v + ' » créé',
+            'Le jeu est rattaché au snapshot validé — cette base ne bougera plus.');
+          ouvrirMoment('v1');
+        }
+      });
+
+      /* ── 3. Les gestes qui n'existent pas côté serveur ────────────────────
+         Un bouton muet se lit comme une panne : ici le clic DIT ce qui manque,
+         et nomme l'écart. Ne pas afficher le geste du tout aurait été un autre
+         choix défendable — mais il figure dans les critères d'acceptation de la
+         story, et le PO doit voir que le contrat ne le sert pas. */
+      panneau.querySelectorAll('[data-hyp-act]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (b.dataset.hypAct === 'supprimer') {
+            notify('error', 'Suppression impossible',
+              'Le contrôleur n’expose aucun DELETE : un jeu d’hypothèses créé par erreur reste dans le dossier, et son nom reste pris. Écart ouvert · STORY-464.');
+          } else {
+            var sl = slotCourant();
+            if (!sl) return;
+            if (refus) refus.hidden = true;
+            poser('[data-hyp-dlg-base]', sl.dataset.hypBase);
+            poser('[data-hyp-dlg-base2]', sl.dataset.hypBase);
+            poser('[data-hyp-dlg-version]', '1');
+            if (titreDlg) titreDlg.textContent = 'Dupliquer en un second scénario';
+            if (champNom) { champNom.value = 'Optimiste 2026'; champNom.readOnly = false; }
+            if (confirmer) confirmer.textContent = 'Créer le jeu';
+            majConfirmer();
+            ouvrir(ov);
+          }
+        });
+      });
+
+      /* ── 4. État initial ─────────────────────────────────────────────────
+         On ouvre sur « sans base validée » : c'est la précondition de la story,
+         et c'est l'état dans lequel se trouve tout dossier neuf. */
+      ouvrirMoment('sans-base');
+    })();
+
   })();
 </script>
