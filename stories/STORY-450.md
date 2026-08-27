@@ -1,4 +1,4 @@
-# STORY-466 : Ni le jeu d'états ni son snapshot ne nomment la balance dont ils sortent
+# STORY-450 : Ni le jeu d'états ni son snapshot ne nomment la balance dont ils sortent
 
 Status: ready-for-dev
 

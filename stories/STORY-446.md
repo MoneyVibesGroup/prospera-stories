@@ -1,4 +1,4 @@
-# STORY-462 : « Liasse déposée » est affiché pour une liasse seulement FIGÉE — et l'état DÉPOSÉ n'existe nulle part
+# STORY-446 : « Liasse déposée » est affiché pour une liasse seulement FIGÉE — et l'état DÉPOSÉ n'existe nulle part
 
 Status: ready-for-dev
 
@@ -29,7 +29,7 @@ croit sa DSF télédéclarée alors qu'elle est seulement figée dans Prospera.
 - [ ] AC-1 — **Correction immédiate, sans dépendance** : tout libellé « déposée » adossé à
       `LIASSE_FIGEE` devient « **figée** » (commentaire de l'énuméré, maquette, front).
 - [ ] AC-2 — `JeuEtatsStatut` gagne `DEPOSE`, atteignable **uniquement** depuis `VALIDE`, et
-      **jamais** rouvrable sans passer par une réouverture tracée (STORY-460).
+      **jamais** rouvrable sans passer par une réouverture tracée (STORY-444).
 - [ ] AC-3 — Le dépôt porte ses **faits** : date de dépôt, canal, **numéro d'accusé**,
       **identité du signataire** (nom + n° d'inscription à l'ordre), et le **`snapshotId`** de la
       version déposée — une liasse se dépose dans **une** version, pas « en général ».

@@ -1,4 +1,4 @@
-# STORY-470 : Un brouillon créé par erreur ne s'annule pas — aucune route de suppression, et l'exercice est un libellé saisi
+# STORY-454 : Un brouillon créé par erreur ne s'annule pas — aucune route de suppression, et l'exercice est un libellé saisi
 
 Status: ready-for-dev
 
@@ -31,9 +31,9 @@ L'immuabilité s'applique aux **versions figées**, pas aux brouillons : confond
 - [ ] AC-2 — Un jeu `VALIDE` n'est **jamais** supprimable, ni ses snapshots : c'est l'invariant.
 - [ ] AC-3 — La suppression est **journalisée** (`AuditType.JEU_SUPPRIME`, avec le libellé
       d'exercice dans la cible) — supprimer est un acte, il se trace.
-- [ ] AC-4 — `@Roles(TENANT_ADMIN)` (cohérent avec **STORY-463**).
+- [ ] AC-4 — `@Roles(TENANT_ADMIN)` (cohérent avec **STORY-447**).
 - [ ] AC-5 — L'événement `liasse.etat.change` publie la disparition, sans quoi le portefeuille
-      resterait à « bilan en cours » pour un jeu qui n'existe plus (même famille que STORY-461).
+      resterait à « bilan en cours » pour un jeu qui n'existe plus (même famille que STORY-445).
 - [ ] AC-6 — ⚠️ **Ne corrige pas la cause** : l'exercice reste un libellé libre tant que
       **STORY-381 AC-9** n'est pas livrée. Cette story rend l'erreur réparable, pas impossible.
 

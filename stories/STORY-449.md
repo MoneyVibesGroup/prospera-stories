@@ -1,4 +1,4 @@
-# STORY-465 : `GET /bilan/etats/:id` RE-CALCULE la liasse d'un jeu VALIDÉ au lieu de rendre son snapshot — deux nombres pour un même état figé
+# STORY-449 : `GET /bilan/etats/:id` RE-CALCULE la liasse d'un jeu VALIDÉ au lieu de rendre son snapshot — deux nombres pour un même état figé
 
 Status: ready-for-dev
 
@@ -48,5 +48,5 @@ l'invariant que la story vend (NFR-004).
 - **Actionnable côté front dès aujourd'hui, sans backend** : lire une liasse VALIDÉE depuis
   `GET …/versions/:version`, jamais depuis `GET …/etats/:id`. C'est la règle d'appel que FE-034
   inscrit et que la maquette écrit à l'écran.
-- Même famille que **STORY-468** (le snapshot n'a pas d'empreinte de son contenu) : sans elle, rien
+- Même famille que **STORY-452** (le snapshot n'a pas d'empreinte de son contenu) : sans elle, rien
   ne permettrait même de **constater** la divergence.

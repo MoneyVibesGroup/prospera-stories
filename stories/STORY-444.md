@@ -1,4 +1,4 @@
-# STORY-460 : La réouverture d'une liasse figée n'exige aucun motif et n'en trace aucun
+# STORY-444 : La réouverture d'une liasse figée n'exige aucun motif et n'en trace aucun
 
 Status: ready-for-dev
 
@@ -37,12 +37,12 @@ d'**un seul compte** (FE-030).
       un bandeau se lit.
 - [ ] AC-4 — La réouverture d'un jeu **jamais validé** reste refusée (`409 JEU_NON_VALIDE`,
       inchangé) : pas de motif à demander là où il n'y a pas d'acte.
-- [ ] AC-5 — `contexte` étant publié par **STORY-458**, le motif apparaît dans le journal sans
+- [ ] AC-5 — `contexte` étant publié par **STORY-442**, le motif apparaît dans le journal sans
       travail supplémentaire côté lecture.
 
 ## Conséquences ailleurs
 
-- Dépend de **STORY-458** pour être **visible** (sinon le motif est stocké et invisible, exactement
+- Dépend de **STORY-442** pour être **visible** (sinon le motif est stocké et invisible, exactement
   le défaut que 458 corrige).
 - La maquette FE-034 **dessine le champ** dans le dialogue de réouverture et déclare qu'il n'est
   transmis à personne aujourd'hui — règle PO : dessiner la cible, et le dire.

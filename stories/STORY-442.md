@@ -1,4 +1,4 @@
-# STORY-458 : Le `contexte` d'un événement d'audit est stocké et jamais publié — une ligne `EXPORT_EFFECTUE` ne dit pas ce qui a été exporté
+# STORY-442 : Le `contexte` d'un événement d'audit est stocké et jamais publié — une ligne `EXPORT_EFFECTUE` ne dit pas ce qui a été exporté
 
 Status: ready-for-dev
 
@@ -35,7 +35,7 @@ fait foi** ?
 
 ## Conséquences ailleurs
 
-- Se livre avec **STORY-459** (le journal n'a ni pagination ni fenêtre) : les deux touchent le
+- Se livre avec **STORY-443** (le journal n'a ni pagination ni fenêtre) : les deux touchent le
   même DTO et la même route.
 - Sans elle, l'écran d'export **FE-038** ne pourra pas répondre à « quelle version le client
   a-t-il reçue ? » depuis le journal.

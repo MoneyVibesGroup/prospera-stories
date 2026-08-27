@@ -1,4 +1,4 @@
-# STORY-464 : Aucune route ne compare deux versions figées — alors que les deux liasses complètes sont stockées
+# STORY-448 : Aucune route ne compare deux versions figées — alors que les deux liasses complètes sont stockées
 
 Status: ready-for-dev
 
@@ -41,5 +41,5 @@ exactement ce que la règle « pas de second arbitre » interdit (FE-030/FE-031)
 
 - L'écran vit dans l'onglet **Validation** de FE-034 (bouton « Comparer v1 et v2 », désactivé dans
   la maquette et nommant cette story).
-- Se combine à **STORY-460** : le motif de la réouverture explique *pourquoi*, la comparaison
+- Se combine à **STORY-444** : le motif de la réouverture explique *pourquoi*, la comparaison
   montre *quoi*. Les deux ensemble constituent le dossier de justification d'une correction.

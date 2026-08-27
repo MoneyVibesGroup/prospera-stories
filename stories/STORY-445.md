@@ -1,4 +1,4 @@
-# STORY-461 : Rouvrir une liasse sur un exercice CLOS est accepté — et sans retour : la liasse reste bloquée en brouillon et le portefeuille l'affiche « bilan en cours »
+# STORY-445 : Rouvrir une liasse sur un exercice CLOS est accepté — et sans retour : la liasse reste bloquée en brouillon et le portefeuille l'affiche « bilan en cours »
 
 Status: ready-for-dev
 

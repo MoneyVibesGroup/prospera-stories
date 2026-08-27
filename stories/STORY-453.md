@@ -1,4 +1,4 @@
-# STORY-469 : L'échéance de dépôt de la DSF n'est publiée nulle part — une date d'arrêté ne se lit jamais seule
+# STORY-453 : L'échéance de dépôt de la DSF n'est publiée nulle part — une date d'arrêté ne se lit jamais seule
 
 Status: ready-for-dev
 
@@ -44,5 +44,5 @@ une source citée pour une donnée que le fichier ne porte pas. Le paquet promet
 
 - La maquette FE-034 affiche le rapprochement et le retard (**83 jours** sur le scénario de démo),
   en nommant cette story — c'est la seule information légale de l'écran, et elle vient de nulle part.
-- Prérequis naturel de **STORY-462** (dépôt) : on ne constate pas un dépôt sans savoir s'il est
+- Prérequis naturel de **STORY-446** (dépôt) : on ne constate pas un dépôt sans savoir s'il est
   dans les temps.

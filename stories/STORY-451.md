@@ -1,4 +1,4 @@
-# STORY-467 : Les surcharges de mapping — le seul acte humain qui change les chiffres — ne sont pas journalisées
+# STORY-451 : Les surcharges de mapping — le seul acte humain qui change les chiffres — ne sont pas journalisées
 
 Status: ready-for-dev
 
@@ -37,7 +37,7 @@ changent le contenu. La fiche FE-034 demande de tracer « import / mapping / val
 - [ ] AC-4 — Aucune reprise rétroactive : les surcharges antérieures n'ont pas d'événement, et le
       journal ne l'invente pas.
 - [ ] AC-5 — ⚠️ L'**import de balance** reste hors périmètre : il vit dans `balance-service`, qui a
-      sa propre trace. Le journal du Bilan doit **pointer** vers elle (STORY-466), pas la recopier.
+      sa propre trace. Le journal du Bilan doit **pointer** vers elle (STORY-450), pas la recopier.
 
 ## Conséquences ailleurs
 

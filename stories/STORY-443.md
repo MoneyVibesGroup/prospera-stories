@@ -1,4 +1,4 @@
-# STORY-459 : `GET /bilan/audit` n'a ni pagination, ni fenêtre de dates, ni filtre par cible — un journal append-only jamais purgé rend tout
+# STORY-443 : `GET /bilan/audit` n'a ni pagination, ni fenêtre de dates, ni filtre par cible — un journal append-only jamais purgé rend tout
 
 Status: ready-for-dev
 
@@ -38,4 +38,4 @@ Trois manques, du plus grave au plus gênant :
 ## Conséquences ailleurs
 
 - La maquette FE-034 n'offre que le filtre par **type** — le seul servi — et l'écrit à l'écran.
-- À livrer avec **STORY-458** (même DTO, même route).
+- À livrer avec **STORY-442** (même DTO, même route).

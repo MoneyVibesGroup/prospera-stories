@@ -1,4 +1,4 @@
-# STORY-457 : La piste d'audit et le snapshot ne nomment personne — `userId` et `validePar` sont des `ObjectId` nus
+# STORY-441 : La piste d'audit et le snapshot ne nomment personne — `userId` et `validePar` sont des `ObjectId` nus
 
 Status: ready-for-dev
 

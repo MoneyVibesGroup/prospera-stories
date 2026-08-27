@@ -1,4 +1,4 @@
-# STORY-463 : Un collaborateur peut figer la liasse entière, alors qu'il ne peut pas valider la surcharge d'un seul compte
+# STORY-447 : Un collaborateur peut figer la liasse entière, alors qu'il ne peut pas valider la surcharge d'un seul compte
 
 Status: ready-for-dev
 

@@ -1,4 +1,4 @@
-# STORY-468 : Le snapshot n'a pas d'empreinte de son propre contenu — le champ `checksum` est celui du paquet référentiel
+# STORY-452 : Le snapshot n'a pas d'empreinte de son propre contenu — le champ `checksum` est celui du paquet référentiel
 
 Status: ready-for-dev
 
@@ -46,6 +46,6 @@ version.
 
 ## Conséquences ailleurs
 
-- Nécessaire à **STORY-462** : un accusé de dépôt doit pouvoir citer l'empreinte de la version
+- Nécessaire à **STORY-446** : un accusé de dépôt doit pouvoir citer l'empreinte de la version
   déposée.
-- Utile à **STORY-458** : le `contexte` d'un export cite déjà une « empreinte » — laquelle ?
+- Utile à **STORY-442** : le `contexte` d'un export cite déjà une « empreinte » — laquelle ?
