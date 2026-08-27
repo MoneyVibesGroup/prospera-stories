@@ -1,11 +1,11 @@
 # STORY-398 : Le contrat de rattachement n'est pas publié — et l'un de ses champs est publié FAUX
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — Référentiels & table de passage (FR-005..FR-008)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/dto`, `modules/bilan/mapping-override/dto`
 **Points :** 2 → **3** ⬆️ *(2026-08-25 : périmètre étendu aux DTO de liasse, voir §③)*
-· **Sprint :** S20
+· **Sprint :** S20 · **Complexité :** medium
 **Origine :** remontée le **2026-08-24** par **FE-030**, en câblant la table de passage —
 c'est-à-dire en essayant de **consommer** `POST …/bilan/table-de-passage/dry-run`.
 **Étendue le 2026-08-25 par FE-031**, qui a livré le consommateur que cette story attendait
@@ -197,3 +197,11 @@ champ, personne ne le sait.
   tests ; FE-031 : ~300 lignes + 256 de tests). C'est le troisième service touché par le même
   patron `@ApiProperty` sans `type` (après `balance-service` et ceux de STORY-376 / 389) ⇒
   **candidat à une règle d'architecture**, pas à une n-ième story de rattrapage.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branche `MNV-398` ouverte sur `bilan-service` **et** sur `docs`
+(preuve : `git rev-parse --abbrev-ref HEAD` rend `MNV-398` dans les deux dépôts, 2026-08-27).
+Aucun contrat d'événement Kafka touché ⇒ **un seul dépôt de code**.
