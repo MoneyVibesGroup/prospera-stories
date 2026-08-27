@@ -1,10 +1,10 @@
 # STORY-397 : Les codes de réintégration sont validés mais jamais publiés — le comptable les tape à l'aveugle
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-020 — Cahiers & pièces (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `referentiel` / `cahiers`
-**Points :** 3 · **Sprint :** S20
+**Points :** 3 · **Sprint :** S20 · **Complexité :** medium
 **Origine :** remontée le **2026-08-24** par **FE-044**, en dessinant le formulaire de
 création d'une catégorie de dépense.
 
@@ -136,3 +136,25 @@ qui en portent déjà un. Offrir un champ libre aurait été offrir un piège.
   ⇒ **Les livrer ensemble** est probablement plus économique que séparément.
 - Créée par **FE-044**, qui a fait le choix de ne pas offrir le champ plutôt que d'offrir
   un champ libre menant au refus.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branche `MNV-397` ouverte sur `balance-service` (base `dev`) et sur
+`docs/` (base `main`) le **2026-08-27**.
+
+### Décision de conception — QUEL paquet fiscal la route lit-elle ?
+
+Il existe **deux** validateurs de `codeReintegration` dans le service, et ils ne résolvent pas le
+même paquet :
+
+| appelant | paquet résolu | pourquoi |
+|---|---|---|
+| `categories-depenses.validerCodeReintegration` | `chargerPaquetFiscal(orgId)` — **sans exercice** | une catégorie n'est **rattachée à aucun exercice** (D-083-3) |
+| `cahiers-depenses.construireContexte` | `chargerPaquetFiscal(orgId, exercice)` | une **ligne** connaît son exercice, et son taux doit être celui-là |
+
+Le consommateur de cette story est **FE-044, le formulaire de catégorie** — donc le premier. La
+route résout le paquet **sans exercice**, ce qui la met sur la **source exacte** du validateur
+qu'elle sert (AC-3). Un exercice arbitraire aurait publié une liste que ce validateur n'applique
+pas : l'écart précis que l'AC-3 interdit.
