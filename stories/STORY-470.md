@@ -47,3 +47,18 @@ personne ne puisse même le constater après coup.
 
 - À trancher **avant** FE-035 (implémentation) : le rôle change la forme de l'écran, pas seulement un
   attribut `disabled`.
+
+## Décision PO — 2026-08-27 : ARBITRAGE REPORTÉ
+
+> *« Story 470, vu que pour le moment on ne code pas, je valide la maquette. »*
+
+L'arbitrage entre **(a)** édition ouverte + verrouillage par l'administrateur et **(b)** édition
+réservée au `TENANT_ADMIN` **n'est pas rendu**. Il est **reporté au démarrage de l'implémentation de
+FE-035**, la maquette étant validée en l'état.
+
+⚠️ **Ce que le report ne change pas.** La contrainte reste entière : le rôle détermine la **forme** de
+l'écran — dans le modèle (a) l'écran porte un état « verrouillé » et un refus `409` à rendre, dans le
+modèle (b) il porte un sélecteur de rôle et une phrase de redirection, comme la table de passage.
+Ce n'est pas un attribut `disabled` qu'on ajoutera à la fin. **L'arbitrage redevient bloquant au
+premier jour de code**, et la maquette validée ne le préempte pas : elle montre l'écran **sans**
+distinction de rôle, ce qui correspond au contrat **actuel** — pas à une décision.
