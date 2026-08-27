@@ -1,10 +1,10 @@
 # STORY-399 : Le contenu du référentiel n'est lisible par aucune route — et le serveur valide contre lui
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — Référentiels & table de passage (FR-005..FR-008)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/referentiel`
-**Points :** 5 · **Sprint :** S20
+**Points :** 5 · **Sprint :** S20 · **Complexité :** medium
 **Origine :** remontée le **2026-08-24** par **FE-030**, en dessinant le dialogue
 d'affectation d'un compte non reconnu.
 
@@ -116,3 +116,13 @@ compte inhabituel est précisément celui qu'aucun autre compte n'a atteint.**
 - ⚠️ **Recouvrement avec STORY-400** (affectation par racine) : les deux touchent le même
   dialogue et la même route d'écriture. Les livrer ensemble évite deux passes de front.
 - Consommateur nommé : **FE-030** (dialogue d'affectation + regroupement par classe).
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — dev démarré le **2026-08-27**, branche `MNV-399` ouverte sur
+`docs` et sur `bilan-service`.
+
+⚠️ **Un seul dépôt de code** : la story n'expose que de la lecture HTTP, aucun contrat
+d'événement Kafka n'est touché.
