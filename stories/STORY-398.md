@@ -1,6 +1,6 @@
 # STORY-398 : Le contrat de rattachement n'est pas publié — et l'un de ses champs est publié FAUX
 
-Status: review
+Status: done
 
 **Épic :** EPIC-010 — Référentiels & table de passage (FR-005..FR-008)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/dto`, `modules/bilan/mapping-override/dto`
@@ -26,8 +26,12 @@ pour traiter les DTO de liasse — son hors-périmètre d'origine les y renvoyai
 mappes!: RattachementCompte[];          // ← pas de `type:`
 ```
 
-Faute de `type`, Swagger déduit la forme de l'`example` — un **tableau** — et publie
-`array of string`. `openapi-typescript` rend donc côté client :
+Faute de `type`, `emitDecoratorMetadata` réfléchit la propriété en `Array` **sans type
+d'élément** et `@nestjs/swagger` retombe sur `items: { type: 'string' }` ⇒ publie
+`array of string`. ⚠️ **Corrigé au dev (2026-08-27)** : la story attribuait la cause à
+l'`example`. C'est faux, et mesuré — la même propriété **dépourvue de tout `example`**
+publie le même `array of string`. Diagnostiquer par l'exemple mène à l'envers, et fait
+croire à l'abri tous les tableaux qui n'en portent pas. `openapi-typescript` rend donc côté client :
 
 ```ts
 mappes: string[];   // ⛔ FAUX : le serveur envoie des OBJETS
@@ -202,8 +206,11 @@ champ, personne ne le sait.
 
 ## Progress Tracking
 
-**Statut : `review`** — implémentée, portes de qualité passées, 7 mutations rouges, vérification
-docker faite sur le **service réel**. Branche `MNV-398` ouverte sur `bilan-service` **et** sur `docs`
+**Statut : `done`** — implémentée, validée, revue (code + sécurité), vérification docker **rejouée
+sur l'état final**, mergée en rebase sur `dev`. Clôturée le **2026-08-27**.
+
+**PR** : `prospera-bilan-service` **#51**, 2 commits — feature (`7604b02`) puis revue (`1561fdc`).
+Un seul dépôt : la story ne touche aucun contrat d'événement. Branche `MNV-398` ouverte sur `bilan-service` **et** sur `docs`
 (preuve : `git rev-parse --abbrev-ref HEAD` rend `MNV-398` dans les deux dépôts, 2026-08-27).
 Aucun contrat d'événement Kafka touché ⇒ **un seul dépôt de code**.
 
@@ -275,12 +282,13 @@ aurait laissé passer exactement le défaut que la story corrige.
 
 ### Portes de qualité
 
-Lint **0 warning** · build OK · **1147 unitaires** (1 skipped) + **300 e2e** verts (287 → 300, les
-13 du contrat) · seuils 65/90/90/90 tenus. Les `*.dto.ts` étant **exclus de `collectCoverageFrom`**,
+Lint **0 warning** · build OK · **1147 unitaires** (1 skipped) + **311 e2e** verts (287 → 311, les
+24 du contrat) · seuils 65/90/90/90 tenus. Les `*.dto.ts` étant **exclus de `collectCoverageFrom`**,
 aucun décorateur corrigé ici n'est visible aux seuils : `openapi-contract.e2e-spec.ts` est le seul
 filet contre la récidive.
 
-**7 mutations appliquées, chacune vérifiée ROUGE puis restaurée** :
+**9 mutations au total** (7 au dev ci-dessous, 2 de plus après revue), chacune vérifiée ROUGE puis
+restaurée :
 
 | # | mutation | tests qui virent au rouge |
 |---|---|---|
@@ -300,6 +308,49 @@ la propriété est typée par une classe*. La vraie régression est le retour au
 cette mutation a échoué **à la compilation** (import devenu inutilisé) : une mutation rouge par
 erreur de compilation ne prouve rien, elle a été nettoyée pour que ce soit le **test** qui rougisse
 (leçon STORY-179).
+
+### Revue de code — 5 constats, 0 bloquant, tous corrigés
+
+| # | constat | correctif |
+|---|---|---|
+| ① | **la garde de contrat n'était jamais prouvée non-vacante** : les 7 appels à `ecartsContrat()` étaient tous `expect(...).toEqual([])`. Un `return []` prématuré les laissait **verts en ne comparant plus rien** — et `opaques()`, lui, était déjà auto-gardé par son inventaire figé | 11 tests : 9 cas exerçant chacun **une branche** du validateur (requis absent · clé non publiée · `null` sur non-nullable · hors énumération · type faux · schéma opaque · schéma absent · tableau/objet · schéma sans `type`) + **2 témoins POSITIFS** (chaîne ISO sous `date-time` ; `null` sous `nullable`, y compris posé à côté d'un `$ref`) |
+| ② | **la cause du bug était mal nommée** dans 4 commentaires (« Swagger déduisait la forme de l'`example` ») — et la fausse cause est *actionnable* : on « répare » un exemple sans que le contrat bouge, et on croit à l'abri les tableaux qui n'en ont pas | cause réelle rétablie (`emitDecoratorMetadata` réfléchit `Array` sans type d'élément), **vérifiée par sonde** : même propriété sans `example` ⇒ même `array of string` |
+| ③ | **la justification du « à plat plutôt qu'`extends` » était fausse** — et faisait vivre `code`/`version` en deux exemplaires décorés, libres de diverger : les « deux descriptions parallèles » que l'AC-4 interdit | `ReferentielStampDto extends ReferentielRefDto`. `@nestjs/swagger` **aplatit** l'héritage (aucun `allOf`) — vérifié en test **et** sur le service docker |
+| ④ | les assertions `allOf: [{$ref}]` **cassaient si on retirait une `description`** : `@ApiProperty({ type: Dto })` seul émet un `$ref` **nu**, c'est le mot-clé frère qui produit l'`allOf`. Test rouge sur un contrat resté exact | helper `nomDuRef()` : on assert la **cible**, jamais l'emballage |
+| ⑤ | **`implements` manquait aux enveloppes** `RattachementResultDto` et `BilanDto`, alors que la story en fait « le lien qui interdit les deux descriptions parallèles ». Or `produireBilan` construit sa réponse par **spread** (`{ ...bilan, stamp }`), et le spread échappe au contrôle des propriétés excédentaires de TypeScript | `implements RattachementResult` / `implements BilanProduit` |
+
+⚠️ **`ReferentielDiagnosticDto` reste sans `implements`, et c'est correct** : il n'a pas d'interface
+de domaine, et le contrôleur le construit par **littéral** avec un type de retour déclaré — la
+vérification des propriétés excédentaires de TypeScript s'applique déjà. Y ajouter un `implements`
+aurait exigé d'inventer une interface pour la seule satisfaction de la symétrie.
+
+**2 mutations supplémentaires, appliquées après revue et vérifiées ROUGES** :
+
+| # | mutation | effet |
+|---|---|---|
+| 8 | `ecartsContrat` rendue toujours vide (`if (chemin.length >= 0) return []` — **elle compile**) | **9 rouges** — et les 7 `toEqual([])` restent verts, ce qui est exactement la démonstration du constat ① |
+| 9 | un champ requis ajouté à `BilanProduit` | 1ʳᵉ erreur `tsc` : **`Class 'BilanDto' incorrectly implements interface 'BilanProduit'`** |
+
+⚠️ Portée exacte du garde-fou ⑤, pour ne pas le surestimer : `implements` attrape un champ **requis**
+ajouté à l'interface et non publié. Un champ que le producteur ajouterait au littéral **sans** le
+déclarer à l'interface passerait, lui, par le spread — et c'est `ecartsContrat` (« rendu par la
+route, NON publié ») qui le rattrape. Les deux gardes sont **complémentaires**, aucune ne couvre le
+cas de l'autre.
+
+### Revue de sécurité — 0 constat
+
+Aucune vulnérabilité introduite. Trois points tranchés **sur pièces** plutôt que supposés :
+`validePar`/`valideAt`/`ancienPoste`/`motif` étaient **déjà émis** par `from()` avant la story (vérifié
+sur `git show c201418:…`) — le passage en requis+nullable ne fait atteindre **aucune donnée nouvelle**
+au client ; **aucune** des 14 classes n'est utilisée en `@Body()` (les corps restent servis par
+`ProposerSurchargeDto`/`CibleDto`, `RattachementRequestDto`, `BilanDryRunRequestDto`, tous décorés
+`class-validator`) ; le `checksum` d'exemple est le **sha256 de l'entrée vide**, constante publique.
+
+⚠️ **Relevé hors périmètre, non corrigé ici** : `SwaggerModule.setup('api/docs', …)` est monté **sans
+garde**, uniformément sur `auth-service`, `expert-comptable`, `balance-service`, `dossier-service` et
+`bilan-service`. C'est une posture d'écosystème **préexistante**, que cette story ne crée ni
+n'aggrave — mais ce qu'elle publie devient d'autant plus lisible pour qui interroge `/api/docs-json`.
+Décision à prendre au niveau architecture, pas dans une story de contrat.
 
 ### Vérification docker — sur le service RÉEL, tous contrôleurs montés
 
@@ -328,6 +379,17 @@ opaques** répartis sur **29 DTO** — là où la story annonçait « 20+ autres
 `CompteResultatDto` 7…) est le vrai inventaire de la dette laissée à FE-032/033/034, et il appuie la
 note de la story : **c'est un candidat à une règle d'architecture, pas à une n-ième story de
 rattrapage**.
+
+**Rejouée sur l'état FINAL** (après les correctifs de revue), puisque le constat ③ change la façon
+dont `ReferentielStampDto` est produit. Preuve que le conteneur exécute bien le code de la branche :
+recompilation `Found 0 errors` horodatée après le dernier commit, et `grep` dans le conteneur sur le
+volume monté (`extends ReferentielRefDto` présent, `implements BilanProduit` présent).
+
+Diff des deux documents publiés (avant revue / après revue) : **un seul schéma change,
+`ReferentielStampDto`, et seulement par un mot de `description`** hérité du parent (« Code du
+référentiel effectif. » → « Code du référentiel **comptable** effectif. »). Type, propriétés,
+`required` : identiques, et **aucun `allOf`** — l'héritage est bien aplati. 78 schémas et 37 chemins
+avant comme après ; 62 objets opaques avant comme après, **0** dans le périmètre.
 
 Stack arrêtée après la vérification (`docker compose stop`).
 
