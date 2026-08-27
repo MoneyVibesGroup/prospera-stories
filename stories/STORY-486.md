@@ -6,8 +6,9 @@ Status: ready-for-dev
 dans `etats/` (EPIC-011) et la garde d'entrée dans `mapping-override/`*
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/etats`, `modules/bilan/mapping-override`
 **Points :** 3 · **Sprint :** S20
-**Origine :** remontée le **2026-08-27** par la **revue de code de STORY-401**, et
-**mesurée** sur le référentiel réel `syscohada-revise@2.1` — pas déduite du code.
+**Origine :** remontée le **2026-08-27** par la **revue de code de STORY-401**, puis
+**confirmée et re-mesurée par sa revue de sécurité** (confiance 95) sur le référentiel réel
+`syscohada-revise@2.1` — jamais déduite du code.
 
 ---
 
@@ -28,6 +29,23 @@ de table de passage** produit un rattachement de règle vide.
 
 Et la garde d'entrée ne l'interdit pas : `MappingOverrideService.proposer` exige seulement
 que le poste **existe** dans `pkg.postes` (`POSTE_INCONNU`).
+
+⚡⚡ **La revue de SÉCURITÉ de STORY-401 a mesuré le chemin de bout en bout, et il est
+entièrement applicatif** — aucun accès base requis, `TENANT_USER` propose, `TENANT_ADMIN`
+valide, les deux surcharges passent les gardes (`POSTE_INCONNU`, `COMPTE_HORS_REFERENTIEL`),
+puis la liasse est acceptée. Mesure sur `syscohada-revise@2.1`, `211000 → {BILAN_ACTIF, AZ}`
+et `101000 → {BILAN_PASSIF, CP}` :
+
+| | `totalActifN` | `totalPassifN` | `equilibreN` | `soldesComptesNonMappes` |
+|---|---|---|---|---|
+| sans surcharge | 1 000 000 | 1 000 000 | `true` | `[]` |
+| avec les 2 surcharges | **0** | **0** | `true` | **`[]`** |
+
+⚠️ **Et la cause exacte n'est pas seulement « le poste n'a pas de règle »** : `AZ` **a** une
+règle dans le paquet, sous `etat: 'BILAN'` — la cible visée est `BILAN_ACTIF`, et la
+recherche `r.etat === cible.etat && r.poste === cible.poste` échoue sur le couple. Un
+correctif qui ne regarderait que « ce poste porte-t-il une règle quelque part » laisserait
+donc passer ce cas-là. **CWE-693** (*Protection Mechanism Failure*), A04:2021.
 
 **Surface mesurée sur les 5 artefacts embarqués** : ~50 postes de `pkg.postes` ne portent
 aucune règle (`AZ`, `BG`, `BK`, `BT`, `BZ`, `CP`…), **plus** tous les postes `type='total'`
