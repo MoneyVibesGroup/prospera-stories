@@ -1,6 +1,6 @@
 # STORY-440 : La batterie ne porte ni sévérité ni cible adressable, et son drapeau `valide` repose sur deux contrôles dont l'un est tautologique
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — `etats/controles-coherence.types.ts`, `etats/controles-coherence-production.service.ts`
@@ -9,6 +9,12 @@ Status: needs-po-decision
 Vérifié contre la DSF déposée `1000745307_2025_Definitif (1).xlsx`, feuille *« Type de Contôles »*.
 
 ---
+
+## ✅ Arbitrage (2026-08-27)
+
+**AC-4 tranché : au contrat.** Voir l'AC lui-même. Le reste de la fiche est inchangé —
+AC-1 (sévérité), AC-2 (cible adressable) et AC-6 (le verdict ne bouge pas) ne demandaient
+pas d'arbitrage.
 
 ## Le fait — trois manques, une même conséquence
 
@@ -48,9 +54,13 @@ Mesuré contre les **8 contrôles intermontants** que l'administration applique 
 - [ ] AC-3 — `ControlesCoherenceProduit` porte un **récapitulatif** : nombre de contrôles
       `CALCULE` / `NON_APPLICABLE` / `INDETERMINABLE`, pour qu'un `valide: true` obtenu sur deux
       contrôles applicables ne se lise pas comme un `valide: true` obtenu sur quatre.
-- [ ] AC-4 — La **liste des contrôles non couverts** est publiée (comptes écartés, identité des
-      exercices comparés, articulation comptable ↔ fiscal) : un contrôle absent est une
-      information, pas un silence. ⚠️ **À arbitrer** : le contrat ou la documentation ?
+- [ ] AC-4 — La **liste des contrôles non couverts** est publiée **au contrat** (comptes écartés,
+      identité des exercices comparés, balance après clôture, articulation note ↔ poste,
+      articulation comptable ↔ fiscal), chacun avec son ticket. ✅ **Arbitré le 2026-08-27 : le
+      contrat, pas la documentation.** Devant un voyant vert, la première question d'un réviseur
+      est « *qu'est-ce que vous n'avez pas vérifié ?* ». Une note d'`@ApiOperation` ne lui parvient
+      jamais ; et laissée au front, la liste est **codée en dur** — c'est ce que fait la maquette
+      FE-033 aujourd'hui, et elle périmera en silence au premier contrôle ajouté.
 - [ ] AC-5 — Agnosticisme P7 : rien de tout ceci n'ajoute de structure OHADA au moteur.
 - [ ] AC-6 — Non-régression : `valide` garde **exactement** sa sémantique actuelle. Cette story
       **décrit** mieux, elle ne change pas le verdict — le gate reste STORY-064.

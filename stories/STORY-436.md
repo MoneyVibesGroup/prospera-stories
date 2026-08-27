@@ -1,6 +1,6 @@
 # STORY-436 : Quatre lignes du TFT ne sont dérivables d'aucune balance, et aucune route n'accepte de les saisir — le tableau des flux ne peut jamais être complété
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/etats`, `dto`, contrôleur `bilan-diagnostics.controller.ts`
@@ -32,15 +32,29 @@ un état que personne ne peut finir.
 notes 3, 4, 7 — mouvements d'immobilisations, antériorité des créances) sont dans le **même cas**.
 La ligne de saisie qui sert le TFT doit servir les notes, ou il y en aura deux.
 
-## Ce qu'il faut trancher (PO)
+## ✅ Arbitrage (2026-08-27) — **sur le jeu d'états persisté**
 
-- **Où vivent ces valeurs ?** Sur le **jeu d'états persisté** (STORY-064, `POST /bilan/etats`) —
-  ce qui a du sens : elles font partie de la liasse, pas de la balance — ou sur le **dossier/exercice** ?
-- **Sont-elles reprises d'un exercice à l'autre ?** Un remboursement d'emprunt est annuel ; un
-  tableau d'amortissement le donnerait. **Le journal les porte** : une route qui les dériverait des
-  écritures (comptes 16x au débit) est une **quatrième voie**, plus juste et plus coûteuse.
+Ces valeurs sont des **faits de l'exercice déposé**, pas des paramètres du dossier : un dividende
+est voté par une assemblée, un remboursement d'emprunt appartient à un exercice et à un seul.
+Trois conséquences décident :
 
-## Critères d'acceptation (à confirmer après arbitrage)
+1. **Elles doivent être figées avec la liasse.** Rattachées au dossier, elles flotteraient d'un
+   exercice à l'autre et une liasse rouverte changerait **en silence** — exactement ce que
+   STORY-065 existe pour empêcher.
+2. **Elles doivent être auditables.** La piste d'audit (FR-017) porte sur le jeu d'états ; les
+   poser ailleurs obligerait à réinventer datation et attribution.
+3. **Elles n'ont de sens qu'avec un état.** Compléter le `FN` d'un TFT qui n'existe pas encore
+   n'a pas de signification comptable.
+
+⇒ **`PUT /bilan/etats/{id}/complements`**, dépendance assumée à **STORY-064**.
+
+⚠️ **La dérivation depuis le journal (4ᵉ voie) est écartée pour l'instant, mais elle est la plus
+juste** — aucune saisie, aucune erreur de report. Elle est inapplicable ici : l'entrée du module
+est une **balance**, pas un journal, et un dossier alimenté par import de balance n'a pas les
+écritures. À rouvrir quand le dossier portera son journal (elle deviendra alors un **contrôle**
+de la saisie, pas son remplacement).
+
+## Critères d'acceptation
 
 - [ ] AC-1 — Une route accepte les **compléments hors balance** d'une liasse, par code de poste,
       avec leur exercice : `PUT /bilan/etats/{id}/complements`. Elle refuse tout code dont le

@@ -1,6 +1,6 @@
 # STORY-434 : Le TFT bâti sur les variations NETTES double-compte les dotations et les valeurs de cession — l'écart d'articulation vaut exactement `RL + RO`, et il est systématique
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — `etats/tft-production.service.ts`, `etats/bilan.types.ts`, `etats/evaluateur-formule.*`, paquet référentiel
@@ -53,31 +53,56 @@ amortissements — c'est-à-dire sur **toute** entité qui possède une immobili
    `netN`, `netN1` — **mais ni `brutN1` ni `amortN1`**, et l'évaluateur ne voit que `netN`.
    La variation brute n'est donc **pas calculable aujourd'hui**, même en le voulant.
 
-## Ce qu'il faut trancher (PO)
+## ✅ Arbitrage (2026-08-27) — **voie A puis voie B : une seule route, deux étages**
 
-- **Voie A — publier le brut et l'amortissement N-1**, ajouter un `etatSource: 'BILAN_ACTIF_BRUT'`
-  (ou un mode `VARIATION_BRUT`), et corriger les opérandes `FF`/`FG`/`FH` du paquet. Le TFT
-  reconcilie alors **au franc près** dès qu'il n'y a ni cession ni virement de poste à poste.
-- **Voie B — brancher la note 3A** (mouvements bruts réels : acquisitions, cessions, virements),
-  qui est la source **exacte** — mais qui n'est **pas dérivable d'une balance** (STORY-436/FE-080).
-- **Voie C — statu quo assumé** : garder l'estimation et rendre l'écart **explicite et décomposé**
-  à l'écran (ce que la maquette fait déjà), en acceptant que le TFT ne soit **pas déposable en l'état**.
+⚠️ **Et la voie A a été re-dérivée avant d'être retenue : elle ne suffit pas.** La première
+rédaction de cette fiche annonçait « le TFT reconcilie au franc près dès qu'il n'y a ni cession
+ni virement ». **C'est faux dès qu'il y a une cession.** Mesuré sur le jeu de la maquette :
 
-⚠️ **Ne pas choisir est un choix** : aujourd'hui le produit publie un TFT faux de 604 % avec
-`valide: true`.
+| | `ZC` | `ZG` | écart vs Bilan |
+|---|---|---|---|
+| aujourd'hui (variation du **net**) | 680 000 | 1 055 000 | **905 000** |
+| **voie A** (variation du **brut**) | 75 000 | 450 000 | **300 000** |
+| **voie A + B** (mouvements de la **note 3A**) | −225 000 | 150 000 | **0** |
 
-## Critères d'acceptation (voie A, à confirmer)
+La voie A retire **605 000 sur 905 000 (67 %)** — tout le double-comptage des dotations. Le
+résidu de **300 000** vaut **exactement la valeur BRUTE des cessions**, et la balance ne la
+publie nulle part : `brut cédé = VNC (RO, 45 000) + amortissements sur le bien cédé (255 000)`,
+et le second terme n'est publié par aucun champ. **Seule la note 3A le donne** — c'est sa
+colonne « Diminutions ». C'est d'ailleurs *pourquoi* le formulaire OHADA exige la note 3A.
+
+**Décision :**
+
+- **Jalon 1 (voie A) — livrable tout de suite, sans dépendance.** Il retire le biais
+  *structurel* (celui qui frappe **toute** entité amortissant un bien, même sans jamais rien
+  céder) et il est de toute façon **prérequis** : le brut N-1 est aussi ce qui permettra de
+  contrôler l'ouverture de la note 3A (STORY-439) et de corriger les notes (STORY-438).
+- **Jalon 2 (voie B) — conditionné à STORY-436.** Dès que les mouvements bruts de la note 3A
+  sont saisissables, `FF`/`FG`/`FH` les lisent et l'écart tombe à **zéro**. À rechiffrer à ce
+  moment-là ; les 8 points de cette fiche couvrent le jalon 1.
+- ⛔ **Voie C écartée.** Un tableau des flux qui ne retombe pas sur la trésorerie du Bilan
+  n'est pas un tableau des flux : le formulaire déposé porte lui-même sa ligne de contrôle en
+  pied. Assumer l'écart, c'est livrer un état que l'entité ne peut pas déposer.
+
+## Critères d'acceptation — jalon 1 (voie A)
 
 - [ ] AC-1 — `PosteActif` porte `brutN1` et `amortN1` (`null` si le jeu N-1 n'est pas produit).
 - [ ] AC-2 — L'évaluateur résout un opérande `mode: 'VARIATION_BRUT'` sur `BILAN_ACTIF`.
-- [ ] AC-3 — `FF`/`FG`/`FH` du paquet `syscohada-revise@2.1` passent en `VARIATION_BRUT`, et
-      `FI` reste `+TN` (prix de cession, déjà juste). Leur `statutTft` passe de `ESTIME` à
-      `CALCULE` **seulement** en l'absence de virement de poste à poste — sinon il reste `ESTIME`.
-- [ ] AC-4 — Un test d'articulation : sur un jeu sans virement, `ZG === variationBilan` **et**
-      `ZH === tresorerieClotureN`, `ecart === 0`. Le test échoue si quelqu'un remet `netN`.
+- [ ] AC-3 — `FF`/`FG`/`FH` du paquet `syscohada-revise@2.1` passent en `VARIATION_BRUT` ;
+      `FI` reste `+TN` (prix de cession, déjà juste). ⚠️ **Leur `statutTft` reste `ESTIME`** —
+      il ne passera `CALCULE` qu'au jalon 2 : tant que les cessions brutes ne sont pas connues,
+      le montant reste une estimation, et le dire est tout l'intérêt du statut de preuve.
+- [ ] AC-4 — Test d'articulation, **exact et sans complaisance** : sur un jeu **sans cession ni
+      virement**, `ZG === variationBilan` et `ecart === 0` ; sur un jeu **avec cession**,
+      `ecart === valeur brute des cessions` — l'écart résiduel est **connu et borné**, pas subi.
+      Le test échoue si quelqu'un remet `netN`.
 - [ ] AC-5 — Le jeu de la maquette FE-033 devient un **cas de test versionné** : `ZG` doit passer
-      de 1 055 000 à 150 000, et l'écart de 905 000 à 0.
+      de 1 055 000 à **450 000**, et l'écart de 905 000 à **300 000** (jalon 1), puis à **0**
+      au jalon 2.
 - [ ] AC-6 — Agnosticisme P7 : `sfd-bceao@2.0` traverse sans effet (aucune opérande TFT).
+- [ ] AC-7 — Le commentaire périmé de `tft.types.ts` (« *`ecart = 0` par construction* »)
+      disparaît dans la foulée : il décrit le TFT d'avant STORY-113 et enseigne exactement la
+      mauvaise règle.
 
 ## Conséquences ailleurs
 

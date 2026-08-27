@@ -1654,6 +1654,19 @@
   .tft-legend { display: flex; gap: 0.9rem; flex-wrap: wrap; font-size: 0.74rem; color: var(--muted-fg); }
   .tft-legend span b { color: var(--foreground); }
 
+  /* L'arbitrage rendu sur un écart : un écran qui annonce un manque doit dire
+     OÙ EN EST LA DÉCISION, sinon le PO doit redemander (règle FE-046). */
+  .tft-arb { border-top: 1px solid color-mix(in srgb, var(--success) 30%, var(--border)); background: color-mix(in srgb, var(--success) 7%, var(--card)); padding: 0.75rem 0.95rem; }
+  .tft-arb > b { font-size: 0.84rem; color: var(--success); }
+  .tft-arb p { margin: 0.35rem 0 0; font-size: 0.77rem; color: var(--muted-fg); line-height: 1.55; }
+  .tft-arb-steps { display: flex; align-items: stretch; gap: 0.5rem; flex-wrap: wrap; margin: 0.6rem 0; }
+  .tft-arb-steps span { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0.7rem; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); background: var(--card); }
+  .tft-arb-steps span i { font-style: normal; font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-fg); }
+  .tft-arb-steps span b { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 0.92rem; }
+  .tft-arb-steps span.ok { border-color: color-mix(in srgb, var(--success) 45%, var(--border)); }
+  .tft-arb-steps span.ok b { color: var(--success); }
+  .tft-arb-steps .ar { border: 0; background: none; padding: 0; align-self: center; color: var(--muted-fg); font-size: 1.1rem; }
+
   /* Décomposition d'un écart : un nombre rouge sans son origine ne se corrige pas. */
   .tft-why { border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border)); border-radius: var(--radius); background: color-mix(in srgb, var(--danger) 6%, var(--card)); overflow: hidden; }
   .tft-why > .h { display: flex; align-items: center; gap: 0.55rem; padding: 0.7rem 0.95rem; border-bottom: 1px solid color-mix(in srgb, var(--danger) 22%, var(--border)); }
@@ -12706,6 +12719,20 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
                             <div class="r sum"><span>Total = l'écart <code>ZH</code> &minus; trésorerie du Bilan</span><span class="n">905&nbsp;000</span></div>
                             <div class="r"><span style="color:var(--success)"><b>Avec les mouvements BRUTS</b> (525&nbsp;000 d'acquisitions corporelles, 300&nbsp;000 de prix de cession — c'est-à-dire la <b>note 3A</b>), <code>ZC</code> vaudrait <b>&minus;225&nbsp;000</b> et <code>ZG</code> <b>150&nbsp;000</b> — <b>exactement la variation du Bilan</b>. Le TFT retombe au franc près.</span><span class="n" style="color:var(--success)">écart&nbsp;0</span></div>
                           </div>
+                          <div class="tft-arb">
+                            <b>✅ Arbitré le 27/08 — voie A puis voie B, une seule route en deux étages</b>
+                            <p><b>Jalon 1</b>&nbsp;: les opérandes <code>FF</code>/<code>FG</code>/<code>FH</code> lisent la variation du <b>BRUT</b> au lieu du net (<code>PosteActif</code> gagne <code>brutN1</code>/<code>amortN1</code>). <b>Livrable sans dépendance</b>, et de toute façon prérequis de STORY-438 / STORY-439.
+                            <b>Jalon 2</b>&nbsp;: les mouvements de la <b>note 3A</b> — conditionné à la saisie hors balance (STORY-436).</p>
+                            <div class="tft-arb-steps">
+                              <span><i>aujourd'hui</i><b>905 000</b></span>
+                              <span class="ar">→</span>
+                              <span><i>jalon 1 · voie A</i><b>300 000</b></span>
+                              <span class="ar">→</span>
+                              <span class="ok"><i>jalon 2 · note 3A</i><b>0</b></span>
+                            </div>
+                            <p>⚠️ <b>La voie A ne suffit pas, et il vaut mieux le savoir avant de coder.</b> Elle retire <b>605 000 sur 905 000 (67 %)</b> — tout le double-comptage des <b>dotations</b>, celui qui frappe toute entité amortissant un bien. Le résidu de <b>300 000</b> vaut <b>exactement la valeur brute des cessions</b>, que la balance ne publie nulle part&nbsp;: <code>brut cédé = VNC (45&nbsp;000) + amortissements sur le bien cédé (255&nbsp;000)</code>, et le second terme n'a <b>aucun champ</b>. Seule la <b>note 3A</b> le donne — c'est sa colonne «&nbsp;Diminutions&nbsp;», et c'est <b>pourquoi</b> le formulaire OHADA l'exige.</p>
+                            <p>⛔ <b>Voie C (statu quo) écartée</b>&nbsp;: un tableau des flux qui ne retombe pas sur la trésorerie du Bilan n'est pas un tableau des flux — le formulaire déposé porte lui-même sa ligne de contrôle en pied.</p>
+                          </div>
                         </div>
 
                         <div class="crs-art">
@@ -12716,9 +12743,9 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
                             <span class="badge badge-invited"><span class="d"></span>1 contrôle calculé, et il ne passe pas</span>
                           </div>
                           <div class="crs-artline ko"><span class="ic">!</span><span class="t"><b>La variation reconstituée par les flux ≠ la variation de trésorerie du Bilan</b><p>C'est le contrôle <code>controleTresorerie</code>, et — contrairement à <code>coherenceResultat</code> du compte de résultat — <b>ce n'en est pas un faux</b>&nbsp;: <code>variationTft</code> vient de la <b>cascade des flux</b> (<code>ZG</code>), <code>variationBilan</code> de la <b>trésorerie des postes marqués</b>. Deux chemins indépendants, donc un écart possible — et ici il vaut 905&nbsp;000, soit <b>604&nbsp;%</b> de la variation réelle.</p></span><span class="val"><b>1&nbsp;055&nbsp;000</b>≠ 150&nbsp;000</span></div>
-                          <div class="crs-artline na"><span class="ic">i</span><span class="t"><b>…et ce contrôle est <b>INFORMATIF</b>&nbsp;: la liasse reste <code>valide: true</code></b><p><code>ControlesCoherenceProductionService</code> classe <code>VARIATION_TRESORERIE</code> en <code>INFORMATIF</code>&nbsp;; seuls <code>EQUILIBRE_BILAN</code> et <code>COHERENCE_RESULTAT</code> sont bloquants. Un TFT faux de 905&nbsp;000 ne retient donc <b>rien</b>. Le choix se défend (les lignes <b>estimées</b> peuvent créer un écart légitime) — mais il doit être <b>dit à l'écran</b>, sinon un vert global couvre un rouge local. <span class="code">à trancher · <b>STORY-440</b></span></p></span><span class="val"><b>informatif</b>n'empêche rien</span></div>
+                          <div class="crs-artline na"><span class="ic">i</span><span class="t"><b>…et ce contrôle est <b>INFORMATIF</b>&nbsp;: la liasse reste <code>valide: true</code></b><p><code>ControlesCoherenceProductionService</code> classe <code>VARIATION_TRESORERIE</code> en <code>INFORMATIF</code>&nbsp;; seuls <code>EQUILIBRE_BILAN</code> et <code>COHERENCE_RESULTAT</code> sont bloquants. Un TFT faux de 905&nbsp;000 ne retient donc <b>rien</b>. Le choix se défend (les lignes <b>estimées</b> peuvent créer un écart légitime) — mais il doit être <b>dit à l'écran</b>, sinon un vert global couvre un rouge local. <b>✅ Arbitré le 27/08</b>&nbsp;: le verdict ne bouge pas, mais la <b>liste des contrôles non couverts</b> passe <b>au contrat</b>. <span class="code">écart ouvert · <b>STORY-440</b></span></p></span><span class="val"><b>informatif</b>n'empêche rien</span></div>
                           <div class="crs-artline ok"><span class="ic">✓</span><span class="t"><b>L'ouverture <code>ZA</code> = trésorerie nette de clôture N-1</b><p>Servi&nbsp;: <code>ZA = BT(N-1) &minus; DT(N-1)</code>, sous-totaux du référentiel en mode <code>VALEUR_N_1</code>. C'est la même trésorerie que celle lue au Bilan sur les postes marqués <code>tresorerie</code> — <b>l'ancrage du haut du tableau tient</b>, c'est le bas qui décroche.</p></span><span class="val"><b>700&nbsp;000</b>= 700&nbsp;000</span></div>
-                          <div class="crs-artline na"><span class="ic">?</span><span class="t"><b>Quatre lignes du formulaire ne sont <b>pas dérivables</b> d'une balance, et rien ne permet de les saisir</b><p><code>FJ</code> cessions financières, <code>FM</code> prélèvements sur le capital, <code>FN</code> <b>dividendes versés</b>, <code>FQ</code> <b>remboursements d'emprunts</b>&nbsp;: ces mouvements ne laissent pas de solde, seulement une trace en <b>journal</b>. Le service les rend à <code>null</code> — ce qui est <b>juste</b> — mais aucune route n'accepte de les compléter. <b>Tant que ces quatre cases restent vides, la liasse n'est pas déposable.</b> <span class="code">écart ouvert · <b>STORY-436</b> · <b>FE-080</b></span></p></span><span class="val"><b>4 lignes</b>non saisissables</span></div>
+                          <div class="crs-artline na"><span class="ic">?</span><span class="t"><b>Quatre lignes du formulaire ne sont <b>pas dérivables</b> d'une balance, et rien ne permet de les saisir</b><p><code>FJ</code> cessions financières, <code>FM</code> prélèvements sur le capital, <code>FN</code> <b>dividendes versés</b>, <code>FQ</code> <b>remboursements d'emprunts</b>&nbsp;: ces mouvements ne laissent pas de solde, seulement une trace en <b>journal</b>. Le service les rend à <code>null</code> — ce qui est <b>juste</b> — mais aucune route n'accepte de les compléter. <b>Tant que ces quatre cases restent vides, la liasse n'est pas déposable.</b> <b>✅ Arbitré le 27/08</b>&nbsp;: la saisie vivra <b>sur le jeu d'états persisté</b> (<code>PUT …/bilan/etats/{id}/complements</code>), pas sur le dossier — ce sont des <b>faits de l'exercice déposé</b>, ils doivent être <b>figés avec la liasse</b> et auditables. <span class="code">écart ouvert · <b>STORY-436</b> · <b>FE-080</b></span></p></span><span class="val"><b>4 lignes</b>non saisissables</span></div>
                         </div>
 
                         <div class="card-surface" style="overflow:hidden">
@@ -13117,7 +13144,7 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>
                             <b>Ce que la batterie ne regarde pas — et qui peut rendre une liasse verte parfaitement fausse</b>
                             <span class="grow"></span>
-                            <span class="badge badge-invited"><span class="d"></span>4 angles morts</span>
+                            <span class="badge badge-invited"><span class="d"></span>4 angles morts &middot; ✅ passent au contrat (STORY-440)</span>
                           </div>
                           <div class="coh-row warn">
                             <span class="ic">!</span>
