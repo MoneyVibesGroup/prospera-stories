@@ -1,6 +1,6 @@
 # STORY-399 : Le contenu du référentiel n'est lisible par aucune route — et le serveur valide contre lui
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-010 — Référentiels & table de passage (FR-005..FR-008)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/referentiel`
@@ -121,8 +121,12 @@ compte inhabituel est précisément celui qu'aucun autre compte n'a atteint.**
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — dev terminé le **2026-08-27**, branche `MNV-399` ouverte sur
-`docs` et sur `bilan-service`. Portes vertes, vérification docker faite. En attente de revue.
+**Statut : `done`** — implémentée, validée, revue (code + sécurité), vérification docker
+**rejouée sur l'état final**, mergée en rebase sur `dev`. Clôturée le **2026-08-27**.
+
+**PR** : `prospera-bilan-service` **#52**, 2 commits — feature (`9d58d04`) puis revue
+(`2784c6e`). Un seul dépôt de code, aucun contrat d'événement touché. Branche `MNV-399`
+ouverte sur `bilan-service` **et** sur `docs`.
 
 ⚠️ **Un seul dépôt de code** : la story n'expose que de la lecture HTTP, aucun contrat
 d'événement Kafka n'est touché.
@@ -234,6 +238,62 @@ read-models (`orgkycstatuses`, `orgbilanentitlements`, `dossiers_dossier`) semé
 Le refus `REFERENTIEL_INTEGRITY` n'est pas reproductible sur l'artefact embarqué ; il passe
 par **le même** `toHttpFromReferentielError` que les autres, et la mutation n°5 prouve que
 retirer cette traduction fait rougir les cinq refus d'un coup.
+
+### Revue de code — 3 constats, 0 bloquant, tous corrigés (+ 1 constat ponytail)
+
+**① Le plus important, et *ma propre table de mutations l'avait manqué*.** La route
+`plan-de-comptes` n'était gardée que par un `toBeGreaterThan(100)` là où le critère énonce
+« rend **exactement** `pkg.planDeComptes` ». La route `postes`, elle, avait bien son égalité
+contre `postesCount`. **Mesuré par le relecteur** : muter `slice(0, 150)` sur 174 comptes
+laisse **les 94 tests verts** — 24 comptes réels disparaissent de la réponse, et de tout
+regroupement par classe, sans qu'une seule assertion bronche.
+
+⚡ **Pourquoi ma passe de mutation ne l'avait pas vu** : ma mutation n°4 testait la liste
+**vide** (`slice(0, 0)`), que le seuil `> 100` attrape. La **troncature partielle** passait
+juste en dessous. Un seuil et une égalité ne gardent pas la même chose, et une mutation
+« liste vide » ne prouve rien d'une mutation « liste amputée ». ⇒ égalité ajoutée contre
+`planCount`, et **mutation n°11** au tableau : `slice(0, 150)` rougit désormais.
+
+**② Les chiffres corrigés étaient recopiés dans le code.** `postesCount: 214` et
+`planCount: 918` figuraient dans le docblock du DTO et dans celui du contrôleur — alors que
+la prémisse ① ci-dessus les corrige et écrit « ne doivent pas être recopiés ailleurs ».
+Remplacés par les valeurs mesurées, avec **le paquet nommé à côté du nombre** pour qu'ils ne
+redeviennent pas une affirmation générale.
+
+**③ Un docblock de test décrivait une discipline qui n'existe pas.** Le mock
+`MappingOverride` annonçait un `create` « qui échoue par défaut, armé par les tests qui en
+ont besoin » — armement jamais implémenté : il réussit toujours. Le commentaire énonçait
+exactement le risque qu'il prétendait fermer. Réécrit pour dire ce que le mock fait.
+
+**④ (ponytail, lentille sur-ingénierie)** Le test unitaire nommé « AC-3 … **MÊME** source »
+ne touche pas le juge : avec un moteur mocké, il compare la liste à elle-même. **Renommé**
+pour ce qu'il garde réellement (ordre et absence de filtre) plutôt que supprimé — la preuve
+de l'AC-3 est l'e2e qui soumet les 163 postes au **vrai** `MappingOverrideService`. Un titre
+qui promet l'AC-3 ferait croire la garde plus large qu'elle n'est.
+
+### Revue de sécurité — 0 constat
+
+Chaîne de gardes intacte et **identique aux six routes voisines** ; `orgId` vient du **JWT**,
+jamais de l'URL — le `dossierId` ne sert qu'au `DossierScopeGuard`, donc **aucun IDOR** ; un
+dossier étranger et un dossier inexistant rendent le **même** 404 (anti-énumération) ; le
+contenu servi est de la **norme comptable publique**, aucune donnée d'organisation ; cache
+du `ReferentielLoader` non forçable (clé issue du read-model Kafka, pas de l'appelant), donc
+pas de DoS par rechargement ; payload maximal mesuré **28 Ko** sous throttler 100 req/min/IP.
+
+⚠️ **Une latence notée, délibérément non corrigée** : `plan-de-comptes` rend le tableau du
+paquet **en cache** sans copie (là où `postes` en rend une, par effet de bord du `.map`). Les
+trois vecteurs de mutation ont été instruits — intercepteur, consommateur applicatif,
+pollution de prototype — et **aucun n'existe** : la revue l'a classé sous le seuil de
+confiance, robustesse et non vulnérabilité. Le jour où un consommateur trierait cette liste
+**en place**, il corromprait le cache **pour toutes les organisations** partageant ce
+référentiel. Consigné ici plutôt que fermé par un `.slice()` spéculatif.
+
+### Vérification docker REJOUÉE sur l'état final
+
+Le commit de revue touche `src/` : la vérification a été **refaite** après lui, stack
+redémarrée. Document publié **identique** (39 chemins, 80 schémas, schémas des 2 DTO et
+réponses du `POST` inchangés au comparateur), réponses des deux routes **identiques octet
+pour octet** à la première mesure, et `163 = postesCount` / `174 = planCount` reconfirmés.
 
 ### ⛔ Constat HORS PÉRIMÈTRE — quatre lignes d'en-tête du formulaire sont packagées en postes
 
