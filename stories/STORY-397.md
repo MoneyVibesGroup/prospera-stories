@@ -1,6 +1,6 @@
 # STORY-397 : Les codes de réintégration sont validés mais jamais publiés — le comptable les tape à l'aveugle
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-020 — Cahiers & pièces (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `referentiel` / `cahiers`
@@ -141,9 +141,11 @@ qui en portent déjà un. Offrir un champ libre aurait été offrir un piège.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — branche `MNV-397` ouverte sur `balance-service` (base `dev`) et sur
-`docs/` (base `main`) le **2026-08-27**. Un seul dépôt de code : la story ne touche aucun contrat
-d'événement.
+**Statut : `done`** — implémentée, validée, vérifiée en docker, revue (code + sécurité), mergée en
+rebase sur `dev`. Clôturée le **2026-08-27**.
+
+**PR** : `prospera-balance-service` **#62**, 2 commits — feature (`39022b3`) puis revue (`4b320be`).
+Un seul dépôt : la story ne touche aucun contrat d'événement.
 
 ### Décision de conception — QUEL paquet fiscal la route lit-elle ?
 
@@ -243,3 +245,80 @@ que la story existe pour supprimer.
 
 > Données de vérification laissées en base de dev (12 catégories `MNV397-*`, une org
 > `cabinet-mnv-397`) : le dev repart de zéro, aucune reprise n'est due.
+
+---
+
+## Revue de code — 3 constats, aucun bloquant
+
+Deux lentilles sur le même diff : `prospera-code-review` (correctness, périmètre, tests) et
+`ponytail-review` (sur-ingénierie). **Elles ont convergé sur le même endroit** — ce qui est en
+soi le résultat le plus utile de la passe.
+
+### ⛔ Le constat qui comptait : un 409 documenté que cette route ne peut PAS produire
+
+`@ApiConflictResponse` annonçait `REFERENTIEL_NON_PACKAGE` sur `GET /referentiels/reintegrations`.
+Vérifié dans le code : `ArtefactNonPackageError` n'est levée **qu'à un seul endroit du dépôt** —
+`referentiel-registry.ts:197`, axe **comptable**, cas `smt-togo` — et le manifeste **fiscal** ne
+porte même pas la notion (`EntreePaquetFiscal` = `{ locator, checksum, paysSource }`, aucun champ
+`nonPackage`). Une année fiscale absente donne un `ArtefactNotFoundError`, donc un **500
+`REFERENTIEL_UNAVAILABLE`** — ce que le e2e de cette même story épinglait déjà.
+
+⚡ **L'aggravant est le vrai défaut, et il est du genre qui survit à une suite verte** : le test
+unitaire « paquet fiscal non packagé → 409 motivé » **injectait** cette erreur dans le loader
+fiscal. Il passait au vert en validant un **chemin mort**, et donnait l'apparence que le 409
+documenté était réel. Un mock accepte n'importe quelle erreur — c'est précisément ce qui rend un
+test de mapping capable de certifier une branche que la production ne peut pas atteindre.
+
+⇒ `@ApiConflictResponse` retiré (documenter un refus impossible fait coder au client une branche
+morte **et** le laisse sans code pour le vrai refus) ; test remplacé par la panne réellement
+atteignable (`ArtefactNotFoundError` → 500), **mutation n° 7 vérifiée rouge** (`catch` avalant
+l'erreur et rendant une liste vide).
+
+### Les deux autres
+
+- **Le contrat ne disait pas QUEL paquet.** Deux validateurs produisent `CODE_REINTEGRATION_INCONNU`
+  avec deux paquets différents ; la route s'aligne sur celui des **catégories** (par défaut,
+  D-083-3). C'était dit dans le JSDoc du service — donc invisible du consommateur, qui lit Swagger.
+  L'`@ApiOperation` et le DTO le disent désormais, en renvoyant vers `resultat-fiscal` pour la
+  grille de l'exercice. Latent aujourd'hui (le manifeste ne porte que `togo@2026`), certain le jour
+  où `togo@2027` est publié.
+- Le JSDoc de classe annonçait « **deux** routes » et en énumérait trois — décompte cassé **par ce
+  diff**.
+
+### Écartés, avec leur raison
+
+- `extraireCodesRetraitement` parcourt `deductions_libelles` **après** `reintegrations_libelles` :
+  un paquet qui keyerait un code de réintégration dans la mauvaise table publierait ici un libellé
+  de déduction. Exige un artefact malformé (checksum vérifié), impact = une étiquette d'écran, et
+  les deux tables sont absentes du paquet réel. Confiance ~60, sous le seuil.
+- `toBeGreaterThan(0)` sur `codes.length` dans le e2e « aucun référentiel comptable attribué » : le
+  critère y est « 200 malgré l'axe comptable absent », pas une égalité de liste — laquelle est
+  épinglée exactement ailleurs (les 12 codes ordonnés).
+- Import croisé `referentiel/` → `cahiers/` + `fiscal/` : vérifié, **aucun cycle à l'exécution**
+  (les deux fichiers de règles n'importent de `referentiel/` que des **types**, effacés à la
+  compilation).
+- Chevauchement avec la grille de `resultat-fiscal` : réel, assumé, non substituable (cette
+  grille-là est scopée à l'exercice et exige une balance **et** un dossier).
+
+## Revue de sécurité — 0 vulnérabilité
+
+12 pistes examinées, toutes écartées avec leur raison : contournement JWT (RS256/JWKS imposé,
+route non `@Public()`), IDOR (le handler n'a **ni `@Param` ni `@Query` ni `@Body`** — l'org vient
+du seul claim `org` du jeton), application effective des gardes de classe au nouveau handler
+(`getAllAndOverride([handler, class])`, non redéfini), `PLATFORM_ADMIN` / jeton sans `org` (double
+refus fail-closed), anti-énumération (la réponse ne varie pas selon l'organisation), pollution de
+prototype via `libelles[code]` (le code vient **exclusivement** d'un artefact vérifié par sha256,
+l'appelant ne fournit rien), injection NoSQL (aucune requête Mongo sur ce chemin), fuite d'info
+(le mapper neutralise les messages porteurs de checksum et de locator), secrets, DoS (throttler
+global, artefact caché en *single-flight*, réponse bornée par l'artefact), intégrité fiscale
+(prémisse **revérifiée dans le code**, pas crue).
+
+⚠️ **Un point noté, délibérément non retenu comme vulnérabilité — mais à connaître** :
+`resoudrePaquetFiscal` **ignore** son paramètre `_organizationId`, là où `resoudreReferentiel`
+relit l'entitlement en base et rejoue le refus. `codesReintegration` n'a donc que la **garde HTTP**
+comme contrôle d'accès, sans la défense en profondeur de ses deux routes jumelles. Sans impact
+ici : la donnée servie n'est **pas scopée au tenant** — c'est le paquet fiscal par défaut de la
+plateforme, une référence légale identique pour toutes les organisations. Il n'y a rien à
+exfiltrer. Le jour où la résolution du paquet deviendra org-dépendante (hook STORY-079/080, déjà
+annoncé dans le résolveur), **cette route devra regagner la défense en profondeur** — et c'est
+exactement le moment où l'oubli serait invisible.
