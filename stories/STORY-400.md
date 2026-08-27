@@ -1,6 +1,6 @@
 # STORY-400 : Affecter une RACINE de comptes — et refuser la surcharge acceptée-puis-inerte
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-010 — Référentiels & table de passage (FR-005..FR-008)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/mapping-override`, `modules/bilan/table-de-passage`
@@ -131,12 +131,13 @@ affecte toujours compte par compte.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — implémentée, portes DoD vertes, passe de mutation faite,
-**vérification docker réelle** faite sur stack neuve. Revue de code et revue de sécurité
-à suivre.
+**Statut : `done`** — implémentée, validée, revue (code + sécurité), **vérification docker
+rejouée sur l'état final**, mergée en rebase sur `dev`. Clôturée le **2026-08-27**.
 
-**Branches** : `MNV-400` sur `bilan-service` **et** sur `docs`. **Un seul dépôt de code** :
-aucun contrat d'événement Kafka n'est touché (la surcharge est locale au dossier, FR-008).
+**PR** : `prospera-bilan-service` **#53**, 3 commits — feature (`718cfad`), revue
+(`8470cbd`), sécurité (`676bca2`). Branche `MNV-400` ouverte sur `bilan-service` **et** sur
+`docs`. **Un seul dépôt de code** : aucun contrat d'événement Kafka n'est touché (la
+surcharge est locale au dossier, FR-008).
 
 ### Conception — les deux arbitrages que la story laissait ouverts
 
@@ -263,3 +264,113 @@ et **vérifiée** (`70` est au plan SYSCOHADA). Le mode de panne « proposée, a
 puis sans effet » est donc fermé **côté `bilan-service`**. ⚠️ FE-046 vise l'**Atelier**
 (`balance-service`) : le même correctif de contrat y reste à faire — ce n'est pas le
 périmètre de cette story, qui cadre `bilan-service`.
+
+### Revue de code — 5 constats, **1 bloquant**, tous corrigés
+
+**① BLOQUANT — le contrat publiait `prefixe` À L'ENVERS, et c'était l'AC-5 elle-même.**
+`RattachementResultDto.prefixe` annonçait encore « pour une **surcharge**, c'est le **compte
+entier** — rattachement exact, pas par préfixe ». Depuis 400 le serveur y met la **racine**.
+Un client lisant le contrat aurait affiché « compte `476200` affecté individuellement » là
+où le serveur dit « couvert par la racine `4762` » — c'est-à-dire la traçabilité que l'AC-5
+existe pour donner, publiée **au contraire de ce qu'elle vaut**.
+
+⚡ **Pourquoi rien ne rougissait, et c'est la leçon** : le fichier n'était **pas dans le
+diff** (j'avais mis à jour la doc du *type* interne, pas l'`@ApiProperty`) ; `ecartsContrat`
+compare les **valeurs** publiées, jamais les **descriptions** ; et ma mutation M3 ne testait
+que la valeur émise. Trois filets, aucun ne regarde la phrase. ⇒ description corrigée **et**
+garde ajoutée sur la description elle-même, avec la formulation fausse **nommée** —
+mutation **M9** : rouge.
+
+**② La note de migration de prod ne prescrivait que la moitié du geste.** Elle disait
+« `dropIndex` explicite le jour venu ». Or un index composé **non sparse** indexe un champ
+**absent** comme `null`, et `updateOne` (`findOneAndUpdate`) n'écrit **pas** le défaut
+Mongoose : un document d'avant 400 reste **nu en base** — la vérification docker le mesure
+elle-même. Après le seul `dropIndex`, une surcharge *legacy* `VALIDATED` sur `211000`
+(`(t,d,null,'211000')`) et une nouvelle en portée `COMPTE` (`(t,d,'COMPTE','211000')`)
+auraient des clés **distinctes** : aucun `E11000`, aucun 409 — puis les deux retomberaient
+sur la **même** clé `COMPTE|211000` à la lecture, l'une écrasant l'autre au hasard de
+l'ordre de lecture Mongo. C'est **exactement** la perte silencieuse que le §② de la
+conception déclare avoir fermée, rouverte par le runbook. Les deux gestes sont désormais
+écrits, **dans l'ordre**, au-dessus de l'index.
+
+**③** Le JSDoc de **classe** du repository disait encore `Map(compte → cible)` quand celui
+de la **méthode** disait `Map(portée|valeur → cible)` — deux affirmations contradictoires
+dans le même fichier, sur le contrat le plus porteur de la story.
+
+**④** Clause de filtre **toujours vraie** dans le spec d'exhaustivité (tout candidat est,
+par construction, le préfixe d'un compte du plan) : elle faisait croire à un second critère
+là où il n'y en a qu'un. Retirée. ⚡ **Et le relecteur a relevé mieux** : la **seconde**
+mesure dont `descendDuPlan` dépend — *tout préfixe déclaré dans `tableDePassage` descend
+d'un compte du plan* — n'était gardée par **rien**. Sans elle, un paquet futur ferait
+refuser une surcharge sur un compte que le moteur **sait pourtant rattacher** : un refus
+incompréhensible pour le comptable, invisible partout ailleurs. Garde ajoutée sur les 5
+paquets.
+
+**⑤** Assertion strictement impliquée par la précédente (`not.toBeUndefined()` après un
+`toEqual([…])`) : elle ne peut pas échouer seule, et son commentaire lui prêtait un rôle
+qu'elle ne tient pas.
+
+⚠️ **Un piège de la passe de revue, à ne pas rejouer** : le `git checkout --` qui restaurait
+le code après la mutation **M9** a emporté le correctif ① — non committé à ce moment-là. Il
+a fallu le réappliquer. Sur un travail non committé, la restauration par `git checkout` est
+une suppression.
+
+**Lentille sur-ingénierie (ponytail)** — passée sur le même diff : **rien au-delà de ④ et
+⑤**. `cleSurcharge` (un écrivain, un lecteur) et `resoudreSurcharge` sont justifiés, pas des
+indirections gratuites ; le garde-fou `if (!surcharges?.size)` sert le chemin chaud (aucune
+surcharge = le cas courant sur une balance entière).
+
+### Revue de sécurité — **0 vulnérabilité**
+
+Cinq vecteurs instruits, tous écartés sur mesure et non par prudence :
+
+- **La clé composée `portée|valeur` n'est pas forgeable** : `portee` est contrainte par
+  `@IsIn` **et** par l'`enum` Mongoose, `compte` par `^\d[0-9A-Za-z]{1,19}$` — qui exclut le
+  `|` ; le préfixe de lookup est un **littéral**, jamais une donnée. `enableImplicitConversion`
+  transforme un `{"$ne":…}` en `"[object Object]"`, que le `@Matches` refuse. Et le seul
+  chemin d'écriture est `proposer`, qui construit l'objet champ par champ (aucun
+  mass-assignment).
+- **L'élargissement de portée n'est pas une escalade** : le modèle de privilège est inchangé
+  (proposition `TENANT_USER`, validation `TENANT_ADMIN`), et surtout `portee` est publiée
+  **requise en lecture** — l'administrateur dispose donc, **au contrat**, de l'information
+  « ceci est une racine » avant de valider. Racine minimale de 2 caractères, et elle doit
+  descendre du plan : pas de racine « univers ».
+- **L'index élargi ne se contourne pas** : la coexistence des deux portées est **voulue** et
+  résolue **déterministement** (`COMPTE` avant `RACINE` à longueur égale) ; deux `valider`
+  concurrents sur le même couple donnent toujours `E11000` → 409 générique.
+- **Le 422 ne fuit rien** : `organizationId` vient du **JWT seul**, et le plan contre lequel
+  le refus est prononcé est déjà lisible par le même appelant sous **exactement les mêmes
+  gardes**. Aucun oracle.
+- **Le cloisonnement tient** : `chargerSurchargesActives` passe par le
+  `DossierScopedRepository` (fail-closed, `{tenantId}` puis `{dossierId}` fusionnés en
+  dernier). La résolution par préfixe élargit la couverture **à l'intérieur** de la sphère,
+  jamais au-delà.
+
+**Deux observations renvoyées hors sécurité :**
+
+**① `lister` — `@Query('statut')` n'est ni typé ni validé** (`?statut[$ne]=…` fait entrer un
+opérateur Mongo dans le filtre). **Pré-existant** à cette story et **sans impact** : le
+filtre reste tenant+dossier-scopé et ne fait que **restreindre** un ensemble que l'appelant
+obtient déjà en omettant le paramètre. Hors périmètre — à durcir par une story dédiée.
+
+**② `valider` ne rejoue AUCUN des deux contrôles de `proposer`** — ni `POSTE_INCONNU`
+(depuis 058) ni `COMPTE_HORS_REFERENTIEL`. Si le référentiel effectif de l'org change entre
+la proposition et la validation (`entitlement.changed`), une surcharge peut redevenir
+« validée puis inerte » : l'angle mort exact que l'AC-3 ferme **à la proposition**. Le
+périmètre de la story cadre explicitement le contrôle « à la **proposition** » — le rejouer
+ici déborderait. ⇒ **hook inerte documenté** posé sur `valider`, qui note que le paquet y est
+**déjà chargé** (`capturerAncienPoste`) : la story suivante n'aura qu'à s'en servir.
+
+### Vérification docker REJOUÉE sur l'état final
+
+Le commit de revue touche `src/` — dont une description **publiée en OpenAPI**. La
+vérification a donc été refaite après lui, service redémarré :
+
+- `PosteRattacheDto.prefixe` publie bien la **nouvelle** phrase (« le compte entier en portée
+  `COMPTE` et la **racine** en portée `RACINE` ») ; `PorteeSurcharge` est publiée en
+  énumération `['COMPTE','RACINE']` ; `portee` est **requise** dans `SurchargeResponseDto` ;
+- la réponse du `dry-run` est **identique** à la première mesure (comparaison structurelle
+  exacte des deux corps JSON) ;
+- index toujours `tenantId_1_dossierId_1_portee_1_compte_1` (et lui seul, hors `_id_`) ;
+  `4762` toujours porté par **2** surcharges VALIDATED ; le document *legacy* toujours **sans
+  le champ** en base ; `422 COMPTE_HORS_REFERENTIEL` reconfirmé.
