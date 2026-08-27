@@ -142,7 +142,8 @@ qui en portent déjà un. Offrir un champ libre aurait été offrir un piège.
 ## Progress Tracking
 
 **Statut : `in_progress`** — branche `MNV-397` ouverte sur `balance-service` (base `dev`) et sur
-`docs/` (base `main`) le **2026-08-27**.
+`docs/` (base `main`) le **2026-08-27**. Un seul dépôt de code : la story ne touche aucun contrat
+d'événement.
 
 ### Décision de conception — QUEL paquet fiscal la route lit-elle ?
 
@@ -158,3 +159,87 @@ Le consommateur de cette story est **FE-044, le formulaire de catégorie** — d
 route résout le paquet **sans exercice**, ce qui la met sur la **source exacte** du validateur
 qu'elle sert (AC-3). Un exercice arbitraire aurait publié une liste que ce validateur n'applique
 pas : l'écart précis que l'AC-3 interdit.
+
+### Livré
+
+- **`GET /api/v1/referentiels/reintegrations`** — jumelle exacte de `plan-comptes` (STORY-394) :
+  même contrôleur, mêmes gates (`@RequiresBalanceAccess` + `@Roles(TENANT_ADMIN, TENANT_USER)`),
+  `orgId` **toujours** pris au JWT, jamais en paramètre. Rend
+  `{ paquetFiscal: { pays, annee }, codes: [{ code, libelle? }] }`.
+- **`ReintegrationsResponseDto` / `CodeReintegrationDto`** — des **classes** décorées, pas des
+  interfaces : seule une classe entre au document OpenAPI en `$ref` (leçon STORY-376). Le contrat
+  publié ne porte donc aucun `object` opaque, ce que la garde `openapi-contract.e2e-spec.ts`
+  vérifie déjà pour tout le service.
+- **`ReferentielService.codesReintegration`** — la liste sort d'`extraireCodesReintegration`, les
+  libellés d'`extraireCodesRetraitement` (`reintegrations_libelles`). Aucune **troisième** lecture
+  de la rubrique n'a été écrite.
+
+### Ce qui décide de la story : publier ce qui est RÉELLEMENT appliqué
+
+L'AC-3 (« la liste rendue est exactement celle que `estCodeReintegrationAdmis` accepte ») ne se
+satisfait pas d'un code qui « lit le même champ ». Deux choix la portent :
+
+1. **La liste sort de la fonction du validateur**, pas d'une seconde lecture de
+   `reintegrations_codes`. Deux extracteurs parallèles lisant la même clé auraient été verts le
+   jour de la livraison et libres de diverger ensuite — et une liste qui propose un code que la
+   saisie refuse est **pire** que pas de liste : elle promet.
+2. **Le paquet est résolu sans exercice** (cf. la table plus haut). C'est le seul choix qui met la
+   route sur le paquet que le validateur de **catégories** applique réellement.
+
+⚠️ **Limite connue et assumée** : le validateur de **lignes** (`cahiers-depenses`) résout, lui, le
+paquet **de l'exercice de la ligne**. Sur un exercice dont la loi de finances changerait les codes,
+sa liste pourrait différer de celle publiée ici. C'est l'approximation que **D-083-3** a déjà
+prise et documentée (les codes sont structurellement stables, les **taux** ne le sont pas — eux
+sont lus au paquet de l'exercice). La lever demanderait une route scopée au dossier/exercice :
+hors périmètre, et sans consommateur aujourd'hui (FE-044 saisit une catégorie, pas une ligne).
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **3110 unitaires** + **751 e2e** verts · `referentiel.service.ts`
+et `referentiel.controller.ts` à **100 / 100 / 100 / 100** (seuils 65/90/90/90).
+
+**6 mutations appliquées, chacune vérifiée ROUGE puis restaurée** :
+
+| # | mutation | test qui vire au rouge |
+|---|---|---|
+| 1 | le paquet est résolu **avec** un exercice (`{ fin: 2027-12-31 }`) | « résout le paquet SANS exercice (même paquet que le validateur de catégories) » |
+| 2 | la liste sort des **déductions** du même paquet (`extraireCodesRetraitement().deductions`) | « AC-3 : équivalence stricte …, dans les deux sens » + e2e « les codes de DÉDUCTION … ne sont pas publiés ici » |
+| 3 | un `.sort()` est introduit sur les codes | « publie les codes du paquet, dans SON ordre » |
+| 4 | la branche `libelles[code] === undefined` est supprimée (libellé toujours attaché) | « sans libellé, la clé est OMISE — jamais `libelle: undefined` » + e2e « aucun libellé inventé » |
+| 5 | `@RequiresBalanceAccess()` est retiré du contrôleur | e2e « AC-4 : entitlement révoqué → 403 » et « AC-4 : KYC non approuvé → 403 » |
+| 6 | la route se met à charger **aussi** le référentiel comptable | e2e « aucun référentiel comptable attribué → 200 quand même (D-078-1) » |
+
+⚡ **Deux enseignements de la passe de mutation**, tous deux invisibles avant elle :
+
+- **La mutation n° 3 ne rougissait pas sur le paquet réel.** Les douze codes de `togo@2026`
+  (`10, 11, 12, 15, 20, 25, 30, 40, 45, 50, 60, 80`) sont **déjà dans l'ordre trié** : l'assertion
+  e2e « dans l'ordre du paquet » est donc **vraie d'un service qui trie**. Le fixture unitaire a
+  été réordonné (`['30','10','20']`) exprès — c'est lui, et lui seul, qui garde la propriété.
+- **La mutation n° 2 ne compilait pas** au premier essai (import devenu inutilisé) : une mutation
+  rouge **par erreur de compilation** ne prouve rien sur les tests. Elle a été rejouée en retirant
+  aussi l'import, et c'est cette seconde forme — qui compile — qui a fait rougir l'AC-3.
+
+### Vérification docker — la liste publiée EST celle que la saisie applique
+
+Stack `mongo + kafka + redis + auth-service + balance-service`, code de la branche exécuté en
+volume (`Found 0 errors` à 05:32, `Nest application successfully started`). Org réelle créée par
+`register` + `login` (jeton RS256), read-models `orgbalanceentitlements` (ACTIVE,
+`syscohada-revise@2.1`), `orgkycstatuses` (APPROVED) et `dossiers_dossier` (ACTIF) semés par
+`mongosh`.
+
+| # | ce qui est prouvé | résultat |
+|---|---|---|
+| 1 | la route est **montée** (elle refuse, elle ne manque pas) | sans jeton → **401**, jamais 404 |
+| 2 | AC-1 sur le **vrai** artefact `togo@2026` | **200** `{"paquetFiscal":{"pays":"togo","annee":2026},"codes":[{"code":"10"},…,{"code":"80"}]}` — 12 codes, **aucune clé `libelle`** |
+| 3 | **AC-3, sens « tout ce qui est publié est accepté »** | les **12** codes envoyés un par un à `POST /dossiers/{id}/cahiers/categories` → **201 × 12**, et les 12 documents relus en base portent exactement `["10","11","12","15","20","25","30","40","45","50","60","80"]` |
+| 4 | **AC-3, sens inverse — rien d'autre n'est accepté** | les **5 codes de déduction du même paquet** (`90, 95, 100, 120, 125`) + `99` + `13` → **400 `CODE_REINTEGRATION_INCONNU`**, message « *12 code(s) admis* », **aucun document persisté** |
+| 5 | AC-4, la gate réelle | entitlement `REVOKED` → **403 `BALANCE_NOT_ENTITLED`** ; retour `ACTIVE` → **200** |
+
+⚡ **La ligne 4 est celle qui compte, et aucun test mocké ne pouvait la produire** : `90…125`
+vivent dans **la même rubrique du même paquet** que les réintégrations. Une implémentation qui
+aurait publié « les codes de la rubrique » au lieu des **réintégrations** aurait rendu 17 codes,
+dont 5 que la saisie refuse — l'écran aurait proposé au comptable des cases menant droit au `400`
+que la story existe pour supprimer.
+
+> Données de vérification laissées en base de dev (12 catégories `MNV397-*`, une org
+> `cabinet-mnv-397`) : le dev repart de zéro, aucune reprise n'est due.
