@@ -1,6 +1,6 @@
 # STORY-398 : Le contrat de rattachement n'est pas publié — et l'un de ses champs est publié FAUX
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-010 — Référentiels & table de passage (FR-005..FR-008)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/dto`, `modules/bilan/mapping-override/dto`
@@ -202,6 +202,151 @@ champ, personne ne le sait.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — branche `MNV-398` ouverte sur `bilan-service` **et** sur `docs`
+**Statut : `review`** — implémentée, portes de qualité passées, 7 mutations rouges, vérification
+docker faite sur le **service réel**. Branche `MNV-398` ouverte sur `bilan-service` **et** sur `docs`
 (preuve : `git rev-parse --abbrev-ref HEAD` rend `MNV-398` dans les deux dépôts, 2026-08-27).
 Aucun contrat d'événement Kafka touché ⇒ **un seul dépôt de code**.
+
+### ⚠️ Une prémisse de la story est FAUSSE — l'AC-8 corrigé
+
+L'AC-8 et le tableau du §③ annoncent que, sans cascade de sous-totaux, le serveur rend
+`coherenceSousTotaux: null`. **Il ne l'a jamais rendu.** Sur SFD-BCEAO il rend l'**objet**, avec
+`bz`/`dz`/`ecartEquilibre` à `null` et `equilibre`/`coherent` à `true` (« non applicable ») — c'est
+ce que dit le type `CoherenceSousTotaux` (« Sans sous-totaux (SFD) : tout `null`,
+`coherent`/`equilibre = true` ») et ce que l'e2e `bilan-etats` assertait déjà
+(`body.coherenceSousTotaux.bz` → `null`, `.coherent` → `true`).
+
+Publier `nullable: true` sur l'objet, comme le périmètre le demandait, aurait donc **annoncé au
+client un `null` que le serveur n'émet jamais** — le « mensonge dans l'autre sens » : chaque
+lecteur front aurait dû écrire une garde qui ne peut pas se déclencher, et il aurait cherché le
+signal « pas de cascade » au mauvais endroit (le vrai signal est `bz === null`). L'AC-4 tranche le
+conflit : le contrat publie **ce que la route renvoie**. `coherenceSousTotaux` est donc publié
+**requis et non nullable**, ses trois grandeurs `nullable`.
+
+⚡ Ce n'est pas une décision sur parole : la **mutation n°4** (publier l'objet `nullable`, comme
+l'AC-8 le demandait) fait virer le test AC-8 au **rouge**.
+
+### Livré
+
+- **12 classes de DTO déclarées**, chacune `implements` son interface de domaine —
+  `PosteRattacheDto`, `RattachementCompteDto` · `ReferentielRefDto`, `ReferentielStampDto` (fichier
+  partagé neuf) · `PosteActifDto`, `PostePassifDto`, `SousTotalDto`, `ControleEquilibreDto`,
+  `CoherenceSousTotauxDto` · `PosteCibleDto`. `implements` est le **lien** qui interdit les deux
+  descriptions parallèles : l'interface bouge ⇒ le DTO ne compile plus.
+- **`type` et `source` en enums NOMMÉES** (`TypePoste`, `SourceRattachement`), **dérivées des
+  constantes du service** : `TYPES_POSTE` / `SOURCES_RATTACHEMENT` sont ajoutées à
+  `table-de-passage.types.ts` et l'union du type comme l'énumération publiée en sortent. Une valeur
+  ajoutée est publiée **automatiquement** — la leçon de STORY-390, où une liste recopiée en
+  littéraux avait publié en lecture un vocabulaire plus étroit que celui accepté en écriture.
+- **`etat` en enum d'un seul littéral par classe** (`BILAN_ACTIF` / `BILAN_PASSIF` / `BILAN`), pas
+  l'union des trois : `PosteActifDto.etat` ne vaudra jamais `BILAN_PASSIF`, et publier l'union
+  serait un contrat plus large que la réalité. Les constantes sont **typées par l'interface**
+  (`const ETAT_ACTIF: PosteActif['etat']`), donc un renommage casse la compilation.
+- **Comparatifs N-1 `nullable`, jamais optionnels** — les 8 champs de l'AC-7 plus `bz`, `dz`,
+  `ecartEquilibre`. `null` porte un fait, `undefined` n'en porte aucun.
+- **Journal de surcharge requis ET nullable** : `validePar`, `valideAt`, `ancienPoste`, `motif`
+  passent de `required: false` à requis + `nullable`. `SurchargeResponseDto.from()` les pose
+  **systématiquement** (`?? null`) — `required: false` annonçait une absence que le serveur n'a
+  jamais produite. Ils perdent leur `?` en TypeScript : `tsc` oblige désormais `from()` à tous les
+  fournir.
+- **`example` de `mappes` corrigé** (il omettait `source`, AC-5) — et c'est **de lui** que Swagger
+  déduisait le type faux.
+- **`test/openapi-contract.e2e-spec.ts`** (13 tests) — voir ci-dessous.
+
+### Ce qui décide de la story : AC-4, « pas deux descriptions parallèles »
+
+Le garde-fou n'est pas une liste d'assertions recopiant le schéma attendu — ce serait une
+troisième description, libre de vieillir avec les deux autres. `ecartsContrat()` **descend en
+parallèle le schéma publié et le corps HTTP réel** de 5 routes, et rend un écart pour chacun de :
+propriété publiée `required` et absente de la réponse · clé rendue par la route et **non publiée** ·
+`null` rendu sur un champ publié non-`nullable` · valeur hors énumération · type qui ne correspond
+pas · schéma **opaque**. L'`example` de `mappes` passe dans **le même** validateur.
+
+⚠️ **Le piège d'énoncé, hérité de STORY-132/376** : ici le document publiait bien un `type` — le
+**mauvais**. Une garde « toute propriété déclare un `type` » serait passée **au vert sur le bug
+qu'elle prétend attraper**. Ce qui est traqué est l'`object` **opaque** (ni `properties`, ni
+`additionalProperties`, ni `allOf`/`oneOf`/`anyOf`, ni `$ref`) **et** la confrontation à la réponse
+réelle.
+
+⚠️ **L'inventaire des objets opaques est FIGÉ, pas seuillé** : `expect(opaques()).toEqual([…17
+chemins…])`. Il rougit dans les **deux** sens — un nouvel opaque sur un DTO du périmètre (récidive)
+comme la fermeture d'un des 17 (l'inventaire doit rétrécir avec la dette). Un `toBeLessThan(20)`
+aurait laissé passer exactement le défaut que la story corrige.
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **1147 unitaires** (1 skipped) + **300 e2e** verts (287 → 300, les
+13 du contrat) · seuils 65/90/90/90 tenus. Les `*.dto.ts` étant **exclus de `collectCoverageFrom`**,
+aucun décorateur corrigé ici n'est visible aux seuils : `openapi-contract.e2e-spec.ts` est le seul
+filet contre la récidive.
+
+**7 mutations appliquées, chacune vérifiée ROUGE puis restaurée** :
+
+| # | mutation | tests qui virent au rouge |
+|---|---|---|
+| 1 | `type: [RattachementCompteDto]` retiré de `mappes` (**le bug d'origine**) | AC-1, AC-2, AC-5, AC-4 (4 rouges) |
+| 2 | `source` retiré de l'`example` de `mappes` | AC-5 |
+| 3 | `nullable: true` retiré de `netN1` | AC-7, AC-8 |
+| 4 | `coherenceSousTotaux` publié `nullable` (**ce que l'AC-8 demandait**) | AC-8 |
+| 5 | `validePar` remis en `required: false` + `?` | inventaire opaque, AC-3 (les 2 branches) |
+| 6 | énumération `source` recopiée en littéraux (`['referentiel']`) | AC-2, AC-4 |
+| 7 | `BilanDto.referentiel` retypé sur l'**interface** `ReferentielRef` + `example` (code d'origine) | inventaire opaque, AC-6, AC-7, AC-8, AC-3 (5 rouges) |
+
+⚡ **Une mutation est restée VERTE, et elle apprend quelque chose** : retirer `type: ReferentielRefDto`
+en **gardant** le champ typé `ReferentielRefDto` ne casse rien — `emitDecoratorMetadata` réfléchit la
+**classe** et Swagger publie le `$ref` tout seul. Le `type:` explicite est donc redondant *tant que
+la propriété est typée par une classe*. La vraie régression est le retour au **type d'interface**
+(mutation 7), qui n'existe pas à l'exécution — c'est elle qui rougit. ⚠️ La première écriture de
+cette mutation a échoué **à la compilation** (import devenu inutilisé) : une mutation rouge par
+erreur de compilation ne prouve rien, elle a été nettoyée pour que ce soit le **test** qui rougisse
+(leçon STORY-179).
+
+### Vérification docker — sur le service RÉEL, tous contrôleurs montés
+
+⚠️ Cette story n'écrit **rien en base** : la vérification qui compte n'est pas `mongosh`, c'est le
+**document réellement publié** par le service. La batterie e2e ne monte que 2 contrôleurs (26
+schémas) ; le service en monte 13 (**78 schémas, 37 chemins**), et rien ne garantissait a priori que
+les deux documents coïncident.
+
+`docker compose up -d mongo kafka redis bilan-service` (`Found 0 errors`, `/health` → `mongodb: up`,
+`kafka: up`), puis `GET http://localhost:3004/api/docs-json` (102 763 octets) :
+
+| vérifié sur le document du service réel | résultat |
+|---|---|
+| les **12 classes** de la story présentes | 12/12 |
+| `RattachementResultDto.mappes.items` | `$ref → RattachementCompteDto` (jamais `{type: string}`) |
+| `TypePoste.enum` / `SourceRattachement.enum` | `["detail","total"]` / `["referentiel","surcharge"]` |
+| `BilanDto.actif/passif/sousTotaux` `.items` | `$ref → PosteActifDto` / `PostePassifDto` / `SousTotalDto` |
+| `controle`, `coherenceSousTotaux`, `referentiel`, `stamp` | `allOf: [$ref …]`, jamais opaques |
+| `coherenceSousTotaux` requis, **non** `nullable` | ✅ (AC-8 corrigé) |
+| `SurchargeResponseDto.required` | les 10 champs, journal compris |
+| objets **opaques** sur les 14 classes du périmètre | **0** |
+
+⚡ **Chiffre nouveau, et il corrige la story** : le service complet porte encore **62 objets
+opaques** répartis sur **29 DTO** — là où la story annonçait « 20+ autres ». Le détail (`LiasseDto` 6,
+`JeuEtatsResponseDto` 5, `SnapshotResponseDto` 5, `ConsultationIndexItemDto` 4, `TftDto` 6,
+`CompteResultatDto` 7…) est le vrai inventaire de la dette laissée à FE-032/033/034, et il appuie la
+note de la story : **c'est un candidat à une règle d'architecture, pas à une n-ième story de
+rattrapage**.
+
+Stack arrêtée après la vérification (`docker compose stop`).
+
+### Hors périmètre — tenu, et documenté
+
+Les DTO des trois autres états (compte de résultat, TFT, notes annexes), `ControlesCoherenceDto`,
+`JeuEtatsResponseDto` / `LiasseDto` / `JeuEtatsSommaireDto` et les autres n'ont **pas** été touchés,
+bien que `ReferentielRefDto` / `ReferentielStampDto` existent désormais et suffiraient à en refermer
+une partie en quelques lignes. Leurs consommateurs (**FE-032/033/034**) ne sont pas livrés : les
+traiter ici rejouerait l'orphelinat de STORY-144, que le hors-périmètre existe pour éviter. Les 17
+chemins visibles depuis les 2 contrôleurs du périmètre sont **figés dans le test** — ils rougiront
+le jour où on les refermera, ce qui force à mettre l'inventaire à jour au lieu de l'oublier.
+
+### Note aux consommateurs
+
+**FE-030** *(table de passage)* et **FE-031** *(Bilan actif/passif)* : régénérer
+(`npm run gen:api -- bilan`) puis **retirer** `api/lecture-contrat.ts` — mais seulement les lecteurs
+dont le schéma est effectivement publié ci-dessus (`lireActif`, `lirePassif`, `lireSousTotaux`,
+`lireControleEquilibre`, `lireCoherenceSousTotaux`, `lireStamp`). ⚠️ `lireCoherenceSousTotaux` ne doit
+plus envelopper un `null` d'objet : le serveur rend **toujours** l'objet ; c'est `bz === null` qui
+signifie « référentiel sans cascade ». Vérifier le retrait **par mutation** (casser un champ, exiger
+un rouge) plutôt qu'en se fiant à `gen:api`, qui régénère tous les services sans dire lequel a changé.
