@@ -1,10 +1,10 @@
 # STORY-400 : Affecter une RACINE de comptes — et refuser la surcharge acceptée-puis-inerte
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — Référentiels & table de passage (FR-005..FR-008)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/mapping-override`, `modules/bilan/table-de-passage`
-**Points :** 5 · **Sprint :** S20
+**Points :** 5 · **Sprint :** S20 · **Complexité :** high
 **Origine :** remontée le **2026-08-24** à la **revue métier de la maquette FE-030** par un
 expert-comptable habitué à Sage — avant toute ligne de code frontend.
 
@@ -126,3 +126,140 @@ affecte toujours compte par compte.
   ⇒ Ce qui change pour cette story : elle cesse d'être une commodité d'un écran pour devenir un
   **correctif de contrat**, et sa garde front doit être posée **dans les deux écrans**.
 - Consommateurs nommés : **FE-030**, **FE-046**.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — implémentée, portes DoD vertes, passe de mutation faite,
+**vérification docker réelle** faite sur stack neuve. Revue de code et revue de sécurité
+à suivre.
+
+**Branches** : `MNV-400` sur `bilan-service` **et** sur `docs`. **Un seul dépôt de code** :
+aucun contrat d'événement Kafka n'est touché (la surcharge est locale au dossier, FR-008).
+
+### Conception — les deux arbitrages que la story laissait ouverts
+
+**① La couverture : piste ① retenue, et sa borne est NOMMÉE au contrat.** La piste ②
+(`couvre: number`) suppose une balance, que `bilan-service` ne connaît toujours pas
+(STORY-381) : elle reste hors d'atteinte. La piste ① valide donc le compte (ou la racine)
+contre `pkg.planDeComptes`, exposé par STORY-399 — refus **422 `COMPTE_HORS_REFERENTIEL`**.
+
+⚠️ **Le test posé est « la valeur DESCEND d'un compte du plan », pas l'égalité.** L'égalité
+aurait été un contresens : le plan normalisé SYSCOHADA porte des comptes de **2 à 4
+chiffres** (`47`, `211`, `6031`) là où une balance de cabinet porte des comptes de 6
+(`476200`). Une garde en égalité stricte aurait refusé **tout compte réel** — donc
+exactement ce que l'écran FE-030 envoie. C'est le témoin `AC-3 — une RACINE qui DESCEND du
+plan est acceptée` qui l'interdit, et la mutation **M4b** le prouve : passer la garde en
+égalité fait rougir **4 tests**.
+
+⚠️ **Le test réciproque (« la valeur est l'ANCÊTRE d'un compte du plan ») n'a pas été posé,
+parce qu'il est MESURÉ inutile.** Sur les **5** paquets embarqués (syscohada-revise 2.1,
+sfd-bceao 1.0 et 2.0, cima-assurances 1.0, zone-franche-togo 1.0), **aucun** préfixe de
+longueur ≥ 2 d'un compte du plan n'échappe à la descendance : tout ancêtre est lui-même au
+plan. La branche aurait été morte. La mesure est **gardée** par
+`mapping-override.plan.exhaustivite.spec.ts` : un paquet futur qui déclarerait `211` sans
+`21` la fait rougir, au lieu de refuser en silence une racine légitime.
+
+⛔ **Et la borne, dite franchement** : ce contrôle porte sur le **référentiel**, pas sur la
+balance du dossier. Un compte formellement valide mais **absent** de la balance du cabinet
+reste acceptable — le service ne peut pas en juger. C'est écrit dans la description du 422
+publiée en OpenAPI, plutôt que tu.
+
+**② La `Map` injectée au moteur devait changer de clé — sinon l'index de l'AC aurait créé
+une perte silencieuse.** Le périmètre demande que l'unicité porte sur
+`(dossier, portée, valeur)` : `4762` en `RACINE` et `4762` en `COMPTE` peuvent donc
+**coexister validées**. Or `chargerSurchargesActives` rendait une `Map(compte → cible)` —
+les deux se seraient écrasées, et **laquelle survit aurait dépendu de l'ordre de lecture
+Mongo**. La clé est désormais `portée|valeur` (`cleSurcharge`, une seule fonction pour
+l'écrivain et le lecteur). Aucune signature n'a bougé : les 7 sites qui transportent la
+`Map` sont inchangés.
+
+**③ La boucle s'arrête au premier préfixe APPLICABLE, pas au premier TROUVÉ.** Une
+surcharge `COMPTE` posée sur `4762` est bien dans la `Map` quand on examine `476200`, mais
+elle ne s'y applique pas : il faut **continuer** vers `476`, `47`… sinon elle masquerait une
+racine plus courte parfaitement valide. Mutation **M2**.
+
+### Portes DoD
+
+| Porte | Résultat |
+|---|---|
+| lint | **0 erreur, 0 warning** (`eslint --max-warnings 0`) |
+| build | `nest build` **OK** |
+| unitaires | **113 suites, 1186 passés**, 1 skippé |
+| couverture | **98.7 st / 93.76 br / 98.41 fn / 98.65 li** — seuils 65/90/90/90 ; module `mapping-override` et `table-de-passage` à **100 % sur les 4 axes** |
+| e2e | **22 suites, 333 tests** verts |
+
+### Table de mutations — chaque garde vérifiée non-vacante
+
+| # | Mutation appliquée | Attendu | Mesuré |
+|---|---|---|---|
+| M1 | la garde d'égalité stricte retirée (une surcharge `COMPTE` s'applique aussi aux descendants) | rouge | **2 rouges** |
+| M2 | la boucle s'arrête au premier préfixe **trouvé** (une racine plus courte est masquée) | rouge | **1 rouge** |
+| M3 | `prefixe` = le compte entier, même sous une surcharge de racine (AC-5) | rouge | **4 rouges** |
+| M4 | `descendDuPlan` rend toujours `true` (garde AC-3 retirée) | rouge | **2 rouges** |
+| M4b | `descendDuPlan` exige l'**égalité** au plan (garde trop stricte) | rouge | **4 rouges** |
+| M5 | le repli `?? 'COMPTE'` retiré du repository (une surcharge d'avant 400 devient inerte) | rouge | **1 rouge** |
+| M6 | `portee` retirée de la clé d'index unique | rouge | **1 rouge** |
+| M7 | `from()` cesse de poser `portee` (contrat menteur) | rouge | **3 rouges** (e2e contrat) |
+| M8 | `@IsIn` élargi (`PREFIXE` admis en écriture) | rouge | **1 rouge** (e2e) |
+
+⚠️ **Deux mutations ont d'abord échoué par ERREUR DE COMPILATION** (`if (false as boolean)`,
+puis un paramètre devenu inutilisé) : une suite qui ne **tourne pas** ne prouve rien. Elles
+ont été rejouées sous une forme qui compile — c'est la seule façon d'obtenir un rouge qui
+soit un rouge de **test**.
+
+### Vérification docker — stack NEUVE (`down -v`), service réel, Mongo réel
+
+`mongo` + `auth-service` + `bilan-service`, organisation créée par `register`/`login` réels
+(JWT RS256), read-models `orgkycstatuses` / `orgbilanentitlements` / `dossiers_dossier`
+semés en `mongosh`, référentiel effectif `syscohada-revise@2.1` (174 comptes au plan).
+
+| Mesure | Résultat |
+|---|---|
+| index réel de `mapping_overrides` | **`{tenantId, dossierId, portee, compte}`**, `unique`, `partialFilterExpression: {statut:'VALIDATED'}` — **aucun index obsolète** (base neuve) |
+| `POST` compte `999999` (classe 9 absente du plan) | **422 `COMPTE_HORS_REFERENTIEL`**, **0 document écrit** |
+| `POST` racine `4762` / compte `476200` | **201** — la racine du §*Le fait* est désormais saisissable |
+| `4762` en `RACINE` **et** `4762` en `COMPTE`, tous deux `VALIDATED` | **coexistent** (2 documents) — c'est l'index de l'AC qui le permet |
+| 2ᵉ `VALIDATED` sur le **même** couple `(RACINE, 4762)` | **409 `SURCHARGE_EXISTE`** — l'unicité garde toujours |
+| document **legacy** inséré **sans** le champ `portee` | `hasOwnProperty('portee') === false` en base |
+
+**Le rattachement réel** (`POST …/table-de-passage/dry-run`, surcharges relues depuis Mongo) :
+
+| compte | poste | `prefixe` | `source` | ce que ça prouve |
+|---|---|---|---|---|
+| `476200` | `DK` | **`4762`** | surcharge | **AC-1** — couvert par la racine, jamais nommé |
+| `476220` | `DK` | **`4762`** | surcharge | **AC-1** — idem, un compte que personne n'a saisi |
+| `476210` | `BI` | `476210` | surcharge | **AC-2** — le compte exact l'emporte sur la racine |
+| `4762` | `AF` | `4762` | surcharge | **AC-2** — à valeur égale, `COMPTE` l'emporte sur `RACINE` |
+| `211000` | `DK` | `211000` | surcharge | **AC-4** — le document *legacy* **sans champ** s'applique toujours, et **exactement** |
+| `211001` | `BQ` | **`211`** | surcharge | **AC-4** — son voisin d'un caractère retombe sur la racine, pas sur lui |
+| `999999` | — | — | — | non mappé : aucune surcharge, aucun préfixe |
+
+⚠️ **Atomicité : rien à prouver ici, et le dire vaut mieux que l'affirmer.** Toutes les
+écritures de cette story sont **mono-document** (`create`, `updateOne`) — aucune transaction
+multi-documents n'est ouverte. Le seul invariant croisé est l'**index unique partiel**, et
+il est vérifié ci-dessus dans les deux sens (il refuse le doublon de couple, il autorise les
+deux portées).
+
+### Hors périmètre, tenu
+
+- **Affectation en masse depuis l'écran** : non implémentée (c'eût été le problème déplacé).
+- **Table de passage packagée** : jamais touchée — une surcharge reste locale au dossier (FR-008).
+- **Piste ② `couvre: number`** : hors d'atteinte tant que `bilan-service` ne connaît aucune
+  balance (STORY-381). Le refus `COMPTE_HORS_REFERENTIEL` est le hook documenté : le jour où
+  la balance sera là, c'est là qu'il faudra l'enrichir.
+
+⚠️ **Migration de production, différée et NOMMÉE** : Mongoose ne supprime jamais un index
+devenu obsolète (leçon STORY-357). Sur une base **existante**, l'ancien
+`(tenantId, dossierId, compte)` survivrait et interdirait la coexistence des deux portées.
+En dev la base repart de zéro ; en production il faudra un `dropIndex` explicite. C'est écrit
+au-dessus de l'index, dans `mapping-override.schema.ts`.
+
+### ⚡ Second consommateur (FE-046) — ce que cette story lui donne, et ce qu'elle ne lui donne pas
+
+La racine de produits `70` citée par FE-046 est désormais **exprimable** (`portee: RACINE`)
+et **vérifiée** (`70` est au plan SYSCOHADA). Le mode de panne « proposée, acceptée, validée,
+puis sans effet » est donc fermé **côté `bilan-service`**. ⚠️ FE-046 vise l'**Atelier**
+(`balance-service`) : le même correctif de contrat y reste à faire — ce n'est pas le
+périmètre de cette story, qui cadre `bilan-service`.
