@@ -1748,6 +1748,86 @@
     .coh-row .val, .coh-cat { grid-column: 2; text-align: left; }
   }
 
+
+  /* ═══════════════ FE-034 · VALIDATION · VERSIONS · PISTE D'AUDIT ═══════════════
+     Le cycle de vie d'une liasse est une SUITE D'ACTES, pas un bouton. Trois
+     choix de forme en découlent :
+     ① une FRISE en tête : où en est cette liasse, et ce qui l'attend — un
+        statut seul (« BROUILLON ») ne dit pas qu'une version figée existe déjà ;
+     ② l'HISTORIQUE et le JOURNAL sont côte à côte sur le même écran : ce sont
+        les deux moitiés d'une même question (« qu'est-ce qui fait foi, et qui
+        l'a décidé ? ») ; les séparer obligerait à naviguer pour la répondre ;
+     ③ l'identité de l'auteur est rendue TELLE QUE L'API LA SERT — un ObjectId.
+        Afficher un nom que le contrat ne publie pas ferait croire l'écart réglé. */
+
+  .vfr { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+  .vfr-s { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.76rem; padding: 0.22rem 0.55rem; border-radius: 999px; background: var(--hover-surface); color: var(--muted-fg); white-space: nowrap; }
+  .vfr-s .n { width: 1.15rem; height: 1.15rem; border-radius: 50%; display: grid; place-items: center; font-size: 0.64rem; font-weight: 800; background: var(--content-bg); border: 1px solid var(--border-strong); }
+  .vfr-s.done { background: var(--success-soft); color: var(--success); }
+  .vfr-s.done .n { background: var(--success); color: #fff; border-color: transparent; }
+  .vfr-s.now { background: color-mix(in srgb, var(--orange-500) 16%, var(--card)); color: var(--foreground); font-weight: 650; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--orange-500) 45%, transparent); }
+  .vfr-s.now .n { background: var(--orange-500); color: #fff; border-color: transparent; }
+  .vfr-s.stop { background: var(--danger-soft); color: var(--danger); }
+  .vfr-s.stop .n { background: var(--danger); color: #fff; border-color: transparent; }
+  .vfr-a { color: var(--muted-fg); font-size: 0.8rem; }
+
+  /* Zone d'action : l'acte humain a son propre bloc, jamais un bouton perdu. */
+  .vact { display: flex; align-items: flex-start; gap: 0.75rem; flex-wrap: wrap; padding: 0.85rem 0.95rem; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--card); }
+  .vact .txt { flex: 1; min-width: 15rem; }
+  .vact .txt b { font-size: 0.87rem; }
+  .vact .txt p { margin: 0.25rem 0 0; font-size: 0.78rem; color: var(--muted-fg); line-height: 1.55; }
+  .vact .go { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+  .vact.locked { background: var(--hover-surface); }
+
+  /* Historique des versions. Colonnes fixes : on compare des versions, donc les
+     chiffres doivent s'aligner à l'œil (tabular-nums). */
+  table.vver { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  table.vver th { text-align: left; font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted-fg); font-weight: 700; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border-strong); white-space: nowrap; }
+  table.vver td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.vver tr:last-child td { border-bottom: 0; }
+  table.vver td.n, table.vver th.n { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  table.vver tr.foi td { background: color-mix(in srgb, var(--success) 9%, var(--card)); }
+  .vver-v { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; font-family: var(--font-mono); }
+  .vver-foi { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.08rem 0.4rem; border-radius: 999px; background: var(--success-soft); color: var(--success); }
+  .vver-old { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.08rem 0.4rem; border-radius: 999px; background: var(--hover-surface); color: var(--muted-fg); }
+  .vver-note { display: block; margin-top: 0.2rem; font-size: 0.72rem; color: var(--muted-fg); line-height: 1.5; }
+
+  /* Journal d'audit — append-only : aucune ligne n'a d'action, et c'est voulu. */
+  .vjrn-row { display: grid; grid-template-columns: 8.6rem 11.5rem minmax(0, 1fr) 12rem; gap: 0.7rem; align-items: start; padding: 0.55rem 0.95rem; border-bottom: 1px solid var(--border); }
+  .vjrn-row:last-child { border-bottom: 0; }
+  .vjrn-ts { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 0.72rem; color: var(--muted-fg); white-space: nowrap; }
+  .vjrn-t { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; padding: 0.12rem 0.4rem; border-radius: 0.35rem; background: var(--hover-surface); color: var(--muted-fg); justify-self: start; white-space: nowrap; }
+  .vjrn-t.val { background: var(--success-soft); color: var(--success); }
+  .vjrn-t.rou { background: color-mix(in srgb, #f59e0b 20%, transparent); color: #92400e; }
+  .vjrn-t.exc { background: var(--danger-soft); color: var(--danger); }
+  .vjrn-q { font-size: 0.78rem; line-height: 1.5; }
+  .vjrn-q small { display: block; color: var(--muted-fg); font-size: 0.72rem; margin-top: 0.1rem; }
+  .vjrn-who { font-size: 0.72rem; color: var(--muted-fg); }
+  .vjrn-who code { font-family: var(--font-mono); font-size: 0.68rem; display: block; }
+  .vjrn-row.ghost { background: repeating-linear-gradient(135deg, transparent, transparent 6px, var(--hover-surface) 6px, var(--hover-surface) 12px); }
+  .vjrn-row.ghost .vjrn-q, .vjrn-row.ghost .vjrn-ts { opacity: 0.75; font-style: italic; }
+
+  /* ⚠️ Vu SEULEMENT À L'ÉCRAN : `.ref-sum` est monospace + `word-break: break-all`
+     — elle est faite pour un CHECKSUM. Y mettre une phrase la hache en plein mot
+     (« répondra it 409 JEU_VALIDE_NON_RECALCULA BLE »). D'où une classe de prose. */
+  .ref-txt { margin-top: 0.25rem; font-size: 0.74rem; color: var(--muted-fg); line-height: 1.5; }
+  .ref-txt code { font-family: var(--font-mono); font-size: 0.69rem; overflow-wrap: anywhere; }
+
+  /* Un nom, un rôle, un libellé que l'API NE SERT PAS : pointillé + infobulle.
+     Les afficher nus laisserait croire l'écart réglé ; les taire rendrait le
+     journal illisible. Le pointillé dit « reconstitué », et il le dit partout. */
+  .nonservi { text-decoration: underline dotted var(--border-strong); text-underline-offset: 0.18em; cursor: help; }
+
+  /* Le champ d'attestation du dialogue de validation : l'acte humain se COCHE. */
+  .vatt { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.7rem 0.8rem; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--content-bg); }
+  .vatt input { margin-top: 0.15rem; width: 1rem; height: 1rem; flex-shrink: 0; }
+  .vatt label { font-size: 0.8rem; line-height: 1.55; }
+
+  @media (max-width: 860px) {
+    .vjrn-row { grid-template-columns: minmax(0, 1fr); gap: 0.25rem; }
+    .vjrn-t, .vjrn-who { justify-self: start; }
+  }
+
   /* ============ IMPORT SAGE (FE-025) — dry-run en deux temps ============== */
   /* Fil d'Ariane retour Sources → écran d'import. */
   .imp-back { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--muted-fg); background: none; border: 0; cursor: pointer; padding: 0.2rem 0; }
@@ -4157,7 +4237,7 @@
                       <span class="dc-chip">TPU — synthétique</span>
                       <span class="dc-chip">SYSCOHADA · Togo</span>
                     </div>
-                    <div class="dc-foot"><span class="dc-dot ok"></span><span class="grow">Liasse 2024 déposée · <span class="who">Fatou Adjovi</span></span><span class="go">Ouvrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></span></div>
+                    <div class="dc-foot"><span class="dc-dot ok"></span><span class="grow">Liasse 2024 figée · <span class="who">Fatou Adjovi</span></span><span class="go">Ouvrir <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></span></div>
                   </button>
 
                   <button class="dc-card" type="button" data-dc-go="open" data-owner="awa" data-etat="config">
@@ -11020,6 +11100,10 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect width="4" height="7" x="7" y="10" rx="1"/><rect width="4" height="12" x="15" y="5" rx="1"/></svg>
                       États <span class="badge badge-new">FE-031</span>
                     </button>
+                    <button class="atl-tab" role="tab" data-bil-tab="validation" aria-selected="false" title="FE-034 — cycle brouillon → validé, snapshot immuable, versions et piste d'audit">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/><path d="M3 12a9 9 0 0 1 9-9"/></svg>
+                      Validation <span class="badge badge-new">FE-034</span>
+                    </button>
                     <button class="atl-tab" role="tab" data-bil-tab="previsionnel" aria-selected="false" disabled title="FE-035 / FE-036 — hypothèses, projection 3 ans, trésorerie 12 mois">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>
                       Prévisionnel <span class="soon">FE-035</span>
@@ -11870,6 +11954,15 @@
                       <button class="liasse-t" type="button" role="tab" data-bil-etat="tft" aria-selected="false" title="FE-033 — Tableau des flux de trésorerie (TFT/TAFIRE)">Flux de trésorerie <span class="soon" style="background:var(--success-soft);color:var(--success)">FE-033</span></button>
                       <button class="liasse-t" type="button" role="tab" data-bil-etat="notes" aria-selected="false" title="FE-033 — Notes annexes">Notes annexes <span class="soon" style="background:var(--success-soft);color:var(--success)">FE-033</span></button>
                       <button class="liasse-t" type="button" role="tab" data-bil-etat="controles" aria-selected="false" title="FE-033 — Contrôles de cohérence de la liasse">Contrôles de cohérence <span class="soon" style="background:var(--danger-soft);color:var(--danger)">1 anomalie</span></button>
+                    </div>
+
+                    <!-- FE-034 — CE QUE VOUS LISEZ : brouillon ou version figée.
+                         Sans cette ligne, les cinq états ci-dessous sont anonymes : rien
+                         ne distingue le travail en cours de ce qui est opposable. -->
+                    <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem;padding:0.6rem 0.8rem;border:1px solid var(--border-strong);border-left:3px solid var(--orange-500);border-radius:var(--radius);background:var(--card);font-size:0.82rem">
+                      <span class="badge badge-invited"><span class="d"></span>BROUILLON en cours</span>
+                      <span style="flex:1;min-width:16rem;color:var(--muted-fg)">Ces états sont ceux du <b>brouillon</b>, recalculés à chaque lecture. La <b>version 2 figée</b> — celle qui fait foi — se consulte depuis l'onglet <b>Validation</b>, et elle est servie par <code>GET …/versions/2</code>, jamais recalculée.</span>
+                      <button class="btn btn-ghost btn-sm" type="button" data-bil-goto="validation">Voir les versions figées</button>
                     </div>
 
                     <div data-bil-etat-slot="bilan">
@@ -13274,6 +13367,912 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
 
                   </div>
 
+                  <!-- ═══════ FE-034 · VALIDATION, VERSIONS ET PISTE D'AUDIT ═══════
+                       Ce panneau ne montre pas six écrans : il montre SIX MOMENTS de la
+                       même liasse (exercice 2025 d'Ets Kossi Distribution), dans l'ordre
+                       où ils se produisent. C'est la seule façon de rendre visible ce que
+                       la story vend vraiment — qu'une version figée SURVIT à la suivante,
+                       et que le journal ne se réécrit jamais. Les dates, les numéros de
+                       version et les totaux sont PRODUITS par un générateur qui assère
+                       l'équilibre de chaque version, la jointure avec FE-031/032/033
+                       (5 700 000 et 200 000), et le caractère append-only du journal. -->
+                  <div class="atl-panel atl-body" data-bil-panel="validation" hidden>
+                    <div style="display:flex;align-items:flex-start;gap:0.6rem;flex-wrap:wrap">
+                      <div>
+                        <h3 class="atl-sectitle">Validation, versions et piste d'audit</h3>
+                        <p class="atl-secsub">Le moment où la liasse cesse d'être un calcul pour devenir un <b>engagement</b>&nbsp;: l'automatisation propose, <b>l'humain valide</b>. La validation fige un <b>snapshot immuable</b>&nbsp;; toute correction rouvre un brouillon et produit une <b>version de plus</b>, l'ancienne restant consultable&nbsp;; chaque acte est inscrit dans un <b>journal en lecture seule</b>.</p>
+                        <p style="margin:0.45rem 0 0"><span class="badge badge-invited"><span class="d"></span>14 écarts ouverts &middot; STORY-457 → 470 &middot; écran FE-081</span></p>
+                      </div>
+                      <span style="flex:1"></span>
+                      <div class="atelier-demo" role="tablist" aria-label="Moment du cycle de vie (démo)">
+                        <span class="lbl">La même liasse, moment par moment</span>
+                        <button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-val-state="bloque" aria-selected="true">Brouillon bloqué</button><button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-val-state="validable" aria-selected="false">Brouillon validable</button><button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-val-state="v1" aria-selected="false">Figée v1</button><button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-val-state="rouverte" aria-selected="false">Rouverte</button><button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-val-state="v2" aria-selected="false">Figée v2</button><button class="btn btn-ghost btn-sm" type="button" role="tab" data-bil-val-state="culdesac" aria-selected="false">Rouverte sur exercice clos</button>
+                      </div>
+                    </div>
+
+                    <div data-bil-val-slot="bloque" data-val-bz="5 620 000" data-val-cj="120 000" data-val-courante="—" data-val-prochaine="1">
+                      <div class="vfr"><span class="vfr-s now"><span class="n">1</span>Brouillon</span><span class="vfr-a">→</span><span class="vfr-s stop"><span class="n">2</span>Contrôles bloquants</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">3</span>Figée — version …</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Déposée à l'OTR</span><span style="flex:1"></span><span class="code">l'étape 4 n'existe pas dans le produit · <b>STORY-462</b></span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;padding:0.55rem 0.75rem;border:1px dashed var(--border-strong);border-radius:var(--radius);font-size:0.78rem;background:var(--content-bg)"><b>⏱️ Brouillon ouvert depuis le 12/07/2026</b><span style="color:var(--muted-fg);flex:1;min-width:16rem">Exercice clos le <b>31/12/2025</b> ⇒ dépôt de la DSF attendu le <b>30/04/2026</b> — soit <b>73 jours de retard</b>. <b>Aucun écran du produit ne fait ce rapprochement</b>&nbsp;: le paquet fiscal embarqué ne publie que <code>acomptesProvisionnels.echeances</code> (les 4 acomptes d'IS), et son <code>_meta</code> annonce pourtant des «&nbsp;dates de dépôt DSF&nbsp;» qu'il ne porte pas. <span class="code">écart ouvert · <b>STORY-469</b></span></span></div>
+                      <div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <b>Ce jeu d'états</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>BROUILLON — recalculable</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">BROUILLON</div><div class="ref-txt">Recalculable autant que nécessaire&nbsp;; rien n'est figé tant que personne n'a validé.</div></div>
+    <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice ouvert</div></div>
+    <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Aucune version figée</div><div class="ref-txt">Cette liasse n'a jamais été validée — <b>rien ne fait foi</b>.</div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · sha256:e9370b14…a71e</div><div class="ref-txt">⚠️ ce <code>checksum</code> est celui du <b>paquet</b>, pas de la liasse figée · <b>STORY-468</b></div></div>
+  </div>
+</div>
+                      <div class="coh-verdict stop">
+  <span class="flag">⛔</span>
+  <div style="flex:1">
+    <h4>Validation impossible — <code>valide: false</code></h4>
+    <p>Le serveur refuserait en <code>422 LIASSE_NON_VALIDABLE</code>. <b>Le bouton reste donc désactivé, et il dit pourquoi</b>&nbsp;: proposer un geste qui sera refusé fait porter au comptable le diagnostic du serveur. <b>La correction ne se fait pas ici</b> — un Bilan déséquilibré se répare à la <b>table de passage</b>.</p>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Le gate de validation — ce que le serveur re-vérifiera</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>1 bloquant en anomalie</span>
+  </div>
+  <div class="coh-row ko">
+  <span class="ic">!</span>
+  <span class="t"><b><code>EQUILIBRE_BILAN</code> — Équilibre du Bilan (<code>BZ</code> = <code>DZ</code>)</b>
+    <p>Des comptes créditeurs non rattachés portent <b>412&nbsp;300</b>&nbsp;: ils sont écartés de la liasse, et l'équation ne retombe plus. <b>Le seul contrôle réellement faillible de la batterie.</b></p>
+    <span class="el"><i>BZ = 5 620 000</i><i>DZ = 5 207 700</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 412 300</b>anomalie</span>
+</div>
+  <div class="coh-row warn">
+  <span class="ic">=</span>
+  <span class="t"><b><code>COHERENCE_RESULTAT</code> — Résultat du compte de résultat = résultat au passif</b>
+    <p><b>Bloquant, mais à moitié tautologique</b> (STORY-426)&nbsp;: le volet <code>CR = CJ</code> compare deux nombres issus du <b>même</b> calcul. Il ne peut pas rougir — <b>y compris sur la liasse déséquilibrée ci-dessus</b>.</p>
+    <span class="el"><i>resultatNetCR = 120 000</i><i>resultatNetBilan = 120 000</i><i>XI = 120 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>par construction</span>
+</div>
+  <div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  </span>
+  <span class="coh-cat inf">Hors gate</span>
+  <span class="val"><b>905 000</b>sans effet</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+  </div>
+</div>
+                      <div class="vact">
+  <div class="txt">
+    <b>Valider la liasse</b>
+    <p><b>1 blocage à lever</b>&nbsp;: l'équilibre du Bilan. Le geste qui le résout est à la <b>table de passage</b> — rattacher les comptes créditeurs écartés.</p>
+  </div>
+  <div class="go">
+    <button class="btn btn-primary" type="button" disabled title="Un contrôle bloquant est en anomalie">Valider la liasse</button>
+    <button class="btn btn-ghost" type="button" data-bil-goto="passage">Corriger à la table de passage</button>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+    <b>Versions figées de l'exercice 2025</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>aucune</span>
+  </div>
+  <div style="padding:1.1rem 0.95rem;text-align:center;color:var(--muted-fg);font-size:0.82rem">
+    <b style="display:block;color:var(--foreground);font-size:0.88rem;margin-bottom:0.25rem">Cette liasse n'a jamais été validée</b>
+    La première validation créera la <b>version&nbsp;1</b>. Tant qu'aucune n'existe, <b>rien n'est opposable</b>&nbsp;: ni export, ni comparaison d'exercices — <code>GET …/bilan/comparaison</code> répond <code>404 EXERCICE_NON_COMPARABLE</code> tant que l'exercice n'a pas de snapshot (FE-076).
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>
+    <b>Piste d'audit du dossier — lecture seule, append-only</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>1 événement servi</span>
+  </div>
+  <div style="padding:0.55rem 0.95rem;border-bottom:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.72rem;color:var(--muted-fg);text-transform:uppercase;letter-spacing:0.04em;font-weight:700">Filtrer</span>
+    <select data-val-filtre style="font-size:0.78rem;padding:0.2rem 0.4rem;border:1px solid var(--border-strong);border-radius:0.4rem;background:var(--card);color:var(--foreground)">
+      <option value="">Toutes les actions</option>
+      <option value="JEU_CREE">JEU_CREE</option>
+      <option value="JEU_RECALCULE">JEU_RECALCULE</option>
+      <option value="JEU_VALIDE">JEU_VALIDE</option>
+      <option value="JEU_ROUVERT">JEU_ROUVERT</option>
+      <option value="EXERCICE_CLOS">EXERCICE_CLOS</option>
+      <option value="EXPORT_EFFECTUE">EXPORT_EFFECTUE</option>
+    </select>
+    <span style="font-size:0.74rem;color:var(--muted-fg);flex:1;min-width:14rem"><code>?type=</code> est le <b>seul</b> filtre servi&nbsp;: ni fenêtre de dates, ni pagination, ni filtre par cible — un journal append-only jamais purgé rend tout, à chaque ouverture. <span class="code"><b>STORY-459</b></span></span>
+  </div>
+  <div class="vjrn-row">
+  <span class="vjrn-ts">12/07/2026 à 09:14</span>
+  <span class="vjrn-t ">JEU_CREE</span>
+  <span class="vjrn-q">Brouillon créé sur la balance Sage 100 · v3 (1 284 comptes)<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div>
+</div>
+                    </div>
+                    <div data-bil-val-slot="validable" hidden data-val-bz="5 620 000" data-val-cj="120 000" data-val-courante="—" data-val-prochaine="1">
+                      <div class="vfr"><span class="vfr-s done"><span class="n">1</span>Brouillon</span><span class="vfr-a">→</span><span class="vfr-s done"><span class="n">2</span>Contrôles bloquants</span><span class="vfr-a">→</span><span class="vfr-s now"><span class="n">3</span>Figée — version …</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Déposée à l'OTR</span><span style="flex:1"></span><span class="code">l'étape 4 n'existe pas dans le produit · <b>STORY-462</b></span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;padding:0.55rem 0.75rem;border:1px dashed var(--border-strong);border-radius:var(--radius);font-size:0.78rem;background:var(--content-bg)"><b>⏱️ Brouillon ouvert depuis le 12/07/2026</b><span style="color:var(--muted-fg);flex:1;min-width:16rem">Exercice clos le <b>31/12/2025</b> ⇒ dépôt de la DSF attendu le <b>30/04/2026</b> — soit <b>73 jours de retard</b>. <b>Aucun écran du produit ne fait ce rapprochement</b>&nbsp;: le paquet fiscal embarqué ne publie que <code>acomptesProvisionnels.echeances</code> (les 4 acomptes d'IS), et son <code>_meta</code> annonce pourtant des «&nbsp;dates de dépôt DSF&nbsp;» qu'il ne porte pas. <span class="code">écart ouvert · <b>STORY-469</b></span></span></div>
+                      <div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <b>Ce jeu d'états</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>BROUILLON — recalculable</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">BROUILLON</div><div class="ref-txt">Recalculable autant que nécessaire&nbsp;; rien n'est figé tant que personne n'a validé.</div></div>
+    <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice ouvert</div></div>
+    <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Aucune version figée</div><div class="ref-txt">Cette liasse n'a jamais été validée — <b>rien ne fait foi</b>.</div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · sha256:e9370b14…a71e</div><div class="ref-txt">⚠️ ce <code>checksum</code> est celui du <b>paquet</b>, pas de la liasse figée · <b>STORY-468</b></div></div>
+  </div>
+</div>
+                      <div class="coh-verdict go">
+  <span class="flag">✅</span>
+  <div style="flex:1">
+    <h4>Prête à être figée — <code>valide: true</code></h4>
+    <p>Les <b>deux</b> contrôles bloquants passent&nbsp;: le serveur acceptera la validation. <b>Cela ne veut pas dire que la liasse est juste</b> — voir l'onglet <b>Contrôles de cohérence</b>&nbsp;: le tableau des flux est en anomalie de <b>905&nbsp;000</b>, et <b>4 des 8 contrôles</b> que l'administration applique au dépôt ne sont calculés nulle part.</p>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Le gate de validation — ce que le serveur re-vérifiera</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>2 bloquants OK · 2 informatifs hors gate</span>
+  </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>EQUILIBRE_BILAN</code> — Équilibre du Bilan (<code>BZ</code> = <code>DZ</code>)</b>
+    <p>Le seul contrôle réellement faillible de la batterie — et il passe.</p>
+    <span class="el"><i>BZ = 5 620 000</i><i>DZ = 5 620 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
+  <div class="coh-row warn">
+  <span class="ic">=</span>
+  <span class="t"><b><code>COHERENCE_RESULTAT</code> — Résultat du compte de résultat = résultat au passif</b>
+    <p><b>Bloquant, mais à moitié tautologique</b> (STORY-426)&nbsp;: le volet <code>CR = CJ</code> compare deux nombres issus du <b>même</b> calcul. Il ne peut pas rougir, quelle que soit la liasse.</p>
+    <span class="el"><i>resultatNetCR = 120 000</i><i>resultatNetBilan = 120 000</i><i>XI = 120 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>par construction</span>
+</div>
+  <div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  </span>
+  <span class="coh-cat inf">Hors gate</span>
+  <span class="val"><b>905 000</b>sans effet</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+  </div>
+</div>
+                      <div class="vact">
+  <div class="txt">
+    <b>Valider la liasse — cet acte crée la <b>version 1</b></b>
+    <p>La validation est un <b>acte humain</b>&nbsp;: elle fige un snapshot immuable et rend le jeu non recalculable. <b>Elle n'est pas réversible</b> — seule une réouverture, elle-même tracée, permet de corriger, et elle produira une version de plus.</p>
+  </div>
+  <div class="go">
+    <button class="btn btn-primary" type="button" data-val-open="valider">Valider la liasse</button>
+  </div>
+</div>
+<div class="dc-note dc-gap"><b>⚠️ CE BOUTON S'AFFICHE POUR LES DEUX RÔLES — ET C'EST UN ÉCART, PAS UN CHOIX.</b> <code>POST …/etats/:id/valider</code> est annoté <code>@Roles(TENANT_ADMIN, TENANT_USER)</code>&nbsp;: un <b>collaborateur</b> peut figer la liasse entière. Sur le <b>même dossier</b>, <code>POST …/mapping-overrides/:id/valider</code> — l'arbitrage d'<b>un seul compte</b> — est réservé à <code>@Roles(TENANT_ADMIN)</code>. Le produit est donc plus exigeant pour un compte que pour l'arrêté des comptes. <span class="code">écart ouvert · <b>STORY-463</b></span></div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+    <b>Versions figées de l'exercice 2025</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>aucune</span>
+  </div>
+  <div style="padding:1.1rem 0.95rem;text-align:center;color:var(--muted-fg);font-size:0.82rem">
+    <b style="display:block;color:var(--foreground);font-size:0.88rem;margin-bottom:0.25rem">Cette liasse n'a jamais été validée</b>
+    La première validation créera la <b>version&nbsp;1</b>. Tant qu'aucune n'existe, <b>rien n'est opposable</b>&nbsp;: ni export, ni comparaison d'exercices — <code>GET …/bilan/comparaison</code> répond <code>404 EXERCICE_NON_COMPARABLE</code> tant que l'exercice n'a pas de snapshot (FE-076).
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>
+    <b>Piste d'audit du dossier — lecture seule, append-only</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>2 événements servis</span>
+  </div>
+  <div style="padding:0.55rem 0.95rem;border-bottom:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.72rem;color:var(--muted-fg);text-transform:uppercase;letter-spacing:0.04em;font-weight:700">Filtrer</span>
+    <select data-val-filtre style="font-size:0.78rem;padding:0.2rem 0.4rem;border:1px solid var(--border-strong);border-radius:0.4rem;background:var(--card);color:var(--foreground)">
+      <option value="">Toutes les actions</option>
+      <option value="JEU_CREE">JEU_CREE</option>
+      <option value="JEU_RECALCULE">JEU_RECALCULE</option>
+      <option value="JEU_VALIDE">JEU_VALIDE</option>
+      <option value="JEU_ROUVERT">JEU_ROUVERT</option>
+      <option value="EXERCICE_CLOS">EXERCICE_CLOS</option>
+      <option value="EXPORT_EFFECTUE">EXPORT_EFFECTUE</option>
+    </select>
+    <span style="font-size:0.74rem;color:var(--muted-fg);flex:1;min-width:14rem"><code>?type=</code> est le <b>seul</b> filtre servi&nbsp;: ni fenêtre de dates, ni pagination, ni filtre par cible — un journal append-only jamais purgé rend tout, à chaque ouverture. <span class="code"><b>STORY-459</b></span></span>
+  </div>
+  <div class="vjrn-row">
+  <span class="vjrn-ts">18/07/2026 à 16:02</span>
+  <span class="vjrn-t ">JEU_RECALCULE</span>
+  <span class="vjrn-q">Soldes remplacés après correction à la table de passage<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row ghost">
+  <span class="vjrn-ts">14/07/2026 à 15:31</span>
+  <span class="vjrn-t" style="border:1px dashed var(--border-strong);background:transparent">non journalisé</span>
+  <span class="vjrn-q">Surcharge de mapping validée — le seul acte qui a changé les chiffres<small>Aucun type d'audit n'existe pour les surcharges de mapping&nbsp;: <code>AuditType</code> en compte 8, aucun ne les couvre, et <code>mapping-override.controller</code> n'appelle jamais <code>journaliser</code>. <b>La ligne ci-dessus n'apparaît nulle part dans le vrai journal</b> — elle est dessinée ici pour montrer le trou. <span class="code">écart ouvert · <b>STORY-467</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">12/07/2026 à 09:14</span>
+  <span class="vjrn-t ">JEU_CREE</span>
+  <span class="vjrn-q">Brouillon créé sur la balance Sage 100 · v3 (1 284 comptes)<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div>
+</div>
+                    </div>
+                    <div data-bil-val-slot="v1" hidden data-val-bz="5 620 000" data-val-cj="120 000" data-val-courante="1" data-val-prochaine="2">
+                      <div class="vfr"><span class="vfr-s done"><span class="n">1</span>Brouillon</span><span class="vfr-a">→</span><span class="vfr-s done"><span class="n">2</span>Contrôles bloquants</span><span class="vfr-a">→</span><span class="vfr-s now"><span class="n">3</span>Figée — version 1</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Déposée à l'OTR</span><span style="flex:1"></span><span class="code">l'étape 4 n'existe pas dans le produit · <b>STORY-462</b></span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;padding:0.55rem 0.75rem;border:1px dashed var(--border-strong);border-radius:var(--radius);font-size:0.78rem;background:var(--content-bg)"><b>⏱️ Version 1 figée le 18/07/2026</b><span style="color:var(--muted-fg);flex:1;min-width:16rem">Exercice clos le <b>31/12/2025</b> ⇒ dépôt de la DSF attendu le <b>30/04/2026</b> — soit <b>79 jours de retard</b>. <b>Aucun écran du produit ne fait ce rapprochement</b>&nbsp;: le paquet fiscal embarqué ne publie que <code>acomptesProvisionnels.echeances</code> (les 4 acomptes d'IS), et son <code>_meta</code> annonce pourtant des «&nbsp;dates de dépôt DSF&nbsp;» qu'il ne porte pas. <span class="code">écart ouvert · <b>STORY-469</b></span></span></div>
+                      <div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <b>Ce jeu d'états</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>VALIDÉ — lecture seule</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">VALIDÉ</div><div class="ref-txt">Non recalculable&nbsp;: <code>409 JEU_VALIDE_NON_RECALCULABLE</code>.</div></div>
+    <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice ouvert</div></div>
+    <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Version 1</div><div class="ref-txt">Figée le 18/07/2026 à 16:40 — c'est elle qui fait foi.</div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · sha256:e9370b14…a71e</div><div class="ref-txt">⚠️ ce <code>checksum</code> est celui du <b>paquet</b>, pas de la liasse figée · <b>STORY-468</b></div></div>
+  </div>
+</div>
+                      <div class="coh-verdict go">
+  <span class="flag">🔒</span>
+  <div style="flex:1">
+    <h4>Version 1 figée — la liasse est en <b>lecture seule</b></h4>
+    <p>Le snapshot conserve <b>la liasse telle que validée</b> (jamais recalculée), <b>ses soldes sources</b> et son tampon référentiel. Toute correction passe par une <b>réouverture</b>, qui produira une <b>version 2</b> — la 1 restant consultable pour toujours.</p>
+    <p>⚠️ <b>Ce que cet écran affiche vient du snapshot</b> (<code>GET …/versions/1</code>), <b>pas</b> de <code>GET …/etats/:id</code> — cette dernière <b>re-calcule</b> la liasse d'un jeu VALIDÉ à partir des soldes stockés. Deux nombres pour un même état figé. <span class="code">écart ouvert · <b>STORY-465</b></span></p>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Le gate de validation — ce que le serveur re-vérifiera</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>2 bloquants OK · 2 informatifs hors gate</span>
+  </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>EQUILIBRE_BILAN</code> — Équilibre du Bilan (<code>BZ</code> = <code>DZ</code>)</b>
+    <p>Le seul contrôle réellement faillible de la batterie — et il passe.</p>
+    <span class="el"><i>BZ = 5 620 000</i><i>DZ = 5 620 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
+  <div class="coh-row warn">
+  <span class="ic">=</span>
+  <span class="t"><b><code>COHERENCE_RESULTAT</code> — Résultat du compte de résultat = résultat au passif</b>
+    <p><b>Bloquant, mais à moitié tautologique</b> (STORY-426)&nbsp;: le volet <code>CR = CJ</code> compare deux nombres issus du <b>même</b> calcul. Il ne peut pas rougir, quelle que soit la liasse.</p>
+    <span class="el"><i>resultatNetCR = 120 000</i><i>resultatNetBilan = 120 000</i><i>XI = 120 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>par construction</span>
+</div>
+  <div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  </span>
+  <span class="coh-cat inf">Hors gate</span>
+  <span class="val"><b>905 000</b>sans effet</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+  </div>
+</div>
+                      <div class="vact locked">
+  <div class="txt">
+    <b>Liasse figée — aucune action d'édition n'est offerte</b>
+    <p>Ni recalcul, ni correction en place&nbsp;: l'immuabilité est un invariant du serveur (NFR-004), et l'écran <b>ne doit pas suggérer l'inverse</b>. Le seul geste possible est une <b>réouverture</b>, qui est elle-même un acte tracé.</p>
+  </div>
+  <div class="go">
+    <button class="btn btn-ghost" type="button" data-val-open="rouvrir">Rouvrir pour correction</button>
+    <button class="btn btn-ghost" type="button" disabled title="FE-038 — export PDF / Excel fidèle au snapshot">Exporter la liasse figée</button>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+    <b>Versions figées de l'exercice 2025</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>1 version · append-only</span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="vver">
+      <thead><tr><th>Version</th><th>Figée le</th><th>Par</th><th class="n">Total général</th><th class="n">Résultat net</th><th>Balance source</th><th></th></tr></thead>
+      <tbody><tr class="foi">
+  <td><span class="vver-v">v1</span> <span class="vver-foi">fait foi</span></td>
+  <td>18/07/2026 à 16:40<span class="vver-note">Équilibre rétabli : 412 300 de comptes créditeurs rattachés au passif.</span></td>
+  <td><span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span></td>
+  <td class="n">5 620 000</td>
+  <td class="n">120 000</td>
+  <td><i style="color:var(--muted-fg)">non publiée</i><span class="vver-note">le snapshot fige les <b>soldes</b>, jamais l'identité de la balance · <b>STORY-466</b></span></td>
+  <td><button class="btn btn-ghost btn-sm" type="button" data-val-voir="1">Consulter</button></td>
+</tr></tbody>
+    </table>
+  </div>
+  
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>
+    <b>Piste d'audit du dossier — lecture seule, append-only</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>3 événements servis</span>
+  </div>
+  <div style="padding:0.55rem 0.95rem;border-bottom:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.72rem;color:var(--muted-fg);text-transform:uppercase;letter-spacing:0.04em;font-weight:700">Filtrer</span>
+    <select data-val-filtre style="font-size:0.78rem;padding:0.2rem 0.4rem;border:1px solid var(--border-strong);border-radius:0.4rem;background:var(--card);color:var(--foreground)">
+      <option value="">Toutes les actions</option>
+      <option value="JEU_CREE">JEU_CREE</option>
+      <option value="JEU_RECALCULE">JEU_RECALCULE</option>
+      <option value="JEU_VALIDE">JEU_VALIDE</option>
+      <option value="JEU_ROUVERT">JEU_ROUVERT</option>
+      <option value="EXERCICE_CLOS">EXERCICE_CLOS</option>
+      <option value="EXPORT_EFFECTUE">EXPORT_EFFECTUE</option>
+    </select>
+    <span style="font-size:0.74rem;color:var(--muted-fg);flex:1;min-width:14rem"><code>?type=</code> est le <b>seul</b> filtre servi&nbsp;: ni fenêtre de dates, ni pagination, ni filtre par cible — un journal append-only jamais purgé rend tout, à chaque ouverture. <span class="code"><b>STORY-459</b></span></span>
+  </div>
+  <div class="vjrn-row">
+  <span class="vjrn-ts">18/07/2026 à 16:40</span>
+  <span class="vjrn-t val">JEU_VALIDE</span>
+  <span class="vjrn-q">Liasse figée — version 1<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">18/07/2026 à 16:02</span>
+  <span class="vjrn-t ">JEU_RECALCULE</span>
+  <span class="vjrn-q">Soldes remplacés après correction à la table de passage<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row ghost">
+  <span class="vjrn-ts">14/07/2026 à 15:31</span>
+  <span class="vjrn-t" style="border:1px dashed var(--border-strong);background:transparent">non journalisé</span>
+  <span class="vjrn-q">Surcharge de mapping validée — le seul acte qui a changé les chiffres<small>Aucun type d'audit n'existe pour les surcharges de mapping&nbsp;: <code>AuditType</code> en compte 8, aucun ne les couvre, et <code>mapping-override.controller</code> n'appelle jamais <code>journaliser</code>. <b>La ligne ci-dessus n'apparaît nulle part dans le vrai journal</b> — elle est dessinée ici pour montrer le trou. <span class="code">écart ouvert · <b>STORY-467</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">12/07/2026 à 09:14</span>
+  <span class="vjrn-t ">JEU_CREE</span>
+  <span class="vjrn-q">Brouillon créé sur la balance Sage 100 · v3 (1 284 comptes)<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div>
+</div>
+                    </div>
+                    <div data-bil-val-slot="rouverte" hidden data-val-bz="5 620 000" data-val-cj="120 000" data-val-courante="1" data-val-prochaine="2">
+                      <div class="vfr"><span class="vfr-s now"><span class="n">1</span>Brouillon</span><span class="vfr-a">→</span><span class="vfr-s done"><span class="n">2</span>Contrôles bloquants</span><span class="vfr-a">→</span><span class="vfr-s done"><span class="n">3</span>Figée — version 1</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Déposée à l'OTR</span><span style="flex:1"></span><span class="code">l'étape 4 n'existe pas dans le produit · <b>STORY-462</b></span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;padding:0.55rem 0.75rem;border:1px dashed var(--border-strong);border-radius:var(--radius);font-size:0.78rem;background:var(--content-bg)"><b>⏱️ Version 1 figée le 18/07/2026</b><span style="color:var(--muted-fg);flex:1;min-width:16rem">Exercice clos le <b>31/12/2025</b> ⇒ dépôt de la DSF attendu le <b>30/04/2026</b> — soit <b>79 jours de retard</b>. <b>Aucun écran du produit ne fait ce rapprochement</b>&nbsp;: le paquet fiscal embarqué ne publie que <code>acomptesProvisionnels.echeances</code> (les 4 acomptes d'IS), et son <code>_meta</code> annonce pourtant des «&nbsp;dates de dépôt DSF&nbsp;» qu'il ne porte pas. <span class="code">écart ouvert · <b>STORY-469</b></span></span></div>
+                      <div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <b>Ce jeu d'états</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>BROUILLON — recalculable</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">BROUILLON</div><div class="ref-txt">Recalculable autant que nécessaire&nbsp;; rien n'est figé tant que personne n'a validé.</div></div>
+    <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice ouvert</div></div>
+    <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Version 1</div><div class="ref-txt">Un brouillon est ouvert par-dessus&nbsp;: la version 1 reste <b>la seule qui fasse foi</b>.</div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · sha256:e9370b14…a71e</div><div class="ref-txt">⚠️ ce <code>checksum</code> est celui du <b>paquet</b>, pas de la liasse figée · <b>STORY-468</b></div></div>
+  </div>
+</div>
+                      <div class="coh-verdict go">
+  <span class="flag">✏️</span>
+  <div style="flex:1">
+    <h4>Brouillon rouvert — la <b>version 1 reste la seule qui fasse foi</b></h4>
+    <p>Rouvrir n'efface rien&nbsp;: les snapshots sont <b>append-only</b>. Tant que ce brouillon n'est pas validé, c'est la version&nbsp;1 qui est opposable — et c'est elle qu'un export ou une comparaison d'exercices doit servir.</p>
+    <p>⚠️ <b>Aucun motif n'a été demandé, et aucun n'est conservé</b>&nbsp;: <code>POST …/rouvrir</code> ne prend pas de corps, et l'événement <code>JEU_ROUVERT</code> n'a pas de contexte. Rouvrir des comptes arrêtés sans justification écrite est <b>le point faible de l'opposabilité</b>. <span class="code">écart ouvert · <b>STORY-460</b></span></p>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Le gate de validation — ce que le serveur re-vérifiera</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>2 bloquants OK · 2 informatifs hors gate</span>
+  </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>EQUILIBRE_BILAN</code> — Équilibre du Bilan (<code>BZ</code> = <code>DZ</code>)</b>
+    <p>Le seul contrôle réellement faillible de la batterie — et il passe.</p>
+    <span class="el"><i>BZ = 5 620 000</i><i>DZ = 5 620 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
+  <div class="coh-row warn">
+  <span class="ic">=</span>
+  <span class="t"><b><code>COHERENCE_RESULTAT</code> — Résultat du compte de résultat = résultat au passif</b>
+    <p><b>Bloquant, mais à moitié tautologique</b> (STORY-426)&nbsp;: le volet <code>CR = CJ</code> compare deux nombres issus du <b>même</b> calcul. Il ne peut pas rougir, quelle que soit la liasse.</p>
+    <span class="el"><i>resultatNetCR = 120 000</i><i>resultatNetBilan = 120 000</i><i>XI = 120 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>par construction</span>
+</div>
+  <div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  </span>
+  <span class="coh-cat inf">Hors gate</span>
+  <span class="val"><b>905 000</b>sans effet</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+  </div>
+</div>
+                      <div class="vact">
+  <div class="txt">
+    <b>Valider la liasse — cet acte crée la <b>version 2</b></b>
+    <p>La validation est un <b>acte humain</b>&nbsp;: elle fige un snapshot immuable et rend le jeu non recalculable. <b>Elle n'est pas réversible</b> — seule une réouverture, elle-même tracée, permet de corriger, et elle produira une version de plus.</p>
+  </div>
+  <div class="go">
+    <button class="btn btn-primary" type="button" data-val-open="valider">Valider la liasse</button>
+  </div>
+</div>
+<div class="dc-note dc-gap"><b>⚠️ CE BOUTON S'AFFICHE POUR LES DEUX RÔLES — ET C'EST UN ÉCART, PAS UN CHOIX.</b> <code>POST …/etats/:id/valider</code> est annoté <code>@Roles(TENANT_ADMIN, TENANT_USER)</code>&nbsp;: un <b>collaborateur</b> peut figer la liasse entière. Sur le <b>même dossier</b>, <code>POST …/mapping-overrides/:id/valider</code> — l'arbitrage d'<b>un seul compte</b> — est réservé à <code>@Roles(TENANT_ADMIN)</code>. Le produit est donc plus exigeant pour un compte que pour l'arrêté des comptes. <span class="code">écart ouvert · <b>STORY-463</b></span></div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+    <b>Versions figées de l'exercice 2025</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>1 version · append-only</span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="vver">
+      <thead><tr><th>Version</th><th>Figée le</th><th>Par</th><th class="n">Total général</th><th class="n">Résultat net</th><th>Balance source</th><th></th></tr></thead>
+      <tbody><tr class="foi">
+  <td><span class="vver-v">v1</span> <span class="vver-foi">fait foi</span></td>
+  <td>18/07/2026 à 16:40<span class="vver-note">Équilibre rétabli : 412 300 de comptes créditeurs rattachés au passif.</span></td>
+  <td><span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span></td>
+  <td class="n">5 620 000</td>
+  <td class="n">120 000</td>
+  <td><i style="color:var(--muted-fg)">non publiée</i><span class="vver-note">le snapshot fige les <b>soldes</b>, jamais l'identité de la balance · <b>STORY-466</b></span></td>
+  <td><button class="btn btn-ghost btn-sm" type="button" data-val-voir="1">Consulter</button></td>
+</tr></tbody>
+    </table>
+  </div>
+  
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>
+    <b>Piste d'audit du dossier — lecture seule, append-only</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>4 événements servis</span>
+  </div>
+  <div style="padding:0.55rem 0.95rem;border-bottom:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.72rem;color:var(--muted-fg);text-transform:uppercase;letter-spacing:0.04em;font-weight:700">Filtrer</span>
+    <select data-val-filtre style="font-size:0.78rem;padding:0.2rem 0.4rem;border:1px solid var(--border-strong);border-radius:0.4rem;background:var(--card);color:var(--foreground)">
+      <option value="">Toutes les actions</option>
+      <option value="JEU_CREE">JEU_CREE</option>
+      <option value="JEU_RECALCULE">JEU_RECALCULE</option>
+      <option value="JEU_VALIDE">JEU_VALIDE</option>
+      <option value="JEU_ROUVERT">JEU_ROUVERT</option>
+      <option value="EXERCICE_CLOS">EXERCICE_CLOS</option>
+      <option value="EXPORT_EFFECTUE">EXPORT_EFFECTUE</option>
+    </select>
+    <span style="font-size:0.74rem;color:var(--muted-fg);flex:1;min-width:14rem"><code>?type=</code> est le <b>seul</b> filtre servi&nbsp;: ni fenêtre de dates, ni pagination, ni filtre par cible — un journal append-only jamais purgé rend tout, à chaque ouverture. <span class="code"><b>STORY-459</b></span></span>
+  </div>
+  <div class="vjrn-row">
+  <span class="vjrn-ts">22/07/2026 à 10:05</span>
+  <span class="vjrn-t rou">JEU_ROUVERT</span>
+  <span class="vjrn-q">Liasse rouverte pour correction — aucun motif n'est demandé ni conservé<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small><small>Aucun motif&nbsp;: la route n'en prend pas. <span class="code"><b>STORY-460</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">18/07/2026 à 16:40</span>
+  <span class="vjrn-t val">JEU_VALIDE</span>
+  <span class="vjrn-q">Liasse figée — version 1<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">18/07/2026 à 16:02</span>
+  <span class="vjrn-t ">JEU_RECALCULE</span>
+  <span class="vjrn-q">Soldes remplacés après correction à la table de passage<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row ghost">
+  <span class="vjrn-ts">14/07/2026 à 15:31</span>
+  <span class="vjrn-t" style="border:1px dashed var(--border-strong);background:transparent">non journalisé</span>
+  <span class="vjrn-q">Surcharge de mapping validée — le seul acte qui a changé les chiffres<small>Aucun type d'audit n'existe pour les surcharges de mapping&nbsp;: <code>AuditType</code> en compte 8, aucun ne les couvre, et <code>mapping-override.controller</code> n'appelle jamais <code>journaliser</code>. <b>La ligne ci-dessus n'apparaît nulle part dans le vrai journal</b> — elle est dessinée ici pour montrer le trou. <span class="code">écart ouvert · <b>STORY-467</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">12/07/2026 à 09:14</span>
+  <span class="vjrn-t ">JEU_CREE</span>
+  <span class="vjrn-q">Brouillon créé sur la balance Sage 100 · v3 (1 284 comptes)<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div>
+</div>
+                    </div>
+                    <div data-bil-val-slot="v2" hidden data-val-bz="5 700 000" data-val-cj="200 000" data-val-courante="2" data-val-prochaine="3">
+                      <div class="vfr"><span class="vfr-s done"><span class="n">1</span>Brouillon</span><span class="vfr-a">→</span><span class="vfr-s done"><span class="n">2</span>Contrôles bloquants</span><span class="vfr-a">→</span><span class="vfr-s now"><span class="n">3</span>Figée — version 2</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Déposée à l'OTR</span><span style="flex:1"></span><span class="code">l'étape 4 n'existe pas dans le produit · <b>STORY-462</b></span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;padding:0.55rem 0.75rem;border:1px dashed var(--border-strong);border-radius:var(--radius);font-size:0.78rem;background:var(--content-bg)"><b>⏱️ Version 2 figée le 22/07/2026</b><span style="color:var(--muted-fg);flex:1;min-width:16rem">Exercice clos le <b>31/12/2025</b> ⇒ dépôt de la DSF attendu le <b>30/04/2026</b> — soit <b>83 jours de retard</b>. <b>Aucun écran du produit ne fait ce rapprochement</b>&nbsp;: le paquet fiscal embarqué ne publie que <code>acomptesProvisionnels.echeances</code> (les 4 acomptes d'IS), et son <code>_meta</code> annonce pourtant des «&nbsp;dates de dépôt DSF&nbsp;» qu'il ne porte pas. <span class="code">écart ouvert · <b>STORY-469</b></span></span></div>
+                      <div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <b>Ce jeu d'états</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>VALIDÉ — lecture seule</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">VALIDÉ</div><div class="ref-txt">Non recalculable&nbsp;: <code>409 JEU_VALIDE_NON_RECALCULABLE</code>.</div></div>
+    <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice ouvert</div></div>
+    <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Version 2</div><div class="ref-txt">Figée le 22/07/2026 à 11:47 — c'est elle qui fait foi.</div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · sha256:e9370b14…a71e</div><div class="ref-txt">⚠️ ce <code>checksum</code> est celui du <b>paquet</b>, pas de la liasse figée · <b>STORY-468</b></div></div>
+  </div>
+</div>
+                      <div class="coh-verdict go">
+  <span class="flag">🔒</span>
+  <div style="flex:1">
+    <h4>Version 2 figée — la liasse est en <b>lecture seule</b></h4>
+    <p>Le snapshot conserve <b>la liasse telle que validée</b> (jamais recalculée), <b>ses soldes sources</b> et son tampon référentiel. Toute correction passe par une <b>réouverture</b>, qui produira une <b>version 3</b> — la 2 restant consultable pour toujours.</p>
+    <p>⚠️ <b>Ce que cet écran affiche vient du snapshot</b> (<code>GET …/versions/2</code>), <b>pas</b> de <code>GET …/etats/:id</code> — cette dernière <b>re-calcule</b> la liasse d'un jeu VALIDÉ à partir des soldes stockés. Deux nombres pour un même état figé. <span class="code">écart ouvert · <b>STORY-465</b></span></p>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Le gate de validation — ce que le serveur re-vérifiera</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>2 bloquants OK · 2 informatifs hors gate</span>
+  </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>EQUILIBRE_BILAN</code> — Équilibre du Bilan (<code>BZ</code> = <code>DZ</code>)</b>
+    <p>Le seul contrôle réellement faillible de la batterie — et il passe.</p>
+    <span class="el"><i>BZ = 5 700 000</i><i>DZ = 5 700 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
+  <div class="coh-row warn">
+  <span class="ic">=</span>
+  <span class="t"><b><code>COHERENCE_RESULTAT</code> — Résultat du compte de résultat = résultat au passif</b>
+    <p><b>Bloquant, mais à moitié tautologique</b> (STORY-426)&nbsp;: le volet <code>CR = CJ</code> compare deux nombres issus du <b>même</b> calcul. Il ne peut pas rougir, quelle que soit la liasse.</p>
+    <span class="el"><i>resultatNetCR = 200 000</i><i>resultatNetBilan = 200 000</i><i>XI = 200 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>par construction</span>
+</div>
+  <div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  </span>
+  <span class="coh-cat inf">Hors gate</span>
+  <span class="val"><b>905 000</b>sans effet</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+  </div>
+</div>
+                      <div class="vact locked">
+  <div class="txt">
+    <b>Liasse figée — aucune action d'édition n'est offerte</b>
+    <p>Ni recalcul, ni correction en place&nbsp;: l'immuabilité est un invariant du serveur (NFR-004), et l'écran <b>ne doit pas suggérer l'inverse</b>. Le seul geste possible est une <b>réouverture</b>, qui est elle-même un acte tracé.</p>
+  </div>
+  <div class="go">
+    <button class="btn btn-ghost" type="button" data-val-open="rouvrir">Rouvrir pour correction</button>
+    <button class="btn btn-ghost" type="button" disabled title="FE-038 — export PDF / Excel fidèle au snapshot">Exporter la liasse figée</button>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+    <b>Versions figées de l'exercice 2025</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>2 versions · append-only</span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="vver">
+      <thead><tr><th>Version</th><th>Figée le</th><th>Par</th><th class="n">Total général</th><th class="n">Résultat net</th><th>Balance source</th><th></th></tr></thead>
+      <tbody><tr class="foi">
+  <td><span class="vver-v">v2</span> <span class="vver-foi">fait foi</span></td>
+  <td>22/07/2026 à 11:47<span class="vver-note">Compte 476200 reclassé : +80 000 à l'actif et au résultat.</span></td>
+  <td><span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span></td>
+  <td class="n">5 700 000</td>
+  <td class="n">200 000</td>
+  <td><i style="color:var(--muted-fg)">non publiée</i><span class="vver-note">le snapshot fige les <b>soldes</b>, jamais l'identité de la balance · <b>STORY-466</b></span></td>
+  <td><button class="btn btn-ghost btn-sm" type="button" data-val-voir="2">Consulter</button></td>
+</tr><tr>
+  <td><span class="vver-v">v1</span> <span class="vver-old">remplacée</span></td>
+  <td>18/07/2026 à 16:40<span class="vver-note">Équilibre rétabli : 412 300 de comptes créditeurs rattachés au passif.</span></td>
+  <td><span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span></td>
+  <td class="n">5 620 000</td>
+  <td class="n">120 000</td>
+  <td><i style="color:var(--muted-fg)">non publiée</i><span class="vver-note">le snapshot fige les <b>soldes</b>, jamais l'identité de la balance · <b>STORY-466</b></span></td>
+  <td><button class="btn btn-ghost btn-sm" type="button" data-val-voir="1">Consulter</button></td>
+</tr></tbody>
+    </table>
+  </div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:16rem">Entre <b>v1</b> et <b>v2</b>&nbsp;: <b>+80 000</b> au total général <b>et</b> au résultat net — le reclassement du compte <code>476200</code>. <b>C'est l'écran qui a fait cette soustraction</b>&nbsp;: aucune route ne compare deux versions figées, alors que les deux liasses complètes sont stockées.</span>
+    <button class="btn btn-ghost btn-sm" type="button" disabled title="STORY-464 — aucune route ne compare deux versions">Comparer v1 et v2 <span class="soon">STORY-464</span></button>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>
+    <b>Piste d'audit du dossier — lecture seule, append-only</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>7 événements servis</span>
+  </div>
+  <div style="padding:0.55rem 0.95rem;border-bottom:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.72rem;color:var(--muted-fg);text-transform:uppercase;letter-spacing:0.04em;font-weight:700">Filtrer</span>
+    <select data-val-filtre style="font-size:0.78rem;padding:0.2rem 0.4rem;border:1px solid var(--border-strong);border-radius:0.4rem;background:var(--card);color:var(--foreground)">
+      <option value="">Toutes les actions</option>
+      <option value="JEU_CREE">JEU_CREE</option>
+      <option value="JEU_RECALCULE">JEU_RECALCULE</option>
+      <option value="JEU_VALIDE">JEU_VALIDE</option>
+      <option value="JEU_ROUVERT">JEU_ROUVERT</option>
+      <option value="EXERCICE_CLOS">EXERCICE_CLOS</option>
+      <option value="EXPORT_EFFECTUE">EXPORT_EFFECTUE</option>
+    </select>
+    <span style="font-size:0.74rem;color:var(--muted-fg);flex:1;min-width:14rem"><code>?type=</code> est le <b>seul</b> filtre servi&nbsp;: ni fenêtre de dates, ni pagination, ni filtre par cible — un journal append-only jamais purgé rend tout, à chaque ouverture. <span class="code"><b>STORY-459</b></span></span>
+  </div>
+  <div class="vjrn-row">
+  <span class="vjrn-ts">23/07/2026 à 09:30</span>
+  <span class="vjrn-t ">EXPORT_EFFECTUE</span>
+  <span class="vjrn-q">Export effectué — format, version et empreinte non publiés<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small><small>Le service <b>stocke</b> pourtant format, version, <code>snapshotId</code> et empreinte dans <code>contexte</code> — le DTO de lecture ne les publie pas. <span class="code"><b>STORY-458</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">22/07/2026 à 11:47</span>
+  <span class="vjrn-t val">JEU_VALIDE</span>
+  <span class="vjrn-q">Liasse figée — version 2<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">22/07/2026 à 11:20</span>
+  <span class="vjrn-t ">JEU_RECALCULE</span>
+  <span class="vjrn-q">Soldes remplacés — reclassement du compte 476200<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">22/07/2026 à 10:05</span>
+  <span class="vjrn-t rou">JEU_ROUVERT</span>
+  <span class="vjrn-q">Liasse rouverte pour correction — aucun motif n'est demandé ni conservé<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small><small>Aucun motif&nbsp;: la route n'en prend pas. <span class="code"><b>STORY-460</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">18/07/2026 à 16:40</span>
+  <span class="vjrn-t val">JEU_VALIDE</span>
+  <span class="vjrn-q">Liasse figée — version 1<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">18/07/2026 à 16:02</span>
+  <span class="vjrn-t ">JEU_RECALCULE</span>
+  <span class="vjrn-q">Soldes remplacés après correction à la table de passage<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row ghost">
+  <span class="vjrn-ts">14/07/2026 à 15:31</span>
+  <span class="vjrn-t" style="border:1px dashed var(--border-strong);background:transparent">non journalisé</span>
+  <span class="vjrn-q">Surcharge de mapping validée — le seul acte qui a changé les chiffres<small>Aucun type d'audit n'existe pour les surcharges de mapping&nbsp;: <code>AuditType</code> en compte 8, aucun ne les couvre, et <code>mapping-override.controller</code> n'appelle jamais <code>journaliser</code>. <b>La ligne ci-dessus n'apparaît nulle part dans le vrai journal</b> — elle est dessinée ici pour montrer le trou. <span class="code">écart ouvert · <b>STORY-467</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">12/07/2026 à 09:14</span>
+  <span class="vjrn-t ">JEU_CREE</span>
+  <span class="vjrn-q">Brouillon créé sur la balance Sage 100 · v3 (1 284 comptes)<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div>
+</div>
+                    </div>
+                    <div data-bil-val-slot="culdesac" hidden data-val-bz="5 700 000" data-val-cj="200 000" data-val-courante="2" data-val-prochaine="3">
+                      <div class="vfr"><span class="vfr-s now"><span class="n">1</span>Brouillon</span><span class="vfr-a">→</span><span class="vfr-s done"><span class="n">2</span>Contrôles bloquants</span><span class="vfr-a">→</span><span class="vfr-s done"><span class="n">3</span>Figée — version 2</span><span class="vfr-a">→</span><span class="vfr-s"><span class="n">4</span>Déposée à l'OTR</span><span style="flex:1"></span><span class="code">l'étape 4 n'existe pas dans le produit · <b>STORY-462</b></span></div><div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;padding:0.55rem 0.75rem;border:1px dashed var(--border-strong);border-radius:var(--radius);font-size:0.78rem;background:var(--content-bg)"><b>⏱️ Version 2 figée le 22/07/2026</b><span style="color:var(--muted-fg);flex:1;min-width:16rem">Exercice clos le <b>31/12/2025</b> ⇒ dépôt de la DSF attendu le <b>30/04/2026</b> — soit <b>83 jours de retard</b>. <b>Aucun écran du produit ne fait ce rapprochement</b>&nbsp;: le paquet fiscal embarqué ne publie que <code>acomptesProvisionnels.echeances</code> (les 4 acomptes d'IS), et son <code>_meta</code> annonce pourtant des «&nbsp;dates de dépôt DSF&nbsp;» qu'il ne porte pas. <span class="code">écart ouvert · <b>STORY-469</b></span></span></div>
+                      <div class="ref-card">
+  <div class="ref-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <b>Ce jeu d'états</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>BROUILLON — recalculable</span>
+  </div>
+  <div class="ref-grid">
+    <div class="ref-item"><div class="ref-k">Statut du cycle de vie</div><div class="ref-v">BROUILLON</div><div class="ref-txt">Recalculable autant que nécessaire&nbsp;; rien n'est figé tant que personne n'a validé.</div></div>
+    <div class="ref-item"><div class="ref-k">Dossier &amp; exercice</div><div class="ref-v">Ets Kossi Distribution</div><div class="ref-txt"><b>2025</b> — exercice <b>CLOS</b> le 31/07/2026</div></div>
+    <div class="ref-item"><div class="ref-k">Ce qui fait foi</div><div class="ref-v">Version 2</div><div class="ref-txt">Un brouillon est ouvert par-dessus&nbsp;: la version 2 reste <b>la seule qui fasse foi</b>.</div></div>
+    <div class="ref-item"><div class="ref-k">Référentiel &amp; moteur</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0 · sha256:e9370b14…a71e</div><div class="ref-txt">⚠️ ce <code>checksum</code> est celui du <b>paquet</b>, pas de la liasse figée · <b>STORY-468</b></div></div>
+  </div>
+</div>
+                      <div class="coh-verdict stop">
+  <span class="flag">⛔</span>
+  <div style="flex:1">
+    <h4>Rouverte, et impossible à re-figer — l'exercice 2025 est <b>clos</b></h4>
+    <p>La réouverture a été <b>acceptée</b> (<code>200</code>)&nbsp;; la re-validation répondra <code>409 EXERCICE_CLOS</code>. La liasse est donc en <b>cul-de-sac</b>&nbsp;: brouillon, sans retour possible vers VALIDÉ tant que l'exercice n'est pas rouvert — et le <b>portefeuille</b> affiche désormais «&nbsp;bilan en cours&nbsp;» sur un exercice clos. <span class="code">écart ouvert · <b>STORY-461</b></span></p>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <b>Le gate de validation — ce que le serveur re-vérifiera</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>2 bloquants OK · 2 informatifs hors gate</span>
+  </div>
+  <div class="coh-row ok">
+  <span class="ic">✓</span>
+  <span class="t"><b><code>EQUILIBRE_BILAN</code> — Équilibre du Bilan (<code>BZ</code> = <code>DZ</code>)</b>
+    <p>Le seul contrôle réellement faillible de la batterie — et il passe.</p>
+    <span class="el"><i>BZ = 5 700 000</i><i>DZ = 5 700 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>OK</span>
+</div>
+  <div class="coh-row warn">
+  <span class="ic">=</span>
+  <span class="t"><b><code>COHERENCE_RESULTAT</code> — Résultat du compte de résultat = résultat au passif</b>
+    <p><b>Bloquant, mais à moitié tautologique</b> (STORY-426)&nbsp;: le volet <code>CR = CJ</code> compare deux nombres issus du <b>même</b> calcul. Il ne peut pas rougir, quelle que soit la liasse.</p>
+    <span class="el"><i>resultatNetCR = 200 000</i><i>resultatNetBilan = 200 000</i><i>XI = 200 000</i></span>
+  </span>
+  <span class="coh-cat blk">Bloquant</span>
+  <span class="val"><b>écart 0</b>par construction</span>
+</div>
+  <div class="coh-row na">
+  <span class="ic">–</span>
+  <span class="t"><b>Les 2 contrôles <code>INFORMATIF</code> — que le gate <b>ne regarde pas</b></b>
+    <p><code>VARIATION_TRESORERIE</code> est en <b>anomalie de 905&nbsp;000</b> (systématique, décomposée par FE-033) et <code>ARTICULATION_NOTES</code> est nul par construction. <b>Ni l'un ni l'autre n'empêche de figer</b> — c'est le contrat, et c'est défendable&nbsp;; ce qui ne l'est pas, c'est qu'un feu vert le laisse ignorer.</p>
+  </span>
+  <span class="coh-cat inf">Hors gate</span>
+  <span class="val"><b>905 000</b>sans effet</span>
+</div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:14rem">La liste ci-dessus vient des <b>contrôles</b> (FE-033), pas du refus <code>422</code>&nbsp;: le serveur ne renvoie que des chaînes <code>«&nbsp;CODE&nbsp;: STATUT (écart N)&nbsp;»</code>, sans libellé ni cible. Le <code>422</code> sert de <b>garde-fou de dernière seconde</b>, jamais de source d'affichage.</span>
+    <button class="btn btn-ghost btn-sm" type="button" data-bil-etat-go="controles">Voir les 4 contrôles en détail</button>
+  </div>
+</div>
+                      <div class="vact">
+  <div class="txt">
+    <b>Valider la liasse</b>
+    <p>Les contrôles passent, et la validation sera pourtant <b>refusée</b>&nbsp;: l'exercice est clos. <b>Essayez</b> — l'écran rend le refus du serveur tel quel.</p>
+  </div>
+  <div class="go">
+    <button class="btn btn-primary" type="button" data-val-try409>Valider la liasse</button>
+    <button class="btn btn-ghost" type="button" data-val-goto-exercice>Rouvrir l'exercice 2025</button>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+    <b>Versions figées de l'exercice 2025</b>
+    <span class="grow"></span>
+    <span class="badge badge-active"><span class="d"></span>2 versions · append-only</span>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="vver">
+      <thead><tr><th>Version</th><th>Figée le</th><th>Par</th><th class="n">Total général</th><th class="n">Résultat net</th><th>Balance source</th><th></th></tr></thead>
+      <tbody><tr class="foi">
+  <td><span class="vver-v">v2</span> <span class="vver-foi">fait foi</span></td>
+  <td>22/07/2026 à 11:47<span class="vver-note">Compte 476200 reclassé : +80 000 à l'actif et au résultat.</span></td>
+  <td><span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span></td>
+  <td class="n">5 700 000</td>
+  <td class="n">200 000</td>
+  <td><i style="color:var(--muted-fg)">non publiée</i><span class="vver-note">le snapshot fige les <b>soldes</b>, jamais l'identité de la balance · <b>STORY-466</b></span></td>
+  <td><button class="btn btn-ghost btn-sm" type="button" data-val-voir="2">Consulter</button></td>
+</tr><tr>
+  <td><span class="vver-v">v1</span> <span class="vver-old">remplacée</span></td>
+  <td>18/07/2026 à 16:40<span class="vver-note">Équilibre rétabli : 412 300 de comptes créditeurs rattachés au passif.</span></td>
+  <td><span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span></td>
+  <td class="n">5 620 000</td>
+  <td class="n">120 000</td>
+  <td><i style="color:var(--muted-fg)">non publiée</i><span class="vver-note">le snapshot fige les <b>soldes</b>, jamais l'identité de la balance · <b>STORY-466</b></span></td>
+  <td><button class="btn btn-ghost btn-sm" type="button" data-val-voir="1">Consulter</button></td>
+</tr></tbody>
+    </table>
+  </div>
+  <div style="padding:0.6rem 0.95rem;border-top:1px solid var(--border);display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.76rem;color:var(--muted-fg);flex:1;min-width:16rem">Entre <b>v1</b> et <b>v2</b>&nbsp;: <b>+80 000</b> au total général <b>et</b> au résultat net — le reclassement du compte <code>476200</code>. <b>C'est l'écran qui a fait cette soustraction</b>&nbsp;: aucune route ne compare deux versions figées, alors que les deux liasses complètes sont stockées.</span>
+    <button class="btn btn-ghost btn-sm" type="button" disabled title="STORY-464 — aucune route ne compare deux versions">Comparer v1 et v2 <span class="soon">STORY-464</span></button>
+  </div>
+</div>
+                      <div class="coh">
+  <div class="h">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.05rem;height:1.05rem;color:var(--muted-fg)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h6"/></svg>
+    <b>Piste d'audit du dossier — lecture seule, append-only</b>
+    <span class="grow"></span>
+    <span class="badge badge-invited"><span class="d"></span>9 événements servis</span>
+  </div>
+  <div style="padding:0.55rem 0.95rem;border-bottom:1px solid var(--border);display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:0.72rem;color:var(--muted-fg);text-transform:uppercase;letter-spacing:0.04em;font-weight:700">Filtrer</span>
+    <select data-val-filtre style="font-size:0.78rem;padding:0.2rem 0.4rem;border:1px solid var(--border-strong);border-radius:0.4rem;background:var(--card);color:var(--foreground)">
+      <option value="">Toutes les actions</option>
+      <option value="JEU_CREE">JEU_CREE</option>
+      <option value="JEU_RECALCULE">JEU_RECALCULE</option>
+      <option value="JEU_VALIDE">JEU_VALIDE</option>
+      <option value="JEU_ROUVERT">JEU_ROUVERT</option>
+      <option value="EXERCICE_CLOS">EXERCICE_CLOS</option>
+      <option value="EXPORT_EFFECTUE">EXPORT_EFFECTUE</option>
+    </select>
+    <span style="font-size:0.74rem;color:var(--muted-fg);flex:1;min-width:14rem"><code>?type=</code> est le <b>seul</b> filtre servi&nbsp;: ni fenêtre de dates, ni pagination, ni filtre par cible — un journal append-only jamais purgé rend tout, à chaque ouverture. <span class="code"><b>STORY-459</b></span></span>
+  </div>
+  <div class="vjrn-row">
+  <span class="vjrn-ts">04/08/2026 à 08:12</span>
+  <span class="vjrn-t rou">JEU_ROUVERT</span>
+  <span class="vjrn-q">Liasse rouverte — acceptée alors que l'exercice est CLOS<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small><small>Aucun motif&nbsp;: la route n'en prend pas. <span class="code"><b>STORY-460</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">31/07/2026 à 17:00</span>
+  <span class="vjrn-t exc">EXERCICE_CLOS</span>
+  <span class="vjrn-q">Exercice 2025 clos<small>cible&nbsp;: <code>exercices</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">23/07/2026 à 09:30</span>
+  <span class="vjrn-t ">EXPORT_EFFECTUE</span>
+  <span class="vjrn-q">Export effectué — format, version et empreinte non publiés<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small><small>Le service <b>stocke</b> pourtant format, version, <code>snapshotId</code> et empreinte dans <code>contexte</code> — le DTO de lecture ne les publie pas. <span class="code"><b>STORY-458</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">22/07/2026 à 11:47</span>
+  <span class="vjrn-t val">JEU_VALIDE</span>
+  <span class="vjrn-q">Liasse figée — version 2<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">22/07/2026 à 11:20</span>
+  <span class="vjrn-t ">JEU_RECALCULE</span>
+  <span class="vjrn-q">Soldes remplacés — reclassement du compte 476200<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">22/07/2026 à 10:05</span>
+  <span class="vjrn-t rou">JEU_ROUVERT</span>
+  <span class="vjrn-q">Liasse rouverte pour correction — aucun motif n'est demandé ni conservé<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small><small>Aucun motif&nbsp;: la route n'en prend pas. <span class="code"><b>STORY-460</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">18/07/2026 à 16:40</span>
+  <span class="vjrn-t val">JEU_VALIDE</span>
+  <span class="vjrn-q">Liasse figée — version 1<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">18/07/2026 à 16:02</span>
+  <span class="vjrn-t ">JEU_RECALCULE</span>
+  <span class="vjrn-q">Soldes remplacés après correction à la table de passage<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div><div class="vjrn-row ghost">
+  <span class="vjrn-ts">14/07/2026 à 15:31</span>
+  <span class="vjrn-t" style="border:1px dashed var(--border-strong);background:transparent">non journalisé</span>
+  <span class="vjrn-q">Surcharge de mapping validée — le seul acte qui a changé les chiffres<small>Aucun type d'audit n'existe pour les surcharges de mapping&nbsp;: <code>AuditType</code> en compte 8, aucun ne les couvre, et <code>mapping-override.controller</code> n'appelle jamais <code>journaliser</code>. <b>La ligne ci-dessus n'apparaît nulle part dans le vrai journal</b> — elle est dessinée ici pour montrer le trou. <span class="code">écart ouvert · <b>STORY-467</b></span></small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Awa Diallo · Administratrice</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c02">userId 68a1f3…4c02</code></span>
+</div><div class="vjrn-row">
+  <span class="vjrn-ts">12/07/2026 à 09:14</span>
+  <span class="vjrn-t ">JEU_CREE</span>
+  <span class="vjrn-q">Brouillon créé sur la balance Sage 100 · v3 (1 284 comptes)<small>cible&nbsp;: <code>jeux_etats</code> · <code>689c1a7f…</code> · «&nbsp;2025&nbsp;»</small></span>
+  <span class="vjrn-who"><b class="nonservi" title="Nom et rôle NON servis par l'API — STORY-457">Kofi Santos · Collaborateur</b><code title="la seule valeur servie : 68a1f3c9d24b7e0192ab4c31">userId 68a1f3…4c31</code></span>
+</div>
+</div>
+                    </div>
+
+                    <div class="dc-note dc-gap"><b>Ce que valide cette maquette (FE-034).</b> Le <b>cycle de vie</b> d'une liasse rendu comme une suite d'actes&nbsp;: le <b>gate</b> qui n'autorise la validation que si les contrôles bloquants passent et qui <b>nomme</b> le blocage, l'<b>acte humain</b> confirmé par une attestation explicite, le <b>figement</b> qui retire toute action d'édition, la <b>réouverture</b> qui conserve l'ancienne version, l'<b>historique</b> des snapshots avec la version qui fait foi, et la <b>piste d'audit</b> en lecture seule. Six moments de la <b>même</b> liasse — pas six écrans décoratifs&nbsp;: chacun est la suite du précédent.</div>
+
+                    <div class="dc-note dc-gap"><b>⛔ « VALIDÉE » NE VEUT PAS DIRE « DÉPOSÉE », ET LE PRODUIT DIT AUJOURD'HUI LE CONTRAIRE.</b> <code>JeuEtatsStatut</code> ne compte que <b>deux</b> valeurs — <code>BROUILLON</code> et <code>VALIDE</code> — et l'événement <code>liasse.etat.change</code> ne publie que <code>FIGEE</code>/<code>BROUILLON</code> (<code>dossier-service</code> rejette explicitement <code>DEPOSEE</code>&nbsp;: <i>« etat inconnu (DEPOSEE) »</i>). Pourtant l'énuméré <code>AvancementDossier</code> documente <code>LIASSE_FIGEE</code> comme <i>«&nbsp;→ Liasse déposée&nbsp;»</i>, et la carte du portefeuille l'affichait ainsi. <b>Un cabinet qui lit «&nbsp;liasse déposée&nbsp;» croit sa DSF télédéclarée</b> alors qu'elle est seulement figée dans Prospera — au Togo, le dépôt est un acte devant l'OTR, avec accusé. ⇒ le libellé du portefeuille est corrigé par cette story en «&nbsp;<b>Liasse 2024 figée</b>&nbsp;», et le vrai état DÉPOSÉ est fiché. <span class="code">écart ouvert · <b>STORY-462</b> · écran <b>FE-081</b></span></div>
+
+                    <div class="dc-note dc-gap"><b>⛔ LA PISTE D'AUDIT NE NOMME PERSONNE — ET C'EST L'AC-4 QUI TOMBE.</b> <code>AuditEventResponseDto</code> publie <code>userId</code>, un <code>ObjectId</code> de 24 caractères&nbsp;; <code>SnapshotSommaireDto.validePar</code> aussi. <b>Aucune route de <code>bilan-service</code> ne résout un utilisateur en nom</b>, et le journal est justement l'écran où l'identité <b>est</b> l'information. La fiche demande «&nbsp;action, <b>auteur</b>, horodatage, cible&nbsp;»&nbsp;: trois sur quatre sont servis. L'écran affiche donc l'identifiant <b>tel quel</b> — inventer un nom laisserait croire l'écart réglé. <span class="code">écart ouvert · <b>STORY-457</b></span></div>
+
+                    <div class="dc-note dc-gap"><b>⛔ ROUVRIR UN EXERCICE CLOS EST ACCEPTÉ — ET SANS RETOUR.</b> <code>JeuEtatsService.valider()</code> appelle <code>refuserSiExerciceClos()</code>&nbsp;; <b><code>rouvrir()</code> et <code>recalculer()</code> ne l'appellent pas</b>. Sur un exercice clos, la réouverture répond donc <code>200</code>, le jeu redevient <code>BROUILLON</code>, <code>liasse.etat.change</code> publie <code>BROUILLON</code> — et la re-validation répond <code>409 EXERCICE_CLOS</code>. Résultat&nbsp;: une liasse <b>bloquée en brouillon</b>, un <b>portefeuille qui affiche «&nbsp;bilan en cours&nbsp;»</b> sur un exercice clos, et un cabinet qui doit deviner qu'il faut rouvrir l'<b>exercice</b> avant la <b>liasse</b>. Rejouez la bascule «&nbsp;Rouverte sur exercice clos&nbsp;». <span class="code">écart ouvert · <b>STORY-461</b></span></div>
+
+                    <div class="dc-note dc-gap"><b>⚠️ LE SNAPSHOT N'A PAS D'EMPREINTE DE SON PROPRE CONTENU.</b> Le champ <code>checksum</code> de <code>SnapshotSommaireDto</code> se lit comme la signature de la version figée&nbsp;; c'est en réalité le <b>sha256 du paquet référentiel</b> (<code>ReferentielPackage.meta.checksum</code>), <b>identique pour toutes les versions</b> tant que le référentiel ne bouge pas — on le voit ci-dessus, v1 et v2 portent le même. Rien ne permet donc de prouver qu'un snapshot n'a pas été altéré en base, alors que l'immuabilité est précisément ce que la story vend. Le nom du champ est lui-même un piège de lecture. <span class="code">écart ouvert · <b>STORY-468</b></span></div>
+
+                    <div class="dc-note dc-gap"><b>⚠️ UNE VERSION FIGÉE NE DIT PAS SUR QUELLE BALANCE ELLE A ÉTÉ ARRÊTÉE.</b> C'est la première question d'un réviseur devant une liasse&nbsp;: <i>«&nbsp;elle sort de quelle balance&nbsp;?&nbsp;»</i>. Le snapshot fige bien les <b>soldes</b> (<code>soldesN</code>/<code>soldesN1</code>), mais <b>aucun identifiant, aucune version, aucun checksum</b> de la balance d'origine — <code>bilan-service</code> ne connaît aucun <code>balanceId</code> (écart déjà tracé par FE-028). Conséquence directe ici&nbsp;: rien n'empêche qu'une <b>v2 soit arrêtée sur une autre balance que la v1</b>, sans que l'historique le montre. <span class="code">écart ouvert · <b>STORY-466</b></span></div>
+
+                    <div class="dc-note dc-gap"><b>⚡ CE QUI EST ACTIONNABLE DÈS AUJOURD'HUI, SANS AUCUN BACKEND.</b> ① Lire une liasse VALIDÉE <b>depuis son snapshot</b> (<code>GET …/versions/:version</code>) et <b>jamais</b> depuis <code>GET …/etats/:id</code>, qui la <b>re-calcule</b> (STORY-465) — c'est une règle d'appel, pas une demande. ② Ne <b>jamais</b> composer la liste des blocages à partir du <code>422</code>&nbsp;: ses chaînes n'ont ni libellé ni cible&nbsp;; la source d'affichage est la batterie de contrôles, le <code>422</code> est un garde-fou. ③ Ne proposer <b>aucune</b> action d'édition sur un jeu VALIDÉ. ④ Traiter <code>409 JEU_DEJA_VALIDE</code> et <code>409 SNAPSHOT_VERSION_CONFLICT</code> comme des <b>courses gagnées par un collègue</b> — recharger et montrer la version créée, pas afficher une erreur.</div>
+
+                    <div class="dc-note dc-gap"><b>⛔ UN BROUILLON CRÉÉ PAR ERREUR NE S'ANNULE PAS.</b> <code>JeuEtatsController</code> n'expose <b>aucune route de suppression</b> — ni <code>DELETE</code>, ni «&nbsp;abandonner&nbsp;». Or l'exercice est un <b>libellé saisi</b> et l'index est unique sur <code>(tenantId, exercice)</code>&nbsp;: une frappe (<code>«&nbsp;2O25&nbsp;»</code>, <code>«&nbsp;Exercice 2025&nbsp;»</code>) crée un jeu <b>définitif</b>, qui restera dans <code>GET …/bilan/etats</code> pour toujours, à côté du vrai. C'est un cas de tous les jours en cabinet, et le produit n'a rien à lui opposer. ⚠️ La suppression <b>ne doit pas</b> s'étendre à un jeu VALIDÉ ni à ses snapshots — c'est l'abandon d'un <b>brouillon</b> qui manque, et il doit lui aussi être <b>journalisé</b>. <span class="code">écart ouvert · <b>STORY-470</b></span></div>
+
+                    <div class="dc-note dc-gap"><b>⚠️ «&nbsp;LE CABINET ARRÊTE&nbsp;» EST UNE APPROXIMATION, ET ELLE EST ASSUMÉE ICI.</b> En OHADA, ce sont les <b>dirigeants de l'entité</b> qui arrêtent les comptes&nbsp;; le cabinet les <b>établit</b>, et le professionnel qui les signe engage sa responsabilité. Le produit ne connaît que des utilisateurs du <b>cabinet</b> — la société traitée est un <b>dossier</b>, pas un compte (décision PRD Atelier, personas). L'attestation du dialogue dit donc ce qui est vrai <b>aujourd'hui</b>&nbsp;: le cabinet arrête pour son client. L'<b>approbation par le client</b> et l'<b>identité du signataire</b> (nom, n° d'inscription) sont des exigences du <b>dépôt</b>, et elles sont portées par l'écran de dépôt. <span class="code">écran <b>FE-081</b> · <b>STORY-462</b></span></div>
+
+                    <div class="dc-note dc-gap"><b>⚠️ UN SEUL JEU D'ÉTATS PAR EXERCICE, ET L'EXERCICE EST UN LIBELLÉ LIBRE.</b> L'index unique <code>(tenantId, exercice)</code> fait répondre <code>409 EXERCICE_A_DEJA_UN_JEU</code> à la seconde création — les <b>versions</b> sont portées par les snapshots, pas par des jeux parallèles. Mais <code>CreerJeuEtatsDto.exercice</code> est une <b>chaîne saisie</b>&nbsp;: «&nbsp;2025&nbsp;» et «&nbsp;Exercice 2025&nbsp;» sont deux exercices différents pour le service, et c'est aussi ce qui casse la comparaison pluriannuelle (FE-076). Le libellé doit venir de <code>dossier-service</code>. <span class="code">déjà fiché · <b>STORY-381</b> AC-9</span></div>
+
+                  </div>
+
                 </div>
               </div>
 
@@ -13741,6 +14740,85 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
 </div>
 
 <!-- ==================== FE-008 · Dialog de confirmation (AlertDialog) ==================== -->
+<div class="overlay" id="valOverlay" data-open="false">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="valTitle">
+    <div class="dialog-head">
+      <span class="dh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+      <div>
+        <h3 id="valTitle">Valider la liasse — exercice 2025</h3>
+        <p>Ets Kossi Distribution · cette action crée la version <b data-val-cible>2</b></p>
+      </div>
+    </div>
+    <form class="dialog-body" onsubmit="return false" id="valForm">
+      <div class="tdp-avert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span><b>Ce que la validation fait, et qu'on ne défait pas.</b> Elle fige un <b>snapshot immuable</b> — la liasse telle qu'elle est ici, ses soldes sources et son tampon référentiel — et rend le jeu <b>non recalculable</b>. Corriger ensuite exige une <b>réouverture</b>, qui produira une <b>version de plus</b>&nbsp;: l'ancienne reste consultable, elle ne disparaît jamais.</span>
+      </div>
+
+      <div class="tdp-avert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span><b>Valider n'est pas déposer.</b> Le tableau des flux reste en anomalie de <b>905&nbsp;000</b>, et <b>4 des 8 contrôles</b> que l'administration applique au dépôt ne sont calculés nulle part (voir l'onglet <b>Contrôles de cohérence</b>). Figer enregistre l'arrêté du cabinet&nbsp;; la télédéclaration à l'OTR est un <b>autre acte</b>, qui n'existe pas encore dans le produit. <span class="code">STORY-462</span></span>
+      </div>
+
+      <div class="field">
+        <label>Ce qui sera figé</label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:0.5rem">
+          <div class="ref-item"><div class="ref-k">Total général</div><div class="ref-v" data-val-dlg-bz>5 700 000</div><div class="ref-sum">BZ = DZ</div></div>
+          <div class="ref-item"><div class="ref-k">Résultat net</div><div class="ref-v" data-val-dlg-cj>200 000</div><div class="ref-sum">CJ = XI</div></div>
+          <div class="ref-item"><div class="ref-k">Référentiel</div><div class="ref-v">syscohada-revise@2.1</div><div class="ref-sum">bilan-engine@1.0.0</div></div>
+        </div>
+      </div>
+
+      <div class="vatt">
+        <input type="checkbox" id="valAtteste" data-val-atteste />
+        <label for="valAtteste">J'atteste que les états ci-dessus sont ceux que le cabinet <b>arrête</b> pour l'exercice 2025 d'Ets Kossi Distribution, et j'accepte qu'ils deviennent <b>opposables</b> en l'état.</label>
+      </div>
+      <p class="helper" style="text-align:left;margin:0">L'attestation est une <b>décision d'écran</b>, pas une exigence du serveur&nbsp;: <code>POST …/valider</code> ne prend aucun corps. C'est ce qui distingue un <b>acte</b> d'un clic — et le bouton reste inactif tant qu'elle n'est pas cochée.</p>
+
+      <div class="bal-refus warn" data-val-refus hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+        <div>
+          <b data-val-refus-titre>Liasse non validable</b>
+          <p data-val-refus-txt>Le serveur re-produit les contrôles au moment de la validation&nbsp;: le refus est rendu <b>verbatim</b>, jamais reformulé.</p>
+          <span class="code" data-val-refus-code>422 · LIASSE_NON_VALIDABLE</span>
+        </div>
+      </div>
+    </form>
+    <div class="dialog-foot">
+      <button class="btn btn-ghost btn-sm" type="button" data-val-close>Annuler</button>
+      <button class="btn btn-primary btn-sm" type="button" data-val-confirm disabled>Figer la liasse</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="rouOverlay" data-open="false">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="rouTitle">
+    <div class="dialog-head">
+      <span class="dh-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></span>
+      <div>
+        <h3 id="rouTitle">Rouvrir la liasse pour correction</h3>
+        <p>La version figée <b data-val-actuelle>2</b> reste consultable — elle ne sera pas effacée</p>
+      </div>
+    </div>
+    <form class="dialog-body" onsubmit="return false" id="rouForm">
+      <div class="tdp-avert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span><b>Rouvrir n'annule pas la version figée</b> — les snapshots sont append-only. Tant que le nouveau brouillon n'est pas validé, c'est la version <b data-val-actuelle2>2</b> qui reste opposable&nbsp;; la correction produira une version <b data-val-suivante>3</b>.</span>
+      </div>
+
+      <div class="field">
+        <label for="rou-motif">Motif de la réouverture</label>
+        <textarea id="rou-motif" rows="3" placeholder="Pourquoi ces comptes arrêtés sont rouverts — c'est ce que lira un contrôleur."></textarea>
+        <p class="helper" style="text-align:left;margin-top:0.35rem">⛔ <b>Ce champ n'est transmis à personne aujourd'hui.</b> <code>POST …/etats/:id/rouvrir</code> ne prend <b>aucun corps</b>, et l'événement <code>JEU_ROUVERT</code> n'a pas de contexte. Il est dessiné parce que rouvrir des comptes arrêtés <b>sans justification écrite</b> est le point faible de l'opposabilité — et parce qu'un écran doit montrer la cible. <span class="code">écart ouvert · <b>STORY-460</b></span></p>
+      </div>
+    </form>
+    <div class="dialog-foot">
+      <button class="btn btn-ghost btn-sm" type="button" data-val-close>Annuler</button>
+      <button class="btn btn-primary btn-sm" type="button" data-rou-confirm disabled>Rouvrir un brouillon</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="confirmOverlay" data-open="false">
   <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmDesc">
     <div class="dialog-head">
@@ -17490,6 +18568,178 @@ la rapprocher du CR) et <b>FE-079</b> (faire figurer la ligne <code>CJ</code> au
             window.setTimeout(function () { setTft('nominal'); }, 700);
           });
         }
+      })();
+
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      // FE-034 — Validation, versions, piste d'audit : les six moments de la même
+      // liasse, les deux dialogues et le refus 409 joué pour de vrai.
+      // ⚠️ CLOISONNEMENT (leçons FE-031/FE-032) : la famille de bascules porte SON
+      //    attribut (`data-bil-val-state` → `data-bil-val-slot`) et ne pilote que
+      //    ses propres slots. Racine = `.page[data-page="bilan"]`, jamais autre chose.
+      // ⚠️ Les dialogues vivent au niveau DOCUMENT (comme tous les overlays), pas
+      //    dans la page : les chercher dans `mod` les rendrait introuvables.
+      // ═══════════════════════════════════════════════════════════════════════════
+      (function () {
+        var mod = document.querySelector('.page[data-page="bilan"]');
+        if (!mod) return;
+
+        /* ── 1. Les six moments ────────────────────────────────────────────── */
+        var vBtns = mod.querySelectorAll('[data-bil-val-state]');
+        var vSlots = mod.querySelectorAll('[data-bil-val-slot]');
+        var moment = 'bloque';
+
+        function ouvrirMoment(nom) {
+          moment = nom;
+          vBtns.forEach(function (b) {
+            b.setAttribute('aria-selected', String(b.dataset.bilValState === nom));
+          });
+          vSlots.forEach(function (sl) {
+            sl.hidden = sl.dataset.bilValSlot !== nom;
+          });
+        }
+        vBtns.forEach(function (b) {
+          b.addEventListener('click', function () { ouvrirMoment(b.dataset.bilValState); });
+        });
+
+        /* ── 2. Le filtre du journal : `?type=` est le SEUL filtre servi ───── */
+        mod.querySelectorAll('[data-val-filtre]').forEach(function (sel) {
+          sel.addEventListener('change', function () {
+            var t = sel.value;
+            var panneau = sel.closest('.coh');
+            if (!panneau) return;
+            panneau.querySelectorAll('.vjrn-row').forEach(function (row) {
+              var badge = row.querySelector('.vjrn-t');
+              var type = badge ? badge.textContent.trim() : '';
+              /* La ligne « non journalisé » n'est PAS un événement : elle sort
+                 dès qu'un filtre de type s'applique — c'est ce que ferait le
+                 serveur, qui ne l'a jamais eue. */
+              row.hidden = t !== '' && type !== t;
+            });
+          });
+        });
+
+        /* ── 3. Les dialogues ──────────────────────────────────────────────── */
+        var valOv = document.getElementById('valOverlay');
+        var rouOv = document.getElementById('rouOverlay');
+        var atteste = document.querySelector('[data-val-atteste]');
+        var confirmer = document.querySelector('[data-val-confirm]');
+        var motif = document.getElementById('rou-motif');
+        var rouConfirmer = document.querySelector('[data-rou-confirm]');
+        var refus = document.querySelector('[data-val-refus]');
+
+        function ouvrir(ov) { if (ov) ov.dataset.open = 'true'; }
+        function fermer(ov) { if (ov) ov.dataset.open = 'false'; }
+
+        document.querySelectorAll('[data-val-close]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            fermer(valOv); fermer(rouOv);
+          });
+        });
+        [valOv, rouOv].forEach(function (ov) {
+          if (!ov) return;
+          ov.addEventListener('click', function (ev) { if (ev.target === ov) fermer(ov); });
+        });
+        document.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Escape') { fermer(valOv); fermer(rouOv); }
+        });
+
+        /* ⚡ L'ACTE HUMAIN SE COCHE. Le bouton reste inactif tant que
+           l'attestation ne l'est pas : c'est la seule différence visible entre
+           « j'ai cliqué » et « j'arrête les comptes ». Décision d'écran assumée —
+           le serveur, lui, ne prend aucun corps. */
+        function majConfirmer() {
+          if (confirmer && atteste) confirmer.disabled = !atteste.checked;
+        }
+        if (atteste) atteste.addEventListener('change', majConfirmer);
+
+        /* Symétrique côté réouverture : un motif vide n'ouvre rien. Le champ
+           n'est transmis à personne (STORY-460) — raison de plus pour que
+           l'écran montre l'exigence qu'il faudra servir. */
+        function majRouvrir() {
+          if (rouConfirmer && motif) rouConfirmer.disabled = motif.value.trim().length === 0;
+        }
+        if (motif) motif.addEventListener('input', majRouvrir);
+
+        /* ⚡ LE DIALOGUE LIT LE MOMENT OUVERT — il ne récite pas des nombres.
+           Première version : le dialogue affichait 5 700 000 / 200 000 et « crée
+           la version 2 » même ouvert depuis le brouillon qui n'a JAMAIS été
+           validé (5 620 000 / version 1). Personne ne l'aurait vu sans ouvrir le
+           dialogue et LIRE — c'est la 3ᵉ fois qu'un chiffre plausible et faux
+           passe tous les tests de structure. */
+        function slotCourant() {
+          return mod.querySelector('[data-bil-val-slot]:not([hidden])');
+        }
+        function poser(sel, valeur) {
+          document.querySelectorAll(sel).forEach(function (n) { n.textContent = valeur; });
+        }
+
+        mod.querySelectorAll('[data-val-open]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var sl = slotCourant();
+            if (!sl) return;
+            if (refus) refus.hidden = true;
+            if (b.dataset.valOpen === 'valider') {
+              poser('[data-val-cible]', sl.dataset.valProchaine);
+              poser('[data-val-dlg-bz]', sl.dataset.valBz);
+              poser('[data-val-dlg-cj]', sl.dataset.valCj);
+              if (atteste) atteste.checked = false;
+              majConfirmer();
+              ouvrir(valOv);
+            } else {
+              poser('[data-val-actuelle]', sl.dataset.valCourante);
+              poser('[data-val-actuelle2]', sl.dataset.valCourante);
+              poser('[data-val-suivante]', sl.dataset.valProchaine);
+              if (motif) motif.value = '';
+              majRouvrir();
+              ouvrir(rouOv);
+            }
+          });
+        });
+
+        if (confirmer) confirmer.addEventListener('click', function () {
+          var sl = slotCourant();
+          var cible = sl ? Number(sl.dataset.valProchaine) : 1;
+          fermer(valOv);
+          notify('success', 'Liasse figée — version ' + cible,
+            'Le snapshot est immuable. Toute correction rouvrira un brouillon et produira une version de plus.');
+          ouvrirMoment(cible >= 2 ? 'v2' : 'v1');
+        });
+
+        if (rouConfirmer) rouConfirmer.addEventListener('click', function () {
+          fermer(rouOv);
+          notify('success', 'Brouillon rouvert',
+            'La version figée reste consultable : les snapshots sont append-only.');
+          ouvrirMoment('rouverte');
+        });
+
+        /* ── 4. Le refus 409 EXERCICE_CLOS, joué ───────────────────────────── */
+        mod.querySelectorAll('[data-val-try409]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            notify('error', 'Validation refusée · 409 EXERCICE_CLOS',
+              'Exercice clos : validation interdite jusqu’à ré-ouverture. La liasse reste en brouillon — et le portefeuille l’affiche « bilan en cours ».');
+          });
+        });
+        mod.querySelectorAll('[data-val-goto-exercice]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            notify('info', 'L’exercice se rouvre depuis le dossier',
+              'Q6 a tranché que le DOSSIER fait foi sur l’exercice : la ré-ouverture vit dans sa fiche, pas dans le Bilan.');
+          });
+        });
+
+        /* ── 5. Consulter une version figée ────────────────────────────────── */
+        mod.querySelectorAll('[data-val-voir]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var v = b.dataset.valVoir;
+            notify('info', 'Version ' + v + ' — lecture du snapshot',
+              'GET …/etats/:id/versions/' + v + ' rend la liasse TELLE QUE VALIDÉE, jamais recalculée. Les états s’ouvriraient en lecture seule.');
+            var onglet = mod.querySelector('[data-bil-tab="etats"]');
+            if (onglet) onglet.click();
+          });
+        });
+
+        /* ── 6. État initial ───────────────────────────────────────────────── */
+        ouvrirMoment('bloque');
       })();
 
       setGate("granted");
