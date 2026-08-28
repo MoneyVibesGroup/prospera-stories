@@ -383,3 +383,56 @@ STORY-536 → 537 · 538 · 539          le contrat de dépôt, puis le premier 
 accusé) bloque FE-081 depuis sa création et devient centrale sous la voie A ; **STORY-441**
 (résoudre un `userId` en nom) rend deux AC inapplicables sur l'écran même où l'identité **est**
 l'information — et le fichier de dépôt exige le signataire.
+
+---
+
+## 11. L'écran « Vos modules » — revue du 2026-08-28
+
+Revue demandée par le PO à la lecture de l'accueil (FE-014), faite **contre le registre réel** —
+`platform-catalog-service/src/modules/packs/packs.seed-data.ts` et
+`prospera-frontend-expert-comptable/src/features/modules/config/registry.ts` — et non contre les
+épics.
+
+**L'accueil affiche 4 modules. Le pack `cabinet` en octroie 5. Deux seulement se recouvrent.**
+
+| Carte | Code registre client | `href` | Dans le pack ? |
+|---|---|---|---|
+| Bilan & états financiers | `bilan` | `/bilan` ✅ | ✅ |
+| Atelier de balance | `balance` | `/atelier` ✅ | ⛔ absent |
+| Conseil fiscal | `conseil` | ⛔ aucun | ⛔ inconnu du catalogue |
+| Déclarations fiscales | `declarations` | ⛔ aucun | ⛔ inconnu du catalogue |
+
+Et dans l'autre sens : `fiscalite`, `equipe`, `support-client`, `dashboard` sont **au pack** et
+n'apparaissent **nulle part** à l'écran.
+
+### Les trois conséquences, du plus grave au plus discret
+
+1. ⛔ **« Abonnement requis » sur Déclarations fiscales est FAUX.** `declarations` n'est pas au pack :
+   souscrire une formule **n'ouvrira rien**. C'est **pire que « non activé »**, qui au moins
+   n'appelle pas à payer.
+2. ⛔ **Le pire état est celui de demain, pas celui d'aujourd'hui.** `module-card.tsx` rend
+   `{open && definition.href ? <Link>Ouvrir</Link> : …}` ⇒ le jour où l'entitlement `conseil`
+   arrive, la carte affiche **« Ouvert » sans aucun bouton**.
+3. ⚡ **Le produit livre DÉJÀ du conseil fiscal, et l'accueil dit « non activé ».** STORY-091 et 092
+   sont `done`, livrées par FE-050/051 dans l'onglet **« Impôts et taxes » de l'Atelier**. Le même
+   utilisateur lit « Conseil fiscal : non activé » et s'en sert deux clics plus loin. *(Le contenu
+   propre du module — scénarios d'optimisation, comparatif « déposé vs optimisé » — est STORY-096 et
+   097, `not_started`.)*
+
+### ✅ Arbitrage PO — 2026-08-28
+
+**Deux modules fiscaux, pas un.** `conseil` et `declarations` **se vendent différemment** : les
+déclarations sont une **obligation**, le conseil un **service à valeur ajoutée** facturé plus cher.
+Un seul `fiscalite` empêcherait de vendre l'un sans l'autre.
+
+⇒ **STORY-549** (les codes entrent au catalogue et au pack) et **FE-085** (l'écran cesse de
+promettre ce qu'aucun code n'ouvre, et une garde en CI interdit la récidive).
+
+⚠️ **Le piège de STORY-549 :** ajouter un module à un pack **n'octroie rien rétroactivement**. Sans
+procédure de rattrapage, le gap ne se referme **que pour les nouveaux clients — c'est-à-dire pas du
+tout**.
+
+⚠️ **Point ouvert, nommé et non tranché :** `equipe`, `support-client` et `dashboard` ne sont lus par
+**aucun service applicatif** — seulement par la console. Ce sont des **fonctionnalités du socle**,
+pas des modules facturables, et les laisser au pack les fait ressembler à des entitlements.
+**Recommandation : les sortir.** C'est une décision d'offre, pas de code.
