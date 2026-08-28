@@ -4,13 +4,13 @@ Status: ready-for-dev
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/export`, `modules/bilan/referentiel`
-**Points :** 13 → **5** ⬇️ *(2026-08-28 : scindée — le gabarit part en STORY-558, les 33 notes en STORY-559 ; il reste l'interface de récupération et le décompte de complétude)* · **Sprint :** S20
+**Points :** 13 → **5** ⬇️ *(2026-08-28 : scindée — le gabarit part en STORY-537, les 33 notes en STORY-559 ; il reste l'interface de récupération et le décompte de complétude)* · **Sprint :** S20
 **Origine :** demande PO du **2026-08-28** — *« le fichier xlsx c'est pour la déclaration, est-ce
 que le système génère cela aussi ? »*
 **Pièce de référence :** `1000745307_2025_Definitif (1).xlsx` — **DSF définitive**, dossier PARVIS
 DE LA MAISON SAINTE (PMS), NIF 1000745307, exercice clos le 2025-12-31. **92 feuilles.**
 **Arbitrage PO :** ✅ **RENDU le 2026-08-28 — le gabarit devient une DONNÉE PAR PAYS**, le Togo en
-étant la première instance. ⇒ scindée : **STORY-558** porte le gabarit et le classeur ;
+étant la première instance. ⇒ scindée : **STORY-537** porte le gabarit et le classeur ;
 **STORY-559** porte les 33 notes manquantes. Cette fiche garde la **moitié `bilan-service`** —
 l'interface de récupération et le décompte de complétude.
 **Réf. :** **STORY-073** (export PDF/XLSX, livré) · **STORY-330/331** (production du livrable et
@@ -92,7 +92,7 @@ de la zone.
 | Fiche | Ce qu'elle porte | Service |
 |---|---|---|
 | **STORY-559** | les 33 notes manquantes du référentiel — **le préalable** | `bilan-service` |
-| **STORY-558** | le gabarit `depot-dsf-togo@2025` et la production du classeur | `fiscal-service` |
+| **STORY-537** | le gabarit `depot-dsf-togo@2025` et la production du classeur | `fiscal-service` |
 | **celle-ci** | l'interface de récupération et le décompte de complétude | `bilan-service` |
 
 ⚠️ **Les 33 notes ne sont d'aucune des deux voies** : c'est un travail de **référentiel**, à faire
@@ -114,7 +114,7 @@ une fois, et il conditionne tout le reste.
 **Hors périmètre**
 
 - **Écrire les 33 notes manquantes du référentiel** : **STORY-559**, prérequis.
-- **Produire le classeur** : **STORY-558**, qui porte le gabarit Togo comme donnée de paquet.
+- **Produire le classeur** : **STORY-537**, qui porte le gabarit Togo comme donnée de paquet.
 - Les fiches d'identification, dirigeants et NAEMA : la matière vit dans `dossier-service`, pas
   ici. Rapprochement à faire, contenu à ne pas dupliquer.
 - Le dépôt lui-même — assisté (**STORY-332/333**) ou **automatisé** (**STORY-561**). ⚠️ **Le PRD

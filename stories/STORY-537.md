@@ -1,12 +1,29 @@
 # STORY-537 : Le fichier e-DSF Togo — le premier pays, et le jalon `format confirmé` est la story
 
-Status: blocked
+Status: ready-for-dev
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` + `bilan-service`
 **Points :** 13 · **Sprint :** S20
 **Prérequis :** **STORY-536** (le contrat de paquet de dépôt)
-**Bloquée par :** ⛔ **le gabarit officiel e-DSF de l'OTR n'est pas au dépôt.** C'est le seul blocage, et il n'est pas technique.
+**Bloquée par :** ✅ **DÉBLOQUÉE le 2026-08-28.** Le seul motif était *« le gabarit officiel e-DSF de
+l'OTR n'est pas au dépôt »* — le PO a fourni une **DSF définitive réelle** :
+`1000745307_2025_Definitif (1).xlsx`, dossier PMS, NIF 1000745307, exercice 2025, **92 feuilles**.
+
+> ### ⚡ Ce que la pièce réelle apporte, mesuré le 2026-08-28
+>
+> | Constat | Conséquence |
+> |---|---|
+> | **92 feuilles**, dont **44 de notes** (1→35 avec les A/B/C/bis) | le gabarit existe, case par case |
+> | `syscohada-revise@2.1` ne déclare que **11 notes** | ⛔ **STORY-559 est le préalable** — sans elle, 33 feuilles sortent vides |
+> | Feuilles hors états : page de garde, fiche conditions, **fiche dépôt**, NAEMA, table des codes, identification 1 & 2, dirigeants, P64→P86, listes clients/fournisseurs | sources hors `bilan-service` — `dossier-service` et balance ventilée |
+> | Feuille **« Balance (Optionnel) »** | le dépôt accepte la balance en pièce jointe ⇒ **STORY-555** la produit, **STORY-557** lui donne ses colonnes |
+> | Les 2 dernières feuilles rendent **8 contrôles** `VRAI`/`FAUX` ; sur cette pièce le 1ᵉʳ est **`FAUX`** *(Actif 3 060 000 / Passif 0)* | `bilan-service` en produit **4** : ⛔ **l'écart se publie, il ne se comble pas en silence**, et le visa se rend **avant** remise |
+>
+> ⚠️ **Le classeur note ce qu'on y dépose.** Un produit qui le remplit hérite de son barème.
+>
+> *(Mesures issues de STORY-558, ouverte par erreur le même jour puis `superseded` — elle
+> réinventait le périmètre de cette fiche.)*
 **Origine :** arbitrage PO du 2026-08-28 — voie A.
 
 ---

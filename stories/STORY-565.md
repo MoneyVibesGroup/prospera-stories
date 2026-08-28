@@ -48,7 +48,7 @@ redevable.
 
 - **GUDEF** — le *guichet unique de dépôt des états financiers*, institué par le **LPF Art. 17**
   (*« Il est institué un guichet unique de dépôt des états financiers (GUDEF) placé sous la tutelle
-  de l'Office »*). C'est le canal de la **liasse** — STORY-558.
+  de l'Office »*). C'est le canal de la **liasse** — STORY-537.
 - **dimana** — le portail OTR de **déclaration des impôts**, confirmé par le PO le 2026-08-28.
   C'est le canal des **déclarations** — celui de cette story.
 

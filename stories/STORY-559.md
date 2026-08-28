@@ -6,7 +6,7 @@ Status: ready-for-dev
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/referentiel/assets`, `etats/notes-annexes`
 **Points :** 13 · **Sprint :** S20
 **Origine :** mesure du 2026-08-28 sur la pièce de dépôt réelle, à la demande du PO.
-**Débloque :** **STORY-558** (le gabarit de dépôt Togo) — sans les notes, le classeur sort avec 33
+**Débloque :** **STORY-537** (le gabarit de dépôt Togo) — sans les notes, le classeur sort avec 33
 feuilles vides.
 **Réf. :** `fiche-questions-comptables-REMPLIE-2026-07-19.md` (§D — périmètre automatisable, déjà
 instruit et **revalidé contre les postes GUDEF réels** le 2026-07-20) · **tech-spec Bilan B8**
@@ -77,7 +77,7 @@ financières et échéances), **27** (chiffre d'affaires), **28** (achats et cha
 **Hors périmètre**
 
 - Les notes **hors SYSCOHADA** : SFD-BCEAO et CIMA ont leurs propres états (STORY-523/524).
-- Le rendu dans le classeur de dépôt : **STORY-558**.
+- Le rendu dans le classeur de dépôt : **STORY-537**.
 - Les feuilles de **détail** P64 → P86 du classeur. Ce ne sont pas des notes annexes SYSCOHADA
   mais des annexes fiscales OTR — même famille de travail, autre source. ⚠️ **À ficher à part**
   plutôt qu'à absorber : les confondre ferait passer une exigence fiscale nationale pour une
@@ -99,7 +99,7 @@ financières et échéances), **27** (chiffre d'affaires), **28** (achats et cha
 
 ## Notes
 
-- ⚡ **C'est le préalable de tout le reste.** STORY-558 produit le classeur, mais un classeur avec
+- ⚡ **C'est le préalable de tout le reste.** STORY-537 produit le classeur, mais un classeur avec
   33 feuilles vides n'est pas déposable. **Cette story a plus de valeur que celle qui la
   consomme.**
 - ⚠️ **La matière existe, elle est juste dispersée** : les postes GUDEF sont au dépôt

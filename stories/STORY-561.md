@@ -10,7 +10,7 @@ le but est, pour chaque pays, si on remplit les liens sur lesquels on va dépose
 suivre le parcours pour la déclaration, on doit pouvoir le faire avec une automatisation ; mais si
 elle n'est pas enregistrée, alors on garde la structure actuelle. »*
 **Prérequis :** **STORY-560** (coffre-fort + mandat) · **STORY-330** (port de canal) ·
-**STORY-331** (canal décrit comme donnée) · **STORY-558** (gabarit du livrable)
+**STORY-331** (canal décrit comme donnée) · **STORY-537** (gabarit du livrable)
 **Réf. :** **AD-12** · PRD fiscalité §3.2 *(la réserve qui est ici levée)*
 
 ---
