@@ -1,6 +1,6 @@
 # STORY-509 : États DIMF 2000 et 2080 — et le jalon `format confirmé` avant d'écrire une ligne
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-127 — États périodiques et ratios prudentiels BCEAO
 **Service :** `microfinance-service` + `bilan-service`
@@ -27,7 +27,18 @@ RSL à 10 % au lieu de 8,75 % — deux erreurs **plausibles**, donc invisibles �
 ⇒ *Les chiffres et les formats d'un état réglementaire se prennent dans la source officielle, jamais
 dans le vraisemblable.*
 
-## Ce qui doit être tranché
+## ✅ TRANCHÉ PAR LE PO — 2026-08-28 : **VOIE A**, le produit dépose
+
+La doctrine est posée par [[STORY-525]] et vaut pour les trois verticaux. Cette story produit donc
+**le fichier déposable**, pas seulement l'état imprimable — et elle hérite du contrat commun de
+[[STORY-536]] (paquet de dépôt) et de [[STORY-538]] (transmission, accusé, rejet).
+
+⛔ **Le jalon `format confirmé` reste entier** : aucun développement avant que le gabarit officiel
+de la Commission Bancaire ne soit au dépôt, sourcé et daté.
+
+---
+
+## Ce qui devait être tranché — conservé pour la traçabilité
 
 **Q1 — Prospera produit-il le fichier déposable, ou l'état imprimable que l'IMF dépose elle-même ?**
 La seconde réponse est parfaitement défendable et divise le coût. ⚠️ **C'est la même question que

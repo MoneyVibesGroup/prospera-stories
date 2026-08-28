@@ -308,3 +308,78 @@ déséquilibre rien** : elle déplace du résultat.
 DISTRIBUTEUR**, pour une entreprise qui pilote son stock au quotidien — pas pour un cabinet qui
 arrête des comptes. ⇒ **Ne pas le tirer pour la vente cabinet.** Le rang de séquence reste ouvert
 pour le distributeur.
+
+---
+
+## 9. Les cinq arbitrages sur les stories `needs-po-decision` — rendus le 2026-08-28
+
+**Il ne reste aucune story `needs-po-decision` au S20.**
+
+| # | Question | Décision PO | Suite |
+|---|---|---|---|
+| **1** | Le produit dépose-t-il, ou produit-il l'état que le client dépose ? | ✅ **VOIE A — le produit dépose** | STORY-525/509/523 débloquées + **STORY-536 → 539** |
+| **2** | Qui valide l'amorce actuarielle CIMA ? | ✅ **on avance en la considérant validée** | STORY-519 débloquée + **STORY-540** met la validation en chantier |
+| **3** | Quel niveau de consolidation promet-on ? | ✅ **NIVEAU ③ — consolidation complète** | STORY-531 débloquée + **EPIC-137→141**, **STORY-541 → 548** |
+| **4** | L'imputation des déficits est-elle facultative ? | ✅ **version BORNABLE** (le sur-ensemble) | STORY-417 chiffrée à 8 pts |
+| **5** | Contrôle « deux résultats coexistants » : bloquant ou avertissement ? | ✅ **ratifié tel quel** | STORY-426 `ready-for-dev` |
+
+### Ce que chaque décision engage, et qu'il faut avoir dit
+
+**① Voie A — le dépôt devient une capacité produit, donc un engagement de disponibilité.** Un
+cabinet qui dépose par Prospera ne peut plus déposer autrement le jour de l'échéance. Trois
+conséquences non négociables, portées par les stories : chaque pays est **une intégration avec son
+jalon `format confirmé`** ; le format est **packagé et versionné**, jamais codé, parce qu'une
+administration le révise sans prévenir ; et **un dépôt peut être REJETÉ** — l'état que le produit ne
+connaît pas, alors qu'un rejet non traité est une échéance manquée, qui coûte **40 %** au Togo.
+⚠️ **Les intégrations pays ne sont pas chiffrées.** STORY-537 ne couvre que le Togo, et son gabarit
+officiel n'est pas encore au dépôt.
+
+**② CIMA — la décision débloque le développement, pas la certification.** Une décision produit ne
+valide pas une méthode actuarielle : la validation est un **acte d'expert**. La conduite retenue
+honore les deux — on construit, le `statut` de l'artefact **reste `a-valider-par-expert` et
+continue d'être publié partout**, et STORY-540 constitue le dossier à soumettre avec les six
+questions à poser. ⚠️ Si la validation infirme une méthode, l'impact est **borné et connu d'avance** :
+les provisions sont des évaluations versionnées, donc une méthode corrigée produit **une nouvelle
+version** sans réécrire l'historique. C'est exactement ce que cette architecture protège.
+
+**③ Niveau ③ — c'est le bon choix, et ce n'est pas une story.** Sept traitements dont aucun ne se
+déduit des balances. Les cinq pièges sont nommés une fois pour toutes dans
+`epics-consolidation-2026-08-28.md`, dont deux que le réflexe fait commettre : **en SYSCOHADA
+l'écart d'acquisition s'AMORTIT** (ce n'est pas IFRS), et **l'écart de conversion va en capitaux
+propres, jamais au résultat**.
+⛔ **Blocage dur : STORY-489.** Tant que le contrat de balance ne porte pas de devise, deux balances
+de monnaies différentes s'additionnent sans qu'aucun contrôle ne le voie — le pire mode de panne
+imaginable dans un module de consolidation.
+
+**④ Bornable — le raisonnement est asymétrique, pas fiscal.** Construire bornable et découvrir que
+l'imputation est obligatoire coûte le retrait d'un contrôle. Construire maximal et découvrir qu'elle
+était facultative a **consommé les reports déficitaires de clients pour rien, irréversiblement**.
+⚠️ **Reste dû, et ce n'est pas une décision produit :** sourcer l'article 101 du CGI togolais. Une
+heure de lecture, qui décide du libellé de l'écran. Et l'avertissement « sous le plancher MFP,
+l'imputation ne rapporte rien » est vrai dans les deux lectures : **il part sans attendre**.
+
+---
+
+## 10. Où en est le S20 — et la seule décision qui compte maintenant
+
+**1 217 points pour 34 de capacité.** Ce n'est plus un sprint : c'est le **backlog ordonné du
+programme**. Et la voie A en ajoutera **à chaque pays ouvert**, sans que rien ne soit chiffré
+aujourd'hui.
+
+⛔ **L'arbitrage de capacité, dû depuis le 2026-08-04, est désormais la seule décision qui compte —
+devant n'importe quelle story.** Ce qui reste immédiatement exploitable est **l'ordre**, écrit dans
+le `committed_points` du sprint et dans les prérequis de chaque fiche.
+
+**Les quatre chaînes qui commandent tout le reste :**
+
+```
+STORY-533 → 422 → 487 + 494          l'habilitation, puis le plan du dossier
+STORY-489 → 490 → 495 → 547          la devise, puis le change, puis la conversion
+STORY-532 → 527 · 539                les bornes d'exercice, puis les amortissements et les échéances
+STORY-536 → 537 · 538 · 539          le contrat de dépôt, puis le premier pays
+```
+
+⚡ **Et deux stories anciennes bloquent plus que leur taille :** **STORY-446** (état `DEPOSE` +
+accusé) bloque FE-081 depuis sa création et devient centrale sous la voie A ; **STORY-441**
+(résoudre un `userId` en nom) rend deux AC inapplicables sur l'écran même où l'identité **est**
+l'information — et le fichier de dépôt exige le signataire.

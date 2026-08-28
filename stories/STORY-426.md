@@ -1,6 +1,6 @@
 # STORY-426 : Le contrôle « résultat du CR = résultat au passif du Bilan » est une tautologie — le seul chiffre indépendant, la case `CJ`, n'est comparé à rien
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/etats`, `modules/bilan/bilan-engine.service.ts`
@@ -8,6 +8,14 @@ Status: needs-po-decision
 **Origine :** maquette **FE-032** (compte de résultat N/N-1), 2026-08-27. Confronté au fichier
 client réel `1000745307_2025_Definitif (1).xlsx` — une **DSF déposée**, feuille
 *« Contôle de Cohérence »*.
+
+---
+
+## ✅ RATIFIÉ PAR LE PO — 2026-08-28
+
+La conduite proposée est retenue **telle quelle** : **avertissement au `dry-run`, bloquant à la
+validation**, sur le critère de **co-occurrence** (`solde(13) ≠ 0` **ET** `resultatNetCR ≠ 0`).
+Les critères d'acceptation révisés du 2026-08-27 font foi.
 
 ---
 

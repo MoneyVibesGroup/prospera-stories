@@ -1,6 +1,6 @@
 # STORY-523 : États annuels CIMA (art. 433) — une trentaine d'états, pas une liasse
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-134 — États annuels CIMA et marge de solvabilité
 **Service :** `assurance-service` + `bilan-service`
@@ -28,7 +28,22 @@ compte de résultat.
 pour l'avoir oublié (échéances d'acomptes, taux de RSL) : deux erreurs **plausibles**, donc
 invisibles à la relecture.
 
-## Ce qui doit être tranché
+## ✅ TRANCHÉ PAR LE PO — 2026-08-28 : **VOIE A**, le produit dépose
+
+Doctrine posée par [[STORY-525]]. Cette story produit **les états déposables** de l'article 433, sur
+le contrat commun de [[STORY-536]] et [[STORY-538]].
+
+⚡ **Et la voie A répond au passage à Q1 (« combien d'états ? ») :** ce n'est plus un choix de
+confort, c'est **ce que le dépôt exige**. Le sous-ensemble se déduit du gabarit officiel, pas de la
+valeur perçue. ⇒ **Le jalon `format confirmé` devient la story elle-même** : tant que les gabarits
+de l'art. 433 ne sont pas au dépôt, il n'y a rien à chiffrer.
+
+⚠️ **13 points est donc une borne basse assumée**, pas une estimation : une trentaine d'états
+réglementaires est un lot, et son chiffrage réel sort du jalon.
+
+---
+
+## Ce qui devait être tranché — conservé pour la traçabilité
 
 **Q1 — Combien d'états, et lesquels ?** Une trentaine d'états annexes n'est pas une story de 13
 points : c'est un lot. ⇒ **Choisir un sous-ensemble par la valeur** (ceux qu'un contrôle demande en

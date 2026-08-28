@@ -1,12 +1,52 @@
 # STORY-417 : L'imputation des déficits est maximale et inconditionnelle — sous le plancher MFP, elle consomme du report pour rien
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
 **Service :** `balance-service` (`:3007`) — `modules/fiscal` · **et** le paquet fiscal `TG@YYYY`
-**Points :** à chiffrer après arbitrage (voir « La question qui commande tout ») · **Sprint :** S20
+**Points :** 8 · **Sprint :** S20 — *chiffré après l'arbitrage PO du 2026-08-28*
 **Origine :** relevée le **2026-08-26** en construisant la maquette **FE-050**, en mettant côte à
 côte les deux moitiés du même écran : le résultat fiscal (STORY-091) et la liquidation (STORY-092).
+
+---
+
+## ✅ ARBITRAGE PO — 2026-08-28 : **la version BORNABLE**, sur l'asymétrie du risque
+
+> « Construire la version bornable (imputation plafonnable par le cabinet), parce que c'est le
+> sur-ensemble. » — PO, 2026-08-28.
+
+**Le raisonnement qui tranche, et il n'est pas fiscal — il est asymétrique :**
+
+| Si on construit… | et que l'article 101 dit… | conséquence |
+|---|---|---|
+| **bornable** | imputation **obligatoire** | on retire un contrôle. **Coût nul.** |
+| **maximale** | imputation **facultative** | ⛔ **on a consommé les reports déficitaires de clients pour rien — et c'est irréversible pour eux.** |
+
+⇒ La version bornable est le **sur-ensemble**, et le seul choix qui ne puisse pas produire un dégât
+non rattrapable chez un client.
+
+⚠️ **Ce que cet arbitrage NE tranche pas, et qui reste dû :** la lecture de l'**article 101 du CGI
+togolais**. Le paquet transcrit « imputable dans la limite de 50 % » et étiquette la règle « LEVIER
+conseil fiscal » — ce qui suggère un choix **sans l'établir**. La sourcer reste une heure de
+lecture, pas une décision de produit, et elle décide du **libellé** de l'écran (« vous pouvez
+borner » vs « vous devez imputer, et voici ce que ça coûte »).
+
+⚡ **Et une partie ne dépend d'AUCUN arbitrage : l'avertissement.** « Sous le plancher MFP,
+l'imputation ne rapporte rien » est vrai dans les deux lectures et part immédiatement.
+
+### Ce que l'arbitrage ajoute aux critères d'acceptation
+
+- [ ] AC-B1 — L'imputation accepte un **plafond volontaire** par exercice (montant ou pourcentage),
+      **borné par le plafond légal du paquet** — jamais au-delà.
+- [ ] AC-B2 — La valeur par défaut reste l'imputation maximale : **rien ne change** pour un dossier
+      qui ne borne pas. Non-régression obligatoire.
+- [ ] AC-B3 — ⚡ **L'avertissement est INCONDITIONNEL et part sans attendre la source légale** :
+      dès que `MFP > IS après imputation`, l'écran chiffre le report **consommé pour rien** et
+      propose le plafond qui l'aurait évité. C'est le cœur de l'écart relevé.
+- [ ] AC-B4 — Le bornage est **tracé avec son motif** : un report non imputé volontairement est une
+      décision de gestion, et un contrôle fiscal la questionnera.
+- [ ] AC-B5 — Le stock de report reste **cohérent entre les deux chemins** : borner puis ne pas
+      borner l'exercice suivant ne doit ni perdre ni dupliquer du report. Test de rejeu.
 
 ---
 

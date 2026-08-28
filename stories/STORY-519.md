@@ -1,11 +1,39 @@
 # STORY-519 : Aucun calcul actuariel n'est inventé — ce que le module calcule, et à quelle condition
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-131 — Provisions techniques ⚠️ **PALIER 2**
 **Service :** `assurance-service`
 **Points :** 8 · **Sprint :** S20
 **Origine :** découpage `epics-assurance-2026-08-27.md`, **AD-12** de la spine — Q2 non tranchée.
+
+---
+
+## ✅ DÉCISION PO — 2026-08-28 : on avance en considérant `cima-assurances` validé
+
+> « Prends comme `cima-assurances` validé ; dans le cas contraire, écris la story pour mettre en
+> place cela, avec les informations dont tu as besoin. » — PO, 2026-08-28.
+
+**Ce que cette décision débloque : le DÉVELOPPEMENT.** Le palier 2 démarre, cette story est
+chiffrable, et STORY-517/518/520/521 ne sont plus suspendues.
+
+⛔ **Ce qu'elle ne peut pas faire, et il faut le dire une fois clairement : une décision produit ne
+valide pas une méthode actuarielle.** La validation est un **acte d'expert**, pas un statut qu'on
+pose. Un référentiel dont le `statut` dit « certifié » sans qu'aucun actuaire ne l'ait signé serait
+**la seule affirmation de ce programme qu'un régulateur pourrait retenir contre son utilisateur**.
+
+⇒ **Conduite retenue, qui honore les deux :**
+
+1. **On construit** — le palier 2 est ouvert, sur les méthodes de l'amorce.
+2. **Le `statut` de l'artefact reste `a-valider-par-expert`** et continue d'être **publié partout
+   où il est servi** (STORY-511 AC-4). Il ne bascule à `certifie` que le jour où quelqu'un signe.
+3. **La validation est mise en chantier en parallèle** : [[STORY-540]] porte le dossier à soumettre
+   et la liste exacte de ce qu'il faut obtenir.
+
+⚠️ **Le jour où la validation infirme une méthode**, l'impact est borné et connu d'avance : les
+provisions sont des **évaluations versionnées** (STORY-517 AD-2), donc une méthode corrigée produit
+**une nouvelle version**, sans réécrire l'historique. C'est précisément ce que cette architecture
+protège.
 
 ---
 
@@ -23,7 +51,7 @@ Trois familles de provisions, trois niveaux d'exigence :
 | **PSAP** | une cadence de règlement + une méthode de projection (chain-ladder ou équivalent) | ⚠️ **méthode à valider** — la cadence est collectée par STORY-516 |
 | **Provisions mathématiques vie** | tables de mortalité, taux d'actualisation, méthode prospective | ⛔ **actuaire obligatoire** — hors de portée de ce module |
 
-## ⛔ Ce qui doit être tranché avant de coder
+## Ce qui devait être tranché — RÉSOLU le 2026-08-28, conservé pour la traçabilité
 
 **Q2 de la spine, non tranchée : qui valide l'amorce ?**
 
@@ -37,7 +65,7 @@ correct, sa provenance impeccable, et sa méthode non validée. C'est exactement
 STORY-412 — *la provenance rend l'erreur plus difficile à mettre en doute qu'un chiffre sans
 provenance*.
 
-## Critères d'acceptation *(applicables une fois Q2 tranchée)*
+## Critères d'acceptation
 
 - [ ] AC-1 — Les provisions **calculables sans actuaire** (primes non acquises) le sont, avec leur
       méthode publiée.

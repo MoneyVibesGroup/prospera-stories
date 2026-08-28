@@ -1,10 +1,10 @@
 # STORY-531 : Ce que « consolidation » veut dire ici — et ce qu'on refuse de promettre
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-136 — Multi-société et périmètre de groupe
 **Service :** `bilan-service`
-**Points :** 13 *(cadrage + le palier retenu)* · **Sprint :** S20
+**Points :** 13 *(le cadrage et l'agrégation ; les retraitements de consolidation sont chiffrés par EPIC-137→141)* · **Sprint :** S20
 **Prérequis :** **STORY-530** (le périmètre daté)
 **Origine :** §6.3 de `analyse-scalabilite-multireferentiel-2026-08-27.md`.
 
@@ -28,7 +28,41 @@ découvre au premier groupe réel.**
 ⚠️ C'est le **même patron** que le palier 1 / palier 2 de l'assurance, et il appelle la même
 conduite : découper, livrer honnêtement le niveau bas, **nommer** ce qui n'est pas fait.
 
-## ⛔ Ce qui doit être tranché
+## ✅ ARBITRAGE PO — 2026-08-28 : **NIVEAU ③ — consolidation SYSCOHADA complète**
+
+> « Je veux la partie 3. » — PO, 2026-08-28.
+
+**C'est le niveau le plus exigeant des trois, et c'est le seul qui corresponde à ce qu'un cabinet
+entend par « consolidation ».** L'arbitrage est donc cohérent avec la promesse — mais il change la
+nature du lot, et il faut le dire :
+
+⛔ **Le niveau ③ n'est pas une story, c'est un module.** Il ajoute sept traitements dont aucun ne se
+déduit des balances : homogénéisation des méthodes comptables, éliminations des résultats internes,
+écart de première consolidation et écart d'acquisition, intérêts minoritaires, impôts différés, mise
+en équivalence, conversion des comptes des filiales étrangères.
+
+⇒ **Plage réservée le 2026-08-28 : EPIC-137 → EPIC-141**, découpée en
+[[STORY-541]] → [[STORY-548]]. **Cette story-ci garde le socle** : le cadrage, l'agrégation et les
+contrôles de recomposition, sur lesquels tous les retraitements viennent se poser.
+
+### ✅ Q2 tranchée avec : les éliminations sont **déclarées puis proposées**
+
+Le produit ne peut pas deviner que le compte client de A est le compte fournisseur de B. Il peut le
+**proposer** quand les montants concordent, et laisser l'humain confirmer — même doctrine que le
+rapprochement bancaire : *un proposé n'a aucun effet tant qu'il n'est pas confirmé*.
+
+### ⚠️ Ce que le niveau ③ exige et que le produit n'a pas encore
+
+| Prérequis | État |
+|---|---|
+| Plusieurs sociétés par organisation | [[STORY-529]] — S20 |
+| Périmètre daté, méthodes, % contrôle et % intérêt | [[STORY-530]] — S20 |
+| **Devise au contrat de balance** | [[STORY-489]] — S20 · ⛔ **bloquant pour [[STORY-548]]** |
+| **Bornes et durée d'exercice** | [[STORY-532]] — S20 · une filiale peut clôturer à une autre date |
+
+---
+
+## Ce qui devait être tranché — RÉSOLU le 2026-08-28, conservé pour la traçabilité
 
 **Q1 — Quel niveau promet-on ?** Recommandation : **② agrégation avec éliminations**, et le dire.
 ① seul n'a presque aucune valeur pour un cabinet (un tableur le fait) ; ③ est un projet à part
@@ -39,7 +73,7 @@ proposées** — le produit ne peut pas deviner qu'un compte client de A est le 
 B ; il peut le proposer quand les montants concordent, et laisser l'humain confirmer. Même doctrine
 que le rapprochement bancaire : *un proposé n'a aucun effet tant qu'il n'est pas confirmé*.
 
-## Critères d'acceptation *(applicables une fois Q1 tranchée)*
+## Critères d'acceptation — le socle (agrégation et recomposition)
 
 - [ ] AC-1 — L'agrégation additionne les balances **validées** des sociétés du périmètre **à la date
       retenue** (STORY-530 AC-3), en respectant leur **méthode** (globale = 100 %, proportionnelle =

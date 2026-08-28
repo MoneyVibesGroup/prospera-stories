@@ -1,6 +1,6 @@
 # STORY-525 : Le dépôt — une doctrine, ou neuf intégrations ? La question qui change le chiffrage du programme international
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` (cadrage) — puis N services selon l'arbitrage
@@ -26,7 +26,44 @@ l'**e-DSF** à l'OTR au Togo, et des plateformes, des formats, des canaux et des
 ⇒ **Ce qui existe couvre la TRACE du dépôt, pas le dépôt.** Et FE-034 a déjà dû corriger un libellé
 qui disait « Liasse déposée » là où le produit ne savait que « figer ».
 
-## ⛔ Ce qui doit être tranché — et c'est un arbitrage, pas un développement
+## ✅ ARBITRAGE PO — 2026-08-28 : **VOIE A. Le produit dépose.**
+
+La doctrine vaut pour **les trois verticaux** : fiscal (ici), IMF ([[STORY-509]]) et assurance
+([[STORY-523]]). Elles cessent d'être `needs-po-decision` et citent cette décision.
+
+### Ce que la voie A engage, dit sans adoucir
+
+**Le dépôt devient une capacité produit, donc un engagement de disponibilité.** Un cabinet qui
+dépose par Prospera ne peut plus déposer autrement le jour de l'échéance. Trois conséquences qui ne
+se négocient pas :
+
+1. ⛔ **Chaque pays est une intégration, avec son jalon `format confirmé`.** Aucun pays n'est promis
+   avant que son gabarit officiel ne soit **au dépôt**, sourcé et daté. Le programme a payé deux
+   fois pour l'avoir oublié (acomptes trimestriels au lieu des dates réelles, RSL à 10 % au lieu de
+   8,75 %) : deux erreurs **plausibles**, donc invisibles à la relecture.
+2. ⛔ **Un format change sans prévenir.** Une administration révise son gabarit entre deux lois de
+   finances. ⇒ Le format est **packagé et versionné**, jamais codé ([[STORY-536]]), et un dépôt
+   porte **la version de format qui l'a produit**.
+3. ⛔ **Un dépôt peut être REJETÉ par l'administration.** C'est l'état que le produit ne connaît pas
+   aujourd'hui, et il est aussi important que l'accusé : un rejet non traité est une échéance
+   manquée, et au Togo une échéance manquée coûte **40 %**.
+
+### Le découpage qui en découle
+
+| Story | Objet |
+|---|---|
+| **STORY-536** | le **paquet de dépôt** : format, canal, calendrier, gabarit — packagé par pays et par état |
+| **STORY-537** | la **génération du fichier e-DSF Togo** (OTR) — 1ᵉʳ pays, jalon `format confirmé` |
+| **STORY-538** | **transmission, accusé et REJET** — le cycle de vie complet d'un dépôt |
+| **STORY-539** | le **calendrier de dépôt** et les échéances opposables, multi-pays et multi-état |
+| **STORY-446** | état `DEPOSE` + accusé — **existante, non livrée, et elle bloque FE-081** |
+
+⚠️ **Cette story-ci reste le CADRAGE** : elle pose la doctrine, le contrat commun et le jalon. Les
+intégrations pays sont chiffrées une par une, et **aucune n'est incluse dans ses 8 points**.
+
+---
+
+## Ce qui a été tranché — conservé pour la traçabilité
 
 **Q1 — Prospera produit-il le fichier de télédéclaration, ou s'arrête-t-il à la liasse que le
 cabinet dépose lui-même ?**
