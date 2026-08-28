@@ -15,7 +15,7 @@
 > vérification « faite en local » — il la rend **impossible**. Quand le réseau manque, l'id pris
 > est un **pari**, et il faut l'écrire comme tel dans le tracker pour que la fusion le rejoue.
 
-Status: review
+Status: done
 
 **Épic :** EPIC-022 — Rapprochement bancaire (relevés + mobile money) · *clôturé le 2026-07-30 ;
 cette story y atterrit sans le rouvrir, comme STORY-402*
@@ -290,3 +290,120 @@ transaction ; tout à prouver côté **portée** et côté **plan**, ce que les 
 running » alors que `portly status` répondait) : lint, build, tests et vérif docker ont été lancés
 directement. À signaler à l'user — la règle « tout serveur/one-shot passe par Portly » n'a pas pu
 être tenue de bout en bout.
+
+---
+
+## Revue de code — 3 constats, 3 corrigés (commit `8d44dde`)
+
+Scan par `prospera-code-review` (préparation `haiku`, analyse `opus`), seconde lentille
+`ponytail-review` sur le **même** diff, synthèse en session `opus`. Constats retenus au seuil de
+confiance ≥ 80 ; les trois étaient **non bloquants** (aucun défaut de correctness dans le code
+exécuté), et les trois ont été corrigés avant le merge.
+
+**① `rapprochement.service.ts` — le commentaire de la feature affirmait une chose fausse (conf. 88)**
+
+Il disait que le `dossierId` du scope borne « les cahiers, **les appariements** et les
+qualifications ». Or `appariements.lignesConfirmees` borne son côté **cahier** et lit son côté
+**relevé** sur **tous les dossiers de l'organisation** — asymétrie assumée et documentée dans
+`appariements.repository.ts`.
+
+⚡ **L'effet est NUL, et c'est démontré, pas supposé** : ce `Set` ne sert qu'à **exclure** des lignes
+déjà lues — donc du dossier — et un appariement d'un autre dossier ne peut référencer qu'une ligne du
+sien (`trouverParIds` est dossier + compte-scopé depuis STORY-402). L'intersection est vide. Mais
+laisser la phrase fausse **arme exactement le piège que l'AC-2 vient de désamorcer à l'autre bout** :
+la story suivante en déduirait que `engagees.releve` compte les lignes DU dossier, et gonflerait un
+compteur d'écran des appariements des autres clients du cabinet. Commentaire corrigé, exception
+nommée, inertie prouvée sur place.
+
+⚠️ **Conséquence sur l'AC-1, dite franchement** : « aucune lecture de `listerEcarts` ne franchit la
+frontière du dossier » n'est vrai **à la lettre** que si l'on excepte cette lecture-là, qui est
+antérieure à la story, hors de son périmètre (l'index `{orgId, lignesReleve}` d'`appariements` est
+délibérément org-keyé, « strictement plus fort », cf. `index-dossier.schema.spec.ts`) et **sans effet
+observable**. Elle est désormais **nommée sur place** plutôt que tue.
+
+**② `rapprochement-response.dto.ts` — le JUMEAU de la prose périmée (conf. 88)**
+
+`lignesCahierExaminees` publiait encore « *(toute l'organisation)* », faux depuis **STORY-236**
+(`lancer` charge par `chargerCahiers(orgId, dossierId, …)`). C'est la **même** prose que cette story
+corrige sur `ListerEcartsQueryDto` : la laisser divergente rendait le contrat du module
+**auto-contradictoire** sur la même matière — une route disant « tout le dossier », l'autre « toute
+l'organisation ». Aucun test ne pouvait rougir : `collectCoverageFrom` exclut les `*.dto.ts`.
+
+**③ `tresorerie.repositories.spec.ts` — le test d'invariant D-411-3 gardait un NOM, pas une PORTÉE (conf. 85)**
+
+Il filtrait `/ParOrg$/` sur les méthodes du prototype : `listerToutesLignesDuCabinet(orgId)` l'aurait
+franchi **au vert** pendant que son titre affirmait le contraire, et l'invariant serait tombé en
+silence — précisément ce que D-411-3 existe pour empêcher. Il regarde désormais le **corps** de
+chaque méthode (toutes doivent mentionner `dossierId`), avec la garde de non-vacuité du projet.
+**Mutation M8** : une méthode org-large nommée autrement fait **rougir** le test (vérifiée, puis
+restaurée) — y compris sous instrumentation de couverture.
+
+**Écartés** (nommés pour que la décision soit relisible) : l'étape `SORT` du plan (le tri `{date, _id}`
+déborde l'index — préexistant, motif partagé avec `lister` depuis STORY-089) · le tri de
+`listerParDossier` non asserté (`qualifierEcarts` re-trie intégralement, retirer le `.sort()` n'aurait
+aucun effet observable) · l'imprécision de l'en-tête `INDEX_OBSOLETES` qui parle d'index « d'unicité »
+alors que la liste en contient deux qui n'en sont pas (préexistant depuis STORY-402) · le double e2e
+qui dérive le dossier du **compte** là où le vrai dépôt lit le champ `dossierId` **stocké**
+(équivalent sous D-402-1, calqué sur `trouverUneParDossier`).
+
+**Lentille `ponytail-review`** : la seule coupe possible était la **densité de commentaire** (le même
+raisonnement « l'index part avec son lecteur » est raconté dans le schéma, le dépôt, la migration et
+deux specs). **Non appliquée** : chacun de ces fichiers se lit seul — un dev qui édite la liste
+d'index de la migration n'ouvre pas le schéma — et la localité du commentaire est justement ce qui a
+permis à cette story de retrouver les deux hooks de STORY-402. La densité est l'idiome de ce dépôt,
+pas un accident.
+
+---
+
+## Revue de sécurité — 0 constat, et ce que ça a coûté de le prouver
+
+Scan par `prospera-security-review` (éligibilité + contexte + résumé en `haiku`, analyse en `opus`,
+**sans downgrade**), synthèse en session `opus`. **Aucun constat de confiance ≥ 80.**
+
+⚡ **La PR EST elle-même un correctif de sécurité** — contrôle d'accès horizontal (**CWE-639**,
+**A01:2021**) — et la revue a servi à borner exactement ce qui était en cause :
+
+- ⚠️ **La frontière TENANT n'a JAMAIS été franchie.** `listerParOrg` filtrait `{orgId, exercice.*}` :
+  le franchissement était **inter-dossiers au sein d'un même cabinet**, entre clients d'un même
+  expert-comptable. Réel, grave pour le comptable — mais à ne pas surévaluer en fuite cross-tenant.
+- **La lecture org-large résiduelle (`engagees.releve`) est inerte**, re-démontrée indépendamment par
+  la revue : un `Set` d'exclusion ne peut que **retirer** d'une liste déjà bornée, jamais y injecter ;
+  et le canal d'inférence (« une ligne de A disparaît à cause d'un appariement de B ») est fermé par
+  l'intersection vide des deux chemins d'écriture d'appariement, tous deux dossier + compte-scopés.
+- **La suppression de `orgId_1_compteTresorerieId_1_date_1` n'ouvre aucune fenêtre**, vérifiée sur
+  **l'historique git** et pas sur le commentaire : `git show 247fd32:…/ligne-releve.schema.ts` montre
+  qu'il a été créé en STORY-089 **sans `unique: true`** — il n'a jamais porté de contrainte. L'absence
+  de `remplacant` est donc correcte : ce champ garde la fenêtre sans contrainte d'**unicité**, et les
+  deux seules entrées sans `remplacant` sont précisément les deux index **non uniques**. Le vrai filet
+  (`dossierId_1_compteTresorerieId_1_checksumLigne_1`, unique) est reconstruit par le `createIndexes()`
+  qui **ouvre** `supprimerIndexObsoletes()` — et si cette construction échoue, l'`await` propage et
+  aucune suppression n'a lieu (fail-closed).
+- **Le `dossierId` vient d'une source vérifiée** : `DossierScopeGuard` résout
+  `findOne({dossierId, orgId})` — jamais par `dossierId` seul — et rend **404 générique** (jamais 403)
+  sur dossier d'une autre org, `tenantId` absent ou dossier inexistant. `exigerDossierId` est
+  fail-closed sur une route non décorée.
+- **Aucune injection d'opérateur Mongo** : `ValidationPipe` global (`whitelist`,
+  `forbidNonWhitelisted`), `@IsISO8601()` → `Date` natives dans le filtre, et `?compteId[$ne]=` aplati
+  par `enableImplicitConversion` puis rejeté par `Types.ObjectId.isValid()` → 404 générique.
+
+---
+
+## Progress Tracking — clôture
+
+**Statut : `done`** — implémentée, validée, **vérifiée sur stack docker neuve avec le dégât rejoué**,
+revue (code + sécurité), mergée en rebase sur `dev`. Clôturée le **2026-08-28**.
+
+**PR** : `prospera-balance-service` **#64**, 2 commits — feature (`3921660`), revue de code
+(`8d44dde`). Branche `MNV-411` supprimée après merge. **Un seul dépôt de code** : aucun contrat
+d'événement Kafka n'est touché. Aucun commit de revue de sécurité : la revue n'a rien trouvé à
+corriger.
+
+**Les trois critères d'acceptation** : AC-1 ✅ (avec la réserve nommée en revue de code, prouvée
+inerte) · AC-2 ✅ (arbitrage D-411-1 publié au contrat **et gardé** par
+`openapi-contract.e2e-spec.ts`) · AC-3 ✅ (prouvé à trois niveaux : unitaire, e2e, et **docker sur
+deux dossiers réels**).
+
+⚠️ **Outillage — à signaler** : **Portly a été indisponible** pendant toute la passe (`portly wait` et
+`portly logs` répondaient « Portly is not running » alors que `portly status` répondait, puis le
+démon a cessé de répondre). Lint, build, tests, mutations et vérification docker ont donc été lancés
+**directement**, hors Portly, contrairement à la règle du poste.
