@@ -4,7 +4,7 @@ Status: ready-for-dev
 
 **Épic :** EPIC-007 — Catalogue de modules et packs verticaux
 **Service :** `platform-catalog-service` (`:3006`) + `frontend-admin-panel` (packs)
-**Points :** 8 · **Sprint :** S20
+**Points :** 13 · **Sprint :** S20 — *8 → 13 le 2026-08-28 : le PO tranche aussi la sortie des fonctionnalités de socle, et elle touche **deux packs**, pas un*
 **Prérequis :** ⛔ **STORY-366** (le catalogue de modules est semé, et un pack ne peut plus référencer un module inconnu) — `not_started`
 **Origine :** revue de l'écran **« Vos modules »** (FE-014) demandée par le PO le 2026-08-28, faite **contre le registre réel** et non contre les épics.
 
@@ -72,15 +72,44 @@ l'un sans l'autre.
       publier. ⚠️ C'est exactement la vérification qui a ouvert ce gap le 2026-08-11 (provisioning à
       `422`) — elle doit le déclarer clos.
 
-## ⚠️ Un point ouvert, nommé et non tranché
+## Second arbitrage PO du 2026-08-28 : les fonctionnalites de socle SORTENT des packs
 
-`equipe`, `support-client` et `dashboard` sont au pack et **ne sont lus par aucun service
-applicatif** — seulement par la console et ses fixtures. Ce ne sont pas des **modules facturables**,
-ce sont des **fonctionnalités du socle**. Les laisser au pack les fait ressembler à des
-entitlements, et le client paie pour des cartes qu'il ne verra jamais.
+`equipe`, `support-client` et `dashboard` **ne sont lus par aucun service applicatif** — verifie :
+seules la console et ses fixtures les connaissent. Ce ne sont pas des **modules facturables**, ce
+sont des **fonctionnalites du socle**. Les laisser au pack les fait ressembler a des entitlements,
+et le client paie pour des cartes qu'il ne verra jamais.
 
-**Recommandation : les sortir du pack.** Mais c'est une décision d'**offre**, pas de code —
-elle appartient au PO et sort du périmètre de cette story.
+⇒ **Ils sortent.** Et l'effet depasse le cabinet :
+
+| Pack | Aujourd'hui | Apres |
+|---|---|---|
+| `cabinet` | `bilan`, `fiscalite`, `equipe`, `support-client`, `dashboard` | `bilan`, **`balance`**, **`conseil`**, **`declarations`** |
+| `assurance-cima` | `bilan`, `finance-transactions`, **`support-client`**, **`dashboard`** | `bilan`, `finance-transactions` |
+| `distributeur` · `imf-sfd` | *(n'en portent aucun)* | inchanges |
+
+⚡ **Pourquoi cette sortie est groupee avec l'ajout et non fichee a part** — meme artefact
+(`packs.seed-data.ts`), meme transcription independante (`packs.front-snapshot.ts`), meme spec de
+comparaison, meme migration, **et une seule procedure de rattrapage**. Les separer couterait deux
+migrations et deux verifications docker de la meme table. C'est le raisonnement de STORY-368,
+applique ici.
+
+⚠️ **Mais les deux moities n'ont PAS le meme profil de risque, et les AC les separent** : ajouter un
+module ne peut rien casser ; **en retirer un touche des organisations deja provisionnees**.
+
+### Ce que la sortie ajoute aux criteres d'acceptation
+
+- [ ] AC-7 — `equipe`, `support-client` et `dashboard` sortent de **tous les packs** — `cabinet`
+      **et** `assurance-cima`. ⚠️ Ne pas se limiter au pack de l'ecran qui a ouvert le sujet : la
+      meme erreur de conception vit dans un second pack.
+- [ ] AC-8 — ⛔ **Ils RESTENT au catalogue**, en statut non octroyable — comme `fiscalite` (AC-3).
+      Les supprimer revoquerait des octrois existants, et **une revocation silencieuse est le seul
+      geste de cette story qui puisse retirer une capacite a un client en production**.
+- [ ] AC-9 — Les organisations **deja porteuses** de ces entitlements sont **inventoriees et
+      listees**. ⛔ **Aucune revocation automatique** : le rattrapage d'AC-4 *ajoute*, il ne retire
+      pas. Retirer se decide organisation par organisation, ou pas du tout.
+- [ ] AC-10 — Un test verifie qu'**aucun service applicatif** ne lit ces trois codes — c'est ce qui
+      rend la sortie sure, et c'est la seule preuve qui vaille. S'il en trouve un, **la sortie
+      s'arrete et le fait est remonte** : la decision reposait sur cette absence.
 
 ## Notes
 

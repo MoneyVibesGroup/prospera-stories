@@ -432,7 +432,27 @@ promettre ce qu'aucun code n'ouvre, et une garde en CI interdit la récidive).
 procédure de rattrapage, le gap ne se referme **que pour les nouveaux clients — c'est-à-dire pas du
 tout**.
 
-⚠️ **Point ouvert, nommé et non tranché :** `equipe`, `support-client` et `dashboard` ne sont lus par
-**aucun service applicatif** — seulement par la console. Ce sont des **fonctionnalités du socle**,
-pas des modules facturables, et les laisser au pack les fait ressembler à des entitlements.
-**Recommandation : les sortir.** C'est une décision d'offre, pas de code.
+### ✅ Second arbitrage PO — 2026-08-28 : les fonctionnalités de socle sortent des packs
+
+`equipe`, `support-client` et `dashboard` ne sont lus par **aucun service applicatif** — seules la
+console et ses fixtures les connaissent. Ce sont des **fonctionnalités du socle**, pas des modules
+facturables. **Ils sortent.**
+
+⚠️ **Et l'effet dépasse le cabinet :** `support-client` et `dashboard` sont **aussi** au pack
+`assurance-cima`. La même erreur de conception vit dans un second pack — ne pas se limiter à celui
+de l'écran qui a ouvert le sujet.
+
+| Pack | Après |
+|---|---|
+| `cabinet` | `bilan`, **`balance`**, **`conseil`**, **`declarations`** |
+| `assurance-cima` | `bilan`, `finance-transactions` |
+| `distributeur` · `imf-sfd` | inchangés |
+
+⛔ **Ils restent au catalogue**, en statut non octroyable. Les supprimer révoquerait des octrois
+existants — **c'est le seul geste de ce lot qui puisse retirer une capacité à un client en
+production**. Aucune révocation automatique : le rattrapage d'AC-4 *ajoute*, il ne retire pas.
+
+⚡ **Groupé avec l'ajout, et non fiché à part** : même artefact, même snapshot front, même spec, même
+migration, **une seule procédure de rattrapage** — raisonnement de STORY-368. Mais les deux moitiés
+n'ont **pas** le même profil de risque, et les AC les séparent : ajouter ne peut rien casser,
+retirer touche des organisations déjà provisionnées. **STORY-549 : 8 → 13 pts.**
