@@ -15,7 +15,7 @@
 > vérification « faite en local » — il la rend **impossible**. Quand le réseau manque, l'id pris
 > est un **pari**, et il faut l'écrire comme tel dans le tracker pour que la fusion le rejoue.
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-022 — Rapprochement bancaire (relevés + mobile money) · *clôturé le 2026-07-30 ;
 cette story y atterrit sans le rouvrir, comme STORY-402*
@@ -198,3 +198,95 @@ Branche `MNV-411` ouverte sur `docs/` (base `main`) et sur `balance-service` (ba
 Décisions **D-411-1 / D-411-2 / D-411-3** posées avant la première ligne de code : l'arbitrage sur
 `compteId`, le geste entier sur les deux index, la suppression de `listerParOrg`.
 Statut aligné aux 3 endroits (en-tête, `sprint-status.yaml`, cette section).
+
+**2026-08-28 — développée, validée, vérifiée sur stack docker neuve. Statut `review`.**
+
+Branche `MNV-411` sur `balance-service`, commit `c1d2860`.
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **3135 unitaires verts** (176 suites) · **781 e2e verts** (26 suites) ·
+couverture **99,13 % stmts / 92,04 % branches / 98,62 % fonctions / 99,23 % lignes**
+(seuils 65/90/90/90).
+
+### Passe de mutation — 7 mutations, 7 rouges, toutes restaurées
+
+| # | Mutation | Ce qui vire au rouge |
+|---|---|---|
+| **M1** | `listerParDossier` filtre sur l'org seule (`void dossierId`) | `tresorerie.repositories.spec.ts` — 1 rouge |
+| **M2** | le service passe `orgId` là où le dossier est attendu | `rapprochement.service.spec.ts` — 2 rouges (AC-1 **et** AC-3) |
+| **M3** | le double e2e cesse d'honorer le `dossierId` | e2e rapprochement — 1 rouge (AC-3) |
+| **M4** | l'index `{dossierId, exercice.debut, date}` retiré du schéma | `index-dossier.schema.spec.ts` — 1 rouge |
+| **M5** | `orgId_1_compteTresorerieId_1_date_1` retiré de la liste de migration | `dossiers-migration.service.spec.ts` — 2 rouges |
+| **M6** | une méthode `*ParOrg` réapparaît dans le dépôt | `tresorerie.repositories.spec.ts` — 1 rouge (invariant D-411-3) |
+| **M7** | la description Swagger revient à sa prose périmée | `openapi-contract.e2e-spec.ts` — 2 rouges (AC-2) |
+
+⚠️ **M1 a d'abord été rouge pour la MAUVAISE raison** : retirer `dossierId` du filtre le laisse
+inutilisé, et `noUnusedParameters` fait échouer la **compilation** — « Test suite failed to run », zéro
+test exécuté. Une mutation rouge par erreur de compilation ne prouve **rien** du filtre (leçon
+STORY-179). Rejouée avec `void dossierId;`, elle rougit sur l'**assertion** attendue.
+
+### Vérification docker — stack neuve (`down -v`), Mongo `rs0`, mongosh direct
+
+Organisation `6a91…1c44`, **deux dossiers ACTIFS du même cabinet** : **A = « Cabinet Verif 411 »**
+(`…10a1`, `estLeCabinet`) et **B = « Boulangerie du Port »** (`…10b2`). Un compte bancaire par
+dossier, relevés importés par l'API (`201`, `dryRun=false`) : **2 lignes en A** (6 400 000 crédit /
+5 100 000 débit) et **1 ligne en B** (5 200 000 crédit). `db.lignes_releve` : **3 documents**,
+groupés par `dossierId` → **A = 2, B = 1**.
+
+**① AC-1 / AC-3 — la portée, mesurée sur les deux dossiers**
+
+| Appel | HTTP | Résultat |
+|---|---|---|
+| `GET /dossiers/A/rapprochement/ecarts` **sans** `compteId` | **200** | `total=2` — `VIR RECU SODIGAZ`, `CHQ 000123`. **Aucune ligne de B.** |
+| `GET /dossiers/B/rapprochement/ecarts` **sans** `compteId` | **200** | `total=1` — `VIR RECU CLIENT VOISIN` seulement |
+| idem A **avec** `compteId` du compte de A | **200** | `total=2`, identique |
+| idem A **avec** `compteId` du compte **de B** | **404** | `COMPTE_TRESORERIE_INTROUVABLE` (jamais 403) |
+
+`totauxParType` d'A : `ENCAISSEMENT_NON_DECLARE = {nombre: 1, montant: 6 400 000}`.
+
+**② ⚡ Le dégât concret, REJOUÉ sur la même stack, service REDÉMARRÉ**
+
+Le dépôt remis au comportement d'avant (filtre `{orgId, exercice.*}`), conteneur **redémarré** pour
+ne pas se fier au hot-reload (`Found 0 errors` compté deux fois dans les logs) : **le même appel
+répond 200 et rend `total=3`**, la ligne `VIR RECU CLIENT VOISIN` du **client voisin** figurant dans
+l'écran du dossier A — et le compteur affichant **« 2 encaissements non déclarés · 11 600 000 »** au
+lieu de **« 1 · 6 400 000 »**. Aucune erreur, aucun code HTTP anormal, des montants plausibles :
+exactement la forme de défaut qu'aucun outil n'attrape. Code restauré, service redémarré, `total=2`
+re-mesuré.
+
+⚡ **C'est la seule mesure qui prouve que la garde a jamais été ouverte** : un re-scopage referme le
+défaut *mécaniquement*, donc *silencieusement*.
+
+**③ D-411-2 — l'index de PLAN, prouvé par le plan d'exécution**
+
+`db.lignes_releve.getIndexes()` : `dossierId_1_exercice.debut_1_date_1` **présent**. `explain()` de la
+requête réelle ⇒ **`IXSCAN` sur cet index**, `totalDocsExamined = 2` pour `nReturned = 2` (aucun
+COLLSCAN). Sans lui, la lecture « tous les comptes du dossier » balayait la plus grosse collection du
+module — invisible au HTTP, mêmes réponses.
+
+**④ D-411-2 — la migration supprime le dernier index préfixé `orgId`**
+
+État **pré-402/411 rejoué** (4 index obsolètes recréés à la main), puis `npm run migrate:dossiers`
+dans le conteneur :
+
+```
+"indexSupprimes": [
+  "comptes_tresorerie.orgId_1_libelle_1",
+  "comptes_tresorerie.orgId_1_actif_1",
+  "lignes_releve.orgId_1_compteTresorerieId_1_checksumLigne_1",
+  "lignes_releve.orgId_1_compteTresorerieId_1_date_1"     ← STORY-411
+]
+```
+
+Après migration : **0 index préfixé `orgId`** sur `lignes_releve`. **Second passage ⇒
+`indexSupprimes: []`** — la commande reste idempotente.
+
+**⑤ Atomicité — sans objet ici, et c'est dit** : cette story ne touche **aucune écriture**. Elle
+change une **lecture**, un index et une liste de suppression d'index. Rien à prouver côté
+transaction ; tout à prouver côté **portée** et côté **plan**, ce que les points ① à ④ font.
+
+⚠️ **Portly indisponible pendant la passe** (`portly wait`/`logs` répondaient « Portly is not
+running » alors que `portly status` répondait) : lint, build, tests et vérif docker ont été lancés
+directement. À signaler à l'user — la règle « tout serveur/one-shot passe par Portly » n'a pas pu
+être tenue de bout en bout.
