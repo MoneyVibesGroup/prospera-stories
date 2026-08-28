@@ -91,6 +91,9 @@ moitié des écrans se bloquent sur une balance absente**.
 - Un compte pour un salarié **créé par son employeur**. ⛔ Tentant et à écarter : un employeur qui
   ouvre un compte fiscal au nom de son salarié crée un accès qu'il pourrait lire. La personne
   ouvre son compte, ou personne ne l'ouvre pour elle.
+  ⚡ **Mais l'employeur peut INVITER** — décision PO du 2026-08-28, fichée en **STORY-569**. La
+  garde ci-dessus n'est pas assouplie : elle est contournée par le haut. L'employeur obtient le
+  droit de proposer, jamais un accès.
 
 ## Critères d'acceptation
 
@@ -115,8 +118,10 @@ moitié des écrans se bloquent sur une balance absente**.
 - ⚡ **Ordre de livraison recommandé : dirigeant, puis cabinet, puis salarié.** Le dirigeant a déjà
   sa donnée dans le produit — c'est le seul des trois qui marche le premier jour. Le cabinet est
   un entitlement. Le salarié arrive vide et dépend entièrement de STORY-568.
-- ⚠️ **Le compte du salarié est un autre produit, pas une autre porte.** Acquisition, support,
-  volumétrie et économie unitaire n'ont rien à voir avec le B2B cabinet. Le construire est une
-  décision de marché autant que de technique — à instruire avant d'ouvrir la porte au public.
+- ⚠️ **Le compte du salarié était « un autre produit, pas une autre porte »** — acquisition,
+  support, volumétrie et économie unitaire sans rapport avec le B2B cabinet. ⬆️ **Nuancé le
+  2026-08-28 par STORY-569** : l'invitation par l'employeur ramène l'acquisition dans le canal que
+  le produit maîtrise déjà. Un interlocuteur, cent comptes. **Ce qui reste un autre produit, c'est
+  le support et l'accompagnement** — pas l'acquisition.
 - ⛔ **STORY-563 doit être amendée** : son hors-périmètre exclut ce que cette story livre. Une
   fiche qui affirme le contraire de sa voisine encode l'ancienne vérité et la garde active.

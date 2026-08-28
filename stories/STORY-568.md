@@ -122,10 +122,22 @@ utile **sans rien saisir**, et ceux qui doivent déclarer ne saisissent que ce q
 ## Notes
 
 - ⚡⚡ **Ce que je recommanderais en tant que fiscaliste, et c'est l'objet même de cette story** :
-  le produit qui « déclare les impôts du salarié » se trompe de promesse pour le Togo. La valeur
-  n'est pas de remplir une déclaration — **c'est de dire, en une minute et avec la base légale, si
-  elle est due.** Pour la majorité, la réponse est non ; pour la minorité, elle vaut cher, parce
-  que c'est celle qui découvre un revenu foncier oublié avant que l'administration ne le fasse.
+  le produit qui « déclare les impôts du salarié » se trompe de promesse. La valeur n'est pas de
+  remplir une déclaration — **c'est de dire, en une minute et avec la base légale, si elle est
+  due.**
+- ⚡⚡ **ET L'ARTICLE 21 SE LIT DANS LES DEUX SENS — précision du PO du 2026-08-28, qui change la
+  portée de cette story.** La dispense est **conditionnelle** : elle ne vaut que si la personne
+  n'a **QUE** des revenus d'emplois **et** que l'impôt a été retenu. Or *« sur la fiche de paie on
+  retire les impôts, mais rares sont ceux qui déclarent les autres impôts »*. ⇒ **Une partie de la
+  population se croit dispensée et ne l'est pas** — elle a un loyer, une activité accessoire, un
+  second employeur. Le verdict de cette story ne dit donc pas seulement « vous n'avez rien à
+  faire » à une majorité tranquille : **il révèle à une minorité qu'elle est en situation
+  irrégulière sans le savoir.**
+- ⛔ **Et ce renversement impose une obligation de forme.** Annoncer à quelqu'un qu'il devait
+  déclarer et ne l'a pas fait est un acte lourd. Le verdict **informe, il n'accuse pas** : il cite
+  l'article, expose ce qui a fait sortir de la dispense, et renvoie au conseil. ⛔ Il ne qualifie
+  jamais un retard, ne chiffre jamais une pénalité de sa propre initiative, et ne conserve aucune
+  liste de personnes « non en règle » exploitable par un tiers.
 - ⚠️ **Le 31 mars est une date, pas un principe** : elle vient du paquet, comme le reste. Un
   report administratif se saisit sans altérer l'échéance légale (`FR-F20`, `[H1]`).
 - ⛔ **Faire valider l'arbitrage Art. 21 / gérant par un fiscaliste togolais avant de le figer.**
