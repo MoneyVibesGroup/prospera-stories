@@ -15,12 +15,12 @@
 > vérification « faite en local » — il la rend **impossible**. Quand le réseau manque, l'id pris
 > est un **pari**, et il faut l'écrire comme tel dans le tracker pour que la fusion le rejoue.
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-022 — Rapprochement bancaire (relevés + mobile money) · *clôturé le 2026-07-30 ;
 cette story y atterrit sans le rouvrir, comme STORY-402*
 **Service :** `balance-service` (`:3007`) — `modules/rapprochement`
-**Points :** 3 · **Sprint :** S20
+**Points :** 3 · **Sprint :** S20 · **Complexité :** medium
 **Origine :** relevée le **2026-08-25** en construisant la maquette **FE-049**, en lisant
 `rapprochement.service.ts` pour savoir ce que l'écran des écarts pouvait honnêtement affirmer.
 
@@ -92,6 +92,80 @@ n'est pas nommément corrigé. Les deux stories sont voisines, pas redondantes.
 
 ---
 
+## Conception — les trois décisions écrites avant d'être codées
+
+### D-411-1 · L'arbitrage : `compteId` reste FACULTATIF, et signifie « tous les comptes de CE dossier »
+
+La story pose deux issues. La seconde — « facultatif = toute la trésorerie du dossier » — exigeait
+**STORY-402 comme préalable** ; celle-ci est **clôturée le 2026-08-28**, les lignes de relevé
+portent désormais un `dossierId` propre et l'appel `listerParDossier(orgId, dossierId, exercice)`
+est **exprimable**. L'issue « obligatoire » n'a donc plus de justification : elle ne se défendait
+que par l'**impossibilité technique** d'exprimer la portée « tous les comptes du dossier ».
+
+⚡ **Et rendre `compteId` obligatoire retirerait la seule question que l'écran sait poser d'entrée** :
+« qu'est-ce qui, dans la trésorerie de ce dossier, n'est justifié nulle part ? ». Un cabinet dont
+le client a une banque **et** deux comptes mobile money devrait sinon ouvrir l'écran trois fois et
+faire la réunion des trois réponses de tête — alors que l'appariement, lui, est déjà calculé sur
+l'ensemble du dossier (`chargerCahiers` est dossier-scopé depuis STORY-236). Le rendre obligatoire
+casserait aussi le contrat d'un consommateur publié (rupture pour tout appelant qui l'omet) pour
+**refermer une faille qui n'est pas dans le caractère facultatif du paramètre, mais dans la lecture
+qu'il déclenche**.
+
+⛔ **Ce qui change vraiment, donc : la lecture, pas le contrat.** `listerParOrg(orgId, exercice)`
+devient `listerParDossier(orgId, dossierId, exercice)`. Le `dossierId` ne vient pas de la requête —
+il vient du **scope d'URL** déjà exigé par le contrôleur (`exigerDossierId`), celui-là même qui
+borne les cahiers, les appariements et les qualifications de la même méthode. Aucune nouvelle
+surface, aucun nouveau paramètre.
+
+**AC-2 est un livrable de contrat** : la description Swagger de `compteId` décrit aujourd'hui un
+**filtre** (« restreint les écarts côté relevé à ce compte ») sans jamais dire ce que son **absence**
+signifie. Elle publiera désormais les deux portées, nommément.
+
+⚠️ **Et elle publie une vérité PÉRIMÉE à corriger au même endroit** (note de la story) : « les écarts
+côté cahier restent calculés sur toute l'**organisation** » est faux depuis **STORY-236** —
+`chargerCahiers(orgId, dossierId, exercice)` les charge **par dossier**. Une prose périmée sur la
+portée est exactement ce qui fait recopier l'ancienne vérité dans l'écran suivant : c'est ainsi que
+FE-049 aurait pu être dessiné sur une promesse fausse. L'asymétrie **réelle** — et assumée, hors
+périmètre — est ailleurs : quand un `compteId` EST fourni, le relevé est borné au compte demandé
+tandis que le cahier reste sur tout le dossier.
+
+### D-411-2 · L'index se pose AVEC son lecteur — et l'ancien part du même geste
+
+STORY-402 a laissé **deux hooks inertes nommément adressés à cette story**, aux deux extrémités du
+même index :
+
+1. `ligne-releve.schema.ts` refusait de poser `{dossierId, exercice.debut, date}` — « un index sans
+   lecteur coûte à chaque écriture de la plus grosse collection du module ». Son lecteur arrive
+   ici : l'index se pose ici.
+2. `dossiers-migration.service.ts` refusait de supprimer `lignes_releve.orgId_1_compteTresorerieId_1_date_1`
+   — **dernier index préfixé `orgId`** de la collection — parce que `listerParOrg` filtrait encore
+   `{orgId, exercice.*}` et qu'un cabinet à plusieurs millions de lignes aurait fait un **COLLSCAN
+   multi-tenant** à chaque ouverture de l'écran. Ce lecteur disparaît ici : l'index part ici.
+
+⚡ **C'est un défaut de PLAN qu'on ferme, pas un défaut de résultat** (leçon STORY-383) : les deux
+moitiés sont **invisibles au HTTP** — mêmes réponses, mêmes montants, mêmes codes. Ne poser que le
+re-scopage laisserait la nouvelle lecture sans index et l'ancienne dépense d'écriture sans lecteur ;
+le geste n'est juste qu'**entier**.
+
+⚠️ Le commentaire de `releves.repository.ts` affirme, lui, que « l'index `{dossierId, exercice.debut,
+date}` est **déjà en place** pour ce jour-là ». **C'est faux** — le schéma dit explicitement le
+contraire. Deux commentaires écrits dans la même story se contredisaient ; seul le schéma fait foi.
+Corrigé au passage.
+
+### D-411-3 · `listerParOrg` est SUPPRIMÉE, pas laissée à côté
+
+Une méthode org-large **sans appelant** n'est pas neutre : c'est le geste le plus court pour l'écran
+suivant, publié dans un dépôt dont toutes les autres méthodes sont dossier-scopées et
+fail-closed. La garder « au cas où » rejouerait exactement le défaut que cette story ferme, une
+story plus tard et sans revue. Le dépôt ne doit plus offrir **aucune** lecture org-large : c'est
+l'invariant que le test de portée gardera.
+
+⚠️ **Conséquence sur le test qui la gardait** : `tresorerie.repositories.spec.ts` fige aujourd'hui la
+portée org-large de `listerParOrg` « pour que la story qui la refermera le fasse en connaissance de
+cause ». Ce test a rempli son office ; il devient le test de la portée **dossier**.
+
+---
+
 ## Critères d'acceptation
 
 1. Aucune lecture de `listerEcarts` ne franchit la frontière du dossier, avec ou sans `compteId`.
@@ -113,3 +187,14 @@ n'est pas nommément corrigé. Les deux stories sont voisines, pas redondantes.
 - ⚠️ Id vérifié libre le 2026-08-25 : absent de `stories/`, absent de `origin/main`, et l'unique
   occurrence dans `git log -S` est un **renumérotage annulé** (une STORY-185 fiscale renommée
   406 le 2026-08-04 puis renumérotée à nouveau — plus aucune référence vivante).
+
+---
+
+## Progress Tracking
+
+**2026-08-28 — conception écrite avant le code, statut `in_progress`.**
+Branche `MNV-411` ouverte sur `docs/` (base `main`) et sur `balance-service` (base `dev`, après
+`git fetch` — `origin/dev` porte bien les 3 commits de STORY-402, préalable de D-411-1).
+Décisions **D-411-1 / D-411-2 / D-411-3** posées avant la première ligne de code : l'arbitrage sur
+`compteId`, le geste entier sur les deux index, la suppression de `listerParOrg`.
+Statut aligné aux 3 endroits (en-tête, `sprint-status.yaml`, cette section).
