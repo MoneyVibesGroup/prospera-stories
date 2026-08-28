@@ -288,6 +288,22 @@ de stocks soit correcte dans la liasse**, ce qui est déjà le cas quand elle vi
 3. **Le dire à l'écran** pour la persona cahiers, doctrine FE-073 : *« la variation de stocks n'est
    pas déduite de vos cahiers ; saisissez votre inventaire »*.
 
+### ✅ Validé par le PO le 2026-08-28 — les trois gestes sont fichés
+
+| Geste | Story | Pts |
+|---|---|---:|
+| ① Saisie d'inventaire de clôture dans l'Atelier | **STORY-534** (backend) + **FE-084** (écran) | 8 + 5 |
+| ② Contrôle « achats sans compte de stock » à la liasse | **STORY-535** — `COHERENCE_STOCKS`, **informatif** | 5 |
+| ③ Le dire à l'écran pour la persona cahiers | **FE-084**, doctrine FE-073 | *(compris ci-dessus)* |
+
+**13 points côté backend, 5 côté frontend — contre 153 pour `stock-service`.** Et le trou est
+fermé là où il existe réellement, c'est-à-dire nulle part ailleurs que sur la persona cahiers.
+
+⚠️ **Le piège technique de ①, à ne pas redécouvrir :** les biens **achetés** (`603x`) ont pour
+variation `SI − SF`, les biens **produits** (`73x`) ont `SF − SI` — **conventions opposées**. Un
+moteur qui applique la même formule aux deux inverse le signe de l'une, et l'erreur **ne
+déséquilibre rien** : elle déplace du résultat.
+
 **`stock-service` (153 pts, EPIC-075→084) reste ce qu'il est : un module du vertical
 DISTRIBUTEUR**, pour une entreprise qui pilote son stock au quotidien — pas pour un cabinet qui
 arrête des comptes. ⇒ **Ne pas le tirer pour la vente cabinet.** Le rang de séquence reste ouvert
