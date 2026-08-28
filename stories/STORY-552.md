@@ -1,6 +1,6 @@
 # STORY-552 : Les indicateurs d'analyse financière — dérivés des masses SYSCOHADA, jamais transposés d'un bilan courant / non courant
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
 **Service :** `bilan-service` (`:3004`) — nouveau `modules/bilan/analyse`
@@ -11,6 +11,7 @@ d'exploitation, flux de trésorerie, croissance, prévisions, risques) constitue
 interprétations comprises, un cahier des charges déjà rédigé.
 **Réf. code :** `bilan-production.service.ts` (postes + `coherenceSousTotaux` : `AZ…DZ`, `BZ`, `DZ`) ·
 `compte-resultat-production.service.ts` (SIG : `XA…XI`) · `tft-production.service.ts`
+**Arbitrage PO :** ✅ **RENDU le 2026-08-28 — VOIE A**, *« voie A oui mais avec suggestion possible pour faciliter »*. La lecture courant / non courant fait l'objet de **STORY-554**, en couche de suggestion déclarée par-dessus.
 **Voisine :** **STORY-483** — *le bilan **prévisionnel** ne sépare pas capitaux propres et dettes,
 donc aucun ratio bancaire*. Même besoin, sur l'autre bout de la chaîne.
 
@@ -27,7 +28,7 @@ liquidité, BFR, DIO/DSO/DPO, capacité de remboursement, TCAM.
 Aujourd'hui l'expert-comptable exporte la liasse et refait ces divisions dans un tableur. C'est
 la partie du métier que le produit ne couvre pas, et c'est celle qui **fait décider**.
 
-## ⛔ L'arbitrage à rendre avant la première ligne de code
+## ✅ L'arbitrage, et ce qu'il a tranché
 
 **Les formules du corpus sont écrites pour un bilan courant / non courant. Le nôtre est en
 masses SYSCOHADA. La correspondance n'est pas bijective.**
@@ -49,15 +50,29 @@ masses SYSCOHADA. La correspondance n'est pas bijective.**
   retraitement est un **arbitrage** (l'actif circulant HAO est-il courant ?) que le produit
   ferait à la place du comptable, en silence, dans un chiffre qu'il présente comme un fait.
 
-⚠️ **Recommandation : voie A**, cohérente avec la règle déjà posée deux fois (FE-030, FE-031) —
-*le serveur calcule, l'écran restitue, et rien n'est déduit qui ne soit dérivable*. Un
-retraitement non déclaré est exactement le défaut que **STORY-551** corrige sur la colonne N-1.
+✅ **ARBITRAGE RENDU LE 2026-08-28 — VOIE A**, avec une nuance que le PO a ajoutée et qui change
+la forme sans changer le fond : *« voie A oui **mais avec suggestion possible pour faciliter** »*.
 
-⛔ **Tant que cet arbitrage n'est pas rendu, cette story n'est pas tirable.**
+⚡ **Ce que la nuance dit exactement.** Le défaut de la voie B n'a jamais été le retraitement
+lui-même — un expert-comptable retraite tous les jours — **c'est le silence**. Un retraitement
+**déclaré, sourcé et nommé comme suggestion** n'est pas un chiffre déguisé : c'est un service. Le
+produit prend donc les deux bénéfices sans le défaut.
+
+⇒ **Cette story livre la voie A seule : les indicateurs sur masses SYSCOHADA sont LA valeur.** La
+lecture courant / non courant est fichée à part — **STORY-554** — pour deux raisons :
+
+1. la voie A est tirable immédiatement et n'a rien à attendre ;
+2. la correspondance de retraitement est une **donnée de référentiel sourcée**, exactement comme
+   les seuils de STORY-553 — même mécanique, même garde de packaging. Elle n'a pas sa place dans
+   le corps du moteur d'indicateurs.
+
+⚠️ **Cohérence avec la règle déjà posée deux fois** (FE-030, FE-031) : *le serveur calcule,
+l'écran restitue, et rien n'est déduit qui ne soit dérivable*. Et symétrie avec **STORY-551** :
+retraiter est légitime, ne pas le déclarer ne l'est pas.
 
 ## Périmètre
 
-**Inclus** *(sous réserve de l'arbitrage)*
+**Inclus**
 
 - `GET /dossiers/{id}/bilan/analyse` — les indicateurs dérivés du **dernier jeu d'états**, et
   `POST …/analyse/dry-run` sur des soldes, pour rester symétrique du reste du module.
@@ -77,6 +92,9 @@ retraitement non déclaré est exactement le défaut que **STORY-551** corrige s
 - **Les seuils d'alerte et l'interprétation** — ils font l'objet de **STORY-553**, et pour une
   raison : un seuil est une donnée qui change par pays, par secteur et par année, jamais une
   constante de code.
+- **La lecture courant / non courant** — **STORY-554**. ⛔ Aucun champ de cette story ne doit
+  l'anticiper : si le moteur d'indicateurs porte le moindre retraitement, l'arbitrage voie A est
+  perdu dans le code avant même d'être implémenté.
 - Les indicateurs par action (BPA, PER) et les ratios de marché : aucune donnée du produit ne les
   alimente.
 - Les ratios de **flux** (couverture des investissements, cash-flow libre) : ils exigent le TFT,
@@ -110,3 +128,7 @@ retraitement non déclaré est exactement le défaut que **STORY-551** corrige s
 - ⚠️ **Si le PO veut un module d'analyse à part entière** (et non un second étage de la
   consultation), c'est un épic neuf — **EPIC-142 est le premier libre**. Cette story reste
   volontairement sous EPIC-014 : elle lit la liasse, elle ne crée aucun agrégat persistant.
+- ⚡ **Témoin d'acceptation transverse à ajouter quand STORY-554 sera livrée** : le même jeu
+  d'états, calculé avec un paquet portant les règles de retraitement et un paquet sans, doit
+  rendre **les mêmes valeurs de référence**. C'est la preuve exécutable que la voie A n'a pas été
+  contaminée.
