@@ -1,6 +1,6 @@
 # STORY-407 : Un relevé importé ne se retire jamais — l'erreur de compte est définitive
 
-Status: review
+Status: done
 
 **Épic :** EPIC-022 — Rapprochement bancaire (relevés + mobile money) · *clôturé le 2026-07-30 ;
 cette story y atterrit sans le rouvrir*
@@ -322,3 +322,123 @@ Après le retrait final : `lignes_releve = 0` · **lignes sans lot connu = 0** �
 c'est le contrat).
 
 Stack arrêtée (`docker compose stop`) à la fin de la passe.
+
+---
+
+## Revue de code — 4 constats, 4 corrigés (commit `8694b1e`)
+
+Scan par le skill `prospera-code-review` (préparation `haiku`, analyse `opus`), **plus** une seconde
+lentille `ponytail-review` sur le même `diff.patch` (over-engineering uniquement — verdict :
+*« Lean already. Ship. »*, net −0 ligne ; les deux candidats qu'elle nomme — le `total` compté à part
+et la borne du nom de fichier — sont gardés parce que la convention du DTO et la DoD les imposent).
+Synthèse, filtrage et correctifs **en session**.
+
+**① — le compte redevenait supprimable APRÈS un retrait, et emportait la trace avec lui.**
+`COMPTE_TRESORERIE_REFERENCE` ne comptait que `lignes_releve` — à **0** une fois le lot retiré. Le
+compte partait donc, ses documents `imports_releve` restaient en base à référencer un compte disparu
+(**orphelins**, que la DoD interdit), et `GET …/{compte}/releves/imports` répondait **404** : le
+retrait effaçait la seule trace qu'il était censé rendre auditable. ⚡ C'est le trou que **cette
+story** venait d'ouvrir, et la vérification ④ ne l'avait pas mesuré — elle comptait les lignes sans
+lot et les qualifications orphelines, jamais **les lots sans compte**. La garde compte désormais les
+lots, et le message **suit la cause réelle** : parler de « lignes » quand il n'y en a plus enverrait
+chercher au mauvais endroit.
+
+**② — la garde d'appariement n'était servie par AUCUN index.** Le seul index portant
+`{orgId, lignesReleve}` est **partiel** (`partialFilterExpression: { statut: 'CONFIRME' }`) : MongoDB
+ne l'utilise que si le prédicat garantit l'appartenance au sous-ensemble — or `idsPourLignesReleve`
+**omet `statut`**, et c'est précisément tout son intérêt (D-407-3). Les deux lectures de la garde
+faisaient donc un **COLLSCAN** de `appariements`, sur un service mutualisé entre tous les tenants.
+Index `{lignesReleve, orgId}` posé **avec son lecteur** (discipline D-411-2), `lignesReleve` en tête
+parce que c'est le champ sélectif. ⚡ La même story appliquait pourtant cette discipline à
+`{dossierId, importId}` : elle ne l'avait pas appliquée au **second** lecteur qu'elle ajoutait.
+
+**③ — le `$or` par ligne de `supprimerPourLignes`.** Écrit pour les quelques lignes d'un appariement,
+il recevait ici **le lot entier**. Un relevé de 300 000 lignes (≈ 35 Mo, sous `TAILLE_MAX_IMPORT`)
+produisait 300 000 clauses : commande BSON de plusieurs mégaoctets, planificateur incapable
+d'énumérer autant de branches ⇒ **500 sur le lot le plus coûteux à défaire à la main**, c'est-à-dire
+celui pour lequel l'endpoint existe. Les identifiants passent par **tranches de 500**. La garde
+d'appariement, elle, **reste une seule requête** : son `$in` est un tableau BSON plat (12 octets par
+identifiant), pas N branches — et la découper ferait **compter deux fois** un appariement engageant
+des lignes de deux tranches, rendant `details.appariements` faux.
+
+**④ — un commentaire d'index faux à la naissance.** Il affirmait porter le tri
+`{createdAt: -1, _id: -1}` que la clé `{dossierId, compteTresorerieId, createdAt}` ne peut pas
+satisfaire (`_id` absent) : SORT bloquant, 900 lots triés en mémoire pour n'en rendre 200 — exactement
+ce que la phrase prétendait éviter. `_id: -1` ajouté à la clé.
+
+⚠️ **`ImportsReleveRepository` devenant une dépendance de `ComptesTresorerieService`, le module de
+test e2e du *rapprochement* a dû recevoir son double** — sans quoi Nest ne résout plus ses
+dépendances et la suite entière tombe (le piège nommé dans `qualite-verification.md`).
+
+### Vérification docker REJOUÉE sur l'état final — stack neuve (`down -v`)
+
+Deux correctifs touchent des **index**, artefact déjà vérifié en ④ : la passe est rejouée entière sur
+une stack neuve, pas reportée depuis la mesure d'avant.
+
+- **Index posés par une stack neuve** : `imports_releve` →
+  `dossierId_1_compteTresorerieId_1_createdAt_-1__id_-1` (④) · `appariements` →
+  `lignesReleve_1_orgId_1` (②), à côté des cinq existants.
+- **② prouvé par le plan d'exécution**, sur un appariement **`PROPOSE`** (celui que l'index partiel
+  n'indexe justement pas) : `explain('executionStats')` ⇒ **`IXSCAN` sur `lignesReleve_1_orgId_1`**,
+  `totalDocsExamined = 1` pour `nReturned = 1`. Sans lui : COLLSCAN.
+- **① prouvé de bout en bout** : compte **avec** ses 2 lignes ⇒ `DELETE` du compte **409**
+  (`details: {lignes: 2, imports: 1}`) · retrait du lot **204** ⇒ `lignes = 0, lots = 1` · `DELETE` du
+  compte à nouveau ⇒ **409**, `details: {lignes: 0, imports: 1}`, message *« garde la trace
+  d'imports »* et non *« porte des lignes »* · `GET …/releves/imports` toujours **200**, la trace
+  lisible. Avant le correctif, ce troisième appel rendait **204** et la trace devenait injoignable.
+
+Stack arrêtée (`docker compose stop`).
+
+---
+
+## Revue de sécurité — 0 constat, et ce qu'il a fallu pour le dire
+
+Scan par `prospera-security-review` (éligibilité + contexte `haiku`, analyse `opus`, **aucun
+downgrade**) sur le diff **incluant** les correctifs de revue. Synthèse en session.
+
+**0 vulnérabilité à confiance ≥ 80.** Ce qui a été effectivement mesuré, et non supposé :
+
+- **Chaîne d'autorisation** — les deux routes héritent des décorateurs de classe
+  (`@Roles(TENANT_ADMIN, TENANT_USER)`, `@RequiresBalanceAccess()`, `@RequiresDossierScope()`).
+  `DossierScopeGuard` classe tout ce qui n'est ni `GET` ni `HEAD` en **écriture** : le `DELETE` est
+  donc refusé **409 `DOSSIER_ARCHIVE`** sur dossier archivé, **404 `DOSSIER_INTROUVABLE`** sur un
+  dossier d'une autre organisation. Aucun `@Public()`, aucun `@SkipThrottle`.
+- **Le `compteId` utilisé après la garde est celui RELU EN BASE** (`compte.doc._id`), jamais celui de
+  l'URL ; les quatre méthodes de dépôt du chemin destructif portent `orgId` + `dossierId` (+ compte,
+  + lot) — le `deleteMany` ne peut structurellement pas porter sur la portée entière.
+- **Anti-énumération** : lot inconnu, lot d'un autre compte, lot d'un autre dossier et identifiant
+  **malformé** rendent le **même 404**. Les deux 409 ne sont atteignables qu'**après** que la
+  propriété du lot est prouvée : ils ne disent rien qu'un 404 aurait tu.
+- **Injection NoSQL fermée par construction** : les trois identifiants sont des `@Param` de *chemin*
+  (Express n'y produit jamais d'objet — `?importId[$ne]=` ne les atteint pas), chacun passant par
+  `Types.ObjectId.isValid` puis `new Types.ObjectId()`.
+- **Période** : `estClos` reçoit `lot.exercice` — les bornes **persistées**, non falsifiables (ce
+  `DELETE` n'a ni corps ni paramètre d'exercice).
+
+Constat **écarté** et pourquoi, parce qu'il est le plus tentant : `idsPourLignesReleve` filtre
+`orgId` **sans** `dossierId` et rend des `appariementIds` au client. Les `ligneIds` interrogés sont
+**déjà** bornés au dossier par `idsParImport` ; pour qu'un identifiant d'un autre dossier sorte, il
+faudrait qu'un appariement du dossier B référence une ligne de relevé du dossier A — impossible
+depuis STORY-402. Cross-tenant fermé par `orgId`. Et sur une garde de **refus**, une portée plus
+large est fail-safe : elle ne peut que refuser plus souvent.
+
+⚠️ **Signalé, non corrigé (décision produit, pas faille)** : un **`TENANT_USER`** peut appeler ce
+`DELETE` destructif. C'est cohérent avec **toutes** les écritures du service (suppression d'un compte
+de trésorerie, annulation d'un appariement, cahiers, balance) — les réserver au `TENANT_ADMIN` serait
+un arbitrage à porter sur l'ensemble du module, pas sur cette seule route.
+
+---
+
+## Progress Tracking — clôture
+
+**2026-08-28 — `done`.** PR module [#65](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/65)
+rebase-mergée sur `dev` (commits `8faaceb` + `8694b1e`), branche supprimée. Revue de code : 4 constats,
+4 corrigés. Revue de sécurité : 0 constat. Vérification docker rejouée sur l'état final.
+
+**Ce que la story laisse volontairement ouvert**, et qui n'est pas un oubli :
+
+- les lignes importées **avant** cette story n'appartiennent à aucun lot et ne se retirent pas
+  (D-407-4 — reconstituer par heuristique ferait supprimer les lignes d'un import **correct**) ;
+- la **course résiduelle** « appariement créé entre la garde et le commit », documentée dans
+  `retirerImport` : dégât borné à un document d'appariement orphelin, visible et annulable ;
+- le retrait reste ouvert au `TENANT_USER`, comme toutes les écritures du module.
