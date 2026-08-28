@@ -1,10 +1,11 @@
 # STORY-422 : La balance est étiquetée du référentiel du DOSSIER, mais ses comptes sont validés contre celui de l'ORGANISATION
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `modules/referentiel`, `modules/cahiers/agregation`, `modules/read-models`
-**Points :** — *(à chiffrer après arbitrage)* · **Sprint :** S20
+**Points :** 8 · **Sprint :** S20
+**Prérequis :** **STORY-533** (l’entitlement porte N référentiels par organisation) — sans elle, la voie A ne peut pas poser sa question de sécurité.
 **Origine :** relevée le **2026-08-26** en construisant la maquette **FE-046**. ⚡ **Écart qui n'existe qu'à la maquette** — il naît de la **jonction de deux stories justes**, mises côte à côte sur un même écran. Ni la revue de l'une, ni celle de l'autre ne pouvait le voir.
 
 ---
@@ -131,7 +132,42 @@ signal — et des états financiers faux.**
 
 ---
 
-## Ce qui doit être tranché (PO + architecture)
+---
+
+## ✅ ARBITRAGE PO — **VOIE A** (rendu le 2026-08-26, confirmé et complété le 2026-08-27)
+
+> « *Valider une balance d’une IMF doit être contre son plan, de même pour une assurance.* »
+> — PO, 2026-08-27, en réponse à la revue expert-comptable de la maquette cumulative.
+
+⚠️ **Écart de traçabilité relevé le 2026-08-27 :** `sprint-status.yaml` portait « ARBITRÉ PAR LE PO LE 2026-08-26 : VOIE A », 8 pts, `ready-for-dev` — **et l'en-tête de cette fiche disait encore `needs-po-decision`**. Le tracker faisait foi, la fiche non, et c'est la fiche que lit celui qui prend la story. ⇒ **Règle : un arbitrage se pose aux DEUX endroits le jour où il est rendu.** 3ᵉ occurrence du patron « la fiche ne fait pas foi sur l'état réel » (après FE-064 et FE-066).
+
+**Q1 — tranchée le 2026-08-26 : voie A.** Le plan de comptes suit le **dossier**. La recommandation du 26/08 est
+retenue telle quelle, y compris son garde-fou : l’objection de sécurité se traite **dans** la voie A
+en posant une question plus stricte — *l’organisation est-elle habilitée au référentiel de CE
+dossier ?* — et non en renonçant au dossier comme porteur.
+
+**Q2 — tranchée le 2026-08-27 : refus à la CONSTRUCTION.** *(restée ouverte le 26/08)* Une balance dont le référentiel du dossier n’est pas
+packagé n’est pas construite : `409 REFERENTIEL_NON_PACKAGE`, avec son motif. Motif comptable :
+une balance est un **objet daté et opposable**, pas un brouillon d’attente. En produire une qui ne
+pourra jamais devenir une liasse, c’est créer une pièce dont on découvrira l’inutilité à
+l’arrêté des comptes — au pire moment de l’année. ⇒ **STORY-487** porte ce refus.
+
+⚠️ **Q2 est réversible à coût nul tant que 487 n’est pas démarrée**, et seulement jusque-là :
+après, des balances existeront ou n’existeront pas, et le rejeu n’est pas symétrique.
+
+### Ce que l’arbitrage ajoute à la définition de terminé
+
+- [ ] AC-A1 — `chargerReferentiel` n’est **jamais** appelable sans `dossierId` : la signature le
+      refuse (paramètre requis), et non un contrôle à l’exécution.
+- [ ] AC-A2 — **Test de mutation obligatoire, et c’est LE test de cette story** : une balance de
+      dossier **SFD-BCEAO** dont les comptes sont valides en SFD et **invalides en SYSCOHADA**
+      doit être acceptée ; la même, validée contre `syscohada-revise@2.1`, doit être **refusée**.
+      Aujourd’hui les deux passent — c’est exactement le silence à briser. Un vert obtenu sans que
+      la variante SYSCOHADA vire au rouge ne prouve rien.
+- [ ] AC-A3 — Le refus d’habilitation (`409`) **nomme le référentiel du dossier** et celui auquel
+      l’organisation a droit. « Accès refusé » sans les deux noms envoie l’appel au support.
+
+## Ce qui devait être tranché (PO + architecture) — RÉSOLU, conservé pour la traçabilité
 
 **Q1 — Le plan de comptes doit-il devenir dépendant du DOSSIER ?**
 
