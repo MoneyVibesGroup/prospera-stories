@@ -1,14 +1,18 @@
 # STORY-556 : Le classeur de dépôt GUDEF fait 92 feuilles — l'export en produit une, et le référentiel ne déclare que 11 notes sur 44
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/export`, `modules/bilan/referentiel`
-**Points :** 13
+**Points :** 13 → **5** ⬇️ *(2026-08-28 : scindée — le gabarit part en STORY-558, les 33 notes en STORY-559 ; il reste l'interface de récupération et le décompte de complétude)* · **Sprint :** S20
 **Origine :** demande PO du **2026-08-28** — *« le fichier xlsx c'est pour la déclaration, est-ce
 que le système génère cela aussi ? »*
 **Pièce de référence :** `1000745307_2025_Definitif (1).xlsx` — **DSF définitive**, dossier PARVIS
 DE LA MAISON SAINTE (PMS), NIF 1000745307, exercice clos le 2025-12-31. **92 feuilles.**
+**Arbitrage PO :** ✅ **RENDU le 2026-08-28 — le gabarit devient une DONNÉE PAR PAYS**, le Togo en
+étant la première instance. ⇒ scindée : **STORY-558** porte le gabarit et le classeur ;
+**STORY-559** porte les 33 notes manquantes. Cette fiche garde la **moitié `bilan-service`** —
+l'interface de récupération et le décompte de complétude.
 **Réf. :** **STORY-073** (export PDF/XLSX, livré) · **STORY-330/331** (production du livrable et
 format de canal décrit comme donnée, `fiscal-service`) · **FE-038** (déclenchement à l'écran)
 
@@ -60,7 +64,7 @@ pièce de référence, le premier est **`FAUX`** (Total Actif 3 060 000 / Total 
 classeur note ce qu'on y dépose.** Un produit qui remplit ce classeur hérite de son barème, et
 doit le viser avant remise — pas après rejet.
 
-## ⛔ L'arbitrage à rendre
+## ✅ L'arbitrage, et ce qu'il tranche
 
 **Qui porte le classeur : `bilan-service` ou `fiscal-service` ?**
 
@@ -73,18 +77,30 @@ doit le viser avant remise — pas après rejet.
   pas du code, et changerait avec la loi de finances sans redéploiement. Mais **`fiscal-service`
   n'existe pas** — ni dossier, ni entrée `docker-compose` — et son socle est `STORY-361`.
 
-⚠️ **Recommandation : voie B pour le gabarit, voie A pour la matière.** `bilan-service` expose ce
-qu'il produit (le PRD fiscalité le dit déjà : *« devient fournisseur du contenu de la liasse pour
-le dépôt (§4). Aucune fonctionnalité nouvelle exigée en v1, mais une interface de récupération à
-exposer »*) et `fiscal-service` assemble le classeur. **Cette story ne livre alors que la moitié
-`bilan-service`**, et la seconde revient à STORY-330.
+✅ **ARBITRAGE RENDU LE 2026-08-28 : voie B pour le gabarit, voie A pour la matière.**
+`bilan-service` expose ce qu'il produit — le PRD fiscalité l'écrivait déjà (*« devient fournisseur
+du contenu de la liasse pour le dépôt ; aucune fonctionnalité nouvelle exigée en v1, mais une
+interface de récupération à exposer »*) — et `fiscal-service` assemble le classeur.
 
-⚠️ **Mais les 33 notes manquantes ne sont d'aucune des deux voies** : c'est un travail de
-**référentiel**, à faire une fois, et il conditionne tout le reste.
+⚡ **Et le PO a ajouté ce qui décide de la forme : « précise que c'est pour le Togo, avec la
+possibilité d'en avoir pour chaque pays ».** Le gabarit est donc une **donnée versionnée du paquet
+pays**, jamais un modèle en dur — c'est déjà la règle de STORY-331, appliquée au cas le plus lourd
+de la zone.
+
+⇒ **Scission :**
+
+| Fiche | Ce qu'elle porte | Service |
+|---|---|---|
+| **STORY-559** | les 33 notes manquantes du référentiel — **le préalable** | `bilan-service` |
+| **STORY-558** | le gabarit `depot-dsf-togo@2025` et la production du classeur | `fiscal-service` |
+| **celle-ci** | l'interface de récupération et le décompte de complétude | `bilan-service` |
+
+⚠️ **Les 33 notes ne sont d'aucune des deux voies** : c'est un travail de **référentiel**, à faire
+une fois, et il conditionne tout le reste.
 
 ## Périmètre
 
-**Inclus** *(sous réserve de l'arbitrage)*
+**Inclus**
 
 - **Le décompte de complétude, avant tout.** Une route qui dit, pour un jeu d'états donné :
   quelles feuilles du classeur sont **produites**, lesquelles sont **déclarées mais vides**, et
@@ -97,15 +113,14 @@ exposer »*) et `fiscal-service` assemble le classeur. **Cette story ne livre al
 
 **Hors périmètre**
 
-- **Écrire les 33 notes manquantes du référentiel.** C'est le préalable, et il mérite sa propre
-  fiche : chaque note est un tableau avec ses colonnes officielles, ses règles d'alimentation
-  depuis les comptes, et sa part « à compléter manuellement » (la fiche de questions comptables du
-  2026-07-19 avait déjà tranché : notes 5, 6, 8, 9, 10, 11, 12, 17 automatisables ; 3, 4, 7 à
-  compléter à la main).
+- **Écrire les 33 notes manquantes du référentiel** : **STORY-559**, prérequis.
+- **Produire le classeur** : **STORY-558**, qui porte le gabarit Togo comme donnée de paquet.
 - Les fiches d'identification, dirigeants et NAEMA : la matière vit dans `dossier-service`, pas
   ici. Rapprochement à faire, contenu à ne pas dupliquer.
-- Le dépôt lui-même. Il est **assisté, jamais automatisé** — décision du PRD fiscalité §3.2, non
-  rouverte.
+- Le dépôt lui-même — assisté (**STORY-332/333**) ou **automatisé** (**STORY-561**). ⚠️ **Le PRD
+  fiscalité §3.2 disait « assisté, jamais automatisé » : le PO a levé cette réserve le 2026-08-28.**
+  Le connecteur est retenu, déclaré par pays, avec repli sur l'assisté quand il n'est pas
+  renseigné. Cette fiche n'en porte rien — mais elle ne doit plus affirmer le contraire.
 
 ## Critères d'acceptation
 

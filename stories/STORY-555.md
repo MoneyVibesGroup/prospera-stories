@@ -1,6 +1,6 @@
 # STORY-555 : La balance entre dans le produit et n'en ressort jamais — aucune route ne l'exporte, et une colonne du format Sage n'est pas dérivable
 
-Status: needs-po-decision
+Status: ready-for-dev
 
 **Épic :** EPIC-017 — Socle `balance-service` + contrat de balance canonique
 **Service :** `balance-service` (`:3007`) — `modules/balance`
@@ -9,6 +9,7 @@ Status: needs-po-decision
 système permet d'exporter la balance sous ce format ? »*
 **Pièce de référence :** `Balance_des_comptes.pdf` — édition **Sage 100 Comptabilité i7 8.50**,
 ETS RELAXED, période du 01/01/23 au 31/12/23, tirée le 08/07/26.
+**Arbitrage PO :** ✅ **RENDU le 2026-08-28 — VOIE B.** *« exporter la balance au format Sage pour obtenir un format identique »*. L'élargissement du contrat, que cette fiche renvoyait à une story propre, est **STORY-557** — prérequis.
 **Réf. :** **STORY-101** (contrat de balance canonique) · **STORY-087** (reprise d'à-nouveaux) ·
 **FE-074** (export CSV + impression, `ready-for-dev`, **côté client**)
 
@@ -60,7 +61,7 @@ bruts au débit et au crédit. De `(mouvements de la période, solde net)` on ne
 **socle de soldes**, pas les cumuls de mouvements de l'exercice précédent. À vérifier à la
 conception plutôt qu'à supposer : c'est le seul endroit du produit où la matière pourrait exister.
 
-## L'arbitrage à rendre
+## ✅ L'arbitrage, et ce qu'il tranche
 
 - **Voie A — exporter ce que le produit détient.** Une balance à **deux** blocs (mouvements,
   soldes), au format Prospera, honnête sur ce qu'elle contient. Livrable tout de suite, et suffit
@@ -71,15 +72,19 @@ conception plutôt qu'à supposer : c'est le seul endroit du produit où la mati
   d'entrée. Coût sans commune mesure, et un import Sage qui ne fournirait pas la colonne rendrait
   l'export incomplet malgré tout.
 
-⚠️ **Recommandation : voie A**, avec la colonne manquante **déclarée absente** plutôt que remplie
-d'un zéro. Un zéro dans une colonne « mouvements antérieurs » se lit comme « ce compte n'avait pas
-bougé », ce qui est faux et invérifiable.
+✅ **ARBITRAGE RENDU LE 2026-08-28 — VOIE B.** Le PO veut le format Sage **à l'identique**, donc
+la paire de colonnes manquante entre au contrat canonique. Ce travail — le schéma **et** les cinq
+adaptateurs — est fiché à part : **STORY-557**, prérequis de celle-ci.
 
-⛔ **Tant que cet arbitrage n'est pas rendu, cette story n'est pas tirable.**
+⚠️ **Ce que la voie B ne dispense pas de faire.** Trois portes sur cinq (cahiers, OCR, saisie)
+n'auront **jamais** l'antériorité. La garde de la voie A reste donc entière : une balance sans
+antériorité s'exporte **sans la colonne**, jamais avec des zéros — et le document le dit. C'est
+`anteriorite: 'COMPLETE' | 'PARTIELLE' | 'ABSENTE'` (STORY-557) qui décide si l'édition Sage est
+produisible pour cette balance.
 
 ## Périmètre
 
-**Inclus** *(sous réserve de l'arbitrage)*
+**Inclus**
 
 - `GET /dossiers/{id}/balances/{balanceId}/export?format=pdf|xlsx|csv` — **côté serveur**, sur une
   **version** de balance identifiée, jamais sur l'écran courant.
@@ -93,8 +98,7 @@ bougé », ce qui est faux et invérifiable.
 
 **Hors périmètre**
 
-- Élargir le contrat canonique (voie B). Si le PO la choisit, c'est une story à part, sur
-  `balance-service` **et** les cinq adaptateurs.
+- Élargir le contrat canonique : **STORY-557**, prérequis rendu par l'arbitrage.
 - Remplacer FE-074. L'export client garde son usage — consulter, trier, bricoler — mais il cesse
   d'être présenté comme la pièce.
 
@@ -104,7 +108,8 @@ bougé », ce qui est faux et invérifiable.
    document au contenu identique.
 2. Le document nomme sa version, sa date de tirage et son statut. ⛔ **Une balance non validée
    sort marquée « provisoire »** — sans exception, et la mention n'est pas retirable par paramètre.
-3. La colonne « mouvements antérieurs » est **absente du document** (voie A) — pas présente à zéro.
+3. La colonne « mouvements antérieurs » est présente quand `anteriorite = 'COMPLETE'`, et
+   **absente du document** sinon — jamais remplie de zéros (STORY-557).
 4. Les totaux et les deux contrôles d'équilibre imprimés sont ceux du service, **jamais recalculés
    au rendu**.
 5. Une balance de 3 000 lignes s'exporte sans dépasser le plafond de débit du service ; le patron
