@@ -1,6 +1,6 @@
 # STORY-402 : Les comptes de trésorerie sont restés ORG-KEYÉS — « une org = une société » recâblé par la porte de derrière
 
-Status: review
+Status: done
 
 **Épic :** EPIC-022 — Rapprochement bancaire (relevés + mobile money) · *clôturé le 2026-07-30 ;
 cette story y atterrit sans le rouvrir, comme STORY-401 dans EPIC-011/012*
@@ -197,9 +197,12 @@ STORY-236 a posé et gardé par un test.
 
 ## Progress Tracking
 
-**Statut : `review`** — implémentée, portes DoD passées, **vérification docker réelle faite sur
-stack neuve** (`down -v`). Branches `MNV-402` ouvertes sur `docs` et `balance-service`.
-**Un seul dépôt de code** : aucun contrat d'événement Kafka n'est touché.
+**Statut : `done`** — implémentée, validée, revue (code + sécurité), **vérification docker rejouée
+deux fois sur l'état final**, mergée en rebase sur `dev`. Clôturée le **2026-08-28**.
+
+**PR** : `prospera-balance-service` **#63**, 3 commits — feature (`be507bf`), revue de code
+(`d4a5b73`), revue de sécurité (`a5f9a0e`). Branche `MNV-402` ouverte sur `balance-service`
+**et** sur `docs`. **Un seul dépôt de code** : aucun contrat d'événement Kafka n'est touché.
 
 ### Portes de qualité
 
@@ -311,3 +314,137 @@ la story corrige est bien refermée **de bout en bout**.
    `balances` et `exercices_atelier` : ce n'est pas un défaut introduit ici, et le projet
    diffère la migration de données à la prod (CLAUDE.md). Nommé pour que la séquence de
    déploiement ne se découvre pas le jour J.
+
+---
+
+## Revue de code — 5 constats, 5 corrigés (commit `d4a5b73`)
+
+**① Le seul qui coûtait quelque chose : un défaut de PLAN, invisible au HTTP.** La migration
+droppait `lignes_releve.orgId_1_compteTresorerieId_1_date_1`. Ce n'est **pas** un index
+d'unicité — l'invariant de STORY-236 ne le vise donc pas — et c'était le **dernier index
+préfixé `orgId`** de la collection, alors que `listerParOrg` reste org-large jusqu'à STORY-411.
+⚡ **Mesuré des deux côtés en docker** : avec l'index, `explain()` rend `IXSCAN` sur
+`orgId_1_compteTresorerieId_1_date_1` ; sans lui, **`COLLSCAN`** — un balayage multi-tenant de
+la plus grosse collection du module à chaque ouverture de l'écran des écarts. Aucun test ne
+pouvait le voir : les e2e doublent la couche données et les unitaires assertent la *forme* du
+filtre, pas le plan. Retiré de la liste, avec la raison écrite au-dessus.
+
+**② Une justification devenue fausse — et cette fois, activement dangereuse.**
+`appariement.schema.ts` affirmait encore « les lignes de relevé vivent dans `tresorerie`, resté
+org-keyed » et se terminait par une **instruction** : « à rebasculer sur `dossierId` le jour où
+`tresorerie` sera lui-même re-scopé, **pas avant** ». Ce jour est arrivé — et la décision de
+D-402-3 est l'**inverse** : l'index org-keyé devient redondant mais reste **strictement plus
+fort**, le relâcher rouvrirait le cas qu'il ferme. La prochaine story de rapprochement aurait
+suivi la phrase écrite et supprimé la seule garde empêchant qu'un même mouvement bancaire
+justifie **deux comptabilités**. Corrigée là, plus dans `appariements.repository.ts`,
+`dossier-scope.guard.ts`, `dossier-cabinet.resolver.ts` et `test/utils/dossier-scope.ts`.
+
+**③ Le contrat publiait les refus métier et EFFAÇAIT les refus de dossier.** `@nestjs/swagger`
+fusionne classe et méthode par un spread **au niveau du code de statut** : le `404` (ou le `409`)
+déclaré sur un handler **remplace intégralement** celui posé par `@RequiresDossierScope`. Les
+**sept** handlers déclarant le leur, `DOSSIER_ARCHIVE` et `DOSSIER_INTROUVABLE` — deux refus
+**mesurés en vérification docker** — disparaissaient du document publié, et `gen:api` en livrait
+un client qui les ignore. Fragments partagés + un bloc de garde dans
+`openapi-contract.e2e-spec.ts` (patron STORY-393). ⚠️ **Dette pré-existante nommée** : une
+dizaine de contrôleurs plus anciens du service ont le même trou ; la balayer relevait d'une story
+propre, pas de celle-ci.
+
+**④ Un test vacant.** `DOSSIER` et `PROFIL` valaient la **même** chaîne dans
+`releves.service.spec.ts` : l'assertion « le dossierId est propagé » ne pouvait pas distinguer le
+dossier du profil — deux `string` d'ObjectId lus à trois lignes d'écart dans `importer`.
+Mutation **M7** (passer le profil à la place du dossier) : verte avant, rouge après.
+
+**⑤ Un commentaire faux et un titre plus fort que ses assertions.** La phase 0 n'était pas
+*contrainte* d'être première (un `$set` n'effleure aucune clé de `{orgId, libelle}`), et le test
+« avant tout rattachement » n'assertait **aucun ordre**. Justification corrigée, ordre réellement
+asserté via `invocationCallOrder` — puis **inversé** par la revue de sécurité (voir ci-dessous).
+
+**Ponytail (lentille sur-ingénierie)** : index `{dossierId, exercice.debut, date}` retiré — aucun
+lecteur avant STORY-411, coût d'écriture immédiat sur la plus grosse collection — et
+`collectionsVerifiees()` inline (une méthode, un appelant). `net −26 lignes`. Écarté : factoriser
+les deux `portee()` privées des dépôts, qui sont chacune le point de mutation de leur propre
+suite.
+
+---
+
+## Revue de sécurité — 2 constats confirmés, 2 corrigés (commit `a5f9a0e`)
+
+**① CWE-639 / OWASP A01 — Broken Access Control sur un chemin d'ÉCRITURE** (confiance 88).
+
+`POST …/rapprochement/ecarts/qualifier` prend `ligneId` **dans le corps** de la requête, pas
+d'une lecture déjà bornée. `trouverUneParOrg` et `marquerStatut` ne filtrant que sur
+l'organisation, un appelant ouvrant les écarts du **dossier A** qualifiait la ligne du
+**dossier B** du même cabinet — et **contournait deux verrous** :
+
+- le **dossier ARCHIVÉ** : le `DossierScopeGuard` n'inspecte que le dossier de l'URL, donc un
+  dossier B archivé voyait ses lignes mutées via l'URL d'un dossier A actif ;
+- l'**exercice CLOS** : `exigerExerciceOuvert` l'évalue sur le dossier **A** avec les dates de la
+  ligne de **B** — exactement la classe de défaut que cette story revendique de fermer côté
+  import.
+
+Et l'état de rapprochement de B — pièce justificative de clôture — devenait faux : une ligne déjà
+`CONFIRME` dans B n'apparaît pas dans `lignesConfirmees(orgId, dossierId = A)`, donc le
+pré-contrôle ne levait rien et le `RAPPROCHE` était écrasé en `ECARTE`.
+
+⚡ **Et le commentaire que cette PR venait d'ajouter affirmait le contraire** : « les identifiants
+arrivent d'appariements et de lectures déjà bornées ». Faux pour ce chemin — c'est précisément la
+phrase qui aurait fait tenir le point pour couvert lors de STORY-411.
+
+`trouverUneParOrg` devient `trouverUneParDossier`, `marquerStatut` prend le dossier ; tous leurs
+appelants le détenaient déjà. **Mesuré sur stack docker** : qualifier depuis A une ligne de B rend
+**404 `LIGNE_RELEVE_INTROUVABLE`** et n'écrit rien (`statutRapprochement` inchangé, 0
+qualification) ; le **même** appel depuis B rend **200** et la qualification atterrit sous B.
+
+**② CWE-693 / OWASP A04 — la migration laissait une fenêtre SANS aucune contrainte d'unicité**
+(confiance 80).
+
+`autoIndex` est actif : Mongoose tente de construire `{dossierId, libelle}` **unique au boot** —
+quand *aucun* document ne porte encore de dossier. Tous s'indexent alors sur la clé
+`(null, libelle)`, et **deux organisations ayant chacune une « Caisse » suffisent** à faire
+échouer la construction, **en silence** (Nest n'écoute pas l'événement `index`). La phase 0
+supprimait ensuite `{orgId, libelle}` — **le seul index d'unicité vivant**. Résultat : jusqu'au
+prochain redémarrage, deux `POST` concurrents créaient deux comptes homonymes dans le même
+dossier, `E11000 → 409` ne se déclenchait **jamais**, l'aiguillage des imports devenait dépendant
+de l'ordre de lecture et le rapprochement cessait d'être reproductible.
+
+⚡ **Mesuré sur un état pré-402 à deux organisations partageant le libellé « Caisse »** :
+`createIndex({dossierId, libelle}, {unique})` échoue en
+`dup key: { dossierId: null, libelle: "Caisse" }`.
+
+Le drop passe **après** le rattachement (les documents portent alors leur dossier, la construction
+réussit), les nouveaux index sont construits **explicitement** avant, et un index d'unicité
+obsolète n'est supprimé **que si son remplaçant existe** — sinon la commande **refuse** et le dit.
+Après migration sur le même état : `index comptes = _id_ | dossierId_1_actif_1 |
+dossierId_1_libelle_1`, les deux « Caisse » vivent dans deux dossiers distincts, et un doublon de
+libellé **dans le même dossier** est refusé en `E11000` — **le filet est vivant, il ne l'a jamais
+cessé**. 2ᵉ exécution : `indexSupprimes: []`, 0 rattachement, 0 orphelin.
+
+⚠️ **Ceci remplace le « constat d'exploitation n°2 » consigné plus haut** : ce qui y était décrit
+comme une propriété héritée de STORY-236/356 à documenter est, côté trésorerie, **corrigé dans le
+code** — la migration ne dépend plus de l'ordre de déploiement.
+
+**⛔ Constat NON corrigé, et nommé** : `RelevesRepository.listerParOrg` (écarts demandés **sans**
+`compteId`) reste org-large. C'est une **lecture d'écran**, périmètre explicite de **STORY-411**,
+que cette PR ne rend pas *nouvellement* exploitable — l'appelant a déjà les droits de lecture sur
+les autres dossiers du cabinet. La refermer ici trancherait, sans story, l'arbitrage que 411 pose
+sur le caractère facultatif de `compteId`.
+
+---
+
+## Bilan de la passe de mutation — 12 mutations, 12 rouges
+
+Aux 6 mutations du développement s'ajoutent **M4b** (phase 0 déplacée), **M7** (profil passé à la
+place du dossier), **M8** (404 ré-effacé), **M9** (portée de `trouverUneParDossier`), **M10**
+(portée de `marquerStatut`), **M11b** (garde du remplaçant rendue décorative) et **M12** (drop
+remis avant le rattachement). Toutes restaurées.
+
+⚠️ **Ce que M2 et M9 ont appris, et qui vaut pour la suite** : muter un **dépôt** laisse l'e2e
+**vert**, parce qu'il le double. C'est M2b — retirer `@RequiresDossierScope()` du contrôleur — qui
+met la chaîne HTTP à l'épreuve. Deux mutations pour un même invariant, parce qu'aucune des deux
+seule ne le couvre.
+
+### État final
+
+Lint **0 warning** · build OK · **3132 unitaires + 777 e2e verts** · couverture
+**99,13 / 92,04 / 98,62 / 99,23** (seuils 65/90/90/90) · **vérification docker rejouée deux fois**,
+stack neuve (`down -v`) à chaque passe.
