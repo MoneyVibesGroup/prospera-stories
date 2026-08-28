@@ -1,6 +1,6 @@
 # STORY-402 : Les comptes de trésorerie sont restés ORG-KEYÉS — « une org = une société » recâblé par la porte de derrière
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-022 — Rapprochement bancaire (relevés + mobile money) · *clôturé le 2026-07-30 ;
 cette story y atterrit sans le rouvrir, comme STORY-401 dans EPIC-011/012*
@@ -197,5 +197,117 @@ STORY-236 a posé et gardé par un test.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — branches `MNV-402` ouvertes sur `docs` et `balance-service`.
-Conception écrite (D-402-1/2/3) **avant** le code, comme l'AC-5 l'exige.
+**Statut : `review`** — implémentée, portes DoD passées, **vérification docker réelle faite sur
+stack neuve** (`down -v`). Branches `MNV-402` ouvertes sur `docs` et `balance-service`.
+**Un seul dépôt de code** : aucun contrat d'événement Kafka n'est touché.
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **3130 tests verts** (176 suites) · e2e verts ·
+couverture **99,16 % stmts / 92,06 % branches / 98,61 % fonctions / 99,25 % lignes**
+(seuils 65/90/90/90).
+
+### Passe de mutation — 6 mutations, 6 rouges, toutes restaurées
+
+| # | Mutation | Ce qui vire au rouge |
+|---|---|---|
+| **M1** | index unique de `comptes_tresorerie` re-préfixé `orgId` | `index-dossier.schema.spec.ts` — 2 rouges (le cas nommé **et** le filet global) |
+| **M2** | la portée du dépôt de comptes retombe sur l'org seule | `tresorerie.repositories.spec.ts` — 4 rouges |
+| **M2b** | `@RequiresDossierScope()` retiré du contrôleur | `dossier-scope.invariant.spec.ts` — 1 rouge |
+| **M3** | la garde d'exercice clos retombe sur l'`orgId` (le repli d'avant 402) | `releves.service.spec.ts` — 2 rouges |
+| **M4** | l'index obsolète n'est plus droppé par la migration | `dossiers-migration.service.spec.ts` — 1 rouge |
+| **M5** | les lignes de relevé rattachées par ORG au lieu de leur COMPTE | `dossiers-migration.service.spec.ts` — 1 rouge |
+| **M6b** | le contrat publie un `dossierId` **faux** (l'`orgId`) | e2e — 1 rouge (AC-3) |
+
+⚠️ **M2 a montré une limite du harnais e2e, et elle est nommée** : muter le *dépôt* laisse
+l'e2e vert, parce qu'il le double. C'est M2b — retirer le décorateur — qui met la chaîne HTTP
+à l'épreuve. Deux mutations pour un même invariant, parce qu'aucune des deux seule ne le
+couvre.
+
+### Vérification docker — stack neuve (`down -v`), Mongo `rs0`, mongosh direct
+
+Organisation `6a91…1f57`, dossiers **A = « Mon cabinet »** (`…10a1`), **B = « Boulangerie du
+Port »** (`…10b2`), **archivé** (`…10c3`).
+
+**① AC-1/AC-2 — le même libellé dans deux dossiers, et l'invisibilité croisée**
+
+| Appel | HTTP | Code |
+|---|---|---|
+| `POST /dossiers/A/tresorerie/comptes` « BOA — compte courant » | **201** | `dossierId: …10a1` publié |
+| `POST /dossiers/B/tresorerie/comptes` **même libellé** | **201** | `dossierId: …10b2` publié |
+| idem une 2ᵉ fois **dans A** | **409** | `COMPTE_TRESORERIE_LIBELLE_EXISTANT` |
+| `GET /dossiers/B/tresorerie/comptes/{idA}` | **404** | `COMPTE_TRESORERIE_INTROUVABLE` |
+| `PATCH` / `DELETE` idem depuis B | **404** | `COMPTE_TRESORERIE_INTROUVABLE` (jamais 403) |
+
+`db.comptes_tresorerie` : **2 documents**, `orgId` identique, `dossierId` distincts. Chaque
+liste ne rend que son dossier.
+
+**② AC-4 — les refus de dossier, comme le reste du service**
+
+`dossier inconnu → 404 DOSSIER_INTROUVABLE` · `dossierId mal formé → 400 DOSSIER_ID_INVALIDE` ·
+`dossier ARCHIVÉ : GET → 200` (D9) **et** `POST → 409 DOSSIER_ARCHIVE`.
+
+**③ ⚡ La garde d'exercice clos — le dégât concret, MESURÉ des deux côtés**
+
+Exercice 2026 **CLOS sur le dossier B**, **OUVERT sur le cabinet A**. Même appel, deux codes :
+
+- `POST /dossiers/B/tresorerie/{compteB}/releves` → **409 `EXERCICE_CLOS`**, 0 ligne écrite ;
+- `POST /dossiers/A/tresorerie/{compteA}/releves` → **201**, 2 lignes écrites, chacune portant
+  `dossierId = …10a1`.
+
+⚡ **Et le comportement d'AVANT a été rejoué sur la même stack** : le service patché pour lire
+le dossier « Mon cabinet » (le `dossierCabinet ?? orgId` d'origine), **redémarré** pour ne pas
+se fier au hot-reload, répond **201** au même appel sur B et **écrit 2 lignes dans l'exercice
+CLOS du client**. Aucune erreur, aucun symptôme. Code restauré, service redémarré, les 2 lignes
+parasites supprimées, et le 409 re-mesuré ensuite. **Le re-scopage referme la garde
+mécaniquement — donc silencieusement : sans cette mesure, rien ne dirait qu'elle a jamais été
+ouverte.**
+
+**④ Atomicité (D-089-5) — prouvée sur le vrai replica set, pas sur un mock**
+
+Index unique **temporaire de vérification** `(dossierId, compteTresorerieId, montant)`, puis
+import d'un CSV de 2 lignes de **même montant** : la 2ᵉ insertion viole l'index **au milieu de
+la transaction** → **409 `IMPORT_RELEVE_CONCURRENT`**, `lignes exercice 2025 = 0`, total
+inchangé (**2**). **Zéro orphelin** : la 1ʳᵉ ligne n'a pas survécu. Index temporaire retiré.
+
+**⑤ Migration `migrate:dossiers` — état PRÉ-402 rejoué, puis migré**
+
+Semis : 1 compte **sans** `dossierId`, 3 lignes **sans** `dossierId` rattachées au compte du
+**dossier B** (donc *pas* au cabinet), et les 4 index obsolètes recréés.
+
+Rapport de la commande : `rattaches: { comptes_tresorerie: 1, lignes_releve: 3 }`,
+`orphelins: { … 0 partout }`, `aDesOrphelins: false`,
+`indexSupprimes: [comptes_tresorerie.orgId_1_libelle_1, comptes_tresorerie.orgId_1_actif_1,
+lignes_releve.orgId_1_compteTresorerieId_1_checksumLigne_1,
+lignes_releve.orgId_1_compteTresorerieId_1_date_1]`.
+
+En base après migration : `index comptes = _id_ | dossierId_1_libelle_1 | dossierId_1_actif_1`
+(les org-keyés ont disparu) · le compte orphelin porte le **dossier du cabinet** ·
+⚡ **les 3 lignes legacy portent le dossier B — celui de LEUR COMPTE — et non le cabinet**, ce
+qui est exactement la discrimination que D-402-1 exige · agrégat de contrôle croisé :
+**0 ligne dont le `dossierId` diffère de celui de son compte**.
+
+**2ᵉ exécution** : `rattaches` tout à 0, `indexSupprimes: []`, `aDesOrphelins: false` —
+**idempotente**, comme STORY-356.
+
+Enfin, l'index obsolète une fois droppé, `PATCH` du compte de B vers **« BOA — compte
+courant »** → **200**, et les deux dossiers portent le même libellé en base. La collision que
+la story corrige est bien refermée **de bout en bout**.
+
+### ⚠️ Deux constats d'exploitation, mesurés, à ne pas perdre
+
+1. **L'index obsolète `{orgId, libelle}` ne peut pas COEXISTER avec la donnée que la story rend
+   légitime.** Tenté de le recréer alors que deux dossiers portaient déjà « BOA — compte
+   courant », Mongo refuse : `E11000 … index: orgId_1_libelle_1 dup key`. C'est la
+   démonstration en creux de D-402-2 : laissé en place, il n'aurait pas *toléré* la nouvelle
+   donnée — il l'aurait **interdite**, avec un 409 sur un libellé que le dossier n'a jamais
+   utilisé.
+2. **Ordre d'exploitation en prod : la migration AVANT la construction du nouvel index.**
+   `autoIndex` n'est pas désactivé dans ce service (défaut Mongoose `true`) : sur une base
+   pré-402 où **tous** les `dossierId` sont absents, ils valent `null` pour l'index, et deux
+   comptes de même libellé — fût-ce dans deux organisations différentes — font **échouer la
+   construction** de `{dossierId, libelle}` unique. Mesuré ici (`dup key: { dossierId: null,
+   libelle: "Ecobank — heritage" }`). ⚠️ **Propriété héritée de STORY-236/356**, identique sur
+   `balances` et `exercices_atelier` : ce n'est pas un défaut introduit ici, et le projet
+   diffère la migration de données à la prod (CLAUDE.md). Nommé pour que la séquence de
+   déploiement ne se découvre pas le jour J.
