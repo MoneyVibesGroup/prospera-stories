@@ -75,8 +75,12 @@ moyen de savoir que la donnée existe.
 
 - Le calcul de l'impôt de la personne physique : **STORY-564** (le barème IRPP manque au paquet).
 - Le paiement : **STORY-565**.
-- Donner un compte Prospera au dirigeant. Il est **sujet** de données, pas utilisateur ; le cabinet
-  agit pour lui sous mandat. ⚠️ À rouvrir si le PO veut un portail client.
+- ⬆️ **AMENDÉ le 2026-08-28 — le compte EST désormais au périmètre, mais dans une autre fiche.**
+  Cette ligne disait *« il est sujet de données, pas utilisateur »* ; le PO a rouvert exactement ce
+  point le même jour : *« un salarié peut créer un compte juste pour la partie déclaration fiscale,
+  de même qu'un dirigeant, mais aussi le cabinet peut créer un compte uniquement pour la
+  déclaration »*. ⇒ **STORY-567** porte les trois portes d'entrée et le rattachement dirigeant ↔
+  société. Cette fiche garde le `Redevable` ; elle ne donne toujours pas d'accès.
 - Les **associés** (`typeBeneficiaire = ASSOCIE`). Le PO a dit *« pour un début »* : le dirigeant
   d'abord. Le modèle les accueille sans travail supplémentaire.
 

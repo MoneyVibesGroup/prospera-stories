@@ -68,6 +68,17 @@ bloc `automatisation`, dans le paquet **pays**, versionné et checksummé :
 ⇒ **Un second pays ne coûte que ce bloc.** Aucun nom de portail, aucune adresse, aucun sélecteur
 n'entre dans le code — c'est déjà la règle d'AD-12 pour le domaine, étendue ici à l'adaptateur.
 
+⚠️ **Au Togo, il y a DEUX canaux OTR, et les confondre enverrait la liasse sur le mauvais portail :**
+
+| Canal | Ce qu'il reçoit | Base |
+|---|---|---|
+| **GUDEF** | les **états financiers** (la liasse) | **LPF Art. 17** — *« Il est institué un guichet unique de dépôt des états financiers (GUDEF) placé sous la tutelle de l'Office »* |
+| **dimana** | les **déclarations d'impôts** | confirmé par le PO le 2026-08-28 |
+
+⇒ Deux blocs `automatisation` distincts, deux parcours, deux jeux de marqueurs. ⛔ Leur
+caractérisation exacte — adresse, écrans, point de reprise humaine — **se relève sur le portail**,
+elle ne se suppose pas.
+
 ## Périmètre
 
 **Inclus**

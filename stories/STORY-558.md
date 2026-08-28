@@ -98,10 +98,15 @@ publie, il ne se comble pas en silence.**
 
 ## Notes
 
-- ⚠️ **Nomenclature.** Le guichet togolais est **GUDEF** (`gudef.otr.tg`), pas « GUIDEF ». Le PRD
-  fiscalité le signale : *« à corriger partout »*. Le dépôt porte encore l'ancienne graphie, y
-  compris dans des noms de fichiers de référentiels — à traiter dans cette story pour ce qui la
-  concerne, sans y engloutir le reste.
+- ⚠️ **Nomenclature, et elle a une base légale.** Le guichet togolais est **GUDEF**, pas
+  « GUIDEF » — et il est institué par le **LPF Art. 17** : *« Il est institué un guichet unique de
+  dépôt des états financiers (GUDEF) placé sous la tutelle de l'Office. »* Le PRD fiscalité le
+  signalait déjà (*« à corriger partout »*) ; le dépôt porte encore l'ancienne graphie, y compris
+  dans des noms de fichiers de référentiels — à traiter ici pour ce qui concerne cette fiche, sans
+  y engloutir le reste.
+- ⚠️ **GUDEF reçoit les états financiers ; les déclarations d'impôts passent par `dimana`**
+  (portail OTR, confirmé par le PO le 2026-08-28). Deux canaux, deux blocs `automatisation` —
+  cf. STORY-561 et STORY-565.
 - ⚡ **Le classeur porte une feuille « Balance (Optionnel) »** : le dépôt accepte la balance en
   pièce jointe. C'est **STORY-555** qui la produit, et **STORY-557** qui lui donne ses colonnes.
 - ⛔ **Ne pas confondre le gabarit et le canal.** Le gabarit dit *à quoi ressemble le fichier* ; le

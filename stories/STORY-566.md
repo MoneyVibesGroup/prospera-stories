@@ -7,7 +7,7 @@ Status: ready-for-dev
 **Points :** 8 · **Sprint :** S30
 **Origine :** **décision PO du 2026-08-28** — *« en lui expliquant, voire optimiser aussi, pour une
 personne physique salarié dirigeant, pour un début »*.
-**Prérequis :** **STORY-563** (le redevable) · **STORY-564** (le barème IRPP)
+**Prérequis :** **STORY-563** (le redevable) · **STORY-564** (le barème IRPP) · **STORY-568** (le verdict de qualification, qui est la première chose à expliquer)
 **Réf. :** **STORY-096** (scénarios d'optimisation légale — leviers → impact IS) · **STORY-097**
 (comparatif « déposé vs optimisé » + dossier de justification + **garde-fous de conformité**)
 
@@ -38,7 +38,13 @@ personnelle**, et le produit ne doit jamais la présenter comme une décision pr
 
 **Inclus — l'explication**
 
-- **La décomposition complète du calcul**, du revenu brut au montant dû : rémunération déclarée,
+- ⚡ **D'abord : est-elle seulement due ?** Le premier élément d'explication n'est pas un calcul,
+  c'est le verdict de **STORY-568** et sa base légale — *« vous êtes dispensé au titre de l'article
+  21 du LPF, parce que vos seuls revenus sont des revenus d'emplois et que l'impôt a été retenu à
+  la source »*. Pour la majorité des salariés togolais, **c'est toute l'explication**, et elle
+  arrive sans qu'ils aient rien saisi.
+- **La décomposition complète du calcul** — quand la déclaration est due — du revenu brut au
+  montant dû : rémunération déclarée,
   abattements appliqués, tranche par tranche avec son taux et sa part d'impôt, retenues déjà
   opérées par l'entreprise, solde.
 - **Chaque étape cite son article** du CGI et le millésime du paquet (STORY-564). Le dirigeant, ou
