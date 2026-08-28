@@ -1,6 +1,6 @@
 # STORY-407 : Un relevé importé ne se retire jamais — l'erreur de compte est définitive
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-022 — Rapprochement bancaire (relevés + mobile money) · *clôturé le 2026-07-30 ;
 cette story y atterrit sans le rouvrir*
@@ -218,3 +218,107 @@ d'import**), le retrait **en dur** avec trace survivante, la borne posée sur **
 non sur `statutRapprochement`, l'absence délibérée de reconstitution des lots antérieurs, et ce
 que le retrait emporte (les qualifications d'écart) comme ce qu'il garde (l'exercice clos).
 Statut aligné aux 3 endroits (en-tête, `sprint-status.yaml`, cette section).
+
+**2026-08-28 — développée, validée, vérifiée sur stack docker neuve. Statut `review`.**
+
+Branche `MNV-407` sur `balance-service`, commit `4df6f91`.
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **3172 unitaires verts** (176 suites) · **791 e2e verts** (26 suites) ·
+seuils de couverture 65/90/90/90 franchis (`modules/tresorerie` : 99,4 % stmts / 84,1 % branches /
+98,9 % fonctions / 99,6 % lignes ; les 5 fichiers neufs de la story à 100 % de lignes sauf
+`imports-releve.repository.ts`, complété ensuite).
+
+### Passe de mutation — 10 mutations, 10 rouges, toutes restaurées
+
+| # | Mutation | Ce qui vire au rouge |
+|---|---|---|
+| M1 | `idsPourLignesReleve` filtre `statut: 'CONFIRME'` | unit ✗ « le filtre ne porte AUCUN statut » |
+| M2 | la garde d'appariement passe à `total > 999` | unit ✗ + **e2e ✗** (appariement PROPOSÉ) |
+| M3 | `marquerRetire` perd `retrait: { $exists: false }` | unit ✗ « le second retrait concurrent perd » |
+| M4 | `supprimerParImport` oublie `compteTresorerieId` | unit ✗ « le retrait porte org, dossier, COMPTE et lot » |
+| M5 | la trace publie `lot.lignesCreees` au lieu du `deletedCount` | unit ✗ « les compteurs RÉELS » |
+| M6 | le retrait n'efface plus les qualifications | unit ✗ « une ligne QUALIFIÉE se retire » |
+| M7 | le retrait refuse un compte désactivé (la garde de trop) | unit ✗ + **e2e ✗** |
+| M8 | `insererPlusieurs` intervertit `compteTresorerieId` et `importId` | unit ✗ |
+| M9 | `estClos` évalué sur des bornes autres que celles du lot | unit ✗ « l'exercice DU LOT » |
+| M10 | `imports.trouver` oublie `compteTresorerieId` | unit ✗ « deux params d'URL discordants ⇒ 404 » |
+
+⚠️ **M8 a d'abord été écrite comme une SUPPRESSION du champ — mutation invalide** : elle rendait le
+paramètre `importId` inutilisé et **échouait à la compilation** (`TS6133`). Un rouge par erreur de
+compilation ne prouve rien ; la mutation a été réécrite en **interversion** (les deux paramètres
+restent lus), qui compile — et c'est elle qui a viré au rouge.
+
+⚠️ **M1, M3, M8 et M10 laissent l'e2e VERT, et c'est structurel, pas un trou** : cet e2e double les
+**dépôts** par des magasins en mémoire (choix assumé depuis STORY-088) — muter le dépôt réel ne peut
+donc rien y changer. C'est la vérification docker ci-dessous qui exerce ces quatre chemins pour de
+vrai.
+
+### Vérification docker — stack neuve (`down -v`), Mongo `rs0`, mongosh direct
+
+Organisation `6a91…b017`, dossier cabinet `6a91…b0a1`, compte `BOA — courant` `6a91…1486`, profil
+d'import `RELEVE` `6a91…14a2`. Relevé BOA de mars importé par l'API (`201`, `dryRun=false`) :
+2 lignes (6 400 000 crédit / 5 100 000 débit).
+
+**① Le lot naît AVEC ses lignes, et l'index existe**
+
+`db.imports_releve` : **1 document** — `nomFichier: 'releve-mars.csv'`, `lignesCreees: 2`,
+`parUserId`, compte, exercice et profil. `db.lignes_releve` : **2 documents**, tous deux
+`importId = 6a91b159…14b4`, **exactement l'`_id` du lot** et l'`importId` publié par la réponse HTTP.
+`getIndexes()` : `dossierId_1_importId_1` (lignes) et
+`dossierId_1_compteTresorerieId_1_createdAt_-1` (lots) **présents**.
+
+**② ⚡⚡ AC-2 — l'appariement `PROPOSE`, le cas que l'e2e ne peut PAS prouver**
+
+Appariement `statut: 'PROPOSE'` inséré sur la 1ʳᵉ ligne. La ligne reste
+**`statutRapprochement: 'NON_RAPPROCHE'`** — mesuré en base. `DELETE …/imports/{lot}` ⇒ **409
+`IMPORT_RELEVE_LIGNES_APPARIEES`**, `details: { appariements: 1, appariementIds: [...] }`, message
+citant `DELETE …/rapprochement/appariements/{id}`. **`db.lignes_releve` = 2** : le lot est resté
+**entier**, jamais à moitié retiré.
+
+⚡ **C'est LA mesure de la story.** Une garde bâtie sur `statutRapprochement` aurait rendu **204** ici
+et laissé un appariement pointant sur des lignes disparues.
+
+**③ ⚡⚡ L'autre sens — la ligne `ECARTE` se retire, et sa décision part avec elle**
+
+Appariement supprimé, 2ᵉ ligne passée `ECARTE` + une `qualifications_ecart` `JUSTIFIE` posée dessus.
+`DELETE` ⇒ **204**. Après : `lignes_releve = 0`, `qualifications_ecart = 0`, et la trace du lot :
+`retrait { parUserId, le, lignesRetirees: 2, qualificationsRetirees: 1 }`. La garde naïve aurait
+refusé ce retrait-là.
+
+**④ AC-1 / D-407-2 — la suppression est DURE, mesurée par le ré-import**
+
+Second `DELETE` du même lot ⇒ **409 `IMPORT_RELEVE_DEJA_RETIRE`**. **Ré-import du MÊME fichier sur le
+MÊME compte ⇒ 201, `nouvelles: 2, ignorees: 0`** — donc l'index unique
+`(dossierId, compteTresorerieId, checksumLigne)` ne compte plus les lignes retirées. Une suppression
+logique aurait rendu `nouvelles: 0, ignorees: 2` : le geste suivant le plus probable après une erreur
+d'exercice ou de profil aurait été refusé.
+
+`GET …/imports` : **2 lots**, du plus récent au plus ancien, le retiré **toujours listé** avec son
+bloc `retrait` — la trace est lisible après la disparition des lignes.
+
+**⑤ Atomicité — prouvée par un ÉCHEC provoqué, service REDÉMARRÉ**
+
+`marquerRetire` muté en `retrait: { $exists: true }` (le marquage ne peut plus aboutir : c'est le cas
+du retrait concurrent perdant), conteneur **redémarré** pour ne rien devoir au hot-reload
+(`Found 0 errors` compté 2 fois dans les logs). `DELETE` ⇒ **409**, et **`lignes_releve = 2`** :
+la suppression a été **annulée avec la transaction**. Sans ce `throw`, les lignes du perdant seraient
+parties sans qu'aucune trace ne les compte. Code restauré, service redémarré (`Found 0 errors` ×3).
+
+**⑥ Refus et anti-énumération**
+
+| Appel | HTTP | Code |
+|---|---|---|
+| lot de A demandé sous le compte **B** du même dossier | **404** | `IMPORT_RELEVE_INTROUVABLE` |
+| lot **inconnu** | **404** | identique — rien ne distingue les deux |
+| `importId` **malformé** (`0x`) | **404** | identique, **aucun 500 `BSONError`** (leçon STORY-405) |
+| exercice **CLOS** (`exercices_dossier` projeté `CLOS`) | **409** | `EXERCICE_CLOS`, lignes intactes |
+
+**⑦ Zéro orphelin, mesuré et non supposé**
+
+Après le retrait final : `lignes_releve = 0` · **lignes sans lot connu = 0** · **qualifications
+`RELEVE` orphelines = 0** · `imports_releve = 2`, dont **2 retirés** (les documents de lot survivent,
+c'est le contrat).
+
+Stack arrêtée (`docker compose stop`) à la fin de la passe.
