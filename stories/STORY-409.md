@@ -1,6 +1,6 @@
 # STORY-409 : la devise d'un compte de trésorerie est imposée `XOF` en dur — un relevé étranger serait lu comme des francs CFA
 
-Status: review
+Status: done
 **Service :** `balance-service` (`:3007`) · **Module :** `tresorerie`
 **Points :** 5 · **Sprint :** S20 · **Epic :** EPIC-022 · **Complexité :** high
 **Origine :** constat PO du 2026-08-25, à la revue de la maquette **FE-049** — « une société peut
@@ -271,3 +271,146 @@ manque une donnée » (D-409-2).
 parfaitement fausse — le mode de panne n°2 du programme, sur le chiffre que le cabinet signe.
 
 Stack arrêtée (`docker compose stop`).
+
+---
+
+## Revue de code — 6 constats, 6 corrigés, dont **2 bloquants** (commit `ad7d86e`)
+
+Scan par `prospera-code-review` (préparation `haiku`, analyse `opus`), synthèse et correctifs en session.
+
+### ⚡⚡ F1 (bloquant) — `null` traverse `@IsOptional()`
+
+`class-validator` **ignore tous les validateurs quand la valeur est `null`** : un `devise: null` — ce que
+poste tout formulaire qui renvoie ses champs vides — franchit `@IsIn` et arrive au service tel quel. Mes
+trois gardes testaient `!== undefined`. **Vérifié moi-même** (`plainToInstance` + `validateSync` ⇒
+**0 erreur**, `devise === null`). Quatre dégâts :
+
+| | Conséquence |
+|---|---|
+| **(a)** | un profil créé avec `devise: null` était **persisté** tel quel, le `GET` le **masquait** (`doc.devise ? …`), et **chaque import** rendait 400 sur un message parlant d'une monnaie « null » — profil définitivement inutilisable, contrat disant l'inverse du comportement |
+| **(b)** | un `PATCH` de **renommage** portant `devise: null` rendait **409 `DEVISE_COMPTE_FIGEE`** — exactement le cas que mon propre commentaire disait vouloir éviter |
+| **(c)** | le même `PATCH` sur un compte vierge écrivait `$set: { devise: null }` ⇒ **500** de validation Mongoose |
+| **(d)** | un profil `BALANCE` avec `devise: null` rendait **400 `DEVISE_HORS_CIBLE`** à un client qui n'avait rien déclaré |
+
+### ⚡⚡ F2 (bloquant) — l'**appariement** mélangeait encore deux monnaies
+
+L'AC-3 ferme l'**écart**. Rien ne fermait l'**appariement**, qui compare par **égalité exacte
+d'entiers** — et **c'est cette story qui rend l'état atteignable** : avant elle, tout compte était `XOF`
+en dur. Avec un profil **muet** (tous les profils existants, et c'est voulu), une ligne de 1 000 GHS
+s'appariait à une recette de 1 000 XOF, l'appariement était **persisté** et le niveau de preuve de la
+ligne de cahier **élevé au fichier**.
+
+⛔ **Pire que l'écart faux** : l'écart s'affiche, l'appariement s'**écrit**. Garde `DEVISE_NON_COMPARABLE`
+(409) sur les **deux** gestes qui apparient ; les **lectures** restent ouvertes.
+
+**Non bloquants** : F3 les quatre codes neufs entrent au contrat OpenAPI (aucun n'y était — un client
+générique aurait pris le nouveau 409 du `PATCH` pour le conflit de libellé) · F4 la prose « unités
+mineures XOF » corrigée là où la story la rend fausse, dont **`soldeApres`**, le champ même qui alimente
+`soldeReleve` · F5 les interfaces `Patch*` déclarent `devise` · F6 le commentaire de `deviseDuProfil`
+décrivait **deux** appelants là où il n'y en a qu'un. Mineurs : description dupliquée extraite,
+condition redondante commentée.
+
+---
+
+## Revue de sécurité — 1 constat, corrigé (commit `0feb523`)
+
+Scan par `prospera-security-review` (`haiku` + `opus`, aucun downgrade).
+
+### ⚡⚡ Le **quatrième** chemin : celui qui **additionne**
+
+`GET /rapprochement/ecarts` **sans `compteId`** lit *tous* les comptes du dossier — c'est sa portée
+publiée — et sommait `ecart.montant` **sans regarder l'unité** : des cédis ajoutés à des francs CFA, sous
+un schéma annonçant « Unités mineures XOF ». Les écarts ne portaient **aucune** devise.
+
+⛔ **Et la garde `DEVISE_NON_COMPARABLE` du commit précédent aggrave le cas au lieu de l'atténuer** : un
+compte non-XOF ne pouvant plus être rapproché, **100 %** de ses lignes restent des écarts permanents et
+pèsent dans ce chiffre.
+
+⚠️ **Ma justification du commit de revue était fausse d'un tiers** : « la lecture reste ouverte, elle dit
+déjà pourquoi l'écart n'est pas calculable » vaut pour `etat` (`motifNonCalculable`) et **pas** pour
+`ecarts`, qui ne porte ni motif, ni avertissement, ni devise. Le raisonnement couvrait **un endpoint pour
+trois**.
+
+Correctif, même discipline que l'écart : chaque écart publie **sa** devise, et `TotalEcartDto.montant`
+devient **`null`** (+ `devise` absente) dès que le type porte plusieurs devises. **`nombre` reste
+exact** — c'est la somme qui disparaît, jamais le compte.
+
+⚠️ **Limite assumée** : le tri départage par montant **les écarts du même jour** (le jour prime), et deux
+d'entre eux peuvent porter des devises différentes — leur ordre relatif est alors arbitraire. Réordonner
+changerait l'affichage de tous les dossiers existants pour un départage de rang.
+
+### 6 mutations de plus — 6 rouges
+
+| # | Mutation | Rouge |
+|---|---|---|
+| **M11** | la garde d'appariement s'inverse | les 2 tests `DEVISE_NON_COMPARABLE` |
+| **M12** | le durcissement contre `null` retiré (compte) | « un `devise: null` ne vaut PAS un changement » |
+| **M13** | idem côté import | « un profil dont la devise vaut `null` reste MUET » |
+| **M14** | un code neuf disparaît du contrat | garde des 5 routes |
+| **M15** | les totaux se remettent à sommer | « deux devises ⇒ montant null » |
+| **M16** | la devise de la ligne ne remonte plus à l'écart | 2 rouges |
+
+⚠️ **M13 d'abord écrite en version ÉQUIVALENTE** (`!= null` au lieu de `!== undefined && !== null`) :
+verte, et pour cause — elle ne changeait rien. Réécrite en `String(profil.devise)`, qui réintroduit
+vraiment le défaut.
+
+---
+
+### Vérification docker REJOUÉE sur l'état final — stack neuve (`down -v`)
+
+Les correctifs changent la **réponse elle-même** (`devise` par écart, `montant` nullable, nouveau 409) :
+la passe est rejouée entière. Dossier monté avec **deux devises** — un compte `XOF` et un compte `GHS`,
+chacun 3 lignes (14 000 000 unités mineures de part et d'autre), importées avec un **profil muet**.
+
+| Appel | Résultat mesuré |
+|---|---|
+| `GET /ecarts` **sans `compteId`** (2 devises) | `ENCAISSEMENT_NON_DECLARE` ⇒ **`nombre: 4`, `montant: null`, `devise` absente** · `DECAISSEMENT` ⇒ `nombre: 2, montant: null` · chaque écart publie `GHS` ou `XOF` |
+| `GET /ecarts?compteId=<XOF>` (1 devise) | **`montant: 13 500 000`, `devise: "XOF"`** — la somme revient dès qu'elle a un sens |
+| `POST /rapprochement/lancer` sur le compte **GHS** | **409 `DEVISE_NON_COMPARABLE`**, `details: { deviseCompte: "GHS", deviseComptabilite: "XOF" }` |
+| `POST /rapprochement/lancer` sur le compte **XOF** | **200** |
+| `PATCH { libelle, devise: null }` sur un compte **avec lignes** | **200** — le renommage passe, et la devise reste `GHS` en base (F1 fermé, mesuré) |
+
+⛔ **Sans le correctif, le premier appel aurait publié `27 000 000`** : 13 500 000 francs CFA additionnés
+à 13 500 000 cédis, sous un schéma annonçant du XOF. C'est le chiffre sur lequel le cabinet aurait
+dimensionné les flux non justifiés de sa clôture.
+
+Stack arrêtée (`docker compose stop`).
+
+---
+
+## Progress Tracking — clôture
+
+**Statut : `done`** — implémentée, validée, **vérifiée sur stack docker neuve puis REJOUÉE sur l'état
+final**, revue (code + sécurité), mergée en rebase sur `dev`. Clôturée le **2026-08-29**.
+
+**PR** : `prospera-balance-service` **#67**, 3 commits — feature (`f7854ce`), revue de code (`ad7d86e`),
+revue de sécurité (`0feb523`). Branche `MNV-409` supprimée après merge. **Un seul dépôt de code** : aucun
+contrat d'événement Kafka n'est touché.
+
+**Les cinq critères d'acceptation** : AC-1 ✅ · AC-2 ✅ (via D-409-1 — le profil d'import) · AC-3 ✅
+(prouvé **des deux côtés** sur les mêmes données) · AC-4 ✅ (test remplacé **et** doublé d'une
+contre-épreuve) · AC-5 ✅ (`DeviseIso` publié aux **quatre** endroits, gardé par le contrat).
+
+**16 mutations, 16 rouges** — dont **trois** qui ont d'abord échoué à prouver quoi que ce soit et ont fait
+corriger le test ou la mutation : **M6** (verte, parce que la contre-épreuve tournait sur un compte XOF où
+le défaut est indistinguable), **M13** (écrite en version *équivalente*), et **M6 bis** (ne compilait pas —
+le typage porte la garde).
+
+**Ce que la story laisse volontairement ouvert**, et qui n'est pas un oubli :
+
+- **La comptabilité reste tenue en `XOF`** (`DEVISES_SUPPORTEES = ['XOF']`, inchangé) : ouvrir cette
+  liste-là déplacerait l'unité de **toutes** les balances du service, et c'est une story à part entière ;
+- **la conversion n'existe pas et n'est pas demandée** — un taux de change est une décision comptable
+  datée. Un compte non-XOF se déclare, s'importe et se consulte ; il ne se **rapproche** pas ;
+- **`POST /appariements/:id/confirmer` ne porte pas la garde de devise.** Chaîne vérifiée comme
+  **inatteignable** (une proposition ne naît que de `lancer`, désormais gardé) — mais c'est une
+  inatteignabilité *par chaînage*, pas une garde en propre ;
+- **le tri des écarts** départage par montant les écarts du **même jour**, devises confondues : ordre
+  relatif arbitraire, assumé et commenté dans `rapprochement.regles.ts` ;
+- **une course résiduelle** entre le comptage des lignes et l'écriture de la devise (`modifier` est hors
+  transaction). L'état qu'elle produit est atteignable **trivialement sans course** (déclarer un compte
+  XOF et y importer un fichier GHS avec un profil muet — ce que la story autorise explicitement) : c'est
+  donc de la robustesse, pas une faille, et la revue de sécurité l'a classée telle.
+
+⚠️ **Outillage** : **Portly indisponible** pendant toute la passe — troisième story consécutive. Tout a
+été lancé directement, hors Portly.
