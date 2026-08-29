@@ -1,6 +1,6 @@
 # STORY-408 : Le vocabulaire mobile money ne se paramètre qu'en se trompant d'abord
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-021 — Profils d'import & mapping réutilisable
 **Service :** `balance-service` (`:3007`) — `modules/balance/imports`
@@ -181,3 +181,103 @@ Décisions **D-408-1 à D-408-6** posées avant la première ligne de code. La p
 qui saute, parce qu'un vocabulaire tronqué **reproduit** le va-et-vient que la story supprime, avec
 en plus la fausse assurance d'avoir tout classé.
 Statut aligné aux 3 endroits (en-tête, `sprint-status.yaml`, cette section).
+
+**2026-08-29 — développée, validée, vérifiée sur stack docker neuve. Statut `review`.**
+
+Branche `MNV-408` sur `balance-service`, commit `3242e6b`.
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **3189 unitaires verts** (176 suites) · **798 e2e verts** (26 suites) ·
+couverture **99,14 % stmts / 92,04 % branches / 98,64 % fonctions / 99,24 % lignes**
+(seuils 65/90/90/90). `fichier-tabulaire.ts` : **100 % stmts / 97,33 % branches**.
+
+⚠️ **Portly indisponible** pendant toute la passe (`portly status` ⇒ « Portly is not running and
+could not be launched »), comme en STORY-411 : lint, build, tests, mutations et vérification docker
+ont été lancés **directement**, hors Portly, contrairement à la règle du poste.
+
+### Passe de mutation — 11 mutations, 11 rouges, toutes restaurées
+
+| # | Mutation | Ce qui vire au rouge |
+|---|---|---|
+| **M1** | la colonne au-delà du plafond est **tronquée** au lieu d'être écartée (`valeurs[i] = []` retiré) | `fichier-tabulaire.spec` — 2 rouges (frontière + `+3`) |
+| **M2** | déduplication sur la forme **brute** (`cle = brut`) | 3 rouges — fusion casse/accents, AC-1 parser |
+| **M3** | off-by-one de la garde d'abandon (`>` au lieu de `===`) | **1 seul rouge : la frontière `plafond + 1`** |
+| **M4** | la forme **normalisée** est publiée à la place de celle du fichier | 6 rouges (unitaires + AC-1/AC-3) |
+| **M5** | le balayage ne lit que l'**aperçu** (le défaut que la story ferme) | 3 unitaires + 2 e2e |
+| **M6** | la cible **BALANCE** balaie aussi (D-408-5 retiré) | 1 unitaire + 1 e2e |
+| **M7** | la borne publiée est décalée de 1 | 1 unitaire + 2 e2e |
+| **M8** | `valeursDistinctes` devient **facultatif** au contrat | `openapi-contract` — 1 rouge |
+| **M9** | la description cesse de dire « vide, et non tronquée » | `openapi-contract` — 1 rouge |
+| **M10** | les cellules **vides** entrent dans le vocabulaire | 3 rouges |
+| **M11** | la colonne abandonnée **se remet à collecter** | 1 rouge (`+3` seulement) |
+
+⚡ **M3 est la mutation qui a payé.** Elle survivait à mes deux premiers tests : « exactement le
+plafond » et « plafond + 3 » sont **tous deux verts** avec un `>` à la place du `===` — à `+3`,
+l'abandon tombe simplement une ligne plus tard. Seule une colonne à **exactement `plafond + 1`**
+sépare les deux, et c'est précisément le cas où un vocabulaire de 51 valeurs serait publié entier,
+au-delà de la borne annoncée par le contrat. Le test de frontière a été écrit **pour** cette mutation.
+
+⚠️ **M11 exige `+ 3` et non `+ 1`** : à `+1`, l'abandon tombe sur la dernière ligne et le chemin
+« colonne déjà abandonnée » n'est **jamais emprunté** — la borne mémoire de D-408-4 resterait non
+exercée. Les deux tests coexistent donc, chacun pour une mutation différente.
+
+⚠️ **M7 d'abord écrite en constante littérale (`valeursPlafond: 20`) ne compilait pas** (TS6133 :
+l'import de `MAX_VALEURS_COLONNE` devenait inutilisé). Un rouge par **erreur de compilation** ne
+prouve rien (leçon STORY-179/407) : réécrite en `MAX_VALEURS_COLONNE - 1`.
+
+### Vérification docker — stack neuve (`down -v`), Mongo `rs0`, parcours HTTP réel
+
+Organisation `6a92…62f7`, dossier `6a92…0d6d`, comptes TMoney `6a92…c3f2` (A) et `6a92…` (B).
+Service redémarré sur la branche (`Found 0 errors` compté dans les logs avant toute mesure).
+
+**① AC-1 — l'analyse publie ce que l'aperçu ne contient pas**
+
+Export TMoney de 8 lignes. `apercu` = **5 lignes**, et la colonne `Type` publie **5 valeurs** :
+`Dépôt, Retrait, Paiement marchand, Frais, Annulation`. Les **trois dernières** sont aux lignes 6, 7
+et 8 — **hors aperçu**. `DEPOT` (ligne 4) **ne fait pas une 6ᵉ entrée** : le serveur compare la
+forme normalisée, la publier deux fois ferait classer deux fois la même chose.
+
+**② ⚡⚡ AC-3 — LA mesure de la story, et sa contre-épreuve, mesurées en base**
+
+| Profil de convention C bâti avec… | HTTP | `nouvelles` | `rejetsTotal` |
+|---|---|---|---|
+| **les seules valeurs publiées** par `/analyser` | **201** | **8** | **0** |
+| **l'aperçu seul** — la seule matière d'avant la story | 201 | 5 | **3 `SENS_INDETERMINE`** |
+
+Les trois rejets de la contre-épreuve nomment exactement les trois valeurs rares :
+« Paiement marchand », « Frais », « Annulation ». En base : compte A = **8 lignes**
+(4 `CREDIT` / 4 250 000 · 4 `DEBIT` / 1 530 000), compte B = **5 lignes**. C'est le va-et-vient,
+mesuré : trois allers-retours de profil évités, sur un fichier de huit lignes.
+
+**③ AC-2 — le plafond désigne la colonne de type sans la nommer**
+
+Fichier de **200 lignes**, 3 types, 200 références et 200 libellés distincts :
+
+| Colonne | valeurs distinctes réelles | publiée ? |
+|---|---|---|
+| `Type` | 3 | ✅ **3 valeurs** |
+| `Date` | 28 | ✅ 28 valeurs (sous le plafond — honnête) |
+| `Libellé` · `Montant` · `Référence` | 200 · 200 · 200 | ⛔ `plafondDepasse: true`, **liste vide** |
+
+Aucune heuristique de nom n'intervient : c'est le seul plafond qui écarte les trois colonnes
+inutilisables et retient le vocabulaire.
+
+**④ ⚡ La borne CWE-770, mesurée et non supposée**
+
+| Fichier | Lignes | Taille réponse | Temps |
+|---|---|---|---|
+| `releve-gros.csv` | 200 | **1 530 octets** | — |
+| `releve-50k.csv` (**3,3 Mo**) | 50 000 | **1 655 octets** | 0,58 s |
+
+**× 250 sur le fichier, + 8 % sur la réponse.** La réponse n'est **pas proportionnelle au fichier** —
+c'est exactement ce que le périmètre exigeait, et l'abandon anticipé (D-408-4) en est la raison :
+au-delà de 51 valeurs distinctes, une colonne cesse d'être normalisée **et** de mémoriser.
+
+**⑤ `/analyser` n'écrit toujours rien**
+
+Somme des documents de **toutes** les collections de `balance_service` **avant** et **après**
+l'analyse du fichier de 200 lignes : **22 = 22**. La story n'ajoute aucune écriture, et le contrat
+« 200, aucune persistance » tient.
+
+Stack arrêtée (`docker compose stop`) à la fin de la passe.
