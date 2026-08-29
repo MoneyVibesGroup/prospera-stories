@@ -1,6 +1,6 @@
 # STORY-410 : un compte de microfinance n'a pas de canal — déclaré en « Banque », il hérite du compte comptable de la banque
 
-Status: in_progress
+Status: review
 **Service :** `balance-service` (`:3007`) · **Module :** `tresorerie`
 **Points :** 3 · **Sprint :** S20 · **Epic :** EPIC-022 · **Complexité :** medium
 **Origine :** constat PO du 2026-08-25, à la revue de la maquette **FE-049** — « …et différents
@@ -164,7 +164,88 @@ demandé une vérification plutôt qu'une intuition :
 - `MOYEN_PAR_CANAL` est un `satisfies Record<TypeCompteTresorerie, MoyenPaiement>` : il **casse à
   la compilation**, ce qui est exactement le mécanisme voulu par le point 4 de la story.
 
-### Reste à faire
+### Implémentation (fait) — commit `ca4aa43`
 
-Implémentation, portes DoD, passe de mutation, vérification docker de la persistance, revue de
-code, revue de sécurité, merge.
+| Fichier | Ce qui change |
+|---|---|
+| `tresorerie/types/tresorerie.ts` | `MICROFINANCE` dans l'énumération + sa clé `microfinance` |
+| `cahiers/agregation/types/ventilation.ts` | `ComptesVentilation.microfinance`, défaut `538` |
+| `agregation/schemas/comptes-ventilation.schema.ts` | `@Prop() microfinance?` |
+| `agregation/dto/agregation.dto.ts` | la clé au corps du PUT **et** à la réponse |
+| `rapprochement/types/rapprochement.ts` | `MOYEN_PAR_CANAL.MICROFINANCE = 'BANQUE'` (D-410-3) |
+| `tresorerie/dto/*.ts` | `enumName: 'CanalTresorerie'` aux **trois** sites (point 4) |
+
+Le `Record<TypeCompteTresorerie, MoyenPaiement>` a bien **cassé à la compilation** à l'ajout de la
+valeur — le mécanisme que le point 4 de la story attendait a fonctionné.
+
+### Portes DoD
+
+Lint **0 warning** · build OK · **3 223** unitaires verts · **809** e2e verts · couverture globale
+**99,14 / 92,02 / 98,64 / 99,25** (seuils 65/90/90/90), `modules/tresorerie/types` à 100 %.
+
+### Passe de mutation — 4 mutations, 4 rouges, aucune par erreur de compilation
+
+| Mutation | Test qui vire au rouge |
+|---|---|
+| `MICROFINANCE: 'banque'` dans `CLE_VENTILATION_PAR_TYPE` | `AC-1/AC-4 — prend SA clé, jamais celle de la banque` |
+| `microfinance: '999'` (défaut hors plan) | `les défauts sont des comptes de DÉTAIL du plan SYSCOHADA livré` |
+| `MOYEN_PAR_CANAL.MICROFINANCE = 'ESPECES'` | `un relevé MICROFINANCE apparie les lignes saisies « BANQUE »` |
+| `enumName` retiré de `CreerCompteTresorerieDto` | `le compte de trésorerie la publie en LECTURE, l'accepte en ÉCRITURE et en FILTRE` |
+
+⚠️ La première est celle qui compte : `Record<…, string>` accepte `'banque'` **sans broncher** — le
+compilateur ne dit rien, seul le test parle. Une mutation rouge par erreur de compilation n'aurait
+rien prouvé (leçon STORY-411/179).
+
+### Vérification docker — stack neuve (`down -v`), parcours HTTP réel
+
+Organisation `6a93…4cca`, dossier `6a93…4ccf`, référentiel `syscohada-revise@2.1`. Service
+redémarré sur la branche (`Found 0 errors. Watching for file changes.` compté **avant** toute
+mesure).
+
+**① Le canal existe, et il prend SA contrepartie (AC-1)**
+
+| Appel | HTTP | Résultat |
+|---|---|---|
+| `POST` compte `MICROFINANCE` | **201** | `compteComptable: "538"`, `compteComptableParDefaut: true` |
+| `POST` compte `BANQUE` | **201** | `compteComptable: "521"` — **inchangé** (AC-2) |
+| `POST` compte `COOPERATIVE` | **400** | `type must be one of … BANQUE, MOBILE_MONEY, CAISSE, MICROFINANCE` |
+| `GET ?type=MICROFINANCE` | **200** | le filtre reconnaît le canal neuf |
+
+**② Le paramétrage est bien LE SIEN, et il est relu (D-089-4)**
+
+| Appel | HTTP | Résultat |
+|---|---|---|
+| `GET comptes-ventilation` (aucune surcharge) | **200** | `"microfinance":"538"` publié à côté des 7 autres |
+| `PUT { "microfinance": "5381" }` | **200** | la clé est acceptée par la whitelist stricte |
+| `GET` des comptes après la surcharge | **200** | `MICROFINANCE → 5381`, **`BANQUE → 521` immobile** |
+| `PUT { "microfinance": "999" }` | **400** | `COMPTE_VENTILATION_INCONNU`, le compte et le référentiel nommés |
+| `PATCH { "type": "BANQUE" }` sur le compte SFD | **400** | `property type should not exist` — canal immuable (D-410-4) |
+
+**③ En base — ce que les e2e ne peuvent pas prouver**
+
+```
+comptes_tresorerie  : 2 documents, 0 sans dossierId,
+                      0 document portant un `compteComptable` FIGÉ
+                      { type: 'MICROFINANCE', libelle: 'FUCEC — compte mutuelle' }
+comptes_ventilation : 1 document, portant `microfinance: '5381'` — et RIEN d'autre
+                      (les 7 défauts ne sont pas recopiés)
+```
+
+⚡ Les deux compteurs à `0` sont l'essentiel : le compte de microfinance **ne fige pas** son défaut
+en base, donc il suivra une correction du paramétrage — et le paramétrage **ne recopie pas** les
+défauts, donc il suivra une correction du plan. Le canal neuf hérite des deux garanties de la
+story d'origine, sans en affaiblir aucune.
+
+Aucune écriture multi-documents n'est introduite par cette story (un compte = un document, un
+paramétrage = un document upserté) : il n'y a pas de transaction à prouver ici.
+
+Stack arrêtée (`docker compose stop`).
+
+### ⛔ Constat relevé au passage — HORS PÉRIMÈTRE, non corrigé
+
+Le défaut `fournisseurs: '401'` **n'est rattachable à aucune racine du plan `sfd-bceao@2.0`** (le
+RCSFD n'a pas de racine de classe 4 sous `41`). Or `agregation.service.ts:143` appelle
+`validerTous` avant chaque agrégation ⇒ sur un dossier au référentiel SFD, l'agrégation des
+cahiers échoue en `COMPTE_VENTILATION_INCONNU`. C'est **antérieur à cette story** et vise un autre
+canal ; le corriger demande des défauts **par référentiel**, ce que le périmètre exclut
+explicitement. Signalé pour arbitrage PO.
