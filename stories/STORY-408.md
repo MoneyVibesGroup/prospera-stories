@@ -1,6 +1,6 @@
 # STORY-408 : Le vocabulaire mobile money ne se paramètre qu'en se trompant d'abord
 
-Status: review
+Status: done
 
 **Épic :** EPIC-021 — Profils d'import & mapping réutilisable
 **Service :** `balance-service` (`:3007`) — `modules/balance/imports`
@@ -281,3 +281,160 @@ l'analyse du fichier de 200 lignes : **22 = 22**. La story n'ajoute aucune écri
 « 200, aucune persistance » tient.
 
 Stack arrêtée (`docker compose stop`) à la fin de la passe.
+
+---
+
+## Revue de code — 1 constat, 1 corrigé (commit `eb90fe5`)
+
+Scan par le skill `prospera-code-review` (préparation `haiku`, analyse `opus`), **plus** la lentille
+over-engineering `ponytail-review` sur le même diff. Synthèse, filtrage et correctifs **en session**.
+
+### ⚡⚡ Le constat : une valeur de vocabulaire n'est **pas** un extrait d'erreur
+
+La valeur publiée passait par `extraitBorne` — 80 caractères puis « … ». C'est l'utilitaire des
+**messages d'erreur**, où personne ne renvoie la chaîne au serveur. Or une valeur de vocabulaire fait
+l'**aller-retour** : le comptable la recopie dans `valeursCredit`, et `lireMontantEtSens` la compare à
+la cellule. Deux conséquences, toutes deux vérifiées :
+
+1. une valeur de plus de 80 caractères était publiée **inapparaiable** ⇒ `SENS_INDETERMINE`
+   **définitif**, que rouvrir le profil **ne répare pas** puisque l'analyse republie la même chaîne ;
+2. deux valeurs partageant leurs 80 premiers caractères sortaient **identiques** d'une liste dite
+   « distincte » — deux cases à cocher rigoureusement semblables à l'écran.
+
+⚡ **La réponse était déjà dans le contrat d'écriture, et je ne l'avais pas regardé** :
+`valeursCredit`/`valeursDebit` portent `@ArrayMaxSize(50)` et `@MaxLength(120, { each: true })`. Les
+deux bornes de l'analyse en sont désormais **dérivées** (plus de littéraux recopiés, leçon STORY-390) :
+publier une 51ᵉ valeur, ou une valeur plus longue, ce serait publier un classement que la création de
+profil **refuse ensuite en 400**. La valeur est publiée **verbatim**, et une colonne portant une valeur
+trop longue est **écartée**, jamais rognée.
+
+⚡ Second effet : `@ArrayMaxSize`/`@MaxLength` ne génèrent **rien** dans le document OpenAPI. Le contrat
+annonçait une liste de chaînes **sans bornes** — un client généré depuis le schéma pouvait construire un
+envoi refusé en 400 sans que rien ne l'ait prévenu. Les bornes sont désormais **publiées**
+(`maxItems`/`maxLength`) et l'égalité est gardée par `openapi-contract.e2e-spec.ts`.
+
+`plafondDepasse: boolean` devient `motifEcart?: MotifEcartVocabulaire`
+(`TROP_DE_VALEURS` | `VALEUR_TROP_LONGUE`) : deux causes distinctes ne se disent pas de la même façon au
+comptable, et un enum atterrit en union de littéraux là où une phrase resterait un commentaire à parser
+(leçon STORY-375).
+
+**Lentille ponytail** — une seule prise retenue : trois tableaux parallèles indexés par `i` fusionnés en
+un état par colonne. Écarté : `colonne` jugé redondant avec `colonnesDetectees[index]` (les mappings
+référencent les colonnes **par nom**, `RefColonne` — la jointure du front se fait dessus).
+
+---
+
+## Revue de sécurité — 2 constats, 2 corrigés (commit `1e4f0a6`)
+
+Scan par `prospera-security-review` (éligibilité + contexte `haiku`, analyse `opus`, **aucun
+downgrade**). Les deux constats ont **la même racine**, et c'est la dimension que ma conception avait
+écartée **avec un argument faux** : j'avais raisonné « les octets publiés sont bornés par les octets de
+cellules lus », en oubliant qu'une **entrée de réponse est émise par colonne**, y compris pour une
+colonne **vide** — 40 octets de sortie pour 1 octet (`;`) d'entrée.
+
+### ① CWE-407 — balayage quadratique `lignes × colonnes déclarées`
+
+La boucle interne était bornée par le nombre d'**en-têtes**, pas par la largeur de la ligne : une ligne à
+**une seule cellule** coûtait quand même une itération par colonne déclarée. Node étant **mono-thread**,
+ce balayage synchrone gèle `/health` et **tous les autres tenants** — le service est mutualisé.
+
+**Mesuré sur le code** (50 000 colonnes × 20 000 lignes à une cellule) : **13 123 ms** de boucle
+d'événements bloquée pour ~150 Ko envoyés. Correctif : `Math.min(etats.length, ligne.length)` — aucun
+changement de comportement, `ligne[i]` au-delà valait déjà `undefined` ⇒ `''` ⇒ `continue`.
+
+### ② CWE-770 — allocation et réponse proportionnelles au **nombre de colonnes**
+
+Un objet + un `Set` + un tableau étaient alloués **par colonne déclarée**, avant toute lecture, et une
+entrée de réponse était émise par colonne même vide. Même mesure : **2 088 898 octets** de réponse.
+Correctif : `entetes.slice(0, MAX_COLONNES_VOCABULAIRE)` **avant** toute allocation, borne **publiée**
+(`colonnesPlafond`) — sans elle au contrat, un client recevant moins d'entrées que de colonnes croirait
+le vocabulaire complet, le silence même que D-408-1 refuse.
+
+| | avant correctif | après |
+|---|---|---|
+| durée du balayage | **13 123 ms** | **10 ms** |
+| poids de `valeursDistinctes` | **2 088 898 o** | **7 898 o** |
+
+⚠️ **La garde de ① a d'abord été écrite en seuil temporel** (`< 2 s`) — et **40 millions d'itérations
+passent dessous** : la mutation qui rétablit le défaut restait **verte**. Un seuil temporel dépend de la
+machine ; il a été remplacé par un **comptage des indices lus** via un `Proxy`, déterministe. C'est
+exactement le « test qu'un code bugué franchit » que la DoD nomme, pris sur le fait.
+
+### 4 mutations de plus — 4 rouges
+
+| # | Mutation | Rouge |
+|---|---|---|
+| **M12** | retour à la publication **tronquée** (`extraitBorne`) | « publie la valeur VERBATIM » |
+| **M13** | la garde de longueur saute (`× 10`) | « écarte la colonne dont une valeur dépasse… » |
+| **M14** | les bornes du DTO d'écriture redeviennent divergentes | `openapi-contract` |
+| **M15** | le plafond de colonnes saute (`× 1000`) | « ne balaie ni ne publie au-delà du plafond » |
+| **M16** | retour au balayage quadratique | « ne lit pas une cellule au-delà de la largeur réelle » |
+
+⚠️ **M16 est passée VERTE au premier essai** — c'est elle qui a démasqué le seuil temporel ci-dessus.
+
+---
+
+### Vérification docker REJOUÉE sur l'état final — stack neuve (`down -v`)
+
+Les correctifs changent la **réponse elle-même** (verbatim, `motifEcart`, `colonnesPlafond`) : la passe
+est rejouée entière, jamais reportée depuis la mesure d'avant.
+
+- **AC-1** : les 5 valeurs de `Type` publiées, dont les 3 hors aperçu ; `valeursPlafond: 50`,
+  `colonnesPlafond: 200`.
+- **AC-3 rejoué** : `201`, `nouvelles: 8`, `rejetsTotal: 0` — le profil se complète toujours en un
+  passage.
+- ⚡ **Verbatim prouvé par les deux côtés** : une valeur de **100** caractères sort **entière** (100, pas
+  80 + « … ») ; une valeur de **130** caractères — au-delà de ce qu'un profil accepte — écarte la colonne
+  en `VALEUR_TROP_LONGUE`, liste vide.
+- ⚡⚡ **L'attaque du constat ① rejouée à travers HTTP** : fichier de **88 Ko** déclarant **50 000
+  colonnes** sur 20 000 lignes à une cellule ⇒ **HTTP 200 en 0,22 s**, **200 entrées** publiées, 9 097
+  octets de `valeursDistinctes` — et **`/health` a répondu `200` quarante fois de suite pendant
+  l'analyse**. Le service n'a jamais été bloqué.
+- Le **surcoût réel de la story** sur ce fichier piège : réponse de **150 402 o** sur le chemin
+  `BALANCE` (celui d'avant la PR, qui ne balaie pas) contre **158 304 o** en `RELEVE` — **+7 902 octets,
+  soit +5 %**, contre +2,1 Mo avant correctif.
+
+⚠️ **Exposition PRÉEXISTANTE nommée, que cette story ne ferme pas** : `colonnesDetectees` publie les
+50 000 en-têtes (150 Ko à lui seul) et **n'a jamais été borné**, avant comme après. Ce n'est pas un défaut
+introduit ici — la revue de sécurité l'a explicitement classé hors périmètre — mais il reste ouvert et
+mérite sa propre story.
+
+Stack arrêtée (`docker compose stop`).
+
+---
+
+## Progress Tracking — clôture
+
+**Statut : `done`** — implémentée, validée, **vérifiée sur stack docker neuve puis REJOUÉE sur l'état
+final**, revue (code + sécurité), mergée en rebase sur `dev`. Clôturée le **2026-08-29**.
+
+**PR** : `prospera-balance-service` **#66**, 3 commits — feature (`c28ffb7`), revue de code (`75a864a`),
+revue de sécurité (`fc2130e`). Branche `MNV-408` supprimée après merge. **Un seul dépôt de code** : aucun
+contrat d'événement Kafka n'est touché, la route est en lecture seule.
+
+**Les trois critères d'acceptation** : AC-1 ✅ (les 3 valeurs hors aperçu publiées, mesuré en docker) ·
+AC-2 ✅ (deux bornes publiées et gardées **égales à celles de l'écriture** par
+`openapi-contract.e2e-spec.ts`) · AC-3 ✅ (prouvé **des deux côtés** : 8 lignes / 0 rejet avec le
+vocabulaire publié, 5 lignes / **3 `SENS_INDETERMINE`** avec l'aperçu seul).
+
+**16 mutations, 16 rouges** — dont **deux qui ont d'abord été VERTES** et ont fait écrire le test qui
+manquait : M3 (l'off-by-one du plafond, que ni « exactement le plafond » ni « plafond + 3 » ne
+distinguaient) et M16 (le balayage quadratique, qu'un seuil temporel de 2 s laissait passer à
+40 millions d'itérations).
+
+**Ce que la story laisse volontairement ouvert**, et qui n'est pas un oubli :
+
+- **`colonnesDetectees` n'est toujours pas borné** — 50 000 en-têtes publiés font 150 Ko de réponse, avant
+  comme après cette story. Exposition **préexistante**, classée hors périmètre par la revue de sécurité,
+  et qui mérite sa propre story ;
+- une colonne au-delà de `colonnesPlafond` n'a **aucune entrée** : le client le détecte en comparant à
+  `colonnesDetectees.length`, la borne étant publiée — mais rien ne le lui **dit** entrée par entrée ;
+- sur un fichier de **moins de 50 lignes**, toutes les colonnes passent sous le plafond et sont donc
+  publiées (mesuré : `Date`, `Libellé`, `Montant`, `Référence` le sont sur l'export de 8 lignes). C'est
+  **honnête** — sur si peu de matière, rien ne distingue un vocabulaire d'une référence — et sans
+  conséquence : le front lit les valeurs de la colonne que l'humain désigne en `sens`.
+
+⚠️ **Outillage — à signaler** : **Portly indisponible** pendant toute la passe (`portly status` ⇒
+« Portly is not running and could not be launched »), exactement comme en STORY-411. Lint, build, tests,
+mutations et vérifications docker ont été lancés **directement**, hors Portly, contrairement à la règle
+du poste.
