@@ -1,6 +1,6 @@
 # STORY-409 : la devise d'un compte de trésorerie est imposée `XOF` en dur — un relevé étranger serait lu comme des francs CFA
 
-Status: in_progress
+Status: review
 **Service :** `balance-service` (`:3007`) · **Module :** `tresorerie`
 **Points :** 5 · **Sprint :** S20 · **Epic :** EPIC-022 · **Complexité :** high
 **Origine :** constat PO du 2026-08-25, à la revue de la maquette **FE-049** — « une société peut
@@ -185,3 +185,89 @@ un humain peut la déclarer) et **D-409-2** (refuser l'import sur un compte non-
 **vraie par vacuité**, puisque sans ligne le motif « aucun solde de fin » répondrait à la place de la
 devise).
 Statut aligné aux 3 endroits (en-tête, `sprint-status.yaml`, cette section).
+
+**2026-08-29 — développée, validée, vérifiée sur stack docker neuve. Statut `review`.**
+
+Branche `MNV-409` sur `balance-service`, commit `f7854ce`.
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **3211 unitaires verts** (177 suites) · **805 e2e verts** (26 suites) ·
+couverture **99,15 % stmts / 92,04 % branches / 98,64 % fonctions / 99,24 % lignes**
+(seuils 65/90/90/90).
+
+⚠️ **Portly indisponible** pendant toute la passe, comme en STORY-408 et STORY-411 : tout lancé
+directement, hors Portly.
+
+### Passe de mutation — 10 mutations, 10 rouges, toutes restaurées
+
+| # | Mutation | Ce qui vire au rouge |
+|---|---|---|
+| **M1** | la devise redevient une constante en dur à la création | « la devise DÉCLARÉE est écrite telle quelle » |
+| **M2** | le verrou de devise saute (`> 0` → `< 0`) | les 2 tests de `DEVISE_COMPTE_FIGEE` |
+| **M3** | l'écart se calcule quand même sur deux devises | AC-3 unitaire **et** e2e |
+| **M4** | la comparaison de devises disparaît | AC-3 unitaire |
+| **M5** | le refus d'import s'inverse | AC-2 + figeage de la ligne |
+| **M6** | le refus devient aveugle au profil **muet** | « un profil MUET ne refuse rien » *(voir ci-dessous)* |
+| **M7** | la ligne ne fige plus la devise du compte | « la ligne persistée FIGE la devise » |
+| **M8** | `\|\|` redevient `??` dans `deviseDuProfil` | « une devise VIDE replie aussi » |
+| **M9** | `DEVISES_SUPPORTEES` sort du vocabulaire ISO | D-409-4 (inclusion) |
+| **M10** | le refus « devise hors cible » s'inverse | les 2 tests de `DEVISE_HORS_CIBLE` |
+
+⚡ **M6 a démasqué une contre-épreuve faible, et le typage a démasqué M6.**
+Écrite au plus simple (`profil.devise !== compte.devise`), la mutation **ne compilait pas** : retirer
+le `!== undefined` fait perdre le narrowing, et `DeviseProfilIncompatibleException` exige une `string`.
+Un rouge par erreur de compilation ne prouve rien (leçon STORY-179/407). Réécrite en repli implicite
+(`profil.devise ?? 'XOF'`), elle **passait au vert** : mon test « un profil muet ne refuse rien » tournait
+sur un compte en **XOF**, où un tel repli est indistinguable du comportement correct. Le test a été
+refait sur un compte **GHS** — le seul cas où la mutation se voit, et exactement celui qui casserait tous
+les profils déjà enregistrés.
+
+### Vérification docker — stack neuve (`down -v`), parcours HTTP réel
+
+Organisation `6a93…72b4`, dossier `6a93…85d2`. Service redémarré sur la branche (`Found 0 errors`
+compté avant toute mesure).
+
+**① AC-1 — la devise devient une donnée**
+
+| Appel | Résultat |
+|---|---|
+| compte **sans** `devise` | **201**, `devise: "XOF"` — la zone UEMOA ne paie rien |
+| compte `devise: "GHS"` | **201**, `devise: "GHS"` |
+| compte `devise: "cedi"` | **400** — la liste est fermée, pas une chaîne libre |
+
+**② AC-2 — le profil est le seul endroit où un fichier déclare sa devise**
+
+| Appel | HTTP | Code |
+|---|---|---|
+| profil **XOF** → compte **GHS** | **400** | `DEVISE_PROFIL_INCOMPATIBLE`, `details: { deviseProfil: "XOF", deviseCompte: "GHS" }` |
+| profil **GHS** → compte **GHS** | **201** | 3 lignes, 0 rejet |
+| profil de cible **BALANCE** portant une devise | **400** | `DEVISE_HORS_CIBLE` |
+
+En base : `lignes_releve` groupées par devise ⇒ **3 lignes `GHS`** sur le compte ghanéen, **3 lignes
+`XOF`** sur le compte togolais. La devise est **figée par ligne**, pas relue.
+
+**③ D-409-5 — la ligne fige, le compte verrouille**
+
+| Geste sur le compte GHS (3 lignes, 1 lot) | HTTP |
+|---|---|
+| `PATCH { devise: "XOF" }` | **409 `DEVISE_COMPTE_FIGEE`**, `details: { deviseActuelle: "GHS", lignes: 3, imports: 1 }` |
+| `PATCH { libelle }` seul | **200** — renommer reste possible |
+| `PATCH { devise: "GHS" }` (identique) | **200** — re-poster n'est pas changer |
+| `PATCH { devise: "EUR" }` sur un compte **vierge** | **200** |
+
+**④ ⚡⚡ AC-3 — LA mesure, et sa contre-épreuve, sur les MÊMES données**
+
+Une balance réelle posée sur l'exercice, un `soldeApres` sur la dernière ligne : **les deux soldes sont
+présents des deux côtés**, ce qui est tout l'intérêt — le refus ne peut pas être confondu avec « il
+manque une donnée » (D-409-2).
+
+| Compte | `soldeComptableTheorique` | `soldeComptable` | `ecart` |
+|---|---|---|---|
+| **GHS** (comptabilité XOF) | `0` | `0` | **`null`** + motif nommant `GHS` et `XOF` |
+| **XOF** (mêmes lignes, même balance) | `0` | `0` | **`0`**, aucun motif |
+
+⛔ **C'est ce `0` que le compte ghanéen aurait affiché** avant la story : une réconciliation parfaite, et
+parfaitement fausse — le mode de panne n°2 du programme, sur le chiffre que le cabinet signe.
+
+Stack arrêtée (`docker compose stop`).
