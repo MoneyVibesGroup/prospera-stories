@@ -1,6 +1,6 @@
 # STORY-410 : un compte de microfinance n'a pas de canal — déclaré en « Banque », il hérite du compte comptable de la banque
 
-Status: review
+Status: done
 **Service :** `balance-service` (`:3007`) · **Module :** `tresorerie`
 **Points :** 3 · **Sprint :** S20 · **Epic :** EPIC-022 · **Complexité :** medium
 **Origine :** constat PO du 2026-08-25, à la revue de la maquette **FE-049** — « …et différents
@@ -249,3 +249,90 @@ RCSFD n'a pas de racine de classe 4 sous `41`). Or `agregation.service.ts:143` a
 cahiers échoue en `COMPTE_VENTILATION_INCONNU`. C'est **antérieur à cette story** et vise un autre
 canal ; le corriger demande des défauts **par référentiel**, ce que le périmètre exclut
 explicitement. Signalé pour arbitrage PO.
+
+---
+
+## Revue de code — 3 constats, 3 corrigés, dont **1 bloquant** (commit `b709ce7`)
+
+### ⚡⚡ BLOQUANT — le canal neuf **dégradait** la lecture du rapprochement (D-410-5)
+
+`MICROFINANCE` est le **premier** canal sans moyen de paiement correspondant (D-410-1 :
+`MOYENS_PAIEMENT` reste à trois valeurs). Conséquence que la conception avait manquée : un cahier
+payé depuis un compte SFD se saisit en `BANQUE`, la ventilation impute donc `banque` (`521`), et la
+balance **ne porte jamais** `538`. `apparierCompteBalance('538', …)` ne retenait alors aucune ligne
+⇒ `nbComptes = 0` ⇒ `soldeComptable = 0`.
+
+Et **aucun** des deux avertissements existants ne pouvait le voir : `nbComptes > 1` est faux à zéro,
+`cumulNonVentilable` aussi. L'écran publiait un écart égal à la **totalité** du solde du relevé, en
+le présentant comme une donnée comptable — le **quatrième** zéro faussement comptable de ce même
+calcul, après ceux de STORY-147, 172 et 370. ⛔ Le même compte déclaré en `BANQUE` — le
+contournement d'**avant** la story — s'appariait, lui.
+
+**Correctif (D-410-5)** : un avertissement quand la balance est **présente** et qu'aucune ligne
+n'apparie le compte déclaré. Le `0` reste publié — c'est le seul chiffre honnête — mais il cesse de
+se taire. Jamais un refus. La garde est **générique** : elle couvre aussi un `compteComptable`
+saisi à côté du plan de saisie, quel que soit le canal.
+
+### NON-BLOQUANT — le test qui disait « et en FILTRE » ne gardait pas le filtre
+
+`ListerComptesTresorerieQueryDto` n'est pas un schéma de `components` : c'est un **paramètre de
+requête**, invisible aux deux assertions du test. Mutation prouvée par la revue : retirer son
+`enumName` laissait les 53 tests du fichier **au vert**. Le test lit désormais
+`paths[…].get.parameters`.
+
+### NON-BLOQUANT — la garde neuve annonçait une portée qu'elle n'avait pas
+
+Le docblock disait « tous les dossiers du référentiel » alors que le balayage ne charge que
+`syscohada-revise@2.1`. La portée est maintenant **écrite avec sa raison** — sur `sfd-bceao@2.0` le
+défaut *antérieur* `fournisseurs: '401'` n'est rattachable à aucune racine — et le défaut que
+**cette** story ajoute (`538`) est vérifié sur les **trois** référentiels packagés.
+
+### Écartés par la revue, à raison
+
+`538` sémantiquement faux sur un dossier SFD (exclu nommément du périmètre, comme `521`/`551`/`571`)
+· `fournisseurs: '401'` cassant l'agrégation SFD (antérieur, signalé pour arbitrage PO) ·
+`MOYEN_PAR_CANAL.MICROFINANCE = 'BANQUE'` (D-410-3, écrite avant le code).
+
+## Revue de sécurité — **0 vulnérabilité** (confiance ≥ 80)
+
+Les quatre pistes instruites, toutes écartées avec leur raison :
+
+| Piste | Pourquoi elle ne tient pas |
+|---|---|
+| Injection NoSQL / pollution de prototype par la clé `microfinance` du PUT | la clé itérée vient de `CLES_COMPTES_VENTILATION` (liste **fermée** de 8 littéraux), jamais des clés du corps ; `whitelist` + `forbidNonWhitelisted` refusent en 400 en amont ; la valeur n'atterrit qu'en **valeur** d'un `$set`, jamais en clé ni en filtre |
+| Une valeur d'enum en plus contournant une garde ailleurs | les deux seules tables indexées par canal sont des `satisfies Record<TypeCompteTresorerie, …>` — un `Record` partiel est **impossible** ; aucun `switch` sur le canal ; aucune garde d'autorisation ni d'entitlement n'est indexée par canal |
+| Fuite inter-tenant / XSS par l'avertissement neuf | `compte` vient de `trouver(user, dossier, id)` — org du JWT, dossier du param gardé, **404** hors portée ; et `compteComptable` était **déjà publié en clair** dans la réponse : l'avertissement n'ajoute aucune information |
+| Intégrité comptable de `MICROFINANCE → BANQUE` | `canalCompatible` est un filtre **restrictif** sur un vivier déjà scopé ; le vivier exclut les lignes engagées et justifiées ; l'appariement manuel refait le contrôle et l'index unique partiel reste le filet (409) |
+
+## Vérification docker REJOUÉE sur l'état final — le correctif D-410-5, en vrai
+
+Service recompilé sur le commit de revue (`Found 0 errors.` horodaté **après** le correctif), même
+organisation et même dossier. Balance posée sur l'exercice portant `521100` et `701000` — **aucune
+ligne `53x`**.
+
+| Compte interrogé | `nbComptesApparies` | `soldeComptable` | Avertissement |
+|---|---|---|---|
+| **MICROFINANCE** (`5381`) | **0** | `0` | **présent**, nommant `5381` et disant que ce `0` n'est pas un solde à zéro |
+| **BANQUE** (`521`) | 1 | `122 500 000` | **aucun** — pas de bruit permanent |
+
+⚡ C'est la **contre-épreuve sur les mêmes données** qui compte : le même appel, la même balance, et
+seul le compte qui n'y figure pas déclenche le mot. Sans le correctif, la première ligne aurait
+publié `0` et un écart plein, en silence.
+
+Stack arrêtée (`docker compose stop`).
+
+## Progress Tracking — clôture
+
+**Statut : `done`** — implémentée, validée, vérifiée sur stack docker neuve, revue (3 constats, 3
+corrigés, dont 1 bloquant), revue de sécurité (0 vulnérabilité), puis **re-vérifiée en docker sur
+l'état final**. PR **#68** rebase-mergée sur `dev` (2 commits), branche supprimée.
+
+Les 4 critères d'acceptation sont tenus : **AC-1** (le canal prend sa clé, `538`), **AC-2** (les
+comptes restés en `BANQUE` ne bougent pas d'eux-mêmes), **AC-3** (l'énumération sort **nommée**,
+`CanalTresorerie`, aux trois sites — écriture, lecture, filtre), **AC-4** (le défaut d'un compte
+`MICROFINANCE` n'est pas celui de `BANQUE`, prouvé en unitaire, en e2e et en docker).
+
+⛔ **Hors périmètre, signalé pour arbitrage PO** : le défaut `fournisseurs: '401'` n'est rattachable
+à aucune racine de `sfd-bceao@2.0` ⇒ sur un dossier au référentiel SFD, l'agrégation des cahiers
+échoue en `COMPTE_VENTILATION_INCONNU`. Antérieur à cette story, il appelle des défauts **par
+référentiel** — un sujet à lui seul.
