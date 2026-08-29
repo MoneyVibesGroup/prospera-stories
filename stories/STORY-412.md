@@ -1,10 +1,10 @@
 # STORY-412 : Les exonérations de MFP ne sont ni transcrites ni exposées — le plancher peut surestimer l'impôt
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
 **Service :** `balance-service` (`:3007`) — `modules/fiscal` (liquidation) · **et** le paquet fiscal `TG@YYYY` (STORY-078)
-**Points :** 5 · **Sprint :** S20
+**Points :** 5 · **Sprint :** S20 · **Complexité :** high
 **Origine :** relevée le **2026-08-26** en construisant la maquette **FE-051**, en confrontant
 `LiquidationResponseDto` au paquet fiscal du projet (`referentiels/paquet-fiscal-togo-2026.json`).
 
@@ -86,6 +86,92 @@ se réclame que si quelqu'un s'aperçoit qu'il l'était.
 
 ---
 
+## Conception — écrite AVANT le code
+
+### D-412-1 — une seule des quatre exonérations est **constatable**, et le code ne doit pas prétendre le contraire
+
+Vérifié plutôt que supposé : `typeEntite` (la seule qualification d'entité que la plateforme
+détienne, `dossier-service`) vaut `ENTREPRISE | MICROFINANCE | ASSURANCE`. **Rien** n'y dit
+« coopérative », « exonérée d'IS » ou « agréée au code des investissements ». Seule
+`dateCreation` — déjà lue par `ContexteFiscalService.chargerProfilFiscal` pour l'exonération TPU —
+permet de trancher « entreprise nouvelle : 12 premiers mois ».
+
+⇒ La transcription porte donc un **mode de constatation** par exonération :
+
+| mode | ce que le moteur en fait |
+|---|---|
+| `DATE_CREATION` | **appliquée** si la donnée le prouve (AC-2) |
+| `NON_CONSTATABLE` | **jamais** appliquée d'office ; publiée dans la liste à vérifier (AC-3) |
+
+⛔ **Aucune surface de déclaration n'est ouverte par cette story.** Déclarer « ce dossier est une
+coopérative » est une donnée d'identité fiscale qui appelle sa propre story (schéma, endpoint,
+RBAC, audit) — exactement comme `natureActivite` a eu la sienne en 095. Ce que la story livre est
+la **moitié qui manque au contrat** : la liste nommée, avec ses codes stables, prête à être
+consommée par cette surface quand elle existera. Hook inerte, documenté ici.
+
+### D-412-2 — fail-closed dans les **deux** sens, et ce n'est pas symétrique
+
+- **Paquet muet** ⇒ aucune exonération, avertissement `EXONERATIONS_NON_PACKAGEES` (AC-4).
+- **Mode inconnu** (un paquet enrichi sans ce dépôt) ⇒ traité en `NON_CONSTATABLE`, donc publié et
+  non appliqué. Jamais deviné.
+- **`dateCreation` absente** ⇒ pas d'exonération + `DATE_CREATION_INCONNUE`.
+- **Exercice à cheval sur la fin des 12 mois** ⇒ **aucun prorata**, avertissement
+  `EXONERATION_PARTIELLE_A_ARBITRER` (AC-6). La loi exonère une **période**, pas une fraction
+  d'exercice : répartir au jour le jour serait une règle que personne n'a écrite.
+
+⚠️ Le sens du repli est celui de tout le moteur (D-095-1, « ne jamais présumer une faveur
+fiscale ») : dans le doute, la MFP **reste calculée** — mais la raison du doute est **publiée**, ce
+qui est précisément ce qui manquait. Une exonération tue coûte de l'impôt en trop ; une exonération
+supposée coûte un redressement. La liste à vérifier est ce qui évite d'avoir à choisir.
+
+### D-412-3 — la fenêtre de début d'activité est la **même règle** que celle de la TPU : une seule implémentation
+
+`evaluerExonerationDebutActivite` (TPU, Art. 128, 24 mois) et l'exonération MFP (Art. 121, 12 mois)
+posent la **même** question : « l'exercice tombe-t-il dans une fenêtre de N mois après la date de
+création ? ». Les trois cas et l'interdit de prorata sont identiques.
+
+⇒ Le calcul est extrait **une fois** dans `fiscal.regles.ts` (`situerExerciceDansFenetre`), et les
+**deux** branches l'appellent. Chacune garde ses codes d'avertissement et son article : c'est la
+**décision** qui diffère, pas l'arithmétique. Deux implémentations de la même règle, ce sont deux
+dates de fin différentes le jour où l'une est corrigée — le défaut que D-083-1 nomme déjà pour les
+montants. La signature publique de la fonction TPU et ses codes ne bougent pas : ses tests
+existants sont la preuve de non-régression.
+
+### D-412-4 — le taux majoré est **publié et nommé non géré**, jamais appliqué en silence
+
+Le déclenchement (« importation en vue de la revente de véhicules d'occasion ») ne se déduit
+d'aucune donnée détenue — même impasse que les trois exonérations non constatables. AC-5 laisse le
+choix : il est donc **publié** (`tauxMajoreMfp`, avec son cas, son code et sa source) et
+**explicitement déclaré non géré** (`TAUX_MAJORE_NON_GERE`). La MFP se calcule au taux de droit
+commun. ⛔ L'appliquer d'office doublerait le minimum forfaitaire de tous les autres
+contribuables ; le taire liquide l'importateur-revendeur à la moitié de son minimum.
+
+### D-412-5 — l'artefact fiscal est **byte-identique dans deux dépôts** : la story en touche deux
+
+`dossier-service` embarque une **copie** du paquet et **vérifie son sha256 au chargement**
+(`portefeuille/echeance/paquet-fiscal.util.ts`, patron STORY-368). Modifier la source dans
+`balance-service` sans y reporter la copie **et** l'empreinte ferait diverger les deux en silence :
+le portefeuille servirait des échéances d'un paquet que le moteur n'applique plus.
+
+⇒ **Deux dépôts, deux branches `MNV-412`, deux PR, intégrées ensemble** — même discipline qu'un
+changement de contrat d'événement. Le contenu lu par `dossier-service`
+(`acomptesProvisionnels.echeances`) n'est **pas** touché par la transcription : le report est une
+mise à niveau d'octets, pas un changement de comportement, et c'est vérifiable.
+
+⚠️ Deux autres copies existent et sont **déjà divergentes** de l'artefact produit —
+`docs/referentiels/` (16 Ko) et `bilan-service/scripts/referentiels/sources/` (4,7 Ko) : elles ne
+sont dans la chaîne de production d'aucun service et ne portent aucune garde d'empreinte. Les
+aligner déborderait ; leur divergence est **antérieure** et signalée ici.
+
+### Périmètre — ce que cette story ne fait pas
+
+- **Aucune surface de déclaration** (coopérative, agrément, import-revente) : D-412-1.
+- **Aucune application du taux majoré** : D-412-4.
+- **Aucune règle d'arrondi** (`is.arrondi`, `acomptesProvisionnels.calcul`) — la story le dit
+  elle-même : à ficher séparément, l'urgence des deux sujets n'est pas la même.
+- **Aucun changement du `max(IS ; MFP)`** : la règle ne bouge pas, c'est son **entrée** qui devient
+  conditionnelle.
+
 ## Critères d'acceptation
 
 1. Le paquet publie `minimumForfaitairePerception.exonerations[]` **structuré** (code, libellé,
@@ -146,3 +232,26 @@ décale une proposition de moins de mille francs.
 
 - Créée le 2026-08-26 par la revue métier de la maquette **FE-051** (« se mettre à la place d'un
   expert-comptable »), demandée par le PO.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branches `MNV-412` (`docs/`, `balance-service`, `dossier-service`),
+ouvertes le 2026-08-29.
+
+### Conception (fait)
+
+D-412-1 à D-412-5 écrites **avant** la première ligne de code. Les trois points qui ont demandé une
+vérification plutôt qu'une intuition :
+
+- `typeEntite` ne connaît **pas** la coopérative (lu dans `dossier-service`) ⇒ une seule des quatre
+  exonérations est constatable ;
+- `dossier-service` **vérifie le sha256** du paquet embarqué ⇒ la story touche **deux** dépôts ;
+- la fenêtre « N mois après la création » existe **déjà** dans la branche TPU ⇒ on l'extrait, on ne
+  la réécrit pas.
+
+### Reste à faire
+
+Transcription du paquet + rebuild d'artefact, extraction, évaluation, exposition au contrat, report
+dans `dossier-service`, portes DoD, passe de mutation, vérification docker, revues, merge.
