@@ -1,6 +1,6 @@
 # STORY-414 : Les types de crédits d'impôt sont validés mais jamais publiés — jumelle de STORY-397
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
 **Service :** `balance-service` (`:3007`) — `modules/fiscal` (liquidation)
@@ -110,3 +110,104 @@ de la route qui publie cette liste. À porter dans la définition de fini du mod
 - Créée le 2026-08-26 par la revue métier de la maquette **FE-051**, demandée par le PO.
 - La maquette FE-051 **affiche l'écart à l'écran** en attendant, pour que le comptable sache que le
   champ est libre et pourquoi.
+
+---
+
+## Progress Tracking
+
+**Statut : `done`** — clôturée le **2026-08-30**. PR **#72** (`balance-service`) rebase-mergée sur
+`dev`, branche supprimée.
+**Un seul dépôt module** : la story ne touche **pas** le paquet fiscal, donc pas d'octets, donc pas
+de `dossier-service`.
+
+### Conception
+
+| Décision | Ce qu'elle tranche |
+|---|---|
+| **D-414-1** | La liste est publiée **dans `LiquidationResponseDto`** (`typesCredits[]`), comme la story le recommande : l'écran appelle déjà cette route, la liste dépend du même exercice et du même paquet, et une route dédiée ajouterait un aller-retour **et** un quatrième chemin littéral sous un préfixe qui en compte déjà beaucoup. ⇒ le piège de l'ordre des routes (`credits/types` avant `credits/:id`) ne se pose même pas. |
+| **D-414-2** | ⛔ **La même valeur, pas deux extractions.** `typesCredits` est la variable `types` que le service extrait **déjà** pour valider le `POST` (`extraireTypesCreditImpot`). Deux extractions, ce serait une liste qui pourrait proposer un code refusé — le défaut d'origine reculé d'un cran, exactement ce qu'AC-4 interdit. |
+| **D-414-3** | AC-2 (« l'absence de `posteLiasse` est **distinguable** d'un `posteLiasse` non renseigné ») est tenu en publiant la **note du paquet** (`noteTypesCredits`), qui **atteste** lesquels n'ont pas de case : « RSL, RSH et la retenue non-résidents n'ont pas de case dédiée dans la grille A..L ». ⛔ Dériver un booléen « sans case » de l'absence du champ aurait **inventé une certitude que le paquet ne donne pas** — c'est du fiscal déduit, ce que NFR-A06 interdit. |
+| **D-414-4** | Liste vide ⇒ `motifTypesCredits: TYPES_CREDITS_NON_PACKAGES`, jamais un tableau vide muet (AC-3). Le `POST` reste **fail-closed** : tout crédit est alors refusé, comme aujourd'hui. |
+
+### Implémentation
+
+| Fichier | Ce qui change |
+|---|---|
+| `types/liquidation.ts` | `MOTIFS_TYPES_CREDITS_ABSENTS` + trois champs sur `Liquidation` |
+| `liquidation.regles.ts` | `extraireNoteTypesCreditImpot` (6 lignes) ; `liquider()` publie liste, note et motif |
+| `liquidation.service.ts` | passe la variable `types` **déjà extraite** — aucune seconde lecture du paquet |
+| `dto/liquidation-response.dto.ts` | `TypeCreditImpotResponseDto` + `typesCredits`, `noteTypesCredits`, `motifTypesCredits` |
+
+⛔ **Zéro changement de comportement sur le `POST`** : la validation, ses codes de refus et son
+caractère fail-closed sont **intacts**. Cette story ne fait que **publier ce qui était déjà là**.
+
+### Portes DoD
+
+lint 0 warning · build OK · **3 276** unitaires · **817** e2e · couverture
+**99,15 / 92,10 / 98,65 / 99,26**.
+
+⚠️ Un fichier e2e a échoué **une fois** sur quatre exécutions, sans reproduction (les trois autres
+passages : 817/817). Aucun lien avec le diff — aucune des routes touchées n'y figure.
+
+### Passe de mutation — 3 mutations, 3 rouges **par assertion**
+
+| Mutation | Effet |
+|---|---|
+| la liste publiée est **tronquée** (`types.slice(0, 2)`) — le scénario exact d'AC-4 | rouge : le test traverse les **deux** chemins réels (publication **et** validation), il ne compare pas une extraction à elle-même |
+| le motif disparaît quand la liste est vide | rouge (AC-3) |
+| la note du paquet remplacée par une chaîne **valide mais fausse** | rouge (AC-2) |
+
+⚠️ La 3ᵉ mutation a d'abord rougi **par erreur de compilation** (import devenu inutilisé) — ce qui
+ne prouve rien. Refaite en valeur *valide mais fausse* (`'note du paquet'`), elle rougit par
+**assertion**.
+
+### Vérification docker — AC-4 prouvé de bout en bout
+
+`GET …/fiscal/liquidation` publie les **cinq** types, `RCM`→`I`, `REGIME_DEROGATOIRE`→`J`, et
+`RSL`/`RSH`/`RETENUE_NON_RESIDENTS` **sans case**, avec la note qui l'atteste.
+
+Puis, sur le **même** dossier, les six `POST …/fiscal/credits` :
+
+| Code envoyé | HTTP |
+|---|---|
+| `RCM`, `REGIME_DEROGATOIRE`, `RSL`, `RSH`, `RETENUE_NON_RESIDENTS` (les 5 **publiés**) | **201** × 5 |
+| `RCM_BIS` (hors liste) | **400** |
+
+⇒ la liste publiée est **exactement** celle que le `POST` accepte : elle ne promet rien qu'elle ne
+tienne, et ne tait rien qu'elle admette. `creditsHorsGrille` sort à **3 000** sur 5 000 de crédits
+— les trois types sans case, cohérents avec la note publiée **avant** la saisie.
+
+---
+
+## Progress Tracking — clôture
+
+**Statut : `done`** — implémentée, validée, vérifiée sur stack docker, revue (**4 constats, 3
+corrigés, 1 consigné**), revue de sécurité (**0 vulnérabilité**). PR **#72** rebase-mergée sur
+`dev` (2 commits).
+
+Les 4 critères d'acceptation sont tenus.
+
+### Revue de code — 4 constats (commit `a1cd65c`)
+
+| Constat | Ce qu'il valait |
+|---|---|
+| **F-414-1 — bloquant** | trois champs neufs, **un schéma neuf** et **une énumération neuve** entraient au contrat OpenAPI **sans une seule assertion** dans le fichier qui garde ce contrat — alors que le bloc STORY-412, dans **le même fichier** et sur **le même DTO**, porte l'avertissement : `collectCoverageFrom` exclut les `*.dto.ts`, donc retirer un champ ou un `enumName` **ne fait bouger aucun chiffre de couverture**. Le client généré par `openapi-typescript` aurait perdu la liste et le formulaire serait retombé sur les codes en dur — **AC-1 défait sans qu'un test rougisse**. 3 tests ajoutés. |
+| **F-414-2** | la description interdisait au front la **seule lecture machine** dont il dispose (« c'est la note qui l'atteste, jamais l'absence seule ») et contredisait le champ jumeau. Or **le moteur lui-même ne connaît que l'absence** : `creditsHorsGrille` se calcule dessus. ⇒ l'absence dit **que**, la note dit **pourquoi**, et les deux descriptions sont alignées. ⚡ Ma décision **D-414-3 était à moitié fausse** : la note atteste, mais elle ne remplace pas le signal exploitable. |
+| **F-414-4** | le motif affirmait « le paquet ne publie pas la rubrique » alors qu'il est **aussi** émis quand des entrées **sans `code`** sont écartées : celui qui diagnostique serait allé chercher une rubrique **absente** au lieu d'une rubrique **malformée**. Libellé rendu neutre. |
+| **F-414-3 — consigné, non corrigé** | ⛔ **La liste n'est disponible que là où la liquidation aboutit.** `GET …/fiscal/liquidation` répond **404** sans balance de base fiscale, **409** si un taux n'est pas packagé ou le CA non sourcé — alors que `POST …/fiscal/credits` fonctionne **sans aucune balance**. Sur un dossier neuf, le comptable peut donc saisir ses attestations de retenue **sans jamais obtenir la liste**, et retombe sur les codes de mémoire : le défaut que la story ferme, dans le seul état où il reste ouvert. C'est la conséquence directe de D-414-1 (l'option **recommandée par la story**) ; le refermer demande la **route dédiée** que la story écarte — à ficher si le PO le veut. |
+
+**5 mutations au total, 5 rouges par assertion**, dont les deux qui prouvent le nouveau filet de
+contrat : `enumName` retiré ⇒ 2 rouges, `type: [String]` à la place du schéma ⇒ 2 rouges.
+
+### Revue de sécurité — 0 vulnérabilité
+
+PR **strictement additive en lecture**, sur une donnée **non tenant** (l'artefact `pays × année`,
+identique pour toutes les organisations), derrière une chaîne de guards **inchangée**.
+
+| Piste instruite | Pourquoi elle ne tient pas |
+|---|---|
+| Élargissement de surface de lecture | du **droit fiscal publié**, identique pour tous ; route toujours `@Roles(TENANT_ADMIN, TENANT_USER)` + `@RequiresBalanceAccess()` + `@RequiresDossierScope()`, `orgId` du JWT. Le second consommateur (`GET …/fiscal/moteur`) porte **les mêmes** gardes. |
+| Canal d'inférence sur le paquet appliqué | la **même réponse** publiait déjà `paquetFiscal: { pays, annee, checksum }` : aucun canal nouveau. |
+| Pollution de prototype | **lectures** par clés **littérales** uniquement, aucune clé dynamique, aucune écriture indexée ; valeurs filtrées par `texteNonVide`. |
+| Manipulation de la ventilation | `versCredit` prend `posteLiasse`/`restituable`/`libelle` **exclusivement** du type packagé et persiste `type.code`, jamais la chaîne brute du DTO. Aucun champ d'entrée neuf ⇒ aucune voie de mass-assignment. |
+| Le `POST` deviendrait plus permissif | `declarerCredit` est **inchangé** — même extraction, même `typeCreditConnu`, même 400. La liste publiée **est** la valeur qui valide. |
