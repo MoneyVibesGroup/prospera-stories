@@ -1,6 +1,6 @@
 # STORY-412 : Les exonérations de MFP ne sont ni transcrites ni exposées — le plancher peut surestimer l'impôt
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
 **Service :** `balance-service` (`:3007`) — `modules/fiscal` (liquidation) · **et** le paquet fiscal `TG@YYYY` (STORY-078)
@@ -251,7 +251,119 @@ vérification plutôt qu'une intuition :
 - la fenêtre « N mois après la création » existe **déjà** dans la branche TPU ⇒ on l'extrait, on ne
   la réécrit pas.
 
-### Reste à faire
+### Implémentation (fait) — commits `374d6e9`, `b965bf5`, `d8451b4` (balance) · `2f667f3` (dossier)
 
-Transcription du paquet + rebuild d'artefact, extraction, évaluation, exposition au contrat, report
-dans `dossier-service`, portes DoD, passe de mutation, vérification docker, revues, merge.
+| Fichier | Ce qui change |
+|---|---|
+| `scripts/referentiels/sources/paquet-fiscal-togo-2026.json` | les 4 exonérations et le taux majoré **transcrits** (code, libellé d'origine, article, mode de constatation, durée) |
+| `src/modules/referentiel/assets/…` + `paquet-fiscal-registry.ts` | artefact reconstruit, empreinte reportée (`478c4753…`) |
+| `fiscal.regles.ts` | `situerExerciceDansFenetre` — la fenêtre, **partagée** avec la TPU (D-412-3) |
+| `tpu.regles.ts` | rebranchée dessus ; signature publique et codes **inchangés** |
+| `types/liquidation.ts` | `ModeConstatationMfp`, `ExonerationMfp`, `TauxMajoreMfp`, `AvertissementMfp` |
+| `liquidation.regles.ts` | extraction, évaluation, et l'exonération qui éteint le plancher |
+| `liquidation.service.ts` | `dateCreation` lue sur les **deux** chemins (liquidation **et** acompte théorique de N−1) |
+| `dto/liquidation-response.dto.ts` | les 5 champs neufs, avec leurs énumérations **nommées** |
+| `dossier-service` (2ᵉ dépôt) | copie de l'artefact + empreinte épinglée reportée |
+
+### Portes DoD
+
+**balance-service** : lint 0 warning · build OK · **3 243** unitaires · **817** e2e · couverture
+99,14 / 92,05 / 98,65 / 99,25 (`modules/fiscal` : 99,58 / 93,64 / 99,42 / 99,88).
+**dossier-service** : lint 0 · build OK · **1 126** unitaires · **255** e2e · couverture
+99,28 / 93,83 / 96,68 / 99,30.
+
+### Passe de mutation — 6 mutations, 6 rouges, et **deux** d'entre elles ont trouvé quelque chose
+
+| Mutation | Effet |
+|---|---|
+| l'exonération n'éteint plus la MFP | 2 tests rouges (AC-2 + la case `D` de la liasse) |
+| mode inconnu ⇒ `DATE_CREATION` au lieu de `NON_CONSTATABLE` | rouge |
+| **`A_CHEVAL` ⇒ `DEDANS`** (le prorata interdit) | ⚡ **rouge dans les DEUX branches** — MFP *et* TPU : la preuve que le partage de D-412-3 est réel, pas déclaré |
+| le paquet muet ne dit plus rien | AC-4 rouge |
+| `enumName` retiré de `AvertissementMfp` | 2 tests de contrat rouges |
+| **l'acompte théorique ignore l'exonération** | ⚡ **survivante au premier essai** ⇒ trou réel, comblé (voir ci-dessous) |
+
+⚡ La 6ᵉ a révélé le **même défaut à un exercice de distance** : l'acompte théorique se dérive de
+l'impôt dû de N−1, donc d'un plancher que l'article 121 éteignait déjà. Une entreprise nouvelle
+exonérée se voyait proposer des acomptes assis sur une MFP qu'elle ne devait pas. Corrigé, et
+gardé par un e2e qui prouve **les deux côtés du même appel** : profil créé le 1ᵉʳ janvier 2025 ⇒
+2025 entièrement dans la fenêtre (théorique `0` au lieu de `120 000`), 2026 entièrement dehors
+(MFP due).
+
+⚠️ Deux mutations ont d'abord rougi **par erreur de compilation** (variable inutilisée, condition
+toujours fausse) — ce qui ne prouve rien. Refaites en valeurs *valides mais fausses*
+(`=== 9999`, `? calculerMfp(…) : calculerMfp(…)`), elles rougissent par **assertion**.
+
+### Vérification docker — les deux services, sur l'artefact réel
+
+Les deux conteneurs portent le **même** sha256 (`478c4753…`) et démarrent : côté `dossier-service`
+c'est la garde de byte-identité qui l'accepte, côté `balance-service` c'est le manifeste. Le
+diagnostic `/referentiels/actifs` publie la nouvelle empreinte — preuve que le paquet **chargé**
+est bien celui-là.
+
+Puis, sur **le même dossier déficitaire**, en ne changeant que la date de création :
+
+| Profil | `mfp` | `impotDu` | `baseRetenue` | avertissements |
+|---|---|---|---|---|
+| **aucun** (date inconnue) | `1 225 000` | `1 225 000` | **`MFP`** | `DATE_CREATION_INCONNUE`, `EXONERATIONS_A_VERIFIER`, `TAUX_MAJORE_NON_GERE` |
+| créé le **2026-02-01** (dans la fenêtre) | **`0`** | **`0`** | **`IS`** | **aucun** |
+| créé le **2025-07-01** (à cheval) | `1 225 000` | `1 225 000` | `MFP` | `EXONERATION_PARTIELLE_A_ARBITRER`, … |
+
+⚡ La première ligne est **l'état d'avant la story** : un impôt de 1 225 000 sur une entreprise en
+perte, servi avec sa formule et son checksum. La deuxième est ce que l'article 121 dit. La case
+`D` de la liasse suit (`{ code: 'D', libellé: 'Minimum forfaitaire de perception', montant: 0 }`).
+
+Les trois exonérations non constatables sont publiées avec leur article (`Art. 121 CGI`), et le
+taux majoré avec le sien (`Art. 120 CGI`). Stack arrêtée (`docker compose stop`).
+
+## Revue de code — 2 constats, 2 corrigés (commit `d8451b4`)
+
+Faite **en session** : la délégation du scan a été coupée par une limite d'API, et la règle du
+projet est que la synthèse revient de toute façon à la session.
+
+- **Deux branches neuves qu'aucun test ne faisait rougir** : la rubrique MFP **sans** clé
+  `exonerations` du tout — l'entrée même du chemin AC-4 — et un paquet muet sur les exonérations
+  **mais publiant** un taux majoré (les deux rubriques sont indépendantes ; le silence sur l'une ne
+  doit pas emporter l'autre). Branches de `liquidation.regles.ts` : 93,54 → 95,42.
+- **Empreintes** : vérifié sur les deux dépôts qu'il ne reste **aucune** trace de l'ancienne
+  (`79edd47e…`) et que les **4** endroits qui l'épinglent portent la nouvelle — manifeste, deux
+  specs, et `dossier-service`.
+
+⚠️ **Relevé au passage** : l'arbre de travail portait encore une **mutation** (`&& false` sur la
+garde d'exonération) laissée par la passe de mutation. `HEAD` était sain — la porte précédente
+avait tourné sur le commit — mais la leçon vaut d'être écrite : **vérifier `git status` avant de
+déclarer une porte verte**, pas seulement après.
+
+## Revue de sécurité — **0 vulnérabilité** (confiance ≥ 80)
+
+| Piste instruite | Pourquoi elle ne tient pas |
+|---|---|
+| Injection / pollution de prototype par les données du paquet | la PR n'ajoute **aucune** entrée HTTP ; la seule source est l'artefact **embarqué et sha256-vérifié**. Les valeurs lues (`code`, `libelle`, `dureeMois`, `valeur`) sont typées et bornées, et n'atteignent **ni** une clé d'objet **ni** un filtre Mongo |
+| Fuite inter-tenant par les champs neufs | `orgId` vient du JWT, `dossierId` du param gardé, sur les **deux** chemins (liquidation et acompte théorique). Les libellés publiés sont du **texte de loi**, identique pour tous |
+| Épuisement de ressources (CWE-770) | la liste publiée est bornée par l'artefact (4 entrées), jamais par une requête |
+| Sous-imposition par exonération inventée | fail-closed : mode inconnu ⇒ `NON_CONSTATABLE`, paquet muet ⇒ rien, prose ⇒ rien, durée absente ⇒ rien, date absente ⇒ rien. **Aucun** chemin n'exonère sans une donnée explicite |
+
+⚠️ **Un point de modèle de confiance, nommé plutôt que tu** : l'exonération constatable repose sur
+`dateCreation`, un champ **déclaré** par l'organisation elle-même. Ce n'est pas une faille — c'est
+le modèle que STORY-095 a déjà établi pour l'exonération de TPU, sur *la même donnée* : la date est
+validée (ISO, jamais dans le futur) et **chaque modification est tracée dans la piste d'audit du
+profil, dans la même transaction**. La responsabilité est donc **imputable**, ce qui est la seule
+chose qu'un moteur puisse exiger d'une déclaration.
+
+## Progress Tracking — clôture
+
+**Statut : `done`** — implémentée, validée, vérifiée sur stack docker, revue (2 constats, 2
+corrigés), revue de sécurité (0 vulnérabilité). PR **#69** (`balance-service`) et **#19**
+(`dossier-service`) rebase-mergées **ensemble** sur `dev`, branches supprimées.
+
+Les 6 critères d'acceptation sont tenus : **AC-1** (paquet structuré, exonérations + taux majoré),
+**AC-2** (constatable ⇒ `mfp = 0`, `mfpExoneree`, `motifExoneration`, `baseRetenue = IS`),
+**AC-3** (non constatable ⇒ publiée à vérifier, MFP maintenue), **AC-4** (paquet muet ⇒
+avertissement, jamais un silence), **AC-5** (taux majoré publié et déclaré non géré), **AC-6**
+(coopérative exonérée sur déficit ⇒ 0 ; 11ᵉ mois exonéré, 13ᵉ non ; exercice à cheval ⇒ arbitrage,
+jamais de prorata).
+
+⛔ **Restent hors périmètre, à ficher si le PO le veut** : la surface de **déclaration** (coopérative,
+agrément, import-revente de véhicules) sans laquelle trois exonérations sur quatre resteront à
+vérifier à la main ; et les **deux règles d'arrondi** en prose (`is.arrondi`,
+`acomptesProvisionnels.calcul`), que la story elle-même écarte.
