@@ -1,6 +1,6 @@
 # STORY-415 : Les codes de retraitement sont publiés NUS — dix-sept cases de liasse sans un seul libellé
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
 **Service :** **le paquet fiscal `TG@YYYY`** (STORY-078) — **aucune ligne de code applicatif**
@@ -128,8 +128,8 @@ douze nombres.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — branches `MNV-415` (`docs/`, `balance-service`, `dossier-service`),
-ouvertes le 2026-08-30.
+**Statut : `done`** — clôturée le **2026-08-30**. PR **#70** (`balance-service`) et **#20**
+(`dossier-service`) rebase-mergées **ensemble** sur `dev`, branches supprimées.
 
 ### ⚡ La prémisse « zéro ligne de code applicatif » était FAUSSE — à moitié
 
@@ -226,3 +226,47 @@ correctif, et la réponse HTTP **inchangée** — le process servait encore l'an
    il est transcrit) — alors que D-078-1 range les libellés de la grille de **liquidation** du
    côté du référentiel. Deux mécanismes pour un même besoin. La duplication est **rendue sûre**
    par D-415-2, elle n'est pas **résolue** : trancher demande une story d'architecture.
+
+---
+
+## Progress Tracking — clôture
+
+**Statut : `done`** — implémentée, validée, vérifiée sur stack docker, revue (**4 constats, 4
+corrigés**), revue de sécurité (**0 vulnérabilité**, confiance ≥ 80). PR **#70**
+(`balance-service`, 3 commits) et **#20** (`dossier-service`, 2 commits) rebase-mergées
+**ensemble** — un artefact gardé par byte-identité ne se merge pas d'un seul côté.
+
+Les 4 critères d'acceptation sont tenus : **AC-1** (les 17 postes codés de `postesDsf` nommés, et
+depuis la revue **`reintegrations`/`deductions` aussi**), **AC-2** (paquet muet ⇒ repli intact,
+aucun libellé inventé), **AC-3** (aucun orphelin, et les codes nus sont **nommés** par le test, pas
+comptés), **AC-4** (chaque table porte sa source, et le test garde **sa** page, pas le mot
+« GUIDEF »).
+
+### Revue de code — 4 constats, 4 corrigés (commits `ab3a856` / `d958566`)
+
+| Constat | Ce qu'il valait |
+|---|---|
+| **F-415-1 — bloquant** | le libellé s'arrêtait à `postesDsf` : la **même case** sortait anonyme dans `reintegrations`/`deductions` de la **même réponse**, et la liste mélangeait postes nommés (cahiers) et numéros nus (saisies manuelles) — la différence tenant à leur seule **origine**. Le libellé est désormais posé **à la naissance** du poste. ⛔ `GET …/fiscal/retraitements` n'en reçoit volontairement aucun : lui faire résoudre le paquet ferait **refuser** une année non packagée là où la liste répondait — une régression pour un libellé. |
+| **F-415-2** | l'exemple Swagger associait le code `20` au libellé du code `25`. Inoffensif tant que le paquet ne publiait rien, **contrevérité** depuis : un intégrateur câblant son écran sur l'exemple range une provision sous « amende », au moment même où la story existe pour que la case soit nommée juste. |
+| **F-415-3** | deux commentaires de `dossier-service` annonçaient un échec **au boot** que la garde ne produit pas : elle est **paresseuse**. Une empreinte non reportée laisse le service démarrer et `/health` répondre `up`. « Le service démarre » ne prouve rien — c'est pourquoi la vérification docker a dû la déclencher explicitement. |
+| **F-415-4** | le contrôle d'AC-4 n'exigeait que le mot « GUIDEF » : une source de déductions citant la **page des réintégrations** restait verte. |
+
+Deux mutations de plus, deux rouges par assertion (le poste manuel reperd son libellé ; la source
+des déductions cite la page 59) — **6 mutations au total sur la story, 6 rouges**.
+
+### Revue de sécurité — 0 vulnérabilité
+
+| Piste instruite | Pourquoi elle ne tient pas |
+|---|---|
+| Pollution de prototype par les clés du paquet (`libelles[code] = valeur`) | `JSON.parse` crée bien `__proto__` en propriété propre, mais la garde `typeof valeur === 'string'` rend l'affectation **no-op** (le setter de `Object.prototype` ignore les primitives). Et la clé devrait figurer dans les listes de codes, donc dans l'artefact **épinglé par sha256**. |
+| Libellé faux ⇒ montant rangé dans la mauvaise case | aucun regroupement ni aucune imputation ne se fait par **libellé** : l'appariement est par `code`, le signe par `sens`. Le libellé est décoratif au sens strict du calcul. |
+| Garde sha256 contournable / temps constant | rejet **avant tout parse et sans mise en cache** des deux côtés. Comparaison à temps constant sans objet : ce n'est pas un secret mais l'empreinte d'un fichier local, sans oracle ni canal de timing. |
+| Fuite par message d'erreur | l'`Error` nu de `dossier-service` (nom de fichier + les deux sha) est normalisé en `500` générique par `AllExceptionsFilter` ; côté `balance-service`, `502 « Paramétrage non intègre »` sans attendu/obtenu. |
+| Élargissement de surface de lecture | les 17 libellés sont du **texte de loi**, identique pour tous les tenants et déjà publié par le référentiel comptable. Routes inchangées, `orgId` du JWT, `dossierId` du scope gardé. |
+| Traversée de chemin sur `readFileSync(join(__dirname,'assets',…))` | le nom de fichier est une **constante** du `Map` littéral, jamais dérivé du `pays`. Aucun `ServeStatic` : les artefacts ne sont pas servis en HTTP. |
+
+⚠️ **Réserve nommée, non retenue** : la garde de byte-identité de `dossier-service` étant
+paresseuse, un déploiement où l'artefact n'aurait pas été recopié casse le portefeuille en 500 à
+chaque requête (rien n'est mis en cache sur ce chemin d'échec) — défaut de **disponibilité en état
+de déploiement déjà cassé**, préexistant, non déclenchable par un attaquant. Ici les octets sont
+conformes.
