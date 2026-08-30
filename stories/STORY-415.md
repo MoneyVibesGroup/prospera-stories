@@ -1,6 +1,6 @@
 # STORY-415 : Les codes de retraitement sont publiés NUS — dix-sept cases de liasse sans un seul libellé
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
 **Service :** **le paquet fiscal `TG@YYYY`** (STORY-078) — **aucune ligne de code applicatif**
@@ -123,3 +123,106 @@ douze nombres.
   2026-08-26 : `postesDsf` publie déjà la grille complète, codes **et sens**, à qui
   appelle `GET /resultat-fiscal`.
 - Consommateur nommé : **FE-050**.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branches `MNV-415` (`docs/`, `balance-service`, `dossier-service`),
+ouvertes le 2026-08-30.
+
+### ⚡ La prémisse « zéro ligne de code applicatif » était FAUSSE — à moitié
+
+La story affirmait que le mécanisme existait « complet et testé », et qu'un développeur qui
+toucherait `fiscal.regles.ts` aurait mal compris. La transcription faite, la **vérification docker**
+a montré l'inverse sur la seule ligne qui portait un montant :
+
+```
+ALIMENTÉE > 25 | 1 200 000 | MANUEL | libelle: ABSENT
+codés sans libellé : ['25']
+```
+
+Seize cases **vides** sortaient nommées, et la case **remplie** sortait en numéro nu. La cause est
+d'une ligne : `construireTableauDsf` posait le libellé sur le poste **de remplacement**
+(`alimente ?? { code, libelle, … }`), donc **jamais** sur un poste réellement alimenté — or un
+retraitement manuel est projeté par `versPosteManuel`, qui n'a **pas** accès aux codes du paquet et
+n'en porte donc aucun. AC-1 exige « un `libelle` **sur chaque poste codé** » : le correctif est
+dans le périmètre, la note « hors périmètre » reposait sur une lecture du code qui ne tenait pas.
+
+⛔ **Et aucun unitaire ne pouvait le voir** : tous construisaient la grille **vide**
+(`construireTableauDsf([], CODES_TOGO)`). C'est le mode de panne le plus coûteux de ce dépôt — un
+test vert sur le cas qui n'arrive jamais.
+
+### Conception
+
+| Décision | Ce qu'elle tranche |
+|---|---|
+| **D-415-1** | Les 17 libellés sont **repris à l'identique** des postes `RESULTAT_FISCAL` de `syscohada-revise@2.1` — seule transcription de la liasse GUIDEF du projet. Typographie comprise (`exédentaires`, `sociéts`, doubles espaces) : corriger la liasse dans une **copie** aurait fait diverger deux artefacts sans que rien ne le signale. |
+| **D-415-2** | La divergence est **interdite par un test**, pas par une convention : `referentiel-assets-coherence.spec.ts` compare les deux artefacts **au caractère près**. Une correction faite un jour côté `bilan-service` fera **rougir** la suite ici tant que le paquet ne l'aura pas suivie. |
+| **D-415-3** | AC-4 (« chaque libellé porte sa source ») est tenu **au niveau de la table** (`reintegrations_libelles_source`, `deductions_libelles_source`), « au même titre que les autres rubriques transcrites » — qui portent toutes **une** source de rubrique. Une source **par libellé** aurait exigé un objet par code, que le résolveur (qui n'accepte que des chaînes) ne sait pas lire : ce serait le changement de code que la story écarte. |
+| **D-415-4** | `construireTableauDsf` nomme la case **alimentée** aussi, sans jamais **écraser** un libellé déjà porté par le poste. |
+
+### Implémentation
+
+| Fichier | Ce qui change |
+|---|---|
+| `scripts/referentiels/sources/paquet-fiscal-togo-2026.json` | `reintegrations_libelles` (12) + `deductions_libelles` (5) + leurs deux sources — **23 lignes**, aucune autre touchée |
+| `src/modules/referentiel/assets/…` + `paquet-fiscal-registry.ts` | artefact reconstruit, empreinte `fcf5bcf4…` (ex-`478c4753…`) |
+| `fiscal.regles.ts` | **le correctif** : la case alimentée porte son nom (D-415-4) + commentaire de contrat remis à jour |
+| `types/fiscal.ts`, `dto/fiscal-response.dto.ts`, `referentiel.service.ts` | quatre affirmations devenues **fausses** (« `togo@2026` n'en publie aucun ») corrigées — dont **une description Swagger**, donc du contrat publié |
+| `referentiel-assets-coherence.spec.ts` | 3 tests **sur les vrais octets** : les 17 nommés · aucun orphelin + source · identité avec le référentiel |
+| `fiscal.regles.spec.ts` | le test de non-régression de la case alimentée ; le test `togo@2026 ne publie AUCUN libellé` **renommé** — il serait resté vert en affirmant le contraire de la vérité |
+| `test/referentiel.e2e-spec.ts` | l'assertion « la clé `libelle` est absente » **inversée** : c'est le livrable |
+| `dossier-service` (2ᵉ dépôt) | artefact recopié + empreinte épinglée reportée (garde de byte-identité) |
+
+### Portes DoD
+
+**balance-service** : lint 0 warning · build OK · **3 247** unitaires · **817** e2e · couverture
+**99,14 / 92,06 / 98,65 / 99,25**.
+**dossier-service** : lint 0 · build OK · **1 126** unitaires · **255** e2e · couverture
+99,28 / 93,83 / 96,68 / 99,30.
+
+### Passe de mutation — 4 mutations, 4 rouges **par assertion**
+
+| Mutation (donnée valide, jamais une erreur de compilation) | Effet |
+|---|---|
+| le libellé du code `45` disparaît du paquet | rouge, et le test **nomme** `45` (AC-3) |
+| un libellé orphelin `999` est ajouté | rouge sur le test des **octets bruts**. ⚡ Le test qui passe par le résolveur, lui, reste **vert** : celui-ci **écarte** les orphelins — un contrôle d'orphelins écrit à travers lui aurait été **vacant** |
+| un libellé est **reformulé** (`exédentaires` → `excédentaires`) | rouge sur la seule identité inter-artefacts — les deux autres restent verts : les trois tests gardent bien trois choses différentes |
+| le correctif D-415-4 est retiré (retour au `?? {…}`) | rouge : la case alimentée reperd son nom |
+
+### Vérification docker — sur la stack réelle, et c'est elle qui a trouvé le défaut
+
+Les deux conteneurs portent le **même** sha256 (`fcf5bcf4…`). Côté `dossier-service`, la garde de
+byte-identité est **paresseuse** : elle ne s'exécute pas au boot. Elle a donc été déclenchée
+explicitement dans le conteneur — `chargerPaquetEmbarque('TG')` rend le paquet (donc sha conforme)
+et `echeancesDuPaquet('TG')` rend toujours `["31-01","31-05","31-07","31-10"]` : mise à niveau
+d'**octets**, comportement **inchangé**.
+
+Côté `balance-service`, sur un dossier réel (`SOCIETE VERIF 415 SA`, balance 2026, un retraitement
+manuel code `25` de 1 200 000) :
+
+| Surface | Avant | Après |
+|---|---|---|
+| `GET /referentiels/actifs` | `478c4753…` | **`fcf5bcf4…`** |
+| `GET /referentiels/reintegrations` | 12 codes **nus** | 12 codes **nommés** |
+| `GET …/fiscal/resultat-fiscal` → `postesDsf` | 17 cases sans libellé | **17 cases nommées**, `codés sans libellé : []` |
+
+⚠️ **Le hot-reload a menti une fois de plus** : `Found 0 errors` affiché, `dist` recompilé avec le
+correctif, et la réponse HTTP **inchangée** — le process servait encore l'ancien module. Un
+`docker compose restart balance-service` a été nécessaire pour que la vérification dise la vérité.
+
+### ⛔ Deux constats relevés, hors périmètre, à ficher si le PO le veut
+
+1. ⚡ **Le code `10` n'est pas une réintégration.** Le paquet le publie dans
+   `reintegrations_codes`, et la liasse le nomme **« BENEFICE NET COMPTABLE ou PERTE NETTE
+   COMPTABLE »** — c'est la **ligne de départ** du calcul, pas un retraitement. La transcription
+   ne crée pas le défaut : elle le **rend visible**. Aujourd'hui `sensDuCode('10')` vaut
+   `REINTEGRATION`, donc une saisie manuelle sur la case `10` est **acceptée** et s'ajoute à
+   l'assiette. La story écarte explicitement les codes eux-mêmes (« ils sont publiés, validés, et
+   cette story n'y touche pas ») — le constat est donc **posé, pas corrigé**.
+2. **Le libellé d'une case de liasse est désormais publié par DEUX artefacts** du même service :
+   le paquet fiscal (`pays × année`) et le référentiel comptable (postes `RESULTAT_FISCAL`, d'où
+   il est transcrit) — alors que D-078-1 range les libellés de la grille de **liquidation** du
+   côté du référentiel. Deux mécanismes pour un même besoin. La duplication est **rendue sûre**
+   par D-415-2, elle n'est pas **résolue** : trancher demande une story d'architecture.
