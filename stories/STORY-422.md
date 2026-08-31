@@ -1,6 +1,6 @@
 # STORY-422 : La balance est étiquetée du référentiel du DOSSIER, mais ses comptes sont validés contre celui de l'ORGANISATION
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `modules/referentiel`, `modules/cahiers/agregation`, `modules/read-models`
@@ -225,8 +225,8 @@ pas le même appel.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — démarrée le **2026-08-31**, juste après la clôture de son prérequis
-[[STORY-533]] (le même jour).
+**Statut : `done`** — démarrée **et** clôturée le **2026-08-31**, juste après son prérequis
+[[STORY-533]] (le même jour). PR `balance-service` **#80**, rebase-mergée sur `dev`.
 
 ### ⚡⚡ Le fait de la story, MESURÉ — et il est pire que ce que la fiche annonce
 
@@ -315,3 +315,225 @@ Deux codes de refus neufs à câbler côté écran, tous deux `409` et tous deux
 
 Et un code qui **disparaît** de `balance-service` : `REFERENTIEL_AMBIGU` (hook de STORY-533 consommé).
 
+### ⚠️ Un piège que `tsc` ne pouvait pas voir
+
+Ajouter deux paramètres au constructeur de `ReferentielResolver` **compile partout** — mais les suites
+e2e qui construisent le résolveur **réel** (et non un mock) montent leur `TestingModule` à
+l'exécution : `Nest can't resolve dependencies of the ReferentielResolver … AxesResolver at index [2]`.
+
+Deux suites sont dans ce cas (`referentiel.e2e-spec.ts`, `suggestion.e2e-spec.ts`) ; les autres mockent
+`ReferentielService` et n'ont rien vu. **Le typage ne garde pas l'injection** — seul le fait de lancer
+les suites l'a trouvé.
+
+⚠️ Corollaire de méthode, payé une fois ici : **lire les TOTAUX d'une exécution, jamais la liste des
+`●`.** Une première lecture m'a fait attribuer l'échec à `cahiers-depenses` (dont les `●` provenaient
+d'une exécution antérieure du fichier de sortie) alors que la suite fautive était `suggestion` — qui,
+elle, ne rendait qu'**une** ligne d'erreur de résolution répétée vingt fois.
+
+### Vérification docker — la persistance et le contrat réels
+
+Stack : `mongo` (rs0) + `kafka` + `redis` + `auth-service` + `platform-catalog-service` +
+`balance-service`, hot-reload confirmé (`Found 0 errors` postérieur au dernier commit).
+Organisation réelle `cabinet533@prospera.local` (`6a953e…4240`), dossier
+**« Mutuelle d'Épargne Bè »** (`6a953e…4299`, `typeEntite: IMF`) semé dans les read-models
+`dossiers_dossier` et `axes_dossier` — tous deux alimentés par Kafka, donc inatteignables autrement.
+
+| # | Ce qui est prouvé | Résultat mesuré |
+|---|---|---|
+| ⓐ | **AC-A2, moitié « accepté »** — dossier d'axe `SFD-BCEAO`, organisation habilitée aux **deux** | `GET /dossiers/{id}/referentiels/plan-comptes?prefixe=20` → **`sfd-bceao@2.0`**, comptes `['20','202','2022','20227','2023','203','2031','2037']` — **`20` « Crédits aux membres » présent** |
+| ⓑ | **AC-A2, la CONTRE-ÉPREUVE** — **même** organisation, **même** entitlement, on bascule le **seul axe** en `SN` | → **`syscohada-revise@2.1`**, `comptes: []`, **`20` absent**. ⚠️ Avant 422, ces deux appels rendaient le **même** plan : celui de l'entitlement. |
+| ⓒ | **AC-A3** — dossier SFD, organisation habilitée au **seul** SYSCOHADA | **409 `REFERENTIEL_NON_HABILITE`** : *« Ce dossier relève du référentiel « sfd-bceao@2.0 », auquel l'organisation … n'est pas habilitée (elle a droit à : syscohada-revise@2.1) »*, avec `details.referentielDuDossier` **et** `details.referentielsHabilites` en champ structuré |
+| ⓓ | Le tag n'est jamais deviné (D-085-7) — aucun axe, aucun profil | **409 `SYSTEME_COMPTABLE_INDETERMINE`** : *« renseigner les axes du dossier avant de traiter ses comptes »* |
+| ⓕ | Le déplacement de routes est **effectif** | `/api/v1/referentiels/plan-comptes` → **404** · `/actifs` → **404** · `/reintegrations` → **200** (elle ne bouge pas, cf. § *Décisions*) |
+
+⚠️ **Ce que cette vérification NE prouve pas, et pourquoi je le dis** : la moitié « une balance SFD est
+**refusée** contre SYSCOHADA » n'a **pas** été rejouée par une soumission HTTP — le calcul du checksum
+côté harnais de vérification n'a pas convergé avec celui du serveur, et diagnostiquer cet écart-là
+relève du harnais, pas de la story. Le lien est établi **par composition**, chaque maillon étant
+vérifié indépendamment :
+
+1. `referentiel-assets-coherence.spec.ts` constate sur les **vrais octets** que `202` est
+   `isCompteValide` en `sfd-bceao@2.0` et **ne l'est pas** en `syscohada-revise@2.1` ;
+2. `referentiel-resolver.service.spec.ts` prouve **quel paquet** est choisi selon l'axe du dossier
+   (mutation : le comportement d'avant 422 fait rougir) ;
+3. `BalanceValidator` appelle `estDeposable = isCompteDeDetail`, via
+   `controleurDeCompte(orgId, dossierId, exercice.debut)` — dont le plan vient désormais du dossier.
+   ⚠️ **Ce n'est PAS le même prédicat que celui mesuré au point 1** (`isCompteValide`) — correctif de
+   revue de code. Le lien tient parce qu'`estCompteDeDetail` commence par
+   `if (!estCompteRattachable(…)) return false` : `isCompteDeDetail ⟹ isCompteValide`, donc la moitié
+   « **refusé** contre SYSCOHADA » se transporte telle quelle. La moitié « **accepté** en SFD » exige en
+   plus une longueur ≤ 6 et un numéro numérique — vrai pour les comptes cités, mais **non prouvé par
+   cette spec** ;
+4. ⓐ/ⓑ ci-dessus montrent le changement de plan **de bout en bout, en HTTP**.
+
+⇒ **À rejouer en soumission de balance complète le jour où le harnais de checksum sera fiabilisé** —
+fiché ici plutôt que passé sous silence.
+
+Stack arrêtée après la vérification.
+
+
+---
+
+## Revue de code (phase ⑥) — 9 constats, 9 traités
+
+⚡⚡ **Le premier était un défaut que J'AI INTRODUIT, et c'est celui que la story existe pour tuer,
+recréé à l'intérieur d'une seule requête.**
+
+### ① ⛔ BLOQUANT — le plan était résolu à la date du JOUR pendant que le tag l'était à `exercice.debut`
+
+`BalanceService.submit` construit son `exercice` soixante lignes avant d'appeler `controleurDeCompte`
+— et ne le passait pas. `chargerReferentiel(orgId, dossierId, date = new Date())` retombait donc sur
+**aujourd'hui**, pour tout le hub de soumission (HTTP, agrégation, reprise, provisions, sage, et
+l'ingestion Kafka).
+
+**Scénario** : dossier passé de `SN` (2025) à `SFD-BCEAO` (2026-03), organisation habilitée aux deux.
+Une agrégation de l'exercice **2025** résolvait le **tag** à `exercice.debut` → `SN`, et faisait juger
+ses **comptes** par le plan **du jour** → RCSFD. Balance taguée `SN`, comptes validés contre le RCSFD.
+⚠️ **Aucun test ne pouvait l'attraper** : `dryRun` et `submit` prenaient tous deux « aujourd'hui »,
+donc ils étaient cohérents **entre eux**.
+
+**Correctif** : `date` devient **REQUISE** sur la façade — le même remède qu'AC-A1 pour `dossierId`.
+C'est le compilateur qui pose la question à chaque appelant, et les 6 sites qui avaient un exercice en
+portée sans le passer (dont `taxes` ×2 et `sage-import`, constat ⑨) sont corrigés du même coup. Un
+appelant qui n'a réellement aucun exercice écrit `new Date()` **sur place**, où le choix se voit.
+⚠️ Le parallèle que j'invoquais avec `chargerPaquetFiscal(orgId, exercice?)` **ne tenait pas** : là-bas
+l'absence rend le paquet *par défaut de la configuration*, ici elle rendait un **plan de comptes
+différent**, sans le dire.
+**Mutation** : revenir à `new Date()` fait rougir le test dédié, et compile.
+
+### ② ⛔ BLOQUANT — le contrat publié affirmait encore que le plan vient de l'ORGANISATION
+
+Cinq `summary`/`description` OpenAPI, dont une qui **contredisait sa voisine dans le même DTO** :
+`referentiel` documenté « effectif de l'org » deux champs au-dessus de `referentielsHabilites`
+documenté « `referentiel` ci-dessus est celui du **DOSSIER** ». **4ᵉ occurrence du patron « le
+bloquant est une description OpenAPI »** après STORY-400, 376 et 533.
+⇒ La story FE annoncée se serait codée là-dessus : mémoïsation du plan **par cabinet**, et réaffichage
+des comptes SYSCOHADA sur le dossier IMF — le point ③ de *Ce que la jonction produit*, que cette story
+existe pour fermer.
+
+### ③ NON-BLOQUANT — mon déplacement de `describe` n'a pas rendu un test vacant : il a rendu la suite DÉPENDANTE DE L'ORDRE
+
+Le bloc AC-A2 est le premier de l'histoire du fichier à charger `sfd-bceao@2.0` **avec succès**, et le
+cache de `ReferentielLoader` est partagé par toute la suite. Mesuré en revue : `--randomize` fait
+tomber **4 seeds sur 8**, toujours sur les deux tests de corruption d'artefact.
+
+**Correctif** : on ne contourne pas par la position — on rend la supposition **bruyante**. Un
+`exigerNonCharge(code, version)` interroge `ReferentielLoader.has()` et échoue avec un message qui dit
+quoi faire, au lieu d'un `200` que personne ne sait expliquer. Vérifié sur les 4 seeds.
+⚠️ **Honnêteté** : la suite reste dépendante de l'ordre — `npm run test:e2e` n'utilise pas
+`--randomize`, donc elle est déterministe en CI, et toute réorganisation future échouera **en le
+disant**. Ce n'est pas l'indépendance d'ordre, c'est sa mise sous garde.
+
+### ④ NON-BLOQUANT — la scission du contrôleur a fait sortir `reintegrations` du contrat sous test
+
+`ReintegrationsResponseDto` n'est référencé que par ce contrôleur : absent d'`openapi-contract.e2e`, il
+disparaissait du document, et la garde « aucun schéma opaque » ne le voyait plus. Le docblock de ce
+fichier décrit **exactement** ce mode de panne : *« en oublier un ferait porter la garde sur un schéma
+absent — elle passerait au vert sans rien avoir vu »*.
+
+### ⑤ NON-BLOQUANT — `estHabilite` était MORT, et sa logique dupliquée
+
+J'avais réécrit le test d'habilitation **en ligne** dans le résolveur au lieu d'appeler le prédicat que
+STORY-533 venait de livrer pour ça — pendant que son docblock affirmait « la question que STORY-422
+pose, et la seule ». La décision n°4 supprimait l'autre méthode morte au motif que « le hook est
+consommé » ; celle-ci restait, en double. ⇒ Prédicat pur `estHabiliteParmi`, appelé par les deux.
+
+### ⑥ NON-BLOQUANT — « (STORY-422) » dans un message RENDU À L'UTILISATEUR
+
+`MESSAGE_SAISIE_COMPTE` n'est pas un commentaire : c'est le `message` de 17 champs de DTO. Un
+comptable recevait un 400 se terminant par un numéro de ticket. Retiré.
+
+### ⑦ NON-BLOQUANT — `expect.any(String)` affaiblissait le seul test qui pouvait voir `?? orgId`
+
+Dans `suggestion`, le seul endroit du diff qui puisse envoyer un `orgId` en guise de `dossierId` était
+aussi le seul dont le test ne regardait pas l'argument. Remplacé par le dossier exact.
+
+### ⑧ NON-BLOQUANT — deux refus jumeaux disaient encore « de cette organisation »
+
+`balance.validator` disait « de ce dossier », les exceptions de cahiers disaient l'inverse **pour le
+même compte et le même plan**. Aligné.
+
+### ⑨ NON-BLOQUANT — trois autres points d'appel avaient l'exercice en portée sans le passer
+
+Fermé par le correctif ① (`date` requise) : `taxes` ×2, `sage-import`, `rapprochement`.
+
+### Ce que la revue a corrigé dans MA propre rédaction
+
+Ma section « AC-A2 prouvé par composition » décrivait un maillon **faux** : j'écrivais que
+« `BalanceValidator` appelle exactement ce prédicat », alors que la spec d'artefacts mesure
+`isCompteValide` et que le validateur appelle `estDeposable = isCompteDeDetail`. **Deux prédicats
+différents.** La chaîne survit parce qu'`estCompteDeDetail` commence par
+`if (!estCompteRattachable(...)) return false` — donc `isCompteDeDetail ⟹ isCompteValide`, et la moitié
+« **refusé** contre SYSCOHADA » se transporte telle quelle. Mais la moitié « **accepté** en SFD » exige
+en plus une longueur ≤ 6 et un numéro numérique : vrai pour les comptes cités, **pas prouvé par cette
+spec**. Reformulé ci-dessous plutôt que laissé tel quel.
+
+
+---
+
+## Revue de sécurité (phase ⑦) — **0 vulnérabilité**
+
+⚠️ **Ce n'était pas une formalité** : la story change **qui décide** du plan de comptes contre lequel
+les écritures d'un dossier sont validées. Le verdict de la revue est que le changement va dans le sens
+du **durcissement** — le référentiel cesse d'être un attribut de l'organisation appliqué
+indistinctement à tous ses dossiers, et devient une donnée du dossier **confrontée** au droit d'usage.
+Il n'est à aucun moment un paramètre de l'appelant.
+
+Points examinés et trouvés sains :
+
+- **Le `dossierId` d'URL est toujours croisé avec l'`orgId` du JWT avant d'être utilisé.** Le
+  contrôleur ne lit **jamais** le paramètre brut : `exigerDossierId(dossier)` rend la valeur déjà
+  résolue par `DossierScopeGuard`, qui filtre `{dossierId, orgId}` et rend **404** (jamais 403) sur un
+  dossier d'un autre tenant — anti-énumération respectée. ✅ **Vérifié à la main** : le guard est bien
+  le **dernier** `APP_GUARD` d'`app.module.ts`, donc après `JwtAuthGuard`.
+- **Le repli sur le profil est tenant-scopé** : `findOne({ orgId: ObjectId(organizationId) })` où
+  l'`organizationId` vient **exclusivement** du JWT, sur un champ à **index unique**. Le cast interdit
+  toute injection NoSQL par opérateur, et l'`orgId` n'est de toute façon jamais un paramètre.
+- **Le `409 REFERENTIEL_NON_HABILITE` ne fuit rien** : ses `details` ne portent que le référentiel d'un
+  dossier **déjà prouvé appartenir à l'org du JWT** et les habilitations de **cette même org**. Aucun
+  409 n'est atteignable pour un dossier tiers — la porte 404 du guard précède.
+- **Les deux refus neufs ne sont pas un oracle** : ils ne naissent que derrière `DossierScopeGuard`, et
+  `BalanceAccessGuard` s'exécutant avant, une org sans droit reçoit 403 avant toute résolution.
+- **L'ancienne surface est réellement morte** : plus aucun appelant de `resoudreReferentiel` ni de
+  `REFERENTIEL_AMBIGU`, et les 28 sites d'appel de `chargerReferentiel` passent tous un `dossierId` —
+  la signature à trois paramètres requis rend l'oubli **non compilable**.
+- **`reintegrations` resté org-scopé est sûr** : la scission conserve `@Roles` + `@RequiresBalanceAccess`
+  et les guards globaux, et la donnée servie sort du **paquet fiscal par défaut de la configuration** —
+  identique pour tous les tenants, aucune donnée d'organisation n'y transite.
+- **Le consommateur Kafka vérifie le dossier AVANT de résoudre le référentiel** : `resoudreDossier`
+  interroge `{dossierId, orgId}` et rejette `DOSSIER_INCONNU` avant `soumettre()`. ✅ **Vérifié à la
+  main.** Un producteur forgé ne peut pas faire valider une balance contre le plan d'un dossier tiers.
+- **`estHabiliteParmi`** : comparaison de chaînes, aucune valeur réseau utilisée comme **clé d'objet**,
+  et le tag passe la liste blanche `REFERENTIELS_BALANCE` **avant** d'indexer `PONT_TAG` — `__proto__`
+  est écarté en amont. Couple **exact**, jamais la famille.
+- **Fail-closed conservé** partout, y compris le `catch` typé d'`estHabilite` (une panne d'infra ne
+  devient pas un « non habilité »).
+
+**Écarté, avec raison** : le choix de la **date** de résolution par l'appelant (`exercice.debut` en
+query) permet à un utilisateur légitime de viser une date antérieure à toute décision d'axe et de
+retomber sur le profil de l'organisation. L'issue reste **bornée aux référentiels que l'org détient
+déjà**, tout se passe intra-tenant, et c'est le comportement délibérément documenté — risque
+d'intégrité métier, pas d'élévation de privilège.
+
+
+---
+
+## Ce qui reste ouvert, fiché plutôt que tu
+
+1. **Une story FRONTEND est nécessaire** (l'user n'a pas de droit de push sur les dépôts frontend) :
+   deux URL changent, deux codes de refus neufs sont à câbler (`REFERENTIEL_NON_HABILITE` avec ses
+   `details`, `SYSTEME_COMPTABLE_INDETERMINE`), un code disparaît (`REFERENTIEL_AMBIGU`), et la mention
+   provisoire du panneau « Refus » de **FE-046** devient **fausse** — elle doit être retirée.
+2. **Le rejeu de la moitié « balance REFUSÉE » en soumission HTTP**, quand le harnais de vérification
+   docker saura recalculer le checksum comme le serveur. Le lien est aujourd'hui établi par
+   composition, avec ses quatre maillons nommés et la réserve du maillon 3 écrite noir sur blanc.
+3. ⚠️ **Relevé par la revue, hors périmètre : rien ne croise le `referentiel` DÉCLARÉ par l'appelant
+   (`SubmitBalanceDto.referentiel`) avec le plan RÉSOLU.** Un `POST /dossiers/D/balances` avec
+   `referentiel: 'CIMA'` sur un dossier `SN` est **encore accepté**, tagué CIMA, comptes validés
+   SYSCOHADA. C'est le sujet même de **Q2 → STORY-487**, et le résolveur neuf le rend **fermable en une
+   ligne** dans `validerReferentiel`. ⇒ À signaler à qui prendra 487.
+4. Le refus `SYSTEME_COMPTABLE_INDETERMINE` **s'ouvre à des endpoints qui ne refusaient rien**
+   (plan-comptes, suggestion, catégories, trésorerie, rattachement) pour les dossiers dont le
+   read-model d'axes n'a pas convergé **et** dont le profil n'a pas de `systemeComptable`. C'est le prix
+   assumé de D-085-7 — STORY-303 imposait déjà ce refus à l'agrégation — mais c'est un **risque de
+   déploiement** à connaître.
