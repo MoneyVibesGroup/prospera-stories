@@ -1,6 +1,6 @@
 # STORY-417 : L'imputation des déficits est maximale et inconditionnelle — sous le plancher MFP, elle consomme du report pour rien
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
 **Service :** `balance-service` (`:3007`) — `modules/fiscal`. ⚠️ Le paquet fiscal `TG@YYYY` reste
@@ -333,9 +333,10 @@ tranche sur le texte de l'article 101, pas en réunion.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — démarrée le **2026-08-31**, branches `MNV-417` sur `docs/` et
-`balance-service`. **Un seul dépôt module** : aucun octet du paquet fiscal ne change (**D-417-3**),
-donc **aucune PR jumelle** `dossier-service` — la garde de byte-identité de STORY-415 reste intacte.
+**Statut : `done`** — clôturée le **2026-08-31**. PR **#74** (`balance-service`, 3 commits)
+rebase-mergée sur `dev`, branche supprimée. **Un seul dépôt module** : aucun octet du paquet fiscal
+ne change (**D-417-3**), donc **aucune PR jumelle** `dossier-service` — la garde de byte-identité de
+STORY-415 reste intacte.
 
 ### Conception — ce que la story laissait ouvert, et comment c'est tranché
 
@@ -453,3 +454,87 @@ modifié.
 `409 IMPUTATION_OBLIGATOIRE` est **inatteignable en docker** — il faudrait modifier l'artefact
 `togo@2026`, que la garde de checksum refuse. C'est exactement la garde voulue. Ce chemin est
 prouvé par les unitaires (paquet fabriqué) **et** par la mutation **M6**.
+
+---
+
+## Progress Tracking — clôture
+
+### Revue de code — 3 constats, 3 corrigés (commits `23ac7e3` et `c86c8ba`)
+
+| # | Constat | Ce qu'il coûtait |
+|---|---|---|
+| **F-417-1** | Trois blocs JSDoc **préexistants** détachés de leur déclaration : les nouveaux types avaient été insérés **entre** le commentaire et le symbole qu'il documentait. | `Liquidation`, `ResultatFiscalResponseDto` et `LiquidationResponseDto` perdaient leur doc — dont **deux blocs portant une instruction pour STORY-096**. Même mécanisme que le commentaire périmé de STORY-402 : un commentaire qui porte une instruction et qui glisse est un piège armé. |
+| **F-417-2** | ⚡⚡ `seuilResultatPourImpot` **n'était pas l'inversion exacte annoncée**. `0,35 × 1 310 730` vaut `458 755,49999999994` en IEEE-754 là où l'arithmétique exacte donne `458 755,5` : `Math.round` rend `458 755`, et le seuil **rate son propre invariant** d'une unité. Mesuré : les taux **0,29 · 0,35 · 0,41 · 0,47** le violent — **1 449 fois** sur la plage éprouvée. | `plafondQuiAuraitEvite` **surestimé d'une unité** : le plafond que le contrat propose au cabinet consommerait **un franc de report pour rien** — exactement le geste que la story existe pour supprimer. Latent avec `togo@2026` (27 %), mais **`tauxIs` est une donnée du paquet, pas une constante du code.** |
+| **F-417-3** | Le bornage en **pourcentage** divisait avant de multiplier : `(29 / 100) × 48 000 000` vaut `13 919 999,999999998`. | Budget publié à `13 919 999` là où le contrat annonce `⌊% × bénéfice⌋` **à trois endroits**. Divergences sur `29 % · 57 % · 58 % · 69 %`. |
+
+⚡⚡ **La leçon de F-417-2, et elle porte au-delà de cette story : le test qui prétendait le prouver
+échantillonnait à côté.** L'`it.each` tenait **six couples** (`0,27 · 0,5 · 0,3 · 0,18 · 0,01`) et
+**aucun des quatre taux fautifs**, sous un commentaire affirmant « prouvé **aux deux bornes** » et une
+JSDoc annonçant « inversion **EXACTE** ». Un échantillon peut satisfaire un théorème qu'il ne prouve
+pas — et plus le commentaire est affirmatif, moins on retourne vérifier. Les deux gardes sont
+désormais des **balayages** : les 50 taux entiers de 1 % à 50 % pour le seuil, les 101 pourcentages
+entiers sur cinq bénéfices pour le budget.
+
+⚡ **Et la branche de sur-correction n'était pas morte.** Le correctif F-417-2 corrige le candidat
+dans les **deux** sens, et la branche « candidat trop haut » sortait non couverte — la tentation
+étant de la croire inatteignable et de la retirer. **Mesurée avant de trancher : atteinte 1 290 fois**,
+*davantage* que la branche inverse (1 022). Au taux `0,45 %` pour un plancher de `5`, la formule rend
+`1 001` alors que `IS(1 000) = round(4,5) = 5` atteint déjà le plancher. Un correctif borné d'un seul
+côté aurait laissé ce cas faux.
+
+**Ponytail (seconde lentille, over-engineering)** : un seul candidat — `plafondQuiAuraitEvite`
+duplique `imputationUtile`. **Écarté** : l'AC-B3 demande explicitement « propose le plafond qui
+l'aurait évité », et nommer le **geste** à côté du **constat** est le livrable de la story. Rien
+d'autre à couper : hors DTO et Swagger (imposés), le code de production ajouté tient en ~190 lignes.
+
+### Revue de sécurité — **0 vulnérabilité**
+
+Six points instruits explicitement, chacun conclu sur le code réel :
+
+1. **`motifBornage` (texte libre client)** — ne quitte jamais trois destinations : `validerBornage`,
+   l'objet `plafondVolontaire`, l'écho JSON. Aucun filtre Mongo, aucun `$where`, aucun nom de
+   fichier, aucun événement Kafka, aucun schéma. ⛔ **Le CSV est hors d'atteinte deux fois** : la
+   route d'export reste liée à `ExerciceFiscalQueryDto` (400), **et** `construireCsvLiasse` n'écrit
+   que `postesDsf`. **La prémisse de STORY-416 (« aucune colonne n'est du texte libre ») est
+   intacte** — c'était le risque n°1 de cette story.
+2. **`enableImplicitConversion`** — sondé contre le `ValidationPipe` exact : `abc`, `NaN`, `Infinity`,
+   `1e999`, doublon de paramètre, `plafondImputation[]`, `plafondImputation[$gt]` ⇒ **400**. ⚡ Et
+   `motifBornage[$ne]=x` est **coercé en la chaîne `"[object Object]"`** : aucun opérateur Mongo ne
+   survit. Aucun `NaN`/`Infinity` n'atteint le calcul.
+3. **Sous-imposition** — impossible par construction (`budgetRetenu = min(légal, volontaire)` ne peut
+   que **relever** l'assiette), et vérifié par fuzz jusqu'à `1e308` / `2^53`.
+4. **Fuite via `IMPUTATION_OBLIGATOIRE`** — `pays@annee` et `source` sont déjà publiés en clair dans
+   toute réponse 200, et le refus est levé **après** le guard de scope et **après** le 404 balance :
+   aucun oracle d'énumération.
+5. **Placement du DTO** — les 13 autres liaisons `@Query()` du module restent sur
+   `ExerciceFiscalQueryDto` ; décorateurs de classe inchangés.
+6. **DoS** — aucune boucle pilotée par une valeur client.
+
+⚡ **Un chemin d'écriture a été instruit et écarté** : `provisions.service.ts` appelle `liquider()`
+— c'est une **écriture en balance**. Vérifié : il construit ses propres bornes **purement datées**,
+sans les trois champs de bornage. Un paramètre d'affichage ne peut donc pas influencer une écriture,
+ni contourner `exigerExerciceModifiable`.
+
+### Vérification docker **rejouée sur l'état final** — et elle DISCRIMINE
+
+Les correctifs de revue changent le calcul : reporter la mesure d'avant aurait été exactement la
+fausse assurance que le projet interdit.
+
+- **Non-régression** : les chiffres de la story sont identiques au franc près
+  (`222 224` / `777 776` / `210 000` / `60 000` / seuil `1 777 776`).
+- **F-417-3 discriminé sur le service réel** : bénéfice 48 000 000, `plafondImputationPourcentage=29`
+  ⇒ `plafondVolontaire.budget = 13 920 000`. **L'ancien code publiait 13 919 999.** La vérification
+  ne se contente pas de passer : elle distingue le code corrigé du code bugué.
+- **F-417-2 n'est PAS discriminable en docker, et c'est structurel** : il faudrait un paquet publiant
+  un taux d'IS de 29/35/41/47 %, donc modifier `togo@2026`, ce que la garde de checksum refuse.
+  Prouvé par balayage unitaire et par les mutations **M14/M16**.
+
+### Portes DoD finales
+
+lint **0 warning** · build OK · **3 354** unitaires · **837** e2e (26 suites) · couverture
+**99,13 / 92,27 / 98,61 / 99,23** — `fiscal.regles.ts` et `liquidation.regles.ts` à **100 %**
+lignes et fonctions.
+
+**Passe de mutation totale : 16 mutations, 16 rouges, 16 compilent** (13 au développement + 3 sur les
+correctifs de revue, dont une **sur-correction d'un pas** pour prouver que la correction est bornée
+des deux côtés).
