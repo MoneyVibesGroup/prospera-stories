@@ -1,6 +1,6 @@
 # STORY-420 : La balance rend le libellé de la RACINE — deux comptes différents y portent le même nom
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `modules/referentiel/libelle-compte.ts`, `modules/cahiers/agregation`
@@ -106,8 +106,8 @@ souvent à deux chiffres.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — démarrée le **2026-08-31**, branches `MNV-420` sur `docs/` et
-`balance-service`. PR module **#77**. **Un seul dépôt** : le plan packagé n'est pas touché (cf. les
+**Statut : `done`** — clôturée le **2026-08-31**. PR **#77** (`balance-service`, 2 commits)
+rebase-mergée sur `dev`, branche supprimée. **Un seul dépôt** : le plan packagé n'est pas touché (cf. les
 Notes de la story — son checksum vit dans **deux** dépôts).
 
 ### Conception
@@ -185,3 +185,70 @@ contrat. Les recettes et la contrepartie restent au plan, **et le disent** (AC-4
 `libelleSource`, `6051`/`6055` portent `categories`… et **`571` et `706` n'ont AUCUNE clé
 `categories`**. ⇒ le défaut **implicite `[]`** de Mongoose n'a pas frappé (D-420-7) — vérifié là où
 il se voit, c'est-à-dire **pas** dans un test unitaire, qui mocke Mongoose.
+
+---
+
+## Progress Tracking — clôture
+
+### Revue de code : 6 constats · Revue de sécurité : 1 constat — **tous corrigés** (commit `81b6fa3`)
+
+| # | Constat | Ce qu'il laissait passer |
+|---|---|---|
+| **F-420-1** (bloquant) | ⚡⚡ **Le provisionnement fiscal EFFAÇAIT la provenance** — relevé **indépendamment par les deux revues**. `finaliser` relit la base (`lignesNormalisees` la **rapporte**), fusionne (`fusionnerParCompte` la **conserve**), puis soumettait **sans** la table. | `buildCanonique` la jetait, pendant que `libelle` — **désormais rédigé par le tenant** — survivait, scellé par le checksum. Or la balance **provisionnée** est celle que `findLatest` rend ensuite : **la base fiscale de l'exercice**, validée par le cabinet et consommée par la liasse. Elle portait un libellé du client **en affirmant par omission qu'il venait du plan**, et l'**AC-2 était annulé là où il sert**. |
+| **F-420-2** | Les dépenses **non ventilables** nourrissaient la résolution du libellé. | Une ligne écartée (sans contrepartie), **absente de la balance**, suffisait à faire rebasculer un compte en `PLAN` — donc à réafficher « Autres achats », **le défaut même de la story** — et à publier comme contributrice une catégorie pesant **0 XOF**. |
+| **F-420-5** | La jointure ignorait le `compteCharge` **de la catégorie**, alors qu'il est **surchargeable à la ligne**. | Une ligne reclassée de `622` vers `6221` faisait porter « Loyer boutique » aux **deux** comptes — deux lignes de montants différents et de nom identique, avec cette fois un contrat qui **affirme** que le nom fait autorité. **Le défaut de la story, reconstitué par l'autre bout.** La catégorie reste **contributrice** du compte surchargé ; elle ne le **nomme** plus. |
+| **F-420-3 (a/b/c)** | Trois maillons **sans aucun filet**, mesurés verts : la transmission de l'**aperçu** (chemin par défaut), `categories` dans la table, et le `default: undefined` du `@Prop`. | (a) l'aperçu perdait les deux champs ; (b) `categories` n'atteignait **jamais** la base ⇒ **AC-2 inerte** ; (c) Mongoose reposait son `[]` implicite — que la vérif docker avait prouvé **une fois**, alors que `balance.schema.spec.ts` existe **précisément pour ce piège** depuis STORY-370. |
+| **F-420-4** | Le test « les catégories sont **TRIÉES** » était **vacant** : il saisissait déjà dans l'ordre trié. | Retirer le `.sort()` le laissait **vert** ; un autre test gardait la propriété **par accident**. Le test qui porte le nom d'une propriété ne l'éprouvait pas. |
+| **F-420-6** | `LigneBalance` avait **perdu son docstring**, inséré entre le commentaire et sa déclaration. | ⚠️ **C'est le MÊME défaut qu'en F-417-1**, refait **quatre stories plus tard** — l'invariant « solde débiteur XOR créditeur » que `BalanceValidator` fait respecter ne s'affichait plus sur le type central du contrat. |
+
+⚡⚡ **La leçon de F-420-1, et elle vaut au-delà** : j'avais **dénombré cinq** points de recopie et
+je les avais tous traités. **Il y en avait six.** Les cinq étaient des **projections** (type,
+schéma, `versLigne`, `buildCanonique`, `fusionnerParCompte`) — je les avais trouvées en suivant la
+donnée. Le sixième est un **appelant** : un service qui reconstruit une balance et la resoumet.
+Suivre la donnée ne le montre pas ; il faut **inventorier les appelants de la porte d'entrée**.
+Et c'est le plus coûteux des six, parce qu'il porte sur la pièce qui va à la liasse.
+
+⚠️ **Deux mutations sont restées vertes au premier rejeu — mes DEUX correctifs**, écrits sans leur
+filet. Corriger sans muter, c'est déplacer le défaut d'un cran : le code est juste, et rien ne le
+garde. Les deux tests ajoutés, **7/7 rouges**.
+
+### Doc du sceau complétée
+
+`balance.checksum.ts` gagne sa section « Ce que le sceau NE couvre PAS » pour les deux champs —
+**hors sceau délibérément** (ils n'influencent aucun montant, et `libelle` lui **est** scellé),
+avec ce que cela laisse ouvert écrit noir sur blanc : effacer `libelleSource` au repos fait passer
+un libellé du tenant pour un intitulé du plan. Perte de **transparence**, jamais d'intégrité
+financière — mais c'est exactement F-420-1 obtenu par une autre porte.
+
+### Revue de sécurité — 1 constat (le même que F-420-1), 0 vulnérabilité au-delà
+
+Quatre axes instruits et refermés sur du code lu : le libellé de catégorie **n'atteint aucun
+export** (le CSV de liasse est alimenté par `postesDsf`, jamais par les lignes de balance — et
+`neutraliserFormule` couvrirait de toute façon CWE-1236), **aucun événement Kafka** (le payload
+`balance.created` ne transporte pas les lignes), **aucun journal**. L'isolation multi-tenant est
+robuste **par construction** : la jointure se fait contre les seules catégories du dossier courant,
+donc un `categorieId` étranger ne trouverait rien. Le paramètre explicite est **inatteignable par
+HTTP** (double filet : `forbidNonWhitelisted`, puis une projection qui ne lit jamais le champ du DTO).
+
+### Portes DoD finales
+
+lint **0 warning** · build OK · **3 411** unitaires · **851** e2e (26 suites) · couverture
+**99,14 / 92,31 / 98,62 / 99,25**. **Mutations : 11 au développement + 7 rejouées en revue, 18
+rouges.**
+
+### Vérification docker **rejouée sur l'état final** — et elle DISCRIMINE
+
+```
+balance PROVISIONNÉE — version 3, origine=PROVISIONS_FISCALES
+571    Caisse                  PLAN      ABSENT
+6051   Autres achats           PLAN      ["Groupe electrogene","Électricité CEET"]
+6055   Carburant motos         CATEGORIE ["Carburant motos"]
+706    Services vendus         PLAN      ABSENT
+441    État et autres collectivités publiques   ABSENT   ABSENT
+891    Impôts sur le résultat  ABSENT    ABSENT
+```
+
+⚡ **F-420-1 fermé, prouvé sur la machine** : la balance **provisionnée** garde
+`6055 → CATEGORIE`, et les lignes **neuves** du provisionnement (`441`, `891`) n'en portent
+**aucune** — elles ne viennent pas des cahiers. **Avant le correctif, `6055` aurait perdu son
+étiquette et serait passé pour un intitulé du plan.**
