@@ -167,6 +167,17 @@ ces mêmes règles — le `??` satisfait le **type**, pas un cas. Les retirer ex
 non nulle, qui serait un mensonge de plus dans le même sens ; c'est **documenté sur place** pour
 qu'une passe anti-complexité ne les « nettoie » pas à tort.
 
+### ⚠️ Un changement de comportement de REQUÊTE, là où la story surveillait la réponse
+
+La story prévenait qu'une enveloppe `{ regles: [...] }` serait un changement cassant — et le
+contrat la verrouille (D-419-6). Mais le changement cassant, si petit soit-il, est **du côté de la
+requête** : la route n'avait **aucun** `@Query()`, donc `forbidNonWhitelisted` n'avait rien à
+filtrer et un paramètre inconnu était **ignoré**. Avec `ExerciceQueryDto`, `?foo=bar` sur
+`GET …/rattachement/surcharges` passe désormais en **400**.
+
+C'est un **durcissement**, cohérent avec tout le reste du service — mais il se **constate**, il ne
+se découvre pas en production. Relevé par la revue de sécurité, consigné ici.
+
 ### Passe de mutation — 8 mutations, 8 rouges, 8 compilent
 
 | # | Mutation | Verdict |
