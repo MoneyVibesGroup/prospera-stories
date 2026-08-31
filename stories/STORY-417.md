@@ -336,3 +336,120 @@ tranche sur le texte de l'article 101, pas en réunion.
 **Statut : `in_progress`** — démarrée le **2026-08-31**, branches `MNV-417` sur `docs/` et
 `balance-service`. **Un seul dépôt module** : aucun octet du paquet fiscal ne change (**D-417-3**),
 donc **aucune PR jumelle** `dossier-service` — la garde de byte-identité de STORY-415 reste intacte.
+
+### Conception — ce que la story laissait ouvert, et comment c'est tranché
+
+| Décision | Ce qu'elle tranche |
+|---|---|
+| **D-417-1** | ⛔ **L'avertissement naît dans la LIQUIDATION.** Le périmètre interdit de faire calculer la MFP par le moteur d'assiette (« ce serait faire dépendre l'assiette de la liquidation, alors que la liquidation dépend de l'assiette ») — or `LiquidationService.liquider` **appelle déjà** `ResultatFiscalService.calculer` : il détient l'assiette **et** la MFP, **sans une dépendance de plus**. Les deux grandeurs qui manquaient (`resultatAvantDeficits`, `totalDeficitsImputes`) étaient **déjà publiées** par le moteur : aucune lecture, aucun calcul supplémentaire. |
+| **D-417-2** | Le bornage est un **paramètre de lecture** (`plafondImputation` \| `plafondImputationPourcentage` + `motifBornage`), jamais un état persisté : `calculer()` et `liquider()` restent purs (D-091-9, D-092-10), donc rejouables par STORY-096. Conséquence assumée : la **trace** de l'AC-B4 est **reproductible**, pas stockée. |
+| **D-417-3** | ⚠️ **`imputationObligatoire` est LU du paquet et NON TRANSCRIT — écart au périmètre, assumé et motivé.** Le périmètre demandait de le transcrire ; la story dit elle-même que sourcer l'article 101 « reste dû » et que c'est « une heure de lecture, pas une décision produit ». Écrire `true` ou `false` sans avoir lu le texte serait une **affirmation fiscale inventée** — la leçon de STORY-415 mot pour mot. Le paquet reste **muet**, le contrat publie `null`, et le bornage est **accepté** (arbitrage PO sur l'asymétrie du risque). Le jour où un fiscaliste tranche : **une ligne de donnée**, zéro ligne de code. ⇒ **aucun octet d'artefact ne change ⇒ un seul dépôt**, pas de PR jumelle `dossier-service`. |
+| **D-417-4** | Le seuil est l'**inversion exacte** de `calculerIsDroitCommun` (arrondi au plus proche) : `round(t·R) ≥ M ⟺ R ≥ (M − 0,5)/t`. L'avis d'expert-comptable divisait simplement (seuil 1 777 778, utile 222 222) ; l'exact donne **1 777 776** et **222 224**. La division simple **surestime le seuil**, donc **sous-estime l'imputation utile** — un conseil qui laisse gaspiller ce qu'il prétend économiser. Prouvé **aux deux bornes**. |
+| **D-417-5** | `rendementImputation` est publié **toujours**, à zéro compris (mêmes zéros que D-091-11) : `seuilResultatUtile` est **en soi** le conseil du §③ de l'avis — « le vrai levier n'est pas l'imputation, c'est le résultat » — et il vaut sans un franc de déficit au stock. |
+| **D-417-6** | Le bornage n'est offert **ni** sur l'export CSV **ni** sur `GET /moteur`. ① `postesDsf` ne porte aucun poste de déficit : le bornage ne change pas un octet du fichier de STORY-416 — et y faire entrer `motifBornage`, **texte libre**, rouvrirait l'injection de formule CSV (CWE-1236) fermée en 416 précisément parce qu'« aucune colonne n'est du texte libre ». ② `forbidNonWhitelisted` les fait **refuser en 400** : fail-closed **gratuit**, jamais un paramètre ignoré. |
+| **D-417-7** | ⛔ **Le bornage ne remonte JAMAIS à l'acompte théorique de N−1**, et c'est **l'inverse** de la leçon de STORY-412. Là, l'exonération de MFP devait être reportée sur N−1 parce qu'elle est un **fait du dossier**. Ici c'est un **paramètre de lecture de l'exercice interrogé** : le propager rebornerait l'imputation d'un exercice **déjà déposé** et ferait varier l'acompte théorique selon un paramètre d'affichage. Le même geste, la réponse opposée — gardé par un test dédié (mutation M9). |
+
+### Implémentation
+
+| Fichier | Ce qui change |
+|---|---|
+| `types/fiscal.ts` | `RegleReportDeficitaire.imputationObligatoire` (**requis, nullable**) · `BornageImputation` / `PlafondVolontaire` / `ImputationDeficits` · motif `BORNAGE_VOLONTAIRE` |
+| `fiscal.regles.ts` | lecture de `imputationObligatoire` (**typée**, jamais coercée) · `imputerDeficits` bornable · `validerBornage` (4 refus) |
+| `types/liquidation.ts` | `RendementImputation` + le champ sur `Liquidation` |
+| `liquidation.regles.ts` | `seuilResultatPourImpot` (inversion exacte) · `mesurerRendementImputation` · câblage dans `liquider` |
+| `resultat-fiscal.service.ts` | validation du bornage **en un seul point** — la liquidation en hérite |
+| `liquidation.service.ts` | le bornage traverse jusqu'à l'assiette ; **jamais** vers N−1 |
+| `dto/fiscal.dto.ts` | `ResultatFiscalQueryDto` — **DTO séparé**, c'est lui qui rend le refus de l'export gratuit |
+| `dto/*-response.dto.ts` | `ImputationResponseDto`, `PlafondVolontaireResponseDto`, `RendementImputationResponseDto` |
+| `exceptions/fiscal.exceptions.ts` | 4 codes + `versExceptionBornage` |
+| `fiscal.controller.ts` / `liquidation.controller.ts` | nouveau DTO de requête, 400/409 documentés **par route** (jamais la constante 409 partagée, que `GET /acomptes` ne doit pas hériter) |
+
+### Portes DoD
+
+lint **0 warning** · build OK · **3 353** unitaires · **837** e2e (26 suites) · couverture globale
+**99,13 / 92,21 / 98,61 / 99,23** — `modules/fiscal` à **99,56 / 94,38 / 99,18 / 99,73**,
+`fiscal.regles.ts` et `liquidation.regles.ts` à **100 % lignes/fonctions**.
+
+### Passe de mutation — **13 mutations, 13 rouges, 13 compilent**
+
+⚠️ Chacune a été **rejetée si `tsc` échouait** : une mutation rouge par erreur de compilation ne
+prouve rien (leçon STORY-411/412). Restauration depuis une copie mémoire du fichier, **jamais**
+`git checkout` (qui emporterait le travail non committé).
+
+| # | Mutation | Test qui vire au rouge |
+|---|---|---|
+| M1 | `budgetRetenu` ignore le plafond légal | AC-2 — écrêtement |
+| M2 | `ecrete` figé à `false` | AC-2 — le drapeau |
+| M3 | `BORNAGE_VOLONTAIRE` évalué **avant** `PLAFOND_ATTEINT` | « plafond LÉGAL nul : PLAFOND_ATTEINT l'emporte » |
+| M4 | seuil par **division simple** (la version « naturelle ») | encadrement aux deux bornes + le 1 777 776 |
+| M5 | seuil `null` lu « aucun gaspillage » | « taux d'IS nul ⇒ TOUT est gaspillé » |
+| M6 | garde `IMPUTATION_OBLIGATOIRE` retirée | les deux 409 |
+| M7 | motif non trimé dans le moteur **pur** | « un motif d'ESPACES ne vaut pas un motif » |
+| M8 | le bornage ne traverse plus jusqu'à l'assiette | « le bornage TRAVERSE » |
+| M9 | le bornage **contamine** le théorique de N−1 | D-417-7 |
+| M10 | l'export CSV **accepte** le bornage | D-417-6, e2e |
+| M11 | `imputationObligatoire` coercé (`Boolean`) au lieu d'être **typé** | « une valeur MAL TYPÉE vaut silence » |
+| M12 | `budgetRetenu` forcé à 0 dans la réponse assemblée | non-régression AC-B2 |
+| M13 | le rendement lit le résultat **après** imputation au lieu d'**avant** | le cas de la story |
+
+### Vérification docker — le défaut de la story, chiffré sur une stack NEUVE
+
+`docker compose down -v` → `up --build mongo kafka auth-service balance-service`, tenant réel
+(`register` + `emailVerifiedAt`), read-models de gate semés, dossier `ACTIF`, balance réelle
+(CA 48 000 000 · charges 46 000 000 ⇒ **résultat 2 000 000**), déficit 2024 de **1 000 000**
+déclaré **par l'API**. Paquet : l'artefact `togo@2026` **réel** (IS 27 %, MFP 1 %, Art. 101 CGI).
+
+**① Sans bornage — le défaut, servi par le contrat :**
+
+```json
+"isDroitCommun": 270000, "mfp": 480000, "impotDu": 480000, "baseRetenue": "MFP",
+"rendementImputation": {
+  "imputationRetenue": 1000000,   "imputationUtile": 222224,
+  "reportConsommeSansEffet": 777776,   "valeurAuTauxPlein": 210000,
+  "economieObtenue": 60000,   "seuilResultatUtile": 1777776,
+  "plafondQuiAuraitEvite": 222224 }
+```
+
+⇒ **1 000 000 de report consommés pour 60 000 F d'impôt évité**, et **777 776 partis pour rien** —
+210 000 F d'impôt futur. Les chiffres exacts de l'avis d'expert-comptable, à l'inversion de
+l'arrondi près (D-417-4).
+
+**② Rejeu avec le plafond que le contrat PROPOSE (`plafondImputation=222224`) :**
+
+```json
+"isDroitCommun": 480000, "mfp": 480000, "impotDu": 480000, "baseRetenue": "IS",
+"rendementImputation": { "imputationRetenue": 222224, "reportConsommeSansEffet": 0,
+                         "economieObtenue": 60000 }
+```
+
+⇒ **impôt dû identique au franc près, 777 776 de report SAUVÉS.** ⚡ Et `baseRetenue` bascule
+**exactement** au seuil (`IS = MFP = 480 000`) : la preuve, sur la machine, que l'inversion de
+l'arrondi tombe juste.
+
+**③ AC-3 / AC-B5 — rien n'est écrit, prouvé en base :** `deficits_reportables` et `balances`
+relus **avant** et **après** 8 appels dont 6 bornés (montant, pourcentage, plafond au-delà du
+stock) — `montantDejaImpute` reste **0**, `balances` reste à **1**. Aucun document créé, aucun
+modifié.
+
+**④ `imputation` publié par l'artefact réel :** `imputationObligatoire: null`, `sourceRegle:
+"Art. 101 CGI"`, `plafondLegal: 1000000` — le paquet **muet** de D-417-3, servi tel quel.
+
+**⑤ Les refus, sur le service réel :**
+
+| Requête | Réponse |
+|---|---|
+| montant **et** pourcentage | `400 BORNAGE_AMBIGU` |
+| motif sans plafond | `400 BORNAGE_SANS_PLAFOND` |
+| plafond sans motif | `400 BORNAGE_SANS_MOTIF` |
+| `plafondImputation=-1` / `pourcentage=101` | `400` au DTO |
+| `…/resultat-fiscal/export?plafondImputation=…` | `400 property plafondImputation should not exist` |
+| `…/fiscal/moteur?plafondImputation=…` | `400` idem — et `moteur` **sans** bornage : `200` |
+
+**⑥ Le contrat OpenAPI publié** (`/api/docs-json`) porte bien `ImputationResponseDto`,
+`PlafondVolontaireResponseDto`, `RendementImputationResponseDto`, et les paramètres de bornage
+**uniquement** sur `resultat-fiscal` et `liquidation` — **pas** sur l'export.
+
+⚠️ **Ce que la vérification docker NE discrimine PAS, et c'est structurel** : le chemin
+`409 IMPUTATION_OBLIGATOIRE` est **inatteignable en docker** — il faudrait modifier l'artefact
+`togo@2026`, que la garde de checksum refuse. C'est exactement la garde voulue. Ce chemin est
+prouvé par les unitaires (paquet fabriqué) **et** par la mutation **M6**.
