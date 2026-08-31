@@ -1,6 +1,6 @@
 # STORY-419 : Une règle de rattachement peut être enregistrée, listée, affichée « posée »… et n'agir sur rien
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `modules/cahiers/rattachement`
@@ -125,3 +125,92 @@ lignesPrises!: number;
   pires que l'absence des deux. Cette story-ci ne l'anticipe pas : elle rend seulement le
   problème **visible**, ce qui est le préalable.
 - Voir [[FE-046]] (maquette), `stories/STORY-400.md` (le jumeau), `stories/STORY-394.md`.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — démarrée le **2026-08-31**, branches `MNV-419` sur `docs/` et
+`balance-service`. PR module **#76**. **Un seul dépôt.**
+
+### Conception
+
+| Décision | Ce qu'elle tranche |
+|---|---|
+| **D-419-1** | ⛔ **Le décompte PASSE PAR `resoudreSurcharge`, il ne le réimplémente pas.** Une seconde implémentation de « quelles lignes cette règle prend » divergerait au premier correctif — et c'est **exactement** la divergence que la story existe pour rendre visible. Conséquence **voulue** : l'**éclipse** est respectée. Le libellé primant sur le tiers, une ligne dont le libellé matche une règle `A` n'est **pas** comptée pour la règle `TIERS` `B` qu'elle matche aussi — `B` ne la prend pas, et le dire autrement **sur-déclarerait sa portée**. Une règle systématiquement éclipsée prend donc `0`, ce qui est la vérité. |
+| **D-419-2** | **`applicable` et `lignesPrises` restent ORTHOGONAUX.** Une règle peut porter sur **douze** lignes **et** viser un compte disparu du plan. Les fondre en `0 / false` laisserait le cabinet ignorer s'il doit corriger la **clé** ou le **compte** — « douze lignes concernées, compte hors plan » est le seul message actionnable. |
+| **D-419-3** | `lignesPrises` est **absent** sans exercice désigné, **jamais `0`** (`0` se lirait « règle morte » là où il faut lire « on n'a pas compté »). ⚠️ **Mais un exercice FOURNI et INVALIDE est refusé en 400**, jamais assimilé à une absence : un client croirait qu'on a compté et lirait « aucune règle n'agit ». C'est la distinction **absent ≠ invalide**, et elle est testée des deux côtés. |
+| **D-419-4** | `applicable` réutilise **exactement** le prédicat du moteur (`isCompteDeDetail`), y compris dans la réponse du **`PUT`**, où il est **calculé** et non posé à `true` en dur. La valeur y est nécessairement vraie — `validerCompte` vient de l'exiger — mais la **dériver du même prédicat** interdit que la réponse du `PUT` contredise un jour celle du `GET`. |
+| **D-419-5** | **Seul le cahier de RECETTES est parcouru.** Une règle de rattachement vise un compte de **classe 7** (validé à l'écriture), et les dépenses passent par le `compteCharge` de leur **catégorie** — qui **est déjà** la surcharge `(org, catégorie) → compte` (D-085-6). Compter les dépenses annoncerait une portée que le moteur n'exerce nulle part. |
+| **D-419-6** | La réponse **reste un tableau nu**. La story prévenait qu'une enveloppe `{ regles: [...] }` serait un changement cassant : le test de contrat OpenAPI le **verrouille** désormais (`type: array` + `$ref`), pour qu'un futur enrichissement ne l'introduise pas par inadvertance. |
+
+### Implémentation
+
+| Fichier | Ce qui change |
+|---|---|
+| `rattachement/types/rattachement.ts` | `SurchargeEvaluee extends SurchargeRattachement` (+ `applicable`, `lignesPrises?`) |
+| `rattachement/rattachement.regles.ts` | `compterLignesPrises` — **pure**, clé = la **référence** de la règle (son `id` est facultatif au type) |
+| `rattachement/rattachement.service.ts` | `lister` charge le référentiel et, **si et seulement si** un exercice est désigné, le cahier de recettes |
+| `rattachement/rattachement.controller.ts` | `@Query() ExerciceQueryDto` **réutilisé** (pas un DTO de plus), 400 documenté |
+| `dto/surcharge-rattachement.dto.ts` | `applicable` requis, `lignesPrises` facultatif |
+| `test/openapi-contract.e2e-spec.ts` | ⛔ **le seul filet** : `*.dto.ts` est hors `collectCoverageFrom` |
+
+### Portes DoD
+
+lint **0 warning** · build OK · **3 378** unitaires · **844** e2e (26 suites) · couverture
+**99,14 / 92,27 / 98,61 / 99,24** — `rattachement.regles.ts` et `rattachement.service.ts` à
+**100 %** lignes et fonctions.
+
+⚠️ **Deux branches restent non couvertes, et elles sont inatteignables** : les `?? 0` sur
+`Map.get`. `resoudreSurcharge` rend un élément **du tableau** (`find`) et la table est semée depuis
+ces mêmes règles — le `??` satisfait le **type**, pas un cas. Les retirer exigerait une assertion
+non nulle, qui serait un mensonge de plus dans le même sens ; c'est **documenté sur place** pour
+qu'une passe anti-complexité ne les « nettoie » pas à tort.
+
+### Passe de mutation — 8 mutations, 8 rouges, 8 compilent
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M1 | le décompte passe en **inclusion** au lieu de l'égalité stricte | 🔴 |
+| M2 | l'**éclipse** ignorée : chaque règle compte indépendamment | 🔴 |
+| M3 | les règles sans ligne **absentes** de la table au lieu d'être à zéro | 🔴 |
+| M4′ | `applicable` dérivé du **mauvais test** | 🔴 |
+| M5 | `lignesPrises` publié à `0` au lieu d'être **absent** sans exercice | 🔴 |
+| M6′ | un exercice invalide **avalé** au lieu d'être refusé | 🔴 |
+| M7 | `applicable` rendu **facultatif** au contrat | 🔴 |
+| M8 | `lignesPrises` rendu **requis** au contrat | 🔴 |
+
+⚠️ **M4 et M6 ont d'abord été REJETÉES** — supprimer l'usage d'une variable la rend « déclarée et
+jamais lue » (`noUnusedLocals`), donc la mutation ne compilait pas et **n'aurait rien prouvé**
+(leçon STORY-411/412). Rejouées sous une forme compilable (`applicable` dérivé d'un autre test
+toujours vrai ; l'exception conservée derrière une condition impossible), **les deux rougissent**.
+
+### Vérification docker — la règle inerte se démasque, et le contrôle DISCRIMINE
+
+Stack réelle, tenant réel, **deux règles** et **trois recettes** créées **par l'API** :
+
+| Règle | compte | `applicable` | `lignesPrises` |
+|---|---|---|---|
+| `SODIGAZ` | 706 | `true` | **1** |
+| `TOTAL ENERGIES` | 707 | `true` | **0** |
+
+⚡ **« SODIGAZ SA » n'a PAS été pris** par la règle `SODIGAZ` : l'égalité stricte, mesurée sur le
+service réel. ⛔ **`TOTAL ENERGIES` : enregistrée, listée, tracée — et zéro ligne.** C'est
+littéralement le titre de la story, servi par le contrat.
+
+**Sans exercice**, `lignesPrises` est **absent** des deux règles (et le cahier de recettes n'est pas
+lu). **Avec `?exerciceDebut=` seul**, la réponse est **`400 EXERCICE_INDETERMINE`** — jamais un
+comptage silencieusement omis.
+
+**AC-2 sur la machine, avec un VRAI second référentiel** : une règle sur `781` (« Transferts de
+charges », présent au plan `syscohada-revise@2.1`) est écrite, puis le référentiel de
+l'organisation est basculé sur **`sfd-bceao@2.0`**, dont aucune racine ne préfixe `781`.
+
+```
+Transfert de charges   compte 781   applicable=False
+SODIGAZ                compte 706   applicable=True
+TOTAL ENERGIES         compte 707   applicable=True
+```
+
+⚡ **Et c'est le contrôle qui discrimine** : `706` et `707` restent `true` sous le même référentiel
+basculé. Un prédicat constamment faux aurait passé le premier test et échoué celui-ci.
