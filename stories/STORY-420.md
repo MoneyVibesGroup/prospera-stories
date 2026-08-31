@@ -1,6 +1,6 @@
 # STORY-420 : La balance rend le libellé de la RACINE — deux comptes différents y portent le même nom
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `modules/referentiel/libelle-compte.ts`, `modules/cahiers/agregation`
@@ -101,3 +101,87 @@ souvent à deux chiffres.
   libellé qui manque n'est pas comptable, il est **propre au cabinet** — sa place est du côté
   de la catégorie, pas du référentiel.
 - Voir [[FE-046]] (maquette), `stories/STORY-083.md` (les catégories), `stories/STORY-085.md`.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — démarrée le **2026-08-31**, branches `MNV-420` sur `docs/` et
+`balance-service`. PR module **#77**. **Un seul dépôt** : le plan packagé n'est pas touché (cf. les
+Notes de la story — son checksum vit dans **deux** dépôts).
+
+### Conception
+
+| Décision | Ce qu'elle tranche |
+|---|---|
+| **D-420-1** | ⛔ **Aucun libellé COMPOSITE.** Plusieurs catégories sur un compte est une situation **légitime** ; « Électricité CEET / Carburant motos » **paraîtrait faire autorité**. Le plan reprend la main (`PLAN`) et les contributrices sont publiées **à côté** — ce qui dit ce que le compte agrège **sans prétendre le nommer**. |
+| **D-420-2** | ⛔ **Les deux champs ne sont PAS au `SubmitBalanceDto`** : ils passent par un **paramètre explicite** de `submit`/`dryRun`/`buildCanonique`. C'est **mot pour mot la doctrine déjà écrite dans ce fichier** pour `origine` et `exerciceId` — « ce que l'APPELANT déclare » contre « ce que le SERVEUR constate ». Au DTO, un import Sage pourrait estampiller ses lignes « libellé de catégorie » **sans qu'aucune catégorie n'existe**, et la balance porterait ce mensonge jusqu'au client. |
+| **D-420-3** | ⚠️ **CINQ points de recopie explicite** ont dû être étendus : le type, le schéma Mongoose, `versLigne` (relecture d'une balance **persistée**), `buildCanonique` (persistance) et `fusionnerParCompte` (socle ⊕ mouvements). **En manquer un rendait le livrable inerte sur un chemin** — le champ n'existerait qu'en `dryRun`, ou disparaîtrait **dès qu'un socle d'à-nouveaux existe**, c'est-à-dire sur tous les dossiers en année N+1. |
+| **D-420-4** | `fusionnerParCompte` ne conserve la provenance qu'au **contributeur unique** — exactement la règle de `sources` (STORY-370). Un compte alimenté par le socle **et** par les mouvements n'est plus « le compte de cette catégorie » : la taire vaut mieux que l'affirmer sur une ligne qu'elle ne décrit plus qu'en partie. |
+| **D-420-5** | Les comptes de **contrepartie** sont exclus du nommage, même si une catégorie mal paramétrée en désignait un : la caisse d'un dossier n'est pas « Loyer boutique ». Le cas est théorique (classe 6 contre classe 4/5) — le rendre **impossible** coûte une ligne, l'inverse coûterait un nom faux sur une ligne de trésorerie. |
+| **D-420-6** | Une catégorie **supprimée** depuis la saisie laisse le compte **au plan**. Écrire « catégorie supprimée » serait pire que le générique. |
+| **D-420-7** | `categories` porte **`default: undefined`** au schéma. Sans lui, Mongoose applique un défaut **implicite `[]`** à tout chemin de type tableau, et une recette se persisterait avec `categories: []` — « aucune catégorie ne contribue » **affirmé**, là où la vérité est « ce compte ne relève pas des catégories ». Le piège de STORY-370, à l'identique, atteint par la même porte. |
+
+### Portes DoD
+
+lint **0 warning** · build OK · **3 403** unitaires · **851** e2e (26 suites) · couverture
+**99,14 / 92,32 / 98,62 / 99,25**.
+
+### Passe de mutation — 11 mutations, 11 rouges, 11 compilent… après **deux vertes**
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M1 | un libellé **composite** fabriqué à plusieurs catégories | 🔴 |
+| M2 | les `categories` ne sont plus **triées** | 🔴 |
+| M3′ | les **contreparties** ne sont plus exclues | 🔴 |
+| M4 | une catégorie supprimée reçoit un libellé **inventé** | 🔴 |
+| M5 | `libelleSource` jamais servi sur les recettes (AC-4) | 🔴 |
+| M6′ | la recopie de `versLigne` supprimée | 🔴 |
+| M7″ | la recopie de `buildCanonique` neutralisée | 🔴 |
+| M8′ | la fusion abandonne la provenance **même** à contributeur unique | 🔴 |
+| M9′ | la fusion **garde** la provenance à plusieurs contributeurs | 🔴 |
+| M10 | `buildCanonique` **invente** une provenance sur toutes les lignes | 🔴 |
+
+⚡⚡ **Deux mutations sont d'abord restées VERTES, et les deux accusaient mes tests — pas les
+mutations.**
+
+1. **Mon test de fusion passait pour l'ORDRE des contributeurs, pas pour leur NOMBRE.** Le cumul est
+   initialisé sur le **premier** contributeur ; en plaçant le socle (sans provenance) en premier,
+   `libelleSource` restait `undefined` et rien n'était émis — **même sans la garde**
+   `contributeurs === 1`. Le test décrivait donc une propriété que le code ne devait pas au filet
+   qu'il prétendait éprouver. Corrigé en faisant venir **en premier** la ligne qui **porte** la
+   provenance : la garde est alors seule à empêcher la fuite.
+2. **L'unitaire ET l'e2e de l'agrégation MOCKENT `BalanceService`**, et le mock rend `{...dto}` —
+   donc **plus permissif que le vrai service**. Neutraliser la recopie de `buildCanonique` ne
+   cassait rien, alors que c'est le point où le champ serait **jeté avant la base**. ⇒ deux tests
+   ajoutés sur le **service réel** (`balance.service.spec.ts`), et les mutations rougissent.
+
+⚠️ **La leçon commune** : un test peut passer *parce qu'un mock est plus généreux que la
+production*, ou *parce que l'ordre des données masque la garde*. Dans les deux cas il décrit le
+banc d'essai, pas le code. Trois mutations ont par ailleurs été **rejetées** pour non-compilation
+(`noUnusedLocals`) et rejouées sous forme compilable — une mutation qui ne compile pas ne prouve
+rien.
+
+### Vérification docker — le défaut fermé, et la persistance prouvée sur le document réel
+
+Stack réelle, tenant réel, **deux catégories** et **trois dépenses** créées **par l'API**.
+
+```
+COMPTE   LIBELLE                      SOURCE      CATEGORIES
+571      Caisse                       PLAN        —
+6051     Électricité CEET             CATEGORIE   ["Électricité CEET"]
+6055     Carburant motos              CATEGORIE   ["Carburant motos"]
+706      Services vendus              PLAN        —
+```
+
+⚡ **`6051` et `6055` cessent d'être « Autres achats »** — le titre de la story, servi par le
+contrat. Les recettes et la contrepartie restent au plan, **et le disent** (AC-4).
+
+**AC-2, sur la machine** : une **troisième** catégorie posée sur `6051` le fait basculer à
+`libelle: "Autres achats"`, `libelleSource: 'PLAN'`, `categories: ["Groupe electrogene",
+"Électricité CEET"]` — **aucun composite**.
+
+**Persistance, relue en `mongosh` sur le document réel** : les quatre lignes portent
+`libelleSource`, `6051`/`6055` portent `categories`… et **`571` et `706` n'ont AUCUNE clé
+`categories`**. ⇒ le défaut **implicite `[]`** de Mongoose n'a pas frappé (D-420-7) — vérifié là où
+il se voit, c'est-à-dire **pas** dans un test unitaire, qui mocke Mongoose.
