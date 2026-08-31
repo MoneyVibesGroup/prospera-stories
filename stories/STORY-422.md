@@ -1,6 +1,6 @@
 # STORY-422 : La balance est étiquetée du référentiel du DOSSIER, mais ses comptes sont validés contre celui de l'ORGANISATION
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `modules/referentiel`, `modules/cahiers/agregation`, `modules/read-models`
@@ -220,3 +220,98 @@ pas le même appel.
 - Voir [[FE-046]], `stories/STORY-303.md` (le tag vient du dossier), `stories/STORY-078.md`
   (D-078-3, SMT non packagé), `stories/STORY-394.md` (l'énumération du plan, org-scopée),
   `stories/STORY-304.md`.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — démarrée le **2026-08-31**, juste après la clôture de son prérequis
+[[STORY-533]] (le même jour).
+
+### ⚡⚡ Le fait de la story, MESURÉ — et il est pire que ce que la fiche annonce
+
+La fiche dit « 44 racines communes, les 44 divergent ». C'est vrai, mais ce n'est pas le chiffre qui
+compte. `isCompteValide` rattache **par préfixe** — une balance réelle porte des comptes subdivisés
+(`5211BOA0`, `411FACTURE`) que le plan normalisé ne liste pas un par un. Conséquence mesurée sur les
+artefacts livrés :
+
+> Sur les **372 comptes du RCSFD**, SYSCOHADA n'en refuse que **21**.
+> **Les 351 autres — 94 % — passent la validation et sont rattachés au mauvais poste.**
+
+Ce n'était donc pas « quelques comptes exotiques » qui échappaient au contrôle : c'était la
+**quasi-totalité d'une balance de microfinance**, acceptée sans un signal et présentée dans un bilan
+SYSCOHADA. Les 21 refusés sont précisément le cœur de métier d'une IMF (`20…` « Crédits aux membres »,
+`202` « Crédits à court terme », `2022` « Crédits ordinaires »).
+
+⇒ Ce fait est désormais **exécutable** : `referentiel-assets-coherence.spec.ts` charge les **vrais**
+octets et le constate. Le jour où quelqu'un régénère un artefact et fait converger les deux plans, il
+rougit — et la story perd sa raison d'être avant que quiconque ne s'en aperçoive en production.
+
+### Le périmètre réel, et trois écarts assumés
+
+| Ce que la fiche annonce | Ce qui est |
+|---|---|
+| « **6 points d'appel** » de `chargerReferentiel` | **20** — le compilateur les a tous énumérés dès que `dossierId` est devenu requis (AC-A1 : c'est la signature qui refuse, pas un contrôle à l'exécution). 12 services + 8 appels indirects. |
+| « `GET /referentiels/plan-comptes` devient `GET /dossiers/{id}/…` » | **`actifs` bouge aussi** — ⚠️ **conséquence FORCÉE d'AC-A1**, pas un débordement : dès que `chargerReferentiel` refuse d'être appelée sans dossier, un diagnostic org-scopé n'a plus de référentiel à charger. Le laisser en l'état l'aurait figé sur le `409 REFERENTIEL_AMBIGU` de 533 pour **exactement** les cabinets multi-secteur que cette story vient servir. |
+| — | **`reintegrations` reste org-scopé**, dans un contrôleur séparé : cette énumération sort du **paquet FISCAL**, dont l'axe est `(pays, année)`, pas du référentiel comptable. La déplacer l'aurait soumise à `@RequiresDossierScope()` pour une donnée qui ne dépend d'aucun dossier, et aurait cassé une URL publiée que la story ne touche pas. |
+
+### Décisions de conception
+
+**1. Les trois questions, dans cet ordre** : ① l'organisation a-t-elle un droit d'usage `ACTIVE` ?
+② de quel système comptable relève **ce dossier** ? ③ y est-elle habilitée ? Chaque marche a son refus
+typé, et le référentiel n'est **jamais** deviné.
+
+**2. La cascade du tag est celle d'`axesAvecRepli`, à l'identique.** En prendre une autre ferait
+diverger le tag (STORY-303) et le plan — c'est-à-dire **recréer** le défaut à plus petite échelle. Le
+repli sur le profil de l'organisation reste la marche de non-régression de 303, et il est désormais
+**gardé par l'habilitation**.
+
+**3. `ReferentielResolver` injecte le MODÈLE `ProfilSociete`, pas `ProfilSocieteRepository`.**
+`ProfilSocieteModule` importe `ReferentielModule` (il dérive de `PaquetFiscalRegistry` la liste des
+pays supportés) : injecter son repository fermerait un **cycle**. `MongooseModule.forFeature` n'en
+crée aucun ; le résolveur lit un seul champ, en lecture seule, dans la base du même service.
+
+**4. `resoudreReferentiel(orgId)` et `ReferentielAmbiguError` sont SUPPRIMÉS.** STORY-533 avait écrit :
+*« STORY-422 remplace ces appels par une résolution scopée au dossier ; cette branche redevient alors
+morte »*. Elle l'est : plus aucun appelant de production. Le `409 REFERENTIEL_AMBIGU` disparaît du
+contrat de `balance-service` — **le hook est consommé, pas laissé en place**.
+⚠️ `bilan-service` garde le sien : la story ne le touche pas.
+
+**5. Un 500 disparaît, et c'est un progrès.** Avant 422, l'entitlement alimentait **directement** le
+loader : une version fantaisiste (`syscohada-revise@9.9`) y produisait un `ArtefactNotFoundError`, donc
+un **500** — une panne serveur pour une donnée d'octroi mal saisie. Le référentiel vient désormais du
+**pont tag → couple**, exhaustif par construction : le loader ne reçoit jamais de clé inconnue, et
+l'octroi fantaisiste sort en **409 `REFERENTIEL_NON_HABILITE`** que l'appelant peut corriger.
+
+### Passe de mutation — AC-A2
+
+| Mutation | Attendu | Constaté |
+|---|---|---|
+| rendre `habilites[0]` au lieu du référentiel du tag (**le comportement d'AVANT 422**) | rouge sur les tests d'AC-A2 et d'AC-A3 | ✅ **4 rouges / 46**, et la mutation **compile** |
+
+### ⚠️ Rupture de contrat HTTP — une story FE est nécessaire
+
+Deux routes publiées changent d'URL :
+
+| Avant | Après |
+|---|---|
+| `GET /api/v1/referentiels/plan-comptes` | `GET /api/v1/dossiers/{dossierId}/referentiels/plan-comptes` |
+| `GET /api/v1/referentiels/actifs` | `GET /api/v1/dossiers/{dossierId}/referentiels/actifs` |
+| `GET /api/v1/referentiels/reintegrations` | **inchangée** (paquet fiscal, axe pays/année) |
+
+La rupture est **assumée et voulue** : c'est elle qui empêche un écran d'afficher la liste de comptes
+du cabinet sur le dossier ouvert — le point ③ du § *Ce que la jonction produit*. Mais elle exige une
+story frontend, que le backend ne peut pas porter (l'user n'a pas de droit de push sur les dépôts
+frontend). ⇒ **À ficher**, avec le passage du panneau « Refus » de la maquette **FE-046** — dont la
+mention provisoire (« la liste de comptes n'est pas celle du dossier ») devient **fausse** et doit
+être retirée.
+
+Deux codes de refus neufs à câbler côté écran, tous deux `409` et tous deux **actionnables** :
+
+- `REFERENTIEL_NON_HABILITE` — corps : `details.referentielDuDossier` **et**
+  `details.referentielsHabilites`. L'écran peut dire « ce dossier relève du RCSFD, votre cabinet a
+  droit à SYSCOHADA » et proposer les deux gestes : corriger l'axe, ou demander l'habilitation.
+- `SYSTEME_COMPTABLE_INDETERMINE` — le geste est « renseigner les axes du dossier ».
+
+Et un code qui **disparaît** de `balance-service` : `REFERENTIEL_AMBIGU` (hook de STORY-533 consommé).
+
