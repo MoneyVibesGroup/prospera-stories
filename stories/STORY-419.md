@@ -1,6 +1,6 @@
 # STORY-419 : Une règle de rattachement peut être enregistrée, listée, affichée « posée »… et n'agir sur rien
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `modules/cahiers/rattachement`
@@ -130,8 +130,8 @@ lignesPrises!: number;
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — démarrée le **2026-08-31**, branches `MNV-419` sur `docs/` et
-`balance-service`. PR module **#76**. **Un seul dépôt.**
+**Statut : `done`** — clôturée le **2026-08-31**. PR **#76** (`balance-service`, 2 commits)
+rebase-mergée sur `dev`, branche supprimée. **Un seul dépôt.**
 
 ### Conception
 
@@ -225,3 +225,61 @@ TOTAL ENERGIES         compte 707   applicable=True
 
 ⚡ **Et c'est le contrôle qui discrimine** : `706` et `707` restent `true` sous le même référentiel
 basculé. Un prédicat constamment faux aurait passé le premier test et échoué celui-ci.
+
+---
+
+## Progress Tracking — clôture
+
+### Revue de code — 3 constats, 3 corrigés (commit `abd827a`)
+
+Les trois portent sur la **valeur probante des tests** — **aucun défaut de comportement dans le
+code livré** — et chacun était **prouvé par une mutation exécutée qui restait verte**.
+
+| # | Constat | Ce qu'il laissait passer |
+|---|---|---|
+| **F-419-1** (bloquant) | ⚡⚡ **`applicable` n'était pinné à AUCUN des deux prédicats.** La fixture appelait `referentielFactice` avec **un seul** argument, donc `isCompteValide === isCompteDeDetail` sur **tous** les chemins. | Remplacer l'un par l'autre dans le service laissait **3 378 unitaires et 844 e2e VERTS**. C'est le piège de **STORY-172** — que le docblock de la fixture énonce pourtant en toutes lettres — et deux autres services du même dépôt utilisent délibérément `isCompteValide`. Une règle antérieure à 172 sur un compte à **8 chiffres** (import Sage) est rattachable par préfixe mais **hors niveau de détail** : le moteur l'ignore, et l'écran l'aurait affichée **vivante**. |
+| **F-419-2** (bloquant) | `SurchargeRattachementDto.depuis` n'était exercé que par **une** fixture — sans `lignesPrises`, avec `applicable: true`. | Supprimer le spread conditionnel laissait tout vert **et la couverture inchangée** (`*.dto.ts` hors `collectCoverageFrom`) pendant que le serveur cessait **totalement** de publier `lignesPrises`. Le front serait retombé sur son contournement client : **la story livrée inerte, exactement le patron qu'elle dénonce.** |
+| **F-419-3** (non bloquant) | Seul `exerciceDebut` seul était testé ; `designe` réimplémente « une borne a-t-elle été fournie ? ». | Lui retirer le terme `exerciceFin` rendait **200 sans `lignesPrises`** là où il faut **400** — la confusion *absent ≠ invalide* que D-419-3 interdit, dans le sens que la story disait « testé des deux côtés ». |
+
+⚡⚡ **La leçon : ma propre mutation M4′ était strictement plus faible que le défaut.** Elle dérivait
+`applicable` d'un test **toujours vrai**, que l'AC-2 attrapait déjà. La mutation qui comptait —
+substituer le prédicat **voisin et plausible** — n'avait pas été jouée. **Une mutation ne vaut que
+si elle imite une erreur qu'un développeur ferait vraiment** ; « casser franchement » est facile à
+attraper, « confondre deux prédicats voisins » est le vrai risque, et c'est celui qui était nu.
+
+### ⚠️ Une cinquième mutation reste VERTE — et c'est un MUTANT ÉQUIVALENT, pas un trou
+
+La **même** confusion `isCompteDeDetail` / `isCompteValide` sur la réponse du **`PUT`** est
+**indistinguable par construction** : `estCompteDeDetail` est un **sous-ensemble strict** de
+`estCompteRattachable`, et `validerCompte` vient d'exiger le premier — sur ce chemin, les deux
+prédicats rendent **toujours** `true`. Aucune sortie observable ne change.
+
+Tordre un test pour la faire rougir aurait fabriqué une **fausse assurance** : le test aurait
+gardé une équivalence, pas un comportement. C'est **documenté sur place**, et le code garde la
+forme dérivée — si `validerCompte` se relâchait un jour, la valeur suivrait au lieu de mentir.
+
+⇒ **Une mutation verte est soit un test faible, soit un mutant équivalent. Distinguer les deux est
+tout le travail** — trois fois « test faible » ici, une fois « équivalent ».
+
+### Revue de sécurité — **0 vulnérabilité**, et elle a mesuré au lieu de raisonner
+
+- **La piste DoS est fermée par la CONCEPTION** : le filtre d'exercice est une **égalité exacte**
+  sur `exercice.debut`/`exercice.fin`, pas un intervalle — `?exerciceDebut=1900-01-01&exerciceFin=
+  2999-12-31` ne matche **rien**. Boucle mesurée : `10 000 lignes × 1 000 règles = 337 ms`, quand
+  `GET …/cahiers/recettes` sert déjà 100 000 documents (7 s, 60 Mo) au **même** appelant, sans
+  aucune mise en place. Le vrai sujet — l'absence de pagination — est **pré-existant**.
+- **Aucune fuite** : `applicable` dérive du plan que l'appelant lit déjà via un gate **plus
+  faible** ; `lignesPrises` compte des lignes qu'il peut déjà énumérer avec un gate **identique**.
+- **Injection NoSQL fermée, vérifiée en exécutant le vrai `ValidationPipe`** : `?exerciceDebut[$ne]=`,
+  `?exercice[$gt]=1` et les formes tableau sont toutes rejetées en 400.
+- Le seul motif de refus qui **interpole une valeur client** est **inatteignable par HTTP**
+  (`@IsInt() @Min @Max` s'exécutent avant) : pas de XSS réfléchi, pas d'injection de log.
+
+### Portes DoD finales
+
+lint **0 warning** · build OK · **3 383** unitaires · **844** e2e (26 suites) · couverture
+au-dessus des seuils, `rattachement/` à **100 %** sur les quatre axes pour les règles, le service,
+les exceptions, les schémas et les types.
+
+**Mutations : 8 au développement + 5 rejouées en revue** — 12 rouges, **1 équivalente et
+documentée**.
