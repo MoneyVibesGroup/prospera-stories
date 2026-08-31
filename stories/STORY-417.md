@@ -1,9 +1,10 @@
 # STORY-417 : L'imputation des déficits est maximale et inconditionnelle — sous le plancher MFP, elle consomme du report pour rien
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
-**Service :** `balance-service` (`:3007`) — `modules/fiscal` · **et** le paquet fiscal `TG@YYYY`
+**Service :** `balance-service` (`:3007`) — `modules/fiscal`. ⚠️ Le paquet fiscal `TG@YYYY` reste
+**muet** (**D-417-3**) : sa clé `imputationObligatoire` est **lue**, pas transcrite.
 **Points :** 8 · **Sprint :** S20 — *chiffré après l'arbitrage PO du 2026-08-28*
 **Origine :** relevée le **2026-08-26** en construisant la maquette **FE-050**, en mettant côte à
 côte les deux moitiés du même écran : le résultat fiscal (STORY-091) et la liquidation (STORY-092).
@@ -160,7 +161,15 @@ curseur d'imputation sans montrer cette zone donnerait le mauvais levier.
 
 ---
 
-## La question qui commande tout — à trancher AVANT de chiffrer
+## ~~La question qui commande tout — à trancher AVANT de chiffrer~~ — **DÉPASSÉE le 2026-08-28**
+
+> ⛔ **Section conservée pour l'historique, elle ne commande plus rien.** L'arbitrage PO du
+> 2026-08-28 a tranché **sans** attendre la réponse de droit, et sur un autre critère que le droit :
+> l'**asymétrie du risque**. Le « ne pas coder avant cette réponse » ci-dessous **ne s'applique
+> plus** — ce qui reste dû, c'est la source de l'article 101, et elle décide du **libellé de
+> l'écran**, pas du code. Cf. **D-417-3** : le paquet reste **muet** tant qu'un fiscaliste n'a pas
+> tranché, et le contrat le publie comme tel (`imputationObligatoire: null`).
+
 
 ⛔ **L'imputation d'un déficit reportable est-elle FACULTATIVE au regard de
 l'article 101 du CGI togolais, ou s'impose-t-elle sur le premier exercice bénéficiaire ?**
@@ -216,19 +225,90 @@ tranche sur le texte de l'article 101, pas en réunion.
 
 ---
 
-## Critères d'acceptation
+## Critères d'acceptation — **FIGÉS le 2026-08-31**, branche « bornable » retenue par le PO
 
-*(à figer après l'arbitrage juridique — formulés ici dans la branche « facultative »)*
+### Le bornage (arbitrage PO du 2026-08-28)
 
-1. La règle du paquet publie si l'imputation est obligatoire, avec sa source légale ; un
-   paquet muet conserve **exactement** le comportement d'aujourd'hui.
-2. Quand elle est facultative, un appelant peut demander une imputation **inférieure** au
-   maximum ; une demande supérieure au plafond ou au stock est **plafonnée**, jamais
-   refusée silencieusement, et le montant retenu est publié.
-3. Le calcul reste **pur** : deux appels identiques rendent le même résultat, et aucun
-   n'écrit dans le stock de déficits.
-4. La réponse permet de **mesurer** le rendement de l'imputation retenue sans appeler la
-   liquidation — ou dit explicitement qu'elle ne le permet pas.
+1. **AC-B1 — L'imputation accepte un plafond volontaire par exercice**, en **montant**
+   (`plafondImputation`, unités mineures) **ou** en **pourcentage du bénéfice**
+   (`plafondImputationPourcentage`, 0→100). Les deux ensemble ⇒ **400 `BORNAGE_AMBIGU`**.
+   Le plafond volontaire est **borné par le plafond légal du paquet** : jamais au-delà.
+2. **AC-B2 — La valeur par défaut reste l'imputation maximale.** Aucun paramètre ⇒ **strictement
+   le comportement d'aujourd'hui**, au champ près : la réponse gagne un bloc `imputation`
+   **additif**, aucun champ existant ne change de valeur ni de type. Non-régression prouvée par la
+   suite 091/092 laissée intacte.
+3. **AC-B3 — L'avertissement est INCONDITIONNEL et ne dépend d'aucune source légale** : dès que la
+   MFP l'emporte, la réponse **chiffre le report consommé pour rien**, ce qu'il aurait valu au taux
+   plein, l'économie réellement obtenue, le **seuil** de résultat fiscal sous lequel imputer ne sert
+   plus à rien, et **le plafond qui l'aurait évité** — directement réutilisable comme
+   `plafondImputation`.
+4. **AC-B4 — Le bornage est tracé avec son motif** : `motifBornage` est **obligatoire** dès qu'un
+   plafond volontaire est demandé (**400 `BORNAGE_SANS_MOTIF`** sinon), et il est **republié** dans
+   la réponse à côté du plafond retenu. Un report non imputé volontairement est une décision de
+   gestion : elle se relit avec sa raison, ou elle est indéfendable en contrôle.
+5. **AC-B5 — Le stock de report reste cohérent entre les deux chemins.** Borner puis ne pas borner
+   ne perd ni ne duplique de report, parce que **rien n'est écrit** : `montantDejaImpute` reste
+   **déclaré** (D-091-9). Prouvé par un **test de rejeu** (n appels, plafonds différents, stock
+   identique) **et** par la vérification docker.
+
+### Le contrat (formulation d'origine, conservée et resserrée)
+
+6. **AC-1 — La règle du paquet publie si l'imputation est obligatoire, avec sa source ; un paquet
+   muet conserve exactement le comportement d'aujourd'hui.** Le moteur **lit**
+   `resultatFiscal.reportDeficitaire.imputationObligatoire` et le republie
+   (`null` = le paquet ne tranche pas). Un paquet qui déclare `true` **refuse** tout bornage —
+   **409 `IMPUTATION_OBLIGATOIRE`**, en citant sa source. ⚠️ Cf. **D-417-3** : `togo@2026` reste
+   **muet**, parce que la source n'a pas été lue et qu'une affirmation fiscale non sourcée est pire
+   qu'un silence.
+7. **AC-2 — Une demande supérieure au plafond légal ou au stock est PLAFONNÉE, jamais refusée
+   silencieusement**, et le montant retenu est publié (`budgetRetenu`, `plafondVolontaire.ecrete`).
+8. **AC-3 — Le calcul reste PUR** : deux appels identiques rendent le même résultat, et **aucun
+   n'écrit dans le stock de déficits** (D-091-9, prolongé au bornage).
+9. **AC-4 — La réponse dit explicitement qu'elle ne mesure PAS le rendement sans la liquidation**
+   (`rendementMesurable: false`, même patron que `mfpToujoursDue: true`), et le **mesure** dans la
+   liquidation — le seul point qui détient déjà les deux moitiés. C'est la seconde branche de
+   l'AC-4 d'origine, prise mot pour mot.
+
+---
+
+## Décisions de conception
+
+- **D-417-1 — L'avertissement est publié par la LIQUIDATION, pas par le moteur du résultat
+  fiscal.** Le périmètre interdit de faire calculer la MFP par le moteur d'assiette (« ce serait
+  faire dépendre l'assiette de la liquidation, alors que la liquidation dépend de l'assiette »).
+  Or `LiquidationService.liquider` **appelle déjà** `ResultatFiscalService.calculer` : il détient
+  l'assiette **et** la MFP, sans qu'aucune dépendance nouvelle ne soit créée. Le
+  bloc `rendementImputation` naît donc là, et `ResultatFiscalResponseDto` **dit** qu'il ne le
+  mesure pas (AC-4, seconde branche).
+- **D-417-2 — Le bornage est un PARAMÈTRE DE LECTURE, jamais un état persisté.** `calculer()` et
+  `liquider()` restent purs et rejouables (D-091-9, D-092-10) : c'est ce dont STORY-096 a besoin par
+  construction. Conséquence assumée : la **trace** du bornage (AC-B4) est **reproductible**, pas
+  **stockée** — pour retrouver le chiffre, il faut renvoyer le même paramètre, et le motif voyage
+  avec lui.
+- **D-417-3 — `imputationObligatoire` est LU du paquet, et NON transcrit.** La story elle-même
+  dit que sourcer l'article 101 « reste dû » et que c'est « une heure de lecture, pas une décision
+  produit ». Écrire `true` ou `false` dans l'artefact sans avoir lu le texte serait une **affirmation
+  fiscale inventée** — la leçon exacte de STORY-415 (« un libellé faux est pire qu'un libellé
+  absent »). Le paquet reste donc **muet**, le contrat publie `null`, et le bornage est **accepté**
+  (choix du PO sur l'asymétrie du risque). Le jour où un fiscaliste tranche : **une ligne de
+  donnée** dans la source du paquet, **zéro ligne de code**.
+  ⇒ **Aucun octet d'artefact ne change** ⇒ **un seul dépôt** (pas de PR jumelle `dossier-service`
+  comme en STORY-415, dont la garde de byte-identité n'est pas touchée).
+- **D-417-4 — Le seuil est l'INVERSION EXACTE de `calculerIsDroitCommun`**, qui arrondit au plus
+  proche : `round(t·R) ≥ M ⟺ t·R ≥ M − 0,5 ⟺ R ≥ (M − 0,5)/t`. La table de l'avis
+  d'expert-comptable ci-dessus divise simplement (seuil 1 777 778, imputation utile 222 222) ;
+  l'inversion exacte donne **1 777 776** et **222 224** — **2 unités d'écart**, et c'est la version
+  exacte qui est retenue, avec un test qui la prouve **aux deux bornes** (`IS(seuil) ≥ MFP` et
+  `IS(seuil − 1) < MFP`).
+- **D-417-5 — `rendementImputation` est publié TOUJOURS**, y compris quand rien n'a été gaspillé
+  (mêmes zéros que D-091-11). `seuilResultatUtile` est **en soi** le conseil du §③ de l'avis
+  (« sortir de la zone »), et il vaut même sans un franc de déficit au stock.
+- **D-417-6 — Le bornage n'est offert NI sur l'export CSV NI sur l'aiguillage `GET /moteur`.**
+  ① `postesDsf` ne porte **aucun** poste de déficit : le bornage ne change pas un octet du fichier
+  de STORY-416 — et y faire entrer `motifBornage`, **texte libre**, rouvrirait l'injection de
+  formule CSV (CWE-1236) que STORY-416 a fermée précisément parce qu'« aucune colonne n'est du
+  texte libre ». ② `forbidNonWhitelisted` fait **refuser en 400** un paramètre de bornage envoyé à
+  ces routes : fail-closed, jamais ignoré en silence. Hook inerte documenté pour STORY-096.
 
 ---
 
@@ -248,3 +328,11 @@ tranche sur le texte de l'article 101, pas en réunion.
   sous les yeux : il nomme le mécanisme et renvoie à la liquidation pour vérifier le
   rapport. Il ne propose **aucun geste** que le contrat n'a pas.
 - Consommateur nommé : **FE-050**.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — démarrée le **2026-08-31**, branches `MNV-417` sur `docs/` et
+`balance-service`. **Un seul dépôt module** : aucun octet du paquet fiscal ne change (**D-417-3**),
+donc **aucune PR jumelle** `dossier-service` — la garde de byte-identité de STORY-415 reste intacte.
