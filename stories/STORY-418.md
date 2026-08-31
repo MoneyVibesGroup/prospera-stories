@@ -1,6 +1,6 @@
 # STORY-418 : La provenance d'un compte proposé est une phrase en français — l'écran ne peut ni la trier, ni la traduire
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `modules/cahiers/rattachement`
@@ -101,8 +101,8 @@ origine!: OriginePropositon; // 'REGLE' | 'MOT_CLE' | 'ACTIVITE' | 'DEFAUT'
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — démarrée le **2026-08-31**, branches `MNV-418` sur `docs/` et
-`balance-service`. **Un seul dépôt module.**
+**Statut : `done`** — clôturée le **2026-08-31**. PR **#75** (`balance-service`) rebase-mergée sur
+`dev`, branche supprimée. **Un seul dépôt module.**
 
 ### ⚠️ Une prémisse de la story vérifiée, et FAUSSE
 
@@ -181,3 +181,57 @@ les quatre étiquettes suivent réellement la branche empruntée.
 Contrat publié (`/api/docs-json`) : `OrigineProposition` = `['REGLE','MOT_CLE','ACTIVITE','DEFAUT']`,
 `PropositionRattachementDto.origine` en `$ref` vers ce schéma nommé, et
 `required: ['compte','motif','origine','surcharge']`.
+
+---
+
+## Progress Tracking — clôture
+
+### Revue de code — **0 constat**
+
+Le relecteur a instruit les quatre axes et passé **sa propre** campagne de 8 mutations en bac à
+sable (copie du service, `node_modules` en lien symbolique — le dépôt n'a jamais été touché),
+chacune précédée d'un `tsc --noEmit` pour écarter les faux rouges par erreur de compilation :
+`depuis` qui perd `origine`, moteur qui cesse de lire le tiers, retombée qui écrase l'origine,
+`enumName` retiré, `enum` retiré, enum tronqué à 3 valeurs, tuple réordonné. **7 rouges sur 7
+compilables.**
+
+⚡ **Les deux tests que je lui avais demandé de suspecter tiennent** : « les QUATRE valeurs sont
+réellement produites » n'est pas vacant (le `Set` est construit en **rejouant** le moteur : une
+branche mal étiquetée fait tomber le cardinal à 3, et une valeur ajoutée à l'énumération sans cas
+rougit aussi) ; « le cas `DEFAUT` s'isole » non plus (le filtre rend 3 lignes sur 4, donc il rougit
+**dans les deux sens** — si `DEFAUT` disparaît comme s'il déborde).
+
+### Revue de sécurité — **0 vulnérabilité**
+
+⚡ **L'argument qui referme le sujet** : `origine` est un **sous-ensemble strict** de ce que `motif`
+publiait **déjà**. Le motif divulgue *davantage* — la valeur saisie de la règle et le mot-clé qui a
+matché. La PR remplace une phrase par une étiquette plus **grossière**. Et l'oracle « existe-t-il une
+règle pour ce couple ? » est **déjà offert en clair au même rôle** par `GET …/rattachement/surcharges`.
+Aucun signal cross-tenant : sur un `dossierId` étranger la liste est vide et l'origine retombe sur
+`MOT_CLE`/`ACTIVITE`/`DEFAUT`, **indistinguable** d'un dossier légitime sans règle.
+
+⚡ **Deux vérifications que je n'avais pas faites, et qui auraient pu faire mentir l'étiquette** :
+① `activite` est construit par la **même expression** (`[codeNaema, secteur, objetSocial]
+.filter(...).join(' ')`) dans le service de **proposition** et dans le service de **saisie** — donc
+l'origine affichée correspond bien à ce que l'écriture appliquerait ; ② `enumName:
+'OrigineProposition'` n'entre en **collision** avec aucun des 39 autres `enumName` du service : un
+schéma nommé écrasé par un jeu de valeurs étranger aurait été un défaut invisible au test.
+
+### Suites documentées — hors périmètre, et volontairement
+
+- ⚠️ **L'origine est jetée sur le chemin d'écriture.** `cahiers-recettes.service.ts` ne garde que
+  `proposerRattachement(...).compte` : une ligne **créée** sur un compte `DEFAUT` ne porte donc
+  **aucun signal en base**. Cette story vise l'endpoint de **proposition** ; persister la provenance
+  sur la ligne est le prolongement naturel — et une story à part entière (elle touche le schéma, la
+  migration des lignes existantes et le contrat des deux cahiers).
+- `ORIGINES_SUGGESTION` (STORY-139) nomme **`SURCHARGE`** ce que `ORIGINES_PROPOSITION` nomme
+  **`REGLE`** : deux contrats publics du même service, même concept, deux mots. Divergence réelle,
+  dictée par les énoncés respectifs, à trancher quand l'un des deux bougera.
+- `SuggestionCompteDto.origine` publie son enum **sans `enumName`** — donc anonyme côté client, là
+  où celui-ci est nommé. Pré-existant, non touché.
+
+### Portes DoD finales
+
+lint **0 warning** · build OK · **3 364** unitaires · **840** e2e (26 suites) · couverture
+**99,13 / 92,29 / 98,61 / 99,23** — `rattachement.regles.ts` à **100 %** sur les quatre axes.
+**8 mutations de développement + 8 de revue, toutes rouges** sur les variantes compilables.
