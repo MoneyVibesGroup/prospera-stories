@@ -6,6 +6,18 @@ Status: ready-for-dev
 **Service :** `balance-service` (`:3007`) — `modules/referentiel`, `modules/cahiers/agregation`, `modules/read-models`
 **Points :** 8 · **Sprint :** S20
 **Prérequis :** **STORY-533** (l’entitlement porte N référentiels par organisation) — sans elle, la voie A ne peut pas poser sa question de sécurité.
+**✅ Prérequis LEVÉ le 2026-08-31** — STORY-533 est `done`. `estHabilite(orgId, referentiel)` est
+servi par `balance-service` (`ReferentielService`/`ReferentielResolver`), fail-closed prouvé par
+mutation, et `GET /referentiels/actifs` publie `referentielsHabilites`. ⚠️ **Deux choses à savoir
+avant de prendre cette story :**
+1. `resoudreReferentiel(orgId)` lève désormais **`409 REFERENTIEL_AMBIGU`** dès que l'organisation
+   porte deux référentiels — c'est un **hook explicite de 422**, pas un défaut : la question « quel
+   est LE référentiel de cette org ? » n'a plus de réponse, et on refuse au lieu de deviner. Les
+   **20 points d'appel** de `chargerReferentiel` (et non 6 comme l'annonce le § *Ce que A coûte*)
+   passent tous par `versHttpDepuisErreurReferentiel` ; c'est cette branche que 422 rend morte.
+2. Le corps du 409 porte déjà **`details.referentielsHabilites`** en champ structuré : AC-A3 (« le
+   refus nomme le référentiel du dossier ET celui auquel l'organisation a droit ») n'a plus qu'à y
+   ajouter le référentiel **du dossier**.
 **Origine :** relevée le **2026-08-26** en construisant la maquette **FE-046**. ⚡ **Écart qui n'existe qu'à la maquette** — il naît de la **jonction de deux stories justes**, mises côte à côte sur un même écran. Ni la revue de l'une, ni celle de l'autre ne pouvait le voir.
 
 ---
