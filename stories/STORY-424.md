@@ -1,6 +1,6 @@
 # STORY-424 : Le compte de travail du cabinet (8 caractères) devient une donnée de premier rang, à côté du compte de plan
 
-Status: ready-for-dev
+Status: review
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `modules/referentiel`, `modules/balance`, `modules/cahiers`
@@ -135,3 +135,146 @@ verrait qu'à la liasse.
   référentiel. À traiter quand un second cabinet le demandera, pas avant.
 - Consommateur nommé : **FE-046**. Voir `stories/STORY-146.md`, `stories/STORY-172.md`,
   `stories/STORY-086.md`, `stories/STORY-370.md`, `stories/STORY-101.md`.
+
+---
+
+## Progress Tracking
+
+**Statut : `review`** — développée le **2026-09-01**, branche `MNV-424` (`balance-service`),
+3 commits : le livrable, les trous comblés par la passe de mutation, le trou trouvé par la
+vérification docker.
+
+### Ce que la conception a tranché, et pourquoi
+
+**L'identité canonique reste le compte de plan** (voie B, arbitrage PO du 2026-08-26). Le compte à
+8 caractères est **accepté à la saisie**, **conservé tel quel sur la ligne saisie**, et **ramené**
+au plan à un seul endroit : l'**agrégation**. La ligne de balance publie ensuite les numéros
+d'origine dans `comptesSources` / `sourcesTotal`.
+
+⛔ **Ramener à la SAISIE aurait détruit l'information que la story existe pour conserver.** La ligne
+de recette, de dépense, la règle de rattachement et la catégorie gardent le numéro que le comptable
+a écrit ; c'est la balance — et elle seule — qui porte le compte de plan.
+
+⚡ **Une seule dérivation, celle qui existait déjà** (AC-6). `ramenerAuPlan` et `estCompteDeTravail`
+vivent dans `normalisation-comptes.ts`, à côté de `normaliserCompte` — la fonction que l'import Sage
+applique depuis STORY-146. Aucune seconde implémentation : deux normalisations divergeraient, et
+l'écart ne se verrait qu'à la liasse.
+
+⚠️ **`estCompteDeTravail` est un sur-ensemble STRICT d'`isCompteDeDetail`** : un compte de plan se
+ramène à lui-même, donc tout ce qui passait passe encore, y compris les têtes à deux caractères
+(`12`, `13`) dont dépend l'affectation du résultat (STORY-087). Ce qui s'ouvre est exactement le
+compte que le plan **sait ramener** — `74000000` (racine `74` non déclarée) reste refusé.
+
+⛔ **Les gardes de saisie sont vérifiées sur le compte BRUT, avant dérivation.** `chiffresDeTete` ne
+retient que les chiffres de tête : sans cette ligne, `601; DROP` se ramènerait à `601000`,
+parfaitement déposable — la dérivation **blanchirait** une charge utile que STORY-146 avait fermée.
+
+### La 6ᵉ porte : ce que la soumission de balance fait, et ce qu'elle ne fait PAS
+
+**⚠️ Écart assumé avec la lettre du tableau ③, à valider par le PO.** La ligne « soumission de
+balance → accepté, **ramené** » est implémentée comme : la soumission **accepte et scelle** les
+comptes de travail à côté du compte de plan, sans réécrire `compte`.
+
+**Pourquoi** : le checksum est **calculé par l'adaptateur** sur ce qu'il envoie et **recalculé par le
+serveur** sur ce qu'il persiste. Un serveur qui réécrirait `compte` rendrait donc `400 Checksum
+invalide` à **tout** client direct envoyant des comptes à 8 chiffres — la fonctionnalité serait
+livrée **inerte**. La seule façon de la rendre vivante serait de sceller les lignes *soumises* plutôt
+que les lignes *persistées*, c'est-à-dire d'affaiblir le seul contrôle d'intégrité du contrat pour un
+cas qu'aucun AC ne demande.
+
+⇒ Ce que la porte fait à la place, et qui est nouveau : **elle refuse tout `comptesSources` qui ne se
+ramène pas au compte de sa ligne**. Sans ce contrôle, le champ serait une chaîne libre attachée à un
+montant — un client pourrait attribuer « TH 2023 » au solde d'un tout autre compte, et l'écran le
+lirait comme un fait établi par la plateforme. Même asymétrie que le CWE-345 relevé sur `sources` en
+STORY-370, fermée par la même méthode.
+
+⇒ **Le déblocage de FE-046 est entier** : les cinq portes que l'écran emprunte (recette, dépense,
+règle, catégorie, contrepartie) acceptent le compte du cabinet, et les trois adaptateurs publient
+`comptesSources` sur la ligne.
+
+### Périmètre : ce qui n'a PAS bougé
+
+- le **tag** et le **format** de la balance canonique (STORY-101) — `comptesSources` est **hors
+  checksum**, `v2` inchangé, aucun `v3`, aucune migration ;
+- ce que reçoit `bilan-service` : `balance.created` est **inchangé champ pour champ**, et **aucune
+  ligne persistée ne porte un compte de plus de 6 caractères** (vérifié en docker) ;
+- l'invariant d'équilibre et les deux contrôles de STORY-147 ;
+- le **socle d'à-nouveaux** : `lignesReportees` **omet** délibérément les deux champs (les comptes de
+  travail d'une ligne appartiennent à la balance de N-1, et `fusionnerParCompte` les propagerait
+  sinon à chaque exercice suivant) ; `ANouveauxResponseDto` est inchangé ;
+- le **semis** des catégories par défaut garde `isCompteDeDetail` : ce catalogue ne contient que des
+  comptes de plan.
+
+### ⚡⚡ Ce que la passe de MUTATION a trouvé — 3 assertions qui ne prouvaient rien
+
+1. **`sourcesTotal: comptesSources.length`** dans `comptesDeTravailDe` — c'est-à-dire **plafonner le
+   compteur**, ce que la story interdit explicitement — laissait **107 tests VERTS**. Le cas était
+   gardé sur `normaliserEtRegrouper` (chemin **Sage**) et **nulle part** sur la fonction qu'emprunte
+   le chemin des **cahiers**.
+2. **Retirer `ramener` de `resoudreLibellesCategories` DANS LE SERVICE** laissait **65 tests VERTS** :
+   la fonction pure était gardée, le **câblage** libre — l'angle mort exact de MNV-172. Le défaut
+   laissé passer **annulait STORY-420** pour tout cabinet saisissant à 8 chiffres : table indexée sur
+   `60510000`, ligne portant `605100`, jointure vide, et **tous** les libellés de catégorie de retour
+   sur « Autres achats ».
+3. **Comparer les comptes DÉRIVÉS au lieu des comptes BRUTS** dans le test de nommage de F-420-5
+   laissait **51 tests VERTS** : mes deux catégories nommaient **chacune leur propre** compte, si bien
+   que les deux comparaisons donnaient le même verdict. Seul le cas de la **surcharge à la ligne** les
+   sépare.
+
+Mutations passées et **toutes rouges** ensuite (17) : garde de saisie désarmée · compte de plan
+listé comme source · compteur plafonné (×2) · `buildCanonique` non systématique · validateur sans
+contrôle de dérivation · agrégation sans dérivation · câblage du libellé · fusion qui abandonne les
+comptes de travail · nommage sur comptes dérivés · les **5 portes** revenues à `isCompteDeDetail` ·
+`applicable` retombé sur `isCompteDeDetail` · `versLigne` sans repli · les deux invariants
+liste/compteur du validateur · aperçu d'import servant des champs indéfinis.
+
+### ⚡⚡ Ce que la VÉRIFICATION DOCKER a trouvé, qu'aucun test ne voyait
+
+**L'aperçu d'import Sage ne publiait pas les deux champs.** `previewLines` est une **liste blanche**
+projetée champ par champ : les valeurs étaient calculées par la normalisation, persistées en base,
+servies par la balance et par l'aperçu des cahiers — et **absentes du seul écran où le comptable
+relit ce qui va être écrit**. Aucune suite ne regardait le **contenu** d'une `previewLine` : les trois
+occurrences de `previewLines` dans les tests valaient toutes `[]`. Et `regroupements` ne suffisait
+pas : il dit la même chose **par compte** et **plafonné à 20**.
+
+⚠️ Le premier test écrit pour combler ce trou posait `toHaveProperty('comptesSources')` — la mutation
+« servir des champs **indéfinis** » restait **VERTE** (Jest voit la clé, pas la valeur). Le test
+assert désormais la **valeur** fondue, plus une seconde ligne à `[]`/`0`.
+
+⚠️ **Le hot-reload a menti** : après le correctif, `nest --watch` annonçait « Found 0 errors » en
+servant toujours l'ancien code. Un `docker compose restart balance-service` a été nécessaire — le
+piège documenté de [[hot-reload-ment-verif-docker]].
+
+### Vérification docker — stack NEUVE (`down -v`), état FINAL
+
+`docker compose up -d mongo kafka redis balance-service auth-service`, compte tenant créé via l'IdP,
+read-models semés (`orgkycstatuses`, `orgbalanceentitlements`, `dossiers_dossier`, `axes_dossier`).
+
+| Ce qui est prouvé | Résultat |
+|---|---|
+| **AC-3** — recette saisie sur `70730000` | `201`, `compteProduit: "70730000"` **conservé** |
+| **AC-4** — règle de rattachement sur `70730009` | `200`, **`applicable: true`** |
+| porte catégorie `60510000` · porte dépense · porte contrepartie `52100001` | `201` / `201` / `200` |
+| borne — `74000000` (racine `74` non déclarée au plan) | `400 COMPTE_INCONNU` |
+| **AC-3** — balance des cahiers | `707300` ← `["70730000","70730002"]`, `sourcesTotal: 2` |
+| non-régression **STORY-420** | `605100` porte `libelleSource: CATEGORIE` + « Électricité CEET » |
+| lignes sans compte de travail | `comptesSources: []`, `sourcesTotal: 0` — **servis, jamais absents** |
+| **AC-2** — import Sage | `44280001` + `44280002` → `442800`, sur `previewLines` **et** `regroupements` |
+| **persistance réelle** (`mongosh`) | 6 lignes ; **0** champ absent · **0** incohérence liste/compteur · **0** compte listé égal à celui de sa ligne · **0** compte > 6 caractères |
+| **AC-5** — `balance.created` | payload **inchangé champ pour champ**, `checksumVersion: v2` |
+| **atomicité** — `comptesSources` falsifié (`70100001` sur la ligne `601000`) | `400`, et **0 balance / 0 événement** écrits (1 → 1) |
+| `comptesSources` contenant le compte de sa propre ligne | `400`, message explicite |
+| `comptesSources` cohérent (`60100001` → `601000`) | le refus ne porte **plus** dessus (checksum) |
+
+### Portes de qualité
+
+Lint **0 warning** · build OK · **3 544** unitaires + **877** e2e verts · couverture
+**99,14 / 92,35 / 98,65 / 99,24** (seuils 65/90/90/90).
+
+### AC-7 — OpenAPI
+
+Les deux champs sont déclarés sur `LigneView` (balance persistée), `LigneBalanceApercuDto` (aperçu
+cahiers), `PreviewLineDto` (aperçu d'import) et `LigneBalanceDto` (soumission, **facultatifs**). Un
+test de contrat e2e verrouille leur présence **et** leur caractère requis à la lecture : non déclaré,
+un champ réellement rendu est **élagué** par tout client généré (leçon STORY-370). ⚠️ Les **types du
+front** restent à régénérer côté FE-046 — hors périmètre de ce dépôt.
