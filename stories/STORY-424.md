@@ -1,6 +1,6 @@
 # STORY-424 : Le compte de travail du cabinet (8 caractères) devient une donnée de premier rang, à côté du compte de plan
 
-Status: review
+Status: done
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — `modules/referentiel`, `modules/balance`, `modules/cahiers`
@@ -140,9 +140,9 @@ verrait qu'à la liasse.
 
 ## Progress Tracking
 
-**Statut : `review`** — développée le **2026-09-01**, branche `MNV-424` (`balance-service`),
-3 commits : le livrable, les trous comblés par la passe de mutation, le trou trouvé par la
-vérification docker.
+**Statut : `done`** — développée **et clôturée** le **2026-09-01**. PR `balance-service` **#82**
+(**5 commits** : le livrable, les trous comblés par la passe de mutation, le trou trouvé par la
+vérification docker, la revue de code, la revue de sécurité), **rebase-mergée sur `dev`**.
 
 ### Ce que la conception a tranché, et pourquoi
 
@@ -278,3 +278,64 @@ cahiers), `PreviewLineDto` (aperçu d'import) et `LigneBalanceDto` (soumission, 
 test de contrat e2e verrouille leur présence **et** leur caractère requis à la lecture : non déclaré,
 un champ réellement rendu est **élagué** par tout client généré (leçon STORY-370). ⚠️ Les **types du
 front** restent à régénérer côté FE-046 — hors périmètre de ce dépôt.
+
+---
+
+## Revue de code (phase ⑥) — 5 constats, **5 traités**
+
+| # | Constat | Gravité | Traitement |
+|---|---|---|---|
+| **F-424-1** | `agregerContreparties` publiait le compte de paramétrage **brut**. Cette story venant d'ouvrir la porte « comptes de contrepartie » au compte de travail, un dossier paramétrant `banque: '52100001'` produisait une ligne `521000` **et** une répartition annonçant `52100001` — un numéro que les `lignes` de la même réponse ne portent plus. Défaut que STORY-410 a traité comme réel (D-410-5). | comportement | **corrigé** — la répartition reçoit la **même** dérivation que la balance ; deux contreparties d'une même racine se fondent en un couple, comme leurs écritures en une ligne. Gardé par un test de règle **et** un test de câblage. |
+| **F-424-4** | Le compteur de comptes de travail du chemin Sage comptait des **lignes** là où le contrat promet des comptes **distincts**. Cas non atteignable (l'import refuse `doublonsFichier` en amont) — mais l'invariant d'un champ neuf ne doit pas reposer sur une garde d'un autre fichier. | robustesse | **corrigé** — la garde réutilise le `Set` déjà présent, sans mémoire supplémentaire. |
+| **F-424-2** | La description OpenAPI de `PreviewLineDto.comptesSources` affirmait que `regroupements` « dit la même chose ». **Faux** : deux champs **homonymes** dans la même réponse, l'un incluant le compte de plan et comptant des lignes, l'autre non ; et une ligne réécrite **sans** fusion n'apparaît pas du tout dans `regroupements`. | contrat | **corrigé** — la description nomme la différence. |
+| **F-424-3** | **7 commentaires** nommaient `isCompteDeDetail` là où le code appelle `estCompteDeTravail`, dont un JSDoc portant une **instruction** trois lignes au-dessus du code qui la contredit. | documentation | **corrigé** — dont l'argument du « mutant équivalent » de STORY-419, qui **ne tient plus** (`411FACTURE` n'est pas rattachable alors que sa dérivée `411000` l'est : les deux prédicats divergent réellement), et le bloc doctrinal du checksum, qui ignorait ce **3ᵉ** champ hors sceau. |
+| **F-424-5** | Le JSDoc de `saisis` affirmait « distincts » alors que la liste reçoit un `push` **par écriture**. Un lecteur qui l'aurait cru aurait pu retirer le `Set` de `comptesDeTravailDe` et publier un compteur d'**écritures**. | documentation | **corrigé** |
+
+Constats **écartés** par la revue elle-même, avec vérification : régression sur les têtes à 2
+caractères · fuite d'un compte à 8 caractères vers `bilan-service` (`balance.created` ne porte
+**aucune ligne**) · déplacement du checksum · débordement de périmètre du typage `fiscal/`
+(nécessaire, pas cosmétique) · branches défensives mortes du validateur · omission volontaire dans
+`lignesReportees`.
+
+## Revue de sécurité (phase ⑦) — **1 vulnérabilité, corrigée**
+
+### F-424-S1 · CWE-20 (Improper Input Validation) — confiance **90**
+
+`validerComptesSources` vérifiait le type, le doublon, l'inégalité au compte de la ligne et la
+**dérivation** — **jamais les gardes de saisie**.
+
+⛔ **La dérivation ne filtre rien** : `normaliserCompte` ne retient que les *chiffres de tête*.
+Vérifié en exécution — `601000<img src=x onerror=alert(1)>` se ramène à `601000`, donc franchissait
+le seul contrôle de la boucle ; `601` + 30 000 caractères aussi.
+
+⛔ **L'asymétrie était exactement celle que cette méthode existe pour fermer.** `SubmitBalanceDto`
+applique `@Matches(CARACTERES_COMPTE)` + `@MaxLength(20)` sur ce champ, mais l'**import fichier**
+construit son DTO **en code**, sans `class-validator`, et son parser ne valide **aucun** format de
+compte. La chaîne hostile était persistée **verbatim** et servie sous un champ que le contrat déclare
+`[0-9A-Za-z]{1,20}` avec `example: ['44280001']` — tout consommateur (FE-046, un export, une
+jointure) est fondé à le traiter comme un identifiant sûr. C'était accessoirement la seule borne de
+**longueur** : la liste est plafonnée à 10 entrées, jamais leur taille.
+
+⇒ **Corrigé** : `respecteGardesDeSaisie` sur chaque entrée, dans la boucle. Aucun cas légitime perdu
+— un compte réellement présent dans un fichier franchit ces gardes par construction. **Vérifié en
+docker** : l'import du fichier hostile rend `400` et **rien n'est écrit**.
+
+**Durcissement joint** (constat que la revue avait écarté comme défaut de contrat plutôt que faille) :
+une liste **non plafonnée** vaut désormais son propre total — invariant **exact**, puisque la liste
+se remplit avant d'être plafonnée. Sans lui, un client annonçait `sourcesTotal: 9 007 199 254 740 991`
+en ne listant qu'un compte, et l'écran affichait « liste incomplète » sur une ligne qui ne l'était
+pas. L'ancienne règle « liste vide ⟺ total nul » en est le cas particulier.
+
+**Vérifié et écarté par la revue** : authentification, chaîne de guards, throttler (aucun contrôleur
+touché) · isolation multi-tenant · injection NoSQL et pollution de prototype (`Map`/`Set`, jamais
+d'objet nu indexé par une entrée utilisateur) · ReDoS · XSS/CSRF/SSRF/CORS · rejeu (la clé
+d'idempotence n'est pas le checksum) · contrat Kafka (`balance.created` ne porte aucune ligne ⇒ **un
+seul dépôt**, et l'ingestion est une liste blanche qui ne recopie pas ces champs).
+
+## Vérification docker **rejouée** sur l'état final (après ⑥ et ⑦)
+
+| Ce qui est prouvé | Résultat |
+|---|---|
+| **F-424-1** — contrepartie paramétrée `52100001` | publiée `521000`, et ce compte **existe** dans les `lignes` de la même réponse |
+| lignes de balance | inchangées : `707300` ← `['70730000','70730002']` · `605100` ← `['60510000']` + `libelleSource: CATEGORIE` |
+| **F-424-S1** — import Sage d'un compte `601000<img src=x onerror=…>` | `400`, message générique, **0 balance / 0 événement** écrits, **0 ligne** portant un `<` en base |
