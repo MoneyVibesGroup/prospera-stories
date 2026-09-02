@@ -1,6 +1,6 @@
 # STORY-434 : Le TFT bâti sur les variations NETTES double-compte les dotations et les valeurs de cession — l'écart d'articulation vaut exactement `RL + RO`, et il est systématique
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — `etats/tft-production.service.ts`, `etats/bilan.types.ts`, `etats/evaluateur-formule.*`, paquet référentiel
@@ -112,3 +112,38 @@ colonne « Diminutions ». C'est d'ailleurs *pourquoi* le formulaire OHADA exige
 - Le commentaire de `tft.types.ts` — « *`ecart = 0` par construction* » — est **périmé depuis
   STORY-113** et doit disparaître dans la foulée : il décrit le TFT du temps où ce n'était qu'un
   squelette, et il enseigne exactement la mauvaise règle (celle de `coherenceResultat`).
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branches `MNV-434` ouvertes sur `bilan-service` **et**
+`balance-service` (base `dev`), flux APEX-PROSPERA lancé le 2026-09-02.
+
+### ⚠️ Prémisse la plus risquée, instruite AVANT de coder : la story touche DEUX dépôts
+
+L'AC-3 modifie `syscohada-revise@2.1`. Or cet artefact est **byte-identique** dans les deux
+dépôts — `sha256` mesuré, même préfixe `fb959403a7f9f0f6` dans
+`bilan-service/src/modules/bilan/referentiel/assets/` et
+`balance-service/src/modules/referentiel/assets/`. Et
+`balance-service/src/modules/referentiel/referentiel-assets-coherence.spec.ts` **lit le dépôt
+voisin** quand les deux sont côte à côte (« *empreintes figées, recopiées de `bilan-service`* »,
+D-078-2) : régénérer d'un côté **fait rougir l'autre**.
+
+⇒ **Deux branches `MNV-434`, deux PR, ouvertes et intégrées ENSEMBLE** — patron STORY-428.
+Le générateur (`scripts/referentiels/build.mjs`) vit dans `bilan-service` avec les sources ;
+`balance-service` n'a que la source du paquet fiscal et reçoit une **copie**.
+
+⚠️ Les checksums sont **épinglés** dans quatre fichiers au moins :
+`bilan-service/…/referentiel-registry.ts` + `referentiels-additionnels-coherence.spec.ts`,
+`balance-service/…/referentiel-registry.ts` + `referentiel-registry.spec.ts` +
+`bundled-artifact-source.spec.ts` + `referentiel-assets-coherence.spec.ts`.
+
+### ⚠️ Le jeu de la maquette FE-033 n'est PAS dans la fiche
+
+L'AC-5 demande que « le jeu de la maquette FE-033 devienne un cas de test versionné » et donne
+les **résultats** (`ZG` 1 055 000 → 450 000, écart 905 000 → 300 000) mais **pas les soldes**.
+Le jeu sera donc **reconstruit** à partir des grandeurs que la fiche énonce — `RL` 860 000,
+`RO` 45 000, prix de cession 300 000, acquisitions brutes 525 000, variation de trésorerie du
+Bilan 150 000 — et l'écart entre le jeu reconstruit et les chiffres annoncés sera **consigné
+honnêtement** plutôt que forcé.
