@@ -1,6 +1,6 @@
 # STORY-432 : Une balance après détermination du résultat produit un compte de résultat ENTIÈREMENT VIDE — et tous les contrôles restent verts
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/etats`, `dto`
@@ -74,3 +74,41 @@ résultat entièrement vide.** Rien, nulle part, ne dit pourquoi.
 - **FE-032** doit porter un **troisième état** de démonstration (« balance après clôture ») et
   l'expliquer à l'écran, à côté de « Servi » et « Résultat non affecté ».
 - **STORY-426** partage le champ `etatBalance` : les deux stories se tirent ensemble.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branche `MNV-432` ouverte sur `bilan-service` (base `dev`), flux
+APEX-PROSPERA lancé le 2026-09-02.
+
+### ⚠️ Ce que l'instruction a trouvé DÉJÀ FAIT — et ce qui reste, qui n'est pas ce que la fiche décrit
+
+`etatBalance` **existe depuis STORY-426** et la dérivation demandée par l'AC-1 est **déjà celle du
+code** (`bilan-production.service.ts`, `etatBalance()`) : `resultatPorteAuPassif ≠ 0` **et**
+`resultatNetN = 0` ⇒ `'APRES_DETERMINATION'`. L'AC-2 est **déjà tenue** aussi :
+`controleResultatNonAffecte` ne rend `ANOMALIE` que sur `'RESULTAT_NON_AFFECTE'` — tout autre état,
+`APRES_DETERMINATION` compris, sort en `OK`, donc la liasse reste **validable**.
+
+⛔ **Mais la fiche dit « la réponse publie `etatBalance` », et sur la route qui compte c'est FAUX.**
+`CompteResultatDto.coherenceResultat` est typé par une **interface** (`CoherenceResultat`) :
+`@nestjs/swagger` la publie en **`object` opaque, sans une seule propriété**. Le champ part bien
+dans le JSON, mais **aucun client généré ne peut le lire** — or l'écran qui affiche le compte de
+résultat vide (FE-032) est précisément celui qui doit expliquer pourquoi. C'est la leçon STORY-427 à
+l'identique : livrer le champ derrière un contrat qui ne le décrit pas, c'est ne rien livrer.
+
+Sur le **Bilan** la situation est bonne : `controle` est typé `ControleEquilibreDto` et
+`etatBalance` y est publié en **énumération nommée** (garde de contrat STORY-426).
+
+### Périmètre retenu
+
+1. **AC-1 réellement tenu** : `coherenceResultat` cesse d'être opaque — un `CoherenceResultatDto`
+   publie ses six propriétés, `etatBalance` en énumération `ETATS_BALANCE`. ⚠️ **Une seule des
+   quatre** propriétés opaques nommées en dette par STORY-430 est traitée : celle qui porte le champ
+   de cette story. Les trois autres (`referentiel`, `stamp`, `coherenceSig`) **restent en dette
+   nommée** — les toucher déborderait.
+2. **AC-4** : le contrôleur ne porte **aucun `@ApiOperation`** aujourd'hui (mesuré : 0 sur
+   `bilan-diagnostics.controller.ts`, 0 sur `jeu-etats.controller.ts`). L'hypothèse de balance est
+   à énoncer là où elle change la lecture.
+3. **AC-3 / AC-5** : les trois états d'une balance couverts par des tests qui les **distinguent**.
+4. **Vigilance TFT** : à instruire et à consigner.
