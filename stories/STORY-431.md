@@ -1,6 +1,6 @@
 # STORY-431 : Les comptes écartés ne sont relevés que sur N — la colonne N-1 peut être minorée sans qu'aucun avertissement ne le dise
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — `etats/compte-resultat-production.service.ts`,
@@ -68,3 +68,24 @@ qu'un contrôle absent, parce qu'il rassure.
 
 - **FE-032** affiche déjà l'avertissement dans l'état « Comptes écartés » et **le dit
   explicitement** : « ce contrôle ne porte que sur N ».
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branche `MNV-431` ouverte sur `bilan-service` (base `dev`), flux
+APEX-PROSPERA lancé le 2026-09-02.
+
+### Périmètre confirmé à l'ouverture
+
+Les deux moteurs `bilan-production.service.ts` (l. 137) et `compte-resultat-production.service.ts`
+(l. 112) calculent bien `aggN1` et n'en publient **jamais** les `nonMappes`. Le champ manquant
+est donc **additif** des deux côtés.
+
+⚠️ **Vérification demandée par la Vigilance — TFT et contrôles de cohérence** : ni
+`tft-production.service.ts` ni `controles-coherence-production.service.ts` n'agrègent de soldes.
+Ils travaillent sur les **états déjà produits** (`produire(pkg, bilan, cr)` et
+`produire(bilan, coherence, tft, notes, coherenceSig)`) et n'ont donc **pas** de passe `aggN1` à
+récupérer. Le seul point de contact est `controleComptesNonAffectes`, qui lit
+`bilan.soldesComptesNonMappes` — c'est-à-dire **N seul** — et dont le JSDoc le dit déjà. Étendre le
+**contrôle** à `N-1` reste un écart distinct : voir « Écart relevé au passage » ci-dessous.
