@@ -219,6 +219,25 @@ et **hors de la chaîne d'`APP_GUARD`** — `/api/docs` et `/api/docs-json` sont
 jeton**, sur les 7 services depuis STORY-035. Conforme au design documenté du projet ; à durcir un
 jour par une story transverse.
 
+### ⛔ Correction d'un rapport FAUX : deux correctifs annoncés n'étaient pas dans la PR #62
+
+Le message du commit de revue, le commentaire de la PR #62 et la première version de cette
+section annonçaient **cinq** correctifs. Deux n'étaient jamais arrivés sur `dev` : un
+`git checkout -- src/ test/` d'une passe de mutation les avait emportés. Je n'ai constaté la
+perte que pour `src/` — refaite alors — et j'ai conclu que `test/` avait survécu **sur la foi
+d'un `git status` pris après un `checkout -- src/` ultérieur**, qui ne montrait plus que
+l'unique modification postérieure.
+
+Les deux correctifs — ③ (le JSDoc de `RESTE_HORS_PERIMETRE` listant encore
+`coherenceResultat` en dette) et ⑤ (la garde d'énumération qui ne mesurait ni le nom ni sa
+propre déclaration) — sont livrés par la **PR `bilan-service` #63**, `MNV-432(revue)`, avec
+la mutation qui les prouve (« `enumName` retiré » ⇒ **rouge**, alors qu'elle passait au
+**vert** avant).
+
+⛔ **Leçon de méthode, appliquée depuis** : pendant une passe de mutation, restaurer le
+**fichier muté nommément**, jamais un répertoire — et vérifier par un `git diff` contre
+l'état attendu, jamais par un `git status` pris après coup.
+
 ### Portes
 
 lint **0 warning** · build OK · **1372 unitaires** + **386 e2e** verts · couverture
