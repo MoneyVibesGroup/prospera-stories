@@ -1,6 +1,6 @@
 # STORY-444 : La réouverture d'une liasse figée n'exige aucun motif et n'en trace aucun
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-012 — Validation, immutabilité, exercices, audit
 **Service :** `bilan-service`
@@ -46,3 +46,113 @@ d'**un seul compte** (FE-030).
   le défaut que 458 corrige).
 - La maquette FE-034 **dessine le champ** dans le dialogue de réouverture et déclare qu'il n'est
   transmis à personne aujourd'hui — règle PO : dessiner la cible, et le dire.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — implémentée, portes DoD franchies, vérification docker faite sur
+la route réelle. Revues (code + sécurité) et merge à suivre.
+
+Branches créées **avant** la première ligne de code (preuve `git rev-parse --abbrev-ref HEAD`
+sur chaque dépôt impacté) :
+
+```
+docs             MNV-444
+bilan-service    MNV-444
+```
+
+**Un seul dépôt impacté** : la route, son DTO, le champ persisté et le contrat de lecture
+vivent entièrement dans `bilan-service`. Aucun contrat d'événement ne change (la ligne
+d'outbox `liasse.etat.change` publiée par la réouverture garde exactement sa charge), donc
+pas de second dépôt. **Aucun consommateur** de `POST …/bilan/etats/:id/rouvrir` n'existe hors
+du service — `admin-panel`, `frontend-admin-panel` et `expert-comptable` ne l'appellent nulle
+part, vérifié par balayage : le passage de « aucun corps » à « corps obligatoire » ne casse
+aucun appelant.
+
+### Ce qui est livré
+
+- **AC-1** — `RouvrirJeuEtatsDto` : `motif` **obligatoire**, 10 à 500 caractères, **rogné
+  avant d'être mesuré**, aucun caractère de contrôle. Corps absent, motif vide ou fait
+  d'espaces ⇒ **400**, messages en français.
+- **AC-2** — la ligne `JEU_ROUVERT` porte `contexte: { motif, versionRouverte }` :
+  « pourquoi » ne défend rien si l'on ne sait pas **quelle version** a cessé de faire foi.
+- **AC-3** — `derniereReouverture: { motif, par, at }` est écrit **dans la transition gardée
+  elle-même** et publié au contrat en classe nommée (`DerniereReouvertureDto`), jamais en
+  `object` opaque.
+- **AC-4** — un jeu jamais validé rend toujours `409 JEU_NON_VALIDE`, **avec un motif
+  valide**.
+- **AC-5** — le motif se relit sur `GET …/bilan/audit` sans une ligne de code de lecture :
+  STORY-442 publie déjà `contexte`.
+
+### ⚠️ Ce que la story change et qui n'était écrit nulle part
+
+`AuditService.journaliser` documentait une propriété : « les huit clés d'aujourd'hui sont
+**toutes calculées côté service**, aucune ne vient d'un corps de requête — c'est la propriété
+à conserver » (constat de la revue de sécurité de STORY-442). **Cette story la casse
+délibérément** : le `motif` est la première clé du journal qui vienne d'une saisie, et il
+existe précisément pour être **relu par les collaborateurs du dossier**. Les trois docstrings
+qui portaient l'ancienne affirmation (`audit.service.ts`, `audit-event.schema.ts`,
+`AuditEventResponseDto.contexte`) sont corrigés dans le même diff — sans quoi le contrat
+publié aurait affirmé « seul `EXPORT_EFFECTUE` porte un contexte » alors que le code en écrit
+deux.
+
+Ce qui remplace la propriété perdue : toute saisie versée dans `contexte` est **bornée et
+rognée par son DTO**, et son champ **annonce au contrat qu'il sera publié**.
+
+### ⛔ L'arbitrage de l'AC-3 : un fait daté ne s'efface pas
+
+`derniereReouverture` n'est **pas** remis à `null` par une re-validation. La fiche dit « tant
+que le brouillon est ouvert » ; l'effacer à la validation supprimerait un fait pour économiser
+au client une lecture de `statut`, et ferait disparaître du document la seule trace de la
+dernière réouverture d'un jeu re-figé. Le contrat le dit explicitement : c'est `statut` qui
+décide si le bandeau s'affiche. Vérifié en base (le champ survit à la re-validation) et figé
+par un e2e.
+
+### ⚠️ L'ordre des refus est observable, et il est documenté
+
+Les pipes s'exécutent **avant** le handler : sur un jeu déjà `BROUILLON`, un appel **sans**
+motif rend **400**, pas `JEU_NON_VALIDE`. Le 409 de l'AC-4 n'apparaît qu'avec un motif valide.
+Dit dans l'`@ApiOperation` de la route, et figé par un e2e qui mesure les deux.
+
+### Vérification
+
+Lint 0 warning · build OK · **1 637 unitaires + 451 e2e verts** · couverture **98,8 / 93,97 /
+98,74 / 98,82** · **5 mutations rouges par assertion**, aucune par erreur de compilation (la
+mutation « le repo n'écrit plus le motif » a dû être réécrite avec un `void reouverture;` pour
+compiler avant d'être comptée) :
+
+| mutation | ce qui vire au rouge |
+|---|---|
+| le `@Transform` ne rogne plus | 3 unitaires + 2 e2e (dix espaces redeviennent un motif valide) |
+| `derniereReouverture` retiré du patch du repository | le spec de repository (patch `toEqual`) |
+| la route ne verse plus de `contexte` au journal | 1 unitaire + 1 e2e (AC-2) |
+| le charset de contrôle remplacé par `/^[\s\S]*$/u` | 5 unitaires (saut de ligne, octet nul, C1…) |
+| `derniereReouverture: null` ajouté au patch de validation | l'e2e « le champ SURVIT à une re-validation » |
+
+⚠️ **Le `*.dto.ts` étant hors `collectCoverageFrom`**, la garde de l'AC-1 est éprouvée par un
+spec dédié qui instancie la **vraie** `ValidationPipe` avec les options de `main.ts` — sans
+lui, retirer le rognage ou desserrer une borne ne ferait bouger aucun seuil.
+
+**Vérification docker sur la route réelle** — stack `docker compose` (mongo, kafka, redis,
+auth-service, mailhog, bilan-service), **JWT réel de l'IdP** (inscription, vérification de
+l'e-mail par le lien Mailhog, connexion), read-models semés à la main :
+
+| critère | mesure |
+|---|---|
+| AC-1 | corps absent · `""` · 14 espaces · saut de ligne · 5 caractères ⇒ **400** cinq fois ; le jeu reste `VALIDE` en base et **0** ligne au journal |
+| AC-1 | motif envoyé entouré d'espaces ⇒ **72 caractères en base**, aucun espace de bord : c'est la valeur rognée qui est conservée |
+| AC-3 | `derniereReouverture` en base porte un **`ObjectId`** et une **`Date`** réels, pas des chaînes |
+| AC-2 | une seule ligne `JEU_ROUVERT`, `contexte = { motif, versionRouverte: 1 }` |
+| AC-5 | `GET …/bilan/audit?type=JEU_ROUVERT` rend ce contexte tel quel — zéro ligne de code de lecture |
+| AC-3 | re-validation ⇒ `statut: VALIDE` **et** le motif toujours là ; 2ᵉ réouverture ⇒ `versionRouverte: 2`, le jeu porte le nouveau motif, le journal **garde les deux** |
+| AC-4 | jeu jamais validé : **400** sans motif, **409 `JEU_NON_VALIDE`** avec un motif valide |
+| atomicité | la ligne d'outbox `liasse.etat.change` (`etat: BROUILLON`, `version: 1`) est écrite avec le jeu ; **0** jeu `BROUILLON` portant encore un `validePar` |
+
+⚠️⚠️ **La vérification docker a été prouvée NON-VACANTE** : rejouée sur le code **muté** (le
+repository n'écrit plus `derniereReouverture`), la 3ᵉ réouverture laisse en base le motif de
+la **2ᵉ** — le contrôle tombe. Une vérification qui ne discrimine pas ne prouve rien.
+
+⚠️ **Le hot-reload a menti une fois de plus** : après le passage des messages de validation en
+français, le conteneur servait encore les messages anglais ; `docker restart` a été nécessaire
+(piège déjà fiché).
