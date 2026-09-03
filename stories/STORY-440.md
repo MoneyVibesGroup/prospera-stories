@@ -1,10 +1,10 @@
 # STORY-440 : La batterie ne porte ni sévérité ni cible adressable, et son drapeau `valide` repose sur deux contrôles dont l'un est tautologique
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — `etats/controles-coherence.types.ts`, `etats/controles-coherence-production.service.ts`
-**Points :** 3 · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
+**Points :** 3 · **Complexité :** medium · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
 **Origine :** maquette **FE-033** (TFT/TAFIRE, notes annexes, contrôles de cohérence), 2026-08-27.
 Vérifié contre la DSF déposée `1000745307_2025_Definitif (1).xlsx`, feuille *« Type de Contôles »*.
 
@@ -72,3 +72,17 @@ Mesuré contre les **8 contrôles intermontants** que l'administration applique 
 - **FE-034** lit ce drapeau pour autoriser la validation : AC-3 est ce qui l'empêchera d'annoncer
   « tout est vert » sur une liasse où deux contrôles sur quatre n'ont pas eu lieu.
 - **FE-078** porte la moitié « comptable ↔ fiscal » des 8 contrôles de l'administration.
+
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branches `MNV-440` créées dans `docs/` et `bilan-service` **avant** la
+première ligne de code.
+
+```
+docs             MNV-440
+bilan-service    MNV-440
+```
+
+⚠️ **Un seul dépôt de module** : aucun artefact de référentiel n'est régénéré, donc pas de recopie
+byte-identique vers `balance-service`.
