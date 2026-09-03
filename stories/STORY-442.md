@@ -1,10 +1,10 @@
 # STORY-442 : Le `contexte` d'un événement d'audit est stocké et jamais publié — une ligne `EXPORT_EFFECTUE` ne dit pas ce qui a été exporté
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-012 — Validation, immutabilité, exercices, audit
 **Service :** `bilan-service`
-**Points :** 2 · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
+**Points :** 2 · **Complexité :** low · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
 **Origine :** maquette **FE-034** (cycle brouillon → validé, snapshot immuable, piste d'audit), 2026-08-27.
 Relevé en lisant les contrôleurs de `bilan-service` sur `origin/dev`.
 
@@ -39,3 +39,19 @@ fait foi** ?
   même DTO et la même route.
 - Sans elle, l'écran d'export **FE-038** ne pourra pas répondre à « quelle version le client
   a-t-il reçue ? » depuis le journal.
+
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branches `MNV-442` créées dans `docs/` et `bilan-service` **avant** la
+première ligne de code.
+
+```
+docs             MNV-442
+bilan-service    MNV-442
+```
+
+⚠️ **Périmètre tenu** : la fiche note que la story « se livre avec **STORY-443** » (le journal n'a ni
+pagination ni fenêtre). STORY-443 **n'est pas** dans cette livraison — seul le champ manquant l'est.
+Les deux touchent le même DTO et la même route, mais rien n'oblige à les livrer ensemble, et l'élargir
+ici déborderait le périmètre.
