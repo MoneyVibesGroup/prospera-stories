@@ -36,6 +36,36 @@ Les contrôles qu'un réviseur fait **en premier**, et qu'aucun code ne fait :
 ⚠️ Le premier n'est **pas calculable aujourd'hui** : le brut ne franchit pas la frontière du
 moteur (**STORY-438**). Le quatrième l'est déjà.
 
+## ⛔ Deux contraintes portées par STORY-437 — à lire AVANT d'écrire le contrôle
+
+### ① Les notes `3A` et `3C` n'existent pas encore
+
+Le tableau ci-dessus rapproche les **notes 3A et 3C**. Le paquet `syscohada-revise@2.1` ne déclare
+que la note **`3`** : ses sous-notes n'ont **ni `NoteMeta`, ni titre**. Elles arrivent avec
+**STORY-437 AC-2** (les 35 numéros / 45 feuilles, titres relevés sur le GUIDEF).
+
+⇒ Les rapprochements ① et ② ne sont pas seulement bloqués par le brut (STORY-438) : ils sont
+bloqués par **l'absence de la note qu'ils citent**. Les rapprochements ③ (note `7` → `BI`) et ④
+(note `11` → `BS`) sont, eux, calculables **aujourd'hui**.
+
+### ② `note` est un renvoi DOCUMENTAIRE — jamais un rapprochement chiffré
+
+⚡ **C'est le piège qui rendrait ce contrôle faux, et il est silencieux.** La tentation est de
+dériver les rapprochements du champ `postes[].note` : « le poste porte `27`, donc total(note 27) =
+montant(poste) ». **Faux, et mesuré sur la liasse déposée :**
+
+| Renvoi du formulaire | Ce que la dérivation calculerait | Pourquoi c'est faux |
+|---|---|---|
+| `RK → 27` (*Charges de personnel*) | total(`27A`) **+** total(`27B`) | La **`27B`** est un état d'**effectifs, masse salariale et personnel extérieur**. Elle ne s'additionne à rien — l'additionner aux charges de personnel produit un écart qui n'a aucun sens comptable. |
+| `RL → 3C&28` (*Dotations*) | total(`3C`) **+** total(`28`) | Deux **familles** distinctes, pas une somme. La ligne symétrique `TJ` (*Reprises*) ne porte que `28` — le formulaire lui-même le dit. |
+| `AI → 3` (*Immobilisations corporelles*) | total(note `3`) | La feuille `BILAN ACTIF` n'a **qu'une colonne « Note » pour trois colonnes de montants** (BRUT / AMORT / NET). Le renvoi `3` vaut pour la **ligne entière** : le brut se justifie en `3A`, l'amortissement en `3C`, les cessions en `3D`. |
+
+⇒ **Le renvoi dit *où lire*, pas *quoi égaler*.** Un poste qui porte une note n'en est pas le total.
+
+**AC-7 en conséquence** : les rapprochements de `ARTICULATION_NOTES` sont **déclarés
+explicitement** — comme le tableau de cette story les écrit —, jamais dérivés de `postes[].note`.
+Un test le fige : ajouter un renvoi au paquet **ne doit créer aucun rapprochement**.
+
 ## Critères d'acceptation
 
 - [ ] AC-1 — `ARTICULATION_NOTES` compare, pour chaque note, le **total de la note** au
@@ -51,9 +81,16 @@ moteur (**STORY-438**). Le quatrième l'est déjà.
 - [ ] AC-5 — Agnosticisme P7 : `NON_APPLICABLE` si le référentiel ne déclare aucun renvoi.
 - [ ] AC-6 — Un test qui **falsifie** un total de note et vérifie que le contrôle rougit — le test
       que le contrôle actuel ne peut pas avoir.
+- [ ] **AC-7** — Les rapprochements sont **déclarés explicitement**, **jamais dérivés** de
+      `postes[].note` (voir §② ci-dessus). Un test le fige : **ajouter un renvoi au paquet ne crée
+      aucun rapprochement**. ⚠️ Cet AC survit au changement de contrat de **STORY-437 AC-8**
+      (`note: string | string[]`) : une liste ne se somme pas davantage qu'une chaîne.
 
 ## Conséquences ailleurs
 
 - **Ordonnancement** : AC-1 n'est complet qu'après **STORY-438**. Livrer d'abord les
   rapprochements calculables (notes 7, 8, 9, 10, 11, 5, 6), puis les bruts.
+- ⛔ **Dépendance dure sur STORY-437 (AC-2)** : les rapprochements ① *Immobilisations brutes*
+  (note `3A`) et ② *Amortissements* (note `3C`) citent des notes que le paquet **ne déclare pas
+  encore**. Ils ne peuvent pas être livrés avant. Les rapprochements ③ et ④ le peuvent.
 - **FE-033** liste ce manque parmi les « angles morts » du panneau de contrôles.
