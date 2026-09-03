@@ -1,10 +1,10 @@
 # STORY-443 : `GET /bilan/audit` n'a ni pagination, ni fenêtre de dates, ni filtre par cible — un journal append-only jamais purgé rend tout
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-012 — Validation, immutabilité, exercices, audit
 **Service :** `bilan-service`
-**Points :** 3 · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
+**Points :** 3 · **Complexité :** medium · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
 **Origine :** maquette **FE-034** (cycle brouillon → validé, snapshot immuable, piste d'audit), 2026-08-27.
 Relevé en lisant les contrôleurs de `bilan-service` sur `origin/dev`.
 
@@ -39,3 +39,22 @@ Trois manques, du plus grave au plus gênant :
 
 - La maquette FE-034 n'offre que le filtre par **type** — le seul servi — et l'écrit à l'écran.
 - À livrer avec **STORY-442** (même DTO, même route).
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branches créées **avant** la première ligne de code (preuve
+`git rev-parse --abbrev-ref HEAD` sur chaque dépôt impacté) :
+
+```
+docs             MNV-443
+bilan-service    MNV-443
+```
+
+**Un seul dépôt impacté** : la route, son DTO et son index vivent entièrement dans `bilan-service`.
+Aucun contrat d'événement ne change, donc pas de second dépôt (la règle « un contrat Kafka = 2
+dépôts » ne s'applique pas ici). **Aucun consommateur** de `GET …/bilan/audit` n'existe hors du
+service : `admin-panel`, `frontend-admin-panel` et `expert-comptable` ne l'appellent nulle part —
+vérifié par balayage. Le changement de forme de la réponse (AC-4) ne casse donc aucun appelant
+existant.

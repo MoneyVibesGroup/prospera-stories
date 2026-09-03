@@ -3174,7 +3174,7 @@ sprints:
         epic: "EPIC-012"
         points: 3
         service: "bilan-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 PAR LA MAQUETTE FE-034. La route ne prend qu un parametre : `?type=`. Trois manques, du plus grave au plus genant : ① AUCUN FILTRE PAR CIBLE - le journal est celui du DOSSIER et melange jeux d etats et exercices ; la question naturelle « le journal de CETTE liasse » n est pas servie alors que `cible.id` est stocke sur chaque ligne ; ② AUCUNE PAGINATION - la collection est append-only et jamais purgee, la reponse grossit indefiniment et l ecran la charge en entier a chaque ouverture ; ③ AUCUNE FENETRE DE DATES. ⚠️ AC-2 : pagination PAR CURSEUR sur `createdAt`, pas par offset - un journal append-only en tete de liste deplace les pages. ⚠️ AC-5 : les filtres se combinent en ET, jamais en OU.
+        status: "in_progress"  # CREEE le 2026-08-27 PAR LA MAQUETTE FE-034. La route ne prend qu un parametre : `?type=`. Trois manques, du plus grave au plus genant : ① AUCUN FILTRE PAR CIBLE - le journal est celui du DOSSIER et melange jeux d etats et exercices ; la question naturelle « le journal de CETTE liasse » n est pas servie alors que `cible.id` est stocke sur chaque ligne ; ② AUCUNE PAGINATION - la collection est append-only et jamais purgee, la reponse grossit indefiniment et l ecran la charge en entier a chaque ouverture ; ③ AUCUNE FENETRE DE DATES. ⚠️ AC-2 : pagination PAR CURSEUR sur `createdAt`, pas par offset - un journal append-only en tete de liste deplace les pages. ⚠️ AC-5 : les filtres se combinent en ET, jamais en OU.
         story_path: "stories/STORY-443.md"
       - story_id: "STORY-444"
         title: "La reouverture d une liasse figee n exige aucun motif et n en trace aucun"
