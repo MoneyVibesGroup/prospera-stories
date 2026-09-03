@@ -1,10 +1,10 @@
 # STORY-439 : `ARTICULATION_NOTES` est nul par construction — le contrôle qui compte, note ↔ poste d'état, n'existe pas
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — `etats/controles-coherence-production.service.ts`, `etats/controles-coherence.types.ts`
-**Points :** 3 · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
+**Points :** 3 · **Complexité :** high · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
 **Origine :** maquette **FE-033** (TFT/TAFIRE, notes annexes, contrôles de cohérence), 2026-08-27.
 Vérifié contre la DSF déposée `1000745307_2025_Definitif (1).xlsx`.
 
@@ -68,23 +68,75 @@ Un test le fige : ajouter un renvoi au paquet **ne doit créer aucun rapprocheme
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — `ARTICULATION_NOTES` compare, pour chaque note, le **total de la note** au
-      **montant du poste d'état** qu'elle justifie — deux chemins de calcul distincts — et non
-      le total à sa propre somme.
-- [ ] AC-2 — Une note dont le détail n'est **pas** dérivable (`detailACompleter: true`) rend
-      `INDETERMINABLE` pour ce rapprochement, **jamais** `OK`. Un contrôle non fait ne se peint
-      pas en vert.
-- [ ] AC-3 — `elements[]` nomme la note **et** le poste (`{ref: 'note 7'}`, `{ref: 'BILAN_ACTIF|BI'}`),
-      pas seulement l'écart.
-- [ ] AC-4 — Le filet anti-régression actuel (Σ postes = total) **reste**, sous un code distinct
-      (`INTEGRITE_NOTES`, `INFORMATIF`) : il a une valeur, ce n'est simplement pas un contrôle métier.
+- [ ] AC-1 — `ARTICULATION_NOTES` compare, pour chaque note, le total **re-dérivé de son
+      DÉTAIL** (la ventilation par compte, issue de la **balance**) au **montant des postes
+      d'état** qu'elle justifie (issu de l'**agrégation** du Bilan/CR) — deux chemins de
+      calcul et **deux entrées** distincts — et non le total à sa propre somme.
+      Comparaison sur **N et N-1**.
+- [ ] AC-2 — Une note dont le détail n'est **pas dérivable** rend `INDETERMINABLE` pour ce
+      rapprochement, **jamais** `OK`. Un contrôle non fait ne se peint pas en vert — et le
+      contrôle global ne rend `OK` que si **aucune** note n'est restée indéterminable.
+- [ ] AC-3 — `elements[]` nomme la note **et** le poste (`{ref: 'note 8 (détail)'}`,
+      `{ref: 'BILAN_ACTIF|BJ'}`), pas seulement l'écart.
+- [ ] AC-4 — Le filet anti-régression actuel (Σ postes = total) **reste**, sous un code
+      distinct (`INTEGRITE_NOTES`, `INFORMATIF`) : il a une valeur, ce n'est simplement pas
+      un contrôle métier.
 - [ ] AC-5 — Agnosticisme P7 : `NON_APPLICABLE` si le référentiel ne déclare aucun renvoi.
-- [ ] AC-6 — Un test qui **falsifie** un total de note et vérifie que le contrôle rougit — le test
-      que le contrôle actuel ne peut pas avoir.
+- [ ] AC-6 — Un test qui **falsifie** le détail d'une note et vérifie que le contrôle rougit
+      — le test que le contrôle actuel ne peut pas avoir. Et un test qui rejoue le cas
+      **réellement atteignable** en production (ci-dessous).
 - [ ] **AC-7** — Les rapprochements sont **déclarés explicitement**, **jamais dérivés** de
       `postes[].note` (voir §② ci-dessus). Un test le fige : **ajouter un renvoi au paquet ne crée
       aucun rapprochement**. ⚠️ Cet AC survit au changement de contrat de **STORY-437 AC-8**
       (`note: string | string[]`) : une liste ne se somme pas davantage qu'une chaîne.
+
+## ⚡⚡ Cadrage ajusté avant dev — deux lectures littérales qui refaisaient la tautologie
+
+**① « Total de la note ↔ montant du poste » est DÉJÀ tautologique.** `NoteAnnexe.totalN` **est**
+`Σ postes.montantN` (STORY-062), et sur `syscohada-revise@2.1` **dix notes sur onze n'ont qu'un
+seul poste contributeur** (la note 3 en a trois : `AD`, `AI`, `AP`). Comparer le total au poste
+aurait reproduit **exactement** le voyant que cette story existe pour supprimer. Le seul second
+chemin qui existe dans le produit est le **détail** de la note : la ventilation par compte, bâtie
+depuis les **lignes de balance** et non depuis les postes d'état.
+
+**② `detailACompleter: true` n'est pas le bon critère.** Depuis STORY-436, une note `TRAME`
+**renseignée** porte `detailACompleter: false` — et son détail reste **non dérivable** : les
+cellules sont des chaînes libres (`string[][]`), et le paquet ne déclare **ni le type ni le rôle**
+de ses colonnes. Choisir « Valeurs brutes à la clôture » reviendrait à déduire une règle d'un
+**libellé**, ce que le projet s'interdit partout (cf. le JSDoc de `ComplementPoste`). Appliqué
+littéralement, l'AC-2 aurait comparé **0** au poste et rendu une **fausse `ANOMALIE`** sur toute
+liasse dont la trame est saisie. Le critère retenu est donc « détail **dérivable** », dont
+`detailACompleter` n'est qu'un cas.
+
+### Le cas qui rend le contrôle réellement faillible — mesuré sur le paquet
+
+Trois préfixes de comptes portent **à la fois** un candidat d'actif et un candidat de passif, et
+l'actif est un **poste de note** :
+
+| préfixe | candidat actif | candidat passif |
+|---|---|---|
+| `45`, `46`, `47` | `BILAN_ACTIF\|BJ` — « Autres créances », **note 8** (`VENTILATION`) | `BILAN_PASSIF\|DM` |
+
+`NotesAnnexesProductionService.ventilerParCompte` choisit le poste **sur le solde N** puis calcule
+`montantN1` **sur ce même poste** ; `BilanProductionService` refait son choix **sur le solde N-1**.
+Un compte `47…` **créditeur en N-1** et **débiteur en N** part donc en `DM` au Bilan N-1 et reste
+sous `BJ` dans la ventilation N-1 : la colonne comparative de la note 8 **ne se rapproche plus** du
+Bilan. ⚠️ Le JSDoc de `ventilerParCompte` justifie ce raccourci par « les postes de notes v1 sont
+non ambigus » — **c'est faux sur le paquet livré**, `BJ` l'est.
+
+⇒ Sur la colonne **N**, l'écart reste nul par construction (même agrégation, deux implémentations
+miroir) ; sur la colonne **N-1**, il est **atteignable en production**. C'est ce qui distingue ce
+contrôle du précédent.
+
+## ⛔ Hors périmètre, motivé et tracé — les deux rapprochements de la trame
+
+Les lignes 1 et 3 du tableau ci-dessus (note 3A brut ↔ colonne Brut du Bilan, note 7 brut ↔ `BI`)
+**ne sont pas livrées**. STORY-438 a bien fait franchir le brut au moteur, mais il manque **l'autre
+moitié** : le paquet doit déclarer **quelle colonne de trame se rapproche de quelle colonne
+d'état**. Ni `NoteMeta` ni `renvois` ne le portent, et l'inventer serait inventer une donnée
+fiscale (même refus qu'à l'AC-5 de STORY-434). Chemin de reprise : `NoteMeta` gagne un
+`rapprochement { colonne, cible }`, sourcé de l'imprimé — deux artefacts à régénérer, donc
+**deux dépôts** (patron STORY-428). À ficher comme story de suivi.
 
 ## Conséquences ailleurs
 
@@ -94,3 +146,16 @@ Un test le fige : ajouter un renvoi au paquet **ne doit créer aucun rapprocheme
   (note `3A`) et ② *Amortissements* (note `3C`) citent des notes que le paquet **ne déclare pas
   encore**. Ils ne peuvent pas être livrés avant. Les rapprochements ③ et ④ le peuvent.
 - **FE-033** liste ce manque parmi les « angles morts » du panneau de contrôles.
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branches `MNV-439` créées dans `docs/` et `bilan-service` **avant** la
+première ligne de code.
+
+```
+docs             MNV-439
+bilan-service    MNV-439
+```
+
+⚠️ **Un seul dépôt de module** : aucun artefact de référentiel n'est régénéré (cf. § *Hors périmètre*),
+donc pas de recopie byte-identique vers `balance-service`.
