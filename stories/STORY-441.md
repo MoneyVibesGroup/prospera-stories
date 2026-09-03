@@ -1,10 +1,10 @@
 # STORY-441 : La piste d'audit et le snapshot ne nomment personne — `userId` et `validePar` sont des `ObjectId` nus
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-012 — Validation, immutabilité, exercices, audit
 **Service :** `bilan-service`
-**Points :** 5 · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
+**Points :** 5 · **Complexité :** high · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
 **Origine :** maquette **FE-034** (cycle brouillon → validé, snapshot immuable, piste d'audit), 2026-08-27.
 Relevé en lisant les contrôleurs de `bilan-service` sur `origin/dev`.
 
@@ -45,3 +45,20 @@ Même remarque pour l'**AC-2** (« statut VALIDÉ + horodatage/**validateur** af
   nom et rôle marqués en pointillé (« reconstitué »), pour ne pas laisser croire l'écart réglé.
 - Même patron que l'affichage des dossiers affectés (STORY-136) : le nom d'un collaborateur
   est déjà une donnée que le front doit résoudre ailleurs.
+
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branches `MNV-441` créées dans `docs/` et `bilan-service` **avant** la
+première ligne de code.
+
+```
+docs             MNV-441
+bilan-service    MNV-441
+```
+
+⚠️ **Un seul dépôt de module, vérifié avant de coder** : les quatre topics `identity.*` que ce
+read-model consomme sont **déjà publiés** par `auth-service` (`IdentityUserRegisteredV1` porte
+`email`, `firstName`, `lastName`, `status` ; `IdentityMembershipChangedV1` porte `role` et `orgId`).
+Le contrat d'événement **ne change pas** — la règle « un changement de contrat touche 2 dépôts » ne
+s'applique donc pas ici.
