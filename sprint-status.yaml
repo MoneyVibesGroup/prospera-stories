@@ -4653,8 +4653,8 @@ sprints:
     end_date: "2027-09-09"
     capacity_points: 34
     committed_points: 29  # ⚖️ RE-COMPOSÉ le 2026-08-03 au re-découpage PI-SPI : les 3 stories auth-service (171/166/167, 21 pts) sont INCHANGÉES ; les 10 pts paiement (ex-150/151) deviennent l'amorce du nouveau socle (237/238/239, 8 pts).
-    completed_points: 0
-    status: "not_started"  # RANG 1 de l'ordre PO : le socle. ⚡ Ce sprint débloque à lui seul TOUT le frontend distributeur (DI-01/DI-02/AP-17) — sans lui, l'administrateur créé dans la console n'a aucun rôle à recevoir.
+    completed_points: 5  # ✅ 2026-09-03 : STORY-237 (3) + STORY-238 (2). Les 24 pts restants (171/166/167 auth-service, 239 paiement) ne sont pas commencés.
+    status: "in_progress"  # ⚠️ OUVERT HORS DE SA FENÊTRE : les deux premières stories du socle paiement ont été livrées le 2026-09-03, sur un sprint daté 2027-08-26 → 2027-09-09, alors que `current_sprint` vaut 20. Ce n'est pas une avance de planning, c'est un DÉCALAGE du calendrier avec le réel, à trancher au prochain sprint-planning — je ne touche pas à `current_sprint`, le faire impliquerait que les sprints 21→30 sont clos. RANG 1 de l'ordre PO : le socle. ⚡ Ce sprint débloque à lui seul TOUT le frontend distributeur (DI-01/DI-02/AP-17) — sans lui, l'administrateur créé dans la console n'a aucun rôle à recevoir.
     goal: "Socle distributeur (EPIC-025) : les 14 personas au catalogue de rôles + les rôles personnalisés par organisation. Amorce paiement-service (:3005) : scaffold relying party, DEUX bases Mongo aux rôles restreints (le journal d'audit doit être ineffaçable AVANT la première opération d'argent), read-models et gate."
     stories:
       - story_id: "STORY-171"
@@ -4683,14 +4683,14 @@ sprints:
         epic: "EPIC-035"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # 🆕 2026-08-03. Remplace l'amorce de l'ex-STORY-150. Port :3005 vérifié LIBRE au docker-compose racine ce jour.
+        status: "done"  # ✅ 2026-09-03, commit `bc6f846` sur `MNV-237`. ⚠️ Son statut était resté `not_started` alors que la story était livrée — repris ici en même temps que STORY-238. Historique : 🆕 2026-08-03, remplace l'amorce de l'ex-STORY-150 ; port :3005 vérifié LIBRE au docker-compose racine ce jour.
         assigned_to: null
       - story_id: "STORY-238"
         title: "Deux bases MongoDB et rôles restreints (`paiement_service`, `paiement_service_audit`)"
         epic: "EPIC-035"
         points: 2
         service: "paiement-service"
-        status: "not_started"  # ⚡ EN TÊTE, avant toute opération d'argent. Les privilèges Mongo sont ADDITIFS et sans deny : un readWrite sur la base métier redonnerait `remove` à une simple collection d'audit. Seule la séparation de BASE tient (patron fiscal AD-10). ⚠️ Nommage vérifié dans le docker-compose réel : `<service>_service`, PAS `paiement`/`paiement_audit` comme l'annonçait la spine fiscal-service (non déployée, donc non ratifiée).
+        status: "done"  # ✅ 2026-09-03, commit `addb25f` sur `MNV-238` (branche poussée). Le refus vient du SERVEUR : `update`/`remove`/`drop` sur `paiement_service_audit` rendent `Unauthorized` (code 13), vérifié contre un MongoDB réel avec le compte applicatif. ⛔ ARBITRAGE PO PENDANT LA STORY — LA TOPOLOGIE MONGO A CHANGÉ : le `mongo` mutualisé de la stack n'a AUCUNE authentification (`mongod --replSet rs0 --bind_ip_all`, ni `--auth` ni utilisateur root), donc aucun privilège à restreindre ; et l'authentification est GLOBALE à une instance, jamais par base. L'activer sur `mongo` cassait les 8 autres services, dont 5 lisent leur MONGODB_URI depuis un `.env` local NON VERSIONNÉ (`env_file:` — expert-comptable, auth-service, kyc-service, platform-catalog-service, bilan-service). ⇒ INSTANCE DÉDIÉE `mongo-paiement`, portant les DEUX bases sur le MÊME réplica set `rs-paiement` (la transaction audit + métier ne franchit pas la frontière d'un déploiement). Même arbitrage repris le jour même par STORY-571 (`mongo-notification`). ⚡ Le test qui déclare un ENVIRONNEMENT non conforme est `npm run test:conformite` — hors de `npm test` et de `test:e2e`, qui tournent sans dépendance externe ; retourné sur le compte de maintenance (qui détient `remove`), 7 de ses 9 cas rougissent. ⚠️ Nommage vérifié dans le docker-compose réel : `<service>_service`, PAS `paiement`/`paiement_audit` comme l'annonçait la spine fiscal-service (non déployée, donc non ratifiée). ⚡ EN TÊTE, avant toute opération d'argent : les privilèges Mongo sont ADDITIFS et sans deny — un readWrite sur la base métier redonnerait `remove` à une simple collection d'audit ; seule la séparation de BASE tient (patron fiscal AD-10).
         assigned_to: null
       - story_id: "STORY-239"
         title: "Read-models locaux et gate `@RequiresPaiementAccess`"
