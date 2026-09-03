@@ -1,6 +1,6 @@
 # STORY-439 : `ARTICULATION_NOTES` est nul par construction — le contrôle qui compte, note ↔ poste d'état, n'existe pas
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — `etats/controles-coherence-production.service.ts`, `etats/controles-coherence.types.ts`
@@ -68,21 +68,21 @@ Un test le fige : ajouter un renvoi au paquet **ne doit créer aucun rapprocheme
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — `ARTICULATION_NOTES` compare, pour chaque note, le total **re-dérivé de son
+- [x] AC-1 — `ARTICULATION_NOTES` compare, pour chaque note, le total **re-dérivé de son
       DÉTAIL** (la ventilation par compte, issue de la **balance**) au **montant des postes
       d'état** qu'elle justifie (issu de l'**agrégation** du Bilan/CR) — deux chemins de
       calcul et **deux entrées** distincts — et non le total à sa propre somme.
       Comparaison sur **N et N-1**.
-- [ ] AC-2 — Une note dont le détail n'est **pas dérivable** rend `INDETERMINABLE` pour ce
+- [x] AC-2 — Une note dont le détail n'est **pas dérivable** rend `INDETERMINABLE` pour ce
       rapprochement, **jamais** `OK`. Un contrôle non fait ne se peint pas en vert — et le
       contrôle global ne rend `OK` que si **aucune** note n'est restée indéterminable.
-- [ ] AC-3 — `elements[]` nomme la note **et** le poste (`{ref: 'note 8 (détail)'}`,
+- [x] AC-3 — `elements[]` nomme la note **et** le poste (`{ref: 'note 8 (détail)'}`,
       `{ref: 'BILAN_ACTIF|BJ'}`), pas seulement l'écart.
-- [ ] AC-4 — Le filet anti-régression actuel (Σ postes = total) **reste**, sous un code
+- [x] AC-4 — Le filet anti-régression actuel (Σ postes = total) **reste**, sous un code
       distinct (`INTEGRITE_NOTES`, `INFORMATIF`) : il a une valeur, ce n'est simplement pas
       un contrôle métier.
-- [ ] AC-5 — Agnosticisme P7 : `NON_APPLICABLE` si le référentiel ne déclare aucun renvoi.
-- [ ] AC-6 — Un test qui **falsifie** le détail d'une note et vérifie que le contrôle rougit
+- [x] AC-5 — Agnosticisme P7 : `NON_APPLICABLE` si le référentiel ne déclare aucun renvoi.
+- [x] AC-6 — Un test qui **falsifie** le détail d'une note et vérifie que le contrôle rougit
       — le test que le contrôle actuel ne peut pas avoir. Et un test qui rejoue le cas
       **réellement atteignable** en production (ci-dessous).
 - [ ] **AC-7** — Les rapprochements sont **déclarés explicitement**, **jamais dérivés** de
@@ -149,8 +149,10 @@ fiscale (même refus qu'à l'AC-5 de STORY-434). Chemin de reprise : `NoteMeta` 
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — branches `MNV-439` créées dans `docs/` et `bilan-service` **avant** la
-première ligne de code.
+**Statut : `done`** — implémentée, validée, revue (code + sécurité), **vérification docker rejouée sur
+l'état final**, PR `bilan-service` **#70** (5 commits) rebase-mergée sur `dev` le 2026-09-03.
+
+Branches créées **avant** la première ligne de code :
 
 ```
 docs             MNV-439
@@ -159,3 +161,122 @@ bilan-service    MNV-439
 
 ⚠️ **Un seul dépôt de module** : aucun artefact de référentiel n'est régénéré (cf. § *Hors périmètre*),
 donc pas de recopie byte-identique vers `balance-service`.
+
+### Ce qui est livré
+
+| AC | Livré |
+|---|---|
+| AC-1 | `ARTICULATION_NOTES` rapproche le **détail** d'une note — sa ventilation par compte, bâtie depuis les **lignes de balance** — des **postes d'état** qu'elle justifie, issus de l'**agrégation** du Bilan/CR. Sur **N et N-1**. |
+| AC-2 | Détail non dérivable ⇒ `INDETERMINABLE`. Le contrôle global ne rend `OK` que si **tous** ses rapprochements ont été faits, et il **liste les non faits** avec `valeur: null` — y compris quand un autre est en anomalie. |
+| AC-3 | `elements[]` nomme la note **et** le poste (`note 8 (détail)`, `BILAN_ACTIF|BJ`), suffixés `(N-1)` sur la colonne comparative. |
+| AC-4 | Le filet de 062 reste, sous `INTEGRITE_NOTES` (`INFORMATIF`) — **durci au passage** : somme des valeurs absolues, statut déduit du **nombre** de notes en écart. |
+| AC-5 | `NON_APPLICABLE` sans renvoi de note. Aucun code OHADA écrit dans le contrôle (invariant P7). |
+| AC-6 | Deux tests qui falsifient, dont un **sur l'artefact réel** où le rouge sort du moteur, pas d'un littéral. |
+
+`MOTEUR_VERSION` 1.11.0 → **1.12.0** : la batterie passe de 6 à 7 lignes **et** `ARTICULATION_NOTES`
+change de libellé, de statut et d'écart sous le même code. Deux raisons indépendantes.
+
+### ⚡⚡ Deux lectures littérales de la fiche refaisaient la tautologie qu'elle ferme
+
+**① « Total de la note ↔ montant du poste » est DÉJÀ tautologique.** `NoteAnnexe.totalN` **est**
+`Σ postes.montantN` (STORY-062), et sur `syscohada-revise@2.1` **dix notes sur onze n'ont qu'un seul
+poste contributeur** (la note 3 en a trois : `AD`, `AI`, `AP`). Le seul second chemin qui existe dans
+le produit est le **détail**.
+
+**② `detailACompleter: true` n'est pas le bon critère.** Depuis STORY-436, une note `TRAME`
+**renseignée** porte `detailACompleter: false`, et son détail reste **non dérivable** : cellules libres,
+colonnes ni typées ni qualifiées par le paquet. Appliqué à la lettre, l'AC-2 aurait comparé **0** au
+poste ⇒ **fausse `ANOMALIE`** sur toute liasse dont la trame est saisie.
+
+### Le cas qui rend le contrôle réellement faillible — mesuré, puis reproduit en docker
+
+Trois préfixes portent **à la fois** un candidat d'actif et un candidat de passif, et l'actif est un
+poste de note : `45`, `46`, `47` → `BILAN_ACTIF|BJ` (« Autres créances », **note 8**, `VENTILATION`)
+**ou** `BILAN_PASSIF|DM`. `ventilerParCompte` choisit le poste **sur le solde N** puis calcule sa
+colonne N-1 sur ce même poste ; le Bilan refait son choix **sur le solde N-1**. Un compte `47…`
+créditeur en N-1 et débiteur en N part en `DM` au Bilan et reste sous `BJ` dans la note.
+
+⚠️ Le JSDoc de `ventilerParCompte` justifiait ce raccourci par « les postes de notes v1 sont non
+ambigus » — **c'est faux sur le paquet livré**. Corrigé, sans changer le calcul : le rapprochement le
+**signale** ; le corriger changerait la valeur produite d'une note et relève de son propre arbitrage.
+
+⇒ Sur la colonne **N** l'écart reste nul par construction (deux implémentations miroir de la même
+agrégation) ; sur **N-1** il est **atteignable en production**.
+
+### ⛔ Hors périmètre, motivé et tracé — les deux rapprochements de la trame
+
+Note 3A brut ↔ colonne Brut du Bilan, note 7 brut ↔ `BI`. STORY-438 a fait franchir le brut au moteur,
+mais il manque **l'autre moitié** : le paquet doit déclarer **quelle colonne de trame se rapproche de
+quelle colonne d'état**. Ni `NoteMeta` ni `renvois` ne le portent, et l'inventer serait inventer une
+donnée fiscale (même refus qu'à l'AC-5 de STORY-434). Chemin de reprise : `NoteMeta` gagne un
+`rapprochement { colonne, cible }`, sourcé de l'imprimé — deux artefacts, donc **deux dépôts** (patron
+STORY-428). **À ficher comme story de suivi.**
+
+### ⚡⚡ Revue de code — 5 constats, aucun bloquant, deux gardes qui ne gardaient rien
+
+1. **Le durcissement d'`INTEGRITE_NOTES` n'était mesuré par RIEN** : rétablir la somme signée et le
+   statut déduit de l'écart laissait **1 121 tests VERTS**, alors que deux totaux faux en sens
+   contraire s'annulaient et rendaient le voyant vert.
+2. **« Un rapprochement non fait reste visible » n'était prouvé que HORS anomalie** : filtrer
+   `elements` sur `valeur !== null` dans la branche `ANOMALIE` laissait les mêmes 1 121 tests verts,
+   en effaçant du contrat les trois trames non rapprochées — l'écran aurait affiché « 1 anomalie » et
+   laissé croire les huit autres notes rapprochées.
+3. **Le cadre de 063 affirmait encore « ne calcule aucune règle métier neuve »** — faux depuis cette
+   story, et le piège est nommé : déplacer la mesure vers le service d'état amont y ouvrirait un
+   **second chemin de calcul du détail**, exactement le motif que la batterie existe pour attraper.
+   (« les **quatre** contrôles d'articulation » devenait faux aussi.)
+4. **Trois JSDoc disaient `elements` vide hors anomalie**, contredits par la description Swagger du
+   **même document**.
+5. Le JSDoc de `noteVentilee` décrivait un **tuple qui n'a jamais existé**, masquant les deux champs
+   qui portent le cas central de la story.
+
+**Lentille over-engineering** (`ponytail-review`) : le test AC-5 recopiait tout le pipeline de
+production au lieu de réutiliser le helper du fichier (−12 lignes nettes). Rien d'autre à couper.
+
+### ⚡ Revue de sécurité — aucune vulnérabilité, une garde rendue structurelle
+
+Aucun constat de confiance ≥ 80. Écartés par la mesure : le gate `valide` (`bloquantSatisfait` dérive
+de `categorie`, jamais d'une liste de codes — un 7ᵉ code ne peut pas le déplacer, et le refus **422**
+filtre avec le **même** prédicat) ; la fuite de numéros de comptes (`rapprocherNote` lit les montants
+de la ventilation, **jamais** `ligne.compte` ; `modele-liasse` ne projette pas `elements`) ;
+l'épuisement de ressources (boucle linéaire bornée par le paquet et le plafond de 5 000 soldes) ; et la
+**non-répudiation**, où le bump 1.12.0 couvre les deux changements observables.
+
+⛔ **Un point signalé a été traité** : la précondition « les appelants passent toujours `soldesN` »
+n'était tenue que par un **JSDoc**. `construireNote` posait `ventilation: []` sur toute note
+`VENTILATION`, et le contrôle neuf lit la **présence** de ce champ comme preuve de dérivabilité — un
+appelant qui omettrait les soldes aurait produit une **fausse anomalie égale au total de chaque note
+ventilée**. C'est désormais une garde de code, et `detailACompleter` reste piloté par le **mode**
+déclaré : les deux ne disent pas la même chose.
+
+### Vérification
+
+Lint 0 warning · build OK · **1 524** unitaires + **410** e2e verts · couverture
+**98,75 / 93,84 / 98,69 / 98,75**.
+
+**13 mutations, toutes rouges par assertion** — sauf celle du retrait du code de `CODES_CONTROLE`, qui
+casse la compilation, ce qui **est** le mécanisme d'exhaustivité déclaré depuis STORY-401.
+
+⚠️ **Un piège rencontré et à ne pas refaire** : `git checkout -- <fichier>` pendant la passe de
+mutation a **effacé la garde structurelle non committée** ; elle a dû être reposée. Committer avant de
+muter (fiche `git-checkout-efface-le-travail-non-committe`).
+
+**Vérification docker — rejouée sur l'état FINAL**, par la route réelle
+`POST /dossiers/:id/bilan/etats/controles/dry-run`, sur `syscohada-revise@2.1` :
+
+| balance | `ARTICULATION_NOTES` | `INTEGRITE_NOTES` |
+|---|---|---|
+| N-1 à **sens inversé** sur `47…` | **`ANOMALIE`**, écart 120 000 — `note 8 (détail) (N-1) = −120 000` contre `BILAN_ACTIF|BJ (N-1) = 0`, **et les trois trames toujours listées** | `OK` — **aveugle au défaut** |
+| N-1 de **même sens** | **`INDETERMINABLE`**, les notes 3, 4 et 7 nommées — jamais `OK` | `OK` |
+
+7 contrôles servis, `valide` inchangé (les deux sont `INFORMATIF`), et le `/api/docs-json` du conteneur
+publie `INTEGRITE_NOTES` dans l'`enum` `CodeControle`.
+
+⚠️ **Conséquence produit à connaître** : sur `syscohada-revise@2.1`, `ARTICULATION_NOTES` rendra
+`INDETERMINABLE` sur **toute liasse réelle** tant que les trames 3/4/7 ne sont pas rapprochables. C'est
+le comportement voulu — un contrôle non fait ne se peint pas en vert — et c'est ce qui rend le hors
+périmètre ci-dessus visible à l'écran plutôt que silencieux.
+
+⚠️ **Flake e2e pré-existant** de `bilan-service` (fiche `flake-e2e-bilan-service`) : deux suites sont
+tombées sur une exécution complète, vertes à la relancée immédiate et en isolation. Sans rapport avec
+ce diff.
