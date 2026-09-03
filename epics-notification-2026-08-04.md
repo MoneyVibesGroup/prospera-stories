@@ -38,11 +38,11 @@ et mobile.
 stories entrent dans `sprint-status.yaml` — pas au découpage. Voir l'historique ci-dessous : c'est
 exactement cette réservation anticipée qui a échoué trois fois.
 
-> ⚡ **Slotting du bloc 1 — 2026-09-03.** Le bloc 1 a désormais un sprint : **S41**, et ses dix
-> stories portent **STORY-570 → STORY-579**. La plage a été prise **le jour du slotting** et
-> enregistrée dans `sprint-status.yaml` (bloc `reserved_ranges` + `story_id_high_water_mark`), pas
-> ici — c'est précisément la règle que les trois collisions ci-dessous ont produite. **Les blocs 2 et
-> 3 restent sans `story_id`** : ils seront attribués à leur propre slotting.
+> ✅ **Module intégralement slotté — 2026-09-03.** Les trois blocs ont un sprint — **S41, S42, S43** —
+> et leurs **29 stories** portent **STORY-570 → STORY-598**. La plage a été prise **le jour du
+> slotting** et enregistrée dans `sprint-status.yaml` (bloc `reserved_ranges` +
+> `story_id_high_water_mark`), pas ici — c'est précisément la règle que les trois collisions
+> ci-dessous ont produite. **EPIC-063 et EPIC-064 restent seuls dehors**, sur déclencheur externe.
 
 > ### ⚠️ Historique des collisions — trois fois le même défaut
 >
@@ -80,9 +80,8 @@ Le découpage réel donne **118 pts**, soit **+33 %** sur l'estimation du PRD �
 que le découpage `paiement-service` (94 estimés → 118 réels). Après le report d'EPIC-063 et EPIC-064
 (décision PO du 2026-08-04), il reste **104 pts sur trois blocs** :
 
-> ⚡ **BLOC 1 SLOTTÉ AU S41 le 2026-09-03** (décision PO) — voir le sprint 41 de
-> `sprint-status.yaml`. Les blocs 2 et 3 restent sans sprint. Le paragraphe ci-dessous vaut toujours
-> pour eux.
+> ✅ **LES TROIS BLOCS SONT SLOTTÉS le 2026-09-03** (décision PO) — sprints 41, 42 et 43 de
+> `sprint-status.yaml`. Le paragraphe ci-dessous est conservé pour la trace du raisonnement.
 >
 > ⛔ **AUCUN SPRINT N'ÉTAIT ATTRIBUÉ — corrigé le 2026-08-15.** Ce tableau annonçait « S23 → S25 ».
 > **Ces trois sprints appartiennent à la fiscalité** (EPIC-027, EPIC-028, EPIC-029 — vérifié dans
@@ -103,12 +102,28 @@ que le découpage `paiement-service` (94 estimés → 118 réels). Après le rep
 > avant le S31**, pas au S35. STORY-304 porte par ailleurs un hook **inerte** en attendant le
 > service.
 
-| Bloc | Épics | Stories | Pts | Sprint | Capacité 34 |
+| Bloc | Épics, dans l'ordre de tirage | Stories | Pts | Sprint | Capacité 34 |
 | --- | --- | --- | ---: | --- | --- |
-| **Bloc 1** | EPIC-054, EPIC-055, EPIC-056 | STORY-570 → 579 | **40** | **S41** | ⚠️ +6, consigné |
-| **Bloc 2** | EPIC-057, EPIC-058, EPIC-059, EPIC-060 | — | **41** | non slotté | ⚠️ +7 |
-| **Bloc 3** | EPIC-061, EPIC-062 | — | **23** | non slotté | ✅ −11 |
+| **Bloc 1** | EPIC-054 → EPIC-055 → EPIC-056 | STORY-570 → 579 | **40** | **S41** | ⚠️ +6 |
+| **Bloc 2** | EPIC-057 → EPIC-059 → EPIC-062 → EPIC-058 | STORY-580 → 590 | **36** | **S42** | ⚠️ +2 |
+| **Bloc 3** | EPIC-061 → EPIC-060 | STORY-591 → 598 | **28** | **S43** | ✅ −6 |
 | *reporté* | EPIC-063, EPIC-064 | — | *14* | — | — |
+
+⚡ **Le rééquilibrage exerce la permission que ce document donnait deux paragraphes plus bas.**
+EPIC-062 (9 pts) est monté du bloc 3 vers le S42, EPIC-060 (14 pts) est descendu vers le S43 : les
+blocs valaient 40 / 41 / 23, ils valent 40 / 36 / 28. Le total reste **104 pts pour 102 de capacité**
+sur trois sprints — le dépassement résiduel du S41 est **structurel**, ses trois épics étant chaînés.
+
+⛔ **Deux contraintes d'ordre tiennent le nouveau découpage.** ① EPIC-059 (S42) précède EPIC-061
+(S43) : FR-N48 exige qu'un désabonnement éteigne un envoi de masse **déjà en cours d'exécution**, et
+sans le registre de consentement la vérification à l'instant de la remise n'a rien à interroger.
+② EPIC-061 précède EPIC-060 **dans le même sprint** : la console de FR-N55 est bornée à quatre
+actions dont « suspendre un envoi de masse » — la construire avant l'envoi de masse produirait une
+action sans objet, testée verte contre rien.
+
+⚡ **EPIC-058 ferme le S42 au lieu de l'ouvrir.** C'est le seul épic bloqué par **C8**, et le poser en
+tête ferait échouer le sprint **en bloc** si la décision programme glisse. Posé en queue, un
+glissement coûte 13 points qui décalent au S43 — lequel passerait à 41.
 
 **Le report solde le total mais pas la répartition** : les blocs 1 et 2 dépassent encore la capacité de
 six et sept points. C'est un problème de **sprint planning**, pas de structure d'épics — les
