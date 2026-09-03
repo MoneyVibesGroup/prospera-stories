@@ -38,6 +38,12 @@ et mobile.
 stories entrent dans `sprint-status.yaml` — pas au découpage. Voir l'historique ci-dessous : c'est
 exactement cette réservation anticipée qui a échoué trois fois.
 
+> ⚡ **Slotting du bloc 1 — 2026-09-03.** Le bloc 1 a désormais un sprint : **S41**, et ses dix
+> stories portent **STORY-570 → STORY-579**. La plage a été prise **le jour du slotting** et
+> enregistrée dans `sprint-status.yaml` (bloc `reserved_ranges` + `story_id_high_water_mark`), pas
+> ici — c'est précisément la règle que les trois collisions ci-dessous ont produite. **Les blocs 2 et
+> 3 restent sans `story_id`** : ils seront attribués à leur propre slotting.
+
 > ### ⚠️ Historique des collisions — trois fois le même défaut
 >
 > **1. 2026-08-04.** Le memlog du PRD (2026-08-02) annonçait « 16 stories, STORY-150 à 165 ». Plage
@@ -74,23 +80,35 @@ Le découpage réel donne **118 pts**, soit **+33 %** sur l'estimation du PRD �
 que le découpage `paiement-service` (94 estimés → 118 réels). Après le report d'EPIC-063 et EPIC-064
 (décision PO du 2026-08-04), il reste **104 pts sur trois blocs** :
 
-> ⛔ **AUCUN SPRINT N'EST ATTRIBUÉ — corrigé le 2026-08-15.** Ce tableau annonçait « S23 → S25 ».
+> ⚡ **BLOC 1 SLOTTÉ AU S41 le 2026-09-03** (décision PO) — voir le sprint 41 de
+> `sprint-status.yaml`. Les blocs 2 et 3 restent sans sprint. Le paragraphe ci-dessous vaut toujours
+> pour eux.
+>
+> ⛔ **AUCUN SPRINT N'ÉTAIT ATTRIBUÉ — corrigé le 2026-08-15.** Ce tableau annonçait « S23 → S25 ».
 > **Ces trois sprints appartiennent à la fiscalité** (EPIC-027, EPIC-028, EPIC-029 — vérifié dans
 > `sprint-status.yaml` le 2026-08-15). Le module n'a donc, à ce jour, **aucune place dans le plan** :
 > il n'est slotté nulle part et `notification-service` n'existe pas dans le dépôt (zéro code).
 > Les colonnes ci-dessous sont des **blocs d'ordonnancement**, pas des sprints — l'attribution est une
 > décision PO.
 >
-> ⚠️ **Contrainte dure à respecter au slotting :** le module doit être livré **avant le sprint 37**,
-> où la story « Émission du lien via `notification-service` » (PI-SPI) en dépend, et où STORY-304
-> porte un hook aujourd'hui **inerte** en attendant le service.
+> ⛔⛔ **Contrainte dure — et la borne écrite ici était FAUSSE.** Ce paragraphe annonçait « avant le
+> sprint 37 ». Vérifié le 2026-09-03 : le slotting `paiement-service` du **2026-08-03** avait déjà
+> posé **STORY-261** (« Émission du lien via `notification-service` ») au **sprint 35**, qui ferme le
+> **2027-11-04** — pas au 37. La borne était donc fausse **le jour où elle a été écrite**, le
+> 2026-08-15.
+>
+> Le S41 retenu par le PO ferme le **2028-01-27**, soit **cinq sprints après son consommateur**. Le
+> conflit est **assumé et consigné** dans le `status` du sprint 41. Deux issues, et aucune n'est de
+> laisser les choses ainsi : soit le S41 remonte devant le S35, soit STORY-261 recule. **À trancher
+> avant le S31**, pas au S35. STORY-304 porte par ailleurs un hook **inerte** en attendant le
+> service.
 
-| Bloc | Épics | Pts | Capacité 34 |
-| --- | --- | ---: | --- |
-| **Bloc 1** | EPIC-054, EPIC-055, EPIC-056 | **40** | ⚠️ +6 |
-| **Bloc 2** | EPIC-057, EPIC-058, EPIC-059, EPIC-060 | **41** | ⚠️ +7 |
-| **Bloc 3** | EPIC-061, EPIC-062 | **23** | ✅ −11 |
-| *reporté* | EPIC-063, EPIC-064 | *14* | — |
+| Bloc | Épics | Stories | Pts | Sprint | Capacité 34 |
+| --- | --- | --- | ---: | --- | --- |
+| **Bloc 1** | EPIC-054, EPIC-055, EPIC-056 | STORY-570 → 579 | **40** | **S41** | ⚠️ +6, consigné |
+| **Bloc 2** | EPIC-057, EPIC-058, EPIC-059, EPIC-060 | — | **41** | non slotté | ⚠️ +7 |
+| **Bloc 3** | EPIC-061, EPIC-062 | — | **23** | non slotté | ✅ −11 |
+| *reporté* | EPIC-063, EPIC-064 | — | *14* | — | — |
 
 **Le report solde le total mais pas la répartition** : les blocs 1 et 2 dépassent encore la capacité de
 six et sept points. C'est un problème de **sprint planning**, pas de structure d'épics — les
