@@ -1,6 +1,6 @@
 # STORY-452 : Le snapshot n'a pas d'empreinte de son propre contenu — le champ `checksum` est celui du paquet référentiel
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-012 — Validation, immutabilité, exercices, audit
 **Service :** `bilan-service`
@@ -54,8 +54,10 @@ version.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — développement et portes de qualité passés le 2026-09-04, branches
-créées **avant** la première ligne de code :
+**Statut : `done`** — PR `bilan-service` **#84** (3 commits) rebase-mergée sur `dev` le
+2026-09-04. Revue de code + revue de sécurité + **vérification docker rejouée sur l'état final**.
+
+Branches créées **avant** la première ligne de code :
 
 ```
 docs             MNV-452
