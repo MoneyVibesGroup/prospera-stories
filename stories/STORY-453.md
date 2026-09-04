@@ -1,6 +1,6 @@
 # STORY-453 : L'échéance de dépôt de la DSF n'est publiée nulle part — une date d'arrêté ne se lit jamais seule
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-012 — Validation, immutabilité, exercices, audit
 **Service :** `balance-service · bilan-service` ⚠️ **corrigé le 2026-09-04** — la fiche annonçait `bilan-service · dossier-service`. `dossier-service` n'est **pas** impacté : il embarque bien une copie du paquet fiscal, mais ne lit que `acomptesProvisionnels.echeances` et sert l'échéance d'**acompte**, jamais celle de dépôt. C'est `balance-service` qui possède l'axe fiscal et résout l'échéance.
@@ -92,8 +92,12 @@ plus `docs/`. Champ **additif** sur `balance.created`, `schemaVersion` inchangé
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — développement, portes de qualité et vérification docker du
-round-trip passés le 2026-09-04. Branches créées **avant** la première ligne de code :
+**Statut : `done`** — PR `balance-service` **#88** (3 commits) et `bilan-service` **#85**
+(2 commits) rebase-mergées sur `dev` **ensemble** le 2026-09-04 — un changement de contrat
+d'événement ne s'intègre pas à moitié. Revue de code + revue de sécurité + vérification
+docker du round-trip, **rejouée** après le correctif de sécurité.
+
+Branches créées **avant** la première ligne de code :
 
 ```
 docs             MNV-453
@@ -193,3 +197,63 @@ pas*.
 ⚠️ **Atomicité** : rien de neuf. `depotLiasse` est un champ de plus sur l'écriture
 transactionnelle existante (transition + outbox, STORY-359/381) ; cette story n'introduit
 aucun nouveau chemin d'écriture multi-documents.
+
+### ⑥ Revue de code — 6 constats, aucun bloquant, tous corrigés
+
+⛔⛔ **Le champ ne voyageait que par effet de bord du spread.**
+`BalanceEventsService.etatDocumentChange` ne **déclarait** pas `depotLiasse` : le bloc
+traversait quand même, parce qu'un `...(x ? {x} : {})` dans un littéral échappe au contrôle
+des propriétés excédentaires de TypeScript. Destructurer `params` — geste banal de
+nettoyage — l'aurait supprimé en laissant **build, lint et 3 603 unitaires verts**, et
+`bilan-service` aurait servi `null`, que le contrat définit comme « pas d'information » :
+indiscernable du cas dégradé nominal. Le champ est typé, et le segment **service → outbox**
+est désormais gardé — le spec de `BalanceService` mocke l'émetteur, il ne prouvait que
+l'appel. Mutation vérifiée, build vert.
+
+⛔⛔ **Le calcul de l'échéance échappait aux seuils de couverture.** `collectCoverageFrom`
+exclut les `*.dto.ts`, et les deux seules fonctions de calcul du consommateur y vivaient :
+remplacer `Math.round` par `Math.floor` en retirant les cas d'heure aurait laissé la
+couverture à 98,85 % pour un décompte **faux d'un jour** au voisinage de l'échéance —
+c'est-à-dire un dépôt réputé « dans les temps » la veille. Le calcul vit maintenant dans
+`echeance-depot.ts`, couvert.
+
+Quatre autres, corrigés : la forme du bloc **redéclarée quatre fois** sans lien typé (un
+site oublié suffisait à écrire un champ neuf en base puis à le jeter à la lecture, sans que
+le compilateur dise rien) · le `forFeature(DossierDossier)` **mort** dans `BalanceModule`,
+dont le commentaire justifiait une précaution devenue caduque · **trois docstrings arrachés**
+à ce qu'ils documentaient, dont celui de `marquerEtat`.
+
+⚠️ **Et le constat qu'on ne referme PAS.** La date est **figée à la validation** et rien ne
+peut la re-résoudre : `VALIDÉE` est terminal, le producteur n'a aucun chemin de
+ré-émission. Le jour où la rubrique `depot` sera corrigée — ce que l'**AC-6 rend attendu** —
+`…/fiscal/liquidation` et `…/fiscal/tpu` serviront la date corrigée (ils résolvent à la
+lecture) et `GET /bilan/etats/{id}` l'ancienne, indéfiniment, sur toutes les balances déjà
+validées : deux surfaces du même produit, deux dates légales, et la fausse est celle de
+l'écran de la liasse. C'est une conséquence **assumée** de la voie « publiée déjà résolue »
+tranchée par l'user, désormais **nommée** dans le schéma du read-model avec son chemin de
+reprise. ⚠️ Elle nuance aussi l'AC-5 : « calculée à la lecture, jetable sans dette » ne vaut
+que pour `joursRestants` ; la **date**, elle, est écrite durablement.
+
+### ⑦ Revue de sécurité — 0 vulnérabilité, un durcissement appliqué
+
+`EcheanceDepotService` lisait `dossiers_dossier` sur le seul `dossierId` — la **seule** des
+quatre lectures de la méthode à ne pas porter son tenant. Non exploitable (le
+`DossierScopeGuard` a déjà croisé le couple avec l'organisation du JWT, `dossierId` est
+unique globalement, et `marquerEtat` re-lit la balance org+dossier-scopée avant), mais une
+lecture fail-closed ne se repose pas sur une garde en amont. Filtre complété, et le double
+du test **applique** désormais le filtre au lieu de le recevoir.
+
+Déclaré propre par la revue : pas de pollution de prototype ni d'injection NoSQL (liste
+blanche de quatre clés, valeurs primitives, jamais en position d'opérateur) · le `catch`
+n'avale aucune décision d'autorisation, et un artefact altéré est journalisé en `error` par
+le loader **avant** d'être levé · pas de fenêtre TOCTOU (`exercice` est immuable après
+création) · **toutes** les dérives du régime vont dans le sens alarmant ou absent, jamais
+rassurant.
+
+### ⑧ Vérification docker REJOUÉE après le correctif de sécurité
+
+Le correctif change un **filtre de lecture** déjà éprouvé : la vérification a été rejouée
+sur l'état final, après `docker restart` du producteur et validation d'une troisième version
+de balance. Événement et projection **identiques** : `depotLiasse: {echeance:
+"2027-03-31", typeContribuableRetenu: "entreprise individuelle / TPU declaratif", source:
+"LPF Art. 56"}`, `schemaVersion: 1`.
