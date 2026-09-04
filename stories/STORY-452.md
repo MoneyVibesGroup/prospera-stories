@@ -113,9 +113,14 @@ rougir ce test, et **rien d'autre** — ni la compilation, ni le lint, ni les 1 
   contenu dans `liasse`, qui est scellée. Altérer `complements` ne change donc rien de ce qui est
   servi, mais casserait la reproductibilité d'un rejeu. L'inclure **romprait** la comparabilité avec
   les empreintes scellées par cette story.
-- **`ConsultationVersionSommaireDto.checksum`** (`GET …/consultation/…`) porte le **même** piège de
-  nommage, sur une liste de versions. L'AC-2 ne nomme que `SnapshotSommaireDto` ; ce jumeau reste à
-  renommer.
+- **DEUX jumeaux de nommage restent à traiter**, pas un seul (constat de revue de code — mon
+  inventaire initial n'en nommait qu'un) : `ConsultationVersionSommaireDto.checksum`
+  (`consultation/dto/consultation-detail.dto.ts`) **et** `ExerciceCompareDto.checksum`
+  (`comparaison-exercices/dto/comparaison-exercices-response.dto.ts`), ce dernier alimenté par
+  `checksum: s.checksum` d'un **snapshot** et publié à côté de `snapshotId` et `version`, avec un
+  `@ApiProperty` **nu, sans description**. Les deux publient la valeur du paquet de référentiel sous
+  un nom qui se lit « signature de cette version » — le piège exact que l'AC-2 ferme, sur une surface
+  que l'AC-2 ne nomme pas. Une story qui se fierait au hook initial n'en traiterait qu'une sur deux.
 
 ### Portes de qualité (2026-09-04)
 
@@ -159,3 +164,79 @@ Cette story n'introduit **aucun** nouveau chemin d'écriture multi-documents.
 ⚠️ **Angle mort déclaré** : une stack neuve ne contient que des snapshots **postérieurs** à la story.
 Le cas AC-5 a donc été rejoué en retirant l'empreinte d'un document réel — c'est la seule façon
 d'éprouver le refus rétroactif sur cette base.
+
+### ⑥ Revue de code — 4 constats, aucun bloquant, tous corrigés
+
+⛔⛔ **L'e2e des empreintes ne mesurait que le NUMÉRO de version.** `figerDeuxVersions` enchaînait
+`valider → rouvrir → valider` **sans recalculer** : v1 et v2 scellaient un contenu rigoureusement
+identique sauf `version`. L'assertion « les deux empreintes diffèrent » était donc portée à 100 % par
+le numéro de version — **mesuré** : en retirant `version` du scellé, les deux empreintes redevenaient
+égales. Un moteur devenu insensible aux **chiffres** passait cet e2e au vert, alors que son docstring
+affirmait déjà rejouer le scénario FE-034 (80 000 d'écart, même `checksum`). Le docstring était faux
+avant le code. Correctif : un `recalculer` de +80 000 des deux côtés entre les deux `valider`, plus
+une assertion de **non-vacuité** sur `totalActifN`. Vérifié après correctif : l'e2e **reste vert** sans
+`version` dans le scellé — il mesure bien le contenu.
+
+Trois autres, corrigés :
+
+- le **500 `SNAPSHOT_ALTERE` n'était publié sur aucune route** : le code existait dans l'énumération
+  sans être rattaché à un statut, alors que le précédent `LIASSE_FIGEE_INTROUVABLE` est 400 lignes
+  plus haut dans le même fichier. `@ApiOperation` + `@ApiInternalServerErrorResponse` ajoutés ;
+- **deux blocs de documentation détachés de ce qu'ils documentent** : mon test STORY-452 s'était
+  inséré **entre** la docstring STORY-449 et son `it`, et la note `minimize` entre la docstring de
+  classe de `SnapshotLiasse` et le `export class` ;
+- l'**inventaire des jumeaux de `checksum`** était incomplet (voir les hooks ci-dessus).
+
+### ⑦ Revue de sécurité — 3 constats, aucun exploitable par un appelant HTTP
+
+Tous de la même famille : **le mécanisme livré est plus étroit que ce que mes propres commentaires
+affirmaient**. L'adversaire est celui qui écrit dans `snapshots_liasse` par un autre chemin que le
+repository — précisément celui que la story nomme.
+
+⛔⛔ **Le schéma affirmait « une propriété de la DONNÉE, vérifiable SANS FAIRE CONFIANCE AU CODE »,
+opposable « à qui a pu écrire dans la collection par un autre chemin ». C'est faux.** L'empreinte est
+un **sha256 nu, sans clé**, écrit dans le **même document** que ce qu'il scelle, par un algorithme
+déterministe dont le code est dans le dépôt. Qui peut écrire ici maquille les chiffres **et**
+recalcule le sceau — ou, moins cher encore, écrit `empreinte: null`, que l'AC-5 impose de lire comme
+« version antérieure à la story » et donc de **ne pas** vérifier. Ce qu'elle atteste réellement :
+l'altération **accidentelle ou non avertie** (corruption, bug, `updateOne` d'un opérateur), ce que
+l'invariant d'immuabilité n'avait jamais eu.
+
+Le troisième constat porte sur la **portée du scellé** : les sept champs de l'AC-1 couvrent le
+contenu, mais la même réponse sert **hors sceau** le validateur (`validePar`, `valideAt`) et la
+provenance de balance (`balanceId`, `balanceVersion`, `balanceChecksum`). Antidater une validation ou
+la réattribuer à un autre collaborateur ne déclenche donc **pas** `SNAPSHOT_ALTERE` — sur le document
+même que la story vend comme opposable.
+
+**Correctif retenu : publier la portée exacte, pas élargir le mécanisme.** `MENTION_PORTEE_DE_L_EMPREINTE`
+reprend le patron de `MENTION_PORTEE_DU_SCEAU` (STORY-381), au même endroit et pour la même raison :
+*une garantie d'intégrité surévaluée est un défaut de sécurité en soi*. Elle est servie dans la
+description Swagger d'`empreinte` et sur la route, et **gardée au contrat** — mutation vérifiée, la
+déplacer sur un autre champ fait rougir l'e2e de contrat, build vert. Les rédactions du schéma et
+d'`empreinte-snapshot` sont corrigées.
+
+🪝 **Ce qui est renvoyé à une story dédiée, et pourquoi** : rendre l'empreinte opposable à un tiers
+disposant de l'accès en écriture exige un **HMAC** (clé détenue par le service, env validée) ou la
+publication du sceau vers un **témoin externe** — un secret à gérer et un contrat de plus. Borner le
+fail-open de l'AC-5 par une date de déploiement demande une variable d'environnement que l'AC ne
+prévoit pas, et aucun discriminateur **stocké dans le document** ne peut aider : l'attaquant contrôle
+le document entier. Étendre le scellé au validateur et à la provenance rendrait par ailleurs
+incomparables les empreintes déjà scellées — cela demande un `empreinteVersion` explicite.
+
+### ⑧ Vérification docker REJOUÉE sur l'état final
+
+Les correctifs ⑥/⑦ n'ont touché que des descriptions Swagger, des commentaires et des tests — jamais
+le calcul scellé ni le schéma persisté. La vérification a néanmoins été rejouée après
+`docker restart`, sur le code final.
+Parcours rejoué sur un second jeu (exercice 2024), après `docker restart` sur le code final :
+
+| Constat | Mesure |
+|---|---|
+| version scellée servie | `GET …/versions/1` → **200**, `empreinte` `73dbb30fa8e2e48c…` (64 caractères) |
+| empreinte réellement persistée | identique en base ; `checksum` du paquet `e9e22c979a5be93d…`, distinct |
+| altération directe en base (`updateOne` sur `totalActifN`) | **500 `SNAPSHOT_ALTERE`** |
+| `$unset empreinte` sur le contenu toujours altéré (AC-5) | **200**, `empreinte: null` |
+| la **portée** est publiée dans le contrat **servi** (`/api/docs-json`) | `n'atteste PAS` ✓ · `ne protège pas` ✓ · `hors sceau` ✓ |
+
+⚠️ Le dernier contrôle vise le document OpenAPI **réellement servi**, pas la constante dans le code :
+c'est la seule façon de vérifier que la mention de portée atteint le client.
