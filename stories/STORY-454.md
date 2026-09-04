@@ -4,7 +4,7 @@
 > la rédaction de la fiche, faux à l'ouverture du dev : STORY-381 (AC-9) l'avait déjà
 > corrigé. La clause est retirée du titre et l'écart est instruit dans *Le fait*.
 
-Status: review
+Status: done
 
 **Épic :** EPIC-012 — Validation, immutabilité, exercices, audit
 **Service :** `bilan-service`
@@ -74,7 +74,9 @@ reste réel : la ligne `etats_liasse_dossier` continuait de publier `etat: BROUI
 
 ## Progress Tracking
 
-**Statut : `review`** (dev + validation faits ; revue de code, revue de sécurité et merge à suivre).
+**Statut : `done`** — 2026-09-04. Revue de code (7 constats, tous corrigés), revue de sécurité
+(0 vulnérabilité, 1 durcissement appliqué), vérification docker rejouée sur l'état final, deux PR
+intégrées ensemble en rebase-merge sur `dev`.
 
 ### Ce qui a été livré
 
@@ -172,3 +174,93 @@ n'est pas cette story** : sur l'arbre **propre** (changements remisés), la suit
 tombe aussi — un autre fichier, même symptôme (timeouts à 5 s, un `401` au lieu d'un `404`
 sous contention JWKS). En série (`--runInBand`), 508/508 passent avec les changements.
 Flakiness d'environnement préexistante, à instruire hors de cette story.
+
+### ⑥ Revue de code — 7 constats, aucun bloquant, tous corrigés
+
+⛔⛔ **Un point de recopie oublié, et deux des quatre copies étaient des descriptions
+OpenAPI PUBLIÉES.** Le producteur avait bien appris que `version` vaut toujours `null`
+sous `SUPPRIMEE` ; les quatre recopies de cette énumération dans `dossier-service`, non.
+Chacune s'annonce exhaustive — « sa signification suit `etat` » — puis n'énumère que
+`FIGEE`/`BROUILLON`/`DEPOSEE`, alors que le champ `etat` du **même `@ApiProperty`** venait
+d'être étendu par ce diff : deux descriptions voisines du même document ne décrivaient plus
+le même énuméré. Un client qui lit `etat: "SUPPRIMEE"` et cherche ce que vaut `version`
+n'obtenait pas de réponse d'un contrat qui prétend en donner une.
+
+⛔ **Deux descriptions neuves renvoyaient à un champ que ce service ne publie pas.**
+`jeuEtatsId` ne vit que dans le read-model interne : `EtatAmontDto` n'expose que `etat`,
+`depuis` et `version`. Un client généré aurait cherché un champ inexistant.
+
+⛔ **Le commentaire d'un cas de test affirmait un fait inventé** : « le vocabulaire du JEU
+côté producteur (`SUPPRIME`, masculin) ». Aucun `JeuEtatsStatut.SUPPRIME` n'existe — cette
+story **efface** le document, elle ne le marque pas — donc le parallèle avec le couple
+`DEPOSE`/`DEPOSEE`, où `DEPOSE` **est** un vrai statut, était faux. Le test reste bon ; sa
+justification était fabriquée. Même famille que le vocabulaire d'événement inventé de
+STORY-441.
+
+Quatre autres, corrigés : le docstring de `deposer` affirmait encore être **le seul**
+chemin d'écriture sans garde de clôture, alors que cette story en ajoute un second — le
+défaut exact de STORY-445, une garde localisée par des docstrings sur un seul site · le
+livrable était justifié par « le contrôleur exposait **sept** routes », alors qu'il en
+exposait **onze** (l'inventaire de la fiche était déjà périmé, et le chiffre était le seul
+élément vérifiable de la justification) · l'insertion du bloc e2e avait **orphelinisé** le
+docstring d'en-tête de la suite STORY-447, qui coiffait désormais la mauvaise suite · le
+paragraphe du plafond employait `rouvrir` pour dire « recréer », dans le fichier même dont
+l'objet est de distinguer les vocabulaires d'état.
+
+**Seconde lentille — sur-ingénierie** (`ponytail-review`) : un seul constat, appliqué. La
+variable locale de `supprimerBrouillon`, son affectation et le `return` après le `finally`
+ne servaient à rien, aucun travail ne suivant la transaction. `return` direct dans le
+`try`, comme `valider` le fait déjà trente lignes plus haut. −3 lignes.
+
+### ⑦ Revue de sécurité — 0 vulnérabilité, un durcissement appliqué
+
+**Aucun défaut d'authentification, d'autorisation, d'isolation multi-tenant, d'injection,
+de secret ni d'infrastructure.** La portée du filtre de suppression — l'axe le plus
+dangereux d'une route destructrice — est fermée **trois fois sur trois clés
+indépendantes** : `chargerParId`, `snapshots.exists` et le filtre atomique portent tous
+`(tenant, dossier)`, et l'extraction de `filtreGarde` a été vérifiée iso-comportementale
+contre `dev`. La course entre la garde « aucun snapshot » et l'écriture est fermée dans les
+deux sens d'entrelacement, `valider` avortant son propre snapshot si la suppression commite
+d'abord.
+
+⛔⛔ **Le constat retenu : la seule trace ATTRIBUÉE d'une destruction irréversible était
+écrite hors transaction, par un canal qui avale ses erreurs.** Le patron « hook post-action
+isolé » est sûr pour `valider`, `rouvrir` et `deposer` — leur document survit et porte déjà
+son auteur, donc perdre la ligne de journal coûte du confort. **La suppression ne laisse
+aucun document**, et ni la ligne d'outbox ni la pierre tombale d'aval ne portent d'auteur :
+un échec d'écriture, ou un `SIGTERM` entre le commit et le journal, rendait la destruction
+**répudiable** — « qui a supprimé cette liasse ? » sans réponse dans les données.
+
+C'est l'arbitrage que STORY-446 avait **déjà tranché** pour `depots`, sur constat de revue
+de sécurité : une pièce opposable ne repose pas sur ce canal, elle commite avec l'acte. La
+ligne `JEU_SUPPRIME` passe donc par `AuditRepository.creerDansTransaction` (même forme et
+mêmes gardes fail-closed que `SnapshotLiasseRepository.creer`) et par un
+`journaliserDansTransaction` qui **propage** son échec. ⚠️ Conséquence assumée :
+`audit_events` indisponible ⇒ la suppression est **refusée**, plutôt que réussie sans trace.
+
+Déclaré propre par ailleurs : pas d'injection NoSQL (`@Param` rend toujours une chaîne, et
+l'enveloppe du consommateur type chaque champ avant le filtre) · CSRF sans objet (Bearer
+seul, `credentials: false`) · pas d'empoisonnement de partition (enveloppe invalide ⇒ offset
+avancé + `warn`) · rien d'opposable détruit (snapshots impossibles par l'AC-1, jeux
+d'hypothèses impossibles car leur base **exige** un snapshot) · l'absence de
+`refuserSiExerciceClos` n'ouvre pas d'impasse, `creerBrouillon` ne la portant pas non plus.
+
+### ⑧ Vérification docker REJOUÉE sur l'état final
+
+Le correctif de sécurité déplace une écriture déjà mesurée : le parcours complet a été
+rejoué **après** les correctifs, pas reporté. Les dix mesures repassent, plus deux :
+
+| # | Mesure sur l'état final | Résultat |
+|---|---|---|
+| ⑪ | La ligne `JEU_SUPPRIME`, désormais écrite dans la transaction | porte `userId`, `tenantId` **et** `dossierId`, posés par `creerDansTransaction` |
+| ⑫ | Balayage des traces sans auteur | **0** audit `JEU_SUPPRIME` sans `userId` |
+
+Et la 8ᵉ mutation : reverser la trace dans `journaliser` (canal best-effort) fait rougir
+l'unitaire d'abort **et** l'e2e d'AC-3.
+
+| Porte, après correctifs | `bilan-service` | `dossier-service` |
+|---|---|---|
+| Lint · build | ✅ | ✅ |
+| Unitaires | ✅ 1 836 | ✅ 1 134 |
+| e2e | ✅ 509 | ✅ 255 |
+| Couverture `modules/bilan/audit` | ✅ 100 % sur les 4 axes | — |
