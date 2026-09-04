@@ -87,3 +87,109 @@ plus `docs/`. Champ **additif** sur `balance.created`, `schemaVersion` inchangé
   en nommant cette story — c'est la seule information légale de l'écran, et elle vient de nulle part.
 - Prérequis naturel de **STORY-446** (dépôt) : on ne constate pas un dépôt sans savoir s'il est
   dans les temps.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — développement, portes de qualité et vérification docker du
+round-trip passés le 2026-09-04. Branches créées **avant** la première ligne de code :
+
+```
+docs             MNV-453
+balance-service  MNV-453
+bilan-service    MNV-453
+```
+
+⚠️ **Trois dépôts, pas deux** — la fiche annonçait `bilan-service · dossier-service` ;
+`dossier-service` n'est pas touché (cf. le recadrage ci-dessus).
+
+### Ce qui est livré — l'AC-4 seul, les autres étant tenus par STORY-413
+
+- **`balance-service`** résout l'échéance **à la validation de la balance** et la joint à
+  `balance.etat.document.change` sous un bloc `depotLiasse` **additif** (`schemaVersion`
+  inchangé, clé omise quand elle n'a rien à dire).
+- **`bilan-service`** la réplique dans `balances_balance` et la sert sur
+  `GET /bilan/etats/{id}` avec ses **jours restants signés**.
+
+### ⛔ Pourquoi l'échéance voyage RÉSOLUE, et non sous forme de calendrier
+
+`bilan-service` ne peut pas la dériver : lignée plus ancienne du paquet fiscal (sans
+`depot`) et aucun régime fiscal dans son read-model. Et il ne **doit** pas essayer — ce
+serait un **second moteur pour une date légale** dont le manquement déclenche la taxation
+d'office et une majoration de 40 %. Deux dérivations d'une même règle finissent corrigées
+d'un seul côté : motif déjà constaté quatre fois dans ce dépôt.
+
+`EcheanceDepotService` n'invente donc **aucune règle** : il câble `extraireCalendrierDepot`
++ `resoudreDateLimiteDepot` (STORY-413) et la cascade de régime de STORY-303
+(`axesAvecRepli` + `versRegimeFiscalConnu`), dont le docstring prévoit explicitement que
+les sites « ne font que la câbler ».
+
+### ⚠️ Deux propriétés qui ne se voient nulle part ailleurs
+
+- **La résolution ne LÈVE JAMAIS.** Une échéance est un confort de lecture ; la validation
+  d'une balance est un acte comptable. Un paquet injoignable laisse la balance se valider,
+  et l'événement part sans le bloc.
+- **`undefined` et un `motif` ne disent pas la même chose.** Le premier : « la question n'a
+  pas pu être posée » ; le second : « elle l'a été, aucune échéance n'est constatable ».
+  Les confondre afficherait un incident comme une règle fiscale.
+
+### ⚠️ Aucun cycle de modules
+
+`FiscalModule` importe `BalanceModule` : l'inverse était impossible. Le read-model du
+dossier entre donc par `forFeature` (aucune dépendance de module créée) et `AxesResolver`
+par `ReadModelsModule`, la couche basse — le patron déjà utilisé dans ce fichier pour
+`CompteTresorerie` et `ProfilSociete`.
+
+### 🪝 Hooks inertes documentés
+
+- **`GET /bilan/etats/{id}` seule résout l'échéance** — la route de l'écran de la liasse.
+  Les routes d'écriture rendent `null` : leur faire lire le read-model ajouterait une
+  requête à chaque acte comptable pour un champ d'affichage. Un e2e rend ce choix
+  **délibéré** ; le jour où un écran en a besoin ailleurs, il rougit.
+- **Le `30-04` de la majorité du portefeuille reste sans date** — `formeJuridique` manque
+  au contrat `DossierEtatV1`, dette nommée par STORY-413 et toujours ouverte. Rien ne
+  distingue une société d'une entreprise individuelle au réel : l'échéance sort
+  `DATE_LIMITE_INDETERMINABLE`, et c'est le comportement voulu.
+- **AC-6 — validation par un fiscaliste togolais** avant mise en production : hors code,
+  inchangé.
+
+### Portes de qualité (2026-09-04)
+
+| Porte | `balance-service` | `bilan-service` |
+|---|---|---|
+| lint | 0 warning | 0 warning |
+| build | OK | OK |
+| unitaires | 3 610 | 1 813 |
+| couverture | 99,13 / 92,31 / 98,66 / 99,23 | 98,83 / 94,15 / 98,79 / 98,85 |
+| e2e | 884 | 503 |
+
+⚠️ Un premier passage e2e de `bilan-service` a fait tomber `openapi-contract` ; la suite
+passe en isolation et la ré-exécution complète est verte. C'est le **flake déjà documenté**
+de ce dépôt (suite différente à chaque fois, toujours un refus d'authentification), sans
+rapport avec ce diff.
+
+### ⚠️ Vérification docker — le ROUND-TRIP Kafka de bout en bout
+
+Le contrat traverse deux services : la seule preuve qui compte est le trajet complet.
+Tenant réel, dossier et profil semés, exercice clos au **31/12/2026** (le paquet
+`togo@2026` est le seul embarqué), régime `SYNTHETIQUE`.
+
+| Étape | Mesure |
+|---|---|
+| ① `balance_service.outbox_events` après `POST …/balances/{id}/valider` | topic `balance.etat.document.change`, `schemaVersion: 1` **inchangé**, `depotLiasse: {echeance: "2027-03-31", typeContribuableRetenu: "entreprise individuelle / TPU declaratif", source: "LPF Art. 56"}` |
+| **AC-2** — projection sur l'année suivant la clôture | clôture 31/12/**2026** ⇒ échéance **2027**-03-31, jamais une année civile en dur |
+| ② `bilan_service.balances_balance` après relais Kafka | `etat: VALIDÉE`, `depotLiasse` identique, `echeance` stockée en **`Date`** (convertie une seule fois) |
+| ③ `GET /dossiers/{id}/bilan/etats/{jeu}` | `echeanceDepot: {date: "2027-03-31…", joursRestants: 208, typeContribuableRetenu, source}` |
+| **AC-4** — décompte signé, calculé à la lecture | 208 jours au 2026-09-04, cohérent au jour près |
+
+⛔⛔ **Le premier passage a montré une projection VIDE, et ce n'était pas un bug du code** :
+le conteneur `bilan-service` exécutait encore le module d'avant la story. Le message
+consommé avait avancé l'offset — un `docker restart` seul ne suffit pas, il a fallu
+**re-valider une nouvelle version de balance** pour produire un message neuf. C'est le
+piège du hot-reload déjà fiché, dans sa variante Kafka : *l'offset consommé ne se rejoue
+pas*.
+
+⚠️ **Atomicité** : rien de neuf. `depotLiasse` est un champ de plus sur l'écriture
+transactionnelle existante (transition + outbox, STORY-359/381) ; cette story n'introduit
+aucun nouveau chemin d'écriture multi-documents.
