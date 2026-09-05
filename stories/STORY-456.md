@@ -1,10 +1,10 @@
 # STORY-456 : Le déficit reportable est le seul poste de la liasse sans piste d'audit publiée — alors qu'il est persisté
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
 **Service :** `balance-service` (`:3007`) — `modules/fiscal`
-**Points :** 2 · **Sprint :** S20
+**Points :** 2 · **Complexité :** low · **Sprint :** S20
 **Origine :** relevée le **2026-08-27** par la **passe expert-comptable de FE-050**, en cherchant quoi
 afficher dans la colonne de justification du stock de déficits — et en ne trouvant rien à afficher.
 
@@ -97,6 +97,14 @@ jamais publié est du travail déjà payé, et une garantie qui n'existe pas.**
    indéfendable. ⚠️ **Rupture de contrat assumée** sur `DeclarerDeficitDto` : à annoncer, et à ne
    retenir que si le PO l'arbitre — sinon, se limiter aux AC-1/2 et laisser le champ facultatif.
    *(L'écran FE-050 propose déjà les deux champs ; il ne les impose pas.)*
+
+   > **✅ ARBITRÉ PAR LE PO le 2026-09-05 — AC-3 RETENU, sur `justification` seule.**
+   > `baseLegale` **reste facultative** : sur un report l'article invoqué est le même pour tout le
+   > monde (art. 101 CGI), l'exiger ajoute une case à remplir sans ajouter d'information — là où la
+   > justification nomme l'**origine**, qui est précisément ce que le vérificateur demande. La
+   > rupture ne coûte presque rien aujourd'hui (aucune production, l'écran propose déjà le champ) et
+   > ne fera qu'enchérir : seules les déclarations **futures** sont concernées, aucune reprise
+   > rétroactive, aucune migration.
 4. **Aucune rétro-attribution** : un déficit sans auteur exploitable rend le champ absent, jamais un
    utilisateur système. Signer a posteriori une déclaration qu'on n'a pas vue est pire que ne pas la
    signer.
