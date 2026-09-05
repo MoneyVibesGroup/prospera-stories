@@ -4715,8 +4715,8 @@ sprints:
     end_date: "2027-09-23"
     capacity_points: 34
     committed_points: 27  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
-    completed_points: 0
-    status: "not_started"  # 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-035.
+    completed_points: 19  # STORY-240 (5), 241 (3), 242 (5), 243 (3), 245 (3). Reste STORY-244 (3) et STORY-246 (5).
+    status: "in_progress"  # 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-035 : les quatre stories de l'épic sont livrées, EPIC-036 est entamée par STORY-245.
     goal: "🏁 EPIC-035 : le journal d'audit chaîné PAR CRÉANCE (jamais global — une chaîne globale sérialiserait tout le service), la séparation des pouvoirs au niveau de l'ACTEUR, et les comptes d'encaissement dont le titulaire est obligatoire — le contrôle qui matérialise NFR-1 dans le modèle de données. Puis l'ouverture du port `PaymentProvider`."
     stories:
       - story_id: "STORY-240"
@@ -4752,7 +4752,7 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # Port ASYNCHRONE par nature : initier rend une référence, la confirmation arrive comme un fait séparé. Un port synchrone exclurait tout PSP réel.
+        status: "done"  # ✅ 2026-09-05, commit `4a45dd8` sur `MNV-245`, branchée sur `origin/dev` (STORY-243 y était, sous son SHA réécrit `f709d9c` — pas de `rebase --onto`). 950 tests unitaires, 37 e2e, couverture 100 % sur les six fichiers de la story. ⚡ Le port est asynchrone par nature MAIS `capacites()` est délibérément SYNCHRONE : AD-7 interdit tout appel réseau avant d'afficher un prix (NFR-8), une déclaration est une connaissance du CODE et non une interrogation du fournisseur. ⚡ Les capacités sont lues UNE FOIS au démarrage, normalisées, validées puis GELÉES EN PROFONDEUR : les redemander à chaque lecture laisserait une capacité changer entre l'affichage d'un prix et le paiement — ni le routage déterministe (AD-6) ni les frais figés (AD-7) n'y survivent. ⚡ La COUVERTURE pays × devise est l'unité de déclaration (FR-P58) : trois listes indépendantes auraient promis leur produit cartésien (mobile money au TG + carte au BJ = carte au TG). Les bornes de montant ne portent pas de devise, elle est DÉRIVÉE de la couverture (leçon STORY-242). ⚡ Une déclaration incohérente fait échouer le DÉMARRAGE avec TOUTES ses raisons — un fournisseur injoignable est un fait d'exploitation (FR-P11, zéro adaptateur reste un état légal), une déclaration qui se contredit est un défaut de code qu'aucun redémarrage ne répare. ⚡ Le barème est EXHAUSTIF sur les méthodes couvertes : une méthode sans ligne afficherait des frais nuls, donc un total annoncé inférieur à ce que le payeur paiera (AD-7). ⚠️ Un fournisseur inconnu LÈVE, jamais des capacités vides par défaut ; la QUESTION est normalisée (elle vient d'une donnée, STORY-289) mais la DÉCLARATION ne l'est pas (elle vient du code). ⚠️ PORTÉE ANTICIPÉE, à arbitrer : le type `Montant` (couple unité mineure × devise) est introduit ici parce que le port le fait voyager — décimales, référentiel et arithmétique restent ENTIÈREMENT STORY-250. ⚠️ `delaiDeMiseADispositionHeures` et non « délai de règlement » : le mot est proscrit par la spine, et `reversement` par NFR-1b. ⚠️ `MOTIF_PAYS`/`MOTIF_DEVISE` déménagent dans `domain/referentiel/codes-iso.ts` (ré-exportés par STORY-242) : une seule vérité sur la forme d'un code ISO. ⚠️ `gh` toujours absent du poste — PR à créer à la main.
         assigned_to: null
       - story_id: "STORY-246"
         title: "Adaptateur FedaPay sandbox — checkout par redirection"
@@ -5567,7 +5567,7 @@ paiement_epics:
       quoi: "Devenir consommateur des topics paiement.abonnement.* — c'est ce qui remplace la décision C8, ouverte depuis STORY-034. Le contrat d'événement existe avant qu'on écrive le consommateur."
   epics:
     - { id: "EPIC-035", name: "Socle paiement-service, comptes d'encaissement et secrets", frs: "FR-P01..P06, P59..P62 + AR-01..AR-05, AR-08, AR-15", stories: "STORY-237..244", points: 27, status: "proposed" }
-    - { id: "EPIC-036", name: "Fournisseurs de paiement interchangeables et simultanés", frs: "FR-P07..P12, P58", stories: "STORY-245..249, 289", points: 24, status: "proposed" }
+    - { id: "EPIC-036", name: "Fournisseurs de paiement interchangeables et simultanés", frs: "FR-P07..P12, P58", stories: "STORY-245..249, 289", points: 24, status: "in_progress" }  # STORY-245 livrée le 2026-09-05 : le port et le registre de capacités. `src/adapters/` reste vide — STORY-246 y met FedaPay.
     - { id: "EPIC-037", name: "Créance, demande, lien public et encaissement 🏁 incrément 1", frs: "FR-P13..P27, P55 + AR-06, AR-07, AR-10, AR-12", stories: "STORY-250..261, 290", points: 54, status: "proposed" }
     - { id: "EPIC-038", name: "Paiement hors Prospera et promesses", frs: "FR-P28..P36 + AR-09", stories: "STORY-262..267", points: 19, status: "proposed" }
     - { id: "EPIC-039", name: "Réconciliation, relevé et restitution ⛔ préalable STORY-268", frs: "FR-P37..P41 + AR-13", stories: "STORY-268..273", points: 27, status: "proposed" }
