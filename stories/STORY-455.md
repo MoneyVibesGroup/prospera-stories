@@ -1,6 +1,6 @@
 # STORY-455 : Le report déficitaire n'est jamais constaté — le même franc est imputable à chaque exercice, indéfiniment
 
-Status: review
+Status: done
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
 **Service :** `balance-service` (`:3007`) — `modules/fiscal`
@@ -177,9 +177,10 @@ point qui pourra enrichir l'affichage — colonne « déclaré / constaté ».
 
 ## Progress Tracking
 
-**Statut : `review`** — 2026-09-05. Développement, revue de code (5 constats, 1 bloquant),
-revue de sécurité (2 vulnérabilités, toutes deux confirmées en docker), correctifs appliqués,
-vérification docker **rejouée sur l'état final**. Reste le merge.
+**Statut : `done`** — 2026-09-05. Développement, revue de code (5 constats, 1 bloquant), revue
+de sécurité (2 vulnérabilités, toutes deux confirmées en docker **avant** correction),
+correctifs appliqués, vérification docker **rejouée sur l'état final**, PR
+`balance-service` #89 rebase-mergée sur `dev`.
 
 ### La question de rédaction, tranchée : **voie A**
 
