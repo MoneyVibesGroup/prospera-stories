@@ -1,6 +1,6 @@
 # STORY-456 : Le déficit reportable est le seul poste de la liasse sans piste d'audit publiée — alors qu'il est persisté
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-023 — Fiscalité (résultat fiscal, liquidation, TVA, provisions, TPU)
 **Service :** `balance-service` (`:3007`) — `modules/fiscal`
@@ -133,8 +133,9 @@ rend *juste*. Livrer 456 seule affiche proprement l'origine d'un chiffre qui con
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — 2026-09-05. Développement fait, portes DoD franchies, vérification
-docker faite sur la base réelle. Reste : revue de code, revue de sécurité, merge.
+**Statut : `done`** — 2026-09-05. Développement, portes DoD, vérification docker, revue de code
+(4 constats, aucun bloquant, tous corrigés), revue de sécurité (**0 vulnérabilité**), vérification
+docker **rejouée sur l'état final**, PR `balance-service` **#90** rebase-mergée sur `dev`.
 
 ### L'arbitrage de l'AC-3
 
@@ -251,3 +252,68 @@ un libellé : leçon STORY-445). Deux dossiers **vierges** ont été semés dans
 (`456000…0001` / `456000…0002`) : les deux dossiers existants portent chacun une balance 2026 arrêtée,
 donc le gel du stock y interdit toute déclaration antérieure à 2026 — sans dossier neuf, la mesure ⑤
 était impossible.
+
+### ⑥ Revue de code — 4 constats, aucun bloquant, tous corrigés
+
+**CODE-1 — le CONTRAT publié n'était gardé par RIEN, et c'est le livrable de la story.**
+`openapi-contract.e2e-spec.ts` est le seul filet du dépôt sur le document publié, et il n'avait reçu
+aucune assertion — alors que le DTO **voisin dans la même classe** en avait reçu une pour STORY-455.
+Or les `*.dto.ts` sont **hors `collectCoverageFrom`**, l'e2e fiscal assert le **corps JSON** et jamais
+le document, et `nest-cli.json` ne charge pas le plugin Swagger : une propriété non décorée
+**disparaît** du schéma. ⇒ retirer un `@ApiPropertyOptional` laissait **3 662 unitaires et 895 e2e
+verts** pendant que FE-050 cessait de pouvoir lire les champs. C'est le défaut de **STORY-432**
+(« vrai du JSON, faux du CONTRAT »), **un cran au-dessus** de celui que la story corrige : elle publie
+une donnée que le schéma stockait, et elle allait la publier sans que rien ne garde la publication.
+Trois gardes ajoutées : les deux surfaces, l'optionnalité (AC-2/AC-4), la rupture de l'AC-3.
+
+**CODE-2 — un test qui promettait plus qu'il ne mesurait.** « la justification est ÉCRITE, jamais
+conditionnée » ne pouvait pas distinguer l'écriture inconditionnelle du spread conditionnel d'avant :
+`justification` étant désormais toujours non vide, `...(x != null ? { x } : {})` produit la même clé et
+la même valeur. Renommé sur ce qu'il mesure, et il **nomme** où vit la vraie garde (le `@IsNotEmpty()`,
+mutation M6).
+
+**CODE-3 — une taxonomie fausse qui se contredisait 14 lignes plus bas.** Le commentaire de bloc
+rangeait `baseLegale` avec `justification` dans le seau « absents **avant** l'AC-3 », alors que
+l'arbitrage PO la laisse facultative **définitivement** : des déficits déclarés **après** la story en
+seront dépourvus, donc son absence ne date **jamais** un document. Trois raisons distinctes, pas deux.
+
+**CODE-4 — deux des quatre lignes du test AC-1 étaient aveugles.** Le document mocké portait la
+**même** `baseLegale` que le corps, et `parUserId: 'u1'` **était** `USER.userId` : la recopie que le
+test prétend interdire les laissait vertes. Les quatre valeurs divergent désormais, et une assertion
+vérifie que `USER.userId` n'apparaît **nulle part** dans la réponse.
+
+⇒ **M8** (décorateur Swagger retiré) et **M9** (`justification` ré-annoncée facultative) rouges sur le
+filet neuf. Portes rejouées : lint 0, **3 662** unitaires, **899** e2e, couverture inchangée.
+
+### ⑦ Revue de sécurité — 0 vulnérabilité
+
+Rien de confiance ≥ 80. L'argument qui ferme le sujet principal — **la publication de champs jusque-là
+non publiés** — est que `PosteRetraitementResponseDto` publie `parUserId`, `le`, `baseLegale` et
+`justification` **depuis STORY-091**, sur la **route sœur du même contrôleur**, derrière les **mêmes**
+gardes : aucune classe d'exposition nouvelle. Les trois routes sont derrière la chaîne complète plus
+`@Roles`, `@RequiresBalanceAccess`, `@RequiresDossierScope` et `@RequiresRegime(REEL)` ;
+`DossierScopeGuard` rend **404, jamais 403**, et le dépôt refiltre sur `orgId` **et** `dossierId`.
+
+Examinés puis écartés, sous le seuil et dits ici pour mémoire :
+
+- **XSS stocké via `justification`/`baseLegale`** désormais réfléchies : aucune sanitisation dans le
+  dépôt, mais réponse `application/json` sous Helmet (`nosniff`), aucun *sink* ici, et **le même texte
+  libre est déjà publié sur la surface jumelle**. L'exploitabilité dépend entièrement de FE-050, hors
+  dépôt. La PR n'introduit ni nouveau *sink* ni nouvelle classe de donnée.
+- **L'AC-3 rend-il un chemin plus permissif ?** Non : `@IsNotEmpty()` s'exécute dans le pipe **après**
+  toutes les gardes, et les trois refus de service sont intacts et dans le même ordre.
+- **Mass assignment / injection NoSQL** : l'objet inséré est construit champ par champ, jamais par
+  spread du corps ; `imputations` reste inécrivable à la déclaration, donc le clivage constaté/déclaré
+  de STORY-455 n'est pas falsifiable.
+- **Un index unique obsolète `(orgId, exerciceOrigine)`** que Mongoose ne supprime jamais
+  transformerait la déclaration légitime du second dossier en 409. ⇒ **mesuré** : `getIndexes()` sur la
+  base réelle ne rend **que** `{dossierId, exerciceOrigine}`. Sujet de migration STORY-236, sans objet
+  ici.
+
+### ⑧ Vérification docker rejouée sur l'état final
+
+Les correctifs de revue touchaient le **contrat publié**, l'artefact que la mesure ③ avait vérifié :
+elle a donc été rejouée après redémarrage du conteneur. Les deux surfaces publient les quatre champs,
+**aucun** annoncé requis, `DeclarerDeficitDto.required = ['exerciceOrigine', 'montant',
+'justification']`, la relecture rend la piste d'audit des deux déficits semés, et la déclaration sans
+motif rend toujours **400**.
