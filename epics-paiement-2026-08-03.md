@@ -453,14 +453,29 @@ En tant qu'**administrateur plateforme Money Vibes**, je veux déclarer un fourn
 
 > Absorbée de l'ancienne **STORY-168**, superseded le 2026-08-03. Le trou qu'elle nommait est réel : STORY-245/248 livrent le contrat et le routage, pas le moyen de **déclarer un fournisseur sans déployer**. Même patron que le registre du catalogue de modules (STORY-032).
 
+> ⚡⚡ **DEUX ARBITRAGES PO DU 2026-09-05, pris avant l'implémentation.**
+>
+> **1. Money Vibes devient une organisation comme une autre**, et c'est le **journal d'audit** qui l'impose — pas le gate. Trois stories (242, 603, 248) avaient conclu que « l'administration Prospera n'a pas de surface HTTP » et renvoyé le problème à une *surface plateforme énumérée*. Le mur est plus bas et plus dur : `JournalAudit.valider` exige un `orgId` **et** un `creanceId` qui soient de vrais `ObjectId`, et un opérateur plateforme (`tenantId` à `null`) n'a **rien à quoi accrocher sa trace**. L'exception aurait demandé de rendre `orgId` facultatif — c'est-à-dire de rendre « `orgId` oublié » indiscernable de « acte de plateforme », sur le champ qui porte le cloisonnement, dans une base en ajout seul. C'est la **moitié essentielle de STORY-601**, tirée en avant parce que STORY-289 ne peut pas exister sans elle.
+>
+> **2. Les bornes de montant deviennent contractuelles** — second point PO laissé ouvert par STORY-246, tranché par le critère de STORY-603 : une borne ne dit pas *si* un couple est servi, elle dit *combien* peut y passer. Elle rejoint donc le **barème contractuel** (par organisation), et non le registre plateforme : `100 → 300 000 XOF` est le plafond du palier *travailleur indépendant* de FedaPay, et il plafonnait aussi les comptes *entreprise*.
+
 **Critères d'acceptation**
 
 - **Étant donné** un administrateur plateforme **quand** il déclare un fournisseur **alors** il peut l'activer ou le désactiver **pays par pays**, et régler son routage, **sans aucun déploiement**.
 - **Étant donné** ce registre **quand** on l'inspecte **alors** il porte **activation, routage et identifiants** — **jamais les capacités**, qui restent déclarées par l'adaptateur (AD-5). Un test échoue si une capacité devient administrable.
 - **Étant donné** un fournisseur activé pour un pays sans adaptateur enregistré **quand** l'activation est tentée **alors** elle est refusée — le registre ne peut pas promettre ce que le code ne sait pas faire.
 - **Étant donné** les identifiants saisis au registre **quand** ils sont persistés **alors** ils suivent AD-14 : chiffrés, non restituables.
+- **Étant donné** une organisation dont le contrat prévoit d'autres bornes que la grille publiée **quand** elle les enregistre **alors** elles **priment**, dans les deux sens, et **n'entrent pas dans la version du barème** — un plafond n'est pas un prix (AD-7).
 
-**Points :** 5
+> ⚠️ **Ce que la story a livré autrement que la lettre de ses critères.**
+> - **AC-2 se tient par une DÉRIVATION** : l'ensemble des pays ouvrables vient de `paysCouverts(capacites)`, jamais d'une saisie. Le registre **ne peut que retrancher** ; une capacité ne peut pas entrer par cette porte, qui ne s'ouvre que vers l'intérieur.
+> - **AC-4 se tient par une ABSENCE** : le registre ne porte **aucun** identifiant de fournisseur. STORY-246 l'a établi — la clé qui authentifie un appel sortant est celle de l'**organisation**, scellée sur son compte d'encaissement. Une clé de plateforme rangée ici ferait de Prospera le marchand de fait de ses clients (NFR-1) **sans qu'aucun champ ne bouge ailleurs**. Un secret qui n'existe pas ne peut pas être restitué : c'est la seule non-restitution qu'aucune évolution future ne défait. Deux gardes de sources la tiennent, avec leurs contre-preuves.
+> - **« Régler son routage » n'est pas la table de STORY-248** : le registre est le **filtre amont** du routage. Une règle d'organisation ne peut viser qu'un marché ouvert (`ROUTAGE_MARCHE_FERME` à la saisie), et un marché fermé après coup **laisse la main à la règle suivante** à la résolution — jamais un refus global.
+> - **L'absence de décision FERME.** Un fournisseur qu'aucun document ne nomme n'a aucun marché ouvert. Fail-closed, et gratuit **aujourd'hui seulement** : aucune demande de paiement n'existe avant EPIC-037.
+> - **Huitième droit** `paiement:fournisseur:administrer`, après deux refus d'en créer un (STORY-603, STORY-248) — et c'est le critère de ces refus qui l'impose : détenteur distinct, et pouvoir d'un autre ordre. C'est aussi le **premier droit de ce service que l'IdP sache attribuer**, `perms` dérivant du rôle plateforme.
+> - ⛔ **Défaut de STORY-603 corrigé au passage** : `cleBaremeContractuel` rendait une clef lisible que le journal **refuse** (`ACTE_MALFORME`), donc aucun barème n'était enregistrable contre un vrai journal.
+
+**Points :** 8
 
 ---
 
@@ -1032,7 +1047,7 @@ En tant qu'**équipe produit**, je veux démontrer le parcours complet de Kossi 
 | Épic | Stories | Points |
 | --- | --- | --- |
 | EPIC-035 — Socle, comptes, secrets | STORY-237 → 244 | 27 |
-| EPIC-036 — Fournisseurs interchangeables | STORY-245 → 249, 289 | 24 |
+| EPIC-036 — Fournisseurs interchangeables | STORY-245 → 249, 289, 603 | 35 |
 | EPIC-037 — Créance, demande, lien, encaissement | STORY-250 → 261, 290 | 54 |
 | EPIC-038 — Hors Prospera et promesses | STORY-262 → 267 | 19 |
 | EPIC-039 — Réconciliation et restitution | STORY-268 → 273 | 27 *(dont 8 hors service)* |
