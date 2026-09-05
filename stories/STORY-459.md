@@ -1,6 +1,6 @@
 # STORY-459 : Aucune dotation aux amortissements : l'investissement gonfle l'actif sans jamais le déprécier, et la CAF est prise pour le résultat
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -34,17 +34,17 @@ et rien dans l'écran ne dit lequel choisir.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Une hypothèse `dureeAmortissementAns` (ou `tauxAmortissementPct`) s'ajoute au jeu, bornée,
+- [x] AC-1 — Une hypothèse `dureeAmortissementAns` (ou `tauxAmortissementPct`) s'ajoute au jeu, bornée,
       avec la même exigence de version que les autres (`versions_hypotheses`).
-- [ ] AC-2 — Le CR prévisionnel porte une ligne `dotationsAmortissements`, déduite du résultat.
-- [ ] AC-3 — `capaciteAutofinancement = resultatNet + dotations` — la définition comptable, pas une
+- [x] AC-2 — Le CR prévisionnel porte une ligne `dotationsAmortissements`, déduite du résultat.
+- [x] AC-3 — `capaciteAutofinancement = resultatNet + dotations` — la définition comptable, pas une
       assimilation.
-- [ ] AC-4 — `actifImmobiliseNet` est **diminué** des dotations cumulées ; l'équilibre `ecart = 0`
+- [x] AC-4 — `actifImmobiliseNet` est **diminué** des dotations cumulées ; l'équilibre `ecart = 0`
       reste vrai après arrondis (le test de cohérence existant doit rester vert).
-- [ ] AC-5 — Le stock d'immobilisations **existant** au bilan de base continue de s'amortir : l'ancre
+- [x] AC-5 — Le stock d'immobilisations **existant** au bilan de base continue de s'amortir : l'ancre
       résiduelle n'est pas un actif neuf. À défaut de donnée, la story **le déclare** au lieu de le
       supposer.
-- [ ] AC-6 — `MODELE_PROJECTION_VERSION` incrémentée.
+- [x] AC-6 — `MODELE_PROJECTION_VERSION` incrémentée.
 
 ## Arbitrages PO du 2026-09-05 (avant écriture d'une ligne)
 
@@ -105,8 +105,8 @@ négatif dès `n > d`.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** (2026-09-05) — branches `MNV-459` créées dans `bilan-service` et `docs/`
-**avant** la première ligne de code.
+**Statut : `done`** (2026-09-05) — PR `bilan-service` **#89** rebase-mergée sur `dev`, branche supprimée.
+Branches `MNV-459` créées dans `bilan-service` et `docs/` **avant** la première ligne de code.
 
 ```
 bilan-service : MNV-459
@@ -211,3 +211,62 @@ Parcours réel sur le dossier de démonstration, base `bilan_service`.
   bien le champ (`HypothesesDto`), qui est ce qu'AC-1 demande.
 - **Prorata temporis** (D-459-3) : demanderait une date d'acquisition que le modèle annuel n'a pas.
   Se tient avec STORY-460, qui doit décider si l'investissement est récurrent ou échelonné.
+
+### Revue de code — 4 constats, tous corrigés (commit dédié `c643ecb`)
+
+1. **⚡⚡ Les TROIS réponses qui publient `MODELE_PROJECTION_VERSION` ne disaient pas la même
+   version.** `ProjectionResponseDto` était passé à 1.2.0 ; `ProjectionMensuelleResponseDto` et
+   `ComparaisonResponseDto` annonçaient encore « 1.1.0 (STORY-458) livre l'impôt », alors que les
+   deux endpoints rendent bien `1.2.0` (ils renvoient la **même constante**). Point de recopie :
+   trois sites, un seul traité — et le champ qui mentait sur sa version est précisément celui dont
+   la description entière sert à dire **« ne comparez pas deux versions de modèle »**. La garde
+   AC-6 que j'avais ajoutée ne balayait que `ProjectionResponseDto` : elle ne pouvait pas le voir.
+2. **La métadonnée « Amortissements » et la ligne « dont amortissements cumulés » n'étaient
+   gardées par AUCUN test.** Ce sont pourtant la déclaration d'AC-5 et l'explication d'AC-4 **dans
+   la pièce remise au banquier**. Un refactor du tableau de métadonnées les aurait fait disparaître
+   du PDF avec 1 928 unitaires et 524 e2e au vert. Deux tests ajoutés, dont un qui vérifie que le
+   « dont » reste **immédiatement sous** la ligne qu'il détaille.
+3. **Une branche morte dans une phrase remise à une banque.** `mentionAmortissement` portait un
+   ternaire sur `stockExistantAmorti`, dont la branche « stock amorti » n'est atteignable par rien
+   (`regimeAmortissement` rend `false` pour tout référentiel). Écrite en dur, avec le hook de
+   reprise nommé — même arbitrage qu'en STORY-457 sur le repli de `exigerFormeCourante`. La
+   couverture de branches du fichier passe de 85 % à 88,9 %.
+4. **⚡ Convention de signe : deux charges voisines sous deux conventions opposées.** J'avais publié
+   la dotation en **négatif** par analogie avec l'impôt de STORY-458 — mais l'analogie est fausse.
+   L'impôt est négatif parce qu'il **s'additionne** au résultat avant impôt pour donner le résultat
+   net, deux lignes adjacentes. La section du compte de résultat, elle, ne s'additionne pas : `coût
+   des ventes` et `charges d'exploitation` sont publiées **positives** et se retranchent de la
+   marge. Le PDF affichait donc `Marge brute 33 000 000 / Charges 22 000 000 / Dotations
+   −1 000 000`, et un lecteur appliquant le signe montré ligne à ligne tombait à côté du résultat.
+   ⚠️ **Ma propre garde de recomposition contenait la preuve du défaut** : elle devait nier la ligne
+   de charges à la main (`+ -val("Charges d'exploitation")`) pour tomber juste. Les deux lignes
+   passent en positif, au compte de résultat comme au bilan.
+
+Deux nits corrigés au passage : une fixture e2e dont le `fluxExploitation` ne recomposait plus, et
+une anti-assertion asymétrique (`not.toContain('croissanceCaPct')` n'excluait pas
+`croissanceProduitsPct`, que le message de croissance cite aussi).
+
+**Vérification docker rejouée sur l'état final** (le correctif de signe touche l'export déjà
+vérifié) : le PDF recompose `54 037,50 − 36 025,00 − 10 000,00 = 8 012,50`, et le bilan publie
+`Actif immobilisé net 49 083,34 / dont amortissements cumulés 10 000,00`.
+
+### Revue de sécurité — aucune vulnérabilité
+
+Périmètre couvert : validation d'entrée sur les trois sources (HTTP, document ancien, rejeu d'une
+version antérieure), couverture des **trois** chemins de calcul, intégrité comptable, fuite
+d'information par le message de refus, déni de service, puis le référentiel habituel (auth,
+autorisation/IDOR/multi-tenant, injection NoSQL, secrets, Docker/Redis/Kafka, désérialisation,
+rejeu).
+
+Deux points confirmés au passage :
+
+- le message de refus interpole le **nom** du jeu, mais les trois appelants lisent ce document via
+  `DossierScopedRepository` (fail-closed sur `tenantId` + `dossierId`), et la comparaison lève son
+  `404 HYPOTHESES_INTROUVABLE` générique **avant** la garde de forme : un identifiant d'un autre
+  tenant ne peut pas produire un 422 qui nomme sa ressource ;
+- `dureeAmortissementAns` n'entre dans **aucune** boucle — `dotationExercice` est en O(1).
+
+Deux observations sous le seuil de signalement, notées sans correctif : la garde accepte tout
+entier ≥ 1 là où le DTO plafonne à 50 (non exploitable, le DTO est le seul écrivain et une durée
+plus longue ne fait qu'une dotation plus petite) ; et `ComparaisonService` charge les ancres et la
+fiscalité avant d'appliquer la garde de forme (coût borné à 5 snapshots, chargeur mémoïsé).
