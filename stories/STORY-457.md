@@ -1,6 +1,6 @@
 # STORY-457 : `croissanceCaPct` s'applique au TOTAL DES PRODUITS, pas au chiffre d'affaires
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -90,7 +90,7 @@ l'artefact SYSCOHADA y est à reporter.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** (2026-09-05).
+**Statut : `done`** — clôturée le **2026-09-05**. PR `bilan-service` **#87** et `balance-service` **#91** rebase-mergées **ensemble** sur `dev` ; PR `docs` #219 sur `main`.
 
 ### ② Branches créées AVANT la moindre ligne de code
 
