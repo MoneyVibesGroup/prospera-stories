@@ -1,6 +1,6 @@
 # STORY-458 : La projection ne calcule ni ne décaisse aucun impôt — et au Togo l'impôt dû n'est pas 27 % du résultat
 
-Status: review
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -112,8 +112,8 @@ compris. Le décalage réel (acomptes sur l'exercice précédent + solde de rég
 
 ## Progress Tracking
 
-**Statut : `review`** — branche `MNV-458` sur `bilan-service` (base `dev`), branche
-`MNV-458` sur `docs/` (base `main`).
+**Statut : `done`** (2026-09-05) — PR `bilan-service` **#88** rebase-mergée sur `dev`
+(3 commits : feature, revue, et la fiche côté `docs/`), branche supprimée.
 
 - [x] Arbitrages PO D-458-1 et D-458-2 tranchés et consignés **avant** la première ligne de code.
 - [x] Développement.
