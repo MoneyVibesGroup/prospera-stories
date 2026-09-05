@@ -177,8 +177,9 @@ point qui pourra enrichir l'affichage — colonne « déclaré / constaté ».
 
 ## Progress Tracking
 
-**Statut : `review`** — 2026-09-05, développement terminé, portes de qualité franchies,
-vérification docker faite. Revues de code et de sécurité à suivre.
+**Statut : `review`** — 2026-09-05. Développement, revue de code (5 constats, 1 bloquant),
+revue de sécurité (2 vulnérabilités, toutes deux confirmées en docker), correctifs appliqués,
+vérification docker **rejouée sur l'état final**. Reste le merge.
 
 ### La question de rédaction, tranchée : **voie A**
 
@@ -345,3 +346,173 @@ prouve rien. Elles ont été reformulées pour compiler.
   le pose.
 - **STORY-417 n'est pas préjugée** : le bornage volontaire reste un paramètre de **lecture**,
   et le constat enregistre ce que le calcul **par défaut** impute.
+
+---
+
+## ⑥⑦ Revues — 7 constats, 3 bloquants, tous corrigés
+
+⚠️ **Les deux scans ont tourné en parallèle**, la revue de sécurité rendant son rapport la
+première : les correctifs de sécurité sont donc committés **avant** ceux de la revue de code,
+l'inverse de l'ordre habituel. Aucune conséquence — les deux jeux de constats sont disjoints,
+et la vérification docker a été rejouée après les deux.
+
+### ⑦ Revue de sécurité — 2 vulnérabilités, confirmées SUR LA BASE avant correction
+
+**① Le constat décrivait une AUTRE balance que celle qu'on arrête** (élevée, CWE-841).
+`trouverDerniereBaseFiscale` ne filtre **pas** sur l'`etat` : elle rend la plus récente de
+l'exercice, **brouillons compris**. Arrêter une balance pendant qu'un import plus récent dort
+en brouillon faisait donc écrire un constat calculé sur **ce brouillon**, sous le `balanceId`
+de la balance arrêtée — la ligne d'audit **mentait**.
+
+⛔ **Mesuré avant correction** : balance A bénéficiaire (imputant 5 195 000) arrêtée pendant
+qu'un brouillon B déficitaire, postérieur, existait ⇒ **constat écrit à `0`**, exercice scellé
+sur ce zéro, et `imputationsNonConstatees` **éteint** par lui. C'est exactement l'état que le
+code décrit comme « pire que le défaut d'origine » — et il survient **sans intention**, dès
+qu'un cabinet valide un import pendant qu'un autre attend.
+
+⇒ `trouverBaseFiscaleParId` et un paramètre d'**ancrage** sur `calculerPour`, réservé à
+l'arrêté : la route HTTP n'ancre jamais, le résultat publié reste celui de la base fiscale de
+l'exercice. Le repli sur cette base demeure, et c'est **D-094-2** : une balance provisionnée
+porte déjà la charge d'impôt qu'on cherche à calculer, l'arrêté prononcé sur elle doit
+constater sur la balance de travail.
+
+**② Le nouveau chemin sautait `@RequiresRegime(REEL)`** (moyenne, CWE-863). Cette garde
+d'exclusivité RÉEL/TPU vit sur les **contrôleurs fiscaux** et n'a aucun double dans les
+services — son propre docstring le dit. L'arrêté part du contrôleur de **balance**, qui ne la
+porte pas. Le régime se résolvant par `(dossier, exercice)` depuis STORY-303, un dossier RÉEL
+en 2022 — qui déclare son déficit — puis SYNTHETIQUE en 2025 voyait son report **consommé par
+un exercice sous TPU** où il n'était pas imputable, donc **sur-imposé** sur ses exercices
+réels suivants, sans remède puisque le gel interdit ensuite toute correction.
+
+⛔ **Mesuré avant correction** : `GET /fiscal/resultat-fiscal` rendait **409
+`REGIME_INCOMPATIBLE`** pendant que `POST /balances/:id/valider` consommait **5 195 000**.
+
+⇒ le régime est résolu dans `preparer`, sur les bornes de l'exercice arrêté, et **on
+s'abstient sans lever** : la validation d'une balance sous TPU reste légitime, elle ne
+consomme simplement aucun report. Lever aurait rendu la validation impossible.
+
+### ⑥ Revue de code — 5 constats, dont 1 bloquant
+
+**① BLOQUANT — le moteur n'était plus rejouable sur un exercice déjà arrêté.**
+`projeterDeficits` lisait un `montantDejaImpute` **global**, qui agrège désormais les constats
+de **tous** les exercices — y compris ceux **postérieurs** à celui qu'on calcule, et le sien
+propre. Recalculer 2024 après l'arrêté de 2025 rendait `restant: 0`,
+`AUCUN_DEFICIT_DISPONIBLE`, donc une **base imposable 2024 doublée**.
+
+⛔ Et ce n'est pas un défaut d'affichage : `LiquidationService` et
+`ProvisionsFiscalesService` appellent ce même calcul — l'**IS de 2024 se reliquidait sur la
+base fausse**, et régénérer la balance provisionnée y aurait écrit cette charge.
+
+⚠️ **Avant cette story le rejeu était stable parce que rien n'écrivait.** C'est l'écriture qui
+crée l'obligation de **dater** la lecture — le livrable a introduit le besoin en même temps
+que la donnée qui permet d'y répondre (`imputations[].exercice`).
+
+⇒ le stock projeté est celui de l'**ouverture** de l'exercice calculé : les constats
+`>= annee` sont neutralisés. **`>=` et non `>`** — sans quoi rejouer un exercice juste après
+son propre arrêté imputerait moins que ce que cet arrêté a constaté. La décomposition AC-5 est
+datée de la même façon, pour que l'identité `déclaré + constaté = déjà imputé` reste vraie ;
+la part **déclarée**, elle, reste **absolue** : elle n'appartient à aucun exercice.
+
+⚠️⚠️ **La vérification docker ne pouvait pas le voir** : sa mesure ⑥ rejouait l'exercice
+**suivant**, jamais un exercice **déjà arrêté**. Pire — elle affichait le symptôme
+(`deficitsImputes` tombé de 5 195 000 à 2 805 000 sur le **même** exercice 2026) et je l'ai lu
+comme la fonctionnalité. **Une mesure ne prouve que ce qu'elle interroge**, et celle-ci
+interrogeait la mauvaise année.
+
+**② Le câblage de l'appelant n'était gardé par RIEN — deux mutations vérifiées vertes.**
+Retirer `origine` de l'appel à `preparer` laissait **1 589 tests verts** (un socle
+d'à-nouveaux validé aurait alors consommé le report d'un exercice jamais établi) ; désolidariser
+`le` de l'horodatage de la transition, **93**. La garde existe bel et bien dans le service de
+constat — mais **la donnée qu'elle lit vient de l'appelant, que rien ne gardait**. Patron
+[[points-de-recopie-projection-vs-appelant]] de STORY-420. Le **même** trou existait sur
+`versDeclare` : après le correctif ①, ne plus transmettre les `imputations` au moteur restait
+**vert**.
+
+**③ Le contrôle d'identité de `constater` sur-promettait.** Son docstring annonçait de
+détecter un stock qui a changé ; il ne comparait que les **identifiants**. Or `prepare` est
+calculé **hors** transaction et n'est **jamais recalculé** — pas même quand `withTransaction`
+rejoue son callback sur un `WriteConflict`. Deux exercices d'un même dossier arrêtés en
+concurrence écrivaient donc le même franc **deux fois**, sous un jeu d'identifiants inchangé
+et dans les bornes du `$expr`. ⇒ les stocks observés à la préparation entrent dans la
+comparaison, fail-closed.
+
+**④ Le `oneOf` du 409 de `/valider` n'avait pas gagné de variante.** Le nouveau code ne vivait
+que dans la `description` : un client généré typait le corps comme l'union des **deux** DTO
+publiés, et `body.code === 'CONSTAT_IMPUTATION_IMPOSSIBLE'` était une **erreur de compilation**
+chez lui. Famille STORY-427/432 — le JSON servi est bon, le **contrat** ne l'est pas.
+
+**⑤ Le moteur fiscal tournait AVANT les refus transactionnels.** Re-valider une balance déjà
+figée rendait un motif **fiscal** au lieu de `BALANCE_DEJA_VALIDEE`, alors que le docstring de
+`marquerEtat` pose que « l'ordre n'est pas cosmétique — le motif du refus est ce sur quoi le
+comptable agit ».
+
+**Et une instruction FAUSSE dans mon propre commentaire**, retirée : « à importer dans
+`AppModule` **APRÈS** `FiscalModule` ». L'ordre du tableau `imports` n'a aucun effet, Nest
+résout les portées après le scan complet du graphe. Un commentaire périmé qui porte une
+**instruction** est un piège armé.
+
+### ⑧ Vérification docker REJOUÉE sur l'état final — 9 mesures
+
+Les correctifs changent les chiffres mesurés : le parcours a été **rejoué**, pas reporté.
+
+| # | Mesure sur l'état final | Résultat |
+|---|---|---|
+| ① | Arrêté de la balance 2026 | **200**, `montantDejaImpute` `0 → 5 195 000`, une imputation `{2026, 5 195 000}` |
+| ② | ⚡ **REJEU du MÊME exercice après son arrêté** | `deficitsImputes: 5 195 000` — **stable**. Avant le correctif ① : 2 805 000 |
+| ③ | Le stock vu de 2026 | `restant: 8 000 000` (son propre constat neutralisé), `exercicesImputation: [2026]` — l'historique complet reste publié |
+| ④ | ⚡ **AC-7 ①** — constat de **2025** semé, lecture de 2026 | `deficitsImputes: **2 805 000**`, `montantImputeConstate: 5 195 000`, `montantImputeDeclare: 0` — **les chiffres exacts de la fiche**, et l'identité de décomposition tient |
+| ⑤ | SÉCU-1 rejouée : arrêté de A avec un brouillon déficitaire **plus récent** | constat **5 195 000**, `balanceId` = **la balance arrêtée**. Avant : `0` |
+| ⑥ | SÉCU-2 rejouée : arrêté sous régime **SYNTHETIQUE** | **200**, et `montantDejaImpute: 0`, **0 imputation** |
+| ⑦ | **Seconde validation du même exercice** (2ᵉ balance) | **200**, déficit inchangé, **1 seule** imputation — AC-7 ② |
+| ⑧ | Re-valider une balance **déjà VALIDÉE** | **409 `BALANCE_DEJA_VALIDEE`** — l'ordre des refus est restauré |
+| ⑨ | Balayage d'invariants sur **toute** la collection | 0 anomalie sur 6 contrôles (stock négatif, constaté > déclaré, imputation sans auteur, exercice en doublon, imputation antérieure à l'origine, montant négatif) |
+
+⚠️ **Ce qui reste NON mesurable de l'extérieur, et dit comme tel** : l'abort sur *échec
+d'écriture* du constat (stock modifié entre la préparation et la transaction) est une course
+de quelques millisecondes, non forçable par l'API. Couvert par les mutations M8, M14, M15 et
+R10. Le chemin de refus **calculable**, lui, est mesuré (paquet fiscal absent ⇒ 409, balance
+restée `BROUILLON`).
+
+⚠️ **La chaîne entre DEUX exercices ne peut pas être jouée par l'API** : un seul paquet fiscal
+est publié (`togo@2026`), et deux exercices clôturant la même année civile partagent la clé de
+constat. La mesure ④ sème donc le constat de 2025 en base et **lit le moteur réel** — c'est
+son comportement qui est mesuré, pas la fixture. La logique de chaînage est en outre pure et
+gardée par 5 tests dédiés (mutations R1/R2, rouges).
+
+### Mutations des correctifs — 15 de plus, 15 rouges
+
+| # | Mutation | Test qui rougit |
+|---|---|---|
+| S1 | Garde de régime neutralisée | constat « un exercice sous TPU ne constate RIEN » |
+| S2 | Régime résolu sur « aujourd'hui » | constat « résolu sur les bornes de l'exercice arrêté » |
+| S3 | L'ancre n'est plus passée au moteur | constat « constate ce que `deficitsImputes` publie » |
+| S4 | L'ancre est ignorée par le moteur | moteur « l'ancre remplace la sélection » |
+| S5 | L'ancre ignore les bornes d'exercice | dépôt « borné à l'org, au dossier ET à l'exercice » |
+| R1 | Le stock n'est plus daté | rejeu, **4 tests** |
+| R2 | `>` au lieu de `>=` | rejeu, **4 tests** |
+| R3 | La part constatée cesse d'être datée | identité de décomposition |
+| R4 | Les `imputations` ne sont plus transmises au moteur | stock **et** calcul, **2 tests** |
+| R5 | Le corps du 409 retiré du `oneOf` | contrat OpenAPI |
+| R6 | Le DTO du 409 n'est plus enregistré (`$ref` cassé) | contrat OpenAPI |
+| R7 | Le câblage de l'ORIGINE retiré de l'appel | « `preparer` reçoit l'origine du document relu » |
+| R8 | L'horodatage du constat désolidarisé | « la MÊME date que la transition » |
+| R9 | Le court-circuit « déjà VALIDÉE » retiré | « ne fait pas tourner le moteur fiscal » |
+| R10 | La comparaison des STOCKS retirée | « le stock a bougé ⇒ arrêté REFUSÉ » |
+
+⚠️ **Cinq mutations ont dû être reformulées** parce qu'elles ne compilaient pas (variable ou
+paramètre devenu inutilisé, expression toujours nulle). Une mutation rouge par erreur de
+compilation ne prouve **rien**.
+
+### Portes de qualité, après correctifs
+
+| Porte | `balance-service` |
+|---|---|
+| Lint (0 warning) | ✅ |
+| Build | ✅ |
+| Unitaires + couverture | ✅ **3 658** tests · 99,17 / 92,40 / 98,68 / 99,27 |
+| e2e | ✅ **892/892** |
+| Boot réel docker | ✅ |
+
+⚠️ **Un échec intermittent, hors story** : `SageParserService › Excel › « Mouvements cumulés »`
+a rougi **une fois** en exécution parallèle, puis repassé au vert deux fois de suite (suite
+isolée, puis suite complète). Même symptôme que l'intermittence relevée en STORY-454.
