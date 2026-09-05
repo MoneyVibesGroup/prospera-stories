@@ -1,6 +1,6 @@
 # STORY-458 : La projection ne calcule ni ne décaisse aucun impôt — et au Togo l'impôt dû n'est pas 27 % du résultat
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -60,3 +60,64 @@ Pour une entreprise à faible marge — le cas de la quasi-totalité des distrib
   première ligne qu'un analyste crédit reconstitue.
 - Le module **Fiscalité** (EPIC-fiscal) porte déjà la liquidation `max(IS, MFP)` : la story doit
   **réutiliser** ce calcul, pas en écrire un second — deux formules divergeraient en silence.
+
+---
+
+## Arbitrages PO du 2026-09-05 (avant écriture d'une ligne)
+
+La fiche a été rédigée le **2026-08-27**, soit **neuf jours avant** la clôture de STORY-457
+(2026-09-05) qui isole le chiffre d'affaires. Sa table de chiffres reflète donc l'état
+dégradé qu'AC-4 décrivait comme provisoire, et **deux points ont été tranchés par le PO**
+avant le développement.
+
+### D-458-1 — l'assiette du MFP est le CA HT de **l'exercice liquidé**, pas du précédent
+
+AC-4 écrit « CA HT du **dernier exercice clos** » et sa table applique 1 % aux produits de
+l'exercice **précédent** (163 750 / 176 850 / 190 998). Or :
+
+- le paquet fiscal du dépôt (`minimumForfaitairePerception.base`) dit **« chiffre d'affaires
+  hors TVA »**, sans décalage — Art. 120 CGI ;
+- le moteur fiscal existant (`balance-service/src/modules/fiscal/liquidation.regles.ts`)
+  l'assied sur le CA de **l'exercice liquidé** ;
+- la fiche exige elle-même de **réutiliser ce calcul**, « pas d'en écrire un second — deux
+  formules divergeraient en silence ». Un décalage d'un an **est** cette divergence.
+
+**Retenu** : `assietteMfp(n) = chiffreAffaires(n)`. Le CA projeté est le CA de base isolé par
+STORY-457, porté par la **même** croissance que les produits (le modèle suppose la structure
+des produits stable — hypothèse **publiée**, pas cachée). Quand le référentiel ne déclare
+aucun marqueur de CA (SFD-BCEAO, CIMA), l'assiette retombe sur le **total des produits** et
+la réponse le **signale** (`assietteMfpSource: 'TOTAL_PRODUITS'`) — c'est le repli qu'AC-4
+prévoyait, désormais l'exception et non la règle.
+
+Effet mesuré sur le dossier de démonstration : MFP **135 000 / 145 800 / 157 464** (et non
+163 750 / 176 850 / 190 998), l'IS restant écarté les trois années. **Les chiffres de la
+section « Le fait » ci-dessus sont donc périmés** — ils décrivaient l'assiette de repli.
+
+### D-458-2 — le décaissement mensuel : quatre quarts aux échéances du paquet
+
+Le calendrier d'acomptes n'a de sens que dans le plan **mensuel** (12 mois de N+1) : l'annuel
+n'a pas de granularité pour l'exprimer. Deux modèles étaient possibles ; le **calendrier réel**
+(acomptes assis sur l'exercice **précédent**, solde l'année suivante) obligerait à liquider
+l'exercice de base à partir d'un résultat comptable **déjà net d'impôt** — une approximation de
+plus, sur une donnée que le modèle ne possède pas.
+
+**Retenu** : l'impôt de l'exercice est **décaissé dans l'exercice**. Côté annuel, la CAF devient
+le résultat **après** impôt ; côté mensuel, une ligne `decaissementsImpot` porte **un quart** de
+l'impôt de N+1 à chacune des quatre échéances publiées par le paquet (31-01, 31-05, 31-07,
+31-10), par partition entière exacte. `Σ mensuel = annuel` reste une **identité**, arrondis
+compris. Le décalage réel (acomptes sur l'exercice précédent + solde de régularisation) est un
+**hook inerte documenté**, hors périmètre.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** — branche `MNV-458` sur `bilan-service` (base `dev`), branche
+`MNV-458` sur `docs/` (base `main`).
+
+- [x] Arbitrages PO D-458-1 et D-458-2 tranchés et consignés **avant** la première ligne de code.
+- [ ] Développement.
+- [ ] Portes DoD (lint, build, couverture, unit, e2e).
+- [ ] Vérification docker de la persistance / des montants réels.
+- [ ] Revue de code.
+- [ ] Revue de sécurité.
