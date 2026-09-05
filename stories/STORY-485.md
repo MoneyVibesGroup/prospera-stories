@@ -12,10 +12,10 @@ Relevé en regardant les trois colonnes de la projection annuelle côte à côte
 
 ## Le fait
 
-`ProjectionAnnuelleService.projeter()` applique le **même** `croissanceCaPct` à chaque itération :
+`ProjectionAnnuelleService.projeter()` applique le **même** `croissanceProduitsPct` à chaque itération :
 
 ```ts
-produits = arrondir(produits * (1 + hypotheses.croissanceCaPct / 100));
+produits = arrondir(produits * (1 + hypotheses.croissanceProduitsPct / 100));
 ```
 
 Sur le scénario prudent, les produits font donc **17 193 750 → 18 053 438 → 18 956 110** — soit
@@ -32,9 +32,14 @@ normal. Il n'apparaît qu'à la restitution, quand les trois exercices sont en l
 ⚠️ Distinct de **STORY-460** (les montants d'investissement, de financement et de remboursement sont
 récurrents sans le dire) : là il s'agit de **montants**, ici d'un **taux**.
 
+> ⚠️ **Renommage du 2026-09-05 (STORY-457)** : le champ s'appelait `croissanceCaPct` quand cette
+> fiche a été écrite. Il s'applique au **total des produits** et porte désormais ce nom-là —
+> rupture de contrat assumée et arbitrée par le PO. Les extraits ci-dessus ont été réalignés :
+> la fiche décrit le code tel qu'il est, pas tel qu'il était.
+
 ## Critères d'acceptation
 
-- [ ] AC-1 — `croissanceCaPct` accepte soit un nombre (comportement actuel, appliqué aux trois
+- [ ] AC-1 — `croissanceProduitsPct` accepte soit un nombre (comportement actuel, appliqué aux trois
       exercices), soit un **tableau de trois taux**. Un nombre reste valide : aucune migration.
 - [ ] AC-2 — Même traitement pour `tauxMargePct` et `tauxChargesPct` — une entreprise qui monte en
       charge voit sa structure de coûts bouger, et laisser le seul taux de croissance variable
