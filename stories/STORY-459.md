@@ -115,3 +115,99 @@ docs          : MNV-459
 
 **Périmètre — un seul dépôt** : `bilan-service`. Aucun contrat d'événement Kafka n'est touché, donc pas
 de second dépôt à synchroniser.
+
+### Ce qui a été livré
+
+- **Unité pure `amortissement.ts`** (patron de `bfr.ts` / `impot.ts`) : `dotationExercice` et le
+  type publié `AmortissementProjection`.
+- **Hypothèse `dureeAmortissementAns`** — entier 1..50 au DTO, versionnée comme les autres.
+- **Moteur annuel** : ligne `dotationsAmortissements` au compte de résultat, déduite **avant**
+  l'impôt ; `capaciteAutofinancement = resultatNet + dotations` ; `actifImmobiliseNet` net des
+  dotations cumulées, elles-mêmes publiées (`amortissementsCumules`).
+- **`exigerFormeCourante` étendue** au second champ dont un document ancien peut être dépourvu,
+  avec un message qui nomme le champ fautif. Même code d'erreur, le geste de reprise étant le même.
+- **Export** : ligne « Dotations aux amortissements » (en négatif, comme l'impôt), ligne « dont
+  amortissements cumulés » au bilan, et métadonnée « Amortissements » qui **dit le périmètre**.
+- **`MODELE_PROJECTION_VERSION` 1.1.0 → 1.2.0.**
+- **Hors périmètre, trouvé par le balayage de contrat** : `ExerciceProjeteDto.exercice` se publiait
+  en `object` opaque faute de `type: String` — le **millésime**, c'est-à-dire le libellé de colonne
+  de tout tableau prévisionnel. Corrigé plutôt qu'inventorié : monter `ProjectionResponseDto` au
+  balayage OpenAPI était nécessaire pour garder les `@ApiProperty` de cette story, et c'est ce
+  montage qui l'a révélé. Aucun autre opaque n'est apparu dans la grappe.
+
+### Le mensuel n'a demandé aucune ligne — et c'est le contrôle
+
+Une dotation n'est **pas décaissée** : le plan mensuel compose son flux ligne à ligne, et aucune
+de ces lignes ne bouge. Tout l'écart mensuel tient dans la colonne d'impôt, qui baisse parce que
+l'IS se liquide sur un résultat diminué des dotations. L'attendu figé des douze périodes le
+**vérifie colonne par colonne** : cinq colonnes identiques à l'octet au modèle 1.1.0, la sixième
+à 675 000 au lieu de 742 500. Une dotation qui aurait fui dans le plan de trésorerie ferait
+bouger une autre colonne.
+
+### Mutations volontaires (chacune restaurée, chacune compilant)
+
+| Mutation | Compile | Tests rouges |
+|---|---|---|
+| `min(rang, durée)` retiré de `dotationExercice` (formule naïve) | oui | 3 |
+| `capaciteAutofinancement = resultatNet` (le défaut d'origine) | oui | 11 |
+| dotations non retranchées du résultat avant impôt | oui | 10 |
+| dotations non retranchées de `actifImmobiliseNet` | oui | 9 |
+| garde `dureeAmortissementAns` désarmée | oui | 7 |
+| ligne « Dotations aux amortissements » retirée de l'export | oui | 2 |
+| `type: String` retiré du millésime publié | oui | 1 |
+
+⚠️ **Chaque mutation a été vérifiée par `tsc` avant d'être jugée** : une mutation qui ne compile
+pas rougit par erreur de type et ne prouve rien (leçon STORY-458).
+
+### Portes de qualité
+
+Lint 0 warning · build OK · **1 928 unitaires** + **524 e2e** verts · couverture globale
+**98,87 / 94,26 / 98,85 / 98,90** (seuils 65/90/90/90), les trois fichiers neufs à 100 % de
+branches.
+
+### Vérification docker (2026-09-05, stack `docker compose`, `Found 0 errors`)
+
+Parcours réel sur le dossier de démonstration, base `bilan_service`.
+
+1. **Contrat servi par le conteneur** — `dureeAmortissementAns` publié avec sa description,
+   `AmortissementProjectionDto` présent, et `ExerciceProjeteDto.exercice` passé de
+   `{"type":"object"}` à `{"type":"string"}`.
+2. **Bornes** — création sans le champ ⇒ **400** ; `dureeAmortissementAns: 0` ⇒ **400**.
+3. **Persistance** — `db.jeux_hypotheses` porte `dureeAmortissementAns: 5` (type `number`).
+4. **Versionnement** — `versions_hypotheses` fige la durée. Après une édition à 3 ans,
+   `?versionHypotheses=1` rejoue avec **5** (dotations 1 000 000 / 2 000 000 / 3 000 000) et la
+   version courante avec **3** (1 666 667 / 3 333 333 / **5 000 000**, plafonnées à
+   l'investissement annuel).
+5. **⚡⚡ Le document ANCIEN, celui qui dormait vraiment en base** — `verif-458-prudent`, écrit par
+   la vérification de STORY-458 et dépourvu du champ, rend **422 `HYPOTHESES_FORME_OBSOLETE`** sur
+   la projection annuelle **et** sur la comparaison (le 3ᵉ chemin), avec un message qui nomme le
+   champ **et** le scénario fautif. Jamais un 200 aux montants `null`.
+6. **Projection réelle** (investissements 5 000 000, durée 5) — dotations 1 000 000 / 2 000 000 /
+   3 000 000 ; résultat avant impôt N+1 = 5 403 750 − 3 602 500 − 1 000 000 = **801 250** ; IS =
+   27 % = **216 338** ; résultat net **584 912** ; CAF **1 584 912** = 584 912 + 1 000 000 ;
+   `ecart = 0` sur les trois exercices.
+7. **⚡ Durée de 1 an, le cas que le `min` protège** — l'actif immobilisé net vaut **908 334** aux
+   trois exercices, exactement l'ancre résiduelle recalculée à la main
+   (`totalActif − BFR − trésorerie`) : il y revient et n'y descend **jamais**, pendant que les
+   amortissements cumulés montent à 5 000 000 / 10 000 000 / 15 000 000. `ecart = 0`.
+8. **Plan mensuel** — aucune ligne de dotation parmi les huit publiées, `fluxNet` du mois 1
+   recomposable de ses lignes, `ecartArticulation = 0`.
+9. **Document remis à un tiers** — le PDF **et** le classeur portent « Dotations aux
+   amortissements » (en négatif), « dont amortissements cumulés », et la métadonnée
+   *« Amortissements : Linéaire sur 1 an(s), investissements projetés seuls — les immobilisations
+   déjà au bilan de base ne sont pas amorties (le référentiel n'en déclare pas le montant) »*.
+   C'est AC-5 jusque dans la pièce que lit le banquier.
+
+### Hooks inertes documentés (hors périmètre, non codés)
+
+- **Marqueur `MappingRule.dotationsAmortissements`** (D-459-1) : ferait remonter la dotation
+  constatée de la base comme un agrégat, sur le patron exact de `chiffreAffaires` (STORY-457), et
+  permettrait d'amortir le stock existant sans toucher l'invariant P7. Touche les artefacts des
+  cinq référentiels ⇒ story à part entière.
+- **`HypothesesResponseDto.hypotheses` reste publié `type: Object`** : en **lecture**, le nouveau
+  champ est donc invisible d'un client généré — exactement comme les neuf autres, depuis
+  STORY-068. Défaut **pré-existant et uniforme**, non traité ici : le typer ferait entrer tout le
+  contrôleur d'hypothèses dans le balayage de contrat, avec ses opaques. L'écriture, elle, publie
+  bien le champ (`HypothesesDto`), qui est ce qu'AC-1 demande.
+- **Prorata temporis** (D-459-3) : demanderait une date d'acquisition que le modèle annuel n'a pas.
+  Se tient avec STORY-460, qui doit décider si l'investissement est récurrent ou échelonné.
