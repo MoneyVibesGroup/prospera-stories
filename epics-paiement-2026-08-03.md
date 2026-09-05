@@ -355,6 +355,33 @@ En tant qu'**organisation cliente**, je veux que mon compte soit vérifié avant
 
 **Points :** 3
 
+### STORY-599 — Le compte d'encaissement PI-SPI : alias, code marchand et participant agréé
+
+En tant qu'**organisation cliente de l'UEMOA**, je veux déclarer le compte par lequel le système de paiement instantané interopérable de la sous-région m'adresse un encaissement — mon alias, mon code marchand et l'établissement agréé qui me le tient — afin que l'arrivée du SPI ne demande qu'un adaptateur et non une reprise du modèle de données. *(FR-P01, FR-P02, FR-P03, FR-P06, FR-P09, FR-P10 · AD-1, AD-5, AD-14, NFR-1a)*
+
+> **Le SPI n'est pas une configuration : c'est un changement de schéma, et c'est pourquoi il passe AVANT l'adaptateur.** FR-P10 promet que « l'ajout du SPI BCEAO est une configuration, pas une réécriture ». La promesse tient sur les **fournisseurs** — AD-5 en fait des adaptateurs interchangeables — et elle ne tient pas sur le **compte** : `TYPES_COMPTE` et `METHODES_PAIEMENT` sont deux unions **fermées**, et une destination SPI n'entre dans aucun de leurs membres. Un adaptateur livré avant elles n'aurait aucun compte à servir.
+>
+> ⚡⚡ **Sur le SPI, la destination de l'argent cesse d'être UNE valeur, et c'est le vrai sujet de la story.** Chez FedaPay, celui qui reçoit l'appel est aussi celui qui tient le compte : un seul identifiant marchand désigne la destination entière, et le sceller (STORY-243) la protégeait entière. Le SPI sépare les deux. **Money Vibes n'est pas un participant agréé et ne le sera pas** — les participants sont des banques, des IMF, des EME et des établissements de paiement agréés ; nous parlons au schéma, l'argent atterrit chez l'un d'eux. La destination devient donc un **triplet** : alias, code marchand, participant. **Sceller un tiers d'un triplet ne protège rien** : il reste deux champs en clair dans le même document, et il suffit d'en réécrire un pour rediriger l'argent sans qu'aucun déchiffrement n'échoue.
+>
+> ⚡ **Le remède est celui que STORY-243 a déjà payé, pris par l'autre bout : ce n'est pas le chiffrement qui protège la destination, c'est le LIEN.** Le code marchand est **destiné à être publié** — c'est lui qu'un QR normalisé porte, et un QR se scanne. Il ne peut donc pas être protégé en étant caché ; il ne peut l'être qu'en étant **lié**. Les données associées authentifiées existent exactement pour cela : le participant et le code marchand restent en clair, lisibles et indexables, et entrent dans le lien du scellé — les réécrire rend l'alias **inouvrable**, donc le détournement bruyant au lieu d'être muet.
+
+**Critères d'acceptation**
+
+- **Étant donné** les unions fermées `TYPES_COMPTE` et `METHODES_PAIEMENT` **quand** on les lit **alors** chacune porte le membre du schéma interopérable, sous un nom qui désigne une **nature de compte** et jamais l'institution qui l'opère — et **aucun de ces deux membres n'autorise quoi que ce soit** : tant qu'aucun adaptateur ne déclare ni la nature ni la méthode, aucun compte ne peut être déclaré ainsi et aucune règle de routage ne peut le viser.
+- **Étant donné** une déclaration de compte **quand** son type est celui du schéma **alors** le **code marchand** et le **participant** sont **obligatoires**, contrôlés par le domaine **et** par le schéma Mongo ; **quand** son type est l'un des trois autres **alors** les mêmes champs sont **refusés** — une destination à moitié renseignée, ou renseignée sur un compte qui n'en a que faire, n'est pas exprimable.
+- **Étant donné** un compte du schéma **quand** on l'écrit **alors** son **alias est l'identifiant scellé du compte**, unique scellé du document, normalisé sous une seule forme internationale — deux graphies du même numéro sont deux destinations, et c'est celui qui a enregistré l'autre qui reçoit l'argent.
+- **Étant donné** un compte du schéma déjà écrit **quand** son code marchand ou son participant est modifié directement en base **alors** son alias **ne s'ouvre plus** : le triplet ne se démonte pas. **Et étant donné** un compte déclaré avant cette story **quand** on le relit **alors** son lien est **inchangé, octet pour octet** — un lien étendu pour tous aurait rendu illisibles tous les identifiants marchands déjà scellés.
+- **Étant donné** un adaptateur **quand** il déclare ses capacités **alors** il déclare aussi les **natures de compte qu'il sait adresser**, et une déclaration vide ou inconnue fait échouer le **démarrage** ; **quand** un compte est déclaré chez un fournisseur qui ne sert pas sa nature **alors** il est refusé à la saisie, sous un code qui lui est propre — jamais devant le payeur, et jamais confondu avec un fournisseur inconnu.
+- **Étant donné** n'importe quelle sortie du service — réponse d'API, journal d'audit, trace d'erreur, sérialisation d'un document **quand** on y cherche l'alias **alors** on n'en trouve que l'empreinte visible ; le code marchand et le participant, eux, **sortent en clair et doivent sortir** : ils sont ce qui permet à une organisation de constater que sa destination est toujours la sienne.
+
+> ⚠️ **Ce que la story ne fait pas — et deux refus délibérés.**
+> - Elle **n'écrit aucun adaptateur** : c'est STORY-600. Tant qu'il n'existe pas, la nature de compte et la méthode sont du **vocabulaire sans pouvoir**, et c'est précisément ce qui les rend livrables seules.
+> - ⛔ Elle **n'énumère pas les huit États de l'UEMOA ni la devise du schéma**. Ce serait une **seconde déclaration** de ce que l'adaptateur déclare déjà en couvertures (AD-5), et deux listes de la même chose divergent : le jour où le schéma s'étend, un compte passerait un contrôle et échouerait à l'autre. La couverture reste la seule source, contrôlée au routage.
+> - ⛔ Elle **ne tient aucune liste de participants agréés**. Ils se comptent par centaines sur huit pays et la BCEAO les publie ; une liste en dur serait périmée avant d'être relue, et une liste administrable **autoriserait** — ce que le critère de STORY-603 et STORY-289 interdit à une donnée. Le service contrôle la **forme** du code participant ; la vérité vient du schéma, à la vérification, quand l'adaptateur existera.
+> - ⚠️ **Money Vibes n'étant pas participante, aucun compte de ce type ne peut être vérifié aujourd'hui** : il naît `NON_VERIFIE` et ne reçoit aucune demande de paiement (AD-14). Le passage en production a un déclencheur nommé — la convention avec un participant agréé — exactement comme les passerelles de `notification-service`.
+
+**Points :** 8
+
 ---
 
 # EPIC-036 : Fournisseurs de paiement interchangeables et simultanés
