@@ -120,9 +120,10 @@ compris. Le décalage réel (acomptes sur l'exercice précédent + solde de rég
 - [x] Portes DoD : lint **0 warning**, build OK, **1 899** unitaires + **517** e2e verts,
       couverture **98,87 / 94,24 / 98,84 / 98,89** (seuils 65/90/90/90).
 - [x] Discipline de mutation : **6 mutations, 6 rougissements ciblés** (détail plus bas).
-- [x] Vérification docker sur la base réelle.
-- [ ] Revue de code.
-- [ ] Revue de sécurité.
+- [x] Vérification docker sur la base réelle, **rejouée sur l'état final** après les
+      correctifs de revue (ils touchaient l'export, déjà mesuré).
+- [x] Revue de code — **5 constats, tous corrigés** (dont 1 bloquant).
+- [x] Revue de sécurité — **0 vulnérabilité**.
 
 ### Ce qui a été livré
 
@@ -210,6 +211,59 @@ trésorerie redevient celle d'avant la story — **jamais un impôt nul silencie
 forfaitaire 1.00 % du chiffre d'affaires — impôt dû = max des deux » et les lignes
 « dont chiffre d'affaires », « Résultat avant impôt », « Impôt sur les bénéfices » (en
 négatif) et « Résultat net (après impôt) ».
+
+### Revue de code — 5 constats, tous corrigés (commit dédié)
+
+| # | Gravité | Constat | Correctif |
+|---|---|---|---|
+| 1 | **bloquant** | L'export affirmait « minimum forfaitaire 1 % **du chiffre d'affaires** » même quand l'assiette **retenue** était le total des produits. Le taux vient du paquet, mais l'assiette dépend du référentiel : un snapshot figé **avant STORY-457** ne porte pas `chiffreAffairesN`, le moteur liquide alors sur les produits et le publie (`assietteMfpSource`) — que `mentionFiscalite` ne lisait pas. Un document remis à une banque annonçait une assiette **plus large de 31 %** que celle du calcul, avec la ligne « dont chiffre d'affaires » **vide** juste au-dessus. | la mention nomme l'assiette qui a **servi** ; deux tests neufs (repli signalé, régime sans minimum) |
+| 2 | non-bloquant | Le mode de panne du chargement de référentiel est **neuf** — avant cette story la projection ne lisait aucun artefact — et n'était pas traduit : un snapshot épinglé sur un référentiel retiré du registre rendait un **500 nu**, là où les routes de liasse rendent un code lisible sur le **même** snapshot. | `chargerFiscalite`, **seul juge des trois chemins**, traduit via `toHttpFromReferentielError` ; spec dédiée |
+| 3 | non-bloquant | `ComparaisonResponseDto.modeleVersion` publiait encore `1.0.0` quand le code rend `1.1.0`, et ses deux `resultatNet` ont changé de **sens** sans une ligne de description. | exemple corrigé + descriptions |
+| 4 | non-bloquant | La description de `decaissementsImpot` énonçait comme un fait deux comportements que le code ne tient pas (étalement sur 12 mois sans échéancier publié, `0` partout sans impôt calculable) ; et la réponse **mensuelle** ne publiait pas `fiscalite`, donc douze zéros ne disaient pas s'il s'agit d'un impôt **nul** ou **inconnu** — la distinction même qu'exige AC-5. | description exacte + `fiscalite` publiée sur le mensuel, test unitaire et e2e |
+| 5 | non-bloquant | L'énumération de l'invariant de `PeriodeMensuelle` n'avait pas reçu l'impôt, alors que c'est **elle** qu'on relit avant d'ajouter la ligne suivante. | énumération complétée |
+
+Une **seconde lentille** (over-engineering) a été passée sur le même diff : rien à retrancher
+qui ne heurte une convention du dépôt — les deux primitives `calculerIs`/`calculerMfp` restent
+exportées parce que leur spec les met à l'épreuve directement, et le drapeau `applicable`
+reste redondant avec `parametres !== null` **par convention publiée** (même rôle que
+`tresorerieAncree` et `chiffreAffairesAncre` : le contrat doit **nommer** l'état dégradé).
+
+### Revue de sécurité — aucune vulnérabilité
+
+Surface analysée : les 8 fichiers de production, **avec** le code voisin qui décide de
+l'exploitabilité (loader, source d'artefact, registre, mapper d'erreurs, gate d'accès,
+repositories scopés, contrôleurs). Écarté avec raison :
+
+- **Path traversal / SSRF** : le `locator` ne vient jamais de la donnée — il est résolu dans
+  le manifeste **en dur** du registre, et un `code@version` inconnu lève avant toute I/O.
+- **Fuite d'information par les messages neufs** : les trois erreurs atteignables
+  (`REFERENTIEL_UNAVAILABLE`, `REFERENTIEL_INTEGRITY`, `..._TRANSIENT`) sont des **littéraux
+  constants** ; ni chemin, ni locator, ni hash ne sortent.
+- **Anti-énumération** : dans les trois chemins, les 404 et le 409 sont tranchés **avant** le
+  premier chargement de référentiel — une erreur d'artefact ne peut pas servir d'oracle.
+- **Injection de formule / XSS dans l'export** : la mention ne concatène que des littéraux et
+  des nombres formatés ; la ligne d'impôt écrit un nombre ou `null`.
+- **DoS / empoisonnement de cache** : l'échéancier vient de l'artefact vérifié par checksum,
+  pas de l'appelant ; le cache de fiscalité est **local à un appel**, keyé par un `snapshotId`
+  déjà scopé.
+
+⚠️ **Un point relevé par la revue de sécurité, volontairement laissé hors périmètre** :
+`chargerFiscalite` ne confronte pas le `referentielChecksum` **figé dans le snapshot** à celui
+du paquet effectivement chargé (validé, lui, contre le checksum **courant** du registre). Le
+dépôt pratiquant la révision d'artefact « en place » à version constante, une projection
+**rejouée** après un tel bump peut rendre des montants d'impôt différents à snapshot
+identique. Ce n'est pas une faille (il faut un accès en écriture au dépôt ou à l'image) et le
+comportement est **celui de tous les consommateurs existants** du loader — mais cette story
+rend l'écart financièrement significatif pour la première fois. À instruire dans une story
+dédiée au déterminisme du rejeu, pas ici.
+
+### Note d'exécution — une suite e2e intermittente, étrangère à la branche
+
+Sur **quatre** exécutions complètes de la suite e2e, **une** a échoué dans
+`bilan-jeu-etats.e2e-spec.ts` (un `valider` rendant 400 après une réouverture) — fichier
+**non touché** par cette branche. La suite passe **seule** (89/89) et sur les trois autres
+exécutions complètes (518/518), sur la branche comme sur `dev`. Le test précédent y mute une
+fausse dépendance partagée (`retirerPourSonde`). Signalé, **non corrigé** : hors périmètre.
 
 ### Hooks inertes documentés (hors périmètre, non codés)
 
