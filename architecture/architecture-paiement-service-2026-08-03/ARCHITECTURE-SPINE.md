@@ -188,8 +188,17 @@ l'organe de parole unique (AD-17).
   référence et de quoi présenter le checkout ; la confirmation arrive comme un **fait séparé** (AD-4),
   jamais comme valeur de retour. Un port synchrone exclurait tout PSP réel.
 - **Rule (capacités) :** chaque fournisseur déclare pays, devises, méthodes, montants minimum et
-  maximum, barème de frais, paiement partiel, délai de règlement, et son
+  maximum, paiement partiel, délai de mise à disposition, et son
   `modeCheckout: REDIRECTION | API_DIRECTE`. Rien de tout cela n'est codé en dur ni lu ailleurs.
+- **Amendement du 2026-09-05 (STORY-603) — le barème n'est PAS une capacité.** La règle ci-dessus
+  citait le « barème de frais » parmi les capacités ; il en est sorti. Une **capacité** dit ce que
+  le code **sait faire**, et c'est pour cela qu'elle ne peut pas être administrable (AD-6). Un
+  **tarif** ne dit pas *si*, il dit *combien* : il ne peut ouvrir aucun chemin que la capacité ne
+  déclare déjà, donc il peut être une donnée sans qu'AD-6 soit amendé. L'adaptateur ne déclare
+  plus qu'une **grille publiée facultative** (`baremePublie`), datée et non administrable ; le
+  tarif réellement appliqué à une organisation est le barème de **son contrat**, qui prime.
+  Un barème de contrat portant un couple ou une méthode que l'adaptateur ne déclare pas est
+  **refusé** — sans quoi une donnée administrable élargirait une capacité par la porte de derrière.
 - **Rule (données de paiement) :** les deux modes de checkout sont livrés en v1. En mode
   `API_DIRECTE`, les données de paiement — PAN, PIN, OTP — sont **en transit seulement** : jamais
   persistées, jamais journalisées, jamais présentes dans la boîte de réception, dans le journal
@@ -222,9 +231,19 @@ l'organe de parole unique (AD-17).
 - **Binds:** FR-P09, FR-P23, FR-P23b, FR-P23c, FR-P24b, FR-P58, NFR-8, CM-2
 - **Prevents:** un montant découvert après coup par le payeur, et un tarif recalculé à la lecture qui
   changerait rétroactivement ce qu'un payeur a supporté
-- **Rule (affichage) :** les frais annoncés viennent du **barème déclaré en capacités** du fournisseur.
-  Aucun appel réseau n'est fait avant d'afficher un prix — la page doit rester ouvrable sur une 3G
-  d'Agoè (NFR-8).
+- **Rule (affichage) :** les frais annoncés viennent du **barème applicable** — celui du contrat de
+  l'organisation s'il existe, la **grille publiée** du fournisseur à défaut (STORY-603). Aucun appel
+  réseau n'est fait avant d'afficher un prix — la page doit rester ouvrable sur une 3G d'Agoè
+  (NFR-8) ; la résolution a lieu à l'émission de la demande, et la page publique lit la version
+  **figée**, jamais un tarif re-résolu.
+- **Rule (absence de tarif, 2026-09-05 / STORY-603) :** un couple **couvert mais non tarifé** — ni
+  contrat, ni grille publiée — produit un refus nommé `TARIF_NON_CONTRACTE`, rendu à
+  l'**organisation**, à l'émission. **Jamais des frais nuls**, et jamais `AUCUN_FOURNISSEUR_ELIGIBLE`,
+  qui désigne le routage : les deux causes ne se soignent pas pareil.
+- **Rule (version, 2026-09-05 / STORY-603) :** la version d'un barème **saisi** est **dérivée de son
+  contenu** ; celle d'une grille publiée reste **déclarée**, avec sa date de relevé. Une version
+  saisie laisserait deux jeux de chiffres porter le même nom, et la version figée sur une demande
+  ancienne désignerait des nombres qui ont changé.
 - **Rule (figement) :** la politique de frais **et** la version du barème sont **figées à l'émission de
   la demande**, jamais relues à l'encaissement. Un changement de politique ou de barème ne modifie
   aucune demande déjà communiquée à un payeur.

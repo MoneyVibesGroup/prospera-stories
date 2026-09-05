@@ -387,6 +387,25 @@ En tant qu'**organisation cliente**, je veux encaisser réellement en environnem
 
 **Points :** 5
 
+### STORY-603 — Les cinq pays de FedaPay, et le barème qui devient contractuel
+
+En tant qu'**organisation cliente qui encaisse hors du Bénin**, je veux que Prospera connaisse tous les pays où mon fournisseur sait encaisser **et** le tarif que mon contrat prévoit, afin d'encaisser au Togo sans qu'un tarif inventé soit annoncé à mes payeurs. *(FR-P09, FR-P58, AD-5, AD-6, AD-7)*
+
+> **Elle tranche le point PO laissé ouvert par STORY-246** — « soit le barème cesse d'être une capacité, soit AD-6 s'amende pour un barème par organisation ». La réponse est la première branche, et **AD-6 n'a pas besoin d'être amendé** : une capacité dit ce que le code **sait faire**, un tarif dit **combien** ; comme un tarif ne peut ouvrir aucun chemin, il peut être administrable sans jamais mentir sur ce que le code sait faire.
+
+**Critères d'acceptation**
+
+- **Étant donné** les capacités déclarées par l'adaptateur FedaPay **quand** on les lit **alors** elles portent les **cinq** couples que sa documentation publie — `BJ`, `TG`, `CI`, `NE`, `SN`, tous en `XOF` — avec les méthodes réellement offertes, et rien d'autre.
+- **Étant donné** une couverture **quand** on l'inspecte **alors** le barème qu'elle porte est explicitement la **grille publiée** du fournisseur, datée, et **facultative** : une couverture dont le fournisseur ne publie aucun tarif en est dépourvue, et aucun chiffre n'y est supposé.
+- **Étant donné** une organisation **quand** elle enregistre le barème de **son** contrat pour un couple fournisseur × pays × devise **alors** il est conservé, **journalisé** (AD-10) et **prime** sur la grille publiée, pour cette organisation seulement.
+- **Étant donné** un barème de contrat **quand** on l'enregistre pour un couple ou une méthode que l'adaptateur **ne déclare pas** **alors** il est refusé : **le contrat dit COMBIEN, jamais SI** — aucune donnée administrable n'élargit une capacité (AD-6).
+- **Étant donné** une demande sur un couple couvert **quand** ni le contrat ni la grille publiée ne tarifent la méthode **alors** elle est refusée à l'**émission**, à l'organisation, sous le code `TARIF_NON_CONTRACTE` — **jamais des frais nuls**, et jamais un refus qui parle de routage.
+- **Étant donné** deux barèmes de contrat au contenu différent **quand** on lit leur version **alors** elle diffère : la version d'un barème **saisi** est **dérivée de son contenu**, jamais choisie — sans quoi la version figée sur une demande ancienne (AD-7) désignerait des nombres qui ont changé.
+
+> ⚠️ **Ce que la story ne fait pas.** Elle ne déplace **pas** les bornes de montant au niveau du compte marchand (second point ouvert de STORY-246 — c'est STORY-289), et son résolveur **n'a pas encore d'appelant** : la demande de paiement qui figera la version arrive en EPIC-037. C'est la même situation, assumée, que `initier` depuis STORY-246.
+
+**Points :** 8
+
 ### STORY-247 — Adaptateur FedaPay — mode checkout API directe
 
 En tant que **payeur**, je veux payer sans quitter la page quand le fournisseur le permet, afin que le parcours reste d'un seul tenant. *(FR-P14, AD-5, risque R4)*

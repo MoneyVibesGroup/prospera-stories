@@ -4774,11 +4774,18 @@ sprints:
     start_date: "2027-09-23"
     end_date: "2027-10-07"
     capacity_points: 34
-    committed_points: 30
-    completed_points: 0
-    status: "not_started"  # 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-036.
+    committed_points: 38  # ⚠️ 30 + 8 (STORY-603, ajoutée le 2026-09-05) — AU-DESSUS de la capacité. STORY-247 (5 pts) est volontairement écartée du cadrage du 2026-09-05 (elle porte R4, conformité carte) : la sortir du sprint ramènerait à 33. Décision PO à prendre, pas prise ici.
+    completed_points: 8
+    status: "in_progress"  # 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-036. ✅ STORY-603 livrée le 2026-09-05 : le barème quitte les capacités, les cinq pays de FedaPay entrent.
     goal: "🏁 EPIC-036 : les deux modes de checkout, le routage déterministe sans repli implicite, et le registre ADMINISTRABLE (ouvrir un marché sans déploiement). Puis l'ouverture de la créance : montants en unité mineure, upsert idempotent, et la créance saisie à la main — le chemin A, sans quoi l'écran distributeur porte sur un objet inexistant."
     stories:
+      - story_id: "STORY-603"
+        title: "Les cinq pays de FedaPay, et le barème qui devient contractuel"
+        epic: "EPIC-036"
+        points: 8
+        service: "paiement-service"
+        status: "done"  # ✅ 2026-09-05, commit sur `MNV-603`, branchée sur `origin/dev` (STORY-244 y était, sous son SHA réécrit `8de9eb4` — arbres vérifiés identiques, pas de `rebase --onto`). 1174 tests unitaires, 54 e2e. ⚡⚡ TRANCHE LE POINT PO OUVERT PAR STORY-246 — et AD-6 N'A PAS BESOIN D'ÊTRE AMENDÉ : une capacité dit ce que le code SAIT FAIRE, un tarif dit COMBIEN ; comme un tarif ne peut ouvrir aucun chemin, il peut être administrable sans jamais mentir sur ce que le code sait faire. Le barème SORT donc des capacités : il ne reste dans `Couverture` qu'une `baremePublie` FACULTATIVE (la grille d'affiche, datée, non administrable), et le barème du CONTRAT d'une organisation prime dessus. ⚡⚡ LE PAYS N'ÉTAIT PAS LE PROBLÈME, LE BARÈME L'ÉTAIT : FedaPay encaisse dans CINQ pays (BJ, TG, CI, NE, SN — tous XOF, relevé docs.fedapay.com du 2026-09-05), mais ne publie sa grille QUE pour le Bénin. Le Togo recevait `AUCUN_FOURNISSEUR_ELIGIBLE`, un refus qui désigne le ROUTAGE et dont le remède est d'ouvrir un marché, alors qu'il suffisait d'enregistrer un tarif : nouveau code `TARIF_NON_CONTRACTE`, rendu à l'organisation, à l'émission. ⚡ LE CONTRAT DIT COMBIEN, JAMAIS SI — un barème pour un couple ou une méthode que l'adaptateur ne déclare pas est REFUSÉ ; sans ce refus, il aurait suffi d'enregistrer un tarif pour qu'un couple non implémenté paraisse servi (une capacité par la porte de derrière). ⚡ LA VERSION D'UN BARÈME SAISI EST DÉRIVÉE DE SON CONTENU, jamais choisie : AD-7 la fige sur la demande, et une version saisie laisserait deux jeux de chiffres porter le même nom. Asymétrie assumée avec la grille publiée, dont la version reste DÉCLARÉE avec sa date de relevé — elle vit dans le code, donc sous revue et sous l'historique du dépôt. ⚡ L'ALPHABET D'UNE VALEUR DÉRIVÉE DOIT CONTENIR CELUI DE TOUT CE DONT ELLE DÉRIVE : `MOTIF_VERSION_BAREME` excluait le souligné qu'admet `MOTIF_IDENTIFIANT_FOURNISSEUR` — cassé pour les seuls fournisseurs au nom composé, donc vert sous tout test écrit avec un nom simple (trouvé par un test, corrigé). ⚠️ L'arrondi des frais va VERS LE HAUT : arrondir vers le bas annoncerait au payeur un total inférieur d'une unité à ce qu'il paiera. ⚠️ AUCUN 8e DROIT : `paiement:compte:administrer` couvre les trois routes — le barème est une clause du MÊME contrat que le compte marchand qu'il tarife, et qui détient ce droit peut déjà rediriger TOUS les encaissements, pouvoir strictement plus grave. ⛔ RESTE OUVERT : les bornes de montant ne sont toujours pas au niveau du compte marchand (STORY-289), et le résolveur n'a AUCUN APPELANT tant que la demande de paiement n'existe pas (EPIC-037) — même situation assumée que `initier` depuis STORY-246.
+        assigned_to: null
       - story_id: "STORY-247"
         title: "Adaptateur FedaPay — mode checkout API directe"
         epic: "EPIC-036"
