@@ -432,8 +432,23 @@ conservée sans durée — y compris le contact actif.
 - Le carnet ne stocke **que ce qui sert à joindre** : nom d'usage, identifiants de canal, langue,
   consentement. Jamais le montant dû, le solde, le score ou le statut de dossier — ceux-ci restent
   dans le module et transitent comme variables de message (FR-N05).
-- Le rendu du message n'est pas conservé, sauf valeur probante — donc les variables sensibles ne se
-  retrouvent pas dupliquées dans le journal.
+- Le rendu du message n'est pas conservé, sauf valeur probante.
+- ⛔ **Amendement du 2026-09-06 (STORY-587, AR-20) — la phrase précédente disait davantage, et elle
+  était fausse.** Elle affirmait que ne pas conserver le rendu suffisait à ce que « les variables
+  sensibles ne se retrouvent pas dupliquées dans le journal ». Or **FR-N35 journalise explicitement
+  les variables** : `{ montantDu, nom }` est exactement aussi personnel que le texte rendu, et le
+  journal décrit ici comme minimisé ne l'était pas. Un PRD qui se trompe sur sa propre minimisation
+  est une pièce **opposée à l'organisation** le jour d'un contrôle.
+- ⚡ **Ce qui est vrai, et depuis quand.** Les variables sont bien journalisées, et c'est leur
+  **horloge propre — 90 jours** — qui borne l'exposition (AD-15). Au terme, elles sont retirées et
+  il ne reste que le squelette : destinataire, `modele@version`, canal, statut, coût. L'affirmation
+  du PRD devient donc vraie **au bout de quatre-vingt-dix jours, pas avant**. Cette horloge est
+  livrée par STORY-586 ; elle est **paramétrable par organisation dans la limite d'un plafond
+  opposable** (STORY-585), et le service **refuse** une durée qui le dépasse au lieu de la ramener
+  en silence.
+- ⚠️ **Conséquence à dire, pas à subir** : la fenêtre de **rejeu manuel** d'un envoi échoué (FR-N40)
+  est bornée par cette même horloge. Sans variables, il n'y a plus rien à rendre — le rendu figé
+  n'étant jamais conservé — et la console doit l'annoncer avant que l'utilisateur ne clique.
 
 ### 9.4 Droits des personnes
 
