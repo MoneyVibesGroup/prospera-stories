@@ -271,6 +271,24 @@ travail au même titre.
 - **AR-03** — **Deux bases Mongo** sur le réplica set `rs0` : `notification_service` (readWrite) et `notification_service_preuves` (`find`+`insert` seulement), plus un **compte de maintenance** absent de la configuration du service *(AD-14)*.
 - **AR-04** — **Trois files BullMQ disjointes** — `transactionnel-prioritaire`, `transactionnel`, `masse` — avec pools d'exécutants séparés, la file étant déterminée par la nature de l'envoi et jamais par l'appelant *(AD-13, NFR-3)*.
 - **AR-05** — **Deux chemins d'entrée** : API pour les messages porteurs d'un secret, consumers de bus pour tout le reste *(AD-2)*.
+  > ⛔⛔ **ARBITRAGE DU 2026-09-06 (STORY-607) — LA LISTE `EVENEMENTS_DECLENCHEURS` NE S'OUVRE
+  > PAS.** `paiement-service` (STORY-261) prévoyait de publier `paiement.demande.emise` **pour
+  > que ce service envoie le lien de paiement**. La demande est raisonnable, la solution évidente
+  > — ajouter un topic — et elle détruirait le seul contrôle qui rende AD-2 vérifiable : une
+  > liste ouverte ne rougit pas, elle accueille. Une règle de déclenchement appartient à une
+  > **organisation** ; laisser abonner une règle à un topic arbitraire permettrait un jour de
+  > brancher un envoi sur un topic porteur de secret.
+  >
+  > **Décision : la liste reste fermée, l'événement de paiement s'amaigrit (ni jeton, ni URL, ni
+  > QR), et le lien part par APPEL DIRECT** à `POST /envois` — file de sortie HTTP côté paiement,
+  > STORY-608. Gardé par `src/domain/declenchement/liste-fermee-ad2.spec.ts`, qui vérifie aussi
+  > que le DTO d'écriture **dérive** de la liste au lieu de recopier des topics : c'est là que
+  > l'ouverture se ferait sans toucher au domaine.
+  >
+  > ⚠️ **La même règle vaut pour `auth-service`** : un code de vérification et un lien de
+  > réinitialisation sont exactement ce qu'AD-2 refuse de mettre sur le bus. C'est ce qui décide
+  > de la forme de **STORY-610** — délégation des sept e-mails **par appel**, pas par événement,
+  > malgré l'inversion de dépendance que cela crée.
 - **AR-06** — **C8 — authentification machine-à-machine** : décision programme, condition bloquante de l'incrément 2 *(AD-2)*.
 - **AR-07** — **Boîte de réception d'accusés append-only** avec vérification de signature avant persistance et **parseur brut monté uniquement sur les routes de webhook** *(AD-4, AD-17)*.
 - **AR-08** — **Trois index uniques d'idempotence** distincts, plus la clé étendue `(orgId, cleIdempotence, regleDeclenchementId, destinataireRef, canal)` *(AD-3)*.

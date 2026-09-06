@@ -653,9 +653,36 @@ En tant qu'**exploitant**, je veux que le cycle d'une demande soit explicite et 
 
 En tant qu'**organisation cliente**, je veux que le lien parte au payeur par WhatsApp, SMS ou e-mail, afin qu'il n'ait rien à chercher. *(FR-P17, AD-17)*
 
+> ⛔⛔ **ARBITRAGE AD-2 DU 2026-09-06 (STORY-607) — LE LIEN NE PASSE PAS PAR LE BUS.**
+> Deux contrats se contredisaient, et l'un des deux était déjà du code livré. Cette story
+> prévoyait de publier `paiement.demande.emise` **pour que la notification envoie le lien** ;
+> `notification-service` l'interdit — sa liste `EVENEMENTS_DECLENCHEURS` est **fermée**, ne
+> contient aucun topic `paiement.*`, et son AD-2 discrimine les deux chemins d'entrée **par le
+> contenu** : *tout ce qui transporte un lien à usage unique ou un code entre par appel direct,
+> jamais par le bus.*
+>
+> **Ce qui a été tranché, et pourquoi ce n'est pas l'ouverture de la liste.** Une règle de
+> déclenchement appartient à une **organisation** ; laisser abonner une règle à un topic
+> arbitraire permettrait un jour de brancher un envoi sur un topic porteur de secret, et le
+> discriminant d'AD-2 cesserait d'être **vérifiable en revue**. La liste fermée n'est pas une
+> commodité, c'est le contrôle.
+>
+> **L'événement n'est pas supprimé, il est AMAIGRI.** `paiement.demande.emise` reste utile à la
+> comptabilité, à la relance et au pilotage ; il perd le jeton, l'URL et le QR — ce qu'il n'avait
+> pas le droit de porter. Un topic Kafka est lu par des consommateurs qu'on n'a pas écrits,
+> conservé selon une rétention qu'on n'a pas choisie, et **rejouable** : un jeton qui y passe est
+> un jeton dont on ne contrôle plus la durée de vie, alors qu'il vaut 256 bits d'entropie et
+> qu'il est **tout** ce qui protège la page (STORY-253).
+>
+> **L'envoi du lien au payeur se fait donc par APPEL DIRECT** à `POST /envois` de
+> `notification-service`, via la file de sortie HTTP de **STORY-608**. *Appeler la notification
+> n'est pas parler au payeur* : l'organe de parole reste unique (AD-17), et l'AC-2 historique de
+> cette story reste vrai et vérifié.
+
 **Critères d'acceptation**
 
 - **Étant donné** une demande émise **quand** elle est persistée **alors** `paiement.demande.emise` est publié via l'outbox, dans la même transaction.
+- **Étant donné** l'événement publié **quand** on l'inspecte **alors** il ne porte **ni jeton, ni URL de lien, ni QR** *(STORY-607, AC-1)*.
 - **Étant donné** le code du service **quand** on cherche un envoi direct au payeur **alors** il n'en existe aucun — ni SMS, ni e-mail, ni WhatsApp ; l'organe de parole est unique.
 - **Étant donné** l'événement publié **quand** on l'inspecte **alors** il est keyé `orgId`, porte `eventId` et `schemaVersion`, et véhicule l'état absolu.
 
