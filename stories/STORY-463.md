@@ -1,6 +1,6 @@
 # STORY-463 : L'ancre des emplois durables peut devenir négative — un actif immobilisé net négatif que le contrôle d'équilibre ne peut pas voir
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -126,6 +126,78 @@ mauvaise collection, « 0 » se lisait comme « rien écrit » alors que tout l'
 
 Lint 0 warning · build OK · **2 021** unitaires verts, seuils de couverture tenus (98,89 / 94,42 / 98,87 /
 98,91) · **562** e2e verts.
+
+### Revue de code — 2 constats, aucun bloquant, et un troisième trouvé en corrigeant
+
+1. **Le JSDoc de `HypothesesDto` s'était détaché de sa classe.** La constante avait été
+   insérée **entre** le bloc de documentation de STORY-068 et la classe : les deux blocs se
+   rattachaient à la constante, et la classe n'avait plus aucune documentation. Constante
+   déplacée au-dessus.
+2. **AC-4 n'était publié qu'en prose.** Le plugin Swagger n'est pas monté : un `@Max()` de
+   class-validator **ne se propage pas** au document OpenAPI. Le schéma n'annonçait **aucune
+   borne**, et un formulaire ou un client généré depuis lui laissait partir le `450` pour
+   `45` — la saisie fautive d'un facteur 10 que AC-4 existe précisément pour attraper.
+   `minimum`/`maximum` sont désormais publiés, et les trois descriptions **dérivent de la
+   constante** au lieu de recopier « 365 » à la main : rien n'aurait rougi si la constante
+   avait bougé seule.
+3. ⚡⚡ **Trouvé en MESURANT le correctif 2** : les trois délais se publiaient `type: number`
+   alors que `@IsInt()` les exige entiers. Une borne posée sur un type **fractionnaire** est
+   un contrat qui se contredit — un client généré enverrait `45.5` et recevrait un 400 que le
+   schéma ne prédisait pas. `type: 'integer'` explicite, comme les trois échéanciers du même
+   fichier. **Ce constat-là n'a été visible que parce que le correctif précédent a été mesuré
+   et non supposé.**
+
+Mutations du commit de revue : `maximum` retiré → **3 e2e rouges** ; `type` remis à `number`
+→ **3 e2e rouges**. Le balayage de contrat compare à la **constante**, jamais à `365` écrit
+dans le test.
+
+Resserrement ponytail retenu : les deux `it` de la fonction pure fusionnés (le premier
+n'ajoutait que la borne zéro). Rien d'autre à retrancher — le reste est de la documentation,
+convention du dépôt.
+
+### Revue de sécurité — 0 vulnérabilité
+
+Aucun constat. La PR est **strictement additive** côté contrat et **strictement restrictive**
+côté validation : aucune garde, aucune authentification, aucune autorisation, aucun secret,
+aucune surface d'infrastructure n'est touché. Vérifié explicitement : le passage des trois
+`@ApiProperty` littéraux à un helper partagé **n'a retiré aucun décorateur `class-validator`**
+(le diff ne supprime que trois `@Max(3650)`), les deux seuls chemins d'écriture restent
+couverts, le contrôle ne peut ni lever ni bloquer, et le rétrécissement de la borne **réduit**
+la surface au lieu de l'ouvrir.
+
+**Un durcissement retenu d'une remarque de marge** : `categorie` était typée sur l'union
+large `CategorieControle` alors que le contrat publie `enum: ['INFORMATIF']`. Un contrôle du
+prévisionnel devenu `BLOQUANT` par inadvertance aurait donc été un **écart silencieux entre
+le code et le schéma publié** — la forme exacte du défaut de STORY-426. Le champ est épinglé
+en `Extract<CategorieControle, 'INFORMATIF'>` : le lien avec le vocabulaire partagé est gardé,
+la dérive devient une erreur de compilation. Mutation : forcer `'BLOQUANT'` **ne compile plus**
+sans transtypage, et avec transtypage → **4 unitaires rouges**.
+
+⚠️ **Ce que le balayage de contrat NE garde PAS** : l'`enum` publié vient du **décorateur**,
+donc une dérive de la valeur servie à l'exécution laisserait le schéma annoncer `INFORMATIF`
+pendant que l'API rendrait autre chose. Mesuré : la mutation transtypée laisse les 127 e2e de
+contrat **verts**. Ce sont les unitaires et l'e2e de projection qui gardent la valeur — le
+typage, lui, empêche la dérive en amont.
+
+### Vérification docker REJOUÉE sur l'état final
+
+Le correctif de revue a changé un **artefact publié** — le schéma OpenAPI — donc la
+vérification de la phase ④ a été rejouée après les correctifs, sur le service redémarré.
+
+| Mesure sur `/api/docs-json` servi | Résultat |
+|---|---|
+| Les 3 délais | `type: integer`, `minimum: 0`, `maximum: 365`, description portant « À LA SAISIE ». |
+| `ControleAncrageProjectionDto` | **5** propriétés publiées (`0` aurait signifié un `object` opaque), `code` et `categorie` en `enum`. |
+| Projection à 65 j | `ancrageEmploisDurables = { montant: −1 388, ecart: −1 388, coherent: false }`, `categorie: INFORMATIF`. |
+| N+1 sur le même jeu | `actifImmobiliseNet = −1 388`, `controle.equilibre = **true**`, `controleAncrage.coherent = **false**`. |
+| Création à 366 j | **400**, et toujours `0` délai > 365 en base. |
+
+### Flottement de test observé, sans rapport avec ce diff
+
+Un passage de la suite e2e complète a rendu `bilan-jeu-etats.e2e-spec.ts › rouvrir un jeu
+BROUILLON → 409` en **404**. La suite passe **89/89 isolément** et la suite complète passe
+**565/565** aux relances. Ce fichier n'est ni touché ni importé par ce diff. Signalé tel quel :
+c'est une fragilité d'ordonnancement pré-existante, pas un effet de la story.
 
 ### Hors périmètre, assumé
 
