@@ -1,6 +1,6 @@
 # STORY-460 : Investissement, financement et remboursement sont des montants RÉCURRENTS — et rien dans le contrat ne le dit
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -47,3 +47,23 @@ Le hook est annoncé dans `projection.types.ts` (« échéancier non uniforme »
 - FR-020 (trésorerie mensuelle) a le même besoin, en plus fin : un investissement a un **mois**.
 - La maquette FE-035 porte l'avertissement sur les trois champs et sur le verdict du scénario
   « Optimiste » — c'est aujourd'hui la seule protection de l'utilisateur.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress`** (2026-09-06) — branches `MNV-460` créées dans `bilan-service` et `docs/`
+**avant** la première ligne de code.
+
+```
+bilan-service : MNV-460
+docs          : MNV-460
+```
+
+**Périmètre — un seul dépôt** : `bilan-service`. Aucun contrat d'événement Kafka n'est touché, donc pas
+de second dépôt à synchroniser.
+
+**Arbitrage AC-1 / AC-3** : aucun report PO n'est enregistré, donc **AC-1 est livrée** (échéancier par
+exercice) et AC-3 ne s'y substitue pas — mais son exigence de fond (« le contrat doit dire ce que le code
+fait ») est tenue quand même : la valeur scalaire reste le **montant annuel récurrent** et le contrat le
+nomme désormais explicitement.
