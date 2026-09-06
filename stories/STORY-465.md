@@ -1,6 +1,6 @@
 # STORY-465 : Aucun rebasage : quand la liasse est re-validée, les jeux d'hypothèses continuent de projeter sur l'ancien snapshot, en silence
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -129,6 +129,63 @@ devenait injoignable, donc **tout jeton valide était refusé en 401**. Le diagn
 faux : c'est le service qui ne pouvait plus vérifier de signature. Relancer l'infrastructure **puis** les
 deux services a suffi. À retenir : un 401 généralisé après un incident d'infrastructure se diagnostique
 côté **émetteur de clés**, pas côté jeton.
+
+### Revue de code — 2 constats, aucun bloquant
+
+1. ⚠️ **Un bloc de documentation détaché de la fonction qu'il justifie**, rattaché à la voisine —
+   **même défaut qu'en STORY-464**, un fichier plus loin. `avecFraicheur`, la seule fonction qui
+   porte la comparaison de fraîcheur, se retrouvait **sans aucune documentation**, alors que c'est
+   précisément celle qu'un mainteneur serait tenté de « simplifier » en comparant les `snapshotId` :
+   un jeu d'états sans snapshot redeviendrait alors **périmé**, avec un avertissement qu'**aucun
+   rebasage ne pourrait lever** (`rebaser` rend 409 sur ce même jeu).
+
+2. ⚡⚡ **`rebaser` codait `baseAJour: true` EN DUR sur ses deux sorties**, alors que les quatre
+   autres écritures le **calculent** — et c'est la route dont ce champ est le **produit**.
+   Conséquence : les quatre assertions `toBe(true)` posées après un rebasage vérifiaient une
+   **constante littérale**, pas une lecture. **Inverser la comparaison de fraîcheur ne les faisait
+   pas bouger.**
+
+   `snapshots.dernier` est lu **hors transaction** : une validation concurrente peut figer une
+   version entre cette lecture et la réponse. Un `true` en dur ferait retirer le bandeau
+   d'avertissement à l'écran pendant que le `GET` suivant rendrait `false` — deux vérités
+   contradictoires sur le champ dont la fiche dit qu'il « existe pour être cru ».
+
+   Deux essais **discriminants** ajoutés : la validation concurrente pendant le rebasage, et le
+   no-op qui calcule lui aussi. La **description OpenAPI publiée**, qui gravait la même supposition,
+   suit. Mutation : recoder `true` en dur → **1 test rouge**.
+
+### Revue de sécurité — 0 vulnérabilité
+
+Les sept axes instruits et clos. Les plus utiles :
+
+- **Injection dans le pipeline d'agrégation** : Mongoose ne caste **pas** les pipelines, le risque
+  est donc réel en principe. Ici les trois opérandes sont des `ObjectId` construits côté serveur, et
+  **aucune entrée utilisateur n'atteint** le `$match` ni le `$in` — les `jeuEtatsId` viennent
+  exclusivement de documents déjà dossier-scopés.
+- **Élévation de privilège** : `base` n'a que **deux écrivains** dans tout le module — `creer` et
+  `rebaser`. `editer` patche `{ hypotheses, version }`, `renommer` patche `{ nom }` : un
+  `TENANT_USER` ne peut pas obtenir l'effet du rebasage par un autre chemin.
+- **Intégrité comptable** : les deux écritures partagent la **même session**, abort gardé. La
+  version sortante est historisée avec l'**ancienne** base, donc `getVersion(id, N)` continue de
+  résoudre les chiffres d'un export déjà émis.
+
+Elle relève **indépendamment** le même défaut de fraîcheur codée en dur, en le renvoyant à la revue
+de code.
+
+### Vérification docker REJOUÉE sur l'état final
+
+| Mesure | Résultat |
+|---|---|
+| Liste | **21 jeux, 11 périmés** (un de moins qu'avant : le premier rebasage de la vérification initiale a tenu). |
+| Rebasage de `v461-bfr` | version d'édition **1 → 2**, base **2 → 3**, `baseAJour` **calculé** à `true`. |
+| No-op immédiat | **200**, version **inchangée à 2**. |
+| Preuve en base | `jeu.version = 2`, `base.version = 3`, et l'historique ne porte **qu'une** ligne : `v1 → base.version = 2`, l'**ancienne** base. |
+
+⚠️ **L'infrastructure est retombée une seconde fois** pendant cette phase : Mongo, puis Kafka, ont
+quitté la liste des conteneurs (`exit code 0`, **pas** de kill par manque de mémoire). Relancer
+`mongo kafka redis` **puis** les deux services a suffi à chaque fois. Aucun rapport avec le code de
+la story — mais c'est ce qui explique les 401 en cascade : `auth-service` privé de Mongo ne sert plus
+son JWKS, et **tout jeton valide est alors refusé**.
 
 ### Portes
 
