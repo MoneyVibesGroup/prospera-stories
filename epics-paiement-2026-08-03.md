@@ -409,6 +409,31 @@ En tant qu'**équipe Money Vibes**, je veux encaisser les abonnements Prospera p
 
 **Points :** 5
 
+### STORY-602 — Garde de destination : le compte retenu appartient à l'organisation de la créance
+
+En tant qu'**organisation cliente**, je veux qu'aucun chemin d'argent ne puisse retenir un compte d'encaissement qui n'est pas le mien, afin qu'une erreur d'identifiant — ou un appelant mal intentionné — ne fasse ni partir mon argent ailleurs, **ni sortir la destination bancaire d'une autre organisation**. *(FR-P01, FR-P06, FR-P60, FR-P62 · AD-14, AD-16, NFR-6)*
+
+> ⚡⚡ **LE SCELLÉ PROTÉGEAIT DÉJÀ L'ARGENT. IL NE PROTÉGEAIT PAS LA DIVULGATION — ET DEPUIS STORY-600 IL Y A QUELQUE CHOSE À DIVULGUER.** Le lien du scellé (STORY-243) nomme l'organisation **et** le compte : un compte d'une autre organisation ne s'ouvre pas, donc aucun encaissement ne part vers une destination volée. Cette protection est réelle et elle reste. Mais le seul passage par lequel un secret sort du coffre charge le compte **par son identifiant seul**, puis remet à l'adaptateur une **vue** du compte — pays, devise, nature, fournisseur, état de vérification — **avant** que le déchiffrement échoue. Tant que cette vue ne disait rien de sensible, l'arbitrage tenait. STORY-600 y a fait entrer la **destination en clair** : le participant agréé et le numéro de compte chez lui. Un identifiant erroné suffit désormais à faire lire, à un adaptateur, chez quelle banque une autre organisation encaisse — et un adaptateur met ce qu'il reçoit dans un corps de requête sortante et dans ses traces.
+>
+> ⚡ **UNE PROTECTION QUI ARRIVE TROP TARD PROTÈGE LE MAUVAIS BIEN.** La cryptographie répond « ce chiffré n'est pas authentique » là où la vérité est « ce compte n'est pas le vôtre ». Les deux phrases n'ont ni le même statut HTTP — une intégrité d'artefact contre une ressource introuvable — ni le même remède, ni le même lecteur. Et une organisation qui se trompe d'identifiant recevrait un message qui accuse le système d'une corruption.
+>
+> ⛔ **ET CE N'EST PAS UN ÉCHO.** STORY-289 a posé la règle : un contrôle qui vérifie ce que son appelant vient d'affirmer n'est pas un second avis. Ici les deux faits n'ont pas la même source — l'appelant affirme **l'organisation de la créance**, qui vient du jeton signé ; le contrôle lit **à qui appartient le compte**, qui vient du document. Les rapprocher est exactement ce que le cas d'usage ne peut pas faire seul, puisqu'il ne charge pas le compte.
+
+**Critères d'acceptation**
+
+- **Étant donné** le seul passage par lequel un secret sort du coffre **quand** on l'appelle **alors** il **exige l'organisation** et charge le compte par le couple `(organisation, compte)` : un compte d'une autre organisation est **introuvable**, et le refus est celui d'un compte qui n'existe pas — **même code, même message** (AD-16 : distinguer les deux apprendrait à qui balaie que ses identifiants bien formés, eux, ont été cherchés).
+- **Étant donné** un compte d'une autre organisation **quand** un adaptateur tente de l'emprunter **alors** **rien** ne lui est remis : ni le clair, ni la vue, ni la destination — le refus tombe **avant** le chargement du scellé et **avant** tout appel sortant. Le test le prouve en constatant que le coffre n'est pas ouvert et que l'usage n'est **jamais exécuté**.
+- **Étant donné** une demande d'initiation et une demande de vérification **quand** on les inspecte **alors** chacune **nomme l'organisation** dont elle vient, à côté du compte qu'elle vise. Un adaptateur ne la choisit pas : il la transporte, et s'il la transportait mal, le compte serait introuvable — le défaut est **fermant**.
+- **Étant donné** la note qui déclarait que le cloisonnement ne se joue pas dans ce service **quand** on la relit **alors** elle est **remplacée par la règle vraie** : le cloisonnement se joue **là où la vue du compte est construite**, parce que c'est là qu'elle devient lisible. Une note qui décrit un arbitrage périmé est plus dangereuse qu'une absence de note.
+- **Étant donné** la protection cryptographique du lien **quand** on la cherche **alors** elle est **toujours là, inchangée** : la garde de cette story ne la remplace pas, elle arrive **avant**. Un test le vérifie en montrant que les deux refus existent et ne se confondent pas — l'un dit « pas à vous », l'autre « pas authentique ».
+
+> ⛔ **Ce que la story ne fait pas.**
+> - **Elle ne déplace pas le cloisonnement dans le domaine** : l'appartenance d'un compte est un fait de **persistance**, et le domaine ne charge rien. La mettre dans un agrégat obligerait à charger le compte deux fois, ou à faire confiance à un objet passé.
+> - **Elle ne touche ni au gate d'AD-16, ni au filtrage des listes** : ceux-ci protègent des **lectures**, celle-ci protège un **emprunt de secret** — le seul geste après lequel une destination part sur le réseau.
+> - ⚠️ **Elle ne crée aucun droit et n'ajoute aucune route.**
+
+**Points :** 3
+
 ---
 
 # EPIC-036 : Fournisseurs de paiement interchangeables et simultanés
