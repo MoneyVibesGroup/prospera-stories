@@ -1,6 +1,6 @@
 # STORY-464 : Un jeu d'hypothèses ne se supprime pas et ne se renomme pas — et son nom, saisi à la main, est confisqué pour toujours
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -143,6 +143,92 @@ mes propres tests :
 - une assertion « le canal best-effort n'est pas emprunté » était **vacante** : le mock ne portait pas la
   méthode, donc elle était vraie par absence. Le canal est désormais **fourni exprès** pour que
   l'assertion mesure quelque chose.
+
+### Revue de code — 3 constats, dont un BLOQUANT de contrat
+
+1. ⚡⚡ **BLOQUANT — le 409 de la CRÉATION recouvrait DEUX refus et n'en publiait qu'un.**
+   `POST …/hypotheses` rend `HYPOTHESES_EXISTE` **et** `BASE_NON_VALIDEE`, et seul le premier
+   porte un `details`. Publier la forme du renommage sur cette route annonçait `details`
+   **requis** et un `code` restreint à une seule valeur : un client généré aurait lu
+   `body.details.conflitAvec` sur un `BASE_NON_VALIDEE` — **le refus le plus fréquent de la
+   route** — et cassé sur `undefined`. Deux formes distinctes désormais : chaque route publie
+   ce qu'elle tient **réellement**, une classe unique sous-promettant sur l'une ou
+   **sur-promettant** sur l'autre, et c'est la sur-promesse qui casse un client.
+
+   ⚡ **En corrigeant, découvert que `JeuHypothesesController` n'entrait dans AUCUN balayage
+   de contrat** — c'est pourquoi rien ne rougissait. Il y est monté, et trois assertions
+   gardent les deux formes. Exactement la raison qui avait laissé passer six `object` opaques
+   en STORY-448.
+
+2. ⚡⚡ **La cible du journal d'export était le SEGMENT D'URL BRUT.** Le contrôleur ne le passe
+   par aucun pipe, et `Types.ObjectId.isValid` accepte l'hexadécimal **en majuscules** :
+   `…/previsionnel/507F1F77…` résout le même document et l'export réussit. La ligne d'audit
+   portait alors une cible en majuscules, que la garde de suppression — qui compare à
+   `_id.toString()`, minuscule — **ne retrouvait pas**. Le jeu redevenait supprimable **alors
+   qu'un PDF était déjà parti**, sans qu'aucune erreur ne le dise.
+
+   ⛔ Canonisé sous **garde de forme** (`^[0-9a-fA-F]{24}$` + `toLowerCase`) et **non** par
+   `new ObjectId(…).toString()`, qui **lève** sur une chaîne quelconque et **corrompt** une
+   chaîne de 12 caractères que `isValid` accepte pourtant.
+
+3. ⚠️ **Un commentaire périmé porteur d'une INSTRUCTION** (patron STORY-402).
+   `referentiel-http.mapper.ts` affirmait que le filtre global de ce service n'avait **pas** de
+   canal `details` et en tirait « lui ouvrir ce canal déborderait le périmètre ». Cette PR rend
+   la phrase fausse : la porte décrite comme fermée est ouverte. La **décision** tient toujours
+   — publier les candidats changerait un contrat déjà servi, sur une branche que STORY-422 rend
+   inatteignable — mais pour une **autre raison**, désormais écrite.
+
+Mutations du commit de revue : cible non canonisée → **1 unitaire rouge** ; `details` requis
+sur la création → **1 e2e rouge** ; `code` n'annonçant plus qu'un refus → **1 e2e rouge** ;
+`details` cessant d'être requis sur le renommage → **1 e2e rouge**.
+
+⚠️ Deux tentatives de mutation ont été **rouges par erreur de compilation** — donc sans valeur —
+et rejouées sous une forme compilante.
+
+### Revue de sécurité — 0 vulnérabilité, mais un invariant DOCUMENTÉ qui était faux
+
+Aucun constat. Les six points sensibles ont été instruits et clos : le point d'extension du
+filtre, la publication de l'id et du nom d'un **autre** document par le refus qui nomme (pas de
+fuite : l'index unique porte `tenantId` **et** `dossierId`, et la relecture passe par le dépôt
+scopé), les deux suppressions à filtre construit à la main (les deux clés de cloisonnement y
+sont), la contournabilité de la garde d'export (casse fermée, encodage d'URL décodé par Express,
+id de 12 caractères **impossible** avec le `bson` installé), l'élévation de privilège par le
+renommage (le collaborateur dispose déjà de `POST` et `PUT` sur le même agrégat), et l'intégrité
+de la piste d'audit.
+
+⚡⚡ **En revanche, la justification que j'avais écrite était FAUSSE.** Le docstring affirmait
+« seul ce qui est **délibérément** placé sous `details` sort ». C'est faux d'une exception
+**tierce** : `@nestjs/terminus` lève un `ServiceUnavailableException({ status, info, error,
+details })`, et `/health` est `@Public()`. Son `details` traversait le filtre **sans que
+personne dans ce service l'ait décidé**. La divulgation était marginale ce jour-là — le filtre
+publiait déjà `payload.error` — mais l'invariant ne tenait pas, et il serait devenu un vrai
+canal de fuite le jour où un indicateur de santé enrichit sa charge `down`.
+
+⛔ **La garde porte désormais sur la présence d'un `code` APPLICATIF**, qui n'existe que sur les
+refus formulés par ce service et porteurs d'un vocabulaire opposable. Une charge **sans** `code`
+n'est pas un refus que ce service a formulé, donc son `details` n'est pas un `details` qu'il a
+voulu publier. Mutation : garde retombant sur la seule présence de `details` → **1 unitaire
+rouge**.
+
+### Vérification docker REJOUÉE sur l'état final
+
+Les correctifs de revue touchent des artefacts déjà vérifiés — la cible d'audit et le contrat
+publié — donc la vérification a été rejouée après eux, sur le service redémarré.
+
+| Mesure | Résultat |
+|---|---|
+| ⚡⚡ Export via un id **en MAJUSCULES** | export **200**, et la cible journalisée est **minuscule** : `6a9d396b…`. |
+| La garde retrouve donc cet export | `DELETE` → **409 `HYPOTHESES_EXPORTEES`**. Le contournement par casse est **fermé de bout en bout**. |
+| Refus de nom pris | **409** portant `details.conflitAvec: { id, nom }`. |
+
+⚠️ **Le chemin de fuite de `terminus` n'a PAS été rejoué en docker** : il exige un indicateur de
+santé **en panne**, que la stack ne produit pas à la demande. Il est gardé par un **unitaire**
+qui construit l'exception exacte de `terminus`, et par sa mutation.
+
+### Portes finales
+
+Lint 0 warning · build OK · **2 054** unitaires verts, seuils tenus (98,90 / 94,60 / 98,88 /
+98,93) · **581** e2e verts (séquentiel).
 
 ### Hors périmètre, assumé
 
