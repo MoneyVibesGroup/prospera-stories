@@ -3318,7 +3318,7 @@ sprints:
         epic: "EPIC-013"
         points: 3
         service: "bilan-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 PAR LA MAQUETTE FE-035. `AncresProjection` publie 5 nombres et AUCUN poste de BFR : l ecran ne peut afficher aucun delai constate, alors que c est le premier calcul d un cabinet. Pire, `bfrNormatif` est applique AUSSI a l exercice de base (delibere), donc le BFR reel du bilan est REMPLACE des le depart : 2 606 354 sur le dossier de demo, soit 57 jours de produits et 46 % du total actif, sans qu on sache s il ressemble au reel. Il faut `bfrReelBase` + les delais constates dans les ancres, par marqueurs de paquet (invariant P7 preserve).
+        status: "in_progress"  # MAJ 2026-09-06 — dev lance, branches MNV-461 creees dans bilan-service, balance-service ET docs AVANT la premiere ligne de code. DEUX depots de code : le marqueur `bfr` change l octet de syscohada-revise-2.1.json, recopie A L OCTET dans balance-service (patron STORY-428). — Historique —   # CREEE le 2026-08-27 PAR LA MAQUETTE FE-035. `AncresProjection` publie 5 nombres et AUCUN poste de BFR : l ecran ne peut afficher aucun delai constate, alors que c est le premier calcul d un cabinet. Pire, `bfrNormatif` est applique AUSSI a l exercice de base (delibere), donc le BFR reel du bilan est REMPLACE des le depart : 2 606 354 sur le dossier de demo, soit 57 jours de produits et 46 % du total actif, sans qu on sache s il ressemble au reel. Il faut `bfrReelBase` + les delais constates dans les ancres, par marqueurs de paquet (invariant P7 preserve).
         story_path: "stories/STORY-461.md"
       - story_id: "STORY-462"
         title: "Le taux de marge saisi n est verifiable contre rien - les ancres ne publient pas la marge brute constatee"
