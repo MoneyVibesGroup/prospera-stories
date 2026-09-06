@@ -1,6 +1,6 @@
 # STORY-461 : Le BFR réel de la base n'est publié nulle part — on saisit un délai clients sans connaître le délai constaté
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -48,8 +48,9 @@ qu'on sache s'il ressemble au BFR réel.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** (2026-09-06) — branches `MNV-461` créées dans **trois** dépôts, **avant** la
-première ligne de code.
+**Statut : `done`** (2026-09-06) — PR `bilan-service` **#91** et PR `balance-service` **#92**
+rebase-mergées sur `dev` **ensemble**, branches supprimées. Branches `MNV-461` créées dans **trois**
+dépôts, **avant** la première ligne de code.
 
 ```
 bilan-service   : MNV-461
@@ -140,3 +141,64 @@ fiche cite déjà.
 `VALIDE`), et l'`orgId` du read-model de balance a été **aligné sur le `tenantId` du jeu d'états** — il
 pointait sur l'organisation d'une vérification antérieure, ce qui faisait échouer la revalidation en
 `BALANCE_INTROUVABLE`. Aucun autre document modifié hors des jeux `v461-*`.
+
+### Revue de code — deux constats BLOQUANTS, tous deux mesurés, corrigés
+
+1. **⚡⚡ Le CÂBLAGE DE PRODUCTION de toute la story n'était gardé par AUCUN test.** L'unité pure
+   `bfr-reel.ts` est couverte à 100 %, mais sur un paquet **fabriqué à la main** ; `projeter()` l'est avec
+   des ancres **construites à la main**. Entre les deux, les deux lignes qui font vivre la story en
+   production n'étaient traversées par **aucune assertion à valeur non nulle** : sur les 26 occurrences de
+   `bfrReel`/`bfrReelBase` dans les batteries, toutes celles issues d'une vraie production valaient `null`.
+   *Mutation appliquée — `bfrReel(pkg, [], [])` et `bfrReelBase: null`, qui **compilent** — :
+   **1 991 unitaires et 549 e2e restaient VERTS** pendant que les quatre AC ne livraient plus rien sur
+   aucun dossier, y compris SYSCOHADA.* Le contrat OpenAPI restait vert (il ne garde que la **forme**) et
+   la sonde de `MOTEUR_VERSION` aussi (la clé `bfrReel` est toujours là, à `null`). La vérification docker
+   était la **seule** preuve, et elle ne rejoue pas en CI.
+   Correctif : une batterie qui produit un bilan sur un paquet marqué et exige un BFR **non nul** — avec un
+   poste de trésorerie **émis mais non marqué**, sans quoi une implémentation qui sommerait tout l'actif
+   passerait —, et **`ancrage.spec.ts`, qui n'existait pas**, pour garder le report. Mutation rejouée :
+   3 tests rouges.
+2. **⚡ QUATRE empreintes figées oubliées dans le `test/` de `balance-service`.** Le `rootDir: src` de Jest
+   unitaire ne voit pas les `*.e2e-spec.ts`, et **je n'avais pas lancé `npm run test:e2e` sur ce dépôt** :
+   ma propre porte de qualité était incomplète, et la section *Portes* ci-dessus ne listait aucun e2e pour
+   `balance-service`. Il y a donc **six** empreintes à suivre là-bas, pas quatre — le tableau de mutations
+   avait été validé sur un balayage incomplet. Corrigé ; `npm run test:e2e` : **899/899 verts**.
+
+⚠️ **Une instabilité de suite, pas une régression** : lancée **en parallèle** d'une autre suite lourde, la
+batterie e2e de `balance-service` a échoué deux fois de suite à des endroits **différents** (`health`, puis
+`cahier de dépenses`, 69 tests). Relancée **seule** : 899/899. C'est de la contention de ressources, pas un
+défaut du code — noté pour que la prochaine story ne s'y perde pas.
+
+Points instruits par le relecteur puis écartés, notables : le **double comptage** d'une composante est
+structurellement impossible (`bfrReel` ne reçoit que `actif`/`passif`, jamais `sousTotaux`, et les trois
+postes ont des préfixes de comptes disjoints) ; les assiettes de `delaisConstates` sont bien **identiques**
+à celles de `bfrNormatif` ; un `tauxMargePct > 100` rend des délais négatifs, mais c'est un comportement
+**pré-existant** de `bfrNormatif` depuis STORY-070, non introduit ici.
+
+**Portes rejouées après correctifs** — `bilan-service` : lint 0 warning · build OK · **1 997 unitaires** +
+**549 e2e** verts · couverture 98,89 / 94,39 / 98,86 / 98,91, **100 %** sur `bfr-reel.ts` et `ancrage.ts`.
+`balance-service` : lint 0 warning · build OK · **3 662 unitaires** + **899 e2e** verts.
+
+### Revue de sécurité — aucune vulnérabilité
+
+Périmètre couvert : authentification, autorisation (IDOR, RBAC, isolation multi-tenant), injection NoSQL,
+web, fichiers, secrets et cryptographie, infrastructure, logique métier (intégrité comptable, opposabilité)
+et le référentiel NestJS habituel. Sept points instruits, dont trois **par mesure directe** :
+
+- **Intégrité des artefacts** — les **six** empreintes des deux dépôts recalculées au `shasum` :
+  conformes ; `cmp` entre les deux dépôts : **byte-identiques** ; aucune occurrence résiduelle des
+  anciennes empreintes. Et le générateur **rejoué** produit les cinq artefacts **à l'octet identique** :
+  l'artefact livré est bien la sortie de sources committées, rien n'y a été glissé à la main.
+- **Diff sémantique du paquet** — `meta`, `regles`, `renvois`, `racinesDeGestion`, `planDeComptes`,
+  `postes`, `notes` et `paquetFiscal` **identiques** ; `tableDePassage` : 126 → 126 règles, **exactement
+  trois** ajouts de clé, **aucune clé retirée ni modifiée**.
+- **Opposabilité** — `MOTEUR_VERSION` n'est jamais relue depuis les données : aucun couple « tampon
+  identique / contenu différent » n'est atteignable. `exigerEmpreinteIntacte` recalcule sur le **contenu
+  stocké**, donc les snapshots figés avant la story ne sont pas rétro-invalidés.
+- **Catégorie `bfr` inconnue** — vocabulaire fermé au build ; à l'exécution un cumul `NaN` échoue la garde
+  d'entier sûr et rend **400**, jamais un montant faux en 200.
+- **`Infinity`/`NaN` dans les délais** — impossible : la garde `assiette === 0` est exacte (opérandes
+  entiers) et les numérateurs sont bornés par `MAX_SAFE_INTEGER`.
+- **Surface exposée** — aucun contrôleur, guard, décorateur ni pipe touché ; `bfrReelBase` est un agrégat
+  de données que la même route sert déjà au même rôle, dans le même scope de dossier. Et une **surcharge de
+  mapping d'organisation ne peut pas déplacer un marqueur** : `bfrReel` lit le paquet packagé.
