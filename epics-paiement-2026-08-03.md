@@ -383,6 +383,32 @@ En tant qu'**organisation cliente de l'UEMOA**, je veux déclarer le compte par 
 
 **Points :** 8
 
+### STORY-601 — Money Vibes encaisse pour elle-même, par le même modèle que ses clients
+
+En tant qu'**équipe Money Vibes**, je veux encaisser les abonnements Prospera par exactement le chemin que suivent mes clients, afin qu'**aucune exception plateforme n'existe sur le chemin de l'argent** — et que le jour où l'on serait tenté d'en écrire une, le code la refuse. *(FR-P01, FR-P02, FR-P42→P48 · AD-10, AD-16, NFR-1a)*
+
+> ⚡⚡ **STORY-289 A DÉJÀ TRANCHÉ LE PRINCIPE, ET CE QUI RESTE N'EST PAS UNE PORTE À OUVRIR.** Trois stories (242, 603, 248) avaient conclu que l'administration Prospera exigeait une **surface plateforme énumérée** ; STORY-289 a montré que le mur n'était pas le gate mais le **journal d'audit**, qui exige un `orgId` et un `creanceId` réels — un opérateur sans organisation n'a rien à quoi accrocher sa trace. Le remède tenait en une phrase : Money Vibes est une organisation comme une autre. Ce qui reste ici est donc l'inverse d'une ouverture : **prouver qu'aucune porte n'est nécessaire**, et **empêcher qu'on en perce une**.
+>
+> ⚡⚡ **CE QUE MONEY VIBES DOIT FRANCHIR, ELLE LE FRANCHIT COMME LES AUTRES — ET C'EST INCONFORTABLE EXPRÈS.** Le gate d'AD-16 demande trois faits : un courriel vérifié, un KYC approuvé, un droit d'usage actif. Aucun ne s'écrit dans ce service : ils arrivent par les mêmes événements que pour un client. La conséquence est que **tant que ces trois faits n'existent pas, Money Vibes n'encaisse rien** — et c'est précisément ce qui garantit qu'aucun client ne le peut sans eux. Un gate qui admet une exception cesse d'être une preuve pour tout le monde, pas seulement pour l'exception.
+>
+> ⛔ **LA TENTATION A UN NOM ET UNE ADRESSE.** `ORGANISATION_PLATEFORME` existe depuis STORY-289, et le jour où le gate refusera Money Vibes, la ligne qui « débloque » tiendra en six mots. Elle percerait le cloisonnement **pour toutes les organisations à la fois**, et aucun test métier ne la verrait — les tests d'une organisation cliente resteraient verts. Elle doit donc être **impossible à écrire sans faire rougir une garde**, et c'est le cœur livrable de cette story.
+
+**Critères d'acceptation**
+
+- **Étant donné** le chemin de l'argent **quand** on le balaie **alors** l'identifiant de l'organisation plateforme n'y est lu **nulle part** : ni dans un gate, ni dans un cas d'usage, ni dans un adaptateur, ni dans le domaine. Son **unique** lecteur est la surface d'administration du registre (STORY-289), nommé dans un inventaire ; un second lecteur fait rougir, et une contre-preuve montre que la garde sait rougir.
+- **Étant donné** l'organisation plateforme **quand** elle demande l'accès au module **alors** elle est refusée **exactement comme n'importe quelle autre** — courriel non vérifié, KYC non approuvé, droit d'usage inactif, mêmes codes et mêmes messages ; **et quand** les trois faits existent **alors** elle est admise **sans qu'aucune ligne de code ne la nomme**. Le test le prouve en faisant passer le même scénario deux fois, une fois avec une organisation cliente et une fois avec celle de la plateforme, sur le **même** jeu d'assertions.
+- **Étant donné** un compte d'encaissement de Money Vibes **quand** il est déclaré **alors** il emprunte la route de tout le monde : même contrôleur, même gate, même coffre, même lien, même chaîne d'audit — et son origine de saisie vaut **`ORGANISATION`**, parce qu'elle saisit **pour elle-même**. Il n'existe aucune route ni aucun champ par lequel un appelant puisse déclarer une autre origine.
+- **Étant donné** l'origine de saisie réservée à l'administration Prospera **quand** on cherche qui peut la produire **alors** personne aujourd'hui, et **c'est correct** : elle ne décrit pas Money Vibes agissant pour elle-même, mais Money Vibes agissant **pour un client** — un acte délégué, qui demande d'abord que le catalogue de l'IdP sache attribuer un droit de tenant. Le vocabulaire reste, sans producteur, et un test le constate plutôt que de le supposer.
+- **Étant donné** la note du contrôleur qui déclare le second chemin de FR-P02 sans surface HTTP **quand** on la relit **alors** elle est **remplacée par la réponse** : ce chemin n'a jamais eu besoin d'une surface plateforme, il avait besoin d'une organisation. Une note qui décrit un blocage résolu est une note qui envoie le prochain lecteur construire ce qu'il ne faut pas.
+
+> ⛔ **Ce que la story ne fait pas.**
+> - **Elle ne crée aucune organisation, aucun KYC, aucun droit d'usage** : ces trois faits viennent d'`auth-service`, de `kyc-service` et du catalogue, par les événements que ce service projette déjà. Les fabriquer ici serait exactement l'exception qu'elle existe pour interdire. ⚠️ **Le raccordement de l'organisation Money Vibes est donc un préalable d'exploitation, pas une ligne de code** — et il porte un nom, comme la convention avec un participant agréé.
+> - **Elle n'ouvre aucune surface plateforme, ne crée aucun droit**, et ne touche ni au registre de STORY-289 ni au catalogue de permissions.
+> - **Elle ne traite pas l'acte délégué** — Money Vibes agissant pour un client — qui appartient à la fondation RBAC et à ses arbitrages.
+> - ⛔ **Elle n'encaisse encore rien** : l'abonnement Prospera est EPIC-041, et la demande de paiement EPIC-037. Ce qu'elle livre est que **le jour où ces stories arriveront, Money Vibes n'aura besoin d'aucune ligne à part.**
+
+**Points :** 5
+
 ---
 
 # EPIC-036 : Fournisseurs de paiement interchangeables et simultanés
