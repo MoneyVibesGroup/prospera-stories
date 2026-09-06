@@ -10,7 +10,15 @@
 
 ---
 
-## Bloc B1 — L'identité d'envoi de l'organisation · 21 pts
+## Bloc B1 — L'identité d'envoi de l'organisation · 21 pts · 🏁 **LIVRÉ le 2026-09-06**
+
+> ✅ **STORY-604, 605, 614, 615 et 616 sont livrées** (branches `MNV-604` → `MNV-616`, chaînées
+> sur `origin/dev`). 2 447 tests unitaires, 218 e2e. Les fiches 614, 615 et 616 ont été **écrites
+> et implémentées dans la même session** ; chacune porte son journal de livraison.
+>
+> ⚡ Ce que le bloc a réellement fermé : l'e-mail d'une microfinance partait du relais Money Vibes
+> sous l'expéditeur Money Vibes. Il part désormais de son compte, sous son adresse — et une
+> adresse sur le relais partagé exige un domaine attesté par le DNS de son propriétaire.
 
 > ⛔ **Le trou central.** `configurations_passerelles` existe depuis STORY-572, mais le chemin
 > d'envoi ne la lit **jamais** : l'adaptateur SMTP lit la configuration d'environnement, et le seul
