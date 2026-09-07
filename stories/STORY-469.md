@@ -1,6 +1,6 @@
 # STORY-469 : Le BFR est calculé sur des montants HT, alors que créances clients et dettes fournisseurs sont TTC
 
-Status: review
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -101,7 +101,7 @@ n'existe pas dans le modèle.
 
 ## Progress Tracking
 
-**Statut : review** (dev + validation + vérification docker faits ; revues à suivre).
+**Statut : done** — clôturée le 2026-09-07. PR `bilan-service` #101 rebase-mergée sur `dev`.
 ⚠️ **AC-3 est livré comme un HORS PÉRIMÈTRE DÉCLARÉ** (D-469-4), pas comme une ligne de calcul :
 c'est l'une des deux branches que l'AC offre explicitement.
 
@@ -168,3 +168,77 @@ fournisseurs à « environ 2 640 742 », la mesure donne **2 254 292**. L'estima
 **taux de marge** différent du 30 % de mon jeu — le coût des ventes, assiette des dettes, en
 dépend directement. Les créances, elles, ne dépendent que des produits et du délai : elles
 tombent au franc près.
+
+### Revue de code — 11 constats, **4 BLOQUANTS**, tous corrigés
+
+1. ⚡⚡ **BLOQUANT — un ENCAISSEMENT CLIENT NÉGATIF au mois 12.** Le plan mensuel confrontait une
+   production **hors taxes** à des encours devenus **TTC**. `echeancierDelai` impose son identité
+   en déversant le résidu sur le **dernier mois** : il y recevait donc **18 % du mouvement
+   d'encours**. *Mesuré : `encaissementsClients` du mois 12 à **−733 335** sur un délai clients
+   de 180 jours, et **−11 632 871** à 365 jours.* Un encaissement client négatif ne décrit rien.
+
+   ⛔ **Pire, les indicateurs penchaient du côté FAUSSEMENT RASSURANT** : corriger le BFR *à la
+   hausse* faisait paraître le plan mensuel *meilleur* — `moisTresorerieNegative` passait de 4 à
+   2. Et le balayage à **1 764 combinaisons** ne pouvait pas le voir : `ecartArticulation` est nul
+   **par construction**, c'est la *distribution* qui était fausse, pas la somme.
+
+   **Correctif** : l'échéancier boucle désormais sur le BFR **hors taxes** — les deux bases
+   coïncident — et la part **fiscale** du mouvement de BFR devient une **ligne publiée**
+   (`variationTvaBfr`), visible au lieu d'être noyée. C'est elle qui garde l'articulation
+   **exacte**. ⚠️ Ce n'est **pas** le modèle de TVA de STORY-478 : le plan continue de faire
+   circuler du hors taxes. *Remesuré à 45, 90, 120, 180 et 365 jours : encaissements **identiques**
+   avec ou sans TVA, **aucun** mois négatif, articulation nulle.*
+
+2. **BLOQUANT — le CÂBLAGE du taux dans `delaisConstates` n'était gardé par rien.** Retirer le 4ᵉ
+   argument à son **appel** laissait **321 unitaires et 48 e2e verts** ; la mutation de la table
+   ne mutait que la **fonction pure**. C'est pourtant la « conséquence ailleurs » que la fiche
+   nomme. Troisième occurrence du même angle mort après STORY-467 et STORY-468.
+
+3. **BLOQUANT — le document EXPORTÉ ne disait rien du taux.** Il sert des créances et des dettes
+   déplacées de ~18 % sans nommer le taux, sa source, ni le fait que la TVA nette n'est pas
+   portée — alors que les **quatre** autres hypothèses du modèle ont toutes leur mention, les deux
+   dernières ajoutées comme constats de revue au motif exact « la réponse HTTP, elle, le dit ».
+
+4. **BLOQUANT — `tauxTvaPct: null` servi sous un schéma `type: number` non nullable.** Rien
+   n'efface le `null` à l'écriture : le contrat mentait à un client généré.
+
+**Sept scories**, toutes corrigées : un renvoi à STORY-469 comme story **future** dans le
+docstring de `delaisConstates` ; le taux publié non arrondi (`0.145` rendait
+`14.499999999999998`) ; les bornes publiées du nouveau champ gardées par rien ; deux descriptions
+OpenAPI périmées.
+
+**Mutations après correctifs : 18, toutes rouges.**
+
+### Revue de sécurité — 0 vulnérabilité
+
+Cinq axes instruits et clos. Les plus utiles :
+
+- **Artefact malformé** : `resoudreTva` passe par les deux helpers défensifs pré-existants — une
+  chaîne, un tableau, un objet, `NaN`, `Infinity`, `0` ou `27` rendent tous `null`, c'est-à-dire
+  le repli hors taxes. **Aucun `NaN` ne peut atteindre le calcul.** Un `tauxStandard: 0.999`
+  serait accepté (amplification bornée à ×2) mais l'artefact est **embarqué et vérifié par
+  empreinte** : ce n'est pas une surface d'attaque, et la PR n'élargit pas la frontière de
+  confiance que STORY-458 franchit déjà.
+- **Le champ n'atteint aucun filtre Mongo ni pipeline d'agrégation**, et il n'existe **aucun
+  écrivain hors DTO** : `dupliquer` clone un document déjà validé, la restauration relit un
+  historique lui-même écrit par le DTO, aucun script n'écrit cette collection.
+- **Injection de formule dans le classeur** : la métadonnée ne concatène **aucune donnée
+  utilisateur libre** — un nombre et un littéral pris dans une table close de cinq entrées — et la
+  cellule commence toujours par son libellé.
+- **Aucun contrôleur, guard ni rôle touché** : un `TENANT_USER` paramètre un calcul qu'il pouvait
+  déjà déclencher.
+
+### Vérification docker REJOUÉE sur l'état final
+
+Les correctifs ont changé le **moteur mensuel**, l'**export** et l'**arrondi du taux** : la mesure
+a été refaite après, jamais reportée.
+
+| Mesure rejouée | Résultat |
+|---|---|
+| Modèle | **1.6.0** sur les deux jeux |
+| Assujettie | taux **18**, source `TAUX_PUBLIE`, créances **2 415 313**, dettes **2 254 292**, équilibre nul |
+| Exonérée (saisie à 0) | source `HYPOTHESE_SAISIE`, créances **2 046 875** — le montant d'**avant la story** |
+| ⛔ **D-469-5** | stocks **955 208** dans les deux cas, à l'unité près |
+| ⛔ **Le correctif du bloquant ①** | plan mensuel : **aucun** encaissement négatif, `M12 = 1 501 039` contre une moyenne de 1 482 434 — le mois 12 est redevenu **ordinaire**. `ecartArticulation = 0`. |
+| **Export** | classeur en **200**, portant la mention, le **taux**, la **source** et la **limite** (« La TVA nette ») |
+| **Bornes** | `-1`, `1800` et `100.01` → **400** sur le service réel |
