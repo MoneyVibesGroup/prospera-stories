@@ -288,6 +288,23 @@ entrante est celle d'AD-2, et elle est limitée aux messages porteurs d'un secre
 
 ### AD-10 — Une réponse entrante porte un niveau de certitude de rattachement
 
+> ⛔ **ÉCART OUVERT relevé le 2026-09-07 (STORY-625 / STORY-626) — la cascade est livrée à DEUX
+> niveaux sur trois.** Les règles (1) et (3) ci-dessous ont leurs stories (626, 627). La règle (2),
+> le rattachement `PRESUME` par conversation ouverte, **n'en a aucune dans les vingt du rail B** :
+> elle est tombée dans un trou entre deux fiches, pas par décision. Le domaine livré n'expose donc
+> que `certain` et `aucun`.
+>
+> ⚠️ **STORY-625 avait un argument réel** — *une présomption affichée finit toujours par être lue
+> comme un fait* — mais **la règle miroir ci-dessous y répond déjà** : un `PRESUME` s'affiche à un
+> humain et ne déclenche aucun automatisme, exactement comme le « lu » d'AD-5.
+>
+> ⛔ **Ce qui est en jeu est le SMS**, le canal qui reçoit des réponses et ne dit jamais à quoi elles
+> répondent. Sans la règle (2), la réponse d'un client par SMS n'est jamais montrée à côté de la
+> relance qu'elle prolonge — même pas à un humain qui saurait la lire. **Question PO : une story
+> pour le niveau `presume`, ou un amendement écrit de cette décision qui l'assume.** L'énumération
+> du contrat `notification.reponse.recue` a été rétrécie à ce qui est réellement produit ;
+> l'élargir plus tard reste compatible `BACKWARD`.
+
 - **Binds:** FR-N41, FR-N42, FR-N43, FR-N44, FR-N45, NFR-1b
 - **Prevents:** une réponse **devinée** présentée à un module appelant comme un fait — donc une
   promesse de paiement enregistrée automatiquement à partir d'un message qui répondait à autre chose

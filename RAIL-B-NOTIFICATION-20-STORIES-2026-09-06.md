@@ -295,7 +295,11 @@ l'envoi qui l'a provoquée par une référence portée par le canal ; à défaut
 
 **Points :** 5 · **Prérequis :** 621
 
-### 16 · STORY-626 🆕 — La réponse est routée vers le module qui avait parlé
+### 16 · STORY-626 ✅ — La réponse est routée vers le module qui avait parlé
+
+**Livrée le 2026-09-07** (branche `MNV-626`) · **Fiche :** `stories/STORY-626.md`
+⛔ **Écart ouvert : AD-10 décrit TROIS niveaux de rattachement, le rail n'en couvre que deux.**
+Le niveau `presume` (conversation ouverte) n'a de story nulle part — signalé, non inventé.
 
 ⚡ **Le contexte vient de l'envoi d'origine, pas du contenu du message.** Lire l'intention dans le
 texte serait une devinette sur le chemin de l'argent : *« oui »* peut répondre à une promesse de
