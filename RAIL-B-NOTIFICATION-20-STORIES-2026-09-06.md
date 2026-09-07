@@ -115,7 +115,9 @@ organisation vit sur une route **authentifiée et cloisonnée**.
 ⚡ Ils doivent exister **avant que quiconque ait rien fait**, sinon la toute première inscription de
 la plateforme n'a aucun message à envoyer.
 
-### 7 · STORY-617 🆕 — La marque de l'organisation sur les modèles système
+### 7 · STORY-617 ✅ — La marque de l'organisation sur les modèles système
+
+**Livrée le 2026-09-07** (branche `MNV-617`) · **Fiche :** `stories/STORY-617.md`
 
 **Récit :** en tant qu'**organisation cliente**, je veux que les messages de compte portent mon nom,
 mon logo et mes couleurs, afin que mes utilisateurs ne reçoivent pas un message de Prospera.
