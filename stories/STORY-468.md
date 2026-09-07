@@ -1,6 +1,6 @@
 # STORY-468 : La durée de l'exercice de base n'est publiée nulle part — une croissance annuelle appliquée à un exercice de 18 mois
 
-Status: review
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service` — ⚠️ **pas `dossier-service`**, voir D-468-1
@@ -95,7 +95,7 @@ L'écran ne peut même pas **prévenir**.
 
 ## Progress Tracking
 
-**Statut : review** (dev + validation + vérification docker faits ; revues à suivre).
+**Statut : done** — clôturée le 2026-09-07. PR `bilan-service` #100 rebase-mergée sur `dev`.
 ⚠️ **AC-4 reste ouvert** : l'affichage est un travail de l'écran, le back-end livre la donnée.
 
 ### Livré
@@ -166,3 +166,95 @@ fichier. **Une mutation mal restaurée est pire qu'une mutation non faite.**
 ⚠️ **Écriture non-lecture assumée** : les dates de l'exercice du read-model ont été modifiées le
 temps de la mesure, puis **restaurées et revérifiées**. Le read-model est alimenté par Kafka : il
 serait de toute façon reprojeté au prochain événement.
+
+### Revue de code — 8 constats, **5 BLOQUANTS**, tous corrigés
+
+1. ⚡⚡ **BLOQUANT — j'avais écrit un SECOND calcul d'une grandeur qui existe déjà.**
+   `dureeEnMois` (STORY-430) est la réponse du service à la colonne « Durée (en mois) » de la
+   DSF, et **son docstring rejette explicitement** la règle des « mois touchés » que j'avais
+   posée. Les deux divergent, et **dans le mauvais sens** : `2025-01-15 → 2026-01-14` — douze
+   mois **exactement**, le cas statutaire d'une société immatriculée en cours de mois —
+   rendait **13**. Le moteur aurait donc **annualisé une base déjà annuelle**, en amputant les
+   flux de **7,7 %**, et l'aurait déclaré comme une correction : l'inverse exact du défaut que
+   la story ferme. Le service aurait de surcroît publié **deux réponses contradictoires à la
+   même colonne** (22 contre 21 sur `2024-03-17 → 2025-12-31`). Le fichier n'est plus qu'un
+   **adaptateur** qui délègue, et une garde interdit au second calcul de revenir.
+
+   ⚠️ **Ma batterie était tirée du MÊME modèle mental que le code** : l'`it.each` « le
+   quantième n'entre pas dans le compte » ne pouvait que confirmer la formule. Le cas
+   discriminant y est désormais.
+
+2. **BLOQUANT — la garde d'incohérence de dates était plus étroite que sa justification.**
+   Elle promettait de fermer « fin avant début » mais ne voyait ni l'inversion **intra-mois**
+   (`2025-03-20 → 2025-03-05` rendait **1**) ni les dates **égales**. Un « exercice d'un mois »
+   tiré de dates inversées donne `facteur = 12`, c'est-à-dire des flux **multipliés par
+   douze**, publiés comme une base annualisée. Les deux cas de la batterie étaient inter-mois :
+   la fixture **ne pouvait pas produire le cas nommé**.
+
+3. **BLOQUANT — le document EXPORTÉ servait les ancres annualisées en silence.** Sur dix-huit
+   mois, le PDF remis à une banque imprime **13 333 333** là où la DSF déposée porte
+   **20 000 000**, sans facteur pour retrouver le constaté. L'AC-2 exige que l'annualisation ne
+   soit pas faite en silence, et l'export est du **back-end**, pas « l'affichage » de l'AC-4.
+
+4. **BLOQUANT — deux classes portaient le nom `HypothesesBaseDto`.** `@nestjs/swagger` **clé
+   ses schémas par nom de classe** : une seule survivait. Tant que les deux étaient de forme
+   identique la collision restait inoffensive ; **cette story les a fait diverger**, et le
+   schéma retenu annonçait `dureeMois` **requis** sur une route qui ne le rendait jamais.
+
+5. **BLOQUANT — `MODELE_PROJECTION_VERSION` restait à 1.4.0** alors que deux projections du
+   **même snapshot** rendent des montants différents selon que le jeu porte ou non une durée.
+   La convention du dépôt est explicite : STORY-460 a incrémenté **alors qu'elle ne déplaçait
+   aucun montant**. → **1.5.0**.
+
+6. ⚡⚡ **Le point d'application est unique, mais QUATRE sites l'alimentent — et un SEUL était
+   gardé.** Muter les trois autres à `null` laissait **2 155 unitaires et 643 e2e VERTS**. Le
+   plus grave : un jeu ancré sur dix-huit mois **rebasé** perdait sa durée — `updateOne`
+   remplace le sous-document `base` **entier** — et repartait avec `baseAnnualisable: true`,
+   une affirmation **fausse**, et un N+1 de nouveau surestimé de 50 %.
+
+7. **La comparaison annualisait sans rien déclarer.** `baseHomogene` ne regarde que le jeu
+   d'états et la version de snapshot : il vaut **`true`** sur deux bases de durées différentes,
+   et l'écart publié aurait été imputé à l'hypothèse alors qu'il vient de la base — le défaut
+   exact que STORY-466 a fermé pour la duplication.
+
+8. La docstring de `refusDeForme` et l'énumération de portée du juge de forme.
+
+**Mutations après correctifs : 14, toutes rouges** (dont une par site d'alimentation).
+
+### Revue de sécurité — 0 vulnérabilité
+
+Six axes instruits et clos, plusieurs **par exécution** :
+
+- **Isolation** : la nouvelle lecture prend `tenantId` et `dossierId` **du document** jeu
+  d'états, lui-même rendu par un dépôt dossier-scopé fail-closed — un jeu d'un autre dossier
+  est **déjà** `null` (404 anti-énumération) avant toute lecture d'exercice. Patron identique
+  aux deux autres appelants du dépôt.
+- **Données venant de Kafka** : dates inversées franches, intra-mois et égales rendent toutes
+  `null` — **pas de division par zéro, pas de facteur négatif**. Le facteur est **borné dans
+  (0 ; 12]**. Pas de `NaN` publiable. Le seul écrivain du read-model rejette en amont toute
+  borne non parsable.
+- **Injection de formule dans le classeur** : la métadonnée ne concatène **aucune donnée
+  d'utilisateur**, et la cellule commence toujours par son libellé littéral — elle ne peut pas
+  débuter par `=`.
+- **Reproductibilité** : `base` n'est jamais construit depuis une entrée client, donc pas de
+  *mass-assignment* sur `dureeMois` ; le calcul est déterministe.
+
+⚠️ **Deux observations hors périmètre sécurité, notées pour mémoire** : le consommateur ne
+**vérifie** pas la normalisation UTC que le contrat d'événement promet côté producteur (une
+borne décalée ferait passer un exercice de 12 mois à 11, donc des flux gonflés de 9 %) ; et une
+année étendue produirait une durée finie plutôt qu'un `null`. Ni l'un ni l'autre n'est
+atteignable par un appelant HTTP.
+
+### Vérification docker REJOUÉE sur l'état final
+
+Les correctifs ont changé la **règle de durée**, la **version du modèle** et l'**export** : la
+mesure a été refaite après, jamais reportée.
+
+| Mesure rejouée | Résultat |
+|---|---|
+| Modèle | **1.5.0** sur les deux jeux |
+| 12 mois | durée 12, non annualisée, produits **16 375 000**, N+1 **18 012 500**, équilibre nul |
+| 18 mois | durée 18, annualisée au facteur 2/3, produits **10 916 667**, N+1 **12 008 334**, équilibre nul |
+| **Export** | classeur en **200**, portant la mention, la **durée**, le **facteur** et la **saisonnalité nommée** |
+| **Version historisée** | `GET …/versions/1` publie `dureeMois: 18` — la route que le contrat annonçait sans la rendre |
+| **Comparaison** | `baseHomogene: true` sur deux durées différentes, et **chaque scénario publie la sienne** (12 / 18) — l'écart n'est plus imputable à l'hypothèse par erreur |
