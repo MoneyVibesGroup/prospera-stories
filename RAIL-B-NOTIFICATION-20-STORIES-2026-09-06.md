@@ -352,7 +352,13 @@ déjà écrite, il lui manque cette porte d'entrée.
 
 ## Bloc B5 — La cloche et la recette du rail · 8 pts
 
-### 19 · STORY-612 🆕 — La cloche reçoit les faits d'abonnement
+### 19 · STORY-612 ✅ — La cloche reçoit les faits d'abonnement
+
+**Livrée le 2026-09-07** (branche `MNV-612`) · **Fiche :** `stories/STORY-612.md`
+⛔⛔ **AC-4 était FAUX quand la fiche a été écrite** : le gate refusait `SUSPENDED`, donc une
+organisation suspendue ne pouvait pas lire le message qui lui dit comment se rétablir.
+⚠️ **AC-5 revient à `paiement-service`** : l'ordre préavis-puis-suspension appartient à celui
+qui déclenche, et le poser ici créerait une seconde vérité sur la chronologie d'un abonnement.
 
 **Points :** 3 · **Fiche écrite :** `stories/STORY-612.md`
 
