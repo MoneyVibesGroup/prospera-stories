@@ -327,7 +327,12 @@ défaut est une **donnée d'organisation** (FR-N43), pas un réglage de platefor
 
 **Points :** 3 · **Prérequis :** 626
 
-### 18 · STORY-628 🆕 — Interception du « STOP »
+### 18 · STORY-628 ✅ — Interception du « STOP »
+
+**Livrée le 2026-09-07** (branche `MNV-628`) · **Fiche :** `stories/STORY-628.md`
+⚡⚡ **Une prédiction écrite dans le code de STORY-583 s'est vérifiée à la ligne près** :
+`estMoyenOperant` a changé d'une ligne, et les refus posés sur elle se sont ouverts ensemble.
+SMS et WhatsApp portent désormais un envoi de masse conforme à FR-N47.
 
 ⛔ **Sur un canal entrant, le refus arrive comme un MESSAGE, pas comme un clic sur un lien.** Le
 désabonnement de EPIC-059 ne le voit pas. Un « STOP » non intercepté est une infraction, sur un
