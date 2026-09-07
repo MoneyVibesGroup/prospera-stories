@@ -235,7 +235,9 @@ jeton mort n'est pas un échec d'envoi mais une **radiation du carnet**.
 
 **Points :** 3 · **Prérequis :** 620
 
-### 13 · STORY-623 🆕 — Chaîne de repli ordonnée, sur échec technique seulement
+### 13 · STORY-623 ✅ — Chaîne de repli ordonnée, sur échec technique seulement
+
+**Livrée le 2026-09-07** (branche `MNV-623`) · **Fiche :** `stories/STORY-623.md`
 
 ⛔ **Le repli se déclenche sur échec technique du canal, JAMAIS sur l'absence de lecture** (FR-N21).
 Replier parce que le message n'a pas été lu ferait d'un client silencieux un client harcelé sur
