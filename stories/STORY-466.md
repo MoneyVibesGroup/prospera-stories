@@ -1,6 +1,6 @@
 # STORY-466 : La duplication d'un jeu d'hypothèses n'existe pas côté serveur — alors qu'elle est le geste central de la comparaison de scénarios
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -39,3 +39,31 @@ paramètres, ce qui :
 
 - Sans cette route, l'AC-3 de **FE-035** est livrable côté front mais **fausse dans son effet** : la
   maquette le montre et le déclare.
+
+## Décisions de cadrage (2026-09-07)
+
+- **D-466-1 — `duplicateDe` est publié sur la réponse du jeu ET sur le scénario de
+  comparaison.** L'AC-4 dit « peut s'appuyer sur » : un champ qui n'atteint pas la
+  comparaison rendrait l'AC aspirationnel. La comparaison ne **calcule** rien de neuf à
+  partir de ce champ — les écarts restent exactement ceux de STORY-071 ; elle le
+  **transporte**, ce qui permet à l'écran d'écrire « optimiste = copie de prudent ».
+- **D-466-2 — rôles alignés sur la CRÉATION (`TENANT_ADMIN` + `TENANT_USER`)**, et non sur
+  `rebaser` / `supprimer`, réservés à l'admin. Dupliquer ne détruit rien, ne déplace rien et
+  ne touche aucun jeu existant : le geste est un `POST` de plus, avec la base de l'original.
+- **D-466-3 — 201 Created**, contrairement au 200 explicite de `rebaser` : ici une ressource
+  est bel et bien créée, et le client en reçoit l'identifiant.
+- **D-466-4 — aucune transaction, et c'est une conséquence d'AC-2.** Le point 3 du « fait »
+  ne vaut que si la copie reprend l'historique ; AC-2 tranche l'inverse (version 1,
+  historique vide). Un seul document est écrit — ouvrir une session serait une cérémonie
+  sans objet.
+- **D-466-5 — `duplicateDe` peut désigner un jeu supprimé depuis** (STORY-464 a ouvert la
+  suppression). L'identifiant est conservé tel quel, sans nettoyage ni cascade : c'est une
+  **trace d'origine**, pas une clé étrangère. Même parti que le `conflitAvec: null` de
+  STORY-464, qui préfère dire honnêtement qu'il ne désigne plus personne.
+
+### Hors périmètre (explicite)
+
+- Dupliquer **l'historique** de versions de l'original (AC-2 dit le contraire).
+- Dupliquer **vers un autre dossier** : le repository est dossier-scopé, l'original et la
+  copie vivent dans le même dossier, et rien dans FE-035 ne demande autre chose.
+- Faire **calculer** quoi que ce soit à la comparaison à partir de `duplicateDe` (D-466-1).
