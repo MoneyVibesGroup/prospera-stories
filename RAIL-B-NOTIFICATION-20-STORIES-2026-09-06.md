@@ -189,7 +189,9 @@ l'appelant, et la story l'écrit.
 > commerciale vend *« WhatsApp avec lien de paiement »* en première ligne du tableau des relances
 > microfinance.
 
-### 10 · STORY-620 🆕 — Adaptateur SMS derrière le port unique
+### 10 · STORY-620 ✅ — Adaptateur SMS derrière le port unique
+
+**Livrée le 2026-09-07** (branche `MNV-620`) · **Fiche :** `stories/STORY-620.md`
 
 ⚡ **La preuve que le port d'AD-6 n'a fui nulle part** se refait ici, comme en STORY-580 pour
 l'in-app : deux lignes de fabrique, et rien d'autre ne bouge.
