@@ -1,6 +1,6 @@
 # STORY-466 : La duplication d'un jeu d'hypothèses n'existe pas côté serveur — alors qu'elle est le geste central de la comparaison de scénarios
 
-Status: review
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -72,8 +72,7 @@ paramètres, ce qui :
 
 ## Progress Tracking
 
-**Statut : review** (dev + validation + vérification docker faits ; revue de code et revue de
-sécurité à suivre).
+**Statut : done** — clôturée le 2026-09-07. PR `bilan-service` #96 rebase-mergée sur `dev`.
 
 ### Livré
 
@@ -158,3 +157,83 @@ est toujours la même : **401 `Unauthorized`** ou 404 là où la requête devrai
 fixture RS256/JWKS locale qui ne répond plus — exactement le diagnostic posé en STORY-465 (« un 401
 généralisé se diagnostique côté **émetteur de clés**, pas côté jeton »). **À traiter par une story
 dédiée** : c'est un défaut de l'outillage de test, pas du code de celle-ci.
+
+### Revue de code — 6 constats, aucun bloquant, tous corrigés
+
+1. ⚡⚡ **La batterie d'accord des trois DTO de nom CERTIFIAIT UNE RÈGLE QUE L'APPLICATION
+   N'APPLIQUE PAS.** `plainToInstance` y tournait **sans les options du `ValidationPipe` de
+   production** — `main.ts` monte le pipe en `transform: true` +
+   `transformOptions: { enableImplicitConversion: true }`. La batterie affirmait donc que les
+   trois écrivains refusent un `nom` numérique. **Vérifié contre le service réel en docker** :
+   `POST …/dupliquer` avec `{"nom": 42}` rend **201** et crée un jeu nommé `"42"` ; `PATCH`
+   renomme de la même façon. La coercition vaut aussi pour un booléen (`"true"`) et pour un
+   objet (`"[object Object]"`).
+
+   ⛔ **Le défaut est PRÉEXISTANT** — `creer` et `renommer` le partagent depuis toujours — donc
+   le durcir déborderait STORY-466 : c'est une story dédiée sur les **trois** écrivains à la
+   fois. La correction retenue est de rendre la batterie **honnête** : options de production
+   passées, et les trois cas de coercition écrits pour ce qu'ils sont, avec la raison. Elle
+   cassera le jour où le durcissement ne sera appliqué qu'à deux écrivains sur trois — ce qui
+   est exactement son office.
+
+2. ⚡⚡ **`expect(jeu.version).toBe(1)` était TAUTOLOGIQUE.** Le faux dépôt rendait
+   `version: 1` **en dur**, quoi que le service ait demandé d'écrire. Muter le service en
+   `version: original.version` — c'est-à-dire faire de la copie une **branche**, le défaut que
+   l'AC-2 interdit — laissait cette assertion **VERTE** ; seule sa sœur
+   `toHaveBeenCalledWith` virait au rouge. Le faux dépôt renvoie désormais ce qu'on lui a
+   demandé d'écrire. Mutation rejouée **en neutralisant la sœur** : rouge.
+
+3. ⚡⚡ **Le saut service → DTO → corps HTTP de `duplicateDe` n'était gardé par RIEN.**
+   `ComparaisonResponseDto.from` est une **projection identité** : rien n'aurait signalé que
+   le champ n'arrivait pas au client. La batterie du contrôleur de comparaison n'assertait que
+   `modeleVersion` et `baseHomogene`, et l'e2e de comparaison ne lit pas le champ. Blanchir
+   `duplicateDe` dans la projection laissait les 4 essais **verts**. Assertion ajoutée,
+   mutation **M10 rouge**.
+
+4. Le docstring de STORY-464 s'était retrouvé **au-dessus du `describe` de STORY-466** :
+   l'insertion l'avait séparé de son bloc, qui se retrouvait sans documentation. Même famille
+   qu'un constat de STORY-464 et de STORY-465, deux fichiers plus loin.
+
+5. Un renvoi de docstring vers `noms-hypotheses.spec.ts` — le fichier s'appelle
+   `src/modules/bilan/dto/noms-jeu-hypotheses.spec.ts`. Un lecteur cherchant « la batterie
+   dédiée » annoncée ne la trouvait pas.
+
+6. Un paramètre à **valeur par défaut qu'aucun appelant ne passe** dans le helper e2e
+   (`attendu = 201`) — la flexibilité inatteignable que le dépôt a lui-même retirée dans
+   `echeancier.ts`. Retiré. Au passage, le titre « → 400, **et rien n'est créé** » est
+   désormais **mesuré** (comptage de la liste avant/après), pas seulement promis.
+
+**Seconde lentille (over-engineering)** : le code livré est sobre — `structuredClone` plutôt
+qu'un copieur maison, le 409 et le 404 réutilisés de `creer`, aucune abstraction neuve. Une
+seule redondance retirée : `expect('duplicateDe' in res).toBe(true)` à côté d'un
+`toBeNull()`, qui refuse déjà l'absence.
+
+**Mutations rejouées après correctifs : 9 + 2 = 11, toutes rouges.**
+
+### Revue de sécurité — 0 vulnérabilité
+
+Onze axes instruits et clos. Les plus utiles, avec ce qui a été **mesuré sur la stack** et non
+seulement lu :
+
+- **Forcer la `base`** — un corps portant `base: {…snapshot version 3…}` rend **400** :
+  `forbidNonWhitelisted` refuse tout champ hors `nom`. Idem pour un corps portant `tenantId`,
+  `dossierId`, `duplicateDe` ou `version`. Le `DossierScopedRepository.create` **force** de
+  toute façon `tenantId` et `dossierId` depuis le contexte, l'ordre du spread étant
+  load-bearing.
+- **Injection NoSQL** — `{"nom": {"$ne": null}}` **ne devient jamais un opérateur** : la
+  coercition le transforme en la chaîne `"[object Object]"` avant que `@IsString()` ne
+  regarde, et le seul filtre Mongo qui reçoit une valeur d'appelant (`findOne({ nom })` du
+  409) est réduit par le `scope()` à `{nom, tenantId, dossierId}`.
+- **Élévation de privilège par `TENANT_USER`** (la route lui est ouverte, contrairement à
+  `rebaser` et `supprimer`) : la duplication n'écrit **rien** sur l'original, ne crée aucune
+  version, et la `base` copiée vient d'un document **déjà chargé sous le double scope** — elle
+  ne peut donc désigner ni un snapshot ni une liasse d'un autre dossier. Un `TENANT_USER`
+  pouvait déjà créer un jeu par `POST` : aucun privilège net gagné.
+- **Anti-énumération du 409** — l'`E11000` ne peut venir que de l'index
+  `(tenantId, dossierId, nom)`, donc le jeu nommé dans `details.conflitAvec` est
+  **nécessairement** dans le dossier de l'appelant, qui peut déjà le lister. Structurel, pas
+  ajouté.
+- **`structuredClone` sur un chemin `Mixed`** — pas de prototype pollution : le clonage
+  structuré crée les propriétés par `CreateDataProperty`, jamais par affectation.
+- **404 inter-dossier mesuré** : dupliquer un original du dossier A depuis l'URL du dossier B
+  du **même cabinet** rend **404**, et rien n'est écrit.
