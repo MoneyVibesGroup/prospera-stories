@@ -1,6 +1,6 @@
 # STORY-468 : La durée de l'exercice de base n'est publiée nulle part — une croissance annuelle appliquée à un exercice de 18 mois
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service` — ⚠️ **pas `dossier-service`**, voir D-468-1
@@ -29,12 +29,12 @@ L'écran ne peut même pas **prévenir**.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — `HypothesesBase` (et `AncresProjection`) portent `dureeMois` de l'exercice de base, lue du
+- [x] AC-1 — `HypothesesBase` (et `AncresProjection`) portent `dureeMois` de l'exercice de base, lue du
       dossier (`dateDebut` / `dateCloture`), pas du libellé.
-- [ ] AC-2 — Quand `dureeMois !== 12`, la réponse porte `baseAnnualisable: false` et **l'annualisation
+- [x] AC-2 — Quand `dureeMois !== 12`, la réponse porte `baseAnnualisable: false` et **l'annualisation
       n'est pas faite en silence** : soit le moteur annualise et le **déclare**, soit il refuse — le PO
       tranche, mais le silence n'est pas une option.
-- [ ] AC-3 — Le cas `dureeMois` inconnue (dossier sans dates) rend `null` signalé.
+- [x] AC-3 — Le cas `dureeMois` inconnue (dossier sans dates) rend `null` signalé.
 - [ ] AC-4 — L'écran des hypothèses affiche la durée à côté de l'assiette de croissance.
 
 ## Conséquences ailleurs
@@ -90,3 +90,79 @@ L'écran ne peut même pas **prévenir**.
   une story à part, et une hypothèse de plus à saisir.
 - La **correction rétroactive** des jeux déjà enregistrés : ils portent `null` et se projettent
   comme avant (D-468-5).
+
+---
+
+## Progress Tracking
+
+**Statut : review** (dev + validation + vérification docker faits ; revues à suivre).
+⚠️ **AC-4 reste ouvert** : l'affichage est un travail de l'écran, le back-end livre la donnée.
+
+### Livré
+
+| Fichier | Ce qui change |
+|---|---|
+| `projection/duree-exercice.ts` **(neuf)** | unité **pure** : `dureeMoisExercice`, en mois calendaires |
+| `hypotheses.schema.ts` | `HypothesesBase.dureeMois`, **capturée** à la création |
+| `hypotheses.service.ts` | résolution depuis l'exercice du dossier, **reportée** par `rebaser` et `dupliquer` |
+| `projection/ancrage.ts` | l'**annualisation**, en un seul point |
+| `projection.types.ts` + DTO | `dureeMoisBase`, `baseAnnualisable`, `annualisationAppliquee`, `facteurAnnualisation` |
+| les 3 sites de projection | passent la durée capturée |
+
+### Portes de qualité
+
+| Porte | Résultat |
+|---|---|
+| Lint | 0 erreur, 0 avertissement |
+| Build | `nest build` OK |
+| Unitaires + couverture | **2 155 tests verts** — 98,88 % lignes / 94,55 % branches. `duree-exercice.ts` et `ancrage.ts` à **100 %** sur les quatre axes |
+| E2E | **643 tests verts** (`--runInBand`) |
+
+### Table de mutations — 10 mutations, 9 rouges, 1 déclarée VACANTE
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M1 | durée comptée hors mois calendaires | ROUGE |
+| M2 | durée lue en heure **locale** au lieu d'UTC | ⚠️ **VERT — déclarée non gardée** |
+| M3 | dates incohérentes rendent une durée **négative** au lieu de `null` | ROUGE |
+| M4 | les agrégats de **bilan** sont annualisés eux aussi | ROUGE |
+| M5 | aucune annualisation — la base est projetée telle quelle | ROUGE |
+| M6 | facteur **inversé** (`dureeMois/12`) | ROUGE |
+| M7 | `baseAnnualisable` codé en dur à `true` | ROUGE |
+| M8 | la durée n'est pas capturée à la création | ROUGE |
+| M9 | la lecture du read-model n'est plus scopée au **dossier** | ROUGE |
+| M10 | les **3** sites de projection ne passent plus la durée | ROUGE |
+
+⚠️⚠️ **M2 est déclarée VACANTE plutôt que simulée.** La machine de développement **et** la CI
+tournent sur `Africa/Lome` (**UTC+0**) : muter `getUTCMonth()` en `getMonth()` laisse la batterie
+verte. ⛔ Ma première parade — `process.env.TZ` dans un `beforeAll` — **ne rattrapait rien** :
+Node fige le fuseau au démarrage du worker jest, et la mutation virait au rouge **parce que le
+TÉMOIN échouait**, pas parce que la garde discriminait. Un faux rouge, de la famille des mutations
+rouges par erreur de compilation. La précaution reste dans le code, **déclarée non gardée** — même
+parti que le `-0` de `controleAncrage`.
+
+⚠️ **Un défaut de mon HARNAIS de mutation, attrapé par un e2e.** M10 porte **deux** éditions sur le
+**même** fichier ; la sauvegarde de restauration était écrasée par la version **déjà mutée**, et la
+restauration a laissé du code muté en place — les deux sites de projection ne passaient plus la
+durée. Deux e2e neufs l'ont vu. Le harnais sauvegarde désormais l'**original** une seule fois par
+fichier. **Une mutation mal restaurée est pire qu'une mutation non faite.**
+
+### Vérification docker (stack réelle, données réelles)
+
+| Mesure | Résultat |
+|---|---|
+| AC-1 | Le jeu créé porte `base.dureeMois: 12`, persisté en **`number`**, publié sur la réponse. |
+| ⚡⚡ **AC-1/AC-2 sur un exercice de 18 mois** | Dates du dossier portées à `2024-07-01 → 2025-12-31`. Le jeu capture **18**, la réponse publie `baseAnnualisable: false`, `annualisationAppliquee: true`, `facteur = 2/3`. Produits **16 375 000 → 10 916 667**, N+1 **18 012 500 → 12 008 334**. |
+| ⛔ **D-468-3** | `totalActifBase` et `tresorerieBase` **identiques** entre les deux jeux, sur le **même** snapshot. Seuls les flux bougent. |
+| ⚡ **La correction collatérale** | Délai clients **constaté** : **44 → 66** jours. Il était sous-estimé d'un tiers, et il redevient juste sans qu'une ligne de `bfr.ts` change. |
+| Invariant | Taux de marge constaté **inchangé** (18,32 %) : c'est un **ratio**, l'annualisation ne le déplace pas. |
+| Équilibre | `ecart = 0` sur les trois exercices du jeu annualisé. |
+| ⚡ **D-468-5 prouvé** | Les dates du dossier ont été **restaurées** à `2025-01-01 → 2025-12-31` après la création : le jeu porte **toujours 18**. La projection reste reproductible même quand le dossier se corrige. |
+| D-468-4 | Plan mensuel du jeu annualisé : `ecartArticulation = 0`, et le mensuel voit la **même** base (10 916 667). |
+| AC-3 | Les **28** jeux antérieurs publient `dureeMoisBase: null`, `baseAnnualisable: true`, `facteur: null`. **Aucun refus.** |
+| Contrat | **0** réponse omet `dureeMois` sur la base — le champ est toujours présent, `null` compris. |
+| D-468-8 | Le montant constaté se retrouve : `10 916 667 / (2/3)` rend bien **16 375 000**. |
+
+⚠️ **Écriture non-lecture assumée** : les dates de l'exercice du read-model ont été modifiées le
+temps de la mesure, puis **restaurées et revérifiées**. Le read-model est alimenté par Kafka : il
+serait de toute façon reprojeté au prochain événement.
