@@ -205,7 +205,9 @@ numéro se normalise par le carnet, jamais à la main.
 
 **Points :** 5 · **Prérequis :** 604, 614
 
-### 11 · STORY-621 🆕 — Adaptateur WhatsApp et statut d'approbation du modèle
+### 11 · STORY-621 ✅ — Adaptateur WhatsApp et statut d'approbation du modèle
+
+**Livrée le 2026-09-07** (branche `MNV-621`) · **Fiche :** `stories/STORY-621.md`
 
 ⛔ **WhatsApp n'envoie pas ce qu'on veut : il envoie un modèle APPROUVÉ par lui.** C'est ce que
 FR-N16 nomme, et c'est le seul canal où le statut d'approbation d'un modèle est une donnée **du
