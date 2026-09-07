@@ -1,6 +1,6 @@
 # STORY-467 : Un emprunt ne coûte rien : aucune hypothèse de taux d'intérêt, aucune charge financière dans le modèle
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -25,17 +25,17 @@ trois scénarios de la maquette FE-035.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Une hypothèse `tauxInteretPct` (et, si l'échéancier de **STORY-460** est livré, la durée)
+- [x] AC-1 — Une hypothèse `tauxInteretPct` (et, si l'échéancier de **STORY-460** est livré, la durée)
       s'ajoute au jeu, bornée et versionnée.
-- [ ] AC-2 — Le CR prévisionnel porte `chargesFinancieres`, calculées sur l'**encours** de dette
+- [x] AC-2 — Le CR prévisionnel porte `chargesFinancieres`, calculées sur l'**encours** de dette
       (financement cumulé − remboursements cumulés), et le résultat en tient compte.
-- [ ] AC-3 — Une trésorerie de clôture négative génère un **coût de découvert** au taux saisi, ou
+- [x] AC-3 — Une trésorerie de clôture négative génère un **coût de découvert** au taux saisi, ou
       **est refusée** comme hypothèse — l'un ou l'autre, jamais le silence actuel.
-- [ ] AC-4 — ⚠️ Le plafond de déductibilité des **intérêts de comptes courants d'associés** (taux légal
+- [x] AC-4 — ⚠️ Le plafond de déductibilité des **intérêts de comptes courants d'associés** (taux légal
       majoré de 3 points, Art. 99 m / 102 CGI — le paquet fiscal le publie déjà) est **hors périmètre**
       de cette story : il appartient au résultat fiscal, pas au modèle de projection. À nommer pour ne
       pas être redécouvert.
-- [ ] AC-5 — `MODELE_PROJECTION_VERSION` incrémentée.
+- [x] AC-5 — `MODELE_PROJECTION_VERSION` incrémentée.
 
 ## Conséquences ailleurs
 
@@ -93,3 +93,77 @@ trois scénarios de la maquette FE-035.
 - Un **taux de découvert distinct** du taux d'emprunt (D-467-6).
 - Les **intérêts sur la dette de la base** (D-467-3), faute d'ancre pour l'encours.
 - Le **point fixe** du coût de découvert (D-467-5).
+
+---
+
+## Progress Tracking
+
+**Statut : review** (dev + validation + vérification docker faits ; revues à suivre).
+
+### Livré
+
+| Fichier | Ce qui change |
+|---|---|
+| `projection/charges-financieres.ts` **(neuf)** | unité **pure** : `interetsSurEncours`, `coutDeDecouvert` |
+| `hypotheses.schema.ts` + `dto/hypotheses.dto.ts` | `tauxInteretPct` **requis**, borné `[0 ; 100]` **dans le contrat** |
+| `projection/forme-hypotheses.ts` | 3ᵉ branche de la garde — absence et négatif refusés, **`0` accepté** |
+| `projection-annuelle.service.ts` | intérêts sur l'encours moyen + coût de découvert en **deux passes** |
+| `projection-mensuelle.service.ts` + ses types | ligne `decaissementsChargesFinancieres`, sans quoi l'articulation diverge |
+| `projection.types.ts` | bloc `ChargesFinancieresExercice`, `MODELE_PROJECTION_VERSION` **1.4.0** |
+| les 3 DTO de réponse | le bloc publié, décomposé, et les descriptions de version |
+| `export/modele-previsionnel.ts` | **la ligne du compte de résultat et la colonne mensuelle** |
+
+### Portes de qualité
+
+| Porte | Résultat |
+|---|---|
+| Lint | 0 erreur, 0 avertissement |
+| Build | `nest build` OK |
+| Unitaires + couverture | **2 124 tests verts** — 98,90 % lignes / 94,65 % branches (planchers 90/65). `charges-financieres.ts`, `projection-annuelle.service.ts` et `projection-mensuelle.service.ts` à **100 %** sur les quatre axes |
+| E2E | **637 tests verts** (`--runInBand`) |
+
+### Table de mutations — 10 mutations, 10 rouges
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M1 | assiette = **clôture** au lieu de la moyenne | ROUGE |
+| M2 | assiette = **ouverture** au lieu de la moyenne | ROUGE |
+| M3 | borne d'encours négatif retirée (**produit financier** tiré d'une dette) | ROUGE |
+| M4 | le découvert n'est plus facturé | ROUGE |
+| M5 | charges financières retirées du résultat avant impôt | ROUGE |
+| M6 | charges financières **réintégrées dans la CAF**, comme une dotation | ROUGE |
+| M7 | le mensuel ne les décaisse plus | ROUGE |
+| M8 | **transposition** impôt ↔ charges financières dans le mensuel | ROUGE |
+| M9 | garde de forme retirée sur `tauxInteretPct` | ROUGE |
+| M10 | ligne d'export du compte de résultat retirée | ROUGE |
+
+⚠️ **M8 a été écrite parce que la signature l'appelle** : le moteur mensuel reçoit désormais
+**quatre `number` positionnels adjacents**, dont deux montants voisins. Les transposer **compile**.
+Un essai les discrimine par des montants volontairement différents.
+
+⚠️ **M10 n'aurait pas rougi avec la fixture d'origine.** La garde de recomposition du compte de
+résultat exporté ne discrimine une ligne **manquante** que si son montant est **non nul** ; la
+fixture portait `0`. Elle porte désormais **500**, la charge d'exploitation ayant été descendue de
+30 000 à 29 500 pour que la somme retombe sur les mêmes 8 000 — aucun autre montant ne bouge.
+
+### Vérification docker (stack réelle, données réelles)
+
+Base `bilan_service` du dossier de vérification, **25 jeux d'hypothèses** antérieurs à la story.
+
+| Mesure | Résultat |
+|---|---|
+| ⚡⚡ **D-467-1, conséquence MESURÉE et non supposée** | Les **25 jeux existants** rendent **422 `HYPOTHESES_FORME_OBSOLETE`** en projection, avec un message qui **nomme le champ**. Aucun `NaN`, aucun HTTP 200 aux montants à `null`. |
+| ⚡⚡ **AC-2 — le fait de la story, chiffré** | Deux jeux identiques au taux près : résultat net **584 912** à 0 % contre **526 512** à 8 %. L'écart, **58 400**, vaut exactement `80 000 × (1 − 27 %)` — le coût de l'emprunt **après impôt**. Un plan financé par emprunt ne rend plus le même résultat qu'un plan financé par apport. |
+| AC-2 | Bloc publié entier : encours 0 → 2 000 000, moyen 1 000 000, intérêts 80 000. Compte de résultat **recomposable** ligne à ligne sur les trois exercices, **équilibre `ecart = 0`** partout. |
+| ⚡ **AC-3 sur un scénario qui plonge** | Investissement 50 000 000 sans financement : clôtures **−46 921 051**, −102 827 890, −163 022 590, et un coût de découvert de **3 475 633**, 7 616 881 puis 12 075 747. Chiffré, jamais tu. |
+| ⛔ **D-467-5, plafond visible** | L'assiette publiée (**−43 445 418**) est bien **au-dessus** de la clôture finale (−46 921 051) : une seule itération, et le lecteur voit sur quoi le taux a porté. |
+| ⛔ **D-467-8** | Sur l'exercice déficitaire, `is: 0` et **`mfp: 137 500` toujours dû** — les charges financières réduisent l'IS, jamais le minimum assis sur le chiffre d'affaires. |
+| **D-467-7** | Plan mensuel : `ecartArticulation = 0`, somme des douze lignes = **80 000** = la charge annuelle, flux net recomposable **les douze mois**, clôture du mois 12 = clôture annuelle N+1. |
+| **AC-1** | Corps sans le champ → **400**. Taux `-1`, `800`, `100.01` → **400**. Persisté en `number`. |
+| **Le document du banquier** | Export **xlsx et pdf en 200**, et la chaîne « Charges financières » **est dans le classeur**, colonne mensuelle comprise. Sans elle, le document aurait été **arithmétiquement faux**. |
+| **Rétro-compatibilité** | 25 documents sans le champ se **relisent** sans erreur ; aucun champ inventé. Seul le **calcul** est refusé. |
+
+⚠️ **Le conteneur servait encore le modèle 1.3.0** au premier appel : le `nest --watch` n'avait pas
+repris le changement de branche. Un `docker compose restart` a suffi — mais la mesure aurait
+« confirmé » l'ancien modèle. **Vérifier `modeleVersion` avant de conclure quoi que ce soit d'une
+projection.**
