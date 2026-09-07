@@ -3358,7 +3358,7 @@ sprints:
         epic: "EPIC-013"
         points: 2
         service: "bilan-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 PAR LA MAQUETTE FE-035, en ecrivant ses criteres d acceptation (AC-3 exige « creer / lister / editer / dupliquer »). Le controleur ne l offre pas : le front ne peut que refaire un POST complet, ce qui recapture la base (STORY-465), perd l origine (rien ne relie la copie a son modele) et n est pas transactionnel. Il faut `POST …/:id/dupliquer` qui reprend la BASE DE L ORIGINAL + `duplicateDe`.
+        status: "in_progress"  # MAJ 2026-09-07 (demarrage) — flux APEX complet dans Claude a la demande de l user. Cadrage precise dans la fiche (D-466-1 a D-466-5) : duplicateDe publie sur la reponse du jeu ET sur le scenario de comparaison (AC-4), roles alignes sur la CREATION, 201, aucune transaction (AC-2 impose un historique vide, donc UN seul document ecrit). # CREEE le 2026-08-27 PAR LA MAQUETTE FE-035, en ecrivant ses criteres d acceptation (AC-3 exige « creer / lister / editer / dupliquer »). Le controleur ne l offre pas : le front ne peut que refaire un POST complet, ce qui recapture la base (STORY-465), perd l origine (rien ne relie la copie a son modele) et n est pas transactionnel. Il faut `POST …/:id/dupliquer` qui reprend la BASE DE L ORIGINAL + `duplicateDe`.
         story_path: "stories/STORY-466.md"
       - story_id: "STORY-467"
         title: "Un emprunt ne coute rien : aucune hypothese de taux d interet, aucune charge financiere dans le modele"
