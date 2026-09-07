@@ -277,7 +277,11 @@ filtre*).
 
 > **Dépend du bloc B3 :** sans canal bidirectionnel, il n'existe aucune source de réponse.
 
-### 15 · STORY-625 🆕 — Message entrant : réception signée et rattachement à certitude
+### 15 · STORY-625 ✅ — Message entrant : réception signée et rattachement à certitude
+
+**Livrée le 2026-09-07** (branche `MNV-625`) · **Fiche :** `stories/STORY-625.md`
+⛔ **AD-17 amendé : deux surfaces publiques → trois.** La garde d'inventaire a rougi, et la
+décision a été portée dans la colonne vertébrale plutôt qu'absorbée dans un test desserré.
 
 ⚡ **Le rattachement se fait par CERTITUDE, jamais par ressemblance.** Une réponse se rattache à
 l'envoi qui l'a provoquée par une référence portée par le canal ; à défaut, elle est **rangée sans

@@ -474,20 +474,32 @@ entrante est celle d'AD-2, et elle est limitée aux messages porteurs d'un secre
 - **Rule (pas de facturation) :** aucune facturation ni blocage sur dépassement au v1. Le modèle de coût
   est complet pour que la facturation s'y branche **sans reprise de données** (FR-N63).
 
-### AD-17 — Deux surfaces non authentifiées, énumérées et bornées
+### AD-17 — Trois surfaces non authentifiées, énumérées et bornées
 
-- **Binds:** FR-N41, FR-N47, FR-N48, NFR-5, NFR-7
+> **Amendé le 2026-09-07 par STORY-625 : deux → trois.** La garde de STORY-583 a rougi sur
+> l'ouverture de la surface des messages entrants, et c'est ce pour quoi elle existe : une surface
+> publique de plus est une décision d'architecture, pas un effet de bord d'implémentation.
+> ⚡ **Ce que la règle protège n'a jamais été le nombre, c'est l'énumération** — le jour où le
+> nombre devient l'invariant qu'on défend, on contourne la liste au lieu de l'amender.
+
+- **Binds:** FR-N41, FR-N47, FR-N48, FR-N44, NFR-5, NFR-7
 - **Prevents:** un désabonnement forgé pour un tiers, l'énumération des destinataires d'une organisation
   à partir d'un lien, et un webhook falsifié qui écrirait des accusés
-- **Rule (énumération) :** exactement **deux** préfixes sont exemptés de la validation JWT à la
+- **Rule (énumération) :** exactement **trois** préfixes sont exemptés de la validation JWT à la
   gateway, **nommément et de manière énumérée**, jamais par un motif large : la surface publique de
-  **désabonnement** et les **webhooks de passerelle**. Aucune autre route n'est publique.
+  **désabonnement**, les **webhooks de passerelle** et les **messages entrants**. Aucune autre route
+  n'est publique.
+- **Rule (séparation webhook / entrant) :** les deux surfaces signées partagent le **jeton** de la
+  passerelle et se distinguent par leur **chemin**, jamais par le contenu du corps. L'une rapporte le
+  sort d'un message que nous avons envoyé, l'autre apporte un message qu'un humain a écrit.
 - **Rule (jeton de désabonnement) :** le lien porte un jeton **opaque à forte entropie**, sans aucun
   identifiant devinable — ni `orgId`, ni identifiant de contact, ni séquence. Il ne désigne qu'un couple
   `(identifiantCanal, canal)` et n'ouvre **aucune lecture** du carnet. Un jeton inconnu et un jeton
   révoqué rendent la **même** réponse.
-- **Rule (webhooks) :** la signature est vérifiée **avant** persistance (AD-4), sur le **corps de requête
-  non parsé**. Le parseur brut est monté **uniquement** sur les routes de webhook ; un parseur global
+- **Rule (surfaces signées) :** la signature est vérifiée **avant** persistance (AD-4), sur le **corps
+  de requête non parsé**. Le parseur brut est monté **uniquement** sur les préfixes qui portent une
+  signature, et la liste de ces préfixes est une **donnée** parcourue au démarrage — un second
+  montage écrit à la main aurait fini par diverger du premier, ou par être oublié. Un parseur global
   casse silencieusement la vérification.
 - **Rule (débit) :** chaque surface publique porte son propre plafond de débit, par jeton et par IP.
 
