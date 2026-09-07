@@ -135,7 +135,9 @@ recopier sept fois, et diverger à la première correction.
 
 **Points :** 3 · **Prérequis :** 611
 
-### 8 · STORY-618 🆕 — Une mise en page HTML livrée avec le code, et son repli texte
+### 8 · STORY-618 ✅ — Une mise en page HTML livrée avec le code, et son repli texte
+
+**Livrée le 2026-09-07** (branche `MNV-618`) · **Fiche :** `stories/STORY-618.md`
 
 **Récit :** en tant que **destinataire**, je veux un message lisible sur mon téléphone, afin de ne
 pas recevoir un mur de texte brut d'un logiciel qui coûte 65 millions.
