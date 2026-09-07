@@ -222,7 +222,9 @@ approuvé passe. Le modéliser comme une capacité, pas comme un cas particulier
 
 **Points :** 5 · **Prérequis :** 620
 
-### 12 · STORY-622 🆕 — Adaptateur push
+### 12 · STORY-622 ✅ — Adaptateur push
+
+**Livrée le 2026-09-07** (branche `MNV-622`) · **Fiche :** `stories/STORY-622.md`
 
 ⚠️ Le destinataire est un **jeton d'appareil**, pas une personne : il expire, il se révoque, et un
 jeton mort n'est pas un échec d'envoi mais une **radiation du carnet**.
