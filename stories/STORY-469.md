@@ -1,6 +1,6 @@
 # STORY-469 : Le BFR est calculé sur des montants HT, alors que créances clients et dettes fournisseurs sont TTC
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -50,3 +50,49 @@ n'existe pas dans le modèle.
 
 - Se combine avec **STORY-461** : le délai constaté doit être calculé de la **même** façon que le délai
   projeté, sinon la comparaison qu'offre l'écran est un rapprochement de deux conventions.
+
+## Décisions de cadrage (2026-09-07)
+
+- **D-469-1 — AC-1 tranché : le taux vient du PAQUET FISCAL, une hypothèse OPTIONNELLE le
+  surcharge** (arbitrage user du 2026-09-07). Le paquet publie déjà `tva.tauxStandard` (0,18,
+  Art. 195 CGI) pour SYSCOHADA révisé, et `tva.exoneration: true` pour la zone franche togolaise
+  — l'invariant du projet est que **les taux viennent du référentiel, jamais du code**, comme
+  l'IS et le minimum forfaitaire. Mais l'**assujettissement est une propriété de l'ENTREPRISE**,
+  pas du référentiel : une société non assujettie ou au régime TPU sous SYSCOHADA doit pouvoir
+  saisir **0**. D'où la surcharge, **optionnelle** — aucun jeu existant n'est refusé de plus.
+- **D-469-2 — deux référentiels n'ont AUCUN paquet fiscal** (`cima-assurances`, `sfd-bceao`) :
+  le taux y est **inconnu**, et le modèle applique **0** — c'est-à-dire le comportement
+  d'aujourd'hui, en HT. ⛔ **Mais il le DÉCLARE** : la réponse publie le taux appliqué et d'où il
+  vient. Un `0` silencieux serait indiscernable d'une exonération constatée.
+- **D-469-3 — l'exonération publiée vaut ZÉRO, pas « inconnu ».** `tva.exoneration: true` de la
+  zone franche est une **mesure**, pas une absence : le modèle l'applique et le dit. Confondre
+  les deux ferait passer une exonération légale pour un trou de données.
+- **D-469-4 — AC-3 tranché : `tvaNette` est HORS PÉRIMÈTRE, et déclarée** (arbitrage user).
+  La TVA nette au bilan est ce qui **reste dû à la clôture** : elle dépend de la **périodicité de
+  déclaration**, que le paquet fiscal **ne publie pas** — c'est le même angle mort que
+  STORY-478 relève pour son AC-3. La chiffrer supposerait un calendrier **inventé**, sur le poste
+  de BFR que la fiche décrit elle-même comme « souvent le plus volatil ». ⛔ **Le flux de TVA
+  appartient à STORY-478** (8 points), qui écrit noir sur blanc : « ⚠️ Distinct de STORY-469, qui
+  porte sur le MONTANT du BFR ; ici c'est l'ABSENCE D'UNE LIGNE ». Le hors-périmètre est **nommé
+  dans le code et publié dans la réponse**, jamais tu.
+- **D-469-5 — seuls les CRÉANCES et les DETTES passent en TTC, jamais les stocks.** Un stock est
+  valorisé au **coût d'acquisition hors taxes récupérables** : la TVA déductible n'y entre pas.
+  C'est ce qui rend l'erreur difficile à voir — deux tiers de la formule sont faux, un tiers est
+  juste — et c'est aussi ce qui interdit de « corriger » les trois d'un coup.
+- **D-469-6 — `delaisConstates` suit la MÊME convention, sinon l'écran rapproche deux
+  conventions.** Un délai constaté vaut `créances RÉELLES du bilan (TTC) / assiette × 360` : si
+  l'assiette reste HT alors que le BFR projeté devient TTC, la confrontation que STORY-461 offre
+  cesse d'être une identité. Les deux bougent ensemble ou aucun ne bouge.
+- **D-469-7 — le taux effectif est résolu par une unité PURE et PARTAGÉE**, jamais recopiée dans
+  chaque moteur. Le mensuel dérive ses agrégats de N+1 lui-même : deux résolutions divergentes
+  casseraient `ecartArticulation` — le piège de STORY-460, de STORY-467 et de STORY-468.
+- **D-469-8 — AC-4 est la garde de non-régression, et elle est structurelle** : à taux **0**, la
+  formule TTC **est** la formule HT. C'est ce qui rend le cas exonéré et le cas « paquet absent »
+  identiques au chiffre près à ce que le modèle rendait avant.
+
+### Hors périmètre (explicite)
+
+- **AC-3 / `tvaNette`** au BFR (D-469-4) — faute de périodicité publiée. Renvoyé à STORY-478.
+- Le **flux** de TVA du plan de trésorerie mensuel : c'est STORY-478.
+- Les **taux réduits** et les opérations à taux multiples : le paquet publie `type: "taux unique"`.
+- La **TVA déductible sur immobilisations** : elle ne touche pas le BFR d'exploitation.
