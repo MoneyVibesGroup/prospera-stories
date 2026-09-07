@@ -365,7 +365,14 @@ qui déclenche, et le poser ici créerait une seconde vérité sur la chronologi
 ⚠️ La cloche existe et **un seul service y dépose**. Si chaque module invente son bandeau d'alerte,
 il y aura des alertes dans quarante-cinq écrans et aucun endroit commun.
 
-### 20 · STORY-629 🆕 — Recette de bout en bout du rail notification
+### 20 · STORY-629 ✅ — Recette de bout en bout du rail notification
+
+**Livrée le 2026-09-07** (branche `MNV-629`) · **Fiche :** `stories/STORY-629.md`
+🏁 **RAIL B COMPLET — 20 stories sur 20.**
+⛔⛔ **La recette a trouvé 66 tests e2e morts**, cassés par STORY-617 et STORY-624 : une
+dépendance ajoutée à un service casse tout montage Nest, et la suite unitaire ne le voit pas
+parce qu'elle construit le service à la main. Ce qui manquait n'était pas un test, c'était la
+commande : `npm test` ne lance pas les e2e, et rien ne les lançait.
 
 **Récit :** en tant qu'**équipe**, je veux une recette qui traverse le service de la configuration
 d'une passerelle jusqu'à l'accusé de réception, afin de savoir que le rail tient sans le rail A.
