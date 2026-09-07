@@ -158,7 +158,10 @@ sans partie texte tombe en indésirable.
 
 **Points :** 5 · **Prérequis :** 617
 
-### 9 · STORY-619 🆕 — Pièce jointe : capacité déclarée, borne, et refus lisible
+### 9 · STORY-619 ✅ — Pièce jointe : capacité déclarée, borne, et refus lisible
+
+**Livrée le 2026-09-07** (branche `MNV-619`) · **Fiche :** `stories/STORY-619.md`
+🏁 **Bloc B2 complet** — STORY-611, 617, 618, 619 livrées.
 
 **Récit :** en tant que **module de facturation**, je veux joindre une facture au message, afin que
 le client n'ait pas à se connecter pour l'obtenir.
