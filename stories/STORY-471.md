@@ -1,6 +1,6 @@
 # STORY-471 : Le prévisionnel est le seul objet du module sans piste d'audit — ni auteur, ni motif, ni événement de journal
 
-Status: review
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -57,7 +57,7 @@ justifier ne vaut pas beaucoup mieux qu'une projection qu'on ne peut pas rejouer
 
 ## Progress Tracking
 
-**Statut : in_progress** — ouvert le 2026-09-07, branche `MNV-471`.
+**Statut : done** — clôturée le 2026-09-07. PR `bilan-service` #102 rebase-mergée sur `dev`.
 
 ### Ce que la lecture du code a démenti ou précisé, AVANT d'écrire
 
@@ -179,3 +179,64 @@ prouve que ce qu'elle interroge (famille STORY-455).
   créée, aucun chiffre changé.
 - **`HypothesesResponseDto` ne publie pas l'auteur** : l'AC-5 porte sur l'historique, et la
   version courante y figure déjà avec le sien.
+
+### Revue de code — 5 constats, tous corrigés (commit dédié)
+
+| Constat | Ce qu'il cassait |
+|---|---|
+| ⛔ **bloquant** — `rebaser` résolvait l'auteur **après** l'écriture | La garde de `userObjectId` ne tombait qu'au moment de journaliser, donc **après** le commit. Un jeton dont le `sub` n'est pas un `ObjectId` — rien ne le valide en amont — recevait un **403 sur un rebasage déjà écrit** : le client croit l'acte refusé pendant que ses chiffres de départ ont changé. Famille STORY-451. |
+| ⚡ un essai **vacant**, seul filet du contexte de rebasage | La fixture donnait `jeu.version = 2` sur un snapshot version 1 : `version` (2−1) et `snapshotVersion` (1) valaient **tous deux 1**. Publier l'un à la place de l'autre — la confusion exacte que le docstring sépare — laissait l'essai **vert**. Fixture rendue discriminante (4 contre 2). |
+| ⚡ le **contrat publié** devenait faux | `AuditEventResponseDto.contexte` énumère quels types portent quelles clés et annonçait « Six types ». Le compte était **déjà faux d'une unité** (STORY-464) et cette story en ajoutait trois. Décompte retiré, les quatre actes du prévisionnel décrits — dont le fait que leur `motif` est une **saisie libre publiée**. |
+| ⚡ `contexte.duplicateDe` journalisait la **chaîne d'URL brute** | `isValid` accepte l'hexadécimal en **majuscules** : la ligne d'audit ne correspondait alors ni au champ de la réponse, ni à un `?cibleId=` construit depuis elle. Précédent STORY-464. |
+| ⚡ `PUT :id` gagnait **quatre causes de 400** sans les publier | `@ApiBadRequestResponse` les documente, comme le fait déjà son patron sœur `POST …/:id/rouvrir`. |
+
+### Revue de sécurité — 1 constat, corrigé (commit séparé)
+
+⚡⚡ **Le constat portait sur ma propre justification.** Le docstring qui motive le canal
+best-effort affirme que les quatre actes « laissent chacun un document porteur de leur
+auteur ». Vrai de trois — ils posent `versionPar` — et **faux du quatrième** : D-471-1
+avait décidé, à raison, que le rebasage ne touche pas `versionPar` puisqu'il ne change pas
+les paramètres. La ligne `HYPOTHESES_REBASEES` était donc la **seule trace attribuée** d'un
+acte qui change la base de calcul d'un document remis à une banque, confiée à un canal dont
+le `catch` avale ses erreurs : un `SIGTERM` entre le commit et l'audit rendait l'acte
+**répudiable**. Même famille que STORY-454, sur un acte engageant plutôt que destructeur.
+
+**Corrigé à la racine, pas en réécrivant le commentaire** : `jeux_hypotheses` gagne
+`rebasePar`, posé **dans la transaction**. La propriété redevient vraie des quatre actes, et
+le docstring dit désormais que c'en est la **condition** — quiconque ajoutera un acte ici
+devra vérifier qu'il laisse un document nommant son auteur, sinon c'est
+`journaliserDansTransaction` qu'il lui faut.
+
+Les onze autres pistes examinées ont été écartées, dont la principale : l'invariant d'appel
+d'`AuteursRepository` (read-models d'identité **globaux à la plateforme**) **tient** sur le
+nouvel appelant — les `userId` versés viennent tous d'un jeu chargé par le repository
+dossier-scopé, et l'organisation passée est celle du JWT.
+
+### ⚡⚡ Vérification docker REJOUÉE — et ce qu'elle a attrapé
+
+Le correctif de sécurité touchait un chemin déjà vérifié, donc la mesure a été rejouée sur
+l'état final. **Elle a d'abord rendu `rebasePar` ABSENT.**
+
+> **`Found 0 errors` du watcher ne prouve PAS que le nouveau code est servi.** Deux
+> recompilations vertes n'avaient produit **aucun** `Nest application successfully started` :
+> le port était encore tenu par le process précédent, qui a continué de servir le code
+> d'avant le correctif. C'est le démarrage réussi qu'il faut compter, pas la compilation.
+
+Après redémarrage effectif, scénario complet rejoué sur l'état final, avec **deux identités
+réelles** du read-model :
+
+| Fait mesuré | Résultat |
+|---|---|
+| Ada rebase un jeu dont les paramètres sont d'Ama | `rebasePar` = **Ada**, `versionPar` reste **Ama** |
+| La version 1 porte **Ada**, pas Ama qui l'a remplacée | ✅ (D-471-1) |
+| Le motif est effacé par une édition sans motif | ✅ · `$type: "null"` rend **0** partout |
+| Duplication appelée avec un id en **MAJUSCULES** | le journal porte la forme **canonique**, identique au champ du document |
+| Journal : `CREEES` (Ada) puis 2 × `MODIFIEES` (Ama, versions sortantes 1 et 2) | ✅ |
+
+### Portes finales
+
+Lint 0 · build OK · **2 227** unitaires (1 ignoré) · **94** e2e · couverture globale
+**99,02 / 94,68 / 99,28 / 99,04** — très au-dessus des seuils 65/90/90/90 · **12 mutations
+volontaires** au total, toutes rouges (deux premières tentatives rouges par **erreur de
+compilation** écartées : elles ne prouvaient rien, et ont été refaites en gardant le
+paramètre employé).
