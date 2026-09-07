@@ -1,6 +1,6 @@
 # STORY-467 : Un emprunt ne coûte rien : aucune hypothèse de taux d'intérêt, aucune charge financière dans le modèle
 
-Status: review
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -98,7 +98,7 @@ trois scénarios de la maquette FE-035.
 
 ## Progress Tracking
 
-**Statut : review** (dev + validation + vérification docker faits ; revues à suivre).
+**Statut : done** — clôturée le 2026-09-07. PR `bilan-service` #99 rebase-mergée sur `dev`.
 
 ### Livré
 
@@ -167,3 +167,74 @@ Base `bilan_service` du dossier de vérification, **25 jeux d'hypothèses** ant�
 repris le changement de branche. Un `docker compose restart` a suffi — mais la mesure aurait
 « confirmé » l'ancien modèle. **Vérifier `modeleVersion` avant de conclure quoi que ce soit d'une
 projection.**
+
+### Revue de code — 9 constats, aucun bloquant, tous corrigés
+
+**Trois gardes qui ne gardaient rien**, et c'est le cœur de ce que la revue a rapporté :
+
+1. ⚡⚡ **LE CÂBLAGE du moteur mensuel n'était gardé par RIEN dès qu'il y a découvert.** Toutes
+   les batteries mensuelles tournaient à taux nul sauf une — **sans découvert** — donc
+   `total === interetsDette` partout. Remplacer `.chargesFinancieres.total` par
+   `.interetsDette` aux **deux** sites de production laissait **1 678 unitaires et 72 e2e
+   VERTS**, alors que l'annuel retranchait le coût de découvert par la CAF pendant que le
+   mensuel ne décaissait que les intérêts : `ecartArticulation = coutDecouvert`, sur une route
+   dont le contrat publie l'articulation comme une **identité**. **Le scénario exact pour
+   lequel AC-3 existe n'était pas articulé.** Trois gardes ajoutées : le moteur, puis les
+   **deux appelants par leur vraie route** — `ProjectionService` et `ComparaisonService`, ce
+   dernier étant le troisième chemin que STORY-457 avait déjà oublié.
+
+   ⚠️ **Mon premier correctif ne fermait que la moitié du trou** : il gardait le moteur, pas le
+   fil qui lui apporte la valeur. La mutation rejouée est restée **verte** jusqu'à ce que les
+   deux e2e de câblage existent.
+
+2. **La colonne mensuelle de l'export n'était gardée par rien** : la fixture portait `0`, et
+   une garde de recomposition ne discrimine une colonne **manquante** que si son montant est
+   **non nul**. C'est la correction que j'avais déjà faite du côté annuel et pas du mensuel.
+
+3. **Les bornes PUBLIÉES du taux (AC-1) n'étaient gardées par rien** : les retirer de
+   l'`@ApiProperty` laissait les **130** essais du contrat verts. Le précédent existait à
+   l'identique pour les délais BFR ; la garde compare à la **constante**, jamais au littéral.
+
+**Six scories**, toutes corrigées : l'encours moyen était **publié non arrondi** alors que tout
+le modèle est en unités entières — et la batterie affirmait le contraire ; un commentaire
+décrivait l'**opérateur inverse** du code ; la docstring de portée du juge de forme énumérait
+trois causes sur quatre ; la numérotation des étapes avait désaccordé le docblock et le corps ;
+le document d'export portait un montant de charges financières **sans son taux ni son
+périmètre**, alors que la réponse HTTP publie `dettesBaseNonPortees` en disant jouer « le même
+rôle **exactement** » que le stock non amorti, qui a sa mention depuis STORY-459 ; et **AC-4
+n'était nommé nulle part dans le code** alors que la fiche demande de le nommer *pour ne pas
+être redécouvert* — il l'est désormais à l'endroit exact de la déduction.
+
+**Mutations après correctifs : 15, toutes rouges.**
+
+### Revue de sécurité — 0 vulnérabilité
+
+Six axes instruits et clos. Les plus utiles, **mesurés et non déduits** :
+
+- **Déni de service par le calcul** : les deux passes sont bornées par l'horizon (3 exercices),
+  soit 6 liquidations au lieu de 3 — facteur **constant**, aucune récursion, aucun point fixe.
+  Moteur exécuté sur les extrêmes autorisés (`financement = MAX_SAFE_INTEGER`, taux 100,
+  croissance 10 000, trésorerie très négative) : **aucune** valeur non finie, `ecart = 0` aux
+  trois exercices **même au-delà de `MAX_SAFE_INTEGER`**, aucun `-0` sérialisé. `Infinity`
+  n'apparaît qu'à partir d'un taux ≈ `1e300`, **inatteignable** : les seuls chemins d'écriture
+  composent le DTO borné, `dupliquer` recopie et `rebaser` ne touche pas les hypothèses.
+- **Déterminisme du modèle à deux passes** : deux appels sur la même entrée rendent des JSON
+  **strictement identiques**.
+- **Aucun quatrième chemin de projection non gardé** : l'export passe par `ProjectionService`,
+  donc les trois appelants de `exigerFormeCourante` sont bien tous les appelants — le piège de
+  STORY-445 est évité.
+- **Anti-énumération du 422** : sur la comparaison, un jeu hors périmètre tombe en **404 avant**
+  la garde de forme. On n'apprend pas le nom d'un jeu d'un autre tenant.
+- **Coercition** : `""`, `" "` et `false` deviennent `0` — valeur **légitime** de ce champ, donc
+  rien qu'une requête honnête ne puisse déjà écrire.
+
+### Vérification docker REJOUÉE sur l'état final
+
+Les correctifs de revue ont touché le moteur (encours moyen arrondi) et l'export (métadonnée) :
+la mesure a été **refaite après**, jamais reportée.
+
+| Mesure rejouée | Résultat |
+|---|---|
+| Modèle | `1.4.0`, encours moyen **entier**, bloc **recomposable** (`interetsDette = round(moyen × taux/100)`), compte de résultat recomposable |
+| ⛔ **Le câblage, sur un exercice qui plonge** | coût de découvert **3 475 633**, `total ≠ interetsDette`, `ecartArticulation = 0`, somme des douze lignes = **3 475 633**, clôture du mois 12 = clôture annuelle N+1 |
+| Export | classeur en **200**, portant la mention, **le taux**, **le périmètre** et l'annonce du découvert |
