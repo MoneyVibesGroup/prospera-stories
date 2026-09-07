@@ -253,7 +253,10 @@ inexplicable.
 
 **Points :** 5 · **Prérequis :** 620, 621, 622
 
-### 14 · STORY-624 🆕 — Segments SMS, alphabet non latin et coût annoncé avant l'envoi
+### 14 · STORY-624 ✅ — Segments SMS, alphabet non latin et coût annoncé avant l'envoi
+
+**Livrée le 2026-09-07** (branche `MNV-624`) · **Fiche :** `stories/STORY-624.md`
+🏁 **Bloc B3 complet** — STORY-620, 621, 622, 623, 624 livrées.
 
 ⚡ **Le nombre de segments est une DONNÉE du texte, pas une estimation.** 160 caractères en alphabet
 latin, **70 en UCS-2** dès qu'un caractère sort de l'alphabet — un seul « é » mal encodé triple la
