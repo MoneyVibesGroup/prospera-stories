@@ -1,6 +1,6 @@
 # STORY-471 : Le prévisionnel est le seul objet du module sans piste d'audit — ni auteur, ni motif, ni événement de journal
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -51,3 +51,51 @@ justifier ne vaut pas beaucoup mieux qu'une projection qu'on ne peut pas rejouer
   déficit reportable persiste sa piste d'audit sans la publier). Trois occurrences : c'est un patron de
   module, à trancher une fois.
 - L'écran FE-035 affiche aujourd'hui « Auteur non tracé » en pointillé, faute de mieux.
+
+
+---
+
+## Progress Tracking
+
+**Statut : in_progress** — ouvert le 2026-09-07, branche `MNV-471`.
+
+### Ce que la lecture du code a démenti ou précisé, AVANT d'écrire
+
+⚡ **La fiche est PARTIELLEMENT PÉRIMÉE.** Elle a été rédigée le 2026-08-27 ; **STORY-464 a
+été clôturée le 2026-09-06**, et elle a livré une partie du constat n° 1 :
+
+| Constat de la fiche | État réel au 2026-09-07 |
+|---|---|
+| « `AuditType` compte huit actes, aucun sur le prévisionnel » | **Faux** : `HYPOTHESES_SUPPRIMEES` existe depuis STORY-464, et elle est journalisée **dans la transaction** de suppression. L'énumération compte aussi `JEU_COMPLEMENTS_SAISIS`, `LIASSE_DEPOSEE`, `JEU_SUPPRIME` et les trois `MAPPING_SURCHARGE_*`. |
+| « `JeuHypothesesController` n'injecte pas `AuditService` » | **Vrai du contrôleur**, mais le **service**, lui, l'injecte déjà (garde `aEteExporte` + journal de suppression). |
+| « `versions_hypotheses` ne stocke ni `userId` ni motif » | **Vrai**, inchangé. |
+
+Restent donc à livrer : `HYPOTHESES_CREEES`, `HYPOTHESES_MODIFIEES`, `HYPOTHESES_REBASEES`.
+
+### Décisions de conception
+
+- **D-471-1 — L'auteur d'une version est REPORTÉ, jamais celui de l'acte qui l'archive.**
+  La version historisée porte les paramètres de l'état **précédent** ; elle est insérée par
+  l'édition **suivante**. Écrire l'auteur de l'acte d'archivage y ferait dire « Awa a saisi
+  ces paramètres » alors qu'Awa vient de les **remplacer** — un journal plausible et faux,
+  exactement ce que la story existe pour fermer. Le `JeuHypotheses` **courant** porte donc
+  `creePar` (et `motif`) de sa version courante, et `versionner()` les **reporte** dans la
+  version sortante, comme il reporte déjà la `base` sortante.
+- **D-471-2 — Le `motif` accompagne les paramètres qu'il justifie**, donc le jeu en `V+1`,
+  puis migre dans l'historique quand cette version est à son tour archivée. La fiche écrit
+  « stocké sur la version sortante » ; pris à la lettre sur le vocabulaire du code
+  (`versionSortante = doc.version`), le motif « passage de 8 à 5 % » se serait attaché à la
+  version qui portait **8 %**, décalé d'un cran.
+- **D-471-3 — La DUPLICATION est journalisée en `HYPOTHESES_CREEES`**, avec
+  `contexte.duplicateDe`. STORY-466 (livrée le 2026-09-07, après la rédaction de la fiche)
+  a ouvert un **second** chemin de création : ne journaliser que `POST` ferait apparaître
+  des jeux dont le journal ne porte aucun acte de naissance. Aucun type neuf n'est inventé
+  hors des quatre que l'AC-1 nomme.
+- **D-471-4 — Le RENOMMAGE n'est pas journalisé.** Aucun des quatre types de l'AC-1 ne le
+  couvre, il ne crée pas de version et ne change aucun chiffre. Hors périmètre, à dessein.
+- **D-471-5 — Rebaser sur une base déjà à jour (le no-op de STORY-465, AC-4) ne
+  journalise RIEN.** Une ligne « rebasé » sur un acte qui n'a rien écrit est du bruit dans
+  le journal même qu'on construit pour expliquer les changements. `rebaser()` rend donc
+  `{ jeu, versionCreee }` : le contrôleur ne peut pas déduire le fait autrement, et un
+  drapeau **optionnel** ajouté au type de retour commun aurait été `undefined` sur les cinq
+  autres chemins.
