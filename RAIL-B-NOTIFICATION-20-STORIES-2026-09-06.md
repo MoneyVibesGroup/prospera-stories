@@ -312,7 +312,12 @@ paiement comme à une campagne.
 
 **Points :** 3 · **Prérequis :** 625
 
-### 17 · STORY-627 🆕 — Destination par défaut d'une réponse sans contexte
+### 17 · STORY-627 ✅ — Destination par défaut d'une réponse sans contexte
+
+**Livrée le 2026-09-07** (branche `MNV-627`) · **Fiche :** `stories/STORY-627.md`
+⚡ **Le motif de non-rattachement est enregistré alors qu'il ne change PAS la destination** :
+il est la seule chose qui puisse dire qu'une panne de passerelle se cache derrière un routage
+par défaut qui fonctionne parfaitement.
 
 ⚠️ « Sans contexte » et « contexte inconnu de nous » ne se lisent pas pareil, et la destination par
 défaut est une **donnée d'organisation** (FR-N43), pas un réglage de plateforme.
