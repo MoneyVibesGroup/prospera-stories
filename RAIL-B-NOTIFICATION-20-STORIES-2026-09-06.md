@@ -105,9 +105,12 @@ organisation vit sur une route **authentifiée et cloisonnée**.
 
 ## Bloc B2 — Les messages système et la marque · 16 pts
 
-### 6 · STORY-611 🆕 — Les sept modèles de compte, livrés avec le code
+> 🏁 **STORY-611 livrée le 2026-09-07** (branche `MNV-611`, empilée sur `MNV-616`).
 
-**Points :** 5 · **Fiche écrite :** `stories/STORY-611.md` · ⛔ **Bloque STORY-610** (consolidation)
+### 6 · STORY-611 ✅ — Les sept modèles de compte, livrés avec le code
+
+**Points :** 5 · **Fiche :** `stories/STORY-611.md` · **Livrée** · ⛔ **Bloque STORY-610**
+(consolidation)
 
 ⚡ Ils doivent exister **avant que quiconque ait rien fait**, sinon la toute première inscription de
 la plateforme n'a aucun message à envoyer.
