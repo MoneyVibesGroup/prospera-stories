@@ -1,6 +1,6 @@
 # STORY-471 : Le prévisionnel est le seul objet du module sans piste d'audit — ni auteur, ni motif, ni événement de journal
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -99,3 +99,83 @@ Restent donc à livrer : `HYPOTHESES_CREEES`, `HYPOTHESES_MODIFIEES`, `HYPOTHESE
   `{ jeu, versionCreee }` : le contrôleur ne peut pas déduire le fait autrement, et un
   drapeau **optionnel** ajouté au type de retour commun aurait été `undefined` sur les cinq
   autres chemins.
+
+### Livré
+
+| Fichier | Ce qui change |
+|---|---|
+| `audit/audit.enums.ts` | `HYPOTHESES_CREEES`, `HYPOTHESES_MODIFIEES`, `HYPOTHESES_REBASEES` (AC-1) |
+| `hypotheses.schema.ts` | `versionPar` + `motif` sur le jeu **courant** — attributs de sa version courante |
+| `versions/version-hypotheses.schema.ts` | `creePar` + `motif`, **reportés** du parent à l'archivage (AC-3) |
+| `dto/editer-hypotheses.dto.ts` | `motif?` facultatif, rogné, borné 3..500, sans caractère invisible (AC-4) |
+| `hypotheses.service.ts` | `creer`/`dupliquer`/`editer` prennent l'auteur ; `versionner` reporte auteur et motif ; `rebaser` rend `{ jeu, versionCreee }` |
+| `hypotheses.controller.ts` | journalise les 4 actes ; résout les auteurs **en un lot** (patron `AuditController`) |
+| `dto/version-hypotheses.dto.ts` | `auteur` (`AuteurDto \| null`) et `motif` publiés sur la liste **et** le détail (AC-5) |
+
+### Portes de qualité
+
+| Porte | Résultat |
+|---|---|
+| Lint | 0 erreur, 0 avertissement (`{src,test}/**/*.ts`) |
+| Build | `nest build` OK |
+| Unitaires | 2 221 tests, 0 échec (122 sur le module) |
+| e2e | 94 tests sur `bilan-hypotheses`, 0 échec |
+| Mutation | **8 mutations volontaires, 8 rouges** (cf. ci-dessous) |
+
+### Mutations volontaires — ce que chaque test filtre vraiment
+
+| Mutation | Test devenu rouge |
+|---|---|
+| `creePar: doc.versionPar` → `patch.versionPar` | D-471-1, en unitaire **et** en e2e |
+| `$unset` du motif supprimé | « le motif d'une édition SANS motif est EFFACÉ » |
+| le no-op rend `versionCreee: true` | « le NO-OP rend `versionCreee: false` » |
+| le contrôleur journalise aussi le no-op | « le NO-OP de rebasage ne journalise RIEN » |
+| version **entrante** dans le journal au lieu de la sortante | les deux essais du contexte de `HYPOTHESES_MODIFIEES` |
+| auteurs résolus dans une **autre** organisation | « SÉCURITÉ — résolus dans l'organisation du JWT » |
+| filtre des identifiants nuls retiré | « une version SANS auteur ne fait résoudre personne » |
+| la ligne **courante** perd son auteur | « l'historique rend l'auteur de CHAQUE version » |
+
+⚠️ Une neuvième mutation — l'organisation remplacée par un `ObjectId` neuf — a rougi par
+**erreur de compilation** (`tenantId` devenu inutilisé) : elle ne prouvait rien, et a été
+refaite en gardant le paramètre employé.
+
+### Vérification docker — base réelle `bilan_service`
+
+Stack `docker compose` en marche, `bilan-service` **redémarré** pour garantir que le code
+servi est celui de la branche (confirmé : `Found 0 errors`, puis une création acceptée avec
+les champs neufs). Deux jetons RS256 signés localement pour **deux identités réelles** du
+read-model — Ada Verif et Ama Koffi — la clé privée lue sans être affichée puis effacée.
+
+Scénario : Ada crée le jeu · Ama édite **avec** motif · Ama réédite **sans** motif · Ada
+rebase (deux fois : un no-op puis un rebasage réel après réouverture/revalidation de la
+liasse, snapshot v4).
+
+| Fait mesuré | Résultat |
+|---|---|
+| ⚡⚡ `versions_hypotheses` v1 porte **Ada**, pas Ama qui l'a remplacée | ✅ (D-471-1) |
+| v2 porte le motif qui **justifie ses** paramètres | ✅ (D-471-2) |
+| Le motif est **effacé** par une édition sans motif | ✅ le champ est retiré |
+| `motif` de **type** `null` en base | **0 partout** — le `$unset` retire, il ne met pas `null` |
+| Journal : `HYPOTHESES_CREEES` puis 2 × `MODIFIEES` (versions sortantes 1 et 2) | ✅ |
+| **Une seule** ligne `HYPOTHESES_REBASEES` pour **deux** appels | ✅ (D-471-5 : le no-op n'écrit rien) |
+| Le rebasage ne touche ni `versionPar` ni `motif` | ✅ |
+| `GET …/versions` publie « Ada Verif » sur v1, « Ama Koffi » sur v2 et v3 | ✅ (AC-5) |
+| Un `creePar` versé par l'appelant | **400** `property creePar should not exist` (AC-3) |
+| Motif d'espaces · saut de ligne | **400** · **400** (AC-4) |
+| Jeu **antérieur** à la story (32 en base) | `auteur: null`, `motif: null`, **200** — jamais un nom inventé |
+| Versions **orphelines** · versions sans `dossierId` | **0** · **0** |
+
+⚠️ **Un faux positif de ma propre mesure, et il vaut d'être écrit** : la requête
+`{ motif: null }` a d'abord rendu 8 versions et 33 jeux, ce qui se lisait comme « le `$unset`
+écrit `null` ». C'est faux — en Mongo, `{ champ: null }` matche **aussi l'absence du champ**.
+Le seul test qui sépare les deux est `{ $type: "null" }`, et il rend **0**. Une mesure ne
+prouve que ce qu'elle interroge (famille STORY-455).
+
+### Non livré, à dessein
+
+- **`HYPOTHESES_DUPLIQUEES`** — la duplication émet `HYPOTHESES_CREEES` avec
+  `contexte.duplicateDe` (D-471-3). Aucun type n'est inventé hors des quatre que l'AC-1 nomme.
+- **Le renommage n'est pas journalisé** (D-471-4) : hors des quatre types, aucune version
+  créée, aucun chiffre changé.
+- **`HypothesesResponseDto` ne publie pas l'auteur** : l'AC-5 porte sur l'historique, et la
+  version courante y figure déjà avec le sien.
