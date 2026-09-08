@@ -1,6 +1,6 @@
 # STORY-473 : La comparaison ne publie aucune série mensuelle — le graphe comparatif coûte un appel par scénario
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -46,3 +46,30 @@ d'hypothèses (NFR-006, < ~2 s), c'est le facteur de coût dominant.
 - Publier la série ne coûte **rien** de plus au serveur : elle est déjà en mémoire.
 - Si la charge de la réponse devient un sujet (5 scénarios × 12 nombres = 60 entiers), un paramètre
   `?detail=mensuel` serait préférable à l'omission — mais 60 entiers ne sont pas un sujet.
+
+
+---
+
+## Progress Tracking
+
+**Statut : in_progress** — ouvert le 2026-09-08, branche `MNV-473`.
+
+### Prémisses vérifiées dans le code AVANT d'écrire
+
+**La fiche est exacte, au mot près.** `comparaison.service.ts` calcule bien
+`clotures = mensuelComplet.periodes.map(p => p.tresorerieCloture)`, en tire les quatre
+scalaires, puis **laisse tomber la série**. Publier ce que l'on vient de produire ne coûte
+rien : elle est en mémoire.
+
+### Décisions de conception
+
+- **D-473-1 — Les quatre scalaires sont CONSERVÉS** (AC-1). Ils sont le **résumé** de la
+  série, pas son substitut : un client qui n'a besoin que du creux ne doit pas avoir à le
+  recalculer, et `ecarts.mensuel` continue de porter le seul écart de trésorerie minimale.
+- **D-473-2 — `type: [Number]` explicite au contrat** (AC-3), et ce n'est pas décoratif :
+  sans lui `@nestjs/swagger` publie le tableau en `object` opaque, qu'un client généré type
+  `Record<string, never>`. Le champ serait **servi mais illisible**, et la story n'aurait
+  rien livré — patron relevé par STORY-398 puis STORY-432.
+- **D-473-3 — Aucun paramètre `?detail=mensuel`.** La fiche l'envisage si la charge devenait
+  un sujet ; 5 scénarios × 12 entiers n'en est pas un, et une option de format qu'aucun
+  appelant ne demande est une flexibilité à maintenir sans preneur.
