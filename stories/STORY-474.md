@@ -1,6 +1,6 @@
 # STORY-474 : La comparaison ne publie pas les hypothèses des scénarios comparés
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -43,7 +43,7 @@ lit `jeu.hypotheses` pour projeter, et ne les reporte pas dans la réponse.
 
 ## Progress Tracking
 
-**Statut : in_progress** — ouvert le 2026-09-08, branche `MNV-474`.
+**Statut : done** — clôturée le 2026-09-08. PR `bilan-service` #106 rebase-mergée sur `dev`.
 
 ### ⚡ Deux prémisses de la fiche corrigées AVANT d'écrire
 
@@ -68,3 +68,42 @@ lit `jeu.hypotheses` pour projeter, et ne les reporte pas dans la réponse.
   même qui sert à expliquer les écarts.
 - **D-474-4 — La liste est TRIÉE**, pour qu'une réponse soit comparable à une autre et qu'un
   essai ne dépende pas de l'ordre d'itération d'un objet.
+
+### Livré
+
+`ComparaisonScenario.hypotheses` (l'objet tel qu'il a servi, typé `HypothesesDto`) et
+`parametresDivergents: string[]` au niveau racine, calculé par l'unité pure
+`parametres-divergents.ts`. Aucune écriture en base, aucune route neuve.
+
+### Portes
+
+Lint 0 · build OK · **2 280** essais unitaires · **694** e2e · **6 mutations volontaires, 6 rouges**.
+
+### ⚡⚡ Revue de code — 4 constats, dont un MAJEUR
+
+**Ma normalisation masquait la divergence de `tauxTvaPct`.** J'avais posé « absent vaut 0 » comme
+règle générale : vraie de **17 paramètres sur 18**, et fausse du seul qui compte ici. Absent, c'est
+le taux du **paquet fiscal** qui s'applique (18 %) ; `0` dit « non assujetti ». Ce sont les deux
+seules valeurs qui déplacent les **deux plus gros postes du BFR**.
+
+> Deux scénarios aux trésoreries différentes, tous autres paramètres identiques, et
+> `parametresDivergents` rendait **`[]`** : *l'écran dont la raison d'être est d'expliquer pourquoi
+> deux colonnes diffèrent taisait précisément le paramètre qui l'explique.*
+
+Et l'erreur **symétrique** : un échéancier absent face au même montant **répété** était signalé,
+alors que les deux décrivent le même plan au centime. **Corrigé à la racine** — la comparaison porte
+désormais sur ce que le **moteur** utilise, jamais sur la forme écrite en base, et les champs dont
+l'absence vaut réellement zéro sont **énumérés un par un**, parce que la règle générale est fausse.
+
+**La garde du tri était VACANTE** (mutation vérifiée par la revue) : retirer le `.sort()` laissait
+**361 essais verts**. Deux causes cumulées — mes deux paires étaient **déjà** dans l'ordre
+alphabétique selon l'ordre d'insertion des clés, et mon assertion `toEqual([...r].sort())` était la
+tautologie exacte de STORY-427/430, vraie de n'importe quelle sortie.
+
+Plus une description **publiée** fausse dans les deux sens (recopiée à trois endroits), et une
+assertion e2e toujours vraie (le séparateur venait du `join`, pas des données).
+
+### Revue de sécurité — 0 constat
+
+Mêmes rôles que la route qui publie déjà le même objet, cloisonnement fail-closed inchangé, aucun
+champ technique dans le sous-objet publié.

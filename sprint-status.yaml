@@ -3430,7 +3430,8 @@ sprints:
         epic: "EPIC-013"
         points: 2
         service: "bilan-service"
-        status: "in_progress"  # MAJ 2026-09-08 (dev) — branche MNV-474. ⚡ DEUX PREMISSES CORRIGEES : il y a 18 parametres et non « neuf » (cinq stories les ont etendus depuis la redaction de la fiche — un decompte chiffre se perime en silence), et la distinction « version utilisee vs version courante » de l AC-1 N EXISTE PAS sur cette route : comparer() ne prend aucun parametre de version et projette toujours la courante. # CREEE le 2026-08-27 PAR LA MAQUETTE FE-036. `ComparaisonScenario` porte nom, version et base - aucun des neuf parametres. Un tableau comparatif qui ne dit pas CE QUI DIFFERE entre deux colonnes ne se lit pas : c est la premiere question de celui qui le regarde. Il faut 2 a 5 appels `GET .../hypotheses/:id` de plus pour ecrire « croissance 5 % contre 15 % ». Le service a pourtant les jeux en main : il lit `jeu.hypotheses` pour projeter et ne les reporte pas. Avec STORY-473, les deux ramenent la comparaison a UN appel la ou l ecran en fait 1 + 2n.
+        status: "done"  # MAJ 2026-09-08 (cloture) — 3 AC livres, PR bilan-service #106 rebase-mergee sur dev. Revue de code : 4 constats dont un MAJEUR — ma normalisation « absent vaut 0 » etait vraie de 17 parametres sur 18 et FAUSSE du seul qui compte : tauxTvaPct absent vaut le taux du PAQUET FISCAL (18 %), pas zero, et parametresDivergents rendait [] sur deux scenarios aux tresoreries differentes. ⚡ La garde du TRI etait VACANTE (mutation verifiee : retirer le .sort() laissait 361 essais verts — mes paires etaient deja dans l ordre alphabetique, et mon assertion toEqual([...r].sort()) etait la tautologie de STORY-427/430). Revue de securite : 0 constat.
+        completed_date: "2026-09-08"
         story_path: "stories/STORY-474.md"
       - story_id: "STORY-475"
         title: "La comparaison se limite a DEUX mesures annuelles : ni produits, ni marge, ni BFR, ni CAF, ni cumul"
