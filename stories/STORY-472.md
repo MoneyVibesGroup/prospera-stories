@@ -1,6 +1,6 @@
 # STORY-472 : Aucune charge n'est fixe : le résultat croît exactement au taux de croissance, et le point mort est inexprimable
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -65,7 +65,7 @@ d'affaires est doublement faux.
 
 ## Progress Tracking
 
-**Statut : in_progress** — ouvert le 2026-09-08, branche `MNV-472`.
+**Statut : done** — clôturée le 2026-09-08. PR `bilan-service` #104 rebase-mergée sur `dev`.
 
 ### Prémisses vérifiées dans le code AVANT d'écrire
 
@@ -112,3 +112,77 @@ Contrairement aux deux stories précédentes du lot, **la fiche est exacte** :
 - **D-472-6 — `MODELE_PROJECTION_VERSION` passe à `1.7.0`, et cette version DÉPLACE des
   montants** — mais seulement pour un jeu qui saisit des charges fixes. Un jeu existant rend
   les mêmes chiffres au centime : c'est l'objet du test de non-régression de l'AC-1.
+
+### Livré
+
+| Fichier | Ce qui change |
+|---|---|
+| `hypotheses.schema.ts` + son DTO | `chargesFixesAnnuelles?`, `chargesFixesParExercice?`, `masseSalarialeAnnuelle?` — tous facultatifs |
+| `projection/point-mort.ts` (neuf) | unité **pure** : seuil, motif, base, jours, taux de MCV, décomposition |
+| `projection-annuelle.service.ts` | scission variables/fixes, point mort par exercice |
+| `projection-mensuelle.service.ts` | **la même scission** — sans elle l'articulation était rompue |
+| `echeancier.ts` | `chargesFixesParExercice` entre dans `CHAMPS_ECHEANCIER` |
+| `projection.types.ts` + 3 DTO | `MODELE_PROJECTION_VERSION` **1.7.0**, publié partout où l'historique l'est |
+
+### Portes
+
+Lint 0 · build OK · **154** suites unitaires / **2 265** essais · **23** suites e2e / **689** essais ·
+**9 mutations volontaires, 9 rouges**.
+
+### ⚡⚡ Revue de code — 3 constats, dont 2 bloquants
+
+**Le moteur MENSUEL avait été oublié.** Il re-dérive ses agrégats sous un commentaire disant
+« mêmes formules que le moteur annuel », ce qui n'était **plus vrai** : il ne retranchait que les
+charges variables alors que le flux annuel auquel il s'articule retranche le total. L'écart valait
+**exactement** les charges fixes, sur un invariant que le service documente comme une **identité
+pour tout jeu**. Trois surfaces en dépendaient, dont la **comparaison de scénarios**, qui en tire
+son compteur de mois négatifs — donc **faussement rassurant**.
+
+> **Et la garde de cohérence était VACANTE.** Son balayage fait varier produits, délais et
+> croissance sur **plus de mille** combinaisons — **jamais les charges fixes**. Les mille
+> combinaisons restaient vertes pendant que l'articulation était rompue. *Un balayage ne couvre
+> que les axes qu'il énumère : ajouter une dimension au modèle oblige à l'ajouter là.*
+
+**Le point mort était un seuil de PRODUITS publié comme un CHIFFRE D'AFFAIRES.** Le taux de marge
+sur coût variable était rapporté aux produits, le seuil obtenu divisé par le CA pour donner des
+jours : deux bases mélangées. Sur un jeu dont le CA vaut 60 % des produits, **trois exercices
+bénéficiaires** recevaient un point mort **supérieur à leur chiffre d'affaires** et **plus de 360
+jours** — « ce plan n'atteint pas son point mort dans l'année », juste à côté d'un résultat net
+positif. C'est la confusion produits ≠ CA de STORY-457, que D-472-5 ne refermait qu'au
+dénominateur. Le taux se rapporte désormais à la base sur laquelle le seuil est **exprimé**, et la
+réponse **publie cette base**.
+
+> **Et le test qui aurait dû le voir CONFIRMAIT le défaut** : son attendu était tiré du même modèle
+> mental que le code. Dé-tautologisé, plus un invariant neuf — *un exercice bénéficiaire ne peut
+> pas avoir un point mort au-dessus de son CA* — avec une fixture choisie pour **discriminer** (une
+> première version passait les deux calculs et ne mesurait rien).
+
+### Revue de sécurité — 0 vulnérabilité, et un écart contrat/code
+
+Les cinq axes sont instruits et écartés avec mesure : aucune entrée admissible ne produit `Infinity`
+ni `NaN`, le mode de panne « plan plausible et faux » est fermé (absent vaut 0, et l'ajout à
+`CHAMPS_ECHEANCIER` met le tableau sous la garde de forme), aucun champ n'entre dans un filtre, la
+masse salariale republiée l'était déjà par la même route, aucune route ni garde n'est modifiée.
+
+⚡ Elle relève en revanche un écart contrat/code **créé par mon propre correctif** de revue de code.
+Corrigé **plus loin que le constat** : le champ s'appelait `joursChiffreAffaires`, et ce **nom**
+mentait dès que la base vaut les produits. *Un nom de champ se lit comme une affirmation* — le
+défaut que STORY-440 a payé. Renommé `jours`, l'unité étant déclarée par `base`.
+
+### Vérification docker — rejouée sur l'état final
+
+| Fait mesuré | Résultat |
+|---|---|
+| **AC-4, le levier** | produits +8 % → résultat **+14,61 %** avec structure, **+8,00 %** sans |
+| **AC-1, non-régression** sur un jeu antérieur | total **inchangé**, part fixe nulle |
+| **Bloquant 1 fermé** | articulation **écart 0** avec structure, clôtures identiques ; l'écart de trésorerie vaut exactement les charges fixes |
+| **Bloquant 2 fermé** | sur 3 exercices bénéficiaires, seuil **sous le CA** et **sous 360 jours** (163, 151, 140) |
+| **D-472-3** vérifié en réel | un jeu sans charge saisie a un point mort dû à ses **dotations** |
+| Champ non saisi persisté à la valeur nulle | **0** |
+
+### Non livré, à dessein
+
+- **L'export PDF ne publie ni la scission ni le point mort** : l'AC-2 porte sur « la réponse », et
+  l'export reste **arithmétiquement juste** puisqu'il sert le total. L'étendre aurait débordé.
+- **Aucun calcul social sur la masse salariale** (AC-3 demande qu'elle soit *exprimable*, pas
+  *cotisée*) : publier des cotisations sans les calculer serait pire que de ne rien dire.
