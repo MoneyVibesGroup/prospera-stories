@@ -1,6 +1,6 @@
 # STORY-472 : Aucune charge n'est fixe : le résultat croît exactement au taux de croissance, et le point mort est inexprimable
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -59,3 +59,56 @@ d'affaires est doublement faux.
 - C'est la story la plus structurante du lot : elle change la **forme** du compte de résultat
   prévisionnel, donc l'écran FE-036 (projection) autant que FE-035 (hypothèses).
 - Elle rend **STORY-459** (dotations) plus naturelle : une dotation est une charge fixe par excellence.
+
+
+---
+
+## Progress Tracking
+
+**Statut : in_progress** — ouvert le 2026-09-08, branche `MNV-472`.
+
+### Prémisses vérifiées dans le code AVANT d'écrire
+
+Contrairement aux deux stories précédentes du lot, **la fiche est exacte** :
+
+| Affirmation de la fiche | Vérifié |
+|---|---|
+| `chargesExploitation = produits × tauxChargesPct` | ✅ `projection-annuelle.service.ts:216` |
+| Aucune charge de structure | ✅ aucun champ de `Hypotheses` n'en porte |
+| STORY-460 (échéanciers) livrée | ✅ `investissementsParExercice` & co. existent, le patron est réutilisable |
+| `MODELE_PROJECTION_VERSION` à incrémenter | ✅ vaut `1.6.0`, passera à **`1.7.0`** |
+
+### Décisions de conception
+
+- **D-472-1 — Trois champs, pas un.** `chargesFixesAnnuelles` (montant récurrent),
+  `chargesFixesParExercice` (échéancier `[N+1, N+2, N+3]`, même patron que STORY-460) et
+  `masseSalarialeAnnuelle` **distincte** (AC-3). La masse salariale n'est pas un sous-cas
+  décoratif : elle a un régime propre (CNSS 17,5 % employeur, IRPP retenu à la source) que
+  des stories fiscales ultérieures liront, et la noyer dans un total la rendrait
+  irrécupérable. **Aucun calcul social n'est fait ici** — l'AC-3 demande qu'elle soit
+  *exprimable*, pas *cotisée*.
+- **D-472-2 — Tous FACULTATIFS, et le repli reproduit les chiffres actuels** (AC-1). Absent
+  vaut **0**, jamais `NaN` : contrairement à `tauxInteretPct` (STORY-467), un défaut à zéro
+  n'affirme rien de faux ici — il dit « ce plan n'a pas de charges de structure saisies »,
+  ce qui est exactement l'état de tous les jeux existants. Aucune garde de forme bloquante
+  n'est donc ajoutée, et aucun jeu déjà en base n'est refusé de plus.
+- **D-472-3 — Le point mort retient TOUTES les charges fixes, pas seulement celles saisies.**
+  Une dotation aux amortissements et une charge d'intérêts **sont** des charges fixes : les
+  omettre publierait un seuil de rentabilité **trop bas**, c'est-à-dire le mensonge le plus
+  dangereux qu'un document remis à un banquier puisse porter. Le dénominateur est donc
+  `chargesFixesExploitation + masseSalariale + dotations + chargesFinancières`, et la
+  réponse **publie sa décomposition** — sans elle, l'analyste ne peut pas vérifier le
+  chiffre, ce que la fiche reproche précisément au module.
+- **D-472-4 — `seuilRentabilite` vaut `null` quand il n'a pas de sens**, jamais un nombre
+  inventé : taux de marge sur coût variable **négatif ou nul** (le modèle perd de l'argent
+  sur chaque unité vendue, donc aucun volume ne rend rentable) ou produits nuls. Le motif
+  est publié à côté, comme les refus d'impôt de STORY-458.
+- **D-472-5 — Le point mort en JOURS se calcule sur le CHIFFRE D'AFFAIRES, et vaut `null`
+  quand il est inconnu.** ⚡⚡ STORY-457 a établi que le CA n'est **pas** le total des
+  produits, et que `chiffreAffaires` est `null` sur un jeu dont la base ne le distingue pas.
+  Diviser par `produits` en appelant le résultat « jours de CA » rejouerait exactement la
+  confusion que cette story-là a corrigée. Sur 360 jours (`JOURS_ANNEE_COMMERCIALE`, déjà
+  partagé avec le BFR), jamais 365.
+- **D-472-6 — `MODELE_PROJECTION_VERSION` passe à `1.7.0`, et cette version DÉPLACE des
+  montants** — mais seulement pour un jeu qui saisit des charges fixes. Un jeu existant rend
+  les mêmes chiffres au centime : c'est l'objet du test de non-régression de l'AC-1.
