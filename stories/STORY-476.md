@@ -95,3 +95,79 @@ est une **copie** posée dans le jeu d'hypothèses à la capture, pas une lectur
 - **D-476-5 — 🪝 Hook inerte pour STORY-477.** `avertissements` est un tableau de
   `{ code, message, details }` avec un énuméré de codes ouvert : STORY-477 (jeux aux paramètres
   identiques) y ajoutera son code sans toucher au contrat. Rien d'autre n'est posé d'avance.
+
+### Livré
+
+La garde `BASES_HETEROGENES` porte désormais sur `(jeuEtatsId, snapshotId, base.version)`,
+`?autoriserBasesHeterogenes=true` la force pour un usage d'analyse, et `avertissements[]` est
+publié dans **tous** les cas. Aucune écriture en base : la story ne déplace qu'une lecture.
+
+### Portes
+
+Lint 0 · build OK · **2 292** essais unitaires · **700** e2e · couverture 99 / 94,55 / 99,3 / 99,05 ·
+**8 mutations volontaires, dont 2 VERTES au premier tour** — les deux ont été corrigées, cf. ci-dessous.
+
+### ⚡⚡ Deux gardes VACANTES, révélées par la mutation
+
+**⚡⚡ La garde de VERSION n'était gardée par RIEN (M1).** Retirer `versions.length === 1` de
+`baseHomogene` laissait **toute la batterie et les 700 e2e au vert**. Cause : ma fixture de l'AC-1
+faisait diverger **à la fois** le `snapshotId` **et** la version, si bien que la garde de snapshot
+suffisait à la couvrir. Les deux conditions gardent pourtant **deux cas différents** — et seul
+« deux versions recopiées pour un **même** snapshot » discrimine la première, c'est-à-dire un jeu
+dont la copie de `base.version` a **désynchronisé**. C'était exactement la fixture de l'essai
+d'origine de la story, que j'avais remplacée en la croyant équivalente. Essai ajouté.
+
+**⛔⛔ La batterie e2e mesurait un `ValidationPipe` QUI N'EXISTE PAS EN PRODUCTION (M3).** Retirer
+`@Type(() => String)` du DTO — la seule défense contre la conversion implicite — laissait l'essai
+« ni `true` ni `false` ⇒ 400 » au **vert**. Cause : le pipe de `bilan-comparaison.e2e-spec.ts`
+omettait `transformOptions: { enableImplicitConversion: true }`, que `main.ts` pose et que **cinq
+autres** batteries e2e du dépôt posent déjà (`bilan-jeu-etats`, `bilan-hypotheses`, `bilan-export`,
+`bilan-audit`, `mapping-overrides`). Le mécanisme contre lequel le `@Type` protège n'était donc
+jamais activé. Pipe aligné ⇒ la mutation vire **rouge sur deux essais**, et la démonstration tient :
+sans `@Type`, `class-transformer` applique `Boolean(value)` **avant** tout `@Transform`
+(`applyCustomTransformations` est appelé **après** `transform()`), donc `'oui'` **et** `'false'`
+arrivent à `true` et la porte s'ouvre sur une faute de frappe.
+
+⚠️ **Quinze autres batteries e2e du dépôt ont le même écart de pipe** — hors périmètre de cette
+story, mais tout filet qu'elles opposent au `ValidationPipe` mesure autre chose que la production.
+
+### ⛔⛔ La charge d'erreur du 409 n'arrivait pas au client
+
+`AllExceptionsFilter` **reconstruit** le corps : il ne recopie que `message`, `code` et `details`
+(le point d'extension ouvert par STORY-464), et **jette en silence** tout autre champ posé sur la
+charge d'une `HttpException`. Écrits à la racine, `versionsSnapshotEnPresence` et
+`hypothesesIdsARebaser` — le cœur de l'AC-1 — disparaissaient du 409, **sans erreur nulle part**.
+⚠️ **L'unitaire restait vert** : il inspecte l'exception, pas la réponse HTTP. C'est l'e2e qui l'a
+montré, exactement le piège que le docstring du filtre décrit.
+
+### Vérification en réel (docker)
+
+Stack réelle, organisation neuve, **deux snapshots d'un même jeu d'états** (v1 et v2) et trois jeux
+d'hypothèses semés en base, aux **paramètres identiques** :
+
+| Cas | Appel | Résultat |
+|---|---|---|
+| A | v1 + v2, sans paramètre | **409** `BASES_HETEROGENES`, `details.versionsSnapshotEnPresence = [1, 2]`, `details.hypothesesIdsARebaser` = le seul jeu sur la v1 |
+| B | v2 + v2 | **200**, `baseHomogene: true`, `avertissements: []` |
+| C | v1 + v2, `?autoriserBasesHeterogenes=true` | **200**, `baseHomogene: false`, un avertissement `BASES_HETEROGENES` nommant le jeu à rebaser |
+| D | `?autoriserBasesHeterogenes=oui` | **400** « must be a boolean value » |
+| E | `?autoriserBasesHeterogenes=false` | **409**, comme l'absence |
+
+⚡⚡ **Le cas C démontre le défaut que la story ferme, chiffres à l'appui.** Les deux scénarios
+portent des paramètres **identiques** (`parametresDivergents: []`) et rendent pourtant **17 685 000**
+contre **18 360 000** de produits en N+1, **130 275** contre **140 400** de résultat — un écart
+publié de **675 000** que *rien dans la réponse* n'imputait à la base avant cette story.
+
+⚠️ **Première mesure NON concluante, et je la consigne** : j'avais d'abord fait diverger les deux
+snapshots sur `totalActifN` et `resultatNetN`. Les deux scénarios sont sortis **au chiffre près
+identiques** — ces deux champs-là n'entrent pas dans les mesures que la comparaison publie. Une
+mesure ne prouve que ce qu'elle **interroge** : c'est `totalProduitsN` qui porte la cascade, et la
+démonstration ci-dessus est celle-là.
+
+### Hors périmètre, corrigé quand même
+
+`dev` portait **une erreur de lint** (`no-base-to-string` sur `parametres-divergents.ts`, héritée
+de STORY-474) qui empêchait la porte « lint 0 warning ». Corrigée au minimum : `String(v)` sur un
+objet rend `'[object Object]'`, donc **deux objets différents s'y comparent égaux** et une
+divergence de paramètre serait silencieusement masquée. Aucun paramètre d'hypothèses n'est
+aujourd'hui un objet nu — le cas est défensif, mais la règle a raison sur le fond.
