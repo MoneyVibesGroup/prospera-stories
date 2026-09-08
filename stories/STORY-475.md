@@ -1,6 +1,6 @@
 # STORY-475 : La comparaison se limite à deux mesures annuelles — ni produits, ni marge, ni BFR, ni CAF
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -49,7 +49,7 @@ lisible.
 
 ## Progress Tracking
 
-**Statut : in_progress** — ouvert le 2026-09-08, branche `MNV-475`.
+**Statut : done** — clôturée le 2026-09-08. PR `bilan-service` #107 rebase-mergée sur `dev`.
 
 ### Prémisses vérifiées AVANT d'écrire
 
@@ -75,3 +75,47 @@ déduit donc de ce flux, sans champ neuf.
 - **D-475-3 — Le cumul est celui de l'HORIZON COMPLET** (les trois exercices), jamais une
   moyenne : c'est la grandeur sur laquelle un arbitrage se fait, et c'est elle qui montre que
   **la rentabilité et la trésorerie ne classent pas les scénarios dans le même ordre**.
+
+### Livré
+
+Six mesures annuelles au lieu de deux, `cumul` par scénario, et les écarts sur **toutes** les
+mesures. Aucune écriture en base, aucun calcul neuf : toutes les mesures venaient déjà du moteur.
+
+### Portes
+
+Lint 0 · build OK · **2 287** essais unitaires · **694** e2e · **9 mutations volontaires, 9 rouges**.
+
+### ⚡⚡ Revue de code — 7 constats
+
+**`capaciteAutofinancement` n'était gardé par RIEN** (mutation confirmée) : le remplacer par `0`
+laissait **2 286 unitaires et 694 e2e verts**, y compris l'essai qui se présentait comme le filet
+anti-remplissage. Trois causes cumulées — un `typeof === 'number'` vrai de zéro, un essai qui
+omettait ce champ, et un écart devenu `0 === 0 - 0`.
+
+**Et ma garde « pas des zéros » ne prouvait que la VARIABILITÉ** : elle comparait les deux
+scénarios entre eux, donc **n'importe quel** champ du moteur qui varie la satisfaisait — câbler
+`margeBrute` sur `produits` la laissait verte. Elle confronte désormais chaque mesure à **la valeur
+du moteur**.
+
+**Deux DTO n'implémentaient pas leurs interfaces** — précisément ceux qui portent `cumul`, alors que
+j'avais écrit la justification de l'`implements` trois classes plus haut. Supprimer `cumul` du DTO
+laissait `tsc` **et** 2 286 essais verts : le champ serait parti dans le JSON **sans être déclaré au
+contrat**.
+
+**Les écarts de cumul publiaient une garantie de signe fausse** : « en valeur positive » sur une
+**différence**, que le code viole dès qu'un scénario investit moins que la référence. Un client
+lisant « 6 000 000 investis **en plus** » là où le chiffre dit « de moins » — l'inversion exacte que
+D-475-2 existe pour empêcher, **réintroduite par la description**.
+
+Plus la description de l'endpoint qui énumérait deux mesures sur six, un titre d'essai promettant
+plus que ce qu'il mesure, et trois fixtures de cumul contredisant leurs propres lignes.
+
+### Revue de sécurité — 0 constat
+
+Aucune route ni garde modifiée ; toutes les mesures viennent du moteur invoqué sur le snapshot du
+dossier autorisé ; même classe de sensibilité que les deux déjà servies ; volume borné à 5 scénarios.
+
+### Vérification en réel
+
+Les six mesures servies, les **six** écarts re-dérivables des mesures publiées, le cumul
+re-dérivable des exercices, et les investissements cumulés **positifs**.
