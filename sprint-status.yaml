@@ -3438,7 +3438,8 @@ sprints:
         epic: "EPIC-013"
         points: 3
         service: "bilan-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 PAR LA MAQUETTE FE-036. `ComparaisonAnnuel` = resultatNet + tresorerieCloture. Sur le dossier de demo, Optimiste et Prudent different de 5 948 219 de PRODUITS en N+3 - un tiers du chiffre - et la comparaison ne le montre pas. ⚡ Second manque, et il est le plus parlant : AUCUN CUMUL. Optimiste degage 2 288 704 de resultat cumule contre 975 659 a Prudent, et c est pourtant Prudent qui finit le plus bas en tresorerie ⇒ LA RENTABILITE ET LA TRESORERIE NE CLASSENT PAS LES SCENARIOS DANS LE MEME ORDRE, et c est exactement ce qu une comparaison doit rendre lisible. Toutes ces mesures sont deja calculees : la story est une projection de champs, pas un calcul neuf.
+        status: "done"  # MAJ 2026-09-08 (cloture) — 3 AC livres, PR bilan-service #107 rebase-mergee sur dev. Revue de code : 7 constats. ⚡⚡ capaciteAutofinancement n etait garde par RIEN (le remplacer par 0 laissait 2 286 unitaires ET 694 e2e verts, y compris l essai qui se presentait comme le filet anti-remplissage), et ma garde « pas des zeros » ne prouvait que la VARIABILITE — n importe quel champ du moteur qui varie la satisfaisait. ⚡⚡ Deux DTO n implementaient pas leurs interfaces : supprimer `cumul` laissait tsc ET tous les essais verts, le champ partant dans le JSON sans etre declare au contrat. ⚡ Et les ecarts de cumul publiaient « en valeur positive » sur une DIFFERENCE — une garantie de signe que le code viole. Revue de securite : 0 constat.
+        completed_date: "2026-09-08"
         story_path: "stories/STORY-475.md"
       - story_id: "STORY-476"
         title: "Deux scenarios assis sur DEUX SNAPSHOTS differents sont compares, et la reponse est 200"
