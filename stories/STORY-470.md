@@ -1,6 +1,6 @@
 # STORY-470 : Un collaborateur crée et modifie seul un jeu d'hypothèses — aucun second regard, alors que la table de passage et la liasse en exigent un
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -79,7 +79,7 @@ l'écran FE-035 est fait pour permettre.
 
 ## Progress Tracking
 
-**Statut : in_progress** — ouvert le 2026-09-07, branche `MNV-470`.
+**Statut : done** — clôturée le 2026-09-08. PR `bilan-service` #103 rebase-mergée sur `dev`.
 
 ### ⚡ Ce que la lecture du code a démenti, AVANT d'écrire
 
@@ -122,3 +122,75 @@ qu'il pose.**
 - **D-470-6 — Pas de motif de verrouillage.** La fiche n'en demande pas, et la ligne d'audit
   `HYPOTHESES_VERROUILLE` livrée ici dit déjà **qui** et **quand**. Ajouter une saisie libre
   publiée sans que la fiche la cadre serait un débordement.
+
+### Livré
+
+| Fichier | Ce qui change |
+|---|---|
+| `hypotheses.schema.ts` | `verrouillage?: { par, at }` — l'acte d'engagement, posé par le service |
+| `audit/audit.enums.ts` | `HYPOTHESES_VERROUILLE` |
+| `hypotheses.repository.ts` | `majSiLibre` — écriture dont le **filtre** porte l'absence de verrou |
+| `hypotheses.service.ts` | `verrouiller` idempotent ; `editer` et `rebaser` gardés, **les deux** |
+| `hypotheses.controller.ts` | `POST …/:id/verrouiller`, `@Roles(TENANT_ADMIN)` + refus **nommé** |
+| `dto/hypotheses-response.dto.ts` | `verrouillage` publié avec son auteur **résolu en nom** (AC-4) |
+
+### Portes
+
+Lint 0 · build OK · **23 suites e2e / 689 essais** · **7 mutations volontaires, 7 rouges**.
+
+### Revue de code — 5 constats, dont 2 bloquants
+
+| Constat | Ce qu'il cassait |
+|---|---|
+| ⛔⛔ **bloquant** — le verrou était posé et vérifié en **lecture-puis-écriture** | Deux appels concurrents lisaient tous deux un jeu libre : le second **écrasait l'auteur et la date** du premier, et **deux** lignes partaient au journal append-only. Pire, un `PUT` lisant un jeu libre pouvait écrire ses paramètres sur un jeu **verrouillé entre-temps** — la croissance d'un plan remis à une banque passant de 5 à 15 % sans refus, c'est-à-dire le défaut même que la story ferme, rouvert par une fenêtre d'une requête. |
+| ⛔ **bloquant** — le 409 n'était publié sur **aucune** des deux routes qui le rendent | Un client généré traitait le refus comme une erreur générique et affichait « erreur inattendue », au lieu de la phrase que l'AC-2 exige. `PUT :id` ne publiait même pas le conflit de version qu'il rendait déjà. |
+| ⚡ le **renommage** ne résolvait pas le responsable | C'est la **seule** réponse d'écriture qui puisse porter le verrou d'autrui, puisqu'il reste ouvert sur un jeu engagé. L'écran recevait `auteur: null` là où l'AC-4 impose de nommer, et la justification écrite disait l'inverse du code. |
+| ⚡ deux docstrings | Celle de `HypothesesResponseDto` s'était retrouvée collée à la classe neuve ; « les quatre actes du prévisionnel » du contrat d'audit en compte **cinq**. |
+
+### ⚡⚡ Mon premier filet contre le bloquant était VACANT
+
+La mutation « condition retirée du filtre » laissait les **86 essais du service VERTS** — cette
+batterie **mocke** le repository, donc aucun de ses tests ne pouvait voir le filtre. *Un test qui
+garde le comportement d'un appelant face à un double ne garde pas ce que fait le vrai.* Le filet a
+été reposé dans `hypotheses.repository.spec.ts`, seule place d'où la condition est visible, et la
+mutation y rougit.
+
+### ⚠️ Une dette de STORY-471 révélée ici
+
+`bilan-projection.e2e-spec.ts` tombait **en entier** (48 essais, « Nest can't resolve
+dependencies ») depuis que STORY-471 avait ajouté `AuteursRepository` au constructeur du
+contrôleur. **Vérifié : la suite était déjà rouge sur `dev`.** La cause est de méthode —
+STORY-471 n'avait lancé que `test:e2e -- bilan-hypotheses`, jamais la suite entière, alors que le
+commentaire décrivant ce piège exact se trouvait **à trois lignes** du fournisseur à ajouter.
+Réparé dans cette PR.
+
+### Revue de sécurité — 0 vulnérabilité
+
+Inventaire exhaustif des écrivains des deux collections : **aucun chemin ne change les chiffres
+d'un jeu verrouillé sans passer par la garde**. L'invariant d'appel d'`AuteursRepository`
+(read-models d'identité **globaux à la plateforme**) tient sur les **quatre** nouveaux appelants,
+y compris `lister()` qui verse un lot. Le 403 de rôle est rendu **avant** toute lecture et ne
+distingue rien, donc n'énumère pas. Le déni de service métier est borné : dupliquer reste ouvert
+et produit une copie libre, renommer libère le nom, supprimer reste possible.
+
+### Vérification docker — REJOUÉE sur l'état final
+
+Les correctifs de revue touchaient les chemins d'écriture déjà mesurés, donc la vérification a été
+refaite en entier.
+
+| Fait mesuré | Résultat |
+|---|---|
+| Collaborateur verrouille · administrateur verrouille | **403** nommé · **200** |
+| `PUT` paramètres · `POST rebaser` | **409** · **409** — les deux chemins qui changent les chiffres |
+| `PATCH` renommer · `POST dupliquer` | **200** · **201**, copie **libre** et origine tracée |
+| `POST deverrouiller` | **404** — la route n'existe pas |
+| Re-verrouiller | **200**, date d'origine **conservée**, **une** ligne de journal pour **deux** appels |
+| Le renommage publie le responsable **nommé** | ✅ correctif de revue vérifié en réel |
+| Jeux verrouillés sans auteur · `verrouillage` de type `null` | **0** · **0** |
+
+⚠️ **Deux pannes d'infrastructure traversées, et le diagnostic tenait dans la mémoire du projet.**
+Mongo, Kafka et Redis s'étaient arrêtés ; après leur relance, **tous** les appels rendaient `401`.
+La cause n'était pas les jetons mais l'**émetteur de clés** : `auth-service`, redémarré sans base,
+ne servait plus son JWKS. Relancé, les appels repassent. Et la preuve que le code de la branche est
+**servi** a été tirée de l'appel de la **surface neuve** — un collaborateur recevant
+`VERROUILLAGE_RESERVE_ADMIN` — jamais des logs.
