@@ -5195,7 +5195,7 @@ sprints:
         epic: "EPIC-042"
         points: 2
         service: "paiement-service"
-        status: "not_started"
+        status: "done"  # livree le 2026-09-08 (branche MNV-285)
         assigned_to: null
       - story_id: "STORY-286"
         title: "Console d'exploitation bornée sur `admin-panel`"
