@@ -1,6 +1,6 @@
 # STORY-476 : Deux scénarios assis sur deux snapshots différents sont comparés, et la réponse est 200
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -54,7 +54,7 @@ observable : l'écart n'était qu'un risque tant qu'on ne comparait pas.
 
 ## Progress Tracking
 
-**Statut : in_progress** — ouverte le 2026-09-08, branche `MNV-476`.
+**Statut : done** — clôturée le 2026-09-08. PR `bilan-service` #108 rebase-mergée sur `dev`.
 
 ### Prémisses vérifiées AVANT d'écrire
 
@@ -93,8 +93,16 @@ est une **copie** posée dans le jeu d'hypothèses à la capture, pas une lectur
   ne dit pas *quelles* bases divergent laisse l'utilisateur sans le geste de reprise : c'est le
   `POST …/hypotheses/:id/rebaser` de STORY-465 qu'il doit viser, et il lui faut savoir sur quel jeu.
 - **D-476-5 — 🪝 Hook inerte pour STORY-477.** `avertissements` est un tableau de
-  `{ code, message, details }` avec un énuméré de codes ouvert : STORY-477 (jeux aux paramètres
-  identiques) y ajoutera son code sans toucher au contrat. Rien d'autre n'est posé d'avance.
+  `{ code, message, hypothesesIds }` avec un énuméré de codes ouvert
+  (`CodeAvertissementComparaison`) : STORY-477 (jeux aux paramètres identiques) y ajoutera son
+  code sans toucher à la forme. Rien d'autre n'est posé d'avance.
+  ⚠️ **Forme corrigée en revue** : la première rédaction annonçait un `details` libre — un objet
+  opaque se publie `object` au contrat et devient illisible d'un client généré (patron
+  STORY-432/376). `hypothesesIds` est typé, et il porte le geste de reprise.
+- **D-476-6 — Le paramètre n'ouvre QUE la divergence de version.** Deux jeux d'états différents
+  restent un 409 **inconditionnel** : `ComparaisonResponse.base` ne publie qu'**une** base commune,
+  celle du premier scénario, et forcer ferait publier sa provenance comme celle de tous — la
+  réponse mentirait sur elle-même, ce qui est pire que le défaut que la story ferme.
 
 ### Livré
 
@@ -171,3 +179,66 @@ de STORY-474) qui empêchait la porte « lint 0 warning ». Corrigée au minimum
 objet rend `'[object Object]'`, donc **deux objets différents s'y comparent égaux** et une
 divergence de paramètre serait silencieusement masquée. Aucun paramètre d'hypothèses n'est
 aujourd'hui un objet nu — le cas est défensif, mais la règle a raison sur le fond.
+
+### ⚡⚡ Revue de code — 5 constats, tous corrigés
+
+**⛔⛔ `hypothesesIdsARebaser` sortait VIDE dans le cas exact que la garde de version couvre.** Le
+repère de reprise était le seul `snapshotId` du jeu le plus récent : deux jeux portant le **même**
+snapshot sous deux `base.version` recopiées — la seule situation qui rende `versions.length === 1`
+non-vacante — donnaient un 409 qui **ne désignait personne**, et un `avertissements[0].hypothesesIds`
+vide quand la comparaison était forcée. Mon commentaire affirmait pourtant, deux lignes plus haut,
+que « la liste n'est jamais vide dès lors que la base est hétérogène ». L'ancre est désormais le
+**couple** `(snapshotId, version)`, celui-là même que `baseHomogene` compare — non vide dans les deux
+cas. ⚠️ **Mon essai ne pouvait pas le voir** : il n'assertionnait que `versionsSnapshotEnPresence`.
+
+**⚡ Les deux refus portaient le MÊME code sans discriminant déclaré.** `BASES_HETEROGENES` couvre un
+refus **forçable** (versions) et un refus **inconditionnel** (jeux d'états). Un écran qui reçoit le
+second propose « forcer la comparaison », le deuxième appel rend le **même 409**, et l'utilisateur ne
+sait pas pourquoi. `details.forcable` les distingue désormais, sur les deux chemins.
+
+**⛔ Le `@ApiQuery` du contrôleur ÉCRASAIT la description du DTO.** `@nestjs/swagger` fusionne les
+paramètres implicites et explicites par `assign(item, find(explicites, ['name', item.name]))` :
+l'entrée explicite est la **source** de l'`assign`. La description portée par `ComparaisonQueryDto` —
+celle qui vit à côté des validateurs, donc celle qu'une story future corrigera — n'atteignait jamais
+le contrat publié. Patron STORY-400, où le bloquant **était** une description OpenAPI. `@ApiQuery`
+retiré, DTO seule source ; vérifié dans `/api/docs-json` sur la stack réelle.
+
+**⚡ L'essai « `avertissements` traverse la projection identité » était une TAUTOLOGIE par aliasing.**
+`ComparaisonResponseDto.from` est l'identité et le service était mocké avec **le même objet** :
+`expect(dto.avertissements).toEqual(res.avertissements)` se réduisait à `expect(x).toEqual(x)` — vrai
+même si `from` **supprimait** le champ (patron STORY-430). La valeur attendue est désormais clonée
+avant l'appel. ⚠️ Et le commentaire surestimait l'essai : le filet réel du « le champ arrive au
+client » est `implements ComparaisonResponse` (compilation) plus l'e2e qui lit le JSON.
+
+**⚡ Justification creuse.** Le commentaire opposait `?? false` à `!!` « pour que l'absence et `false`
+soient le même chemin » : le `ValidationPipe` ne laisse passer que `true`, `false` ou l'absence, donc
+les deux formes sont **indiscernables** et aucune mesure ne peut les départager.
+
+### Revue de sécurité — 0 constat
+
+Vérifié et clos, axe par axe : le paramètre de forçage ne rouvre **que l'ancien comportement** sur des
+documents déjà chargés par le repository scopé (aucun chemin ni aucune lecture nouvelle) ; sa
+validation est **fail-closed**, démontrée dans la source installée de `class-transformer` (la branche
+`enableImplicitConversion` est un `else if` **après** `@Type()`, et `transform()` précède
+`applyCustomTransformations`) ; le 409 est levé **après** `DossierScopeGuard` et le `find` scopé, donc
+`hypothesesIdsARebaser` est un sous-ensemble des ids que l'appelant a lui-même envoyés et
+`versionsSnapshotEnPresence` était **déjà** publié en 200 avant la story — aucune énumération ;
+`avertissements[].message` ne concatène aucun fragment contrôlé par un tiers (`base.version` est posé
+côté serveur depuis `snapshot.version`) ; et `valeurComparable` ne publie **que des noms de clés**, la
+sortie de `JSON.stringify` ne quitte jamais la fonction.
+
+### Vérification en réel rejouée après les correctifs
+
+| Cas | Appel | Résultat |
+|---|---|---|
+| A | v1 + v2, sans paramètre | 409 · `forcable: true` · versions `[1, 2]` · le jeu sur la v1 nommé |
+| B | v2 + v2 | 200 · `baseHomogene: true` · `avertissements: []` |
+| C | v1 + v2, forcé | 200 · `baseHomogene: false` · avertissement nommant le jeu à rebaser |
+| D | `=oui` | 400 |
+| E | `=false` | 409, comme l'absence |
+| F | **même snapshot, deux versions recopiées** | 409 · versions `[2, 9]` · **liste NON vide** — le correctif du constat 1 |
+| G | jeux d'états différents, **forcé** | 409 · `forcable: false` — le paramètre ne l'ouvre pas |
+
+Contrat publié relu sur `/api/docs-json` : le paramètre porte bien la description du DTO,
+`AvertissementComparaisonDto` est typé (`code` sur l'énuméré, `message`, `hypothesesIds: array`),
+aucun `object` opaque.
