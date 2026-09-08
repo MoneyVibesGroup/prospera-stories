@@ -3471,7 +3471,8 @@ sprints:
         epic: "EPIC-013"
         points: 2
         service: "bilan-service"
-        status: "in_progress"  # MAJ 2026-09-08 (ouverture, branche MNV-477) — fait VERIFIE : IdsDupliquesConstraint fait new Set(ids).size === ids.length, elle refuse deux fois le meme IDENTIFIANT et ne lit jamais les valeurs. ⚠️ « les NEUF parametres » est FAUX, il y en a 18 — troisieme fois que la meme erreur traverse une fiche de cette epopee (STORY-474 l avait deja relevee). Le nombre n entre dans aucun critere. D-477-1 : doublons REUTILISE l egalite de parametresDivergents (formeEffective + valeurComparable), sinon deux champs de la MEME reponse se contrediraient.
+        status: "done"  # MAJ 2026-09-08 (cloture) — 3 AC livres, PR bilan-service #109 rebase-mergee sur dev. doublons publie les groupes de scenarios aux parametres effectifs egaux, bati sur la MEME egalite que parametresDivergents (D-477-1) — sinon deux champs de la meme reponse se contrediraient. Revue de code : 3 constats. ⚡⚡ La description PUBLIEE promettait « tous les ecarts a zero » alors que le champ ne compare que les HYPOTHESES, jamais la BASE : deux scenarios aux memes parametres sur deux VERSIONS FIGEES differentes — ce que STORY-476 a rendu forcable la veille — sont un doublon AVEC des ecarts non nuls, et un ecran qui grise une courbe sur ce seul champ en cacherait une reellement differente. ⚠️ Aucune batterie ne pouvait le montrer : la fixture e2e servait la MEME liasse pour les deux snapshots, les ecarts sortaient a zero PAR CONSTRUCTION DU DOUBLE. ⚡ Et une 7e mutation VERTE avait deja fait retirer un .sort() qui ne gardait rien : l immunite a l ordre des cles vient de la liste PARTAGEE de l union. Revue de securite : 0 constat.
+        completed_date: "2026-09-08"
         story_path: "stories/STORY-477.md"
       - story_id: "STORY-478"
         title: "Le plan de tresorerie 12 mois ne porte AUCUNE ligne de TVA : il fait circuler du HT"
