@@ -1,6 +1,6 @@
 # STORY-475 : La comparaison se limite à deux mesures annuelles — ni produits, ni marge, ni BFR, ni CAF
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -43,3 +43,35 @@ lisible.
 
 - Ces mesures sont **déjà calculées** par `ProjectionAnnuelleService` : la story est une projection de
   champs, pas un calcul neuf.
+
+
+---
+
+## Progress Tracking
+
+**Statut : in_progress** — ouvert le 2026-09-08, branche `MNV-475`.
+
+### Prémisses vérifiées AVANT d'écrire
+
+**Exactes.** Les quatre mesures de l'AC-1 sont déjà calculées par exercice :
+`produits` et `margeBrute` dans `compteResultat`, `bfr` dans `bilanSimplifie`,
+`capaciteAutofinancement` dans `tresorerie`. La story est bien **une projection de champs**.
+
+⚠️ Pour l'AC-2, `investissements` est disponible **par exercice** dans le moteur, mais n'est
+**pas publié** sur `ExerciceProjete` : seul `fluxInvestissement` l'est, en négatif. Le cumul se
+déduit donc de ce flux, sans champ neuf.
+
+### Décisions de conception
+
+- **D-475-1 — L'écart accompagne CHAQUE mesure comparée** (AC-3). Un champ publié sans son
+  écart oblige le client à refaire la soustraction, et deux soustractions divergent tôt ou
+  tard — sur des arrondis, sur un signe, ou parce que l'une oublie un cas. Le contrat
+  `ComparaisonEcartsAnnuel` reprend donc **exactement** les six mesures de
+  `ComparaisonAnnuel`.
+- **D-475-2 — Le cumul d'INVESTISSEMENTS est publié en valeur POSITIVE** (un montant investi),
+  là où le moteur porte `fluxInvestissement` **négatif** (une sortie de trésorerie). Publier le
+  flux tel quel sous le nom « investissements » ferait lire « −15 000 000 investis ». Le signe
+  est fixé une fois, à la publication, et documenté.
+- **D-475-3 — Le cumul est celui de l'HORIZON COMPLET** (les trois exercices), jamais une
+  moyenne : c'est la grandeur sur laquelle un arbitrage se fait, et c'est elle qui montre que
+  **la rentabilité et la trésorerie ne classent pas les scénarios dans le même ordre**.
