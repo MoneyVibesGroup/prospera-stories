@@ -1,18 +1,18 @@
-# STORY-632 : Le journal à deux acteurs — un acte délégué se lit chez le client, et il nomme Money Vibes
+# STORY-651 : Le journal à deux acteurs — un acte délégué se lit chez le client, et il nomme Money Vibes
 
 Status: ready-for-dev
 
 **Épic :** EPIC-025 — Fondation RBAC (catalogue de permissions, rôles, portée)
 **Service :** `paiement-service` + `notification-service` (+ patron repris par tout service recevant un contrôleur d'administration)
-**Points :** 5 · **Sprint :** ⚠️ **NON SLOTTÉE** — le S32 proposé le 2026-09-05 a été **clôturé** (27/27) avant l’intégration de cette fiche. Elle se tire avec STORY-631, qu’elle conditionne. ⚠️ **RENUMÉROTÉE le 2026-09-08** (ex-STORY-600) : la branche locale `r1-rbac-tenant` n’était pas poussée, et le cadrage PI-SPI du 2026-09-05 a repris 599 et 600 en ne balayant que les branches distantes. Le tracker de `main` demandait cette renumérotation.
-**Prérequis :** **STORY-631** (les contrôleurs d'administration)
+**Points :** 5 · **Sprint :** ⚠️ **NON SLOTTÉE** — le S32 proposé le 2026-09-05 a été **clôturé** (27/27) avant l’intégration de cette fiche. Elle se tire avec STORY-650, qu’elle conditionne. ⚠️ **RENUMÉROTÉE DEUX FOIS le 2026-09-08** (ex-STORY-600, puis brièvement 632) : la branche locale `r1-rbac-tenant` n’était pas poussée, et le cadrage PI-SPI du 2026-09-05 a repris 599 et 600 en ne balayant que les branches distantes. Le tracker de `main` demandait cette renumérotation. ⚠️ La plage **631 → 649** est ensuite revenue au plan de convergence des rails C et D (document du 2026-09-08) : ces deux fiches se posent donc au-delà, en 650 et 651.
+**Prérequis :** **STORY-650** (les contrôleurs d'administration)
 **Origine :** arbitrage PO du 2026-09-04, Q2 : *« le client doit le voir dans son journal, c'est important pour la traçabilité »*.
 
 ---
 
 ## Le fait
 
-STORY-631 ouvre la délégation. **Sans cette story-ci, elle est inacceptable** — et le défaut ne
+STORY-650 ouvre la délégation. **Sans cette story-ci, elle est inacceptable** — et le défaut ne
 serait pas l'absence de trace, mais une trace **qui se lit de travers**.
 
 Un journal qui écrit *« passerelle e-mail modifiée le 4 septembre à 14 h 12 »* dans le journal du
@@ -66,5 +66,5 @@ le jour où elle sert.
 
 ## Notes
 
-- Voir [[STORY-631]], [[STORY-240]] (journal chaîné + outbox), [[STORY-166]], [[STORY-167]],
+- Voir [[STORY-650]], [[STORY-240]] (journal chaîné + outbox), [[STORY-166]], [[STORY-167]],
   [[AP-24]] (la console lit déjà un journal d'audit), [[AP-13]].

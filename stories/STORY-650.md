@@ -1,10 +1,10 @@
-# STORY-631 : Money Vibes agit POUR une organisation — contrôleurs d'administration, `orgId` explicite, et la liste blanche de ce qui est délégable
+# STORY-650 : Money Vibes agit POUR une organisation — contrôleurs d'administration, `orgId` explicite, et la liste blanche de ce qui est délégable
 
 Status: ready-for-dev
 
 **Épic :** EPIC-025 — Fondation RBAC (catalogue de permissions, rôles, portée)
 **Service :** `paiement-service` (`:3005`) + `notification-service` (`:3008`)
-**Points :** 8 · **Sprint :** ⚠️ **NON SLOTTÉE** — le S32 proposé le 2026-09-05 a été **clôturé** (27/27) avant l’intégration de cette fiche ; le slotting reste à rendre au prochain sprint-planning. Elle se tire avec STORY-166/167, dont elle dépend. ⚠️ **RENUMÉROTÉE le 2026-09-08** (ex-STORY-599) : la branche locale `r1-rbac-tenant` n’était pas poussée, et le cadrage PI-SPI du 2026-09-05 a repris 599 et 600 en ne balayant que les branches distantes. Le tracker de `main` demandait cette renumérotation.
+**Points :** 8 · **Sprint :** ⚠️ **NON SLOTTÉE** — le S32 proposé le 2026-09-05 a été **clôturé** (27/27) avant l’intégration de cette fiche ; le slotting reste à rendre au prochain sprint-planning. Elle se tire avec STORY-166/167, dont elle dépend. ⚠️ **RENUMÉROTÉE DEUX FOIS le 2026-09-08** (ex-STORY-599, puis brièvement 631) : la branche locale `r1-rbac-tenant` n’était pas poussée, et le cadrage PI-SPI du 2026-09-05 a repris 599 et 600 en ne balayant que les branches distantes. Le tracker de `main` demandait cette renumérotation. ⚠️ La plage **631 → 649** est ensuite revenue au plan de convergence des rails C et D (document du 2026-09-08) : ces deux fiches se posent donc au-delà, en 650 et 651.
 **Prérequis :** **STORY-166** (socle de rôles) · **STORY-167** (surcharge par organisation) — les deux `not_started` au S31
 **Origine :** arbitrage PO du 2026-09-04, **Q2 = oui** : *« je dois pouvoir le faire pour lui… mais le client doit le voir dans son journal, c'est important pour la traçabilité »*.
 
@@ -76,7 +76,7 @@ Le point de rupture serait un `orgId` **optionnel** ajouté aux routes existante
 - [ ] AC-6 — Le **titulaire d'un compte d'encaissement n'est jamais pré-rempli avec Money Vibes**
       (AP-13, `422 TITULAIRE_REQUIS`). Un opérateur qui saisit pour un client saisit **le titulaire
       du client**.
-- [ ] AC-7 — Chaque acte délégué émet l'entrée de journal de **STORY-632**. ⛔ Un acte délégable qui
+- [ ] AC-7 — Chaque acte délégué émet l'entrée de journal de **STORY-651**. ⛔ Un acte délégable qui
       n'écrit pas au journal du client **ne passe pas la DoD** : la traçabilité est la condition de
       l'arbitrage, pas son complément.
 
@@ -88,5 +88,5 @@ Le point de rupture serait un `orgId` **optionnel** ajouté aux routes existante
 
 ## Notes
 
-- Voir [[STORY-166]], [[STORY-167]], [[STORY-632]], [[STORY-241]], [[STORY-243]], [[STORY-048]],
+- Voir [[STORY-166]], [[STORY-167]], [[STORY-651]], [[STORY-241]], [[STORY-243]], [[STORY-048]],
   [[AP-13]], `kyc-admin.controller.ts` et `entitlements.controller.ts` (les deux précédents).
