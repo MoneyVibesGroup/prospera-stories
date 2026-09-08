@@ -1,6 +1,6 @@
 # STORY-473 : La comparaison ne publie aucune série mensuelle — le graphe comparatif coûte un appel par scénario
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -52,7 +52,7 @@ d'hypothèses (NFR-006, < ~2 s), c'est le facteur de coût dominant.
 
 ## Progress Tracking
 
-**Statut : in_progress** — ouvert le 2026-09-08, branche `MNV-473`.
+**Statut : done** — clôturée le 2026-09-08. PR `bilan-service` #105 rebase-mergée sur `dev`.
 
 ### Prémisses vérifiées dans le code AVANT d'écrire
 
@@ -73,3 +73,44 @@ rien : elle est en mémoire.
 - **D-473-3 — Aucun paramètre `?detail=mensuel`.** La fiche l'envisage si la charge devenait
   un sujet ; 5 scénarios × 12 entiers n'en est pas un, et une option de format qu'aucun
   appelant ne demande est une flexibilité à maintenir sans preneur.
+
+### Livré
+
+`ComparaisonMensuel.clotures: number[12]`, publiée par scénario, typée `[Number]` au contrat.
+Les quatre scalaires sont conservés. **Aucune écriture en base, aucune route neuve, aucun calcul
+supplémentaire** : la série était déjà en mémoire.
+
+### Portes
+
+Lint 0 · build OK · **2 268** essais unitaires · **691** e2e · **3 mutations volontaires, 3 rouges**.
+
+### ⚡⚡ Revue de code — 4 constats, dont mon filet d'AC-3 au mauvais niveau
+
+**Le filet d'AC-3 ne mesurait pas le contrat.** Il lisait `res.body` — ce que le **service**
+produit — alors que le DTO de réponse est l'identité et que cette batterie ne monte aucun
+sérialiseur : le décorateur `@ApiProperty` n'avait **aucune influence** sur ce qu'il vérifiait.
+Retirer `type: [Number]` le laissait **vert**. C'est le même défaut de niveau que STORY-470, deux
+stories plus tôt. Le filet interroge désormais le **document publié**.
+
+**Et ma justification publiée était fausse**, ce qui orientait le diagnostic à l'envers : elle
+annonçait un `object` opaque, donc désignait implicitement l'inventaire des opaques comme filet.
+**Mesuré** : la dégradation réelle est `items: { type: 'string' }` — un `string[]` — et cet
+inventaire reste **vert** dessus. C'est le patron STORY-427, pas STORY-398.
+
+**Les fixtures du contrôleur contredisaient l'invariant** que la PR publie : douze zéros à côté
+d'un minimum de 12 229 164. C'est la seule réponse complète du dépôt ; recopiée, elle aurait rendu
+**rouge un code juste**.
+
+**Et l'essai e2e nommait « trois séries » pour deux scénarios aux hypothèses identiques** : les
+deux séries étaient égales, donc la boucle ne distinguait pas « chacun publie la sienne » de
+« celle de référence recopiée ».
+
+### Revue de sécurité — 0 constat
+
+Aucune route ni garde ajoutée ; la série est celle du scénario déjà servi au même appelant sous les
+mêmes rôles ; `ids` est borné à 5 sans doublons ; aucun moteur ni accès base supplémentaire.
+
+### Vérification en réel
+
+Deux scénarios, **12 points chacun**, séries **différentes**, et les quatre scalaires se
+**re-dérivent exactement** de la série publiée.
