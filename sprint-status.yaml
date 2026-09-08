@@ -5136,7 +5136,7 @@ sprints:
         epic: "EPIC-040"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # 🏁 EPIC-040 + INCRÉMENT 2. La restauration de paiement_service_audit est un acte tracé HORS application ; les chaînes sont revérifiées après.
+        status: "done"  # livree le 2026-09-08 (branche MNV-276)
         assigned_to: null
       - story_id: "STORY-279"
         title: "`platform-catalog-service` consomme `paiement.abonnement.*`"
