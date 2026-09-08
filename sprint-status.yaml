@@ -5122,7 +5122,7 @@ sprints:
         epic: "EPIC-040"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # Append-only : elle contre-passe, elle ne supprime pas. Aucune initiation de remboursement n'existe dans l'API.
+        status: "done"  # livree le 2026-09-08 (branche MNV-274)
         assigned_to: null
       - story_id: "STORY-275"
         title: "Rôle distinct et publication de l'annulation"
