@@ -3471,7 +3471,7 @@ sprints:
         epic: "EPIC-013"
         points: 2
         service: "bilan-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 PAR LA MAQUETTE FE-036. `IdsDupliquesConstraint` refuse deux fois le meme IDENTIFIANT, jamais les memes VALEURS. Le dossier de demo porte « Optimiste 2026 » et « Optismiste 2026 » - la faute de frappe que STORY-464 a etablie comme indeboulonnable - aux neuf parametres identiques : tous les ecarts a 0, deux courbes superposees. Ce n est pas un cas de laboratoire : c est la consequence mecanique de l absence de duplication (STORY-466), l utilisateur ressaisissant a la main. La reponse doit SIGNALER les doublons, pas les refuser : comparer un scenario avec sa copie est un usage legitime.
+        status: "in_progress"  # MAJ 2026-09-08 (ouverture, branche MNV-477) — fait VERIFIE : IdsDupliquesConstraint fait new Set(ids).size === ids.length, elle refuse deux fois le meme IDENTIFIANT et ne lit jamais les valeurs. ⚠️ « les NEUF parametres » est FAUX, il y en a 18 — troisieme fois que la meme erreur traverse une fiche de cette epopee (STORY-474 l avait deja relevee). Le nombre n entre dans aucun critere. D-477-1 : doublons REUTILISE l egalite de parametresDivergents (formeEffective + valeurComparable), sinon deux champs de la MEME reponse se contrediraient.
         story_path: "stories/STORY-477.md"
       - story_id: "STORY-478"
         title: "Le plan de tresorerie 12 mois ne porte AUCUNE ligne de TVA : il fait circuler du HT"
