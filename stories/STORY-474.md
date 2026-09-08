@@ -1,6 +1,6 @@
 # STORY-474 : La comparaison ne publie pas les hypothèses des scénarios comparés
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -37,3 +37,34 @@ lit `jeu.hypotheses` pour projeter, et ne les reporte pas dans la réponse.
 
 - Avec **STORY-473**, ces deux ajouts ramènent la comparaison à **un** appel là où l'écran en fait
   aujourd'hui **1 + 2n**.
+
+
+---
+
+## Progress Tracking
+
+**Statut : in_progress** — ouvert le 2026-09-08, branche `MNV-474`.
+
+### ⚡ Deux prémisses de la fiche corrigées AVANT d'écrire
+
+| Affirmation | État réel au 2026-09-08 |
+|---|---|
+| « les **neuf** paramètres » | **Faux — il y en a 18.** La fiche date du 2026-08-27 ; cinq stories les ont étendus depuis : 459 (durée d'amortissement), 460 (trois échéanciers), 467 (taux d'intérêt), 469 (taux de TVA) et 472 (deux charges fixes + leur échéancier). **Un décompte chiffré dans une fiche se périme en silence** — le dépôt a déjà tranché cette famille sur le contrat d'audit (STORY-471). |
+| AC-1 : « dans la version utilisée pour la projection (**pas la version courante si elles diffèrent**) » | **La distinction n'existe pas sur cette route.** `comparer(ids)` ne prend aucun paramètre de version, charge les jeux par `find({_id: {$in}})` et projette `jeu.hypotheses`, c'est-à-dire **toujours la courante** — que `hypothesesVersion` publie déjà. L'AC-1 se réduit donc à publier ce qui a **effectivement** servi, et le sélecteur `?versionHypotheses=` reste propre à `…/:id/projection`. |
+
+### Décisions de conception
+
+- **D-474-1 — Publier l'objet d'hypothèses TEL QU'IL A SERVI**, jamais une recopie champ par
+  champ. Une énumération manuelle se périme à la première story qui ajoute un paramètre —
+  c'est déjà arrivé cinq fois depuis la rédaction de la fiche — et le champ oublié serait
+  **absent sans que rien ne le dise**.
+- **D-474-2 — `parametresDivergents` est calculé sur l'UNION des clés présentes**, pas sur
+  celles du premier scénario : un paramètre saisi par un seul scénario est précisément une
+  divergence, et le lire depuis la référence seule le rendrait invisible.
+- **D-474-3 — La comparaison est structurelle, pas textuelle** : deux échéanciers `[1, 2, 3]`
+  ne divergent pas, et un champ **absent** face à un champ **à zéro** ne divergent pas non
+  plus — absent vaut 0 pour tous les paramètres facultatifs du modèle (D-472-2). Comparer les
+  formes brutes signalerait des divergences qui ne changent **aucun chiffre**, sur l'écran
+  même qui sert à expliquer les écarts.
+- **D-474-4 — La liste est TRIÉE**, pour qu'une réponse soit comparable à une autre et qu'un
+  essai ne dépende pas de l'ordre d'itération d'un objet.
