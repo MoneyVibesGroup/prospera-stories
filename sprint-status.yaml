@@ -5129,7 +5129,7 @@ sprints:
         epic: "EPIC-040"
         points: 2
         service: "paiement-service"
-        status: "not_started"  # Celui qui constate l'entrée ne doit pas pouvoir l'effacer seul — au niveau de l'ACTEUR (AD-11).
+        status: "done"  # livree le 2026-09-08 (branche MNV-275)
         assigned_to: null
       - story_id: "STORY-276"
         title: "Piste d'audit opposable sur toute opération d'argent"
