@@ -3422,7 +3422,8 @@ sprints:
         epic: "EPIC-013"
         points: 3
         service: "bilan-service"
-        status: "in_progress"  # MAJ 2026-09-08 (dev) — branche MNV-473. Fiche VERIFIEE EXACTE : le service calcule bien les 12 clotures puis les JETTE. # CREEE le 2026-08-27 PAR LA MAQUETTE FE-036. `ComparaisonMensuel` porte tresorerieMinimale, moisTresorerieMinimale, moisTresorerieNegative et tresorerieCloture12 - PAS les douze cloture. Or `comparer()` les A calculees pour en tirer ces quatre scalaires, puis les JETTE. Consequence directe : le « graphe comparatif » que la story FE-036 exige demande UN APPEL `projection-mensuelle` PAR SCENARIO (trois de plus sur le dossier de demo, cinq au maximum du contrat), et le front recompose ce que le serveur vient de produire - sur un ecran dont la story exige un recalcul REACTIF (NFR-006). Publier la serie ne coute rien : elle est deja en memoire.
+        status: "done"  # MAJ 2026-09-08 (cloture) — 4 AC livres, PR bilan-service #105 rebase-mergee sur dev. Revue de code : 4 constats. ⚡⚡ Mon filet d AC-3 etait AU MAUVAIS NIVEAU (il lisait res.body, pas le document publie : retirer type:[Number] le laissait VERT) — meme defaut que STORY-470. ⚡ Et ma justification publiee etait FAUSSE : la degradation reelle est string[], pas un object opaque, donc l inventaire des opaques reste vert dessus (patron STORY-427, pas 398). Revue de securite : 0 constat.
+        completed_date: "2026-09-08"
         story_path: "stories/STORY-473.md"
       - story_id: "STORY-474"
         title: "La comparaison ne publie pas les HYPOTHESES des scenarios compares"
