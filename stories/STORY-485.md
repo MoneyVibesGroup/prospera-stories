@@ -140,3 +140,105 @@ son rang depuis STORY-481 : il reçoit les hypothèses **de cet exercice**, comm
   elle en livre trois. Le patron est posé pour les suivants s'ils sont demandés.
 - **`tauxDecouvertPct`** : il se replie sur `tauxInteretPct`, et rendre variable l'un sans l'autre
   ferait diverger le repli. Les deux ensemble, ou aucun.
+
+---
+
+## Progress Tracking
+
+### Développement (2026-09-09)
+
+Un seul dépôt, `bilan-service`. Les cinq AC sont livrés.
+
+### ⚡⚡ Le test a trouvé un cran plus profond que le cadrage
+
+D-485-2 disait : les neuf lecteurs doivent recevoir les taux de **leur** exercice. Une fois cela fait,
+le test d'articulation mensuel/annuel — l'identité `ecartArticulation === 0` — **est resté rouge sur
+les TROIS exercices**, le premier compris :
+
+| profil de marge | exercice 1 | exercice 2 | exercice 3 |
+|---|---|---|---|
+| plat `30/30/30` | 0 | 0 | 0 |
+| variable `10/50/90` | **−1 666 666** | **+3 666 666** | **+4 033 332** |
+
+**Le moteur mensuel lit le taux de DEUX périodes.** Ses propres flux relèvent de son exercice ; mais
+l'**encours d'ouverture** qu'il hérite — le BFR normatif de la période précédente — relève du taux
+de cette période-là. L'annuel le calcule ainsi depuis STORY-481 : `bfrBase` pour l'exercice 1, hors
+boucle, au taux **saisi** ; le BFR de l'exercice `rang − 1` ensuite. Le mensuel le recalculait au
+taux **courant**.
+
+⛔ **Rien d'autre ne l'aurait signalé.** Le BFR n'entre pas dans l'équilibre du bilan ; seule cette
+identité, que STORY-460 et STORY-467 ont chacune payée, le rendait visible. Le cadrage avait raison
+sur le principe et incomplet d'un cran sur la portée.
+
+Prouvé en docker, sur le parcours réel — l'ouverture de chaque exercice **égale** la clôture du
+précédent :
+
+| exercice | `bfrBase` (ouverture) | `ecartArticulation` |
+|---|---|---|
+| N+1 | 6 135 000 | 0 |
+| N+2 | **7 117 200** ← BFR de N+1 | 0 |
+| N+3 | **8 098 200** ← BFR de N+2 | 0 |
+
+### Table de mutations — 7 sur 7 ROUGES, dont DEUX d'abord fausses
+
+| # | Mutation | Résultat |
+|---|---|---|
+| M1 | le BFR annuel relit le taux SAISI | ROUGE |
+| M2 | le mensuel relit le taux saisi (AC-5) | ROUGE |
+| M3 | l'ouverture du mensuel prend le taux COURANT | ROUGE |
+| M4 | la garde des taux devient celle des montants | ROUGE |
+| M5 | la garde de forme des profils est retirée | ROUGE |
+| M6 | un couple de taux sort de `COUPLES_ECHEANCIER` | **d'abord FAUX ROUGE** → ROUGE |
+| M7 | les profils de taux se persistent en `null` | **d'abord FAUX ROUGE** → ROUGE |
+
+⚡⚡ **M6 et M7 mentaient toutes les deux, et pour la même raison** : la mutation cassait la
+**compilation** (import devenu inutile) ou faisait rougir une batterie voisine. Rejouées proprement,
+les deux points de recopie n'étaient gardés par **rien** — exactement le trou que STORY-483 avait
+laissé sur `COUPLES_ECHEANCIER`, une story plus tôt, et qu'elle avait fermé pour son seul champ.
+Deux tests neufs les gardent, dont un `it.each` sur les trois couples.
+
+### Ce que la garde d'incrément de version a mesuré
+
+`MODELE_PROJECTION_VERSION` passe de `1.12.0` à `1.13.0`, et la garde a fait exactement son travail :
+son diff ne portait que **trois clés ajoutées** — `croissanceAppliquee`, `tauxMargeApplique`,
+`tauxChargesApplique`. **Aucun montant existant n'a bougé d'un centime.** C'est la non-régression
+qu'AC-1 exige (« un nombre reste valide : aucune migration »), **mesurée** plutôt qu'affirmée.
+
+⚠️ Une garde de contrat a rougi ensuite : la description publiée du champ `modeleVersion` doit
+**nommer** la version courante, sur les trois routes. C'est une convention que ce dépôt tient depuis
+`1.2.0`, et elle interdit qu'un incrément de modèle passe sans que le contrat dise ce qui a changé.
+
+⛔ **Un remplacement en masse de « 1.12.0 » a été fait puis ANNULÉ**, parce qu'il réécrivait
+l'historique : il transformait « 1.11.0 → 1.12.0 (STORY-439) » en « 1.11.0 → 1.13.0 » dans un
+versionnement qui n'a rien à voir, et « 1.12.0 → 1.13.0 (STORY-440) » en « 1.13.0 → 1.13.0 ». Seules
+les mentions de la version **courante** — les `example:` du contrat et les assertions des tests — ont
+été mises à jour.
+
+### Vérification docker — sur le parcours HTTP réel
+
+⚠️ Version servie confirmée avant de conclure : la réponse annonce `1.13.0`.
+
+**① Les trois profils sont persistés, et ceux qui ne sont pas saisis n'existent pas en base :**
+
+```
+croissance : [20,10,0]     marge : [28,30,32]     charges : [22,20,19]
+jeu SANS profil — clés `ParExercice` présentes : (aucune)
+```
+
+**② AC-1 et AC-4 sur la projection servie :**
+
+| | produits | croissance | marge | charges | BFR | écart |
+|---|---|---|---|---|---|---|
+| N+1 | 108 000 000 | 20 | 28 | 22 | 7 117 200 | 0 |
+| N+2 | 118 800 000 | 10 | 30 | 20 | 8 098 200 | 0 |
+| N+3 | 118 800 000 | 0 | 32 | 19 | 8 367 480 | 0 |
+
+⚡ **Les produits de N+2 et N+3 sont identiques** — une croissance nulle en troisième année — et le
+BFR **continue de varier**, parce qu'il suit la marge. C'est la mesure qui prouve que le BFR lit le
+taux de son exercice : à produits égaux, seule la marge peut le faire bouger.
+
+**③ AC-5** — les trois plans mensuels, articulation nulle, ouverture égale à la clôture précédente
+(tableau plus haut).
+
+**④ Non-régression, sur un jeu réel sans profil** : `capitauxPropres` de 112 365 600, 122 461 100 et
+132 358 770 — **identiques au franc** à ceux mesurés en clôturant STORY-483, sur le même dossier.
