@@ -1,10 +1,10 @@
 # STORY-483 : Le bilan prévisionnel ne sépare pas capitaux propres et dettes — donc aucun ratio bancaire
 
-Status: review
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
-**Points :** 5 · **Complexité :** high · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
+**Points :** 5 · **Complexité :** high · **Assigné à :** vivianMoneyVibesGroupes · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
 **Origine :** maquette **FE-036** (projection 3 ans, trésorerie 12 mois, scénarios comparés), 2026-08-27.
 Relevé en cherchant, dans le bilan prévisionnel simplifié, les trois chiffres qu'un banquier demande.
 
@@ -455,3 +455,9 @@ corroborent le mensonge — trois sources concordantes qui interrogent toutes le
 Un diagnostic croisé sur trois commandes n'est pas un diagnostic croisé si elles partagent la même
 prémisse.
 
+### Clôture — 2026-09-09
+
+**PR `MNV-483(bilan)` #115** et **PR `MNV-483(balance)` #94** rebase-mergées sur `dev` **ensemble**
+(contrat d'artefact partagé, leçon STORY-428), branches supprimées. PR `docs/` mergée sur `main`.
+
+Assigné à : `vivianMoneyVibesGroupes`.
