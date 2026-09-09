@@ -1,10 +1,10 @@
 # STORY-484 : Une projection n'est ni figée, ni horodatée, ni tracée — alors qu'elle est remise à un tiers
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
-**Points :** 5 · **Complexité :** medium · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
+**Points :** 5 · **Complexité :** medium · **Assigné à :** vivianMoneyVibesGroupes · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
 **Origine :** maquette **FE-036** (projection 3 ans, trésorerie 12 mois, scénarios comparés), 2026-08-27.
 Relevé par la checklist posée en FE-034 puis étendue en FE-035 : pour tout objet qu'un cabinet REMET À UN TIERS, demander « qui a le droit » ET « qui le saura ».
 
@@ -33,14 +33,14 @@ c'est l'acte de **restitution** qui n'est pas tracé.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — La réponse porte `produitLe` (horodatage serveur) et `produitPar` (identifiant de
+- [x] AC-1 — La réponse porte `produitLe` (horodatage serveur) et `produitPar` (identifiant de
       l'appelant). Une date posée par le client serait une date qu'il choisit.
-- [ ] AC-2 — Un `AuditType.PROJECTION_CONSULTEE` est journalisé par appel, avec le triplet de
+- [x] AC-2 — Un `AuditType.PROJECTION_CONSULTEE` est journalisé par appel, avec le triplet de
       reproductibilité — c'est ce triplet, et non la réponse, qui permet de rejouer.
-- [ ] AC-3 — Le rôle : `@Roles(TENANT_ADMIN, TENANT_USER)` sur les deux contrôleurs. **Arbitrage PO
+- [x] AC-3 — Le rôle : `@Roles(TENANT_ADMIN, TENANT_USER)` sur les deux contrôleurs. **Arbitrage PO
       requis**, même arbitrage que **STORY-470** : un prévisionnel remis à un tiers engage le cabinet.
       À trancher **avant** la première ligne de code, le rôle changeant la forme de l'écran.
-- [ ] AC-4 — Aucune écriture métier n'est introduite : la projection reste une dérivation. Le journal
+- [x] AC-4 — Aucune écriture métier n'est introduite : la projection reste une dérivation. Le journal
       est un effet de bord d'observabilité, pas un agrégat.
 
 ## Conséquences ailleurs
@@ -223,3 +223,73 @@ sérialisé un `snapshotId: undefined` — un champ qui *paraît* renseigné et 
 **AC-4** — aucune écriture métier : les trois routes restent des `@Get`, aucune transaction n'est
 ouverte, et un journal en panne rend quand même la réponse **avec** son horodatage, prouvé par trois
 tests qui rejettent l'écriture d'audit.
+
+### Revue de code et revue de sécurité — 10 constats, tous réels, tous traités
+
+**Sécurité — un constat, et il visait la propriété même de la story.**
+
+⚡⚡ `cibleJeu` recopiait le segment d'URL **brut**. Or `Types.ObjectId.isValid` accepte
+l'hexadécimal en **MAJUSCULES** : appeler la route avec un identifiant en majuscules résout **le
+même document**, rend 200 et sort le prévisionnel. Mais la relecture du journal par cible est une
+**égalité de chaîne**, et la réponse publie l'identifiant en **minuscules**. La question « qui a
+sorti CE prévisionnel ? », posée avec l'identifiant que la réponse elle-même donne, rendait donc
+une **liste vide** sur un document réellement sorti du cabinet.
+
+⛔ Un appelant ordinaire, sans aucune élévation, choisissait sa casse et se rendait invisible au
+seul contrôle ciblé — c'est-à-dire exactement ce que cette story existe pour livrer. Et le dépôt
+avait **déjà tranché ce cas**, cinq fichiers plus loin, dans `ExportService`, avec le même `HEX_24`
+et le même commentaire. Le correctif n'y avait pas été repris.
+
+**Code — neuf constats, dont un bloquant.**
+
+| # | Constat | Ce qu'il produisait |
+|---|---|---|
+| 1 | le contrat OpenAPI affirmait encore « Aucune écriture : dérivation déterministe » | un intégrateur comparant deux réponses conclut que le prévisionnel a bougé, à chaque appel |
+| 2 | l'exercice journalisé venait de la **requête**, défaut recopié à la main | le jour où ce défaut change, le journal ment sur **lequel** des trois documents est sorti |
+| 3 | le `it.each` présenté comme une énumération était une **liste manuelle** | une 4ᵉ route non tracée la laisserait verte, sous un docstring qui promet le contraire |
+| 4 | aucune batterie ne montait `BilanModule` | retirer le provider laisse tout vert et l'application **ne démarre pas** |
+| 5 | `expect(ua.produitPar).toBe(ub.produitPar)` — **vacant** | `undefined` des deux côtés passe ; c'était la seule assertion e2e du champ |
+| 6 | l'identité d'une comparaison ignorait la version de chaque scénario | rejouer donne d'autres chiffres, et rien ne le dit |
+| 7 | la description publiée des contextes ignorait le type neuf | un écran lit `contexte.snapshotId` et affiche une case vide sur les comparaisons |
+
+⚡⚡ **Le constat 2 est celui qui instruit le plus.** Le code lisait `query.exercice ?? 1` et **le
+test recopiait le même littéral** : les deux auraient bougé ensemble, et le test qui prétendait
+garder ce champ ne pouvait que confirmer le défaut. La correction ne se limite pas au code — la
+fixture **diverge maintenant volontairement** de la requête, seule construction où les deux valeurs
+sont discernables.
+
+⚡ **Le constat 3 a produit un vrai test.** La liste écrite à la main a été gardée, mais un test lit
+désormais les **métadonnées Nest** du prototype et exige que chaque route déclarée y figure : c'est
+lui l'énumération, et il rougit tout seul. Le docstring dit maintenant la vérité.
+
+### Table de mutations finale — 7 mutations, 7 rouges par assertion
+
+Chaque rouge relu pour vérifier qu'il vient d'une assertion, jamais d'une erreur de compilation.
+
+| # | Mutation | Résultat |
+|---|---|---|
+| M1 | `produitPar` vient du paramètre de route | ROUGE — 2 routes |
+| M2 | l'horodatage devient un littéral figé | ROUGE — 2 routes |
+| M3 | le type d'acte journalisé devient `EXPORT_EFFECTUE` | ROUGE |
+| M4 | la collection cible perd son `snake_case` | ROUGE |
+| M5 | le triplet perd `versionHypothesesId` | ROUGE — 2 routes |
+| M6 | la canonisation de l'identifiant est retirée | ROUGE |
+| M7 | le provider est retiré de `BilanModule` | ROUGE |
+
+### Vérification docker REJOUÉE sur l'état final
+
+Le scénario de la revue de sécurité, mesuré sur la stack :
+
+```
+appel en MAJUSCULES : 200
+cible.id journalisé : 6aa0c337addcc6aab64cac70
+retrouvé par la requête en MINUSCULES : 1
+```
+
+Le document sort, et il est **retrouvable** par l'identifiant que la réponse publie. Avant le
+correctif, la même requête rendait zéro.
+
+### Clôture — 2026-09-09
+
+PR `MNV-484(bilan)` rebase-mergée sur `dev`, branche supprimée. PR `docs/` mergée sur `main`.
+Assigné à : `vivianMoneyVibesGroupes`.
