@@ -1,6 +1,6 @@
 # STORY-482 : Une trésorerie négative n'est ni nommée, ni financée : portée à l'actif, sans découvert, sans agios, sans besoin chiffré
 
-Status: review
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -250,3 +250,83 @@ La limite reste réelle — elle est démontrée sur un jeu construit (120 jours
 trésorerie de départ : trois clôtures annuelles positives, **−3 333 337 au mois 4**) — mais elle est,
 aujourd'hui, théorique sur les données en base. Le contrat la publie quand même : c'est une propriété du
 modèle, pas du portefeuille du jour.
+
+
+### Revue de sécurité — 0 vulnérabilité, 1 durcissement
+
+Six axes clos sans constat (authentification, autorisation et multi-tenant, injection NoSQL sur le
+chemin `Mixed`, web, fichiers et export, infrastructure, logique métier). Le refus 422 ajouté est bien
+**précédé** du 404 anti-énumération, donc il ne peut citer qu'un nom de jeu que l'appelant possède
+déjà ; le filtre d'exception global ne laisse fuir ni message ni pile sur un 500.
+
+⚡⚡ **Un durcissement retenu, et vérifié avant d'être corrigé.** `tauxDecouvertPct` était le **seul**
+intrant neuf du moteur exclu d'`exigerFormeCourante`, alors qu'il vit sur le même chemin `Mixed` que
+les cinq autres. L'argument qui l'en excluait — « aucun document existant ne le porte » — est vrai de
+la **rétro-compatibilité** et ne dit rien du **mode d'échec**. *Mesuré : à `-8`, le coût de découvert
+sort à **−4 323 067** — un **produit financier tiré d'un découvert** — et le résultat net passe de
+−19 903 067 à −11 256 933, publié en **HTTP 200** sans aucun signal.* C'est mot pour mot le motif pour
+lequel la garde refuse un `tauxInteretPct` négatif. ⛔ La garde valide le repli **résolu** et non le
+champ écrit : le contrôler nu refuserait les 52 jeux en base.
+
+### Revue de code — 7 constats, tous réels, tous traités
+
+**C1 — BLOQUANT.** Trois sites affirmaient encore que `tauxInteretPct` porte le découvert, dont une
+**description OpenAPI publiée sur la surface de SAISIE**, vingt lignes au-dessus d'un
+`tauxDecouvertPct` disant l'inverse. Un intégrateur qui saisit 16 % attendait un agio à 8 %, parce que
+le contrat le lui disait. ⛔ **Aucun des trois filets du dépôt ne regarde une description** — la leçon
+de STORY-400, où le bloquant était déjà une phrase publiée. Un test de contrat regarde désormais la
+phrase, et exige que les deux descriptions se renvoient l'une à l'autre.
+
+**C2** — le test « le moteur MENSUEL refuse lui aussi » ne l'atteignait **jamais** : même entrée à
+l'octet que celui du dessus, il ré-assertionnait l'exception du moteur **annuel**, levée avant que le
+mensuel soit construit. On pouvait neutraliser la mesure du besoin dans le mensuel seul sans qu'aucun
+des deux ne rougisse. Réécrit sur un ancrage sain, avec un témoin qui prouve que l'ancrage, lui, passe.
+
+**C3** — `tauxDecouvertPct` n'était éprouvé par **aucun** test de la surface d'écriture ni du contrat.
+S'il avait manqué au DTO, `forbidNonWhitelisted` aurait rendu **400** à toute saisie — fonctionnalité
+inutilisable par HTTP, avec les 2 467 unitaires et les 785 e2e **verts**. Le patron `tauxTvaPct` a été
+repris intégralement, mutations comprises.
+
+**C4** — la garde de forme nomme **six** intrants, le moteur en lit une douzaine. Les sept autres
+rendaient un **500 anonyme** depuis que le besoin de financement est chiffré : la panne exacte que
+D-482-6 disait vouloir remplacer par un 422 nommé, déplacée d'un champ à l'autre. ⛔ Ajouter un bloc
+de garde par champ aurait reproduit, au prochain champ, la « garde sur un seul des chemins » de
+STORY-445 : le filet rattrape par le **type** de l'échec — `SerieCloturesCorrompue` — sur les
+**quatre** appels de moteur du dépôt, dont un quatrième qu'aucune revue précédente n'avait dénombré.
+⛔⛔ Et surtout **pas** sur `RangeError` : celui d'`ancrerExercice` signale un rang hors bornes, donc un
+bug, et l'attraper le déguiserait en « ré-enregistrez votre jeu ».
+
+**C5** — la description de version de la route de comparaison annonçait un changement qui n'y a pas
+lieu (elle ne publie rien du bilan simplifié hors `bfr.montant`) et taisait celui qui y a lieu
+(`parametresDivergents` peut nommer `tauxDecouvertPct` résolu, qu'aucun scénario n'a saisi).
+
+**C6** — `ventilerTresorerie` avalait en `{ 0, 0 }` la corruption que sa sœur **lève**, violant
+l'identité que sa propre docstring pose. Deux fonctions exportées du même fichier ne peuvent pas
+traiter la même corruption à l'opposé l'une de l'autre.
+
+**C7** — `MOIS_HORIZON` était du code mort gardé par une assertion tautologique, sous un test qui
+mesurait le **premier** rang en prétendant mesurer la borne haute : ses deux séries étaient
+entièrement égales, donc la convention « à profondeur égale, le premier gagne » sortait 25 et 12,
+jamais 36. Sa suppression retire aussi le seul import de valeur vers `projection.types`, donc le cycle
+d'imports documenté.
+
+### Table de mutations finale — 23 sur 23 ROUGES
+
+Aux quinze de la phase de développement s'ajoutent huit mutations sur les correctifs de revue : le
+filet retiré de chaque appelant, le filet élargi à `RangeError`, la ventilation qui ravale à nouveau la
+corruption, le mensuel qui cesse de chiffrer le besoin, la garde du taux de découvert sous ses trois
+angles, et la description publiée qui redit « AUSSI au découvert ». ⚠️ Deux d'entre elles ont d'abord
+sorti « NE COMPILE PAS » et ont dû être réécrites compilables — la même leçon qu'au premier tour.
+
+### Portes finales et vérification docker rejouée
+
+Lint 0 warning · build OK · **2 467 unitaires** + **785 e2e** verts · couverture
+**99,06 / 95,09 / 99,34 / 99,12** · `besoin-financement.ts` et `forme-hypotheses.ts` à 100 % sur les
+quatre axes.
+
+⚠️ **Vérification docker REJOUÉE sur l'état final**, les correctifs touchant le moteur déjà mesuré.
+Le conteneur sert le code corrigé (`SerieCloturesCorrompue` et `calculerOuRefuser` présents dans
+`dist`, modèle `1.12.0`), et les mesures sont **identiques au chiffre** : 27 jeux projetés, 0 écart non
+nul, 0 totalActif non recomposable, 0 montant négatif à l'actif ou au passif, 5 exercices réellement à
+découvert. ⛔ Les refus restent à **25**, exactement ceux de STORY-467 : la garde ajoutée sur le taux
+de découvert n'en refuse **aucun de plus**, tous les jeux retombant sur le repli déjà validé.
