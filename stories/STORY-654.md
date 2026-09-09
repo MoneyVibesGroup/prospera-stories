@@ -111,3 +111,27 @@ défaut de STORY-653 : `/comptes` liste désormais **deux** comptes
 désormais TOUS les comptes et nomme chacun avec sa raison de refus. La
 différence entre « un compte ne marche pas » et « aucun ne marche » est
 exactement ce que le participant a besoin de lire.
+
+## Ce que la première adresse réelle a changé (2026-09-09, même jour)
+
+Une adresse de paiement réelle a été fournie. L'annuaire la résout — nom, pays,
+catégorie — et **le chemin nominal de la vérification d'un compte est prouvé
+contre le schéma pour la première fois** : jusque-là il n'avait jamais vu qu'un
+`404`. La lecture du client, la comparaison du pays et le retour de l'empreinte
+ont tourné pour de vrai.
+
+⛔⛔ **MAIS LE BÉNÉFICIAIRE DOIT ÊTRE À NOUS, ET L'ANNUAIRE NE SUFFIT PAS À LE
+DIRE.** Une adresse peut exister au répertoire sans être celle de notre client
+business : le schéma refuse alors la demande par un `404` qui **nomme le
+business**. Les deux rôles ne se remplacent donc pas —
+`PI_SPI_ALIAS_ENCAISSEMENT` doit être à nous, `PI_SPI_ALIAS_PAYEUR` à un tiers
+enrôlé — et la recette les distingue plutôt que de produire un échec qui
+ressemblerait à un défaut de notre code.
+
+⚡ **Une adresse fournie court-circuite le décor, délibérément.** Le décor n'est
+pas ce que la recette éprouve : il n'existe que pour amener une adresse. Exiger
+de la fabriquer quand le participant ne résout pas ses propres comptes
+laisserait **un défaut extérieur décider de ce que nous savons de notre code**.
+
+État : **5 prouvés, 1 bloqué, 0 échec**. Il ne manque qu'une adresse de paiement
+sur l'un de NOS comptes — ce que la résolution des comptes bloque encore.
