@@ -180,3 +180,165 @@ ratios la majorité des prévisionnels de reprise d'activité.
 - **Le retraitement courant / non courant** : arbitré voie A ailleurs (STORY-552), sans objet ici.
 - **`zone-franche-togo-1.0` et `sfd-bceao-1.0`** : marqueur déclaré si et seulement si leur liasse porte
   un poste de dettes financières identifiable dans la source déjà transcrite ; sinon repli déclaré.
+
+---
+
+## Progress Tracking
+
+### Développement (2026-09-09)
+
+Deux dépôts, deux branches `MNV-483` : `bilan-service` (le livrable) et `balance-service` (la
+contrepartie d'artefact). Les cinq AC sont livrés, AC-3 **pleinement** et non par son repli.
+
+Preuve de branchement avant la première ligne :
+
+```
+docs               MNV-483
+bilan-service      MNV-483
+balance-service    MNV-483
+```
+
+**Ce que la lecture du code a changé au cadrage** — trois faits relevés avant d'écrire :
+
+1. **Le repli d'AC-3 aurait vidé la story de son objet.** Sans ancre, `dettesFinancieres` ne compte
+   que les emprunts **neufs** : le dossier de vérification, qui porte 63 000 000 d'emprunts, aurait
+   affiché un endettement de **2 000 000** — soit un ratio de 0,018 au lieu de 0,58. Trente fois trop
+   bas, sous un nom qui promet l'exactitude.
+2. **CIMA et SFD-BCEAO ne peuvent pas déclarer le marqueur, et c'est une bonne nouvelle.** Leur passif
+   **agrège** : `CP4` de CIMA porte « Dettes (financières, réassureurs, tiers) », `BP1`/`BP2` de SFD
+   mêlent trésorerie interbancaire et dépôts des membres. Le repli n'est donc pas du code mort à
+   écrire par acquit de conscience : c'est le comportement de **deux paquets sur quatre**.
+3. **STORY-459 est livrée**, donc la CAF intègre les dotations et `capaciteRemboursement` est
+   défendable. La note « Conséquences ailleurs » de cette fiche est **périmée** sur ce point.
+
+**Le point de recopie que la story a coûté :** le checksum de `syscohada-revise@2.1` est écrit **en
+dur en douze endroits, répartis sur les deux dépôts** — manifeste, garde de byte-identité, quatre
+specs et deux e2e côté `balance-service`. Le paquet `zone-franche-togo@1.0` partage la table de
+passage SYSCOHADA : son empreinte change aussi, en deux points de plus. `sfd-bceao` et
+`cima-assurances` restent **byte-identiques**, ce que le générateur garantit par construction (champ
+additif émis en dernier, uniquement si la source le déclare).
+
+### Table de mutations — 12 sur 12 ROUGES, dont une d'abord FAUSSE
+
+| # | Mutation | Résultat |
+|---|---|---|
+| M1 | la dette de base n'est plus découpée dans l'ancre | ROUGE |
+| M2 | la dette projetée oublie l'ancre | ROUGE |
+| M3 | le cas « financement nul » n'est plus déterminé | ROUGE |
+| M4 | l'indétermination devient un zéro silencieux | ROUGE |
+| M5 | `capitauxPropres > 0` devient `!== 0` (endettement négatif publié) | ROUGE |
+| M6 | le 5ᵉ échéancier sort de `CHAMPS_ECHEANCIER` | ROUGE |
+| M7 | la garde 422 du chemin `Mixed` est retirée | ROUGE |
+| M8 | un paquet muet publie `0` au lieu de `null` | ROUGE |
+| M9 | la somme absorbe les postes NON marqués | ROUGE |
+| M10 | le câblage du marqueur dans le bilan produit est neutralisé | **d'abord FAUX ROUGE** → ROUGE |
+| M11 | le `?? null` de l'ancrage est retiré | ROUGE |
+| M12 | un **sous-total** porte le marqueur (source d'artefact) | ROUGE — le générateur LÈVE |
+
+⚡⚡ **M10 est la mutation la plus instructive, et elle a d'abord menti.** Remplacer l'appel par `null`
+faisait échouer la campagne **par erreur de compilation** — l'import devenait inutile — et non par
+assertion : exactement le piège relevé en STORY-411 et STORY-412. Rejouée avec un appel qui **compile**
+(`dettesFinancieres(pkg, [])`), les deux batteries de la story restaient **VERTES**. Le câblage du
+marqueur dans le bilan produit n'était gardé par **rien** — le même trou que STORY-461 avait payé sur
+`bfrReel`, au même endroit, une story plus tard. Un `describe` neuf le garde, avec un poste de passif
+**émis mais non marqué** dans la fixture : sans lui, une implémentation qui sommerait tout le passif
+passerait.
+
+M12 nomme le poste fautif dans son message : `BILAN/DZ (total)`.
+
+### Vérification docker — parcours HTTP complet, sur données réellement persistées
+
+⚠️ **Version servie confirmée AVANT de conclure** (piège STORY-467) : le conteneur annonce
+`bilan-engine@1.17.0` et porte `dettes-financieres.ts`. ⚠️ Le volume Kafka a dû être réinitialisé
+(`Shutdown broker because all log dirs have failed`) — dev uniquement, Mongo intact.
+
+Parcours réel : organisation → dossier `SARL VERIF 483` → exercice 2025 → axes `SN`/`REEL` → balance
+soumise et validée → jeu d'états produit et **figé** → jeu d'hypothèses → projection HTTP.
+
+**① AC-3 — l'ancre, sur le snapshot RÉELLEMENT figé :**
+
+```
+moteurVersion           : bilan-engine@1.17.0
+bilan.dettesFinancieres : 63000000
+postes passif emis      : CA=62000000  DA=55000000  DB=8000000  DJ=21000000
+equilibre               : actif=165000000 passif=146000000 resultat=19000000 ecart=0
+```
+
+`63 000 000 = DA (55) + DB (8)`. **Les fournisseurs `DJ` (21 000 000) sont exclus** — c'est ce que le
+marqueur discrimine, et un poste de passif émis non marqué le prouve dans la même mesure.
+
+**② AC-2 et AC-5 — la projection servie en HTTP, les trois exercices :**
+
+| | capitaux propres | dettes fin. | concours | somme | totalPassif | écart |
+|---|---|---|---|---|---|---|
+| N+1 | 112 365 600 | 65 000 000 | 0 | 177 365 600 | 177 365 600 | 0 |
+| N+2 | 122 461 100 | 67 000 000 | 0 | 189 461 100 | 189 461 100 | 0 |
+| N+3 | 132 358 770 | 69 000 000 | 0 | 201 358 770 | 201 358 770 | 0 |
+
+`65 000 000 = 63 ancrés + 6 empruntés − 4 remboursés`. L'identité tient **au franc** sur les trois
+exercices.
+
+**③ AC-4 — les ratios servis**, `endettement` 0,5785 → 0,5471 → 0,5213, `autonomieFinanciere` 0,6335 →
+0,6464 → 0,6573, `capaciteRemboursement` 8,82 → 8,28 → 7,75 années, `dettesFinancieresAncrees: true`.
+
+**④ Le champ saisi est bien persisté, et l'absent n'est PAS persisté en `null`** (piège STORY-460,
+mesuré en docker parce qu'il est invisible en unitaire) :
+
+```
+empruntsNouveaux persiste            : 6000000
+empruntsNouveauxParExercice present  : false
+```
+
+Sur le jeu jumeau sans ventilation, **aucune des deux clés n'est écrite**.
+
+**⑤ Les contre-épreuves** — sans elles la mesure ne prouverait qu'une démonstration :
+
+- ventilation incohérente (`empruntsNouveaux` 11 M > `financement` 10 M) ⇒ **400
+  `VENTILATION_FINANCEMENT_INCOHERENTE`**, message nommant l'exercice N+1 ;
+- même jeu **sans** ventilation ⇒ `capitauxPropres: null`, `dettesFinancieres: null`, les trois ratios
+  `null` avec `VENTILATION_FINANCEMENT_INDETERMINEE`, **`ecart` toujours 0** et `totalPassif`
+  **identique au franc** à celui du jeu ventilé (177 365 600) — la ventilation ne déplace rien.
+
+**⑥ Non-régression mesurée sur TOUT le portefeuille persisté**, par sonde rejouant le moteur sur les
+54 jeux et leurs snapshots réels (54 jeux, 0 sans snapshot) :
+
+| Mesure | Résultat |
+|---|---|
+| jeux refusés par une garde | **25** — le compte exact d'avant la story (STORY-467), inchangé |
+| jeux refusés **par la garde neuve** | **0** — D-483-1 mesurée, pas supposée |
+| jeux projetables | 29 (27 d'avant + les 2 de cette vérification) |
+| exercices projetés | 87 |
+| exercices dont `ecart !== 0` | **0** |
+| exercices dont `CP + DF + concours !== totalPassif` | **0** |
+| exercices publiant une dette financière négative | **0** |
+| jeux assis sur un snapshot ANTÉRIEUR (`dettesFinancieresAncrees: false`) | **27** — le `?? null` traverse sans casser |
+
+⚡⚡ **Un fait mesuré qui VALIDE D-483-7, et qui aurait pu être perdu.** **33 jeux sur 54** portent un
+financement **nul sur tout l'horizon** : leur ventilation est connue sans ambiguïté, et ils obtiennent
+leurs ratios sans rien saisir. Un repli naïf — « pas de `empruntsNouveaux` ⇒ indéterminé » — aurait
+privé de ratios **61 % du portefeuille réel**, dont les prévisionnels de reprise d'activité et de
+désendettement, qui sont précisément ceux qu'on porte à une banque.
+
+**⚠️ Une limite, nommée plutôt que tue.** La sonde du point ⑥ applique `SANS_IMPOT`, là où la route
+résout le paquet fiscal du référentiel : ses **montants** ne sont donc pas au franc ceux de la route.
+Les **invariants** qu'elle mesure — écart nul, identité de somme, absence de montant négatif, compte
+des refus — ne dépendent d'aucune fiscalité. Le trajet HTTP réel, lui, a bien été exercé (points ① à
+⑤), contrairement à la vérification de STORY-482.
+
+**⚠️ Quatre raccourcis de configuration assumés**, tous en dehors du périmètre mesuré : KYC approuvé,
+entitlements Balance et Bilan activés et habilités au couple `syscohada-revise@2.1`, e-mail marqué
+vérifié — écrits directement dans les read-models, parce que leurs flux amont ne sont pas l'objet de
+cette story. Aucun ne touche un champ que la story lit ou écrit.
+
+### Écart CONNU, laissé hors périmètre et publié au contrat
+
+⚠️ **Les charges financières restent assises sur le financement net cumulé ENTIER**, apports en
+capital compris (`encoursOuvertureDette`, STORY-467). Sur un jeu qui **ventile**, les intérêts portent
+donc une assiette **plus large** que la dette publiée : la vérification ci-dessus paie 6 % sur
+10 000 000 de financement alors que 4 000 000 sont un apport.
+
+Ce n'est **pas** corrigé ici, et c'est délibéré : D-483-1 pose que cette story ne change **aucun
+montant de trésorerie**, et le corriger déplacerait le résultat, l'impôt et la clôture de tous les
+jeux qui ventilent. L'écart est **publié dans la description OpenAPI de `dettesFinancieres`** plutôt
+que tu, et appelle une story propre — assiette d'intérêts limitée aux emprunts, avec la migration de
+contrat que cela suppose.
