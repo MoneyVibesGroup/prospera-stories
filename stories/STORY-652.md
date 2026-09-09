@@ -1,6 +1,6 @@
 # STORY-652 : La clé d'API du participant — un jeton valide ne suffit pas, et la santé ne le dira jamais
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -39,32 +39,32 @@ qui émet sa créance.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — La clé est un **réglage du RACCORDEMENT**, jamais de l'organisation : même durée de
+- [x] AC-1 — La clé est un **réglage du RACCORDEMENT**, jamais de l'organisation : même durée de
       vie, même portée et même provenance que l'origine, l'URL des jetons et l'identifiant client —
       tous délivrés par le même enrôlement, auprès du même participant. Elle rejoint donc les
       **manques de configuration** : sans elle, `API_BUSINESS` est déclaré **INDISPONIBLE**, et
       `/health` le dit. ⛔ Seul le **nom** du réglage sort dans la réponse, jamais sa valeur : cette
       route est publique (STORY-249).
-- [ ] AC-2 — **Tout appel vers l'origine du participant** porte la clé dans `X-Api-Key`, à côté du
+- [x] AC-2 — **Tout appel vers l'origine du participant** porte la clé dans `X-Api-Key`, à côté du
       `Authorization: Bearer`. Les **deux** points de terminaison sont concernés — la recherche
       d'une adresse de paiement et la demande de paiement — et un test l'atteste sur chacun. ⚠️ Un
       test qui n'en couvrirait qu'un laisserait la vérification d'un compte échouer en `403`, donc
       un compte réputé **non vérifiable** pour une raison qui n'a rien à voir avec lui.
-- [ ] AC-3 — ⛔⛔ **La clé n'atteint JAMAIS le serveur d'autorisation, et cela tient par une ABSENCE
+- [x] AC-3 — ⛔⛔ **La clé n'atteint JAMAIS le serveur d'autorisation, et cela tient par une ABSENCE
       D'INJECTION, pas par une garde de mots.** Ce sont deux hôtes distincts : l'un est exposé par
       le participant, l'autre est le serveur d'autorisation. La fonction qui demande le jeton reçoit
       un type qui **ne porte aucun champ de clé** — elle n'a donc rien avec quoi la divulguer, et
       aucune relecture n'est nécessaire pour s'en convaincre. Un test lit les en-têtes de la requête
       de jeton et **échoue si `X-Api-Key` y apparaît**.
-- [ ] AC-4 — La clé est un `Secret` **dès sa lecture** : elle ne s'imprime ni dans un journal, ni
+- [x] AC-4 — La clé est un `Secret` **dès sa lecture** : elle ne s'imprime ni dans un journal, ni
       dans une trace d'erreur, ni sous `util.inspect`, ni dans aucune sérialisation (STORY-243).
       Une garde de balayage cherche sa **valeur** dans toute sortie du service, avec une
       contre-preuve sur contenu fabriqué qui prouve qu'elle sait encore rougir.
-- [ ] AC-5 — ⚠️ **La story ne prétend PAS détecter une clé FAUSSE.** Une clé absente rend le
+- [x] AC-5 — ⚠️ **La story ne prétend PAS détecter une clé FAUSSE.** Une clé absente rend le
       fournisseur indisponible ; une clé erronée reste invisible jusqu'au premier appel réel, et
       c'est une conséquence assumée de STORY-249, pas un oubli. Le message d'échec correspondant
       **nomme la clé comme remède possible** au lieu de rendre un refus muet.
-- [ ] AC-6 — **Non-régression** : l'adaptateur FedaPay est inchangé, et le code de l'adaptateur du
+- [x] AC-6 — **Non-régression** : l'adaptateur FedaPay est inchangé, et le code de l'adaptateur du
       schéma ne porte **aucune condition d'environnement** — la garde de STORY-246 s'applique sans
       être assouplie.
 
@@ -108,3 +108,17 @@ qui émet sa créance.
 - ⚠️ **STORY-599 à STORY-603 n'ont aucune fiche dans `stories/`** : elles ne vivent que dans
   `epics-paiement-2026-08-03.md`, alors que le code livré les cite. Constaté le 2026-09-09, hors
   périmètre de cette story, mais à trancher — un identifiant sans fiche ne se relit pas.
+
+## Livraison
+
+🏁 **Livrée le 2026-09-09**, branche `MNV-652`. Vérifiée **en conteneur** : sans
+`PI_SPI_API_KEY`, `/health` rend `API_BUSINESS INDISPONIBLE` en nommant le
+réglage manquant, et le conteneur est `unhealthy` ; avec la clé, la santé est
+`ok` et les deux fournisseurs sont disponibles. Vérifiée aussi par **appel réel**
+au simulateur de la BCEAO : jeton obtenu, clé présentée, application atteinte.
+
+⚡ **Le piège qui a coûté le plus cher n'était pas dans la story** : le typage
+structurel de TypeScript accepte les champs en trop, donc ajouter la clé à plat
+sur le raccordement l'aurait emportée chez le serveur d'autorisation sans qu'un
+seul outil ne bronche. Les identifiants d'autorisation sont devenus un
+sous-objet ; la fuite est désormais inexprimable.
