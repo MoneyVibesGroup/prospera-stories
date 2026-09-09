@@ -218,6 +218,57 @@ service en marche, les tests unitaires sur les deux routes avec mutations rouges
 chargé par le loader avec **checksum vérifié**. Le parcours HTTP de bout en bout sur un dossier
 assurance, lui, n'est pas prouvé.
 
+### ⛔⛔ La revue de code a trouvé un SECOND bloquant, plus grave que le premier
+
+`meta.statut` n'avait **aucun lecteur** dans `bilan-service`, et ma propre docstring y affirmait
+« **Publié, et c'est tout l'objet** » — une description qui contredisait le code du fichier où elle
+est écrite.
+
+⛔ Or c'est **ce service qui produit la liasse CIMA**. Un assureur obtenait son bilan et son compte
+de résultat avec un tampon de traçabilité **indiscernable** de celui d'un SYSCOHADA arrêté, et la
+mise en garde n'était lisible que sur deux routes d'un **autre** service, qu'il n'appelle pas pour
+éditer sa liasse. C'est mon propre raisonnement — *un artefact livré sans chemin d'accès coûte autant
+qu'un artefact absent* — **non appliqué au dépôt où il comptait le plus**.
+
+⚡⚡ **La porte est fermée par le TYPE, pas par la vigilance.** `statut` est **requis** dans la
+signature du tampon (`string | undefined`, et non `statut?`) : le compilateur **nomme** les **huit**
+sites qui estampillent un document. Un champ facultatif les aurait laissés l'omettre en silence, et
+c'est le mode de panne « une garde posée sur un seul des N chemins ».
+
+| surface | porte le statut |
+|---|---|
+| bilan, compte de résultat, TFT, notes annexes, contrôles, diagnostic | ✅ **six routes de production** |
+| jeu d'états, snapshot | ⛔ **non — documents FIGÉS** |
+
+⚠️ Les deux surfaces de documents figés ne le portent pas, et **c'est écrit à ces deux endroits** :
+un document scellé rend ce avec quoi il a été scellé, et l'ajouter au snapshot serait un changement
+de forme des pièces déjà figées. Nommé plutôt que tu.
+
+### Les cinq autres constats
+
+| # | Constat | Ce qu'il produisait |
+|---|---|---|
+| 1 | le DTO de la route de **suggestion** ne déclarait pas le champ | servi dans le JSON par épandage, **absent du schéma** — illisible d'un client généré |
+| 3 | aucune assertion HTTP sur la **sérialisation réelle** | un intercepteur ajouté un jour ferait disparaître le champ, tout resterait vert |
+| 4 | la description publiée disait « {code, version, checksum} — hook inerte » | il en publie quatre et porte la seule mise en garde réglementaire du produit |
+| 5 | `recopieLe` affirmait encore une recopie de **STORY-428** | ce n'est pas un commentaire, c'est une **donnée** injectée dans le nom du test |
+| 6 | la route `plan-comptes` sert les 80 comptes de l'amorce sans mise en garde | **écarté** : elle n'a jamais porté de tampon, y ajouter le statut seul serait une extension de forme hors périmètre |
+
+⚡ **Le constat 5 mérite d'être retenu.** Dans trois mois, la garde inter-dépôts rougit après une
+régénération ; le développeur lit « recopié le 2026-09-01 (STORY-428) », part chercher ce qui a bougé
+depuis 428, et **ne trouve pas 488** — la seule story à avoir touché cet octet depuis. C'est
+exactement le mode de panne que ce champ existe pour supprimer.
+
+⚡ **Une garde de contrat existante a rougi**, et son attendu est révisé **sciemment** : elle épingle
+la forme **exacte** du tampon, pas un sous-ensemble. C'est elle qui empêche un champ d'entrer au
+contrat sans qu'on s'en aperçoive.
+
+### ⚡ Ce que la revue a prouvé et que la vérification docker n'avait pas pu
+
+Le maillon que je n'avais pas réussi à mesurer sur la stack — la **sérialisation réelle** sur un
+dossier CIMA — est désormais prouvé par l'e2e, qui monte l'application entière et rend un `200` avec
+l'artefact réel. Le statut y est asserté **sur sa valeur**, pas sur sa présence.
+
 ### Clôture — 2026-09-09
 
 PR `MNV-488(bilan)` et PR `MNV-488(balance)` rebase-mergées sur `dev` **ensemble** (artefact
