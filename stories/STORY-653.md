@@ -95,11 +95,22 @@ courte fait échouer l'encaissement. On l'omet plutôt que de le laisser tout ca
 
 ## Ce qui reste ouvert
 
-- ⛔ **La route d'enrôlement d'une adresse de paiement.** Le jeton porte `alias.write` et
-      `alias.read`, mais aucune des six formes essayées n'existe. Sans elle, aucune recette ne peut
-      aller jusqu'à une demande **acceptée** : il faut deux adresses enrôlées, celle du compte qui
-      encaisse et celle d'un payeur. En l'état, le corps corrigé franchit la validation du schéma et
-      échoue proprement sur `Alias … non trouvé` — ce qui prouve la forme, pas le bout en bout.
+- ⛔⛔ **LE BAC À SABLE N'EST PAS PROVISIONNÉ, ET CE N'EST PAS UN DÉFAUT DE CODE.** La route de
+      création d'alias est `POST /comptes/{numero}/alias` avec `{"type":"SHID"}` (documentation
+      reçue le 2026-09-09). Elle **existe et fonctionne** sur notre hôte : un `type` inconnu y rend
+      un `400` en nommant `/type`. Mais **le compte que `GET /comptes` nous rend est inconnu du
+      service des alias** : `404 « Le compte 44511072980305975922 n'existe pas »`, avec un jeton
+      portant TOUTES les portées, sur le même hôte et à la seconde près. Le même `404` répond pour
+      le compte d'exemple de la documentation. **Deux services du même hôte ne voient donc pas le
+      même référentiel de comptes**, et aucune route ne permet d'en déclarer un : ni `POST /comptes`,
+      ni `/clients`, ni `/participants`, ni `/business` n'existent. Le déblocage appartient au
+      participant, pas à ce dépôt.
+      ⚠️ **L'hôte de la documentation, lui, exige le mTLS** : `sandbox.api.pi-bceao.com` ferme la
+      connexion sans certificat client. C'est bien `no-mtls.piz.simulateurs.pi-bceao.com` qu'il faut
+      utiliser — et c'est aussi la preuve que le mTLS de production est un développement réel, pas
+      une case à cocher.
+      En l'état, le corps corrigé franchit la validation du schéma et échoue proprement sur
+      `Alias … non trouvé` — ce qui prouve la FORME, pas le bout en bout.
 - ⚠️ **Aucun cas d'usage ne construit encore de demande d'initiation** : le port existe, les
       adaptateurs l'implémentent, et rien ne l'appelle. Le refus d'AC-1 est donc aujourd'hui une
       garde sans appelant — elle protège la story qui câblera l'émission.
