@@ -1,6 +1,6 @@
 # STORY-482 : Une trésorerie négative n'est ni nommée, ni financée : portée à l'actif, sans découvert, sans agios, sans besoin chiffré
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -82,21 +82,41 @@ facultatif, donc `exigerFormeCourante` ne s'y ajoute pas.
 - `maximal` — le creux le plus profond **à la maille de la réponse** : `max(0, −min(clôtures))` sur
   les douze mois de l'exercice demandé (route mensuelle) ou sur les trois clôtures annuelles (route
   annuelle).
-- `surHorizon` — le creux le plus profond **de l'horizon entier, à la maille MENSUELLE** (les
-  trente-six mois). ⛔ C'est le seul des trois qui soit un vrai besoin de financement : une clôture
-  annuelle **cache** le creux intra-annuel, et c'est exactement le défaut que STORY-481 a nommé — « le
-  pire moment du prévisionnel se trouvait structurellement hors du document ». Identique sur les deux
-  routes, donc jamais deux chiffres pour la même question.
-- `moisMaximal` — le rang du mois, **sur l'horizon (1..36)**, où survient `surHorizon`. ⛔ Il date
-  `surHorizon` et **non** `maximal` : `surHorizon` est mensuel sur les deux routes, donc ce rang est
-  toujours un vrai mois, sans convention à inventer pour la maille annuelle. `0` quand
-  `surHorizon === 0` — la même convention d'absence que `moisTresorerieMinimale`.
-- ⚠️ La route annuelle calcule donc les trois plans mensuels pour servir `surHorizon`. C'est de
-  l'arithmétique pure, sans entrée/sortie, sur un chemin déjà emprunté par `ancrerExercice`.
+- `surHorizon` — le creux le plus profond de **l'horizon entier**, mesuré sur les clôtures
+  **annuelles**. Identique sur les deux routes, donc jamais deux chiffres pour la même question :
+  sur la route mensuelle, c'est lui qui dit que le creux de l'exercice consulté n'est pas forcément
+  le pire de l'horizon.
+- `moisMaximal` — le rang du mois, **sur l'horizon (1..36)**, où survient `maximal`. `0` quand
+  `maximal` est nul, la convention d'absence de `moisTresorerieMinimale`. Sur la route annuelle la
+  maille est l'exercice : son creux est daté du **dernier mois** de celui-ci (12, 24 ou 36), qui est
+  bien le mois dont la clôture a été mesurée.
+- ⛔⛔ **`surHorizon` est un MINORANT, et le contrat le dit.** Le mesurer à la maille mensuelle
+  exigerait que le moteur **annuel** projette les trente-six mois, c'est-à-dire qu'il dépende du
+  moteur **mensuel**, qui dépend déjà de lui : la dépendance ne peut pas s'inverser. Le vrai creux
+  mensuel se lit donc sous `maximal` de la route mensuelle, un exercice à la fois. ⚡⚡ **Mesuré** :
+  sur un jeu à 120 jours de délai clients et sans trésorerie de départ, les trois clôtures annuelles
+  sont positives — 10 000 000, 20 000 000, 30 000 000 — donc la route annuelle annonce
+  `surHorizon: 0`, *« aucun besoin »*, pendant que l'entreprise est à **−3 333 337 au mois 4**. C'est
+  le défaut que STORY-481 avait nommé, et la raison d'être de la distinction entre les deux champs.
+  Publié, jamais tu — même traitement que `dettesBaseNonPortees` (D-467-3).
 
 **D-482-5 — `MODELE_PROJECTION_VERSION` : mineure.** Des champs s'ajoutent et un montant change
 (`totalActif` d'un exercice à trésorerie négative), mais aucun champ ne disparaît et aucune saisie ne
 devient requise.
+
+**D-482-6 — les trois délais de BFR rejoignent `exigerFormeCourante`, et c'est une conséquence, pas
+un débordement.** ⚡⚡ Découvert **par un test qui a rougi** : `anteriorite.spec.ts` plantait un
+`delaiBfrClientsJours: NaN` pour éprouver le repli d'apurement, « sans lever ». Or ce `NaN` corrompt
+le BFR, donc la trésorerie, donc **les douze clôtures mensuelles et les trois clôtures annuelles** —
+et la réponse partait en **HTTP 200 avec tous les montants à `null`**, quatrième occurrence exacte du
+piège de STORY-457/459/467. Le besoin de financement ne peut pas être chiffré là-dessus : le moteur
+**lève** plutôt que de publier `0`, c'est-à-dire *« aucun besoin »* sur un scénario qui n'a rien
+calculé — l'erreur faussement rassurante que la revue de sécurité de STORY-457 avait relevée sur
+`moisTresorerieMinimale`. Sans la garde, ce refus légitime remonterait en **500 anonyme** ; avec
+elle, c'est un **422 qui nomme le champ**. ⚠️ Aucun jeu enregistré n'est refusé de plus : les trois
+délais existent depuis l'origine du schéma, sont requis au DTO et bornés `[0, 365]` — seule une
+écriture **hors DTO** peut y planter autre chose. À confirmer sur les jeux réels en vérification
+docker.
 
 ### Hors périmètre, nommé
 
@@ -111,3 +131,122 @@ devient requise.
   les traiter ensemble, sinon le modèle facturera le découvert et pas l'emprunt.
   ✅ **Traité** : 467 est clôturée depuis le 2026-09-07, le mécanisme est en place, et cette story n'y
   ajoute que le taux distinct (D-482-3).
+
+
+---
+
+## Progress Tracking
+
+### Développement (2026-09-08 → 2026-09-09)
+
+Branches `MNV-482` créées **avant la première ligne** sur `bilan-service` (base `dev`) et `docs` (base `main`).
+
+**Livré, AC par AC.**
+
+- **AC-1** — `ventilerTresorerie` (unité pure) rend `tresorerieActive = max(0, clôture)` et
+  `concoursBancaires = max(0, −clôture)`. `totalActif` prend la première, `totalPassif` la seconde. Le
+  signe a cessé d'être une donnée : il est devenu le **choix du côté**, ce qui rend le montant négatif à
+  l'actif structurellement impossible.
+- **AC-2** — l'écart reste nul **par identité** : `max(0, T) − max(0, −T) = T`, donc les deux totaux
+  bougent du même montant et aucune division n'intervient. Éprouvé sur un exercice à découvert en
+  unitaire, en e2e et en docker.
+- **AC-3** — `tauxDecouvertPct` facultatif ; absent il vaut `tauxInteretPct` (D-482-3). Publié à côté de
+  `tauxPct` dans `ChargesFinancieresExercice` pour que le bloc reste recomposable dès qu'un jeu dissocie
+  les deux. ⚠️ Le reste de l'AC-3 — la charge décaissée, publiée comme ligne du plan de trésorerie —
+  était **déjà livré par STORY-467** sous `decaissementsChargesFinancieres` : rien à refaire.
+- **AC-4** — `besoinFinancement` à la racine des deux réponses, une seule forme, une seule unité pure.
+- **AC-5** — `MODELE_PROJECTION_VERSION` : `1.11.0` → `1.12.0`.
+
+**Portes de qualité.** Lint 0 warning · build OK · **2 454 unitaires** + **768 e2e** verts · couverture
+**99,06 / 95,07 / 99,33 / 99,12** pour des seuils de 65/90/90/90 · `besoin-financement.ts` à 100 % sur
+les quatre axes.
+
+### Table de mutations — 15 sur 15 ROUGES
+
+⚠️⚠️ **La table m'a menti au premier tour, et la leçon vaut d'être écrite.** Trois mutations sortaient
+« vertes » alors qu'elles **ne compilaient pas** (`TS6133` : une variable devenue inutilisée). Ma boucle
+lisait la ligne `Tests:` et n'y trouvait pas le mot `failed` — mais elle disait `Tests: 0 total`. **Une
+suite qui ne tourne pas ne prouve rien**, ni dans un sens ni dans l'autre. Rejouées en gardant le code
+compilable (`offsetMois * 0 + …`, `MOIS_PAR_EXERCICE * 0 + 1`, `||` → `&&`), les trois sont rouges.
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M1 | `ventilerTresorerie` inverse les deux côtés | ROUGE (13) |
+| M2 | `totalActif` reprend la clôture signée — l'état d'avant la story | ROUGE (5) |
+| M3 | `totalPassif` oublie les concours bancaires | ROUGE (4) |
+| M4 | `??` devient `||` : un `tauxDecouvertPct: 0` saisi est écrasé | ROUGE (1) |
+| M5 | le défaut redevient `0`, à la lettre de la fiche | ROUGE (7) |
+| M6 | `moisMaximal` perd sa convention d'absence | ROUGE (1) |
+| M7 | `moisMaximal` perd son offset d'horizon | ROUGE (3) |
+| M8 | à profondeur égale, le **dernier** rang gagne | ROUGE (2) |
+| M9 | la série corrompue rend `0` au lieu de lever | ROUGE (4) |
+| M10 | `surHorizon` dérivé du seul exercice servi | ROUGE (1) |
+| M11 | la maille annuelle se date au mois 1, 2, 3 | ROUGE (1) |
+| M12 | la garde des délais de BFR est retirée | ROUGE (6) |
+| M13 | l'export imprime la position nette à l'actif | ROUGE (2) |
+| M14 | la mention du découvert redit « au même taux » | ROUGE (1) |
+| M15 | la métadonnée de besoin annonce toujours « Aucun » | ROUGE (1) |
+
+⚡⚡ **M13 et M14 étaient de VRAIS trous**, et seuls dans la pièce remise au banquier. L'export pouvait
+réimprimer la position nette **négative** sous le libellé « Trésorerie active » — le défaut exact que la
+story ferme — et la mention des charges financières pouvait redire « au même taux », une phrase
+**imprimée** devenue fausse dès qu'un jeu dissocie les deux taux. Les 41 tests du module restaient
+VERTS : la fixture du fichier clôture en positif, donc rien ne discriminait. Deux blocs de tests
+construisent désormais un exercice **à découvert**, le seul état qui mesure.
+
+### Vérification docker — sur les données réellement persistées
+
+Stack relancée (`mongo`, `bilan-service`). ⚠️ **Version servie confirmée AVANT de conclure** : le
+conteneur annonce `MODELE_PROJECTION_VERSION = 1.12.0`, donc le code de la branche est bien celui qui
+tourne — le piège relevé en clôturant STORY-467.
+
+**① D-482-6 mesurée, pas supposée.** Sur **52 jeux** et **14 versions** persistés, la nouvelle garde des
+délais de BFR en refuse **0**. La revendication « aucun jeu enregistré n'est refusé de plus » est donc
+mesurée. (25 des 52 restent refusés par la garde de STORY-467, ce qui est son comportement attendu et
+inchangé.)
+
+**② D-482-3 mesurée.** **0 jeu sur 52** porte `tauxDecouvertPct` : tous retombent sur `tauxInteretPct`,
+donc le coût de découvert livré par STORY-467 est préservé partout. Un défaut à `0`, à la lettre de la
+fiche, l'aurait retiré aux 27 jeux projetables.
+
+**③ Le moteur réel, sur les 27 jeux projetables et leurs snapshots réels — 81 exercices :**
+
+| Mesure | Résultat |
+|---|---|
+| exercices dont `controle.ecart !== 0` ou dont `totalActif` ne se recompose pas | **0** |
+| exercices publiant un montant négatif à l'actif ou au passif | **0** |
+| exercices réellement **à découvert** | **5** |
+
+Les 5 exercices à découvert, tous avec `tresorerieActive = 0`, `tresorerieNette` négative et
+`ecart = 0` :
+
+| jeu | taux emprunt | taux découvert | découvert | coût |
+|---|---|---|---|---|
+| `v467-decouvert` | 8 | 8 | 46 772 551 | 3 464 633 |
+| `v467-decouvert` | 8 | 8 | 102 504 160 | 7 592 901 |
+| `v467-decouvert` | 8 | 8 | 162 493 277 | 12 036 539 |
+| `472-structure` | 0 | 0 | 3 503 174 | 0 |
+| `472-structure` | 0 | 0 | 7 542 261 | 0 |
+
+⛔ Les deux exercices à coût nul ne sont **pas** une régression : `472-structure` saisit
+`tauxInteretPct: 0`, et `??` fait gagner ce `0` — c'est précisément ce que M4 garde.
+
+**⚠️ Deux limites de cette vérification, nommées plutôt que tues.**
+
+1. **La sonde applique `SANS_IMPOT`**, là où la route résout le paquet fiscal du référentiel. Les
+   montants ci-dessus ne sont donc pas au centime ceux de la route ; les **invariants** mesurés
+   (ventilation, écart nul, absence de montant négatif, préservation du taux) ne dépendent pas de la
+   fiscalité.
+2. **Le trajet HTTP n'a pas pu être exercé.** Le proxy de ports de Docker Desktop a cessé de relayer
+   vers l'hôte — les connexions sur `3004` sont acceptées puis jamais servies, `auth-service` compris —
+   et sans `auth-service` joignable il n'y avait pas de jeton à minter. Le service répond bien depuis
+   l'intérieur du conteneur (`/health` en 503 `kafka: down`, le **démarrage dégradé** de l'invariant 4).
+   Le contrat HTTP est couvert par les **768 e2e**, qui montent l'application Nest réelle avec son
+   `ValidationPipe`, dont **15 tests neufs** écrits pour cette story.
+
+**⚡⚡ Un fait mesuré qui NUANCE D-482-4.** Sur les 27 jeux réels, le creux **mensuel** ne dépasse
+**jamais** `surHorizon` : le portefeuille actuel n'exhibe pas le sous-estimation que le contrat annonce.
+La limite reste réelle — elle est démontrée sur un jeu construit (120 jours de délai clients, sans
+trésorerie de départ : trois clôtures annuelles positives, **−3 333 337 au mois 4**) — mais elle est,
+aujourd'hui, théorique sur les données en base. Le contrat la publie quand même : c'est une propriété du
+modèle, pas du portefeuille du jour.
