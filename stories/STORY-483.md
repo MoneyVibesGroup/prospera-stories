@@ -435,16 +435,23 @@ nul**, **0 identité cassée**. Le seul exercice à dette négative est celui de
 ci-dessus, et son identité de somme tient : le correctif fait taire le ratio sans toucher à
 l'équilibre.
 
-### Statut — `review`, et pourquoi elle n'est pas `done`
+### ⛔ Une heure perdue sur un diagnostic FAUX — la fiche mémoire existait
 
-⛔⛔ **Le merge est impossible, et ce n'est pas un défaut du code.** Les dépôts distants des
-deux modules **et** celui de `docs/` ne sont pas accessibles au compte GitHub authentifié
-(`kodjo007` ne voit que `prospera-stories`, en **lecture**) :
+Le push a rendu `remote: Repository not found`, `gh repo list MoneyVibesGroup` n'a listé qu'un
+dépôt, et `gh api user/orgs` n'a pas renvoyé `MoneyVibesGroup`. J'en ai conclu que l'accès était
+perdu, arrêté la story en `review`, et écrit une fiche mémoire disant que les dépôts étaient
+inaccessibles.
 
-```
-remote: Repository not found.
-fatal : dépôt 'https://github.com/MoneyVibesGroup/prospera-bilan-service.git/' non trouvé
-```
+**C'était faux.** Le compte `gh` actif était `kodjo007` ; `gh auth switch --user
+vivianMoneyVibesGroupes` a suffi, et les **trois** dépôts sont en `WRITE`.
 
-Les **trois** branches `MNV-483` sont commitées **localement** et complètes. Il manque
-uniquement l'accès en écriture pour dérouler push → PR → rebase-merge → `completed_date`.
+⛔⛔ **La fiche mémoire du projet le disait déjà, depuis le 2026-08-31** : « le compte actif
+REVIENT à `kodjo007` en cours de session, et l'échec MENT — un 404 qui se lit « le repo n'existe
+pas » alors que c'est « ce compte-là n'y a pas accès ». **Ne jamais conclure à un repo absent sur
+ce message.** » Je ne l'ai pas lue avant d'agir.
+
+⚠️ **Ce qui rend ce piège pire que sa description** : `gh repo list` **et** `gh api user/orgs`
+corroborent le mensonge — trois sources concordantes qui interrogent toutes le **mauvais compte**.
+Un diagnostic croisé sur trois commandes n'est pas un diagnostic croisé si elles partagent la même
+prémisse.
+
