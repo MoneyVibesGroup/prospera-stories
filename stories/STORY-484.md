@@ -134,3 +134,92 @@ réponse désigne déjà comme la **référence** des écarts — et le contexte
 - **`EXPORT_EFFECTUE`** : l'export du prévisionnel est **déjà** journalisé, cette story ne le touche
   pas. Un même prévisionnel sorti puis exporté produira deux lignes, de deux types différents — c'est
   la lecture voulue, ce sont deux actes.
+
+---
+
+## Progress Tracking
+
+### Développement (2026-09-09)
+
+Un seul dépôt, `bilan-service`. Quatre AC : **trois livrés, un constaté déjà satisfait**.
+
+**Ce que la lecture du code a changé au cadrage :**
+
+1. **AC-3 était déjà vrai.** Les deux contrôleurs portent `@Roles(TENANT_ADMIN, TENANT_USER)`,
+   `@RequiresBilanAccess()` et `@RequiresDossierScope()`. Le critère décrivait l'état courant.
+2. **La fiche parle de deux contrôleurs, il y a TROIS routes.** C'est la différence qui compte : la
+   projection annuelle et la mensuelle vivent dans le même contrôleur, et compter les contrôleurs
+   plutôt que les routes est exactement la façon dont ce dépôt a produit quatre fois une garde posée
+   sur un seul des chemins.
+3. **L'arbitrage `journaliser` / `journaliserDansTransaction` était déjà rendu**, par la revue de
+   sécurité de STORY-454, et sa règle est écrite dans le dépôt : le canal qui **propage** est réservé
+   aux actes **destructeurs**. Une lecture prend l'autre.
+
+### La garde e2e qu'il a fallu DÉPLACER, et pourquoi ce n'est pas l'affaiblir
+
+⚡⚡ **Deux tests existants affirmaient « deux appels rendent une réponse identique »** — un
+`JSON.stringify(a) === JSON.stringify(b)` sur le corps entier. Un horodatage les rend **faux par
+construction**, et c'est la story qui a raison : le document remis à un tiers doit dire quand il a été
+produit.
+
+⛔ **La tentation était de remplacer l'assertion exhaustive par un `toEqual` sur quelques champs
+choisis.** C'aurait transformé une garde qui couvre **tout le corps** en un échantillon — le mode de
+panne que ce dépôt paie régulièrement. La garde a donc été **déplacée d'un cran** :
+
+- tout le corps **moins les deux champs de traçabilité** reste comparé au caractère près ;
+- une seconde assertion épingle que **ces deux-là, et eux seuls**, sont ce qui varie.
+
+Sans la seconde, ajouter demain un troisième champ non déterministe passerait inaperçu.
+
+### Le câblage que seul l'e2e pouvait révéler
+
+⚡ **Trois modules de test montaient les contrôleurs sans le service neuf.** Les tests de contrôleur
+instancient la classe à la main : ils prouvent le geste, pas son **injection**. Les e2e ont rendu
+`Nest can't resolve dependencies of the ProjectionController` — puis, une fois le provider ajouté,
+`can't resolve dependencies of the RestitutionService`, parce que deux de ces modules ne fournissaient
+pas non plus `AuditService`. Trois montages à réparer, qu'aucun test unitaire n'aurait signalés.
+
+### Table de mutations — 5 sur 5 ROUGES, par assertion
+
+| # | Mutation | Résultat |
+|---|---|---|
+| M1 | `produitPar` vient du paramètre de route, plus du JWT | ROUGE — 2 routes |
+| M2 | l'horodatage devient un littéral figé | ROUGE — 2 routes |
+| M3 | le type d'acte journalisé devient `EXPORT_EFFECTUE` | ROUGE |
+| M4 | la collection cible perd son `snake_case` explicite | ROUGE |
+| M5 | le triplet perd `versionHypothesesId` | ROUGE — 2 routes |
+
+⚠️ **Chaque rouge a été relu pour vérifier qu'il vient d'une ASSERTION et non d'une erreur de
+compilation** — le piège qui a produit trois fausses lectures en STORY-483. M2 et M5 ont été rejouées
+isolément : deux tests nommés échouent à chaque fois, un par route.
+
+### Vérification docker — les trois routes, sur les documents réellement écrits
+
+⚠️ Version servie confirmée avant de conclure : le conteneur a recompilé (`Found 0 errors`) et sert
+`RestitutionService`.
+
+**AC-1 — les trois réponses HTTP :**
+
+```
+annuelle    produitLe 2026-09-09T06:58:15.253Z   produitPar 6aa0c1548a0d92a3c5470501
+mensuelle   produitLe 2026-09-09T06:58:15.790Z   produitPar 6aa0c1548a0d92a3c5470501
+comparaison produitLe 2026-09-09T06:58:45.652Z   produitPar 6aa0c1548a0d92a3c5470501
+```
+
+`produitPar` est bien le **sujet du jeton**, pas l'identifiant de jeu passé dans le chemin.
+
+**AC-2 — les trois lignes écrites dans `audit_events`**, relues directement :
+
+| restitution | cible | contexte |
+|---|---|---|
+| `PROJECTION_ANNUELLE` | `jeux_hypotheses` / le jeu | triplet complet |
+| `PROJECTION_MENSUELLE` | `jeux_hypotheses` / le jeu | triplet **+ `exercice: 3`** |
+| `COMPARAISON` | `jeux_hypotheses` / le jeu de **référence** | `jeux` (les deux ids), `jeuEtatsId`, `versionsSnapshot`, `modeleVersion` |
+
+⛔ **La comparaison ne publie PAS de `snapshotId`**, et c'est délibéré : elle porte 2 à 5 scénarios
+dont les versions de snapshot peuvent différer. Réutiliser le triplet de la projection annuelle aurait
+sérialisé un `snapshotId: undefined` — un champ qui *paraît* renseigné et ne l'est pas.
+
+**AC-4** — aucune écriture métier : les trois routes restent des `@Get`, aucune transaction n'est
+ouverte, et un journal en panne rend quand même la réponse **avec** son horodatage, prouvé par trois
+tests qui rejettent l'écriture d'audit.
