@@ -1,6 +1,6 @@
 # STORY-494 : `smt-togo@1.0` est déclaré et non packagé — la TPE, persona la plus nombreuse du marché, est la seule à recevoir un refus
 
-Status: review
+Status: done
 
 **Épic :** EPIC-109 — Paquets fiscaux pays : gabarit, garde et procédure de sourcing
 **Service :** `balance-service` + `bilan-service` (`referentiels/`, `ReferentielRegistry`)
@@ -81,7 +81,7 @@ servi ici.**
 
 ## Progress Tracking
 
-**Statut : `review`** — implémentée, portes passées, vérification docker faite sur la stack.
+**Statut : `done` (2026-09-09)** — PR `bilan-service#119` et `balance-service#97` mergées ENSEMBLE (artefact partagé à l'octet), après revue de code (3 bloquants traités) et revue de sécurité (aucune vulnérabilité).
 
 ### Décisions de sourcing (le cœur des 13 points)
 
