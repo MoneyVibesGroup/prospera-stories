@@ -98,13 +98,23 @@ courte fait échouer l'encaissement. On l'omet plutôt que de le laisser tout ca
 - ⛔⛔ **LE BAC À SABLE N'EST PAS PROVISIONNÉ, ET CE N'EST PAS UN DÉFAUT DE CODE.** La route de
       création d'alias est `POST /comptes/{numero}/alias` avec `{"type":"SHID"}` (documentation
       reçue le 2026-09-09). Elle **existe et fonctionne** sur notre hôte : un `type` inconnu y rend
-      un `400` en nommant `/type`. Mais **le compte que `GET /comptes` nous rend est inconnu du
-      service des alias** : `404 « Le compte 44511072980305975922 n'existe pas »`, avec un jeton
-      portant TOUTES les portées, sur le même hôte et à la seconde près. Le même `404` répond pour
-      le compte d'exemple de la documentation. **Deux services du même hôte ne voient donc pas le
-      même référentiel de comptes**, et aucune route ne permet d'en déclarer un : ni `POST /comptes`,
-      ni `/clients`, ni `/participants`, ni `/business` n'existent. Le déblocage appartient au
-      participant, pas à ce dépôt.
+      un `400` en nommant `/type`. **Le simulateur se contredit lui-même, et deux appels le
+      prouvent** — même hôte, même jeton toutes portées, même clé, à quelques secondes
+      d'intervalle :
+
+      | Appel | Réponse |
+      | --- | --- |
+      | `GET /v1/comptes` | `200`, et il **liste** `44511072980305975922` |
+      | `GET /v1/comptes/44511072980305975922` | `404 « Le compte … n'existe pas »` |
+      | `POST /v1/comptes/44511072980305975922/alias` | le même `404` |
+
+      ⚡ **Ce n'est donc PAS un problème d'alias** : c'est la résolution d'un compte **par son
+      numéro** qui ne trouve pas ce que la collection annonce. Le compte d'exemple de la
+      documentation rend le même `404`, et aucune route ne permet d'en déclarer un : ni
+      `POST /comptes`, ni `/clients`, ni `/participants`, ni `/business` n'existent. Le déblocage
+      appartient au participant, pas à ce dépôt.
+      ⚠️ **Et le chemin de base est bien `/v1`, pas `/piz/v1`** : ce dernier, que la documentation
+      emploie sur l'hôte avec mTLS, n'existe pas sur celui-ci.
       ⚠️ **L'hôte de la documentation, lui, exige le mTLS** : `sandbox.api.pi-bceao.com` ferme la
       connexion sans certificat client. C'est bien `no-mtls.piz.simulateurs.pi-bceao.com` qu'il faut
       utiliser — et c'est aussi la preuve que le mTLS de production est un développement réel, pas
