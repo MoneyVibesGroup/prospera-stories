@@ -89,7 +89,7 @@ servi ici.**
 |---|---|---|
 | **Plan de comptes** | `plan-comptable-syscohada.json` **réutilisé tel quel** | Le SMT n'est pas un référentiel comptable distinct : c'est un **régime de présentation allégé** de l'AUDCIF, tenu sur le plan normalisé. Écrire un « plan SMT » aurait inventé exactement ce que D-078-3 refusait d'inventer. Patron `zone-franche-togo`, qui réutilise déjà les sources SYSCOHADA. |
 | **Postes** | Transcrits de `docs/referentiels/postes-smt-togo.json` | Extraction du formulaire officiel, faite le 2026-07-19. 28 postes, 3 états. Accents **restaurés** : l'amorce les avait perdus à l'extraction (elle écrit « Systeme Minimal de Tresorerie »), les autres sources du dépôt les portent. |
-| **Table de passage** | Bâtie sur les **préfixes déjà sourcés** de `table-de-passage-syscohada.json` | Aucun préfixe nouveau : chaque compte rattaché à un poste SMT vient d'une ligne SYSCOHADA existante, agrégée aux lignes plus grossières du formulaire SMT. Même méthode que la table SYSCOHADA elle-même (« construite, règles standard »), validée à l'époque contre 50 comptes Sage réels. |
+| **Table de passage** | Bâtie sur les **préfixes de `table-de-passage-syscohada.json`** | Chaque compte rattaché à un poste SMT vient d'une ligne SYSCOHADA existante, agrégée aux lignes plus grossières du formulaire. Même méthode que la table SYSCOHADA elle-même (« construite, règles standard »), validée à l'époque contre 50 comptes Sage réels. ⚠️ **Une exception, nommée** (constat N6) : `622` (Locations et charges locatives) vient du **plan de comptes** et non de la table packagée, qui s'arrête à `62`. « Aucun préfixe nouveau » était faux, et c'est cette déclaration que porte l'AC-1. |
 | **`_meta`** | Vocabulaire de **STORY-491**, sur ce seul paquet | `zoneComptable: OHADA`, `pays: ['TG']`, `devisePresentation: 'XOF'`, `normeSource`, `statut: 'a-valider-par-expert'`. ⛔ Les **quatre paquets existants ne sont pas touchés** : compléter leur `_meta` change leur checksum, ce que la procédure de sourcing interdit en place dès qu'un `code@version` est catalogué. C'est le périmètre de 491, avec la montée de version que cela impose. `smt-togo@1.0` est neuf, donc jamais catalogué. |
 
 ### ⚡⚡ Le défaut que le développement a produit, et qui serait parti en production
@@ -125,9 +125,14 @@ Les deux trous sont fermés dans cette story :
   d'affaires**. En marquer une le publierait faux (famille STORY-457). ⚠️ **Conséquence assumée** : la
   liquidation TPU d'un dossier SMT répondra `CA_NON_SOURCE` tant qu'une story ne packagera pas la table
   « CA » du formulaire — à ouvrir, la persona SMT étant précisément la persona TPU.
-- **Comptes hors formulaire non mappés, délibérément** : `50`/`51` (titres de placement, valeurs à
-  encaisser) et `478`/`479` (écarts de conversion) n'ont aucune ligne au SMT. Ils ne sont pas perdus :
-  le contrôle les **nomme** (vérifié, voir ci-dessous).
+- **Comptes sans ligne propre au formulaire** : `50` (titres de placement) et `51` (valeurs à
+  encaisser) sont rattachés à **`AC5` « Banque (+/‑) »**, la ligne de trésorerie du SMT — classement
+  conforme à SYSCOHADA, qui range `BQ` et `BR` en trésorerie-actif. ⚡⚡ **C'est un correctif de revue
+  (B1), pas un choix initial** : je les avais laissés hors table, ce qui rendait **non validable** la
+  liasse d'une balance parfaitement équilibrée portant un chèque à l'encaissement. Voir plus bas.
+  Les écarts de conversion `478`/`479`, eux, sont rattachés par le préfixe `47` : présentés en
+  « Clients et débiteurs divers » ou « Fournisseurs et créditeurs divers » selon leur sens. Imprécis,
+  mais aucun montant n'est perdu et le SMT n'a pas de ligne pour eux.
 - **Les surfaces de documents FIGÉS ne portent pas `statut`** (`stamp` du jeu d'états et du snapshot) :
   décision antérieure, écrite en toutes lettres dans `jeu-etats-response.dto.ts`, et story à part. Les
   **six routes de production** le portent bien — vérifié.
@@ -139,16 +144,16 @@ Cabinet `verif494@cabinet.tg` / org `6aa1c72a3f5f36e39f6543f3`, dossier TPE
 
 | Preuve | Commande / route | Résultat |
 |---|---|---|
-| Artefact présent, byte-identique dans les 2 conteneurs | `shasum` dans `prospera-balance-service-1` | `68bd7821…ce82d7`, identique au manifeste des deux dépôts |
+| Artefact présent, byte-identique dans les 2 conteneurs | `sha256sum` dans les deux conteneurs | `c4d0318a…d8628f`, identique dans les deux et au manifeste des deux dépôts |
 | Balance SMT acceptée (elle était refusée avant) | `POST /dossiers/{id}/balances` | **201** ; `db.balances` : `referentiel: 'SMT'`, 14 lignes, `estEquilibre: true`, checksum `eb70a456…` |
 | Validation + round-trip Kafka | `POST …/balances/{id}/valider` | **200**, `etat: 'VALIDÉE'` ; `bilan_service.balances_balance` a reçu le document |
-| Liasse simplifiée produite | `POST /dossiers/{id}/bilan/etats` | **201**, `referentiel: smt-togo@1.0`, `valide: true` |
+| Liasse simplifiée produite, puis **RECALCULÉE sur l'artefact corrigé** | `POST /dossiers/{id}/bilan/etats` puis `…/recalculer` | **201** puis **200**, `referentiel: smt-togo@1.0`, `valide: true`, tampon portant le checksum final `c4d0318a…` |
 | Bilan équilibré | jeu d'états | ACTIF `AC1..AC5` = **1 550 000**, PASSIF = **1 550 000**, écart **0** |
 | Compte de résultat de trésorerie | jeu d'états | recettes **750 000**, dépenses **500 000**, solde **250 000**, résultat **250 000** |
 | **Les 3 cases de variation sont NOMMÉES et vides** | jeu d'états | `CRD`/`CRE`/`CRF` **émises à 0** — le formulaire n'est pas tronqué |
 | AC-3 — états non prévus | jeu d'états | TFT `postes: []`, `NON_APPLICABLE`, `coherent: true` ; notes `NON_APPLICABLE` ; `valide: true` |
 | AC-2 — le statut atteint le lecteur | `POST …/etats/bilan/dry-run` | `stamp.statut = "a-valider-par-expert"` |
-| Absences **nommées**, pas silencieuses | dry-run avec un `501000` | `comptesNonMappes: ['501000']`, totaux **inchangés** |
+| ⚡ **B1 rejoué sur l'état FINAL** — balance ÉQUILIBRÉE portant un `511000` (chèque à l'encaissement) | dry-run bilan + contrôles | `AC5` absorbe la valeur (400 000 → 500 000), `ACZ = PAZ = 1 550 000`, `ecartN: 0`, `comptesNonMappes: []`, **`valide: true`**. Avant le correctif : écart **−100 000**, `EQUILIBRE_BILAN` en **ANOMALIE**, liasse **non validable** |
 | AC-5 — bascule d'axe | nouvel axe `SN` au 2026-01-01 | l'exercice 2025 **reste** `smt-togo@1.0` et la liasse déjà produite est intacte |
 
 ⚠️ **Dit comme tel** : l'habilitation, le KYC et les read-models de dossier ont été **posés directement en
@@ -156,14 +161,65 @@ base** pour monter le scénario (le dossier n'est pas passé par `dossier-servic
 prouvé de bout en bout est la chaîne **balance → Kafka → liasse** ; l'octroi d'entitlement, lui, ne l'est
 pas par cette vérification.
 
+### ⛔ Ma mesure du « défaut pré-existant » était FAUSSE — prise par la revue de code
+
+J'avais écrit qu'un compte de classe 4 **débiteur** dont un préfixe plus long est déclaré au passif
+(`421000`, Personnel — avances et acomptes) rendait la liasse **déséquilibrée**, donc non validable, au
+Système Normal comme au SMT, avec un écart de 77 700 à l'appui.
+
+**C'est faux, et l'erreur est dans ma mesure** : j'avais ajouté le compte **sans contrepartie**, donc
+sur une balance que j'avais moi-même déséquilibrée. L'écart annoncé était exactement le déséquilibre
+que je venais d'introduire — `1 550 000 − 77 700 = 1 472 300`. Rejoué **avec sa contrepartie** :
+
+| | `smt-togo@1.0` | `syscohada-revise@2.1` (témoin) |
+|---|---|---|
+| `ecartN` | **0** | **0** |
+| `EQUILIBRE_BILAN` | **OK** | **OK** |
+| `valide` | **true** | **true** |
+| présentation | `PA4` = 122 300 au lieu de 200 000 | `DK` rendu à **−77 700** |
+
+⇒ Le défaut réel est un défaut de **présentation** — l'avance au personnel est portée en diminution
+d'un poste de passif au lieu d'être présentée à l'actif — et il ne déséquilibre **rien** : déplacer un
+montant de l'actif vers un passif négatif préserve l'identité `actif = passif + résultat`. Il est
+pré-existant (comportement identique sous SYSCOHADA) et hors périmètre.
+
+⚡⚡ **C'est le même biais de mesure qui m'a fait rater le bloquant des comptes `50`/`51`** : là aussi
+ma preuve docker (« dry-run avec un `501000` → nommé, totaux inchangés ») avait été prise sur une
+balance rendue déséquilibrée par l'ajout du compte, si bien qu'elle **ne pouvait pas** montrer la
+conséquence. **Une mesure ne prouve que ce qu'elle interroge, et ajouter une ligne à une balance sans
+sa contrepartie change la question posée.**
+
+### Constats de revue traités
+
+| # | Constat | Traitement |
+|---|---|---|
+| **B1** | `50`/`51` sans ligne SMT ⇒ sur une balance **équilibrée**, `EQUILIBRE_BILAN` en anomalie et liasse **non validable**, alors que `balance-service` acceptait la balance | ⚡⚡ **corrigé** : rattachés à `AC5` « Banque (+/‑) », la ligne de trésorerie du formulaire — classement conforme à SYSCOHADA (`BQ`/`BR` en trésorerie-actif). Nouveau checksum |
+| **B2** | Deux descriptions **OpenAPI publiées** citaient encore le SMT comme exemple du référentiel non livré | corrigé — le code d'erreur reste documenté, l'exemple périmé retiré |
+| **B3** | La section « défaut pré-existant » de cette fiche était fausse | réécrite ci-dessus, sur une mesure refaite |
+| **N1** | Deux commentaires du filet d'opérandes périmés par la story elle-même | corrigés |
+| **N2** | Quatre autres endroits affirmaient encore que le SMT n'est pas packagé | corrigés |
+| **N4** | ⚡ La fixture ne portait **aucun amortissement** : le signe de `CRG` dans `CRH` n'était gardé par **rien** (mutation verte mesurée par la revue) | `681` ajouté à la fixture ; mutation rejouée ⇒ **rouge sur 2 tests** |
+| **N5** | Les 4 champs d'identité n'avaient pas été recopiés dans le type de `balance-service`, pourtant nommé « troisième point de recopie » | recopiés ; la garde du statut couvre le SMT dans les **deux** dépôts |
+| **N6** | « Aucun préfixe nouveau » était faux d'exactement un : `622` | justification corrigée, et **mesurée** par un test |
+| **N7** | Le test « deux marqueurs de trésorerie » était aveugle à un **troisième**, porté par `PA3`, qui marquait les emprunts long terme comme trésorerie | marqueur retiré (SYSCOHADA ne marque pas `DA`/`DB`) ; l'assertion porte sur l'**ensemble complet** |
+| **N8** | Pas de fiche de provenance, alors que les 3 autres paquets non-SYSCOHADA en ont une | `docs/referentiels/README-smt-togo.md` écrit |
+| **N3** | `cles()` créée pour tuer les listes écrites à la main, appliquée à **une seule** des huit gardes | ⚠️ **partiellement traité** : `statut-paquet` étendu dans les deux dépôts (c'est la garde que le paquet neuf rendait aveugle en introduisant un statut). Les six autres restent à lister ; la revue les a rejouées à la main sur le paquet SMT, qui les passerait. **Dette nommée, à ouvrir en story.** |
+
+⚠️ **Toute la vérification ci-dessus a été REJOUÉE sur l'état final**, après les correctifs de revue :
+le correctif B1 change l'artefact, donc son checksum, donc tout résultat mesuré avant lui ne valait plus
+rien. Les deux services ont été redémarrés et la liasse recalculée.
+
 ### Portes de qualité
+
+Mesurées **après** les correctifs de revue.
 
 | | balance-service | bilan-service |
 |---|---|---|
 | Lint | 0 warning | 0 warning |
 | Build | OK | OK |
-| Unitaires | **3 704** verts, 186 suites | **2 621** verts, 169 suites |
-| Couverture | 99.3 % st. / 92.5 % br. / 98.7 % fn. | 99.2 % st. / 95.2 % br. / 99.4 % fn. |
+| Unitaires | **3 706** verts, 186 suites | **2 623** verts, 169 suites |
+| End-to-end | **902** verts, 26 suites | **797** verts, 23 suites |
+| Couverture | ≥ seuils (65/90/90/90), portes passées | ≥ seuils, portes passées |
 
 ⚠️ Un premier passage a montré `sage-parser.service.spec.ts` rouge sur un **dépassement de délai** (5 s) ;
 rejoué isolément **et** en suite complète, il passe. Flakiness sous charge, sans rapport avec la story.
@@ -174,3 +230,4 @@ rejoué isolément **et** en suite complète, il passe. Flakiness sous charge, s
 |---|---|---|
 | Retirer `CRD` de la table de passage (checksum régénéré, pour que le rouge ne vienne pas d'un refus d'intégrité) | `operandes-coherence` **et** production de liasse | **Rouge des deux côtés**, avec `OperandeNonResolueError` sur `CRH` — le défaut de production reproduit |
 | Rétablir la règle laxiste `tableDePassage ∪ postes` dans le filet | fixture « poste au gabarit seulement » | **Rouge**, un seul test, pour la bonne raison |
+| ⚡ Inverser le signe de `CRG` dans `CRH` **et** l'ajouter aux opérandes de `CRB` | batterie de liasse SMT | **Verte avant le correctif N4** (la fixture ne portait aucun amortissement) ⇒ **rouge sur 2 tests** après ajout du compte `681` à la fixture |
