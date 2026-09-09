@@ -342,3 +342,95 @@ montant de trésorerie**, et le corriger déplacerait le résultat, l'impôt et 
 jeux qui ventilent. L'écart est **publié dans la description OpenAPI de `dettesFinancieres`** plutôt
 que tu, et appelle une story propre — assiette d'intérêts limitée aux emprunts, avec la migration de
 contrat que cela suppose.
+
+### Revue de code et revue de sécurité — 12 constats, tous réels, tous traités
+
+Les deux revues ont tourné sur le même diff, en `opus`, sans PR (les dépôts distants sont
+inaccessibles). **Aucun faux positif** : chaque constat a été reproduit avant d'être corrigé.
+
+⚠️ **Un seul commit de correction pour les deux revues**, délibérément : leurs constats se
+recouvrent sur les mêmes fonctions — le signe de la dette a été trouvé par les deux — et un
+découpage aurait produit un commit intermédiaire qui ne compile pas.
+
+**Quatre bloquants, dont deux que la vérification docker de la veille n'avait pas rencontrés.**
+
+| # | Constat | Ce qu'il produisait |
+|---|---|---|
+| 1 | `empruntsNouveaux: null` valait « zéro emprunt » et non « absent » | trois ratios **donnés pour exacts** sur un endettement **sous-estimé de 40 %** |
+| 2 | la dette projetée pouvait être **négative**, sans garde | un endettement négatif, qui **se lit comme un endettement faible** |
+| 3 | `COUPLES_ECHEANCIER` non étendu | deux scénarios du **même plan** signalés divergents |
+| 4 | la garde 400 des trois écrivains n'était gardée par **aucun test** | la retirer laissait la campagne entièrement verte |
+
+⚡⚡ **Le constat 1 est celui qui aurait survécu à tout.** `@IsOptional()` laisse passer un
+`null` explicite, le pilote Mongo le persiste tel quel, et le code le lisait par
+`=== undefined` : un front qui sérialise un champ de formulaire vide — le cas **ordinaire** —
+envoyait donc l'intégralité du financement en capitaux propres. Ni les 2 512 unitaires, ni les
+785 e2e, ni ma vérification docker ne l'auraient vu : **je n'avais éprouvé que l'absence du
+champ, jamais son `null`**. La convention est pourtant énoncée en toutes lettres cinquante
+lignes plus loin dans le fichier voisin — « un `null`, que `@IsOptional()` laisse passer à
+l'écriture, doit valoir « absent » aux DEUX endroits ».
+
+⚡⚡ **Le constat 2 montre une garde posée d'un seul côté de la fraction.** Le refus sur des
+capitaux propres négatifs existait, et son motif était écrit noir sur blanc : « un nombre
+négatif, qui se lit comme un endettement faible ». La dette est le **numérateur** de deux
+ratios sur trois, et rien ne regardait son signe. Le scénario n'est pas de laboratoire : un
+plan de désendettement est la branche **déterminée** de D-483-7, celle qui couvre 61 % du
+portefeuille. Pire encore, deux composantes **toutes deux négatives** donnaient une autonomie
+financière d'apparence **saine** — « 60 % des ressources sont propres » — pour une entreprise
+structurellement insolvable, sur l'indicateur exact que regarde le banquier. ⛔ Le **montant**
+reste publié : l'écrêter à zéro casserait l'identité de somme constante, donc AC-5. C'est le
+**ratio** qui se tait, pas la mesure.
+
+⚡ **Le constat 3 est un point de recopie que j'avais cherché et manqué.** La story avait bien
+recensé `CHAMPS_ECHEANCIER` et lui avait dédié un test **et** une mutation (M6) — mais il
+existe une **seconde** liste, `COUPLES_ECHEANCIER`, dans un autre fichier, que rien ne relie à
+la première. Chercher les points de recopie ne suffit pas quand la copie porte un autre nom.
+
+**Deux constats de sécurité de plus :** la garde de ventilation consommait les échéanciers
+**avant** leur validation de forme, rendant un **500 anonyme** là où les six causes voisines
+rendent un 422 nommé — le constat exact que la revue de sécurité de STORY-482 avait déjà porté,
+réintroduit par un ordre d'insertion ; et l'ancre de dette est désormais lue **typée**, parce
+que c'est la **seule** expression du moteur où une ancre est le premier opérande d'un `+` : une
+chaîne y était **concaténée** au lieu de produire un `NaN` visible.
+
+**Quatre non-bloquants traités** : `apportsCapitalCumules` et `empruntsNouveauxCumules` sont
+publiés (le contrat promettait la ventilation et laissait l'apport à déduire) ; la description
+d'`autonomieFinanciere` ne promet plus un intervalle `[0, 1]` que le code ne tient pas ;
+l'énumération OpenAPI des motifs est **annotée sur son type**, donc en retirer une valeur est
+une erreur de compilation ; et l'**export** — le document qu'on pose sur le bureau du banquier —
+porte enfin la ventilation, **après** le total, sans séparer les concours bancaires du total
+qui les inclut.
+
+### Table de mutations finale — 21 mutations, 21 rouges, dont TROIS d'abord fausses
+
+Neuf mutations de plus après correctifs. ⚡⚡ **Deux d'entre elles étaient VERTES au premier
+tour** : le cinquième couple d'échéancier et la lecture typée de l'ancre n'étaient gardés par
+rien. Avec M10 au premier tour, cela fait **trois fausses lectures sur vingt-et-une** — et
+aucune des trois n'aurait été vue sans rejouer la mutation en lisant *pourquoi* le rouge
+apparaît.
+
+### Portes et vérification docker REJOUÉES sur l'état final
+
+Les correctifs touchent le moteur : la vérification a été **rejouée en entier**, jamais
+reportée depuis la mesure d'avant.
+
+Lint 0 warning · build OK · **2 525 unitaires + 785 e2e verts** · couverture **99,11 / 95,20 /
+99,34 / 99,17** · `balance-service` inchangé et vert (3 662 + 899).
+
+Les montants nominaux sont **identiques au franc** à ceux d'avant les correctifs — 112 365 600
+de capitaux propres en N+1, 65 000 000 de dettes, identité de somme vérifiée sur les trois
+exercices — ce qui est le résultat attendu : aucun correctif ne devait déplacer le chemin
+nominal.
+
+Deux contre-épreuves neuves, en HTTP réel :
+
+| Cas | Avant correctif | Après |
+|---|---|---|
+| `empruntsNouveaux: null` | trois ratios publiés, `motif: null` | `capitauxPropres: null`, `VENTILATION_FINANCEMENT_INDETERMINEE` |
+| plan de désendettement, dette **−27 000 000** en N+3 | endettement négatif donné pour exact | `DETTES_FINANCIERES_NEGATIVES` sur les deux ratios concernés |
+
+Sonde de non-régression rejouée sur les **56 jeux** persistés : **25 refusés** (le compte
+d'avant la story, inchangé), **0 refusé par la garde neuve**, **93 exercices**, **0 écart non
+nul**, **0 identité cassée**. Le seul exercice à dette négative est celui de la contre-épreuve
+ci-dessus, et son identité de somme tient : le correctif fait taire le ratio sans toucher à
+l'équilibre.
