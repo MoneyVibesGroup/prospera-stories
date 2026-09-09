@@ -104,12 +104,20 @@ courte fait échouer l'encaissement. On l'omet plutôt que de le laisser tout ca
 
       | Appel | Réponse |
       | --- | --- |
-      | `GET /v1/comptes` | `200`, et il **liste** `44511072980305975922` |
+      | `GET /v1/comptes` | `200`, il **liste** `44511072980305975922` |
+      | `POST /v1/comptes/transactions`, ce compte en payeur | `403` — il ne conteste que **l'autre** compte |
+      | `POST /v1/comptes/transactions`, ce compte en payé | `403` — idem, il ne conteste que **l'autre** |
       | `GET /v1/comptes/44511072980305975922` | `404 « Le compte … n'existe pas »` |
-      | `POST /v1/comptes/44511072980305975922/alias` | le même `404` |
+      | `GET /v1/comptes/44511072980305975922/alias` | le même `404` |
 
-      ⚡ **Ce n'est donc PAS un problème d'alias** : c'est la résolution d'un compte **par son
-      numéro** qui ne trouve pas ce que la collection annonce. Le compte d'exemple de la
+      ⚡⚡ **DEUX SERVICES CONNAISSENT CE COMPTE, DEUX AUTRES LE NIENT.** Le transfert
+      intra-comptes l'accepte **dans les deux positions** et ne conteste que le numéro fictif qu'on
+      lui oppose : le compte existe donc bien **pour ce client**, sous exactement le numéro que la
+      liste annonce. Ce n'est ni un problème d'alias, ni un format de numéro, ni un provisionnement
+      absent : **ce sont les routes de détail et d'alias qui ne le résolvent pas.**
+      ⚠️ Le paramètre `numero` de la collection est **accepté mais jamais appliqué** (`00000…` rend
+      le même compte) — la liste est une réponse figée, elle ne prouve rien à elle seule. C'est le
+      **transfert** qui prouve l'existence, parce qu'il, lui, discrimine. Le compte d'exemple de la
       documentation rend le même `404`, et aucune route ne permet d'en déclarer un : ni
       `POST /comptes`, ni `/clients`, ni `/participants`, ni `/business` n'existent. Le déblocage
       appartient au participant, pas à ce dépôt.
