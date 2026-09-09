@@ -1,10 +1,10 @@
 # STORY-485 : Un seul taux de croissance pour les trois exercices — aucun profil n'est exprimable
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
-**Points :** 3 · **Complexité :** high · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
+**Points :** 3 · **Complexité :** high · **Assigné à :** vivianMoneyVibesGroupes · **Sprint :** S20 (décision PO du 2026-08-09 : tout ce qui touche balance/bilan y est ancré)
 **Origine :** maquette **FE-036** (projection 3 ans, trésorerie 12 mois, scénarios comparés), 2026-08-27.
 Relevé en regardant les trois colonnes de la projection annuelle côte à côte : elles croissent toutes exactement au même taux.
 
@@ -39,16 +39,16 @@ récurrents sans le dire) : là il s'agit de **montants**, ici d'un **taux**.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — `croissanceProduitsPct` accepte soit un nombre (comportement actuel, appliqué aux trois
+- [x] AC-1 — `croissanceProduitsPct` accepte soit un nombre (comportement actuel, appliqué aux trois
       exercices), soit un **tableau de trois taux**. Un nombre reste valide : aucune migration.
-- [ ] AC-2 — Même traitement pour `tauxMargePct` et `tauxChargesPct` — une entreprise qui monte en
+- [x] AC-2 — Même traitement pour `tauxMargePct` et `tauxChargesPct` — une entreprise qui monte en
       charge voit sa structure de coûts bouger, et laisser le seul taux de croissance variable
       décrirait une entreprise qui n'existe pas.
-- [ ] AC-3 — Les bornes du DTO s'appliquent **par élément** (`[-100, 10 000]`), et la longueur du
+- [x] AC-3 — Les bornes du DTO s'appliquent **par élément** (`[-100, 10 000]`), et la longueur du
       tableau est exactement `HORIZON_EXERCICES`.
-- [ ] AC-4 — La réponse échoue le taux **retenu par exercice** (`compteResultat.croissanceAppliquee`) :
+- [x] AC-4 — La réponse échoue le taux **retenu par exercice** (`compteResultat.croissanceAppliquee`) :
       un plan à taux variables qui ne dit pas lequel a servi n'est pas vérifiable à la main.
-- [ ] AC-5 — Le mensuel consomme le taux de **son** exercice — cohérent avec **STORY-481**.
+- [x] AC-5 — Le mensuel consomme le taux de **son** exercice — cohérent avec **STORY-481**.
 
 ## Conséquences ailleurs
 
@@ -242,3 +242,116 @@ taux de son exercice : à produits égaux, seule la marge peut le faire bouger.
 
 **④ Non-régression, sur un jeu réel sans profil** : `capitauxPropres` de 112 365 600, 122 461 100 et
 132 358 770 — **identiques au franc** à ceux mesurés en clôturant STORY-483, sur le même dossier.
+
+---
+
+## Revue de code et revue de sécurité — 9 constats, tous réels, tous traités
+
+### ⚡⚡ Sécurité — le TROU DE TABLEAU, et pourquoi le correctif recommandé ne suffisait pas
+
+`Array.prototype.every` **saute les trous** d'un tableau creux, exactement comme le fait
+`each: true` de class-validator. Un corps qui envoie l'objet à clés **non contiguës**
+`{"0": 15, "2": 5}` est converti par `enableImplicitConversion` en tableau creux de longueur 3 :
+il franchissait les **six** décorateurs du champ **et** la garde de forme.
+
+Mesuré sur la stack, avant correctif :
+
+| étape | mesure |
+|---|---|
+| `POST …/hypotheses` | **201 CRÉÉ** |
+| persistance Mongo | `[15, null, 5]` |
+| toute projection du jeu | **422** `HYPOTHESES_FORME_OBSOLETE` |
+
+⛔ Un `TENANT_USER` ordinaire créait donc un jeu d'apparence normale qui empoisonnait **toute**
+projection, tout plan mensuel, tout export, et **toute comparaison l'incluant** — un scénario
+suffisant à refuser en bloc une comparaison de cinq. Et si un administrateur avait **verrouillé**
+le jeu entre-temps, le geste de reprise que le message prescrit — « ré-enregistrer » — devenait
+lui-même impossible.
+
+⚡⚡ **Le correctif recommandé par la revue ne fermait pas la porte.** Matérialiser les trous
+(`Array.from`) rend le prédicat correct, mais je l'ai rejoué en docker : **le jeu était toujours
+créé en 201**. La garde de forme s'exécute au **calcul**, pas à l'**écriture**.
+
+⇒ la série est désormais vérifiée **à l'écriture**, au point de passage unique des trois
+écrivains. Cela change la **nature** de la panne : un **400 sur la requête fautive** au lieu d'un
+422 différé sur une ressource déjà persistée que l'utilisateur croit valide.
+
+⛔ **Les deux familles sont fermées.** Les échéanciers de montants portaient le même trou depuis
+STORY-460 — `investissementsParExercice: {"0":100,"2":300}` produisait exactement la même chaîne.
+N'en fermer qu'une aurait fait diverger deux prédicats porteurs du même défaut, c'est-à-dire
+recréé le mode de panne « une garde sur un seul des N chemins » que ce dépôt a payé cinq fois.
+
+### Revue de code — 8 constats, dont 2 bloquants
+
+| # | Constat | Ce qu'il produisait |
+|---|---|---|
+| 1 | l'entrée d'historique de STORY-482 **renumérotée** `1.13.0` au contrat publié | `1.12.0` disparaissait, deux entrées sous la même version : un intégrateur ne peut plus dater ses projections stockées |
+| 2 | `croissanceProduitsPct` affirmait encore s'appliquer « telle quelle à chaque exercice » | phrase **fausse** dès qu'un profil est saisi, et aucun des trois taux ne nommait son frère |
+| 3 | la comparaison résolvait les taux avec le résolveur des **échéanciers** | latent : deux résolutions du même fait finissent par diverger |
+| 4 | les gardes de contrat qui énumèrent les couples non étendues | **troisième** point de recopie ; c'est son absence qui a laissé passer le constat 2 |
+| 5 | trois descriptions publiées **concaténées sans espace** | deux entrées de changelog collées, sur les trois routes |
+| 6-7 | « 1.13.0 → 1.13.0 », et une version attribuée à la story précédente | résidus du remplacement en masse annulé |
+
+⚡⚡ **Le constat 1 est le plus instructif, et il vient de moi.** J'avais fait un remplacement en
+masse de `1.12.0`, vu qu'il réécrivait l'historique, et je l'avais annulé — mais l'annulation
+était **incomplète sur une des trois routes**. La garde de contrat ne pouvait pas le voir : elle
+vérifie que la description **nomme la version courante**, ce qui restait vrai.
+
+⚡ **Le constat 4 explique le constat 2.** La convention « le récurrent nomme sa série » est gardée
+par un `it.each` du contrat OpenAPI, qui énumère **en dur** les trois couples de montants. Ne pas
+l'étendre aux trois taux, c'est exactement ce qui a laissé une description fausse être publiée.
+
+### Table de mutations finale — 10 sur 10 ROUGES, dont QUATRE d'abord fausses
+
+| # | Mutation | Résultat |
+|---|---|---|
+| M1 | le BFR annuel relit le taux SAISI | ROUGE |
+| M2 | le mensuel relit le taux saisi (AC-5) | ROUGE |
+| M3 | l'ouverture du mensuel prend le taux COURANT | ROUGE |
+| M4 | la garde des taux devient celle des montants | ROUGE |
+| M5 | la garde de forme des profils est retirée | ROUGE |
+| M6 | un couple de taux sort de la liste des couples | **d'abord FAUX** → ROUGE |
+| M7 | les profils de taux se persistent en `null` | **d'abord FAUX** → ROUGE |
+| M8 | la matérialisation des trous est retirée (2 prédicats) | ROUGE |
+| M9 | la garde d'écriture des TAUX neutralisée | **d'abord FAUX** → ROUGE, 3 tests |
+| M10 | la garde d'écriture des MONTANTS neutralisée | **d'abord FAUX** → ROUGE, 2 tests |
+
+⛔ **Quatre faux rouges sur dix, tous par erreur de compilation** — un import devenu inutile, une
+liste vidée. Rejouées en gardant les symboles **utilisés** (`&& false` plutôt que `if (false)`),
+elles nomment enfin des tests. Sans cette relecture, quatre gardes auraient été déclarées prouvées
+sans l'être.
+
+### Vérification docker REJOUÉE sur l'état final
+
+⚠️ **La stack avait été détruite** par un arrêt non propre : Mongo refusait de démarrer (moteur de
+stockage), et ma première réparation a aggravé le cas — un instance réparée refuse de rejoindre un
+jeu de réplicas. Remède : suppression de la base `local` en mode autonome, qui **préserve les
+données métier** (les 57 jeux d'hypothèses ont survécu). Le volume Kafka, lui, a été réinitialisé —
+les topics sont auto-créés et l'outbox vit en Mongo.
+
+**① Le trou, rejoué sur l'état final :**
+
+```
+croissanceProduitsPctParExercice -> HTTP 400 | SERIE_PAR_EXERCICE_INEXPLOITABLE
+investissementsParExercice       -> HTTP 400 | SERIE_PAR_EXERCICE_INEXPLOITABLE
+documents écrits : 0
+```
+
+**② AC-1 et AC-4**, version servie `1.13.0` :
+
+| | produits | croissance | marge | charges | BFR | écart |
+|---|---|---|---|---|---|---|
+| N+1 | 108 000 000 | 20 | 28 | 22 | 7 117 200 | 0 |
+| N+2 | 118 800 000 | 10 | 30 | 20 | 8 098 200 | 0 |
+| N+3 | 118 800 000 | 0 | 32 | 19 | 8 367 480 | 0 |
+
+**③ AC-5** — articulation nulle sur les trois, et l'ouverture de chaque exercice **égale** le BFR
+de clôture du précédent (6 135 000 → 7 117 200 → 8 098 200).
+
+**④ Non-régression** — le jeu sans profil rend `capitauxPropres` de 112 365 600, 122 461 100 et
+132 358 770 : **identiques au franc** aux mesures d'avant les correctifs, et à celles de STORY-483.
+
+### Clôture — 2026-09-09
+
+PR `MNV-485(bilan)` rebase-mergée sur `dev`, branche supprimée. PR `docs/` mergée sur `main`.
+Assigné à : `vivianMoneyVibesGroupes`.
