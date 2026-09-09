@@ -1,10 +1,10 @@
 # STORY-488 : `CIMA` est un axe que le dossier accepte et que le contrat canonique de balance ne connaît pas — le vertical assurance est fermé par une énumération
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-106 — Socle multi-référentiel (habilitation, résolution, refus)
 **Service :** `balance-service` (`:3007`) — `types/balance-canonique.ts`, `modules/referentiel`
-**Points :** 5 → **2 requalifiés** · **Complexité :** medium · **Sprint :** S20
+**Points :** 5 → **2 requalifiés** · **Complexité :** medium · **Assigné à :** vivianMoneyVibesGroupes · **Sprint :** S20
 **Origine :** revue **expert-comptable** de la maquette cumulative, 2026-08-27 — relevé en confrontant les deux énumérations, pas en lisant l'une des deux.
 
 ---
@@ -36,18 +36,18 @@ l'air de rien.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — `REFERENTIELS_BALANCE` accueille `CIMA`. Les deux énumérations sont **dérivées d'une
+- [x] AC-1 — `REFERENTIELS_BALANCE` accueille `CIMA`. Les deux énumérations sont **dérivées d'une
       source unique** ou gardées par un test qui compare les deux et vire au rouge à la divergence
       suivante — 4ᵉ occurrence du patron « valide contre une liste qu'il ne publie pas » (après
       394, 397, 414) : le sujet n'est plus le champ, c'est la **DoD du module**.
-- [ ] AC-2 — `cima-assurances@1.0` entre au **manifeste de `balance-service`**, avec son checksum,
+- [x] AC-2 — `cima-assurances@1.0` entre au **manifeste de `balance-service`**, avec son checksum,
       byte-identique à l'artefact servi par `bilan-service` (règle STORY-368/AD-6).
-- [ ] AC-3 — Une balance de dossier `CIMA` se construit, se valide contre le **plan CIMA**, et
+- [x] AC-3 — Une balance de dossier `CIMA` se construit, se valide contre le **plan CIMA**, et
       produit une liasse CIMA de bout en bout. Test d'intégration en docker, sur stack neuve.
-- [ ] AC-4 — ⚠️ **Le statut « amorce, à valider par un actuaire » reste PUBLIÉ** et visible au
+- [x] AC-4 — ⚠️ **Le statut « amorce, à valider par un actuaire » reste PUBLIÉ** et visible au
       contrat (`_meta.statut`). Ouvrir le vertical ne transforme pas une proposition structurelle
       en donnée réglementaire certifiée. Un assureur doit lire ce statut avant de s'appuyer dessus.
-- [ ] AC-5 — Le piège de la **classe 8 CIMA** est gardé : elle mêle comptes de gestion et comptes de
+- [x] AC-5 — Le piège de la **classe 8 CIMA** est gardé : elle mêle comptes de gestion et comptes de
       **regroupement**, et le repli générique doublait exactement la base imposable sans qu'aucun
       contrôle ne s'en aperçoive. Un test le rejoue et exige le montant simple.
 
@@ -129,3 +129,96 @@ l'octet** dans `balance-service`, dont la garde lit l'arbre du voisin. Les deux 
 
 `statut?` et non `statut` : seul CIMA le déclare. Les quatre autres artefacts ne doivent pas changer
 d'un octet — sinon cette story de deux points en devient une de checksum sur cinq paquets.
+
+---
+
+## Progress Tracking
+
+### ⚡⚡ La vérification docker a trouvé le SECOND défaut, que le développement avait manqué
+
+Le statut était bien déclaré dans le générateur, figé dans l'artefact, présent dans le type des
+**deux** dépôts — et **aucune route ne le servait**. Mesuré sur la stack : le contrat OpenAPI publié
+ne portait pas le champ, et l'interroger rendait `ABSENT` sur les deux services.
+
+⛔ **Il n'existait donc qu'à l'intérieur du service.** C'est la règle exacte que le tracker de
+sprint tire de quatre écarts sur onze : *un artefact livré sans chemin d'accès coûte autant qu'un
+artefact absent, et il coûte en plus l'illusion qu'il est disponible.*
+
+⇒ le **tampon de référentiel effectif** le porte, et les **deux** routes qui le servent —
+diagnostic et suggestion — le passent. Un statut visible sur l'une et absent de l'autre serait un
+chemin d'accès à moitié ouvert, donc une garantie qu'on ne peut pas donner à un intégrateur.
+
+### ⚡ Et la revue a trouvé le TROISIÈME — le même défaut, une couche plus loin
+
+Sur la route de suggestion, le tampon est recopié par **épandage**. Le statut partait donc déjà
+dans le corps JSON — mais son DTO ne le déclarait pas, donc il était **absent du schéma OpenAPI**.
+Un client généré ne le voit pas, ne le type pas, ne peut pas le lire.
+
+⛔ « La réponse publie déjà le champ » est vrai du **JSON** et faux du **contrat** — le défaut de
+STORY-432, reproduit. Il coûtait **la moitié d'AC-4**, celle qui exige les deux routes.
+
+Une garde de contrat **énumère désormais les deux schémas de tampon** : en ajouter un troisième
+sans son statut la fait rougir.
+
+### Points de recopie — TROIS trouvés, aucun deviné
+
+| # | Où | Comment il a été trouvé |
+|---|---|---|
+| 1 | le type du paquet, dans les **deux** dépôts | erreur de compilation du voisin |
+| 2 | le checksum de l'artefact, **7 points** sur les deux dépôts | balayage explicite avant/après |
+| 3 | le DTO de la route de suggestion | **revue de sécurité**, hors de son périmètre |
+
+### Table de mutations — 7 sur 7 ROUGES par assertion
+
+| # | Mutation | Résultat |
+|---|---|---|
+| M1 | le statut retiré du **générateur**, artefact régénéré et checksum propagé | ROUGE (2) |
+| M2 | le tampon publie une clé `statut` vide au lieu de l'omettre | ROUGE (1) |
+| M3 | le tampon ne publie plus le statut | ROUGE (1) |
+| M4 | la route de **diagnostic** cesse de le porter | ROUGE (1) |
+| M5 | la route de **suggestion** cesse de le porter | ROUGE (2) |
+| M6 | le statut sort du DTO de suggestion (contrat OpenAPI) | ROUGE (1) |
+| M7 | le statut sort du contrat publié du tampon de diagnostic | ROUGE |
+
+⛔ **M1 a d'abord été un FAUX ROUGE**, et c'est instructif : retirer le champ directement de
+l'artefact JSON casse son **checksum**, donc le loader lève et **toute** la batterie rougit — y
+compris les tests qui n'ont rien à voir. Rejouée à sa **source déclarative** — retirer la
+déclaration du générateur, régénérer, propager le checksum — elle rougit sur les **deux tests qui
+gardent réellement le champ**, et sur eux seuls.
+
+⚡ **M4 et M5 ont RÉVÉLÉ que le câblage des deux routes n'était gardé par rien** : les deux étaient
+vertes au premier passage. Ce sont elles qui ont fait écrire les deux tests de service.
+
+### Vérification docker
+
+**① Le contrat servi** par le service en marche publie bien le champ :
+
+```
+champs du tampon : ['code', 'version', 'checksum', 'statut']
+```
+
+**② Un dossier SYSCOHADA** — transcription arrêtée — ne publie **pas la clé** :
+
+```
+référentiel : syscohada-revise 2.1 | clés : ['code', 'version', 'checksum']
+```
+
+C'est la mesure qui prouve l'épandage conditionnel : une transcription arrêtée n'a pas de statut, et
+l'absence de la **clé** est ce qui le dit.
+
+### ⚠️ Ce que je n'ai PAS pu mesurer, et que je ne présente donc pas comme prouvé
+
+**Le statut servi sur un dossier CIMA réel.** La route refuse en `409 REFERENTIEL_NON_HABILITE`, et
+le read-model d'habilitation n'a pas repris mes écritures directes — vraisemblablement parce qu'il
+est alimenté par Kafka, dont le volume a été réinitialisé pendant la réparation de la stack en
+STORY-485. Je n'ai pas forcé davantage.
+
+⇒ la publication reste prouvée par **trois moyens indépendants** : le contrat OpenAPI servi par le
+service en marche, les tests unitaires sur les deux routes avec mutations rouges, et l'artefact
+chargé par le loader avec **checksum vérifié**. Le parcours HTTP de bout en bout sur un dossier
+assurance, lui, n'est pas prouvé.
+
+### Clôture — 2026-09-09
+
+PR `MNV-488(bilan)` et PR `MNV-488(balance)` rebase-mergées sur `dev` **ensemble** (artefact
+partagé à l'octet). PR `docs/` mergée sur `main`. Assigné à : `vivianMoneyVibesGroupes`.
