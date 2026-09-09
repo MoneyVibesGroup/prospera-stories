@@ -1,10 +1,10 @@
 # STORY-489 : Le contrat canonique de balance ne porte aucune devise — le « ×100 » est une convention XOF que rien ne déclare
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-107 — Devise, unités et arrondis (socle d'internationalisation)
 **Service :** `balance-service` (`:3007`) — `types/balance-canonique.ts` · `bilan-service` (consommateur)
-**Points :** 8 · **Sprint :** S20
+**Points :** 8 · **Complexité :** high · **Sprint :** S20
 **Origine :** revue **expert-comptable** de la maquette cumulative, 2026-08-27, demandée par le PO — *« on débute avec l'UEMOA mais le but est de toucher la CEDEAO, l'Afrique de l'Est et l'Europe, voire l'Amérique »*.
 
 ---
@@ -77,3 +77,121 @@ facture en EUR ou en USD**. La devise n'est pas un attribut de pays, c'est un at
 
 - ISO 4217 est la seule source d'exposant admissible — ne pas la coder à la main par pays.
 - Voir [[STORY-101]] (contrat canonique), [[STORY-492]] (registre des pays), [[FE-082]].
+
+---
+
+## Requalification (2026-09-09, avant la première ligne)
+
+La fiche est **exacte** : rien de son sujet n'est livré. `devise` n'existe ni au `SubmitBalanceDto`
+ni au schéma Mongo, `exposant` n'existe nulle part dans les deux dépôts, et `TOLERANCE_EQUILIBRE`
+est une constante littérale à `100`. Vérifié fichier par fichier.
+
+Deux points seulement doivent être **verrouillés ici**, parce qu'ils changent le coût de la story.
+
+### R-489-1 — l'arbitrage d'AC-4 est DÉJÀ TRANCHÉ par le code
+
+AC-4 demande de décider « avec l'architecture » si ajouter `devise` invalide les checksums. La
+réponse est dans `balance.checksum.ts` : le sceau n'est **pas** l'empreinte du corps sérialisé,
+c'est une **forme canonique à liste blanche** qui ne retient que `exercice`, `source`,
+`referentiel`, `version` et `lignes[]`.
+
+⇒ un champ posé **au niveau de l'enveloppe** n'entre pas dans le sceau : **aucun checksum existant
+n'est invalidé, aucune migration, aucun `v3`**. C'est le chemin déjà pris trois fois (STORY-370,
+STORY-420, STORY-424), documenté dans ce même fichier.
+
+⚠️ **La contrepartie doit être dite** : un champ hors sceau est **altérable au repos** sans que
+l'empreinte le détecte. Le fichier porte déjà ce raisonnement pour `sources`. Pour `devise`, le
+risque est borné par AC-5 — la divergence avec la devise du **dossier** est refusée à l'écriture,
+donc une altération se détecte à la relecture métier, pas par le sceau.
+
+### R-489-2 — le périmètre est MONO-DÉPÔT
+
+L'en-tête de la fiche annonce `bilan-service (consommateur)`. Mesuré : **zéro occurrence** de
+`devise` dans tout `bilan-service/src`, specs comprises. Le consommateur n'a rien à adapter tant
+que la devise ne **franchit pas la frontière**, et l'y faire franchir c'est ajouter un champ à
+`BalanceCreatedEventV1` — donc producteur **et** consommateur, deux dépôts, deux PR.
+
+⇒ **c'est exactement l'objet de STORY-490**, que la propre section « Conséquences ailleurs » de
+cette fiche différait. La story reste donc **sur `balance-service` seul**, et l'événement ne bouge
+pas.
+
+### R-489-3 — la dépendance à STORY-492 n'est pas bloquante
+
+AC-1 exige une liste fermée « servie par le registre ». STORY-492 (registre des pays) est
+`ready-for-dev`. Mais la liste fermée **existe déjà localement** : `DEVISES_ISO`, livrée par
+STORY-409 deux jours **après** la rédaction de cette fiche. Coder contre elle puis la faire dériver
+du registre quand 492 arrivera est le traitement déjà appliqué à `longueurCompteDetail`.
+
+---
+
+## Arbitrages de cadrage
+
+### D-489-1 — ⚡⚡ `exposant` est l'échelle RÉELLEMENT APPLIQUÉE, et l'écart à l'ISO est PUBLIÉ
+
+C'est la décision centrale, et elle demande de nommer précisément le défaut.
+
+Le produit stocke tous les montants **multipliés par 100**. Pour l'euro ou le naira, dont l'exposant
+ISO 4217 vaut 2, cette échelle **est** la sous-unité officielle. Pour le franc CFA, dont l'exposant
+ISO vaut **0**, elle ne l'est pas : le produit a inventé deux décimales — un choix d'arithmétique
+défendable, qu'il a **mal nommé**.
+
+⛔ **Deux corrections sont possibles et une seule est acceptable.**
+
+| | Ce qu'elle ferait | Verdict |
+|---|---|---|
+| déclarer `exposant: 0` pour XOF | rendrait les montants stockés **cent fois trop grands** : toutes les pièces figées se reliraient faux | ⛔ **interdite par AC-4** — « sans réécrire un seul montant » |
+| déclarer l'échelle **appliquée** et publier son écart à l'ISO | les montants gardent leur sens, et le nom cesse de mentir | ✅ retenue |
+
+⇒ `exposant` est l'échelle appliquée, servie par le registre, **jamais envoyée par le client**
+(AC-1). Le contrat **déclare explicitement**, pour XOF, que cette échelle diverge de l'ISO 4217 et
+pourquoi. C'est ce que la fiche réclame : le défaut n'était pas le ×100, c'était son **nom**.
+
+⚠️ Ce que cette story ne fait **pas** : ramener XOF à son exposant ISO. Ce serait une réécriture de
+pièces opposables, et elle relève d'une décision produit, pas d'une story de contrat.
+
+### D-489-2 — la tolérance devient une FONCTION de l'exposant, gardée sur la fonction
+
+`TOLERANCE_EQUILIBRE = 100` est remplacée par `toleranceEquilibre(exposant) = 10 ** exposant`,
+c'est-à-dire **une unité monétaire**, quelle que soit la devise.
+
+⚠️ **À exposant 2, elle vaut 100 : les trois sites d'appel rendent exactement ce qu'ils rendaient**,
+et aucune balance existante ne change de verdict d'équilibre.
+
+⛔ **La mutation d'AC-3 porte sur la FONCTION, pas sur une devise inventée.** Le registre ne déclare
+aujourd'hui aucune devise d'exposant 0 — en fabriquer une pour rendre le test possible serait de la
+spéculation, et un `it` sur une valeur que le produit ne sert pas est une garde vacante déguisée.
+La fonction, elle, est éprouvée à 0, 2 et 3 : figer son résultat à `100` la fait rougir à 0.
+
+### D-489-3 — `DEVISES_SUPPORTEES` reste à `['XOF']`, et c'est le point
+
+Le registre connaît six codes ISO ; le produit n'en **sert** qu'un. Cette story livre le **socle**
+— déclarer, publier, comparer — pas l'ouverture commerciale. Élargir `DEVISES_SUPPORTEES` sans
+paquet fiscal, sans plan de comptes et sans référentiel pour ces monnaies produirait des balances
+qu'aucune liasse ne peut consommer, c'est-à-dire le défaut de STORY-438.
+
+### D-489-4 — AC-4 par PROJECTION à la lecture, jamais par écriture
+
+Les balances existantes ne portent pas le champ. Elles le reçoivent **à la lecture**
+(`devise: 'XOF'`, exposant de la convention), sans qu'une seule écriture ne les touche.
+
+⚠️ Le repli est **nommé dans le contrat**, jamais silencieux : une balance antérieure à cette story
+est reconnaissable, et un intégrateur doit pouvoir la distinguer d'une balance qui a **déclaré** sa
+devise.
+
+### D-489-5 — AC-6 se garde par un test de PRÉSENCE, pas par une relecture
+
+Le mot `XOF` doit disparaître des **types et constantes** du contrat canonique. Un test balaie les
+fichiers du contrat et échoue si le littéral y réapparaît.
+
+⛔ **Le balayage ne peut pas viser tout le dépôt** : `XOF` reste parfaitement légitime dans le
+registre des devises, dans le profil société, dans les paquets fiscaux et dans les messages de
+refus. Le viser partout rendrait le test intenable et il serait désactivé à la première gêne — le
+sort de toutes les gardes trop larges.
+
+### Hors périmètre, nommé
+
+- **La propagation en aval** (liasse, prévisionnel, fiscal, export) : STORY-490.
+- **Le contrat d'événement `BalanceCreatedEventV1`** : il ne bouge pas, cf. R-489-2.
+- **Les montants du paquet fiscal par devise** : STORY-493.
+- **Les opérations en devise étrangère** et leur conversion : STORY-495, qui se tire après 490.
+- **Le front** et ses « F CFA » en dur : FE-082.
