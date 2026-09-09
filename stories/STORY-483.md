@@ -1,6 +1,6 @@
 # STORY-483 : Le bilan prévisionnel ne sépare pas capitaux propres et dettes — donc aucun ratio bancaire
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-013 — Prévisionnel (annuel 3 ans + mensuel 12 mois)
 **Service :** `bilan-service`
@@ -434,3 +434,17 @@ d'avant la story, inchangé), **0 refusé par la garde neuve**, **93 exercices**
 nul**, **0 identité cassée**. Le seul exercice à dette négative est celui de la contre-épreuve
 ci-dessus, et son identité de somme tient : le correctif fait taire le ratio sans toucher à
 l'équilibre.
+
+### Statut — `review`, et pourquoi elle n'est pas `done`
+
+⛔⛔ **Le merge est impossible, et ce n'est pas un défaut du code.** Les dépôts distants des
+deux modules **et** celui de `docs/` ne sont pas accessibles au compte GitHub authentifié
+(`kodjo007` ne voit que `prospera-stories`, en **lecture**) :
+
+```
+remote: Repository not found.
+fatal : dépôt 'https://github.com/MoneyVibesGroup/prospera-bilan-service.git/' non trouvé
+```
+
+Les **trois** branches `MNV-483` sont commitées **localement** et complètes. Il manque
+uniquement l'accès en écriture pour dérouler push → PR → rebase-merge → `completed_date`.
