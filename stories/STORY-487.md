@@ -1,6 +1,6 @@
 # STORY-487 : Une balance dont le référentiel du dossier n'est pas packagé ne se construit pas — le refus remonte à la construction
 
-Status: review
+Status: done
 
 **Épic :** EPIC-106 — Socle multi-référentiel (habilitation, résolution, refus)
 **Service :** `balance-service` (`:3007`) — `modules/cahiers/agregation`, `modules/balance`, `modules/referentiel`
@@ -182,7 +182,7 @@ ouvert un fail-open que la version d'origine fermait.**
   correction change la persistance, donc la mesure d'avant ne valait plus rien. Plan de
   l'agrégation re-mesuré : `COLLSCAN: false`, `IXSCAN: true`, `FETCH: false` — index
   **couvrant**, les documents ne sont plus remontés du stockage.
-- **Statut** : `review` → prêt pour merge.
+- **2026-09-10** — PR `balance-service#98` **mergée** sur `dev`. Statut `done`.
 
 ## Notes
 
