@@ -261,11 +261,108 @@ erreur — le faux vert de STORY-489).
 | M10 | accepter un triplet **partiel** au read-model | `balance-payload.util.spec` | ROUGE (1/43) |
 | M11 | rebasage qui **reporte** la devise au lieu de la relire | `hypotheses.service.spec` | ROUGE (1/99) |
 | M12 | le gel ne recopie plus la devise du jeu | `jeu-etats.service.spec` | ROUGE (1/117) |
+| M13 | devise **effective** câblée en dur sur le repli (⑥ F1) | `balance-events.spec` | ROUGE (1/4) |
+| M14 | mention posée sur la seule 1re section du **prévisionnel** (⑥ F3) | `modele-previsionnel.spec` | ROUGE (1/32) |
+| M15 | paquet fiscal sans devise ⇒ `XOF` fabriqué (⑦ F-3) | `referentiel-loader.service.spec` | ROUGE (1/43) |
+| M16 | forme du code devise non bornée (⑦ F-2) | `balance-payload.util.spec` | **VERT ⚠️ puis ROUGE (5/48)** |
 
-⛔ **Deux mutations ont dû être RÉÉCRITES** parce que leur première forme ne compilait pas
+⛔ **Cinq mutations ont dû être RÉÉCRITES** parce que leur première forme ne compilait pas
 (paramètre devenu inutilisé, champ devenu non assignable) : elles rendaient « 0 test
 exécuté », que la première lecture prend pour un rouge. Les formes retenues compilent et
 échouent sur une **assertion**.
+
+⛔⛔ **M16 EST SORTIE VERTE, ET C'ÉTAIT MA PROPRE CORRECTION DE REVUE.** J'avais ajouté la
+garde de forme du code devise (constat ⑦ F-2) **sans le test qui la mesure** : la desserrer
+en `/^.+$/` laissait les 43 tests verts. C'est exactement le défaut que la table existe pour
+attraper, commis dans le geste censé fermer un défaut. Cinq cas ajoutés (minuscules, quatre
+lettres, chiffre, 5 000 caractères, glyphe de contrôle bidi) — M16 rougit désormais sur les
+cinq.
+
+### ⑥ Revue de code — 4 constats, aucun bloquant, tous des **filets qui ne gardent pas**
+
+Scan délégué à un sous-agent `opus`, plus une seconde lentille sur l'over-engineering.
+Chaque constat a été **vérifié dans le code** avant d'être corrigé.
+
+**F1 — les deux fixtures « devise DÉCLARÉE » valaient `XOF`, c'est-à-dire le REPLI.**
+`projeterDevise(undefined)` rend `XOF` : une fixture déclarée en `XOF` ne peut donc pas
+distinguer `devise: projection.devise` d'un `devise: DEVISE_PAR_DEFAUT` câblé en dur. Mesuré :
+la mutation laissait vertes les deux specs, le `toEqual` du contrat complet **et** le spec
+d'outbox. `bilan-service` aurait figé **toutes** ses liasses sur la convention — et aucun e2e
+ni docker ne pouvait rattraper, `DEVISES_SUPPORTEES` interdisant à l'API de produire une autre
+monnaie. Fixtures passées à `GHS` (M13).
+
+**F2 — deux docstrings nommaient un filet qui n'existe pas.** `devise-liasse.ts` citait
+`montant.exposant-attendu.spec.ts` : **ce fichier n'a jamais existé**. `export.types.ts`
+affirmait que `export-agnosticisme.spec.ts` vérifie la mention sur toutes les sections : ce
+spec ne garde que les imports interdits et ne contient pas une occurrence de `unite`. Patron
+STORY-402/437 — un commentaire périmé qui porte une instruction est un piège armé.
+
+**F3 — AC-4 n'était tenu que du côté liasse.** Le seul `expect` sur `section.unite` du dépôt
+vivait dans `modele-liasse.spec.ts` ; retirer `avecUnite(…)` de `modelePrevisionnel` laissait
+la suite verte (le test de métadonnée **globale** reste vert sans lui). Un plan à trois ans
+remis à un banquier serait sorti sans mention de monnaie sur chaque état (M14).
+
+**F4 — le filet d'exhaustivité balayait une LISTE FERMÉE de neuf fichiers.** Il ne rougissait
+que sur une nouvelle **méthode** dans l'un d'eux ; un **nouveau fichier** serait passé sans un
+mot — le geste même que la garde existe pour empêcher. Les fichiers sont désormais
+**découverts** par balayage de `src/` sur le critère « lit un paquet fiscal », avec une garde
+de non-vacance sur le balayage lui-même.
+
+**Lentille over-engineering** : `UNITES_MINEURES_PAR_UNITE` cesse d'être exporté (trois usages,
+tous dans son fichier). Rien d'autre à retrancher.
+
+### ⑦ Revue de sécurité — 3 constats, aucun bloquant
+
+**F-3 (le plus grave) — deux replis vers la même valeur font une garde qui passe toujours.**
+`PaquetFiscalLoader` posait `devise: meta.devise ?? 'XOF'` : la devise était le **seul** champ
+de `_meta` à se donner un défaut, là où `pays` et `annee` lèvent deux lignes plus haut. Tant
+qu'elle n'était qu'un libellé, c'était défendable ; depuis cette story c'est l'**opérande de
+référence** d'AC-3, et l'autre opérande retombe lui aussi sur `XOF`. ⇒ Le jour où un paquet
+hors zone franc est packagé — **exactement le jour où la garde doit servir** — un artefact qui
+oublie `_meta.devise`, ou l'écrit sous une autre casse, aurait été réputé `XOF`, et les huit
+sites d'appel n'y auraient rien changé. Refus explicite désormais ; le test qui **verrouillait
+l'affirmation inverse** a été réécrit (M15). `statut` garde son défaut : c'est un libellé.
+
+**F-2 — l'asymétrie de bornage était le signal.** Dans la même fonction, `lireDevise` bornait
+l'exposant (entier 0..8) et le drapeau (booléen), mais acceptait le **code** dès lors que la
+chaîne était non vide. Une chaîne arbitraire venue d'un message était persistée, recopiée sur
+le jeu d'états, **scellée dans un snapshot append-only** et imprimée en tête de chaque état
+d'un PDF/XLSX opposable. Garde de **forme** ISO 4217 alphabétique ajoutée — pas un vocabulaire
+fermé, donc l'objection D-490-2 ne s'y applique pas. ⚠️ **L'injection de formule Excel était
+déjà fermée** par le préfixe « Montants en » : cette garde ferme la longueur et les glyphes,
+pas une injection.
+
+**F-1 — une justification devenue fausse.** Le docstring de `balance.schema.ts` justifiait
+l'exclusion de `devise` du checksum par « la devise ne franchit pas la frontière vers
+`bilan-service` ». Cette story fait exactement l'inverse. Corrigé, avec le coût déclaré : la
+devise n'est scellée **nulle part** sur toute la chaîne — ni au checksum de balance, ni à
+l'empreinte du snapshot (D-490-4). Non atteignable depuis l'API (aucun chemin d'écriture sur
+les snapshots), mais c'est le seul champ figé dont c'est vrai. 🪝 L'inclure aux deux sceaux
+est une story à part : elle rendrait incomparables toutes les empreintes déjà scellées.
+
+**Vérifiés fermés, et nommés pour que la revue suivante ne les refasse pas** : injection NoSQL
+(aucune valeur de message n'entre dans un filtre Mongo), mass-assignment (les écritures
+énumèrent leurs champs), IDOR / multi-tenant (aucun endpoint ni guard ajouté), poison-pill (un
+triplet malformé n'a jamais fait rejeter un message), idempotence du consommateur (inchangée),
+DoS (`10 ** exposant` borné avant écriture), fuite d'information dans les refus (les deux
+devises et le paquet appartiennent au tenant appelant).
+
+### ⑧ Vérification docker REJOUÉE sur l'état final
+
+Deux correctifs touchaient des chemins déjà vérifiés (le chargeur de paquet fiscal en F-3,
+l'acceptation du triplet en F-2) : la vérification a été **rejouée**, jamais reportée.
+
+```
+chargeur DURCI, paquet togo@2026        : resultat-fiscal 200 · liquidation 200 · regime 200 (SYNTHETIQUE)
+round-trip Kafka COMPLET (balance v2)   : read-model = {etat:VALIDÉE, devise:XOF, exposant:2, deviseDeclaree:true}
+GET etats/:id · versions/1 · hypotheses : {code:XOF, exposant:2, source:BALANCE_DECLAREE}
+```
+
+⚠️ **Trois échecs e2e écartés APRÈS mesure, pas après supposition.** Trois exécutions
+successives de la suite e2e de `balance-service` ont rendu **trois ensembles différents** de
+tests en timeout à 5 s (`suggestion`, `pieces-ocr`, puis `rapprochement`/`tresorerie`), tous
+sans rapport avec la devise. Cause : neuf conteneurs docker en concurrence sur le CPU.
+**Vérifié** : conteneurs arrêtés, la suite rend **904/904 verts**.
 
 ### Vérification docker — sur la stack réelle
 
