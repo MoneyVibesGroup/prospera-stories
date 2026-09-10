@@ -129,8 +129,8 @@ Stack réelle, `balance-service` reconstruit, jeton d'un cabinet réel.
 |---|---|
 | Lint | 0 warning |
 | Build | OK |
-| Unitaires | **3 720** verts, 187 suites |
-| End-to-end | **902** verts, 26 suites |
+| Unitaires | **3 726** verts, 188 suites |
+| End-to-end | **904** verts, 26 suites |
 | Couverture | ≥ seuils 65/90/90/90 |
 
 ## Table de mutations
@@ -141,6 +141,48 @@ Stack réelle, `balance-service` reconstruit, jeton d'un cabinet réel.
 | Faire que le référentiel se charge normalement | batterie AC-1/3/5 | **Rouge sur les 4 gardes neuves** : elles distinguent bien le cas refusé du cas nominal |
 | Retirer le **seul décorateur réel** `@RequiresDossierScope()`, commentaire laissé | invariant de portée | **VERT avant durcissement**, **rouge après** |
 | Rendre le contrôleur d'inventaire niché sans décorateur | invariant de portée | **Rouge**, contrôleur nommé |
+
+## Constats de revue traités
+
+Les deux revues ont convergé sur le même bloquant : **mon durcissement de l'invariant avait
+ouvert un fail-open que la version d'origine fermait.**
+
+| # | Constat | Traitement |
+|---|---|---|
+| **BL-2 / V1** | ⛔⛔ `cheminDeclare` lisait le **premier** `@Controller` du fichier et attribuait ce chemin à tout le fichier. Un fichier du dépôt en déclare **deux** (`referentiel.controller.ts`). Un contrôleur niché **non gardé** en seconde position redevenait invisible — la garde d'origine le voyait | ⚡⚡ **corrigé** : découpage **par classe** (les décorateurs d'une classe précèdent son `export class`), ce qui lie le chemin **et** le décorateur à la **même** classe. Raisonner sur l'union des chemins du fichier n'aurait pas suffi : un fichier portant un niché **gardé** et un niché **non gardé** serait passé |
+| **BL-1** | ⛔⛔ La branche « déclaré non packagé » de `etatPaquet` — **le cœur d'AC-4** — n'était gardée par **rien**. La neutraliser laissait **1 039 tests verts**, en compilant proprement | corrigé : garde sur **registre synthétique** (l'idiome que STORY-494 avait posé pour la branche jumelle), avec un **témoin de discrimination** dans le même manifeste ; plus une batterie complète sur `inventaireReferentiels`, qui n'avait **aucun** spec |
+| **BL-3** | Le contrat publié affirmait que `tag` vaut l'une des quatre valeurs et que `referentiel` est un couple `code@version` — faux **sur la seule ligne qui intéresse le lecteur** de cette route, l'anomalie | corrigé sur le document réellement servi, avec la consigne explicite de ne pas écrire de correspondance exhaustive sans branche par défaut |
+| **V2** | ⛔ L'agrégation org-scopée faisait un **COLLSCAN** : aucun index ne commence par `orgId`. Chaque appel faisait lire **tous** les documents de la collection, ceux des autres cabinets compris, `lignes[]` comprises. Épuisement de ressources **cross-tenant** depuis un compte légitime | corrigé : index `{ orgId, referentiel, dossierId }`, dont l'ordre suit la projection ⇒ index **couvrant** |
+| **NB-1** | Le contrôleur neuf n'était pas au filet des contrats opaques, dont le docblock dit qu'en oublier un rend la garde **vacante** | ajouté |
+| **NB-2** | Mon insertion avait séparé `listByOrg` de son docblock, qui décrivait donc la méthode voisine **à contre-sens** | replacé |
+| **NB-3** | Mon commentaire « `$addToSet` sur un champ absent produit un `null` » est **faux** | corrigé après mesure sur le Mongo du projet (7.0.40) : un champ **absent** est ignoré (`[]`), seul un `null` **explicite** remonte |
+| **NB-4** | Aucun e2e sur la route neuve, alors qu'elle partage le préfixe `balances` | ajouté **dans le fichier du voisin de préfixe**, seul endroit où l'ordre de résolution est réellement exercé, plus le fail-closed de la gate |
+| **NB-5** | La garde de rejeu frôlait la tautologie : `mockRejectedValue` rend la **même instance** aux deux appels | fabrique d'erreurs **distinctes**, plus un témoin `not.toBe` qui interdit le retour à l'instance partagée |
+| **NB-6** | `PONT_TAG['constructor']` rend une valeur **héritée** truthy ⇒ entrée publiée sous `undefined@undefined` avec le mauvais motif | appartenance testée sur les clés **propres**, garde sur quatre clés du prototype |
+| **NB-7** | Fiche : trois volumes différents, et pas de section *Progress Tracking* | corrigés ici |
+
+### Mutations rejouées après correctifs
+
+| Mutation | Avant | Après |
+|---|---|---|
+| Neutraliser la branche `nonPackage` de `etatPaquet` | **1 039 verts** | **rouge** |
+| Contrôleur niché non gardé en **seconde** position d'un fichier | **5 verts** | **rouge**, et il nomme « contrôleur 2 » |
+
+## Progress Tracking
+
+- **2026-09-10** — Story recadrée : sa prémisse était fausse (le refus est livré depuis
+  STORY-422) et son exemple périmé (le SMT est packagé depuis STORY-494). Périmètre réel :
+  les gardes absentes, le motif muet sur le dossier, l'inventaire inexistant.
+- **2026-09-10** — Implémentation, portes de qualité et vérification docker (route servie,
+  tag hors contrat inventorié, cloisonnement multi-tenant prouvé sur données réelles).
+- **2026-09-10** — Revue de code et revue de sécurité : **4 bloquants** traités, dont une
+  **régression fail-open que j'avais moi-même introduite** sur la garde de portée dossier,
+  et le cœur d'AC-4 gardé par rien. 7 non-bloquants traités.
+- **2026-09-10** — ⚠️ **Vérification docker REJOUÉE sur l'état final** : l'index de
+  correction change la persistance, donc la mesure d'avant ne valait plus rien. Plan de
+  l'agrégation re-mesuré : `COLLSCAN: false`, `IXSCAN: true`, `FETCH: false` — index
+  **couvrant**, les documents ne sont plus remontés du stockage.
+- **Statut** : `review` → prêt pour merge.
 
 ## Notes
 
