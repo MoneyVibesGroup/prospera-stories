@@ -31,19 +31,19 @@ qu'un chiffre sans provenance »).
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — `JeuEtats` porte la devise de sa balance source et la rend à chaque lecture, versions
+- [x] AC-1 — `JeuEtats` porte la devise de sa balance source et la rend à chaque lecture, versions
       figées comprises. Une version figée rend **la devise qui était la sienne**, jamais celle du
       dossier à l'instant de la lecture.
-- [ ] AC-2 — Les hypothèses de prévisionnel et la projection portent la devise ; elle est **héritée**
+- [x] AC-2 — Les hypothèses de prévisionnel et la projection portent la devise ; elle est **héritée**
       de la balance d'ancrage, non saisie. Un plan à trois ans dans une monnaie autre que la balance
       qui l'ancre n'a pas de sens et doit être impossible à exprimer.
-- [ ] AC-3 — Le moteur fiscal **refuse** (`409 DEVISE_PAQUET_INCOHERENTE`) quand la devise de la
+- [x] AC-3 — Le moteur fiscal **refuse** (`409 DEVISE_PAQUET_INCOHERENTE`) quand la devise de la
       balance diffère de celle du paquet fiscal appliqué. ⛔ **Il ne convertit pas** : convertir
       demanderait un taux, un taux demande une date et une source, et aucune des deux n'est décidée.
       Refuser est la seule conduite honnête tant que STORY-495 n'est pas rendue.
-- [ ] AC-4 — L'export porte la devise **en en-tête de chaque état**, comme l'exige la présentation
+- [x] AC-4 — L'export porte la devise **en en-tête de chaque état**, comme l'exige la présentation
       d'états financiers. Un bilan sans mention de monnaie n'est pas un bilan opposable.
-- [ ] AC-5 — Aucune conversion nulle part dans cette story. Un test le prouve : aucun taux, aucun
+- [x] AC-5 — Aucune conversion nulle part dans cette story. Un test le prouve : aucun taux, aucun
       arrondi de change, aucune multiplication entre deux montants de devises différentes.
 
 ## Conséquences ailleurs
@@ -201,4 +201,172 @@ qui itèrent sur les sections) la portent. La métadonnée globale reste, elle n
 
 ## Progress Tracking
 
-_(en cours)_
+### Ce que le développement a appris, et que la fiche ne disait pas
+
+**① ⚡⚡ Le test d'exhaustivité a trouvé HUIT sites, là où l'inventaire manuel en
+avait trouvé six.** Les deux manquants sont dans `ProvisionsFiscalesService` — et
+`appliquerTpu` est le plus instructif : elle ne **charge** pas la balance, elle la
+**reçoit en paramètre**. Un filet qui cherche les lectures de dépôt
+(`trouverDerniereBaseFiscale`, `trouverBaseFiscaleParId`) la manque par construction. Le
+marqueur qui l'a rattrapée est `lignesNormalisees(` — le passage obligé des montants
+d'une balance vers le calcul, quelle que soit la façon dont elle est arrivée. Et c'est un
+chemin d'**écriture** : il inscrit la charge d'impôt dans la balance.
+
+⇒ **Un inventaire manuel de chemins n'est pas un filet.** Les deux batteries écrites ici
+(`devise-paquet.exhaustivite.spec.ts` et son assertion de **compte**) rougissent au
+neuvième site écrit demain.
+
+**② ⚡⚡ La vérification docker a montré DEUX sources pour un seul fait.** L'export d'une
+liasse figée lit la devise **du snapshot** ; `GET /bilan/etats/:id` lit celle **du jeu**.
+Deux surfaces du même document, deux lectures — le patron exact qui a produit « deux dates
+légales pour le même exercice » en STORY-453.
+
+Elles ne peuvent **pas** diverger, et c'est démontrable : un jeu est lié à **une** balance
+pour sa vie entière (`refuserSiAutreBalance` refuse tout recalcul nommant une autre), une
+balance `VALIDÉE` est terminale (son événement n'est jamais ré-émis), et le gel recopie.
+Ce dernier maillon n'était gardé par **rien** — il l'est désormais (M12). ⇒ **Aucun
+paramètre ajouté** aux sept sites d'appel du DTO pour fermer une divergence inatteignable :
+l'invariant est **prouvé**, la flexibilité n'est pas construite.
+
+**③ ⚠️ Le refus d'échelle non rendable plantait au lieu de refuser.** Première passe e2e :
+`500` anonyme sur l'export du prévisionnel, parce qu'un harnais passait une base sans
+devise à un module **pur** dont le type la déclare pourtant requise. Un `TypeError` se
+cherche, un refus nommé se diagnostique.
+
+**④ ⚠️ `taux de change` est écrit six fois dans `balance-service`** — dans des messages de
+refus (`tresorerie`, `rapprochement`, `imports`) qui disent précisément qu'on ne convertit
+pas. Le test d'AC-5 vise donc des **identifiants**, jamais de la prose : bannir la phrase
+interdirait d'expliquer la règle, bannir l'identifiant interdit de l'enfreindre. Cette
+famille de refus est aussi le **précédent maison** dont la garde d'AC-3 est la transposition
+au fiscal.
+
+### Table de mutations — 12 sur 12 ROUGES par assertion
+
+⚠️ Chaque ligne a été vérifiée **rouge par ASSERTION**, jamais par erreur de compilation
+(une mutation qui ne compile pas ne prouve rien), et le nombre de tests exécutés est
+relevé à chaque tour (une commande qui n'exécute **aucun** test rend « 0 total » sans
+erreur — le faux vert de STORY-489).
+
+| # | Mutation | Batterie | Verdict |
+|---|---|---|---|
+| M1 | retirer `devise: updated.devise` de `marquerEtat` | `balance.service.spec` | ROUGE (1/105) |
+| M2 | `...projection` au lieu des 3 champs énumérés | `balance-events.spec` | ROUGE (1/4) |
+| M3 | retirer la garde de `RegimeService.vue` | `regime.service.spec` | ROUGE (1/14) |
+| M4 | retirer la garde de `provisions.appliquer` | `devise-paquet.exhaustivite.spec` | ROUGE (1/2) |
+| M5 | exempter une balance **sans** devise déclarée | `devise-paquet.spec` | ROUGE (2/6) |
+| M6 | **sceller** la devise dans l'empreinte du snapshot | `empreinte-snapshot.spec` | ROUGE (1/14) |
+| M7 | servir une version figée sans **sa** devise | `export.service.spec` | ROUGE (1/16) |
+| M8 | ne poser la mention que sur la 1re section | `modele-liasse.spec` | ROUGE (1/20) |
+| M9 | drapeau absent ⇒ `BALANCE_DECLAREE` | `devise-liasse.spec` | ROUGE (1/12) |
+| M10 | accepter un triplet **partiel** au read-model | `balance-payload.util.spec` | ROUGE (1/43) |
+| M11 | rebasage qui **reporte** la devise au lieu de la relire | `hypotheses.service.spec` | ROUGE (1/99) |
+| M12 | le gel ne recopie plus la devise du jeu | `jeu-etats.service.spec` | ROUGE (1/117) |
+
+⛔ **Deux mutations ont dû être RÉÉCRITES** parce que leur première forme ne compilait pas
+(paramètre devenu inutilisé, champ devenu non assignable) : elles rendaient « 0 test
+exécuté », que la première lecture prend pour un rouge. Les formes retenues compilent et
+échouent sur une **assertion**.
+
+### Vérification docker — sur la stack réelle
+
+⚠️ La stack était détruite (WiredTiger en panne après un arrêt non propre) : `mongod
+--repair`, puis suppression de la base `local` en mode autonome et ré-init du replica set —
+**les données métier ont été préservées**, et la vérification s'appuie dessus.
+
+**① Le round-trip Kafka porte le triplet, sur les DEUX topics** — outbox réelle, après
+soumission puis validation d'une balance déclarant `XOF` :
+
+```
+balance.created              -> {"devise":"XOF","exposant":2,"deviseDeclaree":true}
+balance.etat.document.change -> {"devise":"XOF","exposant":2,"deviseDeclaree":true}
+balance.etat.change          -> {}            (topic d'EXERCICE : hors périmètre)
+```
+
+⛔ **`exposantIso` et `exposantDivergeDeLIso` sont absents des deux payloads** — D-490-2
+vérifié sur des messages réels, pas sur un mock.
+
+Read-model de `bilan-service` après chaque message :
+
+```
+après balance.created   : etat=BROUILLON  devise=XOF exposant=2 deviseDeclaree=true
+après etat.document.change : etat=VALIDÉE devise=XOF exposant=2 deviseDeclaree=true
+```
+
+**② Persistance réelle de la liasse et de sa version figée** (`mongosh`, documents bruts) :
+
+```
+jeux_etats        : {exercice:"2026", statut:"BROUILLON", devise:"XOF", exposant:2, deviseDeclaree:true}
+snapshots_liasse  : {version:1, devise:"XOF", exposant:2, deviseDeclaree:true, empreinte:"d7dd48cf…"}
+jeux_hypotheses   : base = {…, dureeMois:12, devise:"XOF", exposant:2, deviseDeclaree:true}
+```
+
+**③ D-490-4 — l'empreinte du snapshot est bien celle des SEPT champs**, recalculée depuis
+le document en base avec la fonction du service :
+
+```
+empreinte en base       : d7dd48cf9328f7425a6e6d5975d07be777a5331175a0d7935910ea00cb353fcf
+recalcul SANS la devise : d7dd48cf9328f7425a6e6d5975d07be777a5331175a0d7935910ea00cb353fcf  IDENTIQUE
+```
+
+⚠️ **Ce que cette mesure prouve, et ce qu'elle ne prouve pas** : elle établit que le sceau
+stocké est celui des sept champs et qu'ajouter la devise **à l'entrée** ne le change pas.
+Elle ne prouve **pas** qu'un développeur ajoutant la devise **au corps** de
+`empreinteSnapshot` serait arrêté — c'est M6 qui le prouve.
+
+**④ AC-1 — une version figée rend LA DEVISE QUI ÉTAIT LA SIENNE.** Mesure
+**discriminante** : le snapshot est forcé à `GHS` en base pendant que le jeu reste `XOF`.
+
+```
+GET …/etats/{id}/versions/1  -> {"code":"GHS", …}   (lit SON snapshot)
+GET …/etats/{id}             -> {"code":"XOF", …}   (lit le jeu)
+export ?version=1 (XLSX)     -> « Montants en GHS » (suit le snapshot)
+export sans ?version (XLSX)  -> « Montants en GHS » (STORY-449 : un jeu figé s'exporte figé)
+```
+
+C'est cette mesure qui a révélé le point ② ci-dessus. État restauré à `XOF` ensuite.
+
+**⑤ AC-4 — la mention en en-tête de CHAQUE état**, classeur réellement produit puis
+**rouvert** (un `.xlsx` est un ZIP : lire ses octets ne prouve rien) :
+
+```
+liasse figée   : 8 mentions « Montants en XOF » + la métadonnée « Unité : Montants en XOF »
+prévisionnel   : 8 mentions « Montants en XOF » + la métadonnée
+```
+
+**⑥ Le parc EXISTANT, sans une seule écriture** — un jeu figé avant la story, réellement
+en base :
+
+```
+document en base : devise=undefined exposant=undefined
+réponse servie   : {"code":"XOF","exposant":2,"source":"CONVENTION_HISTORIQUE"}
+après lecture    : devise=undefined            (AUCUNE écriture)
+```
+
+**⑦ R-490-1 vérifiée, pas supposée — la divergence d'AC-3 est INATTEIGNABLE** :
+
+```
+POST …/balances {"devise":"EUR"} -> 400 ['devise must be one of the following values: XOF']
+paquet togo@2026                 -> _meta.devise = XOF
+```
+
+⇒ La porte se referme **avant même** `exigerDeviseCoherente`, sur la liste fermée du DTO
+(`DEVISES_SUPPORTEES`). Le refus `409 DEVISE_PAQUET_INCOHERENTE` est donc prouvé en
+unitaire et en test de service uniquement — **et c'est écrit dans le code, à la ligne
+concernée**.
+
+**⑧ Non-régression du moteur fiscal, garde en place** :
+
+```
+GET …/fiscal/resultat-fiscal?exercice=2026        -> 200
+GET …/fiscal/liquidation?exercice=2026            -> 200
+GET …/profil-societe/regime?debut=…&fin=…         -> 200
+   regimeFiscal = SYNTHETIQUE — « CA 120 000 ≤ plafond TPU 60 000 000 »
+```
+
+La dernière ligne est **le sixième chemin** : la comparaison que la garde protège s'exécute
+bien, après le contrôle de devise.
+
+⚠️ **Données créées pour la vérification** (dev, jetables) : un dossier `Verif 490 devise`
+avec son exercice 2026, sa balance, sa liasse et son jeu d'hypothèses ; et un
+`profil-societe` sur l'organisation d'essai, qui n'en avait pas — nécessaire pour atteindre
+la route de régime.
