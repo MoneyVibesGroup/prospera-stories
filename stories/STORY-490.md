@@ -1,6 +1,6 @@
 # STORY-490 : La devise s'arrête à la balance — la liasse, le prévisionnel, le fiscal et l'export la perdent
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-107 — Devise, unités et arrondis (socle d'internationalisation)
 **Service :** `bilan-service` + `balance-service` (`modules/fiscal`)
@@ -467,3 +467,13 @@ bien, après le contrôle de devise.
 avec son exercice 2026, sa balance, sa liasse et son jeu d'hypothèses ; et un
 `profil-societe` sur l'organisation d'essai, qui n'en avait pas — nécessaire pour atteindre
 la route de régime.
+
+### Clôture — 2026-09-10
+
+PR `MNV-490(balance)` #99 et `MNV-490(bilan)` #120 **rebase-mergées ensemble** sur `dev`,
+branches supprimées — un changement de contrat d'événement touche 2 dépôts, et les intégrer
+séparément aurait laissé le read-model de la relying party diverger en silence. Les deux
+ordres d'intégration étaient sûrs : le producteur publie les trois champs en **requis**, le
+consommateur les déclare **optionnels**.
+
+PR `docs/` mergée sur `main`. Assigné à : `vivianMoneyVibesGroupes`.
