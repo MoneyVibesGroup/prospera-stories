@@ -405,3 +405,49 @@ d'estampillage ; cache du loader (non borné, les six paquets n'évincent rien) 
 devises ; noms de fichiers et de fonctions cités par les docstrings (tous existent) ; `meta-vocabulaire.json` bien
 émis dans `dist` ; aucune perturbation de l'empreinte, de la comparaison de versions ni de la comparaison
 d'exercices par le `statut` désormais scellé.
+
+---
+
+## Revue de sécurité (phase ⑦) — **0 vulnérabilité**
+
+Scan délégué au skill `prospera-security-review` (éligibilité, contexte et résumé en `haiku`, analyse en
+`opus`), les deux PR revues **ensemble**, dans le code réel. Synthèse dans la session.
+
+⚠️ **Ce n'était pas une formalité** : la story ouvre une route **hors** du gate Bilan et de la portée
+dossier — la seule du module. Points examinés et trouvés sains :
+
+- **Contrôle d'accès** : la chaîne globale s'applique (throttler IP → JWT RS256 → e-mail vérifié → rôles) ;
+  ni `@Public()` ni `@AllowUnverified()`. La route n'accepte **aucun** identifiant d'organisation ni de
+  dossier, et ne lit que le registre codé en dur et le cache de paquets commun à tous : aucune donnée
+  d'une autre organisation, aucune énumération possible.
+- **Contenu servi** : dix champs projetés explicitement — le plan, les postes, la table de passage et le
+  paquet fiscal ne sortent jamais. Aucun identifiant de contribuable (le nom du classeur GUIDEF a été
+  écarté en dev) ; le checksum est celui d'un artefact embarqué dans l'image, pas un secret.
+- **Injection** : la valeur de `pays` ne sert qu'à un `includes` en mémoire, sans requête Mongo ; motif
+  ancré, sans ReDoS.
+- **Chemins de fichiers** : le locator d'artefact ne vient jamais de la requête ; `BundledArtifactSource`
+  garde son motif et le confinement au répertoire.
+- **Erreurs** : messages génériques, pas de hash divulgué sur une erreur d'intégrité.
+- **Déni de service** : loader single-flight, cache borné de fait aux six clés du registre, route à chaud
+  en mémoire, derrière le throttler.
+- **Intégrité comptable (D-491-1)** : rien ne change hors méta sous un même `code@version` (mesuré sur
+  les onze artefacts des deux dépôts) ; aucun code ne revérifie le checksum d'un snapshot contre le
+  registre courant — seule conséquence, le faux signal `referentielHomogene` déjà accepté.
+- **Mise en garde scellée** : valeur toujours issue de l'artefact serveur ; `undefined` n'est persisté ni
+  haché — ni fausse alerte d'altération, ni contournement du sceau.
+- **Nouveau sens de `statut`** : aucun code des services ni de la console n'autorise ou n'interdit un acte
+  selon sa valeur — aucune garde ne bascule de fermée à ouverte.
+
+### ⚡ Le seul correctif : un docstring de sécurité qui nommait la MAUVAISE garde
+
+Le docstring du filtre `pays` affirmait, sur le patron d'`audit-query.dto.ts`, que c'est **le motif** qui
+referme l'injection d'opérateur, `?pays[$ne]=x` arrivant en chaîne `'[object Object]'`. **Mesuré** :
+`@nestjs/platform-express` 11 ne reconfigure pas l'analyseur de query, Express 5 le laisse en mode
+*simple*, et `?pays[$ne]=x` arrive en **clé inconnue**, refusée par `forbidNonWhitelisted` — la mutation C3
+(motif desserré) laissait d'ailleurs ce cas vert. Pas de faille (le refus a lieu), mais une justification
+de sécurité fausse est un piège armé (patron STORY-402) : docstring corrigé, vraie garde épinglée par un
+e2e qui asserte le message exact du refus (`property pays[$ne] should not exist`).
+
+⚠️ **Observé hors périmètre, confié à une tâche à part** : `audit-query.dto.ts` (STORY-443) porte la même
+affirmation (« élargir ce motif, c'est ouvrir la porte »), et d'autres DTO de query la reprennent peut-être
+dans les autres services. À **mesurer** service par service avant de corriger.
