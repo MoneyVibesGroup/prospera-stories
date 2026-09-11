@@ -145,8 +145,10 @@ classé le SMT `a-valider-par-expert` malgré un README qui dit « amorce ») :
 ⚠️ **Conséquence visible, assumée** : le tampon des liasses SYSCOHADA porte désormais
 `statut: 'a-valider-par-expert'` là où il ne portait rien (« absent = transcription arrêtée », STORY-488).
 Aucune validation experte n'étant consignée, l'absence affirmait une maturité que rien n'établit.
-Les documents **figés** (jeu d'états, snapshot) ne portent toujours ni `statut` ni `miseEnGarde` :
-ils rendent ce avec quoi ils ont été scellés.
+Le **tampon** des documents figés (jeu d'états, snapshot) ne porte ni `statut` ni `miseEnGarde`.
+⚠️ **Corrigé en revue de code** : cette phrase disait « les documents figés ne portent ni l'un ni
+l'autre ». Faux pour leur **contenu** — la liasse scellée porte `liasse.statut` depuis STORY-488, et
+porte désormais `liasse.miseEnGarde` avec lui (voir *Revue de code*).
 
 ### D-491-4 — les listes de pays viennent des sites officiels, pas de la mémoire
 
@@ -243,7 +245,7 @@ canonique du générateur, qui reconstruit désormais le `_meta` dans cet ordre.
 | `sfd-bceao@1.0` | `4982504f…` → `efee0a6c…` |
 | `sfd-bceao@2.0` | `09b46dcc…` → `91ca19e2…` |
 | `zone-franche-togo@1.0` | `15cc9421…` → `1ed4e853…` |
-| `cima-assurances@1.0` | `2d4f3061…` → `aaa30313…` |
+| `cima-assurances@1.0` | `2d4f3061…` → `aaa30313…` → **`9ca429c8…`** (revue de code : norme source corrigée) |
 | `smt-togo@1.0` | `c4d0318a…` → **inchangé** |
 
 Recopie à l'octet dans `balance-service` des trois artefacts partagés qui bougent (SYSCOHADA, SFD @2.0,
@@ -340,3 +342,66 @@ Seuils 65 / 90 / 90 / 90 : tenus, aucun abaissement.
   déjà héberger des paquets déposés par la console (STORY-149), qui ne passeraient pas par `build.mjs`.
 - **`miseEnGarde` est facultative hors amorce** au générateur ; aujourd'hui seules les deux amorces en
   portent une.
+
+---
+
+## Revue de code (phase ⑥) — 5 constats, 5 corrigés, dont 1 bloquant
+
+Scan délégué au skill `prospera-code-review` (préparation `haiku`, analyse `opus`), puis seconde lentille
+`ponytail-review` ; synthèse, vérification et correctifs dans la session. ⚠️ Une première passe du
+sous-agent d'analyse a été **coupée par une limite d'API** sans rendre de rapport : relancée, avec
+consignation des constats au fil de l'eau.
+
+### ① ⛔ BLOQUANT — la norme CIMA renvoyait au mauvais livre du Code
+
+La `normeSource` de `cima-assurances@1.0` citait « Livre III, Titre IV, Chapitre III ». **Vérifié sur
+cima-afrique.org** : le Chapitre III « Plan comptable particulier à l'assurance et à la capitalisation »
+est au **Livre IV** (« Règles comptables applicables aux organismes d'assurance »), qui se divise
+directement en chapitres ; le Titre IV du Livre III s'intitule « Dispositions transitoires ».
+
+⚡⚡ **L'erreur venait du dépôt lui-même** — `README-cima-assurances.md` (STORY-122), recopié tel quel. La
+fiche exigeait des métadonnées « renseignées depuis leurs sources, sans rien inventer » : je n'ai rien
+inventé, j'ai **transmis** une erreur, que le checksum aurait scellée dans deux dépôts et que la route
+catalogue aurait servie à toutes les organisations. **Une référence recopiée d'un README n'est pas une
+référence vérifiée** — les listes de pays, elles, avaient été relevées sur les pages officielles ; la
+norme ne l'avait pas été. Corrigé à la source (le README) **et** dans l'artefact (`aaa30313…` →
+`9ca429c8…`, recopié à l'octet), référence épinglée par un test (mutation R1 : rouge).
+
+### ② La liasse SCELLÉE perdait la mise en garde
+
+`produireLiasseComplete` rendait `statut` sans `miseEnGarde`. Je l'avais laissée de côté en la croyant
+**sans lecteur** — c'était faux : `valider()` fige la `LiasseProduite` **entière** dans
+`snapshots_liasse.liasse`, l'empreinte la couvre, et `GET …/versions/:version` la ressert. Une liasse CIMA
+validée aurait scellé `amorce` **sans ce qu'elle ne couvre pas** — exactement la perte que D-491-2 évite
+sur les tampons. Corrigé ; sixième production gardée par le test du moteur (mutation R2 : rouge).
+⚠️ **Vérifié avant correction** : `liasse` est un chemin `Mixed`, où le pilote peut écrire `undefined` en
+`null` (mesure de STORY-460) — ce qui fausserait l'empreinte, calculée en mémoire. Lecture seule en base :
+le snapshot scellé le 2026-09-10 **avec** le code de STORY-488 ne porte pas de clé `statut` ; ce chemin
+d'écriture jette donc `undefined`, et la correction ne fabrique aucun `null`.
+Et les deux commentaires qui affirmaient que « le snapshot ne stocke pas le statut du paquet » sont
+corrigés : seul le **tampon** des documents figés ne le recopie pas (🪝 le lire depuis la liasse scellée =
+story à part).
+
+### ③ ④ ⑤ Trois descriptions devenues fausses par la story
+
+| # | Où | Ce qu'elle disait |
+|---|---|---|
+| ③ | docstring du tampon, deux dépôts | `statut` « présent sur les seuls référentiels qui ne sont pas une transcription arrêtée » |
+| ④ | description OpenAPI du tampon de diagnostic (`balance-service`) | `{code, version, checksum, statut}`, la « seule mise en garde réglementaire » étant dans `statut` |
+| ⑤ | trois descriptions de `miseEnGarde` | « absente sinon » — alors que le générateur l'accepte hors amorce |
+
+### Ponytail — un constat retenu, un laissé
+
+- **Retenu** : la ligne de journal `meta` du générateur, retirée. Elle levait un `TypeError` quand `pays`
+  manquait — la garde **accidentelle** qui avait d'abord masqué la mutation G8.
+- **Laissé, préexistant** : `balance-service` décrit le même tampon par **deux** DTO
+  (`EffectiveReferentielStampDto`, `TamponReferentielDto`), auxquels cette story ajoute `miseEnGarde` en
+  double. Les fusionner est une story à part.
+
+### Pistes écartées par la revue, après vérification
+
+Non-régression hors `meta` des six artefacts ; byte-identité inter-dépôts ; les 8 + 2 sites
+d'estampillage ; cache du loader (non borné, les six paquets n'évincent rien) ; listes de pays et
+devises ; noms de fichiers et de fonctions cités par les docstrings (tous existent) ; `meta-vocabulaire.json` bien
+émis dans `dist` ; aucune perturbation de l'empreinte, de la comparaison de versions ni de la comparaison
+d'exercices par le `statut` désormais scellé.

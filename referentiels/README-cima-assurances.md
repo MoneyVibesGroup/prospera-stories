@@ -1,8 +1,17 @@
 # Référence CIMA-assurances (extraite du Code CIMA officiel)
 
-**Source :** *Code des assurances CIMA — Livre III, Titre IV, Chapitre III : « Plan comptable
-particulier à l'assurance et à la capitalisation »* (Conférence Interafricaine des Marchés
-d'Assurances). Dernière modification structurante : décision du Conseil des Ministres du 2 avril 2008.
+**Source :** *Code des assurances CIMA — Livre IV « Règles comptables applicables aux organismes
+d'assurance », Chapitre III : « Plan comptable particulier à l'assurance et à la capitalisation »*
+(Conférence Interafricaine des Marchés d'Assurances). Dernière modification structurante : décision du
+Conseil des Ministres du 2 avril 2008.
+
+> ⚠️ **Corrigé le 2026-09-11 (revue de code de STORY-491).** Ce README écrivait « Livre III, Titre IV,
+> Chapitre III ». Sur cima-afrique.org, le Livre IV se divise directement en chapitres, le Chapitre III
+> y est le plan comptable, et le Titre IV du Livre III s'intitule « Dispositions transitoires ».
+> L'erreur a failli être scellée dans la `normeSource` de `cima-assurances@1.0`, servie par la route
+> catalogue — une référence recopiée d'un README n'est pas une référence vérifiée.
+> - Livre IV : https://cima-afrique.org/wp-content/code-cima/fr/LIVREIVREGLESCOMPTABLESAPPLICABL.html
+> - Chapitre III : https://cima-afrique.org/wp-content/code-cima/fr/CHAPITREIIIPLANCOMPTABLEPARTICUL.html
 - Liste des comptes (art. 431) : https://cima-afrique.org/wp-content/code-cima/fr/Article431Listedescomptes.html
 - États modèles (art. 433) : https://cima-afrique.org/wp-content/code-cima/fr/Article433Etatsmodeles.html
 - Terminologie / fonctionnement (art. 432) : https://cima-afrique.org/wp-content/code-cima/fr/Article432Terminologieexplicativ.html
