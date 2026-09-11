@@ -1,6 +1,6 @@
 # STORY-491 : Le manifeste d'un référentiel ne dit ni sa zone, ni ses pays, ni sa devise, ni la norme dont il dérive
 
-Status: review
+Status: done
 
 **Épic :** EPIC-108 — Le référentiel devient un plugin déclaré (zone, pays, devise, norme)
 **Service :** `bilan-service` (`ReferentielRegistry`, `scripts/referentiels/build.mjs`) + `balance-service` (manifeste)
@@ -34,21 +34,21 @@ Conséquences immédiates, toutes vérifiables :
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Le `ReferentielPackage` déclare, en `_meta` : `zoneComptable` (`OHADA` · `BCEAO-SFD` ·
+- [x] AC-1 — Le `ReferentielPackage` déclare, en `_meta` : `zoneComptable` (`OHADA` · `BCEAO-SFD` ·
       `CIMA` · `IFRS` · `IFRS-PME` · `AUTRE`), `pays[]` (codes **ISO 3166-1 alpha-2**),
       `devisePresentation` (ISO 4217, **ou `null`** si le référentiel est multi-devise),
       `normeSource` (texte + référence officielle) et `statut` (`certifie` · `amorce` ·
       `a-valider-par-expert`).
-- [ ] AC-2 — `pays: []` **vide** signifie « aucun pays », jamais « tous ». ⛔ Fail-closed prouvé par
+- [x] AC-2 — `pays: []` **vide** signifie « aucun pays », jamais « tous ». ⛔ Fail-closed prouvé par
       mutation — même garde que STORY-533 AC-4.
-- [ ] AC-3 — Le `build.mjs` **refuse de packager** un référentiel dont le `_meta` est incomplet. La
+- [x] AC-3 — Le `build.mjs` **refuse de packager** un référentiel dont le `_meta` est incomplet. La
       garde s'exécute au build, pas au démarrage : un artefact incomplet ne doit pas exister.
-- [ ] AC-4 — Les quatre référentiels existants sont renseignés depuis leurs sources, sans rien
+- [x] AC-4 — Les quatre référentiels existants sont renseignés depuis leurs sources, sans rien
       inventer : `syscohada-revise@2.1` (OHADA, 17 pays), `sfd-bceao@2.0` (BCEAO-SFD, 8 pays UEMOA),
       `cima-assurances@1.0` (CIMA, 14 pays), `zone-franche-togo@1.0` (OHADA, `TG`).
       ⚠️ **Aucune modification des plans, des postes ni des tables de passage** — l'ajout est
       strictement métadonnée, et la non-régression des 163 postes / 124 mappings SYSCOHADA le prouve.
-- [ ] AC-5 — Une route publie le **catalogue des référentiels** avec ces métadonnées. C'est elle que
+- [x] AC-5 — Une route publie le **catalogue des référentiels** avec ces métadonnées. C'est elle que
       STORY-492 interroge, et c'est elle qui permettra un jour de dire « ce pays n'est pas servi »
       au lieu de laisser un écran vide.
 
@@ -218,8 +218,8 @@ paquets : `PAYS_SUPPORTES = ['TG']` (`dossier-service`), `PaquetFiscalRegistry.p
 
 ## Progress Tracking
 
-**Statut : `review`** — démarrée le **2026-09-10**, développée et validée le **2026-09-11** (flux APEX
-complet : branches `MNV-491` sur `docs`, `bilan-service`, `balance-service`).
+**Statut : `done`** — démarrée le **2026-09-10**, développée, revue et clôturée le **2026-09-11** (flux
+APEX complet : branches `MNV-491` sur `docs`, `bilan-service`, `balance-service`).
 
 ### Ce qui est livré, critère par critère
 
@@ -276,7 +276,7 @@ CIMA) : sha256 identiques des deux côtés, mesurés — les deux PR s'intègren
   (AC-8 de 398) : `sfd-bceao@1.0` étant devenu une amorce, cette garde vérifie gratuitement que la mise en
   garde servie sur une route de production est **décrite** au contrat — elle a rougi sous la mutation C2.
 
-### Table de mutations — 31 rouges par assertion, 7 refus du générateur
+### Table de mutations — 31 mutations : 24 rouges par assertion, 7 refus du générateur
 
 | # | Mutation | Résultat |
 |---|---|---|
@@ -327,8 +327,10 @@ Bilan, portée dossier), avec les artefacts réels.
 
 | Dépôt | Lint | Build | Unit | E2E | Couverture (st/br/fn/li) |
 |---|---|---|---|---|---|
-| `bilan-service` | 0 | ✅ | 2758 (+1 skip préexistant) | 816 | 99.19 / 95.34 / 99.37 / 99.26 |
+| `bilan-service` | 0 | ✅ | 2760 (+1 skip préexistant) | 817 | 99.19 / 95.34 / 99.37 / 99.26 |
 | `balance-service` | 0 | ✅ | 3765 | 905 | 99.14 / 92.51 / 98.48 / 99.25 |
+
+*(État final, après les correctifs des revues ⑥ et ⑦.)*
 
 Seuils 65 / 90 / 90 / 90 : tenus, aucun abaissement.
 
@@ -451,3 +453,20 @@ e2e qui asserte le message exact du refus (`property pays[$ne] should not exist`
 ⚠️ **Observé hors périmètre, confié à une tâche à part** : `audit-query.dto.ts` (STORY-443) porte la même
 affirmation (« élargir ce motif, c'est ouvrir la porte »), et d'autres DTO de query la reprennent peut-être
 dans les autres services. À **mesurer** service par service avant de corriger.
+
+---
+
+## Clôture — 2026-09-11
+
+PR `MNV-491(bilan)` [prospera-bilan-service#121](https://github.com/MoneyVibesGroup/prospera-bilan-service/pull/121)
+et PR `MNV-491(balance)` [prospera-balance-service#100](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/100)
+rebase-mergées sur `dev` **ensemble**, `bilan-service` d'abord (artefacts partagés à l'octet) ; branches
+supprimées. Vérification docker rejouée sur l'état final après le correctif CIMA : octets servis dans
+les deux conteneurs = `9ca429c8…`, contrat servi conforme, 401 sans jeton.
+
+**Bilan** : 5 constats de revue de code corrigés (1 bloquant : la norme CIMA venait d'un README faux) ;
+0 vulnérabilité en revue de sécurité, un docstring de sécurité corrigé ; **33 mutations** — 26 rouges
+par assertion (dont R1/R2, les gardes ajoutées en revue) et 7 refus du générateur. ⚠️ Les messages de
+commit de la phase ④ et la description de la PR `bilan-service` écrivaient « 31 mutations rouges par
+assertion + 7 refus » : c'était 31 **au total**, dont 24 par assertion. Assigné à :
+`vivianMoneyVibesGroupes`.
