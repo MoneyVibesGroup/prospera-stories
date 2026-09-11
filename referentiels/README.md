@@ -50,4 +50,17 @@ Ce qui casse si on corrige en place un paquet déjà catalogué :
 2. **Snapshots figés non reproductibles.** `jeux_etats` et `snapshots_liasse` persistent le checksum sans jamais le re-vérifier : un snapshot antérieur ne casse pas, il devient une trace qui désigne un contenu **qui n'existe plus** — ce qui érode exactement la promesse d'immutabilité de STORY-065.
 3. **Comparaison d'exercices faussée.** `comparaison-exercices` dédoublonne par `code@version#checksum` : deux exercices figés de part et d'autre d'une correction sortent `referentielHomogene: false` à code **et** version identiques. Signal faux, non bloquant.
 
-**Garde-fou en place** — les 5 artefacts embarqués ont leur digest **épinglé en littéral** dans `referentiels-additionnels-coherence.spec.ts` (`DIGESTS_EPINGLES`), hors du registre. Comparer l'artefact au seul registre est tautologique : les régresser tous les deux ensemble passerait au vert. Toute évolution d'un paquet doit donc mettre l'épinglage à jour **sciemment**, jamais « pour faire passer la spec ».
+**Garde-fou en place** — les artefacts embarqués ont leur digest **épinglé en littéral** dans `referentiels-additionnels-coherence.spec.ts` (`DIGESTS_EPINGLES`), hors du registre. Comparer l'artefact au seul registre est tautologique : les régresser tous les deux ensemble passerait au vert. Toute évolution d'un paquet doit donc mettre l'épinglage à jour **sciemment**, jamais « pour faire passer la spec ». ⚡ Depuis STORY-491, la liste des fichiers vérifiés est **découverte dans le manifeste** : un paquet ajouté sans digest épinglé fait rougir la garde (c'est la main qui avait laissé `smt-togo@1.0` dehors).
+
+### ⚡ Extension écrite de la règle — révision en place tant qu'aucune migration d'octrois n'est outillée (STORY-428 → STORY-491)
+
+La règle ci-dessus n'a **pas** été appliquée à `syscohada-revise@2.1`, et c'est un choix écrit, pas une dérive : le manifeste de `bilan-service` le révise en place « sciemment » depuis STORY-428, et sept stories l'ont fait depuis (429, 434, 435, 457, 461, 462 ; 488 pour `cima-assurances@1.0`). Deux raisons :
+
+1. **Ce qui identifie une liasse figée est son tampon complet** `{code, version, checksum}` (`referentiel-stamp.ts`), pas la version seule — et c'est ce tampon que la comparaison d'exercices déduplique.
+2. **Une nouvelle version n'épargne pas l'ancienne.** `@2.1` resterait packagé pour les octrois existants — donc avec le défaut qu'on corrige, pour toutes les organisations déjà servies. Et depuis STORY-491, le générateur refuse de packager un `_meta` incomplet : l'ancienne version devrait être complétée **quand même**, son checksum changerait dans les deux options.
+
+⚠️ **Cette extension cesse le jour où une migration d'octrois est outillée** : à partir de là, c'est une nouvelle version qu'il faut, comme la règle le dit.
+
+### Le `_meta` d'un paquet (STORY-491)
+
+Tout paquet déclare, et `build.mjs` **refuse de packager** s'il en manque un : `zoneComptable` (`OHADA` · `BCEAO-SFD` · `CIMA` · `IFRS` · `IFRS-PME` · `AUTRE`), `pays` (ISO 3166-1 alpha-2 ; `[]` = **aucun** pays, jamais « tous »), `devisePresentation` (ISO 4217, ou `null` **écrit** = multi-devise), `normeSource` (texte + référence officielle), `statut` (`certifie` · `a-valider-par-expert` · `amorce`) — et `miseEnGarde` pour toute `amorce`. Le vocabulaire vit dans `bilan-service/src/modules/bilan/referentiel/meta-vocabulaire.json`, lu par le générateur **et** publié par le service. Les listes de pays sont relevées sur les pages officielles (OHADA, BCEAO, CIMA — **sans les Comores**, que la page de la CIMA ne compte pas). Le catalogue se lit sur `GET /api/v1/referentiels` (`bilan-service`).

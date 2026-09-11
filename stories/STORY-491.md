@@ -1,6 +1,6 @@
 # STORY-491 : Le manifeste d'un référentiel ne dit ni sa zone, ni ses pays, ni sa devise, ni la norme dont il dérive
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-108 — Le référentiel devient un plugin déclaré (zone, pays, devise, norme)
 **Service :** `bilan-service` (`ReferentielRegistry`, `scripts/referentiels/build.mjs`) + `balance-service` (manifeste)
@@ -216,5 +216,127 @@ paquets : `PAYS_SUPPORTES = ['TG']` (`dossier-service`), `PaquetFiscalRegistry.p
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — démarrée le **2026-09-10** (flux APEX complet : branches `MNV-491` sur
-`docs`, `bilan-service`, `balance-service`).
+**Statut : `review`** — démarrée le **2026-09-10**, développée et validée le **2026-09-11** (flux APEX
+complet : branches `MNV-491` sur `docs`, `bilan-service`, `balance-service`).
+
+### Ce qui est livré, critère par critère
+
+| | Livré | Preuve |
+|---|---|---|
+| AC-1 | `_meta` des **six** paquets : `zoneComptable`, `pays`, `devisePresentation`, `normeSource`, `statut` (+ `miseEnGarde` des amorces) | `meta-complete.spec.ts` — valeurs exactes par paquet, vocabulaire publié, ISO 3166-1 contrôlé par les noms de régions ICU |
+| AC-2 | `couvrePays` : `[]` ne couvre **aucun** pays ; `?pays=XX` sur la route | mutation A1 (« `[]` vaut tous ») rouge sur 5 tests, dont un paquet synthétique `pays: []` au niveau du service |
+| AC-3 | `build.mjs` refuse de packager un `_meta` incomplet ou hors vocabulaire, et nomme **toutes** les fautes | mutations G1→G7 : sept refus, sept messages qui nomment le paquet et le champ |
+| AC-4 | cinq paquets complétés depuis leurs sources ; `smt-togo@1.0` inchangé | **hors `meta`, les six artefacts sont identiques octet pour octet à ceux de `dev`** (comparaison ci-dessous) |
+| AC-5 | `GET /api/v1/referentiels` (`bilan-service`), chaque paquet chargé par le loader, checksum vérifié | e2e sur la vraie chaîne de guards + contrat confronté à la réponse réelle |
+
+### AC-4 — la non-régression, mesurée et non supposée
+
+Comparaison de chaque artefact régénéré à sa version de `dev`, `meta` exclu : **identique pour les six**
+(169 postes / 126 règles / 174 comptes SYSCOHADA, inchangés — la fiche disait 163/124). Seule valeur
+préexistante du `meta` à changer : le `statut` de CIMA, déplacé par D-491-2.
+⚡ **`smt-togo@1.0` garde son checksum à l'octet** (`c4d0318a…`) : son ordre de clés est devenu l'ordre
+canonique du générateur, qui reconstruit désormais le `_meta` dans cet ordre.
+
+| Paquet | Checksum avant → après |
+|---|---|
+| `syscohada-revise@2.1` | `e9f26eb1…` → `512fab01…` |
+| `sfd-bceao@1.0` | `4982504f…` → `efee0a6c…` |
+| `sfd-bceao@2.0` | `09b46dcc…` → `91ca19e2…` |
+| `zone-franche-togo@1.0` | `15cc9421…` → `1ed4e853…` |
+| `cima-assurances@1.0` | `2d4f3061…` → `aaa30313…` |
+| `smt-togo@1.0` | `c4d0318a…` → **inchangé** |
+
+Recopie à l'octet dans `balance-service` des trois artefacts partagés qui bougent (SYSCOHADA, SFD @2.0,
+CIMA) : sha256 identiques des deux côtés, mesurés — les deux PR s'intègrent **ensemble**.
+
+### Points de recopie — trouvés par le compilateur et par les gardes, aucun deviné
+
+- **Huit sites** estampillent un document dans `bilan-service` : `miseEnGarde` est un paramètre **requis**
+  de `toEffectiveStamp` (patron 488), le compilateur les a nommés — six routes de production, deux
+  documents figés (qui passent `undefined` explicitement, avec la raison).
+- ⚠️ **Le type interdit d'OUBLIER la mise en garde, pas de la MAL câbler** : `miseEnGarde: undefined` à la
+  place de la variable compilait, et aucune batterie ne tournait sur une amorce. D'où six tests de
+  câblage au contrôleur et cinq au moteur — un par route, jamais un seul (mutations T3, T4, T5).
+- Deux tampons dans `balance-service` (diagnostic, suggestion), et leurs **deux DTO** : le tampon de la
+  suggestion est recopié par épandage, donc le champ serait parti dans le JSON sans être au schéma —
+  le défaut de STORY-488, rejoué d'office (mutation B5).
+
+### Ce que les gardes existantes ont attrapé toutes seules
+
+- ⚡ **L'invariant de portée dossier (STORY-357) a rougi sur la route catalogue** — il exige que tout
+  contrôleur du module Bilan soit niché sous le dossier. L'exception est **nommée** (liste, pas motif) et
+  gardée par un test qui exige qu'elle existe et ne réclame pas le scope. ⛔ Et un piège au passage :
+  l'invariant classe les contrôleurs sur leur **source** — mon commentaire, qui citait le gabarit du
+  chemin niché pour dire que la route n'en était pas, suffisait à faire passer le fichier pour niché.
+- ⚡ **`DIGESTS_EPINGLES` ne gardait pas `smt-togo@1.0`** depuis STORY-494 : la liste des fichiers était
+  écrite à la main. Elle est désormais **découverte dans le manifeste** (mutation C6).
+- Le contrat de `bilan-service` confronte déjà la réponse réelle du Bilan **SFD-BCEAO @1.0** à son schéma
+  (AC-8 de 398) : `sfd-bceao@1.0` étant devenu une amorce, cette garde vérifie gratuitement que la mise en
+  garde servie sur une route de production est **décrite** au contrat — elle a rougi sous la mutation C2.
+
+### Table de mutations — 31 rouges par assertion, 7 refus du générateur
+
+| # | Mutation | Résultat |
+|---|---|---|
+| G1–G7 | `pays` absent · devise absente (≠ `null`) · amorce sans mise en garde · clé `statutt` · zone `SYSCOHADA` · pays `tg` · pays en double | **7 REFUS** au build, message nommant paquet et champ |
+| G8 | garde du générateur **retirée** + `pays` absent, artefact régénéré, checksum propagé | ROUGE — `meta-complete` + service catalogue, **indépendamment** du générateur |
+| G9 | le générateur recopie le vocabulaire en dur | ROUGE |
+| A1 | `pays: []` vaut « tous » | ROUGE (5) |
+| A2 | le service ignore le filtre | ROUGE (4) |
+| A3 / A4 | la projection fabrique `pays: []` / `devisePresentation: null` au lieu de refuser | ROUGE / ROUGE |
+| A5 | le service sort des providers de `BilanModule` | ROUGE (garde de câblage, patron 484) |
+| T1 / T2 | tampon sans mise en garde / clé publiée vide | ROUGE / ROUGE (3) |
+| T3 / T4 / T5 | TFT, diagnostic, notes : mise en garde perdue en route | ROUGE × 3 |
+| C1 / C2 | zone sans énumération nommée / `miseEnGarde` hors schéma du tampon | ROUGE / ROUGE |
+| C3 | motif ISO du paramètre `pays` desserré | ROUGE (e2e 400) |
+| C4 | `@RequiresBilanAccess` posé sur le catalogue | ROUGE (une organisation sans octroi reçoit 403) |
+| C5 | le gabarit du chemin niché cité dans le contrôleur | ROUGE (invariant 357) |
+| C6 | `smt-togo@1.0` retiré de l'épinglage | ROUGE |
+| B1–B6 | balance : câblage suggestion, câblage diagnostic, tampon, `amorce` perdu du vocabulaire recopié, `miseEnGarde` hors schéma, `statut` redevenu `string` nu | ROUGE × 6 |
+
+⛔ **Deux mutations ont d'abord MENTI, et c'est consigné** :
+- **T3 est d'abord sorti ROUGE PAR COMPILATION** — la variable devenue inutilisée déclenchait
+  `noUnusedLocals`. Un rouge de compilation ne prouve rien ; rejouée sous une forme qui compile
+  (`miseEnGarde && undefined`), elle rougit par assertion.
+- **G8 a d'abord échoué au build — par ACCIDENT** : la ligne de journal `pays.length` du générateur lève
+  un `TypeError` quand `pays` manque. Une garde accidentelle n'est pas une garde : la mutation a été
+  rejouée en neutralisant ce journal, et c'est la batterie Jest qui a rougi, seule.
+
+### Vérification docker — stack réelle, code de la branche
+
+Cette story **n'écrit rien en base** : la vérification porte sur ce qu'aucun e2e ne prouve.
+⚠️ Mongo, Kafka et Redis étaient arrêtés depuis sept heures, les services applicatifs tournant à vide :
+infra relancée, services redémarrés, stack passée sous Portly (`PROSPERA/stack`).
+
+| # | Ce qui est prouvé | Mesuré |
+|---|---|---|
+| ① | **L'application démarre** — aucun e2e ne monte `BilanModule` | `ReferentielCatalogueController {/api/referentiels}` monté, `Nest application successfully started` |
+| ② | La route est gardée dans l'application réelle | `GET /api/v1/referentiels` et `?pays=GH` sans jeton → **401** |
+| ③ | Le contrat **servi** par `bilan-service` en marche | route + paramètre `pays` + sécurité bearer ; `ReferentielCatalogueDto` 10 champs requis ; `ZoneComptable` et `StatutReferentiel` publiés ; tampon `{code, version, checksum, statut, miseEnGarde}` |
+| ④ | Le contrat **servi** par `balance-service` en marche | ses deux tampons publient `statut` → `StatutReferentiel` et `miseEnGarde` |
+| ⑤ | Les octets servis sont ceux de la branche | sha256 des assets **dans les deux conteneurs** = registres ; les quatre artefacts partagés byte-identiques |
+
+⚠️ **Non rejoué en docker, et dit comme tel** : l'appel **authentifié** par un jeton de l'IdP réel — il
+exige un compte sur `auth-service`, et aucune écriture en base ne le rend obligatoire. Il est prouvé par
+l'e2e `referentiels-catalogue`, sur la vraie chaîne de guards (jeton RS256, e-mail vérifié, rôles, gate
+Bilan, portée dossier), avec les artefacts réels.
+
+### Portes
+
+| Dépôt | Lint | Build | Unit | E2E | Couverture (st/br/fn/li) |
+|---|---|---|---|---|---|
+| `bilan-service` | 0 | ✅ | 2758 (+1 skip préexistant) | 816 | 99.19 / 95.34 / 99.37 / 99.26 |
+| `balance-service` | 0 | ✅ | 3765 | 905 | 99.14 / 92.51 / 98.48 / 99.25 |
+
+Seuils 65 / 90 / 90 / 90 : tenus, aucun abaissement.
+
+### Décisions prises pendant le développement
+
+- **La confidentialité d'une source** : le nom du classeur GUIDEF dont la liasse SYSCOHADA est extraite
+  porte l'**identifiant fiscal d'un contribuable**. Il n'est pas repris dans `normeSource`, que la route
+  catalogue sert à **toutes** les organisations.
+- **Une seconde porte à la projection** (`versEntreeCatalogue`) : elle **refuse** un `_meta` incomplet au
+  lieu de le compléter — le port `ArtifactSource` est le seam d'un registre distant, et le catalogue sait
+  déjà héberger des paquets déposés par la console (STORY-149), qui ne passeraient pas par `build.mjs`.
+- **`miseEnGarde` est facultative hors amorce** au générateur ; aujourd'hui seules les deux amorces en
+  portent une.
