@@ -246,13 +246,56 @@ correspondent au manifeste, c'est-à-dire précisément quand quelqu'un régén�
 son empreinte à la main. C'est exactement ce que fait `dossier-service`, et c'est donc le scénario pour
 lequel cette garde existe — pas du code mort, mais il fallait le mesurer pour le savoir.
 
+### Revue de code et revue de sécurité (phases ⑥/⑦)
+
+**Revue de sécurité : 0 vulnérabilité.** Son constat décisif a été **rejoué à la main** : les dix-neuf
+rubriques du paquet sont identiques **à l'octet** entre l'ancienne et la nouvelle version, seul `_meta`
+change (deux clés ajoutées, `statut` modifié, aucune supprimée), et l'artefact est **reproductible** depuis
+sa source. Elle a aussi vérifié que `scripts/` n'est pas copié dans l'image runtime, qu'aucun endpoint
+`@Public()` n'a été ajouté, que les erreurs du loader sont traduites en 500 génériques, et que le texte
+nouvellement publié ne porte ni identifiant de contribuable ni chemin interne.
+
+**Revue de code : 7 constats retenus, 7 corrigés.**
+
+| # | Constat | Ce qui aurait cassé |
+|---|---|---|
+| F1 | une `source: ""` **blanchissait tout le sous-arbre** d'une rubrique | dix rubriques sur dix-neuf ne sont décrites par aucun schéma : pour elles le balayage est le **seul** filet. C'est ce qu'écrit quelqu'un qui package un second pays « en attendant la référence d'article » |
+| F2 | le loader acceptait `miseEnGarde: ""` | encart vide sous un barème non validé — et justement sur le chemin pour lequel cette garde existe : un artefact **recopié** n'est jamais passé par `build.mjs` |
+| F3 | `nombre` d'acomptes ne gardait **rien** | le schéma en faisait la protection contre l'échéance oubliée, et rien ne confrontait les deux champs. Ils sont lus **séparément** : le nombre divise l'acompte, la liste fait le calendrier, et `dossier-service` ne lit que la liste ⇒ trois dates annoncées, des quarts versés, une échéance ratée en silence |
+| F4 | une **valeur** de `format` non implémentée était ignorée | garder le NOM d'un mot-clé ne garde pas sa VALEUR : `"format": "date-iso-8601"` passait et n'était appliqué par personne — le mode de panne exact que le garde-mots-clés existe pour empêcher |
+| F5 | `statut` publié **facultatif** alors qu'il est toujours servi, et requis à un chemin / optionnel à l'autre du **même** corps | ⚡⚡ le rendre obligatoire a fait apparaître **huit types intermédiaires** qui recopiaient `{pays, annee, checksum}` et **tronquaient le statut avant le DTO**. Tous pointent désormais sur `EffectifPaquetFiscalStamp` |
+| F6 | deux proses nommaient encore le statut « COMPLET » | un lecteur du contrat y apprenait une valeur que le loader refuse |
+| F7 | les deux gardes de statut s'étaient insérées **entre** un commentaire et le code qu'il explique | le commentaire du garde-fou de câblage désignait un contrôle situé vingt lignes plus bas |
+
+⚡⚡ **Le constat le plus instructif est F5**, et il n'était pas dans mon plan : un champ rendu **obligatoire
+au contrat** a révélé huit déclarations intermédiaires qui le laissaient tomber. La valeur était calculée,
+puis perdue en route, et la seule chose qui l'a montrée est d'avoir écrit au contrat ce que le code
+garantit déjà.
+
+**Constat trouvé hors des deux rapports, par balayage personnel des points de recopie** : la route
+`GET /referentiels/reintegrations` servait du **contenu** de paquet (les codes de retraitement) sans pouvoir
+dire d'où il sort — alors que son propre docblock disait que l'enveloppe existe « pour savoir de quelle loi
+de finances sortent les codes affichés ». Elle publie désormais le tampon complet, **strictement en
+additif**. Les **dix** sites d'apposition passent maintenant tous par la fonction unique.
+
+**Constats de sur-ingénierie : 3 remontés, 0 retenu**, et un écarté sur **mesure** plutôt que sur avis —
+l'alternative proposée pour supprimer l'option `--schema` (importer le `.mjs` directement depuis une spec
+TypeScript) **ne compile pas** dans ce dépôt (`TS7016`, vérifié). Les deux autres (remplacer la table des
+jours par mois par `Date`, replier un prédicat à un seul appelant) ont été écartés : la table est explicite
+et correcte sur février, et le prédicat porte un nom qui sert la lecture.
+
+**Quatre mutations supplémentaires** vérifient les quatre gardes ajoutées par la revue, chacune rouge :
+source vide de nouveau acceptée 🔴, R5 désactivée 🔴, format inconnu admis au vocabulaire 🔴, mise en garde
+vide de nouveau acceptée 🔴. **Vérification docker rejouée** sur l'état final : la garde renforcée refuse
+une mise en garde faite d'espaces dans le conteneur réel.
+
 ### Portes
 
 | Porte | Résultat |
 |---|---|
 | lint `balance-service` | **0 warning** |
 | build `balance-service` | OK (`nest build`) |
-| `test:cov` `balance-service` | **3 807** tests, 192 suites — **99.15 / 92.52 / 98.49 / 99.25** (seuils 65/90/90/90) |
+| `test:cov` `balance-service` | **3 816** tests, 192 suites — **99.15 / 92.53 / 98.49 / 99.25** (seuils 65/90/90/90) |
 | `test:e2e` `balance-service` | **905** tests, 26 suites |
 | lint / build / cov / e2e `dossier-service` | 0 warning · OK · **1 245** tests, 99.31 / 94.06 / 96.88 / 99.33 · **272** e2e |
 
