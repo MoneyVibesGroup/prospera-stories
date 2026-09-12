@@ -356,9 +356,60 @@ démarrée. Tout le reste a transité par le vrai bus.
 |---|---|---|---|---|---|
 | `dossier-service` | 0 | ✅ | 1 245 | 272 | 99.31 / 94.06 / 96.88 / 99.33 |
 | `balance-service` | 0 | ✅ | 3 785 | 905 | 99.15 / 92.53 / 98.49 / 99.25 |
-| `bilan-service` | 0 | ✅ | 2 774 (+1 skip préexistant) | 817 | 99.20 / 95.39 / 99.37 / 99.26 |
+| `bilan-service` | 0 | ✅ | 2 776 (+1 skip préexistant) | 817 | 99.19 / 95.38 / 99.37 / 99.26 |
 
-Seuils 65 / 90 / 90 / 90 : tenus, aucun abaissement.
+Seuils 65 / 90 / 90 / 90 : tenus, aucun abaissement. ⚠️ Chiffres **rejoués après les
+commits de revue** (⑥/⑦) : `bilan-service` gagne 2 unitaires (la garde de lecture unique
+du pays, et le troisième cas de contexte du repository) et rend 0.01 point de branches —
+les deux branches de `paysDe` fusionnées en une.
+
+### Revue de code et revue de sécurité (phases ⑥/⑦)
+
+Les deux revues ont tourné **en session sur `opus`** : les sous-agents délégués sont morts
+trois fois sur la limite de session sans rendre de rapport. Aucun downgrade.
+
+**Cinq constats retenus, tous corrigés dans un commit de revue dédié par dépôt.** Aucun
+bloquant sur `dossier-service`.
+
+| # | Dépôt | Constat | Gravité |
+|---|---|---|---|
+| 1 | `bilan-service` | **Trois `enum` OpenAPI publiaient une liste que le serveur avait cessé de respecter** : `PAQUET_FISCAL_HORS_PAYS` est rendu par `FiscaliteProjectionDto.motif`, `.motifTva` et `TvaAppliqueeDto.source`, et aucun des trois ne l'annonçait. Un client généré typait l'union **sans** la valeur qu'il allait recevoir — et les `*.dto.ts` étant hors `collectCoverageFrom`, aucun test ne pouvait rougir. | **bloquant** |
+| 2 | `balance-service` | **Deux justifications devenues fausses** : les docstrings de `resoudrePaquetFiscalDeReference` et `chargerPaquetFiscalDeReference` rangeaient « la proposition de régime du profil » parmi les lecteurs du paquet **de référence**, alors que `regime.service` lit celui **du dossier**. Une justification périmée à cet endroit précis invite à y ramener la route — c'est-à-dire à réintroduire le défaut que la story ferme. | non bloquant |
+| 3 | `bilan-service` | `paysDuDossier()` dupliqué **à l'identique** dans `ProjectionService` et `ComparaisonService`, chacun injectant son `TenantContext`. Une règle fail-closed en deux exemplaires est une règle qu'un correctif futur ne changera qu'à moitié. | non bloquant |
+| 4 | `balance-service` | `anneeDeReference()` re-parsait la configuration et redupliquait le `throw` de `resoudrePaquetFiscalDeReference()`. | non bloquant |
+| 5 | `bilan-service` | « le pays est lu **une** fois pour toute la comparaison » était une phrase de commentaire que **rien ne mesurait** : déplacer l'appel dans la boucle des snapshots n'aurait rougi nulle part. | non bloquant |
+
+#### Le correctif du constat 1 est structurel, pas littéral
+
+Ajouter la valeur manquante aux trois listes aurait refermé ce trou-ci et laissé le
+suivant ouvert. Les unions de motifs deviennent donc des **inventaires runtime** —
+`MOTIFS_IMPOT_ABSENT`, `MOTIFS_TVA`, `SOURCES_TAUX_TVA` — dont le **type dérive** et que
+`@ApiProperty({ enum })` publie tels quels (patron STORY-375, déjà en place dans
+`balance-service` pour `MOTIFS_DATE_LIMITE_ABSENTE`). Le contrat ne peut plus diverger de
+ce que le code rend : c'est le compilateur qui l'interdit, pas un test à écrire.
+
+**Mutation de contrôle** — retirer `PAQUET_FISCAL_HORS_PAYS` de `MOTIFS_IMPOT_ABSENT` :
+**rouge**, 2 erreurs de compilation (`fiscalite-loader.ts` ne peut plus produire le motif,
+`modele-previsionnel.ts` ne peut plus le lire). ⚠️ Le premier passage de cette mutation
+s'est affiché **VERT** : `grep "error TS"` ne matchait pas parce que les codes ANSI coupent
+la chaîne (`error\x1b[0m\x1b[90m TS2345`) — le même piège que pendant la campagne de
+mutations de la phase ④, retombé dans le même trou.
+
+#### Revue de sécurité — sept axes, aucun constat
+
+| Axe | Vérifié |
+|---|---|
+| Contrôle d'accès | `PaysController` porte `@RequiresDossierAccess()` **au niveau de la classe**, et l'invariant `dossier-access.invariant.spec.ts` balaie le **système de fichiers** (tout `*.controller.ts`) avec un garde-fou de non-vacuité : un contrôleur ajouté demain sans le gate rougit. |
+| Injection | `:code` borné par `@Matches(/^[A-Z]{2}$/)` ; le registre est **en mémoire** — aucune valeur d'entrée n'atteint une requête Mongo depuis ces routes. |
+| IDOR / multi-tenant | Les **deux** lectures ajoutées de `dossiers_dossier` portent l'`orgId` **dans le filtre**, pas seulement le `dossierId`. |
+| Anti-énumération | Read-model absent ⇒ **404** `DOSSIER_INTROUVABLE`, jamais 403 ; `PAYS_INTROUVABLE` en 404, jamais une entrée vide. |
+| Fuite d'information | `details.pays` nomme le pays **du dossier de l'appelant** ou celui qu'il vient de saisir ; le registre ne publie que des métadonnées produit, aucune donnée d'organisation. |
+| Intégrité comptable | Les **19** sites d'appel fiscaux énumérés un à un : tout ce qui connaît un dossier passe par `chargerPaquetFiscal(orgId, dossierId, …)`. Les deux seuls lecteurs du paquet de référence sont les catégories de dépenses et leurs codes de réintégration (D-083-3). |
+| Fail-open par absence | Pays absent du registre ⇒ `non-servi` ; `pays === null` ⇒ aucun paquet ; paquet sans pays déclaré ⇒ non appliqué. L'absence n'est jamais une permission. |
+
+⚠️ **Pas de rejeu de la vérification docker** : aucun correctif ne touche ce qui est écrit
+en base ni le résultat d'une résolution — métadonnées de contrat, déplacement d'une lecture
+inchangée, et deux commentaires.
 
 ### Décisions prises pendant le développement
 
