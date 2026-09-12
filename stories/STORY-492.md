@@ -43,20 +43,20 @@ Une entrée par pays, dérivée et non ressaisie :
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — `GET /pays` rend le registre. `GET /pays/{code}` rend une entrée, ou `404` — jamais une
+- [x] AC-1 — `GET /pays` rend le registre. `GET /pays/{code}` rend une entrée, ou `404` — jamais une
       entrée vide qui se lirait « servi avec rien ».
-- [ ] AC-2 — Le statut est **calculé**, jamais saisi : `servi` exige un référentiel packagé **et** un
+- [x] AC-2 — Le statut est **calculé**, jamais saisi : `servi` exige un référentiel packagé **et** un
       paquet fiscal ; `partiel` exige le référentiel seul. Un pays devient `servi` le jour où son
       paquet est packagé, sans qu'on touche au registre.
-- [ ] AC-3 — La création d'un dossier sur un pays `non-servi` est **refusée**
+- [x] AC-3 — La création d'un dossier sur un pays `non-servi` est **refusée**
       (`409 PAYS_NON_SERVI`) ; sur un pays `partiel`, elle est **acceptée avec un avertissement
       publié** — le référentiel comptable suffit à tenir une balance et une liasse ; c'est le
       calcul de l'impôt qui manque, et il faut le dire au lieu de le laisser découvrir.
-- [ ] AC-4 — Le registre est semé pour les **17 États de l'OHADA** au minimum, et les six États de
+- [x] AC-4 — Le registre est semé pour les **17 États de l'OHADA** au minimum, et les six États de
       la CEDEAO hors OHADA y figurent en `non-servi` **avec leur devise et leur norme réelle**
       (IFRS / IFRS for SMEs). ⚡ Les faire figurer en `non-servi` vaut mieux que les omettre :
       omettre laisse croire à un oubli, `non-servi` est une décision qu'on peut relire.
-- [ ] AC-5 — Un test de cohérence croise le registre et les manifestes : **aucun pays `servi` sans
+- [x] AC-5 — Un test de cohérence croise le registre et les manifestes : **aucun pays `servi` sans
       artefact packagé correspondant**. Il vire au rouge si l'un des deux bouge sans l'autre.
 
 ## Conséquences ailleurs
@@ -247,7 +247,8 @@ est `servi`.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — démarrée le **2026-09-11** (flux APEX complet).
+**Statut : `in_progress`** — démarrée le **2026-09-11** (flux APEX complet), développée et
+validée le **2026-09-12**.
 
 Branches `MNV-492` créées **avant la moindre ligne de code** :
 
@@ -257,3 +258,120 @@ dossier-service: MNV-492 @ a57b1a7
 balance-service: MNV-492 @ 7e39470
 bilan-service: MNV-492 @ 2d9edbd
 ```
+
+### Ce qui est livré, critère par critère
+
+| | Livré | Preuve |
+|---|---|---|
+| AC-1 | `GET /pays` (23 entrées, par code ISO) et `GET /pays/:code` — `404 PAYS_INTROUVABLE` sur un pays hors registre, `400` sur une forme invalide | e2e sur la vraie chaîne de guards + **vérification docker** (⑥ ci-dessous) |
+| AC-2 | statut **calculé** sur le miroir des paquets, `manques[]` publié ; ajouter un paquet fiscal fait basculer un pays sans toucher au semis | `registre-pays.spec.ts` (mutations M1–M3, M9) dont un test qui n'écarte QUE le paquet fiscal entre deux calculs |
+| AC-3 | `409 PAYS_NON_SERVI` (code et statut changés, D-492-6) ; `partiel` accepté avec `avertissements[PAYS_PARTIEL]` et `statutPays` consigné au journal | unitaires + e2e + **docker** : BJ créé en `201`, CM et FR refusés sans **rien** écrire |
+| AC-4 | 17 États OHADA + 6 États CEDEAO hors OHADA, devise ISO 4217 et cadre comptable réel, chaque valeur à sa source primaire | `registre-pays.semis.spec.ts` — listes recopiées des sources, jamais du semis ; codes ISO contrôlés par les noms de régions ICU |
+| AC-5 | `registre-pays.coherence.spec.ts` confronte le miroir aux artefacts **réels** des deux dépôts voisins, puis **recalcule** le registre sur eux seuls et exige les mêmes statuts | mutations M10 et M11 (miroir amputé / miroir qui invente) ⇒ rouge |
+| D-492-4 | le paquet fiscal se résout par le **pays du dossier** dans `balance-service` | **docker** : même route, même jeton — BJ `409 PAQUET_FISCAL_NON_PUBLIE`, TG `200` |
+| D-492-5 | le paquet embarqué du prévisionnel ne vaut que dans son pays (`PAQUET_FISCAL_HORS_PAYS`) | unitaires (les trois chemins) ; ⚠️ **non rejoué en docker**, dit comme tel ci-dessous |
+
+### Table de mutations — 29 rouges, et un contrôle vert délibéré
+
+| # | Mutation | Résultat |
+|---|---|---|
+| M1 | `pays: []` d'un référentiel vaudrait « tous les pays » | ROUGE |
+| M2 | le statut ignore la devise tenue (la condition que la fiche oubliait) | ROUGE (5) |
+| M3 | un référentiel packagé dans **un seul** dépôt suffirait | ROUGE (6) |
+| M4 | un pays `non-servi` est accepté à la création | ROUGE (29) |
+| M5 | un pays `partiel` est refusé | ROUGE (8) |
+| M6 | `statutPays` disparaît du journal | ROUGE (2) |
+| M7 | la création ne publie plus aucun avertissement | ROUGE (4) |
+| M8 | un pays **absent** du registre vaut `partiel` (fail-open) | ROUGE (5) |
+| M9 | tout pays du registre devient créable | ROUGE (2) |
+| M10 / M11 | le miroir perd un paquet réel / invente un pays couvert | ROUGE / ROUGE |
+| M12 | la réponse HTTP **partage** les tableaux du registre au lieu de les copier | ROUGE |
+| M13 | `GET /pays/:code` rend une entrée quelconque au lieu de `404` | ROUGE |
+| M14 | le paquet fiscal résolu sur la **clé** du manifeste au lieu de `paysSource` | ROUGE (4) |
+| M15 | repli silencieux sur le paquet togolais quand le pays n'en a pas | ROUGE (3) |
+| M16 | retour à la résolution par **configuration** | ROUGE (2) |
+| M17 | le pays du dossier lu **sans son tenant** | ROUGE (13) |
+| M18 | read-model absent ⇒ repli silencieux sur `TG` au lieu du 404 | ROUGE (2) |
+| M19 | un déficit se déclare sur un pays sans paquet | ROUGE |
+| M20 | un pays sans paquet traité comme un **incident** (bloc absent, `warn`) | ROUGE |
+| M21 | le diagnostic avale **toute** erreur fiscale, pas seulement celle du pays | ROUGE |
+| M22 | le paquet embarqué s'applique quel que soit le pays | ROUGE (7) |
+| M23 | un paquet qui ne **déclare** aucun pays est réputé universel | ROUGE |
+| M24 | « absent » et « hors pays » confondus en un seul motif | ROUGE |
+| M25 / M26 | la projection / la comparaison n'utilisent pas le pays lu | ROUGE / ROUGE |
+| M27 | l'export rend la mention « absent » pour un paquet hors pays | ROUGE |
+| M28 / M29 | contexte sans dossier ⇒ pays inventé / read-model lu sans son tenant | ROUGE / ROUGE |
+| **M28b** | **contrôle** : filtre réécrit à l'identique (mutation **équivalente**) | **VERTE, attendue** — c'est ce qui prouve que le harnais ne rougit pas à tort |
+
+⛔ **HUIT mutations sont d'abord sorties rouges PAR COMPILATION** (`noUnusedLocals`,
+narrowing en `never`, `possibly null`) — M4, M14, M15, M17, M18, M20, M25, M28. **Un rouge de
+compilation ne prouve rien** (leçon STORY-491) : chacune a été **rejouée** sous une forme qui
+compile, et c'est ce second résultat qui est consigné ci-dessus. ⚠️ Le harnais lui-même a
+menti d'abord : il cherchait `error TS` dans une sortie **colorée**, où la chaîne est coupée
+par un code ANSI — six mutations se sont affichées « vertes » avant que la détection ne soit
+corrigée.
+
+### ⚡ Un défaut trouvé par son propre test, avant d'être livré
+
+`chargerFiscalite` passait `PAQUET_FISCAL_HORS_PAYS` **sans condition** : un référentiel qui
+ne publie **aucun** paquet (SFD-BCEAO, CIMA) aurait vu son motif changer de `ABSENT` à
+`HORS_PAYS` — un mensonge sur un document remis à une banque, et une régression invisible aux
+2 774 tests existants. Le cas « un référentiel SANS paquet reste ABSENT », écrit **avec** la
+garde, l'a fait rougir immédiatement (mutation M24 le verrouille).
+
+### Vérification docker — stack réelle, code de la branche
+
+⚠️ Kafka refusait de démarrer (`DUPLICATE_BROKER_REGISTRATION` + checkpoint corrompu par un
+arrêt non propre) : volume `prospera_kafka-data` **réinitialisé** — en dev les volumes repartent
+de zéro (CLAUDE.md). Cabinet créé de bout en bout par l'API (`register` → lien de vérification
+relevé dans Mailhog → `login` → jeton **RS256 réel**).
+
+| # | Ce qui est prouvé | Mesuré |
+|---|---|---|
+| ① | **L'application démarre** avec le module neuf — aucun e2e ne monte `AppModule` | `Found 0 errors` puis `PaysController {/api/pays} (version: 1)` |
+| ② | Les deux routes sont gardées | `GET /api/v1/pays` et `/pays/TG` sans jeton → **401** |
+| ③ | **D-492-9** — le gate KYC s'applique au registre | jeton valide, KYC non approuvé → **403 `KYC_NOT_APPROVED`** |
+| ④ | Le registre servi | **23** entrées : `TG` servi, 7 UEMOA `partiel`, 15 `non-servi` ; `BJ` porte devise, cadre comptable, 3 zones, 3 référentiels, `manques: [PAQUET_FISCAL]` |
+| ⑤ | `GET /pays/:code` | `TG` servi · `BJ` partiel · `CM` non-servi (`DEVISE`, `PAQUET_FISCAL`) · `FR` **404 PAYS_INTROUVABLE** · `tg` et `TOGO` **400** |
+| ⑥ | **AC-3 — création sur un pays `partiel`** | `201` + `avertissements[PAYS_PARTIEL]` ; en base : dossier `ACTIF` persisté, journal `DOSSIER_CREE.details.statutPays = 'partiel'` **et** `MANDAT_ATTESTE` dans la **même** transaction, outbox `dossier.created` `SENT` |
+| ⑦ | **Refus sans écriture** | `CM` → 409 (`manques: [DEVISE, PAQUET_FISCAL]`), `FR` → 409 (absent) ; **0 dossier, 0 entrée de journal** — aucun orphelin |
+| ⑧ | **D-492-10** — « Mon cabinet » né de `identity.org.created` (chemin Kafka, hors e2e) | journal : `paysSupporte: true` **et** `statutPays: 'servi'` |
+| ⑨ | L'événement traverse le **vrai** bus | le dossier béninois apparaît dans `dossiers_dossier` de `balance-service` |
+| ⑩ | ⚡⚡ **Le cœur de la story** — même route, même cabinet, même jeton | dossier **BJ** → `409 PAQUET_FISCAL_NON_PUBLIE`, `details.pays: "BJ"` ; dossier **TG** → `200` avec la règle togolaise (`Art. 101 CGI`, plafond 50 %). Avant cette story, le béninois recevait **la même réponse togolaise** |
+| ⑪ | La déclaration d'un déficit est refusée hors pays servi | `POST …/fiscal/deficits` sur BJ → `409` (sans quoi l'arrêté de sa balance aurait été bloqué plus tard) |
+| ⑫ | Le diagnostic distingue les deux axes | BJ : `referentiel syscohada-revise@2.1`, `integrity: verified`, **`fiscal: null`** ; TG : le même référentiel **et** `togo@2026` |
+
+⚠️ **Non rejoué en docker, et dit comme tel** : le motif `PAQUET_FISCAL_HORS_PAYS` du
+**prévisionnel** (D-492-5) — il exige une balance validée, un jeu d'états, un snapshot figé
+puis un jeu d'hypothèses sur un dossier béninois. Il est prouvé en unitaire sur les **trois**
+chemins (projection annuelle, mensuelle, comparaison) et par ses mutations M22–M27.
+⚠️ **Simulé par écriture directe des read-models, et dit comme tel** : l'approbation KYC
+(`kyc.status.changed`), l'octroi `balance` (`entitlement.changed`) et les axes du dossier
+(`dossier.axes.decides`) — trois événements dont les producteurs ne sont pas dans la stack
+démarrée. Tout le reste a transité par le vrai bus.
+
+### Portes
+
+| Dépôt | Lint | Build | Unit | E2E | Couverture (st/br/fn/li) |
+|---|---|---|---|---|---|
+| `dossier-service` | 0 | ✅ | 1 245 | 272 | 99.31 / 94.06 / 96.88 / 99.33 |
+| `balance-service` | 0 | ✅ | 3 785 | 905 | 99.15 / 92.53 / 98.49 / 99.25 |
+| `bilan-service` | 0 | ✅ | 2 774 (+1 skip préexistant) | 817 | 99.20 / 95.39 / 99.37 / 99.26 |
+
+Seuils 65 / 90 / 90 / 90 : tenus, aucun abaissement.
+
+### Décisions prises pendant le développement
+
+- **Le libellé du pays n'est pas publié** : le code ISO suffit, et le front le localise
+  (`Intl.DisplayNames`). Publier un nom aurait ajouté 23 valeurs à vérifier et à maintenir,
+  pour une donnée que le navigateur possède déjà.
+- **`paquetsFiscaux` est une LISTE** là où la fiche écrivait un champ au singulier : un pays a
+  un paquet **par loi de finances** (D-078-1). `[]` dit « aucun ».
+- **Les 409 des routes fiscales publiaient `PAQUET_FISCAL_NON_PACKAGE`** — un code
+  **qu'aucune route n'émet** (le vrai est `PAQUET_FISCAL_NON_PUBLIE`). Découvert en documentant
+  le cas « pays », corrigé sur les sept contrôleurs fiscaux.
+- **`codesReintegration` perd son paramètre d'organisation** : la réponse n'en dépendait pas, et
+  le garder aurait fait chercher un dossier là où il n'y en a pas.
+- **Le régime proposé (`profil-societe`) lit désormais le paquet du dossier**, mais **sans son
+  exercice** : faire suivre l'année changerait le verdict des exercices non packagés — une autre
+  décision, à prendre pour les deux routes à la fois.
