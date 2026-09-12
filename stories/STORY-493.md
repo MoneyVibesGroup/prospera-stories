@@ -1,6 +1,6 @@
 # STORY-493 : Packager un paquet fiscal pays est un travail non reproductible — ni schéma, ni garde de complétude, ni procédure
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-109 — Paquets fiscaux pays : gabarit, garde et procédure de sourcing
 **Service :** `balance-service` (`scripts/referentiels/sources/`, `scripts/referentiels/build.mjs`,
@@ -32,23 +32,23 @@ propre traçabilité rendait plus difficile à mettre en doute qu'un chiffre san
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Un **schéma JSON** décrit le paquet fiscal : impôt sur le résultat (taux, minimum
+- [x] AC-1 — Un **schéma JSON** décrit le paquet fiscal : impôt sur le résultat (taux, minimum
       forfaitaire et ses **exonérations**), régime synthétique et son plafond, TVA (taux,
       exonérations, règles de déduction, échéances), retenues à la source, types de « autres impôts
       et taxes » avec leur **déductibilité** et leur **code de réintégration**, échéances
       déclaratives et de paiement, report déficitaire (durée et ordre d'imputation), **devise** et
       **pays**.
-- [ ] AC-2 — Chaque valeur porte sa **référence légale** (texte, article, année) et l'`_meta` porte
+- [x] AC-2 — Chaque valeur porte sa **référence légale** (texte, article, année) et l'`_meta` porte
       la loi de finances applicable. Une valeur sans référence fait **échouer le build** — c'est la
       seule garde qui empêche « vraisemblable » d'entrer.
-- [ ] AC-3 — Une **garde de complétude** refuse au build un paquet dont une section obligatoire
+- [x] AC-3 — Une **garde de complétude** refuse au build un paquet dont une section obligatoire
       manque, en nommant la section. Le paquet togolais doit la passer **sans modification** ; s'il
       ne la passe pas, c'est la garde qui est fausse, et le constater est un résultat en soi.
-- [ ] AC-4 — Une **procédure de sourcing** écrite (`referentiels/README-paquet-fiscal.md`) : où
+- [x] AC-4 — Une **procédure de sourcing** écrite (`referentiels/README-paquet-fiscal.md`) : où
       trouver le texte officiel, quoi extraire, dans quel ordre, ce qui se valide par un fiscaliste
       et ce qui ne se valide pas. Elle est rédigée **en refaisant le paquet togolais avec**, pas de
       mémoire — sinon elle décrit une méthode que personne n'a suivie.
-- [ ] AC-5 — Le statut « à valider par un fiscaliste » est un **champ**, pas une note de bas de page.
+- [x] AC-5 — Le statut « à valider par un fiscaliste » est un **champ**, pas une note de bas de page.
       Un paquet non validé est servi avec son statut, et tout écran qui l'affiche doit pouvoir le
       dire. Un barème présenté comme certifié quand il ne l'est pas est le seul défaut de ce produit
       qui puisse coûter un redressement à un client.
@@ -133,7 +133,9 @@ crédits d'impôt), et le balayage des valeurs orphelines n'est que le **second 
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — démarrée le **2026-09-12** (flux APEX complet, développement compris).
+**Statut : `done`** — démarrée et clôturée le **2026-09-12** (flux APEX complet, développement compris).
+PR intégrées en **rebase** : `balance-service` **#102** et `dossier-service` **#25**, ensemble, l'artefact
+étant partagé à l'octet entre les deux dépôts. Branches supprimées.
 
 - ① Fiche requalifiée sur mesure du code : trois contenus pour un même paquet, la garde de STORY-491
   hors sujet ici, et la règle d'AC-2 calibrée par balayage (D-493-A, D-493-B, D-493-C ci-dessus).
@@ -334,3 +336,18 @@ une mise en garde faite d'espaces dans le conteneur réel.
   `31-04` et `31-02` avaient la bonne forme et n'existent pas. Février reste admis jusqu'au 29.
 - **`statut` typé sur le vocabulaire a révélé 23 fixtures** qui écrivaient `'COMPLET'`, `'TEST'`, `''` :
   toutes alignées. Ce n'est pas un dommage collatéral, c'est le type qui fait son travail.
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **Le paquet fiscal embarqué par `bilan-service`** n'est soumis ni au schéma, ni au vocabulaire fermé, et
+  son statut n'est publié sur aucune surface du prévisionnel. Conséquence nommée par la revue de sécurité :
+  après cette story, un chiffre d'impôt servi par `balance-service` dit « barème non validé », là où un
+  chiffre **prévisionnel** tiré d'une **amorce** ne porte aucun signal. Antérieur à ce travail, hors
+  périmètre (le refermer change le checksum de `syscohada-revise@2.1`, acte de contrat). **Story à ouvrir.**
+- **Aligner les copies de `bilan-service` et de `docs/`** sur l'artefact autoritaire : même raison.
+- **Le barème CNSS** reste incomplet (plafond, branches, SMIG). La `miseEnGarde` du paquet le **nomme**
+  désormais, au lieu de le laisser en prose invisible.
+- **Ce que la garde ne peut pas faire, et qui est écrit dans la procédure** : elle vérifie qu'une référence
+  légale **existe**, jamais qu'elle **dit ce que la valeur affirme**. Seule la relecture article par article
+  le fait. Aucun outil de ce dépôt ne la remplace, et prétendre le contraire serait le pire service à rendre
+  au packageur du pays suivant.
