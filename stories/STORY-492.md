@@ -1,6 +1,6 @@
 # STORY-492 : Aucun registre ne dit quels pays sont servis — la liste des cinq pays est codée dans un `<select>`
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-108 — Le référentiel devient un plugin déclaré (zone, pays, devise, norme)
 **Service :** `dossier-service` (registre, refus de création) + `balance-service` (paquet fiscal résolu par le pays du dossier) + `bilan-service` (prévisionnel) — la fiche disait `platform-catalog-service` (`:3006`), voir la requalification et **D-492-1**
@@ -247,8 +247,19 @@ est `servi`.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — démarrée le **2026-09-11** (flux APEX complet), développée et
-validée le **2026-09-12**.
+**Statut : `done`** — démarrée le **2026-09-11** (flux APEX complet), développée, validée,
+revue et **intégrée le 2026-09-12**.
+
+Les trois PR ont été intégrées en rebase-merge dans cet ordre, `dossier-service` **en
+dernier** : c'est lui qui ouvre la création sur un pays `partiel`, et l'ouvrir avant que
+`balance-service` et `bilan-service` sachent refuser un barème étranger aurait créé, le
+temps de deux merges, exactement le défaut que la story ferme.
+
+| Ordre | PR | Commits |
+|---|---|---|
+| 1 | `balance-service` [#101](https://github.com/MoneyVibesGroup/prospera-balance-service/pull/101) | `ebf6628` + revue `53a5b2b` |
+| 2 | `bilan-service` [#122](https://github.com/MoneyVibesGroup/prospera-bilan-service/pull/122) | `8203aa6` + revue `e230056` |
+| 3 | `dossier-service` [#24](https://github.com/MoneyVibesGroup/prospera-dossier-service/pull/24) | `1bac64f` |
 
 Branches `MNV-492` créées **avant la moindre ligne de code** :
 
