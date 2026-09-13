@@ -1,6 +1,8 @@
 # STORY-495 : Aucune opération en devise étrangère n'est exprimable — un importateur n'a ni écart de conversion, ni gain, ni perte de change
 
-Status: ready-for-dev
+Status: in-progress
+
+**Complexité :** high
 
 **Épic :** EPIC-107 — Devise, unités et arrondis (socle d'internationalisation)
 **Service :** `balance-service` + `bilan-service`
@@ -39,6 +41,50 @@ fournisseur importante et une monnaie qui a bougé, dépasse largement le seuil 
 **Ne fait pas :** aller chercher un cours. Le produit ne s'abonne à aucune source de taux ; le cours
 est **saisi et justifié** par le comptable, comme il l'est aujourd'hui dans son dossier de travail.
 ⚡ Un cours automatique sans source opposable serait pire que pas de cours : il aurait l'air juste.
+
+## Requalification mesurée avant de brancher (2026-09-13)
+
+| Affirmation de la fiche | Verdict | Mesure |
+|---|---|---|
+| Zéro occurrence de « taux de change » dans le produit | **VRAI** | les 4 seules occurrences sont des **refus** de conversion (imports, rapprochement, trésorerie) |
+| STORY-489/490 livrées | **VRAI, mais** | la devise est portée par la **balance entière**, pas par la ligne ; seul `XOF` est accepté (D-489-3) |
+| Une « ligne » peut porter le montant d'origine | **FAUX** | la ligne de balance est un **agrégat par compte** (4 colonnes) ; le produit n'a **aucun objet « dette de 50 000 EUR envers le fournisseur X »** — AC-1 exige un registre neuf |
+| Pertes et gains de change en **654/754** | **FAUX** | 654/754 sont les **cessions courantes d'immobilisations**. Le change est en 656/756 (commercial) et 676/776 (financier) — et **aucun de ces quatre comptes n'existe dans l'artefact** `syscohada-revise@2.1`, qui s'arrête à 2-3 chiffres |
+| 478 / 479 écarts de conversion | **VRAI** | `478` → poste **BU** (actif, note 12), `479` → poste **DV**. Présents et mappés |
+| « proposé, jamais appliqué d'office » a un patron | **VRAI** | `POST provisions/appliquer` (aperçu sans écriture) et `POST affectation-resultat` |
+| AC-2 justification obligatoire a un précédent | **VRAI** | registre des autres taxes : `justification` non vide, 2000 caractères |
+
+⛔ **AC-5 est mal posé** : un écart **latent** ne passe **jamais** par le compte de résultat — 478/479
+sont des comptes de **bilan**. Seule la **dotation à la provision** y apparaît. « Distinguer latent et
+réalisé au compte de résultat » n'a donc pas de sens tel qu'écrit.
+
+⚠️ **L'AC-5 de STORY-490 (« aucune conversion nulle part ») est gardé par un test.** Cette story le
+lève partiellement : le test doit être **amendé et borné au registre**, jamais supprimé ni laissé
+faussement vert.
+
+### D-495-A — périmètre resserré à ce que 8 points portent
+
+**Dans** : le registre des créances et dettes en devises (montant d'origine + cours + date + source,
+les quatre ensemble ou `400`), la réévaluation de clôture produisant les écarts **478 / 479 jamais
+compensés**, et la **provision proposée** sur le patron de l'affectation du résultat (rien de
+pré-rempli).
+
+**Hors périmètre, nommé — pas oublié** :
+
+- le change **réalisé au règlement** (656/756, 676/776) : le produit n'a **aucun événement de
+  règlement** d'une dette, et ces comptes ne sont pas dans l'artefact. Story dédiée.
+- la **contre-passation de 478/479 à l'ouverture de N+1** : la reprise des à-nouveaux reporte la
+  classe 4 telle quelle — le défaut n'apparaîtrait qu'en **deuxième année**.
+- l'**enrichissement de l'artefact** (656/756/676/776, compte de provision) : il est recopié à
+  l'octet dans deux dépôts et attend la validation de l'expert.
+- la **présentation latent / réalisé** en note annexe (`bilan-service`).
+- les **comptes de trésorerie en devises**, déjà exclus par la fiche.
+
+⚠️ Étendre `ORIGINES_BALANCE` d'une origine `ECARTS_CONVERSION` casse les lectures exhaustives qui
+les excluent une par une : **trois lecteurs** à revoir.
+
+⚠️ AC-6 : le dossier de démonstration **n'existe dans aucun fichier du dépôt** (donnée du volume
+docker) — sa non-régression se prouve en **vérif docker**, pas en e2e.
 
 ## Critères d'acceptation
 
