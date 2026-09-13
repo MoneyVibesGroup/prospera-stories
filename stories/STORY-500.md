@@ -46,6 +46,22 @@ l'exercice qui les a courus, pas à celui qui les paie.
 - **D-500-E — aucun compte comptable n'est choisi ici** (patron D-499-D) : le choix appartient à
   l'adaptateur de balance (STORY-507).
 
+### Décisions de correctif d'audit (2026-09-13, pendant le dev)
+
+- **D-500-H — les intérêts courus incluent le jour d'arrêté.** Le solde d'une date est celui de fin de
+  journée, l'arrêté aussi : les courus portent sur `[dernière échéance, arrêté + 1 jour)`, bornés à la
+  prochaine échéance. ⛔ Arrêté exclu, le **31/12 était perdu pour l'exercice N** et réapparaissait dans
+  l'échu du 01/01, rattaché à N+1 — ce qu'AC-3 interdit. Raccordement exact : la veille d'une échéance, les
+  courus valent l'intérêt entier de la période.
+- **D-500-I — sur un dépôt à terme, l'annulation d'un versement n'est admise que datée du jour
+  d'ouverture.** Annuler la constitution plus tard retirait le capital avant l'échéance : une **rupture
+  anticipée par la porte de derrière**, sans règle de pénalité, alors que la rupture est hors périmètre.
+  ⚠️ Conséquence assumée : une constitution erronée découverte après le jour d'ouverture ne se corrige pas
+  dans 500 — elle relève de la même story que la rupture anticipée.
+- **Borne des entiers sûrs à l'écriture.** Un montant unitaire borné ne borne pas une somme : le
+  9 008ᵉ versement maximal dépassait 2⁵³, était **admis**, puis toute situation postérieure rendait 500.
+  Refus typé à l'écriture.
+
 ### Hors périmètre, déclaré
 
 Rupture anticipée d'un dépôt à terme, renouvellement, capitalisation, rémunération des comptes à vue,
