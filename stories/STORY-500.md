@@ -83,7 +83,50 @@ clôture d'un compte, publication d'événement, production de balance.
 ## Progress Tracking
 
 **Statut : `in_progress` (2026-09-13).** Branches `MNV-500` ouvertes sur `docs` (base `main`) et
-`microfinance-service` (base `dev`). Décisions D-500-A → D-500-E consignées ci-dessus.
+`microfinance-service` (base `dev`). Décisions D-500-A → D-500-I consignées ci-dessus.
+
+### Développement — livré
+
+- Module `depots` : collections `comptes_depot` (conditions immuables, compteur de révision servant de
+  verrou) et `mouvements_depot` (append-only, refus de réécriture par le schéma, index uniques nommés
+  d'annulation et de levée). Situation **dérivée** à une date d'arrêté ; blocages actifs du dossier.
+- Fonctions pures : calendrier des échéances (pas `k × mois` depuis l'ouverture, jour borné en fin de
+  mois), intérêts (numérateur exact cumulé, arrondi une fois par période), invariants à toute date
+  (solde ≥ 0, bloqué ≤ solde, payés ≤ échus), borne des entiers sûrs.
+
+### ⚡⚡ Ce que les suites mockées ne voyaient pas
+
+- ⛔ **Aucun mouvement ne s'écrivait contre un vrai Mongo.** Le schéma `comptes_depot` déclare
+  `timestamps.createdAt` : Mongoose ajoute alors, à l'incrément `$inc` du verrou, l'initialisation de
+  `ouvertLe`. Le hook d'immuabilité — qui n'admet que l'incrément seul — refusait **toute** écriture. Les
+  unitaires testaient le hook sur une mise à jour fabriquée à la main, les e2e mockaient la couche
+  données : **tout était vert**. Seule la spec sur Mongo réel l'a vu. Corrigé (`timestamps: false` sur le
+  verrou) ; la mutation inverse fait rougir cette spec.
+- Audit de calcul (sous-agent `opus`, constats vérifiés dans le code avant correction) : D-500-H, D-500-I,
+  borne des entiers sûrs ; un test qui prétendait garder les jours d'échéance ne gardait rien (renommé).
+- Revue du service : exposant jamais contrôlé (seule la devise l'était) — corrigé.
+- Contrat Swagger : un `400` de méthode effaçait `DOSSIER_ID_INVALIDE` ; deux codes nouveaux publiés
+  nulle part ; une description contredisait D-500-H — corrigés, gardés par l'e2e.
+
+### Portes (rejouées en session sur l'état final)
+
+Lint 0 · build OK · **1 594** unitaires / 88 suites, couverture **99,47 / 95,88 / 99,29 / 99,51** ·
+**189** e2e (18 sautés : suites Mongo sans URI) · **18/18** sur Mongo réel.
+
+| Mutation | Test qui rougit (par assertion) |
+|---|---|
+| verrou sans `timestamps: false` | `depots.mongo.e2e-spec.ts` |
+| courus sans le jour d'arrêté (D-500-H) | `interets-dat.spec.ts` (clôture au 31/12) |
+| garde D-500-I jamais exécutée | `depots.service.spec.ts` |
+| borne des entiers sûrs ignorée | `depots.service.spec.ts` |
+| exposant ignoré (entrée / transaction) | `depots.service.spec.ts` |
+| code `MONTANT_DEPOT_HORS_BORNE` non publié | `depots.e2e-spec.ts` |
+| route `:mouvementId` au niveau de `situation` | `depots.e2e-spec.ts` (20 rouges) |
+| `@RequiresReferentielDuDossier()` retiré | invariant de portée + `depots.e2e-spec.ts` |
+| retrait DAT, membre clos, exercice, solde à toute date, devise, index… (11) | `depots.service.spec.ts` |
+
+⚠️ Deux mutations rougissaient d'abord **par erreur de compilation** (import ou méthode devenus inutilisés) :
+rejouées sous une forme qui compile, elles rougissent par assertion.
 
 ## Notes
 
