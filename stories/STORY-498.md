@@ -1,10 +1,12 @@
 # STORY-498 : Le paquet prudentiel BCEAO devient un artefact packagé, séparé du paquet comptable
 
-Status: ready-for-dev
+Status: in-progress
+
+**Complexité :** medium
 
 **Épic :** EPIC-121 — Socle vertical SFD
-**Service :** `microfinance-service` + `scripts/referentiels/`
-**Points :** 8 · **Sprint :** S20
+**Service :** `microfinance-service` *(y compris son propre `scripts/referentiels/`, qui n'existait pas — la fiche le citait comme un emplacement existant)*
+**Points :** 5 *(ramenée de 8 le 2026-09-13 : la mécanique seule, D-498-A)* · **Sprint :** S20
 **Origine :** découpage `epics-microfinance-2026-08-27.md`, **AD-3** de la spine — Q2 tranchée.
 
 ---
@@ -19,6 +21,41 @@ Commission Bancaire de l'UMOA.
 par des **textes différents**, à des **rythmes différents**. Les fusionner obligerait à republier
 `sfd-bceao@2.0` — donc à **recalculer tous les checksums de liasse et invalider les snapshots** — à
 chaque instruction prudentielle nouvelle. C'est le coût que STORY-368 a déjà payé une fois.
+
+## ▶️ Reprise le 2026-09-13 — re-mesurée sur le socle livré
+
+Le report du matin tenait à l'absence du service. **STORY-497 est livrée** : la story reprend, sous
+**D-498-A** (décision user) — la **mécanique seule**, AC-1 et AC-2 déclarés **non livrés**, aucune
+valeur inventée.
+
+| Affirmation | Verdict | Mesure |
+|---|---|---|
+| Le chargeur du socle accueille le prudentiel « **sans modification** » (rapport de l'agent du socle) | **PARTIEL** | la mécanique est générique (sha256, cache, single-flight), mais `nature` n'accepte que le littéral `'référentiel'` ⇒ à élargir |
+| Le paquet se charge « par le même mécanisme » (AC-1) | **VRAI** | même source d'assets, même `nest-cli.json` — mais une garde exige que `assets/` contienne **exactement** l'artefact comptable : il faut séparer les artefacts **partagés** de l'artefact **propre** |
+| La garde de source « fait échouer le build » (AC-2) | **PARTIEL** | elle tourne en **test jest** (`execFileSync`), jamais dans `nest build` |
+| La garde R4 protège chaque valeur | **PARTIEL** | elle ne voit que nombres et booléens (une règle écrite en texte lui échappe), et une `source` posée sur une rubrique couvre tout son sous-arbre ⇒ le **schéma** doit exiger une source par tranche et par seuil |
+| Statut `a-valider-par-expert` (AC-3) | **FAUX pour un paquet vide** | le vocabulaire réserve ce statut à une transcription qui **couvre** sa norme |
+| `sfd-bceao@2.0` inchangé (AC-4) | **VRAI, et désormais en 3 copies** | sha256 `91ca19e2…87bf2ac` identique dans `bilan-service`, `balance-service` et `microfinance-service` ; mais aucun des deux voisins ne compare la copie de `microfinance-service` |
+| ⚠️ Constat hors fiche | — | aucune `ArtefactError` n'est traduite en HTTP dans le socle : un checksum violé rend **500** au lieu de **502**, route de diagnostic existante comprise |
+
+### Décisions du 2026-09-13
+
+- **D-498-B — statut `amorce`, pas `a-valider-par-expert`.** Un paquet volontairement vide déclaré « à
+  valider par un expert » affirmerait une couverture qui n'existe pas. `amorce` + `miseEnGarde` dit la
+  vérité, ce qui est l'intention même d'AC-3 : ne jamais surévaluer la maturité d'un texte réglementaire.
+- **D-498-C — la route est scopée au dossier.** L'invariant du socle impose le gate d'accès sur toute
+  route nichée sous un dossier ; au niveau organisation il faudrait le poser à la main, et un oubli
+  laisserait la route ouverte sans erreur.
+- **D-498-D — la traduction HTTP des `ArtefactError` entre dans cette story**, route de diagnostic
+  comprise : la nouvelle route en a besoin, et un 500 anonyme sur une intégrité violée n'est pas un refus.
+- **D-498-E — le validateur est recopié en ADAPTANT, pas à l'octet.** Chaque service est un dépôt
+  séparé et aucun mécanisme de partage n'existe ; une copie exacte créerait une quatrième identité à
+  tenir entre dépôts, pour des règles (R2, R3, R5, R7, R8) purement fiscales. Coût accepté et écrit : un
+  correctif futur de R4 côté fiscal ne se propagera pas tout seul.
+
+⛔ **La preuve ne doit pas être vacante sur un paquet vide** : un validateur qui ne trouve rien à refuser
+passe toujours. Elle exige une **fixture temporaire** portant une valeur sans source, qui fait échouer la
+garde, et sa jumelle **avec** source, qui passe.
 
 ## Critères d'acceptation
 
