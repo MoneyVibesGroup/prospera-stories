@@ -1,6 +1,6 @@
 # STORY-498 : Le paquet prudentiel BCEAO devient un artefact packagé, séparé du paquet comptable
 
-Status: in-progress
+Status: review
 
 **Complexité :** medium
 
@@ -102,6 +102,54 @@ peuplé de valeurs plausibles.
   `balance-service`, checksum sha256 conforme au registre, 372 comptes / 31 postes / 31 mappings.
 - AC-3 : `a-valider-par-expert` **est** un statut prévu du vocabulaire (`meta-vocabulaire.json`), et
   la clé de méta d'un référentiel est `meta`, **pas** `_meta` (contrairement au paquet fiscal).
+
+## Progress Tracking
+
+**Statut : `review`.** PR `microfinance-service` **#2**. AC-1 et AC-2 **non livrés** par décision (D-498-A).
+
+### Portes — rejouées en session après correctifs
+
+lint 0 warning · build OK · **810 unitaires / 56 suites** · **38 e2e / 3 suites** · couverture
+99,77 / 93,18 / 99,5 / 99,75 (seuils 65/90/90/90 inchangés). 8 mutations au développement et 5 en
+revue, **toutes rouges par assertion**.
+
+### Revue de code et de sécurité — un bloquant, deux non-bloquants, aucune faille
+
+- ⛔ **F-1 — `normeSource` était une fausse déclaration, et un test la verrouillait.** Le paquet
+  **prudentiel** citait dans ce champ les Instructions 025 et 026-02-2009, qui instituent le **plan
+  comptable** RCSFD. Or `normeSource` désigne la norme que le paquet **transcrit** : un écran ou un
+  contrôle qui lirait ce champ ne lirait pas la `miseEnGarde`. Pire, un test exigeait l'égalité avec la
+  norme comptable — quiconque aurait voulu corriger le champ aurait vu ce test lui ordonner de remettre
+  l'erreur. Valeur retenue : « **Aucune** — aucun texte prudentiel de la BCEAO ou de la Commission Bancaire
+  de l'UMOA applicable aux SFD n'a été fourni au projet (D-498-A) ». Un test interdit désormais d'y citer
+  la norme comptable ou le moindre numéro d'instruction.
+- **F-2 — la règle « un paquet vide ne peut être qu'`amorce` » se contournait.** Un paquet vide auquel on
+  ajoutait une rubrique inconnue contenant un simple nombre passait au statut **`certifie`, sans mise en
+  garde** : le validateur et le service ne définissaient pas « vide » de la même façon. Corrigé en
+  comptant les trois seules collections réelles, **et** en fermant le schéma
+  (`additionalProperties: false`) : sans cette fermeture, une valeur transcrite hors des rubriques
+  connues aurait été **packagée sans jamais être appliquée**. Une garde vérifie que validateur et service
+  rendent le même verdict « vide » sur six fixtures.
+- **F-3 — la liste des artefacts partagés n'était branchée sur aucune comparaison** : un second artefact
+  partagé aurait passé l'exhaustivité sans être comparé à aucun amont. Chaque artefact partagé est
+  maintenant confronté à chaque voisin.
+- **Sécurité : aucune vulnérabilité.** Gate et portée au niveau de la classe, 404 au même corps que
+  l'inexistant, messages 502/503/500 sans chemin ni empreinte, validateur absent de l'image.
+
+### La preuve n'est pas vacante
+
+Sur un paquet volontairement vide, un validateur qui ne trouve rien à refuser passe toujours. Vérifié
+par la revue : la fixture « valeur sans source » est **acceptée par le schéma** et rend exactement une
+faute R4, sa jumelle avec source passe, et retirer R4 la fait repasser au vert.
+
+⚠️ Limite écrite : la garde prouve qu'une source est **présente**, pas qu'elle est **vraie**.
+
+### Non livré, et dit comme tel
+
+- **AC-1** (tranches, taux, règles de déclassement, seuils) et **AC-2** (référence opposable par valeur) :
+  aucun texte prudentiel fourni. La route publie `valeursLivrees: false`.
+- La recopie du validateur ne se propagera pas toute seule : un correctif futur de R4 côté fiscal devra
+  être reporté ici à la main (D-498-E).
 
 ## Notes
 
