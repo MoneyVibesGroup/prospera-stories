@@ -1,6 +1,6 @@
 # STORY-498 : Le paquet prudentiel BCEAO devient un artefact packagé, séparé du paquet comptable
 
-Status: review
+Status: done
 
 **Complexité :** medium
 
@@ -105,7 +105,7 @@ peuplé de valeurs plausibles.
 
 ## Progress Tracking
 
-**Statut : `review`.** PR `microfinance-service` **#2**. AC-1 et AC-2 **non livrés** par décision (D-498-A).
+**Statut : `done` (2026-09-13).** PR `microfinance-service` **#2** intégrée en rebase-merge sur `dev`. AC-1 et AC-2 **non livrés** par décision (D-498-A).
 
 ### Portes — rejouées en session après correctifs
 
@@ -143,6 +143,18 @@ par la revue : la fixture « valeur sans source » est **acceptée par le schém
 faute R4, sa jumelle avec source passe, et retirer R4 la fait repasser au vert.
 
 ⚠️ Limite écrite : la garde prouve qu'une source est **présente**, pas qu'elle est **vraie**.
+
+### Démarrage réel prouvé — la story n'écrit rien en base, mais un module neuf doit démarrer
+
+Pas de vérification de persistance (aucune écriture). Mais le module prudentiel n'était prouvé que par
+une compilation dans un test, et ce projet a déjà vu une application incapable de démarrer sous des
+suites vertes (STORY-425). Sur la stack réelle, code en vol = branche `MNV-498` : compilation
+`Found 0 errors`, `PrudentielModule dependencies initialized`, `Nest application successfully started`,
+route prudentielle **montée** (`401` sans jeton, et non `404`), `/api/v1/health` `mongodb: up`,
+`kafka: up`.
+
+⚠️ La sonde a d'abord compté **27 erreurs de démarrage** — toutes antérieures : `docker logs` d'un
+conteneur redémarré sans être recréé garde son historique. Filtrées au dernier démarrage : **0**.
 
 ### Non livré, et dit comme tel
 
