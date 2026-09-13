@@ -35,6 +35,37 @@ chaque instruction prudentielle nouvelle. C'est le coût que STORY-368 a déjà 
 - [ ] AC-5 — Une route publie le paquet prudentiel actif, avec sa version et son checksum. C'est ce
       que l'écran affichera à côté de chaque montant provisionné.
 
+## Mesuré le 2026-09-13 — story REPORTÉE, faute de textes opposables
+
+⏸ **Reportée sur décision user du 2026-09-13.** Elle dépend de [[STORY-497]] (sa route AC-5 vit dans
+`microfinance-service`, qui n'existe pas), et surtout : **le dépôt ne contient AUCUNE valeur
+prudentielle BCEAO**. Balayage fait le 2026-09-13 — tranches d'ancienneté, taux de provision, seuils
+de ratios : rien, hors mentions d'intention (spine, epics, FE-105). `docs/referentiels/README-sfd-bceao.md`
+ne liste que des comptes (19x/29x en souffrance, 199/299 provisions), sans bornes ni taux.
+
+⛔ **AC-1 et AC-2 sont donc inatteignables honnêtement en l'état** : AC-2 fait échouer le build pour
+toute valeur sans référence, et inventer une tranche ou un taux « vraisemblable » est précisément ce
+que la règle du projet interdit. Aucun numéro d'instruction n'est cité ici de mémoire.
+
+**Décision user du 2026-09-13 — D-498-A, la mécanique seule.** À la reprise, la story livre le
+schéma prudentiel, la garde « valeur sans source ⇒ échec », le chargement vérifié par checksum, la
+route de publication et la non-régression de `sfd-bceao@2.0` — **AC-1 et AC-2 restant déclarés non
+livrés** tant que les textes ne sont pas fournis. Le paquet naît donc **vide et gardé**, jamais
+peuplé de valeurs plausibles.
+
+**Mesures utiles à la reprise :**
+
+- La garde de STORY-493 est **spécifique au fiscal** : `scripts/referentiels/valider-paquet-fiscal.mjs`
+  repère les fichiers au motif `paquet-fiscal-<pays>-<annee>` et suit `paquet-fiscal.schema.json`.
+  Le prudentiel demande **son propre schéma et sa propre branche de validation**.
+- ⚠️ « Fait échouer le build » est **PARTIEL** : la garde tourne dans `build.mjs` (lancé à la main) et,
+  en CI, dans le test jest `paquet-fiscal-schema.spec.ts` — **pas** dans `npm run build`
+  (= `nest build`). Le prudentiel doit se brancher sur le **test**, sinon la garde ne garde rien en CI.
+- AC-4 mesuré : l'asset `sfd-bceao@2.0` est **identique à l'octet** entre `bilan-service` et
+  `balance-service`, checksum sha256 conforme au registre, 372 comptes / 31 postes / 31 mappings.
+- AC-3 : `a-valider-par-expert` **est** un statut prévu du vocabulaire (`meta-vocabulaire.json`), et
+  la clé de méta d'un référentiel est `meta`, **pas** `_meta` (contrairement au paquet fiscal).
+
 ## Notes
 
 - Voir [[STORY-491]] (le manifeste déclaré), [[STORY-493]] (la même garde côté fiscal), [[STORY-368]]
