@@ -1,6 +1,6 @@
 # STORY-495 : Aucune opération en devise étrangère n'est exprimable — un importateur n'a ni écart de conversion, ni gain, ni perte de change
 
-Status: in-progress
+Status: done
 
 **Complexité :** high
 
@@ -113,8 +113,7 @@ docker) — sa non-régression se prouve en **vérif docker**, pas en e2e.
 
 ## Progress Tracking
 
-**Statut : `in-progress` — code livré et revu, correctifs de revue en cours, vérification docker à rejouer.**
-PR `balance-service` **#104**.
+**Statut : `done` (2026-09-13).** PR `balance-service` **#104** intégrée en rebase-merge sur `dev`.
 
 ### Décisions prises au développement (D-495-B à I)
 
@@ -164,6 +163,52 @@ PR `balance-service` **#104**.
 - Vérifié et écarté par la revue : le sens des écarts dans les **quatre cas** (créance/dette × hausse/baisse)
   est juste, la non-compensation est gardée par une fixture qui porte deux pertes et deux gains, l'exposant
   **appliqué** du XOF est utilisé partout.
+
+### Correctifs de revue — appliqués et prouvés (commit `3c65736`)
+
+- **B1** : `maxDecimalPlaces` retiré. Un cours est comparé à sa représentation exacte au millionième, sans marge
+  à choisir ⇒ **400 `COURS_INVALIDE`** avec son motif. Balayé exhaustivement sur trois plages de 200 000 valeurs.
+- **B2** : une réévaluation incomplète publie la provision **`REEVALUATION_INCOMPLETE`**, `montantDeReference: null`
+  et les devises sans cours — plus jamais « aucune perte latente » sur un chiffre non mesuré.
+- **N1** : **400 `DATE_COURS_CLOTURE_ANTERIEURE_OPERATION`** ; avertissement `COURS_NON_DATE_A_LA_CLOTURE`.
+- **N2** : la réponse publie `exerciceClos`. **N3** : forme OpenAPI 3.0 valide, et une garde balaie tout le document
+  contre `type: "null"`.
+
+Portes sur l'état final, rejouées en session : lint 0 · build OK · **4 148 unitaires / 202 suites** · **1 073 e2e / 28
+suites** · couverture 99,2 / 92,76 / 98,57 / 99,29. Six mutations de revue, toutes rouges par assertion.
+
+### ✅ Vérification docker FINALE — sur l'état corrigé, stack recréée, machine au calme
+
+Code en vol vérifié dans le conteneur (commit `3c65736`, `Found 0 errors` filtré au dernier démarrage). Jeton RS256
+réel. Capture AC-6 prise **avant toute écriture**.
+
+| Point | Verdict |
+|---|---|
+| **Persistance** : 4 lignes écrites (dette 401 EUR, créance 411 USD…), tous les champs, `orgId`/`dossierId` justes | **PROUVÉ** |
+| **Le calcul, contre le calcul à la main** : 4 écarts et leurs sens exacts, **actif 63 215 000 / passif 19 013 388**, provision proposée 63 215 000, `appliquee: false`. Ni le net de 44 201 612 (compensation), ni les écarts 100 fois plus petits (exposant ISO 0) | **PROUVÉ** |
+| **La réévaluation n'écrit rien** : instantané des **35 collections** (nombre et SHA-256 du contenu) identique avant et après onze appels | **PROUVÉ** |
+| **AC-6 à l'octet** : réponses et document brut du dossier témoin identiques ; seul le `requestId` diffère | **PROUVÉ** |
+| **B1** : `1e-7`, `5e-7`, `1.5e-7`, `655.9570001` ⇒ 400, **aucun document persisté** ; `1e-6` accepté | **PROUVÉ** |
+| **B2** : cas discriminant — un seul cours EUR **égal** à l'historique (actif 0, où l'ancien code concluait « aucune perte latente ») ⇒ `REEVALUATION_INCOMPLETE` | **PROUVÉ** |
+| **N1 / N2** : refus de la date antérieure, avertissement hors fin d'exercice, `exerciceClos` vrai une fois l'exercice clos | **PROUVÉ** |
+| **Refus réels** : groupe incomplet, CNY, `null`, objet, `2026-02-30` ⇒ 400 ; `DELETE` d'une ligne d'une **autre organisation** ⇒ 404 au **même corps** que l'inexistant, la ligne restant en base ; exercice clos ⇒ 409, suppression comprise ; compte inchangé après chaque refus | **PROUVÉ** |
+| **Suppression** : 4 `DELETE` ⇒ 204 et 0 document ; second `DELETE` ⇒ 404 | **PROUVÉ** |
+
+**Nettoyage** : l'instantané final des 35 collections est **identique à celui de départ**.
+
+### Non atteint, et mineur — dits plutôt que tus
+
+- ⚠️ **NON ATTEINT** : le **succès** d'une création sur un exercice clos synthétique (2024), faute de référentiel pour
+  cet exercice. Le refus y est prouvé, et le cas complet l'est sur 2026 fermé temporairement.
+- **Mineur** : `montantTenue` est stocké en BSON `int` ou `double` selon sa taille (au-delà de l'int32). La valeur
+  reste un entier exact ; seule une requête filtrant `{$type: "int"}` manquerait une ligne. Nommé, non corrigé.
+
+### ⚡ La première vérification docker n'a rien prouvé, et c'était la bonne conclusion
+
+Lancée tôt, pendant que quatre agents faisaient tourner jest, elle s'est heurtée à une machine **saturée** (charge de
+l'hôte à 208, Kafka à 228 % de CPU) : la route n'a jamais répondu, et l'agent a déclaré **tous les points NON
+ATTEINTS** plutôt que de conclure. Elle a surtout laissé ce qui a rendu la vérification finale décisive : l'état de
+départ mesuré, la capture avant/après, et le **calcul à la main des signatures de défaut**.
 
 ### Vérification docker — une première tentative NON ATTEINTE, et dite comme telle
 
