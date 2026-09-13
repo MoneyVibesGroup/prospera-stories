@@ -68,6 +68,65 @@ posé par STORY-497). ⇒ **2 PR** : `dossier-service` et `microfinance-service`
 - [ ] AC-5 — ⚠️ **Aucun rattachement de compte codé ici** : le compte SYSCOHADA/RCSFD d'une part
       sociale vient du **référentiel du dossier** (AD-8), comme partout ailleurs.
 
+## Progress Tracking
+
+**Statut : `in-progress` — les deux volets livrés, revus et corrigés ; vérification docker en cours.**
+PR `dossier-service` **#27** et PR `microfinance-service` **#3**, à intégrer **ensemble** (contrat d'événement).
+
+### Volet `dossier-service` — la devise publiée, et explicite pour une IMF
+
+- `DossierEtatV1` publie `devise` sur `dossier.created` et `dossier.updated`, **lue par son nom** : la leçon de
+  STORY-496 (un spread de document Mongoose perd les chemins de schéma en silence) est appliquée et prouvée sur un
+  **vrai document Mongoose**.
+- **D-499-B** : un dossier `MICROFINANCE` sans devise ⇒ `400 DEVISE_REQUISE` ; hors devises tenues ⇒
+  `400 DEVISE_NON_TENUE` (D-499-G). Les autres types gardent XOF par défaut, non-régression prouvée.
+- **D-499-F** : le retrait de la devise est refusé pour tous les types (`$unset`, `null`, vide, `$rename`).
+- ⚡ **Un test vacant démasqué par sa propre mutation** : le type `devise?: string | null` neutralisait la conversion
+  implicite, si bien que le test « valeur non textuelle » ne mesurait rien. Retypé, la mutation rougit.
+- **Revue : aucun constat.** Le point critique est vérifié **dans le code des quatre consommateurs** de `dossier.*` :
+  aucun ne rejette la charge portant le champ en plus — pas de poison-pill.
+- Portes, rejouées en session : **1 352 unitaires / 299 e2e**, couverture 99,49 / 94,75 / 98,02 / 99,52.
+
+### Volet `microfinance-service` — membres et parts sociales
+
+- **Membres** : numéro de sociétaire saisi (D-499-C), unique **par dossier**, doublon ⇒ 409 **générique** ;
+  identité rectifiable, jamais sur un mouvement (D-499-E) ; clôture sans suppression (AC-3) ; réactivation d'un
+  radié **non livrée** (D-499-L).
+- **Parts** : mouvements append-only, solde **dérivé** jamais stocké, annulation en contre-mouvement, double
+  annulation bloquée par **index unique** ; devise lue sur le dossier, jamais de repli (AD-11) ; membre radié ⇒ plus
+  de souscription, remboursement permis (D-499-F).
+- **Concurrence (D-499-J)** : chaque écriture commence par incrémenter un compteur sur la fiche du membre, **dans la
+  transaction et avant toute lecture du solde** ; deux remboursements concurrents se sérialisent.
+- **Agence (D-499-A)** et **compte comptable (D-499-D)** : emplacements inertes documentés, aucune donnée en base.
+
+### Revue du volet microfinance — un bloquant, corrigé
+
+- ⛔ **Aucune garde ne vérifiait le TYPE du dossier.** Une organisation habilitée pouvait créer membres et parts
+  **dans son dossier d'entreprise**, « Mon cabinet » compris, avec le XOF implicite : **D-499-B était contournée
+  exactement là où elle devait fermer le trou**. Pire, un dossier d'entreprise en JPY ou KWD aurait reçu des parts à
+  l'échelle 2. Le test du socle qui prouvait ce refus avait disparu avec les sondes. **Corrigé** : un garde global
+  résout le référentiel du dossier (`409 REFERENTIEL_DOSSIER_INDETERMINE`), et `portee-dossier.invariant.spec.ts`
+  **interdit à un nouveau contrôleur de l'oublier**.
+- **Un remboursement était comparé au solde total, pas au solde à sa date** : on pouvait rembourser en février des
+  parts souscrites en juin, et le capital d'un exercice devenait négatif à sa clôture. **Corrigé** : le solde ne peut
+  devenir négatif **à aucune date** (`409 SOLDE_PARTS_NEGATIF_A_UNE_DATE`), pour le remboursement et l'annulation.
+  Les mouvements d'un même jour se **compensent** : une date sans heure ne dit rien de l'ordre dans la journée, et
+  l'identifiant, généré hors transaction et réutilisé au rejeu, n'est pas croissant sous concurrence.
+- Sécurité : aucune vulnérabilité (IDOR, données personnelles masquées dans pino, bornes du montant).
+- Portes sur l'état final, rejouées en session : **1 154 unitaires / 77 suites**, **84 e2e** et 10 sautés (la suite
+  Mongo), couverture 99,68 / 94,53 / 99,34 / 99,71.
+
+### ⚠️ Deux points dits plutôt que tus
+
+- **Le dépôt `microfinance-service` n'a AUCUNE CI** (rien sous `.github`), et la seule preuve de la concurrence sur
+  Mongo réel (`parts-sociales.mongo.e2e-spec.ts`) est sautée sans `MONGO_INTEGRATION_URI`. Son saut est désormais
+  **visible** dans la sortie (test sentinelle « NON EXÉCUTÉE ») et la commande est documentée — mais **une régression de
+  la concurrence passerait toute suite automatique au vert**. Créer la CI est une décision d'infrastructure, hors
+  story.
+- **Un test a rendu 404 une seule fois** pendant les correctifs, sur une machine chargée. **Non reproduit** : cinq
+  exécutions complètes de sa suite, 33/33 à chaque fois. Cause **non établie** — consigné comme non reproduit, pas
+  comme résolu.
+
 ## Notes
 
 - Voir [[STORY-497]] (socle), [[STORY-422]] (44 racines communes divergentes).
