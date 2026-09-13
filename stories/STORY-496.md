@@ -1,6 +1,6 @@
 # STORY-496 : Le dossier n'a que deux axes — le régime dérogatoire (zone franche, code des investissements) n'a nulle part où se déclarer
 
-Status: review
+Status: done
 
 **Complexité :** high
 
@@ -90,7 +90,7 @@ franche », et ainsi de suite — une combinatoire qui se multiplierait à chaqu
 
 ## Progress Tracking
 
-**Statut : `review` → prêt au merge.** Deux dépôts, deux PR à intégrer **ensemble** (contrat d'événement) :
+**Statut : `done` (2026-09-13).** Les deux PR sont intégrées en rebase-merge sur `dev` — `balance-service` **#103 en premier** (le consommateur doit savoir lire les champs avant que le producteur ne les émette), puis `dossier-service` **#26**. Deux dépôts, deux PR à intégrer **ensemble** (contrat d'événement) :
 `dossier-service` **#26** (producteur, AC-1/2/6) et `balance-service` **#103** (consommateur + moteur,
 AC-3/4/5).
 
