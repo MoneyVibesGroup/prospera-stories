@@ -128,6 +128,34 @@ Lint 0 · build OK · **1 594** unitaires / 88 suites, couverture **99,47 / 95,8
 ⚠️ Deux mutations rougissaient d'abord **par erreur de compilation** (import ou méthode devenus inutilisés) :
 rejouées sous une forme qui compile, elles rougissent par assertion.
 
+### Revue de code (⑥) — PR `microfinance-service` #4 — aucun bloquant, deux constats corrigés
+
+- **La vue portefeuille ne pouvait pas utiliser l'index des levées** (confiance 85, vérifié par `explain`) :
+  l'index unique `unicite_levee_par_blocage` est **partiel** (`$type: objectId`) et un `$expr` ne porte pas
+  cette condition — Mongo parcourait, pour chaque blocage, toutes les levées du dossier (≈ 25 millions
+  d'entrées examinées pour une page de 50 sur un dossier de 5 000 blocages levés). **Corrigé** : la condition
+  de l'index est ajoutée au `$match` des levées.
+- **La vue `blocages-depot` n'était jamais exécutée contre un vrai Mongo** (confiance 80) : seule la FORME de
+  son pipeline était testée — exactement l'angle mort où le verrou refusé est resté caché. **Corrigé** : tests
+  sur Mongo réel (levée postérieure à l'arrêté, levée antérieure enregistrée après, autre dossier, pagination
+  enjambant des blocages levés).
+- Lentille over-engineering (`ponytail-review`) : six simplifications cosmétiques (spread, type en double,
+  regex du motif recopiée de `texte-identite.ts`) — **non appliquées** : aucune ne change un comportement, et
+  la factorisation de la regex toucherait un fichier partagé avec `membres`, hors périmètre.
+
+### Revue de sécurité (⑦) — aucune vulnérabilité
+
+Seize pistes examinées et écartées avec preuve dans le code : IDOR sur les identifiants de chemin **et sur
+les cibles** d'annulation/levée (cherchées uniquement parmi les mouvements du compte lus sous verrou, même
+409 qu'un identifiant inexistant), 404 jamais 403, décorateurs de classe sans exception de méthode,
+injection NoSQL (`apres`, `dateArrete`, `limite` validés), mass assignment (`forbidNonWhitelisted`, devise
+et auteur jamais lus du corps), motif libre absent des journaux, double annulation/levée concurrente (verrou
++ index uniques), verrou d'exercice sur chaque correction, intégrité comptable.
+Un point sous le seuil, **corrigé par prudence** : sur un état proche de 2⁵³, le rapport d'une violation
+convertissait les montants et levait une erreur brute (500) — la borne est désormais vérifiée **avant** les
+invariants ; la mutation inverse fait rougir le test. Un point **consigné comme dette** : chaque écriture
+et chaque situation chargent tous les mouvements du compte (linéaire, même patron que les parts sociales).
+
 ## Notes
 
 - Voir [[STORY-499]], [[STORY-507]] (publication en balance), spine AD-1.
