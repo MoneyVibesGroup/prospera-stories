@@ -1,6 +1,6 @@
 # STORY-497 : Socle `microfinance-service` — le portefeuille naît dans un dossier, sur le référentiel du dossier
 
-Status: review
+Status: done
 
 **Complexité :** high
 
@@ -99,7 +99,7 @@ Les prérequis, eux, sont **vérifiés dans le code** : STORY-533 (`entitlement.
 
 ## Progress Tracking
 
-**Statut : `review` → prêt au merge.** Deux PR à intégrer **ensemble** : `microfinance-service` **#1**
+**Statut : `done` (2026-09-13).** Deux PR intégrées **ensemble** en rebase-merge, catalogue d'abord (le module doit exister avant que le service ne l'exige) : : `microfinance-service` **#1**
 (socle) et `platform-catalog-service` **#18** (module `microfinance` + version fantôme). Séparées, l'une
 refuse tous les abonnés et l'autre ouvre une porte sur rien.
 
