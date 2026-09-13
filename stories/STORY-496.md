@@ -1,6 +1,8 @@
 # STORY-496 : Le dossier n'a que deux axes — le régime dérogatoire (zone franche, code des investissements) n'a nulle part où se déclarer
 
-Status: ready-for-dev
+Status: in-progress
+
+**Complexité :** high
 
 **Épic :** EPIC-109 — Paquets fiscaux pays : gabarit, garde et procédure de sourcing
 **Service :** `dossier-service` (axes) + `balance-service` (`modules/fiscal`, résolution du paquet)
@@ -26,6 +28,28 @@ inatteignable. Un distributeur en zone franche est donc aujourd'hui imposé **au
 
 ⛔ **C'est le seul endroit du produit où un défaut de paramétrage produit un impôt trop élevé, pas
 trop bas.** Le client le découvre en payant.
+
+## Requalification mesurée avant de brancher (2026-09-13)
+
+| Affirmation de la fiche | Verdict | Mesure |
+|---|---|---|
+| Le dossier porte 2 axes datés, aucun 3ᵉ | **VRAI** | `dossier-service` `decisions_axes` (append-only), contrat `dossier.axes.decides` consommé par `balance-service` seul |
+| `zone-franche-togo@1.0` « packagé » | **PARTIEL** | packagé **dans `bilan-service` seulement** (champ `paquetFiscal` embarqué) ; le manifeste fiscal de `balance-service` ne porte que `togo@2026` |
+| … « chiffré, sourcé » | **PARTIEL** | 5 rubriques (`is` en paliers, `taxeDividendes`, `tva`, `fiscaliteDePorte`, `variantesRegionales`) ; rejouée contre le validateur de STORY-493 : **20 fautes** (7 rubriques obligatoires absentes, `statut` hors vocabulaire) |
+| « 30 % d'IS là où il en doit 0 » | **FAUX** | le droit commun togolais packagé est **27 %** (`is.taux: 0.27`) |
+| « une MFP dont il est probablement exonéré » | **PARTIEL** | le paquet zone franche n'a **aucune** rubrique MFP ; `togo@2026` liste l'exonération `AGREMENT_CODE_INVESTISSEMENTS` en `NON_CONSTATABLE` |
+
+⚡ **Ajouter une seconde famille TG au manifeste rend 500 sur TOUS les dossiers togolais** (`refDuPays`
+lève « manifeste ambigu ») : AC-3 n'est pas un ajout, c'est un changement de clé de résolution.
+
+⚡ `IMPOT_REGIME_DEROGATOIRE: 0` est **codé en dur** au poste H de la liquidation.
+
+### D-496-A — le régime dérogatoire est une SURCOUCHE du droit commun, pas une copie
+
+Le paquet dérogatoire ne porte **que** ce qui déroge, chaque valeur avec sa source ; tout le reste est
+**hérité explicitement** du paquet de droit commun du pays, et la résolution publie les deux références.
+Une copie complète de `togo@2026` aurait fait passer le validateur en **déclarant** vérifiées pour la
+zone franche des rubriques (MFP, TPU, dépôt) que personne n'a relues sous ce régime.
 
 ## Pourquoi un troisième axe, et pas un type de client
 
