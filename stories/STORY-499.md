@@ -1,6 +1,6 @@
 # STORY-499 : Membres et parts sociales — le sociétaire d'une mutuelle n'est pas un client
 
-Status: in-progress
+Status: done
 
 **Complexité :** high
 
@@ -70,8 +70,7 @@ posé par STORY-497). ⇒ **2 PR** : `dossier-service` et `microfinance-service`
 
 ## Progress Tracking
 
-**Statut : `in-progress` — les deux volets livrés, revus et corrigés ; vérification docker en cours.**
-PR `dossier-service` **#27** et PR `microfinance-service` **#3**, à intégrer **ensemble** (contrat d'événement).
+**Statut : `done` (2026-09-13).** PR `microfinance-service` **#3** et PR `dossier-service` **#27** intégrées **ensemble** en rebase-merge sur `dev` (contrat d'événement).
 
 ### Volet `dossier-service` — la devise publiée, et explicite pour une IMF
 
@@ -115,6 +114,39 @@ PR `dossier-service` **#27** et PR `microfinance-service` **#3**, à intégrer *
 - Sécurité : aucune vulnérabilité (IDOR, données personnelles masquées dans pino, bornes du montant).
 - Portes sur l'état final, rejouées en session : **1 154 unitaires / 77 suites**, **84 e2e** et 10 sautés (la suite
   Mongo), couverture 99,68 / 94,53 / 99,34 / 99,71.
+
+### ✅ Vérification docker — les dix points prouvés, aucun défaut
+
+Stack recréée (conteneurs arrêtés puis redémarrés par Portly), code en vol vérifié **dans les deux conteneurs**,
+`Found 0 errors` filtré au dernier démarrage, jetons RS256 réels.
+
+| Point | Verdict |
+|---|---|
+| **D-499-B** : dossier MICROFINANCE sans devise ⇒ 400 `DEVISE_REQUISE` (`null` compris), aucun document ni événement écrit ; `" xof "` ⇒ 201 et `XOF` en base ; dossier d'entreprise sans devise ⇒ XOF, inchangé | **PROUVÉ** |
+| **Round-trip de la devise** : `dossier.created` et `dossier.updated` la portent ; le read-model microfinance la reçoit ; `balance-service` projette les dossiers **sans rejet** (0 « ignoré », `LAG 0`) | **PROUVÉ** |
+| **Aucun repli sur XOF** : sur un dossier projeté avant la story (sans devise en read-model), souscription, remboursement et annulation ⇒ 409 `DEVISE_DOSSIER_ABSENTE`, aucun mouvement écrit | **PROUVÉ** |
+| **Collections et index réels** : `membres`, `mouvements_parts_sociales`, unicité du numéro par dossier, unicité de l'annulation | **PROUVÉ** |
+| **Membres** : numéro normalisé, doublon ⇒ 409 **générique** (ni nom ni identifiant), même numéro dans un autre dossier ⇒ 201, pagination, rectification, transitions, sortie de `DECEDE` refusée, **aucune route DELETE** | **PROUVÉ** |
+| **Parts, contre des montants calculés d'avance** : remboursement au-delà du solde ⇒ 409 ; **remboursement daté avant la souscription ⇒ 409 `SOLDE_PARTS_NEGATIF_A_UNE_DATE`** (solde à la date −10 000) ; même jour ⇒ accepté ; double annulation et annulation d'annulation ⇒ 409 ; solde final **20 000** identique dans l'API et au recalcul `mongosh` ; **aucun champ solde en base** ; membre radié : souscription refusée, remboursement permis | **PROUVÉ** |
+| ⛔ **Garde de type (bloquant de revue)** : sur deux dossiers d'entreprise d'une organisation habilitée, les **11 routes** ⇒ 409 `REFERENTIEL_DOSSIER_INDETERMINE`, rien écrit | **PROUVÉ** |
+| **Portée** : membre ou mouvement d'un autre dossier, et jeton d'une autre organisation ⇒ 404 au **même corps** que l'inexistant ; exercice clos ⇒ 409, y compris quand le solde permettait le remboursement ; exercice introuvable ⇒ 409 | **PROUVÉ** |
+| **Données personnelles** : 0 occurrence sur 22 motifs d'identité dans les logs ; les mouvements portent exactement leurs clés techniques, sans identité | **PROUVÉ** |
+| ⛔ **Concurrence** — (a) la spec d'intégration sur le Mongo de la stack : **10 tests passés sur 10**, sans le test sentinelle ; (b) en HTTP réel, deux remboursements de 60 lancés **en parallèle** sur un solde de 100 : **un seul succès et un solde final de 40, aux cinq tirages** ; un sixième, chronométré, confirme les deux requêtes en vol à la même milliseconde | **PROUVÉ** |
+
+### Réserves de la vérification — dites sans gravité
+
+- Sur un dossier d'entreprise, aucun membre ne pouvant exister, les routes visant un membre n'avaient **aucune issue en
+  succès possible** : leur 409 y mesure l'ordre des gardes, pas une écriture évitée. La création et la liste, elles,
+  pouvaient réussir sans la garde.
+- Les logs ne journalisent que les réponses 4xx (jamais le corps) : l'absence d'identité porte sur ces lignes.
+- **Les deux premiers passages de trois points étaient NULS** (des identifiants vides produisaient des routes `//`,
+  rien écrit) : seuls les passages rejoués sont rapportés.
+
+### Effets de bord laissés en base de dev
+
+Des données de vérification ne peuvent pas être retirées par l'API — c'est voulu (dossiers archivés, membres jamais
+supprimés, mouvements append-only) : 3 dossiers archivés, 6 membres, 18 mouvements. ⚠️ Un **exercice 2026 est resté
+OUVERT** sur le dossier « IMF Verif 497 », antérieur à la story.
 
 ### ⚠️ Deux points dits plutôt que tus
 
