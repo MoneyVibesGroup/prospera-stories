@@ -1,6 +1,6 @@
 # STORY-500 : Dépôts de la clientèle — à vue, à terme, et les intérêts que l'institution DOIT
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -82,8 +82,8 @@ clôture d'un compte, publication d'événement, production de balance.
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-09-13).** Branches `MNV-500` ouvertes sur `docs` (base `main`) et
-`microfinance-service` (base `dev`). Décisions D-500-A → D-500-I consignées ci-dessus.
+**Statut : `done` (2026-09-13).** PR `microfinance-service` **#4** intégrée en rebase-merge sur `dev` (3 commits
+de feature et 2 de revue). Décisions D-500-A → D-500-I consignées ci-dessus.
 
 ### Développement — livré
 
@@ -170,6 +170,43 @@ depuis 21:17, l'ancien processus tenant le port. Il servait donc du code d'AVANT
 Un `grep` dans `src/` montrait le code à jour **sur disque** : il ne prouvait rien du processus. Stack
 redémarrée par Portly ; le code servi est prouvé par l'OpenAPI publiée sur le port (elle contient
 `ANNULATION_VERSEMENT_DAT_HORS_OUVERTURE`, que seul le contrôleur final déclare).
+
+### ✅ Vérification docker — onze points prouvés, aucun défaut
+
+Code servi reconfirmé avant le premier point (HEAD `3974d70`, processus démarré après la dernière modification de
+`src/`, marqueur présent sur le port), jetons RS256 réels, montants **calculés d'avance** (DAT de 1 000 000 à 36 %,
+base 360 : 1 000 par jour), recalculs `mongosh` directs.
+
+| Point | Verdict |
+|---|---|
+| **P1** collections `comptes_depot`, `mouvements_depot` ; index uniques partiels d'annulation et de levée | **PROUVÉ** |
+| **P2** ouverture : compte à vue sans aucune condition en base ; DAT aux quatre conditions exactes ; à vue avec taux ⇒ 400 `CONDITIONS_INTERDITES_COMPTE_A_VUE`, DAT sans base ⇒ 400 `CONDITIONS_DAT_INCOMPLETES`, rien écrit | **PROUVÉ** |
+| **P3** compte à vue : retrait qui mord dans un blocage ⇒ 409, rien écrit ; levée, retrait, annulation ; documents à clés techniques seules, **aucun champ solde**, aucune identité, `enregistrePar` = `sub` du jeton (5/5) ; solde `mongosh` = API = attendu à trois dates | **PROUVÉ** |
+| **P4** DAT : versement hors ouverture, retrait avant échéance, **annulation tardive du versement (D-500-I)**, paiement d'intérêts non échus ⇒ 409 chacun, un seul mouvement en base après les quatre | **PROUVÉ** |
+| **P5** intérêts (D-500-H) : courus 17 000 au 31/01 (jour compris), 31 000 la veille de l'échéance (période entière), au jour d'échéance échus 31 000 et courus 1 000 ; paiement des échus exacts ⇒ non payés 0 | **PROUVÉ** |
+| **P6** rejeu (AC-5) : situations au 31/03 relues avant et après cinq écritures d'avril ⇒ **diff vide** sur les deux comptes | **PROUVÉ** |
+| **P7** vue portefeuille (AC-4) : blocage levé après l'arrêté présent, absent à la date de la levée ; blocage d'un autre dossier jamais présent ; aucune identité | **PROUVÉ** |
+| **P8** concurrence HTTP : deux retraits de 60 en parallèle sur 100, **5 tirages** ⇒ chaque fois un 201 et un 409, un seul RETRAIT et solde 40 en base | **PROUVÉ** |
+| **P9** portée : autre membre, autre compte, autre dossier, autre organisation ⇒ 404 au même corps que l'inexistant ; dossier d'ENTREPRISE ⇒ les **13 routes** en 409 `REFERENTIEL_DOSSIER_INDETERMINE`, rien écrit | **PROUVÉ** |
+| **P10** exercice clos par `dossier-service` (propagé en 1 s) ⇒ 409 `EXERCICE_CLOS` ; date hors exercice ⇒ 409 `EXERCICE_INTROUVABLE` ; rien écrit | **PROUVÉ** |
+| **P11** journaux : 0 occurrence du motif saisi, des noms, prénoms et numéros de sociétaire ; aucune 500 | **PROUVÉ** |
+
+Cohérence en base : **0 mouvement orphelin**, 0 mouvement dont l'organisation, le dossier ou le membre diffère de
+son compte. Comptages et diffs du rejeu **relus en session** après le rapport du sous-agent.
+
+#### Réserves — dites sans gravité
+
+- P8 : départ des deux requêtes à ~15 ms d'écart — concurrentes, sans preuve d'une arrivée à la même milliseconde.
+- P9 : sur un dossier d'entreprise aucun compte ne peut exister ; les routes visant un compte y mesurent l'ordre des
+  gardes, pas une écriture évitée.
+- P11 : les logs ne journalisent que les lignes de requête, jamais les corps.
+- Non rejoué en docker (gardé par les unitaires et les mutations) : `MONTANT_DEPOT_HORS_BORNE`, base 365 et autres
+  périodicités.
+
+#### Effets de bord laissés en base de dev
+
+Rien ne se retire par l'API, c'est voulu : dossiers « IMF Verif 500 A » (2 membres, 7 comptes, 22 mouvements,
+exercice 2026 ouvert) et « IMF Verif 500 B » (1 membre, 1 compte, 2 mouvements, exercice 2025 **clos**, 2026 ouvert).
 
 ## Notes
 
