@@ -111,6 +111,69 @@ docker) — sa non-régression se prouve en **vérif docker**, pas en e2e.
   peuvent être en devises. Le périmètre s'arrête aux **créances et dettes** dans cette story ;
   les comptes de trésorerie en devises sont **nommés et exclus**, pas oubliés.
 
+## Progress Tracking
+
+**Statut : `in-progress` — code livré et revu, correctifs de revue en cours, vérification docker à rejouer.**
+PR `balance-service` **#104**.
+
+### Décisions prises au développement (D-495-B à I)
+
+- **D-495-B — rien n'est écrit en balance.** Écrire une version de balance aurait exigé une nouvelle
+  origine dans `ORIGINES_BALANCE`, que **trois lectures** excluent une par une (agrégation, gel du cahier,
+  moteur fiscal) — et deux balances dérivées se seraient disputé la base du provisionnement fiscal, qui
+  repart de « la dernière balance non provisionnée ». La réévaluation **publie** le calcul et les écritures
+  proposées ; leur application est **hors périmètre**. ⚠️ C'est l'inverse de ce que la requalification
+  envisageait (« trois lecteurs à revoir ») : le coût mesuré a tranché. Effet voulu pour AC-6 :
+  `ORIGINES_BALANCE` et le checksum v2 ne bougent pas.
+- **D-495-C — la nature (créance/dette) se déduit du compte**, limité aux comptes des postes **BI**
+  (411/412/414/416/418) et **DJ** (401/402/408) de l'artefact, une spec vérifiant l'égalité. 409 et 419
+  sont refusés : ce sont des **avances**, qui ne se réévaluent pas.
+- **D-495-D — pas de transaction** : chaque écriture touche un seul document.
+- **D-495-E — le montant en tenue est saisi puis contrôlé** contre montant d'origine × cours historique,
+  à une unité monétaire près.
+- **D-495-F — le cours de clôture n'est pas enregistré** : saisi avec sa source, renvoyé dans la réponse,
+  jamais persisté. ⚠️ Conséquence assumée : **l'opposabilité du cours de clôture est hors périmètre** — un
+  auditeur ne peut pas le retrouver dans le produit.
+- **D-495-G — le gel se limite à un exercice clos** (même règle que les registres fiscaux) ; la
+  réévaluation reste calculable sur un exercice clos, comme un **nouveau calcul**, jamais une relecture.
+- **D-495-H — provision sans écriture** : seul le montant de référence est publié, `appliquee: false`. Les
+  comptes 194 / 6971 ne sont pas au niveau de détail de l'artefact : **non inventés**.
+- **D-495-I — arrondi** en entiers exacts (BigInt), une seule fois par ligne, au plus proche, demi-unité
+  éloignée de zéro.
+- **Le CNY est refusé**, pas ajouté au registre des devises. **La garde de STORY-490 est bornée, pas
+  levée** : elle exempte le seul nouvel agrégat, et le vocabulaire de valorisation reste interdit partout
+  ailleurs.
+
+### Revues — deux bloquants, dont un chiffré à une dette entière
+
+- ⛔ **B1 (trouvé par les DEUX revues) — un cours en notation exponentielle rend 500 ou est lu comme 0.**
+  `class-validator` compte les décimales par `toString().split('.')` : `1e-7` lève (500), et `1.5e-7` est
+  **accepté** puis arrondi à 0. Un cours de clôture `1.5e-7` sur une dette de 50 000 EUR fait passer
+  **toute la dette en gain latent 479**, réponse 200.
+- ⛔ **B2 — la provision affirmait « aucune perte latente » quand la perte n'avait pas été mesurée** : un
+  cours de devise oublié rend la réévaluation incomplète, et la provision affichait pourtant 0 —
+  précisément dans le cas où le chiffre manque.
+- **N1** — le cours de clôture pouvait être daté **avant l'opération** qu'il réévalue. Décision : ce cas
+  est **refusé** (non-sens) ; un cours non daté du dernier jour de l'exercice produit un **avertissement**,
+  pas un refus — un cours du dernier jour ouvré est légitime, et fixer une tolérance en jours inventerait
+  une règle.
+- **N2** — une docstring décrivait comme une « relecture » ce qui est un nouveau calcul ; la réponse
+  publiera `exerciceClos`. **N3** — un type `null` invalide en OpenAPI 3.0 était publié.
+- **Sécurité : aucune vulnérabilité exploitable** — isolation entre organisations vérifiée sur la
+  suppression, BigInt borné, throttler en place, pas de fuite.
+- Vérifié et écarté par la revue : le sens des écarts dans les **quatre cas** (créance/dette × hausse/baisse)
+  est juste, la non-compensation est gardée par une fixture qui porte deux pertes et deux gains, l'exposant
+  **appliqué** du XOF est utilisé partout.
+
+### Vérification docker — une première tentative NON ATTEINTE, et dite comme telle
+
+La vérification précoce n'a **rien prouvé** : la machine était saturée (charge de l'hôte à 208, quatre
+agents faisant tourner jest en parallèle, Kafka à 228 % de CPU), et la route neuve n'a jamais répondu. Elle
+a laissé une **préparation** : état de départ mesuré en base (le dossier témoin d'AC-6 et le checksum de sa
+balance), un script de capture avant/après, et le **calcul à la main** des écarts attendus — dont les
+chiffres qui trahiraient une **compensation** (un net de 44 201 612 au lieu de 63 215 000 et 19 013 388) ou
+un **facteur 100** d'exposant. Elle sera rejouée sur l'état corrigé, sur une stack seule.
+
 ## Notes
 
 - Voir [[STORY-489]], [[STORY-490]], SYSCOHADA révisé (opérations en monnaies étrangères).
