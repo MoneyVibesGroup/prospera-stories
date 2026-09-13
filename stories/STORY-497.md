@@ -1,6 +1,8 @@
 # STORY-497 : Socle `microfinance-service` — le portefeuille naît dans un dossier, sur le référentiel du dossier
 
-Status: ready-for-dev
+Status: in-progress
+
+**Complexité :** high
 
 **Épic :** EPIC-121 — Socle vertical SFD
 **Service :** `microfinance-service` (nouveau)
@@ -42,7 +44,19 @@ story vaut 13 et non 5.
 
 ## Mesuré le 2026-09-13 — story REPORTÉE, et trois arbitrages tranchés
 
-⏸ **Reportée sur décision user du 2026-09-13** : le service n'existe pas et son dépôt non plus.
+▶️ **REPRISE le 2026-09-13** (le report de la matinée est levé, décision user) : le dépôt
+**`MoneyVibesGroup/prospera-microfinance-service` est créé**, `main` et `dev` poussées, le socle est
+en cours sur `MNV-497`. **Port 3011** (3005 et 3008 restent libres), base Mongo `microfinance_service`,
+audience JWT `microfinance-service`.
+
+⛔ **TROU MESURÉ LE 2026-09-13 — AD-9 n'a aucun compte où se poser.** La spine exige que le service
+tienne les **engagements hors bilan** (crédits accordés non décaissés, garanties reçues), qui comptent
+pour le prudentiel. Or le plan de comptes de `sfd-bceao@2.0` s'arrête à la **classe 7** : son README
+écrit que la **classe 8 est « hors amorce »**, parce qu'elle n'entre ni au bilan ni au compte de
+résultat. Deux voies, à trancher **avant** la story des engagements : étendre `sfd-bceao` — donc le
+republier, recalculer les checksums et invalider les snapshots, précisément le coût qu'AD-3 veut
+éviter — ou loger la classe 8 dans un artefact séparé. **Hors périmètre du socle.**
+
 Les prérequis, eux, sont **vérifiés dans le code** : STORY-533 (`entitlement.schema.ts` porte
 `referentiels?: {code,version}[]`, publié sur `entitlement.changed`), STORY-422
 (`resoudreReferentielDuDossier`) et STORY-489 (devise au contrat canonique) sont bien livrées.
