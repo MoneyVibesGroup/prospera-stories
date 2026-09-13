@@ -156,6 +156,21 @@ convertissait les montants et levait une erreur brute (500) — la borne est dé
 invariants ; la mutation inverse fait rougir le test. Un point **consigné comme dette** : chaque écriture
 et chaque situation chargent tous les mouvements du compte (linéaire, même patron que les parts sociales).
 
+### Portes sur l'état final (HEAD `3974d70`, rejouées en session après les correctifs de revue)
+
+Lint 0 · build OK · **1 595** unitaires / 88 suites, couverture **99,47 / 95,88 / 99,29 / 99,51** · **189** e2e
+(23 sautés : suites Mongo sans URI) · **23/23** sur Mongo réel (dont 5 tests de la vue portefeuille ; la mutation
+de la date des levées en fait rougir 3).
+
+### ⚠️ Vérification docker — un premier passage NUL, dit plutôt que tu
+
+Le premier passage a été **arrêté avant d'écrire quoi que ce soit** : le conteneur répondait `healthy`, mais le
+processus en mémoire datait de 20:27 — **tous les rechargements à chaud échouaient en `EADDRINUSE :::3011`**
+depuis 21:17, l'ancien processus tenant le port. Il servait donc du code d'AVANT D-500-H, D-500-I et la revue.
+Un `grep` dans `src/` montrait le code à jour **sur disque** : il ne prouvait rien du processus. Stack
+redémarrée par Portly ; le code servi est prouvé par l'OpenAPI publiée sur le port (elle contient
+`ANNULATION_VERSEMENT_DAT_HORS_OUVERTURE`, que seul le contrôleur final déclare).
+
 ## Notes
 
 - Voir [[STORY-499]], [[STORY-507]] (publication en balance), spine AD-1.
