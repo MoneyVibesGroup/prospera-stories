@@ -361,6 +361,22 @@ levée, limite globale comprise. Confirme le retrait du throttle propre (D-504-R
   calcul entrelacé) — la correction reste portée par l'index unique (dossier, version).
 - Mutations R1, S1, K1 → K3, Q1 → Q5 rouges par assertion. Portes du dev : 2 366 unitaires, 353 e2e, 60/60 Mongo réel.
 
+### ✅ Dernière mini-vérification docker (HEAD `d8b53f8`) — trois points prouvés, un non productible, aucun échec
+
+Code servi prouvé avant tout point (335 fichiers identiques hôte/conteneur ; `dist` sans aucun décorateur de throttle
+propre ni constante retirée ; OpenAPI servie sans aucune réponse 429, avec le détail `plafond: ORGANISATION | PROCESSUS`
+propre à `d8b53f8` ; artefact prudentiel inchangé).
+
+| Point | Verdict |
+|---|---|
+| **V1** (D-504-R) 15 propositions puis 15 actes en 1,4 s ⇒ 30 × 409 paquet vide, **zéro 429**, `X-RateLimit-Limit: 100` (limite globale) au lieu de 10 et 3 ; aucune collection modifiée, profiler : zéro opération sur crédits, arrêtés, lignes et verrous | **PROUVÉ** |
+| **V2** (D-504-R) throttle global inchangé, premier `APP_GUARD` (lu sans le saturer) | **PROUVÉ** |
+| **V3** (D-504-S) emplacement par organisation | **NON PRODUCTIBLE** — pris après le refus du paquet vide ; détail publié dans l'OpenAPI et le `dist` |
+| **V4** non-régression : 403 du rôle sans écriture, date future refusée, corps invalides en 400, trois collections et index nommés, `/health`, paquet de 498 ; zéro 5xx, zéro 429, 36 refus appariés | **PROUVÉ** |
+
+Réserve : les correctifs appliqués en session après ce passage ne touchent que des tests et des **commentaires** des
+fichiers de production (constaté par diff par le vérificateur) — le comportement vérifié est celui du commit final.
+
 ### Vérification ciblée de `d8b53f8` (code et sécurité) — mergeable, aucune vulnérabilité
 
 - **Validé** : D-504-S sans fuite par construction (contrôles synchrones avant toute prise, un refus « processus » ne
