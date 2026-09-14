@@ -3697,7 +3697,7 @@ sprints:
         epic: "EPIC-124"
         points: 8
         service: "microfinance-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 — decoupage epics-microfinance-2026-08-27.md + spine architecture-microfinance-service-2026-08-27. Le réflexe est de stocker un statut SAIN / EN_SOUFFRANCE sur le crédit et de le mettre à jour par un batch nocturne. C'est le mauvais modèle, et il ne se rattrape pas.
+        status: "in-progress"  # MAJ 2026-09-14 (demarrage, flux APEX complet) — branches MNV-503. D-503-A (user) MECANIQUE SEULE : paquet prudentiel vide ⇒ NON_CLASSABLE avec version + checksum + valeursLivrees false ; AC-2 prouve par un paquet de TEST fictif jamais servi. Credit non decaisse = hors bilan, jamais « sain » (consequence de D-502-P). # CREEE le 2026-08-27 — decoupage epics-microfinance-2026-08-27.md + spine architecture-microfinance-service-2026-08-27. Le réflexe est de stocker un statut SAIN / EN_SOUFFRANCE sur le crédit et de le mettre à jour par un batch nocturne. C'est le mauvais modèle, et il ne se rattrape pas.
         story_path: "stories/STORY-503.md"
       - story_id: "STORY-504"
         title: "Provisionnement réglementaire par tranche — calculé, proposé, jamais appliqué d'office"

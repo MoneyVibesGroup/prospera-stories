@@ -1,6 +1,8 @@
 # STORY-503 : Le classement sain / en souffrance est DÉRIVÉ d'une date d'arrêté — jamais stocké
 
-Status: ready-for-dev
+Status: in-progress
+
+**Complexité :** high
 
 **Épic :** EPIC-124 — Classement et provisionnement réglementaire
 **Service :** `microfinance-service`
@@ -20,6 +22,26 @@ comptes le demande.** Un statut stocké et mis à jour ne se rejoue pas : il dit
 dernière fois que le batch est passé, et personne ne peut prouver ce qu'il valait à la date
 d'arrêté. Un contrôle demandera précisément qu'il se rejoue.
 
+## Cadrage mesuré avant de coder (2026-09-14)
+
+| Affirmation | Verdict | Mesure |
+|---|---|---|
+| Les tranches d'ancienneté existent dans le paquet prudentiel | **FAUX** | `prudentiel-sfd-bceao@1.0` : `provisionnement.tranches: []` — amorce vide (D-498-A) |
+| L'échéance la plus ancienne impayée et les jours de retard sont dérivés | **VRAI** | STORY-502 (AC-4), sur la seule version en vigueur (D-502-N) |
+| Un crédit non décaissé a un retard | **FAUX** | D-502-P : l'échéancier naît du décaissement ; c'est un engagement hors bilan (AD-9) |
+
+### Décision du 2026-09-14
+
+- **D-503-A — MÉCANIQUE SEULE (décision user, doctrine D-498-A)** : `classer` est une fonction pure des jours de retard
+  et du paquet ; faute de tranche, le classement rend `NON_CLASSABLE`, avec la version, le checksum du paquet et
+  `valeursLivrees: false`. AC-2 est prouvé par un **paquet de test marqué fictif**, jamais servi ni embarqué : changer
+  une borne change le classement. Aucune valeur prudentielle n'est écrite.
+- Un crédit sans décaissement ou dont l'octroi est annulé n'est **pas** « sain » : il est nommé hors bilan.
+
+### Hors périmètre, déclaré
+
+Contagion par débiteur et crédits restructurés (STORY-505) · provisionnement (STORY-504) · valeurs BCEAO réelles.
+
 ## Critères d'acceptation
 
 - [ ] AC-1 — `classer(creditId, dateArrete)` est une **fonction pure** de l'échéancier, des
@@ -34,6 +56,11 @@ d'arrêté. Un contrôle demandera précisément qu'il se rejoue.
 - [ ] AC-5 — Performance : le classement de l'ensemble d'un portefeuille à une date donnée est
       calculable en une passe. ⚠️ Une IMF de taille moyenne porte plusieurs milliers de crédits ;
       une dérivation naïve par crédit ne tiendra pas l'arrêté.
+
+## Progress Tracking
+
+**Statut : `in-progress` (2026-09-14).** Branches `MNV-503` ouvertes sur `docs` (base `main`) et
+`microfinance-service` (empilée sur la 502, rebasée sur `dev` après son merge). Décision D-503-A ci-dessus.
 
 ## Notes
 
