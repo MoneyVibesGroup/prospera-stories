@@ -1,6 +1,6 @@
 # STORY-502 : L'échéancier — la pièce contre laquelle le retard se calcule
 
-Status: in-progress
+Status: done
 
 **Complexité :** high
 
@@ -63,8 +63,8 @@ pénalités de retard · publication en balance (STORY-507).
 
 ## Progress Tracking
 
-**Statut : `in-progress` (2026-09-14).** Branches `MNV-502` ouvertes sur `docs` (base `main`) et
-`microfinance-service` (base `dev`, qui contient STORY-501). Décisions D-502-A → D-502-D consignées ci-dessus.
+**Statut : `done` (2026-09-14).** PR `microfinance-service` **#6** intégrée en rebase-merge sur `dev` (2 commits de
+feature, 3 de revue, 1 de tests) ; branche supprimée. Décisions D-502-A → D-502-D consignées ci-dessus.
 PR `microfinance-service` **#6**.
 
 ### Développement — livré (sous-agent `opus`, rapport à vérifier en revue)
@@ -212,6 +212,27 @@ sur `127.0.0.1`) appliqué à tous les montages et au JWKS de test.
 Lint 0 · build OK · **2 024** unitaires / 102 suites, couverture **99,74 / 96,66 / 99,52 / 99,78** · **298** e2e sur
 **deux passages complets** (43 sautés : suites Mongo sans URI), **aucun échec intermittent** depuis le correctif du
 transport · **33/33** sur Mongo réel (`credits.mongo` + `depots.mongo`, aucun sauté).
+
+### ✅ Re-vérification docker ciblée (HEAD `a72586d`) — sept points prouvés, aucun défaut
+
+Code servi prouvé avant tout point : md5 de `credits.service.ts` identique sur disque, dans le conteneur et dans le
+blob git ; OpenAPI servie avec `DECAISSEMENT_SUR_ECHEANCE_IMPAYEE` et `VERSION_DEJA_ETABLIE_A_CETTE_DATE`, sans le code
+retiré ; idem après redémarrage. Attendus calculés par un modèle indépendant AVANT les appels. Empreintes du rejeu
+**recontrôlées en session** (trois relectures identiques).
+
+| Point | Verdict |
+|---|---|
+| **Q1** (D-502-T) arriéré : tranche de 1 ⇒ 409 `{dateEcheance: 2026-02-01, restantDu: 82 512}` ; rien écrit, v1 identique à l'octet ; 182 jours de retard toujours publiés | **PROUVÉ** |
+| **Q2** (D-502-T) échéance du jour impayée ⇒ 409 ; payée puis tranche ⇒ 201, v2 conforme (report 0), 0 jour le lendemain | **PROUVÉ** |
+| **Q3** (D-502-U, P9 rejoué) deux rééchelonnements simultanés, **5 crédits** ⇒ `[201, 409]` chaque fois, une seule version | **PROUVÉ** |
+| **Q4** (D-502-U) successifs même date ⇒ 201 puis 409 ; à l'échéance suivante ⇒ v3, v2 identique à l'octet | **PROUVÉ** |
+| **Q5** (D-502-U) tranche ou rééchelonnement le jour du premier décaissement ou d'une tranche ⇒ 409 | **PROUVÉ** |
+| **Q6** non-régression : partiel payé ponctuellement (0 jour, encours = capital restant dû = `mongosh`) ; rejeu au 30/04 après écritures ultérieures et redémarrage ⇒ diff vide | **PROUVÉ** |
+| **Q7** 50 versions : 0 orpheline, contiguës, aucune paire à la même date sur ce passage ; 0 réponse 5xx sur 148 | **PROUVÉ** |
+
+Réserve : quatre crédits de dev portent encore v1/v2/v3 à la même date — créés par le premier passage sur `cb492ea`,
+**avant** le correctif (le défaut P9 lui-même) ; aucune migration (le dev repart de zéro). Effets de bord en base de
+dev : produit `V502B-*-IC`, 10 crédits de vérification ; mots de passe des comptes verif497 réinitialisés.
 
 ### Revue de sécurité (⑦) — aucune vulnérabilité
 
