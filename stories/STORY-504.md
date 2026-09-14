@@ -300,6 +300,30 @@ le défaut antérieur du `LoggingInterceptor` se reproduit (42 lignes au faux st
   (quota partagé derrière un même NAT) ; un processus tué en plein acte bloque les actes du dossier jusqu'à 5 min ; le
   cache des propositions terminées reste une dette.
 
+### Revue ciblée de D-504-Q (code et sécurité) — mergeable, cinq constats non bloquants corrigés d'office
+
+- **Validé** : aucune fuite d'emplacement du sémaphore sur aucun chemin ; prise du verrou atomique (deux reprises d'un
+  verrou expiré ⇒ une seule réussit, l'autre bute sur l'index unique) ; libération par jeton ; marque de
+  `LignesArreteValidees` infalsifiable à l'exécution et `@ts-expect-error` effectif.
+- **[sécurité, 85] Le throttle propre déclenche un défaut du stockage de `@nestjs/throttler` 6.5.0** : les minuteurs de
+  décrément sont rangés par nom de throttler et non par clé ; le retour d'une clé bloquée efface ceux de **toutes** les
+  clés, dont les compteurs cessent de décroître. Défaut antérieur, mais le throttle propre en faisait tomber le coût de
+  ≈ 102 à **4 requêtes anonymes par minute** (script sur la vraie classe : victime refusée dès la minute 5,5).
+- **[sécurité, 90] Throttle compté par IP avant l'authentification** : un anonyme derrière le même NAT épuise le quota
+  d'actes de toute une IMF.
+- **[sécurité, 85] Sémaphore global sans part par organisation** : un seul utilisateur occupe les deux emplacements en
+  permanence (deux dates distinctes toutes les 30 s), toutes les autres organisations sont refusées.
+- **[85] L'isolation de la clé de mutualisation n'est protégée par aucun test** : retirer le dossier de la clé ferait
+  servir à un tenant la proposition complète d'un autre, sans qu'un test rougisse.
+- **[80] Chiffres périmés** dans les commentaires qui justifient les bornes (acte ≈ 91 s au plafond, pas 75).
+
+### Décisions du 2026-09-14 (après revue ciblée de D-504-Q)
+
+- **D-504-R — le throttle propre aux deux routes est retiré** : il aggravait un défaut de bibliothèque exploitable sans
+  authentification ; le sémaphore et le verrou bornent le coût. Le défaut du stockage du throttler (antérieur, tout le
+  service) est consigné comme dette, avec le throttle par utilisateur authentifié qui le remplacerait.
+- **D-504-S — au plus un emplacement de calcul par organisation**, dans le plafond global du processus.
+
 ### Portes sur l'état final (HEAD `e3111d0`, rejouées en session dans le worktree, en séquence)
 
 Lint 0 · build OK · **2 362** unitaires / 121 suites (1 saut conditionnel préexistant), couverture
