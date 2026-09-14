@@ -361,6 +361,12 @@ levée, limite globale comprise. Confirme le retrait du throttle propre (D-504-R
   calcul entrelacé) — la correction reste portée par l'index unique (dossier, version).
 - Mutations R1, S1, K1 → K3, Q1 → Q5 rouges par assertion. Portes du dev : 2 366 unitaires, 353 e2e, 60/60 Mongo réel.
 
+### Portes sur l'état final (HEAD `d8b53f8`, rejouées en session dans le worktree, en séquence)
+
+Lint 0 · build OK · **2 366** unitaires / 121 suites (1 saut conditionnel préexistant), couverture
+**99,79 / 97,15 / 99,61 / 99,82** · **353** e2e (70 sautés : suites Mongo sans URI) · **60/60** sur Mongo réel
+(`credits.mongo`, `depots.mongo`, `classement-credits.mongo`, `provisionnement.mongo`, aucun sauté).
+
 ### Portes sur l'état final (HEAD `e3111d0`, rejouées en session dans le worktree, en séquence)
 
 Lint 0 · build OK · **2 362** unitaires / 121 suites (1 saut conditionnel préexistant), couverture
