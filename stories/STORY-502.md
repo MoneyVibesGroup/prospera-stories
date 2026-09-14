@@ -195,6 +195,18 @@ exacte) ⇒ la requête part chez lui. Mécanisme reproduit par script. C'est ce
 correctif `ecouterPourSupertest` **n'avait jamais été porté** ici : helper `test/utils/serveur-e2e.ts` (écoute unique
 sur `127.0.0.1`) appliqué à tous les montages et au JWKS de test.
 
+### Seconde vague de correctifs (commits `7f21f66` tests, `a72586d` revue) — relue en session
+
+- **D-502-T appliquée** : `DECAISSEMENT_SUR_ECHEANCE_IMPAYEE` (détails `dateEcheance`, `restantDu`), lue sur la
+  version en vigueur à la fin du jour de la tranche. Scénario de revue : tranche de 1 refusée, rien écrit, retard
+  toujours publié (151 jours au 02/07). Conséquence : une tranche ne reporte plus jamais d'intérêts échus.
+- **D-502-U appliquée** : `VERSION_DEJA_ETABLIE_A_CETTE_DATE` (détail `dateVersion`) sur tranche et rééchelonnement ;
+  un rééchelonnement suivant reste possible à une échéance de la version en vigueur (version 3 prouvée).
+- Code mort retiré (garde, inventaire, Swagger, test sur données impossibles).
+- Flake : `test/utils/serveur-e2e.ts` (écoute unique sur `127.0.0.1`) sur les cinq montages + JWKS de test.
+- Mutations : garde T retirée ⇒ 2 unitaires + 2 e2e rouges ; garde U retirée ⇒ 3 unitaires + 2 e2e + 1 Mongo réel
+  (concurrent puis successif) rouges.
+
 ### Revue de sécurité (⑦) — aucune vulnérabilité
 
 Pistes écartées avec preuve : IDOR sur échéanciers et rééchelonnement (filtres org/dossier/membre/crédit, verrou
