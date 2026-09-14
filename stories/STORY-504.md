@@ -175,6 +175,28 @@ compterait des arrêtés jamais écrits. **Non corrigé ici** (périmètre) — 
 - `type` au lieu de `typeGarantie` dans la ligne ; relecture projetée du dernier arrêté ; recalcul par page consigné en
   dette.
 
+### Correctifs de revue livrés (commit `1029fce`)
+
+- **D-504-K** : `@Roles(TENANT_ADMIN)` sur le seul handler d'application, inscrit comme **unique exception nommée** à
+  l'invariant de portée. ⚡ En l'écrivant, l'invariant s'est révélé **vacant** sur les handlers (il ne balayait que les
+  décorateurs de classe) : il lit désormais le corps de chaque classe. Anti-énumération : la garde de rôle passe avant la
+  garde de dossier ⇒ un `TENANT_USER` reçoit le même 403 quel que soit le dossier, jamais lu.
+- **D-504-L** : horloge injectable (`src/common/horloge/horloge.ts`), `ARRETE_PROVISION_DATE_FUTURE` jugé avant
+  l'exercice ; la proposition ne lit pas l'horloge.
+- **D-504-M** : `versionDeReference` publiée par la proposition, exigée par l'acte ; `dejaApplique` jugé avant la version.
+- **D-504-O** : la proposition d'une date passée part du dernier arrêté daté au plus tard à cette date.
+- `type` dans la ligne ; relecture projetée du dernier arrêté.
+- 15 mutations rouges par assertion ; portes du dev : 2 323 unitaires, 352 e2e, 48/48 Mongo réel.
+
+### Décision du 2026-09-14 (user) — la borne de 2 000 crédits refusait une IMF moyenne
+
+- ⛔ Le correctif D-504-N bornait le portefeuille à **2 000 crédits par arrêté** (pire cas théorique : 20 garanties par
+  crédit dans un seul document de 16 Mo), alors qu'une IMF moyenne porte « plusieurs milliers » de crédits (503 AC-5).
+- **D-504-P — les lignes d'un arrêté sortent du document d'en-tête (décision user)** : en-tête dans
+  `arretes_provision`, une ligne par crédit dans la collection append-only `lignes_arrete_provision`, écrites **dans une
+  seule transaction** (aucun en-tête sans ses lignes, aucune ligne orpheline). La limite de document disparaît ; il reste
+  un **plafond de coût** par requête, compté avant le calcul (50 000 crédits).
+
 ## Notes
 
 - Voir [[STORY-498]], [[STORY-503]], [[STORY-507]] (la publication en balance).
