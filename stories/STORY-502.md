@@ -117,6 +117,29 @@ PR `microfinance-service` **#6**.
 - **D-502-E confirmée** : un remboursement anticipé paie les échéances suivantes en entier ; réduire les intérêts
   passe par un rééchelonnement explicite.
 
+### Correctifs de revue (commits `0e88b37`, `cb492ea`) et décisions qui en découlent
+
+- **D-502-P appliquée** : l'octroi n'écrit plus d'échéancier ; version 1 au premier décaissement ; chaque tranche
+  écrit une nouvelle version sur le capital restant dû + la tranche, dont les dates sont les **dates d'échéance
+  restantes recopiées** de la version en vigueur (la date de fin ne bouge pas) ; différé = différé en vigueur moins
+  les échéances échues ; intérêts échus impayés reportés.
+- **D-502-Q — un décaissement ne s'annule plus** (`409 ANNULATION_DECAISSEMENT_CONSOLIDE`) : sous D-502-P, chaque
+  décaissement a fixé une version. ⚠️ **Retire l'annulation de tranche livrée en STORY-501** ; un crédit décaissé ne
+  peut plus voir son octroi annulé. Correction d'un décaissement erroné = emplacement inerte
+  `CORRECTION_D_UN_DECAISSEMENT`.
+- **D-502-R** — une tranche est refusée avant le dernier mouvement, en cours de période, à ou après la date de fin,
+  ou après des intérêts payés par anticipation (quatre codes typés).
+- **D-502-S** — toute version de rang ≥ 2 (tranche ou rééchelonnement) **consolide** ce qui la précède
+  (`MOUVEMENT_CONSOLIDE_PAR_UNE_VERSION`) ; la version 1 ne consolide rien.
+- Rééchelonnement sans décaissement ⇒ `409 REECHELONNEMENT_SANS_DECAISSEMENT`.
+- Preuves : C1 (octroi annulé ou jamais décaissé ⇒ 0 jour, aucune échéance), C2 (décaissement tardif sans retard
+  avant la 1re échéance ; partiel payé ponctuellement : 12 échéances sans refus, 0 jour ; **encours = capital restant
+  dû à toute date**, unitaire + e2e + Mongo réel), C3 (cinq jeux d'annuités où la mutation rougit).
+- ⚠️ Codes devenus inatteignables par l'API, gardés en défense : `CAPITAL_REMBOURSE_SUPERIEUR_AU_DECAISSE`,
+  `ANNULATION_OCTROI_ANTERIEURE_A_UN_MOUVEMENT`.
+- ⚠️ Flake e2e : un `404` sur `POST produits-credit` une fois pendant un passage complet, non reproduit — même profil
+  que l'échec non reproduit de STORY-501 ; cause recherchée en revue ciblée.
+
 ### Revue de sécurité (⑦) — aucune vulnérabilité
 
 Pistes écartées avec preuve : IDOR sur échéanciers et rééchelonnement (filtres org/dossier/membre/crédit, verrou
