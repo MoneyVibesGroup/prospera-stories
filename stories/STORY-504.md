@@ -300,6 +300,27 @@ le défaut antérieur du `LoggingInterceptor` se reproduit (42 lignes au faux st
   (quota partagé derrière un même NAT) ; un processus tué en plein acte bloque les actes du dossier jusqu'à 5 min ; le
   cache des propositions terminées reste une dette.
 
+### Complément de vérification docker (HEAD `e3111d0`) — quatre points prouvés, un non productible
+
+Code servi prouvé avant tout point (335 fichiers identiques hôte/conteneur ; constantes du `dist` = source ; OpenAPI
+servie : l'ancien code de plafond absent, `PORTEFEUILLE_AU_DELA_DU_PLAFOND_DE_COUT`, `PROVISIONNEMENT_CALCULS_SATURES`,
+`ARRETE_PROVISION_DEJA_EN_COURS` et plafond interpolé présents). Ordre des gardes **lu dans le code servi** avant les
+attendus.
+
+| Point | Verdict |
+|---|---|
+| **U1** code servi et contrat publié | **PROUVÉ** |
+| **U2** `verrous_arrete_provision` et ses index (unique par dossier, TTL) présents ; 10 actes refusés ⇒ profiler : 0 opération sur les verrous (jamais pris avant le refus du paquet vide), 0 verrou résiduel | **PROUVÉ** |
+| **U3** throttle propre de `e3111d0` : 429 au 11ᵉ appel de proposition et au 4ᵉ acte, `Retry-After: 60` ; la route voisine non limitée ; retour après la fenêtre | **PROUVÉ** (pour `e3111d0`, retiré par D-504-R) |
+| **U4** saturation et verrou concurrent | **NON PRODUCTIBLE** — emplacement et verrou suivent le refus du paquet vide ; couverts par les unitaires et la spec Mongo réel |
+| **U5** non-régression : 403 du rôle sans écriture, 16 corps invalides en 400, index des en-têtes, lignes et verrous, dossier de 2 000 crédits jamais refusé par le plafond, `/health`, paquet de 498 ; 0 réponse 5xx, 56 refus appariés à leur ligne WARN | **PROUVÉ** |
+
+⛔ **Défaut du stockage de `@nestjs/throttler` 6.5.0 reproduit sur la stack** (hors code de la story, tout le service) :
+après la levée d'un blocage sur l'acte, le compteur de `classement-credits` reste à **93** au lieu de revenir à 99 après la
+fenêtre — six requêtes jamais décomptées. Les limites publiées (« N par 60 s par IP ») ne sont plus tenues après une
+levée, limite globale comprise. Confirme le retrait du throttle propre (D-504-R) ; la limite globale reste touchée —
+**dette à traiter par une story dédiée**, avec le défaut du `LoggingInterceptor`.
+
 ### Revue ciblée de D-504-Q (code et sécurité) — mergeable, cinq constats non bloquants corrigés d'office
 
 - **Validé** : aucune fuite d'emplacement du sémaphore sur aucun chemin ; prise du verrou atomique (deux reprises d'un
