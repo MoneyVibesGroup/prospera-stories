@@ -1,6 +1,6 @@
 # STORY-501 : Un crédit est la somme de ses événements — jamais un encours qu'on corrige
 
-Status: in-progress
+Status: done
 
 **Complexité :** high
 
@@ -75,8 +75,8 @@ publication d'événements · scoring ou décision d'octroi (AD-12).
 
 ## Progress Tracking
 
-**Statut : `in-progress` (2026-09-14).** Branches `MNV-501` ouvertes sur `docs` (base `main`) et
-`microfinance-service` (base `dev`). Décisions D-501-A → D-501-F consignées ci-dessus. PR
+**Statut : `done` (2026-09-14).** PR `microfinance-service` **#5** intégrée en rebase-merge sur `dev` (2 commits
+de feature, 1 de revue) ; branche supprimée. Décisions D-501-A → D-501-F consignées ci-dessus. PR
 `microfinance-service` **#5**.
 
 ### Développement — livré (sous-agent `opus`, rapport vérifié en session)
@@ -144,6 +144,35 @@ BigInt et borne des entiers sûrs ; `decidePar` jamais journalisé.
 
 Lint 0 · build OK · **1 886** unitaires / 99 suites, couverture **99,74 / 96,63 / 99,45 / 99,78** · **279** e2e
 (38 sautés : suites Mongo sans URI) · **28/28** sur Mongo réel (`credits.mongo` 15, `depots.mongo` 13, aucun sauté).
+
+### ✅ Vérification docker — douze points prouvés, aucun défaut (HEAD `9071849`)
+
+Code servi prouvé **avant** le premier point : processus démarré après la dernière modification de `src/`, 0
+`EADDRINUSE`, `PRODUIT_CREDIT_CODE_EXISTANT` publié sur le port, et `garanties: [[]]` rendu **400** (le correctif
+de revue est bien celui qui tourne). Jetons RS256 réels, montants codés dans le harnais avant exécution, recalculs
+`mongosh` directs. Rapport du sous-agent **recontrôlé en session** : empreintes des trois relectures du portefeuille
+identiques.
+
+| Point | Verdict |
+|---|---|
+| **P1** collections `produits_credit`, `credits`, `mouvements_credit` ; 4 index uniques nommés, dont `unicite_blocage_nanti` partiel | **PROUVÉ** |
+| **P2** produit : 201, doublon ⇒ 409 `PRODUIT_CREDIT_CODE_EXISTANT`, un seul document | **PROUVÉ** |
+| **P3** octroi : conditions exactes, **aucun encours, solde ni agence** parmi les 21 clés, devise du dossier, auteur = `sub` ; sans base ⇒ 400, `[[]]` ⇒ 400, rien écrit | **PROUVÉ** |
+| **P4** nantissement sur 4 blocages réels : 201 ; même blocage ⇒ 409 `BLOCAGE_DEJA_NANTI` ; autre membre ⇒ 409 ; blocage levé ⇒ 409 ; deux crédits « nantissement + caution » coexistent (D-501-G) | **PROUVÉ** |
+| **P5** tranches 1 000 000 + 500 000, troisième ⇒ 409 ; engagement hors bilan 1 500 000 → 500 000 → 0 | **PROUVÉ** |
+| **P6** remboursements saisis en désordre : API = `mongosh` = attendu à trois dates ; événements retenus chronologiques | **PROUVÉ** |
+| **P7** annulation d'une tranche déjà remboursée ⇒ 409 ; annulation valide agit **à sa date** (veille inchangée) ; double annulation ⇒ un document | **PROUVÉ** |
+| **P8** rejeu AC-6 : portefeuille au 30/06 relu avant, après écritures ultérieures et après **redémarrage du service** ⇒ diff vide | **PROUVÉ** |
+| **P9** concurrence HTTP : 2 × 60 sur 100, **5 tirages** ⇒ `[201, 409]` chaque fois, un seul décaissement | **PROUVÉ** |
+| **P10** portée : autre membre, dossier, organisation ⇒ 404 au corps de l'inexistant ; dossier d'ENTREPRISE ⇒ les **12 routes** en 409, rien écrit | **PROUVÉ** |
+| **P11** exercice clos ⇒ 409 `EXERCICE_CLOS`, rien écrit ; témoin en exercice ouvert ⇒ 201 | **PROUVÉ** |
+| **P12** 0 orphelin, 0 incohérence org/dossier/membre/devise, 0 annulation hors crédit ; journaux sans `decidePar`, référence ni motif ; aucune 500 sur 93 réponses | **PROUVÉ** |
+
+Réserves : P9 sans preuve d'arrivée à la même milliseconde (écart de départ < 0,4 ms) ; P10 sur dossier
+d'entreprise mesure l'ordre des gardes ; non rejoués en docker (gardés par unitaires et mutations) : annulation
+d'octroi, membre radié, bornes. Mots de passe des comptes de vérif 497 réinitialisés par le parcours
+`forgot-password` (non conservés). Effets de bord laissés en base de dev : « IMF Verif 500 A » (2 produits,
+10 crédits, 14 mouvements de crédit, 4 blocages) et « IMF Verif 500 B » (1 produit, 1 crédit).
 
 ### Réserves et dettes
 
