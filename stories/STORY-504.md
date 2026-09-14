@@ -361,6 +361,27 @@ levée, limite globale comprise. Confirme le retrait du throttle propre (D-504-R
   calcul entrelacé) — la correction reste portée par l'index unique (dossier, version).
 - Mutations R1, S1, K1 → K3, Q1 → Q5 rouges par assertion. Portes du dev : 2 366 unitaires, 353 e2e, 60/60 Mongo réel.
 
+### Vérification ciblée de `d8b53f8` (code et sécurité) — mergeable, aucune vulnérabilité
+
+- **Validé** : D-504-S sans fuite par construction (contrôles synchrones avant toute prise, un refus « processus » ne
+  suit jamais une part prise, libération en `finally`, ensemble des organisations borné) ; aucune organisation ne peut
+  tenir les deux emplacements ; D-504-R sans code mort, throttle global inchangé en tête des gardes ; clé de mutualisation
+  réellement protégée (retirer l'organisation ou le dossier fait rougir un test) ; verrou prouvé entre deux instances.
+- **[90] Les tests de D-504-S réutilisaient la même instance d'`orgId`** : une part comparée par instance d'objet serait
+  passée inaperçue, alors qu'en production la garde crée un `ObjectId` à chaque requête — D-504-S serait devenue inerte.
+- **[100] JSDoc détachée par insertion** dans la spec Mongo ; **[85] chiffres encore discordants** (263/265 ms ;
+  0,83–1,47 ms par ligne attribué au seul volume de 20 000 lignes) ; **[80] deux noms** (`codeDe` / `refusDe`,
+  « part » / « emplacement » de l'organisation).
+
+### Correctifs appliqués en session (tests et commentaires seulement)
+
+- Les appels « même organisation » passent désormais des identifiants **nouveaux de même valeur** (unitaires : test de
+  D-504-S et test des deux dossiers d'une organisation ; spec Mongo : le second acte simultané). **Mutation « emplacement
+  comparé par instance »** ⇒ les deux tests unitaires rougissent par assertion ; fichier restauré à l'identique.
+- JSDoc fusionnée ; fourchettes rattachées à leur volume (0,87 à 1,14 ms par ligne à 20 000 lignes, 0,83 à 1,47 ms tous
+  volumes confondus) ; acte au plafond ≈ 95 à 110 s, marge du verrou ≈ 2,7 à 3,2 (≈ 1,3 à 1,6 avec un calcul entrelacé) ;
+  un seul nom : « emplacement de l'organisation », `codeDe`.
+
 ### Portes sur l'état final (HEAD `d8b53f8`, rejouées en session dans le worktree, en séquence)
 
 Lint 0 · build OK · **2 366** unitaires / 121 suites (1 saut conditionnel préexistant), couverture
