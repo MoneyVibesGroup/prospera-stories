@@ -102,6 +102,12 @@ PR `microfinance-service` **#8** (un commit `a84951c`, rebasé sur `dev`).
   dotations écrites ≠ revues si un arrêté intervient entre la revue et l'acte ; mainlevée suivie pour le seul
   nantissement ; une devise divergente bloque la proposition.
 
+### Portes (HEAD `a84951c`, rejouées en session dans le worktree, en séquence)
+
+Lint 0 · build OK · **2 289** unitaires / 116 suites (1 saut conditionnel préexistant), couverture
+**99,78 / 97,17 / 99,59 / 99,81** · **341** e2e (56 sautés : suites Mongo sans URI) · **46/46** sur Mongo réel
+(`credits.mongo`, `depots.mongo`, `classement-credits.mongo`, `provisionnement.mongo`).
+
 ## Notes
 
 - Voir [[STORY-498]], [[STORY-503]], [[STORY-507]] (la publication en balance).
