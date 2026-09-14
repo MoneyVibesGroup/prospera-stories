@@ -61,6 +61,29 @@ Contagion par débiteur et crédits restructurés (STORY-505) · provisionnement
 
 **Statut : `in-progress` (2026-09-14).** Branches `MNV-503` ouvertes sur `docs` (base `main`) et
 `microfinance-service` (empilée sur la 502, rebasée sur `dev` après son merge). Décision D-503-A ci-dessus.
+PR `microfinance-service` **#7** (un commit `7233685`, développé dans un worktree séparé pour ne pas perturber la
+vérification docker de 502 en cours sur l'arbre monté).
+
+### Développement — livré (sous-agent `opus`, rapport à vérifier en revue)
+
+- `classerCredit` (fonction pure), règle de partition des tranches, service et routes
+  `GET …/classement-credits?dateArrete=` (portefeuille) et `GET …/credits/:creditId/classement?dateArrete=`.
+- Paquet de test **fictif** (`test/utils/paquet-prudentiel-fictif.ts`, taux à 0), hors `assets` et hors registre.
+- Aucun état de classement en base (spec d'inventaire).
+
+### Décisions prises pendant le dev (2026-09-14)
+
+- **D-503-B — statuts** : `CLASSE` ; `NON_CLASSABLE` (motif `AUCUNE_TRANCHE_DANS_LE_PAQUET`, même pour un crédit à jour) ;
+  `HORS_BILAN_NON_DECAISSE`, `OCTROI_ANNULE`, `NON_OCTROYE_A_LA_DATE` (paquet non consulté). Chaque résultat porte le
+  paquet (code, version, checksum) et `valeursLivrees`.
+- **D-503-C — partition des tranches** : depuis 0 jour, sans trou ni chevauchement, bornes incluses, dernière ouverte ;
+  contrôlée au packaging (règle P2 du validateur) et à l'exécution, un test garantit l'accord des deux.
+- **D-503-D — « une passe »** : trois lectures par page de 100 crédits au plus, nombre constant ; paquet chargé une
+  fois par requête. Mesure indicative sur Mongo réel : 2 000 crédits en 20 pages, ≈ 1 s.
+- **D-503-E** — `valeursLivrees` reprend la définition de la route du paquet (vrai dès une règle ou un seuil).
+- **D-503-F** — la tranche est citée sans son taux (STORY-504) ; devise et exposant ajoutés au restant dû.
+- **D-503-G** — le paquet est chargé avant le crédit : un paquet en erreur rend un 5xx sans rien révéler du crédit.
+- ⚠️ Fixture de STORY-498 `TRANCHE_FICTIVE` ramenée à 0 jour (sinon la règle P2 la refuse).
 
 ## Notes
 
