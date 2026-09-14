@@ -108,6 +108,49 @@ Lint 0 · build OK · **2 289** unitaires / 116 suites (1 saut conditionnel pré
 **99,78 / 97,17 / 99,59 / 99,81** · **341** e2e (56 sautés : suites Mongo sans URI) · **46/46** sur Mongo réel
 (`credits.mongo`, `depots.mongo`, `classement-credits.mongo`, `provisionnement.mongo`).
 
+### Revue de code (⑥) — un bloquant, cinq non bloquants (fonctions pures exécutées par script)
+
+- **[bloquant, 90] Un arrêté daté dans le futur était accepté et bloquait tout arrêté antérieur** : le 14/09, un arrêté
+  au 31/12 compte comme impayées des échéances futures (provision 291 369 au lieu de 4 567), puis toute proposition et
+  tout arrêté au 30/09, 31/10 ou 30/11 rendent 409 — irréversible (append-only, aucune route), et STORY-507 le
+  publierait.
+- **[90] L'acte pouvait écrire des dotations que personne n'avait revues** : l'empreinte excluait la provision déjà
+  constatée ; revue contre v1 (dotation 774 100), un autre arrêté appliqué entre-temps, même empreinte ⇒ v3 écrit
+  274 100 jamais vu, alors que le contrat promet « ce qui est écrit est ce qui a été revu, ou rien ».
+- **[85] Un arrêté tient en un document** : au-delà de 16 000 à 34 000 crédits selon les garanties (mesure bson), l'acte
+  finit en 500 non typé après le calcul complet.
+- **[80] La provision d'une date passée n'était plus consultable** dès qu'un arrêté postérieur existait (écart au brief,
+  qui ne refusait que l'écriture).
+- **[80] `typeGarantie` contre `type`** pour la même garantie dans le même contrat HTTP (défaut déjà corrigé en 503).
+- **[80] Chaque page recalcule tout le portefeuille** et relit l'arrêté entier.
+- Validés : dotation en complément, garantie non admise jamais déduite, arrondi par excès une fois par ligne, crédit non
+  classé nommé sans montant, idempotence et concurrence sur Mongo réel, paquet (checksum, validateur, aucune valeur).
+
+### Revue de sécurité (⑦) — deux constats LATENTS (aucune écriture possible tant que le paquet est vide)
+
+- **[85] C-1 — même défaut que le bloquant de revue** (arrêté futur), vu comme verrouillage exploitable par un simple
+  `TENANT_USER` (CWE-841).
+- **[80] C-2 — consommation de ressources non bornée** (CWE-770) : recalcul intégral par requête, `limite` ne borne que
+  la réponse ; à 100 appels par minute sur une IMF de 20 000 crédits, le processus partagé sature.
+- Écartés avec preuve : IDOR (arrêté, levées de blocage, lot du portefeuille), 404 jamais 403, injection (empreinte au
+  motif sha256 strict), mass assignment, rejeu d'empreinte, courses, exercice clos, fuites d'erreurs, intégrité de
+  l'artefact, paquet fictif inchargeable en production. **Aucune élévation de privilège** : toutes les écritures du
+  service sont ouvertes à `TENANT_USER` — la réserve de l'acte est une décision produit.
+
+### Décisions du 2026-09-14 (après revues)
+
+- **D-504-K — appliquer un arrêté est réservé à `TENANT_ADMIN` (décision user)** ; la proposition reste ouverte à
+  `TENANT_USER`. Exception fermée et testée à l'invariant « aucun rôle sur un handler ».
+- **D-504-L** — un arrêté daté après le jour courant est refusé à l'application (`ARRETE_PROVISION_DATE_FUTURE`).
+- **D-504-M** — l'acte engage aussi la **version de référence** revue : un arrêté intervenu entre la revue et l'acte ⇒
+  proposition périmée ; un contenu identique au dernier arrêté reste `dejaApplique`.
+- **D-504-N** — portefeuille compté **avant** le calcul et refusé au-delà d'une borne déduite de la taille maximale d'un
+  document (`PORTEFEUILLE_TROP_VOLUMINEUX_POUR_UN_ARRETE`), filet de taille BSON avant l'insertion.
+- **D-504-O** — la proposition d'une date passée se calcule contre le dernier arrêté daté au plus tard à cette date ;
+  seule l'écriture antérieure est refusée.
+- `type` au lieu de `typeGarantie` dans la ligne ; relecture projetée du dernier arrêté ; recalcul par page consigné en
+  dette.
+
 ## Notes
 
 - Voir [[STORY-498]], [[STORY-503]], [[STORY-507]] (la publication en balance).
