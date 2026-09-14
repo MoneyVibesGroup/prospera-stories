@@ -235,6 +235,28 @@ compterait des arrêtés jamais écrits. **Non corrigé ici** (périmètre) — 
 - Réserves : plafond de 50 000 **non mesuré** (extrapolé ≈ 75 s) ; la validation bloque encore la boucle ≈ 1,9 s par
   lot ; la proposition est recalculée à chaque appel (dette `CACHE_DE_LA_PROPOSITION_DE_PROVISION`).
 
+### Revue ciblée des correctifs (code et sécurité) — mergeable, un constat de sécurité latent corrigé avant merge
+
+- Constats de la première revue **fermés** (vérifiés dans le code et les journaux des portes) : date future, dotations
+  revues (empreinte + version fixent les dotations, les lignes d'un rang étant immuables), taille, date passée, `type`,
+  relecture projetée, RBAC. Atomicité : une seule session pour l'en-tête et tous les lots, rejeu sur les mêmes `_id`.
+  Anti-énumération du 403 de rôle **conforme** (il ne dépend que du rôle et précède toute lecture du dossier).
+- **[sécurité, 85] S-1 — aucune borne sur les calculs SIMULTANÉS** (CWE-400/770) : au plafond, une proposition ≈ 30 s et
+  0,1 Gio, un acte ≈ 75 s ; un `TENANT_USER` à 100 propositions par minute sur un dossier de 50 000 crédits dépasse le tas
+  Node ; quelques actes parallèles affament la boucle au-delà de 20 s ⇒ Mongoose tient la connexion pour perdue ⇒ **toutes
+  les écritures transactionnelles de tous les tenants échouent**. Inexploitable tant que le paquet est vide ; bloquant
+  avant de servir un paquet réel ⇒ **corrigé avant merge** (règle du projet).
+- **[90] C-1** — « lignes validées » garanti par convention seulement (type structurel, insertion `lean` sans
+  validation) ⇒ type nominal.
+- **[85] C-2** — plafond recopié en dur dans Swagger, trois noms pour un concept, compte de lectures faux dans un
+  commentaire.
+
+### Décision du 2026-09-14 (après revue ciblée)
+
+- **D-504-Q — borner la simultanéité** : au plus deux calculs de provisionnement par processus (refus immédiat
+  retryable), verrou par dossier pris **avant** le recalcul de l'acte (expiration automatique), propositions identiques
+  mutualisées, throttle propre aux deux routes, lots de validation de 200 avec assertion sur le blocage de la boucle.
+
 ### Portes sur l'état final (HEAD `346a692`, rejouées en session dans le worktree, en séquence)
 
 Lint 0 · build OK · **2 342** unitaires / 119 suites (1 saut conditionnel préexistant), couverture
