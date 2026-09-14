@@ -1,6 +1,6 @@
 # STORY-503 : Le classement sain / en souffrance est DÉRIVÉ d'une date d'arrêté — jamais stocké
 
-Status: in-progress
+Status: done
 
 **Complexité :** high
 
@@ -59,8 +59,8 @@ Contagion par débiteur et crédits restructurés (STORY-505) · provisionnement
 
 ## Progress Tracking
 
-**Statut : `in-progress` (2026-09-14).** Branches `MNV-503` ouvertes sur `docs` (base `main`) et
-`microfinance-service` (empilée sur la 502, rebasée sur `dev` après son merge). Décision D-503-A ci-dessus.
+**Statut : `done` (2026-09-14).** PR `microfinance-service` **#7** intégrée en rebase-merge sur `dev` (1 commit de
+feature, 1 de revue) ; branche et worktree supprimés. Décision D-503-A ci-dessus.
 PR `microfinance-service` **#7** (un commit `7233685`, développé dans un worktree séparé pour ne pas perturber la
 vérification docker de 502 en cours sur l'arbre monté).
 
@@ -117,6 +117,31 @@ Lint 0 · build OK · **2 099** unitaires / 107 suites (1 saut conditionnel pré
   mutation « calculé comme `valeursLivrees` » ⇒ 2 rouges. Références de spec corrigées.
 - Portes (HEAD `09ef331`) : lint 0 · build OK · **2 101** unitaires / 107 suites, couverture
   **99,75 / 96,93 / 99,53 / 99,78** · **314** e2e · **36/36** sur Mongo réel.
+
+### ✅ Vérification docker (HEAD `09ef331`) — neuf points prouvés, aucun défaut
+
+Code servi et **démarrage réel** prouvés avant tout point (arbre monté basculé en détaché sur `09ef331`, processus
+postérieur, 0 erreur d'injection de dépendances avec `PrudentielModule` importé, 303 fichiers de `src/` identiques
+hôte/conteneur, idem après redémarrage). Attendus écrits avant le premier appel. Empreintes du rejeu **recontrôlées en
+session**.
+
+| Point | Verdict |
+|---|---|
+| **R1** démarrage sans erreur (deux fois) ; `/health` 200 ; route du paquet de 498 intacte | **PROUVÉ** |
+| **R2** paquet servi vide ⇒ `NON_CLASSABLE`, `tranchesLivrees: false`, aucune clé `valeursLivrees` ; checksum recalculé à la main = manifeste = conteneur ; retard 0 / 1 / 51 jours identique **clé pour clé** à l'échéancier et à la situation | **PROUVÉ** |
+| **R3** `HORS_BILAN_NON_DECAISSE`, `OCTROI_ANNULE`, `NON_OCTROYE_A_LA_DATE` aux dates limites, route unitaire = portefeuille | **PROUVÉ** |
+| **R4** 20 classements ⇒ trois collections au même sha256, aucune collection ni champ « class » nouveaux | **PROUVÉ** |
+| **R5** rejeu au 30/04 : diff vide après remboursements, décaissement, rééchelonnement ultérieurs et après redémarrage | **PROUVÉ** |
+| **R6** pagination par 2 : 44 crédits distincts = base, dans l'ordre ; 9 paramètres invalides ⇒ 400 | **PROUVÉ** |
+| **R7** autre membre, dossier, organisation ⇒ 404 au corps de l'inexistant ; dossier d'entreprise ⇒ 409 | **PROUVÉ** |
+| **R8** 2 000 crédits (5 modèles créés par l'API, clonés) : parcours complet en **≈ 0,86 s**, **les mêmes 7 lectures par page** (profiler), aucune lecture par crédit ; chaque clone classé comme son modèle | **PROUVÉ (indicatif)** |
+| **R9** 0 réponse 5xx, 0 erreur, 0 trace de pile | **PROUVÉ** |
+
+Réserves : `CLASSE` n'est pas productible en docker tant que le paquet servi est vide (AC-2 prouvé par le paquet fictif
+des tests) ; R8 mesuré sur la stack de dev chargée ; les clones de R8 sont insérés par `mongosh` (valent pour la mesure,
+pas comme preuve d'écriture) ; dans un même dossier, `MEMBRE_INTROUVABLE` et `CREDIT_INTROUVABLE` restent distincts
+(hérité de 501, sans fuite entre dossiers). Effets de bord en base de dev : dossier « IMF Verif 503 Perf DAC909 »
+(2 000 crédits), +4 crédits dans le dossier A.
 
 ### Revue de sécurité (⑦) — aucune vulnérabilité
 
