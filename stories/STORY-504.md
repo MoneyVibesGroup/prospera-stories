@@ -300,6 +300,12 @@ le défaut antérieur du `LoggingInterceptor` se reproduit (42 lignes au faux st
   (quota partagé derrière un même NAT) ; un processus tué en plein acte bloque les actes du dossier jusqu'à 5 min ; le
   cache des propositions terminées reste une dette.
 
+### Portes sur l'état final (HEAD `e3111d0`, rejouées en session dans le worktree, en séquence)
+
+Lint 0 · build OK · **2 362** unitaires / 121 suites (1 saut conditionnel préexistant), couverture
+**99,79 / 97,15 / 99,61 / 99,82** · **355** e2e dont la suite dédiée au throttle (68 sautés : suites Mongo sans URI) ·
+**58/58** sur Mongo réel (`credits.mongo`, `depots.mongo`, `classement-credits.mongo`, `provisionnement.mongo`, aucun sauté).
+
 ### Portes sur l'état final (HEAD `346a692`, rejouées en session dans le worktree, en séquence)
 
 Lint 0 · build OK · **2 342** unitaires / 119 suites (1 saut conditionnel préexistant), couverture
