@@ -65,6 +65,36 @@ pénalités de retard · publication en balance (STORY-507).
 
 **Statut : `in-progress` (2026-09-14).** Branches `MNV-502` ouvertes sur `docs` (base `main`) et
 `microfinance-service` (base `dev`, qui contient STORY-501). Décisions D-502-A → D-502-D consignées ci-dessus.
+PR `microfinance-service` **#6**.
+
+### Développement — livré (sous-agent `opus`, rapport à vérifier en revue)
+
+- Échéancier **généré et persisté à l'octroi** dans `echeanciers_credit` (append-only, index
+  `unicite_version_echeancier_par_credit`), écrit dans la même transaction que le crédit ; fonctions pures de
+  génération et d'imputation. Remboursement à montant unique imputé ; rééchelonnement versionné ; route
+  `GET …/credits/:creditId/echeancier?dateArrete=` et `POST …/reechelonnements`.
+
+### Décisions prises pendant le dev (2026-09-14)
+
+- **D-502-E** — l'excédent d'un remboursement paie les échéances suivantes **en entier, intérêts compris**, dans
+  l'ordre du produit ; refus au-delà de tout le restant dû. ⚠️ Écart au brief (qui proposait « capital restant +
+  intérêts échus ») : sinon un emprunteur soldant son capital par avance paraîtrait en retard sur des intérêts
+  futurs — soumis à la revue.
+- **D-502-F** — taux périodique = points de base × mois de la période / 120 000 ; `A_ECHEANCE` = taux × durée
+  en années.
+- **D-502-G** — durée multiple du pas de périodicité, sinon `400 DUREE_INCOMPATIBLE_AVEC_PERIODICITE`.
+- **D-502-H** — arrondi demi-unité vers le haut, une fois par intérêt et pour l'annuité ; capital constant en
+  partie entière ; la dernière échéance absorbe l'écart ; capital d'annuité borné au restant dû.
+- **D-502-I** — l'échéancier porte sur le montant **octroyé**, première échéance à l'octroi + 1 pas, même en
+  décaissement partiel — soumis à la revue (effet sur 503/504).
+- **D-502-J** — le jour est l'unité ; les flux d'un même jour se compensent.
+- **D-502-K** — une annulation de remboursement retire les derniers montants imputés, à sa date.
+- **D-502-L** — une échéance est échue dès son jour ; jours de retard = arrêté − échéance (0 le jour même).
+- **D-502-M** — rééchelonnement au début, à une échéance ou après la dernière de la version en vigueur ; base
+  capital restant dû > 0 sans intérêt payé d'avance ; intérêts échus impayés reportés sur la première échéance ;
+  consolidation (aucun mouvement ni annulation antérieurs ensuite) ; non annulable.
+- **D-502-N** — statut `REMPLACEE` ; le retard ne se lit que sur la version en vigueur.
+- **D-502-O** — remboursement à montant unique, capital et intérêts dérivés (remplace D-501-C).
 
 ## Notes
 
