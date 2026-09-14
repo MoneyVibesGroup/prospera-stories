@@ -207,6 +207,12 @@ sur `127.0.0.1`) appliqué à tous les montages et au JWKS de test.
 - Mutations : garde T retirée ⇒ 2 unitaires + 2 e2e rouges ; garde U retirée ⇒ 3 unitaires + 2 e2e + 1 Mongo réel
   (concurrent puis successif) rouges.
 
+### Portes sur l'état final (HEAD `a72586d`, rejouées en session, en séquence)
+
+Lint 0 · build OK · **2 024** unitaires / 102 suites, couverture **99,74 / 96,66 / 99,52 / 99,78** · **298** e2e sur
+**deux passages complets** (43 sautés : suites Mongo sans URI), **aucun échec intermittent** depuis le correctif du
+transport · **33/33** sur Mongo réel (`credits.mongo` + `depots.mongo`, aucun sauté).
+
 ### Revue de sécurité (⑦) — aucune vulnérabilité
 
 Pistes écartées avec preuve : IDOR sur échéanciers et rééchelonnement (filtres org/dossier/membre/crédit, verrou
