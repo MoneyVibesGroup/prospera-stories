@@ -85,6 +85,23 @@ vérification docker de 502 en cours sur l'arbre monté).
 - **D-503-G** — le paquet est chargé avant le crédit : un paquet en erreur rend un 5xx sans rien révéler du crédit.
 - ⚠️ Fixture de STORY-498 `TRANCHE_FICTIVE` ramenée à 0 jour (sinon la règle P2 la refuse).
 
+### Portes (HEAD `7233685`, rejouées en session dans le worktree, en séquence)
+
+Lint 0 · build OK · **2 099** unitaires / 107 suites (1 saut conditionnel préexistant), couverture
+**99,75 / 96,94 / 99,53 / 99,78** · **314** e2e sur deux passages complets (46 sautés : suites Mongo sans URI) ·
+**36/36** sur Mongo réel (`credits.mongo`, `depots.mongo`, `classement`).
+
+### Revue de sécurité (⑦) — aucune vulnérabilité
+
+Pistes écartées avec preuve : gardes de classe héritées par les deux routes ; portefeuille filtré org/dossier et
+lectures `$in` bornées aux identifiants de la page ; `historique` et `lotDuPortefeuille` publics mais sans autre
+entrée qu'un `DossierScope` issu de la garde, `CreditsService` non exporté ; paquet résolu par le référentiel du
+dossier sans repli ; aucun oracle d'existence par le 5xx (règle chargée avant le crédit, dépendant du seul dossier) ;
+injection NoSQL (DTO existants) ; corps du 500 générique, détail des tranches en journal seulement ; pagination
+bornée, paquet servi par le cache du chargeur et jamais muté ; **le paquet fictif ne peut pas être chargé en
+production** (aucun import de `test/` depuis `src`, `tsconfig.build` exclut `test`, assets limités aux deux JSON,
+manifeste à une clé) ; checksum comparé au manifeste avant parse.
+
 ## Notes
 
 - Voir [[STORY-502]], [[STORY-504]], [[STORY-505]], spine AD-2.
