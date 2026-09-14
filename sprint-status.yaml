@@ -3705,7 +3705,7 @@ sprints:
         epic: "EPIC-124"
         points: 13
         service: "microfinance-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 — decoupage epics-microfinance-2026-08-27.md + spine architecture-microfinance-service-2026-08-27. C'est ce qu'une IMF cherche dans les cinq premières minutes, et c'est le seul endroit du programme où l'absence est un risque réglementaire pour le client, pas un inconfort : une IMF sous-provisionnée est en infraction, pas en retard.
+        status: "in-progress"  # MAJ 2026-09-14 (demarrage, flux APEX complet) — branches MNV-504. D-504-A (user) MECANIQUE SEULE : complement jamais brut, formule par montant, paquet vide ⇒ 409 PAQUET_PRUDENTIEL_SANS_VALEUR, rubrique garanties admises ajoutee VIDE, preuve par paquet de test fictif. D-504-B (user) application = arrete de provision append-only, dry-run par defaut, contenu identique n ecrit rien ; version de balance inerte (507). # CREEE le 2026-08-27 — decoupage epics-microfinance-2026-08-27.md + spine architecture-microfinance-service-2026-08-27. C'est ce qu'une IMF cherche dans les cinq premières minutes, et c'est le seul endroit du programme où l'absence est un risque réglementaire pour le client, pas un inconfort : une IMF sous-provisionnée est en infraction, pas en retard.
         story_path: "stories/STORY-504.md"
       - story_id: "STORY-505"
         title: "Déclassement en cascade et rééchelonnements — les deux façons de sortir d'un retard, et une seule est honnête"
