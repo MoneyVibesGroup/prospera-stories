@@ -73,6 +73,34 @@ Valeurs BCEAO réelles · écriture comptable et publication en balance (STORY-5
 
 **Statut : `in-progress` (2026-09-14).** Branches `MNV-504` ouvertes sur `docs` (base `main`) et
 `microfinance-service` (worktree empilé sur la 503, rebasé sur `dev` après son merge). Décisions D-504-A et B ci-dessus.
+PR `microfinance-service` **#8** (un commit `a84951c`, rebasé sur `dev`).
+
+### Développement — livré (sous-agent `opus`, rapport à vérifier en revue)
+
+- `GET …/provisionnement?dateArrete=` (dry-run) : par crédit, assiette, taux, provision requise, dotation ou reprise,
+  formule ; sous-totaux par tranche ; crédits non provisionnés comptés par statut ; empreinte de la proposition.
+- `POST …/arretes-provision` `{ dateArrete, empreinte }` : l'acte explicite écrit un arrêté dans `arretes_provision`
+  (201) ou répond `dejaApplique` (200) pour un contenu identique.
+- Paquet prudentiel : rubrique `provisionnement.garantiesAdmises: []` ajoutée **vide** (schéma, validateur, chargeur,
+  types) ; checksum `a4d29eb5…` → `b4b79e8a…` ; `sfd-bceao-2.0` inchangé.
+
+### Décisions prises pendant le dev (2026-09-14)
+
+- **D-504-C** — paquet servi sans tranche ⇒ `409 PAQUET_PRUDENTIEL_SANS_VALEUR` avant toute lecture de crédit ; taux ou
+  garantie illisible ⇒ 500 journalisée.
+- **D-504-D** — une garantie admise par type (règle P3), déduite à la quotité du paquet ; un nantissement dont le
+  blocage est levé à l'arrêté n'est pas déduit.
+- **D-504-E** — calcul exact en BigInt, **un seul arrondi par ligne, par excès** (prudence) ; totaux = sommes de lignes ;
+  dépassement des entiers sûrs ⇒ `409 PROVISIONNEMENT_HORS_BORNE`.
+- **D-504-F** — empreinte = sha256 du contenu canonique hors provision déjà constatée, dotation, reprise et formule ;
+  empreinte périmée ⇒ `409 PROPOSITION_PROVISION_PERIMEE`.
+- **D-504-G** — provision déjà constatée = provision requise au dernier arrêté ; date antérieure au dernier arrêté ⇒ 409.
+- **D-504-H** — rang par dossier sous index unique ; le perdant d'une course relit le gagnant (`dejaApplique` ou 409).
+- **D-504-I** — un crédit non classé donne une ligne **sans** provision, jamais une provision à 0.
+- **D-504-J** — l'arrêté est la seule exemption, fermée, du contrôle « aucun état de classement stocké » de 503.
+- Réserves avouées : ≈ 21 000 crédits au plus par arrêté (limite de document) ; pas de route de lecture des arrêtés ;
+  dotations écrites ≠ revues si un arrêté intervient entre la revue et l'acte ; mainlevée suivie pour le seul
+  nantissement ; une devise divergente bloque la proposition.
 
 ## Notes
 
