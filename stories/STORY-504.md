@@ -207,6 +207,34 @@ compterait des arrêtés jamais écrits. **Non corrigé ici** (périmètre) — 
   qu'insérer l'en-tête puis les lignes validées par lots ordonnés de 1 000, sous la même session ; une ligne invalide est
   refusée avant toute transaction. Atomicité prouvée par un doublon glissé dans le 2ᵉ lot (0 en-tête, 0 ligne en base).
 
+### D-504-P livrée (commit `346a692`)
+
+- **`arretes_provision`** : l'en-tête seul (version, date, paquet, empreinte, `versionDeReference`, totaux, sous-totaux par
+  tranche, crédits non provisionnés, `nombreLignes`, auteur) ; index unique (dossier, version) inchangé.
+- **`lignes_arrete_provision`** (append-only) : une ligne par crédit (arrêté, version, crédit, membre, statut, jours de
+  retard, provision détaillée avec sa formule) ; index `unicite_ligne_arrete_provision_par_credit` (arrêté, crédit) et
+  `lecture_lignes_arrete_provision_par_version` (org, dossier, version, crédit). Les deux schémas refusent toute réécriture.
+- ⚡ **Second défaut vu sur 20 000 lignes** : validées d'un seul bloc, les lignes tenaient la boucle d'événements **25 s** ;
+  le pilote ne recevait plus ses battements de cœur et Mongoose 8 considérait la connexion perdue **sans émettre
+  d'événement** ⇒ `startSession` expirait. Validation par lots de 1 000 rendant la main entre deux lots.
+- Preuves sur Mongo réel (3 500 crédits) : doublon dans le 2ᵉ lot ⇒ 0 en-tête et 0 ligne ; ligne invalide refusée avant
+  toute transaction ; deux applications concurrentes ⇒ un en-tête et exactement 3 500 lignes ; réapplication ⇒ aucune
+  commande d'écriture.
+
+| Mesure (Mongo réel) | 5 000 lignes | 20 000 lignes |
+|---|---|---|
+| Acte complet | 8,6 s | 29,7 s |
+| dont validation hors transaction | 4,6 s | 15,4 s |
+| dont écriture dans la transaction | 1,0 s (5 lots) | 2,5 s (20 lots) |
+| Proposition | 2,9 s | 11,8 s |
+| Plus long blocage de la boucle | 1,9 s | 1,9 s |
+
+- Mutations P1 → P7 rouges par assertion (lignes hors transaction ⇒ 1 500 lignes orphelines ; index non unique ⇒
+  3 501 lignes ; déjà constatée lue au mauvais rang ; plafond ignoré ; crochets append-only neutralisés ×2 ; validation
+  sans rendre la main ⇒ 0 en-tête après 30,7 s de silence du pilote).
+- Réserves : plafond de 50 000 **non mesuré** (extrapolé ≈ 75 s) ; la validation bloque encore la boucle ≈ 1,9 s par
+  lot ; la proposition est recalculée à chaque appel (dette `CACHE_DE_LA_PROPOSITION_DE_PROVISION`).
+
 ## Notes
 
 - Voir [[STORY-498]], [[STORY-503]], [[STORY-507]] (la publication en balance).
