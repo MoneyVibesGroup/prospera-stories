@@ -91,6 +91,24 @@ Lint 0 · build OK · **2 099** unitaires / 107 suites (1 saut conditionnel pré
 **99,75 / 96,94 / 99,53 / 99,78** · **314** e2e sur deux passages complets (46 sautés : suites Mongo sans URI) ·
 **36/36** sur Mongo réel (`credits.mongo`, `depots.mongo`, `classement`).
 
+### Revue de code (⑥) — aucun bloquant, trois correctifs appliqués d'office
+
+- **[95] Deux noms pour le même concept dans le même contrat HTTP** : le classement publiait `joursDeRetard` et
+  `echeanceLaPlusAncienneImpayee`, la situation et l'échéancier de 502 `joursRetard` et
+  `echeanceImpayeeLaPlusAncienne`. ⚠️ L'écart venait **du brief de développement**, pas du dev. Aligné sur les noms de
+  502, helper `retardPublie` réutilisé — gratuit avant merge, cassant après.
+- **[85] `valeursLivrees` pouvait valoir `true` avec `NON_CLASSABLE / AUCUNE_TRANCHE_DANS_LE_PAQUET`** (définition de
+  498 : vrai dès une règle ou un seuil) — contraire à D-503-A.
+- **[95] Deux commentaires citaient une spec qui ne contient pas le test d'accord** — corrigés.
+- Écartés avec preuve : 500 (et non 502) pour des tranches incohérentes, conforme à la table de 498 ; frontières
+  testées de 0 à 10⁶ jours ; AC-4 prouvé en unitaire, HTTP et Mongo réel ; AC-5 en lots bornés conforme ; paquet
+  fictif hors assets et manifeste ; fixture de 498 modifiée légitimement ; périmètre respecté.
+
+### Décision du 2026-09-14 (après revue)
+
+- **D-503-H — le classement publie `tranchesLivrees`** (vrai seulement si le paquet porte au moins une tranche), et non
+  `valeursLivrees` : un même nom ne doit pas porter deux sens selon la route ; la route du paquet de 498 garde le sien.
+
 ### Revue de sécurité (⑦) — aucune vulnérabilité
 
 Pistes écartées avec preuve : gardes de classe héritées par les deux routes ; portefeuille filtré org/dossier et
