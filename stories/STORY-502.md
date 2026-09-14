@@ -140,6 +140,61 @@ PR `microfinance-service` **#6**.
 - ⚠️ Flake e2e : un `404` sur `POST produits-credit` une fois pendant un passage complet, non reproduit — même profil
   que l'échec non reproduit de STORY-501 ; cause recherchée en revue ciblée.
 
+### Revue ciblée des correctifs — C1, C2, C3 fermés ; un nouveau bloquant
+
+- Vérifié en exécutant les règles réelles : octroi annulé ⇒ 0 jour ; partiel payé ponctuellement ⇒ aucun refus,
+  encours = capital restant dû chaque jour sur 16 mois ; cumul de 5 versions (tranches, rééchelonnement, annulation)
+  cohérent ; annuités exactes sur quatre jeux dont des montants de 7 et 123 457.
+- **[bloquant, 95] Une tranche, même d'UNE unité, effaçait le retard** : 900 000 décaissés, aucun paiement, 150 jours
+  de retard ; tranche de 1 ⇒ le lendemain **0 jour** — la nouvelle version réamortissait les arriérés. Rééchelonnement
+  déguisé, sans motif ni marqueur : un crédit non entièrement décaissé restait « sain » indéfiniment.
+- **[90] Le paiement du jour, saisi après la tranche du même jour, était refusé** par la consolidation.
+- **[95] `ANNULATION_OCTROI_ANTERIEURE_A_UN_MOUVEMENT` inatteignable**, testé sur des données impossibles.
+
+### ⚠️ Vérification docker (premier passage, HEAD `cb492ea`) — onze points prouvés, UN ÉCHEC
+
+Code servi prouvé (démarrage après la dernière modification, md5 disque = conteneur, marqueurs sur le port, idem
+après redémarrage). Montants attendus calculés AVANT les appels par un calcul indépendant en fractions exactes.
+
+| Point | Verdict |
+|---|---|
+| **P1** `echeanciers_credit` + index de version ; octroi ⇒ **aucune version** | PROUVÉ |
+| **P2** trois modes + différé : dates, capital, intérêt, total = calcul indépendant ; somme du capital exacte | PROUVÉ |
+| **P3** ordres d'imputation opposés ⇒ 965 000 / 950 000 conformes ; anticipé et partiel distingués | PROUVÉ |
+| **P4** retard 0 / 0 / 1 / 49 aux frontières ; jamais décaissé et octroi annulé ⇒ 0 jour | PROUVÉ |
+| **P5** partiel payé ponctuellement : 0 jour ; encours = capital restant dû = `mongosh` à trois dates | PROUVÉ |
+| **P6** tranche en cours de période ⇒ 409 ; tranche à échéance ⇒ v2 conforme, **v1 identique à l'octet** ; décaissement non annulable | PROUVÉ |
+| **P7** rééchelonnement : v2 conforme, v1 intacte, mouvement antidaté ⇒ 409 consolidé, sans décaissement ⇒ 409 | PROUVÉ |
+| **P8** rejeu au 30/04 : diff vide après écritures ultérieures et après redémarrage (premier passage invalidé par une écriture du harnais datée avant l'arrêté, rejoué) | PROUVÉ |
+| **P9** remboursements concurrents ⇒ `[201, 409]` × 5 | PROUVÉ |
+| **P9** ⛔ **deux rééchelonnements à la même date ⇒ `[201, 201]`**, simultanés **ou successifs** : deux versions identiques | **ÉCHEC** |
+| **P10** portée ⇒ 404 au corps de l'inexistant ; dossier d'entreprise ⇒ 409 | PROUVÉ |
+| **P11** exercice clos ⇒ 409, rien écrit ; réouvert ⇒ 201 | PROUVÉ |
+| **P12** 30 versions : 0 orpheline, contiguës, `mouvementId` cohérent ; aucune 5xx sur 199 appels ; journaux sans motif | PROUVÉ |
+
+⛔ **P9 n'était pas une course** : D-502-M admet un rééchelonnement « au début de la version en vigueur », et la v2
+débute précisément à cette date — un double clic créait deux rééchelonnements que STORY-505 compterait.
+
+### Décisions du 2026-09-14 (seconde vague)
+
+- **D-502-T — une tranche est refusée tant qu'une échéance échue reste impayée (décision user)**
+  (`DECAISSEMENT_SUR_ECHEANCE_IMPAYEE`), celle du jour comprise. Pour débloquer un crédit en retard : régulariser ou
+  rééchelonner explicitement. Ferme aussi le refus du paiement du jour saisi après la tranche.
+- **D-502-U — une nouvelle version de rang ≥ 2 est datée STRICTEMENT après le début de la version en vigueur**
+  (correctif du défaut P9).
+- Code mort `ANNULATION_OCTROI_ANTERIEURE_A_UN_MOUVEMENT` retiré ; `CAPITAL_REMBOURSE_SUPERIEUR_AU_DECAISSE` gardé en
+  défense en profondeur.
+
+### ⚡ Flake e2e — cause établie
+
+Les deux échecs e2e non reproduits (STORY-501, puis un `404` sur `POST produits-credit` en 502) viennent du
+**transport de test**, pas du service : `app.init()` sans écoute ⇒ supertest ouvre `listen(0)` sur `::` à **chaque
+requête** puis appelle `127.0.0.1:<port>`. Sous macOS les ports IPv4 et IPv6 sont comptés séparément : le port tiré
+peut être tenu en IPv4 seul par un autre processus (mesuré : deux écouteurs VS Code répondant 404 et 401 sur l'URL
+exacte) ⇒ la requête part chez lui. Mécanisme reproduit par script. C'est celui de STORY-630 (bilan-service), dont le
+correctif `ecouterPourSupertest` **n'avait jamais été porté** ici : helper `test/utils/serveur-e2e.ts` (écoute unique
+sur `127.0.0.1`) appliqué à tous les montages et au JWKS de test.
+
 ### Revue de sécurité (⑦) — aucune vulnérabilité
 
 Pistes écartées avec preuve : IDOR sur échéanciers et rééchelonnement (filtres org/dossier/membre/crédit, verrou
