@@ -235,6 +235,29 @@ compterait des arrêtés jamais écrits. **Non corrigé ici** (périmètre) — 
 - Réserves : plafond de 50 000 **non mesuré** (extrapolé ≈ 75 s) ; la validation bloque encore la boucle ≈ 1,9 s par
   lot ; la proposition est recalculée à chaque appel (dette `CACHE_DE_LA_PROPOSITION_DE_PROVISION`).
 
+### Re-vérification docker ciblée (HEAD `346a692`) — neuf points prouvés, deux limites
+
+Code servi prouvé avant tout point (331 fichiers identiques hôte/conteneur ; `dist` recompilé contenant
+`ARRETE_PROVISION_DATE_FUTURE` et le plafond de coût à 50 000, sans l'ancienne borne ni `taille-arrete` ; schéma d'en-tête
+sans lignes ; checksum du paquet servi `b4b79e8a…`).
+
+| Point | Verdict |
+|---|---|
+| **T1** (D-504-K) `TENANT_USER` en POST ⇒ 403 sans code, 0 en-tête et 0 ligne ; proposition identique pour les deux rôles | **PROUVÉ** |
+| **T2** (D-504-K) même 403 pour son dossier, une autre organisation, un inexistant, un malformé ; `TENANT_ADMIN` : autre organisation = inexistant (404 identiques) | **PROUVÉ** |
+| **T3** (D-504-L) lendemain ⇒ `ARRETE_PROVISION_DATE_FUTURE` (jugé avant l'exercice) ; la proposition ne lit pas l'horloge ; rien écrit | **PROUVÉ** |
+| **T4** (D-504-M) 16 corps invalides ⇒ 400 (dont `versionDeReference` absente, négative, décimale, textuelle, objet, tableau, 2⁵³) | **PROUVÉ** |
+| **T5** non-régression : `/health`, paquet de 498, classement de 503 identique au premier passage, dry-run sans écriture (16 collections, profiler : 0 écriture) | **PROUVÉ** |
+| **T6** 0 réponse 5xx, 0 pile ; 55 refus appariés à leur ligne WARN au même statut | **PROUVÉ** |
+| **P1** (D-504-P) deux collections, index nommés des lignes, aucun en-tête portant des lignes | **PROUVÉ** |
+| **P2** agrégations de cohérence (orphelines, `nombreLignes`, doublons) exécutées — **à vide** | **PROUVÉ (à vide)** |
+| **P3** dossiers de 2 000 crédits jamais refusés par le plafond | **Réponse PROUVÉE** — la disparition de l'ancienne borne ne l'est que par le code servi (refus du paquet vide avant tout comptage) |
+
+Réserves : dotation, reprise, écriture des lignes, atomicité, courses, `dejaApplique`, proposition périmée et plafond ne
+sont **pas productibles** avec le paquet servi vide (prouvés par la spec Mongo réel) ; frontière de minuit UTC non testée ;
+le défaut antérieur du `LoggingInterceptor` se reproduit (42 lignes au faux statut, non compté). Script de cohérence
+`coherence-arretes-504b.js` prêt pour le jour où un paquet réel sera servi.
+
 ### Revue ciblée des correctifs (code et sécurité) — mergeable, un constat de sécurité latent corrigé avant merge
 
 - Constats de la première revue **fermés** (vérifiés dans le code et les journaux des portes) : date future, dotations
