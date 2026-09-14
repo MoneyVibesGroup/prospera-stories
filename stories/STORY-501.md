@@ -76,7 +76,84 @@ publication d'événements · scoring ou décision d'octroi (AD-12).
 ## Progress Tracking
 
 **Statut : `in-progress` (2026-09-14).** Branches `MNV-501` ouvertes sur `docs` (base `main`) et
-`microfinance-service` (base `dev`). Décisions D-501-A → D-501-F consignées ci-dessus.
+`microfinance-service` (base `dev`). Décisions D-501-A → D-501-F consignées ci-dessus. PR
+`microfinance-service` **#5**.
+
+### Développement — livré (sous-agent `opus`, rapport vérifié en session)
+
+- Module `credits` : collections `produits_credit` (immuable, code unique par dossier), `credits` (conditions
+  immuables, verrou `revision` avec `timestamps: false`, **aucun encours en base**) et `mouvements_credit`
+  (append-only refusé par le schéma : `DECAISSEMENT`, `REMBOURSEMENT` ventilé, `ANNULATION`,
+  `ANNULATION_OCTROI`). Situation et portefeuille **dérivés** à une date d'arrêté, avec la liste des événements
+  retenus (« pourquoi 1 240 000 »). Hook D-500-D débloqué : `CREDIT_NANTI_PAR_BLOCAGE` livré.
+- 12 routes (GET/POST seulement) sous `dossiers/:dossierId/microfinance`.
+
+### Décisions prises pendant le dev (2026-09-14)
+
+- **D-501-G — l'index de nantissement du brief était faux sur Mongo réel** : un unique sur
+  `garanties.blocageId` indexe `null` pour chaque garantie sans blocage ⇒ deux crédits « nantissement +
+  caution » entraient en collision (faux `BLOCAGE_DEJA_NANTI`). Tableau `blocagesNantis` + index unique
+  partiel `unicite_blocage_nanti`.
+- **D-501-H** — mouvement à annuler introuvable (paramètre d'URL) ⇒ `404 MOUVEMENT_CREDIT_INTROUVABLE`, même
+  corps inexistant / malformé / autre crédit.
+- **D-501-I** — nombre de périodes `⌈durée / pas⌉`, `A_ECHEANCE` = 1 ; borne le différé.
+- **D-501-J** — un blocage levé à **n'importe quelle date** ne peut pas être nanti.
+- **D-501-K** — annulation d'octroi : aucun décaissement non annulé, date ≥ dernier mouvement.
+- **D-501-L** — une annulation ne recopie aucun montant ; elle agit **à sa date**, jamais rétroactivement.
+- **D-501-M** — avant la date d'octroi : engagement nul, aucun événement.
+- **D-501-N** — produit cité au corps mais absent du dossier ⇒ `409 PRODUIT_CREDIT_INTROUVABLE`.
+- **D-501-O** — taux borné comme les DAT (1 à 10 000 points de base).
+- **D-501-P** — référence de garantie au charset fermé, sans espace : on ne peut pas y écrire un nom.
+- **D-501-Q** — produits en sous-dossier de `CreditsModule` ; `decision` validée `@IsObject`.
+
+### Mutations (rougissent par assertion, restaurées sans `git checkout`)
+
+| Mutation | Test qui rougit |
+|---|---|
+| `timestamps: false` retiré du verrou | `credits.repositories.spec.ts` ; `credits.mongo.e2e-spec.ts` |
+| décaissé ≤ octroyé retiré | `invariants-credit.spec.ts`, `credits.service.spec.ts`, e2e « cycle » |
+| capital ≤ décaissé vérifié au total seulement | annulation d'une tranche ⇒ violation à une date **intermédiaire** |
+| effet d'annulation à la date de la cible / rejeu rétroactif | `invariants-credit.spec.ts`, `situation-credit.spec.ts`, AC-6 sur Mongo |
+| garde membre ACTIF au décaissement retirée | `credits.service.spec.ts` (RADIE, DECEDE), e2e |
+| blocage d'un autre membre accepté | `depots.repositories.spec.ts`, `credits.mongo.e2e-spec.ts` |
+| exercice clos ignoré | `credits.service.spec.ts` (3), `credits.mongo.e2e-spec.ts` |
+| route paramétrée avant les littérales | `credits.controller.spec.ts` |
+| garanties sans `@IsObject({ each })` (revue ⑥) | `credits.dto.spec.ts` (2 cas) — **rejouée en session** |
+
+### Revue de code (⑥) — un bloquant corrigé, deux non bloquants corrigés
+
+- **[bloquant, 90] Une garantie envoyée comme TABLEAU passait le pipe et rendait 500** : `@ValidateNested({ each })`
+  seul admet `garanties: [[]]` ; le service construisait une garantie sans type, Mongoose levait une
+  `ValidationError` que le filtre ne traduit pas. Le piège fermé pour `decision` (D-501-Q) restait ouvert sur
+  les éléments de la liste. **Corrigé** (`@IsObject({ each: true })`), mutation prouvée.
+- **[90] Méthode morte** `MouvementsCreditRepository.trouver` (aucun appelant, figée par un test) — retirée.
+- **[95] Commentaire citant un spec inexistant** — corrigé.
+- Lentille over-engineering (`ponytail-review`) **non passée** sur ce run, pour tenir le rythme demandé.
+
+### Revue de sécurité (⑦) — aucune vulnérabilité
+
+Pistes écartées avec preuve : filtres org/dossier/membre/crédit sur chaque lecture et verrou ; blocage d'un
+autre membre/dossier/org ⇒ même `409 BLOCAGE_NANTI_INTROUVABLE` qu'un inexistant ; cible d'annulation cherchée
+parmi les seuls mouvements du crédit verrouillé ; 404 jamais 403 ; injection NoSQL (identifiants, dates,
+curseur validés en chaîne) ; mass assignment (devise, exposant, auteur, portée jamais lus du corps,
+`forbidNonWhitelisted` sur les objets imbriqués) ; E11000 traduits par nom d'index ; concurrence (verrou en
+première écriture + index uniques d'annulation, d'annulation d'octroi et de nantissement) ; exercice clos ;
+BigInt et borne des entiers sûrs ; `decidePar` jamais journalisé.
+
+### Portes sur l'état final (HEAD `9071849`, rejouées en session après les correctifs de revue)
+
+Lint 0 · build OK · **1 886** unitaires / 99 suites, couverture **99,74 / 96,63 / 99,45 / 99,78** · **279** e2e
+(38 sautés : suites Mongo sans URI) · **28/28** sur Mongo réel (`credits.mongo` 15, `depots.mongo` 13, aucun sauté).
+
+### Réserves et dettes
+
+- **Levée d'un blocage nanti** : les dépôts ne la refusent pas (ils ne lisent pas les crédits) ; le nantissement
+  est validé hors transaction. Documenté, hors périmètre.
+- **Rejeu intégral linéaire** (D-501-E) ; une divergence de devise dans une page du portefeuille rend la page en 409.
+- Statut du membre hors verrou, même arbitrage que les dépôts.
+- ⚠️ Un test e2e a échoué **une fois**, pendant un passage lancé en parallèle de la couverture et des specs Mongo ;
+  non identifié (sortie filtrée), **non reproduit** au passage suivant (279/279). Consigné comme non reproduit.
+- Portly indisponible pendant le run (« not running ») : tests bornés lancés directement.
 
 ## Notes
 
