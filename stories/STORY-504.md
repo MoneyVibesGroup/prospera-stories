@@ -235,6 +235,12 @@ compterait des arrêtés jamais écrits. **Non corrigé ici** (périmètre) — 
 - Réserves : plafond de 50 000 **non mesuré** (extrapolé ≈ 75 s) ; la validation bloque encore la boucle ≈ 1,9 s par
   lot ; la proposition est recalculée à chaque appel (dette `CACHE_DE_LA_PROPOSITION_DE_PROVISION`).
 
+### Portes sur l'état final (HEAD `346a692`, rejouées en session dans le worktree, en séquence)
+
+Lint 0 · build OK · **2 342** unitaires / 119 suites (1 saut conditionnel préexistant), couverture
+**99,78 / 97,2 / 99,6 / 99,81** · **352** e2e (64 sautés : suites Mongo sans URI) · **54/54** sur Mongo réel
+(`credits.mongo`, `depots.mongo`, `classement-credits.mongo`, `provisionnement.mongo`, aucun sauté).
+
 ## Notes
 
 - Voir [[STORY-498]], [[STORY-503]], [[STORY-507]] (la publication en balance).
