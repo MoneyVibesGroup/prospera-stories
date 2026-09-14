@@ -280,6 +280,26 @@ le défaut antérieur du `LoggingInterceptor` se reproduit (42 lignes au faux st
   retryable), verrou par dossier pris **avant** le recalcul de l'acte (expiration automatique), propositions identiques
   mutualisées, throttle propre aux deux routes, lots de validation de 200 avec assertion sur le blocage de la boucle.
 
+### D-504-Q livrée (commit `e3111d0`) — le coût simultané borné
+
+- **Sémaphore par processus** : deux calculs de provisionnement au plus (propositions et actes confondus), au-delà
+  `409 PROVISIONNEMENT_CALCULS_SATURES` immédiat, emplacement libéré en `finally`.
+- **Verrou d'acte par dossier** (`verrous_arrete_provision`, index unique + TTL) : prise atomique par un upsert filtré sur
+  l'expiration, `409 ARRETE_PROVISION_DEJA_EN_COURS` immédiat pour un second acte, relâché avec son jeton ; durée 5 min,
+  daté par l'horloge système (l'horloge métier figée des tests purgerait le verrou en plein acte). Il **précède** l'index
+  unique (dossier, version), qui reste le filet de correction.
+- **Propositions identiques en cours mutualisées** ; throttle propre par IP : 10 propositions et 3 actes par minute (429 +
+  `Retry-After`).
+- **Lots de validation de 200** : plus long blocage de la boucle pendant la validation 284 ms (5 000 lignes) et 427 ms
+  (20 000 lignes), contre ≈ 1,1 s avec des lots de 1 000 ; assertion relative dans la spec de mesure.
+- **C-1** : `LignesArreteValidees` devient une classe nominale (constructeur privé, marque privée, fabrique unique).
+- **C-2** : `PORTEFEUILLE_AU_DELA_DU_PLAFOND_DE_COUT`, clé `plafondDeCout`, plafond interpolé dans Swagger.
+- Mutations Q1 → Q5 rouges par assertion (deux tests durcis qui rougissaient d'abord par exception). Portes du dev :
+  2 362 unitaires, 355 e2e, 58/58 Mongo réel.
+- Réserves : sémaphore et throttle en mémoire (N instances ⇒ 2 × N calculs) ; throttle par IP avant authentification
+  (quota partagé derrière un même NAT) ; un processus tué en plein acte bloque les actes du dossier jusqu'à 5 min ; le
+  cache des propositions terminées reste une dette.
+
 ### Portes sur l'état final (HEAD `346a692`, rejouées en session dans le worktree, en séquence)
 
 Lint 0 · build OK · **2 342** unitaires / 119 suites (1 saut conditionnel préexistant), couverture
