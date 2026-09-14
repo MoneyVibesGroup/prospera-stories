@@ -197,6 +197,16 @@ compterait des arrêtés jamais écrits. **Non corrigé ici** (périmètre) — 
   seule transaction** (aucun en-tête sans ses lignes, aucune ligne orpheline). La limite de document disparaît ; il reste
   un **plafond de coût** par requête, compté avant le calcul (50 000 crédits).
 
+### ⚡ Ce que Mongo réel a montré pendant D-504-P
+
+- ⛔ **Un arrêté de 20 000 lignes validait ses lignes DANS la transaction** : la transaction dépassait la limite de
+  **60 s** de MongoDB, le serveur l'annulait, `ExecuteurTransactions` la rejouait **cinq fois** puis abandonnait — et le
+  service traduisait l'abandon en conflit d'écriture : **409 au bout de 579 s**, sans rien écrire. Invisible aux
+  doublures : seule la mesure sur Mongo réel l'a montré.
+- Correctif : lignes construites et **validées avant l'ouverture de la transaction** ; la transaction ne fait plus
+  qu'insérer l'en-tête puis les lignes validées par lots ordonnés de 1 000, sous la même session ; une ligne invalide est
+  refusée avant toute transaction. Atomicité prouvée par un doublon glissé dans le 2ᵉ lot (0 en-tête, 0 ligne en base).
+
 ## Notes
 
 - Voir [[STORY-498]], [[STORY-503]], [[STORY-507]] (la publication en balance).
