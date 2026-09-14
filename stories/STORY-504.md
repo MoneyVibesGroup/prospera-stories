@@ -345,6 +345,22 @@ levée, limite globale comprise. Confirme le retrait du throttle propre (D-504-R
   service) est consigné comme dette, avec le throttle par utilisateur authentifié qui le remplacerait.
 - **D-504-S — au plus un emplacement de calcul par organisation**, dans le plafond global du processus.
 
+### D-504-R et D-504-S livrées (commit `d8b53f8`)
+
+- **D-504-R** : `@Throttle`, 429 documentés, constantes, suite e2e de throttle et exemption du banc retirés ; un test
+  vérifie qu'aucune route ni la classe ne porte de limite propre ou d'exemption ; emplacement inerte
+  `THROTTLE_PROPRE_DU_PROVISIONNEMENT` nommant le défaut du stockage et ce qui débloquera un throttle par utilisateur
+  authentifié.
+- **D-504-S** : un emplacement de calcul par organisation, vérifié avant le plafond du processus ; détail
+  `plafond: ORGANISATION | PROCESSUS` ; aucun emplacement perdu (succès, proposition rejointe puis rejetée, refus sous le
+  verrou). Dans un même processus, le second acte d'une organisation est refusé par sa part ; entre deux processus, par
+  le verrou (prouvé avec deux instances du service sur la même base).
+- **Clé de mutualisation protégée** : deux organisations ⇒ deux calculs et deux empreintes ; deux dossiers d'une même
+  organisation ⇒ jamais la proposition de l'autre ; même identifiant de dossier sous deux organisations ⇒ deux calculs.
+- Chiffres sourcés : acte de 20 000 lignes en 32,6 à 38,1 s, ≈ 95 s au plafond ; marge du verrou ≈ 3,2 (≈ 1,6 avec un
+  calcul entrelacé) — la correction reste portée par l'index unique (dossier, version).
+- Mutations R1, S1, K1 → K3, Q1 → Q5 rouges par assertion. Portes du dev : 2 366 unitaires, 353 e2e, 60/60 Mongo réel.
+
 ### Portes sur l'état final (HEAD `e3111d0`, rejouées en session dans le worktree, en séquence)
 
 Lint 0 · build OK · **2 362** unitaires / 121 suites (1 saut conditionnel préexistant), couverture
