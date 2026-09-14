@@ -109,6 +109,15 @@ Lint 0 · build OK · **2 099** unitaires / 107 suites (1 saut conditionnel pré
 - **D-503-H — le classement publie `tranchesLivrees`** (vrai seulement si le paquet porte au moins une tranche), et non
   `valeursLivrees` : un même nom ne doit pas porter deux sens selon la route ; la route du paquet de 498 garde le sien.
 
+### Correctifs de revue (commit `09ef331`) et portes sur l'état final (rejouées en session)
+
+- Noms alignés sur 502 (`joursRetard`, `echeanceImpayeeLaPlusAncienne`), `retardPublie` réutilisé ; grep des anciens
+  noms dans `src`, `test`, `scripts` : **0**. `tranchesLivrees` (D-503-H) : paquet à seuils sans tranche ⇒
+  `NON_CLASSABLE`, `tranchesLivrees: false` (alors que `valeursLivrees` de 498 vaut `true` sur le même paquet) ;
+  mutation « calculé comme `valeursLivrees` » ⇒ 2 rouges. Références de spec corrigées.
+- Portes (HEAD `09ef331`) : lint 0 · build OK · **2 101** unitaires / 107 suites, couverture
+  **99,75 / 96,93 / 99,53 / 99,78** · **314** e2e · **36/36** sur Mongo réel.
+
 ### Revue de sécurité (⑦) — aucune vulnérabilité
 
 Pistes écartées avec preuve : gardes de classe héritées par les deux routes ; portefeuille filtré org/dossier et
