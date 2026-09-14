@@ -96,6 +96,34 @@ PR `microfinance-service` **#6**.
 - **D-502-N** — statut `REMPLACEE` ; le retard ne se lit que sur la version en vigueur.
 - **D-502-O** — remboursement à montant unique, capital et intérêts dérivés (remplace D-501-C).
 
+### Revue de code (⑥) — deux bloquants, un non bloquant (vérifiés en exécutant les fonctions pures)
+
+- **[bloquant, 95] Un crédit dont l'octroi est annulé restait publié EN RETARD** : octroi annulé, rien décaissé ⇒
+  à l'arrêté 149 jours de retard, échéance n°1 impayée, 1 000 000 de capital restant dû. STORY-503 aurait classé
+  en souffrance un crédit qui n'a jamais existé.
+- **[bloquant, 90] D-502-I contredisait l'invariant « capital remboursé ≤ décaissé »** : l'échéancier exigeait un
+  capital qu'on ne pouvait pas rembourser. Décaissement partiel de 500 000 sur 1 000 000 payé ponctuellement ⇒
+  échéance 7 refusée, 152 jours de retard au 31/12, deux assiettes divergentes (encours ≠ capital restant dû).
+- **[95] La garde « somme du capital = montant » ne gardait rien en annuités** : le plafonnement au restant dû
+  rattrapait l'écart par hasard sur les jeux de test.
+- **D-502-E validée** par la revue (seule lecture cohérente avec « sans recalcul »).
+
+### Décisions user du 2026-09-14 (après la revue)
+
+- **D-502-P — l'échéancier NAÎT DU DÉCAISSEMENT (remplace D-502-I)** : aucun échéancier ni retard sans
+  décaissement ; version 1 au premier décaissement, sur le décaissé, date de fin fixée à ce moment ; chaque tranche
+  suivante écrit une nouvelle version sur le capital restant dû, même date de fin ; tranche en cours de période
+  refusée (prorata inerte).
+- **D-502-E confirmée** : un remboursement anticipé paie les échéances suivantes en entier ; réduire les intérêts
+  passe par un rééchelonnement explicite.
+
+### Revue de sécurité (⑦) — aucune vulnérabilité
+
+Pistes écartées avec preuve : IDOR sur échéanciers et rééchelonnement (filtres org/dossier/membre/crédit, verrou
+identique), 404 jamais 403, `version` et statut jamais lus du corps, concurrence (verrou en première écriture + index
+`(creditId, version)`), contournement de la consolidation par annulation ou mouvement antidaté, exercice clos à la
+date du rééchelonnement, débordement (pire cas 3·10¹³ < 2⁵³), coût BigInt négligeable, aucune journalisation du motif.
+
 ## Notes
 
 - Voir [[STORY-501]], [[STORY-503]], [[STORY-505]] (rééchelonnements et contagion).
