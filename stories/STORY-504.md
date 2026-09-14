@@ -137,6 +137,30 @@ Lint 0 · build OK · **2 289** unitaires / 116 suites (1 saut conditionnel pré
   l'artefact, paquet fictif inchargeable en production. **Aucune élévation de privilège** : toutes les écritures du
   service sont ouvertes à `TENANT_USER` — la réserve de l'acte est une décision produit.
 
+### Vérification docker — premier passage (HEAD `a84951c`, avant correctifs de revue) — six points prouvés
+
+Code servi, démarrage et **chargement réel de l'artefact modifié** prouvés avant tout point : 322 fichiers de `src`
+identiques hôte/conteneur ; sha256 des octets de `prudentiel-sfd-bceao-1.0.json` identique sur l'hôte, dans `dist` et
+au manifeste (`b4b79e8a…`), rendu par `GET …/prudentiel` ; journal du chargeur « tranches=0, garanties admises=0 ».
+
+| Point | Verdict |
+|---|---|
+| **S1** démarrage, `/health`, route du paquet de 498, classement de 503 inchangé (23 lignes), `sfd-bceao-2.0` intact | **PROUVÉ** |
+| **S2** paquet servi vide ⇒ 409 `PAQUET_PRUDENTIEL_SANS_VALEUR` sur GET et POST ; collection et index nommé présents, 0 document | **PROUVÉ** |
+| **S3** 10 propositions ⇒ aucune collection modifiée, profiler : 0 écriture, aucun crédit lu | **PROUVÉ** (chemin de refus seulement) |
+| **S4** autre organisation ⇒ 404 au corps de l'inexistant ; dossier d'entreprise ⇒ 409 ; `TENANT_USER` admis sur le POST (**avant** D-504-K) | **PROUVÉ** |
+| **S5** 15 POST et 6 GET invalides ⇒ 400, empreinte jamais recopiée | **PROUVÉ** |
+| **S6** 0 réponse 5xx, 0 pile, aucune valeur de taux journalisée | **PROUVÉ** |
+
+⚠️ Le calcul réel (dotation, reprise, idempotence, concurrence) **n'est pas productible** sur la stack tant que le
+paquet servi est vide : il est prouvé par le paquet fictif des tests, jamais injecté dans le conteneur.
+
+⛔ **Défaut constaté hors périmètre, antérieur à 504 (depuis STORY-497)** : `LoggingInterceptor` lit
+`response.statusCode` dans `tap({ error })` **avant** que le filtre d'exceptions n'y pose le vrai statut ⇒ il journalise
+200 ou 201 pour une requête refusée. Mesuré : 22 lignes `POST …/arretes-provision 201` alors que le client a reçu 409 ou
+400 et qu'aucun arrêté n'existe ; même motif sur les routes de 501 à 503. Sur un acte réglementaire, la piste d'audit
+compterait des arrêtés jamais écrits. **Non corrigé ici** (périmètre) — à traiter par une story dédiée.
+
 ### Décisions du 2026-09-14 (après revues)
 
 - **D-504-K — appliquer un arrêté est réservé à `TENANT_ADMIN` (décision user)** ; la proposition reste ouverte à
