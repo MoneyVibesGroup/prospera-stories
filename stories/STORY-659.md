@@ -1,6 +1,6 @@
 # STORY-659 : Le portefeuille d'une IMF ne se classe ni ne se provisionne — il manque le texte prudentiel BCEAO, pas du code
 
-Status: blocked
+Status: in_progress
 
 **Complexité :** high
 
