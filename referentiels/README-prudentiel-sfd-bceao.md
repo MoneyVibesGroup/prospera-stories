@@ -27,11 +27,11 @@ sa caution** (p. 65).
 
 | Texte (mois) | Tranche du paquet (jours) | Taux | Référence |
 |---|---|---|---|
-| 0 à 3 mois — provisionnement facultatif | 0 à 90 | 0 (minimum légal) | p. 64-65 |
-| plus de 3 à 6 mois (2991) | 91 à 180 | 40 % | p. 65 |
-| plus de 6 à 12 mois (2992) | 181 à 360 | 80 % | p. 65 |
-| plus de 12 à 24 mois (2993) | 361 à 720 | 100 % | p. 65 |
-| plus de 24 mois — irrécouvrable, classée en charges | 721 et plus | 100 % (aucun taux écrit) | p. 64 |
+| 0 à 3 mois — provisionnement facultatif | 0 à 89 | 0 (minimum légal) | p. 64-65 |
+| plus de 3 à 6 mois (2991) | 90 à 181 | 40 % | p. 65 |
+| plus de 6 à 12 mois (2992) | 182 à 365 | 80 % | p. 65 |
+| plus de 12 à 24 mois (2993) | 366 à 730 | 100 % | p. 65 |
+| plus de 24 mois — irrécouvrable, classée en charges | 731 et plus | 100 % (aucun taux écrit) | p. 64 |
 
 Les pages 55-56 (comptes 19/199, prêts aux institutions financières) portent les **mêmes** taux et la même assiette.
 
@@ -69,9 +69,13 @@ Valeurs en **pour cent**, comme le texte les écrit (`ratio = A/B × 100`).
   ou de crédits sont inférieurs à **50 millions de FCFA** sur deux exercices consécutifs ; l'Instruction
   n°030-02-2009 impose la **version développée** aux autres. La version développée n'a été trouvée publiée nulle part
   (cb-umoa.org, bceao.int, DRS-SFD Sénégal, Trésor ivoirien) : **l'identité de ses taux n'est pas vérifiée**.
-- **D-659-B — un mois = 30 jours.** Le service compte le retard en jours (`arrêté − échéance`). Aux jours limites
-  (91-92, 181-184, 361-365), la convention range le retard dans la tranche **supérieure** : elle ne sous-provisionne
-  jamais.
+- **D-659-B — une borne = la durée la plus courte de N mois civils.** Le service compte le retard en jours
+  (`arrêté − échéance`), le texte en mois. Balayage des dates de 2024 à 2031 : 3 mois civils font **au moins
+  89 jours** (du 15 février au 15 mai), 6 mois au moins 181, 12 mois au moins 365, 24 mois au moins 730. Les bornes
+  valent ces minima : un retard n'est **jamais** rangé sous sa tranche réelle, et ne l'est au-dessus qu'aux jours
+  où la durée civile est plus longue. ⚠️ La première transcription lisait « 1 mois = 30 jours » et affirmait la même
+  garantie : elle était fausse à la borne des 3 mois (90 jours de retard sur une échéance de février restaient à
+  0 %) — relevé par la revue de code.
 - **D-659-C — au-delà de 24 mois, 100 %.** Le texte classe la créance en charges sans écrire de taux ; le passage en
   perte (compte 669) n'est pas modélisé.
 - **D-659-D — 0 à 3 mois, taux nul.** Le provisionnement y est facultatif : le paquet transcrit le minimum.
