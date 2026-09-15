@@ -270,6 +270,12 @@ l'acte d'un `TENANT_ADMIN` — exactement le chiffre maquillé que la story veut
 compiler. ⚠️ Portly injoignable pendant cette phase (« Open Portly.app ») : les suites de test bornées ont été lancées
 directement, aucun serveur hors Portly.
 
+### Portes sur l'état final (HEAD `828e530`, rejouées en session, en séquence)
+
+Lint 0 · build OK · **2 615** unitaires / 128 suites, couverture **99,77 / 97,17 / 99,65 / 99,80** · **375** e2e HTTP
+(80 sautés : suites Mongo sans URI) · **Mongo réel 80/80** sur les 5 suites (`credits`, `classement-credits`,
+`provisionnement` 57/57 ; `depots`, `parts-sociales` 23/23), aucune sautée. Octets NUL hérités inchangés (1 et 2).
+
 ## Notes
 
 - Voir [[STORY-503]], [[STORY-504]], [[STORY-506]], [[STORY-659]].
