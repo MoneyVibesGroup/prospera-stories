@@ -4190,7 +4190,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "ready-for-dev"  # phase A, prerequis 661
+        status: "review"  # MNV-662 poussee, empilee sur MNV-661 — recette Docker : demande poussee et ACCEPTEE par PI-SPI
         story_path: "stories/STORY-662.md"
         assigned_to: null
       - story_id: "STORY-663"
