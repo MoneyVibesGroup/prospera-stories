@@ -4198,7 +4198,7 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "ready-for-dev"  # phase A, prerequis 662
+        status: "review"  # MNV-663 poussee sur dev — recette Docker : echeance -> demande poussee a PI-SPI
         story_path: "stories/STORY-663.md"
         assigned_to: null
       - story_id: "STORY-664"
