@@ -62,7 +62,7 @@ l'organisation, depuis son propre compte — jamais d'un compte de Money Vibes.
 
 | Story | Titre | Pts | Prérequis |
 | --- | --- | --- | --- |
-| **STORY-661** | L'adresse de paiement du payeur — un moyen de paiement, pas un profil | 3 | 600, 290 |
+| **STORY-661** | L'adresse de paiement du payeur — un moyen de paiement, pas un profil | 5 | 600, 290 |
 | **STORY-662** | La demande part dans l'application du payeur — l'émission appelle enfin le fournisseur | 5 | 661, 653 |
 | **STORY-663** | L'échéance d'abonnement émet sa demande — la facturation récurrente | 3 | 662 |
 | **STORY-664** | Le QR dynamique d'une demande — la référence qui rapproche toute seule | 3 | 655 |
@@ -103,15 +103,18 @@ l'organisation, depuis son propre compte — jamais d'un compte de Money Vibes.
 | --- | --- | --- | --- |
 | **STORY-669** | La trésorerie par l'API du participant — le relevé n'est plus un fichier qu'on dépose | 5 | 269, 666 |
 
-- ⛔ **Bloquée par le simulateur** tant qu'il ne résout pas les comptes qu'il liste (STORY-653).
+- ~~Bloquée par le simulateur~~ — **débloquée le 2026-09-15** : le détail d'un compte répond sous
+  le chemin du participant (`/TGD999`), et son solde avec. Reste le prérequis 666.
 
 ## 4. Ce qui reste bloqué hors du dépôt
 
-- ⛔ **Aucun alias sur nos comptes.** `GET /v1/comptes` liste deux comptes que `GET
-  /v1/comptes/{numero}` et la création d'alias ne résolvent pas, alors que le transfert intra-comptes
-  les accepte. Tant que ce défaut du simulateur dure, **aucune demande ne peut être acceptée de bout
-  en bout**, même en phase A : le bénéficiaire doit être une adresse de notre client business. Le
-  rapport à envoyer au support tient en une phrase (voir STORY-653).
+- ✅ **LEVÉ le 2026-09-15 — ce n'était pas un défaut du simulateur, c'était notre chemin.** L'origine
+  de l'API est `https://no-mtls.piz.simulateurs.pi-bceao.com/<PARTICIPANT>` (`/TGD999`), pas `/v1`.
+  Sous `/v1`, l'annuaire et la liste des comptes répondent, mais le détail d'un compte et la création
+  d'alias disent « le compte n'existe pas », et la demande de paiement tombe en 500. Sous `/TGD999`,
+  le SHID de « MONEY VIBES » a été créé sur le compte `44511072980305975922`, et la recette d'appel
+  réel prouve 8 étapes sur 8 : **le schéma accepte la demande de paiement poussée par l'adaptateur.**
+  Aucun ticket au support n'est nécessaire.
 - ⚠️ **Le mTLS** de la route de rappel et des appels de production : développement réel, hors de
   ce plan.
 
