@@ -1,6 +1,6 @@
 # STORY-504 : Provisionnement réglementaire par tranche — calculé, proposé, jamais appliqué d'office
 
-Status: in-progress
+Status: done
 
 **Complexité :** high
 
@@ -71,7 +71,8 @@ Valeurs BCEAO réelles · écriture comptable et publication en balance (STORY-5
 
 ## Progress Tracking
 
-**Statut : `in-progress` (2026-09-14).** Branches `MNV-504` ouvertes sur `docs` (base `main`) et
+**Statut : `done` (2026-09-15).** PR `microfinance-service` **#8** intégrée en rebase-merge sur `dev` (1 commit de
+feature, 5 de revue) ; branche et worktree supprimés. Branches `MNV-504` ouvertes sur `docs` (base `main`) et
 `microfinance-service` (worktree empilé sur la 503, rebasé sur `dev` après son merge). Décisions D-504-A et B ci-dessus.
 PR `microfinance-service` **#8** (un commit `a84951c`, rebasé sur `dev`).
 
@@ -360,6 +361,26 @@ levée, limite globale comprise. Confirme le retrait du throttle propre (D-504-R
 - Chiffres sourcés : acte de 20 000 lignes en 32,6 à 38,1 s, ≈ 95 s au plafond ; marge du verrou ≈ 3,2 (≈ 1,6 avec un
   calcul entrelacé) — la correction reste portée par l'index unique (dossier, version).
 - Mutations R1, S1, K1 → K3, Q1 → Q5 rouges par assertion. Portes du dev : 2 366 unitaires, 353 e2e, 60/60 Mongo réel.
+
+### Portes sur l'état final (rejouées en session après les correctifs de tests, en séquence)
+
+Lint 0 · build OK · **2 366** unitaires / 121 suites (1 saut conditionnel préexistant), couverture
+**99,79 / 97,15 / 99,61 / 99,82** · **353** e2e sur **deux passages** (70 sautés : suites Mongo sans URI) · **60/60** sur
+Mongo réel (`credits.mongo`, `depots.mongo`, `classement-credits.mongo`, `provisionnement.mongo`, aucun sauté).
+Mutation « emplacement comparé par instance » : 2 rouges en unitaire, 1 rouge sur Mongo réel (deux actes simultanés, même
+processus) ; fichier restauré à l'identique. ⚠️ Une première passe a été interrompue par la fin de session : rejouée
+entièrement, aucun résultat partiel retenu.
+
+### Dettes consignées, hors périmètre (à traiter par des stories dédiées)
+
+- **`LoggingInterceptor`** (depuis STORY-497) : statut journalisé avant le filtre d'exceptions ⇒ 200/201 journalisés pour
+  des requêtes refusées ; la piste d'audit compterait des arrêtés jamais écrits.
+- **Stockage de `@nestjs/throttler` 6.5.0** : la levée d'un blocage annule les décréments de tous les compteurs, limite
+  globale comprise (reproduit sur la stack).
+- **Valeurs prudentielles BCEAO** : tranches, taux et garanties admises absents ⇒ aucun calcul réel productible ni
+  vérifiable en docker (D-498-A, D-503-A, D-504-A).
+- Cache des propositions terminées (`CACHE_DE_LA_PROPOSITION_DE_PROVISION`) ; route de lecture des arrêtés ; sémaphore
+  et verrou en mémoire (N instances ⇒ 2 × N calculs) ; mainlevée suivie pour le seul nantissement.
 
 ### ✅ Dernière mini-vérification docker (HEAD `d8b53f8`) — trois points prouvés, un non productible, aucun échec
 
