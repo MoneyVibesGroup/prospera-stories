@@ -126,7 +126,7 @@ sur 90 000 appels aléatoires : 0 divergence. La purge ne lève jamais un blocag
 trié) ⇒ `Math.max(...echeances)` + test. ④ La mutation d'AC-2 décrite dans la spec ne compilait pas ⇒ commentaire corrigé
 (double conversion).
 
-⚠️ **Incident de livraison.** Le séparateur de clé ` ` avait été écrit comme **un octet NUL brut** : tout vert à
+⚠️ **Incident de livraison.** Le séparateur de clé `\u0000` avait été écrit comme **un octet NUL brut** : tout vert à
 l'exécution, mais git traitait le fichier en **binaire** (diff « Bin », illisible en revue). Repéré après recopie dans
 5 dépôts ; corrigé en v3 (séquence d'échappement, chaîne identique à l'exécution) par un commit de revue dédié partout, et
 réaligné dans `document-service` où il avait été remplacé par une espace. Contrôle final : 0 octet NUL, même md5, 0 fichier
