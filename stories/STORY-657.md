@@ -1,6 +1,6 @@
 # STORY-657 : Le journal d'accès ment sur chaque requête refusée — 12 services journalisent 200/201 là où le client a reçu 409, 404 ou 400
 
-Status: ready-for-dev
+Status: in_progress
 
 **Complexité :** medium
 
