@@ -245,6 +245,31 @@ l'acte d'un `TENANT_ADMIN` — exactement le chiffre maquillé que la story veut
   lui : une décision et un rééchelonnement concurrents se sérialisent, le second relit le premier. Écarté : comparer les
   horodatages d'enregistrement à la lecture — dépendant des horloges des instances, et silencieux pour l'utilisateur.
 
+### Correctifs de revue livrés (commits dédiés `76894c8` revue, `828e530` sécurité)
+
+- **Revue** : commentaire du plafond de coût porté à six lectures par page.
+- **Sécurité (D-505-T)** : refus `REECHELONNEMENT_ANTERIEUR_A_UNE_DECISION_DE_REPRISE` dans `deciderReechelonnement`, la
+  dernière décision lue sous le verrou (`DecisionsRepriseProvisionRepository.derniereDateDuCredit`, en session) ;
+  enregistrement d'une décision en transaction, verrou du crédit en première écriture, mouvements relus sous lui,
+  insertion en session, concurrence persistante traduite en `409 CREDIT_ECRITURE_CONCURRENTE` ; Swagger du
+  rééchelonnement complété ; message du `404 CREDIT_INTROUVABLE` partagé (même corps partout).
+- **Preuves** : unitaires (refus le jour même et après la décision, admis la veille, lecture sous le verrou et dans la
+  session ; ordre verrou → mouvements → insertion ; mouvements de l'historique ignorés ; 404 au message commun) ; e2e
+  HTTP (antidaté et jour même ⇒ 409, rien d'écrit) ; **Mongo réel** : scénario séquentiel, et **course forcée** — la
+  décision relit les mouvements sous son verrou puis attend, le rééchelonnement du même jour part pendant l'attente ⇒ la
+  décision s'écrit, le rééchelonnement jamais. Suites Mongo `credits`, `classement-credits`, `provisionnement` :
+  **57/57** sur `828e530`.
+
+| Mutation | Tests rougis |
+|---|---|
+| M-T1 — refus D-505-T rendu impossible | 2 unitaires (jour même, après) + 1 e2e HTTP |
+| M-T2 — verrou de la décision pris APRÈS l'insertion | 2 unitaires (ordre, 404 du verrou) + **la course sur Mongo réel** (les deux s'écrivent : reçu `ECRIT`) |
+
+⚠️ Une première passe de mutations ne compilait pas sous ts-jest (`noUnusedLocals` / `noUnusedParameters` : « 0 test »,
+« failed to run ») : écartée, aucun rouge de compilation n'est compté comme une preuve ; mutations réécrites pour
+compiler. ⚠️ Portly injoignable pendant cette phase (« Open Portly.app ») : les suites de test bornées ont été lancées
+directement, aucun serveur hors Portly.
+
 ## Notes
 
 - Voir [[STORY-503]], [[STORY-504]], [[STORY-506]], [[STORY-659]].
