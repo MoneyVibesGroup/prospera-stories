@@ -154,6 +154,48 @@ intérêts échus (extra-comptables selon le RCSFD) · écritures 6691 / 291-294
 **Statut : `in_progress` (2026-09-15).** Flux APEX complet dans la session. Branches `MNV-505` créées **avant toute
 ligne** : `docs` (base `main`, `745ca59`) et `microfinance-service` (base `dev`, `c15e006`).
 
+### Développement — trois lots `opus` en parallèle, rapports vérifiés avant intégration
+
+Un commit de contrats partagés (`2e047fa` : types de mouvement de perte, rubrique `ContagionPrudentielle`, helper
+`passageEnPerte`, paquet fictif avec contagion), puis trois worktrees hors de l'arbre monté (leçon de STORY-503) :
+
+- **Lot A — paquet 1.2** (`22692c4`) : schéma et validateur (règle **P4** : active ⇒ seuil entier sûr ≥ 0 et au moins
+  une tranche ; inactive ⇒ `null`), chargeur (`fautesDeLaContagion`, accord P4 ↔ chargeur), artefact
+  `prudentiel-sfd-bceao@1.2` (sha256 `b7c83604…9d209d7e0`), route du paquet. **Vérifié en session** : sha256 de 1.0
+  (`b4b79e8a…`) et 1.1 (`c76b1afe…`) inchangés, diff 1.1 → 1.2 limité à version, révision, mise en garde (7) et
+  rubrique ; validateur OK sur les trois artefacts.
+- **Lot B — passage en perte et recouvrement** (`4326aac`) : routes `passage-en-perte` (TENANT_ADMIN) et
+  `recouvrements`, montant = capital restant dû décidé par le service, index `unicite_passage_en_perte_par_credit`,
+  refus nommés, situation (`montantPasseEnPerte`, `recouvreApresPerte`, `encours`). Balayages : 144 scénarios
+  (montant = capital restant dû), 40 + 200 séquences (plafond du recouvrement à toute date). Mutations M1 → M7 rouges.
+- **Lot C — classement et provisionnement** (`bd444dc`) : statut `PASSE_EN_PERTE`, `categorie`, `restructuration`,
+  `contagion` (fonction pure `appliquerContagion`), `sortieEnPerte`, reprise suspendue, `provisionConstituee` relue
+  par l'arrêté suivant, `parCategorie`, collection et routes `decisions-reprise-provision`. Balayages : 720 permutations
+  et découpages en pages, 176 lignes (identités de provision), 60 portefeuilles (totaux). Mutations M1 → M8 rouges.
+
+### Décisions prises pendant le dev (2026-09-15) — à relire en revue
+
+- **D-505-P** — l'index du passage en perte porte sur `(creditId, type)` : l'index d'annulation d'octroi occupe déjà la
+  clé `{creditId}`, et deux index partiels de même clé rendraient la violation indiscernable (`violeIndexUnique`).
+- **D-505-Q** — la décision de reprise retenue est publiée dès qu'elle est valable, même sans reprise, et lue même sans
+  arrêté de référence : elle entre dans l'empreinte, qui ne dépend jamais de l'arrêté de référence ; la lire seulement
+  avec lui changerait l'empreinte d'un arrêté à sa réapplication (AC-6).
+- **D-505-R** — `parTranche` garde ses quatre totaux : une ligne passée en perte n'a pas de tranche, sa reprise n'entre
+  que dans les totaux généraux.
+- **D-505-S** — la route du paquet publie `declassement: {}` quand le paquet ne déclare pas la contagion.
+- Refus `CREDIT_PASSE_EN_PERTE` sans détail (même corps par la règle et par l'index) ; liste des décisions paginée ;
+  `decidePar` publié.
+
+### Intégration sur `MNV-505` (en session)
+
+- A et B appliqués sans conflit ; C : six conflits d'ajouts concurrents (liste des restrictions de rôle, emplacements,
+  e2e HTTP) résolus par script à l'octet — octet NUL hérité de `test/credits.e2e-spec.ts` préservé ; compte des
+  opérations publiées porté à 22 (16 crédits, 2 produits, 4 provisionnement).
+- **Doublon supprimé** : les lots A et C avaient chacun écrit un `fautesDeLaContagion` ; `regle-de-classement.ts`
+  réutilise celui du chargeur (règle « jamais deux copies d'une formule »), ses tests passent par `regleDeClassement`.
+- **Horloge explicite** : le lot B avait donné à `CreditsService` une horloge par défaut ; retirée, les cinq
+  constructions directes des suites la reçoivent.
+
 ## Notes
 
 - Voir [[STORY-503]], [[STORY-504]], [[STORY-506]], [[STORY-659]].
