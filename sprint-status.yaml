@@ -26,7 +26,7 @@ sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 #
 # ── ÉTAT AU 2026-08-15 ────────────────────────────────────────────────────────────────────────────
 epic_id_high_water_mark: "EPIC-141"   # MAJ 2026-08-28 — +EPIC-137 a 141 (Consolidation SYSCOHADA niveau 3, STORY-541 a 548), pris a l arbitrage PO « je veux la partie 3 ».   # MAJ 2026-08-27 (2e passe du jour) — +EPIC-135 (Immobilisations et amortissements, STORY-526/527/528) et +EPIC-136 (Multi-societe et perimetre de groupe, STORY-529/530/531), pris a l arbitrage du point 6 par le PO. EPIC-110 reste LIBRE dans la plage socle.   # MAJ 2026-08-27 — +EPIC-106 a 134 (29 epics, 4 plages) pris LE JOUR DU DECOUPAGE de la revue expert-comptable de la maquette cumulative. RESERVATION VERIFIEE : max reel EPIC-105 (assistant-ia), et les plages 044-053 / 054-064 / 065-074 / 075-084 / 085-094 / 095-105 sont contigues et toutes reservees ⇒ 106 est le premier libre. 106-110 socle multi-referentiel (SEULE plage SLOTTEE et dont le service EXISTE deja) · 111-120 comptabilite-service · 121-127 microfinance · 128-134 assurance.   # dernier épic ATTRIBUÉ — EPIC-095→105 pris le 2026-08-16 par assistant-service (découpage Assistant IA, plage RÉSERVÉE le jour même, NON SLOTTÉE) ; EPIC-085→094 pris le 2026-08-15 par pdv-service ; EPIC-075→084 le même jour par stock-service ; EPIC-065→074 le même jour par catalogue-produits-service ; EPIC-044→053 le même jour par reseau-service. Historique : EPIC-043 = dossier-client, S20. — Historique (origin/main, MNV-401) — dernier épic ATTRIBUÉ — EPIC-095→105 pris le 2026-08-16 par assistant-service (découpage Assistant IA, plage RÉSERVÉE le jour même, NON SLOTTÉE) ; EPIC-085→094 pris le 2026-08-15 par pdv-service ; EPIC-075→084 le même jour par stock-service ; EPIC-065→074 le même jour par catalogue-produits-service ; EPIC-044→053 le même jour par reseau-service. Historique : EPIC-043 = dossier-client, S20.
-story_id_high_water_mark: "STORY-669"  # MAJ 2026-09-15 — +STORY-652→655 et 660 (livrees, PI-SPI) +STORY-661→669 (PLAN-PI-SPI-CAS-D-USAGE-2026-09-15). Ancien plafond : "STORY-659"
+story_id_high_water_mark: "STORY-670"  # MAJ 2026-09-15 (soir) — +STORY-670 (consultation d une demande chez le schema, doc recue le jour meme). MAJ 2026-09-15 — +STORY-652→655 et 660 (livrees, PI-SPI) +STORY-661→669 (PLAN-PI-SPI-CAS-D-USAGE-2026-09-15). Ancien plafond : "STORY-659"
 
 reserved_ranges:
   - range: "STORY-631 → STORY-649"
@@ -4235,6 +4235,14 @@ sprints:
         service: "paiement-service"
         status: "ready-for-dev"  # phase C, prerequis 666 — DEBLOQUEE 2026-09-15 : le simulateur resout ses comptes sous /TGD999 (le chemin /v1 etait la cause)
         story_path: "stories/STORY-669.md"
+        assigned_to: null
+      - story_id: "STORY-670"
+        title: "Consulter une demande chez le schema - le paiement se constate sans webhook"
+        epic: "EPIC-036"
+        points: 5
+        service: "paiement-service"
+        status: "review"  # MNV-670 poussee sur dev — recette Docker : demande payee dans le bac a sable -> encaissement constate, demande Soldee
+        story_path: "stories/STORY-670.md"
         assigned_to: null
 
   # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
