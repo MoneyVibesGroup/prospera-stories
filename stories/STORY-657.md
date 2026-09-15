@@ -1,6 +1,6 @@
 # STORY-657 : Le journal d'accès ment sur chaque requête refusée — 12 services journalisent 200/201 là où le client a reçu 409, 404 ou 400
 
-Status: in_progress
+Status: done
 
 **Complexité :** medium
 
@@ -74,19 +74,19 @@ n'importe quel nombre.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Pour une requête terminée par une exception HTTP, la ligne de l'intercepteur porte **le statut reçu par le
+- [x] AC-1 — Pour une requête terminée par une exception HTTP, la ligne de l'intercepteur porte **le statut reçu par le
       client** : celui de l'exception (`HttpException.getStatus()`), et **500** pour une erreur non HTTP. Même règle que
       le filtre global (4xx `warn`, 5xx `error`) — le statut ne doit jamais diverger entre les deux lignes.
-- [ ] AC-2 — Pour une requête réussie, le statut journalisé reste celui de la réponse (200, 201, 204…), inchangé.
-- [ ] AC-3 — ⛔ **Le test du chemin d'erreur rougit sur le code actuel** : réponse simulée au statut par défaut
+- [x] AC-2 — Pour une requête réussie, le statut journalisé reste celui de la réponse (200, 201, 204…), inchangé.
+- [x] AC-3 — ⛔ **Le test du chemin d'erreur rougit sur le code actuel** : réponse simulée au statut par défaut
       d'Express (200, et 201 pour un POST), exception `ConflictException` ⇒ la ligne attendue contient **409** ; erreur
       non HTTP ⇒ **500**. **Mutation** : remettre la lecture de `response.statusCode` ⇒ le test rougit par assertion.
-- [ ] AC-4 — **Preuve sur Mongo et HTTP réels, pas seulement en unitaire** : un test e2e (banc existant) envoie une
+- [x] AC-4 — **Preuve sur Mongo et HTTP réels, pas seulement en unitaire** : un test e2e (banc existant) envoie une
       requête refusée (409 et 400) et une réussie, et vérifie que la ligne journalisée et le statut HTTP reçu
       **concordent** — le défaut ne se voit qu'en présence du vrai filtre global.
-- [ ] AC-5 — Les **12** dépôts reçoivent le même correctif et le même test ; chaque dépôt passe ses portes DoD (lint 0,
+- [x] AC-5 — Les **12** dépôts reçoivent le même correctif et le même test ; chaque dépôt passe ses portes DoD (lint 0,
       build, couverture ≥ seuils, unit + e2e verts).
-- [ ] AC-6 — Vérification docker sur au moins deux services (dont `microfinance-service`) : une rafale de requêtes
+- [x] AC-6 — Vérification docker sur au moins deux services (dont `microfinance-service`) : une rafale de requêtes
       refusées produit des lignes INFO dont le statut est **identique** à celui de la ligne WARN du filtre et de la
       réponse HTTP (appariement par identifiant de requête, zéro divergence).
 
@@ -102,3 +102,70 @@ Le format de la ligne, pino, le `requestId`, la journalisation des corps (jamais
 - ⚠️ `docker-compose*.yml` et la CI racine ne sont versionnés dans aucun dépôt : rien à y changer ici.
 - Voir [[STORY-504]] (vérifications docker qui ont mis le défaut en évidence), [[STORY-497]] (socle microfinance),
   [[STORY-109]] (précédent de story transverse sur plusieurs dépôts).
+
+---
+
+## Progress Tracking
+
+### 2026-09-15 — ✅ done : 12 dépôts, 12 PR rebase-mergées sur `dev`
+
+**Décision de conception (D-657-1).** AC-1 demandait « la même règle que le filtre global ». Or `AllExceptionsFilter`
+existe en **8 variantes** d'un dépôt à l'autre (md5 distincts : identifiant mal formé requalifié en 400 ici, pas là).
+Recopier sa règle dans l'intercepteur l'aurait fait diverger à la première évolution d'un filtre. Le chemin d'erreur
+attend donc l'événement `close` de la réponse et lit `response.statusCode` à ce moment-là : c'est **par construction** le
+statut reçu par le client, quelle que soit la règle du service. Réponse déjà détruite (client parti avant l'erreur) ⇒
+écriture différée d'un `setImmediate`, après le passage du filtre. Le chemin de succès est inchangé (AC-2).
+
+**Livraison.** Correctif de référence écrit, revu et prouvé dans `microfinance-service`, puis propagé par sous-agents ;
+fichiers identiques partout (intercepteur md5 `bbdf7740…`, spec `147cb163…`), sauf `notification-service` et
+`paiement-service` qui gardent leur masquage d'URL / de jeton (seul le chemin d'erreur change) et `balance-service`, dont
+l'e2e importe son propre utilitaire d'écoute (`test/utils/serveur.ts`, imposé par un test d'invariant).
+
+| Dépôt | PR | Dépôt | PR |
+|---|---|---|---|
+| auth-service | #26 | expert-comptable | #6 |
+| microfinance-service | #9 | balance-service | #105 |
+| admin-panel | #26 | bilan-service | #123 |
+| kyc-service | #19 | paiement-service | #64 |
+| platform-catalog-service | #19 | notification-service | #57 |
+| dossier-service | #28 | document-service (ocr) | #18 |
+
+**Revue de code (⑥, opus) — quatre constats non bloquants, tous traités.** ① Un client qui coupe AVANT l'erreur : la
+réponse est déjà détruite, l'écriture immédiate relisait le défaut d'Express ⇒ `setImmediate` + test qui rougit sur la
+version précédente. ② **Les refus des guards n'atteignent jamais l'intercepteur** (`fnCanActivate` s'exécute avant
+`interceptorsConsumer.intercept`) : 401, 403 et 429 ne produisent **aucune** ligne INFO, avant comme après. ⚠️ **Correction
+de cette fiche** : le « 403 » cité dans « Le fait » provient d'un guard, hors du mécanisme corrigé ; AC-6 a donc été mené
+sur des 409, 400, 401 et 404 levés **après** les guards (handler, service, pipes). Un JSON mal formé (échec du parseur
+d'Express, avant le routage) est dans le même cas. ③ ④ concernaient STORY-658.
+
+**Revue de sécurité (⑦, opus) — aucune vulnérabilité.** Pas de fuite d'écouteur sous connexions lentes (un `once` par
+requête en erreur), contexte CLS conservé dans l'écouteur (`requestId` juste), aucune injection nouvelle.
+
+**Mutations (dans chaque dépôt, par assertion).** Écriture immédiate au lieu de `close` ⇒ unitaires 409 et 500 + e2e 409,
+400 et 500 rouges, succès vert. `setImmediate` retiré ⇒ test « client parti avant l'erreur » rouge.
+
+**AC-4 — précision honnête.** `test/journal-acces.e2e-spec.ts` monte le **vrai** `AllExceptionsFilter` et le **vrai**
+`LoggingInterceptor` sur du HTTP réel (409, 400, 500, 201) ; il n'écrit pas en base — la persistance n'est pas l'objet du
+défaut. La preuve sur Mongo réel est portée par AC-6 (V2).
+
+**AC-5 — portes.** Lint 0, build, unit et e2e verts dans les 12 dépôts, couverture au seuil dans 11. ⚠️ **Exception
+`notification-service`** : `test:cov` échoue au seuil **functions** (89,18 % < 90 %) **déjà sur `origin/dev`** (vérifié en
+session, 3 242 tests verts) ; les branches ne l'aggravent pas (89,20 %). **Décision user du 2026-09-15 : pousser et
+consigner la dette.**
+
+**AC-6 — vérification docker (stack neuve réduite ; appariement refait en session depuis les journaux bruts).**
+
+| Point | Code servi (grep dans le conteneur) | Résultat |
+|---|---|---|
+| témoin `dev` sur auth-service | `apresReponse` = 0 | **3 divergences sur 4** : 409 journalisé 201, 400 et 401 journalisés 200 |
+| **V1** auth-service | `MNV-657@cdf2611`, `apresReponse` = 2 | 13 requêtes (400, 401, 409, 200, 201, 202) : **0 divergence** HTTP / INFO / WARN ; 1 JSON mal formé hors intercepteur |
+| **V2** microfinance-service, requêtes authentifiées | `MNV-657@ade6919`, `apresReponse` = 2 | 14 requêtes (201, 200, 409, 400, 404) : **0 divergence** ; **1 seul** membre en base (le 201), aucun pour les refus |
+
+Preuve brute : `scratchpad/verif-docker/` de la session (`v1*`, `v2*`, `synthese.md`).
+
+**Dettes et hors périmètre relevés.**
+- `notification-service` : couverture des fonctions sous le seuil sur `dev` — story de couverture à cadrer.
+- `expert-comptable` : `billing-plans.e2e-spec.ts`, **3 tests rouges sur `dev`** (constaté en session sur `4a2e8d2`).
+- `paiement-service` : `notifications-webhook.e2e-spec.ts`, AC-4 « rejoué N fois » **rouge sur `dev`** (constaté sur `1532315`).
+- Les refus des guards et des parseurs ne sont pas journalisés par l'intercepteur (constat ②) : à cadrer si l'exploitation
+  en a besoin.
