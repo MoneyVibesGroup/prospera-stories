@@ -1,6 +1,6 @@
 # STORY-505 : Déclassement en cascade et rééchelonnements — les deux façons de sortir d'un retard, et une seule est honnête
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -127,32 +127,33 @@ intérêts échus (extra-comptables selon le RCSFD) · écritures 6691 / 291-294
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Le classement s'applique **au débiteur** : la règle de contagion vient du paquet
+- [x] AC-1 — Le classement s'applique **au débiteur** : la règle de contagion vient du paquet
       prudentiel (activée ou non, avec son seuil), jamais du code.
       *Preuve* : paquet fictif actif ⇒ un crédit à jour d'un membre dont un autre crédit dépasse le seuil prend la
       tranche de ce retard ; **changer le seuil dans le paquet change le classement** (mutation) ; paquet servi 1.2
       inactif ⇒ classement identique, crédit par crédit, à celui de STORY-503.
-- [ ] AC-2 — Un crédit **rééchelonné** porte un marqueur permanent, avec la date et le motif du
+- [x] AC-2 — Un crédit **rééchelonné** porte un marqueur permanent, avec la date et le motif du
       rééchelonnement, et le **nombre de rééchelonnements successifs**.
       *Preuve* : deux rééchelonnements ⇒ `nombreReechelonnements: 2`, dates et motifs ; rejeu à une date entre les
       deux ⇒ 1 ; avant le premier ⇒ absent.
-- [ ] AC-3 — Les indicateurs et les états distinguent **sain**, **restructuré** et **en souffrance**.
+- [x] AC-3 — Les indicateurs et les états distinguent **sain**, **restructuré** et **en souffrance**.
       ⛔ Un crédit restructuré ne se compte **jamais** dans « sain » sans être nommé.
       *Preuve* : rééchelonné à jour ⇒ `RESTRUCTURE` (mutation « marqueur ignoré » rouge) ; `parCategorie` somme
       exactement les lignes `CLASSE`.
-- [ ] AC-4 — Les **abandons de créance** (passage en perte) sont des événements (AD-1), et le crédit
+- [x] AC-4 — Les **abandons de créance** (passage en perte) sont des événements (AD-1), et le crédit
       abandonné reste lisible : une créance passée en perte peut être recouvrée plus tard.
       *Preuve* : passage ⇒ encours 0, montant = capital restant dû, crédit lisible en situation et classement ;
       recouvrement ultérieur publié ; tout autre mouvement refusé ; persistance prouvée sur Mongo réel.
-- [ ] AC-5 — ⚠️ Un rééchelonnement **ne libère pas** la provision automatiquement. Sa reprise est
+- [x] AC-5 — ⚠️ Un rééchelonnement **ne libère pas** la provision automatiquement. Sa reprise est
       une décision, au même titre que sa dotation (STORY-504 AC-4).
       *Preuve* : arrêté 1 provision X, rééchelonnement, arrêté 2 ⇒ reprise 0, suspendue ; arrêté 3 sans décision ⇒
       toujours maintenue (mutation « relit `provisionRequise` » rouge) ; décision datée ⇒ reprise proposée.
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-09-15).** Flux APEX complet dans la session. Branches `MNV-505` créées **avant toute
-ligne** : `docs` (base `main`, `745ca59`) et `microfinance-service` (base `dev`, `c15e006`).
+**Statut : `done` (2026-09-15).** PR `microfinance-service` **#12** intégrée en rebase-merge sur `dev` (1 commit de
+feature, 1 de revue, 1 de sécurité) ; branche supprimée. Flux APEX complet dans la session. Branches `MNV-505` créées
+**avant toute ligne** : `docs` (base `main`, `745ca59`) et `microfinance-service` (base `dev`, `c15e006`).
 
 ### Développement — trois lots `opus` en parallèle, rapports vérifiés avant intégration
 
@@ -275,6 +276,48 @@ directement, aucun serveur hors Portly.
 Lint 0 · build OK · **2 615** unitaires / 128 suites, couverture **99,77 / 97,17 / 99,65 / 99,80** · **375** e2e HTTP
 (80 sautés : suites Mongo sans URI) · **Mongo réel 80/80** sur les 5 suites (`credits`, `classement-credits`,
 `provisionnement` 57/57 ; `depots`, `parts-sociales` 23/23), aucune sautée. Octets NUL hérités inchangés (1 et 2).
+
+### ✅ Vérification docker (HEAD `828e530`, stack neuve) — sept points prouvés, aucun défaut
+
+Stack reconstruite à neuf (`down -v`, `up -d --build`, par `docker compose` depuis la racine) ; code servi prouvé avant
+tout point : HEAD `828e530`, 349 fichiers de `src/` identiques hôte/conteneur, « Found 0 errors », le code
+`REECHELONNEMENT_ANTERIEUR_A_UNE_DECISION_DE_REPRISE` publié par l'OpenAPI servie. Tenant monté par l'API (KYC approuvé
+par la vraie voie, entitlement, deux dossiers MICROFINANCE et leur exercice), sauf `npm run seed:admin`. **Attendus
+calculés à la main avant chaque appel** (148 contrôles).
+
+| Point | Verdict |
+|---|---|
+| **V1** paquet servi `1.2`, sha256 `b7c83604…9d209d7e0` recalculé dans le conteneur ; contagion inactive ; un crédit à jour d'un membre dont un autre crédit a 105 jours de retard reste `SAIN` | **PROUVÉ** |
+| **V2** `SAIN` au 05-31, `EN_SOUFFRANCE` à `joursRetard: 0` le jour de l'échéance impayée ; `RESTRUCTURE` 1 puis 2 rééchelonnements (dates, motifs, `mouvementId`), rejeu intermédiaire à 1 | **PROUVÉ** |
+| **V3** passage en perte : 403 pour un `TENANT_USER`, 409 date future, 201 à **1 061 000** (1 200 000 − 139 000 calculé à la main) ; un seul document, index `(creditId, type)` unique et partiel ; tout mouvement ensuite ⇒ 409 `CREDIT_PASSE_EN_PERTE`, sans écriture ; encours 0 ; recouvrements plafonnés (761 000 admis au centime près, 800 000 refusé), annulation à SA date | **PROUVÉ** |
+| **V4** reprise suspendue : arrêté 1 à 400 000 ; rééchelonnement ; arrêté 2 ⇒ reprise 0, suspendue 400 000, **constituée 400 000 écrite** ; arrêté 3 maintenu ; refus de décision (403, sans rééchelonnement, future, en double) puis 201 ; arrêté 4 ⇒ reprise 400 000 et `decisionDeReprise` écrite ; réapplication `dejaApplique`, rien d'écrit | **PROUVÉ** |
+| **V5** D-505-T : rééchelonnement par un `TENANT_USER` la veille et le jour de la décision ⇒ 409 `dateDecision`, comptes inchangés ; le lendemain ⇒ 201 | **PROUVÉ** |
+| **V6** sortie en perte `{500 000, 200 000, 200 000}` sans `provision` ; totaux « déjà constatée » et « reprise » qui l'incluent ; `parCategorie` des quatre arrêtés = sommes recalculées depuis la base | **PROUVÉ** |
+| **V7** 0 ligne orpheline (4 en-têtes, 16 lignes = `nombreLignes`), aucune écriture sur refus, **0 réponse 5xx**, 0 erreur, 0 trace de pile | **PROUVÉ** |
+
+Écart d'attendu, non de code : `details.exposant` vaut 2 (franc CFA × 100, STORY-489). Non productible : la contagion
+ACTIVE sur la stack (paquet servi inactif — prouvée par le paquet fictif et 720 permutations). Stack arrêtée
+(`docker compose stop`) ; effets de bord en base de dev : organisation « IMF Verif 505 », 3 dossiers, 15 crédits,
+4 arrêtés, 9 décisions.
+
+### ⚠️ Réserve consignée — la course décision / rééchelonnement du même jour (D-505-T)
+
+Course naturelle sur la stack, 8 essais simultanés : **jamais** un rééchelonnement écrit après une décision datée au
+plus tard de lui. Mais quand le rééchelonnement valide le premier (6 sur 8, ordre prouvé par l'oplog : `revision` 3
+puis 4), la décision le relit sous le verrou **et le couvre** — c'est la lettre de D-505-T (« le second relit le
+premier »). Une décision envoyée au même instant qu'un rééchelonnement du même jour peut donc couvrir un
+rééchelonnement que le `TENANT_ADMIN` n'a pas vu. Jugée non bloquante : il faudrait viser la même seconde, et la décision
+retenue reste publiée sur la ligne que l'administrateur applique par un acte explicite.
+
+### Dettes consignées, hors périmètre
+
+- **La décision de reprise cite le rééchelonnement qu'elle couvre** (identifiant du mouvement) : ferme la réserve
+  ci-dessus sans dépendre de l'ordre d'arrivée — changement de contrat de la route, à cadrer.
+- Lignes d'arrêté antérieures à la 505 sans `provisionConstituee` ni `parCategorie` (migration avant la production).
+- Lignes d'arrêté sans `restructuration` ni `contagion` (à trancher avec les écritures 291-294, STORY-507).
+- Crédits « redevenus sains après souffrance » et concordats (291), `CORRECTION_D_UN_PASSAGE_EN_PERTE`, valeurs de
+  contagion (aucun texte SFD), version développée du RCSFD.
+- Portly injoignable pendant la fin du flux : tests et stack lancés directement (tests bornés, `docker compose`).
 
 ## Notes
 
