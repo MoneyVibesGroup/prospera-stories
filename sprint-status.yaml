@@ -3737,7 +3737,7 @@ sprints:
         epic: "EPIC-124"
         points: 8
         service: "microfinance-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 — decoupage epics-microfinance-2026-08-27.md + spine architecture-microfinance-service-2026-08-27. Deux règles que le classement par échéance seul ne couvre pas, et qui décident du provisionnement :
+        status: "in_progress"  # MAJ 2026-09-15 (demarrage, flux APEX complet) — cadrage mesure : le RCSFD servi (p. 64-65, relu en image) n ecrit AUCUNE contagion par debiteur ; le compte 291 « credits immobilises » range les reechelonnes a part ; un reechelonnement libere aujourd hui toute la provision a l arrete suivant (tranche 0-89 j a 0 %). DECISIONS USER : D-505-A contagion mecanique, rubrique structuree declassement.contagion, INACTIVE dans prudentiel-sfd-bceao@1.2 (1.0 et 1.1 inchangees) ; D-505-B restructure = reechelonnes seuls ; D-505-C souffrance = au moins une echeance echue impayee ; D-505-D reprise d un reechelonne = decision datee par credit (TENANT_ADMIN), provision maintenue sinon. Cadrage session D-505-E → O (categorie, marqueur derive, passage en perte et recouvrement, reprise suspendue relue par l arrete suivant, parCategorie). Branches MNV-505 docs (main) + microfinance-service (dev). # CREEE le 2026-08-27 — decoupage epics-microfinance-2026-08-27.md + spine architecture-microfinance-service-2026-08-27. Deux règles que le classement par échéance seul ne couvre pas, et qui décident du provisionnement :
         story_path: "stories/STORY-505.md"
       - story_id: "STORY-506"
         title: "PAR 30/90/180 et taux de recouvrement, par agence et par produit"
