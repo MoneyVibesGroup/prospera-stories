@@ -196,6 +196,22 @@ Un commit de contrats partagés (`2e047fa` : types de mouvement de perte, rubriq
 - **Horloge explicite** : le lot B avait donné à `CreditsService` une horloge par défaut ; retirée, les cinq
   constructions directes des suites la reçoivent.
 
+### Portes sur l'état intégré (rejouées en session, en séquence)
+
+Lint 0 · build OK · **2 607** unitaires / 128 suites, couverture **99,77 / 97,15 / 99,65 / 99,79** · **374** e2e HTTP
+(78 sautés : suites Mongo sans URI).
+
+**Mongo réel** (5 suites, `MONGO_INTEGRATION_URI`, replica set `rs0`) : premier passage **73/78** — les 5 rouges
+étaient des tests de STORY-504 et STORY-659 qui comparaient les totaux et l'en-tête d'arrêté champ pour champ, sans
+les champs de la 505 (`provisionConstituee`, `repriseSuspendue`, `parCategorie`) ; aucun écart de montant. Attendus
+complétés depuis les totaux que chaque test calcule déjà (jamais en dur), et les lignes relues en base comparées aussi
+sur `categorie` et `sortieEnPerte`. Second passage : **78/78**, aucun sauté (`provisionnement.mongo` 27/27).
+
+### PR
+
+`microfinance-service` **#12** (`MNV-505` → `dev`), un commit de feature `7ad63c1` (les commits des lots et de
+l'intégration regroupés).
+
 ## Notes
 
 - Voir [[STORY-503]], [[STORY-504]], [[STORY-506]], [[STORY-659]].
