@@ -212,6 +212,39 @@ sur `categorie` et `sortieEnPerte`. Second passage : **78/78**, aucun sauté (`p
 `microfinance-service` **#12** (`MNV-505` → `dev`), un commit de feature `7ad63c1` (les commits des lots et de
 l'intégration regroupés).
 
+### Revue de code (⑥) — aucun bloquant, un constat corrigé d'office
+
+- **[85] Commentaire du plafond de coût resté à « cinq lectures par page »** (`bornes-arrete.ts`) : la 505 ajoute la
+  lecture des décisions de reprise, une sixième. Corrigé.
+- Lentille `ponytail-review` : deux constats non bloquants. **Laissés de côté** : la garde « date future » est une
+  comparaison d'une ligne, dont le code et le message diffèrent pour chaque route (arrêté, passage en perte, décision) —
+  un helper commun ajouterait plus qu'il ne retire ; le regroupement des décisions par crédit n'est pas une copie de
+  `regrouperParCredit` (les valeurs regroupées n'ont pas la même forme).
+- Écartées avec preuve par la revue : catégorie sur l'échéance impayée (et non `joursRetard > 0`), contagion
+  indépendante de l'ordre et des pages, aucune lecture de contagion quand la règle est inactive, `provisionConstituee`
+  relue par l'arrêté suivant, identités de provision et empreinte, rejeu d'une date passée, non-régression des noms
+  publiés. **Coût mesuré** de la dernière passe du provisionnement, sur 50 000 crédits : 134 à 286 ms de boucle tenue
+  (la partie lourde reste page par page, entre deux lectures).
+- **Dettes relevées, hors périmètre** : des lignes d'arrêté écrites avant la 505 n'ont ni `provisionConstituee` ni
+  `parCategorie` (migration à prévoir avant la production, règle du projet : le dev repart de zéro) ; les lignes d'arrêté
+  ne persistent ni `restructuration` ni `contagion`, ce que les écritures 291-294 de STORY-507 devront trancher.
+
+### Revue de sécurité (⑦) — un constat confirmé (85), corrigé avant le merge
+
+**Une décision de reprise pouvait valoir pour un rééchelonnement qu'elle n'avait pas vu.** Une décision est valable
+pour le dernier rééchelonnement daté au plus tard d'elle (D-505-M) ; or un `TENANT_USER` pouvait enregistrer un
+nouveau rééchelonnement **antidaté** ou **posé le jour même** d'une décision existante : la décision prise pour le
+premier rééchelonnement couvrait alors le second, et la provision d'un crédit redevenu en souffrance était reprise sans
+l'acte d'un `TENANT_ADMIN` — exactement le chiffre maquillé que la story veut empêcher (CWE-840, OWASP A04).
+
+### Décision du 2026-09-15 (après la revue de sécurité)
+
+- **D-505-T — un rééchelonnement se date STRICTEMENT après la dernière décision de reprise du crédit**
+  (`409 REECHELONNEMENT_ANTERIEUR_A_UNE_DECISION_DE_REPRISE`, détail `dateDecision`), jugé **sous le verrou du
+  crédit**. L'enregistrement d'une décision prend le **même verrou**, dans une transaction, et relit les mouvements sous
+  lui : une décision et un rééchelonnement concurrents se sérialisent, le second relit le premier. Écarté : comparer les
+  horodatages d'enregistrement à la lecture — dépendant des horloges des instances, et silencieux pour l'utilisateur.
+
 ## Notes
 
 - Voir [[STORY-503]], [[STORY-504]], [[STORY-506]], [[STORY-659]].
