@@ -1,6 +1,6 @@
 # STORY-658 : Lever un seul blocage de throttle efface les échéances de tous les clients — 12 services, et la connexion à l'IdP en tête
 
-Status: ready-for-dev
+Status: in_progress
 
 **Complexité :** high
 
