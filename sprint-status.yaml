@@ -4161,15 +4161,15 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "review"  # MNV-660 poussee, en attente de fusion
+        status: "done"  # MNV-660 fusionnee dans dev (c5cc604)
         story_path: "stories/STORY-660.md"
         assigned_to: null
       - story_id: "STORY-661"
         title: "L adresse de paiement du payeur - un moyen de paiement, pas un profil"
         epic: "EPIC-036"
-        points: 3
+        points: 5
         service: "paiement-service"
-        status: "ready-for-dev"  # PLAN-PI-SPI-CAS-D-USAGE-2026-09-15, phase A
+        status: "review"  # MNV-661 poussee (b8ff84d), en attente de fusion — recette reelle 7 prouves / 0 echec
         story_path: "stories/STORY-661.md"
         assigned_to: null
       - story_id: "STORY-662"
