@@ -1,8 +1,9 @@
-# Paquet prudentiel des SFD de l'UMOA — provenance (STORY-659)
+# Paquet prudentiel des SFD de l'UMOA — provenance (STORY-659, STORY-505)
 
-Artefact : `microfinance-service/src/modules/referentiel/assets/prudentiel-sfd-bceao-1.1.json`
-(`prudentiel-sfd-bceao@1.1`, statut **`a-valider-par-expert`**). La version `1.0` (amorce vide, STORY-498/504)
-reste packagée, octets inchangés.
+Artefact servi : `microfinance-service/src/modules/referentiel/assets/prudentiel-sfd-bceao-1.2.json`
+(`prudentiel-sfd-bceao@1.2`, statut **`a-valider-par-expert`**, sha256 `b7c83604…9d209d7e0`) : les valeurs de la
+`1.1` (STORY-659), inchangées, plus la rubrique structurée `declassement.contagion`, déclarée **inactive**
+(STORY-505, D-505-A). Les versions `1.0` (amorce vide, STORY-498/504) et `1.1` restent packagées, octets inchangés.
 
 ⚠️ Ne pas confondre avec l'**Instruction n°026-11-2016** (engagements en souffrance) : elle vise les **banques**
 (PCB révisé), pas les SFD.
@@ -80,8 +81,22 @@ Valeurs en **pour cent**, comme le texte les écrit (`ratio = A/B × 100`).
   perte (compte 669) n'est pas modélisé.
 - **D-659-D — 0 à 3 mois, taux nul.** Le provisionnement y est facultatif : le paquet transcrit le minimum.
 
+## Contagion par débiteur (STORY-505, version 1.2)
+
+Le RCSFD version allégée (compte 29, p. 64-65, relu en image le 2026-09-15) n'écrit **aucune** règle de contagion
+du déclassement aux autres crédits d'un même débiteur. Décision user **D-505-A** : la mécanique est livrée, la règle
+est une rubrique structurée (`active`, `seuilJoursRetard`, `source`) et le paquet servi la déclare
+`active: false`, `seuilJoursRetard: null`. Aucun seuil n'est inventé ; la contagion n'est prouvée que sur le paquet
+fictif des tests. Règle **P4** du validateur : active ⇒ seuil entier sûr ≥ 0 et au moins une tranche ; inactive ⇒
+seuil `null`.
+
+Les crédits **rééchelonnés** relèvent du compte 291 « crédits immobilisés » (p. 64) : le texte ne leur fixe aucune
+provision propre, et STORY-505 maintient la provision déjà constatée jusqu'à une décision de reprise datée
+(D-505-D).
+
 ## Ce qui reste avant `certifie`
 
 1. Relecture de chaque valeur contre les pages citées par un **praticien SFD** nommé.
-2. Confirmation des taux de la **version développée** du RCSFD.
+2. Confirmation des taux de la **version développée** du RCSFD, et de l'absence de contagion par débiteur dans
+   cette version.
 3. Validation des conventions D-659-B à D-659-D.
