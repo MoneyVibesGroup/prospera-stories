@@ -89,6 +89,16 @@ publiée n'est comparable à rien.
   lirait « portefeuille sain ».
 - **D-506-L — les sommes du portefeuille sont en `BigInt`**, publiées en entiers sûrs ou refusées
   (`409 INDICATEURS_HORS_BORNE`), comme `PROVISIONNEMENT_HORS_BORNE` (D-504) : jamais un arrondi silencieux.
+- **D-506-N (née de la revue de sécurité) — le coût SIMULTANÉ est borné, par le compteur PARTAGÉ avec
+  le provisionnement.** Le plafond de coût (D-504-N) borne **une** requête ; il ne borne rien du nombre
+  de requêtes en vol. Or ce parcours est le jumeau de la proposition de provisionnement (≈ 0,4 Gio et
+  30 à 50 s au plafond), et le projet a **retiré** le throttle des routes lourdes (D-504-R) au motif
+  que « le coût reste borné par les emplacements de calcul ». Le compteur est donc **extrait** vers
+  `EmplacementsDeCalcul` et les deux routes passent par **lui** — deux compteurs parallèles
+  laisseraient la **somme** non bornée. Chaque service traduit la saturation dans son code
+  (`PROVISIONNEMENT_CALCULS_SATURES` inchangé, `INDICATEURS_CALCULS_SATURES` ajouté). Deux appels
+  **identiques** en vol partagent un calcul, donc un emplacement : la route est déterministe (D-506-I),
+  et sans cela un tableau de bord qui rafraîchit deux fois se refuserait lui-même.
 - **D-506-M (prise en cours de développement) — le dû d'une créance ABANDONNÉE n'est plus exigible** : les
   crédits passés en perte (et ceux dont l'octroi est annulé) sortent du taux d'encaissement. Les compter y
   mesurerait **deux fois** le même échec — une fois dans le taux d'encaissement, une fois dans le taux de
@@ -149,9 +159,9 @@ copies privées ; la catégorie vient de `categorieDuClassement` (STORY-505), ja
 
 ### Portes de qualité (HEAD `c51b83c` + correctifs de la passe de mutation)
 
-Lint 0 warning · build OK · **2 648 unitaires** verts · **454 e2e** verts, Mongo réel compris ·
-couverture globale **99,76 / 97,23 / 99,55 / 99,78** (seuils 65/90/90/90), et **100 % sur les quatre
-fichiers de la story**.
+Lint 0 warning · build OK · **2 670 unitaires** verts · **454 e2e** verts, Mongo réel compris ·
+couverture globale **99,76 / 97,24 / 99,55 / 99,79** (seuils 65/90/90/90), et **100 % sur les cinq
+fichiers de la story** (les quatre des indicateurs, plus `emplacements-de-calcul.ts`).
 
 ### Table de mutations — ce qui prouve que les tests filtrent
 
@@ -214,6 +224,45 @@ version 1 ; son rééchelonnement du 10/08 les consolide, et sa version en vigue
 au 31/08. Le taux d'encaissement, qui ne lit que la version en vigueur (D-506-B), ne les voit donc plus — les
 compter en plus les aurait **comptées deux fois**, puisqu'elles sont déjà dans le capital de la version 2.
 C'est exactement pourquoi `RESTRUCTURE` est publié à part (AC-5) : le ratio embellit, la catégorie le dit.
+
+### ⑥ Revue de code et ⑦ revue de sécurité — 7 constats, tous traités
+
+**Bloquant, trouvé par les DEUX revues — le coût simultané n'était borné par rien** (CWE-770,
+confiances 92 et 85). Vérifié moi-même dans le dépôt avant d'agir : `bornes-arrete.ts` et
+`emplacements-non-livres.ts` écrivent noir sur blanc que les emplacements de calcul **sont** la
+mitigation retenue, le throttle ayant été retiré pour cette raison. Scénario : un `TENANT_USER`, sur
+**son propre** dossier, tire N appels simultanés ; au-delà de 20 s sans battement de cœur, Mongoose
+tient la connexion pour perdue et **toutes les écritures transactionnelles du processus échouent, tous
+tenants confondus**. Corrigé par D-506-N.
+
+⚡⚡ **Le constat le plus utile de la revue de code (C-2), et il était MESURÉ** : déplacer l'exigible et
+l'encaissé échus hors du bloc `enVigueur` — donc compter aussi les versions **remplacées**, le double
+comptage que D-506-B interdit — laissait **1 126 tests verts**. Aucune fixture ne portait plus d'une
+version d'échéancier : la règle la plus mise en avant de la story n'était filtrée par **aucun** test, et
+ma propre table de mutations ne la couvrait pas (M6 couvrait D-506-M, pas D-506-B). Trois tests
+multi-versions la ferment ; la même mutation vire désormais au rouge.
+
+| Constat | Traitement |
+|---|---|
+| **C-1 / V-1** (bloquant) — aucun emplacement de calcul pris | corrigé — D-506-N, compteur partagé + mutualisation des appels identiques |
+| **C-2** — D-506-B non filtrée par les tests (mesuré : 1 126 verts sous mutation) | corrigé — 3 tests multi-versions ; la mutation vire 2 tests au rouge |
+| **C-3** — `type: 'null'` n'existe qu'en OpenAPI **3.1**, le document émis est en **3.0** | corrigé — ⚠️ le retirer tout court **fait échouer la génération du document entier** (mesuré) : encodé `type: 'object'` + `additionalProperties: false` |
+| **C-4** — la convention publiée annonçait « l'encours total du portefeuille », faux pour les ratios de `parProduit` | corrigé — elle nomme l'**ensemble mesuré** et dit lequel à chaque niveau |
+| **C-5** — le mapper, seul des neuf du dépôt sans spec | corrigé — tri, conventions et liste blanche éprouvés de front |
+| **C-6** — l'emplacement livré de la story asserté nulle part | corrigé — le basculer en `livre: false` rougit désormais |
+
+**Aucun autre constat de sécurité** : isolation multi-tenant (404 anti-énumération du guard de portée),
+scope `orgId`+`dossierId` sur les trois lectures, injection par `dateArrete`, fuite dans la réponse et
+dans `details`, et non-régression des deux gardes extraites — tous explorés et écartés, motifs consignés.
+
+### ✅ Vérification docker REJOUÉE sur l'état final (les correctifs changent l'exécution)
+
+| Point | Verdict |
+|---|---|
+| **V11** chiffres **identiques** à la vérification initiale, champ pour champ — seul le bloc `conventions` a changé (C-4) | **PROUVÉ** |
+| **V12** D-506-N : **12 appels simultanés à des dates DIFFÉRENTES ⇒ 8 refusés** `409 INDICATEURS_CALCULS_SATURES`, détail `plafond: ORGANISATION` (3 tirages : 18, 18 puis 17 refus sur 24) | **PROUVÉ** |
+| **V13** mutualisation : **12 appels IDENTIQUES en parallèle ⇒ 12 × 200**, aucun refus — et toujours aucune écriture | **PROUVÉ** |
+| **V14** OpenAPI servie en **3.0.0** : `parAgence` sort en `{type: object, additionalProperties: false, nullable: true, example: null}`, et le 409 documente `INDICATEURS_CALCULS_SATURES` | **PROUVÉ** |
 
 **Non productible sur la stack** : le plafond de coût (`PORTEFEUILLE_AU_DELA_DU_PLAFOND_DE_COUT`, 50 001
 crédits) et `DEVISE_CREDIT_DIVERGENTE` — prouvés en unitaire, et par mutation (M8, M9). Stack arrêtée
