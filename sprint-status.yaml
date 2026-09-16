@@ -4214,7 +4214,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "in-progress"  # MNV-665 — depot de la clef apres declaration + bascule a deux clefs + tunnel de recette
+        status: "review"  # MNV-665 poussee sur dev — recette REELLE par tunnel ngrok : webhook PI-SPI signe recu, demande Soldee sans consultation ; rotation reelle -> l ancienne clef verifie encore (204), puis refusee (401) passe le terme. ⛔ MESURE AC-6 : webhook et consultation produisent DEUX clefs d unicite (l evenement PAIEMENT_RECU ne porte pas d end2endId) -> la regle-donnee de STORY-670 RESTE, unification sur txId = story a part
         story_path: "stories/STORY-665.md"
         assigned_to: null
       - story_id: "STORY-666"
