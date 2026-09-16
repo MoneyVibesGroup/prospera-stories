@@ -1,6 +1,6 @@
 # STORY-506 : PAR 30/90/180 et taux de recouvrement, par agence et par produit
 
-Status: review
+Status: done
 
 **Complexité :** high
 
@@ -138,6 +138,9 @@ publication d'une balance (STORY-507) · historisation/arrêté d'indicateurs pe
   session D-506-E → D-506-L. Statut `ready-for-dev` → `in_progress`. Branches `MNV-506` (`docs/` et
   `microfinance-service`).
 - **2026-09-16** — développement, portes de qualité, table de mutations et vérification docker (ci-dessous).
+- **2026-09-16** — revue de code ⑥ et revue de sécurité ⑦ (7 constats, tous traités), vérification docker
+  **rejouée** sur l'état final, PR `microfinance-service` **#13 rebase-mergée sur `dev`**, branche
+  supprimée. Statut `review` → `done`.
 
 ### Ce qui est livré
 
