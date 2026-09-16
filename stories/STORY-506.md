@@ -1,6 +1,6 @@
 # STORY-506 : PAR 30/90/180 et taux de recouvrement, par agence et par produit
 
-Status: in_progress
+Status: review
 
 **Complexité :** high
 
@@ -89,6 +89,11 @@ publiée n'est comparable à rien.
   lirait « portefeuille sain ».
 - **D-506-L — les sommes du portefeuille sont en `BigInt`**, publiées en entiers sûrs ou refusées
   (`409 INDICATEURS_HORS_BORNE`), comme `PROVISIONNEMENT_HORS_BORNE` (D-504) : jamais un arrondi silencieux.
+- **D-506-M (prise en cours de développement) — le dû d'une créance ABANDONNÉE n'est plus exigible** : les
+  crédits passés en perte (et ceux dont l'octroi est annulé) sortent du taux d'encaissement. Les compter y
+  mesurerait **deux fois** le même échec — une fois dans le taux d'encaissement, une fois dans le taux de
+  récupération, qui est fait pour ça. Mesuré en vérification docker : le crédit C5 pesait 206 500 d'exigible
+  échu ; l'inclure aurait fait tomber le taux publié de 46,54 % à 41,69 %.
 
 ### Périmètre
 
@@ -103,18 +108,18 @@ publication d'une balance (STORY-507) · historisation/arrêté d'indicateurs pe
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — PAR 30, PAR 90, PAR 180 à une date d'arrêté, **avec leur convention publiée** (numérateur
+- [x] AC-1 — PAR 30, PAR 90, PAR 180 à une date d'arrêté, **avec leur convention publiée** (numérateur
       et dénominateur explicités dans la réponse). ⛔ Pas de ratio sans sa définition. → D-506-A, D-506-E,
       D-506-F, D-506-K
-- [ ] AC-2 — Taux de recouvrement, encours total, encours en souffrance, nombre de crédits actifs et
+- [x] AC-2 — Taux de recouvrement, encours total, encours en souffrance, nombre de crédits actifs et
       encours moyen. → D-506-B, D-506-D, D-506-H, D-506-J
-- [ ] AC-3 — Ventilation par **agence** et par **produit de crédit**, et la somme des ventilations
+- [x] AC-3 — Ventilation par **agence** et par **produit de crédit**, et la somme des ventilations
       **égale** le total. Un total qui ne se recompose pas est une erreur qu'aucun contrôle ne voit.
       ⚠️ **Partiellement livré (D-506-C)** : par produit, entièrement, somme prouvée = total ; **par
       agence, non livré** — le concept n'existe dans aucun service, emplacement inerte documenté.
-- [ ] AC-4 — Chaque indicateur porte **sa date d'arrêté** et se **rejoue à l'identique** — corollaire
+- [x] AC-4 — Chaque indicateur porte **sa date d'arrêté** et se **rejoue à l'identique** — corollaire
       direct d'AD-2. → D-506-I
-- [ ] AC-5 — ⚠️ Les crédits **restructurés** apparaissent séparément dans tous les indicateurs
+- [x] AC-5 — ⚠️ Les crédits **restructurés** apparaissent séparément dans tous les indicateurs
       (STORY-505 AC-3) : les noyer dans « sain » est précisément ce qui rend un PAR flatteur. → D-506-D
 
 ## Progress Tracking
@@ -122,6 +127,98 @@ publication d'une balance (STORY-507) · historisation/arrêté d'indicateurs pe
 - **2026-09-15** — cadrage mesuré (tableau ci-dessus), décisions user D-506-A → D-506-D, décisions de
   session D-506-E → D-506-L. Statut `ready-for-dev` → `in_progress`. Branches `MNV-506` (`docs/` et
   `microfinance-service`).
+- **2026-09-16** — développement, portes de qualité, table de mutations et vérification docker (ci-dessous).
+
+### Ce qui est livré
+
+`GET /api/v1/dossiers/:dossierId/microfinance/indicateurs-portefeuille?dateArrete=AAAA-MM-JJ` —
+`TENANT_ADMIN` ou `TENANT_USER`, **non paginée** (`limite` et `apres` refusés en 400, D-506-G).
+
+| Fichier | Rôle |
+|---|---|
+| `credits/indicateurs/indicateurs-portefeuille.ts` | l'agrégation **pure** : PAR par seuil, catégories, perte, encaissement, ventilation par produit ; sommes `BigInt` |
+| `credits/indicateurs/indicateurs-portefeuille.service.ts` | le parcours du portefeuille page par page, la contagion appliquée à l'ensemble, les refus |
+| `credits/indicateurs/indicateurs-portefeuille.mapper.ts` | la réponse et les **conventions publiées avec les chiffres** (AC-1) |
+| `credits/indicateurs/dto/…` | le contrat OpenAPI |
+
+**Réutilisations plutôt que copies** (aucune règle dupliquée) : l'exigible et l'encaissé échus sont calculés
+**dans la passe d'imputation qui existait déjà** (`imputation-echeancier.ts`, +2 champs) ; le plafond de coût
+du portefeuille (`exigerPortefeuilleSousLePlafondDeCout`) et la garde de devise d'un crédit
+(`exigerDeviseDuCredit`) deviennent des fonctions **partagées** avec le provisionnement, qui en portait des
+copies privées ; la catégorie vient de `categorieDuClassement` (STORY-505), jamais d'une seconde règle.
+
+### Portes de qualité (HEAD `c51b83c` + correctifs de la passe de mutation)
+
+Lint 0 warning · build OK · **2 648 unitaires** verts · **454 e2e** verts, Mongo réel compris ·
+couverture globale **99,76 / 97,23 / 99,55 / 99,78** (seuils 65/90/90/90), et **100 % sur les quatre
+fichiers de la story**.
+
+### Table de mutations — ce qui prouve que les tests filtrent
+
+Chaque règle a été **cassée volontairement**, les tests relancés, puis le code restauré. ⚠️ Une mutation qui
+ne compile pas ne compte pas : elle rend « 0 test », jamais un rouge (leçon STORY-505).
+
+| Mutation | Verdict |
+|---|---|
+| M1 — PAR : `>=` au lieu de `>` (le crédit à 180 jours pile entre) | **ROUGE** (1) |
+| M2 — PAR : numérateur = la seule part échue au lieu de l'encours total | **ROUGE** (5) |
+| M3 — PAR arrondi par défaut au lieu de par excès | **ROUGE** (5) |
+| M4 — ratio publié à `0` quand le dénominateur est nul | **ROUGE** (3) |
+| M5 — un crédit passé en perte reçoit une catégorie | **ROUGE** (2) |
+| M6 — l'échu d'une créance abandonnée compte dans le taux d'encaissement | **ROUGE** (1) |
+| M7 — encours moyen publié à `0` sans aucun crédit actif | **ROUGE** (2) |
+| M8 — le plafond de coût du portefeuille n'est plus opposé | **ROUGE** (1) |
+| M9 — la devise d'un crédit n'est plus confrontée à celle du dossier | **ROUGE** (1) |
+| M10 — la contagion s'applique page par page, pas au portefeuille | **ROUGE** (1) |
+
+⚡ **M9 a trouvé un test qui passait pour la mauvaise raison.** Le crédit « divergent » du test portait des
+mouvements dans la devise du DOSSIER : c'est la garde « mouvements vs crédit » de STORY-501 qui levait, et le
+test serait resté vert même sans jamais confronter le crédit au dossier. Le crédit divergent est désormais
+cohérent avec lui-même — seule la garde visée peut le refuser.
+
+### ✅ Vérification docker (stack neuve, `down -v` puis `up --build`) — dix points prouvés
+
+Code servi prouvé avant tout point : `Found 0 errors`, `indicateurs/` monté dans le conteneur, et la route
+publiée par l'**OpenAPI servie** (`/api/docs-json`). Tenant monté par l'API réelle : organisation et jeton
+RS256 de l'IdP (`aud` contenant `microfinance-service`), dossier **MICROFINANCE** créé par `dossier-service`
+et **arrivé par Kafka** dans le read-model `dossiers_dossier`, exercice 2026 ouvert. ⚠️ **Seuls le KYC et
+l'entitlement ont été semés directement** dans leurs read-models (`org_kyc_status`,
+`org_microfinance_entitlement`) au lieu de passer par `kyc-service` et `platform-catalog-service` : ce sont
+des projections, et aucune n'est le sujet de cette story. Attendus **calculés à la main avant l'appel**.
+
+Portefeuille semé (XOF, exposant 2), arrêté au **2026-08-31** :
+
+| Crédit | Produit | Situation | Encours | Retard |
+|---|---|---|---|---|
+| C1 | CAMPAGNE | 7 échéances échues payées au centime | 500 000 | 0 j — `SAIN` |
+| C2 | CAMPAGNE | jamais remboursé | 600 000 | **202 j** — `EN_SOUFFRANCE` |
+| C3 | EQUIPEMENT | 1ʳᵉ échéance au 04/03 | 900 000 | **180 j pile** — `EN_SOUFFRANCE` |
+| C4 | EQUIPEMENT | rééchelonné le 10/08 | 400 000 | 0 j — `RESTRUCTURE` |
+| C5 | CAMPAGNE | passé en perte le 01/05 | **0** | 202 j — `PASSE_EN_PERTE` |
+
+| Point | Verdict |
+|---|---|
+| **V1** encours total **2 400 000**, 5 crédits, **4 actifs**, moyen **600 000** — recomposé depuis les documents : décaissé 3 400 000 (mongosh) − 700 000 de capital imputé − 300 000 de perte | **PROUVÉ** |
+| **V2** ⛔ **la borne stricte** : PAR 30 et PAR 90 = 1 500 000 (2 crédits) ; **PAR 180 = 600 000, 1 seul crédit** — C3, à 180 jours **pile**, n'y entre pas | **PROUVÉ** |
+| **V3** arrondi **par excès** sur un ratio de risque : CAMPAGNE 600 000/1 100 000 = 54,5454 % ⇒ **5 455** points de base (par défaut aurait publié 5 454) | **PROUVÉ** |
+| **V4** AC-5 : `SAIN` 500 000 · `RESTRUCTURE` 400 000 · `EN_SOUFFRANCE` 1 500 000 — somme **exactement** l'encours total, le restructuré jamais compté sain | **PROUVÉ** |
+| **V5** AC-3 : Σ des ventilations = total pour l'encours (1 100 000 + 1 300 000), les effectifs (3 + 2) **et les trois numérateurs de PAR** | **PROUVÉ** |
+| **V6** D-506-J/D-506-M : perte 300 000 sur 1 crédit ; taux d'encaissement **826 000 / 1 774 500 = 4 654 pdb**, recalculé à la main depuis les cinq échéanciers — les **206 500** d'échu de C5 en sont exclus (les inclure aurait publié 4 169) | **PROUVÉ** |
+| **V7** D-506-I : **trois appels**, empreinte des 18 collections **identique** au document près, et les `revision` des 5 crédits inchangées — aucune écriture | **PROUVÉ** |
+| **V8** AC-4 : un remboursement daté du **15/09** écrit après coup ⇒ la réponse au 31/08 est **identique octet pour octet** ; au 30/09 l'encours tombe à 2 310 000 et l'encaissé monte à 926 000 | **PROUVÉ** |
+| **V9** refus : sans `dateArrete` **400**, date malformée **400**, **`limite` refusée en 400** (la route n'est pas paginée), sans jeton **401**, dossier d'un autre type **409 REFERENTIEL_DOSSIER_INDETERMINE** | **PROUVÉ** |
+| **V10** `parAgence: null` publié avec sa raison dans les conventions, et aucune collection d'indicateurs n'existe en base | **PROUVÉ** |
+
+⚡ **Ce que la vérification a rendu visible** — C4 portait **275 331** d'échéances échues **impayées** dans sa
+version 1 ; son rééchelonnement du 10/08 les consolide, et sa version en vigueur n'a **aucune** échéance échue
+au 31/08. Le taux d'encaissement, qui ne lit que la version en vigueur (D-506-B), ne les voit donc plus — les
+compter en plus les aurait **comptées deux fois**, puisqu'elles sont déjà dans le capital de la version 2.
+C'est exactement pourquoi `RESTRUCTURE` est publié à part (AC-5) : le ratio embellit, la catégorie le dit.
+
+**Non productible sur la stack** : le plafond de coût (`PORTEFEUILLE_AU_DELA_DU_PLAFOND_DE_COUT`, 50 001
+crédits) et `DEVISE_CREDIT_DIVERGENTE` — prouvés en unitaire, et par mutation (M8, M9). Stack arrêtée
+(`docker compose stop`). Effets de bord en base de dev : organisation « IMF Verif 506 », 2 dossiers,
+5 membres, 2 produits, 5 crédits.
 
 ## Notes
 
