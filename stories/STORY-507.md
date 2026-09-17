@@ -1,6 +1,6 @@
 # STORY-507 : Le portefeuille publie une BALANCE canonique — pas des écritures
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 **Épic :** EPIC-126 — Articulation portefeuille → balance
@@ -155,19 +155,19 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
 
 ## Definition of Done
 
-- [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
+- [x] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
 - [x] Documentation du contrat Kafka et schéma JSON mis à jour dans les deux services concernés.
 - [x] `microfinance-service` : lint 0 warning, build, couverture et e2e verts.
 - [x] `balance-service` : lint 0 warning, build, couverture et e2e verts.
 - [x] Chaque ligne M1–M12 est mutée, exécutée rouge puis restaurée ; aucune mutation ne survit.
 - [x] Vérification docker sur volumes neufs, puis rejeu sur l'état final après les revues.
 - [x] Revue de code et revue de sécurité sans constat ouvert.
-- [ ] Branches `MNV-507`, commits français, PR vers `dev` pour les services et vers `main` pour docs,
+- [x] Branches `MNV-507`, commits français, PR vers `dev` pour les services et vers `main` pour docs,
       rebase-merge, branches distantes supprimées.
 
 ## Progress Tracking
 
-- **Statut courant :** `in_progress`
+- **Statut courant :** `done`
 - **2026-09-16 — cadrage et démarrage :** authentification GitHub confirmée sous
   `vivianMoneyVibesGroupes` ; branches `MNV-507` créées depuis `main` pour docs et depuis `dev` pour
   `microfinance-service` et `balance-service`, toutes rebasées sur leur origine. Mesure du code,
@@ -223,11 +223,13 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
   d'états `6aab772a2985e568ff4f64b9` en `sfd-bceao@2.0`. Le rejeu conserve une seule balance et un seul
   événement ; `mongosh` confirme 1 en-tête, 1 ligne liée, 0 ligne orpheline, 1 marqueur de traitement,
   1 projection, 1 jeu d'états et des checksums identiques de bout en bout. Stack arrêtée proprement.
-- **Implémentation :** terminée, prête pour revue.
+- **Implémentation :** terminée et intégrée.
 - **Revue de code :** terminée, 1 constat documentaire corrigé, 0 constat ouvert.
 - **Vérification docker :** passage initial et rejeu final après revues verts sur volumes neufs.
 - **Revue de sécurité :** terminée, 0 vulnérabilité.
-- **Clôture :** à faire.
+- **Clôture :** PR `microfinance-service` #14 rebase-mergée sur `dev` (`be001755`) ; PR
+  `balance-service` #107 rebase-mergée sur `dev` (`d22535a8`) ; clôture documentaire portée par la
+  PR `prospera-stories` #280 vers `main`. Branches distantes des services supprimées.
 
 ## Notes
 
