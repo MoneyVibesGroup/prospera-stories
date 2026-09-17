@@ -1,6 +1,10 @@
+---
+baseline_commit: b9ebd8a11752ea475fc659f911b8913dbd7cef25
+---
+
 # STORY-361 : Scaffold `fiscal-service` (:3012), socle transverse et point de santé
 
-Status: ready-for-dev
+Status: review
 
 **Complexité :** high
 
@@ -63,48 +67,48 @@ copier ici anticiperait trois stories distinctes.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1 — Boot réel.** `docker compose up` à la racine démarre `fiscal-service` sur `:3012` ;
+- [x] **AC-1 — Boot réel.** `docker compose up` à la racine démarre `fiscal-service` sur `:3012` ;
       `GET /api/v1/health` répond `200` quand Mongo/rs0, Kafka et Redis sont disponibles.
-- [ ] **AC-2 — Démarrage dégradé Kafka.** Kafka absent au boot ne tue pas le processus HTTP ; le
+- [x] **AC-2 — Démarrage dégradé Kafka.** Kafka absent au boot ne tue pas le processus HTTP ; le
       health expose `kafka: down` et redevient sain après reconnexion.
-- [ ] **AC-3 — RS256/JWKS local.** Un JWT RS256 valide, d'issuer attendu et destiné à
+- [x] **AC-3 — RS256/JWKS local.** Un JWT RS256 valide, d'issuer attendu et destiné à
       `fiscal-service`, atteint la route protégée. HS256, audience/issuer erronés et signature altérée
       rendent `401`. Aucune requête à l'IdP n'est faite après résolution de la clé cachée.
-- [ ] **AC-4 — Pureté du domaine.** Un balayage exécutable de `src/domain/**/*.ts` échoue si un import
+- [x] **AC-4 — Pureté du domaine.** Un balayage exécutable de `src/domain/**/*.ts` échoue si un import
       `@nestjs/*` ou `mongoose` y apparaît.
-- [ ] **AC-5 — Correspondance HTTP fixe.** Les cinq familles d'erreur produisent exactement les
+- [x] **AC-5 — Correspondance HTTP fixe.** Les cinq familles d'erreur produisent exactement les
       statuts `400/404/409/422/502` prévus, via une seule fonction partagée.
-- [ ] **AC-6 — Chaîne de guards réelle.** Un test interroge le vrai `AppModule` et protège présence
+- [x] **AC-6 — Chaîne de guards réelle.** Un test interroge le vrai `AppModule` et protège présence
       et ordre de la chaîne globale. Un e2e prouve qu'une route non publique est refusée sans jeton.
-- [ ] **AC-7 — Configuration fail-fast et CORS.** Toute variable requise est validée au boot ; une
+- [x] **AC-7 — Configuration fail-fast et CORS.** Toute variable requise est validée au boot ; une
       allowlist vide n'active pas CORS, une origine listée seule est acceptée et `*` n'est jamais un
       joker.
-- [ ] **AC-8 — Aucun métier anticipé.** Le service ne contient aucun schéma d'obligation,
+- [x] **AC-8 — Aucun métier anticipé.** Le service ne contient aucun schéma d'obligation,
       déclaration, audit, read-model ou paquet ; aucun topic métier n'est consommé ou produit.
 
 ## Tâches / Sous-tâches
 
-- [ ] **T1 — Créer et brancher le dépôt** (AC-1, AC-8)
-  - [ ] Créer `prospera-fiscal-service`, initialiser `main`, `dev`, puis `MNV-361` avant le code.
-  - [ ] Poser l'identité Git `vivianMoneyVibesGroupes` et protéger `.env` dès le premier commit.
-- [ ] **T2 — Poser le runtime NestJS commun** (AC-1, AC-7, AC-8)
-  - [ ] Config, logger, bootstrap, Swagger, ValidationPipe, CORS, Dockerfile et tests de bootstrap.
-  - [ ] DatabaseModule Mongo `fiscal_service`, sans schéma métier.
-- [ ] **T3 — Poser l'authentification relying-party** (AC-3, AC-6)
-  - [ ] Stratégie RS256/JWKS cachée et guards globaux dans l'ordre imposé.
-  - [ ] Route technique protégée et e2e négatifs/positifs.
-- [ ] **T4 — Poser Kafka, Redis et health** (AC-1, AC-2)
-  - [ ] Connexions tolérantes au démarrage et indicateurs Mongo/rs0, Kafka, Redis.
-  - [ ] Tests de panne, reconnexion et arrêt propre.
-- [ ] **T5 — Poser la frontière hexagonale minimale** (AC-4, AC-5, AC-8)
-  - [ ] Dossier `domain/` sans framework et invariant de balayage.
-  - [ ] Correspondance HTTP partagée, exacte et testée.
-- [ ] **T6 — Intégrer à la stack locale** (AC-1, AC-7)
-  - [ ] Bloc compose `:3012`, override watch, healthcheck, audience IdP et CORS.
-  - [ ] Vérifier sur volumes neufs, puis arrêter la stack.
-- [ ] **T7 — Prouver la DoD** (AC-1 à AC-8)
-  - [ ] Lint 0, build, test:cov, test:e2e dans une porte unique.
-  - [ ] Rejouer toutes les mutations ci-dessous, chacune rouge par assertion, puis restaurer.
+- [x] **T1 — Créer et brancher le dépôt** (AC-1, AC-8)
+  - [x] Créer `prospera-fiscal-service`, initialiser `main`, `dev`, puis `MNV-361` avant le code.
+  - [x] Poser l'identité Git `vivianMoneyVibesGroupes` et protéger `.env` dès le premier commit.
+- [x] **T2 — Poser le runtime NestJS commun** (AC-1, AC-7, AC-8)
+  - [x] Config, logger, bootstrap, Swagger, ValidationPipe, CORS, Dockerfile et tests de bootstrap.
+  - [x] DatabaseModule Mongo `fiscal_service`, sans schéma métier.
+- [x] **T3 — Poser l'authentification relying-party** (AC-3, AC-6)
+  - [x] Stratégie RS256/JWKS cachée et guards globaux dans l'ordre imposé.
+  - [x] Route technique protégée et e2e négatifs/positifs.
+- [x] **T4 — Poser Kafka, Redis et health** (AC-1, AC-2)
+  - [x] Connexions tolérantes au démarrage et indicateurs Mongo/rs0, Kafka, Redis.
+  - [x] Tests de panne, reconnexion et arrêt propre.
+- [x] **T5 — Poser la frontière hexagonale minimale** (AC-4, AC-5, AC-8)
+  - [x] Dossier `domain/` sans framework et invariant de balayage.
+  - [x] Correspondance HTTP partagée, exacte et testée.
+- [x] **T6 — Intégrer à la stack locale** (AC-1, AC-7)
+  - [x] Bloc compose `:3012`, override watch, healthcheck, audience IdP et CORS.
+  - [x] Vérifier sur volumes neufs, puis arrêter la stack.
+- [x] **T7 — Prouver la DoD** (AC-1 à AC-8)
+  - [x] Lint 0, build, test:cov, test:e2e dans une porte unique.
+  - [x] Rejouer toutes les mutations ci-dessous, chacune rouge par assertion, puis restaurer.
 
 ## Table de mutations obligatoire
 
@@ -121,12 +125,12 @@ copier ici anticiperait trois stories distinctes.
 
 ## Definition of Done
 
-- [ ] Dépôt, branches et PR vers `dev` conformes au flux Git PROSPERA.
-- [ ] `./node_modules/.bin/eslint "{src,test}/**/*.ts" --max-warnings 0` vert.
-- [ ] `npm run build`, `npm run test:cov`, `npm run test:e2e` verts ; seuils 65/90/90/90 tenus.
-- [ ] M1 à M8 réellement rouges puis restaurées.
-- [ ] Stack Docker neuve : port, health complet, RS256, CORS et démarrage Kafka dégradé prouvés.
-- [ ] Aucun secret ni `.env` réel lu, affiché ou committé.
+- [x] Dépôt, branches et PR vers `dev` conformes au flux Git PROSPERA.
+- [x] `./node_modules/.bin/eslint "{src,test}/**/*.ts" --max-warnings 0` vert.
+- [x] `npm run build`, `npm run test:cov`, `npm run test:e2e` verts ; seuils 65/90/90/90 tenus.
+- [x] M1 à M8 réellement rouges puis restaurées.
+- [x] Stack Docker neuve : port, health complet, RS256, CORS et démarrage Kafka dégradé prouvés.
+- [x] Aucun secret ni `.env` réel lu, affiché ou committé.
 - [ ] Revue de code, revue de sécurité, re-vérification Docker, rebase-merge et clôture réalisées.
 
 ## Notes techniques
@@ -140,7 +144,37 @@ copier ici anticiperait trois stories distinctes.
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-09-17).** Story recadrée depuis l'architecture réelle : le dépôt et le
-service sont absents ; le périmètre s'arrête strictement avant les bases d'audit, read-models, gate
-fiscal et chargeur de paquet. Branche docs `MNV-361` créée avant toute écriture de code.
+**Statut : `review` (2026-09-17).** Story recadrée depuis l'architecture réelle : le périmètre
+s'arrête strictement avant les bases d'audit, read-models, gate fiscal et chargeur de paquet. Dépôt
+privé `MoneyVibesGroup/prospera-fiscal-service` créé ; `main`, `dev`, puis `MNV-361` ont été créées et
+poussées avant toute écriture de code. Les branches `docs/MNV-361` et `fiscal-service/MNV-361` sont
+alignées.
 
+- 2026-09-17 : socle NestJS livré dans `fiscal-service/MNV-361` : port `3012`, Mongo
+  `fiscal_service`/`rs0`, JWT RS256/JWKS caché, chaîne globale de guards mesurée depuis le vrai
+  `AppModule`, Kafka tolérant au boot, Redis limité à la santé, CORS explicite, point de santé et
+  frontière de domaine sans schéma ni contrat métier anticipé. L'intégration racine
+  `docker-compose.yml`, override et CI est locale, la racine PROSPERA n'étant pas versionnée.
+- 2026-09-17 : porte unique Portly verte — eslint 0 avertissement, build, **237 tests unitaires**,
+  **10 e2e** ; couverture : statements **99,23 %**, branches **90,4 %**, fonctions **98,64 %**,
+  lignes **99,15 %**.
+- 2026-09-17 : mutations **M1 à M8 réellement jouées**. Chacune a rendu rouge son assertion dédiée
+  (options JWT exactes, audience, métadonnées du vrai `AppModule`, statuts 409/422, balayage du
+  domaine, boot Kafka, replica set Mongo, wildcard CORS), puis le code a été restauré et la porte
+  unique a été rejouée verte.
+- 2026-09-17 : vérification Docker sur volumes neufs (`down -v` préalable) verte. Après redémarrage
+  du conteneur fiscal : `GET /api/v1/health` → **200**, Mongo `{ setName: "rs0",
+  isWritablePrimary: true }`, Kafka/Redis `up`, et `fiscal_service` ne contient **aucune collection**.
+  CORS : `http://localhost:3100` reçoit l'en-tête attendu ; une origine étrangère n'en reçoit aucun.
+- 2026-09-17 : preuve IdP réelle sans exposer de secret : register **201**, e-mail présent dans
+  Mailhog, verify-email **200**, login **200** ; access token `alg=RS256`, audience comprenant
+  `fiscal-service`, `emailVerified=true`, puis route technique protégée **200** avec rôle
+  `TENANT_ADMIN`. Les e2e rejettent aussi HS256, issuer/audience erronés et signature altérée, et
+  prouvent le cache JWKS sans second appel IdP.
+- 2026-09-17 : Kafka arrêté puis `fiscal-service` redémarré : processus HTTP vivant et health
+  **503** avec `kafka.status=down`, Mongo/Redis restant `up`. Après reprise de Kafka, health revenu
+  à **200** avec les trois dépendances `up`. La stack, son réseau et ses volumes de vérification ont
+  ensuite été arrêtés et supprimés via Portly.
+- 2026-09-17 : commit initial du socle `b666845` poussé sur `fiscal-service/MNV-361` ; PR
+  `MoneyVibesGroup/prospera-fiscal-service#1` ouverte vers `dev`. Statut synchronisé à `review` en
+  attente des revues APEX de code et de sécurité.
