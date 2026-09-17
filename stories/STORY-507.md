@@ -72,9 +72,11 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
   via le registre de STORY-489, recalcule le checksum avec l'algorithme canonique et refuse toute
   divergence.
 - **D-507-J — lecture partielle :** `PORTEFEUILLE_SFD`, comme `A_NOUVEUX` et
-  `PROVISIONS_FISCALES`, est exclue des recherches de balance complète/courante, de la base fiscale,
-  de la balance de clôture et du gel du référentiel. Elle reste consultable explicitement par son
-  origine.
+  `PROVISIONS_FISCALES`, est concernée par des exclusions, mais elles ne sont pas toutes identiques.
+  Dans le détail, `PORTEFEUILLE_SFD`, comme `A_NOUVEAUX`, est exclue des recherches de balance
+  complète/courante, de la balance de clôture et du gel du référentiel. La base fiscale exclut en
+  plus `PROVISIONS_FISCALES`, qui reste une balance complète enrichie pour les autres lectures.
+  Chaque origine partielle reste consultable explicitement par son origine.
 - **D-507-K — résultat d'ingestion :** l'ingestion Kafka conserve le comportement existant : balance
   créée en brouillon ou rejeu idempotent ; rejet métier sur `balance.rejected`. La validation reste
   une décision explicite de l'API canonique avant production de la liasse.
@@ -159,7 +161,7 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
 - [x] `balance-service` : lint 0 warning, build, couverture et e2e verts.
 - [x] Chaque ligne M1–M12 est mutée, exécutée rouge puis restaurée ; aucune mutation ne survit.
 - [ ] Vérification docker sur volumes neufs, puis rejeu sur l'état final après les revues.
-- [ ] Revue de code et revue de sécurité sans constat ouvert.
+- [x] Revue de code et revue de sécurité sans constat ouvert.
 - [ ] Branches `MNV-507`, commits français, PR vers `dev` pour les services et vers `main` pour docs,
       rebase-merge, branches distantes supprimées.
 
@@ -202,10 +204,22 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
   révélé une assertion d'outbox globale contaminée par le scénario précédent ; resserrée sur le
   dossier courant, elle passe 29/29, dont le rollback au deuxième lot laisse 0 en-tête et 0 ligne.
   La stack a été arrêtée proprement. Le rejeu Docker final reste à exécuter après les revues.
+- **2026-09-17 — revue de code :** lecture intégrale des diffs des deux PR, puis vérification des
+  invariants d'atomicité, d'idempotence par origine, de résolution tenant-scopée du référentiel, de
+  recalcul du checksum, de compatibilité du contrat v1 et du balayage des lectures complètes. Aucun
+  défaut de code retenu. Un constat documentaire non bloquant a été corrigé : D-507-J assimilait à
+  tort `PROVISIONS_FISCALES` aux origines toujours partielles, alors qu'elle n'est exclue que de la
+  base fiscale. La lentille Ponytail conclut « Lean already. Ship. » : aucun niveau d'abstraction,
+  dépendance ou mécanisme spéculatif à retirer.
+- **2026-09-17 — revue de sécurité :** 0 vulnérabilité de confiance ≥ 80. L'organisation et le
+  dossier sont recoupés avant toute résolution ; le consommateur refuse origine, devise, compte,
+  référentiel ou checksum incohérent avant persistance ; balance, lignes, arrêté et outbox restent
+  atomiques et idempotents ; aucun endpoint, rôle, secret, journal sensible ni dépendance n'est
+  ajouté. La confiance inter-service C8 préexistante n'est ni élargie ni contournée par cette story.
 - **Implémentation :** terminée, prête pour revue.
-- **Revue de code :** à faire.
+- **Revue de code :** terminée, 1 constat documentaire corrigé, 0 constat ouvert.
 - **Vérification docker :** passage initial vert ; rejeu final après revue à faire.
-- **Revue de sécurité :** à faire.
+- **Revue de sécurité :** terminée, 0 vulnérabilité.
 - **Clôture :** à faire.
 
 ## Notes
