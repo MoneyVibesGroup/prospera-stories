@@ -160,7 +160,7 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
 - [x] `microfinance-service` : lint 0 warning, build, couverture et e2e verts.
 - [x] `balance-service` : lint 0 warning, build, couverture et e2e verts.
 - [x] Chaque ligne M1–M12 est mutée, exécutée rouge puis restaurée ; aucune mutation ne survit.
-- [ ] Vérification docker sur volumes neufs, puis rejeu sur l'état final après les revues.
+- [x] Vérification docker sur volumes neufs, puis rejeu sur l'état final après les revues.
 - [x] Revue de code et revue de sécurité sans constat ouvert.
 - [ ] Branches `MNV-507`, commits français, PR vers `dev` pour les services et vers `main` pour docs,
       rebase-merge, branches distantes supprimées.
@@ -216,9 +216,16 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
   référentiel ou checksum incohérent avant persistance ; balance, lignes, arrêté et outbox restent
   atomiques et idempotents ; aucun endpoint, rôle, secret, journal sensible ni dépendance n'est
   ajouté. La confiance inter-service C8 préexistante n'est ni élargie ni contournée par cette story.
+- **2026-09-17 — rejeu Docker final après revues :** volumes supprimés puis stack relancée par
+  Portly. Le parcours complet est resté vert sur le dossier `6aab7724c153b0bfd10cd647` : arrêté
+  `6aab77278825b8720d2a8ede`, événement unique `SENT`, balance
+  `6aab7728c0bf40df903cc40a` `PORTEFEUILLE_SFD` validée en XOF/exposant 2 avec deux lignes, puis jeu
+  d'états `6aab772a2985e568ff4f64b9` en `sfd-bceao@2.0`. Le rejeu conserve une seule balance et un seul
+  événement ; `mongosh` confirme 1 en-tête, 1 ligne liée, 0 ligne orpheline, 1 marqueur de traitement,
+  1 projection, 1 jeu d'états et des checksums identiques de bout en bout. Stack arrêtée proprement.
 - **Implémentation :** terminée, prête pour revue.
 - **Revue de code :** terminée, 1 constat documentaire corrigé, 0 constat ouvert.
-- **Vérification docker :** passage initial vert ; rejeu final après revue à faire.
+- **Vérification docker :** passage initial et rejeu final après revues verts sur volumes neufs.
 - **Revue de sécurité :** terminée, 0 vulnérabilité.
 - **Clôture :** à faire.
 
