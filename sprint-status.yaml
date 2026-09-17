@@ -3761,7 +3761,7 @@ sprints:
         epic: "EPIC-126"
         points: 5
         service: "microfinance-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 — decoupage epics-microfinance-2026-08-27.md + spine architecture-microfinance-service-2026-08-27. Un crédit octroyé et non décaissé n'est pas un encours : c'est un engagement. Une garantie reçue d'un membre n'est pas un actif de l'institution. Les deux vivent en classe 8 du RCSFD, et l'analyse du 2026-07-21 l'a explicitement mis hors amorce : « classe 8 (hors-bilan / engagements) : hors états DIMF 2000/2080 ».
+        status: "in_progress"  # MAJ 2026-09-17 — flux APEX demarre : branches MNV-508 docs/main + microfinance-service/dev. D-508-A a I : l engagement non decaisse et les garanties reutilisent les evenements de credit ; seule la caution donnee recoit un agregat append-only. Liberation des garanties par mouvement, restitution separee donnes/recus avec totaux exacts et admission lue du paquet prudentiel. Aucun compte de classe 8 invente, aucun evenement Kafka, aucun changement balance-service. # CREEE le 2026-08-27 — decoupage epics-microfinance-2026-08-27.md + spine architecture-microfinance-service-2026-08-27. Un crédit octroyé et non décaissé n'est pas un encours : c'est un engagement. Une garantie reçue d'un membre n'est pas un actif de l'institution. Les deux vivent en classe 8 du RCSFD, et l'analyse du 2026-07-21 l'a explicitement mis hors amorce : « classe 8 (hors-bilan / engagements) : hors états DIMF 2000/2080 ».
         story_path: "stories/STORY-508.md"
       - story_id: "STORY-509"
         title: "États DIMF 2000 et 2080 — et le jalon `format confirmé` avant d'écrire une ligne"
