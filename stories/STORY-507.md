@@ -81,6 +81,14 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
 - **D-507-L — périmètre contractuel :** `balance.submitted.v1` reste en version 1 avec ajout de champs
   compatibles pour les producteurs existants. `origine` est absente pour une balance complète et
   obligatoire pour la publication SFD ; `devise` garde le défaut rétrocompatible de STORY-489.
+- **D-507-M — créance classée au-delà de 24 mois :** le RCSFD n'ouvre aucun groupe de comptes de
+  souffrance au-delà de 24 mois et le passage en perte reste une décision explicite du SFD. Une
+  créance toujours classée au-delà de cette borne reste donc dans le dernier groupe de souffrance,
+  intégralement provisionnée ; elle ne bascule jamais artificiellement au compte 669.
+- **D-507-N — résolution du référentiel SFD :** `balance-service` conserve la cascade existante
+  axes datés du dossier → profil de l'organisation, puis utilise le `typeEntite` du read-model
+  dossier comme troisième marche. `MICROFINANCE` désigne `SFD-BCEAO` ; une entité inconnue ou un
+  dossier absent reste indéterminé, sans repli permissif.
 
 ## Périmètre
 
@@ -104,25 +112,25 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
 
 ## Critères d'acceptation
 
-- [ ] **AC-1 — Origine canonique.** `PORTEFEUILLE_SFD` est disponible au contrat canonique. Le type,
+- [x] **AC-1 — Origine canonique.** `PORTEFEUILLE_SFD` est disponible au contrat canonique. Le type,
       la validation, le schéma de persistance et la liste publiée dérivent d'une source unique.
-- [ ] **AC-2 — Référentiel du dossier.** Les comptes produits viennent du référentiel SFD du dossier,
+- [x] **AC-2 — Référentiel du dossier.** Les comptes produits viennent du référentiel SFD du dossier,
       résolus par le service et jamais codés en dur. Le message n'envoie aucun code de référentiel ;
       `balance-service` le résout et revalide chaque compte.
-- [ ] **AC-3 — Devise, exposant et intégrité.** L'événement porte la devise ; la balance persistée et
+- [x] **AC-3 — Devise, exposant et intégrité.** L'événement porte la devise ; la balance persistée et
       sa réponse portent devise + exposant. `balance-service` recalcule le checksum et rejette toute
       divergence.
-- [ ] **AC-4 — Rejeu.** La même date d'arrêté republiée produit la même version et le même contenu,
+- [x] **AC-4 — Rejeu.** La même date d'arrêté republiée produit la même version et le même contenu,
       ou un `200` idempotent — jamais un second événement ni un doublon canonique.
-- [ ] **AC-5 — Provision décidée seulement.** Une proposition ne publie rien. Seul un arrêté appliqué
+- [x] **AC-5 — Provision décidée seulement.** Une proposition ne publie rien. Seul un arrêté appliqué
       avec succès, dans la même transaction que l'outbox, entre dans la contribution.
-- [ ] **AC-6 — Contribution équilibrée et isolée.** Chaque publication est équilibrée, ne contient
+- [x] **AC-6 — Contribution équilibrée et isolée.** Chaque publication est équilibrée, ne contient
       que les reclassements/provisions/reprises/pertes du portefeuille et n'est jamais sélectionnée
       comme balance complète, base fiscale, clôture ou motif de gel.
-- [ ] **AC-7 — Compatibilité.** Les producteurs existants de `balance.submitted.v1` restent acceptés ;
+- [x] **AC-7 — Compatibilité.** Les producteurs existants de `balance.submitted.v1` restent acceptés ;
       une origine inconnue, une devise invalide, un compte absent du référentiel ou un checksum faux
       sont rejetés sans créer de balance.
-- [ ] **AC-8 — Chaîne réelle.** Sur stack docker neuve : arrêté appliqué → outbox → Kafka → balance
+- [x] **AC-8 — Chaîne réelle.** Sur stack docker neuve : arrêté appliqué → outbox → Kafka → balance
       brouillon `PORTEFEUILLE_SFD` → validation explicite → liasse SFD produite. Les collections sont
       inspectées avec `mongosh`, sans doublon ni orphelin après échec.
 
@@ -146,10 +154,10 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
 ## Definition of Done
 
 - [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
-- [ ] Documentation du contrat Kafka et schéma JSON mis à jour dans les deux services concernés.
-- [ ] `microfinance-service` : lint 0 warning, build, couverture et e2e verts.
-- [ ] `balance-service` : lint 0 warning, build, couverture et e2e verts.
-- [ ] Chaque ligne M1–M12 est mutée, exécutée rouge puis restaurée ; aucune mutation ne survit.
+- [x] Documentation du contrat Kafka et schéma JSON mis à jour dans les deux services concernés.
+- [x] `microfinance-service` : lint 0 warning, build, couverture et e2e verts.
+- [x] `balance-service` : lint 0 warning, build, couverture et e2e verts.
+- [x] Chaque ligne M1–M12 est mutée, exécutée rouge puis restaurée ; aucune mutation ne survit.
 - [ ] Vérification docker sur volumes neufs, puis rejeu sur l'état final après les revues.
 - [ ] Revue de code et revue de sécurité sans constat ouvert.
 - [ ] Branches `MNV-507`, commits français, PR vers `dev` pour les services et vers `main` pour docs,
@@ -164,9 +172,39 @@ doivent devenir ni une balance de travail, ni une base fiscale, ni un motif de g
   lecture des AD-5/AD-7 et des stories 489/499–506. Décisions D-507-A à L prises avant le premier
   changement de code. Point structurant : le vertical ne possède pas la contrepartie de trésorerie ;
   il publie donc la contribution prudentielle équilibrée décidée, pas une fausse balance générale.
-- **Implémentation :** en cours.
+- **2026-09-17 — implémentation et portes de handoff :** `microfinance-service` construit la
+  contribution prudentielle cumulative depuis l'arrêté décidé, résout les comptes par les libellés
+  uniques du paquet servi et écrit `balance.submitted` dans la transaction de l'arrêté. Le contrat,
+  la documentation et le schéma JSON portent l'origine et la devise. `balance-service` accepte et
+  persiste `PORTEFEUILLE_SFD`, résout le référentiel depuis le dossier, dérive l'exposant, recalcule
+  le checksum, isole l'origine dans la clé d'idempotence et l'écarte de toutes les lectures qui
+  exigent une balance complète. Les décisions D-507-M/N ferment les deux cas découverts en cours
+  d'implémentation. Portes finales avant revue :
+  - `microfinance-service` : lint 0 warning, build vert, 134 suites/2 689 tests unitaires verts,
+    couverture statements 99,72 %, branches 96,99 %, fonctions 99,56 %, lignes 99,73 % ; 13 suites
+    e2e vertes, 377 tests exécutés et 83 sentinelles Mongo sautées comme prévu sans URI ;
+  - `balance-service` : lint 0 warning, build vert, 203 suites/4 172 tests unitaires verts,
+    couverture statements 99,17 %, branches 92,74 %, fonctions 98,58 %, lignes 99,26 % ; 29 suites
+    e2e/1 077 tests verts.
+- **2026-09-17 — mutations :** M1 à M12 ont chacune été appliquées au code, ont fait virer leur test
+  gardien au rouge, puis ont été restaurées. Rejeu de référence après restauration : 10 suites/405
+  tests ciblés verts côté `balance-service`, 5 suites/100 tests ciblés verts côté
+  `microfinance-service`.
+- **2026-09-17 — vérification Docker initiale sur volumes neufs :** build frais des deux images,
+  services HTTP et Kafka/Mongo sains, puis parcours réel réussi : dossier
+  `6aab2f5bbb66ae606cba9194`, arrêté `6aab2f5c62baf776da42bfa6`, balance
+  `6aab2f5eadf7a0d7dd428be3` et jeu d'états `6aab2f61a363a8afb226da90`. L'arrêté produit exactement
+  1 ligne et 1 événement `balance.submitted` `SENT`; l'événement produit exactement 1 balance
+  `PORTEFEUILLE_SFD` en XOF, exposant 2, 2 lignes, validée explicitement ; le rejeu laisse ces
+  cardinalités à 1. La projection Bilan et le jeu d'états portent le même `balanceId` et le même
+  checksum, avec le référentiel `sfd-bceao@2.0`. Inspection `mongosh` : 0 ligne d'arrêté orpheline,
+  1 ingestion et 1 marqueur de traitement. La suite Mongo réelle de provisionnement a d'abord
+  révélé une assertion d'outbox globale contaminée par le scénario précédent ; resserrée sur le
+  dossier courant, elle passe 29/29, dont le rollback au deuxième lot laisse 0 en-tête et 0 ligne.
+  La stack a été arrêtée proprement. Le rejeu Docker final reste à exécuter après les revues.
+- **Implémentation :** terminée, prête pour revue.
 - **Revue de code :** à faire.
-- **Vérification docker :** à faire sur stack neuve.
+- **Vérification docker :** passage initial vert ; rejeu final après revue à faire.
 - **Revue de sécurité :** à faire.
 - **Clôture :** à faire.
 
