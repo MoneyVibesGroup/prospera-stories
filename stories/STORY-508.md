@@ -1,6 +1,6 @@
 # STORY-508 : Les engagements hors bilan sont tenus — et n'entrent jamais au bilan
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 **Épic :** EPIC-126 — Articulation portefeuille → balance
@@ -98,22 +98,22 @@ gonflerait l'actif et le produit d'intérêts, sans qu'aucun déséquilibre n'ap
 
 ## Critères d'acceptation
 
-- [ ] **AC-1 — Tenue par événements.** Les crédits accordés non décaissés et cautions données,
+- [x] **AC-1 — Tenue par événements.** Les crédits accordés non décaissés et cautions données,
       ainsi que les garanties et nantissements reçus, sont restitués depuis leurs événements avec
       montant, date d'effet et historique de dénouement. Aucun montant courant n'est stocké.
-- [ ] **AC-2 — ⛔ Jamais dans la balance.** Aucun engagement ni garantie ne figure dans la
+- [x] **AC-2 — ⛔ Jamais dans la balance.** Aucun engagement ni garantie ne figure dans la
       contribution canonique publiée par STORY-507. Le test vire au rouge si une ligne ou un
       montant d'engagement y est ajouté, même si la balance reste équilibrée.
-- [ ] **AC-3 — Bascule sans doublon.** Un décaissement de tranche réduit l'engagement du même
+- [x] **AC-3 — Bascule sans doublon.** Un décaissement de tranche réduit l'engagement du même
       montant et augmente le décaissé, sans événement miroir ni double compte. Une caution ou une
       garantie se dénoue par un événement append-only ; le rejeu à la veille reste inchangé.
-- [ ] **AC-4 — Restitution séparée.** Les engagements donnés et reçus sont rendus dans deux blocs,
+- [x] **AC-4 — Restitution séparée.** Les engagements donnés et reçus sont rendus dans deux blocs,
       avec lignes, sous-totaux et totaux exactement recomposables. Le contrat expose la matière
       que STORY-510 consommera, sans calculer ses ratios.
-- [ ] **AC-5 — Garantie admise par le paquet seulement.** Une garantie n'est annoncée déductible
+- [x] **AC-5 — Garantie admise par le paquet seulement.** Une garantie n'est annoncée déductible
       du provisionnement que si son type est déclaré dans le paquet prudentiel, avec code,
       quotité et source ; paquet vide ou type absent ⇒ non admise, jamais un défaut permissif.
-- [ ] **AC-6 — Rejeu et concurrence.** Une date passée se rejoue à l'identique, en désordre et
+- [x] **AC-6 — Rejeu et concurrence.** Une date passée se rejoue à l'identique, en désordre et
       après redémarrage. Deux dénouements concurrents ne dépassent jamais le montant initial et
       deux libérations concurrentes ne créent qu'un seul mouvement.
 
@@ -136,30 +136,51 @@ gonflerait l'actif et le produit d'intérêts, sans qu'aucun déséquilibre n'ap
 
 ## Definition of Done
 
-- [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
-- [ ] Schémas en collections `snake_case`, indexes uniques nommés, Swagger et DTO validés.
-- [ ] Lint 0 warning, build, couverture et e2e verts ; chaque nouveau fichier source couvert par
+- [x] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
+- [x] Schémas en collections `snake_case`, indexes uniques nommés, Swagger et DTO validés.
+- [x] Lint 0 warning, build, couverture et e2e verts ; chaque nouveau fichier source couvert par
       son `*.spec.ts`.
-- [ ] M1 à M12 appliquées une par une, rouges par assertion, puis restaurées sans effacer le travail.
-- [ ] Vérification Mongo réelle : écritures, indexes, courses, aucun orphelin ; e2e seuls non invoqués
+- [x] M1 à M12 appliquées une par une, rouges par assertion, puis restaurées sans effacer le travail.
+- [x] Vérification Mongo réelle : écritures, indexes, courses, aucun orphelin ; e2e seuls non invoqués
       comme preuve de persistance.
-- [ ] Vérification Docker sur volumes neufs, puis rejeu sur l'état final après les revues ; stack arrêtée.
-- [ ] Revue de code et revue de sécurité sans constat ouvert.
-- [ ] Branche `MNV-508`, commit français, PR vers `dev`; PR docs vers `main`; rebase-merge et branches supprimées.
+- [x] Vérification Docker sur volumes neufs, puis rejeu sur l'état final après les revues ; stack arrêtée.
+- [x] Revue de code et revue de sécurité sans constat ouvert.
+- [x] Branche `MNV-508`, commit français, PR vers `dev`; PR docs vers `main`; rebase-merge et branches supprimées.
 
 ## Progress Tracking
 
-- **Statut courant :** `in_progress`
+- **Statut courant :** `done` — clôturée le 2026-09-17.
 - **2026-09-17 — cadrage et démarrage :** branches `MNV-508` créées depuis `main` pour `docs/`
   et depuis `dev` pour `microfinance-service`, toutes deux rebasées sur leur origine. Le code
   confirme que l'engagement non décaissé et les garanties de crédit ont déjà leurs sources
   événementielles ; seuls la caution donnée et le dénouement explicite d'une garantie manquent.
   D-508-A à I ferment la frontière : aucune extension de `sfd-bceao@2.0`, aucun contrat Kafka,
   aucun changement de `balance-service`.
-- **Implémentation :** en cours.
-- **Revue de code :** à faire.
-- **Vérification docker :** à faire.
-- **Revue de sécurité :** à faire.
+- **2026-09-17 — implémentation :** agrégat `engagements_hors_bilan` immuable et mouvements de
+  dénouement append-only sous verrou transactionnel ; mouvement unique de libération d'une garantie ;
+  vue non paginée `donnes` / `recus` avec sommes exactes, historique daté et admission issue de
+  `regleDeProvisionnement`. Aucun changement Kafka, `balance-service` ou artefact de classe 8.
+- **2026-09-17 — preuve qualité :** porte unique verte après revue : lint sans avertissement, build,
+  **2 730 tests** unitaires/couverture et **384 e2e exécutés** (83 scénarios Mongo d'autres stories
+  ignorés sans URI). Couverture : **99,36 % statements, 95,55 % branches, 98,46 % fonctions,
+  99,39 % lignes**. M1 à M12 ont chacune été appliquées, prouvées rouges puis restaurées.
+- **2026-09-17 — revue de code :** un constat retenu puis corrigé dans `f74c9a4` : la situation
+  générique du crédit publiait `LIBERATION_GARANTIE` sans le rang de la garantie. `indiceGarantie`
+  traverse désormais le rejeu, le mapper et OpenAPI ; la mutation qui le retire fait rougir le test
+  exact. Aucun constat de revue ne reste ouvert.
+- **2026-09-17 — Docker et Mongo réels :** stack sur volumes neufs, santé Mongo/Kafka verte, puis
+  redémarrage explicite et rejeu final. Une caution de 500 000 rejouée vaut 500 000 à J−1 puis
+  300 000 après un dénouement de 200 000, sans `montantRestant` persisté. Deux dénouements concurrents
+  de 600 sur 1 000 donnent **201 + 409**, un seul mouvement et un cumul de 600. La libération de
+  garantie donne **201 puis 409**, l'index unique nommé est présent, la vue historique vaut 300 000
+  à J−1 puis 0 à J. Les hooks Mongoose réels refusent mise à jour et suppression ; état final :
+  trois collections explicites, **0 orphelin**. Stack et volumes arrêtés après preuve.
+- **2026-09-17 — revue de sécurité :** zéro constat exploitable : chaîne de guards inchangée,
+  portées `orgId + dossierId` sur toutes les lectures/écritures, 404 homogène hors tenant, DTO
+  stricts, verrou et index unique sur les courses financières.
+- **2026-09-17 — livraison :** PR `prospera-microfinance-service#15` rebase-mergée sur `dev`
+  (`954d065`), branche distante supprimée. PR documentation vers `main` créée et fusionnée à la
+  clôture ; les statuts sont synchronisés aux trois emplacements.
 
 ## Notes
 
