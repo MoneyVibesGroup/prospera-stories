@@ -4246,7 +4246,8 @@ sprints:
         epic: "EPIC-027"
         points: 8
         service: "fiscal-service"
-        status: "defined"  # MAJ 2026-09-18 — story cadrée depuis AR-03/AR-04/AD-16 après STORY-295. Trois groupes propres fiscal-identity/fiscal-kyc/fiscal-entitlement ; contrats producteurs réels, projections transactionnelles idempotentes, gate local emailVerified + KYC APPROVED + entitlement module fiscalite ACTIVE. Périmètre borné avant le chargeur de paquet STORY-297. Branches docs/fiscal-service MNV-296 créées avant code.
+        status: "done"  # CLÔTURE 2026-09-18 — PR fiscal-service #3 rebase-mergée sur dev au commit fb2a1c9. Read-models identité/KYC/entitlement transactionnels et idempotents, trois groupes Kafka propres, gate local emailVerified + KYC APPROVED + fiscalite ACTIVE, aucun appel chaud. Revue code Opus : 1 bloquant corrigé, tombstone LWW pour une suspension inter-topics reçue avant l'identité ; contre-revue verte. Sécurité finale : 0 constat ; ponytail final : Lean already. Ship. M1 à M8 + mutation tombstone rouges puis restaurées. Porte finale : 358 unitaires, 12 e2e, couverture 98,82/94,38/97,54/99,09. Docker neuf : Kafka/Mongo réels, atomicité forcée, autonomie services voisins arrêtés ; re-preuve finale suspension 2031 → inscription 2030 ignorée → update 2032 appliquée.
+        completed_date: "2026-09-18"
         assigned_to: "vivianMoneyVibesGroupes"
         story_path: "stories/STORY-296.md"
       - story_id: "STORY-297"
