@@ -4237,7 +4237,8 @@ sprints:
         epic: "EPIC-027"
         points: 5
         service: "fiscal-service"
-        status: "defined"  # MAJ 2026-09-18 — fiche STORY-295 créée après clôture de STORY-361. Réalité mesurée : le Mongo rs0 partagé est anonyme, donc incapable de refuser update/remove par privilège ; activer auth globalement casserait les services existants. Patron ratifié par paiement STORY-238 et notification STORY-571 : instance dédiée mongo-fiscal, rs-fiscal, bases fiscal_service + fiscal_service_audit sur le même déploiement ; compte applicatif readWrite métier et find+insert audit ; maintenance absente de la configuration du service. Branches docs/fiscal-service MNV-295 poussées avant code.
+        status: "done"  # MAJ 2026-09-18 (clôture) — PR fiscal-service #2 rebase-mergée sur dev au commit 5073535. Instance dédiée authentifiée mongo-fiscal/rs-fiscal ; compte fiscal_app@admin en readWrite métier et strictement find+insert audit ; maintenance absente de toute configuration applicative. Revues Codex : code 3 bloquants + 1 non-bloquant, sécurité 2 moyens, tous corrigés et contre-revus. M1 à M8 + 2 mutations de revue rouges puis restaurées. Porte finale verte : 279 unitaires, 11 e2e, couverture 99,05/92,77/98,94/98,98. Docker neuf : health 200, conformité 9/9, refus réels code 13, base métier sans collection et audit limité à journal_conformite.
+        completed_date: "2026-09-18"
         assigned_to: "vivianMoneyVibesGroupes"
         story_path: "stories/STORY-295.md"
       - story_id: "STORY-296"
