@@ -4233,12 +4233,13 @@ sprints:
         assigned_to: "vivianMoneyVibesGroupes"
         story_path: "stories/STORY-361.md"
       - story_id: "STORY-295"
-        title: "Deux bases MongoDB et rôles restreints (`fiscal`, `fiscal_audit`)"
+        title: "Deux bases MongoDB authentifiées et journal techniquement ineffaçable"
         epic: "EPIC-027"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "defined"  # MAJ 2026-09-18 — fiche STORY-295 créée après clôture de STORY-361. Réalité mesurée : le Mongo rs0 partagé est anonyme, donc incapable de refuser update/remove par privilège ; activer auth globalement casserait les services existants. Patron ratifié par paiement STORY-238 et notification STORY-571 : instance dédiée mongo-fiscal, rs-fiscal, bases fiscal_service + fiscal_service_audit sur le même déploiement ; compte applicatif readWrite métier et find+insert audit ; maintenance absente de la configuration du service. Branches docs/fiscal-service MNV-295 poussées avant code.
+        assigned_to: "vivianMoneyVibesGroupes"
+        story_path: "stories/STORY-295.md"
       - story_id: "STORY-296"
         title: "Read-models locaux et gate `@RequiresFiscalAccess`"
         epic: "EPIC-027"
