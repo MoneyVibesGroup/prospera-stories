@@ -4,7 +4,7 @@ baseline_commit: b9ebd8a11752ea475fc659f911b8913dbd7cef25
 
 # STORY-361 : Scaffold `fiscal-service` (:3012), socle transverse et point de santé
 
-Status: review
+Status: done
 
 **Complexité :** high
 
@@ -131,7 +131,7 @@ copier ici anticiperait trois stories distinctes.
 - [x] M1 à M8 réellement rouges puis restaurées.
 - [x] Stack Docker neuve : port, health complet, RS256, CORS et démarrage Kafka dégradé prouvés.
 - [x] Aucun secret ni `.env` réel lu, affiché ou committé.
-- [ ] Revue de code, revue de sécurité, re-vérification Docker, rebase-merge et clôture réalisées.
+- [x] Revue de code, revue de sécurité, re-vérification Docker, rebase-merge et clôture réalisées.
 
 ## Notes techniques
 
@@ -144,7 +144,7 @@ copier ici anticiperait trois stories distinctes.
 
 ## Progress Tracking
 
-**Statut : `review` (2026-09-17).** Story recadrée depuis l'architecture réelle : le périmètre
+**Statut : `done` (2026-09-18).** Story recadrée depuis l'architecture réelle : le périmètre
 s'arrête strictement avant les bases d'audit, read-models, gate fiscal et chargeur de paquet. Dépôt
 privé `MoneyVibesGroup/prospera-fiscal-service` créé ; `main`, `dev`, puis `MNV-361` ont été créées et
 poussées avant toute écriture de code. Les branches `docs/MNV-361` et `fiscal-service/MNV-361` sont
@@ -200,3 +200,6 @@ alignées.
   `kid` et audience fiscale, route protégée **200** avec organisation/rôles concordants. Mongo
   confirme `rs0`, zéro collection et zéro document dans `fiscal_service`. La pile, son réseau et ses
   volumes ont ensuite été supprimés via Portly.
+- 2026-09-18 : PR `MoneyVibesGroup/prospera-fiscal-service#1` rebase-mergée sur `dev` au commit
+  `f953e8e7fc510f13603ced859a56f6686b958496`. Story clôturée et statut synchronisé aux trois
+  emplacements BMAD.
