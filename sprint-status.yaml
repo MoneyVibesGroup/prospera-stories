@@ -4246,8 +4246,9 @@ sprints:
         epic: "EPIC-027"
         points: 8
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "defined"  # MAJ 2026-09-18 — story cadrée depuis AR-03/AR-04/AD-16 après STORY-295. Trois groupes propres fiscal-identity/fiscal-kyc/fiscal-entitlement ; contrats producteurs réels, projections transactionnelles idempotentes, gate local emailVerified + KYC APPROVED + entitlement module fiscalite ACTIVE. Périmètre borné avant le chargeur de paquet STORY-297. Branches docs/fiscal-service MNV-296 créées avant code.
+        assigned_to: "vivianMoneyVibesGroupes"
+        story_path: "stories/STORY-296.md"
       - story_id: "STORY-297"
         title: "Chargeur de paquet fiscal depuis `catalog-service`"
         epic: "EPIC-027"
