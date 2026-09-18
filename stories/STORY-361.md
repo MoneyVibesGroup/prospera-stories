@@ -114,7 +114,7 @@ copier ici anticiperait trois stories distinctes.
 
 | ID | Mutation volontaire | Test qui doit rougir |
 |---|---|---|
-| M1 | autoriser `HS256` dans la stratégie | e2e rejette le jeton symétrique |
+| M1 | autoriser `HS256` dans la stratégie | options exactes `['RS256']` + e2e rejette le jeton symétrique |
 | M2 | retirer la vérification d'audience | e2e audience étrangère |
 | M3 | retirer `JwtAuthGuard` du vrai `AppModule` | invariant de câblage + e2e sans jeton |
 | M4 | permuter `409` et `422` | spec de correspondance HTTP exacte |
@@ -178,3 +178,25 @@ alignées.
 - 2026-09-17 : commit initial du socle `b666845` poussé sur `fiscal-service/MNV-361` ; PR
   `MoneyVibesGroup/prospera-fiscal-service#1` ouverte vers `dev`. Statut synchronisé à `review` en
   attente des revues APEX de code et de sécurité.
+- 2026-09-18 : revue de code Codex `gpt-6-astra` en raisonnement `ultra` : **7 constats majeurs et
+  4 mineurs**. Revue de sécurité indépendante, même modèle/effort : **1 constat majeur**, recoupant
+  le défaut du stockage natif de `@nestjs/throttler` 6.5.0. Tous les constats sont corrigés : stockage
+  par clé de STORY-658, journalisation après fermeture de la réponse de STORY-657, client Redis de
+  santé borné sans file hors ligne, audience exactement `fiscal-service`, health e2e avec le vrai
+  filtre, invariant AST du domaine, altération binaire réelle de la signature JWT, écoute e2e unique
+  sur `127.0.0.1`, hooks d'arrêt et démarrage Compose sans dépendance dure à Kafka.
+- 2026-09-18 : table **M1 à M8 rejouée intégralement après revue**, chaque mutation rouge puis
+  restaurée. Quatre mutations de correction supplémentaires sont aussi rouges : suppression du
+  stockage throttler réel, réactivation de la file Redis, journalisation d'erreur avant le filtre et
+  relâchement de l'audience. Porte unique finale verte : eslint 0 avertissement, build, **253 tests
+  unitaires**, **10 e2e** ; couverture statements **98,84 %**, branches **91,17 %**, fonctions
+  **98,78 %**, lignes **98,74 %**.
+- 2026-09-18 : re-vérification Docker sur volumes neufs. Démarrage à froid de Mongo + Redis +
+  `fiscal-service` **sans conteneur Kafka** : processus HTTP vivant, health **503** avec Kafka down et
+  les deux autres dépendances up ; après ajout du broker, le même conteneur revient à **200**. Redis
+  coupé : health **503 en 23 ms**, puis récupération **200 en 22 ms** ; arrêt du service Redis absent
+  en **1,15 s**. CORS : origine autorisée **204 avec en-tête**, origine étrangère **204 sans
+  en-tête**. Preuve IdP réelle : inscription, e-mail Mailhog, vérification, login, JWT `RS256` avec
+  `kid` et audience fiscale, route protégée **200** avec organisation/rôles concordants. Mongo
+  confirme `rs0`, zéro collection et zéro document dans `fiscal_service`. La pile, son réseau et ses
+  volumes ont ensuite été supprimés via Portly.
