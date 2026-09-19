@@ -56,15 +56,26 @@ mentir.
   grand livre. C'est le **même arbitrage que STORY-509**, dans le **même épic** — l'y placer aurait
   obligé à ingérer une balance étrangère (contre l'invariant « une base Mongo par service ») ou à
   publier presque tout en `INDETERMINABLE`. `sprint-status.yaml` est corrigé en conséquence.
-- **D-510-B — les assiettes entrent au paquet prudentiel, en version `1.3`.** ⛔ Aucun seuil, aucun
-  poste, aucun signe, aucune quotité dans le code. Les versions `1.0`, `1.1` et `1.2` restent
-  packagées **aux octets** ; la `1.3` reprend les rubriques de provisionnement et de déclassement de
-  la `1.2` sans y toucher et ajoute la seule rubrique `ratios.assiettes`. La `1.3` est packagée dans
-  `bilan-service` ; `microfinance-service` **reste sur la `1.2`** et n'est pas modifié par cette story.
-- **D-510-C — une assiette est une liste de termes `{poste, signe, source}`.** Elle se résout par la
-  mécanique de concordance déjà livrée (rattachement d'un solde au **plus long préfixe cité**), qui
-  n'est pas recopiée mais réutilisée. Chaque terme porte sa source ; un terme sans source est refusé
-  par le validateur.
+- **D-510-B — un artefact DISJOINT, `ratios-prudentiels-sfd-bceao@1.0`.** ⛔ Aucun seuil, aucun
+  poste, aucun signe dans le code. Les assiettes ne rejoignent **pas** le paquet de
+  `microfinance-service` : elles viennent d'un **autre texte** (l'Instruction n°010-08-2010, quand le
+  provisionnement vient du RCSFD compte 29), et ce service n'utilise aucune de ses rubriques de
+  provisionnement. C'est exactement la doctrine de `etats-dimf-sfd-bceao@1.0`, manifeste disjoint du
+  comptable, dans ce même service. `prudentiel-sfd-bceao@1.0/1.1/1.2` restent **aux octets** et
+  `microfinance-service` n'est **pas modifié** ; ses 11 seuils y sont aujourd'hui **morts** (aucun
+  code ne les lit) et le README dit lequel des deux artefacts fait foi pour un ratio.
+- **D-510-C — un ratio est une fonction des états DIMF produits, pas de la balance brute.** Chaque
+  terme d'assiette désigne un **poste** ; sa valeur est le montant que STORY-509 produit déjà pour ce
+  poste à partir de la balance. La mécanique de concordance n'est ni recopiée ni réécrite : elle est
+  **appelée**. Conséquence mesurée et voulue : `E90 TOTAL DE L'ACTIF` portant 0 terme de concordance,
+  le dénominateur de la capitalisation devient `INDETERMINABLE` **par construction**, sans cas
+  particulier dans le code. Chaque terme porte sa source ; un terme sans source est refusé au build.
+- **D-510-C bis — un poste absent du jeu de soldes vaut zéro ; un poste hors artefact est inconnu.**
+  Les deux se confondraient en un `0` silencieux. Mesure : sur les 79 postes cités par les annexes,
+  **69 existent** dans `etats-dimf-sfd-bceao@1.0` et les **10 absents sont exactement les postes hors
+  bilan** `N1A`, `N1H`, `N1J`, `N1K`, `N2A`, `N2H`, `N2J`, `N2M`, `N3A`, `Q1A`. Ces dix-là sont
+  déclarés dans l'artefact avec leur origine `HORS_BILAN_NON_TRANSCRIT` : ils ne valent pas zéro, ils
+  rendent leur assiette incomplète et leur ratio `INDETERMINABLE`.
 - **D-510-D — deux assiettes pour « risques portés par une institution ».** `RISQUES_ANNEXE_I`
   (13 postes) et `RISQUES_ANNEXE_VI` (12, sans `A2A`). Le texte les donne sous le **même** intitulé
   avec deux compositions ; les mutualiser élargirait un dénominateur réglementaire et rendrait
@@ -92,33 +103,42 @@ mentir.
   est un trou de conformité, pas une commodité. Sa déclaration est un **hook inerte documenté**.
 - **D-510-I — signalé, jamais corrigé.** Un dépassement produit un verdict `NON_CONFORME` et rien
   d'autre : aucune mesure de redressement, aucune écriture, aucun événement. Le produit constate.
-- **D-510-J — le rejeu se fait sur la version applicable à la date.** La `1.3` porte
-  `_meta.applicableDepuis: "2010-08-30"`, verbatim de l'article 6. Une date d'arrêté antérieure à
-  toute version applicable rend `INDETERMINABLE` / `AUCUN_PAQUET_APPLICABLE_A_CETTE_DATE` — jamais un
-  verdict. Une version sans `applicableDepuis` (les `1.0` à `1.2`) n'est **pas** sélectionnable par
-  date : l'absence ne vaut pas « depuis toujours ».
+- **D-510-J — le rejeu se fait sur la version applicable à la date.** L'artefact porte
+  `_meta.applicableDepuis: "2010-08-30"` — verbatim de l'article 6 : « *Elle entre en vigueur le
+  30 août 2010* ». Une date d'arrêté antérieure à toute version applicable rend `INDETERMINABLE` /
+  `AUCUN_ARTEFACT_APPLICABLE_A_CETTE_DATE`, jamais un verdict. Une version sans `applicableDepuis`
+  n'est **pas** sélectionnable par date : l'absence ne vaut pas « depuis toujours ».
 - **D-510-K — un verdict porte toujours de quoi le refaire à la main.** Chaque ratio publie son
   numérateur et son dénominateur **avec le détail de leurs termes** (poste, libellé, signe, solde
   retenu), le seuil, l'opérateur, la valeur et la source. Un ratio sans ses deux termes n'est pas
   vérifiable — même exigence que « chaque écriture porte sa formule » du moteur fiscal.
+- **D-510-L — la capacité, pas la route.** STORY-509 a livré les états DIMF sans les exposer, et le
+  module le dit noir sur blanc. Cette story fait de même : le moteur est câblé, testé et atteignable
+  par le pont du registre, aucune route ne le rend. Poser une route ici supposerait de trancher d'où
+  vient la balance d'un arrêté passé — question qui n'appartient pas à cette story.
 
 ## Périmètre
 
 ### Livré
 
-- Le paquet prudentiel `prudentiel-sfd-bceao@1.3` : rubrique `ratios.assiettes` (les 11 normes, leurs
-  assiettes en postes, l'assiette commune des fonds propres, les conditions d'applicabilité, les
-  lacunes du texte marquées), sources verbatim, `applicableDepuis`, packagé dans `bilan-service`.
-- Le schéma JSON et la règle de validation **P5** correspondante, avec le script de validation.
-- Le moteur de ratios : résolution d'une assiette en postes, somme signée, quotient × 100, comparaison
-  au seuil, verdict, ou `INDETERMINABLE` + motif nommé.
-- La restitution de chaque ratio avec ses deux termes détaillés, son seuil, sa source et le
-  `{code, version, checksum}` du paquet qui l'a produit.
+- L'artefact `ratios-prudentiels-sfd-bceao@1.0` : les 11 normes, leurs assiettes en postes, l'assiette
+  commune des fonds propres, les conditions d'applicabilité, les lacunes du texte marquées, chaque
+  élément avec sa source verbatim et `applicableDepuis`, packagé dans `bilan-service`.
+- Son générateur (`build-ratios-prudentiels.mjs`, source → artefact déterministe + sha256 imprimé) et
+  son entrée au manifeste, sur le patron exact de `etats-dimf-sfd-bceao@1.0`.
+- Le moteur de ratios : résolution d'une assiette en postes **depuis les états DIMF produits**, somme
+  signée sous garde d'entier sûr, quotient × 100, comparaison au seuil, verdict — ou `INDETERMINABLE`
+  avec un motif nommé.
+- Le résultat produit pour chaque ratio : ses deux termes détaillés, son seuil, sa source, et le
+  `{code, version, checksum}` de l'artefact qui l'a produit.
 - Le rejeu à une date d'arrêté passée sur la version applicable à cette date.
 
 ### Hors périmètre
 
 - Toute **écriture** : ni collection, ni événement Kafka, ni dotation, ni mesure de redressement (D-510-I).
+- **L'exposition HTTP** : comme STORY-509 dans le même épic, la story livre la **capacité** et son
+  artefact, pas sa route. Hook inerte documenté, câblé et testé, pour que le branchement ne soit plus
+  qu'un contrôleur (D-510-L).
 - La **déclaration de la catégorie prudentielle** du SFD — hook inerte documenté (D-510-H).
 - Les **données déclaratives** des annexes III, IV et VI, et le **total de l'actif** de l'annexe VIII :
   elles n'existent dans aucun artefact et ne seront pas inventées (D-510-F).
@@ -133,61 +153,70 @@ mentir.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1 — Tout vient du paquet.** Les ratios, leurs **assiettes** et leurs **seuils** viennent
-      **intégralement du paquet prudentiel**. ⛔ Aucun seuil, aucun poste, aucun signe dans le code.
-      Test de mutation : changer un seuil **ou un poste d'assiette** au paquet doit changer le verdict.
-- [ ] **AC-2 — Un ratio porte ses deux termes.** Chaque ratio est rendu avec son **numérateur**, son
+- [x] **AC-1 — Tout vient du paquet.** Les ratios, leurs **assiettes** et leurs **seuils** viennent
+      **intégralement de l'artefact packagé**. ⛔ Aucun seuil, aucun poste, aucun signe dans le code.
+      Test de mutation : changer un seuil **ou un poste d'assiette** à l'artefact change le verdict.
+- [x] **AC-2 — Un ratio porte ses deux termes.** Chaque ratio est rendu avec son **numérateur**, son
       **dénominateur**, son **seuil** et son **verdict**, numérateur et dénominateur détaillés terme
       par terme (poste, libellé, signe, solde retenu) et exactement recomposables (D-510-K).
-- [ ] **AC-3 — Non calculable ⇒ `INDETERMINABLE`.** Un ratio dont une donnée manque rend le statut
+- [x] **AC-3 — Non calculable ⇒ `INDETERMINABLE`.** Un ratio dont une donnée manque rend le statut
       `INDETERMINABLE` avec un **motif qui nomme la lacune**, **jamais zéro et jamais un verdict**.
       ⚡ 4ᵉ occurrence du patron : un booléen de conformité se lit toujours avec son statut. La part
       calculable est publiée quand même — un numérateur connu et un dénominateur absent se disent.
-- [ ] **AC-4 — Signalé, jamais corrigé.** Un dépassement de seuil est signalé et rien d'autre : le
+- [x] **AC-4 — Signalé, jamais corrigé.** Un dépassement de seuil est signalé et rien d'autre : le
       produit constate, il ne décide d'aucune mesure de redressement et n'écrit rien.
-- [ ] **AC-5 — Rejeu daté.** Les ratios se rejouent à une date d'arrêté passée avec la **version du
+- [x] **AC-5 — Rejeu daté.** Les ratios se rejouent à une date d'arrêté passée avec la **version du
       paquet applicable alors**, publiée avec son checksum. Un seuil révisé en 2026 ne rend pas non
       conforme un arrêté 2024 ; une date antérieure à toute version applicable rend `INDETERMINABLE`.
-- [ ] **AC-6 — Les deux compositions de « risques » restent distinctes.** Le dénominateur de
+- [x] **AC-6 — Les deux compositions de « risques » restent distinctes.** Le dénominateur de
       l'annexe VI ne contient pas `A2A` ; celui de l'annexe I le contient. Un test vire au rouge si
       les deux assiettes sont mutualisées (D-510-D).
-- [ ] **AC-7 — `L70` / `L80` comptés une seule fois.** Un report à nouveau déficitaire est **déduit**
+- [x] **AC-7 — `L70` / `L80` comptés une seule fois.** Un report à nouveau déficitaire est **déduit**
       des fonds propres, jamais ajouté puis déduit. Un test mesure les fonds propres d'un jeu où
       `L70 < 0` et `L80 < 0` et rougit au moindre double comptage (D-510-E).
-- [ ] **AC-8 — L'annexe VII n'est pas présentée comme un ratio.** Elle est publiée comme norme de
+- [x] **AC-8 — L'annexe VII n'est pas présentée comme un ratio.** Elle est publiée comme norme de
       dotation (base, taux), sans verdict, avec le motif qui dit pourquoi (D-510-G). Un test vérifie
-      qu'aucune route ne lui rend un `numerateur`/`denominateur`.
+      qu'aucun résultat ne lui porte de `numerateur`/`denominateur`.
 
 ## Table de mutations obligatoire
 
-| ID | Mutation réellement appliquée | Test qui doit virer au rouge |
+15 mutations **réellement appliquées** au code, à l'artefact ou à sa source, chacune prouvée rouge puis
+restaurée. ⚠️ Deux d'entre elles ont d'abord **survécu** : elles ont révélé deux trous de test, comblés
+avant de poursuivre (voir *Progress Tracking*).
+
+| ID | Mutation appliquée | Ce qui vire au rouge |
 |---|---|---|
-| M1 | Écrire un seuil en dur dans le code au lieu de le lire au paquet | Paquet fictif à seuil modifié ⇒ verdict inversé |
-| M2 | Ajouter/retirer un poste d'une assiette dans le code plutôt qu'au paquet | Paquet fictif à assiette modifiée ⇒ numérateur exact différent |
-| M3 | Ajouter `A2A` à l'assiette de l'annexe VI (mutualiser I et VI) | AC-6 : les deux dénominateurs diffèrent exactement d'`A2A` |
-| M4 | Sommer `L70`/`L80` en ajout **et** en déduction | AC-7 : fonds propres d'un jeu déficitaire |
-| M5 | Ignorer le signe du terme (`-` traité comme `+`) | Fonds propres : les 7 déductions retranchent réellement |
-| M6 | Rendre `0` au lieu d'`INDETERMINABLE` quand le dénominateur manque | AC-3 : statut + motif, jamais une valeur |
-| M7 | Fabriquer le total de l'actif par somme des postes A…D | AC-3 : capitalisation `INDETERMINABLE` / `TOTAL_ACTIF_SANS_FORMULE` |
-| M8 | Rendre un verdict de liquidité en choisissant un des trois seuils | AC-3 + D-510-H : `CATEGORIE_PRUDENTIELLE_NON_DECLAREE` et 3 seuils publiés |
-| M9 | Accepter la catégorie prudentielle en paramètre de requête | Aucune route n'expose ce paramètre ; le DTO le refuse |
-| M10 | Sélectionner une version de paquet sans `applicableDepuis` par date | AC-5 : `AUCUN_PAQUET_APPLICABLE_A_CETTE_DATE` |
-| M11 | Servir la `1.3` en ignorant le checksum, ou modifier un octet de la `1.2` | Checksum vérifié au chargement ; `1.0`/`1.1`/`1.2` octets inchangés |
-| M12 | Retirer la `source` d'un terme d'assiette dans l'artefact | Règle **P5** du validateur : source exigée par terme |
-| M13 | Publier l'annexe VII avec un numérateur/dénominateur et un verdict | AC-8 |
-| M14 | Additionner en `number` sans garde d'entier sûr | Refus hors entier sûr sur une somme de postes |
+| M1 | Le seuil du paquet ignoré dans la comparaison (`(seuil + 1) * d`) | 3 tests : opérateurs et bornes |
+| M2 | Un poste d'assiette qui n'existe dans aucun état (`A12` → `Z99`) | **Le générateur refuse** : « le poste Z99 est déclaré dans les états mais absent de `etats-dimf-sfd-bceao@1.0` » |
+| M3 | `A2A` ajouté à l'annexe VI — les deux assiettes de risques mutualisées | **Le générateur refuse** : « assiettes RISQUES_ANNEXE_I et RISQUES_ANNEXE_VI : compositions identiques — mutualisation interdite ». La mutation ne peut pas atteindre l'artefact servi ; l'assertion d'artefact reste le second filet, exercé par M11 |
+| M4 | `retenuSi` ignoré — tous les termes retenus | 3 tests : report déficitaire compté deux fois |
+| M5 | Signe inversé (`orientation`) | 21 tests |
+| M6 | Assiette incomplète totalisée à `0` au lieu de `null` | 3 tests : AC-3 |
+| M7 | Un poste sans formule n'annule plus la valeur du terme | 1 test — ⚠️ **a d'abord survécu** |
+| M8 | Condition d'applicabilité ignorée — verdict de liquidité rendu | 12 tests |
+| M9 | Terme réservé à l'infra-annuel retenu au 31 décembre | 1 test |
+| M10 | Sélection par date qui ignore `applicableDepuis` | 3 tests du registre |
+| M11 | Un octet de l'artefact modifié sans reporter son sha256 | 14 tests : le chargeur refuse |
+| M12 | `source` retirée d'un terme de la transcription | **Le générateur refuse** : « source obligatoire » |
+| M13 | L'annexe VII dotée d'un numérateur et d'un dénominateur | 2 tests : AC-8 |
+| M14 | Garde d'entier sûr affaiblie (`isFinite` au lieu de `isSafeInteger`) | 1 test — ⚠️ **a d'abord survécu** |
+| M15 | Verdict décidé sur la valeur arrondie au lieu du produit en croix | 1 test : la borne exacte |
+
+⚠️ **Deux mutations écartées parce qu'elles ne compilaient pas** — un code qui ne compile pas rend « 0 test »,
+jamais un rouge : le seuil remplacé par une constante (`seuil` devenait inutilisé) et le signe comparé à une
+valeur hors union. Reformulées en M1 et M5, qui compilent et rougissent.
 
 ## Definition of Done
 
 - [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
 - [ ] `sprint-status.yaml` corrigé : `service: bilan-service` (D-510-A), avec la raison datée.
-- [ ] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts ; chaque fichier neuf couvert.
-- [ ] M1 à M14 appliquées une par une, prouvées rouges par assertion, puis restaurées.
-- [ ] Artefact `1.3` validé par son script, checksum recalculé et publié ; `1.0`/`1.1`/`1.2` octets inchangés.
-- [ ] Vérification docker réelle sur l'état final, après les revues.
+- [x] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts ; chaque fichier neuf couvert.
+- [x] M1 à M15 appliquées une par une, prouvées rouges (ou refusées au build), puis restaurées.
+- [x] Artefact produit par son générateur, sha256 reporté au manifeste, garde de complétude `assets/` ↔ manifeste verte.
+- [ ] ⚠️ Aucune écriture en base : la vérification docker porte sur le **démarrage réel** du service avec l'artefact embarqué (chargement, checksum, registre), pas sur une persistance.
 - [ ] Revue de code et revue de sécurité sans constat ouvert.
 - [ ] Branche `MNV-510`, commit français, PR vers `dev` ; PR docs vers `main` ; rebase-merge, branches supprimées.
-- [ ] `docs/referentiels/README-prudentiel-sfd-bceao.md` étendu : provenance des assiettes, pages, lacunes.
+- [x] `docs/referentiels/README-ratios-prudentiels-sfd-bceao.md` créé : provenance, pages, décisions, réserves du texte.
 
 ## Progress Tracking
 
@@ -200,6 +229,27 @@ mentir.
   deux côtés des fonds propres, trois numérateurs déclaratifs, un dénominateur sans formule, des
   assiettes en durée résiduelle, une annexe qui n'est pas un ratio. Base de non-régression relevée
   avant toute écriture.
+- **2026-09-19 — implémentation :** artefact disjoint `ratios-prudentiels-sfd-bceao@1.0` (11 normes,
+  10 assiettes, 115 termes, chaque terme avec sa source verbatim), son générateur, son manifeste, son
+  chargeur à checksum vérifié, et le moteur de production. Le moteur **consomme les états DIMF produits**
+  au lieu de relire une balance : la concordance poste → comptes de STORY-509 n'est ni recopiée ni
+  réécrite. Aucune route, aucune écriture, aucun événement — hook inerte documenté dans `bilan.module.ts`,
+  comme STORY-509.
+- **2026-09-19 — un constat trouvé par le test, pas par la revue :** le moteur tranchait en silence la
+  convention de signe de l'annexe VII que D-510-G interdit de trancher — « + Report à nouveau déficitaire »
+  appliqué littéralement rendait une base de **1 200 au lieu de 800** pour un report de −200, dans le sens
+  qui **gonfle une dotation obligatoire**. Corrigé : l'assiette porte `conventionDeSigne`, le moteur publie
+  ses termes et **refuse le total**.
+- **2026-09-19 — porte de qualité :** lint 0 avertissement, build, **2 931 tests unitaires** (182 suites),
+  couverture **99,19 % statements, 95,28 % branches, 99,41 % fonctions, 99,27 % lignes**, **822 e2e** verts.
+  Base de non-régression avant la story : 2 730 tests dans `microfinance-service`, non touché.
+- **2026-09-19 — mutations :** M1 à M15 appliquées une par une. ⚠️ **Deux ont survécu au premier passage** et
+  ont révélé deux trous de test réels : (1) un terme écrit comme une somme de postes dont **un seul** est
+  sans formule publiait la **somme partielle des autres** — aucune assertion ne portait sur le terme
+  lui-même, toutes étant satisfaites par le motif de la norme ; (2) la garde d'entier sûr de l'addition
+  était masquée par celle du produit en croix, qui lève **la même classe d'erreur** — le test comparait la
+  classe, pas le contexte. Tests ajoutés, les deux mutations rougissent. Deux autres mutations ont été
+  écartées pour non-compilation et reformulées.
 
 ## Notes
 
