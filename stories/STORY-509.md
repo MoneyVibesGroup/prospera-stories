@@ -147,3 +147,158 @@ espace ni minuscule : les états devront être codifiés **`DIMF-2000`** et **`D
 
 ⚠️ Le `canal` du paquet devra déclarer un dépôt **papier** (`DEPOT_PHYSIQUE`), pas un téléservice —
 le vocabulaire du contrat le prévoit déjà.
+
+---
+
+## ✅ Arbitrage PO du 2026-09-19 — le préalable est levé
+
+**Livrable retenu : les états codés + le régime de dépôt**, `canal` = `DEPOT_PHYSIQUE`. Le rendu
+imprimable signable (PDF/A prêt à signer) part en **story de présentation dédiée** : il ne change
+rien aux nombres, seulement à leur mise en page.
+
+**Périmètre de gabarit : la version DÉVELOPPÉE seule.** C'est la règle et non le cas marginal —
+l'allégée est réservée aux encours < 50 M FCFA quand l'article 44 commence à 2 Md, si bien que toute
+la bande intermédiaire relève de la développée. L'allégée reste un hook inerte.
+
+## Implémentation — `bilan-service`, branche `MNV-509`
+
+⚠️ **Pas dans `microfinance-service`.** Ce service ne détient aucun grand livre, et son chargeur de
+référentiel **ampute volontairement** `postes` / `tableDePassage` (« ils produisent la liasse, que ce
+service ne produit pas »). Le moteur, les soldes et le générateur d'artefacts vivent dans
+`bilan-service`.
+
+Artefact **`etats-dimf-sfd-bceao@1.0`**, manifeste **disjoint** du comptable (un gabarit se révise
+sans faire bouger l'octet d'un référentiel servi) :
+
+| | postes | intercalaires | termes de concordance |
+|---|---|---|---|
+| **DIMF 2000** (bilan, `D : AA0`) | 140 | 2 | 582 |
+| **DIMF 2080** (compte de résultat, `D : RA0`) | 242 | 19 | 457 |
+
+Plus la concordance officielle de l'annexe 1.1 (1 039 termes signés, avec le mode `extrait` de la
+mention « ex ») et le régime de dépôt de l'Instruction n°030-02-2009 article par article.
+
+### ⚡ Le document officiel se contredit — le recoupement l'a révélé
+
+Le RCSFD présente **chaque état deux fois**, en vis-à-vis (annexes 2.2 / 3.3) et en liste (2.3 / 3.4).
+**Les deux ne coïncident pas, et aucune n'est complète seule** :
+
+| Défaut | Présentation fautive | Ce qui tranche |
+|---|---|---|
+| `C32` **omis**, son libellé décalé sur `C31` | liste (p. 393) | vis-à-vis + concordance + plan de comptes (`321` biens meubles / `322` marchandises) |
+| `T54`→`T58`, `T6B`, `T6C` **sautés** | liste (p. 419) | vis-à-vis (p. 415-416) + concordance |
+| `R5Y`→`R7D`, `V6A`→`V7D` **absents** | vis-à-vis — **la page 413 du PDF est BLANCHE** | liste (p. 418, 421) + concordance |
+| `1146` **coupé** en `114` + `6` par le crénage | extraction | un compte à un chiffre aurait rattaché toute la classe 6 à `F60` |
+
+Les quatre arbitrages sont dans le bloc `corrections` de l'artefact, avec leurs sources, et
+**verrouillés par des tests** — sans eux, un relecteur de bonne foi « corrigerait » vers la version
+fautive.
+
+### Critères d'acceptation
+
+- [x] **AC-1** — gabarit officiel sourcé, référencé et **en machine**, vérifié par sha256.
+- [x] **AC-2** — *relu, car infaisable au pied de la lettre* : `sfd-bceao@2.0` porte **31 postes**
+      (4 à l'actif) quand le DIMF 2000 développé en compte **140**. La liasse est **dérivée** des
+      DIMF, donc plus grossière : on ne désagrège pas. L'état est produit depuis **les mêmes
+      soldes**, par la concordance officielle, en **un seul** chemin de calcul — l'esprit de l'AC
+      (jamais deux moteurs sur le même nombre) est tenu, sans une correspondance inventée.
+- [x] **AC-3** — l'état porte sa période, sa date d'arrêté, la version du gabarit, le paquet et son
+      checksum vérifié.
+- [x] **AC-4** — périodicité **annuelle** établie et portée par l'artefact.
+
+### ⛔ Aucun total n'est supposé
+
+`E90` et `L90` figurent à l'annexe 1.1 **sans aucune formule**, et la hiérarchie des rubriques n'est
+**pas déductible** de la concordance (`A10 = + 10` est plus large que les comptes qu'énumère `A01` :
+ni l'un ni l'autre ne contient l'autre). Ils sortent à `null` avec leur motif plutôt qu'à une somme
+vraisemblable — un total plausible est précisément ce que le jalon interdit. `T84` et `X84`, qui ont
+une formule officielle, la gardent.
+
+### ⚠️ Écart de plan de comptes — publié, pas comblé
+
+La concordance cite **44 comptes** que `sfd-bceao@2.0` ne porte pas (racines **39, 45, 46, 47, 49,
+73**). La classe 9 est hors périmètre assumé, mais **ces six-là sont des comptes de bilan et de
+résultat** — et `X84` (TOTAL PRODUITS) cite `73`. Chaque ligne produite publie ses `comptesAbsents`,
+et un test fige la mesure. **Sa résorption appartient au référentiel comptable, pas à cette story.**
+
+🪝 **Hooks inertes documentés** — posés, câblés, testés, mais **sans appelant en production** :
+le chargeur, le service de production et le pont `sfd-bceao@2.0 → etats-dimf-sfd-bceao@1.0`. Aucun
+endpoint n'est exposé : la story livre le gabarit et la capacité, son exposition HTTP et le rendu
+imprimable relèvent des stories suivantes.
+
+## Progress Tracking
+
+- **Lint** 0 warning · **build** OK.
+- **Tests** : 2 842 unitaires (178 suites) + 822 e2e, tous verts.
+- **Couverture** : 99,18 statements / 95,44 branches / 99,39 fonctions / 99,24 lignes
+  (seuils 65/90/90/90).
+- **Table de mutations** — chaque garde a été vérifiée mordante :
+
+| Mutation | Effet attendu | Mesuré |
+|---|---|---|
+| Le mode `extrait` traité comme un solde | les comptes « ex » cessent de basculer selon la côte | **3 rouges** |
+| Contrôle d'identité de l'artefact retiré | un autre paquet servi sous la bonne clé | **1 rouge** |
+| `C31` reprend le libellé fautif de la liste | la transcription régresse vers le défaut du document | **2 rouges** (checksum + libellé) |
+| Fichier orphelin ajouté aux assets | la garde manifeste ↔ assets cesse de couvrir | **1 rouge** |
+
+⚠️ Une cinquième tentative (`if (false)`) a été écartée : elle **ne compilait pas**, et « 0 test »
+n'est pas un rouge.
+
+- **Vérification docker** : **sans objet** — la story n'écrit rien en base (artefact embarqué,
+  registre en mémoire, service de calcul pur). Aucune collection touchée, aucun événement publié.
+- Deux gardes d'assets existantes élargies à la seconde famille d'artefacts **sans être
+  affaiblies** (mutation ci-dessus).
+
+## Revues ⑥ et ⑦ — ce qu'elles ont trouvé
+
+**Revue de sécurité : aucune vulnérabilité** (confiance ≥ 80). Intégrité vérifiée avant parse, cache à
+clé fermée, traversée de chemin impossible (manifeste codé en dur + confinement du locator), pas de
+pollution de prototype, aucune fuite dans les journaux ni les erreurs. Le générateur n'est exécuté ni
+par `npm run build` ni par le Dockerfile.
+
+**Revue de code : cinq défauts de correctness sur le seul chemin de calcul** — le socle était sain,
+les quinze lignes du calcul portaient tout le mal.
+
+⚡⚡ **Le signe de la concordance n'est pas un multiplicateur.** Le `+`/`−` de l'annexe 1.1 dit dans
+quel **sens** le compte se lit, puis s'il s'ajoute ou se retranche : `+` désigne un compte du sens
+naturel de sa côte, `−` sa **contrepartie**, de sens inverse. Le multiplier par `−1` sur un
+`débit − crédit` **déjà signé** nie deux fois.
+
+| Mesuré sur l'artefact réel | Avant | Après |
+|---|---|---|
+| `A70` — brut 10 M, provision 2 M | 12 000 000 | **8 000 000** |
+| `A71` — la provision SEULE | +2 000 000 *(un actif né de rien)* | **−2 000 000** |
+| `D1S` — `+ 42 − 429` | 1 000 000 | **800 000** |
+| `L10` — subvention créditrice | −3 000 000 | **+3 000 000** |
+| `X84` — TOTAL PRODUITS | −10 000 000 | **+10 000 000** |
+| lignes de passif négatives | 169 sur 380 | **0** |
+
+⛔ **Et mon propre test verrouillait l'erreur** : intitulé « la provision se DÉDUIT », il affirmait
+`6 200` sur 5 000 de brut et 1 200 de provision — la provision **ajoutée** — et son commentaire se
+contredisait dans la même phrase. C'est lui qui faisait passer le défaut au vert, et il aurait fait
+rougir le correctif. Même patron qu'en [[STORY-498]].
+
+Trois autres : le mode `extrait` **compensait** le sous-arbre avant de choisir le sens (la mention
+« ex » parle des comptes **au pluriel**) ; `D1S` cite une racine **et** son descendant, si bien que la
+déduction de la provision s'annulait ; et le libellé de `F01` avait absorbé le fragment d'en-tête
+« A NETS N NETS N-1 » — défaut de **donnée**, scellé par checksum, destiné à l'état imprimé.
+
+Enfin, plusieurs gardes n'en étaient pas : `classe` n'était validée nulle part, la « garde » annoncée
+sur les documents **créait** l'entrée manquante (d'où deux orthographes du même RCSFD dans l'artefact
+livré), et quatre mutations du régime de dépôt passaient au vert.
+
+### Table de mutations — seconde passe
+
+| Mutation | Mesuré |
+|---|---|
+| Le signe redevient un multiplicateur | **8 rouges** |
+| Terme le plus spécifique retiré | **1 rouge** |
+| Mode `extrait` compensé avant orientation | **4 rouges** |
+| Garde des lignes du chargeur retirée | **2 rouges** |
+| Bruit d'en-tête réintroduit dans un libellé | **build rouge nommé** |
+| `classe: 'trois'` · rythme inconnu · années négatives · clé surnuméraire | **4 builds rouges nommés** |
+| Garde d'état par vérité de valeur | **4 rouges** |
+| Borne d'entier sûr neutralisée | **2 rouges** |
+
+**Portes finales** : lint 0 warning · build OK · **2 859 unitaires + 822 e2e** verts · couverture
+**99,18 / 95,41 / 99,39 / 99,25**. Artefact `sha256 6e958cf4…5822`.
