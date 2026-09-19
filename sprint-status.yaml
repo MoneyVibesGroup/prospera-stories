@@ -3950,8 +3950,10 @@ sprints:
         title: "Le paquet de dépôt — format, canal, calendrier et gabarit, packagés par pays et par état"
         epic: "EPIC-032"
         points: 13
-        service: "fiscal-service (registre) + consommateurs bilan-service / microfinance-service / assurance-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — VOIE A (le produit depose), decision 1 sur 5. La voie A engage le produit à produire des fichiers déposables. Le premier réflexe serait d'écrire un générateur e-DSF togolais et de le dupliquer par pays. C'est la faute qu'il faut éviter avant la première ligne : un format de dépôt est du droit administratif, il change sans prévenir, et neuf générateurs codés en dur, c'est neuf régressions par an que personne ne voit venir.
+        service: "fiscal-service (contrat + registre) + dossier-service (statut de depot au registre pays) ; consommateurs FUTURS bilan-service / microfinance-service / assurance-service"
+        status: "done"  # CLOTURE 2026-09-19 — PR fiscal-service #5 puis dossier-service #31 rebase-mergees sur dev DANS CET ORDRE (la garde de coherence de dossier lit le manifeste de fiscal ; l ordre inverse aurait laisse dossier rouge jusqu au 2e merge). Contrat + registre du paquet de depot, manifeste VIDE (AC-6 — STORY-537 livre la 1re instance) ; capacite de depot DISTINCTE au registre pays (AC-4). Revue securite : 0 vulnerabilite >= 80. Revue de code : 0 bloquant, 6 non-bloquants TOUS corriges, 4 mesures par mutation — toutes des gardes correctes que RIEN ne faisait rougir (la nature du refus decidait du 502 vs 422 sans temoin ; la fixture d ambiguite passait 2x la MEME entree ; l entree active en tete du manifeste simule rendait le filtre actif invisible ; retirer PaquetsDepotModule d AppModule laissait 456 unit + 28 e2e VERTS avec un 404 en face). Gate @RequiresFiscalAccess hisse au niveau CLASSE. 14 mutations rouges. Verif docker REJOUEE sur image reconstruite apres correctifs. Porter ArtefactLoader ecarte, mesure : 264 lignes d infra absente pour remplacer ~60.
+        completed_date: "2026-09-19"
+        assigned_to: "vivianMoneyVibesGroupes"
         story_path: "stories/STORY-536.md"
       - story_id: "STORY-537"
         title: "Le fichier e-DSF Togo — le premier pays, et le jalon `format confirmé` est la story"
