@@ -4251,12 +4251,13 @@ sprints:
         assigned_to: "vivianMoneyVibesGroupes"
         story_path: "stories/STORY-296.md"
       - story_id: "STORY-297"
-        title: "Chargeur de paquet fiscal depuis `catalog-service`"
+        title: "Chargeur de paquet fiscal depuis le catalogue"
         epic: "EPIC-027"
         points: 8
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # MAJ 2026-09-19 — développement démarré après cadrage du contrat réel : entitlement.changed v2 enrichi, MinIO privé, paquet fiscal commun à trois consommateurs.
+        assigned_to: "vivianMoneyVibesGroupes"
+        story_path: "stories/STORY-297.md"
   - sprint_number: 23
     start_date: "2027-05-06"
     end_date: "2027-05-20"
