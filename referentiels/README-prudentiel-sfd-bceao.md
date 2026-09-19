@@ -68,8 +68,18 @@ Valeurs en **pour cent**, comme le texte les écrit (`ratio = A/B × 100`).
 
 - **D-659-A — version allégée.** L'Instruction n°021-12-2010 (art. 2) la réserve aux SFD dont les encours de dépôts
   ou de crédits sont inférieurs à **50 millions de FCFA** sur deux exercices consécutifs ; l'Instruction
-  n°030-02-2009 impose la **version développée** aux autres. La version développée n'a été trouvée publiée nulle part
-  (cb-umoa.org, bceao.int, DRS-SFD Sénégal, Trésor ivoirien) : **l'identité de ses taux n'est pas vérifiée**.
+  n°030-02-2009 (art. 4) impose la **version développée** aux SFD de l'article 44, et l'Instruction n°007-06-2010
+  fixe ce seuil à **2 milliards de FCFA**. ⇒ La bande **50 M – 2 Md** relève de la développée : **l'allégée est le
+  cas marginal**.
+  ✅ **CORRIGÉ le 2026-09-19** — cette fiche affirmait que la version développée « n'a été trouvée publiée nulle
+  part (… Trésor ivoirien) ». **Elle l'est, précisément là** : [microfinance.tresor.gouv.ci](https://microfinance.tresor.gouv.ci/micro/wp-content/uploads/2019/11/RCSSFD.pdf)
+  (457 p., ISBN 978-2-916140-08-7, sha256 `d21c6949…7d7ffa17`), et ses annexes sont **extractibles en texte**.
+  ⚡ **Ses règles de provisionnement sont IDENTIQUES à celles de l'allégée**, vérifiées dans le texte : mêmes
+  tranches (`1991` 6 mois au plus · `1992` plus de 6 à 12 mois · `1993` plus de 12 à 24 mois), mêmes taux
+  **40 % / 80 % / 100 %**, même assiette (« solde restant dû » = encours − dépôts de garantie constitués par le
+  débiteur et/ou sa caution), même caractère **facultatif de 0 à 3 mois**, et **aucune contagion par débiteur**.
+  ⇒ `prudentiel-sfd-bceao@1.2` vaut donc aussi pour les SFD en version développée. Cf.
+  [README-etats-dimf-sfd-bceao.md](README-etats-dimf-sfd-bceao.md).
 - **D-659-B — une borne = la durée la plus courte de N mois civils.** Le service compte le retard en jours
   (`arrêté − échéance`), le texte en mois. Balayage des dates de 2024 à 2031 : 3 mois civils font **au moins
   89 jours** (du 15 février au 15 mai), 6 mois au moins 181, 12 mois au moins 365, 24 mois au moins 730. Les bornes
@@ -97,6 +107,7 @@ provision propre, et STORY-505 maintient la provision déjà constatée jusqu'à
 ## Ce qui reste avant `certifie`
 
 1. Relecture de chaque valeur contre les pages citées par un **praticien SFD** nommé.
-2. Confirmation des taux de la **version développée** du RCSFD, et de l'absence de contagion par débiteur dans
-   cette version.
+2. ✅ **FAIT le 2026-09-19** — taux de la **version développée** confirmés identiques, et **absence de contagion
+   par débiteur** vérifiée dans cette version (cf. D-659-A). Reste à faire relire par un praticien, comme le
+   point 1.
 3. Validation des conventions D-659-B à D-659-D.
