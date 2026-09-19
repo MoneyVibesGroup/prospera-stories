@@ -1,6 +1,6 @@
 # STORY-510 : Ratios prudentiels — capitalisation, liquidité, limitation des risques
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 **Épic :** EPIC-127 — États périodiques et ratios prudentiels BCEAO
@@ -218,19 +218,19 @@ arbre de travail non committé.
 
 ## Definition of Done
 
-- [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
-- [ ] `sprint-status.yaml` corrigé : `service: bilan-service` (D-510-A), avec la raison datée.
+- [x] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
+- [x] `sprint-status.yaml` corrigé : `service: bilan-service` (D-510-A), avec la raison datée.
 - [x] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts ; chaque fichier neuf couvert.
 - [x] M1 à M20 appliquées une par une, prouvées rouges (ou refusées au build), puis restaurées.
 - [x] Artefact produit par son générateur, sha256 reporté au manifeste, garde de complétude `assets/` ↔ manifeste verte.
 - [x] ⚠️ Aucune écriture en base : la vérification docker porte sur le **démarrage réel** du service avec l'artefact embarqué (boot Nest, checksum dans le conteneur, 11 normes produites), pas sur une persistance.
-- [ ] Revue de code et revue de sécurité sans constat ouvert.
-- [ ] Branche `MNV-510`, commit français, PR vers `dev` ; PR docs vers `main` ; rebase-merge, branches supprimées.
+- [x] Revue de code et revue de sécurité sans constat ouvert.
+- [x] Branche `MNV-510`, commit français, PR vers `dev` ; PR docs vers `main` ; rebase-merge, branches supprimées.
 - [x] `docs/referentiels/README-ratios-prudentiels-sfd-bceao.md` créé : provenance, pages, décisions, réserves du texte.
 
 ## Progress Tracking
 
-- **Statut courant :** `in_progress` — ouverte le 2026-09-19.
+- **Statut courant :** `done` — clôturée le 2026-09-19.
 - **2026-09-19 — cadrage mesuré :** branches `MNV-510` créées depuis `main` pour `docs/` et depuis
   `dev` pour `bilan-service`, rebasées sur leur origine. Texte officiel retéléchargé et **empreinte
   vérifiée** (`23ac4caa…`), annexes I à IX transcrites, pages sensibles relues **en image**. La
@@ -301,6 +301,26 @@ arbre de travail non committé.
   dans les journaux, aucune route, aucun accès base, aucune lecture non scopée. Un **durcissement** retenu :
   le générateur construit son chemin de sortie depuis `meta.code`/`meta.version` sans contraindre leur forme,
   là où son voisin `build-etats-dimf.mjs` fige le préfixe et impose `/^\d+\.\d+$/`.
+
+- **2026-09-19 — livraison :** PR `prospera-bilan-service#126` rebase-mergée sur `dev` (`99a157f`), branche
+  distante supprimée. PR documentation vers `main` créée et fusionnée à la clôture ; les statuts sont
+  synchronisés aux trois emplacements.
+
+## Ce que cette story ne rend pas encore
+
+⛔ **Sur une balance réelle, aucune des 11 normes n'a de verdict** — mesuré, pas supposé : une suite de
+tests les produit depuis les artefacts embarqués et fige les motifs, norme par norme. Ce n'est pas un
+défaut du moteur, c'est l'état de la matière disponible. Pour débloquer un verdict, il faut apporter au
+moins l'une de ces matières, et chacune est une story à elle seule :
+
+| Matière manquante | Ce qu'elle débloquerait |
+|---|---|
+| Les 10 postes hors bilan `N*`/`Q*` transcrits dans un artefact d'états | annexes I, V, VI — mais **pas** le netting des dépôts de garantie, qui reste bloquant sur I et VI |
+| La ventilation des soldes par **durée résiduelle** | annexes II et V |
+| Les **données déclaratives** des tableaux annexés | annexes III, IV, VI |
+| Le **total de l'actif**, qu'aucun texte ne compose | annexe VIII |
+| La **catégorie prudentielle** du SFD, déclarée et auditable | les trois normes de liquidité |
+| La **dotation constatée** + l'arbitrage de signe de l'annexe VII | annexe VII |
 
 ## Notes
 
