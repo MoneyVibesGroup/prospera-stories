@@ -74,7 +74,7 @@
 | # | Document | Levier |
 |---|---|---|
 | F6 | 🟡 **Plan comptable SFD-BCEAO (RCSFD)** — *déjà amorcé* : `plan-comptable-sfd-bceao.json` (156 comptes, classes 1-7) | Plan de comptes du vertical microfinance — **à faire valider/compléter** par un expert SFD |
-| F7 | 🟡 **États réglementaires SFD** — DIMF 2000 (Bilan) / DIMF 2080 (Compte de résultat), Instr. 025/026-02-2009 | Gabarits de liasse SFD (SIG propres, pas de TFT — cf. fiche F3) — amorce dans `README-sfd-bceao.md` |
+| F7 | ✅ **États réglementaires SFD** — DIMF 2000 (Bilan) / DIMF 2080 (Compte de résultat), Instr. 025/026-02-2009 | **TROUVÉ le 2026-09-19** : gabarits des DEUX versions + concordance codes postes ↔ plan de comptes, sourcés dans `README-etats-dimf-sfd-bceao.md`. ⚠️ Le SIG n'est pas un état séparé : ce sont des lignes intercalaires du DIMF 2080 |
 | F8 | ⬜ **Loi PARMEC / réglementation prudentielle SFD BCEAO** + régime fiscal spécifique microfinance | Exonérations & particularités fiscales des SFD |
 
 ### F.3 Vertical Assurance (CIMA)

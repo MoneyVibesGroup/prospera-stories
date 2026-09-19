@@ -1,6 +1,6 @@
 # STORY-509 : États DIMF 2000 et 2080 — et le jalon `format confirmé` avant d'écrire une ligne
 
-Status: blocked
+Status: ready-for-dev
 
 **Épic :** EPIC-127 — États périodiques et ratios prudentiels BCEAO
 **Service :** `microfinance-service` + `bilan-service`
@@ -62,75 +62,88 @@ dans un même produit seraient incompréhensibles pour le cabinet.
 
 ---
 
-## ⛔ Jalon NON LEVÉ — constat daté du 2026-09-19
+## ✅ Jalon `format confirmé` — LEVÉ le 2026-09-19 (sauf un arbitrage produit)
 
-**Cette story ne peut pas démarrer, et c'est elle-même qui l'interdit** : « aucune ligne de code
-avant d'avoir en main le gabarit officiel », AC-1 exigeant qu'il soit « sourcé et référencé
-(instruction, année, version) **et versé au dépôt** ». État vérifié dans l'arbre, pas déduit :
+Le constat de blocage posé plus tôt le même jour disait vrai de l'**arbre** — zéro code de ligne
+DIMF, `tmp/` suivi par aucun dépôt — mais il concluait trop vite que la matière n'existait pas. Une
+recherche sur les sources officielles a trouvé l'essentiel. Tout ce qui suit a été **lu dans les PDF
+primaires**, pas résumé depuis un site tiers.
 
-| Vérification | Résultat |
-|---|---|
-| un code de ligne DIMF (`A2A`, `F2C`, `R3G`, `V4E`, `E90`, `L90`…) quelque part dans l'arbre, hors `node_modules` | **zéro occurrence** |
-| `tmp/pdfs/` suivi par un dépôt git | **non** — la racine `PROSPERA/` n'est pas un dépôt, et `docs/` ne suit aucun chemin `tmp/` |
-| ce que `docs/referentiels/documents-a-fournir.md` dit de lui-même, ligne **F7** | 🟡 « États réglementaires SFD — DIMF 2000 / DIMF 2080 » → **amorce** |
-| `bilan-service/…/assets/sfd-bceao-2.0.json` | son `normeSource` **cite** les états DIMF, mais ses 31 postes sont des codes **internes Prospera** (`BA1..BAT`, `RC1..RSG`) — sans rapport avec `A01`/`F01`/`R08`/`V08` |
+📄 **Tout est consigné, sourcé et daté dans
+[`referentiels/README-etats-dimf-sfd-bceao.md`](../referentiels/README-etats-dimf-sfd-bceao.md)** —
+empreintes sha256, cartographie des annexes page par page, textes cités article par article.
 
-⇒ Le dépôt porte une **mention** que les postes sont « dérivés des états DIMF », jamais un
-**gabarit de dépôt**.
+### ⭐ Le gabarit officiel existe en accès public, et il est lisible par machine
 
-### Ce qui existe, hors dépôt, et ce qu'il vaut
+La **version développée du RCSFD** (457 p., ISBN 978-2-916140-08-7, maquette 27/07/2009) est publiée
+par la **DRSSFD du Trésor ivoirien**. Vérifié directement :
 
-`tmp/pdfs/rcsfd-officiel.pdf` (RCSFD, 201 p.) et dix rendus d'annexes en PNG. Vérifié en lisant les
-images — `pdftotext` ne rend que du charabia sur ces pages, la police n'ayant pas de table Unicode
-(piège déjà consigné dans `README-prudentiel-sfd-bceao.md`) :
+- **Annexe 2.2** — `BILAN VERSION DEVELOPPEE`, `DIMF 2000`, colonne `Code poste`, en-têtes complets ;
+- **Annexe 3.3** — `DIMF 2080` développé (`D : RA0`) ;
+- **Annexe 2.4** — le **hors-bilan**, dans les deux versions ;
+- **Annexe 1** — la **concordance codes postes ↔ plan de comptes**, en formules directement
+  transcriptibles (`A01 = + 101 + 1101 + … − 199`, `A10 = + 10`, `A11 = + 101`).
 
-- **pages A23-A25** — le **DIMF 2000 « BILAN VERSION ALLEGEE » est COMPLET** : colonne `Code poste`
-  (`A01, A10, A11, A12, A2A, A2H…A73` à l'actif ; `F01, F1A, F2A…F60` au passif), colonnes
-  `BRUT / AMT-PROV / NET` en N et N-1, totaux `E90` / `L90`, en-tête `Etat:` + `Date d'arrêté
-  AAAA/MM/JJ` + `(en Francs CFA)`. **C'est réel et réutilisable.**
-- **pages A29-A30** — le **DIMF 2080 est TRONQUÉ** : les pages A31-A32 (fin du compte de résultat
-  **et tout le tableau des Soldes Intermédiaires de Gestion**) ne sont pas rendues.
-- **ANNEXE 1 (A5-A20)** — « nomenclature des codes postes **et concordance avec le plan de
-  comptes** » : **pas rendue du tout**. C'est précisément la table sans laquelle AC-2 (« produire
-  l'état depuis la liasse **déjà calculée** ») est infaisable sans inventer le mapping.
+⚡ **Le tout sort de `pdftotext -layout` en texte brut** — ni image, ni OCR, ni transcription à la
+main. C'est précisément ce qui manquait à **AC-2**, et le livre contient **les deux versions**.
 
-### ⚡ Ce qui bloque vraiment, et qu'aucun travail de transcription ne lèvera
+### AC-4 est tranché : les DIMF sont ANNUELS
 
-Même parfaitement transcrites, ces annexes ne donnent **pas** ce que la voie A exige :
+L'infra-annuel existe (loi-cadre **art. 55**), mais il porte sur des « **données périodiques** »
+régies par l'Instruction **n°020-12-2010** — mensuelles pour les SFD de l'article 44, trimestrielles
+pour les autres. **Ce ne sont pas les DIMF.** Les états de synthèse sont **arrêtés au 31 décembre**
+et transmis dans les **six mois** (Instruction n°030-02-2009, art. 6 ; loi-cadre art. 51-52).
 
-1. **Le format de fichier déposable et son canal.** Le RCSFD ne dit que « supports papier ou
-   électronique », avec dossier + bordereau d'authentification + carte de spécimens de signature.
-   **Aucun schéma, aucun téléservice, aucune adresse.** Or [[STORY-525]] engage le produit à
-   *produire le fichier*, et [[STORY-536]] réclame un `format.schema` et un `canal` **sourcés**.
-2. **La périodicité infra-annuelle d'AC-4.** Le texte dit « remise **annuelle** pour les SFD » et
-   renvoie, pour les états périodiques, à « une périodicité fixée par la BCEAO » — **fixée
-   ailleurs**, dans un texte que le dépôt n'a pas.
+### ⚠️ Le gabarit que nous détenions est celui du cas MARGINAL
 
-⇒ Ces deux faits ne se déduisent d'aucune source en notre possession. Les inventer, c'est
-exactement la faute que cette story nomme en préambule : *deux erreurs plausibles, donc invisibles
-à la relecture.*
+Trois textes, et la règle n'est lisible dans aucun pris isolément :
 
-### Ce qu'il faut pour débloquer
+- Instruction **n°030-02-2009 art. 4** — les SFD de l'**article 44** *doivent* la version développée ;
+- Instruction **n°021-12-2010 art. 2** — l'allégée est réservée aux encours **< 50 M FCFA** sur deux
+  exercices, et le choix inverse est **irréversible** (art. 3) ;
+- Instruction **n°007-06-2010** — l'article 44, c'est **≥ 2 Md FCFA** sur deux exercices.
 
-- [ ] **① Obtenir du PO** le format de dépôt effectif et son canal (téléservice ? gabarit tableur
-      transmis ? dépôt physique ?), et la périodicité réellement exigée des SFD.
-- [ ] ② Verser au dépôt le PDF RCSFD et ses rendus, avec leur `sha256` et leur date de relevé —
-      `tmp/` n'appartient à aucun dépôt aujourd'hui.
-- [ ] ③ Rendre les pages PDF **165-166** (fin DIMF 2080 + SIG) et **139-154** (ANNEXE 1,
-      concordance codes postes ↔ plan de comptes).
-- [ ] ④ Transcrire codes, ordre et colonnes en artefact machine avec sa provenance (instruction,
-      page, date, `sha256`), comme `README-prudentiel-sfd-bceao.md` l'a fait pour le prudentiel.
-- [ ] ⑤ Acter que le gabarit en main est la version **allégée** : `README-prudentiel-sfd-bceao.md`
-      (D-659-A) note que la version développée s'impose aux SFD > 50 M FCFA et **n'a été trouvée
-      publiée nulle part**. La couverture sera partielle par construction.
+⇒ La bande **entre 50 M et 2 Md FCFA** n'est ni tenue par l'article 44, ni éligible à l'allégée :
+elle relève de la **développée**. **L'allégée est l'exception, pas la règle** — or c'est son gabarit
+que nous avions en main.
 
-**① est seul bloquant** : ②③④ sont du travail que nous pouvons faire, ① dépend d'une source que
-nous n'avons pas.
+### ⛔ Ce qui reste ouvert — un arbitrage PRODUIT, plus une incertitude documentaire
+
+**Il n'existe aucun format de fichier normé, et ce n'est pas une lacune de nos sources : c'est le
+texte qui n'en prévoit aucun.** Instruction n°030-02-2009, art. 7 :
+
+> « Les états financiers ou documents de synthèse sont communiqués **sur support papier** […]
+> revêtus de la **signature** d'une personne dûment accréditée […]. Ils **peuvent également** être
+> transmis […] **sur support électronique, en complément** des documents sur support papier. »
+
+Cinq exemplaires au Ministre, plus deux à la BCEAO et deux à la Commission Bancaire pour les SFD de
+l'article 44. Aucun XML, aucun schéma, aucune plateforme régionale de télétransmission.
+
+⇒ **Question au PO, et elle seule reste bloquante** : la voie A ([[STORY-525]]) engage le produit à
+« produire le fichier déposable ». Puisque le dépôt légal est **papier signé**, cela signifie
+produire un **document imprimable conforme au gabarit** (PDF/A prêt à signer), et non un flux de
+télétransmission. **Confirmer cette lecture avant d'écrire le générateur.**
+
+Piste non vérifiée, à ne pas confondre avec une source : des canevas électroniques nationaux sont
+rapportés par des communiqués et la presse (DRSSFD Côte d'Ivoire, e-Contrôle au Bénin, « Espace Pro »
+au Sénégal). **Aucun fichier téléchargé, aucun texte fondateur trouvé.**
+
+### Ce que la story peut faire dès maintenant
+
+- [x] AC-1 — gabarit officiel **sourcé et référencé** (instruction, année, version) et versé au
+      dépôt sous forme de fiche de référence avec empreintes sha256 et cartographie des annexes.
+      ⚠️ Les PDF eux-mêmes ne sont pas committés (23,5 Mo) : patron du dépôt, URL + sha256.
+- [ ] AC-2 — produire l'état depuis la liasse déjà calculée, via l'annexe 1 de concordance.
+- [ ] AC-3 — période, date d'arrêté et **version du gabarit** portées par l'état.
+- [x] AC-4 — périodicité **annuelle** établie ; l'infra-annuel relève d'un autre livrable.
+- [ ] ⛔ **Préalable** : arbitrage PO sur la forme du livrable (document imprimable signable).
 
 ### Rattachement à l'existant
 
-[[STORY-536]] est **livrée** (2026-09-19) : le contrat de paquet de dépôt que cette story
-consommera existe désormais — `format` + `schema`, `gabarit` poste → case **sourcé case par case**,
-`canal`, `calendrier`, `penalites`, vérifié par checksum. ⚠️ Son alphabet d'`etat`
-(`^[A-Z][A-Z0-9-]{1,39}$`) n'accepte ni espace ni minuscule : les états devront être codifiés
-`DIMF-2000` et `DIMF-2080`.
+[[STORY-536]] est **livrée** (2026-09-19) : le contrat de paquet de dépôt que cette story consommera
+existe — `format` + `schema`, `gabarit` poste → case **sourcé case par case**, `canal`, `calendrier`,
+`penalites`, vérifié par checksum. ⚠️ Son alphabet d'`etat` (`^[A-Z][A-Z0-9-]{1,39}$`) n'accepte ni
+espace ni minuscule : les états devront être codifiés **`DIMF-2000`** et **`DIMF-2080`**.
+
+⚠️ Le `canal` du paquet devra déclarer un dépôt **papier** (`DEPOT_PHYSIQUE`), pas un téléservice —
+le vocabulaire du contrat le prévoit déjà.
