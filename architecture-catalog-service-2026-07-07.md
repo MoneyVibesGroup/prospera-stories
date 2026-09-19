@@ -228,7 +228,23 @@ export class Entitlement {
 
 ---
 
-## Contrat d'événements `entitlement.changed` (v1) — source de vérité
+## Contrat d'événements `entitlement.changed` — source de vérité
+
+Le bloc v1 ci-dessous est conservé comme **historique de la décision initiale**. Le contrat
+effectivement publié depuis STORY-533 est **v2** : `schemaVersion: 2`, `referentiel` singulier
+remplacé par `referentiels?: { code: string; version: string }[]` (champ absent si vide), mêmes
+`eventId`, `orgId`, `moduleCode`, `versionCode`, `config`, `status`, `occurredAt` et état absolu.
+Depuis STORY-297, chaque référence du module `fiscalite` porte aussi `artifactUri: string` et
+`checksum: string` (`sha256:<64 caractères hexadécimaux>`), issus de la `ReferentielVersion`
+exacte. Ces deux champs sont **optionnels au niveau du contrat v2 partagé** pour les autres
+modules et les anciens événements ; `fiscal-service` refuse localement toute référence fiscale
+qui ne les porte pas ensemble. Aucun consommateur ne doit appeler le catalogue sur son chemin
+chaud pour compléter ces métadonnées. Le payload d'outbox conserve explicitement `config: {}` :
+la minimisation Mongoose d'un objet vide supprimait ce champ du message Kafka, malgré sa présence
+dans le contrat v2 ; les lecteurs fiscaux traitent les anciens messages ainsi minimisés comme
+une configuration vide.
+
+### Contrat initial v1 (historique)
 
 > Transport aligné sur `architecture-prospera-ecosystem-2026-07-04.md` § Contrats d'événements : **Apache Kafka**.
 

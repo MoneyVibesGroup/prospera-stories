@@ -149,6 +149,15 @@ publiées en prose et jamais exposées au contrat.
 
 ## Étape 6 — Déposer, générer, reporter le checksum
 
+Depuis STORY-297, la source déclare `_meta.consommateurs` : la liste explicite des services
+autorisés à charger cette version. Le paquet commun Togo 2026 déclare `balance-service`,
+`dossier-service` et `fiscal-service` ; la surcouche zone franche, lue seulement par le
+chargeur historique de balance, déclare `balance-service`. Toute modification de cette liste
+change les octets, donc exige une nouvelle génération, le report de l'empreinte dans les
+manifestes et le dépôt de **ces mêmes octets** dans le bucket privé du catalogue. Une référence
+fiscale octroyée avant la publication de `artifactUri`/`checksum` doit être ré-octroyée pour
+alimenter son read-model ; elle ne déclenche aucun repli vers une copie embarquée.
+
 ```bash
 # 1. la source, nommée EXACTEMENT paquet-fiscal-<pays>-<année>.json : c'est le NOM DU FICHIER qui porte
 #    la clé, et le répertoire qui fait foi — rien n'est énuméré à la main
@@ -164,7 +173,7 @@ node scripts/referentiels/build.mjs
 
 Sur le Togo, le générateur imprime `rubriques : 19` (les 20 clés de premier niveau moins le `_meta`),
 `statut : a-valider-par-expert` et l'empreinte
-`d8d2c5675d562815cbab51f0929d0cd13146a15f78997c7c3f3d42d92df7b3ed` — exactement la valeur déclarée au
+`9b6d11a65317f34edc36c975bddd551bd17c9e5b627bd14861008be224b811e2` — exactement la valeur déclarée au
 manifeste. **4. La reporter à la main** dans `paquet-fiscal-registry.ts`, avec le code pays ISO :
 
 ```ts
