@@ -1,6 +1,6 @@
 # STORY-509 : États DIMF 2000 et 2080 — et le jalon `format confirmé` avant d'écrire une ligne
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-127 — États périodiques et ratios prudentiels BCEAO
 **Service :** `microfinance-service` + `bilan-service`
