@@ -180,7 +180,7 @@ mentir.
 
 ## Table de mutations obligatoire
 
-15 mutations **réellement appliquées** au code, à l'artefact ou à sa source, chacune prouvée rouge puis
+20 mutations **réellement appliquées** au code, à l'artefact ou à sa source, chacune prouvée rouge puis
 restaurée. ⚠️ Deux d'entre elles ont d'abord **survécu** : elles ont révélé deux trous de test, comblés
 avant de poursuivre (voir *Progress Tracking*).
 
@@ -201,19 +201,29 @@ avant de poursuivre (voir *Progress Tracking*).
 | M13 | L'annexe VII dotée d'un numérateur et d'un dénominateur | 2 tests : AC-8 |
 | M14 | Garde d'entier sûr affaiblie (`isFinite` au lieu de `isSafeInteger`) | 1 test — ⚠️ **a d'abord survécu** |
 | M15 | Verdict décidé sur la valeur arrondie au lieu du produit en croix | 1 test : la borne exacte |
+| M16 | Les contributions d'une assiette à convention non écrite recomposent son total | 2 tests — le bloquant de revue |
+| M17 | Garde de format de la date d'arrêté affaiblie (`/^.+$/`) | 2 tests : ISO complet et `JJ/MM/AAAA` |
+| M18 | `d <= 0` ramené à `d === 0` dans la valeur publiée | 1 test : dénominateur négatif |
+| M19 | Motif de netting non applicable ignoré | 3 tests |
+| M20 | Vocabulaire de `usage` rouvert au générateur | **Le générateur refuse** : « usage « ETATS_INFRA_ANNUEL_SEULEMENT » hors vocabulaire » |
 
-⚠️ **Deux mutations écartées parce qu'elles ne compilaient pas** — un code qui ne compile pas rend « 0 test »,
+⚠️ **Trois mutations écartées parce qu'elles ne compilaient pas** — un code qui ne compile pas rend « 0 test »,
 jamais un rouge : le seuil remplacé par une constante (`seuil` devenait inutilisé) et le signe comparé à une
-valeur hors union. Reformulées en M1 et M5, qui compilent et rougissent.
+valeur hors union. Reformulées en M1, M5 et M17, qui compilent et rougissent.
+
+⚠️ **Le harnais de mutation a effacé les correctifs de revue une fois** : son `git checkout --` de
+restauration rétablit le fichier depuis `HEAD`, et les correctifs n'y étaient pas encore. Réappliqués,
+puis **committés avant** de reprendre les mutations. La règle tient en une phrase : ne jamais muter un
+arbre de travail non committé.
 
 ## Definition of Done
 
 - [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
 - [ ] `sprint-status.yaml` corrigé : `service: bilan-service` (D-510-A), avec la raison datée.
 - [x] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts ; chaque fichier neuf couvert.
-- [x] M1 à M15 appliquées une par une, prouvées rouges (ou refusées au build), puis restaurées.
+- [x] M1 à M20 appliquées une par une, prouvées rouges (ou refusées au build), puis restaurées.
 - [x] Artefact produit par son générateur, sha256 reporté au manifeste, garde de complétude `assets/` ↔ manifeste verte.
-- [ ] ⚠️ Aucune écriture en base : la vérification docker porte sur le **démarrage réel** du service avec l'artefact embarqué (chargement, checksum, registre), pas sur une persistance.
+- [x] ⚠️ Aucune écriture en base : la vérification docker porte sur le **démarrage réel** du service avec l'artefact embarqué (boot Nest, checksum dans le conteneur, 11 normes produites), pas sur une persistance.
 - [ ] Revue de code et revue de sécurité sans constat ouvert.
 - [ ] Branche `MNV-510`, commit français, PR vers `dev` ; PR docs vers `main` ; rebase-merge, branches supprimées.
 - [x] `docs/referentiels/README-ratios-prudentiels-sfd-bceao.md` créé : provenance, pages, décisions, réserves du texte.
@@ -250,6 +260,47 @@ valeur hors union. Reformulées en M1 et M5, qui compilent et rougissent.
   était masquée par celle du produit en croix, qui lève **la même classe d'erreur** — le test comparait la
   classe, pas le contexte. Tests ajoutés, les deux mutations rougissent. Deux autres mutations ont été
   écartées pour non-compilation et reformulées.
+- **2026-09-19 — vérification docker, sur volumes neufs :** `docker compose down -v` puis infra
+  Mongo/Kafka/Redis **healthy**. `bilan-service` compile dans le conteneur (« Found 0 errors ») et
+  **« Nest application successfully started »** — ⚡ c'est la seule preuve du câblage des trois providers :
+  **aucun e2e de ce service ne boote `AppModule`**, contrairement à `microfinance-service`. `/health` rend
+  `mongodb: up, kafka: up`. L'artefact est présent dans `dist/…/assets/` **dans le conteneur**, sha256
+  `ea097779…` identique à celui du manifeste. Bout en bout sur l'artefact compilé : les 11 normes sortent,
+  chacune avec ses motifs. Stack arrêtée après la preuve.
+- **2026-09-19 — revue de code :** rapport dense, obtenu en rejouant mes propres mutations, en
+  régénérant l'artefact et en **exécutant le moteur sur l'artefact réel**. **Un constat bloquant que mes
+  tests ne voyaient pas :** le total de la base de l'annexe VII était bien refusé, mais les
+  **contributions publiées la recomposaient** — `+` appliqué à la valeur absolue d'un report de −200
+  rendait +200, et leur somme redonnait **1 200 au lieu de 800**, exactement le chiffre que D-510-G
+  interdit, dans le sens qui gonfle une dotation obligatoire. Mes assertions portaient sur `montant`,
+  jamais sur `contribution`. Corrigé : une assiette à convention non écrite publie ses montants et
+  **aucune contribution**. Six autres constats retenus et corrigés : (1) la date d'arrêté n'était ni
+  validée ni normalisée — `2026-12-31T00:00:00.000Z` passait pour **infra-annuel** et faisait entrer `L75`
+  à côté de `L80`, résultat compté deux fois, sans exception ni motif ; (2) la règle de netting « nets des
+  provisions **et des dépôts de garantie** » était transcrite mais **inerte**, seule lacune du texte qui
+  n'était pas nommée — elle aurait fait sortir `NON_CONFORME` un SFD conforme le jour où les postes hors
+  bilan seront transcrits ; (3) `usage` était le seul vocabulaire non fermé du générateur, une faute de
+  frappe produisait un artefact **accepté** ; (4) un dénominateur négatif publiait un quotient
+  (« −4,55 % ») à côté d'un `INDETERMINABLE` ; (5) un seuil décimal aurait fait lever « montant hors
+  bornes » ; (6) aucun test ne faisait tourner le moteur sur l'artefact réel — c'est précisément la sonde
+  qui a révélé le bloquant, elle devient une suite. Une ligne **inerte** signalée (`total = null`, dont la
+  neutralisation laissait 34 tests verts) supprimée plutôt que laissée en faux filet. Constat cosmétique
+  écarté : aucun. Artefact régénéré, sha256 reporté au manifeste.
+- **2026-09-19 — porte rejouée après correctifs :** lint 0, build, **2 944 tests unitaires** (183 suites),
+  couverture **99,2 / 95,3 / 99,41 / 99,27**, **822 e2e**. Mutations M16 à M20 sur les correctifs : toutes
+  rouges ou refusées au build.
+- **2026-09-19 — vérification docker REJOUÉE sur l'état final :** l'artefact ayant changé, la première
+  mesure ne valait plus rien. ⚠️ Au premier essai le conteneur servait encore l'**ancien** artefact
+  (`ea097779…`) — le hot-reload n'avait pas recopié l'asset, et la boucle d'attente avait matché une ligne
+  de log de la session précédente. Après `docker compose restart` et filtrage des logs par horodatage :
+  « Found 0 errors », « Nest application successfully started », artefact `62f6a761…` **identique au
+  manifeste** dans le conteneur, `/health` `mongodb: up, kafka: up`. Stack arrêtée.
+- **2026-09-19 — revue de sécurité :** **aucune vulnérabilité exploitable**. Vérifié : le `locator` ne vient
+  jamais de l'appelant (manifeste statique + confinement au répertoire d'assets), le sha256 est comparé
+  **avant** tout parse et toute mise en cache, la clé `enVol` est libérée à l'échec, aucun secret ni chemin
+  dans les journaux, aucune route, aucun accès base, aucune lecture non scopée. Un **durcissement** retenu :
+  le générateur construit son chemin de sortie depuis `meta.code`/`meta.version` sans contraindre leur forme,
+  là où son voisin `build-etats-dimf.mjs` fige le préfixe et impose `/^\d+\.\d+$/`.
 
 ## Notes
 

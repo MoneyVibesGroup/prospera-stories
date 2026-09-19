@@ -2,7 +2,7 @@
 
 Artefact servi : `bilan-service/src/modules/bilan/referentiel/assets/ratios-prudentiels-sfd-bceao-1.0.json`
 (`ratios-prudentiels-sfd-bceao@1.0`, statut **`a-valider-par-expert`**, sha256
-`ea097779…bbe49f76f`) : les **assiettes** des 11 normes de l'Instruction n°010-08-2010, leurs seuils, leurs
+`62f6a761…8d6e5d9a`) : les **assiettes** des 11 normes de l'Instruction n°010-08-2010, leurs seuils, leurs
 conditions d'applicabilité, et les **lacunes du texte** nommées une par une.
 
 ⚠️ **Ne pas confondre avec `prudentiel-sfd-bceao@1.2`** (packagé dans `microfinance-service`), qui transcrit
@@ -44,6 +44,7 @@ Sept lacunes, chacune portée par l'artefact et publiée avec son motif :
 | `CATEGORIE_PRUDENTIELLE_NON_DECLAREE` | annexe V | **une** assiette, **trois** seuils (100 / 80 / 60 %) selon la catégorie du SFD, que le produit ne déclare nulle part |
 | `DOTATION_CONSTATEE_ABSENTE` | annexe VII | ce n'est pas un ratio : une **base** et un **taux**, et le verdict exigerait la dotation réellement constatée |
 | `CONVENTION_DE_SIGNE_NON_ECRITE` | annexe VII | voir D-510-G ci-dessous |
+| `NETTING_NON_APPLICABLE_SUR_LES_ETATS` | annexes I et VI | « Montants nets des provisions **et des dépôts de garantie** » — la concordance retranche bien les provisions, mais aucun poste d'actif ne porte les dépôts de garantie reçus (`G30`, au passif) |
 
 ## Décisions de transcription (à relire par le praticien)
 
@@ -96,6 +97,21 @@ Sept lacunes, chacune portée par l'artefact et publiée avec son motif :
 - La **périodicité de production** (mensuelle / trimestrielle selon que le SFD relève ou non de l'article 44)
   est dans le texte mais n'entre pas dans le calcul d'un ratio : elle relèvera de la story qui exposera les
   états.
+
+## Ce que le produit rend aujourd'hui
+
+⛔ **Aucune des 11 normes n'a de verdict sur une balance réelle** — et c'est mesuré, pas supposé : une
+suite de tests produit les 11 normes depuis les artefacts embarqués et fige, norme par norme, les motifs
+exacts. Pour qu'un seul verdict apparaisse, il faudra apporter au moins l'une de ces matières :
+
+| Ce qui manque | Ce que cela débloquerait |
+|---|---|
+| Les 10 postes hors bilan `N*`/`Q*` transcrits dans un artefact d'états | annexes I, V, VI — mais **pas** le netting des dépôts de garantie, qui reste bloquant sur I et VI |
+| La ventilation des soldes par **durée résiduelle** | annexes II et V |
+| Les **données déclaratives** des tableaux annexés (prêts aux dirigeants, plus gros emprunteur, opérations hors épargne et crédit) | annexes III, IV, VI |
+| Le **total de l'actif**, qu'aucun texte ne compose | annexe VIII |
+| La **catégorie prudentielle** du SFD, déclarée et auditable | les trois normes de liquidité |
+| La **dotation constatée** à la réserve générale + l'arbitrage de signe | annexe VII |
 
 ## Ce qui reste avant `certifie`
 
