@@ -1,6 +1,6 @@
 # STORY-509 : États DIMF 2000 et 2080 — et le jalon `format confirmé` avant d'écrire une ligne
 
-Status: ready-for-dev
+Status: blocked
 
 **Épic :** EPIC-127 — États périodiques et ratios prudentiels BCEAO
 **Service :** `microfinance-service` + `bilan-service`
@@ -59,3 +59,78 @@ dans un même produit seraient incompréhensibles pour le cabinet.
 ## Notes
 
 - Voir [[STORY-525]] (la même question, côté fiscal), [[STORY-510]], spine AD-10.
+
+---
+
+## ⛔ Jalon NON LEVÉ — constat daté du 2026-09-19
+
+**Cette story ne peut pas démarrer, et c'est elle-même qui l'interdit** : « aucune ligne de code
+avant d'avoir en main le gabarit officiel », AC-1 exigeant qu'il soit « sourcé et référencé
+(instruction, année, version) **et versé au dépôt** ». État vérifié dans l'arbre, pas déduit :
+
+| Vérification | Résultat |
+|---|---|
+| un code de ligne DIMF (`A2A`, `F2C`, `R3G`, `V4E`, `E90`, `L90`…) quelque part dans l'arbre, hors `node_modules` | **zéro occurrence** |
+| `tmp/pdfs/` suivi par un dépôt git | **non** — la racine `PROSPERA/` n'est pas un dépôt, et `docs/` ne suit aucun chemin `tmp/` |
+| ce que `docs/referentiels/documents-a-fournir.md` dit de lui-même, ligne **F7** | 🟡 « États réglementaires SFD — DIMF 2000 / DIMF 2080 » → **amorce** |
+| `bilan-service/…/assets/sfd-bceao-2.0.json` | son `normeSource` **cite** les états DIMF, mais ses 31 postes sont des codes **internes Prospera** (`BA1..BAT`, `RC1..RSG`) — sans rapport avec `A01`/`F01`/`R08`/`V08` |
+
+⇒ Le dépôt porte une **mention** que les postes sont « dérivés des états DIMF », jamais un
+**gabarit de dépôt**.
+
+### Ce qui existe, hors dépôt, et ce qu'il vaut
+
+`tmp/pdfs/rcsfd-officiel.pdf` (RCSFD, 201 p.) et dix rendus d'annexes en PNG. Vérifié en lisant les
+images — `pdftotext` ne rend que du charabia sur ces pages, la police n'ayant pas de table Unicode
+(piège déjà consigné dans `README-prudentiel-sfd-bceao.md`) :
+
+- **pages A23-A25** — le **DIMF 2000 « BILAN VERSION ALLEGEE » est COMPLET** : colonne `Code poste`
+  (`A01, A10, A11, A12, A2A, A2H…A73` à l'actif ; `F01, F1A, F2A…F60` au passif), colonnes
+  `BRUT / AMT-PROV / NET` en N et N-1, totaux `E90` / `L90`, en-tête `Etat:` + `Date d'arrêté
+  AAAA/MM/JJ` + `(en Francs CFA)`. **C'est réel et réutilisable.**
+- **pages A29-A30** — le **DIMF 2080 est TRONQUÉ** : les pages A31-A32 (fin du compte de résultat
+  **et tout le tableau des Soldes Intermédiaires de Gestion**) ne sont pas rendues.
+- **ANNEXE 1 (A5-A20)** — « nomenclature des codes postes **et concordance avec le plan de
+  comptes** » : **pas rendue du tout**. C'est précisément la table sans laquelle AC-2 (« produire
+  l'état depuis la liasse **déjà calculée** ») est infaisable sans inventer le mapping.
+
+### ⚡ Ce qui bloque vraiment, et qu'aucun travail de transcription ne lèvera
+
+Même parfaitement transcrites, ces annexes ne donnent **pas** ce que la voie A exige :
+
+1. **Le format de fichier déposable et son canal.** Le RCSFD ne dit que « supports papier ou
+   électronique », avec dossier + bordereau d'authentification + carte de spécimens de signature.
+   **Aucun schéma, aucun téléservice, aucune adresse.** Or [[STORY-525]] engage le produit à
+   *produire le fichier*, et [[STORY-536]] réclame un `format.schema` et un `canal` **sourcés**.
+2. **La périodicité infra-annuelle d'AC-4.** Le texte dit « remise **annuelle** pour les SFD » et
+   renvoie, pour les états périodiques, à « une périodicité fixée par la BCEAO » — **fixée
+   ailleurs**, dans un texte que le dépôt n'a pas.
+
+⇒ Ces deux faits ne se déduisent d'aucune source en notre possession. Les inventer, c'est
+exactement la faute que cette story nomme en préambule : *deux erreurs plausibles, donc invisibles
+à la relecture.*
+
+### Ce qu'il faut pour débloquer
+
+- [ ] **① Obtenir du PO** le format de dépôt effectif et son canal (téléservice ? gabarit tableur
+      transmis ? dépôt physique ?), et la périodicité réellement exigée des SFD.
+- [ ] ② Verser au dépôt le PDF RCSFD et ses rendus, avec leur `sha256` et leur date de relevé —
+      `tmp/` n'appartient à aucun dépôt aujourd'hui.
+- [ ] ③ Rendre les pages PDF **165-166** (fin DIMF 2080 + SIG) et **139-154** (ANNEXE 1,
+      concordance codes postes ↔ plan de comptes).
+- [ ] ④ Transcrire codes, ordre et colonnes en artefact machine avec sa provenance (instruction,
+      page, date, `sha256`), comme `README-prudentiel-sfd-bceao.md` l'a fait pour le prudentiel.
+- [ ] ⑤ Acter que le gabarit en main est la version **allégée** : `README-prudentiel-sfd-bceao.md`
+      (D-659-A) note que la version développée s'impose aux SFD > 50 M FCFA et **n'a été trouvée
+      publiée nulle part**. La couverture sera partielle par construction.
+
+**① est seul bloquant** : ②③④ sont du travail que nous pouvons faire, ① dépend d'une source que
+nous n'avons pas.
+
+### Rattachement à l'existant
+
+[[STORY-536]] est **livrée** (2026-09-19) : le contrat de paquet de dépôt que cette story
+consommera existe désormais — `format` + `schema`, `gabarit` poste → case **sourcé case par case**,
+`canal`, `calendrier`, `penalites`, vérifié par checksum. ⚠️ Son alphabet d'`etat`
+(`^[A-Z][A-Z0-9-]{1,39}$`) n'accepte ni espace ni minuscule : les états devront être codifiés
+`DIMF-2000` et `DIMF-2080`.
