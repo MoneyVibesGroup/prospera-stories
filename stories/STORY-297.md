@@ -4,7 +4,7 @@ baseline_commit: 595270e8ea89780d52e8cf8cee828054b298a1bc
 
 # STORY-297 : Chargeur de paquet fiscal depuis le catalogue
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -109,18 +109,18 @@ réglementaire altérée ou destinée à un autre service.
 
 ## Definition of Done
 
-- [ ] Branches `MNV-297` rebasées avant code, PR sur `dev` pour les quatre services et sur `main`
+- [x] Branches `MNV-297` rebasées avant code, PR sur `dev` pour les quatre services et sur `main`
   pour la documentation ; intégration coordonnée uniquement après toutes les revues.
 - [x] Porte unique eslint + build + test:cov + test:e2e verte sur chaque dépôt modifié.
 - [x] M1 à M6 réellement rouges puis restaurées ; chaque source neuve couverte par fichier.
 - [x] Vérification Docker réelle du trajet catalogue → Kafka → read-model → MinIO → HTTP,
   avec altération d'octet et contrôle des collections.
-- [ ] Revue de code et revue de sécurité Codex, correctifs, contre-revue ; statut synchronisé
+- [x] Revue de code et revue de sécurité Codex, correctifs, contre-revue ; statut synchronisé
   aux trois emplacements et `completed_date` à la clôture.
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-09-19).** Contrats vérifiés dans les services réels. Branches docs et
+**Statut : `done` (2026-09-19).** Contrats vérifiés dans les services réels. Branches docs et
 quatre services créées puis rebasées avant le code. La liste de consommateurs et les métadonnées
 d'artefact, absentes à ce jour, sont des prérequis explicites et non des hypothèses silencieuses.
 
@@ -148,3 +148,13 @@ restauration des octets, la même route a produit HTTP **200** avec l'empreinte 
 `fiscal-service` dans `_meta.consommateurs`. Aucune requête cross-base ni appel catalogue sur le
 chemin chaud. Le `docker-compose.yml` racine (non versionné dans ce workspace) porte localement
 les variables MinIO du fiscal ; sa transposition de déploiement reste explicitement nécessaire.
+
+**Revues et clôture (2026-09-19).** Revue de code Codex Opus : aucun constat retenu. Revue de
+sécurité Codex Opus des cinq PR ouvertes : aucune vulnérabilité exploitable retenue. La revue des
+preuves a relevé une lacune Swagger : aucun test ne protégeait l'annonce de la réponse 502.
+Un test du document OpenAPI versionné et de la délégation au tenant couvre désormais le contrôleur
+(2/2 fonctions). Le retrait volontaire du décorateur **et de son import** a produit une vraie
+assertion rouge sur `502`, puis le code a été restauré ; porte complète fiscale relancée verte
+et contre-revue Codex favorable. PR catalogue #21 (`97e717e`), balance #108 (`6d6d23d`),
+dossier #30 (`429fbd2`) et fiscal #4 (`788d6ef`) rebase-mergées sur `dev` dans cet ordre ; PR
+documentation #285 rebase-mergée sur `main` après synchronisation du statut.
