@@ -4255,7 +4255,8 @@ sprints:
         epic: "EPIC-027"
         points: 8
         service: "fiscal-service"
-        status: "in_progress"  # MAJ 2026-09-19 — développement démarré après cadrage du contrat réel : entitlement.changed v2 enrichi, MinIO privé, paquet fiscal commun à trois consommateurs.
+        status: "done"  # CLÔTURE 2026-09-19 — PR catalogue #21, balance #108, dossier #30 et fiscal #4 rebase-mergées sur dev ; docs #285 sur main. Revues Codex code et sécurité : 0 constat retenu ; lacune de preuve OpenAPI corrigée et contre-revue favorable. M1 à M6 + 3 mutations supplémentaires rouges puis restaurées ; portes complètes vertes sur quatre services. Docker neuf : outbox config {}, Kafka réel, MinIO privé altéré 502 puis restauré 200, Mongo vérifié.
+        completed_date: "2026-09-19"
         assigned_to: "vivianMoneyVibesGroupes"
         story_path: "stories/STORY-297.md"
   - sprint_number: 23
