@@ -1,6 +1,6 @@
 # STORY-513 : Contrats et quittances — émettre n'est pas encaisser
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -121,19 +121,19 @@ si bien que `1.5e-7` est **accepté puis lu `0`**. Tout montant et tout taux de 
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Contrat : souscripteur, catégorie (**Vie / Non-Vie**, structurant — AD-3), dates
+- [x] AC-1 — Contrat : souscripteur, catégorie (**Vie / Non-Vie**, structurant — AD-3), dates
       d'effet et d'échéance, périodicité, **fractionnement**, intermédiaire.
-- [ ] AC-2 — Quittance : période couverte, montant, accessoires et taxes, état (émise, encaissée,
+- [x] AC-2 — Quittance : période couverte, montant, accessoires et taxes, état (émise, encaissée,
       annulée, impayée). Les quittances sont **append-only** : une annulation est une quittance
       d'annulation, pas une suppression.
-- [ ] AC-3 — ⛔ **L'émission et l'encaissement sont deux événements distincts**, et un test le
+- [x] AC-3 — ⛔ **L'émission et l'encaissement sont deux événements distincts**, et un test le
       prouve : émettre sans encaisser crée une créance et un produit ; encaisser ne crée aucun
       produit.
-- [ ] AC-4 — Les **ristournes** et les annulations de l'exercice se distinguent de celles portant sur
+- [x] AC-4 — Les **ristournes** et les annulations de l'exercice se distinguent de celles portant sur
       des exercices antérieurs — elles ne s'imputent pas au même endroit.
-- [ ] AC-5 — La **période couverte** par la quittance est portée : c'est elle, et non la date
+- [x] AC-5 — La **période couverte** par la quittance est portée : c'est elle, et non la date
       d'émission, qui alimentera la provision pour primes non acquises (STORY-514).
-- [ ] AC-6 — ⚠️ Périmètre : **la comptabilité de l'assurance, pas l'assurance** (Q1). Ni tarification,
+- [x] AC-6 — ⚠️ Périmètre : **la comptabilité de l'assurance, pas l'assurance** (Q1). Ni tarification,
       ni souscription au guichet, ni gestion commerciale.
 
 ## Table de mutations obligatoire
@@ -202,12 +202,12 @@ transport — mais il fallait le mesurer pour le savoir, et non le supposer.
 - [x] Aucun numéro de compte comptable dans le code, les schémas ni les fixtures (D-513-1).
 - [x] Outbox toujours inerte : aucun producteur ajouté.
 - [x] STORY-672 créée et slottée.
-- [ ] Revue de code et revue de sécurité sans constat ouvert.
-- [ ] PR module vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
+- [x] Revue de code (**4 bloquants confirmés et corrigés**, 2 non-bloquants corrigés, 5 consignés) et revue de sécurité (**1 constat retenu, corrigé**) — **aucun constat ouvert**.
+- [x] PR module vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
 
 ## Progress Tracking
 
-- **Statut courant :** `in_progress` — ouverte le **2026-09-20**.
+- **Statut courant :** `done` — ouverte et clôturée le **2026-09-20**.
 - **2026-09-20 — cadrage mesuré :** branche `MNV-513` sur `docs`. Prérequis STORY-511 `done`,
   STORY-512 `done` le jour même. Artefact `cima-assurances@1.0` dépouillé : **11 comptes de gestion
   déclarés ne sont routés vers aucun poste**, dont `73` et `82` — exactement les deux dont l'AC-4 a
@@ -260,6 +260,58 @@ transport — mais il fallait le mesurer pour le savoir, et non le supposer.
   Poser le mauvais champ rend un jeton qui traverse l'IdP et se fait refuser en `403 EMAIL_NOT_VERIFIED`
   par le service aval, sans que rien ne dise pourquoi. Stack arrêtée après vérification.
 - **2026-09-20 — PR ouverte :** `prospera-assurance-service#3`, base `dev`.
+- **2026-09-20 — revue de code ⑥ :** ⛔⛔ **4 bloquants, tous confirmés de première main.**
+  Deux d'entre eux étaient des **erreurs comptables**, et l'un était **verrouillé par un test**.
+
+  | # | Constat | Verdict |
+  |---|---|---|
+  | B1 | `effetDeLEncaissement()` rendait `creance: DIMINUE` pour **tout** mouvement, remboursement compris | ✅ **CONFIRMÉ** — corrigé, et le test qui l'assertait aussi |
+  | B2 | La ristourne plafonnée par `resteDu` ⇒ **une prime payée n'était plus ristournable** | ✅ **CONFIRMÉ** — plafond porté sur la prime restant à réduire |
+  | B3 | Le test « verrou avant toute lecture » posé sur le **seul chemin qui ne lit rien** | ✅ **CONFIRMÉ** — assertions d'ordre **et de session** ajoutées sur la ristourne |
+  | B4 | `encaisseNet = encaisse − rembourse` exercé par **aucun** test | ✅ **CONFIRMÉ** — test symétrique ajouté |
+  | N1 | Le commentaire de l'e2e portait encore l'affirmation fausse sur l'ordre des routes | ✅ retenu — corrigé |
+  | N7 | `devise.ts` nomme **STORY-499**, la story du **jumeau** microfinance | ✅ retenu — pointeur corrigé dans les deux fichiers |
+  | N2, N3, N4, N5, N6 | dettes de modèle et de couverture, sans mode de panne silencieux dans ce périmètre | consignés, non corrigés ici |
+
+  ⚡⚡ **B1 est le constat le plus instructif, et il rejoue le patron de STORY-498.** Le code
+  calculait `encaisseNet = encaisse − rembourse` — donc rembourser **fait remonter la créance** — et
+  publiait pourtant `DIMINUE`. Un test construisait **délibérément** `remboursement: true` et assertait
+  `DIMINUE` : le test était juste, il **figeait l'erreur**. Or l'effet typé est le **seul** contrat que
+  cette story publie sur le **sens** des événements : l'adaptateur de balance aurait porté chaque
+  remboursement au **crédit** du compte assurés au lieu du débit, et la balance serait restée
+  équilibrée.
+
+  ⚡⚡ **B2 rendait l'AC-4 inatteignable dans son propre exemple.** Le plafond confondait l'**événement
+  économique** (une réduction de prime, comptes `73`/`82`) avec la **position de trésorerie** — la
+  confusion exacte que cette story existe pour empêcher. L'asymétrie le disait déjà : l'**annulation**,
+  réduction *totale*, n'avait aucun plafond et fonctionnait sur une prime payée ; seule la ristourne,
+  réduction *partielle*, était bloquée.
+
+  ⚡ **B3 est le frère de M5**, et il porte sur l'invariant le plus commenté de la story. Le test
+  d'ordre était posé sur `emettreQuittance`, dont le travail sous verrou est une **simple insertion** :
+  l'ordre y est garanti par la structure et ne peut rougir que si l'on supprime le verrou. Les trois
+  chemins où le verrou **sert** — ceux qui relisent — n'avaient rien. Hisser la lecture hors de la
+  transaction restait **vert**.
+- **2026-09-20 — revue de sécurité ⑦ :** **1 constat retenu (85), moyen.** Le **nombre d'encaissements
+  par quittance n'était borné par rien** : un encaissement de 1 suivi de son remboursement, répété,
+  ajoute **deux documents par cycle** et laisse le net à zéro — aucune règle métier ne s'y oppose. Les
+  deux lectures qui les agrègent n'ayant pas de borne, un `TENANT_USER` légitime pouvait épuiser la
+  mémoire d'un processus **partagé par tous les tenants**. ⛔ **Et rien n'aurait pu défaire
+  l'empoisonnement** : les collections sont append-only, sans chemin de suppression à aucun niveau.
+  ⇒ Borne **nommée** (`TROP_D_EVENEMENTS_SUR_LA_QUITTANCE`, 500) posée **sous le verrou** — une borne
+  au `.limit()` de la lecture aurait calculé un cumul **faux** sur un sous-ensemble, ce qui est pire
+  qu'un refus. Plus l'index manquant sur `quittanceVisee`, sans lequel la lecture parcourait **toutes**
+  les quittances du contrat.
+
+  ⚡ Les quatre axes les plus critiques sont ressortis **propres** : isolation multi-tenant (les huit
+  filtres portent `orgId` **et** `dossierId`, verrou compris), anti-énumération (404 partout, aucun
+  `details` révélant une ressource non vérifiée), injection NoSQL (éprouvée empiriquement sur le
+  `ValidationPipe` réel), et conservation monétaire sous verrou.
+- **2026-09-20 — vérification docker REJOUÉE** (les correctifs changent un comportement déjà mesuré) :
+  prime 135 000 réglée intégralement, **ristourne de 20 000 désormais acceptée** (refusée avant B2),
+  remboursement de 20 000 qui rend `effet.creance: AUGMENTE` (B1), et situation finale bouclée —
+  `totalDu` 115 000, `encaisseNet` 115 000, **reste dû 0**. Le cycle est cohérent de bout en bout.
+  Stack arrêtée.
 
 ## Notes
 
