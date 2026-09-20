@@ -1,6 +1,6 @@
 # STORY-512 : Le plan CIMA packagé s'arrête à 2 chiffres — la question du niveau de détail n'a jamais été posée
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -59,6 +59,9 @@ déduction est défendable, elle n'est pas du *verbatim* — et elle explique l'
 
 ### F3 — ⚡ 26 libellés sur 79 sont ABRÉGÉS par rapport au texte, et plusieurs perdent leur portée
 
+*(27 divergent au sens strict ; le 27ᵉ est `43`, « État » contre « Etat » — la page officielle omet
+l'accent, l'artefact le met. Écart de pure orthographe, pas une abréviation.)*
+
 L'artefact annonce des libellés « verbatim ». Mesuré compte par compte : **26 divergent**. Trois
 exemples qui ne sont pas cosmétiques — c'est la **portée du compte** qui disparaît :
 
@@ -94,18 +97,47 @@ fermée est dans le texte) :
 > comptes se lisent toujours à partir de la gauche. »
 
 ⛔ **Et l'article 431 ne respecte pas l'article 430** : il énumère **129 comptes à 5 chiffres**
-(`01010`, `01011`, `01030`, `01031`, `20480`, `69091`…) — un niveau que le cadre ne nomme pas et
-n'autorise pas.
+(`01010`, `01011`, `01030`, `01031`, `20480`, `69091`…) — un niveau que le **cadre** ne nomme pas.
+⚠️ Il est en revanche **autorisé ailleurs**, et c'est ce que la première rédaction de cette story a
+manqué : cf. **F5 bis**.
 
-⚠️ **La différence décisive avec le SFD.** Le texte BCEAO porte une **clause d'ouverture** — « les
-autres chiffres décrivent de façon plus détaillée la nature des opérations » — qui laisse
-l'établissement subdiviser. **Le Code CIMA n'en a aucune** : ni « liste non limitative », ni « les
-entreprises peuvent créer les subdivisions dont elles ont besoin ». La seule latitude du Code est
-nominative et vise **un** compte : « Ce compte [`08`] est subdivisé, **selon les besoins**, en comptes
-divisionnaires et sous-comptes structurés sur le modèle de la classe 2 » (art. 432).
+### F5 bis — ⛔⛔ CORRIGÉ EN REVUE : la clause d'ouverture EXISTE, et elle nomme SIX chiffres
 
-⇒ Le silence du Code au-delà de ce qu'il énumère est un **silence**, pas une permission. On ne peut
-donc ni plafonner à 4 (le texte lui-même en fait 5), ni justifier davantage que 5 par un texte.
+⚠️ **Cette section affirmait d'abord que « le Code CIMA n'a aucune clause d'ouverture », et la
+décision D-512-1 déclarait `5` sur cette base. C'était faux.** La revue de code l'a trouvé, et le
+texte a été revérifié sur les deux sources officielles (page `Article432…`, et PDF consolidé
+*CODE CIMA 2019*, art. 432 classe 4) :
+
+> « Les comptes divisionnaires 400 à 403 donnent lieu à l'ouverture pour chaque réassureur, dans
+> chaque monnaie du traité, d'un compte […] ; l'entreprise ouvre à cet effet les comptes 4002,
+> 4003…, jusqu'à 4038 et 4039 ; **si le nombre des comptes ainsi disponible est insuffisant, il sera
+> créé des comptes à cinq chiffres (de 40020 et 40021 à 40398 et 40399) ou à six chiffres.** […]
+> **Les comptes 404 à 408 fonctionnent de manière analogue.** »
+
+⚡ La clause est **plus explicite que celle du RCSFD** — elle *énumère* les paliers — et elle vit
+dans l'article que cette story citait déjà trois fois par ailleurs (F6, `6026`). La recherche initiale
+l'avait manquée parce qu'elle cherchait le vocabulaire du RCSFD (« non limitative », « subdiviser »,
+« autres chiffres ») et que le Code CIMA emploie une formulation entièrement différente.
+
+⛔ **Conséquence mesurée : à 5, le produit refusait un compte que le texte prévoit.** Un assureur à
+plus de 190 couples réassureur × monnaie tient `400200`, `400201`… — six chiffres, prévus noir sur
+blanc. `isCompteDeDetail('400200')` aurait rendu `false`, la ligne aurait été **refusée en 400**, et
+`CompteDuDossierService.verdict()` aurait rendu `valide: false` sur un compte du plan officiel.
+C'est **mot pour mot** le mode de panne que l'ancien commentaire D-511-K disait vouloir éviter :
+« un assureur qui subdivise verrait ses comptes refusés par une exigence que personne n'a écrite ».
+
+⇒ **6, et c'est un PLAFOND.** Dépouillement des 608 pages du Code consolidé 2019 : il n'existe que
+**trois** énoncés de profondeur (art. 430 ; art. 432 classe 2, amortissements en 4 chiffres ; art. 432
+classe 4, jusqu'à 6), et **aucun** ne mentionne sept chiffres ou plus. L'**art. 412** ferme le reste :
+
+> « Les entreprises désireuses de pousser leurs écritures au-delà de ces comptes obligatoires
+> **doivent utiliser les sous-comptes définis au chapitre III du présent titre, avec leur numéro et
+> intitulé**. »
+
+⚡ **Et 6 n'est pas une analogie avec SYSCOHADA ou le RCSFD** — qui valent 6 pour leurs raisons
+propres. Il a **sa** source. C'est exactement la méthode de STORY-172, appliquée jusqu'au bout cette
+fois : le premier passage s'était arrêté à l'art. 431 et avait pris le silence de l'art. 430 pour une
+absence de règle.
 
 ⚠️ Le README du dépôt (`docs/referentiels/README-cima-assurances.md`) écrit « comptes principaux à
 2 chiffres, divisionnaires à 3, sous-comptes à 4 » : c'est une transcription **fidèle de l'art. 430**,
@@ -127,9 +159,10 @@ la transcription de STORY-671**, relevés ici pendant qu'ils sont sous les yeux.
 
 | # | Décision | Pourquoi |
 |---|---|---|
-| **D-512-1** | `longueurCompteDetail` **= 5** pour `cima-assurances@1.0` | **Sourcé, pas choisi — et le sourcing est double.** L'art. 430 nomme les niveaux et s'arrête à 4 ; l'art. 431 **énumère 129 comptes à 5 chiffres**. Déclarer `4` refuserait `20480`, qui est un compte **du plan officiel** : entre le cadre théorique et la liste qui l'applique, c'est la liste qui fait foi. Exactement la méthode de STORY-172 (« la longueur se constate sur le plan lui-même, pas par analogie avec SYSCOHADA ») — appliquée ici au plan **officiel**, non au plan packagé. ⚠️ Et l'on ne peut pas aller au-delà de 5 : contrairement au RCSFD, le Code CIMA **n'a aucune clause d'ouverture** (F5) |
+| **D-512-1** ⚠️ **RÉVISÉ EN REVUE** | `longueurCompteDetail` **= 6** pour `cima-assurances@1.0` (et **non 5**, comme la première rédaction le décidait) | **Sourcé, pas choisi — et le sourcing est TRIPLE.** L'art. 430 nomme les niveaux et s'arrête à 4 ; l'art. 431 **énumère 129 comptes à 5 chiffres** ; l'art. 432 classe 4 **autorise nommément 6**. Déclarer `4` refuserait `20480`, déclarer `5` refuserait `400200` — deux comptes que le texte prévoit. ⛔ **6 est un plafond** : aucun des trois énoncés de profondeur du Code ne va au-delà, et l'art. 412 ferme le reste. Ce n'est pas une analogie avec SYSCOHADA (6 aussi, pour sa raison propre) : le chiffre a **sa** source |
 | **D-512-2** | La valeur ne se dérive **PAS** du plan packagé | Le plan packagé s'arrête à 2 : en dériver `2` refuserait **tout** compte réel d'assureur (`3112` est un compte de production normal). Le niveau de détail est une propriété du **référentiel**, pas de l'état d'avancement de sa transcription |
-| **D-512-3** | ⛔ Le plan n'est **pas** enrichi ici. F1 et F3 partent en **STORY-671** | AC-5 : « on ne complète pas un plan comptable par analogie » — et on ne transcrit pas 972 comptes en marge d'une story de 8 points. La transcription change les **octets** de l'artefact dans **trois** dépôts, impose une **version `@1.1`**, et rouvre la table de passage. C'est une story, avec son sourcing |
+| **D-512-6** ⚡ **AJOUTÉ EN REVUE** | Déclarer la valeur **branche aussi la dérivation au plan**, et c'est assumé | `normaliserCompte`/`ramenerAuPlan` (STORY-424, voie B) lisent la **même** donnée et étaient **inertes** pour CIMA tant qu'elle valait `undefined`. Une balance CIMA portait donc des comptes **du logiciel** (`57100000`, `411FACTURE`) comme s'ils étaient des comptes **du plan** — exactement ce que 424 avait fermé pour les trois autres référentiels. ⛔ Conséquence à dire, pas à taire : **deux comptes longs distincts qui se ramènent au même compte de plan fusionnent, et leurs soldes sont sommés**. Le compte saisi n'est pas perdu (il suit dans `comptesSources`). Les données CIMA antérieures portant des comptes de 7 à 20 caractères deviennent non déposables — fail-closed, et la migration est un souci de prod, différé |
+| **D-512-3** | ⛔ Le plan n'est **pas** enrichi ici. F1 et F3 partent en **STORY-671** | AC-5 : « on ne complète pas un plan comptable par analogie » — et on ne transcrit pas 972 comptes en marge d'une story de 8 points. La transcription change les **octets** de l'artefact dans **trois** dépôts, impose une **nouvelle version du paquet**, et rouvre la table de passage. C'est une story, avec son sourcing |
 | **D-512-4** | La branche fail-open `longueurDetail === undefined` reste **exercée**, sur une entrée **synthétique** | CIMA était le **seul** référentiel packagé sans niveau de détail : le déclarer rend la branche inatteignable depuis le manifeste de production. Patron déjà rencontré en STORY-494 (`nonPackage` devenu vacant) — la garde s'exerce sur une entrée fabriquée, jamais on ne laisse mourir le mécanisme |
 | **D-512-5** | `05` est **conservé** et sa déduction est **écrite** | Ses quatre enfants sont au texte ; le retirer casserait le rattachement de `050…059` sans rien gagner. Ce qui manquait n'est pas le compte, c'est la **mention** qu'il est déduit |
 
@@ -176,36 +209,50 @@ la transcription de STORY-671**, relevés ici pendant qu'ils sont sous les yeux.
 
 ## Table de mutations obligatoire
 
-**7 mutations réellement appliquées**, chacune prouvée rouge puis restaurée. ⚠️ **L'une a produit un
-constat réel (M6)** et **une autre était mal formulée (M7)** — le détail est dans le *Progress Tracking*.
+**11 mutations réellement appliquées sur l'état FINAL** (après les correctifs de revue), chacune
+prouvée rouge puis restaurée. ⚠️ **Trois ont produit un constat réel** (M6, M6ter, et la reformulation
+de M7) ; **trois formulations initiales ne compilaient pas** et ont été reformulées — une mutation qui
+ne compile pas est « 0 test », jamais un rouge (leçon STORY-505).
 
 | ID | Mutation appliquée | Ce qui a viré au rouge |
 |---|---|---|
-| M1 | `longueurCompteDetail: 5` → `6` au manifeste de `balance-service` | **2 tests** |
-| M2 | idem au manifeste d'`assurance-service` | **4 tests** |
-| M3 | Retirer la ligne du manifeste CIMA (retour au fail-open) | **6 tests** |
-| M4 | `normalise.length <= longueurDetail` → `<` dans `estCompteDeDetail` | **3 tests**, dont la borne exacte `31123` |
+| M1 | `longueurCompteDetail: 6` → `5` au manifeste de `balance-service` | **3 tests** |
+| M1bis | `6` → `7`, l'autre côté de la borne | **3 tests** |
+| M2 | `6` → `5` au manifeste d'`assurance-service` | **4 tests** |
+| M2bis | `6` → `7` | **4 tests** |
+| M3 | Retirer la ligne du manifeste (retour au fail-open) | **3 tests** |
+| M4 | `normalise.length <= longueurDetail` → `<` | **3 tests**, dont la borne exacte |
 | M5 | Un octet altéré dans `bilan-service`, **source** des octets | **1 test dans CHACUN** des deux dépôts aval |
-| M6 | Chemin du voisin redirigé vers le dépôt **local** | ⛔ **VERT 19/19 — la garde était une tautologie.** Rouge après correctif ; la variante « chemin différent qui retombe dans ce dépôt » rougit aussi |
-| M7 | L'exerciseur synthétique cesse d'exercer le fail-open (`undefined` → `6`) | **1 test** — mais seulement grâce à l'assertion ajoutée en D-512-4 (formulation initiale « supprimer l'entrée » : ne mesurait **rien**, la branche ayant deux exerciseurs) |
+| M6 | Chemin du voisin redirigé vers le dépôt **local** | ⛔ **VERT 19/19 à la première passe — la garde était une tautologie.** Rouge après correctif |
+| M6ter | Le voisin est un **LIEN SYMBOLIQUE** vers le dépôt local | ⛔ **VERT à la deuxième passe** — `resolve()` est purement lexical. Rouge après passage à `realpathSync` |
+| M7 | L'exerciseur synthétique cesse d'exercer le fail-open (`undefined` → `6`) | **1 test** — grâce à l'assertion ajoutée en D-512-4 ; la formulation initiale (« supprimer l'entrée ») ne mesurait **rien** |
+| M8 | La garde de saisie s'applique au compte **dérivé** au lieu du **brut** | **1 test** — sans elle, `601; DROP` serait **blanchi** en `601000` |
+| M9 | La dérivation redevient inerte pour le seul CIMA | **1 test** |
+
+⚠️ **Deux gardes successivement prises en défaut au même endroit.** M6 a montré que la garde de
+byte-identité se laissait pointer sur le dépôt local. Le correctif — comparer des chemins **résolus** —
+a été écrit, et son commentaire promettait de couvrir « un lien ». La revue de code a relevé que
+`resolve()` **ne suit pas les liens**, et M6ter l'a confirmé : le correctif était vert sur le cas qu'il
+annonçait fermer. ⇒ **Une garde qui promet plus qu'elle ne tient est du même genre que la tautologie
+qu'elle remplace.** Fermé pour de bon par `realpathSync`, qui canonise aussi la casse.
 
 ## Definition of Done
 
-- [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
+- [x] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
 - [x] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts sur **`balance-service`** et
       **`assurance-service`**.
-- [x] M1 à M7 appliquées une par une, prouvées rouges, puis restaurées.
+- [x] M1 à M9 (11 mutations, variantes comprises) appliquées une par une sur l'état **final**, prouvées rouges, puis restaurées.
 - [x] ⛔ **Non-régression mesurée sur `balance-service`** : déclarer un niveau de détail pour CIMA
       **restreint** `isCompteDeDetail`. Aucune suite existante ne doit changer de verdict sans que ce
       soit voulu et dit.
 - [x] Checksum `cima-assurances-1.0.json` **inchangé** dans les trois dépôts (`9ca429c8…`).
 - [x] STORY-671 créée, sourcée et slottée.
-- [ ] Revue de code et revue de sécurité sans constat ouvert.
-- [ ] PR module(s) vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
+- [x] Revue de code (3 bloquants : 2 confirmés et corrigés, 1 faux positif ; 4 non-bloquants tous corrigés) et revue de sécurité (aucun constat ≥ 80) — **aucun constat ouvert**.
+- [x] PR module(s) vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
 
 ## Progress Tracking
 
-- **Statut courant :** `in_progress` — ouverte le **2026-09-20**.
+- **Statut courant :** `done` — ouverte et clôturée le **2026-09-20**.
 - **2026-09-20 — cadrage mesuré :** branche `MNV-512` sur `docs`. Page officielle de l'art. 431
   téléchargée et dépouillée (1 093 lignes, 1 052 comptes extraits) ; artefact comparé compte par
   compte et libellé par libellé. Cinq constats : F1 (troncature de profondeur, 80/1 052), F2 (`05`
@@ -261,6 +308,56 @@ constat réel (M6)** et **une autre était mal formulée (M7)** — le détail e
   `3012` rattachable à rien. Stack arrêtée.
 - **2026-09-20 — PR ouvertes :** `prospera-balance-service#109` et `prospera-assurance-service#2`,
   toutes deux base `dev`, à intégrer **ensemble**.
+- **2026-09-20 — revue de code ⑥ :** ⛔⛔ **elle a invalidé la décision centrale de la story.**
+  **3 constats bloquants remontés, 2 confirmés, 1 faux positif ;** 4 non-bloquants, tous retenus.
+
+  | # | Constat | Verdict après vérification de première main |
+  |---|---|---|
+  | 1 | L'art. 432 **contient** une clause d'ouverture, qui nomme **six** chiffres ⇒ la valeur est 6, pas 5 | ✅ **CONFIRMÉ** — texte relu sur la page officielle **et** sur le PDF consolidé 608 p. Corrigé partout |
+  | 2 | Déclarer la longueur **branche aussi la réécriture** des comptes (`normaliserCompte`), niée par la doc livrée et non couverte | ✅ **CONFIRMÉ** — mesuré avant/après (`57100000` → `571000`, `411FACTURE` → `411000`, et **deux comptes longs distincts fusionnent, soldes sommés**). D-512-6 ajoutée, commentaires corrigés, test écrit |
+  | 3 | La branche `MNV-512` de `balance-service` embarquerait un commit étranger `MNV-297` | ❌ **FAUX POSITIF** — `git log origin/dev..MNV-512` rend **un** commit, et la PR GitHub porte **3 fichiers**. Non reproductible |
+  | 4 | `resolve()` ne suit pas les liens ⇒ la garde de la garde promet plus qu'elle ne tient | ✅ retenu — `realpathSync` des deux côtés, ce qui canonise aussi la casse |
+  | 5 | Trois affirmations périmées dans `assurance-service` (« 80 comptes », « libellés verbatim », un **titre de test**) | ✅ retenu — corrigées |
+  | 6 | `cf. sfd-bceao` comme exemple de référentiel sans niveau de détail : périmé depuis STORY-172 | ✅ retenu — corrigé |
+  | 7 | Le tableau « ce que cette batterie prouve » n'était mis à jour que dans **un** des deux dépôts | ✅ retenu — corrigé |
+
+  ⚡⚡ **La leçon de la story change avec le constat 1, et elle vaut plus que le chiffre.** Le premier
+  sourcing s'était arrêté à l'art. 431 et avait pris **le silence de l'art. 430 pour une absence de
+  règle** — puis l'avait écrit en gras (« le Code CIMA n'a aucune clause d'ouverture »), ce qui a
+  transformé une lacune de recherche en **affirmation sourcée**. La recherche cherchait le vocabulaire
+  du RCSFD (« non limitative », « subdiviser », « autres chiffres ») ; le Code CIMA dit la même chose
+  avec des mots entièrement différents (« si le nombre des comptes ainsi disponible est insuffisant,
+  il sera créé des comptes à cinq chiffres… ou à six chiffres »). ⇒ **Une recherche négative ne prouve
+  l'absence que du vocabulaire cherché.** Le seul contrôle qui l'aurait attrapée : relire **en entier**
+  l'article de terminologie du plan, qui était déjà ouvert pour un autre motif (F6, la coquille `6126`).
+
+  ⚠️ **Et la story aurait livré le défaut qu'elle disait fermer.** Le commentaire D-511-K qu'elle
+  supprimait annonçait : « un assureur qui subdivise verrait ses comptes refusés par une exigence que
+  personne n'a écrite ». À 5, `400200` — six chiffres, prévus noir sur blanc pour les comptes de
+  réassureurs — était refusé. La story se serait fermée en ayant **créé** ce qu'elle prétendait éviter.
+- **2026-09-20 — revue de sécurité ⑦ :** **aucun constat ≥ 80.** Examinés : chemin d'injection
+  (`respecteGardesDeSaisie` évalué sur le compte **brut avant** dérivation — `601; DROP` reste refusé,
+  vérifié par mutation), borne d'entrée CWE-770 (`LONGUEUR_MAX_COMPTE` reste la seule borne
+  d'`isCompteValide`, évaluée avant la boucle), intégrité comptable (aucune donnée packagée ne change
+  de verdict), intégrité de l'artefact (checksum et confinement du locator hors diff, intacts), fuite
+  d'information (deux URL publiques, rien d'autre). ⚡ C'est elle qui a **signalé sous son seuil** le
+  branchement de la dérivation — le constat 2 de la revue de code : deux revues indépendantes ont
+  trouvé le même fait par deux chemins.
+- **2026-09-20 — correctifs de revue :** commit dédié dans chaque dépôt, séparé du commit de feature.
+  Valeur portée à **6** et sourcing réécrit (art. 430 → 431 → 432, plus le plafond de l'art. 412) ;
+  D-512-6 ajoutée sur la dérivation au plan et **testée**, y compris la fusion de deux comptes longs
+  distincts ; `realpathSync` dans les deux gardes ; trois affirmations périmées corrigées dans
+  `assurance-service`, dont un **titre de test** ; exemple `cf. sfd-bceao` retiré ; tableau « ce que
+  cette batterie prouve » complété dans les **deux** dépôts. README CIMA corrigé (5 → 6, clause
+  d'ouverture citée).
+- **2026-09-20 — portes DoD rejouées sur l'état final :** lint 0 warning, build OK.
+  `balance-service` **4 176 unit + 1 077 e2e** verts ; `assurance-service` **854 unit + 17 e2e** verts.
+  ⚠️ Une passe intermédiaire a montré 1 unitaire et 54 e2e rouges : **flake d'exécution parallèle
+  connu**, verts en isolation et sur la passe suivante — pas un constat.
+- **2026-09-20 — vérification runtime REJOUÉE** (le correctif change la valeur vérifiée, donc la
+  mesure d'avant ne vaut plus) : `Référentiel cima-assurances@1.0 chargé (plan=80 comptes, règles=6,
+  **détail=6**)`, checksum `9ca429c8…` vérifié, et **`400200` — le compte que l'art. 432 prévoit — est
+  déposable**, `4002001` ne l'est pas, `3012` n'est rattachable à rien. Stack arrêtée.
 
 ## Notes
 
