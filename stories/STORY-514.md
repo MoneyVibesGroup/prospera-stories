@@ -249,6 +249,49 @@ simple à instrumenter (leçon B3 de STORY-513).
   (art. 334-9). Trois règles d'assiette manquaient à l'énoncé : provision spéciale pluriannuelle à
   **100 %**, calcul **séparé par branche** (art. 328), et taux **relevable par la Commission**.
   Six décisions : D-514-1 à D-514-6.
+- **2026-09-20 — revue de sécurité ⑦ : 3 constats, TOUS CORRIGÉS.**
+  - ⛔⛔ **C2 — un double-clic pouvait murer une branche définitivement.** La tête de chaîne
+    se lisait par `sort({dateArrete: -1, _id: -1})`, en justifiant le second critère par
+    « à date égale, en ordre d'insertion ». **`_id` n'est pas l'ordre d'insertion** : il est
+    généré **avant** la transaction, **réutilisé à chaque rejeu**, et sa partie aléatoire
+    est **fixe par processus**. Chaîne `R → B → A` avec `_id(A) < _id(B)` ⇒ le tri rend `B`,
+    qui a déjà un successeur ⇒ l'index refuse tout insert, **indéfiniment**, sur une
+    collection append-only qu'aucune route ne répare. ⇒ **Rang attribué dans la
+    transaction**, index unique, lecture par rang. ⚠️ La doublure du harnais reproduisait
+    le mauvais critère **des deux côtés** : aucun test n'aurait pu le voir.
+  - ⛔ **C1 — la borne ne bornait pas le travail.** `limit(2001)` bornait les documents
+    **rendus**, pas **examinés** : l'index ne pouvait pas servir le tri, d'où un `SORT`
+    bloquant. Mesuré : **60 000 documents examinés pour 2 001 rendus**, en transaction, sur
+    une base partagée par tous les tenants. Index posé.
+  - ⛔ **C3 — aucun plafond d'évaluations**, sur une collection append-only. Exactement le
+    défaut corrigé en STORY-513 sur les encaissements. Borne nommée, comptée sous la
+    transaction.
+- **2026-09-20 — revue de code ⑥ : ⛔⛔ 10 CONSTATS, ET LA STORY N'EST PAS MERGEABLE EN
+  L'ÉTAT.** Le relecteur a relu les articles **en ligne**, pas les JSDoc. Quatre constats
+  sont des **erreurs de transcription réglementaire**, et deux demandent un arbitrage qui
+  dépasse cette story.
+
+  | # | Constat | Suite |
+  |---|---|---|
+  | 1 | Tête de chaîne sur `_id` pré-généré | ✅ **corrigé** (= C2 de la revue de sécurité) |
+  | 2 | `primeAcquise = primeEmise − montantRetenu` **ignore la provision d'ouverture** ; l'identité est `primeEmise − variation`. Dès le 2ᵉ arrêté, les deux chiffres de la **même réponse** divergent. ⚠️ **Et un test verrouille la valeur fausse** | ⛔ **à corriger** |
+  | 3 | La **provision spéciale disparaît à l'exercice suivant** : la lecture filtre sur `exerciceDebut` en égalité, or une prime pluriannuelle n'est émise **qu'une fois**. Une reprise de 944 234 passerait en produit alors que deux tiers du risque restent à courir | ⛔ **à corriger** |
+  | 4 | L'assiette filtre sur `periode.debut` là où l'art. 334-10 dit **« émises »**. ⚠️ Le correctif propre exige de **persister `dateEmission`** — donc de toucher le schéma de **STORY-513, déjà mergée** | ⛔ **arbitrage** |
+  | 5 | La fenêtre est indexée sur le fractionnement du **contrat**, appliquée à la période de la **quittance**, et rien ne lie les deux | ⛔ à corriger |
+  | 6 | Le **second déclencheur** de la provision spéciale (« ou pour une durée différente ») est **élidé de la citation** et absent du code. Une police de 4 mois serait provisionnée à **53 %** du minimum légal | ⛔ **à corriger** |
+  | 7 | `BrancheAssurance` publie **Vie / Non-Vie** sous le nom « branche (art. 328) ». L'art. 328 énumère une vingtaine de branches d'agrément : une évaluation `NON_VIE` est **exactement le total interdit**. **D-514-5 n'est pas tenue** | ⛔ **arbitrage** |
+  | 8 | `primeEmise` inclut les **taxes**, que l'article ne nomme pas (« y compris les accessoires et coûts des polices »). Écart mesuré : **+18 %** sur le chiffre même de l'AC-4 | ⛔ **arbitrage** |
+  | 9 | L'**arithmétique exacte n'est mesurée par aucun test** : le relecteur a substitué l'implémentation naïve et **les huit entrées assertées passent** | ⛔ à corriger |
+  | 10 | Un test annonce une règle que sa fonction ne peut pas exercer (la coupure ne dépend pas du jour d'arrêté — la fonction ne prend pas de date d'arrêté) | ⛔ à corriger |
+
+  ⚡⚡ **Le constat 2 est la RÉCIDIVE EXACTE de la leçon de STORY-513** : un test qui
+  **verrouille** une valeur fausse. Et le constat 9 celle de M5 : le critère du test est
+  rendu par un **autre chemin** que celui qu'il prétend garder.
+
+  ⛔ **La story reste `in_progress` et la PR #4 n'est pas mergée.** Les constats 4, 7 et 8
+  demandent une décision : persister `dateEmission` touche le schéma d'une story **déjà
+  mergée** ; renommer `branche` change un **contrat public** et rend l'AC « calcul par
+  branche » non tenu ; l'inclusion des taxes change l'assiette **et** le chiffre publié.
 - **2026-09-20 — ⛔⛔ L'AC-2 EST BLOQUÉE, et c'est la mesure qui le dit.** L'art. 432 nomme les comptes
   qui portent la variation (« Provisions de primes : **320**, 340, 350, 360, 3820… ») et l'art. 431
   montre qu'ils vivent à **trois et quatre chiffres** : `3200` « Pour risques en cours : primes émises
