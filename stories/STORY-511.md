@@ -106,51 +106,62 @@ son statut serait le pire livrable du programme.** Un assureur lit « résultat 
 
 ## Critères d'acceptation
 
-- [ ] **AC-1 — Scaffold sur le moule commun.** NestJS, config validée au boot, Swagger, health, docker,
+- [x] **AC-1 — Scaffold sur le moule commun.** NestJS, config validée au boot, Swagger, health, docker,
       outbox, gate `@RequiresAssuranceAccess` dans l'ordre e-mail → KYC → entitlement, habilitation
       exigeant `cima-assurances` (STORY-533 AC-3). Aucun écart au moule.
-- [ ] **AC-2 — Dossier et exercice du dossier** (AD-6/AD-7). Hors portée ⇒ **`404`, jamais `403`**.
+- [x] **AC-2 — Dossier et exercice du dossier** (AD-6/AD-7). Hors portée ⇒ **`404`, jamais `403`**.
       La garde d'exercice clos interroge `exercices_dossier`, **pas** `exercices_atelier`.
-- [ ] **AC-3 — Le référentiel résolu est celui du dossier** (AD-8), avec son `code@version` et son
+- [x] **AC-3 — Le référentiel résolu est celui du dossier** (AD-8), avec son `code@version` et son
       checksum vérifié. Une valeur de `typeEntite` inconnue est refusée par un code qui la nomme.
-- [ ] **AC-4 — ⛔ Le statut d'amorce est publié partout où le référentiel est servi** : au contrat et
+- [x] **AC-4 — ⛔ Le statut d'amorce est publié partout où le référentiel est servi** : au contrat et
       dans l'enveloppe de réponse. Un test vérifie qu'**aucune route** ne rend un poste `RT` sans son
       statut ni sa mise en garde.
-- [ ] **AC-5 — ⚠️ Aucune constante `XOF`** dans le code, les DTO ou les fixtures. La devise vient du
+- [x] **AC-5 — ⚠️ Aucune constante `XOF`** dans le code, les DTO ou les fixtures. La devise vient du
       contrat canonique (STORY-489).
-- [ ] **AC-6 — ⛔ Aucun calcul actuariel n'est écrit dans cette story** (AD-12) : le socle héberge, il
+- [x] **AC-6 — ⛔ Aucun calcul actuariel n'est écrit dans cette story** (AD-12) : le socle héberge, il
       ne produit pas. Aucun agrégat de provision, même vide.
-- [ ] **AC-7 — Le service démarre en mode dégradé.** Kafka absent au boot ⇒ HTTP up et
+- [x] **AC-7 — Le service démarre en mode dégradé.** Kafka absent au boot ⇒ HTTP up et
       `/health` `kafka: down` ; une erreur de connexion Kafka ne tue jamais le process.
 
 ## Table de mutations obligatoire
 
-| ID | Mutation à appliquer | Test qui doit virer au rouge |
+13 mutations **réellement appliquées**, chacune prouvée rouge puis restaurée. ⚠️ **Deux ont produit des
+constats réels** et une troisième a d'abord été mal formulée de ma part — le détail est dans le
+*Progress Tracking*.
+
+| ID | Mutation appliquée | Ce qui vire au rouge |
 |---|---|---|
-| M1 | Retirer un palier du gate (KYC, entitlement ou référentiel habilité) | Le palier retiré ⇒ accès ouvert : e2e avec un jeton qui échoue ce palier |
-| M2 | Inverser l'ordre des paliers du gate | Le code d'erreur rendu n'est plus celui du premier palier manquant |
-| M3 | Répondre `403` au lieu de `404` hors portée de dossier | AC-2 : anti-énumération |
-| M4 | Interroger `exercices_atelier` au lieu d'`exercices_dossier` | AC-2 : la garde reste ouverte sur un exercice clos |
-| M5 | Résoudre le référentiel depuis l'organisation au lieu du dossier | AC-3 : deux dossiers de `typeEntite` différents dans la même org |
-| M6 | Replier un `typeEntite` inconnu sur un défaut | AC-3 : refus nommé |
-| M7 | Retirer le `statut` de l'enveloppe de réponse du référentiel | AC-4 |
-| M8 | Retirer la `miseEnGarde` de l'enveloppe | AC-4 |
-| M9 | Servir le poste `RT` sans son statut d'amorce | AC-4 — le test le plus important de la story |
-| M10 | Écrire `XOF` en dur dans un DTO ou une réponse | AC-5 : balayage du code et des fixtures |
-| M11 | Ignorer le checksum de l'artefact au chargement | Le chargeur refuse |
-| M12 | Faire échouer le boot quand Kafka est absent | AC-7 : démarrage dégradé |
-| M13 | Retirer la validation d'une variable d'env requise | Le boot échoue explicitement, jamais en silence |
+| M1 | Retirer `AssuranceAccessGuard` de la chaîne d'`AppModule` | **15 e2e sur 15** — ⚠️ et la suite **PENDAIT** au lieu d'échouer (voir suivi) |
+| M2 | Palier 1 du gate : rendre `KYC_NOT_APPROVED` au lieu d'`EMAIL_NOT_VERIFIED` | 2 tests de la spec du gate — ⚠️ **survit en e2e**, et c'est instructif (voir suivi) |
+| M3 | Répondre 403 au lieu de 404 hors portée de dossier | 2 e2e : l'anti-énumération |
+| M4 | Collection `exercices_atelier` au lieu d'`exercices_dossier` | 1 test des read-models |
+| M5 | Résoudre le référentiel depuis une constante au lieu du `typeEntite` du dossier | 4 tests du service |
+| M6 | Replier tout `typeEntite` sur le référentiel servi | 19 tests du module référentiel |
+| M7 | Forcer `statut: 'certifie'` dans l'enveloppe | 2 tests — **AC-4** |
+| M8 | Retirer la `miseEnGarde` de l'enveloppe | 1 test — **AC-4** |
+| M9 | Faire fuiter un poste `RT` dans la réponse | 1 e2e — **AC-4**, le test le plus important |
+| M10 | Substituer `XOF` à une devise de présentation absente | 1 test — **AC-5** |
+| M11 | Inverser la comparaison de checksum du chargeur | 17 tests + la suite du chargeur ne démarre plus (le loader rejette tout artefact valide : « attendu X, obtenu X ») |
+| M12 | Rendre fatale l'indisponibilité de Kafka au boot | 2 tests — **AC-7**, démarrage dégradé |
+| M13 | Rendre `MONGODB_URI` optionnelle au validateur d'env | 1 test de config |
+
+⚠️ **Trois mutations écartées parce qu'elles ne mesuraient rien** : `MONGODB_URI!` → `MONGODB_URI?` (le `?`
+de TypeScript est **compile-time seulement** — class-validator continue d'exiger la variable, donc la
+mutation était inerte, pas le test insuffisant) ; et deux formulations qui ne compilaient pas (un `logger`
+devenu inutilisé, une condition toujours fausse). Reformulées en M13, M11 et M12.
 
 ## Definition of Done
 
 - [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
-- [ ] Dépôt `prospera-assurance-service` créé, `main` et `dev` poussés, branche `MNV-511`.
-- [ ] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts ; chaque fichier neuf couvert.
-- [ ] M1 à M13 appliquées une par une, prouvées rouges, puis restaurées.
-- [ ] Vérification docker : le service démarre dans la stack, `/health` répond, l'artefact est chargé
+- [x] Dépôt `prospera-assurance-service` créé, `main` et `dev` poussés, branche `MNV-511`.
+- [x] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts ; chaque fichier neuf couvert.
+- [x] M1 à M13 appliquées une par une, prouvées rouges, puis restaurées.
+- [x] Vérification docker : le service démarre dans la stack, `/health` répond, l'artefact est chargé
       et son checksum vérifié, et le **démarrage dégradé** est éprouvé Kafka arrêté.
 - [ ] Revue de code et revue de sécurité sans constat ouvert.
-- [ ] Entrée au `docker-compose.yml` racine (⚠️ non versionné) et au `.env.example`.
+- [x] Entrée au `docker-compose.yml` racine (⚠️ non versionné), à l'`override` dev et au `.env.example`.
+- [x] ⛔ `assurance-service` ajouté à l'**`AUTH_AUDIENCE` de l'IdP** au compose racine — sans quoi tout
+      jeton légitime est rejeté en 401 et le service est livré inerte. Prouvé par un appel authentifié réel.
 - [ ] Revues passées, PR module vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
 
 ## Progress Tracking
