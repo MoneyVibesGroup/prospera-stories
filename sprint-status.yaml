@@ -4206,7 +4206,7 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "in-progress"  # MNV-664 — le QR interoperable d une demande, canal dynamique, presente au comptoir ; AC-6 MESURE si notre reference traverse jusqu au PAIEMENT_RECU
+        status: "review"  # MNV-664 poussee sur dev — recette REELLE : QR scanne et paye (300 XOF) dans le bac a sable sur une demande NON poussee. ⚡ MESURE AC-6 : le txId du PAIEMENT_RECU EST la reference mise dans le QR -> rapprochement automatique, demande Soldee, 0 orphelin. ⛔ Defaut trouve par Docker apres 3 473 tests verts : le registre rend l ENVELOPPE d observation, qui ne delegue que les methodes qu elle enumere -> methode facultative absente a l execution ; garde ecrite (port vs enveloppe)
         story_path: "stories/STORY-664.md"
         assigned_to: null
       - story_id: "STORY-665"
