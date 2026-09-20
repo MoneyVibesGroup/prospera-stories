@@ -47,6 +47,30 @@ que personne l'ait décidé**. Ici la limitation au niveau 2 était **assumée**
 `statut: amorce`) — mais elle n'était **chiffrée nulle part** : personne ne pouvait dire qu'il
 manquait 972 comptes, ni que 26 libellés étaient réécrits.
 
+## ⛔⛔ Cette story DÉBLOQUE l'AC-2 de STORY-514 — ajouté le 2026-09-20
+
+STORY-514 doit faire entrer la **variation de la provision pour risques en cours** au compte de
+résultat. L'**art. 432** nomme les comptes porteurs (« Provisions de primes : **320**, 340, 350, 360,
+3820… ») et l'**art. 431** montre qu'ils vivent à **trois et quatre chiffres** :
+
+```
+32.   Provisions techniques des opérations d'assurance directe dommages, RC et risques divers
+  320.  Primes
+    3200. Pour risques en cours : primes émises par anticipation
+    3201. Pour risques en cours : autres primes
+  325.  Sinistres          ← LE FRÈRE, sous la MÊME racine `32`
+```
+
+⇒ Tant que le plan packagé s'arrête aux racines à 2 chiffres, **aucun poste de variation ne peut être
+câblé juste** : sur `32`, il capterait aussi les provisions de sinistres, les provisions mathématiques,
+l'égalisation et les ristournes à payer. `RT` passerait de « ignore les provisions » à « les compte
+toutes, en bloc » — **pire que le défaut d'origine, et invisible** (`CAT = CPT` reste vrai).
+
+⚠️ **STORY-514 a donc reporté son AC-2** (sa décision D-514-7) et livre tout le reste. C'est cette
+story-ci qui la débloque, et l'AC-4 ci-dessous — « mesurer l'assiette poste par poste, avant et
+après » — en prend tout son sens : les 972 comptes ajoutés sont précisément ce qui permettra de
+distinguer `3200` de `3250`.
+
 ## Trois pièges relevés pendant la mesure — à ne pas redécouvrir
 
 1. ⚡⚡ **Le Code monte d'un cran à chaque article.** L'**art. 430** nomme les niveaux et s'arrête
