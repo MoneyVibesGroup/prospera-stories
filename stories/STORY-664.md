@@ -64,13 +64,26 @@ imprimé vers un compte que le schéma ne reconnaît pas est un code qu'on distr
 - Elle **ne décide pas** qu'une demande déjà poussée ne peut pas être présentée (voir le point PO
   ci-dessous).
 
-## Point à trancher (PO)
+## Point tranché (PO, 2026-09-20)
 
-⚠️ **Une demande poussée ET présentée est payable deux fois** : le payeur peut régler la demande dans
-son application *et* scanner le QR au comptoir. Le service ne l'interdit pas — il ne peut pas savoir
-ce qui a été montré à qui, et la créance sait absorber un trop-perçu (STORY-259). Faut-il refuser le
-QR d'une demande déjà poussée, au prix du cas légitime « le payeur n'a pas réglé dans son
-application, je lui présente le code » ?
+⛔⛔ **UNE DEMANDE POUSSÉE NE SE PRÉSENTE PAS.** Le PO a tranché : le risque de double paiement
+l'emporte. Une demande qui vit déjà dans l'application du payeur ne rend aucun QR — lui en donner un
+lui offrirait **deux** façons de régler la même chose, et rien ne l'empêcherait de faire les deux ;
+c'est ensuite au bénéficiaire de rendre l'argent.
+
+⚡ **Le critère est la LIGNE d'initiation, pas l'état de la demande.** `EN_ATTENTE` ferme aussi (le
+relais pousse dans quelques secondes) ; `ECHEC_DEFINITIF` **laisse passer**, et c'est le cas le plus
+utile — rien n'a jamais atteint l'application du payeur, le code n'est pas un second canal mais le
+seul. Une demande `Envoyee` peut l'être pour son **lien** sans avoir jamais été poussée au schéma :
+l'état ne distingue pas les deux, la ligne si.
+
+⚠️ **Le coût est assumé et NOMMÉ dans le refus** : « le payeur n'a pas réglé dans son application,
+je lui présente le code » devient impossible. Le message dit le remède — révoquer la demande poussée
+et en émettre une autre sans adresse de paiement.
+
+⚠️ Livré sur la branche `MNV-664-arbitrage` (664 étant déjà fusionnée), avec quatre tests — dont la
+contre-preuve sur `ECHEC_DEFINITIF`. **Non rejoué en recette Docker** : la règle est une requête
+filtrée, et le câblage du modèle est désormais tenu par une garde (voir ci-dessous).
 
 
 ## Livraison (2026-09-20)
@@ -137,10 +150,19 @@ méthode facultative oubliée rougira avant Docker.
   QR interopérable **qui REFUSE** : un test qui s'en servirait sans le dire échoue
   au lieu de passer sur un silence.
 
-## Ce qui reste ouvert
+### ⚡ Une garde de plus, née du câblage de l'arbitrage
 
-- Le point PO ci-dessus (une demande poussée **et** présentée est payable deux
-  fois) n'est pas tranché : le service ne l'interdit pas.
+`demandes.module.invariant.spec.ts` compare les modèles que Nest **injectera**
+dans les providers du module à ceux que le module **déclare**. Un
+`@InjectModel(X)` non déclaré compile, passe tous les tests unitaires — ils
+construisent les classes à la main — et fait échouer le conteneur au démarrage
+par une `UnknownDependenciesException` : le dépôt l'a payé quatre fois, dont une
+qui a vécu sur `dev` une story entière. La garde lit les métadonnées que le
+conteneur lira, donc elle voit ce que voit le démarrage **sans démarrer**. ⚠️ Elle
+ne remplace pas la recette : un module qui oublie d'importer un autre module lui
+échappe encore.
+
+## Ce qui reste ouvert
 - ⚡ **La mesure renforce le remède nommé par [[STORY-665]]** : sur les deux
   canaux, le webhook clé sur `txId` et n'apporte **jamais** d'`end2endId`.
   Unifier la dérivation sur `txId` est donc encore plus défendable — mais un
