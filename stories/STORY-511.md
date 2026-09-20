@@ -1,6 +1,6 @@
 # STORY-511 : Socle `assurance-service` — et l'amorce est publiée comme telle, partout
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 **Épic :** EPIC-128 — Socle vertical CIMA
@@ -164,21 +164,21 @@ devenu inutilisé, une condition toujours fausse). Reformulées en M13, M11 et M
 
 ## Definition of Done
 
-- [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
+- [x] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
 - [x] Dépôt `prospera-assurance-service` créé, `main` et `dev` poussés, branche `MNV-511`.
 - [x] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts ; chaque fichier neuf couvert.
 - [x] M1 à M13 appliquées une par une, prouvées rouges, puis restaurées.
 - [x] Vérification docker : le service démarre dans la stack, `/health` répond, l'artefact est chargé
       et son checksum vérifié, et le **démarrage dégradé** est éprouvé Kafka arrêté.
-- [ ] Revue de code et revue de sécurité sans constat ouvert.
+- [x] Revue de code et revue de sécurité sans constat ouvert.
 - [x] Entrée au `docker-compose.yml` racine (⚠️ non versionné), à l'`override` dev et au `.env.example`.
 - [x] ⛔ `assurance-service` ajouté à l'**`AUTH_AUDIENCE` de l'IdP** au compose racine — sans quoi tout
       jeton légitime est rejeté en 401 et le service est livré inerte. Prouvé par un appel authentifié réel.
-- [ ] Revues passées, PR module vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
+- [x] Revues passées, PR module vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
 
 ## Progress Tracking
 
-- **Statut courant :** `in_progress` — ouverte le 2026-09-19.
+- **Statut courant :** `done` — ouverte le 2026-09-19, clôturée le **2026-09-20**.
 - **2026-09-19 — cadrage mesuré :** branche `MNV-511` sur `docs`. Prérequis vérifiés `done`
   (488, 533, 422, 489). Artefact `cima-assurances@1.0` relu : `statut: amorce`, `miseEnGarde` explicite,
   `RT` qui se déclare amorce dans son propre libellé — l'AC-4 a sa matière, il s'agit de la faire
