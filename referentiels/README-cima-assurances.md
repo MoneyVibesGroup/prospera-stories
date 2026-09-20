@@ -19,9 +19,33 @@ Conseil des Ministres du 2 avril 2008.
 
 > ⚠️ Le secteur **assurances est EXCLU du SYSCOHADA** (comme les banques/PCB et les SFD/RCSFD). Une
 > entreprise d'assurance agréée CIMA tient sa comptabilité selon **ce** plan, pas selon SYSCOHADA.
-> Codification : classes **1 à 8 et 0** ; comptes principaux à 2 chiffres, divisionnaires à 3, sous-comptes à 4.
+> Codification (**art. 430**, verbatim) : classes **1 à 8 et 0** ; comptes principaux à 2 chiffres,
+> divisionnaires à 3, sous-comptes à 4.
 
-## Plan de comptes — comptes principaux à 2 chiffres (art. 431, verbatim)
+> ⚠️ **Corrigé le 2026-09-20 (STORY-512).** Cette ligne décrivait le **cadre** (art. 430) et laissait
+> croire qu'elle décrivait la **liste**. Mesuré sur la page officielle de l'art. 431 : **1 052 comptes
+> énumérés sur QUATRE niveaux** — 79 à 2 chiffres, 345 à 3, **499 à 4** et **129 à 5** (`01010`,
+> `20480`, `69091`…). ⛔ **L'article 431 dépasse donc le cadre de l'article 430**, qui s'arrête aux
+> sous-comptes à 4 chiffres et ne comporte **aucune clause d'ouverture** — contrairement au RCSFD
+> BCEAO (« les autres chiffres décrivent de façon plus détaillée la nature des opérations »). La seule
+> latitude du Code est nominative : « Ce compte [`08`] est subdivisé, **selon les besoins**… »
+> (art. 432).
+> ⇒ `longueurCompteDetail` vaut **5** pour `cima-assurances` (STORY-512, D-512-1) : entre le cadre et
+> la liste qui l'applique, c'est la liste qui fait foi — déclarer 4 refuserait `20480`, compte du plan
+> officiel.
+> ⚠️ **Le paquet packagé ne porte que les 79 racines à 2 chiffres (+ `05`, déduit).** La transcription
+> des 972 comptes manquants et le rétablissement de **26 libellés abrégés** relèvent de **STORY-671**.
+> ⚠️ Deux coquilles de la page officielle, relevées le 2026-09-20 : `6126. Frais accessoires` doit se
+> lire **`6026`** (l'art. 432 le cite trois fois), et **`6905` est imprimé sans son point** — un
+> parseur sur `^\d+\.` le perd en silence.
+> ⚠️ Le PDF consolidé `droit-afrique.com/upload/doc/cima/CIMA-Plan-comptable-assurances.pdf` cité plus
+> haut était **injoignable** le 2026-09-20.
+
+## Plan de comptes — comptes principaux à 2 chiffres (art. 431)
+
+> ⚠️ **« verbatim » retiré le 2026-09-20 (STORY-512)** : **26 des 79 libellés ci-dessous sont abrégés**
+> par rapport au texte, et plusieurs perdent la restriction « dans le pays concerné » — qui oppose le
+> national à l'étranger (`28`, `159`, `517`). Rétablissement en **STORY-671**.
 
 ### CLASSE 1 — Comptes de capitaux permanents
 - 10 Capital · 11 Réserves · 12 Report à nouveau · 13 Réserves réglementaires
