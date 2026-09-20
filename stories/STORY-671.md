@@ -72,7 +72,7 @@ manquait 972 comptes, ni que 26 libellés étaient réécrits.
       pas le README du dépôt, pas l'artefact `@1.0`.
 - [ ] AC-2 — Les **26 libellés abrégés** sont rétablis dans leur forme officielle. Un test les nomme
       un par un : un libellé re-raccourci doit rougir.
-- [ ] AC-3 — ⛔ **Nouvelle version `cima-assurances@1.1`** — les octets changent, donc la version
+- [ ] AC-3 — ⛔ **Nouvelle version du paquet** — les octets changent, donc la version
       change, le checksum aussi, et **les trois dépôts** sont recopiés dans le **même** lot de PR
       (`bilan-service` produit, `balance-service` et `assurance-service` recopient). La garde de
       byte-identité doit passer sur les trois.
@@ -89,6 +89,17 @@ manquait 972 comptes, ni que 26 libellés étaient réécrits.
 - [ ] AC-7 — Le `statut` de l'artefact reste `amorce` : compléter le **plan de comptes** ne valide ni
       la **liasse** ni les **provisions techniques** (AD-12). Ce qui change, c'est la `miseEnGarde` —
       elle ne peut plus dire que le plan est allégé.
+
+## ⚠️ Collision de version à arbitrer avant de coder
+
+**STORY-514** (provision pour primes non acquises) exige elle aussi une **nouvelle version du
+paquet** : son AC-2 fait entrer un poste de variation au compte de résultat et modifie la table de
+passage de `RT`, aujourd'hui `+RP1 +RP3 +RP5 −RC1 −RC5 −RC8` — mesuré dans l'artefact le 2026-09-20.
+
+⇒ **Les deux stories ne peuvent pas prendre `@1.1` toutes les deux.** Celle qui livre en premier la
+prend ; l'autre s'aligne. Vérifier la version réellement packagée **avant** de commencer, et non en
+recopiant ce document : c'est le mode de collision que le bloc `RESERVED_RANGES` de
+`sprint-status.yaml` décrit pour les numéros de story, transposé aux versions d'artefact.
 
 ## Hors périmètre
 
