@@ -4206,7 +4206,7 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "ready-for-dev"  # phase A
+        status: "in-progress"  # MNV-664 — le QR interoperable d une demande, canal dynamique, presente au comptoir ; AC-6 MESURE si notre reference traverse jusqu au PAIEMENT_RECU
         story_path: "stories/STORY-664.md"
         assigned_to: null
       - story_id: "STORY-665"
