@@ -49,12 +49,13 @@ manquait 972 comptes, ni que 26 libellés étaient réécrits.
 
 ## Trois pièges relevés pendant la mesure — à ne pas redécouvrir
 
-1. ⚡⚡ **Le Code se contredit sur la profondeur.** L'**article 430** nomme les niveaux et s'arrête
-   aux « sous-comptes (quatre chiffres) » ; l'**article 431** énumère **129 comptes à 5 chiffres**
-   (`01010`, `20480`, `69091`…). Et contrairement au RCSFD BCEAO, le Code CIMA **n'a aucune clause
-   d'ouverture** (ni « liste non limitative », ni droit général de subdiviser) — la seule latitude
-   vise nominativement le compte `08` (art. 432, « selon les besoins »). ⇒ Transcrire **ce que
-   l'art. 431 énumère**, sans compléter ni plafonner.
+1. ⚡⚡ **Le Code monte d'un cran à chaque article.** L'**art. 430** nomme les niveaux et s'arrête
+   aux « sous-comptes (quatre chiffres) » ; l'**art. 431** énumère **129 comptes à 5 chiffres**
+   (`01010`, `20480`, `69091`…) ; et l'**art. 432, classe 4**, autorise nommément **six** chiffres
+   (« …il sera créé des comptes à cinq chiffres (de 40020 et 40021 à 40398 et 40399) **ou à six
+   chiffres** »). ⇒ Transcrire **ce que l'art. 431 énumère**, sans compléter ni plafonner — les
+   comptes à 6 chiffres de l'art. 432 ne sont pas une liste, ils sont une **autorisation** ouverte à
+   l'entreprise, et ils n'ont donc rien à faire dans le paquet.
 2. ⚠️ **`6126` est une coquille de la page officielle pour `6026`.** La liste imprime
    `6126. Frais accessoires` en classe 6, sous `602`. L'**article 432 tranche trois fois** :
    « sous-comptes 6020 et 6026 », « par le débit des comptes 6020 et 6026 », « comptabilisés au
@@ -83,9 +84,12 @@ manquait 972 comptes, ni que 26 libellés étaient réécrits.
 - [ ] AC-5 — `05` : soit la racine est **retrouvée dans une source officielle** et transcrite
       verbatim, soit elle reste **déduite** et l'artefact le dit. La page en ligne imprime ses quatre
       enfants (`050`, `052`, `057`, `059`) et **pas** la racine.
-- [ ] AC-6 — ⚠️ **`longueurCompteDetail` reste à 5** (STORY-512, D-512-1) : la transcription **confirme**
-      la valeur, elle ne la change pas. Si le dépouillement exhaustif trouve un compte à 6 chiffres,
-      c'est un constat à remonter, pas une valeur à ajuster en silence.
+- [ ] AC-6 — ⚠️ **`longueurCompteDetail` reste à 6** (STORY-512, D-512-1, révisé en revue) : la
+      transcription **confirme** la valeur, elle ne la change pas. Le 6 ne vient pas de l'art. 431
+      (qui s'arrête à 5 chiffres) mais de la clause d'ouverture de l'**art. 432, classe 4**, qui
+      autorise nommément « cinq chiffres […] ou à six chiffres » pour les comptes de réassureurs.
+      Si le dépouillement exhaustif trouve un compte à **sept** chiffres, c'est un constat à remonter,
+      pas une valeur à ajuster en silence.
 - [ ] AC-7 — Le `statut` de l'artefact reste `amorce` : compléter le **plan de comptes** ne valide ni
       la **liasse** ni les **provisions techniques** (AD-12). Ce qui change, c'est la `miseEnGarde` —
       elle ne peut plus dire que le plan est allégé.

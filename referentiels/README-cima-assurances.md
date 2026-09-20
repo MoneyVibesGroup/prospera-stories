@@ -30,9 +30,17 @@ Conseil des Ministres du 2 avril 2008.
 > BCEAO (« les autres chiffres décrivent de façon plus détaillée la nature des opérations »). La seule
 > latitude du Code est nominative : « Ce compte [`08`] est subdivisé, **selon les besoins**… »
 > (art. 432).
-> ⇒ `longueurCompteDetail` vaut **5** pour `cima-assurances` (STORY-512, D-512-1) : entre le cadre et
-> la liste qui l'applique, c'est la liste qui fait foi — déclarer 4 refuserait `20480`, compte du plan
-> officiel.
+> ⛔⛔ **Et l'art. 432, classe 4, porte une CLAUSE D'OUVERTURE qui nomme SIX chiffres** — corrigé le
+> 2026-09-20 par la revue de code de STORY-512, après que la première rédaction eut affirmé le
+> contraire : « l'entreprise ouvre à cet effet les comptes 4002, 4003…, jusqu'à 4038 et 4039 ; **si le
+> nombre des comptes ainsi disponible est insuffisant, il sera créé des comptes à cinq chiffres (de
+> 40020 et 40021 à 40398 et 40399) ou à six chiffres.** […] Les comptes 404 à 408 fonctionnent de
+> manière analogue. » La clause est plus explicite que celle du RCSFD — elle **énumère** les paliers.
+> ⇒ `longueurCompteDetail` vaut **6** pour `cima-assurances` (STORY-512, D-512-1). Déclarer 4
+> refuserait `20480`, déclarer 5 refuserait `400200` : deux comptes que le texte prévoit.
+> ⛔ **6 est un plafond** : les 608 pages du Code consolidé 2019 ne portent que **trois** énoncés de
+> profondeur, aucun au-delà de six, et l'**art. 412** ferme le reste (« …doivent utiliser les
+> sous-comptes définis au chapitre III du présent titre, avec leur numéro et intitulé »).
 > ⚠️ **Le paquet packagé ne porte que les 79 racines à 2 chiffres (+ `05`, déduit).** La transcription
 > des 972 comptes manquants et le rétablissement de **26 libellés abrégés** relèvent de **STORY-671**.
 > ⚠️ Deux coquilles de la page officielle, relevées le 2026-09-20 : `6126. Frais accessoires` doit se
