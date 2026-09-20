@@ -73,6 +73,18 @@ son statut serait le pire livrable du programme.** Un assureur lit « résultat 
   commentaire qui l'interdit est posé là où la lecture se fera : la classe 8 CIMA mêle comptes de
   **gestion** et comptes de **regroupement**, et le repli générique du moteur fiscal y a déjà **doublé
   exactement** la base imposable sans qu'aucun contrôle ne s'en aperçoive.
+- **D-511-J — le socle ne sert AUCUN poste de liasse.** Le contrat rend l'**identité** et la **maturité**
+  du référentiel — code, version, checksum, statut, mise en garde, source, pays, devise de présentation —
+  et rien d'autre. Les postes (`CAT`, `CPT`, `RT`, `RN`) font la **liasse**, que `bilan-service` produit :
+  les recopier ici créerait une **seconde source** pour la même chose, et c'est exactement ainsi qu'un `RT`
+  finirait publié sans son statut par la route qui l'aurait recopié. Un e2e balaye les routes **découvertes
+  sur l'application montée** — pas une liste écrite à la main — et vérifie qu'aucune ne porte de poste.
+- **D-511-K — aucun niveau de détail de compte n'est déclaré.** Les 80 comptes de l'article 431 sont tous
+  à **deux chiffres**, mais c'est ce que le texte **énumère**, pas une longueur qu'il **fixerait**. Déclarer
+  `2` trancherait la question que **STORY-512** pose explicitement, et refuserait le compte `3012` d'un
+  assureur qui subdivise, au nom d'une exigence que personne n'a écrite. `undefined` = aucune exigence, le
+  rattachement reste **par préfixe**. ⚠️ Le vertical SFD a payé cette question **deux fois** (STORY-172,
+  STORY-368) pour l'avoir devinée.
 - **D-511-I — le socle ne publie aucune balance.** AD-5 la promet au vertical ; elle suppose des
   quittances et des sinistres, qui n'existent pas encore. Hook inerte documenté.
 
