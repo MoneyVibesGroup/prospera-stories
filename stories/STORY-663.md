@@ -1,6 +1,6 @@
 # STORY-663 : L'échéance d'abonnement émet sa demande — la facturation récurrente
 
-Status: review
+Status: done
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`

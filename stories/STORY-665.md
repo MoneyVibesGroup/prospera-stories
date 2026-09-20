@@ -1,6 +1,6 @@
 # STORY-665 : Le secret de notification après la déclaration, et deux secrets pendant la bascule
 
-Status: review
+Status: done
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`

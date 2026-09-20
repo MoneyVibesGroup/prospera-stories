@@ -1,6 +1,6 @@
 # STORY-662 : La demande part dans l'application du payeur — l'émission appelle enfin le fournisseur
 
-Status: review
+Status: done
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`

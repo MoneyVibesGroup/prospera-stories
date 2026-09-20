@@ -4182,7 +4182,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "review"  # MNV-661 poussee (b8ff84d), en attente de fusion — recette reelle 7 prouves / 0 echec
+        status: "done"  # MNV-661 fusionnee dans dev (2026-09-20, verifie par `git cherry`) — ex-review : poussee (b8ff84d), en attente de fusion — recette reelle 7 prouves / 0 echec
         story_path: "stories/STORY-661.md"
         assigned_to: null
       - story_id: "STORY-662"
@@ -4190,7 +4190,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "review"  # MNV-662 poussee, empilee sur MNV-661 — recette Docker : demande poussee et ACCEPTEE par PI-SPI
+        status: "done"  # MNV-662 fusionnee dans dev (2026-09-20, verifie par `git cherry`) — ex-review : poussee, empilee sur MNV-661 — recette Docker : demande poussee et ACCEPTEE par PI-SPI
         story_path: "stories/STORY-662.md"
         assigned_to: null
       - story_id: "STORY-663"
@@ -4198,7 +4198,7 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "review"  # MNV-663 poussee sur dev — recette Docker : echeance -> demande poussee a PI-SPI
+        status: "done"  # MNV-663 fusionnee dans dev (2026-09-20, verifie par `git cherry`) — ex-review : poussee sur dev — recette Docker : echeance -> demande poussee a PI-SPI
         story_path: "stories/STORY-663.md"
         assigned_to: null
       - story_id: "STORY-664"
@@ -4214,7 +4214,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "review"  # MNV-665 poussee sur dev — recette REELLE par tunnel ngrok : webhook PI-SPI signe recu, demande Soldee sans consultation ; rotation reelle -> l ancienne clef verifie encore (204), puis refusee (401) passe le terme. ⛔ MESURE AC-6 : webhook et consultation produisent DEUX clefs d unicite (l evenement PAIEMENT_RECU ne porte pas d end2endId) -> la regle-donnee de STORY-670 RESTE, unification sur txId = story a part
+        status: "done"  # MNV-665 fusionnee dans dev (2026-09-20, verifie par `git cherry`) — ex-review : poussee sur dev — recette REELLE par tunnel ngrok : webhook PI-SPI signe recu, demande Soldee sans consultation ; rotation reelle -> l ancienne clef verifie encore (204), puis refusee (401) passe le terme. ⛔ MESURE AC-6 : webhook et consultation produisent DEUX clefs d unicite (l evenement PAIEMENT_RECU ne porte pas d end2endId) -> la regle-donnee de STORY-670 RESTE, unification sur txId = story a part
         story_path: "stories/STORY-665.md"
         assigned_to: null
       - story_id: "STORY-666"
@@ -4254,7 +4254,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "review"  # MNV-670 poussee sur dev — recette Docker : demande payee dans le bac a sable -> encaissement constate, demande Soldee
+        status: "done"  # MNV-670 fusionnee dans dev (2026-09-20, verifie par `git cherry`) — ex-review : poussee sur dev — recette Docker : demande payee dans le bac a sable -> encaissement constate, demande Soldee
         story_path: "stories/STORY-670.md"
         assigned_to: null
 

@@ -1,6 +1,6 @@
 # STORY-670 : Consulter une demande chez le schéma — le paiement se constate sans webhook
 
-Status: review
+Status: done
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
