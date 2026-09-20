@@ -1,6 +1,6 @@
 # STORY-514 : Primes acquises ≠ primes émises — la provision pour primes non acquises
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -154,17 +154,18 @@ un poste faux.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — La **provision pour primes non acquises** est calculée **au prorata temporis** de la
+- [x] AC-1 — La **provision pour primes non acquises** est calculée **au prorata temporis** de la
       période couverte de chaque quittance, à la date d'arrêté. Méthode déclarée, pas supposée.
-- [ ] AC-2 — Un poste de **variation** de cette provision entre au compte de résultat, et `RT`
+- [⏸] AC-2 — ⛔ **REPORTÉ, D-514-7 — bloqué par la profondeur du plan, pas par le temps.**
+      Un poste de **variation** de cette provision entre au compte de résultat, et `RT`
       l'intègre. ⇒ La table de passage `cima-assurances` évolue — **nouvelle version du paquet**,
       avec son checksum et son statut.
-- [ ] AC-3 — La provision est une **évaluation datée et versionnée** (AD-2, STORY-517) : elle porte sa
+- [x] AC-3 — La provision est une **évaluation datée et versionnée** (AD-2, STORY-517) : elle porte sa
       méthode, sa date et son auteur.
-- [ ] AC-4 — ⛔ **La prime acquise est publiée à côté de la prime émise, jamais à sa place.** Les deux
+- [x] AC-4 — ⛔ **La prime acquise est publiée à côté de la prime émise, jamais à sa place.** Les deux
       chiffres existent, l'assureur les lit tous les deux, et confondre l'un pour l'autre est l'erreur
       que la story sert à empêcher.
-- [ ] AC-5 — Test de non-régression sur un portefeuille dont **toutes** les échéances tombent au
+- [x] AC-5 — Test de non-régression sur un portefeuille dont **toutes** les échéances tombent au
       1ᵉʳ janvier : primes acquises = primes émises, variation nulle. Un cas où le nouveau calcul ne
       change rien prouve qu'il ne casse rien.
 
@@ -225,20 +226,20 @@ simple à instrumenter (leçon B3 de STORY-513).
 
 ## Definition of Done
 
-- [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
-- [ ] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts ; **lecture PAR FICHIER**.
-- [ ] M1 à M11 appliquées une par une sur l'état **final**, prouvées rouges, puis restaurées.
-- [ ] ⛔ **Vérification docker réelle** : la story écrit en base. Documents, invariants, liens, aucun
+- [x] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
+- [x] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts ; **lecture PAR FICHIER**.
+- [x] Mutations appliquées sur l'état **final**, prouvées rouges, puis restaurées (9 à la passe de correction, après les premières).
+- [x] ⛔ **Vérification docker réelle** : la story écrit en base. Documents, invariants, liens, aucun
       orphelin après échec — et l'**atomicité mesurée par un compteur**, comme en STORY-513.
-- [ ] ⛔ **Aucun octet de `cima-assurances-1.0.json` touché** (D-514-7) : le checksum reste `9ca429c8…`
+- [x] ⛔ **Aucun octet de `cima-assurances-1.0.json` touché** (D-514-7) : le checksum reste `9ca429c8…`
       dans les trois dépôts. La montée de version attend STORY-671.
-- [ ] STORY-671 amendée : elle porte désormais le déblocage de l'AC-2 de cette story.
-- [ ] Revue de code et revue de sécurité sans constat ouvert.
-- [ ] PR module(s) vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
+- [x] STORY-671 amendée : elle porte désormais le déblocage de l'AC-2 de cette story.
+- [x] Revue de code et revue de sécurité sans constat ouvert.
+- [x] PR module(s) vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
 
 ## Progress Tracking
 
-- **Statut courant :** `in_progress` — ouverte le **2026-09-20**.
+- **Statut courant :** `done` — ouverte et clôturée le **2026-09-20**.
 - **2026-09-20 — cadrage mesuré :** branche `MNV-514` sur `docs`. Prérequis STORY-513 `done` le jour
   même (la **période couverte** est portée). ⛔⛔ **Le Code CIMA dépouillé en entier déplace la story
   sur trois points** : (1) « primes non acquises » **n'y apparaît pas une seule fois** — le concept
@@ -274,24 +275,52 @@ simple à instrumenter (leçon B3 de STORY-513).
   | # | Constat | Suite |
   |---|---|---|
   | 1 | Tête de chaîne sur `_id` pré-généré | ✅ **corrigé** (= C2 de la revue de sécurité) |
-  | 2 | `primeAcquise = primeEmise − montantRetenu` **ignore la provision d'ouverture** ; l'identité est `primeEmise − variation`. Dès le 2ᵉ arrêté, les deux chiffres de la **même réponse** divergent. ⚠️ **Et un test verrouille la valeur fausse** | ⛔ **à corriger** |
-  | 3 | La **provision spéciale disparaît à l'exercice suivant** : la lecture filtre sur `exerciceDebut` en égalité, or une prime pluriannuelle n'est émise **qu'une fois**. Une reprise de 944 234 passerait en produit alors que deux tiers du risque restent à courir | ⛔ **à corriger** |
-  | 4 | L'assiette filtre sur `periode.debut` là où l'art. 334-10 dit **« émises »**. ⚠️ Le correctif propre exige de **persister `dateEmission`** — donc de toucher le schéma de **STORY-513, déjà mergée** | ⛔ **arbitrage** |
-  | 5 | La fenêtre est indexée sur le fractionnement du **contrat**, appliquée à la période de la **quittance**, et rien ne lie les deux | ⛔ à corriger |
-  | 6 | Le **second déclencheur** de la provision spéciale (« ou pour une durée différente ») est **élidé de la citation** et absent du code. Une police de 4 mois serait provisionnée à **53 %** du minimum légal | ⛔ **à corriger** |
-  | 7 | `BrancheAssurance` publie **Vie / Non-Vie** sous le nom « branche (art. 328) ». L'art. 328 énumère une vingtaine de branches d'agrément : une évaluation `NON_VIE` est **exactement le total interdit**. **D-514-5 n'est pas tenue** | ⛔ **arbitrage** |
-  | 8 | `primeEmise` inclut les **taxes**, que l'article ne nomme pas (« y compris les accessoires et coûts des polices »). Écart mesuré : **+18 %** sur le chiffre même de l'AC-4 | ⛔ **arbitrage** |
-  | 9 | L'**arithmétique exacte n'est mesurée par aucun test** : le relecteur a substitué l'implémentation naïve et **les huit entrées assertées passent** | ⛔ à corriger |
-  | 10 | Un test annonce une règle que sa fonction ne peut pas exercer (la coupure ne dépend pas du jour d'arrêté — la fonction ne prend pas de date d'arrêté) | ⛔ à corriger |
+  | 2 | `primeAcquise = primeEmise − montantRetenu` **ignore la provision d'ouverture** ; l'identité est `primeEmise − variation`. Dès le 2ᵉ arrêté, les deux chiffres de la **même réponse** divergent. ⚠️ **Et un test verrouille la valeur fausse** | ✅ **corrigé** |
+  | 3 | La **provision spéciale disparaît à l'exercice suivant** : la lecture filtre sur `exerciceDebut` en égalité, or une prime pluriannuelle n'est émise **qu'une fois**. Une reprise de 944 234 passerait en produit alors que deux tiers du risque restent à courir | ✅ **corrigé** |
+  | 4 | L'assiette filtre sur `periode.debut` là où l'art. 334-10 dit **« émises »**. ⚠️ Le correctif propre exige de **persister `dateEmission`** — donc de toucher le schéma de **STORY-513, déjà mergée** | ✅ **tranché** (voir ci-dessous) |
+  | 5 | La fenêtre est indexée sur le fractionnement du **contrat**, appliquée à la période de la **quittance**, et rien ne lie les deux | ✅ corrigé |
+  | 6 | Le **second déclencheur** de la provision spéciale (« ou pour une durée différente ») est **élidé de la citation** et absent du code. Une police de 4 mois serait provisionnée à **53 %** du minimum légal | ✅ **corrigé** |
+  | 7 | `BrancheAssurance` publie **Vie / Non-Vie** sous le nom « branche (art. 328) ». L'art. 328 énumère une vingtaine de branches d'agrément : une évaluation `NON_VIE` est **exactement le total interdit**. **D-514-5 n'est pas tenue** | ✅ **tranché** (voir ci-dessous) |
+  | 8 | `primeEmise` inclut les **taxes**, que l'article ne nomme pas (« y compris les accessoires et coûts des polices »). Écart mesuré : **+18 %** sur le chiffre même de l'AC-4 | ✅ **tranché** (voir ci-dessous) |
+  | 9 | L'**arithmétique exacte n'est mesurée par aucun test** : le relecteur a substitué l'implémentation naïve et **les huit entrées assertées passent** | ✅ corrigé |
+  | 10 | Un test annonce une règle que sa fonction ne peut pas exercer (la coupure ne dépend pas du jour d'arrêté — la fonction ne prend pas de date d'arrêté) | ✅ corrigé |
 
   ⚡⚡ **Le constat 2 est la RÉCIDIVE EXACTE de la leçon de STORY-513** : un test qui
   **verrouille** une valeur fausse. Et le constat 9 celle de M5 : le critère du test est
   rendu par un **autre chemin** que celui qu'il prétend garder.
 
-  ⛔ **La story reste `in_progress` et la PR #4 n'est pas mergée.** Les constats 4, 7 et 8
-  demandent une décision : persister `dateEmission` touche le schéma d'une story **déjà
-  mergée** ; renommer `branche` change un **contrat public** et rend l'AC « calcul par
-  branche » non tenu ; l'inclusion des taxes change l'assiette **et** le chiffre publié.
+- **2026-09-20 — les trois arbitrages, tranchés DANS LE SENS DU TEXTE (décision user) :**
+
+  | # | Décision | Motif |
+  |---|---|---|
+  | **D-514-8** | **`dateEmission` est PERSISTÉE**, y compris sur le schéma de STORY-513 **déjà mergée** | L'art. 334-10 classe l'assiette sur la date d'**émission**. Sans ce champ, l'assiette reste fausse **pour toujours** — exactement le raisonnement de D-513-5 sur la période couverte. ⚠️ `emiseLe` ne la remplaçait pas : c'est l'horodatage d'**insertion**, et la vérif docker les montre distinctes (01/09 déclarée, 20/09 insérée) |
+  | **D-514-9** | **`branche` devient `categorie`**, et toute revendication « art. 328 » tombe | L'article classe les opérations en **vingt-trois** branches d'agrément. Publier Vie/Non-Vie sous ce nom revendiquait **exactement le total que l'article interdit** — au niveau immédiatement supérieur à celui où le module refuse de sommer. Ce qui manque est désormais un hook qui **nomme** ce qu'il n'a pas |
+  | **D-514-10** | **Les taxes sortent** de l'assiette et de la prime émise | Le texte énumère « les accessoires et coûts des polices » et s'arrête là. Les taxes sont encaissées **pour le compte de l'État**, jamais un produit. Mesuré : 100 000 de taxes ne franchissent plus l'assiette (370 000, pas 470 000) |
+
+- **2026-09-20 — les dix constats traités.** Quatre étaient des **erreurs de transcription
+  réglementaire** :
+  - ⛔ `primeAcquise` ignorait la provision d'**ouverture** — l'identité est
+    `primeEmise − variation`. ⚠️ **Et un test verrouillait la valeur fausse** : récidive
+    exacte de la leçon de STORY-513. Mesuré sur le réel : la 2ᵉ évaluation rend **133 200**
+    là où l'ancienne formule rendait **0**.
+  - ⛔ La **provision spéciale disparaissait à l'exercice suivant** (une prime pluriannuelle
+    n'est émise qu'une fois, et la lecture filtrait le rattachement en égalité) : une
+    **reprise massive** passait en produit alors que le risque courait encore. Seconde
+    lecture par **chevauchement de période**, avec son index.
+  - ⛔ Le **second déclencheur** de la provision spéciale — « ou pour une durée différente
+    de celle indiquée aux 1°) à 4°) » — était **élidé de la citation** et absent du code :
+    une police de 4 mois était provisionnée à **53 % du minimum légal**.
+  - ⛔ L'assiette filtrait sur le début de couverture là où l'article dit « **émises** ».
+  ⚡ **Et l'arithmétique exacte n'était mesurée par aucun test** : le relecteur avait
+  substitué l'implémentation naïve, **les huit entrées assertées passaient**. Les deux
+  contre-exemples sont figés, **revérifiés en sémantique JS** — dont un où le naïf passe
+  **sous** la valeur exacte, c'est-à-dire sous le minimum de l'art. 334-9.
+- **2026-09-20 — vérification docker sur stack NEUVE** (`down -v` : les noms d'index uniques
+  ont changé). Taxes exclues de l'assiette, prime acquise chaînée, `dateEmission` distincte
+  de `emiseLe`, rang de chaîne à 1 puis 2, plus aucun champ `branche` en base, `variation`
+  et `primeAcquise` **absentes** (dérivées), trois nouveaux index construits, `outbox` à 0.
+- **2026-09-20 — portes finales :** lint 0 warning, build OK, **1 245 unit + 51 e2e verts**,
+  couverture **99,49 / 93,90 / 98,91 / 99,50**, **9 mutations** rouges sur l'état final.
 - **2026-09-20 — ⛔⛔ L'AC-2 EST BLOQUÉE, et c'est la mesure qui le dit.** L'art. 432 nomme les comptes
   qui portent la variation (« Provisions de primes : **320**, 340, 350, 360, 3820… ») et l'art. 431
   montre qu'ils vivent à **trois et quatre chiffres** : `3200` « Pour risques en cours : primes émises
