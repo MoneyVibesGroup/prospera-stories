@@ -106,6 +106,40 @@ variation au compte de résultat**. L'AC-2 a donc bien son objet.
 **STORY-671** (transcription des 1 052 comptes) et **STORY-672** (routage des 11 comptes de gestion
 orphelins, dont `73` et `82`). Celle qui livre en premier prend la version ; les autres s'alignent.
 
+### M6 — ⛔⛔ L'AC-2 est BLOQUÉE par STORY-671, et la livrer quand même serait PIRE que de ne pas la livrer
+
+L'**article 432** nomme les comptes qui portent la variation, dans sa description du compte `80`
+« Exploitation générale (comptes spéciaux aux entreprises de toute nature) » :
+
+> « **Provisions de primes : 320, 340, 350, 360, 3820, 3840, 3850** et (cessions) 3920, 3940, 3950,
+> 39820, 39840, 39850. »
+
+Et l'**article 431** montre où ils vivent — **à trois et quatre chiffres** :
+
+```
+32.   Provisions techniques des opérations d'assurance directe dommages, RC et risques divers
+  320.  Primes
+    3200. Pour risques en cours : primes émises par anticipation
+    3201. Pour risques en cours : autres primes
+    3205. Pour risques croissants          3206. Pour égalisation
+    3208. Pour ristournes à payer          3209. Pour annulations de primes
+  325.  Sinistres
+    3250. Pour sinistres à payer           3254. Provisions mathématiques
+```
+
+⛔ **`320` (Primes) et `325` (Sinistres) sont FRÈRES sous la même racine `32`.** Le plan packagé
+`cima-assurances@1.0` ne porte que les **racines à 2 chiffres** (mesuré en STORY-512 : 80 sur 1 052).
+Router un poste de variation sur `32` capterait donc **aussi les provisions de sinistres**, les
+provisions mathématiques, l'égalisation et les ristournes à payer.
+
+⇒ **`RT` passerait de « ignore les provisions » à « les compte toutes, en bloc ».** C'est une erreur
+**plus grave** que celle que la story sert à corriger, et elle serait **invisible** : la balance reste
+équilibrée, `CAT = CPT` reste vrai, et le chiffre est plausible.
+
+⇒ **L'AC-2 n'est pas réalisable à la profondeur actuelle du plan.** Elle attend **STORY-671**, qui rend
+`3200`/`3201` routables. Ce n'est pas un report de confort : c'est la différence entre un poste juste et
+un poste faux.
+
 ## Décisions de cadrage du 2026-09-20 — à relire en revue
 
 | # | Décision | Pourquoi |
@@ -116,6 +150,7 @@ orphelins, dont `73` et `82`). Celle qui livre en premier prend la version ; les
 | **D-514-4** | Le module publie un **minimum calculé**, et l'évaluation peut porter un montant **retenu supérieur** | Art. 334-9 : le montant légal est un **minimum** assorti d'une obligation de **suffisance**. Un modèle à une seule valeur ferait du minimum un maximum |
 | **D-514-5** | ⛔ Calcul **séparé par branche** (art. 328), jamais un total | Le texte l'impose en propre. Et c'est la même doctrine que l'étanchéité Vie/Non-Vie d'AD-3 |
 | **D-514-6** | ⛔ **Aucun calcul actuariel inventé** (AD-12) — et il n'y en a pas à inventer | Les deux méthodes sont **prescrites par le texte**, avec leur assiette. Ce que le module fait est une **transcription**, pas une évaluation |
+| **D-514-7** ⛔⛔ | **L'AC-2 est REPORTÉE en attente de STORY-671**, et la story livre tout le reste | La provision pour risques en cours vit à **4 chiffres** (`3200`, `3201`) sous `320`, dont le **frère** `325` porte les sinistres. Le plan packagé s'arrêtant à 2 chiffres, un poste de variation câblé sur `32` capterait **toutes** les provisions techniques. `RT` passerait de « les ignore » à « les compte toutes » — **pire**, et **invisible**. On ne livre pas un poste faux pour cocher un AC |
 
 ## Critères d'acceptation
 
@@ -148,11 +183,16 @@ orphelins, dont `73` et `82`). Celle qui livre en premier prend la version ; les
 - Le calcul **séparé par branche** (art. 328), jamais un total.
 - ⛔ **La prime acquise publiée À CÔTÉ de la prime émise, jamais à sa place** (AC-4) : les deux chiffres
   existent, l'assureur lit les deux.
-- Le **poste de variation** au compte de résultat et son entrée dans `RT` — **nouvelle version du
-  paquet** `cima-assurances`, recopiée dans les **trois** dépôts dans le même lot de PR.
+- La **variation** de la provision entre deux arrêtés, **calculée et publiée par le service** — c'est
+  le chiffre que le poste de liasse consommera le jour où il pourra exister.
 
 ### Hors périmètre
 
+- ⛔⛔ **Le poste de variation dans la liasse et son entrée dans `RT` (AC-2) — REPORTÉ, D-514-7.**
+  Techniquement impossible à faire **juste** tant que le plan packagé s'arrête à 2 chiffres : la
+  provision pour risques en cours est à `3200`/`3201`, sous un `320` dont le frère `325` porte les
+  sinistres. **STORY-671** le débloque. ⚠️ La story livre **tout le reste**, y compris la variation
+  elle-même — seule sa **présentation en liasse** attend.
 - ⛔ Les **autres provisions techniques** : sinistres à payer (art. 334-12), mathématiques des rentes,
   risque d'exigibilité (art. 334-14) → EPIC-131, STORY-515 à STORY-518.
 - ⛔ La **réassurance** (art. 334-11 : la part du réassureur au bilan, les abandons de primes) →
@@ -178,7 +218,7 @@ simple à instrumenter (leçon B3 de STORY-513).
 | M5 | Appliquer 36 % aux années suivantes d'un contrat pluriannuel au lieu de 100 % | la provision spéciale |
 | M6 | Sommer les branches au lieu de les séparer | **D-514-5**, art. 328 |
 | M7 | Publier la prime acquise **à la place** de la prime émise | **AC-4** |
-| M8 | Retirer le poste de variation de la formule de `RT` | **AC-2** |
+| M8 | *(sans objet — l'AC-2 est reportée, D-514-7 : il n'y a pas de poste à muter)* | — |
 | M9 | Rendre la méthode implicite (une seule, non portée par l'évaluation) | **AD-2 / D-514-2** |
 | M10 | Autoriser l'écrasement d'une évaluation existante | l'append-only de l'évaluation |
 | M11 | Un portefeuille dont **toutes** les échéances tombent au 1ᵉʳ janvier | **AC-5** : primes acquises = primes émises, variation nulle |
@@ -190,9 +230,9 @@ simple à instrumenter (leçon B3 de STORY-513).
 - [ ] M1 à M11 appliquées une par une sur l'état **final**, prouvées rouges, puis restaurées.
 - [ ] ⛔ **Vérification docker réelle** : la story écrit en base. Documents, invariants, liens, aucun
       orphelin après échec — et l'**atomicité mesurée par un compteur**, comme en STORY-513.
-- [ ] ⛔ **Byte-identité de l'artefact** rétablie dans les **trois** dépôts après la montée de version,
-      et les PR intégrées **ensemble**.
-- [ ] Version du paquet **vérifiée avant de coder** (STORY-671 et STORY-672 en demandent une aussi).
+- [ ] ⛔ **Aucun octet de `cima-assurances-1.0.json` touché** (D-514-7) : le checksum reste `9ca429c8…`
+      dans les trois dépôts. La montée de version attend STORY-671.
+- [ ] STORY-671 amendée : elle porte désormais le déblocage de l'AC-2 de cette story.
 - [ ] Revue de code et revue de sécurité sans constat ouvert.
 - [ ] PR module(s) vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
 
@@ -209,6 +249,16 @@ simple à instrumenter (leçon B3 de STORY-513).
   (art. 334-9). Trois règles d'assiette manquaient à l'énoncé : provision spéciale pluriannuelle à
   **100 %**, calcul **séparé par branche** (art. 328), et taux **relevable par la Commission**.
   Six décisions : D-514-1 à D-514-6.
+- **2026-09-20 — ⛔⛔ L'AC-2 EST BLOQUÉE, et c'est la mesure qui le dit.** L'art. 432 nomme les comptes
+  qui portent la variation (« Provisions de primes : **320**, 340, 350, 360, 3820… ») et l'art. 431
+  montre qu'ils vivent à **trois et quatre chiffres** : `3200` « Pour risques en cours : primes émises
+  par anticipation » et `3201` « …autres primes », sous `320` **dont le frère `325` porte les
+  sinistres**. Le plan packagé n'ayant que les racines à 2 chiffres (80 sur 1 052, mesuré en
+  STORY-512), un poste câblé sur `32` capterait **toutes** les provisions techniques — sinistres,
+  provisions mathématiques, égalisation, ristournes à payer comprises.
+  ⇒ `RT` passerait de « ignore les provisions » à « les compte toutes, en bloc » : **pire** que le
+  défaut d'origine, et **invisible** (`CAT = CPT` reste vrai). **D-514-7** : l'AC-2 attend STORY-671.
+  On ne livre pas un poste faux pour cocher un AC.
 
 ## Notes
 
