@@ -4222,7 +4222,7 @@ sprints:
         epic: "EPIC-036"
         points: 8
         service: "paiement-service"
-        status: "ready-for-dev"  # phase B, prealable distributeurs, NFR-1
+        status: "in-progress"  # MNV-666 — le raccordement PI-SPI devient une donnee d ORGANISATION (secret et cle d API scelles, client id et participant en clair) ; AUCUN repli sur les variables d environnement, sinon NFR-1 est viole par defaut
         story_path: "stories/STORY-666.md"
         assigned_to: null
       - story_id: "STORY-667"
