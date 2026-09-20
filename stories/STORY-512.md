@@ -161,46 +161,45 @@ la transcription de STORY-671**, relevés ici pendant qu'ils sont sous les yeux.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Un `longueurCompteDetail` est **déclaré** pour `cima-assurances`, comme il l'est pour
+- [x] AC-1 — Un `longueurCompteDetail` est **déclaré** pour `cima-assurances`, comme il l'est pour
       les autres référentiels — et il est **sourcé**, pas choisi.
-- [ ] AC-2 — Le comportement sur un compte plus long que la profondeur du plan est **testé et
+- [x] AC-2 — Le comportement sur un compte plus long que la profondeur du plan est **testé et
       documenté** : accepté par rattachement de préfixe, ou refusé. ⛔ Le laisser implicite reproduit
       exactement l'angle mort de STORY-172.
-- [ ] AC-3 — ⚠️ **Vérifier que les 80 comptes sont bien la liste complète de l'article 431**, en
+- [x] AC-3 — ⚠️ **Vérifier que les 80 comptes sont bien la liste complète de l'article 431**, en
       recoupant contre la source officielle — pas contre l'artefact. C'est précisément le contrôle
       qui a révélé la troncature du SFD.
-- [ ] AC-4 — La byte-identité de l'artefact entre `balance-service` et `bilan-service` est **gardée**
+- [x] AC-4 — La byte-identité de l'artefact entre `balance-service` et `bilan-service` est **gardée**
       (règle AD-6/STORY-368), et la garde **prouve qu'elle détecte** (test de mutation).
-- [ ] AC-5 — Si le plan doit être enrichi au-delà de l'article 431, l'enrichissement est **une story
+- [x] AC-5 — Si le plan doit être enrichi au-delà de l'article 431, l'enrichissement est **une story
       séparée avec son sourcing** : on ne complète pas un plan comptable par analogie.
 
 ## Table de mutations obligatoire
 
-⚠️ À remplir **pendant** le dev : chaque mutation réellement appliquée, prouvée rouge, puis restaurée.
-Une mutation qui ne compile pas n'est pas « 0 test », c'est une mutation **mal formulée** (leçon
-STORY-505) — la reformuler, ne jamais la compter.
+**7 mutations réellement appliquées**, chacune prouvée rouge puis restaurée. ⚠️ **L'une a produit un
+constat réel (M6)** et **une autre était mal formulée (M7)** — le détail est dans le *Progress Tracking*.
 
-| ID | Mutation à appliquer | Ce qui doit virer au rouge |
+| ID | Mutation appliquée | Ce qui a viré au rouge |
 |---|---|---|
-| M1 | `longueurCompteDetail: 5` → `6` dans le manifeste de `balance-service` | le test de valeur sourcée |
-| M2 | `longueurCompteDetail: 5` → `6` dans le manifeste d'`assurance-service` | le test de valeur sourcée |
-| M3 | Retirer la ligne `longueurCompteDetail` du manifeste CIMA (retour au fail-open) | les tests de profondeur : un compte à 6 chiffres redevient « de détail » |
-| M4 | `normalise.length <= longueurDetail` → `<` dans `estCompteDeDetail` | le test de la borne exacte (5 chiffres accepté) |
-| M5 | Altérer un octet de `cima-assurances-1.0.json` dans **un** dépôt | la garde de byte-identité, dans les **trois** dépôts |
-| M6 | Faire pointer la garde sur le dépôt local au lieu du voisin | la garde cesse de comparer — elle doit rougir, pas passer |
-| M7 | Supprimer l'entrée synthétique qui exerce le fail-open | la couverture de branche de `estCompteDeDetail` |
+| M1 | `longueurCompteDetail: 5` → `6` au manifeste de `balance-service` | **2 tests** |
+| M2 | idem au manifeste d'`assurance-service` | **4 tests** |
+| M3 | Retirer la ligne du manifeste CIMA (retour au fail-open) | **6 tests** |
+| M4 | `normalise.length <= longueurDetail` → `<` dans `estCompteDeDetail` | **3 tests**, dont la borne exacte `31123` |
+| M5 | Un octet altéré dans `bilan-service`, **source** des octets | **1 test dans CHACUN** des deux dépôts aval |
+| M6 | Chemin du voisin redirigé vers le dépôt **local** | ⛔ **VERT 19/19 — la garde était une tautologie.** Rouge après correctif ; la variante « chemin différent qui retombe dans ce dépôt » rougit aussi |
+| M7 | L'exerciseur synthétique cesse d'exercer le fail-open (`undefined` → `6`) | **1 test** — mais seulement grâce à l'assertion ajoutée en D-512-4 (formulation initiale « supprimer l'entrée » : ne mesurait **rien**, la branche ayant deux exerciseurs) |
 
 ## Definition of Done
 
 - [ ] Statut synchronisé dans ce document, `sprint-status.yaml` et le présent Progress Tracking.
-- [ ] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts sur **`balance-service`** et
+- [x] Lint 0 warning, build, couverture ≥ 65/90/90/90, unit + e2e verts sur **`balance-service`** et
       **`assurance-service`**.
-- [ ] M1 à M7 appliquées une par une, prouvées rouges, puis restaurées.
-- [ ] ⛔ **Non-régression mesurée sur `balance-service`** : déclarer un niveau de détail pour CIMA
+- [x] M1 à M7 appliquées une par une, prouvées rouges, puis restaurées.
+- [x] ⛔ **Non-régression mesurée sur `balance-service`** : déclarer un niveau de détail pour CIMA
       **restreint** `isCompteDeDetail`. Aucune suite existante ne doit changer de verdict sans que ce
       soit voulu et dit.
-- [ ] Checksum `cima-assurances-1.0.json` **inchangé** dans les trois dépôts (`9ca429c8…`).
-- [ ] STORY-671 créée, sourcée et slottée.
+- [x] Checksum `cima-assurances-1.0.json` **inchangé** dans les trois dépôts (`9ca429c8…`).
+- [x] STORY-671 créée, sourcée et slottée.
 - [ ] Revue de code et revue de sécurité sans constat ouvert.
 - [ ] PR module(s) vers `dev`, PR docs vers `main`, rebase-merge, branches supprimées.
 
@@ -216,6 +215,52 @@ STORY-505) — la reformuler, ne jamais la compter.
   `6126` pour `6026` et `6905` sans point, arbitrées par l'art. 432). Cinq décisions : D-512-1 à
   D-512-5. **Recoupement croisé** : art. 430, 431 et 432 relus un par un sur les pages officielles ;
   le PDF consolidé cité par le README (`droit-afrique.com`) est **mort**.
+- **2026-09-20 — dev :** branches `MNV-512` sur `balance-service` et `assurance-service` (base `dev`).
+  `longueurCompteDetail: 5` déclaré dans les deux manifestes, sourcing complet au commentaire
+  (art. 430 + art. 431 + absence de clause d'ouverture). Tests de profondeur écrits sur le **vrai**
+  artefact dans les deux dépôts : borne exacte, rattachement inchangé, `3012`, trous de numérotation.
+  Octets de `cima-assurances-1.0.json` **inchangés** (`9ca429c8…`) et `bilan-service` **non touché**.
+- **2026-09-20 — portes DoD :** lint 0 warning et build OK sur les deux services.
+  `balance-service` **4 175 unit + 1 077 e2e** verts ; `assurance-service` **853 unit + 17 e2e** verts.
+  Aucun seuil de couverture franchi à la baisse.
+- **2026-09-20 — table de mutations, 7 appliquées et prouvées :**
+
+  | ID | Mutation appliquée | Constaté |
+  |---|---|---|
+  | M1 | `5` → `6` au manifeste de `balance-service` | **2 rouges** |
+  | M2 | `5` → `6` au manifeste d'`assurance-service` | **4 rouges** |
+  | M3 | ligne retirée du manifeste (retour fail-open) | **6 rouges** |
+  | M4 | `length <= longueurDetail` → `<` | **3 rouges** (dont la borne exacte `31123`) |
+  | M5 | un octet altéré dans `bilan-service` (source des octets) | **1 rouge dans CHACUN** des deux dépôts aval |
+  | M6 | chemin du voisin redirigé vers le dépôt **local** | ⛔ **VERT 19/19 — défaut réel** (voir ci-dessous) |
+  | M7 | l'exerciseur synthétique cesse d'exercer le fail-open | **1 rouge** |
+
+  ⛔⛔ **M6 a trouvé un vrai défaut, et c'est le constat le plus utile de la story.** La garde de
+  byte-identité inter-dépôts se laissait pointer sur le dépôt **local** : elle comparait alors le
+  fichier à lui-même et **19 tests sur 19 restaient verts**. Une garde qui se présente comme une
+  comparaison inter-dépôts et qui est une tautologie aurait survécu à n'importe quelle divergence
+  réelle — exactement le mode de panne de STORY-368, avec un cran de plus : là-bas la copie était
+  périmée, ici c'est *l'instrument de mesure* qui était faux. Correctif : une **garde de la garde**
+  qui compare les chemins **résolus** et exige que l'amont soit hors de la racine du dépôt. ⚠️ Une
+  égalité de chaînes n'aurait pas suffi — un chemin *différent* qui retombe dans le dépôt (via `..`,
+  un lien) est le même piège, et la variante M6bis le prouve : rouge elle aussi. Corrigé dans les
+  **deux** dépôts.
+
+  ⚠️ **M7 a d'abord été mal formulée.** « Supprimer l'entrée synthétique » ne mesurait rien : la
+  branche `longueurDetail === undefined` est exercée à **deux** endroits (la spec du chargeur, sur la
+  fonction pure, et le manifeste synthétique de la spec de cohérence). Reformulée en « l'exerciseur
+  cesse d'exercer » (`undefined` → `6`), elle rougit — mais seulement parce qu'une **assertion** a été
+  ajoutée sur le fail-open lui-même (D-512-4) : sans elle, l'exerciseur pouvait cesser d'exercer en
+  silence, en chargeant sans rougir.
+- **2026-09-20 — vérification runtime (conteneur réel, pas un mock) :** la story n'écrit rien en base,
+  mais le manifeste devait **atteindre le runtime**. Stack démarrée (`mongo` + `assurance-service`),
+  chargeur de production exercé dans le conteneur sur les octets déployés :
+  `Référentiel cima-assurances@1.0 chargé (plan=80 comptes, règles=6, détail=5)`, checksum
+  `9ca429c8…` **vérifié**, et le comportement en profondeur mesuré tel que spécifié —
+  `31`/`311`/`3112`/`31123` déposables, `311234` et `3112345678` rattachables mais **non** déposables,
+  `3012` rattachable à rien. Stack arrêtée.
+- **2026-09-20 — PR ouvertes :** `prospera-balance-service#109` et `prospera-assurance-service#2`,
+  toutes deux base `dev`, à intégrer **ensemble**.
 
 ## Notes
 
