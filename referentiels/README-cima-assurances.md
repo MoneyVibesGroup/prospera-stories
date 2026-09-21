@@ -151,6 +151,68 @@ Conseil des Ministres du 2 avril 2008.
    l'en retirer y produirait un résultat *avant* HAO et *avant* impôt (**D-091-3**). La règle appartient au
    référentiel **dans les deux sens**.
 
+## `cima-assurances@2.0` — les variations de provisions techniques entrent au résultat (STORY-518)
+
+⚠️ **Deux versions coexistent, comme `sfd-bceao@1.0` et `@2.0`.** `@1.0` reste packagée et **intacte**
+(`9ca429c8…`) : son résultat technique a été servi à des organisations, et on ne réécrit pas un
+chiffre déjà publié. `@2.0` (`e779903a…`) est la version **servie** depuis STORY-518.
+
+### Ce que `@2.0` change, et pourquoi
+
+`@1.0` publiait `RT = +RP1 +RP3 +RP5 −RC1 −RC5 −RC8` : des primes **émises** (compte `70`) contre des
+prestations **payées** (compte `60`). C'est un résultat d'encaissements et de décaissements sous un
+libellé qui dit « résultat technique » — et le libellé du poste le **disait** déjà.
+
+⚡⚡ **Le Code CIMA n'a AUCUN compte de gestion pour la variation d'une provision technique.**
+L'**article 432** énumère les comptes constituant les postes du compte 80 « Exploitation générale »,
+et les prend en **classe 3** :
+
+> « **Provisions de sinistres : 325, 355, 3825, 3855** et (cessions) 3925, 3955, 39825, 39855. »
+> « **Provisions de primes : 320, 340, 350, 360, 3820, 3840, 3850** et (cessions) … »
+> « **Provisions mathématiques : 310, 340, 3810, 3840** et (cessions) … » *(sociétés vie)*
+
+Le mot « variation » ne paraît que **deux fois** dans toute la liste de l'article 431 — `655`
+« Variation de commissions sur primes acquises et non émises » et `7024` « Variation de la provision
+de primes acquises et non émises » — et **jamais** pour une provision technique du passif.
+
+⇒ La variation se lit donc **entre deux arrêtés**, sur un poste de **bilan**, par une opérande
+`mode: 'VARIATION'`.
+
+### Les deux postes, et pourquoi deux et non trois
+
+| Poste | Libellé | Source |
+|---|---|---|
+| `RV1` | Variation des provisions techniques **brutes** | `VARIATION` de `CP3` (`BILAN_PASSIF`) |
+| `RV2` | Variation de la **part des cessionnaires** | `VARIATION` de `CA2` (`BILAN_ACTIF`) |
+
+`RT = +RP1 +RP3 +RP5 −RC1 −RC5 −RC8 −RV1 +RV2`.
+
+⛔ **Le Code en nomme trois** (provisions mathématiques, de sinistres, de primes), et `@2.0` n'en
+porte que deux. La raison est mesurée, pas choisie : le plan packagé s'arrête à **2 chiffres**, et
+`ramenerAuPlan` fusionne `3200` (risques en cours) et `3250` (sinistres à payer) sur `32`. Les trois
+postes sont **indiscernables** tant que **STORY-671** n'a pas transcrit le plan. Le **brut** contre
+les **cessions**, lui, est séparable — et l'**article 334-11** en fait une interdiction, pas une
+présentation : la part cédée ne peut « en aucun cas » être compensée avec le brut.
+
+### Ce que `@2.0` ne change PAS
+
+- ⛔ `RN` **ne cascade plus depuis `RT`** et énumère ses 13 opérandes de détail. Il est le poste
+  terminal, confronté à `Σ_CR (crédit − débit)` par `coherenceSig` ; une balance équilibrée impose
+  cette égalité **par construction**. Y faire entrer la variation aurait fait passer **tout** dossier
+  CIMA en `ANOMALIE` sur une balance pourtant juste. L'écart `RT`/`RN` est **l'écriture d'inventaire**
+  que le plan CIMA passe contre le compte `80` — déclaré en `racinesDeGestion` et rattaché à **aucun**
+  poste (**STORY-522**).
+- Le **statut reste `amorce`** : la réserve levée est celle des variations, **pas** celle de la
+  séparation Vie/Non-Vie (**STORY-521**) ni celle des états C1..C25 (**STORY-523**). Le libellé de
+  `RT` le dit : « Résultat technique (amorce — hors séparation Vie/Non-Vie) ».
+- Le **plan de comptes est identique** — 80 racines à 2 chiffres, `longueurCompteDetail: 6`.
+
+### ⚠️ Sans colonne N-1, `RT` n'est pas publié
+
+Une variation ne se lit pas dans un solde : sans `soldesN1`, `RV1`, `RV2` et `RT` sont **indéterminés**
+et **absents** de la réponse — jamais rendus `0`, et surtout jamais repliés sur la valeur de `@1.0`.
+Seul `RN`, qui ne dépend d'aucune variation, reste mesuré.
+
 ## Cadrage de l'amorce `cima-assurances@1.0`
 - Plan de comptes = **liste officielle art. 431** (comptes à 2 chiffres, verbatim).
 - Postes / table de passage = **proposition STRUCTURELLEMENT cohérente** (plan ⊇ préfixes de la table),
@@ -158,4 +220,6 @@ Conseil des Ministres du 2 avril 2008.
   **multi-référentiel** (4ᵉ référentiel pluggable, même code, invariant P7) et amorcer le vertical `assurance`
   déjà prévu en admin-panel. La **ventilation fine** (Vie/Non-Vie, variations de provisions techniques,
   parts réassureurs poste par poste) et les **états C1..C25** sont hors amorce → stories dédiées.
+  ⚡ **Les variations de provisions techniques ne le sont plus depuis `@2.0`** (STORY-518, section
+  ci-dessus) ; la ventilation Vie/Non-Vie et les états C1..C25 le restent.
 - Résultat technique / résultat net encodés en postes `FORMULE` (opérandes signées, moteur B8 agnostique).
