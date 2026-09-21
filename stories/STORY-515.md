@@ -1,6 +1,6 @@
 # STORY-515 : Sinistres — déclaration, évaluation, règlement, recours et sauvetages
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -181,34 +181,34 @@ la transcription des 1 052 comptes :
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Un sinistre porte **quatre dates distinctes** : survenance, déclaration, évaluation,
+- [x] AC-1 — Un sinistre porte **quatre dates distinctes** : survenance, déclaration, évaluation,
       règlement. Aucune n'est déduite d'une autre.
       ⚡ **Précisé par le texte (M1)** : deux de ces dates vivent sur le dossier (survenance,
       déclaration), deux sont portées par des **événements** (chaque évaluation a sa date, chaque
       règlement la sienne) — un sinistre a **zéro, une ou dix** dates de règlement, et un champ
       unique aurait imposé d'en écraser neuf.
-- [ ] AC-2 — L'**évaluation** du sinistre (l'estimation de ce qu'il coûtera) est un **événement
+- [x] AC-2 — L'**évaluation** du sinistre (l'estimation de ce qu'il coûtera) est un **événement
       daté et versionné** : elle change dans le temps, et chaque révision est conservée. Écraser
       l'évaluation précédente effacerait la matière de la cadence (STORY-516).
       ⚡⚡ **Augmenté par le texte (M2, D-515-1)** : il y a **deux** suites d'évaluations
       successives — les **sommes à payer** et les **sommes à recouvrer** —, et le Code interdit de
       les compenser.
-- [ ] AC-3 — Les **recours** (contre un tiers responsable) et les **sauvetages** (récupération d'un
+- [x] AC-3 — Les **recours** (contre un tiers responsable) et les **sauvetages** (récupération d'un
       bien) sont tenus **séparément** et viennent en **atténuation** de la charge de sinistre —
       jamais en produit.
       ⚡ **Précisé (M2, M5)** : l'atténuation est celle de la **charge** (état C1 : « A déduire :
       recours (6029) »), **jamais** une déduction de la **provision**, que l'art. 334-12 exige
       **brute**. Et « sauvetage » n'a **aucun compte** au plan CIMA : la distinction est tenue dans
       le registre, l'imputation appartient à AD-5.
-- [ ] AC-4 — Un sinistre est rattaché à son **contrat** et donc à sa **catégorie Vie / Non-Vie**
+- [x] AC-4 — Un sinistre est rattaché à son **contrat** et donc à sa **catégorie Vie / Non-Vie**
       (AD-3) : la ventilation ne se reconstitue pas après coup.
-- [ ] AC-5 — Un sinistre **rouvert** après clôture est exprimable et tracé. C'est un cas courant, et
+- [x] AC-5 — Un sinistre **rouvert** après clôture est exprimable et tracé. C'est un cas courant, et
       un modèle qui ne le prévoit pas force à créer un second sinistre — ce qui fausse tous les
       comptages.
       ⚡ **Confirmé par le texte (M7)**, qui en donne la formule : `a − b − c de l'année précédente`.
       Le dossier réouvert réintègre les « restant à payer » de son exercice de survenance
       **d'origine**. ⚠️ Vocabulaire du régulateur : **terminé**, pas « clos » (D-515-3).
-- [ ] AC-6 — ⚠️ Périmètre : ce module **enregistre** un sinistre, il ne le **gère** pas (pas
+- [x] AC-6 — ⚠️ Périmètre : ce module **enregistre** un sinistre, il ne le **gère** pas (pas
       d'expertise, pas de workflow de gestion) — Q1 de la spine.
 
 ## Périmètre
@@ -247,7 +247,7 @@ la transcription des 1 052 comptes :
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — cadrage réglementaire mesuré le 2026-09-21 (sources relues :
+**Statut : `done`** — ouverte et clôturée le **2026-09-21**. Cadrage réglementaire mesuré (sources relues :
 `cima-afrique.org` articles 334-2, 334-8, 334-12, 334-13, 415, 422 ; Code intégral 361 p. pour l'état
 modèle C10b et le plan comptable de l'art. 431).
 
@@ -348,3 +348,22 @@ assurance-service  MNV-515
   **irrécupérable par l'API**, ce qui est exactement la démonstration du constat.
 - **2026-09-21 — portes finales :** lint **0 warning**, build OK, **1 444 unit + 79 e2e verts**,
   couverture **99,55 / 94,21 / 99,10 / 99,59** (seuils 65/90/90/90), **20 mutations** jouées.
+- **2026-09-21 — clôture.** PR `assurance-service` **#5** (4 commits) rebase-mergée sur `dev`,
+  branche supprimée. Les six critères d'acceptation sont tenus, et deux d'entre eux ont été
+  **augmentés par le texte** : l'AC-2 porte désormais **deux** chaînes d'évaluations successives
+  (art. 415 + 334-12), et l'AC-1 la **ventilation** principal / frais accessoires des paiements.
+
+## Notes
+
+- Voir [[STORY-513]] (le contrat, qui donne la catégorie et la monnaie), [[STORY-516]] (l'état C10b,
+  dont cette story pose la matière : exercice de **survenance** sur le dossier, exercice
+  d'**opération** sur chaque événement), [[STORY-517]] (les provisions techniques hébergées),
+  [[STORY-519]] (les tardifs et le chargement de gestion, qui ne se calculent pas ici),
+  [[STORY-520]] (la part des réassureurs), [[STORY-671]] (qui rendra `3250`/`3259` routables),
+  spine AD-2, AD-3, AD-7, AD-12.
+- Sources officielles : *Code CIMA*, art. **415** (enregistrement des sinistres — l'article que
+  cette story transcrit), **416** (recours et sauvetages, « traitement parallèle »), **334-8 3°**
+  (définition de la provision pour sinistres à payer), **334-12** (dossier par dossier, montant
+  **brut**, recours en **évaluation distincte**), **334-13** (chargement ≥ 5 %), **422** et
+  l'**état modèle C10b** (tableaux C, D, E, F), **431** (plan comptable).
+  https://cima-afrique.org/wp-content/code-cima/fr/Article415Enregistrementdessinis.html
