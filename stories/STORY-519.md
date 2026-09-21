@@ -424,3 +424,84 @@ preuve.
 STORY-540 ; rien n'a été touché ici.
 
 Stack arrêtée après la mesure (`docker compose stop`).
+
+### ⑥ Revue de code — quatre constats, dont DEUX bloquants qu'aucune porte ne voyait
+
+⚠️ **Le contexte compte** : au moment de la revue, lint était à 0, le build passait, **1 771
+unitaires et 171 e2e étaient verts**, la couverture des fichiers neufs était à **100 %** sur les
+quatre axes, une table de **15 mutations toutes rouges** avait été passée, et une **vérification
+docker de 18 mesures** avait été conduite sur Mongo réel. Les deux défauts ci-dessous ont traversé
+tout cela.
+
+Ils ont ceci en commun : **chacun publiait une affirmation fausse avec une provenance impeccable** —
+le patron de STORY-412 que la story cite elle-même.
+
+#### ⛔⛔ Bloquant 1 — `null` traverse `@IsOptional()`, et le fail-closed tombait avec la règle du tout-ou-rien
+
+`@IsOptional()` laisse passer **`null` autant qu'`undefined`** — mesuré sur le `ValidationPipe` réel
+de ce service (`whitelist`, `forbidNonWhitelisted`, `transform`, `enableImplicitConversion`). Le
+filtre qui comptait les champs déclarés excluait `undefined` et `''`, **pas `null`**. Deux chemins en
+sortaient, et le second est le pire :
+
+| Corps | Ce qui se passait |
+|---|---|
+| `"methodeValideeLe": null` | `declares.length === 3`, donc pas de refus ; `versJourUtc(null)` rend `Invalid Date`, dont **toute comparaison est fausse** — les **deux** bornes de date franchies ; Mongoose refusait le cast ⇒ **`500` non nommé** au lieu d'un refus publié |
+| `"methodeValideeParNom": null` | ⛔⛔ **`201`** — le document s'écrivait, et la méthode ressortait **`VALIDEE_PAR_UN_EXPERT` sans aucun expert nommé** (`"valideeParNom": null`), sur un registre **append-only** que rien n'efface |
+
+⇒ Un prédicat unique, `estValidationDeclaree`, **partagé par la règle d'écriture et par la lecture** :
+aucun des deux côtés ne peut plus en diverger. Le patron existait déjà dans ce dépôt
+(`exigerPeriodeCouverte` de `contrats.service.ts`, qui filtre `=== undefined || === null`).
+
+#### ⛔⛔ Bloquant 2 — le registre CALCULÉ publiait l'art. 334-8 sur une évaluation VIE
+
+Le module calcule **par catégorie** (D-514-5, AD-3) et accepte donc `VIE`. Or la « provision pour
+risques en cours » est un poste de l'**art. 334-8**, qui énumère les provisions des **autres
+opérations** : la liste vie de l'**art. 334-2** ne la contient pas. Le mapper appelait le catalogue
+en **`NON_VIE` codé en dur**, et servait donc `fondement: art. 334-8 2°` sur une provision vie.
+
+⛔ **Et cela contredisait le catalogue servi par le MÊME service** : les cinq lignes vie y sont
+toutes `SAISIE`, et le couple `VIE / RISQUES_EN_COURS` **n'y existe pas**.
+
+⇒ La **catégorie est passée**. En vie : `A_VALIDER_PAR_UN_EXPERT`, **aucun `fondement`**, et une mise
+en garde qui dit ce qu'il en est. ⚠️ La story **ne change pas ce que le module calcule** (hors
+périmètre) — elle refuse seulement de prétendre qu'un article le prescrit.
+
+⚡⚡ **Pourquoi l'AC-6 ne l'a pas attrapé, et c'est la leçon transposable.** La confrontation opposait
+**deux constantes écrites à la main**, dont **aucune n'est lue par le code qui calcule**. La
+troisième déclaration — celle qui circulait réellement — était le `NON_VIE` en dur du mapper.
+⇒ **Une déclaration de plus ne mesure le comportement que si elle en est dérivée.**
+
+#### Non-bloquants, corrigés aussi
+
+- La ligne calculée du catalogue **dit** maintenant que la **saisie de ce type reste ouverte**
+  (D-519-8). Le dire **là** revient à le dire **avant** que l'appelant saisisse, ce qui est la raison
+  d'être de la route ; la mise en garde de la réponse de création n'arrivait qu'une fois la question
+  tranchée.
+- Le JSDoc du service ne renvoie plus les règles livrées « à STORY-519 » — une story close.
+
+**Écarté** : la lentille *over-engineering* a sorti un seul constat — la forme `MethodeServie` est
+déclarée deux fois (interface pour les constructeurs, classe pour Swagger, −13 lignes possibles).
+**Non retenu** : `catalogue-des-methodes.ts` est un module de domaine **pur** que `provisions/`
+importe ; y faire entrer `@nestjs/swagger` les coupleraient, et la duplication n'est **pas
+silencieuse** — `tsc` casse si les deux formes divergent.
+
+### ④bis Vérification docker REJOUÉE sur l'état final
+
+Les correctifs touchent des chemins déjà mesurés : la vérification est **refaite sur une stack
+neuve** (`down -v`), avec un jeton IdP réel. ⚠️ L'ordre de déclaration des routes est cette fois lu
+dans le **routeur Nest réel** (`methodes` mappée **avant** `:provisionId`).
+
+| Vérification | Résultat |
+|---|---|
+| `"methodeValideeParNom": null` | **`400 VALIDATION_METHODE_INCOMPLETE`** (auparavant : `201` avec une caution vide) |
+| `"methodeValideeLe": null` | **`400 VALIDATION_METHODE_INCOMPLETE`** (auparavant : `500` au cast) |
+| une chaîne d'espaces | **`400`** — arrêtée plus tôt encore, par le validateur de texte du DTO |
+| ces trois tentatives ont écrit | **0 document** — aucun `500`, aucun orphelin |
+| évaluation **VIE** calculée | `201`, `statut: A_VALIDER_PAR_UN_EXPERT`, **`fondement` ABSENT** |
+| ⚠️ `334-8` dans la réponse vie | présent **uniquement dans la mise en garde qui explique pourquoi il ne s'applique pas** — jamais comme fondement |
+| évaluation **NON-VIE** calculée — la différence | `TRANSCRITE_DU_TEXTE`, `fondement: art. 334-8 2°…`, `montantMinimal: 365 400` |
+| la ligne calculée du catalogue | mentionne bien que la **saisie reste acceptée** |
+| le cas **légitime** n'est pas muré | `201`, `VALIDEE_PAR_UN_EXPERT`, et en base `nom=Aminata Diallo`, `le=2026-02-01` |
+
+Portes rejouées sur l'état final : lint **0**, build OK, **1 784** unit + **173** e2e verts,
+couverture **99,57 / 94,45 / 99,25 / 99,63**.
