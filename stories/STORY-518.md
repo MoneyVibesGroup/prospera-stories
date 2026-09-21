@@ -1,6 +1,6 @@
 # STORY-518 : `RT` cesse d'être un résultat de trésorerie — les variations de provisions techniques entrent au compte de résultat
 
-Status: in_progress
+Status: review
 
 **Complexité :** high
 
@@ -205,28 +205,28 @@ c'est **STORY-522**). Le libellé de `RN` le dit, et le contrôle reste vert.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — De nouveaux postes de **variation** entrent au compte de résultat CIMA, et `RT` les
+- [x] AC-1 — De nouveaux postes de **variation** entrent au compte de résultat CIMA, et `RT` les
       intègre en `FORMULE` avec **opérandes signées**. ⚠️ **Amendé par M5** : la table de passage ne
       suffit pas — le contexte d'évaluation du CR doit aussi porter les postes de **bilan**
       (D-518-4), sans quoi l'opérande lève `OperandeNonResolueError`.
-- [ ] AC-2 — Nouvelle **version du paquet** `cima-assurances@2.0`, avec son checksum, **byte-identique
+- [x] AC-2 — Nouvelle **version du paquet** `cima-assurances@2.0`, avec son checksum, **byte-identique
       entre les trois dépôts** (`bilan-service` source des octets, `balance-service`,
       `assurance-service` — règle AD-6 / STORY-368). ⚠️ `@1.0` reste packagé et **intact** : les
       versions coexistent, comme `sfd-bceao@1.0` et `@2.0`. ⚡ Et elle est **servie** (D-518-6), sinon
       le livrable est inerte.
-- [ ] AC-3 — ⛔ Le libellé de `RT` **perd la réserve « hors variations de provisions techniques »** —
+- [x] AC-3 — ⛔ Le libellé de `RT` **perd la réserve « hors variations de provisions techniques »** —
       et **garde** « hors séparation Vie/Non-Vie », qui est STORY-521 (D-518-3). Le retirer en entier
       serait le mensonge le plus coûteux du programme, simplement déplacé sur l'autre moitié.
-- [ ] AC-4 — Un test compare `RT` **avec** et **sans** variations sur un jeu où les provisions
+- [x] AC-4 — Un test compare `RT` **avec** et **sans** variations sur un jeu où les provisions
       **bougent d'un arrêté à l'autre** : l'écart doit être significatif. ⚡ Un test où les deux
       donnent le même chiffre ne prouve rien — c'est ce que la version actuelle produit déjà.
-- [ ] AC-5 — Les provisions consommées sont **celles arrêtées à la date d'arrêté**, jamais une
+- [x] AC-5 — Les provisions consommées sont **celles arrêtées à la date d'arrêté**, jamais une
       réévaluation postérieure : la variation se lit sur les deux colonnes `soldesN` / `soldesN1`
       (D-518-1), et **jamais** sur la dernière valeur connue.
-- [ ] AC-6 — ⛔ **Aucune régression sur les contrôles** : `EQUILIBRE_BILAN` et `COHERENCE_RESULTAT`
+- [x] AC-6 — ⛔ **Aucune régression sur les contrôles** : `EQUILIBRE_BILAN` et `COHERENCE_RESULTAT`
       restent `OK` sur une balance CIMA équilibrée, et l'articulation `RN == bilan.controle.resultatNetN`
       tient (M6). Un dossier `@1.0` produit **exactement** les mêmes états qu'avant.
-- [ ] AC-7 — La **variation indéterminée** (aucun jeu `N-1` fourni) ne devient **jamais `0`** : `RT`
+- [x] AC-7 — La **variation indéterminée** (aucun jeu `N-1` fourni) ne devient **jamais `0`** : `RT`
       ressort indéterminé, jamais un chiffre faux présenté comme juste.
 
 ## Notes
@@ -239,4 +239,102 @@ c'est **STORY-522**). Le libellé de `RN` le dit, et le contrôle reste vert.
 
 ## Progress Tracking
 
-<!-- rempli pendant le développement -->
+**Statut : `in_progress` → `review` le 2026-09-21.** Quatre dépôts, quatre branches `MNV-518`.
+
+### Ce qui est livré
+
+| Dépôt | Contenu |
+|---|---|
+| `bilan-service` | sources `postes-cima-v2.json` / `table-de-passage-cima-v2.json`, entrée `@2.0` dans `build.mjs`, artefact `cima-assurances-2.0.json` (`e779903a…`), manifeste, **et le semis des postes de Bilan dans le contexte d'évaluation du CR** |
+| `balance-service` | artefact recopié byte-identique, manifeste, `PONT_TAG['CIMA'] → @2.0` |
+| `assurance-service` | artefact recopié byte-identique, manifeste, `REFERENTIEL_SERVI → @2.0`, garde de byte-identité passée à deux artefacts |
+| `platform-catalog-service` | snapshot des paquets, pack `assurance-cima → @2.0`, écart au front déclaré **avec sa garde de version nommée** |
+
+⛔ **`cima-assurances@1.0` n'a pas bougé d'un octet** : `9ca429c8ae8a1ae1c7f64310dc0e09b0c6da4c9031aff171b721d1d9728c8d04`
+dans les trois dépôts et dans les trois conteneurs. Le résultat technique de `@1.0` ayant été
+attribué à des organisations, le corriger en place aurait réécrit un chiffre déjà servi.
+
+### Le défaut trouvé pendant le développement, par le test de l'AC-7
+
+`EvaluateurFormuleService` réinjectait un agrégat **indéterminé** sous la forme d'un `0` dans le
+contexte de cascade (`valeurN: valeurN ?? 0`, avec un commentaire qui l'assumait). Conséquence
+mesurée : **sans jeu N-1, `RT` ressortait à 22 000** — c'est-à-dire *exactement* le résultat de
+trésorerie de `@1.0`, republié sous le libellé du résultat technique corrigé. L'indétermination se
+propage désormais, et l'agrégat n'est **pas émis** plutôt que publié à zéro.
+
+⚡ Ce défaut était **latent depuis STORY-110** : aucun paquet ne portait d'opérande `VARIATION` au
+compte de résultat, donc la branche n'était pas atteignable. C'est CIMA `@2.0` qui l'a rendue
+atteignable, et c'est l'AC-7 qui l'a attrapée.
+
+### Table de mutations — `bilan-service` (committé avant de muter)
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M1 | `RT` : le signe de `RV1` passe de `-` à `+` | **4 rouges** / 17 |
+| M2 | `RV1` : `mode: VARIATION` retiré (retombe sur `VALEUR` = le **stock**) | **7 rouges** / 17 |
+| M3 | `RN` cascade de nouveau depuis `RT` (l'ancienne formule) | **5 rouges** / 17 |
+| M4 | évaluateur : retour du `?? 0` à la réinjection en cascade | **3 rouges** / 77 |
+| M5 | `choisirPosteBilan` : suppression de l'arbitrage par le sens du solde | ⛔ **NE COMPILE PAS** (paramètre inutilisé) |
+| M5 bis | `choisirPosteBilan` : **inversion** de l'arbitrage (actif ⇄ passif) | **2 rouges** / 60 |
+| M6 | `semerPostesBilan` : le semis ne sème plus rien | **29 rouges** / 77 |
+
+⚠️ M5 rappelle la leçon de STORY-517 : **une mutation qui ne compile pas ne mesure rien.** Retirer
+l'arbitrage rendait le paramètre `solde` inutilisé, `tsc` refusait, jest rendait « 0 test ».
+Reformulée en **inversion**, elle rougit.
+
+### Table de mutations — `platform-catalog-service`
+
+| # | Mutation | Verdict |
+|---|---|---|
+| MC2 | le couple du front **remplacé** au lieu d'être servi | **1 rouge** |
+| MC3 | une **famille étrangère** ajoutée au pack | **1 rouge** |
+| MC4 | `@2.0` octroyée mais **absente** du snapshot des paquets | **1 rouge** |
+| MC5 | écart déclaré, mais le pack retombé sur `@1.0` | **2 rouges** |
+| MC6 | la charnière : une clé ajoutée **sans** sa garde de version | **1 rouge** |
+
+⛔ **Une première passe de mutations n'a rien mesuré** et il faut le dire : le harnais restaurait
+depuis `HEAD` alors que le travail n'était **pas encore committé**, donc MC3 et MC4 s'exécutaient
+contre un pack inchangé et « survivaient » sans rien prouver. Committer **avant** de muter, toujours
+— [[git-checkout-efface-le-travail-non-committe]], pour la seconde fois.
+
+### Vérification docker — stack réelle, `docker compose up`
+
+Aucune écriture en base n'est faite par cette story ; ce qui est vérifié ici, c'est que le paquet est
+**réellement servi** et que le chiffre **change réellement**.
+
+| # | Vérification | Résultat mesuré |
+|---|---|---|
+| V1 | `GET /api/v1/referentiels` sur `bilan-service` | **7 paquets**, dont `cima-assurances@2.0`, checksum `e779903a…`, `statut: amorce` |
+| V2 | `sha256sum` de l'artefact **DANS les trois conteneurs** (règle AD-6) | `e779903a…` identique partout ; `@1.0` à `9ca429c8…` partout |
+| V3 | `POST /dossiers/:id/bilan/etats/compte-resultat/dry-run`, org habilitée `@2.0` | `RV1 = 1 500 000` · `RV2 = 500 000` · **`RT = 1 200 000`** · `RN = 1 000 000` |
+| V4 | `coherenceSig` sur le même appel | `{ resultatNetSig: 1 000 000, resultatNetDirect: 1 000 000, ecart: 0, coherent: true }` |
+| V5 | **même balance**, organisation restée sur `@1.0` | **`RT = 2 200 000`** — l'écart de `1 000 000` est la variation, et rien d'autre |
+| V6 | **même appel sans colonne N-1** | `sig = ['RN']` — **`RT` absent**, ni `0`, ni `2 200 000` |
+
+⚡ V5 est l'AC-4 mesurée **sur la stack**, pas en unitaire : 2 200 000 contre 1 200 000 sur la même
+balance, **45 % d'écart**. Un test où les deux donneraient le même chiffre n'aurait rien prouvé.
+
+### Portes de qualité
+
+| Dépôt | Lint | Build | Unitaires | e2e | Couverture |
+|---|---|---|---|---|---|
+| `bilan-service` | 0 warning | OK | **2 975** | **822** | 99,2 / 95,3 / 99,4 / 99,3 |
+| `balance-service` | 0 warning | OK | **4 177** | **1 077** | seuils tenus |
+| `assurance-service` | 0 warning | OK | **1 706** | **161** | 99,6 / 94,2 / 99,2 / 99,6 |
+| `platform-catalog-service` | 0 warning | OK | **740** | **200** | seuils tenus |
+
+⚠️ Quatre e2e de `balance-service` ont rougi **pendant que la stack docker tournait**, puis sont
+repassées vertes une par une et suite complète une fois la stack arrêtée : saturation de la VM, pas
+une régression — le piège déjà consigné dans [[montage-fichier-unique-inode-git]].
+
+### Ce qui reste ouvert, et qui n'est pas dans cette story
+
+- ⚠️ **Le front déclare encore `cima-assurances@1.0`** dans `vertical-packs.ts` (dépôt frontend, hors
+  périmètre). L'écart est **déclaré** côté catalogue et **compensé par une garde qui nomme la
+  version attendue** — ticket ouvert : `TICKET-FRONTEND-referentiel-cima-2-0-story-518.md`.
+- ⚠️ **Migration de données différée** : une organisation déjà octroyée à `@1.0` continue d'être
+  servie sans erreur par `bilan-service`, mais doit voir son octroi rejoué pour recevoir `@2.0`.
+  ⛔ Et il ne faut **pas** lui octroyer les deux : `resolveReferentielForOrg` lève
+  `ReferentielAmbiguError` dès qu'une organisation en porte plus d'un (STORY-422, « on refuse au
+  lieu de choisir »). C'est la vérification docker qui a attrapé cette erreur de conception, après
+  qu'elle eut été écrite et committée.
