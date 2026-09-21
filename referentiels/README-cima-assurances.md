@@ -213,6 +213,88 @@ Une variation ne se lit pas dans un solde : sans `soldesN1`, `RV1`, `RV2` et `RT
 et **absents** de la réponse — jamais rendus `0`, et surtout jamais repliés sur la valeur de `@1.0`.
 Seul `RN`, qui ne dépend d'aucune variation, reste mesuré.
 
+## `cima-assurances@3.0` — les cessions en réassurance entrent au résultat (STORY-520)
+
+⚠️ **Trois versions coexistent désormais.** `@1.0` (`9ca429c8…`) et `@2.0` (`e779903a…`) restent
+packagées et **intactes** : toutes deux ont été servies à des organisations, et on ne réécrit pas un
+chiffre déjà publié. `@3.0` (`dbfae17a…`) est la version **servie** depuis STORY-520.
+
+### ⛔⛔ Ce que `@3.0` défait n'est pas un manque : c'est une COMPENSATION
+
+La spine écrivait « **Rien** dans le CR pour la part des réassureurs dans les sinistres ». **C'est
+faux, et ce qui est vrai est pire.** L'article 431 porte les deux comptes, nommément :
+
+> `609.` **Part des réassureurs dans les prestations et frais**
+> `709.` **Part des réassureurs dans les primes**
+
+et l'article 432 les désigne comme les **cessions** des postes du compte 80 :
+
+> « Prestations et frais payés : 602, 604, 605, 606, 6902, 6904, 6905 et **(cessions) 609, 6909.** »
+> « Primes : 702, 704, 705, 706, 7902, 7904, 7905 et **(cessions) 709, 7909.** »
+
+Le plan de `@1.0`/`@2.0` s'arrêtant à **2 chiffres**, la résolution au **plus long préfixe** rabattait
+`609` sur `60` — donc sur `RC1` — et `709` sur `70` — donc sur `RP1`. Le compte de résultat servi
+**n'omettait pas** les cessions : il les **compensait**, et aucun libellé ne le disait. ⚡ Une
+omission se voit ; une compensation ne se voit pas — et l'**art. 334-11** l'interdit au bilan.
+
+### Le plan gagne EXACTEMENT deux comptes — les premiers à trois chiffres
+
+| Compte | Libellé (art. 431, verbatim) | Classe |
+|---|---|---|
+| `609` | Part des réassureurs dans les prestations et frais | 6 |
+| `709` | Part des réassureurs dans les primes | 7 |
+
+⛔ **Ce n'est PAS la transcription du plan** (**STORY-671**, 972 comptes manquants) : ce sont les deux
+seuls comptes que l'article 432 nomme lui-même « (cessions) » pour les deux postes séparés ici. Sans
+eux, les préfixes de la table de passage seraient **orphelins** (garde CC2) et la séparation serait
+décorative. `longueurCompteDetail` reste **6**, sourcé aux mêmes articles 430/432.
+
+### Les deux postes, et pourquoi leur signe n'est pas choisi
+
+| Poste | Libellé | Règle | Compte |
+|---|---|---|---|
+| `RP6` | Part des réassureurs dans les primes | `PRODUIT` | `709` |
+| `RC9` | Part des réassureurs dans les prestations et frais | `CHARGE` | `609` |
+
+⚡ `709` est un compte de **produit** qui se **débite** ; `609` une **charge** qui se **crédite**.
+Sous les règles `PRODUIT` (`crédit − débit`) et `CHARGE` (`débit − crédit`), les deux ressortent donc
+**négatifs** : la « charge de cession » est ce **produit négatif**, jamais un poste de classe 6
+inventé, et l'atténuation est cette **charge négative** retranchée. Le sens vient du compte.
+
+`RT = +RP1 +RP6 +RP3 +RP5 −RC1 −RC9 −RC5 −RC8 −RV1 +RV2`.
+
+⛔ **`RN` les reçoit AUSSI**, et c'est la condition de non-régression : il est le poste **terminal**
+confronté à `Σ_CR (crédit − débit)`. Extraire `709` de l'assiette de `RP1` laisse la somme inchangée
+**à la seule condition** qu'il les énumère ; les oublier ne lèverait **rien** et ferait passer tout
+dossier CIMA en `ANOMALIE` sur une balance pourtant juste.
+
+⚠️ `RP1` et `RC1` **nomment désormais leur caractère brut** (« brutes de cessions », « brutes de la
+part des réassureurs ») : sans cela, le même libellé désignerait une assiette **nette** en `@2.0` et
+**brute** en `@3.0`.
+
+### ⚡⚡ Le test d'exhaustivité que `@2.0` annonçait n'existait pas
+
+Le commentaire de `table-de-passage-cima-v2.json` écrivait : *« Ajouter un poste de détail au CR sans
+l'ajouter ici casserait l'égalité en silence : c'est ce que garde le test d'exhaustivité. »* — et
+**aucune suite des trois dépôts** ne confrontait les opérandes du terminal à l'assiette du compte de
+résultat. STORY-520 l'écrit (`cima-resultat-net-exhaustivite.spec.ts`), par **expansion transitive**
+des formules : une garde littérale serait fausse sur `@1.0`, dont le `RN` cascade depuis `RT`.
+
+### Ce que `@3.0` ne change PAS
+
+- Le **statut reste `amorce`**. Les réserves levées sont celles de la réassurance au compte de
+  résultat, **pas** la séparation Vie/Non-Vie (**STORY-521**), ni les états C1..C25 (**STORY-523**),
+  ni le niveau de détail du plan (**STORY-671**).
+- ⛔ **Les cessions « étranger » restent dehors** : `7909` est cité par l'art. 432 et **absent** de
+  l'art. 431 — même contradiction que D-518-7 —, et `69` / `79` ne sont rattachés à **aucun** poste
+  de la table de passage. Rattacher `6909` accrocherait un fragment d'une classe dont le tout est
+  libre.
+- ⛔ **La rétrocession** est nommée et non traitée : le compte `39` s'intitule « Part des
+  cessionnaires **et rétrocessionnaires** », mais `assurance-service` ne modélise que la **cession**.
+- ⛔ **Les plafonds de l'art. 308** (cessions hors zone CIMA : plafonds par branche, branches non
+  cessibles, autorisation ministérielle au-delà de 50 %) sont **cités et non appliqués** — le module
+  ne porte ni la branche d'agrément de l'art. 328, ni le territoire du réassureur.
+
 ## Cadrage de l'amorce `cima-assurances@1.0`
 - Plan de comptes = **liste officielle art. 431** (comptes à 2 chiffres, verbatim).
 - Postes / table de passage = **proposition STRUCTURELLEMENT cohérente** (plan ⊇ préfixes de la table),

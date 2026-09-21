@@ -1,6 +1,6 @@
 # STORY-520 : La réassurance se modélise à la cession — pas en correction finale
 
-Status: in_progress
+Status: review
 
 **Complexité :** high
 
@@ -188,30 +188,30 @@ digests épinglés, bascule de la version servie (D-520-8).
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Un **traité** de réassurance : type (quote-part, excédent de plein, excédent de
+- [x] AC-1 — Un **traité** de réassurance : type (quote-part, excédent de plein, excédent de
       sinistre), taux ou plein de conservation, commissions, période, réassureurs et leurs parts.
       ⚠️ **Amendé par D-520-6** : append-only, périodes non chevauchantes par `(catégorie, type)` —
       le traité en vigueur à une date doit être **sans ambiguïté**.
-- [ ] AC-2 — Les **primes cédées** sont dérivées des quittances selon le traité, et entrent au
+- [x] AC-2 — Les **primes cédées** sont dérivées des quittances selon le traité, et entrent au
       compte de résultat comme **charge de cession** — nouveau poste, nouvelle version du paquet.
       ⚠️ **Amendé par M1/M5** : le poste `RP6` porte le compte `709`, qui est un **produit débité** ;
       la « charge de cession » est ce produit négatif, jamais un poste de classe 6 inventé.
       ⚠️ **Amendé par M6** : dérivable pour la **quote-part** ; pour l'excédent de sinistre la prime
       cédée est **contractuelle** et **saisie** ; pour l'excédent de plein la donnée est **absente de
       ce service** et le module **refuse** au lieu d'inventer.
-- [ ] AC-3 — La **part des réassureurs dans les sinistres** est dérivée des sinistres selon le
+- [x] AC-3 — La **part des réassureurs dans les sinistres** est dérivée des sinistres selon le
       traité, et entre en **atténuation** — nouveau poste également (`RC9` ← `609`).
-- [ ] AC-4 — ⛔ **Aucune compensation.** Brut et cédé sont publiés séparément partout : au bilan
+- [x] AC-4 — ⛔ **Aucune compensation.** Brut et cédé sont publiés séparément partout : au bilan
       (`CP3` brut / `CA2` part des cessionnaires), au compte de résultat, et dans chaque provision
       (STORY-517 AC-5). Une présentation nette est une **présentation**, jamais un stockage.
       ⚡ **Mesuré (M1)** : aujourd'hui `RP1` et `RC1` **compensent** — le critère porte donc autant
       sur ce qu'il faut **extraire** que sur ce qu'il faut ajouter.
-- [ ] AC-5 — `RT` intègre les postes de cession (STORY-518), et un test compare le résultat
+- [x] AC-5 — `RT` intègre les postes de cession (STORY-518), et un test compare le résultat
       **brut** et **net de réassurance** : les deux doivent différer sur un jeu avec traité, et être
       **égaux** sur un jeu sans traité.
-- [ ] AC-6 — La **rétrocession** est nommée et **exclue** du périmètre, plutôt que passée sous
+- [x] AC-6 — La **rétrocession** est nommée et **exclue** du périmètre, plutôt que passée sous
       silence : le plan la mentionne (`CA2`), le module ne la traite pas dans cette story.
-- [ ] AC-7 — ⛔ **Aucune régression** : `EQUILIBRE_BILAN`, `COHERENCE_RESULTAT` et l'articulation
+- [x] AC-7 — ⛔ **Aucune régression** : `EQUILIBRE_BILAN`, `COHERENCE_RESULTAT` et l'articulation
       `RN == bilan.controle.resultatNetN` restent verts sur une balance CIMA équilibrée portant
       `609` et `709` (M4). Un dossier `@1.0` ou `@2.0` produit **exactement** les mêmes états
       qu'avant, octet pour octet sur les deux artefacts.
@@ -226,4 +226,148 @@ digests épinglés, bascule de la version servie (D-520-8).
 
 ## Progress Tracking
 
-**Statut : `in_progress` le 2026-09-21.** Cinq dépôts, cinq branches `MNV-520`.
+**Statut : `review` le 2026-09-21.** Cinq dépôts, cinq branches `MNV-520`.
+
+### Ce qui est livré
+
+| Dépôt | Contenu |
+|---|---|
+| `assurance-service` | module `reassurance` — schéma `Traite` append-only et chaîné, `catalogue-des-cessions`, dérivations pures (`cession-de-primes`, `part-des-reassureurs`), deux repositories de lecture, 5 routes, 17 codes de refus ; artefact `@3.0` recopié, `REFERENTIEL_SERVI → @3.0` |
+| `bilan-service` | sources `plan-comptable-cima-v3` / `postes-cima-v3` / `table-de-passage-cima-v3`, entrée `@3.0` dans `build.mjs`, artefact `cima-assurances-3.0.json` (`dbfae17a…`), manifeste, liasse `@3.0`, **et le test d'exhaustivité de `RN` qui n'existait pas** |
+| `balance-service` | artefact recopié byte-identique, manifeste (`longueurCompteDetail: 6`), `PONT_TAG['CIMA'] → @3.0` |
+| `platform-catalog-service` | snapshot des paquets, pack `assurance-cima → @3.0`, écart au front mis à jour avec sa garde nominative |
+| `docs` | story cadrée, README du référentiel, ticket frontend `@3.0` |
+
+⛔ **`cima-assurances@1.0` et `@2.0` n'ont pas bougé d'un octet** : `9ca429c8…` et `e779903a…`,
+mesurés **dans le conteneur** après démarrage. Les deux ont été attribuées ; on ne réécrit pas un
+chiffre déjà servi.
+
+### Table de mutations — 18 mutations, committées avant de muter
+
+| # | Mutation | Résultat |
+|---|---|---|
+| M1 | garde `estObjectId` retirée du repository | 🔴 4 tests |
+| M2 | prime cédée arrondie au **plancher** | 🔴 1 test |
+| M3 | priorité neutralisée dans la tranche XS | 🔴 3 tests |
+| M4 | paramètre **étranger** au type accepté | 🔴 1 test |
+| M5 | montant non dérivable rendu `0` au lieu de `null` | 🔴 1 test |
+| M6 | chronologie en `<=` : l'échéance exacte refusée | 🔴 2 tests |
+| M7 | parts inférieures à 10 000 acceptées | 🔴 1 test |
+| M8 | borne d'émission repoussée de 300 ans | 🔴 1 test |
+| M9 | taux à `0` effacé de la réponse | 🔴 1 test |
+| M10 | quittance inexploitable ignorée en silence | 🔴 1 test |
+| M11 | fin de traité **inclusive** (prime cédée deux fois) | 🔴 1 test |
+| M12 | fin de couverture sinistre **inclusive** | 🔴 1 test |
+| **M13** | **plancher remplacé par un arrondi au plus proche** | ⚠️ **A SURVÉCU** — voir ci-dessous |
+| M14 | plafond de la cession remplacé par un plancher | 🔴 8 tests |
+| B1 | `RP6` retiré des opérandes de `RN` | 🔴 2 tests |
+| B2 | les deux comptes de cession retirés du plan | 🔴 54 tests |
+| B3 | signe de `RC9` inversé dans `RT` | 🔴 15 tests |
+| B4 | libellé de `RP1` divergent entre postes et table | 🔴 25 tests |
+| B5 | `PONT_TAG` revenu à `@2.0` | 🔴 1 test |
+| B6 | pack revenu à `@2.0` | 🔴 1 test |
+| E1 | `@IsObject({ each })` passé à `each: false` | 🔴 16 tests e2e |
+
+#### ⚠️ M13 — la direction de l'arrondi n'était gardée par AUCUN cas
+
+Remplacer `Math.floor` par `Math.round` dans `fractionArrondiAuInferieur` laissait les 21 tests de
+`reassurance.contraintes` **verts**. La raison est mesurable : le seul jeu asserté était
+`1 001 × 40 % = 400,4`, où plancher et arrondi au plus proche donnent **le même chiffre**. La
+batterie prouvait que plafond et plancher **diffèrent**, jamais que le plancher **est** un plancher.
+
+⇒ Cinq jeux confrontent désormais les deux directions à la valeur exacte, dont
+`1 002 × 40 % = 400,8` où l'arrondi rendrait `401` — une atténuation surévaluée, donc un résultat
+amélioré, sur chaque sinistre d'un portefeuille. La mutation vire au rouge sur cinq tests.
+
+⚠️ **Deux mutations ont d'abord semblé survivre à tort** : leur chaîne cible avait été **reformatée
+par prettier**, si bien qu'elles ne s'appliquaient pas. Une mutation qui ne modifie rien n'est pas
+un vert — c'est le pendant du « 0 test » d'une mutation qui ne compile pas, et il faut le vérifier
+des deux côtés.
+
+### Portes de qualité
+
+| Dépôt | Lint | Build | Unitaires | e2e | Couverture |
+|---|---|---|---|---|---|
+| `assurance-service` | 0 | ✅ | **1 992** | **200** | 99,6 / 94,5 / 99,2 / 99,7 |
+| `bilan-service` | 0 | ✅ | **3 047** | ✅ | ≥ seuils |
+| `balance-service` | 0 | ✅ | **4 178** | **1 077** | ≥ seuils |
+| `platform-catalog-service` | 0 | ✅ | **740** | **200** | 99,7 / 96,8 / 100 / 99,8 |
+
+### ⛔⛔ Vérification docker — stack neuve, Mongo réel, jeton IdP réel
+
+`docker compose down -v`, puis stack reconstruite. ⚠️ **La chaîne d'accès est exercée pour de vrai**
+(leçon STORY-511) : inscription et connexion réelles à l'IdP (`aud` contenant `assurance-service`),
+dossier `ASSURANCE` et exercice créés **par `dossier-service`** et propagés aux read-models **par
+Kafka réel**. Seuls les read-models KYC et entitlement ont été semés directement — leurs producteurs
+(`kyc-service`, `platform-catalog-service`) ne sont pas dans cette stack, et c'est dit plutôt que
+sous-entendu.
+
+| # | Vérification | Résultat |
+|---|---|---|
+| 1 | le catalogue servi par Nest réel | **3 types**, un par valeur de `TypeTraite` |
+| 2 | ce que chaque type dérive | `QUOTE_PART` : les deux · `EXCEDENT_DE_SINISTRE` : prime `SAISIE` · `EXCEDENT_DE_PLEIN` : `NON_DERIVABLE` |
+| 3 | les 5 réserves voyagent avec la réponse | art. **308** cité · **rétrocession** nommée · **accessoires exclus** |
+| 4 | ⚠️ **ordre de routage réel** : `methodes` n'est pas appariée sur `:traiteId` | `200` sur `methodes` |
+| 5 | le traité **réellement écrit** | collection **`reassurance_traites`**, 22 champs, `rang: 0`, `traitePrecedentId: null` |
+| 6 | les **trois index uniques**, tels que Mongo les porte | `unicite_reference_traite`, `unicite_succession_traite`, `unicite_rang_traite` — **aucun partiel** |
+| 7 | ⛔ **six refus n'écrivent RIEN** | `1` document avant, `1` après |
+| 8 | la **chaîne** : le suivant remplace le précédent, qui ne bouge pas | `rang 0` (taux 4 000) puis `rang 1` (taux 5 000), `precedent` renseigné |
+| 9 | un traité d'un **autre type** coexiste sur la même période | `201` |
+| 10 | ⚡ l'**assiette exclut taxes ET accessoires** | prime `1 000 000` + `50 000` d'accessoires + `140 000` de taxes ⇒ assiette **`1 000 000`** |
+| 11 | la cession d'une quote-part, dérivée du portefeuille réel | cédée **400 000** (40 %) · commission **100 000** · part **160 000** |
+| 12 | ⛔ **aucun champ « net »** dans la réponse | `[]` |
+| 13 | `EXCEDENT_DE_SINISTRE` : prime **saisie**, part = **tranche** | `300 000` (`SAISIE`) · part **200 000** = `400 000 − 200 000` |
+| 14 | ⛔ `EXCEDENT_DE_PLEIN` : les trois montants cédés à **`null`**, jamais `0` | `raisons: ['DONNEE_ABSENTE_DE_CE_SERVICE']`, **brut toujours mesuré** |
+| 15 | anti-énumération : malformé et inexistant | **404** tous les deux |
+| 16 | dossier **non assurance** — 7ᵉ maillon | `409 REFERENTIEL_DOSSIER_INDETERMINE` |
+| 17 | le référentiel **servi** | `cima-assurances@3.0`, `amorce`, checksum `dbfae17a…`, mise en garde nommant la **rétrocession** |
+| 18 | ⛔ **les octets de `@1.0` et `@2.0`, dans le conteneur** | `9ca429c8…` et `e779903a…` — **inchangés** |
+| 19 | ⛔ habilitation au **couple exact** | `@1.0` → **403** · `@2.0` → **403** · `@3.0` → **200** |
+| 20 | ⛔⛔ **une prime sans période couverte** | **le défaut ci-dessous** |
+
+#### ⛔⛔ Le défaut que la vérification docker a trouvé, et qu'aucune porte ne voyait
+
+Au moment de la mesure : lint à 0, build vert, **1 984 unitaires et 198 e2e** verts, couverture à
+99,6 / 94,5 / 99,2 / 99,7 sur le module, et **18 mutations** déjà passées.
+
+Une prime **sans période couverte** — une ligne héritée d'avant STORY-513, que la route ne peut plus
+écrire et que la base peut encore porter — ne satisfait **aucune** comparaison de plage : en BSON, un
+champ absent n'entre pas dans le même *type bracket* qu'une date, donc `periodeDebut: { $lt: … }` ne
+la ramène pas. Elle était écartée **par la requête**, avant d'atteindre la consolidation — et la
+garde fail-closed censée la refuser (`QUITTANCE_INEXPLOITABLE_POUR_LA_CESSION`) **ne pouvait jamais
+se déclencher**.
+
+⚡ **Mesuré** : une prime de `777 000` sans `periodeDebut` laissait l'assiette à `1 000 000` et
+`quittancesRetenues` à `1`, **sans aucun refus**. Le module sous-cédait **exactement du montant de la
+prime oubliée** — et sous-céder **gonfle** le résultat technique. C'est le mot à mot de ce que le
+JSDoc de cette garde annonçait empêcher.
+
+⚠️ **Pourquoi aucun test ne pouvait le voir** : les unitaires nourrissent la fonction pure
+**directement**, là où c'est la **requête** qui filtrait le cas ; et le double du harnais e2e
+reproduisait fidèlement… le filtre défectueux. Une garde éprouvée sur le seul chemin qui ne l'exerce
+pas.
+
+⇒ Seconde branche `$or` sur les **primes sans période**, préfixe `{orgId, dossierId}` en tête (donc
+servi par l'index) et lecture toujours bornée. Trois tests ferment le trou, à trois niveaux : la
+**forme du filtre** (spec du repository — le seul endroit où il se voit), le **409 avec ses
+identifiants** (e2e), et le double du harnais aligné sur le vrai repository. Mutation rejouée : 🔴 aux
+deux niveaux.
+
+⚠️ **Et la restauration de cette mutation a effacé le correctif** : `git checkout --` rend le
+fichier à sa version **committée**, et le correctif ne l'était pas encore. Réécrit, puis **committé
+avant** de remuter. La leçon était déjà en mémoire ; elle s'applique à la lettre pendant une passe de
+mutation.
+
+#### ④bis Vérification rejouée sur l'état final, conteneur REDÉMARRÉ
+
+⚠️ `docker restart` plutôt qu'un simple hot-reload : `nest --watch` peut annoncer « Found 0 errors »
+en exécutant encore l'ancien code (leçon déjà en mémoire). `Nest application successfully started`
+confirmé après redémarrage.
+
+| # | Vérification | Avant le correctif | Après |
+|---|---|---|---|
+| 20 | une prime de **777 000** sans période couverte | assiette **1 000 000**, `quittancesRetenues: 1`, **HTTP 200, aucun refus** | **HTTP 409** `QUITTANCE_INEXPLOITABLE_POUR_LA_CESSION`, `details.sansPeriode` portant **l'identifiant exact** |
+| 21 | la même prime, période rétablie | — | assiette **1 777 000**, `quittancesRetenues: 2`, cédée **710 800** (40 % exacts) |
+
+⇒ La garde **existe désormais pour de vrai**, et le montant qui disparaissait entre bien dans
+l'assiette dès qu'il est plaçable. Stack arrêtée après la mesure (`docker compose stop`).
