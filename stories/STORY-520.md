@@ -1,6 +1,6 @@
 # STORY-520 : La réassurance se modélise à la cession — pas en correction finale
 
-Status: review
+Status: done
 
 **Complexité :** high
 
@@ -226,7 +226,9 @@ digests épinglés, bascule de la version servie (D-520-8).
 
 ## Progress Tracking
 
-**Statut : `review` le 2026-09-21.** Cinq dépôts, cinq branches `MNV-520`.
+**Statut : `done` le 2026-09-21.** Cinq dépôts, cinq branches `MNV-520`, cinq PR rebase-mergées :
+`bilan-service#128` · `balance-service#111` · `assurance-service#10` ·
+`platform-catalog-service#23` · la PR `docs/` sur `main`.
 
 ### Ce qui est livré
 
