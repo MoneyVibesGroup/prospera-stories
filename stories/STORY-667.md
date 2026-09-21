@@ -1,6 +1,6 @@
 # STORY-667 : Le QR imprimé d'un point de vente — le paiement spontané trouve sa créance
 
-Status: review
+Status: done
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -84,7 +84,7 @@ d'affectation, son motif obligatoire et son auteur restent ceux de STORY-271.
   clefs nommée par [[STORY-665]] (id ≥ 674 — 673 est pris par FedaPay), et il est porté ici comme point ouvert.
 - Elle **n'ouvre aucun écran** et n'imprime aucune affiche : elle rend un SVG.
 
-## Livraison (2026-09-21 — branche `MNV-667`, commit `a9103a1`, sur `origin/dev` à `8b45a74`)
+## Livraison (2026-09-21 — branche `MNV-667`, commit `a9103a1` ; **fusionnée dans `dev` le 2026-09-21 sous `224ee17`**, vérifié par `git cherry`)
 
 **Suites :** 3 633 unitaires (271 suites), 295 e2e, lint 0, `tsc` 0. **Recette Docker sur le
 vrai conteneur : 21/21** (vrai Mongo, vrai coffre, vrai journal, vraie route publique de

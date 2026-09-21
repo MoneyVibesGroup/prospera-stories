@@ -4230,7 +4230,7 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "review"  # MNV-667 (a9103a1) sur dev — point de vente + QR STATIQUE sans montant ; ⛔ un QR reutilisable revient avec le MEME txId : l instant de l evenement entre dans la clef (seulement pour un point de vente, jamais pour une demande), sans instant on ne devine pas (error) ; l orphelin porte sa provenance, AUCUN rattachement d office (FR-P39) ; recette Docker 21/21 ; ⚡ AC-7 MESURE le 2026-09-21 : affiche scannee 2 fois pour de vrai -> MEME txId (= le lieu), evDate present et EGAL a la dateIrrevocabilite du paiement, 2 webhooks signes, 2 encaissements en attente (150 et 175) — l ancienne clef aurait avale le second ; POUSSEE (MNV-667 + docs-667) ; garde de cablage neuve : a rougi a sa 1re execution (2 modules crus globaux)
+        status: "done"  # MNV-667 fusionnee dans dev (2026-09-21, 224ee17, verifie par `git cherry`) — ex-review : point de vente + QR STATIQUE sans montant ; ⛔ un QR reutilisable revient avec le MEME txId : l instant de l evenement entre dans la clef (seulement pour un point de vente, jamais pour une demande), sans instant on ne devine pas (error) ; l orphelin porte sa provenance, AUCUN rattachement d office (FR-P39) ; recette Docker 21/21 ; ⚡ AC-7 MESURE le 2026-09-21 : affiche scannee 2 fois pour de vrai -> MEME txId (= le lieu), evDate present et EGAL a la dateIrrevocabilite du paiement, 2 webhooks signes, 2 encaissements en attente (150 et 175) — l ancienne clef aurait avale le second ; POUSSEE (MNV-667 + docs-667) ; garde de cablage neuve : a rougi a sa 1re execution (2 modules crus globaux)
         story_path: "stories/STORY-667.md"
         assigned_to: null
       - story_id: "STORY-668"
@@ -4246,7 +4246,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "review"  # MNV-669 (375fd0b) empilee sur MNV-667 — POST .../releves/relevements : le compte se RELEVE chez le participant (GET /paiements-recus, curseur, irrevocable seulement, filtres reverifies) et passe par le MEME import que STORY-269 : relever 2 fois n ajoute rien ; position du compte RENDUE et JAMAIS rangee (NFR-1b : « tresorerie » et « solde » interdits) ; la cascade cherche notre reference de DEMANDE au libelle ; recette REELLE 17/17 : 5 paiements, position 1 000 001 025 = 1e9 + 1 025 au franc pres, 3 couples CERTAINS / 0 proposition, ecart 325 = les 2 scans du comptoir de 667 ; ⛔ sort= ne trie que la PAGE, meta.total = taille de page, l API ne nomme qu UNE erreur par reponse
+        status: "review"  # MNV-669 (08eee86) POUSSEE, sur dev a 224ee17 (rebasee apres la fusion de 667, arbre identique) — POST .../releves/relevements : le compte se RELEVE chez le participant (GET /paiements-recus, curseur, irrevocable seulement, filtres reverifies) et passe par le MEME import que STORY-269 : relever 2 fois n ajoute rien ; position du compte RENDUE et JAMAIS rangee (NFR-1b : « tresorerie » et « solde » interdits) ; la cascade cherche notre reference de DEMANDE au libelle ; recette REELLE 17/17 : 5 paiements, position 1 000 001 025 = 1e9 + 1 025 au franc pres, 3 couples CERTAINS / 0 proposition, ecart 325 = les 2 scans du comptoir de 667 ; ⛔ sort= ne trie que la PAGE, meta.total = taille de page, l API ne nomme qu UNE erreur par reponse
         story_path: "stories/STORY-669.md"
         assigned_to: null
       - story_id: "STORY-670"
