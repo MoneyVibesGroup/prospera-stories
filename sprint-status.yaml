@@ -4238,7 +4238,7 @@ sprints:
         epic: "EPIC-036"
         points: 8
         service: "paiement-service"
-        status: "in-progress"  # DEBLOQUEE par le PO le 2026-09-21 : amendement VALIDE et applique au PRD (FR-P65->P69, NFR-1d, R8), code ouvert en BAC A SABLE (le juridique reste un prealable de la PRODUCTION), droits de FR-P60 reemployes, envois reels <= 100 XOF autorises ; ⛔ MESURE : un txId rejoue rend HTTP 200 + REJETE/DU03, et GET /paiements-envoyes/{txId} rend alors CE rejet et pas l execution -> l issue se lit dans la LISTE, IRREVOCABLE gagne, un ordre rejete est TERMINAL (FR-P68 durci)
+        status: "review"  # MNV-668 (15865a8) empilee sur MNV-669 — amendement du PRD VALIDE par le PO le 2026-09-21 (FR-P65->P69, NFR-1d) ; ordre de paiement prepare par un role, valide par un AUTRE (jamais la meme personne : $ne DANS LE FILTRE), part UNE fois (engagement COMMIS avant l appel, reference = identifiant de l ordre), rejete = TERMINAL (FR-P68 durci par la mesure : un txId rejoue rend 200 + DU03 et la lecture par identifiant rend CE rejet) ; recette REELLE 17/17 : 25 XOF partis UNE fois, le meme identifiant renvoye au vrai schema est lu EXECUTE sans un franc de plus ; ⛔ PRODUCTION FERMEE tant que le point juridique du §10 n est pas leve
         story_path: "stories/STORY-668.md"
         assigned_to: null
       - story_id: "STORY-669"
