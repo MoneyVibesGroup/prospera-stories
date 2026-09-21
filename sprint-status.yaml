@@ -4230,7 +4230,7 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "in-progress"  # phase B — fiche ecrite le 2026-09-21, branche MNV-667 ; ⛔ piege central : un QR REUTILISABLE revient avec le MEME txId a chaque paiement, la clef PAIEMENT_RECU:<txId> avalerait le 2e client comme un rejeu
+        status: "review"  # MNV-667 (a9103a1) sur dev — point de vente + QR STATIQUE sans montant ; ⛔ un QR reutilisable revient avec le MEME txId : l instant de l evenement entre dans la clef (seulement pour un point de vente, jamais pour une demande), sans instant on ne devine pas (error) ; l orphelin porte sa provenance, AUCUN rattachement d office (FR-P39) ; recette Docker 21/21 ; ⚠ AC-7 OUVERT : scan reel du code statique (2 fois) a faire au telephone ; garde de cablage neuve : a rougi a sa 1re execution (2 modules crus globaux)
         story_path: "stories/STORY-667.md"
         assigned_to: null
       - story_id: "STORY-668"
