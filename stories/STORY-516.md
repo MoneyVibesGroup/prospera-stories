@@ -227,9 +227,45 @@ assurance-service  MNV-516
   - **Requête sans catégorie : `400`** — jamais d'état toutes catégories confondues.
   - ⛔ **Aucune écriture** : 13 collections, **aucune** créée par l'état, `outbox_events` à **0**, et
     le registre de STORY-515 **inchangé** (1 sinistre, 6 événements).
-- **2026-09-21 — portes de qualité :** lint **0 warning**, build OK, **1 509 unit + 93 e2e verts**,
-  couverture **99,55 / 93,70 / 99,16 / 99,62** (seuils 65/90/90/90), module `etat-sinistres` à
-  **100 %** lignes et fonctions.
+- **2026-09-21 — revue de code ⑥ : 2 bloquants, 4 non bloquants, TOUS TRAITÉS.**
+
+  | # | Constat | Suite |
+  |---|---|---|
+  | 1 | ⛔⛔ Le comptage des dossiers terminés s'appuyait sur un invariant d'**ordre d'insertion** là où l'état filtre sur la **date**. Une **réouverture antidatée** vue sans sa terminaison rendait `termines: -1` et `restantAPayer: 2` sur une ligne à **un seul dossier** | ✅ corrigé — comptage **par dossier**, résultat dans `[0, total]` par construction |
+  | 2 | ⛔⛔ L'état **additionnait des devises et des échelles différentes** et ne publiait **aucune** devise. Le module jumeau refuse exactement ce cas, et le cas est **atteignable** (la garde de devise du contrat est inerte tant que `dossier-service` ne publie pas de devise) | ✅ corrigé — monnaie lue, exigée homogène, publiée |
+  | 3 | La 3ᵉ lecture n'était ni bornée ni servie par un index (= le constat de la revue de sécurité) | ✅ corrigé |
+  | 4 | Trois libellés annonçaient « **au cours de l'exercice** » pour des **cumuls depuis l'origine** — les reporter dans un C10b annuel aurait compté deux fois ce qui avait déjà été déclaré | ✅ corrigé |
+  | 5 | Les deux assertions de l'AC-5 côté service étaient **VACANTES** : leur fixture ne créait jamais de ligne « antérieurs ». Figer `agregeLesAnterieurs: false` restait **vert** | ✅ corrigé — fixture à `EXERCICES_MAX + 1` |
+  | 6 | L'argument d'exactitude des cumuls était **arithmétiquement faux** : il comptait les **dossiers** là où le facteur qui borne est le nombre d'**événements** (`20 000 × 10¹² = 2 × 10¹⁶`, au-dessus de `MAX_SAFE_INTEGER`) | ✅ corrigé — garde **explicite** sur les totaux |
+
+  ⚡ **Sur les axes conventions, périmètre et harnais e2e : RIEN.** Le relecteur a vérifié que les
+  doublures du harnais reproduisent fidèlement le repository — projections, `limite + 1`, coupe de
+  date sur les **deux** champs, réduction par rang.
+
+- **2026-09-21 — revue de sécurité ⑦ : 2 constats, corrigés.**
+  - ⛔⛔ **ÉLEVÉ — une borne DÉCLARÉE et jamais appliquée.** `EVALUATIONS_MAX_PAR_ETAT` n'était
+    importée nulle part : la lecture des évaluations n'avait **ni borne ni refus**, alors que le
+    commentaire de classe promettait que « les trois lectures sont bornées ». Et son tri
+    `{rang: -1}` n'était servi par **aucun** index. Ordre de grandeur : **un million** de documents
+    triés pour en rendre dix mille. ⚡ **Régression de la leçon de STORY-515**, qui avait corrigé
+    exactement ce défaut. ⇒ Volume **compté avant d'agréger**, refus au-delà.
+  - ⛔ **MOYEN — la borne ne bornait que les documents RENDUS.** `dateOperation` n'était dans aucun
+    index : le `$lte` était un filtre **résiduel** après `FETCH`. Une date d'arrêté très ancienne
+    (`1900-01-01` passe la validation, qui ne refuse que le futur) ne satisfait aucun document,
+    donc rien ne comptait vers la limite — **2,5 millions** de documents examinés pour `nReturned:
+    0`. ⇒ Index `{orgId, dossierId, sinistreId, dateOperation}` posé, **mesuré** :
+    `docsExamined == nReturned == 1`.
+- **2026-09-21 — ⚡⚡ ET LA MESURE A CONTREDIT MON PROPRE CORRECTIF.** Le tri aligné sur l'index
+  force **encore** un `SORT` bloquant dès que le filtre de date est présent — `explain` sur un vrai
+  Mongo, l'ajout d'un index couvrant n'y changeant rien. Le même tri **sans** le filtre est servi.
+  ⇒ Le commentaire a été **corrigé plutôt que l'affirmation maintenue** : ce qui protège est la
+  **borne**, le tri n'est qu'aligné. Laisser l'inverse aurait été exactement « une garde qui promet
+  plus qu'elle ne tient » — le défaut que cette même revue reproche ailleurs.
+- **2026-09-21 — vérification docker rejouée sur l'état final** : devise `GNF` **publiée**,
+  `termines: 0` / `restantAPayer: 1` (jamais négatif), catégorie vide **sans devise inventée**, et
+  l'index de la coupure **réellement construit et utilisé**.
+- **2026-09-21 — portes finales :** lint **0 warning**, build OK, **1 519 unit + 93 e2e verts**,
+  couverture **99,52 / 93,79 / 99,17 / 99,59** (seuils 65/90/90/90), **15 mutations** jouées.
 
 ## Notes
 
