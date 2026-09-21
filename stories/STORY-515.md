@@ -175,6 +175,9 @@ la transcription des 1 052 comptes :
 | **D-515-7** | Le **rattachement est à la survenance**, l'exception transports / maladie est **nommée et non couverte** | L'art. 415 l'exclut explicitement, et la **branche** de l'art. 328 n'existe nulle part dans ce dépôt (constat mesuré en STORY-514). Le module ne peut pas reconnaître un contrat de transport ; il rattache à la survenance et le publie. On ne livre pas une règle fausse pour un cas qu'on ne sait pas distinguer |
 | **D-515-8** | ⛔ **Ni tardifs, ni chargement de 5 %, ni provision agrégée** | Art. 334-12 (tardifs, sur circulaire CCA) et 334-13 (chargement ≥ 5 %) portent sur un **agrégat d'inventaire**, pas sur un dossier. AD-12 interdit d'inventer le calcul, et STORY-517 / STORY-519 en sont propriétaires. Ce module **fournit la matière**, dossier par dossier, comme l'art. 334-12 l'impose |
 | **D-515-9** | ⛔ **Aucun numéro de compte, aucun poste de liasse, aucun producteur Kafka** | D-513-1. `RC1` mappe la racine `60` et le plan packagé s'arrête à deux chiffres : ni `6020`/`6026`/`6029` ni `3250`/`3259` ne sont routables avant **STORY-671**. L'outbox reste inerte : aucun AC ne demande d'événement inter-services, et STORY-516 lit ces données **dans le même service** |
+| **D-515-10** ⚡⚡ | Le **sinistre est l'agrégat**, et il porte un **verrou logique** (`sinistres.revision`) incrémenté en **première écriture** de toute transaction | Patron `contrats.revision` (STORY-513). Sans lui, deux terminaisons concurrentes lisent toutes deux « en cours » et passent toutes deux : le dossier serait compté **deux fois** terminé au tableau C de l'état C10b, et la ligne `a − b − c` deviendrait fausse pour toujours sur une collection append-only |
+| **D-515-11** | **Deux collections d'événements**, pas une : `evaluations_sinistre` (chaînée) et `evenements_sinistre` (plate) | L'index unique de succession indexe la clé `null` de **chaque** document sans prédécesseur. Sur une collection commune, le premier règlement entrerait en collision avec la racine des évaluations — leçon STORY-501 (« un index unique sur un champ absent indexe `null` »). Argument mesuré, pas une préférence de rangement |
+| **D-515-12** | L'**état** (`EN_COURS`/`TERMINE`) se dérive d'un **COMPTE**, jamais d'un tri : `TERMINE` ssi `nbTerminaisons > nbRéouvertures` | Compter est **commutatif** : l'état ne dépend donc d'aucun ordre de lecture. Un tri sur `_id` désignerait un « dernier » événement arbitraire — `_id` est généré avant la transaction, réutilisé à chaque rejeu, et sa partie aléatoire est fixe par processus (constat de revue de sécurité de STORY-514) |
 
 ## Critères d'acceptation
 
@@ -307,6 +310,41 @@ assurance-service  MNV-515
     − 50 000 = 2 751 000`.
   - **Aucun orphelin**, collections en snake_case explicite, **`outbox_events` à 0** (aucun
     producteur Kafka, D-515-9).
-- **2026-09-21 — portes de qualité :** lint **0 warning**, build OK, **1 434 unit + 79 e2e verts**,
-  couverture **99,55 / 94,20 / 99,10 / 99,59** (seuils 65/90/90/90), module `sinistres` à **100 %**
-  lignes et fonctions.
+- **2026-09-21 — revue de code ⑥ : 2 bloquants, 6 non bloquants, TOUS TRAITÉS.**
+
+  | # | Constat | Suite |
+  |---|---|---|
+  | 1 | ⛔⛔ La **borne d'événements** laisse passer l'événement de trop, puis **gèle le dossier définitivement** (= le constat de la revue de sécurité) | ✅ corrigé |
+  | 2 | ⛔⛔ `reference` et `nature` **sans `@Transform`** : sous `enableImplicitConversion`, `nature: {a:1}` était **accepté** et persisté `"[object Object]"` — sur le champ que l'**art. 415 exige**, et qu'aucune route ne modifie. Effet miroir : `"  SIN-1  "` était **refusé** là où le cycle prime le rogne | ✅ corrigé |
+  | 3 | Trois exports annonçaient des consommateurs **inexistants** (« la règle vit à un seul endroit », « les deux lisent cette liste ») | ✅ supprimés |
+  | 4 | « Le DTO pose déjà la borne » : il ne la posait **pas** — `minimum`/`maximum` vivaient dans l'OpenAPI sans `@Min`/`@Max` | ✅ corrigé |
+  | 5 | `terminaisons` / `reouvertures` publiaient `MONTANT_SINISTRE_INVALIDE`, **inatteignable** sur des routes sans montant | ✅ corrigé |
+  | 6 | Cinq références à des décisions en **lettres** (brouillon), dont deux vers des décisions **absentes de la story** | ✅ alignées, et **D-515-10/11/12 ajoutées** (leçon STORY-511) |
+  | 7 | « expose exactement **9** routes » pour dix, **sans assertion de compte** : l'intitulé ne pouvait pas rougir | ✅ corrigé |
+  | 8 | Le tri `{nature: 1, rang: -1}` **n'est pas servi** par l'index (directions mixtes ⇒ `SORT` bloquant) alors que le commentaire l'affirmait | ✅ corrigé en `{nature: -1, rang: -1}` |
+
+  ⚡ **Sur l'axe réglementaire : RIEN.** Le relecteur a relu les articles **en ligne** — art. 415,
+  334-12, 334-13, état C10b — et les citations comme leur transcription sont fidèles.
+
+- **2026-09-21 — revue de sécurité ⑦ : 1 constat ÉLEVÉ, corrigé.** ⛔⛔ **L'événement de trop murait
+  le dossier pour toujours.** `exigerNombreDEvenements` servait **à la fois** la lecture et
+  l'écriture avec un `>` strict, alors que le repository lit `limite + 1` : à 500 événements la
+  lecture rendait 500, `500 > 500` était faux, et le **501ᵉ passait**. Dès lors, **toute** lecture
+  rendait 501 et refusait — `GET /situation`, tous les `POST`. Les deux collections étant
+  append-only, **aucune route ne défaisait l'état** : le chiffre réglementaire de l'état C10b
+  devenait illisible **pour toujours**, sur une donnée comptable, atteignable par un `TENANT_USER`
+  en six minutes sous le throttler. ⇒ **Deux seuils** : `>=` à l'écriture (refuse le document de
+  trop), `>` en lecture (refuse un cumul calculé sur un ensemble tronqué, désormais inatteignable).
+  ⚠️ **Et les trois tests existants figeaient le défaut** : ils montaient une doublure à `MAX + 1`,
+  donc verts avec `>` comme avec `>=`. Le nouveau test exerce la **frontière** en trois assertions
+  conjointes — à `MAX−1` l'écriture passe, à `MAX` elle est refusée, et à `MAX` **la situation répond
+  encore**. Mutation « remettre `>` » : **rouge**.
+- **2026-09-21 — ⚠️ la vérif docker a d'abord donné un FAUX VERT.** Après correctifs, le conteneur
+  rendait encore l'**ancien** comportement (`nature: {a:1}` en 201) alors que le fichier monté
+  portait bien le correctif : `nest --watch` n'avait pas recompilé. Leçon
+  [[hot-reload-ment-verif-docker]], vérifiée une fois de plus. Après `restart` : `nature: {a:1}`
+  → **400**, `"  SIN-2026-000222  "` → **201 persistée rognée**, `principal: -1` → **400** par le
+  `@Min` du DTO. ⚡ Et la base gardait le `"[object Object]"` écrit **avant** le correctif —
+  **irrécupérable par l'API**, ce qui est exactement la démonstration du constat.
+- **2026-09-21 — portes finales :** lint **0 warning**, build OK, **1 444 unit + 79 e2e verts**,
+  couverture **99,55 / 94,21 / 99,10 / 99,59** (seuils 65/90/90/90), **20 mutations** jouées.
