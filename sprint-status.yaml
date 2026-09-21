@@ -3834,7 +3834,7 @@ sprints:
         epic: "EPIC-131"
         points: 13
         service: "assurance-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 — decoupage epics-assurance-2026-08-27.md + spine architecture-assurance-service-2026-08-27. Les provisions techniques représentent l'essentiel du passif d'un assureur. Le plan CIMA leur donne un poste dédié : CP3 — « Provisions techniques brutes », mappé aux comptes 31, 32, 34, 35, 38. (Lu dans l'artefact le 2026-08-27.)
+        status: "in_progress"  # 2026-09-21 : CADRAGE MESURE — le Code publie DEUX listes de provisions techniques, pas une : art. 334-2 (vie, CINQ postes depuis 2018) et art. 334-8 (autres operations, NEUF postes depuis 2016). Le TYPE depend donc de la CATEGORIE, et une edition pre-2016 omet DEUX postes. La non-compensation brut/cede est imposee par l art. 334 et verrouillee par l art. 334-11. L auteur est DECLARE (nom + qualite) faute de read-model d identite dans ce service. — Historique — CREEE le 2026-08-27 — decoupage epics-assurance-2026-08-27.md + spine architecture-assurance-service-2026-08-27. Les provisions techniques représentent l'essentiel du passif d'un assureur. Le plan CIMA leur donne un poste dédié : CP3 — « Provisions techniques brutes », mappé aux comptes 31, 32, 34, 35, 38. (Lu dans l'artefact le 2026-08-27.)
         story_path: "stories/STORY-517.md"
       - story_id: "STORY-518"
         title: "`RT` cesse d'être un résultat de trésorerie — les variations de provisions techniques entrent au compte de résultat"
