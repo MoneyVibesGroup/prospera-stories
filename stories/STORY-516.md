@@ -1,6 +1,6 @@
 # STORY-516 : Les cadences de règlement — la matière première de la PSAP, et rien d'autre ne la produit
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -134,24 +134,24 @@ sait pas reconnaître un contrat de transport. Il produit donc le **C10b** et le
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Un triangle de liquidation : par **exercice de survenance** × **exercice de règlement**,
+- [x] AC-1 — Un triangle de liquidation : par **exercice de survenance** × **exercice de règlement**,
       les montants payés et les évaluations restantes. Dérivé des événements de STORY-515, jamais
       saisi.
       ⚡ **C'est le tableau D de l'état C10b** (M2), en plus précis : « Paiement de l'exercice
       (`6020` et `6026`) » et « Provision au 31 décembre », *détail par exercice de survenance*.
-- [ ] AC-2 — Le triangle est calculé **par catégorie Vie / Non-Vie** et par branche — agréger toutes
+- [x] AC-2 — Le triangle est calculé **par catégorie Vie / Non-Vie** et par branche — agréger toutes
       branches confondues produit une cadence qui ne décrit aucun risque réel.
       ⚠️ **AJUSTÉ (M5, D-516-6)** : la **branche** de l'art. 328 n'existe **nulle part dans ce
       dépôt** — constat déjà mesuré en STORY-514. Le triangle est calculé **par catégorie**, il le
       **publie comme tel**, et il **nomme** ce qui manque. Livrer un axe « branche » à deux valeurs
       revendiquerait exactement le total que l'article interdit.
-- [ ] AC-3 — Le triangle porte sa **date d'arrêté** et se **rejoue à l'identique**.
+- [x] AC-3 — Le triangle porte sa **date d'arrêté** et se **rejoue à l'identique**.
       ⚡ Rendu possible par **D-515-4** : les deux exercices sont **persistés** par STORY-515, jamais
       re-résolus à la lecture.
-- [ ] AC-4 — ⛔ **Aucune extrapolation, aucune méthode de projection dans cette story** (AD-12) : on
+- [x] AC-4 — ⛔ **Aucune extrapolation, aucune méthode de projection dans cette story** (AD-12) : on
       restitue ce qui s'est passé. Chain-ladder et consorts sont du palier 2, et ils exigent un
       actuaire.
-- [ ] AC-5 — Le triangle indique **explicitement sa profondeur d'historique** et son caractère
+- [x] AC-5 — Le triangle indique **explicitement sa profondeur d'historique** et son caractère
       incomplet. ⚠️ Une cadence sur un seul exercice n'est pas une cadence, et l'afficher comme telle
       inviterait à s'en servir.
       ⚡ **Le régulateur a tranché la même question (M3)** : ses tableaux ouvrent sur une colonne
@@ -184,7 +184,7 @@ sait pas reconnaître un contrat de transport. Il produit donc le **C10b** et le
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — cadrage réglementaire mesuré le 2026-09-21, sur la source officielle
+**Statut : `done`** — ouverte et clôturée le **2026-09-21**. Cadrage réglementaire mesuré, sur la source officielle
 (`cima-afrique.org` art. 422 et circulaire CRCA n° 00230/2005) **et** sur le Code intégral (361 p.,
 texte extrait localement : `cadence` → **0 occurrence**, et l'état modèle C10b lu tableau par
 tableau).
@@ -266,6 +266,11 @@ assurance-service  MNV-516
   l'index de la coupure **réellement construit et utilisé**.
 - **2026-09-21 — portes finales :** lint **0 warning**, build OK, **1 519 unit + 93 e2e verts**,
   couverture **99,52 / 93,79 / 99,17 / 99,59** (seuils 65/90/90/90), **15 mutations** jouées.
+
+- **2026-09-21 — clôture.** PR `assurance-service` **#6** (6 commits) rebase-mergée sur `dev`,
+  branche supprimée. Les cinq critères sont tenus, dont **l'AC-2 ajusté** (calcul par catégorie, la
+  branche de l'art. 328 n'existant nulle part dans ce dépôt) et **l'AC-5 rendu falsifiable** après
+  un constat de revue.
 
 ## Notes
 
