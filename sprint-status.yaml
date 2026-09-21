@@ -3826,7 +3826,7 @@ sprints:
         epic: "EPIC-130"
         points: 8
         service: "assurance-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 — decoupage epics-assurance-2026-08-27.md + spine architecture-assurance-service-2026-08-27. Une cadence de règlement dit, par exercice de survenance, comment les paiements se répartissent dans le temps : tant la première année, tant la deuxième, tant la troisième. C'est la matière à partir de laquelle une provision pour sinistres à payer se calcule — et aucune autre donnée ne la remplace.
+        status: "in_progress"  # 2026-09-21 : CADRAGE MESURE — « cadence » a ZERO occurrence dans le Code CIMA. La seule que le regulateur nomme est celle des DECLARATIONS TARDIVES (circ. 00230/2005), pas des reglements. Ce qu'il publie est un ETAT : C10b « Paiements et provisions pour sinistres, par exercice » (art. 422), dont le tableau D EST le triangle demande par l'AC-1. L'axe « branche » de l'AC-2 n'existe nulle part dans ce depot (constat STORY-514) : calcul par CATEGORIE, et on le dit. — Historique — CREEE le 2026-08-27 — decoupage epics-assurance-2026-08-27.md + spine architecture-assurance-service-2026-08-27. Une cadence de règlement dit, par exercice de survenance, comment les paiements se répartissent dans le temps : tant la première année, tant la deuxième, tant la troisième. C'est la matière à partir de laquelle une provision pour sinistres à payer se calcule — et aucune autre donnée ne la remplace.
         story_path: "stories/STORY-516.md"
       - story_id: "STORY-517"
         title: "Une provision technique est une évaluation datée, versionnée, avec sa méthode et son auteur — jamais un solde"
