@@ -1,6 +1,6 @@
 # STORY-668 : L'ordre de paiement — il part du compte de l'organisation, validé par un second rôle
 
-Status: blocked
+Status: in-progress
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -10,11 +10,12 @@ par l'annuaire), **STORY-669** (relever les paiements) — et ⛔ **l'amendement
 **Origine :** le parcours « Règlement fournisseurs » du catalogue PI-SPI, demandé par le PO le
 2026-09-15 pour les distributeurs.
 
-⛔⛔ **CETTE STORY EST BLOQUÉE PAR UNE DÉCISION, PAS PAR DU CODE.** Le PRD ne couvre que
-l'encaissement ; ordonner un paiement sortant touche NFR-1, c'est-à-dire le régime juridique. La
-proposition d'amendement est écrite —
-`prds/prd-paiement-service-2026-08-02/amendement-ordres-de-paiement-PROPOSITION.md` — et **elle
-attend le PO**. Rien n'a été codé, et rien ne le sera avant.
+✅ **DÉBLOQUÉE PAR LE PO LE 2026-09-21.** Elle était bloquée par une décision, pas par du code : le PRD
+ne couvrait que l'encaissement, et ordonner un paiement sortant touche NFR-1. L'amendement est
+**validé et appliqué** (`prds/prd-paiement-service-2026-08-02/amendement-2026-09-21-ordres-de-paiement.md`,
+FR-P65→P69, NFR-1d, R8). Trois décisions : (1) on code, **en bac à sable** — la confirmation
+juridique reste un préalable de la PRODUCTION ; (2) les deux rôles réemploient la paire de droits de
+FR-P60 ; (3) des envois réels de **100 XOF au plus** sont autorisés pour mesurer le contrat.
 
 ⚠️ **Le titre du plan disait « Régler un fournisseur ».** Le mot « règlement » est proscrit par la
 garde du port (convention de la spine : le PRD ne le dit jamais), et `payout`/`reversement` le sont
@@ -35,11 +36,29 @@ n'a rien reçu.
   que rend `confirmation: true`, et si le second temps est un appel distinct.
 - `GET /paiements-envoyes` existe (vide) : un ordre exécuté se **relèvera** comme un paiement reçu
   ([[STORY-669]]), et c'est par là que son issue se constatera si aucun webhook ne la porte.
-- ⚠️ **La sonde s'est arrêtée à la validation du SHID**, avec l'UUID nul pour bénéficiaire. Ce que
-  rend un envoi accepté, ses événements de webhook (`PAIEMENT_ENVOYE` ?) et son délai restent à
-  mesurer — avec de l'argent du bac à sable, donc avec l'accord du PO.
+### ⚡⚡ Puis mesuré AVEC de l'argent du bac à sable (50 et 10 XOF, autorisés par le PO)
 
-## Critères d'acceptation — PROPOSÉS, sous réserve de l'amendement
+- `confirmation: false` → `200 {txId, end2endId, statut: "ENVOYE", payeNom, payePays}` ; quatre
+  secondes plus tard la liste le montre `IRREVOCABLE` (`categorie: "733"`), et la position du compte
+  a baissé **du montant exact** (1 000 001 025 → 1 000 000 975).
+- `confirmation: true` → `statut: "INITIE"`, **aucun franc ne bouge** ; le second temps du schéma
+  est `PUT /paiements-envoyes/{txId}/confirmations`. **Non utilisé** : nos deux rôles sont les
+  nôtres, et l'ordre part en un temps, à la validation.
+- ⛔⛔ **LE MÊME `txId` REPOSTÉ REND `HTTP 200`** — avec `statut: "REJETE"`, `statutRaison: "DU03"`
+  et un **nouvel** `end2endId`. Le schéma protège donc lui-même du double envoi. Mais **deux
+  lectures naïves sont fausses** : qui lit le code HTTP croit l'ordre parti ; qui lit ce rejet le
+  croit **échoué**, alors qu'il est exécuté.
+- ⛔⛔ **`GET /paiements-envoyes/{txId}` REND LA DERNIÈRE TENTATIVE** (`REJETE/DU03`), **pas celle
+  qui est partie.** Seule la liste `GET /paiements-envoyes?txId=` montre les deux. **L'issue se lit
+  dans la liste, et `IRREVOCABLE` gagne sur tout** ; `DU03` n'est jamais une issue, c'est l'écho
+  d'un rejeu.
+
+⚡ **C'est cette mesure qui a durci FR-P68.** Le texte validé disait « un échec laisse l'ordre
+rejouable par une nouvelle validation ». Rejouer sous un **nouvel** identifiant ferait partir
+l'argent deux fois ; rejouer sous le **même** rend un `DU03` qu'on lirait comme un échec. Un ordre
+rejeté est donc **terminal** : on en prépare un autre, à deux.
+
+## Critères d'acceptation
 
 - [ ] AC-1 — Une organisation **prépare** un ordre : bénéficiaire (adresse de paiement **confirmée
       par l'annuaire** avant d'être rangée), montant, motif, compte payeur **dont elle est
@@ -54,9 +73,11 @@ n'a rien reçu.
 - [ ] AC-4 — L'ordre part **sous le raccordement de l'organisation**, depuis **son** compte. Aucun
       repli. ⛔ **Par absence d'injection** : le chemin qui transmet ne peut pas lire la
       configuration de la plateforme.
-- [ ] AC-5 — L'issue (exécuté, rejeté) vient **du fournisseur** — notification signée ou relève —
-      jamais d'une valeur de retour. Un ordre rejeté redevient validable ; un ordre exécuté est
-      terminal.
+- [ ] AC-5 — L'issue (exécuté, rejeté) vient **du fournisseur**, jamais d'une supposition : elle se
+      lit dans la **liste** par identifiant, où l'exécution **gagne sur tout** et où un rejet pour
+      doublon n'est **jamais** une issue. ⛔ **Un ordre rejeté est terminal.** Une transmission dont
+      l'issue est inconnue (panne au milieu) **se consulte** ; si le schéma ne connaît rien, l'ordre
+      redevient **à valider** — par un humain, jamais par une reprise automatique.
 - [ ] AC-6 — ⛔ **Aucune imputation.** Un ordre n'éteint aucune créance de l'organisation et ne crée
       aucun encaissement : il sort du périmètre d'AD-3/AD-4. Il se trace (deux auteurs), il ne se
       supprime pas, il s'annule tant qu'il n'est pas parti.
@@ -65,16 +86,14 @@ n'a rien reçu.
 - [ ] AC-8 — Recette **réelle** : un ordre préparé par un rôle, validé par un autre, exécuté sur le
       bac à sable, et **relevé** ensuite parmi les paiements envoyés.
 
-## ⛔ Ce que le PO doit trancher avant la première ligne de code
+## Tranché par le PO le 2026-09-21
 
-1. **Ouvre-t-on ce périmètre**, et code-t-on **avant** ou **après** la confirmation juridique ?
-   (§10 du PRD portait déjà « à faire confirmer juridiquement » pour la seule détention de fonds.)
-2. **Les droits des deux rôles.** Le catalogue ne sait pas attribuer un **nouveau** droit de tenant
-   aujourd'hui : deux droits neufs = deux routes que personne ne peut appeler ; réemployer la paire
-   de FR-P60 (`paiement:demande:emettre` / `paiement:encaissement:valider`) est appelable tout de
-   suite, au prix de noms qui ne disent plus exactement ce qu'ils ouvrent.
-3. **Une recette avec de l'argent du bac à sable** : envoyer quelques francs du compte de Money
-   Vibes vers l'adresse du payeur de test — la seule façon de mesurer ce que rend un envoi accepté.
+1. ✅ **Le périmètre est ouvert, et on code maintenant** — bac à sable seulement ; la confirmation
+   juridique est un préalable de la **production**, écrit au §10 du PRD.
+2. ✅ **Les droits de FR-P60 sont réemployés** : `paiement:demande:emettre` prépare (et annule),
+   `paiement:encaissement:valider` valide (et consulte). ⚠️ Coût nommé : le nom du droit ne dit plus
+   exactement ce qu'il ouvre — à reprendre quand le catalogue saura créer un droit de tenant.
+3. ✅ **Envois réels autorisés : 100 XOF au plus**, vers l'adresse du payeur de test.
 4. **IBAN / numéro de compte** : hors de cet amendement (le bac à sable exige un SHID).
 
 ## Notes

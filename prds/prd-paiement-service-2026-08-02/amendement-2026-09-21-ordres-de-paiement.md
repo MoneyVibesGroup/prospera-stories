@@ -1,6 +1,14 @@
-# PROPOSITION d'amendement — les ordres de paiement sortants
+# Amendement du 2026-09-21 — les ordres de paiement sortants
 
-**Statut : ⚠️ PROPOSITION — non validée, non appliquée à `prd.md`.**
+**Statut : ✅ VALIDÉ par le PO le 2026-09-21, et APPLIQUÉ à `prd.md`.**
+
+> **Trois décisions du PO, prises le 2026-09-21 :** (1) l'amendement est validé et le code est ouvert
+> **en bac à sable** — la confirmation juridique reste un préalable de la PRODUCTION ; (2) les deux
+> rôles réemploient la paire de droits de FR-P60 ; (3) des envois réels de **100 XOF au plus** sont
+> autorisés sur le bac à sable pour mesurer le contrat.
+>
+> ⛔ **FR-P68 a été DURCI après validation, par la mesure** : « un échec laisse l'ordre rejouable »
+> est devenu « un ordre rejeté est terminal ». Voir la §2bis ci-dessous.
 **Date :** 2026-09-21 · **Demandé par :** le PO (objectif du 2026-09-15 : « que les distributeurs
 règlent leurs fournisseurs ») · **Débloque :** [[STORY-668]] · **Rédigé pour :** le PO, qui tranche.
 
@@ -38,7 +46,16 @@ reversement — ce service ne reverse rien, il n'a rien reçu.
 ⚠️ La sonde s'est arrêtée à la validation du SHID, avec l'UUID nul pour bénéficiaire : **aucun
 argent n'a bougé**, et ce que rend un envoi accepté reste à mesurer.
 
-## 3. Texte proposé
+## 2bis. Ce que les envois réels ont mesuré (2026-09-21, 50 puis 10 XOF)
+
+| Mesure | Résultat |
+| --- | --- |
+| `confirmation: false` | `200 {txId, end2endId, statut: "ENVOYE", payeNom, payePays, dateDemande}` ; quatre secondes plus tard la liste le montre `IRREVOCABLE`, `categorie: "733"`, et la position du compte a baissé **du montant exact** |
+| `confirmation: true` | `statut: "INITIE"`, **aucun franc ne bouge** ; le second temps est `PUT /paiements-envoyes/{txId}/confirmations` (corps non mesuré) — **non utilisé** : nos deux rôles sont les nôtres |
+| ⛔⛔ **Le même `txId` reposté** | **`HTTP 200`**, avec `statut: "REJETE"`, `statutRaison: "DU03"` et un **nouvel** `end2endId`. Le schéma protège du double envoi — mais un client qui lit le code HTTP croit l'ordre parti, et un client qui lit ce rejet le croit **échoué** |
+| ⛔⛔ **`GET /paiements-envoyes/{txId}` après un doublon** | rend **la dernière tentative** (`REJETE/DU03`), **pas celle qui est partie**. Seule la liste `GET /paiements-envoyes?txId=` montre les deux. **L'issue se lit donc dans la liste, et `IRREVOCABLE` gagne sur tout** |
+
+## 3. Texte validé (FR-P68 durci)
 
 ### Glossaire (§4) — une entrée
 

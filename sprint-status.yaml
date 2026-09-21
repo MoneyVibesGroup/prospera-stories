@@ -4238,7 +4238,7 @@ sprints:
         epic: "EPIC-036"
         points: 8
         service: "paiement-service"
-        status: "blocked"  # phase B, TOUJOURS BLOQUEE par l amendement du PRD — 2026-09-21 : fiche ecrite + PROPOSITION d amendement redigee (prds/.../amendement-ordres-de-paiement-PROPOSITION.md, FR-P65->P69 + NFR-1d), en attente du PO ; MESURE sans rien envoyer : POST /paiements-envoyes exige txId, payeurAlias, payeAlias (un SHID), montant, confirmation ; vocabulaire : « ordre de paiement » (« reglement », payout et reversement sont proscrits par deux gardes)
+        status: "in-progress"  # DEBLOQUEE par le PO le 2026-09-21 : amendement VALIDE et applique au PRD (FR-P65->P69, NFR-1d, R8), code ouvert en BAC A SABLE (le juridique reste un prealable de la PRODUCTION), droits de FR-P60 reemployes, envois reels <= 100 XOF autorises ; ⛔ MESURE : un txId rejoue rend HTTP 200 + REJETE/DU03, et GET /paiements-envoyes/{txId} rend alors CE rejet et pas l execution -> l issue se lit dans la LISTE, IRREVOCABLE gagne, un ordre rejete est TERMINAL (FR-P68 durci)
         story_path: "stories/STORY-668.md"
         assigned_to: null
       - story_id: "STORY-669"
