@@ -418,3 +418,73 @@ Fait le 2026-09-21 sur les pages officielles et sur l'artefact packagé. **Onze 
 contredisent la story** : la spécialisation imposée par l'art. 326 (M1), le vocabulaire du régulateur
 (M2), le rattachement des charges communes au compte 80 (M4), et l'existence d'un sens CIMA déjà pris
 pour « comptes techniques » (M8). Dix décisions D-521-1 à D-521-10.
+
+### Ce qui est livré
+
+**`bilan-service`** — `cima-assurances@4.0` (`021992b5…`) : sources `plan-comptable-cima-v4.json`,
+`postes-cima-v4.json`, `table-de-passage-cima-v4.json`, entrée `@4.0` dans `build.mjs`, artefact
+généré. **`@1.0`, `@2.0` et `@3.0` intacts — vérifié par `git diff --stat` sur le répertoire
+`assets/` : aucune ligne.** Moteur `ComptesCimaProductionService`, module `etats-cima.ts`, DTO et
+route `POST /bilan/etats/resultat-cima/dry-run`.
+
+**`assurance-service`** — `categorie` sur `Quittance`, recopiée du contrat aux **trois** chemins qui
+en écrivent une ; `REFERENTIEL_SERVI` → `@4.0` ; artefact recopié byte-identique.
+
+**`balance-service`**, **`platform-catalog-service`** — enregistrement, bascule du tag servi,
+digests épinglés, snapshot et pack. ⚡ Au passage, l'assertion **registre ↔ octets** manquante pour
+`@3.0` — oubliée par STORY-520 — est rétablie.
+
+### ⛔ Ce que la réutilisation a coûté, et pourquoi elle était obligatoire
+
+Les deux modèles du compte 80 agrègent **exactement** comme le compte de résultat. Une seconde
+implémentation aurait divergé sans que rien ne confronte les deux sorties — la règle n°5 des
+consignes de dev l'interdit (« ne jamais réécrire une formule qui existe déjà : l'importer »).
+
+Le compte de résultat a donc été rendu **réutilisable par état** : `agreger`, `choisirPosteCR`,
+`emettrePostes`, `contexteDetailCR`, `produireSig`, `metaPostes` et `ordreInconnu` prennent un
+paramètre `etat` valant `COMPTE_RESULTAT` par défaut. **Le comportement du compte de résultat est
+inchangé** — 527 tests de `etats/` verts immédiatement après le paramétrage, puis 3 072 au total.
+
+⚠️ Le prix : les types littéraux `PosteResultat.etat` et `PosteSig.etat` passent de
+`'COMPTE_RESULTAT'` à `string`. Le littéral promettait sur la **structure** ce qui n'était vrai que
+d'un **appelant** ; le DTO du compte de résultat, lui, continue de publier l'enum fermé, et cette
+promesse-là reste exacte.
+
+### Table de mutations — 11 mutations, 11 rouges
+
+| # | Mutation | Effet attendu | Mesuré |
+|---|---|---|---|
+| M1 | `RC1` cesse d'énumérer les comptes à trois chiffres | `6010` quitte `Σ_CR` ⇒ `RN` change | **3 rouges** |
+| M2 | le modèle NON servi est calculé au lieu d'être rendu vide | les charges communes fuitent dans les deux états | **6 rouges** |
+| M3 | le signe des variations est inversé dans l'articulation | `ecart ≠ 0` | **1 rouge** |
+| M4 | un compte d'ACCEPTATION dérive l'agrément | « vie » conclu sur une société de toute nature | **1 rouge** |
+| M5 | le squelette rend `0` au lieu de `null` | « néant » publié à la place de « sans objet » | **3 rouges** |
+| M6 | le solde devient la PREMIÈRE formule au lieu de la dernière | la mauvaise grandeur est publiée en solde | **1 rouge** |
+| M7 | une opérande du modèle Vie vise le poste `RESULTAT_BILAN` | la garde `operandes-coherence` doit couvrir les états neufs | **1 rouge** |
+| M8 | la catégorie de la **prime** est figée | la recopie du contrat n'est plus lue | **2 rouges** |
+| M9 | idem sur l'**annulation** | idem | **1 rouge** |
+| M10 | idem sur la **ristourne** | idem | **1 rouge** |
+| M11 | le signe qui donne le `sens` d'un agrégat est inversé | la part des cessionnaires est annoncée `CHARGE` | **1 rouge** |
+
+⛔⛔ **Deux leçons de la passe elle-même, payées comptant :**
+
+1. **Une mutation qui ne compile pas rend « 0 test », et ce n'est PAS un rouge.** Figer la catégorie
+   par `CategorieAssurance.NON_VIE` sans importer l'enum a produit une suite qui ne démarre pas —
+   mesure vide prise pour une détection. Refaite en `'NON_VIE' as typeof contrat.categorie`, elle
+   vire bien au rouge. *(Leçon déjà écrite par STORY-505, et rejouée ici.)*
+2. ⚠️ **`git checkout --` efface le travail NON COMMITTÉ.** Deux fois : les trois recopies de
+   catégorie d'`assurance-service`, puis le correctif du `sens` de `bilan-service`. **Committer
+   AVANT de muter** n'est pas une précaution, c'est la condition pour que la passe soit réversible.
+
+### Portes de qualité
+
+| Dépôt | lint | build | unitaires | couverture | e2e |
+|---|---|---|---|---|---|
+| `bilan-service` | 0 | OK | **3 072** | fichiers neufs 98,71 / 91,11 / 100 / 100 | **822** |
+| `assurance-service` | 0 | OK | **2 010** | 99,6 / 94,49 / 99,18 / 99,65 | **201** |
+| `balance-service` | 0 | OK | **4 179** | 99,16 / 92,74 / 98,58 / 99,26 | 1 077 |
+| `platform-catalog-service` | 0 | OK | 740 | 99,73 / 96,81 / 100 / 99,78 | 200 |
+
+⚠️ **Deux défauts que seules les portes ont vus**, consignés en M12 : `npm run build` attrape ce que
+`tsc --noEmit` laisse passer, et une dépendance ajoutée au constructeur de `BilanEngineService` a
+cassé sa spec unitaire **puis les huit modules de test e2e**.
