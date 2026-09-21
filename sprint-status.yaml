@@ -4246,7 +4246,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "in-progress"  # fiche ecrite le 2026-09-21 (branche MNV-669) — MESURE : GET /paiements-recus (portee paiement.read) rend txId ET end2endId, filtres payeCompte + dateIrrevocabilite[gte|lte] APPLIQUES, curseur meta.page, meta.total = taille de PAGE ; le mot « tresorerie » est INTERDIT par la garde NFR-1b : releve + position lue, jamais rangee — phase C, prerequis 666 — DEBLOQUEE 2026-09-15 : le simulateur resout ses comptes sous /TGD999 (le chemin /v1 etait la cause)
+        status: "review"  # MNV-669 (375fd0b) empilee sur MNV-667 — POST .../releves/relevements : le compte se RELEVE chez le participant (GET /paiements-recus, curseur, irrevocable seulement, filtres reverifies) et passe par le MEME import que STORY-269 : relever 2 fois n ajoute rien ; position du compte RENDUE et JAMAIS rangee (NFR-1b : « tresorerie » et « solde » interdits) ; la cascade cherche notre reference de DEMANDE au libelle ; recette REELLE 17/17 : 5 paiements, position 1 000 001 025 = 1e9 + 1 025 au franc pres, 3 couples CERTAINS / 0 proposition, ecart 325 = les 2 scans du comptoir de 667 ; ⛔ sort= ne trie que la PAGE, meta.total = taille de page, l API ne nomme qu UNE erreur par reponse
         story_path: "stories/STORY-669.md"
         assigned_to: null
       - story_id: "STORY-670"
