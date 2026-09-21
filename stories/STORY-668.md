@@ -89,7 +89,7 @@ rejeté est donc **terminal** : on en prépare un autre, à deux.
       de [[STORY-669]] (des lignes `SORTANT`) est un travail à part — la cascade de rapprochement
       ne confronte que des entrées — et il est porté en point ouvert plutôt que fait à moitié.
 
-## Livraison (2026-09-21 — branche `MNV-668`, commit `15865a8`, empilée sur `MNV-669`)
+## Livraison (2026-09-21 — branche `MNV-668`, commit `257c81b`, sur `origin/dev` à `55037ea` — rebasée après la fusion de 669, arbre identique)
 
 **Suites :** 3 814 unitaires (278 suites), 322 e2e, lint 0, `tsc` 0. **Recette RÉELLE sur le bac à
 sable, par le vrai conteneur : 17/17.** ⚠️ Dernière exécution unitaire complète : 3 812 / 3 813 —
