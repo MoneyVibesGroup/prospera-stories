@@ -204,11 +204,11 @@ assurance-service  MNV-517
 | lint | `eslint "{src,test}/**/*.ts" --max-warnings 0` — **0** |
 | build | `nest build` — OK |
 | couverture du module | **100 / 100 / 100 / 100** (branches / fonctions / lignes / statements) |
-| couverture globale | **99,56 / 94,16 / 99,23 / 99,62** — seuils 65/90/90/90 |
-| unitaires | **1 684** verts, 94 suites |
-| e2e | **149** verts, dont **56** pour ce module |
+| couverture globale | **99,56 / 94,20 / 99,23 / 99,62** — seuils 65/90/90/90 |
+| unitaires | **1 698** verts, 94 suites |
+| e2e | **160** verts, dont **67** pour ce module |
 
-### Table de mutations — 18 mutations, 18 ROUGES
+### Table de mutations — 25 mutations, 25 ROUGES (18 au développement, 7 en revue)
 
 Chaque règle qui protège d'une régression précise a été **volontairement cassée**, puis restaurée.
 
@@ -289,6 +289,97 @@ La même chaîne, lue à deux dates, **ne rend pas la même version** :
 
 ⛔ L'arrêté d'avril **ne consomme pas** la réévaluation de juin. Et la catégorie `VIE`, vide, ne
 publie **aucune devise** — pas de monnaie inventée sur un ensemble vide (leçon STORY-489).
+
+### ⑥⑦ Revue de code et revue de sécurité — **quatre constats bloquants communs**
+
+Les deux revues (`opus`, sur le même diff) ont **convergé sur les quatre mêmes défauts**, tous
+reproduits sur Mongo réel **avant** correction. Aucun n'était visible en lecture du code seul.
+
+| # | Défaut | Mesuré avant correctif |
+|---|---|---|
+| 1 | les totaux additionnaient des **monnaies hétérogènes** — la garde ne tenait que DANS une chaîne, et une chaîne neuve n'a pas de précédente | `1 000 000` centimes d'euro ajoutés à `20 000 008` GNF, publiés sous l'étiquette `GNF` |
+| 2 | aucun contrôle d'**entier exact** sur les cumuls — le JSDoc de la borne ne raisonnait que sur la *soustraction* | 11 versions à `999 999 999 999 999` ⇒ total faux **d'une unité**, en silence |
+| 3 | le `$group` portait sur **(type, exercice)** : un type provisionné sur deux exercices comptait **deux fois** | `22 001 000` là où le poste `CP3` portait `12 001 000` |
+| 4 | `devise` acceptée en **texte libre de 200 caractères** au lieu d'un code ISO 4217 | `PROVISION SOUS-EVALUEE — VOIR NOTE ACTUAIRE` accepté en `201`, **verrouillant la chaîne à vie** |
+
+⛔⛔ **Le constat n° 3 disait déjà l'inverse du code dans sa propre documentation** : le résumé de
+la route promettait « **pour chaque type**, la dernière version antérieure à cette date », et le
+repository écrivait « une par **chaîne** ». **Aucun test ne l'exerçait** — le harnais e2e n'ouvrait
+qu'un seul exercice, donc le cas était hors de portée de toute la suite.
+
+⚡ Le tri porte désormais `(dateEvaluation, rang)` décroissants, et il lui **faut les deux** : le
+rang est propre à **une** chaîne, donc deux chaînes du même type sur deux exercices portent toutes
+deux un `rang: 1`, et un tri sur le seul rang en désignerait une **au hasard**.
+
+#### Constats propres à la revue de code
+
+| # | Défaut |
+|---|---|
+| 5 | ⛔⛔ **la « garde de la garde » du graphe d'injection ne gardait qu'une INCLUSION** (ci-dessous) |
+| 6 | la **borne haute** des montants n'était éprouvée par **aucun** test — la relâcher d'un facteur 9 laissait **140 verts**, alors que c'est elle qui protège les cumuls du n° 2 |
+| 7 | `LONGUEUR_MAX_AUTEUR` déclarée et **jamais importée** (récidive du patron STORY-516) |
+| 8 | le commentaire `AD-3` d'`app.module.ts`, tronqué par la réécriture, laissait entendre que STORY-516 et STORY-517 **n'étaient pas livrées** — neuf lignes sous leur propre déclaration |
+| 9 | aucune garde d'**arrêté futur**, alors que les deux lectures voisines la posent |
+
+### ⛔⛔ Le correctif du matin portait lui-même le défaut qu'il venait fermer
+
+`app.module.injection.spec.ts`, écrit une heure plus tôt pour fermer l'angle mort du graphe
+d'injection, filtrait les imports d'`AppModule` **sur la liste qu'il était censé éprouver** :
+
+```ts
+.filter((m) => MODULES_METIER.some((connu) => connu === m))   // ⛔ jette les manquants
+```
+
+Ce filtre **jette précisément les modules absents** : l'assertion ne prouvait que
+`MODULES_METIER ⊆ AppModule.imports`, jamais la réciproque — **alors que son JSDoc promettait
+l'inverse**. `AppModule` importe **neuf** modules de `src/modules/` ; la liste n'en portait que
+**six**. `AuthModule`, `ReadModelsModule` et `DiagnosticsModule` manquaient, et le test était
+**VERT**.
+
+⚡ **Le filtre porte désormais sur l'ORIGINE du module**, lue dans les `import` d'`app.module.ts` —
+la seule source qui dise d'où vient une classe.
+
+⚡⚡ **Mesuré des deux côtés, sur exactement le même oubli** : retirer un module de la liste fait
+**rougir** le filtre corrigé et laisse **VERT** le filtre d'origine.
+
+⚠️ Monter les neuf graphes a demandé d'ajouter `ClsModule` et `CommonModule` — `@Global()` et
+déclarés par `AppModule`, ils font partie de l'**environnement réel** de chaque module — et de
+servir au double de configuration les valeurs de développement de `.env.example`, sans quoi
+`JwtStrategy` échouait au `super()` pour une raison de **fixture**, pas de graphe.
+
+### Sept mutations de plus, toutes rouges
+
+| # | Mutation | Test qui rougit |
+|---|---|---|
+| M21 | `‖` remplacé par `&&` dans la garde de monnaie unique | 2 |
+| M22 | `Number.isSafeInteger` remplacé par `Number.isFinite` | 2 |
+| M23 | groupement par `(type, exercice)` rétabli | 2 |
+| M24 | tri sans la date | 1 |
+| M25 | arrêté futur toléré d'un jour | 1 |
+| M26 | `methode` retombée à la borne de 200 | 1 **e2e** |
+| M27 | la garde d'exhaustivité se refiltre elle-même | 1 (avec un module retiré) |
+
+⚠️ **M27 a d'abord survécu — et ce n'était pas un trou de test.** La mutation est **équivalente**
+tant que la liste est complète : elle ne devient un défaut qu'au moment où un module est ajouté
+sans l'être à la liste. ⇒ **Analyser POURQUOI une mutation survit** avant de conclure (leçon
+STORY-516). La mutation décisive n'était pas « casser le filtre », c'était « **oublier un
+module** ».
+
+### ④bis Vérification docker REJOUÉE sur l'état final
+
+Les correctifs touchent l'agrégation déjà vérifiée : la mesure est refaite sur un **dossier neuf**,
+à deux exercices ouverts et à monnaie unique.
+
+| Vérification | Avant | Après |
+|---|---|---|
+| le même type sur **deux exercices** | `22 500 000` (deux lignes) | **`12 500 000`** (une ligne, exercice 2026) |
+| un type **non réévalué** depuis 2025 | — | **reste en vigueur**, avec son propre exercice |
+| `totalPartDesReassureurs` | `5 000 000` | **`3 000 000`** — la part 2025 n'est plus comptée deux fois |
+| **AC-3** toujours vrai — arrêté au 31/12/2025 | — | `10 500 000` : la réévaluation de mars 2026 **n'est pas consommée** |
+| deux monnaies dans une catégorie | total faux publié | **`409 DEVISES_HETEROGENES_DANS_LES_PROVISIONS`** |
+| arrêté au 31/12/2099 | `200` | **`400 DATE_ARRETE_PROVISIONS_FUTURE`** |
+| `gnf`, `GN`, `GNFX`, `francs guinéens` | `201` | **`400`** sur les quatre |
+| plans d'exécution | — | lecture bornée **et** agrégation servies par index, `docsExamined == nReturned`, **aucun `COLLSCAN`** |
 
 ## Notes
 
