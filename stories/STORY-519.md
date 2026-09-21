@@ -1,6 +1,6 @@
 # STORY-519 : Aucun calcul actuariel n'est inventé — ce que le module calcule, et à quelle condition
 
-Status: defined
+Status: review
 
 **Complexité :** high
 
@@ -320,7 +320,7 @@ du vocabulaire qui le décrit, soit les deux stories cessent d'annoncer une vale
 
 ## Progress Tracking
 
-**Statut : `defined` le 2026-09-21.** Cadrage réglementaire mesuré **avant** toute ligne de code, sur
+**Statut : `review` le 2026-09-21.** Cadrage réglementaire mesuré **avant** toute ligne de code, sur
 deux sources indépendantes croisées (pages officielles `cima-afrique.org` + Code CIMA 2019 intégral,
 608 p. extraites localement). Six constats (M1 → M6) ont **déplacé la story**, dont deux qui
 contredisent sa propre prémisse : aucun article du Code n'exige d'actuaire (M1), et la provision
@@ -332,3 +332,95 @@ Branches créées **avant** la première ligne de code :
 docs               MNV-519
 assurance-service  MNV-519
 ```
+
+### Portes de qualité
+
+| Porte | Mesure |
+|---|---|
+| lint | `eslint "{src,test}/**/*.ts" --max-warnings 0` — **0** |
+| build | `nest build` — OK |
+| unitaires | **1 771** verts, 95 suites |
+| e2e | **171** verts, 7 suites |
+| couverture globale | **99,57 / 94,43 / 99,25 / 99,63** — seuils 65/90/90/90 |
+| fichiers neufs | catalogue, déclaration du module calculé, DTO : **100 / 100 / 100 / 100** |
+
+### Table de mutations — 15 mutations, 15 ROUGES
+
+Chaque règle qui protège d'une régression précise a été **volontairement cassée**, puis restaurée.
+Le travail était **committé avant de muter** : le harnais restaure depuis `HEAD`, et muter du travail
+non committé ne mesure rien (leçon payée deux fois en STORY-518).
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M1 | `entreeDuCatalogue` rend un défaut prudent au lieu de **jeter** | **1 rouge** / 41 |
+| M2 | une entrée retirée du catalogue (`EGALISATION`) | **1 rouge** / 41 |
+| M3 | l'origine d'une **saisie** publiée comme `CALCULEE_PAR_LE_MODULE` | **1 rouge** / 18 |
+| M4 | l'origine de l'**agrégat** `en-vigueur` inversée | **1 rouge** / 65 |
+| M5 | statut fail-closed inversé : non validée devient `VALIDEE_PAR_UN_EXPERT` | **2 rouges** / 59 |
+| M6 | la validation **partielle** est acceptée (un nom sans date) | **4 rouges** / 65 |
+| M7 | borne de validation relâchée de `>` en `>=` (le même jour est refusé) | **1 rouge** / 65 |
+| M8 | la validation **postérieure** à l'évaluation n'est plus refusée | **1 rouge** / 65 |
+| M9 | ⛔ la réserve du prorata servie dans les deux cas | **NE COMPILE PAS** |
+| M9 bis | la réserve du prorata **inversée** (servie sur le forfait) | **3 rouges** / 56 |
+| M10 | la mise en garde « ce type est aussi calculé » servie **partout** | **2 rouges** / 59 |
+| M11 | le module calculé déclare un **autre type** que le catalogue | **1 rouge** / 41 |
+| M12 | ⛔ le catalogue servi expose la **constante** au lieu d'une copie | **NE COMPILE PAS** |
+| M12 bis | idem, avec le type importé pour que ça compile | ⚠️ **SURVIT** (65 verts) |
+| M12 ter | idem, **après correction du test** | **1 rouge** / 65 |
+| M13 | l'origine de la réponse **calculée** inversée | **2 rouges** / 79 |
+| M14 | la méthode calculée sort **sans le marqueur du prorata** | ⚠️ **SURVIT** (13 verts) |
+| M14 bis | idem, **après ajout du test manquant** | **1 rouge** / 15 |
+| M15 | route `methodes` déclarée **APRÈS** la route paramétrée | **2 rouges** / 37 |
+
+### ⚡⚡ Ce que la passe de mutation a trouvé, et que RIEN d'autre ne voyait
+
+**Deux mutations ont survécu**, sur des portes toutes vertes. Les deux étaient de vrais trous.
+
+- **M14 — le marqueur du prorata n'était gardé par aucun test.** Le bloc `methodeServie` était bien
+  publié, mais **rien ne vérifiait qu'il dépendait de la méthode retenue** : toutes les entrées
+  assertées étaient des **forfaits**. La réserve propre à la méthode **dérogatoire** aurait pu cesser
+  d'être servie sans qu'un seul test bouge. C'est le patron de STORY-514 — *un test peut ne rien
+  mesurer parce que les deux implémentations coïncident sur ses entrées*.
+- **M12 — le test de la copie se comparait à LUI-MÊME.** L'assertion confrontait la seconde lecture à
+  `CATALOGUE_DES_METHODES[0].raisons`, c'est-à-dire à la source que la mutation **corrompt aussi** :
+  les deux côtés bougeaient ensemble. L'attendu est désormais **capturé avant**, par copie. Patron
+  [[story-513-test-qui-verrouille-le-sens]].
+
+⚠️ **Et deux mutations n'ont d'abord rien mesuré parce qu'elles ne compilaient pas** (M9, M12) :
+supprimer une branche rendait un paramètre inutilisé, et `tsc` refusait — jest rendait « 0 test »,
+jamais un rouge. Reformulées en **inversion** et en **import ajouté**, elles rougissent. Troisième
+récidive de cette leçon après STORY-517 et STORY-518.
+
+### ⛔⛔ Vérification docker — stack neuve, Mongo réel, jeton IdP réel
+
+Stack redémarrée après `docker compose down -v`. ⚠️ **La chaîne d'accès est exercée pour de vrai**
+(leçon STORY-511) : inscription et connexion réelles à l'IdP, `aud` du jeton contrôlé — il contient
+bien `assurance-service` —, puis appel d'une route **gardée**. Aucune route publique n'a servi de
+preuve.
+
+| # | Vérification | Résultat |
+|---|---|---|
+| 1 | le catalogue servi par Nest réel | **14 lignes**, dont **1** calculée (`NON_VIE` / `RISQUES_EN_COURS`) |
+| 2 | chaque ligne saisie porte une raison, chaque ligne cite son article | `sans raison: 0`, `sans fondement: 0` |
+| 3 | ⛔ aucune raison n'invoque l'actuaire | `citent l'actuaire: 0` |
+| 4 | les motifs de la PSAP sont ceux du texte | `JUGEMENT_EXIGE_PAR_LE_TEXTE`, `RENVOI_A_UNE_CIRCULAIRE`, `ACCORD_DE_LA_COMMISSION_REQUIS` |
+| 5 | le motif de la PM vie | `DONNEE_ABSENTE_DE_CE_SERVICE` — jamais « actuaire obligatoire » |
+| 6 | la ligne calculée **dit** que son plancher ignore l'art. 334-11 | réserve servie : **oui** |
+| 7 | **ordre de routage réel** : `methodes` n'est pas appariée sur `:provisionId` | `200` sur `methodes`, `404` sur un identifiant inexistant |
+| 8 | ⚡ les **trois champs de validation** réellement écrits en base | `nom`, `qualité`, `le: 2026-02-01T00:00:00.000Z` |
+| 9 | ⛔ le **validateur** est distinct de l'**auteur** en base | `Aminata Diallo` ≠ `Aissatou Diallo` |
+| 10 | ⛔ `origine` et `methodeServie` ne sont **PAS stockés** — dérivés | `true` sur les **deux** collections |
+| 11 | sans validation : les trois champs **absents** en base, statut servi `A_VALIDER_PAR_UN_EXPERT` | `true` |
+| 12 | **les trois refus n'écrivent RIEN** | `2` documents avant, `2` après, **aucun** document `RISQUES_CROISSANTS` |
+| 13 | le **même jour** est licite (la borne est `>`, pas `>=`) | `201` |
+| 14 | l'**agrégat** dit que ses totaux sont saisis | `origine: SAISIE`, `totalBrut: 36 000 000`, 3 lignes toutes `SAISIE` |
+| 15 | le registre **calculé**, cycle prime réel (contrat + quittance par HTTP) | `origine: CALCULEE_PAR_LE_MODULE`, `statut: TRANSCRITE_DU_TEXTE` |
+| 16 | ⚡ la réserve du **prorata** ne voyage QUE sur le prorata | forfait : **non** · prorata : **oui** |
+| 17 | et les deux méthodes **divergent vraiment** | `montantMinimal` **365 400** (forfait) contre **550 603** (prorata) |
+| 18 | ⛔ l'artefact `cima-assurances` **n'a pas bougé d'un octet** | `2.0`, `statut: amorce`, checksum `e779903a8cc8e091…` |
+
+⚠️ **La ligne 18 confirme aussi M6** : le statut de l'artefact vaut bien **`amorce`**, et non
+`a-valider-par-expert` comme l'écrivaient cette story et l'AC-2 de [[STORY-540]]. Réserve portée à
+STORY-540 ; rien n'a été touché ici.
+
+Stack arrêtée après la mesure (`docker compose stop`).
