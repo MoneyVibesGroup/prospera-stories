@@ -4222,7 +4222,7 @@ sprints:
         epic: "EPIC-036"
         points: 8
         service: "paiement-service"
-        status: "review"  # MNV-666 livree (3b4f914, sur dev) — raccordement = donnee d ORGANISATION, secret client et cle d API SCELLES sous un lien qui nomme l organisation et le genre, client id et participant en clair ; AUCUN repli (la classe qui prete le raccordement n injecte pas la configuration) ; refus nomme a l EMISSION ; recette REELLE Docker 16/16 : demande ACCEPTEE par le schema sous le raccordement declare par l API. Points PO : un deploiement sert UN participant (table participant->origine = donnee de PLATEFORME), pas de retrait, Money Vibes doit declarer le sien AVANT la mise en service
+        status: "done"  # MNV-666 fusionnee dans dev (2026-09-21, 8b45a74, verifie par `git cherry`) — ex-review : raccordement = donnee d ORGANISATION, secret client et cle d API SCELLES sous un lien qui nomme l organisation et le genre, client id et participant en clair ; AUCUN repli (la classe qui prete le raccordement n injecte pas la configuration) ; refus nomme a l EMISSION ; recette REELLE Docker 16/16 : demande ACCEPTEE par le schema sous le raccordement declare par l API. Points PO : un deploiement sert UN participant (table participant->origine = donnee de PLATEFORME), pas de retrait, Money Vibes doit declarer le sien AVANT la mise en service
         story_path: "stories/STORY-666.md"
         assigned_to: null
       - story_id: "STORY-667"
