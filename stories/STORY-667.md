@@ -69,7 +69,7 @@ d'affectation, son motif obligatoire et son auteur restent ceux de STORY-271.
 - [x] AC-6 — La référence d'une **autre** organisation ne désigne rien : le point de vente se cherche
       **dans l'organisation du compte qui a reçu la notification** (AD-16), et un paiement dont la
       référence ne désigne ni demande ni point de vente reste l'orphelin simple qu'il était.
-- [ ] AC-7 — **MESURE réelle** sur le bac à sable : un QR statique scanné et payé **deux fois**. Ce
+- [x] AC-7 — **MESURE réelle** sur le bac à sable : un QR statique scanné et payé **deux fois**. Ce
       que porte `txId`, si `evDate` est présent, et si les deux paiements produisent deux
       encaissements en attente sous le même point de vente. La story ne suppose pas, elle mesure.
 
@@ -88,22 +88,40 @@ d'affectation, son motif obligatoire et son auteur restent ceux de STORY-271.
 
 **Suites :** 3 633 unitaires (271 suites), 295 e2e, lint 0, `tsc` 0. **Recette Docker sur le
 vrai conteneur : 21/21** (vrai Mongo, vrai coffre, vrai journal, vraie route publique de
-notification ; le participant est joué — voir AC-7).
+notification), puis **mesure réelle : deux scans, deux encaissements** (AC-7).
 
-⚠️ **AC-7 RESTE OUVERT, ET IL NE PEUT PAS SE FERMER SANS UN TÉLÉPHONE.** La recette signe elle-même
-ses webhooks, sous la forme que [[STORY-664]] a **mesurée** pour un code dynamique. Ce que le schéma
-envoie pour un code **statique** n'a pas été vu : il faut scanner l'affiche **deux fois** dans
-l'application du bac à sable, par le tunnel. Trois questions, dans l'ordre où elles coûtent :
+### ⚡⚡ AC-7 — LA MESURE : deux scans réels de la même affiche, deux encaissements
 
-1. `txId` est-il bien la référence du lieu ? S'il est **absent**, l'événement entier est refusé
-   (« ni identifiant de bout en bout ni référence ») et le participant rejouera sans fin — il faudra
-   alors une clef de repli dans l'adaptateur. S'il est **autre chose**, le paiement arrive orphelin
-   simple : rien n'est perdu, mais la provenance l'est.
-2. `evDate` est-il présent sur ce canal ? Sinon on retombe dans AC-4 : le deuxième client est
-   journalisé en `error`, pas rangé.
-3. `evDate` est-il **stable d'une re-livraison à l'autre** ? C'est l'hypothèse sur laquelle AC-3
-   repose. S'il changeait, un rejeu compterait deux fois — à mesurer en coupant le tunnel pendant
-   un paiement.
+Affiche de Money Vibes (point de vente `6ab09cc2d75e710b7b300549`) scannée **deux fois** dans
+l'application du bac à sable, le 2026-09-21, par un tunnel ngrok et un webhook déclaré chez le schéma
+pour l'occasion. Corps reçus, signés par le participant, verbatim :
+
+```json
+{"data":[{"evCode":"PAIEMENT_RECU","evDate":"2026-09-21T03:11:52.862Z","montant":150,
+"client":"thierno barry","alias":"6feb273d-…f36b","txId":"6ab09cc2d75e710b7b300549"}],"meta":{"total":1}}
+{"data":[{"evCode":"PAIEMENT_RECU","evDate":"2026-09-21T03:12:33.323Z","montant":175,
+"client":"thierno barry","alias":"6feb273d-…f36b","txId":"6ab09cc2d75e710b7b300549"}],"meta":{"total":1}}
+```
+
+Les trois questions de la fiche, et ce que le schéma a répondu :
+
+1. ⚡ **`txId` EST la référence du lieu** — la même dans les deux paiements. Le piège de cette story
+   n'était donc pas une hypothèse : sous la clef d'avant, `PAIEMENT_RECU:6ab09cc2…` aurait rangé les
+   150 et **écarté les 175 comme un rejeu**, avec un `204`. Mesuré à la place : deux `204`, **deux
+   encaissements en attente** (150 et 175), tous deux sous leur point de vente, clefs
+   `…:2026-09-21T03:11:52.862Z` et `…:2026-09-21T03:12:33.323Z`.
+2. ⚡ **`evDate` est présent sur le canal statique**, comme sur le dynamique ([[STORY-664]]). Toujours
+   aucun `end2endId` dans l'événement.
+3. ⚡⚡ **`evDate` EST LA DATE D'IRRÉVOCABILITÉ DU PAIEMENT, À LA MILLISECONDE** — relue chez le
+   schéma par `GET /paiements-recus?txId=…` ([[STORY-669]]) : `dateIrrevocabilite` vaut
+   `03:11:52.862Z` et `03:12:33.323Z`. L'instant qui entre dans la clef est donc une propriété du
+   **paiement**, pas de la livraison : une re-livraison ne peut pas en porter un autre. C'était
+   l'hypothèse sur laquelle AC-3 reposait ; elle n'est plus une hypothèse. ⚠️ La re-livraison
+   elle-même n'a pas été provoquée (il aurait fallu couper le tunnel pendant un paiement).
+
+⚡ Chez le schéma, ces paiements portent `categorie: "000"` — le canal statique — là où le QR d'une
+demande porte `400` et une demande poussée `401`. La position du compte est passée de
+1 000 000 700 à 1 000 001 025 : **+325, les deux scans, au franc près.**
 
 ### Ce qui a été construit
 
@@ -169,8 +187,8 @@ l'application du bac à sable, par le tunnel. Trois questions, dans l'ordre où 
 
 ### ⚠️ Points ouverts pour le PO
 
-1. **AC-7** — le scan réel (ci-dessus). L'affiche de Money Vibes est prête dans le volume Docker
-   (point de vente `6ab09cc2d75e710b7b300549`).
+1. ~~AC-7~~ — **fermé par la mesure du 2026-09-21** (ci-dessus). ⚠️ Le webhook `3ae97d02-…` déclaré
+   chez le schéma pointe sur un tunnel ngrok éphémère : il est mort dès la fin de la recette.
 2. **UN QR DYNAMIQUE SCANNÉ DEUX FOIS A LE MÊME DÉFAUT DE NAISSANCE.** Même `txId`, donc même
    clef : le second paiement d'une demande est écarté comme un rejeu, alors que ce serait un
    trop-perçu à constater. Hors périmètre ici — sa clef doit rester recomposable par la
