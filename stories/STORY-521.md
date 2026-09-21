@@ -28,8 +28,9 @@ préférence de présentation.
 
 ## Cadrage mesuré avant de coder (2026-09-21)
 
-Sept constats, relevés sur les **pages officielles `cima-afrique.org`** et dans l'artefact packagé.
-**Trois contredisent la story**, et l'un d'eux en déplace la raison d'être.
+Onze constats, relevés sur les **pages officielles `cima-afrique.org`** — corpus de **940 pages** de
+l'édition « CODE CIMA 2019 », ce qui rend les recherches négatives rejouables — et dans l'artefact
+packagé. **Quatre contredisent la story**, et l'un d'eux en déplace la raison d'être.
 
 ### M1 — ⛔⛔ La prémisse est FAUSSE : en zone CIMA, **nul ne peut être agréé pour les deux**
 
@@ -200,6 +201,80 @@ deux silencieuses :
 ⇒ `COMPTE_RESULTAT` et son terminal `RN` sont **intouchables** dans cette story. Les états
 réglementaires s'ajoutent **à côté**, jamais à la place.
 
+### M8 — ⛔⛔ « comptes techniques » **existe** dans le Code CIMA, et désigne autre chose
+
+Recherche menée sur les **940 pages** de l'édition officielle « CODE CIMA 2019 ». L'expression
+« compte(s) technique(s) » y apparaît **une seule fois**, et pas là où la story la place :
+
+> **Art. 432, classe 7** — « En dehors des **comptes techniques (comptes 70, 73, 75 et 79)**, les
+> produits comprennent […] »
+
+⇒ En CIMA, « comptes techniques » désigne **quatre comptes de la classe 7**, pas un compte de
+résultat. « non technique » n'y paraît qu'une fois aussi, en **adjectif** (art. 432, compte 82 :
+« les pertes et profits au titre des exercices antérieurs sur les **postes non techniques** »).
+
+⚡ Nommer nos états « compte technique Vie / Non-Vie / non technique » créerait donc **un second sens
+pour une expression que le Code emploie déjà** — le défaut exact de [[STORY-503]]. C'est ce qui rend
+**D-521-1 non négociable**, au-delà d'une préférence de style.
+
+Contrôle des deux autres formulations, sur le même corpus : « compte d'exploitation générale »
+**19 occurrences**, « compte général de pertes et profits » **22 occurrences**. Le vocabulaire du
+régulateur est sans ambiguïté.
+
+⚠️ **Recherche négative, et ce qu'elle prouve exactement** : « gestion distincte », « comptabilité
+distincte », « gestion séparée » — **zéro occurrence** dans le Code. Elle ne prouve pas que
+l'étanchéité n'existe pas : elle prouve que **CIMA l'obtient par l'interdiction structurelle de
+l'art. 326**, et non par une règle de cloisonnement comptable interne. Les deux mènent au même
+résultat par des chemins opposés, et seul le second aurait demandé une clé de répartition.
+
+### M9 — ⚡ La clé de répartition EXISTE — mais entre **catégories**, jamais entre vie et non-vie
+
+AC-3 se méfie d'« une clé inventée ». Le Code en publie une, et il faut savoir qu'elle existe pour ne
+pas la ramasser au mauvais endroit. **Art. 433, « Dispositions communes à toutes les entreprises »**,
+placé après les deux modèles de l'état C1 :
+
+> « La répartition **par catégorie ou sous-catégorie** des frais de gestion et des dotations aux
+> amortissements s'effectue en rapportant à chaque branche les frais qui lui sont directement
+> applicables et en ventilant les autres frais généraux aussi exactement que possible […] Sauf
+> justification spéciale, le total des frais respectivement affectés aux catégories transports et
+> acceptations ne devra pas dépasser **10 %** et **2,5 %** des primes.
+> **Les produits financiers sont, à défaut d'une étude plus poussée, ventilés par catégorie ou
+> sous-catégorie au prorata des provisions techniques nettes de réassurance.** »
+
+⇒ Cette clé ventile **à l'intérieur d'une activité**, entre les **23 catégories de l'art. 411**, et
+elle appartient à l'**état C1** — donc à **[[STORY-523]]**, pas à celle-ci. Elle est **supplétive**
+(« à défaut d'une étude plus poussée »), ce qui la rend précisément indisponible comme défaut de
+moteur. **AC-3 reste tenu : aucune clé n'est inventée ici, et celle du Code n'est pas convoquée hors
+de son état.**
+
+### M10 — ⚠️ Les comptes d'**acceptations** figurent dans les DEUX listes de l'art. 432, et c'est cohérent
+
+L'art. 432 cite `604` et `606` dans la liste **vie** *et* dans la liste **toute nature**, et `704`
+dans les deux également. Ce n'est pas une coquille : l'**art. 326 alinéa 1** exempte les
+**acceptations en réassurance** d'agrément. Une société non-vie peut donc légitimement porter des
+acceptations vie, et son compte 80 doit pouvoir les recevoir.
+
+⇒ **Conséquence directe sur la dérivation (D-521-4)** : un compte d'acceptation **ne prouve rien** sur
+l'agrément. Seules les **affaires directes** le prouvent — `601` / `701` (vie) contre `602` / `702`
+(dommages). Dériver la catégorie d'un `604` ferait conclure « vie » sur une société non-vie
+parfaitement régulière.
+
+### M11 — ⚡ Le seul régime mixte du Code ne produit **qu'un seul** compte 80
+
+**Art. 715** (microassurance) : une entreprise de microassurance peut être agréée pour la
+microassurance **non vie** *et* pour l'**assurance temporaire décès** — le seul cas mixte pérenne du
+Code. Et l'**art. 723** tranche la conséquence comptable :
+
+> « **Le mode de gestion de la branche 11 est assimilé dans ce cas à celui de l'IARD.** »
+
+⇒ Même dans le cas mixte, **un seul compte 80**, sur le modèle « Assurances de toute nature ».
+L'**art. 337-4** (sociétés mixtes héritées de l'avant-Code) va dans le même sens pour la marge de
+solvabilité : calcul **séparé puis sommé**, jamais une base agrégée.
+
+⚡ **Le Code ne connaît donc aucune situation où deux comptes 80 coexistent.** C'est la confirmation
+la plus forte de M1 — et elle vient d'un article que la story ne cite pas.
+
+
 ---
 
 ## Décisions de cadrage du 2026-09-21
@@ -209,10 +284,10 @@ réglementaires s'ajoutent **à côté**, jamais à la place.
 | **D-521-1** | Les trois états portent le **numéro de compte du Code** : `COMPTE_80_VIE_CAPITALISATION`, `COMPTE_80_TOUTE_NATURE`, `COMPTE_87_PERTES_ET_PROFITS` | **Mesuré (M2)** : « compte technique », « Non-Vie » et « compte non technique » ne sont pas les mots du Code à cet endroit. Le numéro de compte, lui, est sans ambiguïté et traverse les 14 États. Leçon [[STORY-503]] : un brief qui nomme les champs crée un second nom pour un concept publié |
 | **D-521-2** | **`COMPTE_RESULTAT` est conservé tel quel**, `RN` reste son dernier `FORMULE` et le terminal confronté à `Σ_CR` | **Mesuré (M6/M7)**. Les trois états réglementaires sont des **présentations** ajoutées à côté ; l'articulation avec le bilan ne bouge pas d'un franc. Régression interdite (AC-7) |
 | **D-521-3** | Le plan gagne **exactement huit comptes à trois chiffres** — `601`, `602`, `604`, `605`, `701`, `702`, `704`, `705` — libellés verbatim de l'art. 431 | **Mesuré (M5)**. Sans eux, les deux modèles seraient alimentés par le même `60`/`70` et l'étanchéité serait décorative. Ce n'est **pas** la transcription du plan ([[STORY-671]]) : ce sont les huit comptes que l'axe exige |
-| **D-521-4** | La **catégorie du dossier se DÉRIVE des comptes présents dans la balance**, jamais d'un paramètre saisi | Le référentiel produit la liasse depuis une balance, qui ne porte aucun axe de catégorie. `601`/`604`/`701`/`704` ⇒ vie ; `602`/`605`/`702`/`705` ⇒ toute nature. C'est AC-6 mot pour mot : ce qui n'est pas dans la donnée ne se devine pas |
+| **D-521-4** | La **catégorie du dossier se DÉRIVE des comptes d'AFFAIRES DIRECTES présents dans la balance**, jamais d'un paramètre saisi, et **jamais d'un compte d'acceptation** | Le référentiel produit la liasse depuis une balance, qui ne porte aucun axe de catégorie. `601` / `701` ⇒ vie ; `602` / `702` ⇒ toute nature. **Mesuré (M10)** : `604`, `606`, `704` figurent dans les DEUX listes de l'art. 432 parce que l'art. 326 al. 1 exempte les acceptations d'agrément — en dériver la catégorie conclurait « vie » sur une société non-vie régulière. C'est AC-6 mot pour mot : ce qui n'est pas dans la donnée ne se devine pas |
 | **D-521-5** | Le modèle qui ne s'applique pas est servi **`NON_APPLICABLE`, squelette compris** — jamais absent | AC-5, patron du TFT absent du SFD (`tft-production.service.ts:137-163`) : l'onglet reste visible, les mesures valent `null` et jamais `0`. *Un état qui disparaît fait chercher ce qu'on a cassé* |
 | **D-521-6** | Une balance portant **à la fois** des comptes du 1°) et du 2°) de l'art. 300 produit un constat **nommé et bloquant** ; une balance ne portant que `60`/`70` à deux chiffres rend la catégorie **`INDETERMINABLE`** | **Mesuré (M1)** : le premier cas décrit une entreprise que l'art. 326 interdit. Le second est le cas de **toutes les balances CIMA existantes** — il doit se dire, pas se deviner (AC-6) |
-| **D-521-7** | ⛔ **La question des acceptations en réassurance n'est pas tranchée** : le module la **nomme** et range `604`/`705` dans le modèle de leur catégorie, sans conclure sur la licéité d'une acceptation vie par une société non-vie | **Mesuré (M1)**, art. 326 al. 1 : l'agrément est levé pour les acceptations, la spécialisation de l'al. 3 ne l'est pas. Ce n'est pas au module d'arbitrer un point que le texte laisse ouvert. AD-12 : on n'invente rien |
+| **D-521-7** | Les comptes d'**acceptations** sont routés dans **le modèle effectivement servi**, et **exclus de la dérivation** | **Mesuré (M10)** : l'art. 432 les cite dans les deux listes, et l'art. 326 al. 1 explique pourquoi. Le module ne tranche pas la licéité d'une acceptation vie par une société non-vie — il cesse simplement d'en **tirer une conclusion d'agrément**. AD-12 : on n'invente rien |
 | **D-521-8** | `cima-assurances@4.0` devient la version **SERVIE** ; `@1.0`, `@2.0` et `@3.0` restent packagées et **intactes, octet pour octet** | D-518-6 / D-520-8 : un paquet publié non servi est **inerte**. ⚠️ `estHabiliteParmi` compare le couple **exact** : l'octroi est à rejouer. **Migration = souci de prod, différé** |
 | **D-521-9** | `assurance-service` : la **quittance** reçoit sa catégorie **recopiée du contrat** à l'émission, comme le sinistre — et les deux lectures qui en dépendent filtrent **dans la requête**, plus en mémoire | AC-1. Mesuré : la quittance est le **seul maillon** du cycle prime qui ne porte pas la catégorie, et les bornes `QUITTANCES_MAX_*` comptent aujourd'hui **les deux catégories confondues** |
 | **D-521-10** | Le **statut du paquet reste `amorce`** | La réserve levée est celle de la séparation Vie/Non-Vie, **pas** celle des états C1..C25 ([[STORY-523]]) ni celle du niveau de détail du plan ([[STORY-671]]). Le libellé de `RT` cesse en revanche de dire « hors séparation Vie/Non-Vie » |
@@ -308,9 +383,14 @@ version servie, digests épinglés, artefact recopié byte-identique, snapshot e
 
 - Voir [[STORY-513]], [[STORY-518]], [[STORY-520]], [[STORY-522]], [[STORY-523]], [[STORY-671]],
   spine AD-3.
-- Sources officielles dépouillées le 2026-09-21 — pages `cima-afrique.org` : art. **300** (objet du
-  contrôle, 1°) et 2°)), art. **326** (agrément et spécialisation), art. **431** (liste des comptes),
-  art. **432** (terminologie, les trois listes du compte 80), art. **433** (états modèles).
+- Sources officielles dépouillées le 2026-09-21 — édition « CODE CIMA 2019 », `cima-afrique.org`,
+  **940 pages** parcourues (les recherches négatives de M8 sont donc rejouables) : art. **300**
+  (objet du contrôle, 1°) et 2°)), art. **326** (agrément, spécialisation, exemption des
+  acceptations), art. **328** (branches 1-18 IARD / 20-23 vie), art. **337-4** (sociétés mixtes),
+  art. **411** (23 catégories), art. **422** (liste des états comptables), art. **431** (liste des
+  comptes), art. **432** (terminologie, les trois listes du compte 80, « comptes techniques » =
+  70/73/75/79), art. **433** (états modèles et clé de ventilation par catégorie), art. **715** et
+  **723** (microassurance mixte).
 
 ## Progress Tracking
 
@@ -319,7 +399,7 @@ code** — `assurance-service`, `bilan-service`, `balance-service`, `platform-ca
 
 ### Cadrage
 
-Fait le 2026-09-21 sur les pages officielles et sur l'artefact packagé. **Sept constats M1-M7, dont
-trois contredisent la story** : la spécialisation imposée par l'art. 326 (M1), le vocabulaire du
-régulateur (M2), le rattachement des charges communes au compte 80 (M4). Dix décisions D-521-1 à
-D-521-10.
+Fait le 2026-09-21 sur les pages officielles et sur l'artefact packagé. **Onze constats M1-M11, dont quatre
+contredisent la story** : la spécialisation imposée par l'art. 326 (M1), le vocabulaire du régulateur
+(M2), le rattachement des charges communes au compte 80 (M4), et l'existence d'un sens CIMA déjà pris
+pour « comptes techniques » (M8). Dix décisions D-521-1 à D-521-10.
