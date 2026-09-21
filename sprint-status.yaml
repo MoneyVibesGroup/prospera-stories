@@ -4230,7 +4230,7 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "ready-for-dev"  # phase B, prerequis 664 et 666
+        status: "in-progress"  # phase B — fiche ecrite le 2026-09-21, branche MNV-667 ; ⛔ piege central : un QR REUTILISABLE revient avec le MEME txId a chaque paiement, la clef PAIEMENT_RECU:<txId> avalerait le 2e client comme un rejeu
         story_path: "stories/STORY-667.md"
         assigned_to: null
       - story_id: "STORY-668"
