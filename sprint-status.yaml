@@ -4246,7 +4246,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "ready-for-dev"  # phase C, prerequis 666 — DEBLOQUEE 2026-09-15 : le simulateur resout ses comptes sous /TGD999 (le chemin /v1 etait la cause)
+        status: "in-progress"  # fiche ecrite le 2026-09-21 (branche MNV-669) — MESURE : GET /paiements-recus (portee paiement.read) rend txId ET end2endId, filtres payeCompte + dateIrrevocabilite[gte|lte] APPLIQUES, curseur meta.page, meta.total = taille de PAGE ; le mot « tresorerie » est INTERDIT par la garde NFR-1b : releve + position lue, jamais rangee — phase C, prerequis 666 — DEBLOQUEE 2026-09-15 : le simulateur resout ses comptes sous /TGD999 (le chemin /v1 etait la cause)
         story_path: "stories/STORY-669.md"
         assigned_to: null
       - story_id: "STORY-670"
