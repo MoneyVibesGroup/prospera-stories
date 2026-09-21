@@ -630,3 +630,124 @@ variationProvisionsBrutes = 1 500 000   variationPartCessionnaires = 500 000
 
 ⇒ `RN` **ne vaut pas** le solde du compte 80, et la différence est **exactement** la variation de
 provisions — celle que l'égalité littérale de l'AC-4 passait sous silence.
+
+---
+
+## ⑥⑦ Revues — quatre bloquants, aucune vulnérabilité
+
+**Revue de sécurité : AUCUNE vulnérabilité.** Route gardée exactement comme ses cinq voisines
+(comparaison ligne à ligne), bornes d'entrée déjà couvertes par `@ArrayMaxSize(5000)`, isolation
+tenant étanche (`404` et non `403` sur un dossier d'une autre organisation), bascule de version
+**fail-closed** sans rapprochement de version voisine, artefact toujours chargé sous vérification
+sha256, aucun secret dans les 5 501 lignes du diff.
+
+**Revue de code : quatre bloquants et sept constats.** ⛔ **Le plus grave n'était pas le mien.**
+
+### ⛔⛔ Un commerçant togolais qualifié d'assureur-vie
+
+`syscohada-revise@2.1` déclare **exactement les mêmes huit numéros de compte** : `601 Achats de
+marchandises`, `602 Achats de matières premières`, `701 Ventes de marchandises`, `705 Travaux
+facturés`… La dérivation ne regardait que le **numéro**.
+
+| Balance d'une PME commerciale | Ce que le module publiait |
+|---|---|
+| `601` = 5 000 000, `701` = 9 000 000 | `agrement: VIE_CAPITALISATION` |
+| la même + `602` = 1 000 000 | `agrement: INCOMPATIBLE_ART_326` |
+
+Le second cas publie à un commerçant, mot pour mot, *« la balance décrit une entreprise que le Code
+interdit »*. C'est le **renversement complet de l'AC-6** que cet état revendique.
+
+⇒ Le correctif ne teste **pas** `meta.code === 'cima-assurances'` : il regarde si le paquet **porte
+réellement les deux modèles**. Un test sur le nom cesserait de garder le jour où un référentiel se
+renomme — sans rien lever.
+
+### ⛔⛔ Les acceptations sortaient de l'état servi — et mon code contredisait ma décision
+
+D-521-7 dit « routées dans le modèle **effectivement servi** ». Le code les routait dans le modèle
+de **leur nature**. L'art. 326 al. 1 exemptant les acceptations d'agrément, une société de toute
+nature porte légitimement un `604` :
+
+```
+RC1 = 5 550 000   contre   EN1 = 5 500 000
+RP1 = 8 090 000   contre   EN10 = 8 000 000
+articulation : ecart = −40 000, ANOMALIE  ⇐ exactement le montant perdu
+```
+
+⚡ **Et le correctif était déjà dans le Code** : l'art. 432 cite `604` dans les **deux** listes du
+compte 80. Un seul modèle étant servi, les router dans les deux ne compte jamais deux fois.
+
+### ⛔⛔ Les surcharges d'organisation, perdues
+
+`agregerPourEtat` **déclarait** un paramètre `surcharges` que personne n'alimentait. Le compte de
+résultat les honore, le compte 80 lisait la table packagée : `RC1 = 0` contre `EN1 = 5 500 000`,
+écart **−5 500 000**. Deux lectures de la même balance — le défaut contre lequel le JSDoc de
+`choisirPosteBilan` met explicitement en garde.
+
+### ⛔ Mon test verrouillait le défaut
+
+Le test de l'AC-3 exigeait que les comptes d'`EV1` et d'`EN1` soient **disjoints**. Appliquer la
+lecture juste de l'art. 432 le faisait **rougir** : il refusait la correction. Et le témoin qui
+aurait dû voir le défaut — « un compte d'acceptation ne prouve aucun agrément » — construisait
+exactement la balance fautive et n'assertait **que** l'agrément, jamais `EN1` ni l'articulation, qui
+était en `ANOMALIE` dans ce test même, en vert.
+
+L'invariant est restaté : les **affaires directes** sont disjointes, et le recouvrement des deux
+modèles est **exactement** l'ensemble des acceptations — égalité, pas inclusion.
+
+### Les autres constats, tous corrigés
+
+| # | Constat | Conséquence mesurée |
+|---|---|---|
+| N7 | un compte **ouvert mais non mouvementé** qualifiait | une balance générale exportée en entier faisait sortir un dossier régulier en `INCOMPATIBLE_ART_326` |
+| N4 | le squelette annonçait **tout** en `CHARGE` | « Primes et accessoires » et « SOLDE DU COMPTE 80 » rangés au débit |
+| N5 | un état `INDETERMINABLE` publiait des lignes `NON_APPLICABLE` | le lecteur des lignes conclut l'inverse de ce que l'état annonce |
+| N1 | ⛔ **livrable annoncé non réalisé** | trois documents affirmaient que `RT` perdait sa réserve « hors séparation Vie/Non-Vie ». Il ne l'avait pas perdue |
+| N2 | `build.mjs` promettait que « `PP1` se dérive du solde du modèle servi » | aucun chemin ne le fait |
+| N3 | deux JSDoc **de plus** détachés par mes insertions | `produireLiasseComplete` et `agregerPourEtat` sans documentation |
+| N6 | aucun e2e n'exerçait la route neuve | c'est **pourquoi** le défaut de mappage d'erreur était passé |
+| (sécu) | la route était la seule des six sans `try/catch` | le `MONTANT_HORS_BORNES` que son propre contrat annonce en 400 sortait en **500** |
+
+### Table de mutations de la passe de revue — 7 mutations
+
+| # | Mutation | Mesuré |
+|---|---|---|
+| M12 | `EN1` reperd les acceptations vie | **3 rouges** — le balayage rougit sur `TOUTE_NATURE + 604/704` |
+| M13 | les surcharges n'arrivent plus au compte 80 | **1 rouge** |
+| M14 | la garde de paquet retirée | **1 rouge** — SYSCOHADA redevient qualifiable |
+| M15 | le filtre des comptes non mouvementés retiré | **1 rouge** |
+| M16 | la règle `PRODUIT` du squelette | ⚡ **SURVIVANTE** |
+| M16 quater | le repli de `sensDe` forcé à `CHARGE` | **2 rouges** |
+| M17 | le statut des lignes toujours `NON_APPLICABLE` | **1 rouge** |
+
+⚡⚡ **La survivante est la plus instructive** : forcer `REGLE_PRODUIT` à une valeur impossible
+laissait les 31 tests **verts**. La branche ne servait à rien — les opérandes signées du solde
+donnent déjà le bon sens pour tout poste qui y entre. **Une mutation survivante s'est donc soldée
+par du code en moins, pas par un test de plus autour de code mort.**
+
+⚠️ **Et deux leçons de méthode, payées comptant une seconde fois** : une mutation qui ne compile pas
+rend « 0 test » — ce n'est **pas** un rouge, et trois mutations ont dû être refaites en version
+compilable. `git checkout --` a effacé du travail non committé **trois fois** dans cette passe.
+
+### ④ bis — Vérification docker REJOUÉE sur l'état final
+
+L'artefact a changé **trois fois** pendant les revues (`021992b5…` → `4ff0478b…` → `c541b92c…`). Les
+mesures de la phase ④ ne valaient donc plus rien. Rejouées sur la stack, artefact servi vérifié dans
+le conteneur (`sha256 = c541b92c…`) :
+
+| Cas | Avant correctif | Après |
+|---|---|---|
+| toute nature **portant des acceptations vie** | `ecart = −40 000`, `ANOMALIE` | `OK`, **écart 0** |
+| comptes de l'autre famille **ouverts à 0/0** | `INCOMPATIBLE_ART_326` | `VIE_CAPITALISATION`, **écart 0** |
+| PME commerciale sous **plan SYSCOHADA** | `INCOMPATIBLE_ART_326` | `REFERENTIEL_SANS_COMPTE_80`, 0 compte relevé, 0 ligne, articulation `NON_APPLICABLE` |
+| cas nominal vie (témoin) | `OK` | `OK` |
+
+**Persistance rejouée** : `8 quittances | concordantes 8 | divergentes 0 | sans categorie 0`, sur
+`4 contrats`, et **aucun index ne porte `categorie`** — D-521-9 bis tient toujours dans la base.
+
+### Portes après revue
+
+| Dépôt | lint | build | unitaires | couverture | e2e |
+|---|---|---|---|---|---|
+| `bilan-service` | 0 | OK | **3 093** | 99,01 / 95,08 / 99,25 / 99,08 — fichiers neufs à **100 %** de lignes | **827** |
+| `balance-service` | 0 | OK | 388 (référentiel) | — | — |
+| `assurance-service` | 0 | OK | 161 (référentiel) | — | — |
