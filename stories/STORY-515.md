@@ -254,3 +254,59 @@ Branches créées **avant** la première ligne de code :
 docs               MNV-515
 assurance-service  MNV-515
 ```
+
+- **2026-09-21 — cadrage mesuré, et il AUGMENTE la story.** L'article 415 **est** cette story : il
+  énumère ce qu'un registre de sinistres doit porter. Deux de ses exigences n'étaient dans aucun
+  critère d'acceptation — **deux chaînes d'évaluations successives** (sommes à payer / sommes à
+  recouvrer, que l'art. 334-12 interdit de compenser) et un **paiement ventilé en principal et frais
+  accessoires** (comptes `6020`/`6026`, que l'état C10b additionne). Trois autres constats déplacent
+  le livrable : le vocabulaire du régulateur est **terminé**, jamais « clos » ; la réouverture
+  n'existe dans **aucun article** mais l'état C10b en donne la formule (`a − b − c`) ; et le
+  rattachement à la survenance **n'est pas universel** (l'art. 415 exclut maladie et transports, que
+  ce dépôt ne sait pas reconnaître faute de porter la branche de l'art. 328). Neuf décisions :
+  D-515-1 à D-515-9.
+- **2026-09-21 — développement.** Trois collections (`sinistres`, `evaluations_sinistre`,
+  `evenements_sinistre`), un **verrou logique** par dossier, l'effet économique **typé par
+  composante**, l'état **dérivé d'un compte** (jamais d'un tri). ⚠️ Quatre codes de refus renommés
+  pour rester **globalement uniques** — le dépôt l'exige et son test de non-doublon le tient.
+- **2026-09-21 — ⚡ un trou de scan rebouché au passage.** Le motif qui vérifie qu'un repository
+  append-only n'expose aucune réécriture **n'énumérait pas `findOneAndUpdate`** (hérité de STORY-513 /
+  STORY-514). Inerte là où il était posé — aucun de ces repositories n'écrit —, mais il se présentait
+  comme exhaustif : exactement le patron « une garde qui promet plus qu'elle ne tient » de STORY-512.
+  Ici il **doit** tenir, puisque le verrou logique EST un `findOneAndUpdate`.
+- **2026-09-21 — passe de mutation : 16 mutations, 15 rouges du premier coup, ⛔ 1 TROU.**
+  « la tête de chaîne est lue par RANG décroissant » demandait la nature `SOMMES_A_PAYER` ; une
+  mutation faisant **ignorer le paramètre** au profit d'un filtre en dur sur cette même valeur laissait
+  **55 tests du service et 22 du repository au vert**. La fixture coïncidait avec la valeur mutée —
+  le test ne mesurait plus le paramètre qu'il croyait mesurer (patron STORY-514, « un test qui ne
+  diverge pas du naïf »). ⇒ Le test demande désormais la nature **non triviale**, et un second
+  asserte la **différence** entre les deux appels.
+- **2026-09-21 — ⚡⚡ vérification docker, avec un JETON RÉEL de l'IdP** (leçon STORY-511 : une vérif
+  qui n'exerce que des routes publiques ne prouve rien).
+  - **La chaîne d'accès est exercée** : inscription + connexion réelles, `aud` contrôlée
+    (`assurance-service` y figure), et le premier appel rend **404 `DOSSIER_INTROUVABLE`** — pas
+    401 : le JWT est **accepté** et la requête atteint la chaîne.
+  - **Les 10 routes sont mappées**, `:sinistreId` en dernier, et les logs confirment que le code
+    exécuté est celui de la branche (`Found 0 errors`, montage à chaud).
+  - **Le cas canonique passe** : sinistre survenu le 28/12/2025 (exercice **CLOS**), déclaré le
+    15/01/2026 (exercice ouvert) — bornes de survenance persistées `2025-01-01 → 2026-01-01`.
+  - ⛔⛔ **Les DEUX chaînes coexistent** : `SOMMES_A_RECOUVRER` démarre au **rang 1** alors que
+    `SOMMES_A_PAYER` est au rang 2, avec **deux racines `evaluationPrecedenteId: null`**. C'est la
+    preuve que l'index unique de succession porte bien la **nature** — sans elle, la seconde racine
+    aurait été refusée. ⚡ Et l'index **tient vraiment** : une seconde racine insérée directement en
+    base est refusée en `E11000`.
+  - ⚡⚡ **Atomicité prouvée par un COMPTEUR** (patron STORY-513) : `sinistres.revision` vaut
+    **exactement 9** — les 9 écritures réussies sous verrou. Les **2 refus métier**
+    (`SINISTRE_TERMINE`, `SINISTRE_DEJA_TERMINE`) ont **avorté leur transaction** : à 11, l'incrément
+    d'un refus aurait survécu, donc rien n'aurait été atomique.
+  - **Cycle de vie complet sur Mongo réel** : terminaison → règlement **refusé** → seconde
+    terminaison **refusée** → réouverture → règlement **accepté**, sur le **même** dossier (aucun
+    second sinistre créé, AC-5).
+  - **Situation dérivée** : les deux évaluations publiées **côte à côte** (4 500 000 et 800 000), le
+    net (3 700 000) **n'apparaît nulle part**, charge nette de recours `3 001 000 + 200 000 − 400 000
+    − 50 000 = 2 751 000`.
+  - **Aucun orphelin**, collections en snake_case explicite, **`outbox_events` à 0** (aucun
+    producteur Kafka, D-515-9).
+- **2026-09-21 — portes de qualité :** lint **0 warning**, build OK, **1 434 unit + 79 e2e verts**,
+  couverture **99,55 / 94,20 / 99,10 / 99,59** (seuils 65/90/90/90), module `sinistres` à **100 %**
+  lignes et fonctions.
