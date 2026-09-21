@@ -457,4 +457,50 @@ NoSQL fermée par `relireValeurBrute` + validateurs stricts, `null` traversant `
 par les deux gardes de montant, message générique sur la collision de référence, chaîne de traités
 verrouillée par deux index uniques non partiels, et aucun secret, Kafka, CORS ou upload touché.
 
+### ④ter Vérification docker REJOUÉE sur l'état final — et l'index MESURÉ
+
+Les trois correctifs de revue touchent des chemins déjà mesurés : stack **neuve**
+(`down -v`), inscription et connexion réelles à l'IdP, dossier `ASSURANCE` et exercice créés par
+`dossier-service` et propagés par **Kafka réel**.
+
+⚠️ **Le démon Docker est tombé entre les revues et cette mesure** (`500` sur toutes les routes de
+l'API). Redémarrage de Docker Desktop, puis stack reconstruite — rien n'a été déclaré vérifié entre
+les deux.
+
+| # | Vérification | Résultat |
+|---|---|---|
+| R1 | la cession nominale, sur l'état final | assiette `1 000 000` · cédée `400 000` · commission `100 000` · charge brute `400 000` · part `160 000` |
+| R2 | l'index de la lecture dédiée est **réellement posé** | `orgId_1_dossierId_1_type_1_periodeDebut_1`, non partiel |
+| R6 | la **borne de lecture** est réelle | 20 001 quittances ⇒ **409** `TROP_DE_QUITTANCES_POUR_LES_CESSIONS`, jamais un total tronqué |
+| R7 | ⛔ une **ristourne tardive** ne change pas un arrêté passé | ristourne émise le 15/09 : arrêté du **30/06** inchangé (`1 000 000` / `400 000`), arrêté du **21/09** à `700 000` / `280 000` |
+| R8 | ⛔ un **exposant divergent** est refusé | contrat exposant 2 accepté en `201` à l'écriture, cession **409** `DEVISES_HETEROGENES_DANS_LES_CESSIONS` |
+| R9 | la garde « quittance inexploitable » tient toujours | **409**, avec l'identifiant exact dans `details.sansPeriode` |
+| R10 | ⛔ les octets des trois artefacts, **dans le conteneur** | `9ca429c8…`, `e779903a…`, `dbfae17a…` |
+
+#### ⚡⚡ LA MESURE que la revue de sécurité réclamait — et ce qu'elle dit vraiment
+
+La revue reprochait, à juste titre, que « servi par un index » n'était **adossé à aucune mesure**.
+`explain('executionStats')` sur un dossier de **20 001 quittances**, **aucune** pathologique :
+
+| | `keysExamined` | `nReturned` | temps |
+|---|---|---|---|
+| lecture dédiée, **avec** l'index | **0** | 0 | 1 ms |
+| lecture dédiée, **sans** l'index | **20 000** | 0 | 160 ms |
+| le `$or` d'avant, **sans** l'index | **20 000** | 0 | 230 ms |
+
+⇒ Le diagnostic de la revue est **confirmé et chiffré** : sans index, on examine **20 000 clés pour
+n'en rendre aucune**, à chaque appel, sur une base partagée par tous les tenants.
+
+⚠️ **Mais la mesure corrige aussi la part du remède.** Avec l'index, le `$or` coûte **0 clé** lui
+aussi : c'est l'**index** qui ferme le trou, pas la séparation de la requête. La lecture dédiée reste
+le bon geste — elle rend la borne exprimable, sa limite est sémantiquement juste (`limite` nu, on
+**nomme** sans chercher la suite) et l'intention devient lisible — mais ce n'est pas elle qui fait la
+différence de coût, et l'écrire autrement serait s'attribuer un effet qu'on n'a pas mesuré.
+
+⚠️ **La première mesure ne discriminait pas** : toutes les quittances semées partageaient la même
+`periodeFin`, ce qui réduit le balayage à **une** recherche. Il a fallu 20 000 `periodeFin`
+**distinctes** — la forme réelle d'un registre qui croît — pour que le chiffre veuille dire quelque
+chose. Un jeu qui ne sait pas distinguer les deux états ne mesure rien, dans un sens comme dans
+l'autre.
+
 Stack arrêtée après la mesure (`docker compose stop`).
