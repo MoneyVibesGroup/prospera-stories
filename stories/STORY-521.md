@@ -28,7 +28,7 @@ préférence de présentation.
 
 ## Cadrage mesuré avant de coder (2026-09-21)
 
-Onze constats, relevés sur les **pages officielles `cima-afrique.org`** — corpus de **940 pages** de
+Douze constats, relevés sur les **pages officielles `cima-afrique.org`** — corpus de **940 pages** de
 l'édition « CODE CIMA 2019 », ce qui rend les recherches négatives rejouables — et dans l'artefact
 packagé. **Quatre contredisent la story**, et l'un d'eux en déplace la raison d'être.
 
@@ -275,6 +275,20 @@ solvabilité : calcul **séparé puis sommé**, jamais une base agrégée.
 la plus forte de M1 — et elle vient d'un article que la story ne cite pas.
 
 
+### M12 — ⚠️ Deux défauts que seules les PORTES ont vus, et jamais la compilation
+
+Consignés parce qu'ils se reproduiront :
+
+1. **`npm run build` attrape ce que `tsc --noEmit` laisse passer.** Le moteur compilait sous
+   `tsc --noEmit -p tsconfig.json` et échouait sous `nest build` : `eslint --fix` avait retiré deux
+   assertions de type qu'il jugeait « inutiles », et c'est **elles** qui fermaient l'union. ⇒ La
+   porte est `npm run build`, jamais un `tsc` de contrôle.
+2. ⛔ **Ajouter une dépendance au constructeur d'un service casse TOUS les modules de test qui
+   l'instancient.** `BilanEngineService` a fait rougir d'abord sa propre spec unitaire (`Expected
+   10 arguments, but got 9`), puis **huit** modules e2e (`Nest can't resolve dependencies […]
+   ComptesCimaProductionService at index [9]`). C'est le **manquement structurel n°1** de
+   `.agents/rules/qualite-verification.md`, et **seul `npm run test:e2e` le révèle**.
+
 ---
 
 ## Décisions de cadrage du 2026-09-21
@@ -289,7 +303,8 @@ la plus forte de M1 — et elle vient d'un article que la story ne cite pas.
 | **D-521-6** | Une balance portant **à la fois** des comptes du 1°) et du 2°) de l'art. 300 produit un constat **nommé et bloquant** ; une balance ne portant que `60`/`70` à deux chiffres rend la catégorie **`INDETERMINABLE`** | **Mesuré (M1)** : le premier cas décrit une entreprise que l'art. 326 interdit. Le second est le cas de **toutes les balances CIMA existantes** — il doit se dire, pas se deviner (AC-6) |
 | **D-521-7** | Les comptes d'**acceptations** sont routés dans **le modèle effectivement servi**, et **exclus de la dérivation** | **Mesuré (M10)** : l'art. 432 les cite dans les deux listes, et l'art. 326 al. 1 explique pourquoi. Le module ne tranche pas la licéité d'une acceptation vie par une société non-vie — il cesse simplement d'en **tirer une conclusion d'agrément**. AD-12 : on n'invente rien |
 | **D-521-8** | `cima-assurances@4.0` devient la version **SERVIE** ; `@1.0`, `@2.0` et `@3.0` restent packagées et **intactes, octet pour octet** | D-518-6 / D-520-8 : un paquet publié non servi est **inerte**. ⚠️ `estHabiliteParmi` compare le couple **exact** : l'octroi est à rejouer. **Migration = souci de prod, différé** |
-| **D-521-9** | `assurance-service` : la **quittance** reçoit sa catégorie **recopiée du contrat** à l'émission, comme le sinistre — et les deux lectures qui en dépendent filtrent **dans la requête**, plus en mémoire | AC-1. Mesuré : la quittance est le **seul maillon** du cycle prime qui ne porte pas la catégorie, et les bornes `QUITTANCES_MAX_*` comptent aujourd'hui **les deux catégories confondues** |
+| **D-521-9** | `assurance-service` : la **quittance** reçoit sa catégorie **recopiée du contrat**, aux **trois** chemins qui en écrivent une (prime, annulation, ristourne), comme le sinistre | AC-1. Mesuré : la quittance est le **seul maillon** du cycle prime qui ne la portait pas |
+| **D-521-9 bis** | ⛔ **Aucun index, et aucune requête ne filtre sur ce champ.** ⚠️ *Amende D-521-9, qui annonçait l'inverse* | **Mesuré en cours de dev** : en BSON un champ **absent** ne satisfait aucune égalité — une quittance écrite avant ce champ sortirait **silencieusement** de l'assiette de cession. C'est le défaut exact de la vérif docker de STORY-520 (777 000 disparus, HTTP 200), dont le correctif avait lui-même dû être repris faute d'index. L'autorité reste le **contrat** ; ce champ rend la catégorie *lisible*, pas *interrogeable*. ⇒ Les bornes `QUITTANCES_MAX_*` continuent de compter les deux catégories : c'est **consigné, pas corrigé** |
 | **D-521-10** | Le **statut du paquet reste `amorce`** | La réserve levée est celle de la séparation Vie/Non-Vie, **pas** celle des états C1..C25 ([[STORY-523]]) ni celle du niveau de détail du plan ([[STORY-671]]). Le libellé de `RT` cesse en revanche de dire « hors séparation Vie/Non-Vie » |
 
 ---

@@ -305,3 +305,169 @@ des formules : une garde littérale serait fausse sur `@1.0`, dont le `RN` casca
   ⚡ **Les variations de provisions techniques ne le sont plus depuis `@2.0`** (STORY-518, section
   ci-dessus) ; la ventilation Vie/Non-Vie et les états C1..C25 le restent.
 - Résultat technique / résultat net encodés en postes `FORMULE` (opérandes signées, moteur B8 agnostique).
+
+## `cima-assurances@4.0` — Vie et Non-Vie deviennent étanches (STORY-521)
+
+⚠️ **Quatre versions coexistent désormais.** `@1.0` (`9ca429c8…`), `@2.0` (`e779903a…`) et `@3.0`
+(`dbfae17a…`) restent packagées et **intactes** : toutes ont été servies à des organisations, et on
+ne réécrit pas un chiffre déjà publié. `@4.0` (`021992b5…`) est la version **servie** depuis
+STORY-521.
+
+### ⛔⛔ Ce que la lecture du Code a défait : la prémisse de la story
+
+La story écrivait : *« un assureur agréé pour les deux doit présenter les deux comptes »*. **C'est
+faux en zone CIMA**, et c'est l'article 326 qui le dit, à la lettre :
+
+> « **Toute entreprise réalisant des opérations définies au 1°) de l'article 300 ne peut pratiquer
+> en même temps les opérations définies au 2°) du même article.** »
+> *(alinéa 4 : les sociétés qui pratiquaient les deux à l'entrée en vigueur du Code avaient **trois
+> ans** pour se mettre en conformité — délai expiré depuis 1998.)*
+
+et l'**article 300** sépare les deux ensembles :
+
+> « **1°)** les entreprises qui contractent des engagements dont l'exécution dépend de la durée de la
+> vie humaine ou qui font appel à l'épargne en vue de la capitalisation […] ;
+> **2°)** les entreprises d'assurance de toute nature […] **autres que celles visées au 1°)**. »
+
+⇒ **La spécialisation EST l'étanchéité.** Le Code ne demande jamais deux comptes techniques dans une
+même liasse : il publie **deux modèles alternatifs**, et l'entreprise établit celui de son agrément.
+
+⚡ Confirmation par un article que la story ne citait pas : le **seul** régime mixte pérenne du Code
+est la **microassurance** (art. 715, non-vie + temporaire décès), et l'**art. 723** en tranche la
+conséquence comptable — « **le mode de gestion de la branche 11 est assimilé dans ce cas à celui de
+l'IARD** ». Même là, **un seul compte 80**. L'art. 337-4 (sociétés mixtes héritées) va dans le même
+sens pour la marge de solvabilité : calcul **séparé puis sommé**, jamais une base agrégée.
+
+### ⛔ Et le vocabulaire de la story n'est pas celui du régulateur
+
+Dépouillement des **940 pages** de l'édition officielle « CODE CIMA 2019 » :
+
+| Expression | Occurrences | Ce qu'elle désigne réellement |
+|---|---|---|
+| « comptes techniques » | **1** | art. 432, classe 7 : « En dehors des **comptes techniques (comptes 70, 73, 75 et 79)**, les produits comprennent… » — **quatre comptes de la classe 7**, pas un état |
+| « non technique » | **1** | art. 432, compte 82 : « …sur les **postes non techniques** » — un **adjectif** |
+| « compte d'exploitation générale » | **19** | ← le terme du régulateur |
+| « compte général de pertes et profits » | **22** | ← le terme du régulateur |
+
+⇒ Les trois états portent donc le **numéro de compte du Code**, qui ne se confond avec rien :
+
+| État publié | Intitulé verbatim de l'art. 433 |
+|---|---|
+| `COMPTE_80_VIE_CAPITALISATION` | « Compte 80 - **Vie / Capitalisation** » |
+| `COMPTE_80_TOUTE_NATURE` | « Compte 80 - **Assurances de toute nature** » |
+| `COMPTE_87_PERTES_ET_PROFITS` | « COMPTE 87 - COMPTE GENERAL DE PERTES ET PROFITS » |
+
+⚠️ « Assurances de toute nature » **est** le non-vie : l'art. 300 2°) le définit comme « autres que
+celles visées au 1°) ». Le périmètre est exact, seul le mot surprend. Et « NON VIE » existe bien dans
+le Code — mais pour les **états de réassurance** (`ETAT RS2 VIE` / `ETAT RS2 NON VIE`). Une recherche
+négative n'aurait donc prouvé que l'absence du **vocabulaire cherché**, jamais celle du concept.
+
+### Le plan gagne EXACTEMENT huit comptes — et pas un de plus
+
+Les classes 6 et 7 ne portent **aucun** axe vie/dommages à deux chiffres : `60 Prestations dans le
+pays concerné`, `70 Primes ou cotisations dans le pays concerné`. L'axe vit au **3ᵉ chiffre**, et
+l'art. 431 est régulier :
+
+| Compte | Libellé verbatim (art. 431) |
+|---|---|
+| `601` | Prestations échues (**affaires directes vie**) |
+| `602` | Prestations et frais payés (**affaires directes dommages, RC et risques divers**) |
+| `604` | Prestations échues (**acceptations vie**) |
+| `605` | Prestations et frais (**acceptations d'affaires dommages, RC et risques divers**) |
+| `701` | Primes (**affaires directes vie**) |
+| `702` | Primes (**affaires directes dommages, RC et risques divers**) |
+| `704` | Primes (**acceptations vie**) |
+| `705` | Primes (**acceptations dommages, RC et risques divers**) |
+
+**Ce qui ne descend PAS, et pourquoi c'est mesuré :**
+
+- les **cessions** restent entières — l'art. 432 cite `609` et `709` **à trois chiffres dans les deux
+  listes**, chaque modèle prenant la totalité du compte de cession puisqu'un seul s'applique. `RC9` /
+  `RP6` livrés par STORY-520 traversent `@4.0` **inchangés** ;
+- la **classe 3** porte déjà l'axe **dès deux chiffres** (`31`/`34` vie, `32`/`35` dommages, `38`
+  étranger) : aucun compte à ajouter. ⚡ Et la **spécialisation** rend `CP3` correct pour le modèle
+  servi **sans le scinder** — une société vie ne porte aucun `32`/`35`. Le bilan ne bouge pas ;
+- `603`, `606`, `703` et `706` sont **cités par l'art. 432 et absents de l'art. 431** — même
+  contradiction que `7909` (D-518-7, D-520-5). Ils restent dehors.
+
+### ⛔⛔ Ce que `@4.0` ne change PAS — et c'est le cœur de la version
+
+`COMPTE_RESULTAT`, `RT` et `RN` sont **inchangés**. Seul le libellé de `RT` perd sa réserve « hors
+séparation Vie/Non-Vie », qui vient d'être levée.
+
+Et surtout : **`RC1` et `RP1` ÉNUMÈRENT les huit nouveaux comptes** en plus de `60`/`70`. Sans cela,
+`6010` se résoudrait au plus long préfixe sur `601` — dont le seul rattachement serait le poste du
+modèle Vie — et **quitterait l'assiette de `RC1`, donc `Σ_CR`, donc `RN`**. Le compte de résultat, le
+résultat porté au passif et `COHERENCE_RESULTAT` seraient alors faux **ensemble**, donc cohérents,
+donc **verts**. C'est le piège de M4 de STORY-520 pris dans l'autre sens : là il fallait **extraire**
+`609` de `RC1` ; ici il faut impérativement **y maintenir** les huit.
+
+### L'agrément se DÉRIVE de la balance, et jamais d'un paramètre
+
+La liasse est produite depuis une balance, qui ne porte aucun axe de catégorie. `@4.0` la dérive des
+**affaires directes** présentes — `601`/`701` ⇒ vie, `602`/`702` ⇒ toute nature — et publie les
+comptes relevés qui **justifient** la dérivation.
+
+⚠️ **Les acceptations (`604`, `605`, `704`, `705`) en sont exclues, et ce n'est pas un oubli.**
+L'art. 432 les cite dans les **deux** listes, parce que l'**art. 326 alinéa 1** exempte les
+acceptations d'agrément : *« Toutefois, en ce qui concerne les opérations d'acceptation en
+réassurance, cet agrément n'est pas exigé. »* Une société de toute nature peut donc porter un `604`
+en toute régularité — en conclure « vie » serait faux.
+
+Quatre issues, et **aucune n'est un repli silencieux** :
+
+| Balance | Agrément | Les deux états |
+|---|---|---|
+| `601`/`701` | `VIE_CAPITALISATION` | Vie **calculé**, toute nature `NON_APPLICABLE` |
+| `602`/`702` | `TOUTE_NATURE` | la symétrie exacte |
+| les deux familles | `INCOMPATIBLE_ART_326` | **aucun** calculé — la balance décrit une entreprise que le Code interdit |
+| ni l'une ni l'autre (plan à 2 chiffres) | `INDETERMINABLE` | **aucun** calculé — le cas de **toutes** les balances CIMA antérieures |
+
+⇒ Le modèle qui ne s'applique pas est servi **vide et non omis**, squelette compris, `null` partout et
+jamais `0` — patron du TFT absent du référentiel SFD. *Un état qui disparaît fait chercher ce qu'on a
+cassé.*
+
+⚡⚡ **Et calculer les deux aurait été pire que ne rien publier.** Les charges communes — frais de
+personnel, impôts, commissions, frais divers — sont rattachées aux **deux** modèles (art. 432, liste
+« comptes communs à toutes les entreprises »). Le modèle non applicable sortirait donc garni de tout
+**sauf de ses primes et de ses prestations** : un état à qui il ne manque que le métier a l'air d'un
+état.
+
+### L'articulation publiée est celle qui est VRAIE
+
+La story annonçait `RN = résultat Vie + résultat Non-Vie + résultat non technique`. **Cette égalité ne
+peut pas tenir** : `RN` est le poste **terminal**, confronté à `Σ_CR (crédit − débit)`, tandis que le
+solde du compte 80 intègre les **variations de provisions techniques**, lues sur des postes de
+**bilan** (classe 3) et donc **hors** de cette somme. L'y faire entrer ferait passer tout dossier CIMA
+en `ANOMALIE` sur une balance pourtant juste — le défaut que D-518-5 et M4 de STORY-520 ont déjà
+évité deux fois.
+
+L'identité contrôlée **nomme donc la variation** :
+
+> `solde du compte 80 servi` = `RN` − `variation des provisions brutes` + `variation de la part des
+> cessionnaires`
+
+⚠️ Et le **solde du compte 80 diffère de `RT`** : `RT` n'énumère que huit postes et laisse dehors les
+frais de personnel, les impôts, les travaux et fournitures, les frais divers, les subventions et les
+produits accessoires — que l'art. 432 range pourtant **nommément** dans le compte 80. Le chiffre du
+Code est le solde ; `RT` reste servi tel quel, avec son libellé d'amorce.
+
+### Le compte 87 est publié en SQUELETTE, et c'est le périmètre qui le veut
+
+Ses lignes sont nourries par les comptes `82` à `86`, qui ne sont routés vers **aucun** poste du
+paquet : c'est le sujet de **STORY-672** (« onze comptes de gestion CIMA ne mènent à aucun poste »).
+L'état existe, ses lignes existent, et chacune dit `A_COMPLETER`.
+
+### Ce que `@4.0` ne couvre pas
+
+- Le **statut reste `amorce`** : la réserve levée est celle de la séparation Vie/Non-Vie, **pas**
+  celle des états C1..C25 (**STORY-523**), ni celle du niveau de détail du plan (**STORY-671**), ni
+  celle des onze comptes de gestion non routés (**STORY-672**).
+- ⛔ **La clé de répartition de l'art. 433 n'est pas convoquée.** Elle existe — « les produits
+  financiers sont, à défaut d'une étude plus poussée, ventilés par catégorie ou sous-catégorie au
+  prorata des provisions techniques nettes de réassurance », avec des plafonds durs de **10 %**
+  (transports) et **2,5 %** (acceptations) sur les frais de gestion — mais elle ventile **entre les
+  23 catégories de l'art. 411**, pour l'**état C1**, et elle est **supplétive**. Elle appartient à
+  STORY-523.
+- Le **compte 88** (résultats en instance d'affectation), la rétrocession, les cessions « étranger »
+  (`6909`, `7909`) et les plafonds de l'art. 308.
