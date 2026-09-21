@@ -1,6 +1,6 @@
 # STORY-666 : Le raccordement PI-SPI par organisation — Money Vibes n'appelle jamais pour autrui
 
-Status: review
+Status: done
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -73,7 +73,7 @@ une falsification de requête côté serveur, refusée en STORY-642. Elles reste
 - Elle **ne touche pas** FedaPay : sa clé marchande est déjà par organisation depuis [[STORY-246]].
 - Elle **n'ouvre aucun écran** : la console est STORY-286.
 
-## Livraison (2026-09-21 — branche `MNV-666`, commit `3b4f914`, sur `origin/dev`)
+## Livraison (2026-09-21 — branche `MNV-666`, commit `3b4f914` ; **fusionnée dans `dev` le 2026-09-21 sous `8b45a74`**, vérifié par `git cherry`, arbre identique)
 
 **Suites :** 3 569 unitaires (266 suites), 283 e2e, lint 0, `tsc` 0. **Recette réelle Docker
 sur le bac à sable : 16/16.**
