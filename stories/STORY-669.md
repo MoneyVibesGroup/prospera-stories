@@ -1,6 +1,6 @@
 # STORY-669 : Le relevé par l'API du participant — il ne se dépose plus, il se relève
 
-Status: review
+Status: done
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -92,7 +92,7 @@ premier, la consultation range sous le second). C'est la seule réponse du sché
   (id ≥ 674).
 - Elle **ne touche pas** FedaPay : son relevé reste un fichier.
 
-## Livraison (2026-09-21 — branche `MNV-669`, commit `08eee86`, sur `origin/dev` à `224ee17` — rebasée après la fusion de 667, arbre identique)
+## Livraison (2026-09-21 — branche `MNV-669`, commit `08eee86` ; **fusionnée dans `dev` le 2026-09-21 sous `55037ea`**, vérifié par `git cherry`)
 
 **Suites :** 3 703 unitaires (274 suites), 309 e2e, lint 0, `tsc` 0. **Recette RÉELLE sur le bac à sable,
 par le vrai conteneur : 17/17** — rien n'y est joué.

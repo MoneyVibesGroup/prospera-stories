@@ -4238,7 +4238,7 @@ sprints:
         epic: "EPIC-036"
         points: 8
         service: "paiement-service"
-        status: "review"  # MNV-668 (15865a8) empilee sur MNV-669 — amendement du PRD VALIDE par le PO le 2026-09-21 (FR-P65->P69, NFR-1d) ; ordre de paiement prepare par un role, valide par un AUTRE (jamais la meme personne : $ne DANS LE FILTRE), part UNE fois (engagement COMMIS avant l appel, reference = identifiant de l ordre), rejete = TERMINAL (FR-P68 durci par la mesure : un txId rejoue rend 200 + DU03 et la lecture par identifiant rend CE rejet) ; recette REELLE 17/17 : 25 XOF partis UNE fois, le meme identifiant renvoye au vrai schema est lu EXECUTE sans un franc de plus ; ⛔ PRODUCTION FERMEE tant que le point juridique du §10 n est pas leve
+        status: "review"  # MNV-668 (257c81b) POUSSEE, sur dev a 55037ea (rebasee apres la fusion de 669, arbre identique) — amendement du PRD VALIDE par le PO le 2026-09-21 (FR-P65->P69, NFR-1d) ; ordre de paiement prepare par un role, valide par un AUTRE (jamais la meme personne : $ne DANS LE FILTRE), part UNE fois (engagement COMMIS avant l appel, reference = identifiant de l ordre), rejete = TERMINAL (FR-P68 durci par la mesure : un txId rejoue rend 200 + DU03 et la lecture par identifiant rend CE rejet) ; recette REELLE 17/17 : 25 XOF partis UNE fois, le meme identifiant renvoye au vrai schema est lu EXECUTE sans un franc de plus ; ⛔ PRODUCTION FERMEE tant que le point juridique du §10 n est pas leve
         story_path: "stories/STORY-668.md"
         assigned_to: null
       - story_id: "STORY-669"
@@ -4246,7 +4246,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "review"  # MNV-669 (08eee86) POUSSEE, sur dev a 224ee17 (rebasee apres la fusion de 667, arbre identique) — POST .../releves/relevements : le compte se RELEVE chez le participant (GET /paiements-recus, curseur, irrevocable seulement, filtres reverifies) et passe par le MEME import que STORY-269 : relever 2 fois n ajoute rien ; position du compte RENDUE et JAMAIS rangee (NFR-1b : « tresorerie » et « solde » interdits) ; la cascade cherche notre reference de DEMANDE au libelle ; recette REELLE 17/17 : 5 paiements, position 1 000 001 025 = 1e9 + 1 025 au franc pres, 3 couples CERTAINS / 0 proposition, ecart 325 = les 2 scans du comptoir de 667 ; ⛔ sort= ne trie que la PAGE, meta.total = taille de page, l API ne nomme qu UNE erreur par reponse
+        status: "done"  # MNV-669 fusionnee dans dev (2026-09-21, 55037ea, verifie par `git cherry`) — ex-review : POST .../releves/relevements : le compte se RELEVE chez le participant (GET /paiements-recus, curseur, irrevocable seulement, filtres reverifies) et passe par le MEME import que STORY-269 : relever 2 fois n ajoute rien ; position du compte RENDUE et JAMAIS rangee (NFR-1b : « tresorerie » et « solde » interdits) ; la cascade cherche notre reference de DEMANDE au libelle ; recette REELLE 17/17 : 5 paiements, position 1 000 001 025 = 1e9 + 1 025 au franc pres, 3 couples CERTAINS / 0 proposition, ecart 325 = les 2 scans du comptoir de 667 ; ⛔ sort= ne trie que la PAGE, meta.total = taille de page, l API ne nomme qu UNE erreur par reponse
         story_path: "stories/STORY-669.md"
         assigned_to: null
       - story_id: "STORY-670"
