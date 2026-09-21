@@ -2,7 +2,7 @@
 title: "PRD — PI-SPI & encaissement (paiement-service)"
 status: final
 created: 2026-08-02
-updated: 2026-08-02
+updated: 2026-09-21  # amendement « ordres de paiement » (FR-P65→P69, NFR-1d) — validé par le PO
 project: prospera
 service: paiement-service
 position_sequence: "Bloc 0 (avancé — décision PO)"
@@ -111,6 +111,7 @@ validée par la remise (FR-P31→P33), et une page qui tient sur un téléphone 
 | **Demande de paiement** | Intention d'encaisser un montant auprès d'un payeur identifié, rattachée à une créance projetée. Objet central du module. |
 | **Lien de paiement** | Surface publique d'une demande, communiquée au payeur (WhatsApp, SMS, e-mail, QR). |
 | **Encaissement** | Constatation qu'un montant a été payé — **par le lien** ou **hors Prospera**. Terme unique : le PRD ne dit jamais « règlement ». |
+| **Ordre de paiement** | *(amendement du 2026-09-21)* Instruction donnée par une organisation de payer un bénéficiaire **depuis son propre compte, chez son propre établissement**. Prospera le **transmet** ; il ne l'exécute pas et ne porte jamais l'argent. Jamais « règlement », jamais « reversement ». |
 | **Paiement hors Prospera** | Encaissement réalisé sans passer par le service (espèces au commercial, MoMo direct). Déclaré manuellement, puis validé. |
 | **Promesse de paiement** | Engagement daté du payeur à compléter un solde restant. Alimente la relance. |
 | **Bénéficiaire** | Le titulaire du compte qui reçoit les fonds. Toujours l'organisation cliente (cas A) ou Money Vibes (cas C). **Jamais un compte de transit.** |
@@ -136,6 +137,7 @@ validée par la remise (FR-P31→P33), et une page qui tient sur un téléphone 
 - Abonnements Prospera : cycle, échéance, impayé, suspension, période de grâce
 - Octroi et révocation d'entitlements à l'activation et à la suspension
 - Multi-pays et multi-devise d'Afrique de l'Ouest
+- *(amendement du 2026-09-21)* **Ordonner un paiement sortant** depuis le compte d'une organisation, sous ses propres identifiants, vers un bénéficiaire désigné par une adresse de paiement du schéma interopérable
 
 ### 5.2 Hors périmètre
 
@@ -147,6 +149,7 @@ validée par la remise (FR-P31→P33), et une page qui tient sur un téléphone 
 | Envoi du lien au payeur | `notification-service` (#1) | Le lien est un message ; l'organe de parole est unique |
 | Écritures comptables | `balance-service` / Comptabilité | Ce module publie l'événement, il n'écrit pas le journal |
 | **Initiation de remboursement** | Chez le client et son PSP | Prospera ne détient pas les fonds : il ne peut pas les rendre |
+| Ordre de paiement **depuis un compte de Money Vibes pour le compte d'autrui** | — | **Interdit par NFR-1d.** Un ordre de paiement n'est pas un remboursement : il ne défait aucun encaissement et ne s'impute sur aucune créance |
 | **Conversion de devise** | Nulle part | Convertir serait une activité de change, donc un agrément |
 | Détention de fonds, compte de transit, séquestre | — | **Interdit par NFR-1** |
 
@@ -279,6 +282,11 @@ Un module qui ne le traite pas produit une balance créances fausse.
 | **FR-P62** | Cloisonnement strict par organisation : comptes, demandes, encaissements, relevés, abonnements. Aucune requête ne traverse cette frontière. |
 | **FR-P63** | Console d'exploitation sur `admin-panel`, bornée : suivre les demandes, consulter les notifications de fournisseur rejetées, réacheminer une demande, consulter les écarts de rapprochement. |
 | **FR-P64** | Le service expose un **fournisseur de candidats** pour le moteur de règles de l'assistant (`FR-IA03b`) : demandes de paiement expirées sans relance, **promesses de paiement échues et non tenues**, encaissements déclarés non validés au-delà du délai, créances sans encaissement depuis N jours, abonnements arrivant à échéance. *Ajouté à la revue croisée.* ⚠️ Ces candidats alimentent le module **Relance (#24)** ; ce module ne relance pas. |
+| **FR-P65** | *(amendement du 2026-09-21)* Une organisation peut **préparer un ordre de paiement** : un bénéficiaire (adresse de paiement **confirmée par l'annuaire**, comme l'est déjà celle d'un payeur), un montant, un motif, et le compte de l'organisation qui paie. Un ordre préparé **ne part pas**. |
+| **FR-P66** | **Séparation des pouvoirs** (pendant de FR-P60) : préparer un ordre et le **valider** sont deux droits distincts, qui ne se cumulent pas par défaut sur un même rôle — et **la même personne ne valide jamais l'ordre qu'elle a préparé**, quels que soient ses droits. *(Décision PO du 2026-09-21 : tant que le catalogue ne sait pas attribuer de nouveau droit de tenant, la paire de FR-P60 est réemployée — émettre une demande pour préparer, valider un encaissement pour valider.)* |
+| **FR-P67** | Un ordre ne part que **validé**, **une seule fois**, sous le **raccordement de l'organisation** et depuis **un compte dont elle est titulaire**. Aucun repli sur un raccordement de la plateforme ; aucun compte de Money Vibes n'est jamais payeur pour autrui. |
+| **FR-P68** | L'**issue** d'un ordre (exécuté, rejeté) vient **du fournisseur**, jamais d'une supposition. ⛔ **Un ordre rejeté est terminal** : on en prépare un autre, à deux. *(Durci par la mesure du 2026-09-21 : le schéma répond `200` à un identifiant rejoué, avec un rejet « doublon », et sa consultation par identifiant rend alors ce rejet — pas l'exécution qui l'a précédé. Un ordre « rejouable » serait de l'argent parti deux fois.)* Une transmission dont l'issue est inconnue **se consulte** ; elle ne se renvoie jamais d'office. |
+| **FR-P69** | Préparation, validation, transmission et issue d'un ordre sont journalisées dans la **piste d'audit append-only** (FR-P61), avec leurs deux auteurs. Un ordre **ne se supprime pas** ; il s'annule tant qu'il n'est pas parti. |
 
 ---
 
@@ -296,6 +304,10 @@ moment, y compris transitoirement et y compris en environnement de test.
 - **NFR-1b** — Le modèle de données ne comporte **aucune notion de solde détenu, de portefeuille, de
   séquestre ou de reversement**. Leur apparition serait le signal d'un changement de régime.
 - **NFR-1c** — Le seul cas où Money Vibes est bénéficiaire est l'**abonnement** (cas C), sur son
+- **NFR-1d** — *(amendement du 2026-09-21)* Un **ordre de paiement** part **exclusivement** du compte d'une
+  organisation, sous ses identifiants, vers un tiers qu'elle désigne. Le modèle de données ne
+  comporte **aucun compte payeur appartenant à Money Vibes pour le compte d'autrui**, et NFR-1b
+  continue de s'appliquer sans exception : ni solde détenu, ni reversement, ni transit.
   propre compte, pour son propre compte.
 
 > **Motif.** Encaisser pour le compte d'un tiers en UEMOA suppose un statut d'établissement de monnaie
@@ -395,6 +407,7 @@ non tranché — il est donc le seul décalable.
 | **Détention de fonds** | Aucune. Le module est orchestrateur (NFR-1). Pas d'agrément d'établissement de monnaie électronique requis à ce titre **[à faire confirmer juridiquement]** |
 | **Agrément des fournisseurs** | Porté par le PSP, pays par pays. Prospera ne s'y substitue pas et ne le revend pas |
 | **Change** | Hors périmètre (FR-P56). Convertir supposerait un agrément distinct |
+| **Initiation de paiement** *(amendement du 2026-09-21)* | Prospera **transmet** un ordre donné par le titulaire du compte, avec les identifiants du titulaire, à l'établissement du titulaire. Il ne détient pas les fonds et n'exécute pas l'opération. ⚠️ **[À FAIRE CONFIRMER JURIDIQUEMENT AVANT TOUTE MISE EN PRODUCTION]** — décision PO : le développement et le bac à sable sont ouverts, la production ne l'est pas tant que ce point n'est pas levé |
 | **LCB/FT** | Portée par le PSP sur le flux monétaire. Prospera conserve la traçabilité (FR-P61) et alimentera le module Conformité (#27) |
 | **Données personnelles du payeur** | Le payeur n'a pas de compte Prospera : même régime que le carnet de contacts de `notification-service` — voir son §9 |
 
@@ -429,6 +442,7 @@ non tranché — il est donc le seul décalable.
 | # | Risque | Traitement |
 |---|---|---|
 | **R1** | Un compte de collecte au nom de Money Vibes est ouvert « pour les tests » et jamais défait → changement de régime juridique | **NFR-1 + SM-1 à 0.** Le contrôle est dans le modèle de données, pas dans la vigilance |
+| **R8** | *(amendement du 2026-09-21)* Un ordre de paiement part **deux fois** (rejeu, double clic, reprise après panne) → de l'argent sorti à tort, **sans retour possible par ce service** (FR-P49) | L'identifiant de l'ordre EST l'identifiant de transaction (le schéma rejette un doublon — mesuré) ; la transition vers la transmission est **dans le filtre** de l'écriture ; un rejet est terminal ; aucune reprise automatique |
 | **R2** | Le XOF traité à deux décimales → montants faux d'un facteur 100 | **NFR-2.** Unité mineure par devise, jamais de flottant |
 | **R3** | Les frais à la charge du payeur dissuadent l'usage du lien, et tout le monde reste aux espèces | **CM-2** surveille. Le module reste juste grâce au groupe F |
 | **R4** | C8 non tranché à l'ouverture de l'incrément 3 | Incrément 3 décalable par conception |
