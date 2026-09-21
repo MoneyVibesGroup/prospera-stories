@@ -1,6 +1,6 @@
 # STORY-517 : Une provision technique est une évaluation datée, versionnée, avec sa méthode et son auteur — jamais un solde
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -185,7 +185,9 @@ méthode ; **STORY-519** dira ce qui se calcule, et à quelle condition.
 
 ## Progress Tracking
 
-**Statut : `in_progress`** — cadrage réglementaire mesuré le 2026-09-21 sur la source officielle
+**Statut : `done`** (2026-09-21) — développée, validée, revue (code **et** sécurité) et intégrée en
+rebase sur `dev` ([PR #7](https://github.com/MoneyVibesGroup/prospera-assurance-service/pull/7)).
+Cadrage réglementaire mesuré le 2026-09-21 sur la source officielle
 (`cima-afrique.org`, art. 334-2 et 334-8 dans leur version **en vigueur**) **et** sur le Code
 intégral (art. 334 « sans déduction des réassurances cédées », art. 334-11, confrontés au texte
 extrait localement).
