@@ -1,6 +1,6 @@
 # STORY-521 : Vie et Non-Vie deviennent étanches — deux comptes techniques, jamais une somme
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -354,43 +354,43 @@ version servie, digests épinglés, artefact recopié byte-identique, snapshot e
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — La **catégorie Vie / Non-Vie** est portée par le contrat (STORY-513 AC-1) et se
+- [x] AC-1 — La **catégorie Vie / Non-Vie** est portée par le contrat (STORY-513 AC-1) et se
       propage à tout : quittances, sinistres, provisions, traités de réassurance.
       ⚠️ **Amendé par D-521-9** : mesuré, seuls **sinistres**, **provisions** (× 2) et **traités** la
       portaient. La **quittance** ne la portait pas, et les lectures de cession et de provision
       ramenaient **les deux catégories** avant de trancher en mémoire — bornes de sécurité
       comprises.
-- [ ] AC-2 — Le référentiel publie **trois états de résultat** : technique Vie, technique Non-Vie,
+- [x] AC-2 — Le référentiel publie **trois états de résultat** : technique Vie, technique Non-Vie,
       non technique. Nouvelle version du paquet, `@1.0` conservé intact.
       ⚠️ **Amendé par M2 / D-521-1** : ce sont les **modèles de l'art. 433**, et ils portent les mots
       du Code — `Compte 80 - Vie / Capitalisation`, `Compte 80 - Assurances de toute nature`,
       `Compte 87 - Compte général de pertes et profits`.
       ⚠️ **Amendé par D-521-2** : ils s'ajoutent **à côté** de `COMPTE_RESULTAT`, jamais à sa place.
-- [ ] AC-3 — ⛔ **Aucun poste n'est imputable aux deux à la fois.** Ce qui n'est affectable ni à
+- [x] AC-3 — ⛔ **Aucun poste n'est imputable aux deux à la fois.** Ce qui n'est affectable ni à
       l'une ni à l'autre va au **compte non technique** — jamais réparti par une clé inventée. Une
       clé de répartition est une décision de direction, pas un défaut de moteur.
       ⚠️ **Amendé par M4** : le Code range les charges communes **dans le compte 80** (art. 432,
       liste « comptes communs à toutes les entreprises »), pas au compte 87. Et **M1 le rend vrai par
       construction** : une entreprise n'ayant qu'une activité, aucun poste ne peut être imputable aux
       deux. **Aucune clé n'est inventée parce qu'aucune n'est nécessaire.**
-- [ ] AC-4 — `RN` = résultat technique Vie + résultat technique Non-Vie + résultat non technique.
+- [x] AC-4 — `RN` = résultat technique Vie + résultat technique Non-Vie + résultat non technique.
       Le contrôle d'articulation le vérifie, et un écart est **bloquant**.
       ⛔ **Amendé par M6** : l'égalité littérale est **fausse** — `RT` intègre `−RV1 +RV2` lus sur le
       **bilan**, hors `Σ_CR`. Le contrôle vérifie donc l'articulation **réellement vraie** :
       `solde du compte 80 servi + éléments propres au compte 87 = RN − RV1 + RV2`, la variation étant
       **nommée** dans l'écart et non passée sous silence. Un écart reste **bloquant**.
-- [ ] AC-5 — Un assureur **mono-activité** rend le compte technique de l'autre catégorie **vide, pas
+- [x] AC-5 — Un assureur **mono-activité** rend le compte technique de l'autre catégorie **vide, pas
       absent**, avec statut `NON_APPLICABLE`. ⚡ Même doctrine que le TFT absent du SFD : *un état qui
       disparaît fait chercher ce qu'on a cassé*.
       ⚠️ **Amendé par M1** : « mono-activité (cas le plus fréquent) » — c'est le **seul cas légal**
       (art. 326). L'état de l'autre catégorie est non applicable **par construction**, et le dire
       ainsi est plus juste que de le présenter comme un portefeuille incomplet.
-- [ ] AC-6 — ⚠️ La **ventilation ne se reconstitue pas après coup** : un jeu de données historiques
+- [x] AC-6 — ⚠️ La **ventilation ne se reconstitue pas après coup** : un jeu de données historiques
       sans catégorie ne peut pas être réparti, et le module doit le dire plutôt que de deviner.
       ⚡ **Mesuré (D-521-4/6)** : c'est le cas de **toutes** les balances CIMA existantes, qui ne
       portent que `60`/`70` à deux chiffres ⇒ catégorie `INDETERMINABLE`, les deux modèles non
       servis, et l'indétermination **publiée**.
-- [ ] AC-7 — ⛔ **Aucune régression** : `EQUILIBRE_BILAN`, `COHERENCE_RESULTAT` et l'articulation
+- [x] AC-7 — ⛔ **Aucune régression** : `EQUILIBRE_BILAN`, `COHERENCE_RESULTAT` et l'articulation
       `RN == bilan.controle.resultatNetN` restent verts. Un dossier `@1.0`, `@2.0` ou `@3.0` produit
       **exactement** les mêmes états qu'avant, octet pour octet sur les trois artefacts.
 
@@ -409,8 +409,9 @@ version servie, digests épinglés, artefact recopié byte-identique, snapshot e
 
 ## Progress Tracking
 
-**Statut : `in_progress` le 2026-09-21.** Cinq dépôts branchés `MNV-521` **avant la première ligne de
-code** — `assurance-service`, `bilan-service`, `balance-service`, `platform-catalog-service`, `docs`.
+**Statut : `done` le 2026-09-21.** Cinq dépôts, cinq branches `MNV-521` créées **avant la première
+ligne de code**, cinq PR rebase-mergées : `bilan-service#129` · `assurance-service#11` ·
+`balance-service#112` · `platform-catalog-service#24` · la PR `docs/` sur `main`.
 
 ### Cadrage
 
