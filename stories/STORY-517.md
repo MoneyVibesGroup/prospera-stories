@@ -197,6 +197,99 @@ docs               MNV-517
 assurance-service  MNV-517
 ```
 
+### Portes de qualité
+
+| Porte | Mesure |
+|---|---|
+| lint | `eslint "{src,test}/**/*.ts" --max-warnings 0` — **0** |
+| build | `nest build` — OK |
+| couverture du module | **100 / 100 / 100 / 100** (branches / fonctions / lignes / statements) |
+| couverture globale | **99,56 / 94,16 / 99,23 / 99,62** — seuils 65/90/90/90 |
+| unitaires | **1 684** verts, 94 suites |
+| e2e | **149** verts, dont **56** pour ce module |
+
+### Table de mutations — 18 mutations, 18 ROUGES
+
+Chaque règle qui protège d'une régression précise a été **volontairement cassée**, puis restaurée.
+
+| # | Mutation | Test qui rougit |
+|---|---|---|
+| M1 | `typeAdmisDansLaCategorie` rendue toujours vraie | 14 |
+| M2 | `DE_GESTION` ajoutée à la liste **Non-Vie** | 4 |
+| M3 | `rang` figé à 1 | 1 |
+| M4 | tête de chaîne triée par `_id` au lieu du **rang** | 1 |
+| M5 | signe de `variationDuBrut` inversé | 8 |
+| M6 | brut **compensé** de la part cédée (art. 334-11) | 4 |
+| M7 | arrêté élargi de 100 jours dans l'agrégation | 1 |
+| M8 | comparaison de chronologie inversée | 5 |
+| M9 | l'exposant seul ne déclenche plus le refus de monnaie | 2 |
+| M10 | borne de versions relâchée de `>=` en `>` | 1 |
+| M11 | évaluation du jour même refusée (`>` → `>=`) | 1 |
+| M12 | `Number.isSafeInteger` remplacé par `!isNaN` | 2 |
+| M13 | borne de lecture « en vigueur » relâchée | 1 |
+| M14 | portée tenant inversée (`orgId` ↔ `dossierId`) | 1 |
+| M15 | `findOneAndUpdate` retiré des hooks append-only | 1 |
+| M16 | chaînage rompu (`provisionPrecedenteId` toujours `null`) | 1 |
+| M17 | garde d'identifiant malformé inversée | 3 |
+| M18 | **routes permutées** (`en-vigueur` après `:provisionId`) | 2 unit **+ 9 e2e** |
+
+⚠️ **Quatre mutations ont dû être reformulées** : leur forme naïve (`if (false)`, suppression d'un
+paramètre devenu inutilisé) **ne compilait pas**, et une mutation qui ne compile pas rend « 0 test »,
+jamais un rouge — elle ne mesure rien.
+
+### ⛔⛔ Vérification docker — elle a trouvé un bug que RIEN d'autre ne voyait
+
+**`ProvisionsTechniquesModule` ne fournissait pas `Horloge`**, que le service injecte pour refuser
+une évaluation future. `UnknownDependenciesException` au boot : le service ne démarrait **pas**, et
+le vertical entier tombait avec lui — alors que **lint 0, build OK, 1 677 unitaires et 149 e2e
+étaient verts**.
+
+Aucun niveau ne pouvait le voir : l'unitaire construit le service **à la main**, le harnais e2e
+déclare ses providers **à plat** sans importer le module, et `app.module.invariant.spec.ts` lit la
+**métadonnée** sans rien instancier — son propre commentaire nomme cet angle mort.
+
+⚡ **L'angle mort est fermé** par `app.module.injection.spec.ts` : il double les seules **frontières
+du process** (connexion Mongo, client Kafka, configuration) et laisse Nest résoudre tout le reste
+**pour de vrai**, module métier par module métier, plus un second test qui garde la liste elle-même.
+Vérifié par mutation : retirer le provider `Horloge` le fait rougir en 10 ms.
+
+#### Ce qui a été mesuré sur Mongo réel (base `assurance_service`, replica set `rs0`)
+
+| # | Vérification | Résultat |
+|---|---|---|
+| 1 | trois versions écrites, **six refus n'écrivent rien** | `total: 3` puis `total: 12` inchangé après 5 refus de plus |
+| 2 | la chaîne en base : rangs, prédécesseurs, montants précédents | linéaire et cohérente |
+| 3 | aucun champ `montantNet` nulle part | `avecNet: 0` |
+| 4 | les **deux index uniques** existent | `unicite_succession_provision_technique`, `unicite_rang_provision_technique` |
+| 5 | une **seconde racine** est refusée — la clé `null` **est** indexée | `E11000` sur l'index de succession |
+| 6 | un **second successeur** du même maillon est refusé | `E11000` sur l'index de succession |
+| 7 | un **second maillon au même rang** est refusé | `E11000` sur l'index de rang |
+| 8 | ces trois tentatives n'ont rien écrit | `total: 3` |
+| 9 | le comptage borné est **servi par un index** | `IXSCAN`, `docsExamined == nReturned` (3 = 3) |
+| 10 | la tête de chaîne : **aucun `SORT` bloquant** | index `unicite_rang_provision_technique`, 1 examiné / 1 rendu |
+| 11 | **dix écritures concurrentes** sur la même chaîne | 9 × `201`, 1 × `409` (retryable) |
+| 12 | après concurrence : rangs 1→9 **tous uniques**, **une seule racine**, 9 prédécesseurs distincts | aucune bifurcation |
+| 13 | chaque maillon pointe le rang immédiatement inférieur, aucun orphelin | `chainageCoherent: true` |
+| 14 | le `409` de concurrence n'a **rien** écrit | `total: 12` = 3 + 9 |
+| 15-16 | version d'un autre dossier / dossier d'une autre organisation | **404**, jamais 403 |
+| 17 | identifiant malformé et identifiant inexistant | **même code, même message** |
+| 18 | `PATCH` / `PUT` / `DELETE` sur une version | **404** — les routes n'existent pas |
+| 19 | évaluation dans un exercice **clos** | `409 EXERCICE_CLOS` |
+| 20 | évaluation datée **demain** | `400 DATE_EVALUATION_FUTURE`, détails `aujourdhui` |
+| 21-22 | `1.5e-7` et `"1000"` en montant | **400** — la notation et la conversion implicite sont fermées |
+
+#### ⚡⚡ AC-3 prouvé sur l'agrégation réelle — deux arrêtés, un seul dossier
+
+La même chaîne, lue à deux dates, **ne rend pas la même version** :
+
+| Arrêté | Version retenue | `totalBrut` |
+|---|---|---|
+| **2026-04-30** | rang **1** (évaluée le 31/03) | **12 000 000** |
+| **2026-12-31** | rang **2** (évaluée le 30/06) + l'autre chaîne | **18 000 000** |
+
+⛔ L'arrêté d'avril **ne consomme pas** la réévaluation de juin. Et la catégorie `VIE`, vide, ne
+publie **aucune devise** — pas de monnaie inventée sur un ensemble vide (leçon STORY-489).
+
 ## Notes
 
 - Voir [[STORY-513]] (le contrat, qui porte la catégorie et la monnaie), [[STORY-514]] (la provision
