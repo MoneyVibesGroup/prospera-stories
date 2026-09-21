@@ -4606,6 +4606,23 @@ sprints:
         story_path: "stories/STORY-672.md"
         assigned_to: "vivianMoneyVibesGroupes"
 
+      - story_id: "STORY-674"
+        title: "Les paiements envoyes entrent au releve - la position se recoupe de nouveau"
+        epic: "EPIC-036"
+        points: 5
+        service: "paiement-service"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-21 — point ouvert de STORY-668 et 669 : depuis qu un ordre de paiement peut partir, position du compte != ouverture + entrees relevees (ecart mesure : 75 XOF, ecrit nulle part). GET /paiements-envoyes rend TOUTES les tentatives (executee, doublon REJETE/DU03, INITIE) : seul l IRREVOCABLE est de l argent sorti. La cascade compte deja un SORTANT en horsPerimetre. ⚠ filtres de /paiements-envoyes NON sondes (sauf txId). Prerequis : 668 et 669 fusionnees
+        story_path: "stories/STORY-674.md"
+        assigned_to: null
+      - story_id: "STORY-675"
+        title: "Une seule clef d unicite par paiement - webhook et consultation cessent de se contredire"
+        epic: "EPIC-036"
+        points: 8
+        service: "paiement-service"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-21 — le remede NOMME ET REPORTE par STORY-665 (AC-6) : webhook = PAIEMENT_RECU:<txId>, consultation = PAIEMENT_RECU:<end2endId>, seule la regle-donnee de 670 empeche le double compte. ⛔ txId seul n est PAS une clef de paiement (QR statique : 667 ; QR dynamique scanne 2 fois : TOUJOURS OUVERT, le 2e paiement est avale comme un rejeu). Deux pieces neuves : le pont GET /paiements-recus?txId= (669) et evDate = dateIrrevocabilite a la ms (667, 664). ⚠ ARBITRAGE A TRANCHER A L OUVERTURE : voie A recommandee (txId + instant), B (end2endId via un appel sortant pendant la reception d un webhook), C (table de correspondance). ⛔ append-only : rien ne se reecrit
+        story_path: "stories/STORY-675.md"
+        assigned_to: null
+
   # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
   - sprint_number: 21
     start_date: "2027-04-08"
