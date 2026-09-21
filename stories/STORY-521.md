@@ -488,3 +488,145 @@ promesse-là reste exacte.
 ⚠️ **Deux défauts que seules les portes ont vus**, consignés en M12 : `npm run build` attrape ce que
 `tsc --noEmit` laisse passer, et une dépendance ajoutée au constructeur de `BilanEngineService` a
 cassé sa spec unitaire **puis les huit modules de test e2e**.
+
+### ⛔⛔ Vérification docker — stack neuve, jeton IdP réel, Kafka réel
+
+**Contexte**, dit franchement : `docker compose up --build` est resté bloqué **25 minutes** sans
+progresser. La voie documentée par `CLAUDE.md` a été prise — démarrage **sans reconstruire**, `src/`
+étant monté en volume avec `nest start --watch`, donc le code exécuté est celui de la branche.
+
+⚠️ **Et ce n'est pas suffisant comme preuve** : `nest --watch` peut annoncer « Found 0 errors » en
+servant encore l'ancien code. Le témoin retenu est donc **fonctionnel** :
+
+```
+GET /api/v1/whoami/assurance-access
+→ { "acces": "accorde", "referentielExige": "cima-assurances@4.0" }
+```
+
+`@4.0` n'existe que sur cette branche. Le conteneur exécutait bien son code.
+
+**Mise en place** — stack rebâtie depuis zéro (`docker compose down -v`) :
+
+| Étape | Moyen | Résultat |
+|---|---|---|
+| Compte + organisation | `POST /auth/register` puis `/auth/login` sur l'IdP | jeton **RS256 réel**, `org = 6ab1a896…` |
+| E-mail vérifié | `emailVerifiedAt` posé en base `auth_service` | ⚡ le claim `emailVerified` se **calcule** dessus |
+| KYC + entitlement | read-models locaux de chaque service | `whoami` passe de `403 KYC_NOT_APPROVED` à `accorde` |
+| Dossier `ASSURANCE` | `POST /dossiers` sur **`dossier-service`** | `typeEntite: ASSURANCE`, `referentielComptable: CIMA` |
+| Exercice 2026 | `POST /dossiers/{id}/exercices` | `statut: OUVERT` |
+| **Propagation** | **Kafka réel** | `dossiers_dossier` **2** · `exercices_dossier` **1**, sans intervention manuelle |
+
+**La mesure** — un contrat par catégorie, puis les **trois** chemins qui écrivent une quittance :
+
+```
+=== VERIFICATION FINALE, sur données non corrompues ===
+OK   PRIME      POL-521-VIE     → VIE
+OK   PRIME      POL-521-NON_VIE → NON_VIE
+OK   RISTOURNE  POL-521-VIE     → VIE
+OK   ANNULATION POL-521-NON_VIE → NON_VIE
+
+quittances = 4 | concordantes = 4 | divergentes = 0 | sans categorie = 0
+contrats   = 2 (un par categorie)
+```
+
+La jointure est faite **en base** : pour chaque quittance, sa catégorie est confrontée à celle de
+**son** contrat, relu par `contratId`. Une recopie figée aurait produit un `ECART` sur la moitié des
+lignes.
+
+**D-521-9 bis vérifié sur les index réels** — les huit index de `quittances` sont :
+
+```
+{_id} {quittanceVisee} {orgId,dossierId,contratId,_id} {orgId,dossierId,contratId,quittanceVisee}
+{orgId,dossierId,exerciceDebut,exerciceFin,_id} {orgId,dossierId,exerciceDebut,rattachement,_id}
+{orgId,dossierId,periodeFin,periodeDebut} {orgId,dossierId,type,periodeDebut}
+```
+
+**Aucun ne porte `categorie`** — la décision tient dans la base, pas seulement dans le code.
+
+#### ⚠️ Ce que la vérification a révélé par accident, et qu'il faut dire
+
+En testant « la collection refuse-t-elle la réécriture ? », un `updateOne` lancé **directement dans
+`mongosh`** a **réussi** et corrompu une quittance. Le champ a été restauré et la mesure finale
+refaite sur données propres.
+
+⇒ **L'append-only de `quittances` est APPLICATIF**, porté par un hook `pre` de Mongoose : il ne
+s'applique qu'aux écritures qui passent par le modèle. Une écriture directe en base le contourne.
+Ce n'est pas un défaut de cette story — c'est une propriété du garde qu'il vaut mieux avoir mesurée
+que supposée.
+
+#### ⚠️ Ce que la vérification NE couvre PAS
+
+- **`bilan-service` n'écrit rien** dans cette story : ses trois états sont servis par une route
+  `dry-run`, en lecture seule. Il n'y a donc aucune persistance à prouver de ce côté — seulement le
+  **graphe d'injection réel**, vérifié séparément par un démarrage du service.
+- La stack a été **tuée en cours de route par manque de mémoire** (`mongo` et `kafka`, exit `137`) :
+  cette VM docker héberge sept conteneurs étrangers au projet. Relancée, les read-models avaient
+  survécu au checkpoint, et la mesure a été refaite ensuite.
+
+#### ⚡ Et le graphe d'injection RÉEL de `bilan-service`, exercé de bout en bout
+
+La leçon de [[STORY-517]] — *aucun test n'instanciait le graphe d'injection* — est la raison de cette
+mesure. `bilan-service` a été démarré dans la stack : **`healthy`**, aucun
+`Nest can't resolve dependencies`. Le `ComptesCimaProductionService` entre donc bien dans le vrai
+`AppModule`, pas seulement dans un `RootTestModule`.
+
+**La route existe** — témoin par contraste, sans jeton :
+
+| Appel | Code |
+|---|---|
+| `POST …/bilan/etats/resultat-cima/dry-run` | **401** (la route est là, la garde répond) |
+| `POST …/bilan/etats/resultat-inexistant/dry-run` | **404** (témoin : une route absente rend 404) |
+
+et le contrat OpenAPI servi publie `EtatsResultatCimaDto`, `EtatResultatCimaDto`, `LigneEtatCimaDto`.
+
+**Quatre balances CIMA, quatre comportements** (`HTTP 200`, `cima-assurances@4.0`) :
+
+| # | Balance | `agrement` | Vie | Toute nature | Articulation |
+|---|---|---|---|---|---|
+| ① | `6010`/`7010`, primes 8 M | `VIE_CAPITALISATION` | `CALCULE`, solde **0** | `NON_APPLICABLE` | `OK`, écart **0** |
+| ② | la même, primes 9 M | `VIE_CAPITALISATION` | `CALCULE`, solde **1 000 000** | `NON_APPLICABLE` | `OK`, écart **0** |
+| ③ | `60`/`70` à deux chiffres | `INDETERMINABLE` | `INDETERMINABLE`, solde `null` | idem | `NON_APPLICABLE` |
+| ④ | `6010` **et** `6020` | `INCOMPATIBLE_ART_326` | `INCOMPATIBLE_ART_326` | idem | `NON_APPLICABLE` |
+
+⛔⛔ **Le cas ① méritait qu'on s'y arrête** : un solde de **0** est un mauvais témoin — un moteur qui
+ne calculerait rien le rendrait aussi. Ce qui prouve qu'il est **mesuré** et non vide :
+
+```
+compte80Vie          statut=CALCULE         solde=0     lignes=18  non nulles=9
+compte80TouteNature  statut=NON_APPLICABLE  solde=null  lignes=18  non nulles=0
+compte87             statut=A_COMPLETER     solde=null  lignes= 7  non nulles=0
+
+  EV1   CHARGE     5 500 000   Prestations échues (affaires directes et acceptations vie)
+  EV2   CHARGE    −1 400 000   Part des réassureurs dans les prestations et frais
+  EV3   CHARGE     1 200 000   Charges de commissions
+  EV4   CHARGE       900 000   Frais de personnel
+  EV10  PRODUIT    8 000 000   Primes et accessoires, nets d'annulations
+  EV11  PRODUIT   −2 000 000   Part des réassureurs dans les primes
+  EV13  PRODUIT    1 200 000   Produits des placements
+  EV16  CHARGE     1 500 000   Variation des provisions techniques brutes
+  EV17  PRODUIT      500 000   Variation de la part des cessionnaires
+```
+
+Et le cas ② lève le doute pour de bon : la même balance, une prime portée de 8 à 9 millions, rend un
+solde de **1 000 000**. Le moteur suit la donnée.
+
+**Trois choses que ce relevé prouve, et qu'aucun test unitaire ne prouvait :**
+
+1. **AC-5, en vrai** : le modèle non applicable est servi avec ses **18 lignes**, toutes à `null` —
+   *présent et vide*, jamais omis, jamais `0`.
+2. **Les signes viennent des comptes, pas du code** : `EV2` et `EV11` ressortent **négatifs** parce
+   que `609` est une charge créditée et `709` un produit débité. Personne ne les a posés.
+3. **Le `sens` est dérivé** : `EV16` sort `CHARGE` et `EV17` `PRODUIT`, conformément aux signes
+   qu'ils portent dans le solde — le correctif d'auto-revue est **vivant en production**, pas
+   seulement testé.
+
+**L'articulation de l'AC-4, recomposée depuis les quatre grandeurs publiées :**
+
+```
+soldeCompte80 = 0   resultatNetCR = 1 000 000
+variationProvisionsBrutes = 1 500 000   variationPartCessionnaires = 500 000
+0 == 1 000 000 − 1 500 000 + 500 000   →  True    ecart = 0    statut = OK
+```
+
+⇒ `RN` **ne vaut pas** le solde du compte 80, et la différence est **exactement** la variation de
+provisions — celle que l'égalité littérale de l'AC-4 passait sous silence.
