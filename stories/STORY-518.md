@@ -1,6 +1,6 @@
 # STORY-518 : `RT` cesse d'être un résultat de trésorerie — les variations de provisions techniques entrent au compte de résultat
 
-Status: review
+Status: done
 
 **Complexité :** high
 
@@ -239,7 +239,9 @@ c'est **STORY-522**). Le libellé de `RN` le dit, et le contrôle reste vert.
 
 ## Progress Tracking
 
-**Statut : `in_progress` → `review` le 2026-09-21.** Quatre dépôts, quatre branches `MNV-518`.
+**Statut : `done` le 2026-09-21.** Quatre dépôts, quatre branches `MNV-518`, quatre PR
+rebase-mergées sur `dev` : `bilan-service#127` · `balance-service#110` · `assurance-service#8` ·
+`platform-catalog-service#22`.
 
 ### Ce qui est livré
 
