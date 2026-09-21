@@ -505,3 +505,30 @@ dans le **routeur Nest réel** (`methodes` mappée **avant** `:provisionId`).
 
 Portes rejouées sur l'état final : lint **0**, build OK, **1 784** unit + **173** e2e verts,
 couverture **99,57 / 94,45 / 99,25 / 99,63**.
+
+### ⑦ Revue de sécurité — AUCUNE vulnérabilité, et c'est mesuré
+
+Périmètre strictement sécurité, analyse en `opus`, **aucun saut de phase**. **Zéro constat** de
+confiance ≥ 80. Les points vérifiés, et la preuve retenue :
+
+| Point | Preuve |
+|---|---|
+| la route neuve porte la **chaîne de gardes complète** | les sept gardes sont globales et pilotées par métadonnée ; le handler **ne pose aucun `@Roles` de méthode**, donc rien ne **remplace** ceux de la classe |
+| **ordre de déclaration** | `methodes` déclarée avant `:provisionId`, et **aucun autre contrôleur** monté sous `dossiers/:dossierId/assurance` ne déclare un motif capable de l'avaler |
+| **anti-énumération** | appelant hors portée → **404** `DOSSIER_INTROUVABLE`, jamais 403 |
+| **injection d'opérateur NoSQL** | `{"$ne": null}` et `{"$gt": ""}` → **400** ; c'est le couple **type + charset** qui ferme, pas un `@IsString()` que `enableImplicitConversion` neutraliserait |
+| **mass-assignment** | `orgId` et `rang` glissés au corps → **400** (`forbidNonWhitelisted`) ; et la persistance fait `...validation` — **trois clés littérales** — et jamais `...corps` |
+| le canal **`details`** des trois refus | `declares` (un nombre 0-3), `aujourdhui` (l'horloge), `valideeLe`/`dateEvaluation` (l'entrée de l'appelant) — aucun état interne, aucun oracle ; les trois contrôles sont posés **avant toute lecture Mongo** |
+| le **catalogue** servi | texte réglementaire public, aucune donnée de tenant, aucun chiffre |
+| **journalisation** | le filtre global journalise méthode + URL + message, jamais le corps ni la valeur d'un champ |
+
+⚠️ **Contre-vérifié dans la session, sur la stack docker** : les cinq charges hostiles — opérateur
+`$ne`, opérateur `$gt` sur la date, tableau à la place d'une chaîne, `orgId` injecté, `rang` injecté
+— rendent **toutes `400`**, et **zéro document** est écrit.
+
+**Écarté, et dit** : le charset admis laisse passer `<script>` dans les champs de texte libre. C'est
+la politique **délibérée et déjà en vigueur** du service (`auteurNom`, `auteurQualite`, `methode`,
+`parametres`, textes de contrat), sur une API JSON sans rendu serveur ; la PR n'ouvre aucune classe
+nouvelle et ne rend pas l'existante nouvellement exploitable. Également écarté :
+`VALIDATION_METHODE_FUTURE` est **strictement dominée** par la borne « pas après l'évaluation » —
+c'est une branche morte, pas un affaiblissement.
