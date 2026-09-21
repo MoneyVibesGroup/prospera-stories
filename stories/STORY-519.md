@@ -1,6 +1,6 @@
 # STORY-519 : Aucun calcul actuariel n'est inventé — ce que le module calcule, et à quelle condition
 
-Status: review
+Status: done
 
 **Complexité :** high
 
@@ -236,36 +236,36 @@ du vocabulaire qui le décrit, soit les deux stories cessent d'annoncer une vale
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Les provisions **calculables sans actuaire** (provision pour **risques en cours**,
+- [x] AC-1 — Les provisions **calculables sans actuaire** (provision pour **risques en cours**,
       art. 334-9 et 334-10) le sont, avec leur **méthode publiée**.
       ⚡ **PRÉCISÉ (M4, M5, D-519-6)** : « publiée » signifie **servie dans la réponse**, avec son
       fondement (l'article) **et ses réserves** — le plancher couvre l'art. 334-10 **seul**, le
       calcul est fait par **catégorie** et non par branche (art. 328), et la condition d'ouverture du
       prorata est **déclarée**, pas vérifiée. Le calcul lui-même ne change pas.
-- [ ] AC-2 — Les provisions **exigeant une méthode validée** sont **saisies**, avec leur méthode et
+- [x] AC-2 — Les provisions **exigeant une méthode validée** sont **saisies**, avec leur méthode et
       leur auteur (STORY-517), et le module **ne propose aucun montant**.
       ⚡ **PRÉCISÉ (M3)** : pour la PSAP, ce n'est pas « un actuaire » qui manque — le Code renvoie
       à une **circulaire** de la Commission pour les tardifs et **subordonne à son accord** toute
       méthode statistique, **bornée aux deux derniers exercices**. Le motif publié doit être celui
       du texte.
-- [ ] AC-3 — ⛔ Une provision **saisie** et une provision **calculée** sont **distinguées au
+- [x] AC-3 — ⛔ Une provision **saisie** et une provision **calculée** sont **distinguées au
       contrat** et à l'écran. Les confondre ferait porter au produit une responsabilité qu'il
       n'assume pas.
       ⚡ **AUGMENTÉ (D-519-2)** : le discriminant porte aussi sur l'**agrégat** `en-vigueur` et son
       total, pas seulement sur les éléments.
-- [ ] AC-4 — Le nom de l'actuaire ou de l'expert qui a validé une méthode est **porté par la
+- [x] AC-4 — Le nom de l'actuaire ou de l'expert qui a validé une méthode est **porté par la
       méthode**, pas par une note. Sans validation, la méthode est servie **avec son statut**.
       ⚡⚡ **CORRIGÉ PAR LE TEXTE (M1, D-519-3, D-519-4)** : **aucun article du Code n'exige qu'un
       actuaire valide une provision** — le certificateur nommé est un **mandataire social**
       (art. 425, sous sanction). La validation reste portée, comme exigence **du produit** ; elle est
       **distincte** de l'auteur de l'évaluation ; sa `qualite` est un **texte libre** ; et le statut
       par défaut est **`A_VALIDER_PAR_UN_EXPERT`**, jamais l'absence du champ.
-- [ ] AC-5 — ⛔ **Le catalogue est TOTAL et éprouvé comme tel** : chaque couple (catégorie, type)
+- [x] AC-5 — ⛔ **Le catalogue est TOTAL et éprouvé comme tel** : chaque couple (catégorie, type)
       admis par `TYPES_PAR_CATEGORIE` a exactement une entrée, et le test le **dérive de la
       transcription des articles**, jamais des clés du catalogue lui-même.
       ⚠️ C'est la leçon de STORY-517 : *la garde écrite pour fermer un angle mort portait le même
       défaut — elle filtrait sur la liste qu'elle devait éprouver.*
-- [ ] AC-6 — ⛔ **Ce que le module calcule est déclaré des DEUX côtés et confronté** : le module
+- [x] AC-6 — ⛔ **Ce que le module calcule est déclaré des DEUX côtés et confronté** : le module
       calculé nomme le couple qu'il produit, le catalogue le classe, et un test les **oppose**. Une
       divergence doit rougir — c'est la seule garantie qui survive à l'ajout d'un futur calcul.
 
@@ -320,7 +320,7 @@ du vocabulaire qui le décrit, soit les deux stories cessent d'annoncer une vale
 
 ## Progress Tracking
 
-**Statut : `review` le 2026-09-21.** Cadrage réglementaire mesuré **avant** toute ligne de code, sur
+**Statut : `done` le 2026-09-21.** Cadrage réglementaire mesuré **avant** toute ligne de code, sur
 deux sources indépendantes croisées (pages officielles `cima-afrique.org` + Code CIMA 2019 intégral,
 608 p. extraites localement). Six constats (M1 → M6) ont **déplacé la story**, dont deux qui
 contredisent sa propre prémisse : aucun article du Code n'exige d'actuaire (M1), et la provision
@@ -532,3 +532,24 @@ la politique **délibérée et déjà en vigueur** du service (`auteurNom`, `aut
 nouvelle et ne rend pas l'existante nouvellement exploitable. Également écarté :
 `VALIDATION_METHODE_FUTURE` est **strictement dominée** par la borne « pas après l'évaluation » —
 c'est une branche morte, pas un affaiblissement.
+
+### ⑧⑨ Intégration et clôture
+
+**Statut : `done` le 2026-09-21.** Deux dépôts, deux branches `MNV-519`, deux PR rebase-mergées :
+`assurance-service#9` sur `dev` et `docs` sur `main`. Branches supprimées.
+
+⚡ **Un ticket frontend est ouvert** pour le « à l'écran » de l'AC-3 :
+`tickets/TICKET-FRONTEND-origine-et-statut-de-methode-story-519.md`. L'user est développeur
+**backend** et n'a pas de droit de push sur les dépôts frontend — la moitié écran de l'AC-3 ne peut
+pas être livrée ici, et le ticket le dit.
+
+⛔ **Réserve portée à [[STORY-540]]** : le `statut` de l'artefact vaut **`amorce`**, pas
+`a-valider-par-expert` comme l'écrivaient cette story et l'AC-2 de STORY-540. La valeur existe dans
+le vocabulaire fermé `STATUTS_REFERENTIEL` mais **aucun artefact packagé ne la porte**. Rien n'a été
+touché ici : modifier l'artefact, c'est une nouvelle version et un nouveau checksum, sur un paquet
+**déjà servi**.
+
+⚠️ **Réserve de version non levée** : le *Règlement CIMA 2024 sur les engagements règlementés et les
+provisions techniques en assurance vie* n'a **pas pu être obtenu** et n'a **pas été reconstitué**.
+Sans effet sur cette story, qui se borne à déclarer qu'elle ne calcule pas la partie vie ; bloquant
+pour toute story qui la calculerait.
