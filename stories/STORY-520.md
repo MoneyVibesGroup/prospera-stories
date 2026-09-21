@@ -242,7 +242,7 @@ digests épinglés, bascule de la version servie (D-520-8).
 mesurés **dans le conteneur** après démarrage. Les deux ont été attribuées ; on ne réécrit pas un
 chiffre déjà servi.
 
-### Table de mutations — 18 mutations, committées avant de muter
+### Table de mutations — 21 mutations, committées avant de muter
 
 | # | Mutation | Résultat |
 |---|---|---|
@@ -370,4 +370,91 @@ confirmé après redémarrage.
 | 21 | la même prime, période rétablie | — | assiette **1 777 000**, `quittancesRetenues: 2`, cédée **710 800** (40 % exacts) |
 
 ⇒ La garde **existe désormais pour de vrai**, et le montant qui disparaissait entre bien dans
-l'assiette dès qu'il est plaçable. Stack arrêtée après la mesure (`docker compose stop`).
+l'assiette dès qu'il est plaçable.
+
+### ⑥ Revue de code — quatre constats, dont DEUX bloquants
+
+⚠️ **Le contexte compte** : au moment des revues, lint était à 0 sur les quatre dépôts, les builds
+passaient, **1 993 + 3 032 + 4 178 + 740 unitaires** et **199 + 1 077 + 200 e2e** étaient verts, le
+module neuf était à **100 %** lignes et fonctions, une table de **21 mutations** avait été passée, et
+une **vérification docker de 21 mesures** avait été conduite sur Mongo réel — qui avait elle-même
+déjà trouvé un défaut. Les deux bloquants ci-dessous ont traversé tout cela.
+
+#### ⛔⛔ Bloquant 1 — la cession publiait un total qui ADDITIONNAIT des unités différentes
+
+`lireCessions` somme les quittances de **tous** les contrats d'une catégorie et les événements de
+**tous** ses sinistres, puis libelle le total avec la devise et l'exposant du **traité**. Rien ne
+confrontait la monnaie des pièces sommées.
+
+⚡ **Le trou est atteignable, et il est silencieux** : `exigerDeviseDuDossier` — ici comme dans
+`contrats.service.ts` — ne compare que la **devise**, jamais l'**exposant**. Deux contrats `GNF`
+exposant 0 et `GNF` exposant 2 passent donc tous deux en `201`, et une prime de `1 000 000` sur
+chacun vaut `1 000 000 GNF` d'un côté, `10 000,00 GNF` de l'autre. La cession publiait `2 000 000`
+au lieu de `1 010 000`, en **200**, sous une devise parfaitement plausible.
+
+⛔ **Les deux routes jumelles de ce service refusent déjà exactement ce cas**, sur les **mêmes**
+collections : `DEVISES_HETEROGENES` (STORY-514) et `DEVISES_HETEROGENES_DANS_L_ETAT` (STORY-516). Et
+la projection des sinistres portait déjà `devise` et `exposant` — **lus par personne**. C'était un
+oubli, pas une décision. ⇒ `DEVISES_HETEROGENES_DANS_LES_CESSIONS`, éprouvé en unitaire et **par
+HTTP** sur deux contrats d'exposants différents.
+
+#### ⛔⛔ Bloquant 2 — la date d'arrêté ne bornait que la MOITIÉ des quittances
+
+La prime était écartée si son émission suivait l'arrêté — avec le commentaire qui posait
+l'invariant : « la céder rendrait la même mesure différente d'un arrêté à l'autre, sur des faits
+identiques ». Mais l'**annulation** et la **ristourne** qui la corrigent s'appliquaient **quelle que
+soit leur propre date d'émission** : une correction porte sa date propre et ne recopie que la
+**période** de sa cible, donc la requête de chevauchement la ramène.
+
+⚡ **Mesuré** : une ristourne de `300 000` émise le 10 décembre faisait passer le même appel
+`?dateArrete=2026-06-30` de `assiette: 1 000 000` à `assiette: 700 000`. Une annulation de décembre
+faisait **disparaître** la prime d'un arrêté de juin. La route refuse pourtant un arrêté futur
+**précisément** pour que le chiffre soit reproductible — l'invariant ne valait que d'un côté.
+
+⇒ Les corrections sont bornées par l'arrêté comme les primes, et une correction **sans** date
+d'émission rejoint la liste fail-closed plutôt que de s'appliquer en aveugle.
+
+#### Les deux non-bloquants, traités
+
+- **Quatre commentaires laissés à `@2.0` par la bascule qu'ils décrivent** — dont celui de
+  `packs.seed-data.ts` qui se présente comme « l'endroit où l'exploitant viendra lire l'impact de la
+  bascule » et nommait la version que cette story remplace ; et celui de l'e2e de suggestion, dont la
+  justification (« le plan est inchangé, **donc** la suggestion est identique ») est devenue fausse :
+  le plan passe à **82** comptes. La suggestion ne bouge pas, mais pour une autre raison.
+- **Deux compteurs annoncés que le contenu contredit** : « 18 mutations » pour une table de 21,
+  « les six paquets » pour une boucle qui en parcourt sept.
+
+#### Écarté
+
+- Une prime portant `periodeDebut` **sans** `periodeFin` reste écartée en silence. Aucun chemin
+  d'écriture, historique compris, ne produit cette forme — les deux champs sont apparus ensemble en
+  STORY-513. Confiance insuffisante, non corrigé.
+
+### ⑦ Revue de sécurité — un constat, sur le correctif de la vérification docker
+
+⛔ **La seconde branche du `$or` n'était servie par AUCUN index.** Le correctif issu de la
+vérification docker ajoutait les primes sans période en seconde branche du `$or` de
+`quittancesDuTraite`. Sur l'index de période, `periodeFin` reste un intervalle plein, donc les bornes
+de `periodeDebut` sont inexploitables : le sous-plan retombait sur le seul préfixe
+`{orgId, dossierId}` et **parcourait toutes les quittances du dossier** — pour n'en rendre, en régime
+nominal, **aucune**. Le `limit` bornait les documents *rendus*, jamais les documents *examinés*, sur
+une base **partagée par tous les tenants**. C'est le mode de panne déjà payé deux fois ici
+(STORY-514 : 60 000 examinés pour 2 001 rendus ; STORY-516 : la coupure par date d'arrêté).
+
+⚠️ **Et le JSDoc affirmait l'inverse, deux fois** : « chaque filtre est servi par un index », « le
+préfixe reste en tête, **donc** servi par l'index ». Vrai du préfixe — et c'est précisément ce
+préfixe seul qui laisse le reste résiduel.
+
+⇒ Lecture **dédiée**, servie par un index posé sur le schéma des quittances,
+`{orgId, dossierId, type, periodeDebut}`. ⚠️ **Non partiel, et c'est une contrainte de MongoDB** :
+une `partialFilterExpression` n'admet pas `$exists: false`. Même situation et même justification que
+l'index posé par STORY-516 sur le schéma de STORY-515.
+
+**Tout le reste a été éprouvé et tient** : chaîne de gardes sur les cinq routes (`lireCatalogue`, sans
+paramètre de portée, reste gardée — la métadonnée est de **classe**), isolation multi-tenant sur les
+huit lectures, `404` indistinct pour « inexistant », « autre dossier » et « malformé », injection
+NoSQL fermée par `relireValeurBrute` + validateurs stricts, `null` traversant `@IsOptional()` capté
+par les deux gardes de montant, message générique sur la collision de référence, chaîne de traités
+verrouillée par deux index uniques non partiels, et aucun secret, Kafka, CORS ou upload touché.
+
+Stack arrêtée après la mesure (`docker compose stop`).
