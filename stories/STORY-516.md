@@ -196,6 +196,41 @@ docs               MNV-516
 assurance-service  MNV-516
 ```
 
+- **2026-09-21 — cadrage mesuré, et il déplace le NOM du livrable.** `cadence` rend **zéro
+  occurrence** sur le Code intégral ; le mot n'apparaît que dans les circulaires annexées, où il
+  désigne les **déclarations tardives**. Ce que le régulateur publie est l'**état C10b** (art. 422),
+  dont le **tableau D** est exactement le triangle de l'AC-1. Sept décisions : D-516-1 à D-516-7.
+- **2026-09-21 — développement.** Un module de **lecture pure** : aucune collection, aucune
+  écriture, aucun producteur Kafka. L'agrégation est faite de **fonctions pures** — ni état, ni
+  horloge — et l'horloge n'intervient qu'une fois, pour refuser un arrêté **futur**.
+- **2026-09-21 — passe de mutation : 10 mutations, 9 rouges du premier coup, ⛔ 1 TROU.**
+  « un événement orphelin de sa catégorie est ignoré » restait **vert** sous une mutation qui
+  supprimait la garde. ⚠️ **La mutation était ÉQUIVALENTE dans le cas testé, pas inoffensive** :
+  sans ligne « antérieurs », un cumul orphelin est perdu de toute façon, puisque le résultat se
+  construit à partir des **lignes** et non des cumuls. Elle change tout dès que la fenêtre est
+  dépassée : l'événement d'une **autre catégorie** se déverse alors dans « antérieurs », et le total
+  d'un compte technique est gonflé par la sinistralité de l'autre — alors que leur étanchéité est
+  **réglementaire** (AD-3). ⇒ Test manquant écrit, combinant les deux conditions. Leçon STORY-511 :
+  « une mutation qui survit n'est pas toujours un trou de test — vérifier laquelle des deux ».
+- **2026-09-21 — ⚡⚡ vérification docker : l'AC-3 prouvé par DEUX arrêtés sur le MÊME dossier.**
+  Sur les données réelles de STORY-515 (sinistre survenu le 28/12/2025, déclaré le 15/01/2026) :
+
+  | Arrêté | Ce que l'état publie |
+  |---|---|
+  | **2026-09-21** | ligne **survenance 2025** × colonne **opération 2026** — le triangle ; paiements `3 000 000 + 125 000` (le règlement du 10/09) ; ⛔ `recoursEncaisses: 0` — **le recours du 01/10 est postérieur** ; provision `4 500 000` et recours à encaisser `800 000` **côte à côte** |
+  | **2026-06-01** | provision **`3 800 000`** — la **première** évaluation (31/03), **pas** la révision du 30/06 |
+
+  ⇒ **La tête de chaîne est bien « la dernière version ANTÉRIEURE à l'arrêté »**, jamais la dernière
+  tout court. Et la garde d'arrêté futur a rendu `400` sur un arrêté au 31/12/2026 — nous étions le
+  21/09.
+  - **Étanchéité vérifiée** : l'état `VIE` rend **zéro ligne** là où `NON_VIE` en rend une.
+  - **Requête sans catégorie : `400`** — jamais d'état toutes catégories confondues.
+  - ⛔ **Aucune écriture** : 13 collections, **aucune** créée par l'état, `outbox_events` à **0**, et
+    le registre de STORY-515 **inchangé** (1 sinistre, 6 événements).
+- **2026-09-21 — portes de qualité :** lint **0 warning**, build OK, **1 509 unit + 93 e2e verts**,
+  couverture **99,55 / 93,70 / 99,16 / 99,62** (seuils 65/90/90/90), module `etat-sinistres` à
+  **100 %** lignes et fonctions.
+
 ## Notes
 
 - Voir [[STORY-515]] (qui pose la matière : exercice de **survenance** sur le dossier, exercice
