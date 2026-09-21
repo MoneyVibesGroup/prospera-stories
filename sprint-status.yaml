@@ -4585,6 +4585,14 @@ sprints:
         status: "done"  # MNV-670 fusionnee dans dev (2026-09-20, verifie par `git cherry`) — ex-review : poussee sur dev — recette Docker : demande payee dans le bac a sable -> encaissement constate, demande Soldee
         story_path: "stories/STORY-670.md"
         assigned_to: null
+      - story_id: "STORY-673"
+        title: "FedaPay contre le reel - un compte marchand ne se verifie jamais, donc n encaisse jamais"
+        epic: "EPIC-036"
+        points: 5
+        service: "paiement-service"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-21 PAR LE PREMIER APPEL REEL au bac a sable FedaPay — `identifierLeCompteMarchand` (STORY-244) exige un `account_id` dans GET /v1/currencies, la vraie reponse n en porte AUCUN : `validerCompte` leve TOUJOURS, aucun compte FedaPay ne devient VERIFIE, donc FedaPay n a jamais encaisse de bout en bout (invisible aux tests : doubles). Sur un compte neuf AUCUN GET ne nomme le compte. Creation de transaction + checkout heberge TIENNENT. ARBITRAGE a l ouverture : la reference consignee = empreinte de la cle (recommande, precedent STORY-600). Porte aussi la recette reelle des notifications signees. NON SLOTTEE
+        story_path: "stories/STORY-673.md"
+        assigned_to: null
 
       - story_id: "STORY-671"
         title: "Le plan CIMA est transcrit en entier — 1 052 comptes, pas 80"
