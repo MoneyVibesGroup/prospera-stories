@@ -327,6 +327,83 @@ balance, **45 % d'écart**. Un test où les deux donneraient le même chiffre n'
 repassées vertes une par une et suite complète une fois la stack arrêtée : saturation de la VM, pas
 une régression — le piège déjà consigné dans [[montage-fichier-unique-inode-git]].
 
+### Revue de code et revue de sécurité — 2026-09-21
+
+Les deux revues ont tourné **en parallèle sur le même diff**, et elles ont **convergé sur le même
+constat bloquant** — comme en STORY-517, où quatre constats identiques étaient sortis des deux côtés.
+
+#### ⛔⛔ Le constat des deux revues : un comparatif **vide** n'est pas un comparatif
+
+`const aggN1 = soldesN1 ? …` — `[]` est ***truthy***. Une passe N-1 était donc construite sur un jeu
+vide, le semis la remplissait de **zéros**, et l'opérande `mode: 'VARIATION'` publiait le **stock
+entier** des provisions techniques comme s'il était la variation de la période.
+
+| `soldesN1` | `RT` publié |
+|---|---|
+| absent | **absent** (correct : indéterminé) |
+| `[]` | **`−3 800 000`** ⛔ publié comme **mesuré** |
+| arrêté N-1 réel | `+1 200 000` |
+
+Le résultat technique **changeait de signe**, et les **sept contrôles de cohérence restaient verts** :
+`coherenceSig` confronte `RN`, qui depuis D-518-5 ne cascade plus depuis `RT`. ⇒ **C'est exactement
+le défaut que cette story supprime, réintroduit par la porte du tableau vide** — et la porte est
+**neuve** : avant `@2.0`, aucun agrégat de la colonne N ne dépendait du comparatif.
+
+⚠️ **Le piège `[]` est déjà nommé dans ce dépôt** : `SOLDES_N2_SANS_N1` (STORY-433) teste `?.length`
+pour cette raison exacte, et son commentaire renvoie au « piège `[]` de STORY-430/409 ». La garde
+existait **au contrôleur**, pas dans les deux services de production — c'est là qu'elle est posée,
+parce que c'est le seul point que les appelants **hors HTTP** traversent aussi (jobs, recalcul d'un
+jeu persisté portant déjà `[]`).
+
+#### Les huit autres constats, tous traités
+
+| # | Constat | Traitement |
+|---|---|---|
+| ② | La propagation de l'indétermination change la sortie de **SYSCOHADA** (TFT `ZB`/`ZG`/`ZH` : chiffre → `null` sans N-1), **hors périmètre CIMA et sans test** | **Gardé** — le contrôle de trésorerie disait déjà `INDETERMINABLE` pendant que les sous-totaux sortaient chiffrés ; les deux se contredisaient. Pinné par un test, et le commentaire qui énonçait l'inverse du code est rectifié |
+| ③ | La garde de conformité au front avait été **relâchée au-delà du besoin** (`Set` + `toContainEqual`), laissant franchir la configuration que le fichier de données interdit 40 lignes plus haut | Comparaison **stricte restaurée** |
+| ④ | Le JSDoc **promettait plus qu'il ne tenait** : les deux lectures d'un poste divergent sur le poste marqué `RESULTAT_BILAN` (mesuré : `6 000 000` contre `7 000 000`) | Promesse ramenée à ce qu'elle tient, **et la porte fermée à la source** |
+| ⑤ | La garde CI ne suivait pas la règle de semis : une opérande vers `BILAN:CPT` levait un **500 sur toute la liasse**, CI verte | Règle ajoutée à `verifierOperandes`, avec ses fixtures |
+| ⑥ | Le poste **terminal** des SIG se lisait sur la sortie **filtrée** : `sig.at(-1)` pouvait désigner un autre poste, et le contrôle aurait comparé la mauvaise grandeur | Terminal lu sur les formules **déclarées** ; non mesuré ⇒ non applicable, jamais reporté sur le voisin |
+| ⑦ | Un commentaire du catalogue **contredisait les deux autres dépôts du même commit** (« servie sans erreur en attendant » — faux pour `balance` 409 et `assurance` 403) | Rectifié |
+| ⑧ | Deux JSDoc nommaient encore `@1.0`, dont un faux depuis STORY-512 | Rectifiés |
+| ⑨ | `REFS` énumérée à la main : `@2.0` absente, donc CC1/CC2/CC4 non rejoués sur le seul paquet à opérandes inter-états | Ajoutée |
+
+⛔⛔ **Et ⑨ a révélé un défaut latent du fichier de garde lui-même** : son index de paquets était clé
+par **`code` seul**. Deux versions d'un même référentiel dans `REFS`, et la seconde écrasait la
+première — `CC3` confrontait alors le checksum de `@1.0` aux **octets de `@2.0`**. Latent depuis
+l'origine parce que `REFS` n'avait jamais porté deux versions d'un même code ; révélé **en
+rougissant**, ce qui est le bon comportement. Re-clé par `code@version`.
+
+#### Mutations de la passe de revue
+
+| # | Mutation | Verdict |
+|---|---|---|
+| M9 | retour de la simple présence à la place de `?.length` | **1 rouge** |
+| M10 | retour du `?? 0` dans l'évaluateur (le TFT doit rougir) | **1 rouge** |
+| M11 | règle de semis inter-états **supprimée** | ⛔ **NE COMPILE PAS** |
+| M11 bis | règle visant un préfixe d'état inexistant (mutation de **valeur**) | **2 rouges** |
+| M12 | terminal relu sur la sortie filtrée (`sig.at(-1)`) | **1 rouge** |
+| M13 | index des paquets re-clé par `code` seul | **7 rouges** |
+
+⛔ **Et le `git checkout --` de restauration a effacé le correctif non committé** — la fiche
+[[git-checkout-efface-le-travail-non-committe]] a frappé une **troisième** fois dans cette story,
+alors même que la section précédente la citait. **Committer avant de muter n'est pas une précaution,
+c'est une étape du protocole.**
+
+#### Vérification docker REJOUÉE sur l'état final
+
+Les correctifs touchent le moteur : la phase ④ est rejouée, jamais reportée depuis une mesure
+antérieure.
+
+| # | Cas | Résultat |
+|---|---|---|
+| V3 | comparatif **réel** | `RV1 = 1 500 000` · `RV2 = 500 000` · **`RT = 1 200 000`** · `RN = 1 000 000` |
+| V5 | même balance, organisation restée sur **`@1.0`** | **`RT = 2 200 000`**, `ecart = 0` — aucune régression |
+| V6 | comparatif **absent** | `sig = ['RN']` — `RT` **absent** |
+| V7 | comparatif **`[]`** *(le constat de sécurité)* | `sig = ['RN']` — `RT` **absent**, là où il sortait à `−3 800 000` |
+
+`coherenceSig.ecart = 0` et `coherent = true` dans les quatre cas.
+
 ### Ce qui reste ouvert, et qui n'est pas dans cette story
 
 - ⚠️ **Le front déclare encore `cima-assurances@1.0`** dans `vertical-packs.ts` (dépôt frontend, hors
