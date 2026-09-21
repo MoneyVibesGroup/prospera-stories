@@ -4238,7 +4238,7 @@ sprints:
         epic: "EPIC-036"
         points: 8
         service: "paiement-service"
-        status: "blocked"  # phase B, BLOQUEE par l amendement du PRD (envoi de paiements hors perimetre)
+        status: "blocked"  # phase B, TOUJOURS BLOQUEE par l amendement du PRD — 2026-09-21 : fiche ecrite + PROPOSITION d amendement redigee (prds/.../amendement-ordres-de-paiement-PROPOSITION.md, FR-P65->P69 + NFR-1d), en attente du PO ; MESURE sans rien envoyer : POST /paiements-envoyes exige txId, payeurAlias, payeAlias (un SHID), montant, confirmation ; vocabulaire : « ordre de paiement » (« reglement », payout et reversement sont proscrits par deux gardes)
         story_path: "stories/STORY-668.md"
         assigned_to: null
       - story_id: "STORY-669"
