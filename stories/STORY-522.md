@@ -241,3 +241,104 @@ ait à s'en souvenir.
 |---|---|---|
 | M1 | on remet `80` dans les racines de la **source** `v5` | ⛔ **le build ÉCHOUE**, en nommant `80 « Exploitation générale »` |
 | M2 | on remet `80` dans les racines de l'**artefact servi** | **3 rouges** dans `fiscal.regles.spec.ts` — dont le témoin des racines |
+
+## ⑥⑦ Revues — six constats, aucune vulnérabilité
+
+**Revue de sécurité : AUCUNE vulnérabilité applicative.** Pas de route, pas de changement d'authZ,
+pas d'entrée utilisateur, pas de secret, isolation tenant intacte. Le relecteur a **rejoué le
+générateur en bac à sable** : les dix artefacts ressortent **octet pour octet identiques** à ceux du
+dépôt — le spread conditionnel de `nature` fait ce qu'il annonce. Bascule de version **fail-closed**.
+
+**Revue de code : six constats**, tous réels, tous corrigés. Trois touchaient au cœur de la story.
+
+### ⛔⛔ C1 — la porte ne survivait pas à une version future
+
+`exigerRacinesSansRegroupement` ne filtre que les comptes **déjà marqués** : un plan qui n'en
+déclare aucun la rend vraie **à vide**. Rien n'obligeait une version ultérieure du même code à
+conserver les marqueurs de la précédente ⇒ **l'affirmation centrale de la story ne tenait pas.**
+
+⚡ Le scénario est nommé dans la mise en garde de `@5.0` elle-même : **STORY-671** re-transcrit
+l'art. 431 depuis le texte officiel, produit un `plan-comptable-cima-v6.json` sans re-poser
+`nature: 'REGROUPEMENT'`, reprend les racines de `@4.0` — et **tout serait vert**, la garde dérivée
+passant à vide et son témoin ne lisant que `@5.0`.
+
+⇒ `exigerMarqueursMonotones` : tout numéro marqué par une version antérieure du **même code** doit
+l'être encore s'il figure au plan. Le retirer **sciemment** reste possible — il faut retirer le
+compte du plan, ce qui se voit.
+
+### ⛔ C2 — ma garde AC-3 lisait un nom de fichier, pas ce que le pont sert
+
+Elle nommait `'cima-assurances-5.0.json'` **en dur**. Le jour où `PONT_TAG.CIMA` passe à la version
+suivante, elle continuerait de mesurer un fichier **gelé pour toujours**, donc structurellement
+incapable de régresser — pendant que la version servie pourrait republier `['6','7','8']` sans rien
+faire rougir. **C'était le défaut que la story corrige, déplacé d'une constante vers un nom de
+fichier.** Elle dérive désormais du pont, avec un témoin qui vérifie la liaison.
+
+### ⛔ C3 — la documentation qui aurait survécu à sa propre correction
+
+**Huit endroits** affirmaient encore que `80` est « de la gestion réelle » et qu'il n'y a que
+**trois** comptes de regroupement — dont la documentation **normative** de `racinesDeGestion`
+(`balance-service/src/modules/referentiel/types/referentiel-package.ts`). Un futur auteur de plan
+sectoriel l'aurait ouverte, y aurait lu le modèle, et aurait déclaré son propre compte de
+regroupement en gestion.
+
+### Les trois autres
+
+| # | Constat | Conséquence |
+|---|---|---|
+| C4 | **quatre JSDoc détachés** par mes insertions, dont un en production | `calculerResultatComptable` perdait l'avertissement « le nettage par ligne est obligatoire » — un refactor l'aurait doublée |
+| C5 | la prose de bascule disait encore `@4.0` **là où le code dit à l'exploitant d'aller lire** | l'octroi se rejoue à la main : il aurait ré-octroyé `@4.0`, et le vertical entier serait resté fermé (403/409) |
+| C6 | `bundled-artifact-source.spec.ts` sans son cas `@5.0` | le seul test prouvant que la source embarquée récupère les octets visait une version que personne ne sert |
+
+### ⚠️ Et deux erreurs de ma part, attrapées en chemin
+
+1. **Ma première mutation de la monotonie était VIDE.** `@5.0` est la première version à poser des
+   marqueurs : il n'y avait rien à comparer, et « 0 erreur » n'était **pas** une détection. Refaite
+   en marquant `87` dans `@4.0` puis en l'oubliant dans `@5.0`, elle lève bien, en nommant le compte.
+2. ⛔ **Ma correction de prose par expression régulière a renommé une CLÉ du registre.** `re.sub` sur
+   `cima-assurances@4.0` a frappé la clé du manifeste, pas seulement un commentaire : deux clés
+   `@5.0`, plus de `@4.0`. **Attrapée par la garde des empreintes**, restaurée, et les cinq couples
+   clé/locator sont désormais contrôlés un par un.
+
+### ⚡ Un refus de plus, né de la revue de sécurité
+
+Signalé comme « risque résiduel à arbitrer », retenu : depuis que `80` sort des racines, une balance
+**déjà clôturée** rend un résultat comptable de **zéro** — donc une base imposable nulle, sans
+qu'aucun contrôle ne s'en aperçoive. `BalanceDejaRegroupeeException` **refuse et nomme le compte**.
+La condition est volontairement **étroite** : un exercice dont les produits égalent exactement les
+charges ne déclenche rien, et c'est testé.
+
+⚡ **Et une garde du dépôt l'a complété toute seule** : un test énumère **tous** les codes de refus
+fiscaux et exige que chacun soit **publié au contrat OpenAPI**. Le mien ne l'était pas — la DoD
+« endpoints documentés dans Swagger », rendue mécanique.
+
+### Table de mutations — 4 mutations
+
+| # | Mutation | Mesuré |
+|---|---|---|
+| M1 | `80` remis dans les racines de la **source** | ⛔ le **build échoue**, en nommant `80 « Exploitation générale »` |
+| M2 | `80` remis dans les racines de l'**artefact servi** | **3 rouges** dans `fiscal.regles.spec.ts` |
+| M3 | une racine **descendante** (`801`) | ⛔ le **build échoue** — la comparaison va dans les deux sens |
+| M4 | `@4.0` marque `87`, `@5.0` l'oublie | ⛔ le **build échoue** : « marqueur REGROUPEMENT PERDU sur 87 » |
+
+### Portes finales
+
+| Dépôt | lint | build | unitaires | e2e |
+|---|---|---|---|---|
+| `bilan-service` | 0 | OK | **3 127** | **827** |
+| `balance-service` | 0 | OK | **4 193** | **1 078** |
+| `assurance-service` | 0 | OK | **2 015** | **202** |
+| `platform-catalog-service` | 0 | OK | **740** | **200** |
+
+### ⚠️ Vérification docker — NON APPLICABLE, et pourquoi
+
+**Cette story n'écrit rien en base** : elle change un paquet de référentiel et un calcul en lecture
+seule. La règle du projet vise les stories qui **persistent**.
+
+⚠️ Une vérification **fonctionnelle** sur stack réelle aurait tout de même eu de la valeur. Elle n'a
+pas pu être faite : le **démon docker est tombé** en fin de flux (500 sur toutes ses routes API).
+⛔ Il n'a **pas** été redémarré : cette machine héberge sept conteneurs étrangers au projet, qu'un
+redémarrage aurait tués. Le dire plutôt que de prétendre la vérification faite.
+
+⇒ Ce que couvre à sa place la garde de l'AC-3 : elle lit l'**artefact réellement servi**, résolu par
+le pont, et mesure le calcul dessus. C'est la même chaîne, sans le réseau.
