@@ -1,6 +1,6 @@
 # STORY-523 : États annuels CIMA (art. 433) — une trentaine d'états, pas une liasse
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-134 — États annuels CIMA et marge de solvabilité
 **Service :** `assurance-service` + `bilan-service`
@@ -243,8 +243,12 @@ la passe venait d'effacer la garde qu'elle devait éprouver : le rouge observé 
 La story **n'écrit rien en base** : la vérification porte sur ce que docker seul révèle — l'artefact
 réellement **empaqueté et chargé** dans l'image.
 
+> ⚠️ **Mesure du 2026-09-22, AVANT la revue**, sur l'artefact `93b41b2c…`. Les correctifs de revue
+> ayant régénéré l'artefact, **c'est le rejeu plus bas qui fait foi** — celui-ci est conservé pour
+> la traçabilité, et non comme preuve de l'état livré.
+
 ```
-checksum VÉRIFIÉ par le loader : 328c17be651a863d65d23c1a18c996373409d440128226e98d9a432d662f501a
+checksum VÉRIFIÉ par le loader : 93b41b2cc9f1720972917acc675d23d41ca84ccce0dc3f2908d27a546d382cc0
 états chargés : 46 | dépôt : DEPOT_PHYSIQUE | butoir : 1er juin
   VIE_CAPITALISATION   PRODUIT=4 AILLEURS=0 NON_PRODUIT=33 NON_APPLICABLE=9
   TOUTE_NATURE         PRODUIT=4 AILLEURS=1 NON_PRODUIT=35 NON_APPLICABLE=6
@@ -253,6 +257,64 @@ checksum VÉRIFIÉ par le loader : 328c17be651a863d65d23c1a18c996373409d44012822
   bilan actif : 5 postes publiés / 172 lignes de gabarit
   C10b : NON_APPLICABLE → assurance-service
 ```
+
+### Revue de code — 6 constats, tous corrigés · Revue de sécurité — 0 constat
+
+Les deux scans ont tourné en `opus`. La revue de sécurité n'a retenu **aucun** constat : elle a
+vérifié l'ordre `checksum → parse → cache`, l'impossibilité d'empoisonner le cache, l'absence de
+pollution de prototype, et — point métier central — **zéro exemption sur un agrément non tranché**,
+mesurée sur les cinq agréments.
+
+| # | Constat de revue de code | Gravité | Correctif |
+|---|---|---|---|
+| 1 | **L'ordre des branches ① applicabilité / ② produit ailleurs n'était fixé par AUCUN test** — permuter les deux laissait 3 152 tests verts | ⛔ bloquant | `C10B` ajouté au test AC-4 « assureur vie » |
+| 2 | Les portes du générateur ne confrontaient **que le rythme `ANNUEL`** — un `C99S` inventé était accepté | non-bloquant | les **quatre** listes légales confrontées dans les deux sens + non-vacuité |
+| 3 | JSDoc détaché par insertion (10ᵉ récidive) | non-bloquant | réattaché, contrôle mécanique passé |
+| 4 | Le motif du C11 **se contredisait** : « Gabarit relevé à l'Article 433 » sur l'état qui n'en a aucun | non-bloquant | le motif d'un gabarit `LIBRE` **remplace**, il n'ajoute pas |
+| 5 | `postesPublies: 0` sur le C10b, indistinguable de « non alimenté » | non-bloquant | `null`, jamais `0`, quand ce dépôt ne produit pas l'état |
+| 6 | 5 divergences entre la story, le README et l'artefact | non-bloquant | les deux documents alignés sur le relevé |
+
+⚡ **Le constat 1 est celui qui compte.** `C10B` est le **seul** état du catalogue à la fois
+restreint par périmètre **et** attribué à un autre dépôt — donc le seul qui discrimine les deux
+ordres — et mon test AC-4 l'excluait précisément. Sans lui, un assureur vie lisait « Produit par
+assurance-service, à demander à ce service » sur un état qui ne lui est **pas dû**.
+⇒ *Un test qui énumère des cas peut omettre le seul qui discrimine, et rester vert pour toujours.*
+
+Deux durcissements tirés des observations **sous le seuil** de la revue de sécurité : `catalogueRef`
+(une référence sans sa version n'en est pas une, AC-1) et la porte d'applicabilité qui vérifie la
+**nature** du renvoi, pas seulement sa présence — une source recopiée de l'état voisin passait sans
+rien lever et exemptait l'assureur du mauvais côté.
+
+### Vérification docker REJOUÉE sur l'artefact final (`328c17be…`)
+
+Les correctifs ayant régénéré l'artefact, la vérification de la phase ④ a été rejouée — jamais
+reportée depuis la mesure d'avant correctif.
+
+```
+checksum VÉRIFIÉ par le loader : 328c17be651a863d65d23c1a18c996373409d440128226e98d9a432d662f501a
+états : 46 | dépôt : DEPOT_PHYSIQUE | butoir : 1er juin
+  VIE_CAPITALISATION   PRODUIT=4 AILLEURS=0 NON_PRODUIT=33 NON_APPLICABLE=9 | total=46
+  TOUTE_NATURE         PRODUIT=4 AILLEURS=1 NON_PRODUIT=35 NON_APPLICABLE=6 | total=46
+  INDETERMINABLE       PRODUIT=5 AILLEURS=1 NON_PRODUIT=40 NON_APPLICABLE=0 | total=46
+  ① C10b sur assureur VIE        : NON_APPLICABLE (et non PRODUIT_AILLEURS)
+  ① C10b sur assureur TOUTE_NAT. : PRODUIT_AILLEURS → assurance-service
+  ④ motif du C11                 : « Cet état n'a AUCUN gabarit officiel… »
+  ⑤ postesPublies du C10b        : null / 248 lignes
+  ⑤ bilan actif (produit ici)    : 5 / 172 lignes
+```
+
+### ⚠️ Trois incidents de méthode, dans la passe de mutation
+
+1. **`git checkout --` a effacé trois fois du travail non committé** — et, la fois où un `git mv`
+   avait été indexé, il a laissé un **fichier fantôme non suivi** (`etats-cima-manifeste.ts`,
+   duplicata du registre) que seule la couverture **par fichier** a révélé, à 0 %. Il n'a jamais
+   atteint la branche poussée. ⇒ **Sauvegarde fichier explicite, jamais `git checkout`.**
+2. **Un `str.replace` silencieux n'a rien matché** après un reformatage d'`eslint --fix` : le
+   `C10B` que je croyais avoir ajouté au test n'y était pas, et la mutation « probante » ne
+   prouvait rien. ⇒ **Toute édition se relit après coup** ; une mutation se vérifie **appliquée**
+   avant d'être interprétée.
+3. Les accents graves des messages de commit ont été **interprétés par le shell** comme des
+   substitutions de commande, mangeant des mots. ⇒ Messages écrits **depuis un fichier**.
 
 - Les trois lectures **bouclent à 46** : aucun état n'est perdu en route, quel que soit l'agrément.
 - ⚠️ **L'applicabilité prime sur le lieu de production** : pour un assureur vie, le C10b sort
