@@ -33,6 +33,11 @@ La doctrine est posée par [[STORY-525]] et vaut pour les trois verticaux. Cette
 **le fichier déposable**, pas seulement l'état imprimable — et elle hérite du contrat commun de
 [[STORY-536]] (paquet de dépôt) et de [[STORY-538]] (transmission, accusé, rejet).
 
+> ⚠️ **Requalifié le 2026-09-22 par la doctrine de dépôt** (`doctrine-depot-2026-09-22.md` §3,
+> livrable de [[STORY-525]]) : sous le régime `DEPOT_PHYSIQUE` que cette story a mesuré (art. 7 de
+> l'instruction n°030-02-2009), le livrable exact n'est pas un fichier — c'est l'état conforme au
+> gabarit, prêt à signer. C'est ce qu'a acté l'arbitrage PO du 2026-09-19 plus bas.
+
 ⛔ **Le jalon `format confirmé` reste entier** : aucun développement avant que le gabarit officiel
 de la Commission Bancaire ne soit au dépôt, sourcé et daté.
 
