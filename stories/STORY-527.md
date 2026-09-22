@@ -1,6 +1,6 @@
 # STORY-527 : Plan d'amortissement — les dotations se calculent, avec leur formule, et le prorata temporis n'est pas optionnel
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-135 — Immobilisations et amortissements
 **Service :** module `immobilisations` de `balance-service` — ⚠️ **+ `dossier-service`** (copie à l'octet du paquet fiscal, M3)
@@ -296,3 +296,6 @@ ne se prouve pas sur le point d'arrivée, que le solde rattrape, mais sur la **t
 ⚠️ **Ce que ces tests ne prouvent pas** : la persistance du coefficient figé, le plan servi sur un
 exercice réellement ouvert par `dossier-service`. C'est la vérification docker, faite sur l'état final
 après les revues, avec STORY-526.
+
+- 2026-09-22 — **poussée, PR ouvertes** : `balance-service#115` (empilée sur #114) et `dossier-service#32` ; statut `in_progress` → `review`. Revue de code (⑥) et
+  revue de sécurité (⑦) en cours.
