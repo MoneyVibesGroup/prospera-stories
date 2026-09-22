@@ -1,6 +1,6 @@
 # STORY-522 : La classe 8 CIMA se lit par liste explicite, jamais par racine — la base imposable exactement doublée
 
-Status: in_progress
+Status: done
 
 **Complexité :** high
 
@@ -185,8 +185,9 @@ et il est consigné pour sa propre story.
 
 ## Progress Tracking
 
-**Statut : `in_progress` le 2026-09-22.** Cinq dépôts branchés `MNV-522` **avant la première ligne de
-code** — `bilan-service`, `assurance-service`, `balance-service`, `platform-catalog-service`, `docs`.
+**Statut : `done` le 2026-09-22.** Cinq dépôts, cinq branches `MNV-522` créées **avant la première
+ligne de code**, cinq PR rebase-mergées : `bilan-service#130` · `assurance-service#12` ·
+`balance-service#113` · `platform-catalog-service#25` · la PR `docs/` sur `main`.
 
 ### Ce qui est livré
 
