@@ -222,3 +222,65 @@ importé que pour la devise.
 - 2026-09-22 — **cadrage fait avant tout code** : 9 constats M1-M9, 9 décisions D-526-1 à 9. Le
   service est confirmé (M1), l'arbitrage n° 1 du 16/08 est déclaré caduc (M2), et l'AC-1 est tenu au
   sens d'AD-8 parce qu'**aucun des quatre référentiels ne qualifie un compte d'immobilisation** (M4).
+
+- 2026-09-22 — branche `MNV-526` ouverte sur `balance-service` (depuis `origin/dev` @ `4926c62`), puis
+  **développée** : commit `0cc3f48`.
+
+### Ce qui est livré
+
+| Fichier (`src/modules/immobilisations/`) | Rôle |
+|---|---|
+| `enums/immobilisations.enums.ts` | vocabulaires fermés : 6 types de mouvement, 2 modes, 5 statuts, motifs de refus |
+| `schemas/mouvement-immobilisation.schema.ts` | `immobilisations_mouvements` : index unique `{ immobilisationId, rang }`, champs requis **par type**, crochets qui refusent toute réécriture (8 opérations + `save` d'un document existant) |
+| `immobilisations.regles.ts` | le **pur** : exercice couvrant, mouvements effectifs, projection, transitions, cible d'annulation |
+| `immobilisations.repository.ts` | accès données, `orgId` **et** `dossierId` dans chaque filtre, aucune méthode d'écriture hors l'insertion |
+| `immobilisations.service.ts` | lit, décide par les règles, écrit **un** document, traduit l'`E11000` du rang en `409 CONFLIT_CONCURRENT` |
+| `immobilisations.controller.ts` | 8 routes sous `dossiers/:dossierId/immobilisations` — 2 lectures, 6 écritures, **aucun** PUT/PATCH/DELETE |
+| `balance/reprise/exercices.repository.ts` | `exercicesDuDossier` : les bornes réelles publiées par `dossier-service` |
+
+**Deux défauts de ma propre rédaction, vus avant les tests** : la projection substituait des replis
+silencieux (`mode ?? 'LINEAIRE'`, `valeurOrigine ?? 0`) — un mode perdu aurait été présenté comme
+linéaire, une valeur perdue comme nulle. Remplacés par `present()`, qui **lève** sur une incohérence du
+registre ; et `enregistreLe` était publié requis alors que le code le rendait conditionnel.
+
+### Portes — mesurées dans cette session (job Portly `tmp_8dc58ba9`, sortie 0)
+
+| Porte | Résultat |
+|---|---|
+| lint | 0 avertissement |
+| build | OK |
+| `test:cov` | **209 suites, 4 279 tests verts** — global 99,17 % instr. / 92,62 % branches / 98,59 % fonctions / 99,26 % lignes ; module `immobilisations` 100 / 88,46 / 100 / 100 |
+| `test:e2e` | **30 suites, 1 120 tests verts** — dont `immobilisations.e2e-spec.ts` (37) et le filet OpenAPI étendu au contrôleur |
+
+### Table de mutations — 20 mutations, 20 rouges
+
+Deux premières passes **mesuraient à vide** (M3, M15 : `&& false` rend le corps inatteignable, TypeScript y
+rétrécit les variables à `never` et la suite ne compile plus — « 0 total » n'est pas un rouge). Refaites
+sous une forme que le compilateur ne rétrécit pas (`&& Number.NaN > 0`).
+
+| Mutation | Ce qu'elle casse | Rougit |
+|---|---|---|
+| M1 | la fin d'exercice devient exclue (AC-3) | 2 tests |
+| M2 | deux exercices chevauchants : le premier est pris (M5) | 2 |
+| M3 | plus de chronologie : mise en service avant l'acquisition (AC-2) | 2 |
+| M4 | chronologie stricte : le même jour refusé | 1 |
+| M5 | la sortie cesse d'être terminale | 5 |
+| M6 | seconde mise en service admise | 2 |
+| M7 | annulation d'un mouvement du milieu (D-526-4) | 2 |
+| M8 | un mouvement annulé reste effectif | 8 |
+| M9 | valeur résiduelle égale à l'origine admise | 1 |
+| M10 | gel lu sur l'année **civile** au lieu de l'exercice du dossier (AC-3) | 1 |
+| M11 | annulation sur exercice clos admise | 1 |
+| M12 | l'`E11000` du rang remonte en 500 (D-526-3) | 1 |
+| M13 | devise codée `XOF` (AC-5) — rougit **parce que** la spec élargit les devises tenues à `XAF` | 1 |
+| M14 | compte hors du plan du dossier admis (AC-1) | 1 |
+| M15 | refus de transition ignorés par le service | 4 |
+| M16 | `orgId` retiré du filtre de lecture (multi-tenant) | 1 |
+| M17 | un document enregistré se ré-enregistre (AC-4) | 1 |
+| M18 | `deleteOne` n'est plus intercepté (AC-4) | 1 |
+| M19 | une cession sans prix devient persistable | 1 |
+| M20 | un montant en chaîne converti en silence par `enableImplicitConversion` | 1 (e2e) |
+
+⚠️ **Ce que ces tests ne prouvent pas** : l'index unique réel, les crochets sur Mongo réel, la
+persistance. C'est la vérification docker, faite **une fois**, sur l'état final après les revues, avec
+STORY-527 (même module).
