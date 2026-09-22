@@ -229,3 +229,70 @@ lecture, aucune écriture.
   dépendance à STORY-532 ne bloque pas ce moteur (M1) ; le paquet ne publiait **aucun** coefficient,
   il faut le transcrire — un troisième dépôt (M3) ; le CGI fait partir le dégressif du premier jour du
   mois d'acquisition quand l'AUDCIF et l'AC-2 le font partir de la mise en service (M4).
+
+- 2026-09-22 — branches `MNV-527` ouvertes **avant tout code** : `balance-service` (empilée sur
+  `MNV-526`, même module) et `dossier-service` (depuis `origin/dev` @ `7cfe86a`). Développée :
+  `balance-service` `1e53e9b` + `c7257bc`, `dossier-service` `1b6b744` + `9a50d35`.
+
+### Ce qui est livré
+
+| Fichier | Rôle |
+|---|---|
+| `balance-service` `scripts/referentiels/sources/paquet-fiscal-togo-2026.json` + schéma | `resultatFiscal.amortissementDegressif` : le barème de l'Art. 100 transcrit (1,5 / 2 / 2,5), conditions, bascule, point de départ fiscal, source — paquet régénéré, sha256 `90501c8a…` |
+| `…/immobilisations/bareme-degressif.regles.ts` | lecture du barème, **tout ou rien** ; tranche d'une durée en années ENTIÈRES |
+| `…/immobilisations/plan-amortissement.regles.ts` | le moteur **pur** (`bigint`, 30/360, bascule, solde, plafond, sortie, interruptions) |
+| `…/immobilisations/plan-amortissement.vue.ts` | pas d'arrondi dérivé des exposants (100 pour le XOF), formule en clair, projection |
+| `…/immobilisations.service.ts` | coefficient résolu **à l'acquisition** et figé avec sa source ; `plan()` |
+| `…/immobilisations.controller.ts` | `GET /dossiers/:dossierId/immobilisations/:immobilisationId/plan` |
+| `dossier-service` `…/echeance/assets/paquet-fiscal-togo-2026.json` + empreinte | copie à l'octet (convention STORY-368) |
+
+### ⛔ Un rouge PRÉEXISTANT dans `dossier-service`, corrigé sur décision de l'utilisateur
+
+Les portes de `dossier-service` ont rougi (4 tests, `registre-pays.coherence.spec.ts`) — **sans rapport
+avec 527** et **déjà rouges sur `dev`** : le miroir ignorait `cima-assurances@2.0` à `@5.0`, packagés
+dans `balance-service` et `bilan-service` depuis STORY-518/520/521/522 (21-22/09), et la spec lisait
+tout le dossier d'assets de `bilan-service`, qui porte depuis STORY-509/510/523/524 des artefacts sans
+bloc `meta` (`TypeError` sur toute la batterie). Personne n'avait rejoué la suite de `dossier-service`
+depuis. **Question posée à l'utilisateur, réponse : corriger dans `MNV-527`**, commit séparé
+`9a50d35`, déclaré hors périmètre — miroir aligné (dix référentiels), un référentiel reconnu à son bloc
+`meta`. Effet servi : `GET /pays` publie quatre versions CIMA de plus ; aucun statut de pays ne change.
+
+### Portes — mesurées dans cette session
+
+| Dépôt | lint · build | unitaires | couverture (instr. / branches / fonctions / lignes) | e2e |
+|---|---|---|---|---|
+| `balance-service` (job `tmp_f661d8fe`) | ✅ | **212 suites, 4 384** | 99,16 / 92,71 / 98,57 / 99,25 | **30 suites, 1 130** |
+| `dossier-service` (job `tmp_46cbe83d`) | ✅ | **88 suites, 1 373** | 99,44 / 94,85 / 98,06 / 99,47 | **8 suites, 304** |
+
+### Table de mutations — 19 mutations, 18 rouges, 1 équivalente
+
+**Deux tests renforcés AVANT la passe**, parce que le raisonnement mutation par mutation montrait qu'ils
+ne discriminaient pas : la tranche d'une durée non entière ne se prouve pas sur 54 ou 78 mois (hors de
+toute tranche de toute façon) mais sur **42, 66, 90** ; et la bascule dégressive avec valeur résiduelle
+ne se prouve pas sur le point d'arrivée, que le solde rattrape, mais sur la **table entière**.
+
+| Mutation | Ce qu'elle casse | Rougit |
+|---|---|---|
+| P1 | annuité pleine dès qu'un jour est amorti — prorata ignoré (AC-2) | 6 |
+| P2 | la fenêtre part du début d'exercice, pas de la mise en service (AC-2) | 4 |
+| P3 | plus de plafond au reste à amortir (AC-4) | 3 — dont l'invariant qui LÈVE |
+| P4 | vérification après chaque dotation neutralisée | **équivalente** : inatteignable tant que le plafond existe ; P3 prouve qu'elle se déclenche. Gardée : elle fait échouer bruyamment un changement futur du plafond |
+| P5 | plus de bascule en linéaire (AC-1) | 2 |
+| P6 | bascule sur la valeur nette au lieu de (valeur nette − résiduelle) (M5) | 2 |
+| P7 | plus de solde exact en fin de vie | 5 |
+| P8 | le 31 compte — le décompte n'est plus 30/360 | 2 |
+| P9 | le jour de sortie n'est plus amorti (AC-5) | 3 |
+| P10 | résultat de cession inversé (AC-5) | 3 |
+| P11 | le calcul dépend de la date du jour (AC-6) | 1 |
+| P12 | une réévaluation n'interrompt plus avant son exercice (M10) | 1 |
+| P13 | un trou d'exercices passe pour la fin des exercices connus (M9) | 1 |
+| P14 | une durée non entière entre dans une tranche (M6) | 3 |
+| P15 | une tranche illisible sautée au lieu d'invalider le barème | 2 |
+| P16 | paquet résolu hors de l'exercice d'acquisition (D-527-5) | 1 |
+| P17 | le plan part de l'ACQUISITION (AC-2) | 2 |
+| P18 | dégressif sans barème enregistré sans coefficient (AC-1) — **refaite** : la 1ʳᵉ forme ne compilait pas (« 0 total ») | 1 |
+| P19 | arrondi à l'unité mineure : centimes de franc (M8) | 1 |
+
+⚠️ **Ce que ces tests ne prouvent pas** : la persistance du coefficient figé, le plan servi sur un
+exercice réellement ouvert par `dossier-service`. C'est la vérification docker, faite sur l'état final
+après les revues, avec STORY-526.
