@@ -161,18 +161,20 @@ et il est consigné pour sa propre story.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Toute lecture de la classe 8 passe par une **liste explicite de comptes**, jamais par
+- [x] AC-1 — Toute lecture de la classe 8 passe par une **liste explicite de comptes**, jamais par
       une racine. `racinesDeGestion` cesse de porter des racines de classe 8 en bloc.
-- [ ] AC-2 — Les comptes de **regroupement** sont **identifiés et marqués** dans le plan packagé,
+- [x] AC-2 — Les comptes de **regroupement** sont **identifiés et marqués** dans le plan packagé,
       depuis l'article 431 — pas déduits de leur numéro.
-- [ ] AC-3 — ⛔ **Test de régression permanent, et c'est LE test :** un jeu de balance CIMA où la
+- [x] AC-3 — ⛔ **Test de régression permanent, et c'est LE test :** un jeu de balance CIMA où la
       classe 8 est renseignée doit produire une base imposable **simple**. Remettre la racine `80`
       dans `racinesDeGestion` doit faire **doubler le résultat et virer le test au rouge** — sinon
       la garde ne garde rien.
-- [ ] AC-4 — La même vérification est faite pour **les trois autres référentiels** : le repli
+- [x] AC-4 — ⚡ **Tenue par une mesure NÉGATIVE** (M5) : les quatre autres référentiels sont sains,
+      leur classe 8 étant intégralement de la gestion. Le défaut est **propre à CIMA**.
+      La même vérification est faite pour **les trois autres référentiels** : le repli
       générique est **partagé**, et le défaut est un défaut de repli, pas de CIMA. Le trouver
       ailleurs serait le résultat le plus utile de la story.
-- [ ] AC-5 — Le repli, quand il ne sait pas décider, **refuse plutôt que de deviner** et nomme le
+- [x] AC-5 — Le repli, quand il ne sait pas décider, **refuse plutôt que de deviner** et nomme le
       compte en cause. Une base imposable calculée sur une source douteuse est pire qu'une erreur
       déclarée.
 
@@ -180,3 +182,62 @@ et il est consigné pour sa propre story.
 
 - Consolide [[STORY-488]] AC-5, qui posait la garde ; celle-ci la rend explicite et la généralise.
 - Voir spine AD-9, `analyse-referentiels-sfd-zonefranche-cima-2026-07-21.md` §3.
+
+## Progress Tracking
+
+**Statut : `in_progress` le 2026-09-22.** Cinq dépôts branchés `MNV-522` **avant la première ligne de
+code** — `bilan-service`, `assurance-service`, `balance-service`, `platform-catalog-service`, `docs`.
+
+### Ce qui est livré
+
+**`bilan-service`** — `cima-assurances@5.0` (`5234764a…`) :
+- sources `plan-comptable-cima-v5.json` (le marqueur), `postes-cima-v5.json`,
+  `table-de-passage-cima-v5.json` (les racines perdent `80`), entrée `@5.0` dans `build.mjs` ;
+- ⛔ **`nature: 'REGROUPEMENT'`** sur `80`, `87`, `88`, `89`, en **spread conditionnel** et
+  **vocabulaire fermé** — les quatre autres paquets gardent leurs octets à l'identique, vérifié ;
+- ⛔⛔ **`exigerRacinesSansRegroupement`** : le générateur **refuse d'empaqueter** un référentiel
+  dont une racine capte un compte marqué, **en le nommant** ;
+- `CompteReferentiel.nature?` au contrat, `NatureCompte` au vocabulaire ;
+- la garde de `referentiels-additionnels-coherence.spec.ts` **retournée** et **dérivée du marqueur**.
+
+**`balance-service`** — la garde permanente de l'AC-3 **lit l'artefact** ; registre, `PONT_TAG` et
+digests basculés.
+**`assurance-service`**, **`platform-catalog-service`** — artefact recopié byte-identique, version
+servie, snapshot et pack.
+
+### ⛔ Ce que la garde disait, et qui était faux
+
+`referentiels-additionnels-coherence.spec.ts:617` affirmait :
+
+```ts
+it('CIMA — les trois comptes de REGROUPEMENT (87/88/89) sont HORS gestion', () => {
+  // …et la gestion réelle de la même classe, elle, est bien captée.
+  for (const gestion of ['80', '82', '83', '84', '85', '86']) { … capte: true }
+});
+```
+
+Elle **exigeait** que `80` soit capté et l'appelait « la gestion réelle » : appliquer la lecture
+juste de l'art. 432 la faisait **rougir**. Son titre annonçait **trois** comptes de regroupement là
+où le texte en fait **quatre**. C'est le **troisième test qui verrouille un défaut** rencontré dans
+ce dépôt.
+
+⇒ La règle n'est plus **écrite** : elle est **dérivée du marqueur** que le plan déclare, exactement
+comme la porte du générateur. Elle vaut pour tout référentiel, présent et futur, sans que personne
+ait à s'en souvenir.
+
+### ⚠️ Deux trous de garde comblés au passage
+
+1. **`@4.0` était absente** de la liste `ARTEFACTS` de cette même suite : la version que le pont
+   servait réellement n'était gardée par **aucune** assertion métier. On pouvait y remettre `'8'` —
+   la classe entière — sans faire rougir autre chose que les checksums.
+2. **La garde « permanente » de STORY-488 AC-5 mesurait une constante locale** (`GESTION_CIMA`,
+   `fiscal.regles.spec.ts:74`), pas l'artefact. Et **aucun de ses tests ne mettait un compte `80`
+   dans la balance** — ils portaient le résultat récapitulé sur `88`, un compte déjà exclu. C'est
+   exactement pourquoi le défaut a survécu.
+
+### Table de mutations
+
+| # | Mutation | Mesuré |
+|---|---|---|
+| M1 | on remet `80` dans les racines de la **source** `v5` | ⛔ **le build ÉCHOUE**, en nommant `80 « Exploitation générale »` |
+| M2 | on remet `80` dans les racines de l'**artefact servi** | **3 rouges** dans `fiscal.regles.spec.ts` — dont le témoin des racines |
