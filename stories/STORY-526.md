@@ -1,6 +1,6 @@
 # STORY-526 : Registre des immobilisations — le produit RESTITUE Brut/Amort/Net sans que rien ne le CALCULE
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-135 — Immobilisations et amortissements
 **Service :** `balance-service` / module `immobilisations` (nouveau) — ✅ **confirmé au cadrage** (M1)
@@ -284,3 +284,6 @@ sous une forme que le compilateur ne rétrécit pas (`&& Number.NaN > 0`).
 ⚠️ **Ce que ces tests ne prouvent pas** : l'index unique réel, les crochets sur Mongo réel, la
 persistance. C'est la vérification docker, faite **une fois**, sur l'état final après les revues, avec
 STORY-527 (même module).
+
+- 2026-09-22 — **poussée, PR ouvertes** : `balance-service#114` ; statut `in_progress` → `review`. Revue de code (⑥) et
+  revue de sécurité (⑦) en cours.
