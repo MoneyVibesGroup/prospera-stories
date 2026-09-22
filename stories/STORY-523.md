@@ -199,6 +199,7 @@ inter-services (invariants #2 et #3) — même discipline que « un contrat d'é
 ## Notes
 
 - Voir [[STORY-509]] et [[STORY-525]] (la même question de doctrine), [[STORY-521]], [[STORY-524]].
+- Doctrine de dépôt commune aux trois verticaux : [`doctrine-depot-2026-09-22.md`](../doctrine-depot-2026-09-22.md), posée par [[STORY-525]].
 
 ## Progress Tracking
 

@@ -59,6 +59,7 @@ dans un même produit seraient incompréhensibles pour le cabinet.
 ## Notes
 
 - Voir [[STORY-525]] (la même question, côté fiscal), [[STORY-510]], spine AD-10.
+- Doctrine de dépôt commune aux trois verticaux : [`doctrine-depot-2026-09-22.md`](../doctrine-depot-2026-09-22.md), posée par [[STORY-525]].
 
 ---
 
