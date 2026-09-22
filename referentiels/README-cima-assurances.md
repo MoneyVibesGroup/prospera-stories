@@ -471,3 +471,114 @@ L'état existe, ses lignes existent, et chacune dit `A_COMPLETER`.
   STORY-523.
 - Le **compte 88** (résultats en instance d'affectation), la rétrocession, les cessions « étranger »
   (`6909`, `7909`) et les plafonds de l'art. 308.
+
+## `cima-assurances@5.0` — la classe 8 se lit par liste explicite (STORY-522)
+
+⚠️ **Cinq versions coexistent.** `@1.0` (`9ca429c8…`), `@2.0` (`e779903a…`), `@3.0` (`dbfae17a…`) et
+`@4.0` (`c541b92c…`) restent packagées et **intactes**. `@5.0` (`5234764a…`) est la version
+**servie** depuis STORY-522.
+
+### ⛔⛔ Ce que `@5.0` corrige est un chiffre FAUX, pas un manque
+
+Les quatre versions précédentes publiaient :
+
+```
+racinesDeGestion: ['6', '7', '80', '82', '83', '84', '85', '86']
+```
+
+Or l'**article 432** dit, en une phrase :
+
+> « **Le solde du compte 80 est viré, pour clôture des écritures, au compte 87.** »
+
+La chaîne est donc `classes 6/7 → 80 → 87 → 88 → 89`. Le compte `80` **reprend par construction** ce
+que les classes 6 et 7 portent déjà — c'est exactement la définition de compte de regroupement que
+ce dépôt applique depuis STORY-369 pour exclure `87`, `88` et `89`. **`80` appartenait à la même
+famille et était resté dedans.**
+
+⚡ **Mesuré** en rejouant `calculerResultatComptable` sur une balance d'après inventaire — classes
+6/7 encore soldées **et** compte 80 ayant reçu le virement de clôture :
+
+| ligne | débit | crédit |
+|---|---|---|
+| `70` primes | — | 900 000 000 |
+| `60` prestations | 760 000 000 | — |
+| `80` exploitation générale | — | 140 000 000 |
+
+```
+résultat RÉEL de l'exercice      : 140 000 000
+avec les racines de @4.0         : 280 000 000     ⇐ facteur exactement 2
+avec @5.0                        : 140 000 000
+```
+
+⛔ **Et aucun filet ne pouvait le voir.** `resoudreCompteResultatNet` rend `null` pour CIMA — le
+paquet ne publie pas `regles.COMPTE_RESULTAT_NET` et aucun compte de classe 1 ne s'intitule
+« résultat net » (`13` = « Réserves réglementaires »). Le contrôle d'articulation ne s'exécute donc
+**jamais** sur un dossier CIMA : le doublement était structurellement **silencieux**.
+
+⚠️ **L'artefact le disait déjà de lui-même** : aucune des 65 lignes de sa table de passage ne
+rattache le compte `80` à un poste, alors que les deux états `COMPTE_80_*` livrés par STORY-521 sont
+alimentés **exclusivement** par des comptes des classes 6 et 7. Le paquet décrivait `80` comme une
+récapitulation et le déclarait en même temps comme une source primaire.
+
+### ⛔ Ce n'est pas la correction d'une racine : c'est une PORTE
+
+Le plan marque désormais les **quatre** comptes de regroupement :
+
+| compte | libellé | `nature` |
+|---|---|---|
+| `80` | Exploitation générale | `REGROUPEMENT` |
+| `87` | Compte général de pertes et profits | `REGROUPEMENT` |
+| `88` | Résultats en instance d'affectation | `REGROUPEMENT` |
+| `89` | Bilan | `REGROUPEMENT` |
+
+et le générateur **refuse d'empaqueter** tout référentiel dont une racine de gestion capterait l'un
+d'eux, **en le nommant** :
+
+```
+cima-assurances@5.0 — racine de gestion captant un compte de REGROUPEMENT :
+80 « Exploitation générale ». Un compte de regroupement reprend des montants déjà portés
+par les comptes qu'il regroupe : le sommer avec eux double le résultat, en silence.
+```
+
+⇒ Corriger `80` une seule fois aurait laissé le défaut revenir — ici, ou sur un référentiel futur.
+Le marqueur est **déclaré**, jamais déduit d'un numéro : `85 Impôts sur les bénéfices` et `87 Compte
+général de pertes et profits` sont voisins et de natures opposées. Seul le texte tranche.
+
+### ⚠️ Ce qui RESTE dans les racines, et pourquoi
+
+`82` à `86` sont des comptes à **mouvements propres** — pertes et profits sur exercices antérieurs,
+dotations hors exploitation, exceptionnel, impôts sur les bénéfices, prestations entre
+établissements. L'art. 433 les fait recevoir au compte 87 **sans qu'ils regroupent** d'autres
+comptes de gestion. Les retirer produirait un résultat *avant* HAO et *avant* impôt : la fausse
+réparation symétrique de **D-091-3**.
+
+### ⚡ Le défaut est PROPRE à CIMA — mesuré sur les cinq paquets
+
+| paquet | racines | compte de regroupement capté |
+|---|---|---|
+| `syscohada-revise@2.1` | `['6','7','8']` | non |
+| `zone-franche-togo@1.0` | `['6','7','8']` | non |
+| `smt-togo@1.0` | `['6','7','8']` | non |
+| `sfd-bceao@2.0` | `['6','7']` | non |
+| `cima-assurances@4.0` | `['6','7','80',…]` | ⛔ **oui — `80`** |
+
+Les trois plans SYSCOHADA/SMT/zone franche portent la **même** classe 8, intégralement de la
+gestion : `81` valeurs comptables des cessions, `82` produits des cessions, `83`→`86` HAO, `87`
+participation des travailleurs, `88` subventions d'équilibre, `89` impôts sur le résultat. **Aucun
+compte de regroupement.** `sfd-bceao` n'a pas de classe 8.
+
+⇒ CIMA est le seul plan **sectoriel** du dépôt, et le seul à mêler gestion et regroupement dans une
+même classe. La réponse à « le défaut est-il ailleurs ? » est **non**, et c'est un résultat utile :
+il dit où ne **pas** aller corriger.
+
+### Ce que `@5.0` ne couvre pas
+
+- ⛔ **La reprise de la charge d'impôt déjà comptabilisée.** `85 Impôts sur les bénéfices` **est**
+  dans les racines, mais `resoudreCompteImpotResultat` rend `null` pour CIMA ⇒
+  `chargeImpotComptabilisee = 0`, et la charge d'IS entre dans le résultat comptable **sans jamais
+  être reprise** avant l'assiette. Défaut réel, distinct, **nommé et non corrigé ici**.
+- ⛔ **L'absence de contrôle d'articulation** sur un dossier CIMA (`resoudreCompteResultatNet` rend
+  `null`) — c'est ce qui rendait le doublement invisible, et cela reste vrai pour tout autre défaut
+  du même chemin.
+- Le **statut reste `amorce`** : les états C1..C25 (**STORY-523**), le niveau de détail du plan
+  (**STORY-671**) et les onze comptes de gestion non routés (**STORY-672**) restent hors couverture.
