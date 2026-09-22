@@ -193,5 +193,63 @@ inter-services (invariants #2 et #3) — même discipline que « un contrat d'é
 ## Progress Tracking
 
 - 2026-09-22 — branche `MNV-523` ouverte sur `docs/`, `bilan-service`, `assurance-service`.
-- 2026-09-22 — **jalon `format confirmé` levé** : relevé de l'art. 433 (3 757 lignes, 50 blocs),
-  croisé art. 422 / 422-1 / 422-2 / 425. Constats M1 à M8, décisions D-523-1 à D-523-7.
+- 2026-09-22 — **jalon `format confirmé` levé** : relevé de l'art. 433 (3 750 lignes utiles,
+  50 blocs), croisé art. 422 / 422-1 / 422-2 / 425. Constats M1 à M8, décisions D-523-1 à D-523-7.
+- 2026-09-22 — artefact `etats-cima@1.0` (**46 états**, sha256 `93b41b2c…`), générateur à portes,
+  registre + pont depuis les **cinq** versions de `cima-assurances`, dérivation du statut, DTO et
+  catalogue servi sur la route de STORY-521. Recopie à l'octet dans `assurance-service`.
+- 2026-09-22 — **portes DoD**. `bilan-service` : lint 0, build OK, **3 152 unit + 827 e2e** verts,
+  couverture **99,01 / 95,06 / 99,26 / 99,08**. `assurance-service` : lint 0, build OK,
+  **2 022 unit + 202 e2e** verts, couverture **99,6 / 94,49 / 99,18 / 99,65**.
+
+### Table de mutations — 9 mutations, 9 rouges
+
+| # | Mutation | Ce qu'elle simule | Résultat |
+|---|---|---|---|
+| M-a | retirer `C9` de la source | un état de l'art. 422 omis du catalogue | 🔴 build refusé, code nommé |
+| M-b | retirer `normeContenu` du C11 | un gabarit `LIBRE` non spécifié (D-523-3) | 🔴 build refusé |
+| M-c | retirer `sourcePerimetre` du C20 | une restriction d'applicabilité non relevée | 🔴 build refusé |
+| M-d | restreindre `C25` à la vie sans source | le cas C10d rejoué | 🔴 build refusé |
+| M-e | états moteur sans producteur | un état qui « s'émet tout seul » | 🔴 build refusé |
+| M-f | publier `C99`, hors liste légale | le catalogue déborde le Code | 🔴 build refusé |
+| M1 | `PRODUIT` dès `produitPar === service` | **le statut redevient DÉCLARÉ** | 🔴 1 test |
+| M2 | un agrément non tranché exempte | la direction dangereuse de l'erreur | 🔴 1 test |
+| M3 | `PRODUIT_AILLEURS` dit `NON_PRODUIT` | le C10b disparaît de la carte | 🔴 1 test |
+| M4 | omettre les états non produits | **le défaut que l'AC-3 ferme** | 🔴 7 tests |
+| M5 | artefact orphelin dans `assets/` | la garde découvrante le voit-elle ? | 🔴 1 test |
+| M5-bis | un manifeste cesse d'être découvert | la découverte elle-même | 🔴 1 test |
+| M6 | attribuer un état moteur inexistant | la garde D-523-7 côté `bilan-service` | 🔴 2 tests |
+| M7 | retirer le producteur du C10b | la garde D-523-7 côté `assurance-service` | 🔴 2 tests |
+| M8 | retirer l'attribution du catalogue | non-vacuité de la garde jumelle | 🔴 3 tests |
+| M9 | recopier l'artefact dans `balance-service` | l'exclusion d'amont cesse d'être vraie | 🔴 1 test |
+
+⚠️ **M9 a dû être rejouée.** Sa première exécution est tombée alors qu'un `git checkout -- src/` de
+la passe venait d'effacer la garde qu'elle devait éprouver : le rouge observé était celui d'un
+*autre* test. Rejouée sur l'état **committé**, elle rougit bien sur la garde d'exclusion.
+⇒ *Une passe de mutation se joue sur du code committé, et son rouge se lit par le NOM du test.*
+
+### Vérification docker — l'artefact chargé par le processus, pas seulement présent
+
+La story **n'écrit rien en base** : la vérification porte sur ce que docker seul révèle — l'artefact
+réellement **empaqueté et chargé** dans l'image.
+
+```
+checksum VÉRIFIÉ par le loader : 93b41b2cc9f1720972917acc675d23d41ca84ccce0dc3f2908d27a546d382cc0
+états chargés : 46 | dépôt : DEPOT_PHYSIQUE | butoir : 1er juin
+  VIE_CAPITALISATION   PRODUIT=4 AILLEURS=0 NON_PRODUIT=33 NON_APPLICABLE=9
+  TOUTE_NATURE         PRODUIT=4 AILLEURS=1 NON_PRODUIT=35 NON_APPLICABLE=6
+  INDETERMINABLE       PRODUIT=5 AILLEURS=1 NON_PRODUIT=40 NON_APPLICABLE=0
+  C11 : LIBRE | norme : Article 337-1, Article 337-2, Article 337-3, Article 337-4
+  bilan actif : 5 postes publiés / 172 lignes de gabarit
+  C10b : NON_APPLICABLE → assurance-service
+```
+
+- Les trois lectures **bouclent à 46** : aucun état n'est perdu en route, quel que soit l'agrément.
+- ⚠️ **L'applicabilité prime sur le lieu de production** : pour un assureur vie, le C10b sort
+  `NON_APPLICABLE` et non `PRODUIT_AILLEURS`. C'est le bon ordre — un état qui n'est pas dû n'est
+  pas « disponible ailleurs », il n'est pas dû.
+- Le contrôle ne s'est pas contenté du `Found 0 errors` des logs (qui peut annoncer l'ancien code) :
+  le **loader compilé** a été exécuté dans le conteneur, checksum vérifié sur les octets empaquetés.
+- ⚠️ Côté `assurance-service`, l'artefact est présent dans le `dist/` au même sha256, mais **aucun
+  code d'exécution ne le lit** en `@1.0` — seule la garde d'attribution le fait. C'est dit plutôt
+  que masqué.
