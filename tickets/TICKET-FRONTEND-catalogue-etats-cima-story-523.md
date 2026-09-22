@@ -28,14 +28,23 @@ modèles** de l'article 433, chacun avec son statut de production.
       "perimetre": "VIE_CAPITALISATION",
       "statut": "NON_PRODUIT",
       "produitPar": null,
-      "postesPublies": 0,
+      "postesPublies": null,
       "lignesGabarit": 96,
       "reference": "Article 433 — « L'état C20 est établi par les entreprises d'assurances sur la vie »",
       "motif": "Non produit par la plateforme à ce jour — à établir hors produit. Gabarit relevé à l'Article 433."
     }
-  ]
+  ],
+  "catalogueRef": {
+    "code": "etats-cima",
+    "version": "1.0",
+    "checksum": "328c17be651a863d65d23c1a18c996373409d440128226e98d9a432d662f501a"
+  }
 }
 ```
+
+`catalogueRef` dit **quel catalogue** a produit ces statuts (`null` hors zone CIMA). À conserver
+avec toute capture ou export : sans lui, deux versions du catalogue rendraient deux verdicts
+indiscernables après coup.
 
 ## ⛔ La règle d'affichage, et elle n'est pas négociable
 
@@ -53,9 +62,16 @@ l'AC-3, et c'est la doctrine FE-073 transposée. Filtrer la liste sur `statut ==
 ⚠️ `motif` est **toujours renseigné** et déjà rédigé en français : l'afficher tel quel suffit, il
 n'y a pas de table de traduction à tenir côté front.
 
+## ⛔ `postesPublies` peut valoir `null` — et `null` n'est pas `0`
+
+`null` veut dire **« ce service ne produit pas cet état, il n'y a donc rien à compter »**. C'est le
+cas du `C10B` (produit par `assurance-service`) et de tout état `NON_PRODUIT`. Afficher `0` à la
+place lirait « zéro poste sur 248 » sur un état **parfaitement produit** — exactement l'inverse de
+la vérité. Un tiret, ou l'absence de la paire, conviennent ; un zéro, non.
+
 ## Deux nombres, aucun verdict
 
-`postesPublies` et `lignesGabarit` se présentent **côte à côte**, jamais fondus en un pourcentage
+Quand `postesPublies` est un **nombre**, il se présente **côte à côte** avec `lignesGabarit`, jamais fondu en un pourcentage
 ni en une barre de complétion. Le back n'invente aucun seuil, et le front ne doit pas en inventer
 un non plus : un état à `5 / 172` n'est pas « à 3 % », il est *« 5 postes publiés, gabarit officiel
 de 172 lignes »*. Une jauge transformerait une mesure en promesse.

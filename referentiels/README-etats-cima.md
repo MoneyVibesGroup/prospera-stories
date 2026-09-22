@@ -23,12 +23,18 @@ produire**, et c'est lui qui borne le périmètre déposable :
 
 | Article | Ce qu'il impose | Combien |
 |---|---|---|
-| **422** | états **annuels** d'entreprise | 4 comptes (5 modèles) + 18 états |
+| **422** | états **annuels** d'entreprise | 4 comptes + 18 états → **25 entrées** |
 | **422-1** | états de **surveillance complémentaire** — entreprises consolidantes ou combinantes de l'art. 434 | G1 à G5, G10 à G16 (12) |
 | **422-2** | états **trimestriels** (T1, T2) et **semestriels** (bilan 89, compte 80, compte 87, C4 S, RS1, RS2) | 9 |
 | **433** | les **modèles** de tout ce qui précède | 3 750 lignes utiles, 50 blocs |
 
 ⇒ **46 états au catalogue** `etats-cima@1.0`.
+
+⚠️ **Pourquoi 25 entrées pour « 4 comptes + 18 états ».** Le catalogue publie des **modèles**, pas
+des intitulés : le bilan du compte 89 se présente en **deux côtés** (actif, passif), le compte 80 en
+**deux modèles alternatifs** (art. 326 al. 3), et l'état C1 de même. Soit 6 entrées de comptes et
+19 d'états. *Compter les intitulés au lieu des modèles fait perdre exactement les alternatives que
+la spécialisation de l'agrément impose.*
 
 ## 2. ⛔⛔ L'état C11 n'a aucun gabarit, et n'en aura jamais
 
@@ -58,7 +64,7 @@ aucun article de contenu.
 |---|---|---|
 | `IMPOSE` | 37 | un modèle est publié et doit être suivi |
 | `LIBRE` | 1 | le C11 — cf. §2 |
-| `NARRATIF` | 5 | G5, G12, G13, G14, G15 : le Code demande une **description** (« les entreprises dressent la liste… », « décrivent sommairement… »), pas un tableau |
+| `NARRATIF` | 5 | G5, G12, G13, G14, G15 : le Code demande une **description** (« les entreprises dressent la liste… », « décrivent sommairement… »), pas un tableau. ⚠️ **G16 n'en est pas** : malgré sa brièveté, le Code y écrit « selon le **modèle suivant** » et publie quatre colonnes |
 | `RENVOI` | 3 | les bilan/compte 80/compte 87 **semestriels** : l'art. 422-2 les impose sans republier de modèle, parce que c'est celui de l'annuel |
 
 ⚠️ Compter les `NARRATIF` et les `RENVOI` comme « gabarit absent » se trompe de forme — c'est
@@ -107,7 +113,7 @@ faite deux fois.** `DEPOT_PHYSIQUE` dans les deux verticaux.
 
 ## 6. L'artefact
 
-`etats-cima@1.0` — `sha256 93b41b2cc9f1720972917acc675d23d41ca84ccce0dc3f2908d27a546d382cc0`
+`etats-cima@1.0` — `sha256 328c17be651a863d65d23c1a18c996373409d440128226e98d9a432d662f501a`
 
 - **Généré par** `bilan-service/scripts/referentiels/build-etats-cima.mjs` depuis
   `sources/etats-cima.json` (source de vérité des octets).
@@ -126,13 +132,28 @@ pour une structure sourcée.
 
 Le statut de chaque état est **dérivé** de ce que le moteur émet, jamais déclaré dans l'artefact.
 
-| Statut | Aujourd'hui | Lesquels |
-|---|---|---|
-| `PRODUIT` (bilan-service) | 5 | bilan 89 (actif, passif), compte 80 ×2, compte 87 |
-| `PRODUIT_AILLEURS` | 1 | **C10b**, par `assurance-service` ([[STORY-516]]) |
-| `NON_PRODUIT` | 40 | nommés à l'écran avec leur code (AC-3) |
+⛔ **Le compte dépend de l'agrément dérivé de la balance** — il n'y a pas un chiffre unique, et
+publier celui d'un seul cas serait faux pour les deux autres. Mesuré sur `cima-assurances@5.0` :
+
+| Agrément dérivé | `PRODUIT` | `PRODUIT_AILLEURS` | `NON_PRODUIT` | `NON_APPLICABLE` |
+|---|---|---|---|---|
+| `VIE_CAPITALISATION` | 4 | 0 | 33 | 9 |
+| `TOUTE_NATURE` | 4 | 1 | 35 | 6 |
+| `INDETERMINABLE` (et les deux autres non tranchés) | 5 | 1 | 40 | 0 |
+
+`PRODUIT` = le bilan 89 (actif et passif), le modèle applicable du compte 80 et le compte 87.
+`PRODUIT_AILLEURS` = **C10b**, par `assurance-service` ([[STORY-516]]).
+
+⚠️ Sur un assureur **vie**, `C10b` sort `NON_APPLICABLE` et **non** `PRODUIT_AILLEURS` :
+l'applicabilité prime sur le lieu de production. *Un état qui n'est pas dû n'est pas « disponible
+ailleurs », il n'est pas dû.*
 
 ⚠️ **`PRODUIT` ne veut pas dire « complet ».** Le bilan servi compte **5 postes par côté** face à un
 gabarit de **172 et 121 lignes**. Le catalogue publie les deux nombres — `postesPublies` et
 `lignesGabarit` — **sans verdict de complétude** : un seuil arbitraire transformerait une mesure en
 promesse. C'est à l'assureur de juger, pas au produit d'affirmer.
+
+⛔ **Et `postesPublies` vaut `null`, jamais `0`, quand le dépôt interrogé ne produit pas l'état.**
+Le C10b sortait `0 / 248` alors qu'`assurance-service` le produit : `0` n'y était pas distinguable
+de « non alimenté », et la paire se lisait comme une complétude accablante sur un état parfaitement
+produit. *Un zéro de repli affirme « néant » là où la vérité est « non mesuré ici ».*

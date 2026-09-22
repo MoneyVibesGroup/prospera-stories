@@ -71,7 +71,7 @@ de logique nouvelle.
 > entreprise.** »
 
 C'est la **seule** occurrence de cette formule dans tout l'article 433 : 2 lignes là où le C4 en a
-138 et le C10 en a 470.
+**139** et le C10 en a **469**.
 
 ⚡ **Conséquence sur la garde elle-même.** Le jalon dit « aucune ligne de code avant d'avoir les
 **gabarits** officiels en main ». Appliqué littéralement au C11, il **bloque pour toujours** : le
@@ -84,23 +84,33 @@ forme libre n'est pas un état non spécifié.
 
 ### M4 — Les « squelettes » du groupe sont des états **narratifs**, pas des gabarits manquants
 
-G5, G13, G14, G16 tiennent en 2 à 9 lignes parce que le Code y demande une **description**, pas un
-tableau : « les entreprises **dressent la liste** des GIE, pools et autres groupements… », « les
-entreprises **décrivent sommairement**… ». Un relevé qui les compte comme « gabarit absent » se
-trompe de forme.
+**G5, G12, G13, G14 et G15** tiennent en 3 à 12 lignes parce que le Code y demande une
+**description**, pas un tableau : « les entreprises **dressent la liste** des GIE, pools et autres
+groupements… », « les entreprises **décrivent sommairement**… ». Un relevé qui les compte comme
+« gabarit absent » se trompe de forme.
 
-### M5 — Cinq états sont réservés à un agrément, et le texte le dit
+⚠️ **G16 n'en est pas** — malgré ses 9 lignes, le Code y écrit « selon le **modèle suivant** » et
+publie quatre colonnes. Il est donc `IMPOSE`. *La brièveté d'un bloc ne dit pas sa nature.*
 
-| État | Réservé à | Source |
+### M5 — Quinze états sont réservés à un agrément, et le texte le dit à chaque fois
+
+| Réservé à | États | Source relevée |
 |---|---|---|
-| `C1_VIE` | vie et capitalisation | art. 433, « établi par les entreprises d'assurances sur la vie » |
-| `C1_DOMMAGES` | toute nature | art. 433, « établi par les entreprises d'assurances en dommage » |
-| `C20`, `C21` | vie et capitalisation | art. 433, « établi par les entreprises d'assurances sur la vie » |
-| `C10A`, `C10B` | toute nature | art. 433, « pour l'ensemble des opérations d'assurances **dommages** » |
-| `C10`, `C10C`, `C10D` | toute nature | art. 433 — RC véhicules terrestres à moteur / transports / sinistres de grande ampleur |
+| vie et capitalisation | `COMPTE_80_VIE_CAPITALISATION` | art. 300 (1°) et 326 al. 3 |
+| vie et capitalisation | `C1_VIE`, `C20`, `C21` | art. 433, « établi par les entreprises d'assurances sur la vie » |
+| vie et capitalisation | `G4`, `RS2_VIE` | art. 433, intitulés « provisions techniques **vie** » / « RS2 **VIE** » |
+| toute nature | `COMPTE_80_TOUTE_NATURE` | art. 300 (2°) et 326 al. 3 |
+| toute nature | `C1_DOMMAGES` | art. 433, « établi par les entreprises d'assurances en dommage » |
+| toute nature | `C10A`, `C10B` | art. 433, « pour l'ensemble des opérations d'assurances **dommages** » |
+| toute nature | `C10`, `C10C` | art. 433 — RC véhicules terrestres à moteur / catégorie Transports |
+| toute nature | `G3`, `T2`, `RS2_NON_VIE` | art. 433, intitulés « équilibre technique **dommages** » / « recours **automobile** » / « RS2 **NON VIE** » |
 
-⇒ **C'est la matière de l'AC-4** : sur un assureur vie, neuf états sortent `NON_APPLICABLE` —
-servis et expliqués, jamais masqués.
+⇒ **C'est la matière de l'AC-4.** Mesuré sur l'artefact : un assureur **vie** voit **9** états
+`NON_APPLICABLE`, un assureur **toute nature** en voit **6** — servis et expliqués, jamais masqués.
+
+⛔ **`C10D` n'en fait PAS partie**, et ce fut le point de bascule : le classer « dommages » par
+voisinage avec `C10a`/`C10b` l'aurait exempté à tout assureur vie, alors que ses colonnes — zone et
+année de survenance, victimes, évaluation globale — ne nomment ni branche ni catégorie.
 
 ### M6 — Le régime de dépôt CIMA est **le même que celui du SFD** : papier certifié
 
@@ -234,7 +244,7 @@ La story **n'écrit rien en base** : la vérification porte sur ce que docker se
 réellement **empaqueté et chargé** dans l'image.
 
 ```
-checksum VÉRIFIÉ par le loader : 93b41b2cc9f1720972917acc675d23d41ca84ccce0dc3f2908d27a546d382cc0
+checksum VÉRIFIÉ par le loader : 328c17be651a863d65d23c1a18c996373409d440128226e98d9a432d662f501a
 états chargés : 46 | dépôt : DEPOT_PHYSIQUE | butoir : 1er juin
   VIE_CAPITALISATION   PRODUIT=4 AILLEURS=0 NON_PRODUIT=33 NON_APPLICABLE=9
   TOUTE_NATURE         PRODUIT=4 AILLEURS=1 NON_PRODUIT=35 NON_APPLICABLE=6
