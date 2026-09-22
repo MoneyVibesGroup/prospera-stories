@@ -128,6 +128,12 @@ SFD (art. 7 de l'instruction n°030-02-2009 : support papier signé). **La doctr
 demandée par Q1 existe donc déjà** — `DEPOT_PHYSIQUE` — et elle n'est pas un choix produit : c'est
 la mesure, deux fois.
 
+> ⚠️ **Requalifié le 2026-09-22 par la doctrine de dépôt** (`doctrine-depot-2026-09-22.md` §3 et §4
+> C1, livrable de [[STORY-525]]) : `DEPOT_PHYSIQUE` est le **régime** de dépôt de l'assurance — et
+> de l'IMF —, pas la doctrine. La doctrine unique est la **voie A**, pour les trois verticaux ; le
+> fiscal togolais, lui, dépose sur un téléservice. Le paragraphe ci-dessus reste tel qu'il a été
+> écrit : c'est la mesure qui a nourri la doctrine.
+
 ### M7 — ⚠️ Le bilan CIMA servi aujourd'hui est à **10 postes** face à un gabarit de **296 lignes**
 
 Mesuré sur `cima-assurances@5.0` : `BILAN_ACTIF` **5 postes**, `BILAN_PASSIF` **5 postes**. Le

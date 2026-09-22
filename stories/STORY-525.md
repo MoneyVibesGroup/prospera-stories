@@ -1,6 +1,6 @@
 # STORY-525 : Le dépôt — une doctrine, ou neuf intégrations ? La question qui change le chiffrage du programme international
 
-Status: ready-for-dev
+Status: review
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` (cadrage) — puis N services selon l'arbitrage
@@ -224,14 +224,14 @@ qui tient les trois types de dossiers.
 
 ## Critères d'acceptation *(applicables une fois Q1 tranchée)*
 
-- [ ] AC-1 — La doctrine retenue est **écrite** et s'applique aux trois verticaux ; STORY-509 et
+- [x] AC-1 — La doctrine retenue est **écrite** et s'applique aux trois verticaux ; STORY-509 et
       STORY-523 la citent au lieu de la re-poser.
-      *Fait :* la doctrine est écrite dans `doctrine-depot-2026-09-22.md` et couvre les trois
-      verticaux (§3). STORY-509 et STORY-523 la citent dans leurs *Notes*. **Laissé décoché :**
-      « au lieu de la re-poser » n'est pas tenu. STORY-523 M6 et `README-etats-cima.md` l. 111-112
-      appellent encore `DEPOT_PHYSIQUE` « la doctrine de dépôt unique » (M7). Ce sont des passages
-      de documents livrés, que la consigne interdit de réécrire ; la doctrine les requalifie (§4,
-      C1). Il reste à trancher s'il faut les annoter.
+      *Preuve :* la doctrine est écrite dans `doctrine-depot-2026-09-22.md` et couvre les trois
+      verticaux (§3). STORY-509 et STORY-523 la citent dans leurs *Notes* **et à l'endroit même où
+      elles la re-posaient** : STORY-523 M6, STORY-509 (« le fichier déposable ») et
+      `README-etats-cima.md` §5 portent un renvoi daté qui **requalifie** le passage (régime ≠
+      doctrine) — une annotation, pas une réécriture : le texte d'origine reste lisible, c'est la
+      mesure qui a nourri la doctrine (M7).
 - [x] AC-2 — Sous **voie B** : l'écran dit **explicitement** que le dépôt est à la charge du cabinet,
       partout où une liasse est figée. Doctrine FE-073 — dire ce qu'on ne fait pas est une
       information ; laisser croire qu'on le fera est une promesse.
@@ -290,3 +290,18 @@ qui tient les trois types de dossiers.
 - **Vérification docker : sans objet.** Story de cadrage : aucun code, aucune écriture en base, aucun
   événement.
 - Branche `MNV-525` du dépôt `docs`.
+- 2026-09-22 — **vérification par la session du travail délégué** (un rapport de sous-agent n'est pas
+  une preuve) — rejoué, pas lu :
+  - la DSF togolaise n'est versée dans **aucun** dépôt : `git ls-files` rend **0** `.xlsx` dans `docs`,
+    `fiscal-service`, `bilan-service`, `balance-service`, `dossier-service` — la pièce est citée par
+    dix documents, jamais committée (M9 tient) ;
+  - la pièce ③ du jalon (parcours + accusé) n'est **pas** une invention de la doctrine : EPIC-032,
+    `epics-fiscalite-2026-08-03.md` l. 270-271, exige *« pièce réelle en main (accusé, gabarit, parcours
+    de dépôt) »* ;
+  - le §9 de l'analyse dit bien *« son gabarit officiel n'est pas encore au dépôt »* (M9).
+- 2026-09-22 — **AC-1 fermé par annotation** : les deux passages qui re-posaient la doctrine
+  (STORY-523 M6, STORY-509 « le fichier déposable ») et `README-etats-cima.md` §5 portent un renvoi
+  daté vers la doctrine. Rien n'est effacé. AC-1 à AC-4 cochés, chacun avec sa preuve.
+- 2026-09-22 — statut `ready-for-dev` → `review`. ⚠️ **Statuts périmés relevés, non corrigés ici** (hors
+  périmètre, signalés à l'utilisateur) : FE-081 et FE-095 `blocked` sur une STORY-446 livrée ; l'en-tête
+  de STORY-538 ; la note « jalon levé » de STORY-330 à 333 ; STORY-539 l. 27 (« DIMF trimestriel »).

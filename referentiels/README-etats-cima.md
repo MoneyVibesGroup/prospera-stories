@@ -111,6 +111,10 @@ Même raison côté agrément dérivé : `INDETERMINABLE`, `INCOMPATIBLE_ART_326
 ⇒ **La « doctrine de dépôt unique » que Q1 réclamait n'est pas un choix produit : c'est une mesure,
 faite deux fois.** `DEPOT_PHYSIQUE` dans les deux verticaux.
 
+> ⚠️ **Requalifié le 2026-09-22** (`doctrine-depot-2026-09-22.md` §3 et §4 C1, [[STORY-525]]) :
+> `DEPOT_PHYSIQUE` est le **régime** commun à l'assurance et à l'IMF ; la **doctrine** unique est la
+> voie A, pour les trois verticaux — le fiscal togolais dépose, lui, sur un téléservice.
+
 ## 6. L'artefact
 
 `etats-cima@1.0` — `sha256 328c17be651a863d65d23c1a18c996373409d440128226e98d9a432d662f501a`
