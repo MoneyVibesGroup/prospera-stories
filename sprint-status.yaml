@@ -3908,7 +3908,7 @@ sprints:
         epic: "EPIC-135"
         points: 13
         service: "balance-service / module immobilisations (nouveau) — à confirmer au cadrage"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 — revue expert-comptable, section 6 de analyse-scalabilite-multireferentiel-2026-08-27.md. L'audit de couverture du 16/08 a trouvé le module entièrement absent de la documentation — ni PRD, ni spine, ni épics, ni story — seul de la vague 2 dans ce cas. Et son constat central n'est pas confortable :
+        status: "in_progress"  # 2026-09-22 — CADRAGE fait avant tout code (M1-M9, D-526-1 a 9) : service CONFIRME balance-service (arbitrage PO n°3 du 16/08) ; l arbitrage n°1 du 16/08 (« controleur d abord, aucune fiche ») est CADUC depuis la sortie du cadrage du 27/08 ; AC-1 tenu au sens d AD-8 parce qu AUCUN des quatre referentiels ne qualifie un compte d immobilisation (SFD : valeurs immobilisees en 41-44, sa classe 2 = credits) — la qualification est l objet de STORY-528. Registre append-only avec ANNULATION LIFO (patron STORY-499), concurrence par rang unique. — Historique — CREEE le 2026-08-27 — revue expert-comptable, section 6 de analyse-scalabilite-multireferentiel-2026-08-27.md. L'audit de couverture du 16/08 a trouvé le module entièrement absent de la documentation — ni PRD, ni spine, ni épics, ni story — seul de la vague 2 dans ce cas. Et son constat central n'est pas confortable :
         story_path: "stories/STORY-526.md"
       - story_id: "STORY-527"
         title: "Plan d'amortissement — les dotations se calculent, avec leur formule, et le prorata temporis n'est pas optionnel"
