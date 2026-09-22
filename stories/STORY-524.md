@@ -1,6 +1,6 @@
 # STORY-524 : Marge de solvabilité et représentation des engagements réglementés
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-134 — États annuels CIMA et marge de solvabilité
 **Service :** `bilan-service` — ⚠️ **corrigé le 2026-09-22** (D-524-1) ; l'en-tête disait `assurance-service`
@@ -307,28 +307,28 @@ du C11 se renseignera dans la story qui publiera l'état.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1** — Les **exigences, taux, plafonds, planchers et bases** viennent d'un artefact
+- [x] **AC-1** — Les **exigences, taux, plafonds, planchers et bases** viennent d'un artefact
       **packagé et sourcé** (article du Code CIMA), jamais du code. ⛔ Test de mutation : changer un
       plafond doit changer le verdict.
-- [ ] **AC-2** — La marge de solvabilité est rendue avec **ses deux termes** — marge **disponible**
+- [x] **AC-2** — La marge de solvabilité est rendue avec **ses deux termes** — marge **disponible**
       (337-1) et marge **à constituer** (337-2 / 337-3) — et non un seul verdict. Un ratio sans ses
       termes n'est pas vérifiable à la main.
-- [ ] **AC-3** — ⚠️ **Reformulée (M3, M4)** — La représentation est rendue **catégorie par
+- [x] **AC-3** — ⚠️ **Reformulée (M3, M4)** — La représentation est rendue **catégorie par
       catégorie** : engagements à représenter, actifs admis, **limite avec sa base et son sens**
       (plafond, plancher, ou les deux), et l'écart **signé**. ⛔ Une **insuffisance** sur le 1°) ou le
       6°) est une infraction au même titre qu'un dépassement. La somme des catégories **de 335-1**
       égale le total ; les **dérogations** (335-3, 335-5, 335-2) sont publiées **à part**, parce
       qu'elles se superposent.
-- [ ] **AC-4** — Un contrôle **non calculable** rend `INDETERMINABLE` avec un **motif nommé**,
+- [x] **AC-4** — Un contrôle **non calculable** rend `INDETERMINABLE` avec un **motif nommé**,
       **jamais zéro et jamais conforme**, et l'indétermination **remonte** aux agrégats qui en
       dépendent. ⚡ 5ᵉ occurrence du patron : un booléen de conformité se lit toujours avec son statut.
-- [ ] **AC-5** — ⚠️ **Reformulée (M5)** — La base de chaque contrôle est celle que **le texte
+- [x] **AC-5** — ⚠️ **Reformulée (M5)** — La base de chaque contrôle est celle que **le texte
       impose** : **brute** pour la représentation (art. 334), **ratio net/brut** avec son plancher
       propre pour la marge (337-2 : 50 %, 337-3 : 85 %). L'artefact la **déclare et la source** ; le
       code ne la décide pas, et ne l'offre pas au choix.
-- [ ] **AC-6** — Les deux contrôles se **rejouent** à une date d'arrêté passée, avec la **version
+- [x] **AC-6** — Les deux contrôles se **rejouent** à une date d'arrêté passée, avec la **version
       d'artefact qui s'appliquait alors**.
-- [ ] **AC-7** — ⚡ **Ajouté (M11, M12, M13)** — Le rattachement compte → catégorie admise se fait par
+- [x] **AC-7** — ⚡ **Ajouté (M11, M12, M13)** — Le rattachement compte → catégorie admise se fait par
       **numéro de compte**, déclaré dans l'artefact, **jamais par lecture d'un libellé** ; et le
       moteur vérifie qu'il travaille sur un paquet CIMA par une **propriété structurelle**, jamais
       par `meta.code`.
@@ -495,6 +495,108 @@ Docker **arrêté** après vérification.
 Lint **0 warning** · build OK · **3 258 unitaires** + **827 e2e** verts (196 + 26 suites) ·
 couverture **99 / 94,8 / 99,29 / 99,1** pour des seuils de 65/90/90/90 · moteur de solvabilité
 à **100 % de lignes**.
+
+### Revue de code — 5 constats, 3 bloquants · Revue de sécurité — 0 vulnérabilité
+
+**Sécurité : AUCUNE vulnérabilité.** Les sept axes sont propres — checksum vérifié avant tout
+parse et toute mise en cache, single-flight qui ne sert jamais un paquet rejeté, locator constant
+derrière une allowlist, aucune route donc aucun point d'entrée, journalisation sans donnée,
+générateur absent de l'image Docker (vérifié au `Dockerfile`), et aucun puits de pollution de
+prototype (tous les index sont des `Map`/`Set`).
+
+⚡ **Mais c'est la revue de SÉCURITÉ qui a trouvé le défaut fonctionnel le plus grave**, en
+creusant l'axe « intégrité financière » — et la revue de code l'a trouvé indépendamment. Les
+deux ont convergé.
+
+#### ⛔⛔ C1 — la marge tombait en panne dès qu'une réassurance s'applique
+
+`montantDeMethode` exigeait `Number.isSafeInteger` sur le produit intermédiaire. Or `divise`
+vaut `base × taux / 100 [/ diviseur]` : il est **fractionnaire** dès que la base n'est pas
+divisible, et `isSafeInteger` est **toujours faux** sur un fractionnaire. La garde de
+dépassement se transformait en refus de calculer.
+
+Mesuré sur 20 000 tirages : **65,8 %** des cas levaient `MontantHorsBornesError` — et **0 %**
+quand le rapport réducteur vaut exactement 100 %, ce qu'utilisaient **tous** les tests. La marge
+tombait donc en panne **précisément lorsqu'une réassurance réelle s'applique, et jamais sans**.
+Sur l'art. 337-2 b) (taux 25, diviseur 3), une base de 1 000 000 levait au lieu de rendre 41 667.
+
+⚠️ **C'est la correction du « produit intermédiaire non borné » de la phase ④ qui l'avait
+introduit.** Une correction peut créer un défaut pire que celui qu'elle ferme. Ce qu'il faut
+borner est la **perte de précision** au-delà de 2⁵³, pas l'intégralité d'une valeur qui n'a
+aucune raison d'être entière.
+
+#### ⛔⛔ C2 — la garde structurelle était vraie sur son propre contre-exemple
+
+Elle exigeait que le plan porte les comptes `23, 24, 31, 32, 39` — et **`syscohada-revise@2.1`
+les déclare tous les cinq**. Elle **nommait dans son commentaire le piège exact qu'elle laissait
+passer**. Récidive du défaut de [[STORY-517]] et [[STORY-522]] : *la garde écrite pour fermer un
+angle mort portait elle-même ce défaut*.
+
+Mesuré : avec `referentielComptable: syscohada-revise@2.1`, l'ancienne garde passait et c'est le
+compte `20` qui arrêtait le build **par accident** — sur un message qui ne dit rien du vrai
+problème, et qui disparaîtrait dès qu'une révision cesserait de citer ce compte (ce que
+[[STORY-671]] rend plausible). Le prédicat discriminant existait déjà et la story le nomme :
+`porteLesModelesDuCompte80` lit les **deux modèles alternatifs du compte 80** sur `postes[].etat`,
+qu'aucun plan de droit commun ne publie. La nouvelle garde refuse SYSCOHADA **en le nommant**.
+
+#### ⛔⛔ C3 — les portes du verbatim acceptaient un SUFFIXE du chiffre réel
+
+La recherche était une sous-chaîne nue : `plancher: 5` passait sur « avec un minimum de **15%** »,
+`taux: 5` sur « **25 %** », `plafondVie: 3` sur « **35** % ». La porte censée tenir l'**AC-1** —
+*changer un plafond doit changer le verdict* — laissait publier un plancher **divisé par trois**,
+et le moteur rendait `CONFORME` un assureur en infraction.
+
+⚠️ **Les mutations M18/M20 de la phase ④ n'étaient refusées que par chance** : 60 et 50 ne sont
+suffixes de rien. Ancre `(^|[^0-9])` posée aux 5 portes du générateur et dans le spec. Mesuré
+après correctif : plancher **5 % refusé**, plancher **15 % accepté**.
+
+#### C4 (non bloquant) — le test qui prétendait garder le produit intermédiaire ne gardait rien
+
+Il passait une base si grande que le **premier** produit (`base × taux`) levait déjà : retirer
+toute borne sur l'intermédiaire le laissait **vert**. C'est cette fausse assurance qui avait
+masqué C1. Il exige désormais une base qui franchisse le produit initial sans encombre, et il le
+**prouve** en assertant que ce produit passe.
+
+#### C5 (non bloquant, écarté) — utilitaires dupliqués
+
+`DATE_ISO`, `exigerDateIso`, `additionSure`, `plusLongPrefixeCite` existent déjà dans
+`etats-dimf-production` et `ratios-prudentiels-production`. **Patron préexistant** (`additionSure`
+vit dans 8 fichiers du dépôt) : les factoriser toucherait des fichiers hors périmètre. Signalé,
+non corrigé.
+
+#### Ce que la revue a vérifié et trouvé juste
+
+Arrondis `floor`/`ceil` et produit en croix · échelles % vs points de base · `retenuSi` + valeur
+absolue sur le compte 12 · `LE_PLUS_ELEVE` et la propagation de l'indétermination · plus long
+préfixe calculé sur toute l'assiette · piège du signe du compte 73 · les 6 catégories, les 2
+planchers, 335-2 en delta, les 4 bases, le compte 39 jamais retranché, les 3 marges disjointes,
+337-4 sans méthode, les 3 dispersions · et **toutes les valeurs packagées relevées une à une
+contre le texte**.
+
+#### Constats écartés par la session
+
+- **Mémoïsation des assiettes** : `ENGAGEMENTS_REGLEMENTES` est résolue **9 fois** par production
+  (36 résolutions pour 19 assiettes distinctes), chacune rescannant la balance. La revue de
+  sécurité chiffre le coût comme négligeable (8 termes, 13 comptes cités). **Non corrigé** :
+  partager un même objet entre contrôles introduirait de l'aliasing pour un gain non démontré.
+- **`ponytail-review`** : `net: -7 lines possible` — le seul constat recevable est le
+  `plusLongPrefixeCite` dupliqué (= C5). Les champs verbatim (`baseBrute`, `enteteVerbatim`,
+  `regleDeBord`) sont écartés au filtre DoD : ils sont la **preuve de la transcription** exigée
+  par l'AC-1, et ils sont assertés par les tests.
+
+### ⚠️ Incident de méthode
+
+Le `git checkout --` d'une passe de mutation a **effacé le correctif de C1**, non committé à cet
+instant. Piège connu du projet, payé une fois de plus. Restauré, et les mutations suivantes ont
+travaillé **sur copie** (`cp` plutôt que `git checkout`).
+
+### Vérification docker REJOUÉE sur l'état final
+
+Le code du moteur ayant changé après les correctifs, les mesures de la phase ④ ne valaient plus.
+Stack redémarrée, service `Nest application successfully started`, `/health` ok, checksum
+**inchangé** `41c2b17f…`, verdicts **identiques** (13 `INDETERMINABLE` + 4 `NON_APPLICABLE`),
+primes nettes **5 010 000**. Et surtout le **cas de C1 rejoué** : 20 % de la base fractionnaire
+avec un rapport de 52,73 % **calcule** désormais, là où il levait. Docker arrêté.
 
 ### ⚠️ Constat annexe, hors périmètre
 
