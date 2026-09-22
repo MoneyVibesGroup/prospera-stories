@@ -3,7 +3,7 @@
 Status: in_progress
 
 **Épic :** EPIC-134 — États annuels CIMA et marge de solvabilité
-**Service :** `bilan-service` (moteur) + `assurance-service` (paquet servi) — ⚠️ **corrigé le 2026-09-22**, cf. D-524-1 ; l'en-tête disait `assurance-service`
+**Service :** `bilan-service` — ⚠️ **corrigé le 2026-09-22** (D-524-1) ; l'en-tête disait `assurance-service`
 **Points :** 13 · **Sprint :** S20
 **Complexité :** high
 **Prérequis :** **STORY-517** (provisions hébergées) · **STORY-520** (réassurance) · **STORY-521** (Vie/Non-Vie) · **STORY-523** (catalogue des états) — tous `done`
@@ -257,7 +257,10 @@ comptes 23, 24, 21, 26, 27, 28, 55, 56, 57 pour les actifs représentatifs. C'es
 [[STORY-510]] (D-510-A), et la story le disait elle-même : « *voir STORY-510, les ratios prudentiels
 IMF, **même forme*** ». S'ajoute que la **dérivation de l'agrément** qui choisit entre 337-2 et 337-3
 est déjà dans le moteur ([[STORY-521]]), et que C4 et C11 sont des états de l'art. 433.
-⚠️ `assurance-service` reçoit le paquet **recopié à l'octet**, comme `etats-cima@1.0` en STORY-523.
+⚠️ **Et `assurance-service` ne reçoit rien.** Le paquet `etats-cima@1.0` y avait été recopié parce
+que ce service PRODUIT un état du catalogue (le C10b) ; ici, aucun consommateur n'existe hors du
+moteur — `ratios-prudentiels-sfd-bceao` n'est d'ailleurs recopié dans aucun autre dépôt non plus.
+Recopier par symétrie aurait créé une empreinte à maintenir pour personne.
 
 **D-524-2 — Les exigences, taux, plafonds, planchers ET bases sont packagés et sourcés.** Un nouvel
 artefact `solvabilite-cima`, généré comme `etats-cima@1.0`, dont **chaque** règle porte son article.
@@ -353,3 +356,152 @@ du C11 se renseignera dans la story qui publiera l'état.
 - 2026-09-22 — **cadrage sur le texte fait avant tout code** : 15 constats M1-M15 relevés sur le
   recueil officiel CODE CIMA 2019. **Deux critères d'acceptation reformulés** (AC-3, AC-5), **un
   ajouté** (AC-7), **la prémisse de la story renversée** (M11), **le service corrigé** (D-524-1).
+
+- 2026-09-22 — branche `MNV-524` ouverte sur `bilan-service`. ⚠️ La branche ouverte sur
+  `assurance-service` a été **retirée** : le moteur et l'artefact vivent dans `bilan-service`, et
+  aucun consommateur n'existe ailleurs (le patron `ratios-prudentiels-sfd-bceao` n'est recopié
+  dans aucun autre dépôt non plus). **Deux dépôts touchés**, pas trois.
+
+- 2026-09-22 — **DÉVELOPPÉE ET VALIDÉE**, PR `bilan-service#132` ouverte.
+
+### Ce qui est livré
+
+| Fichier | Rôle |
+|---|---|
+| `scripts/referentiels/sources/solvabilite-cima.json` | la transcription curée (source de vérité des octets) |
+| `scripts/referentiels/build-solvabilite-cima.mjs` | le générateur et ses portes |
+| `src/modules/bilan/referentiel/assets/solvabilite-cima-1.0.json` | l'artefact — sha256 `41c2b17f…` |
+| `…/referentiel/solvabilite-cima.types.ts` | contrat de l'artefact |
+| `…/referentiel/solvabilite-cima-registry.ts` | **4ᵉ manifeste**, disjoint, avec `pourReferentielALaDate` (AC-6) |
+| `…/referentiel/solvabilite-cima-loader.service.ts` | chargeur fail-closed, checksum vérifié avant parse |
+| `…/etats/solvabilite-cima.types.ts` | contrat de sortie (`VerdictControle`, `MotifIndeterminableSolvabilite`) |
+| `…/etats/solvabilite-cima-production.service.ts` | le moteur, **pur** |
+| 5 fichiers `*.spec.ts` | 97 tests |
+
+**17 contrôles, 19 assiettes, 8 termes, 26 éléments sans compte.**
+
+### ⛔⛔ Le fait mesuré — AUCUN contrôle ne rend de verdict
+
+Sur `cima-assurances@5.0`, les 17 contrôles sortent `INDETERMINABLE` ou `NON_APPLICABLE`. **Ce
+n'est pas un défaut de transcription, c'est le grain du plan** — et c'est ce que la story
+mesure de plus utile :
+
+| Motif | Contrôles | Ce qui manque |
+|---|---|---|
+| `ELEMENT_SANS_COMPTE_AU_PLAN` | 10 | 3 des 4 composantes des engagements réglementés (art. 334, 2°/3°/4°) et 5 des 8 éléments de la marge disponible |
+| `VENTILATION_PAR_CATEGORIE_ADMISE_ABSENTE` | 5 | le compte **23** porte les catégories 1°) *et* 2°) (plafonds 50 % et 40 %) ; le **24** les 4°) et 5°) (20 % et 10 %) |
+| `DETAIL_PAR_EMETTEUR_HORS_BALANCE` | 3 | l'art. 335-4 raisonne par émetteur et par immeuble |
+| `ANTERIORITE_DES_CREANCES_HORS_BALANCE` | 2 | « trois mois de date », « un an de date » : le compte 41 n'a pas d'axe d'antériorité |
+| `VENTILATION_PAR_BRANCHE_HORS_BALANCE` | 2 | les branches 4 à 7, 11 et 12 des art. 335-3 al. 2 et 335-5 al. 2 |
+| `PROVISIONS_PAR_TYPE_HORS_BALANCE` | 1 | la provision pour risques en cours, agrégée dans le compte 32 |
+| `LOCALISATION_HORS_BALANCE` | 1 | le 6°) exige l'État de souscription de l'établissement |
+| `ACCORD_DE_LA_COMMISSION_REQUIS` · `FRACTION_VERSEE_DU_CAPITAL_NON_ISOLEE` · `PLAFOND_AUTO_REFERENT` · `PART_DES_CESSIONNAIRES_…` · `HISTORIQUE_TRIENNAL_…` · `METHODE_INDETERMINABLE` | 1 chacun | les six lacunes de la marge dommages |
+
+⇒ **C'est un résultat, pas un échec** : la table dit exactement ce qu'un plan affiné
+([[STORY-671]]) devrait isoler. Un verdict rendu aujourd'hui sur une assiette amputée serait
+faux **dans le sens qui rassure**. Un test verrouille ce fait et **rougira le jour où l'un
+d'eux rendra un verdict**.
+
+### ⛔ Deux défauts que les tests ont attrapés pendant l'écriture
+
+1. **Le rapport réducteur était compté 100 fois trop grand.** Les points de base (`÷ 10 000`) et
+   les pourcentages (`÷ 100`) sont deux échelles ; les confondre surévaluait la marge à
+   constituer d'un facteur 100 — c'est-à-dire déclarait `NON_CONFORME` un assureur qui ne l'est
+   pas. Attrapé parce que l'attendu du test avait été **calculé à la main**, pas recopié de la
+   sortie.
+2. **⚡⚡ Le signe du compte 73, nié deux fois.** « Réductions et ristournes de primes » est un
+   compte de la **classe 7 (produits) mais de sens débiteur** : lu selon la règle `PRODUIT`
+   (crédit − débit), il rend **spontanément** une valeur négative. Lui appliquer en plus le
+   « − » du texte le niait deux fois et **gonflait** les primes de leurs annulations, donc la
+   marge à constituer, donc la sévérité du verdict. Même mode de panne que [[STORY-509]] : *un
+   signe réglementaire appliqué comme multiplicateur à un solde déjà signé*.
+
+### ⚠️ Et une fausse lacune, qui rendait indéterminable une assiette calculable
+
+L'assiette des primes portait une note « pour mémoire » rangée parmi les `elementsSansCompte` —
+alors que le compte 70 agrège directes et acceptations, ce qui est **exactement** ce que
+l'art. 337-2 a) demande. Une note rangée au mauvais endroit rendait `null` le **seul terme
+calculable de toute la marge**. Le générateur refuse désormais tout motif déclaré au
+vocabulaire et employé nulle part.
+
+### Table de mutations — 27 mutations, 27 rouges
+
+| # | Mutation | Résultat |
+|---|---|---|
+| 1 | verdict de limite forcé à `CONFORME` | ✅ 4 rouges |
+| 2 | `>=` → `>` dans le verdict de marge | ❌ **SURVIVANTE** → test ajouté → ✅ |
+| 3 / 4 | `floor`→`round` (plafond), `ceil`→`round` (plancher) | ✅ |
+| 5 / 13 | plancher du rapport neutralisé / figé à 50 % | ✅ |
+| 6 | `LE_PLUS_ELEVE` retient la plus petite | ✅ |
+| 7 | `some`→`every` sur les méthodes indéterminables | ✅ |
+| 8 | valeur absolue retirée de `retenuSi` | ✅ |
+| 9 | `elementsSansCompte` ignoré | ✅ 3 rouges |
+| 10 | plafond vie appliqué au mauvais agrément | ✅ |
+| 11 | motif `AGREMENT_NON_DERIVABLE` non posé | ✅ |
+| 12 | `NON_APPLICABLE` → `CONFORME` | ✅ 5 rouges |
+| 14 | borne de date `>` → `>=` | ✅ |
+| 15 | `PRODUIT` retiré de la lecture créditrice | ✅ 9 rouges |
+| 17 | insuffisance jamais détectée | ✅ |
+| 18 / 20 | plafond 50 %→60 %, plancher vie 85 %→50 % | ✅ **refusés AU BUILD** |
+| 19 | plancher du 1°) supprimé | ✅ |
+| 21 | signe du compte 73 remis à `−` | ✅ |
+| 22 | compte 39 déduit de l'assiette brute | ✅ |
+| 23 | une catégorie de l'art. 335-1 retirée | ✅ **refusé AU BUILD** |
+| 24 | règle de lecture inversée | ✅ |
+| 25 | compte inexistant au plan | ✅ **refusé AU BUILD** |
+| 26 / 27 | provider retiré des `providers` / des `exports` | ✅ |
+
+⚠️ **M21 et M22 rejouées avec le checksum RÉALIGNÉ** : sans cela elles rougissaient d'abord par
+l'empreinte épinglée (20 tests), ce qui aurait masqué si le test métier discrimine. Réalignées,
+elles font rougir **2 tests métier chacune** — c'est là la preuve.
+
+⚠️ **Une mutation ÉQUIVALENTE, dite comme telle** (M16) : comparer à la borne arrondie rend le
+même verdict que le produit en croix, parce que `actifs` est entier et l'arrondi un plancher
+(`actifs > floor(x)` ⟺ `actifs > x`). Ajouter un test pour « la couvrir » n'aurait rien
+discriminé. L'équivalence est commentée dans le code, avec sa condition de validité.
+
+### ⛔⛔ Une branche MORTE retirée, et une garde d'injection ajoutée
+
+- Aucun terme ne peut rendre de contribution `null` : un compte absent vaut **réellement** zéro
+  et figure dans `comptesAbsents`. La branche qui le guettait ne gardait rien — **code en
+  moins**, et le contrat dit maintenant la vérité (`montant: number`).
+- ⛔ **AUCUN test de `bilan-service` ne boote `AppModule`** (constat déjà relevé par
+  [[STORY-510]]). Les trois providers ajoutés n'étaient donc vérifiés par aucun test
+  d'instanciation — exactement le mode de panne de [[STORY-517]], où un service ne démarrait
+  pas avec 1 677 unitaires verts. `bilan.module.solvabilite.spec.ts` ferme **cet** angle mort,
+  en **dérivant** la liste des providers des métadonnées du module, jamais d'une liste recopiée.
+  ⚠️ La garde d'exhaustivité de `AppModule` reste manquante dans ce dépôt : hors périmètre.
+
+### Vérification docker — stack neuve
+
+⚠️ La story **ne persiste rien** : il n'y a pas de document à compter. Ce qui se vérifie, et qui
+n'est vérifiable que là, c'est que **le processus démarre et charge l'artefact**.
+
+| Mesure | Résultat |
+|---|---|
+| `docker compose down -v` puis stack neuve (mongo, kafka, redis, bilan-service) | mongo + kafka `Healthy` |
+| Démarrage du service **avec les 3 nouveaux providers** | `Nest application successfully started` — le graphe d'injection se résout en conditions réelles |
+| `/api/v1/health` | `{"status":"ok","mongodb":"up","kafka":"up"}` |
+| sha256 de l'artefact **dans le conteneur** | `41c2b17f…` = celui épinglé au registre |
+| Artefact chargé **par le processus** (loader compilé de `dist/`) | `17 contrôles, 19 assiettes, applicable depuis 2016-04-08`, checksum vérifié |
+| Production sur balance réelle | `13 INDETERMINABLE + 4 NON_APPLICABLE` — identique aux tests |
+| Primes nettes d'annulations | **5 010 000** (5 100 000 − 90 000) — le signe du compte 73 est juste **en conditions réelles** |
+| Engagements réglementés | terme brut **7 000 000**, sans déduction du compte 39 ; assiette `null` (3 composantes sans compte) |
+
+Docker **arrêté** après vérification.
+
+### Portes finales
+
+Lint **0 warning** · build OK · **3 258 unitaires** + **827 e2e** verts (196 + 26 suites) ·
+couverture **99 / 94,8 / 99,29 / 99,1** pour des seuils de 65/90/90/90 · moteur de solvabilité
+à **100 % de lignes**.
+
+### ⚠️ Constat annexe, hors périmètre
+
+**Cinq comptes de gestion du plan `cima-assurances@5.0` ne sont routés vers aucun poste** de la
+table de passage : `69` (charges à l'étranger), **`73` (réductions et ristournes de primes)**,
+`74` (ristournes obtenues), `78` (travaux faits par l'entreprise), `79` (produits à l'étranger).
+Le compte 73 est une **réduction de produit** : non routé, il laisse les primes du compte de
+résultat **surévaluées de leurs annulations**. Ce n'est pas un défaut introduit par cette story
+— le moteur de solvabilité lit la balance et non les états, il n'est donc pas affecté — mais il
+touche la liasse CIMA et mérite sa propre story.
