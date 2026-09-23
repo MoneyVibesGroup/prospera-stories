@@ -1,6 +1,6 @@
 # STORY-527 : Plan d'amortissement — les dotations se calculent, avec leur formule, et le prorata temporis n'est pas optionnel
 
-Status: review
+Status: done
 
 **Épic :** EPIC-135 — Immobilisations et amortissements
 **Service :** module `immobilisations` de `balance-service` — ⚠️ **+ `dossier-service`** (copie à l'octet du paquet fiscal, M3)
@@ -378,3 +378,4 @@ SN créés par les **vraies routes** de `dossier-service`, arrivés par Kafka ; 
 | Sécurité — 1 000 exercices exactement | plan `200` en 43 ms, lignes **identiques** à celles d'avant l'ajout |
 
 Pile arrêtée après la vérification (`docker compose stop`).
+- 2026-09-23 — **clôturée** : `balance-service#115` (re-ciblée sur `dev` après #114, arbre identique à l'état vérifié `226166e`) et `dossier-service#32` rebase-mergées sur `dev` ; branches supprimées. Statut `review` → `done`.
