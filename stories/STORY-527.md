@@ -299,3 +299,82 @@ après les revues, avec STORY-526.
 
 - 2026-09-22 — **poussée, PR ouvertes** : `balance-service#115` (empilée sur #114) et `dossier-service#32` ; statut `in_progress` → `review`. Revue de code (⑥) et
   revue de sécurité (⑦) en cours.
+
+### Revue de code (⑥) — 6 constats, dont 1 bloquant, tous corrigés — `balance-service` `fe5cda3`
+
+Scan `prospera-code-review` (`opus`), constats **vérifiés un à un dans le code** avant correction ; lentille
+`ponytail-review` en second.
+
+| # | Constat | Correction | Mutation |
+|---|---|---|---|
+| 1 ⛔ | **La provenance du coefficient perdait le paquet hérité.** `sourceCoefficient` était recomposé à la main (`pays@année` + une empreinte) : en zone franche, seule l'empreinte de la SURCOUCHE restait, pas celle de `togo@2026` d'où vient le barème. Registre append-only : irrattrapable après coup | la fiche fige le tampon `versTamponPaquetFiscal` ENTIER (`regime`, `base` et son empreinte compris) — schéma, relecture, DTO `EffectifPaquetFiscalStampDto` | R1, R2, R7 rouges |
+| 2 | Les doubles de test publiaient `TG@2026` ; le chargeur publie `togo@2026` (clé de manifeste) | doubles alignés sur le chargeur | — |
+| 3 | Sortie datée du **dernier jour** de l'exercice non protégée (`<=` → `<` : 94 tests verts) | deux cas : avec et sans exercice suivant ouvert | R3 rouge |
+| 4 | Le test « toute réécriture est interceptée » était vrai à vide sur 5 opérations sur 8 (`timestamps` y pose déjà un crochet) | filtre sur le crochet de refus lui-même | R4 rouge |
+| 5 | Le passage de la réévaluation du service au moteur (M10) n'était testé nulle part | test service → plan `INTERROMPU` | R5 rouge |
+| 6 | Une dernière page exactement pleine annonçait une suite (`>` → `>=` : verts) | test de la page pleine | R6 rouge |
+
+Ponytail : trois réutilisations — `asObjet` et `dateDansExercice` des cahiers au lieu de leurs copies,
+`versVueCalcul` sans recopie champ à champ. Écartés par le relecteur, et laissés : la bascule dégressive
+avec valeur résiduelle (le plafond, pas la bascule, rejoint la VR — application littérale de D-527-4,
+question de cadrage), le schéma JSON du paquet plus lâche que le lecteur (latent), l'absence de 400
+documenté sur `GET /immobilisations` (convention non uniforme du dépôt).
+
+### Revue de sécurité (⑦) — 1 constat, corrigé — `balance-service` `226166e`
+
+**Déni de service sur `GET …/immobilisations/:id/plan`** (confiance 85, CWE-407 / CWE-770). Le moteur
+comparait, à chaque exercice de la chaîne, chaque exercice du dossier à tous les autres. **Mesure rejouée
+dans la session** (le rapport n'est pas une preuve) : 10 000 exercices d'un jour → 4,5 s de boucle
+d'événements bloquée par lecture, 20 000 → 27 s, 36 600 → 204 s — pour tous les tenants. **La voie
+d'attaque existe, vérifiée en docker** : `dossier-service` n'admet qu'un exercice OUVERT à la fois, mais
+un exercice de reprise `MIGRATION` naît `CLOS`, ne prend pas cette place, n'a ni durée minimale ni
+contrôle de chevauchement — tout membre du cabinet en crée à volonté.
+
+- **Moteur** : exercices indexés une fois (tri, un passage pour les chevauchements, table des débuts) —
+  36 600 exercices : 86 ms. Même sémantique, éprouvée cas par cas.
+- **Plafond** : le plan lit au plus 1 000 exercices. Au-delà, `409 PLAN_INCALCULABLE`
+  `EXERCICES_TROP_NOMBREUX` — jamais une liste tronquée.
+- **Écritures** : elles ne lisent plus que les exercices qui couvrent leur date (`exercicesCouvrant`).
+
+| Mutation | Ce qu'elle casse | Rougit |
+|---|---|---|
+| S1 · S2 | branche « un exercice antérieur finit après son début » retirée · recouvrement d'un seul jour | 3 · 2 |
+| S3 · S4 | exercice postérieur commençant le dernier jour · branche « le suivant commence avant sa fin » retirée | 1 · 2 |
+| S5 · S6 | la dernière fin au lieu de la plus tardive · liste non triée | 1 · 1 |
+| S7bis | comparaison deux à deux réintroduite, allégée — **refaite** : la 1ʳᵉ forme ne compilait pas (« 0 total ») | 1 |
+| S8 · S9 | liste tronquée rendue au-delà du plafond · chargement sans limite | 1 · 1 |
+| S10 · S11 | le plan ignore le dépassement · l'écriture recharge le dossier entier | 1 · 1 |
+| S12 | premier jour de l'exercice exclu de la lecture ciblée | 1 |
+
+⚡ **Le test de coût a été dimensionné sur mesure, pas choisi** : à 20 000 exercices, une comparaison
+deux à deux allégée tient en 1,5 s et passait sous un seuil de 2 s. À 40 000 elle prend 12 s ; l'index,
+0,1 s (0,5 s sous instrumentation) — seuil posé à 3 s.
+
+Hors périmètre, **à porter par une story `dossier-service`** : borner le nombre, la durée et le
+chevauchement des exercices (défense en profondeur), et le nombre de mouvements par immobilisation.
+
+### Portes finales — état `226166e`, mesurées dans cette session
+
+| Dépôt | lint · build | unitaires | couverture (instr. / branches / fonctions / lignes) | e2e |
+|---|---|---|---|---|
+| `balance-service` (job `tmp_d55e42d1`) | ✅ | **212 suites, 4 403** | 99,16 / 92,66 / 98,58 / 99,25 | **30 suites, 1 130** |
+
+### Vérification docker — pile neuve (`down -v`), état final `226166e` + `dossier-service` `9a50d35`
+
+Code en vol prouvé par le Swagger vivant (`SourceCoefficientDto {paquetFiscal, article}`,
+`EXERCICES_TROP_NOMBREUX` — deux marqueurs des seuls commits de revue). Dossier TG, exercice 2026 et axes
+SN créés par les **vraies routes** de `dossier-service`, arrivés par Kafka ; KYC et droit d'usage semés.
+
+| Scénario | Mesuré |
+|---|---|
+| A linéaire, 45 000 000 XOF, VR 5 000 000, 60 mois, MES 01/04/2026 | 2026 : **6 000 000 XOF** (270/360) ; après clôture de 2026 et ouverture de 2027 : 2027 **8 000 000 XOF** |
+| B dégressif, 1 000 000 XOF, 60 mois, MES 01/07/2026 | coefficient **2/1** ; 2026 : **200 000 XOF**, 2027 : **320 000 XOF**, formule en clair |
+| Provenance figée **en base** | `sourceCoefficient.paquetFiscal` = `togo`/2026/`90501c8a…2686`/statut/mise en garde, `article: Art. 100 CGI`, sans `updatedAt` |
+| AC-6 — cession de A au 30/06/2027 | ligne 2026 **identique** ; `SORTI`, VNC 35 000 000, prix 30 000 000, moins-value 5 000 000 |
+| M10 — réévaluation de B au 30/09/2027 | plan `INTERROMPU` `REEVALUATION_NON_MODELISEE`, seule la ligne 2026 |
+| Dégressif 54 mois · date 2028 | `400 DUREE_HORS_BAREME_DEGRESSIF` · `409 EXERCICE_INTROUVABLE` — rien d'écrit |
+| Sécurité — voie d'attaque | 3 exercices de reprise d'**un jour** acceptés (`201 CLOS`, 1 jour) et propagés |
+| Sécurité — 1 001 exercices au dossier | `409 PLAN_INCALCULABLE EXERCICES_TROP_NOMBREUX` en 70 ms ; une écriture 2027 sur ce dossier : `201` en 52 ms, rattachée à 2027 |
+| Sécurité — 1 000 exercices exactement | plan `200` en 43 ms, lignes **identiques** à celles d'avant l'ajout |
+
+Pile arrêtée après la vérification (`docker compose stop`).
