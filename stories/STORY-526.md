@@ -287,3 +287,31 @@ STORY-527 (même module).
 
 - 2026-09-22 — **poussée, PR ouvertes** : `balance-service#114` ; statut `in_progress` → `review`. Revue de code (⑥) et
   revue de sécurité (⑦) en cours.
+
+### Revues (⑥ et ⑦) — corrections portées par `MNV-527`, branche empilée sur le même module
+
+Les deux revues ont porté sur le diff entier du module (`MNV-527` contre `dev`, qui contient `MNV-526`).
+Les corrections qui touchent le code de 526 sont committées sur `MNV-527` et arrivent sur `dev` avec
+#115, juste après #114 : aucune n'est un défaut bloquant **de 526 seule**.
+
+- **Revue de code** (`fe5cda3`) : le test « toute réécriture est interceptée » était **vrai à vide** sur
+  5 opérations sur 8 (`timestamps` y pose déjà son propre crochet) — il filtre désormais sur le crochet
+  de refus lui-même (mutation R4 rouge) ; la dernière page **exactement pleine** annonçait une suite sans
+  qu'aucun test ne le voie (R6 rouge) ; `exerciceCouvrant` réutilise `dateDansExercice` des cahiers.
+- **Revue de sécurité** (`226166e`) : les écritures ne lisent plus que les exercices qui **couvrent leur
+  date** (`exercicesCouvrant`), au lieu de tout le dossier — `dossier-service` ne borne pas le nombre
+  d'exercices (voie d'attaque vérifiée : exercices de reprise d'un jour). Mutations S11 · S12 rouges.
+
+### Vérification docker — pile neuve, état final `226166e`, faite avec STORY-527
+
+| Scénario | Mesuré en base |
+|---|---|
+| Index | `{immobilisationId: 1, rang: 1}` **UNIQUE** présent sur `immobilisations_mouvements` |
+| Concurrence — deux mises en service simultanées | une `201`, une `409 CONFLIT_CONCURRENT` ; **une seule** `MISE_EN_SERVICE` en base |
+| Rattachement | chaque mouvement porte l'exercice **du dossier** et son `exerciceId` |
+| Exercice de reprise 2025 (`CLOS`) | acquisition datée 2025 : `409 EXERCICE_CLOS` ; annulation d'un mouvement de 2026 après sa clôture : `409 EXERCICE_CLOS` — rien d'écrit |
+| Aucun exercice (2028) | `409 EXERCICE_INTROUVABLE` — la lecture ciblée, sur Mongo réel |
+| Anti-énumération | dossier d'un autre cabinet et dossier inexistant : `404 DOSSIER_INTROUVABLE`, corps **identiques** ; immobilisation inconnue ou mal formée : `404 IMMOBILISATION_INTROUVABLE` |
+| AC-6 — rien d'autre n'est écrit | photographie des 36 collections avant/après : seule `immobilisations_mouvements` change du fait du registre (0 → 6) |
+
+Pile arrêtée après la vérification (`docker compose stop`).
