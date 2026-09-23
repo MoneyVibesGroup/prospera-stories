@@ -3939,7 +3939,7 @@ sprints:
         epic: "EPIC-136"
         points: 8
         service: "dossier-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 — revue expert-comptable, section 6 de analyse-scalabilite-multireferentiel-2026-08-27.md. Avant toute consolidation, il faut un périmètre : quelles sociétés, détenues à quel pourcentage, depuis quand, et selon quelle méthode.
+        status: "in_progress"  # ⬆ 2026-09-23 : branche MNV-530 ouverte, CADRAGE sur le texte (AUDCIF art. 74, 78, 80, 94, 96) fait avant tout code — 7 constats, 7 decisions : la methode est DECLAREE parce que le texte la detache du seuil (M2) ; controle = somme des droits de vote des seules societes controlees, interet = produit le long des chaines (M3) ; cycles et plafond de 100 % juges DATE PAR DATE (M5) et sous verrou (M6). — CREEE le 2026-08-27 — revue expert-comptable, section 6 de analyse-scalabilite-multireferentiel-2026-08-27.md. Avant toute consolidation, il faut un périmètre : quelles sociétés, détenues à quel pourcentage, depuis quand, et selon quelle méthode.
         story_path: "stories/STORY-530.md"
       - story_id: "STORY-531"
         title: "Ce que « consolidation » veut dire ici — et ce qu'on refuse de promettre"
