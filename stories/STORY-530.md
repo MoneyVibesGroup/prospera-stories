@@ -1,6 +1,6 @@
 # STORY-530 : Le périmètre de groupe — mère, filiales, pourcentages, et la date à laquelle tout ça était vrai
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-136 — Multi-société et périmètre de groupe
 **Service :** `dossier-service`
@@ -173,3 +173,63 @@ son identité** : le périmètre ne devient pas un moyen de lire un dossier qu'o
   constats, 7 décisions. La méthode est déclarée parce que le texte lui-même la détache du seuil (M2) ;
   contrôle et intérêt ne se composent pas de la même façon (M3) ; cycles et plafond de 100 % se jugent
   date par date (M5) et sous verrou (M6).
+
+- 2026-09-23 — **développée** (`dossier-service`, branche `MNV-530`) : module `participations` — liens
+  datés (contrôle et intérêt en points de base), clôture, annulation motivée, journal des deux dossiers ;
+  invariants (doublon, ≤ 100 %, cycle) jugés aux jours de bascule, sous verrou par organisation, reprise
+  bornée à 3 ; périmètre à une date en fractions exactes, méthode déclarée, sociétés hors portée
+  masquées ; borne de 2 000 liens par organisation. Au-delà de la fiche : motif obligatoire à
+  l'annulation ; le journal ne nomme jamais l'autre dossier ; une `reference` (`S0`, `S1`…) garde la
+  structure lisible pour un collaborateur. PR `dossier-service#33`.
+
+### Revue de code (⑥)
+
+- **1 constat (confiance 80), corrigé** (`109ae3b`) : un lien créé avec une date de fin future (pacte à
+  terme, D-530-1) refusait toute clôture (`LIEN_DEJA_CLOS`) — la procédure de changement de D-530-3
+  (clore, puis créer le successeur le lendemain) y était impossible, seule l'annulation restait. Une
+  clôture peut désormais RACCOURCIR un lien jamais clos ; une fin posée par une clôture ne se repose pas,
+  aucune fin ne s'allonge. Quatre mutants rouges.
+
+### Revue de sécurité (⑦)
+
+- **1 constat (confiance 95), corrigé** dans un commit séparé (`f4f082b`) : ⚡⚡ **DoS par la taille des
+  fractions exactes** (CWE-400/407). L'intérêt le long d'une chaîne de k liens a un dénominateur de
+  10 000^k, réduit à chaque étape par un PGCD naïf : une chaîne de 1 000 liens à 99,99 % — admise par
+  tous les invariants d'écriture — bloquait la boucle d'événements **39 s** pour tous les cabinets et
+  publiait 4,4 Mo ; 2 000 liens, plusieurs minutes. Au-delà de **30 niveaux**, le périmètre rend
+  `409 PERIMETRE_TROP_PROFOND` sans rien calculer ; la borne porte sur la **plus longue** chaîne retenue
+  (celle qui fixe la taille de la fraction), pas sur la profondeur publiée. Trois mutants rouges.
+
+### Mutations — rejouées dans la session
+
+- 22 / 22 rouges sur les mutations restantes de l'agent (reprise, portée du lecteur, verrou, dépôt,
+  rôles, DTO, immuabilité, garde d'exhaustivité ; S12-S14 et R3 réalignées sur le correctif de revue) —
+  les 33 premières définitions ont été purgées avec le scratchpad, leur table (toutes rouges) est celle
+  de l'agent ; + 4 mutants du correctif de revue, + 3 du correctif de sécurité.
+
+### Portes finales — `f4f082b`, mesurées dans la session
+
+| lint · build | unitaires | couverture (instr. / branches / fonctions / lignes) | e2e |
+|---|---|---|---|
+| ✅ | **100 suites, 1 623** | 99,44 / 94,49 / 98,49 / 99,55 | **9 suites, 334** |
+
+### Vérification docker — pile neuve (`down -v`), `dossier-service` `f4f082b`
+
+| Scénario | Mesuré |
+|---|---|
+| M→F 80/80, F→PF 60/60 (IG), périmètre au 30/06/2025 | F : contrôle 8000, intérêt 4/5 ; PF : contrôle 6000, intérêt **12/25** (4800) |
+| Cycle PF→M | `409 PARTICIPATION_CIRCULAIRE`, cycle nommé — rien d'écrit |
+| Doublon M→F chevauchant | `409 LIEN_DEJA_EN_VIGUEUR` (`premierJourCommun`) |
+| X→F 30 % (80 + 30) | `409 DETENTION_SUPERIEURE_A_100` (11 000 > 10 000) |
+| Course A→B / B→A simultanés | un `201`, un `409 PARTICIPATION_CIRCULAIRE` ; **1** lien en base |
+| ⚡ Revue : fin 2030 ramenée au 30/06/2026, successeur au 01/07/2026 | `200` puis `201` ; 2ᵉ clôture `409 LIEN_DEJA_CLOS` ; `closLe`/`closPar` en base |
+| Annulation | sans motif `400` ; avec motif `200 ANNULE`, lien sorti du périmètre |
+| Journal | 2 entrées par acte (10 créations, 2 clôtures, 2 annulations sur 5 + 1 + 1 actes) |
+| ⚡ Sécurité : chaîne à 99,99 % | 30 maillons `200` en 39 ms ; 31 maillons `409 PERIMETRE_TROP_PROFOND` en 27 ms ; `/health` 32 ms |
+
+Non rejoué en docker : le masquage pour un collaborateur (`TENANT_USER`), couvert par l'e2e (jeton
+collaborateur sur chaque route) et les mutations S15/S16/S18/R2.
+
+Pile arrêtée après la vérification (`docker compose stop`).
+- 2026-09-23 — **clôturée** : `dossier-service#33` rebase-mergée sur `dev`, branche supprimée. Statut
+  `in_progress` → `done`.
