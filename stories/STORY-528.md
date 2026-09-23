@@ -1,6 +1,6 @@
 # STORY-528 : Les dotations rejoignent la balance, et la Note 3 cesse d'être restituée sans source
 
-Status: review
+Status: done
 
 **Épic :** EPIC-135 — Immobilisations et amortissements
 **Service :** module `immobilisations` de `balance-service` + `bilan-service` (Note 3, consommateur) —
@@ -266,3 +266,72 @@ publication, fixés par mesure ; au-delà, `409` explicite.
 - 2026-09-23 — **poussée, PR ouvertes** : `balance-service#116` et `bilan-service#133` (contrat d'événement
   neuf : les deux s'intègrent ensemble) ; statut `in_progress` → `review`. Revue de code (⑥), revue de
   sécurité (⑦) et vérification docker sur l'état final suivent.
+
+### Revue de code (⑥) — `018d89a`
+
+- `bilan-service` : **0 constat** (seuil 80). `balance-service` : **1 constat bloquant, retenu et corrigé**.
+- ⚡⚡ **La publication repartait de sa propre balance dotée.** `trouverDerniereBaseFiscale` n'exclut pas
+  `AMORTISSEMENTS` (voulu pour M2 : les provisions partent de la balance dotée) ; dès la première
+  publication, la balance dotée devenait donc la base la plus récente, et la suivante mesurait son
+  « déjà porté » sur ses propres écritures. Une cession enregistrée après coup laissait la dotation
+  d'origine en balance (`EXCEDENT_EN_BALANCE`, NOP) ; un compte partagé devenait `NON_VENTILABLE` sur la
+  ventilation que le produit avait lui-même écrite. Aucun test ne l'exerçait : le mock de base rendait
+  toujours l'import. Correctif : base **hors** `AMORTISSEMENTS` pour les dotations ; NOP seulement si la
+  balance dotée en place est chaînée à la base courante ; une balance dotée périmée plus récente que la
+  base est remplacée même sans écriture. Trois tests + un au dépôt, chacun muté au rouge (F1-F4).
+- Lentille ponytail : `totalDes` réimplémente `additionner` (−6 lignes possibles) — laissé, cosmétique.
+- Écartés (confiance < 80 ou sans effet) : clé de partition `dossierId` (précédent `dossier-service`) ;
+  message du 409 lors d'un aller-retour du `PUT …/complements` ; recalcul écrit avant de produire.
+
+### Revue de sécurité (⑦) — `965bd7e`
+
+- `bilan-service` : **0 constat**. `balance-service` : **1 constat (confiance 90), corrigé** dans un commit
+  séparé. ⚡⚡ **DoS par complexité quadratique** (CWE-407) : un `TENANT_USER` déclare des milliers de biens
+  aux comptes distincts — non mis en service, ils échappent à la borne de lignes de plan — puis appelle
+  l'aperçu à volonté. `chevauchementsEntreNatures` comparait chaque compte à chaque compte (mesuré
+  16,8 s de boucle bloquée à 5 000 biens, 54 s à 10 000), pour **tous** les tenants. Correctif :
+  chevauchements et attribution au plus long préfixe cherchent les ≤ 20 préfixes de chaque compte dans
+  une table ; l'union-find de l'invariant compresse tout le chemin (une chaîne se reparcourait à chaque
+  nœud). Trois tests de coût dimensionnés sur le mutant : réinjecter chaque version quadratique fait
+  rougir exactement le sien.
+- Un chrono de 250 ms (refus au-delà de la borne) rougissait sous couverture et charge : remplacé par
+  une garde structurelle (moteur appelé pour AUCUN bien), re-prouvée par mutation (`225e2d5`).
+
+### Mutations — rejouées dans la session, arbres isolés
+
+- `balance-service` @ `965bd7e` : **44 / 44 rouges** (R1-R39, R30b, F1-F4 ; R5 réorientée sur la boucle
+  de préfixes après le correctif de sécurité) + 3 mutations du correctif de sécurité.
+- `bilan-service` @ `3fa7361` : **17 / 17 rouges** (filigrane `>` et neutralisé, idempotence, bornes
+  absentes, lecture sans dossier, version de schéma, devise, borne de lignes, doublon, forme de compte,
+  échelle, tableau vide, 409, tableau non transmis, bloc sur toute note, `MOTEUR_VERSION`, consommateur
+  non fourni) — trois reformulées pour compiler, jamais comptées rouges avant.
+
+### Vérification docker — pile neuve (`down -v`), `balance-service` `965bd7e`, `bilan-service` `3fa7361`
+
+Code en vol prouvé (`horsDotations` présent dans le conteneur, « Found 0 errors » ×4). Dossier TG,
+exercice 2026 et axes SN créés par les vraies routes de `dossier-service`, arrivés par Kafka.
+
+| Scénario | Mesuré |
+|---|---|
+| Acquisition aux contreparties inversées | `400 CONTREPARTIES_INVALIDES DOTATION_HORS_GESTION` |
+| A (camion, 60 mois, MES 01/04) + B (presse, MES 01/07), même `681300` | aperçu `200` v2 : `ECRITE` 610 000 000, crédits 284510 = 600 000 000 / 284110 = 10 000 000, écart 0 |
+| Écriture | `201` v2 `AMORTISSEMENTS`, `balanceSourceId` = v1 ; outbox `SENT` ; `tableaux_immobilisations` projeté (v2) |
+| Republication identique | `200 idempotent` — 2 balances, tableau republié |
+| ⚡ **Constat de revue** : cession de A au 30/06 APRÈS publication | `201` v3 chaînée à v1 : 681300 = 210 000 000, 284510 = 200 000 000 ; écart de cumul **montré** (`ECARTS_NON_CORRIGES`, cession hors périmètre) |
+| Ré-import où 284510 > 245100 | aperçu et écriture `409 AMORTISSEMENTS_SUPERIEURS_AU_BRUT` (5 200 000 000 > 4 500 000 000) — rien d'écrit ni publié |
+| Ré-import correct, publication | v6 chaînée à v5 |
+| Balance v6 validée | publication `409 BALANCE_VALIDEE_IMMUABLE` |
+| Jeu d'états sur v6 (`bilan-service`) | `201` ; capture `CAPTURE` v6 figée en base ; note 3 `provenance: REGISTRE`, postes AM/AN, totaux ; autres notes `BALANCE`/`A_COMPLETER` |
+| Saisie de la note 3 | `409 NOTE_ALIMENTEE_PAR_LE_REGISTRE` ; `lignes: []` → `200` |
+| Non-régression : 2ᵉ dossier, même org, même exercice, sans registre | `registre: null`, note 3 `A_COMPLETER`, aucun tableau capté d'un autre dossier |
+
+Pile arrêtée après la vérification (`docker compose stop`).
+- 2026-09-23 — **clôturée** : portes finales sur l'état mergé (`bbca5c5`) — `balance-service` lint/build OK,
+  **216 suites, 4 503 tests**, couverture 99,17 / 92,8 / 98,68 / 99,28, e2e **30 suites, 1 142** ;
+  `bilan-service` (`3fa7361`) lint/build OK, **204 suites, 3 455 tests** (+1 ignoré), 99,03 / 95,14 /
+  99,32 / 99,13, e2e **26 suites, 840**. Les tests de coût du correctif de sécurité passent à 5 s de seuil
+  (tailles portées à 15 000 biens, 30 000 × 30 000, 40 000 maillons : ≤ 172 ms instrumentés, chaque
+  mutant quadratique rouge) — un seuil à 1 s rougissait en suite complète saturée. ⚠️ Le test de
+  performance « 40 000 exercices » de STORY-527 rougit sous charge et passe seul : antérieur, non touché.
+  `balance-service#116` et `bilan-service#133` rebase-mergées **ensemble** sur `dev` (contrat à 2
+  dépôts) ; branches supprimées. Statut `review` → `done`.
