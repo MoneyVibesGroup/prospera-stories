@@ -1,6 +1,6 @@
 # STORY-528 : Les dotations rejoignent la balance, et la Note 3 cesse d'être restituée sans source
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-135 — Immobilisations et amortissements
 **Service :** module `immobilisations` de `balance-service` + `bilan-service` (Note 3, consommateur) —
@@ -229,3 +229,40 @@ publication, fixés par mesure ; au-delà, `409` explicite.
   Bilan SYSCOHADA est structurellement nulle (M1, convention miroir hors périmètre) ; aucun référentiel
   ne déclare les contreparties d'une immobilisation (M3) ; la Note 3 exige un contrat d'événement neuf
   vers `bilan-service` (M7) ; et le mécanisme copié porte un défaut de version latent (M6).
+
+- 2026-09-23 — branches `MNV-528` ouvertes **avant tout code** : `balance-service` (depuis `origin/dev`
+  @ `9ca7d41`) et `bilan-service` (depuis `origin/dev` @ `bbf27d7`). Développée — la moitié
+  `balance-service` dans la session, la moitié `bilan-service` par un sous-agent sur un cahier autonome
+  (contrat d'événement fixé en amont), relue ici.
+
+### Ce qui est livré
+
+| Dépôt · fichier | Rôle |
+|---|---|
+| `balance-service` `…/immobilisations/dotations.regles.ts` | le **pur** : part de chaque bien dans l'exercice (brut 3A, amortissements 3C), tableau par compte, attribution au préfixe le plus long, complément, confrontation, invariant |
+| `…/immobilisations/dotations.service.ts` · `dotations.controller.ts` | `POST …/immobilisations/dotations/publier` — le mécanisme des provisions ; bornes de lecture et de calcul |
+| `…/immobilisations` schéma, DTO, service | les deux contreparties déclarées à l'acquisition (D-528-1), gardées contre le plan du dossier |
+| `…/balance/balance.repository.ts` · `balance-canonique.ts` | origine `AMORTISSEMENTS` ; dernière balance d'une origine ; plus haute version de TOUTE la lignée (M6) |
+| `…/kafka/events/immobilisations-events.ts` + outbox | `immobilisations.tableau.publie` v1, écrit dans la transaction de la balance |
+| `…/referentiel/assets/syscohada-revise-2.1.json` | recopie à l'octet (sha256 `484c6a80…`) |
+| `bilan-service` `scripts/referentiels/sources/notes-syscohada.json` + `build.mjs` | la note 3 déclare `alimentation: REGISTRE_IMMOBILISATIONS` ; deux artefacts régénérés |
+| `…/read-models/immobilisations-*` · `tableaux_immobilisations` | consommateur isolé, validation stricte, projection idempotente à filigrane |
+| `…/jeu-etats/capture-registre.ts` + service | le tableau FIGÉ sur le jeu à la création et au recalcul ; écarté (et dit) si devise ou échelle diffèrent ; saisie de la note refusée (`409 NOTE_ALIMENTEE_PAR_LE_REGISTRE`) |
+| `…/etats/notes-annexes-production.service.ts` | bloc `registre` par poste (table de passage + surcharges), comptes non rattachés listés, `provenance` sur chaque note ; `MOTEUR_VERSION` 1.18.0 |
+| `…/export/modele-liasse.ts` | le bloc imprimé (deux sections, brut puis amortissements) ; export sans registre inchangé à l'empreinte près |
+
+### Écarts au cadrage, décidés en développement
+
+- **D-528-4** : une sixième issue, `SOLDE_CREDITEUR_EN_BALANCE` — un compte de charge créditeur
+  amené au registre créditerait l'amortissement de PLUS que la dotation calculée ; montré, jamais écrit.
+- **D-528-9, mesurée** : deux bornes, pas une. 20 000 **mouvements** lus, et 20 000 **lignes de plan**
+  estimées avant tout calcul par la règle d'arrêt du moteur (mise en service → fin de vie) — un bien
+  amorti ne coûte que sa durée de vie. Mesuré : 100 biens sur 1 000 exercices d'un jour bloquaient la
+  boucle **8,7 s** ; le moteur ré-indexait les exercices POUR CHAQUE bien (600 biens : 3,6 s). Plans
+  tronqués à la clôture publiée, relâchés aussitôt lus, exercices indexés une fois : à la borne,
+  **133 ms** ; un bien de plus est refusé en 2 ms. La borne se juge au coût d'un appel RÉPÉTÉ : le
+  throttler en admet 100 par minute et par IP.
+
+- 2026-09-23 — **poussée, PR ouvertes** : `balance-service#116` et `bilan-service#133` (contrat d'événement
+  neuf : les deux s'intègrent ensemble) ; statut `in_progress` → `review`. Revue de code (⑥), revue de
+  sécurité (⑦) et vérification docker sur l'état final suivent.
