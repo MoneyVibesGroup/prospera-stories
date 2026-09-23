@@ -1,6 +1,6 @@
 # STORY-525 : Le dépôt — une doctrine, ou neuf intégrations ? La question qui change le chiffrage du programme international
 
-Status: review
+Status: done
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` (cadrage) — puis N services selon l'arbitrage
@@ -305,3 +305,4 @@ qui tient les trois types de dossiers.
 - 2026-09-22 — statut `ready-for-dev` → `review`. ⚠️ **Statuts périmés relevés, non corrigés ici** (hors
   périmètre, signalés à l'utilisateur) : FE-081 et FE-095 `blocked` sur une STORY-446 livrée ; l'en-tête
   de STORY-538 ; la note « jalon levé » de STORY-330 à 333 ; STORY-539 l. 27 (« DIMF trimestriel »).
+- 2026-09-23 — **clôturée** : story documentaire, sans code — la revue de sécurité est sans objet (aucun code à analyser) ; cohérence et périmètre du diff vérifiés (annotations datées, rien d'effacé). PR `docs` rebase-mergée sur `main`. Statut `review` → `done`.
