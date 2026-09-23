@@ -3924,7 +3924,7 @@ sprints:
         epic: "EPIC-135"
         points: 8
         service: "module immobilisations + balance-service + bilan-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-27 — revue expert-comptable, section 6 de analyse-scalabilite-multireferentiel-2026-08-27.md. C'est la story qui referme le constat du cadrage du 16/08 : aujourd'hui STORY-059 restitue les colonnes Brut / Amort / Net et STORY-062 les notes d'immobilisations, à partir de soldes que personne ne produit. Une fois STORY-527 livrée, ces soldes ont enfin une source.
+        status: "in_progress"  # ⬆ 2026-09-23 : branche MNV-528 ouverte, CADRAGE fait avant tout code (9 constats, 9 decisions) — la colonne Amort du Bilan SYSCOHADA est STRUCTURELLEMENT nulle (convention miroir hors perimetre, M1) ; aucun referentiel ne declare les contreparties d une immobilisation, le cabinet les declare a l acquisition (M3) ; la Note 3 exige un contrat d evenement neuf vers bilan-service (M7) ; defaut de version LATENT des provisions fiscales (M6, fiche). — CREEE le 2026-08-27 — revue expert-comptable, section 6 de analyse-scalabilite-multireferentiel-2026-08-27.md. C'est la story qui referme le constat du cadrage du 16/08 : aujourd'hui STORY-059 restitue les colonnes Brut / Amort / Net et STORY-062 les notes d'immobilisations, à partir de soldes que personne ne produit. Une fois STORY-527 livrée, ces soldes ont enfin une source.
         story_path: "stories/STORY-528.md"
       - story_id: "STORY-529"
         title: "Un cabinet ne peut pas créer une deuxième société — `POST /profil-societe` répond 409, et personne n'a jamais ouvert de story"
