@@ -1,6 +1,6 @@
 # STORY-526 : Registre des immobilisations — le produit RESTITUE Brut/Amort/Net sans que rien ne le CALCULE
 
-Status: review
+Status: done
 
 **Épic :** EPIC-135 — Immobilisations et amortissements
 **Service :** `balance-service` / module `immobilisations` (nouveau) — ✅ **confirmé au cadrage** (M1)
@@ -315,3 +315,4 @@ Les corrections qui touchent le code de 526 sont committées sur `MNV-527` et ar
 | AC-6 — rien d'autre n'est écrit | photographie des 36 collections avant/après : seule `immobilisations_mouvements` change du fait du registre (0 → 6) |
 
 Pile arrêtée après la vérification (`docker compose stop`).
+- 2026-09-23 — **clôturée** : `balance-service#114` rebase-mergée sur `dev` ; les corrections de revue et de sécurité qui touchent son code sont arrivées avec #115, fusionnée dans la foulée. Branches supprimées. Statut `review` → `done`.
