@@ -1,6 +1,6 @@
 # STORY-529 : Un cabinet ne peut pas créer une deuxième société — `POST /profil-societe` répond 409, et personne n'a jamais ouvert de story
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-136 — Multi-société et périmètre de groupe
 **Service :** `balance-service` (`profil-societe` et ses lecteurs) + `dossier-service` (contrat
@@ -200,3 +200,58 @@ périmètre est STORY-530, la consolidation STORY-531 → EPIC-137-141. Écrit d
   date de création du cabinet et donc son exonération de MFP (M2) ; le repli des axes ne peut pas quitter
   le cabinet sans casser tout dossier client non décidé (M3) ; un rejeu de `migrate:dossiers` écraserait
   l'identité du cabinet (M7).
+
+- 2026-09-23 — **développée** dans deux dépôts, branches `MNV-529` (la moitié `balance-service` rebasée sur
+  `dev` après STORY-528 : un conflit résolu dans `immobilisations.service.ts`) : read-model
+  `dossiers_dossier` (devise, date de création, activité) ; profil keyé sur `dossierId`, routes nichées +
+  historiques dépréciées ; cascade donnée par donnée (profil du dossier → déclaration du dossier), date
+  future écartée à la lecture ; repli des axes sur le cabinet (D-529-5) ; `migrate:profils` ;
+  `migrate:dossiers` ne republie plus que les profils du cabinet ; `dossier-service` publie `dateCreation`,
+  `objetSocial`, `codeNaema`, `secteur` (clé absente omise, jamais `null`). PR `balance-service#117` +
+  `dossier-service#34`.
+
+### Revues (⑥ code, ⑦ sécurité)
+
+- Revue de sécurité : **0 constat** (IDOR, routes historiques, OCR, migration, date falsifiable examinés).
+- Revue de code : 3 constats. **C-3** (409 `DOSSIER_ARCHIVE` absent du Swagger OCR niché) : **faux
+  positif**, démontré par mutation — `@RequiresDossierScope()`, posé sur la classe, le documente déjà ;
+  la garde OpenAPI ajoutée protège ce décorateur (le muter fait rougir les 2 écritures OCR).
+  **C-1** (fenêtre de déploiement : entre le démarrage du code et `migrate:profils`, aucun profil hérité
+  n'est lu — mesuré en docker : `404 PROFIL_SOCIETE_INTROUVABLE` avant, `200` après) et **C-2** (les
+  dossiers déjà créés ne reçoivent date de création et activité qu'au prochain `dossier.updated`, aucune
+  republication) : souci de production, **différé** (règle du projet : le dev repart de zéro). C-1 est
+  nommé dans la docstring de `migrate:profils` (« avant d'ouvrir le trafic »). ⚠️ **Hook pour la mise en
+  production** : une commande `dossier-service` qui republie `dossier.updated` en état absolu pour tous
+  les dossiers, à lancer avec le déploiement des deux PR.
+
+### Portes et mutations — mesurées dans la session
+
+| Dépôt | lint · build | unitaires | couverture | e2e |
+|---|---|---|---|---|
+| `balance-service` (rebasé sur 528) | ✅ | **224 suites, 4 594** (+1 ignoré) | 99,18 / 92,93 / 98,71 / 99,29 | **30 suites, 1 192** |
+| `dossier-service` | ✅ | **101 suites, 1 640** | 99,44 / 94,56 / 98,49 / 99,55 | **9 suites, 336** |
+
+Mutations rejouées (échantillon indépendant, suites complètes des modules touchés) : **7 / 7 rouges** —
+date future acceptée, déclaration ignorée, déclaration avant le profil, profil lu sans le dossier
+(résolveur et dépôt), déclaration lue sans le dossier, profil du cabinet jamais trouvé pour le repli.
+Trois ne compilaient pas au premier jet : reformulées, jamais comptées rouges avant. La table complète de
+l'agent (32 mutations, toutes rouges) a été purgée avec le scratchpad.
+
+### Vérification docker — pile neuve (`down -v`)
+
+| Scénario | Mesuré |
+|---|---|
+| Dossier client déclaré (date 2025-03-01, NAEMA 4711, commerce) | réplique dans `dossiers_dossier` de `balance-service` : date, objet, NAEMA, secteur, devise |
+| ⚡ Deuxième société dans une même organisation | profil du cabinet (route historique) `201` + profil du client (route nichée) `201` ; doublon sur le client `409 PROFIL_SOCIETE_DEJA_EXISTANT` ; index `dossierId_1` unique |
+| Lectures | nichée client / cabinet `200` chacun le sien ; historique → cabinet ; dossier inconnu `404` |
+| Migration — base héritée (2 profils sans `dossierId`) | org avec cabinet **rattachée à son dossier « Mon cabinet »** ; org sans cabinet **nommée** (`AUCUN_DOSSIER_CABINET`), jamais rattachée, sortie en erreur |
+| Idempotence | 2ᵉ passe : 0 rattaché, 3 déjà rattachés |
+| Route historique de l'org migrée | avant migration `404`, après `200` avec sa date de création d'origine |
+| Index au redémarrage | `dossierId_1` reconstruit (un seul orphelin restant) |
+
+Non exposée en HTTP : la **source** de la date de création (profil / déclaration) — la cascade est prouvée
+par les unitaires et les mutations U1-U5, sa matière (la déclaration répliquée) en base.
+
+Pile arrêtée après la vérification (`docker compose stop`).
+- 2026-09-23 — **clôturée** : `balance-service#117` et `dossier-service#34` rebase-mergées **ensemble** sur
+  `dev` (contrat à 2 dépôts) ; branches supprimées. Statut `in_progress` → `done`.
