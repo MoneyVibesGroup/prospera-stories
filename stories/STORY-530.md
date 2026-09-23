@@ -1,10 +1,11 @@
 # STORY-530 : Le périmètre de groupe — mère, filiales, pourcentages, et la date à laquelle tout ça était vrai
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-136 — Multi-société et périmètre de groupe
 **Service :** `dossier-service`
 **Points :** 8 · **Sprint :** S20
+**Complexité :** high
 **Prérequis :** **STORY-529** (plusieurs sociétés par organisation)
 **Origine :** §6.3 de `analyse-scalabilite-multireferentiel-2026-08-27.md`.
 
@@ -38,6 +39,137 @@ verrait la cause.
 - [ ] AC-6 — Le périmètre appartient au **dossier de la mère**, et ne franchit jamais la frontière de
       l'organisation : deux cabinets ne partagent pas un périmètre.
 
+---
+
+# Cadrage — fait AVANT toute ligne de code
+
+Sources : **AUDCIF 2017, articles 74, 78, 80, 94 et 96**, lus verbatim (texte officiel, édition
+LegalRDC) ; la règle de cumul des droits de vote en cascade, de pratique constante (elle n'est pas écrite
+dans l'Acte uniforme) ; le code de `dossier-service` (`dev`) ; le cadrage de STORY-529.
+
+## Les constats mesurés
+
+### M1 — Une « société » est un dossier du cabinet (D-529-1)
+
+STORY-529 a tranché : le dossier porte l'identité complète de la société et la balance est keyée sur
+lui. Un lien de participation relie donc **deux dossiers de la même organisation**. Aucun code n'est
+partagé avec 529 : la dépendance est une **décision**, pas une branche.
+
+### M2 — Le texte distingue trois contrôles, et aucun ne se réduit à un seuil
+
+AUDCIF art. 78 : le **contrôle exclusif** résulte *« soit de la détention directe ou indirecte de la
+majorité des droits de vote »*, *« soit de la désignation, pendant deux exercices successifs, de la
+majorité des membres des organes »* (présumée au-delà de 40 % sans détenteur supérieur), *« soit du droit
+d'exercer une influence dominante […] en vertu d'un contrat ou de clauses statutaires »* ; le **contrôle
+conjoint** suppose un accord contractuel entre un nombre limité d'associés ; l'**influence notable** est
+présumée à partir d'**un cinquième** des droits de vote. Art. 80 : exclusif ⇒ **intégration globale**,
+conjoint ⇒ **intégration proportionnelle**, influence notable ⇒ **mise en équivalence**. Art. 96 : une
+entité peut sortir du périmètre malgré sa détention (perte de contrôle démontrée, restrictions sévères,
+titres détenus en vue de leur cession, importance négligeable).
+
+⇒ L'AC-2 est exactement le texte : un contrat donne le contrôle sans la majorité, l'art. 96 retire la
+majorité sans retirer les titres. La méthode est **déclarée** ; un pourcentage n'en décide jamais.
+
+### M3 — Contrôle et intérêt ne se composent pas de la même façon
+
+Le **pourcentage de contrôle** additionne les droits de vote détenus dans une société par la mère **et
+par les seules sociétés qu'elle contrôle** : une chaîne de contrôle s'arrête à la première société non
+contrôlée. Le **pourcentage d'intérêt** multiplie les parts de capital le long de chaque chaîne et somme
+les chaînes. Exemple de référence : mère → fille 80 % (contrôlée), fille → petite-fille 60 % ⇒ contrôle
+**60 %**, intérêt **48 %**. C'est la divergence que l'AC-1 annonce, et la seconde grandeur est celle qui
+chiffrera les minoritaires (STORY-544).
+
+### M4 — Un lien direct porte déjà DEUX pourcentages
+
+Droits de vote et parts de capital divergent dès le lien direct (actions à droit de vote double, actions
+sans droit de vote). Le lien porte donc `pctControle` (droits de vote détenus) **et** `pctInteret` (parts
+de capital détenues), jamais l'un déduit de l'autre.
+
+### M5 — Un périmètre daté se juge à CHAQUE date, pas sur l'ensemble des liens
+
+Deux garde-fous que l'AC-4 et le simple bon sens imposent se jugent **date par date** : une participation
+circulaire n'existe que si tous ses liens sont en vigueur **en même temps** (A→B jusqu'en 2021 et B→A
+depuis 2023 ne forment aucun cycle), et la somme des détentions d'une même société ne dépasse **jamais
+100 %** — mais seulement parmi les liens simultanés. Le calendrier d'un ensemble de liens se découpe en
+intervalles où l'ensemble en vigueur est constant : c'est sur eux que le contrôle porte.
+
+### M6 — Deux écritures concurrentes peuvent former ensemble ce que chacune évite
+
+Un cycle A→B / B→A créé par deux requêtes simultanées passe les deux contrôles s'ils lisent l'état avant
+l'écriture de l'autre. Même classe que STORY-505 (une règle d'écriture sous un verrou commun) : les
+écritures de liens d'une organisation doivent être **sérialisées**.
+
+### M7 — Les conventions de `dossier-service` s'appliquent telles quelles
+
+Écriture sur un dossier archivé ⇒ `409 DOSSIER_ARCHIVE` (D9, règle unique du service) ; toute écriture
+est **journalisée** (`dossiers_journal`, vocabulaire fermé `type-evenement-dossier`) ; transactions
+manuelles à abandon gardé ; portée appliquée **dans la requête** (un collaborateur ne voit que ses
+dossiers, jamais « Mon cabinet »).
+
+## Les décisions
+
+**D-530-1 — Le lien de participation** (collection `liens_participation`) : organisation, dossier
+**détenteur**, dossier **détenu**, `pctControle` et `pctInteret` en **points de base** (entiers 0 à 10 000,
+deux décimales, jamais un flottant), **méthode** déclarée — `INTEGRATION_GLOBALE`,
+`INTEGRATION_PROPORTIONNELLE`, `MISE_EN_EQUIVALENCE`, `HORS_PERIMETRE` —, **date d'effet** et **date de
+fin** facultative, incluse, à minuit UTC (convention des exercices du service). Refus : même dossier des
+deux côtés, dossier d'une autre organisation (`404`, anti-énumération), dossier archivé, deux
+pourcentages nuls, fin antérieure à l'effet.
+
+**D-530-2 — Les invariants, jugés intervalle par intervalle** (M5), sous verrou (M6) : pas deux liens
+simultanés entre les mêmes dossiers (`409 LIEN_DEJA_EN_VIGUEUR`) ; somme des droits de vote et somme des
+parts détenues dans un même dossier ≤ 100 % à toute date (`409 DETENTION_SUPERIEURE_A_100`) ; **aucun
+cycle** à aucune date (`409 PARTICIPATION_CIRCULAIRE`, le cycle nommé). La sérialisation passe par un
+document de verrou par organisation, incrémenté dans la transaction de l'écriture (`409
+CONFLIT_CONCURRENT` en cas de course, rien d'écrit).
+
+**D-530-3 — Un lien se clôt ou s'annule, il ne se réécrit pas.** Un changement de pourcentage ou de
+méthode = **clore** le lien (date de fin) et en créer un nouveau le lendemain ; une erreur de saisie =
+**annuler** (le lien sort de tout calcul, reste lisible et journalisé). Aucune autre modification.
+
+**D-530-4 — `GET /dossiers/:dossierId/perimetre?date=AAAA-MM-JJ` (AC-3)**, date **exigée** (jamais
+supposée), calcul **pur** : la mère (entité consolidante, 100/100) ; les sociétés contrôlées de proche
+en proche par des liens `INTEGRATION_GLOBALE` ; pour chaque société atteinte depuis la mère ou une société
+contrôlée — contrôle = somme des droits de vote de ces détenteurs, intérêt = somme sur les chaînes du
+produit des parts (fraction **exacte**, publiée aussi arrondie à deux décimales) (M3) ; méthode = celle
+que déclarent ses liens entrants. Liens entrants de méthodes **divergentes** ⇒ la société est rendue
+**sans méthode** avec l'anomalie `METHODES_DIVERGENTES` — jamais une méthode choisie. Une chaîne ne se
+poursuit qu'à travers une société **contrôlée** : ce que détient une société mise en équivalence ou
+intégrée proportionnellement n'entre pas au périmètre de la mère par elle. `HORS_PERIMETRE` ⇒ listée en
+**exclue**, avec son motif (art. 96, justification en annexe).
+
+**D-530-5 — La circularité est refusée à l'écriture ET détectée à la lecture** (AC-4) : le calcul ne
+boucle jamais — une incohérence en base rend `409 PERIMETRE_CIRCULAIRE`, pas une récursion infinie.
+
+**D-530-6 — Frontière de l'organisation (AC-6)** : les deux dossiers d'un lien appartiennent à
+l'organisation du jeton, chaque requête filtre sur elle ; le périmètre ne lit que les liens de cette
+organisation. Écritures réservées à `TENANT_ADMIN` (comme la création d'un dossier) ; lecture ouverte à
+qui a la portée du dossier de la mère — et une société **hors de la portée du lecteur** est rendue **sans
+son identité** : le périmètre ne devient pas un moyen de lire un dossier qu'on ne peut pas ouvrir.
+
+**D-530-7 — Routes** : `POST /dossiers/:dossierId/participations` (le dossier du chemin est le
+**détenteur**), `GET /dossiers/:dossierId/participations` (liens détenus et reçus), `POST
+…/participations/:lienId/cloture`, `POST …/participations/:lienId/annulation`, `GET
+/dossiers/:dossierId/perimetre`. Bornes de volume (liens par organisation) posées sur mesure.
+
+## Hors périmètre — hooks inertes documentés
+
+- **Toute consolidation** (AC-5) : agrégation, éliminations, retraitements — STORY-531 puis EPIC-137-141.
+- **La publication du périmètre vers `bilan-service`** : aucun consommateur n'existe ; c'est la
+  consolidation (531) qui dira ce qu'elle doit recevoir. Aucun producteur n'émet dans le vide.
+- **Les entités hors cabinet** (une société du groupe que le cabinet ne tient pas en dossier) et **les
+  sous-périmètres des entités en intégration proportionnelle**.
+- **Les dates de clôture divergentes** entre mère et filiales (STORY-532) et l'homogénéité des
+  référentiels et devises (531).
+
 ## Notes
 
-- Voir [[STORY-529]], [[STORY-531]].
+- Voir [[STORY-529]], [[STORY-531]], `epics-consolidation-2026-08-28.md`.
+
+## Progress Tracking
+
+- 2026-09-23 — branche `MNV-530` ouverte sur `docs/` ; statut `ready-for-dev` → `in_progress`.
+- 2026-09-23 — **cadrage fait avant tout code**, sur le texte (AUDCIF art. 74, 78, 80, 94, 96) : 7
+  constats, 7 décisions. La méthode est déclarée parce que le texte lui-même la détache du seuil (M2) ;
+  contrôle et intérêt ne se composent pas de la même façon (M3) ; cycles et plafond de 100 % se jugent
+  date par date (M5) et sous verrou (M6).
