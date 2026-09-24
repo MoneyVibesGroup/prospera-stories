@@ -1,6 +1,6 @@
 # STORY-676 : Les notes 3A et 4 renvoient à des lignes de titre que le Bilan ne produit jamais — la note des immobilisations totalise 1 000 000 face à 47 000 000
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — Référentiels & table de passage
 **Service :** `bilan-service` (`:3004`) — paquet `syscohada-revise@2.2`, moteur des notes annexes
@@ -87,4 +87,4 @@ des notes.
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-09-24).** Créée par la clôture de STORY-559.
+**Statut : `in_progress` (2026-09-24).** Créée par la clôture de STORY-559. Branches `MNV-676` : `prospera-bilan-service` (base `dev`) et `docs` (base `main`).

@@ -4145,7 +4145,7 @@ sprints:
         epic: "EPIC-010"
         points: 5
         service: "bilan-service"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 (verif docker) — defaut ANTERIEUR, identique en @2.1 : AD/AI/AQ declares `detail` avec le prefixe de leurs enfants, ils ne recoivent que des residus. Revise @2.2 EN PLACE (octroye a personne) ; @2.1 fige. DOIT PRECEDER STORY-677, DEBLOQUE STORY-537.
+        status: "in_progress"  # ⬆ 2026-09-24 : EN COURS (MNV-676, bilan-service + docs), lancee avec STORY-677 (partie catalogue en parallele). — Historique — 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 (verif docker) — defaut ANTERIEUR, identique en @2.1 : AD/AI/AQ declares `detail` avec le prefixe de leurs enfants, ils ne recoivent que des residus. Revise @2.2 EN PLACE (octroye a personne) ; @2.1 fige. DOIT PRECEDER STORY-677, DEBLOQUE STORY-537.
         story_path: "stories/STORY-676.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-677"
