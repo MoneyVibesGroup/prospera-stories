@@ -1,6 +1,6 @@
 # STORY-534 : L'inventaire de clôture — le seul chiffre qu'un cahier ne peut pas produire, et sans lequel la marge est fausse
 
-Status: review
+Status: done
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — module `inventaire` (nouveau)
@@ -40,26 +40,26 @@ déséquilibre rien : elle déplace du résultat.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Saisie, par compte de **classe 3 du référentiel du dossier** : **stock initial** et
+- [x] AC-1 — Saisie, par compte de **classe 3 du référentiel du dossier** : **stock initial** et
       **stock final**, à la date de clôture de l'exercice. Les comptes proposés viennent du
       référentiel du **dossier** (doctrine STORY-422), jamais d'une liste codée.
-- [ ] AC-2 — La variation est **calculée**, jamais saisie, et porte **sa formule et son compte de
+- [x] AC-2 — La variation est **calculée**, jamais saisie, et porte **sa formule et son compte de
       contrepartie** (`603x` ou `73x`) — même exigence que les écritures d'impôt.
-- [ ] AC-3 — ⛔ **Les deux conventions de signe sont testées dans les deux sens** : stock qui monte
+- [x] AC-3 — ⛔ **Les deux conventions de signe sont testées dans les deux sens** : stock qui monte
       et stock qui descend, pour un bien acheté **et** pour un bien produit. Quatre cas, quatre
       assertions. C'est le test de cette story.
-- [ ] AC-4 — Le **stock initial est pré-rempli depuis la balance d'ouverture** quand elle existe
+- [x] AC-4 — Le **stock initial est pré-rempli depuis la balance d'ouverture** quand elle existe
       (reprise d'à-nouveaux), et **un écart entre les deux est signalé, jamais corrigé d'office**.
       Un stock initial qui ne correspond pas au stock final de l'exercice précédent est une
       information, pas une faute de frappe à écraser.
-- [ ] AC-5 — L'inventaire produit des lignes de balance par le **même mécanisme que les provisions
+- [x] AC-5 — L'inventaire produit des lignes de balance par le **même mécanisme que les provisions
       fiscales** : **dry-run par défaut**, écriture sur acte explicite, **nouvelle version** de
       balance. On n'écrase jamais, on empile.
-- [ ] AC-6 — La **dépréciation des stocks** (`39x`) est **proposable et jamais appliquée d'office** :
+- [x] AC-6 — La **dépréciation des stocks** (`39x`) est **proposable et jamais appliquée d'office** :
       c'est un jugement, au même titre que l'affectation du résultat et la provision pour perte de
       change.
-- [ ] AC-7 — Les montants portent leur **devise** (STORY-489). Aucune constante `XOF`.
-- [ ] AC-8 — ⚠️ Un référentiel **sans classe 3 marchande** (`sfd-bceao`, `cima-assurances`) rend
+- [x] AC-7 — Les montants portent leur **devise** (STORY-489). Aucune constante `XOF`.
+- [x] AC-8 — ⚠️ Un référentiel **sans classe 3 marchande** (`sfd-bceao`, `cima-assurances`) rend
       l'écran **non applicable et le dit**, plutôt que de proposer une saisie sans objet.
 
 ## Ce que cette story NE fait PAS
@@ -249,3 +249,24 @@ déséquilibre rien : elle déplace du résultat.
   `effetResultat` et des écritures) et `compteDepreciation` du canevas (doublon de l'entrée `39`)
   retirés du contrat avant toute consommation. Écartés, tracés : 14 points dont le constat
   pré-existant sur la numérotation des provisions (cf. hors périmètre).
+- 2026-09-24 — ⑦ **revue de sécurité** (scan `opus`, préparation `haiku` ; synthèse en session) :
+  **0 constat** de confiance ≥ 80, 22 points examinés et écartés — dont, rejoués par les preuves de
+  la story : isolation multi-tenant (le filtre du scope dossier porte `orgId`, dossier d'un autre
+  cabinet ⇒ 404 identique, docker), injection NoSQL (charset `^\d{2,20}$` + relecture du corps brut,
+  `{ $gt: '' }` ⇒ 400 en e2e), gel sur les deux chemins (test de revue + 409 docker). Écarté car
+  PRÉ-EXISTANT : la fenêtre entre la garde de gel et `submit` (même patron que provisions et
+  dotations ; `POST /balances` n'applique déjà que `estClos`).
+- 2026-09-24 — **portes sur l'état final** (`33c811d`) : lint 0, build, `test:cov` 4 661 verts
+  (99,2 / 93,07 / 98,73 / 99,3 ; module `inventaire` **100 / 100 / 100 / 100**), e2e 31 suites /
+  1 230. ⚠️ 4 rouges sous une charge machine de **410** (conteneurs `zedeca-*` + l'infra PROSPERA restée
+  debout après `portly stop`) : les tests de COÛT de STORY-527/528 et un délai jest de 5 s du parseur
+  Sage — repassés SEULS : 141/141, **seuils inchangés**. **Vérification docker rejouée sur stack NEUVE**
+  (le contrat a changé en revue) : 69 contrôles, dont les deux nouveaux (`sensVariation` et
+  `compteDepreciation` absents du contrat, le sens porté par les écritures) — un contrôle rendu VIDE
+  par un `mongosh` en échec sous charge, rétabli par la base : D porte exactement deux balances
+  d'inventaire (v2 à 07:53:55, v4 à 07:57:06, toutes deux sur la brute), aucune version née de la NOP.
+  `docker compose stop` ensuite.
+- 2026-09-24 — ⑧ **`balance-service#118` rebase-mergée sur `dev`** (`0bdcebf`, `e7d391c`, `ac32942`),
+  branche supprimée (locale et distante). ⑨ **clôture** : statut `done` aux trois endroits,
+  `completed_date` posée. Suites nommées : la numérotation des provisions (constat pré-existant,
+  cf. hors périmètre) ; le contrôle `COHERENCE_STOCKS` (STORY-535) ; l'écran (FE-084).
