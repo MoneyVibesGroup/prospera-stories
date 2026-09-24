@@ -1,6 +1,6 @@
 # STORY-559 : Le référentiel déclare 11 notes annexes, le dépôt en attend 44 — les 33 manquantes, avec leurs règles d'alimentation
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-010 — Référentiels & table de passage
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/referentiel/assets`, `etats/notes-annexes`
@@ -157,5 +157,68 @@ charges ; 16B/16Bbis : 2ᵉ et 3ᵉ tableaux) relèvent du **gabarit case par ca
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-09-24).** Branches `MNV-559` : `prospera-bilan-service` (base `dev`) et
+**Statut : `done` (2026-09-24).** PR `prospera-bilan-service` **#137** rebase-mergée sur `dev` (`54447ec` + revue `763fb95`). Branches `MNV-559` : `prospera-bilan-service` (base `dev`) et
 `docs` (base `main`).
+
+- 2026-09-24 — ① cadrage (`docs` `3392ef3`) : arbitrages user (absorption de STORY-437, AC-6 lu
+  « `@2.1` figé + lignes d'actif identiques », E1 = périmètre complet), contrat amendé, nature des 44
+  feuilles.
+- 2026-09-24 — ③ **dev** (`prospera-bilan-service` `a0b0957`). **Méthode de transcription** : un script
+  lit le classeur (openpyxl, cellules fusionnées résolues) ; pour chaque feuille, le titre après « : »
+  et les en-têtes du tableau principal, empilés de haut en bas et joints par « — », espaces
+  consécutifs réduits ; deux corrections manuelles consignées (8A : `2018` est une valeur, pas un
+  en-tête ; 27B : « AUTRES ETATS DE L'OHADA » est un seul libellé sur deux lignes). La provenance de
+  chaque note (feuille, cellule de titre, plage d'en-tête) est portée par la clé `source` des sources
+  — **non packagée**, et sans le nom du classeur (il porte le NIF du contribuable, cf. `build.mjs`).
+  Contre-épreuve : 66 renvois relus sur les feuilles d'états = annexe A de 437, **0 écart**.
+  `syscohada-revise@2.2` = `292f8d78…` ; `@2.1` inchangé (`24d3e5ab…`) ; `bilan-engine@1.20.0`.
+- 2026-09-24 — ④ portes : lint 0 · build · `test:cov` 4 172 verts (99,22 % lignes / 95,53 % branches /
+  99,41 % fonctions) · e2e 887 verts. Tests d'acceptation sur l'artefact RÉEL
+  (`notes-syscohada-2.2.spec.ts`) : AC-1 (44 feuilles listées en dur → code déclaré ou motif hors
+  périmètre), AC-2 (modes, colonnes, 13/21/32 renvois, `CE → 3E`, `RL/RN → [3C, 28]`), AC-3 (les 43
+  notes sortent, les 12 non citées avec `postes: []`), AC-4 (trame : colonnes, aucune ligne), AC-5
+  (anomalie d'articulation levée sur la note 19, passif), AC-6 (sortie `@2.1` épinglée par empreinte
+  mesurée sur le code d'AVANT la story ; lignes d'actif des 11 notes identiques en `@2.2`), AC-7
+  (checksums distincts, les deux paquets chargés, tampon d'une liasse figée `@2.1` inchangé).
+  **Mutations** : 25 sur le moteur, les gardes et la donnée (note retirée, note sans feuille, `CE →
+  3e`, `RL` réduit à `3C`, `DK` sans renvoi, colonnes vidées, `3A` sans `renvoi`, `@2.1` révisé en
+  place…) — **toutes rouges** ; les mutants qui ne compilaient pas (« 0 total ») ont été réécrits,
+  un survivant (dédoublonnage redondant) a conduit à supprimer le code.
+- 2026-09-24 — ⑥ **revue de code** (scan `opus` + lentille `ponytail-review`, synthèse en session) :
+  **1 bloquant** — le `totalN: null` d'une note hétérogène se lisait sur les postes PRODUITS : une
+  ligne `419`/`409`/`478` à 0/0 faisait passer les notes 7/12/17 de 380 000/50 000/200 000 à des
+  cases vides, sur des chiffres identiques (le même exercice imprimé différemment selon la liasse qui
+  le lit). La famille se lit désormais sur la **déclaration** : le total ne dépend que du couple
+  (paquet, note). Non bloquants corrigés : ventilation des postes de PRODUIT gardée (mutant
+  survivant), AC-5 à égalité exacte, specs dédiées des deux fichiers neufs, garde « pas de somme
+  hétérogène » testée au dépassement d'entier sûr, Swagger du statut, 4 commentaires devenus faux ;
+  `ponytail` : `exigerRenvoiNote` supprimé. Commit dédié `8d3555f`.
+- 2026-09-24 — ⑦ **revue de sécurité** (scan `opus`, synthèse en session) : **0 constat** ≥ 80 —
+  saisie sur une note `MIXTE` (n'entre dans aucun montant ni contrôle ; gel et 404 inter-tenant
+  inchangés ; largeur/tailles bornées), injection de formule à l'export (exceljs écrit une chaîne en
+  texte), total `null` et contrôles, service de `@2.2` à une org non habilitée (le référentiel se lit
+  dans l'entitlement), **fuite de la pièce client** (aucun nom, NIF, adresse ni montant dans le diff —
+  contrôlé aussi en session).
+- 2026-09-24 — ④ **vérification docker sur stack NEUVE, sur l'état final `8d3555f`** : **71 contrôles,
+  0 échec**, API réelles + `mongosh` en lecture. Habilitation **par la voie réelle** (catalogue →
+  `entitlement.changed` → `orgbilanentitlements`) : A en `@2.2`, B en `@2.1`. A : 43 notes dans
+  l'ordre du formulaire, non citées à `postes: []`, 16A/18/15A `MIXTE` ventilées et complétables,
+  totaux `null` sur 12/6/28, `RL`/`RN` dans 3C et 28. B : 11 notes, `3` et non `3A` ; lignes d'actif
+  identiques entre les deux paquets (même empreinte). `PUT …/complements` 16A → 200 et persisté ;
+  refus 422 (note ventilée, largeur, note inconnue, parent `3`) **sans écriture** (`updatedAt` et
+  compteurs inchangés) ; 409 sur un jeu validé. Snapshots : A `2.2`/`292f8d78…`/43 notes, B
+  `2.1`/`24d3e5ab…`/11 notes ; relecture `versions/1` identique au snapshot. B → jeu de A : 404 ×4.
+  Compteurs finaux `jeux_etats=2`, `snapshots_liasse=2`, 0 orphelin. `docker compose stop` ensuite.
+  ⚠️ Un premier passage a été **jeté** : le correctif de revue était appliqué pendant qu'il tournait
+  (`src/` monté, `nest --watch` redémarré en boucle, VM à une charge de 220).
+
+**Constats hors périmètre, à ficher** (aucun n'est une régression de 559) :
+
+- ⚠️ **Octroi de `@2.2`** — packagé et chargeable, **servi à personne** tant que le pack du catalogue
+  ne le cite pas et que le pont `SN → syscohada-revise@2.1` de `balance-service` ne suit pas (sinon la
+  balance d'une org passée en `@2.2` ne résout plus). **Préalable de STORY-537.**
+- ⚠️ **Notes 3/3A et 4 : les renvois portent sur des postes-titres** (`AD`, `AI`, `AQ`) que le Bilan ne
+  produit jamais (les comptes vont au plus long préfixe : `231 → AK`, `271 → AS`). Mesuré en docker :
+  la note 3A totalise 1 000 000 face à 47 000 000 d'immobilisations au Bilan, la note 4 vaut 0 face à
+  2 000 000. **Identique en `@2.1`**, et aucun contrôle ne le signale (`ARTICULATION_NOTES` classe 3A
+  « non dérivable »).

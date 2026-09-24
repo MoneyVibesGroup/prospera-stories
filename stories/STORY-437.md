@@ -1,6 +1,6 @@
 # STORY-437 : Onze numéros de note sur les trente-cinq de la liasse déposée, et aucun en dehors du Bilan actif — les renvois du compte de résultat ne mènent nulle part
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-010 — États financiers (`bilan-service`)
 **Service :** `bilan-service` (`:3004`) — paquet référentiel (`postes[].note`, `notes[]`) + `scripts/referentiels`
@@ -93,12 +93,12 @@ mécanismes, deux critères. Aucun titre inventé dans un cas comme dans l'autre
 
 ## Critères d'acceptation
 
-- [ ] **AC-1** — Les postes du `COMPTE_RESULTAT` et du `BILAN_PASSIF` du paquet
+- [x] **AC-1** — Les postes du `COMPTE_RESULTAT` et du `BILAN_PASSIF` du paquet
       `syscohada-revise@2.1` portent leur `note`, **relevée par code poste** sur les colonnes `F`
       (passif) et `H` (résultat) du GUIDEF. **Les 53 couples sont en Annexe A** : la transcription
       est une recopie, pas un relevé. Le `BILAN_ACTIF` est déjà conforme (0 écart mesuré) et **ne
       doit pas être retouché**.
-- [ ] **AC-2** — `pkg.notes` déclare les **35 numéros / 45 feuilles** avec leur **titre officiel
+- [x] **AC-2** — `pkg.notes` déclare les **35 numéros / 45 feuilles** avec leur **titre officiel
       imprimé** (Annexe B, recopié tel quel) et leur `mode` : **`VENTILATION`** quand le détail de
       la note est dérivable de la **balance** (comptes du plan), **`TRAME`** sinon. Sont `TRAME` par
       construction — aucun compte ne les produit : `1`, `2`, `3A`…`3E`, `16B`, `16Bbis`, `16C`,
@@ -113,7 +113,7 @@ mécanismes, deux critères. Aucun titre inventé dans un cas comme dans l'autre
       « une note sans titre déclaré rend `libelle: null` » est **conservée**.
 - [x] AC-6 — Garde-fou « pas de renvoi orphelin », dans les deux sens. **Livré — puis amendé par
       l'AC-7, qui en corrige la règle.**
-- [ ] **AC-7 (nouveau) — le garde-fou AC-6 est amendé dans ses DEUX sens, sinon il bloque l'AC-2.**
+- [x] **AC-7 (nouveau) — le garde-fou AC-6 est amendé dans ses DEUX sens, sinon il bloque l'AC-2.**
       Zéro champ ajouté au contrat :
       - **sens aller** — un renvoi est servi s'il résout vers au moins une `NoteMeta`,
         **directement OU par préfixe** : `3` est servi parce que `3A`…`3E` existent, `27` par
@@ -126,7 +126,7 @@ mécanismes, deux critères. Aucun titre inventé dans un cas comme dans l'autre
         sinon P7 tombe et le comparateur redevient un dictionnaire SYSCOHADA ;
       - le test qui **fige le manque** (« aucun renvoi hors du Bilan actif », comptes 29 et 43) est
         **retiré et remplacé** par les comptes mesurés : **13 / 21 / 32**.
-- [ ] **AC-8 (nouveau) — multiplicité et casse du renvoi.**
+- [x] **AC-8 (nouveau) — multiplicité et casse du renvoi.**
       - `postes[].note` accepte **`string | string[]`** ; `RL` et `RN` portent `["3C", "28"]`.
         **Champ additif, rétrocompatible** : une chaîne reste une chaîne, les 13 renvois de l'actif
         ne bougent pas.
@@ -135,7 +135,7 @@ mécanismes, deux critères. Aucun titre inventé dans un cas comme dans l'autre
         `3E` sont **deux clés distinctes** dans l'index `note → NoteMeta` et dans les ensembles de
         l'AC-6/AC-7 : le renvoi de `CE` serait orphelin **sans qu'aucun test d'ordre ne rougisse**.
         Normaliser à la transcription, et un test le dit.
-- [ ] **AC-9 (nouveau) — réaligner les 11 titres déjà livrés sur les titres officiels.** Ce ne sont
+- [x] **AC-9 (nouveau) — réaligner les 11 titres déjà livrés sur les titres officiels.** Ce ne sont
       pas des variantes de style : **deux sont faux au fond**.
       - `12` — paquet : *« Écart de conversion-**Actif** »* / GUIDEF : **« ECARTS DE CONVERSION »**.
         La note sert l'actif (`BU`), le passif (`DV`) **et** le compte de résultat (`TI`, `TM` —
@@ -274,7 +274,7 @@ renvois du compte de résultat · **437c** les 21 renvois du bilan passif.
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev`** — AC-3, AC-4, AC-5 et AC-6 sont implémentés, validés, revus (code +
+**Statut : `done` (2026-09-24) — clôturée par STORY-559**, qui a livré AC-1, AC-2, AC-7, AC-8 et AC-9 dans `syscohada-revise@2.2` (`prospera-bilan-service#137`). ⚠️ AC-7 livré avec un écart assumé : le parent n'est pas résolu « par préfixe » mais par la sous-note qui se **déclare** `renvoi` (`3A←3`, `15A←15`, `16A←16`, `27A←27`) — le préfixe dit qu'une note existe, pas laquelle porte les postes. AC-9 : `@2.1` reste figé à l'octet (bump, décision user), les titres officiels sont servis en `@2.2`. — Historique — **Statut : `ready-for-dev`** — AC-3, AC-4, AC-5 et AC-6 sont implémentés, validés, revus (code +
 sécurité) et mergés — PR `bilan-service` **#68** (3 commits) rebase-mergée sur `dev` le 2026-09-02.
 **AC-1 et AC-2 restent à livrer**, avec les trois critères que l'analyse du 2026-09-03 a fait
 apparaître (**AC-7**, **AC-8**, **AC-9**).
