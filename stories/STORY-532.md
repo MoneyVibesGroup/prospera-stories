@@ -1,6 +1,6 @@
 # STORY-532 : La liasse ne connaît que le LIBELLÉ de son exercice — ni dates, ni durée, et la DSF exige les trois
 
-Status: review
+Status: done
 
 **Épic :** EPIC-011 — États financiers (liasse OHADA)
 **Service :** `bilan-service` (`jeu-etats`, `export`) — un seul dépôt, aucun contrat d'événement touché
@@ -200,3 +200,15 @@ brouillon, le snapshot pour une version figée. Une liasse non datée le dit, sa
   ~0,6 s mesurés seul — la machine était à une charge de 138 sur 8 cœurs (conteneurs d'un autre
   projet). Seuil NON touché (il est dimensionné sur le mutant quadratique, 4,4 s) ; rejoué à charge
   normale : vert.
+- 2026-09-24 — ⑦ **revue de sécurité** (scan `opus`, synthèse en session) : **0 constat** de confiance ≥ 80 —
+  IDOR par `exerciceIdN1` (lu avec l'org du jeton ET le dossier du chemin : un exercice d'ailleurs est
+  introuvable), aucun oracle d'existence (404 constant), injection d'opérateur (sonde du vrai
+  `ValidationPipe` : `{"$ne":null}`, tableau, nombre, `0x…` refusés), contournement du gel, injection
+  de formule à l'export (préfixe « clé : » constant), déni de service.
+- 2026-09-24 — **vérification docker REJOUÉE sur l'état final** (stack neuve) : **0 échec**, scénario complet
+  plus celui du constat bloquant — v1 au N-1 désigné, réouverture, recalcul sans désignation (v2
+  anonyme), dépôt de v1 : chaque version garde SON N-1 en base (`[[1,"2024-03-17"],[2,null]]`) et le
+  dépôt publie la période de v1. `docker compose stop` ensuite.
+- 2026-09-24 — ⑧ `prospera-bilan-service#135` **rebase-mergée** sur `dev` (`d2da3cd`), branche `MNV-532`
+  supprimée. ⑨ statut `review` → **`done`** aux 3 endroits, `completed_date: "2026-09-24"` ; note de
+  passage ajoutée à STORY-537 (AC-6).

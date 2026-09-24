@@ -76,3 +76,8 @@ internes du produit — la liasse est juste, l'équilibre tient, l'empreinte est
 ## Notes
 
 - Voir [[STORY-536]], [[STORY-538]], [[STORY-449]], [[STORY-441]], [[STORY-426]], [[STORY-532]], [[FE-081]].
+- ✅ **Ce que STORY-532 a posé (2026-09-24)** — pour l'AC-6 : `periode` est au contrat de la liasse
+  (`bilan-service`, jeu d'états et version figée) — bornes `AAAA-MM-JJ` (fin incluse), `dureeMoisN` en
+  mois révolus (la convention de la DSF : 17 mars → 31 décembre rend 9), celles du N-1 désigné et
+  `comparabiliteReduite`. Une version figée rend SES bornes. Une liasse non datée le dit (`motifN`) :
+  la DSF ne doit pas l'inventer.
