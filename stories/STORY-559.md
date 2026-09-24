@@ -1,6 +1,6 @@
 # STORY-559 : Le référentiel déclare 11 notes annexes, le dépôt en attend 44 — les 33 manquantes, avec leurs règles d'alimentation
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — Référentiels & table de passage
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/referentiel/assets`, `etats/notes-annexes`
@@ -83,6 +83,52 @@ financières et échéances), **27** (chiffre d'affaires), **28** (achats et cha
   plutôt qu'à absorber : les confondre ferait passer une exigence fiscale nationale pour une
   exigence comptable OHADA.
 
+## ⚖️ Décisions du 2026-09-24 — avant la première ligne
+
+**Arbitrages user** (rendus à l'ouverture du dev) :
+
+| Question | Décision |
+|---|---|
+| STORY-437 (en `review`, AC-1/2/7/8/9 non livrés) couvre la moitié de cette story | **Absorbée** : ses AC restants sont livrés ici, en `@2.2`, et 437 se clôt avec cette PR. |
+| AC-6 exige « les 11 notes à l'identique », or les renvois du GUIDEF ajoutent des postes de passif/CR aux notes 5, 6, 7, 12, 17 et 437 AC-9 réaligne leurs titres | **`@2.1` figé octet pour octet** (une liasse figée se relit telle quelle) ; en `@2.2`, sur les mêmes soldes, les **lignes d'actif** des 11 notes (postes, montants, ventilation) sont identiques. Titres, colonnes et renvois passif/CR ajoutés = **delta assumé et déclaré**. |
+| E1 — quelles notes en v1 | **Périmètre complet** : les 44 feuilles. |
+
+**Source unique : la DSF réelle** `1000745307_2025_Definitif (1).xlsx` (versée au dépôt de travail le
+2026-09-24, **non committée** — pièce client). Les titres, les colonnes et les renvois sont **relevés
+cellule par cellule** sur ses feuilles, par un script qui lit les cellules fusionnées (méthode en
+*Progress Tracking*). Contre-épreuve : les **66 renvois poste → note** relus sur les colonnes `E`/`F`/`H`
+des feuilles d'états = l'annexe A de STORY-437, **0 écart sur 66**.
+
+### Le contrat, amendé au minimum
+
+| Besoin mesuré | Réponse | Pourquoi pas autre chose |
+|---|---|---|
+| `RL`/`RN` impriment `3C&28` | `postes[].note: string \| string[]` (437 AC-8) | une chaîne `'3C&28'` serait une note fantôme |
+| le GUIDEF imprime `3e` sur `CE` | normalisé `3E` à la transcription, garde de test | `3e` ≠ `3E` comme clé : renvoi orphelin **silencieux** |
+| l'état imprime `3`, `15`, `16`, `27`, les feuilles n'existent qu'en sous-notes | `NoteMeta.renvoi` : la sous-note **déclare** le numéro parent dont elle justifie les postes (`3A←3`, `15A←15`, `16A←16`, `27A←27`) | la résolution « par préfixe » de 437 AC-7 dit *qu'*une note existe, pas **laquelle** porte les postes (`3` → `3A`…`3E` ?) |
+| 1, 31 à 34 ne sont citées par aucun état | `NoteMeta.autonome: true`, **dans le paquet** (437 AC-7) | une liste dans le moteur ferait tomber P7 |
+| une part calculée + une part à compléter | `mode: 'MIXTE'` (= nature MIXTE) ; `VENTILATION` = nature AUTOMATIQUE | renommer `VENTILATION` casserait le contrat publié |
+| notes 5, 6, 7, 12, 17, 28… mêlent actif/passif ou produits/charges | `totalN: null` quand les postes couvrent plus d'une famille | `BU + DV + TI + TM` est un chiffre sans signification (même règle que STORY-438) |
+
+### Nature de chaque feuille (44)
+
+| Nature | Notes | Motif |
+|---|---|---|
+| `VENTILATION` | 5, 6, 9, 10, 11, 14, 20, 21, 22, 23, 24, 25, 26, 27A, 29, 30 | feuille « Libellés · Année N · Année N-1 · Variation » : tout se ventile par compte |
+| `MIXTE` | 3C, 3D, 3E, 4, 7, 8, 12, 13, 15A, 16A, 17, 18, 19, 28 | montants ventilables ; échéances, devises, actionnaires, mouvements → à compléter |
+| `TRAME` | 1, 3A (alimentée par le registre), 3B, 8A, 15B, 16B, 16Bbis, 16C, 27B, 31, 32, 33, 34 | aucune donnée de balance ne les produit |
+| **hors périmètre** | **2**, **35** | feuilles **narratives** (sections de texte, liste de questions) : ni ventilation ni trame à colonnes ne les représente — rendu texte au gabarit de STORY-537 |
+
+`NOTE 23 24` est **une** feuille pour **deux** notes (`23`, `24`) : 44 feuilles ⇒ 45 numéros ⇒ 43 notes
+déclarées + 2 hors périmètre. Les notes 4, 7, 8 et 17 changent de nature (`TRAME`/`VENTILATION` →
+`MIXTE`) : leurs colonnes `@2.1` n'étaient **pas** celles de la feuille (échéances, pas mouvements) —
+elles avaient été écrites avant STORY-437 et jamais confrontées au formulaire.
+
+⚠️ `colonnes` porte le **tableau principal** de la feuille, de gauche à droite, colonne de libellés
+comprise quand elle est imprimée, en-têtes à plusieurs niveaux joints par « — ». Les tableaux
+**secondaires** (1 : engagements financiers ; 4 : filiales ; 5 : dettes HAO ; 12 : transferts de
+charges ; 16B/16Bbis : 2ᵉ et 3ᵉ tableaux) relèvent du **gabarit case par case** de STORY-537.
+
 ## Critères d'acceptation
 
 1. Les 44 feuilles de notes du classeur de référence ont chacune un code déclaré au paquet, ou
@@ -108,3 +154,8 @@ financières et échéances), **27** (chiffre d'affaires), **28** (achats et cha
   travail de saisie rigoureuse** — et c'est ce qui le rend chiffrable à 13 points.
 - ⛔ **Aucune règle ne se dérive du corpus pédagogique `Image_lecons`** : ses numéros de comptes
   sont ceux du plan **français**. Source unique : le plan du dépôt et les postes GUDEF.
+
+## Progress Tracking
+
+**Statut : `in_progress` (2026-09-24).** Branches `MNV-559` : `prospera-bilan-service` (base `dev`) et
+`docs` (base `main`).
