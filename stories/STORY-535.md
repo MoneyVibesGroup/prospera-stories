@@ -1,6 +1,6 @@
 # STORY-535 : Des achats sans aucun compte de stock — le contrôle qui rend l'oubli visible, sans jamais refuser
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-011 — États financiers (contrôles de cohérence de la liasse)
 **Service :** `bilan-service` — `controles-coherence`
@@ -137,3 +137,23 @@ contrôle **signale**, il ne décide pas — catégorie `INFORMATIF`, comme le m
   vocabulaire des contrôles d'ÉTAT, pas celui de la batterie ; M2 — aucune déclaration d'achats ni de
   variation n'existe, P7 impose de la poser dans l'artefact), 9 décisions. Deux dépôts :
   `bilan-service` et la copie de l'artefact dans `balance-service`.
+- 2026-09-24 — **dev** (bilan-service `08b7a6a`, `1cd0ea3`, `0337d81` — PR #136 ; balance-service `622499d` — PR
+  #119, jumelles) : marqueur `inventaire` dans `build.mjs` (émission en dernier, garde
+  `exigerInventaireCompletOuAbsent`), déclaré dans la source SYSCOHADA (`RA`/`RC`, `RB`/`RD`/`RF`/`TE`,
+  seuil `0.05`) ; seuls `syscohada-revise@2.1` (`484c6a80…` → `24d3e5ab…`) et `zone-franche-togo@1.0`
+  (`1b6462ac…` → `8e32081e…`) changent, diff limité aux sept lignes ; recopie à l'octet dans
+  balance-service. Contrôle `COHERENCE_STOCKS` (8ᵉ code), CR en paramètre facultatif, `MOTEUR_VERSION`
+  1.19.0. **Gardes du générateur prouvées par mutation manuelle** (hors Jest) : marqueur partiel, seuil
+  absent, seuil illisible, aucun poste `bfr: STOCKS`, sous-total `XA` marqué — cinq refus, source et
+  artefacts restaurés à l'octet. Portes : bilan-service lint 0, build, `test:cov` 4 063 (99,12 / 95,45 /
+  99,41 / 99,21), e2e 880 (dont 3 sur l'artefact RÉEL) ; balance-service lint 0, build, `test:cov` 4 664
+  (+ le test de coût de STORY-527 rouge sous charge 95, repassé seul 43/43, seuil inchangé), e2e 1 230.
+  **9 mutations rouges** — dont un survivant comblé (« ni achat ni chiffre d'affaires » : le mutant
+  `totalAchats >= 0` signalait une anomalie de zéro) et deux gardes redondantes retirées (le `typeof`
+  doublait `Number.isFinite`).
+- 2026-09-24 — **vérification docker sur stack NEUVE**, chaîne STORY-534 → 535 par les API réelles,
+  18 contrôles, 0 échec : dossier aux cahiers sans inventaire ⇒ `COHERENCE_STOCKS` `ANOMALIE`
+  `INFORMATIF`, écart 60 000 000 (les achats), libellé nommant le geste, `valide: true` ; liasse créée sur
+  la balance validée PUIS validée malgré l'anomalie (AC-7), snapshot figé en base :
+  `bilan-engine@1.19.0`, 8 contrôles, `ANOMALIE`, `valide: true` ; second dossier inventorié (STORY-534,
+  31 = 30 000 000, 6031 créditeur) ⇒ `OK`, liasse créée. `docker compose stop` ensuite. Statut → `review`.
