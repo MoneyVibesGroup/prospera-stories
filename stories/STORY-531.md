@@ -1,6 +1,6 @@
 # STORY-531 : Ce que « consolidation » veut dire ici — et ce qu'on refuse de promettre
 
-Status: review
+Status: done
 
 **Épic :** EPIC-136 — Multi-société et périmètre de groupe
 **Service :** `bilan-service` (agrégation, journal de consolidation) + `dossier-service` (périmètre
@@ -344,3 +344,43 @@ d'arrêt : chacune bornée **sur mesure**, refus nommé au-delà — jamais une 
   chaîne citée DANS `"$(…)"`, et découpait les corps JSON en plusieurs arguments. Script corrigé (corps et
   requêtes en variables, `egal` refusant tout appel sans exactement 3 arguments), stack recréée, rejoué.
 - 2026-09-24 — ⑤ branches poussées, **PR ouvertes ensemble** (contrat à 2 dépôts) : `prospera-dossier-service#35` (producteur) et `prospera-bilan-service#134` (consommateur), liées l'une à l'autre ; statut `in_progress` → `review`.
+- 2026-09-24 — ⑥ **revue de code** (scan `opus` en deux tranches — contrat, consolidation — plus la lentille
+  `ponytail-review` ; synthèse en session) : **9 constats, tous confirmés en session** (mutants rejoués :
+  les 7 survivants annoncés survivaient bien), **1 bloquant**. Corrigés dans des commits dédiés
+  (`dossier-service` `0759fd7`, `bilan-service` `412250b`) :
+  - ⛔ **bloquant — `GET …/perimetre/arretes` n'avait pas été livrée**, alors que D-531-2 et D-531-10 la
+    décident : livrée — métadonnées seules (identifiant, date, version, horodatage, effectifs ; jamais
+    les sociétés figées), du plus récent au plus ancien, paginée avec les bornes du journal, ouverte à
+    qui a la portée du dossier, 404 hors portée ;
+  - **EQUILIBRE** lisait le déséquilibre hérité sur les contributions DÉJÀ mises à l'échelle — un arrondi
+    ligne à ligne s'y serait retrouvé des deux côtés, contrôle vert : il se lit désormais sur les TOTAUX
+    BRUTS de chaque liasse (chemin indépendant, M8), prouvé par le mutant « arrondi ligne à ligne » ;
+  - `devise.source` publiait celle de la seule mère : c'est la plus faible du groupe ;
+  - code de traitement `RAPPROCHEMENT_RECIPROQUES` → **`ELIMINATIONS_PROPOSEES`** (D-531-9) ;
+  - la projection réécrivait `updatedAt` au rejeu (Mongoose ajoute `$set` à tout `updateOne`) :
+    `timestamps: { updatedAt: false }`, prouvé sur le vrai schéma avec témoin ;
+  - gardes manquantes ajoutées : export du repository et consommateur au graphe du module (retirer
+    l'export laissait 4 008 tests verts et un service qui ne démarre pas), anomalie en double, détails du
+    journal au rang 3 avec effectifs distincts, borne de lignes exacte ;
+  - Swagger complété (`SOURCES_TROP_VOLUMINEUSES`, `DOSSIER_ID_INVALIDE`) ;
+  - `ponytail` : deux simplifications retenues (une seule désignation des sociétés refusées,
+    `trouver()` sur l'identifiant déjà validé) ; commentaires périmés corrigés.
+  **21 mutations sur les correctifs, toutes rouges.** Portes rejouées : `dossier-service` lint 0,
+  build, 1 708 unitaires (99,45 / 94,61 / 98,55 / 99,56), e2e 9 suites / 350 ; `bilan-service` lint 0,
+  build, 4 013 unitaires (99,13 / 95,42 / 99,4 / 99,22), e2e 27 suites / 865.
+- 2026-09-24 — ⑦ **revue de sécurité** (scan `opus` sur les deux PR analysées ensemble, synthèse en session) :
+  **0 constat** de confiance ≥ 80 — IDOR, RBAC, anti-énumération, injection d'opérateur, message Kafka
+  empoisonné (200 000 messages mutés, aucune exception, aucun motif ne recopie une valeur reçue),
+  courses (numérotation, double annulation, arrêtés concurrents), immuabilité, bornes de volume.
+  Deux points écartés, à arbitrer côté produit : dans `bilan-service` la portée d'un dossier est
+  l'organisation (M7, antérieur à la story) — l'agrégat nomme donc des filiales qu'un TENANT_USER ne voit
+  pas dans `dossier-service` ; le plafond de 200 écritures, annulées comprises (D-531-11), peut être
+  épuisé par un abus interne attribué.
+- 2026-09-24 — **vérification docker REJOUÉE sur l'état final** (stack neuve, `down -v`) : **0 échec** —
+  tout le scénario précédent, plus la liste des arrêtés (pipeline réel `$size`, ordre, pagination,
+  aucune société figée, 404 pour le cabinet B), les écarts hérités lus sur les totaux bruts (0, 0, 0),
+  `devise.source` du groupe, `ELIMINATIONS_PROPOSEES` publié `NON_TRAITE` ; en base, les arrêtés projetés
+  portent `createdAt` et **aucun** `updatedAt`. `docker compose stop` ensuite.
+- 2026-09-24 — ⑧ `prospera-dossier-service#35` et `prospera-bilan-service#134` **rebase-mergées ensemble**
+  sur `dev` (`53f0d40`, `149d343`), branches `MNV-531` supprimées. ⑨ statut `review` → **`done`** aux 3
+  endroits, `completed_date: "2026-09-24"` ; notes de passage ajoutées à STORY-541 et STORY-542.

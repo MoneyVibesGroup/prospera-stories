@@ -54,3 +54,12 @@ propres et dont le **résultat est surévalué** — et rien ne le signale.
 
 - Voir [[STORY-541]], [[STORY-544]] (la part des minoritaires dans les résultats internes),
   [[STORY-545]], [[STORY-531]].
+- ✅ **Ce que STORY-531 a posé (2026-09-24)** — la moitié DÉCLARÉE de la Q2 : `POST …/consolidation/
+  exercices/:exerciceId/eliminations` écrit une élimination équilibrée, justifiée, numérotée, entre la
+  mère et des sociétés intégrées GLOBALEMENT, annulable avec motif (journal `ecritures_consolidation`).
+  Restent à cette story : l'origine `PROPOSEE` (`ORIGINES_ECRITURE` ne connaît que `DECLAREE` — un
+  proposé ne doit avoir AUCUN effet tant qu'il n'est pas confirmé), les résultats internes, l'effet
+  d'impôt, la reprise pluriannuelle, et l'**AC-6** : une société intégrée proportionnellement est
+  aujourd'hui REFUSÉE à la déclaration (`409 SOCIETE_NON_ELIMINABLE`, raison
+  `INTEGRATION_PROPORTIONNELLE`) plutôt qu'éliminée à 100 % — c'est ce refus que le prorata lèvera. Les
+  traitements `ELIMINATIONS_PROPOSEES` et `RESULTATS_INTERNES` sont publiés `NON_TRAITE`.

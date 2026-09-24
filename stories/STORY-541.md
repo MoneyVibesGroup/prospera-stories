@@ -45,3 +45,10 @@ les six retraitements suivants s'appliquent à une base déjà fausse.
 ## Notes
 
 - Voir [[STORY-531]] (le socle), [[STORY-542]], [[STORY-545]], `epics-consolidation-2026-08-28.md`.
+- ✅ **Ce que STORY-531 a posé (2026-09-24)** — le journal de l'AC-3 existe : collection
+  `ecritures_consolidation` de `bilan-service`, rattachée à (cabinet, dossier de la MÈRE, exercice de la
+  mère), numérotée, ACTIVE → ANNULEE par annulation motivée, jamais réécrite ni effacée (garde de
+  schéma). Il ne connaît que la nature `ELIMINATION` (`NATURES_ECRITURE`) : cette story y ajoute la
+  sienne. L'agrégat applique déjà toute écriture ACTIVE ligne à ligne, et ses contrôles RECOMPOSITION
+  et EQUILIBRE la vérifient. Le traitement `HOMOGENEISATION` est publié `NON_TRAITE`
+  (`traitements.ts`) : c'est cette story qui le fait passer `APPLIQUE`.
