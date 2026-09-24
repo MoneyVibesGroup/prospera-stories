@@ -187,6 +187,17 @@ déséquilibre rien : elle déplace du résultat.
   comptes non packagés.
 - **Le rattrapage de l'écart d'ouverture** : c'est la reprise d'à-nouveaux (STORY-087).
 - **Le contrôle `COHERENCE_STOCKS`** : STORY-535. **L'écran** : FE-084.
+- ⚠️ **Constat de revue, PRÉ-EXISTANT (hors diff) — la ré-application des provisions peut échouer
+  en 409.** Les provisions numérotent par `nextVersion`, qui ne compte que les balances SANS
+  origine (`provisions.service.ts:531/557` → `findLatest` filtre `origine: { $exists: false }`) :
+  une ré-application dont le contenu CHANGE sur une base brute inchangée recalcule la version
+  qu'occupe déjà la balance provisionnée précédente, et `submit` rend alors l'existante ⇒ 409
+  `VERSION_BALANCE_CONCURRENTE` à chaque essai, tant qu'aucune nouvelle balance brute n'existe.
+  L'avertissement `PROVISIONS_FISCALES_A_REAPPLIQUER` (ici, et depuis STORY-528 pour les dotations)
+  invite donc à un geste qui échoue dans ce cas. Établi par LECTURE du code, non rejoué en docker.
+  Piste : numéroter les provisions au-delà de toute la lignée (`derniereVersionDeLaLignee + 1`, le
+  M6 de STORY-528). **À reprendre dans une story dédiée** — la corriger ici toucherait le moteur
+  fiscal de STORY-094, hors du périmètre de cette story.
 
 ## Notes
 
@@ -225,3 +236,16 @@ déséquilibre rien : elle déplace du résultat.
   code — lignes de balance non triées (le checksum canonique trie par compte : 400) et une requête Mongo
   en ligne coupée en deux par les accolades de bash 3.2 (la garde d'arité de `egal` l'a signalée).
   `docker compose stop` ensuite. Statut → `review`.
+- 2026-09-24 — ⑥ **revue de code** (scan `opus` + lentille `ponytail-review` ; synthèse en session,
+  commit dédié `33c811d`) : **0 défaut de justesse** dans le code — conventions de signe, écritures,
+  chaîne des dérivées, NOP, numérotation, contrat publié vérifiés un à un ; **3 constats non
+  bloquants**, trois trous de test prouvés par des mutants survivants et REJOUÉS en session :
+  une correction sur la MÊME base (autre contenu) n'était couverte par aucun test (mutant « NOP sur la
+  base seule » vert : la correction n'aurait jamais été écrite) ; le gel n'était testé que sur
+  l'aperçu (mutant « gel sur l'aperçu seulement » vert — `submit` ne voit que `estClos`, jamais une
+  balance validée) ; la provenance des libellés (F-420-1) n'était lue ni à l'aperçu ni à l'écriture.
+  Trois tests ajoutés, **6 mutants rouges** (MR1, MR2, MR3, MR3b, et M1/M2 rejoués après la
+  suppression ci-dessous). Lentille ponytail : `sensVariation` (déductible du signe de
+  `effetResultat` et des écritures) et `compteDepreciation` du canevas (doublon de l'entrée `39`)
+  retirés du contrat avant toute consommation. Écartés, tracés : 14 points dont le constat
+  pré-existant sur la numérotation des provisions (cf. hors périmètre).
