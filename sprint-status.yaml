@@ -4140,6 +4140,22 @@ sprints:
         status: "done"  # ✅ CLOTUREE 2026-09-24 — prospera-bilan-service#137 rebase-mergee sur dev (54447ec + revue 763fb95). syscohada-revise@2.2 (292f8d78) : 43 notes relevees cellule par cellule sur la DSF reelle (2 et 35 narratives hors perimetre), 66 renvois (0 ecart avec l annexe A de 437), natures VENTILATION/TRAME/MIXTE, @2.1 fige a l octet. Revue de code : 1 BLOQUANT (le total null d une note heterogene dependait de la FORME de la balance — une ligne a 0/0 changeait l imprime) corrige, 5 non-bloquants corriges. Revue securite : 0 constat. Verif docker sur stack neuve, etat final : 71 controles, 0 echec, habilitation par la voie reelle. ⚠️ @2.2 SERVI A PERSONNE tant que le catalogue ne l octroie pas et que le pont SN de balance-service ne suit pas — PREALABLE DE STORY-537, a ficher. ⚠️ Notes 3A/4 : renvois sur des postes-titres jamais produits (3A = 1 000 000 face a 47 000 000 au Bilan), identique en @2.1, a ficher — Historique — ⬆ 2026-09-24 : EN COURS (MNV-559, bilan-service + docs). ABSORBE les AC restants de STORY-437 (AC-1/2/7/8/9 — decision user du 2026-09-24). Arbitrages user : AC-6 = @2.1 fige octet pour octet + lignes d actif des 11 notes identiques en @2.2 (titres realignes et renvois passif/CR = delta assume) ; E1 = PERIMETRE COMPLET (44 feuilles). Colonnes officielles et 66 renvois RELEVES SUR LA DSF REELLE (1000745307_2025_Definitif), 0 ecart avec l annexe A de 437. — Historique — CREEE le 2026-08-28. DEBLOQUE STORY-558 : sans les notes, le classeur de depot sort avec 33 FEUILLES VIDES. ⚡ CE N EST PAS UN DEFAUT DE L EXPORT, C EST UN TROU DE REFERENTIEL — et c est la BONNE architecture (les postes et leurs regles vivent en donnee versionnee, jamais en dur), donc le trou est EXACTEMENT LA OU IL DOIT ETRE REPARE. Les 11 notes declarees (3,4,5,6,7,8,9,10,11,12,17) sont L ACTIF ET UNE SEULE NOTE DE PASSIF ; manquent les notes de passif, de resultat et de detail. ⚡⚡ UNE GRANDE PARTIE EST DEJA INSTRUITE ET NE DOIT PAS ETRE REFAITE : la fiche de questions comptables du 2026-07-19, REVALIDEE LE 20/07 CONTRE LES POSTES GUDEF REELS, a deja tranche le perimetre automatisable (5,6,8,9,10,11,12,17 automatiques ; 3,4,7 a completer) et la FORME des notes a completer (TRAME pre-structuree avec les colonnes officielles, PAS un tableau vide). ⚠️ ELLE AVAIT LAISSE UNE QUESTION OUVERTE AU PO (E1) : quelles notes le pilote EXIGE en v1 — candidates citees 15, 16, 27, 28, 3C, 8. A trancher ici ou a assumer comme perimetre complet. ⇒ Trois natures DANS LA DONNEE et non dans le code : AUTOMATIQUE, TRAME, MIXTE ; le moteur ne doit porter AUCUN if par note. Montee en syscohada-revise@2.2 + checksum, non-regression exigee sur les 11 existantes.
         completed_date: "2026-09-24"
         story_path: "stories/STORY-559.md"
+      - story_id: "STORY-676"
+        title: "Les notes 3A et 4 renvoient a des lignes de titre que le Bilan ne produit jamais — la note des immobilisations totalise 1 000 000 face a 47 000 000"
+        epic: "EPIC-010"
+        points: 5
+        service: "bilan-service"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 (verif docker) — defaut ANTERIEUR, identique en @2.1 : AD/AI/AQ declares `detail` avec le prefixe de leurs enfants, ils ne recoivent que des residus. Revise @2.2 EN PLACE (octroye a personne) ; @2.1 fige. DOIT PRECEDER STORY-677, DEBLOQUE STORY-537.
+        story_path: "stories/STORY-676.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-677"
+        title: "Octroyer syscohada-revise@2.2 — le paquet des 44 feuilles de notes n est servi a personne"
+        epic: "EPIC-032"
+        points: 3
+        service: "platform-catalog-service (packs) + balance-service (artefact + pont SN)"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 — les deux packs SYSCOHADA et le pont SN de balance-service citent @2.1 ; la mecanique d octroi existe (mesuree en docker), c est la DONNEE qui manque. Prerequis STORY-676. DEBLOQUE STORY-537 en production.
+        story_path: "stories/STORY-677.md"
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-396"
         title: "Une panne d infrastructure est rendue au cabinet comme « votre piece est illisible »"
         epic: "EPIC-020"
