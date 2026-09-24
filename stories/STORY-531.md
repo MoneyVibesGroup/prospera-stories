@@ -1,6 +1,6 @@
 # STORY-531 : Ce que « consolidation » veut dire ici — et ce qu'on refuse de promettre
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-136 — Multi-société et périmètre de groupe
 **Service :** `bilan-service` (agrégation, journal de consolidation) + `dossier-service` (périmètre
@@ -296,3 +296,51 @@ d'arrêt : chacune bornée **sur mesure**, refus nommé au-delà — jamais une 
   pourcentage d'intégration proportionnelle à la part de capital des détenteurs (M3) ; l'art. 97 impose la
   même date de clôture, que les exercices répliqués permettent de vérifier (M6) ; le journal et la
   recomposition sont le socle de 541 → 548 (M9).
+- 2026-09-23 — **dev `dossier-service`** (commit `23b7497`, branche `MNV-531`) : `POST
+  /dossiers/:id/perimetre/arretes` (TENANT_ADMIN) — calcul sous le verrou de l'organisation, document
+  `perimetres_arretes` immuable au schéma (mise à jour, remplacement, suppression et `save()` d'un
+  existant refusés), version par (mère, date), journal `PERIMETRE_ARRETE` sur la mère, événement
+  `dossier.perimetre.arrete` v1 dans l'outbox **sous la même session**, taille bornée (512 Kio mesurés).
+  Portes : lint 0, build, `test:cov`, e2e 9 suites / 344 — **14 mutations, toutes rouges**.
+- 2026-09-23 — **dev `bilan-service`** (commit `9e3b0e9`, branche `MNV-531`) : consommateur
+  `dossier.perimetre.arrete` (group isolé `bilan-perimetre`), validation stricte **cohérence comprise**
+  (méthode = celle de tous les liens retenus, `null` ⇔ liens divergents ⇔ UNE anomalie citant exactement
+  ces liens, un lien retenu cité une fois, détenteurs = mère ou contrôlées, parts ≤ 100 %) — chaque règle
+  recoupée avec le calcul du producteur (`perimetre.regles.ts`) pour ne jamais écarter un message qu'il
+  émet ; `GET …/consolidation/exercices/:exerciceId/agregat`, journal `ecritures_consolidation`
+  (déclaration, annulation motivée, garde de schéma : seul un `$set` de l'annulation vers `ANNULEE` passe).
+  Portes : lint 0, build, `test:cov` 4 008 tests (99,12 / 95,36 / 99,4 / 99,21 ; fichiers neufs à 100 %
+  de lignes, ≥ 92 % de branches), e2e 27 suites / 865.
+- 2026-09-23 — **mutations `bilan-service`** : 62 menées en session (agrégation 11, plus fort reste 6,
+  service 23, traitements 5, cohérence du périmètre + garde du journal 17), **toutes rouges** — dont deux
+  après renforcement du test (tri multi-sociétés ; le test de coût, redimensionné sur le mutant
+  quadratique). Les 57 mutations du sous-agent de tests : **15 rejouées indépendamment, toutes rouges**,
+  dont la garde d'exhaustivité des codes qu'il n'avait pas pu éprouver.
+- 2026-09-23 — ⚡ **deux écarts de production relevés par le sous-agent de tests, corrigés** : la garde du
+  journal laissait passer `$set`/`$unset` de `createdAt`, un `$unset` du statut et un `$rename` entre champs
+  d'annulation (elle raisonnait par champ, pas par opérateur) ; le consommateur acceptait des anomalies
+  en double, citant des liens étrangers à leur société, et une méthode sans rapport avec ses liens.
+- 2026-09-24 — **vérification docker sur stack NEUVE** (`down -v`), tout par les API réelles, 2 cabinets,
+  **0 échec**. Ce qui a été discriminé :
+  - le **contrat réel** : le consommateur strict accepte les messages du producteur réel (v1 et v2) et
+    projette exactement ses sociétés (dossier, méthode, somme des parts) — une règle plus stricte que le
+    producteur aurait laissé l'agrégat en `PERIMETRE_NON_ARRETE` ;
+  - le **pipeline réel** sur Mongo 7 (dernier snapshot des jeux figés) et l'égalité de clôture de l'art. 97 ;
+    `101000` = 1 000 000 + 500 000 + 50 % × 200 000 = 1 600 000,00, contrôles RECOMPOSITION et EQUILIBRE
+    satisfaits, l'associée listée `MISE_EN_EQUIVALENCE_NON_TRAITEE` ;
+  - le **journal** : l'élimination touchant l'IP refusée (`SOCIETE_NON_ELIMINABLE`) sans rien écrire ;
+    l'élimination mère ↔ fille (n° 1) imputée ligne à ligne (− 5 000 000 sur les deux comptes, contrôles
+    satisfaits), **empreintes des liasses identiques avant/après** ; l'annulation passe la garde de schéma
+    sous la forme RÉELLE que Mongoose émet (horodatages compris), lignes inchangées, seconde annulation
+    `409 ECRITURE_DEJA_ANNULEE`, agrégat revenu à 1 600 000,00 ;
+  - la **version 2** du même jour retenue par l'agrégat ;
+  - le **cloisonnement** : le cabinet B reçoit `404` sur l'agrégat, l'élimination et l'arrêté du cabinet A ;
+  - la **persistance** : 2 arrêtés = 2 entrées `PERIMETRE_ARRETE` sur la mère (0 sur les sociétés) = 2
+    événements `SENT`, aucun orphelin dans un sens ni dans l'autre ; 2 projections, 2 marqueurs
+    d'idempotence ; une écriture, annulée ; rien chez B ;
+  - le **démarrage dégradé** sur cluster vierge : le consommateur du périmètre, différé faute de topic,
+    rejoint son group 5 s plus tard sans redémarrage (invariant n° 4).
+  ⚠️ Un premier passage avait affiché des ✅ faux : bash 3.2 (macOS) développe les accolades `{a,b}` d'une
+  chaîne citée DANS `"$(…)"`, et découpait les corps JSON en plusieurs arguments. Script corrigé (corps et
+  requêtes en variables, `egal` refusant tout appel sans exactement 3 arguments), stack recréée, rejoué.
+- 2026-09-24 — ⑤ branches poussées, **PR ouvertes ensemble** (contrat à 2 dépôts) : `prospera-dossier-service#35` (producteur) et `prospera-bilan-service#134` (consommateur), liées l'une à l'autre ; statut `in_progress` → `review`.
