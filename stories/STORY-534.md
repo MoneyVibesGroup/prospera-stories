@@ -1,6 +1,6 @@
 # STORY-534 : L'inventaire de clôture — le seul chiffre qu'un cahier ne peut pas produire, et sans lequel la marge est fausse
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-020 — Cahiers & rattachement (Atelier Balance)
 **Service :** `balance-service` (`:3007`) — module `inventaire` (nouveau)
@@ -199,3 +199,29 @@ déséquilibre rien : elle déplace du résultat.
 - 2026-09-24 — **cadrage fait avant tout code** : 8 constats mesurés (dont M5 : la table SN appliquée
   par préfixe écrirait une variation de stocks dans une commission sur titres SFD ou une ristourne de
   primes CIMA), 9 décisions. Un seul dépôt : `balance.created` ne porte pas l'origine.
+- 2026-09-24 — **dev `balance-service`** (commits `1f3931f`, `55a1799`, branche `MNV-534`, PR #118) : module
+  `inventaire` (canevas `GET …/inventaire`, application `POST …/inventaire/appliquer`, aperçu par
+  défaut) ; 5ᵉ origine `INVENTAIRE` ; `trouverDerniereBaseFiscale` prend la LISTE des origines exclues
+  (les dotations passent `[AMORTISSEMENTS]`, l'inventaire `[AMORTISSEMENTS, INVENTAIRE]`) ;
+  `versDtoCanonique` des dotations exporté plutôt que recopié ; verrou d'inventaire des origines, énumération
+  OpenAPI `OrigineBalance` et liste des routes à 422 mis à jour ; l'avertissement de l'agrégation nomme le
+  geste (D-534-9). Portes : lint 0, build, `test:cov` 4 659 tests (99,2 / 93,03 / 98,73 / 99,3 ; module
+  `inventaire` 100 / 98,07 / 100 / 100, `inventaire.regles.ts` 100 % partout) — ⚠️ 3 tests de COÛT
+  (STORY-527/528) rouges sous une charge machine de 139 (conteneurs `zedeca-*` d'un autre projet),
+  repassés seuls à charge 18 : 82/82, **seuils inchangés** ; e2e 31 suites / 1 230 (dont
+  `inventaire.e2e-spec.ts` : ValidationPipe de production, plan RÉEL, scope dossier). **27 mutations,
+  toutes rouges** — dont un mutant ÉQUIVALENT (M23 : le contrôleur testait un `balanceId` que le service
+  garantit ; la condition morte est retirée, M23b rouge) et une reformulation (M17 ne compilait pas).
+- 2026-09-24 — **vérification docker sur stack NEUVE** (`down -v`), tout par les API réelles :
+  67 contrôles, 0 échec. Reprise d'à-nouveaux 2025 → 2026 (31 et 245100 reportés) → cahiers (vente,
+  achat de marchandises) → agrégation (base brute `ocr` v1, l'avertissement nomme le geste) → canevas
+  (31 pré-rempli à 100 000 000 depuis le socle, 38/39 dits) → aperçu sans écriture → application :
+  `INVENTAIRE` v2 chaînée à la BRUTE, SI et SF lisibles dans les mouvements du 31 relativement à la base,
+  6031 et 73 créditeurs, rien sur 39, équilibrée, `balance.created` à l'outbox → NOP à l'identique →
+  **dotations v3 bâties SUR l'inventaire** → nouvelle application : `DOTATIONS_A_REAPPLIQUER`, v4 bâtie
+  sur la BRUTE (jamais sur la dotée), dotations republiées v5 sur v4 → balance directe : canevas
+  `BALANCE_HORS_CAHIERS`, 409, aucune écriture → cabinet B : 404 → v4 validée : inventaire 409
+  `BALANCE_VALIDEE_IMMUABLE`, cahier figé (409). ⚠️ Premier passage : deux défauts du SCRIPT, pas du
+  code — lignes de balance non triées (le checksum canonique trie par compte : 400) et une requête Mongo
+  en ligne coupée en deux par les accolades de bash 3.2 (la garde d'arité de `egal` l'a signalée).
+  `docker compose stop` ensuite. Statut → `review`.
