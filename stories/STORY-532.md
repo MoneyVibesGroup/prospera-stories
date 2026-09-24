@@ -1,6 +1,6 @@
 # STORY-532 : La liasse ne connaît que le LIBELLÉ de son exercice — ni dates, ni durée, et la DSF exige les trois
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-011 — États financiers (liasse OHADA)
 **Service :** `bilan-service` (`jeu-etats`, `export`) — un seul dépôt, aucun contrat d'événement touché
@@ -158,3 +158,22 @@ brouillon, le snapshot pour une version figée. Une liasse non datée le dit, sa
   (M1) ; le contrat de la période existe (STORY-430) mais le jeu ne le remplit pas (M2) ; le N-1 est
   anonyme et se désignera (M4) ; la durée garde LA convention de `bilan-service` (M5) ; STORY-527 ne
   dépend plus d'ici (M6).
+- 2026-09-24 — **dev `bilan-service`** (commit `4e99613`, branche `MNV-532`) : bornes capturées à la
+  création (celles que `exigerBalancePortante` lisait déjà), recopiées au gel hors empreinte ; N-1 désigné
+  par `exerciceIdN1` (création et recalcul) avec ses trois refus ; `periode` sur les 7 routes qui rendent
+  un jeu et sur la version figée — le bloc de STORY-430 par héritage (`resumerComparabilite`), plus
+  `motifN`/`motifN1` ; rattachement à la lecture par `exerciceId` ; export : Début, Clôture, Durée (en
+  mois), N-1 et comparabilité. Le compilateur impose la période à chaque appelant (paramètre requis).
+  Portes : lint 0, build, `test:cov` 4 041 tests (99,12 / 95,49 / 99,4 / 99,21 ; `periode-liasse.ts`
+  100 %), e2e 27 suites / 876 — dont 7 e2e STORY-532 (AC-4 discriminant : après le gel, le read-model
+  répond une autre année, la version rend la sienne) et 4 gardes de contrat OpenAPI. **14 mutations,
+  toutes rouges** (capture, gel, garde de chronologie, 404, pré-contrôle, rattachement, motifs, export,
+  contrôleur). L'empreinte d'export figée par STORY-528 reste valide une fois les trois lignes de
+  période retirées : STORY-532 n'ajoute rien d'autre au document.
+- 2026-09-24 — **vérification docker sur stack NEUVE** (`down -v`), tout par les API réelles, **0 échec** :
+  N-1 IRRÉGULIER (17 mars → 31 décembre, clos) désigné face à un N de 12 mois ⇒ `dureeMoisN1: 9`,
+  `comparabiliteReduite: true` ; les trois refus (sans soldes 400, exercice d'un AUTRE cabinet 404, N
+  désigné comme son N-1 400) n'écrivent aucun jeu ; bornes en base en **dates BSON** sur le jeu et sur le
+  snapshot v1 ; `periode` identique à la création, sur le jeu figé et sur la version 1 ; l'export XLSX
+  imprime début, clôture, durée, N-1 et comparabilité ; le cabinet B reçoit 404 sur la liasse de A.
+  `docker compose stop` ensuite.
