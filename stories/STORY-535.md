@@ -1,10 +1,11 @@
 # STORY-535 : Des achats sans aucun compte de stock — le contrôle qui rend l'oubli visible, sans jamais refuser
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-011 — États financiers (contrôles de cohérence de la liasse)
 **Service :** `bilan-service` — `controles-coherence`
 **Points :** 5 · **Sprint :** S20
+**Complexité :** medium — un contrôle informatif, mais sa déclaration vit dans l'ARTEFACT du référentiel : `syscohada-revise@2.1` change d'octet, et sa copie dans `balance-service` le suit (deux dépôts, PR intégrées ensemble)
 **Origine :** §8.1 de `analyse-scalabilite-multireferentiel-2026-08-27.md`, validé par le PO le 2026-08-28. **Geste ② sur trois.**
 
 ---
@@ -53,6 +54,86 @@ contrôle **signale**, il ne décide pas — catégorie `INFORMATIF`, comme le m
       fait de ce contrôle informatif. Un vert qui devient rouge sur une liasse déjà validée hier
       ferait chercher ce qu'on a cassé.
 
+## Le fait, mesuré dans le code (cadrage du 2026-09-24)
+
+- **M1 — La batterie ne parle pas le vocabulaire d'AC-1.** Un `ControleArticulation` porte
+  `code`, `libelle`, `categorie`, `statut` ∈ `OK` / `ANOMALIE` / `INDETERMINABLE` / `NON_APPLICABLE`,
+  `severite` (STORY-440), `ecart` et `elements` — **aucun booléen `coherent`**. `CALCULE` + `coherent`
+  est le vocabulaire des contrôles PORTÉS PAR LES ÉTATS (`ControleTresorerie`, `CoherenceSig`,
+  `coherenceSousTotaux`), que la batterie convertit. Ajouter `coherent` changerait la forme publiée
+  que `moteur-version.spec.ts` fige.
+- **M2 — Aucun référentiel ne déclare « achats » ni « variation de stocks ».** Seuls marqueurs
+  existants : `margeBrute` (`XA`), `chiffreAffaires` (`XB`), `bfr` — dont `bfr: 'STOCKS'` sur `BB`
+  (SYSCOHADA et zone franche). Le moteur est référentiel-agnostique (invariant P7) : `601`, `6031`,
+  `73` ne s'écrivent pas dans le code. **La déclaration vit donc dans l'artefact** — qui change
+  d'octet : régénération (`build.mjs`), checksums au registre et aux empreintes épinglées, et la
+  COPIE de `syscohada-revise@2.1` embarquée par `balance-service` (patron STORY-462/483).
+- **M3 — Les postes, mesurés dans les artefacts.** SYSCOHADA (et zone franche, même source) :
+  achats `RA` (601), `RC` (602), **`RE` (604, 605, 608 — mêle les achats NON stockés `605`)** ;
+  variations `RB` (6031), `RD` (6032), `RF` (6033), `TE` (73) ; stocks `BB` (31 à 38, `bfr: STOCKS`).
+  **SMT** : achats ET variations fondus dans `CR4` (601…608 avec 6031…6033), `73` dans `CR3` avec
+  d'autres produits — inséparables au niveau des postes. **SFD** : achats (`61`) et stocks (`32`) noyés
+  dans des postes agrégés, `603` = charges sur titres. **CIMA** : la classe 3 porte les provisions
+  techniques.
+- **M4 — Aucun seuil n'est déclaré nulle part** : les seuils de la batterie (`severiteCritique`,
+  `severiteMajeure`, `toleranceTresorerie`) sont des défauts de code surchargeables par
+  `regles` — aucun artefact ne les surcharge. AC-4 demande l'inverse : « déclaré, pas codé ».
+- **M5 — La batterie ne reçoit ni le compte de résultat ni les soldes** (`produire(pkg, bilan,
+  coherence, tft, notes, coherenceSig?)`) ; le moteur les a tous deux sous la main aux deux appels.
+- **M6 — `bfrReel.stocks` vaut `null` quand `BB` n'est pas émis** — or l'absence de tout compte de
+  stock est exactement le cas à voir : « poste de stocks déclaré mais non émis » vaut **zéro**.
+- **M7 — Ajouter un code** : `CODES_CONTROLE` fait échouer `tsc` tant que son constructeur manque ;
+  cinq specs recopient la liste à la main ; le tampon `MOTEUR_VERSION` monte à chaque contrôle ajouté
+  (précédents 401, 426, 439, 440).
+
+## Les décisions (cadrage du 2026-09-24)
+
+- **D-535-1 — Le contrôle entre dans la batterie, avec SON vocabulaire.** `COHERENCE_STOCKS`,
+  `INFORMATIF`, `statut` `OK`/`ANOMALIE`/`INDETERMINABLE`/`NON_APPLICABLE`, `severite`, `ecart`,
+  `elements` — aucun champ ajouté au contrat. AC-1 s'y lit ainsi (« cohérent » ⟺ `OK`), et le
+  patron d'AC-2 devient : **une absence n'est jamais une anomalie** — `NON_APPLICABLE` et
+  `INDETERMINABLE` ne sont jamais `ANOMALIE`, prouvé par test.
+- **D-535-2 — Un marqueur `inventaire` déclaré par l'artefact** (`ACHATS_STOCKABLES` sur `RA`,
+  `RC` ; `VARIATION_STOCKS` sur `RB`, `RD`, `RF`, `TE`) ; les stocks restent ceux que `bfr: 'STOCKS'`
+  désigne déjà. **`RE` n'est pas marqué** : il mêle les achats non stockés (`605`, l'électricité d'un
+  prestataire) — le marquer ferait crier le contrôle sur tout dossier de services. Garde de
+  `build.mjs` : les deux catégories ou aucune, sur des postes de détail du compte de résultat, un
+  poste `bfr: 'STOCKS'` présent et un seuil déclaré.
+- **D-535-3 — Le seuil est DÉCLARÉ, jamais codé** (AC-4) : `regles.seuilAchatsSansStock` = `0.05`
+  dans la source SYSCOHADA — les achats stockables pèsent au moins 5 % du chiffre d'affaires (ou le
+  chiffre d'affaires est nul). **Aucun défaut de code** : absent ou illisible ⇒ `INDETERMINABLE`.
+- **D-535-4 — `NON_APPLICABLE` quand l'artefact ne déclare pas le marqueur** (AC-5) : SFD et CIMA —
+  et le **SMT**, mesuré (M3) : ses achats et ses variations partagent une case, la déclaration n'y
+  serait pas vraie.
+- **D-535-5 — La règle** : `ANOMALIE` ⟺ achats stockables non négligeables **et** stocks nuls (postes
+  `bfr: STOCKS` émis, ou absents) **et** toutes les variations nulles. `ecart` = les achats en cause
+  (AC-3), sévérité rapportée au chiffre d'affaires (méthode de STORY-440), `elements` = les postes
+  d'achats et de stocks, adressables (`etat`/`poste`).
+- **D-535-6 — Le message nomme le geste** (AC-6) : le libellé dit « saisissez votre inventaire de
+  clôture » et renvoie à l'Atelier (STORY-534), jamais « incohérence détectée ».
+- **D-535-7 — `valide` ne bouge pas** (AC-7) : `INFORMATIF` est toujours satisfait
+  (`bloquantSatisfait`) — prouvé par test. Tampon `MOTEUR_VERSION` 1.18.0 → 1.19.0.
+- **D-535-8 — Le compte de résultat entre dans la batterie** en paramètre FACULTATIF (les ~70
+  appelants de spec ne bougent pas ; le moteur le passe aux deux appels) ; absent ⇒ `INDETERMINABLE`.
+- **D-535-9 — Deux dépôts, aucun contrat d'événement** : la copie de `syscohada-revise@2.1` dans
+  `balance-service` suit à l'octet (asset, registre, specs de checksum) ; les deux PR s'intègrent
+  ensemble.
+
+## Hors périmètre — hooks inertes documentés
+
+- **SMT** : séparer achats et variations dans sa source (`CR4`/`CRD`) avant d'y déclarer le marqueur.
+- **`RE`** : n'y compter que les achats STOCKÉS (`604`) exigerait de scinder le poste.
+- **Le renvoi cliquable** vers l'écran d'inventaire : c'est FE-084 (le contrat ne porte pas de lien).
+- **L'écran** et la phrase dans l'onglet Cahiers : FE-084.
+
 ## Notes
 
 - Voir [[STORY-534]] (le geste qui referme le trou), [[FE-084]], `controles-coherence-response.dto.ts`.
+
+## Progress Tracking
+
+- 2026-09-24 — branche `MNV-535` ouverte sur `docs/` ; statut `ready-for-dev` → `in_progress`.
+- 2026-09-24 — **cadrage fait avant tout code** : 7 constats mesurés (dont M1 — AC-1 parle le
+  vocabulaire des contrôles d'ÉTAT, pas celui de la batterie ; M2 — aucune déclaration d'achats ni de
+  variation n'existe, P7 impose de la poser dans l'artefact), 9 décisions. Deux dépôts :
+  `bilan-service` et la copie de l'artefact dans `balance-service`.
