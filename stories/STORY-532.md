@@ -122,10 +122,14 @@ de N. **Non-régression** : `soldesN1` sans désignation reste accepté — pér
 `motifN1: N1_NON_DESIGNE` ; sans comparatif, `motifN1: SANS_COMPARATIF`.
 
 **D-532-5 — L'existant, sans reprise de données** (règle du projet, AC-3) : un jeu ou une version sans
-bornes capturées est **rattaché à la lecture** — par son `exerciceId` s'il le porte, sinon par son
-libellé dans le dossier (la jointure de `refuserSiExerciceClos` et de la consultation). Introuvable ⇒
-bornes `null`, `motifN: EXERCICE_NON_RATTACHE`. Jamais une date inventée à partir de « 2025 ». Les
-bornes étant immuables, le rattachement rend celles qu'aurait données la capture.
+bornes capturées est **rattaché à la lecture par son `exerciceId`**. Sans `exerciceId` (antérieur à
+STORY-381), ou introuvable ⇒ bornes `null`, `motifN: EXERCICE_NON_RATTACHE`. Jamais une date inventée
+à partir de « 2025 ». Les bornes étant immuables, le rattachement rend celles qu'aurait données la
+capture. *(Amendée le 2026-09-24, en revue de code : le repli par LIBELLÉ initialement écrit ici n'est
+pas retenu — le libellé n'est pas une clé : `libelleDepuisBornes` nomme « 2024 » deux exercices
+distincts d'une même année civile, et un rattachement par libellé daterait une liasse avec les bornes
+d'un autre exercice. STORY-381 notait d'ailleurs qu'aucune liasse n'était encore produite depuis un
+écran.)*
 
 **D-532-6 — L'export porte la période** (AC-6) : métadonnées « Début », « Clôture », « Durée (en
 mois) » (et celles du N-1 quand il est daté), lues à la même source que la devise — le jeu pour un
@@ -177,3 +181,22 @@ brouillon, le snapshot pour une version figée. Une liasse non datée le dit, sa
   snapshot v1 ; `periode` identique à la création, sur le jeu figé et sur la version 1 ; l'export XLSX
   imprime début, clôture, durée, N-1 et comparabilité ; le cabinet B reçoit 404 sur la liasse de A.
   `docker compose stop` ensuite.
+- 2026-09-24 — ⑥ **revue de code** (scan `opus`, lentille `ponytail-review` ; synthèse en session) :
+  2 constats confirmés, 3 tests qui ne discriminaient rien (mutants survivants confirmés), 1 point à
+  trancher. Corrigés dans un commit dédié (`e3e8466`) :
+  - ⛔ **bloquant — `deposer` publiait la période du JEU** (celle de la dernière version) à côté de la
+    liasse de la version DÉPOSÉE, qui peut être antérieure (v1 au N-1 désigné, v2 anonyme, dépôt de
+    v1) : le service désigne la version servie (`versionServie`), la période se lit sur elle — e2e du
+    scénario ajouté ;
+  - Swagger : les périodes et durées de `PeriodeLiasseDto` redéclarées avec leur sens pour une liasse
+    (les descriptions héritées de STORY-430 disaient « telle que fournie » par la requête) ;
+  - gardes ajoutées : la période lue sur le BON document route par route, la re-désignation transmise
+    au recalcul, un N-1 de même durée sans « comparabilité réduite » à l'export ;
+  - **D-532-5 amendée** : rattachement par `exerciceId` seul — le libellé n'est pas une clé
+    (`libelleDepuisBornes` nomme « 2024 » deux exercices distincts d'une même année) ;
+  - `ponytail` : `PeriodeLiasseDto.depuis` réduit à un `Object.assign`.
+  **6 mutations sur les correctifs, toutes rouges.** Portes : lint 0, build, `test:cov` 4 042, e2e 877.
+  ⚠️ Un premier `test:cov` a échoué sur le test de coût de l'agrégat (STORY-531) : 3,8 s au lieu de
+  ~0,6 s mesurés seul — la machine était à une charge de 138 sur 8 cœurs (conteneurs d'un autre
+  projet). Seuil NON touché (il est dimensionné sur le mutant quadratique, 4,4 s) ; rejoué à charge
+  normale : vert.
