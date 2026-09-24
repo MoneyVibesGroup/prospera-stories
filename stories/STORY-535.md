@@ -1,6 +1,6 @@
 # STORY-535 : Des achats sans aucun compte de stock — le contrôle qui rend l'oubli visible, sans jamais refuser
 
-Status: review
+Status: done
 
 **Épic :** EPIC-011 — États financiers (contrôles de cohérence de la liasse)
 **Service :** `bilan-service` — `controles-coherence`
@@ -33,24 +33,24 @@ contrôle **signale**, il ne décide pas — catégorie `INFORMATIF`, comme le m
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Nouveau contrôle `COHERENCE_STOCKS` dans la batterie existante, suivant **exactement**
+- [x] AC-1 — Nouveau contrôle `COHERENCE_STOCKS` dans la batterie existante, suivant **exactement**
       le contrat des autres : `statut` ∈ `CALCULE` / `INDETERMINABLE` / `NON_APPLICABLE`, un booléen
       `coherent`, une catégorie `INFORMATIF`.
-- [ ] AC-2 — ⛔ **Le booléen se lit avec son statut, jamais seul.** 6ᵉ occurrence du patron, après
+- [x] AC-2 — ⛔ **Le booléen se lit avec son statut, jamais seul.** 6ᵉ occurrence du patron, après
       `coherenceSousTotaux`, `coherenceResultat` et `ControleTresorerie` : lire `coherent` seul
       afficherait une anomalie là où il n'y a qu'une absence. Un test le prouve.
-- [ ] AC-3 — Règle : la liasse porte des **achats** (comptes de la classe 6 déclarés « achats » par
+- [x] AC-3 — Règle : la liasse porte des **achats** (comptes de la classe 6 déclarés « achats » par
       le référentiel) **non négligeables**, et **aucun solde de classe 3** ni **aucune variation**
       (`603x` / `73x`) ⇒ `coherent: false`, avec le montant des achats en cause.
-- [ ] AC-4 — ⚠️ **Le seuil de « non négligeable » est déclaré, pas codé** : un montant nul ou
+- [x] AC-4 — ⚠️ **Le seuil de « non négligeable » est déclaré, pas codé** : un montant nul ou
       symbolique ne doit pas produire un signal que personne ne regardera. Un contrôle qui crie tout
       le temps ne dit plus rien.
-- [ ] AC-5 — `NON_APPLICABLE` quand le **référentiel du dossier ne déclare pas de classe 3 marchande**
+- [x] AC-5 — `NON_APPLICABLE` quand le **référentiel du dossier ne déclare pas de classe 3 marchande**
       (`sfd-bceao`, `cima-assurances`) — et `coherent: true`, parce que *« rien à réconcilier »
       compte comme un succès*. Doctrine déjà appliquée au TFT absent du SFD.
-- [ ] AC-6 — Le message **nomme le geste** : « saisissez votre inventaire de clôture » avec le renvoi
+- [x] AC-6 — Le message **nomme le geste** : « saisissez votre inventaire de clôture » avec le renvoi
       vers l'écran de STORY-534, jamais « incohérence détectée ».
-- [ ] AC-7 — ⚠️ **Non-régression : le drapeau global de la liasse ne change pas de couleur** du seul
+- [x] AC-7 — ⚠️ **Non-régression : le drapeau global de la liasse ne change pas de couleur** du seul
       fait de ce contrôle informatif. Un vert qui devient rouge sur une liasse déjà validée hier
       ferait chercher ce qu'on a cassé.
 
@@ -157,3 +157,20 @@ contrôle **signale**, il ne décide pas — catégorie `INFORMATIF`, comme le m
   la balance validée PUIS validée malgré l'anomalie (AC-7), snapshot figé en base :
   `bilan-engine@1.19.0`, 8 contrôles, `ANOMALIE`, `valide: true` ; second dossier inventorié (STORY-534,
   31 = 30 000 000, 6031 créditeur) ⇒ `OK`, liasse créée. `docker compose stop` ensuite. Statut → `review`.
+- 2026-09-24 — ⑥ **revue de code** (scan `opus` + lentille `ponytail-review` ; synthèse en session, commit
+  dédié `eca6c58`) : **0 défaut de justesse** (règle, signes, P7, gardes du générateur, recopie à l'octet
+  revérifiés) ; 7 constats non bloquants, tous traités — trois gardes sans test DISCRIMINANT, prouvées par
+  mutant survivant puis rejouées rouges : le CR sur le chemin de la LIASSE (C1 : le mutant qui l'ôte passait
+  4 063 + 880 tests — la liasse figée aurait porté `INDETERMINABLE` sans signal), le seuil DÉCLARÉ (C2 : 5 %
+  codés en dur passaient), stocks bruts/nets (C3). C4 **assumé et écrit** : avec le seuil déclaré égal au
+  défaut `severiteCritique`, toute anomalie ressort `CRITIQUE` en SYSCOHADA. C5 Swagger (`ecart` = achats
+  en cause), C6 JSDoc détaché par insertion (dixième récidive), C7 justification du tampon. Ponytail :
+  union littérale au lieu d'un tableau sans consommateur.
+- 2026-09-24 — ⑦ **revue de sécurité** (préparation `haiku`, analyse `opus`) : **0 constat** — le contrôle
+  ne peut ni bloquer ni débloquer une validation (`bloquantSatisfait` seul écrivain, prouvé en docker),
+  artefact vérifié au sha256 dans les deux dépôts, coût borné par le référentiel embarqué.
+- 2026-09-24 — **portes sur l'état final** (bilan-service) : lint 0, build, `test:cov` 4 067, e2e 880.
+  Aucune vérification docker rejouée : ni l'artefact ni la forme de la réponse n'ont bougé en revue
+  (tests, descriptions Swagger, commentaires, type).
+- 2026-09-24 — ⑧ **`bilan-service#136` et `balance-service#119` rebase-mergées ENSEMBLE sur `dev`**,
+  branches supprimées. ⑨ clôture : statut `done` aux trois endroits, `completed_date` posée.
