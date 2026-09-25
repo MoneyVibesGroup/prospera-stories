@@ -4145,7 +4145,8 @@ sprints:
         epic: "EPIC-010"
         points: 5
         service: "bilan-service"
-        status: "in_progress"  # ⬆ 2026-09-24 : EN COURS (MNV-676, bilan-service + docs), lancee avec STORY-677 (partie catalogue en parallele). — Historique — 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 (verif docker) — defaut ANTERIEUR, identique en @2.1 : AD/AI/AQ declares `detail` avec le prefixe de leurs enfants, ils ne recoivent que des residus. Revise @2.2 EN PLACE (octroye a personne) ; @2.1 fige. DOIT PRECEDER STORY-677, DEBLOQUE STORY-537.
+        status: "done"  # ✅ CLOTUREE 2026-09-25 — prospera-bilan-service#138 rebase-mergee (6c9fcf3 + revue 8bb2e54). AC-0 : le BILAN etait faux aussi (AZ = AP seul, BZ != DZ) ; voie A : AD/AI/AQ en sous-totaux dans une table de passage propre a @2.2, en-cours sur leur ligne (2191 AE, 2193 AF, 2392/2393 AL, 2495 AN — plan SYSCOHADA revise), @2.2 revise EN PLACE (08571c9b), @2.1 fige. Revue de code : 2 non-bloquants corriges (surcharge vers un sous-total : compte perdu en silence → publie NON MAPPE + refus a la proposition + champ `rattachable`). Securite : 0. Verif docker stack neuve : 132 OK. ⚠️ Revele STORY-678 : EQUILIBRE_BILAN OK sur un Bilan @2.1 imprime desequilibre. — Historique — ⬆ 2026-09-24 : EN COURS (MNV-676, bilan-service + docs), lancee avec STORY-677 (partie catalogue en parallele). — Historique — 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 (verif docker) — defaut ANTERIEUR, identique en @2.1 : AD/AI/AQ declares `detail` avec le prefixe de leurs enfants, ils ne recoivent que des residus. Revise @2.2 EN PLACE (octroye a personne) ; @2.1 fige. DOIT PRECEDER STORY-677, DEBLOQUE STORY-537.
+        completed_date: "2026-09-25"
         story_path: "stories/STORY-676.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-677"
@@ -4155,6 +4156,14 @@ sprints:
         service: "platform-catalog-service (packs) + balance-service (artefact + pont SN)"
         status: "ready-for-dev"  # 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 — les deux packs SYSCOHADA et le pont SN de balance-service citent @2.1 ; la mecanique d octroi existe (mesuree en docker), c est la DONNEE qui manque. Prerequis STORY-676. DEBLOQUE STORY-537 en production.
         story_path: "stories/STORY-677.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-678"
+        title: "Un Bilan imprime desequilibre se valide — aucun controle ne regarde la cascade des sous-totaux"
+        epic: "EPIC-010"
+        points: 3
+        service: "bilan-service"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la verif docker de STORY-676 : liasse @2.1 avec BZ 26 900 000 face a DZ 75 900 000, EQUILIBRE_BILAN OK ecart 0, liasse VALIDEE. Le verdict lit l identite directe (juste), la cascade imprimee n est lue par AUCUN controle (exclue a dessein pour les AMORCE). Categorie a piloter par meta.statut (P7).
+        story_path: "stories/STORY-678.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-396"
         title: "Une panne d infrastructure est rendue au cabinet comme « votre piece est illisible »"
