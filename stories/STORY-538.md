@@ -163,3 +163,55 @@ ne garde que **l'empreinte** (sha256 + taille) — l'archivage du fichier lui-m�
 
 - 2026-09-25 — ① cadrage : décisions user (fiscal-service seul, empreinte seule), conception D-538-1 à
   D-538-11 écrite avant le code.
+- 2026-09-25 — ③ **dev** — `prospera-fiscal-service` `3f82668` (PR **#7**) : domaine pur
+  `domain/depot/depot.ts` (machine à états, chaîne, bornes, motif, obligation, divergence) ; service
+  `application/depots/depots.service.ts` (ordre : format → portée en amont → chaîne → une écriture) ;
+  ports `RegistreDepots` et `SourceLiasseDeposee` ; adaptateur Mongo (collection `depots`, index
+  `une_transmise_par_chaine` et `une_retransmission_par_rejet`, écriture conditionnelle append-only) ;
+  lecteurs stricts de `bilan-service` (`versions/:v` → empreinte + `valideAt` ; `etats/:id` → statut +
+  `echeanceDepot`) ; contrôleur `/depots` (multipart borné, fichier haché en mémoire, jamais écrit).
+- 2026-09-25 — ④ **portes** : lint 0 · build · **1 075** unitaires · **75** e2e · couverture
+  99,47 / 95,05 / 98,66 / 98,96 (fichiers neufs à 100 % de lignes, sauf une garde inatteignable).
+  **Mutations — 16/16 tuées** (script `PROSPERA/tmp/mutation-538/muter.py`, qui refuse un motif
+  introuvable ; deux mutants d'abord non compilables — « 0 test » — réécrits avant d'être comptés) :
+  filtre sans `statut: TRANSMISE` · rejet qui ferme l'obligation · retransmission non liée admise ·
+  motif rogné · motif converti par le DTO · chaîne lue avant la portée · portée dossier non vérifiée ·
+  accusé ouvert au `TENANT_USER` · transmission ouverte au `TENANT_USER` · index partiel élargi ·
+  numéro d'accusé jamais exigé · borne basse retirée · version non scellée admise · obligation lue sur
+  la tête seule · identifiants non normalisés · retransmission datée avant son rejet.
+- 2026-09-25 — ④ **vérification docker sur stack NEUVE** (`down -v`) : **81 OK, 0 KO** —
+  `PROSPERA/tmp/verif-docker-538/`. Code des branches prouvé (restart + « Found 0 errors », sha256
+  hôte = src monté). En base (`mongo-fiscal`) : dépôt 1 cité avec l'empreinte **du snapshot relu dans
+  `bilan_service`**, la référence de format du manifeste, le canal `TELESERVICE`/`DECLARE`, l'empreinte
+  du fichier recalculée ; **les deux index éprouvés par INSERTION DIRECTE** (`E11000` sur chacun) ;
+  cloisonnement B → 404 sur dépôt, rejet et chaîne de A ; `motDePasse` / `identifiantPortail` → 400 ;
+  motif relu **à l'octet** ; transmission jamais réécrite ; retransmission non liée 409, liée 201 ;
+  accusé sans numéro 422 ; réécriture après acceptation 409 ; divergence publiée puis résorbée par le
+  `deposer` de `bilan-service` ; 0 orphelin ; seule `fiscal_service.depots` a bougé (0 → 2).
+  ⚠️ **Réserve** : `bilan-service` publiait une échéance **non constatable**
+  (`DATE_LIMITE_INDETERMINABLE`) — le relais est prouvé en docker sur ce cas ; le cas daté (jours
+  négatifs) l'est en unitaire et en e2e.
+  ⚠️ **Constat HORS PÉRIMÈTRE** : au démarrage à froid, le consommateur `dossier-kyc` de
+  `dossier-service` a crashé (`KafkaJSGroupCoordinatorNotFound`, Kafka pas prêt) et **n'a jamais
+  rejoint son groupe** — ses voisins si ; le read-model KYC restait vide, tout `POST /dossiers` en
+  403 `KYC_NOT_APPROVED`. Contourné par un `docker restart` ; à ficher (démarrage dégradé, invariant 4).
+- 2026-09-25 — ⑥ **revue de code** (scan `opus`) : **2 constats retenus, corrigés** (`b25fbae`) —
+  ① **bloquant** : `@EstObjectId()` admet les majuscules et la clé de chaîne se compare comme une
+  chaîne ⇒ `66F1…` ouvrait une **seconde chaîne** (deux `TRANSMISE` que l'index ne voyait pas), puis le
+  recoupement d'`id` des amonts rendait ce dépôt illisible (502) — identifiants normalisés en minuscules
+  aux DTO ; ② une retransmission pouvait être **datée avant le rejet** qu'elle remplace —
+  `borneBasseTransmission`. Lentille ponytail : `lireChaine` passe la clé telle quelle (appliqué) ;
+  factorisation de l'intercepteur multer **écartée** (toucherait le code de 537 hors périmètre).
+  Écartés par le scan (< 80) : course entre deux premiers dépôts (40), borne « aujourd'hui » en UTC (50),
+  recalcul chez bilan sur jeu rouvert (60), consigne de divergence après réouverture (55).
+- 2026-09-25 — ⑦ **revue de sécurité** (scan `opus`) : **1 constat, confiance 88, corrigé**
+  (`33e5b05`) — CWE-639 / A01 : `GET /depots` s'en remettait à `bilan-service` pour la portée par
+  dossier. ⚡⚡ **La prémisse de conception était FAUSSE, mesurée dans le code** : `bilan-service` ne
+  filtre que par ORGANISATION (`dossier-scope.guard.ts`, `findOne({ dossierId, orgId })`) ; seul
+  `dossier-service` connaît l'affectation. Un `TENANT_USER` non affecté lisait la chaîne entière —
+  motif de rejet de l'administration, numéro d'accusé, auteurs. La portée se vérifie désormais chez
+  `dossier-service` dans `lireChaine` **et** `transmettre` (défense en profondeur), avant toute
+  lecture de chaîne, avec la même réponse qu'une liasse inexistante. Port et adaptateur corrigés.
+  Mutations M17/M18 tuées ; **table rejouée en entier sur l'état final : 18/18**.
+  ⛔ **Constat PRÉ-EXISTANT, HORS PÉRIMÈTRE, à ficher** : ce même `bilan-service` sert donc les liasses
+  d'un dossier à tout collaborateur de l'organisation, affecté ou non.
