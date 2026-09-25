@@ -4154,7 +4154,7 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "platform-catalog-service (packs) + balance-service (artefact + pont SN)"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 — les deux packs SYSCOHADA et le pont SN de balance-service citent @2.1 ; la mecanique d octroi existe (mesuree en docker), c est la DONNEE qui manque. Prerequis STORY-676. DEBLOQUE STORY-537 en production.
+        status: "in_progress"  # ⬆ 2026-09-25 : EN COURS (MNV-677 : platform-catalog-service + balance-service + docs) — STORY-676 mergee, @2.2 = 08571c9b. — Historique — 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 — les deux packs SYSCOHADA et le pont SN de balance-service citent @2.1 ; la mecanique d octroi existe (mesuree en docker), c est la DONNEE qui manque. Prerequis STORY-676. DEBLOQUE STORY-537 en production.
         story_path: "stories/STORY-677.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-678"
