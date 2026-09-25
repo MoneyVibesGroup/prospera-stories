@@ -1,9 +1,9 @@
 # STORY-537 : Le fichier e-DSF Togo — le premier pays, et le jalon `format confirmé` est la story
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
-**Service :** `fiscal-service` + `bilan-service`
+**Service :** `fiscal-service` (générateur, paquet `TG` × `DSF`) + `dossier-service` (miroir du registre pays) — `bilan-service` **lu, non modifié**
 **Points :** 13 · **Sprint :** S20
 **Prérequis :** **STORY-536** (le contrat de paquet de dépôt)
 **Bloquée par :** ✅ **DÉBLOQUÉE le 2026-08-28.** Le seul motif était *« le gabarit officiel e-DSF de
@@ -52,9 +52,65 @@ Le programme a produit deux erreurs de ce type, et **les deux étaient plausible
 internes du produit — la liasse est juste, l'équilibre tient, l'empreinte est bonne — et elle est
 **rejetée au guichet**, ou pire, **acceptée avec des montants dans les mauvaises cases**.
 
+## ⚖️ Cadrage du 2026-09-25 — décisions prises avant la première ligne
+
+**Décisions user** : gabarit = **copie anonymisée** de la DSF réelle (option b) ; le générateur
+**remplit le classeur fourni** (celui que le cabinet télécharge sur le portail de l'OTR pour son
+client ; en test, le gabarit anonymisé).
+
+### ⚡ Ce que la mesure du classeur a appris — et qui fonde la conception
+
+| Mesure (DSF réelle, 92 feuilles) | Conséquence |
+|---|---|
+| Le classeur est **personnalisé par l'OTR** : NIF dans une cellule **verrouillée** (`Page de garde!F29`), GUID identique en `A1` des 92 feuilles, empreintes de 40 caractères cachées (`AL30xx`, 84 feuilles) | on **remplit le classeur du contribuable**, on n'en fabrique pas un : un fichier rebâti sur un gabarit commun perdrait ces marques, dont le contrôle au guichet est inconnu |
+| **6 061 formules**, 87 feuilles protégées, 5 validations, feuilles « Contrôle de cohérence » (VRAI/FAUX) | écriture **chirurgicale** dans le XML des seules cellules de saisie : aucune formule écrasée, rien réenregistré par une bibliothèque |
+| Sur les lignes de titre (`AD`, `AI`, `AQ`…), le formulaire **calcule lui-même** brut/amortissements | le gabarit ne cible **que des cellules de saisie** (style déverrouillé) — jamais une formule |
+| États : ~300 cellules de saisie, chaque ligne porte son **code poste** en colonne B | le rattachement poste → case est **mécanique et sourcé par le formulaire lui-même** |
+| Notes : **4 291** cellules de saisie, lignes par nature (« Marchandises », « Matières premières »…) | rattacher chaque ligne à des comptes est une transcription du calibre de STORY-559 ⇒ **hors périmètre**, story à part |
+
+Gabarit anonymisé : `PROSPERA/tmp/gabarit-dsf/dsf-togo-sn-gabarit.xlsx` (sha256 `4576c003…`,
+reproductible) — saisies vidées, 93 formules liées au classeur 2024 du client retirées, NIF/GUID/
+empreintes remplacés par des zéros de même forme, métadonnées, chemin d'enregistrement
+(`C:\Users\<poste>\Desktop\OTR\<sigle>\`), lien externe et paramètres d'impression retirés ;
+**deux contrôles de fuite** (l'un indépendant du script, à marqueurs connus, jamais versionnés) et
+tous deux **mutés** ; ouvert par Excel sans réparation. Versé comme **fixture** avec son script.
+
+### La conception retenue
+
+- **Où** : `fiscal-service` — AD-11 (« le contenu de la liasse vient de `bilan-service` ;
+  `fiscal-service` en fait l'emballage ») et PRD §4. Il lit la **version figée** par
+  `GET …/bilan/etats/:id/versions/:version` (empreinte vérifiée par `bilan-service`) et le dossier par
+  `GET /dossiers/:id` (`dossier-service`), par des **ports** à adaptateur HTTP qui transmettent le jeton
+  de l'appelant — chaque service applique son propre cloisonnement (404). Aucune base partagée,
+  aucune copie.
+- **Le paquet `TG` × `DSF` v1.0** (1ʳᵉ instance du contrat de STORY-536) : `format.support: TABLEUR`,
+  `schema` = la description du classeur attendu (feuilles, **ancres** — le code poste de chaque ligne
+  ciblée —, référentiels acceptés, devise) ; `gabarit` = une entrée par cellule de saisie, **sourcée**
+  (feuille, ligne, colonne du formulaire) ; `canal` GUDEF (LPF art. 17) ; `calendrier` clôture + 4 mois
+  (CGI art. 96, **à confirmer**) ; `penalites` 30/40/80 % (LPF art. 121) ; statut
+  `a-valider-par-expert`.
+- **Stateless** : le classeur entre dans la requête, le classeur rempli en sort ; rien n'est stocké.
+  Le fichier produit **porte la référence du format et de la liasse** qui l'ont produit (propriétés
+  personnalisées du document — AC-3 de 536). L'archivage du livrable et l'accusé : STORY-538.
+- **Dépôt assisté** : le classeur rempli s'ouvre dans Excel (recalcul forcé à l'ouverture), le cabinet
+  complète ce que le produit ne sait pas (notes, champs hors liasse), lit la feuille « Contrôle de
+  cohérence », enregistre et dépose sur GUDEF.
+
+### Gardes (refus sans rien produire)
+
+| Refus | Pourquoi |
+|---|---|
+| Classeur non reconnu (feuille ou ancre absente) | un formulaire révisé ne se remplit pas « à peu près » : c'est le jalon `format confirmé` |
+| **NIF du classeur ≠ NIF du dossier** | ne jamais verser la liasse d'un client dans le formulaire d'un autre |
+| Référentiel ou devise hors de ceux que le paquet déclare | le gabarit est écrit en postes SYSCOHADA, en XOF |
+| Un contrôle bloquant figé n'est pas `OK`/`NON_APPLICABLE`, ou `RESULTAT_NON_AFFECTE` (STORY-426) est absent de la version | AC-5 |
+| **Cascade des sous-totaux incohérente** (`coherenceSousTotaux.coherent: false`) | le trou de STORY-678 : une liasse `@2.1` imprime un Bilan déséquilibré que rien ne bloque |
+| Période inconnue (`motifN`) | la DSF a ses dates : on ne les invente pas (STORY-532) |
+| Fichier hostile : taille, bombe zip, macro (`vbaProject`), `DOCTYPE`/entités XML | le classeur vient de l'utilisateur |
+
 ## Critères d'acceptation
 
-- [ ] AC-1 — Le **gabarit officiel de l'OTR** est versé au dépôt, avec sa référence et sa date, et
+- [ ] AC-1 — *(cadré : le gabarit anonymisé versé comme fixture avec son script et sa date ; le paquet `TG` × `DSF` v1.0 publié au manifeste de `fiscal-service`, `dossier-service` le reflète — Togo `depot: servi` pour `DSF`)* Le **gabarit officiel de l'OTR** est versé au dépôt, avec sa référence et sa date, et
       packagé selon STORY-536. **C'est l'AC-0 de fait : rien ne commence avant.**
 - [ ] AC-2 — Le fichier est généré **depuis une version FIGÉE** de la liasse, jamais depuis un
       brouillon ni depuis un recalcul. ⚠️ `JeuEtatsService.consulter()` recalcule aujourd'hui quel
@@ -62,7 +118,7 @@ internes du produit — la liasse est juste, l'équilibre tient, l'empreinte est
       `GET /etats/:id`.
 - [ ] AC-3 — Chaque case du fichier est **traçable jusqu'au poste de liasse** qui l'a alimentée. Un
       dépôt qu'on ne peut pas expliquer case par case n'est pas défendable devant un contrôle.
-- [ ] AC-4 — Le fichier porte l'**identité du déclarant** et du **signataire** (nom, n° d'inscription
+- [ ] AC-4 — *(cadré : déclarant = raison sociale + NIF lus dans `dossier-service` ; signataire {nom, qualité} et expert-comptable {nom, n° d'inscription à l'ordre} fournis à la génération — aucune donnée inventée : date de signature et date d'arrêté vides si non fournies)* Le fichier porte l'**identité du déclarant** et du **signataire** (nom, n° d'inscription
       à l'ordre) — reprise de FE-081, et **STORY-441** reste le blocage réel : aucune route ne
       résout aujourd'hui un `userId` en nom.
 - [ ] AC-5 — ⛔ **Les contrôles bloquants de la liasse sont rejoués avant génération** : on ne
@@ -70,8 +126,19 @@ internes du produit — la liasse est juste, l'équilibre tient, l'empreinte est
       résultats coexistant), qui est précisément le contrôle nº 2 de l'OTR.
 - [ ] AC-6 — La **durée de l'exercice** (STORY-532) est portée : la DSF a sa colonne, et un premier
       exercice de 18 mois est le cas normal d'une entreprise qui démarre.
-- [ ] AC-7 — Un jeu de test complet est déposé au dépôt : une liasse connue → le fichier attendu,
+- [ ] AC-7 — *(cadré : liasse synthétique + gabarit anonymisé → classeur attendu épinglé par **sha256** — sortie déterministe)* Un jeu de test complet est déposé au dépôt : une liasse connue → le fichier attendu,
       **octet pour octet**. C'est la seule non-régression qui tienne sur un format administratif.
+
+## Hors périmètre (cadrage du 2026-09-25)
+
+- **Les 43 feuilles de notes** : 4 291 cellules de saisie à rattacher ligne par ligne aux comptes —
+  **story à créer** à la clôture. Le classeur produit les laisse vierges ; le cabinet les complète.
+- Les champs d'identification hors liasse et hors dossier (RCCM, CNSS, activité, dirigeants,
+  domiciliations bancaires…) : laissés au cabinet.
+- L'archivage du livrable, l'accusé de dépôt, le cycle de vie après `VALIDE` : **STORY-538**.
+- Le dépôt automatisé sur GUDEF : **STORY-560** (amende AD-13).
+- La feuille « Balance (Optionnel) » : **STORY-555/557**.
+
 
 ## Notes
 
@@ -81,3 +148,8 @@ internes du produit — la liasse est juste, l'équilibre tient, l'empreinte est
   mois révolus (la convention de la DSF : 17 mars → 31 décembre rend 9), celles du N-1 désigné et
   `comparabiliteReduite`. Une version figée rend SES bornes. Une liasse non datée le dit (`motifN`) :
   la DSF ne doit pas l'inventer.
+
+## Progress Tracking
+
+**Statut : `in_progress` (2026-09-25).** Branches `MNV-537` : `prospera-fiscal-service` et
+`prospera-dossier-service` (base `dev`), `docs` (base `main`).
