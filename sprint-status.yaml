@@ -3998,7 +3998,8 @@ sprints:
         epic: "EPIC-032"
         points: 13
         service: "fiscal-service"
-        status: "in_progress"  # 🚧 EN COURS le 2026-09-25 — branche MNV-538 (docs + fiscal-service). Cadrage : decisions user = fiscal-service SEUL (propagation ACCEPTEE -> DEPOSE de bilan-service en HOOK INERTE, story a creer) et EMPREINTE SEULE du fichier transmis (archivage = story a part). Conception D-538-1 a 11 ecrite avant le code : nouvel agregat `Depot` (1er agregat persiste de fiscal-service), journal `transitions[]` append-only par updateOne conditionnel, chaine lineaire (dossier, jeu, pays, etat) avec index uniques partiels, motif de rejet conserve a l octet, obligation OUVERTE tant qu aucun depot n est ACCEPTEE (echeance RELAYEE de bilan-service, jamais recalculee), portee dossier re-verifiee en amont. — Historique — CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — VOIE A (le produit depose), decision 1 sur 5. Le cycle de vie servi par bilan-service s'arrête à VALIDE, c'est-à-dire figée dans Prospera. La voie A ajoute trois états que le produit ne connaît pas, et le troisième est celui qu'on oublie :
+        status: "done"  # ✅ CLOTUREE 2026-09-25 — PR prospera-fiscal-service#7 rebase-mergee sur `dev` (3 commits : feature, revue de code, revue de securite). Premier agregat persiste de fiscal-service : `depots`, cycle TRANSMISE -> ACCEPTEE | REJETEE, journal `transitions[]` append-only (une seule ecriture conditionnelle), chaine lineaire tenue par 2 index uniques partiels EPROUVES PAR INSERTION DIRECTE en docker, motif de rejet relu A L OCTET, obligation OUVERTE tant qu aucun depot n est accepte (echeance RELAYEE de bilan-service), divergence avec DEPOSE publiee. REVUE DE CODE : 2 constats corriges — ① BLOQUANT : un identifiant en MAJUSCULES ouvrait une SECONDE chaine (deux TRANSMISE invisibles a l index, puis 502) ; ② une retransmission pouvait etre datee AVANT le rejet qu elle remplace. REVUE DE SECURITE : 1 constat (88) corrige — ⚡⚡ la premisse etait FAUSSE : bilan-service ne filtre la portee QUE par organisation (dossier-scope.guard.ts findOne({dossierId, orgId})) ; un TENANT_USER non affecte lisait la chaine (motif, accuse, auteurs) ⇒ portee exigee chez dossier-service. Portes : lint 0, build, 1 082 unitaires (--runInBand : la spec chronometree de 537 cede sous charge machine 47), 77 e2e, couverture 99,47/95,36/98,67/99 ; 18/18 mutations tuees, table rejouee sur l etat final. Verif docker REJOUEE sur stack NEUVE apres correctifs : 84 OK / 0 KO. Suites creees : STORY-681 (propagation ACCEPTEE -> DEPOSE, outbox), 682 (archivage du fichier), 683 (portee bilan-service, PRE-EXISTANT), 684 (consommateur dossier-kyc qui crashe au boot). — Historique — 🚧 EN COURS le 2026-09-25 — branche MNV-538 (docs + fiscal-service). Cadrage : decisions user = fiscal-service SEUL (propagation ACCEPTEE -> DEPOSE de bilan-service en HOOK INERTE, story a creer) et EMPREINTE SEULE du fichier transmis (archivage = story a part). Conception D-538-1 a 11 ecrite avant le code : nouvel agregat `Depot` (1er agregat persiste de fiscal-service), journal `transitions[]` append-only par updateOne conditionnel, chaine lineaire (dossier, jeu, pays, etat) avec index uniques partiels, motif de rejet conserve a l octet, obligation OUVERTE tant qu aucun depot n est ACCEPTEE (echeance RELAYEE de bilan-service, jamais recalculee), portee dossier re-verifiee en amont. — Historique — CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — VOIE A (le produit depose), decision 1 sur 5. Le cycle de vie servi par bilan-service s'arrête à VALIDE, c'est-à-dire figée dans Prospera. La voie A ajoute trois états que le produit ne connaît pas, et le troisième est celui qu'on oublie :
+        completed_date: "2026-09-25"
         story_path: "stories/STORY-538.md"
       - story_id: "STORY-539"
         title: "Le calendrier de dépôt — multi-pays, multi-état, et l'échéance se calcule depuis la clôture réelle"
@@ -4182,6 +4183,38 @@ sprints:
         service: "fiscal-service (paquet TG/DSF v1.1) ; bilan-service lu"
         status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la cloture de STORY-537 : les notes y ont ete mises hors perimetre, mesure a l appui (4 291 cellules de saisie, lignes par nature a rattacher aux comptes, sourcees).
         story_path: "stories/STORY-680.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-681"
+        title: "Un accuse consigne dans fiscal-service ne marque pas la liasse deposee — la propagation ACCEPTEE -> DEPOSE"
+        epic: "EPIC-032"
+        points: 8
+        service: "fiscal-service (producteur, outbox a creer) + bilan-service (consommateur)"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : decision user — la propagation etait un hook inerte de 538 ; la divergence ACCUSE_NON_REPORTE_SUR_LA_LIASSE se voit en docker. Contrat = 2 depots.
+        story_path: "stories/STORY-681.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-682"
+        title: "Le fichier reellement transmis n est pas conserve — seule son empreinte l est"
+        epic: "EPIC-032"
+        points: 5
+        service: "fiscal-service (MinIO, bucket prive)"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : decision user — empreinte seule en 538, archivage en story a part.
+        story_path: "stories/STORY-682.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-683"
+        title: "bilan-service sert les liasses d un dossier a tout collaborateur de l organisation, affecte ou non"
+        epic: "EPIC-012"
+        points: 5
+        service: "bilan-service"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : ⛔ constat de SECURITE PRE-EXISTANT mesure par la revue de 538 : dossier-scope.guard.ts filtre findOne({dossierId, orgId}) seulement.
+        story_path: "stories/STORY-683.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-684"
+        title: "Au demarrage a froid, le consommateur KYC de dossier-service crashe et ne revient jamais"
+        epic: "EPIC-012"
+        points: 3
+        service: "dossier-service"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : observe en verif docker 538 (passe 1) : KafkaJSGroupCoordinatorNotFound, groupe dossier-kyc jamais re-joint, read-model KYC vide, POST /dossiers en 403. Invariant 4. Intermittent.
+        story_path: "stories/STORY-684.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-396"
         title: "Une panne d infrastructure est rendue au cabinet comme « votre piece est illisible »"
