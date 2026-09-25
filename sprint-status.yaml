@@ -4154,7 +4154,8 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "platform-catalog-service (packs) + balance-service (artefact + pont SN)"
-        status: "in_progress"  # ⬆ 2026-09-25 : EN COURS (MNV-677 : platform-catalog-service + balance-service + docs) — STORY-676 mergee, @2.2 = 08571c9b. — Historique — 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 — les deux packs SYSCOHADA et le pont SN de balance-service citent @2.1 ; la mecanique d octroi existe (mesuree en docker), c est la DONNEE qui manque. Prerequis STORY-676. DEBLOQUE STORY-537 en production.
+        status: "done"  # ✅ CLOTUREE 2026-09-25 — PR jumelles rebase-mergees ENSEMBLE : prospera-balance-service#120 (recopie @2.2 a l octet 08571c9b ; pont SN = liste par preference 2.2 puis 2.1, le resolveur sert la premiere version que l org DETIENT ; revue : l inventaire rend le couple servi + `habilite`) puis prospera-platform-catalog-service#26 (packs distributeur/cabinet → @2.2, transcription). Revues : securite 0, code 2 mineurs corriges. Verif docker stack neuve, 4 orgs (pack, ancienne @2.1, mixte, sans SYSCOHADA) : 178 OK ; 4 KO = UN defaut ANTERIEUR (la validation ne reverifie pas l habilitation) → STORY-679. ⚠️ La console front code @2.1 (et sfd-bceao@1.3, inexistant) en dur : ticket frontend. STORY-537 debloquee cote back. — Historique — ⬆ 2026-09-25 : EN COURS (MNV-677 : platform-catalog-service + balance-service + docs) — STORY-676 mergee, @2.2 = 08571c9b. — Historique — 🆕 CREEE le 2026-09-24 par la cloture de STORY-559 — les deux packs SYSCOHADA et le pont SN de balance-service citent @2.1 ; la mecanique d octroi existe (mesuree en docker), c est la DONNEE qui manque. Prerequis STORY-676. DEBLOQUE STORY-537 en production.
+        completed_date: "2026-09-25"
         story_path: "stories/STORY-677.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-678"
@@ -4164,6 +4165,14 @@ sprints:
         service: "bilan-service"
         status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la verif docker de STORY-676 : liasse @2.1 avec BZ 26 900 000 face a DZ 75 900 000, EQUILIBRE_BILAN OK ecart 0, liasse VALIDEE. Le verdict lit l identite directe (juste), la cascade imprimee n est lue par AUCUN controle (exclue a dessein pour les AMORCE). Categorie a piloter par meta.statut (P7).
         story_path: "stories/STORY-678.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-679"
+        title: "Une balance se valide sous un referentiel que l organisation ne detient plus — la validation ne reverifie pas l habilitation"
+        epic: "EPIC-032"
+        points: 3
+        service: "balance-service"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la verif docker de STORY-677 : brouillon SN depose sous @2.1, habilitation passee a smt-togo@1.0, POST valider → 200 VALIDEE + outbox + projection bilan ; seul le depot passe par le resolveur. Defaut ANTERIEUR, identique sur dev.
+        story_path: "stories/STORY-679.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-396"
         title: "Une panne d infrastructure est rendue au cabinet comme « votre piece est illisible »"
