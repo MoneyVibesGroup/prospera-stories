@@ -1,6 +1,6 @@
 # STORY-537 : Le fichier e-DSF Togo — le premier pays, et le jalon `format confirmé` est la story
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` (générateur, paquet `TG` × `DSF`) + `dossier-service` (miroir du registre pays) — `bilan-service` **lu, non modifié**
@@ -110,23 +110,23 @@ tous deux **mutés** ; ouvert par Excel sans réparation. Versé comme **fixture
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — *(cadré : le gabarit anonymisé versé comme fixture avec son script et sa date ; le paquet `TG` × `DSF` v1.0 publié au manifeste de `fiscal-service`, `dossier-service` le reflète — Togo `depot: servi` pour `DSF`)* Le **gabarit officiel de l'OTR** est versé au dépôt, avec sa référence et sa date, et
+- [x] AC-1 — *(cadré : le gabarit anonymisé versé comme fixture avec son script et sa date ; le paquet `TG` × `DSF` v1.0 publié au manifeste de `fiscal-service`, `dossier-service` le reflète — Togo `depot: servi` pour `DSF`)* Le **gabarit officiel de l'OTR** est versé au dépôt, avec sa référence et sa date, et
       packagé selon STORY-536. **C'est l'AC-0 de fait : rien ne commence avant.**
-- [ ] AC-2 — Le fichier est généré **depuis une version FIGÉE** de la liasse, jamais depuis un
+- [x] AC-2 — Le fichier est généré **depuis une version FIGÉE** de la liasse, jamais depuis un
       brouillon ni depuis un recalcul. ⚠️ `JeuEtatsService.consulter()` recalcule aujourd'hui quel
       que soit le statut (**STORY-449**) : lire la liasse par `GET …/versions/:version`, jamais par
       `GET /etats/:id`.
-- [ ] AC-3 — Chaque case du fichier est **traçable jusqu'au poste de liasse** qui l'a alimentée. Un
+- [x] AC-3 — Chaque case du fichier est **traçable jusqu'au poste de liasse** qui l'a alimentée. Un
       dépôt qu'on ne peut pas expliquer case par case n'est pas défendable devant un contrôle.
-- [ ] AC-4 — *(cadré : déclarant = raison sociale + NIF lus dans `dossier-service` ; signataire {nom, qualité} et expert-comptable {nom, n° d'inscription à l'ordre} fournis à la génération — aucune donnée inventée : date de signature et date d'arrêté vides si non fournies)* Le fichier porte l'**identité du déclarant** et du **signataire** (nom, n° d'inscription
+- [x] AC-4 — *(cadré : déclarant = raison sociale + NIF lus dans `dossier-service` ; signataire {nom, qualité} et expert-comptable {nom, n° d'inscription à l'ordre} fournis à la génération — aucune donnée inventée : date de signature et date d'arrêté vides si non fournies)* Le fichier porte l'**identité du déclarant** et du **signataire** (nom, n° d'inscription
       à l'ordre) — reprise de FE-081, et **STORY-441** reste le blocage réel : aucune route ne
       résout aujourd'hui un `userId` en nom.
-- [ ] AC-5 — ⛔ **Les contrôles bloquants de la liasse sont rejoués avant génération** : on ne
+- [x] AC-5 — ⛔ **Les contrôles bloquants de la liasse sont rejoués avant génération** : on ne
       produit pas un fichier de dépôt depuis une liasse en anomalie. Y compris **STORY-426** (deux
       résultats coexistant), qui est précisément le contrôle nº 2 de l'OTR.
-- [ ] AC-6 — La **durée de l'exercice** (STORY-532) est portée : la DSF a sa colonne, et un premier
+- [x] AC-6 — La **durée de l'exercice** (STORY-532) est portée : la DSF a sa colonne, et un premier
       exercice de 18 mois est le cas normal d'une entreprise qui démarre.
-- [ ] AC-7 — *(cadré : liasse synthétique + gabarit anonymisé → classeur attendu épinglé par **sha256** — sortie déterministe)* Un jeu de test complet est déposé au dépôt : une liasse connue → le fichier attendu,
+- [x] AC-7 — *(cadré : liasse synthétique + gabarit anonymisé → classeur attendu épinglé par **sha256** — sortie déterministe)* Un jeu de test complet est déposé au dépôt : une liasse connue → le fichier attendu,
       **octet pour octet**. C'est la seule non-régression qui tienne sur un format administratif.
 
 ## Hors périmètre (cadrage du 2026-09-25)
@@ -151,7 +151,7 @@ tous deux **mutés** ; ouvert par Excel sans réparation. Versé comme **fixture
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-09-25).** Branches `MNV-537` : `prospera-fiscal-service` et
+**Statut : `done` (2026-09-25).** PR jumelles rebase-mergées ensemble : `prospera-fiscal-service` **#6** puis `prospera-dossier-service` **#36**. Branches `MNV-537` : `prospera-fiscal-service` et
 `prospera-dossier-service` (base `dev`), `docs` (base `main`).
 
 - 2026-09-25 — ③ **dev** — `prospera-fiscal-service` `7717c65` (PR **#6**), `prospera-dossier-service`
@@ -174,3 +174,39 @@ tous deux **mutés** ; ouvert par Excel sans réparation. Versé comme **fixture
     synthétique (contrôlé) ; le gabarit repasse le vérificateur indépendant (0 fuite).
   - ⚠️ **Rattrapage** dans `dossier-service` : le miroir des référentiels n'avait pas reçu
     `syscohada-revise@2.2` (STORY-559/677) — `registre-pays.coherence.spec.ts` rougissait.
+- 2026-09-25 — ⑦ **revue de sécurité** (scan `opus`) : **1 constat grave, confiance 95, mesuré** —
+  CWE-1333 : des expressions à coût **quadratique** sur une balise ouvrante sans fermante
+  (`<Relationship ` ×40k, 1,45 Ko envoyés ⇒ 21,6 s ; ~96 Ko ⇒ des heures) gelaient la boucle
+  d'événements : **tout `fiscal-service`** (routes de tous les cabinets, `/health`, Kafka) — une seule
+  requête, le throttler n'y pouvait rien. Corrigé (`a26402a`) : balayage **linéaire** du XML, petites
+  parties bornées, ouverture/remplissage dans un **fil isolé** (délai 30 s, tas plafonné, 2 fils au plus) ;
+  23 formes hostiles < 7 ms à 2N ; test chronométré qui rougit sur les anciennes expressions. Le reste
+  tient : bombe zip, chemins, XXE, SSRF (redirections non suivies), jeton, cloisonnement 404, injection.
+- 2026-09-25 — ⑥ **revue de code** (scan `opus`, trois points mesurés sur le vrai moteur) : **3 bloquants**
+  corrigés (`7a4cd95`) — C1 **montant perdu sans bruit** (immobilisations sur `AD`/`AI` en `@2.1` ⇒ AZ du
+  formulaire 10 000 contre 470 000, contrôle OTR n°1 FAUX, fichier livré) ⇒ refus nommé
+  `LIASSE_NON_TRANSCRIPTIBLE` ; C2 `E23` (« NOM COMMERCIAL ») recevait le sigle ⇒ retirée ; C3 balance
+  **après détermination** ⇒ CR à zéro écrit comme mesuré ⇒ refus nommé en N, cases N-1 (CR et TFT)
+  vierges tracées `NON_PRODUIT` sur une N-1 définitive. + un test qu'une mutation traversait (caches de
+  formules), 2 mineurs. `CJ` : aucun double comptage (mesuré dans les deux états de balance).
+- 2026-09-25 — ④ **vérification docker sur stack NEUVE** (état final) : **221 OK, 0 bug** — habilitations
+  par le catalogue ; livrable A : 163 cases écrites conformes à des attentes recalculées depuis
+  `versions/1`, 59 vierges à raison, NIF et GUID intacts, 5 966 formules, protections et validations
+  identiques, 0 cache, `fullCalcOnLoad`, propriétés du format et de la liasse, déterministe ; refus
+  `NIF_DIVERGENT`, `CLASSEUR_NON_RECONNU`, `CLASSEUR_MACRO_INTERDITE`, `.rels` hostile en 1,6 s avec
+  `/health` réactif ; 404 version / autre organisation / liasse non figée ; **aucune écriture** en base.
+  ⚡ **Le livrable ouvert dans Excel, recalculé : contrôle OTR n°1 (équilibre) = VRAI (759 000 =
+  759 000), n°2 (résultat CR = passif) = VRAI (97 000), durée = 12.** Scripts :
+  `PROSPERA/tmp/verif-docker-537/`.
+- 2026-09-25 — portes finales rejouées en session (`7a4cd95`) : lint 0 · build (prebuild) ·
+  `test:cov` 958 · e2e 60. ⑧ `#6` puis `#36` rebase-mergées.
+
+**Pour la suite :**
+
+- **STORY-680 (créée)** : les 43 feuilles de notes (4 291 cases) — le classeur les laisse aujourd'hui au
+  cabinet.
+- `'Page de garde'!E23` : le formulaire la libelle « NOM COMMERCIAL » mais la relit « SIGLE USUEL »
+  (`'FICHE DEPOT'!D31`, en-têtes des notes) — à trancher par l'expert ; laissée au cabinet.
+- Le calendrier (CGI art. 96, 30/04) et l'adresse GUDEF restent **à confirmer** (paquet
+  `a-valider-par-expert`).
+- STORY-538 (archive du livrable, accusé), STORY-560 (dépôt automatisé), STORY-678/679 inchangées.
