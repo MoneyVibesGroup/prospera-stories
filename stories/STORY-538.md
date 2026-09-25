@@ -1,6 +1,6 @@
 # STORY-538 : Transmission, accusé — et REJET : l'état que le produit ne connaît pas et qui coûte 40 %
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` — `bilan-service` et `dossier-service` **lus, non modifiés**
@@ -34,21 +34,21 @@ moment que personne ne choisit.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Le cycle de vie porte `TRANSMISE`, `ACCEPTEE`, `REJETEE`, en plus des états existants.
+- [x] AC-1 — Le cycle de vie porte `TRANSMISE`, `ACCEPTEE`, `REJETEE`, en plus des états existants.
       Chaque transition est **horodatée, attribuée et append-only** : un dépôt ne se réécrit pas.
-- [ ] AC-2 — Un dépôt cite **la version figée** qu'il a transmise **et son empreinte** (STORY-452).
+- [x] AC-2 — Un dépôt cite **la version figée** qu'il a transmise **et son empreinte** (STORY-452).
       On dépose **une** version, pas « la liasse ».
-- [ ] AC-3 — Un **rejet** porte son **motif** tel que l'administration le rend, **non reformulé**.
+- [x] AC-3 — Un **rejet** porte son **motif** tel que l'administration le rend, **non reformulé**.
       ⚠️ Un motif traduit ou résumé fait perdre le vocabulaire exact que le cabinet devra citer au
       guichet.
-- [ ] AC-4 — ⛔ **Un rejet ne clôt rien** : l'échéance reste ouverte, le retard continue de se
+- [x] AC-4 — ⛔ **Un rejet ne clôt rien** : l'échéance reste ouverte, le retard continue de se
       compter, et l'écran le dit. C'est l'inverse du réflexe — un état terminal se lit « c'est fini ».
-- [ ] AC-5 — Une **retransmission** après rejet crée un **nouveau dépôt** lié au précédent, et
+- [x] AC-5 — Une **retransmission** après rejet crée un **nouveau dépôt** lié au précédent, et
       conserve les deux. Le rejet fait partie du dossier de contrôle.
-- [ ] AC-6 — ⚠️ **La transmission elle-même est optionnelle et déclarée par le paquet** : tous les
+- [x] AC-6 — ⚠️ **La transmission elle-même est optionnelle et déclarée par le paquet** : tous les
       canaux ne sont pas automatisables. Un canal `physique` produit le fichier et **enregistre un
       dépôt déclaré par l'utilisateur** — le cycle de vie est le même, l'automatisation non.
-- [ ] AC-7 — Aucun secret d'authentification à un téléservice n'est stocké en clair. ⚠️ C'est
+- [x] AC-7 — Aucun secret d'authentification à un téléservice n'est stocké en clair. ⚠️ C'est
       exactement la condition bloquante C8 déjà rencontrée par `notification-service` : **la
       nommer ici évite de la redécouvrir au moment de brancher le premier téléservice.**
 
@@ -137,12 +137,12 @@ ne garde que **l'empreinte** (sha256 + taille) — l'archivage du fichier lui-m�
 ## Hors périmètre (cadrage du 2026-09-25)
 
 - ⛔ **La propagation `ACCEPTEE` → `DEPOSE` vers `bilan-service`** — décision user : hook inerte
-  documenté, **story à créer** à la clôture (événement `fiscal.*` → consommateur `bilan-service`, qui
+  documenté, **STORY-681** (événement `fiscal.*` → consommateur `bilan-service`, qui
   suppose d'abord une **outbox** dans `fiscal-service`). En attendant, la lecture de la chaîne
   **publie la divergence** (accusé consigné ici sans `DEPOSE` là-bas, ou l'inverse) : les deux faits
   coexistent, ils ne se contredisent pas en silence.
-- **L'archivage du fichier transmis** (décision user) : seule son empreinte est conservée — story à
-  créer.
+- **L'archivage du fichier transmis** (décision user) : seule son empreinte est conservée —
+  **STORY-682**.
 - **La chaîne d'audit serveur d'AD-10** (`fiscal_service_audit`, insertion seule, empreintes
   chaînées) : non implémentée dans le service ; le journal vit sur le dépôt, append-only **par le
   code** — hook nommé.
@@ -158,7 +158,7 @@ ne garde que **l'empreinte** (sha256 + taille) — l'archivage du fichier lui-m�
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-09-25).** Branches `MNV-538` : `prospera-fiscal-service` (base `dev`),
+**Statut : `done` (2026-09-25).** PR `prospera-fiscal-service` **#7** rebase-mergée sur `dev`. Branches `MNV-538` : `prospera-fiscal-service` (base `dev`),
 `docs` (base `main`).
 
 - 2026-09-25 — ① cadrage : décisions user (fiscal-service seul, empreinte seule), conception D-538-1 à
@@ -194,7 +194,7 @@ ne garde que **l'empreinte** (sha256 + taille) — l'archivage du fichier lui-m�
   ⚠️ **Constat HORS PÉRIMÈTRE** : au démarrage à froid, le consommateur `dossier-kyc` de
   `dossier-service` a crashé (`KafkaJSGroupCoordinatorNotFound`, Kafka pas prêt) et **n'a jamais
   rejoint son groupe** — ses voisins si ; le read-model KYC restait vide, tout `POST /dossiers` en
-  403 `KYC_NOT_APPROVED`. Contourné par un `docker restart` ; à ficher (démarrage dégradé, invariant 4).
+  403 `KYC_NOT_APPROVED`. Contourné par un `docker restart` — **STORY-684** (démarrage dégradé, invariant 4).
 - 2026-09-25 — ⑥ **revue de code** (scan `opus`) : **2 constats retenus, corrigés** (`b25fbae`) —
   ① **bloquant** : `@EstObjectId()` admet les majuscules et la clé de chaîne se compare comme une
   chaîne ⇒ `66F1…` ouvrait une **seconde chaîne** (deux `TRANSMISE` que l'index ne voyait pas), puis le
@@ -213,5 +213,20 @@ ne garde que **l'empreinte** (sha256 + taille) — l'archivage du fichier lui-m�
   `dossier-service` dans `lireChaine` **et** `transmettre` (défense en profondeur), avant toute
   lecture de chaîne, avec la même réponse qu'une liasse inexistante. Port et adaptateur corrigés.
   Mutations M17/M18 tuées ; **table rejouée en entier sur l'état final : 18/18**.
-  ⛔ **Constat PRÉ-EXISTANT, HORS PÉRIMÈTRE, à ficher** : ce même `bilan-service` sert donc les liasses
-  d'un dossier à tout collaborateur de l'organisation, affecté ou non.
+  ⛔ **Constat PRÉ-EXISTANT, HORS PÉRIMÈTRE** : ce même `bilan-service` sert donc les liasses d'un
+  dossier à tout collaborateur de l'organisation, affecté ou non — **STORY-683**.
+- 2026-09-25 — ④ **portes finales** (`33e5b05`) : lint 0 · build · **1 082/1 082** unitaires ·
+  **77/77** e2e · couverture 99,47 / 95,36 / 98,67 / 99. ⚠️ Mesuré : en parallèle, la spec
+  **chronométrée de 537** (`balayage-lineaire`, borne 500 ms) cède sous une charge machine de 47 due à
+  d'autres processus (665 à 958 ms) ; seule elle passe (26/26), et la suite complète passe en
+  `--runInBand`. Aucun fichier `src/adapters/xlsx` n'est touché par 538.
+- 2026-09-25 — ⑧ **vérification docker REJOUÉE sur stack NEUVE, état final** (`33e5b05`) : **84 OK,
+  0 KO** — les 81 de la passe 1, plus un identifiant en MAJUSCULES qui retombe sur la même chaîne
+  (409 `DEPOT_EN_COURS`, aucune seconde chaîne en base). Passe 1 archivée dans `passe-1/`. Stack
+  arrêtée (`docker compose stop`) après la vérification.
+- 2026-09-25 — ⑧ **PR #7 rebase-mergée** sur `dev` (3 commits : feature `3f82668`, revue de code
+  `b25fbae`, revue de sécurité `33e5b05`), branche supprimée.
+- 2026-09-25 — ⑨ **clôture** : suites créées — **STORY-681** (propagation `ACCEPTEE` → `DEPOSE`,
+  outbox), **STORY-682** (archivage du fichier transmis), **STORY-683** (portée par dossier de
+  `bilan-service`, pré-existant), **STORY-684** (consommateur `dossier-kyc` qui crashe au boot).
+  FE-095 débloquée côté backend.
