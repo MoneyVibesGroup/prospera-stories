@@ -1,6 +1,6 @@
 # STORY-677 : Octroyer `syscohada-revise@2.2` — le paquet des 44 feuilles de notes n'est servi à personne
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `platform-catalog-service` (packs) + `balance-service` (artefact + pont `SN`)
@@ -59,4 +59,4 @@ refusée par `balance-service`, qui compare le **couple exact** et n'embarque pa
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-09-24).** Créée par la clôture de STORY-559.
+**Statut : `in_progress` (2026-09-25).** Branches `MNV-677` : `prospera-platform-catalog-service` et `prospera-balance-service` (base `dev`), `docs` (base `main`). Partie catalogue committée (`026a474`).
