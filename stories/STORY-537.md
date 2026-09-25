@@ -153,3 +153,24 @@ tous deux **mutés** ; ouvert par Excel sans réparation. Versé comme **fixture
 
 **Statut : `in_progress` (2026-09-25).** Branches `MNV-537` : `prospera-fiscal-service` et
 `prospera-dossier-service` (base `dev`), `docs` (base `main`).
+
+- 2026-09-25 — ③ **dev** — `prospera-fiscal-service` `7717c65` (PR **#6**), `prospera-dossier-service`
+  `5e6545c` (PR **#36**, jumelle — à intégrer après fiscal-service) :
+  - paquet `TG` × `DSF` v1.0 (`sha256:44a99f80…`) produit par un script reproductible depuis le
+    gabarit anonymisé : **223 cases de saisie** (Bilan actif 66, passif 44, compte de résultat 66,
+    TFT 35, page de garde 3, fiche d'identification 9), **125 ancres** ; non ciblé : les 95 cases de
+    lignes à code qui sont des **formules** du formulaire (titres, totaux, NET = F−G), `K9`, `R5`,
+    `F29` (NIF OTR) ; grammaire des postes typée (`SOURCE|CODE|champ`) ; `signeParSens` (le formulaire
+    attend les charges en négatif) et `controlesExiges` déclarés dans le schéma, jamais dans le code ;
+  - générateur hexagonal (ports `SourceLiasseFigee`, `SourceDossier`, `ClasseurTableur`), écriture
+    chirurgicale (`fflate` 0.8.3 à la compression, `zlib` borné à la décompression), 17 gardes ;
+  - **AC-7** : liasse synthétique au format réel (produite par le vrai moteur de `bilan-service`) +
+    gabarit ⇒ sha256 épinglé `fb2bb20f…` ; un **évaluateur des formules du formulaire** prouve au
+    centime que le classeur recalcule nos totaux (BZ, AZ, CP, DZ, les 9 SIG, ZA…ZH, `R5` = 12) et
+    que les contrôles OTR n°1 et n°2 valent « VRAI » ;
+  - 18 mutations tuées ; portes : lint 0 · build · `test:cov` 869 · e2e 60.
+  - ⚠️ **Relevé en session avant commit** : le vrai NIF du contribuable servait de valeur de test dans
+    4 specs et un commentaire (pris dans la doc) — remplacé par un NIF fictif ; la fixture de liasse est
+    synthétique (contrôlé) ; le gabarit repasse le vérificateur indépendant (0 fuite).
+  - ⚠️ **Rattrapage** dans `dossier-service` : le miroir des référentiels n'avait pas reçu
+    `syscohada-revise@2.2` (STORY-559/677) — `registre-pays.coherence.spec.ts` rougissait.
