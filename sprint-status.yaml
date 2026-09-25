@@ -3998,7 +3998,7 @@ sprints:
         epic: "EPIC-032"
         points: 13
         service: "fiscal-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — VOIE A (le produit depose), decision 1 sur 5. Le cycle de vie servi par bilan-service s'arrête à VALIDE, c'est-à-dire figée dans Prospera. La voie A ajoute trois états que le produit ne connaît pas, et le troisième est celui qu'on oublie :
+        status: "in_progress"  # 🚧 EN COURS le 2026-09-25 — branche MNV-538 (docs + fiscal-service). Cadrage : decisions user = fiscal-service SEUL (propagation ACCEPTEE -> DEPOSE de bilan-service en HOOK INERTE, story a creer) et EMPREINTE SEULE du fichier transmis (archivage = story a part). Conception D-538-1 a 11 ecrite avant le code : nouvel agregat `Depot` (1er agregat persiste de fiscal-service), journal `transitions[]` append-only par updateOne conditionnel, chaine lineaire (dossier, jeu, pays, etat) avec index uniques partiels, motif de rejet conserve a l octet, obligation OUVERTE tant qu aucun depot n est ACCEPTEE (echeance RELAYEE de bilan-service, jamais recalculee), portee dossier re-verifiee en amont. — Historique — CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — VOIE A (le produit depose), decision 1 sur 5. Le cycle de vie servi par bilan-service s'arrête à VALIDE, c'est-à-dire figée dans Prospera. La voie A ajoute trois états que le produit ne connaît pas, et le troisième est celui qu'on oublie :
         story_path: "stories/STORY-538.md"
       - story_id: "STORY-539"
         title: "Le calendrier de dépôt — multi-pays, multi-état, et l'échéance se calcule depuis la clôture réelle"
