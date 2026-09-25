@@ -39,9 +39,12 @@ refusée par `balance-service`, qui compare le **couple exact** et n'embarque pa
 - [ ] AC-2 — `balance-service` embarque `syscohada-revise-2.2.json` **à l'octet** (même sha256 que
       `bilan-service`, garde de byte-identité comme pour `@2.1`) et son pont `SN` résout `@2.2`.
       `@2.1` reste au manifeste de `balance-service` (octrois existants).
-- [ ] AC-3 — Vérification docker, stack neuve, voie réelle : une organisation provisionnée par le
-      pack reçoit `@2.2` pour `bilan` **et** `balance` ; sa balance se valide, sa liasse sort 43
-      notes ; une organisation restée en `@2.1` n'est pas affectée.
+- [ ] AC-3 — Vérification docker, stack neuve, voie réelle : une organisation qui reçoit le pack
+      (octroi `bilan` en `@2.2`) **et** une habilitation `balance` en `@2.2` — ⚠️ octroyée **à part** :
+      les packs n'ont pas de module `balance` (écart connu `GAP-packs-verticaux-sans-module-balance`,
+      constat de revue) — voit sa balance se valider et sa liasse sortir 43 notes ; une organisation
+      restée en `@2.1` n'est pas affectée ; une organisation mixte (`bilan@2.2` / `balance@2.1`) est
+      servie sans erreur (les 5 comptes ajoutés en `@2.2` sont déposables sous `@2.1`).
 - [ ] AC-4 — Mutation : remettre le pont `SN` sur `@2.1` fait rougir le test du pont ; retirer
       l'artefact `@2.2` de `balance-service` fait rougir la garde de byte-identité.
 
