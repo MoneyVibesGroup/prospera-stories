@@ -1,6 +1,6 @@
 # STORY-540 : Le dossier de validation de `cima-assurances` — ce qu'on soumet, à qui, et ce qu'on attend en retour
 
-Status: review
+Status: done
 
 **Complexité :** medium
 
@@ -306,10 +306,10 @@ le contournerait ([[STORY-521]]). L'AC-3 reste juste pour le produit ; le regist
 - [x] `python3 outils/verifier.py` : **aucun `ECHEC` nouveau** par rapport à la mesure d'avant la
       story.
 - [x] Tout lien relatif du dossier résout vers un fichier existant.
-- [ ] Revue de code et revue de sécurité passées (`opus`), constats traités.
+- [x] Revue de code et revue de sécurité passées (`opus`), constats traités.
 - [x] ⚠️ **Vérification docker : non applicable** — la story ne persiste rien et ne touche aucun
       service. Dit, pas omis.
-- [ ] Statut aligné aux **3 endroits**.
+- [x] Statut aligné aux **3 endroits**.
 
 ## Notes
 
@@ -319,7 +319,7 @@ le contournerait ([[STORY-521]]). L'AC-3 reste juste pour le produit ; le regist
 
 ## Progress Tracking
 
-**Statut : `review` le 2026-09-26** — cadré, rédigé, validé ; revues ⑥ et ⑦ à passer. Cadrage mesuré **avant** toute rédaction du dossier : douze
+**Statut : `done` le 2026-09-26** — cadré, rédigé, validé, revu (code et sécurité), intégré par la PR `prospera-stories#323`. Cadrage mesuré **avant** toute rédaction du dossier : douze
 constats (M1 → M12), dont **trois qui contredisent la story** — le statut vaut `amorce` (M2), il n'est
 **pas** publié partout (M3), le plan n'est pas verbatim (M4) — et **deux qui la dépassent** : les
 textes publient déjà une partie des réponses (M5, M6), et trois règlements de 2024 manquaient au
@@ -399,3 +399,72 @@ portent le premier trouvé.
 ⚠️ **Vérification docker : non applicable, et non lancée** — la story ne persiste rien et ne modifie
 aucun service. Les constats sur le comportement des routes (M3, R-01) sont établis **par lecture du
 code** sur `origin/dev`, pas par une mesure à l'exécution.
+
+### ⑥ Revue de code — dix constats, tous du texte, dont cinq bloquants
+
+Analyse en `opus`, sur le diff de la PR `#323`. **Le socle a tenu** : empreinte de l'artefact, formules
+et leur développement, index des comptes (une réplique de `rattacher()` sur les 90 comptes : 0
+divergence), textes verbatim contrôlés ligne à ligne, comptes et statuts. Ce qui n'a pas tenu, c'est
+ce que le dossier **dit** — le livrable même.
+
+| # | Constat | Gravité | Traitement |
+|---|---|---|---|
+| 1 | R-01 affirmait que « les versions » ne servent pas le statut ; la liasse **scellée** le stocke et deux routes le ressertent sous `liasse` — la story qui traitera R-01 l'aurait relu dans le paquet du jour | bloquant | R-01, M3 et README disent où le lire |
+| 2 | « le premier état que l'art. 422 exige » : l'article énumère d'abord le **bilan** | bloquant | question 1.1, priorité 2 |
+| 3 | « à répéter pour toutes catégories… » était attribué à l'art. 433 : c'est l'annexe du règlement 006/2024 ; l'art. 433 dit « pour l'ensemble des opérations d'assurances dommages […] et pour chacune des catégories […] » | bloquant | 6.2, R-39, M9 ; la phrase est versée aux textes |
+| 4 | quatre réserves `LIMITE` rattachées à des questions qui ne les posaient pas ; la légende de `DÉFAUT` contredisait neuf rattachements | bloquant | sous-questions **2.5** et **5.7** (28 au total), légende corrigée |
+| 5 | l'exemple `6010` était faux (`RC1` cite `60` **et** `601`) et cachait l'effet utile : `6030`, `6060`, `606`, `703`, `706` n'atteignent jamais le compte 80 | bloquant | exemple `6091`, effet écrit en README, R-08 et 3.4 |
+| 6 | `RT` exclut aussi les charges des placements (`67`) en retenant leurs produits (`77`) | non bloquant | R-20, 1.1 c |
+| 7 | les **surcharges** d'organisation l'emportent sur la table packagée sans changer l'empreinte | non bloquant | réserve **R-47** (nouvelle), README |
+| 8 | trois citations entre guillemets n'étaient pas mot pour mot, et M6-e attribuait à l'art. 432 ce qui vient de l'art. 433 | non bloquant | citations exactes |
+| 9 | `textes-de-reference.md` annonçait « points de conduite retirés » (faux pour les points en fin de libellé) et coupait l'art. 432 sans le marquer | non bloquant | méthode décrite exactement, coupe marquée `[…]` |
+| 10 | coquille « comme la produit » | non bloquant | corrigée |
+
+⚡ **Le constat 4 en cachait quatre autres de la même famille** : un contrôle croisé écrit pour le
+vérifier — chaque réserve rattachée à une question est-elle **citée** par elle, et réciproquement ? — a
+trouvé R-08, R-13, R-20 et R-22 rattachées à une question de trop. Réduites à celle qui les pose ;
+écarts : **0** dans les deux sens.
+
+**Écartés, et dits** (doute < 80 ou hors périmètre) : la plage de lignes d'un commentaire cité, le titre
+exact d'une garde de test, deux paraphrases de stories (pas des textes réglementaires), la « moyenne
+sur quatre années » de la circulaire (soumise à confirmation en 5.4), les lectures d'articles non
+versés au dossier (les stories sources sont citées ouvertement), l'absence de `assigned_to` (préexistant).
+
+**Lentille *over-engineering*** (`ponytail-review`) : deux simplifications du générateur (liste des états,
+signe réutilisé), **−5 lignes**, sortie **identique à l'octet** — `--verifier` vert sans régénérer.
+
+### ⑦ Revue de sécurité — aucune vulnérabilité
+
+Éligibilité, contexte et résumé par sous-agents `haiku`, analyse en `opus`. **Zéro constat** de
+confiance ≥ 80 :
+
+| Point | Preuve |
+|---|---|
+| le script | chemins figés depuis son propre dossier, un seul argument (`--verifier`), aucun `eval`/`exec`/`subprocess`/`pickle`, `json.loads` sur le tampon qu'il vient de hacher — pas de fenêtre entre contrôle et usage |
+| secrets et données personnelles | aucune adresse, aucun motif de secret, aucun hôte ni port, aucun chemin de poste ; les seuls noms propres sont ceux des présidents du Conseil des Ministres, signataires des règlements publiés |
+| l'artefact rendu public | les dépôts de service sont privés, `prospera-stories` est **public** : la copie publie un référentiel comptable, sans secret ni donnée personnelle, de même nature que les neuf artefacts déjà sous `referentiels/` |
+| la procédure | elle **empêche** de verser fiches signées et identités, elle n'y incite pas |
+
+**Deux remarques sous le seuil, appliquées** : le consentement du signataire mentionne désormais le
+dépôt **public** ; et la fiche porte le **commit** du dossier reçu — l'empreinte lie les octets du paquet,
+pas le rendu que l'expert lit, ce qu'un essai sur copie a montré (signes inversés au rendu, `--verifier`
+vert). Le registre cite une fiche par un **identifiant opaque**. Hors PR, relevé : l'exclusion du `.env`
+de ce dépôt vient de `.git/info/exclude`, local, et non d'un `.gitignore` versionné.
+
+### ⑧ Vérification rejouée sur l'état final
+
+Commit de revue `522d2b5` : `--verifier` **0** ; table de mutations rejouée — **5 sur 5 rouges**, témoins
+verts ; 21 liens relatifs, 0 mort ; aucun octet NUL ; vérificateur du dépôt : 24 OK, 6 alertes, les
+**3 mêmes échecs** préexistants. Vérification docker : non applicable.
+
+### ⑨ Clôture
+
+**Statut : `done` le 2026-09-26.** Un seul dépôt, une branche `MNV-540`, une PR rebase-mergée :
+`prospera-stories#323` sur `main`. Branche supprimée.
+
+⛔ **Rien n'a été corrigé dans le produit, et c'est le périmètre** (D-540-9). Le registre recommande au PO
+quatre priorités, qui n'attendent aucun expert parce qu'elles rendent faux un document **déjà
+publié** : **R-01** (statut absent du jeu d'états et de l'export), **R-02** (comptes 80/87 absents de la
+liasse scellée), **R-09 à R-14** (bilan à l'écart du modèle de l'art. 433), **R-28/R-29** (impôt jamais
+repris, aucun contrôle d'articulation). Et deux défauts d'artefacts voisins : **R-43** (`etats-cima@1.0`
+sans C10e ni C6S) et **R-44** (`GN` au lieu de `GW`).
