@@ -1,6 +1,6 @@
 # STORY-539 : Le calendrier de dépôt — multi-pays, multi-état, et l'échéance se calcule depuis la clôture réelle
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` — `dossier-service` **lu par événements déjà publiés, non modifié**
@@ -31,18 +31,18 @@ période).**
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — L'échéance est **calculée** depuis les **bornes réelles de l'exercice** (STORY-532) et
+- [x] AC-1 — L'échéance est **calculée** depuis les **bornes réelles de l'exercice** (STORY-532) et
       la règle du paquet de dépôt (STORY-536), jamais depuis un libellé ni une constante.
-- [ ] AC-2 — La **périodicité** est portée par l'état, pas par le dossier : annuel, trimestriel,
+- [x] AC-2 — La **périodicité** est portée par l'état, pas par le dossier : annuel, trimestriel,
       mensuel. Un même dossier porte des échéances de périodicités différentes.
-- [ ] AC-3 — Le **report au jour ouvré** est déclaré par le paquet, pays par pays. ⚠️ Le supposer
+- [x] AC-3 — Le **report au jour ouvré** est déclaré par le paquet, pays par pays. ⚠️ Le supposer
       universel est faux, et un jour d'écart sur une pénalité de 40 % n'est pas une nuance.
-- [ ] AC-4 — Une échéance **non calculable** rend `INDETERMINABLE` **avec son motif** — bornes
+- [x] AC-4 — Une échéance **non calculable** rend `INDETERMINABLE` **avec son motif** — bornes
       d'exercice absentes, paquet non packagé — **jamais une date par défaut**. ⛔ Une échéance
       inventée est pire qu'une échéance absente : elle rassure.
-- [ ] AC-5 — Le **retard** est calculé et publié avec sa **pénalité chiffrée** depuis le paquet. Le
+- [x] AC-5 — Le **retard** est calculé et publié avec sa **pénalité chiffrée** depuis le paquet. Le
       produit est déjà précis sur ce qui se rattrape ; il doit l'être sur ce qui ne se rattrape pas.
-- [ ] AC-6 — Les échéances d'un portefeuille sont restituables **par cabinet**, triées par urgence.
+- [x] AC-6 — Les échéances d'un portefeuille sont restituables **par cabinet**, triées par urgence.
       ⚠️ `EcheanceChip` existe déjà au portefeuille avec sa garde « absente ≠ zéro » : **s'y brancher,
       ne pas en créer une seconde.**
 
@@ -180,36 +180,36 @@ cabinet rend une **liste vide**, jamais un 403 (anti-énumération).
 
 ## Tâches
 
-- [ ] T1 — Étendre le contrat du paquet de dépôt : `calendrier.periodicite` (obligatoire) et
+- [x] T1 — Étendre le contrat du paquet de dépôt : `calendrier.periodicite` (obligatoire) et
   `calendrier.joursNonOuvres` (obligatoire **ssi** report ≠ `AUCUN`, interdit sinon), avec leurs
   sources ; garde `prebuild` qui refuse un paquet incohérent.
-- [ ] T2 — Reconstruire `tg-dsf-1.0.json` par son producteur (`npm run paquet:tg-dsf`), mettre à jour
+- [x] T2 — Reconstruire `tg-dsf-1.0.json` par son producteur (`npm run paquet:tg-dsf`), mettre à jour
   le checksum du manifeste, et vérifier l'artefact octet à octet.
-- [ ] T3 — Écrire le moteur de calendrier en domaine pur : découpage en périodes par rythme, ajout de
+- [x] T3 — Écrire le moteur de calendrier en domaine pur : découpage en périodes par rythme, ajout de
   mois rabattu en fin de mois, report au jour ouvré déclaré, borne de durée d'exercice, retard signé,
   vocabulaire fermé d'`INDETERMINABLE`.
-- [ ] T4 — Répliquer en read-models locaux les dossiers (`dossier.created|updated`) et les exercices
+- [x] T4 — Répliquer en read-models locaux les dossiers (`dossier.created|updated`) et les exercices
   (`dossier.exercice.ouvert|clos|rouvert`) : consumers idempotents (`ProcessedEvent`), état absolu,
   démarrage dégradé si Kafka est absent.
-- [ ] T5 — Exposer `GET /api/v1/echeances` : par cabinet (jeton seul), filtre facultatif par dossier,
+- [x] T5 — Exposer `GET /api/v1/echeances` : par cabinet (jeton seul), filtre facultatif par dossier,
   tri par urgence, `INDETERMINABLE` avec motif, retard et taux de pénalité sourcés.
-- [ ] T6 — Prouver par mutation chaque garde, passer les portes complètes, et vérifier sur stack
+- [x] T6 — Prouver par mutation chaque garde, passer les portes complètes, et vérifier sur stack
   docker **neuve** le round-trip Kafka et la restitution réelle ; puis revue de code et revue de
   sécurité.
 
 ## Definition of Done
 
-- [ ] Aucune échéance produite sans bornes réelles ; aucune date par défaut ; aucun montant de
+- [x] Aucune échéance produite sans bornes réelles ; aucune date par défaut ; aucun montant de
   pénalité inventé ; aucun report au jour ouvré supposé.
-- [ ] Un paquet déclarant un report sans ses jours non ouvrés, un paquet sans périodicité, un
+- [x] Un paquet déclarant un report sans ses jours non ouvrés, un paquet sans périodicité, un
   checksum faux : chacun **fait échouer le build**, et une mutation de chaque garde rend des tests
   rouges.
-- [ ] Le cloisonnement par cabinet est prouvé sur un jeton réel : un dossier d'un autre cabinet rend
+- [x] Le cloisonnement par cabinet est prouvé sur un jeton réel : un dossier d'un autre cabinet rend
   une liste vide, jamais un 403.
-- [ ] eslint 0 warning, build, `test:cov` ≥ 65/90/90/90, `test:e2e` verts.
-- [ ] Vérification docker consignée : round-trip Kafka `dossier.*` + `dossier.exercice.*` mesuré en
+- [x] eslint 0 warning, build, `test:cov` ≥ 65/90/90/90, `test:e2e` verts.
+- [x] Vérification docker consignée : round-trip Kafka `dossier.*` + `dossier.exercice.*` mesuré en
   base, échéances restituées depuis des bornes réellement projetées.
-- [ ] PR `fiscal-service` sur `dev` et PR `docs/` sur `main`, rebase-mergées, statut synchronisé aux
+- [x] PR `fiscal-service` sur `dev` et PR `docs/` sur `main`, rebase-mergées, statut synchronisé aux
   trois emplacements et `completed_date`.
 
 ## Notes
@@ -219,7 +219,8 @@ cabinet rend une **liste vide**, jamais un 403 (anti-énumération).
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-09-26).** Branches `MNV-539` créées sur `docs` (base `main`) et
+**Statut : `done` (2026-09-26).** PR `prospera-fiscal-service` **#8** rebase-mergée sur `dev`
+(`5500197`), branche supprimée. Branches `MNV-539` créées sur `docs` (base `main`) et
 `fiscal-service` (base `dev`) **avant la première ligne de code**.
 
 ### Ce qui est livré — `fiscal-service` seul
