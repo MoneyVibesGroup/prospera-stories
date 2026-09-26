@@ -159,7 +159,10 @@ sinon `404 SOCIETE_INTROUVABLE` (anti-énumération) ; leur intégration se juge
 qui mêle plusieurs partenaires ne s'apparie pas (hook).
 
 **D-542-2 — Le rapprochement (AC-1).** Calculé à la lecture, pour l'exercice, sur les liasses **figées** :
-pour chaque appariement actif, le net de chaque côté (Σ débits − crédits des comptes déclarés).
+pour chaque appariement actif, le net de chaque côté (Σ débits − crédits des comptes déclarés), ⛔ **après les
+éliminations actives de l'exercice qui ne le citent pas** (*amendé en revue de code* : un compte déjà soldé —
+par une élimination déclarée sans appariement, ou par celle d'un appariement annulé puis redéclaré — se
+proposait une seconde fois, et la confirmation l'éliminait deux fois sans qu'aucun contrôle ne rougisse).
 **Concordant** ⇔ les deux nets sont opposés et non nuls, **à l'unité** ⇒ `PROPOSEE`, avec les lignes qui
 soldent chaque compte (100 %) et le pourcentage qui s'appliquera. Sinon : `DESEQUILIBREE` (les deux nets et
 l'écart — **signalé, jamais forcé**), `SANS_SOLDE` (rien à éliminer), `NON_APPLICABLE` (une société n'est pas
@@ -169,7 +172,8 @@ rouverte puis refigée) : l'élimination reste appliquée, mais **nommée**. Pub
 …/eliminations/propositions` et dans l'agrégat.
 
 **D-542-3 — La confirmation (AC-2, AC-7).** `POST …/eliminations/propositions/:appariementId/confirmation` :
-la proposition est **recalculée** sur les liasses figées du moment — jamais reçue du client —, puis écrite au
+la proposition est **recalculée** sur les liasses figées et le journal du moment (les nets de D-542-2) — jamais
+reçue du client —, puis écrite au
 journal : nature `ELIMINATION`, **origine `PROPOSEE`**, l'appariement cité (identifiant, numéro), les
 **sources** (jeu, version, empreinte des deux liasses), justification = celle de l'appariement, auteur = qui
 confirme. Refus : appariement inconnu (`404 APPARIEMENT_INTROUVABLE`) ou annulé (`409
@@ -210,15 +214,20 @@ vendeur et détenteur **distincts**, chacun la mère ou une société intégrée
 **D-542-7 — Les mouvements de chaque exercice et le report (AC-3, AC-4, M4).** Pour la consolidation de
 l'exercice k, chaque résultat interne actif d'un exercice E ≤ k de la mère donne :
 - `MARGE_STOCK` — en E : débit `compteResultat` (vendeur) / crédit `compteStock` (détenteur), la marge ; en
-  **E+1** (l'exercice suivant de la mère) : **réalisation** — débit réserves (vendeur) / crédit
+  **E+1** (l'exercice de la mère qui ouvre le **lendemain** de la clôture de E) : **réalisation** — débit réserves (vendeur) / crédit
   `compteResultat` (vendeur) : le stock détenu en E est réputé revendu en E+1, ce qui en reste est **redéclaré**
   à la clôture de E+1. Au-delà : rien.
 - `PLUS_VALUE_CESSION` — en E : débit `compteResultat` (cédant) / crédit `compteImmobilisation` (acquéreur), la
   plus-value ; **chaque exercice à partir de E**, automatiquement : débit `compteAmortissements` / crédit
   `compteDotations` (acquéreur), l'amortissement excédentaire de l'exercice (cumul C(t) = PV × jours 30/360
   depuis la cession / (30 × durée), borné à PV, arrondi sur le cumul — la somme des annuités vaut le cumul) ;
-  **ouverture** (k > E) : crédit `compteImmobilisation` PV, débit `compteAmortissements` C(fin k−1), débit
-  réserves (cédant) PV − C(fin k−1).
+  **ouverture** (k > E) : crédit `compteImmobilisation` PV, débit `compteAmortissements` C(veille de l'ouverture
+  de k), débit réserves (cédant) PV − C(veille de l'ouverture de k).
+- ⛔ *Amendé en revue de code* — **les dates, jamais les rangs** : `dossier-service` n'impose aucun chaînage des
+  exercices ; la mère aux seuls exercices 2023 et 2025 réalisait en 2025 la marge de 2023 et comptait deux années
+  de reprise. Un trou se calcule comme un exercice sans déclaration : la marge s'y est réalisée, la reprise suit
+  le calendrier. Contiguë, la chaîne donne exactement C(fin k−1). Un exercice qui CHEVAUCHE l'exercice courant
+  n'est pas antérieur (D-541-8) : la garde des bornes relève de `dossier-service`.
 - Les réserves sont le **compte de réserves du groupe** (méthodes en vigueur, D-541-8) ; l'effet sur le résultat
   est imputé **au vendeur** (art. 251-2). Absent alors qu'un report en dépend : `409
   COMPTE_RESERVES_NON_DECLARE` ; compte de gestion : `409 COMPTE_RESERVES_INVALIDE` (STORY-541).
@@ -356,3 +365,42 @@ rien redéclarer.
   `docker compose stop` ensuite.
 - 2026-09-26 — ⑤ branche `MNV-542` poussée, **PR `prospera-bilan-service#141`** ouverte sur `dev` ; statut
   `in_progress` → `review`.
+- 2026-09-26 — ⑥ **revue de code** (`prospera-code-review` : deux analyses `opus` — cœur métier ; contrat,
+  persistance et tests — et la lentille `ponytail-review`), synthèse en session `opus`, **commit dédié
+  `ee169c4`** :
+  - ⛔ **deux constats bloquants, vérifiés puis corrigés à la racine** — les 6 tests qui les gardent (4 service,
+    2 e2e enchaînés) **rougissent sur le code d'avant** :
+    - **double élimination silencieuse** : un appariement annulé laisse son élimination active ; les mêmes
+      comptes, redéclarés, se proposaient à nouveau et la confirmation les éliminait deux fois — `RECOMPOSITION`
+      et `EQUILIBRE` verts, `ELIMINATIONS_PROPOSEES` appliqué. Même effet avec une élimination déclarée sans
+      appariement. Le rapprochement lit désormais les nets **après les éliminations actives qui ne citent pas
+      l'appariement** (D-542-2 et D-542-3 amendées) : `SANS_SOLDE`, confirmation refusée ; un appariement
+      étendu d'un compte ne se propose que pour ce compte ; une confirmée que double une autre élimination
+      passe `PERIMEE`, nommée ;
+    - **un trou dans la chaîne des exercices de la mère** (`dossier-service` n'impose aucun chaînage) : la mère
+      sans 2024 réalisait en 2025 la marge de 2023 et y reprenait deux années d'amortissement excédentaire —
+      **les dates, jamais les rangs** (D-542-7 amendée) : ouverture à la veille du début de l'exercice,
+      réalisation dans l'exercice qui ouvre le lendemain de la clôture.
+  - Non bloquants corrigés : les 409 nés d'un index unique RELISENT et nomment le conflit (`details.ecritures`,
+    comme la pré-lecture ; disparu entre-temps, la déclaration réessaie) ; les montants se jugent sur la valeur
+    REÇUE (`""` et `false` valaient 0, `true` 1 avant `@IsInt()` : un coût laissé vide éliminait le stock
+    entier) ; chaque déclaration de résultat interne ne nomme que ses refus au Swagger (test d'exclusivité) ;
+    libellé d'`ELIMINATIONS_PROPOSEES` ; message de `BIEN_DEJA_SORTI`, qui disait l'inverse de la règle ; deux
+    JSDoc périmées ; hooks inertes documentés dans le code ; le pourcentage publié vient de la mise à l'échelle
+    elle-même ; ponytail : la constante du compte de réserves absent, inlinée.
+  - **Écartés, avec leur raison** : la double lecture de l'exercice à l'annulation d'un résultat interne (la
+    retirer lirait le journal avant de juger l'exercice, ou chargerait d'un rappel l'annulation partagée avec
+    531/541) ; deux raccourcis ponytail sur du code partagé déjà en place (l'analyse d'identifiant des deux
+    services, la fabrique des gardes d'immuabilité) ; le CHEVAUCHEMENT d'exercices de la mère (un exercice qui
+    chevauche n'est pas antérieur, D-541-8 ; la garde des bornes relève de `dossier-service`) ; ce qui touche à
+    la sécurité, renvoyé à ⑦.
+  - **Mutations des correctifs** : 24 mutants, tous tués (4 ne compilaient pas — « 0 test » n'est jamais un
+    rouge — : réécrits et rejoués). **Portes** : lint 0, build, `test:cov` **6 037** (250 suites ; **99,25 /
+    96,19 / 99,52 / 99,34**), e2e **29 suites / 1 522**.
+  - **Vérification docker rejouée sur l'état final** (stack NEUVE, `ee169c4`) : **226 OK, 0 KO** (208 avant la revue).
+    Phase 0 : les sources montées, et quatre marqueurs des correctifs dans le `dist`. Nouveaux contrôles, écrits
+    AVANT : chaque 409 `APPARIEMENT_DEJA_ELIMINE` nomme l'élimination qui l'emporte — la seconde confirmation
+    comme la COURSE, où le perdant relit après l'index réel ; n° 1 annulé, son élimination confirmée reste
+    active, les mêmes comptes se redéclarent (l'index partiel des clés ACTIVES les a libérés : n° 4), n° 4 est
+    `SANS_SOLDE` et sa confirmation refusée, journal inchangé, 411200 et 401200 soldés UNE fois, résultat = R0 ;
+    une marge au coût vide ou au stock `true` → 400, rien d'écrit. `docker compose stop` ensuite.
