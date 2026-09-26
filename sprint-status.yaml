@@ -4024,7 +4024,7 @@ sprints:
         epic: "EPIC-137"
         points: 13
         service: "bilan-service — module consolidation (nouveau)"
-        status: "ready-for-dev"  # CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. C'est le premier retraitement, et celui qu'on saute le plus souvent parce qu'il ne se voit pas : l'agrégation additionne des balances produites selon des méthodes comptables différentes.
+        status: "in_progress"  # ⬆ 2026-09-26 : branches MNV-541 ouvertes (docs + bilan-service), CADRAGE fait avant tout code (8 constats, 15 decisions) — aucune donnee du produit ne permet de CALCULER un retraitement : le montant se DECLARE, le produit exige la norme (referentiel du groupe, versionne et date), les faits (methodes de chaque societe) et une decision par divergence (retraitement ou omission motivee, art. 86 dernier alinea) ; le cumul est REPORTE en reclassant l effet resultat en reserves sur les racines de gestion declarees par le paquet ; art. 86 3° et 5° absents de la liste fermee ⇒ STORY-685 et 686. — Historique — CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. C'est le premier retraitement, et celui qu'on saute le plus souvent parce qu'il ne se voit pas : l'agrégation additionne des balances produites selon des méthodes comptables différentes.
         story_path: "stories/STORY-541.md"
       - story_id: "STORY-542"
         title: "Éliminations — les opérations réciproques ne touchent pas le résultat, les résultats internes si"
