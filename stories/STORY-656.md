@@ -199,6 +199,47 @@ pourrait pas passer.
 - Persistance relue en `mongosh` : `tpu_parametrages` = 1 document (`PRESTATIONS_SERVICES`, exercice 2026),
   balance servie `{referentiel: 'SMT', version: 1, etat: 'VALIDÉE'}`.
 
+### Revue de code ⑥ — 8 constats, **tous traités** (1 bloquant)
+
+Scan `prospera-code-review` (`opus`) + seconde lentille `ponytail-review` (over-engineering :
+*« rien à retrancher »*). Correctifs dans un commit **dédié** par dépôt (`003ce59`, `31e0140`).
+
+| # | Constat | Traitement |
+|---|---|---|
+| ① **BLOQUANT** | **AC-6 n'était gardé par AUCUN test au-delà de la fonction pure.** Mesuré : retirer l'argument `motif` aux **deux** sites d'appel laissait **205 unitaires et 85 e2e VERTS**. Le comptable recevait alors « ce référentiel **ne désigne aucun** poste de chiffre d'affaires » — le message **faux** que la story existe pour supprimer — sur un référentiel qui en désigne un | un test par service assert le code, `COMPTE_RESULTAT/ZZ` dans `message` **et** `details.motif`, et l'**absence** du message « ne désigne aucun poste ». **Mutation rejouée après correctif : les 2 tests rougissent** |
+| ② | `docs/referentiels/README-smt-togo.md` — la doc de référence du paquet affirmait encore « **aucun marqueur de chiffre d'affaires** […] la liquidation TPU répond `CA_NON_SOURCE` […] **à ouvrir en story** » | section réécrite : dette **levée**, avec le pourquoi (le constat était juste, c'est le *contrat* du marqueur qui était la limite) |
+| ③ | **Sept** emplacements affirmaient encore l'ancienne cardinalité (`bfr`, `marge_brute`, `dettes_financieres` se **définissaient par contraste** avec `chiffre_affaires`) ou citaient `exigerUnSeulChiffreAffaires` / `valeurDuPosteMarque`, supprimés | les 7 corrigés — la prochaine story qui décide d'une cardinalité lisait le contraire du contrat |
+| ④ | La « **doctrine du marqueur `bfr`** » invoquée pour justifier le `null` n'est **pas** celle que `bfrReel` implémente (lui cumule ce qui est émis) | le précédent cité est désormais la règle « complet ou absent » du **générateur** ; sinon la prochaine story implémenterait une somme partielle en croyant faire l'inverse |
+| ⑤ | **Les deux lecteurs du même marqueur divergent** : filtre d'état, et critère de refus. Un paquet marquant `CR1` **et** une ligne sans compte (le SMT en porte trois : `CRD`/`CRE`/`CRF`) ⇒ la liasse publie `CR1 + 0`, la TPU répond `409`, sur le même dossier | **fermé au générateur** : un poste marqué doit résoudre **au moins une racine** (mutation : `CRD` marqué ⇒ le build lève en le nommant). Le filtre d'état, lui, est **documenté des deux côtés** — aucun paquet livré n'en pose hors du compte de résultat |
+| ⑥ | Le test de non-recouvrement **ne pouvait pas rougir seul**, et l'en-tête avait **retiré** la mise en garde qui le disait | mise en garde restaurée **et** prédicat désormais gardé : un paquet **synthétique** marquant `70` et `701` doit être détecté — sans ce cas la boucle était inexerçable |
+| ⑦ | `le(s) poste(s) … sont désignés` dans un message lu par un comptable | accord au singulier dans le cas nominal, des deux côtés (moteur **et** générateur) |
+| ⑧ | **Rupture de contrat** non nommée, avec `FE-051` en `ready-for-dev` sur ces deux écrans | nommée dans les **deux** DTO : `poste`/`etat` disparaissent du premier niveau (aucune valeur juste quand deux postes ont servi), le client lit `chiffreAffaires.postes[].poste` |
+
+⚠️ **La vérification docker n'est PAS rejouée, et c'est mesuré** : une garde n'émet rien, donc
+`smt-togo@1.0` reproduit `00335c03…` à l'identique après les correctifs — l'artefact vérifié en
+④ est le même octet. Portes rejouées : lint 0 warning, build OK, couverture **99,13/95,63/99,41/99,22**
+et **99,20/93,05/98,74/99,31**, 4 243 + 4 715 unitaires et 888 + 1 238 e2e verts.
+
+**Écarté** (pré-existant, hors périmètre, signalé) : `profil-societe/regime/regime.regles.ts`
+calcule un **second** chiffre d'affaires sur le préfixe `'70'` **codé en dur** (donc `708`/`709`
+compris) pour *proposer* l'axe de régime — une estimation que l'humain confirme, antérieure à
+cette story, mais qui nuance la formule « une seule définition du CA, jamais deux ». Et
+`bfrReel` publie un BFR amputé quand une seule de ses trois composantes n'est pas émise.
+
+### Revue de sécurité ⑦ — **0 vulnérabilité**
+
+Scan `prospera-security-review` (`opus`, aucun downgrade). Vérifié et jugé sain : le `motif` du
+refus ne porte **que** des couples `état/poste` d'un artefact vérifié par sha256 (zéro donnée de
+tenant, et le référentiel était **déjà** nommé dans le message) ; l'assiette fiscale n'est pas
+manipulable par une ligne de balance (racines `701`–`704` et `705`–`707` disjointes, venues de
+l'artefact et non de la requête ; `@IsInt() @Min(0)` sur les soldes) ; aucun artefact n'atteint
+le runtime sans checksum conforme ; le marqueur n'est accepté que sur `true` **strict** aux deux
+bouts ; ni pollution de prototype ni injection d'opérateur Mongo (la valeur n'entre dans aucun
+filtre) ; **zéro** guard, décorateur, DTO d'entrée, requête Mongo, variable d'env ou secret
+touché ; coût runtime **strictement identique** à l'avant-story (`4n + 3n` contre `7n`), le
+second facteur borné par l'artefact — pas de DoS (les deux dettes STORY-537/528 ne se rejouent
+pas).
+
 ### ⚠️ Deux constats de la vérification — des gardes du produit, consignés
 
 1. **`PUT /fiscal/tpu/parametrage` répond `409 BALANCE_VALIDEE_IMMUABLE`** dès qu'une balance de l'exercice
