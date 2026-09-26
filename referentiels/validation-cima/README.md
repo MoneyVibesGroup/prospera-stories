@@ -17,9 +17,9 @@ revenu signé, rien ne change dans le produit, et son statut reste `amorce`.
 |---|---|---|
 | **L'artefact** tel que le produit le sert, octet pour octet | [`cima-assurances-5.0.json`](cima-assurances-5.0.json) | identique aux trois copies de service ; empreinte épinglée dans leurs trois manifestes |
 | **Sa structure écrite en clair** : 72 postes en cinq états, 65 lignes de table de passage, 12 formules développées jusqu'aux comptes, le plan et ce que chaque compte alimente | [`formules-en-clair.md`](formules-en-clair.md) | **générée** depuis l'artefact (voir « Vérifier ce dossier ») |
-| **Les six questions**, reposées sur le texte, et la **fiche de réponse** | [`questions.md`](questions.md) | 26 sous-questions : lectures à confirmer, écarts à arbitrer, questions ouvertes |
+| **Les six questions**, reposées sur le texte, et la **fiche de réponse** | [`questions.md`](questions.md) | 28 sous-questions : lectures à confirmer, écarts à arbitrer, questions ouvertes |
 | **Les textes** que les questions lisent, en extraits verbatim | [`textes-de-reference.md`](textes-de-reference.md) | art. 432 et 433, art. 334-4, circulaire n° 00230/2005, règlements de 2024 |
-| **Le registre des réserves** | [`registre-des-reserves.md`](registre-des-reserves.md) | 46 réserves, toutes `OUVERTE` au 2026-09-26 |
+| **Le registre des réserves** | [`registre-des-reserves.md`](registre-des-reserves.md) | 47 réserves, toutes `OUVERTE` au 2026-09-26 |
 | **Les méthodes de provisionnement** | servies par `assurance-service` : `GET /api/v1/dossiers/{dossierId}/assurance/provisions-techniques/methodes` | 14 lignes, une seule calculée ; reproduites en `questions.md` § 5.1 |
 
 ⚠️ **Pourquoi `@5.0` seul.** Cinq versions sont packagées ; les quatre premières restent servies
@@ -56,13 +56,16 @@ Pour chaque profil, **la fiche de réponse de [`questions.md`](questions.md), re
 2. pour toute correction, **la référence qui la fonde** : article, circulaire, instruction nationale,
    usage de place nommable. Sans elle, une correction ne peut pas entrer dans la `normeSource` d'une
    version suivante ;
-3. l'**identité** du signataire (nom, qualité, date) et l'**empreinte** examinée ;
+3. l'**identité** du signataire (nom, qualité, date), l'**empreinte** de l'artefact examiné et le
+   **commit** du dossier qu'il a reçu : l'empreinte lie les octets du paquet, pas le rendu qu'il a lu
+   (`formules-en-clair.md`, `questions.md`) — le commit, si ;
 4. son **accord**, ou non, pour que son nom soit publié avec le paquet (voir « Le statut »).
 
 ⛔ **Ce dépôt est public** (`MoneyVibesGroup/prospera-stories`). Les fiches remplies et signées, et
 l'identité des experts, **n'y sont jamais versées** : elles sont conservées dans l'espace documentaire
 de l'entreprise. Le registre ne consigne que le **verdict**, sa **date**, l'**empreinte** examinée et
-une **référence** vers la fiche.
+un **identifiant opaque** de la fiche — jamais un nom de fichier ou une mention qui porterait le nom de
+l'expert.
 
 ## Ce que le produit ne demande PAS de valider
 
@@ -77,9 +80,15 @@ une **référence** vers la fiche.
 Ce sont les règles qui décident des montants. Lues dans le code de `bilan-service` le 2026-09-26.
 
 - **Un compte est capté par le plus long préfixe** que cite la table de passage, **tous états
-  confondus**, et reçoit toutes les lignes qui portent ce préfixe : `6010` va au poste qui cite `601`,
-  pas à celui qui cite `60`. Un compte plus long que le plan (jusqu'à 6 chiffres) se rattache à son
-  préfixe **sans qu'aucune erreur ne puisse être détectée** s'il est mal placé.
+  confondus**, et reçoit toutes les lignes qui portent ce préfixe : `6091` va aux postes qui citent
+  `609` (`RC9`, `EV2`, `EN2`), jamais à celui qui cite `60` (`RC1`). Un compte plus long que le plan
+  (jusqu'à 6 chiffres) se rattache à son préfixe **sans qu'aucune erreur ne puisse être détectée**
+  s'il est mal placé. Et un compte que l'art. 432 range au compte 80 mais que le plan ignore — `6030`,
+  `6060`, `606`, `703`, `706` — est capté par `60` ou `70` : il n'alimente que `RC1` ou `RP1`, jamais le
+  compte 80 (R-08).
+- **Une surcharge de rattachement** validée par une organisation l'emporte sur la table packagée —
+  comptes 80 et 87 compris — sans changer l'empreinte du paquet : ce que ce dossier fait valider, c'est
+  la table packagée, pas les surcharges d'une organisation (R-47).
 - **Un compte qu'aucune ligne ne capte** est écarté de tous les totaux et **publié** avec son solde ;
   s'il n'est pas nul, un contrôle **bloquant** (`COMPTES_NON_AFFECTES`) empêche de valider la liasse.
   Exception : la route qui sert les comptes 80 et 87 ne publie pas ces comptes — ils y disparaissent en
@@ -118,6 +127,8 @@ diagnostic du référentiel, les six états en consultation (`dry-run`), référ
 comptes de `balance-service`, référentiel d'`assurance-service` ; le
 **jeu d'états** — création, validation, dépôt — et l'**export PDF/XLSX** ne le servent pas. Une liasse
 CIMA exportée ne dit pas qu'elle vient d'une amorce : réserve **R-01**, la première du registre.
+⚠️ La liasse **scellée**, elle, stocke le statut et la mise en garde du paquet qui l'a produite, et deux
+routes les ressertent sous `liasse` : c'est là que la correction de R-01 doit les lire.
 
 ### La bascule à `certifie` — ce qu'elle exigera
 
@@ -132,7 +143,7 @@ La signature est une condition **nécessaire, pas suffisante** (STORY-540, D-540
    (aujourd'hui, il l'accepterait : R-03). La garde « aucun paquet ne se déclare `certifie` » sera
    révisée **sciemment**, avec la preuve de validation.
 4. **Le nom publié suppose l'accord** du signataire, recueilli sur sa fiche : le `meta` est servi à
-   tout utilisateur du produit.
+   tout utilisateur du produit — et à tout lecteur de ce dépôt public, si le paquet y est copié.
 
 ## Au retour des fiches
 
@@ -148,7 +159,7 @@ La signature est une condition **nécessaire, pas suffisante** (STORY-540, D-540
 ## Vérifier ce dossier
 
 ```bash
-cd referentiels/validation-cima
+cd referentiels/validation-cima             # Python 3.9 ou plus
 python3 generer_formules.py --verifier     # la copie est-elle l'artefact servi, le document est-il à jour ?
 shasum -a 256 cima-assurances-5.0.json      # doit rendre 5234764a…0859
 ```

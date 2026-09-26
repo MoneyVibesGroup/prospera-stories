@@ -15,7 +15,7 @@ Trois documents accompagnent celui-ci, et chaque question y renvoie :
 - [`textes-de-reference.md`](textes-de-reference.md) — **ce que dit le texte**, en extraits verbatim :
   art. 432 et 433, circulaire n° 00230/2005, règlements de 2024 (§ 1 à 11) ;
 - [`registre-des-reserves.md`](registre-des-reserves.md) — **ce que le produit sait déjà de ses
-  limites** (`R-01` à `R-46`).
+  limites** (`R-01` à `R-47`).
 
 Chaque sous-question est d'un des trois types suivants — **on ne vous demande pas de lire le texte à
 notre place** :
@@ -44,8 +44,8 @@ qu'en consultation (R-02).
 ### 1.1 · QUESTION OUVERTE — Une présentation agrégée, pour quel usage ?
 
 Le modèle du bilan de l'art. 433 détaille plusieurs dizaines de lignes (`textes-de-reference.md` § 4) ;
-le paquet en présente huit. Le compte d'exploitation générale est le premier état que l'art. 422
-exige, et il n'entre pas dans la liasse scellée.
+le paquet en présente huit. Le compte d'exploitation générale est l'un des quatre comptes que l'art.
+422 exige — avec le bilan et les comptes 87 et 88 — et il n'entre pas dans la liasse scellée.
 
 - **a.** Un bilan agrégé en 4 + 4 postes a-t-il un usage légitime pour une entreprise d'assurance
   (pilotage, revue analytique), sachant qu'il ne peut pas être déposé ?
@@ -53,7 +53,8 @@ exige, et il n'entre pas dans la liasse scellée.
   détaillé, comptes 80, 87 et 88), plutôt que la présentation agrégée ?
 - **c.** Le compte de résultat propre au produit (`RT`, `RN`) doit-il être conservé à côté des modèles,
   ou retiré ? `RT` n'est pas le solde du compte 80 : il laisse dehors les charges et produits communs
-  que l'art. 432 range au compte 80 (R-20).
+  que l'art. 432 range au compte 80, et les charges des placements (`67`) alors qu'il en retient les
+  produits (`77`) (R-20).
 
 *Proposition du produit : aucune décision prise — la présentation actuelle reste servie, avec son
 statut `amorce`, jusqu'à votre réponse.* Réserves : R-02, R-15, R-20.
@@ -265,6 +266,25 @@ présentation ne l'est pas.
 >
 > Référence : ……………………………………………………………………………………………………
 
+### 2.5 · QUESTION OUVERTE — Deux limites déclarées : acceptables ?
+
+**Paquet** :
+- **sans colonne N-1**, les variations — donc `RT` et les soldes des comptes 80 — ne sont **pas
+  publiées**, jamais mises à 0 ; une N-1 fournie **sans** compte de classe 3 est lue comme des
+  provisions nulles à l'ouverture, ce qui est juste pour une entreprise nouvelle et faux pour une N-1
+  incomplète — rien ne distingue les deux (R-21) ;
+- **la réassurance** n'est traitée qu'à la cession : ni la rétrocession, ni les cessions « à l'étranger »
+  (`6909`, `7909`), ni les plafonds de l'art. 308, ni l'excédent de plein (R-41).
+
+**Question** : ces limites sont-elles acceptables — et pour quel usage — tant que le produit les
+publie avec son statut `amorce` ? Réserves : R-21, R-41.
+
+> ☐ la proposition du produit est acceptable · ☐ autre réponse · ☐ hors de ma compétence
+>
+> Réponse : ……………………………………………………………………………………………………………
+>
+> Référence : ……………………………………………………………………………………………………
+
 ---
 
 ## Q3 — La frontière Vie / Assurances de toute nature · profil A
@@ -322,6 +342,9 @@ des risques vie, et ces acceptations entrent-elles dans son compte 80 ? Réserve
 **Texte** : les listes du compte 80 citent `603`, `606`, `703`, `706`, `7909`, `360`, `3910`, `3930`,
 `3950`, `3955`, `3960` ; la liste de l'art. 431 ne les énumère pas. La page officielle porte aussi des
 coquilles : `6126` pour `6026`, `6905` sans point, un `6029` en double (sous `602` et sous `620`).
+**Paquet** : faute de ces comptes au plan, un `6030`, `6060`, `606`, `703` ou `706` — que les listes du
+compte 80 nomment — est capté par `60` ou `70` : il n'alimente que `RC1` ou `RP1`, **jamais** le compte
+80 (`formules-en-clair.md` § 8).
 **Question** : ces comptes existent-ils — dans une édition imprimée, une circulaire, un plan de place ?
 Le produit doit-il les créer, et avec quels libellés ? Réserve : R-08.
 
@@ -366,7 +389,7 @@ d'impôt passée en `85`.
 - **a.** Le « résultat net » du produit doit-il être le solde du compte 87 ?
 - **b.** La variation des provisions `150` et `19` passe-t-elle par le compte 87, et non par une
   dotation de classe 6 ? La réponse éclaire aussi la question 1.2.
-- **c.** L'impôt sur les bénéfices (`85`) doit-il être repris avant l'assiette fiscale, comme la
+- **c.** L'impôt sur les bénéfices (`85`) doit-il être repris avant l'assiette fiscale, comme le
   produit le fait pour ses autres référentiels ?
 
 Réserves : R-17, R-23, R-28, R-29.
@@ -504,6 +527,24 @@ et pour les **deux derniers exercices** de survenance. Cet accord est donné **�
 n'est pas une propriété que le produit peut acquérir, ni une question que vous pouvez trancher pour
 lui. Le produit n'en calcule aucune (R-36). *Aucune réponse attendue.*
 
+### 5.7 · QUESTION OUVERTE — Deux limites déclarées : acceptables ?
+
+**Paquet** :
+- **aucune provision, aucun sinistre, aucune cession** calculés ou hébergés par `assurance-service`
+  n'atteint la liasse : l'adaptateur de balance n'existe pas, et une méthode validée ne change la
+  liasse que si l'entreprise en passe le résultat en balance (R-42) ;
+- **ne sont pas couverts** : les transports (rattachés à l'exercice de souscription, état C10c), la
+  maladie, les sauvetages (sans compte au plan) et le risque d'exigibilité (R-40).
+
+**Question** : ces limites sont-elles acceptables — et pour quel usage — tant que le produit les
+publie avec son statut `amorce` ? Réserves : R-40, R-42.
+
+> ☐ la proposition du produit est acceptable · ☐ autre réponse · ☐ hors de ma compétence
+>
+> Réponse : ……………………………………………………………………………………………………………
+>
+> Référence : ……………………………………………………………………………………………………
+
 ---
 
 ## Q6 — La cadence · profil B
@@ -531,10 +572,12 @@ que le produit doit publier cette ligne ? Réserve : R-35.
 
 **Paquet** : l'état est tenu **par catégorie Vie / Non-Vie**, lignes par exercice de survenance,
 colonnes par exercice d'opération ; les exercices trop anciens sont agrégés sur une ligne « antérieurs ».
-**Texte** : le modèle C10 B est « à répéter pour toutes catégories des assurances terrestres » ; celui
-qu'annexe le règlement n° 006/2024 porte **dix** exercices (N-9 à N) et des tableaux B bis ; la
-circulaire travaille sur **quatre** années de déclaration.
-**Questions** : quelle maille — catégorie, sous-catégorie, branche — et quelle profondeur le produit
+**Texte** : l'art. 433 (§ 7) établit l'état C10b « pour l'ensemble des opérations d'assurances dommages
+réalisées dans le pays et pour chacune des catégories d'assurances dommages définies à l'article 411 » ;
+le modèle C10 B annexé au règlement n° 006/2024 est « à répéter pour toutes catégories des assurances
+terrestres », et ses tableaux A et B — les seuls qu'il republie — portent **dix** exercices (N-9 à N) ;
+la circulaire travaille sur **quatre** années de déclaration.
+**Questions** : quelle maille — l'ensemble, plus chaque catégorie de l'art. 411 — et quelle profondeur le produit
 doit-il tenir pour que son état C10b serve, d'une part au dépôt, d'autre part au calcul des tardifs ?
 Réserve : R-39.
 
@@ -573,6 +616,7 @@ méthodes statistiques soumises à l'accord de la Commission (5.6) ? Réserve : 
 | 2.2 Où la variation est comptabilisée | question ouverte | A | R-22 |
 | 2.3 `73`, `74`, `78`, `69`, `79` | écart | A | R-17 |
 | 2.4 Commissions reçues, charges de placement | écart | A | R-19 |
+| 2.5 Deux limites : la colonne N-1, la réassurance | question ouverte | A | R-21, R-41 |
 | 3.1 L'agrément se déduit des affaires directes | lecture | A | R-26 |
 | 3.2 `605` et `705` dans le modèle Vie | écart | A | R-16 |
 | 3.3 Acceptations vie d'une entreprise de toute nature | question ouverte | A | R-27 |
@@ -586,6 +630,7 @@ méthodes statistiques soumises à l'accord de la Commission (5.6) ? Réserve : 
 | 5.4 La méthode des tardifs | lecture | B | R-35 |
 | 5.5 Le chargement de la PSAP | question ouverte | B | R-37 |
 | 5.6 Les méthodes statistiques | information | B | R-36 |
+| 5.7 Deux limites : la chaîne vers la liasse, les branches non couvertes | question ouverte | B | R-40, R-42 |
 | 6.1 Une cadence de déclarations | lecture | B | R-35 |
 | 6.2 La maille de l'état C10b | question ouverte | B | R-39 |
 | 6.3 Le triangle des paiements | question ouverte | B | R-39 |
@@ -600,12 +645,15 @@ pas une validation : la sous-question reste ouverte.
 | Nom | | |
 | Qualité (texte libre) | | |
 | Questions examinées | Q1 à Q4 | Q5, Q6 |
+| Commit du dossier reçu (rempli à l'envoi) | | |
 | Date | | |
 | Signature | | |
 
 > **Déclaration.** Les réponses ci-dessus portent sur l'artefact `cima-assurances@5.0` identifié par
-> l'empreinte sha256 `5234764a311cf472bef7f1fd3e8ae1066f6a7c3d8d8cf6849948be92b72c0859`, et **sur lui
-> seul**. Elles ne valent pour aucune autre version.
+> l'empreinte sha256 `5234764a311cf472bef7f1fd3e8ae1066f6a7c3d8d8cf6849948be92b72c0859`, **telle que
+> la présente le dossier au commit indiqué ci-dessus**, et sur lui seul. Elles ne valent pour aucune
+> autre version.
 >
 > ☐ **J'accepte** que mon nom et ma qualité soient publiés avec le paquet, dans son `meta`, si ma
-> validation contribue à le déclarer `certifie` — ce `meta` est servi à tout utilisateur du produit.
+> validation contribue à le déclarer `certifie` — ce `meta` est servi à tout utilisateur du produit,
+> et une copie du paquet peut être versée au dépôt **public** de la documentation, lisible par tous.
