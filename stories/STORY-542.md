@@ -1,6 +1,6 @@
 # STORY-542 : Éliminations — les opérations réciproques ne touchent pas le résultat, les résultats internes si
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-137 — Homogénéisation et éliminations (consolidation)
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -295,3 +295,64 @@ rien redéclarer.
   déclarent et se REPORTENT — la marge de N se réalise en N+1, l'amortissement excédentaire est repris chaque
   exercice jusqu'à la sortie (M4, D-542-6 à 8) ; aucune famille n'est « appliquée » par silence (M7, D-542-9) ;
   les dividendes internes, promis par le libellé mais hors des AC, deviennent STORY-687 (D-542-11).
+- 2026-09-26 — **dev `bilan-service`** (branche `MNV-542`, commits `90ba08a` → `b72bacc`) : collection
+  `appariements_consolidation` (immuable hors annulation, index unique partiel des clés `société|compte`) et
+  ses trois routes ; rapprochement PUR (concordance à l'unité, sept états dont `PERIMEE`) ; `GET
+  …/eliminations/propositions` en lecture seule — rien n'est écrit ; confirmation RECALCULÉE (origine
+  `PROPOSEE`, sources citées, index unique partiel exercice × appariement) ; intégration proportionnelle
+  éliminable au plus faible pourcentage (ANC 2020-01 art. 261-3 à 261-5), `ELIMINATION_A_REPARTIR`,
+  `ELIMINATION_HORS_APPARIEMENT` ; nature `RESULTAT_INTERNE` — marge sur stock (taux ou coût), plus-value
+  (déclarée ou calculée, amortissable ou non), sortie du bien, omissions — dont les lignes se CALCULENT
+  chaque exercice (élimination, réalisation en N+1, reprise 30/360, ouverture en réserves au vendeur,
+  libération à la sortie) ; statuts `ELIMINATIONS_PROPOSEES` et `RESULTATS_INTERNES` conditionnels ;
+  `DIVIDENDES_INTERNES` nommé (STORY-687). Douze routes, treize codes de refus. *Amendé en cours de dev :*
+  une plus-value sur un bien non amortissable est publiée en phase `REPORT` les exercices suivants (aucune
+  reprise n'a lieu) — relevé par les e2e.
+- 2026-09-26 — ⚡ **tests écrits en parallèle par quatre sous-agents `opus`** (règles pures, service,
+  unitaires, e2e + contrat OpenAPI), chacun propriétaire de ses fichiers, code de production jamais touché —
+  **trois défauts trouvés, tous corrigés** :
+  - l'agrégat ne protégeait pas le rapprochement contre un net hors des entiers sûrs : `500` brut au lieu du
+    `422 AGREGAT_HORS_BORNES` que le GET des propositions rendait déjà ;
+  - `cles` d'un appariement est un tableau Mongoose (`[]` par défaut, `required` n'exige que la présence) :
+    un appariement sans clés passait la validation et l'index n'en protégeait aucun compte — validateur
+    « au moins deux clés » (même famille que [[mongoose-strict-unset-et-defaut-tableau]]) ;
+  - une plus-value sur un terrain publiée en `AMORTISSEMENT` alors qu'aucune reprise n'a lieu → `REPORT`.
+  Remarques retenues : `appariementId` jugé avant toute lecture ; `isDuplicateKeyOn` par `Object.hasOwn`
+  (un nom hérité du prototype n'est pas un champ d'index) ; énumération de détail nommée ; un JSDoc détaché.
+- 2026-09-26 — ⚡ **mesuré avant de borner** (au pire cas des bornes, meilleur de trois passes) : le
+  rapprochement relisait la liasse d'une société pour CHAQUE appariement — **108 ms** de boucle bloquée à
+  200 appariements sur deux sociétés de 15 000 lignes ; nets des comptes déclarés indexés une fois :
+  **4,3 ms**, gardé par un test STRUCTUREL (une lecture par liasse) dont le mutant rougit — un test
+  chronométré aurait été fragile sous la couverture. Diagnostic de 2 000 résultats internes reportés :
+  5,7 ms ; agrégat 30 000 lignes + 2 000 résultats internes : 82 ms.
+- 2026-09-26 — **mutations** : 293 mutants passés par les trois batteries unitaires sur des copies hors
+  dépôt (78 service, 103 règles, 112 unitaires), tous tués ; 5 mutants e2e par espions, tués ; puis une
+  **table finale décision par décision** sur l'état final (`tmp/mutation-542-final/`) : 31 mutants, dont 3
+  qui ne compilaient pas et 1 au motif double — réécrits et rejoués (« 0 test » n'est jamais un rouge) —
+  **30/30 tués** ; le seul survivant était ÉQUIVALENT (la garde `ELIMINATION_HORS_APPARIEMENT` comparait
+  aussi des tailles que `ELIMINATION_MONO_SOCIETE` rendait redondantes) : code mort retiré.
+- 2026-09-26 — **portes** (`bilan-service` @ `4623624`, avant le retrait du code mort, rejouées ensuite sur
+  le module) : lint 0 (`{src,test}`), `tsc`, `test:cov` **5 995 unitaires** (250 suites ; couverture **99,25 /
+  96,17 / 99,52 / 99,34** ; fichiers neufs à 100 % des lignes, ≥ 98 % des branches), `test:e2e` **29 suites /
+  1 514** (1 093 avant la story). Deux invariants transverses mis au contrat : 18 contrôleurs dont 15 nichés,
+  tous sous `@RequiresDossierScope()` ; index uniques des appariements et du journal, `(tenantId, dossierId)`
+  en tête.
+- 2026-09-26 — **vérification docker sur stack NEUVE** (`down -v`), tout par les API réelles, 2 cabinets —
+  scripts, scénario (attentes écrites AVANT) et journal : `PROSPERA/tmp/verif-docker-542/` : **208 OK, 0 KO**.
+  Phase 0 (30 OK) : le conteneur exécute `MNV-542` @ `b72bacc` (empreintes des sources montées, marqueurs
+  dans le `dist`, « Found 0 errors » après restart). Mise en place (81 OK) : le groupe de 541 (FILLE IG, JV IP
+  50 %, ASSO MEE), mais trois balances DISTINCTES portant des comptes réciproques (dont un couple déséquilibré
+  de 25 000). Le scénario (97 OK) : R0 calculé par un chemin INDÉPENDANT (soldes injectés × pourcentages) =
+  résultat de l'agrégat ; **une proposition n'est jamais écrite** (journal vide après le GET, agrégat
+  identique à la base) ; confirmation recalculée, sources = empreintes relevées ; **course** : deux
+  confirmations simultanées ⇒ un 201, un 409, une seule élimination active en base ; réciproques soldés,
+  **résultat inchangé** ; **prorata** 50 % (411300 = 512 500) ; appariement déséquilibré traité à la main,
+  `ELIMINATION_A_REPARTIR`, `ELIMINATION_HORS_APPARIEMENT` ; plus-value de 2024 : `COMPTE_RESERVES_NON_DECLARE`
+  puis, les méthodes du groupe déclarées, **la reprise de 2025 sans rien redéclarer** (+300 000, lignes
+  exactes) ; marges (IG, IP au prorata) ; résultat = R0 − 950 000 ; sortie : libération de 825 000,
+  `BIEN_DEJA_SORTI` à l'annulation et à la seconde sortie, retour en reprise après l'annulation de la sortie ;
+  liasses intactes à l'empreinte ; cloisonnement (B : 404 partout, rien chez B) ; journal écriture par
+  écriture ; index uniques partiels présents et **éprouvés par insertion directe** (E11000, rien inséré).
+  `docker compose stop` ensuite.
+- 2026-09-26 — ⑤ branche `MNV-542` poussée, **PR `prospera-bilan-service#141`** ouverte sur `dev` ; statut
+  `in_progress` → `review`.
