@@ -4032,8 +4032,9 @@ sprints:
         epic: "EPIC-137"
         points: 13
         service: "bilan-service — module consolidation"
-        status: "ready-for-dev"  # CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. Il y a deux familles d'éliminations, elles n'ont rien à voir, et les confondre est l'erreur classique :
+        status: "in_progress"  # ⬆ 2026-09-26 : branches MNV-542 ouvertes (docs + bilan-service), CADRAGE fait avant tout code (9 constats, 14 decisions) — une balance n a pas de tiers : les APPARIEMENTS se declarent (societe, comptes) x 2 au dossier de la mere, le produit RAPPROCHE sur les liasses figees et PROPOSE quand les nets s opposent a l unite, un propose n est jamais ecrit (aucun effet) tant qu il n est pas CONFIRME ; desequilibre signale, jamais force ; prorata au PLUS FAIBLE pourcentage d integration (ANC 2020-01 art. 261-3 a 261-5) ; resultats internes DECLARES (marge sur stock encore detenu, plus-value de cession interne) et REPORTES — la marge de N se realise en N+1, l amortissement excedentaire est repris chaque exercice jusqu a la sortie declaree, effet au VENDEUR (art. 251-2) ; aucune famille APPLIQUE par silence (omission motivee) ; dividendes internes hors AC => STORY-687. — Historique — CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. Il y a deux familles d'éliminations, elles n'ont rien à voir, et les confondre est l'erreur classique :
         story_path: "stories/STORY-542.md"
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-543"
         title: "Écart de première consolidation — écarts d'évaluation d'abord, écart d'acquisition ensuite, et jamais l'inverse"
         epic: "EPIC-138"
@@ -4236,6 +4237,14 @@ sprints:
         service: "bilan-service — module consolidation"
         status: "ready-for-dev"  # 🆕 CREEE le 2026-09-26 par le cadrage de STORY-541 (M2, D-541-13) : l art. 86 5° de l AUDCIF (charges d impot non recuperables sur distributions prevues entre integrees) n etait fiche nulle part ; nomme IMPOSITIONS_SUR_DISTRIBUTIONS, NON_TRAITE, requis pour consolider.
         story_path: "stories/STORY-686.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-687"
+        title: "Les dividendes verses entre societes du groupe gonflent le resultat consolide"
+        epic: "EPIC-137"
+        points: 5
+        service: "bilan-service — module consolidation"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-26 par le cadrage de STORY-542 (M7, D-542-11) : le libelle de RESULTATS_INTERNES promettait les dividendes internes (ANC 2020-01 art. 251-2 : elimines en totalite) sans qu aucun AC de 542 ne les couvre — effet d impot PERMANENT (contredit l AC-5 de 542) et prorata du BENEFICIAIRE ; nomme DIVIDENDES_INTERNES, NON_TRAITE, requis pour consolider.
+        story_path: "stories/STORY-687.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-396"
         title: "Une panne d infrastructure est rendue au cabinet comme « votre piece est illisible »"
