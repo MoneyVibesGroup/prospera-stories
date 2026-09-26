@@ -1,6 +1,6 @@
 # STORY-540 : Le dossier de validation de `cima-assurances` — ce qu'on soumet, à qui, et ce qu'on attend en retour
 
-Status: in_progress
+Status: review
 
 **Complexité :** medium
 
@@ -238,13 +238,13 @@ le contournerait ([[STORY-521]]). L'AC-3 reste juste pour le produit ; le regist
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Le dossier ci-dessus est **constitué et versé au dépôt**, sous
+- [x] AC-1 — Le dossier ci-dessus est **constitué et versé au dépôt**, sous
       `referentiels/validation-cima/`, avec l'artefact, ses formules **écrites en clair** (pas en
       JSON) et les six questions.
       ⚡ **PRÉCISÉ (M1, D-540-1, D-540-3, D-540-4)** : l'artefact est `@5.0`, copié octet pour octet
       et identifié par son empreinte ; les formules sont **générées** depuis lui (`--verifier`) ; les
       questions sont **reposées sur le texte** ; les textes de référence sont versés.
-- [ ] AC-2 — ⛔ **Le `statut` de l'artefact reste `a-valider-par-expert`** et continue d'être publié
+- [x] AC-2 — ⛔ **Le `statut` de l'artefact reste `a-valider-par-expert`** et continue d'être publié
       partout où il est servi. Il ne bascule à `certifie` que **le jour où quelqu'un signe**, et le
       nom du signataire entre au `_meta`.
       ⚡⚡ **CORRIGÉ PAR LA MESURE (M2, M3, D-540-2)** : le statut **reste `amorce`** — la valeur que
@@ -252,14 +252,17 @@ le contournerait ([[STORY-521]]). L'AC-3 reste juste pour le produit ; le regist
       du jeu d'états et de l'export ⇒ réserve **R-01**, première du registre, story à ouvrir (hors
       code). La bascule exige la signature **et** la fin de l'amorce ; elle se fera par une story
       propre, qui ajoutera le signataire au `meta` et la garde au générateur.
-- [ ] AC-3 — Un **registre des réserves** : chaque point que la validation infirme devient une story,
+      ⚠️ **Tenu tel que corrigé, pas tel qu'écrit** : le statut n'a pas bougé (cinq versions `amorce`,
+      aucun artefact touché), mais la publication « partout » **n'est pas obtenue** — elle ne peut
+      l'être qu'en code, et R-01 la porte.
+- [x] AC-3 — Un **registre des réserves** : chaque point que la validation infirme devient une story,
       et la story cite la réserve. ⚠️ Les provisions étant des **évaluations versionnées**
       (STORY-517), une méthode corrigée produit **une nouvelle version** — l'historique n'est jamais
       réécrit, et c'est ce que cette architecture protège.
       ⚡ **PRÉCISÉ (D-540-8, M12)** : le registre est amorcé avec les réserves **déjà connues** (stories
       512 à 524, 671, 672) et celles de ce cadrage, chacune rattachée à la question qui la met à
       l'épreuve ; l'append-only est applicatif, pas garanti en base.
-- [ ] AC-4 — Le dossier nomme **ce que le produit ne demande PAS de valider** : le plan de comptes
+- [x] AC-4 — Le dossier nomme **ce que le produit ne demande PAS de valider** : le plan de comptes
       (officiel, verbatim) et l'architecture du moteur. On fait relire ce qui est une proposition,
       pas ce qui est une transcription.
       ⚡ **CORRIGÉ (M4)** : on ne fait pas valider le **texte** de l'art. 431 ; sa **transcription**
@@ -295,14 +298,14 @@ le contournerait ([[STORY-521]]). L'AC-3 reste juste pour le produit ; le regist
 
 ## Definition of Done
 
-- [ ] `python3 generer_formules.py --verifier` vert, et **rouge** quand on altère le document généré
+- [x] `python3 generer_formules.py --verifier` vert, et **rouge** quand on altère le document généré
       ou la copie de l'artefact (table de mutations consignée).
-- [ ] L'empreinte de la copie égale celle des **trois** manifestes de service.
-- [ ] `python3 outils/verifier.py` : **aucun `ECHEC` nouveau** par rapport à la mesure d'avant la
+- [x] L'empreinte de la copie égale celle des **trois** manifestes de service.
+- [x] `python3 outils/verifier.py` : **aucun `ECHEC` nouveau** par rapport à la mesure d'avant la
       story.
-- [ ] Tout lien relatif du dossier résout vers un fichier existant.
+- [x] Tout lien relatif du dossier résout vers un fichier existant.
 - [ ] Revue de code et revue de sécurité passées (`opus`), constats traités.
-- [ ] ⚠️ **Vérification docker : non applicable** — la story ne persiste rien et ne touche aucun
+- [x] ⚠️ **Vérification docker : non applicable** — la story ne persiste rien et ne touche aucun
       service. Dit, pas omis.
 - [ ] Statut aligné aux **3 endroits**.
 
@@ -314,7 +317,7 @@ le contournerait ([[STORY-521]]). L'AC-3 reste juste pour le produit ; le regist
 
 ## Progress Tracking
 
-**Statut : `in_progress` le 2026-09-26.** Cadrage mesuré **avant** toute rédaction du dossier : douze
+**Statut : `review` le 2026-09-26** — cadré, rédigé, validé ; revues ⑥ et ⑦ à passer. Cadrage mesuré **avant** toute rédaction du dossier : douze
 constats (M1 → M12), dont **trois qui contredisent la story** — le statut vaut `amorce` (M2), il n'est
 **pas** publié partout (M3), le plan n'est pas verbatim (M4) — et **deux qui la dépassent** : les
 textes publient déjà une partie des réponses (M5, M6), et trois règlements de 2024 manquaient au
@@ -329,3 +332,68 @@ docs  MNV-540
 Mesure du vérificateur du dépôt **avant** la story (`outils/verifier.py`) : 33 contrôles, 24 OK,
 6 alertes, **3 échecs préexistants** (T2 `story_path`, T5 engagement, T7 compteur) — la référence à
 ne pas dégrader.
+
+### ③ Le dossier — livré le 2026-09-26
+
+`referentiels/validation-cima/`, sept fichiers :
+
+| Fichier | Contenu |
+|---|---|
+| `README.md` | ce qu'on soumet, à qui, ce qu'on attend en retour, ce qu'on ne demande pas, comment le produit passe d'une balance aux postes, le statut et sa bascule, la conduite au retour |
+| `questions.md` | **26 sous-questions** typées — 7 lectures à confirmer, 7 écarts à arbitrer, 11 questions ouvertes, 1 pour information —, la fiche de réponse et le bloc de signature |
+| `registre-des-reserves.md` | **46 réserves**, toutes `OUVERTE` ; quatre priorités recommandées au PO (R-01, R-02, R-09 à R-14, R-28/R-29) |
+| `formules-en-clair.md` | **généré** : 72 postes, 65 lignes, 12 formules développées jusqu'aux comptes, les 90 comptes du plan et ce que chacun alimente (23 n'alimentent rien) |
+| `generer_formules.py` | le générateur, bibliothèque standard seule ; refuse une copie dont l'empreinte n'est pas celle des manifestes ; `--verifier` |
+| `cima-assurances-5.0.json` | l'artefact soumis, octet pour octet |
+| `textes-de-reference.md` | extraits verbatim — art. 432, 433, 334-4, circulaire 00230/2005 — et règlements 2024 transcrits depuis les scans, chacun avec URL, date et empreinte de la source |
+
+Plus : un bandeau « remplacée » sur la §2 de `fiche-validation-referentiels-2026-07-21.md`, et un
+renvoi depuis `referentiels/README-cima-assurances.md`.
+
+⚠️ **Corrigé en cours de rédaction, et il faut le dire** — chaque point a été rattrapé par une
+relecture contre le code ou le texte, pas par une porte :
+
+- **« 7 routes »** servent le statut, écrivais-je, en recopiant les **lignes** d'un rapport de
+  sous-agent dont l'une groupait cinq routes. Recompté dans le contrôleur : **onze**. Corrigé aux
+  quatre endroits qui le disaient.
+- **R-13** portait une phrase qui décrivait un comportement **correct** — un résultat antérieur
+  légitime en `88` — comme une réserve. Retirée.
+- **R-38** disait « le catalogue est à relire contre le règlement 02/2024 » sans l'avoir fait. Fait :
+  le PDF de la FANAF est **le même fichier à l'octet** que le règlement n° 02/2024 ; ce règlement ne
+  modifie **que** l'art. 334-4 ; et la mise en garde servie pour `VIE / DE_GESTION` cite encore la
+  phrase de **2018** (« La Commission peut préciser… »), devenue « Le Secrétariat Général peut, par voie
+  de règlement d'application… ». La réserve est désormais précise.
+
+### ④ Validation
+
+| Porte | Mesure |
+|---|---|
+| générateur | `python3 generer_formules.py --verifier` → **0** |
+| empreinte de la copie | `5234764a…0859` = celle des trois copies de service et des trois manifestes ; le blob indexé par git a la même |
+| liens relatifs | **21** vérifiés sur les huit documents touchés, **0** mort |
+| octets NUL | **aucun** dans les fichiers livrés |
+| vérificateur du dépôt | 33 contrôles, 24 OK, 6 alertes, **3 échecs — les mêmes qu'avant** (T2, T5, T7) |
+
+**Table de mutations** — la garde est `--verifier` ; chaque mutation est jouée sur l'état **committé**
+(`f3b1578`), restaurée depuis `HEAD`, et le script est conservé
+(`PROSPERA/tmp/verif-docker-540/mutations-540.sh`) :
+
+| # | Mutation | Code de sortie |
+|---|---|---|
+| T0 | témoin : état committé | **0** |
+| M1 | un signe inversé dans la formule de `RT` du document | **1** |
+| M2 | un octet ajouté à la copie de l'artefact | **1** — refus de générer |
+| M3 | la ligne des 23 comptes orphelins retirée du document | **1** |
+| M4 | l'empreinte épinglée dans le générateur altérée | **1** — refus de générer |
+| M5 | le document généré supprimé | **1** |
+| T1 | témoin : état restauré | **0** |
+
+⚠️ **Ce que `--verifier` ne garde pas** : la **justesse** de la dérivation au regard du moteur — il
+garde la **fidélité** du document à l'artefact. La dérivation qui compte le plus, l'index des comptes
+(§ 8), a donc été confrontée au code : elle reproduit `rattacher()` de `table-de-passage.service.ts`
+— préfixes testés du plus long au plus court, **tous états confondus**, et toutes les lignes qui
+portent le premier trouvé.
+
+⚠️ **Vérification docker : non applicable, et non lancée** — la story ne persiste rien et ne modifie
+aucun service. Les constats sur le comportement des routes (M3, R-01) sont établis **par lecture du
+code** sur `origin/dev`, pas par une mesure à l'exécution.
