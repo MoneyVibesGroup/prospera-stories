@@ -1,6 +1,6 @@
 # STORY-541 : Retraitements d'homogénéisation — additionner des balances qui n'appliquent pas les mêmes méthodes est faux
 
-Status: review
+Status: done
 
 **Épic :** EPIC-137 — Homogénéisation et éliminations (consolidation)
 **Service :** `bilan-service` — module `consolidation` (posé par STORY-531 ; aucun contrat d'événement : **un
@@ -362,3 +362,43 @@ reportés sont comptés **avant** d'être chargés, borne mesurée → `409 REPR
     l'exercice courant). Laissées de côté : la fabrique commune des deux gardes `bulkWrite` et le
     `contexte()` partagé entre les deux services (deux agrégats distincts, une dizaine de lignes chacun).
   Portes rejouées sur le module : 1 144 unitaires, e2e consolidation + contrat 392 verts.
+- 2026-09-26 — ⑦ **revue de sécurité** (skill `prospera-security-review` : préparation `haiku`, analyse
+  `opus` sur le diff final `ba94c73`, synthèse en session) : **1 constat retenu, confirmé dans le code et
+  corrigé** dans un commit dédié (`54b0214`) :
+  - ⛔ **CWE-770 — la déclaration d'un retraitement relisait tout l'historique, sans borne** :
+    `declarerRetraitement` chargeait, hydratées (lignes, justification, effet d'impôt), toutes les
+    homogénéisations actives de la (société, rubrique) sur TOUS les exercices de la mère, dont le
+    nombre n'est pas borné. Sonde de la revue : ≈ 0,6 s de boucle bloquée par requête à 25 exercices
+    de 200 écritures de 50 lignes. L'agrégat jugeait son report AVANT de charger ; la déclaration, non.
+    Correctif : la borne du report (D-541-15) est jugée avant toute lecture, par la même méthode que
+    l'agrégat (`409 REPRISES_TROP_VOLUMINEUSES`) ; l'historique se lit en TRACE (`historiqueDe` :
+    agrégation projetée — numéro, exercice, régime, omission, « porte des lignes » calculé en base) ;
+    les règles lisent une `TraceDHomogeneisation`. Unitaires, e2e (refus sans relire l'historique ; la
+    déclaration ne lit jamais l'historique hydraté), contrat OpenAPI ; **8 mutants, 8 rouges** — dont
+    un qui survivait d'abord : « porte des lignes » forcé à vrai dans la lecture du journal de
+    l'agrégat, qu'aucun test de SERVICE ne gardait (« à revoir » sur une omission seule) ⇒ test ajouté.
+  - Écartées (22 pistes examinées) : chaîne de guards intacte, rôles et portée de dossier sur les sept
+    routes ; IDOR (`:societeId`, `societeDossierId`, `:exerciceId`, `:ecritureId`) ⇒ 404 sans
+    énumération ; cloisonnement de chaque requête neuve ; injection NoSQL (vrais DTO sous le
+    `ValidationPipe` réel : charsets) ; mass assignment ; immuabilité (`bulkWrite` compris) ; courses ;
+    fuites dans les refus ; ReDoS ; agrégat (borné avant chargement, 93 ms à la borne).
+  - Portes rejouées : lint 0, build, **5 125 unitaires** (couverture 99,19 / 95,88 / 99,46 / 99,27),
+    **1 093 e2e**.
+- 2026-09-26 — ⑧ **vérification docker REJOUÉE sur l'état final** (`54b0214`, stack NEUVE, `down -v`) —
+  les correctifs de revue et de sécurité touchaient le chemin vérifié en ④ : **218 OK, 0 KO**
+  (`PROSPERA/tmp/verif-docker-541/`, première passe archivée dans `passe-1/`) :
+  - phases 0 à 5 : le conteneur exécute `MNV-541` @ `54b0214` (empreintes des fichiers montés,
+    marqueur du correctif dans le `dist`) ; **le scénario entier, 77 OK**, « à revoir » compris sous la
+    règle corrigée par la revue ;
+  - phase 6, le correctif de sécurité **sur la base réelle** — écritures de sonde semées par `mongosh`
+    sous un marqueur, puis retirées : à la borne (2 000 écritures, 10 000 lignes), l'historique se lit
+    en trace (`$project` et `$size` exécutés par Mongo 7), le refus métier reste juste, **74 ms** de
+    médiane ; une écriture de plus ⇒ `409 REPRISES_TROP_VOLUMINEUSES` à la déclaration COMME à
+    l'agrégat, `details` exacts, rien d'écrit ; au volume de l'attaque (5 000 écritures de 50 lignes),
+    la MÊME requête : **838,7 ms sous l'ancien code** (`ba94c73`, extrait puis vérifié à l'empreinte
+    dans le conteneur) **contre 60,4 ms** — refusée avant toute lecture. Retour au code final vérifié,
+    sonde retirée, état de la phase 5 revérifié (agrégat calculé, `APPLIQUE`).
+  `docker compose stop` ensuite.
+- 2026-09-26 — ⑧ **`prospera-bilan-service#140` rebase-mergée sur `dev`** (`8d6791a`), branche supprimée.
+- 2026-09-26 — ⑨ **clôture** : statut `review` → `done` aux trois endroits, `completed_date` posé ; PR
+  `docs/` sur `main`.
