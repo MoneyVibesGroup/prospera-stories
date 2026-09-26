@@ -222,6 +222,10 @@ régime en vigueur. Différent, avec un cumul reporté non nul (ou une écriture
 périmée) ⇒ **À REVOIR** : le cumul est **toujours rejoué à l'identique** (jamais abandonné en silence), et la
 (société, rubrique) doit recevoir dans l'exercice un retraitement — l'écriture de changement de méthode,
 permise même si la société est désormais conforme — ou une omission motivée, sous le régime en vigueur.
+*Précisé en revue de code :* « un cumul reporté » se lit **au moins une écriture antérieure active qui porte
+des lignes** — une approximation par excès (un cumul entièrement soldé reste à revoir, le cabinet le dit par
+une omission `SANS_INCIDENCE`) ; un historique d'**omissions seules** n'a rien reporté et n'est jamais à
+revoir.
 
 **D-541-10 — Le statut de `HOMOGENEISATION` (AC-6, M8).** `APPLIQUE` si et seulement si : un référentiel du
 groupe est en vigueur ; pour chaque société intégrée (mère comprise) et chaque rubrique du groupe, l'état
@@ -310,7 +314,8 @@ reportés sont comptés **avant** d'être chargés, borne mesurée → `409 REPR
     opération hors `insertOne`, sur `methodes_comptables` ET sur le journal de STORY-531 ;
   - deux énumérations anonymes du régime publié, nommées.
 - 2026-09-26 — **mutations** : 48 mutants (règles pures, agrégation, service, dépôts, schémas,
-  contrôleurs, DTO, chargeur, graphe du module), **48 rouges, aucun survivant** — dont 13 réécrits pour
+  contrôleurs, DTO, chargeur, graphe du module), **48 rouges, aucun survivant dans la table** — ⚠️ un
+  mutant HORS table survivait (l'arrondi ligne à ligne en IP) : relevé par la revue ⑥, gardé depuis — dont 13 réécrits pour
   compiler (un mutant qui casse la compilation ne prouve rien). En plus : le mutant du coût (rouge), le
   chargeur sans la ligne (5 rouges), et 22 mutations e2e menées par le sous-agent sur une copie isolée.
 - 2026-09-26 — **portes** (`bilan-service` @ `3ee33f4`) : lint 0 (`{src,test}`), `nest build`, `test:cov`
@@ -339,3 +344,21 @@ reportés sont comptés **avant** d'être chargés, borne mesurée → `409 REPR
   `docker compose stop` ensuite.
 - 2026-09-26 — ⑤ branche `MNV-541` poussée, **PR `prospera-bilan-service#140`** ouverte sur `dev` ; statut
   `in_progress` → `review`.
+- 2026-09-26 — ⑥ **revue de code** (scan `opus` en deux tranches — cœur métier, contrat/persistance/tests —,
+  lentille `ponytail-review`, synthèse en session) : **6 constats retenus, 1 bloquant**, corrigés dans un
+  commit dédié (`ba94c73`) :
+  - ⛔ **bloquant — `estARevoir` ignorait la condition de D-541-9** (« avec un cumul reporté ») : un
+    historique d'OMISSIONS seules, après un changement de méthode, bloquait le statut et **laissait passer
+    un retraitement avec lignes sur une société conforme**, contre l'AC-6 — la seule façon d'obtenir
+    `APPLIQUE` étant de produire l'écriture que l'AC-6 interdit. Codé comme décidé ; trois mutants de la
+    règle, tous rouges ; tests d'omissions seules (règle, déclaration, diagnostic, rubrique retirée) ;
+  - ⚡ **un mutant survivait à la passe de mutations** : le plus fort reste écriture par écriture
+    (D-541-11) n'était gardé par aucun test — tous les cas IP n'avaient qu'une ligne par colonne, où
+    l'arrondi ligne à ligne donne le même résultat. Test à deux débits d'une demi-unité ; le mutant rougit ;
+  - Swagger : `GET …/eliminations` ne rend que les éliminations (le résumé disait « toutes les écritures »),
+    `REPRISES_TROP_VOLUMINEUSES` nomme ses deux bornes et ses `details`, RECOMPOSITION et EQUILIBRE
+    couvrent retraitements et reports ; JSDoc périmée de `METHODES_INCOHERENTES` ;
+  - `ponytail` : deux simplifications retenues (`etablie` = aucun manque ; une seule façon de ranger
+    l'exercice courant). Laissées de côté : la fabrique commune des deux gardes `bulkWrite` et le
+    `contexte()` partagé entre les deux services (deux agrégats distincts, une dizaine de lignes chacun).
+  Portes rejouées sur le module : 1 144 unitaires, e2e consolidation + contrat 392 verts.
