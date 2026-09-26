@@ -66,6 +66,14 @@ Réponse : ☐ Validé ☐ À corriger → _____________________________________
 
 ## §2 — CIMA assurances (`cima-assurances@1.0`, version allégée)
 
+> ⚠️ **Section remplacée le 2026-09-26 (STORY-540) — ne pas l'envoyer.** Elle soumettait
+> `cima-assurances@1.0` ; le paquet servi est `@5.0`. Une partie de ce qu'elle demandait a été tranchée
+> depuis, par le texte ou par une story — variations de provisions (STORY-518), réassurance
+> (STORY-520), Vie / Non-Vie (STORY-521), classe 8 (STORY-522) — et le reste est reposé, sur `@5.0`,
+> dans le dossier à soumettre :
+> [`referentiels/validation-cima/`](referentiels/validation-cima/README.md). Les §1 et §3 ne sont pas
+> concernés.
+
 **Contexte :** plan de comptes = **liste officielle art. 431 du Code CIMA** (non modifiable). À valider : le
 **regroupement en rubriques** de Bilan / Compte de résultat et les **2 formules de résultat**.
 
