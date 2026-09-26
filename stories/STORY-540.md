@@ -109,8 +109,8 @@ rétrocession, cessions à l'étranger, plafonds de l'art. 308, compte 88, nivea
 
 ### M3 — ⛔⛔ « Continue d'être publié partout où il est servi » est FAUX aujourd'hui
 
-Mesuré dans le code : le statut et la mise en garde du paquet sont servis sur **7 routes** —
-catalogue `GET /referentiels`, diagnostic `…/bilan/referentiel`, les dry-runs d'états, balance
+Mesuré dans le code : le statut et la mise en garde du paquet sont servis sur **onze routes** —
+catalogue `GET /referentiels`, diagnostic `…/bilan/referentiel`, les **six** dry-runs d'états, balance
 `…/referentiels/actifs` et `suggest-comptes`, assurance `…/assurance/referentiel`.
 
 Ils sont **absents** du circuit principal :
@@ -170,7 +170,7 @@ confirmer**, et inscrit au registre avec « story à ouvrir ».
 | Règlement | Ce qu'il change | Effet sur le dossier |
 |---|---|---|
 | **n° 006/CIMA/PCMA/CE/SG/CIMA/2024** (Abidjan, 8 août 2024) | art. **422** (état **C10e** nouveau), art. **422-2** (bilan, comptes 80 et 87 **semestriels**, état **C6S** nouveau), art. 730 ; modèles annexés C6 S, C10, C10 B, C10 C, C25 bis, RA2, RS1, C10E ; transition jusqu'au **31 décembre 2027** | ne republie **pas** les modèles du bilan ni des comptes 80, 87 et 88 : la base de `@5.0` tient. ⛔ Mais `etats-cima@1.0` (46 états) n'a **ni C10e ni C6S** — R-43 |
-| **n° 02/CIMA/PCMA/CE/SG/2024** (Dakar, 16 janvier 2024) | art. **334-4** : méthode de la **provision de gestion** en vie | c'est le « Règlement 2024 » que STORY-519 (M2) n'avait pas pu obtenir. Sans effet sur ce que le module calcule (il ne calcule pas la vie) — R-38 |
+| **n° 02/CIMA/PCMA/CE/SG/2024** (Dakar, 16 janvier 2024) | art. **334-4**, et lui seul : les dispositions transitoires de 2018 disparaissent, la compensation entre catégories homogènes de contrats devient **autorisée**, les modalités de la provision de gestion passent au **Secrétariat Général** | c'est le « Règlement 2024 » que STORY-519 (M2) n'avait pas pu obtenir — **même fichier à l'octet** que celui de la FANAF. Sans effet sur ce que le module calcule ; ⛔ mais la mise en garde que le catalogue des méthodes sert pour `VIE / DE_GESTION` cite encore la phrase de 2018 — R-38 |
 | n° 004/CIMA/PCMA/CE/SG/CIMA/2024 (Abidjan, 8 août 2024) | art. 329-3 : capital minimum | hors périmètre |
 
 ### M8 — Q5 : « admises par la Commission » n'est pas une propriété d'une méthode
@@ -248,7 +248,7 @@ le contournerait ([[STORY-521]]). L'AC-3 reste juste pour le produit ; le regist
       partout où il est servi. Il ne bascule à `certifie` que **le jour où quelqu'un signe**, et le
       nom du signataire entre au `_meta`.
       ⚡⚡ **CORRIGÉ PAR LA MESURE (M2, M3, D-540-2)** : le statut **reste `amorce`** — la valeur que
-      le vocabulaire assigne à ce paquet. Il **n'est pas** publié partout : servi sur 7 routes, absent
+      le vocabulaire assigne à ce paquet. Il **n'est pas** publié partout : servi sur onze routes, absent
       du jeu d'états et de l'export ⇒ réserve **R-01**, première du registre, story à ouvrir (hors
       code). La bascule exige la signature **et** la fin de l'amorce ; elle se fera par une story
       propre, qui ajoutera le signataire au `meta` et la garde au générateur.

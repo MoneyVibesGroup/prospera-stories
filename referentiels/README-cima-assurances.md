@@ -5,6 +5,10 @@ d'assurance », Chapitre III : « Plan comptable particulier à l'assurance et �
 (Conférence Interafricaine des Marchés d'Assurances). Dernière modification structurante : décision du
 Conseil des Ministres du 2 avril 2008.
 
+> 📋 **Dossier de validation** (STORY-540) : [`validation-cima/`](validation-cima/README.md) — l'artefact
+> `@5.0` soumis octet pour octet, sa structure écrite en clair, les six questions reposées sur le texte
+> et le registre des réserves.
+
 > ⚠️ **Corrigé le 2026-09-11 (revue de code de STORY-491).** Ce README écrivait « Livre III, Titre IV,
 > Chapitre III ». Sur cima-afrique.org, le Livre IV se divise directement en chapitres, le Chapitre III
 > y est le plan comptable, et le Titre IV du Livre III s'intitule « Dispositions transitoires ».

@@ -1,0 +1,1958 @@
+{
+  "meta": {
+    "code": "cima-assurances",
+    "version": "5.0",
+    "libelle": "CIMA — Plan comptable particulier à l’assurance et à la capitalisation (version allégée, deux modèles alternatifs du compte 80, compte 87, et classe 8 lue par liste explicite — les comptes de regroupement sont marqués et exclus de la gestion)",
+    "date": "2026-09-22",
+    "zoneComptable": "CIMA",
+    "pays": [
+      "BF",
+      "BJ",
+      "CF",
+      "CG",
+      "CI",
+      "CM",
+      "GA",
+      "GQ",
+      "GW",
+      "ML",
+      "NE",
+      "SN",
+      "TD",
+      "TG"
+    ],
+    "devisePresentation": null,
+    "normeSource": "Code des assurances CIMA — Livre IV « Règles comptables applicables aux organismes d’assurance », Chapitre III « Plan comptable particulier à l’assurance et à la capitalisation » (art. 430, classes comptables ; art. 431, liste des comptes ; art. 432, terminologie et fonctionnement — « Le solde du compte 80 est viré, pour clôture des écritures, au compte 87 », qui fait de `80` un compte de regroupement au même titre que `87`, `88` et `89` ; art. 433, états modèles ; art. 334-11, part des cessionnaires jamais compensée), lu avec le Livre III — art. 300 et art. 326 (agrément et spécialisation), Conférence Interafricaine des Marchés d’Assurances — dernière modification structurante : décision du Conseil des Ministres du 2 avril 2008.",
+    "statut": "amorce",
+    "miseEnGarde": "Structure de liasse et plan de comptes proposés depuis le référentiel CIMA ; les variations de provisions techniques et les cessions en réassurance entrent au résultat technique, brut et cédé publiés séparément et JAMAIS compensés ; le compte 80 « Exploitation générale » est publié dans ses DEUX modèles alternatifs de l’art. 433 — Vie / Capitalisation et Assurances de toute nature — dont UN SEUL s’applique à une entreprise donnée, l’art. 326 interdisant de pratiquer les deux activités ; et les comptes de REGROUPEMENT (80, 87, 88, 89) sont marqués et EXCLUS des racines de gestion, sans quoi le résultat comptable les compte deux fois. Le compte 87 est publié en SQUELETTE : les comptes 82 à 86 ne sont routés vers aucun poste (STORY-672). Restent NON couverts : les états C1..C25 et leur clé de ventilation par catégorie, la reprise de la charge d’impôt déjà comptabilisée, la rétrocession, les cessions « à l’étranger » (6909 / 7909), les plafonds de l’art. 308, le compte 88 et le niveau de détail du plan. À VALIDER par un actuaire avant tout usage réglementaire."
+  },
+  "regles": {
+    "NET_ACTIF": "Solde débiteur net (déduction des amortissements/provisions), présenté à l'actif",
+    "SOLDE_CREDITEUR": "Solde créditeur présenté au passif",
+    "SOLDE_DEBITEUR": "Solde débiteur présenté à l'actif",
+    "CHARGE": "Charge du compte de résultat",
+    "PRODUIT": "Produit du compte de résultat",
+    "FORMULE": "Agrégat calculé par opérandes signées (totaux du Bilan, résultat technique et résultat net)"
+  },
+  "racinesDeGestion": [
+    "6",
+    "7",
+    "82",
+    "83",
+    "84",
+    "85",
+    "86"
+  ],
+  "planDeComptes": [
+    {
+      "numero": "10",
+      "libelle": "Capital",
+      "classe": 1
+    },
+    {
+      "numero": "11",
+      "libelle": "Réserves",
+      "classe": 1
+    },
+    {
+      "numero": "12",
+      "libelle": "Report à nouveau",
+      "classe": 1
+    },
+    {
+      "numero": "13",
+      "libelle": "Réserves réglementaires",
+      "classe": 1
+    },
+    {
+      "numero": "14",
+      "libelle": "Subventions d'équipement reçues",
+      "classe": 1
+    },
+    {
+      "numero": "15",
+      "libelle": "Provisions pour pertes et charges",
+      "classe": 1
+    },
+    {
+      "numero": "16",
+      "libelle": "Emprunts et autres dettes à plus d'un an",
+      "classe": 1
+    },
+    {
+      "numero": "17",
+      "libelle": "Comptes de liaison des établissements et succursales",
+      "classe": 1
+    },
+    {
+      "numero": "18",
+      "libelle": "Dettes pour espèces remises par les cessionnaires et rétrocessionnaires",
+      "classe": 1
+    },
+    {
+      "numero": "19",
+      "libelle": "Provision pour dépréciation des immobilisations et titres",
+      "classe": 1
+    },
+    {
+      "numero": "20",
+      "libelle": "Frais d'établissement et de développement dans le pays concerné",
+      "classe": 2
+    },
+    {
+      "numero": "21",
+      "libelle": "Immobilisations dans le pays concerné",
+      "classe": 2
+    },
+    {
+      "numero": "22",
+      "libelle": "Immobilisations en cours dans le pays concerné",
+      "classe": 2
+    },
+    {
+      "numero": "23",
+      "libelle": "Valeurs mobilières et titres assimilés (affectables à la représentation)",
+      "classe": 2
+    },
+    {
+      "numero": "24",
+      "libelle": "Prêts et effets assimilés (affectables à la représentation)",
+      "classe": 2
+    },
+    {
+      "numero": "25",
+      "libelle": "Titres de participation",
+      "classe": 2
+    },
+    {
+      "numero": "26",
+      "libelle": "Dépôts et cautionnement",
+      "classe": 2
+    },
+    {
+      "numero": "27",
+      "libelle": "Valeurs garantissant les engagements",
+      "classe": 2
+    },
+    {
+      "numero": "28",
+      "libelle": "Valeurs immobilisées à l'étranger",
+      "classe": 2
+    },
+    {
+      "numero": "31",
+      "libelle": "Provisions techniques opérations d'assurance directe vie",
+      "classe": 3
+    },
+    {
+      "numero": "32",
+      "libelle": "Provisions techniques opérations d'assurance directe dommages, RC et risques divers",
+      "classe": 3
+    },
+    {
+      "numero": "34",
+      "libelle": "Provisions techniques acceptations vie",
+      "classe": 3
+    },
+    {
+      "numero": "35",
+      "libelle": "Provisions techniques acceptations dommages, RC et risques divers",
+      "classe": 3
+    },
+    {
+      "numero": "38",
+      "libelle": "Provisions techniques à l'étranger",
+      "classe": 3
+    },
+    {
+      "numero": "39",
+      "libelle": "Part des cessionnaires et rétrocessionnaires dans les provisions techniques",
+      "classe": 3
+    },
+    {
+      "numero": "40",
+      "libelle": "Réassureurs, cédants, coassureurs",
+      "classe": 4
+    },
+    {
+      "numero": "41",
+      "libelle": "Assurés et courtiers, agents généraux et autres producteurs",
+      "classe": 4
+    },
+    {
+      "numero": "42",
+      "libelle": "Personnel",
+      "classe": 4
+    },
+    {
+      "numero": "43",
+      "libelle": "État",
+      "classe": 4
+    },
+    {
+      "numero": "44",
+      "libelle": "Actionnaires (ou sociétaires)",
+      "classe": 4
+    },
+    {
+      "numero": "45",
+      "libelle": "Filiales (ou société mère)",
+      "classe": 4
+    },
+    {
+      "numero": "46",
+      "libelle": "Débiteurs et créditeurs divers",
+      "classe": 4
+    },
+    {
+      "numero": "47",
+      "libelle": "Comptes de régularisation, passif",
+      "classe": 4
+    },
+    {
+      "numero": "48",
+      "libelle": "Comptes de régularisation, actif",
+      "classe": 4
+    },
+    {
+      "numero": "49",
+      "libelle": "Comptes d'attente à régulariser",
+      "classe": 4
+    },
+    {
+      "numero": "50",
+      "libelle": "Emprunts à moins d'un an",
+      "classe": 5
+    },
+    {
+      "numero": "51",
+      "libelle": "Prêts non affectables à la représentation",
+      "classe": 5
+    },
+    {
+      "numero": "52",
+      "libelle": "Effets à payer",
+      "classe": 5
+    },
+    {
+      "numero": "53",
+      "libelle": "Effets à recevoir",
+      "classe": 5
+    },
+    {
+      "numero": "54",
+      "libelle": "Chèques et coupons à encaisser",
+      "classe": 5
+    },
+    {
+      "numero": "55",
+      "libelle": "Titres de placement",
+      "classe": 5
+    },
+    {
+      "numero": "56",
+      "libelle": "Banques et chèques postaux",
+      "classe": 5
+    },
+    {
+      "numero": "57",
+      "libelle": "Caisse",
+      "classe": 5
+    },
+    {
+      "numero": "59",
+      "libelle": "Virements internes",
+      "classe": 5
+    },
+    {
+      "numero": "60",
+      "libelle": "Prestations dans le pays concerné",
+      "classe": 6
+    },
+    {
+      "numero": "601",
+      "libelle": "Prestations échues (affaires directes vie)",
+      "classe": 6
+    },
+    {
+      "numero": "602",
+      "libelle": "Prestations et frais payés (affaires directes dommages, RC et risques divers)",
+      "classe": 6
+    },
+    {
+      "numero": "604",
+      "libelle": "Prestations échues (acceptations vie)",
+      "classe": 6
+    },
+    {
+      "numero": "605",
+      "libelle": "Prestations et frais (acceptations d'affaires dommages, RC et risques divers)",
+      "classe": 6
+    },
+    {
+      "numero": "609",
+      "libelle": "Part des réassureurs dans les prestations et frais",
+      "classe": 6
+    },
+    {
+      "numero": "61",
+      "libelle": "Frais de personnel dans le pays concerné",
+      "classe": 6
+    },
+    {
+      "numero": "62",
+      "libelle": "Impôts et taxes dans le pays concerné",
+      "classe": 6
+    },
+    {
+      "numero": "63",
+      "libelle": "Travaux, fournitures et services extérieurs",
+      "classe": 6
+    },
+    {
+      "numero": "64",
+      "libelle": "Transports et déplacements",
+      "classe": 6
+    },
+    {
+      "numero": "65",
+      "libelle": "Commissions dans le pays concerné",
+      "classe": 6
+    },
+    {
+      "numero": "66",
+      "libelle": "Frais divers de gestion",
+      "classe": 6
+    },
+    {
+      "numero": "67",
+      "libelle": "Frais financiers",
+      "classe": 6
+    },
+    {
+      "numero": "68",
+      "libelle": "Dotations aux amortissements et provisions",
+      "classe": 6
+    },
+    {
+      "numero": "69",
+      "libelle": "Charges par nature à l'étranger",
+      "classe": 6
+    },
+    {
+      "numero": "70",
+      "libelle": "Primes ou cotisations dans le pays concerné",
+      "classe": 7
+    },
+    {
+      "numero": "701",
+      "libelle": "Primes (affaires directes vie)",
+      "classe": 7
+    },
+    {
+      "numero": "702",
+      "libelle": "Primes (affaires directes dommages, RC et risques divers)",
+      "classe": 7
+    },
+    {
+      "numero": "704",
+      "libelle": "Primes (acceptations vie)",
+      "classe": 7
+    },
+    {
+      "numero": "705",
+      "libelle": "Primes (acceptations dommages, RC et risques divers)",
+      "classe": 7
+    },
+    {
+      "numero": "709",
+      "libelle": "Part des réassureurs dans les primes",
+      "classe": 7
+    },
+    {
+      "numero": "71",
+      "libelle": "Subventions d'exploitation reçues",
+      "classe": 7
+    },
+    {
+      "numero": "73",
+      "libelle": "Réductions et ristournes de primes",
+      "classe": 7
+    },
+    {
+      "numero": "74",
+      "libelle": "Ristournes, rabais et remises obtenus",
+      "classe": 7
+    },
+    {
+      "numero": "75",
+      "libelle": "Commissions et participations reçues des réassureurs",
+      "classe": 7
+    },
+    {
+      "numero": "76",
+      "libelle": "Produits accessoires",
+      "classe": 7
+    },
+    {
+      "numero": "77",
+      "libelle": "Produits financiers",
+      "classe": 7
+    },
+    {
+      "numero": "78",
+      "libelle": "Travaux faits par l'entreprise pour elle-même",
+      "classe": 7
+    },
+    {
+      "numero": "79",
+      "libelle": "Produits par nature à l'étranger",
+      "classe": 7
+    },
+    {
+      "numero": "80",
+      "libelle": "Exploitation générale",
+      "classe": 8,
+      "nature": "REGROUPEMENT"
+    },
+    {
+      "numero": "82",
+      "libelle": "Pertes et profits sur exercices antérieurs",
+      "classe": 8
+    },
+    {
+      "numero": "83",
+      "libelle": "Dotation aux provisions exceptionnelles et réserves réglementaires",
+      "classe": 8
+    },
+    {
+      "numero": "84",
+      "libelle": "Pertes et profits exceptionnels",
+      "classe": 8
+    },
+    {
+      "numero": "85",
+      "libelle": "Impôts sur les bénéfices",
+      "classe": 8
+    },
+    {
+      "numero": "86",
+      "libelle": "Produits de prestations de services échangés",
+      "classe": 8
+    },
+    {
+      "numero": "87",
+      "libelle": "Compte général de pertes et profits",
+      "classe": 8,
+      "nature": "REGROUPEMENT"
+    },
+    {
+      "numero": "88",
+      "libelle": "Résultats en instance d'affectation",
+      "classe": 8,
+      "nature": "REGROUPEMENT"
+    },
+    {
+      "numero": "89",
+      "libelle": "Bilan",
+      "classe": 8,
+      "nature": "REGROUPEMENT"
+    },
+    {
+      "numero": "00",
+      "libelle": "Engagements en faveur de l'entreprise",
+      "classe": 0
+    },
+    {
+      "numero": "01",
+      "libelle": "Engagements à la charge de l'entreprise",
+      "classe": 0
+    },
+    {
+      "numero": "03",
+      "libelle": "Autres charges envers des tiers",
+      "classe": 0
+    },
+    {
+      "numero": "05",
+      "libelle": "Plan d'investissement",
+      "classe": 0
+    },
+    {
+      "numero": "06",
+      "libelle": "Valeurs reçues en nantissement des cessionnaires et rétrocessionnaires",
+      "classe": 0
+    },
+    {
+      "numero": "07",
+      "libelle": "Valeurs appartenant à des institutions de prévoyance",
+      "classe": 0
+    },
+    {
+      "numero": "08",
+      "libelle": "Valeurs remises par les organismes réassurés",
+      "classe": 0
+    },
+    {
+      "numero": "09",
+      "libelle": "Autres valeurs détenues par l'entreprise",
+      "classe": 0
+    }
+  ],
+  "postes": [
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "CA1",
+      "libelle": "Valeurs immobilisées (placements et immobilisations)",
+      "note": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "CA2",
+      "libelle": "Part des cessionnaires et rétrocessionnaires dans les provisions techniques",
+      "note": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "CA3",
+      "libelle": "Créances (assurés et intermédiaires, réassureurs, État, divers)",
+      "note": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "CA4",
+      "libelle": "Comptes financiers (titres de placement, banques, caisse)",
+      "note": null
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "code": "CAT",
+      "libelle": "TOTAL DE L'ACTIF",
+      "note": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CP1",
+      "libelle": "Capitaux propres",
+      "note": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CP2",
+      "libelle": "Provisions pour risques et charges et dépréciations",
+      "note": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CP3",
+      "libelle": "Provisions techniques brutes",
+      "note": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CP4",
+      "libelle": "Dettes (financières, réassureurs, tiers)",
+      "note": null
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "code": "CPT",
+      "libelle": "TOTAL DU PASSIF",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RC1",
+      "libelle": "Charges de prestations (sinistres, capitaux et rentes) — brutes de la part des réassureurs",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RC9",
+      "libelle": "Part des réassureurs dans les prestations et frais",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RC2",
+      "libelle": "Frais de personnel",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RC3",
+      "libelle": "Impôts et taxes",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RC4",
+      "libelle": "Travaux, fournitures et services extérieurs ; transports et déplacements",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RC5",
+      "libelle": "Commissions",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RC6",
+      "libelle": "Frais divers de gestion",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RC7",
+      "libelle": "Frais financiers (charges de placements)",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RC8",
+      "libelle": "Dotations aux amortissements et provisions",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RP1",
+      "libelle": "Primes ou cotisations — brutes de cessions",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RP6",
+      "libelle": "Part des réassureurs dans les primes",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RP2",
+      "libelle": "Subventions d'exploitation reçues",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RP3",
+      "libelle": "Commissions et participations reçues des réassureurs",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RP4",
+      "libelle": "Produits accessoires",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RP5",
+      "libelle": "Produits financiers (produits de placements)",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RV1",
+      "libelle": "Variation des provisions techniques brutes",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RV2",
+      "libelle": "Variation de la part des cessionnaires et rétrocessionnaires dans les provisions techniques",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RT",
+      "libelle": "Résultat technique (amorce — hors les charges générales que l’art. 432 range au compte 80)",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "code": "RN",
+      "libelle": "RÉSULTAT NET DE L'EXERCICE (avant impôt sur les bénéfices — amorce ; tel que les livres le portent, hors variations de provisions techniques)",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV1",
+      "libelle": "Prestations échues (affaires directes vie et acceptations) — brutes de la part des réassureurs",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV2",
+      "libelle": "Part des réassureurs dans les prestations et frais",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV3",
+      "libelle": "Charges de commissions",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV4",
+      "libelle": "Frais de personnel",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV5",
+      "libelle": "Impôts et taxes",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV6",
+      "libelle": "Travaux, fournitures et services extérieurs ; transports et déplacements",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV7",
+      "libelle": "Frais divers de gestion",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV8",
+      "libelle": "Dotations aux amortissements et provisions",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV9",
+      "libelle": "Charges des placements",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV10",
+      "libelle": "Primes et accessoires, nets d'annulations (affaires directes vie et acceptations) — brutes de cessions",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV11",
+      "libelle": "Part des réassureurs dans les primes",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV12",
+      "libelle": "Commissions et participations reçues des réassureurs",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV13",
+      "libelle": "Produits des placements",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV14",
+      "libelle": "Subventions d'exploitation",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV15",
+      "libelle": "Produits accessoires",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV16",
+      "libelle": "Variation des provisions techniques brutes",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV17",
+      "libelle": "Variation de la part des cessionnaires et rétrocessionnaires dans les provisions techniques",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "code": "EV18",
+      "libelle": "SOLDE DU COMPTE 80 — Vie / Capitalisation",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN1",
+      "libelle": "Prestations et frais payés (affaires directes dommages, RC et risques divers, et acceptations) — bruts de la part des réassureurs",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN2",
+      "libelle": "Part des réassureurs dans les prestations et frais",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN3",
+      "libelle": "Charges de commissions",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN4",
+      "libelle": "Frais de personnel",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN5",
+      "libelle": "Impôts et taxes",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN6",
+      "libelle": "Travaux, fournitures et services extérieurs ; transports et déplacements",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN7",
+      "libelle": "Frais divers de gestion",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN8",
+      "libelle": "Dotations aux amortissements et provisions",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN9",
+      "libelle": "Charges des placements",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN10",
+      "libelle": "Primes et accessoires, nets d'annulations (affaires directes dommages, RC et risques divers, et acceptations) — brutes de cessions",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN11",
+      "libelle": "Part des réassureurs dans les primes",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN12",
+      "libelle": "Commissions et participations reçues des réassureurs",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN13",
+      "libelle": "Produits des placements",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN14",
+      "libelle": "Subventions d'exploitation",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN15",
+      "libelle": "Produits accessoires",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN16",
+      "libelle": "Variation des provisions techniques brutes",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN17",
+      "libelle": "Variation de la part des cessionnaires et rétrocessionnaires dans les provisions techniques",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "code": "EN18",
+      "libelle": "SOLDE DU COMPTE 80 — Assurances de toute nature",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_87_PERTES_ET_PROFITS",
+      "code": "PP1",
+      "libelle": "Pertes ou profits d'exploitation de l'exercice (compte 80)",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_87_PERTES_ET_PROFITS",
+      "code": "PP2",
+      "libelle": "Pertes et profits sur exercices antérieurs",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_87_PERTES_ET_PROFITS",
+      "code": "PP3",
+      "libelle": "Dotations de l'exercice aux provisions hors exploitation et aux réserves réglementaires",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_87_PERTES_ET_PROFITS",
+      "code": "PP4",
+      "libelle": "Pertes et profits exceptionnels",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_87_PERTES_ET_PROFITS",
+      "code": "PP5",
+      "libelle": "Impôts sur les bénéfices",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_87_PERTES_ET_PROFITS",
+      "code": "PP6",
+      "libelle": "Produits et prestations de services échangés entre établissements",
+      "note": null
+    },
+    {
+      "etat": "COMPTE_87_PERTES_ET_PROFITS",
+      "code": "PPN",
+      "libelle": "RÉSULTAT NET DE L'EXERCICE (solde du compte 87)",
+      "note": null
+    }
+  ],
+  "tableDePassage": [
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "CA1",
+      "libelle": "Valeurs immobilisées (placements et immobilisations)",
+      "type": "detail",
+      "regle": "NET_ACTIF",
+      "comptesSyscohada": [
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28"
+      ]
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "CA2",
+      "libelle": "Part des cessionnaires et rétrocessionnaires dans les provisions techniques",
+      "type": "detail",
+      "regle": "SOLDE_DEBITEUR",
+      "comptesSyscohada": [
+        "39"
+      ]
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "CA3",
+      "libelle": "Créances (assurés et intermédiaires, réassureurs, État, divers)",
+      "type": "detail",
+      "regle": "SOLDE_DEBITEUR",
+      "comptesSyscohada": [
+        "40",
+        "41",
+        "44",
+        "45",
+        "46",
+        "48"
+      ]
+    },
+    {
+      "etat": "BILAN_ACTIF",
+      "poste": "CA4",
+      "libelle": "Comptes financiers (titres de placement, banques, caisse)",
+      "type": "detail",
+      "regle": "SOLDE_DEBITEUR",
+      "comptesSyscohada": [
+        "51",
+        "53",
+        "54",
+        "55",
+        "56",
+        "57"
+      ]
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CP1",
+      "libelle": "Capitaux propres",
+      "type": "detail",
+      "regle": "SOLDE_CREDITEUR",
+      "comptesSyscohada": [
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "88"
+      ],
+      "role": "RESULTAT_BILAN"
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CP2",
+      "libelle": "Provisions pour risques et charges et dépréciations",
+      "type": "detail",
+      "regle": "SOLDE_CREDITEUR",
+      "comptesSyscohada": [
+        "15",
+        "19"
+      ]
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CP3",
+      "libelle": "Provisions techniques brutes",
+      "type": "detail",
+      "regle": "SOLDE_CREDITEUR",
+      "comptesSyscohada": [
+        "31",
+        "32",
+        "34",
+        "35",
+        "38"
+      ]
+    },
+    {
+      "etat": "BILAN_PASSIF",
+      "poste": "CP4",
+      "libelle": "Dettes (financières, réassureurs, tiers)",
+      "type": "detail",
+      "regle": "SOLDE_CREDITEUR",
+      "comptesSyscohada": [
+        "16",
+        "17",
+        "18",
+        "42",
+        "43",
+        "46",
+        "47",
+        "50",
+        "52"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RC1",
+      "libelle": "Charges de prestations (sinistres, capitaux et rentes) — brutes de la part des réassureurs",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "60",
+        "601",
+        "602",
+        "604",
+        "605"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RC9",
+      "libelle": "Part des réassureurs dans les prestations et frais",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "609"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RC2",
+      "libelle": "Frais de personnel",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "61"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RC3",
+      "libelle": "Impôts et taxes",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "62"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RC4",
+      "libelle": "Travaux, fournitures et services extérieurs ; transports et déplacements",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "63",
+        "64"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RC5",
+      "libelle": "Commissions",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "65"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RC6",
+      "libelle": "Frais divers de gestion",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "66"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RC7",
+      "libelle": "Frais financiers (charges de placements)",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "67"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RC8",
+      "libelle": "Dotations aux amortissements et provisions",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "68"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RP1",
+      "libelle": "Primes ou cotisations — brutes de cessions",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "70",
+        "701",
+        "702",
+        "704",
+        "705"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RP6",
+      "libelle": "Part des réassureurs dans les primes",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "709"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RP2",
+      "libelle": "Subventions d'exploitation reçues",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "71"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RP3",
+      "libelle": "Commissions et participations reçues des réassureurs",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "75"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RP4",
+      "libelle": "Produits accessoires",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "76"
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RP5",
+      "libelle": "Produits financiers (produits de placements)",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "77"
+      ]
+    },
+    {
+      "etat": "BILAN",
+      "poste": "CAT",
+      "libelle": "TOTAL DE L'ACTIF",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "CA1",
+          "signe": "+",
+          "etatSource": "BILAN_ACTIF"
+        },
+        {
+          "poste": "CA2",
+          "signe": "+",
+          "etatSource": "BILAN_ACTIF"
+        },
+        {
+          "poste": "CA3",
+          "signe": "+",
+          "etatSource": "BILAN_ACTIF"
+        },
+        {
+          "poste": "CA4",
+          "signe": "+",
+          "etatSource": "BILAN_ACTIF"
+        }
+      ],
+      "role": "TOTAL_ACTIF"
+    },
+    {
+      "etat": "BILAN",
+      "poste": "CPT",
+      "libelle": "TOTAL DU PASSIF",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "CP1",
+          "signe": "+",
+          "etatSource": "BILAN_PASSIF"
+        },
+        {
+          "poste": "CP2",
+          "signe": "+",
+          "etatSource": "BILAN_PASSIF"
+        },
+        {
+          "poste": "CP3",
+          "signe": "+",
+          "etatSource": "BILAN_PASSIF"
+        },
+        {
+          "poste": "CP4",
+          "signe": "+",
+          "etatSource": "BILAN_PASSIF"
+        }
+      ],
+      "role": "TOTAL_PASSIF"
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RV1",
+      "libelle": "Variation des provisions techniques brutes",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "CP3",
+          "signe": "+",
+          "mode": "VARIATION",
+          "etatSource": "BILAN_PASSIF"
+        }
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RV2",
+      "libelle": "Variation de la part des cessionnaires et rétrocessionnaires dans les provisions techniques",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "CA2",
+          "signe": "+",
+          "mode": "VARIATION",
+          "etatSource": "BILAN_ACTIF"
+        }
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RT",
+      "libelle": "Résultat technique (amorce — hors les charges générales que l’art. 432 range au compte 80)",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "RP1",
+          "signe": "+"
+        },
+        {
+          "poste": "RP6",
+          "signe": "+"
+        },
+        {
+          "poste": "RP3",
+          "signe": "+"
+        },
+        {
+          "poste": "RP5",
+          "signe": "+"
+        },
+        {
+          "poste": "RC1",
+          "signe": "-"
+        },
+        {
+          "poste": "RC9",
+          "signe": "-"
+        },
+        {
+          "poste": "RC5",
+          "signe": "-"
+        },
+        {
+          "poste": "RC8",
+          "signe": "-"
+        },
+        {
+          "poste": "RV1",
+          "signe": "-"
+        },
+        {
+          "poste": "RV2",
+          "signe": "+"
+        }
+      ]
+    },
+    {
+      "etat": "COMPTE_RESULTAT",
+      "poste": "RN",
+      "libelle": "RÉSULTAT NET DE L'EXERCICE (avant impôt sur les bénéfices — amorce ; tel que les livres le portent, hors variations de provisions techniques)",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "RP1",
+          "signe": "+"
+        },
+        {
+          "poste": "RP6",
+          "signe": "+"
+        },
+        {
+          "poste": "RP2",
+          "signe": "+"
+        },
+        {
+          "poste": "RP3",
+          "signe": "+"
+        },
+        {
+          "poste": "RP4",
+          "signe": "+"
+        },
+        {
+          "poste": "RP5",
+          "signe": "+"
+        },
+        {
+          "poste": "RC1",
+          "signe": "-"
+        },
+        {
+          "poste": "RC9",
+          "signe": "-"
+        },
+        {
+          "poste": "RC2",
+          "signe": "-"
+        },
+        {
+          "poste": "RC3",
+          "signe": "-"
+        },
+        {
+          "poste": "RC4",
+          "signe": "-"
+        },
+        {
+          "poste": "RC5",
+          "signe": "-"
+        },
+        {
+          "poste": "RC6",
+          "signe": "-"
+        },
+        {
+          "poste": "RC7",
+          "signe": "-"
+        },
+        {
+          "poste": "RC8",
+          "signe": "-"
+        }
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV1",
+      "libelle": "Prestations échues (affaires directes vie et acceptations) — brutes de la part des réassureurs",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "601",
+        "604",
+        "605"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV2",
+      "libelle": "Part des réassureurs dans les prestations et frais",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "609"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV3",
+      "libelle": "Charges de commissions",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "65"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV4",
+      "libelle": "Frais de personnel",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "61"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV5",
+      "libelle": "Impôts et taxes",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "62"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV6",
+      "libelle": "Travaux, fournitures et services extérieurs ; transports et déplacements",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "63",
+        "64"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV7",
+      "libelle": "Frais divers de gestion",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "66"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV8",
+      "libelle": "Dotations aux amortissements et provisions",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "68"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV9",
+      "libelle": "Charges des placements",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "67"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV12",
+      "libelle": "Commissions et participations reçues des réassureurs",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "75"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV13",
+      "libelle": "Produits des placements",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "77"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV14",
+      "libelle": "Subventions d'exploitation",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "71"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV15",
+      "libelle": "Produits accessoires",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "76"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV10",
+      "libelle": "Primes et accessoires, nets d'annulations (affaires directes vie et acceptations) — brutes de cessions",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "701",
+        "704",
+        "705"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV11",
+      "libelle": "Part des réassureurs dans les primes",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "709"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV16",
+      "libelle": "Variation des provisions techniques brutes",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "CP3",
+          "signe": "+",
+          "mode": "VARIATION",
+          "etatSource": "BILAN_PASSIF"
+        }
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV17",
+      "libelle": "Variation de la part des cessionnaires et rétrocessionnaires dans les provisions techniques",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "CA2",
+          "signe": "+",
+          "mode": "VARIATION",
+          "etatSource": "BILAN_ACTIF"
+        }
+      ]
+    },
+    {
+      "etat": "COMPTE_80_VIE_CAPITALISATION",
+      "poste": "EV18",
+      "libelle": "SOLDE DU COMPTE 80 — Vie / Capitalisation",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "EV10",
+          "signe": "+"
+        },
+        {
+          "poste": "EV11",
+          "signe": "+"
+        },
+        {
+          "poste": "EV12",
+          "signe": "+"
+        },
+        {
+          "poste": "EV13",
+          "signe": "+"
+        },
+        {
+          "poste": "EV14",
+          "signe": "+"
+        },
+        {
+          "poste": "EV15",
+          "signe": "+"
+        },
+        {
+          "poste": "EV1",
+          "signe": "-"
+        },
+        {
+          "poste": "EV2",
+          "signe": "-"
+        },
+        {
+          "poste": "EV3",
+          "signe": "-"
+        },
+        {
+          "poste": "EV4",
+          "signe": "-"
+        },
+        {
+          "poste": "EV5",
+          "signe": "-"
+        },
+        {
+          "poste": "EV6",
+          "signe": "-"
+        },
+        {
+          "poste": "EV7",
+          "signe": "-"
+        },
+        {
+          "poste": "EV8",
+          "signe": "-"
+        },
+        {
+          "poste": "EV9",
+          "signe": "-"
+        },
+        {
+          "poste": "EV16",
+          "signe": "-"
+        },
+        {
+          "poste": "EV17",
+          "signe": "+"
+        }
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN1",
+      "libelle": "Prestations et frais payés (affaires directes dommages, RC et risques divers, et acceptations) — bruts de la part des réassureurs",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "602",
+        "604",
+        "605"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN2",
+      "libelle": "Part des réassureurs dans les prestations et frais",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "609"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN3",
+      "libelle": "Charges de commissions",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "65"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN4",
+      "libelle": "Frais de personnel",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "61"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN5",
+      "libelle": "Impôts et taxes",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "62"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN6",
+      "libelle": "Travaux, fournitures et services extérieurs ; transports et déplacements",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "63",
+        "64"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN7",
+      "libelle": "Frais divers de gestion",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "66"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN8",
+      "libelle": "Dotations aux amortissements et provisions",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "68"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN9",
+      "libelle": "Charges des placements",
+      "type": "detail",
+      "regle": "CHARGE",
+      "comptesSyscohada": [
+        "67"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN12",
+      "libelle": "Commissions et participations reçues des réassureurs",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "75"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN13",
+      "libelle": "Produits des placements",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "77"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN14",
+      "libelle": "Subventions d'exploitation",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "71"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN15",
+      "libelle": "Produits accessoires",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "76"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN10",
+      "libelle": "Primes et accessoires, nets d'annulations (affaires directes dommages, RC et risques divers, et acceptations) — brutes de cessions",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "702",
+        "704",
+        "705"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN11",
+      "libelle": "Part des réassureurs dans les primes",
+      "type": "detail",
+      "regle": "PRODUIT",
+      "comptesSyscohada": [
+        "709"
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN16",
+      "libelle": "Variation des provisions techniques brutes",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "CP3",
+          "signe": "+",
+          "mode": "VARIATION",
+          "etatSource": "BILAN_PASSIF"
+        }
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN17",
+      "libelle": "Variation de la part des cessionnaires et rétrocessionnaires dans les provisions techniques",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "CA2",
+          "signe": "+",
+          "mode": "VARIATION",
+          "etatSource": "BILAN_ACTIF"
+        }
+      ]
+    },
+    {
+      "etat": "COMPTE_80_TOUTE_NATURE",
+      "poste": "EN18",
+      "libelle": "SOLDE DU COMPTE 80 — Assurances de toute nature",
+      "type": "total",
+      "regle": "FORMULE",
+      "comptesSyscohada": [],
+      "operandes": [
+        {
+          "poste": "EN10",
+          "signe": "+"
+        },
+        {
+          "poste": "EN11",
+          "signe": "+"
+        },
+        {
+          "poste": "EN12",
+          "signe": "+"
+        },
+        {
+          "poste": "EN13",
+          "signe": "+"
+        },
+        {
+          "poste": "EN14",
+          "signe": "+"
+        },
+        {
+          "poste": "EN15",
+          "signe": "+"
+        },
+        {
+          "poste": "EN1",
+          "signe": "-"
+        },
+        {
+          "poste": "EN2",
+          "signe": "-"
+        },
+        {
+          "poste": "EN3",
+          "signe": "-"
+        },
+        {
+          "poste": "EN4",
+          "signe": "-"
+        },
+        {
+          "poste": "EN5",
+          "signe": "-"
+        },
+        {
+          "poste": "EN6",
+          "signe": "-"
+        },
+        {
+          "poste": "EN7",
+          "signe": "-"
+        },
+        {
+          "poste": "EN8",
+          "signe": "-"
+        },
+        {
+          "poste": "EN9",
+          "signe": "-"
+        },
+        {
+          "poste": "EN16",
+          "signe": "-"
+        },
+        {
+          "poste": "EN17",
+          "signe": "+"
+        }
+      ]
+    }
+  ]
+}
