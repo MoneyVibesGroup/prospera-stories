@@ -128,8 +128,9 @@ coût dimensionné sur le mutant**, jamais sur le code sain.
 ### D-539-7 — `clôture + N mois` se cale sur la fin de mois, et ça se prouve
 
 `31-10 + 4 mois` n'est pas le 31 février. La règle retenue : **même quantième, rabattu au dernier
-jour du mois d'arrivée**. `31-12 + 4 = 30-04` (le cas togolais), `31-10 + 4 = 28-02` (29 en
-bissextile), `30-06 + 4 = 31-10`. ⚠️ Aucune conversion « un mois = 30 jours » n'est employée —
+jour du mois d'arrivée** — rabattu, jamais prolongé. `31-12 + 4 = 30-04` (le cas togolais),
+`31-10 + 4 = 28-02` (29 en bissextile), et `30-06 + 4 = 30-10` : le quantième reste 30 parce
+qu'octobre le porte, il ne glisse pas au 31. ⚠️ Aucune conversion « un mois = 30 jours » n'est employée —
 la leçon de STORY-659 : *une conversion mois → jours annoncée prudente sous-provisionnait*.
 
 ### D-539-8 — La pénalité est PUBLIÉE chiffrée, elle n'est pas MONÉTISÉE (AC-5)
@@ -220,3 +221,80 @@ cabinet rend une **liste vide**, jamais un 403 (anti-énumération).
 
 **Statut : `in_progress` (2026-09-26).** Branches `MNV-539` créées sur `docs` (base `main`) et
 `fiscal-service` (base `dev`) **avant la première ligne de code**.
+
+### Ce qui est livré — `fiscal-service` seul
+
+| Couche | Livrable |
+|---|---|
+| Contrat (`domain/paquets-depot`) | `calendrier.periodicite` obligatoire · `calendrier.joursNonOuvres` obligatoire **ssi** report ≠ `AUCUN`, interdit sinon · garde `prebuild` |
+| Artefact | `tg-dsf-1.0.json` reconstruit par son producteur (`ANNUEL`, sourcé CGI art. 96), checksum du manifeste aligné |
+| Domaine (`domain/calendrier-depot`) | moteur pur : découpage par rythme, `clôture + N mois` rabattue en fin de mois, report au jour ouvré déclaré, borne de durée, retard signé, vocabulaire fermé d'`INDETERMINABLE` |
+| Read-models | `dossiers_fiscal` ← `dossier.created|updated` · `exercices_dossier` ← `dossier.exercice.ouvert|clos|rouvert` — **deux consumer groups**, deux abonnements explicites, idempotence `processed_events` |
+| Application / HTTP | `SourcePortefeuille` (port + adaptateur Mongo) · `EcheancesService` · `GET /api/v1/echeances` |
+
+⛔ **Aucun contrat d'événement touché, aucun second dépôt** : les deux contrats consommés sont
+publiés et émis depuis STORY-355 / STORY-236.
+
+### Portes de qualité
+
+| Porte | Résultat |
+|---|---|
+| eslint `--max-warnings 0` | 0 warning |
+| `npm run build` (avec `prebuild`) | OK |
+| `npm run test:cov` | **1 197 tests verts** · **99,1 / 95,71 / 98,79 / 99,53** (seuils 65/90/90/90) |
+| `npm run test:e2e` | 89 verts (7 suites) |
+
+⚠️ **L'empreinte épinglée du livrable AC-7 a bougé, et c'est la preuve que la provenance tient** :
+le classeur produit embarque `PROSPERA format checksum` en propriété de document (STORY-536 AC-3).
+`calendrier.periodicite` change les octets du paquet, donc le checksum, donc l'empreinte du
+livrable. Une empreinte **inchangée** aurait signifié que le livrable ne porte plus son format.
+Gabarit, schéma de classeur et montants sont identiques — vérifié champ par champ contre `HEAD`.
+
+### Gardes de build — un paquet incohérent casse `npm run build`
+
+Chaque cas a été **écrit dans l'artefact, avec son checksum réaligné** (pour que la garde
+d'empreinte ne masque pas celle du calendrier), puis restauré :
+
+| Paquet muté | Refus obtenu |
+|---|---|
+| report `SUIVANT` sans `joursNonOuvres` | `calendrier : champs invalides — manquants joursNonOuvres` |
+| `periodicite` retirée | `calendrier : champs invalides — manquants periodicite` |
+| semaine entièrement non ouvrée | `…semaine déclare la semaine entière : aucun report ne retomberait sur un jour ouvré` |
+| férié `31-04` | `…feries[0] doit être une date fixe JJ-MM existante` |
+
+Et le paquet réel repasse la garde.
+
+### Table de mutations — chaque garde abîmée rend des tests ROUGES
+
+⚠️ Deux mutations écrites d'abord **n'ont pas mordu** (`M4`, `M18`) : leur motif ne matchait plus
+le fichier reformaté par `eslint --fix`. Une mutation qui ne s'applique pas passe pour une preuve —
+elles ont été réécrites sur le texte réel avant d'être retenues.
+
+| # | Garde abîmée | Résultat |
+|---|---|---|
+| M1 | le vocabulaire des rythmes n'est plus imposé | 🔴 1 |
+| M2 | un report n'exige plus son calendrier de jours non ouvrés | 🔴 2 |
+| M3 | une semaine entièrement non ouvrée est acceptée | 🔴 1 |
+| M4 | un férié `31-04` est accepté | 🔴 2 |
+| M5 | le quantième n'est plus rabattu en fin de mois | 🔴 6 |
+| M6 | « un mois = 30 jours » remplace l'arithmétique civile | 🔴 6 |
+| M7 | la borne de durée d'exercice est levée | 🔴 4 |
+| M8 | le report recule toujours, quel que soit le sens déclaré | 🔴 1 |
+| M9 | une échéance atteinte le jour même ouvre déjà les pénalités | 🔴 1 |
+| M10 | l'indéterminable est trié comme un zéro | 🔴 2 |
+| M11 | un dossier archivé revient au portefeuille | 🔴 1 |
+| M12 | la requête des exercices n'est plus cloisonnée par cabinet | 🔴 1 |
+| M13 | le consumer des dossiers s'abonne AUSSI aux exercices | 🟢 **puis** 🔴 1 |
+| M14 | un pays sans paquet rend une liste vide au lieu d'un motif | 🔴 2 |
+| M15 | des bornes inversées entrent dans le read-model | 🔴 1 |
+| M16 | un porteur sans cabinet n'est plus refusé | 🔴 1 |
+| M17 | la restitution n'est plus bornée | 🔴 1 |
+| M18 | `ANNUEL` rend l'année civile au lieu de l'exercice | 🔴 2 |
+
+⛔ **M13 est le constat de la passe.** Abonner le consumer des dossiers **aussi** aux topics
+d'exercice ne faisait rougir **aucun** test : la suite vérifiait les constantes de topics et les
+consumer groups, jamais l'appel `subscribe` réel. Un exercice projeté dans le read-model des
+dossiers serait donc passé sans un rouge — `raisonSociale` absente, statut `OUVERT` au lieu
+d'`ACTIF`, *un portefeuille faux et parfaitement plausible*, exactement ce que le contrat amont
+documente comme le piège du projet. Deux tests ont été ajoutés (abonnement exact de chaque
+consumer, et démarrage dégradé Kafka absent) ; M13 rougit désormais.
