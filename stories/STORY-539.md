@@ -241,7 +241,7 @@ publiés et émis depuis STORY-355 / STORY-236.
 |---|---|
 | eslint `--max-warnings 0` | 0 warning |
 | `npm run build` (avec `prebuild`) | OK |
-| `npm run test:cov` | **1 197 tests verts** · **99,1 / 95,71 / 98,79 / 99,53** (seuils 65/90/90/90) |
+| `npm run test:cov` | **1 208 tests verts** · **99,11 / 95,73 / 98,79 / 99,53** (seuils 65/90/90/90) |
 | `npm run test:e2e` | 89 verts (7 suites) |
 
 ⚠️ **L'empreinte épinglée du livrable AC-7 a bougé, et c'est la preuve que la provenance tient** :
@@ -290,6 +290,49 @@ elles ont été réécrites sur le texte réel avant d'être retenues.
 | M16 | un porteur sans cabinet n'est plus refusé | 🔴 1 |
 | M17 | la restitution n'est plus bornée | 🔴 1 |
 | M18 | `ANNUEL` rend l'année civile au lieu de l'exercice | 🔴 2 |
+
+### Revues ⑥ et ⑦ — cinq constats, tous du même genre
+
+**Revue de sécurité : un constat de confiance 80, corrigé.** `GET /api/v1/echeances` bornait sa
+**réponse** (500 lignes) sans borner son **travail** : la route chargeait tous les dossiers actifs
+du cabinet, puis tous leurs exercices, et matérialisait le produit avant d'en servir une page —
+mesuré à **~800 ms d'event-loop bloquée pour tous les tenants** sur 10 000 dossiers, que son propre
+titulaire peut constituer, à raison d'une requête toutes les 3 s (très en deçà du throttler par IP).
+⚡ Ce qui rend le constat sérieux : `dossier-service`, qui **possède** ce portefeuille, le sert avec
+un plafond serveur dur (`TAILLE_PAGE_MAX = 100`) posé après sa propre revue et commenté « ce n'est
+pas une limite de confort, c'est une garde » — le read-model répliqué le relisait sans rien.
+⇒ deux plafonds serveur appliqués par `.limit()` sur les **deux** requêtes, lues à `plafond + 1`
+pour savoir qu'il en reste sans compter ce qu'on ne servira pas ; le port rend `{ dossiers,
+tronque }` et la réponse le **propage** ; `push(...tableau)` remplacé par une boucle (au-delà
+d'environ 125 000 éléments, l'étalement dépassait la pile et levait un `RangeError`).
+
+Dix axes éprouvés sans constat : cloisonnement de la route (l'`orgId` ne vient que du claim `org`,
+les **deux** requêtes le portent, le spread de `dossierId` est placé **après** et ne peut pas
+l'écraser), filtre `?dossierId=` qui ne peut que restreindre, porteur sans organisation, gate au
+niveau classe, **injection NoSQL éprouvée par exécution** (`dossierId[$ne]`, `[$gt]`, `[0]`, doublon
+de clé, objet JSON : toutes rejetées en 400), consumers Kafka (message forgé, rejeu, message
+invalide), boucle de report, intégrité de l'artefact, fuite d'information.
+
+**Revue de code : aucun constat bloquant, quatre non-bloquants** — tous « une propriété correcte
+qu'aucun test ne défendait » :
+
+| # | Constat | Correctif |
+|---|---|---|
+| F1 | **JSDoc détaché, 10ᵉ récidive du projet** : l'insertion d'`etatsActifs` a glissé entre le bloc de `trouver` et `trouver` | bloc remis sur sa méthode |
+| F2 | l'**assiette** des pénalités n'était asservie que par `toBeGreaterThan(0)` — la remplacer par `source.document` laissait tout vert. Or D-539-8 ne CHOISIT aucun taux : l'assiette est la seule chose qui dise lequel des 30/40/80 % vise le cabinet | assertion par **valeur**, unitaire et e2e |
+| F3 | le filtre `actif` d'`etatsActifs` n'était observé nulle part : le manifeste réel n'a qu'une entrée. À l'archivage annoncé par D-539-3, un couple à deux versions rendrait son état **deux fois** | test sur le manifeste simulé, qui en porte deux |
+| F4 | `motif` en `@ApiPropertyOptional` alors qu'il est **toujours** émis : hors du `required[]`, le client généré le type facultatif et l'AC-4 devient omissible à l'écran | `@ApiProperty({ nullable: true })` + assertion sur le schéma |
+
+Cinq mutations de plus, toutes rouges : **M19** (borne Mongo neutralisée) · **M20** (troncature
+amont non propagée) · **M21** (assiette ← document source) · **M22** (filtre `actif` retiré) ·
+**M23** (`motif` facultatif). ⚠️ M19 écrite d'abord en **retirant** le `.limit()` ne compilait pas —
+« 0 test » n'est pas un rouge ; réécrite en `limit(0)`.
+
+⚠️ **La vérification docker n'est PAS faite** : la VM de Docker Desktop refuse de démarrer sur le
+poste (`no route to host` vers `192.168.65.7:2376`, aucun processus de backend, les trois sockets
+muettes ; un quit + relance de l'application n'y a rien changé). Le script de vérification est prêt
+(`tmp/verif-docker-STORY-539/verifier.sh`) et **la story ne peut pas être clôturée avant** :
+round-trip Kafka réel, idempotence, calendrier servi sur jeton réel, cloisonnement.
 
 ⛔ **M13 est le constat de la passe.** Abonner le consumer des dossiers **aussi** aux topics
 d'exercice ne faisait rougir **aucun** test : la suite vérifiait les constantes de topics et les
