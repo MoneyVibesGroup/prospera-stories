@@ -291,6 +291,43 @@ elles ont été réécrites sur le texte réel avant d'être retenues.
 | M17 | la restitution n'est plus bornée | 🔴 1 |
 | M18 | `ANNUEL` rend l'année civile au lieu de l'exercice | 🔴 2 |
 
+### Vérification docker — stack NEUVE (`down -v` puis `up --build`)
+
+Services : `mongo`, `mongo-fiscal` (rs-fiscal), `kafka`, `redis`, `mailhog`, `auth-service`,
+`dossier-service`, `fiscal-service`. Jeton **réel** d'un cabinet inscrit par l'IdP (register →
+lien Mailhog → `verify-email` **200** → login) ; seuls les read-models d'accès (KYC, entitlement)
+sont semés, parce qu'ils appartiennent à d'autres services.
+
+| Ce qui est mesuré | Résultat |
+|---|---|
+| ⚡ **abonnements sur le VRAI broker** | `fiscal-dossier` → `{dossier.created, dossier.updated}` · `fiscal-exercice` → `{dossier.exercice.ouvert, .clos, .rouvert}` — **disjoints**, lus dans le `memberAssignment` de kafkajs |
+| ⚡ **round-trip réel** | un dossier et un exercice créés dans `dossier-service` (outbox) ⇒ `dossiers_fiscal` et `exercices_dossier` portent `pays: TG`, `statut: ACTIF`, et les **bornes réelles** `2025-01-01 → 2025-12-31` |
+| ⚡ **le calendrier servi** | `date: 2026-04-30` · `resteEnJours: -149` · `rythme: ANNUEL` · période = l'exercice · provenance `TG/DSF@1.0` + `sha256:2b6784de…` · **trois** pénalités (30/40/80 %) avec assiettes **distinctes** et sources LPF art. 121 |
+| ⛔ **second dossier du même cabinet, sans exercice** | `INDETERMINABLE` + `EXERCICE_ABSENT`, `date: null`, aucune pénalité — jamais une date par défaut |
+| ⚡ **idempotence, offsets SUPPRIMÉS** | les deux consumer groups effacés ⇒ **rejeu complet depuis le début** ⇒ **9 dossiers / 2 exercices / 25 marqueurs avant ET après**. Zéro doublon, zéro marqueur de plus |
+| cloisonnement — sans jeton | `401` |
+| cloisonnement — `dossierId` mal formé | `400` au bord HTTP |
+| ⚡ **cloisonnement — deux cabinets RÉELS** | le cabinet B ne voit que son dossier ; celui du cabinet A est **absent** ; filtrer sur le dossier du cabinet A depuis B rend une **liste vide**, jamais un 403 |
+| ⚡ **démarrage dégradé** (invariant nº 4) | Kafka arrêté, service redémarré : HTTP **répond**, `kafka → down`, `mongodb`/`mongodb-audit`/`redis` `up`, **`RestartCount=0`** — le process n'est jamais mort |
+| ⚡ **rattrapage** | Kafka relancé : les **cinq** consumers se réabonnent seuls, sans redémarrer le service |
+
+⚠️ La santé dégradée est mesurée **dans le conteneur** : le proxy de ports de Docker Desktop
+cesse de relayer `3012` après un `stop`/`start` du service. Le mapping est bien déclaré et le
+service répond — c'est un artefact de l'hôte, pas du produit.
+
+⚠️ **Trois défauts de mon SCRIPT de vérification, pas du produit** — chacun aurait fait conclure
+à un bug :
+
+1. le corps du courriel est en **quoted-printable** : `token=3D2cbb…` porte `=3D`, qui *est* le
+   signe `=`. Sans décodage, on capture un jeton faux d'un caractère et l'IdV rend `400` ;
+2. l'e-mail part par une **file BullMQ** : il n'est pas encore chez Mailhog au retour de
+   `register`. Le chercher tout de suite rend un jeton vide ;
+3. `/api/v2/messages` **ne rend pas le plus récent en tête** : sans filtrer sur le destinataire,
+   on vérifie le compte d'un run précédent et on se connecte avec un autre, toujours non vérifié —
+   et on accuse le gate `EmailVerifiedGuard`.
+
+⛔ **Aucun dépôt réel n'est revendiqué** : cette story ne produit ni ne transmet de fichier.
+
 ### Revues ⑥ et ⑦ — cinq constats, tous du même genre
 
 **Revue de sécurité : un constat de confiance 80, corrigé.** `GET /api/v1/echeances` bornait sa
@@ -327,12 +364,6 @@ Cinq mutations de plus, toutes rouges : **M19** (borne Mongo neutralisée) · **
 amont non propagée) · **M21** (assiette ← document source) · **M22** (filtre `actif` retiré) ·
 **M23** (`motif` facultatif). ⚠️ M19 écrite d'abord en **retirant** le `.limit()` ne compilait pas —
 « 0 test » n'est pas un rouge ; réécrite en `limit(0)`.
-
-⚠️ **La vérification docker n'est PAS faite** : la VM de Docker Desktop refuse de démarrer sur le
-poste (`no route to host` vers `192.168.65.7:2376`, aucun processus de backend, les trois sockets
-muettes ; un quit + relance de l'application n'y a rien changé). Le script de vérification est prêt
-(`tmp/verif-docker-STORY-539/verifier.sh`) et **la story ne peut pas être clôturée avant** :
-round-trip Kafka réel, idempotence, calendrier servi sur jeton réel, cloisonnement.
 
 ⛔ **M13 est le constat de la passe.** Abonner le consumer des dossiers **aussi** aux topics
 d'exercice ne faisait rougir **aucun** test : la suite vérifiait les constantes de topics et les
