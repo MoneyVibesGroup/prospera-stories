@@ -1,6 +1,6 @@
 # STORY-541 : Retraitements d'homogénéisation — additionner des balances qui n'appliquent pas les mêmes méthodes est faux
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-137 — Homogénéisation et éliminations (consolidation)
 **Service :** `bilan-service` — module `consolidation` (posé par STORY-531 ; aucun contrat d'événement : **un
@@ -122,7 +122,9 @@ bilan ne se déduit **pas** du premier chiffre : en SFD BCEAO, la classe 1 est l
 sont en classe 5. Chaque paquet déclare ses **`racinesDeGestion`** (`6,7,8` SYSCOHADA/SMT/zone franche ;
 `6,7` SFD ; `6,7,82…86` CIMA — STORY-369), présentes dans l'artefact mais **absentes du type**
 `ReferentielPackage` de `bilan-service` (seul `balance-service` les lit). Le compte de réserves qui reçoit
-le report ne peut donc pas être codé en dur : c'est un paramètre du groupe.
+le report ne peut donc pas être codé en dur : c'est un paramètre du groupe. ⚠️ *Amendé en cours de dev :*
+elles étaient aussi ÉCARTÉES par la liste blanche de `ReferentielLoader.parse` — le type n'était que la
+moitié du constat (relevé par les e2e, corrigé ; cf. Progress Tracking).
 
 ### M5 — Les consolidations antérieures sont calculées à la lecture, et leur journal grossit avec les années
 
@@ -279,3 +281,61 @@ reportés sont comptés **avant** d'être chargés, borne mesurée → `409 REPR
   reclassant leur effet résultat en réserves, sur les racines de gestion DÉCLARÉES par le paquet (M4,
   D-541-8) ; les méthodes de chaque société sont déclarées, sans quoi « conforme » et « jamais examinée »
   se confondent (M7, D-541-3) ; l'art. 86 3° et 5° manquaient à la liste fermée (M2, D-541-13).
+- 2026-09-26 — **dev `bilan-service`** (branche `MNV-541`, commits `c018802` → `3ee33f4`) : collection
+  `methodes_comptables` (immuable, versionnée, datée ; garde de schéma, `bulkWrite` compris) et ses quatre
+  routes ; journal : nature `HOMOGENEISATION`, société d'origine, rubrique, régime figé, effet d'impôt,
+  omission motivée ; trois routes de retraitements ; report du cumul (bilan tel quel, effet résultat en
+  réserves sur les `racinesDeGestion` du paquet) ; « à revoir » sur changement de méthode ; statut
+  `HOMOGENEISATION` conditionnel ; `ECRITURES_FISCALES` et `IMPOSITIONS_SUR_DISTRIBUTIONS` nommés.
+  Éliminations et retraitements séparés par nature partout (liste, annulation, agrégat).
+- 2026-09-26 — ⚡ **mesuré avant de borner** (leçon de STORY-530) : au pire cas admis (100 sociétés ×
+  150 rubriques), le diagnostic réindexait les déclarations à chaque examen — **1,1 s** de boucle
+  bloquée, ramenée à 40 ms ; le test de coût est dimensionné sur ce mutant (2,3 s, rouge ; 58 ms pour le
+  code). ⚡ Une borne en LIGNES laissait passer des milliers d'omissions (zéro ligne) : le report se borne
+  aussi en ÉCRITURES (2 000), jugé avant tout chargement.
+- 2026-09-26 — ⚡⚡ **les tests écrits en parallèle ont trouvé sept défauts, tous corrigés** (confirmés en
+  réactivant chaque test qui les montrait — 23 rouges, puis verts) :
+  - ⛔ **le chargeur de référentiels écartait `racinesDeGestion`** : `ReferentielLoader.parse` reconstruit
+    le paquet par LISTE BLANCHE — le champ était dans les octets vérifiés et perdu en route ; tout report
+    d'un retraitement passé rendait `409 REPORT_IMPOSSIBLE`, et un compte de réserves de gestion
+    n'était jamais reconnu. Les unitaires moquaient `load`, le harnais e2e doublait le chargeur : seul
+    le contrat OpenAPI, qui monte le vrai, l'a vu. **Même famille exacte que STORY-656** — et le constat
+    M4 du cadrage ne regardait que le TYPE. Prouvé sur les octets réels de quatre paquets ;
+  - rubrique absente ⇒ 500 ; `effetImpot: []` ou `null` écrivait un effet d'impôt sans nature
+    (contournait l'AC-4) ; `omission: null` s'écrivait comme un « retraitement » sans ligne qui valait
+    décision ; tableaux imbriqués (`[[…]]`) parcourus comme la liste, contournant les bornes — corrigés
+    par `@IsDefined()`, `@IsObject()`, `@IsObject({ each: true })` (lignes d'élimination de STORY-531
+    comprises) et le refus explicite de `null` ;
+  - `Model.bulkWrite()` ne passe par aucun crochet de requête : un `pre('bulkWrite')` refuse toute
+    opération hors `insertOne`, sur `methodes_comptables` ET sur le journal de STORY-531 ;
+  - deux énumérations anonymes du régime publié, nommées.
+- 2026-09-26 — **mutations** : 48 mutants (règles pures, agrégation, service, dépôts, schémas,
+  contrôleurs, DTO, chargeur, graphe du module), **48 rouges, aucun survivant** — dont 13 réécrits pour
+  compiler (un mutant qui casse la compilation ne prouve rien). En plus : le mutant du coût (rouge), le
+  chargeur sans la ligne (5 rouges), et 22 mutations e2e menées par le sous-agent sur une copie isolée.
+- 2026-09-26 — **portes** (`bilan-service` @ `3ee33f4`) : lint 0 (`{src,test}`), `nest build`, `test:cov`
+  **5 106 unitaires** (237 suites ; couverture **99,19 / 95,77 / 99,46 / 99,27** ; fichiers neufs à 100 %
+  des lignes), `test:e2e` **28 suites / 1 091**. Les e2e de la story (146 tests, services réels, dépôts
+  doublés) et le contrat OpenAPI (le VRAI chargeur de référentiels monté) couvrent les sept routes.
+- 2026-09-26 — **vérification docker sur stack NEUVE** (`down -v`), tout par les API réelles, 2 cabinets —
+  scripts et journal : `PROSPERA/tmp/verif-docker-541/` ; attentes écrites AVANT (`SCENARIO.md`) :
+  - phase 0 : le conteneur exécute `MNV-541` @ `3ee33f4` (sources hôte = src monté, marqueurs dans le
+    `dist`, « Found 0 errors » après restart) — 21 OK ;
+  - mise en place : cabinets, KYC, octrois (15 OK) ; groupe MÈRE, FILLE (IG 80 %), JV (IP 50 %), ASSO
+    (MEE 25 %), exercices 2024 et 2025, périmètre arrêté au 2024-12-31 et au 2025-12-31 (17 OK) ; trois
+    liasses 2025 figées, empreintes relevées (21 OK). ⚠️ Deux premiers passages de la phase 3 en échec
+    (15 KO) — **erreurs du script, pas du produit** : `dossier-service` n'admet qu'un exercice OUVERT
+    (409 `EXERCICE_DEJA_OUVERT`) — 2024 se clôt avant 2025 —, puis un état mal tenu après le 409 ;
+  - **le scénario : 77 OK, 0 KO**. Discriminé : le **report appliqué par le VRAI chargeur** (réserves
+    `118000` au crédit, 284500 cumulé, 681300 sans report — le code d'avant le correctif rendait
+    `REPORT_IMPOSSIBLE`) ; la **version en vigueur** lue par les vraies requêtes Mongo (groupe v1 pour
+    2024, v2 pour 2025, figées dans le régime des écritures) ; soldes = base + les seules écritures du
+    scénario, RECOMPOSITION et EQUILIBRE satisfaits ; AC-6 (mère conforme, JV sans objet : 409, rien
+    écrit ; groupe homogène = agrégation) ; omission contradictoire ; **liasses intactes à l'empreinte**
+    (AC-3) ; annulation (plus de report, seconde annulation 409, route des éliminations 404) ;
+    **changement de méthode** (FILLE v2 conforme ⇒ `METHODE_MODIFIEE`, écriture de solde acceptée malgré
+    la conformité, puis 409) ; cloisonnement (B : 404 partout, rien chez B) ; persistance du journal et
+    des méthodes, écriture par écriture (`dateEffet` à minuit UTC, aucun `updatedAt`).
+  `docker compose stop` ensuite.
+- 2026-09-26 — ⑤ branche `MNV-541` poussée, **PR `prospera-bilan-service#140`** ouverte sur `dev` ; statut
+  `in_progress` → `review`.
