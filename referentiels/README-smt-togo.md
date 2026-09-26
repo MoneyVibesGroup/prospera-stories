@@ -28,11 +28,14 @@ l'affirmait et c'était faux ; c'est corrigé là-bas.
 
 - **Les 4 notes annexes du formulaire** (immobilisations, stocks, clients/créances/dettes, détail des
   recettes et dépenses). L'état des notes rend `NON_APPLICABLE`, **onglet visible**.
-- **Aucun marqueur de chiffre d'affaires.** Le formulaire sépare « Recettes sur ventes » et « Recettes
-  sur prestations de services », et leur total (`CRA`) inclut les autres recettes : **aucune des trois
-  lignes n'est le chiffre d'affaires**. En marquer une le publierait faux.
-  ⇒ **Conséquence** : la liquidation TPU d'un dossier SMT répond `CA_NON_SOURCE` — un refus explicite,
-  jamais un CA nul. À ouvrir en story, la persona SMT étant précisément la persona TPU.
+- ~~**Aucun marqueur de chiffre d'affaires.**~~ ⚡⚡ **LEVÉ par STORY-656** (2026-09-26, artefact
+  `c4d0318a…` → `00335c03…`). Le constat restait juste — aucune des trois lignes n'est *à elle seule* le
+  chiffre d'affaires, et `CRA` inclut les autres recettes — mais il décrivait une limite du **contrat du
+  marqueur**, qui ne savait désigner qu'**un** poste. Le marqueur désigne désormais **plusieurs** postes,
+  **sommés** : `smt-togo@1.0` marque `CR1` **et** `CR2`, jamais `CRA` ni `CR3`. La liquidation TPU d'un
+  dossier SMT **aboutit**, sur une assiette égale à `CR1 + CR2`.
+  ⚠️ Le générateur **lève** si `CRA` est marqué en plus (racines recouvrantes), et si un poste marqué ne
+  rattache aucun compte — voir `exigerChiffreAffairesSansDoubleCompte` dans `build.mjs`.
 - **Un seul préfixe ne vient pas de la table SYSCOHADA** : `622` (Locations et charges locatives), qui
   alimente « Dépenses sur loyers ». Il vient du **plan de comptes** SYSCOHADA révisé, pas de la table
   packagée — laquelle s'arrête à `62`. Le compte reste reconnu à la saisie.
