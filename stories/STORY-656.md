@@ -1,6 +1,6 @@
 # STORY-656 : La TPE au Système Minimal de Trésorerie ne peut pas liquider sa TPU — le marqueur de chiffre d'affaires désigne UN poste, le formulaire SMT en a deux
 
-Status: review
+Status: done
 
 **Épic :** EPIC-109 — Paquets fiscaux pays : gabarit, garde et procédure de sourcing
 **Service :** `bilan-service` (artefact `smt-togo@1.0`, marqueur au `tableDePassage`) + `balance-service`
@@ -108,8 +108,10 @@ retiré, `CRA` marqué, un poste inexistant marqué, la somme remplacée par le 
 
 ## Progress Tracking
 
-**Statut : `review`** — implémenté, validé, vérifié en docker le **2026-09-26**. Branches `MNV-656` dans
-les **3** dépôts (`docs`, `bilan-service`, `balance-service`).
+**Statut : `done`** — clôturée le **2026-09-26**. Les deux PR de contrat d'artefact intégrées
+**ENSEMBLE** en rebase-merge sur `dev`, à 5 secondes d'intervalle : `bilan-service` **#139**
+(`8226ebf`) et `balance-service` **#121** (`b6d9a03`). Byte-identité de `smt-togo@1.0` vérifiée sur
+`dev` **après** merge dans les deux dépôts : `00335c03…` de part et d'autre.
 
 ### Ce qui a été livré
 
