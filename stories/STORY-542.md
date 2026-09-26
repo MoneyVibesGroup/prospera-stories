@@ -1,6 +1,6 @@
 # STORY-542 : Éliminations — les opérations réciproques ne touchent pas le résultat, les résultats internes si
 
-Status: review
+Status: done
 
 **Épic :** EPIC-137 — Homogénéisation et éliminations (consolidation)
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -404,3 +404,19 @@ rien redéclarer.
     active, les mêmes comptes se redéclarent (l'index partiel des clés ACTIVES les a libérés : n° 4), n° 4 est
     `SANS_SOLDE` et sa confirmation refusée, journal inchangé, 411200 et 401200 soldés UNE fois, résultat = R0 ;
     une marge au coût vide ou au stock `true` → 400, rien d'écrit. `docker compose stop` ensuite.
+- 2026-09-26 — ⑦ **revue de sécurité** (skill `prospera-security-review` : préparation `haiku` — éligibilité,
+  règles, résumé —, analyse `opus` sur le diff final `ee169c4`, synthèse en session) : **0 constat de confiance
+  ≥ 80**, affirmations du rapport vérifiées dans le code. Les pistes renvoyées par la revue de code, jugées
+  preuves à l'appui : le volume lu par la CONFIRMATION est borné en amont — au plus deux liasses, chacune
+  plafonnée à 5 000 soldes par ses DTO d'entrée, le tiers de ce que l'agrégat admet déjà (mesuré : 5,8 ms de
+  désérialisation, 0,8 ms de calcul) ; le report des résultats internes passés est compté avant d'être chargé
+  (≈ 42 ms à la borne). Écartées aussi : IDOR (`appariementId`, `ecritureId`, `ecritureOrigineId`,
+  `exerciceId`, sociétés d'un autre cabinet ou hors groupe ⇒ 404 identiques) ; écriture sur une autre mère ;
+  403 au lieu de 404 ; injection NoSQL (identifiants, comptes au motif sans `|`, énumérations, montants jugés
+  sur la valeur reçue) ; affectation de masse ; courses (l'index unique tranche, le perdant relit) ;
+  immuabilité ; entiers sûrs ; déni de service (rapprochement indexé, listes plafonnées) ; fuites dans
+  `details` ; gardes et décorateurs des douze routes. **Aucun commit de sécurité.**
+- 2026-09-26 — ⑧ **`prospera-bilan-service#141` rebase-mergée sur `dev`** (`8fb50c0`), branche supprimée —
+  aucune CI par dépôt : les portes rejouées en ⑥ en tiennent lieu.
+- 2026-09-26 — ⑨ **clôture** : statut `done` aux trois endroits, `completed_date` posée ; PR `docs/` rebase-mergée
+  sur `main`.
