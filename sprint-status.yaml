@@ -4008,7 +4008,7 @@ sprints:
         epic: "EPIC-032"
         points: 8
         service: "fiscal-service"
-        status: "ready-for-dev"  # CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — VOIE A (le produit depose), decision 1 sur 5. Une échéance de dépôt se calcule depuis la date de clôture réelle, par une règle du type clôture + N mois. Deux choses manquent aujourd'hui pour la produire :
+        status: "in_progress"  # CADREE le 2026-09-26 — VOIE A. Le calendrier de depot devient un croisement (dossier x etat x periode) : moteur de calendrier en domaine pur (cloture + N mois, rabattu en fin de mois), periodicite et jours non ouvres declares par le paquet, read-models locaux dossiers/exercices alimentes par les topics dossier.* deja publies (aucun contrat d'evenement touche, un seul depot), restitution par cabinet triee par urgence. ready-for-dev depuis le 2026-08-28.
         story_path: "stories/STORY-539.md"
       - story_id: "STORY-540"
         title: "Le dossier de validation de `cima-assurances` — ce qu'on soumet, à qui, et ce qu'on attend en retour"
