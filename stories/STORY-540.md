@@ -119,7 +119,7 @@ Ils sont **absents** du circuit principal :
 |---|---|
 | le **jeu d'états** — création, lecture, recalcul, compléments, validation, réouverture, dépôt | `stamp` forcé à `statut: undefined, miseEnGarde: undefined` (`jeu-etats-response.dto.ts:616-627`), avec un commentaire « 🪝 Story à part » **sans numéro** |
 | l'**export PDF/XLSX** de la liasse | son « Statut » imprimé est `Brouillon` / `Version`, le cycle de vie — jamais la maturité |
-| les versions, leurs comparaisons, la consultation sans version, la comparaison d'exercices, la consolidation, le prévisionnel | aucun des deux champs |
+| la liste des versions et leurs comparaisons, la consultation sans version, la comparaison d'exercices, la consolidation, le prévisionnel | aucun des deux champs |
 | les routes fiscales de `balance-service` | seul le statut du **paquet fiscal** est servi |
 | `platform-catalog-service`, `admin-panel` | ne portent pas la maturité |
 
@@ -158,7 +158,7 @@ ouverte** (le texte ne tranche pas).
 | b | `74` → « Produits accessoires : 74, 76, 794, 796 » ; `78` → « Travaux faits par l'entreprise pour elle-même » ; `73` « est, en fin d'année, soldé par les comptes 701 à 706 » | aucun des trois n'est routé ([[STORY-672]]) | R-17 |
 | c | Bilan : la provision pour dépréciation (`192`, `197`) et `195` sont **déduites de l'actif** | `19` est présenté **au passif** (`CP2`) — actif et passif gonflés du même montant, aucun contrôle ne le voit | R-09 |
 | d | Bilan : `41` à `45` figurent **des deux côtés** ; `40` est scindé **par sous-compte** (`4000/4040/4080` débiteurs à l'actif, `4001/4041/4081` créditeurs au passif) | `40, 41, 44, 45` à l'actif seul, `42, 43` au passif seul : un solde inverse **diminue** son poste, sans signal | R-10 |
-| e | Art. 432 : `49` figure au bilan s'il n'a pu être reclassé, « sans compensation » ; `17` des deux côtés ; le résultat de l'exercice en `87` | `49` n'est routé nulle part, `17` au passif seul, le résultat est ajouté à `CP1` pour le seul total | R-11 à R-13 |
+| e | Art. 432 : `49` figure au bilan s'il n'a pu être reclassé — « il n'est pas établi de compensation entre les soldes créditeurs et les soldes débiteurs des comptes » ; art. 433 (bilan) : `17` des deux côtés, le résultat de l'exercice en `87` | `49` n'est routé nulle part, `17` au passif seul, le résultat est ajouté à `CP1` pour le seul total | R-11 à R-13 |
 | f | Compte 80 : la variation des provisions de **sinistres** passe aux prestations (débit), celle des provisions de **primes** aux primes (crédit) | une seule ligne `Δ CP3` et une `Δ CA2` — faute de plan détaillé ([[STORY-518]]) | R-18 |
 | g | Art. 422 : le compte d'exploitation générale fait partie des états annuels | la liasse **validée** (scellée, exportée) ne contient **pas** les comptes 80 et 87 : seul le dry-run `resultat-cima` les sert | R-02 |
 
@@ -192,9 +192,11 @@ confirmer**, et inscrit au registre avec « story à ouvrir ».
   écoulé** » du tableau C. L'état C10b produit par `assurance-service` ne la publie **pas**
   (`tableau-c10b.ts` : terminés, restant à payer, réouverts), alors que la donnée — date de
   survenance, date de déclaration — est collectée par [[STORY-515]].
-- Sa maille est **survenance × exercice d'opération, par catégorie Vie/Non-Vie**. Le modèle C10 B
-  est, lui, « à répéter pour toutes catégories des assurances terrestres », et celui de 2024 porte
-  **dix** exercices.
+- Sa maille est **survenance × exercice d'opération, par catégorie Vie/Non-Vie**. L'art. 433
+  établit l'état « pour l'ensemble des opérations d'assurances dommages réalisées dans le pays et pour
+  chacune des catégories d'assurances dommages définies à l'article 411 » ; le modèle annexé au
+  règlement n° 006/2024 est « à répéter pour toutes catégories des assurances terrestres », et ses
+  tableaux A et B — les seuls qu'il republie — portent **dix** exercices.
 
 ### M10 — Q4 est répondue ; ce qui reste de la classe 8 est autre chose
 
@@ -340,8 +342,8 @@ ne pas dégrader.
 | Fichier | Contenu |
 |---|---|
 | `README.md` | ce qu'on soumet, à qui, ce qu'on attend en retour, ce qu'on ne demande pas, comment le produit passe d'une balance aux postes, le statut et sa bascule, la conduite au retour |
-| `questions.md` | **26 sous-questions** typées — 7 lectures à confirmer, 7 écarts à arbitrer, 11 questions ouvertes, 1 pour information —, la fiche de réponse et le bloc de signature |
-| `registre-des-reserves.md` | **46 réserves**, toutes `OUVERTE` ; quatre priorités recommandées au PO (R-01, R-02, R-09 à R-14, R-28/R-29) |
+| `questions.md` | **28 sous-questions** typées — 7 lectures à confirmer, 7 écarts à arbitrer, 13 questions ouvertes, 1 pour information —, la fiche de réponse et le bloc de signature |
+| `registre-des-reserves.md` | **47 réserves**, toutes `OUVERTE` ; quatre priorités recommandées au PO (R-01, R-02, R-09 à R-14, R-28/R-29) |
 | `formules-en-clair.md` | **généré** : 72 postes, 65 lignes, 12 formules développées jusqu'aux comptes, les 90 comptes du plan et ce que chacun alimente (23 n'alimentent rien) |
 | `generer_formules.py` | le générateur, bibliothèque standard seule ; refuse une copie dont l'empreinte n'est pas celle des manifestes ; `--verifier` |
 | `cima-assurances-5.0.json` | l'artefact soumis, octet pour octet |

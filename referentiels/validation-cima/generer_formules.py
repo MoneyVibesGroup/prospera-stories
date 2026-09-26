@@ -71,29 +71,24 @@ def generer(artefact, empreinte):
         c = plan.get(numero)
         return f"`{numero}` {c['libelle']}" if c else f"`{numero}` ⚠️ absent du plan packagé"
 
-    def developper(code, facteur, variation, chemin):
+    def developper(code, sens, variation, chemin):
         """Formule développée jusqu'aux comptes : (signe, comptes | None, variation ?, chemin)."""
         ligne = par_poste.get(code)
         chemin = chemin + [code]
         if ligne is None:
-            return [(facteur, None, variation, chemin)]
+            return [(sens, None, variation, chemin)]
         if ligne["regle"] != "FORMULE":
-            return [(facteur, ligne["comptesSyscohada"], variation, chemin)]
+            return [(sens, ligne["comptesSyscohada"], variation, chemin)]
         termes = []
         for op in ligne["operandes"]:
-            f = facteur if op["signe"] == "+" else -facteur
+            s = sens if op["signe"] == "+" else ("-" if sens == "+" else "+")
             v = variation or op.get("mode") == "VARIATION"
-            termes += developper(op["poste"], f, v, chemin)
+            termes += developper(op["poste"], s, v, chemin)
         return termes
 
-    connus = [e for e, _ in ORDRE_ETATS]
-    etats = list(ORDRE_ETATS)
-    for e in [p["etat"] for p in postes] + [l["etat"] for l in lignes]:
-        if e not in connus:
-            connus.append(e)
-            etats.append((e, e))
-    etats = [(e, t) for e, t in etats if any(p["etat"] == e for p in postes)
-             or any(l["etat"] == e for l in lignes)]
+    presents = dict.fromkeys(x["etat"] for x in postes + lignes)
+    etats = [(e, t) for e, t in ORDRE_ETATS if e in presents]
+    etats += [(e, e) for e in presents if e not in dict(ORDRE_ETATS)]
 
     o = []
     w = o.append
@@ -177,8 +172,8 @@ def generer(artefact, empreinte):
             w("")
             w("| Signe | Comptes | Chemin |")
             w("|:---:|---|---|")
-            for facteur, comptes, variation, chemin in developper(l["poste"], 1, False, []):
-                s = "+" if facteur > 0 else MOINS
+            for sens, comptes, variation, chemin in developper(l["poste"], "+", False, []):
+                s = signe(sens)
                 via = " › ".join(f"`{c}`" for c in chemin[1:])
                 if comptes is None:
                     w(f"| {s} | ⚠️ poste sans ligne de table de passage | {via} |")

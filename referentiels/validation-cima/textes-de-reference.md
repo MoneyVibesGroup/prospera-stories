@@ -4,8 +4,9 @@
 > (D-540-4). Chaque extrait donne sa source, sa date de relevé et l'**empreinte sha256 du fichier
 > téléchargé** : n'importe qui peut le télécharger à nouveau et vérifier qu'il n'a pas bougé.
 >
-> Les pages HTML ont été converties en texte, **points de conduite retirés** (`………`) : les modèles
-> d'états y perdent leur mise en colonnes, jamais leurs mots. Les règlements de 2024 sont des
+> Les pages HTML ont été converties en texte : les cellules faites **uniquement** de points de conduite
+> (`………`) sont retirées, les points qui prolongent un libellé sont conservés, et une coupe est marquée
+> `[…]`. Les modèles d'états y perdent leur mise en colonnes, jamais leurs mots. Les règlements de 2024 sont des
 > **PDF scannés** : leurs articles ont été **transcrits à la lecture**, et le disent.
 
 ## Sources
@@ -76,7 +77,7 @@ Sauf impossibilité, les opérations inscrites dans ce compte sont reclassées e
 
 ```text
 En dehors des comptes techniques (comptes 70, 73, 75 et 79), les produits comprennent les sommes reçues ou à recevoir au titre de l'exploitation, et se rapportant à l'exercice en cours, soit en contrepartie de fournitures de services ou avantages exécutés ou fournis par l'entreprise, soit exceptionnellement sans contrepartie. Ils comprennent également les travaux faits par l'entreprise pour elle-même.
-
+[…]
 70. Primes ou cotisations émises
 Le compte 70 est, lors de l'émission des quittances, crédité du montant des primes ou cotisations, y compris les accessoires et coûts de police, mais net de taxes d'assurance.
 Les capitaux constitutifs de rentes gérées par l'entreprise constituées à la suite d'un sinistre ne sont pas comptabilisés en 70 mais sont portés au compte 6021.
@@ -462,10 +463,13 @@ Les différents postes de l'état C1 sont constitués par les mêmes comptes que
 
 ## 7. Art. 433 — l'état C10b, tableau C, et la mesure des provisions
 
-Sert à la question **Q6** : la ligne « Dont déclarés au cours de l'exercice écoulé » est la matière
-de la circulaire des tardifs (§ 8).
+Sert à la question **Q6** : la portée de l'état — l'ensemble des opérations dommages **et** chacune
+des catégories de l'art. 411 —, et la ligne « Dont déclarés au cours de l'exercice écoulé », matière de
+la circulaire des tardifs (§ 8).
 
 ```text
+Les états C10a et C10b sont établis pour l'ensemble des opérations d'assurances dommages réalisées dans le pays et pour chacune des catégories d'assurances dommages définies à l'article 411, conformément aux modèles ci-après :
+[…]
 C - NOMBRE DE SINISTRES PAYÉS OU A PAYER
 Détail par exercice de survenance
 NOMBRE DE SINISTRES
