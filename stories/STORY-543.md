@@ -1,6 +1,6 @@
 # STORY-543 : Écart de première consolidation — écarts d'évaluation d'abord, écart d'acquisition ensuite, et jamais l'inverse
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-138 — Écarts d'acquisition et intérêts minoritaires
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -297,16 +297,18 @@ dépend : `409 COMPTE_RESERVES_NON_DECLARE` ; compte de gestion : `409 COMPTE_RE
 **sans mise à l'échelle**, couverte par `RECOMPOSITION` et `EQUILIBRE`.
 
 **D-543-8 — Le traitement se décide lien par lien, jamais par silence.** `ECART_PREMIERE_CONSOLIDATION` est
-`APPLIQUE` si et seulement si **chaque lien retenu vers une société intégrée** a son écart actif, et qu'aucun
-manque n'est nommé :
+`APPLIQUE` si et seulement si **chaque lien retenu vers une société intégrée, détenu par la mère ou par une
+société intégrée**, a son écart actif, et qu'aucun manque n'est nommé — des titres ne s'éliminent que dans une
+balance agrégée : la projection du périmètre l'exige déjà, le service ne s'en remet pas à elle :
 - `ECART_NON_DECLARE` — un lien retenu sans écart (les titres ne sont pas éliminés) ;
-- `LIEN_NON_RETENU` — un écart dont le lien n'est plus retenu (pourcentage modifié, société sortie) : **non
-  appliqué**, nommé ;
+- `LIEN_NON_RETENU` — un écart dont le lien n'est plus retenu (pourcentage modifié, société ou détenteur sorti) :
+  **non appliqué**, nommé ;
 - `REEVALUATION_TOTALE_A_REVOIR` — une réévaluation totale dont la société a désormais plusieurs liens retenus :
   appliquée, nommée ;
 - `SORTIE_ORPHELINE` — une sortie dont l'écart n'est plus actif.
-Un écart de l'exercice qui vise une société que le périmètre n'intègre plus est refusé avec les autres natures
-(`409 ECRITURE_HORS_PERIMETRE`).
+Un écart de l'exercice qui vise une société — détenue ou détentrice — que le périmètre n'intègre plus est refusé
+avec les autres natures (`409 ECRITURE_HORS_PERIMETRE`) ; à la déclaration, le détenteur est jugé comme la
+société détenue (`409 SOCIETE_NON_ELIMINABLE`, nommé), comme il l'est à la sortie d'un élément.
 
 **D-543-9 — L'écart d'acquisition négatif est SIGNALÉ (AC-5).** Alerte `ECART_ACQUISITION_NEGATIF` sur la
 déclaration et à l'agrégat, avec son montant et le message de l'AC : le plus souvent une erreur d'affectation des
@@ -344,9 +346,10 @@ acquis, l'écart affecté d'abord aux écarts d'évaluation, le résidu en écar
   filiale du périmètre** : nommées (`LIEN_NON_RETENU`), jamais calculées.
 - **Période d'évaluation de 12 mois** (D4C, ch. 6, section 2) : l'écart s'annule et se redéclare avec motif,
   sans verrou de date.
-- **Test de dépréciation annuel** de l'écart d'acquisition (D4C § 5.1.2.2), **écart non ventilable par
-  ancienneté** imputé en résultat (art. 83), **rapprochement** des capitaux propres déclarés avec une liasse
-  figée à la date d'entrée : non traités — le paquet de règles le dit dans sa mise en garde.
+- **Test de dépréciation annuel** de l'écart d'acquisition (D4C § 5.1.2.2) et **écart non ventilable par
+  ancienneté** imputé en résultat (art. 83) : règles du TEXTE non transcrites — le paquet de règles les nomme
+  dans sa mise en garde. **Rapprochement** des capitaux propres déclarés avec une liasse figée à la date
+  d'entrée : limite du PRODUIT, nommée ici (ce n'est pas une règle du texte, le paquet ne la porte pas).
 - **Réévaluation totale d'une société détenue par plusieurs liens** (acquisitions successives) : la partielle
   s'impose, lien par lien — la part des minoritaires dans ses écarts d'évaluation n'est pas reconnue.
 
@@ -365,3 +368,109 @@ acquis, l'écart affecté d'abord aux écarts d'évaluation, le résidu en écar
   lus sur l'édition officielle par un sous-agent de recherche, ont retourné l'hypothèse de départ : la durée
   d'amortissement est celle de l'ENTITÉ — le référentiel en publie le REPLI (10 ans) —, et le négatif se reprend
   ÉTALÉ sur une durée non chiffrée (M4, quatre arbitrages consignés).
+- 2026-09-28 — **dev `bilan-service`** (branche `MNV-543`, commits `ee929f8` → `f96f876`) : règles PURES de
+  l'écart (`ecarts-premiere-consolidation.regles.ts` — date d'entrée lue au périmètre, calcul figé dans l'ordre du
+  texte, lignes de chaque exercice : élimination rejouée, amortissements 30/360 importés de 542, cumul passé en
+  réserves, écart négatif étalé, sortie d'un élément ; diagnostic lien par lien) ; nature
+  `ECART_PREMIERE_CONSOLIDATION` au journal, deux index uniques partiels (un écart actif par lien, une sortie
+  active par élément) ; colonne `ecartsPremiereConsolidation` appliquée à l'identité ; famille d'artefacts
+  `consolidation-audcif@1.0` (manifeste, pont, chargeur à sha256 vérifié, parse par liste blanche) ; quatre
+  routes, sept codes de refus ; traitement `ECART_PREMIERE_CONSOLIDATION` conditionnel. Bornes MESURÉES avant
+  d'être posées (`consolidation.constants.ts`) : 500 écarts × 10 éléments, 33 500 lignes d'écart, ≈ 49 ms.
+- 2026-09-28 — ⚡ **tests écrits en parallèle par cinq sous-agents `opus`** (règles pures et agrégation ; paquet
+  de règles ; service ; contrôleur, DTO, schéma, dépôts, graphe du module ; e2e et contrat OpenAPI), chacun
+  propriétaire de ses fichiers, code de production jamais touché, chacun avec sa passe de mutation sur une copie
+  privée — **huit défauts trouvés, tous corrigés**, chaque test rougissant sur le code d'avant (prouvé sur une
+  copie restaurée depuis `HEAD`) :
+  - `calculerEcart` sommait les capitaux propres en flottant : MAX + 1 + 1 − MAX donnait un K « sûr » et FAUX, une
+    quote-part qui ne valait pas la somme des lignes éliminées, une écriture d'entrée déséquilibrée — la borne
+    porte désormais sur Σ |montant|, qui rend exactes toutes les sommes partielles ;
+  - ⛔ un compte de RÉSULTAT confondu avec un compte de BILAN de la même société — la dotation de l'écart
+    d'acquisition sur l'écart lui-même ou sur les titres, la dotation d'un élément sur un capital éliminé, le
+    résultat d'une sortie sur l'élément — fondait l'amortissement dans le bilan (les lignes se nettent par
+    société et compte) : le résultat ne le voyait plus, l'effet publié était faux (−11 000 000 au lieu de
+    −1 000 000) — `COMPTES_CONFONDUS`, à la déclaration et à la sortie ;
+  - un élément VALIDE enveloppé dans un tableau (`[[…]]`) franchissait la validation — un 500 au service :
+    `@IsObject({ each: true })`, le patron que les autres DTO du module portaient déjà (STORY-373, 541) ;
+  - le parse du paquet de règles : un document `null` levait une `TypeError` (un 500 au lieu du 409 nommé), un
+    document sans code faisait entrer `undefined` parmi les codes connus et un fondement sans document passait ;
+    les textes du `_meta` n'étaient pas contrôlés ;
+  - le plan et les comptes de l'écart d'acquisition publiés par étalement (une clé glissée en base sortait) ;
+    `DUREE_REPRISE_A_DECLARER` absent de la prose du 400 ; `-0` publié pour une part du groupe nulle.
+  - Règle resserrée (observation de l'agent du service) : une sortie tombée dans un exercice où l'écart
+    s'appliquait DÉJÀ, déclarée plus tard, passait d'office en réserves — son effet sur le résultat de l'exercice
+    de la sortie était perdu : `SORTIE_TARDIVE` ; seule une sortie antérieure à l'exercice de l'écart (acquisition
+    ancienne) se déclare après coup.
+  - Code mort retiré, désigné par des mutants équivalents : deux bornes impliquées par Σ |reconnu|, trois
+    ouvertures nulles par construction. D4 de l'agent du référentiel : la fiche, pas l'artefact, était en faute
+    (le rapprochement des capitaux propres est une limite du produit, pas une règle du texte).
+  - Mutations des agents : règles 79 (76 tués, 3 équivalents), référentiel 74 tués, service 80 (79 tués,
+    1 équivalent : la mère n'est jamais une société de l'arrêté), surface HTTP et persistance 86 tués ; puis
+    **14 mutants des gardes ajoutées, tous tués** (dont 2 réécrits : l'ancre ne matchait plus après `eslint --fix`,
+    et 1 survivant réel — le `-0` — tué par un test ajouté).
+- 2026-09-28 — ⚡ **batterie e2e et contrat OpenAPI** (sous-agent `opus`, commit `a3a1acc`) : 216 tests sur les
+  écarts, 60 ajoutés au contrat OpenAPI. Le harnais simule désormais TOUS les index uniques du journal, lus sur le
+  schéma (il ne simulait que le numéro), et sert le VRAI chargeur sur le VRAI artefact. 57 mutants, tous tués.
+  **Deux défauts du code de production**, corrigés :
+  - ⛔ **D3 — des titres « fantômes »** : un écart d'un exercice passé dont le DÉTENTEUR n'était plus intégré
+    s'appliquait quand même. La colonne créditait les titres d'une société que l'agrégat ne porte pas, et ni
+    `RECOMPOSITION` ni `EQUILIBRE` ne le voyaient (la colonne reste équilibrée). Désormais, un lien n'est retenu
+    que si la société détenue ET son détenteur sont éliminables — la règle même de la sortie : l'écart devient
+    `LIEN_NON_RETENU`, nommé, jamais appliqué. La déclaration juge le détenteur (`409 SOCIETE_NON_ELIMINABLE`,
+    nommé). La projection du périmètre refuse déjà un tel arrêté ; le service ne s'en remet plus à elle. Quatre
+    tests unitaires ajoutés, rouges sur `f96f876`.
+  - **D2** : `ECARTS_TROP_VOLUMINEUX` n'était documenté dans aucune réponse publiée — il l'est au 409 de
+    `GET …/agregat`, avec ses quatre clés de `details` ; `COMPTE_RESERVES_*` et `ECRITURE_HORS_PERIMETRE` citent
+    les écarts.
+  - La suite COMPLÈTE a rougi deux invariants de STORY-357 que les passes ciblées ne lançaient pas : le balayage
+    des contrôleurs gardés (18 → 19, le 16ᵉ niché) et la liste des index uniques de `ecritures_consolidation`
+    (+ les deux index partiels) — mis à jour.
+- 2026-09-28 — **portes DoD** (état `a3a1acc`) : lint `{src,test}` 0 avertissement · build OK · `test:cov` 259
+  suites, 7 008 tests verts (2 ignorés) — 99,30 % instructions / 96,37 % branches / 99,55 % fonctions / 99,38 %
+  lignes, chaque fichier touché à 100 % de lignes · e2e 30 suites, 1 799 tests verts · aucun JSDoc détaché ajouté,
+  aucun octet NUL. ⚠️ Au premier passage de `test:cov`, le test chronométré de 541 (diagnostic sous 500 ms) a
+  mesuré 543 ms sous une charge de 21 : vert seul et au second passage complet, machine au repos ; 543 ne touche
+  pas `homogeneisation.regles.ts`.
+- 2026-09-28 — **table de mutations FINALE, décision par décision, rejouée par la session** sur l'état `a3a1acc`
+  (copie privée, remplacement exigé unique, rapport JSON de jest, jamais un grep ; script et journaux dans
+  `tmp/mutation-543/`) : **38 mutants, 38 tués**, chaque premier test rouge sémantique (aucun chronométré) —
+  D-543-1 (écart déjà déclaré non cherché · société détenue ou détenteur non jugés · index partiel sans
+  `statut: ACTIVE`) · D-543-2 (date d'entrée sans le détenteur · quote-part lue sur le contrôle) · D-543-3 (ni
+  retraitements ni motif · ni écarts d'évaluation ni motif · comptes de l'écart non exigés · reprise étalée sans
+  durée à 120 mois codés) · D-543-4 (K brut · EA = Δ · part du groupe = le reconnu · QP arrondie globalement) ·
+  D-543-5 (repli codé · sha256 non vérifié · durée déclarée ignorée) · D-543-6 (passé remis en charge · cumul lu à
+  l'ouverture · amortissement non arrêté à la sortie · amortissement passé hors réserves · reprise immédiate
+  rejouée · minoritaires aux réserves du détenteur) · D-543-7 (colonne mise à l'échelle · hors recomposition ·
+  hors chemin B) · D-543-8 (détenteur non intégré consolidé · `LIEN_NON_RETENU` appliqué · `APPLIQUE` malgré les
+  manques · `ECART_NON_DECLARE` tu) · D-543-9 · D-543-10 · D-543-11 (rôle `TENANT_USER` retiré · annulation
+  malgré une sortie) · D-543-12 (deux bornes décalées · 30 éléments) · D-543-13 (libellé inversé). ⚠️ Trois
+  mutants ne compilaient pas au premier passage (`x && false` casse le rétrécissement non-null ; une constante
+  devenue inutilisée) : MESURES VIDES, jamais comptées comme tuées — réécrits sous une forme qui compile, tués.
+- 2026-09-28 — **vérification docker sur stack NEUVE** (`docker compose down -v`, puis `up`) — **275 verdicts, 0 KO**,
+  scripts et journaux dans `tmp/verif-docker-543/` (attentes écrites AVANT, dans `SCENARIO.md`) :
+  - p0 (29 OK) : branche `MNV-543` au commit `a3a1acc`, rien de modifié ; `docker restart`, puis « Found 0 errors »
+    dans les logs POSTÉRIEURS ; sha256 hôte = sources montées (15 fichiers, artefact compris) ; l'artefact copié
+    à l'octet dans le `dist` ; les marqueurs 543 compilés — dont ceux des derniers correctifs (détenteur jugé,
+    `SORTIE_TARDIVE`, `ECARTS_TROP_VOLUMINEUX`).
+  - p1 à p4 (82 OK) : deux cabinets (KYC approuvé, octrois), le groupe (MÈRE → FILLE en intégration globale 80 %
+    entrée le 01/01/2025, MÈRE → coentreprise en intégration proportionnelle 50 % depuis 2020, une associée
+    mise en équivalence), les arrêtés, les balances et les liasses 2025 FIGÉES.
+  - p5, 2025 (82 OK) : base `NON_TRAITE` (les deux liens intégrés nommés, pas l'associée) ; sept refus, rien
+    d'écrit après chacun ; course de deux déclarations simultanées : un 201, un 409 `ECART_DEJA_DECLARE` qui
+    nomme le gagnant, UN écart actif en base ; `COMPTE_RESERVES_NON_DECLARE` puis méthodes du groupe ; agrégat
+    `APPLIQUE`, `RECOMPOSITION` et `EQUILIBRE` satisfaits, la colonne compte par compte égale aux attentes
+    calculées à la main, ⛔ M6 — les titres de la coentreprise (intégrée à 50 %) crédités du coût ENTIER, soldés
+    —, le résultat = R0 − 550 000 (R0 par un chemin indépendant) ; persistance : deux écarts actifs sans ligne
+    écrite, figés, liasses intactes, index partiels présents, insertion DIRECTE d'un second écart actif → E11000,
+    rien d'inséré ; annulation → `ECART_NON_DECLARE`, redéclaration → mêmes chiffres ; cloisonnement : le cabinet
+    B → 404 partout, rien chez lui.
+  - p6, 2026 (82 OK) : exercices clos et ouverts, arrêté, balances et liasses 2026 FIGÉES ; ⛔ AC-6 — l'élimination
+    rejouée À L'IDENTIQUE de 2025, la 2ᵉ année d'amortissement sans rien redéclarer, le passé en réserves ;
+    `SORTIE_TARDIVE` (sortie de 2025 déclarée en 2026) et `COMPTES_CONFONDUS` (cession sur le compte de l'élément)
+    refusés, rien d'écrit ; la sortie du terrain : plus d'imputation de l'écart, 4 000 000 au résultat de cession,
+    effet −4 460 000 ; seconde sortie et annulation de l'écart → 409 `ELEMENT_DEJA_SORTI`, rien d'écrit ni
+    d'annulé ; insertion DIRECTE d'une seconde sortie active → E11000 ; les six liasses intactes.
+  - `docker compose stop` ensuite. ⚠️ Au démarrage à froid, onze services Nest compilant ensemble (charge 24 à 30) :
+    `auth-service` déclaré malsain au premier `up`, sain quelques minutes plus tard ; l'administrateur plateforme
+    à semer sur une stack neuve (`npm run seed:admin`) avant p1.
+- 2026-09-28 — statut `in_progress` → `review`.
