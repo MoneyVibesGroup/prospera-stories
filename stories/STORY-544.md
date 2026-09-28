@@ -54,9 +54,11 @@ significatifs est un contresens — et rien, dans l'équilibre du bilan, ne le s
 
 # Cadrage — fait AVANT toute ligne de code
 
-Sources : **AUDCIF 2017**, art. 79, 81, 85, 89 et 90 ; le **SYSCOHADA révisé**, deuxième partie « Dispositif
-comptable relatif aux comptes consolidés et combinés » (D4C) — relevé en cours sur l'édition officielle
-(biblio.ohada.org, `explnum_id=2063`), citations consignées en M7 ; le code de `bilan-service` (`dev` @ `5d2531e`)
+Sources : **AUDCIF 2017**, art. 79, 81, 85, 89 et 90 ; le **SYSCOHADA révisé**, édition officielle
+(biblio.ohada.org, `explnum_id=2063`) — deuxième partie « Dispositif comptable relatif aux comptes consolidés et
+combinés » (D4C, pp. 1131 à 1238 relues **en entier** par reconnaissance de texte sur les pages rendues en image,
+les citations clés revérifiées à l'image) et première partie, Plan comptable général OHADA (cadre comptable,
+p. 210 ; modèle de bilan, p. 998) ; citations consignées en M7 ; le code de `bilan-service` (`dev` @ `5d2531e`)
 et de `dossier-service` (périmètre, STORY-530) ; les fiches STORY-530, 531, 541, 542, 543, 545 à 548.
 
 ## Les constats mesurés
@@ -132,12 +134,58 @@ somme de ces comptes AVANT le partage, la part du groupe la même somme APRÈS �
 part des minoritaires une troisième grandeur, calculée par le partage : leur égalité est un contrôle qui peut
 échouer.
 
-### M7 — AC-6 : ce que dit le texte d'une quote-part négative
+### M7 — Les textes, lus sur l'édition officielle — et ce qu'ils ne disent PAS
 
-*En cours de relevé sur l'édition officielle du D4C* (sous-agent de recherche, pages rendues en image). Pour
-comparaison seulement : le règlement CRC 99-02 (France) impute l'excédent aux majoritaires sauf obligation formelle
-des minoritaires de combler les pertes ; IFRS 10 attribue aux minoritaires même un solde débiteur. La décision
-D-544-6 fixe le MÉCANISME ; la règle elle-même est celle que le texte écrit, transcrite verbatim.
+Le D4C (pages imprimées ; titre XII) :
+- **ch. 2, § 3.1, p. 1147** — l'intégration globale consiste à *« répartir les capitaux propres et le résultat entre
+  les intérêts de l'entité consolidante et les intérêts des autres actionnaires ou associés dits « intérêts
+  minoritaires » »* ; **§ 3.2, p. 1148** — en proportionnelle, *« aucun intérêt minoritaire n'est donc constaté »* ;
+  **ch. 5, § 5.1, p. 1177** — *« sans constatation d'intérêts minoritaires directs »* : les minoritaires INDIRECTS
+  d'un détenteur partiellement détenu existent (M2) ;
+- **ch. 4, § 3.3, p. 1163** — les écarts de conversion *« appartiennent aussi bien au groupe qu'aux associés
+  minoritaires. Il faut alors faire la répartition selon le pourcentage d'intérêts détenu par chaque partie »* :
+  l'AC-1 est écrit par le texte ;
+- **ch. 5, § 2.1, p. 1168** — *« Pour l'établissement des comptes consolidés, aucun plan de comptes n'est prévu.
+  L'entité consolidante est donc libre de définir un plan de comptes spécifique […] il est nécessaire de faire des
+  ajustements et de créer des comptes spécifiques »* (M5 : les comptes se DÉCLARENT) ; **§ 2.1.1** — *« Il ne doit
+  rester dans le bilan consolidé que deux catégories de postes de capitaux propres : les capitaux propres (part du
+  groupe) ; et les intérêts minoritaires »* ; **p. 1169** — *« Compte « Intérêts minoritaires » : les intérêts
+  minoritaires représentent les droits des associés autres que l'entité mère du groupe dans l'actif net
+  consolidé »* ; § 2.1.4, la *« double partie double »* — écritures des comptes de bilan, écritures des comptes de
+  gestion : la colonne de D-544-7 ;
+- **ch. 5, § 4.4, p. 1176-1177** — *« éliminer la valeur comptable de la participation de l'entité mère dans chaque
+  filiale et la part de l'entité mère dans les capitaux propres de chaque filiale […] ; attribuer le résultat net
+  aux propriétaires de l'entité mère et aux intérêts minoritaires »* ; *« Dans le Bilan consolidé, les intérêts
+  minoritaires doivent être présentées dans les capitaux propres mais séparément de la participation des
+  propriétaires de l'entité mère. Le résultat net est attribué aux propriétaires de l'entité mère et aux intérêts
+  minoritaires. »* ;
+- **ch. 5, section 7, p. 1179-1180** — la consolidation **par paliers** : *« chaque sous-consolidation est opérée en
+  appliquant aux capitaux propres d'une filiale le pourcentage de participation détenu par l'entité qui joue le
+  rôle de mère dans le sous-ensemble »* — la méthode contre laquelle M3 est vérifié ;
+- **ch. 6, section 4, p. 1184-1185** — les écarts d'évaluation *« appartiennent aux actionnaires majoritaires et
+  minoritaires »*, en réserves *« qui seront, au moment du partage des capitaux propres, ventilées entre le groupe
+  et les minoritaires »* ;
+- **ch. 7, § 1.1.1, p. 1190** — un changement de pourcentage sans perte de contrôle est une opération *« entre deux
+  catégories d'ayants droit aux capitaux propres consolidés (part groupe et intérêts minoritaires) »* ;
+- **ch. 8, p. 1200 et 1203** — les modèles : au bilan *« Part de l'entité consolidante / Part des minoritaires /
+  TOTAL CAPITAUX PROPRES DE L'ENSEMBLE CONSOLIDE »* ; au compte de résultat *« Résultat net de l'ensemble
+  consolidé / Part des minoritaires / Part de l'entité consolidante »* — les trois lignes de l'AC-4 ; § 3.1,
+  p. 1201 : il *« fait apparaître de façon distincte la part de l'entité consolidante et la part des associés
+  minoritaires dans le résultat net »*.
+
+Le PCGO : cadre comptable, **p. 210** — classe 1 *« Comptes de ressources durables : 10 Capital ; 11 Réserves ;
+12 Report à nouveau ; 13 Résultat net de l'exercice ; 14 Subventions d'investissement ; 15 Provisions réglementées
+et fonds assimilés ; 16 Emprunts… ; 19 Provisions pour risques et charges »* ; modèle de bilan, **p. 998** — les
+postes CA à CM sous *« TOTAL CAPITAUX PROPRES ET RESSOURCES A[…] »* (l'intitulé est tronqué au scan) : M4.
+
+⛔ **Ce que le texte ne dit pas** : le D4C n'écrit **aucune règle propre à une quote-part minoritaire négative** (ni
+« même débitrice », ni « imputée aux majoritaires », ni obligation de combler). Son seul plancher à zéro est celui
+des **titres mis en équivalence** (ch. 5, section 6, p. 1179 : *« retenue normalement pour une valeur nulle »*),
+écrit pour eux seuls (STORY-546). Il reprend en revanche l'approche d'IFRS 10 — l'attribution du résultat aux deux
+catégories d'ayants droit, sans plancher, les minoritaires dans les capitaux propres, les variations de pourcentage
+entre ayants droit — et IFRS 10 (§ B94) attribue aux minoritaires même un solde débiteur ; le règlement français
+CRC 99-02, qui imputait l'excédent aux majoritaires sauf obligation formelle, n'est pas repris. *(Pour comparaison
+seulement.)* ⇒ D-544-6.
 
 ### M8 — Les bornes
 
@@ -178,11 +226,16 @@ fraction) — la somme vaut l'arrondi de la somme exacte. La part des minoritair
 reprise à l'unité près, telle que 543 l'a publiée.
 
 **D-544-6 — La quote-part négative (AC-6, M7).** Par société propriétaire, sur le **stock** : `A` = part des
-minoritaires dans ses capitaux propres hors résultat, `B` = dans son résultat, `T = A + B`. Si `T < 0`, la règle
-**publiée par le paquet de règles de consolidation** s'applique — son traitement et ses fondements verbatim —, et
-**une alerte `QUOTE_PART_MINORITAIRE_NEGATIVE` la nomme toujours** : la société, la part calculée, la part
-comptabilisée, ce qui en est porté par le groupe. ⛔ Jamais un zéro sans alerte. *Règle du texte : M7, à
-transcrire.*
+minoritaires dans ses capitaux propres hors résultat, `B` = dans son résultat, `T = A + B`. La règle est **publiée
+par le paquet de règles de consolidation**, jamais codée : `ATTRIBUEE_AUX_MINORITAIRES` (la part leur reste,
+débitrice) ou `IMPUTEE_AU_GROUPE` (la part comptabilisée ne descend sous zéro ni pour `A` ni pour `T` : le groupe
+porte l'excédent, et les bénéfices suivants lui reviennent jusqu'à remboursement — jugé sur le stock, sans mémoire
+d'un exercice à l'autre). Dès que `A < 0` ou `T < 0`, **une alerte `QUOTE_PART_MINORITAIRE_NEGATIVE` la nomme
+toujours** : la société, la règle, la part calculée, la part comptabilisée, ce qu'en porte le groupe. ⛔ Jamais un
+zéro sans alerte. *Amendée à la réception du relevé (M7)* : le texte n'écrivant aucune règle propre, `consolidation-
+audcif@1.1` publie **`ATTRIBUEE_AUX_MINORITAIRES`**, fondée sur l'attribution sans plancher (D4C p. 1169, 1177,
+1190), avec une **mise en garde** qui le dit et le statut `a-valider-par-expert` du paquet ; un avis contraire se
+traduit par une version 1.2 — une ligne au registre, **aucun code**.
 
 **D-544-7 — Les comptes et la colonne (M5).** Le référentiel de méthodes du groupe (D-541-2) accepte deux comptes
 facultatifs, **ensemble ou pas du tout** : `compteInteretsMinoritaires` (bilan) et `compteResultatMinoritaires`
@@ -259,3 +312,17 @@ premier trouvé). Un écart déjà déclaré garde la règle qu'il a figée (1.0
   chemins (M6). ⚠️ Le texte de l'AC-6 (M7) est encore en relevé sur l'édition officielle : sur arbitrage de l'user
   (« ok continue »), le développement démarre sur le mécanisme de D-544-6 ; la règle sera transcrite, et D-544-6
   amendée, dès le relevé rendu.
+- 2026-09-28 — **relevé du texte (M7)** : le sous-agent de recherche s'est arrêté sur une erreur d'API après avoir
+  rendu et lu par reconnaissance de texte les 108 pages du D4C (pp. 1131 à 1238, aucune page manquante) ; relevé
+  exploité dans la session, citations clés revérifiées sur l'image (p. 1169, 1177), le PCGO lu à l'image (p. 210,
+  998). ⚡ Le D4C n'écrit aucune règle sur une quote-part minoritaire négative ; il écrit en revanche l'AC-1
+  (p. 1163 : la répartition *« selon le pourcentage d'intérêts »*), la liberté du plan de comptes de consolidation
+  (p. 1168 : M5) et la méthode par paliers (p. 1179-1180 : M3). D-544-6 amendée : la règle publiée découle de
+  l'attribution sans plancher, mise en garde à l'appui.
+- 2026-09-28 — **dev `bilan-service`** (branche `MNV-544`, commit `49b9c59`) : règles pures du partage
+  (`interets-minoritaires.regles.ts` — taux exact, attribution par propriétaire, plus fort reste à la fraction,
+  règle de l'AC-6, manques, colonne) ; STORY-543 publie ses lignes brutes étiquetées (`composantes`) ; colonne
+  `interetsMinoritaires` appliquée après coup, `RECOMPOSITION` et `EQUILIBRE` rejugés ; trois lignes de résultat et
+  contrôle `PARTAGE_DU_RESULTAT` ; deux comptes aux méthodes du groupe ; paquet `consolidation-audcif@1.1`
+  (empreinte `c2aa2790…`), départage des versions à date égale. Vérifié avant tout test sur l'exemple de M3 :
+  **574**, la valeur par paliers, colonne équilibrée.
