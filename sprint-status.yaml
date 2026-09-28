@@ -4041,8 +4041,9 @@ sprints:
         epic: "EPIC-138"
         points: 13
         service: "bilan-service — module consolidation"
-        status: "ready-for-dev"  # CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. À l'entrée d'une filiale au périmètre, le coût d'acquisition des titres ne vaut presque jamais la quote-part de capitaux propres acquise. La différence est l'écart de première consolidation, et elle se décompose dans cet ordre :
+        status: "in_progress"  # ⬆ 2026-09-28 : branches MNV-543 ouvertes (docs + bilan-service), CADRAGE fait avant tout code (10 constats, 13 decisions) — rien n elimine aujourd hui les titres (l agregat compte deux fois la meme richesse) : un ecart par LIEN retenu, date d entree et quote-part LUES au perimetre (la date d entree d une detention indirecte est celle de son detenteur), cout / capitaux propres d entree / retraitements / justes valeurs DECLARES, le produit calcule dans l ordre du texte (ecarts d evaluation d abord, ecart d acquisition = residu, jamais declare), lignes a la quote-part du groupe sans mise a l echelle, elimination rejouee chaque exercice, amortissements 30/360 en reserves pour le passe ; regle de l ecart d acquisition publiee par une famille d artefacts DISJOINTE (consolidation-audcif@1.0) : AUDCIF art. 82 + D4C ch. 6 lus sur l edition officielle — duree de l ENTITE, repli publie 10 ans, negatif repris ETALE sur une duree declaree. — Historique — CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. À l'entrée d'une filiale au périmètre, le coût d'acquisition des titres ne vaut presque jamais la quote-part de capitaux propres acquise. La différence est l'écart de première consolidation, et elle se décompose dans cet ordre :
         story_path: "stories/STORY-543.md"
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-544"
         title: "Intérêts minoritaires — ce qui appartient au groupe et ce qui ne lui appartient pas"
         epic: "EPIC-138"
