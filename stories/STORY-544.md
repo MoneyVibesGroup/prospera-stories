@@ -1,6 +1,6 @@
 # STORY-544 : Intérêts minoritaires — ce qui appartient au groupe et ce qui ne lui appartient pas
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-138 — Écarts d'acquisition et intérêts minoritaires
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -326,3 +326,80 @@ premier trouvé). Un écart déjà déclaré garde la règle qu'il a figée (1.0
   contrôle `PARTAGE_DU_RESULTAT` ; deux comptes aux méthodes du groupe ; paquet `consolidation-audcif@1.1`
   (empreinte `c2aa2790…`), départage des versions à date égale. Vérifié avant tout test sur l'exemple de M3 :
   **574**, la valeur par paliers, colonne équilibrée.
+- 2026-09-28 — ⚡ **tests écrits en parallèle par cinq sous-agents `opus`** (règles pures ; agrégation et service ;
+  paquet de règles, registre et chargeur ; méthodes, DTO et inventaires ; e2e et contrat OpenAPI), chacun
+  propriétaire de ses fichiers, code de production jamais touché, chacun avec sa passe de mutation sur une copie
+  privée. La vérité par paliers est recalculée DANS les tests en fractions exactes : 574 et 544 de M3, puis 400
+  cascades aléatoires égales au franc près (intégration globale et proportionnelle, deux réévaluations, résultats
+  internes de tout vendeur, retraitements, réciproques). Mutations des agents : 86/89, 47/49, 55/56, 40/40,
+  46/46 — les survivants équivalents, analysés. **Huit défauts trouvés, tous corrigés** (commit `0a1b4cf`) :
+  - ⛔ `appliquerInteretsMinoritaires` refaisait la somme de l'équilibre dans l'ordre des comptes TRIÉS : près des
+    bornes, elle débordait là où l'ordre de l'agrégat tenait — un groupe **sans** minoritaires recevait `422`,
+    servi avant 544. La somme est désormais exacte en `bigint`, seul le total est borné ;
+  - une part que la règle impute entièrement au groupe exigeait des comptes (manque, traitement non appliqué) :
+    ce qui se COMPTABILISE décide, jamais ce qui se calcule ;
+  - l'alerte citait le total quand c'est la part des capitaux propres hors résultat qui est négative ;
+  - ⚡ arbitrage — AC-5 l'emporte : un groupe sans minoritaires publie sa part nulle même quand le paquet des
+    liasses ne dit pas ses racines de gestion (le résultat, lui, ne se lit pas sans elles) ;
+  - les motifs des comptes n'étaient pas tous rendus d'un coup (incomplets ET confondus) ;
+  - la réponse partageait des objets avec la vue, et la part nulle d'une réponse avec la suivante : copies ;
+  - Swagger : le `400` de `POST …/methodes-groupe` ne nommait pas les deux motifs, la description de
+    `GET …/agregat` ignorait le partage et `PARTAGE_DU_RESULTAT` ;
+  - `consolidation-audcif@1.1` : la norme source citait un chapitre 8 qu'aucun fondement n'emploie (empreinte
+    recalculée, `1ae0ca13…`).
+  - Relevé, laissé en l'état : un compte des minoritaires envoyé en NOMBRE (`108900`) est accepté, converti par
+    `enableImplicitConversion` — le même traitement que `compteReserves`, et la forme du compte ferme toute
+    injection d'opérateur (`{ "$gt": "" }` refusé) ; la projection du périmètre ne juge que la FORME de
+    `interetExact` — un intérêt supérieur à `π` viole un invariant du producteur et rend `500` (D-544-2).
+- 2026-09-28 — **coût** (D-544-12) : le partage cumule par propriétaire et classe chaque compte UNE fois par ligne,
+  et chaque colonne de signe ne reçoit que ses montants (113-160 ms → 50-64 ms, sous charge). ⚡ Ce premier banc
+  n'était pas le pire cas : des intérêts de 60 % se réduisent (3/5), le dénominateur plafonnait à 21 chiffres.
+  Refait avec des intérêts premiers avec 10 000 (60,01 %), il atteint les **121 chiffres** qu'admet
+  `PROFONDEUR_CHAINE_MAX = 30` (dossier-service). Mesuré (meilleur de trois passes, cinq lancements, charge ≈ 20
+  sur 8 cœurs) : 100 sociétés, 30 000 lignes, un écart par filiale ; `agreger` 26-28 ms, **partage 36 ms (un
+  niveau) et 53 ms (trente niveaux)**, colonne 6 ms. Consigné à côté des bornes (`consolidation.constants.ts`),
+  aucune borne nouvelle.
+- 2026-09-28 — **table de mutations de la session** — une mutation par décision, sur une copie privée (hors dépôt),
+  jugée sur les rouges NON chronométrés : **36/36 tuées**. Premier passage : 28 tuées et 8 « mesures vides » — des
+  mutants qui ne compilaient pas (`noUnusedLocals`, code inaccessible) ne mesurent rien ; réécrits en formes
+  compilables et rejoués, tous tués. ⚡ Deux verdicts relus : D5a (cible de la colonne tronquée) — jest n'écrit pas
+  son rapport JSON quand un échec porte un `bigint`, relu sur la sortie texte : 25 rouges ; D6a (`IMPUTEE` sans
+  plancher) — son premier rouge était le test CHRONOMÉTRÉ de l'agrégat ; au rejeu, 8 rouges de l'AC-6. Couverts :
+  l'intérêt exact (contre l'arrondi, le contrôle, `π`) ; chaque propriétaire (vendeur, détenteur, part MINORITAIRES
+  entière, réévaluation partielle, retraitements, réciproques) ; la base (réserves, comptes d'entrée déclarés,
+  racines lues) ; le plus fort reste ; la règle de l'AC-6 (plancher, alerte, identité, règle lue) ; la colonne
+  (comptes ramenés à zéro, sens, propriétaire, `RECOMPOSITION`) ; les comptes (incomplets, confondus, persistés) ;
+  les trois lignes (lues AVANT la colonne, contrôle, déduction) ; les manques (condition, AC-5, comptabilisé
+  contre calculé, compte de gestion, compte déjà mouvementé) ; le total publié ; le paquet (version la plus
+  haute, clé au parse, racine vide).
+- 2026-09-28 — **portes finales** sur `7a4602b` : lint 0 avertissement, build OK ; `test:cov` **261 suites,
+  7 518 tests verts** (2 ignorés, préexistants), couverture **99,32 / 96,53 / 99,56 / 99,40** (seuils
+  65/90/90/90) — `interets-minoritaires.regles.ts` et `plus-fort-reste.ts` à 100 % partout, les branches non
+  couvertes restantes toutes antérieures à 544 ; le test chronométré de 541, rouge sous une charge de 121, repasse
+  dans la passe complète. e2e **31 suites, 1 889 tests verts**. Aucun JSDoc détaché ni octet NUL introduit.
+- 2026-09-28 — **vérification docker sur stack NEUVE** (`docker compose down -v`, puis `up`), tout par les API
+  réelles, deux cabinets, attentes écrites AVANT et recalculées par la méthode par paliers sur les soldes
+  réellement injectés : **233 verdicts, 0 KO**. p0 (31) : branche `MNV-544` à `7a4602b`, « Found 0 errors » après
+  redémarrage, sources montées à l'octet, artefacts 1.0 et 1.1 copiés dans le `dist` à l'octet ; p2-p4 (148) :
+  octrois, périmètres (⚡ PETITE projetée à l'intérêt **12/25 = 48 %** pour un contrôle de 60 %), liasses figées.
+  p5 (54) — le scénario :
+  - sans comptes : `200`, `NON_TRAITE`, manque `COMPTES_MINORITAIRES_NON_DECLARES`, colonne vide, taux exacts
+    publiés, parts de la table des propriétaires (PETITE 26 348 000, FILLE 3 280 000, JV 5 000 000), **total
+    34 628 000 = paliers**, trois lignes 33 675 000 / 7 861 000 / 25 814 000, `PARTAGE_DU_RESULTAT` non
+    satisfait (la balance ne l'isole pas encore) ;
+  - refus `400 METHODES_INCOHERENTES` (un seul compte ; compte confondu avec les réserves), rien d'écrit ;
+    `COMPTES_MINORITAIRES_INVALIDES` (compte de gestion, attendu `BILAN`) ; `COMPTE_MINORITAIRES_DEJA_MOUVEMENTE`
+    (121000, les quatre sociétés nommées) ;
+  - `108900` / `869000` : `APPLIQUE`, la colonne ligne à ligne égale à la table (22 lignes, dont l'élimination
+    des capitaux propres acquis, au DÉTENTEUR), `108900` C 34 628 000, `869000` D 7 861 000, contrôle satisfait, la
+    balance porte 25 814 000, `RECOMPOSITION` et `EQUILIBRE` ; ⛔ PETITE 101000 après la colonne = **3 048 000**,
+    48 % de la hausse du capital depuis l'entrée ;
+  - persistance : les quatre versions des méthodes telles que déclarées (v1 sans comptes → `null`), l'agrégat
+    n'écrit RIEN (documents comptés avant/après), les quatre liasses intactes (empreintes) ;
+  - AC-6 (groupe 2, filiale déficitaire à 70 %) : alerte `QUOTE_PART_MINORITAIRE_NEGATIVE`,
+    `ATTRIBUEE_AUX_MINORITAIRES`, −3 000 000 calculés = comptabilisés, portés par le groupe : 0 ; `108900`
+    débiteur de 3 000 000 ; trois lignes −40 700 000 / −15 105 000 / −25 595 000 ;
+  - AC-5 (cabinet B, filiale à 100 %, aucune méthode déclarée) : `APPLIQUE`, part nulle publiée, trois lignes
+    19 300 000 / 0 / 19 300 000, contrôle satisfait ; cloisonnement : B lit l'agrégat de A → `404`.
+
+  Stack arrêtée (`docker compose stop`). Statut `in_progress` → `review`.
