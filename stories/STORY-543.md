@@ -1,6 +1,6 @@
 # STORY-543 : Écart de première consolidation — écarts d'évaluation d'abord, écart d'acquisition ensuite, et jamais l'inverse
 
-Status: review
+Status: done
 
 **Épic :** EPIC-138 — Écarts d'acquisition et intérêts minoritaires
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -268,8 +268,11 @@ Tous figés sur l'écriture, avec ce qui les a produits. L'écriture d'entrée e
 
 **D-543-5 — La règle de l'écart d'acquisition est PUBLIÉE par le référentiel, et figée à la déclaration (AC-4,
 AC-5, M7).** Nouvelle famille d'artefacts, `consolidation-audcif@1.0` — « règles de consolidation de l'AUDCIF
-2017 » —, disjointe du paquet des liasses : générateur, manifeste (empreinte, date d'application), chargeur à
-sha256 vérifié, **pont** depuis les référentiels de liasse (`syscohada-revise@2.1`, `@2.2`, `zone-franche-togo@1.0`).
+2017 » —, disjointe du paquet des liasses : manifeste (empreinte, date d'application), chargeur à sha256
+vérifié, **pont** depuis les référentiels de liasse (`syscohada-revise@2.1`, `@2.2`, `zone-franche-togo@1.0`).
+L'artefact est écrit À LA MAIN — sans générateur, contrairement aux familles CIMA, DIMF et prudentielles : deux
+règles ne justifient pas une source à compiler ; son empreinte est épinglée par le spec d'artefact, qui le fait
+lire par le VRAI chargeur (une révision `1.1` se fait à la main, empreinte recalculée).
 Elle publie, fondements **verbatim** à l'appui (M4) : positif — `AMORTISSEMENT_LINEAIRE`, durée de repli **120
 mois** ; négatif — `REPRISE_ETALEE`, sans durée par défaut ; applicable depuis le 2019-01-01. Le référentiel du
 groupe est celui de la liasse de la mère pour l'exercice : sans elle, sans règle publiée à cette clôture, ou
@@ -341,7 +344,10 @@ acquis, l'écart affecté d'abord aux écarts d'évaluation, le résidu en écar
 - **Mise en équivalence** (STORY-546) : l'écart d'une société mise en équivalence se loge dans les titres mis en
   équivalence — refusée ici, nommée.
 - **Variation de périmètre en cours d'exercice** (STORY-548, M10) : le résultat antérieur à l'entrée au compte de
-  résultat de l'exercice d'entrée ; la note de périmètre (le tableau de l'écart).
+  résultat de l'exercice d'entrée ; la note de périmètre (le tableau de l'écart) ; et, relevé en revue, le
+  reclassement du résultat d'entrée éliminé (13x) : rejouée à l'identique, son élimination porte dès N+1 sur le
+  résultat de N+1 alors que la société l'a affecté en réserves — total des capitaux propres et compte de résultat
+  justes, répartition résultat / réserves du bilan à reclasser.
 - **Variations de pourcentage après l'entrée** (acquisition complémentaire, cession partielle) et **sortie de la
   filiale du périmètre** : nommées (`LIEN_NON_RETENU`), jamais calculées.
 - **Période d'évaluation de 12 mois** (D4C, ch. 6, section 2) : l'écart s'annule et se redéclare avec motif,
@@ -474,3 +480,55 @@ acquis, l'écart affecté d'abord aux écarts d'évaluation, le résidu en écar
     `auth-service` déclaré malsain au premier `up`, sain quelques minutes plus tard ; l'administrateur plateforme
     à semer sur une stack neuve (`npm run seed:admin`) avant p1.
 - 2026-09-28 — statut `in_progress` → `review`.
+- 2026-09-28 — **revue de code ⑥** (PR bilan-service#142) — scan `prospera-code-review` : contexte `haiku`, puis trois
+  analyses `opus` en parallèle (règles pures ; service, surface HTTP et persistance ; paquet de règles et valeur
+  probante des tests), et la lentille `ponytail-review` ; synthèse, vérification de CHAQUE constat et correctifs
+  dans la session. **Deux bloquants, tous deux prouvés puis corrigés :**
+  - ⛔ **un écart d'acquisition NUL rendait l'écart illisible** : il fige `comptesEcartAcquisition: {}`, et
+    Mongoose SUPPRIME par défaut les objets vides d'un chemin `Mixed` à l'écriture (`minimize`) — relu sans lui,
+    la liste de l'exercice tombait en 500, et l'annulation, écrite, répondait 500. Reproduit sur le vrai schéma
+    (`toBSON` : la clé absente de ce que le pilote reçoit) ; le spec du schéma comparait avec
+    `toObject({ minimize: false })`, qui masquait l'effacement. Correctif à la racine : `minimize: false` sur le
+    journal, comme STORY-452 — aucune autre forme du journal ne porte d'objet vide (vérifié forme par forme).
+  - ⛔ **`SORTIE_TARDIVE` raisonnait par le RANG** (trouvé indépendamment par deux analyses) : la mère sans
+    exercice 2024, un bâtiment de l'écart de 2023 cédé le 30/06/2024 n'était déclarable NULLE PART (400 en 2025,
+    400 en 2023) et s'amortissait encore. La garde cherche désormais l'exercice DE LA MÈRE qui contient la sortie :
+    refusée seulement s'il existe et que l'écart s'y appliquait ; sinon (un trou, une acquisition ancienne) elle se
+    déclare après coup, son effet en réserves (M8).
+  - Non bloquants corrigés : l'effet d'un exercice sur le résultat (au plus Σ |reconnu| + |EA|) pouvait sortir des
+    entiers sûrs quand chacun y tenait — un effet arrondi publié : borne conjointe ; le message de
+    `DATE_HORS_EXERCICE` invitait à ce que `SORTIE_TARDIVE` refuse ; deux descriptions Swagger (écarts dans
+    `ECRITURE_HORS_PERIMETRE` et dans la description de l'agrégat) ; deux tests renforcés — le blocage du compte
+    de réserves jugé sur DEUX écarts (le drapeau réécrit au lieu d'être accumulé ne rougissait rien) et les bornes
+    mesurées de D-543-12 épinglées (×10 passait) ; D-543-5 amendée (l'artefact est écrit à la main, sans
+    générateur) ; `ponytail` : un export sans consommateur retiré, une forme de type recopiée remplacée.
+  - Tests ajoutés, rouges sur `a3a1acc` (prouvé sur une copie) ; **11 mutants des correctifs, tous tués**
+    (`tmp/mutation-543/muter_revue.py`) : `minimize` retiré ; l'ancienne garde par le rang ; l'exercice de la
+    sortie cherché sans sa clôture, ou sans son ouverture ; `>=` affaibli, ou restreint à l'exercice de l'écart ;
+    la borne conjointe retirée ou décalée d'une unité ; le drapeau des réserves réécrit ; les deux bornes relevées.
+  - Écartés, avec raison : l'élimination du compte de résultat d'entrée (13x) rejouée à l'identique déplace dès
+    N+1 le résultat d'entrée entre « résultat » et « réserves » au bilan (total des capitaux propres et compte de
+    résultat justes, conforme à D-543-6) — à porter à STORY-548 ; `SORTIE_TARDIVE` acceptée quand l'exercice de
+    l'écart est illisible — branche inatteignable (la projection n'efface aucun exercice).
+- 2026-09-28 — **portes et vérification docker REJOUÉES sur l'état final** (`25c6545`, le correctif `minimize`
+  change la persistance réelle) : lint 0 · build OK · `test:cov` 259 suites, 7 016 tests verts (2 ignorés) —
+  99,30 / 96,38 / 99,55 / 99,38 · e2e 30 suites, 1 799 verts. ⚠️ Le test chronométré de 541 (500 ms) a mesuré 601 et
+  677 ms quand `test:cov` tournait sur une machine encore chargée par la campagne de mutations : vert au repos, et
+  543 ne touche pas son code. Stack docker NEUVE (`down -v`) : **285 verdicts, 0 KO** — p0 (29 : commit
+  `25c6545`, les trois correctifs de revue compilés dans le `dist`) · p1 à p6 (le scénario 2025 et le rejeu 2026, à
+  l'identique du premier passage) · **p7 (10), l'écart d'acquisition NUL en base réelle** : coût 3 250 000 = QP +
+  g ⇒ EA 0, plan `AUCUN` ; `comptesEcartAcquisition: {}` ÉCRIT tel quel (lu par `mongosh`) ; la liste de
+  l'exercice relue : 200 ; l'agrégat `APPLIQUE`, résultat R0 − 490 000 ; l'annulation : 200, jamais 500 ; la JV
+  redéclarée. `docker compose stop` ensuite.
+- 2026-09-28 — **revue de sécurité ⑦** (PR bilan-service#142, tête `25c6545`) — `prospera-security-review` :
+  éligibilité, contexte et résumé par trois sous-agents `haiku`, analyse `opus` de la PR comme un tout, verdict
+  vérifié dans la session : **0 constat** de confiance ≥ 80. Preuves jouées sur une copie privée : les nouvelles
+  requêtes du journal filtrent toutes sur le cabinet et la mère (retirer le filtre de la classe de base les fait
+  rougir) ; les charges d'opérateurs Mongo sur les identifiants et les montants sont refusées en 400 par la vraie
+  `ValidationPipe` (les identifiants du corps portent la forme exacte d'un ObjectId) ; un écart d'un autre cabinet
+  rend le même 404 qu'un identifiant inconnu, rien d'écrit ; `PLATFORM_ADMIN` reçoit 403 sur les quatre routes.
+  Pistes écartées, avec raison : double élimination par course (fermée par les deux index uniques partiels,
+  collision nommée) ; annulation concurrente d'une sortie (au pire une sortie orpheline, nommée, sans effet) ;
+  l'artefact de règles, qu'aucune entrée ne choisit et dont l'empreinte est vérifiée avant lecture.
+- 2026-09-28 — ✅ **CLÔTURÉE** — prospera-bilan-service#142 rebase-mergée sur `dev` (`5d2531e`), branche supprimée
+  (distante et locale). Statut `review` → `done` aux trois endroits, `completed_date` posé.
