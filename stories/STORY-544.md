@@ -1,6 +1,6 @@
 # STORY-544 : Intérêts minoritaires — ce qui appartient au groupe et ce qui ne lui appartient pas
 
-Status: review
+Status: done
 
 **Épic :** EPIC-138 — Écarts d'acquisition et intérêts minoritaires
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -403,3 +403,34 @@ premier trouvé). Un écart déjà déclaré garde la règle qu'il a figée (1.0
     19 300 000 / 0 / 19 300 000, contrôle satisfait ; cloisonnement : B lit l'agrégat de A → `404`.
 
   Stack arrêtée (`docker compose stop`). Statut `in_progress` → `review`.
+- 2026-09-28 — **revue de code** (PR bilan-service#143) : scan `prospera-code-review` (préparation `haiku`, analyse
+  `opus`, qui a rejoué 11 mutations de son cru, toutes tuées) et lentille `ponytail-review` sur le code de
+  production ; synthèse en session `opus`. **Aucun défaut de calcul.** Deux constats non bloquants, corrigés
+  (commit `06db6b9`) :
+  - Swagger disait `controles.partageDuResultat` nul si et seulement si le partage n'est pas calculé ; il l'est
+    aussi quand les racines de gestion sont inconnues, même pour un groupe sans minoritaires (AC-5) ;
+  - le module ne posait pas ses hooks inertes : `attribuer` énumère les colonnes qu'il partage, et une colonne de
+    plus (545, 547, 687) en sortirait sans erreur ni contrôle rouge. Le hook de 543 pour 544 dit désormais ce que
+    544 lit (les composantes étiquetées).
+
+  Laissé de côté : `ponytail` propose `localeCompare(…, { numeric: true })` à la place de `versionPlusHaute`
+  (−8 lignes) — le comparateur explicite ne dépend d'aucune collation, huit cas le gardent, et rien ne changerait
+  de comportement. Écartés par la revue : les parts publiées sans colonne (voulu, D-544-9), le `500` d'un intérêt
+  supérieur à `π` (D-544-2, inatteignable chez le producteur), les dividendes internes (STORY-687). Les
+  correctifs ne touchent ni le calcul ni la persistance : la vérification docker reste valable (lint, build,
+  3 suites unitaires et 2 e2e rejoués).
+- 2026-09-28 — **revue de sécurité** (`prospera-security-review` : préparation `haiku`, analyse `opus`) : **aucun
+  constat** de confiance ≥ 80. 18 pistes examinées et écartées, dont :
+  - aucune route ni décorateur d'accès touché, et aucune lecture nouvelle : tout vient de l'agrégat, déjà borné à
+    l'organisation du jeton ;
+  - les deux comptes sont fermés par leur forme, APRÈS la conversion implicite (un objet devient
+    `"[object Object]"`, refusé), et ne servent jamais dans un filtre Mongo ;
+  - le coût `bigint` est borné par la profondeur admise et mesuré (53 ms) ;
+  - tout chemin vers un `500` remonte à la règle qui l'empêche ;
+  - l'artefact 1.1 est vérifié par son empreinte et relu par liste blanche ;
+  - aucun secret.
+
+  Un durcissement facultatif, qu'aucune requête de l'API n'atteint, est laissé de côté et noté hors du dépôt
+  public.
+- 2026-09-28 — **PR bilan-service#143 rebase-mergée sur `dev`** (`bbace49`), branche supprimée. Statut `review` →
+  `done`.
