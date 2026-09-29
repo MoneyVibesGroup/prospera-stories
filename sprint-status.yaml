@@ -4058,7 +4058,7 @@ sprints:
         epic: "EPIC-139"
         points: 13
         service: "bilan-service — module consolidation"
-        status: "ready-for-dev"  # CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. Un retraitement de consolidation modifie le résultat consolidé sans modifier la base fiscale de l'entité qui l'a subi. L'impôt payé, lui, reste celui des comptes individuels. L'écart est une différence temporelle, et elle produit un impôt différé.
+        status: "in_progress"  # ⬆ 2026-09-29 : branches MNV-545 ouvertes (docs + bilan-service), CADRAGE fait avant tout code (8 constats, 15 decisions) — approche bilantielle lue sur les lignes appliquees, taux entite par entite (paquet fiscal x pays, fail-closed), entite fiscale et proprietaire distincts, colonne impotsDifferes AVANT les minoritaires, jugement declare sur tout actif, preuve d impot a deux chemins. ⛔ Defaut de STORY-543 mis au jour : l ecart d acquisition fige sans l impot des ecarts d evaluation (D4C ch. 6 p. 1182) — corrige pour les nouvelles declarations. — Historique — CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. Un retraitement de consolidation modifie le résultat consolidé sans modifier la base fiscale de l'entité qui l'a subi. L'impôt payé, lui, reste celui des comptes individuels. L'écart est une différence temporelle, et elle produit un impôt différé.
         story_path: "stories/STORY-545.md"
       - story_id: "STORY-546"
         title: "Mise en équivalence — une ligne au bilan, une ligne au résultat, et rien d'autre"
