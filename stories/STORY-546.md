@@ -1,6 +1,6 @@
 # STORY-546 : Mise en équivalence — une ligne au bilan, une ligne au résultat, et rien d'autre
 
-Status: review
+Status: done
 
 **Épic :** EPIC-139 — Impôts différés et mise en équivalence
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -205,6 +205,9 @@ trois comptes ; écarts et résultats internes admettent une associée ; `GET �
   quote-part — le résultat les compte deux fois, la valeur est juste.
 - **Dépréciation des titres** d'une associée (et d'une filiale) : à éliminer en totalité (p. 1179) — à ficher.
 - **Impôt différé** des résultats internes avec une associée, et du changement de taux sur ses écarts d'évaluation.
+- **Jugement sur un actif d'impôt** d'une associée (545, D-545-8) : l'effet d'un retraitement `DIFFERENCE_TEMPORELLE`
+  d'une associée est netté à (1 − t) sans décision `RECONNU` — le jugement de la récupération appartient à ses comptes
+  (relevé en revue, laissé ouvert).
 - **Présentation** (STORY-548) : postes « Titres mis en équivalence » et « Part dans les résultats nets des entités
   mises en équivalence » ; entrée et variation de pourcentage en cours d'exercice. **Conversion** (STORY-547).
 
@@ -246,3 +249,12 @@ trois comptes ; écarts et résultats internes admettent une associée ; `GET �
   sous engagement, provision 2 500 000), résultat interne au facteur 3/10, résultat consolidé 11 677 000 dont quote-part
   −7 323 000, minoritaires 2 482 900 ; aucune contribution d'une associée ; course de deux engagements tranchée par
   l'index unique réel ; associée sans liasse nommée (`AUCUNE_LIASSE`) ; cloisonnement 404. Statut `in_progress` → `review`.
+- 2026-09-29 — **revue de code** (scan `opus` + lentille ponytail) : aucun bloquant ; 1 constat retenu — la valeur d'une
+  associée ne se recomposait pas depuis la réponse (ni l'écart qui porte le lien ni son écart d'acquisition net publiés) :
+  chaque lien les publie désormais (`560adff`) ; 4 simplifications (branche inatteignable, défaut sans usage, replis sur des
+  tables complètes). Écarté, consigné en hook : le jugement sur un actif d'impôt d'une associée. Correctif sans effet sur
+  les calculs vérifiés en docker (champs publiés ajoutés) : 8 035 unitaires bilan et 2 201 e2e rejoués verts.
+- 2026-09-29 — **revue de sécurité** (`opus`) : **aucun constat** — gardes, IDOR (dossier, exercice, écriture, société),
+  isolation du cabinet dans l'agrégat, injection, courses sur l'engagement, bornes de volume examinés.
+- 2026-09-29 — **clôture** : `prospera-bilan-service#145` rebase-mergée sur `dev` (`1402264`), branches supprimées ;
+  statut `review` → `done`.
