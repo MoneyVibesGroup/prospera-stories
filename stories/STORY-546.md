@@ -1,6 +1,6 @@
 # STORY-546 : Mise en équivalence — une ligne au bilan, une ligne au résultat, et rien d'autre
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-139 — Impôts différés et mise en équivalence
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -105,7 +105,7 @@ sans impôt d'entrée, 545) : `EA = coût − QP`, amorti ou repris selon le pla
 élimination des capitaux propres acquis, ni écart d'acquisition à l'actif : son montant net d'amortissement entre dans
 la valeur.
 
-### M6 — Les résultats internes : le pourcentage du groupe, ou le PRODUIT
+### M6 — Les résultats internes : le pourcentage de participation, ou le PRODUIT
 
 *« …sont éliminés, à hauteur du pourcentage de participation détenu par le groupe dans le capital de cette entité. Si
 les opérations ont été effectuées avec une entité intégrée proportionnellement ou mise en équivalence, l'élimination
@@ -169,8 +169,11 @@ est négative, l'alerte `QUOTE_PART_MISE_EN_EQUIVALENCE_NEGATIVE` la nomme (dét
 provision) — jamais un zéro silencieux.
 
 **D-546-9 — Les résultats internes (AC-6, M6).** 542 admet une société mise en équivalence (vendeur ou détenteur), sauf
-détenue par plusieurs liens (`409`, raison `PLUSIEURS_LIENS`). Appliqué au pourcentage d'intérêt du groupe dans
-l'associée — au produit avec une société intégrée proportionnellement ou une autre associée ; ses lignes côté associée
+détenue par plusieurs liens (`409`, raison `PLUSIEURS_LIENS`). Appliqué — ⚡ amendé au développement (l'intérêt du groupe
+était prévu) — à la PART DE PARTICIPATION du détenteur (son lien, comme la valeur — M3 ; *« à
+hauteur du pourcentage de participation »*, *« produit des pourcentages des deux participations »*), jamais l'intérêt du
+groupe, que le partage de 544 compterait deux fois (associée à 30 % d'une fille à 80 % : 3/10, pas 6/25) — au produit avec
+une société intégrée proportionnellement ou une autre associée ; ses lignes côté associée
 reportées sur son détenteur (valeur, quote-part, réserves), dans la colonne `miseEnEquivalence`. Pas d'impôt différé
 calculé sur elles (hook) : la preuve d'impôt les range parmi les écritures sans impôt différé.
 
@@ -211,4 +214,35 @@ trois comptes ; écarts et résultats internes admettent une associée ; `GET �
   toute ligne** ; statut `ready-for-dev` → `in_progress`.
 - 2026-09-29 — **cadrage** : 8 constats, 15 décisions. La valeur par détenteur (M3) ; trois stories rouvertes pour
   l'associée — retraitements (541), résultats internes (542), écart (543) — qui toutes la refusaient (M1).
-
+- 2026-09-29 — **dev** (`bilan-service` `87b3f1f`) : module pur `mise-en-equivalence.regles.ts`, colonne
+  `miseEnEquivalence` appliquée AVANT l'impôt différé et les minoritaires, étape de l'agrégat (liasses des associées en
+  manques nommés, retraitements et reports exclus de la balance et de l'impôt différé, résultats internes et écarts
+  séparés), trois comptes aux méthodes, journal `MISE_EN_EQUIVALENCE` (engagement, index unique partiel) et ses trois
+  routes, `consolidation-audcif@1.3`, vue et « dont quote-part » au résultat.
+- 2026-09-29 — **tests** (`2d6ca65`) écrits par 5 sous-agents `opus` (≈ 3 900 tests touchés, 127 mutations tuées sur 127
+  valides) ; **défauts trouvés et corrigés** (`43d9f80`) :
+  - ⛔ **D-546-9 amendée** — le facteur d'un résultat interne avec une associée était l'intérêt du groupe (6/25 pour
+    30 % d'une fille à 80 %) : le partage de 544 appliquait ensuite les minoritaires de la fille une SECONDE fois
+    (19,2 % au lieu de 24 %). Le texte dit « pourcentage de participation », « produit des pourcentages des deux
+    participations » : c'est la part du lien du détenteur (3/10), le partage fait le reste — comme la valeur (M3) ;
+  - capitaux propres + résultat additionnés en flottant avant `BigInt` : arrondi silencieux au-delà de 2⁵³ ⇒ `somme`
+    (422 `AGREGAT_HORS_BORNES`) ;
+  - une liasse aux soldes introuvables publiée comme source lue ; la borne de volume jugée par lot (M8 : le groupe
+    entier) ; une lecture de soldes vide ;
+  - un écart figé en intégration sur un lien devenu mis en équivalence (inatteignable en production : un lien est
+    immuable) aurait été lu pour sa seule part d'acquisition — il reste nommé (`LIEN_NON_RETENU`) ;
+  - Swagger : `ECARTS_EVALUATION_SANS_OBJET`, raisons `MISE_EN_EQUIVALENCE`, `PLUSIEURS_LIENS`,
+    `SOCIETE_NON_MISE_EN_EQUIVALENCE` non documentées.
+  - Contrat de 543 changé, assumé : un écart de l'exercice sur l'ancien lien d'une société devenue associée n'est plus un
+    409 `ECRITURE_HORS_PERIMETRE` (l'associée est admise) mais un manque nommé `LIEN_NON_RETENU`.
+- 2026-09-29 — **table de mutations de la session 11/11** (propriétaire des lignes, valeur négative retenue, routage des
+  écarts, facteur, source publiée, borne commune, colonne après l'impôt, signe de la quote-part, rôle `TENANT_USER`,
+  index unique, somme flottante) ; un mutant d'abord non compilable réécrit avant d'être compté.
+- 2026-09-29 — **portes** : lint 0, build OK, 8 923 unitaires (le chronomètre de 541 rougit sous charge, vert seul :
+  117 ms), 2 201 e2e, couverture 99,36 / 96,64 / 99,61 / 99,44.
+- 2026-09-29 — **vérification docker sur stack NEUVE** (`tmp/verif-docker-546/`) : **250 verdicts OK, 0 KO** — attentes
+  recalculées depuis les soldes injectés ; associée à 30 % d'une fille à 80 % (valeur 16 069 500, quote-part 2 764 500,
+  écart d'acquisition net 960 000 dans la valeur), associée aux capitaux propres négatifs (retenue pour zéro, alerte ;
+  sous engagement, provision 2 500 000), résultat interne au facteur 3/10, résultat consolidé 11 677 000 dont quote-part
+  −7 323 000, minoritaires 2 482 900 ; aucune contribution d'une associée ; course de deux engagements tranchée par
+  l'index unique réel ; associée sans liasse nommée (`AUCUNE_LIASSE`) ; cloisonnement 404. Statut `in_progress` → `review`.
