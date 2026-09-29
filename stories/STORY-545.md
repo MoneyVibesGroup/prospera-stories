@@ -1,6 +1,6 @@
 # STORY-545 : Impôts différés de consolidation — chaque retraitement déplace du résultat sans déplacer l'impôt
 
-Status: review
+Status: done
 
 **Épic :** EPIC-139 — Impôts différés et mise en équivalence
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -208,8 +208,11 @@ sans comptes à la déclaration, l'écart se fige comme avant, la raison avec lu
 suit l'amortissement : `S0` vaut l'impôt d'entrée l'exercice de l'entrée.
 
 **D-545-7 — Actif et passif, jamais compensés (AC-3).** Chaque élément porte son stock au compte d'impôt différé
-**actif** si `S1 < 0`, **passif** si `S1 > 0`, sur SA société : ni entre entités, ni entre juridictions — ni même
-au sein d'une société. Publiés par société : actif, passif, élément par élément.
+**actif** si `S1 < 0`, **passif** si `S1 > 0`, sur SA société : ni entre entités, ni entre juridictions, ni entre
+deux éléments d'une même société. *Précisé en revue de code* : au sein d'UN élément (une écriture, un écart), la
+différence est une, et nette ; le stock d'un écart dont le signe a changé depuis l'entrée est RECLASSÉ — l'impôt
+d'entrée sort du compte figé à la déclaration, le stock entier va au compte de son signe. Publiés par société :
+actif, passif, élément par élément.
 
 **D-545-8 — Le jugement sur un actif (AC-4).** Un élément ACTIF d'un retraitement ou d'un résultat interne est
 **proposé**, jamais appliqué d'office : il ne s'applique que si le cabinet a décidé `RECONNU` pour son entité fiscale
@@ -226,8 +229,8 @@ facultatifs, **ensemble ou pas du tout** : `compteImpotsDifferesActif` et `compt
 `compteChargeImpotsDifferes` (gestion) — distincts entre eux et des comptes de réserves et des minoritaires (`400
 METHODES_INCOHERENTES`, motifs `COMPTES_IMPOTS_DIFFERES_INCOMPLETS` | `COMPTES_CONSOLIDATION_CONFONDUS`). Manques à
 l'agrégat : `COMPTES_IMPOTS_DIFFERES_NON_DECLARES`, `COMPTES_IMPOTS_DIFFERES_INVALIDES` (nature),
-`COMPTE_IMPOTS_DIFFERES_DEJA_MOUVEMENTE` — et `COMPTE_IMPOTS_DIFFERES_MODIFIE`, un écart figé sur un compte qui
-n'est plus celui du groupe.
+`COMPTE_IMPOTS_DIFFERES_DEJA_MOUVEMENTE`. Un écart figé sur un compte qui n'est plus celui du groupe n'est pas un
+manque : son impôt d'entrée est reclassé (D-545-7, amendée en revue de code).
 
 **D-545-10 — La colonne `impotsDifferes`, AVANT les minoritaires.** L'impôt différé déplace du résultat et des
 capitaux propres qui se partagent : sa colonne s'applique à l'agrégat, puis le partage de 544 la lit — chaque ligne
@@ -343,4 +346,29 @@ préparatoire, D-531-10) ; `POST …/methodes-groupe` accepte les trois comptes 
     preuve = théorique ; cloisonnement : 404.
   Un KO du script (un bien non amortissable envoyé avec `amortissement: null`, que le DTO refuse à bon droit) :
   l'étape rejouée seule (`p5b_benin.py`), 6/6. Stack arrêtée (`docker compose stop`). Statut `in_progress` → `review`.
+- 2026-09-29 — **revue de code** (PR bilan-service#144) : scan `prospera-code-review` (préparation `haiku`, analyse
+  `opus`, sans passe de mutation — table déjà jouée) et lentille `ponytail-review` ; synthèse en session `opus`.
+  Deux constats, corrigés (commit `911f218`, avant rebase) :
+  - ⛔ **bloquant** — le stock d'impôt d'un ÉCART restait sur le compte figé à l'entrée, alors qu'un écart qui mêle un
+    actif amorti et un passif réévalué change de signe en s'amortissant (scénario rejoué : bâtiment +4 000 000,
+    provision −3 000 000 ⇒ entrée 270 000 au passif, deux exercices plus tard stock −162 000 : le compte de PASSIF
+    finissait débiteur, et `entites` contredisait la balance). La colonne sort désormais l'impôt d'entrée du compte
+    figé et porte le stock entier sur le compte de son signe ; `COMPTE_IMPOTS_DIFFERES_MODIFIE`, devenu sans objet, est
+    retiré ; D-545-7 et D-545-9 amendées. Tests du reclassement ajoutés (règles et e2e), rouges sous l'ancienne formule ;
+  - un JSDoc (celui du partage des minoritaires) détaché par l'insertion du bloc des impôts différés — 12ᵉ récidive :
+    le contrôle mécanique « deux `/**` consécutifs » ne voyait pas le bandeau `//` intercalé ; il tolère désormais les
+    lignes `//` et vides.
+  `ponytail` : deux simplifications retenues (`pgcd` partagé, un type nommé au chargeur) ; une écartée par la DoD (les
+  deux taux, clôture et ouverture, toujours égaux aujourd'hui : c'est le hook documenté du report variable, D-545-4).
+- 2026-09-29 — **revue de sécurité** (`prospera-security-review` : éligibilité, contexte et résumé `haiku`, analyse
+  `opus`) : **aucun constat** de confiance ≥ 80. Dix-sept pistes examinées et écartées, dont : routes au patron de
+  541-543 (portée de la mère, rôles, accès Bilan) ; décision d'une autre organisation ⇒ 404 ; aucune société d'un autre
+  cabinet nommée dans un refus ; identifiants et comptes fermés par leur forme, jamais dans un filtre Mongo ; casse
+  normalisée avant l'index unique ; lectures toutes bornées (pays : sociétés intégrées ; décisions : plafond du
+  journal) ; ni taux ni pays venus du client ; artefact 1.2 vérifié par sha256 avant le parse par liste blanche.
+- 2026-09-29 — **portes et vérification docker REJOUÉES sur l'état final** (`911f218`) : `test:cov` 265 suites,
+  8 213 tests, couverture 99,34 / 96,61 / 99,59 / 99,42 ; e2e 32 suites, 2 053 tests ; stack NEUVE, **215 verdicts,
+  0 KO** (l'étape BENIN corrigée dans le script de la phase 5). Stack arrêtée.
+- 2026-09-29 — **PR bilan-service#144 rebase-mergée sur `dev`** (`1ff2166`), branche supprimée. Statut `review` →
+  `done`.
 
