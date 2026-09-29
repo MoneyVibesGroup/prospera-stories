@@ -199,6 +199,11 @@ journal, ses traitements, sa qualification — publiés avec lui. Il alimente la
 propres. Absent, il est **nommé**, jamais remplacé par des zéros : `AUCUN_EXERCICE_PRECEDENT`,
 `AGREGAT_N1_INDISPONIBLE` (le refus de son agrégat, code relayé), `REFERENTIEL_DIFFERENT`, `DEVISE_DIFFERENTE`.
 
+⚠️ **Limite nommée (relevée par les tests)** : la qualification du comparatif est celle de SON agrégat — où
+`ETATS_ET_NOTES_CONSOLIDES` n'est jamais appliqué ; le comparatif se dit donc toujours « agrégé ». Le produire pour
+N-1 exigerait ses propres états, notes et N-2. C'est le mot le moins vendeur (AC-2) ; à revoir quand 685 à 687 seront
+livrées.
+
 **D-548-4 — Le TFT (M9).** Produit si et seulement si le comparatif existe, que le périmètre **n'a pas varié** (note de
 variation vide) et qu'**aucune société n'est convertie** (N ni N-1). Sinon `null`, motif nommé : `SANS_COMPARATIF`,
 `VARIATION_DE_PERIMETRE`, `CONVERSION`. Sa colonne N-1 reste `null` (elle exige N-2 — nommé).
@@ -290,3 +295,18 @@ la liste des versions est plafonnée ; un contenu scellé au-delà de la limite 
   collection `etats_consolides` en ajout seul, audit `ETATS_CONSOLIDES_FIGES` ; les règles de placement du bilan et
   du compte de résultat EXPORTÉES du moteur (comportement identique), jamais recopiées. En préparant la vérif docker :
   M11 (comptes 107/108/28/29 non rattachés) ⇒ D-548-5 amendée ; un conflit d'écriture concurrent rendu en 409.
+- 2026-09-29 — **tests** écrits par 4 sous-agents `opus` sur des fichiers disjoints (≈ 800 tests : règles pures —
+  balayage de 100 groupes aléatoires sur le VRAI moteur, `syscohada-revise` 2.1 et 2.2 —, service, contrôleur, schéma,
+  dépôt, DTO, règles de placement exportées et leurs tests JUMEAUX sur 5 paquets réels, e2e, contrat OpenAPI) ;
+  ≈ 75 mutants joués, tous tués. **Défauts trouvés et corrigés** (`fd4ca8e`) :
+  - ⛔ la preuve d'impôt portait son taux en `bigint` : `GET …/etats` et le gel rendaient **500** dès qu'une preuve
+    était établie (tout groupe dont la mère a un pays) — `scellable` publie un `bigint` en chaîne, comme l'agrégat ;
+  - la note de périmètre lisait la mère dans l'arrêté, qui ne la porte JAMAIS (invariant du producteur) : la mère
+    manquait — et le test unitaire, qui la plaçait dans l'arrêté, était vert à tort ;
+  - le gel relisait les raisons sociales APRÈS le commit : une lecture échouée faisait croire à un gel manqué, et un
+    nouvel essai en figeait un second — lues désormais avant la transaction ;
+  - seize objets du contrat étaient publiés opaques : typés (DTO de l'agrégat réutilisés, bornes en `AAAA-MM-JJ`) ;
+  - les notes annexes sur les postes n'étaient pas nommées non produites (D-548-1, AC-5) : `NOTES_SUR_LES_POSTES`.
+- 2026-09-29 — **portes** : lint 0, build OK, 10 519 unitaires (seul échec : un chronomètre de 5 s de
+  `resultat-bilan-marqueur` sous charge, vert seul), 2 487 e2e (35 suites), couverture 99,39 / 96,9 / 99,61 / 99,48 ;
+  l'invariant des routes gardées compte le 20ᵉ contrôleur niché (`3c698c7`).
