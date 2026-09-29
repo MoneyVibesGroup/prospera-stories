@@ -155,11 +155,22 @@ comptes de l'**écart d'acquisition** ne sont portés que par chaque écriture d
 La part des minoritaires, la part du groupe et la quote-part de mise en équivalence au résultat sont déjà calculées
 (`resultat`, 544 AC-4).
 
+### M11 — ⚡ La table individuelle ne rattache ni 107, ni 108, ni 28, ni 29 (relevé en préparant la vérif docker)
+
+`syscohada-revise` ne rattache aucun compte `107x`, `108x`, `28x`, `29x` (la « convention miroir » des amortissements
+n'est pas transcrite — limite antérieure du moteur, `bilan-production.service.ts`). Or les vérifications de 544 à 547
+déclaraient les minoritaires sur `108900` et l'écart de conversion sur `107900` ; l'écart d'acquisition s'amortit
+naturellement en `28x`. Sur ces comptes, le bilan du groupe **ne s'équilibre pas** — et la recomposition, elle, reste
+satisfaite (le compte n'entre dans aucun poste, par aucun des deux chemins). Deux conséquences : le gel les refuse en
+les nommant (`COMPTES_NON_RATTACHES`, D-548-9), et ils ne peuvent pas laisser `ETATS_ET_NOTES_CONSOLIDES` se dire
+appliqué (D-548-5, amendée). Le remède existe : une **surcharge** de mapping (STORY-058) sur le dossier de la mère.
+
 ## Les décisions
 
 **D-548-1 — Les états, au modèle du Système normal (art. 89, 90).** Bilan, compte de résultat (SIG compris) et TFT sont
 produits par le **moteur des liasses individuelles**, appelé sur la balance du groupe (`lignes[].solde`) avec le
-référentiel commun (D-531-6) et les **surcharges actives du cabinet** — celles de ses liasses. Les notes annexes du
+référentiel commun (D-531-6) et les **surcharges actives du dossier de la MÈRE** — le plan de classement retenu pour la
+consolidation est celui de l'entité consolidante (art. 86 1°) ; une surcharge propre à une filiale n'y vaut pas. Les notes annexes du
 Système normal (notes individuelles) ne sont pas produites : ce ne sont pas les notes consolidées (AC-5).
 
 **D-548-2 — Les lignes propres, « distinctement » (M3, M10).** Publiées à part, chacune avec ses comptes, son montant N
@@ -167,7 +178,8 @@ et N-1, et le(s) **poste(s) hôte(s)** où le moteur range ses comptes — l'ét
 
 | Code | État | Source |
 |---|---|---|
-| `ECART_ACQUISITION` | actif | comptes de l'écart et de ses amortissements, écarts actifs (543) |
+| `ECART_ACQUISITION` | actif | comptes de l'écart et de ses amortissements, écarts POSITIFS actifs (543) |
+| `ECART_ACQUISITION_NEGATIF` | passif | compte de l'écart négatif repris en étalé (543) |
 | `TITRES_MIS_EN_EQUIVALENCE` | actif | compte déclaré (546) |
 | `IMPOTS_DIFFERES_ACTIF` / `_PASSIF` | actif / passif | comptes déclarés (545) |
 | `ECARTS_DE_CONVERSION` | passif (capitaux propres) | compte déclaré (547) |
@@ -193,7 +205,9 @@ variation vide) et qu'**aucune société n'est convertie** (N ni N-1). Sinon `nu
 
 **D-548-5 — Le mot (AC-2).** Les états sont qualifiés par **la** règle de STORY-531 (`qualifier`), sur les traitements
 de l'agrégat N, `ETATS_ET_NOTES_CONSOLIDES` compris — `APPLIQUE` si et seulement si bilan, CR et TFT sont produits, le
-comparatif N-1 aussi, les deux notes établies et la recomposition satisfaite. Intitulés : « États financiers
+comparatif N-1 aussi, les deux notes établies et **aucun motif de non-gel** (D-548-9 : recomposition, équilibre,
+comptes non rattachés, résultat de la part du groupe) — ⚡ amendée : la seule recomposition laissait « appliqué » un
+bilan déséquilibré par un compte non rattaché (M11). Intitulés : « États financiers
 consolidés du groupe » / « États financiers agrégés du groupe — non consolidés » ; chaque état porte le sien (« Bilan
 consolidé » / « Bilan agrégé — non consolidé »…). Le comparatif porte **sa propre** qualification. ⚡ **La balance du
 groupe (`GET …/agregat`) ne change pas** : elle ne produit aucun état, `ETATS_ET_NOTES_CONSOLIDES` y reste `NON_TRAITE` —
@@ -226,7 +240,8 @@ recopiée. Chaque total publie ses contributions par entité ; un écart nomme l
 ETATS_NON_FIGEABLES`, tous les motifs d'un coup : recomposition des états ou de l'agrégat non satisfaite, bilan non
 équilibré, comptes non rattachés, CR dont le résultat n'est pas la part du groupe. La qualification ne bloque pas : un
 état agrégé se fige **sous son mot**. Collection `etats_consolides`, en ajout seul ; version = suivante de
-(mère, exercice), dans la transaction ; index unique ⇒ `409 ETATS_CONSOLIDES_VERSION_CONCURRENTE`. Empreinte sha256
+(mère, exercice), dans la transaction ; index unique ⇒ `409 ETATS_CONSOLIDES_VERSION_CONCURRENTE` — sur un `E11000`
+comme sur un conflit d'écriture (deux transactions qui se croisent, patron des hypothèses). Empreinte sha256
 canonique du contenu scellé, version comprise, dates en chaînes (M8) : exercice, qualification, intitulé, référentiel,
 devise, périmètres N et N-1, **sources de chaque entité** (jeu, version, empreinte, balance, version et checksum de
 balance) N et N-1, écritures du journal imputées, version des méthodes du groupe, états, lignes propres, notes,
@@ -267,6 +282,11 @@ la liste des versions est plafonnée ; un contenu scellé au-delà de la limite 
 
 - 2026-09-29 — branches `MNV-548` ouvertes sur `docs/` (depuis `main`) et `bilan-service` (depuis `dev`) **avant
   toute ligne** ; statut `ready-for-dev` → `in_progress`.
-- 2026-09-29 — **cadrage** : 10 constats, 13 décisions. Le mot « consolidé » reste inatteignable tant que 685 à 687 ne
+- 2026-09-29 — **cadrage** : 10 constats (11 avec M11), 13 décisions. Le mot « consolidé » reste inatteignable tant que 685 à 687 ne
   sont pas livrées (M2) ; le placement d'un compte se décide sur la balance du GROUPE (M6) ; l'empreinte canonique
   perd les dates (M8).
+- 2026-09-29 — **dev** (`bilan-service` `7aea26f`, `909e53c`, `100a037`) : module pur `etats-consolides.regles.ts`
+  (recomposition par entité, lignes propres, notes, mot, non-produits, gel), service, contrôleur (4 routes),
+  collection `etats_consolides` en ajout seul, audit `ETATS_CONSOLIDES_FIGES` ; les règles de placement du bilan et
+  du compte de résultat EXPORTÉES du moteur (comportement identique), jamais recopiées. En préparant la vérif docker :
+  M11 (comptes 107/108/28/29 non rattachés) ⇒ D-548-5 amendée ; un conflit d'écriture concurrent rendu en 409.
