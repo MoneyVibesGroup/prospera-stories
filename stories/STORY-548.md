@@ -1,6 +1,6 @@
 # STORY-548 : Les états consolidés et leurs notes — et le mot qui figure en tête est « consolidé » ou « agrégé », jamais le plus vendeur
 
-Status: review
+Status: done
 
 **Épic :** EPIC-141 — États consolidés et notes
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -206,7 +206,8 @@ livrées.
 
 **D-548-4 — Le TFT (M9).** Produit si et seulement si le comparatif existe, que le périmètre **n'a pas varié** (note de
 variation vide) et qu'**aucune société n'est convertie** (N ni N-1). Sinon `null`, motif nommé : `SANS_COMPARATIF`,
-`VARIATION_DE_PERIMETRE`, `CONVERSION`. Sa colonne N-1 reste `null` (elle exige N-2 — nommé).
+`VARIATION_DE_PERIMETRE`, `CONVERSION`. ⚡ Amendée en revue : un référentiel sans tableau des flux (le moteur rend un
+squelette `NON_APPLICABLE`, jamais `null`) ⇒ `REFERENTIEL_SANS_TFT` — il ne compte plus comme produit. Sa colonne N-1 reste `null` (elle exige N-2 — nommé).
 
 **D-548-5 — Le mot (AC-2).** Les états sont qualifiés par **la** règle de STORY-531 (`qualifier`), sur les traitements
 de l'agrégat N, `ETATS_ET_NOTES_CONSOLIDES` compris — `APPLIQUE` si et seulement si bilan, CR et TFT sont produits, le
@@ -230,7 +231,9 @@ sociales résolues à la lecture, dans la portée du lecteur (D-530-6), **hors**
 société : `ENTREE` (consolidée en N, pas en N-1 — date d'entrée des liens retenus, § 6.6), `SORTIE` (l'inverse — date
 non portée, nommée), `CHANGEMENT_DE_METHODE`, `VARIATION_DE_POURCENTAGE` (contrôle ou intérêt). Une entrée intégrée cite
 sa **contribution au résultat consolidé** (AC-4) — sur l'exercice ENTIER, limite nommée (STORY-543, M10). Non établie
-sans exercice précédent ou sans arrêté à sa clôture (motif nommé). Une société entrée et sortie dans l'exercice :
+sans exercice précédent ou sans arrêté à sa clôture (motif nommé). ⚡ Amendée en revue : un arrêté N-1 qui porte une méthode `null`
+(méthodes divergentes) ⇒ non établie, `PERIMETRE_N1_EN_ANOMALIE` — elle se lisait « non consolidée » : une ENTRÉE
+fausse publiée, une SORTIE tue. Une société entrée et sortie dans l'exercice :
 invisible, nommé.
 
 **D-548-8 — La recomposition (AC-4).** Pour chaque poste de détail du bilan (actif net, passif) et du compte de
@@ -323,3 +326,19 @@ la liste des versions est plafonnée ; un contenu scellé au-delà de la limite 
   cloisonnement 404 ; empreintes des liasses inchangées. ⚡ Outillage : VM Docker à 7,75 Gio — stack complète tuée
   (137) ⇒ services démarrés EN ESCALIER ; un seul exercice ouvert par dossier ⇒ 2024 clos avant d'ouvrir 2025.
   Statut `in_progress` → `review`.
+- 2026-09-29 — **revue de code** (scan `opus` + lentille ponytail) : 2 constats retenus, corrigés (`40b9fd1`) —
+  ⛔ un arrêté N-1 en anomalie de méthode faisait publier une ENTRÉE fausse (et figeable) : note non établie,
+  `PERIMETRE_N1_EN_ANOMALIE` (D-548-7 amendée) ; un TFT `NON_APPLICABLE` comptait comme produit :
+  `REFERENTIEL_SANS_TFT` (D-548-4 amendée) ; chacun prouvé par un mutant tué ; ponytail : `TraitementDto` de
+  l'agrégat réutilisé, un enveloppeur intégré. Écartés : contrôle de taille en JSON plutôt qu'en BSON (au pire un 500
+  sans écriture, confiance < 80), duplication de trois aides privées de `ConsolidationService` (les factoriser
+  déborderait le périmètre).
+- 2026-09-29 — **revue de sécurité** (`opus`) : **aucun constat** — rôles (gel `TENANT_ADMIN`), IDOR (exercice, version),
+  cloisonnement de chaque lecture nouvelle (N-1, arrêtés, écarts, raisons sociales, versions), anti-énumération,
+  refus relayé sans `details`, injection, intégrité du gel (contenu recalculé par le serveur, immuabilité, course,
+  audit dans la transaction), bornes, sérialisation examinés.
+- 2026-09-29 — **portes rejouées sur l'état final** : lint 0, 10 535 unitaires (seul échec : un chronomètre de 500 ms
+  de STORY-541 sous une charge machine ≈ 50, vert seul), 2 487 e2e. **Vérification docker REJOUÉE sur l'état final**
+  (`40b9fd1`), stack neuve : **277 OK, 0 KO** (passes précédentes archivées dans `tmp/verif-docker-548/passe-*`).
+- 2026-09-29 — **clôture** : `prospera-bilan-service#147` rebase-mergée sur `dev` (`84b85e8`), branches supprimées ;
+  statut `review` → `done`.

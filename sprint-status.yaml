@@ -4082,7 +4082,8 @@ sprints:
         epic: "EPIC-141"
         points: 13
         service: "bilan-service — module consolidation"
-        status: "review"  # 2026-09-29 — dev + tests + portes + vérif docker (275 OK) ; — cadrage fait (10 constats, 13 décisions), branches MNV-548 ouvertes ; CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. Les états consolidés ne sont pas les états individuels avec d'autres chiffres. Ils portent des lignes qui n'existent nulle part ailleurs, et des notes qui sont l'essentiel de leur valeur probante :
+        status: "done"  # 2026-09-29 — CLÔTURÉE : bilan-service#147 rebase-mergée (84b85e8), revue (2 constats corrigés), sécu (0), vérif docker rejouée 277 OK ; — cadrage fait (10 constats, 13 décisions), branches MNV-548 ouvertes ; CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. Les états consolidés ne sont pas les états individuels avec d'autres chiffres. Ils portent des lignes qui n'existent nulle part ailleurs, et des notes qui sont l'essentiel de leur valeur probante :
+        completed_date: "2026-09-29"
         story_path: "stories/STORY-548.md"
       - story_id: "STORY-549"
         title: "Deux cartes sans code, quatre codes sans carte — le registre de modules du cabinet entre au catalogue"
