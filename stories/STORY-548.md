@@ -1,6 +1,6 @@
 # STORY-548 : Les états consolidés et leurs notes — et le mot qui figure en tête est « consolidé » ou « agrégé », jamais le plus vendeur
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-141 — États consolidés et notes
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -310,3 +310,16 @@ la liste des versions est plafonnée ; un contenu scellé au-delà de la limite 
 - 2026-09-29 — **portes** : lint 0, build OK, 10 519 unitaires (seul échec : un chronomètre de 5 s de
   `resultat-bilan-marqueur` sous charge, vert seul), 2 487 e2e (35 suites), couverture 99,39 / 96,9 / 99,61 / 99,48 ;
   l'invariant des routes gardées compte le 20ᵉ contrôleur niché (`3c698c7`).
+- 2026-09-29 — **vérification docker sur stack NEUVE** (`tmp/verif-docker-548/`, passe 3) : **275 OK, 1 KO** — le KO est
+  une attente écrite à tort (le groupe 2 ne se fige pas : 40 % de minoritaires CALCULÉS mais non comptabilisés,
+  faute de compte déclaré ⇒ `RESULTAT_DIFFERENT_DE_LA_PART_DU_GROUPE`, exactement ce que D-548-9 veut) ; attente
+  corrigée, recalculée depuis les soldes. Trois écritures directes en base, dites et restaurées (altération d'une
+  version figée, date de l'arrêté N-1, référentiel d'un snapshot). Prouvé : le mot AGREGE (685-687) ; 108900 non
+  rattaché ⇒ bilan déséquilibré, gel refusé et nommé, puis surcharge 108900 → CG ⇒ figeable, ETATS_ET_NOTES APPLIQUE ;
+  sources N et N-1 de chaque entité ; contributions au résultat recalculées (MÈRE R, SOEUR 3R, FILLE 2R − 20 %),
+  SOEUR = 3 × MÈRE poste par poste ; lignes propres ; empreinte RECALCULÉE hors du service ; audit dans la
+  transaction ; course de deux gels ⇒ 201 + 409, sans doublon ; comparatif indisponible relayé, colonnes N-1 null ;
+  entrée de NOUVELLE au 2025-06-30, TFT `VARIATION_DE_PERIMETRE`, EXCLUE et ses deux justifications ; AC-7 ;
+  cloisonnement 404 ; empreintes des liasses inchangées. ⚡ Outillage : VM Docker à 7,75 Gio — stack complète tuée
+  (137) ⇒ services démarrés EN ESCALIER ; un seul exercice ouvert par dossier ⇒ 2024 clos avant d'ouvrir 2025.
+  Statut `in_progress` → `review`.
