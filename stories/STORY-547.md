@@ -1,6 +1,6 @@
 # STORY-547 : Conversion des comptes d'une filiale étrangère — trois taux, et l'écart va en capitaux propres
 
-Status: review
+Status: done
 
 **Épic :** EPIC-140 — Conversion des comptes des entités étrangères
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -334,4 +334,8 @@ l'exercice ; la liasse de la mère, sur le rapprochement et la confirmation, dan
   nature), isolation du cabinet de chaque lecture nouvelle, anti-énumération (`HORS_GROUPE` sans raison sociale),
   injection, bornes (cours, exposants, tableaux, `bigint`), course sur l'index partiel, immuabilité du journal, checksum
   du paquet examinés.
+- 2026-09-29 — **vérification docker REJOUÉE sur l'état final** (`63fd24a`, correctif de revue compris), stack neuve :
+  **276 OK, 0 KO** (première passe archivée dans `tmp/verif-docker-547/passe-1/`).
+- 2026-09-29 — **clôture** : `prospera-bilan-service#146` rebase-mergée sur `dev` (`94070d2`), branches supprimées ;
+  statut `review` → `done`.
 
