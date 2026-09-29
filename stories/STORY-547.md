@@ -1,6 +1,6 @@
 # STORY-547 : Conversion des comptes d'une filiale étrangère — trois taux, et l'écart va en capitaux propres
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-140 — Conversion des comptes des entités étrangères
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -284,3 +284,40 @@ l'exercice ; la liasse de la mère, sur le rapprochement et la confirmation, dan
   toute ligne** ; statut `ready-for-dev` → `in_progress`.
 - 2026-09-29 — **cadrage** : 9 constats, 15 décisions. AC-4 amendée par le texte (M3) : l'écart de la méthode temporelle
   va au résultat, au groupe seul ; le rapprochement et la confirmation lisaient des soldes sans contrôle de devise (M2).
+- 2026-09-29 — **dev** (`bilan-service` `b27d7ff`, `49d3dcf`) : module pur `conversion.regles.ts` (cotation, taux par compte,
+  arithmétique exacte, écart posé sur la balance CONVERTIE, plan et manques), conversion des soldes avant tout calcul sur
+  les trois chemins (agrégat, rapprochement, confirmation — ces deux derniers ne contrôlaient aucune devise), partage des
+  minoritaires qui écarte l'écart de la méthode temporelle (§ 2.3), journal `CONVERSION` (index unique partiel) et ses
+  trois routes, deux comptes d'écart aux méthodes du groupe, `consolidation-audcif@1.4`, vue `conversion` de l'agrégat.
+  La garde de STORY-490 (« aucune conversion nulle part ») bornée, nommément, au seul module qui convertit.
+- 2026-09-29 — **tests** écrits par 5 sous-agents `opus` sur des fichiers disjoints (≈ 1 000 tests ajoutés : règles pures,
+  service, DTO/schéma/contrôleur, référentiel, e2e) ; **défauts trouvés et corrigés** :
+  - ⛔ le rapprochement et la confirmation ne comparaient que le CODE des devises : une filiale XOF/0 appariée à une mère
+    XOF/2 était rapprochée à cent fois sa valeur — même garde d'échelle que l'agrégat (`2ce6992`) ;
+  - ⛔ la table des sources de 1.4 (recopiée de 1.3) ne couvrait ni l'art. 87 de l'AUDCIF (p. 42) ni les p. 1159 à 1164 du
+    D4C, et nommait « Retraitements » le chapitre 4 : relu sur l'édition officielle (pages de garde p. 1149 et 1159), les
+    retraitements sont le chapitre 3 et la conversion le chapitre 4. 1.4 corrige la table et les cinq fondements des
+    impôts différés qui citaient « ch. 4 » (erreur héritée de STORY-545) ; 1.2 et 1.3 restent telles que publiées
+    (`1917319`) ;
+  - la vue de l'agrégat recopiait les cours relus du journal par étalement (liste blanche) ; la doc du 400
+    `DATE_COURS_HORS_EXERCICE` annonçait `details.champ` ; l'inventaire des codes ne balayait pas le nouveau contrôleur ;
+    les sociétés d'un compte d'écart déjà mouvementé non triées.
+- 2026-09-29 — **table de mutations 37/37 tuées** (`tmp/mutation-547/`) : racine la plus longue, un seul taux (AC-2),
+  cotation, échelle, arrondi, écart omis, hérité ignoré, écart temporel partagé (§ 2.3), exclusion du partage, AC-1 mère
+  exemptée, paire, destination codée en dur, cours historique hors capitaux propres, manques jamais levés, alerte de date,
+  contrat des cours, propositions d'une autre devise, `CONVERSION` d'office, devise non figée, dates, conversion sans
+  objet, devise non déclarée, course, échelles au rapprochement, rapprochement non converti, devise du groupe, AC-7
+  (groupe mono-devise planifié), manques 543 et associée, `TENANT_USER`, index, méthode en trop au paquet, conversion
+  implicite du DTO. Trois mutants d'abord non compilables réécrits avant d'être comptés.
+- 2026-09-29 — **portes** : lint 0, build OK, 9 825 unitaires, 2 363 e2e (un chronomètre de 5 s d'`openapi-contract`
+  rougit sous charge — load ≈ 21 —, vert seul : 508/508), couverture 99,37 / 96,73 / 99,59 / 99,45.
+- 2026-09-29 — **vérification docker sur stack NEUVE** (`tmp/verif-docker-547/`) : **276 verdicts OK, 0 KO**. ⚠️ Une seule
+  écriture directe en base, dite comme telle : la devise des snapshots des deux filiales (GHS, NGN) — `balance-service`
+  n'accepte que le XOF (M1) ; la mère et la sœur portent un XOF DÉCLARÉ par l'API. Attentes recalculées depuis les soldes
+  injectés : FILLE_G au cours de clôture (trois taux servis, écart en capitaux propres, 40 % aux minoritaires), FILLE_N au
+  cours historique en cotation inverse (écart au résultat, part des minoritaires = 1/5 du résultat HORS écart), résultat
+  consolidé 419 062 700 identique quand la clôture passe de 36,9 à 38,45 (AC-4) ; AC-1 (devise non déclarée nommée) ;
+  course de deux déclarations tranchée par l'index réel ; rapprochement MÈRE ↔ FILLE_G dans la devise du groupe, devise
+  XOF/2 figée sur l'élimination confirmée ; écart 543 sur FILLE_N ⇒ `NON_TRAITE` nommé ; AC-7 (groupe mono-devise :
+  section vide, contributions = soldes injectés) ; cloisonnement 404. Statut `in_progress` → `review`.
+
