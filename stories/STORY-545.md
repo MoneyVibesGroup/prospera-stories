@@ -1,6 +1,6 @@
 # STORY-545 : Impôts différés de consolidation — chaque retraitement déplace du résultat sans déplacer l'impôt
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-139 — Impôts différés et mise en équivalence
 **Service :** `bilan-service` — module `consolidation` (aucun contrat d'événement : **un seul dépôt**)
@@ -241,8 +241,9 @@ différé — lus sur la balance. Lignes : **impôt théorique** `t_mère × RAI
 de taux** ; **actifs non reconnus** ; **arrondis** ; **impôt propre aux comptes individuels** Σ (exigible_s − t_s ×
 résultat avant impôt de sa liasse) — différences permanentes, impôt minimum, rappels. Contrôle **`PREUVE_D_IMPOT`** :
 l'égalité EXACTE (fractions) de la somme et de l'impôt constaté — deux chemins ; lignes publiées arrondies au plus
-fort reste pour sommer à l'impôt constaté ; taux effectif publié. `null`, raison nommée, si le taux de la mère ou les
-racines de l'impôt manquent.
+fort reste pour sommer à l'impôt constaté ; taux effectif publié. `null`, raison nommée, si les
+racines de l'impôt manquent ou si le taux d'UNE société intégrée manque — sans lui, son impôt ne s'explique pas
+(arbitrage de la revue des tests : un groupe avec une filiale d'un pays sans taux publié n'a pas de preuve).
 
 **D-545-12 — Le traitement se décide, jamais par silence.** `IMPOTS_DIFFERES` est `APPLIQUE` si et seulement si
 aucun manque : taux de chaque entité fiscale d'un élément, règles du paquet, comptes (s'il y a une ligne à passer),
@@ -282,3 +283,64 @@ préparatoire, D-531-10) ; `POST …/methodes-groupe` accepte les trois comptes 
   d'acquisition figé sans l'impôt des écarts d'évaluation — corrigé pour les nouvelles déclarations (D-545-6). Taux
   entité par entité par le paquet fiscal et le pays (M2), approche bilantielle sur les lignes appliquées (M4), entité
   fiscale et propriétaire distincts (M5), preuve d'impôt à deux chemins (M6).
+- 2026-09-29 — **dev `bilan-service`** (branche `MNV-545`, commit `dc0de5a`) : règles pures
+  (`impots-differes.regles.ts` — taux, éléments, jugement, colonne, preuve exacte), colonne `impotsDifferes` appliquée
+  AVANT les minoritaires (`appliquerColonne` commun avec 544), partage des minoritaires qui la lit, impôt d'entrée figé
+  avec l'écart (correctif de 543), trois comptes aux méthodes du groupe, décisions au journal (nature `IMPOT_DIFFERE`,
+  index unique partiel, routes `…/impots-differes/decisions`), paquet `consolidation-audcif@1.2` (empreinte
+  `fec292de…`), citations revérifiées sur l'image des pages (p. 1156, 1157, 1158, 1182 ; PCGO p. 266). Vérifié avant
+  tout test sur un banc jetable : groupe à marge interne de 1 000 000 ⇒ RAI 5 000 000, impôt constaté 1 350 000 =
+  27 % exactement ; sans décision, la preuve reste satisfaite et nomme 270 000 d'impôts différés non comptabilisés.
+- 2026-09-29 — ⚡ **tests écrits en parallèle par six sous-agents `opus`** (règles pures ; impôt d'entrée de l'écart ;
+  service, contrôleur et DTO de décision ; référentiel, méthodes, journal et invariants ; agrégation, minoritaires et
+  réponse ; e2e et contrat OpenAPI), chacun propriétaire de ses fichiers, code de production jamais touché, chacun
+  avec sa passe de mutation sur une copie privée : **155/155 tuées**. Vérités recalculées DANS les tests : la preuve
+  en fractions exactes sur 300 groupes aléatoires, la méthode par paliers sur 400 réévaluations (part nette des
+  minoritaires à une unité au plus de `(1 − p) × E × (1 − t)`), les minoritaires d'une filiale vendeuse (−292 000).
+  **Quatre défauts trouvés, tous corrigés** :
+  - ⛔ la preuve qui échoue d'une fraction d'unité publiait `ecart = 0` (chaque ligne arrondie à part effaçait
+    l'écart) : l'écart est désormais la différence EXACTE, arrondie et jamais ramenée à zéro ;
+  - l'arrondi de l'impôt d'entrée d'un écart était classé en « changements de taux » : l'élément porte le taux FIGÉ
+    de l'entrée, l'arrondi va aux arrondis, seul un vrai changement de taux aux changements de taux ;
+  - la réponse recopiait l'impôt d'entrée par étalement (un champ inconnu du document serait sorti) : champ par champ,
+    selon le statut ;
+  - le code de refus de la garde « société intégrée », généralisée pour les décisions, passait par une variable et
+    échappait à l'inventaire des codes : chaque appelant lève son refus, code littéral.
+  Retiré : une raison d'indisponibilité de la preuve (`IMPOTS_DIFFERES_NON_CALCULES`) qu'aucun chemin n'atteignait.
+  Relevé, laissé en l'état : les lignes de l'agrégat sont publiées par référence depuis STORY-531 (hors périmètre).
+- 2026-09-29 — **table de mutations de la session** — une mutation par décision, sur une copie privée (hors dépôt),
+  jugée sur les suites unitaires de consolidation et du référentiel : **23/23 tuées** (AC-6 ; effet non classé ;
+  base d'un retraitement courant ; entité fiscale d'un résultat interne ; pays du paquet ; report variable ; mouvement
+  direct de capitaux propres ; écart d'acquisition avant impôt ; réserves des minoritaires brutes ; compte de stock ;
+  jugement ignoré ; décision de l'exercice précédent ; trois comptes ensemble ; stock sous une racine de capitaux
+  propres ; minoritaires calculés avant l'impôt ; partage de la colonne ; différentiel de taux ; impôt propre aux
+  comptes individuels ; traitement toujours appliqué ; clé écartée par le parse ; décision en double ; écart de preuve
+  effacé ; arrondi d'entrée). Premier passage : 5 mesures vides (mutants qui ne compilaient pas ou ne s'appliquaient
+  pas — ligne reformatée), réécrites en formes compilables et typées, toutes tuées.
+- 2026-09-29 — **portes finales** sur `80bddcb` : lint 0 avertissement, build OK ; `test:cov` **265 suites, 8 211 tests
+  verts** (2 ignorés, préexistants), couverture **99,34 / 96,61 / 99,59 / 99,42** (seuils 65/90/90/90) ; e2e **32 suites,
+  2 052 tests verts**. Aucun JSDoc détaché ni octet NUL introduit (un JSDoc détaché par une insertion attrapé avant le
+  premier commit).
+- 2026-09-29 — **vérification docker sur stack NEUVE** (`docker compose down -v`, puis `up`), tout par les API réelles,
+  trois groupes, attentes écrites AVANT (`tmp/verif-docker-545/SCENARIO.md`) et recalculées sur les soldes réellement
+  injectés : **220 verdicts OK**. p0 (37) : branche `MNV-545` à `80bddcb`, « Found 0 errors » après redémarrage, sources
+  montées à l'octet, artefacts 1.0/1.1/1.2 dans le `dist` à l'octet ; p1-p4 (114) : octrois, dossiers projetés AVEC leur
+  pays (BENIN `BJ`), arrêtés, liasses figées avec l'impôt exigible au 891. p5 (69) — le scénario :
+  - écart déclaré sans comptes d'impôt ⇒ figé `NON_CALCULE` ; agrégat `NON_TRAITE` avec trois manques nommés, colonne
+    vide, preuve SATISFAITE (5 605 500 = 4 752 000 + 54 000 + 405 000 non comptabilisés + 394 500) ;
+  - refus des méthodes (deux comptes sur trois ; actif = réserves), rien d'écrit ; ⛔ l'écart redéclaré sans comptes
+    d'écart d'acquisition ⇒ `400 COMPTES_ECART_ACQUISITION_MANQUANTS` sens `POSITIF` — l'impôt d'entrée fait naître
+    l'écart d'acquisition ; redéclaré ⇒ `CALCULE` 27/100, 2 700 000 / 2 160 000 / 540 000, EA 2 160 000 ;
+  - `NON_RECONNU` ⇒ `APPLIQUE`, ligne « actifs non reconnus » 270 000 ; doublon ⇒ 409 nommé ; après annulation, DEUX
+    `RECONNU` simultanés ⇒ un 201, un 409 qui nomme le gagnant — le VRAI index unique ;
+  - `RECONNU` ⇒ la colonne ligne à ligne = SCENARIO.md ; soldes 276900 D 270 000, 169900 C 1 215 000, 899900 C 405 000 ;
+    preuve 4 693 680 + 112 320 + 394 500 = **5 200 500** = impôt constaté, taux effectif 2 992 pb ; minoritaires de la
+    filiale **1 071 000** (20 % de son résultat, impôt différé compris) ; RECOMPOSITION, EQUILIBRE ;
+  - persistance : méthodes v1 (`null`) et v2, les deux écarts (annulé `NON_CALCULE`, actif `CALCULE` avec EA et plan
+    figés), les décisions (sans ligne), l'index unique partiel en base ; l'agrégat n'écrit RIEN ; liasses intactes ;
+  - groupe 2 (BENIN, `BJ`) : taux indisponible nommé (`PAQUET_FISCAL_HORS_PAYS`), écart figé `NON_CALCULE`, tous ses
+    éléments `NON_CALCULE`, preuve `null` — ⛔ jamais 27 % ; cabinet B (AC-6) : zéro, `APPLIQUE` sans aucun compte,
+    preuve = théorique ; cloisonnement : 404.
+  Un KO du script (un bien non amortissable envoyé avec `amortissement: null`, que le DTO refuse à bon droit) :
+  l'étape rejouée seule (`p5b_benin.py`), 6/6. Stack arrêtée (`docker compose stop`). Statut `in_progress` → `review`.
+
