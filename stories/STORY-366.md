@@ -1,9 +1,9 @@
 # STORY-366 : Le catalogue de modules est semé, et un pack ne peut plus référencer un module inconnu
 
-Status: not_started
+Status: in_progress
 
 **Epic :** EPIC-007 — `platform-catalog-service` (catalogue + entitlements)
-**Points :** 8 · **Sprint :** 20 (backend) · **Service :** `platform-catalog-service` (`:3003`) + `frontend-admin-panel`
+**Points :** 8 · **Complexité :** medium · **Sprint :** 20 (backend) · **Service :** `platform-catalog-service` (`:3003`) + `frontend-admin-panel`
 **Gaps repris :** `GAP-packs-verticaux-sans-module-balance` *(ouvert le 2026-08-11, MESURÉ)* · le trou de
 seed des modules du pack distributeur *(nommé par les spines `catalogue-produits`, `stock` et `pdv`)*
 **Arbitrage PO du 2026-08-15 :** **les QUATRE verticaux reçoivent `balance`**
@@ -135,3 +135,63 @@ Le schéma `Module` distingue **trois** états, pas deux :
 - [ ] Backend et frontend déclarent **la même composition de packs**.
 - [ ] Aucun module semé sans `referentielFamilies` **présent**.
 - [ ] `GAP-packs-verticaux-sans-module-balance` passe à **fermé**, avec la preuve du rejeu docker.
+
+## Cadrage du 2026-09-29 — ce que le code dit, et les décisions qui en sortent
+
+Relu sur `origin/dev` de `platform-catalog-service` (tête `f112770`) et sur `origin/dev` de
+`frontend-admin-panel` (tête `c7d6c43`, lecture seule).
+
+### Ce qui a changé depuis la rédaction (2026-08-15)
+
+- **Le mécanisme de semis existe** : STORY-497 a livré `ModulesSeedService` + `MODULES_SEED`
+  (`$setOnInsert`, entrée par entrée, `echecs` nommés, boot jamais tué). Il ne sème qu'**un** module,
+  `microfinance`. ⇒ La story n'écrit pas de semeur : elle **remplit la table**.
+- **Les codes sont 17 + `microfinance` = 18** en base neuve (`microfinance` est déjà semé).
+- Le pack `imf-sfd` porte déjà un écart déclaré au front sur `modules` (`microfinance`, en queue).
+
+### Décisions
+
+- **D-366-1 — Libellés, descriptions et familles viennent des fixtures de la console**
+  (`frontend-admin-panel/src/features/catalog/api/fixtures.ts`, `c7d6c43`). Pour les modules
+  normatifs, elles sont **identiques** à `REFERENTIEL_FAMILIES_BY_MODULE` (STORY-148) — les deux
+  sources concordent, rien n'est inventé. Les autres reçoivent **`[]` explicite** (règle de la story).
+  ⚡ `balance` est **absent** des fixtures : libellé « Atelier de balance » (celui de la carte client,
+  cf. STORY-549), familles = le **pont de `balance-service`** (`ReferentielRegistry.PONT_TAG` :
+  `syscohada-revise`, `smt-togo`, `sfd-bceao`, `cima-assurances`) — l'artefact livré qui décide ce
+  que le service sait servir.
+- **D-366-2 — Chaque module semé publie une version `1.0` ACTIVE.** ⛔ Le « hors périmètre » ci-dessus
+  (« aucune `ModuleVersion` ») est **incompatible avec l'AC-1** : `assertCatalogCoherence` exige une
+  version non `RETIRED`, donc un module sans version reste en `422`. Ce paragraphe date d'avant
+  STORY-497, qui sème déjà `microfinance@1.0` par le même chemin. L'AC l'emporte ; les
+  `ReferentielVersion`, elles, restent un geste d'exploitation (checksum), non semé.
+- **D-366-3 — Statut `ACTIVE` pour les 17.** `ModuleStatus` n'a pas d'état « planifié » (les
+  fixtures disent `PLANNED`, que le back ne connaît pas), et l'assistant de la console bloque tout
+  module non `ACTIVE` (`plan.ts` → `module-deprecated`).
+- **D-366-4 — `balance` en TÊTE des quatre packs** (texte de la story). ⚠️ La garde front ↔ back
+  exigeait que la liste du front soit le **préfixe** du seed (écart = ajout en queue). Elle devient :
+  la liste du front est une **sous-séquence** du seed (rien retiré, rien permuté), **et** les modules
+  ajoutés sont **nommés** pack par pack — une garde nominative, comme celles des versions.
+- **D-366-5 — Le front n'est pas modifié ici** (dépôt en lecture seule pour ce flux). L'écart
+  `modules` est **déclaré** pour les quatre packs dans `ECARTS_ASSUMES_AU_FRONT`, et le geste front
+  est confié au dev frontend par la story **AP-36**. ⇒ La ligne de DoD « backend et frontend
+  déclarent la même composition » se ferme **par AP-36**, pas ici.
+
+### Écarts ouverts, signalés et NON inventés
+
+- ⛔ **Deux modules normatifs sont rangés dans un pack qui n'octroie pas leur famille** (fixtures
+  + STORY-148) : `facturation` (`zone-franche-togo`) dans `distributeur` (`syscohada-revise`), et
+  `finance-transactions` (`syscohada-revise`) dans `assurance-cima` (`cima-assurances`). Un octroi
+  par le pack part en `422 REFERENTIEL_INCOMPATIBLE`. Décider laquelle des deux tables a tort est
+  une **décision d'offre** : ils sont figés dans une liste d'exceptions nommée
+  (`modules.seed-data.spec.ts`) — un troisième cas vire au rouge.
+- ⚠️ **La console envoie `referentiel` (singulier) à chaque module du pack** (`runner.ts` →
+  `grantEntitlement`). Depuis STORY-533 le DTO attend `referentiels` et refuse le champ inconnu
+  (`forbidNonWhitelisted`) ⇒ **400** ; et un module non normatif recevrait
+  `422 REFERENTIEL_NOT_APPLICABLE`. Relevé dans AP-36 (le pluriel est déjà porté par AP-29).
+- ⛔ Le renommage `catalogue` → `catalogue-produits` (AD-14) n'est **pas** livré avec : aucune story
+  n'en est ouverte, et le périmètre l'exclut. Le code `catalogue` est donc semé tel quel.
+
+## Progress Tracking
+
+- 2026-09-29 — cadrage (ci-dessus) ; branches `MNV-366` ouvertes sur `docs/` et
+  `platform-catalog-service` ; statut `in_progress`.
