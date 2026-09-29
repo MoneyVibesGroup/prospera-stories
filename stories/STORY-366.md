@@ -1,6 +1,6 @@
 # STORY-366 : Le catalogue de modules est semé, et un pack ne peut plus référencer un module inconnu
 
-Status: in_progress
+Status: done
 
 **Epic :** EPIC-007 — `platform-catalog-service` (catalogue + entitlements)
 **Points :** 8 · **Complexité :** medium · **Sprint :** 20 (backend) · **Service :** `platform-catalog-service` (`:3003`) + `frontend-admin-panel`
@@ -126,15 +126,15 @@ Le schéma `Module` distingue **trois** états, pas deux :
 
 ## Definition of Done
 
-- [ ] Une base vierge démarrée produit **17 modules** ; aucun octroi ne rend plus `422` pour cause de
+- [x] Une base vierge démarrée produit **17 modules** ; aucun octroi ne rend plus `422` pour cause de
       module inconnu.
-- [ ] **Le scénario du 2026-08-11 est rejoué en docker** : provisionner un pack complet ⇒
+- [x] **Le scénario du 2026-08-11 est rejoué en docker** : provisionner un pack complet ⇒
       `whoami/balance-access` à `200`. ⚠️ **Vérifié en réel, pas en test unitaire** — c'est une vérif
       docker qui a trouvé le défaut, c'est une vérif docker qui doit le déclarer clos.
-- [ ] **Test de garde** : ajouter un module fictif à un pack **fait virer la CI au rouge**.
-- [ ] Backend et frontend déclarent **la même composition de packs**.
-- [ ] Aucun module semé sans `referentielFamilies` **présent**.
-- [ ] `GAP-packs-verticaux-sans-module-balance` passe à **fermé**, avec la preuve du rejeu docker.
+- [x] **Test de garde** : ajouter un module fictif à un pack **fait virer la CI au rouge**.
+- [ ] Backend et frontend déclarent **la même composition de packs**. ⇒ **renvoyé à AP-36** (D-366-5) : le back déclare l'écart.
+- [x] Aucun module semé sans `referentielFamilies` **présent**.
+- [x] `GAP-packs-verticaux-sans-module-balance` passe à **fermé**, avec la preuve du rejeu docker.
 
 ## Cadrage du 2026-09-29 — ce que le code dit, et les décisions qui en sortent
 
@@ -195,3 +195,35 @@ Relu sur `origin/dev` de `platform-catalog-service` (tête `f112770`) et sur `or
 
 - 2026-09-29 — cadrage (ci-dessus) ; branches `MNV-366` ouvertes sur `docs/` et
   `platform-catalog-service` ; statut `in_progress`.
+- 2026-09-29 — dev (`MNV-366`, 2 commits) : `MODULES_SEED` porte 18 codes (17 + `microfinance`),
+  `referentielFamilies` toujours écrit, `balance` en tête des 4 packs, garde CI « aucun module de pack
+  absent du semis », `ECARTS_DE_FAMILLE_AU_PACK` (2 écarts nommés). Story front **AP-36** rédigée.
+- Portes : lint 0 · build OK · 818 unitaires (99,73 / 96,8 / 100 / 99,78) · 200 e2e.
+- **Mutations — 8/8 tuées** (`tmp/mutations-366/`) : module fantôme dans un pack (3 rouges) ·
+  familles omises si vides (1) · `balance` en queue du cabinet (1) · `balance` retiré d'Assurance (2)
+  · familles de `facturation` changées (2) · `stock` retiré du semis (3) · `smt-togo` retiré de
+  `balance` (1) · famille inventée sur `dashboard` (2).
+- **Vérification docker sur stack NEUVE** (`tmp/verif-docker-366/`, état final `64d6dc3`) — 52 OK :
+  - p1 (21 OK) : journal « créés : 18 · échecs : 0 » ; `modules` = les 18 codes ; aucun document
+    sans `referentielFamilies` ; les 9 non normatifs à `[]` ; `balance` sur ses 4 familles ; 18
+    `moduleversions` en `1.0 ACTIVE` ; `GET /catalog/modules` publie `[]` ; `balance` en tête des
+    4 packs, aucun module de pack inconnu du catalogue.
+  - p2 (8 OK) : `stock` édité et `dashboard` DEPRECATED par l'API, redémarrage du conteneur ⇒
+    documents **strictement identiques**, journal « créés : 0 · non touchés : 18 · échecs : 0 ».
+  - p3 (10 OK) : organisation Finance, KYC approuvé ⇒ `whoami/balance-access` **403
+    `BALANCE_NOT_ENTITLED`** (le constat du 2026-08-11, reproduit) ; dépôt `sfd-bceao@2.0` ; pack lu
+    par l'API et octroyé ENTIER (8 modules, **aucun 400/422**) ; 8 entitlements ACTIVE, 8 événements ;
+    read-model `balance` ACTIVE `sfd-bceao@2.0` ⇒ **`balance-access` 200**.
+  - p4 (13 OK) : `fantome` 422 · `facturation` sous syscohada `422 REFERENTIEL_INCOMPATIBLE` ·
+    non normatif + référentiel `422 REFERENTIEL_NOT_APPLICABLE` · `balance` sans référentiel
+    `400 REFERENTIEL_REQUIRED` · champ singulier de la console 400 ; **aucun entitlement ni événement
+    écrit par les refus** (non-vacance : les 8 octrois lus avant).
+  - ⚠️ Un KO de ma requête de preuve (organizationId interrogé en ObjectId) corrigé et rejoué (p3b).
+    **Constat préexistant, hors périmètre** : le schéma `Entitlement` déclare
+    `organizationId: Types.ObjectId`, mais la base porte des **chaînes** (8/8) — cohérent, lectures
+    comprises, sans effet fonctionnel mesuré ; à surveiller si une écriture passe un jour par un autre
+    chemin (index unique `(organizationId, moduleCode)` sur deux types).
+- Revue de code ⑥ : 4 constats non bloquants (commentaires rendus faux) corrigés (`MNV-366(revue)`) ;
+  ponytail-review : rien à retrancher. Revue de sécurité ⑦ : **0 constat**.
+- `prospera-platform-catalog-service#27` rebase-mergée sur `dev` (`3e6c2d1`), branche supprimée.
+  Statut `done`.
