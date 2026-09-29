@@ -252,7 +252,9 @@ nature (capitaux propres / gestion) ; qu'aucune liasse ne mouvemente (`COMPTE_EC
 motifs d'un coup dans `details.manques` : additionner une balance non convertie est le mode de panne que la story existe
 pour fermer (« aucune addition silencieuse »). Ce qu'elle ne convertit pas **(M8)** se nomme en **manque**, l'agrégat
 calculé, `CONVERSION` `NON_TRAITE` : `ECART_PREMIERE_CONSOLIDATION_NON_CONVERTI` (un écart actif sur une société
-convertie reste au cours de son calcul), `ASSOCIEE_NON_CONVERTIE`.
+convertie reste au cours de son calcul), `ASSOCIEE_NON_CONVERTIE`. ⚡ **Amendée en revue** : aussi quand le
+**détenteur** est converti — l'élimination (543) et la valeur (546) retirent un coût FIXE, en devise du groupe, de ses
+titres convertis au cours de clôture : le résidu se nomme, jamais silencieux.
 
 **D-547-13 — Le traitement.** `CONVERSION` est `APPLIQUE` si et seulement si aucun manque — un groupe mono-devise l'est
 d'office (D-547-2). La vue `conversion` publie la devise du groupe, et pour chaque société convertie : sa devise, la
@@ -320,4 +322,16 @@ l'exercice ; la liasse de la mère, sur le rapprochement et la confirmation, dan
   course de deux déclarations tranchée par l'index réel ; rapprochement MÈRE ↔ FILLE_G dans la devise du groupe, devise
   XOF/2 figée sur l'élimination confirmée ; écart 543 sur FILLE_N ⇒ `NON_TRAITE` nommé ; AC-7 (groupe mono-devise :
   section vide, contributions = soldes injectés) ; cloisonnement 404. Statut `in_progress` → `review`.
+- 2026-09-29 — **revue de code** (scan `opus` + lentille ponytail) : 4 constats retenus, corrigés (`63fd24a`) —
+  ⛔ **bloquant** : un DÉTENTEUR converti (une filiale étrangère qui détient une sœur ou une associée) laissait un résidu
+  de titres à l'actif, sans manque — l'élimination retire un coût fixe en devise du groupe de titres convertis au cours
+  de clôture ; nommé désormais (D-547-12 amendée), prouvé par deux mutants tués ; Swagger de la devise de l'agrégat (la
+  monnaie de présentation), inventaire des codes (`details.champs`), ordres des refus ; ponytail : `versSoldeNet`
+  partagé plutôt que dupliqué. Écartés : `diviserArrondi` ≈ `arrondiRationnel` (types et garde différents),
+  `refuserSiEchellesHeterogenes` ≈ la boucle de `homogeneite` (détail publié différent). Suites rejouées : 9 827
+  unitaires, 2 363 e2e.
+- 2026-09-29 — **revue de sécurité** (`opus`) : **aucun constat** — gardes et rôles, IDOR (exercice, écriture, société,
+  nature), isolation du cabinet de chaque lecture nouvelle, anti-énumération (`HORS_GROUPE` sans raison sociale),
+  injection, bornes (cours, exposants, tableaux, `bigint`), course sur l'index partiel, immuabilité du journal, checksum
+  du paquet examinés.
 
