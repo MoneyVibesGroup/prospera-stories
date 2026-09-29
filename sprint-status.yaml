@@ -4066,7 +4066,7 @@ sprints:
         epic: "EPIC-139"
         points: 8
         service: "bilan-service — module consolidation"
-        status: "ready-for-dev"  # CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. La mise en équivalence est la méthode des entreprises associées — celles sur lesquelles le groupe exerce une influence notable sans les contrôler. Et c'est la méthode la plus simple des trois, à condition de ne pas la traiter comme les deux autres :
+        status: "in_progress"  # ⬆ 2026-09-29 : branches MNV-546 ouvertes (docs + bilan-service), CADRAGE fait avant tout code (8 constats, 15 decisions) — valeur calculee PAR DETENTEUR (le partage de 544 donne leur part aux minoritaires du detenteur), capitaux propres retraites (541 rouverte pour l associee), ecart dans la valeur (543), resultats internes au pourcentage du groupe ou au produit (542), quote-part negative : valeur nulle sauf engagement declare, colonne miseEnEquivalence avant impots differes et minoritaires. — Historique — CREEE le 2026-08-28 — arbitrage PO du 2026-08-28 — CONSOLIDATION NIVEAU 3 (complete) ; decoupage epics-consolidation-2026-08-28.md. La mise en équivalence est la méthode des entreprises associées — celles sur lesquelles le groupe exerce une influence notable sans les contrôler. Et c'est la méthode la plus simple des trois, à condition de ne pas la traiter comme les deux autres :
         story_path: "stories/STORY-546.md"
       - story_id: "STORY-547"
         title: "Conversion des comptes d'une filiale étrangère — trois taux, et l'écart va en capitaux propres"
