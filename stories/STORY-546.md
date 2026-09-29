@@ -54,7 +54,7 @@ consolidé de tous les actifs et dettes d'une entité que le groupe ne contrôle
 
 # Cadrage — fait AVANT toute ligne de code
 
-Sources : le **SYSCOHADA révisé**, édition officielle — D4C, titre XII, ch. 3 § 3.3 (p. 1150), ch. 5 § 2.1.2 et
+Sources : le **SYSCOHADA révisé**, édition officielle — D4C, titre XII, ch. 2 § 3.3 (p. 1148), ch. 5 § 2.1.2 et
 2.1.3 (p. 1168-1169), ch. 5 section 6 (p. 1178-1179, relues à l'image), ch. 6 § 5.1.3 (p. 1185), ch. 8 § 3.1
 (p. 1201) ; le code de `bilan-service` (`dev` @ `1ff2166`, STORY-545 comprise) et de `dossier-service` (périmètre,
 STORY-530) ; les fiches STORY-530, 541 à 545.
@@ -93,15 +93,17 @@ retraite donc comme une filiale — mais ses retraitements ne vont pas à la bal
 changent ses capitaux propres et son résultat, et donc la valeur et la quote-part. Le report de 541 (cumul passé en
 réserves) vaut pour elle aussi. Retraitements `DIFFERENCE_TEMPORELLE` : nets de leur impôt au taux de SON pays (545).
 
-### M5 — L'écart d'acquisition vit DANS la valeur
+### M5 — L'écart d'acquisition vit DANS la valeur — et il n'y a PAS d'écart d'évaluation
 
 *« L'écart d'acquisition positif enregistré dans le cas de l'entrée d'une entité mise en équivalence n'est pas inscrit
-séparément à l'actif du Bilan […] mais inclus dans la valeur comptable des titres mis en équivalence »* (p. 1185) ;
-*« L'écart qui en résulte est un écart d'acquisition présenté selon les mêmes modalités que les écarts d'acquisition
-définis dans le cadre de l'intégration globale »* (p. 1178). Le calcul figé de 543 (et l'impôt d'entrée de 545) vaut
-tel quel ; seules ses LIGNES changent : ni élimination des capitaux propres acquis, ni écart d'évaluation ou
-d'acquisition à l'actif — leurs montants nets d'amortissement entrent dans la valeur. Réévaluation partielle seulement
-(aucun minoritaire n'est constaté sur une associée).
+séparément à l'actif du Bilan dans un compte d'immobilisation incorporelle mais inclus dans la valeur comptable des
+titres mis en équivalence »* (§ 5.1.3, p. 1186) ; *« L'écart qui en résulte est un écart d'acquisition présenté selon les
+mêmes modalités que les écarts d'acquisition définis dans le cadre de l'intégration globale »* (p. 1178). ⛔ Et, lu à
+l'image pendant le cadrage : *« s'il s'agit d'une influence notable, les comptes de l'entité n'étant pas repris il n'y a
+pas d'écart d'évaluation »* (ch. 6, section 4, p. 1185). Le calcul figé de 543 vaut donc, SANS écart d'évaluation (donc
+sans impôt d'entrée, 545) : `EA = coût − QP`, amorti ou repris selon le plan figé ; ses LIGNES changent — ni
+élimination des capitaux propres acquis, ni écart d'acquisition à l'actif : son montant net d'amortissement entre dans
+la valeur.
 
 ### M6 — Les résultats internes : le pourcentage du groupe, ou le PRODUIT
 
@@ -140,15 +142,15 @@ capitaux propres (paquet de règles) `+ R`, `R = Σ` comptes de gestion — de s
 retraitements (541, désormais admis sur elle et jugés par le diagnostic des méthodes), nets d'impôt au taux de son pays
 s'ils sont `DIFFERENCE_TEMPORELLE` ; à l'ouverture, `CP − R`. Taux indisponible quand il en faut un : manque.
 
-**D-546-4 — La valeur, par lien (AC-1, M3).** Pour chaque lien retenu : `V = p_lien × CP + écart` (D-546-5), posée
+**D-546-4 — La valeur, par lien (AC-1, M3).** Pour chaque lien retenu : `V = p_lien × CP + EA net` (D-546-5), posée
 sur le DÉTENTEUR ; le partage de 544 donne aux minoritaires du détenteur leur part — il reste au groupe l'intérêt
 exact. Fractions exactes, arrondies une fois par ligne.
 
-**D-546-5 — L'écart (AC-4, M5).** 543 admet un lien vers une société mise en équivalence : réévaluation partielle
-seulement (`409 METHODE_MINORITAIRES_INAPPLICABLE`, raison `MISE_EN_EQUIVALENCE`), comptes de l'écart d'acquisition
-non exigés ; son calcul figé est celui de 543 (impôt d'entrée de 545 compris). Chaque exercice, la valeur porte
-`Σ (g − amortissements) − leur impôt différé + (EA − amortissements de l'EA)` — plans de 543, taux d'entrée figé. Un
-lien sans écart actif : manque `ECART_NON_DECLARE` (ses titres ne sont pas remplacés) ; l'écart annulé libère le lien.
+**D-546-5 — L'écart (AC-4, M5).** 543 admet un lien vers une société mise en équivalence : réévaluation partielle,
+**aucun écart d'évaluation** (`400 ECART_INCOHERENT`, motif `ECARTS_EVALUATION_SANS_OBJET` — p. 1185), comptes de
+l'écart d'acquisition non exigés ; son calcul figé est celui de 543. Chaque exercice, la valeur porte l'écart
+d'acquisition net de ses amortissements (ou de ses reprises) — plan de 543. Un lien sans écart actif : manque
+`ECART_NON_DECLARE` (ses titres ne sont pas remplacés) ; l'écart annulé libère le lien.
 
 **D-546-6 — Les lignes (AC-3), sur le détenteur, par lien** : crédit des titres (coût déclaré, compte déclaré) ; débit
 de la valeur retenue au compte des titres mis en équivalence ; crédit de la provision (D-546-8) ; crédit de la
@@ -186,7 +188,7 @@ société mise en équivalence l'est d'office. La société reste citée dans `n
 elle n'est pas agrégée), et `miseEnEquivalence` publie sa valeur.
 
 **D-546-13 — Le paquet `consolidation-audcif@1.3`.** 1.2 plus une clé `miseEnEquivalence` : la règle de la quote-part
-négative et les fondements verbatim (p. 1169, 1178, 1179, 1185).
+négative et les fondements verbatim (p. 1169, 1178, 1179, 1185, 1186).
 
 **D-546-14 — Routes et rôles.** `GET|POST …/exercices/:exerciceId/mise-en-equivalence/engagements`,
 `POST …/engagements/:ecritureId/annulation` — `TENANT_ADMIN`, `TENANT_USER` ; les méthodes du groupe acceptent les
