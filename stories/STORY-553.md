@@ -1,6 +1,6 @@
 # STORY-553 : Un seuil d'alerte est une donnée de référentiel versionnée — jamais une constante de code
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/referentiel`, `modules/bilan/analyse`
@@ -154,3 +154,29 @@ qu'un artefact absent* — vaut ici : des seuils packagés sans axe **secteur** 
 
 - 2026-09-30 — arbitrages PO rendus (ci-dessus) ; branches `MNV-553` ouvertes (`docs/`,
   `bilan-service`) ; statut `in_progress`.
+- 2026-09-30 — dev (session `opus`) : bloc `seuils` + garde `normSeuils` (`gardes-analyse.mjs`),
+  vocabulaire `seuils-vocabulaire.json`, passe d'appréciation `analyse.seuils.ts`, `codeNaema`
+  au read-model dossier et à la réponse ; aucun octet d'artefact modifié (`build.mjs` régénère à
+  l'identique).
+- 2026-09-30 — validation : lint 0 · build OK · 10 704 unitaires + couverture aux seuils (fichiers
+  neufs à 100 %) · 2 513 e2e · **16/16 mutations tuées** (`tmp/mutations-553/` : garde `source`,
+  ordre selon `sens`, contiguïté, doublon de secteur, axe vide, build sans garde, liste blanche du
+  chargeur, préfixe le plus long, secteur supposé, borne haute, verdict par défaut, paquet cité,
+  service qui ignore le secteur, normalisation, payload mal typé, filtre `orgId`).
+- 2026-09-30 — **vérif docker, stack neuve** (`tmp/verif-docker-553/`) : **64 OK / 0 KO** —
+  `dossiers_dossier.codeNaema` = `"47.11"` tel que publié ; `null` ÉCRIT (champ présent) pour un
+  dossier sans code ; dry-run réel : `codeNaema: "4711"` normalisé, 19 indicateurs sans verdict
+  (`AUCUN_REPERE_DECLARE`, `seuilApplique: null`), valeurs de 552 inchangées (68,75 ; 600 000 ;
+  45) ; cabinet B sur un dossier de A ⇒ 404 ; lecture seule (30 documents avant/après). Une
+  première passe avait 2 KO dus au SCRIPT (axes posés sans exercice ouvert ⇒ 409 voulu) : corrigé,
+  rejouée entière sur stack neuve.
+- 2026-09-30 — revue de code (scan `opus`) : 2 constats non bloquants. **Corrigé** : le contrat
+  d'une réponse AVEC verdicts n'était confronté à aucune réponse réelle ⇒ test de contrat OpenAPI
+  sous un paquet augmenté de seuils (mutation ⇒ rouge). **Consigné** : les dossiers projetés AVANT
+  ce déploiement n'ont pas `codeNaema` (lecture ⇒ `null` alors qu'ils peuvent en déclarer un) —
+  migration différée (règle projet) ; ⚠️ **prérequis de la story de sourcing des seuils** : rattraper
+  le read-model (forcer un `dossier.updated`, ou rejouer le topic une fois les marqueurs
+  `ProcessedEvent` expirés), sinon ces dossiers ne recevront que les repères `TOUS`.
+- 2026-09-30 — revue de sécurité (scan `opus`, jamais allégée) : **0 constat** (lecture fail-closed
+  `orgId` + `dossierId` du contexte gardé, aucun filtre bâti sur une entrée, payload typé).
+- 2026-09-30 — `bilan-service#151` rebase-mergée sur `dev` ; statut **done**.
