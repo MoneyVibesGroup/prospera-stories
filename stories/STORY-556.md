@@ -1,6 +1,6 @@
 # STORY-556 : Le classeur de dépôt GUDEF fait 92 feuilles — l'export en produit une, et le référentiel ne déclare que 11 notes sur 44
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
 **Service :** `bilan-service` (`:3004`) **+ `fiscal-service`** — PR jumelles (arbitrage user du 2026-09-30)
@@ -208,3 +208,9 @@ de la liasse ne déclare pas (`@2.1`) est **non modélisée**, jamais vide (AC-2
   corps amont plafonné à 16 Mio, clés de dictionnaire filtrées par motif).
 - Lentille ponytail : 9 simplifications de forme non appliquées (validateurs de forme dupliqués entre
   `correspondance-classeur.ts` et `schema-classeur.ts`, `effectifs` dérivables) — dette nommée.
+
+- **Vérification docker (④, stack NEUVE `down -v`, 2026-09-30)** — `tmp/verif-docker-555-557/`, **249 verdicts OK, 0 KO**, commune à 555/556/557 ; p0 prouve les commits exécutés (`balance-service` b962ebb, `bilan-service` 29a7aab, `fiscal-service` d2d744a) et l'identité sha256 hôte = `src` monté, `pdfkit` 0.19.1 dans l'image.
+  Liasse FIGÉE `syscohada-revise@2.2` : `…/contenu` ⇒ 43 notes, empreinte = celle du snapshot en base, 13 trames et **aucune** en `VIDE` ; complétude ⇒ 92 feuilles, six listes, chaque feuille une fois, effectifs **6 / 27 / 15 / 0 / 36 / 8** — ceux calculés à la main avant le run ; contrôles OTR n°1/n°2 avec le verdict de la liasse ; paquet = checksum du manifeste ; B ⇒ 404 (`LIASSE_INTROUVABLE` côté fiscal) ; aucune écriture dans les bases bilan et fiscal.
+- **Mutations rejouées en session** : 8/8 rouges (+ 4 de revue).
+- **Intégration (⑧)** : PR jumelles `bilan-service#153` puis `fiscal-service#10` rebase-mergées ENSEMBLE sur `dev` ; chaque `dev` = l'arbre vérifié.
+- **2026-09-30 — `done`.** Statut synchronisé : en-tête, `sprint-status.yaml` (+ `completed_date`), ce suivi.
