@@ -1,6 +1,6 @@
 # STORY-678 : Un Bilan imprimé déséquilibré se valide — aucun contrôle ne regarde la cascade des sous-totaux
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-010 — Référentiels & table de passage
 **Service :** `bilan-service` — contrôles de cohérence de la liasse
@@ -47,4 +47,6 @@ STORY-531 : un contrôle qui ne peut pas échouer sur le défaut qu'on croit qu'
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-09-25).** Créée par la clôture de STORY-676.
+**Statut : `in_progress` (2026-09-30).** Branches `MNV-678` (bilan-service + docs), lancée avec STORY-679.
+
+— Historique — `ready-for-dev` (2026-09-25) : créée par la clôture de STORY-676.

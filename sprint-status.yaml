@@ -4189,7 +4189,7 @@ sprints:
         epic: "EPIC-010"
         points: 3
         service: "bilan-service"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la verif docker de STORY-676 : liasse @2.1 avec BZ 26 900 000 face a DZ 75 900 000, EQUILIBRE_BILAN OK ecart 0, liasse VALIDEE. Le verdict lit l identite directe (juste), la cascade imprimee n est lue par AUCUN controle (exclue a dessein pour les AMORCE). Categorie a piloter par meta.statut (P7).
+        status: "in_progress"  # ⬆ 2026-09-30 : EN COURS (MNV-678 : bilan-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la verif docker de STORY-676 : liasse @2.1 avec BZ 26 900 000 face a DZ 75 900 000, EQUILIBRE_BILAN OK ecart 0, liasse VALIDEE. Le verdict lit l identite directe (juste), la cascade imprimee n est lue par AUCUN controle (exclue a dessein pour les AMORCE). Categorie a piloter par meta.statut (P7).
         story_path: "stories/STORY-678.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-679"
