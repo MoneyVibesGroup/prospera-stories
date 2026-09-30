@@ -1,6 +1,6 @@
 # STORY-551 : La colonne N-1 est retraitée avec la table de passage d'aujourd'hui — et la liasse ne le dit pas
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-011 — États financiers (liasse OHADA : Bilan, CR, TFT/TAFIRE, annexes)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/etats`, `modules/bilan` (moteur)
@@ -146,4 +146,34 @@ recalcule.
 
 - 2026-09-30 — cadrage (D-551-1..6) ; branches `MNV-551` ouvertes (`docs/`, `bilan-service`) ; statut
   `in_progress`. Dev fait dans un worktree pendant la vérif docker de STORY-550, puis rebasé sur `dev`.
+- 2026-09-30 — dev (`bilan-service` `MNV-551`) : `etats/methode-n1.ts` (fonction pure),
+  `clesSurchargesAppliquees` à côté de `cleSurcharge`, bloc produit par Bilan et CR, recopié par le
+  TFT ; `MethodeN1Dto` sur les trois réponses ; `MOTEUR_VERSION` 1.22.0, sonde avec comparatif.
+- **Portes** (arbre principal, état final) : lint 0 · build OK · 281 suites / 10 553 unitaires +
+  2 490 e2e verts · couverture 99,41 / 97,01 / 99,61 / 99,48. ⚠️ Dans le worktree de dev, une suite
+  (`migrate-dossiers-rollback.bootstrap.spec.ts`) échouait par épuisement des workers Jest avec un
+  `node_modules` en lien symbolique : artefact d'environnement, vert sur l'arbre principal.
+- **Mutations — 9/9 tuées, toutes COMPILABLES** (`tmp/mutations-551/`) : bloc publié sans comparatif,
+  décompte de N seul, portée ignorée, garde « surcharge COMPTE existe » retirée (ajoutée après la
+  revue), TFT sans bloc, CR sans bloc, référentiel compté comme surcharge, bloc publié opaque au
+  contrat, valeur N-1 altérée à côté du bloc (AC-5 renforcé). ⚠️ Quatre premières rédactions ne
+  COMPILAIENT pas (paramètre ou import devenu inutilisé, rétrécissement de type sur `&& false`) :
+  réécrites ; « Tests: 0 total » n'est jamais compté comme un rouge.
+- **Revue de code** (opus) : 0 bloquant ; **3 corrigés** (commit `MNV-551(revue)`) — garde de portée
+  non couverte (mutant survivant), test AC-5 qui ne comparait que la colonne N, description « même
+  tampon que N » inexacte sur les routes des jeux d'états (le bloc porte `statut`/`miseEnGarde`, le
+  tampon racine non : comparer par code/version/checksum).
+- **Revue de sécurité** (opus) : **0 constat** — surcharges chargées par un dépôt scopé tenant +
+  dossier, fail-closed ; le nombre ne révèle rien hors du dossier de l'appelant ; aucune route ni
+  `@Public()` ajoutée ; snapshots append-only intacts.
+- **Vérification docker sur stack NEUVE, état final** (`tmp/verif-docker-551/`, `72dd241`) :
+  **56 OK, 0 KO**. Dossier Z : surcharge `COMPTE 411000 → BILAN_ACTIF|BJ` proposée puis VALIDÉE par
+  l'API ; jeu avec `soldesN` + `soldesN1` ⇒ `methodeN1` = { retraite, `syscohada-revise@2.2` (pack),
+  tampon au sha256 du paquet, `surchargesAppliquees: 1` } **identique** sur Bilan, CR et TFT ; liasse
+  figée ⇒ `snapshots_liasse` porte le bloc sur les trois états, `moteurVersion 1.22.0` ; `GET
+  …/versions/1` rend exactement la base. Dossier W : sans comparatif ⇒ clé absente des trois états.
+  ⚠️ Un lancement avorté par le démon Docker (500 sur `down -v` après un `compose stop`) : Docker
+  redémarré, stack neuve rejouée.
+- 2026-09-30 — `bilan-service#149` rebase-mergée sur `dev` (`1895cb1`, `0f05a57`), branche supprimée ;
+  statut `done`.
 
