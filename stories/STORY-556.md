@@ -1,10 +1,10 @@
 # STORY-556 : Le classeur de dépôt GUDEF fait 92 feuilles — l'export en produit une, et le référentiel ne déclare que 11 notes sur 44
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
-**Service :** `bilan-service` (`:3004`) — `modules/bilan/export`, `modules/bilan/referentiel`
-**Points :** 13 → **5** ⬇️ *(2026-08-28 : scindée — le gabarit part en STORY-537, les 33 notes en STORY-559 ; il reste l'interface de récupération et le décompte de complétude)* · **Sprint :** S20
+**Service :** `bilan-service` (`:3004`) **+ `fiscal-service`** — PR jumelles (arbitrage user du 2026-09-30)
+**Points :** 13 → **5** ⬇️ *(2026-08-28 : scindée — le gabarit part en STORY-537, les 33 notes en STORY-559 ; il reste l'interface de récupération et le décompte de complétude)* · **Sprint :** S20 · **Complexité :** high · **Assigné à :** `vivianMoneyVibesGroupes`
 **Origine :** demande PO du **2026-08-28** — *« le fichier xlsx c'est pour la déclaration, est-ce
 que le système génère cela aussi ? »*
 **Pièce de référence :** `1000745307_2025_Definitif (1).xlsx` — **DSF définitive**, dossier PARVIS
@@ -145,3 +145,38 @@ une fois, et il conditionne tout le reste.
   référentiels portent encore l'ancienne graphie, y compris dans des noms de fichiers packagés.
 - ⛔ **Ne pas confondre « produire le classeur » et « déposer ».** Le premier est le sujet de cette
   story. Le second est un geste humain sur un portail à MFA, et le restera en v1.
+
+## ⚡ Recadrage du 2026-09-30 — ce qui prime sur le texte ci-dessus
+
+La fiche a été écrite **avant** STORY-559 et STORY-537. Mesuré sur le code au 2026-09-30 :
+
+| La fiche disait | Le code dit |
+|---|---|
+| 4 contrôles produits | **8** codes (`CODES_CONTROLE`) : `EQUILIBRE_BILAN`, `COHERENCE_RESULTAT`, `VARIATION_TRESORERIE`, `ARTICULATION_NOTES`, `COMPTES_NON_AFFECTES`, `RESULTAT_NON_AFFECTE`, `INTEGRITE_NOTES`, `COHERENCE_STOCKS` |
+| 11 notes déclarées | `syscohada-revise@2.2` en déclare **43** (NOTE 2 et 35 : narratives, hors périmètre) |
+| gabarit `depot-dsf-togo@2025`, `fiscal-service` inexistant | paquet **`TG` × `DSF` v1.0** livré par 537, 92 feuilles dans `format.schema.feuilles` ; les 43 feuilles de notes restent vierges (**STORY-680**) |
+| « interface de récupération » à créer | `fiscal-service` lit déjà la version figée par la route publique `…/versions/:version` — avec la mise en page d'un snapshot, pas adressée par code |
+
+**Les 8 contrôles intermontants du classeur**, lus dans `Type de Contôles` (B13-B20) : n°1 Actif = Passif ↔ `EQUILIBRE_BILAN` ; n°2 résultat CR = résultat au passif ↔ `RESULTAT_NON_AFFECTE` ; n°3 → n°8 (résultat fiscal, liquidation IS/IR, chiffre d'affaires ×2, comptes bancaires ×2) : **aucun contrôle produit**.
+
+### ✅ Arbitrage user du 2026-09-30 — scinder en deux dépôts
+
+La liste des 92 feuilles est une donnée **du paquet pays** : elle ne doit exister qu'**à un endroit**.
+
+| Dépôt | Ce qu'il porte |
+|---|---|
+| `bilan-service` | `GET …/etats/:id/versions/:version/contenu` — l'interface de récupération (AC-4) : états et notes **par code**, sans mise en page, statut de chaque note (`PRODUITE` / `A_COMPLETER` / `VIDE`), contrôles tels que produits, référentiel@version (AC-3) |
+| `fiscal-service` | le **décompte par feuille** (AC-1, 2, 5, 6) : une correspondance versionnée des 92 feuilles de `TG×DSF v1.0` (nature + motif), les 8 contrôles OTR mis en regard, et une route qui lit le contenu ci-dessus |
+
+**Règles de décompte** — `produites` (le livrable v1.0 y écrit), `produitesNonTranscrites` (la matière
+existe côté `bilan-service`, le gabarit n'a pas de case : renvoi STORY-680), `declareesVides` (déclarée
+au référentiel, **rien** dans cette liasse), `nonModelisees` (avec motif), `calculeesParLeClasseur`.
+Somme = 92. ⛔ Un poste à 0 est une **réponse** (`PRODUITE`), pas un vide ; une note que le référentiel
+de la liasse ne déclare pas (`@2.1`) est **non modélisée**, jamais vide (AC-2).
+
+**Hors périmètre ajouté** : transcrire les notes dans le classeur (**STORY-680**).
+
+## Progress Tracking
+
+- **2026-09-30 — `in_progress`.** Recadrage + arbitrage user (scission `bilan-service` / `fiscal-service`).
+  Branches `MNV-556` ouvertes sur les deux dépôts (base `dev`).
