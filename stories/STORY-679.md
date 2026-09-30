@@ -1,6 +1,6 @@
 # STORY-679 : Une balance se valide sous un référentiel que l'organisation ne détient plus — la validation ne revérifie pas l'habilitation
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `balance-service` — validation de la balance canonique
@@ -46,4 +46,6 @@ Seul le dépôt (`POST /balances`) passe par le résolveur de référentiel. `pr
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-09-25).** Créée par la clôture de STORY-677.
+**Statut : `in_progress` (2026-09-30).** Branches `MNV-679` (balance-service + docs), lancée avec STORY-678.
+
+— Historique — `ready-for-dev` (2026-09-25) : créée par la clôture de STORY-677.
