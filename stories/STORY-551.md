@@ -1,10 +1,10 @@
 # STORY-551 : La colonne N-1 est retraitée avec la table de passage d'aujourd'hui — et la liasse ne le dit pas
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-011 — États financiers (liasse OHADA : Bilan, CR, TFT/TAFIRE, annexes)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/etats`, `modules/bilan` (moteur)
-**Points :** 3 · **Sprint :** S20
+**Points :** 3 · **Sprint :** S20 · **Complexité :** medium
 **Origine :** lecture du corpus pédagogique `Image_lecons` (2026-08-28) — fiches **2.2 permanence
 des méthodes** et **2.5 indépendance des exercices**, qui sont la justification comptable de la
 colonne N-1 et du verrou de référentiel.
@@ -98,3 +98,52 @@ recalcule.
 - ⚠️ L'écran distingue déjà « N-1 absent » de « N-1 = 0 »
   (`bilan.etats.comparatif.legendeSansComparatif`). Cette story ajoute la troisième mention qui
   manque : **« N-1 recalculé »**. Restitution : **FE-087**.
+
+---
+
+## Cadrage du 2026-09-30 — ce que le code dit, et les décisions qui en sortent
+
+### Constats (prémisses vérifiées contre le code)
+
+1. **« Un seul paquet pour les deux colonnes » est exact**, à une nuance près sur la signature : le
+   moteur résout le référentiel lui-même (`produireBilan(organizationId, soldesN, soldesN1?)`) et passe
+   **la même** `Map` de surcharges aux deux passes d'agrégation (Bilan, CR, TFT, liasse complète).
+2. **« Compter les surcharges appliquées » n'est pas « compter les surcharges »** : une surcharge
+   `VALIDATED` peut ne viser aucun compte de la balance, ou viser une cible sans ligne de détail — le
+   compte part alors en **non mappé** (STORY-676) et rien n'est appliqué. Et deux surcharges de **même
+   valeur** et de portées différentes (`COMPTE`, `RACINE`) peuvent coexister et s'appliquer chacune :
+   compter les valeurs distinctes sous-compterait.
+3. ⛔ **AC-3 inexact tel qu'écrit** : `POST …/bilan/etats` crée un **brouillon sans snapshot** ; le
+   snapshot naît à `POST …/:id/valider`. Reformulé : le brouillon consulté **et** le snapshot figé à la
+   validation portent le bloc.
+4. **La sonde de forme ne voyait pas le cas** : `moteur-version.spec.ts` produisait ses états **sans**
+   `soldesN1` — un bloc qui n'existe qu'avec un comparatif y serait entré sans rien faire rougir.
+
+### Décisions
+
+- **D-551-1 — calculé dans les services de production**, pas dans le moteur : `methodeN1(pkg,
+  surchargesN, surchargesN1)` (fonction pure, `etats/methode-n1.ts`) ; le tampon est
+  `toEffectiveStamp(pkg.meta)`, le même que celui de N. Bilan et CR le produisent quand la passe N-1
+  existe (`soldesN1?.length`, un `[]` vaut absent) ; le TFT le **recopie** du Bilan dont il dérive.
+- **D-551-2 — clé ABSENTE sans comparatif** (épandage conditionnel), jamais `null`.
+- **D-551-3 — `surchargesAppliquees` = taille de l'union N ∪ N-1 des clés `portée|valeur` réellement
+  appliquées** (`clesSurchargesAppliquees`, à côté de `cleSurcharge`) ; portée reconstituée exactement
+  comme `resoudreSurcharge` la choisit (`COMPTE` à l'égalité stricte si une telle surcharge existe,
+  `RACINE` sinon). Le décompte porte sur la **balance**, pas sur un état : Bilan et CR publient le
+  même nombre (testé).
+- **D-551-4 — TFT** : une passe N-2 (`soldesN2`) est produite avec la même méthode, mais ses
+  surcharges ne sont pas comptées (documenté sur le type). Un TFT `NON_APPLICABLE` (référentiel sans
+  tableau) n'a pas de colonne N-1, donc pas de bloc.
+- **D-551-5 — `MOTEUR_VERSION` 1.21.0 → 1.22.0** ; la sonde produit désormais aussi Bilan, CR et TFT
+  **avec** comparatif et fige la forme du bloc. ⚠️ Un snapshot figé avant 1.22.0 ne porte pas le bloc :
+  son absence y signifie « non déclaré », pas « non retraité » (collection append-only).
+- **D-551-6 — contrat** : `MethodeN1Dto` (classe, `type` explicite partout), publié `@ApiPropertyOptional`
+  sur `BilanDto`, `CompteResultatDto` et `TftDto`.
+- **Hors périmètre confirmé** : l'export PDF/Excel de la liasse n'imprime pas encore la mention (le
+  toucher changerait l'empreinte du document) — restitution écran : FE-087.
+
+## Progress Tracking
+
+- 2026-09-30 — cadrage (D-551-1..6) ; branches `MNV-551` ouvertes (`docs/`, `bilan-service`) ; statut
+  `in_progress`. Dev fait dans un worktree pendant la vérif docker de STORY-550, puis rebasé sur `dev`.
+
