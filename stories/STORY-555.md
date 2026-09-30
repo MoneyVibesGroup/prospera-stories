@@ -1,10 +1,10 @@
 # STORY-555 : La balance entre dans le produit et n'en ressort jamais — aucune route ne l'exporte, et une colonne du format Sage n'est pas dérivable
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-017 — Socle `balance-service` + contrat de balance canonique
 **Service :** `balance-service` (`:3007`) — `modules/balance`
-**Points :** 8 · **Sprint :** S20
+**Points :** 8 · **Sprint :** S20 · **Complexité :** medium · **Assigné à :** `vivianMoneyVibesGroupes`
 **Origine :** demande PO du **2026-08-28** — *« le fichier `Balance_des_comptes.pdf` : est-ce que le
 système permet d'exporter la balance sous ce format ? »*
 **Pièce de référence :** `Balance_des_comptes.pdf` — édition **Sage 100 Comptabilité i7 8.50**,
@@ -127,3 +127,18 @@ produisible pour cette balance.
 - ⛔ **Ne pas prendre le PDF de référence pour un gabarit officiel.** C'est une édition **Sage**,
   pas un format réglementaire : rien n'oblige à en copier la mise en page. Ce qu'il faut en
   reprendre, ce sont les **informations** qu'un réviseur y cherche.
+
+## Cadrage de conception — instruction du code (2026-09-30)
+
+| Point de décision | Décision |
+|---|---|
+| Base | Branche `MNV-555` **empilée sur `MNV-557`** : l'export lit `anteriorite`, dérivée par 557. |
+| Route | `GET dossiers/:dossierId/balances/:id/export?format=pdf\|xlsx\|csv` sur le contrôleur existant (mêmes `@Roles`, `@RequiresBalanceAccess`, `@RequiresDossierScope`, 404 anti-énumération). Un `balanceId` **est** une version : pas de paramètre de version à inventer. |
+| En-tête | Dénomination = `raisonSociale` du `DossierScope` déjà injecté ; exercice = `exercice {debut, fin}` de la balance ; version, source, origine, référentiel ; « provisoire » dès que `etat ≠ VALIDÉE`, sans paramètre pour la retirer. |
+| Contrôles imprimés | Le `sommaire` **persisté** (mouvements, soldes, `estEquilibre`) — jamais recalculé au rendu (AC-4). |
+| Rendu | Patron `bilan-service/src/modules/bilan/export` (STORY-073) repris : `empreinte` calculée **avant** la datation (AC-1 : deux tirages de la même version ont la même empreinte), `nom-fichier` en liste blanche, `StreamableFile`. `pdfkit` ajouté à `balance-service` (même version que `bilan-service`) ; `exceljs` déjà présent. CSV : helpers anti-injection de formule déjà présents (`export-liasse.regles.ts`). |
+| Débit | `@Throttle` propre à la route (le service n'en a aucun ; seul le throttler global s'applique). |
+
+## Progress Tracking
+
+- **2026-09-30 — `in_progress`.** Instruction du code faite. Démarre après STORY-557 (prérequis).
