@@ -4189,9 +4189,10 @@ sprints:
         epic: "EPIC-010"
         points: 3
         service: "bilan-service"
-        status: "in_progress"  # ⬆ 2026-09-30 : EN COURS (MNV-678 : bilan-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la verif docker de STORY-676 : liasse @2.1 avec BZ 26 900 000 face a DZ 75 900 000, EQUILIBRE_BILAN OK ecart 0, liasse VALIDEE. Le verdict lit l identite directe (juste), la cascade imprimee n est lue par AUCUN controle (exclue a dessein pour les AMORCE). Categorie a piloter par meta.statut (P7).
+        status: "done"  # ✅ CLOTUREE 2026-09-30 — prospera-bilan-service#154 rebase-mergee (feature + revue). Nouveau controle CASCADE_SOUS_TOTAUX (grands totaux imprimes vs totaux directs), BLOQUANT sauf paquet amorce (meta.statut), NON_APPLICABLE sans grands totaux ; bilan-engine@1.23.0. Revue de code : 2 non-bloquants corriges (Swagger HYPOTHESE_BALANCE devenu faux, en-tetes e2e). Securite : 0. Verif docker stack neuve : @2.2 validee (snapshot 9 controles), @2.1 -> 422 LIASSE_NON_VALIDABLE sur la seule cascade (BZ 26 900 000 / DZ 75 900 000), aucune ecriture. AC-4 : PO a tranche « merger, bloquant » ; zone-franche-togo@1.0 porte le meme defaut mais n est pas octroyable au module bilan (latent). — Historique — ⬆ 2026-09-30 : EN COURS (MNV-678 : bilan-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la verif docker de STORY-676 : liasse @2.1 avec BZ 26 900 000 face a DZ 75 900 000, EQUILIBRE_BILAN OK ecart 0, liasse VALIDEE. Le verdict lit l identite directe (juste), la cascade imprimee n est lue par AUCUN controle (exclue a dessein pour les AMORCE). Categorie a piloter par meta.statut (P7).
         story_path: "stories/STORY-678.md"
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-09-30"
       - story_id: "STORY-679"
         title: "Une balance se valide sous un referentiel que l organisation ne detient plus — la validation ne reverifie pas l habilitation"
         epic: "EPIC-032"
