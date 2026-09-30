@@ -4198,9 +4198,10 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "balance-service"
-        status: "in_progress"  # ⬆ 2026-09-30 : EN COURS (MNV-679 : balance-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la verif docker de STORY-677 : brouillon SN depose sous @2.1, habilitation passee a smt-togo@1.0, POST valider → 200 VALIDEE + outbox + projection bilan ; seul le depot passe par le resolveur. Defaut ANTERIEUR, identique sur dev.
+        status: "done"  # ✅ CLOTUREE 2026-09-30 — prospera-balance-service#125 rebase-mergee (feature + revue). valider resout le referentiel par controleurDeCompte (methode du depot : couple exact, pont SN par preference, date de l exercice), hors transaction, apres 404/deja-validee ; non detenu -> 409 REFERENTIEL_NON_HABILITE (corps du depot), aucune ecriture ; comptes rejuges par le plan servi (exigerCompteDuPlan partage). Revue de code : 1 non-bloquant corrige (REJETEE -> VALIDEE non couvert). Securite : 0. Verif docker stack neuve : org D -> 409, compteurs de toutes les collections et document inchanges, jamais projetee VALIDEE ; orgs habilitees valident. — Historique — ⬆ 2026-09-30 : EN COURS (MNV-679 : balance-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la verif docker de STORY-677 : brouillon SN depose sous @2.1, habilitation passee a smt-togo@1.0, POST valider → 200 VALIDEE + outbox + projection bilan ; seul le depot passe par le resolveur. Defaut ANTERIEUR, identique sur dev.
         story_path: "stories/STORY-679.md"
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-09-30"
       - story_id: "STORY-680"
         title: "Les 43 feuilles de notes du fichier e-DSF Togo — 4 291 cases a rattacher, ligne par ligne, aux comptes"
         epic: "EPIC-032"
