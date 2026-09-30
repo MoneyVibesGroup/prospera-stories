@@ -1,6 +1,6 @@
 # STORY-552 : Les indicateurs d'analyse financière — dérivés des masses SYSCOHADA, jamais transposés d'un bilan courant / non courant
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
 **Service :** `bilan-service` (`:3004`) — nouveau `modules/bilan/analyse`
@@ -154,4 +154,86 @@ Posés par la session sur les constats du cadrage, tranchés par le PO :
 
 - 2026-09-30 — arbitrages PO rendus (ci-dessus) ; branches `MNV-552` ouvertes (`docs/`,
   `bilan-service`, `balance-service`) ; statut `in_progress`.
+- 2026-09-30 — dev (sous-agent `opus`, en worktrees, repris et vérifié en session) : marqueur
+  `masseAnalyse` + garde du générateur `exigerMassesAnalyseCoherentes` ; module `bilan/analyse`
+  (19 indicateurs, `GET …/bilan/analyse` et `POST …/analyse/dry-run`) ; recopie à l'octet dans
+  `balance-service`.
+
+### Décisions de dev (D-552-1..12)
+
+- **D-552-1** — 12 masses (`ACTIF_IMMOBILISE`, `ACTIF_CIRCULANT`, `ECART_CONVERSION_ACTIF`,
+  `CAPITAUX_PROPRES`, `DETTES_FINANCIERES_ET_RESSOURCES_ASSIMILEES`, `PASSIF_CIRCULANT`,
+  `ECART_CONVERSION_PASSIF`, `VENTES_MARCHANDISES`, `ACHATS`, `VARIATION_STOCKS_ACHATS`,
+  `VALEUR_AJOUTEE`, `EXCEDENT_BRUT_EXPLOITATION`) sur des postes de **détail** seulement (48 + `XC`/`XD`
+  en @2.1, 45 + `XC`/`XD` en @2.2) ; chaque détail du Bilan porte **soit** une masse **soit**
+  `tresorerie` (partition imposée par le générateur). Mesuré : sous @2.1, `AZ` vaut 0 sur une balance à
+  `211`/`245` ; la masse recomposée depuis les détails donne 1 500 000 — d'où « jamais les sous-totaux ».
+- **D-552-2** — ⚠️ **révision EN PLACE de `@2.1`, `@2.2` et `zone-franche-togo@1.0`**, sans nouvelle
+  version, malgré la règle du registre « après STORY-677, toute révision de @2.2 est un bump ». Vérifié :
+  cette règle protégeait la **sortie** de la liasse (notes relues sous un paquet qui ne les produit
+  plus) ; ici le marqueur est **additif**, la liasse ne change pas d'un octet, `MOTEUR_VERSION` reste
+  1.22.0, aucun consommateur ne confronte le checksum du catalogue à celui du paquet embarqué (le
+  read-model d'octroi n'en porte pas), et `@2.1` — octroyé à tous — a déjà été révisé ainsi (535, 656).
+  Le commentaire du registre est reformulé : « toute révision de @2.2 **qui change la sortie de la
+  liasse** est un bump ». L'analyse d'une liasse figée publie `stamp` (paquet lu), `stampLiasse`
+  (snapshot) et `memePaquet`. **Décision à confirmer par le PO** (une `@2.3` resterait possible).
+- **D-552-3** — capitaux propres = masse (CJ compris) + résultat du CR ; résultat de l'exercice = CR +
+  poste de résultat du passif ; les deux alimentés ⇒ `null` (`RESULTAT_NON_AFFECTE`).
+- **D-552-4** — dénominateur ≤ 0 ⇒ `null` (`DENOMINATEUR_NUL` / `DENOMINATEUR_NEGATIF`), jamais 0.
+- **D-552-5** — jours = `regles.baseJoursAnnee` (360) × mois / 12, durée propre à chaque colonne ;
+  durée inconnue ⇒ `null` (`DUREE_EXERCICE_INCONNUE`), jamais une année présumée ; cycle = DIO + DSO −
+  DPO sur les valeurs publiées.
+- **D-552-6** — assiettes : DIO = stocks / (achats + variation des stocks d'achats) ; DPO = fournisseurs
+  / achats ; DSO = clients / CA ; montants tels que la liasse les porte (créances TTC, CA HT) — **à faire
+  valider par un expert-comptable**, la formule publiée le dit.
+- **D-552-7** — colonne N-1 du Bilan qui ne retombe pas sur son total ⇒ indicateurs N-1 `null`
+  (`COLONNE_N1_INCOMPLETE`) — cf. constat ouvert ci-dessous.
+- **D-552-8** — arrondi exact à 2 décimales (`bigint`, demi-unité éloignée de zéro).
+- **D-552-9** — cascade des SIG non réconciliée ⇒ VA, EBE et capacité de remboursement `null` en N.
+- **D-552-10** — sans `exercice`, le jeu dont la fin d'exercice est la plus récente ; aucun ⇒ 404
+  `JEU_ETATS_INTROUVABLE` ; `?version=` passe par `consulterVersion` (empreinte revérifiée).
+- **D-552-11** — `methodeN1` (STORY-551) repris de la liasse quand elle porte un comparatif.
+- **D-552-12** — le dry-run a son corps (`AnalyseDryRunRequestDto`, bornes de `BilanDryRunRequestDto`,
+  `soldesN2` refusé) et réutilise `BilanEngineService.produireEtatsAnalysables` (un seul paquet).
+
+### Validation
+
+- **Portes** (arbres principaux, état final) : bilan-service lint 0 · build OK · 286 suites / 10 652
+  unitaires + 2 512 e2e · couverture 99,41 / 96,97 / 99,62 / 99,5 ; balance-service lint 0 · build OK ·
+  228 suites / 4 715 unitaires + 1 238 e2e · couverture 99,2 / 93,05 / 98,74 / 99,31. Régénération des
+  artefacts par `build.mjs` : **0 octet modifié** (reproductible) ; artefacts identiques à l'octet entre
+  les deux dépôts.
+- **Mutations — rejouées par la session sur l'arbre principal : 19/19 compilables tuées**
+  (`tmp/mutations-552/`, `resultats-principal.txt`) : dénominateur nul, stocks ajoutés, trésorerie et
+  écarts de conversion omis, lecture de `AZ`, applicabilité par la zone, durée N sur N-1,
+  `@RequiresDossierScope` et `@LectureSeule` neutralisées (réécrites compilables), SIG, résultat non
+  affecté, colonne N-1 incomplète, marqueur absent compté 0, arrondi tronqué, CP sans résultat, choix du
+  jeu par libellé, dénominateur négatif, année présumée. Plus, côté sous-agent : B1/B2 (octets et
+  checksum de `balance-service`) et G1–G8 (gardes du générateur, dans un bac isolé).
+- **Revue de code** (opus) : 0 défaut de calcul ni de classement (partition vérifiée poste par poste,
+  arbitrages PO respectés) ; **2 corrigés** — branche morte `versionServie` et son test, décomptes faux
+  dans les commentaires.
+- **Revue de sécurité** (opus) : **0 constat** — routes scopées tenant + dossier (fail-closed), 404
+  partout, `exercice` au charset fermé, `version` entier, corps borné, artefacts vérifiés au chargement.
+- **Vérification docker sur stack NEUVE, état final** (`tmp/verif-docker-552/`, bilan `3c5e6e1`, balance
+  `d26e2b5`) : **163 OK, 0 KO**. Liasse `syscohada-revise@2.2` avec comparatif figée ⇒ `GET …/analyse` :
+  19 indicateurs calculés, **numérateur et dénominateur de chacun recomposés hors du service depuis ses
+  postes, valeur recalculée** (N et N-1) ; cycle = DIO + DSO − DPO ; `stampLiasse` = tampon du snapshot ;
+  deux GET identiques ; `?version=1` identique ; dry-run sans CA ⇒ `null` + `DENOMINATEUR_NUL` ; sans
+  exercice ⇒ `DUREE_EXERCICE_INCONNUE` ; cabinet octroyé SFD ⇒ `NON_APPLICABLE` `sfd-bceao`,
+  `indicateurs: null` ; cabinet B sur le dossier de A ⇒ **404** ; aucune écriture en base.
+  ⚠️ Une première passe : 1 KO venu du **scénario** (dry-run sans dates : la durée est jugée avant le
+  dénominateur) — attente corrigée, stack neuve rejouée.
+- 2026-09-30 — `balance-service#122` (`69bd878`, `1e86316`) puis `bilan-service#150` (`752d50a`,
+  `58a0377`, `ab4e80d`) rebase-mergées ensemble sur `dev`, branches supprimées ; statut `done`.
+
+### Constats ouverts (hors périmètre, à ficher)
+
+- ⛔ **Défaut préexistant de la liasse** : `BilanProductionService.emettreActif`/`emettrePassif` ne
+  parcourent que les postes **présents en N** — un poste soldé en N perd son montant N-1 dans la colonne
+  comparative publiée, alors que `controle.totalActifN1` le compte. L'analyse le détecte
+  (`COLONNE_N1_INCOMPLETE`) ; le Bilan N-1, lui, reste silencieusement incomplet. **Story à ficher.**
+- La cascade des SIG n'a pas de contrôle de réconciliation en colonne N-1.
+- D-552-2 (révision en place de `@2.2`) à confirmer par le PO ; D-552-6 (assiettes DIO/DPO/DSO) par un
+  expert-comptable.
 
