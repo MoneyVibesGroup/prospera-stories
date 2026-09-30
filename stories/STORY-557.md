@@ -1,6 +1,6 @@
 # STORY-557 : Le contrat de balance porte les mouvements antérieurs — la colonne qui manque à l'édition Sage, et les cinq portes qui doivent la fournir
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-017 — Socle `balance-service` + contrat de balance canonique
 **Service :** `balance-service` (`:3007`) — `modules/balance`, ses **cinq** adaptateurs d'entrée
@@ -155,3 +155,9 @@ celle de la comptabilité du client. Les deux nouveaux champs portent ce que **l
   trois blocs sans socle chaîné tout compte qui a un passé (le socle Prospera ne connaît pas
   l'antériorité — à arbitrer par le PO) ; « Solde N-1 » placé avant « Soldes » reste lu comme solde
   (défaut antérieur à la story).
+
+- **Vérification docker (④, stack NEUVE `down -v`, 2026-09-30)** — `tmp/verif-docker-555-557/`, **249 verdicts OK, 0 KO**, commune à 555/556/557 ; p0 prouve les commits exécutés (`balance-service` b962ebb, `bilan-service` 29a7aab, `fiscal-service` d2d744a) et l'identité sha256 hôte = `src` monté, `pdfkit` 0.19.1 dans l'image.
+  Par la VRAIE route d'import Sage, un fichier dans l'ordre de l'édition : en base, `401000.mouvementDebit` = la période (2 000 000,00), **jamais** l'antérieure (3 000 000,00) ; cumuls ×100 ; `COMPLETE` 6/6. Sans bloc : clé **absente** (jamais 0), `ABSENTE`. Soumission directe partielle : `PARTIELLE` 3/6 ; demi-paire ⇒ 400 sans écriture. En-tête de période daté « du … au … » : lu comme la période.
+- **Mutations rejouées en session** : 19/19 rouges (+ 3 de revue), code compilable (`TS:0`).
+- **Intégration (⑧)** : `balance-service#123` rebase-mergée sur `dev` le 2026-09-30 ; branche supprimée APRÈS re-ciblage de #124 (supprimer la base d'une PR empilée la ferme).
+- **2026-09-30 — `done`.** Statut synchronisé : en-tête, `sprint-status.yaml` (+ `completed_date`), ce suivi.
