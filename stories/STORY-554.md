@@ -1,10 +1,11 @@
 # STORY-554 : La lecture courant / non courant est offerte comme SUGGESTION — déclarée, sourcée, et jamais confondue avec le chiffre
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/analyse`, `modules/bilan/referentiel`
 **Points :** 5 · **Sprint :** S20
+**Complexité :** medium
 **Prérequis :** **STORY-552** (les indicateurs sur masses SYSCOHADA — la valeur de référence)
 **Origine :** **arbitrage PO du 2026-08-28** sur STORY-552 : *« voie A oui mais avec suggestion
 possible pour faciliter »*.
@@ -104,3 +105,42 @@ même principe — **retraiter est légitime, ne pas le déclarer ne l'est pas.*
   retraitement fait, ils ne le décrivent pas ; et ils sont bâtis sur des masses qui ne sont pas
   celles du SYSCOHADA révisé. La source doit être comptable et citable — c'est tout l'objet du
   champ `source`.
+
+## Arbitrage PO du 2026-09-30 (rendu avant la première ligne de code)
+
+**Contenant seul.** La mécanique, les gardes de packaging et le contrat sont livrés ; la
+correspondance SYSCOHADA elle-même — chaque déplacement est un choix comptable qui doit citer une
+source — sera peuplée et validée par un expert-comptable dans une story à part. Aucun paquet livré
+ne porte de lecture alternative ⇒ aucun octet d'artefact ne change, **pas de PR jumelle**
+`balance-service`. Branche `MNV-554` **empilée** sur `MNV-553` (même module de gardes, même
+passe d'analyse).
+
+## Décisions de dev (D-554-1..6)
+
+- **D-554-1** — le bloc est **singulier par construction** : `lectureAlternative: { source,
+  deplacements[] }`, lu dans `_meta.lecture_alternative`. Une source qui en déclare une **liste**
+  est refusée au packaging (« un seul jeu ») : deux jeux ne sont même pas représentables dans
+  l'artefact.
+- **D-554-2** — un déplacement est `{ etat, poste, vers, motif }` : le poste change de **masse
+  d'analyse**. Garde `normLectureAlternative` (`gardes-analyse.mjs`), confrontée à la table de
+  passage du paquet et au vocabulaire `MASSES_ANALYSE` de `build.mjs` : poste inconnu ou sans
+  masse, masse cible inconnue / d'un autre état / d'une autre nature / unique, masse déjà portée,
+  poste déplacé deux fois, `source` ou `motif` vides ⇒ refus.
+- **D-554-3** — la valeur alternative est calculée par **la même fonction pure** (`calculerAnalyse`)
+  sur une copie du paquet où les postes déplacés changent de masse : aucune formule dupliquée, et
+  la valeur de référence ne peut pas en dépendre (AC-6).
+- **D-554-4** — un indicateur est « concerné » quand sa **composition** change (postes × terme ×
+  signe, marqueurs ignorés). Un poste qui passe d'une masse à une autre sommée au même terme (le
+  total de l'actif somme immobilisé et circulant) ne concerne pas l'indicateur : sa valeur ne bouge
+  pas. Le cycle d'exploitation hérite des déplacements de ses composantes.
+- **D-554-5** — publication : `lectureAlternative: { suggestion: true, n, n1, postesDeplaces[{ etat,
+  poste, libelle, de, vers, motif }], source, referentiel }`, **absente** (jamais `null`) sur un
+  indicateur non concerné ; colonnes sans verdict (les seuils de 553 jugent la valeur de
+  référence).
+- **D-554-6** — le type TypeScript fixe `suggestion: true` (littéral) et le contrat Swagger
+  `enum: [true]` : aucun chemin ne peut publier la valeur retraitée sans son étiquette.
+
+## Progress Tracking
+
+- 2026-09-30 — arbitrage PO rendu (ci-dessus) ; branches `MNV-554` ouvertes (`docs/`,
+  `bilan-service`, empilée sur `MNV-553`) ; statut `in_progress`.
