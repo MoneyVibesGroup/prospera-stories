@@ -1,10 +1,10 @@
 # STORY-552 : Les indicateurs d'analyse financière — dérivés des masses SYSCOHADA, jamais transposés d'un bilan courant / non courant
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
 **Service :** `bilan-service` (`:3004`) — nouveau `modules/bilan/analyse`
-**Points :** 8 · **Sprint :** S20
+**Points :** 8 · **Sprint :** S20 · **Complexité :** high
 **Origine :** lecture du corpus pédagogique `Image_lecons` (2026-08-28) — les **11 posters
 « Comment analyser »** (structure financière, rentabilité, liquidité, solvabilité, BFR et cycle
 d'exploitation, flux de trésorerie, croissance, prévisions, risques) constituent, formules et
@@ -132,3 +132,26 @@ retraiter est légitime, ne pas le déclarer ne l'est pas.
   d'états, calculé avec un paquet portant les règles de retraitement et un paquet sans, doit
   rendre **les mêmes valeurs de référence**. C'est la preuve exécutable que la voie A n'a pas été
   contaminée.
+
+---
+
+## Arbitrages PO du 2026-09-30 (rendus avant la première ligne de code)
+
+Posés par la session sur les constats du cadrage, tranchés par le PO :
+
+1. **« Autonomie financière »** — le prévisionnel publie déjà un indicateur de ce nom, avec une
+   autre formule (`CP / (CP + dettes financières)`). ⇒ L'analyse publie **`CP / total passif`** sous
+   un **code distinct**, pour qu'aucun écran ne confonde deux chiffres homonymes.
+2. **Dettes financières** (endettement, capacité de remboursement) ⇒ le **marqueur existant
+   `dettesFinancieres`** (emprunts et location-acquisition, STORY-483), **pas** le sous-total `DD`
+   qui inclut les provisions pour risques.
+3. **Cycle d'exploitation** publié ⇒ **DIO + DSO − DPO** (cycle de conversion de trésorerie).
+4. **Désignation des masses** (P7) ⇒ un **nouveau marqueur `masseAnalyse`** dans la table de passage
+   SYSCOHADA (patron `bfr` / `dettesFinancieres`). Il change le checksum des artefacts : recopie dans
+   `balance-service`, donc **deux dépôts et deux PR jumelles**.
+
+## Progress Tracking
+
+- 2026-09-30 — arbitrages PO rendus (ci-dessus) ; branches `MNV-552` ouvertes (`docs/`,
+  `bilan-service`, `balance-service`) ; statut `in_progress`.
+
