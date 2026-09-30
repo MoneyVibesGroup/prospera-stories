@@ -1,6 +1,6 @@
 # STORY-554 : La lecture courant / non courant est offerte comme SUGGESTION — déclarée, sourcée, et jamais confondue avec le chiffre
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/analyse`, `modules/bilan/referentiel`
@@ -144,3 +144,23 @@ passe d'analyse).
 
 - 2026-09-30 — arbitrage PO rendu (ci-dessus) ; branches `MNV-554` ouvertes (`docs/`,
   `bilan-service`, empilée sur `MNV-553`) ; statut `in_progress`.
+- 2026-09-30 — dev (session `opus`, worktree `tmp/wt-554` pendant la vérif docker de 553) : garde
+  `normLectureAlternative`, calcul `analyse.lecture-alternative.ts`, contrat Swagger
+  (`ValeurCalculeeDto` / `LectureAlternativeDto` / `PosteDeplaceDto`) ; aucun octet d'artefact.
+- 2026-09-30 — validation : lint 0 · build OK · 10 739 unitaires + couverture aux seuils · 2 515
+  e2e (dont le contrat OpenAPI d'une réponse AVEC suggestions, sous un paquet augmenté) · **24/24
+  mutations tuées** (`tmp/mutations-554/`). Story sans écriture en base ni artefact modifié ⇒
+  **pas de vérif docker de persistance** (la réponse est prouvée par l'e2e de contrat ; la
+  lecture seule de la route est prouvée par la vérif docker de 553).
+- 2026-09-30 — revue de code (scan `opus`) : **4 constats, tous corrigés** (commit `revue`) — ⛔ un
+  poste portant un autre marqueur lu par l'analyse (`bfr`, `dettesFinancieres`…) aurait été lu à
+  son ancienne place (stock outil retranché deux fois de la liquidité réduite) ⇒ refusé au
+  packaging, liste confrontée aux sélecteurs réels ; un produit pouvait rejoindre une masse de
+  charges ⇒ **famille** de masse au vocabulaire du générateur ; des déplacements pouvaient vider
+  une masse ⇒ refusé ; N-1 retraitée non vérifiée en valeur ⇒ testée ; exemple Swagger incohérent
+  ⇒ neutre.
+- 2026-09-30 — revue de sécurité (scan `opus`, jamais allégée) : **0 constat**.
+- 2026-09-30 — `bilan-service#152` rebase-mergée sur `dev` ; statut **done**.
+- ⚠️ **Pour la story de peuplement** : les retraitements les plus courants (stock outil, comptes
+  courants bloqués) visent des postes qui portent `bfr` ou `dettesFinancieres` — refusés
+  aujourd'hui. Les accepter exigera de dire comment ces marqueurs suivent le poste déplacé.
