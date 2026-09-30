@@ -130,3 +130,28 @@ celle de la comptabilité du client. Les deux nouveaux champs portent ce que **l
 
 - **2026-09-30 — `in_progress`.** Instruction du code faite (cf. cadrage). Branche `MNV-557`
   ouverte sur `balance-service` (base `dev`).
+- **2026-09-30 — développement** (`balance-service#123`, 6 commits). Le défaut du parser est reproduit
+  par un test ROUGE avant correction (dans l'ordre des colonnes de l'édition Sage, les cumuls
+  antérieurs étaient lus comme les mouvements de la période), vert après.
+- **Portes rejouées en session** : lint 0 · build · 4 793 unitaires (99,26 / 93,24 / 98,88 / 99,38) ·
+  1 252 e2e. **Table de mutations** : 22 mutants (champ omis dans `buildCanonique`, `?? 0` réintroduit,
+  regroupement qui garde la 1re ligne, mot-clé antérieur retiré, liste blanche du profil, contrôle
+  exécuté en `PARTIELLE`, `default: 0` au schéma…), chacun rougit sur un code qui compile.
+- **Revue de code (⑥, opus)** — 2 constats retenus, corrigés dans un commit dédié :
+  1. ⛔ *bloquant* — la règle de date rangeait aussi un en-tête de **période** (« Mouvements du
+     01/01/23 au 31/12/23 », « Période du … ») parmi les antérieurs : la période perdait ses
+     mouvements. Un intervalle ou le mot « période » n'est jamais antérieur par la date ; une colonne
+     antérieure *par sa seule date* redevient la période quand son côté n'a pas d'autre mouvement.
+  2. *non bloquant* — des cumuls posés à côté d'une grandeur **dérivée** (profil sans mouvements)
+     déclaraient `COMPLETE` une balance aux mouvements fabriqués : cumuls écartés, avec avertissement.
+  Mutations du correctif : 3/3 rougissent. Lentille ponytail : 6 simplifications de forme, non
+  appliquées (code prouvé par sa table de mutations) — dette nommée : `detecterDivergencesAnteriorite`
+  recopie la boucle de `detecterDivergencesSoldes`, `anterieursIncomplets` celle de `mouvementsIncomplets`.
+- **Revue de sécurité (⑦, opus)** — **0 constat** (regex linéaires, validation des trois entrées
+  HTTP/Kafka/fichier, entier sûr au regroupement, aucune route touchée). Garde de paire et
+  `isSafeInteger` vérifiées dans le validateur.
+- **Points laissés, assumés** : checksum v2 hors cumuls (précédent de `sources`, AC-4) ⇒ renvoyer la
+  même version avec des cumuls ajoutés est un NOP ; `divergencesSoldes` signale sur un fichier Sage à
+  trois blocs sans socle chaîné tout compte qui a un passé (le socle Prospera ne connaît pas
+  l'antériorité — à arbitrer par le PO) ; « Solde N-1 » placé avant « Soldes » reste lu comme solde
+  (défaut antérieur à la story).
