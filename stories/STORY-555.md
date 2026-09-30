@@ -142,3 +142,29 @@ produisible pour cette balance.
 ## Progress Tracking
 
 - **2026-09-30 — `in_progress`.** Instruction du code faite. Démarre après STORY-557 (prérequis).
+- **2026-09-30 — développement** (`balance-service#124`, empilée sur #123). Route
+  `GET /dossiers/:dossierId/balances/:id/export?format=pdf|xlsx|csv` ; document bâti depuis la vue
+  publique de `GET :id` (mêmes lignes, même sommaire persisté, même `anteriorite`) ; en-têtes
+  `Content-Disposition`, `X-Empreinte-Document`, `Cache-Control: no-store`. Balance-service n'a pas
+  d'`AuditService` : aucune trace d'export écrite (constat, pas un oubli).
+- **Portes rejouées en session** (après rebase sur 557 corrigée) : lint 0 · build · 4 880 unitaires
+  (99,27 / 93,26 / 98,91 / 99,4) · 1 280 e2e. **Table de mutations** : 13 mutants (provisoire
+  conditionné autrement, colonne antérieure en `PARTIELLE`, zéros au lieu de l'absence, sommaire
+  recalculé, empreinte après datation, neutralisation retirée ×3, `@Throttle` retiré, route avalée,
+  légende retirée, coût quadratique ×2), tous rouges. Le test de coût juge le **rapport**
+  t(3000)/t(750) : un rendu CSV quadratique passait sous le seul plafond absolu.
+- **Revue de sécurité (⑦, opus)** — ⛔ **1 constat, corrigé dans un commit dédié** : la troncature
+  d'un libellé au PDF retirait un caractère à la fois (n mesures en O(n)) ; le libellé n'étant pas
+  borné à la saisie, **un seul export** d'un libellé de 20 000 caractères gelait la boucle
+  d'événements du service entier ≈ 26 s (mesuré ; CWE-407). Dichotomie : O(n log n). Test de coût qui
+  rougit sur la boucle d'avant (26 189 ms). ⚠️ *Défense en profondeur hors périmètre* : borner
+  `libelle` (`@MaxLength`) à la saisie et à l'import — à ficher.
+- **Revue de code (⑥, opus)** — 4 constats non bloquants, tous corrigés (commit dédié) : numéro de
+  compte **tronqué** au PDF en antériorité complète (colonne désormais insécable, élargie à son plus
+  long contenu aux dépens du libellé) ; format XLSX `'# ##0,00'` sans décimales (→ `#,##0.00`) ;
+  `Content-Disposition`/`X-Empreinte-Document` illisibles par un front cross-origin
+  (`exposedHeaders`, prouvé en vérif docker faute de test sur `main.ts`) ; JSDoc STORY-557 détaché
+  (14ᵉ récidive). Mutations du correctif : 3/3 rougissent — dont une qu'un premier test laissait
+  passer (compte imprimé entier mais débordant sur le libellé) et qui a exigé un test de largeur.
+  ⚠️ Le même format XLSX `'# ##0,00'` existe dans `bilan-service/…/export/rendu-excel.ts` (STORY-073) :
+  **défaut préexistant, à ficher**. Lentille ponytail : 6 simplifications de forme non appliquées.
