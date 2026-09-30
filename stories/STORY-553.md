@@ -1,10 +1,11 @@
 # STORY-553 : Un seuil d'alerte est une donnée de référentiel versionnée — jamais une constante de code
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-014 — Consultation & export — `bilan-service`
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/referentiel`, `modules/bilan/analyse`
 **Points :** 5 · **Sprint :** S20
+**Complexité :** medium
 **Prérequis :** **STORY-552** (les indicateurs eux-mêmes) — cette story n'a aucun objet sans elle.
 **Origine :** lecture du corpus pédagogique `Image_lecons` (2026-08-28) — les tableaux
 « Références des valeurs (repères indicatifs) » des posters d'analyse, et le tableau
@@ -112,3 +113,44 @@ qu'un artefact absent* — vaut ici : des seuils packagés sans axe **secteur** 
 - ⚠️ **Ne pas confondre repère et règle.** Les bornes de cette story colorent un chiffre pour
   aider à lire ; elles ne bloquent aucune validation de liasse. Les contrôles bloquants restent
   les quatre de `controles-coherence` — un ratio n'en devient jamais un cinquième.
+
+## Arbitrages PO du 2026-09-30 (rendus avant la première ligne de code)
+
+1. **Axe secteur ⇒ le code NAEMA du dossier, par préfixe.** Le seuil déclare des préfixes NAEMA
+   normalisés ; le plus long qui couvre le code du dossier l'emporte ; `TOUS` porte les repères
+   généraux. Le read-model dossier de `bilan-service` gagne `codeNaema` — déjà publié par
+   `dossier-service` depuis STORY-529 : **aucun changement de contrat d'événement**.
+2. **Contenant seul.** Aucun paquet livré ne porte de seuils : le corpus `Image_lecons` n'est
+   pas une source citable, et c'est le défaut même que la story dénonce. Le sourcing fera
+   l'objet d'une story à part. ⇒ aucun octet d'artefact ne change, **pas de PR jumelle**
+   `balance-service`.
+
+## Décisions de dev (D-553-1..7)
+
+- **D-553-1** — bloc `seuils` lu dans `_meta.seuils` de la table de passage, émis dans l'artefact
+  par spread conditionnel (un paquet muet reste byte-identique, AC-1) ; `build.mjs` refuse au
+  packaging via `normSeuils` (`scripts/referentiels/gardes-analyse.mjs`).
+- **D-553-2** — les gardes vivent dans un module ESM à part pour être **exécutées** par Jest
+  (`gardes-analyse.spec.ts`, dans un `node` fils) : aucun paquet réel ne les exerce.
+- **D-553-3** — forme d'un seuil : `{ indicateur, sens, bornes[{ niveau, min, max }], source,
+  applicableA: { naema[] } }` ; intervalles `[min, max)` contigus couvrant toute la droite ;
+  niveaux fermés `TRES_BON > BON > ACCEPTABLE > RISQUE`, ordonnés selon `sens` (c'est ce qui dit
+  de quel côté est le rouge) ; un seul seuil par (indicateur, préfixe).
+- **D-553-4** — vocabulaire (indicateurs, sens, niveaux, `TOUS`) dans `seuils-vocabulaire.json`,
+  lu par le générateur et importé par le TypeScript ; une spec confronte la liste des
+  indicateurs à `CODES_INDICATEUR`.
+- **D-553-5** — le verdict est posé par une **passe à part** (`analyse.seuils.ts`) après le
+  calcul : aucune valeur n'en dépend. Chaque colonne porte `verdict` + `motifVerdict`
+  (`AUCUN_REPERE_DECLARE` | `VALEUR_INDETERMINEE`) — un **code**, le libellé de l'AC-3 est dans
+  le contrat Swagger. L'indicateur porte `seuilApplique: { sens, bornes, source, secteurRetenu,
+  referentiel: { code, version } }` ou `null`.
+- **D-553-6** — la réponse publie `codeNaema` **normalisé** (majuscules et chiffres) : l'axe sur
+  lequel les seuils ont été résolus. Sans code, seuls les repères `TOUS` s'appliquent — jamais
+  un secteur supposé.
+- **D-553-7** — les préfixes se comparent à la forme que porte le dossier : un code `47.11`
+  (normalisé `4711`) est couvert par `47`, pas par `G47`. À dire au sourcing.
+
+## Progress Tracking
+
+- 2026-09-30 — arbitrages PO rendus (ci-dessus) ; branches `MNV-553` ouvertes (`docs/`,
+  `bilan-service`) ; statut `in_progress`.
