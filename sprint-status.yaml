@@ -4198,7 +4198,7 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "balance-service"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la verif docker de STORY-677 : brouillon SN depose sous @2.1, habilitation passee a smt-togo@1.0, POST valider → 200 VALIDEE + outbox + projection bilan ; seul le depot passe par le resolveur. Defaut ANTERIEUR, identique sur dev.
+        status: "in_progress"  # ⬆ 2026-09-30 : EN COURS (MNV-679 : balance-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la verif docker de STORY-677 : brouillon SN depose sous @2.1, habilitation passee a smt-togo@1.0, POST valider → 200 VALIDEE + outbox + projection bilan ; seul le depot passe par le resolveur. Defaut ANTERIEUR, identique sur dev.
         story_path: "stories/STORY-679.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-680"
