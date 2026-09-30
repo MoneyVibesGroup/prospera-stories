@@ -1,10 +1,10 @@
 # STORY-557 : Le contrat de balance porte les mouvements antérieurs — la colonne qui manque à l'édition Sage, et les cinq portes qui doivent la fournir
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-017 — Socle `balance-service` + contrat de balance canonique
 **Service :** `balance-service` (`:3007`) — `modules/balance`, ses **cinq** adaptateurs d'entrée
-**Points :** 8 · **Sprint :** S20
+**Points :** 8 · **Sprint :** S20 · **Complexité :** high · **Assigné à :** `vivianMoneyVibesGroupes`
 **Origine :** **arbitrage PO du 2026-08-28** sur STORY-555 — *« exporter la balance au format Sage
 pour obtenir un format identique »*. C'est la **voie B**, celle que STORY-555 avait mise hors
 périmètre en la renvoyant à une fiche propre. La voici.
@@ -100,3 +100,33 @@ ne l'auront jamais. Un champ obligatoire les casserait toutes.
 - ⚠️ **Instruire `POST …/balance/a-nouveaux` avant de conclure** (STORY-087) : c'est le seul endroit
   du produit où des cumuls d'exercice antérieur pourraient déjà exister. À regarder dans le code,
   pas à déduire de son nom.
+
+## Cadrage de conception — instruction du code (2026-09-30)
+
+⛔⛔ **Le défaut n'est pas seulement une colonne absente : elle est aujourd'hui LUE À LA PLACE
+d'une autre.** `sage-parser.service.ts` classe une colonne en « mouvement » dès que son en-tête
+contient `mouvement` (`MOTS_MOUVEMENT`), et retient la **première** (`mouvements[0]`). Dans
+l'édition Sage, « Mouvements au 31/12/N-1 » **précède** « Mouvements » : ce sont les cumuls
+antérieurs qui entrent comme mouvements de l'exercice. La colonne antérieure doit être reconnue
+**avant** la classification mouvement / solde — test rouge d'abord, dans l'ordre réel des colonnes.
+
+⚠️ **`aNouveauDebit` / `aNouveauCredit` existent déjà sur la ligne — et ne sont PAS cette colonne.**
+Ils sont **constatés depuis le socle Prospera** (`aNouveauxDuSocle`, STORY-423) : c'est
+l'antériorité *vue par le produit*, exactement ce que le hors-périmètre interdit de présenter comme
+celle de la comptabilité du client. Les deux nouveaux champs portent ce que **la source** déclare.
+
+| Point de décision | Décision |
+|---|---|
+| `anteriorite` | **Dérivée** des lignes par une fonction pure, jamais persistée : toujours cohérente, aucune migration, et une balance d'avant la story se lit `ABSENTE` sans réécriture (AC-4). Forme : `{ statut, lignesPorteuses, lignesTotal }`. |
+| Recopies explicites | `buildCanonique`, `versLigne`, `LigneView`, `lireSoumission`, `LigneBalanceDto`, `CHAMPS_MAPPING.BALANCE` (liste blanche qui **supprime en silence**) — chacune porte les deux champs, jamais `?? 0`. |
+| Regroupement de comptes (`normaliserEtRegrouper`) | Les cumuls **se somment** ; une seule ligne du groupe sans antériorité ⇒ la ligne regroupée n'en porte pas. |
+| Reprise d'à-nouveaux (STORY-087) | **Instruite** : `lignesReportees` produit un socle de **soldes**, mouvements à 0. Aucun cumul N-1 n'existe dans le produit ⇒ `ABSENTE`, rien de fabriqué. |
+| Balances dérivées (provisions, dotations, inventaire) | Une ligne héritée de la base **conserve** son antériorité (les écritures de la période ne réécrivent pas le passé) ; une ligne créée par la dérivation n'en a pas ⇒ `PARTIELLE`. |
+| Saisie directe / `balance.submitted` | Le contrat HTTP et l'événement entrant acceptent les deux champs **optionnels** (ajout de propriétés facultatives : rétrocompatible) — c'est la forme publique de STORY-101. |
+| Checksum | `sceller` v2 ne projette pas les champs optionnels ⇒ **aucun checksum existant ne bouge** (témoin AC-4). |
+| Contrôle AC-5 | `(antD − antC) + (mvtD − mvtC) = soldeD − soldeC` par compte, publié comme `detecterDivergencesSoldes` (plafonné, total donné), **uniquement** si `COMPLETE`, jamais bloquant. |
+
+## Progress Tracking
+
+- **2026-09-30 — `in_progress`.** Instruction du code faite (cf. cadrage). Branche `MNV-557`
+  ouverte sur `balance-service` (base `dev`).
