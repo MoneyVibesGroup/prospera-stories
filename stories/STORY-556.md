@@ -180,3 +180,31 @@ de la liasse ne déclare pas (`@2.1`) est **non modélisée**, jamais vide (AC-2
 
 - **2026-09-30 — `in_progress`.** Recadrage + arbitrage user (scission `bilan-service` / `fiscal-service`).
   Branches `MNV-556` ouvertes sur les deux dépôts (base `dev`).
+- **2026-09-30 — développement** (PR jumelles `bilan-service#153` + `fiscal-service#10`).
+  - `bilan-service` : `GET …/etats/:id/versions/:version/contenu` (mêmes gardes, même 404, même
+    revérification d'empreinte que `versions/:version`) ; refus `CONTENU_AMBIGU` si deux lignes
+    figées portent la même clé. ⚠️ **Constat** : la liasse figée porte bilan actif/passif,
+    sous-totaux, compte de résultat, TFT — **pas** de résultat fiscal ni de liquidation IS (déclarés
+    au référentiel, non produits par le moteur) : les « six états » de la fiche étaient quatre.
+  - `fiscal-service` : correspondance des 92 feuilles (`src/modules/completude-depot/assets/tg-dsf-1.0.json`)
+    qui désigne le paquet scellé par son empreinte — paquet **inchangé** (`paquet:tg-dsf:verifier`
+    conforme, `2b6784de…`) ; classement : 4 états, 1 page de garde, 1 identification, 42 feuilles de
+    notes (43 notes), 8 calculées par le classeur (0 case de saisie), 36 non modélisées ;
+    `GET /v1/livrables-depot/:pays/:etat/completude` (10/min). Les 8 contrôles OTR : n°1 ↔
+    `EQUILIBRE_BILAN`, n°2 ↔ `RESULTAT_NON_AFFECTE`, n°3 → n°8 non couverts, nommés avec leur formule.
+- **Portes rejouées en session** : bilan lint 0 · build · 10 766 unitaires (99,39 / 97 / 99,58 / 99,5)
+  · 2 521 e2e ; fiscal lint 0 · build · 1 299 unitaires (99,19 / 96,1 / 98,89 / 99,57) · 106 e2e.
+  Table de mutations : 9 mutants de dev + 1 (bilan) et 3 (fiscal) de revue, tous rouges.
+- **Revue de code (⑥, opus)** — ⛔ **1 constat, retenu comme bloquant** (la revue le classait
+  non bloquant) : la règle de statut testait « aucune matière » AVANT `detailACompleter`, si bien
+  que les **douze trames vierges** du classeur (notes 1, 3B, 8A, 15B, 16B, 16Bbis, 16C, 27B, 31→34)
+  sortaient « déclarées vides » — lu « rien à déclarer », précisément ce que l'AC-2 interdit.
+  Corrigé des deux côtés : `bilan-service` rend `A_COMPLETER` dès que le détail reste à saisir ;
+  `fiscal-service` gagne une **sixième liste `aCompleter`**, prioritaire (l'action du cabinet
+  prime). Effectifs AC-6 : **@2.2 = 6 produites + 27 à compléter + 15 non transcrites + 0 vide + 36
+  non modélisées + 8 calculées = 92** ; **@2.1 = 6 + 2 + 8 + 0 + 68 + 8 = 92**.
+- **Revue de sécurité (⑦, opus)** — **0 constat** (gardes et 404 identiques à `versions/:version`,
+  identifiants `@EstObjectId` + `encodeURIComponent` avant l'appel amont, jeton relayé sans journal,
+  corps amont plafonné à 16 Mio, clés de dictionnaire filtrées par motif).
+- Lentille ponytail : 9 simplifications de forme non appliquées (validateurs de forme dupliqués entre
+  `correspondance-classeur.ts` et `schema-classeur.ts`, `effectifs` dérivables) — dette nommée.
