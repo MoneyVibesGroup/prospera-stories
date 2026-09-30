@@ -1,6 +1,6 @@
 # STORY-555 : La balance entre dans le produit et n'en ressort jamais — aucune route ne l'exporte, et une colonne du format Sage n'est pas dérivable
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-017 — Socle `balance-service` + contrat de balance canonique
 **Service :** `balance-service` (`:3007`) — `modules/balance`
@@ -168,3 +168,9 @@ produisible pour cette balance.
   passer (compte imprimé entier mais débordant sur le libellé) et qui a exigé un test de largeur.
   ⚠️ Le même format XLSX `'# ##0,00'` existe dans `bilan-service/…/export/rendu-excel.ts` (STORY-073) :
   **défaut préexistant, à ficher**. Lentille ponytail : 6 simplifications de forme non appliquées.
+
+- **Vérification docker (④, stack NEUVE `down -v`, 2026-09-30)** — `tmp/verif-docker-555-557/`, **249 verdicts OK, 0 KO**, commune à 555/556/557 ; p0 prouve les commits exécutés (`balance-service` b962ebb, `bilan-service` 29a7aab, `fiscal-service` d2d744a) et l'identité sha256 hôte = `src` monté, `pdfkit` 0.19.1 dans l'image.
+  Trois formats : types exacts, pièce jointe, même empreinte sur deux tirages ET entre formats ; `PROVISOIRE` en tête ; colonnes antérieures seulement en `COMPLETE` ; totaux = sommaire EN BASE ; `?provisoire=false` ⇒ 400 ; B ⇒ 404 ; **CORS** : `Access-Control-Expose-Headers` = `Content-Disposition, X-Empreinte-Document` pour une origine autorisée ; aucune écriture (compteurs de toutes les collections identiques) ; après validation, plus de mention et l'empreinte change.
+- **Mutations rejouées en session** : 13/13 rouges (+ 4 de revue/sécurité).
+- **Intégration (⑧)** : `balance-service#124` re-ciblée sur `dev` après #123, rebasée (ne restent que ses 5 commits), rebase-mergée ; `dev` = l'arbre vérifié, octet pour octet.
+- **2026-09-30 — `done`.** Statut synchronisé : en-tête, `sprint-status.yaml` (+ `completed_date`), ce suivi.
