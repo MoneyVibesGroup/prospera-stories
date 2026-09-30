@@ -1,10 +1,10 @@
 # STORY-550 : « Rechercher l'erreur » n'est pas outillé — un bilan déséquilibré ne rend que trois totaux et aucune piste
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-011 — États financiers (liasse OHADA : Bilan, CR, TFT/TAFIRE, annexes)
 **Service :** `bilan-service` (`:3004`) — `modules/bilan/etats`
-**Points :** 5 · **Sprint :** S20
+**Points :** 5 · **Sprint :** S20 · **Complexité :** medium
 **Origine :** lecture du corpus pédagogique `Image_lecons` (96 fiches, 2026-08-28) — la fiche
 **« Construire un bilan » 6/7** clôt son pipeline par une 5ᵉ étape que le service n'outille pas :
 *« Si oui → bilan équilibré ✓. **Si non → rechercher l'erreur.** »*
@@ -117,3 +117,109 @@ balance.
 - ⛔ **Ne pas dériver ce diagnostic du corpus pédagogique lui-même.** Ses numéros de comptes
   sont ceux du plan comptable **français** (`512` Banque, `641` Salaires, `707` Ventes de
   marchandises), pas SYSCOHADA. Seuls ses **cas** servent, jamais ses codes.
+
+---
+
+## Cadrage du 2026-09-29 — ce que le code dit, et les décisions qui en sortent
+
+### Le fait qui structure tout : l'écart n'a que TROIS sources
+
+`BilanProductionService.agreger` cumule les lignes par compte, choisit **un** poste par compte, et
+`ecartN = totalActif − (totalPassif + résultat)` vaut exactement **`Σ (débit − crédit)` des comptes qui
+ont atteint un poste**. D'où l'identité, exacte :
+
+```
+ecartN = desequilibreBalance − Σ solde(non affectés) − Σ solde(rattachés sans règle)
+```
+
+où `desequilibreBalance = Σ débit − Σ crédit` de la balance source. Aucune autre cause n'est possible :
+c'est ce qui rend les pistes **calculables** au sens de la story, et la ventilation **exacte**.
+
+### Constats (prémisses vérifiées contre le code)
+
+1. **« `comptesNonMappes` est un `string[]` sans montant » est périmé** : STORY-401 publie déjà
+   `soldesComptesNonMappes` (compte + solde net) dans `BilanDto`. Le montant de chaque compte écarté
+   est donc déjà au contrat ; la story le **reprend dans la piste n°1** (au contrôle lui-même), sans
+   second canal.
+2. ⛔ **AC-4 n'est pas atteignable tel qu'écrit : `COHERENCE_RESULTAT` ne peut pas rougir sur « le
+   résultat non reporté ».** Il compare deux fois la même agrégation (`resultatNetCR` et
+   `resultatNetBilan`, constat déjà posé par STORY-426), et le moteur **place** le résultat au passif
+   par construction. Dans le moteur, « le résultat n'atteint pas le passif » prend la forme d'un compte
+   de résultat (`13`) qui n'atteint aucun poste — et c'est alors la **ventilation** (piste n°2) qui loge
+   l'écart en classe 1, `COHERENCE_RESULTAT` restant `OK`. La fixture le montre au lieu de le cacher.
+3. ⛔ **AC-3 tel qu'écrit (« un même compte alimente un poste d'actif et un poste de passif ») est
+   impossible dans le moteur** : un compte est placé sur **un seul** poste par colonne (ventilation au
+   solde pour les classes 4/5). La forme ALVAREZ, dans une balance, est **un même solde saisi deux
+   fois** — le moteur cumule les lignes d'un compte avant de le placer, sans rien en dire.
+4. **Piste n°3 (STORY-486) déjà en partie fermée par STORY-676** : une **surcharge** vers une cible sans
+   détail rend désormais le compte **non mappé**. Reste le cas d'un rattachement **par le paquet** sans
+   règle exploitable (`choisirRattachementBilan` → `undefined`) : aucun artefact livré ne le produit,
+   un référentiel **déposé** le peut. La piste le nomme.
+
+### Décisions
+
+- **D-550-1 — la matière vient de la passe d'agrégation, la publication de la batterie.** `BilanProduit`
+  gagne `diagnosticEquilibre` (`desequilibreBalance`, `comptesSansRegle`, `comptesSurPlusieursLignes`),
+  calculé dans `agreger` — jamais recalculé à côté. `ControleArticulation` gagne `pistes?`, porté par
+  **`EQUILIBRE_BILAN` seul**.
+- **D-550-2 — AC-4 amendé** (constat 2) : fixture Bénin = compte `131000` (résultat 400 000) à la
+  balance, surchargé vers `CP` (sous-total, donc non mappé) ⇒ `EQUILIBRE_BILAN` en anomalie,
+  **`COHERENCE_RESULTAT` `OK`** (démontré, non caché), ventilation `[{ classe: '1', effet: 400 000 }]`.
+- **D-550-3 — AC-3 amendé** (constat 3) : piste n°4 = **comptes présents sur plusieurs lignes de la
+  balance source**, avec chaque ligne. Fixture ALVAREZ = balance juste + trésorerie `521000` saisie une
+  seconde fois (3 000 000) ⇒ `ecartN = 3 000 000`, la piste nomme `521000`.
+- **D-550-4 — la ventilation n'attribue que ce qui s'attribue.** `parClasse` = effet sur l'écart
+  (`−Σ solde`) des comptes écartés (non affectés + sans règle), par premier caractère du compte (la
+  classe, sans présumer le plan — P7), classes à effet nul omises ; la part due à la balance source
+  déséquilibrée est publiée **à part** (`desequilibreBalance`) : l'attribuer à une classe serait deviner
+  où manque l'écriture. Invariant testé : `Σ effet + desequilibreBalance = ecart`.
+- **D-550-5 — piste n°1 signée** : `soldeNet` (signé), `montantAbsolu`, et `expliqueLEcart ⟺ au moins
+  un compte ∧ ecartN = −soldeNet` (un solde débiteur écarté minore l'actif). Vraie aussi pour un
+  équilibre compensé (`0 = −0`) : c'est précisément le cas où l'équilibre ne prouve rien (AC-5).
+- **D-550-6 — en `OK`** : piste n°1 publiée (éventuellement vide), les trois autres à `null`
+  (non publiées). Aucun verdict ne change ; les `ref` historiques des `elements` sont inchangés.
+- **D-550-7 — `MOTEUR_VERSION` 1.20.0 → 1.21.0** : deux clés de plus dans chaque snapshot figé (sonde
+  `moteur-version.spec.ts` mise à jour), aucun montant ni verdict ne bouge.
+- **D-550-8 — contrat** : tous les nouveaux objets sont des **classes DTO** (`PistesEquilibreDto`,
+  `PisteComptesEcartesDto`, `VentilationEcartDto`, `EffetParClasseDto`, `CompteSansRegleDto`,
+  `CompteSurPlusieursLignesDto`, `LigneBalanceSourceDto`, `DiagnosticEquilibreDto`) avec `type`
+  explicite — jamais un tableau déduit d'un `example` (AC-6).
+
+## Progress Tracking
+
+- 2026-09-29 — cadrage (D-550-1..8) ; branches `MNV-550` ouvertes (`docs/`, `bilan-service`) ; statut
+  `in_progress`.
+- 2026-09-29 — dev (`bilan-service` `MNV-550`) : `diagnosticEquilibre` relevé dans la passe
+  d'agrégation N, `pistes` publiées par `EQUILIBRE_BILAN`, 8 DTO typés, `MOTEUR_VERSION` 1.21.0.
+  Spec `equilibre-pistes-syscohada.spec.ts` sur l'artefact réel (ALVAREZ, Bénin, compensé, trois
+  sources à la fois, compte sur trois lignes) + e2e de contrat (AC-6).
+- **Portes** (état final) : lint 0 · build OK · 280 suites / 10 543 unitaires + 2 489 e2e verts ·
+  couverture ≥ seuils.
+- **Mutations — 11/11 tuées, toutes COMPILABLES** (`tmp/verif-docker-550/mutations.sh`) : signe de
+  `expliqueLEcart`, pistes publiées en `OK`, signe de l'effet par classe, première ligne perdue,
+  troisième ligne perdue, compte sans règle oublié, déséquilibre de la balance à 0, classe à effet
+  nul publiée, compte à solde nul listé, sans-règle hors ventilation, `expliqueLEcart` sans compte.
+  ⚠️ Une première rédaction du mutant « pistes en OK » ne COMPILAIT pas (« Tests: 0 total ») :
+  réécrite ; la passe distingue désormais « non exécutée » de « survit ».
+- **Revue de code** (opus) : 0 bloquant ; 2 constats corrigés (commit `MNV-550(revue)`) — la passe
+  N-1 calculait un diagnostic jeté (et pouvait lever `MONTANT_HORS_BORNES` pour rien), chaque ligne
+  de la balance était copiée ; **1 laissé** : `soldeNet`/`montantAbsolu` sommés sans borne, comme le
+  fait déjà `COMPTES_NON_AFFECTES` (irréaliste en XOF : 5 000 lignes au plus).
+- **Revue de sécurité** (opus) : **0 constat** — bornes réelles vérifiées (`@ArrayMaxSize(5000)`,
+  pire cas ≈ 0,5 Mo par snapshot), aucune donnée hors de la balance fournie par l'appelant, aucun
+  verdict ni gate 422 altéré, exemples Swagger fictifs.
+- **Vérification docker sur stack NEUVE, état final** (`tmp/verif-docker-550/`, `181d4e8`) :
+  **63 OK, 0 KO**. Code de la branche prouvé (restart + « Found 0 errors », sha256 hôte = monté,
+  marqueurs compilés). Dossier X : balance juste validée, jeu reçu avec `521000` saisie deux fois ⇒
+  `ANOMALIE`, écart 9 000 000, piste n°4 = `521000` sur deux lignes, ventilation
+  `desequilibreBalance: 9 000 000` sans classe, `ref` historiques inchangés ; relu par GET
+  (recalcul depuis la base) identique ; `jeux_etats.soldesN` porte bien les deux lignes (mongosh) ;
+  validation **422 `LIASSE_NON_VALIDABLE`**, **0 snapshot**. Dossier Y : balance juste ⇒ `OK`, piste
+  n°1 publiée vide, trois `null` ; liasse figée v1 ; en base (`snapshots_liasse`) `moteurVersion
+  1.21.0`, pistes et `diagnosticEquilibre` figés avec les **tableaux vides conservés**
+  (`minimize: false`) ; `GET …/versions/1` rend exactement ce qui est en base.
+  ⚠️ Deux lancements précédents avortés par le démon Docker (500 sur l'API, puis blocage) :
+  Docker Desktop redémarré, `down -v` rejoué à la main, vérif relancée de zéro.
+- 2026-09-30 — `bilan-service#148` rebase-mergée sur `dev` (`62f47c7`, `53ae437`), branche
+  supprimée ; statut `done`.
+
