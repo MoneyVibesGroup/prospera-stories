@@ -4207,7 +4207,7 @@ sprints:
         epic: "EPIC-032"
         points: 13
         service: "fiscal-service (paquet TG/DSF v1.1) ; bilan-service lu"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la cloture de STORY-537 : les notes y ont ete mises hors perimetre, mesure a l appui (4 291 cellules de saisie, lignes par nature a rattacher aux comptes, sourcees).
+        status: "in_progress"  # ⬆ 2026-10-01 : EN COURS (MNV-680 : fiscal-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la cloture de STORY-537 : les notes y ont ete mises hors perimetre, mesure a l appui (4 291 cellules de saisie, lignes par nature a rattacher aux comptes, sourcees).
         story_path: "stories/STORY-680.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-681"
