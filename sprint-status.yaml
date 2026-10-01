@@ -4207,9 +4207,10 @@ sprints:
         epic: "EPIC-032"
         points: 13
         service: "fiscal-service (paquet TG/DSF v1.1) ; bilan-service lu"
-        status: "in_progress"  # ⬆ 2026-10-01 : EN COURS (MNV-680 : fiscal-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la cloture de STORY-537 : les notes y ont ete mises hors perimetre, mesure a l appui (4 291 cellules de saisie, lignes par nature a rattacher aux comptes, sourcees).
+        status: "done"  # ✅ CLOTUREE 2026-10-01 — prospera-fiscal-service#11 rebase-mergee. Paquet TG x DSF v1.1 : 3 555 cases de saisie (42 feuilles de notes) — 453 rattachees aux comptes (prefixe le plus long, sourcees), 1 002 de trame, 2 100 vierges tracees ; 19 feuilles remplies ; v1.0 archivee. Excel : controles OTR VRAI, notes = postes. Revue de code : 1 BLOQUANT corrige (NOTE 6 colonne N-1 tenue par formule du formulaire = stocks doubles) + 2 non-bloquants. Securite : 0. Suites : 688, 689, 690. — Historique — ⬆ 2026-10-01 : EN COURS (MNV-680 : fiscal-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la cloture de STORY-537 : les notes y ont ete mises hors perimetre, mesure a l appui (4 291 cellules de saisie, lignes par nature a rattacher aux comptes, sourcees).
         story_path: "stories/STORY-680.md"
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-10-01"
       - story_id: "STORY-681"
         title: "Un accuse consigne dans fiscal-service ne marque pas la liasse deposee — la propagation ACCEPTEE -> DEPOSE"
         epic: "EPIC-032"
@@ -4265,6 +4266,30 @@ sprints:
         service: "bilan-service — module consolidation"
         status: "ready-for-dev"  # 🆕 CREEE le 2026-09-26 par le cadrage de STORY-542 (M7, D-542-11) : le libelle de RESULTATS_INTERNES promettait les dividendes internes (ANC 2020-01 art. 251-2 : elimines en totalite) sans qu aucun AC de 542 ne les couvre — effet d impot PERMANENT (contredit l AC-5 de 542) et prorata du BENEFICIAIRE ; nomme DIVIDENDES_INTERNES, NON_TRAITE, requis pour consolider.
         story_path: "stories/STORY-687.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-688"
+        title: "Un compte a solde inverse refuse le livrable e-DSF entier — 411 crediteur sous BI, 47 qui change de sens"
+        epic: "EPIC-032"
+        points: 3
+        service: "fiscal-service (garde AC-3 de 680)"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-01 par la revue de STORY-680 : la garde LIASSE_NON_TRANSCRIPTIBLE refuse tout le classeur (etats compris) quand un compte porte un montant dans une colonne sans ligne (ex. 411100 amortN sous BI -> note 7 ; 471000 amortN1 sous BJ -> note 8). Conforme a AC-3, mais la v1.0 produisait ces liasses. A trancher : note vierge tracee, ou ligne de reclassement.
+        story_path: "stories/STORY-688.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-689"
+        title: "Un depot transmis enregistre le paquet actif, pas la version qui a produit le fichier"
+        epic: "EPIC-032"
+        points: 2
+        service: "fiscal-service (depots, STORY-538)"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-01 par la revue de STORY-680 : depots.service transmettre releve la reference du paquet ACTIF ; un livrable produit en v1.0 puis transmis apres le passage en v1.1 serait enregistre 1.1. Lire la version inscrite dans le fichier (PROSPERA format version).
+        story_path: "stories/STORY-689.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-690"
+        title: "Les 23 feuilles de notes encore laissees au cabinet — mouvements, zones geographiques, trames a libelle imprime"
+        epic: "EPIC-032"
+        points: 8
+        service: "fiscal-service (paquet TG x DSF v1.2) ; bilan-service (plan)"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-01 par la cloture de STORY-680 : notes 1, 3A-3D, 8A, 12, 15B, 16B, 16B bis, 16C, 21, 22, 26, 27B, 28, 30, 31, 34 vierges tracees ; trames MIXTE sur lignes a libelle imprime (4, 7, 8, 15A, 16A-19) non transcrites. Arbitrages de plan : 484 vs 485 (creances HAO), 185/188 sous DA (DSF : note 19).
+        story_path: "stories/STORY-690.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-396"
         title: "Une panne d infrastructure est rendue au cabinet comme « votre piece est illisible »"
