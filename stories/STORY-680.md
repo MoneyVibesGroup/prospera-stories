@@ -1,6 +1,6 @@
 # STORY-680 : Les 43 feuilles de notes du fichier e-DSF Togo — 4 291 cases à rattacher, ligne par ligne, aux comptes
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` (paquet `TG` × `DSF`, v1.1) — `bilan-service` lu (notes annexes de la liasse figée)
@@ -41,4 +41,6 @@ notes** sortent **vierges** : le cabinet les complète dans Excel.
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-09-25).** Créée par la clôture de STORY-537.
+**Statut : `in_progress` (2026-10-01).** Branche `MNV-680` ouverte (fiscal-service + docs).
+
+- 2026-09-25 — `ready-for-dev`. Créée par la clôture de STORY-537.
