@@ -4224,7 +4224,7 @@ sprints:
         epic: "EPIC-032"
         points: 5
         service: "fiscal-service (MinIO, bucket prive)"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : decision user — empreinte seule en 538, archivage en story a part.
+        status: "in_progress"  # ⬆ 2026-10-01 : EN COURS (MNV-682 : fiscal-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : decision user — empreinte seule en 538, archivage en story a part.
         story_path: "stories/STORY-682.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-683"

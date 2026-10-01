@@ -1,6 +1,6 @@
 # STORY-682 : Le fichier réellement transmis n'est pas conservé — seule son empreinte l'est
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `fiscal-service` (MinIO, bucket privé)
@@ -33,4 +33,6 @@ et le classeur rempli par 537 ne se régénère pas à l'identique si le classeu
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-09-25).** Créée par la clôture de STORY-538.
+**Statut : `in_progress` (2026-10-01).** Branche `MNV-682` ouverte (fiscal-service + docs).
+
+- 2026-09-25 — `ready-for-dev`. Créée par la clôture de STORY-538.
