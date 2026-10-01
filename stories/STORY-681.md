@@ -32,6 +32,10 @@ main dans bilan-service — le même fait, saisi deux fois.
 - [ ] AC-3 — `bilan-service` consomme de façon **idempotente** (`ProcessedEvent`) et pose `DEPOSE` avec
       les faits du dépôt ; ⚠️ le signataire exigé par STORY-446 n'est pas porté par fiscal-service :
       trancher (champ facultatif côté bilan, ou saisie à l'accusé) **avant** le code.
+      ✅ **Tranché le 2026-10-01 (user) : saisi à l'accusé.** `POST …/accepter` de fiscal-service exige
+      `signataire { nom, numeroOrdre }` (mêmes règles que `SignataireDepotDto` de bilan-service), conservé
+      sur le dépôt et porté par l'événement ; bilan-service garde son invariant (un `DEPOSE` a toujours
+      un signataire). ⚠️ Donnée personnelle d'un tiers sur le bus : jamais journalisée.
 - [ ] AC-4 — Un rejet **ne** publie **pas** `DEPOSE` ; une liasse déjà `DEPOSE` ne se réécrit pas.
 - [ ] AC-5 — La divergence publiée par `GET /depots` disparaît sans saisie manuelle — prouvé en docker.
 
