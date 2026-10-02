@@ -1,6 +1,6 @@
 # STORY-684 : Au démarrage à froid, le consommateur KYC de dossier-service crashe et ne revient jamais
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-012
 **Service :** `dossier-service` (consommateur `kyc.status.changed`, groupe `dossier-kyc`)
@@ -258,3 +258,33 @@ de `dossier-service` ; portes vertes (lint 0, build OK, 1726 unitaires, 351 e2e,
 99.46/94.67/98.58/99.57) ; table de mutations M1–M10 toutes rouges. Commit `6903ede` sur `MNV-684`, non
 poussé. **Reste** : vérification docker (scénario ci-dessus), revues ⑥/⑦, puis `review`.
 `sprint-status.yaml` non modifié à ce stade (consigne).
+
+**2026-10-02 — ✅ `done`. `prospera-dossier-service#37` rebase-mergée sur `dev` (`f992a39`, `817b8b1`).**
+
+- **Revue de code (⑥)** — 0 bloquant, 2 non-bloquants **corrigés** (commit `673659a`) : C1 `arreter()`
+  pendant une tentative en cours laissait le consommateur rejoindre son groupe après la fin du module
+  (`arrete` relu après `connect()` et `subscribe()`) ; C2 le `groupId` était recopié deux fois (consommateur
+  et registre de santé) — un copier-coller incohérent rendait `/health` aveugle : la supervision crée
+  désormais elle-même le consommateur depuis `groupId`. 3 mutants neufs (MC1a, MC1b, MC2) rouges. Seconde
+  lentille (over-engineering) : rien à retirer.
+- **Revue de sécurité (⑦)** — **0 constat** ≥ 80. Écarté (informatif, CWE-200) : la réponse 503 publique de
+  `/health` nomme les groupes hors groupe — même ordre que le message d'erreur broker qu'elle exposait déjà.
+- **Portes sur l'état final** : lint 0, build OK, 1 729 unitaires (99,46 / 94,68 / 98,58 / 99,57), 351 e2e.
+  Mutations rejouées en session : M1, M6, M8 + MC1a, MC1b, MC2 — toutes rouges.
+- **Vérification docker (AC-3), stack neuve, passe 2** (`tmp/verif-docker-684/passe-2/`) :
+  1. Mongo + `dossier-service` seuls (`--no-deps`), **Kafka absent** : HTTP up, `/health` **503**
+     `kafka: down` (invariant 4 — le process répond).
+  2. Relances journalisées, délai **1 → 2 → 4 → 8 → 16 s puis plafonné à 30 s** ; Kafka laissé absent
+     ~30 min : `dossier-kyc` a tenu **49 relances** sans jamais abandonner.
+  3. Kafka démarré : les **4 groupes rejoignent** (`dossier-kyc` 40 s après le Kafka sain) ; broker :
+     `dossier-kyc` a 1 membre ; `/health` **200**.
+  4. Témoin négatif : `POST /dossiers` avant approbation ⇒ **403 `KYC_NOT_APPROVED`** ; KYC approuvé ⇒
+     `dossier_service.orgkycstatuses` = `APPROVED` en 3 s ; `POST /dossiers` ⇒ **201**. 4 OK / 0 KO.
+  5. Coupure de Kafka **en cours de route** : `/health` 503, kafkajs relance lui-même (`restart: true`,
+     journalisé, aucun second `run()`), `dossier-kyc` rejoint 25 s après le retour, `/health` 200.
+  ⚠️ Passe 1 (2026-10-02 matin) abandonnée aux étapes 7-8 : VM Docker à 4 Go saturée (conteneurs en
+  137, Kafka tué) — rejouée entièrement sur VM 8 Go. Le cas exact `KafkaJSGroupCoordinatorNotFound` reste
+  prouvé par le test contre le vrai code kafkajs (non provocable à la demande en docker).
+- **AC-4** : 45 consommateurs sur 10 services partagent le défaut (liste ci-dessus) — fiché en story de
+  suite à la clôture du lot 683-685.
+
