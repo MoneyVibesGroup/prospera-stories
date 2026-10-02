@@ -4242,9 +4242,10 @@ sprints:
         epic: "EPIC-012"
         points: 3
         service: "dossier-service"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : observe en verif docker 538 (passe 1) : KafkaJSGroupCoordinatorNotFound, groupe dossier-kyc jamais re-joint, read-model KYC vide, POST /dossiers en 403. Invariant 4. Intermittent.
+        status: "done"  # ✅ CLOTUREE 2026-10-02 — prospera-dossier-service#37 rebase-mergee (817b8b1). Cause racine : kafkajs 2.2.4 resout run() meme quand l adhesion echoue, et KafkaJSGroupCoordinatorNotFound est non-retriable (Crash puis Stopped, jamais relance). SupervisionConsommateur (etat tire de GROUP_JOIN/CRASH, relance 1 s doublee plafonnee 30 s) sur les 4 consommateurs ; /health kafka:down tant qu un groupe attendu n a pas rejoint. Revue de code : 2 non-bloquants corriges. Securite : 0. Mutations rouges. Verif docker stack neuve : 49 relances sans abandon, 4 groupes rejoints, read-model KYC rempli, POST /dossiers 201, coupure Kafka en cours de route absorbee. AC-4 : 45 consommateurs sur 10 services au meme defaut. — Historique — 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : observe en verif docker 538 (passe 1) : KafkaJSGroupCoordinatorNotFound, groupe dossier-kyc jamais re-joint, read-model KYC vide, POST /dossiers en 403. Invariant 4. Intermittent.
         story_path: "stories/STORY-684.md"
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-10-02"
       - story_id: "STORY-685"
         title: "Les ecritures passees pour la seule loi fiscale restent dans les comptes consolides"
         epic: "EPIC-137"
