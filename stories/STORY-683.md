@@ -1,6 +1,6 @@
 # STORY-683 : bilan-service sert les liasses d'un dossier à tout collaborateur de l'organisation, affecté ou non
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-012
 **Service :** `bilan-service` (`DossierScopeGuard`, read-model du dossier)
@@ -211,20 +211,11 @@ exécuté sur les 3 specs du garde/filtre + l'e2e `consolidation-portee-groupe`,
 | G7b | `filtrePorteeDossiers` ⇒ `{ dossierId: { $in }, orgId }` pour tout porteur | 🔴 3 unitaires + **43 e2e** |
 | G8 | contrôle `estObjectId` des identifiants lus retiré | 🔴 1 unitaire (« identifiant mal formé venu d'un read-model ⇒ 404 sans compter ») — e2e verte (aucun double ne sert d'identifiant mal formé) |
 
-### AC-4 — relying parties au garde de portée à `orgId` seul (lecture seule, NON corrigées)
+### AC-4 — autres relying parties
 
-Relevé sur les checkouts principaux (`dev`) :
-
-| Service | Fichier:ligne | Constat |
-|---|---|---|
-| `balance-service` (`7a42a5c`) | `src/modules/read-models/guards/dossier-scope.guard.ts:109` | `findOne({ dossierId, orgId })` — 31 contrôleurs `@RequiresDossierScope()` |
-| `microfinance-service` (`954d065`) | `src/modules/read-models/guards/dossier-scope.guard.ts:100` | idem — 9 contrôleurs |
-| `assurance-service` (`c030b85`) | `src/modules/read-models/guards/dossier-scope.guard.ts:100` | idem — 7 contrôleurs |
-| `document-service` (`4d93bb2`) | `src/modules/read-models/dossier.gate.ts:136` | `DossierGate` : `findOne({ dossierId, orgId })` ; son docstring (l. 84-86) dit déjà qu'un `TENANT_USER` non affecté passe |
-| `fiscal-service` (`4cc14d2`) | `src/application/depots/depots.service.ts:367-392` | **pas** de read-model : portée relue chez `dossier-service` (`exigerPortee` → `dossiers.lire`) — correcte, mais par appel synchrone ; son commentaire l. 375-378 (« bilan-service ne filtre que par organisation ») deviendra **périmé** à l'intégration de 683 |
-
-Le contrat publie désormais l'affectation : chacun de ces services peut répliquer
-`filtrePorteeDossier` par un ajout local (stories à créer).
+Relevé fait (lecture seule, non corrigé ici) : d'autres services qui consomment `dossier.*` n'appliquent
+pas encore la portée par collaborateur. 🔒 Le détail (services, fichiers) n'est pas publié dans ce dépôt
+public — il est tenu en local (`PROSPERA/tmp/securite-683-suites/`). Suites : [[STORY-694]], [[STORY-695]].
 
 ### Reste à faire — vérification docker (session principale)
 
@@ -256,3 +247,33 @@ Collections réelles : **`dossier_service.dossiers`**, **`dossier_service.outbox
 9. Contrôles : `db.dossiers_dossier.find({contributeursUserIds: {$type: 'string'}}).count() == 0`
    (identifiants castés en `ObjectId`) ; aucun document `dossiers_dossier` avec `affectation`
    (clé hors schéma) ; `processed_events` porte un marqueur par `eventId` projeté.
+
+### ✅ Clôture — 2026-10-02 : `done`
+
+**Intégrées ensemble** (changement de contrat, 2 dépôts) : `prospera-dossier-service#38` → `dev` @ `e030d54`
+(rebasée sur 684) et `prospera-bilan-service#156` → `dev` @ `e97c3b8`.
+
+- **Revue de code (⑥)** — 0 bloquant ; 3 commentaires devenus faux rectifiés (`447fcf9`) : C1 l'accusé fiscal
+  (`deposer` est `TENANT_ADMIN` seul : la portée par collaborateur y est triviale, fiscal-service la vérifie
+  déjà), C2 la fixture e2e, C3 la projection. Seconde lentille (over-engineering) : rien à retirer.
+- **Revue de sécurité (⑦)** — **1 constat CONFIRMÉ et corrigé** : S1, CWE-863 — la consolidation d'un
+  dossier mère exposait à un collaborateur affecté à la seule mère les soldes, l'identité et les liasses des
+  filiales qui ne lui sont pas affectées (préexistant, devenu le seul chemin restant). **Décision utilisateur**
+  (2026-10-02) : refus si une société du groupe est hors portée ⇒ **D-683-7** (`PorteeGroupeGuard`, 9
+  contrôleurs, 40 routes ; commit `e97c3b8`). Revue de sécurité du correctif : 0 constat.
+- **Portes sur l'état final** : bilan — lint 0, build OK, 10 940 unitaires (99,41 / 97,02 / 99,59 / 99,51),
+  3 030 e2e ; dossier (rebasé sur 684) — 1 737 unitaires (99,46 / 94,69 / 98,59 / 99,57), 351 e2e.
+  Mutations rejouées en session : M1 (réécrit compilable : `{}` dans le `$or` ⇒ 168 e2e rouges), M2, M4, P2,
+  G1, G6 — toutes rouges.
+- **Vérification docker** (`tmp/verif-docker-683/`, stack neuve, code servi prouvé par le marqueur
+  `STORY-683` lu 40 fois sur le port 3004) : étapes 1-9 de la story + D-683-7 sur un **vrai périmètre arrêté**
+  (MÈRE/FILLE IG/JV IP/ASSO MEE) : **154 OK** ; 5 KO au premier passage de B7 = jeu de données du script
+  (compte déjà apparié ⇒ 409 légitime), rejoués en B7b avec les mêmes attentes : 12/12. Audit sceptique de la
+  vérif : probante ; il a relevé que D-683-3 n'était prouvé que côté garde (état antérieur fabriqué par
+  `$unset`) ⇒ **`p7_projection.py` rejoué en session : 23 OK / 0 KO** — un vrai `dossier.updated` antérieur
+  (sans affectation) publié dans Kafka efface les deux clés et ferme l'accès, un message à l'affectation mal
+  formée est projeté sans affectation, journalisé, **sans poison pill** (le message suivant est consommé), et
+  le témoin d'écriture `methodes_comptables` (0 → 1) ferme la vacance relevée par l'audit.
+- **Suites fichées** : [[STORY-694]], [[STORY-695]] (alignement des autres relying parties — AC-4) ; [[STORY-696]] (republication de l'affectation des dossiers existants avant la mise en production —
+  D-683-3) ; [[STORY-693]] (supervision des consommateurs Kafka des autres services — AC-4 de 684).
+
