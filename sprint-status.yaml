@@ -4216,9 +4216,10 @@ sprints:
         epic: "EPIC-032"
         points: 8
         service: "fiscal-service (producteur, outbox a creer) + bilan-service (consommateur)"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : decision user — la propagation etait un hook inerte de 538 ; la divergence ACCUSE_NON_REPORTE_SUR_LA_LIASSE se voit en docker. Contrat = 2 depots.
+        status: "done"  # ✅ CLOTUREE 2026-10-02 — PR jumelles rebase-mergees dans l ordre consommateur puis producteur : prospera-bilan-service#155 puis prospera-fiscal-service#13. fiscal.declaration.deposee v1 (etat absolu) ecrit par la PREMIERE outbox de fiscal-service dans la transaction de l accuse ACCEPTEE ; signataire saisi a l accuse (decision user) ; bilan pose DEPOSE par la logique de POST deposer, idempotence technique + metier. Securite : 1 constat corrige (CWE-863, gardes dossier archive / acces Bilan contournees par l evenement). Revue de code : 4 corriges. Mutations 19+1 / 27. Verif docker stack neuve : 0 KO reel, divergence ACCUSE_NON_REPORTE disparue sans saisie (AC-5). Suites : 691 (accuse sans numero), 692 (test:cov bilan exit 1 preexistant). — Historique — ⬆ 2026-10-01 : EN COURS (MNV-681 : fiscal-service + bilan-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : decision user — la propagation etait un hook inerte de 538 ; la divergence ACCUSE_NON_REPORTE_SUR_LA_LIASSE se voit en docker. Contrat = 2 depots.
         story_path: "stories/STORY-681.md"
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-10-02"
       - story_id: "STORY-682"
         title: "Le fichier reellement transmis n est pas conserve — seule son empreinte l est"
         epic: "EPIC-032"
@@ -4291,6 +4292,22 @@ sprints:
         service: "fiscal-service (paquet TG x DSF v1.2) ; bilan-service (plan)"
         status: "ready-for-dev"  # 🆕 CREEE le 2026-10-01 par la cloture de STORY-680 : notes 1, 3A-3D, 8A, 12, 15B, 16B, 16B bis, 16C, 21, 22, 26, 27B, 28, 30, 31, 34 vierges tracees ; trames MIXTE sur lignes a libelle imprime (4, 7, 8, 15A, 16A-19) non transcrites. Arbitrages de plan : 484 vs 485 (creances HAO), 185/188 sous DA (DSF : note 19).
         story_path: "stories/STORY-690.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-691"
+        title: "Un accuse sans numero n a aucune issue — DEPOT_PHYSIQUE et COURRIEL ne marquent jamais la liasse deposee"
+        epic: "EPIC-032"
+        points: 3
+        service: "bilan-service (depots[], route deposer) + fiscal-service"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par la revue de STORY-681 : fiscal n exige un numero d accuse que pour TELESERVICE ; bilan refuse l evenement (NUMERO_ACCUSE_ABSENT) car depots[].numeroAccuse est obligatoire depuis STORY-446, et la route manuelle l exige aussi : divergence permanente. Latent (seul paquet publie en TELESERVICE). Decision PO : numero facultatif selon le canal, ou piece justificative.
+        story_path: "stories/STORY-691.md"
+        assigned_to: "vivianMoneyVibesGroupes"
+      - story_id: "STORY-692"
+        title: "test:cov de bilan-service sort en code 1 alors que toutes les suites passent — process.exit(1) d un bootstrap"
+        epic: "EPIC-032"
+        points: 1
+        service: "bilan-service (migrate-dossiers-rollback.bootstrap.ts)"
+        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par les portes de STORY-681 : la spec de migrate-dossiers-rollback.bootstrap importe le script, qui appelle process.exit(1) ; 295/295 suites vertes mais code 1. Preexistant (reproduit sur origin/dev 30a2816). Une porte qui sort en 1 sur une suite verte masque un vrai rouge.
+        story_path: "stories/STORY-692.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-396"
         title: "Une panne d infrastructure est rendue au cabinet comme « votre piece est illisible »"
