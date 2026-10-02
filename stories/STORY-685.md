@@ -1,6 +1,6 @@
 # STORY-685 : Les écritures passées pour la seule loi fiscale restent dans les comptes consolidés
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-137 — Homogénéisation et éliminations (consolidation)
 **Service :** `bilan-service` — module `consolidation`
@@ -326,3 +326,41 @@ cloisonnement (B : 404, rien chez B) ; persistance sans orphelin. Collections r�
   détaché introduit (les trois signalés sur la branche existent sur `dev`), aucun octet NUL.
 - 2026-10-02 — **vérification docker : NON faite** (consigne). Scénario prêt à rejouer : `tmp/verif-docker-685/
   SCENARIO.md`. ⛔ L'atomicité et l'index unique partiel ne sont prouvés que sur le double en mémoire.
+
+### ✅ Clôture — 2026-10-02 : `done`
+
+**`prospera-bilan-service#157` rebase-mergée sur `dev` @ `432ced7`**, rebasée sur STORY-683 (intégrée avant elle).
+
+- **Revue de code (⑥)** — 0 bloquant, 3 constats non bloquants (confiance 80) :
+  - n°3 **corrigé** (`778624a`) : aucun test ne réunissait une écriture fiscale de l'exercice, une part
+    antérieure et l'absence de compte de réserves — le mutant `e.origine === 'RETRAITEMENT'` survivait ; test
+    ajouté, mutant rouge ;
+  - n°1 **fiché** [[STORY-697]] : le résiduel fiscal ignore la part du `151` déjà éliminée par l'écart de
+    première consolidation (STORY-543) ⇒ `151` consolidé négatif, réserves d'avant l'acquisition — le cadrage
+    (C7) ne l'avait pas vu ;
+  - n°2 **fiché** [[STORY-698]] : groupe multi-devise (GNF, CDF) — le `15` au cours historique et le `851` au
+    cours moyen font partir un écart de change en réserves ; sans effet en XOF/XAF.
+  Seconde lentille (over-engineering) : rien à retirer.
+- **Revue de sécurité (⑦)** — **0 constat**. Point d'intégration relevé et traité au rebase sur 683 :
+  `EcrituresFiscalesController` reçoit `@PorteeGroupe()` (`2b55d55`, D-683-7) — l'invariant de balayage de 683
+  l'a exigé (rouge avant, 10 contrôleurs / 44 routes ensuite) ; la batterie de portée par collaborateur passe à
+  22 contrôleurs (`432ced7`). Mutant « décorateur retiré » : 1 invariant + 4 e2e rouges.
+- **Portes sur l'état final (rebasé)** : lint 0, build OK, 11 148 unitaires (99,42 / 96,98 / 99,56 / 99,52),
+  3 087 e2e. Mutations rejouées en session : M04, M08, M09, M10 + la mutation de revue — toutes rouges
+  (28 + 2 au total).
+- **Vérification docker** (`tmp/verif-docker-685/`, stack neuve, code servi prouvé par le marqueur
+  `ECRITURE_FISCALE_DEJA_DECLAREE` lu sur le port et l'empreinte de `consolidation-audcif-1.5.json` dans le
+  conteneur) : SCENARIO.md étapes 1-12 + étape 13 (portée du groupe) — **203 OK, 2 KO**, aucun défaut de code :
+  KO n°1 = script de mise en place (axes de B avant exercice), KO n°2 = **erreur de prose du SCENARIO** à
+  l'étape 9 (la gagnante de la course de l'étape 8 restait ACTIVE : `regles.ts` ne propose rien à une société
+  qui a déjà une écriture active, D-685-1). Montants lus : passif `169900` −270 000 (189 000 reportés + 81 000),
+  charge `899900` +81 000. Audit sceptique : 5 vacances ⇒ **compléments rejoués en session**
+  (`p7_complements.py` 21 OK + `p7b` 4 OK — 3 KO de p7 dus à MON filtre, `societeDossierId` cherché en ObjectId
+  alors que le schéma le déclare `string`) : l'**index unique partiel réel** refuse un doublon ACTIVE (E11000)
+  et accepte la contre-preuve ANNULEE ; témoin positif de la portée sur la route de confirmation (409 métier,
+  pas 404) et sur l'annulation ; tout annulé ⇒ la part antérieure revient proposée en réserves ; omission
+  acceptée (aucune ligne, aucun effet d'impôt) ⇒ `OMISE`, `APPLIQUE` ; déclaration `DECLAREE` réussie,
+  déséquilibrée refusée (400) sans écrire.
+- **Suites fichées** : [[STORY-697]], [[STORY-698]] (revue de code) ; [[STORY-699]] (D4C § 2.2.2 et § 2.2.3),
+  [[STORY-700]] (associées, SFD, SMT) — D-685-13.
+
