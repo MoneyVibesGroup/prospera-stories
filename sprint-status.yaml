@@ -4224,9 +4224,10 @@ sprints:
         epic: "EPIC-032"
         points: 5
         service: "fiscal-service (MinIO, bucket prive)"
-        status: "in_progress"  # ⬆ 2026-10-01 : EN COURS (MNV-682 : fiscal-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : decision user — empreinte seule en 538, archivage en story a part.
+        status: "done"  # ✅ CLOTUREE 2026-10-02 — prospera-fiscal-service#12 rebase-mergee. Fichier transmis archive dans le bucket MinIO PRIVE fiscal-depots (cle aleatoire 128 bits, jamais exposee), put -> re-hachage -> insertion ; objet supprime seulement quand rien n a ete ecrit, CONSERVE sur issue incertaine ; GET /v1/depots/:id/fichier = URL presignee apres portee dossier-service et re-verification sha256+taille ; anterieur fichier:null. Revue de code : 2 non-bloquants corriges (bucket recree a la demande ; objet conserve sur accuse Mongo perdu). Securite : 0. Mutations 22/22. Verif docker stack neuve : 180 OK / 0 KO. — Historique — ⬆ 2026-10-01 : EN COURS (MNV-682 : fiscal-service + docs). — Historique — 🆕 CREEE le 2026-09-25 par la cloture de STORY-538 : decision user — empreinte seule en 538, archivage en story a part.
         story_path: "stories/STORY-682.md"
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-10-02"
       - story_id: "STORY-683"
         title: "bilan-service sert les liasses d un dossier a tout collaborateur de l organisation, affecte ou non"
         epic: "EPIC-012"
