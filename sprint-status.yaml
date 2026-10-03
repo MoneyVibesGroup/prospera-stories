@@ -4325,9 +4325,10 @@ sprints:
         epic: "EPIC-012"
         points: 5
         service: "balance-service"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par la cloture du lot 683-685 : AC-4 de STORY-683 : aligner la portee par collaborateur sur bilan-service (affectation publiee sur dossier.*, filtrePortee en filtre de requete). Detail non publie (depot public).
+        status: "done"  # ✅ CLOTUREE 2026-10-03 — prospera-balance-service#126 rebase-mergee (4eeb012). Portee par collaborateur alignee sur bilan-service (affectation projetee fail-closed, filtrePortee en filtre de requete, 404 unique, routes « Mon cabinet » reservees a l admin, referentiels restreints a la portee). Revue de code : 2 non-bloquants corriges. Securite : 0. Verif docker : 125 OK + complements en session 19 OK. — Historique — 🆕 CREEE le 2026-10-02 par la cloture du lot 683-685 : AC-4 de STORY-683 : aligner la portee par collaborateur sur bilan-service (affectation publiee sur dossier.*, filtrePortee en filtre de requete). Detail non publie (depot public).
         story_path: "stories/STORY-694.md"
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-10-03"
       - story_id: "STORY-695"
         title: "microfinance, assurance et document-service appliquent la portee par collaborateur du contrat dossier.*"
         epic: "EPIC-012"
