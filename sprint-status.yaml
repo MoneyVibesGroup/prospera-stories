@@ -4334,9 +4334,10 @@ sprints:
         epic: "EPIC-012"
         points: 5
         service: "microfinance-service, assurance-service, document-service"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par la cloture du lot 683-685 : AC-4 de STORY-683 : meme alignement que 694. Detail non publie (depot public).
+        status: "done"  # ✅ CLOTUREE 2026-10-03 — prospera-microfinance-service#16 (1a18747), prospera-assurance-service#14 (26b01f9), prospera-ocr-service#20 (ef7eaf0) rebase-mergees. Portee par collaborateur alignee sur bilan-service dans les trois services ; rejeu de document-service revérifié sur le dossier de la piece. Revue de code : corrections appliquees. Securite : 0. Verif docker : 264 OK + complements en session 53 OK. — Historique — 🆕 CREEE le 2026-10-02 par la cloture du lot 683-685 : AC-4 de STORY-683 : meme alignement que 694. Detail non publie (depot public).
         story_path: "stories/STORY-695.md"
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-10-03"
       - story_id: "STORY-696"
         title: "Les dossiers existants restent fermes aux collaborateurs tant que leur affectation n a pas ete republiee"
         epic: "EPIC-012"
