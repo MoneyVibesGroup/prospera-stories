@@ -1,6 +1,6 @@
 # STORY-686 : L'impôt sur les distributions prévues entre sociétés du groupe n'est constaté nulle part
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-139 — Impôts différés et mise en équivalence
 **Service :** `bilan-service` — module `consolidation`
@@ -190,11 +190,78 @@ une **distribution dans une autre devise** que celle du groupe (le cabinet décl
 consolidé) ; les distributions **des associées** (mise en équivalence) ; l'élimination du dividende lui-même
 (STORY-687).
 
+## Table de mutations — une par décision, chacune APPLIQUÉE (une occurrence exacte), jugée sur `Test Suites` et `Tests`, restaurée depuis le commit
+
+Script et journal : `tmp/verif-docker-686/mutations/` (`mutants.py`, `passe.py`, `passe-1.log`, `passe-reprise.log`),
+dans un worktree propre détaché de `MNV-686` @ `0f5befb`. **30 mutants, 30 rouges.** Premier passage : 25 rouges, 5 qui
+ne compilaient pas (M01, M26, M27, M28, M30) — ⛔ aucun n'est un rouge ; réécrits en formes typées, rejoués seuls, rouges.
+
+| # | Décision | Mutation | Verdict |
+|---|---|---|---|
+| M01 | D-686-2 | un taux groupe (27 %) au lieu du taux déclaré | ROUGE — 10 |
+| M02 | D-686-2 | le taux d'IS de l'entité exigé pour une distribution | ROUGE — 2 |
+| M03 | D-686-3 | une réduction lue comme une charge (signe) | ROUGE — 5 |
+| M04 | D-686-3 | toujours 100 % (pourcentage d'intégration ignoré) | ROUGE — 3 |
+| M05 | D-686-3 | l'entité qui supporte inversée | ROUGE — 10 |
+| M06 | D-686-4 | la base d'ouverture du report jamais posée | ROUGE — 3 |
+| M07 | D-686-4 | le report d'une entité sortie appliqué | ROUGE — 2 |
+| M08 | D-686-5 | la réduction échappe au jugement | ROUGE — 2 |
+| M09 | D-686-7 | la charge rangée en changements de taux | ROUGE — 6 |
+| M10 | D-686-7 | une imposition non comptabilisée explique la preuve | ROUGE — 2 |
+| M11 | D-686-8 | moins de deux intégrées : plus d'office | ROUGE — 2 |
+| M12 | D-686-8 | l'exercice toujours examiné (le silence vaut examen) | ROUGE — 5 |
+| M13 | D-686-8 | omission ET distribution non contradictoires | ROUGE — 2 |
+| M14 | D-686-8 | une distribution hors périmètre tue | ROUGE — 2 |
+| M15 | D-686-8 | un élément attendu non calculé vaut appliqué | ROUGE — 3 |
+| M16 | D-686-8 | une colonne non passée ne bloque pas | ROUGE — 2 |
+| M17 | D-686-8 | le statut publié sans le diagnostic | ROUGE — 7 |
+| M18 | D-686-1 | l'index des distributions sans l'effet | ROUGE — 1 |
+| M19 | D-686-1 | l'index des omissions sans le statut | ROUGE — 1 |
+| M20 | D-686-1 | la pré-lecture du doublon neutralisée | ROUGE — 2 |
+| M21 | D-686-1 | le doublon ignore l'effet | ROUGE — 2 |
+| M22 | D-686-9 | la contradiction admise à la déclaration | ROUGE — 2 |
+| M23 | D-686-9 | une société non intégrée admise | ROUGE — 5 |
+| M24 | D-686-9 | la même société des deux côtés admise | ROUGE — 2 |
+| M25 | D-686-2 | un taux hors forme admis | ROUGE — 3 |
+| M26 | D-686-2 | un pays par défaut à la distributrice | ROUGE — 1 |
+| M27 | D-686-4 | le report de l'exercice précédent jamais lu | ROUGE — 4 |
+| M28 | D-686-10 | `@PorteeGroupe()` retiré du contrôleur | ROUGE — 2 |
+| M29 | D-686-1 | l'E11000 des distributions pris pour une course au numéro | ROUGE — 2 |
+| M30 | D-686-8 | les reports non appliqués tus | ROUGE — 1 |
+
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-10-03).** Créée par le cadrage de STORY-541 (D-541-13), `ready-for-dev` le 2026-09-26.
+**Statut : `review` (2026-10-03).** Créée par le cadrage de STORY-541 (D-541-13), `ready-for-dev` le 2026-09-26.
 
 - 2026-10-03 — branches `MNV-686` (`docs` depuis `main`, `bilan-service` depuis `dev` @ `432ced7`) ; **cadrage fait
   avant tout code** : 7 constats, 12 décisions. Le SYSCOHADA range l'opération parmi les impôts différés (D4C
   § 3.2.3, lu à l'image — C1) ; aucun paquet fiscal embarqué ne publie le taux d'une imposition de distribution :
   il se déclare, figé avec le pays de la distributrice (C2, D-686-2) ; la preuve d'impôt reçoit une ligne dédiée (C6).
+- 2026-10-03 — **dev `bilan-service`** (branche `MNV-686`, `9d6a00e` code, `0f5befb` tests) : nature
+  `IMPOSITION_DISTRIBUTION` et ses deux index uniques partiels ; règles pures `impositions-distributions.regles.ts`
+  (éléments, report, diagnostic) ; moteur de 545 étendu (taux PROPRE à l'élément, origines `DISTRIBUTION_PREVUE` et
+  `REPORT_DISTRIBUTION_PREVUE`, ligne de preuve `IMPOSITIONS_SUR_DISTRIBUTIONS`) ; trois routes
+  (`ImpositionsDistributionsController`, sous `@PorteeGroupe()`) ; section `impositionsSurDistributions` de l'agrégat ;
+  quatre codes de refus inscrits à l'inventaire. *Précisé en cours de dev :* le diagnostic compare les éléments
+  ATTENDUS aux éléments CALCULÉS — sans règles d'impôt, le moteur ne rend aucun élément, et une distribution déclarée
+  serait passée pour « rien à comptabiliser ».
+- 2026-10-03 — ⚡ **défaut trouvé par la passe de tests, corrigé** : `PAYS_DISTRIBUTRICE_INCONNU` rendait
+  `details.dossierId`, une clé que `DetailsRefusConsolidationDto` ne publie pas ; la distributrice est désormais nommée
+  par `details.societes[]` (raison `PAYS_INCONNU`).
+- 2026-10-03 — **conséquences voulues sur l'existant** : la preuve d'impôt compte une ligne de plus (nulle sans
+  distribution) ; inventaires transverses (11 contrôleurs de consolidation, 23 sous la batterie de portée par
+  collaborateur, index du dossier) ; les doubles des specs de 541 à 547 apprennent la lecture neuve.
+- 2026-10-03 — **mutations** : 30 / 30 rouges (table ci-dessus).
+- 2026-10-03 — **portes** (`bilan-service` @ `0f5befb`) : lint 0 avertissement (`{src,test}`), `nest build` OK,
+  `test:cov` **307 suites, 11 385 tests verts** (2 ignorés, préexistants), couverture **99,42 / 97 / 99,57 / 99,52**
+  (seuils 65/90/90/90) — `impositions-distributions.regles.ts` et `impositions-distributions.controller.ts` 100 % ;
+  `test:e2e` **40 suites, 3 180 tests verts**. Aucun JSDoc détaché, aucun octet NUL.
+- 2026-10-03 — **vérification docker** (`tmp/verif-docker-686/`, stack NEUVE `down -v`, surcouche légère, code servi
+  prouvé par le marqueur `IMPOSITION_DISTRIBUTION_DEJA_DECLAREE` lu sur le port et les empreintes hôte == conteneur) :
+  SCENARIO.md étapes 1 à 13 — **80 OK, 0 KO** (mise en place : 105 OK, 1 KO de script connu depuis 685 — axes de B
+  posés avant son exercice). Montants lus : report seul 118000 D 1 300 000 / 899900 C 1 300 000, preuve satisfaite
+  (−1 300 000) ; distribution 2025 : passif 169900 C 2 600 000, preuve satisfaite (+1 300 000) ; réduction de la JV
+  `PROPOSE` ⇒ `NON_TRAITE` puis `NON_RECONNU` ⇒ `APPLIQUE`. ⛔ Index RÉELS : course de deux POST ⇒ 201 + 409, un seul
+  document actif ; doublon ACTIF inséré par mongosh ⇒ E11000, la même ANNULÉE acceptée ; deux omissions actives ⇒
+  E11000 ; `getIndexes()` conforme. Pays retiré du read-model ⇒ 409, rien écrit. Cloisonnement : B ⇒ 404 sur les trois
+  routes, rien chez B. Persistance : 5 documents, `lignes` toujours vides, numéros contigus, liasses intactes.
