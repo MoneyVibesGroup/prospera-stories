@@ -4261,7 +4261,7 @@ sprints:
         epic: "EPIC-139"
         points: 5
         service: "bilan-service — module consolidation"
-        status: "in_progress"  # 🔧 2026-10-03 — cadrage fait (7 constats, 12 decisions) : l imposition sur distribution prevue est un impot differe (D4C § 3.2.3), au taux DECLARE (aucun paquet ne le publie), fige avec le pays de la distributrice ; element du moteur de 545, report variable, ligne de preuve dediee. — Historique — 🆕 CREEE le 2026-09-26 par le cadrage de STORY-541 (M2, D-541-13) : l art. 86 5° de l AUDCIF (charges d impot non recuperables sur distributions prevues entre integrees) n etait fiche nulle part ; nomme IMPOSITIONS_SUR_DISTRIBUTIONS, NON_TRAITE, requis pour consolider.
+        status: "review"  # 🔍 2026-10-03 — dev + portes (11 385 unit, 3 180 e2e, 99,42/97/99,57/99,52) + mutations 30/30 + verif docker 80 OK / 0 KO ; revues de code et de securite a venir. — 🔧 cadrage fait (7 constats, 12 decisions) : l imposition sur distribution prevue est un impot differe (D4C § 3.2.3), au taux DECLARE (aucun paquet ne le publie), fige avec le pays de la distributrice ; element du moteur de 545, report variable, ligne de preuve dediee. — Historique — 🆕 CREEE le 2026-09-26 par le cadrage de STORY-541 (M2, D-541-13) : l art. 86 5° de l AUDCIF (charges d impot non recuperables sur distributions prevues entre integrees) n etait fiche nulle part ; nomme IMPOSITIONS_SUR_DISTRIBUTIONS, NON_TRAITE, requis pour consolider.
         story_path: "stories/STORY-686.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-687"
