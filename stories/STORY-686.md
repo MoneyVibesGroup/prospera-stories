@@ -1,6 +1,6 @@
 # STORY-686 : L'impôt sur les distributions prévues entre sociétés du groupe n'est constaté nulle part
 
-Status: review
+Status: done
 
 **Épic :** EPIC-139 — Impôts différés et mise en équivalence
 **Service :** `bilan-service` — module `consolidation`
@@ -153,13 +153,14 @@ référentiel de méthodes du groupe (D-545-9) et au compte de réserves du grou
 comptabilisés ; ils sont retirés des changements de taux et des arrondis (leur impôt est l'arrondi lui-même).
 
 **D-686-8 — Le statut (AC-3).** `IMPOSITIONS_SUR_DISTRIBUTIONS` est `APPLIQUE` si et seulement si :
-- **moins de deux sociétés intégrées** : aucune distribution entre intégrées n'est possible — d'office, sans rien
-  déclarer (patron du groupe mono-devise, STORY-547 AC-7) ;
-- **sinon** : l'exercice est **examiné** — au moins une déclaration active (une distribution, ou une **omission
-  motivée** `SANS_INCIDENCE` | `INCIDENCE_NEGLIGEABLE`, sans ligne — D-541-6) ; aucune omission active **et** une
-  distribution active en même temps ; chaque distribution active dans le périmètre (distributrice et bénéficiaire
-  intégrées) ; chaque élément de distribution (exercice et report) **comptabilisé** — `APPLIQUE` ou
-  `NON_RECONNU` (actif écarté par le jugement), colonne passée.
+- l'exercice est **examiné** — au moins une déclaration active (une distribution, ou une **omission motivée**
+  `SANS_INCIDENCE` | `INCIDENCE_NEGLIGEABLE`, sans ligne — D-541-6) ; ou, d'office, **moins de deux sociétés
+  intégrées** : aucune distribution entre intégrées n'est possible (patron du groupe mono-devise, STORY-547 AC-7) ;
+- **et dans tous les cas** : aucune omission active **et** une distribution active en même temps ; chaque
+  distribution active dans le périmètre (distributrice et bénéficiaire intégrées) ; chaque élément de distribution
+  (exercice et report) **comptabilisé** — `APPLIQUE` ou `NON_RECONNU` (actif écarté par le jugement), colonne passée.
+  *Précisé en revue de code :* le « d'office » ne dispense que de DÉCLARER — une mère restée seule extourne encore la
+  distribution prévue à la clôture précédente.
 
 Sinon `NON_TRAITE`, chaque manque nommé : `DISTRIBUTIONS_NON_EXAMINEES`, `DECLARATIONS_CONTRADICTOIRES`,
 `DISTRIBUTION_HORS_PERIMETRE`, `IMPOSITIONS_NON_COMPTABILISEES`. ⚡ **Aucune distribution prévue ⇒ aucune
@@ -176,8 +177,9 @@ est rattrapée à l'agrégat, D-686-8). Les associées (mise en équivalence) : 
 `@PorteeGroupe()` (D-683-7), `TENANT_ADMIN` et `TENANT_USER` (travail préparatoire, D-531-10) :
 `GET|POST …/consolidation/exercices/:exerciceId/impositions-distributions`,
 `POST …/impositions-distributions/:ecritureId/annulation` ; `GET …/agregat` publie la section
-`impositionsSurDistributions` (statut, déclarations, éléments avec leur impôt, reports, manques) ; les éléments
-figurent dans `impotsDifferes` et la ligne dans la preuve d'impôt.
+`impositionsSurDistributions` (`examine`, déclarations, reports non appliqués, manques) ; le statut figure dans
+`traitements`, les éléments — avec leur impôt, au même `ecritureId` — dans `impotsDifferes`, et la ligne dans la
+preuve d'impôt (*précisé en revue de code*).
 
 **D-686-11 — Bornes.** Aucune lecture nouvelle à l'agrégat hors des déclarations actives de l'exercice (déjà lues,
 bornées à 200) et de celles de l'exercice précédent (une requête, bornée par le même plafond) ; la déclaration lit
@@ -231,7 +233,7 @@ ne compilaient pas (M01, M26, M27, M28, M30) — ⛔ aucun n'est un rouge ; ré�
 
 ## Progress Tracking
 
-**Statut : `review` (2026-10-03).** Créée par le cadrage de STORY-541 (D-541-13), `ready-for-dev` le 2026-09-26.
+**Statut : `done` (2026-10-03).** Créée par le cadrage de STORY-541 (D-541-13), `ready-for-dev` le 2026-09-26.
 
 - 2026-10-03 — branches `MNV-686` (`docs` depuis `main`, `bilan-service` depuis `dev` @ `432ced7`) ; **cadrage fait
   avant tout code** : 7 constats, 12 décisions. Le SYSCOHADA range l'opération parmi les impôts différés (D4C
@@ -265,3 +267,33 @@ ne compilaient pas (M01, M26, M27, M28, M30) — ⛔ aucun n'est un rouge ; ré�
   document actif ; doublon ACTIF inséré par mongosh ⇒ E11000, la même ANNULÉE acceptée ; deux omissions actives ⇒
   E11000 ; `getIndexes()` conforme. Pays retiré du read-model ⇒ 409, rien écrit. Cloisonnement : B ⇒ 404 sur les trois
   routes, rien chez B. Persistance : 5 documents, `lignes` toujours vides, numéros contigus, liasses intactes.
+
+### ✅ Clôture — 2026-10-03 : `done`
+
+**`prospera-bilan-service#158` rebase-mergée sur `dev` @ `c15a54f`** (3 commits : code, tests, revue).
+
+- **Revue de code (⑥)** — scan `opus` + trois lentilles (échecs silencieux, tests, types) + lentille sur-ingénierie
+  (rien à retirer). 0 bloquant ; **6 constats retenus, tous traités** (`dea4d9f`) :
+  - le « d'office » sous deux sociétés intégrées court-circuitait le diagnostic : un report non comptabilisé et une
+    déclaration devenue hors périmètre passaient `APPLIQUE` par silence ⇒ corrigé, D-686-8 précisé ;
+  - `statut` d'un manque publié en texte libre ⇒ énumération `StatutElementImpotDiffere` ;
+  - le report d'une RÉDUCTION n'était testé nulle part (le mutant « signe oublié au report » survivait) ⇒ tests au
+    moteur et aux règles ;
+  - un doublon qui ne diffère que par l'entité qui supporte n'était pas figé ⇒ testé (la pré-lecture suit l'index) ;
+  - la section de l'agrégat n'était vérifiée qu'à vide, son taux recopié par étalement ⇒ projection exacte testée,
+    taux recopié champ par champ ;
+  - D-686-10 annonçait statut et éléments DANS la section ⇒ décision reformulée (ils vivent dans `traitements` et
+    `impotsDifferes`).
+  Écartés : exercices non contigus (règle `seSuivent` de 545 reprise sciemment par D-686-4) ; taux invalide relu en
+  base (inatteignable par l'API, écriture figée) ; union discriminée sur `ElementImpot.taux` (aucun résultat faux).
+  Mutations de revue : M31 à M34 rouges, M11/M12 réajustées sur le code réécrit — **34 / 34 rouges** au total.
+- **Revue de sécurité (⑦)** — **0 constat** (scan `opus`) : portée du groupe sur les trois routes, sociétés du corps
+  confinées au périmètre arrêté, refus sans oracle d'existence, objet figé reconstruit champ par champ, lectures
+  bornées, écriture figée.
+- **Portes sur l'état final** (`dea4d9f`) : lint 0, build OK, **11 394** unitaires (99,42 / 97 / 99,57 / 99,52),
+  **3 180** e2e.
+- **Vérification docker REJOUÉE sur l'état final** (stack neuve, code servi `dea4d9f` prouvé en p0) : scénario
+  **80 OK / 0 KO**, identique à la première passe ; mise en place 105 OK + le KO de script connu (axes de B).
+- **Suites à ficher** (D-686-12) : lecture du taux de retenue dans un paquet fiscal le jour où il est publié, et sa
+  confrontation au taux déclaré ; distribution dans une autre devise ; variation du pourcentage d'intégration entre
+  deux exercices ; distributions des associées.
