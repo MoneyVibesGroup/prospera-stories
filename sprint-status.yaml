@@ -4270,7 +4270,7 @@ sprints:
         epic: "EPIC-137"
         points: 5
         service: "bilan-service — module consolidation"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-26 par le cadrage de STORY-542 (M7, D-542-11) : le libelle de RESULTATS_INTERNES promettait les dividendes internes (ANC 2020-01 art. 251-2 : elimines en totalite) sans qu aucun AC de 542 ne les couvre — effet d impot PERMANENT (contredit l AC-5 de 542) et prorata du BENEFICIAIRE ; nomme DIVIDENDES_INTERNES, NON_TRAITE, requis pour consolider.
+        status: "in_progress"  # 🔧 2026-10-06 — branches MNV-687 ouvertes, cadrage fait (5 constats, 9 decisions) : nature propre DIVIDENDE_INTERNE, lignes calculees a chaque agregat (produit de la beneficiaire contre les reserves du groupe sur la distributrice), aucun report, prorata et minoritaires de la BENEFICIAIRE, effet DIFFERENCE_PERMANENTE explique par la preuve d impot. — Historique — 🆕 CREEE le 2026-09-26 par le cadrage de STORY-542 (M7, D-542-11) : le libelle de RESULTATS_INTERNES promettait les dividendes internes (ANC 2020-01 art. 251-2 : elimines en totalite) sans qu aucun AC de 542 ne les couvre — effet d impot PERMANENT (contredit l AC-5 de 542) et prorata du BENEFICIAIRE ; nomme DIVIDENDES_INTERNES, NON_TRAITE, requis pour consolider.
         story_path: "stories/STORY-687.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-688"
