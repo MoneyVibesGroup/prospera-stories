@@ -1,6 +1,6 @@
 # STORY-687 : Les dividendes versés entre sociétés du groupe gonflent le résultat consolidé
 
-Status: in_progress
+Status: review
 
 **Épic :** EPIC-137 — Homogénéisation et éliminations (consolidation)
 **Service :** `bilan-service` — module `consolidation`
@@ -106,7 +106,28 @@ les a nommés `DIVIDENDES_INTERNES`, `NON_TRAITE`, requis.
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-10-06).** Branches `MNV-687` ouvertes (`docs/` depuis `main`, `bilan-service`
+**Statut : `review` (2026-10-06).** Dev + validation faits — PR `prospera-bilan-service#159` ouverte.
+
+- **Portes** : lint 0, build OK, 11 594 unitaires (99,43 / 97,01 / 99,57 / 99,53 ; `dividendes-internes.regles.ts`,
+  `dividendes-internes.controller.ts`, `dto/dividende-interne.dto.ts` à 100 %), 3 286 e2e (76 neufs + contrat OpenAPI).
+- **Mutations** (chaque mutant compilable, `Tests:` lu, fichier restauré à l'empreinte) : prorata étendu à la
+  distributrice (5 rouges, dont IG ← IP), `DECISION_MANQUANTE` retiré (4), dividende retiré de la preuve (1),
+  contradiction neutralisée (1), propriétaire des minoritaires = distributrice (2), racines de gestion non relues (1),
+  copie de surface des manques (1), `@Montant(0)`, recopie de `compteProduit`, rôle, `@PorteeGroupe`, filtre `ACTIVE`,
+  enum `DIFFERENCE_PERMANENTE` (1 chacun).
+- ⚡ **Trouvé par les tests** : sans méthodes du groupe, l'homogénéisation ne lit aucune racine de gestion — le compte
+  de produit n'était pas jugé (C5) ; corrigé, les racines sont relues dès qu'un dividende est déclaré. ⚠️ Plafond
+  connu : un référentiel qui ne publie AUCUNE racine de gestion laisse le compte non jugé (comme 542).
+- ⚠️ Invariant découvert : chaque index unique doit être SEUL à porter sa dernière clé (`isDuplicateKeyOn`) — l'index
+  des omissions finit sur `statut` (constant sous le filtre), pas sur `nature` (déjà celle de 686).
+- **Vérification docker** (stack neuve, `tmp/verif-docker-687/`) : 183 OK / 1 KO — le KO est le défaut connu du script
+  de mise en place (axes de MÈRE-B postés avant son exercice, identique en 686), hors story. Scénario dividendes
+  77/77 : document figé sans ligne, refus sans écriture, `COMPTE_RESERVES_NON_DECLARE` sans refus de l'agrégat,
+  élimination 600 000 (pct 10 000), IG ← IP 300 000 à 100 %, IP ← IG 200 000 à 50 %, résultat consolidé exact, aucun
+  impôt différé, preuve satisfaite (+162 000 sans impôt), course sur l'index réel (201/409), E11000 directs (doublon,
+  deux omissions de motifs différents), cloisonnement 404, numéros contigus, liasses intactes.
+
+**Historique — `in_progress` (2026-10-06).** Branches `MNV-687` ouvertes (`docs/` depuis `main`, `bilan-service`
 depuis `dev`) avant toute ligne ; cadrage fait (5 constats, 9 décisions).
 
 **Historique — `ready-for-dev` (2026-09-26).** Créée par le cadrage de STORY-542 (D-542-11) — numéro réservé par
