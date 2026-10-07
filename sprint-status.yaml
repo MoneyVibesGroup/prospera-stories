@@ -4288,7 +4288,8 @@ sprints:
         epic: "EPIC-032"
         points: 2
         service: "fiscal-service (depots, STORY-538)"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-01 par la revue de STORY-680 : depots.service transmettre releve la reference du paquet ACTIF ; un livrable produit en v1.0 puis transmis apres le passage en v1.1 serait enregistre 1.1. Lire la version inscrite dans le fichier (PROSPERA format version).
+        status: "done"  # ✅ CLOTUREE 2026-10-07 — prospera-fiscal-service#15 rebase-mergee sur dev (347a415 + revue a2a53eb). Reference de format lue dans les proprietes du fichier, retrouvee au manifeste (active ou archivee). Portes vertes (1 661 unit, 99,3/96,53/99,05/99,65 ; 123 e2e), 16/16 mutants rouges. Revue de code : 0 bloquant, 3 constats corriges. Securite : 0. Docker stack neuve 114 OK / 0 KO (fichier v1.0 enregistre 1.0 apres passage en v1.1). — Historique — 🔧 2026-10-07 — branches MNV-689 ouvertes (docs/main + fiscal-service/dev), cadrage fait (D-689-A a G) : reference lue dans les 4 proprietes PROSPERA format du fichier puis retrouvee au manifeste (active ou archivee) ; absente => VERSION_FORMAT_ABSENTE, inconnue => VERSION_FORMAT_INCONNUE ; canal = paquet actif. — Historique — 🆕 CREEE le 2026-10-01 par la revue de STORY-680 : depots.service transmettre releve la reference du paquet ACTIF ; un livrable produit en v1.0 puis transmis apres le passage en v1.1 serait enregistre 1.1. Lire la version inscrite dans le fichier (PROSPERA format version).
+        completed_date: "2026-10-07"
         story_path: "stories/STORY-689.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-690"
