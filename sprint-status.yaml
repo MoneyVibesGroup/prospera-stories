@@ -4360,7 +4360,7 @@ sprints:
         epic: "EPIC-137"
         points: 5
         service: "bilan-service — module consolidation"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par la cloture de STORY-685 : revue de code n°1 — le residuel fiscal ne lit pas la colonne ecartsPremiereConsolidation : 151 consolide negatif et reserves d avant l acquisition (filiale a 80 %, 151 d entree).
+        status: "in_progress"  # 2026-10-07 — cadrage AC-1 : la fiscale PRECEDE (D-697-1), l ecart elimine une provision reglementee en reserves. Historique : 🆕 CREEE le 2026-10-02 par la cloture de STORY-685 : revue de code n°1 — le residuel fiscal ne lit pas la colonne ecartsPremiereConsolidation : 151 consolide negatif et reserves d avant l acquisition (filiale a 80 %, 151 d entree).
         story_path: "stories/STORY-697.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-698"
