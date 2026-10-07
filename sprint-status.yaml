@@ -4297,7 +4297,8 @@ sprints:
         epic: "EPIC-032"
         points: 8
         service: "fiscal-service (paquet TG x DSF v1.2) ; bilan-service (plan)"
-        status: "in_progress"  # 🔧 2026-10-07 — branche MNV-690 (fiscal-service + docs). Cadrage PO : fiscal seul, AC-3 (plan bilan-service) sortie en STORY-701 ; trames a libelle imprime rapprochees par libelle ; MIXTE : la liasse fait foi sur N/N-1, ecart = refus ; 28/3C non calculables depuis la liasse (aucun mouvement publie). Historique : ready-for-dev 2026-10-01 (cloture de STORY-680).
+        status: "done"  # ✅ CLOTUREE 2026-10-07 — prospera-fiscal-service#16 rebase-mergee sur dev (feature + test pointe + revue f3897b5). Trames a libelles imprimes (18 notes), paquet TG x DSF v1.2 actif. Portes : 1 725 unit, 99,32/96,79/99,06/99,65 ; 123 e2e ; mutations 13 + 9 rouges ; Excel OK. Revue code : 6 constats corriges, 1 ecarte (D-688-4). Securite : 0. AC-3 d origine sortie en STORY-701. Historique : in_progress 2026-10-07 ; ready-for-dev 2026-10-01.
+        completed_date: "2026-10-07"
         story_path: "stories/STORY-690.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-691"
