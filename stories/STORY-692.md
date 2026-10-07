@@ -1,6 +1,6 @@
 # STORY-692 : `test:cov` de bilan-service sort en code 1 alors que toutes les suites passent
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `bilan-service` (`src/migrate-dossiers-rollback.bootstrap.ts` et sa spec)
@@ -23,10 +23,21 @@ sortie — exactement ce qui laisse passer un vrai rouge (cf. STORY-446 : la por
 - [ ] AC-2 — La logique de rollback reste couverte (elle est dans un `*bootstrap*`, exclu des seuils :
       la déplacer hors du bootstrap si elle porte des décisions).
 
+## Périmètre
+
+**Inclus** — `avertissements()` (la seule logique du script, qui porte des décisions) quitte
+`migrate-dossiers-rollback.bootstrap.ts` pour `RollbackMigrationService` (fichier couvert) ; sa spec
+rejoint `rollback-migration.service.spec.ts` ; plus aucune spec n'importe le script.
+
+**Hors périmètre** — `migrate-dossiers.bootstrap.ts` (aucune spec ne l'importe) ; toute garde générique
+« aucune spec n'importe un `*bootstrap*` » (à poser si le défaut récidive).
+
 ## Notes
 
 - Voir [[STORY-681]], [[STORY-446]].
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-10-02).** Créée par les portes de STORY-681.
+**Statut : `in_progress` (2026-10-07).** Branches `MNV-692` sur `docs` et `bilan-service`.
+
+Historique : `ready-for-dev` (2026-10-02) — créée par les portes de STORY-681.
