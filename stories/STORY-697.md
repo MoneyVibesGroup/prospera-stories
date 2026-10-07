@@ -1,6 +1,6 @@
 # STORY-697 : L elimination fiscale ignore la part du 151 deja eliminee par l ecart de premiere consolidation
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-137
 **Service :** `bilan-service` — module `consolidation`
@@ -26,12 +26,12 @@ proposition `Dr 151 500 / Cr réserves 500`. Confirmée, le `151` consolidé vau
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Cadrer AVANT de coder l'articulation 541/543/685 : l'élimination fiscale doit-elle
+- [x] AC-1 — Cadrer AVANT de coder l'articulation 541/543/685 : l'élimination fiscale doit-elle
       précéder (homogénéisation des capitaux propres d'entrée) ou tenir compte des lignes d'écart de
       première consolidation ? Décision écrite, appuyée sur le D4C.
-- [ ] AC-2 — Le scénario chiffré ci-dessus ne produit ni `151` négatif ni réserves d'avant
+- [x] AC-2 — Le scénario chiffré ci-dessus ne produit ni `151` négatif ni réserves d'avant
       l'acquisition ; test unitaire tiré de la décision, mutation rouge.
-- [ ] AC-3 — Non-régression : un groupe sans capitaux propres d'entrée sur `15` ne change pas.
+- [x] AC-3 — Non-régression : un groupe sans capitaux propres d'entrée sur `15` ne change pas.
 
 ## Cadrage (AC-1) — décisions, posées AVANT le code (2026-10-07)
 
@@ -64,7 +64,10 @@ le `151` de la fille, qui gardent leurs 20 % de `151` et le rendent négatif.
 - **D-697-2 — Seulement quand l'élimination fiscale est opérante** : règles publiées, racines de
   gestion connues, règles cohérentes (exactement la condition sous laquelle 685 propose — une seule
   fonction, `reglesUtilisables`, pour les deux). Sans règles (SFD, CIMA, SMT, paquet < 1.5), rien ne
-  change (AC-3) : la provision n'est pas éliminée, l'écart l'élimine où elle est.
+  change (AC-3) : la provision n'est pas éliminée, l'écart l'élimine où elle est. **Amendée en revue
+  (2026-10-07)** : ni pour une société dont l'élimination fiscale de l'exercice est **OMISE** — sa
+  provision n'est jamais contre-passée ; déplacer l'élimination y créait des réserves d'avant
+  l'acquisition sous un traitement `APPLIQUE` (et un 409 sans objet sans compte de réserves).
 - **D-697-3 — Le figé n'est pas touché** (AC-6 de 543) : ni le coût, ni `K`, ni l'écart
   d'acquisition, ni `eliminationCapitauxPropres` ne se recalculent ; seule la **pose** de la ligne
   change. Le compte de réserves devient requis dès qu'une telle ligne existe : son absence ou un
@@ -81,6 +84,23 @@ le `151` de la fille, qui gardent leurs 20 % de `151` et le rendent négatif.
 - Voir [[STORY-685]] (C7, D-685-3), [[STORY-543]], [[STORY-544]] (partage par compte, D-544-7).
 
 ## Progress Tracking
+
+**Statut : `done` (2026-10-07).** prospera-bilan-service#163 rebase-mergée sur `dev`.
+- **Code** : `ecarts-premiere-consolidation.regles.ts` (`racinesProvisionsReglementees`, `societesOmises`,
+  pose en réserves, attribution `DETENTEUR`) ; `ecritures-fiscales.regles.ts` (`reglesUtilisables`, condition
+  unique, reprise aussi par la déclaration d'une société) ; `consolidation.service.ts` (câblage, sociétés
+  intégrées seulement — l'appel des associées n'applique aucune ligne).
+- **Preuve AC-2** : `ecritures-fiscales-ecarts.regles.spec.ts` rejoue la chaîne 543 → 685 (proposition
+  confirmée) → agrégat → 544 par les fonctions de production : `151` = 0, réserves = 0, IM = −250 ; le code
+  d'avant reproduit −400 / +400 (illustration). AC-3 réel : règles opérantes, entrée sans `15` (`101500`,
+  racine et non sous-chaîne), aucun compte de réserves exigé.
+- **Mutations** : 8/8 rouges (déplacement retiré, attribution AUCUNE, règles brutes, argument oublié,
+  cohérence ignorée, omission ignorée, omises non câblées, `includes` au lieu de `startsWith`).
+- **Portes** : lint 0 · build · 11 644 unit, 99,43/97,07/99,58/99,53 · 3 289 e2e.
+- **Vérif docker** : sans objet — aucune écriture en base, aucun schéma touché (calcul de l'agrégat seul).
+- **Revue de code** : 3 constats retenus et corrigés (omission → réserves d'avant l'acquisition ; AC-3 testé
+  sur un cas qui ne pouvait pas rougir ; test « code d'avant » présenté à tort comme filtrant) + condition
+  dupliquée de la déclaration unifiée. **Revue de sécurité** : 0 constat.
 
 **Statut : `in_progress` (2026-10-07).** Cadrage AC-1 posé (D-697-1 à D-697-3) ; branches `MNV-697`
 ouvertes sur `docs` (base `main`) et `bilan-service` (base `dev`).
