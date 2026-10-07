@@ -4351,9 +4351,10 @@ sprints:
         epic: "EPIC-012"
         points: 3
         service: "dossier-service (republication) + relying parties"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par la cloture du lot 683-685 : D-683-3 : fail-closed sur affectation inconnue — en production, republier dossier.* (outbox, par lots, operateur) avant d ouvrir 683.
+        status: "done"  # ✅ CLOTUREE 2026-10-07 — prospera-dossier-service#39 rebase-mergee sur dev (9df382b + revue f359baa). npm run republier:dossiers (CLI operateur, lots bornes, reprise --apres) : ecriture technique sous verrou de version + dossier.updated dans l outbox, meme transaction ; ni version ni updatedAt touches ; transitoires rejouees, echecs nommes (code 1). Portes vertes (1 rouge preexistant hors perimetre : miroir TG x DSF 1.0 vs 1.2 de STORY-690). Verif docker 77 OK + course 19 OK. Revue code : 5 constats corriges. Securite : 0. Procedure de mise en production dans la fiche. — Historique — 🆕 CREEE le 2026-10-02 par la cloture du lot 683-685 : D-683-3.
         story_path: "stories/STORY-696.md"
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-10-07"
       - story_id: "STORY-697"
         title: "L elimination fiscale ignore la part du 151 deja eliminee par l ecart de premiere consolidation"
         epic: "EPIC-137"
