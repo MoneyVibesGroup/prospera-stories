@@ -1,6 +1,6 @@
 # STORY-687 : Les dividendes versés entre sociétés du groupe gonflent le résultat consolidé
 
-Status: review
+Status: done
 
 **Épic :** EPIC-137 — Homogénéisation et éliminations (consolidation)
 **Service :** `bilan-service` — module `consolidation`
@@ -28,14 +28,14 @@ les a nommés `DIVIDENDES_INTERNES`, `NON_TRAITE`, requis.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Un dividende interne est **déclaré** (distributrice, bénéficiaire, montant reçu, compte de produit
+- [x] AC-1 — Un dividende interne est **déclaré** (distributrice, bénéficiaire, montant reçu, compte de produit
       du bénéficiaire, exercice) — il s'élimine du résultat du bénéficiaire contre les **réserves** de la
       distributrice, tracé, justifié, réversible au journal de consolidation.
-- [ ] AC-2 — ⛔ Aucun effet d'impôt différé : l'écriture le **dit** (différence permanente), et STORY-545 ne le
+- [x] AC-2 — ⛔ Aucun effet d'impôt différé : l'écriture le **dit** (différence permanente), et STORY-545 ne le
       lit pas comme une différence temporelle.
-- [ ] AC-3 — Bénéficiaire intégré proportionnellement : éliminé à **son** pourcentage d'intégration ; test du
+- [x] AC-3 — Bénéficiaire intégré proportionnellement : éliminé à **son** pourcentage d'intégration ; test du
       cas IG ← IP (le dividende reçu est déjà la quote-part : jamais le plus faible des deux).
-- [ ] AC-4 — Comme les autres familles (D-542-9) : aucune décision n'est déduite d'un silence — une omission
+- [x] AC-4 — Comme les autres familles (D-542-9) : aucune décision n'est déduite d'un silence — une omission
       motivée, ou au moins une déclaration, fait passer `DIVIDENDES_INTERNES` à `APPLIQUE`.
 
 ## Cadrage (2026-10-06)
@@ -87,8 +87,9 @@ les a nommés `DIVIDENDES_INTERNES`, `NON_TRAITE`, requis.
   omission.
 - **D-687-8 — Manques nommés, jamais un refus de l'agrégat** : `DECISION_MANQUANTE`,
   `DECLARATIONS_CONTRADICTOIRES`, `SOCIETE_NON_INTEGREE`, `COMPTE_PRODUIT_HORS_GESTION`,
-  `COMPTE_RESERVES_NON_DECLARE`, `COMPTE_RESERVES_INVALIDE`. Un dividende non appliqué laisse son produit au
-  résultat — l'état reste « agrégé », ce qu'il était avant cette story.
+  `COMPTE_RESERVES_NON_DECLARE`, `COMPTE_RESERVES_INVALIDE`, et (revue de code) `RACINES_DE_GESTION_INCONNUES`. Un
+  dividende nommé n'est JAMAIS éliminé — sous une contradiction, aucun ne l'est. Un dividende non appliqué laisse
+  son produit au résultat — l'état reste « agrégé », ce qu'il était avant cette story.
 - **D-687-9 — Routes** : `GET`/`POST …/consolidation/exercices/:exerciceId/dividendes-internes` (un
   dividende OU l'omission motivée de l'exercice), `POST …/:ecritureId/annulation` ; `TENANT_ADMIN` et
   `TENANT_USER` ; portée du groupe ; refus à l'écriture : contradiction, doublon, société non intégrée.
@@ -106,7 +107,26 @@ les a nommés `DIVIDENDES_INTERNES`, `NON_TRAITE`, requis.
 
 ## Progress Tracking
 
-**Statut : `review` (2026-10-06).** Dev + validation faits — PR `prospera-bilan-service#159` ouverte.
+**Statut : `done` (2026-10-07).** ✅ Clôturée — `prospera-bilan-service#159` rebase-mergée sur `dev`
+(`ec81c1d` feature, `870bee1` revue).
+
+- **Revue de code** (analyse opus + lentilles ECC silent-failure, pr-test-analyzer, type-design ; ponytail-review :
+  rien à retrancher) — 5 constats, non bloquants, tous corrigés dans le commit de revue, chaque correctif muté
+  rouge : ① sous `DECLARATIONS_CONTRADICTOIRES`, le dividende restait éliminé alors que le contrat le dit non
+  éliminé (relevé par 3 sources) — rien n'est plus jugé ni éliminé sous une contradiction ; ② racines de gestion
+  inconnues : `DIVIDENDES_INTERNES` passait `APPLIQUE` sans juger le compte de produit — nouveau manque
+  `RACINES_DE_GESTION_INCONNUES` (le « plafond connu » noté plus bas est FERMÉ) ; ③ le test de non-relecture du
+  référentiel ne filtrait pas une relecture systématique (espion) ; ④ une assertion toujours vraie retirée ; ⑤ JSDoc
+  de la preuve d'impôt.
+- **Revue de sécurité** (opus) : 0 constat — IDOR à l'annulation, sociétés d'un autre cabinet (`HORS_GROUPE` sans
+  identité), portée du groupe, injection, énumération, courses, déni de calcul de l'agrégat : écartés preuves à
+  l'appui.
+- **Portes après revue** : build OK, unitaires et e2e verts (un test de performance de 541, hors story, a dépassé son
+  seuil sous la charge de la couverture — 706 ms pour 500 —, vert relancé seul).
+- **Vérification docker REJOUÉE sur l'état final**, stack neuve : 183 OK / 1 KO (même KO de script de mise en
+  place), scénario dividendes 77/77.
+
+**Historique — `review` (2026-10-06).** Dev + validation faits — PR `prospera-bilan-service#159` ouverte.
 
 - **Portes** : lint 0, build OK, 11 594 unitaires (99,43 / 97,01 / 99,57 / 99,53 ; `dividendes-internes.regles.ts`,
   `dividendes-internes.controller.ts`, `dto/dividende-interne.dto.ts` à 100 %), 3 286 e2e (76 neufs + contrat OpenAPI).
