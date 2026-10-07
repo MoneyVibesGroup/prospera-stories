@@ -4369,7 +4369,7 @@ sprints:
         epic: "EPIC-137"
         points: 5
         service: "bilan-service — module consolidation"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par la cloture de STORY-685 : revue de code n°2 — 15 au cours historique, 851 au cours moyen (STORY-547) : l ecart part en reserves, le cumul ne retombe jamais a zero (GNF, CDF ; sans effet XOF/XAF).
+        status: "in_progress"  # 2026-10-07 : dev lance (APEX), D-698-1..4 — reconversion de l elimination au cours de chaque compte. 🆕 CREEE le 2026-10-02 par la cloture de STORY-685 : revue de code n°2 — 15 au cours historique, 851 au cours moyen (STORY-547) : l ecart part en reserves, le cumul ne retombe jamais a zero (GNF, CDF ; sans effet XOF/XAF).
         story_path: "stories/STORY-698.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-699"
@@ -4377,7 +4377,7 @@ sprints:
         epic: "EPIC-137"
         points: 5
         service: "bilan-service — module consolidation"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par la cloture de STORY-685 : D-685-13 — D4C ch. 3 § 2.2.2 et § 2.2.3, nommes dans la miseEnGarde de consolidation-audcif@1.5.
+        status: "in_progress"  # 2026-10-07 : dev lance (APEX), D-698-1..4 — reconversion de l elimination au cours de chaque compte. 🆕 CREEE le 2026-10-02 par la cloture de STORY-685 : D-685-13 — D4C ch. 3 § 2.2.2 et § 2.2.3, nommes dans la miseEnGarde de consolidation-audcif@1.5.
         story_path: "stories/STORY-699.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-700"
@@ -4385,7 +4385,7 @@ sprints:
         epic: "EPIC-137"
         points: 5
         service: "bilan-service — module consolidation"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par la cloture de STORY-685 : D-685-13 — associees mises en equivalence (STORY-546) ; aucun paquet de regles pour le SFD (52/668/768) ni le SMT.
+        status: "in_progress"  # 2026-10-07 : dev lance (APEX), D-698-1..4 — reconversion de l elimination au cours de chaque compte. 🆕 CREEE le 2026-10-02 par la cloture de STORY-685 : D-685-13 — associees mises en equivalence (STORY-546) ; aucun paquet de regles pour le SFD (52/668/768) ni le SMT.
         story_path: "stories/STORY-700.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-701"
