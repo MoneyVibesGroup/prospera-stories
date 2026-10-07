@@ -4306,7 +4306,7 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "bilan-service (depots[], route deposer) + fiscal-service"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par la revue de STORY-681 : fiscal n exige un numero d accuse que pour TELESERVICE ; bilan refuse l evenement (NUMERO_ACCUSE_ABSENT) car depots[].numeroAccuse est obligatoire depuis STORY-446, et la route manuelle l exige aussi : divergence permanente. Latent (seul paquet publie en TELESERVICE). Decision PO : numero facultatif selon le canal, ou piece justificative.
+        status: "in_progress"  # ⬆ 2026-10-07 : EN COURS (MNV-691 bilan-service + fiscal-service + docs) — AC-1 tranche par l user : numero facultatif cote bilan. — Historique — 🆕 CREEE le 2026-10-02 par la revue de STORY-681 : fiscal n exige un numero d accuse que pour TELESERVICE ; bilan refuse l evenement (NUMERO_ACCUSE_ABSENT) car depots[].numeroAccuse est obligatoire depuis STORY-446, et la route manuelle l exige aussi : divergence permanente. Latent (seul paquet publie en TELESERVICE). Decision PO : numero facultatif selon le canal, ou piece justificative.
         story_path: "stories/STORY-691.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-692"
