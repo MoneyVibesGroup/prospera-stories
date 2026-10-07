@@ -4315,7 +4315,8 @@ sprints:
         epic: "EPIC-032"
         points: 1
         service: "bilan-service (migrate-dossiers-rollback.bootstrap.ts)"
-        status: "in_progress"  # ⬆ 2026-10-07 : EN COURS (MNV-692 bilan-service + docs). — Historique — 🆕 CREEE le 2026-10-02 par les portes de STORY-681 : la spec de migrate-dossiers-rollback.bootstrap importe le script, qui appelle process.exit(1) ; 295/295 suites vertes mais code 1. Preexistant (reproduit sur origin/dev 30a2816). Une porte qui sort en 1 sur une suite verte masque un vrai rouge.
+        status: "done"  # ✅ CLOTUREE 2026-10-07 — prospera-bilan-service#161 rebase-mergee sur dev. avertissements() sort du bootstrap de la marche arriere vers RollbackMigrationService (couvert), spec du bootstrap supprimee : test:cov 310/310 exit 0 (avant : 4/4 verts, exit 1). e2e 3 288 ; mutation rouge. Revue code 0, securite 0. Historique : in_progress 2026-10-07 ; ready-for-dev 2026-10-02 (cree par les portes de STORY-681).
+        completed_date: "2026-10-07"
         story_path: "stories/STORY-692.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-693"

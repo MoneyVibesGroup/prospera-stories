@@ -1,6 +1,6 @@
 # STORY-692 : `test:cov` de bilan-service sort en code 1 alors que toutes les suites passent
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-032 — Dépôt assisté, accusé et dossier de contrôle
 **Service :** `bilan-service` (`src/migrate-dossiers-rollback.bootstrap.ts` et sa spec)
@@ -18,9 +18,9 @@ sortie — exactement ce qui laisse passer un vrai rouge (cf. STORY-446 : la por
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — La spec n'exécute plus le script à l'import (point d'entrée séparé de la logique, ou
+- [x] AC-1 — La spec n'exécute plus le script à l'import (point d'entrée séparé de la logique, ou
       `process.exit` simulé) ; `test:cov` sort en 0.
-- [ ] AC-2 — La logique de rollback reste couverte (elle est dans un `*bootstrap*`, exclu des seuils :
+- [x] AC-2 — La logique de rollback reste couverte (elle est dans un `*bootstrap*`, exclu des seuils :
       la déplacer hors du bootstrap si elle porte des décisions).
 
 ## Périmètre
@@ -38,6 +38,26 @@ rejoint `rollback-migration.service.spec.ts` ; plus aucune spec n'importe le scr
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-10-07).** Branches `MNV-692` sur `docs` et `bilan-service`.
+**Statut : `done` (2026-10-07).** MoneyVibesGroup/prospera-bilan-service#161 rebase-mergée sur `dev`.
 
-Historique : `ready-for-dev` (2026-10-02) — créée par les portes de STORY-681.
+### Livré
+- `avertissements()` — seule logique du script, porteuse de décisions — quitte
+  `migrate-dossiers-rollback.bootstrap.ts` pour `RollbackMigrationService` (fichier **couvert**, 100 %) ;
+  corps identique à l'octet. Ses 4 tests rejoignent `rollback-migration.service.spec.ts` (helper renommé
+  `rapportRollback`, un `const rapport` local l'aurait masqué) ; la spec du bootstrap est supprimée.
+- Au passage : le JSDoc de `bootstrap()`, détaché par celui d'`avertissements`, y est de nouveau rattaché.
+
+### Mesures
+- **Avant** (spec d'`origin/dev` rejouée seule) : 4/4 verts, `process.exit called with "1"`, **exit 1**.
+- **Après** : `test:cov` 310/310, 99,43 / 97,01 / 99,57 / 99,53, **exit 0** ; e2e 3 288/3 288 exit 0 ; lint 0 ;
+  build OK. Mutation (condition de troncature inversée) : 2 tests rouges.
+- ⚡ La porte rendue honnête a aussitôt servi : un premier `test:cov` est sorti en 1 sur un VRAI rouge —
+  le test de durée de STORY-541 (`homogeneisation.regles`, 589 ms > 500 ms sous instrumentation et charge),
+  vert seul et au second passage. Avant 692, ce rouge était indiscernable du faux 1.
+- Pas de vérification docker : la story n'écrit pas en base et ne change pas le comportement du script.
+
+### Revues
+- Code (opus, lentilles échecs silencieux / tests / types) : 0 constat ; CLI inchangée (stdout, stderr, codes).
+- Sécurité (opus) : **0 constat** — garde-fous de la marche arrière (simulation par défaut, alertes) intacts.
+
+Historique : `in_progress` (2026-10-07) ; `ready-for-dev` (2026-10-02) — créée par les portes de STORY-681.
