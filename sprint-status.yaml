@@ -4315,7 +4315,7 @@ sprints:
         epic: "EPIC-032"
         points: 1
         service: "bilan-service (migrate-dossiers-rollback.bootstrap.ts)"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-02 par les portes de STORY-681 : la spec de migrate-dossiers-rollback.bootstrap importe le script, qui appelle process.exit(1) ; 295/295 suites vertes mais code 1. Preexistant (reproduit sur origin/dev 30a2816). Une porte qui sort en 1 sur une suite verte masque un vrai rouge.
+        status: "in_progress"  # ⬆ 2026-10-07 : EN COURS (MNV-692 bilan-service + docs). — Historique — 🆕 CREEE le 2026-10-02 par les portes de STORY-681 : la spec de migrate-dossiers-rollback.bootstrap importe le script, qui appelle process.exit(1) ; 295/295 suites vertes mais code 1. Preexistant (reproduit sur origin/dev 30a2816). Une porte qui sort en 1 sur une suite verte masque un vrai rouge.
         story_path: "stories/STORY-692.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-693"
