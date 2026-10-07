@@ -4279,7 +4279,7 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "fiscal-service (garde AC-3 de 680)"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-01 par la revue de STORY-680 : la garde LIASSE_NON_TRANSCRIPTIBLE refuse tout le classeur (etats compris) quand un compte porte un montant dans une colonne sans ligne (ex. 411100 amortN sous BI -> note 7 ; 471000 amortN1 sous BJ -> note 8). Conforme a AC-3, mais la v1.0 produisait ces liasses. A trancher : note vierge tracee, ou ligne de reclassement.
+        status: "in_progress"  # 🔧 2026-10-07 — branches MNV-688 ouvertes, cadrage fait (4 constats, 6 decisions) : AC-1 tranche par le PO = note vierge tracee (toutes ses cases montant NON_PRODUIT avec motif, reste du classeur produit), tout compte sans ligne (278400 de 680 compris), ecart ventilation/poste reste un refus, la completude relit la liasse figee et range la feuille en produitesNonTranscrites. — Historique — 🆕 CREEE le 2026-10-01 par la revue de STORY-680 : la garde LIASSE_NON_TRANSCRIPTIBLE refuse tout le classeur (etats compris) quand un compte porte un montant dans une colonne sans ligne (ex. 411100 amortN sous BI -> note 7 ; 471000 amortN1 sous BJ -> note 8). Conforme a AC-3, mais la v1.0 produisait ces liasses. A trancher : note vierge tracee, ou ligne de reclassement.
         story_path: "stories/STORY-688.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-689"
