@@ -1,6 +1,6 @@
 # STORY-702 : document-service, kyc-service et expert-comptable gardent un consommateur Kafka que kafkajs peut abandonner en silence
 
-Status: in_progress
+Status: done
 
 **Épic :** EPIC-012
 **Service :** document-service, kyc-service, expert-comptable (7 consommateurs)
@@ -25,11 +25,11 @@ kyc-document-uploaded), `kyc-service` (document-extract), `expert-comptable` (id
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Chaque consommateur listé passe par `SupervisionConsommateur` + `EtatConsommateursService` : état tiré des événements kafkajs, relance d'un crash non relancé à délai croissant borné, journalisée.
-- [ ] AC-2 — `/health` rend `kafka: down` tant qu'un groupe attendu n'a pas rejoint.
-- [ ] AC-3 — Test d'invariant par service (balayage des bootstraps consommateurs) ; une mutation qui
+- [x] AC-1 — Chaque consommateur listé passe par `SupervisionConsommateur` + `EtatConsommateursService` : état tiré des événements kafkajs, relance d'un crash non relancé à délai croissant borné, journalisée.
+- [x] AC-2 — `/health` rend `kafka: down` tant qu'un groupe attendu n'a pas rejoint.
+- [x] AC-3 — Test d'invariant par service (balayage des bootstraps consommateurs) ; une mutation qui
       retire la relance vire au rouge.
-- [ ] AC-4 — Vérification docker par service : broker absent au boot ⇒ relances ⇒ adhésion.
+- [x] AC-4 — Vérification docker par service : broker absent au boot ⇒ relances ⇒ adhésion.
 
 ## Notes
 
@@ -38,7 +38,11 @@ kyc-document-uploaded), `kyc-service` (document-extract), `expert-comptable` (id
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-10-08).** Branches `MNV-702` sur document-service, kyc-service,
+**Statut : `done` (2026-10-08).** prospera-ocr-service#21, prospera-kyc-service#21,
+prospera-expert-comptable#8 rebase-mergées sur `dev`, branches supprimées. Portes rejouées sur l'état final :
+document 853 unit + 182 e2e, kyc 492 + 104, expert-comptable 281 + 43/46 (3 rouges `billing-plans` préexistants).
+
+Historique : `in_progress` (2026-10-08). Branches `MNV-702` sur document-service, kyc-service,
 expert-comptable. Bootstraps réécrits par les scripts de STORY-693 adaptés (`tmp/702/`) : le nom
 `kyc-document-uploaded.consumer.bootstrap.ts` (point, pas tiret) a imposé d'élargir le balayage de
 l'invariant à `*consumer.bootstrap.ts`.
@@ -58,5 +62,24 @@ supervision (côté document : le fichier à POINT, preuve que le balayage élar
 `groupe … rejoint`, `/health` 200 sur les 3 services en ≤ 60 s, `kafka-consumer-groups --state` : 7 groupes
 `Stable`, 1 membre. Fenêtre d'adhésion (AC-2) : `kyc-service` redémarré broker joignable, sondé toutes les
 0,3 s ⇒ 503 « Consommateur(s) hors de leur groupe : kyc-document-extract. » puis 200.
+
+**Revue de code (2026-10-08, opus + lentilles ECC)** — 0 bloquant ; les 7 bootstraps vérifiés un à un
+(groupId, topics, `fromBeginning`, `handleMessage` intact). 5 corrigés dans un commit dédié `MNV-702(revue)` :
+① commentaire d'incident renommé à l'aveugle par le script (`document-kyc`…) ⇒ `dossier-kyc` (dossier-service) ;
+② doc de classe des 2 consommateurs d'expert-comptable qui affirmait encore « une fois `run()` établi, kafkajs
+gère les reconnexions » — la croyance que la story corrige ; ③ titre « trouve les 1 consommateurs » ;
+④ ⚡ la spec de supervision ne vérifiait QUE le nombre d'appels à `subscribe`/`run`, jamais leurs arguments :
+un `run` sans le vrai `eachMessage` rejoignait le groupe sans rien traiter, `/health` `up` — test ajouté
+(identité de l'objet `execution`) ; ⑤ l'invariant ne voyait que les `*consumer.bootstrap.ts` : il interdit
+désormais tout `.consumer(` hors de `supervision-consommateur.util.ts`, dans toutes les sources.
+Mutations : 3/3 rouges (`run` avec un autre `eachMessage`, `subscribe` sans topics, faux `foo.consumer.ts`) ;
+⚠️ deux premiers mutants ne COMPILAIENT pas (« Tests: 0 total ») : réécrits avant de conclure.
+Écartés : test du singleton partagé bootstrap ↔ `/health` (régression hypothétique, aucune redéclaration
+aujourd'hui) ; `arreter()` pendant un `connect()` en vol (confiance ~60, patron STORY-684) ;
+`enableShutdownHooks` absent des `main.ts` (préexistant, hors périmètre : `onModuleDestroy` ne tourne pas sur
+SIGTERM) ; phrase « kafkajs gère les reconnexions » restée dans les `entitlement-consumer` de STORY-693 (dette).
+
+**Revue de sécurité (2026-10-08, opus)** — 0 constat (handlers inchangés, topics et groupId identiques,
+`/health` n'ajoute que des noms de groupe non secrets, relance bornée à 30 s, pas de SASL à fuir).
 
 Historique : `ready-for-dev` (2026-10-07), créée par le découpage de STORY-693.

@@ -4403,7 +4403,8 @@ sprints:
         epic: "EPIC-012"
         points: 3
         service: "document-service, kyc-service, expert-comptable (7 consommateurs)"
-        status: "in_progress"  # 2026-10-08 — dev lance (APEX), branches MNV-702 x3. Historique : 🆕 CREEE le 2026-10-07 par le decoupage de STORY-693 (decision user) — meme patron SupervisionConsommateur.
+        status: "done"  # ✅ CLOTUREE 2026-10-08 — prospera-ocr-service#21, prospera-kyc-service#21, prospera-expert-comptable#8 rebase-mergees sur dev. 7 consommateurs supervises (document x4, kyc x1, expert-comptable x2), /health down tant qu un groupe n a pas rejoint. Mutations 12/12 + 3/3 rouges. Verif docker stack neuve : broker absent => relances 1->30 s => 7/7 groupes Stable ; fenetre 503 observee (kyc). Revue code : 0 bloquant, 5 corriges (dont arguments subscribe/run jamais verifies, invariant elargi a toute source). Securite : 0. ⚠️ 3 e2e billing-plans d expert-comptable rouges PREEXISTANTS sur dev (MNV-379). Historique : in_progress 2026-10-08 — dev lance (APEX), branches MNV-702 x3. Historique : 🆕 CREEE le 2026-10-07 par le decoupage de STORY-693 (decision user) — meme patron SupervisionConsommateur.
+        completed_date: "2026-10-08"
         story_path: "stories/STORY-702.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-703"
