@@ -4394,7 +4394,7 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "bilan-service (plan, table de passage)"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-07 par le cadrage de STORY-690 (D-690-1) : AC-3 d origine sortie de son perimetre.
+        status: "in_progress"  # 2026-10-08 — cadrage : bump syscohada-revise@2.3 (D-701-1, decision user), 5 depots (D-701-2). Historique : ready-for-dev 2026-10-07, creee par le cadrage de STORY-690 (D-690-1).
         story_path: "stories/STORY-701.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-702"
