@@ -4412,7 +4412,8 @@ sprints:
         epic: "EPIC-012"
         points: 3
         service: "fiscal-service, paiement-service, notification-service (13 consommateurs via 3 classes de base)"
-        status: "in_progress"  # 2026-10-08 — dev lance (APEX), branches MNV-703 x3 ; 13 sous-classes (notification : 5, dont DeclenchementConsumer). Historique : 🆕 CREEE le 2026-10-07 par le decoupage de STORY-693 (decision user) — correction dans la classe de base.
+        status: "done"  # ✅ CLOTUREE 2026-10-08 — prospera-fiscal-service#19, prospera-paiement-service#78, prospera-notification-service#59 rebase-mergees sur dev. 13 consommateurs supervises via leur classe de base, /health down tant qu un groupe n a pas rejoint. Mutations 15/15 + 5/5 (revue). Verif docker stack neuve : broker absent => relances => 13/13 groupes Stable. Revue code : 0 bloquant, 5 corriges (arguments kafkajs et groupe de chaque sous-classe non testes). Securite : 0. ⚠️ seuil fonctions notification et e2e webhook paiement rouges PREEXISTANTS sur dev. Historique : in_progress 2026-10-08 — dev lance (APEX), branches MNV-703 x3 ; 13 sous-classes (notification : 5, dont DeclenchementConsumer). Historique : 🆕 CREEE le 2026-10-07 par le decoupage de STORY-693 (decision user) — correction dans la classe de base.
+        completed_date: "2026-10-08"
         story_path: "stories/STORY-703.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-704"
