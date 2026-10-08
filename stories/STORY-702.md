@@ -1,6 +1,6 @@
 # STORY-702 : document-service, kyc-service et expert-comptable gardent un consommateur Kafka que kafkajs peut abandonner en silence
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-012
 **Service :** document-service, kyc-service, expert-comptable (7 consommateurs)
@@ -38,4 +38,9 @@ kyc-document-uploaded), `kyc-service` (document-extract), `expert-comptable` (id
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-10-07).** Créée par le découpage de STORY-693.
+**Statut : `in_progress` (2026-10-08).** Branches `MNV-702` sur document-service, kyc-service,
+expert-comptable. Bootstraps réécrits par les scripts de STORY-693 adaptés (`tmp/702/`) : le nom
+`kyc-document-uploaded.consumer.bootstrap.ts` (point, pas tiret) a imposé d'élargir le balayage de
+l'invariant à `*consumer.bootstrap.ts`.
+
+Historique : `ready-for-dev` (2026-10-07), créée par le découpage de STORY-693.
