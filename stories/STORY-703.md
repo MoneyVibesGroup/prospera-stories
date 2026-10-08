@@ -1,9 +1,9 @@
 # STORY-703 : Les classes de base des read-models de fiscal, paiement et notification concluent démarré à la résolution de run()
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-012
-**Service :** fiscal-service, paiement-service, notification-service (13 consommateurs via 3 classes de base)
+**Service :** fiscal-service, paiement-service, notification-service (13 consommateurs via 3 classes de base : fiscal 5, paiement 3, notification 5 dont `DeclenchementConsumer` hors `read-models/`)
 **Points :** 3 · **Sprint :** S20 · **Complexité :** medium · **Assigné à :** `vivianMoneyVibesGroupes`
 **Origine :** découpage de STORY-693 (décision user du 2026-10-07) — relevé AC-4 de STORY-684.
 
@@ -38,4 +38,11 @@ qui pose `started = true` après `await run()` perd son consommateur **en silenc
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-10-07).** Créée par le découpage de STORY-693.
+**Statut : `in_progress` (2026-10-08).** Branches `MNV-703` sur fiscal-service, paiement-service,
+notification-service. Socle copié depuis `kyc-service` (version revue de STORY-702) par `tmp/703/socle.py` ;
+les 3 classes de base construisent leur `SupervisionConsommateur` (état injecté par chaque sous-classe) ;
+invariant `tmp/703/invariant.py` : la base délègue, chaque `*consumer.bootstrap.ts` en hérite sans piloter
+kafkajs ni redéfinir son cycle de vie. ⚠️ La 5e sous-classe de notification vit dans
+`modules/declenchement/` — le balayage par nom l'a trouvée, le périmètre « read-models » l'ignorait.
+
+Historique : `ready-for-dev` (2026-10-07), créée par le découpage de STORY-693.
