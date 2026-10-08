@@ -43,4 +43,20 @@ expert-comptable. Bootstraps réécrits par les scripts de STORY-693 adaptés (`
 `kyc-document-uploaded.consumer.bootstrap.ts` (point, pas tiret) a imposé d'élargir le balayage de
 l'invariant à `*consumer.bootstrap.ts`.
 
+**Portes (2026-10-08)** — lint 0, build OK, couverture : document 99,12/93,97/98,36/99,15 (851 tests),
+kyc 95,13/92,76/95,25/95,07 (490), expert-comptable 99,06/92,16/98,82/98,97 (279) ; e2e document 182/182,
+kyc 104/104, expert-comptable 43/46. ⚠️ Les 3 rouges sont dans `billing-plans.e2e-spec.ts` et
+**préexistent sur `dev`** (rejoués sur l'arbre stashé : 3 échecs identiques) : MNV-379 a ajouté
+`includedUsers`/`extraUserAmount` au plan sans mettre l'e2e à jour. Hors périmètre, signalé.
+
+**Mutations (AC-3)** — 12/12 rouges (4 par service) : relance de crash retirée, relance d'échec de
+démarrage retirée, `/health` qui ignore les groupes hors groupe, un bootstrap qui ne démarre plus sa
+supervision (côté document : le fichier à POINT, preuve que le balayage élargi le voit).
+
+**Vérif docker (AC-4, stack neuve)** — services démarrés sans broker : 7/7 consommateurs en
+`démarrage en échec … relance n°k dans 1000→30000 ms`, `/health` 503. Kafka démarré : 7/7
+`groupe … rejoint`, `/health` 200 sur les 3 services en ≤ 60 s, `kafka-consumer-groups --state` : 7 groupes
+`Stable`, 1 membre. Fenêtre d'adhésion (AC-2) : `kyc-service` redémarré broker joignable, sondé toutes les
+0,3 s ⇒ 503 « Consommateur(s) hors de leur groupe : kyc-document-extract. » puis 200.
+
 Historique : `ready-for-dev` (2026-10-07), créée par le découpage de STORY-693.
