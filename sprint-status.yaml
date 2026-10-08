@@ -4403,7 +4403,7 @@ sprints:
         epic: "EPIC-012"
         points: 3
         service: "document-service, kyc-service, expert-comptable (7 consommateurs)"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-07 par le decoupage de STORY-693 (decision user) — meme patron SupervisionConsommateur.
+        status: "in_progress"  # 2026-10-08 — dev lance (APEX), branches MNV-702 x3. Historique : 🆕 CREEE le 2026-10-07 par le decoupage de STORY-693 (decision user) — meme patron SupervisionConsommateur.
         story_path: "stories/STORY-702.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-703"
