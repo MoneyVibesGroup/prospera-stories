@@ -4394,7 +4394,8 @@ sprints:
         epic: "EPIC-032"
         points: 3
         service: "bilan-service (plan, table de passage)"
-        status: "in_progress"  # 2026-10-08 — cadrage : bump syscohada-revise@2.3 (D-701-1, decision user), 5 depots (D-701-2). Historique : ready-for-dev 2026-10-07, creee par le cadrage de STORY-690 (D-690-1).
+        status: "done"  # ✅ CLOTUREE 2026-10-08 — bump syscohada-revise@2.3 (185/188 en BJ/DM, plan 484/485/488 AUDCIF) ; 5 PR rebase-mergees sur dev (bilan#165, balance#128, catalog#29, dossier#40, fiscal#18). TG x DSF v1.3 + notes.compatibles (D-701-4). Portes vertes, 8 mutations rouges, verif docker FIN-OK (131 OK). Revue code : 0 bloquant, 8 corriges ; securite : 0. Historique : in_progress 2026-10-08 (D-701-1 decision user, D-701-2 5 depots) ; ready-for-dev 2026-10-07.
+        completed_date: "2026-10-08"
         story_path: "stories/STORY-701.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-702"
