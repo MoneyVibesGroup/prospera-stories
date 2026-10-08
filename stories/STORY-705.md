@@ -1,6 +1,6 @@
 # STORY-705 : Recopier la détection du consommateur bloqué (STORY-704) dans les 6 autres porteurs du patron
 
-Status: ready-for-dev
+Status: in_progress
 
 **Épic :** EPIC-012
 **Service :** document-service, kyc-service, expert-comptable, fiscal-service, paiement-service, notification-service
@@ -24,4 +24,4 @@ même `SupervisionConsommateur` (code identique) mais restent aveugles à cette 
 
 ## Progress Tracking
 
-**Statut : `ready-for-dev` (2026-10-08).** Créée par le cadrage de STORY-704.
+**Statut : `in_progress` (2026-10-08).** Dev lancé (APEX, enchaîné après STORY-704 à la demande de l'user). Patron de référence : `dossier-service` sur `dev` après STORY-704 (compteur par partition, D-704-1 à 5). Historique : `ready-for-dev` — créée par le cadrage de STORY-704.

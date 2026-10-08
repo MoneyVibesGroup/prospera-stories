@@ -4430,7 +4430,7 @@ sprints:
         epic: "EPIC-012"
         points: 2
         service: "document, kyc, expert-comptable, fiscal, paiement, notification"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-10-08 par le cadrage de STORY-704.
+        status: "in_progress"  # 2026-10-08 — dev lance (APEX, enchaine apres STORY-704). Historique : 🆕 CREEE le 2026-10-08 par le cadrage de STORY-704.
         story_path: "stories/STORY-705.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-396"
