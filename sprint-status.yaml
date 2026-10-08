@@ -4421,7 +4421,8 @@ sprints:
         epic: "EPIC-012"
         points: 3
         service: "transverse — SupervisionConsommateur (dossier, assurance, microfinance, balance, bilan)"
-        status: "in_progress"  # 2026-10-08 — dev lance (APEX) ; perimetre resserre sur les 5 services, recopie dans les 6 autres porteurs => STORY-705. Historique : 🆕 CREEE le 2026-10-07 par la revue de STORY-693 : erreur de traitement permanente => KafkaJSNumberOfRetriesExceeded (retriable) => crash/relance kafkajs en boucle, GROUP_JOIN remet l etat a rejoint, /health majoritairement up.
+        status: "done"  # ✅ CLOTUREE 2026-10-08 — prospera-dossier-service#41, prospera-assurance-service#16, prospera-microfinance-service#18, prospera-balance-service#129, prospera-bilan-service#166 rebase-mergees sur dev. Compteur de crashs PAR PARTITION (revue : kafkajs poursuit les lots apres un rejet, un compteur par groupe etait masque), groupe bloque => /health down durable. Portes x5 vertes ; mutations 70/70. Verif docker : 503 bloque durable ~100 s puis up apres levee. Revue code : 6 corriges (1 bloquant). Securite : 0. Historique : in_progress 2026-10-08 — dev lance (APEX) ; perimetre resserre sur les 5 services, recopie dans les 6 autres porteurs => STORY-705. Historique : 🆕 CREEE le 2026-10-07 par la revue de STORY-693 : erreur de traitement permanente => KafkaJSNumberOfRetriesExceeded (retriable) => crash/relance kafkajs en boucle, GROUP_JOIN remet l etat a rejoint, /health majoritairement up.
+        completed_date: "2026-10-08"
         story_path: "stories/STORY-704.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-705"
