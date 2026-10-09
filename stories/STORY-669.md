@@ -1,6 +1,6 @@
 # STORY-669 : Le relevé par l'API du participant — il ne se dépose plus, il se relève
 
-Status: review
+Status: done — clôturée le 2026-10-09 après revue post-merge (paiement-service #84)
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -181,6 +181,65 @@ du côté de la banque. Les deux stories se recoupent sans s'être concertées.
    d'une demande. À instruire si les comptoirs prennent du volume.
 4. **Les paiements ENVOYÉS ne sont pas relevés** (`/paiements-envoyes` existe, vide) : ils le seront
    avec [[STORY-668]], si l'amendement du PRD l'ouvre.
+
+## Revue post-merge et clôture (2026-10-09 — paiement-service #84, sur `dev`)
+
+⛔ **La PR #76 a été rebase-mergée sur `dev` SANS revue** (`reviews: []`), comme 664, 666, 667 et 668.
+La revue et la clôture ont été rejouées après coup.
+
+**Porte d'entrée rejouée sur `dev`** : lint 0, build OK, seuils tenus. L'e2e passe à 322/323 : le
+seul rouge est `notifications-webhook` AC-4 `ECONNRESET`, déjà présent avant.
+
+### Revue de sécurité (opus) — 1 constat ≥ 80, corrigé
+
+⛔ **La relève pouvait tourner sans fin** (CWE-835 / CWE-400). La boucle de pagination ne s'arrêtait
+que sur une page vide, et son plafond comptait les seuls mouvements **retenus**. Un participant qui
+rend toujours la même page, ou des pages faites d'écartés, faisait tourner une requête authentifiée
+sans fin sur le quota de l'organisation. Le commentaire du code affirmait l'inverse.
+
+Correctifs :
+- un curseur déjà suivi lève `illisible` ;
+- le plafond porte aussi sur les lignes **lues** (2 × plafond + une page) ;
+- une page **pleine** sans curseur lisible lève `illisible`. La fin mesurée est une page vide : la
+  croire finale rangerait un relevé partiel comme complet (AC-4).
+
+Points éprouvés sans constat : cloisonnement (compte d'autrui → 404 avant tout appel), filtres
+revérifiés, montants entiers positifs, curseur jamais suivi comme URL (pas de SSRF), aucune donnée
+du payeur journalisée.
+
+### Revue de code (opus + lentilles ECC) — 5 constats corrigés
+
+1. `jusqua`, documentée « incluse » : `2026-09-30` se lisait à minuit et **perdait le dernier jour
+   en silence**. Une date seule se lit désormais jusqu'à 23:59:59.999 UTC. C'est testé sous
+   conversion implicite, comme en production.
+2. `bilan-de-releve.vue.ts` n'avait **pas de spec** (50 % des branches) : la branche « position
+   absente » d'AC-7 n'était exercée nulle part.
+3. `saitReleverUnCompte` n'avait aucun test : `return true` restait vert.
+4. `lireLeJson` doublait octet pour octet `lireJson`. Il ne reste qu'un chemin.
+5. Un JSDoc détaché par insertion avait fait perdre sa documentation à `BilanDImport`.
+
+**Laissés de côté :**
+- **Ligne irrévocable illisible.** Un `IRREVOCABLE` de ce compte sans identifiant, date ou montant
+  lisible reste **compté parmi les écartés**. C'est le choix explicite de la story, testé (« écarté
+  plutôt que deviné »). Une tentative de le changer en échec a été retirée.
+- **Période absente de la trace.** La trace ne porte ni la période demandée ni les écartés.
+- **Position absente.** Une position absente est indiscernable d'une position en échec.
+
+### Mutations — 6/6 rouges
+
+Curseur répété suivi · plafond de lecture ignoré · page pleine crue dernière · date seule à minuit ·
+position perdue · `saitRelever` toujours vrai. Deux d'entre elles ont été rejouées en mutation de
+valeur : l'une ne s'appliquait pas, l'autre rougissait par compilation (« Tests: 0 total »).
+
+### Vérification réelle rejouée sur l'état final — Mongo rs0, 10/10
+
+Script `PROSPERA/tmp/verif-docker-669/verif-releve.js`. Le vrai adaptateur (réseau simulé), le vrai
+`ImporterLeReleve` et `releve_lignes` sont utilisés.
+- Deux pages sont suivies jusqu'à la vide : **3 lignes** rangées, le rejeté est écarté et compté.
+- La position est lue mais jamais rangée.
+- Une **relève répétée** laisse 3 lignes. Une simulation n'écrit rien.
+- Un curseur répété, ou une page pleine au curseur illisible, donne un **échec**, sans aucune ligne
+  rangée.
 
 ## Notes
 

@@ -4569,9 +4569,10 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "review"  # MNV-669 (375fd0b) empilee sur MNV-667 — POST .../releves/relevements : le compte se RELEVE chez le participant (GET /paiements-recus, curseur, irrevocable seulement, filtres reverifies) et passe par le MEME import que STORY-269 : relever 2 fois n ajoute rien ; position du compte RENDUE et JAMAIS rangee (NFR-1b : « tresorerie » et « solde » interdits) ; la cascade cherche notre reference de DEMANDE au libelle ; recette REELLE 17/17 : 5 paiements, position 1 000 001 025 = 1e9 + 1 025 au franc pres, 3 couples CERTAINS / 0 proposition, ecart 325 = les 2 scans du comptoir de 667 ; ⛔ sort= ne trie que la PAGE, meta.total = taille de page, l API ne nomme qu UNE erreur par reponse
+        status: "done"  # ✅ CLOTUREE 2026-10-09 — paiement-service #76 (dev externe, mergee SANS revue le 2026-09-21) puis #84 (revue post-merge) rebase-mergee. Securite : 1 constat corrige — la pagination pouvait tourner SANS FIN (plafond sur les seuls mouvements RETENUS, curseur repete suivi) : curseur deja vu refuse, plafond sur les lignes LUES, page PLEINE sans curseur = illisible. Revue de code : jusqua sans heure perdait le dernier jour EN SILENCE, vue et capacite sans test, doublon lireLeJson, JSDoc detache. 6/6 mutations rouges, 3945 unitaires, verif reelle Mongo rs0 10/10. # MAJ 2026-09-21 — MNV-669 (375fd0b) empilee sur MNV-667 — POST .../releves/relevements : le compte se RELEVE chez le participant (GET /paiements-recus, curseur, irrevocable seulement, filtres reverifies) et passe par le MEME import que STORY-269 : relever 2 fois n ajoute rien ; position du compte RENDUE et JAMAIS rangee (NFR-1b : « tresorerie » et « solde » interdits) ; la cascade cherche notre reference de DEMANDE au libelle ; recette REELLE 17/17 : 5 paiements, position 1 000 001 025 = 1e9 + 1 025 au franc pres, 3 couples CERTAINS / 0 proposition, ecart 325 = les 2 scans du comptoir de 667 ; ⛔ sort= ne trie que la PAGE, meta.total = taille de page, l API ne nomme qu UNE erreur par reponse
+        completed_date: "2026-10-09"
         story_path: "stories/STORY-669.md"
-        assigned_to: null
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-670"
         title: "Consulter une demande chez le schema - le paiement se constate sans webhook"
         epic: "EPIC-036"
