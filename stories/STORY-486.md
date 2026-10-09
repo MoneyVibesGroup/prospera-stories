@@ -1,6 +1,6 @@
 # STORY-486 : Une surcharge vers un poste sans règle exploitable écarte le solde du compte — en silence, et le compte est pourtant « affecté »
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-010 — Référentiels & table de passage (FR-006/FR-008) · *le code touché vit
 dans `etats/` (EPIC-011) et la garde d'entrée dans `mapping-override/`*
@@ -110,3 +110,45 @@ compte est bien dans les états » est faux.
   désigné**. Le second est plus trompeur que le premier.
 - ⚠️ Mesuré, jamais déduit : les chiffres ci-dessus sortent d'une exécution sur l'artefact
   packagé, avec deux surcharges réellement insérées.
+
+## Progress Tracking
+
+**Statut : `done` (2026-10-09).** PR `prospera-bilan-service` **#167** rebase-mergée sur `dev`
+(dev `39b79f5`, revue `6384144`). Branches `MNV-486` : `prospera-bilan-service`, `prospera-stories`.
+
+- 2026-10-09 — **Relecture du code avant d'écrire : l'essentiel est déjà livré par STORY-676**
+  (2026-09-25). `regleDeDetail` (couple `etat`+`poste` exact, `type: 'detail'`, règle de
+  `REGLES_DE_DETAIL`) est lue par la proposition (`422 POSTE_INCONNU`), la publication des postes
+  (`rattachable`) et la production (un compte surchargé vers un sous-total devient **non mappé**,
+  donc compté par `COMPTES_NON_AFFECTES`). Le cas `AZ` sous `BILAN` mais visé en `BILAN_ACTIF` est
+  fermé. ⇒ AC-1, AC-2 et la moitié « surcharge en base » d'AC-3 étaient satisfaits.
+- **Décision — AC-1 garde `POSTE_INCONNU`, pas de code dédié.** STORY-676 l'a tranché
+  explicitement (référentiel public, l'écran ne propose que les postes `rattachable` ; un second
+  code doublerait la surface sans rien apprendre). Écart assumé au libellé de l'AC.
+- ③ **Le filet restant** (`39b79f5`) : `COMPTES_NON_AFFECTES` lit **aussi**
+  `diagnosticEquilibre.comptesSansRegle` (STORY-550) — un compte rattaché **par la table de
+  passage** à un poste sans règle exploitable (sous-total, `FORMULE`), écarté par
+  `choisirRattachementBilan`. Les deux listes sont lues **côte à côte, jamais fondues** :
+  l'identité de ventilation de `EQUILIBRE_BILAN` compterait sinon chaque compte deux fois.
+  L'élément porte le **poste désigné** (`etat`/`poste`, premier rattachement) — « affecté à un
+  poste qui ne le reçoit pas » —, un non rattaché les garde `null`. `COMPTES_ECARTES_PAR_REGLE`
+  sort de `CONTROLES_NON_COUVERTS`. `MOTEUR_VERSION` `1.23.0 → 1.24.0` (libellé, verdict,
+  `nonCouverts`). JSDoc de `controleComptesNonAffectes` réécrit (AC-5).
+- Aucun artefact livré (24 assets) ne produit le cas : aucun verdict ne bouge sur eux. Tests sur
+  `syscohada-revise@2.1` prolongé d'un sous-total `BZ` sur la racine `4799` (patron STORY-550).
+- ④ lint 0 · build OK · **11 724** unitaires · couverture **99,43 / 97,03 / 99,58 / 99,52** ·
+  **3 289** e2e. **Vérification docker : sans objet** — la story n'écrit rien en base, et la
+  branche neuve n'est atteignable par aucun référentiel embarqué (prouvée sur l'artefact réel).
+- ⑥ Revue de code (opus + ECC `silent-failure-hunter`, `pr-test-analyzer`) : **0 bloquant**,
+  6 corrigés (`6384144`) — ⛔ `expect(valide).toBe(false)` ne filtrait rien (`CASCADE_SOUS_TOTAUX`
+  rend déjà la balance juste non validable sous `@2.1`) : le témoin est la **présence** de
+  `COMPTES_NON_AFFECTES` parmi les bloquants en échec ; le test « surcharge en base » gardait la
+  porte de 676, dit tel quel ; plusieurs postes (premier publié) ; le **422 nomme le poste**
+  (`479900→BILAN|BZ=…`) ; JSDoc (inventaire, N-1, jeu-etats). Ponytail : rien à retrancher.
+- Mutations (toutes rouges) : retirer la seconde porte · publier `postes[1]` · compter les soldes
+  nuls · contrôle `INFORMATIF` · `postes.at(-1)` · message sans poste. Deux mutants non
+  compilables (« Tests: 0 total ») rejoués sous forme compilable.
+- ⑦ Revue de sécurité (opus) : **0 vulnérabilité**. `JeuEtatsService.valider` re-produit la
+  liasse et exige `valide` ; aucun autre producteur ne réintègre un solde écarté.
+- **Hors périmètre** : deux limites antérieures à la story, relevées par les revues, fichées à
+  part. Aucune n'est atteignable avec les référentiels embarqués.
