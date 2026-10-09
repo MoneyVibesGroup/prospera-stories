@@ -1,6 +1,6 @@
 # STORY-666 : Le raccordement PI-SPI par organisation — Money Vibes n'appelle jamais pour autrui
 
-Status: done
+Status: done — clôturée le 2026-10-09 après revue post-merge (paiement-service #81)
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -155,6 +155,64 @@ sur le bac à sable : 16/16.**
 4. **En production, Money Vibes doit déclarer son raccordement AVANT la mise en service de cette
    version**, sinon ses demandes poussées sont refusées à l'émission (c'est le comportement voulu,
    et c'est ce que la recette a mesuré).
+
+## Revue post-merge et clôture (2026-10-09 — paiement-service #81, `cb60700` sur `dev`)
+
+⛔ **La PR #74 a été rebase-mergée sur `dev` SANS revue** (`reviews: []`, compte du dev externe) et la
+fiche était passée `done` sur sa branche. Revue et clôture rejouées après coup, comme pour
+[[STORY-664]].
+
+**Porte d'entrée rejouée sur `dev`** : lint 0, build OK, 3 903 unitaires, seuils tenus ; e2e 322/323,
+le seul rouge étant `notifications-webhook` AC-4 `ECONNRESET`, préexistant.
+
+### Revue de code (opus + lentilles ECC) — 6 constats retenus, tous corrigés
+
+1. ⛔ **AC-6 n'était tenu qu'au RELAIS.** `exigerLeRaccordement` ne lisait que la *présence* du
+   raccordement. Le participant étant désormais une saisie de l'organisation, remplaçable après la
+   vérification de ses comptes, une discordance passait l'émission et la demande était abandonnée
+   ~3 s plus tard (`ECHEC_DEFINITIF`) — exactement l'abandon silencieux que la story disait refuser.
+   La méthode du port reçoit maintenant le participant du compte résolu et le confronte
+   (`PARTICIPANT_NON_RACCORDE`, compte sans participant refusé aussi).
+2. ⛔ **`select: false` des deux scellés : aucun test ne le gardait** — les doubles de collection le
+   simulaient. Mutation survivante ; spec du schéma ajoutée.
+3. ⛔ **Les liens de scellage n'étaient jamais confrontés à l'ouverture** : permuter les genres ou
+   sceller sous un fournisseur non normalisé laissait la suite verte (et chaque appel aurait levé
+   `ErreurDeCoffre` en production). Le test ouvre désormais les scellés du cas d'usage sous le lien
+   de l'adaptateur.
+4. `remplaceUnRaccordement` n'était testé qu'à `true` (mutation « en dur » survivante).
+5. Le motif de l'identifiant client n'existait que dans le domaine : redit dans le schéma, `deposer`
+   étant public.
+6. JSDoc orphelin laissé par la suppression de `VARIABLE_CLE_API`.
+
+**Laissés de côté (non bloquants)** : la présence de la méthode facultative du port décide aussi de
+l'autorisation de *déclarer* un raccordement (un futur adaptateur qui l'oublierait serait
+indéclarable, fermé) ; `deposer` accepte deux `SecretScelle` interchangeables (type marqué possible).
+Ponytail : rien à retrancher.
+
+### Revue de sécurité (opus) — aucun constat ≥ 80
+
+Org tirée du jeton, droit `paiement:compte:administrer`, AES-GCM avec lien en données authentifiées,
+aucun cache de jeton OAuth, aucun repli d'environnement sur les **sept** appels sortants actuels de
+`dev` (dont ceux ajoutés par 667 à 670), `/health` ne nomme personne.
+
+### Preuves sur l'état final
+
+- **Mutations : 7/7 rouges par assertion** (select:false, genres permutés, fournisseur brut,
+  remplace en dur, concordance retirée, participant non transmis, motif retiré — ce dernier
+  rejoué une seconde fois : la première mutation rougissait par compilation, « Tests: 0 total »).
+- lint 0 · build OK · **3 912 unitaires** · couverture 96,25 / 87,37 / 90,68 / 96,13 · e2e 321/323 :
+  `notifications-webhook` AC-4 (préexistant) et `lien-public` AC-7 (flake, 3/3 vert rejoué seul,
+  hors diff).
+- **Vérif réelle, Mongo rs0 sur base neuve, services compilés de `dist/` : 14/14** — collection
+  `raccordements_fournisseur`, `_id` `org:API_BUSINESS` ; scellés en base sans aucun clair ; lecture
+  ordinaire SANS scellés (select:false réel) ; ouverture sous le bon genre ; identifiant à saut de
+  ligne refusé (`ValidationError`), document inchangé ; **participant discordant ⇒
+  `PARTICIPANT_NON_RACCORDE` à l'émission et 0 ligne dans `initiations_sortantes`** ; re-déclaration
+  `remplace = true` puis 1 ligne enfilée, liée au compte et à l'organisation ; organisation sans
+  raccordement ⇒ `RACCORDEMENT_FOURNISSEUR_ABSENT`.
+- ⚠️ La recette réelle sur le bac à sable du schéma (16/16 du dev) n'a **pas** été rejouée : elle
+  exige les identifiants du `.env` racine, illisibles depuis la session. Le correctif ne touche pas
+  l'appel sortant lui-même.
 
 ## Notes
 
