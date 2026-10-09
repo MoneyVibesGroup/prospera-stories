@@ -4,9 +4,10 @@
 **Réf. :** écart trouvé à la **vérification docker de STORY-385**, 2026-08-24
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** not_started
+**Statut :** in_progress
 **Complexité :** medium
 **Sprint :** 20
+**Assigné à :** `vivianMoneyVibesGroupes`
 **Service :** `document-service` (`:3006`)
 
 ---
@@ -92,6 +93,32 @@ afin de **ne pas re-scanner indéfiniment un document qui n'a jamais eu de probl
 
 ---
 
+## Conception — décisions (cadrage APEX du 2026-10-09)
+
+- **D-396-1 — la panne de service n'est PAS un état terminal, et n'ajoute aucune valeur au contrat.**
+  L'extraction reste `EN_COURS` — « pas encore lue », ce qui est **vrai** — et le job BullMQ échoue pour être
+  **rejoué automatiquement** (6 tentatives, attente exponentielle depuis 60 s : ~31 min de fenêtre). Une image
+  réparée dans la fenêtre lit la pièce sans geste du cabinet. Aucune 5ᵉ valeur ⇒ ni l'enum de lecture de
+  STORY-385 ni `document.profil.extrait` / `document.piece.extrait` ne bougent ⇒ **un seul dépôt**
+  (`document-service`), `balance-service` intact.
+- **D-396-2 — la distinction se fait À LA SOURCE, pas sur le texte de l'erreur.** La couche OCR lève
+  `OcrIndisponibleError` (avec un `motif`) **seulement** là où l'échec ne peut pas venir de la pièce :
+  chargement du rasteriseur PDF (`@napi-rs/canvas` + `pdfjs-dist`), création du worker Tesseract (core WASM,
+  `tessdata`), création du répertoire temporaire (disque plein). Tout le reste — ouverture du PDF par pdf.js,
+  reconnaissance d'une image — reste imputable à la pièce ⇒ `ECHEC`, inchangé. Pas de liste de messages
+  d'erreur à reconnaître : elle vieillirait en silence.
+- **D-396-3 — le motif est consultable en base.** Chaque panne pose `panneService { motif, message,
+  survenueLe }` sur l'extraction (profil comme pièce) ; la finalisation le retire (`$unset`, champ déclaré au
+  schéma). **Non publié** sur la lecture des pièces (arbitrage : le contrat de lecture ne change pas, et
+  « pas encore lue » reste exact pendant la fenêtre de rejeu).
+- **D-396-4 — `/api/v1/health` gagne un indicateur `ocr`** : rasteriseur chargeable **et** `tessdata` de la
+  langue par défaut présent ; sinon `down` avec le motif nommé (`RASTERISEUR_PDF`, `TESSDATA`).
+
+**Hors périmètre** — le chemin **KYC** (`ExtractionService`, consommateur `kyc.document.uploaded`), qui convertit
+lui aussi un échec d'OCR en résultat métier : même défaut, autre contrat (`kyc.document.extrait`), à traiter dans
+sa propre story ; le **rejeu des jobs épuisés** au-delà de la fenêtre (BullMQ `failed`, rejouable à la main —
+l'indicateur `/health` dit qu'il faut réparer d'abord).
+
 ## Acceptance Criteria
 
 - [ ] Une erreur **non imputable à la pièce** simulée dans le pipeline OCR ne produit **pas** l'état qui
@@ -122,3 +149,11 @@ produire une pièce `PRETE`, il est ressorti `ECHEC`. ⚡ **L'échec a rendu ser
 à STORY-385 le cas `ECHEC` réel dont sa table de vérification avait besoin *(une pièce `ECHEC` porte bien
 `champs: []` en base, et c'est ce qui prouve que le statut doit décider, pas le tableau)*, et il a exposé
 ce défaut-ci.
+
+---
+
+## Progress Tracking
+
+**Statut : `in_progress` (2026-10-09).** Cadrage APEX : décisions D-396-1 à 4 (panne de service non terminale
+et rejouée, distinction à la source, motif en base, indicateur `/health` `ocr`) ; un seul dépôt, aucun contrat
+modifié ; chemin KYC et rejeu des jobs épuisés hors périmètre.
