@@ -1,6 +1,6 @@
 # STORY-667 : Le QR imprimé d'un point de vente — le paiement spontané trouve sa créance
 
-Status: review
+Status: done — clôturée le 2026-10-09 après revue post-merge (paiement-service #82)
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -84,7 +84,7 @@ d'affectation, son motif obligatoire et son auteur restent ceux de STORY-271.
   clefs nommée par [[STORY-665]] (id ≥ 674 — 673 est pris par FedaPay), et il est porté ici comme point ouvert.
 - Elle **n'ouvre aucun écran** et n'imprime aucune affiche : elle rend un SVG.
 
-## Livraison (2026-09-21 — branche `MNV-667`, commit `a9103a1`, sur `origin/dev` à `8b45a74`)
+## Livraison (2026-09-21 — branche `MNV-667`, commit `a9103a1` ; **fusionnée dans `dev` le 2026-09-21 sous `224ee17`**, PR #75)
 
 **Suites :** 3 633 unitaires (271 suites), 295 e2e, lint 0, `tsc` 0. **Recette Docker sur le
 vrai conteneur : 21/21** (vrai Mongo, vrai coffre, vrai journal, vraie route publique de
@@ -198,6 +198,83 @@ demande porte `400` et une demande poussée `401`. La position du compte est pas
    un amendement du PRD, pas un réglage.
 4. **Aucune fermeture.** Un point de vente ne se retire pas, par construction. Un écran pourra le
    masquer ([[STORY-286]]) ; il continuera de recevoir.
+
+## Revue post-merge et clôture (2026-10-09 — paiement-service #82, `8447264` sur `dev`)
+
+⛔ **La PR #75 a été rebase-mergée sur `dev` SANS revue** (`reviews: []`, compte du dev externe),
+troisième fois de suite après [[STORY-664]] et [[STORY-666]]. La revue et la clôture ont été rejouées
+après coup.
+
+**Porte d'entrée rejouée sur `dev`** : lint 0, build OK, 3 912 tests unitaires, seuils tenus. L'e2e
+passe à 322/323 : le seul rouge est `notifications-webhook` AC-4 `ECONNRESET`, déjà présent avant.
+
+### Revue de code (opus + lentilles ECC) — aucun défaut de comportement, 8 constats corrigés
+
+La production tient les 7 AC. Les constats portent sur ce que les tests ne prouvaient pas : chaque
+mutation ci-dessous restait **verte** avant la revue.
+
+1. **AC-5 côté HTTP** : retirer le filtre `pointDeVenteId` du contrôleur, ou le champ de la vue,
+   laissait la suite verte. Aucun e2e ne lisait la liste filtrée.
+2. **AC-3, « la clef d'une demande ne change pas »** : ce point n'avait aucun test. Dater la clef sur
+   le chemin des demandes restait vert, parce que tous les corps de test portaient un `end2endId`. Il
+   est maintenant testé avec une demande payée par QR, datée, sans identifiant du fournisseur.
+3. **AC-1, `verifie`** : la valeur n'était testée qu'à travers des doubles. La forcer à `true`, ou
+   retirer `verification.statut` de la projection, restait vert. Elle est maintenant testée à la
+   source.
+4. `saitFormerUnQrReutilisable` n'avait aucun test : `return true` restait vert.
+5. L'index partiel du comptoir, le nom et l'index de `points_de_vente` sont maintenant testés sur le
+   vrai schéma.
+6. `PointsDeVenteController` n'avait **aucune spec** (0 % des fonctions en unitaire, masqué par la
+   couverture globale). Sont maintenant couverts : les droits des trois routes, l'organisation et
+   l'auteur pris du jeton, une vue sans `orgId` ni auteur, le 404 commun, et l'absence de toute route
+   de modification ou de suppression.
+7. **Échec silencieux** : quand la mise en attente échouait, un `log` « en attente d'affectation »
+   suivait l'`error` et le contredisait. `mettreEnAttente` rend désormais son issue.
+8. Le JSDoc de `ResumeDeCompte` (« ni état de vérification ») était contredit par le nouveau champ
+   `verifie`.
+
+**Laissés de côté, non bloquants :**
+- Le type de construction `QrInteroperable` admet un montant sur le canal statique. Il date de
+  STORY-655, et le test « champ 54 absent » garde le comportement.
+- `pointDeVente` et `unicite` sont deux variables liées.
+- La lentille de tests signalait le mutant `organizationId` en chaîne dans `RegistreDesPointsDeVente.lire`
+  comme un trou. C'est un faux positif : Mongoose convertit la valeur selon le schéma.
+
+### Revue de sécurité (opus) — 0 constat ≥ 80
+
+Points éprouvés :
+- cloisonnement par organisation sur les trois routes et dans la recherche du comptoir (AC-6) ;
+- `:id` et `pointDeVenteId` contrôlés avant tout filtre (`isValid`, `@IsMongoId`, `$in: []`) ;
+- `evDate` couvert par le HMAC du corps brut : un tiers ne peut pas faire varier la clef ;
+- un paiement de demande ne peut pas basculer dans le chemin du comptoir.
+
+Sous le seuil : la clef suppose que le participant renvoie le même `evDate` à chaque re-livraison.
+AC-7 a mesuré que c'est la date d'irrévocabilité.
+
+### Mutations — 10/10 rouges
+
+Vue sans `pointDeVenteId` · filtre non transmis · `saitFormer` toujours vrai · `verifie` forcé ·
+statut non projeté · index non partiel · clef de demande datée · annonce après échec · droit du QR ·
+collection renommée.
+
+⚠️ La première version de « annonce après échec » rougissait **par compilation** (« Tests: 0 total »).
+Elle a été rejouée en mutation de valeur.
+
+### Vérification réelle rejouée sur l'état final — Mongo rs0, 26/26
+
+Script `PROSPERA/tmp/verif-docker-667/verif-point-de-vente.js`, exécuté sur `dist/`. Les collections,
+les deux barrières d'idempotence et le registre sont réels.
+
+- **AC-3** : deux clients donnent **2 pièces et 2 encaissements en attente** (150 et 175), avec des
+  clefs datées à la milliseconde. La re-livraison est écartée sans nouvelle pièce.
+- **AC-4** : sans instant, le premier paiement est rangé. La collision n'est pas rangée et se
+  journalise en `error` « indiscernable ». Le 400 n'est pas inventé.
+- **AC-6** : le comptoir d'une autre organisation donne un orphelin simple, sans `pointDeVenteId`,
+  sous la clef non datée d'une demande.
+- **AC-5** : la liste filtrée rend les 3 attentes du comptoir. Un identifiant mal formé rend une
+  liste **vide**. L'index partiel est bien posé en base.
+- **Correctif 7** : en cas de panne de la mise en attente, la pièce est conservée, aucune attente
+  n'est écrite, et une seule ligne `error` sort, sans annonce.
 
 ## Notes
 
