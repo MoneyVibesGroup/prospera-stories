@@ -4,7 +4,7 @@
 **Réf. :** écart trouvé à la **vérification docker de STORY-385**, 2026-08-24
 **Priorité :** Should Have
 **Story Points :** 3
-**Statut :** in_progress
+**Statut :** done
 **Complexité :** medium
 **Sprint :** 20
 **Assigné à :** `vivianMoneyVibesGroupes`
@@ -114,22 +114,28 @@ afin de **ne pas re-scanner indéfiniment un document qui n'a jamais eu de probl
 - **D-396-4 — `/api/v1/health` gagne un indicateur `ocr`** : rasteriseur chargeable **et** `tessdata` de la
   langue par défaut présent ; sinon `down` avec le motif nommé (`RASTERISEUR_PDF`, `TESSDATA`).
 
-**Hors périmètre** — le chemin **KYC** (`ExtractionService`, consommateur `kyc.document.uploaded`), qui convertit
-lui aussi un échec d'OCR en résultat métier : même défaut, autre contrat (`kyc.document.extrait`), à traiter dans
-sa propre story ; le **rejeu des jobs épuisés** au-delà de la fenêtre (BullMQ `failed`, rejouable à la main —
+- **D-396-5 (revue ⑥) — la création du worker Tesseract est bornée (60 s) et traduite en `MOTEUR_OCR`** : un
+  rejet de `createWorker` (core WASM absent) et une création figée (`traineddata` tronqué : tesseract.js avale
+  l'échec de `loadLanguage`) gardaient sinon le job actif pour toujours ou rendaient la pièce « illisible ».
+- **D-396-6 (revue ⑥) — le chemin KYC PROPAGE la panne de service** au lieu de publier `unreadable: true` : le
+  `verifierTessdata` à la source avait rendu immédiat ce qui, avant, gelait seulement la partition. Kafka rejoue
+  et la supervision (STORY-705) tient le groupe « bloqué ».
+
+**Hors périmètre** — sur le chemin **KYC**, au-delà de D-396-6, rien ne change (contrat `kyc.document.extrait`
+intact) ; le **rejeu des jobs épuisés** au-delà de la fenêtre (BullMQ `failed`, rejouable à la main —
 l'indicateur `/health` dit qu'il faut réparer d'abord).
 
 ## Acceptance Criteria
 
-- [ ] Une erreur **non imputable à la pièce** simulée dans le pipeline OCR ne produit **pas** l'état qui
+- [x] Une erreur **non imputable à la pièce** simulée dans le pipeline OCR ne produit **pas** l'état qui
       signifie « illisible » — vérifié par mutation *(retirer la distinction ⇒ le test rougit)*.
-- [ ] Une pièce réellement corrompue produit **toujours** l'état « illisible » — la distinction n'élargit
+- [x] Une pièce réellement corrompue produit **toujours** l'état « illisible » — la distinction n'élargit
       rien.
-- [ ] `/api/v1/health` passe **`down`** quand le rasteriseur PDF est absent, et le dit nommément.
-- [ ] Le motif de la panne de service est **consultable** (journalisé et, si l'arbitrage le retient, publié
+- [x] `/api/v1/health` passe **`down`** quand le rasteriseur PDF est absent, et le dit nommément.
+- [x] Le motif de la panne de service est **consultable** (journalisé et, si l'arbitrage le retient, publié
       sur la lecture des pièces) — jamais seulement dans les logs du conteneur.
-- [ ] Non-régression : le chemin **PNG/JPEG**, qui ne passe pas par le rasteriseur, est inchangé.
-- [ ] Si un état s'ajoute au contrat d'événement : la story est **livrée sur 2 dépôts**, PR ouvertes et
+- [x] Non-régression : le chemin **PNG/JPEG**, qui ne passe pas par le rasteriseur, est inchangé.
+- [x] Si un état s'ajoute au contrat d'événement : la story est **livrée sur 2 dépôts**, PR ouvertes et
       intégrées ensemble.
 
 ---
@@ -154,6 +160,43 @@ ce défaut-ci.
 
 ## Progress Tracking
 
-**Statut : `in_progress` (2026-10-09).** Cadrage APEX : décisions D-396-1 à 4 (panne de service non terminale
-et rejouée, distinction à la source, motif en base, indicateur `/health` `ocr`) ; un seul dépôt, aucun contrat
-modifié ; chemin KYC et rejeu des jobs épuisés hors périmètre.
+**Statut : `done` (2026-10-09).** prospera-ocr-service#23 (document-service) rebase-mergée sur `dev`, branche
+supprimée. Scripts : `PROSPERA/tmp/396/` (mutations, portes) et `tmp/verif-docker-396/` (`verif.sh`, `outil.js`).
+
+**Portes (état final)** — lint 0, build OK, test:cov 908 tests (99,18/93,97/98,28/99,20), test:e2e 183 (dont
+`/health` : `ocr` up, puis 503 nommé sans cause brute).
+
+**Mutations** — 21/21 rouges : panne de service rendue `ECHEC` (processeur pièce, processeur profil — AC-1),
+rasteriseur non traduit, tessdata non vérifié avant `createWorker`, disque plein non traduit, rejet de
+`createWorker` non traduit, création non bornée, `/health` toujours up, cause brute rendue par `/health`, `/health`
+qui journalise à chaque sonde, indicateur absent du contrôleur, disponibilité sans rasteriseur, trace sans filtre
+`EN_COURS`, `$unset` retiré (×2), rejeu retiré (×2), trace qui masque la panne, panne non tracée, abandon journalisé
+dès la 1re tentative, KYC qui publie `unreadable`.
+
+**Vérif docker (stack neuve, code de la branche, aucune modification du code)** — seule l'image est abîmée :
+`@napi-rs/canvas` renommé dans le conteneur puis redémarrage. `/health` ⇒ **503**, `ocr` :
+`{ status: down, motif: RASTERISEUR_PDF, message: "OCR indisponible : rasteriseur PDF indisponible (@napi-rs/canvas
+/ pdfjs-dist)." }` (aucun chemin du conteneur). PDF de statuts valide enfilé comme le fait le service (options de
+rejeu lues dans le `dist` réel) : extraction **`EN_COURS`**, `panneService { motif: RASTERISEUR_PDF, message,
+survenueLe }`, 0 marqueur, 0 outbox, job BullMQ **`delayed`** après 1 tentative. Rasteriseur rendu + redémarrage :
+`/health` 200, `ocr` up ; **rejeu automatique** ⇒ extraction **`PRETE`** (confiance 0,9, champs `formeJuridique`,
+`capitalSocial`), `panneService` **retiré**, 1 marqueur, 1 outbox, job `completed` en 2 tentatives. PNG corrompu
+(rasteriseur présent) ⇒ **`ECHEC`**, sans `panneService`, job `completed` en 1 tentative (AC « la distinction
+n'élargit rien »). Chemin PNG/JPEG inchangé (AC non-régression). Stack arrêtée.
+
+**Revue de code (⑥)** — scan opus + lentille ECC `silent-failure-hunter`. Retenus et corrigés : (1) **bloquant** —
+e2e `/health` non câblé (3 rouges) ; (2) rejet de `createWorker` resté « pièce illisible » ⇒ D-396-5 ; (3) création
+figée par un `traineddata` tronqué (job actif pour toujours) ⇒ délai de 60 s ; (4) le chemin KYC publiait désormais
+`unreadable` pour une panne de service ⇒ D-396-6 ; (5) `/health` journalisait à chaque sonde ⇒ au changement d'état ;
+(6) commentaire de rejeu faux + abandon indiscernable ⇒ commentaire rectifié et journal d'abandon
+(`@OnWorkerEvent('failed')`). Mutation « indicateur sous une autre clé » restée verte ⇒ double du contrôleur
+corrigé. Écartés (assumés, documentés) : une erreur déterministe hors OCR rejouée 6 fois avant abandon ; jobs
+épuisés `EN_COURS` jusqu'au rejeu manuel (hors périmètre) ; deux JSDoc détachés préexistants sur `dev`.
+
+**Revue de sécurité (⑦)** — 0 constat, en deux passes (branche, puis delta de revue) : `/health` ne rend que le
+libellé du motif ; aucune pièce ne peut déclencher `OcrIndisponibleError` (`lang` vient de la configuration, la
+pièce n'entre qu'au `recognize`) ; rejeu idempotent (marqueur + `jobId` stable) ; `panneService` exposé par aucune
+route.
+
+Historique : `in_progress` (2026-10-09) — cadrage APEX : décisions D-396-1 à 4 ; un seul dépôt, aucun contrat
+modifié.
