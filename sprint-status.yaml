@@ -4561,9 +4561,10 @@ sprints:
         epic: "EPIC-036"
         points: 8
         service: "paiement-service"
-        status: "review"  # MNV-668 (15865a8) empilee sur MNV-669 — amendement du PRD VALIDE par le PO le 2026-09-21 (FR-P65->P69, NFR-1d) ; ordre de paiement prepare par un role, valide par un AUTRE (jamais la meme personne : $ne DANS LE FILTRE), part UNE fois (engagement COMMIS avant l appel, reference = identifiant de l ordre), rejete = TERMINAL (FR-P68 durci par la mesure : un txId rejoue rend 200 + DU03 et la lecture par identifiant rend CE rejet) ; recette REELLE 17/17 : 25 XOF partis UNE fois, le meme identifiant renvoye au vrai schema est lu EXECUTE sans un franc de plus ; ⛔ PRODUCTION FERMEE tant que le point juridique du §10 n est pas leve
+        status: "done"  # ✅ CLOTUREE 2026-10-09 — paiement-service #77 (dev externe, mergee SANS revue le 2026-09-21) puis #83 (revue post-merge) rebase-mergee. ⛔ BLOQUANT corrige (CWE-362) : un INCONNU lu PENDANT le vol ramenait l ordre a PREPARE, donc ANNULABLE, et l ordre de remplacement partait sous une AUTRE reference = fournisseur paye DEUX FOIS ; dejaTransmis (jamais retire) interdit l annulation, et le silence n est cru qu apres 2 min. Controleur et vue sans spec, session des relectures non gardee (mutant vert). 9/9 mutations rouges, 3946 unitaires, verif reelle Mongo rs0 16/16. # MAJ 2026-09-21 — MNV-668 (15865a8) empilee sur MNV-669 — amendement du PRD VALIDE par le PO le 2026-09-21 (FR-P65->P69, NFR-1d) ; ordre de paiement prepare par un role, valide par un AUTRE (jamais la meme personne : $ne DANS LE FILTRE), part UNE fois (engagement COMMIS avant l appel, reference = identifiant de l ordre), rejete = TERMINAL (FR-P68 durci par la mesure : un txId rejoue rend 200 + DU03 et la lecture par identifiant rend CE rejet) ; recette REELLE 17/17 : 25 XOF partis UNE fois, le meme identifiant renvoye au vrai schema est lu EXECUTE sans un franc de plus ; ⛔ PRODUCTION FERMEE tant que le point juridique du §10 n est pas leve
+        completed_date: "2026-10-09"
         story_path: "stories/STORY-668.md"
-        assigned_to: null
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-669"
         title: "La tresorerie par l API du participant - le releve n est plus un fichier qu on depose"
         epic: "EPIC-036"
