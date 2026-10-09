@@ -586,3 +586,72 @@ il dit où ne **pas** aller corriger.
   du même chemin.
 - Le **statut reste `amorce`** : les états C1..C25 (**STORY-523**), le niveau de détail du plan
   (**STORY-671**) et les onze comptes de gestion non routés (**STORY-672**) restent hors couverture.
+
+## `cima-assurances@6.0` — le plan de l'art. 431 transcrit en entier (STORY-671)
+
+`@1.0` à `@5.0` restent packagées et **intactes**. `@6.0` (`19be9539…`) est la version **servie** :
+`assurance-service` la sert seule (bascule, comme `@5.0` avant elle — un octroi `@5.0` est à rejouer),
+`balance-service` accepte `@6.0` puis `@5.0` (patron STORY-677/701), et le pack catalogue
+`assurance-cima` octroie `@6.0` seule (deux octrois ⇒ `ReferentielAmbiguError` côté `bilan-service`).
+
+**Source : la page officielle de l'art. 431** — <https://cima-afrique.org/wp-content/code-cima/fr/Article431Listedescomptes.html>,
+relevée le 2026-10-09 ; arbitrages tirés de l'art. 432
+(<https://cima-afrique.org/wp-content/code-cima/fr/Article432Terminologieexplicativ.html>).
+
+| Longueur | `@5.0` | `@6.0` |
+|---|---|---|
+| 2 chiffres | 80 | **80** |
+| 3 chiffres | 10 | **344** |
+| 4 chiffres | 0 | **500** |
+| 5 chiffres | 0 | **129** |
+| **Total** | **90** | **1 053** |
+
+### ⛔⛔ Cinq coquilles de la page officielle, et non trois
+
+Le cadrage comptait **1 052** comptes : il dédoublonnait par numéro, et perdait ainsi en silence le
+**second `6029`** de la liste. Le relevé ligne à ligne en compte **1 053**, et le contrôle
+« tout compte a son parent au plan, dans sa fratrie » fait apparaître cinq coquilles :
+
+| Imprimé | Retenu | Libellé | Ce qui tranche |
+|---|---|---|---|
+| `6126` | **`6026`** | Frais accessoires | l'art. 432 cite `6026` trois fois |
+| `6029` (2ᵉ) | **`6209`** | Taxe sur les excédents de provisions pour sinistres | imprimé sous `620`, entre `6208` et `622` ; `6029` « Recours en principal » existe sous `602` et l'art. 432 le cite |
+| `6821` | **`6281`** | Contribution au fonds commun de majoration des rentes viagères | imprimé entre `6280` et `6282` sous `628` ; `682` n'existe pas |
+| `60366` | **`63066`** | Autres matériels | imprimé entre `63065` et `631` sous `6306` ; `6036` n'existe pas |
+| `050` | **`05`** | Plan d'investissement intéressant l'entreprise | l'art. 432 donne la racine `05` mot pour mot ; la liste la traite comme `03` (`035`/`037`/`039` ↔ `052`/`057`/`059`) ; aucun texte ne cite `050` |
+
+Et deux accidents de mise en page : `6905` imprimé **sans son point** (transcrit — l'art. 432 le cite),
+le libellé de `413` imprimé **sur deux lignes** (recousu). Trois libellés (`103`, `119`, `240`) portent le
+point final de l'énumération : retiré. Partout ailleurs, l'orthographe de la page est gardée (`Etat`,
+« Réserves statuaires »).
+
+### AC-5 — `05` n'est plus déduit
+
+`@5.0` le déduisait de ses enfants sous le libellé « Plan d'investissement ». `@6.0` porte le libellé de
+l'**art. 432** : « Plan d'investissement intéressant l'entreprise ».
+
+### AC-4 — l'assiette de chaque poste, mesurée sur les 1 053 comptes
+
+Postes, table de passage et racines de gestion sont **ceux de `@5.0` à l'octet**. Mesuré, pas supposé
+(`bilan-service`, `cima-plan-integral.spec.ts`) : une balance mouvementant **chacun** des 1 053 comptes
+rend le même rattachement compte par compte, le même Bilan et le même compte de résultat sous les deux
+versions. **857** comptes sont rattachés, **196** ne le sont pas — tous sous des racines que `@5.0` ne
+routait déjà vers aucun poste : la classe 0 (hors bilan), les regroupements `80`/`87`/`89`, et les
+comptes de gestion orphelins de **STORY-672** (`49`, `59`, `69`, `73`, `74`, `78`, `79`, `82`→`86`).
+Le plan intégral ne crée aucun trou : il les rend visibles compte par compte.
+
+### AC-6 — `longueurCompteDetail` reste 6
+
+Le compte le plus long de l'art. 431 fait **5** chiffres ; le 6 vient de la clause d'ouverture de
+l'**art. 432, classe 4** (« …ou à six chiffres » pour les comptes de réassureurs). Aucun compte à sept.
+
+### Ce que `@6.0` ne couvre pas
+
+Le statut reste **`amorce`** (AC-7, AD-12) : compléter le plan ne valide ni la liasse ni les
+provisions techniques. Restent hors couverture : les états C1..C25, la rétrocession, les cessions « à
+l'étranger » (`6909`/`7909`), les plafonds de l'art. 308, le compte 88, les comptes non routés
+(**STORY-672**) — et le **rattachement aux postes** des comptes désormais distingués : `3200`/`3201`
+(provision pour risques en cours) restent dans le même poste que `325` (sinistres). Le câblage de leur
+variation au compte de résultat est l'**AC-2 de STORY-514** (D-514-7), que ce paquet rend possible sans
+la livrer. Le pont `solvabilite-cima@1.0` reste attaché à `@5.0` : ré-évaluer ses lacunes au grain de
+`@6.0` est un travail à part.
