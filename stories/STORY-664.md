@@ -1,6 +1,6 @@
 # STORY-664 : Le QR dynamique d'une demande — la référence qui rapproche toute seule
 
-Status: review
+Status: done
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -175,3 +175,48 @@ ne remplace pas la recette : un module qui oublie d'importer un autre module lui
 - Voir [[STORY-655]] (la charge utile et l'arbitrage laissé ouvert), [[STORY-253]] (le QR du lien, à
   ne pas confondre), [[STORY-665]] (le tunnel et la mesure des clefs), [[STORY-271]] (les orphelins),
   [[STORY-667]] (le QR imprimé).
+
+## Progress Tracking
+
+**Statut : `done` (2026-10-09).** `prospera-paiement-service` : #72 + #73 (dev externe, mergées le
+2026-09-20 **sans revue**) puis **#80** (revue post-merge, rebase-mergée : `7ec382d`, `df2bf34`,
+`8f6adae`). Branches `MNV-664`, `MNV-664-arbitrage` et `MNV-664-revue` supprimées.
+
+- ⓪ **Porte d'entrée** : code déjà sur `dev`, story en `review` sur une branche docs non mergée —
+  signalé à l'user, correctifs sur une branche neuve. Porte rejouée : lint 0, build OK, unitaires
+  verts. Un seul rouge e2e, `notifications-webhook` AC-4 (`ECONNRESET`), **préexistant** sur `dev`.
+- ⑥ **Revue de code** (opus + ECC) — **1 bloquant** : AC-5 ne lisait que l'état `Expiree`, qu'aucune
+  minuterie ne pose (AD-12), donc une demande échue rendait son QR. Désormais `estEncaissable`, la
+  règle du lien. **Mutations qui survivaient** et sont maintenant rouges :
+  - SVG ≠ charge utile ;
+  - montant EMV ;
+  - compte et organisation passés au coffre ;
+  - lecture sous l'organisation du jeton, pays lu, ligne cherchée par son `_id` ;
+  - `Creee` + `EN_ATTENTE` ;
+  - délégation de l'enveloppe d'observation, appelée et sans `suivre` ;
+  - garde de câblage étendue à tous les providers ;
+  - quatre remèdes distincts.
+
+  Aussi corrigés : JSDoc détachés et deux commentaires faux de `demandes.module.ts`. La table de
+  mutations rejouée compte **19/19 rouges**.
+- ⑦ **Revue de sécurité** (opus) — 3 constats, corrigés après arbitrage de l'user (2026-10-09) :
+  1. **Double paiement** : `ECHEC_DEFINITIF` laissait passer le QR même après une réponse
+     illisible ou des tentatives épuisées, cas où la demande a pu naître chez le schéma sous le même
+     `txId`. Il ne passe plus que sur **preuve** : refus ou appel non conforme au premier appel
+     parti, ou empêchement local.
+  2. **Montant réglé en partie** : une demande `Partiellement_payee` est refusée, car le code
+     figeait le montant d'origine.
+  3. **Validité dépassée** : couverte par le correctif d'AC-5 ci-dessus.
+
+  Une **contre-revue** des correctifs a trouvé que `tentatives` ne compte que les échecs
+  *enregistrés*. Le relais compte donc désormais chaque appel **avant** qu'il parte (`appels`), et
+  la décision se prend sur ce compteur.
+- ⚖️ **Amendement de l'arbitrage PO du 2026-09-20** : « `ECHEC_DEFINITIF` laisse passer » devient
+  « `ECHEC_DEFINITIF` **prouvé sans poussée** laisse passer ». Les cas douteux ferment, avec le
+  remède nommé : révoquer la demande et en émettre une autre.
+- ⑧ **Persistance réelle** (Mongo rs0, modèle compilé) : `appels` survit au mode strict de
+  Mongoose. Avec 2 appels pour 1 tentative enregistrée, le QR est refusé ; une ligne antérieure au
+  champ est refusée elle aussi. La recette AC-6 du dev (mesure de la référence) n'est pas affectée :
+  aucune lecture ni écriture de ce chemin n'a changé.
+- ④ **Portes finales** : lint 0 · build OK · **3 903** tests unitaires · couverture
+  **96,25 / 87,37 / 90,67 / 96,13** · e2e **322/323** (le rouge préexistant ci-dessus).
