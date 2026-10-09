@@ -4430,7 +4430,8 @@ sprints:
         epic: "EPIC-012"
         points: 2
         service: "document, kyc, expert-comptable, fiscal, paiement, notification"
-        status: "in_progress"  # 2026-10-08 — dev lance (APEX, enchaine apres STORY-704). Historique : 🆕 CREEE le 2026-10-08 par le cadrage de STORY-704.
+        status: "done"  # ✅ CLOTUREE 2026-10-09 — prospera-ocr-service#22, prospera-kyc-service#22, prospera-expert-comptable#9, prospera-fiscal-service#20, prospera-paiement-service#79, prospera-notification-service#60 rebase-mergees sur dev. Patron STORY-704 recopie (util identique dans les 11 porteurs). Mutations 84/84. Verif docker expert-comptable + fiscal : 503 bloque durable puis up. Revues : 0/0. Rouges preexistants : e2e billing expert, e2e webhook paiement, seuil fonctions notification. Historique : in_progress 2026-10-08 — dev lance (APEX, enchaine apres STORY-704). Historique : 🆕 CREEE le 2026-10-08 par le cadrage de STORY-704.
+        completed_date: "2026-10-09"
         story_path: "stories/STORY-705.md"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-396"
