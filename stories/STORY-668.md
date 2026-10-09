@@ -1,6 +1,6 @@
 # STORY-668 : L'ordre de paiement — il part du compte de l'organisation, validé par un second rôle
 
-Status: review
+Status: done — clôturée le 2026-10-09 après revue post-merge (paiement-service #83)
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -180,6 +180,70 @@ l'autre, issue du fournisseur — et le rejeu de la fixture y est resté lisible
 5. **Aucun plafond par ordre ni par jour.** Le second regard est la seule barrière — un plafond
    d'organisation serait une décision de produit, pas un réglage.
 6. Un ordre `INITIE` de 10 XOF est resté chez le schéma (sonde du deux-temps) : il expirera.
+
+## Revue post-merge et clôture (2026-10-09 — paiement-service #83, sur `dev`)
+
+⛔ **La PR #77 a été rebase-mergée sur `dev` SANS revue** (`reviews: []`). La revue et la clôture
+ont été rejouées après coup.
+
+**Porte d'entrée rejouée sur `dev`** : lint 0, build OK, seuils tenus, e2e `ordres-de-paiement`
+13/13.
+
+### ⛔ Constat bloquant (code + sécurité, CWE-362) — un ordre parti pouvait être payé DEUX fois
+
+Les trois scans l'ont trouvé indépendamment, et une sonde sur le vrai cas d'usage l'a reproduit.
+Un seul `INCONNU` ramenait un ordre `EN_TRANSMISSION` à `PREPARE`, sans tenir compte d'un envoi
+encore en vol : la liste du schéma ne montre un envoi qu'après quelques secondes. Or `PREPARE`
+voulait dire « s'annule ». Le scénario :
+
+1. B valide.
+2. Quelqu'un demande des nouvelles pendant le vol : `PREPARE`.
+3. A annule : l'ordre passe `ANNULE`, terminal, et n'est plus jamais réinterrogé.
+4. Un nouvel ordre part sous une **autre** référence, que le schéma ne dédoublonne pas.
+
+Correctifs :
+- **`dejaTransmis`**, posé à la première transmission et **jamais** retiré. L'annulation exige son
+  absence, dans le filtre même de l'écriture. Revenu à `PREPARE`, l'ordre se **revalide sous la même
+  référence** ou son issue se constate. La vue et le message de refus le nomment.
+- **`DELAI_AVANT_DE_CROIRE_AU_SILENCE_MS`** (2 min, au moins jeton + envoi + liste) : avant ce délai,
+  `INCONNU` ne change rien. Une issue positive se consigne sans attendre.
+- Les logs d'échec disent la cause. Un échec de consignation après une réponse du fournisseur est
+  journalisé.
+
+AC-5 (« si le schéma ne connaît rien, l'ordre redevient à valider ») tient toujours, au-delà du
+délai.
+
+### Revue de code — autres constats corrigés
+
+- `OrdresDePaiementController` et `ordre-de-paiement.vue.ts` n'avaient **pas de spec** (0 % des
+  fonctions en unitaire).
+- **Aucun test ne gardait la session** posée sur l'engagement ni sur sa relecture. Le double l'ignorait,
+  et un mutant qui relisait hors transaction restait vert. Le double compte désormais ses lectures et
+  leurs sessions.
+
+**Laissés de côté (non bloquants) :**
+- L'engagement est posé avant de vérifier le raccordement : un raccordement retiré entre préparation et
+  validation laisse l'ordre `EN_TRANSMISSION`.
+- La liste trie hors index.
+- L'absence de traduction 112 → 409 est antérieure et concerne tout le service. En vrai Mongo, la
+  vérification montre d'ailleurs que la perdante d'une course reçoit bien `ORDRE_PAS_DANS_LE_BON_ETAT`.
+
+### Mutations — 9/9 rouges
+
+Annulation sans garde · marqueur non posé · délai ignoré · délai non mesuré · engagement hors
+session · relecture hors session (survivait à la première version du test) · droit de validation ·
+vue sans marqueur · préparateur qui valide.
+
+### Vérification réelle rejouée sur l'état final — Mongo rs0, 16/16
+
+Script `PROSPERA/tmp/verif-docker-668/verif-ordres.js`. Le vrai registre, le vrai cas d'usage, de
+vraies transactions et `ordres_de_paiement` sont utilisés.
+- Deux validations simultanées produisent **une seule transmission**.
+- `INCONNU` dans le délai laisse l'ordre `EN_TRANSMISSION`. Au-delà, il passe à `PREPARE`.
+- **`dejaTransmis` survit au `$unset`**, et l'annulation est alors **refusée en base**.
+- La revalidation part **sous la même référence**.
+- Un ordre jamais transmis s'annule.
+- L'ordre d'une autre organisation donne un 404.
 
 ## Tranché par le PO le 2026-09-21
 
