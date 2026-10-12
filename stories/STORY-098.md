@@ -4,8 +4,9 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A25, FR-A26, FR-A27 · `rapport-bilan-logique-metier-2026-07-12.md` §12 (GUIDEF : **8 contrôles de cohérence officiels** — l'exemplaire fourni en **échoue 2**) · STORY-101 (`BalanceValidator` — équilibre déjà posé en CORE)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Statut :** in_progress
+**Assigné à :** vivianMoneyVibesGroupes
+**Complexité :** high
 **Créée le :** 2026-07-12
 **Sprint :** 19 (EXTENDED)
 **Service :** `balance-service` (:3007)
@@ -14,6 +15,35 @@
 > **Le garde-qualité du hub — et la sincérité de ce qu'on livre.** La balance peut venir de **trois sources** (Sage, IMF, cahiers/OCR). Quelle qu'elle soit, elle doit passer **les mêmes contrôles** avant d'alimenter la liasse. Cette story complète les contrôles d'**intégrité** posés en CORE (équilibre, STORY-101) par :
 > - les **contrôles de cohérence officiels de la DSF** — la GUIDEF en compte **8** (Actif=Passif, articulation du résultat, articulation du CA…) et **l'exemplaire réel fourni en échoue 2** : ces contrôles **existent**, ils sont **appliqués par l'administration**, et une liasse qui les échoue **sera rejetée** ;
 > - le **statut de preuve (FR-A27)** — *dire la vérité sur la qualité de ce qu'on produit*. Une balance reconstituée à 80 % par OCR n'a **pas** la même valeur qu'une balance issue de relevés bancaires. **Le système doit le dire, pas le cacher.**
+
+---
+
+## ⚡ Cadrage rejoué sur le code (2026-10-12) — ce qui existe déjà, ce qui reste
+
+La story date du 2026-07-12. Depuis, **STORY-101/146/147/145/679/091/455** ont livré une partie de ce qu'elle décrit. Relu sur `origin/dev` (3387d56) **avant** de coder :
+
+| Élément de la story | État sur `dev` | Conséquence |
+|---|---|---|
+| Équilibre `Σ D = Σ C` (mouvements **et** soldes), doublons, montants ≥ 0, format | **refusés au dépôt** (`BalanceValidator`, STORY-101/147) | rejoués ici sur les lignes **persistées recalculées** (jamais sur `sommaire`, cf. D-098-2) |
+| Comptes hors plan | **refusés au dépôt ET à la validation** (STORY-146/679 : `400`) | le « non bloquant si référentiel incomplet » n'a plus d'objet : un plan incomplet n'existe plus (D-098-4) |
+| `statutPreuve` pondéré **par les montants** + `annotationRisque` | **livré** (`computeStatutPreuve`, STORY-147) | réutilisé ; le rapport ajoute la **répartition chiffrée** et signale un statut **enregistré** périmé (D-098-6) |
+| Articulation résultat CR ↔ compte de résultat net | **livrée** (`articulerResultat`, STORY-091 ; compte **13** en SYSCOHADA, pas `12x`) | réutilisée telle quelle (D-098-7) |
+| Gate de validation 409 | **couture livrée** (`VALIDATION_GATE`, STORY-145, porte passante) | cette story substitue le `useClass` (D-098-3) |
+| Catalogue de contrôles « lu du gabarit de liasse » | **aucun gabarit de contrôles n'est publié** (ni référentiel, ni catalogue) | D-098-9 |
+
+### Décisions
+
+- **D-098-1 — Rapport ancré sur UNE balance** : `GET /api/v1/dossiers/:dossierId/balances/:id/controles` (et non `?exercice=`). La porte de validation juge **une** balance ; un rapport par exercice jugerait « la plus récente », donc parfois une **autre** que celle qu'on valide (piège STORY-455). Le rapport et la porte appellent **la même fonction** pour les bloquants : le rapport ne peut pas dire « prêt » quand la porte refuse.
+- **D-098-2 — Recalculer, jamais relire** : les contrôles recalculent depuis `lignesNormalisees(doc)` ; aucun ne lit `sommaire.estEquilibre` (une balance d'avant 147 le lit `undefined` ⇒ invalidable à tort, cf. `ValidationGatePassante`).
+- **D-098-3 — Bloquants = intégrité + Actif=Passif**, et rien d'autre. Les articulations (résultat, CA, TVA) sont des **avertissements** : une balance non encore soldée est un état de travail normal, et un contrôle qui dépend du paquet fiscal ne doit jamais rendre une balance **invalidable** parce qu'un paquet n'est pas publié.
+- **D-098-4 — Comptes hors plan** : rapportés **BLOQUANT** dans le rapport (la validation les refuse déjà en `400`, le rapport le dit au lieu de promettre « prêt »).
+- **D-098-5 — Actif = Passif, côté balance** : après affectation du résultat, `Σ net(bilan) + résultat = 0` ⇔ le **résidu** des comptes ni de bilan (classes 1-5, terme structurel OHADA comme `CLASSE_CAPITAUX_PROPRES`) ni de gestion (`racinesDeGestion` **du référentiel**) est nul. Tautologique pour SYSCOHADA (plan 1-8, gestion 6/7/8) ; **réel** pour CIMA (classe 0, classe 8 hors racines — cf. STORY-672). Écart > 1 unité de la devise ⇒ **BLOQUANT**, comptes fautifs listés (plafonnés). L'équilibre **des postes** de la liasse (routage table de passage) reste à `bilan-service` (EQUILIBRE_BILAN, STORY-550) — **délégué, pas dupliqué**.
+- **D-098-6 — Statut de preuve** : recalculé (`computeStatutPreuve`), répartition **pondérée par les montants** publiée par niveau, annotation **chiffrée** pour tout statut ≠ `justifiée`. Si le statut **enregistré** diffère du recalcul (balance d'avant 147, pondérée par le nombre de lignes) ⇒ avertissement `STATUT_PREUVE_PERIME` : **signalé, jamais réécrit** (aucune correction automatique).
+- **D-098-7 — Articulation du résultat** : CR (racines de gestion) ↔ compte de résultat net (`resoudreCompteResultatNet`) **sur la balance contrôlée**, puis ↔ résultat comptable du **tableau fiscal**, qui est calculé sur la **base fiscale retenue** (`trouverDerniereBaseFiscale`). Même balance ⇒ concordant par construction (dit dans le détail) ; balance différente ⇒ **écart signalé** — c'est le vrai risque : le tableau fiscal assis sur un autre document que celui qu'on valide.
+- **D-098-8 — Articulation du CA** : la base MFP **est** le CA du poste chiffre d'affaires (`etablirChiffreAffairesSource`, marge produits bloqués = 0) : comparer le calcul à lui-même serait un test qu'un bug ne fait jamais échouer. Le contrôle compare donc le CA de la balance contrôlée au CA de la **base fiscale que retient la liquidation** ; CA non sourçable ⇒ non applicable, motif nommé.
+- **D-098-8bis — Articulation TVA** : `cumulAnnuel.totalAPayer` de la déclaration (cahiers, STORY-093) ↔ solde du compte `due` **publié par le paquet** (`4441` au Togo, jamais en dur). Non applicable (motif nommé) si régime ≠ réel, paquet non publié, ou aucun cahier sur l'exercice (balance Sage : pas d'alerte fausse).
+- **D-098-9 — Pas de gabarit de contrôles publié** : les **paramètres** de chaque contrôle (racines de gestion, compte de résultat net, poste CA, comptes TVA) sont lus du référentiel/paquet — **aucun compte en dur** ; le **catalogue** des contrôles est du code, faute de gabarit. Hook : `CONTROLES_DELEGUES` liste les contrôles TFT/notes/postes « à vérifier par `bilan-service` ».
+- **D-098-10 — Hors périmètre signalé** : la séparation préparateur/réviseur (tracée par STORY-145 « à trancher avec le PO ») n'est **pas** tranchée ici.
 
 ---
 
@@ -222,7 +252,13 @@ return { code: 'EQUILIBRE', severite: 'BLOQUANT', message: `Écart de ${fmt(ecar
 
 ---
 
-**Status:** ready-for-dev
+**Status:** in_progress
 **Dependencies:** **STORY-101** (`BalanceValidator`, équilibre CORE — consolidé ici), STORY-085/086/102 (les **3 sources** à contrôler), STORY-091/092/093/094 (articulations résultat / CA / TVA), STORY-078 (plan + gabarit) · **coordination** `bilan-service` EPIC-011 (contrôles TFT/notes)
 **Alimente** **STORY-099** (handoff — la balance part **avec son statut de preuve**) et **STORY-100** (e2e)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A25/A26/A27 · GUIDEF (**8 contrôles officiels** — l'exemplaire réel en échoue 2)
+
+---
+
+## Progress Tracking
+
+- 2026-10-12 — `in_progress` : cadrage rejoué sur `origin/dev` (3387d56), décisions D-098-1 → D-098-10. Branches `MNV-098` (docs, balance-service).
