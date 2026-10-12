@@ -4,7 +4,7 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A22, NFR-A04 (garde-fous) · `rapport-bilan-logique-metier-2026-07-12.md` §13 (D11 : prévisionnel + conseil fiscal) · STORY-091 (résultat fiscal), STORY-092 (`max(MFP, IS)` + `baseRetenue`)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** in_progress
+**Statut :** done
 **Complexité :** high
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
@@ -110,19 +110,19 @@ L'optimisation fiscale légale consiste à **agir sur la base imposable** via de
 
 ## Acceptance Criteria
 
-- [ ] **`ScenarioFiscal`** : CRUD (gate, isolation `orgId`) ; statut **toujours `BROUILLON`** ; stocké dans **sa propre collection**.
-- [ ] **⚠️ ISOLATION TOTALE** *(test central)* : après une simulation, la **balance réelle**, les **retraitements réels** et la **liasse** sont **strictement inchangés**.
-- [ ] **⚠️ AUCUN endpoint « appliquer un scénario »** (test qui vérifie son **absence**) — le retraitement réel se saisit via **STORY-091**, geste explicite et tracé.
-- [ ] **Leviers légaux uniquement** : `PROVISION`, `AMORTISSEMENT`, `REPORT_DEFICIT`, `REDUCTION_IMPOT`, `RETRAITEMENT` — **aucun levier de minoration de produit n'existe dans l'énumération** (impossibilité **structurelle**, NFR-A04).
-- [ ] **Chaque levier exige** : `codeRetraitement` **validé au paquet** (**inconnu → 400**), **`baseLegale` obligatoire** (**400** sinon), **`justification` obligatoire** (**400** sinon).
-- [ ] **`SimulationService`** rejoue le moteur (STORY-091 → 092) **en mémoire**, sur une **copie**, et retourne : résultat fiscal simulé, IS simulé, **MFP (inchangée)**, **impôt dû simulé = `max(MFP ; IS)`**, **économie réelle**.
-- [ ] **⚠️ `economieReelle` PLAFONNÉE par la MFP** *(test central)* : si le scénario fait passer l'impôt **sous la MFP**, l'économie est **`impôt initial − MFP`**, **pas** `impôt initial − IS simulé`.
-- [ ] **⚠️ Détection « optimisation inutile »** *(test central)* : si `baseRetenue` devient **`'MFP'`** → **avertissement explicite** (« aucune économie supplémentaire au-delà de X — trésorerie immobilisée pour rien »). Si l'impôt est **déjà** à la MFP → **économie = 0** annoncée.
-- [ ] **Contrôles de plausibilité** (avertissements, **non bloquants**) : provision inhabituellement élevée ; levier **sans pièce** → « indéfendable en contrôle sans pièce ».
-- [ ] **Comparaison** : `GET /fiscal/scenarios` → scénarios classés par **économie réelle** décroissante.
-- [ ] **Régime `SYNTHETIQUE`** : la TPU se calcule sur le **CA** → **avertissement** « pas de levier sur le bénéfice en TPU » (hors périmètre).
-- [ ] **Tests** : simulation nominale, **plafonnement MFP**, **optimisation inutile**, base légale/justification/code manquants (400 ×3), **balance réelle inchangée**, **absence d'endpoint d'application**, plausibilité, classement, isolation `orgId`. **Coverage ≥ 90 %.**
-- [ ] **Swagger** + **CI verte**.
+- [x] **`ScenarioFiscal`** : CRUD (gate, isolation `orgId`) ; statut **toujours `BROUILLON`** ; stocké dans **sa propre collection**.
+- [x] **⚠️ ISOLATION TOTALE** *(test central)* : après une simulation, la **balance réelle**, les **retraitements réels** et la **liasse** sont **strictement inchangés**.
+- [x] **⚠️ AUCUN endpoint « appliquer un scénario »** (test qui vérifie son **absence**) — le retraitement réel se saisit via **STORY-091**, geste explicite et tracé.
+- [x] **Leviers légaux uniquement** : `PROVISION`, `AMORTISSEMENT`, `REPORT_DEFICIT`, `REDUCTION_IMPOT`, `RETRAITEMENT` — **aucun levier de minoration de produit n'existe dans l'énumération** (impossibilité **structurelle**, NFR-A04).
+- [x] **Chaque levier exige** : `codeRetraitement` **validé au paquet** (**inconnu → 400**), **`baseLegale` obligatoire** (**400** sinon), **`justification` obligatoire** (**400** sinon).
+- [x] **`SimulationService`** rejoue le moteur (STORY-091 → 092) **en mémoire**, sur une **copie**, et retourne : résultat fiscal simulé, IS simulé, **MFP (inchangée)**, **impôt dû simulé = `max(MFP ; IS)`**, **économie réelle**.
+- [x] **⚠️ `economieReelle` PLAFONNÉE par la MFP** *(test central)* : si le scénario fait passer l'impôt **sous la MFP**, l'économie est **`impôt initial − MFP`**, **pas** `impôt initial − IS simulé`.
+- [x] **⚠️ Détection « optimisation inutile »** *(test central)* : si `baseRetenue` devient **`'MFP'`** → **avertissement explicite** (« aucune économie supplémentaire au-delà de X — trésorerie immobilisée pour rien »). Si l'impôt est **déjà** à la MFP → **économie = 0** annoncée.
+- [x] **Contrôles de plausibilité** (avertissements, **non bloquants**) : provision inhabituellement élevée ; levier **sans pièce** → « indéfendable en contrôle sans pièce ».
+- [x] **Comparaison** : `GET /fiscal/scenarios` → scénarios classés par **économie réelle** décroissante.
+- [x] **Régime `SYNTHETIQUE`** : la TPU se calcule sur le **CA** → **avertissement** « pas de levier sur le bénéfice en TPU » (hors périmètre).
+- [x] **Tests** : simulation nominale, **plafonnement MFP**, **optimisation inutile**, base légale/justification/code manquants (400 ×3), **balance réelle inchangée**, **absence d'endpoint d'application**, plausibilité, classement, isolation `orgId`. **Coverage ≥ 90 %.**
+- [x] **Swagger** + **CI verte**.
 
 ---
 
@@ -242,21 +242,21 @@ it('ISOLATION : la balance réelle est INCHANGÉE après simulation', async () =
 
 ## Definition of Done
 
-- [ ] `ScenarioFiscal` (CRUD, statut **BROUILLON** uniquement, collection dédiée)
-- [ ] **Leviers légaux uniquement** — aucun levier de minoration dans l'énumération (NFR-A04)
-- [ ] `codeRetraitement` **validé au paquet** ; `baseLegale` + `justification` **obligatoires** (400 sinon)
-- [ ] `SimulationService` rejoue 091→092 **en mémoire** ; **balance réelle inchangée** (test)
-- [ ] **⚠️ Économie RÉELLE plafonnée par la MFP** (test central)
-- [ ] **⚠️ Avertissement « optimisation inutile »** quand le plancher MFP est atteint (test central)
-- [ ] **⚠️ Aucun endpoint d'application** d'un scénario (test d'absence)
-- [ ] Contrôles de plausibilité (provision élevée, levier sans pièce)
-- [ ] Classement des scénarios par économie réelle ; avertissement si régime TPU
-- [ ] Coverage ≥ 90 % ; Swagger ; CI verte
-- [ ] Non-régression : STORY-091/092 (moteur réel) verts
+- [x] `ScenarioFiscal` (CRUD, statut **BROUILLON** uniquement, collection dédiée)
+- [x] **Leviers légaux uniquement** — aucun levier de minoration dans l'énumération (NFR-A04)
+- [x] `codeRetraitement` **validé au paquet** ; `baseLegale` + `justification` **obligatoires** (400 sinon)
+- [x] `SimulationService` rejoue 091→092 **en mémoire** ; **balance réelle inchangée** (test)
+- [x] **⚠️ Économie RÉELLE plafonnée par la MFP** (test central)
+- [x] **⚠️ Avertissement « optimisation inutile »** quand le plancher MFP est atteint (test central)
+- [x] **⚠️ Aucun endpoint d'application** d'un scénario (test d'absence)
+- [x] Contrôles de plausibilité (provision élevée, levier sans pièce)
+- [x] Classement des scénarios par économie réelle ; avertissement si régime TPU
+- [x] Coverage ≥ 90 % ; Swagger ; CI verte
+- [x] Non-régression : STORY-091/092 (moteur réel) verts
 
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** **STORY-091** (résultat fiscal — rejoué), **STORY-092** (`max(MFP, IS)` + `baseRetenue` — **le plancher est le cœur du conseil**), STORY-078 (codes et taux du paquet)
 **Alimente** **STORY-097** (comparatif « déposé vs optimisé » + dossier de justification — la pièce qui **défend** la liasse)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A22, NFR-A04 · D11 (conseil fiscal)
@@ -270,8 +270,8 @@ Le cadrage date du 2026-07-12 ; le moteur a beaucoup évolué depuis (STORY-095,
 - **D-096-1 — Rejeu, jamais réimplémentation.** La simulation appelle **`LiquidationService.liquider`** deux fois (réel, puis simulé) ; le scénario descend jusqu'à `ResultatFiscalService.calculerPour` sous la forme d'un paramètre **en mémoire** (`SimulationAssiette`) qui ajoute des postes et des déficits **par-dessus** les saisies réelles. Taux d'IS dérogatoire, exonération de MFP, bornage, garde de devise : tout est hérité, rien n'est recopié. Aucun dépôt n'est écrit.
 - **D-096-2 — `codeRetraitement` validé contre la grille `resultatFiscal` du paquet** (réintégrations ∪ déductions), le **sens** est celui du paquet. `REDUCTION_IMPOT` y entre aussi : au Togo, la « réduction d'impôt pour investissement de bénéfice » est la **déduction 120** de la liasse. Code inconnu → **400 `CODE_RETRAITEMENT_INCONNU`**, à la simulation (le paquet est celui de l'exercice).
 - **D-096-3 — `REPORT_DEFICIT` passe par le moteur de déficits, pas par un code.** Une déduction libre contournerait le **plafond de l'art. 101 CGI** (50 % du bénéfice) que le paquet publie — l'outil conseillerait alors une imputation illégale (NFR-A04). Le levier porte donc un **`exerciceOrigine`** (obligatoire, antérieur à l'exercice ; 400 sinon) et est projeté comme un déficit déclaré : plafond et durée du paquet s'appliquent. Il ne porte **pas** de `codeRetraitement` (aucun code de la liasse ne l'exprime).
-- **D-096-4 — Régime `SYNTHETIQUE` : 409 `REGIME_INCOMPATIBLE`**, par la même garde de contrôleur que la liquidation (STORY-095 : *chaque surface porte sa garde*). Le corps du 409 est l'avertissement explicite demandé.
-- **D-096-5 — Plausibilité d'une provision mesurée contre l'assiette réelle, pas contre « X % des créances ».** Aucun référentiel ne désigne les créances (seul le chiffre d'affaires l'est) et écrire `411`/`BI` en dur violerait NFR-A06. Une provision **supérieure au résultat fiscal réel** (elle fait basculer l'assiette en perte) lève `PROVISION_INHABITUELLE`. Le ratio sur les créances reste un **hook inerte** documenté (`SimulationService`), à ouvrir quand un référentiel désignera les créances.
+- **D-096-4 — Régime `SYNTHETIQUE` : 409 `REGIME_INCOMPATIBLE`**, le corps du 409 étant l'avertissement explicite demandé. ⚠️ **Garde par route, pas au contrôleur** (constat de revue) : `RegimeFiscalGuard` date le régime sur l'exercice du corps/de la query, sinon sur *aujourd'hui* ; les routes `scenarios/:id…` n'en portent aucun. La garde est donc posée sur `POST`/`GET scenarios`, et `simuler` vérifie le régime **dans le service** sur l'exercice du scénario.
+- **D-096-5 — Plausibilité mesurée contre l'assiette réelle, pas contre « X % des créances ».** Aucun référentiel ne désigne les créances (seul le chiffre d'affaires l'est) et écrire `411`/`BI` en dur violerait NFR-A06. Le **cumul des déductions** du scénario **supérieur au résultat fiscal réel** (l'assiette bascule en perte) lève `DEDUCTION_INHABITUELLE` — sur le cumul et quel que soit le `type`, pour que ni le découpage ni l'étiquette `RETRAITEMENT` ne l'éteignent (constat de revue ; l'avertissement s'appelait `PROVISION_INHABITUELLE` dans le premier jet). Le ratio sur les créances reste un **hook inerte** documenté (`SimulationService`), à ouvrir quand un référentiel désignera les créances.
 - **D-096-6 — L'économie se mesure sur l'impôt dû `max(IS ; MFP)`** : `economieReelle = impotDuReel − impotDuSimule`, `economieIs = impotDuReel − isSimule` (théorique, publiée pour la montrer). Les crédits d'impôt réels sont les mêmes des deux côtés.
 - **D-096-7 — Bornes anti-abus** : 20 leviers au plus par scénario, 50 scénarios au plus par dossier et exercice (le classement rejoue une liquidation par scénario).
 
@@ -280,3 +280,10 @@ Le cadrage date du 2026-07-12 ; le moteur a beaucoup évolué depuis (STORY-095,
 ## Progress Tracking
 
 - **2026-10-12** — `in_progress`. Branches `MNV-096` ouvertes (balance-service depuis `dev`, docs depuis `main`). Décisions D-096-1 à D-096-7.
+- **2026-10-12** — Dev livré sur `MNV-096` (balance-service) : collection `scenarios_fiscaux`, CRUD + `POST …/scenarios/:id/simuler` + classement `GET …/scenarios`. Rejeu de `LiquidationService.liquider` avec `SimulationAssiette` en mémoire (D-096-1).
+- **2026-10-12** — Portes DoD : lint 0, build OK, couverture 99.34 / 93.37 / 99.16 / 99.46, **5112 unit + 1864 e2e verts**. Deux e2e de contrat mis à jour (contrôleur au contrat OpenAPI ; batterie de portée collaborateur 31 → 32 contrôleurs).
+- **2026-10-12** — **Vérif docker** (stack neuve, `tmp/verif-docker-096/`, rejouée sur l'état FINAL après revue) : **81 OK / 0 KO**. Liquidation réelle IS 1 402 650 / MFP 480 000 ; provision 1 200 000 ⇒ économie 324 000 ; provision 4 000 000 ⇒ impôt 480 000 (MFP), **économie réelle 922 650 (≠ 1 080 000)** + `PLANCHER_MFP_ATTEINT` ; report de déficit 2024 de 4 000 000 ⇒ RF **2 597 500** (plafond 50 % du paquet) + `DEFICIT_NON_IMPUTE`. **Isolation** : balance relue en EJSON complet **identique au champ près**, aucune autre collection de `balance_service` modifiée, liquidation réelle identique après simulations ; refus (code inconnu, sans base légale, type de minoration) sans aucun document écrit ; `…/appliquer|application|apply` ⇒ 404 ; cabinet B ⇒ 404 partout, A intact ; PATCH et DELETE persistés.
+- **2026-10-12** — **Mutations : 19/19 rouges** (économie mesurée sur l'IS, postes/déficits simulés non injectés, origine non bornée, garde de régime, « déjà au plancher », portée sans dossier, sens forcé, tri, justification, régime dans `simuler`, refus du classement non captés ×2, montant, type sur réintégration, déficit non imputé tu, cumul des déductions, PATCH `null`).
+- **2026-10-12** — **Revue de code** (opus + lentilles ECC + ponytail) : 13 constats retenus, **tous corrigés** (commit dédié) — garde de régime datée « aujourd'hui » sur les routes `:id` (D-096-4 amendée) ; classement qui échouait en bloc et rendait les scénarios invisibles ⇒ `{ simulations, enEchec }` ; refus nommés par `details` (rang, scénario) ; code absent ⇒ `LEVIER_INVALIDE` ; montant ≤ 0 revérifié ; PROVISION/AMORTISSEMENT/REDUCTION_IMPOT exigent un code de déduction ; plausibilité sur le cumul (D-096-5 amendée) ; `DEFICIT_NON_IMPUTE` ; « économie = 0 » seulement s'il est vrai ; PATCH `null` ⇒ 400 ; test « par-dessus le réel ». Écarté : `yagni` ponytail sur un type à un appelant (convention d'agrégat). **Revue de sécurité** (opus) : **0 vulnérabilité**.
+- **2026-10-12** — `done`. PR balance-service#132 rebase-mergée sur `dev` (882bcbb), branche supprimée.
+- **Hook inerte** : plausibilité « provision > X % des créances » (D-096-5) — à ouvrir quand un référentiel désignera les créances comme il désigne déjà le chiffre d'affaires.

@@ -2357,8 +2357,9 @@ sprints:
         epic: "EPIC-024"
         points: 5
         service: "balance-service"
-        status: "in_progress"  # 2026-10-12 — dev ouvert (MNV-096 balance-service + docs) ; D-096-1..7 dans la story
+        status: "done"  # ✅ CLÔTURÉE 2026-10-12 — PR balance-service#132 rebase-mergée sur dev (882bcbb). Scénarios d'optimisation LÉGALE : brouillons simulés dans `scenarios_fiscaux`, rejeu de `liquider` en mémoire (D-096-1), économie RÉELLE = impôt réel − max(IS simulé ; MFP) — vérif docker : 922 650 et non 1 080 000, balance identique au champ près, aucune route « appliquer ». REPORT_DEFICIT par le moteur de déficits (plafond art. 101, D-096-3). Revue de code : 13 constats corrigés (garde de régime datée « aujourd'hui » sur les routes :id ⇒ garde par route + contrôle dans le service ; classement { simulations, enEchec }) ; sécurité : 0. 5112 unit + 1864 e2e, couverture 99.34/93.37/99.16/99.46, docker 81 OK, mutations 19/19.
         assigned_to: "vivianMoneyVibesGroupes"
+        completed_date: "2026-10-12"
       - story_id: "STORY-097"
         title: "Comparatif « déposé vs optimisé » + dossier de justification (base légale + pièce) + garde-fous conformité — FR-A23/A24"
         epic: "EPIC-024"
