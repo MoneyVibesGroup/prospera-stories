@@ -4,7 +4,7 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A25, FR-A26, FR-A27 · `rapport-bilan-logique-metier-2026-07-12.md` §12 (GUIDEF : **8 contrôles de cohérence officiels** — l'exemplaire fourni en **échoue 2**) · STORY-101 (`BalanceValidator` — équilibre déjà posé en CORE)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** in_progress
+**Statut :** done
 **Assigné à :** vivianMoneyVibesGroupes
 **Complexité :** high
 **Créée le :** 2026-07-12
@@ -37,7 +37,7 @@ La story date du 2026-07-12. Depuis, **STORY-101/146/147/145/679/091/455** ont l
 - **D-098-2 — Recalculer, jamais relire** : les contrôles recalculent depuis `lignesNormalisees(doc)` ; aucun ne lit `sommaire.estEquilibre` (une balance d'avant 147 le lit `undefined` ⇒ invalidable à tort, cf. `ValidationGatePassante`).
 - **D-098-3 — Bloquants = intégrité + Actif=Passif**, et rien d'autre. Les articulations (résultat, CA, TVA) sont des **avertissements** : une balance non encore soldée est un état de travail normal, et un contrôle qui dépend du paquet fiscal ne doit jamais rendre une balance **invalidable** parce qu'un paquet n'est pas publié.
 - **D-098-4 — Comptes hors plan** : rapportés **BLOQUANT** dans le rapport (la validation les refuse déjà en `400`, le rapport le dit au lieu de promettre « prêt »).
-- **D-098-5 — Actif = Passif, côté balance** : après affectation du résultat, `Σ net(bilan) + résultat = 0` ⇔ le **résidu** des comptes ni de bilan (classes 1-5, terme structurel OHADA comme `CLASSE_CAPITAUX_PROPRES`) ni de gestion (`racinesDeGestion` **du référentiel**) est nul. Tautologique pour SYSCOHADA (plan 1-8, gestion 6/7/8) ; **réel** pour CIMA (classe 0, classe 8 hors racines — cf. STORY-672). Écart > 1 unité de la devise ⇒ **BLOQUANT**, comptes fautifs listés (plafonnés). L'équilibre **des postes** de la liasse (routage table de passage) reste à `bilan-service` (EQUILIBRE_BILAN, STORY-550) — **délégué, pas dupliqué**.
+- **D-098-5 — Actif = Passif, côté balance** : après affectation du résultat, `Σ net(bilan) + résultat = 0` ⇔ le **résidu** des comptes ni de bilan (classes 1-5, terme structurel OHADA comme `CLASSE_CAPITAUX_PROPRES`) ni d'une **classe de résultat** (les classes des `racinesDeGestion` **du référentiel**) est nul. ⚠️ *Amendé en revue* : juger par les seules racines refusait `87`/`88`/`89` sous `cima-assurances@1.0…4.0` (classe 8 hors racines, sans marqueur `REGROUPEMENT`). Tautologique pour SYSCOHADA/SMT/SFD ; **réel** pour CIMA (classe 0 d'engagements). Le routage d'un compte de classe 8 qu'aucun poste ne reprend (STORY-672) reste à `bilan-service`. Écart > 1 unité de la devise ⇒ **BLOQUANT**, comptes fautifs listés (plafonnés). L'équilibre **des postes** de la liasse (routage table de passage) reste à `bilan-service` (EQUILIBRE_BILAN, STORY-550) — **délégué, pas dupliqué**.
 - **D-098-6 — Statut de preuve** : recalculé (`computeStatutPreuve`), répartition **pondérée par les montants** publiée par niveau, annotation **chiffrée** pour tout statut ≠ `justifiée`. Si le statut **enregistré** diffère du recalcul (balance d'avant 147, pondérée par le nombre de lignes) ⇒ avertissement `STATUT_PREUVE_PERIME` : **signalé, jamais réécrit** (aucune correction automatique).
 - **D-098-7 — Articulation du résultat** : CR (racines de gestion) ↔ compte de résultat net (`resoudreCompteResultatNet`) **sur la balance contrôlée**, puis ↔ résultat comptable du **tableau fiscal**, qui est calculé sur la **base fiscale retenue** (`trouverDerniereBaseFiscale`). Même balance ⇒ concordant par construction (dit dans le détail) ; balance différente ⇒ **écart signalé** — c'est le vrai risque : le tableau fiscal assis sur un autre document que celui qu'on valide.
 - **D-098-8 — Articulation du CA** : la base MFP **est** le CA du poste chiffre d'affaires (`etablirChiffreAffairesSource`, marge produits bloqués = 0) : comparer le calcul à lui-même serait un test qu'un bug ne fait jamais échouer. Le contrôle compare donc le CA de la balance contrôlée au CA de la **base fiscale que retient la liquidation** ; CA non sourçable ⇒ non applicable, motif nommé.
@@ -252,7 +252,7 @@ return { code: 'EQUILIBRE', severite: 'BLOQUANT', message: `Écart de ${fmt(ecar
 
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** **STORY-101** (`BalanceValidator`, équilibre CORE — consolidé ici), STORY-085/086/102 (les **3 sources** à contrôler), STORY-091/092/093/094 (articulations résultat / CA / TVA), STORY-078 (plan + gabarit) · **coordination** `bilan-service` EPIC-011 (contrôles TFT/notes)
 **Alimente** **STORY-099** (handoff — la balance part **avec son statut de preuve**) et **STORY-100** (e2e)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A25/A26/A27 · GUIDEF (**8 contrôles officiels** — l'exemplaire réel en échoue 2)
@@ -262,3 +262,37 @@ return { code: 'EQUILIBRE', severite: 'BLOQUANT', message: `Écart de ${fmt(ecar
 ## Progress Tracking
 
 - 2026-10-12 — `in_progress` : cadrage rejoué sur `origin/dev` (3387d56), décisions D-098-1 → D-098-10. Branches `MNV-098` (docs, balance-service).
+- 2026-10-12 — **dev** (balance-service PR #134) : `GET /api/v1/dossiers/:dossierId/balances/:id/controles` (intégrité, cohérence DSF, statut de preuve, contrôles délégués à `bilan-service`) ; `ValidationGateControles` substituée à la porte passante (un seul `useClass`) ; `repartitionPreuve` extraite de `computeStatutPreuve` (comportement inchangé) ; `TvaService` exporté par `FiscalModule` ; module feuille `ControlesModule`.
+- 2026-10-12 — **revue de code** (opus + lentilles ECC + ponytail) : **1 bloquant corrigé**. Actif = Passif jugeait par les seules racines de gestion, si bien que `87`/`88`/`89` sous `cima-assurances@1.0…4.0` (classe 8, sans marqueur `REGROUPEMENT`) étaient orphelins : une balance portant le résultat N-1 en `880000` était refusée en 409. Le contrôle juge désormais par les **classes** des racines (D-098-5 amendé). **14 non-bloquants corrigés** :
+  - socle d'à-nouveaux / portefeuille : articulations résultat et TVA non applicables (avant : faux écart au compte 13) ;
+  - régime non réel : tableau fiscal, MFP et TVA non applicables, base fiscale jamais lue ;
+  - balance CIMA déjà regroupée : échec nommé (avant : deux zéros « concordants ») ;
+  - TVA d'une balance provisionnée sans compte de TVA due : un solde nul est confronté à la TVA déclarée ;
+  - une concordance dit sur quelle base elle porte ;
+  - les comptes cités sont les comptes réels de la balance ;
+  - même convention de signe pour tous les écarts (balance − référence) ;
+  - DTO : motifs complétés, enums `source` et contrôles délégués ;
+  - 9 trous de test fermés : résidu débiteur, mouvements seuls, sous-comptes TVA, TVA déductible seule, bloquant de cohérence au rapport, test croisé sur des formes de lignes différentes, câblage de `ControlesModule`.
+  Écartés : union discriminée du type `Controle` (aucun état faux atteignable aujourd'hui) ; part d'un `niveauPreuve` hors énumération (impossible : champ requis, énumération fermée au schéma).
+- 2026-10-12 — **revue de sécurité** (opus) : **0 vulnérabilité**. IDOR, portée collaborateur, contournement de `RegimeFiscalGuard`, ordre 404 → 409, injection via `:id`, CWE-770 (comptes plafonnés à 100, coût linéaire mesuré à environ 430 ms pour 50 000 lignes CIMA) et fuite par `detail` ont été instruits puis écartés.
+- 2026-10-12 — **portes** (état final) :
+  - lint 0, build OK ;
+  - 5276 unit et 1896 e2e ;
+  - couverture 99.35 / 93.47 / 99.18 / 99.47 ; le module `controles` est à 100 % des lignes ;
+  - un rouge de durée hors périmètre (`plan-amortissement.regles.spec`, 3,99 s pour un seuil de 3 s, sous charge) : vert rejoué seul (43/43), fichier non touché par la PR.
+- 2026-10-12 — **mutations : 24/24 rouges**, toutes compilables. Mutants couverts : porte passante, classes de résultat (CIMA 4.0), classes de bilan, CA comparé à lui-même, charge d'impôt, garde « aucun cahier », erreur avalée, socle base fiscale, annotation, statut périmé, avertissement à la porte, Actif = Passif hors porte, pondération par ligne, doublons, prêt inconditionnel, plafond des comptes, TVA provisionnée, socle articulé, base lue hors réel, regroupée concordante, `TvaService` non exporté, résidu débiteur, signe TVA, concordance muette.
+- 2026-10-12 — **vérification docker** sur stack neuve (`down -v`), rejouée sur l'état final : **60/60 OK**, dont 38 propres à 098 (script `PROSPERA/tmp/verif-docker-098/p4_controles.py`).
+  - **C1** : rapport sur une balance saine (0 bloquant, prête pour dépôt). Le moteur TVA réel tourne, sans cahier ⇒ `AUCUNE_TVA_AUX_CAHIERS`. **Aucune écriture**, vérifiée par les compteurs de toutes les collections et par le document inchangé.
+  - **C2** : un brouillon v2 plus récent devient la base de la MFP ⇒ l'écart de CA de −1 000 000 est signalé et la v2 est nommée.
+  - **C3** : la validation de v1 passe (0 bloquant, 2 avertissements).
+  - **C4** : v2 rendue déséquilibrée en base ⇒ `409 CONTROLES_BLOQUANTS`.
+    - `details.bloquants` = `[EQUILIBRE_MOUVEMENTS, EQUILIBRE_SOLDES]` survit au filtre ;
+    - **zéro écriture** (compteurs, état, historique, `updatedAt`) ;
+    - le rapport donne les **mêmes** bloquants que la porte ;
+    - le rejet passe malgré les bloquants.
+  - **C5** : statut de preuve pondéré par les montants (81 % OCR / 16 % fichier / 4 % estimé), annotation chiffrée. Le statut enregistré, forcé à « justifiée », est signalé `STATUT_PREUVE_PERIME` et **jamais réécrit**.
+  - **C6** : isolation multi-tenant. Balance de A dans le dossier de B ⇒ 404 ; dossier de A avec le jeton de B ⇒ 404 `DOSSIER_INTROUVABLE` ; balance inexistante ⇒ 404.
+- 2026-10-12 — `done` : PR balance-service #134 rebase-mergée sur `dev`, branche supprimée.
+- ⚠️ **Hors périmètre, à trancher avec le PO** (tracé par STORY-145) : la séparation préparateur / réviseur à la validation.
+- ⚠️ **FRONT** : nouvelle route et nouveau DTO `RapportControlesResponseDto`, donc types à régénérer. Le 409 `CONTROLES_BLOQUANTS` de `/valider` est désormais **réellement produit**.
+
