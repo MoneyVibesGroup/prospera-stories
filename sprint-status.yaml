@@ -2373,7 +2373,8 @@ sprints:
         epic: "EPIC-024"
         points: 5
         service: "balance-service"
-        status: "in_progress"  # 2026-10-12 — cadrage rejoué sur dev (D-098-1→10), dev en cours
+        status: "done"  # ✅ CLÔTURÉE 2026-10-12 — PR balance-service#134 rebase-mergée sur dev (aa34fd0). Rapport GET /dossiers/:dossierId/balances/:id/controles (intégrité, cohérence DSF : Actif=Passif bloquant, articulations résultat/tableau fiscal/CA/TVA en avertissement sur la BASE FISCALE retenue, statut de preuve recalculé + STATUT_PREUVE_PERIME) ; ValidationGateControles remplace la porte passante (même fonction que le rapport). Revue : 1 bloquant (Actif=Passif refusait 87/88/89 sous CIMA 1.0…4.0) + 14 corrigés ; sécurité : 0. 5276 unit + 1896 e2e, mutations 24/24, docker 60/60.
+        completed_date: "2026-10-12"
         assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-100"
         title: "e2e Atelier (docker) : cahiers/OCR + Sage → balance → fiscal → handoff bilan-service"
