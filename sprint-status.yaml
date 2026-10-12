@@ -2373,8 +2373,8 @@ sprints:
         epic: "EPIC-024"
         points: 5
         service: "balance-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-10-12 — cadrage rejoué sur dev (D-098-1→10), dev en cours
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-100"
         title: "e2e Atelier (docker) : cahiers/OCR + Sage → balance → fiscal → handoff bilan-service"
         epic: "EPIC-024"
