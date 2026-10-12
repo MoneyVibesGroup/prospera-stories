@@ -4,11 +4,13 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A22, NFR-A04 (garde-fous) · `rapport-bilan-logique-metier-2026-07-12.md` §13 (D11 : prévisionnel + conseil fiscal) · STORY-091 (résultat fiscal), STORY-092 (`max(MFP, IS)` + `baseRetenue`)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Statut :** in_progress
+**Complexité :** high
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 19 (EXTENDED)
 **Service :** `balance-service` (:3007)
+**Branche :** `MNV-096` (balance-service, docs)
 **Couvre :** FR-A22 (simulation de scénarios d'optimisation légale)
 
 > **Le conseil fiscal — la fonctionnalité la plus utile, et la plus dangereuse.** Un cabinet ne se contente pas de *calculer* l'impôt : il **conseille**. « Si vous provisionnez cette créance douteuse, votre IS baisse de X. » « Si vous imputez ce déficit reportable, vous économisez Y. » Cette story permet de **simuler** l'effet de **leviers légaux** sur l'impôt.
@@ -254,7 +256,27 @@ it('ISOLATION : la balance réelle est INCHANGÉE après simulation', async () =
 
 ---
 
-**Status:** ready-for-dev
+**Status:** in_progress
 **Dependencies:** **STORY-091** (résultat fiscal — rejoué), **STORY-092** (`max(MFP, IS)` + `baseRetenue` — **le plancher est le cœur du conseil**), STORY-078 (codes et taux du paquet)
 **Alimente** **STORY-097** (comparatif « déposé vs optimisé » + dossier de justification — la pièce qui **défend** la liasse)
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A22, NFR-A04 · D11 (conseil fiscal)
+
+---
+
+## Décisions de conception (2026-10-12, à l'ouverture du dev)
+
+Le cadrage date du 2026-07-12 ; le moteur a beaucoup évolué depuis (STORY-095, 412, 417, 490, 496). Les écarts au texte ci-dessus sont **voulus** et tranchés ici.
+
+- **D-096-1 — Rejeu, jamais réimplémentation.** La simulation appelle **`LiquidationService.liquider`** deux fois (réel, puis simulé) ; le scénario descend jusqu'à `ResultatFiscalService.calculerPour` sous la forme d'un paramètre **en mémoire** (`SimulationAssiette`) qui ajoute des postes et des déficits **par-dessus** les saisies réelles. Taux d'IS dérogatoire, exonération de MFP, bornage, garde de devise : tout est hérité, rien n'est recopié. Aucun dépôt n'est écrit.
+- **D-096-2 — `codeRetraitement` validé contre la grille `resultatFiscal` du paquet** (réintégrations ∪ déductions), le **sens** est celui du paquet. `REDUCTION_IMPOT` y entre aussi : au Togo, la « réduction d'impôt pour investissement de bénéfice » est la **déduction 120** de la liasse. Code inconnu → **400 `CODE_RETRAITEMENT_INCONNU`**, à la simulation (le paquet est celui de l'exercice).
+- **D-096-3 — `REPORT_DEFICIT` passe par le moteur de déficits, pas par un code.** Une déduction libre contournerait le **plafond de l'art. 101 CGI** (50 % du bénéfice) que le paquet publie — l'outil conseillerait alors une imputation illégale (NFR-A04). Le levier porte donc un **`exerciceOrigine`** (obligatoire, antérieur à l'exercice ; 400 sinon) et est projeté comme un déficit déclaré : plafond et durée du paquet s'appliquent. Il ne porte **pas** de `codeRetraitement` (aucun code de la liasse ne l'exprime).
+- **D-096-4 — Régime `SYNTHETIQUE` : 409 `REGIME_INCOMPATIBLE`**, par la même garde de contrôleur que la liquidation (STORY-095 : *chaque surface porte sa garde*). Le corps du 409 est l'avertissement explicite demandé.
+- **D-096-5 — Plausibilité d'une provision mesurée contre l'assiette réelle, pas contre « X % des créances ».** Aucun référentiel ne désigne les créances (seul le chiffre d'affaires l'est) et écrire `411`/`BI` en dur violerait NFR-A06. Une provision **supérieure au résultat fiscal réel** (elle fait basculer l'assiette en perte) lève `PROVISION_INHABITUELLE`. Le ratio sur les créances reste un **hook inerte** documenté (`SimulationService`), à ouvrir quand un référentiel désignera les créances.
+- **D-096-6 — L'économie se mesure sur l'impôt dû `max(IS ; MFP)`** : `economieReelle = impotDuReel − impotDuSimule`, `economieIs = impotDuReel − isSimule` (théorique, publiée pour la montrer). Les crédits d'impôt réels sont les mêmes des deux côtés.
+- **D-096-7 — Bornes anti-abus** : 20 leviers au plus par scénario, 50 scénarios au plus par dossier et exercice (le classement rejoue une liquidation par scénario).
+
+---
+
+## Progress Tracking
+
+- **2026-10-12** — `in_progress`. Branches `MNV-096` ouvertes (balance-service depuis `dev`, docs depuis `main`). Décisions D-096-1 à D-096-7.

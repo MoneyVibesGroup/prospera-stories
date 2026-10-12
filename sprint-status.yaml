@@ -2357,8 +2357,8 @@ sprints:
         epic: "EPIC-024"
         points: 5
         service: "balance-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-10-12 — dev ouvert (MNV-096 balance-service + docs) ; D-096-1..7 dans la story
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-097"
         title: "Comparatif « déposé vs optimisé » + dossier de justification (base légale + pièce) + garde-fous conformité — FR-A23/A24"
         epic: "EPIC-024"
