@@ -4,7 +4,7 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A23, FR-A24, NFR-A04 (garde-fous), NFR-A07 (piste d'audit) · `rapport-bilan-logique-metier-2026-07-12.md` §13 (D11 : défendre la liasse) · STORY-096 (scénarios), STORY-091 (base légale des retraitements)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** in_progress
+**Statut :** done
 **Complexité :** high
 **Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
@@ -143,23 +143,23 @@ Calcul ........... voir détail par créance (annexe)
 
 ## Acceptance Criteria
 
-- [ ] **Comparatif** (`GET /fiscal/comparatif`) : **ligne à ligne** (résultat comptable, retraitements par code, résultat fiscal, IS, **MFP**, **impôt dû**) en 3 colonnes : **référence / optimisée / écart**.
-- [ ] **⚠️ Économie RÉELLE affichée** (plafonnée par la MFP — STORY-096), **jamais** l'économie théorique ; si le **plancher MFP** est atteint → **affiché explicitement** dans le comparatif.
-- [ ] **Dossier de justification** : **une fiche par retraitement** avec `code DSF`, `montant`, **`baseLegale`**, **`justification`**, **`pieces[]`**, **`decidePar`**, **`decideLe`**, `calculDetaille?`.
-- [ ] **⚠️ Retraitement non justifié → LACUNE** *(test central)* : listé comme « indéfendable en l'état » → dossier marqué **`INCOMPLET`**. Un retraitement sans base légale **ne peut pas** figurer comme justifié.
-- [ ] **Statut du dossier** : `COMPLET` (tous justifiés + pièces) | **`INCOMPLET`** (lacunes **listées explicitement**).
-- [ ] **Export** `format=pdf|json` — document présentable au client et à l'OTR (rendu PDF **coordonné** avec `bilan-service` EPIC-014, sans duplication).
-- [ ] **⚠️ GARDE-FOUS FR-A24 — les 5 invariants IMPLÉMENTÉS ET TESTÉS** (suite dédiée `conformite.spec.ts`) :
-  - [ ] **1.** **Aucun endpoint** n'applique un scénario (test d'**absence**) — le réel se saisit via STORY-091.
-  - [ ] **2.** **Aucun levier de minoration** de base réelle n'existe (test sur l'énumération `TypeLevier`) — impossibilité **structurelle**.
-  - [ ] **3.** **Justification obligatoire** : retraitement sans `baseLegale`/`justification` → **400**.
-  - [ ] **4.** **Immutabilité après validation** : liasse `VALIDÉE` → **409** sur balance / retraitement / liquidation / provision (test transverse).
-  - [ ] **5.** **Piste d'audit append-only** : `UPDATE`/`DELETE` sur la collection d'audit → **refusés**.
-- [ ] **Avertissements de risque consolidés** dans le dossier (levier sans pièce, provision inhabituelle, montant atypique) — **signalés avant le contrôle**.
-- [ ] **Mention de responsabilité** : l'outil **restitue** la base légale saisie par le professionnel ; il **ne dit pas le droit** — le cabinet reste responsable de la qualification.
-- [ ] **Traçabilité (NFR-A07)** : la génération du dossier est tracée (auteur, date, scénario, **version du paquet fiscal**).
-- [ ] **Tests** : comparatif exact, **économie réelle (pas théorique)**, plancher MFP affiché, dossier COMPLET, **retraitement non justifié → LACUNE + INCOMPLET**, export, **les 5 garde-fous**, traçabilité, isolation. **Coverage ≥ 90 %.**
-- [ ] **Swagger** + **CI verte**.
+- [x] **Comparatif** (`GET /fiscal/comparatif`) : **ligne à ligne** (résultat comptable, retraitements par code, résultat fiscal, IS, **MFP**, **impôt dû**) en 3 colonnes : **référence / optimisée / écart**.
+- [x] **⚠️ Économie RÉELLE affichée** (plafonnée par la MFP — STORY-096), **jamais** l'économie théorique ; si le **plancher MFP** est atteint → **affiché explicitement** dans le comparatif.
+- [x] **Dossier de justification** : **une fiche par retraitement** avec `code DSF`, `montant`, **`baseLegale`**, **`justification`**, **`pieces[]`**, **`decidePar`**, **`decideLe`**, `calculDetaille?`.
+- [x] **⚠️ Retraitement non justifié → LACUNE** *(test central)* : listé comme « indéfendable en l'état » → dossier marqué **`INCOMPLET`**. Un retraitement sans base légale **ne peut pas** figurer comme justifié.
+- [x] **Statut du dossier** : `COMPLET` (tous justifiés + pièces) | **`INCOMPLET`** (lacunes **listées explicitement**).
+- [x] **Export** `format=pdf|json` — document présentable au client et à l'OTR (rendu PDF **coordonné** avec `bilan-service` EPIC-014, sans duplication).
+- [x] **⚠️ GARDE-FOUS FR-A24 — les 5 invariants IMPLÉMENTÉS ET TESTÉS** (suite dédiée `conformite.spec.ts`) :
+  - [x] **1.** **Aucun endpoint** n'applique un scénario (test d'**absence**) — le réel se saisit via STORY-091.
+  - [x] **2.** **Aucun levier de minoration** de base réelle n'existe (test sur l'énumération `TypeLevier`) — impossibilité **structurelle**.
+  - [x] **3.** **Justification obligatoire** : retraitement sans `baseLegale`/`justification` → **400**.
+  - [x] **4.** **Immutabilité après validation** : liasse `VALIDÉE` → **409** sur balance / retraitement / liquidation / provision (test transverse).
+  - [x] **5.** **Piste d'audit append-only** : `UPDATE`/`DELETE` sur la collection d'audit → **refusés**.
+- [x] **Avertissements de risque consolidés** dans le dossier (levier sans pièce, provision inhabituelle, montant atypique) — **signalés avant le contrôle**.
+- [x] **Mention de responsabilité** : l'outil **restitue** la base légale saisie par le professionnel ; il **ne dit pas le droit** — le cabinet reste responsable de la qualification.
+- [x] **Traçabilité (NFR-A07)** : la génération du dossier est tracée (auteur, date, scénario, **version du paquet fiscal**).
+- [x] **Tests** : comparatif exact, **économie réelle (pas théorique)**, plancher MFP affiché, dossier COMPLET, **retraitement non justifié → LACUNE + INCOMPLET**, export, **les 5 garde-fous**, traçabilité, isolation. **Coverage ≥ 90 %.**
+- [x] **Swagger** + **CI verte**.
 
 ---
 
@@ -285,20 +285,20 @@ describe('FR-A24 — Garde-fous de conformité', () => {
 
 ## Definition of Done
 
-- [ ] Comparatif **ligne à ligne** (référence / optimisée / écart) avec **économie RÉELLE** (plafonnée MFP)
-- [ ] Plancher MFP atteint → **affiché explicitement**
-- [ ] Dossier de justification : **une fiche par retraitement** (base légale, justification, pièces, décideur, date)
-- [ ] **Retraitement non justifié → LACUNE + dossier `INCOMPLET`** (test central)
-- [ ] Export `pdf|json` (coordonné avec `bilan-service` EPIC-014)
-- [ ] **Les 5 garde-fous FR-A24 implémentés ET testés** (`conformite.spec.ts`)
-- [ ] Avertissements de risque consolidés ; mention de responsabilité
-- [ ] Génération du dossier tracée (NFR-A07)
-- [ ] Coverage ≥ 90 % ; Swagger ; CI verte
-- [ ] Non-régression : STORY-096 (scénarios), STORY-091/092 (moteur) verts
+- [x] Comparatif **ligne à ligne** (référence / optimisée / écart) avec **économie RÉELLE** (plafonnée MFP)
+- [x] Plancher MFP atteint → **affiché explicitement**
+- [x] Dossier de justification : **une fiche par retraitement** (base légale, justification, pièces, décideur, date)
+- [x] **Retraitement non justifié → LACUNE + dossier `INCOMPLET`** (test central)
+- [x] Export `pdf|json` (coordonné avec `bilan-service` EPIC-014)
+- [x] **Les 5 garde-fous FR-A24 implémentés ET testés** (`conformite.spec.ts`)
+- [x] Avertissements de risque consolidés ; mention de responsabilité
+- [x] Génération du dossier tracée (NFR-A07)
+- [x] Coverage ≥ 90 % ; Swagger ; CI verte
+- [x] Non-régression : STORY-096 (scénarios), STORY-091/092 (moteur) verts
 
 ---
 
-**Status:** in_progress
+**Status:** done
 **Dependencies:** **STORY-096** (scénarios + **économie réelle plafonnée MFP**), **STORY-091** (retraitements réels + base légale), STORY-092 (liquidation), **STORY-101** (immutabilité) · **coordination** `bilan-service` EPIC-014 (chaîne d'export PDF)
 **Réalise D11** : *défendre la liasse* — et **FR-A24** : les garde-fous qui rendent la fraude structurellement impossible
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A23/A24, NFR-A04/A07
@@ -308,3 +308,10 @@ describe('FR-A24 — Garde-fous de conformité', () => {
 ## Progress Tracking
 
 - 2026-10-12 — `in_progress` : story ajustée au code de `dev` (D-097-1…7), branches `MNV-097` créées sur `docs` (base `main`) et `balance-service` (base `dev`) avant toute ligne de code. Flux complet exécuté par Claude (décision user du jour).
+- 2026-10-12 — dev : `JustificationService` / `JustificationController` (2 GET), règles pures `justification.regles.ts`, `journal_dossiers_justification` append-only, `conformite.spec.ts` (5 invariants FR-A24). Commit `f19a08c`.
+- Portes : lint 0 · build OK · 5179 unit (99.35/93.45/99.17/99.47) · 1885 e2e ; e2e ciblés rejoués après revue (128 unit + 282 e2e).
+- Mutations : 16/16 rouges (3 mutants d'abord non compilables — « Tests: 0 total » — réécrits compilables puis rejoués rouges).
+- ⑥ revue de code (opus + lentilles ECC) : 6 constats corrigés, commit dédié `3387d56` — pièce du levier `REPORT_DEFICIT` (fiche + lacune), contrat Swagger du PDF en binaire, **empreinte SHA-256** du contenu au journal, fiche de scénario datée de sa dernière modification, tests (cumul par case, valeurs des lignes, PDF en échec sans trace, exercice long). **Laissés** : invariant 4 mesuré sur les saisies de l'AC (retraitement, acomptes, crédits, provision) — TVA/taxes/TPU/déficits ont leur garde mais pas de témoin dans `conformite.spec.ts` ; un scénario n'a qu'un auteur (son créateur) ; lectures non transactionnelles entre simulation et lignes du comparatif. Revue ponytail non exécutée (quota).
+- ⑦ revue de sécurité (opus) : 0 vulnérabilité.
+- ⑧ vérif docker sur stack neuve, **rejouée sur l'état final** : 68 OK / 0 KO (`PROSPERA/tmp/verif-docker-097/`) — comparatif 324 000 / 922 650 avec plancher atteint, comparatif sans aucune écriture, dossier INCOMPLET (pièce manquante) puis COMPLET, PDF, journal (3 générations, empreinte, paquet, auteur), refus 404 sans trace, **append-only mesuré sur la vraie base** (9 opérations refusées par le schéma compilé, document identique, compte inchangé).
+- ⑨ PR balance-service#133 rebase-mergée sur `dev`, branche supprimée. `done`.
