@@ -2365,8 +2365,8 @@ sprints:
         epic: "EPIC-024"
         points: 5
         service: "balance-service"
-        status: "not_started"  # NFR-A04 : traçabilité, immutabilité, aucune minoration non justifiée
-        assigned_to: null
+        status: "in_progress"  # 2026-10-12 — démarrée (flux complet Claude) ; story ajustée au code de dev (D-097-1…7). NFR-A04 : traçabilité, immutabilité, aucune minoration non justifiée
+        assigned_to: "vivianMoneyVibesGroupes"
       - story_id: "STORY-098"
         title: "Contrôles d'intégrité + cohérence (Actif=Passif, articulation) + statut de preuve de la balance — FR-A25/A26/A27"
         epic: "EPIC-024"

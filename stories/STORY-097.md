@@ -4,8 +4,9 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § FR-A23, FR-A24, NFR-A04 (garde-fous), NFR-A07 (piste d'audit) · `rapport-bilan-logique-metier-2026-07-12.md` §13 (D11 : défendre la liasse) · STORY-096 (scénarios), STORY-091 (base légale des retraitements)
 **Priorité :** Must Have
 **Story Points :** 5
-**Statut :** ready-for-dev
-**Assigné à :** null
+**Statut :** in_progress
+**Complexité :** high
+**Assigné à :** vivianMoneyVibesGroupes
 **Créée le :** 2026-07-12
 **Sprint :** 19 (EXTENDED)
 **Service :** `balance-service` (:3007)
@@ -116,6 +117,27 @@ Calcul ........... voir détail par créance (annexe)
 5. *(Variante — le cas qui protège)* Un retraitement a été saisi **sans base légale** → il apparaît comme **LACUNE** : « Retraitement code 40 — **1 80 000 — indéfendable en l'état : base légale manquante** » → le dossier est **`INCOMPLET`** → le cabinet **complète avant de déposer**. **L'outil signale la faiblesse avant le contrôle, pas après.**
 6. Le cabinet retient le scénario, **saisit le retraitement réel** (STORY-091, avec base légale et pièce), **valide la liasse** → **immuable** (STORY-101).
 7. **En contrôle** : le dossier de justification est **la pièce** qui répond à « prouvez-le ».
+
+---
+
+## Ajustement au code de `dev` (2026-10-12, avant le développement)
+
+> Story fichée le 2026-07-12 ; STORY-091/096/101/456 ont livré depuis une partie du socle. Relu sur `dev` (882bcbb) **avant** de coder. Les décisions ci-dessous **priment** sur la prose d'origine quand elles la contredisent.
+
+- **D-097-1 — Routes sous le dossier**, comme toutes les routes fiscales depuis STORY-236 :
+  `GET /api/v1/dossiers/:dossierId/fiscal/scenarios/:id/comparatif` (l'exercice est **celui du scénario** : le passer aussi en query inviterait l'incohérence ; régime vérifié dans le service sur l'exercice du scénario, leçon de STORY-096) et
+  `GET /api/v1/dossiers/:dossierId/fiscal/dossier-justification?exercice=&scenarioId=&format=json|pdf`. Un `scenarioId` d'un autre exercice ⇒ **404 `SCENARIO_INTROUVABLE`** (jamais un mélange d'exercices).
+- **D-097-2 — Comparatif = rejeu, jamais un second calcul.** Les lignes viennent de `ResultatFiscalService.calculer` (réel, puis avec les leviers en mémoire — D-096-1) ; l'impôt, l'économie **réelle** et le plancher viennent de la simulation de STORY-096 (`conclureSimulation`). Aucune arithmétique fiscale nouvelle.
+- **D-097-3 — Ce qui fait une LACUNE** (dossier `INCOMPLET` dès qu'il en existe une) :
+  - poste **saisi** (retraitement réel `MANUEL`, levier du scénario) : base légale, justification **ou pièce** absente (chaîne vide ou blanche comprise) — l'AC exige « tous justifiés **et** pièces » pour `COMPLET` ;
+  - **déficit imputé** : justification absente (cas réel : déficits déclarés avant STORY-456). La base légale d'un déficit reste **facultative** (arbitrage PO de STORY-456 : l'article est le même pour tous) et la pièce n'existe pas dans son modèle ;
+  - poste **automatique** (`AUTO_CAHIERS` / `AUTO_TAXES`) : **jamais** une lacune — c'est une réintégration (elle majore la base) dont la preuve est la ligne source, publiée (`lignesSources` / `taxesSources`). Le cabinet ne peut d'ailleurs rien y saisir : une lacune qu'on ne peut pas combler rendrait `COMPLET` inatteignable.
+- **D-097-4 — Garde-fous FR-A24 : ce qui existe déjà est PROUVÉ, pas réécrit.** 1 (aucune route « appliquer ») et 2 (`TYPES_LEVIER` fermé) viennent de STORY-096 ; 3 (justification obligatoire) de STORY-091/096 ; 4 (gel `EXERCICE_CLOS` / `BALANCE_VALIDEE_IMMUABLE`, 409) de `ContexteFiscalService.exigerExerciceModifiable`. La suite `conformite.spec.ts` les **réunit et les mesure** (liste FERMÉE des leviers, toutes les routes des contrôleurs fiscaux, 409 sur chaque saisie fiscale mutante). La balance validée immuable est prouvée par STORY-101 (hors fiscal).
+- **D-097-5 — La piste d'audit append-only est le journal des dossiers produits** (`journal_dossiers_justification`, NFR-A07 : auteur, date, exercice, scénario, format, statut, nombre de lacunes, **tampon du paquet fiscal**). Le dépôt n'expose qu'`inserer`/`lister` ; le schéma **refuse** toute mise à jour et toute suppression par Mongoose (middleware). La trace est écrite **avant** de rendre le dossier : pas de dossier sans trace. ⚠️ Aucune protection **en base** (pas de rôle Mongo dédié) : un accès direct à `mongosh` contourne l'applicatif — limite assumée, à reprendre avec les rôles Mongo de prod.
+- **D-097-6 — PDF : la chaîne de STORY-555 est réutilisée** (`balance/export/rendu-pdf.ts`, modèle `DocumentExport`), aucune dépendance vers `bilan-service` ni seconde chaîne. Bandeau `INCOMPLET` sur chaque page tant qu'une lacune existe.
+- **D-097-7 — Risques consolidés** : les avertissements de la simulation (`LEVIER_SANS_PIECE`, `DEDUCTION_INHABITUELLE`, plancher MFP…) quand un scénario est fourni. **Hook inerte** : « montant atypique » / « provision inhabituelle » sur un retraitement **réel** attend qu'un référentiel désigne les créances (même attente que D-096-5) — aucun seuil inventé.
+
+**Hors périmètre ajouté** : protection de la piste d'audit au niveau des rôles MongoDB (prod) ; seuils de plausibilité des retraitements réels (D-097-7).
 
 ---
 
@@ -276,7 +298,13 @@ describe('FR-A24 — Garde-fous de conformité', () => {
 
 ---
 
-**Status:** ready-for-dev
+**Status:** in_progress
 **Dependencies:** **STORY-096** (scénarios + **économie réelle plafonnée MFP**), **STORY-091** (retraitements réels + base légale), STORY-092 (liquidation), **STORY-101** (immutabilité) · **coordination** `bilan-service` EPIC-014 (chaîne d'export PDF)
 **Réalise D11** : *défendre la liasse* — et **FR-A24** : les garde-fous qui rendent la fraude structurellement impossible
 **Reference:** `prd-atelier-balance-2026-07-12.md` § FR-A23/A24, NFR-A04/A07
+
+---
+
+## Progress Tracking
+
+- 2026-10-12 — `in_progress` : story ajustée au code de `dev` (D-097-1…7), branches `MNV-097` créées sur `docs` (base `main`) et `balance-service` (base `dev`) avant toute ligne de code. Flux complet exécuté par Claude (décision user du jour).
