@@ -4696,9 +4696,10 @@ sprints:
         epic: "EPIC-038"
         points: 3
         service: "paiement-service"
-        status: "ready-for-dev"  # CalendrierOuvre.joursFeries vaut [] : le delai en heures ouvrees compte les feries.
+        status: "done"  # ✅ 2026-10-23, `MNV-719` `18f075d` sur `origin/dev` `0e87d96` (PR a ouvrir). Referentiel versionne TG-2026-10-23 : fixes + feries chretiens calcules depuis Paques 2020-2040 ; fetes musulmanes a saisir par decret (vide) ; 13 janvier a confirmer PO ; un seul pays (Togo).
         story_path: "stories/STORY-719.md"
         assigned_to: null
+        completed_date: "2026-10-23"
       - story_id: "STORY-720"
         title: "Delai de validation par organisation"
         epic: "EPIC-038"
