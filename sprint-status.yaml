@@ -4672,9 +4672,10 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "ready-for-dev"  # Un raccordement n est eprouve nulle part ; revérification periodique sur le modele de STORY-616.
+        status: "done"  # ✅ 2026-10-23, `MNV-716` `e2e4b20` sur `origin/dev` `3709b3b` (PR a ouvrir). Epreuve = jeton + GET /comptes?size=1 ; motifs IDENTIFIANTS_REFUSES / CLE_API_REFUSEE ; injoignable ne marque rien ; etat derive (SAIN, EN_ECHEC, PERIME 24 h, NON_EPROUVE, NON_EPROUVABLE) ; veille 6 h + POST epreuves. ⛔ MESURE : secret faux = 400 invalid_client, lu jusqu ici comme APPEL_NON_CONFORME — corrige. Recette reelle 14 prouves.
         story_path: "stories/STORY-716.md"
         assigned_to: null
+        completed_date: "2026-10-23"
       - story_id: "STORY-717"
         title: "Plusieurs participants dans un deploiement"
         epic: "EPIC-036"
