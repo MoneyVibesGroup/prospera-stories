@@ -5796,8 +5796,10 @@ sprints:
         epic: "EPIC-042"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # Exactement quatre usages. Un réacheminement lancé depuis la console obéit à AD-6 comme partout : la console n'est PAS un chemin d'écriture privilégié.
+        status: "done"  # ✅ 2026-10-23, `MNV-286` `99cd798` sur `origin/dev` `b1150a0` (PR a ouvrir). Rail E : LECTURE SEULE, trois usages (demandes, notifications refusees, ecarts) — le reacheminement reste un geste de l organisation sous AD-6. Module exploitation : 3 GET, aucune route d ecriture (garde), lectures qui ne savent que lire (DemandesALExploitation, RefusALExploitation, ConfrontationDuReleve extraite de RapprocherLeReleve) ; droit plateforme paiement:exploitation:consulter (9e) + PorteDeLaPlateforme (404) ; vues sans payeur ni libelle ; RegistreDesRefus borne (compte existant x motif x jour, $inc, TTL 90 j, aucun corps). 4 062 unitaires, 78 e2e. ⚠ catalogue IdP a completer ; AP-14 a realigner sur 3 panneaux.
         assigned_to: null
+        story_path: "stories/STORY-286.md"
+        completed_date: "2026-10-23"
       - story_id: "STORY-287"
         title: "Fournisseur de candidats pour le moteur de règles de l'assistant"
         epic: "EPIC-042"
