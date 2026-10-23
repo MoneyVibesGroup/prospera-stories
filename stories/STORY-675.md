@@ -1,6 +1,6 @@
 # STORY-675 : Une seule clef d'unicité par paiement — webhook et consultation cessent de se contredire
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-036 — Fournisseurs de paiement interchangeables et simultanés
 **Service :** `paiement-service`
@@ -63,30 +63,30 @@ que le participant n'a jamais livré.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — **Un paiement, une clef, quel que soit le chemin.** Webhook, consultation
+- [x] AC-1 — **Un paiement, une clef, quel que soit le chemin.** Webhook, consultation
       ([[STORY-670]]) et — si la voie retenue le demande — relève dérivent la **même** référence
       d'événement pour le même paiement. La dérivation vit à **un** endroit du domaine ; les
       adaptateurs ne la recomposent pas chacun de leur côté.
-- [ ] AC-2 — ⛔⛔ **Un QR dynamique payé DEUX fois produit DEUX encaissements** : le second est un
+- [x] AC-2 — ⛔⛔ **Un QR dynamique payé DEUX fois produit DEUX encaissements** : le second est un
       **trop-perçu** constaté ([[STORY-259]]), plus un rejeu avalé. La re-livraison du **même**
       événement, elle, reste écartée.
-- [ ] AC-3 — ⛔ **Vu par les deux chemins, un paiement se compte UNE fois** — prouvé par un test qui
+- [x] AC-3 — ⛔ **Vu par les deux chemins, un paiement se compte UNE fois** — prouvé par un test qui
       fait passer le même paiement par le webhook **puis** par la consultation (et l'inverse), avec
       des doubles qui **dédoublonnent par clef** (leçon de [[STORY-667]] : un double qui répond
       toujours « rangé » rendrait ce critère vert sans une ligne de production).
-- [ ] AC-4 — ⚡ **La règle-donnée de [[STORY-670]] est levée — ou gardée, et la fiche dit
+- [x] AC-4 — ⚡ **La règle-donnée de [[STORY-670]] est levée — ou gardée, et la fiche dit
       pourquoi.** Si les clefs se rejoignent, la consultation peut rattraper un événement non
       livré sur un compte qui a un webhook. La lever est le bénéfice attendu de cette story ; la
       garder doit être une décision, pas un oubli.
-- [ ] AC-5 — ⛔⛔ **RIEN NE SE RÉÉCRIT.** Le registre des encaissements et la boîte de réception sont
+- [x] AC-5 — ⛔⛔ **RIEN NE SE RÉÉCRIT.** Le registre des encaissements et la boîte de réception sont
       **append-only** ([[STORY-257]]) : les clefs déjà rangées restent ce qu'elles sont. La story
       dit comment un paiement **déjà constaté sous l'ancienne clef** est reconnu quand il revient
       sous la nouvelle — sans quoi la mise en service elle-même compterait deux fois tout ce qui
       est rejoué ce jour-là.
-- [ ] AC-6 — La clef d'un **point de vente** ([[STORY-667]]) devient un **cas particulier** de la
+- [x] AC-6 — La clef d'un **point de vente** ([[STORY-667]]) devient un **cas particulier** de la
       règle commune, et non une seconde règle à côté : `attestationAuPointDeVente` se range dedans
       ou disparaît.
-- [ ] AC-7 — ⛔ **Sans instant, on ne devine toujours pas** : l'heure de **réception** n'entre dans
+- [x] AC-7 — ⛔ **Sans instant, on ne devine toujours pas** : l'heure de **réception** n'entre dans
       aucune clef (elle distinguerait aussi deux livraisons du même paiement) — la règle de
       [[STORY-667]], AC-4, vaut pour tous les canaux.
 - [ ] AC-8 — Recette **réelle** : un QR dynamique scanné **deux fois** sur le bac à sable (il faut un
@@ -110,3 +110,72 @@ que le participant n'a jamais livré.
 - ⚠️ `categorie` distingue les canaux chez le schéma — `000` QR statique, `400` QR dynamique, `401`
   demande poussée, `733` envoi. Elle n'est **pas** dans le webhook : on ne peut pas s'en servir pour
   choisir une règle de clef à la réception.
+
+## Livraison — 2026-10-23
+
+**Code :** `prospera-paiement-service`, branche `MNV-675` (`f5cc6a1`), basée sur `origin/dev`
+(`3f09e8c`, qui porte déjà STORY-674). 4 038 tests unitaires (295 suites), 39 e2e des notifications
+et points de vente, lint 0. **Recette réelle :** 11 prouvés, 1 bloqué nommé (l'écart de
+[[STORY-674]]), 0 échec. **AC-8 non joué** — voir plus bas.
+
+### L'arbitrage : voie A, retenue à l'ouverture
+
+⚠️ **Décision prise sur la recommandation de la fiche, à confirmer par le PO.** Aucun appel sortant
+pendant la réception d'un webhook public (voie B), aucune troisième collection (voie C).
+
+### La mesure qui a rendu la voie A sûre (2026-10-23)
+
+| Référence | Catégorie | `GET /demandes-paiements/{txId}` |
+|---|---|---|
+| `6aa9ebab…` (abonnement poussé) | `401` | `200`, `IRREVOCABLE`, `end2endId`, `dateConfirmation` — **pas** de `dateIrrevocabilite` |
+| `6ab05033…` (QR de demande) | `400` | **`404`** — « la demande n'existe pas » |
+| `6ab09cc2…` (QR de comptoir, 2 paiements) | `000` | **`404`** |
+
+⇒ **Seule une demande POUSSÉE se consulte**, et son webhook ne porte pas d'instant ([[STORY-665]]).
+La consultation compose donc la clef sans instant, et rejoint le webhook. Un QR, lui, ne se constate
+que par webhook, qui porte `evDate` : sa clef porte l'instant.
+
+### Ce qui a été fait
+
+- **AC-1** — `domain/notifications/reference-de-paiement-recu.ts` compose
+  `PAIEMENT_RECU:<txId>[:<instant ISO>]` ; l'adaptateur l'appelle pour le webhook **et** la
+  consultation. ⚡ Un paiement reçu ne porte **plus de référence de transaction** : la seconde
+  barrière (l'encaissement, clé par `preuve.referenceTransaction` à défaut de la clef d'événement)
+  tombe ainsi sur la même clef par les deux chemins. Le rapprochement l'apparie par notre référence
+  au libellé ([[STORY-669]], AC-6) — comme il le faisait déjà pour un webhook.
+- **AC-2** — un QR dynamique payé deux fois : deux instants, deux clefs, deux encaissements, le
+  second en trop-perçu ; la re-livraison du même événement reste écartée.
+- **AC-3** — `recevoir-la-notification.clef-unique.spec.ts` : vraies fonctions d'attestation, vraie
+  boîte de réception sur un modèle qui refuse une clef prise, registre d'encaissements qui
+  dédoublonne. Webhook puis consultation, et l'inverse : **un** encaissement.
+- **AC-4** — **la règle-donnée de [[STORY-670]] est LEVÉE.** `ConsulterUneDemande` ne reçoit plus
+  le coffre ; `aUnSecretDeNotification` a disparu. Un compte à webhook peut rattraper par
+  consultation un événement jamais livré.
+- **AC-5** — rien ne se réécrit. Une attestation déclare ses **clefs antérieures** ; la boîte les
+  cherche dans la session de l'écriture, et **seulement quand il y en a** (la garde « aucun `find`
+  préalable » de [[STORY-257]] tient pour la clef courante) :
+  - webhook à instant → `PAIEMENT_RECU:<txId>`, reconnue **seulement si la pièce rangée porte le
+    même instant** (sous l'ancienne clef d'une demande, deux paiements d'un QR se confondaient) ;
+  - consultation → `PAIEMENT_RECU:<end2endId>`, reconnue sans condition ;
+  - la clef d'un point de vente portait déjà l'instant depuis [[STORY-667]] : identique, rien à
+    reconnaître.
+- **AC-6** — `attestationAuPointDeVente` devient `uniciteAuPointDeVente` : elle ne compose plus
+  aucune clef, elle dit ce que vaut celle qui arrive.
+- **AC-7** — l'heure de réception n'entre dans aucune clef, pour aucun canal (test dédié).
+
+### AC-8 — non joué
+
+Il faut un **téléphone** pour scanner deux fois le même QR, et un tunnel vers un service démarré
+(Docker) pour recevoir les webhooks. La recette réelle prouve en revanche les deux faits du schéma
+sur lesquels repose la voie A : la clef d'une demande poussée consultée
+(`PAIEMENT_RECU:6aa9ebab0d0e21b43fa904be`) et le refus de consulter un QR.
+
+### Points ouverts
+
+1. ⚠️ **Le risque résiduel de la voie A** : si le participant se mettait un jour à poser `evDate`
+   sur le webhook d'une demande **poussée**, webhook (avec instant) et consultation (sans) ne se
+   rejoindraient plus — et la règle-donnée qui aurait empêché le double compte est levée. Le test
+   AC-3 fige le corps mesuré du webhook ; une recette webhook réelle le revérifierait.
+2. AC-8 à jouer au téléphone, au prochain passage par le tunnel.
+3. Une demande poussée **ET** payée par son QR n'est pas un cas : depuis l'arbitrage du 2026-09-20
+   ([[STORY-664]]), une demande déjà poussée ne se présente pas.

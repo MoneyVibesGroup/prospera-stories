@@ -4638,9 +4638,10 @@ sprints:
         epic: "EPIC-036"
         points: 8
         service: "paiement-service"
-        status: "ready-for-dev"  # 🆕 CREEE le 2026-09-21 — le remede NOMME ET REPORTE par STORY-665 (AC-6) : webhook = PAIEMENT_RECU:<txId>, consultation = PAIEMENT_RECU:<end2endId>, seule la regle-donnee de 670 empeche le double compte. ⛔ txId seul n est PAS une clef de paiement (QR statique : 667 ; QR dynamique scanne 2 fois : TOUJOURS OUVERT, le 2e paiement est avale comme un rejeu). Deux pieces neuves : le pont GET /paiements-recus?txId= (669) et evDate = dateIrrevocabilite a la ms (667, 664). ⚠ ARBITRAGE A TRANCHER A L OUVERTURE : voie A recommandee (txId + instant), B (end2endId via un appel sortant pendant la reception d un webhook), C (table de correspondance). ⛔ append-only : rien ne se reecrit
+        status: "done"  # ✅ 2026-10-23, `MNV-675` `f5cc6a1` sur `origin/dev` `3f09e8c` (PR a ouvrir). VOIE A retenue (txId + instant) — a confirmer par le PO. 4 038 unitaires, 39 e2e, recette reelle 11 prouves. MESURE : GET /demandes-paiements/{txId} = 404 pour un QR (400 et 000) ⇒ seule une poussee se consulte, sans instant, comme son webhook. Clef unique dans domain/notifications/reference-de-paiement-recu.ts ; plus de referenceTransaction sur un paiement recu (les 2 barrieres se rejoignent) ; clefs ANTERIEURES reconnues par la boite (txId au meme instant ; end2endId de consultation) — rien ne se reecrit ; attestationAuPointDeVente → uniciteAuPointDeVente ; REGLE-DONNEE DE 670 LEVEE (ConsulterUneDemande ne recoit plus le coffre). AC-8 (QR scanne 2 fois au telephone) NON JOUE. ⚠ risque residuel : un evDate futur sur le webhook d une poussee ferait diverger les clefs.
         story_path: "stories/STORY-675.md"
         assigned_to: null
+        completed_date: "2026-10-23"
 
   # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
   - sprint_number: 21
