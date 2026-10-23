@@ -1,6 +1,6 @@
 # STORY-707 : La rotation du secret de signature sortante sert vraiment à la remise
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-056 — Le premier message part : port de canal, e-mail, journal et accusés
 **Service :** `notification-service`
@@ -29,12 +29,37 @@ fois**, et seulement sur un refus du client — jamais sur une panne réseau.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Une remise refusée par le client alors que l'ancien secret est **encore servi** est
+- [x] AC-1 — Une remise refusée par le client alors que l'ancien secret est **encore servi** est
       retentée **une fois**, signée avec l'ancien.
-- [ ] AC-2 — ⛔ Une remise qui échoue sans réponse (délai, connexion) **n'est pas** retentée avec
+- [x] AC-2 — ⛔ Une remise qui échoue sans réponse (délai, connexion) **n'est pas** retentée avec
       l'ancien secret : ce n'est pas un refus de signature.
-- [ ] AC-3 — ⚡ Une remise acceptée avec l'ancien secret **remet le compteur d'échecs à zéro**, comme
+- [x] AC-3 — ⚡ Une remise acceptée avec l'ancien secret **remet le compteur d'échecs à zéro**, comme
       une remise acceptée avec le nouveau, et ne compte pas d'échec.
-- [ ] AC-4 — Passé l'échéance, l'ancien secret n'est plus jamais essayé (même règle que STORY-635).
-- [ ] AC-5 — ⛔ Aucun des deux secrets n'apparaît dans un journal, une trace d'erreur ou une réponse
+- [x] AC-4 — Passé l'échéance, l'ancien secret n'est plus jamais essayé (même règle que STORY-635).
+- [x] AC-5 — ⛔ Aucun des deux secrets n'apparaît dans un journal, une trace d'erreur ou une réponse
       d'API.
+
+---
+
+## Livré le 2026-10-23 — branche `MNV-707` (`prospera-notification-service`, sur `origin/dev`)
+
+`npm test` 3 402/3 402 (255 suites) · `npm run test:e2e` 246/246 · lint 0 · build vert.
+
+- Le port de remise sortante rend désormais le **statut HTTP** du client, **absent** s'il n'a rien
+  répondu : « le client a dit non » et « le client n'a rien dit » appellent deux gestes.
+- `estRefusDeSignature` (domaine) : **401 et 403 seulement**. Un `400` dit *je ne comprends pas*, un
+  `5xx` *je suis en panne* — ni l'un ni l'autre ne changerait avec l'ancien secret. Le contrat du
+  récepteur est écrit au README (répondre `400` à une mauvaise signature prive du rattrapage).
+- `remettre` : sur un refus de signature, pendant la fenêtre (`secretSortantServi`, enfin appelée),
+  **un** second essai signé avec l'ancien secret ; succès ⇒ fait remis et série rompue ; double refus ⇒
+  **un seul** échec compté.
+- ⚡ Le double du test **juge la signature** comme le ferait le client : sans cela, rien n'aurait
+  prouvé *quel* secret a signé la remise acceptée.
+
+⛔⛔ **Défaut de production trouvé par AC-3, hors rotation.** La remise à zéro de la série d'échecs
+filtrait `{ _id: destination.organizationId }` — or une destination a son propre `_id`, l'organisation
+est un champ à part. **La série ne se rompait jamais** : une adresse qui échoue une fois de temps en
+temps franchissait le seuil de quarantaine par le seul passage du temps, et frappait d'abord les
+organisations qui reçoivent le plus de faits (la leçon de STORY-633, sur un autre objet). Filtre
+corrigé sur `organizationId`, test de non-régression. Les tests de STORY-641 ne l'avaient pas vu : ils
+vérifiaient `remisLe`, jamais le compteur.
