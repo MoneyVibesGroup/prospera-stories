@@ -43,11 +43,13 @@ l'enregistrement est une fonction sans E/S ; aller le chercher est le travail de
 
 ---
 
-## Livré le 2026-10-23 — branche `MNV-710` (`prospera-notification-service`, **empilée sur `MNV-709`**)
+## Livré le 2026-10-23 — branche `MNV-710` (`prospera-notification-service`, sur `origin/dev`)
 
-`npm test` 3 442/3 442 (259 suites) · `npm run test:e2e` 246/246 · lint 0 · build vert.
-⚠️ Empilée parce qu'AC-6 branche la revérification de 709 : fusionner 709 d'abord, puis
-`git rebase origin/dev` sur 710.
+`npm test` 3 448/3 448 (259 suites) · `npm run test:e2e` 248/248 · lint 0 · build vert.
+⚡ Partie empilée sur `MNV-709` (AC-6 branche sa revérification) ; 709 fusionnée dans `dev` sous
+`208e9ab`, la branche a été **rebasée sur `origin/dev`** (git a sauté l'ancienne copie `ee5b4a6`) :
+**1 commit, 13 fichiers, fusion sans conflit**. L'arbre a changé (il porte aussi 708, fusionnée
+entre-temps) : les deux suites ont été **rejouées** sur la branche rebasée.
 
 - **Domaine pur** (`domain/passerelle/delivrabilite.ts`), quatre états — `CONFORME`, `NON_CONFORME`,
   `ABSENT` et `NON_APPLICABLE` (la passerelle ne déclare rien : le confondre avec `ABSENT` ferait publier
