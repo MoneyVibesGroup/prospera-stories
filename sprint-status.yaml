@@ -4704,9 +4704,10 @@ sprints:
         epic: "EPIC-038"
         points: 3
         service: "paiement-service"
-        status: "ready-for-dev"  # encaissement.delaiValidationHeuresOuvrees est un reglage du SERVICE.
+        status: "done"  # ✅ 2026-10-23, `MNV-720` `7e7cb80` sur `origin/dev` `0e87d96` (PR a ouvrir). AD-6 : l organisation RACCOURCIT (1 → delai du service), jamais n allonge (refus nomme) ; defaut = absence de document ; null rend la main ; audite (REGLAGES_ENCAISSEMENT) ; GET/PUT /v1/reglages-d-encaissement (encaissement:valider).
         story_path: "stories/STORY-720.md"
         assigned_to: null
+        completed_date: "2026-10-23"
       - story_id: "STORY-721"
         title: "Frais imputes par moyen de paiement"
         epic: "EPIC-038"
