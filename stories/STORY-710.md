@@ -1,6 +1,6 @@
 # STORY-710 : SPF et DKIM du domaine d'envoi — prouver que le courriel arrivera
 
-Status: ready-for-dev
+Status: done
 
 **Épic :** EPIC-054 — Permissions au catalogue et cloisonnement des passerelles
 **Service :** `notification-service`
@@ -27,16 +27,47 @@ l'enregistrement est une fonction sans E/S ; aller le chercher est le travail de
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Pour un domaine revendiqué, le service dit **ce qu'il faut publier** : le mécanisme SPF à
+- [x] AC-1 — Pour un domaine revendiqué, le service dit **ce qu'il faut publier** : le mécanisme SPF à
       ajouter (`include:` du relais servi) et le nom + la valeur DKIM attendus pour le sélecteur
       configuré de la passerelle.
-- [ ] AC-2 — ⚡ L'état SPF a **trois** réponses : `CONFORME` (le relais est autorisé), `NON_CONFORME`
+- [x] AC-2 — ⚡ L'état SPF a **trois** réponses : `CONFORME` (le relais est autorisé), `NON_CONFORME`
       (SPF publié mais sans le relais, ou `-all` avant lui), `ABSENT`. ⛔ Deux enregistrements SPF sur
       le même nom sont `NON_CONFORME` (RFC 7208 : erreur permanente).
-- [ ] AC-3 — L'état DKIM a trois réponses : `CONFORME` (la clé publiée est celle attendue),
+- [x] AC-3 — L'état DKIM a trois réponses : `CONFORME` (la clé publiée est celle attendue),
       `NON_CONFORME`, `ABSENT` ; ⛔ une passerelle qui ne signe pas rend `NON_APPLICABLE`, jamais
       `ABSENT`.
-- [ ] AC-4 — ⛔ L'échec d'une résolution n'écrit **rien** (même règle que la preuve de propriété).
-- [ ] AC-5 — ⚠️ Ces états **informent**, ils ne ferment pas l'expéditeur : c'est la propriété qui
+- [x] AC-4 — ⛔ L'échec d'une résolution n'écrit **rien** (même règle que la preuve de propriété).
+- [x] AC-5 — ⚠️ Ces états **informent**, ils ne ferment pas l'expéditeur : c'est la propriété qui
       décide (STORY-615). Les fermer serait une décision PO, tracée comme telle.
-- [ ] AC-6 — La revérification de STORY-709 rafraîchit aussi ces deux états.
+- [x] AC-6 — La revérification de STORY-709 rafraîchit aussi ces deux états.
+
+---
+
+## Livré le 2026-10-23 — branche `MNV-710` (`prospera-notification-service`, **empilée sur `MNV-709`**)
+
+`npm test` 3 442/3 442 (259 suites) · `npm run test:e2e` 246/246 · lint 0 · build vert.
+⚠️ Empilée parce qu'AC-6 branche la revérification de 709 : fusionner 709 d'abord, puis
+`git rebase origin/dev` sur 710.
+
+- **Domaine pur** (`domain/passerelle/delivrabilite.ts`), quatre états — `CONFORME`, `NON_CONFORME`,
+  `ABSENT` et `NON_APPLICABLE` (la passerelle ne déclare rien : le confondre avec `ABSENT` ferait publier
+  un enregistrement que rien n'utilise).
+  - SPF : comparaison sur le **terme entier** (`include:spf.relais.tg.attaquant.tg` ne passe pas), le
+    mécanisme doit précéder `all` ; deux enregistrements SPF (RFC 7208) ou un `+all` ⇒ `NON_CONFORME`.
+  - DKIM : un `p=` vide est une clé **révoquée** ⇒ `NON_CONFORME`, pas `ABSENT` ; avec la clé attendue,
+    comparaison exacte ; sans, la présence suffit.
+- **Ce qu'on attend vient des réglages publics de la passerelle e-mail** (`spf`, `dkimSelecteur`,
+  `dkimClePublique`) — jamais d'un secret. Ce qu'il faut publier est rendu à l'octet près (AC-1).
+- `DelivrabiliteService`, **à part de `DomainesService`** : la preuve de propriété, qui ouvre ou ferme
+  l'expéditeur, ne dépend pas d'une configuration de passerelle.
+- ⚡ **AC-4 : le port DNS lève quelle que soit la cause** ; ici il fallait distinguer. `ENODATA` et
+  `ENOTFOUND` sont des **réponses** du DNS (⇒ `ABSENT`) ; un délai ou un `SERVFAIL` n'écrivent **rien** —
+  le constat précédent est rendu avec `rafraichi: false`, et sans constat antérieur aucun n'est inventé.
+- AC-5 : `estVerifie` est inchangé — ces états informent.
+- Route `POST /passerelles/domaines/:domaine/delivrabilite` ; le constat apparaît au DTO du domaine ; la
+  revérification quotidienne le rafraîchit (un échec y est nommé `domaine:delivrabilite` et ne fait pas
+  compter la preuve comme ratée).
+- ⛔ **Le montage e2e du gate n'avait pas le nouveau service** — la suite unitaire construit le
+  contrôleur à la main et ne pouvait pas le voir (le piège des 66 e2e morts du rail B). Ajouté.
+
+⛔ **Ouvert** : aucune conformité contre un vrai DNS ; DMARC n'est pas constaté.
