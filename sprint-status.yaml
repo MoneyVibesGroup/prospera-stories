@@ -4655,6 +4655,83 @@ sprints:
         story_path: "stories/STORY-675.md"
         assigned_to: null
 
+  # ── Rail E (paiement-service) — STORY-715 → 723, RAIL-E-PAIEMENT-11-STORIES-2026-10-23.md ──
+  - sprint_number: null
+    goal: "Rail E — PI-SPI pret (bac a sable seulement), preuve et regles de gestion"
+    stories:
+      - story_id: "STORY-715"
+        title: "mTLS sur la route de rappel et les appels"
+        epic: "EPIC-036"
+        points: 5
+        service: "paiement-service"
+        status: "blocked"  # ⛔ PRODUCTION FERMEE (consigne du 2026-10-23) : non implementee ; le simulateur a mTLS refuse un fetch sans agent TLS.
+        story_path: "stories/STORY-715.md"
+        assigned_to: null
+      - story_id: "STORY-716"
+        title: "Sante du raccordement, par organisation"
+        epic: "EPIC-036"
+        points: 3
+        service: "paiement-service"
+        status: "ready-for-dev"  # Un raccordement n est eprouve nulle part ; revérification periodique sur le modele de STORY-616.
+        story_path: "stories/STORY-716.md"
+        assigned_to: null
+      - story_id: "STORY-717"
+        title: "Plusieurs participants dans un deploiement"
+        epic: "EPIC-036"
+        points: 5
+        service: "paiement-service"
+        status: "ready-for-dev"  # PI_SPI_API_BASE_URL porte le code d UN participant. Arbitrage.
+        story_path: "stories/STORY-717.md"
+        assigned_to: null
+      - story_id: "STORY-718"
+        title: "Chaine d audit verifiable par route"
+        epic: "EPIC-042"
+        points: 3
+        service: "paiement-service"
+        status: "ready-for-dev"  # JournalAudit.verifierChaineDeCreance n a aucun appelant HTTP.
+        story_path: "stories/STORY-718.md"
+        assigned_to: null
+      - story_id: "STORY-719"
+        title: "Jours feries UEMOA, versionnes"
+        epic: "EPIC-038"
+        points: 3
+        service: "paiement-service"
+        status: "ready-for-dev"  # CalendrierOuvre.joursFeries vaut [] : le delai en heures ouvrees compte les feries.
+        story_path: "stories/STORY-719.md"
+        assigned_to: null
+      - story_id: "STORY-720"
+        title: "Delai de validation par organisation"
+        epic: "EPIC-038"
+        points: 3
+        service: "paiement-service"
+        status: "ready-for-dev"  # encaissement.delaiValidationHeuresOuvrees est un reglage du SERVICE.
+        story_path: "stories/STORY-720.md"
+        assigned_to: null
+      - story_id: "STORY-721"
+        title: "Frais imputes par moyen de paiement"
+        epic: "EPIC-038"
+        points: 3
+        service: "paiement-service"
+        status: "ready-for-dev"  # tarifDe choisit par fournisseur et non par methode.
+        story_path: "stories/STORY-721.md"
+        assigned_to: null
+      - story_id: "STORY-722"
+        title: "Audit des notifications rejetees"
+        epic: "EPIC-042"
+        points: 2
+        service: "paiement-service"
+        status: "ready-for-dev"  # STORY-286 COMPTE les refus hors chaine ; reste a decider ce qui est opposable. Arbitrage.
+        story_path: "stories/STORY-722.md"
+        assigned_to: null
+      - story_id: "STORY-723"
+        title: "Un ordre execute se reconnait apres son doublon"
+        epic: "EPIC-036"
+        points: 3
+        service: "paiement-service"
+        status: "ready-for-dev"  # MESURE 2026-10-23 : le participant ne garde qu une tentative par txId ; apres un DU03 la liste ne montre plus l execution.
+        story_path: "stories/STORY-723.md"
+        assigned_to: null
+
   # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
   - sprint_number: 21
     start_date: "2027-04-08"
