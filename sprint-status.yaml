@@ -26,9 +26,22 @@ sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 #
 # ── ÉTAT AU 2026-08-15 ────────────────────────────────────────────────────────────────────────────
 epic_id_high_water_mark: "EPIC-141"   # MAJ 2026-08-28 — +EPIC-137 a 141 (Consolidation SYSCOHADA niveau 3, STORY-541 a 548), pris a l arbitrage PO « je veux la partie 3 ».   # MAJ 2026-08-27 (2e passe du jour) — +EPIC-135 (Immobilisations et amortissements, STORY-526/527/528) et +EPIC-136 (Multi-societe et perimetre de groupe, STORY-529/530/531), pris a l arbitrage du point 6 par le PO. EPIC-110 reste LIBRE dans la plage socle.   # MAJ 2026-08-27 — +EPIC-106 a 134 (29 epics, 4 plages) pris LE JOUR DU DECOUPAGE de la revue expert-comptable de la maquette cumulative. RESERVATION VERIFIEE : max reel EPIC-105 (assistant-ia), et les plages 044-053 / 054-064 / 065-074 / 075-084 / 085-094 / 095-105 sont contigues et toutes reservees ⇒ 106 est le premier libre. 106-110 socle multi-referentiel (SEULE plage SLOTTEE et dont le service EXISTE deja) · 111-120 comptabilite-service · 121-127 microfinance · 128-134 assurance.   # dernier épic ATTRIBUÉ — EPIC-095→105 pris le 2026-08-16 par assistant-service (découpage Assistant IA, plage RÉSERVÉE le jour même, NON SLOTTÉE) ; EPIC-085→094 pris le 2026-08-15 par pdv-service ; EPIC-075→084 le même jour par stock-service ; EPIC-065→074 le même jour par catalogue-produits-service ; EPIC-044→053 le même jour par reseau-service. Historique : EPIC-043 = dossier-client, S20. — Historique (origin/main, MNV-401) — dernier épic ATTRIBUÉ — EPIC-095→105 pris le 2026-08-16 par assistant-service (découpage Assistant IA, plage RÉSERVÉE le jour même, NON SLOTTÉE) ; EPIC-085→094 pris le 2026-08-15 par pdv-service ; EPIC-075→084 le même jour par stock-service ; EPIC-065→074 le même jour par catalogue-produits-service ; EPIC-044→053 le même jour par reseau-service. Historique : EPIC-043 = dossier-client, S20.
-story_id_high_water_mark: "STORY-714"  # MAJ 2026-10-23 — +STORY-706 → 714 (rail F de notification-service, RAIL-F-NOTIFICATION-11-STORIES-2026-10-23.md). Ancienne valeur : STORY-705.
+story_id_high_water_mark: "STORY-723"  # MAJ 2026-10-23 (2e) — +STORY-715 → 723 (rail E de paiement-service, RAIL-E-PAIEMENT-11-STORIES-2026-10-23.md). Avant : STORY-714 — +STORY-706 → 714 (rail F de notification-service, RAIL-F-NOTIFICATION-11-STORIES-2026-10-23.md). Ancienne valeur : STORY-705.
 
 reserved_ranges:
+  - range: "STORY-715 → STORY-723"
+    status: "RÉSERVÉ"
+    owner: "Rail E — paiement-service (E2 PI-SPI en production, E3 preuve et règles de gestion, + 723 hors liste)"
+    source_doc: "prospera-stories/RAIL-E-PAIEMENT-11-STORIES-2026-10-23.md"
+    reserved_on: "2026-10-23"
+    note: >
+      715 mTLS (production fermée, non implémentée) · 716 santé du raccordement par organisation ·
+      717 plusieurs participants dans un déploiement · 718 chaîne d'audit vérifiable par route ·
+      719 jours fériés UEMOA versionnés · 720 délai de validation par organisation ·
+      721 frais imputés par moyen de paiement · 722 audit des notifications rejetées ·
+      723 un ordre exécuté se reconnaît après son doublon (défaut mesuré pendant STORY-674).
+      Le rail E compte aussi STORY-674, 675 et 286, qui existaient.
+
   - range: "STORY-706 → STORY-714"
     status: "RÉSERVÉ"
     owner: "Rail F — notification-service (F2 temps et secrets, F3 délivrabilité et sécurité, F4 données et droits)"
