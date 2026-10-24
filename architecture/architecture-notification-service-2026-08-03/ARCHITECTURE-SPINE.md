@@ -535,6 +535,17 @@ entrante est celle d'AD-2, et elle est limitée aux messages porteurs d'un secre
   permissions plateforme** (STORY-140) et **attribuables séparément**. Aucun rôle n'est codé en dur.
   *Q6 (rôle nouveau ou permission ajoutée à un rôle existant) est délégué au découpage en stories par
   décision produit ; cette règle tient dans les deux cas.*
+
+> **Amendé le 2026-10-24 par STORY-714 : cinq → six droits.** La politique de conservation, l'export
+> de fin de relation et l'exercice des droits des personnes (FR-N51, FR-N64→N68) n'étaient gardés par
+> **aucun** droit : n'importe quel membre d'une organisation servie pouvait effacer le journal complet
+> d'une personne. Un sixième droit, **`notification:donnees:administrer`**, les garde tous les trois.
+> ⚡ **Pas un droit existant emprunté** : `canal:administrer` aurait fondu « régler les identifiants
+> SMTP » et « décider combien de temps vivent des données personnelles », deux décisions que cette règle
+> promet attribuables séparément ; `journal:consulter` est un droit de lecture. ⚡ **Un droit pour trois
+> surfaces** : elles sont le geste d'une même personne, celle qui répond de la protection des données.
+> Les routes qui restent sans droit sont **inventoriées avec leur raison** par une garde
+> (`routes-sans-droit.invariant.spec.ts`) — la suivante la fait rougir.
 - **Rule (faits temporels) :** l'exécution d'un envoi de masse, sa planification, la purge, l'agrégation
   à 13 mois, la suppression à 90 jours après résiliation et l'expiration d'un jeton de désabonnement
   sont des **travaux BullMQ à clé idempotente**. Aucun `setInterval`, aucune minuterie applicative,
@@ -582,7 +593,7 @@ entrante est celle d'AD-2, et elle est limitée aux messages porteurs d'un secre
 | Corps de requête | Parseur brut **uniquement** sur les routes de webhook (AD-17). Parseur JSON standard partout ailleurs |
 | Rendu | Substitution de variables déclarées sur les modèles de la base ; moteur de template complet réservé aux gabarits HTML livrés **avec le code** (AD-8). Aucune compilation d'un texte lu en base |
 | Journalisation | `nestjs-pino`, corrélation par `nestjs-cls`. **Jamais** un secret de passerelle, jamais un lien à usage unique, jamais un rendu de message, jamais un numéro ou une adresse en clair — l'identifiant de canal est journalisé **masqué** |
-| Permissions | Les cinq droits sont déclarés au catalogue plateforme (STORY-140), attribuables séparément. Aucun rôle codé en dur (AD-18) |
+| Permissions | Les six droits (cinq + `notification:donnees:administrer`, STORY-714) sont déclarés au catalogue plateforme (STORY-140), attribuables séparément. Aucun rôle codé en dur (AD-18) |
 | Configuration | `@nestjs/config`, variables d'environnement uniquement. Aucun tarif, aucun plafond de rétention, aucune décimale de devise en configuration — ils viennent des capacités de canal et du référentiel |
 | Tests | Le domaine se teste sans infrastructure ni passerelle. Trois tests appartiennent à la définition de terminé, pas à la recette : le rejeu d'envoi (AD-3), la reprise d'un envoi de masse interrompu (AD-13), et l'exactitude du XOF à zéro décimale (AD-16). Seuils du moule : 65/90/90/90 |
 
