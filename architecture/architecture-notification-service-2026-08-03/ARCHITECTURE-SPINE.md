@@ -149,6 +149,22 @@ entrante est celle d'AD-2, et elle est limitée aux messages porteurs d'un secre
   (AD-13) et note qu'elle reste ouverte pour d'autres appelants. Ici elle **ne peut pas** être
   contournée. Elle doit être tranchée **avant l'incrément 2**. Hors de l'autorité de cette colonne.
 
+> **C8 tranchée le 2026-10-23 par STORY-589** : un jeton de service par appelant (`Authorization:
+> Bearer`, empreinte seule en mémoire) dit *qui appelle* ; l'organisation dans le corps dit *pour
+> qui* ; route `POST /api/v1/service/envois`, périmètre de clés par appelant écrit dans le dépôt.
+>
+> **Amendé le 2026-10-27 par STORY-610 (arbitrage PO) : la route directe n'est plus RÉSERVÉE aux
+> secrets, elle leur est OBLIGATOIRE.** L'invariant qui protège — *un lien ou un code ne touche jamais
+> le bus* — est intact : la route d'un utilisateur et les règles du bus refusent toujours ces propos.
+> Ce qui tombe est « tout autre déclencheur entre par le bus » : **aucun événement du programme ne porte
+> l'adresse du destinataire** (constaté en STORY-588), et ce service refuse de détenir celle des membres
+> (AD-12). Les trois alertes de compte sans secret (adresse changée, adresse déjà prise, mot de passe
+> modifié) n'avaient donc **aucun** chemin. La route directe sert désormais les **messages de service**
+> — les sept messages de compte d'`auth-service`, et les messages qu'un autre service du programme est
+> **seul à pouvoir adresser** (STORY-590 : les trois messages KYC d'`expert-comptable`) — chaque
+> appelant borné à son périmètre de clés. Un message ordinaire d'organisation y reste refusé
+> (`CHEMIN_D_ENTREE_INADAPTE`).
+
 ### AD-3 — L'idempotence est arbitrée par la base, sur les trois chemins d'écriture
 
 - **Binds:** FR-N06, FR-N25, FR-N30, NFR-4, SM-1
