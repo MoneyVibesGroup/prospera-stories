@@ -46,7 +46,7 @@ touche deux dépôts se mesure **avant** de coder.
 | Dépôt | Base | Commits |
 |---|---|---|
 | `prospera-notification-service` | `MNV-610` (774b81b) | 2216aa4 |
-| `auth-service` | `MNV-610` (0a41634) | 02276f2 |
+| `auth-service` | `MNV-610` (0a41634) | 02276f2, 6abf4d1 |
 | `expert-comptable` | `origin/dev` | cbf7bf8, c171863 |
 | `kyc-service` | `origin/dev` | 83ea922, 0cffb61 |
 
@@ -123,11 +123,17 @@ intact** — préexistant, sans lien ; JWKS et throttler passent en série (flak
 
 ### ⛔ Points ouverts
 
-- **Journal d'accès d'auth-service (AC-4 de STORY-610)** : `pino-http` y écrit le jeton en clair
-  quand l'utilisateur CLIQUE le lien — `GET /api/v1/auth/verify-email?token=<64 hex>` (dans `url`
-  et `query`), idem `confirm-email-change`. Préexistant, hors du chemin d'envoi, jeton consommé par
-  la requête même ; mais la fiche 610 dit « aucun … n'est journalisé dans auth-service ». Remède
-  probable : masquer `query.token` et la query string de `url` dans le sérialiseur `req`.
+- ✅ **Journal d'accès d'auth-service (AC-4 de STORY-610) — CORRIGÉ le 2026-10-29** (commit
+  `6abf4d1` sur `MNV-590` d'auth-service). Le jeton d'un lien CLIQUÉ
+  (`GET /api/v1/auth/verify-email?token=<64 hex>`, idem `confirm-email-change`) sortait en clair
+  par **trois** chemins, pas un : l'objet `req` de pino (`url` ET `query`), la ligne de fin de
+  requête de `LoggingInterceptor`, et la ligne d'erreur d'`AllExceptionsFilter` pour un lien
+  expiré. Une seule règle (`common/utils/url-journalisable.util.ts` : la valeur d'un paramètre
+  dont le nom contient `token`/`secret`/`password` devient `[masqué]`, chemin et noms gardés),
+  appliquée aux trois. Prouvé par `test/journal-sans-jeton.e2e-spec.ts` (chaîne de journalisation
+  de production, tout ce que pino écrit est lu ; un témoin ordinaire y apparaît, le jeton jamais) ;
+  contre-preuves : sans le correctif les deux cas rougissent, sans celui du filtre seul le cas
+  « lien expiré » rougit. auth-service : 936 unitaires, lint 0.
 - **Politique de réessai** : 5 essais à backoff exponentiel depuis 5 s ⇒ le dernier part ~75 s
   après le premier. Une panne de notification plus longue perd le message (l'utilisateur peut
   redemander l'envoi — AC-4 de 589). Héritée de la file SMTP d'origine.
