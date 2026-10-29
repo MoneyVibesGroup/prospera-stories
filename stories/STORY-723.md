@@ -57,7 +57,11 @@ rejets.** Deux conséquences dans le code de [[STORY-668]] :
       envoi), et son recoupement admet exactement la somme des envois de recette connus que le relevé
       ne montre plus — tout autre écart reste un `ECHEC`.
 
-## Arbitrage pris sur recommandation — à confirmer par le PO
+## Arbitrage PO — voie B, confirmée le 2026-10-29
+
+Pris sur recommandation, puis confirmé par le PO le 2026-10-29 : des doublons seuls ne prouvent
+pas l'exécution, car « doublon ⇒ exécuté » est une propriété du bac à sable que la documentation
+PI-SPI ne garantit pas. L'ordre s'arrête à `TRANSMIS`, jamais à `EXECUTE`.
 
 | Voie | Pourquoi |
 |---|---|
@@ -111,9 +115,8 @@ rejets.** Deux conséquences dans le code de [[STORY-668]] :
 
 ### Points ouverts
 
-1. **Arbitrage PO** : voie B (`CONNU → TRANSMIS`) — voir plus haut.
-2. AC-8 de [[STORY-675]] (QR dynamique scanné deux fois) reste **non joué** : il faut un téléphone
+1. AC-8 de [[STORY-675]] (QR dynamique scanné deux fois) reste **non joué** : il faut un téléphone
    et l'application du bac à sable ; rien dans cette story ne le remplace.
-3. Le recoupement de la recette ne tombera jamais plus à zéro tant que des envois de recette sont
+2. Le recoupement de la recette ne tombera jamais plus à zéro tant que des envois de recette sont
    oubliés : c'est voulu, l'écart est nommé au franc près. Tout nouvel envoi de recette s'ajoute à
    `ENVOIS_DE_RECETTE_EXECUTES`.
