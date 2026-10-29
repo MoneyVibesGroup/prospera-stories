@@ -4728,9 +4728,10 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "ready-for-dev"  # MESURE 2026-10-23 : le participant ne garde qu une tentative par txId ; apres un DU03 la liste ne montre plus l execution.
+        status: "done"  # ✅ 2026-10-29, `MNV-723` `e5f331c` sur `origin/dev` `9802e7e` (PR a ouvrir). MESURE CORRIGEE : le participant OUBLIE les executions (< 27 h), pas les rejets ; l identifiant rejoue rend toujours DU03. Doublons seuls = CONNU -> TRANSMIS (voie B, a confirmer PO) ; veille des ordres dans OrdresModule (jeton de reglage). 4 189 unit, 335 e2e, 5 conformites, 10/10 mutations, Docker healthy, recette 15/1/0.
         story_path: "stories/STORY-723.md"
         assigned_to: null
+        completed_date: "2026-10-29"
 
   # ── Module 2 (PI SPI) : EPIC-004 rescopé PA-1 → paiement-service. JIT : dépend PS-1 + C8 + PRD paiement. DÉCALÉ sprint 15→20 (Module 1-bis inséré). ──
   - sprint_number: 21

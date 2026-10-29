@@ -44,4 +44,4 @@ Chaque manque a été **vérifié dans le code** le 2026-10-23, sur `origin/dev`
 
 | Story | Titre | Pts | Constat |
 |---|---|---|---|
-| STORY-723 | Un ordre exécuté se reconnaît après son doublon | ≈3 | ⛔ Mesuré le 2026-10-23 : le participant ne garde qu'une tentative par `txId`, la dernière — après un doublon `DU03`, la liste ne montre plus l'exécution, et `nouvellesDeLaListe` lit `INCONNU`. |
+| STORY-723 | Un ordre exécuté se reconnaît après son doublon | ≈3 | ✅ Livrée le 2026-10-29 (`MNV-723`). La mesure du 2026-10-27 a corrigé la cause : le participant oublie les exécutions (< 27 h), pas les rejets. Constat d'origine — ⛔ Mesuré le 2026-10-23 : le participant ne garde qu'une tentative par `txId`, la dernière — après un doublon `DU03`, la liste ne montre plus l'exécution, et `nouvellesDeLaListe` lit `INCONNU`. |
