@@ -4728,9 +4728,10 @@ sprints:
         epic: "EPIC-042"
         points: 2
         service: "paiement-service"
-        status: "ready-for-dev"  # STORY-286 COMPTE les refus hors chaine ; reste a decider ce qui est opposable. Arbitrage.
+        status: "done"  # ✅ 2026-10-23, `MNV-722` `7ee69dd` sur `origin/dev` `93d1614` (PR a ouvrir). VOIE B (a confirmer PO) : un acte NOTIFICATIONS_REFUSEES_DU_JOUR par compte et par jour echu, chaine du compte, signe du module ; transition dans le filtre (scelleLe) ; veille horaire.
         story_path: "stories/STORY-722.md"
         assigned_to: null
+        completed_date: "2026-10-23"
       - story_id: "STORY-723"
         title: "Un ordre execute se reconnait apres son doublon"
         epic: "EPIC-036"
