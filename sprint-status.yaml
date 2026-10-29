@@ -4719,9 +4719,10 @@ sprints:
         epic: "EPIC-038"
         points: 3
         service: "paiement-service"
-        status: "ready-for-dev"  # tarifDe choisit par fournisseur et non par methode.
+        status: "done"  # ✅ 2026-10-23, `MNV-721` `1286c1b` sur `origin/dev` `69a35be` (PR a ouvrir). tarifDuVersement : fournisseur ET moyen quand l adaptateur NOMME le moyen ; PI-SPI le nomme ; FedaPay NON (mode=null tant que non paye, paiement sandbox par API refuse) — correspondance a mesurer au 1er encaissement reel (673).
         story_path: "stories/STORY-721.md"
         assigned_to: null
+        completed_date: "2026-10-23"
       - story_id: "STORY-722"
         title: "Audit des notifications rejetees"
         epic: "EPIC-042"
