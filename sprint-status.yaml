@@ -4692,9 +4692,10 @@ sprints:
         epic: "EPIC-042"
         points: 3
         service: "paiement-service"
-        status: "ready-for-dev"  # JournalAudit.verifierChaineDeCreance n a aucun appelant HTTP.
+        status: "done"  # ✅ 2026-10-23, `MNV-718` `9eae3d9` sur `origin/dev` `922e0f8` (PR a ouvrir). VerificationDuJournal (lecture seule sur le modele du journal) : verdict + entrees signees + methode ; GET /v1/journal/creances/:id et /chaines/:cle (droit tenant paiement:journal:consulter, 10e) ; console : /exploitation/organisations/:o/chaines/:cle ; 404 commun hors organisation.
         story_path: "stories/STORY-718.md"
         assigned_to: null
+        completed_date: "2026-10-23"
       - story_id: "STORY-719"
         title: "Jours feries UEMOA, versionnes"
         epic: "EPIC-038"
