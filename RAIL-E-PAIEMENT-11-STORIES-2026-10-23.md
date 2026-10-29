@@ -12,6 +12,30 @@ stories qui ne servent que la production (le mTLS) sont réservées et décrites
 
 Chaque manque a été **vérifié dans le code** le 2026-10-23, sur `origin/dev` (`3709b3b`).
 
+## 🏁 Bilan — rail clos le 2026-10-29
+
+**10 stories sur 11 livrées et fusionnées dans `origin/dev`** de `prospera-paiement-service`
+(vérifié le 2026-10-29 par `git log origin/dev --grep=MNV-<n>`). La seule qui reste est celle que la
+consigne du 2026-10-23 interdit d'implémenter.
+
+| Story | État | Dernier commit sur `dev` |
+|---|---|---|
+| STORY-674 | ✅ done (2026-10-23) | `3f09e8c` |
+| STORY-675 | ✅ done (2026-10-23), voie A | `b1150a0` |
+| STORY-286 | ✅ done (2026-10-23) | `3709b3b` |
+| STORY-715 | ⛔ blocked — production fermée | — |
+| STORY-716 | ✅ done (2026-10-23) | `922e0f8` |
+| STORY-717 | ✅ done (2026-10-23), voie A | `0e87d96` |
+| STORY-718 | ✅ done (2026-10-23) | `e27905f` |
+| STORY-719 | ✅ done (2026-10-23) | `69a35be` |
+| STORY-720 | ✅ done (2026-10-23) | `5e4d095` |
+| STORY-721 | ✅ done (2026-10-23) | `93d1614` |
+| STORY-722 | ✅ done (2026-10-24) | `c202199` |
+| STORY-723 | ✅ done (2026-10-29), doublons seuls = `CONNU` → `TRANSMIS` | `8a4defc` |
+
+Les tableaux ci-dessous gardent les constats du 2026-10-23 tels qu'ils ont motivé chaque story ;
+l'état vivant est dans `sprint-status.yaml` et dans la 3ᵉ ligne de chaque fiche.
+
 ---
 
 ## E1 · Fiches prêtes · 16 pts

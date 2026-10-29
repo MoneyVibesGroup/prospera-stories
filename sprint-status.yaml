@@ -4643,7 +4643,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-23, `MNV-674` `32cae3d` sur `origin/dev` `4c7d385` (PR a ouvrir). 4 015 unitaires, 46 e2e, recette reelle 9 prouves / 1 bloque nomme. La releve lit aussi /paiements-envoyes (payeurCompte + dateIrrevocabilite MESURES puis reverifies), lignes SORTANT par ImporterLeReleve ; doublon et INITIE ecartes et comptes ; regle commune tentatives-api-business.ts ; bilan.recoupement (entrees, sorties, positionAuDebut) rendu jamais range ; rapprochement : sorties vs ordres EXECUTE, 2 clefs certaines, ecarts SORTIE_SANS_ORDRE / ORDRE_SANS_SORTIE ; AC-6 par absence d injection (OrdresExecutesDuCompte ne sait que lister). ⛔⛔ MESURE 2026-10-23 : le participant ne garde qu UNE tentative par txId, la DERNIERE — les executions de 50 et 25 du 2026-09-21 sont recouvertes par leur DU03 et ne sont plus listees (AC-8 inatteignable tel qu ecrit ; le recoupement montre les 75 F). ⚠ consequence pour STORY-668 : apres un doublon, la liste ne montre plus l execution — story a creer.
+        status: "done"  # ✅ 2026-10-23, `MNV-674` `32cae3d` sur `origin/dev` `4c7d385` (fusionnee dans `origin/dev`, verifie le 2026-10-29). 4 015 unitaires, 46 e2e, recette reelle 9 prouves / 1 bloque nomme. La releve lit aussi /paiements-envoyes (payeurCompte + dateIrrevocabilite MESURES puis reverifies), lignes SORTANT par ImporterLeReleve ; doublon et INITIE ecartes et comptes ; regle commune tentatives-api-business.ts ; bilan.recoupement (entrees, sorties, positionAuDebut) rendu jamais range ; rapprochement : sorties vs ordres EXECUTE, 2 clefs certaines, ecarts SORTIE_SANS_ORDRE / ORDRE_SANS_SORTIE ; AC-6 par absence d injection (OrdresExecutesDuCompte ne sait que lister). ⛔⛔ MESURE 2026-10-23 : le participant ne garde qu UNE tentative par txId, la DERNIERE — les executions de 50 et 25 du 2026-09-21 sont recouvertes par leur DU03 et ne sont plus listees (AC-8 inatteignable tel qu ecrit ; le recoupement montre les 75 F). ⚠ consequence pour STORY-668 : apres un doublon, la liste ne montre plus l execution — story a creer.
         story_path: "stories/STORY-674.md"
         assigned_to: null
         completed_date: "2026-10-23"
@@ -4652,7 +4652,7 @@ sprints:
         epic: "EPIC-036"
         points: 8
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-23, `MNV-675` `f5cc6a1` sur `origin/dev` `3f09e8c` (PR a ouvrir). VOIE A retenue (txId + instant) — a confirmer par le PO. 4 038 unitaires, 39 e2e, recette reelle 11 prouves. MESURE : GET /demandes-paiements/{txId} = 404 pour un QR (400 et 000) ⇒ seule une poussee se consulte, sans instant, comme son webhook. Clef unique dans domain/notifications/reference-de-paiement-recu.ts ; plus de referenceTransaction sur un paiement recu (les 2 barrieres se rejoignent) ; clefs ANTERIEURES reconnues par la boite (txId au meme instant ; end2endId de consultation) — rien ne se reecrit ; attestationAuPointDeVente → uniciteAuPointDeVente ; REGLE-DONNEE DE 670 LEVEE (ConsulterUneDemande ne recoit plus le coffre). AC-8 (QR scanne 2 fois au telephone) NON JOUE. ⚠ risque residuel : un evDate futur sur le webhook d une poussee ferait diverger les clefs.
+        status: "done"  # ✅ 2026-10-23, `MNV-675` `f5cc6a1` sur `origin/dev` `3f09e8c` (fusionnee dans `origin/dev`, verifie le 2026-10-29). VOIE A retenue (txId + instant) — a confirmer par le PO. 4 038 unitaires, 39 e2e, recette reelle 11 prouves. MESURE : GET /demandes-paiements/{txId} = 404 pour un QR (400 et 000) ⇒ seule une poussee se consulte, sans instant, comme son webhook. Clef unique dans domain/notifications/reference-de-paiement-recu.ts ; plus de referenceTransaction sur un paiement recu (les 2 barrieres se rejoignent) ; clefs ANTERIEURES reconnues par la boite (txId au meme instant ; end2endId de consultation) — rien ne se reecrit ; attestationAuPointDeVente → uniciteAuPointDeVente ; REGLE-DONNEE DE 670 LEVEE (ConsulterUneDemande ne recoit plus le coffre). AC-8 (QR scanne 2 fois au telephone) NON JOUE. ⚠ risque residuel : un evDate futur sur le webhook d une poussee ferait diverger les clefs.
         story_path: "stories/STORY-675.md"
         assigned_to: null
         completed_date: "2026-10-23"
@@ -4660,6 +4660,7 @@ sprints:
   # ── Rail E (paiement-service) — STORY-715 → 723, RAIL-E-PAIEMENT-11-STORIES-2026-10-23.md ──
   - sprint_number: null
     goal: "Rail E — PI-SPI pret (bac a sable seulement), preuve et regles de gestion"
+    status: "done"  # 🏁 RAIL E CLOS le 2026-10-29 — 10 des 11 stories livrees et fusionnees dans `origin/dev` de paiement-service (674, 675, 286, 716 -> 723 ; verifie par `git log --grep` le 2026-10-29). STORY-715 (mTLS) reste `blocked` : production PI-SPI fermee par consigne du 2026-10-23 (point juridique, STORY-668), decrite et non implementee. Les fiches et ce tracker etaient sur 12 branches `docs-*` hors de `main` jusqu au 2026-10-29.
     stories:
       - story_id: "STORY-715"
         title: "mTLS sur la route de rappel et les appels"
@@ -4674,7 +4675,7 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-23, `MNV-716` `e2e4b20` sur `origin/dev` `3709b3b` (PR a ouvrir). Epreuve = jeton + GET /comptes?size=1 ; motifs IDENTIFIANTS_REFUSES / CLE_API_REFUSEE ; injoignable ne marque rien ; etat derive (SAIN, EN_ECHEC, PERIME 24 h, NON_EPROUVE, NON_EPROUVABLE) ; veille 6 h + POST epreuves. ⛔ MESURE : secret faux = 400 invalid_client, lu jusqu ici comme APPEL_NON_CONFORME — corrige. Recette reelle 14 prouves.
+        status: "done"  # ✅ 2026-10-23, `MNV-716` `e2e4b20` sur `origin/dev` `3709b3b` (fusionnee dans `origin/dev`, verifie le 2026-10-29). Epreuve = jeton + GET /comptes?size=1 ; motifs IDENTIFIANTS_REFUSES / CLE_API_REFUSEE ; injoignable ne marque rien ; etat derive (SAIN, EN_ECHEC, PERIME 24 h, NON_EPROUVE, NON_EPROUVABLE) ; veille 6 h + POST epreuves. ⛔ MESURE : secret faux = 400 invalid_client, lu jusqu ici comme APPEL_NON_CONFORME — corrige. Recette reelle 14 prouves.
         story_path: "stories/STORY-716.md"
         assigned_to: null
         completed_date: "2026-10-23"
@@ -4683,7 +4684,7 @@ sprints:
         epic: "EPIC-036"
         points: 5
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-23, `MNV-717` `6443bba` sur `origin/dev` `922e0f8` (PR a ouvrir). VOIE A (a confirmer PO) : origine = hote de l environnement + participant du RACCORDEMENT ; URL d environnement avec code participant reduite a l hote. Le simulateur ne controle pas le segment : composition prouvee, routage non. Recette 14/1/0.
+        status: "done"  # ✅ 2026-10-23, `MNV-717` `6443bba` sur `origin/dev` `922e0f8` (fusionnee dans `origin/dev`, verifie le 2026-10-29). VOIE A (a confirmer PO) : origine = hote de l environnement + participant du RACCORDEMENT ; URL d environnement avec code participant reduite a l hote. Le simulateur ne controle pas le segment : composition prouvee, routage non. Recette 14/1/0.
         story_path: "stories/STORY-717.md"
         assigned_to: null
         completed_date: "2026-10-23"
@@ -4692,7 +4693,7 @@ sprints:
         epic: "EPIC-042"
         points: 3
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-23, `MNV-718` `9eae3d9` sur `origin/dev` `922e0f8` (PR a ouvrir). VerificationDuJournal (lecture seule sur le modele du journal) : verdict + entrees signees + methode ; GET /v1/journal/creances/:id et /chaines/:cle (droit tenant paiement:journal:consulter, 10e) ; console : /exploitation/organisations/:o/chaines/:cle ; 404 commun hors organisation.
+        status: "done"  # ✅ 2026-10-23, `MNV-718` `9eae3d9` sur `origin/dev` `922e0f8` (fusionnee dans `origin/dev`, verifie le 2026-10-29). VerificationDuJournal (lecture seule sur le modele du journal) : verdict + entrees signees + methode ; GET /v1/journal/creances/:id et /chaines/:cle (droit tenant paiement:journal:consulter, 10e) ; console : /exploitation/organisations/:o/chaines/:cle ; 404 commun hors organisation.
         story_path: "stories/STORY-718.md"
         assigned_to: null
         completed_date: "2026-10-23"
@@ -4701,7 +4702,7 @@ sprints:
         epic: "EPIC-038"
         points: 3
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-23, `MNV-719` `18f075d` sur `origin/dev` `0e87d96` (PR a ouvrir). Referentiel versionne TG-2026-10-23 : fixes + feries chretiens calcules depuis Paques 2020-2040 ; fetes musulmanes a saisir par decret (vide) ; 13 janvier a confirmer PO ; un seul pays (Togo).
+        status: "done"  # ✅ 2026-10-23, `MNV-719` `18f075d` sur `origin/dev` `0e87d96` (fusionnee dans `origin/dev`, verifie le 2026-10-29). Referentiel versionne TG-2026-10-23 : fixes + feries chretiens calcules depuis Paques 2020-2040 ; fetes musulmanes a saisir par decret (vide) ; 13 janvier a confirmer PO ; un seul pays (Togo).
         story_path: "stories/STORY-719.md"
         assigned_to: null
         completed_date: "2026-10-23"
@@ -4710,7 +4711,7 @@ sprints:
         epic: "EPIC-038"
         points: 3
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-23, `MNV-720` `7e7cb80` sur `origin/dev` `0e87d96` (PR a ouvrir). AD-6 : l organisation RACCOURCIT (1 → delai du service), jamais n allonge (refus nomme) ; defaut = absence de document ; null rend la main ; audite (REGLAGES_ENCAISSEMENT) ; GET/PUT /v1/reglages-d-encaissement (encaissement:valider).
+        status: "done"  # ✅ 2026-10-23, `MNV-720` `7e7cb80` sur `origin/dev` `0e87d96` (fusionnee dans `origin/dev`, verifie le 2026-10-29). AD-6 : l organisation RACCOURCIT (1 → delai du service), jamais n allonge (refus nomme) ; defaut = absence de document ; null rend la main ; audite (REGLAGES_ENCAISSEMENT) ; GET/PUT /v1/reglages-d-encaissement (encaissement:valider).
         story_path: "stories/STORY-720.md"
         assigned_to: null
         completed_date: "2026-10-23"
@@ -4719,7 +4720,7 @@ sprints:
         epic: "EPIC-038"
         points: 3
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-23, `MNV-721` `1286c1b` sur `origin/dev` `69a35be` (PR a ouvrir). tarifDuVersement : fournisseur ET moyen quand l adaptateur NOMME le moyen ; PI-SPI le nomme ; FedaPay NON (mode=null tant que non paye, paiement sandbox par API refuse) — correspondance a mesurer au 1er encaissement reel (673).
+        status: "done"  # ✅ 2026-10-23, `MNV-721` `1286c1b` sur `origin/dev` `69a35be` (fusionnee dans `origin/dev`, verifie le 2026-10-29). tarifDuVersement : fournisseur ET moyen quand l adaptateur NOMME le moyen ; PI-SPI le nomme ; FedaPay NON (mode=null tant que non paye, paiement sandbox par API refuse) — correspondance a mesurer au 1er encaissement reel (673).
         story_path: "stories/STORY-721.md"
         assigned_to: null
         completed_date: "2026-10-23"
@@ -4728,7 +4729,7 @@ sprints:
         epic: "EPIC-042"
         points: 2
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-23, `MNV-722` `7ee69dd` sur `origin/dev` `93d1614` (PR a ouvrir). VOIE B (a confirmer PO) : un acte NOTIFICATIONS_REFUSEES_DU_JOUR par compte et par jour echu, chaine du compte, signe du module ; transition dans le filtre (scelleLe) ; veille horaire.
+        status: "done"  # ✅ 2026-10-23, `MNV-722` `7ee69dd` sur `origin/dev` `93d1614` (fusionnee dans `origin/dev`, verifie le 2026-10-29). VOIE B (a confirmer PO) : un acte NOTIFICATIONS_REFUSEES_DU_JOUR par compte et par jour echu, chaine du compte, signe du module ; transition dans le filtre (scelleLe) ; veille horaire.
         story_path: "stories/STORY-722.md"
         assigned_to: null
         completed_date: "2026-10-23"
@@ -4737,7 +4738,7 @@ sprints:
         epic: "EPIC-036"
         points: 3
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-29, `MNV-723` `e5f331c` sur `origin/dev` `9802e7e` (PR a ouvrir). MESURE CORRIGEE : le participant OUBLIE les executions (< 27 h), pas les rejets ; l identifiant rejoue rend toujours DU03. Doublons seuls = CONNU -> TRANSMIS (voie B, a confirmer PO) ; veille des ordres dans OrdresModule (jeton de reglage). 4 189 unit, 335 e2e, 5 conformites, 10/10 mutations, Docker healthy, recette 15/1/0.
+        status: "done"  # ✅ 2026-10-29, `MNV-723` `e5f331c` sur `origin/dev` `9802e7e` (fusionnee dans `origin/dev`, verifie le 2026-10-29). MESURE CORRIGEE : le participant OUBLIE les executions (< 27 h), pas les rejets ; l identifiant rejoue rend toujours DU03. Doublons seuls = CONNU -> TRANSMIS (voie B, a confirmer PO) ; veille des ordres dans OrdresModule (jeton de reglage). 4 189 unit, 335 e2e, 5 conformites, 10/10 mutations, Docker healthy, recette 15/1/0.
         story_path: "stories/STORY-723.md"
         assigned_to: null
         completed_date: "2026-10-29"
@@ -5896,7 +5897,7 @@ sprints:
         epic: "EPIC-042"
         points: 3
         service: "paiement-service"
-        status: "done"  # ✅ 2026-10-23, `MNV-286` `99cd798` sur `origin/dev` `b1150a0` (PR a ouvrir). Rail E : LECTURE SEULE, trois usages (demandes, notifications refusees, ecarts) — le reacheminement reste un geste de l organisation sous AD-6. Module exploitation : 3 GET, aucune route d ecriture (garde), lectures qui ne savent que lire (DemandesALExploitation, RefusALExploitation, ConfrontationDuReleve extraite de RapprocherLeReleve) ; droit plateforme paiement:exploitation:consulter (9e) + PorteDeLaPlateforme (404) ; vues sans payeur ni libelle ; RegistreDesRefus borne (compte existant x motif x jour, $inc, TTL 90 j, aucun corps). 4 062 unitaires, 78 e2e. ⚠ catalogue IdP a completer ; AP-14 a realigner sur 3 panneaux.
+        status: "done"  # ✅ 2026-10-23, `MNV-286` `99cd798` sur `origin/dev` `b1150a0` (fusionnee dans `origin/dev`, verifie le 2026-10-29). Rail E : LECTURE SEULE, trois usages (demandes, notifications refusees, ecarts) — le reacheminement reste un geste de l organisation sous AD-6. Module exploitation : 3 GET, aucune route d ecriture (garde), lectures qui ne savent que lire (DemandesALExploitation, RefusALExploitation, ConfrontationDuReleve extraite de RapprocherLeReleve) ; droit plateforme paiement:exploitation:consulter (9e) + PorteDeLaPlateforme (404) ; vues sans payeur ni libelle ; RegistreDesRefus borne (compte existant x motif x jour, $inc, TTL 90 j, aucun corps). 4 062 unitaires, 78 e2e. ⚠ catalogue IdP a completer ; AP-14 a realigner sur 3 panneaux.
         assigned_to: null
         story_path: "stories/STORY-286.md"
         completed_date: "2026-10-23"
