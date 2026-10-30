@@ -105,7 +105,7 @@ qui traverse deux dépôts n'a aujourd'hui **ni endroit où vivre, ni moyen d'ê
 | 9 | **STORY-647** 🆕 | `notification` → `paiement` | après C et D | 5 |
 | 10 | **STORY-648** 🆕 | `paiement` → `notification` | après C et D | 3 |
 | 11 | STORY-631 ⛔ | les quatre services — fiche écrite 2026-10-30, **bloquée** (166/167, 279, 609, cloche) | à la fin | 5 |
-| 12 | STORY-632 | les quatre, sans Money Vibes au milieu | à la fin | 5 |
+| 12 | STORY-632 ⛔ | les quatre, sans Money Vibes au milieu — fiche écrite 2026-10-30, **bloquée** (166/167 seules) | à la fin | 5 |
 | 13 | **STORY-649** 🆕 | les cinq, l'argent qui revient | à la fin | 5 |
 
 ---
@@ -365,6 +365,12 @@ la cloche (aucune story). Seul AC-1 se joue aujourd'hui — et STORY-590 l'a dé
 ### 12 · STORY-632 — Recette croisée : un distributeur encaisse pour lui-même
 
 **Points :** 5 · **Prérequis :** 631 · *(renumérotée depuis 631)*
+
+⛔ **Fiche écrite le 2026-10-30 (`stories/STORY-632.md`), BLOQUÉE par STORY-166/167 seules** : aucun jeton
+réel ne porte `paiement:*` ni `notification:*`, et la séparation des pouvoirs exige trois membres
+habilités. ⚡ **Le prérequis 631 se relâche** : l'envoi de référence de Money Vibes (AC-2) se produit
+par la route directe, comme dans la recette de STORY-646. 632 sera donc la **première** recette
+croisée débloquée — elle n'attend ni 279, ni 609, ni la cloche.
 
 ⚡ **C'est la recette qui matérialise NFR-1.** Les deux cas empruntent le même code ; seule la
 configuration change.
