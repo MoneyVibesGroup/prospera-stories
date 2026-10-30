@@ -5,7 +5,7 @@ Status: done
 **Bloc :** Convergence E0 — le substrat de recette (`CONVERGENCE-RAILS-C-D-2026-09-08.md`)
 **Service :** `prospera-paiement-service` (amorçage de STORY-613, `/health`) · **Points :** 5
 **Prérequis :** STORY-643 (garde de câblage — présente)
-**Branche :** `MNV-645`, depuis `origin/dev` après la fusion de STORY-644
+**Branche :** `MNV-645`, depuis `origin/dev` après la fusion de STORY-644 (`0823afc`, `a664d74`)
 
 ---
 
@@ -77,4 +77,30 @@ trou vaut pour tout le dépôt : à traiter dans une story de garde.
 | lint | 0 |
 | specs de l'amorçage + santé + trois gardes | 133 tests |
 
-Gate Docker : la recette de STORY-646 lance cet amorçage dans le réseau du compose — voir sa fiche.
+## Gate Docker du 2026-10-30 — l'amorçage contre la pile réelle, pour la première fois
+
+Lancé par le profil de recette de STORY-646 (conteneur jetable dans le réseau du compose, image
+construite depuis `MNV-645` par `RECETTE_SURCOUCHES`). Il a trouvé **trois écarts de contrat de
+plus**, tous verts contre les doubles, corrigés dans `a664d74` :
+
+| # | Étape | Ce que la vraie pile a répondu | Correctif |
+|---|---|---|---|
+| 1 | 1 · annuaire | `400 property search should not exist` | le filtre de `GET /admin/organizations` s'appelle **`q`** |
+| 2 | 3 · conformité | (lu dans le code avant l'échec) kyc lit les *magic bytes* : PDF, JPEG, PNG seulement | pièces factices en **vrai PDF** minimal, toujours marquées deux fois (bannière en 2ᵉ ligne du fichier, texte « factice » sur la page) |
+| 3 | 3 · conformité | l'IdP **ouvre une session** à une adresse non vérifiée ; kyc refuse le dépôt en `403 EMAIL_NOT_VERIFIED` | ce `403`-là rend l'étape **incomplète** (code 2), tout autre `403` reste un échec |
+
+Rapport final, sur une pile réelle :
+
+```
+0. Disponibilité de la pile        3 × [fait]
+1. Organisation à l'annuaire       [déjà en place] Money Vibes Group · [fait] Adresse vérifiée
+2. Module de paiement au catalogue [déjà en place] paiement · [déjà en place] 1.0
+3. Pièces de conformité et verdict [fait] Pièces déposées · [fait] Dossier approuvé — APPROVED
+4. Droit d'usage                   [déjà en place] ACTIVE
+AMORÇAGE COMPLET.
+```
+
+⚠️ **Limite connue, héritée de STORY-613** : sans `AMORCAGE_JETON_VERIFICATION`, la ligne « Adresse
+vérifiée » est toujours `à faire`, même quand l'adresse l'est déjà (l'amorçage n'a aucun moyen de le
+lire). Un rejeu sans jeton se déclare donc « incomplet » ; la recette le complète en relisant le lien
+dans Mailhog (`400` d'une adresse déjà vérifiée toléré).
