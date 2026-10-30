@@ -106,7 +106,7 @@ qui traverse deux dépôts n'a aujourd'hui **ni endroit où vivre, ni moyen d'ê
 | 10 | **STORY-648** 🆕 | `paiement` → `notification` | après C et D | 3 |
 | 11 | STORY-631 ⛔ | les quatre services — fiche écrite 2026-10-30, **bloquée** (166/167, 279, 609, cloche) | à la fin | 5 |
 | 12 | STORY-632 ⛔ | les quatre, sans Money Vibes au milieu — fiche écrite 2026-10-30, **bloquée** (166/167 seules) | à la fin | 5 |
-| 13 | **STORY-649** 🆕 | les cinq, l'argent qui revient | à la fin | 5 |
+| 13 | **STORY-649** ⛔ | les cinq, l'argent qui revient — fiche écrite 2026-10-30, **bloquée** (166/167, horloge, prix de 647) | à la fin | 5 |
 
 ---
 
@@ -391,6 +391,13 @@ configuration change.
 ### 13 · STORY-649 🆕 — Recette croisée : le distributeur est facturé pour ce qu'il consomme
 
 **Points :** 5 · **Prérequis :** 632, 647
+
+⛔ **Fiche écrite le 2026-10-30 (`stories/STORY-649.md`), BLOQUÉE** par trois murs dont deux nouveaux :
+les droits (166/167) ; **`409 PERIODE_NON_TERMINEE`** — on ne clôt pas le mois qui court et aucune
+horloge ne se règle, donc la recette ne peut pas clore la période de ses propres SMS (aucune story,
+décision PO) ; et **le point de prix ouvert de 647** — un distributeur sur sa propre passerelle se
+verrait refacturer ce qu'il paie déjà, et AC-3 l'asserterait. AC-6 reformulé : la garde
+`aucune-facturation.spec.ts` est statique, la recette en joue la contrepartie observable.
 
 **Récit :** en tant que **direction**, je veux voir l'argent revenir **vers** Money Vibes sans que
 Money Vibes n'ait touché celui du client, afin de savoir que les deux flux coexistent sans se mélanger.
