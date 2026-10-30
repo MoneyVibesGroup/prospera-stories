@@ -104,7 +104,7 @@ qui traverse deux dépôts n'a aujourd'hui **ni endroit où vivre, ni moyen d'ê
 | 8 | STORY-286 | `paiement` → `admin-panel` | après rail C | 3 |
 | 9 | **STORY-647** 🆕 | `notification` → `paiement` | après C et D | 5 |
 | 10 | **STORY-648** 🆕 | `paiement` → `notification` | après C et D | 3 |
-| 11 | STORY-631 | les quatre services | à la fin | 5 |
+| 11 | STORY-631 ⛔ | les quatre services — fiche écrite 2026-10-30, **bloquée** (166/167, 279, 609, cloche) | à la fin | 5 |
 | 12 | STORY-632 | les quatre, sans Money Vibes au milieu | à la fin | 5 |
 | 13 | **STORY-649** 🆕 | les cinq, l'argent qui revient | à la fin | 5 |
 
@@ -340,6 +340,11 @@ les lance.
 ### 11 · STORY-631 — Recette croisée : un cabinet paie son abonnement
 
 **Points :** 5 · **Prérequis :** E0 complet, 279, 609, 610 · *(renumérotée depuis 630)*
+
+⛔ **Fiche écrite le 2026-10-30 (`stories/STORY-631.md`), BLOQUÉE.** Vérifié dans le code : aucun jeton
+réel ne porte `paiement:*` (STORY-166/167), le catalogue ne consomme aucun fait d'abonnement (279,
+sans fiche), le droit d'usage n'a pas d'échéance (609), et `paiement-service` ne dépose rien dans
+la cloche (aucune story). Seul AC-1 se joue aujourd'hui — et STORY-590 l'a déjà joué.
 
 - AC-1 — Un utilisateur s'inscrit ; le message de vérification part **par la notification**, sous la
   marque de son organisation.
