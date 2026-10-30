@@ -93,8 +93,13 @@ l'adaptateur à la vraie route.
 depuis un `dev` qui ne l'a pas fusionnée (refus voulu : un appelant s'ajoute par revue de code). Le
 compose racine, non versionné, porte déjà l'entrée.
 
-⚠️ **Gate Docker** : rejoué avec STORY-645 et 646, dont le profil de recette est précisément ce qui
-lève la pile. Voir la section ajoutée en fin de série.
+✅ **Gate Docker du 2026-10-30** (recette de STORY-646, pile réelle, `dev` fusionné) : depuis le
+conteneur de `paiement-service`, avec **son** jeton lu dans son environnement, `POST
+/api/v1/service/envois` (modèle `lien-de-paiement`, canal e-mail) rend `200` et
+`moduleAppelant: paiement-service` ; le courriel « … vous adresse une demande de paiement de
+150000 XOF » arrive dans Mailhog avec le lien. La notification démarre avec l'entrée
+`paiement-service:` de `JETONS_DE_SERVICE`. C'est le test `STORY-644` de
+`prospera-recette/paquets/recette-croisee/recette/pile.recette.ts`.
 
 ## Ce qui reste ouvert
 
