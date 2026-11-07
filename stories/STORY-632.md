@@ -9,63 +9,72 @@ Status: review
 **Prérequis :** E0 complet ✅ (643 → 646) · STORY-241, 272, 274, 275 ✅ · STORY-648 ✅ ·
 STORY-666 ✅ · STORY-166/167/171 ✅ (fusionnées sur `dev` le 2026-11-07)
 **Renumérotée** depuis 631.
-**Branches :** `MNV-632` sur `prospera-recette` (`7175bb3`, base `origin/dev` `2df14ea`) ·
-`MNV-632` sur `prospera-paiement-service` (`94126eb`, base `origin/dev` `13113c5`) — un défaut que
-seule la recette a montré (voir « Ce que la recette a trouvé »).
+**Branches `MNV-632` (toutes basées sur `origin/dev`) :**
+
+| Dépôt | Commits | Objet |
+|---|---|---|
+| `prospera-recette` | `7175bb3`, `3a4ef64` | la recette, ses outils, l'alignement de la pile |
+| `prospera-paiement-service` | `94126eb` | le compte d'autrui introuvable au dépôt de clef : 404, plus 422 |
+| `auth-service` | `50d1040` | les 2 droits au catalogue PLATEFORME + la route qui les donne à un membre de Money Vibes |
+| `kyc-service` | `9de4d23` | copie du catalogue, à l'octet près |
+| `platform-catalog-service` | `713a4ba` | copie du catalogue, à l'octet près |
+| `admin-panel` | `a028c26` | copie du catalogue, à l'octet près (son `@IsEnum` refuserait sinon un rôle en 400) |
 
 ---
 
 ## ✅ Livraison du 2026-11-07 — verdicts
 
-Gate sur la vraie pile, images construites depuis `origin/dev` des cinq services (worktrees, surcouche
-`RECETTE_SURCOUCHES`) + le correctif `MNV-632` du paiement. **`npm run recette` : 2 suites, 16/16
-verts** (646 + 632, `globalSetup` réel, 99 s) · **73 tests unitaires** · `verifier` propre.
+Gate sur la vraie pile, images construites depuis les branches `MNV-632` (worktrees, surcouche
+`RECETTE_SURCOUCHES`). **`npm run recette` : 16/16 sur des volumes NEUFS** (`COMPOSE_PROJECT_NAME`
+distinct, `down -v` avant — aucune organisation, aucun marché, aucun administrateur au départ) **et
+16/16 sur la pile partagée** (volumes conservés). Recette : 80 unitaires, `verifier` propre. Auth :
+1 213 unitaires, 92 e2e touchés. Copies du catalogue : tests et typage verts dans les 3 dépôts.
 
 | AC | Verdict | Ce qui le prouve |
 |---|---|---|
 | Étape 0 | ✅ | Deux organisations accueillies par les vraies routes ; chaque jeton porte `org` = SON organisation et des droits de tenant à trois segments, aucun droit de plateforme. |
 | AC-1 | ✅ | `PUT /raccordements/API_BUSINESS` et `POST /comptes-encaissement` (titulaire = A, `secretNotification` posé) avec le jeton de `DIST_ADMIN` de A ; ni le secret client, ni la clé d'API, ni la clef de notification ne reviennent dans une réponse. |
 | AC-2 | ✅ | Passerelle e-mail de A sur **son propre relais** (aucun contrôle de domaine, STORY-615). Liste **fermée** : TOUS les courriels reçus par le payeur de A (lien, reçu, avis d'annulation) portent l'expéditeur de A, et lui seul ; l'envoi de référence de Money Vibes (route directe) porte un autre expéditeur ; il n'apparaît pas au journal de A, qui ne contient pas l'identifiant de Money Vibes. |
-| AC-3 | ✅ ⚠️ | Créance, demande de 100 000 sur 150 000, lien reçu sous l'expéditeur de A, notification `PAIEMENT_RECU` signée HMAC avec le secret d'AC-1 ⇒ `204` ; contre-preuve : signée d'un autre secret, refusée ; solde décomposé `confirme 100 000 / restant 50 000`. ⚠️ **Ne passe que grâce à un marché hérité** — voir « Ce qui bloque encore ». |
+| AC-3 | ✅ | Un **opérateur de Money Vibes** (rôle plateforme donné par la console) **ouvre lui-même** le marché `API_BUSINESS` → `TG` ; contre-preuves : le membre d'un distributeur ne reçoit pas de rôle plateforme (`422 PLATFORM_ROLE_HORS_PLATEFORME`), l'opérateur sans organisation est arrêté à la porte. Puis créance, demande de 100 000 sur 150 000, lien sous l'expéditeur de A, notification `PAIEMENT_RECU` signée HMAC avec le secret d'AC-1 ⇒ `204` (signée d'un autre secret : refusée), solde `confirme 100 000 / restant 50 000`. |
 | AC-4 | ✅ | Le caissier **détient** `valider` (rôle composé) : sa validation de sa propre déclaration rend `409 SEPARATION_POUVOIRS_VIOLEE` — c'est l'**acte** qui borne. Le premier DAF valide ; +50 000 confirmés ; le reçu part sous l'expéditeur de A. |
 | AC-5 | ✅ | Le déclarant puis le validant (qui détiennent tous deux `annulation:enregistrer`) : `409 SEPARATION_POUVOIRS_VIOLEE` ; le second DAF annule (`montantContrePasseMineur` 50 000, `annulePar` = lui) ; le restant remonte de 50 000 ; l'avis d'annulation arrive au payeur sous l'expéditeur de A. |
 | AC-6 | ✅ | Liste fermée : **tout** identifiant à 24 hexadécimaux de la chaîne (raccordement, compte, créance, routage, barème, demande, encaissements, annulation, passerelle), **enchâssés compris** (`<org>\|SAISIE_MANUELLE\|<réf>`, `DEC\|<org>\|<clé>`), appartient à A : `etrangers(vus, connus)` = `[]`. |
 | AC-7 | ✅ | Une sonde de B qui **détient** tous les droits concernés : 9 lectures et écritures sur les ressources de A ⇒ **404** chacune (après correctif) ; ses listes ne contiennent rien de A. |
 
-## Ce que la recette a trouvé
+## Ce que la recette a trouvé — et ce que la story a corrigé
 
-1. ⛔ **`paiement-service` — le dépôt de clef sur le compte d'autrui rendait `422`** (`COMPTE_ENCAISSEMENT_INTROUVABLE`,
-   nature `REGLE_METIER`) là où toutes les autres routes du compte rendent `404`. Pas de fuite (même
-   réponse pour un compte inexistant), mais AD-16 n'était pas tenu sur cette route. **Corrigé** sur
-   `MNV-632` : `refusHorsOrganisation()` sur le seul chemin du dépôt ; AC-7 passe de rouge à vert.
-2. ⚠️ **`prospera-recette` — double décodage quoted-printable.** Le corps lu dans Mailhog était décodé,
-   puis redécodé par l'extracteur de jeton : `token=AB…` devenait l'octet `=AB`. Un jeton sur ~60
-   était mangé, et l'erreur se lisait « aucun courriel n'est arrivé ». Corrigé (`jetonDuLien`).
-3. ⚠️ **`prospera-recette` — la recette de 646 n'était pas rejouable sur des volumes conservés** :
-   l'amorçage ne sait pas constater une adresse déjà vérifiée, rend « incomplet », et Mailhog
-   redémarré n'a plus de lien. La recette le demande désormais à l'IdP (`ownerEmailVerified`).
-4. Les vues du paiement **n'exposent aucune clé d'organisation** : une liste fermée tenue par noms de
-   clés était vide. AC-6 porte donc sur la **forme** des identifiants.
+1. ⛔⛔ **Aucun jeton réel ne pouvait ouvrir un marché fournisseur — donc aucune demande ne
+   s'émettait, pour personne.** Trois maillons manquaient, les trois sont posés :
+   - **le catalogue** : `paiement:fournisseur:administrer` (STORY-289) et
+     `paiement:exploitation:consulter` (STORY-286) n'étaient au catalogue de PERSONNE — STORY-166
+     les a laissés, à raison, hors du catalogue de tenant. Ils entrent au catalogue PLATEFORME
+     (15 codes, 4 copies à l'octet près) ; `PLATFORM_ADMIN` les reçoit au réalignement du boot ;
+   - **le porteur** (arbitrage PO du 2026-11-07 : « rôle plateforme sur un membre de Money
+     Vibes ») : le registre est une surface de l'organisation `plateforme`, dont seul un membre
+     passe la porte ; un rôle plateforme ne vivait que sur des opérateurs sans organisation.
+     Nouvelle route `PUT|DELETE /admin/organizations/:id/members/:userId/platform-role`
+     (`user:invite`), refusée pour tout vertical autre que `plateforme`, anti-escalade,
+     anti-verrouillage, journalisée (`MEMBER_PLATFORM_ROLE_ASSIGNED`) ;
+   - **la porte** : le compose défaut `ORGANISATION_PLATEFORME` à une organisation factice
+     (`507f1f77…`) — la porte n'était ouverte à personne. La recette l'aligne après l'amorçage
+     (relance d'un service, aucun état en base). ⚠️ À poser dans le `.env` racine des postes.
+2. ⛔ **`paiement-service` — le dépôt de clef sur le compte d'autrui rendait `422`**
+   (`COMPTE_ENCAISSEMENT_INTROUVABLE`, nature `REGLE_METIER`) là où toutes les autres routes du
+   compte rendent `404`. Pas de fuite, mais AD-16 n'était pas tenu. **Corrigé** : `refusHorsOrganisation()`.
+3. ⚠️ **L'ordre des gestes** : une organisation ne peut pas router vers un marché fermé
+   (`422 ROUTAGE_MARCHE_FERME`, vu seulement sur volumes neufs) — la plateforme ouvre d'abord.
+4. ⚠️ **`prospera-recette`** : double décodage quoted-printable (un jeton sur ~60 mangé) ; amorçage
+   non rejouable sur volumes conservés (l'IdP est désormais interrogé) ; sur volumes neufs,
+   l'administrateur plateforme n'existe pas (`seed:admin` joué sur `401`) ; les vues du paiement
+   n'exposent aucune clé d'organisation (AC-6 porte sur la forme des identifiants).
+5. ⚠️ **Pile partagée** : le marché `API_BUSINESS` → `TG` y a été ouvert le 2026-09-15 sous
+   l'organisation factice ; sa chaîne d'audit lui appartient, une écriture de Money Vibes y est
+   refusée (`422 CHAINE_AUDIT_ORGANISATION`, à raison). La recette **lit** le registre avant
+   d'écrire et n'y écrit que si le marché est fermé.
 
-## ⛔ Ce qui bloque encore — un droit PLATEFORME qu'aucune story ne porte
-
-**Aucun jeton réel ne peut ouvrir un marché fournisseur.** Le registre est fermé par défaut
-(STORY-289, fail-closed) ; seul `paiement:fournisseur:administrer` l'ouvre (`PUT
-/registre-fournisseurs/:f`). STORY-166 l'a laissé, **volontairement**, hors du catalogue de TENANT
-(« il appartient au catalogue plateforme ») — et personne ne l'a ajouté au catalogue PLATEFORME
-(`permission.enum.ts`, 13 codes, recopié dans 4 dépôts). Mesuré : le jeton de l'opérateur plateforme
-ne le porte pas, et la route rend `403`.
-
-La pile de ce gate hérite d'un marché `API_BUSINESS` → `TG` ouvert le **2026-09-15** (recette PI-SPI
-réelle), hors de tout jeton d'aujourd'hui : c'est lui qui laisse AC-3 passer. **Sur des volumes
-neufs, l'émission rend `422 AUCUN_TARIF_ANNONCABLE`** et le test échoue en nommant le droit manquant.
-Les deux assertions du constat (droit absent, `403`) ne dépendent d'aucun état : elles rougiront le
-jour où le droit entrera au catalogue, et la recette devra alors ouvrir le marché elle-même (le geste
-est écrit en commentaire). Le même trou touche **STORY-631** (Money Vibes émet aussi des demandes) et
-**STORY-649**. `paiement:exploitation:consulter` (STORY-286) est dans le même cas.
-
-➡️ **Story à créer** : ajouter `paiement:fournisseur:administrer` (et `paiement:exploitation:consulter`)
-au catalogue PLATEFORME — les deux sont déjà vérifiés par un guard, la règle d'or est tenue.
+➡️ **STORY-631 et STORY-649 ne sont plus bloquées par ce droit.** Restent à la console : l'écran
+d'attribution du rôle plateforme (AP-) et, si besoin, un rôle plateforme « opérateur paiement » du
+socle (la recette le compose comme une donnée, `OPERATEUR_PAIEMENT_RECETTE`).
 
 ---
 
