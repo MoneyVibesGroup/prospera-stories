@@ -5419,8 +5419,8 @@ sprints:
         epic: "EPIC-025"
         points: 5
         service: "auth-service"
-        status: "not_started"
-        assigned_to: null
+        status: "review"  # 🟡 2026-11-07 — `MNV-171` poussée sur TROIS dépôts (auth 4d4fa7d, front EC 25b4b3d, paiement 31c260d) : à fusionner ENSEMBLE, l'IdP seul casse l'inscription du front et l'amorçage. Référentiel `verticaux` (5 dont `plateforme`, décision PO), seul `cabinet` ouvert à l'inscription ; migration à marqueur (96 orgs réelles → cabinet) ; PATCH …/vertical (entitlement:grant) journalisé, 409 si rôles incompatibles ; ferme STORY-166 AC 10 côté écriture (422 TENANT_ROLE_NON_PROPOSE). Docker 39/39.
+        assigned_to: "claude"
       - story_id: "STORY-166"
         title: "Socle de rôles publié par la plateforme, et le catalogue s'ouvre aux droits de TENANT — les 14 personas distributeur en sont la PREMIÈRE INSTANCE, pas le périmètre"
         epic: "EPIC-025"
