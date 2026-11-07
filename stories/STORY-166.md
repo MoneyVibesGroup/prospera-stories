@@ -8,7 +8,7 @@
 **Priorité :** Must Have — ⚡ **bloque tout le parcours d'entrée du distributeur**
 **Story Points :** 8 *(5 → 8 le 2026-08-03 : décision PO « les 14 personas », + attribut de couverture)*
 **Complexité :** low-medium — **de la donnée, pas du code**
-**Statut :** En revue — code sur la branche `MNV-166` d'`auth-service` (2026-11-07), PR à ouvrir ; vérification docker NON faite
+**Statut :** ✅ Terminée — fusionnée sur `dev` d'`auth-service` (`73f6980`), vérification docker 33/33 (2026-11-07). AC 10 côté écriture livré par STORY-171 (`MNV-171`)
 **Assigné à :** Claude (session du 2026-11-07)
 **Créée le :** 2026-08-02 · **Révisée le :** 2026-08-03 *(décision PO Q5)*
 **Sprint :** **30** — **socle distributeur, vague 0**  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
@@ -298,13 +298,34 @@ distributeur en sont la première instance.
 globale 97,4 %, nouveaux fichiers à 100 %. ⚠️ Deux tests préexistants (`svg-sanitizer` au chrono,
 `throttler-proxy` au timeout) ont échoué sous la charge de la suite complète et passent seuls.
 
-**Reste à faire avant `done`**
+### 2026-11-07 — vérification docker sur `dev` (`73f6980`, image runtime neuve) : **33/33**
 
-- [ ] ⛔ **Vérification docker** (DoD) — non faite, règle « Docker à la demande ». De nouveaux
-      providers entrent dans `RbacModule`/`AdminModule` : seul `docker compose up` prouve que le
-      service démarre (cf. le piège des `UnknownDependenciesException`).
-- [ ] PR `MNV-166` → `dev`, rebase-merge.
-- [ ] STORY-171 pour fermer AC 10 côté écriture.
+Le service **démarre** (`Nest application successfully started`), le seed écrit les 15 rôles,
+les deux routes sont mappées, `/health` = 200. Recette contre le vrai IdP et le vrai Mongo, avec de
+vrais jetons :
+
+| Bloc | Contrôles |
+|---|---|
+| Non-régression (AC 14) | membre sans rôle métier ⇒ `perms: []`, `roles` inchangé ; opérateur plateforme : droits plateforme intacts, aucun droit de tenant |
+| Lecture (AC 1/3/10) | 15 rôles, couverture sur chacun, 7 en attente, ni `_id` ni `__v` ; `?vertical=cabinet` ⇒ 0 ; inconnu ⇒ 400 |
+| AC 2 | `TENANT_ADMIN` ⇒ 403 en lecture comme en attribution |
+| AC 6/13 | `PUT … DIST_ADMIN` ⇒ 200 ; `membership.tenantRole` en base ; ligne d'audit (acteur, membre, rôle, date) relue par `GET …/audit` ; détail d'organisation à jour |
+| AC 11/7 | jeton signé suivant = 6 droits de `DIST_ADMIN`, aucun des trois droits sur l'argent ; ⚡ un **refresh** d'une session ouverte AVANT l'attribution reçoit aussi les droits |
+| AC 12 | `DIST_MARKETING` : login 200, `perms: []`, `/organizations/me` et `/users/me` = 200 |
+| Erreurs | rôle plateforme ⇒ 422, non-membre ⇒ 404, permission injectée par le corps ⇒ 400 |
+| AC 4/5 par DONNÉE | rôle `IMF_AGENT_TEST` inséré en base ⇒ visible et attribuable ; `DIST_MARKETING` passé à `servi` en base ⇒ console ET jeton |
+
+⚠️ Piège rencontré : la protection anti-force-brute du login (`429` après une rafale de
+connexions) — comportement voulu ; une recette qui se connecte souvent doit espacer ses logins.
+
+**Reste à faire**
+
+- [x] Vérification docker (ci-dessus).
+- [x] PR `MNV-166` → `dev` — fusionnée par le PO.
+- [x] AC 10 côté écriture — livré par **STORY-171** (`MNV-171`, 422 `TENANT_ROLE_NON_PROPOSE`).
+- [ ] ⛔ **`paiement:grace:attribuer`** : la seule route de grâce (`POST /abonnements/:id/graces`,
+      STORY-281) est gardée par `paiement:demande:emettre`, pas par ce droit. Il est donc déclaré
+      sans être vérifié — à trancher côté paiement : brancher la route dessus, ou retirer le droit.
 - [ ] Recettes 631/632/649 : rejouables dès qu'un `DIST_*` est attribué sur la vraie pile. 632
       exige trois membres (déclarant, validant, annulant) : `DIST_COMMERCIAL` + `DIST_DAF` ×2 —
       ⚠️ vérifier que 275 n'interdit pas valider ET annuler à la même personne.
