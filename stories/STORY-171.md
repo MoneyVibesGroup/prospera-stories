@@ -7,7 +7,7 @@
 **Priorité :** Must Have — ⚡ **prérequis de STORY-166, à livrer AVANT elle**
 **Story Points :** 5
 **Complexité :** low — un champ, ses lectures, et une décision de nommage
-**Statut :** En revue — branches `MNV-171` poussées sur **trois** dépôts (auth-service, front expert-comptable, paiement-service), vérification docker 39/39 (2026-11-07)
+**Statut :** ✅ Terminée — les trois `MNV-171` fusionnées ensemble sur `dev` le 2026-11-07 (auth-service `9956bc2`, front expert-comptable `c579c1b`, paiement-service `13113c5`) ; vérification docker 39/39. ⚠️ Le `roles` du `409 VERTICAL_ROLES_INCOMPATIBLES` n’atteignait pas le client (filtre d’exceptions de l’IdP) : corrigé par STORY-167.
 **Assigné à :** Claude (session du 2026-11-07)
 **Créée le :** 2026-08-03
 **Sprint :** **30** — socle distributeur  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
