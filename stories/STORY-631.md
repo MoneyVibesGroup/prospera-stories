@@ -1,14 +1,16 @@
 # STORY-631 : Recette croisée — un cabinet paie son abonnement
 
-Status: blocked
+Status: done
 
 **Bloc :** Convergence E4 — les recettes croisées (`CONVERGENCE-RAILS-C-D-2026-09-08.md`, n° 11)
 **Dépôt :** `prospera-recette` (`paquets/recette-croisee/recette/`) · **Points :** 5
 **Services traversés :** `auth-service` · `paiement-service` · `notification-service` ·
 `platform-catalog-service` (+ `kyc-service`, levé par la pile)
 **Prérequis :** E0 complet ✅ (643 → 646) · STORY-610 ✅ · STORY-644 ✅ · STORY-663 ✅ ·
-**STORY-166/167 ⛔** · **STORY-279 ⛔** · **STORY-609 ⛔** · **appel de la cloche côté paiement ⛔**
-(voir « Ce qui bloque »)
+STORY-632 ✅ (droits `paiement:*`) · STORY-279 ✅ · STORY-609 ✅ · STORY-725 ✅ · STORY-726 ✅ ·
+STORY-727 ✅ (voir « Ce qui bloquait »)
+**Livrée le 2026-11-08** — recette **28/28** sur volumes neufs, pile construite depuis `origin/dev`
+de chaque dépôt (`prospera-recette`, branche `MNV-631`).
 **Renumérotée** depuis 630 (STORY-630 a été prise le 2026-09-07 par l'outillage e2e de
 `bilan-service`).
 
@@ -36,7 +38,7 @@ avec une autre configuration ; la dernière (STORY-649) fait tourner les deux fl
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Un utilisateur s'inscrit ; le courriel de vérification part **par
+- [x] AC-1 — Un utilisateur s'inscrit ; le courriel de vérification part **par
       `notification-service`**, et le lien reçu vérifie l'adresse.
       ✅ **Déjà prouvé par STORY-590** (gate Docker du 2026-10-29, 38 verdicts contre Mailhog). La
       recette le **rejoue** comme première marche du scénario, sans le re-démontrer à part.
@@ -44,34 +46,50 @@ avec une autre configuration ; la dernière (STORY-649) fait tourner les deux fl
       ni ce que fait le code ni ce qu'il peut faire : à l'inscription l'organisation n'existe pas
       encore, et les messages de compte partent sous `ORGANISATION_PLATEFORME_ID`, identité
       `PLATEFORME` (constat de 590). La recette assère **cette** identité.
-- [ ] AC-2 — Money Vibes engage un abonnement pour le cabinet (`POST /api/v1/abonnements`) :
+- [x] AC-2 — Money Vibes engage un abonnement pour le cabinet (`POST /api/v1/abonnements`) :
       périodicité, montant, échéance. Le fait `paiement.abonnement.engage` est publié.
-- [ ] AC-3 — L'échéance **est une créance** (`POST /abonnements/:id/echeances`, STORY-663) : une
+- [x] AC-3 — L'échéance **est une créance** (`POST /abonnements/:id/echeances`, STORY-663) : une
       demande est émise et un lien est créé, au payeur posé par `PUT
       /abonnements/:id/adresse-de-paiement`.
-- [ ] AC-4 — Le lien **arrive** au cabinet par courriel, dans Mailhog, sous l'identité d'envoi de
+- [x] AC-4 — Le lien **arrive** au cabinet par courriel, dans Mailhog, sous l'identité d'envoi de
       Money Vibes. ⚡ C'est l'assertion que le câblage de STORY-644 rend possible ; la recette de
       STORY-646 n'a prouvé que la route directe, avec un lien fabriqué.
-- [ ] AC-5 — ⛔ Aucun jeton de lien n'a transité par le bus ni n'apparaît dans un journal.
+- [x] AC-5 — ⛔ Aucun jeton de lien n'a transité par le bus ni n'apparaît dans un journal.
       **Vérifié sur la trace**, pas sur le code : la recette relit les messages Kafka de la fenêtre
       (topics `paiement.*` et `notification.*`) et les `docker logs` des cinq services, et y cherche
       le jeton reçu dans Mailhog. Zéro occurrence hors du courriel.
-- [ ] AC-6 — Le cabinet ouvre le lien sur la page publique (`/api/v1/public/liens/:jeton`) ; la
+- [x] AC-6 — Le cabinet ouvre le lien sur la page publique (`/api/v1/public/liens/:jeton`) ; la
       **notification signée** du fournisseur, reçue sur `/api/v1/public/notifications/:fournisseur/:compteId`,
       crée l'encaissement. La signature est calculée par la recette avec le secret qu'elle a
       elle-même déclaré, par l'API, avec le compte d'encaissement de Money Vibes (la clef qui ouvre
       la signature est celle du **compte**) : une configuration, jamais un état écrit en base
       (STORY-646, AC-3).
-- [ ] AC-7 — Le droit d'usage du cabinet s'**ouvre** sans intervention manuelle, sur le seul fait
+- [x] AC-7 — Le droit d'usage du cabinet s'**ouvre** sans intervention manuelle, sur le seul fait
       `paiement.abonnement.echeance.encaissee`, et son échéance est **prolongée** à la période
       suivante, jamais recréée. La recette lit le droit par `platform-catalog-service`.
-- [ ] AC-8 — Une **cloche** annonce l'échéance suivante dans l'application du cabinet : un message
+- [x] AC-8 — Une **cloche** annonce l'échéance suivante dans l'application du cabinet : un message
       in-app, au fil de l'utilisateur, déposé par la porte commune des envois (STORY-612).
-- [ ] AC-9 — ⛔ Le compte crédité est celui de **Money Vibes**. **Invariant inverse**, vérifié par un
+- [x] AC-9 — ⛔ Le compte crédité est celui de **Money Vibes**. **Invariant inverse**, vérifié par un
       test : aucune créance dont le payeur est un client de Money Vibes (cas STORY-632) n'a pour
       bénéficiaire un compte que Money Vibes contrôle.
 
-## ⛔ Ce qui bloque — vérifié dans le code le 2026-10-30
+## ✅ Ce qui bloquait — tout est levé (2026-11-08)
+
+| # | Blocage | Levé par |
+|---|---|---|
+| 1 | Aucun jeton réel ne portait `paiement:*` | **STORY-632** — les droits plateforme du paiement au catalogue, portés par un membre de Money Vibes (la voie 166/167 n'était pas nécessaire : ce sont des droits de portée **plateforme**) |
+| 2 | Le catalogue ne consommait aucun fait d'abonnement | **STORY-279** |
+| 3 | Un droit d'usage n'avait pas d'échéance | **STORY-609** |
+| 4 | `paiement-service` ne déposait rien dans la cloche | **STORY-726** |
+| 5 | 🆕 Le lien d'une échéance avait un payeur sans canal (`SANS_DESTINATAIRE`) | **STORY-725** — le courriel de facturation sur le contrat |
+| 6 | 🆕 Le contrat ouvrait un module à la carte (`FISCALITE`) retiré de l'offre ; un module normatif s'ouvrait sans référentiel | **STORY-727** (8 lots) + `MNV-279-referentiel-requis` |
+
+⚡ Ce que la recette a trouvé **en tournant** : l'octroi écrivait l'organisation en `ObjectId` sur un
+chemin `Mixed` — droit introuvable (voir STORY-727, « Preuves »). Corrigé avant la clôture.
+
+Le tableau ci-dessous est le constat d'origine, conservé tel quel.
+
+### Constat du 2026-10-30
 
 La fiche est écrite pour être **tirée telle quelle** le jour où ses prérequis sont livrés. Aucun
 d'eux ne l'est. Vérification faite sur `origin/dev` de chaque dépôt, et sur `origin/main` du tracker.
@@ -93,7 +111,7 @@ la surcouche de recette rendrait 631 jouable sans attendre 166/167. **Écartée 
 prouve un chemin d'autorisation que la vraie pile ne sait pas produire ferait passer pour démontré
 le seul maillon qui manque.
 
-## Ce que la recette devra savoir faire, et que le dépôt n'a pas encore
+## Ce que la recette devait savoir faire — ✅ écrit (`compose.ts` : `journaux`, `bus` par un consommateur jetable ; `accueil.ts` : dossier KYC et octroi extraits)
 
 - **Lire le bus.** `prospera-recette` ne lit que Mailhog et les conteneurs. AC-5 exige de relire les
   messages d'une fenêtre (un consommateur jetable, groupe propre à la recette, jamais un groupe d'un
@@ -117,4 +135,4 @@ le seul maillon qui manque.
 - Voir [[STORY-590]] (AC-1 prouvé), [[STORY-610]], [[STORY-644]], [[STORY-646]] (le dépôt de
   recette), [[STORY-663]] (l'échéance émet sa demande), [[STORY-612]] (la cloche), [[STORY-289]]
   (Money Vibes est une organisation), [[STORY-166]], [[STORY-167]], [[STORY-279]], [[STORY-609]],
-  [[STORY-632]], [[STORY-649]].
+  [[STORY-632]], [[STORY-649]], [[STORY-725]], [[STORY-726]], [[STORY-727]].
