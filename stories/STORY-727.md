@@ -81,7 +81,29 @@ retiré de l'offre, et un module normatif s'ouvrait sans référentiel (corrigé
   « classement », balance « devise-paquet », bilan « analyse.agnosticisme ») et fin de ligne CRLF
   (bilan `dossier-scope.invariant`) — rouges sur `origin/dev` avant la story, verts sous Linux.
 
-## Ce qui reste ouvert (à arbitrer)
+## Arbitrages PO du 2026-11-08 sur les points ouverts
+
+1. **Un cabinet qui tient des IMF ou des assureurs prend le module EN OPTION** (pas de package
+   `cabinet-sfd` / `cabinet-cima`) : il ne tient que leur comptabilité. ⛔ **Aujourd'hui, ça ne
+   marche pas** (doute du PO confirmé dans le code) : une option ne reçoit des référentiels QUE
+   des packages du contrat (`ciblesDeLOffre`). Le package `cabinet` n'apporte que
+   `syscohada-revise@2.3`, donc `microfinance` (famille `sfd-bceao`) tombe en écart
+   `REFERENTIEL_REQUIS` et ne s'ouvre pas. Même s'il était ouvert à la main, la garde de
+   microfinance exige `sfd-bceao@2.0` sur le droit de l'organisation. En revanche, la donnée est
+   bien rangée **par dossier** (`dossiers/:dossierId`, référentiel du dossier contrôlé) : un
+   cabinet peut structurellement tenir des dossiers d'IMF. ➡️ **Story à ouvrir** : une option
+   normative apporte ses référentiels (ceux du package de son vertical), et la comptabilité du
+   cabinet (`balance`, `bilan`) gagne la famille correspondante.
+2. **Un impayé SUSPEND les accès, sans supprimer aucune donnée.** Consommer
+   `paiement.abonnement.impayee` (suspendre) et `regularise` (rétablir) dans le catalogue. Portée
+   par **STORY-280** (« Impayé, suspension et préavis », au tracker, sans fiche).
+3. **`facturation` du package `distributeur` en écart `REFERENTIEL_REQUIS` : normal**, rien à
+   changer (le référentiel `zone-franche-togo` ne concerne que les entreprises en zone franche).
+4. **Un reclassement hors d'un vertical inclus ne retire rien** : confirmé (règle STORY-549).
+5. **La propagation remplace les référentiels posés à la main** : confirmé, c'est le
+   comportement voulu (le package fait foi).
+
+## Ce qui était ouvert (texte d'origine)
 
 1. **Packages `cabinet-sfd` / `cabinet-cima`** : un cabinet qui tient des IMF ou des assureurs
    achète-t-il un package dédié, ou le module en option ? Rien n'est semé.
