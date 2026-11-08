@@ -1,106 +1,152 @@
 # STORY-649 : Recette croisée — le distributeur est facturé pour ce qu'il consomme
 
-Status: blocked
+Status: review
 
 **Bloc :** Convergence E4 — les recettes croisées (`CONVERGENCE-RAILS-C-D-2026-09-08.md`, n° 13)
-**Dépôt :** `prospera-recette` (`paquets/recette-croisee/recette/`) · **Points :** 5
+**Dépôt :** `prospera-recette` (`paquets/recette-croisee/recette/facturation.recette.ts`) · **Points :** 5
 **Services traversés :** les cinq — `auth-service` · `kyc-service` · `platform-catalog-service` ·
 `notification-service` · `paiement-service`
-**Prérequis :** STORY-632 ⛔ (son outillage) · STORY-639 ✅ · STORY-647 ✅ · STORY-706 ✅ ·
-STORY-712 ✅ · **STORY-166/167 ⛔** · **une horloge de recette ⛔** · **le point de prix de 647 ⛔**
-(voir « Ce qui bloque »)
+**Prérequis :** STORY-632 ✅ · STORY-639 ✅ · STORY-647 ✅ · STORY-706 ✅ · STORY-712 ✅ ·
+STORY-166/167 ✅ · horloge de recette ✅ (cette story) · point de prix de 647 ✅ (arbitrage PO)
+**Livrée le 2026-11-08** : recette **35/35** sur volumes neufs (projet `recette649`). Les 7 étapes de
+649 s'ajoutent aux 28 de 631/632/pile, qui restent vertes. Images construites depuis les branches
+`MNV-649` (notification, paiement) et depuis `origin/dev` (auth, kyc, catalogue).
 
 ---
 
+## ⚡⚡ Arbitrages PO du 2026-11-08 — ils changent ce que la recette prouve
+
+1. **L'horloge de recette** (blocage n° 2) : une avance réglable par l'environnement dans
+   `notification-service` (`RECETTE_HORLOGE_AVANCE_JOURS`, de 0 à 400 jours). Le démarrage la
+   **refuse sous `NODE_ENV=production`**. Les options libfaketime et recette à cheval sur une fin de
+   mois ont été écartées.
+2. **Le prix d'un SMS envoyé sous la passerelle du client est ZÉRO** (blocage n° 3) : « zéro,
+   assumé ». Le PO a confirmé ce choix après qu'on lui a présenté la conséquence vérifiée dans le
+   code. Tous les tarifs de catalogue valent 0 et le seul relais de la plateforme est le courriel
+   (il n'y a **aucun relais SMS ni WhatsApp**). Tout coût non nul vient donc de la passerelle
+   **propre** du client. **Aujourd'hui, Money Vibes ne facture aucune consommation** et le pont de
+   647 ne crée aucune créance tant que la plateforme ne porte pas de message tarifé.
+
+⇒ AC-3 et AC-5 sont **réécrits** : l'arrêté est publié, le paiement le **lit**, et **aucune**
+créance ne naît. Une absence ne prouve rien à elle seule, c'est pourquoi la recette en donne un
+**témoin positif**.
+
 ## Le récit
 
-En tant que **direction de Money Vibes**, je veux voir l'argent revenir **vers** Money Vibes sans que
-Money Vibes n'ait touché celui du client, afin de savoir que les deux flux coexistent sans se
-mélanger.
-
-⚡⚡ **C'est la seule recette qui fasse tourner les deux flux en même temps, dans la même
-organisation** — le seul état réel. STORY-631 montre Money Vibes qui encaisse ; STORY-632 montre le
-distributeur qui encaisse ; celle-ci montre le distributeur **payeur** de Money Vibes et
-**bénéficiaire** de ses clients, la même semaine.
-
-## Le scénario, dans l'ordre
-
-0. Le distributeur est accueilli et configuré comme en STORY-632 (raccordement, compte, passerelles).
-1. Il envoie 200 SMS sous **sa** passerelle ; les accusés rapportent le coût réel.
-2. La période se clôt ; l'arrêté est publié ; un accusé tardif arrive.
-3. Le paiement transforme l'arrêté en créance au bénéfice de Money Vibes ; Money Vibes émet la
-   demande et le lien part au distributeur.
-4. Pendant ce temps, le distributeur encaisse une créance de son propre client.
-5. Rien ne relie les deux créances.
+En tant que **direction de Money Vibes**, je veux voir les deux flux coexister dans la même
+organisation sans se mélanger : le distributeur **consomme** (sous sa propre passerelle) et
+**encaisse** (pour lui-même), et rien ne relie les deux.
 
 ## Critères d'acceptation
 
-- [ ] AC-1 — Le distributeur envoie **200 SMS** sous **sa** passerelle (adaptateur `sms-http`). Les
-      accusés de délivrance rapportent un coût réel : le **coût réel gagne sur l'estimé** (barème),
-      et le **premier rapporté gagne** — un second accusé pour le même envoi ne change ni l'envoi ni
-      le compteur. Mécanisme déjà en place : `accuses.service.ts` ne corrige que
-      `cout.source: 'BAREME'`, et le compteur ne bouge que si l'envoi a bougé (STORY-597, 712).
-- [ ] AC-2 — La période se clôt (`POST /api/v1/consommation/periodes/:periode/cloture`, ou la
-      clôture planifiée de STORY-706) ; l'arrêté est **immuable** — une seconde clôture rend le même
-      arrêté, marqué `dejaClose`, pas des totaux recalculés ; un **accusé tardif** est imputé à la
-      période **suivante** et l'arrêté ne bouge pas (STORY-639, AC-2).
-- [ ] AC-3 — Le fait `notification.consommation.arretee` fait naître chez le paiement une créance
-      **au bénéfice de Money Vibes**, payeur = le distributeur, référence
-      `ARRETE-<org>-<AAAA-MM>-<DEVISE>` (STORY-647) ; ⚡ **sans aucun droit humain** : le pont passe
-      par Kafka. Money Vibes émet ensuite la demande — **le pont ne le fait pas**, c'est un geste de
-      console (647) — et le lien arrive au distributeur dans Mailhog **sous l'identité d'envoi de
-      Money Vibes**, jamais sous la passerelle du distributeur.
-- [ ] AC-4 — Pendant ce temps, le distributeur encaisse une créance de son propre client, sur **son**
-      compte (le scénario de STORY-632, réduit au paiement par lien).
-- [ ] AC-5 — ⛔ Les deux flux ne se compensent **jamais** : ce qu'il doit à Money Vibes ne réduit
-      pas ce que ses clients lui doivent, et l'inverse. La recette vérifie, par l'API, que les
-      restants des deux créances sont **exactement** ceux de leurs propres encaissements, et
-      qu'aucun encaissement, aucune affectation et aucune entrée de journal ne porte les
-      identifiants des deux créances à la fois.
-- [ ] AC-6 — ⛔ La consommation **n'a rien refusé** : aucun des 200 envois n'a été rejeté pour un
-      motif de coût, de solde ou de quota (journal des envois), et la garde
-      `notification-service/src/modules/consommation/aucune-facturation.spec.ts` est **verte sur le
-      commit de l'image éprouvée**. ⚠️ **Formulation corrigée** : le plan disait « verte à la fin de
-      la recette ». C'est une garde **statique** — elle balaie le code, pas l'exécution — donc elle
-      ne peut pas changer de couleur pendant la recette. La recette en joue la contrepartie
-      observable (aucun refus) et cite le commit sur lequel la garde passe.
+- [x] AC-1 — Le distributeur envoie **200 SMS** sous **sa** passerelle (`sms-http` → faux
+      agrégateur de la recette, expéditeur `DISTRIB`, sa clé). Le coût annoncé est le **barème
+      contracté** (200 × 15). Les accusés rapportent le coût réel (12), qui **gagne** sur l'estimé
+      (`source: REEL`). Un second accusé pour le même envoi (coût 99) ne change ni l'envoi ni le
+      compteur.
+- [x] AC-2 — La période se clôt (`POST …/periodes/:periode/cloture`). L'arrêté est **immuable** :
+      la seconde clôture rend le même, avec `dejaClose`. Le mois que l'avance rend courant est refusé
+      (`409 PERIODE_NON_TERMINEE`). L'**accusé tardif** du 200ᵉ SMS (coût 20, arrivé après la
+      clôture) est imputé à la période **suivante**, qui le marque (`periodesReportees`), et
+      l'arrêté ne bouge pas.
+- [x] AC-3 — *(réécrit, « zéro, assumé »)* `notification.consommation.arretee` part sur le bus avec
+      la ventilation (`sms` : 200 envois, **2 403 XOF**, `{ ORGANISATION: 2403, PLATEFORME: 0 }`).
+      Le paiement le **lit**, ce dont témoigne son journal : `arrêté de consommation sans dû`
+      (orgId, période). **Aucune** créance de Money Vibes ne porte cet arrêté (`404` sur
+      `<MV>|CONSOMMATION_MESSAGES|ARRETE-<org>-<AAAA-MM>-XOF`, et absent de la liste).
+- [x] AC-4 — Pendant ce temps, le distributeur encaisse une créance de son propre client sur
+      **son** compte : raccordement, compte PI-SPI, routage, barème, demande, puis notification
+      signée du fournisseur pour 80 000.
+- [x] AC-5 — *(réécrit)* Les deux flux ne se compensent **jamais**. La créance du client rend
+      exactement ses propres encaissements (confirmé 80 000, restant 0), et rien chez Money Vibes ne
+      vise le distributeur pour sa consommation : il n'existe donc rien qui puisse être compensé.
+- [x] AC-6 — Aucun des 200 envois n'est refusé (200 × `200`, 0 échoué). La garde
+      `aucune-facturation.spec.ts` est verte sur le commit de l'image éprouvée : notification
+      `MNV-649` `33ccedd`, suite unitaire de 3 682 tests. C'est une garde **statique** : la recette
+      en joue la contrepartie observable.
 
-## ⛔ Ce qui bloque — vérifié dans le code le 2026-10-30
+## Ce que la story a dû écrire — trois défauts et deux arbitrages
 
-| # | Blocage | Constat | AC touchés | Ce qui lève |
-|---|---|---|---|---|
-| 1 | **Aucun jeton réel ne porte `paiement:*` ni `notification:*`** | Armer la passerelle exige `notification:canal:administrer` ; la route de clôture et toute la surface de consommation exigent `notification:journal:consulter` ; émettre la demande, `paiement:demande:emettre` ; lire les créances aussi. Aucun de ces codes n'est au catalogue de l'IdP. | 1, 2, 3, 4, 5 | **STORY-166/167** |
-| 2 | ⛔ **On ne clôt pas le mois qui court, et aucune horloge ne se règle** | La clôture refuse `409 PERIODE_NON_TERMINEE` (« on ne clôt pas un mois qui court »). La période est le mois calendaire, lu sur l'horloge système : aucune horloge injectable ni réglable par l'environnement dans `notification-service`. Les 200 SMS envoyés par la recette tombent dans le mois en cours, **que la recette ne peut donc pas clore** — ni par la route, ni par la planification de STORY-706, qui ne clôt que les mois révolus. | 2, 3, et 5 par voie de conséquence | **aucune story**. ⚠️ Décision PO : (a) une horloge de recette, réglable par l'environnement et **refusée en production**, à écrire dans `notification-service` — c'est un réglage, donc compatible avec AC-3 de STORY-646 ; (b) `libfaketime` dans la surcouche de recette, sans toucher au service ; (c) une recette en deux temps, à cheval sur une fin de mois. |
-| 3 | ⛔ **Le montant attendu n'est pas tranché** | Point de prix **ouvert** depuis la livraison de 647 : l'arrêté est valorisé au barème de la passerelle **de l'organisation** (`tarifDe`). Pour un distributeur sur **sa** passerelle — exactement AC-1 — Money Vibes lui refacture ce qu'il paie déjà à son agrégateur. Écrire AC-3 aujourd'hui reviendrait à **asserter une double facturation**. | 3, 5 | **arbitrage PO** sur le prix d'un SMS envoyé sous la passerelle du client (frais de plateforme, zéro, ou le barème) |
-| 4 | **L'outillage de STORY-632** | Accueil d'une organisation de plus, signature des notifications de fournisseur, membres multiples. | 0, 4 | **STORY-632** |
+### `notification-service` — branche `MNV-649` (3 commits sur `origin/dev` `ab6dcf5`)
 
-⚡ **Ce qui n'attend rien** : le pont arrêté → créance (AC-3, première moitié) ne demande aucun droit
-humain, puisqu'il passe par Kafka. C'est aussi le seul pas de cette recette dont le prochain blocage
-n'est pas l'IdP — c'est l'horloge.
+1. **`03aa5f6` — ⛔⛔ défaut : aucun SMS ne pouvait partir sous la passerelle d'un client.**
+   - La résolution ne reconnaissait une passerelle propre qu'à son `hote` (SMTP).
+   - Les adaptateurs HTTP (SMS, WhatsApp, push) déclarent le leur sous `pointDeTerminaison` : la
+     passerelle SMS du client tombait donc sur le relais partagé, dont la garde de domaine refusait
+     l'expéditeur « DISTRIB » (`DOMAINE_NON_VERIFIE`).
+   - Aucun test ne résolvait un canal autre que le courriel. Le correctif est un vocabulaire
+     (`REGLAGES_POINT_DE_TERMINAISON`) et non une comparaison de canal (AD-6), gardé par
+     `point-de-terminaison-declare.spec.ts`. Une mutation qui rétablit `hote` seul fait rougir la
+     preuve.
+2. **`aa998b1` — défaut latent : `staging` aurait chargé `pino-pretty`**, absent de l'image
+   `runtime`, d'où un redémarrage en boucle (le piège de kyc et du catalogue). Les journaux sont
+   désormais lisibles seulement en `development` et `test`, JSON ailleurs.
+3. **`33ccedd` — l'horloge des périodes et la ventilation par identité.**
+   - `HorlogeDesPeriodes` : **une** horloge pour la clôture (route et planifiée) et pour
+     l'imputation d'un fait tardif. C'est l'invariant de STORY-639 : deux horloges feraient tomber
+     un fait dans un arrêté posé. Elle **ne date aucun fait** (`closeLe` et `prepareLe` restent
+     réels).
+   - Une garde vérifie qu'aucun de ces décideurs ne relit l'heure du système.
+   - `coutParIdentite` sur le compteur est maintenu à la remise (coût annoncé) puis à l'accusé
+     (écart réel). L'arrêté et son annonce portent `coutMineurParIdentite`, avec les deux clés
+     toujours écrites et un vocabulaire fermé ; le contrat JSON est mis à jour.
+   - ⛔ La notification ne décide pas de ce qui se facture (`aucune-facturation`) : elle publie un
+     **fait**.
 
-⛔ **La voie écartée : un IdP de recette**, pour la même raison qu'en STORY-631 et 632.
+Résultats : 3 682 tests unitaires, 275 e2e et lint à 0. Les 54 tests de conformité exigent
+l'infrastructure Docker et n'ont pas tourné hors gate ; la recette sur la vraie pile en couvre le
+chemin.
 
-## Ce que la recette devra savoir faire, et que le dépôt n'a pas encore
+### `paiement-service` — branche `MNV-649` (`d9713e0` sur `origin/dev` `4153dfa`)
 
-- **Un récepteur SMS de recette.** `sms-http` parle un contrat posé par Prospera (`POST` JSON, trois
-  champs, une référence en retour), et le point de terminaison vient de la **passerelle de
-  l'organisation**, jamais de l'environnement. La surcouche de recette peut donc lever un faux
-  agrégateur, au même titre que Mailhog pour le courriel, qui répond aux 200 envois et **rappelle**
-  la route d'accusé avec un coût réel. ⚠️ À vérifier au tirage : que la saisie de la passerelle
-  accepte une adresse du réseau de recette (les gardes d'adresse sortante de STORY-711 visent la
-  remise HTTP générique, pas `sms-http`, mais la validation de la saisie n'a pas été relue).
-- **L'horloge**, selon l'arbitrage du blocage n° 2.
+- `dusDeLArrete` ne facture que `coutMineurParIdentite.PLATEFORME`. La règle du barème de 647
+  (AC-4) tient sur cette part.
+- `lireArrete` **exige** la ventilation. Son absence rend l'arrêté illisible : elle ne se lit jamais
+  « tout à la plateforme » (ce serait la double facturation) ni « rien » (ce serait une dette
+  perdue).
+- « Lu, rien à facturer » se **journalise** : c'est le témoin d'AC-3.
+- Résultats : 4 392 tests unitaires et 340 e2e.
+
+### `prospera-recette` — branche `MNV-649` (`6067876` sur `origin/dev` `2baa281`)
+
+- `src/agregateur-sms.ts` : un faux agrégateur **dans le processus de la recette**, qui parle le
+  contrat de `sms-http` (sonde `OPTIONS`, `{ destinataire, expediteur, texte }`, référence en retour,
+  accusés signés HMAC). C'est la recette qui décide quand il rappelle.
+- La surcouche ajoute deux réglages à notification (`NODE_ENV: staging`,
+  `RECETTE_HORLOGE_AVANCE_JOURS: '31'`) et `extra_hosts: host.docker.internal:host-gateway`. La
+  garde du profil les fige. Aucun volume ni état en base n'y entre (AC-3 de 646).
+- La recette absorbe les `429` de notification (100 requêtes par minute et par adresse) en
+  relisant `retry-after` : c'est le comportement voulu du service.
+
+## ⛔ Points ouverts, à arbitrer
+
+1. **Le pont de 647 ne facture rien aujourd'hui** : c'est la conséquence assumée. Il reprendra du
+   sens le jour où la plateforme portera un message tarifé (un relais SMS de Money Vibes, ou un
+   barème sur le relais courriel partagé).
+2. **Un envoi jamais remis n'est sous aucune identité**, donc il n'est facturé à personne. Ce n'est
+   pas un cas de la recette.
+3. **Un compteur antérieur à 649 n'a pas de ventilation** : il est lu à zéro. Sans conséquence tant
+   que la production est fermée (§10, STORY-668), mais à garder en tête au premier déploiement.
+4. Le message de la console client (« la période en cours ») lit encore l'heure système. C'est
+   cosmétique, et cela ne concerne que la recette.
+
+## Ordre de fusion
+
+notification `MNV-649` → paiement `MNV-649` → recette `MNV-649` (sur **dev**) → docs. Le paiement
+refuse un arrêté sans ventilation : le déployer **avant** notification rendrait les arrêtés
+illisibles, donc non facturés. Au vu du point 1, ce n'est pas une perte.
 
 ## Ce qui NE fait PAS partie de cette story
 
 - La facturation de l'abonnement : **STORY-631**.
 - L'impayé de la créance de consommation, la relance, la suspension : leurs stories propres.
-- Toute facturation ou blocage **dans** `notification-service` : interdite au v1 (AD-16, FR-N63) —
-  c'est l'objet d'AC-6.
+- Un relais SMS de la plateforme.
+- Toute facturation ou tout blocage **dans** `notification-service` : c'est interdit au v1 (AD-16,
+  FR-N63).
 
 ## Notes
 
-- Voir [[STORY-631]], [[STORY-632]], [[STORY-646]], [[STORY-647]] (le pont et son point de prix),
-  [[STORY-639]] (la clôture), [[STORY-706]] (la clôture planifiée), [[STORY-712]] (un seul
-  compteur), [[STORY-597]] (le coût réel), [[STORY-620]] (`sms-http`), [[STORY-711]],
-  [[STORY-166]], [[STORY-167]].
+- Constat du 2026-10-30 (fiche « bloquée ») : les droits sont levés par 166, 167 et 632.
+  L'outillage de 632 est réutilisé (`Accueil`, `fournisseur.ts`).
+- Voir [[STORY-631]], [[STORY-632]], [[STORY-646]], [[STORY-647]], [[STORY-639]], [[STORY-706]],
+  [[STORY-712]], [[STORY-597]], [[STORY-620]], [[STORY-604]], [[STORY-615]].
