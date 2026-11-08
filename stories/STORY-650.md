@@ -149,12 +149,35 @@ Le point de rupture serait un `orgId` **optionnel** ajouté aux routes existante
 | prospera-paiement-service | `MNV-650` | 4 440 unitaires + 351 e2e verts · lint 0 · 15 mutations, toutes rouges |
 | prospera-notification-service | `MNV-650` | 3 734 unitaires + 285 e2e verts · lint 0 · 14 mutations : 13 rouges, 1 équivalente (contrôle redondant de la porte plateforme) |
 | auth-service · kyc-service · platform-catalog-service · admin-panel | `MNV-650` | 1 213 · 526 · 980 · 484 unitaires verts ; `permission.enum.ts` identique dans les 4 (17 codes) |
-| prospera-recette | `MNV-650` | recette croisée `delegation.recette.ts` ÉCRITE, **pas encore jouée** |
+| prospera-recette | `MNV-650` + `MNV-650-attente` | recette croisée `delegation.recette.ts` |
 
-⏳ **Integration Gate à faire DEPUIS `dev`**, une fois les branches rebasées (consigne PO du
-2026-11-08) : reconstruire les images depuis `dev`, jouer `delegation.recette.ts` sur volumes neufs
-et le test de conformité `test/delegation-transaction.conformite-spec.ts` de notification (atomicité
-réelle de l'acte et de son intervention, contre le Mongo `rs-notification`).
+### ✅ Integration Gate — 2026-11-08, DEPUIS `dev` (après rebase par le PO)
+
+Images reconstruites depuis `origin/dev` des cinq services (auth `5ef9d4a`, kyc `ae24228`, catalogue
+`350a6a9`, paiement `b42565d`, notification `8759ca8`), une à la fois, projet `recette650`.
+
+- **`delegation.recette.ts` : 10/10 sur volumes NEUFS** (`down -v` puis 0 volume avant le passage) :
+  jeton du support signé avec les deux droits ; 404 au client sur chaque route d'administration ;
+  404 au support pour une organisation inconnue ; aucune surface d'argent ; compte déclaré POUR le
+  client et lu chez lui ; le client lit dans SA chaîne `COMPTE_ENCAISSEMENT_DECLARE_PAR_MONEY_VIBES`,
+  auteur `OPERATEUR_PLATEFORME` (opérateur, Money Vibes, organisation cible, permissions) ;
+  passerelle SMS armée sans jamais restituer les secrets ; modèle créé et publié ; le client lit
+  ses interventions (verbe suffixé, libellé « par Money Vibes », opérateur nommé, aucun secret) ;
+  un acte du client n'écrit aucune intervention.
+- **Conformité notification `delegation-transaction.conformite-spec.ts` : 4/4 contre le vrai Mongo**
+  (`rs-notification`) — l'acte écrit SANS session rejoint la transaction ; une trace qui échoue
+  annule l'acte ; un acte qui échoue à mi-chemin ne laisse rien ; l'intervention ne se réécrit pas.
+  ⚡ Contre-preuve : acte exécuté HORS transaction ⇒ 2 tests rouges.
+- **Non-régression des recettes existantes : toutes vertes** — 632 (distributeur), 631
+  (abonnement), 649 (facturation), pile.
+
+⚠️ **Deux défauts de la RECETTE, mesurés au premier passage** (corrigés sur `MNV-650-attente`) :
+1. le KYC et le droit d'usage du client arrivent par Kafka — quelques secondes après l'accueil, le
+   gate dit encore `*_NOT_ENTITLED` : la recette attend la projection ;
+2. ⚡ **Money Vibes n'avait AUCUN droit d'usage `notification`.** Les surfaces d'administration
+   passent par le gate de l'organisation de l'OPÉRATEUR, comme au paiement (où elle a `paiement`) :
+   **en exploitation, Money Vibes doit détenir le module `notification` pour agir pour un client.**
+   La recette le lui octroie ; l'amorçage de Money Vibes ne le fait pas encore.
 
 ### Ce qui reste ouvert
 
