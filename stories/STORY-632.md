@@ -1,6 +1,6 @@
 # STORY-632 : Recette croisée — un distributeur encaisse pour lui-même
 
-Status: review
+Status: done
 
 **Bloc :** Convergence E4 — les recettes croisées (`CONVERGENCE-RAILS-C-D-2026-09-08.md`, n° 12)
 **Dépôt :** `prospera-recette` (`paquets/recette-croisee/recette/`) · **Points :** 5
