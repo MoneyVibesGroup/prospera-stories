@@ -1,6 +1,6 @@
 # STORY-651 : Le journal à deux acteurs — un acte délégué se lit chez le client, et il nomme Money Vibes
 
-Status: ready-for-dev
+Status: review
 
 **Épic :** EPIC-025 — Fondation RBAC (catalogue de permissions, rôles, portée)
 **Service :** `paiement-service` + `notification-service` (+ patron repris par tout service recevant un contrôleur d'administration)
@@ -68,3 +68,28 @@ le jour où elle sert.
 
 - Voir [[STORY-650]], [[STORY-240]] (journal chaîné + outbox), [[STORY-166]], [[STORY-167]],
   [[AP-24]] (la console lit déjà un journal d'audit), [[AP-13]].
+
+---
+
+## ✅ Livraison du 2026-11-08 — avec STORY-650, paiement ET notification
+
+**AC-6 tranché avant le développement (PO, 2026-11-08) : rien n'est masqué au client.**
+
+| AC | paiement-service | notification-service |
+|---|---|---|
+| AC-1 deux acteurs | nouvel auteur `OPERATEUR_PLATEFORME` au journal chaîné : `utilisateurId`, `organisationOperatrice` (Money Vibes), `pourOrganisation` (vérifiée égale à l'`orgId` de l'entrée), `roles`, `permissions` | même objet `operateur` dans chaque intervention |
+| AC-2 verbe distinct | code suffixé `_PAR_MONEY_VIBES` (ex. `COMPTE_ENCAISSEMENT_DECLARE_PAR_MONEY_VIBES`) ; un test compare les deux chemins | code suffixé (imposé par le schéma) + libellé « … par Money Vibes » |
+| AC-3 lisible par le client | entrée dans SA chaîne, lue par `GET /journal/chaines/:cle` sous `paiement:journal:consulter` | `GET /v1/interventions` sous `notification:journal:consulter`, le droit qui ouvre déjà son journal d'envois |
+| AC-4 même transaction | `EcritureDArgent` (outbox + journal de STORY-240), aucun second mécanisme | `connection.transaction` ; la transaction implicite de Mongoose (`transactionAsyncLocalStorage`) fait rejoindre la transaction aux écritures du cas d'usage ; refus explicite si elle est inactive |
+| AC-5 permissions effectives | copie des `perms` du jeton à l'instant de l'acte, couverte par l'empreinte | copie des `perms` du jeton |
+| AC-7 non-régression | chemin du client : auteur `UTILISATEUR` identique (`toEqual`) | actes du client : aucune entrée, comme avant |
+
+**Facile à rater — tenu :** la trace est écrite **dans le service**, chez le client, jamais côté
+console. Le patron est le même dans les deux services (auteur, suffixe, porte, liste blanche) ; le
+prochain service à recevoir un contrôleur d'administration le recopie.
+
+**Toujours ouvert :** notifier le client d'une intervention (point 2) n'est pas fait.
+
+**Conservation :** `interventions_plateforme` est en ajout seul (hooks Mongoose) et déclarée
+**conservée** à la suppression d'une organisation, à côté de `rapports_purge` : l'effacer
+supprimerait la preuve de l'intervention avec la donnée qu'elle a touchée.

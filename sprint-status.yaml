@@ -5459,6 +5459,20 @@ sprints:
         service: "auth-service"
         status: "not_started"
         assigned_to: null
+      - story_id: "STORY-650"
+        title: "Money Vibes agit POUR une organisation — contrôleurs d'administration, `orgId` explicite, et la liste blanche de ce qui est délégable"
+        epic: "EPIC-025"
+        points: 8
+        service: "paiement-service + notification-service (+ catalogue de l'IdP, 4 dépôts)"
+        status: "review"  # 🟡 2026-11-08 — livrée avec STORY-651, branches MNV-650 (paiement, notification, auth, kyc, catalogue, admin-panel). Arbitrages PO du 2026-11-08 : 650+651 ensemble, notification DANS la même story (pas de fiche à part), rien masqué au client, un code plateforme par service (`paiement:delegation:configurer`, `notification:delegation:configurer` ⇒ 17 codes). Surfaces `admin/organisations/:orgId/{comptes-encaissement,passerelles,modeles}` ; porte en guard JUSTE APRÈS l'authentification (un client reçoit 404, contre-preuve : 403 sans elle) ; liste blanche `NATURE_DES_DROITS` (Record, compilation) ; séparation des pouvoirs fermée à l'opérateur. ⚠️ Défaut trouvé, hors périmètre : le registre, l'exploitation et les abonnements du paiement laissent fuir un 403 (porte dans le contrôleur, après le DroitsGuard).
+        assigned_to: null
+      - story_id: "STORY-651"
+        title: "Le journal à deux acteurs — un acte délégué se lit chez le client, et il nomme Money Vibes"
+        epic: "EPIC-025"
+        points: 5
+        service: "paiement-service + notification-service"
+        status: "review"  # 🟡 2026-11-08 — auteur `OPERATEUR_PLATEFORME` (utilisateur, organisation opératrice, organisation cible vérifiée, rôles, permissions effectives) ; verbe suffixé `_PAR_MONEY_VIBES` ; même transaction (paiement : EcritureDArgent ; notification : connection.transaction + transaction implicite Mongoose) ; notification reçoit un journal `interventions_plateforme` en ajout seul, lu par le client sous `notification:journal:consulter`, CONSERVÉ à la suppression. Chemin du client inchangé. Notifier le client d'une intervention : toujours ouvert.
+        assigned_to: null
       - story_id: "STORY-237"
         title: "Scaffold `paiement-service` (:3005), socle transverse et point de santé"
         epic: "EPIC-035"
@@ -6476,7 +6490,7 @@ velocity:
 # ⚡ RÈGLE À TENIR pour que la section reste vide : une story RÉDIGÉE est slottée OU
 # explicitement marquée `deferred` dans un sprint — jamais laissée sans sprint. Le contrôle
 # tient en une ligne : comparer les fichiers de stories/ à l'ensemble des `story_id` slottés.
-orphan_stories: ["STORY-650", "STORY-651"]   # ⚠️ 2026-09-08 — DEUX ORPHELINES ASSUMÉES, nées de la consolidation des branches de `prospera-stories` sur `main`. Elles ont un fichier et aucun sprint : la branche `r1-rbac-tenant` les proposait au S32, or le S32 a été CLÔTURÉ (27/27) avant leur intégration. ⛔ Leur slotting est une DÉCISION PO, non prise ici — elles dépendent de STORY-166 et 167, encore `not_started` au S31. Historique : # ✅ vide au 2026-08-03 — RE-VÉRIFIÉE ce jour. ⚠️ Elle était FAUSSE entre le 2026-08-02 et le 2026-08-03 : 21 stories backend (STORY-150→170) avaient un fichier et aucun sprint, pendant que cette ligne affirmait « vide ». C'est le pire état possible — un contrôle qui rassure. Slottées le 2026-08-03 aux sprints 30→33 et 35 (décalées de 9 sprints le jour même : le module fiscalité passe devant). ⚡ Le contrôle ne se lit pas, il s'exécute : comparer `stories/*.md` à l'ensemble des `story_id` slottés, à chaque sprint-planning.
+orphan_stories: []   # ✅ 2026-11-08 — STORY-650 et 651 SLOTTÉES au S31, à côté de STORY-166/167 dont elles dépendent (livrées le 2026-11-08 à la demande du PO : « fais la story 650 »). Historique : ⚠️ 2026-09-08 — DEUX ORPHELINES ASSUMÉES, nées de la consolidation des branches de `prospera-stories` sur `main`. Elles ont un fichier et aucun sprint : la branche `r1-rbac-tenant` les proposait au S32, or le S32 a été CLÔTURÉ (27/27) avant leur intégration. ⛔ Leur slotting est une DÉCISION PO, non prise ici — elles dépendent de STORY-166 et 167, encore `not_started` au S31. Historique : # ✅ vide au 2026-08-03 — RE-VÉRIFIÉE ce jour. ⚠️ Elle était FAUSSE entre le 2026-08-02 et le 2026-08-03 : 21 stories backend (STORY-150→170) avaient un fichier et aucun sprint, pendant que cette ligne affirmait « vide ». C'est le pire état possible — un contrôle qui rassure. Slottées le 2026-08-03 aux sprints 30→33 et 35 (décalées de 9 sprints le jour même : le module fiscalité passe devant). ⚡ Le contrôle ne se lit pas, il s'exécute : comparer `stories/*.md` à l'ensemble des `story_id` slottés, à chaque sprint-planning.
 
 # ── Plage de sprints RÉSERVÉE ──────────────────────────────────────────────────────────────────
 # ⚡ Décision PO du 2026-08-03. Le bloc distributeur × PI-SPI, écrit et slotté le jour même en
