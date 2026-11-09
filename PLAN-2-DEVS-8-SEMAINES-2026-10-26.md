@@ -59,8 +59,8 @@ personne ne code sans plan.
 | `__manifest__.py` : version, `depends`, données | `ModuleVersion`, et les `familles` de référentiels que le module sait consommer | ⚠️ **aucun `depends`** : le catalogue ne connaît aucune dépendance entre modules |
 | Les modules de **localisation** (`l10n_tg`…) | Les **référentiels versionnés** et packagés (`syscohada-revise@2.3`, `sfd-bceao@2.0`, `cima-assurances@7.0`), avec leur checksum | ✅ existe, et c'est plus strict qu'Odoo |
 | **Installer** un module pour un client | L'**entitlement** `(organisation × module)`, le topic `entitlement.changed` et la **gate** dans chaque service | ✅ existe |
-| Les **bundles** (une base Odoo « CRM + Ventes ») | Les **packs** de `packs.seed-data.ts` : `distributeur`, `imf-sfd`, `assurance-cima`, `cabinet` | ⚠️ ils citent des modules **non enregistrés** (`pdv`, `stock`, `catalogue`, `commande`, `facturation`) : le provisioning rend 422 depuis le 2026-08-11 |
-| Les **droits** fournis par un module | Le catalogue des permissions | ⛔ **plateforme seulement** : `perms[]` est vide pour tout tenant tant que STORY-365 n'est pas livrée |
+| Les **bundles** (une base Odoo « CRM + Ventes ») | Les **packs** de `packs.seed-data.ts` : `distributeur`, `imf-sfd`, `assurance-cima`, `cabinet` | ✅ **corrigé depuis** : `pdv`, `stock`, `catalogue`, `commande` et `facturation` sont au seed du catalogue (mesuré le 2026-11-09). ⚠️ `reseau` n'y est **pas** encore |
+| Les **droits** fournis par un module | Le catalogue des permissions | ✅ **les droits de tenant existent** (STORY-166 et 167 fusionnées : `perms[]` rempli pour un membre, rôles composés, surcharge DELTA). ⚠️ Le catalogue des droits reste un `enum` fermé dans `auth-service` (13 codes) ; STORY-365 est à requalifier (`CONTRAT-DE-MODULE-2026-11-09.md` C7) |
 | Le **client web unique**, dont le menu dépend des modules installés | Aujourd'hui une app par vertical, avec des menus codés en dur | ⛔ **à construire** : c'est la coque (§1.4) |
 
 ### 1.2 Les trois différences avec Odoo, à connaître avant de vendre la ressemblance
