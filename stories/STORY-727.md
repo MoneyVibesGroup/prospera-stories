@@ -1,6 +1,6 @@
 # STORY-727 : Le contrat vend des PACKAGES — ouverture, palier, lecture seule, version par exercice, évolution, verticaux inclus
 
-Status: review
+Status: done
 
 **Services :** `paiement-service`, `platform-catalog-service`, `dossier-service`, `balance-service`,
 `bilan-service`, `prospera-microfinance-service`, `prospera-assurance-service`,

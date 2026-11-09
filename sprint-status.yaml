@@ -54,6 +54,9 @@ reserved_ranges:
       verticaux inclus, recette. ⚠️ Pris après un MAX sur toutes les branches distantes (724),
       les réservations 725-726 de ce même lot de docs, et le fichier NON SUIVI
       PLAN-2-DEVS-8-SEMAINES-2026-10-26.md (730 → 899) : 728-729 restent libres.
+      ✅ DONE 2026-11-09 — toutes les branches `MNV-727` (et `MNV-727-org-chaine`) fusionnées
+      sur `dev` le 2026-11-08, aucun commit hors de `dev` (vérifié par `git cherry`) ; recette
+      STORY-631 28/28 depuis `origin/dev`.
 
   - range: "STORY-725 → STORY-726"
     status: "RÉSERVÉ"
