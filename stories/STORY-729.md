@@ -189,7 +189,13 @@ pluriel (package `cabinet-sfd`) se tranche par le type d'entité.
 
 - **Le dépôt d'une balance d'un tag contraire n'est pas refusé au `balance-service`** : seule la liasse le
   refuse (AC-6). Reste candidate STORY-236.
-- **Aucune recette n'éprouve le chemin CIMA** : il est couvert par les unitaires seulement.
+- ~~**Aucune recette n'éprouve le chemin CIMA**~~ ✅ **levée le 2026-11-09** :
+  `referentiel-par-dossier.recette.ts` (+4) crée un dossier `ASSURANCE` chez le même cabinet. Il est refusé au bilan **et** à la
+  balance tant que le cabinet ne tient que `microfinance` (tenir une option n'ouvre pas l'autre). L'option
+  `assurance` ouvre `cima-assurances@7.0` pour ce seul dossier : le dossier IMF reste en SFD, « Mon
+  cabinet » en SYSCOHADA. La liasse CIMA sort sur `513` et `1000`, deux comptes absents de SYSCOHADA
+  comme du plan SFD. Aucun code n'a changé : le chemin était juste, il n'était pas éprouvé. Recettes
+  75/75 sur volumes neufs.
 - **Un droit d'option antérieur au déploiement n'est pas rattrapé** : l'événement a déjà été écarté. Il se
   corrige en réémettant le droit depuis le catalogue. Rien n'est en production aujourd'hui.
 

@@ -95,9 +95,46 @@ Ce qui a rougi au passage complet, à raison :
 ## Ce qui reste ouvert
 
 - **Interface** : aucun bouton « Renvoyer » n'existe encore dans le frontend ; la route est prête.
-- ⚠️ **Gate Docker : toujours non rejoué.** Vérifié le 2026-11-09 : aucune recette de
-  `prospera-recette` ne joue le renvoi. La route directe est prouvée par STORY-644 et la recette
-  STORY-631 (le lien d'une échéance arrive par courriel) ; un renvoi réel devrait y produire un
-  second courriel dans Mailhog — c'est le cas à ajouter.
+- ✅ **Gate Docker joué le 2026-11-09** : voir la section suivante. Il a trouvé deux défauts.
 - ✅ **Fusionnée sur `dev`** le 2026-10-30 (`21ef71f`), après `MNV-648` : le conflit attendu sur
   `notification-http.adapter.ts` a été résolu comme prévu (factorisation de 648, clef du lien de 724).
+
+## ✅ Recette croisée du 2026-11-09 — et les deux défauts qu'elle a trouvés
+
+`prospera-recette/paquets/recette-croisee/recette/renvoi-du-lien.recette.ts` (8 tests), sur la vraie pile,
+volumes neufs. Le paiement réarme, son relais appelle la vraie notification, et le courriel arrive dans
+Mailhog :
+- AC-1, AC-2 : un vrai second courriel, avec le **même** lien, ni nouvelle demande ni nouvelle validité ;
+- AC-4 : deux clics simultanés donnent deux `202`, un seul accepté, et aucun message de plus en 30 s ;
+- AC-3 : le troisième renvoi passe, le quatrième rend `409 RENVOIS_EPUISES` et rien ne part. Un lien
+  révoqué rend `LIEN_NON_RENVOYABLE`, un payeur sans canal `422 PAYEUR_INJOIGNABLE` ;
+- AC-5 : `LIEN_RENVOYE` aux rangs 1, 2, 3 (auteur `UTILISATEUR`), `LIEN_REMIS` quatre fois, chaîne
+  intacte, aucun jeton dans la preuve ;
+- AC-6 : `404` pour la demande d'autrui comme pour une demande inconnue, `403` sans le droit.
+
+**Défaut 1 — ⛔⛔ la remise n'était jamais marquée `REMIS`.** Le relais acquittait la ligne par
+`{ _id: demande.id }`, une chaîne. Or `@Prop({ type: Types.ObjectId })` donne un chemin `Mixed` :
+mongoose ne convertit pas, et la chaîne ne trouve rien. Mesuré sur la pile : 0 ligne trouvée par la
+chaîne, 1 par l'`ObjectId`. Conséquences :
+- la ligne restait `EN_ATTENTE`, et le relais la remettait à **chaque tour**. `LIEN_REMIS` s'écrivait
+  toutes les 3 s sur la chaîne de la créance. La notification rendait le même envoi par sa clef : un
+  seul courriel partait, ce qui masquait le défaut ;
+- le renvoi répondait toujours `dejaEnFile: true, renvoi: 0` : **il n'a jamais fonctionné hors des
+  unitaires** ;
+- 50 lignes figées (la taille du lot) auraient bloqué les liens de toutes les demandes suivantes.
+
+Les unitaires ne le voyaient pas, parce que le double de la file accepte n'importe quel filtre. Le test
+lit maintenant le **vrai** schéma (`instance === 'Mixed'`) et exige un `ObjectId` dans le filtre.
+Contre-preuve faite : avec le filtre en chaîne, le test rougit. Même famille de piège que
+`organizationId` dans le catalogue.
+
+**Défaut 2 — le double clic simultané rendait `409`.** Les deux transactions réarment la même ligne,
+MongoDB en abandonne une (`WriteConflict`), et `EcritureDArgent` la rend en `409 ECRITURE_CONCURRENTE`,
+« réessayez ». Le filtre `statut ≠ EN_ATTENTE` ne joue que pour un clic qui arrive **après** le commit
+de l'autre. Le cas d'usage relit maintenant la ligne : si elle est `EN_ATTENTE`, il rend `dejaEnFile`.
+Sinon, c'est le relais qui écrivait (remise acquittée) et le `409` reste vrai. Contre-preuve faite.
+
+**Vérifié :** unitaires paiement 333 suites, 4 484 tests ; e2e `demandes`, `file-de-sortie-notification`,
+`delegation-comptes` 50/50 ; recettes 75/75 sur volumes neufs (images depuis `origin/dev` et ces branches).
+**Branches :** `MNV-651-reprise` du paiement (commit `MNV-724(envois)`), `MNV-724-729-recettes` de la
+recette.

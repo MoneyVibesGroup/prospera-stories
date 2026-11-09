@@ -130,9 +130,8 @@ adressée à un membre n'entre plus que par l'appel de service ou la porte inter
 - ⚠️ **Rejouer les topics ne rattrape pas ces deux manques** : `ProjectionTransactionnelle` écarte un
   événement déjà traité par ce consommateur. Sur une base existante, il faudra un rattrapage dédié
   (à décider). Une pile neuve n'est pas concernée.
-- **Un refus s'abandonne vite** : les 5 tentatives s'enchaînent à chaque tour de relais, soit quelques
-  secondes, et une ligne abandonnée n'est pas reprise. Une adresse projetée juste après est donc
-  perdue pour ce signalement.
+- ~~**Un refus s'abandonne vite**~~ ✅ **levée le 2026-11-09** (voir « Reprise » plus bas) : un refus
+  fait désormais attendre la ligne, et une adresse projetée dans les ~26 h sert encore au signalement.
 - **Le destinataire est le fondateur seul**, pas tous les administrateurs. Un fondateur parti de
   l'organisation n'est plus joignable : le signalement échoue, et personne d'autre n'est prévenu.
 - **La langue du message est le français.** Les phrases d'actes sont rédigées en français par les
@@ -161,3 +160,27 @@ Simulation par défaut, compte rendu sans adresse, relance sans effet. Elles com
 un document existant garde ce qu'un événement a écrit. La recette recrée l'état d'avant la story, prouve que
 personne n'est prévenu, applique, puis constate que la cloche et l'e-mail repartent. PR #81, #113, recette #10,
 fusionnées ; rejoué depuis `dev` sur volumes neufs : les six recettes passent, 61/61.
+
+### Reprise du 2026-11-09 — un e-mail refusé attend l'adresse
+
+**Le défaut.** Un refus du message (`MEMBRE_SANS_ADRESSE` côté notification, `REFUSEE` côté paiement)
+consommait une tentative à chaque tour du relais, toutes les 2 ou 3 s. Les 5 tentatives partaient en une
+dizaine de secondes, puis la ligne passait `ECHEC_DEFINITIF` sans reprise. Une adresse arrivée juste
+après, par Kafka ou par le rattrapage, ne servait plus. La cloche partait, l'e-mail se perdait.
+
+**Le correctif, dans les deux services.** Chaque refus pose `prochaineTentativeLe` : 1 min, 15 min, 2 h,
+puis 24 h, soit environ 26 h entre le premier essai et l'abandon. Le relais ne relit que les lignes
+échues. Une panne du tuyau ne compte toujours rien et se retente au tour suivant. Une remise réussie
+efface le motif et l'attente. Les lignes déjà en base n'ont pas le champ : elles partent au tour
+suivant, comme avant.
+
+Au passage, côté paiement : la remise écrivait `dernierMotif: undefined` dans le `$set`, que mongoose
+retire. Le dernier refus restait donc sur une ligne remise. C'est maintenant un `$unset`.
+
+**Recette** (`delegation.recette.ts`, +2) : l'adresse du fondateur est retirée, la cloche part, l'e-mail
+est refusé **une seule fois** et la ligne attend (contrôlé en base dans les deux services). L'adresse
+revient par `rattrapage-identite --appliquer`, et l'e-mail repart dans les deux services (`REMIS`,
+2 tentatives, ni motif ni attente).
+
+**Branches :** `MNV-651-reprise` dans notification et dans paiement, `MNV-724-729-recettes` dans
+`prospera-recette`.
