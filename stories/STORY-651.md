@@ -127,6 +127,12 @@ adressée à un membre n'entre plus que par l'appel de service ou la porte inter
 - **Les organisations déjà projetées n'ont pas de fondateur côté notification** : les signalements de la
   notification sont écartés (`SANS_FONDATEUR`). Côté paiement, la même limite existe pour une
   organisation projetée avant STORY-726.
+- ⚠️ **Rejouer les topics ne rattrape pas ces deux manques** : `ProjectionTransactionnelle` écarte un
+  événement déjà traité par ce consommateur. Sur une base existante, il faudra un rattrapage dédié
+  (à décider). Une pile neuve n'est pas concernée.
+- **Un refus s'abandonne vite** : les 5 tentatives s'enchaînent à chaque tour de relais, soit quelques
+  secondes, et une ligne abandonnée n'est pas reprise. Une adresse projetée juste après est donc
+  perdue pour ce signalement.
 - **Le destinataire est le fondateur seul**, pas tous les administrateurs. Un fondateur parti de
   l'organisation n'est plus joignable : le signalement échoue, et personne d'autre n'est prévenu.
 - **La langue du message est le français.** Les phrases d'actes sont rédigées en français par les
