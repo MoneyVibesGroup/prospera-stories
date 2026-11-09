@@ -96,7 +96,8 @@ retiré de l'offre, et un module normatif s'ouvrait sans référentiel (corrigé
    cabinet (`balance`, `bilan`) gagne la famille correspondante.
 2. **Un impayé SUSPEND les accès, sans supprimer aucune donnée.** Consommer
    `paiement.abonnement.impayee` (suspendre) et `regularise` (rétablir) dans le catalogue. Portée
-   par **STORY-280** (« Impayé, suspension et préavis », au tracker, sans fiche).
+   par **STORY-280** (« Impayé, suspension et préavis »). ✅ 2026-11-09 : livrée en revue
+   (`MNV-280`, catalogue + recette), fiche écrite.
 3. **`facturation` du package `distributeur` en écart `REFERENTIEL_REQUIS` : normal**, rien à
    changer (le référentiel `zone-franche-togo` ne concerne que les entreprises en zone franche).
 4. **Un reclassement hors d'un vertical inclus ne retire rien** : confirmé (règle STORY-549).
