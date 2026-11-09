@@ -5654,8 +5654,8 @@ sprints:
     end_date: "2027-10-07"
     capacity_points: 34
     committed_points: 65  # ⚠️ +3 (STORY-602, 2026-09-06). ⚠️ +5 (STORY-601, 2026-09-06). ⚠️ CORRIGÉ le 2026-09-06 : la ligne disait 38 alors que les stories slottées en pesaient déjà 49 — les +8 de STORY-603 et les +8 de STORY-599 n'y avaient jamais été reportés, et le sprint 33 était le SEUL du fichier dont `committed_points` ne valait pas la somme de ses stories. 57 = 49 + 8 (STORY-600). ⛔ 23 pts AU-DESSUS de la capacité (34) ; 30 sont DÉJÀ LIVRÉS (603, 248, 249, 289, 599), il reste 27 pts non démarrés pour 4 de marge. Sortir STORY-247 (5 pts, volontairement écartée du cadrage du 2026-09-05 : elle porte R4, conformité carte) ramènerait à 52. ⛔ DÉCISION PO TOUJOURS PAS PRISE. Note d'origine 2026-09-05 : — 12 pts AU-DESSUS de la capacité (34). Sortir STORY-247 (5 pts, volontairement écartée du cadrage : elle porte R4, conformité carte) ramènerait à 41, toujours au-dessus. ⛔ DÉCISION PO TOUJOURS PAS PRISE : 30 pts sont DÉJÀ LIVRÉS (603, 248, 249, 289, 599), le reste à arbitrer. Note d'origine 2026-09-05 : — AU-DESSUS de la capacité. STORY-247 (5 pts) est volontairement écartée du cadrage du 2026-09-05 (elle porte R4, conformité carte) : la sortir du sprint ramènerait à 33. Décision PO à prendre, pas prise ici.
-    completed_points: 8
-    status: "in_progress"  # 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-036 — STORY-600 (écrite le 2026-09-06) en est la dernière pièce, hors STORY-247 écartée pour R4. ✅ STORY-603 livrée le 2026-09-05 : le barème quitte les capacités, les cinq pays de FedaPay entrent.
+    completed_points: 60  # ✅ RESYNC 2026-11-09 : recalculé sur les stories `done` du fichier (8 → 60). AVANT : 
+    status: "in_progress"  # ✅ RESYNC 2026-11-09 : seule STORY-247 (adaptateur FedaPay) reste ouverte : FedaPay est écarté du périmètre. AVANT (`in_progress`) : 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-036 — STORY-600 (écrite le 2026-09-06) en est la dernière pièce, hors STORY-247 écartée pour R4. ✅ STORY-603 livrée le 2026-09-05 : le barème quitte les capacités, les cinq pays de FedaPay entrent.
     goal: "🏁 EPIC-036 : les deux modes de checkout, le routage déterministe sans repli implicite, et le registre ADMINISTRABLE (ouvrir un marché sans déploiement). Puis l'ouverture de la créance : montants en unité mineure, upsert idempotent, et la créance saisie à la main — le chemin A, sans quoi l'écran distributeur porte sur un objet inexistant."
     stories:
       - story_id: "STORY-603"
@@ -5705,57 +5705,57 @@ sprints:
         epic: "EPIC-036"
         points: 8
         service: "paiement-service"
-        status: "in_progress"  # 🚧 Écrite ET implémentée le 2026-09-06, branche `MNV-600` sur les DEUX dépôts (base `MNV-599` non fusionnée). 1530 tests unitaires, lint 0 warning, couverture 99 % sur les fichiers de la story. ⛔ **RESTE À FAIRE AVANT `done` : les e2e et la vérification docker n'ont PAS été lancées** (Docker à la demande), et le corps unitaire de `POST /demandes-paiements` reste à confirmer sur le compte de démonstration — un seul champ est en cause, `montant`, nommé ainsi par les deux points de terminaison frères. ✅ Arbitrage PO du 2026-09-06 : un payeur sans adresse de paiement est REFUSÉ, l'organisation enrôle son client. Note d'origine : — 🏁 elle FERME EPIC-036 (hors STORY-247, écartée pour R4). ⚡⚡ LA CLEF DE PLATEFORME N'ÉTAIT PAS INTERDITE POUR CE QU'ELLE EST, MAIS POUR CE QU'ELLE DÉSIGNAIT : chez FedaPay la clef EST la destination (d'où le refus de STORY-246, R1) ; sur le schéma, l'accès dit QUI APPELLE et le triplet de STORY-599 dit OÙ L'ARGENT ATTERRIT, et il voyage dans la requête. Le refus ne se transpose pas, la GARANTIE si : un alias ne s'ouvre qu'avec le code marchand et le participant qui étaient là au scellement. ⚡⚡ LE SPI N'A PAS DE CHECKOUT — le payeur ne va pas chez le fournisseur, c'est la demande qui va au payeur : ni REDIRECTION (une charge utile de QR n'est pas une URL) ni API_DIRECTE (qui le ferait dépendre de STORY-247, écartée pour R4, alors que rien ici ne touche une donnée de paiement) — donc une TROISIÈME forme de présentation, changement de schéma et non configuration. ⛔ TROU RÉEL TROUVÉ DANS LE CODE : STORY-599 a étendu le lien scellé du côté de l'ÉCRITURE, mais `SecretDuCompte` — seul passage par lequel un secret sort du coffre — le reconstruit SANS la destination ; le premier appel sortant du schéma échouerait sur l'authenticité. Invisible aujourd'hui (aucun adaptateur ne sert cette nature), et cette story le referme. ⚡ EMPRUNTER N'EST PAS SIGNER : l'alias part dans le CORPS comme la destination qu'il est, jamais dans un en-tête d'autorisation — chez FedaPay les deux coïncidaient, la coïncidence n'était pas une règle. ⚡ La vérification pose une QUESTION (alias → participant) et refuse sur le PARTICIPANT, jamais sur le NOM : un nom de titulaire n'a pas de forme canonique. ⚡ Origine restreinte au seul bac à sable publié = la forme EXÉCUTABLE du déclencheur nommé (la convention avec un participant agréé), sans aucun `si production` (NFR-5). ⛔ La garde d'inertie de STORY-599 est SUPPRIMÉE, jamais contournée. ⚠️ PRÉREQUIS D'ENTRÉE : origine, forme de l'accès, opération de demande, format du QR et existence d'une résolution d'alias viennent du COMPTE DE DÉMONSTRATION DU PO — la doc de l'API-Business n'est pas lisible sans compte, et les inventer produirait des critères qui échouent au premier appel. ⚠️ COLLISION D'IDENTIFIANT NON RÉSOLUE : la branche locale non poussée `r1-rbac-tenant` de `prospera-stories` porte encore une STORY-600 « Le journal à deux acteurs » (EPIC-025) ; l'arbitrage PO du 2026-09-05 a donné 599 au PI-SPI et renvoyé les deux brouillons RBAC à une renumérotation qui n'a PAS eu lieu — prochains ids libres après 603 : 604 et suivants.
+        status: "done"  # ✅ RESYNC 2026-11-09 — commit `d8ff16d` (2026-09-06) sur `origin/dev` ; `MNV-599` fusionnée depuis. ⚠️ Les e2e et le Docker de 600 SEULE n’ont jamais été consignés ; son adaptateur a été repris et corrigé par STORY-652 et STORY-653 (done), puis exercé par le rail E. AVANT : `in_progress` — 🚧 Écrite ET implémentée le 2026-09-06, branche `MNV-600` sur les DEUX dépôts (base `MNV-599` non fusionnée). 1530 tests unitaires, lint 0 warning, couverture 99 % sur les fichiers de la story. ⛔ **RESTE À FAIRE AVANT `done` : les e2e et la vérification docker n'ont PAS été lancées** (Docker à la demande), et le corps unitaire de `POST /demandes-paiements` reste à confirmer sur le compte de démonstration — un seul champ est en cause, `montant`, nommé ainsi par les deux points de terminaison frères. ✅ Arbitrage PO du 2026-09-06 : un payeur sans adresse de paiement est REFUSÉ, l'organisation enrôle son client. Note d'origine : — 🏁 elle FERME EPIC-036 (hors STORY-247, écartée pour R4). ⚡⚡ LA CLEF DE PLATEFORME N'ÉTAIT PAS INTERDITE POUR CE QU'ELLE EST, MAIS POUR CE QU'ELLE DÉSIGNAIT : chez FedaPay la clef EST la destination (d'où le refus de STORY-246, R1) ; sur le schéma, l'accès dit QUI APPELLE et le triplet de STORY-599 dit OÙ L'ARGENT ATTERRIT, et il voyage dans la requête. Le refus ne se transpose pas, la GARANTIE si : un alias ne s'ouvre qu'avec le code marchand et le participant qui étaient là au scellement. ⚡⚡ LE SPI N'A PAS DE CHECKOUT — le payeur ne va pas chez le fournisseur, c'est la demande qui va au payeur : ni REDIRECTION (une charge utile de QR n'est pas une URL) ni API_DIRECTE (qui le ferait dépendre de STORY-247, écartée pour R4, alors que rien ici ne touche une donnée de paiement) — donc une TROISIÈME forme de présentation, changement de schéma et non configuration. ⛔ TROU RÉEL TROUVÉ DANS LE CODE : STORY-599 a étendu le lien scellé du côté de l'ÉCRITURE, mais `SecretDuCompte` — seul passage par lequel un secret sort du coffre — le reconstruit SANS la destination ; le premier appel sortant du schéma échouerait sur l'authenticité. Invisible aujourd'hui (aucun adaptateur ne sert cette nature), et cette story le referme. ⚡ EMPRUNTER N'EST PAS SIGNER : l'alias part dans le CORPS comme la destination qu'il est, jamais dans un en-tête d'autorisation — chez FedaPay les deux coïncidaient, la coïncidence n'était pas une règle. ⚡ La vérification pose une QUESTION (alias → participant) et refuse sur le PARTICIPANT, jamais sur le NOM : un nom de titulaire n'a pas de forme canonique. ⚡ Origine restreinte au seul bac à sable publié = la forme EXÉCUTABLE du déclencheur nommé (la convention avec un participant agréé), sans aucun `si production` (NFR-5). ⛔ La garde d'inertie de STORY-599 est SUPPRIMÉE, jamais contournée. ⚠️ PRÉREQUIS D'ENTRÉE : origine, forme de l'accès, opération de demande, format du QR et existence d'une résolution d'alias viennent du COMPTE DE DÉMONSTRATION DU PO — la doc de l'API-Business n'est pas lisible sans compte, et les inventer produirait des critères qui échouent au premier appel. ⚠️ COLLISION D'IDENTIFIANT NON RÉSOLUE : la branche locale non poussée `r1-rbac-tenant` de `prospera-stories` porte encore une STORY-600 « Le journal à deux acteurs » (EPIC-025) ; l'arbitrage PO du 2026-09-05 a donné 599 au PI-SPI et renvoyé les deux brouillons RBAC à une renumérotation qui n'a PAS eu lieu — prochains ids libres après 603 : 604 et suivants.
         assigned_to: null
       - story_id: "STORY-601"
         title: "Money Vibes encaisse pour elle-même, par le même modèle que ses clients"
         epic: "EPIC-035"
         points: 5
         service: "paiement-service"
-        status: "not_started"  # 🆕 Écrite le 2026-09-06. ⚡⚡ CE QUI RESTAIT N'ÉTAIT PAS UNE PORTE À OUVRIR : STORY-289 a montré que le mur n'était pas le gate mais le JOURNAL D'AUDIT, et le remède est que Money Vibes soit une organisation. Cette story prouve donc qu'aucune surface plateforme n'est nécessaire, et EMPÊCHE qu'on en perce une. ⛔ La tentation a un nom : le jour où le gate refusera Money Vibes, la ligne qui débloque tient en six mots et percerait le cloisonnement POUR TOUTES LES ORGANISATIONS À LA FOIS, sans qu'aucun test métier ne la voie. D'où un invariant de sources : l'identifiant de l'organisation plateforme n'est lu QUE par la surface d'administration du registre. ⚡ Le gate traite la plateforme comme les autres, prouvé en rejouant le MÊME scénario avec les deux organisations sur le même jeu d'assertions. ⚠️ Le raccordement de l'organisation Money Vibes (KYC approuvé, droit d'usage actif) est un préalable d'EXPLOITATION, pas une ligne de code — le fabriquer ici serait l'exception que la story interdit.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `d4dfb71` (`MNV-601`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — 🆕 Écrite le 2026-09-06. ⚡⚡ CE QUI RESTAIT N'ÉTAIT PAS UNE PORTE À OUVRIR : STORY-289 a montré que le mur n'était pas le gate mais le JOURNAL D'AUDIT, et le remède est que Money Vibes soit une organisation. Cette story prouve donc qu'aucune surface plateforme n'est nécessaire, et EMPÊCHE qu'on en perce une. ⛔ La tentation a un nom : le jour où le gate refusera Money Vibes, la ligne qui débloque tient en six mots et percerait le cloisonnement POUR TOUTES LES ORGANISATIONS À LA FOIS, sans qu'aucun test métier ne la voie. D'où un invariant de sources : l'identifiant de l'organisation plateforme n'est lu QUE par la surface d'administration du registre. ⚡ Le gate traite la plateforme comme les autres, prouvé en rejouant le MÊME scénario avec les deux organisations sur le même jeu d'assertions. ⚠️ Le raccordement de l'organisation Money Vibes (KYC approuvé, droit d'usage actif) est un préalable d'EXPLOITATION, pas une ligne de code — le fabriquer ici serait l'exception que la story interdit.
         assigned_to: null
       - story_id: "STORY-602"
         title: "Garde de destination : le compte retenu appartient à l'organisation de la créance"
         epic: "EPIC-035"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # 🆕 Écrite le 2026-09-06. ⚡⚡ LE SCELLÉ PROTÉGEAIT DÉJÀ L'ARGENT, PAS LA DIVULGATION — ET DEPUIS STORY-600 IL Y A QUELQUE CHOSE À DIVULGUER : le lien (AD-14) empêche d'OUVRIR le scellé d'une autre organisation, mais `SecretDuCompte` charge le compte par son identifiant SEUL et remet la VUE à l'adaptateur AVANT que le déchiffrement échoue. Cette vue porte désormais la destination EN CLAIR (participant + numéro de compte) : un identifiant erroné suffit à faire lire chez quelle banque une autre organisation encaisse, et un adaptateur met ce qu'il reçoit dans un corps sortant et dans ses traces. ⚡ Une protection qui arrive trop tard protège le mauvais bien : la crypto répond « pas authentique » là où la vérité est « pas à vous » — ni le même statut, ni le même remède, ni le même lecteur. ⛔ CE N'EST PAS UN ÉCHO (STORY-289) : l'appelant affirme l'organisation de la CRÉANCE, qui vient du jeton ; le contrôle lit à qui appartient le COMPTE, qui vient du document.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `7154119` (`MNV-602`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — 🆕 Écrite le 2026-09-06. ⚡⚡ LE SCELLÉ PROTÉGEAIT DÉJÀ L'ARGENT, PAS LA DIVULGATION — ET DEPUIS STORY-600 IL Y A QUELQUE CHOSE À DIVULGUER : le lien (AD-14) empêche d'OUVRIR le scellé d'une autre organisation, mais `SecretDuCompte` charge le compte par son identifiant SEUL et remet la VUE à l'adaptateur AVANT que le déchiffrement échoue. Cette vue porte désormais la destination EN CLAIR (participant + numéro de compte) : un identifiant erroné suffit à faire lire chez quelle banque une autre organisation encaisse, et un adaptateur met ce qu'il reçoit dans un corps sortant et dans ses traces. ⚡ Une protection qui arrive trop tard protège le mauvais bien : la crypto répond « pas authentique » là où la vérité est « pas à vous » — ni le même statut, ni le même remède, ni le même lecteur. ⛔ CE N'EST PAS UN ÉCHO (STORY-289) : l'appelant affirme l'organisation de la CRÉANCE, qui vient du jeton ; le contrôle lit à qui appartient le COMPTE, qui vient du document.
         assigned_to: null
       - story_id: "STORY-250"
         title: "Type `Montant` en unité mineure et décimales par devise"
         epic: "EPIC-037"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # ⚡ EN TÊTE de la chaîne monétaire. Le XOF et le GNF n'ont PAS de décimale : un traitement à deux décimales par défaut produit des montants faux d'un facteur 100 sur le marché principal (R2).
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `a79ee28` (`MNV-250`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — ⚡ EN TÊTE de la chaîne monétaire. Le XOF et le GNF n'ont PAS de décimale : un traitement à deux décimales par défaut produit des montants faux d'un facteur 100 sur le marché principal (R2).
         assigned_to: null
       - story_id: "STORY-251"
         title: "Créance projetée par upsert idempotent"
         epic: "EPIC-037"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # Aucune API de création de créance : la première demande la matérialise, clé (orgId, moduleAppelant, referenceExterne). Un montantOrigine divergent = anomalie tracée, jamais un écrasement.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `ee6b4a9` (`MNV-251`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — Aucune API de création de créance : la première demande la matérialise, clé (orgId, moduleAppelant, referenceExterne). Un montantOrigine divergent = anomalie tracée, jamais un écrasement.
         assigned_to: null
       - story_id: "STORY-290"
         title: "Créance saisie manuellement — le chaînon en attendant Facturation"
         epic: "EPIC-037"
         points: 5
         service: "paiement-service"
-        status: "not_started"  # ⚡ ABSORBE l'ex-STORY-169 (superseded). CHEMIN A retenu par le PO le 2026-08-02 : Facturation (#17) n'existe pas, n'a pas de PRD, et est en position 17 sur 29. Origine `SAISIE_MANUELLE` explicite (AD-2) — pour qu'à l'arrivée de Facturation on sache lesquelles ne pas dupliquer. AUCUNE reprise à prévoir : Facturation devient un SECOND émetteur, pas un remplacement.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `c663a7f` (`MNV-290`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — ⚡ ABSORBE l'ex-STORY-169 (superseded). CHEMIN A retenu par le PO le 2026-08-02 : Facturation (#17) n'existe pas, n'a pas de PRD, et est en position 17 sur 29. Origine `SAISIE_MANUELLE` explicite (AD-2) — pour qu'à l'arrivée de Facturation on sache lesquelles ne pas dupliquer. AUCUNE reprise à prévoir : Facturation devient un SECOND émetteur, pas un remplacement.
         assigned_to: null
       - story_id: "STORY-252"
         title: "Demande de paiement, durée de validité et révocation"
         epic: "EPIC-037"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # Validité 30 j par défaut, plafond 90.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `f088aaf` (`MNV-252`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — Validité 30 j par défaut, plafond 90.
         assigned_to: null
   - sprint_number: 34   # ⬅️ ex-S24
     start_date: "2027-10-07"
     end_date: "2027-10-21"
     capacity_points: 34
     committed_points: 30
-    completed_points: 0
-    status: "not_started"  # 🆕 2026-08-03, re-découpage PI-SPI. LE SPRINT DE L'ARGENT : c'est ici que vivent NFR-3 (non-duplication) et AD-18 (imputation).
+    completed_points: 30  # ✅ RESYNC 2026-11-09 : recalculé sur les stories `done` du fichier (0 → 30). AVANT : 
+    status: "done"  # ✅ RESYNC 2026-11-09 : les 6 stories sont livrées. AVANT (`not_started`) : 🆕 2026-08-03, re-découpage PI-SPI. LE SPRINT DE L'ARGENT : c'est ici que vivent NFR-3 (non-duplication) et AD-18 (imputation).
     goal: "La surface que voit Kossi et le ledger qui la soutient : lien opaque server-rendered tenant sur une 3G, frais annoncés AVANT le choix et figés à l'émission, boîte de réception des notifications signées, et le ledger append-only dont l'idempotence est ARBITRÉE PAR LA BASE. Puis les trois montants nommés — seul l'imputé bouge le solde."
     stories:
       - story_id: "STORY-253"
@@ -5763,50 +5763,50 @@ sprints:
         epic: "EPIC-037"
         points: 5
         service: "paiement-service"
-        status: "not_started"  # ⚡ La SEULE surface non authentifiée du service. Rendu serveur (eta 4.6), HTML minimal — un bundle à hydrater est exactement ce qu'il ne faut pas envoyer sur la 3G d'Agoè (NFR-8). Exige une EXEMPTION JWT ÉNUMÉRÉE à la gateway (jamais un motif large) + plafond de débit par jeton et par IP. Jeton inconnu / expiré / révoqué ⇒ MÊME réponse (anti-énumération).
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `e999c3e` (`MNV-253`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — ⚡ La SEULE surface non authentifiée du service. Rendu serveur (eta 4.6), HTML minimal — un bundle à hydrater est exactement ce qu'il ne faut pas envoyer sur la 3G d'Agoè (NFR-8). Exige une EXEMPTION JWT ÉNUMÉRÉE à la gateway (jamais un motif large) + plafond de débit par jeton et par IP. Jeton inconnu / expiré / révoqué ⇒ MÊME réponse (anti-énumération).
         assigned_to: null
       - story_id: "STORY-254"
         title: "Politique de frais figée à l'émission et annoncée avant le choix"
         epic: "EPIC-037"
         points: 5
         service: "paiement-service"
-        status: "not_started"  # Solution PO : le BARÈME DÉCLARÉ fait foi à l'affichage — aucun appel réseau avant d'afficher un prix (NFR-8 préservé). Politique + version de barème FIGÉES dans la demande (FR-P23c).
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `dbd1934` (`MNV-254`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — Solution PO : le BARÈME DÉCLARÉ fait foi à l'affichage — aucun appel réseau avant d'afficher un prix (NFR-8 préservé). Politique + version de barème FIGÉES dans la demande (FR-P23c).
         assigned_to: null
       - story_id: "STORY-255"
         title: "Simulateur de surcoût de fractionnement, étiqueté estimation"
         epic: "EPIC-037"
         points: 2
         service: "paiement-service"
-        status: "not_started"  # Jamais persisté comme un frais, n'engage rien. CM-2 surveille la désaffection du lien.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `ef42d64` (`MNV-255`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — Jamais persisté comme un frais, n'engage rien. CM-2 surveille la désaffection du lien.
         assigned_to: null
       - story_id: "STORY-256"
         title: "Boîte de réception des notifications signées et corps brut"
         epic: "EPIC-037"
         points: 5
         service: "paiement-service"
-        status: "not_started"  # ⚡ PIÈGE VÉRIFIÉ : FedaPay signe par X-FEDAPAY-SIGNATURE et la vérification exige le CORPS BRUT. Un parseur JSON GLOBAL casse silencieusement la signature et rend NFR-3 invérifiable. Raw body monté UNIQUEMENT sur la route webhook. Miroir entrant de l'outbox.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `91d7fd3` (`MNV-256`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — ⚡ PIÈGE VÉRIFIÉ : FedaPay signe par X-FEDAPAY-SIGNATURE et la vérification exige le CORPS BRUT. Un parseur JSON GLOBAL casse silencieusement la signature et rend NFR-3 invérifiable. Raw body monté UNIQUEMENT sur la route webhook. Miroir entrant de l'outbox.
         assigned_to: null
       - story_id: "STORY-257"
         title: "Ledger append-only, index unique partiel et idempotence prouvée"
         epic: "EPIC-037"
         points: 8
         service: "paiement-service"
-        status: "not_started"  # ⚡ L'INVARIANT LE PLUS COÛTEUX À VIOLER (NFR-3, SM-5) : un double encaissement se voit chez le PAYEUR, pas dans les journaux. La BASE arbitre — index unique PARTIEL (fournisseur, refTransaction) restreint aux encaissements d'origine PSP ; duplicate key = rejeu = SUCCÈS. Aucun verrou applicatif, aucun verrou Redis, aucun `find` préalable. ⚠️ L'index doit être PARTIEL : un encaissement déclaré n'a ni fournisseur ni référence et ferait collisionner toutes les déclarations sur leurs nulls (l'ex-STORY-154 s'en remettait à une clé « dérivée » — réponse plus faible). TEST DANS LA DÉFINITION DE TERMINÉ : rejeu N fois, dans le désordre, en parallèle, après redémarrage ⇒ UN seul encaissement.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `08ee79e` (`MNV-257`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — ⚡ L'INVARIANT LE PLUS COÛTEUX À VIOLER (NFR-3, SM-5) : un double encaissement se voit chez le PAYEUR, pas dans les journaux. La BASE arbitre — index unique PARTIEL (fournisseur, refTransaction) restreint aux encaissements d'origine PSP ; duplicate key = rejeu = SUCCÈS. Aucun verrou applicatif, aucun verrou Redis, aucun `find` préalable. ⚠️ L'index doit être PARTIEL : un encaissement déclaré n'a ni fournisseur ni référence et ferait collisionner toutes les déclarations sur leurs nulls (l'ex-STORY-154 s'en remettait à une clé « dérivée » — réponse plus faible). TEST DANS LA DÉFINITION DE TERMINÉ : rejeu N fois, dans le désordre, en parallèle, après redémarrage ⇒ UN seul encaissement.
         assigned_to: null
       - story_id: "STORY-258"
         title: "Trois montants nommés et imputation par le montant dû"
         epic: "EPIC-037"
         points: 5
         service: "paiement-service"
-        status: "not_started"  # ⚡ TROUVÉ PAR LA REVUE ADVERSE (AD-18), absent du découpage précédent. Sous la politique « frais au bénéficiaire », ce que le payeur a PAYÉ, ce qui est IMPUTÉ et ce que le bénéficiaire a REÇU sont trois nombres différents — et l'écart est du vrai argent. Seul `montantImpute` bouge le solde, sous TOUTES les politiques. Aucun champ `montant` nu.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `b6d78b9` (`MNV-258`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — ⚡ TROUVÉ PAR LA REVUE ADVERSE (AD-18), absent du découpage précédent. Sous la politique « frais au bénéficiaire », ce que le payeur a PAYÉ, ce qui est IMPUTÉ et ce que le bénéficiaire a REÇU sont trois nombres différents — et l'écart est du vrai argent. Seul `montantImpute` bouge le solde, sous TOUTES les politiques. Aucun champ `montant` nu.
         assigned_to: null
   - sprint_number: 35   # ⬅️ ex-S25 (le contenu ex-S35 « assistant IA » recule au S39)
     start_date: "2027-10-21"
     end_date: "2027-11-04"
     capacity_points: 34
     committed_points: 31  # ⚖️ 29 → 31 le 2026-08-03 : +STORY-268 (8, préalable avancé du S36) −STORY-266/267 (6, repoussées au S36).
-    completed_points: 0
-    status: "not_started"  # 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-037 ET l'INCRÉMENT 1 du PRD. Puis EPIC-038 en entier.
+    completed_points: 31  # ✅ RESYNC 2026-11-09 : recalculé sur les stories `done` du fichier (0 → 31). AVANT : 
+    status: "done"  # ✅ RESYNC 2026-11-09 : les 7 stories sont livrées. AVANT (`not_started`) : 🆕 2026-08-03, re-découpage PI-SPI. 🏁 clôture EPIC-037 ET l'INCRÉMENT 1 du PRD. Puis EPIC-038 en entier.
     goal: "⛔ S'OUVRE PAR LE PRÉALABLE STORY-268 (balance-service) — un sprint devant les stories qui s'y branchent. Puis 🏁 INCRÉMENT 1 : un lien émis en bac à sable est payé partiellement puis soldé, sans double encaissement. Et le terrain s'ouvre — les espèces au commercial ne sont PAS le cas marginal en distribution ouest-africaine : un module qui ne les traite pas produit une balance créances fausse."
     stories:
       - story_id: "STORY-268"
@@ -5822,57 +5822,57 @@ sprints:
         epic: "EPIC-037"
         points: 5
         service: "paiement-service"
-        status: "not_started"  # ⚡ Deux restants NOMMÉS (restantCertain / restantAffiche) : « le solde restant » n'existe pas, la question « le déclaré compte-t-il ? » a deux réponses légitimes. + TROP-PERÇU (trouvé par la revue adverse, absent du découpage précédent) : un versement qui dépasse n'est NI rejeté NI tronqué — l'argent est déjà parti chez le payeur.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `bece9db` (`MNV-259`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — ⚡ Deux restants NOMMÉS (restantCertain / restantAffiche) : « le solde restant » n'existe pas, la question « le déclaré compte-t-il ? » a deux réponses légitimes. + TROP-PERÇU (trouvé par la revue adverse, absent du découpage précédent) : un versement qui dépasse n'est NI rejeté NI tronqué — l'argent est déjà parti chez le payeur.
         assigned_to: null
       - story_id: "STORY-260"
         title: "Machine à états de la demande"
         epic: "EPIC-037"
         points: 3
         service: "paiement-service"
-        status: "not_started"
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-06, commit `0ebe341` (`MNV-260`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started`
         assigned_to: null
       - story_id: "STORY-261"
         title: "Émission du lien via `notification-service`"
         epic: "EPIC-037"
         points: 2
         service: "paiement-service"
-        status: "not_started"  # 🏁 EPIC-037 + INCRÉMENT 1. Ce module ne parle JAMAIS directement au payeur : l'organe de parole est unique (AD-17).
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `f3441e4` (`MNV-261`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — 🏁 EPIC-037 + INCRÉMENT 1. Ce module ne parle JAMAIS directement au payeur : l'organe de parole est unique (AD-17).
         assigned_to: null
       - story_id: "STORY-262"
         title: "Déclaration manuelle d'encaissement et clé d'idempotence propre"
         epic: "EPIC-038"
         points: 5
         service: "paiement-service"
-        status: "not_started"  # Clé (orgId, cleDeclaration) fournie par le client : c'est ce qui rend inoffensif un double envoi depuis le téléphone d'un commercial en réseau instable. Auteur de la saisie ≠ encaisseur (deux champs distincts).
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `357dfc2` (`MNV-262`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — Clé (orgId, cleDeclaration) fournie par le client : c'est ce qui rend inoffensif un double envoi depuis le téléphone d'un commercial en réseau instable. Auteur de la saisie ≠ encaisseur (deux champs distincts).
         assigned_to: null
       - story_id: "STORY-263"
         title: "Validation d'un encaissement déclaré"
         epic: "EPIC-038"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # Le déclarant ne peut pas valider (AD-11), quels que soient ses droits.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `f42f75c` (`MNV-263`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — Le déclarant ne peut pas valider (AD-11), quels que soient ses droits.
         assigned_to: null
       - story_id: "STORY-264"
         title: "Délai de validation et remontée d'écart"
         epic: "EPIC-038"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # 48 h OUVRÉES par défaut (calendrier explicite, jamais des heures brutes), plafond 7 j. SM-4 suit la tendance.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `d42c6b4` (`MNV-264`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — 48 h OUVRÉES par défaut (calendrier explicite, jamais des heures brutes), plafond 7 j. SM-4 suit la tendance.
         assigned_to: null
       - story_id: "STORY-265"
         title: "Promesse de paiement : enregistrement"
         epic: "EPIC-038"
         points: 2
         service: "paiement-service"
-        status: "not_started"
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `670c03e` (`MNV-265`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started`
         assigned_to: null
   - sprint_number: 36   # ⬅️ ex-S26 (le contenu ex-S36 « bloc terrain » recule au S40)
     start_date: "2027-11-04"
     end_date: "2027-11-18"
     capacity_points: 34
     committed_points: 31  # ⚖️ 27 → 31 le 2026-08-03 : −STORY-268 (8, avancée au S35) +STORY-266/267 (6) +STORY-277/278 (6, avancées du S37).
-    completed_points: 0
-    status: "not_started"  # 🆕 2026-08-03, re-découpage PI-SPI. ⛔ S'OUVRE PAR UN PRÉALABLE HORS SERVICE (STORY-268).
+    completed_points: 28  # ✅ RESYNC 2026-11-09 : recalculé sur les stories `done` du fichier (0 → 28). AVANT : 
+    status: "in_progress"  # ✅ RESYNC 2026-11-09 : seule STORY-267 reste ouverte : reportée, le module Relance qui la consommerait n’existe pas (RAIL-C). AVANT (`not_started`) : 🆕 2026-08-03, re-découpage PI-SPI. ⛔ S'OUVRE PAR UN PRÉALABLE HORS SERVICE (STORY-268).
     goal: "🏁 EPIC-038 et EPIC-039 — le rapprochement qui tient la promesse commerciale du bundle Finance & Recouvrement (« rapprochement manuel → 0 », SM-3). Cascade de trois clés dont la troisième est PROPOSÉE et jamais appliquée sans confirmation humaine : un appariement faux est pire qu'un écart — l'écart se voit, le faux appariement enterre la question. Puis l'abonnement s'amorce par son PRODUCTEUR d'événements (277/278), pour que le consommateur du catalogue (279, S37) ait un contrat à consommer."
     stories:
       - story_id: "STORY-266"
@@ -5880,7 +5880,7 @@ sprints:
         epic: "EPIC-038"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # ⚡ Travail BullMQ à clé idempotente qui ÉCRIT le fait. Un fait jamais écrit ne peut pas être PUBLIÉ — Relance (#24) devrait alors sonder ce service, ce qui inverse le sens des dépendances. Aucun setInterval nulle part (AD-12).
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `28499bc` (`MNV-266`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — ⚡ Travail BullMQ à clé idempotente qui ÉCRIT le fait. Un fait jamais écrit ne peut pas être PUBLIÉ — Relance (#24) devrait alors sonder ce service, ce qui inverse le sens des dépendances. Aucun setInterval nulle part (AD-12).
         assigned_to: null
       - story_id: "STORY-267"
         title: "Publication des promesses, soldes et candidats vers Relance"
@@ -5929,14 +5929,14 @@ sprints:
         epic: "EPIC-041"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # Une échéance d'abonnement EST une créance : le cas C n'a aucune mécanique propre, seul le bénéficiaire change (NFR-1c). Porte le test qui matérialise SM-1 côté cas A.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `43aa2a0` (`MNV-277`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — Une échéance d'abonnement EST une créance : le cas C n'a aucune mécanique propre, seul le bénéficiaire change (NFR-1c). Porte le test qui matérialise SM-1 côté cas A.
         assigned_to: null
       - story_id: "STORY-278"
         title: "Échéance encaissée : publication vers le catalogue"
         epic: "EPIC-041"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # ⚡ AVANCÉE AU S36 le 2026-08-03 : elle PRODUIT les événements que STORY-279 (S37, platform-catalog-service) doit consommer — le producteur passe désormais un sprint devant le consommateur. AUCUN appel à l'API d'entitlement n'existe — ni PUT, ni jeton de service, ni mTLS. C'est ce qui retire la dépendance C8 au lieu de l'attendre (AD-13). Reprend l'objet de l'ex-STORY-162, elle-même déjà substituée à STORY-039.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `03853a9` (`MNV-278`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — ⚡ AVANCÉE AU S36 le 2026-08-03 : elle PRODUIT les événements que STORY-279 (S37, platform-catalog-service) doit consommer — le producteur passe désormais un sprint devant le consommateur. AUCUN appel à l'API d'entitlement n'existe — ni PUT, ni jeton de service, ni mTLS. C'est ce qui retire la dépendance C8 au lieu de l'attendre (AD-13). Reprend l'objet de l'ex-STORY-162, elle-même déjà substituée à STORY-039.
         assigned_to: null
   - sprint_number: 37   # 🆕 créé le 2026-08-03 par le re-découpage PI-SPI
     start_date: "2027-11-18"
@@ -6001,8 +6001,8 @@ sprints:
     end_date: "2027-12-16"
     capacity_points: 34
     committed_points: 18
-    completed_points: 0
-    status: "not_started"  # 🆕 2026-08-03. 🏁 CLÔTURE EPIC-042, l'INCRÉMENT 3 et LE MODULE 2 (PI-SPI) EN ENTIER. Sous-engagé délibérément : c'est un sprint de clôture et de recette.
+    completed_points: 15  # ✅ RESYNC 2026-11-09 : recalculé sur les stories `done` du fichier (0 → 15). AVANT : 
+    status: "in_progress"  # ✅ RESYNC 2026-11-09 : seule STORY-287 reste ouverte : reportée, `assistant-service` n’existe pas (RAIL-C). AVANT (`not_started`) : 🆕 2026-08-03. 🏁 CLÔTURE EPIC-042, l'INCRÉMENT 3 et LE MODULE 2 (PI-SPI) EN ENTIER. Sous-engagé délibérément : c'est un sprint de clôture et de recette.
     goal: "🏁 MODULE 2 LIVRÉ : pays et devises en référentiel versionné (ouvrir un marché sans déploiement de code), refus de conversion (convertir serait une activité de change), console d'exploitation BORNÉE, et la recette de bout en bout du parcours de Kossi en bac à sable."
     stories:
       - story_id: "STORY-283"
@@ -6010,14 +6010,14 @@ sprints:
         epic: "EPIC-042"
         points: 3
         service: "paiement-service"
-        status: "not_started"  # ReferentielVersion de platform-catalog-service (pays-devises-ao@AAAA.N), checksum sha256 vérifié. Un seul registre de versionnement dans le programme (reprend fiscal AD-5/AD-6). Irrésoluble ⇒ service DÉGRADÉ, pas sain.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `4f179bf` (`MNV-283`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — ReferentielVersion de platform-catalog-service (pays-devises-ao@AAAA.N), checksum sha256 vérifié. Un seul registre de versionnement dans le programme (reprend fiscal AD-5/AD-6). Irrésoluble ⇒ service DÉGRADÉ, pas sain.
         assigned_to: null
       - story_id: "STORY-284"
         title: "Refus de conversion et non-compensation entre devises"
         epic: "EPIC-042"
         points: 2
         service: "paiement-service"
-        status: "not_started"  # Aucun taux de change, aucune devise pivot n'existe dans le code. Convertir supposerait un agrément distinct.
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-07, commit `021d45a` (`MNV-284`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — Aucun taux de change, aucune devise pivot n'existe dans le code. Convertir supposerait un agrément distinct.
         assigned_to: null
       - story_id: "STORY-285"
         title: "Bornes de montant et méthodes lues des capacités"
@@ -6047,7 +6047,7 @@ sprints:
         epic: "EPIC-042"
         points: 5
         service: "paiement-service"
-        status: "not_started"  # 🏁 MODULE 2 LIVRÉ. Rejoue UJ-1 (le parcours de Kossi) intégralement, PLUS le même scénario avec notifications désordonnées et dupliquées. ⚠️ Les cibles NFR-7 y sont MESURÉES ET CONSIGNÉES comme référence à reconfirmer après 30 jours — jamais validées comme un seuil acquis (elles ne dérivent d'aucun usage observé).
+        status: "done"  # ✅ RESYNC 2026-11-09 — livrée le 2026-09-08, commit `1c518ac` (`MNV-288`) sur `origin/dev` de `prospera-paiement-service` ; le tracker était resté à `not_started` (vérifié par `git log origin/dev --grep`). AVANT : `not_started` — 🏁 MODULE 2 LIVRÉ. Rejoue UJ-1 (le parcours de Kossi) intégralement, PLUS le même scénario avec notifications désordonnées et dupliquées. ⚠️ Les cibles NFR-7 y sont MESURÉES ET CONSIGNÉES comme référence à reconfirmer après 30 jours — jamais validées comme un seuil acquis (elles ne dérivent d'aucun usage observé).
         assigned_to: null
 
   - sprint_number: 39   # ⬅️ ex-S22, puis ex-S25, puis ex-S35. ⚡ VIDÉ LE 2026-08-16 — son contenu (STORY-115→119) était la recopie du §10 de la note d'architecture du 2026-07-20, DÉPASSÉE SUR SON PRINCIPE CARDINAL. Le module est re-découpé en EPIC-095 → EPIC-105 (11 épics, 142 pts) et N'EST PAS SLOTTÉ : l'ordonnancement est une décision PO, comme pour reseau, catalogue, stock et pdv.
@@ -6183,8 +6183,8 @@ sprints:
     end_date: "2028-02-10"
     capacity_points: 34
     committed_points: 36   # ⚠️ 36/34, deux points au-dessus — et c'est le MIEUX ATTEIGNABLE : les trois blocs pèsent 104 pts pour 102 de capacité sur trois sprints. ⚡ RÉÉQUILIBRAGE EXPLICITEMENT AUTORISÉ PAR LE DÉCOUPAGE : le bloc 2 du document valait 41 pts (⚠️ +7) ; EPIC-062 (9 pts) est MONTÉ du bloc 3 vers ici et EPIC-060 (14 pts) est DESCENDU vers le S43. `epics-notification-2026-08-04.md` nomme EPIC-057 et EPIC-062 comme les deux épics qui « se déplacent sans rien casser » — c'est cette permission qui est exercée, pas une entorse.
-    completed_points: 36   # ✅ 2026-10-29 — STORY-590 livree (SM-1 = 0 mesure, +3) : 🏁 EPIC-058 et BLOC 2. ✅ 2026-10-23 — STORY-589 livree (C8 tranchee, +5). ✅ 2026-09-06 — STORY-580 → 588 livrees (3+2+3+3+3+3+3+3+5). 🏁 EPIC-057, EPIC-059 et EPIC-062 closes ; 🚀 EPIC-058 entamee. Reste STORY-589 et 590 (8 pts), SUSPENDUES a C8 — AD-2 y reserve l'appel direct aux messages porteurs de secret. ⚡ Consolidation du 2026-09-08 : les branches de docs `MNV-574` → `MNV-598` sont fusionnees sur `main`.
-    status: "in_progress"  # ✅ OUVERT le 2026-09-05 par STORY-580, hors de sa fenetre comme le S41 — le decalage du calendrier avec le reel reste a trancher au prochain sprint-planning. Note d'origine du 2026-09-03. ⚡ ORDRE DE TIRAGE DÉLIBÉRÉ, ET IL N'EST PAS CELUI DU DOCUMENT : EPIC-057 (in-app, 5 pts, aucune dépendance) OUVRE le sprint, EPIC-058 le FERME. Motif : EPIC-058 est le SEUL épic du module bloqué par C8, et le poser en tête ferait échouer le sprint EN BLOC si la décision programme glisse. Posé en queue, un glissement de C8 coûte 13 pts qui décalent au S43 (qui passerait à 41) — pas un sprint entier. ⛔ C8 (authentification machine-à-machine) EST LA CONDITION BLOQUANTE DE CE SPRINT et elle vit HORS du service : décision PROGRAMME ouverte depuis STORY-034. À trancher AVANT l'ouverture du S42. La spine paiement-service l'a contournée par événement (son AD-13) ; ICI ELLE NE PEUT PAS L'ÊTRE — les messages d'auth-service portent des SECRETS (lien de vérification, réinitialisation de mot de passe) qu'on refuse de déposer sur un topic durable, rejouable depuis l'offset 0 et lisible par tout consumer group. ⚡ EPIC-059 EST PLACÉ AVANT EPIC-061 (S43) ET CE N'EST PAS COSMÉTIQUE : FR-N48 exige qu'un désabonnement éteigne un envoi de masse DÉJÀ EN COURS D'EXÉCUTION — sans le registre de consentement, la vérification à l'instant de la remise n'a rien à interroger.
+    completed_points: 36  # ✅ RESYNC 2026-11-09 : recalculé sur les stories `done` du fichier (36 → 36). AVANT : ✅ 2026-10-29 — STORY-590 livree (SM-1 = 0 mesure, +3) : 🏁 EPIC-058 et BLOC 2. ✅ 2026-10-23 — STORY-589 livree (C8 tranchee, +5). ✅ 2026-09-06 — STORY-580 → 588 livrees (3+2+3+3+3+3+3+3+5). 🏁 EPIC-057, EPIC-059 et EPIC-062 closes ; 🚀 EPIC-058 entamee. Reste STORY-589 et 590 (8 pts), SUSPENDUES a C8 — AD-2 y reserve l'appel direct aux messages porteurs de secret. ⚡ Consolidation du 2026-09-08 : les branches de docs `MNV-574` → `MNV-598` sont fusionnees sur `main`.
+    status: "done"  # ✅ RESYNC 2026-11-09 : STORY-582 resynchronisée sur sa fiche, toutes les stories sont `done`. AVANT (`in_progress`) : ✅ OUVERT le 2026-09-05 par STORY-580, hors de sa fenetre comme le S41 — le decalage du calendrier avec le reel reste a trancher au prochain sprint-planning. Note d'origine du 2026-09-03. ⚡ ORDRE DE TIRAGE DÉLIBÉRÉ, ET IL N'EST PAS CELUI DU DOCUMENT : EPIC-057 (in-app, 5 pts, aucune dépendance) OUVRE le sprint, EPIC-058 le FERME. Motif : EPIC-058 est le SEUL épic du module bloqué par C8, et le poser en tête ferait échouer le sprint EN BLOC si la décision programme glisse. Posé en queue, un glissement de C8 coûte 13 pts qui décalent au S43 (qui passerait à 41) — pas un sprint entier. ⛔ C8 (authentification machine-à-machine) EST LA CONDITION BLOQUANTE DE CE SPRINT et elle vit HORS du service : décision PROGRAMME ouverte depuis STORY-034. À trancher AVANT l'ouverture du S42. La spine paiement-service l'a contournée par événement (son AD-13) ; ICI ELLE NE PEUT PAS L'ÊTRE — les messages d'auth-service portent des SECRETS (lien de vérification, réinitialisation de mot de passe) qu'on refuse de déposer sur un topic durable, rejouable depuis l'offset 0 et lisible par tout consumer group. ⚡ EPIC-059 EST PLACÉ AVANT EPIC-061 (S43) ET CE N'EST PAS COSMÉTIQUE : FR-N48 exige qu'un désabonnement éteigne un envoi de masse DÉJÀ EN COURS D'EXÉCUTION — sans le registre de consentement, la vérification à l'instant de la remise n'a rien à interroger.
     goal: "Bloc 2 — 🏁 EPIC-057, 🏁 EPIC-059, 🏁 EPIC-062, 🏁 EPIC-058. La cloche applicative, seul canal dont la lecture est certaine par construction. Puis le refus d'une personne devient opposable immédiatement et survit à l'effacement qu'elle a elle-même demandé. Puis la politique de conservation cesse d'être déclarative : elle s'exécute, elle se trace, et elle REFUSE ce qui dépasse le plafond au lieu de le ramener en silence. Enfin le service devient l'organe de parole unique — auth-service, kyc-service et expert-comptable cessent d'envoyer. CRITÈRE DE SORTIE : SM-1 = 0, mesuré par recherche de `nodemailer` et `createTransport` dans les trois services."
     stories:
       - story_id: "STORY-580"
@@ -6208,7 +6208,7 @@ sprints:
         epic: "EPIC-059"
         points: 3
         service: "notification-service"
-        status: "ready-for-dev"  # 🆕 2026-09-03. AD-14 / FR-N46, N49, N50. ⛔ LE CONSENTEMENT NE SE DÉDUIT JAMAIS DE L'ABSENCE DE REFUS : il est enregistré, daté et SOURCÉ. ⚡ APPEND-ONLY : un revirement est UNE ENTRÉE DE PLUS, jamais un `update` — l'état courant est la projection de la dernière entrée par (identifiantCanal, canal, nature). ⚡ LE REFUS SUIT LA PERSONNE, PAS LE MODULE : le contact étant unique dans l'organisation (AD-11), un refus vaut pour TOUS ses modules — et il N'ÉTEINT PAS les messages transactionnels (AD-1, FR-N50). Les deux défauts sont symétriques et coûtent autant : une promotion envoyée à qui l'a refusée, et une mise en demeure bloquée par un désabonnement marketing.
+        status: "done"  # ✅ RESYNC 2026-11-09 — la fiche dit `done` ; commit `c7d7c45` (2026-09-05) sur `origin/dev` de la notification. AVANT : `ready-for-dev` — 🆕 2026-09-03. AD-14 / FR-N46, N49, N50. ⛔ LE CONSENTEMENT NE SE DÉDUIT JAMAIS DE L'ABSENCE DE REFUS : il est enregistré, daté et SOURCÉ. ⚡ APPEND-ONLY : un revirement est UNE ENTRÉE DE PLUS, jamais un `update` — l'état courant est la projection de la dernière entrée par (identifiantCanal, canal, nature). ⚡ LE REFUS SUIT LA PERSONNE, PAS LE MODULE : le contact étant unique dans l'organisation (AD-11), un refus vaut pour TOUS ses modules — et il N'ÉTEINT PAS les messages transactionnels (AD-1, FR-N50). Les deux défauts sont symétriques et coûtent autant : une promotion envoyée à qui l'a refusée, et une mise en demeure bloquée par un désabonnement marketing.
         story_path: "stories/STORY-582.md"
         assigned_to: null
       - story_id: "STORY-583"
