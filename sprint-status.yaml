@@ -29,6 +29,65 @@ epic_id_high_water_mark: "EPIC-141"   # MAJ 2026-08-28 — +EPIC-137 a 141 (Cons
 story_id_high_water_mark: "STORY-729"  # MAJ 2026-11-09 — +STORY-729 (le référentiel se choisit PAR DOSSIER dans bilan-service : la liasse SFD/CIMA d'un client IMF produite par un cabinet ; arbitrage 1 de 728). Avant : STORY-728 — MAJ 2026-11-09 — +STORY-728 (option normative d'un cabinet + 404 des surfaces plateforme + notification de Money Vibes ; arbitrage 1 de 727 et défauts relevés par 650). Avant : STORY-727 — MAJ 2026-11-08 — +STORY-727 (le contrat vend des packages, 8 lots, une seule story par arbitrage PO). Avant : STORY-726 — MAJ 2026-11-07 — +STORY-725, 726 (débloquer la recette STORY-631 ; 724 existait déjà). Avant : STORY-723 — MAJ 2026-10-23 (2e) — +STORY-715 → 723 (rail E de paiement-service, RAIL-E-PAIEMENT-11-STORIES-2026-10-23.md). Avant : STORY-714 — +STORY-706 → 714 (rail F de notification-service, RAIL-F-NOTIFICATION-11-STORIES-2026-10-23.md). Ancienne valeur : STORY-705.
 
 reserved_ranges:
+  # ── PLAN À DEUX DÉVELOPPEURS (PLAN-2-DEVS-8-SEMAINES-2026-10-26.md, v3) — inscrit le 2026-11-09 ──
+  # Plafonds relevés le 2026-11-09 sur les 33 branches distantes de prospera-stories (aucune branche
+  # MNV-73x ou au-delà dans les dépôts de l'app) : STORY-729, EPIC-141, FE-111, AP-37, MB-04.
+  # ⚡ EXCEPTION ASSUMÉE au corollaire « ne réservez PAS de story_id au découpage » : à deux, c'est la
+  #    plage PAR DÉVELOPPEUR qui évite la collision, pas l'attente du slotting. On consomme sa plage
+  #    dans l'ordre, et le story_id_high_water_mark reste le plafond RÉELLEMENT écrit.
+  - range: "STORY-730 → STORY-899"
+    status: "RÉSERVÉ"
+    owner: "Dev A — code : reseau-service, coque prospera-app, pdv-service, catalogue-produits-service, stock-service"
+    source_doc: "prospera-stories/PLAN-2-DEVS-8-SEMAINES-2026-10-26.md §3"
+    reserved_on: "2026-11-09"
+    note: >
+      Plan démarré le 2026-11-09 (v3, calendrier décalé de 2 semaines). Le fichier du plan était
+      NON SUIVI et promettait déjà cette plage depuis le 2026-10-24 : 725 → 729 l'ont respectée.
+
+  - range: "STORY-900 → STORY-1199"
+    status: "RÉSERVÉ"
+    owner: "Dev B (titulaire du dépôt) — cadrage des 3 projets, moteur d'installation, CRM interne, sinistres, GED"
+    source_doc: "prospera-stories/PLAN-2-DEVS-8-SEMAINES-2026-10-26.md §3"
+    reserved_on: "2026-11-09"
+    note: >
+      Plage large : le cadrage de ≈ 25 modules en consomme beaucoup. Les fiches sont écrites par
+      celui qui code la story, juste avant de la coder.
+
+  - range: "EPIC-142 → EPIC-299"
+    status: "RÉSERVÉ"
+    owner: "Dev B — épics des modules cadrés en semaines 1 à 4 (contrat de module, moteur d'installation, coque, distributeur, microfinance, assurance, CRM, transverses)"
+    source_doc: "prospera-stories/PLAN-2-DEVS-8-SEMAINES-2026-10-26.md §3 et §4"
+    reserved_on: "2026-11-09"
+    note: >
+      EPIC-142 n'était cité que comme « premier libre » dans STORY-552 sur des branches périmées
+      (MNV-239, MNV-240, MNV-297), jamais réservé ni présent sur main. Dev A n'en consomme pas :
+      réseau, PDV, catalogue et stock ont déjà EPIC-044 → 094.
+
+  - range: "PRA-01 → PRA-199"
+    status: "RÉSERVÉ"
+    owner: "Front de la coque unique prospera-app (D1 tranchée le 2026-11-09) — PRA-01 → 99 Dev A, PRA-100 → 199 Dev B"
+    source_doc: "prospera-stories/PLAN-2-DEVS-8-SEMAINES-2026-10-26.md §1.4 et §3"
+    reserved_on: "2026-11-09"
+    note: >
+      Préfixe NEUF. Le plan v2 proposait `PA-`, mais PA-1 → PA-8 désignent déjà des décisions de la
+      spine paiement (architecture-paiement-service-2026-08-03.md) : d'où `PRA-` (PRospera App),
+      absent de toutes les branches le 2026-11-09.
+
+  - range: "AP-38 → AP-99"
+    status: "RÉSERVÉ"
+    owner: "Dev B — console frontend-admin-panel devenue CRM interne Money Vibes (module n°8)"
+    source_doc: "prospera-stories/PLAN-2-DEVS-8-SEMAINES-2026-10-26.md §1.5 et §3"
+    reserved_on: "2026-11-09"
+    note: >
+      Le plan v2 disait AP-30 → 99, mais AP-30 → AP-37 existent déjà (frontend-stories/). ⚠️ FE-109 → 111
+      existent aussi : l'app expert-comptable reprend à FE-112, hors plage réservée.
+
+  - range: "MB-05 → MB-49"
+    status: "RÉSERVÉ"
+    owner: "Dev B — cadrage de l'app mobile terrain prospera-terrain (module n°9, lot 2 ; D4 React Native ou Flutter)"
+    source_doc: "prospera-stories/PLAN-2-DEVS-8-SEMAINES-2026-10-26.md §3 et §4"
+    reserved_on: "2026-11-09"
+
   - range: "STORY-729"
     status: "RÉSERVÉ"
     owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
