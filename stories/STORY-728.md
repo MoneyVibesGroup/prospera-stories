@@ -1,6 +1,6 @@
 # STORY-728 : Un cabinet prend l'IMF ou l'assurance EN OPTION — et deux défauts de la plateforme relevés par 650
 
-Status: review
+Status: done
 
 **Services :** `platform-catalog-service`, `paiement-service` · **Recette :** `prospera-recette`
 **Branches :** `MNV-728` dans les trois dépôts. Base `origin/dev` pour le catalogue et le paiement.
@@ -45,9 +45,13 @@ rebasée sur `dev` après fusion de #8.
 - [x] AC-6 — L'amorçage déclare le module `notification` et l'octroie à Money Vibes (étapes 5 et 6) ;
       le retrait révoque les deux droits. La recette de délégation ne l'octroie plus : elle le
       constate.
-- [ ] AC-7 — Recette sur la vraie pile, **depuis `dev` après fusion** (consigne PO). Elle couvre le
+- [x] AC-7 — Recette sur la vraie pile, **depuis `dev` après fusion** (consigne PO). Elle couvre le
       cabinet aux deux options, les 404 vus par un cabinet et le droit `notification` de Money Vibes
-      posé par l'amorçage. ⏳ Les étapes sont écrites, pas encore jouées.
+      posé par l'amorçage. ✅ Jouée le 2026-11-09 (pile `recette728` du 2026-11-09 — images construites depuis `origin/dev` après fusion, volumes neufs) :
+      `abonnement` (deux étapes 728), `delegation`, `distributeur` et `facturation` sont verts, soit
+      41 tests. `pile.recette` a rougi une fois, sur un `429` de la route directe de
+      notification : le quota était épuisé par les quatre recettes qui avaient envoyé avant elle.
+      Rejouée seule sur la même pile : 7/7.
 
 ## Exploitation — une base déjà semée
 
@@ -68,7 +72,7 @@ rebasée sur `dev` après fusion de #8.
   - 4 447 unitaires (garde de câblage comprise), 352 e2e, lint propre ;
   - contre-épreuve : sans `@SurfacePlateforme()` sur le registre, l'invariant (2 tests) et l'e2e
     (le 403) rougissent.
-- **Recette** `MNV-728` (`1f84b54`) : les étapes.
+- **Recette** `MNV-728` (`1f84b54`) : les étapes, jouées depuis `dev` le 2026-11-09 (AC-7).
 
 ## Ce qui reste hors de cette story
 
