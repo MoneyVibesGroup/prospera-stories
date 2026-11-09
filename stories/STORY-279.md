@@ -1,6 +1,6 @@
 # STORY-279 : `platform-catalog-service` consomme `paiement.abonnement.*`
 
-Status: done (octroi) — `impayee` / `regularise` à arbitrer, voir « Ce qui reste »
+Status: done (octroi) — `impayee` / `regularise` : arbitrés (suspendre) et consommés par STORY-280 (2026-11-09)
 
 **Épic :** EPIC-041 — Abonnements Prospera et entitlements par événement
 **Service :** `platform-catalog-service` · **Points :** 5 · **Branche :** `MNV-279`
