@@ -1,6 +1,6 @@
 # STORY-643 : La garde de câblage dans les dépôts qui ne l'avaient pas — une suite verte veut dire que l'application DÉMARRE
 
-Status: review
+Status: done
 
 **Bloc :** Convergence E0 — le substrat de recette (`CONVERGENCE-RAILS-C-D-2026-09-08.md`, § 1)
 **Points :** 5
@@ -73,6 +73,9 @@ livraison.
   au catalogue. ⚠️ Le premier passage d'auth (123 s) l'a dépassé **sans** expirer. L'explication
   probable, non vérifiée : la compilation synchrone des imports tardifs retient la minuterie. À
   surveiller sur une CI à froid ; si la garde y expire, relever le délai.
+
+- Après fusion (2026-11-09) : les trois gardes passent depuis `origin/dev` (auth `9563746`, kyc
+  `de5e6d1`, admin-panel `5ccace7`).
 
 ## Piège payé pendant la livraison
 

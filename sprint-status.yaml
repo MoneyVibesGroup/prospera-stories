@@ -105,7 +105,7 @@ reserved_ranges:
       649 recette croisée de la facturation.
       643 — MAJ 2026-11-09 : la garde de câblage était déjà dans le paiement et le catalogue ;
       posée dans auth, kyc et admin-panel (branches MNV-643, fiche écrite à la livraison) →
-      review. Contre-épreuve par dépôt, démarrage réel des cinq applications.
+      DONE (fusionnée 2026-11-09, gardes vertes depuis dev). Contre-épreuve par dépôt, démarrage réel des cinq applications.
       Le rail C ne consomme AUCUN identifiant : ses 10 stories (268-276, 285) existent
       depuis le découpage du 2026-08-03.
       ⚠️ Inscrite le 2026-09-08 en consolidant les branches sur `main`. Les deux brouillons
