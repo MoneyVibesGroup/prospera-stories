@@ -166,3 +166,40 @@ schémas : **44 champs de 30 schémas** étaient `Mixed`, dont presque tous les 
 - unitaires : notification 273 suites / 3 780 tests, paiement 334 suites / 4 489 tests ; lint et `tsc` propres ;
 - conformité sur vrai Mongo : paiement 30/30, notification 58/58 (les 4 tests Mailhog joués contre un relais jetable : la surcouche de recette ne republie pas le SMTP 1025).
 **Branche :** `MNV-724-identifiants-objectid` du paiement.
+
+## ✅ 2026-11-09 (soir, suite) — le même piège corrigé dans la notification et le catalogue
+
+Fusionnés sur `dev` à 20 h 36, donc **après** le rejeu ci-dessus (qui tournait sur la notification
+`695bd2c`). Les deux services avaient le même défaut de déclaration ; le piège était connu dans la
+notification depuis le 2026-09-04 (`contact.schema.ts`), mais seul ce fichier avait été corrigé.
+
+- **Notification, `77aec9d`** : **24 champs de 15 schémas** passent à `SchemaTypes.ObjectId` :
+  - les `organizationId` des listes, des envois de masse, des garde-fous, des interventions, des
+    signalements, des passerelles, des read-models KYC/droits et de la rétention ;
+  - `contactId`, `listeId`, `envoiDeMasseId`, `interventionId` et le curseur.
+
+  L'audit montre que les écritures et les filtres passaient tous déjà un `ObjectId`
+  (`organisationDuJeton`, `new Types.ObjectId`, `_id` d'un document). Aucune donnée n'est rangée en
+  chaîne, donc **aucune migration**. `org-profil` et `org-module-souscrit` étaient déjà corrects.
+- **Catalogue, `fec6adc`** : 3 champs.
+  - ⛔ `Entitlement.organizationId` passe en **`type: String`**, PAS en `ObjectId`. C'est la forme que
+    tous les écrivains rangent depuis 727. Un `ObjectId` aurait rendu tous les droits existants
+    invisibles.
+  - `grantedBy` et `createdBy` passent en `SchemaTypes.ObjectId`.
+- **Gardes permanentes** `src/schemas-sans-chemin-mixed.spec.ts` dans les deux dépôts. Elles prouvent la
+  conversion **par l'effet** : un `organizationId` passé en chaîne est rangé en `ObjectId` dans la
+  notification, et l'inverse dans le catalogue. Contre-preuve : rouges sur `dev` avant fusion (24 et
+  3 intrus).
+- **Recompté le 2026-11-09 :** plus aucune déclaration `type: Types.ObjectId` dans le paiement, la
+  notification ou le catalogue (il ne reste que des commentaires).
+
+**Vérifié avant fusion :** unitaires notification 3 784, catalogue 1 030.
+**Rejeu depuis `dev` après fusion :** rapporté par la session qui a fusionné (projet `recettedev724`,
+9 images reconstruites, volumes neufs) : recettes 70/70, et conformité notification 58/58. Le seul rouge
+du passage groupé était un 429 `ThrottlerException` ; la délégation, rejouée seule, a donné 15/15. Les
+types BSON lus en base après la recette : `organizationId` en chaîne dans le catalogue (86/86),
+`objectId` partout dans la notification. ⚠️ Ce rejeu n'avait été consigné nulle part avant cette note,
+et il n'en reste aucune trace dans Docker.
+⚠️ **Non exercés par une recette** : listes, envois de masse et rétention. Ils ne sont couverts que par
+la garde et les unitaires.
+**Branches :** `MNV-724-schemas-objectid` dans la notification et dans le catalogue.

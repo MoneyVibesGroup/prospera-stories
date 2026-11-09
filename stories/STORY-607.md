@@ -71,6 +71,14 @@ C'est le prix pour que `STORY-261` ne soit pas implémentée deux fois.
 - `prospera-paiement-service` : `traces-de-demande.ts` (topic + charge amaigrie),
   `aucun-lien-sur-le-bus.invariant.spec.ts` (AC-2, AC-5), tests de charge (AC-1).
 - `prospera-notification-service` : `src/domain/declenchement/liste-fermee-ad2.spec.ts` (AC-3).
+  ⛔ **Jamais fusionné jusqu'au 2026-11-09** : la branche `MNV-607` de la notification (`a7cba25`) est
+  restée hors de `dev`, alors que celle du paiement y est. Sur `dev`, ajouter un topic `paiement.*` à
+  `EVENEMENTS_DECLENCHEURS` ne rougissait aucun test. Le commit est rejoué sur `origin/dev` dans la
+  branche `MNV-607-liste-fermee` (**PR #85**) :
+  - les 15 tests de `src/domain/declenchement` passent, et `tsc` et `eslint` sont propres ;
+  - contre-preuve : avec `'paiement.demande.emise'` ajouté à la liste, 3 tests rougissent.
+
+  ⚠️ L'AC-3 ne tient sur `dev` qu'après la fusion de la PR.
 - `prospera-stories` : décision écrite dans `epics-paiement-2026-08-03.md` (sous STORY-261) **et**
   `epics-notification-2026-08-04.md` (sous AR-05) — AC-4.
 
