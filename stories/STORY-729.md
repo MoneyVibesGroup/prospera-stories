@@ -90,10 +90,11 @@ une seule chose : **lire la famille du dossier avant de choisir le référentiel
       Les deux tampons sont lus. La contre-preuve : le même cabinet **sans** l'option obtient le
       refus AC-3 sur le dossier IMF.
 
-## Décision à prendre AVANT le développement
+## Décision prise avant le développement
 
-**Q1 — D'où le bilan-service tient-il l'habilitation SFD/CIMA du cabinet ?**
-- **(a) recommandée :** le bilan-service projette **aussi** les droits des options normatives
+**Q1 — D'où le bilan-service tient-il l'habilitation SFD/CIMA du cabinet ?** ✅ **Tranchée par le PO
+le 2026-11-09 : (a).**
+- **(a) retenue :** le bilan-service projette **aussi** les droits des options normatives
   (`microfinance`, `assurance`) dans son read-model, à côté du droit `bilan`. Le gate
   `@RequiresBilanAccess` reste porté **par le seul module `bilan`** : l'option apporte un
   référentiel, pas l'accès au module. L'arbitrage 728 reste intact, et le catalogue ne change pas.

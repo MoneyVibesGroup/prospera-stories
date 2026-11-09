@@ -39,9 +39,9 @@ reserved_ranges:
       l'option seule, la liasse SFD/CIMA du client d'un cabinet est une story bilan-service à part).
       Famille lue sur le typeEntite du dossier (read-model dossiers_dossier), version dans les
       habilitations de cette famille ; refus sans repli ; épingle 727 dans la famille ; balance de
-      famille contraire refusée. ⚠️ Q1 À TRANCHER avant le dev : (a) recommandée = bilan-service
-      projette aussi les droits microfinance/assurance (gate inchangé sur bilan) ; (b) = le
-      catalogue ajoute le référentiel au droit bilan (rouvre 728). Pris après un MAX sur toutes les
+      famille contraire refusée. ✅ Q1 TRANCHÉE par le PO le 2026-11-09 : (a) = bilan-service
+      projette aussi les droits microfinance/assurance (gate inchangé sur bilan) ; (b) écartée
+      (rouvrait 728). Pris après un MAX sur toutes les
       branches distantes (728) et le fichier NON SUIVI PLAN-2-DEVS (730 → 899).
 
   - range: "STORY-728"
