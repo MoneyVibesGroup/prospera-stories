@@ -26,9 +26,24 @@ sprint_plan_path: "docs/sprint-plan-expert-comptable-2026-07-02.md"
 #
 # ── ÉTAT AU 2026-08-15 ────────────────────────────────────────────────────────────────────────────
 epic_id_high_water_mark: "EPIC-141"   # MAJ 2026-08-28 — +EPIC-137 a 141 (Consolidation SYSCOHADA niveau 3, STORY-541 a 548), pris a l arbitrage PO « je veux la partie 3 ».   # MAJ 2026-08-27 (2e passe du jour) — +EPIC-135 (Immobilisations et amortissements, STORY-526/527/528) et +EPIC-136 (Multi-societe et perimetre de groupe, STORY-529/530/531), pris a l arbitrage du point 6 par le PO. EPIC-110 reste LIBRE dans la plage socle.   # MAJ 2026-08-27 — +EPIC-106 a 134 (29 epics, 4 plages) pris LE JOUR DU DECOUPAGE de la revue expert-comptable de la maquette cumulative. RESERVATION VERIFIEE : max reel EPIC-105 (assistant-ia), et les plages 044-053 / 054-064 / 065-074 / 075-084 / 085-094 / 095-105 sont contigues et toutes reservees ⇒ 106 est le premier libre. 106-110 socle multi-referentiel (SEULE plage SLOTTEE et dont le service EXISTE deja) · 111-120 comptabilite-service · 121-127 microfinance · 128-134 assurance.   # dernier épic ATTRIBUÉ — EPIC-095→105 pris le 2026-08-16 par assistant-service (découpage Assistant IA, plage RÉSERVÉE le jour même, NON SLOTTÉE) ; EPIC-085→094 pris le 2026-08-15 par pdv-service ; EPIC-075→084 le même jour par stock-service ; EPIC-065→074 le même jour par catalogue-produits-service ; EPIC-044→053 le même jour par reseau-service. Historique : EPIC-043 = dossier-client, S20. — Historique (origin/main, MNV-401) — dernier épic ATTRIBUÉ — EPIC-095→105 pris le 2026-08-16 par assistant-service (découpage Assistant IA, plage RÉSERVÉE le jour même, NON SLOTTÉE) ; EPIC-085→094 pris le 2026-08-15 par pdv-service ; EPIC-075→084 le même jour par stock-service ; EPIC-065→074 le même jour par catalogue-produits-service ; EPIC-044→053 le même jour par reseau-service. Historique : EPIC-043 = dossier-client, S20.
-story_id_high_water_mark: "STORY-728"  # MAJ 2026-11-09 — +STORY-728 (option normative d'un cabinet + 404 des surfaces plateforme + notification de Money Vibes ; arbitrage 1 de 727 et défauts relevés par 650). Avant : STORY-727 — MAJ 2026-11-08 — +STORY-727 (le contrat vend des packages, 8 lots, une seule story par arbitrage PO). Avant : STORY-726 — MAJ 2026-11-07 — +STORY-725, 726 (débloquer la recette STORY-631 ; 724 existait déjà). Avant : STORY-723 — MAJ 2026-10-23 (2e) — +STORY-715 → 723 (rail E de paiement-service, RAIL-E-PAIEMENT-11-STORIES-2026-10-23.md). Avant : STORY-714 — +STORY-706 → 714 (rail F de notification-service, RAIL-F-NOTIFICATION-11-STORIES-2026-10-23.md). Ancienne valeur : STORY-705.
+story_id_high_water_mark: "STORY-729"  # MAJ 2026-11-09 — +STORY-729 (le référentiel se choisit PAR DOSSIER dans bilan-service : la liasse SFD/CIMA d'un client IMF produite par un cabinet ; arbitrage 1 de 728). Avant : STORY-728 — MAJ 2026-11-09 — +STORY-728 (option normative d'un cabinet + 404 des surfaces plateforme + notification de Money Vibes ; arbitrage 1 de 727 et défauts relevés par 650). Avant : STORY-727 — MAJ 2026-11-08 — +STORY-727 (le contrat vend des packages, 8 lots, une seule story par arbitrage PO). Avant : STORY-726 — MAJ 2026-11-07 — +STORY-725, 726 (débloquer la recette STORY-631 ; 724 existait déjà). Avant : STORY-723 — MAJ 2026-10-23 (2e) — +STORY-715 → 723 (rail E de paiement-service, RAIL-E-PAIEMENT-11-STORIES-2026-10-23.md). Avant : STORY-714 — +STORY-706 → 714 (rail F de notification-service, RAIL-F-NOTIFICATION-11-STORIES-2026-10-23.md). Ancienne valeur : STORY-705.
 
 reserved_ranges:
+  - range: "STORY-729"
+    status: "RÉSERVÉ"
+    owner: "Le référentiel se choisit PAR DOSSIER (bilan-service) — un cabinet produit la liasse SFD ou CIMA de son client IMF"
+    source_doc: "prospera-stories/stories/STORY-729.md"
+    reserved_on: "2026-11-09"
+    note: >
+      Ouverte à la demande du PO le 2026-11-09 (arbitrage 1 de STORY-728 : le référentiel va à
+      l'option seule, la liasse SFD/CIMA du client d'un cabinet est une story bilan-service à part).
+      Famille lue sur le typeEntite du dossier (read-model dossiers_dossier), version dans les
+      habilitations de cette famille ; refus sans repli ; épingle 727 dans la famille ; balance de
+      famille contraire refusée. ⚠️ Q1 À TRANCHER avant le dev : (a) recommandée = bilan-service
+      projette aussi les droits microfinance/assurance (gate inchangé sur bilan) ; (b) = le
+      catalogue ajoute le référentiel au droit bilan (rouvre 728). Pris après un MAX sur toutes les
+      branches distantes (728) et le fichier NON SUIVI PLAN-2-DEVS (730 → 899).
+
   - range: "STORY-728"
     status: "RÉSERVÉ"
     owner: "Un cabinet prend l'IMF ou l'assurance EN OPTION (catalogue) + 404 des surfaces plateforme et notification de Money Vibes (paiement)"
