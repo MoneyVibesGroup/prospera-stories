@@ -94,7 +94,7 @@ qui traverse deux dépôts n'a aujourd'hui **ni endroit où vivre, ni moyen d'ê
 
 | # | Story | Ce qu'elle traverse | Quand | Pts |
 |---|---|---|---|---|
-| 1 | **STORY-643** 🟡 | 5 services · la garde de câblage | paiement + catalogue déjà ; auth, kyc, admin-panel en revue 2026-11-09 | 5 |
+| 1 | **STORY-643** ✅ | 5 services · la garde de câblage | livrée 2026-11-09 (auth, kyc, admin-panel ; paiement et catalogue avant) | 5 |
 | 2 | **STORY-644** ✅ | `paiement` ↔ `notification` au compose | livrée 2026-10-29 | 3 |
 | 3 | **STORY-645** ✅ | amorçage + disponibilité de la pile | livrée 2026-10-30 | 5 |
 | 4 | **STORY-646** ✅ | espace de travail + profil de recette — dépôt `prospera-recette` | livrée 2026-10-30 | 5 |
