@@ -39,6 +39,9 @@ reserved_ranges:
       PLAN-2-DEVS-8-SEMAINES-2026-10-26.md (730 → 899) : 729 reste libre. Arbitrages PO du
       2026-11-09 : référentiel à l'OPTION seule (bilan-service résout par organisation) ;
       module `assurance` déclaré et ajouté à `assurance-cima`.
+      ✅ DONE 2026-11-09 — fusionnée (catalogue #40, paiement #111, recette #9, docs #388) ;
+      recette jouée depuis dev : abonnement, délégation, distributeur, facturation verts ;
+      pile.recette 7/7 rejouée seule (429 de quota au passage groupé).
 
   - range: "STORY-727"
     status: "RÉSERVÉ"
@@ -100,6 +103,9 @@ reserved_ranges:
       convention de disponibilité, espace de travail et profil de recette.
       647-648 pont consommation/facturation et reçus d’encaissement.
       649 recette croisée de la facturation.
+      643 — MAJ 2026-11-09 : la garde de câblage était déjà dans le paiement et le catalogue ;
+      posée dans auth, kyc et admin-panel (branches MNV-643, fiche écrite à la livraison) →
+      review. Contre-épreuve par dépôt, démarrage réel des cinq applications.
       Le rail C ne consomme AUCUN identifiant : ses 10 stories (268-276, 285) existent
       depuis le découpage du 2026-08-03.
       ⚠️ Inscrite le 2026-09-08 en consolidant les branches sur `main`. Les deux brouillons
@@ -5894,7 +5900,7 @@ sprints:
         epic: "EPIC-041"
         points: 3
         service: "paiement-service + platform-catalog-service"
-        status: "review"  # MAJ 2026-11-09 — fiche écrite à la livraison. Paiement DÉJÀ sur dev (72921cc : préavis + constat, refus SUSPENSION_SANS_PREAVIS). Catalogue : MNV-280 (cc2b907, e62ab92) consomme `impayee` (SUSPENDED, rien supprimé, sans-terme épargné, marque `suspension`) et `regularise` (ne lève que la marque du même contrat) — arbitrage PO 2026-11-08 (727 pt 2). Recette MNV-280 (65ab459) écrite, À JOUER depuis dev après fusion. — Une coupure sans préavis est un DÉFAUT, pas une politique — un test échoue si la suspension précède le préavis. CM-1 surveille : une coupure est une perte de client, pas un succès de recouvrement.
+        status: "done"  # MAJ 2026-11-09 (2e) — fusionnée sur dev ; recette jouée depuis dev (pile recette728, volumes neufs) : abonnement vert, étape 280 comprise. — MAJ 2026-11-09 — fiche écrite à la livraison. Paiement DÉJÀ sur dev (72921cc : préavis + constat, refus SUSPENSION_SANS_PREAVIS). Catalogue : MNV-280 (cc2b907, e62ab92) consomme `impayee` (SUSPENDED, rien supprimé, sans-terme épargné, marque `suspension`) et `regularise` (ne lève que la marque du même contrat) — arbitrage PO 2026-11-08 (727 pt 2). Recette MNV-280 (65ab459) écrite, À JOUER depuis dev après fusion. — Une coupure sans préavis est un DÉFAUT, pas une politique — un test échoue si la suspension précède le préavis. CM-1 surveille : une coupure est une perte de client, pas un succès de recouvrement.
         assigned_to: null
       - story_id: "STORY-281"
         title: "Période de grâce bornée, datée et motivée"

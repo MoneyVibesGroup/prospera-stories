@@ -1,6 +1,6 @@
 # STORY-280 : Impayé, suspension et préavis — un impayé SUSPEND les accès, payer son retard les rétablit
 
-Status: review
+Status: done
 
 **Épic :** EPIC-041 — Abonnements Prospera et entitlements par événement
 **Services :** `paiement-service` (producteur, déjà livré) · `platform-catalog-service` (consommateur, cette livraison)
@@ -51,11 +51,13 @@ rien. Cette livraison les fait consommer par le catalogue, dans le groupe des ab
       dont le `statut` contredit son topic, est écarté sans lever (« poison pill »).
 - [x] AC-8 — La réponse d'un droit expose `suspension` quand c'est un impayé (absente pour une
       suspension d'opérateur) : la console distingue un retard d'une sanction.
-- [ ] AC-9 — **Recette sur la vraie pile** (`abonnement.recette.ts`, étape STORY-280). Le cas :
+- [x] AC-9 — **Recette sur la vraie pile** (`abonnement.recette.ts`, étape STORY-280). Le cas :
       un second cabinet est suspendu pour CETTE échéance, préavis publié avant ; le premier cabinet
-      ne perd rien ; payer le retard rétablit et prolonge le droit. ⏳ L'étape est **écrite**. Elle
-      sera **jouée depuis `dev`** après fusion, images reconstruites (consigne PO : jamais depuis
-      les worktrees).
+      ne perd rien ; payer le retard rétablit et prolonge le droit. ✅ Jouée depuis `dev`
+      (pile `recette728` du 2026-11-09 — images construites depuis `origin/dev` après fusion, volumes neufs) : `abonnement` vert.
+      Au premier passage du 2026-11-09 (28/29), le « cabinet retardataire » était créé par
+      `accueil.accueillir`, qui le reclasse distributeur (comptabilité incluse, sans terme, donc
+      jamais suspendue). Corrigé dans `prospera-recette` #8 : il s'inscrit en `cabinet`.
 
 ## Décisions
 
@@ -81,7 +83,9 @@ rien. Cette livraison les fait consommer par le catalogue, dans le groupe des ab
     2 tests rouges.
 - Les doubles **honorent les filtres** de `findOneAndUpdate` (statut, terme, marque) : un double
   qui les ignorerait prouverait l'inverse.
-- `prospera-recette` `MNV-280` (`65ab459`) : l'étape de recette.
+- `prospera-recette` `MNV-280` (`65ab459`) : l'étape de recette ; #8 (`MNV-280-recette-cabinet`) :
+  le retardataire est un vrai cabinet.
+- Recette depuis `dev` : abonnement, délégation, distributeur et facturation verts (pile `recette728` du 2026-11-09 — images construites depuis `origin/dev` après fusion, volumes neufs).
 
 ## Notes
 
