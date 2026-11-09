@@ -138,3 +138,28 @@ Sinon, c'est le relais qui écrivait (remise acquittée) et le `409` reste vrai.
 `delegation-comptes` 50/50 ; recettes 75/75 sur volumes neufs (images depuis `origin/dev` et ces branches).
 **Branches :** `MNV-651-reprise` du paiement (commit `MNV-724(envois)`), `MNV-724-729-recettes` de la
 recette.
+
+## ✅ 2026-11-09 (soir) — le piège corrigé à la racine, dans tout le paiement
+
+Le défaut 1 venait d'une déclaration, pas d'un filtre. `@nestjs/mongoose` lit
+`@Prop({ type: Types.ObjectId })` comme une **classe** à décrire, n'y trouve aucun `@Prop`, et en fait un
+chemin `Mixed` (mesuré : le même `type` en Mongoose pur donne bien un `ObjectId`). Relevé sur les vrais
+schémas : **44 champs de 30 schémas** étaient `Mixed`, dont presque tous les `organizationId`, les deux
+`_id` métier (`envois_sortants`, `initiations_sortantes`), `compteId`, `compteEncaissementId`,
+`demandeId`, `pointDeVenteId`, `organisationAbonnee`.
+
+- Les 44 déclarations passent à `SchemaTypes.ObjectId`. Les types TypeScript disaient déjà
+  `Types.ObjectId` : l'exécution s'aligne sur ce que le code croyait.
+- **Audit avant changement** : toutes les écritures posent de vrais `ObjectId`. Les six agrégations
+  comparent avec un `ObjectId` ou sur un champ texte. Aucune égalité stricte, `Map`, `Set` ou `includes`
+  ne compare deux identifiants lus en base.
+- **Garde permanente** : `schemas-sans-chemin-mixed.spec.ts` charge TOUS les schémas du service et rougit
+  sur tout chemin `Mixed` hors d'une liste motivée (seul `config`, objet libre projeté du catalogue).
+  Contre-preuve : rouge sur `dev`.
+- `initiation-sortante.schema.spec.ts` : un filtre en chaîne est converti, une ligne sans son `_id` est
+  refusée (pas d'`_id` inventé), un faux identifiant est refusé. Contre-preuve : 3 rouges.
+- Le test du défaut 1 exige maintenant un chemin `ObjectId`, et garde l'`ObjectId` dans le filtre.
+
+**Vérifié avant fusion :** e2e paiement 28 suites, 352/352 ; lint propre. Reste à rejouer depuis `dev`
+après fusion : unitaires, conformité sur vrai Mongo, recettes croisées sur volumes neufs.
+**Branche :** `MNV-724-identifiants-objectid` du paiement.

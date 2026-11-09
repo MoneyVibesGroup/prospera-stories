@@ -145,28 +145,33 @@ paiement 11/11.
 
 **Branches :** `MNV-651` — notification PR #80 et paiement PR #112, fusionnées.
 
-### Le rattrapage d'une base existante
+### Le rattrapage d'une base existante — ⛔ SUPPRIMÉ le 2026-11-09 (décision PO)
 
-Rejouer les topics n'aurait rien changé (marqueur d'idempotence), et les republier aurait fait réagir huit
-services et les règles client, donc envoyé de vrais messages. Deux commandes ponctuelles lisent donc
-`auth-service` en lecture seule (`AUTH_MONGODB_URI_LECTURE`) et n'émettent rien :
+Deux commandes (`rattrapage-identite`, `rattrapage-fondateur`) lisaient `auth-service` pour compléter
+les read-models d'une base projetée avant la story. **Elles sont supprimées, et rien ne les remplace.**
 
-```
-node dist/rattrapage-identite.bootstrap.js  [--appliquer]   # notification-service
-node dist/rattrapage-fondateur.bootstrap.js [--appliquer]   # paiement-service
-```
+**Pourquoi.** Les événements d'`auth-service` portent déjà l'adresse (`identity.user.*`) et le fondateur
+(`createdByUserId`), et les deux services les projettent. Sur une base neuve, rien ne manque : la partie
+« le fondateur est PRÉVENU » de `delegation.recette.ts` passe sur volumes neufs sans aucun rattrapage. Les
+commandes ne servaient qu'aux bases d'avant 651/726, et rien n'est en production : ces bases ne vivent que
+sur les postes de dev, et **se recréent à neuf**.
 
-Simulation par défaut, compte rendu sans adresse, relance sans effet. Elles complètent et ne corrigent jamais :
-un document existant garde ce qu'un événement a écrit. La recette recrée l'état d'avant la story, prouve que
-personne n'est prévenu, applique, puis constate que la cloche et l'e-mail repartent. PR #81, #113, recette #10,
-fusionnées ; rejoué depuis `dev` sur volumes neufs : les six recettes passent, 61/61.
+Une version intermédiaire lançait le rattrapage à chaque démarrage du service. Elle a été écartée avant
+fusion : un service ne lit plus la base d'un autre (`AUTH_MONGODB_URI_LECTURE` n'est plus lue nulle part),
+et l'invariant de l'écriture d'argent du paiement (« aucun `setTimeout` hors de la relance Kafka ») la
+refusait d'ailleurs.
+
+⚠️ **Le jour où il y aura une production** et qu'une projection gagnera un champ, la question du
+rattrapage se reposera. Elle se tranchera alors, pas avant.
+
+**Branches :** `MNV-651-sans-rattrapage` dans notification, paiement et `prospera-recette`.
 
 ### Reprise du 2026-11-09 — un e-mail refusé attend l'adresse
 
 **Le défaut.** Un refus du message (`MEMBRE_SANS_ADRESSE` côté notification, `REFUSEE` côté paiement)
 consommait une tentative à chaque tour du relais, toutes les 2 ou 3 s. Les 5 tentatives partaient en une
 dizaine de secondes, puis la ligne passait `ECHEC_DEFINITIF` sans reprise. Une adresse arrivée juste
-après, par Kafka ou par le rattrapage, ne servait plus. La cloche partait, l'e-mail se perdait.
+après, par Kafka, ne servait plus. La cloche partait, l'e-mail se perdait.
 
 **Le correctif, dans les deux services.** Chaque refus pose `prochaineTentativeLe` : 1 min, 15 min, 2 h,
 puis 24 h, soit environ 26 h entre le premier essai et l'abandon. Le relais ne relit que les lignes
@@ -179,7 +184,7 @@ retire. Le dernier refus restait donc sur une ligne remise. C'est maintenant un 
 
 **Recette** (`delegation.recette.ts`, +2) : l'adresse du fondateur est retirée, la cloche part, l'e-mail
 est refusé **une seule fois** et la ligne attend (contrôlé en base dans les deux services). L'adresse
-revient par `rattrapage-identite --appliquer`, et l'e-mail repart dans les deux services (`REMIS`,
+est ensuite rendue à l'identique (une projection en retard), et l'e-mail repart dans les deux services (`REMIS`,
 2 tentatives, ni motif ni attente).
 
 **Branches :** `MNV-651-reprise` dans notification et dans paiement, `MNV-724-729-recettes` dans
