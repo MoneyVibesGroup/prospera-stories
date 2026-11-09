@@ -426,6 +426,30 @@ stock, et ceux à venir.
    fonds de commerce ; il doit savoir qui la voit. *Action produit, hors architecture — mais elle
    conditionne la légitimité de la garantie.*
 
+### ⚡ AD-P17 — Un module est l'unité d'installation, et il tient un contrat en dix clauses
+
+> **Décision PO du 2026-11-09.** Détail, preuves et état mesuré : `CONTRAT-DE-MODULE-2026-11-09.md`.
+> Origine : `PLAN-2-DEVS-8-SEMAINES-2026-10-26.md` §1 (« un service est un module installable, façon Odoo »).
+
+- **Un module est l'unité de vente et d'installation** (un `code` au catalogue) ; **un service est l'unité
+  de déploiement**. Plusieurs modules peuvent vivre dans un service s'ils partagent un agrégat, chacun
+  derrière sa propre gate.
+- **Installer = entitlement `ACTIVE` ; désinstaller = `REVOKED`, sans rien supprimer.** L'effacement est
+  un acte séparé, demandé et tracé (Q4).
+- **Chaque version de module porte un manifeste** : `depends` (dures, bloquent l'installation),
+  `enrichiPar` (optionnelles, emplacement déclaré vide), familles de référentiels, droits, topics publiés
+  et consommés, profil compose. Source dans le dépôt du service, copie au catalogue par version, garde de
+  comparaison (Q1). Dépendance **par code**, jamais par version (Q5). Pas de cycle.
+- **Désinstaller un module requis par un autre est refusé** (409 `MODULE_REQUIS_PAR`, avec les modules
+  dépendants) (Q2). **Une dépendance dure suspendue ne ferme pas le dépendant** : ce qu'il en lit se
+  déclare `SUSPENDU` (Q3).
+- **Les dix clauses** (C1 manifeste · C2 socle · C3 données possédées · C4 fonctionne seul · C5 contrats
+  nommés · C6 paramétrage par données · C7 droits de tenant · C8 module d'écran dans `prospera-app` ·
+  C9 aller-retour sans perte · C10 profil `docker compose`) sont la **définition de « fini »** de tout
+  module. **Chaque PRD porte une section « Contrat de module »** ; le premier épic d'un module est son
+  socle (C1, C2, C3, C10).
+- **Amende** le principe « 18 modules → 18 services » (P12) : le module n'est plus synonyme de service.
+
 ### Nouveaux topics du bus
 
 | Topic | Producteur | Consommé pour |
@@ -523,6 +547,7 @@ que `STORY-356`/`236`/`357` ne sont pas livrées.
 | 1.1 | 2026-07-07 | vivian | **Modules partagés & versioning par organisation** : `bilan-service` (capacité partagée, 2 axes version de code ⊥ référentiel packagé, gate d'accès en relying party) et `catalog-service` (entitlements `(org × module)`, topic `entitlement.changed`, `admin-panel` BFF pour FR-012). Amende l'ownership map (entitlement → catalog ; abonnement reste vertical) ; ajoute **P7/P8** ; insère catalog + bilan dans la roadmap ; risques N/N-1 & routage multi-version. JWT/A3 inchangés. |
 | 1.2 | 2026-07-07 | vivian | **Couche edge/exécution** : décisions **P9** (schema registry adopté maintenant — compatibilité BACKWARD en CI) et **P10** (mono-repo maintenant, poly-repo différé) ; ajout du doc `architecture-gateway` (validation JWT fail-fast à l'edge + services souverains, routage par préfixe, résolution multi-version, services sans port public). Risque #4 (schema registry) passé de « envisager » à « planifié ». |
 | 1.3 | 2026-07-10 | vivian | **Alignement PLAN FINAL** (`docs/synthese-services-prospera-2026-07-10.md`) : décisions **P11** (dogfooding interne d'abord — Money Vibes = client zéro ; N/N-1 & routage multi-version différés jusqu'au 1er client externe, **DG-1** ; chaîne KYC livrée d'abord, **AD-2**) et **P12** (18 modules → 18 services suivant le moule unique ; **NC-1** `catalog-service` → `platform-catalog-service` ; **NB-1** Bilan par import de balance + prévisionnel ; **PA-1** checkout/webhooks → `paiement-service`). Ordre de construction et backlog des 18 modules → `program_backlog` de `sprint-status.yaml`. Invariants inchangés. |
+| **1.8** | **2026-11-09** | PO + Claude | ⚡ **AD-P17 — le module installable, façon Odoo.** Le module devient l'unité de vente et d'installation, le service l'unité de déploiement ; contrat en dix clauses (`CONTRAT-DE-MODULE-2026-11-09.md`), manifeste par version de module (`depends` / `enrichiPar`), désinstallation refusée si le module est requis, aucune suppression à la désinstallation. Décisions D1/D2/D3 du plan à deux développeurs et Q1 → Q5 du contrat. Amende P12. |
 | **1.7** | **2026-08-16** | PO + Claude | ⚡ **AUDIT DE LA CHAÎNE DOCUMENTAIRE** — nouvelle section *« État de la chaîne documentaire »* : elle fixe la **règle** (un module à construire suit PRD → spine → épics → stories ; un module **livré** ne reçoit **ni PRD ni doc d'épics rétroactifs**, seulement une spine rétroactive s'il n'a aucune architecture ou qu'elle est devenue fausse) et l'**état des 11 modules**. ⛔ **Ce que l'audit a trouvé n'était pas un problème de format** : les notes `bilan-service` (07/07) et `expert-comptable` (02/07) portaient **zéro occurrence du mot « dossier »** et décrivaient l'isolation par le seul `orgId` — elles **encodaient l'ancienne vérité et la gardaient active**, six semaines après `AD-P13`. Les deux portent désormais un **encadré de réancrage** distinguant ce qui tombe de ce qui survit (traitement de la note Assistant IA du 20/07). ⚠️ Le vrai risque reste nommé : `bilan-service` expose toujours `POST /bilan/exercices` alors que `dossier-service` fait foi — **deux écritures possibles pour un même fait** tant que STORY-356/236/357 ne sont pas livrées. + en-tête de version corrigée (elle était restée à 1.3). |
 | **1.6** | **2026-08-15** | PO + Claude | ⚡ **AD-P16 — Money Vibes peut lire la donnée métier de TOUTE organisation, dans TOUS les modules.** Capacité programme : jusqu'ici la console ne voyait que l'identité, le KYC et les entitlements, jamais la donnée métier d'un client. Mécanisme : **routes de lecture plateforme réservées à `PLATFORM_ADMIN`, `orgId` en PARAMÈTRE EXPLICITE et jamais tiré du jeton**, lecture seule, **une organisation à la fois**, **journalisées avec leur motif**. La carte de propriété ne bouge pas — ces routes lisent, elles ne dupliquent pas (ni read-model consolidé, ni agrégation permanente au BFF). ⚠️ **DEUX COÛTS ASSUMÉS** : ① le rayon d'action d'un compte plateforme compromis passe de l'identité/KYC/droits à **la donnée métier de tous les clients** — le journal et la limite « une org à la fois » sont les seuls garde-fous ; ② elle traverse un **engagement de confidentialité envers des TIERS** — les prix freelance du catalogue, cachés à la société qui paie l'abonnement, sont **vus par Money Vibes sans condition** ⇒ **`FR-C29d` devient impératif et s'élargit** : le contrat de l'indépendant doit annoncer que l'éditeur peut consulter ses prix. |
 | **1.5** | **2026-08-15** | PO + Claude | ⚡ **AD-P15 — le RBAC s'étend au périmètre tenant, et AMENDE D15.** Deux PRD d'affilée (`FR-R28b` réseau, `FR-C48` catalogue) supposaient pouvoir déclarer des droits de tenant dans un catalogue de permissions qui est **plateforme** et rend `perms: []` à tout utilisateur de tenant — besoin systémique, pas erreur de rédaction : stock, commande, facturation et PDV l'auront aussi. ⚡ **Le discriminant du jeton est écrit une fois** : ce n'est PAS « état tiers ou pas » (un rôle change aussi par action tierce, et `roles[]` y est depuis le premier jour) mais **BORNÉ ou NON BORNÉ**. Vocabulaire fermé ⇒ jeton ; ensemble de données du client ⇒ read-model. C'est ce qui rend AD-P15 et **AD-5 de `reseau-service`** cohérentes au lieu de contradictoires. ⚠️ `auth-service` étant livré et central, l'extension passe par une story dédiée avec ses consommateurs nommés, jamais en effet de bord d'un module métier. |

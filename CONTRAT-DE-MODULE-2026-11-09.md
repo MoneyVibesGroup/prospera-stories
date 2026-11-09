@@ -1,9 +1,9 @@
 # Le contrat de module : ce qu'un service doit tenir pour être installable · **document de doctrine**
 
-> **Date :** 2026-11-09 · **Statut :** proposition, **à valider par le PO le vendredi 13/11/2026**
+> **Date :** 2026-11-09 · **Statut :** ✅ **VALIDÉ par le PO le 2026-11-09**, avec ses cinq choix
+> Q1 → Q5 (§8), quatre jours avant l'échéance du 13/11
 > **Auteur :** Dev B (lot 1 du cadrage, `PLAN-2-DEVS-8-SEMAINES-2026-10-26.md` §1.3 et §4)
-> **Décision de programme proposée :** **AD-P17**. Elle s'ajoute à
-> `architecture-prospera-ecosystem-2026-07-04.md` une fois validée. Le plus haut numéro existant est AD-P16.
+> **Décision de programme :** **AD-P17**, inscrite dans `architecture-prospera-ecosystem-2026-07-04.md`.
 > **S'applique à :** tout module du programme, à partir d'**EPIC-045** chez Dev A. **Chaque PRD écrit
 > ensuite cite ce document** (§6).
 > **Décisions déjà rendues sur lesquelles il repose :** D1 (une seule app `prospera-app`), D2 (deux niveaux
@@ -36,8 +36,8 @@ Un module est « fini » quand il tient ces dix clauses. L'état est **mesuré s
 | C9 | s'**installe et se désinstalle sans perte** | test aller-retour : installer, désinstaller, réinstaller, tout est là | ⚠️ le mécanisme le permet, aucun test ne le prouve |
 | C10 | **démarre seul** avec le socle minimal | `docker compose --profile <code> up` à chaque gate | ⛔ aucun profil dans le compose |
 
-**Ce que le PO valide vendredi :** les dix clauses, et les **cinq choix du §8** (Q1 → Q5), chacun avec
-une recommandation.
+**Validé le 2026-11-09 :** les dix clauses, et les **cinq choix du §8** (Q1 → Q5), tous tranchés selon
+la recommandation.
 
 ---
 
@@ -79,7 +79,7 @@ export const MANIFESTE_PDV = {
 } as const;
 ```
 
-**Où il vit (Q1, recommandation).** La **source** est ce fichier, dans le dépôt du service : c'est le
+**Où il vit (Q1, ✅ tranchée).** La **source** est ce fichier, dans le dépôt du service : c'est le
 propriétaire du module qui le tient. Le **catalogue en garde une copie par `ModuleVersion`** : c'est elle
 que le moteur d'installation lit. Une **garde de test** compare les deux, sur le patron déjà payé de
 `packs.front-snapshot.ts`, où toute divergence doit être déclarée avec son motif.
@@ -224,16 +224,16 @@ première brique de l'installation chez le client (D3).
 ## 3. Les dépendances (D2), en règles
 
 1. **Deux niveaux, et seulement deux.** `depends` bloque l'installation, `enrichiPar` ne bloque jamais.
-2. **Par code, pas par version (Q5).** `depends: ['reseau']`, et non `reseau >= 1.2`. C'est la règle déjà
+2. **Par code, pas par version (Q5, ✅ tranchée).** `depends: ['reseau']`, et non `reseau >= 1.2`. C'est la règle déjà
    choisie pour les référentiels (« la compatibilité se raisonne par famille, jamais par version »,
    STORY-148). Une rupture de contrat se traite par la version du **topic** (C5), pas par la dépendance.
 3. **Pas de cycle.** Le catalogue refuse un manifeste qui en crée un : **422 `MANIFESTE_CYCLE`**.
 4. **Installer un pack**, c'est installer ses modules **dans l'ordre des dépendances**, en une action,
    et de façon idempotente.
-5. **Désinstaller un module dont un autre a besoin** (Q2, recommandation) : **refusé**, **409
+5. **Désinstaller un module dont un autre a besoin** (Q2, ✅ tranchée) : **refusé**, **409
    `MODULE_REQUIS_PAR`**, avec la liste des modules qui en dépendent. Pas de cascade silencieuse.
 6. **Une dépendance dure est une garantie d'installation, pas un couplage d'exécution.** Le module lit
-   sa dépendance par ses read-models (C3). Si elle est suspendue (Q3), il ne s'arrête pas : ce qu'il en
+   sa dépendance par ses read-models (C3). Si elle est suspendue (Q3, ✅ tranchée), il ne s'arrête pas : ce qu'il en
    lit se déclare `SUSPENDU`, sur le patron de l'emplacement vide.
 
 ---
@@ -296,14 +296,14 @@ livre la gate livre aussi le test aller-retour (C9).**
 
 ---
 
-## 8. Les choix demandés au PO pour vendredi 13/11
+## 8. Les choix du PO (✅ tous tranchés le 2026-11-09, selon la recommandation)
 
-| # | Question | Recommandation | Pourquoi |
+| # | Question | ✅ Décision | Pourquoi |
 |---|---|---|---|
 | **Q1** | Où vit le manifeste ? | **Dans le dépôt du service** (source), **copié au catalogue par version**, avec une garde de comparaison | Le propriétaire du module le tient ; le moteur lit le catalogue ; le patron « copie + garde » est déjà payé |
-| **Q2** | Désinstaller un module dont un autre dépend ? | **Refuser (409 `MODULE_REQUIS_PAR`)** | Une cascade silencieuse ferme des écrans que personne n'a choisi de fermer |
+| **Q2** | Désinstaller un module dont un autre dépend ? | **Refuser (409 `MODULE_REQUIS_PAR`)**, en nommant les modules qui en dépendent | Une cascade silencieuse ferme des écrans que personne n'a choisi de fermer |
 | **Q3** | Une dépendance dure est **suspendue** (impayé) : que fait le module qui en dépend ? | **Il reste ouvert** ; ce qu'il lit d'elle se déclare `SUSPENDU` | L'impayé suspend déjà **tous les droits à échéance ouverts par le même contrat** (STORY-280). Le cas restant est une dépendance suspendue **seule** : un litige décidé par un opérateur, ou un module pris sur un autre contrat. Fermer le dépendant punirait un module payé |
-| **Q4** | Combien de temps garde-t-on les données après désinstallation ? | **Sans limite jusqu'à une demande d'effacement**, qui est un acte séparé et tracé | Réinstaller sans perte (C9) l'exige. ⚠️ **À confirmer côté juridique** (données personnelles), comme le point PI-SPI de STORY-668 |
+| **Q4** | Combien de temps garde-t-on les données après désinstallation ? | **Sans limite jusqu'à une demande d'effacement**, qui est un acte séparé et tracé | Réinstaller sans perte (C9) l'exige. ⚠️ Risque résiduel, non bloquant : une revue juridique des données personnelles pourra imposer une durée ; elle s'appliquerait à l'effacement, pas au contrat |
 | **Q5** | Une dépendance se déclare par code ou par version ? | **Par code** en v1 | La même règle que les référentiels (STORY-148) ; la version du topic porte les ruptures |
 
 ---
