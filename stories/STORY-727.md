@@ -94,6 +94,8 @@ retiré de l'offre, et un module normatif s'ouvrait sans référentiel (corrigé
    cabinet peut structurellement tenir des dossiers d'IMF. ➡️ **Story à ouvrir** : une option
    normative apporte ses référentiels (ceux du package de son vertical), et la comptabilité du
    cabinet (`balance`, `bilan`) gagne la famille correspondante.
+   ✅ 2026-11-09 : **STORY-728** (review). ⚠️ Le PO a tranché que le référentiel va à l'**option
+   seule** : `bilan-service` résout par organisation et refuserait un cabinet à deux référentiels.
 2. **Un impayé SUSPEND les accès, sans supprimer aucune donnée.** Consommer
    `paiement.abonnement.impayee` (suspendre) et `regularise` (rétablir) dans le catalogue. Portée
    par **STORY-280** (« Impayé, suspension et préavis »). ✅ 2026-11-09 : livrée en revue
