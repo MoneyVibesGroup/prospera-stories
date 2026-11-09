@@ -382,6 +382,24 @@ entrante est celle d'AD-2, et elle est limitée aux messages porteurs d'un secre
   construction (AD-6). Le désabonnement de masse ne s'applique pas à l'in-app : ce sont des alertes
   applicatives, de nature transactionnelle.
 
+> **Amendé le 2026-11-09 par STORY-651 (arbitrage PO) : le read-model `Utilisateur` projette l'e-mail,
+> et lui seul.** Le service ne le faisait pas, faute de consommateur. Il en a un : un message système
+> adressé à un **membre** sur l'e-mail (`CLES_ADRESSEES_A_UN_MEMBRE`, aujourd'hui
+> `intervention-money-vibes`), dont l'appelant ne détient pas l'adresse.
+>
+> - **Pour ces clés, le destinataire est un `userId`, membre actif de l'organisation, sur tout canal.**
+>   Sur l'e-mail, ce service le remplace par l'adresse projetée ; consentement, suppression et masquage
+>   s'appliquent ensuite comme à toute adresse. Une adresse fournie par l'appelant est refusée.
+> - **L'IdP fait foi.** Le champ est un miroir, réécrit par `identity.user.*` sous la garde du dernier
+>   écrivain, jamais saisi ici.
+> - **Ce qui ne change pas :** aucun `Contact` ne naît d'une identité, le carnet n'est jamais alimenté
+>   par `identity.*`, et le téléphone n'est pas projeté. L'adresse a un seul lecteur (la résolution du
+>   destinataire), et elle reste hors des contrats que le moteur de déclenchement peut lire. Des gardes
+>   le vérifient.
+> - **Limite assumée :** à la résiliation d'une organisation, `utilisateurs` n'est pas effacé (un
+>   utilisateur peut être membre d'ailleurs). L'adresse y reste donc tant que l'IdP n'émet rien : il
+>   n'existe aujourd'hui aucun événement de suppression d'utilisateur.
+
 ### AD-13 — L'envoi de masse : instantané de liste, curseur, matérialisation par lot avant remise
 
 - **Binds:** FR-N28→N34, FR-N48, NFR-2, NFR-3, SM-1, SM-4, critère de sortie de l'incrément 3

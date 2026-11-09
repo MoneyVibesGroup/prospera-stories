@@ -59,8 +59,8 @@ le jour où elle sert.
       **invisible du client** — ce qui rate l'objet de la story tout en donnant l'impression de
       l'avoir traitée.
 2. ⚠️ **La notification.** Tracer n'est pas prévenir. Faut-il **notifier** le client qu'un opérateur
-      est intervenu ? `notification-service` saurait le faire. **Question ouverte, à trancher au
-      sprint-planning** — pas à décider en écrivant l'écran.
+      est intervenu ? `notification-service` saurait le faire. ✅ **Tranchée par le PO le 2026-11-09 :
+      oui, en cloche ET par e-mail, au fondateur** (voir la livraison du point 2 ci-dessous).
 3. ⚠️ **Le patron doit être réutilisable.** Trois services au moins recevront des contrôleurs
       d'administration. Écrire la trace deux fois, c'est garantir qu'elles divergeront.
 
@@ -88,8 +88,54 @@ le jour où elle sert.
 console. Le patron est le même dans les deux services (auteur, suffixe, porte, liste blanche) ; le
 prochain service à recevoir un contrôleur d'administration le recopie.
 
-**Toujours ouvert :** notifier le client d'une intervention (point 2) n'est pas fait.
+**Point 2 (notifier le client) :** pas fait dans cette livraison, voir ci-dessous.
 
 **Conservation :** `interventions_plateforme` est en ajout seul (hooks Mongoose) et déclarée
 **conservée** à la suppression d'une organisation, à côté de `rapports_purge` : l'effacer
 supprimerait la preuve de l'intervention avec la donnée qu'elle a touchée.
+
+---
+
+## 🟡 Point 2 — prévenir le client (2026-11-09) : en revue, recette pas encore jouée
+
+**Arbitrages PO du 2026-11-09 :**
+1. **Cloche ET e-mail**, au **fondateur** de l'organisation.
+2. **Paiement et notification ensemble**, sans fiche séparée (même consigne que 650/651).
+3. **AD-12 est amendé** : la notification tient l'adresse des membres, pour les seuls messages système
+   qui leur sont adressés. Voir le spine de la notification, AD-12.
+
+| | paiement-service | notification-service |
+|---|---|---|
+| Déclencheur | `JournalAudit.consigner`, pour tout auteur `OPERATEUR_PLATEFORME` : aucun cas d'usage n'a à s'en souvenir | `JournalDesInterventions.executer`, après la trace |
+| Même transaction | file `signalements_sortants`, même session que l'entrée | file `signalements_intervention`, même transaction que la trace |
+| Une ligne | par canal : la cloche et l'e-mail réussissent ou échouent séparément | idem |
+| Remise | relais (jumeau des cloches), route directe | relais, porte interne d'`EnvoisService`, bornée aux messages à un membre |
+| Destinataire | `fondateurUserId` (STORY-726), jamais une adresse | `fondateurUserId`, nouveau dans `org_profils` (`createdByUserId`) |
+
+**Le message** (`intervention-money-vibes`, in-app + e-mail, fr/en) porte la phrase et l'instant. Il ne
+porte ni l'opérateur, ni le compte, ni la passerelle : il renvoie au journal, qui les nomme (AC-6). Un
+e-mail sort de Prospera, et il n'a pas à emporter ce que le journal garde.
+
+**Trou fermé en cours de route :** la route d'un utilisateur ne refusait que les secrets. Un membre
+aurait pu annoncer à son fondateur une intervention de Money Vibes qui n'a jamais eu lieu. Une clé
+adressée à un membre n'entre plus que par l'appel de service ou la porte interne.
+
+**Limites connues :**
+- **Les utilisateurs déjà projetés n'ont pas d'adresse**, tant qu'aucun `identity.user.*` ne repasse :
+  leur e-mail est refusé (`MEMBRE_SANS_ADRESSE`) puis abandonné après 5 tentatives. La cloche part quand
+  même.
+- **Les organisations déjà projetées n'ont pas de fondateur côté notification** : les signalements de la
+  notification sont écartés (`SANS_FONDATEUR`). Côté paiement, la même limite existe pour une
+  organisation projetée avant STORY-726.
+- **Le destinataire est le fondateur seul**, pas tous les administrateurs. Un fondateur parti de
+  l'organisation n'est plus joignable : le signalement échoue, et personne d'autre n'est prévenu.
+- **La langue du message est le français.** Les phrases d'actes sont rédigées en français par les
+  appelants, et ni le paiement ni la notification ne connaissent la langue du fondateur.
+
+**Vérifié :** unitaires paiement 332/332 suites (4 472 tests, 1 ignoré), notification 273/273 suites
+(3 777 tests), `tsc` et lint propres.
+**Pas encore joué :** les e2e du paiement, la conformité notification sur vrai Mongo (mise à jour pour
+couvrir l'atomicité du signalement) et la recette. La recette `delegation.recette.ts` n'a pas encore
+d'assertion sur ce signalement. À faire depuis `dev` après fusion, images reconstruites.
+
+**Branches :** `MNV-651` — notification PR #80 (à fusionner d'abord), paiement PR #112.
