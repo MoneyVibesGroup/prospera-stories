@@ -96,7 +96,7 @@ supprimerait la preuve de l'intervention avec la donnée qu'elle a touchée.
 
 ---
 
-## 🟡 Point 2 — prévenir le client (2026-11-09) : en revue, recette pas encore jouée
+## ✅ Point 2 — prévenir le client (2026-11-09) : fusionné, recette jouée
 
 **Arbitrages PO du 2026-11-09 :**
 1. **Cloche ET e-mail**, au **fondateur** de l'organisation.
@@ -140,8 +140,23 @@ adressée à un membre n'entre plus que par l'appel de service ou la porte inter
 
 **Vérifié :** unitaires paiement 332/332 suites (4 472 tests, 1 ignoré), notification 273/273 suites
 (3 777 tests), `tsc` et lint propres.
-**Pas encore joué :** les e2e du paiement, la conformité notification sur vrai Mongo (mise à jour pour
-couvrir l'atomicité du signalement) et la recette. La recette `delegation.recette.ts` n'a pas encore
-d'assertion sur ce signalement. À faire depuis `dev` après fusion, images reconstruites.
+**Joué le 2026-11-09 :** `delegation.recette.ts` 18/18 sur la vraie pile (cloche et e-mail réels, usurpation
+refusée), conformité notification 9/9 sur vrai Mongo (atomicité du signalement comprise), e2e délégation du
+paiement 11/11.
 
-**Branches :** `MNV-651` — notification PR #80 (à fusionner d'abord), paiement PR #112.
+**Branches :** `MNV-651` — notification PR #80 et paiement PR #112, fusionnées.
+
+### Le rattrapage d'une base existante
+
+Rejouer les topics n'aurait rien changé (marqueur d'idempotence), et les republier aurait fait réagir huit
+services et les règles client, donc envoyé de vrais messages. Deux commandes ponctuelles lisent donc
+`auth-service` en lecture seule (`AUTH_MONGODB_URI_LECTURE`) et n'émettent rien :
+
+```
+node dist/rattrapage-identite.bootstrap.js  [--appliquer]   # notification-service
+node dist/rattrapage-fondateur.bootstrap.js [--appliquer]   # paiement-service
+```
+
+Simulation par défaut, compte rendu sans adresse, relance sans effet. Elles complètent et ne corrigent jamais :
+un document existant garde ce qu'un événement a écrit. La recette recrée l'état d'avant la story, prouve que
+personne n'est prévenu, applique, puis constate que la cloche et l'e-mail repartent. PR #81, #113, recette #10.

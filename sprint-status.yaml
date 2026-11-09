@@ -35,6 +35,9 @@ reserved_ranges:
     source_doc: "prospera-stories/stories/STORY-729.md"
     reserved_on: "2026-11-09"
     note: >
+      🟡 REVIEW 2026-11-09 — bilan ET balance (balance-service refusait la balance SFD et validait le
+      dossier IMF contre le plan du cabinet) ; « Mon cabinet » suit l'organisation ; recette 5/5 ;
+      PR bilan #172, balance #137, recette #11.
       Ouverte à la demande du PO le 2026-11-09 (arbitrage 1 de STORY-728 : le référentiel va à
       l'option seule, la liasse SFD/CIMA du client d'un cabinet est une story bilan-service à part).
       Famille lue sur le typeEntite du dossier (read-model dossiers_dossier), version dans les
@@ -5506,7 +5509,7 @@ sprints:
         epic: "EPIC-025"
         points: 5
         service: "paiement-service + notification-service"
-        status: "done"  # ✅ 2026-11-08 — CLÔTURÉE avec STORY-650 (mêmes commits). 🟡 2026-11-08 — auteur `OPERATEUR_PLATEFORME` (utilisateur, organisation opératrice, organisation cible vérifiée, rôles, permissions effectives) ; verbe suffixé `_PAR_MONEY_VIBES` ; même transaction (paiement : EcritureDArgent ; notification : connection.transaction + transaction implicite Mongoose) ; notification reçoit un journal `interventions_plateforme` en ajout seul, lu par le client sous `notification:journal:consulter`, CONSERVÉ à la suppression. Chemin du client inchangé. 🟡 2026-11-09 — point 2 (notifier le client) : cloche ET e-mail au fondateur, paiement + notification, AD-12 amendé (arbitrages PO). PR notification #80 et paiement #112 EN REVUE, unitaires verts ; recette à jouer depuis dev après fusion.
+        status: "done"  # ✅ 2026-11-08 — CLÔTURÉE avec STORY-650 (mêmes commits). 🟡 2026-11-08 — auteur `OPERATEUR_PLATEFORME` (utilisateur, organisation opératrice, organisation cible vérifiée, rôles, permissions effectives) ; verbe suffixé `_PAR_MONEY_VIBES` ; même transaction (paiement : EcritureDArgent ; notification : connection.transaction + transaction implicite Mongoose) ; notification reçoit un journal `interventions_plateforme` en ajout seul, lu par le client sous `notification:journal:consulter`, CONSERVÉ à la suppression. Chemin du client inchangé. 🟡 2026-11-09 — point 2 (notifier le client) : cloche ET e-mail au fondateur, paiement + notification, AD-12 amendé (arbitrages PO). #80 et #112 fusionnées ; recette 18/18, conformité 9/9, e2e 11/11. Rattrapage d'une base existante : PR #81, #113, recette #10.
         assigned_to: null
       - story_id: "STORY-237"
         title: "Scaffold `paiement-service` (:3005), socle transverse et point de santé"

@@ -1,8 +1,8 @@
 # STORY-729 : Le référentiel se choisit PAR DOSSIER — un cabinet produit la liasse SFD ou CIMA de son client IMF
 
-Status: ready-for-dev
+Status: review
 
-**Service :** `bilan-service` · **Recette :** `prospera-recette`
+**Services :** `bilan-service`, `balance-service` (ajouté au développement, voir la livraison) · **Recette :** `prospera-recette`
 **Points :** 8 · **Sprint :** non slottée (même régime que 727/728 : réservée, tirée à la demande du PO)
 **Prérequis :** STORY-728 (le cabinet prend l'option `microfinance`/`assurance`, qui porte le
 référentiel), STORY-304 (`typeEntite` → famille de référentiel), STORY-727 (version épinglée par
@@ -137,3 +137,59 @@ le 2026-11-09 : (a).**
   [[STORY-357]], [[STORY-236]].
 - Id pris après un MAX sur toutes les branches distantes de `prospera-stories` (728). Le fichier NON
   SUIVI `PLAN-2-DEVS-8-SEMAINES-2026-10-26.md` réserve 730 → 899 : 729 est libre.
+
+---
+
+## 🟡 Livraison du 2026-11-09 — en revue
+
+### Deux constats qui ont élargi la story
+
+1. **`balance-service` devait changer aussi.** La fiche ne visait que le bilan. Or sans changement chez
+   lui, un cabinet ne pouvait pas déposer la balance SFD de son client (`REFERENTIEL_NON_HABILITE`), et
+   la liasse n'aurait jamais eu de balance à lire.
+2. **Sa cascade validait le dossier IMF contre le plan du cabinet.** Le profil du cabinet passait devant
+   le type d'entité du client : derrière un cabinet SN, un dossier MICROFINANCE sans décision datée était
+   validé contre SYSCOHADA, sans erreur. L'ordre devient : décision datée, type d'entité, profil du
+   cabinet. D-507-N tient : une décision datée garde la main. `ASSURANCE → CIMA` manquait aussi.
+
+### Décision de conception : « Mon cabinet » suit l'organisation
+
+`dossier-service` crée ce dossier `ENTREPRISE` quel que soit le métier : c'est une valeur par défaut, pas
+une déclaration. Il garde donc le référentiel du droit `bilan`, jamais celui d'une option. Une IMF ne
+perd pas la liasse de sa propre activité (AC-7), et l'arbitrage 1 de STORY-728 tient. Un droit `bilan`
+pluriel (package `cabinet-sfd`) se tranche par le type d'entité.
+
+### Ce qui a été fait
+
+| AC | Réalisation |
+|---|---|
+| AC-1 | `resolveReferentielForOrg` lit le dossier dans le contexte de la requête : les seize appelants en bénéficient sans le faire circuler, et une route sans dossier garde la résolution par organisation |
+| AC-2 | `famille-referentiel.ts`. Une garde charge chaque paquet du manifeste ; elle a attrapé `zone-franche-togo`, absent de la fiche, rangé en SYSCOHADA (même plan et même table de passage) |
+| AC-3 | `409 REFERENTIEL_DU_DOSSIER_NON_HABILITE`, qui nomme la famille attendue |
+| AC-4 | L'épingle reste prioritaire dans la famille ; une épingle d'une autre famille est refusée |
+| AC-5 | L'ambiguïté se mesure dans la famille |
+| AC-6 | `409 BALANCE_REFERENTIEL_DISCORDANT` à la création du brouillon, avant toute écriture |
+| AC-7 | Non-régression assurée par la règle de « Mon cabinet » |
+| AC-8 | `referentiel-par-dossier.recette.ts`, 5/5 |
+| Q1 (a) | `org_options_normatives`, projetée dans les deux services ; le gate reste le seul droit du module |
+
+### Vérifié
+
+- **Recette 5/5** sur la vraie pile, volumes neufs : sans l'option, refus au bilan et à la balance ; avec
+  l'option, la balance SFD sur des comptes absents de SYSCOHADA (`1011`, `5711`), puis la liasse SFD et,
+  dans la même session, la liasse SYSCOHADA de « Mon cabinet ».
+- **E2e** : bilan 41/41 suites, balance 35/35. **Unitaires** : verts en série ; restent rouges les gardes
+  qui comparent des chemins en `/` ou du texte en LF sous Windows (`analyse.agnosticisme`,
+  `dossier-scope.invariant`, `devise-paquet.exhaustivite`), sans lien avec cette story. En parallèle sur
+  ce poste, plusieurs suites dépassent leur délai.
+- Les images du gate sont construites depuis les branches `MNV-729` : à rejouer depuis `dev` après fusion.
+
+### Limites
+
+- **Le dépôt d'une balance d'un tag contraire n'est pas refusé au `balance-service`** : seule la liasse le
+  refuse (AC-6). Reste candidate STORY-236.
+- **Aucune recette n'éprouve le chemin CIMA** : il est couvert par les unitaires seulement.
+- **Un droit d'option antérieur au déploiement n'est pas rattrapé** : l'événement a déjà été écarté. Il se
+  corrige en réémettant le droit depuis le catalogue. Rien n'est en production aujourd'hui.
+
+**PR :** bilan #172, balance #137 (à fusionner ensemble), recette #11.
