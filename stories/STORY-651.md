@@ -166,6 +166,11 @@ rattrapage se reposera. Elle se tranchera alors, pas avant.
 
 **Branches :** `MNV-651-sans-rattrapage` dans notification, paiement et `prospera-recette`.
 
+**🏁 Rejoué depuis `dev` après fusion (2026-11-09, soir)** — notification `695bd2c`, paiement `0dcde70`, recette `762ec69`, neuf images reconstruites, volumes neufs (projet `recettedev651`) :
+- recettes croisées **70/70** sur 7 suites (les 75 de l'après-midi, moins les 5 du rattrapage supprimé) ;
+- unitaires : notification 273 suites / 3 780 tests, paiement 334 suites / 4 489 tests ; lint et `tsc` propres ;
+- conformité sur vrai Mongo : paiement 30/30, notification 58/58 (les 4 tests Mailhog joués contre un relais jetable : la surcouche de recette ne republie pas le SMTP 1025).
+
 ### Reprise du 2026-11-09 — un e-mail refusé attend l'adresse
 
 **Le défaut.** Un refus du message (`MEMBRE_SANS_ADRESSE` côté notification, `REFUSEE` côté paiement)
