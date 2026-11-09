@@ -7,8 +7,8 @@
 **Priorité :** Must Have — ⚡ **prérequis de STORY-166, à livrer AVANT elle**
 **Story Points :** 5
 **Complexité :** low — un champ, ses lectures, et une décision de nommage
-**Statut :** À faire
-**Assigné à :** null
+**Statut :** ✅ Terminée — les trois `MNV-171` fusionnées ensemble sur `dev` le 2026-11-07 (auth-service `9956bc2`, front expert-comptable `c579c1b`, paiement-service `13113c5`) ; vérification docker 39/39. ⚠️ Le `roles` du `409 VERTICAL_ROLES_INCOMPATIBLES` n’atteignait pas le client (filtre d’exceptions de l’IdP) : corrigé par STORY-167.
+**Assigné à :** Claude (session du 2026-11-07)
 **Créée le :** 2026-08-03
 **Sprint :** **30** — socle distributeur  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
 **Service :** `auth-service` (`:3001`)
@@ -181,4 +181,78 @@ catalogue pour filtrer une liste de rôles — une dépendance à contresens.
 
 ## Progress Tracking
 
-*(à remplir à l'implémentation)*
+### 2026-11-07 — implémentation
+
+**Décisions PO prises en cours de story (2026-11-07)**
+
+1. **Inscription publique : `vertical` dans le corps**, validé contre le référentiel.
+2. **L'organisation de Money Vibes a son vertical : `plateforme`**, 5ᵉ entrée du référentiel,
+   **fermée à l'inscription publique**.
+3. **Reclasser exige `entitlement:grant`** (arbitrage commercial ; `PLATFORM_ADMIN`,
+   `PLATFORM_EXECUTIVE`) — aucune des quatre copies du catalogue figé n'est touchée.
+
+**Livré — `auth-service`, branche `MNV-171` (`4d4fa7d`)**
+
+| Pièce | Où |
+|---|---|
+| `Organization.vertical` obligatoire, **sans défaut**, indexé | `organization.schema.ts` |
+| Référentiel `verticaux` (code, libellé, statut, `inscriptionOuverte`) + seed au boot | `organizations/verticaux/*` |
+| Migration nommée `STORY-171-vertical-cabinet`, **à marqueur** (collection `migrations`) | `organizations-vertical-migration.service.ts` |
+| Inscription : 400 `VERTICAL_REQUIS` / `VERTICAL_INCONNU` / `VERTICAL_FERME_A_L_INSCRIPTION`, avant toute écriture | `auth.service.ts`, `register.dto.ts` |
+| Exposition : `/organizations/me`, `/users/me`, liste + détail admin, filtre `?vertical=` | DTO + `listAll` |
+| `GET /admin/verticaux` (`org:read`) · `PATCH /admin/organizations/:id/vertical` (`entitlement:grant`) | `admin-verticaux.*` |
+| Journal `ORG_VERTICAL_CHANGED` (`vertical`, `previousVertical`, motif) dans la transaction | `changeVerticalAndEmit` |
+| ⛔ **STORY-166 AC 10 côté écriture** : 422 `TENANT_ROLE_NON_PROPOSE` ; organisation sans vertical ⇒ refus | `admin-tenant-roles.service.ts` |
+| `vertical` additif dans `identity.org.created` / `identity.org.updated` | `identity-events*` |
+
+**Livré — appelants de l'inscription (sans quoi le merge cassait `dev`)**
+
+- `prospera-frontend-expert-comptable`, `MNV-171` (`25b4b3d`) : `registerCabinet` pose
+  `vertical: 'cabinet'` ; types `auth` régénérés contre l'IdP de la branche.
+- `prospera-paiement-service`, `MNV-171` (`31c260d`) : l'amorçage s'inscrit `cabinet` puis reclasse
+  en `plateforme` par la route console ; couvre aussi l'organisation créée avant la story.
+
+**Choix faits en implémentant — à valider**
+
+1. ⚡ **Seul `cabinet` est ouvert à l'inscription publique** (donnée `inscriptionOuverte`). Un
+   distributeur ne peut donc naître aujourd'hui que par **inscription cabinet + reclassement**
+   console, faute de route de création d'organisation côté console — à ouvrir (AP-02/AP-17).
+2. **Migration à marqueur, pas `updateMany` à chaque boot** : sinon une organisation née sans
+   vertical demain serait rangée `cabinet` au boot suivant — le défaut silencieux que la story
+   interdit.
+3. **Reclassement refusé (409 `VERTICAL_ROLES_INCOMPATIBLES`, rôles listés)** si des membres gardent
+   des rôles que la cible ne propose pas : sinon un distributeur reclassé cabinet garderait ses
+   droits `DIST_*`.
+4. `vertical` est requis à l'OpenAPI mais contrôlé par le **service** (pas par class-validator) pour
+   rendre `{ message, code }` (STORY-138) au lieu du refus générique du `ValidationPipe`.
+5. Fenêtre résiduelle documentée : une attribution de rôle et un reclassement **concurrents** ne
+   sont pas sérialisés entre eux (deux documents différents) ; le reclassement relit les rôles
+   dans sa transaction.
+
+**État des critères**
+
+| AC | État | Preuve docker |
+|:--:|---|---|
+| 1 | ✅ | champ requis, aucun défaut au schéma |
+| 2 | ✅ | `pharmacie` insérée **en base** ⇒ listée, filtrable, cible de reclassement, et fermée à l'inscription — sans livraison |
+| 3 | ✅ | **96** organisations réelles rangées `cabinet` ; 2ᵉ boot : marqueur ⇒ rien ; marqueur effacé + 3ᵉ boot ⇒ 0 touchée ; état `vertical` identique sur les trois passages |
+| 4 | ✅ | sans vertical / inconnu / `distributeur` / `plateforme` ⇒ 400 `{ message, code }`, aucune organisation créée |
+| 5 | ✅ | `/organizations/me`, `/users/me`, liste et détail admin |
+| 6 | ✅ | `?vertical=cabinet` ⇒ total = 97 (compte du filtré) ; combiné à `status` et à `ids` ; inconnu ⇒ 400 |
+| 7 | ✅ | `TENANT_ADMIN` ⇒ 403 ; opérateur plateforme ⇒ 200 |
+| 8 | ✅ | une ligne `cabinet → distributeur` (acteur, date, motif), relue par `GET …/audit` ; même vertical ⇒ aucune ligne ; refus 409 ⇒ aucune ligne |
+| 9 | ✅ | propriétaire de démo : login, `perms: []`, `TENANT_ADMIN` |
+| 166/10 | ✅ | `DIST_ADMIN` à un membre de cabinet ⇒ 422, rien d'écrit ; au membre d'un distributeur ⇒ 200 |
+
+**Tests** : auth-service 1 057 unitaires + 242 e2e, lint 0, couverture 97,3 % ; front : 60 tests
+du module auth, typage ; paiement : 53 tests d'amorçage. Docker : **39/39**, + reclassement réel de
+« Money Vibes Group » `cabinet → plateforme` par la route qu'emprunte l'amorçage.
+
+**Reste à faire avant `done`**
+
+- [ ] Fusionner **les trois** `MNV-171` ensemble : l'IdP seul casserait l'inscription du front et
+      l'amorçage (400 `VERTICAL_REQUIS`).
+- [ ] Route console de **création** d'organisation avec son vertical (AP-02/AP-17) — aujourd'hui
+      inscription cabinet + reclassement.
+- [ ] Consommateur n°3 (`DI-01` refuse un non-distributeur) et n°4 (référentiel comptable keyé
+      type × pays × année) : hors périmètre, le champ est livré.

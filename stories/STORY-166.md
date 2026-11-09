@@ -8,8 +8,8 @@
 **Priorité :** Must Have — ⚡ **bloque tout le parcours d'entrée du distributeur**
 **Story Points :** 8 *(5 → 8 le 2026-08-03 : décision PO « les 14 personas », + attribut de couverture)*
 **Complexité :** low-medium — **de la donnée, pas du code**
-**Statut :** À faire
-**Assigné à :** null
+**Statut :** ✅ Terminée — fusionnée sur `dev` d'`auth-service` (`73f6980`), vérification docker 33/33 (2026-11-07). AC 10 côté écriture livré par STORY-171 (`MNV-171`)
+**Assigné à :** Claude (session du 2026-11-07)
 **Créée le :** 2026-08-02 · **Révisée le :** 2026-08-03 *(décision PO Q5)*
 **Sprint :** **30** — **socle distributeur, vague 0**  *(slotté le 2026-08-03 ; décalé de 9 sprints le même jour — le module fiscalité passe devant, cf. `reserved_sprints`)*
 **Service :** `auth-service` (`:3001`)
@@ -223,4 +223,112 @@ d'autorisation à côté de la vraie.
 
 ## Progress Tracking
 
-*(à remplir à l'implémentation)*
+### 2026-11-07 — implémentation (`auth-service`, branche `MNV-166`, commit `8a5c299`)
+
+**Livré dans la version généralisée** (arbitrage PO du 04/09) : le catalogue s'ouvre aux droits de
+TENANT, le socle de rôles est publié par la plateforme pour toute organisation, et les 14 personas
+distributeur en sont la première instance.
+
+| Pièce | Fichier |
+|---|---|
+| Catalogue de **tenant**, distinct et disjoint du catalogue plateforme | `src/common/rbac/tenant-permission.enum.ts` |
+| Collection `tenant_roles` (permissions validées contre le catalogue de tenant, `couverture`, `verticaux`) | `src/modules/rbac/schemas/tenant-role.schema.ts` |
+| Les 15 rôles du socle | `src/modules/rbac/tenant-system-roles.ts` |
+| Seed idempotent au boot (`runValidators`, tolérant à E11000, aucun `deleteMany`) | `src/modules/rbac/tenant-roles-seed.service.ts` |
+| `Membership.tenantRole` (additif) + `perms[]` = union plateforme ∪ tenant | `membership.schema.ts`, `auth.service.ts` (`issueSession`) |
+| Console : `GET /admin/tenant-roles?vertical=` · `PUT /admin/organizations/:id/members/:userId/tenant-role` | `src/modules/admin/admin-tenant-roles.*` |
+| Journal : `MEMBER_TENANT_ROLE_ASSIGNED` + `targetUserId`, `tenantRole`, `previousTenantRole` | `src/modules/audit/*` |
+
+**Décisions prises en implémentant** — à valider par le PO :
+
+1. ⚡ **Deux catalogues, pas un.** Les codes de tenant ne vont PAS dans `permission.enum.ts`, qui est
+   recopié dans quatre dépôts et valide les rôles **plateforme** : les y mettre les rendrait
+   attribuables au personnel de Money Vibes chez tous les clients. Le mécanisme reste UNIQUE (même
+   claim `perms[]`, mêmes guards) ; seul le catalogue est séparé. Conséquence : **aucune des trois
+   autres copies (kyc, platform-catalog, admin-panel) n'est touchée.**
+2. ⛔ **13 droits, pas 14 : `paiement:grace:attribuer` exclu.** Il est déclaré dans
+   `droits-paiement.ts` mais aucun contrôleur de `paiement-service@origin/dev` ne l'exige (vérifié
+   par `git grep`) — règle d'or. Les deux droits de portée plateforme du paiement
+   (`fournisseur:administrer`, `exploitation:consulter`) restent hors de ce catalogue : ils
+   relèvent du catalogue plateforme, geste encore à faire (quatre copies).
+3. **Rôle de socle ≠ rôle métier.** `Membership.role` (`TENANT_ADMIN`/`TENANT_USER`) reste le
+   **socle commun** (session, profil, organisation, `RolesGuard`) ; `Membership.tenantRole` porte
+   les `perms[]`. `roles[]` du jeton est **inchangé** : aucun service aval ne voit apparaître un
+   nom qu'il ne connaît pas. C'est ce qui rend AC 12 vrai sans inventer de permission « socle ».
+4. **Compositions des rôles servis/partiels** (le §E ne fixait que le trio) :
+   - `DIST_ADMIN` : `compte:administrer`, `paiement:journal:consulter`, `canal:administrer`,
+     `modele:rediger`, `notification:journal:consulter`, `donnees:administrer` — il configure,
+     il n'opère pas sur l'argent ;
+   - `DIST_DG` : les deux journaux · `DIST_DC` : `demande:emettre`, `lien:revoquer` ;
+   - `DIST_COMMERCIAL` : `declarer`, `demande:emettre`, `lien:revoquer` · `DIST_FREELANCE` :
+     `declarer`, `demande:emettre` · `DIST_RECOUVREMENT` : `declarer`, `demande:emettre` ;
+   - `DIST_DAF` : `valider`, `annulation:enregistrer`, `paiement:journal:consulter` ·
+     `DIST_COMPTABLE` : `paiement:journal:consulter` (la « réconciliation » du §E n'a aucun droit
+     au catalogue : aucun guard).
+   - ⚠️ **`envoi-de-masse:executer` / `valider` ne sont donnés à PERSONNE** : c'est une paire de
+     séparation des pouvoirs, et `DIST_MARKETING` est `en_attente_de_module` au tableau §A. Un
+     distributeur ne peut donc pas faire d'envoi de masse avec le socle seul — il faudra `STORY-167`.
+5. **Attribution gardée par `user:invite`** (« inviter un membre et lui attribuer un rôle »), la
+   permission qui garde déjà la relance d'invitation de l'administrateur d'une organisation. Pas
+   d'anti-escalade « n'accorde que ce que tu détiens » : un opérateur plateforme ne détient aucun
+   droit de tenant, par construction.
+6. Les droits suivent l'attribution au **prochain renouvellement** du jeton (TTL d'accès), pas
+   instantanément — compromis assumé d'un vocabulaire fermé dans le jeton (discriminant de 365).
+
+**État des critères**
+
+| AC | État | Preuve |
+|:--:|---|---|
+| 1 | ✅ | `tenant-system-roles.spec.ts` (15 noms exacts, permissions ⊂ catalogue de tenant) |
+| 2 | ✅ | aucune route d'écriture sur le socle ; e2e : un `TENANT_ADMIN` porteur des 13 droits prend 403 en lecture comme en attribution |
+| 3 | ✅ | `couverture` au schéma, au DTO et dans `GET /admin/tenant-roles` ; cohérence couverture/droits testée |
+| 4 | ✅ | `tenant-roles-seed.service.spec.ts` — 16ᵉ rôle (`IMF_AGENT_TEST`) par donnée seule |
+| 5 | ✅ | idem — `DIST_MARKETING` passe à `servi` avec `modele:rediger`, droits et couverture dans le même `$set` |
+| 6 | ✅ | `PUT …/tenant-role` (unitaire + e2e HTTP) |
+| 7 | ✅ | `DIST_ADMIN` ne détient aucun des trois |
+| 8 | ✅ | `declarer` ⇒ COMMERCIAL/FREELANCE/RECOUVREMENT ; `valider`/`annuler` ⇒ DAF ; aucun cumul |
+| 9 | ✅ | deux rôles, deux libellés, couvertures différentes |
+| 10 | 🟡 **partiel** | lecture filtrée (`?vertical=`, taxonomie fermée, 400 hors taxonomie). ⛔ **Le refus à l'attribution attend `Organization.vertical` (STORY-171, `not_started`)** : un opérateur peut aujourd'hui attribuer `DIST_COMMERCIAL` à un membre de cabinet (tracé au journal) |
+| 11 | ✅ | `auth.e2e-spec.ts` — `perms[]` de `DIST_ADMIN` dans le jeton RS256 signé |
+| 12 | ✅ | `auth.e2e-spec.ts` — `DIST_MARKETING` : login 200, `org` et `roles` présents, `perms: []` |
+| 13 | ✅ | rôle + ligne d'audit dans la même transaction ; `GET /admin/organizations/:id/audit` rend `targetUserId`, `tenantRole`, `previousTenantRole` |
+| 14 | ✅ | `system-roles.ts` intouché ; un membre sans rôle métier reçoit exactement `[]` (non-régression testée) |
+
+**Tests** : 1 008 unitaires + 238 e2e verts ; lint 0 sur les fichiers de la story ; couverture
+globale 97,4 %, nouveaux fichiers à 100 %. ⚠️ Deux tests préexistants (`svg-sanitizer` au chrono,
+`throttler-proxy` au timeout) ont échoué sous la charge de la suite complète et passent seuls.
+
+### 2026-11-07 — vérification docker sur `dev` (`73f6980`, image runtime neuve) : **33/33**
+
+Le service **démarre** (`Nest application successfully started`), le seed écrit les 15 rôles,
+les deux routes sont mappées, `/health` = 200. Recette contre le vrai IdP et le vrai Mongo, avec de
+vrais jetons :
+
+| Bloc | Contrôles |
+|---|---|
+| Non-régression (AC 14) | membre sans rôle métier ⇒ `perms: []`, `roles` inchangé ; opérateur plateforme : droits plateforme intacts, aucun droit de tenant |
+| Lecture (AC 1/3/10) | 15 rôles, couverture sur chacun, 7 en attente, ni `_id` ni `__v` ; `?vertical=cabinet` ⇒ 0 ; inconnu ⇒ 400 |
+| AC 2 | `TENANT_ADMIN` ⇒ 403 en lecture comme en attribution |
+| AC 6/13 | `PUT … DIST_ADMIN` ⇒ 200 ; `membership.tenantRole` en base ; ligne d'audit (acteur, membre, rôle, date) relue par `GET …/audit` ; détail d'organisation à jour |
+| AC 11/7 | jeton signé suivant = 6 droits de `DIST_ADMIN`, aucun des trois droits sur l'argent ; ⚡ un **refresh** d'une session ouverte AVANT l'attribution reçoit aussi les droits |
+| AC 12 | `DIST_MARKETING` : login 200, `perms: []`, `/organizations/me` et `/users/me` = 200 |
+| Erreurs | rôle plateforme ⇒ 422, non-membre ⇒ 404, permission injectée par le corps ⇒ 400 |
+| AC 4/5 par DONNÉE | rôle `IMF_AGENT_TEST` inséré en base ⇒ visible et attribuable ; `DIST_MARKETING` passé à `servi` en base ⇒ console ET jeton |
+
+⚠️ Piège rencontré : la protection anti-force-brute du login (`429` après une rafale de
+connexions) — comportement voulu ; une recette qui se connecte souvent doit espacer ses logins.
+
+**Reste à faire**
+
+- [x] Vérification docker (ci-dessus).
+- [x] PR `MNV-166` → `dev` — fusionnée par le PO.
+- [x] AC 10 côté écriture — livré par **STORY-171** (`MNV-171`, 422 `TENANT_ROLE_NON_PROPOSE`).
+- [ ] ⛔ **`paiement:grace:attribuer`** : la seule route de grâce (`POST /abonnements/:id/graces`,
+      STORY-281) est gardée par `paiement:demande:emettre`, pas par ce droit. Il est donc déclaré
+      sans être vérifié — à trancher côté paiement : brancher la route dessus, ou retirer le droit.
+- [ ] Recettes 631/632/649 : rejouables dès qu'un `DIST_*` est attribué sur la vraie pile. 632
+      exige trois membres (déclarant, validant, annulant) : `DIST_COMMERCIAL` + `DIST_DAF` ×2 —
+      ⚠️ vérifier que 275 n'interdit pas valider ET annuler à la même personne.
+- [ ] STORY-365 recouvre en partie celle-ci (ouverture de `perms[]` au tenant) : il lui reste la
+      **borne chiffrée** de `perms[]` et l'échec nommé à son dépassement. Le discriminant de forme
+      (`TENANT_PERMISSION_FORMAT`) est déjà testé ici.
