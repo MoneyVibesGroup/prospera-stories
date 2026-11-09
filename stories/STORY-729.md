@@ -1,6 +1,6 @@
 # STORY-729 : Le référentiel se choisit PAR DOSSIER — un cabinet produit la liasse SFD ou CIMA de son client IMF
 
-Status: review
+Status: done
 
 **Services :** `bilan-service`, `balance-service` (ajouté au développement, voir la livraison) · **Recette :** `prospera-recette`
 **Points :** 8 · **Sprint :** non slottée (même régime que 727/728 : réservée, tirée à la demande du PO)
@@ -140,7 +140,7 @@ le 2026-11-09 : (a).**
 
 ---
 
-## 🟡 Livraison du 2026-11-09 — en revue
+## ✅ Livraison du 2026-11-09 — fusionnée, recette jouée depuis `dev`
 
 ### Deux constats qui ont élargi la story
 
@@ -182,7 +182,8 @@ pluriel (package `cabinet-sfd`) se tranche par le type d'entité.
   qui comparent des chemins en `/` ou du texte en LF sous Windows (`analyse.agnosticisme`,
   `dossier-scope.invariant`, `devise-paquet.exhaustivite`), sans lien avec cette story. En parallèle sur
   ce poste, plusieurs suites dépassent leur délai.
-- Les images du gate sont construites depuis les branches `MNV-729` : à rejouer depuis `dev` après fusion.
+- **Depuis `dev`, après fusion** : images reconstruites (bilan `3f8e235`, balance `12860df`, notification
+  `f522523`, paiement `3fc9eff`), volumes neufs : les six recettes passent, 61/61.
 
 ### Limites
 

@@ -159,4 +159,5 @@ node dist/rattrapage-fondateur.bootstrap.js [--appliquer]   # paiement-service
 
 Simulation par défaut, compte rendu sans adresse, relance sans effet. Elles complètent et ne corrigent jamais :
 un document existant garde ce qu'un événement a écrit. La recette recrée l'état d'avant la story, prouve que
-personne n'est prévenu, applique, puis constate que la cloche et l'e-mail repartent. PR #81, #113, recette #10.
+personne n'est prévenu, applique, puis constate que la cloche et l'e-mail repartent. PR #81, #113, recette #10,
+fusionnées ; rejoué depuis `dev` sur volumes neufs : les six recettes passent, 61/61.
