@@ -1,6 +1,11 @@
 # STORY-570 : Scaffold du service sur :3008, socle transverse et point de santé
 
-Status: ready-for-dev
+Status: done
+
+> ✅ **Livrée le 2026-09-03** — commits `92a8766` et `09f4c87` sur `origin/dev` de
+> `prospera-notification-service`. La fiche était restée à `ready-for-dev` ; le tracker portait déjà
+> `done`, avec le détail (santé à deux niveaux : `/api/v1/health` rend 503 au scaffold, c'est
+> `/api/v1/health/live` que le healthcheck du compose interroge). Statut resynchronisé le 2026-11-09.
 
 **Épic :** EPIC-054 — Socle `notification-service`, carnet de contacts et cloisonnement
 **Service :** `notification-service` (nouveau)

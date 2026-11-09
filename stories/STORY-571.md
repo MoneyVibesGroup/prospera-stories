@@ -1,6 +1,12 @@
 # STORY-571 : Deux bases Mongo aux rôles restreints — les preuves d'envoi sont ineffaçables
 
-Status: ready-for-dev
+Status: done
+
+> ✅ **Livrée le 2026-09-03** — commit `25205a4` sur `origin/dev` de `prospera-notification-service`.
+> ⚡ Écart assumé avec la lettre de la fiche : les deux bases vivent sur une instance dédiée
+> `mongo-notification` (réplica set `rs-notification`, port hôte 27019), pas sur `rs0` — le refus
+> d'effacer une preuve doit venir du serveur, donc d'une instance authentifiée. Le tracker portait déjà
+> `done` ; statut de la fiche resynchronisé le 2026-11-09.
 
 **Épic :** EPIC-054 — Socle `notification-service`, carnet de contacts et cloisonnement
 **Service :** `notification-service` (nouveau)
