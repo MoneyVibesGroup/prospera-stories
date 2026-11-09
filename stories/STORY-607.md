@@ -78,7 +78,8 @@ C'est le prix pour que `STORY-261` ne soit pas implémentée deux fois.
   - les 15 tests de `src/domain/declenchement` passent, et `tsc` et `eslint` sont propres ;
   - contre-preuve : avec `'paiement.demande.emise'` ajouté à la liste, 3 tests rougissent.
 
-  ⚠️ L'AC-3 ne tient sur `dev` qu'après la fusion de la PR.
+  ✅ **Fusionnée sur `dev` le 2026-11-09** (`f9b179d`, équivalent à `87317a5` d'après `git cherry`).
+  Rejouée depuis `dev` : `src/domain/declenchement`, 2 suites, 15/15. L'AC-3 tient.
 - `prospera-stories` : décision écrite dans `epics-paiement-2026-08-03.md` (sous STORY-261) **et**
   `epics-notification-2026-08-04.md` (sous AR-05) — AC-4.
 
