@@ -414,17 +414,20 @@ tester **sans Money Vibes**, avant de décider de conclure. C'est pour lui que l
 prêt en février (PRD Reprise de données, FR-19).
 
 **Conséquences (testables) :**
-- Une **offre d'essai** ouvre au prospect, **dans l'espace d'essai seulement**, les modules qu'elle liste ;
-  elle tient lieu de contrat pour FR-12. `[QUESTION QE-1 : quels modules ? tout le pack, ou l'offre
-  proposée au prospect ?]`
-- L'offre d'essai a une **durée** `[QUESTION QE-2]` ; à son terme, l'accès se ferme, sans rien effacer
-  immédiatement.
+- Une **offre d'essai** ouvre au prospect, **dans l'espace d'essai seulement**, les modules de **l'offre
+  que le commercial lui a proposée**, pas la plateforme complète ; elle tient lieu de contrat pour FR-12.
+- L'essai dure **30 jours**, prolongeable **une fois** par Money Vibes : **60 jours au maximum**. À son terme,
+  l'accès se ferme, sans rien effacer immédiatement.
 - Le prospect n'a **aucun accès à l'espace réel** ; aucun envoi réel ne part (FR-9).
-- **S'il signe**, ses données d'essai `[QUESTION QE-3 : servent-elles de point de départ, ou repart-on
-  d'une reprise fraîche comme pour tout client (FR-8) ?]`.
-- **S'il ne signe pas**, ses données sont **effacées** au bout d'un délai `[QUESTION QE-4]`, et
-  l'effacement est tracé.
-- Ses données restent **cloisonnées** et ne servent **jamais** à l'IA commune sans consentement (partie C).
+- **Il utilise l'IA déjà présente** : le modèle commun fonctionne pour lui comme pour un client.
+  `[ASSUMPTION : sa calibration locale se calcule sur ses données d'essai, dans l'espace d'essai, et suit
+  le sort de ces données]`
+- **S'il signe**, il garde son espace d'essai et ses réglages (tables de correspondance, rôles, zones) ; la
+  reprise est **rejouée à frais** dans l'espace réel : son essai **est** la répétition générale (FR-8).
+- **S'il ne signe pas**, tout est **effacé 30 jours après la fin de l'essai**, et l'effacement est tracé ; il
+  peut **exporter** ses données avant.
+- Ses données restent **cloisonnées** et ne **sortent jamais** vers l'IA commune sans son consentement
+  (partie C) : la règle limite ce qui sort, pas ce qu'il utilise.
 
 **Questions de la partie A, tranchées le 2026-11-10**
 - **QA-1** : la console montre les **modules commerciaux** (18 pour le distributeur, 4 packs, add-on
