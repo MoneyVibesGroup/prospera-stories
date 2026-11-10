@@ -156,7 +156,7 @@ Réalise UJ-8.
 
 | Niveau | Délai cible | Données |
 |---|---|---|
-| **Immédiat** | quelques minutes `[ASSUMPTION : ≤ 5 minutes]` | remboursements et encaissements ; blocage de crédit ; stock disponible au moment de valider une commande |
+| **Immédiat** | **5 minutes** au plus (avec API ; impossible avec un export planifié) | remboursements et encaissements ; blocage de crédit ; stock disponible au moment de valider une commande |
 | **Dans l'heure** | < 1 heure | nouveaux clients et points de vente ; produits ; changements de prix (toujours avec une **date d'effet**) |
 | **La nuit** | avant 6 h | écritures comptables ; historique pour l'IA ; contrôle de concordance ; préparation des états BCEAO |
 
@@ -213,8 +213,12 @@ Réalise UJ-6.
 **Conséquences (testables) :**
 - À côté de chaque donnée venue du logiciel du client, une mention discrète donne l'heure de sa dernière
   mise à jour (« Solde à jour à 10 h 12 »).
-- Au-delà du délai cible de son niveau, la mention passe en **orange**, puis en **rouge**
-  `[ASSUMPTION : rouge au double du délai cible]`.
+- Au-delà du délai cible de son niveau, la mention passe en **orange**, puis en **rouge** :
+  - **immédiat** : orange après **5 min**, rouge après **15 min** ;
+  - **dans l'heure** : orange après **1 h**, rouge après **3 h** ;
+  - **la nuit** : rouge si la donnée n'est **pas arrivée à 6 h** (échéance fixe, pas de délai glissant).
+  `[RECOMMANDATION, à valider : rouge à 3 fois le délai cible, et non 2, pour éviter les fausses alertes
+  dues aux coupures réseau brèves ; le message d'action apparaît dès l'orange]`
 - Pour les données d'argent, la mention dit **quoi faire** : « Solde non confirmé depuis 2 h. Vérifiez le
   reçu du client avant de relancer. »
 - Sans API (export planifié), le niveau **immédiat** est impossible : Prospera l'**affiche**, au lieu de
@@ -229,6 +233,9 @@ Réalise UJ-6.
 - **Money Vibes d'abord** : la console montre l'état du connecteur de chaque client (dernier échange, file
   d'envoi, refus, écarts) et alerte l'équipe, souvent avant que le client ne remarque rien.
 - **L'administrateur du client ensuite**, par WhatsApp ou e-mail, si la panne dure **plus de 30 minutes**.
+- Pour les données de nuit, l'administrateur est aussi prévenu si elles ne sont **pas arrivées à 6 h**
+  `[RECOMMANDATION, à valider]` : une panne nocturne ne dure jamais « 30 minutes » aux yeux de quelqu'un,
+  mais elle prive l'IA des priorités du matin.
 - Sur une instance sur site, l'état du connecteur fait partie des informations de santé envoyées à Money
   Vibes (PRD moteur, FR-16 et FR-26), sans aucune donnée métier.
 
@@ -248,7 +255,22 @@ Exemple chez un distributeur qui garde Odoo pour la comptabilité :
 **Conséquences (testables) :**
 - Cette répartition est la **proposition par défaut** de la console pour un distributeur avec Odoo ;
   l'intégrateur l'ajuste.
-- Versions d'Odoo supportées : `[QUESTION QK-1]`.
+
+**Toutes les versions d'Odoo (décision du PO, 2026-11-10).** Odoo change de forme d'une version à
+l'autre ; le connecteur doit donc s'adapter à celle qu'il trouve :
+- il **détecte la version** et l'édition (Community ou Enterprise) à la connexion, et l'affiche dans le
+  bilan d'installation ;
+- il parle les **deux API** d'Odoo : l'ancienne (XML-RPC / JSON-RPC), présente dans toutes les versions
+  mais dépréciée depuis Odoo 19 et dont la suppression est annoncée pour Odoo 22 (Odoo Online 21.1) ; et la
+  nouvelle (**JSON-2**, depuis Odoo 19). La nouvelle est utilisée dès qu'elle existe ;
+- il connaît les **générations de modèles** : par exemple, les factures sont `account.invoice` jusqu'à Odoo
+  12, puis `account.move` à partir d'Odoo 13 ;
+- un Odoo **personnalisé** par un ancien prestataire passe par les tables de correspondance (PRD Reprise,
+  FR-4) ;
+- **Odoo Online** n'ouvre son API qu'au **plan Custom** : c'est un **prérequis** vérifié à l'installation
+  (PRD moteur, FR-5), avec l'action à faire si le client n'y est pas ;
+- chaque version effectivement rencontrée chez un client entre dans la **matrice de tests** du connecteur ;
+  une version jamais testée est signalée à l'installation, sans être refusée.
 
 #### FR-15 : IMF
 **Conséquences (testables) :**
@@ -269,8 +291,11 @@ Exemple chez un distributeur qui garde Odoo pour la comptabilité :
 **Conséquences (testables) :**
 1. **Clients et produits**, avec les prix.
 2. **Stock**, en lecture.
-3. **Factures et encaissements** vers la comptabilité Odoo.
-4. **La file des écarts** et l'**écran de santé**.
+3. **Factures et encaissements** vers la comptabilité Odoo, **livrés en même temps que la file des écarts
+   et l'écran de santé**.
+- `[RECOMMANDATION, à valider]` Le récit plaçait la file des écarts en 4ᵉ étape. Or l'étape 3 est celle où
+  l'**argent** commence à circuler : sans la file des écarts, la règle « jamais d'argent corrigé en
+  silence » n'aurait aucun outil pour s'appliquer. L'étape 3 ne part donc pas sans elle.
 - La comptabilité dans l'autre sens (d'Odoo vers Prospera) attend : c'est Odoo qui en est propriétaire.
 
 ---
@@ -325,8 +350,8 @@ attente de confirmation (FR-2). C'est le premier cas de ce genre ; la spine devr
 
 ## 8. Questions ouvertes
 
-| # | Question | Proposition |
+| # | Question | État |
 |---|---|---|
-| QK-1 | Quelles **versions d'Odoo** le connecteur supporte-t-il ? | Odoo 17 et 18, Community et Enterprise, à confirmer selon la version du distributeur de février |
-| QK-2 | Les **propositions** du récit (mode selon l'offre, trois garde-fous, trois niveaux de fraîcheur, alerte au client après 30 min, ordre de livraison pour février) sont-elles retenues telles quelles ? | les retenir |
-| QK-3 | Délai « immédiat » : **5 minutes** au plus, et alerte rouge au double du délai cible ? | oui |
+| QK-1 | Versions d'Odoo | ✅ **Toutes** (PO) ; exigences d'adaptation dans FR-14 |
+| QK-2 | Propositions du récit | ✅ **Gardées** (PO), avec trois améliorations recommandées, à valider : file des écarts livrée **avec** l'étape 3 (FR-17) ; alerte « pas arrivé à 6 h » pour la nuit (FR-13) ; seuils de couleur ci-dessous |
+| QK-3 | Délai immédiat et seuils | **5 min** ; orange au délai cible, **rouge à 3 fois** (15 min, 3 h), **6 h fixe** pour la nuit (FR-11) : recommandation, à valider |
