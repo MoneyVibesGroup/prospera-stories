@@ -1,6 +1,6 @@
 ---
 title: "PRD — Moteur d'installation (platform-catalog-service)"
-status: draft
+status: draft  # contenu complet le 2026-11-10 ; relecture (Finalize) avant validation PO le 13/11
 created: 2026-11-09
 updated: 2026-11-10
 project: prospera
@@ -200,9 +200,21 @@ Les trois parcours ont été racontés par le PO le 2026-11-10. Chacun a un **me
 - **Connexion sortante** : la seule liaison permise ; c'est l'instance qui appelle Money Vibes, jamais
   l'inverse.
 - **Licence** : un document **signé par Money Vibes** qui liste, pour une instance, les organisations, leurs
-  modules et leurs échéances. Sur une instance sur site, c'est la source des droits d'usage.
-- **Délai de grâce** : la durée pendant laquelle une instance sur site fonctionne sans pouvoir joindre Money
-  Vibes. `[ASSUMPTION : 30 jours, à fixer]`
+  modules et **deux droits** par module. Sur une instance sur site, c'est la source des droits.
+  - **Droit d'utiliser** : **perpétuel** pour un client qui achète le logiciel (l'assureur), **à
+    échéance** pour un client abonné.
+  - **Droit aux mises à jour** : correctifs, nouvelles versions, nouveau modèle commun, support. Il suit la
+    **maintenance** et a toujours une échéance.
+- **Maintenance** : le contrat qui ouvre le droit aux mises à jour. À sa fin, le logiciel est **figé** à sa
+  dernière version, sans jamais être suspendu.
+- **Signal** : le message hebdomadaire de l'instance à Money Vibes (santé, version, licence).
+- **Délai de grâce** : 30 jours sans signal reçu (comme Odoo). Au-delà, l'instance passe en **gel**.
+- **Gel** : le travail quotidien continue, mais **plus rien ne change** (ni installation, ni mise à jour,
+  même de sécurité). C'est aussi l'état permanent d'un logiciel acheté dont la maintenance a pris fin.
+- **Préavis** : les 30 jours qui suivent l'échéance du droit d'utiliser d'un abonné ; tout fonctionne, avec
+  un avertissement. Ensuite, **suspension** : consulter et exporter seulement.
+- **Mise à jour depuis un fichier** : appliquer une licence ou un paquet signés apportés par e-mail, lien de
+  téléchargement ou clé USB, sans que le serveur ait besoin d'internet.
 - **Version** : un état de la plateforme et de ses modules. **Une seule ligne de version pour tous les
   clients.**
 - **Mise à jour** : le passage d'une instance à une nouvelle version. Elle est **tirée** par l'instance,
@@ -232,8 +244,7 @@ Les trois parcours ont été racontés par le PO le 2026-11-10. Chacun a un **me
 
 **Installation (partie A)**
 - **Offre** : ce que le client a acheté, choisi dans la console : la **plateforme complète**, un ou
-  plusieurs **packs**, plus ou moins des modules ajustés un par un. `[ASSUMPTION : « bundle » (terme
-  commercial) = « pack » (terme du catalogue) ; voir §4.A, question ouverte QA-1]`
+  plusieurs **packs**, plus ou moins des modules ajustés un par un. « Bundle » et « pack » désignent la même chose (QA-1).
 - **Prérequis** : ce qu'un module exige du client pour fonctionner (clé d'accès PI-SPI, numéro WhatsApp
   vérifié, connecteur joignable…). Déclaré au manifeste, vérifié pendant l'installation.
 - **Vérification** : un contrôle réel qu'un module exécute et dont il rend le résultat chiffré (données
@@ -326,7 +337,7 @@ Chaque module installé exécute ses vérifications et en rend le résultat chif
 - **Comptes et rôles** : chaque compte créé (DG, comptable, commercial) avec son rôle, et l'invitation
   envoyée.
 - **Connexions testées** : message WhatsApp de test reçu, lien de paiement PI-SPI de test généré,
-  synchronisation Odoo aller-retour `[ASSUMPTION : relève du module Connecteurs, voir QA-3]`.
+  synchronisation Odoo aller-retour (fournie par le module **Connecteurs**, QA-3).
 - Une vérification qui n'a pas pu s'exécuter n'est jamais affichée comme réussie.
 
 #### FR-7 : Le bilan d'installation et le passage « En service »
@@ -415,25 +426,35 @@ Vibes, avec les mêmes étapes.
 
 #### FR-14 : La licence signée
 **Conséquences (testables) :**
-- Money Vibes émet pour chaque instance sur site une **licence signée** : organisations, modules,
-  échéances. L'instance vérifie la signature **hors ligne**.
+- Money Vibes émet pour chaque instance sur site une **licence signée** : organisations, modules, et pour
+  chaque module `usage: perpétuel | jusqu'au <date>` et `miseAJour: jusqu'au <date>`. L'instance vérifie
+  la signature **hors ligne**.
 - Une licence altérée ou mal signée est refusée, et l'instance garde la précédente.
 - Un module absent de la licence ne s'installe pas : `MODULE_HORS_LICENCE` (422).
 - Une suspension (impayé, litige) ou un ajout de module arrive par une **nouvelle licence**, au contact
   suivant.
 
-#### FR-15 : Fonctionner coupé de Money Vibes
+#### FR-15 : Fonctionner coupé de Money Vibes : le silence ne punit pas
+Le silence ne dit rien de la bonne foi du client (câble coupé, panne réseau, refus de payer) : il ne
+sanctionne donc rien. Le contrat a sa propre horloge (FR-32).
+
 **Conséquences (testables) :**
-- Une instance sur site fonctionne normalement sans joindre Money Vibes pendant le **délai de grâce**
-  `[ASSUMPTION : 30 jours]`.
-- Le DSI et Money Vibes sont alertés à partir de `[ASSUMPTION : J+7]` sans contact.
-- À l'expiration : `[QUESTION QB-1 : que se passe-t-il ?]`
+- **J+7 sans signal** : alerte au DSI et à Money Vibes.
+- **J+30 sans signal** (fin du délai de grâce) : **gel**. Le travail quotidien continue ; aucune
+  installation ni mise à jour ne s'applique ; un bandeau orange s'affiche **pour les administrateurs
+  seulement** ; le DG est alerté ; Money Vibes ouvre un ticket et appelle le client.
+- Le gel se lève **dès que le signal revient**, ou dès qu'une **mise à jour depuis un fichier** (FR-22)
+  apporte une licence fraîche.
+- Débrancher internet n'arrête pas l'horloge du contrat : le droit d'utiliser d'un abonné expire à sa date,
+  connecté ou non.
 
 #### FR-16 : Connexion sortante uniquement, et supervision
 **Conséquences (testables) :**
 - L'instance n'ouvre **aucun port entrant** ; toutes les liaisons sont initiées par elle, en HTTPS.
-- Elle envoie un **battement** à intervalle régulier `[ASSUMPTION : toutes les 15 minutes]` : version, santé
-  par module, licence, indicateurs de niveau 0.
+- Elle envoie un **signal hebdomadaire** (comme Odoo) : version, santé par module, licence, indicateurs de
+  niveau 0.
+- Elle vérifie **chaque jour** s'il existe un **correctif de sécurité** pour elle ; cette requête n'envoie
+  aucune donnée.
 - Money Vibes dispose d'une **vue de supervision** de toutes les instances : version, santé, dernier contact,
   mises à jour en attente.
 
@@ -450,20 +471,22 @@ Vibes, avec les mêmes étapes.
 #### FR-18 : Retour arrière en un clic, sans perte
 **Conséquences (testables) :**
 - Après une promotion, le DSI peut revenir à la version précédente en une action, pendant
-  `[ASSUMPTION : 7 jours]`.
+  **7 jours**.
 - Les données saisies depuis la promotion sont conservées ; une mise à jour dont la migration de données
   n'est pas réversible ne peut pas être publiée sans sauvegarde restaurable.
 
 #### FR-19 : Le chemin rapide des correctifs de sécurité
 **Conséquences (testables) :**
-- Un correctif de sécurité passe par l'essai **et** la promotion dans un délai court
-  `[ASSUMPTION : 72 heures]`, avec retour arrière automatique.
-- Le DSI est prévenu avant ; `[QUESTION QB-2 : peut-il refuser ou reporter ?]`
+- En cas d'urgence, Money Vibes **prévient le DSI** par téléphone et par e-mail, sans attendre la
+  vérification quotidienne.
+- Un correctif de sécurité passe par l'essai **et** la promotion en **72 heures** à partir du moment où le
+  client est prévenu, avec retour arrière automatique.
+- Le DSI peut le **reporter une seule fois, de 7 jours au plus** ; il ne peut pas le refuser.
 
 #### FR-20 : Déploiement par vagues
 **Conséquences (testables) :**
 - Money Vibes fixe l'ordre : un **client pilote** d'abord, puis les autres.
-- Une version ne passe à la vague suivante qu'après `[ASSUMPTION : 7 jours]` de santé sans incident sur la
+- Une version ne passe à la vague suivante qu'après **7 jours** de santé sans incident sur la
   précédente.
 
 #### FR-21 : Une seule ligne de version
@@ -472,10 +495,21 @@ Vibes, avec les mêmes étapes.
 - Une instance ne peut pas rester plus de **deux versions majeures** en retard : c'est la fenêtre de support
   N/N-1 déjà appliquée par le catalogue (`fenetre-de-support.ts`).
 
-#### FR-22 : Mise à jour hors ligne
+#### FR-22 : Mise à jour depuis un fichier, y compris à l'étranger
+Le serveur du client n'a pas besoin d'internet : seuls les fichiers voyagent, et leur signature prouve
+leur origine.
+
 **Conséquences (testables) :**
-- Le **même paquet signé** peut être apporté sur clé USB lors d'une visite et appliqué par le même chemin
-  (essai, puis promotion).
+- La **licence** (quelques kilo-octets) peut être envoyée **par e-mail** ; le DSI la dépose dans la console
+  de l'instance.
+- Le **paquet de mise à jour** se télécharge par un **lien sécurisé à durée limitée**, depuis n'importe quel
+  poste du client, ou arrive sur **clé USB** lors d'une visite.
+- La console offre l'écran « **Mettre à jour depuis un fichier** » : la signature est vérifiée sous les
+  yeux du DSI, puis le chemin habituel s'applique (essai, puis promotion).
+- Le geste technique peut se faire **en visioconférence**, avec le tunnel ouvert par le client (FR-23) ;
+  aucune visite sur place n'est nécessaire.
+- Quand un pays compte plusieurs clients, un **intégrateur partenaire local** peut faire les visites
+  `[hors périmètre du produit : décision commerciale]`.
 
 #### FR-23 : Support à distance à la demande
 **Conséquences (testables) :**
@@ -493,8 +527,20 @@ Vibes, avec les mêmes étapes.
 **Conséquences (testables) :**
 - À partir d'un serveur livré, une procédure scriptée monte le socle, les deux espaces et les modules de la
   licence, chacun par son **profil** (contrat de module C10), avec sauvegardes automatiques.
-- La procédure se termine par un **bilan d'instance** : espaces actifs, licence valide, battement reçu par
-  Money Vibes, sauvegarde testée par une restauration.
+- La procédure se termine par un **bilan d'instance** : espaces actifs, licence valide, premier signal reçu
+  par Money Vibes, sauvegarde testée par une restauration.
+
+#### FR-32 : Fin de contrat : l'échéance du droit d'utiliser, la fin de la maintenance
+**Conséquences (testables) :**
+- **Abonné, droit d'utiliser échu** : **30 jours de préavis** où tout fonctionne avec un avertissement ;
+  puis **suspension** : on ne peut plus que **consulter et exporter**. Jamais d'écran noir, jamais
+  d'effacement. Même règle que la suspension d'impayé de la plateforme (STORY-280), avec l'export en plus.
+- **Client qui a acheté (droit d'utiliser perpétuel), maintenance échue** : le logiciel **continue à vie**,
+  figé à sa dernière version (**gel** permanent) ; plus de mises à jour, de support ni de nouveau modèle
+  commun ; **jamais de suspension**.
+- Le contrat de ce client dit en clair qu'un logiciel figé ne reçoit plus de correctifs de sécurité.
+- **Revenir à la maintenance se paie**, et impose de rattraper les versions manquées (fenêtre de support
+  N/N-1, FR-21).
 
 ### 4.C Données et apprentissage
 
@@ -516,7 +562,8 @@ le droit de les mettre en commun.
 **Conséquences (testables) :**
 - Un consentement porte : organisation, **finalité**, **niveau** (1, 2 ou 3), auteur, date, référence de la
   clause du contrat client.
-- Il est donné par `[QUESTION QC-1 : quel rôle chez le client ?]` ; il se **retire** à tout moment.
+- Il est donné par le **dirigeant (DG)** du client, ou par une personne qu'il **désigne par écrit** ; il se
+  **retire** à tout moment.
 - Chaque don et chaque retrait sont journalisés ; le client consulte ce journal.
 - Sans contrat client signé portant la clause correspondante, aucun consentement ne s'enregistre.
 
@@ -562,7 +609,7 @@ juridique, loi togolaise 2019-014).
 - **NFR-4, traçabilité** : installations, mises en service, promotions, retours arrière, consentements,
   exports et sessions de support sont journalisés en **ajout seul**.
 - **NFR-5, rapidité** : le pack distributeur complet s'installe dans l'espace d'essai en moins de
-  `[ASSUMPTION : 15 minutes]`, hors reprise de données.
+  **15 minutes**, hors reprise de données.
 - **NFR-6, idempotence** : rejouer une installation, une promotion ou un « Réessayer » ne crée aucun doublon.
 
 ## 6. Indicateurs de réussite
@@ -600,9 +647,14 @@ Le moteur vit dans `platform-catalog-service` ; il applique le contrat qu'il fai
 
 ## 8. Questions ouvertes
 
-| # | Question | Bloque |
+Toutes tranchées par le PO le 2026-11-10 :
+
+| # | Question | Décision |
 |---|---|---|
-| QB-1 | À l'expiration du délai de grâce, que fait l'instance ? (continuer et alerter / lecture seule / arrêt) | FR-15 |
-| QB-2 | Le DSI peut-il refuser ou reporter un correctif de sécurité, et jusqu'à quand ? | FR-19 |
-| QC-1 | Qui, chez le client, donne un consentement (DG, DSI, délégué à la protection des données) ? | FR-27 |
-| — | Les valeurs marquées `[ASSUMPTION]` : délai de grâce 30 j, alerte à J+7, battement 15 min, retour arrière 7 j, correctif 72 h, vague 7 j, installation 15 min | à confirmer en bloc |
+| QB-1 | Instance coupée au-delà du délai de grâce | **Gel** à J+30 ; le silence ne punit pas ; le contrat a sa propre horloge (FR-15, FR-32) |
+| QB-2 | Report d'un correctif de sécurité | **Une fois, 7 jours au plus**, pas de refus (FR-19) |
+| QC-1 | Qui consent chez le client | **Le DG**, ou une personne qu'il désigne par écrit (FR-27) |
+| — | Valeurs | Signal **hebdomadaire** + contrôle sécurité **quotidien** ; grâce **30 j**, alerte **J+7** ; retour arrière **7 j** ; correctif **72 h** ; vague **7 j** ; installation **< 15 min** ; préavis **30 j** |
+
+Il ne reste aucune question ouverte. Seule la limite « pas de libre-service en v1 » (§2.2) reste une
+inférence, sans effet sur février.
