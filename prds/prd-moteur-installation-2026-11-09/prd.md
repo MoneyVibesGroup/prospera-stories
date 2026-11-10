@@ -420,8 +420,9 @@ prêt en février (PRD Reprise de données, FR-19).
   l'accès se ferme, sans rien effacer immédiatement.
 - Le prospect n'a **aucun accès à l'espace réel** ; aucun envoi réel ne part (FR-9).
 - **Il utilise l'IA déjà présente** : le modèle commun fonctionne pour lui comme pour un client.
-  `[ASSUMPTION : sa calibration locale se calcule sur ses données d'essai, dans l'espace d'essai, et suit
-  le sort de ces données]`
+  **L'IA s'ajuste aussi sur ses propres données** : sa calibration locale se calcule dans l'espace d'essai
+  et suit le sort de ces données (gardée s'il signe, effacée avec elles s'il ne signe pas). Confirmé par le
+  PO le 2026-11-10 : c'est un argument de vente.
 - **S'il signe**, il garde son espace d'essai et ses réglages (tables de correspondance, rôles, zones) ; la
   reprise est **rejouée à frais** dans l'espace réel : son essai **est** la répétition générale (FR-8).
 - **S'il ne signe pas**, tout est **effacé 30 jours après la fin de l'essai**, et l'effacement est tracé ; il
