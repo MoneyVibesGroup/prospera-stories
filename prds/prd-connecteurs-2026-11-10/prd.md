@@ -217,8 +217,8 @@ Réalise UJ-6.
   - **immédiat** : orange après **5 min**, rouge après **15 min** ;
   - **dans l'heure** : orange après **1 h**, rouge après **3 h** ;
   - **la nuit** : rouge si la donnée n'est **pas arrivée à 6 h** (échéance fixe, pas de délai glissant).
-  `[RECOMMANDATION, à valider : rouge à 3 fois le délai cible, et non 2, pour éviter les fausses alertes
-  dues aux coupures réseau brèves ; le message d'action apparaît dès l'orange]`
+  Rouge à **3 fois** le délai cible, et non 2, pour éviter les fausses alertes dues aux coupures réseau
+  brèves ; le **message d'action apparaît dès l'orange** (validé par le PO le 2026-11-10).
 - Pour les données d'argent, la mention dit **quoi faire** : « Solde non confirmé depuis 2 h. Vérifiez le
   reçu du client avant de relancer. »
 - Sans API (export planifié), le niveau **immédiat** est impossible : Prospera l'**affiche**, au lieu de
@@ -234,7 +234,7 @@ Réalise UJ-6.
   d'envoi, refus, écarts) et alerte l'équipe, souvent avant que le client ne remarque rien.
 - **L'administrateur du client ensuite**, par WhatsApp ou e-mail, si la panne dure **plus de 30 minutes**.
 - Pour les données de nuit, l'administrateur est aussi prévenu si elles ne sont **pas arrivées à 6 h**
-  `[RECOMMANDATION, à valider]` : une panne nocturne ne dure jamais « 30 minutes » aux yeux de quelqu'un,
+  (validé par le PO) : une panne nocturne ne dure jamais « 30 minutes » aux yeux de quelqu'un,
   mais elle prive l'IA des priorités du matin.
 - Sur une instance sur site, l'état du connecteur fait partie des informations de santé envoyées à Money
   Vibes (PRD moteur, FR-16 et FR-26), sans aucune donnée métier.
@@ -293,7 +293,7 @@ l'autre ; le connecteur doit donc s'adapter à celle qu'il trouve :
 2. **Stock**, en lecture.
 3. **Factures et encaissements** vers la comptabilité Odoo, **livrés en même temps que la file des écarts
    et l'écran de santé**.
-- `[RECOMMANDATION, à valider]` Le récit plaçait la file des écarts en 4ᵉ étape. Or l'étape 3 est celle où
+- (Validé par le PO.) Le récit plaçait la file des écarts en 4ᵉ étape. Or l'étape 3 est celle où
   l'**argent** commence à circuler : sans la file des écarts, la règle « jamais d'argent corrigé en
   silence » n'aurait aucun outil pour s'appliquer. L'étape 3 ne part donc pas sans elle.
 - La comptabilité dans l'autre sens (d'Odoo vers Prospera) attend : c'est Odoo qui en est propriétaire.
@@ -353,5 +353,5 @@ attente de confirmation (FR-2). C'est le premier cas de ce genre ; la spine devr
 | # | Question | État |
 |---|---|---|
 | QK-1 | Versions d'Odoo | ✅ **Toutes** (PO) ; exigences d'adaptation dans FR-14 |
-| QK-2 | Propositions du récit | ✅ **Gardées** (PO), avec trois améliorations recommandées, à valider : file des écarts livrée **avec** l'étape 3 (FR-17) ; alerte « pas arrivé à 6 h » pour la nuit (FR-13) ; seuils de couleur ci-dessous |
-| QK-3 | Délai immédiat et seuils | **5 min** ; orange au délai cible, **rouge à 3 fois** (15 min, 3 h), **6 h fixe** pour la nuit (FR-11) : recommandation, à valider |
+| QK-2 | Propositions du récit | ✅ **Gardées** (PO), avec trois améliorations **validées** par le PO : file des écarts livrée **avec** l'étape 3 (FR-17) ; alerte « pas arrivé à 6 h » pour la nuit (FR-13) ; seuils de couleur ci-dessous |
+| QK-3 | Délai immédiat et seuils | **5 min** ; orange au délai cible, **rouge à 3 fois** (15 min, 3 h), **6 h fixe** pour la nuit (FR-11) : ✅ **validé** par le PO |
