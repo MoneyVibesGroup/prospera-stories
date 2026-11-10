@@ -229,3 +229,124 @@ Les trois parcours ont été racontés par le PO le 2026-11-10. Chacun a un **me
   fournie par le client), avec rapport d'écarts et validation par le client avant import.
 - **Connecteurs** : la synchronisation **permanente et dans les deux sens** avec un logiciel que le client
   garde.
+
+**Installation (partie A)**
+- **Offre** : ce que le client a acheté, choisi dans la console : la **plateforme complète**, un ou
+  plusieurs **packs**, plus ou moins des modules ajustés un par un. `[ASSUMPTION : « bundle » (terme
+  commercial) = « pack » (terme du catalogue) ; voir §4.A, question ouverte QA-1]`
+- **Prérequis** : ce qu'un module exige du client pour fonctionner (clé d'accès PI-SPI, numéro WhatsApp
+  vérifié, connecteur joignable…). Déclaré au manifeste, vérifié pendant l'installation.
+- **Vérification** : un contrôle réel qu'un module exécute et dont il rend le résultat chiffré (données
+  importées, comptes créés, message de test reçu). « Vérifié » ne veut jamais dire « pas d'erreur ».
+- **Bilan d'installation** : l'écran, puis le PDF, qui donne pour chaque module de l'offre son voyant et
+  ses vérifications.
+- **Voyant** : 🟢 **vérifié** · 🟠 **en attente** (une dépendance ou un prérequis manque) · 🔴 **bloqué**
+  (avec la raison et l'action à faire).
+- **État du client** : **En installation** tant qu'un voyant n'est pas vert ; **En service** quand tous le
+  sont.
+
+---
+
+## 4. Fonctionnalités
+
+### 4.A Activer : choisir, vérifier, installer, mettre en service
+
+**Description.** Rachid ouvre la fiche du client dans la console Money Vibes et clique sur « Installer
+Prospera Distributeur » (réalise UJ-2). Il part de l'**offre** : la plateforme complète, ou un ou
+plusieurs packs (Terrain & Ventes, Finance & Recouvrement, Stock & Logistique, Croissance & Équipes).
+Choisir un pack coche ses modules ; Rachid ajuste ensuite un par un pour refléter ce que le client a
+réellement acheté. Exemple : Moussa a pris Terrain & Ventes (CRM, Terrain & Tournées, Application mobile,
+Prise de commande) et ajoute Facturation pour que ses commerciaux facturent depuis leur téléphone.
+
+Les **dépendances** se règlent **au moment où l'on coche**, jamais au lancement : on ne peut pas lancer une
+installation avec un module orphelin. Les **prérequis**, eux, ne se voient qu'à l'installation : un module
+dont un prérequis manque passe en rouge, ceux qui en dépendent attendent en orange, et **le reste du pack
+est utilisable tout de suite**. L'installation se termine sur le **bilan d'installation**, qui montre ce qui
+a vraiment été vérifié. Le client passe **En service** seulement quand tout est vert.
+
+**Exigences fonctionnelles**
+
+#### FR-1 : Choisir l'offre du client
+L'équipe de déploiement peut choisir, pour une organisation, la plateforme complète ou un ou plusieurs
+packs, puis ajouter ou retirer des modules un par un. Réalise UJ-2.
+
+**Conséquences (testables) :**
+- Choisir un pack coche tous ses modules ; le retirer décoche ceux qu'aucun autre choix ne retient.
+- La sélection finale (packs, ajouts, retraits), son auteur et sa date sont enregistrés.
+- Un module ajouté hors pack est marqué comme tel dans la sélection et dans le bilan.
+
+#### FR-2 : Ajouter les dépendances au moment du choix, avec leur raison
+Quand un module coché a une dépendance dure non cochée, la console l'ajoute aussitôt et dit pourquoi.
+
+**Conséquences (testables) :**
+- Cocher Relances & Recouvrement sans Facturation ajoute Facturation et affiche : « ➕ Facturation
+  ajoutée : Relances en a besoin pour connaître les créances. »
+- **La raison vient du manifeste** : chaque dépendance dure y porte un libellé lisible par un humain.
+- Annuler l'ajout de la dépendance décoche aussi le module qui l'a demandée.
+- Les dépendances se résolvent en cascade (la dépendance d'une dépendance est ajoutée aussi).
+
+#### FR-3 : Empêcher le retrait d'un module dont d'autres ont besoin
+Quand on retire un module requis par d'autres modules cochés, la console arrête et propose deux issues.
+
+**Conséquences (testables) :**
+- Retirer Facturation alors qu'Encaissements et Relances sont cochés affiche : « ⚠ Encaissements et
+  Relances utilisent Facturation. Retirer les trois, ou garder Facturation ? »
+- Aucune des deux issues ne laisse un module orphelin dans la sélection.
+- La même règle vaut pour désinstaller un module déjà installé : refus `MODULE_REQUIS_PAR` (409) avec la
+  liste des modules dépendants (contrat de module §3, Q2).
+
+#### FR-4 : Un seul point de décision, quel que soit le chemin
+Toute installation passe par la même vérification des dépendances, qu'elle vienne de la console, d'un
+abonnement payé, de la propagation d'un pack ou d'une licence importée sur site.
+
+**Conséquences (testables) :**
+- Une demande d'installation à laquelle manque une dépendance dure est refusée par le serveur avec
+  `MODULE_DEPENDANCE_MANQUANTE` (422) et la liste des modules manquants, **même si la console a été
+  contournée**.
+- Retirer la vérification du point de décision fait échouer les tests des quatre chemins (test de mutation).
+- Un manifeste qui crée un cycle de dépendances est refusé : `MANIFESTE_CYCLE` (422).
+
+#### FR-5 : Vérifier les prérequis pendant l'installation, sans bloquer le reste
+Chaque module déclare ses prérequis au manifeste. Pendant l'installation, un prérequis absent bloque ce
+module et ceux qui en dépendent, et seulement eux.
+
+**Conséquences (testables) :**
+- Clé PI-SPI absente : « ✖ Encaissements & PI-SPI : clé d'accès PI-SPI absente. → Demander la clé à la
+  banque du client, puis « Réessayer ». » Le voyant est 🔴, avec la raison et l'action.
+- Les modules qui dépendent du module bloqué passent 🟠 **en attente** ; les autres s'installent.
+- « Réessayer » ne rejoue que les vérifications en échec, et peut être relancé sans effet de bord.
+- Un module en attente ou bloqué n'apparaît pas dans le menu des utilisateurs du client.
+
+#### FR-6 : Des vérifications réelles, pas des « OK »
+Chaque module installé exécute ses vérifications et en rend le résultat chiffré.
+
+**Conséquences (testables) :**
+- **Données importées** : le nombre d'objets repris par module (« 1 240 points de vente, 312 produits,
+  9 commerciaux »), fourni par la Reprise de données, quelle que soit la source (Odoo ou fichiers).
+- **Comptes et rôles** : chaque compte créé (DG, comptable, commercial) avec son rôle, et l'invitation
+  envoyée.
+- **Connexions testées** : message WhatsApp de test reçu, lien de paiement PI-SPI de test généré,
+  synchronisation Odoo aller-retour `[ASSUMPTION : relève du module Connecteurs, voir QA-3]`.
+- Une vérification qui n'a pas pu s'exécuter n'est jamais affichée comme réussie.
+
+#### FR-7 : Le bilan d'installation et le passage « En service »
+À la fin, la console affiche le bilan : une ligne par module, son voyant et ses vérifications.
+
+**Conséquences (testables) :**
+- Tant qu'une ligne est 🟠 ou 🔴, la fiche du client reste **En installation** et le bilan sert de liste
+  des choses à finir.
+- Quand toutes les lignes sont 🟢, la fiche passe **En service**.
+- « Envoyer le bilan au client » produit un PDF reçu par le dirigeant du client.
+- Le bilan est conservé : on peut le rouvrir et voir qui a installé quoi, quand, et avec quels résultats.
+
+**Questions ouvertes de la partie A**
+- **QA-1** : l'offre commerciale du distributeur compte **18 modules** et **4 packs** (plus un add-on
+  Freelance) ; le catalogue en compte **7 codes** dans le pack `distributeur` (`balance`, `bilan`, `pdv`,
+  `stock`, `catalogue`, `commande`, `facturation`). Lequel des deux la console montre-t-elle, et comment se
+  correspondent-ils ?
+- **QA-2** : où se place l'**espace d'essai** dans ce parcours ? Le bilan « En service » est-il la mise en
+  service dans l'espace réel ?
+- **QA-3** : la synchronisation Odoo aller-retour du bilan est du ressort du module **Connecteurs**. Le
+  distributeur de février en a-t-il besoin ? Si oui, Connecteurs entre au lot 1.
+- **QA-4** : la sélection de Rachid doit-elle concorder avec le contrat ou l'abonnement du client (la console
+  refuse un module non acheté), ou est-ce elle qui fait foi ?
