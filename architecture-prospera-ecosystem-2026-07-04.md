@@ -448,6 +448,12 @@ stock, et ceux à venir.
   C9 aller-retour sans perte · C10 profil `docker compose`) sont la **définition de « fini »** de tout
   module. **Chaque PRD porte une section « Contrat de module »** ; le premier épic d'un module est son
   socle (C1, C2, C3, C10).
+- **C11, ajoutée le 2026-11-10 : le module avec IA.** Journal local des prédictions et des corrections ;
+  modèle à deux étages (commun = Money Vibes, **calibration locale = donnée du client, jamais écrasée**) ;
+  entraînement là où vivent les données ; rien ne sort qu'au niveau permis par un **consentement valide**
+  (0 indicateurs agrégés · 1 échantillon pseudonymisé · 2 accès encadré · 3 mise en commun consentie), **y
+  compris quand l'instance est hébergée chez Money Vibes**. But déclaré du PO : un modèle commun aux
+  clients, le plus tôt possible.
 - **Amende** le principe « 18 modules → 18 services » (P12) : le module n'est plus synonyme de service.
 
 ### Nouveaux topics du bus
