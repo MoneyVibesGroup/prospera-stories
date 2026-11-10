@@ -396,6 +396,9 @@ institutions).
 - Installer un module que le contrat ne couvre pas est refusé : `MODULE_NON_SOUSCRIT` (422).
 - Un module ajouté au contrat devient installable sans autre action.
 
+**Exception :** l'essai avant signature (FR-33), où une **offre d'essai** tient lieu de contrat, dans
+l'espace d'essai seulement.
+
 **Hors périmètre :** la place de marché, où la sélection du client ferait foi (plus tard).
 
 #### FR-13 : Le même geste sur la plateforme Money Vibes et sur site
@@ -404,6 +407,24 @@ institutions).
   Money Vibes et pour un assureur sur ses serveurs.
 - Sur une instance sur site, la console tourne **sur l'instance** et les droits viennent de la **licence**
   (FR-14).
+
+#### FR-33 : L'essai avant signature (ajouté le 2026-11-10)
+Décision du PO : un **prospect** distributeur peut charger **ses propres données** dans l'espace d'essai et
+tester **sans Money Vibes**, avant de décider de conclure. C'est pour lui que l'import en autonomie doit être
+prêt en février (PRD Reprise de données, FR-19).
+
+**Conséquences (testables) :**
+- Une **offre d'essai** ouvre au prospect, **dans l'espace d'essai seulement**, les modules qu'elle liste ;
+  elle tient lieu de contrat pour FR-12. `[QUESTION QE-1 : quels modules ? tout le pack, ou l'offre
+  proposée au prospect ?]`
+- L'offre d'essai a une **durée** `[QUESTION QE-2]` ; à son terme, l'accès se ferme, sans rien effacer
+  immédiatement.
+- Le prospect n'a **aucun accès à l'espace réel** ; aucun envoi réel ne part (FR-9).
+- **S'il signe**, ses données d'essai `[QUESTION QE-3 : servent-elles de point de départ, ou repart-on
+  d'une reprise fraîche comme pour tout client (FR-8) ?]`.
+- **S'il ne signe pas**, ses données sont **effacées** au bout d'un délai `[QUESTION QE-4]`, et
+  l'effacement est tracé.
+- Ses données restent **cloisonnées** et ne servent **jamais** à l'IA commune sans consentement (partie C).
 
 **Questions de la partie A, tranchées le 2026-11-10**
 - **QA-1** : la console montre les **modules commerciaux** (18 pour le distributeur, 4 packs, add-on

@@ -140,8 +140,8 @@ dans la zone. Personne chez Money Vibes n'est intervenu.
 **Conséquences (testables) :**
 - Sur une instance sur site, les fichiers déposés restent **sur l'instance** ; aucun ne transite par Money
   Vibes.
-- Les fichiers d'une reprise se conservent `[ASSUMPTION : jusqu'à la réception définitive, puis
-  suppression tracée]`.
+- Les fichiers d'une reprise se conservent **jusqu'à la réception définitive**, puis sont **supprimés**, et
+  la suppression est tracée.
 
 ### 4.B Traduire sans trahir
 
@@ -188,14 +188,20 @@ pièces sont complètes.
 
 | Métier | Données vivantes (écart à zéro) | Historique (lecture seule) |
 |---|---|---|
-| **Assurance** | assurés (identité, contacts) ; polices en vigueur (garanties, échéances, primes) ; sinistres ouverts (état, montants chiffrés, réserves, pièces reçues, expert désigné) | sinistres clos des **3 à 5 dernières années** (nature, montants, délais, décisions, recours) et polices résiliées ou échues qui leur sont liées |
-| **Distributeur** | points de vente (contacts, zone, GPS si disponible, commercial rattaché) ; produits et prix (prix société, prix freelance) ; créances ouvertes ; commerciaux ; fournisseurs ; stock d'ouverture (FR-10) | ventes des **12 à 24 derniers mois** par point de vente et par produit (au moins 12 mois pour voir les saisons) ; historique des paiements des clients |
-| **IMF** | clients et KYC ; prêts en cours (capital restant dû, **échéancier complet**, retards, pénalités) ; soldes d'épargne ; garanties ; rattachement à l'agence et à l'agent de crédit | prêts clos et leurs remboursements sur **au moins 3 ans ou 3 cycles de crédit** |
+| **Assurance** | assurés (identité, contacts) ; polices en vigueur (garanties, échéances, primes) ; sinistres ouverts (état, montants chiffrés, réserves, pièces reçues, expert désigné) | sinistres clos (nature, montants, délais, décisions, recours) et polices résiliées ou échues qui leur sont liées |
+| **Distributeur** | points de vente (contacts, zone, GPS si disponible, commercial rattaché) ; produits et prix (prix société, prix freelance) ; créances ouvertes ; commerciaux ; fournisseurs ; stock d'ouverture (FR-10) | ventes par point de vente et par produit ; historique des paiements des clients |
+| **IMF** | clients et KYC ; prêts en cours (capital restant dû, **échéancier complet**, retards, pénalités) ; soldes d'épargne ; garanties ; rattachement à l'agence et à l'agent de crédit | prêts clos et leurs remboursements |
+
+**Profondeur d'historique (décision du PO, 2026-11-10) :** **pas de borne fixe**. On reprend **tout
+l'historique que le client peut fournir**, avec un **objectif de 3 ans ou plus** pour les trois métiers :
+c'est ce qui rend l'IA utile (saisons des ventes, cycles de crédit, délais de sinistres).
 
 **Conséquences (testables) :**
 - Un prêt en cours sans échéancier complet est un écart bloquant : sans échéancier, pas de portefeuille à
   risque.
-- La profondeur d'historique est un **paramètre du lot**, dans les bornes ci-dessus.
+- Aucune borne haute ne limite l'historique repris.
+- Un historique de **moins de 3 ans** est signalé au rapport (« historique court : l'IA démarrera avec
+  moins de recul ») ; il ne bloque jamais la bascule.
 
 #### FR-10 : Le stock d'ouverture se compte, il ne se reprend pas
 **Conséquences (testables) :**
@@ -221,8 +227,9 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 
 #### FR-13 : Le client valide avant que rien n'entre
 **Conséquences (testables) :**
-- Aucune donnée n'entre dans un module cible tant que la **liste finale** n'a pas été validée par le client
-  (DG ou personne désignée, `[ASSUMPTION : même règle que le consentement du PRD moteur FR-27]`).
+- Aucune donnée n'entre dans un module cible tant que la **liste finale** n'a pas été validée par le client :
+  le **DG**, ou une personne qu'il **désigne par écrit** (même règle que le consentement, PRD moteur
+  FR-27).
 - La validation enregistre qui, quand, et la version exacte du rapport validé.
 - Toute modification après validation exige une nouvelle validation.
 
@@ -288,8 +295,11 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
   façon.
 - Le droit d'importer est un **droit de tenant** déclaré par le module (contrat de module C7) ; Money Vibes
   peut l'accorder au DSI d'un distributeur dès l'installation.
-- `[ASSUMPTION : même quand le DSI fait la reprise, le feu vert « écart à zéro » reste vérifié par la
-  reprise elle-même, et la bascule reste un acte de Money Vibes ; voir QR-3]`
+- **Le libre-service est prêt en février** pour le distributeur : des **prospects** chargeront leurs propres
+  données dans l'espace d'essai et testeront **sans Money Vibes**, avant de décider de conclure (PRD
+  moteur FR-33, essai avant signature).
+- Même quand le DSI fait la reprise, le feu vert « écart à zéro » est vérifié par la reprise elle-même, et
+  la **bascule** reste un acte de Money Vibes.
 
 ### 4.H L'historique et l'IA
 
@@ -346,10 +356,12 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 
 ## 8. Questions ouvertes
 
-| # | Question | Proposition |
+Toutes tranchées par le PO le 2026-11-10 :
+
+| # | Question | Décision |
 |---|---|---|
-| QR-1 | Les profondeurs d'historique **12 à 24 mois** (distributeur) et **3 ans ou 3 cycles** (IMF) sont des propositions. On les retient ? | les retenir |
-| QR-2 | Combien de temps garde-t-on les **fichiers source** déposés ? | jusqu'à la réception définitive, puis suppression tracée |
-| QR-3 | Le DSI d'un distributeur peut faire la reprise lui-même (décidé). Le **libre-service** doit-il donc être prêt **en février**, pour le distributeur ? Et qui déclenche la **bascule** dans ce cas ? | prêt en février pour le distributeur ; la bascule reste un acte de Money Vibes, sur le feu vert de la reprise |
-| QR-4 | Qui **valide** une reprise chez le client ? | même règle que le consentement : le DG ou une personne désignée par écrit |
-| QR-5 | La **feuille de comptage** du stock est-elle un écran de la reprise ou du module Stock ? | du module Stock ; la reprise lui fournit le pré-remplissage |
+| QR-1 | Profondeur d'historique | **Pas de borne fixe** ; tout ce que le client fournit ; **objectif 3 ans ou plus** (FR-9) |
+| QR-2 | Fichiers source | Gardés **jusqu'à la réception définitive**, puis supprimés, suppression tracée (FR-3) |
+| QR-3 | Libre-service | **Prêt en février** pour le distributeur, y compris pour un **prospect en essai** ; la bascule reste un acte de Money Vibes (FR-19) |
+| QR-4 | Qui valide | Le **DG**, ou une personne qu'il désigne par écrit (FR-13) |
+| QR-5 | Feuille de comptage | Écran du **module Stock** ; la reprise la pré-remplit (FR-10) |
