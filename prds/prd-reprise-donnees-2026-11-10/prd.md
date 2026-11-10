@@ -279,12 +279,17 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 
 #### FR-19 : Le même moteur pour Money Vibes et, plus tard, pour le client
 **Conséquences (testables) :**
-- Aujourd'hui, la reprise initiale et la bascule se font **dans la console Money Vibes**, par l'équipe
+- Par défaut, la reprise initiale et la bascule se font **dans la console Money Vibes**, par l'équipe
   Money Vibes.
-- Plus tard, un **administrateur du client** fait ses imports courants **en libre-service**, avec le même
-  rapport et la même validation ; seul change celui qui valide.
-- Le droit d'importer est un **droit de tenant** déclaré par le module (contrat de module C7) ;
-  `[ASSUMPTION : le libre-service n'est pas requis en février]`.
+- **Pour un distributeur, le DSI du client peut faire lui-même la reprise, s'il le souhaite**, y compris
+  la reprise initiale (décision du PO, 2026-11-10). Il utilise le même moteur, le même rapport et la même
+  validation.
+- Plus tard, un **administrateur du client** fait ses imports courants **en libre-service**, de la même
+  façon.
+- Le droit d'importer est un **droit de tenant** déclaré par le module (contrat de module C7) ; Money Vibes
+  peut l'accorder au DSI d'un distributeur dès l'installation.
+- `[ASSUMPTION : même quand le DSI fait la reprise, le feu vert « écart à zéro » reste vérifié par la
+  reprise elle-même, et la bascule reste un acte de Money Vibes ; voir QR-3]`
 
 ### 4.H L'historique et l'IA
 
@@ -345,6 +350,6 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 |---|---|---|
 | QR-1 | Les profondeurs d'historique **12 à 24 mois** (distributeur) et **3 ans ou 3 cycles** (IMF) sont des propositions. On les retient ? | les retenir |
 | QR-2 | Combien de temps garde-t-on les **fichiers source** déposés ? | jusqu'à la réception définitive, puis suppression tracée |
-| QR-3 | Le **libre-service** client est-il requis en février ? | non : conçu maintenant, ouvert plus tard |
+| QR-3 | Le DSI d'un distributeur peut faire la reprise lui-même (décidé). Le **libre-service** doit-il donc être prêt **en février**, pour le distributeur ? Et qui déclenche la **bascule** dans ce cas ? | prêt en février pour le distributeur ; la bascule reste un acte de Money Vibes, sur le feu vert de la reprise |
 | QR-4 | Qui **valide** une reprise chez le client ? | même règle que le consentement : le DG ou une personne désignée par écrit |
 | QR-5 | La **feuille de comptage** du stock est-elle un écran de la reprise ou du module Stock ? | du module Stock ; la reprise lui fournit le pré-remplissage |
