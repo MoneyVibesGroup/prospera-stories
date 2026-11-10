@@ -1,7 +1,8 @@
 # Le contrat de module : ce qu'un service doit tenir pour être installable · **document de doctrine**
 
 > **Date :** 2026-11-09 · **Statut :** ✅ **VALIDÉ par le PO le 2026-11-09**, avec ses cinq choix
-> Q1 → Q5 (§8), quatre jours avant l'échéance du 13/11
+> Q1 → Q5 (§8), quatre jours avant l'échéance du 13/11. **Amendé le 2026-11-10 par le PO : clause C11
+> « module avec IA »**, issue de la table ronde du PRD moteur d'installation.
 > **Auteur :** Dev B (lot 1 du cadrage, `PLAN-2-DEVS-8-SEMAINES-2026-10-26.md` §1.3 et §4)
 > **Décision de programme :** **AD-P17**, inscrite dans `architecture-prospera-ecosystem-2026-07-04.md`.
 > **S'applique à :** tout module du programme, à partir d'**EPIC-045** chez Dev A. **Chaque PRD écrit
@@ -21,7 +22,8 @@
 cela existe déjà. Ce qui manque, c'est la **règle** qui rend chaque module digne d'être installé seul,
 et c'est l'objet de ce document.
 
-Un module est « fini » quand il tient ces dix clauses. L'état est **mesuré sur `origin/dev` le 2026-11-09**.
+Un module est « fini » quand il tient ces dix clauses, plus la onzième s'il embarque de l'IA. L'état est
+**mesuré sur `origin/dev` le 2026-11-09**.
 
 | # | Le module… | La preuve | État mesuré |
 |:--:|---|---|:--:|
@@ -35,6 +37,7 @@ Un module est « fini » quand il tient ces dix clauses. L'état est **mesuré s
 | C8 | livre son **module d'écran** dans `prospera-app` | une organisation sans le module ne le voit pas dans le menu | ⛔ la coque n'existe pas |
 | C9 | s'**installe et se désinstalle sans perte** | test aller-retour : installer, désinstaller, réinstaller, tout est là | ⚠️ le mécanisme le permet, aucun test ne le prouve |
 | C10 | **démarre seul** avec le socle minimal | `docker compose --profile <code> up` à chaque gate | ⛔ aucun profil dans le compose |
+| C11 | **s'il embarque de l'IA** : journal local des prédictions et corrections, modèle à deux étages, entraînement là où vivent les données, rien ne sort sans consentement | une mise à jour laisse la calibration du client intacte ; une contribution sans consentement est refusée | ⛔ aucun module IA en code (l'IA des démos est maquettée) |
 
 **Validé le 2026-11-09 :** les dix clauses, et les **cinq choix du §8** (Q1 → Q5), tous tranchés selon
 la recommandation.
@@ -219,6 +222,47 @@ première brique de l'installation chez le client (D3).
 
 **Preuve.** La commande ci-dessus, lancée à chaque gate, puis la recette du module.
 
+### C11 : le module avec IA (ajoutée le 2026-11-10)
+
+**Pourquoi.** L'IA des projets n'est pas un service à part : elle vit **dans chaque module** (scoring de
+crédit, alertes de comptes dormants, résumé automatique de sinistre, recommandation de produit…), et
+l'offre assurance promet une **IA locale calibrée sur l'historique du client**. Le but déclaré du PO est
+d'en tirer un **modèle commun** à partir des historiques de tous les clients, le plus tôt possible.
+Cette clause rend les deux possibles sans trahir la donnée d'un client.
+
+**Règle.** Un module qui embarque un modèle :
+
+1. **le déclare dans son manifeste** (C1) : `ia: { modeles: [...], finalites: [...] }`. Un module sans ce
+   champ n'a pas d'IA, et la clause ne s'applique pas à lui.
+2. **journalise localement chaque prédiction et chaque correction humaine** : référence de l'objet, sortie,
+   version du modèle, date, et la correction le cas échéant. Ce journal est une donnée du module (C3) et
+   la matière première de toute amélioration.
+3. **sépare deux étages de modèle** :
+   - le **modèle commun**, livré par Money Vibes, signé et versionné comme du code ;
+   - la **calibration locale**, qui est une **donnée du client**. ⛔ **Une mise à jour ne l'écrase
+     jamais** ; elle est sauvegardée et restaurée avec les autres données (C9).
+4. **s'entraîne là où vivent les données**. Le programme d'entraînement est livré comme une mise à jour ;
+   les données ne se déplacent pas pour lui.
+5. **ne fait rien sortir hors du canal de données de l'instance**, et seulement au niveau qu'autorise un
+   **consentement valide** du client : niveau 0 (indicateurs agrégés), 1 (échantillon pseudonymisé
+   approuvé à chaque export), 2 (accès encadré), 3 (mise en commun consentie). ⚡ **La règle vaut aussi
+   quand l'instance est hébergée chez Money Vibes** (cas des distributeurs) : avoir la donnée sur nos
+   serveurs ne donne pas le droit de la mettre en commun.
+6. **affiche toute prédiction avec sa provenance** : modèle, version, date. Une prédiction sans provenance
+   ne s'affiche jamais comme un fait (règle déjà posée par pdv AD-7 pour les scores).
+
+**Preuve.**
+- Une **empreinte de la calibration** identique avant et après une mise à jour.
+- Une contribution à la mise en commun **sans consentement valide** : refus nommé `CONSENTEMENT_ABSENT`,
+  et rien n'est sorti.
+- Une correction humaine fait **croître** le journal, et l'indicateur agrégé de niveau 0 la compte.
+- Un consentement retiré **exclut** le client du tour d'entraînement suivant. ⚠️ Il ne « désentraîne » pas
+  un modèle déjà produit : le contrat client doit le dire (prérequis juridique, hors de ce document).
+
+**État mesuré.** ⛔ Aucun module IA n'existe en code : `assistant-service` est cadré (EPIC-095 → 105) mais
+non construit, et l'IA des démos de `prospera-font-end` est maquettée. Le registre des consentements et le
+canal de données sont portés par le PRD du moteur d'installation (partie C).
+
 ---
 
 ## 3. Les dépendances (D2), en règles
@@ -269,7 +313,8 @@ le premier test de `MODULE_DEPENDANCE_MANQUANTE`.
 
 ## 6. Ce que chaque PRD, chaque épic et chaque story en tire
 
-**Dans chaque PRD,** une section **« Contrat de module »** de dix lignes, une par clause : la valeur pour
+**Dans chaque PRD,** une section **« Contrat de module »** de onze lignes, une par clause (C11 « sans objet » pour un module
+sans IA) : la valeur pour
 ce module (manifeste, gate, données possédées, emplacements vides, topics, paramètres, droits, écrans,
 profil), ou **« sans objet » avec sa raison**. Une ligne vide fait échouer le contrôle de préparation
 (`bmad-check-implementation-readiness`).
