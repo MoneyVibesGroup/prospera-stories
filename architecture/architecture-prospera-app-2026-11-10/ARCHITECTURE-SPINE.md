@@ -5,7 +5,7 @@ purpose: build-substrate
 altitude: feature
 paradigm: 'application modulaire unique (monolithe modulaire côté front, façon client web d''Odoo) : une coque, des modules d''écran compilés ensemble, allumés par l''état publié'
 scope: 'Client web unique des verticales assurance, distributeur et microfinance : menu, garde d''écran, écrans d''état, bandeaux, habillage, écrans publics et Administration, construits sur l''état publié du moteur d''installation ; forme et frontières des modules d''écran (C8). Hors champ : la console Money Vibes (installation, offres, CRM n°8), l''app expert-comptable, l''app mobile.'
-status: draft
+status: final
 created: '2026-11-10'
 updated: '2026-11-10'
 binds: [FR-9, FR-15, FR-17, FR-33, FR-34, FR-35, FR-36, FR-37, FR-42, FR-43, C2, C4, C7, C8, C13, SM-1, UJ-3, D1]
@@ -214,7 +214,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 - **Prevents:** les données de l'organisation A affichées sous B ; deux sources de l'organisation courante ; un module qui invalide le cache d'un autre.
 - **Rule:** L'organisation courante est **celle du jeton**, jamais un paramètre d'URL ni une valeur stockée dans le navigateur ; une session vaut pour une seule organisation. Changer d'organisation ouvre une nouvelle session et vide tout le cache (`queryClient.clear()`) ; se déconnecter aussi. Les clés de requête commencent par le code du module (`['<code>', …]`) ; le préfixe `['coque', …]` est réservé. Un module n'invalide jamais les clés d'un autre : la fraîcheur des données d'autrui suit la durée de validité et le retour sur l'onglet de leur propre module.
 
-### AD-18 — Les écrans publics, sans session
+### AD-18 — Les écrans publics, sans session, dans `prospera-app` `[ADOPTED]`
 
 - **Binds:** liens envoyés aux tiers (lien de paiement, reçu, page publique), AD-4, AD-8
 - **Prevents:** un écran public placé sous la garde, donc bloqué, ou placé hors garde sans règle.
@@ -249,11 +249,11 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 - **Prevents:** un module accessible et un autre non.
 - **Rule:** WCAG 2.2 niveau AA. Le kit porte les rôles, le focus et les contrastes (règle orange sur clair du design system). Chaque entrée de module passe un contrôle `axe` dans Playwright, et un module qui échoue n'est pas `done`.
 
-### AD-23 — Une doublure de l'état publié, jusqu'au premier gate
+### AD-23 — Une doublure de l'état publié, jusqu'au premier gate `[ADOPTED]`
 
 - **Binds:** squelette de la coque (S3), modules de Dev A (S3 → S5), tests de la coque
 - **Prevents:** une coque construite avant le moteur sur une forme d'état inventée, puis qui casse à son arrivée.
-- **Rule:** Tant que le moteur ne sert pas `GET /etat-publie`, le développement et les tests utilisent une **doublure** qui sert la route au même chemin, derrière le Traefik de dev. Elle est générée depuis `contrat/etat-publie.openapi.json` et `contrat/matrice-etats.json`, avec un scénario par état publié. Elle n'entre jamais dans l'image. C'est une dette nommée, éteinte au premier Integration Gate de la coque, qui se joue sur le vrai moteur, sans aucun mock.
+- **Rule:** Tant que le moteur ne sert pas `GET /etat-publie`, le développement et les tests utilisent une **doublure**, construite par Dev A dans PRA-01, qui sert la route au même chemin, derrière le Traefik de dev. Elle est générée depuis `contrat/etat-publie.openapi.json` et `contrat/matrice-etats.json`, avec un scénario par état publié. Elle n'entre jamais dans l'image. C'est une dette nommée, éteinte au premier Integration Gate de la coque, qui se joue sur le vrai moteur, sans aucun mock.
 
 ### AD-24 — Une erreur se retrouve
 
@@ -377,6 +377,7 @@ sequenceDiagram
 | D1 verticale = configuration | `coque/habillage/`, emplacement `accueil` | AD-13 |
 | Liens envoyés aux tiers | `app/(public)/p/<code>/` | AD-18 |
 | App mobile | hors dépôt : même proxy, même lecture, même organisation du jeton | AD-8, AD-11, AD-15, AD-17 |
+| C8 pour le cabinet : l'app expert-comptable suit la même règle de menu, sur le même état publié | `prospera-frontend-expert-comptable`, par **Dev B**, livré pour **février 2027** | AD-4 → AD-7, AD-15 |
 | SM-1 démo du 15/01 (installer, désinstaller, réinstaller sans perte) | `modules/reseau, pdv, catalogue, stock` sur l'essai de la plateforme ; installation pilotée depuis la console Money Vibes | AD-1 → AD-5 (purge du cache) |
 
 ## Deferred
@@ -385,7 +386,6 @@ sequenceDiagram
 | --- | --- | --- |
 | Canal poussé (SSE, WebSocket) pour l'état publié | 30 s tiennent FR-34 | un besoin mesuré sous la minute |
 | Architecture de l'app mobile : une app pour toutes les verticales ou `prospera-terrain` seule ; authentification (code + PKCE) | la coque n'en dépend que par AD-8, AD-11, AD-15, AD-17 | lot 2 (distributeur, `prospera-terrain`) |
-| Mise à la règle C8 de l'app expert-comptable (même état publié, même matrice) | son propriétaire et son jalon ne sont pas fixés ; le contrat partagé (AD-15) l'y prépare | question au PO, avant FE-112 |
 | Paquet partagé avec l'app expert-comptable (kit, client d'API, session) | aucun second consommateur stable | quand l'app expert-comptable adopte `/m/<code>/` |
 | Hors-ligne et PWA | porté par l'app mobile | — |
 | Contrôle du contraste des couleurs de marque | se fait là où la marque est saisie | spine de la console |
