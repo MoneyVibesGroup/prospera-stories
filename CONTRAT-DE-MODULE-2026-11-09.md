@@ -10,6 +10,26 @@
 > **Décisions déjà rendues sur lesquelles il repose :** D1 (une seule app `prospera-app`), D2 (deux niveaux
 > de dépendance), D3 (un profil `docker compose` par module). Toutes trois tranchées le 2026-11-09.
 
+> **Amendement du 2026-11-10 (PRD moteur d'installation) : à valider par le PO le 13/11.**
+> Source : `prds/prd-moteur-installation-2026-11-09/prd.md` §8.4. Les dix premières clauses et les cinq
+> choix Q1 → Q5 restent validés tels quels ; ce qui suit s'y **ajoute** ou les **précise**.
+>
+> | Où | Changement |
+> |---|---|
+> | **C12** *(nouvelle)* | Migrations rétrocompatibles pendant 7 jours ; exception déclarée `retourArriere: AVEC_PERTE`, interdite sur la plateforme |
+> | **C13** *(nouvelle)* | Installable sous contrôle : prérequis, vérifications, santé, interception en essai, export, import et effacement par organisation |
+> | **C1** | `depends: [{ code, raison }]` ; nouveaux champs du manifeste ; `MANIFESTE_CYCLE` et `MANIFESTE_DEPENDANCE_MINEURE` ; module `instance` au catalogue |
+> | **C2** | La garde lit l'état publié poussé ; `LECTURE_SEULE` ; export ouvert, y compris en `SUSPENDU` ; identité de service du moteur |
+> | **C6** | Même schéma de données pour toutes les organisations |
+> | **C7** | Droits `instance:*` du module `instance` ; format d'`auth-service` à élargir aux codes à tiret |
+> | **C8** | Visible en `EN_SERVICE`, `ESSAI_PROSPECT`, `PREAVIS` ; en `LECTURE_SEULE` : visible, lecture et export seulement |
+> | **C9, Q4** | Deux exceptions écrites à la règle « sans limite jusqu'à une demande d'effacement » |
+> | **C11** | Une clause par finalité ; remise des indicateurs de niveau 0 à l'agent d'instance |
+> | **Q3** | Sa raison (« l'impayé suspend déjà tous les droits ») n'est plus vraie ; la décision est à reconfirmer |
+> | **§0, §1** | Installer = tout octroi passe par le moteur ; Pack = mot commercial ; socle de vertical ; Suspendre n'est pas Désinstaller |
+> | **§6, §7** | Section « Contrat de module » de **treize** lignes ; nouveaux écarts mesurés |
+> | **§9** | Suit la révision de D3 (instance sur site prête avant février 2027) |
+
 ---
 
 ## 0. En une page
@@ -17,27 +37,32 @@
 **Un module est ce qu'on vend et qu'on installe** : un code au catalogue (`reseau`, `pdv`, `stock`…).
 **Un service est ce qu'on déploie** : un dépôt, un conteneur. Un service peut porter plusieurs modules (§4).
 
-**Installer** un module pour un client, c'est poser l'entitlement `(organisation × module)` en `ACTIVE`.
-**Le désinstaller**, c'est le passer en `REVOKED`. Un **pack** installe plusieurs modules d'un coup. Tout
-cela existe déjà. Ce qui manque, c'est la **règle** qui rend chaque module digne d'être installé seul,
-et c'est l'objet de ce document.
+**Installer** un module pour un client, c'est le **faire passer par le moteur d'installation**, qui
+l'installe puis le met en service : l'entitlement `(organisation × module)` passe alors en `ACTIVE`.
+**Aucun autre chemin ne pose `ACTIVE`** (le paiement, un pack, un opérateur ou une licence ne font que
+prolonger ou rouvrir un module déjà installé), sauf le module `instance`, qui naît avec l'organisation.
+**Le désinstaller**, c'est le passer en `REVOKED`. Un **pack** est un mot commercial : l'offre qui
+préselectionne plusieurs modules. Le mécanisme existe déjà. Ce qui manque, c'est la **règle** qui rend
+chaque module digne d'être installé seul, et c'est l'objet de ce document.
 
-Un module est « fini » quand il tient ces dix clauses, plus la onzième s'il embarque de l'IA. L'état est
+Un module est « fini » quand il tient les dix premières clauses, plus la onzième s'il embarque de l'IA, plus les deux dernières (C12 et C13, ajoutées le 2026-11-10). L'état est
 **mesuré sur `origin/dev` le 2026-11-09**.
 
 | # | Le module… | La preuve | État mesuré |
 |:--:|---|---|:--:|
 | C1 | a un **manifeste** : code, version, dépendances dures et optionnelles, familles de référentiels, droits, événements, profil compose | le catalogue refuse un module dont une dépendance dure manque, avec un code nommé | ⛔ aucun champ de dépendance au catalogue |
-| C2 | porte son **socle** : entitlement, gate, cloisonnement par organisation | sans entitlement : un 403 nommé, jamais une donnée | ✅ patron en place (paiement, microfinance, bilan…) |
+| C2 | porte son **socle** : entitlement, gate, cloisonnement par organisation | sans entitlement : un 403 nommé, jamais une donnée ; en lecture seule, l'écriture refusée et l'export ouvert | ✅ patron en place (paiement, microfinance, bilan…) |
 | C3 | **possède ses données**, et lui seul les écrit | la garde de câblage (STORY-643) ne voit aucune collection d'un autre module | ✅ garde posée dans 5 dépôts |
 | C4 | **fonctionne seul** : une dépendance optionnelle absente donne un **emplacement déclaré vide** | un test par dépendance optionnelle désinstallée | ⚠️ règle écrite (pdv AD-7), jamais testée |
 | C5 | **parle par contrats nommés** : topic versionné ou endpoint, jamais la base d'un autre | la suite de conformité, jouée par le consommateur | ✅ patron en place (`entitlement.changed` v2) |
 | C6 | se **paramètre par des données**, jamais par `if (client === …)` | une garde de balayage | ⚠️ règle écrite (pdv AD-8), aucune garde transverse |
 | C7 | **déclare ses droits de tenant**, que l'administrateur du client attribue lui-même | ils apparaissent dans la console du client sans déploiement | ✅ attribution (166, 167) · ⚠️ catalogue des droits fermé |
-| C8 | livre son **module d'écran** dans `prospera-app` | une organisation sans le module ne le voit pas dans le menu | ⛔ la coque n'existe pas |
+| C8 | livre son **module d'écran** dans `prospera-app` | une organisation sans le module ne le voit pas dans le menu ; en lecture seule, il est visible sans action d'écriture | ⛔ la coque n'existe pas |
 | C9 | s'**installe et se désinstalle sans perte** | test aller-retour : installer, désinstaller, réinstaller, tout est là | ⚠️ le mécanisme le permet, aucun test ne le prouve |
 | C10 | **démarre seul** avec le socle minimal | `docker compose --profile <code> up` à chaque gate | ⛔ aucun profil dans le compose |
 | C11 | **s'il embarque de l'IA** : journal local des prédictions et corrections, modèle à deux étages, entraînement là où vivent les données, rien ne sort sans consentement | une mise à jour laisse la calibration du client intacte ; une contribution sans consentement est refusée | ⛔ aucun module IA en code (l'IA des démos est maquettée) |
+| C12 | **migre sans casser la version précédente pendant 7 jours** : étendre puis contracter, lecteur tolérant, topics `@2`, interrupteurs qui ne changent jamais la forme des données | le test « promouvoir, saisir, revenir, tout se relit » | ⛔ aucun module ne le tient ni ne le teste |
+| C13 | est **installable sous contrôle** : prérequis et vérifications avec critère, santé, interception en essai, export, import et effacement par organisation | un test par obligation, dont la matrice des neuf états publiés | ⛔ aucun manifeste ne le déclare |
 
 **Validé le 2026-11-09 :** les dix clauses, et les **cinq choix du §8** (Q1 → Q5), tous tranchés selon
 la recommandation.
@@ -50,18 +75,21 @@ la recommandation.
 |---|---|---|
 | **Module** | Une capacité vendable, identifiée par un `code` stable en kebab-case | `platform-catalog-service` › `Module` |
 | **Version de module** | Une version du code d'un module ; le manifeste s'y attache (§2, C1) | `ModuleVersion` (`moduleCode`, `version`, `status`) |
-| **Pack** | Une liste de modules et de référentiels vendus ensemble pour un métier | `VerticalPack` : `distributeur`, `imf-sfd`, `assurance-cima`, `cabinet` |
-| **Installer** | Poser l'entitlement `(organisation × module)` en `ACTIVE` | `Entitlement`, index unique `{organizationId, moduleCode}` |
-| **Suspendre** | `SUSPENDED` : le module refuse, les données restent (impayé, STORY-280) | `EntitlementStatus` |
+| **Pack** | **Mot commercial** : une liste de modules et de référentiels vendus ensemble pour un métier. Il préselectionne, il n'octroie rien | `VerticalPack` : `distributeur`, `imf-sfd`, `assurance-cima`, `cabinet` (le **catalogue du vertical**) |
+| **Socle de vertical** | N'ouvre plus aucun module : il devient la **liste d'applications** du vertical (l'offre préchargée) | `VerticalPack` ; STORY-727 lot 7 ajusté |
+| **Installer** | Passer par le moteur : il installe, puis met en service, ce qui pose l'entitlement `(organisation × module)` en `ACTIVE`. **Tout octroi** passe par lui ; hors le module `instance` (naissance de l'organisation), aucun autre chemin ne pose `ACTIVE` | `Entitlement`, index unique `{organizationId, moduleCode}` |
+| **Mettre en service** | Ouvrir à l'utilisateur un module déjà installé et vérifié, dans l'espace réel ; l'espace d'essai précède toujours | PRD moteur FR-7, FR-8 |
+| **Suspendre** | `SUSPENDED` : le module refuse, les données restent. C'est une **sanction décidée** (litige, contrat non respecté), **plus** l'impayé (qui suit le préavis, puis la lecture seule). **Suspendre n'est pas Désinstaller** : la suspension se lève, la désinstallation se rouvre par le moteur. L'export reste ouvert | `EntitlementStatus` ; STORY-280 ajustée |
 | **Désinstaller** | `REVOKED` : le module refuse, **les données restent** | `EntitlementStatus` |
-| **Expiré** | Statut **lu**, jamais écrit, dérivé du terme (`ECHEANCE` dépassée) | `terme.ts` › `STATUT_EXPIRE` |
-| **Dépendance dure** (`depends`) | Sans elle, le module n'a pas de sens : son installation est refusée | **n'existe pas** (C1) |
+| **Expiré** | Statut **lu**, jamais écrit, dérivé du terme (`ECHEANCE` dépassée). Il ouvre un **préavis de 30 jours** (`PREAVIS`, module ouvert), puis la **lecture seule** | `terme.ts` › `STATUT_EXPIRE` ; STORY-727 lot 4 ajusté |
+| **Lecture seule** | `LECTURE_SEULE` : le module est **visible**, on le lit et on l'exporte, on n'y écrit rien (C2, C8) | PRD moteur FR-43 |
+| **Dépendance dure** (`depends`, chaque entrée porte sa `raison`) | Sans elle, le module n'a pas de sens : son installation est refusée | **n'existe pas** (C1) |
 | **Dépendance optionnelle** (`enrichiPar`) | Elle ajoute des informations ; son absence laisse un emplacement vide | **n'existe pas** (C1) |
 | **Emplacement vide** | Une donnée que l'API **annonce** comme non disponible, au lieu de la taire ou de rendre 0 | pdv AD-7 (règle écrite) |
 
 ---
 
-## 2. Les dix clauses
+## 2. Les treize clauses
 
 ### C1 : le manifeste
 
@@ -72,13 +100,19 @@ la recommandation.
 export const MANIFESTE_PDV = {
   code: 'pdv',
   version: '1.0.0',
-  depends: ['reseau'],                       // dures : sans elles, installation refusée
+  depends: [{ code: 'reseau', raison: 'Un point de vente se rattache à une agence.' }], // dures : sans elles, installation refusée
   enrichiPar: ['commande', 'facturation'],   // optionnelles : sans elles, emplacement vide
   referentielFamilies: [],                   // déjà au catalogue (STORY-148)
   droits: ['pdv:fiche:consulter', 'pdv:portefeuille:affecter' /* … */],
   publie: ['pdv.point-de-vente.changed@1'],
   consomme: ['reseau.portee.changed@1', 'entitlement.changed@2', 'identity.*'],
   profilCompose: 'pdv',
+  // ajoutés le 2026-11-10 (C12, C13) :
+  prerequis: [/* serveur conforme, ressources externes */],
+  verifications: [/* { code, route, critere } : bilan d'installation */],
+  retourArriere: 'SANS_PERTE',               // ou 'AVEC_PERTE' (C12)
+  interrupteurs: [],                         // changements de comportement visibles (C12)
+  routesLectureSeule: [/* export, états réglementaires */],
 } as const;
 ```
 
@@ -89,6 +123,16 @@ que le moteur d'installation lit. Une **garde de test** compare les deux, sur le
 
 **Preuve.** Le catalogue refuse d'installer un module dont une dépendance dure n'est pas installée chez
 l'organisation : réponse **422 `MODULE_DEPENDANCE_MANQUANTE`**, avec la liste des codes manquants.
+
+**Amendement (2026-11-10).** Le manifeste porte aussi : `depends: [{ code, raison }]` (la raison
+s'affiche au choix de l'offre) ; les **prérequis** ; les **vérifications**, chacune avec son critère et sa
+route ; les **droits de tenant** ; `retourArriere: SANS_PERTE | AVEC_PERTE` ; les `interrupteurs` ; les
+**routes autorisées en lecture seule** ; le profil compose ; et `ia` s'il y a de l'IA (C11). Le catalogue
+refuse à la publication un manifeste qui crée un cycle (**422 `MANIFESTE_CYCLE`**) et une **version
+mineure qui ajoute une dépendance dure** (`MANIFESTE_DEPENDANCE_MINEURE`) : une dépendance nouvelle
+n'arrive qu'avec une version majeure, et elle est fournie sans facturation. Le **moteur d'installation
+est lui-même un module du catalogue** : `code: instance`, `depends: []`. **Un module qui n'est pas au
+catalogue avec son manifeste ne se vend pas.**
 
 **État mesuré.** `Module` porte `code`, `name`, `description`, `status`, `referentielFamilies`.
 `ModuleVersion` porte `moduleCode`, `version`, `status`, `deprecationDate`, `releasedAt`. **Aucune
@@ -111,6 +155,23 @@ place dans `prospera-paiement-service` (`PAIEMENT_NOT_ENTITLED`), `prospera-micr
 
 **Preuve.** Un test e2e par statut (`SUSPENDED`, `REVOKED`, expiré, absent) : un 403 nommé, et **aucune
 donnée dans le corps**.
+
+**Amendement (2026-11-10).** La garde ne lit jamais l'horloge de son conteneur : elle lit l'**état publié**
+que le moteur lui pousse (neuf états : `NON_INSTALLE`, `EN_INSTALLATION`, `DESINSTALLE`, `EN_SERVICE`,
+`ESSAI_PROSPECT`, `PREAVIS`, `LECTURE_SEULE`, `ESSAI_TERMINE`, `SUSPENDU`).
+- **`LECTURE_SEULE`** : la garde laisse passer `GET`, `HEAD` et `OPTIONS`, et refuse toute écriture par un
+  **403 `ABONNEMENT_EXPIRE`**, sauf les routes que le module déclare à son manifeste comme autorisées en
+  lecture seule (export, états réglementaires).
+- **L'export passe toujours.** Chaque module expose une route d'export par organisation, exemptée de la
+  garde, réservée au détenteur de `instance:donnees:exporter`. Elle est ouverte dans **tous les états où le
+  module peut garder des données de l'organisation**, `SUSPENDU` compris : récupérer ses données est un
+  droit du client, et une sanction commerciale ne crée pas de manquement réglementaire chez lui. Seul
+  `NON_INSTALLE` la refuse (403 `<MODULE>_NOT_ENTITLED`, aucune donnée).
+- **Pendant `EN_INSTALLATION`**, les routes de vérification déclarées au manifeste laissent passer
+  l'**identité de service du moteur**, et elle seule.
+- **Preuve ajoutée.** Une matrice : pour chacun des neuf états et chaque sorte de route (lecture,
+  écriture, export, état réglementaire), **un seul attendu**, et le menu de la coque (C8) concorde avec la
+  garde.
 
 ### C3 : le module possède ses données
 
@@ -167,6 +228,9 @@ client reste possible, mais c'est **un module du catalogue comme un autre**, ave
 exécutables**, jamais des mots : une comparaison d'un `organizationId` ou d'un `orgId` à un littéral, et
 un nom d'organisation en dur dans `src/` hors des seeds.
 
+**Amendement (2026-11-10).** Un module a **le même schéma de données pour toutes les organisations** :
+aucune variante par client (C6, C11), ce qui rend possible un modèle commun et une mise à jour unique.
+
 ### C7 : les droits de tenant
 
 **Règle.** Les droits d'un module ont la forme `<module>:<objet>:<action>`, et **leur préfixe est le
@@ -189,6 +253,12 @@ Le module les déclare dans son manifeste. L'administrateur du client les attrib
 **Preuve.** Une garde dans le dépôt du module : `manifeste.droits ⊂ TENANT_PERMISSION_CATALOG`, et chaque
 droit commence par `<code>:`.
 
+**Amendement (2026-11-10).** Le **module `instance`** (le moteur) est au catalogue et naît avec chaque
+organisation. Ses droits `instance:*` (dont `instance:donnees:exporter`) s'attribuent comme les autres et
+ne dépendent d'aucun autre module installé. Le droit de **consentir** (C11) ne s'attribue que par le DG.
+⚠️ Le format de droit d'`auth-service` refuse les codes de module **à tiret** : à élargir. Les droits
+d'un manifeste, lus par le moteur, remplacent à terme l'`enum` fermé.
+
 ### C8 : le module d'écran
 
 **Règle.** Dans `prospera-app` (D1), chaque module livre son dossier `src/modules/<code>/` : routes,
@@ -200,6 +270,15 @@ saisie à la main rend l'écran « module non installé », jamais une page cass
 
 **Dépend de** la spine de la coque, troisième pièce du lot 1, due le 20/11 à Dev A.
 
+**Amendement (2026-11-10).** Une entrée de menu est visible si et seulement si l'**état publié** vaut
+`EN_SERVICE`, `ESSAI_PROSPECT`, `PREAVIS` **ou `LECTURE_SEULE`**, **et** si l'utilisateur a le droit.
+- En **`LECTURE_SEULE`**, le module est **visible, en lecture et en export seulement** : les actions
+  d'écriture sont absentes ou désactivées, et un bandeau dit pourquoi.
+- Une valeur d'état inconnue de la coque se lit `NON_INSTALLE` : on ferme, on n'ouvre pas.
+- L'app expert-comptable (le cabinet) suit **la même règle**, sur le même état publié.
+- En `SUSPENDU`, le module n'est pas au menu ; l'export reste atteignable par l'écran d'Administration du
+  module `instance`.
+
 ### C9 : installer et désinstaller sans perte
 
 **Règle.** Installer est **idempotent** : l'index unique `{organizationId, moduleCode}` le garantit déjà.
@@ -208,6 +287,11 @@ Effacer les données est un **acte séparé**, demandé, tracé, et hors de ce c
 
 **Preuve.** Le test aller-retour, joué sur le vrai backend à chaque Integration Gate : créer des données,
 désinstaller (403 nommé), réinstaller, relire les mêmes données.
+
+**Amendement (2026-11-10).** La règle « effacer est un acte séparé » n'a que **deux exceptions écrites**,
+détaillées à Q4 (§8) : l'essai prospect non signé, et l'acheteur hébergé sur la plateforme qui arrête son
+abonnement d'hébergement. Désinstaller ne supprime toujours rien, y compris les copies que gardent les
+voisins : elles restent stockées et masquées.
 
 ### C10 : démarrer seul
 
@@ -263,12 +347,82 @@ Cette clause rend les deux possibles sans trahir la donnée d'un client.
 non construit, et l'IA des démos de `prospera-font-end` est maquettée. Le registre des consentements et le
 canal de données sont portés par le PRD du moteur d'installation (partie C).
 
+**Amendement (2026-11-10).**
+- **Point 5, précisé.** Le consentement se donne **par finalité** : une clause par finalité, une ligne du
+  registre par finalité. L'IA de Money Vibes lit les données par un **compte de service dédié** qui passe
+  par la garde du registre (jamais par un accès direct à la base).
+- **Niveau 0.** Chaque module avec IA remet ses **indicateurs agrégés** (taux d'erreur par modèle,
+  nombre de corrections, dérive) à l'agent d'instance par un **contrat nommé** (C5), sous un schéma fermé.
+  Aucun indicateur ne contient un identifiant de personne ou de dossier.
+- **Preuve ajoutée.** Un test échoue si un champ non déclaré sort dans l'indicateur.
+
+### C12 : migrations rétrocompatibles pendant 7 jours (ajoutée le 2026-11-10)
+
+**Pourquoi.** Le client doit pouvoir **revenir à la version précédente en un clic, sans perte**, pendant
+les 7 jours qui suivent une promotion. Cela suppose que la version précédente **relise** ce que la
+nouvelle a écrit. Cette clause en fait une propriété de chaque module.
+
+**Règle.**
+1. **Étendre puis contracter.** Pendant les 7 jours, une migration est **additive** : ajouter un champ,
+   une collection, un index. Supprimer, renommer ou changer le type d'un champ se fait dans la version
+   **suivante**, hors de la fenêtre.
+2. **Lecteur tolérant sur les topics.** Un consommateur ignore les champs qu'il ne connaît pas. Un
+   changement incompatible passe par un **topic `@2`**, le `@1` restant publié pendant la fenêtre (C5).
+3. **Valeurs d'énumération.** Une valeur ajoutée ne casse pas la version précédente : elle la lit comme
+   inconnue sans planter. On commence par la **lire** partout, puis on l'**écrit**.
+4. **Interrupteurs.** Tout changement de comportement visible des utilisateurs est déclaré au manifeste
+   (`interrupteurs: [...]`). Un interrupteur **ne change jamais la forme des données** : il ne commande que
+   du comportement. Un changement de forme est une migration, soumise aux points 1 à 3.
+5. **Exception déclarée.** Une version dont une migration ne peut pas être rétrocompatible déclare
+   `retourArriere: AVEC_PERTE`. Elle est **permise sur site seulement** : bandeau rouge **avant** le choix
+   de la date, jamais en vague automatique, retour arrière par restauration de la sauvegarde d'avant
+   promotion. Elle est **interdite sur la plateforme** : le catalogue refuse (`AVEC_PERTE_INTERDIT_PLATEFORME`).
+   Le défaut est `SANS_PERTE`.
+
+**Preuve.** Un test par module, joué à chaque version : **promouvoir, saisir, revenir, tout se relit** ;
+re-promouvoir, tout se relit encore. Un second test joue chaque interrupteur éteint puis allumé.
+
+**État mesuré.** ⛔ Aucun module ne déclare `retourArriere` ni ne joue ce test. Les services existants
+sont à rétro-équiper au fil de leurs gates.
+
+### C13 : installable sous contrôle (ajoutée le 2026-11-10)
+
+**Pourquoi.** Le moteur installe, vérifie, met à jour et efface des modules qu'il n'a pas écrits. Il ne le
+peut que si chaque module **dit ce qu'il lui faut, prouve qu'il marche, et rend ses données**.
+
+**Règle.** Le module, par son manifeste (C1) et son code :
+1. **Déclare ses prérequis** (serveur conforme, ressources externes), vérifiés pendant l'installation.
+2. **Déclare ses vérifications avec leur critère** : chacune a une route, un résultat 🟢, 🟠 ou 🔴 et un
+   critère **chiffré**, pas un « OK ». Elles passent sous l'identité de service du moteur (C2).
+3. **Rend sa santé** : `OK | DEGRADE`. Un module `DEGRADE` **reste ouvert** ; la santé ne ferme rien.
+4. **Lit l'état publié poussé** (C2), jamais une date ni l'horloge de son conteneur.
+5. **Déclare sa lecture seule** : la liste de ses routes autorisées en `LECTURE_SEULE` (C2).
+6. **Intercepte ses sorties dans l'espace d'essai** : aucun envoi réel (message, courriel, paiement,
+   connecteur) n'en part. Une tentative d'écriture réelle depuis l'essai est refusée avec un code nommé
+   (`ECRITURE_REELLE_DEPUIS_ESSAI`).
+7. **Exporte, importe et efface par organisation** : un export en CSV et JSON ; un import de **sa part**
+   d'un dossier d'installation, rejouable sans doublon ; un effacement tracé, avec certificat.
+8. **Rend ses vérifications idempotentes** : chaque vérification a une clef d'idempotence ; la rejouer ne
+   double rien. Une installation interrompue reprend là où elle s'est arrêtée.
+9. **Ne bloque pas les autres** : un prérequis en échec marque rouge le module et orange ses dépendants ;
+   le reste reste utilisable.
+
+**Preuve.**
+- La **matrice** de C2 : neuf états publiés, un seul attendu par sorte de route.
+- Une vérification **rejouée deux fois** ne crée rien de plus.
+- **Exporter, effacer, importer** rend les mêmes données.
+- Une sortie en essai est **interceptée et comptée**, jamais envoyée.
+- Un module `DEGRADE` répond toujours à ses routes métier.
+
+**État mesuré.** ⛔ Aucun manifeste ne déclare ces obligations. Le moteur d'installation (module
+`instance`) est le premier à les tenir ; les modules existants s'y mettent à leur prochaine gate.
+
 ---
 
 ## 3. Les dépendances (D2), en règles
 
 1. **Deux niveaux, et seulement deux.** `depends` bloque l'installation, `enrichiPar` ne bloque jamais.
-2. **Par code, pas par version (Q5, ✅ tranchée).** `depends: ['reseau']`, et non `reseau >= 1.2`. C'est la règle déjà
+2. **Par code, pas par version (Q5, ✅ tranchée).** `depends: [{ code: 'reseau', raison }]`, et non `reseau >= 1.2`. C'est la règle déjà
    choisie pour les référentiels (« la compatibilité se raisonne par famille, jamais par version »,
    STORY-148). Une rupture de contrat se traite par la version du **topic** (C5), pas par la dépendance.
 3. **Pas de cycle.** Le catalogue refuse un manifeste qui en crée un : **422 `MANIFESTE_CYCLE`**.
@@ -305,6 +459,7 @@ deux** sans que la spine le dise.
 | C3 | ses collections seules ; garde de câblage dès le squelette |
 | C7 | droits `reseau:<objet>:<action>` ajoutés à `TenantPermission` par une PR dans `auth-service` |
 | C10 | `profiles: ["reseau"]` dès le premier commit du service dans le compose |
+| C12, C13 | `retourArriere: SANS_PERTE` et les routes d'export déclarés dès le squelette ; la matrice de C2 jouée sur `RESEAU_NOT_ENTITLED` (neuf états) |
 
 `pdv`, qui vient ensuite, déclare `depends: ['reseau']` : c'est le premier vrai cas de dépendance dure, et
 le premier test de `MODULE_DEPENDANCE_MANQUANTE`.
@@ -313,11 +468,12 @@ le premier test de `MODULE_DEPENDANCE_MANQUANTE`.
 
 ## 6. Ce que chaque PRD, chaque épic et chaque story en tire
 
-**Dans chaque PRD,** une section **« Contrat de module »** de onze lignes, une par clause (C11 « sans objet » pour un module
+**Dans chaque PRD,** une section **« Contrat de module »** de **treize** lignes, une par clause (C11 « sans objet » pour un module
 sans IA) : la valeur pour
 ce module (manifeste, gate, données possédées, emplacements vides, topics, paramètres, droits, écrans,
 profil), ou **« sans objet » avec sa raison**. Une ligne vide fait échouer le contrôle de préparation
-(`bmad-check-implementation-readiness`).
+(`bmad-check-implementation-readiness`), **qui est mis à jour pour treize lignes** (C12 et C13 ne sont
+jamais « sans objet » sans raison écrite).
 
 **Le premier épic de chaque module est son socle :** C1, C2, C3 et C10. C'est ce qui manquait aux PRD et
 coûtait les 13 points oubliés.
@@ -338,6 +494,10 @@ livre la gate livre aussi le test aller-retour (C9).**
 | Un droit d'un module non installé est-il filtré ? | Dev B, à mesurer au lot 1 | sem. 1 |
 | STORY-365 dépassée par 166 et 167 | Dev B, à requalifier | sem. 1 |
 | ⚠️ **Le plan v2 (§1.1) dit que les packs citent des modules non enregistrés.** C'est **périmé** : `pdv`, `stock`, `catalogue`, `commande` et `facturation` sont au seed du catalogue | ✅ corrigé dans le plan, dans la même PR que ce document | 2026-11-09 |
+| Aucun module ne déclare C12 ni C13 (`retourArriere`, prérequis, vérifications, export, effacement) | chaque auteur de module, par la gate ; le moteur donne le gabarit | à chaque gate |
+| La garde des modules lit encore les dates, pas l'état publié ; `LECTURE_SEULE` n'a pas sa liste d'export | Dev B, moteur d'installation (FR-34, FR-43) ; `paiement-service` et STORY-727 lot 4 ajustés | sem. 5 et suivantes |
+| Format de droit d'`auth-service` : refuse les codes de module à tiret | Dev B, ticket `auth-service` | avant le premier module à tiret |
+| Les 18 modules du distributeur (et ceux des autres verticaux) ne sont pas tous au catalogue | Dev B pour la liste (module, propriétaire, date), chaque auteur pour son manifeste | liste avant le 13/11 |
 
 ---
 
@@ -347,8 +507,8 @@ livre la gate livre aussi le test aller-retour (C9).**
 |---|---|---|---|
 | **Q1** | Où vit le manifeste ? | **Dans le dépôt du service** (source), **copié au catalogue par version**, avec une garde de comparaison | Le propriétaire du module le tient ; le moteur lit le catalogue ; le patron « copie + garde » est déjà payé |
 | **Q2** | Désinstaller un module dont un autre dépend ? | **Refuser (409 `MODULE_REQUIS_PAR`)**, en nommant les modules qui en dépendent | Une cascade silencieuse ferme des écrans que personne n'a choisi de fermer |
-| **Q3** | Une dépendance dure est **suspendue** (impayé) : que fait le module qui en dépend ? | **Il reste ouvert** ; ce qu'il lit d'elle se déclare `SUSPENDU` | L'impayé suspend déjà **tous les droits à échéance ouverts par le même contrat** (STORY-280). Le cas restant est une dépendance suspendue **seule** : un litige décidé par un opérateur, ou un module pris sur un autre contrat. Fermer le dépendant punirait un module payé |
-| **Q4** | Combien de temps garde-t-on les données après désinstallation ? | **Sans limite jusqu'à une demande d'effacement**, qui est un acte séparé et tracé | Réinstaller sans perte (C9) l'exige. ⚠️ Risque résiduel, non bloquant : une revue juridique des données personnelles pourra imposer une durée ; elle s'appliquerait à l'effacement, pas au contrat |
+| **Q3** | Une dépendance dure est **suspendue** (impayé) : que fait le module qui en dépend ? | **Il reste ouvert** ; ce qu'il lit d'elle se déclare `SUSPENDU` | L'impayé suspend déjà **tous les droits à échéance ouverts par le même contrat** (STORY-280). Le cas restant est une dépendance suspendue **seule** : un litige décidé par un opérateur, ou un module pris sur un autre contrat. Fermer le dépendant punirait un module payé. ⚠️ **Amendé le 2026-11-10 :** la raison « l'impayé suspend déjà tous les droits » n'est **plus vraie** (l'impayé ne suspend plus : préavis de 30 jours, puis lecture seule ; `SUSPENDU` est une sanction décidée). La décision tient pour une dépendance suspendue ou en lecture seule, mais le PO la **reconfirme le 13/11** |
+| **Q4** | Combien de temps garde-t-on les données après désinstallation ? | **Sans limite jusqu'à une demande d'effacement**, qui est un acte séparé et tracé | Réinstaller sans perte (C9) l'exige. ⚠️ Risque résiduel, non bloquant : une revue juridique des données personnelles pourra imposer une durée ; elle s'appliquerait à l'effacement, pas au contrat. ⚡ **Deux exceptions écrites le 2026-11-10** (PRD moteur FR-33 et FR-32) : **(1)** l'essai d'un prospect qui ne signe pas est effacé 30 jours après sa fin, avec trace et certificat d'effacement, l'export restant possible avant ; ouvrir l'essai vaut accepter cet effacement. **(2)** L'acheteur hébergé sur la plateforme qui arrête son abonnement d'hébergement et de maintenance a un préavis de 30 jours, puis **90 jours de lecture seule** avec export de ses données, puis ses données sont **supprimées par Money Vibes** selon la loi 2019-014 (ou il passe sur site) |
 | **Q5** | Une dépendance se déclare par code ou par version ? | **Par code** en v1 | La même règle que les référentiels (STORY-148) ; la version du topic porte les ruptures |
 
 ---
@@ -358,7 +518,10 @@ livre la gate livre aussi le test aller-retour (C9).**
 - Il **ne spécifie pas l'API du moteur d'installation** (installer un pack, ordre des dépendances, refus).
   C'est la deuxième pièce du lot 1 : son PRD cite ce contrat.
 - Il **ne dessine pas la coque `prospera-app`.** C'est la troisième pièce du lot 1 : sa spine part de C8.
-- Il **ne traite pas l'installation complète chez le client** (images, mises à jour, licence) : D3 la
-  renvoie après les 8 semaines. Seul le profil compose (C10) est dans le périmètre.
+- Il **ne traite pas l'installation complète chez le client** (images, mises à jour, licence, retour
+  arrière, canal de données). **D3 est révisée** (décision du PO, séance du 2026-11-09, actée à
+  l'amendement du plan v3 du 2026-11-10) : l'instance sur site est **prête avant février 2027**, et non plus
+  « après les 8 semaines ». Son périmètre est celui du PRD du moteur d'installation ; ce contrat n'y garde
+  que les clauses que les modules doivent tenir (C10, C12, C13).
 - Il **ne crée aucune story.** Les écarts du §7 entrent dans les épics du moteur d'installation
   (EPIC-142 et suivants, plage de Dev B) ou dans la story qui les touche.

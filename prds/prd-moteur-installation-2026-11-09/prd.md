@@ -10,6 +10,7 @@ verticales: [Assurance, Distributeur, IMF, Cabinet, Money Vibes]
 contrat_de_module: CONTRAT-DE-MODULE-2026-11-09.md (AD-P17, C1 → C11 ; C12 et C13 à ajouter)
 mode: coaching
 validation: validation-report.md (passage 2, 2026-11-10, thèmes U-01 → U-28) ; passage 1 dans revue-1/
+addendum: addendum.md
 ---
 
 # PRD — Moteur d'installation
@@ -17,6 +18,8 @@ validation: validation-report.md (passage 2, 2026-11-10, thèmes U-01 → U-28) 
 *Brouillon complet, réécrit deux fois le 2026-11-10 après validation (passage 1 : 30 thèmes ; passage 2 :
 28 thèmes, `validation-report.md`). Les prénoms des parcours sont provisoires et leurs cas d'échec sont
 plausibles, pas vécus.*
+
+*Découpé le 2026-11-10 : ce PRD garde les capacités ; le « comment » destiné à l'architecture (horloges, état de confiance, licence et clés, routes, événements, formes de données, chemins de code) est passé dans `addendum.md`, où mène chaque renvoi « (détail : addendum §A-n) ».*
 
 ---
 
@@ -46,7 +49,7 @@ renouveler, lever une sanction ou déposer une licence ne font que **prolonger o
 installé (FR-4).
 
 Le **cabinet comptable** passe lui aussi par le moteur, comme tout client (décision du PO, 2026-11-10). Il
-est hébergé sur la plateforme Money Vibes `[ASSUMPTION]`. Ses écrans vivent dans l'**app
+est hébergé sur la plateforme Money Vibes (validé par le PO, 2026-11-10). Ses écrans vivent dans l'**app
 expert-comptable**, pas dans `prospera-app` : cette app lit le même état publié (FR-34). Il n'a pas de
 parcours propre dans ce PRD.
 
@@ -205,7 +208,7 @@ Les trois parcours ont été racontés par le PO le 2026-11-10. Chacun a un **me
     remboursement, le temps d'aligner les règles.
 
 *Les trois parcours ci-dessus racontent les verticales. Les deux suivants racontent **le moteur lui-même** :
-ils sont construits à partir des FR, pas racontés par le PO. `[ASSUMPTION : à faire relire par le PO]`*
+ils sont construits à partir des FR, pas racontés par le PO. Relus et validés par le PO le 2026-11-10.*
 
 #### UJ-4. Rachid installe Prospera Distributeur chez Moussa sans rien oublier
 
@@ -370,8 +373,8 @@ ils sont construits à partir des FR, pas racontés par le PO. `[ASSUMPTION : à
   téléchargement ou clé USB, sans que le serveur ait besoin d'internet.
 - **Version** : un état de la plateforme et de ses modules. **Une seule ligne de version pour tous les
   clients.**
-- **Version de plateforme** : un ensemble figé de versions de modules (`versionCode`), publié d'un bloc. La
-  promouvoir met à jour, en une écriture journalisée, la `versionCode` de tous les droits concernés (FR-17).
+- **Version de plateforme** : un ensemble figé de versions de modules (`versionCode`), publié d'un bloc. (détail
+  de la promotion : addendum §A-8).
 - **Mise à jour** : le passage d'une instance à une nouvelle version. Elle arrive d'abord dans l'espace
   d'essai, puis est **promue** dans l'espace réel : à la date choisie par le DSI sur site, dans la fenêtre
   de Money Vibes sur la plateforme (FR-17).
@@ -471,24 +474,13 @@ que lisent `prospera-app`, l'app expert-comptable et les gardes des modules (FR-
 | `INSTALLE` | 🟢 | vérifications passées (espace d'essai) ; **mise en service** (espace réel, FR-8) | désinstallation |
 | `DESINSTALLE` | — | désinstallation (`REVOKED`, rien n'est supprimé, C9) | réinstallation → `EN_INSTALLATION` |
 
-**Seul le moteur ouvre un module** (décision du PO, 2026-11-10). Il pose le droit `ACTIVE` à l'entrée en
-`INSTALLE`, dans l'espace où elle a lieu ; aucun autre chemin ne crée un droit ni ne rouvre un `REVOKED`
-(FR-4). Seule exception : le module `instance`, posé `INSTALLE` et `ACTIVE`, sans terme, à la naissance de
-l'organisation, dans chaque espace où elle naît (chemin 0 de FR-4, FR-42). Un module en attente ou bloqué n'ouvre rien aux utilisateurs (FR-5) ; ses vérifications passent
-par l'identité de service du moteur (FR-6). Chaque transition est journalisée : qui, quand, depuis quel
-chemin (FR-4).
+**Seul le moteur ouvre un module** (décision du PO, 2026-11-10) ; chaque transition est journalisée (détail : addendum §A-2).
 
 **Axe 3 : le droit d'utiliser, pour une organisation et un module.** Ce n'est **pas** un automate : il se
 **calcule** à chaque changement de fait et à chaque échéance, à partir de faits indépendants portés par le
 droit (FR-34), sur l'horloge de référence (FR-15). Il ne garde aucun « état antérieur ».
 
-Les faits :
-- **sanction** : une suspension décidée est en cours, ou non ;
-- **`echeanceLe`** : la fin de la période payée d'un élément en abonnement ; absente pour un élément acheté
-  et payé sur site ; **sur la plateforme**, celle de l'abonnement d'hébergement et de maintenance pour un
-  élément acheté (FR-32) ; même calcul que `paiement-service` (`terme.ts`) ;
-- **`preavisJusquau`** : `echeanceLe` + 30 jours, écrit avec l'échéance ;
-- **`essai`** : `{ finLe, effacementLe }`, pour un droit ouvert par une offre d'essai (FR-33).
+Les faits : une sanction, l'échéance payée, la fin du préavis et les dates d'un essai (détail : addendum §A-2).
 
 | Valeur | Quand (la première ligne qui s'applique) | Sortie |
 |---|---|---|
@@ -499,33 +491,25 @@ Les faits :
 | `PREAVIS{finLe}` | `echeanceLe` passée, `preavisJusquau` (= `finLe`) à venir | paiement → `ACTIF` ; `finLe` → `LECTURE_SEULE` |
 | `ACTIF` | sinon | échéance, sanction |
 
-**Sur site**, un élément **acheté** et payé (droit d'utiliser perpétuel) n'a ni `echeanceLe` ni
-`preavisJusquau` : il ne passe **jamais** par `PREAVIS` ni `LECTURE_SEULE` ; sa fin de maintenance touche
-l'instance (`VERSION_FIGEE`), pas ses modules. **Sur la plateforme**, qui n'a pas de version figée, un
-élément acheté porte l'`echeanceLe` de l'abonnement d'hébergement et de maintenance (FR-32) : arrêter cet
-abonnement le fait passer par `PREAVIS`, puis `LECTURE_SEULE`, puis la suppression de ses données. `PREAVIS` est un état de 30 jours **entre** l'échéance et la lecture
-seule (décision du PO, 2026-11-10) ; « échu ⇒ lecture seule immédiate » de STORY-727 lot 4 est ajusté en
-conséquence. **Un impayé ne produit jamais `SUSPENDU`** (décision du PO, 2026-11-10) : la suspension
-automatique à J+7 de STORY-280 est retirée (§8.4).
+Élément acheté, sur site et sur la plateforme ; impayé, qui ne produit jamais `SUSPENDU` (FR-32, FR-41) (détail : addendum §A-2).
 
-**L'état publié** (un par organisation × module, dans l'espace où l'on se trouve). Si l'axe 2 ne vaut pas
-`INSTALLE`, il donne l'état publié ; sinon, l'axe 3 décide (`ACTIF` se publie `EN_SERVICE`). Comme seul le
-moteur pose `ACTIVE`, un droit ouvert sans installation n'existe pas ; le test en matrice de FR-34 le
-vérifie.
+**L'état publié** (un par organisation × module, dans l'espace où l'on se trouve ; calcul (détail : addendum §A-2)).
 
-| État publié | Droit (catalogue) | Menu de `prospera-app` | Garde du module (C2 amendée) | Bandeau, et pour qui (FR-35) |
-|---|---|---|---|---|
-| `NON_INSTALLE` | absent | caché ; URL saisie → écran « module non installé » | 403 `<MODULE>_NOT_ENTITLED` | — |
-| `EN_INSTALLATION` | absent, ou `REVOKED` pour une réinstallation | caché ; URL saisie → « module en cours d'installation » | 403, sauf l'identité de service du moteur sur les routes de vérification (FR-6) et l'export (FR-43) | administrateurs : lien vers le bilan |
-| `DESINSTALLE` | `REVOKED` | caché ; URL saisie → « module non installé » | 403, sauf l'export (FR-43) | — |
-| `EN_SERVICE` | `ACTIVE`, échéance à venir ou sans échéance | visible | ouvert | — |
-| `ESSAI_PROSPECT{finLe}` | `ACTIVE`, `essai.finLe` à venir | visible | ouvert | **tous** : compte à rebours |
-| `ESSAI_TERMINE{effacementLe}` | `ACTIVE`, `essai.finLe` passée | caché ; URL saisie → « essai terminé, effacement le … » ; « Exporter » reste visible dans l'Administration | 403, sauf l'export | **tous** : « Votre essai est terminé ; vos données seront effacées le … » |
-| `PREAVIS{finLe}` | `ACTIVE`, `echeanceLe` passée, `preavisJusquau` à venir | visible | ouvert | **administrateurs et DG** : date de passage en lecture seule |
-| `LECTURE_SEULE` | `ACTIVE`, `preavisJusquau` passée | visible | lecture seule (FR-43) : écriture refusée `ABONNEMENT_EXPIRE`, sauf export et états déclarés | **tous** : « lecture seule », pour qu'on ne croie pas à une panne |
-| `SUSPENDU` | `SUSPENDED` | **caché** ; URL saisie → « module suspendu, voir votre administrateur » | 403, aucune donnée, sauf l'export et les états réglementaires déclarés (FR-43) | **administrateurs et DG** : la raison et l'action |
+| État publié | Menu de `prospera-app` | Garde du module (C2 amendée) | Bandeau, et pour qui (FR-35) |
+|---|---|---|---|
+| `NON_INSTALLE` | caché ; URL saisie → écran « module non installé » | 403 `<MODULE>_NOT_ENTITLED` | — |
+| `EN_INSTALLATION` | caché ; URL saisie → « module en cours d'installation » | 403, sauf l'identité de service du moteur sur les routes de vérification (FR-6) et l'export (FR-43) | administrateurs : lien vers le bilan |
+| `DESINSTALLE` | caché ; URL saisie → « module non installé » | 403, sauf l'export (FR-43) | — |
+| `EN_SERVICE` | visible | ouvert | — |
+| `ESSAI_PROSPECT{finLe}` | visible | ouvert | **tous** : compte à rebours |
+| `ESSAI_TERMINE{effacementLe}` | caché ; URL saisie → « essai terminé, effacement le … » ; « Exporter » reste visible dans l'Administration | 403, sauf l'export | **tous** : « Votre essai est terminé ; vos données seront effacées le … » |
+| `PREAVIS{finLe}` | visible | ouvert | **administrateurs et DG** : date de passage en lecture seule |
+| `LECTURE_SEULE` | visible | lecture seule (FR-43) : écriture refusée `ABONNEMENT_EXPIRE`, sauf export et états déclarés | **tous** : « lecture seule », pour qu'on ne croie pas à une panne |
+| `SUSPENDU` | **caché** ; URL saisie → « module suspendu, voir votre administrateur » | 403, aucune donnée, sauf l'export et les états réglementaires déclarés (FR-43) | **administrateurs et DG** : la raison et l'action |
 
-`[ASSUMPTION : un module suspendu est caché, pas grisé]`
+Statut du droit au catalogue derrière chaque état publié (détail : addendum §A-2).
+
+Un module suspendu est caché, pas grisé (validé par le PO, 2026-11-10).
 
 **Combinaisons qui ne se devinent pas.**
 - Ajouter un module à un client **En service** le fait passer **En service partiel**, jamais **En
@@ -643,16 +627,12 @@ dans SM-3 (décision du PO, 2026-11-10). Tout changement de **code ou de schéma
   l'échéance d'un contrat dont un module n'est pas installé ; aucun droit n'apparaît.
 - Les chemins 2 et 3 sont des consommateurs d'événements : un refus n'y a personne à qui répondre. Il
   devient un **écart nommé**, journalisé, visible dans la supervision et au bilan du client.
-- Le point de décision est une **bibliothèque unique**, embarquée telle quelle sur site, avec la même suite
-  de conformité.
+- Le point de décision est le même sur la plateforme et sur site (détail : addendum §A-6).
 - Le chemin 0 ne pose que le module `instance`. Test : une organisation neuve n'a aucun autre droit
   (SM-1).
-- Retirer la vérification du point de décision fait échouer les tests du chemin 1 ; retirer la règle
-  « aucun droit créé hors des chemins 0 et 1 » fait échouer les tests des chemins 2 à 6 (test de
-  mutation).
+- Les tests des chemins sont prouvés par mutation (détail : addendum §A-6).
 - Un manifeste qui crée un cycle de dépendances est refusé **par le catalogue, à la publication** :
-  `MANIFESTE_CYCLE` (422). La CI d'un dépôt peut vérifier son manifeste contre la copie publiée du graphe
-  (FR-38).
+  `MANIFESTE_CYCLE` (422). (détail : addendum §A-6)
 
 #### FR-5 : Vérifier les prérequis pendant l'installation, sans bloquer le reste
 Chaque module déclare ses prérequis au manifeste. Pendant l'installation, un prérequis absent bloque ce
@@ -688,9 +668,7 @@ Chaque module installé exécute ses vérifications et en rend le résultat chif
   « aller-retour non vérifié » ; elle est vérifiée dans le réel à la mise en service.
 - « Réessayer » ne renvoie jamais deux fois le même message : chaque vérification a sa clef
   d'idempotence (NFR-6).
-- Les vérifications s'exécutent sous l'**identité de service du moteur**, que la garde du module laisse
-  passer sur les seules routes de vérification déclarées au manifeste, tant que le module est
-  `EN_INSTALLATION` (C2 et C13 amendées). Aucun utilisateur n'y accède.
+- Les vérifications s'exécutent sous l'**identité de service du moteur** (détail : addendum §A-6). Aucun utilisateur n'y accède.
 
 #### FR-7 : Le bilan d'installation et le passage « En service »
 À la fin, la console affiche le bilan : une ligne par module, son voyant et ses vérifications.
@@ -749,13 +727,8 @@ Réalise UJ-1, UJ-2, UJ-3.
   2. pas de bac à sable : les écritures sont **interceptées** ;
   3. le client peut **forcer l'interception** même s'il a un bac à sable ;
   4. le logiciel réel, **jamais** : refus nommé `ECRITURE_REELLE_DEPUIS_ESSAI`.
-- Un bac à sable est **vérifié** quand le client confirme par écrit qu'il est distinct de son logiciel réel,
-  et que le connecteur constate une base distincte (adresse et identifiant de base différents de ceux
-  déclarés pour le réel).
-- L'espace d'essai n'a **jamais d'identifiant d'écriture** du réel. Pour **lire** le vrai logiciel du
-  client, ce qui reste permis pendant l'essai, il reçoit des identifiants **en lecture seule**, propres à
-  l'essai ; à leur déclaration, une écriture de test est tentée et doit être refusée par le logiciel du
-  client, sinon les identifiants sont rejetés.
+- Un bac à sable ne reçoit les écritures de l'essai qu'une fois **vérifié** (détail : addendum §A-7).
+- L'espace d'essai n'a **jamais d'identifiant d'écriture** du réel. Lire le vrai logiciel du client reste permis (détail : addendum §A-7).
 - Le serveur refuse toute destination déclarée pour l'espace réel. L'interdit est vérifié côté serveur, quel
   que soit l'écran. Le PRD Connecteurs **doit** reprendre ces règles (§8.4).
 
@@ -830,7 +803,7 @@ prêt en février (PRD Reprise de données, FR-19).
 **Conséquences (testables) :**
 - Une **offre d'essai** ouvre au prospect, **dans l'espace d'essai seulement**, les modules de **l'offre
   que le commercial lui a proposée**, pas la plateforme complète ; elle tient lieu de contrat pour FR-12.
-  Elle passe par le chemin 1 de FR-4 et pose `essai: { finLe, effacementLe }` sur chaque droit (FR-34).
+  (détail : addendum §A-2)
 - L'essai dure **30 jours**, prolongeable **une fois** par Money Vibes, **avant sa fin** : **60 jours au
   maximum**. À son terme, le prospect passe en `ESSAI_TERMINE` (§3.1) : ses modules se ferment, l'export
   reste ouvert (FR-43), rien n'est effacé immédiatement.
@@ -866,94 +839,53 @@ comportement à partir d'**un seul état publié**, fourni par le moteur. Aucun 
 de dates ou de statuts bruts, ni ne lit l'horloge de son propre conteneur.
 
 **Conséquences (testables) :**
-- **Deux canaux, un seul contenu** :
-  - une **route de lecture** par organisation, servie par le moteur de chaque espace :
-    `GET /etat-publie/{organisationId}`. Elle exige d'être membre authentifié de l'organisation ; les
-    droits déclarés et la santé ne sont rendus qu'aux administrateurs (FR-35). `[ASSUMPTION : chemin de
-    la route]`
-  - un **événement** `etat-publie.changed`, émis à chaque changement de l'état publié d'un module : état
-    absolu, `eventId` pour l'idempotence, clé de partition `organisationId`. Les gardes des modules le
-    projettent dans leur read-model (C2 amendée).
-- L'état publié est **calculé** à partir du droit (statut et faits de l'axe 3, §3.1) et des faits propres au
-  moteur (installation, espace, instance, santé, interrupteurs), dont le moteur est le propriétaire (C3).
-  `entitlement.changed` reste la seule source du **droit** ; l'état publié n'en est pas une copie.
+- **Deux canaux, un seul contenu** : une lecture par organisation, et un événement à chaque changement de
+  l'état publié d'un module (détail : addendum §A-2). La lecture exige d'être membre authentifié de l'organisation ; les
+  droits déclarés et la santé ne sont rendus qu'aux administrateurs (FR-35).
+- L'état publié est **calculé** (détail : addendum §A-2).
 - **Les transitions dues au temps émettent un événement** : début et fin du préavis, fin d'essai,
-  effacement, gel. Le moteur les calcule sur l'**horloge de référence** (horloge scellée sur site, NFR-11 ;
-  horloge de Money Vibes sur la plateforme) et émet `etat-publie.changed` à l'heure dite ; à son
-  redémarrage, il émet celles qu'il a manquées. Le moteur de la partie A est le **seul émetteur** de
-  `etat-publie.changed`, sur site comme sur la plateforme ; sur site, il lit l'horloge scellée auprès de
-  l'agent d'instance, qui la tient (§7, C3 et C5). Les gardes des modules ne calculent **jamais** une
+  effacement, gel. Elles tombent à l'heure dite, sur l'horloge de référence, et celles qu'un arrêt a fait manquer sont
+  émises au redémarrage (détail : addendum §A-1). Les gardes des modules ne calculent **jamais** une
   échéance sur l'horloge de leur conteneur.
-- Une lecture rend :
-  - **l'instance** : espace (`ESSAI` | `REEL`), état (`NORMAL` | `GEL`), `VERSION_FIGEE` oui/non, version
-    de plateforme, heure de référence ;
-  - **chaque module** connu du catalogue : son `code` ; son **état publié** (énumération fermée de neuf
-    valeurs, §3.1) ; la date que l'état porte (`finLe` ou `effacementLe`) ; `acquis` (oui quand le contrat
-    ou la licence le donne sans qu'il soit installé ; lu par la console seulement) ; sa version de code ;
-    ses **interrupteurs** `{ code, allume, dateLimite }` (FR-17) ; sa **santé** `OK` |
-    `DEGRADE{raison, action}` ; les **droits de tenant** qu'il déclare (FR-35). Le module `instance` y
-    figure comme les autres : son état publié vaut toujours `EN_SERVICE`, dès la naissance de
-    l'organisation (chemin 0 de FR-4) ;
-  - **l'utilisateur courant** : ses **droits effectifs** (FR-35), et s'il est **DG** ou
-    **administrateur**, pour les bandeaux (§3.1) ;
-  - **l'accueil de l'organisation** : marque, logo, couleurs, tableau de bord d'accueil, langue (D1).
-    `[ASSUMPTION : posés par l'offre à l'installation, possédés par le moteur]`
-- **Représentation sur le droit** (champs additifs de `entitlement.changed` v2, sans changer
-  `schemaVersion`, comme le terme de STORY-609) : `echeanceLe` reste l'échéance **payée**, calculée comme
-  dans `paiement-service` ; `preavisJusquau` (= `echeanceLe` + 30 jours) est écrit avec elle ; un droit
-  ouvert par une offre d'essai porte `essai: { finLe, effacementLe }`. `PREAVIS` et `ESSAI_PROSPECT` ne
-  reposent donc jamais sur une « échéance repoussée ».
+- Une lecture rend l'instance, chaque module connu du catalogue (le module `instance` compris, toujours
+  `EN_SERVICE`), l'utilisateur courant et l'accueil de l'organisation (détail : addendum §A-2).
+- `PREAVIS` et `ESSAI_PROSPECT` ne reposent jamais sur une « échéance repoussée » (détail : addendum §A-2).
 - Une valeur d'état inconnue de la coque se lit `NON_INSTALLE` (on ferme, on n'ouvre pas).
 - Un changement d'état est visible par la coque **en moins d'une minute**, et toujours à la connexion.
   `[ASSUMPTION : délai]`
 - **La santé ne ferme rien** : un module `DEGRADE` reste ouvert ; un bandeau le dit aux administrateurs, et
   sa ligne passe 🔴 dans la supervision de Money Vibes (FR-16).
 - **Le menu et la garde ne se contredisent jamais** : un test en matrice vérifie, pour chacun des neuf
-  états publiés, que la visibilité au menu (§3.1) et la réponse de la garde du module (C2) concordent. La
-  matrice compte trois cas de plus : un droit `ACTIVE` sans installation, hors le module `instance` (il ne
-  doit pas pouvoir exister) ;
-  la date du serveur reculée de 40 jours (l'état ne change pas) ; la date du serveur avancée de 10 ans
-  (aucune échéance ne tombe, NFR-11).
+  états publiés, que la visibilité au menu (§3.1) et la réponse de la garde du module (C2) concordent. (détail : addendum §A-2)
 - Dans l'espace d'essai, un module `INSTALLE` (🟢) se publie `EN_SERVICE` **pour cet espace seulement** ;
   le même module se publie `NON_INSTALLE` dans l'espace réel tant qu'il n'y est pas mis en service.
-- Sur site, la lecture rend la même forme ; les droits y viennent de la **licence**, projetée en droits du
-  catalogue (source `licence`, FR-14).
+- Sur site, la lecture rend la même forme (détail : addendum §A-2).
 
 #### FR-35 : Les droits de tenant suivent l'installation (ajouté le 2026-11-10)
 **Conséquences (testables) :**
 - Chaque module déclare ses droits de tenant dans son manifeste, sous la forme `<code>:<objet>:<action>`
-  (contrat de module C7). Le format d'`auth-service` refuse aujourd'hui un code de module à tiret
-  (`pi-spi`) : la limite est signalée à C7 (§8.4).
+  (contrat de module C7). (détail : addendum §A-5)
 - L'administrateur du client attribue ces droits lui-même, par des rôles, **sans déploiement** (socle de
   STORY-166 et STORY-167, déjà sur `dev`).
 - **Droits effectifs d'un membre = droits attribués ∩ droits des modules ouverts** (état publié
-  `EN_SERVICE`, `ESSAI_PROSPECT`, `PREAVIS` ou `LECTURE_SEULE`). L'intersection se calcule **dans la coque**
-  (menu) et **dans la garde de chaque module** (C2), à partir de l'état publié ; jamais dans `perms[]`,
-  qu'`auth-service` remplit sans appeler le catalogue. En `LECTURE_SEULE`, les droits restent effectifs ;
+  `EN_SERVICE`, `ESSAI_PROSPECT`, `PREAVIS` ou `LECTURE_SEULE`). (détail : addendum §A-5) En `LECTURE_SEULE`, les droits restent effectifs ;
   c'est la garde qui refuse les écritures (FR-43).
-- Le moteur est enregistré au catalogue comme le module **`instance`**. Le moteur le pose à la naissance
-  de toute organisation, dans chaque espace où elle naît, par le chemin 0 de FR-4 (FR-42) : `INSTALLE` et
-  `ACTIVE` d'emblée, sans essai ni mise en service ; sans terme, non suspendable, jamais vendu. Son état
-  publié vaut toujours `EN_SERVICE` (FR-34). Ses
-  droits passent donc la vérification d'`auth-service` (STORY-167 AC 2) comme ceux de tout module.
+- Le moteur est enregistré au catalogue comme le module **`instance`**. Il est posé à la naissance de toute organisation (chemin 0 de FR-4) ; il est sans terme, non suspendable
+  et jamais vendu (détail : addendum §A-5).
 - Les droits `instance:*` sont **hors intersection** : ils restent effectifs quel que soit l'état des
   autres modules et de l'instance. Le DSI peut donc **déposer une licence** même quand tout est en lecture
   seule, suspendu ou gelé ; l'export reste toujours possible.
-- Les droits du moteur : `instance:mise-a-jour:consulter`, `instance:mise-a-jour:planifier`,
-  `instance:mise-a-jour:revenir`, `instance:fichier:deposer`, `instance:support:ouvrir`,
-  `instance:consentement:donner`, `instance:donnees:exporter`, `instance:bilan:consulter`. `[ASSUMPTION :
-  liste]` Sur la plateforme, `planifier`, `revenir`, `fichier:deposer` et `support:ouvrir` n'ont pas
-  d'objet (Money Vibes décide, FR-17, FR-18) : l'écran des rôles ne les propose pas.
+- Le moteur déclare ses droits `instance:*` ; sur la plateforme, l'écran des rôles ne propose pas ceux qui
+  n'y ont pas d'objet (détail : addendum §A-5).
 - **Le droit de consentir** (`instance:consentement:donner`) ne s'attribue que **par le DG**, à lui-même ou
   à une personne qu'il désigne par écrit ; la référence de l'écrit est rangée au registre (FR-27). Un
   administrateur qui tente de l'attribuer reçoit `CONSENTEMENT_RESERVE_AU_DG` (403).
 - **Chaque bandeau a un droit** : « administrateurs » désigne les détenteurs de `instance:bilan:consulter` ;
-  « DG » désigne le dirigeant enregistré au registre (FR-27). `[ASSUMPTION]`
+  « DG » désigne le dirigeant enregistré au registre (FR-27).
 - L'écran des rôles de `prospera-app` ne **propose** que les droits des modules ouverts et ceux
   d'`instance`. Un droit attribué pour un module désinstallé reste enregistré, n'ouvre rien, et revient tel
   quel à la réinstallation (C9).
-- STORY-365 (« le RBAC s'étend au tenant ») est **requalifiée** contre 166/167 : il reste le filtrage par
-  modules ouverts (dans la coque et les gardes) et la lecture des droits depuis les manifestes.
+- STORY-365 est **requalifiée** (détail : addendum §A-9).
 
 #### FR-36 : Trois lieux d'écrans (ajouté le 2026-11-10, décision du PO)
 Les écrans du **client** (son DSI, son DG, ses administrateurs) sont dans **`prospera-app`** ; pour le
@@ -998,10 +930,7 @@ Chaque version de module publie son manifeste au catalogue (C1, Q1) ; le moteur 
 par lui.
 
 **Conséquences (testables) :**
-- Le manifeste porte : `code`, version, `depends: [{ code, raison }]`, `enrichiPar`, prérequis,
-  vérifications avec leurs critères et leurs routes (FR-6), droits de tenant (FR-35), `retourArriere:
-  SANS_PERTE | AVEC_PERTE` (FR-18), `interrupteurs: [...]` (FR-17), routes autorisées en lecture seule
-  (export, états réglementaires, FR-43), profil `docker compose` (C10).
+- Le manifeste porte tout ce que le moteur lit d'un module (détail : addendum §A-6).
 - La copie au catalogue est comparée à la source du dépôt par une garde (Q1).
 - Le catalogue refuse, à la publication, un manifeste qui crée un cycle (`MANIFESTE_CYCLE`), et une
   **version mineure qui ajoute une dépendance dure** (`MANIFESTE_DEPENDANCE_MINEURE`) : une nouvelle
@@ -1045,18 +974,14 @@ identité** ; c'est le moteur qui la fait naître.
 **Conséquences (testables) :**
 - **Naissance** : le moteur crée l'organisation, avec un identifiant unique (`organisationId`), dans chaque
   espace où elle doit exister. Un client naît dans les deux espaces à l'ouverture de son installation ; un
-  prospect naît dans l'espace d'essai seulement. Aucun autre service ne crée une organisation cliente.
-  `[ASSUMPTION : le moteur demande la création à l'auth-service de chaque espace, qui publie
-  identity.org.created]`
+  prospect naît dans l'espace d'essai seulement. Aucun autre service ne crée une organisation cliente. (détail : addendum §A-7)
 - À sa naissance, l'organisation reçoit le module `instance` (FR-35) par le chemin 0 de FR-4, et **rien
   d'autre** : aucun module ne s'ouvre sans installation (FR-4).
 - La naissance se fait **sur ordre de la console**, jamais par une lecture de l'essai : c'est la 3ᵉ
   exception de NFR-3.
 - **Signature d'un prospect** : le moteur crée l'organisation dans l'espace réel **avec le même
   identifiant** ; rien ne s'y ouvre avant le rejeu du dossier d'installation et la mise en service (FR-8).
-- **Rejeu** : chaque élément du dossier d'installation a un **propriétaire**, qui l'importe par un contrat
-  nommé (C5, C13) : offre (moteur) ; rôles et comptes (`auth-service`) ; zones (`reseau`) ; tables de
-  correspondance (Reprise de données) ; réglages (chaque module). Les comptes de l'essai sont recréés dans
+- **Rejeu** : chaque élément du dossier d'installation a un **propriétaire**, qui l'importe (détail : addendum §A-7). Les comptes de l'essai sont recréés dans
   le réel avec le même identifiant de membre ; leurs invitations partent à la mise en service. Rejoué deux
   fois, le dossier ne crée rien de plus (NFR-6).
 - **Rafraîchissement** (FR-10) : il s'appuie sur la même identité ; aucune table de correspondance
@@ -1075,7 +1000,7 @@ matrice de FR-34.
   réglementaires (BCEAO, SYSCOHADA) (C13).
 - Saisir, encaisser, envoyer et synchroniser **vers** le logiciel du client sont des écritures : fermés.
   Une synchronisation **entrante** (depuis un logiciel qui reste la référence, UJ-3) continue, et l'écran
-  dit sa fraîcheur. `[ASSUMPTION : synchronisation entrante maintenue]`
+  dit sa fraîcheur.
 - **L'export passe toujours** : chaque module expose une route d'export par organisation (C13), exemptée de
   la garde et réservée au détenteur de `instance:donnees:exporter`. Elle est ouverte partout où le module
   peut garder des données de l'organisation, réinstallation comprise ; un seul attendu par état publié :
@@ -1089,10 +1014,10 @@ matrice de FR-34.
   | `ESSAI_TERMINE` | ouvert, jusqu'à l'effacement (FR-33) |
   | `SUSPENDU` | ouvert |
 
-- L'export se fait dans un format ouvert (CSV et JSON), module par module. `[ASSUMPTION : format]`
+- L'export se fait dans un format ouvert (CSV et JSON), module par module.
 - En `SUSPENDU`, l'export et les états réglementaires déclarés restent ouverts au détenteur de
   `instance:donnees:exporter` : une sanction commerciale ne crée pas de manquement réglementaire chez le
-  client. `[ASSUMPTION]`
+  client.
 - Le test en matrice de FR-34 a **un seul attendu** par état publié et par sorte de route (lecture,
   écriture, export, état réglementaire).
 
@@ -1127,7 +1052,7 @@ ses interrupteurs de changement quand elle est prête (FR-17).
 - Le droit d'utiliser suit le mode d'acquisition de l'élément (§3) : **perpétuel** pour un élément acheté,
   une fois le prix entièrement payé ; **à échéance** pour un élément en abonnement.
 - Quand les éléments achetés d'une instance ont des échéances de maintenance différentes, la vente les
-  aligne au prorata ; la licence porte la plus proche. `[ASSUMPTION]`
+  aligne au prorata ; la licence porte la plus proche.
 - Une licence altérée, mal signée ou liée à une autre instance est refusée, et l'instance garde la
   précédente.
 - Un module absent de la licence ne s'installe pas : `MODULE_HORS_LICENCE` (422). Un module que la licence
@@ -1141,19 +1066,12 @@ ses interrupteurs de changement quand elle est prête (FR-17).
   abonnement) garde ses modules achetés quand la licence expire. À chaque paiement, la licence suivante est **envoyée
   automatiquement par e-mail** au DSI et reste **téléchargeable par un lien sécurisé à durée limitée** ;
   l'instance la reçoit aussi d'elle-même au contact suivant.
-- Chaque licence porte un **numéro qui ne fait que croître**. L'instance retient, **pour chaque clé de
-  signature**, le plus haut numéro vu, dans son état de confiance (NFR-11), et refuse toute licence plus
-  ancienne, même authentique : `LICENCE_ANTERIEURE`. Redéposer la licence d'avant une sanction ne lève donc
-  rien.
+- Une licence plus ancienne que la dernière acceptée est refusée, même authentique : `LICENCE_ANTERIEURE`.
+  Redéposer la licence d'avant une sanction ne lève donc rien (détail : addendum §A-3).
 - L'instance refuse aussi, **toutes clés confondues**, une licence dont l'heure de référence signée est
-  antérieure à celle de la dernière licence acceptée : `LICENCE_ANTERIEURE`. Le numéro par clé ne sert qu'à
-  borner l'attaque d'une clé compromise qui signerait un numéro démesuré (2⁶³) : le fichier d'urgence
-  réinitialise le compteur de cette seule clé (NFR-8). Test : une licence signée par l'ancienne clé, reçue
+  antérieure à celle de la dernière licence acceptée : `LICENCE_ANTERIEURE`. (détail : addendum §A-3) Test : une licence signée par l'ancienne clé, reçue
   par e-mail et jamais déposée, est refusée après une sanction émise sous la nouvelle clé.
-- Chaque licence nomme la clé qui l'a signée ; la gestion des clés suit NFR-8. Une licence à échéance n'est
-  acceptée que si sa clé est dans sa période de validité, lue sur l'horloge scellée : une instance coupée
-  cesse d'elle-même de croire une clé ancienne. Une licence perpétuelle reste vérifiable par la chaîne de
-  la clé racine.
+- Chaque licence nomme la clé qui l'a signée ; la gestion des clés suit NFR-8. (détail : addendum §A-3)
 
 #### FR-41 : Sanctionner à distance une instance sur site (ajouté le 2026-11-10, décision du PO)
 Money Vibes doit pouvoir agir sur une instance sur site dont le client ne respecte pas ses délais de
@@ -1177,11 +1095,11 @@ paiement, **même si le client coupe internet**.
   est alertée 7 jours avant l'échéance d'une licence payée que l'instance n'a pas reçue, pour relancer le
   DSI.
 - Un client **acheteur** qui paie en plusieurs fois n'a un droit d'utiliser **perpétuel** qu'une fois le
-  prix entièrement payé ; jusque-là, sa licence est à échéance. `[ASSUMPTION]`
+  prix entièrement payé ; jusque-là, sa licence est à échéance.
 - Un retard sur la seule **maintenance** ne sanctionne jamais un acheteur : son instance passe en version
   figée (FR-32).
 - Un acheteur **entièrement payé** n'est jamais suspendu par le logiciel : un litige se règle par la voie du
-  contrat. `[ASSUMPTION]`
+  contrat.
 
 #### FR-15 : Fonctionner coupé de Money Vibes : le silence ne punit pas
 Le silence ne dit rien de la bonne foi du client (câble coupé, panne réseau, refus de payer) : il ne
@@ -1197,46 +1115,22 @@ e-mail (FR-14, FR-41).
   récent que le dernier vu (FR-22). Redéposer un fichier déjà vu ne lève rien.
 - Débrancher internet n'arrête pas l'horloge du contrat : le droit d'utiliser d'un abonné expire à sa date,
   connecté ou non.
-- **Chaque délai a son horloge de référence** :
-
-  | Délai | Horloge | Départ | Qui l'observe |
-  |---|---|---|---|
-  | Droit d'utiliser, préavis, lecture seule, sur site | horloge scellée de l'instance | `echeanceLe` du module, portée par la licence (FR-14) | l'agent d'instance tient l'horloge ; le moteur de l'instance émet l'événement (FR-34) |
-  | Droit d'utiliser, préavis, lecture seule, sur la plateforme | horloge de Money Vibes | échéance du contrat (pour un élément acheté : celle de l'abonnement d'hébergement, FR-32) | le moteur de la plateforme |
-  | Essai prospect et effacement | horloge de Money Vibes (l'essai est sur la plateforme) | ouverture de l'offre d'essai | le moteur de la plateforme |
-  | Délai de silence : alerte de J+7 | horloge de Money Vibes | dernier contact connu de Money Vibes | Money Vibes |
-  | Délai de silence : gel de J+30 | horloge scellée | dernier contact vu par l'instance | l'agent d'instance ; le moteur de l'instance publie le gel (FR-34) |
-  | Retour arrière et rétrocompatibilité C12 (7 jours) | horloge de l'instance qui promeut (scellée sur site) | promotion | l'agent d'instance |
-  | Correctif de sécurité (72 h) | horloge de Money Vibes | client prévenu (FR-19) | Money Vibes, qui appelle le DSI |
-  | Vague (7 jours sans incident) | horloge de Money Vibes | promotion dans la vague | Money Vibes |
-
+- **Chaque délai a son horloge de référence** (détail : addendum §A-1).
 - Un délai observé en retard (agent d'instance ou moteur arrêté) se rattrape au redémarrage : le moteur
   émet les transitions passées (FR-34).
 - Sur site, les échéances se lisent sur l'**horloge scellée** (décision du PO, 2026-11-10) : elle ne recule
   jamais d'elle-même et fonctionne hors ligne. Reculer la date du serveur est une anomalie tracée et ne
   prolonge rien. Test : reculer la date du serveur de 40 jours ; l'échéance tombe quand même.
-- L'horloge scellée **n'avance pas sans borne** : au-delà de 48 heures d'écart avec le temps machine
-  mesuré, elle n'avance pas et l'anomalie est tracée. Seule une **heure de référence** signée par Money
-  Vibes (dans chaque réponse de contact et chaque fichier) peut la corriger, en avant comme en arrière.
-  Test : avancer la date du serveur de 10 ans ; aucune échéance ne tombe. `[ASSUMPTION : borne de
-  48 heures]`
-- Une horloge logicielle ne sait pas combien de temps la machine est restée **éteinte** : pour ce temps-là,
-  elle ne croit la date du serveur que si elle avance, dans la borne ci-dessus. Le mécanisme (puce de
-  sécurité ou non) est laissé à l'architecture.
+- L'horloge scellée **n'avance pas sans borne** (détail : addendum §A-1). Test : avancer la date du serveur de 10 ans ; aucune
+  échéance ne tombe.
 - L'horloge scellée fait partie de l'**état de confiance** : aucune sauvegarde ne la restaure (NFR-11).
 
 #### FR-16 : Connexion sortante uniquement, et supervision
 **Conséquences (testables) :**
 - L'instance n'ouvre **aucun port entrant** ; toutes les liaisons sont initiées par elle, en HTTPS.
-- Elle envoie un **signal hebdomadaire** (comme Odoo), selon un schéma fermé (FR-26) : version, santé par
-  module, licence, empreinte de l'état de confiance (NFR-11), indicateurs de niveau 0. Une instance en
+- Elle envoie un **signal hebdomadaire** (comme Odoo), selon un schéma fermé (FR-26) (détail : addendum §A-4). Une instance en
   version figée continue de l'envoyer.
-- Elle vérifie **chaque jour** s'il existe un **correctif de sécurité** pour elle. Cette requête n'envoie que
-  l'identifiant de l'instance, sa version, le numéro de sa licence et l'empreinte de son état de confiance
-  (niveau 0) ; sa réponse porte, s'il y a lieu, une nouvelle licence, la liste de révocation (NFR-8) et
-  l'heure de référence.
-- Quand le contact est un fichier, rien ne répond : le fichier porte lui-même la licence, la liste de
-  révocation et l'heure de référence (FR-22).
+- Elle vérifie **chaque jour** s'il existe un **correctif de sécurité** pour elle. (détail : addendum §A-4)
 - Money Vibes dispose d'une **vue de supervision** de toutes les instances : version, santé de chaque module
   (`DEGRADE` en 🔴, FR-34), voyant de santé de l'instance, dernier contact, état de confiance, mises à jour
   en attente, écarts nommés (FR-4).
@@ -1261,8 +1155,7 @@ Deux variantes, parce qu'une plateforme partagée par plusieurs organisations n'
 - Tout changement de **comportement** visible des utilisateurs est déclaré au manifeste comme
   **interrupteur de changement** (`interrupteurs: [...]`, C12) ; la revue de la version classe ce qui est
   visible. Un interrupteur **ne change jamais la forme des données** (décision du PO, 2026-11-10) : il ne
-  commande que du comportement ; un changement de forme passe par une migration rétrocompatible (C12). Les
-  interrupteurs vivent dans le moteur et se lisent dans l'état publié (FR-34). Un test de conformité par
+  commande que du comportement ; un changement de forme passe par une migration rétrocompatible (C12). (détail : addendum §A-8) Un test de conformité par
   module joue chaque interrupteur éteint puis allumé.
 
 **Sur site :**
@@ -1275,13 +1168,11 @@ Deux variantes, parce qu'une plateforme partagée par plusieurs organisations n'
 
 **Sur la plateforme Money Vibes** (comme les grands éditeurs en ligne) :
 - Le **code** est promu pour toutes les organisations dans une **fenêtre fixée par Money Vibes**, avec une
-  **annonce** 7 jours avant (§3). `[ASSUMPTION : durée de l'annonce]` La promotion met à jour, en une écriture
-  journalisée, la `versionCode` de tous les droits concernés.
+  **annonce** 7 jours avant (§3). (détail : addendum §A-8)
 - Les répétitions générales en cours et les essais prospects sont migrés avec la version ; une organisation
   essaie une majeure après le rafraîchissement de son essai (FR-10).
 - Chaque interrupteur est livré éteint : l'administrateur d'une organisation l'essaie dans l'espace d'essai
-  et l'allume quand il est prêt ; à sa **date limite** (30 jours), il s'allume seul. `[ASSUMPTION :
-  30 jours]`
+  et l'allume quand il est prêt ; à sa **date limite** (30 jours), il s'allume seul.
 - **Une seule version d'interrupteurs ouverte à la fois** (décision du PO, 2026-11-10) : la date limite des
   interrupteurs d'une version tombe avant la fenêtre de la version suivante.
 - Un interrupteur ne survit **jamais** à sa date limite : sinon chaque organisation finirait avec sa
@@ -1293,10 +1184,7 @@ Deux variantes, parce qu'une plateforme partagée par plusieurs organisations n'
   **7 jours**, **sans perte** : ce qui a été saisi depuis la promotion reste lisible et modifiable par la
   version précédente. Le retour arrière se fait d'**un pas** : vers la version précédente seulement.
 - Cela repose sur la clause **C12** du contrat de module (décision du PO, 2026-11-10) : pendant 7 jours,
-  chaque migration est **rétrocompatible** (on étend d'abord ; on ne contracte qu'à une version suivante,
-  quand la fenêtre de la version qui a étendu est close partout) ; chaque consommateur d'événements ignore
-  les champs **et les valeurs d'énumération** qu'il ne connaît pas ; un événement qui change de forme passe
-  à une nouvelle version de topic (`@2`), publiée à côté de l'ancienne pendant 7 jours. Chaque module le
+  chaque migration est **rétrocompatible** (détail : addendum §A-8). Chaque module le
   prouve par un test : promouvoir, saisir, revenir, tout se relit ; re-promouvoir, tout se relit encore.
 - Une version dont une migration ne peut pas être rétrocompatible se déclare `retourArriere: AVEC_PERTE` au
   manifeste. Une version de plateforme hérite du pire `retourArriere` de ses modules.
@@ -1339,22 +1227,20 @@ Deux variantes, parce qu'une plateforme partagée par plusieurs organisations n'
   retour arrière demandé par un client, aucune anomalie grave ou bloquante imputée à la version, aucun
   contrôle de santé en échec après promotion.
 - L'attente d'une instance qui ne promeut pas est bornée : au-delà de 14 jours, la vague suivante part sur
-  la foi des autres instances de la vague. `[ASSUMPTION : 14 jours]`
+  la foi des autres instances de la vague.
 - Les correctifs de sécurité ne suivent pas les vagues (FR-19).
 
 #### FR-21 : Une seule ligne de version
 **Conséquences (testables) :**
 - Aucune branche de code propre à un client (contrat de module C6).
 - **Chaque version majeure a une durée de maintenance publiée** (décision du PO, 2026-11-10, modèle Odoo) ;
-  la version suivante embarque les correctifs de la précédente et ses améliorations. La durée est publiée à
-  la sortie de la version (§8.2).
-- Une instance maintenue n'a **jamais plus d'une version majeure de retard** (N-1). C'est une règle
-  nouvelle, sur l'instance, qui reprend le principe de la fenêtre de support des versions de modules
-  (`fenetre-de-support.ts`).
+  la version suivante embarque les correctifs de la précédente et ses améliorations. La durée est de **3 ans, comme Odoo** (décision du PO,
+  2026-11-10), publiée à la sortie de la version.
+- Une instance maintenue n'a **jamais plus d'une version majeure de retard** (N-1). (détail : addendum §A-8)
 - Hors de cette fenêtre, le support contractuel cesse et le DG du client est prévenu ; il n'y a **pas de
   promotion forcée**. Une instance en version figée est exemptée.
 - Le DG d'une instance en version figée est prévenu 90 jours avant que sa version majeure ne sorte de sa
-  durée de maintenance. `[ASSUMPTION : 90 jours]`
+  durée de maintenance.
 
 #### FR-22 : Mise à jour depuis un fichier, y compris à l'étranger
 Le serveur du client n'a pas besoin d'internet : seuls les fichiers voyagent, et leur signature prouve
@@ -1409,8 +1295,7 @@ leur origine.
   administrateurs et le DG ; puis **lecture seule** (`LECTURE_SEULE`). Jamais d'écran noir, jamais
   d'effacement (décision du PO, 2026-11-10), sauf pour l'acheteur hébergé sur la plateforme qui arrête son
   abonnement d'hébergement (ci-dessous).
-- Le même parcours vaut pour un **impayé**, sur site comme sur la plateforme (FR-41). Il remplace « échu ⇒
-  lecture seule immédiate » de STORY-727 lot 4 et la suspension automatique à J+7 de STORY-280 (§8.4). La
+- Le même parcours vaut pour un **impayé**, sur site comme sur la plateforme (FR-41). (détail : addendum §A-9) La
   suspension (`SUSPENDU`) reste une sanction distincte, décidée (§3).
 - La lecture seule suit **une seule règle** (FR-43).
 - **Élément acheté (droit d'utiliser perpétuel), maintenance échue** : le logiciel **continue à vie** ;
@@ -1426,8 +1311,8 @@ leur origine.
   **préavis** de 30 jours, puis **lecture seule** pendant laquelle il **exporte ses données** (FR-43), puis
   **suppression** de ses données par Money Vibes selon les règles de protection des données en vigueur (loi
   togolaise 2019-014), avec certificat. C'est une exception écrite au §3 « Effacer » et à Q4 (§8.4). Il
-  peut aussi **passer sur site**, où sa version peut être figée. `[ASSUMPTION : durée de la lecture seule
-  avant suppression = 90 jours]`
+  peut aussi **passer sur site**, où sa version peut être figée. (validé par le PO, 2026-11-10 : 90 jours de
+  lecture seule avant la suppression).
 - **Revenir à la maintenance se paie, avec le rattrapage de la période manquée** (comme SAP ; décision du
   PO, 2026-11-10), et impose de rattraper les versions manquées (FR-21).
 
@@ -1462,7 +1347,6 @@ passe par la garde du registre (FR-27). La validation juridique de ces clauses e
 - Il est donné par le **dirigeant (DG)** du client, ou par une personne qu'il **désigne par écrit** ; il se
   **retire** à tout moment. Le DG est le dirigeant enregistré par Money Vibes à la signature du contrat ;
   une désignation écrite est un document signé par lui, dont la référence est rangée au registre.
-  `[ASSUMPTION]`
 - Chaque don et chaque retrait sont journalisés ; le client consulte ce journal.
 - Sans contrat client signé portant la clause correspondante, aucun consentement ne s'enregistre.
 - **Sur la plateforme**, les clauses du contrat d'abonnement s'enregistrent au registre **à la signature**,
@@ -1485,10 +1369,7 @@ passe par la garde du registre (FR-27). La validation juridique de ces clauses e
   position GPS précise, photos et **texte libre** ; ramener la date de naissance à l'année ; garder les
   montants. La **table de correspondance** qui permettrait de ré-identifier **ne quitte jamais
   l'instance** (décision du PO, 2026-11-10, selon la loi togolaise 2019-014).
-- **Contre la ré-identification par recoupement** : les identifiants de dossier sont remplacés par un
-  pseudonyme salé propre à chaque export, si bien que deux exports ne se joignent pas ; un groupe de moins
-  de 5 dossiers qui partagent les mêmes valeurs d'âge, de zone et de produit est retiré de l'échantillon.
-  `[ASSUMPTION : seuil de 5 et champs]`
+- Un échantillon résiste à la **ré-identification par recoupement** : deux exports ne se joignent pas (détail : addendum §A-10).
 - Chaque export a un **manifeste signé** : champs, nombre de lignes, finalité. Il est approuvé par le **DG
   du client** (ou la personne qu'il a désignée, FR-27) **et** par le responsable des données de Money Vibes,
   puis rangé au registre. Pas d'approbation, pas d'export.
@@ -1513,7 +1394,7 @@ passe par la garde du registre (FR-27). La validation juridique de ces clauses e
   modèle déjà produit (le contrat client le dit).
 - Une contribution non transmise dans les 30 jours est purgée sur l'instance. Chez Money Vibes, une
   contribution est gardée jusqu'au tour d'entraînement qui l'emploie, puis supprimée ; seul le modèle
-  produit est conservé. `[ASSUMPTION : durées]`
+  produit est conservé.
 
 #### FR-31 : Le modèle commun redescend comme une mise à jour
 **Conséquences (testables) :**
@@ -1552,34 +1433,21 @@ juridique, loi togolaise 2019-014).
   « Réessayer » ne crée aucun doublon ; chaque vérification a sa clef d'idempotence (C13).
 - **NFR-7, sauvegardes** (décisions du PO, 2026-11-10) : règle **3-2-1** (trois copies, deux supports, une
   hors de la machine) ; sur site, la copie hors machine est sur un **second support dans les locaux du
-  client**. Les sauvegardes sont chiffrées. Sur site, une **clé d'exploitation scellée sur l'instance**
-  permet les automatismes (retour arrière, test mensuel), et une **clé de secours** est remise au client,
-  qui seule permet de restaurer sur une autre machine. Perte maximale tolérée **1 heure, sur site comme sur
-  la plateforme** (journal des opérations) ; remise en route **4 heures** `[ASSUMPTION : 4 heures aussi sur
-  la plateforme]`. Un **test de restauration automatique chaque mois**, dont l'échec fait passer le
+  client**. Les sauvegardes sont chiffrées. Sur site, le client détient seul la clé qui restaure sur une autre machine (détail : addendum §A-3). Perte maximale tolérée **1 heure, sur site comme sur
+  la plateforme** (journal des opérations) ; remise en route **4 heures**, sur site comme sur
+  la plateforme (validé par le PO, 2026-11-10). Un **test de restauration automatique chaque mois**, dont l'échec fait passer le
   **voyant de santé de l'instance** en orange (FR-16). Sur la plateforme, conservation par paliers
-  (7 quotidiennes, 4 hebdomadaires, 3 mensuelles). `[ASSUMPTION : paliers]` **Une sauvegarde ne restaure
+  (7 quotidiennes, 4 hebdomadaires, 3 mensuelles). **Une sauvegarde ne restaure
   jamais l'état de confiance** (NFR-11).
-- **NFR-8, clés de signature** (décision du PO, 2026-11-10) : une **clé racine hors ligne**, au coffre,
-  qui ne sert qu'à certifier les clés de signature ; les clés de signature **changent chaque année**
-  `[ASSUMPTION : rythme]` ; la **liste de révocation** voyage dans le signal hebdomadaire, dans la réponse
-  quotidienne **et** dans chaque fichier de mise à jour. Une clé compromise est révoquée par un **fichier
-  d'urgence** signé par la clé racine : il **réinitialise le plus haut numéro** retenu pour cette clé (et
-  l'heure de la dernière licence acceptée, si cette clé l'avait signée),
-  révoque tout ce qu'elle a signé, ré-émet les licences sous une nouvelle clé et passe par le chemin rapide
-  (FR-19).
+- **NFR-8, clés de signature** (décision du PO, 2026-11-10) : les clés de signature sont certifiées par une clé racine hors
+  ligne et changent régulièrement (détail : addendum §A-3) ; la **liste de révocation** voyage dans le signal hebdomadaire, dans la réponse
+  quotidienne **et** dans chaque fichier de mise à jour. Une clé compromise est révoquée par un **fichier d'urgence** signé par la clé racine (détail : addendum §A-3).
 - **NFR-9, interruption** : une promotion n'interrompt pas le travail plus de **15 minutes**, annoncées.
-  `[ASSUMPTION : durée]`
 - **NFR-10, serveur du client** : une configuration minimale publiée (processeur, mémoire, disque,
   second support de sauvegarde) ; la procédure de FR-25 refuse un serveur qui ne la respecte pas.
   `[ASSUMPTION : chiffres à fixer par l'architecture]`
-- **NFR-11, état de confiance** (ajoutée le 2026-11-10) : l'horloge scellée, le plus haut numéro de licence
-  vu par clé, l'heure de référence de la dernière licence acceptée, le registre des consentements et la tête du journal forment l'**état de confiance** de
-  l'instance. Il est ancré **hors des sauvegardes** : aucune restauration, aucun instantané de machine
-  virtuelle, aucun retour arrière `AVEC_PERTE` ne le ramène en arrière. Il n'avance que. Son empreinte est
-  rapportée à Money Vibes à chaque contact ; si elle a reculé, Money Vibes refuse toute licence et tout
-  export de niveau 1 à 3 pour cette instance, et ouvre un ticket. Après la perte du serveur, il est rétabli
-  depuis la dernière empreinte connue de Money Vibes, par un fichier signé. Tests : restaurer une sauvegarde
+- **NFR-11, état de confiance** (ajoutée le 2026-11-10) : l'**état de confiance** de l'instance (§3) est ancré **hors des sauvegardes**
+  (détail : addendum §A-4). Il n'avance que. Un recul est vu par Money Vibes au contact suivant (détail : addendum §A-4). Tests : restaurer une sauvegarde
   de six mois, puis vérifier que l'ancienne licence reste refusée, que le retrait d'un consentement tient,
   et que l'échéance tombe à la même date. Le mécanisme d'ancrage (puce de sécurité, support séparé) est
   laissé à l'architecture (§8.2).
@@ -1594,7 +1462,7 @@ juridique, loi togolaise 2019-014).
 | SM-4 | Données sorties d'une instance, ou lues pour l'apprentissage sur la plateforme, **sans** consentement valide (registre, journal d'export, journal de la garde et journal des lectures d'exploitation AD-P16, vérifiés à chaque export et à chaque entraînement) | 0 |
 | SM-5 | Clients installés la première année | ≈ 10 |
 | SM-6 | Règles propres à un client dans le code : garde de balayage C6, posée au gabarit de chaque dépôt (§8.4) | 0 |
-| SM-7 | Durée d'installation du **deuxième** distributeur, mesurée par le plan d'installation (FR-40) du clic « Installer » à la mise en service, comparée au premier | ≤ 50 % du premier `[ASSUMPTION : seuil]` |
+| SM-7 | Durée d'installation du **deuxième** distributeur, mesurée par le plan d'installation (FR-40) du clic « Installer » à la mise en service, comparée au premier | ≤ 50 % du premier |
 
 **Contre-indicateurs** (à surveiller pour qu'on ne triche pas avec les cibles) :
 - nombre de **retours arrière** par version (une promotion trop rapide se paie ici) ;
@@ -1615,7 +1483,7 @@ dans la spine d'architecture. Un retour arrière ne peut pas être exécuté par
 | C2 | Socle existant du catalogue (droits plateforme `entitlement:*`). **Amendée pour tous** : la garde lit l'état publié poussé (FR-34), jamais l'horloge de son conteneur ; lecture seule selon FR-43 ; route d'export exemptée ; identité de service du moteur sur les routes de vérification (FR-6) |
 | C3 | La partie A possède : offres, dossiers d'installation, plans d'installation, bilans, état publié et ses faits (installation, espace, santé, interrupteurs). Elle est le **seul émetteur** de l'état publié ; sur site, elle lit l'horloge scellée auprès de l'agent d'instance, qui la tient (parties B et C). Licences, état de confiance, consentements et journal appartiennent aux services des parties B et C. Le moteur n'écrit dans aucun autre module : le rejeu passe par le contrat d'import de chaque propriétaire (FR-42) |
 | C4 | Sans Reprise ni Connecteurs dans l'offre, leurs lignes sont grisées « hors offre » et ne bloquent rien (FR-7) |
-| C5 | Publie `entitlement.changed` (existant ; champs additifs `preavisJusquau` et `essai`) et `etat-publie.changed`, dont la partie A est le seul émetteur, transitions dues au temps comprises (FR-34) ; sert `GET /etat-publie/{organisationId}` (FR-34) ; consomme le feu vert de la Reprise ; topics de bilan, de licence et de réception définitive à nommer dans la spine |
+| C5 | Publie `entitlement.changed` (existant) et `etat-publie.changed`, dont la partie A est le seul émetteur, transitions dues au temps comprises (FR-34) ; consomme le feu vert de la Reprise ; topics de bilan, de licence et de réception définitive à nommer dans la spine (détail : addendum §A-2) |
 | C6 | Aucune règle propre à un client ; tout passe par le contrat et la licence. Un module, le moteur compris, a **le même schéma de données pour toutes les organisations** : aucune variante par client (C6, C11) |
 | C7 | Droits plateforme existants ; droits de tenant `instance:*` du module `instance` pour les écrans du client (FR-35) |
 | C8 | Trois lieux (FR-36) : console Money Vibes pour Money Vibes ; module d'écran « Administration » dans `prospera-app` pour le client ; mêmes écrans dans l'app expert-comptable pour le cabinet |
@@ -1634,7 +1502,7 @@ dans la spine d'architecture. Un retour arrière ne peut pas être exécuté par
 | QB-1 | Instance coupée au-delà du délai de silence | **Gel** à J+30 ; le silence ne punit pas ; le contrat a sa propre horloge (FR-15, FR-32) |
 | QB-2 | Report d'un correctif de sécurité | **Une fois, 7 jours au plus**, pas de refus (FR-19) |
 | QC-1 | Qui consent chez le client | **Le DG**, ou une personne qu'il désigne par écrit (FR-27) |
-| — | Valeurs | Signal **hebdomadaire** + contrôle sécurité **quotidien** ; délai de silence **30 j**, alerte **J+7** ; retour arrière **7 j** ; correctif **72 h** ; vague **7 j** ; installation **< 15 min** ; préavis **30 j** |
+| — | Valeurs | Signal **hebdomadaire** + contrôle sécurité **quotidien** ; délai de silence **30 j**, alerte **J+7** ; retour arrière **7 j** ; correctif **72 h** ; maintenance d'une version majeure **3 ans** ; vague **7 j** ; installation **< 15 min** ; préavis **30 j** |
 
 Le 2026-11-10, après la première validation, le PO a tranché : menu de l'essai, mise en service par
 sous-ensemble, lignes hors offre, rétrocompatibilité (C12), connecteurs en essai, sauvegardes et clés,
@@ -1663,64 +1531,46 @@ Chaque décision et sa raison sont au `.memlog.md` ; le texte ci-dessus les appl
 - `[NOTE FOR PM]` **Validation juridique** des clauses d'apprentissage par finalité (plateforme) et des
   clauses du contrat client pour les niveaux 1 à 3 (loi togolaise 2019-014). Propriétaire : PO, avec un
   juriste. Date : avant la signature du premier contrat d'abonnement, en février 2027.
-- `[NOTE FOR PM]` **Durée de maintenance publiée d'une version majeure** (FR-21), qui borne le coût des
-  correctifs pour les versions figées (FR-19). Propriétaire : PO. Date : séance du 13/11.
-- `[NOTE FOR PM]` **Révision de D3** à acter dans le plan v3 (§8), le contrat de module (§9) et AD-P17 ; la
-  charge réelle de Dev B se chiffre dans l'amendement du plan v3 (§8.4). Propriétaire : PO et Dev B. Date :
-  séance du 13/11.
-- `[NOTE FOR PM]` **C12, C13 et les amendements du contrat de module** (§8.4) à intégrer au contrat.
-  Propriétaire : PO. Date : séance du 13/11.
+- `[NOTE FOR PM]` **Révision de D3** à acter dans le plan v3 (§8), le contrat de module (§9) et AD-P17 :
+  l'amendement est rédigé dans `amendement-plan-v3-2026-11-10.md`, à valider par le PO le 13/11. La charge
+  réelle de Dev B s'y chiffre (§8.4). Propriétaire : PO et Dev B. Date : séance du 13/11.
+- `[NOTE FOR PM]` **C12, C13 et les amendements du contrat de module** (§8.4) : ils sont rédigés dans
+  `CONTRAT-DE-MODULE-2026-11-09.md` (PR à venir), à valider par le PO le 13/11. Propriétaire : PO.
+  Date : séance du 13/11.
 - `[NOTE FOR PM]` **Entrée au catalogue des modules commerciaux** (18 pour le distributeur, et ceux des
   autres verticaux), avec leur manifeste C13. Tant qu'un module n'y est pas, il ne se vend pas (FR-12,
-  décision du PO, 2026-11-10). Le PO a décidé que les 18 manifestes ont chacun un propriétaire et une date :
-  **Dev B produit la liste (module, propriétaire, date) avant la séance du 13/11**. Propriétaire : Dev B
-  pour la liste et la table de FR-37 ; l'auteur de chaque module pour son manifeste. Date : table et pack
-  Terrain & Ventes avant la démo du 15/01 ; le reste selon la liste.
+  décision du PO, 2026-11-10). La liste de tous les modules à manifester, toutes verticales, est dans
+  `manifestes-a-produire.md` (fichier produit à part). Propriétaire : Dev B pour la liste et la table de
+  FR-37 ; l'auteur de chaque module pour son manifeste. Date : table et pack Terrain & Ventes avant la démo
+  du 15/01 ; le reste selon la liste.
 - `[NOTE FOR PM]` **Mécanisme d'ancrage de l'état de confiance et de l'horloge scellée** (puce de sécurité
   ou support séparé), et son coût. Propriétaire : l'architecte de la spine du moteur. Date : spine du
   moteur, avant la semaine 5 (07/12).
 
-### 8.3 Inférences à confirmer
+### 8.3 Inférences
 
-Marquées `[ASSUMPTION]` dans le texte.
+Les inférences « à confirmer par le PO » ont été **validées par le PO le 2026-11-10** ; leurs marques
+`[ASSUMPTION]` sont retirées du texte. Les durées et les seuils qu'elles portent (7 j, 30 j, 14 j, 90 j,
+5 dossiers, 4 h…) sont des valeurs de départ. Seul le classement de FR-42, FR-43 et NFR-11 parmi les
+exigences jamais sacrifiées reste marqué `[ASSUMPTION : classement à confirmer par le PO]` (§8.4).
 
-**À confirmer par le PO (séance du 13/11) :**
-- le cabinet hébergé sur la plateforme (§0) ; le module suspendu caché, pas grisé (§3.1) ;
-- un acheteur entièrement payé n'est jamais suspendu
-  par le logiciel, et l'acheteur qui paie en plusieurs fois a une licence à échéance jusqu'au dernier
-  paiement (FR-41) ;
-- en `SUSPENDU`, l'export et les états réglementaires restent ouverts ; en `LECTURE_SEULE`, la
-  synchronisation entrante continue ; l'export se fait en CSV et JSON (FR-43) ;
-- l'alignement au prorata des échéances de maintenance (FR-14) ; la grâce de STORY-281 reporte l'échéance
-  du droit d'utiliser (§8.4) ;
-- l'identité du DG et la preuve de la désignation écrite (FR-27) ; la liste des droits `instance:*` et le
-  droit derrière chaque bandeau (FR-35) ; l'accueil de l'organisation posé par l'offre (FR-34) ;
-- les durées : annonce de la fenêtre (7 jours) et date limite d'un interrupteur (30 jours, FR-17) ; attente
-  bornée d'une vague (14 jours, FR-20) ; prévenance du DG avant la fin de maintenance d'une version figée
-  (90 jours, FR-21) ; lecture seule avant la suppression des données d'un acheteur hébergé sur la
-  plateforme (90 jours, FR-32) ; purge des contributions (FR-30) ; seuil de ré-identification (5 dossiers,
-  FR-28) ;
-- remise en route de 4 heures sur la plateforme et paliers de conservation (NFR-7) ; durée d'interruption
-  (NFR-9) ; seuil de SM-7 ;
-- les parcours UJ-4 et UJ-5, construits à partir des FR (§2.3) ; le classement de FR-42, FR-43 et NFR-11
-  parmi les exigences jamais sacrifiées (§8.4 ; l'ordre de sacrifice lui-même est décidé).
-
-**Laissé à l'architecture (spine du moteur et de la coque) :**
-- deux adresses par instance (§3.1) ; chemin de la route de lecture et délai d'une minute (FR-34) ;
-- borne d'avance de 48 heures de l'horloge scellée (FR-15) ; correctif maintenu au retour arrière (FR-18) ;
-- création des organisations par l'`auth-service` de chaque espace, et lien de la coque entre les deux
-  espaces (FR-42) ;
-- conditions de mesure de NFR-5 ; rythme de rotation des clés (NFR-8) ; chiffres de NFR-10 ; découpage des
+**Laissé à l'architecture (spine du moteur et de la coque), marqué `[ASSUMPTION]` dans le texte :**
+- deux adresses par instance (§3.1) ; chemin de la route de lecture (FR-34, addendum §A-2) et délai d'une
+  minute (FR-34) ;
+- borne d'avance de 48 heures de l'horloge scellée (FR-15, addendum §A-1) ; correctif maintenu au retour arrière (FR-18) ;
+- création des organisations par l'`auth-service` de chaque espace (FR-42, addendum §A-7), et lien de la
+  coque entre les deux espaces (FR-42) ;
+- conditions de mesure de NFR-5 ; rythme de rotation des clés (NFR-8, addendum §A-3) ; chiffres de NFR-10 ; découpage des
   services des parties B et C (§7).
 
 ### 8.4 Ce que ce PRD demande ailleurs
 
 | Document | Changement |
 |---|---|
-| Contrat de module | **§0 et §1** : Installer (le moteur installe puis met en service ; aucun autre chemin ne pose `ACTIVE`, hors le module `instance` à la naissance de l'organisation, chemin 0 de FR-4), Pack (pack commercial ; `VerticalPack` = catalogue du vertical), Suspendre (sanction décidée, plus l'impayé), Expiré (préavis de 30 jours, puis lecture seule). **C1** : `depends: [{ code, raison }]` et les nouveaux champs du manifeste (FR-38). **C2** : la garde lit l'état publié poussé, jamais l'horloge de son conteneur ; lecture seule selon FR-43 ; route d'export exemptée ; identité de service du moteur sur les routes de vérification ; preuve par état publié (neuf états). **C7** : le format d'`auth-service` refuse les codes de module à tiret, à élargir. **C8** : une entrée est visible si l'état publié vaut `EN_SERVICE`, `ESSAI_PROSPECT`, `PREAVIS` ou `LECTURE_SEULE`, et si l'utilisateur a le droit ; l'app expert-comptable suit la même règle pour le cabinet. **C11 §5** : une clause par finalité, compte de service IA dédié (FR-27). **C11** : chaque module avec IA remet ses indicateurs agrégés de niveau 0 à l'agent d'instance par un contrat nommé (FR-26) ; un module a le même schéma de données pour toutes les organisations (§7, C6). **C12** (rétrocompatibilité 7 jours, valeurs d'énumération, topics `@2`, interrupteurs déclarés) et **C13** (installable sous contrôle, FR-38). **§6** : une section de **treize** lignes, et le contrôle de préparation à mettre à jour. **Q3** : sa raison (« l'impayé suspend déjà tous les droits », STORY-280) n'est plus vraie. **Q4** : deux exceptions écrites (effacement de l'essai prospect, FR-33 ; suppression des données de l'acheteur hébergé sur la plateforme, après sa lecture seule, FR-32). **§9** : suit la révision de D3. **Garde C6** : garde de balayage posée au gabarit de chaque dépôt (SM-6) |
+| Contrat de module | Amendements à **§0, §1, C1, C2, C7, C8, C11, C12, C13, §6, Q3, Q4, §9** et à la garde C6 (SM-6), rédigés dans `CONTRAT-DE-MODULE-2026-11-09.md` (PR à venir), à valider par le PO le 13/11 (détail : addendum §A-11) |
 | Plan v3 (§8) et AD-P17 | Acter **D3 révisée** (sur site avant février) et **toutes les FR pour février** (table du §0) ; chiffrer dans cet amendement la charge réelle de Dev B ; ordre de sacrifice (ci-dessous, décidé) |
-| STORY-727 | **Lot 2** : une échéance soldée prolonge les modules installés et note les autres « acquis, à installer » ; elle ne crée plus de droit. **Lot 4** : préavis de 30 jours avant la lecture seule (`preavisJusquau`) ; liste blanche d'export et d'états (FR-43). **Lot 6** : un pack modifié ne s'applique qu'aux nouveaux contrats ; la propagation ne crée plus de droit. **Lot 7** : le socle de vertical n'ouvre plus rien ; `VerticalPack` devient le catalogue du vertical. Les droits de test sont réamorcés, sans reprise de l'existant |
-| STORY-280 et STORY-281 (`paiement-service`, catalogue) | Le jalon `IMPAYE` (J+7) ne produit plus `SUSPENDED` : le consommateur `suspension-par-impaye` sort du chemin de l'impayé (il peut servir à la sanction décidée). Le jalon `PREAVIS` de J-7 est renommé `RAPPEL`, dans `paiement-service` et dans les modèles de notification ; aucun contrat n'est en cours, donc aucune clef d'idempotence à migrer. La régularisation (chemin 3 de FR-4) sort de `PREAVIS` ou de `LECTURE_SEULE`. La grâce de 281 reporte l'échéance du droit d'utiliser, donc le début du préavis `[ASSUMPTION]` |
+| STORY-727 | Lots 2, 4, 6 et 7 ajustés à ce PRD ; droits de test réamorcés (détail : addendum §A-9) |
+| STORY-280 et STORY-281 (`paiement-service`, catalogue) | L'impayé ne suspend plus ; le rappel de J-7 est renommé ; la régularisation sort du préavis ou de la lecture seule (détail : addendum §A-9) |
 | `paiement-service` (vente) | Résoudre les dépendances dures comme la console (FR-12) ; refuser un élément non installable ; avenant automatique quand une majeure ajoute une dépendance ; un seul mode d'acquisition par élément ; envoi de la licence par e-mail à chaque paiement (FR-14) |
 | `auth-service` (STORY-167) | Création des organisations à la demande du moteur, dans chaque espace, avec le même identifiant (FR-42) ; module `instance` traité comme les autres ; droit de consentir attribuable par le DG seul (FR-35) |
 | AD-P16 | Lecture d'exploitation journalisée, sans export en masse, jamais pour l'apprentissage ; l'IA lit par un compte dédié qui passe par la garde du registre (FR-27) |
