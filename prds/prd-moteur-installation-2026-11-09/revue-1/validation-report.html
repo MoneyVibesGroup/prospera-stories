@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<!--
+  PRD Validation Report — skeleton template.
+
+  This file is a starter the synthesis pass fills in directly. There is no
+  substitution engine. The LLM:
+    1. Reads {doc_workspace}/review-rubric.md and every review-{slug}.md from
+       additional reviewers.
+    2. Copies this skeleton.
+    3. Replaces the placeholder content (everything between TEMPLATE markers)
+       with the consolidated review, preserving the structure and CSS.
+    4. Writes the result to {doc_workspace}/validation-report.html.
+    5. Writes a markdown twin to {doc_workspace}/validation-report.md.
+
+  Visual rules the LLM must preserve:
+    - The container width, the color tokens, the typography.
+    - One dimension = one collapsible <section class="dimension">.
+    - Verdict pill uses the verdict-* class matching its judgment.
+    - Severity badge uses the sev-* class matching its level.
+    - Each extra reviewer (adversarial, etc.) gets its own collapsible section
+      below the rubric dimensions.
+    - The footer always shows the artifact paths and timestamp.
+-->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Validation PRD : PRD — Moteur d&#x27;installation (platform-catalog-service)</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+
+    --grade-exc: #16a34a;
+    --grade-good: #65a30d;
+    --grade-fair: #d97706;
+    --grade-poor: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  header.report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .grade {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .grade-excellent { background: var(--grade-exc); }
+  .grade-good { background: var(--grade-good); }
+  .grade-fair { background: var(--grade-fair); }
+  .grade-poor { background: var(--grade-poor); }
+
+  .synthesis {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    font-size: 15.5px;
+  }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+
+  .dimension-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  section summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before {
+    content: "▸";
+    display: inline-block;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+  }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 {
+    display: inline;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .verdict-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: white;
+  }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .verdict-thin { background: var(--verdict-thin); }
+  .verdict-broken { background: var(--verdict-broken); }
+
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+
+  .findings-list { padding: 0 20px 4px; }
+  article.finding {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+  }
+  article.finding:first-child { border-top: none; }
+  article.finding header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+  .badge-sev-low { background: rgba(100, 116, 139, 0.12); color: var(--sev-low); }
+  .badge-sev-medium { background: rgba(202, 138, 4, 0.14); color: var(--sev-medium); }
+  .badge-sev-high { background: rgba(234, 88, 12, 0.14); color: var(--sev-high); }
+  .badge-sev-critical { background: rgba(220, 38, 38, 0.14); color: var(--sev-critical); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+
+  .reviewer-source {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .mechanical {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; color: var(--text); }
+
+  footer.report-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.9em; background: rgba(120,113,108,0.10); padding: 0 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="report-header">
+      <div class="title">
+        <h1>PRD — Moteur d&#x27;installation (platform-catalog-service) — Rapport de validation</h1>
+        <div class="subtitle">C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/prd.md</div>
+      </div>
+      <div class="grade grade-poor">Poor · Insuffisant</div>
+    </header>
+
+    <div class="synthesis">
+      <p>La partie A (FR-1 → FR-7) est la meilleure partie que ce chantier ait produite : chaque exigence porte un message d'écran, un code de refus et un test, et le journal du PO y est retranscrit fidèlement, valeurs comprises (signal hebdomadaire, grâce 30 j, préavis 30 j, report unique de 7 j). Ce qui est en danger, c'est son premier consommateur. Le PRD introduit « installé (essai) ≠ en service (réel) » sans dire comment cela se lit dans l'entitlement <code>ACTIVE</code> du contrat de module, ni ce que le menu de la coque doit montrer. Il ne réconcilie pas non plus ses règles avec ce qui tourne déjà sur <code>dev</code> : STORY-727 ouvre les modules dès le paiement et donne le pack du vertical à toute organisation créée. Enfin, §8 déclare « aucune question ouverte » alors que trois contradictions internes (retour arrière, connecteurs depuis l'essai, sens de « pack ») et l'absence de découpage 15/01 / février / plus tard restent entières.</p>
+      <p>Les deux relecteurs supplémentaires durcissent ce tableau. La revue adversariale (43 constats, dont 6 critical) montre que le PRD n'a <strong>aucun modèle d'états</strong> : les horloges (essai, préavis, grâce, gel, retour arrière, 72 h, vagues) et les états (installé, en service, en attente, bloqué, suspendu, révoqué, gelé, figé) ne sont jamais croisés ; elle ouvre aussi deux failles de sûreté que la grille n'avait pas vues (horloge locale manipulable hors ligne, licence ancienne rejouable) et rend critical le connecteur qui écrit depuis l'essai dans le système de référence du client. La revue de cohérence (29 constats, dont 1 critical) confronte le PRD au contrat, au plan v3 et au code de <code>origin/dev</code> : le moteur ne dit pas <strong>ce qu'il publie pour la coque</strong> (spine due le 20/11), oublie les <strong>droits de tenant</strong> que le contrat et le plan lui confient (STORY-365, semaine 5), contredit D3 et Q4, et décrit des chemins d'installation que le code dément (octroi par vertical de STORY-727 lot 7).</p>
+      <p>Une fois dédoublonnés, les 97 constats se ramènent à 30 thèmes (5 critical, 20 high, 5 medium), détaillés dans <code>validation-report.md</code>, section « Constats consolidés ». Quatre thèmes bloquent la spine de <code>prospera-app</code> (états et contrat de lecture, droits de tenant et lieu des écrans client, sens de « pack », habillage) ; treize demandent un arbitrage du PO avant la validation du 13/11.</p>
+    </div>
+
+    <div class="dimension-summary">
+      <div class="dim-card">
+        <div class="dim-name">Decision-readiness</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Substance over theater</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Strategic coherence</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Done-ness clarity</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Scope honesty</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Downstream usability</div>
+        <div class="dim-verdict" style="color: var(--verdict-thin)">thin</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Shape fit</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+    </div>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Decision-readiness</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Les décisions sont écrites comme des décisions, pas comme des « considérations » : FR-15 assume que « le silence ne punit pas » et en donne la raison ; FR-19 tranche « reporter une fois, jamais refuser » ; FR-32 sépare proprement le droit d'utiliser et le droit aux mises à jour. Le §8 a en revanche le défaut inverse : il clôt tout. Il ne contient aucun <code>[NOTE FOR PM]</code>, alors que les tensions ci-dessous sont réelles et que le PO valide vendredi.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-01 · Pas de découpage par échéance</h3>
+              <span class="finding-location">§1, §4, SM-1, FR-20, FR-30, FR-31</span>
+            </header>
+            <div class="finding-note">Le PRD a deux jalons (démo du 15/01, deux clients en février) mais ne dit nulle part quelles FR chaque jalon exige. FR-30/FR-31 ne peuvent rien produire en février, puisque le contrat C11 constate qu'« aucun module IA n'existe en code ». FR-20 (vagues avec un client pilote) n'a pas de sens avec deux clients. SM-1 (« bilan tout vert ») suppose que les modules du pack distributeur existent le 15/01 et passent leurs vérifications réelles. Sans découpage, Dev B ne peut ni chiffrer ni arbitrer.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une table FR × {15/01, février, plus tard}, et un <code>[NOTE FOR PM]</code> sur la faisabilité de SM-1.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-02 · « Il ne reste aucune question ouverte » (§8) est faux</h3>
+              <span class="finding-location">§8</span>
+            </header>
+            <div class="finding-note">Les constats high de ce rapport (§4, §5, §6) sont des choix que le PO n'a pas encore rendus.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Rouvrir un §8 court (retour arrière et migrations, alignement sur STORY-727, connecteurs depuis l'essai, sens de « pack », AD-P16) et marquer chaque point en <code>[NOTE FOR PM]</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-03 · Le gel permanent bloque l'achat d'un module</h3>
+              <span class="finding-location">§3 « Gel », FR-14, FR-32</span>
+            </header>
+            <div class="finding-note">§3 définit le gel comme « ni installation, ni mise à jour », et FR-32 en fait l'état à vie d'un client qui a acheté le logiciel puis arrêté la maintenance. Ce client ne peut donc plus acheter de module, alors que son droit d'utiliser est perpétuel et que FR-14 fait arriver un ajout « par une nouvelle licence ». Est-ce voulu ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Trancher : un ajout de module rouvre-t-il la maintenance, ou l'installation reste-t-elle permise en gel de fin de maintenance ?</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Substance over theater</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Rien ici n'est du décor. Les besoins du §2.1 sont tous repris dans une FR (DSI → FR-17/18/19 ; direction MV → FR-14/16 ; équipes module → §7). La Vision ne pourrait pas servir à un autre produit : « même ligne de version », « connexion sortante », « dix clients sans dix produits ». Les NFR sont chiffrées (NFR-5 : 15 min) ou ont un mécanisme (NFR-3 : sens unique). Les contre-indicateurs du §6 sont choisis pour empêcher la triche sur les cibles. Le seul soupçon de « théâtre » porte sur les parcours, qui servent les trois PRD du lot plutôt que le moteur (voir Shape fit).</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding"><div class="finding-note">Aucun constat.</div></article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Strategic coherence</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>La thèse est nette : <em>un seul produit, installé par modules, aux deux hébergements, sous le contrôle du client</em>. Les parties A, B et C en découlent. Les indicateurs ne mesurent pourtant que l'activité et les interdits. Rien ne mesure le pari central.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-04 · Aucun indicateur ne valide « sans dix produits à maintenir »</h3>
+              <span class="finding-location">§1, §6 (SM-3, SM-4)</span>
+            </header>
+            <div class="finding-note">SM-3 et SM-4 comptent ce qui est interdit. Rien ne compte les exceptions client (C6) ni l'effort d'une installation après la première.</div>
+            <div class="finding-fix"><strong>Correction :</strong> SM « branches ou règles propres à un client = 0 » (la garde de balayage C6 le mesure déjà), et durée d'installation du 2ᵉ client distributeur comparée au 1ᵉʳ.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-05 · La partie C n'a aucun indicateur</h3>
+              <span class="finding-location">§4.C, §6</span>
+            </header>
+            <div class="finding-note">Le §1 promet un modèle « meilleur à chaque client signé », mais aucun SM ne le suit. Acceptable si C est explicitement « plus tard » (voir G-01).</div>
+            <div class="finding-fix"><strong>Correction :</strong> Sinon, ajouter le nombre d'organisations sous consentement de niveau 3.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Done-ness clarity</h2>
+          <span class="verdict-pill verdict-thin">thin</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>FR-1 à FR-7 sont exemplaires : un message exact (FR-2 « ➕ Facturation ajoutée : … »), un code et un statut (FR-3 <code>MODULE_REQUIS_PAR</code> 409), et même un test de mutation (FR-4). Les parties B et C n'ont pas cette rigueur, et deux FR se contredisent elles-mêmes.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-06 · FR-18 promet l'impossible tel qu'écrit</h3>
+              <span class="finding-location">FR-18</span>
+            </header>
+            <div class="finding-note">« Les données saisies depuis la promotion sont conservées », puis « une mise à jour dont la migration n'est pas réversible ne peut pas être publiée sans sauvegarde restaurable ». Restaurer cette sauvegarde perd justement les données saisies depuis la promotion. Tenir « sans perte » 7 jours suppose des migrations rétrocompatibles (étendre, puis contracter) : c'est une clause de module, et le contrat ne l'a pas.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Imposer la rétrocompatibilité sur 7 jours (et l'ajouter au contrat de module, C1 ou une nouvelle clause), ou dire honnêtement qu'une migration irréversible ferme le retour arrière sans perte.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-07 · Les connecteurs écrivent depuis l'espace d'essai vers le système de référence du client</h3>
+              <span class="finding-location">FR-8, FR-9, UJ-3</span>
+            </header>
+            <div class="finding-note">FR-8 met « connecteurs » dans la répétition générale. Pour l'IMF, UJ-3 dit que ce qui est saisi dans Prospera « repart vers le logiciel, qui reste la référence ». FR-9 n'intercepte que « SMS, WhatsApp, e-mail et liens de paiement ». Une écriture d'essai peut donc arriver dans le core-banking réel, et le PRD Connecteurs ne parle jamais d'espace d'essai.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Ajouter à FR-9 que toute écriture sortante d'un connecteur depuis l'essai est interceptée, ou va vers un bac à sable du logiciel client, et le faire reprendre par le PRD Connecteurs.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-08 · Sauvegardes et clés de signature sans bornes</h3>
+              <span class="finding-location">FR-17, FR-22, FR-25, NFR-1</span>
+            </header>
+            <div class="finding-note">FR-25 et FR-17 disent seulement « sauvegardes automatiques » : ni fréquence, ni rétention, ni lieu, ni perte acceptable, pour un assureur dont les données ne quittent jamais ses locaux. NFR-1 fait reposer toute la confiance sur la signature, sans rotation, révocation ni procédure en cas de clé compromise ; une instance hors ligne n'apprend une révocation que par fichier (FR-22).</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une NFR de sauvegarde chiffrée, et une NFR « cycle de vie des clés » qui dise ce que fait une instance quand elle reçoit une liste de révocation.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-09 · UJ-1 met en service par étapes ; FR-7 et FR-8 ne le permettent pas</h3>
+              <span class="finding-location">UJ-1, FR-7, FR-8, FR-11</span>
+            </header>
+            <div class="finding-note">UJ-1 étape 4 met en service la recherche, puis le circuit sinistre, puis l'IA locale. FR-8 prévoit une seule date et une seule offre rejouée, et FR-7 laisse le client « En installation » tant qu'une ligne n'est pas verte, donc pendant des mois chez l'assureur.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Autoriser une mise en service par sous-ensemble de l'offre (FR-11 le permet presque) et définir « En service » pour un client partiellement en service.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-10 · Partie C peu vérifiable</h3>
+              <span class="finding-location">FR-27, FR-28, FR-29</span>
+            </header>
+            <div class="finding-note">FR-28 ne dit pas ce que « pseudonymisé » recouvre (champs, méthode, détenteur de la table de correspondance) ni qui approuve chaque export. FR-29 n'a qu'une conséquence, « rien n'est copié hors de l'instance », qu'aucun test ne peut vérifier quand une personne analyse par tunnel.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une liste minimale de champs retirés, le rôle qui approuve, et pour FR-29 une conséquence vérifiable (session journalisée, aucun transfert de fichier par le tunnel).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-11 · FR-20 : « sans incident » n'est pas défini</h3>
+              <span class="finding-location">FR-19, FR-20</span>
+            </header>
+            <div class="finding-note">Le PRD ne dit pas non plus si le chemin rapide de FR-19 (72 h) contourne les vagues de 7 jours. Il doit les contourner, sinon les deux FR se contredisent.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Définir « incident » et exempter explicitement les correctifs de FR-19 des vagues.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-12 · FR-7 et les lignes « non installé » du §7 C4</h3>
+              <span class="finding-location">FR-7, §7 C4</span>
+            </header>
+            <div class="finding-note">Les lignes Reprise ou Connecteurs « non installé, jamais vertes » bloquent-elles le passage En service d'un client qui n'a pas acheté ces modules ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Préciser que seules les lignes de l'offre comptent.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Scope honesty</h2>
+          <span class="verdict-pill verdict-thin">thin</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Le PRD décide beaucoup de choses en silence, sur des documents qu'il cite ou qu'il devrait citer.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-13 · STORY-727 (déjà sur <code>dev</code>) contredit FR-8, FR-11 et SM-1, et le PRD ne le dit pas</h3>
+              <span class="finding-location">FR-4, FR-8, FR-11, SM-1</span>
+            </header>
+            <div class="finding-note">STORY-727 ouvre « tous les modules des packages » dès qu'une échéance est soldée (lot 2). Son lot 7 donne à toute organisation <code>distributeur</code>, <code>imf-sfd</code> ou <code>assurance-cima</code>, dès sa création, le package de son vertical sans terme. Le PRD dit à l'inverse qu'« il n'existe aucune commande qui installe […] directement dans l'espace réel » (FR-11), et SM-1 suppose une « organisation vierge » qui n'existe donc pas pour un distributeur. FR-4 cite ces chemins sans dire que leur effet change.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une conséquence explicite. Soit le paiement et l'identité rendent un module <em>souscrit</em> (installable, FR-12) et plus <code>ACTIVE</code>, et 727 est à reprendre. Soit c'est une exception nommée.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-14 · Le feu vert de la Reprise n'est porté par aucune FR</h3>
+              <span class="finding-location">§3, FR-6, FR-8</span>
+            </header>
+            <div class="finding-note">Le PRD Reprise (§C5) dit que « le moteur d'installation ne peut pas mettre le client en service (PRD moteur FR-6, FR-8) » sans feu vert, et le journal le note. Côté moteur, seul le §3 le suggère. FR-6 ne lit qu'un comptage, et FR-8 ne pose aucune condition. Le contrat entre les deux PRD est cassé du côté consommateur.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Dans FR-8 : « la mise en service est refusée tant que la Reprise n'a pas publié son feu vert pour l'organisation » (code nommé, événement consommé).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-15 · D3 révisée et contrat de module §9 non cités</h3>
+              <span class="finding-location">§0, partie 4.B</span>
+            </header>
+            <div class="finding-note">Le contrat (§9) dit encore que l'installation chez le client « est renvoyée après les 8 semaines » par D3. Le journal enregistre la révision de D3 (« prête AVANT FÉVRIER 2027 »), mais le PRD ne cite ni D3 ni cette révision : toute la partie B annule en silence un document qu'il déclare appliquer.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une ligne au §0 qui acte la révision de D3, et une demande d'amendement du §9 du contrat.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-16 · §0 contredit QA-3</h3>
+              <span class="finding-location">§0, QA-3</span>
+            </header>
+            <div class="finding-note">§0 : « Connecteurs (synchronisation permanente, plus tard) ». QA-3 : « Connecteurs doit être prêt en février ; son PRD entre au lot 1 ». Le journal montre que la première version a été remplacée ; le §0 n'a pas suivi.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Aligner le §0 sur QA-3.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-17 · FR-33 crée un effacement automatique sans propriétaire</h3>
+              <span class="finding-location">§3 « Effacer », FR-33, contrat Q4</span>
+            </header>
+            <div class="finding-note">§3 : « Effacer : […] acte séparé, demandé, tracé, hors de ce PRD ». Le contrat (Q4) garde les données « sans limite jusqu'à une demande d'effacement ». FR-33 impose pourtant un effacement non demandé 30 jours après un essai non signé. La décision est légitime, mais aucun document ne dit qui exécute l'effacement dans chaque module.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Nommer l'exception à Q4 et le porteur (le moteur ordonne, chaque module efface par contrat C5 ?).</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Downstream usability</h2>
+          <span class="verdict-pill verdict-thin">thin</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Le glossaire du §3 est l'un des meilleurs du dépôt, et le §7 tient bien les onze lignes que le contrat exige (§6 du contrat). Mais le premier consommateur annoncé, la spine de la coque <code>prospera-app</code>, ne trouve pas ce qu'il vient chercher.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">G-18 · Aucun modèle d'état du module par organisation et par espace, donc pas de règle de menu</h3>
+              <span class="finding-location">§3, FR-5, FR-9, §7 C5/C8</span>
+            </header>
+            <div class="finding-note">Le contrat définit « Installer = poser l'entitlement <code>(organisation × module)</code> en <code>ACTIVE</code> », et C8 : « une entrée est visible si et seulement si l'entitlement effectif est <code>ACTIVE</code> ». Le PRD redéfinit Installer comme « dans l'espace d'essai » et ajoute 🟢/🟠/🔴, En installation / En service, gel, préavis et suspension de licence, sans jamais dire comment ces états se projettent sur l'entitlement, ce que porte <code>entitlement.changed</code>, ni quels états rendent une entrée visible dans quel espace. Le cas central reste ouvert : un module 🟢 en essai, pas encore en service, apparaît-il dans le menu du réel ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une table d'états (module × organisation × espace) → statut d'entitlement → visibilité au menu → refus API, plus une conséquence de FR-9 qui dise comment la coque sait dans quel espace elle tourne.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-19 · « Pack » a deux sens</h3>
+              <span class="finding-location">§3, §4.A, QA-1, SM-1, NFR-5</span>
+            </header>
+            <div class="finding-note">Le §3 reprend la définition du contrat (<code>VerticalPack</code> : <code>distributeur</code>, <code>imf-sfd</code>…). Le §4.A donne au contraire quatre packs au seul distributeur (« Terrain &amp; Ventes, Finance &amp; Recouvrement… »), QA-1 parle de « 18 modules, 4 packs », et SM-1/NFR-5 reviennent au singulier (« le pack distributeur »). Le modèle de données du catalogue dépend de la réponse.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Deux termes, par exemple <strong>pack de vertical</strong> et <strong>pack commercial</strong>, et dire lequel le catalogue stocke.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-20 · Les écrans du client ne sont situés nulle part, et leurs droits manquent</h3>
+              <span class="finding-location">FR-17, FR-18, FR-19, FR-22, FR-23, FR-27, §7 C7/C8</span>
+            </header>
+            <div class="finding-note">Le DSI choisit la date, revient en arrière, reporte un correctif, dépose un fichier, ouvre le tunnel ; le DG consent. Ces écrans sont-ils dans la console Money Vibes, qui tourne « sur l'instance du client » (§3), ou dans <code>prospera-app</code> (C8, D1) ? Le §7 C8 ne liste que des écrans de console, et le §7 C7 ne crée qu'un seul droit client (consentement).</div>
+            <div class="finding-fix"><strong>Correction :</strong> Lister les surfaces client et leurs droits <code>&lt;module&gt;:&lt;objet&gt;:&lt;action&gt;</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-21 · AD-P16 et la recette dans l'essai court-circuitent les niveaux de consentement</h3>
+              <span class="finding-location">§4.C, FR-10, FR-17, FR-29, SM-4</span>
+            </header>
+            <div class="finding-note">Le journal a relevé qu'AD-P16 permet à Money Vibes de lire les données métier, « à trancher ». Le PRD ne cite jamais AD-P16. Pour un distributeur hébergé, Money Vibes est donc toujours « sur place », et le niveau 2 (FR-29) n'a pas de sens. Sur site, Money Vibes « y joue la recette » dans un essai rafraîchi depuis le réel, donc sur des données réelles, sans connexion entrante : par quel accès, sous quel niveau ? SM-4 est en jeu.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Dire si la recette est automatique (sans accès humain) ou passe par le tunnel de niveau 2, et réconcilier explicitement 4.C avec AD-P16.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-22 · Le §7 range tout dans <code>platform-catalog-service</code></h3>
+              <span class="finding-location">§7 C3, frontmatter</span>
+            </header>
+            <div class="finding-note">La partie B décrit au moins deux acteurs : côté Money Vibes (émission de licences, distribution des paquets, supervision) et côté instance (agent de mise à jour, sauvegarde, retour arrière, signal). Le §7 C3 fait en plus « posséder » les consentements, qui vivent chez le client. Le contrat (§4) pose qu'« un agrégat distinct, c'est un service distinct ».</div>
+            <div class="finding-fix"><strong>Correction :</strong> Laisser le découpage à la spine, mais retirer l'affirmation du §7 ou la marquer <code>[ASSUMPTION]</code>.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Shape fit</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Le PRD est bien taillé pour une capacité plateforme chain-top : un glossaire fort, des FR avec leurs conséquences, et la table du contrat de module. Deux défauts de forme : des références brownfield inexactes, et des parcours qui racontent le produit plutôt que le moteur.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-23 · FR-21 cite mal l'existant</h3>
+              <span class="finding-location">FR-21, §3 « une seule ligne de version »</span>
+            </header>
+            <div class="finding-note"><code>fenetre-de-support.ts</code> est une règle par module (au plus <code>MAX_ACTIVE_MAJORS</code> majeures <code>ACTIVE</code>), appliquée quand Money Vibes publie : ce n'est pas une limite au retard d'une instance. « Plus de deux versions majeures en retard » ne dit pas N/N-1. Le lien entre la ligne de version unique et les versions semver par module (<code>ModuleVersion</code>) reste sans réponse, comme le sort d'une instance hors fenêtre.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Définir la version de plateforme (ensemble de versions de modules), la règle de retard admissible, et sa conséquence.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-24 · FR-32 cite STORY-280, mais c'est STORY-727 qui s'applique</h3>
+              <span class="finding-location">FR-32</span>
+            </header>
+            <div class="finding-note">STORY-280 suspend les accès (contrat C2 : « 403 nommé, aucune donnée »). C'est le lot 4 de STORY-727 qui donne « échu ⇒ lecture seule ». Le mot « préavis » est aussi déjà pris : <code>paiement.abonnement.preavis.emis</code> part 7 jours avant l'échéance, le préavis du PRD dure 30 jours après.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Citer 727 lot 4 et renommer l'un des deux préavis.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-25 · Les parcours racontent les verticales, pas le moteur</h3>
+              <span class="finding-location">§2.3 (UJ-1 → UJ-3)</span>
+            </header>
+            <div class="finding-note">Les trois « moments gagnés » appartiennent aux modules métier, à la Reprise et aux Connecteurs. UJ-3 (IMF) ne concerne aucun client de février. Les vrais protagonistes du moteur, Rachid (installation) et Koffi (mise à jour), ne sont racontés que dans le §4.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Garder les trois UJ en contexte partagé du lot et promouvoir en UJ-4 et UJ-5 les récits de Rachid et de Koffi, déjà écrits.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>Revue adversariale (relecteur cynique)</h2>
+          <span class="reviewer-source">C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/review-adversarial-general.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Le PRD décrit bien le <strong>chemin heureux</strong> et les décisions du PO sont fidèlement reprises, mais il n'a <strong>pas de modèle d'états</strong> : les horloges (essai, préavis, grâce, gel, retour arrière, 72 h, vagues) et les états (installé, en service, en attente, bloqué, suspendu, révoqué, gelé, figé) sont posés un par un sans jamais être croisés. Plusieurs promesses se contredisent frontalement (retour arrière « sans perte » contre migration irréversible ; « une seule date choisie par le DSI » contre une plateforme mutualisée ; « on ne copie jamais l'essai vers le réel » contre « il garde son essai et sa calibration »), et deux failles de sûreté sont ouvertes (horloge locale manipulable, licence rejouable). <strong>Pas prêt pour la validation du 13/11 sans une passe sur les constats critical et high.</strong></p>
+            <p>Décompte : <strong>6 critical · 18 high · 15 medium · 4 low</strong> (43 constats). Les décisions tranchées dans <code>.memlog.md</code> ne sont pas contestées en elles-mêmes ; ce sont leurs <strong>conséquences non traitées</strong> qui sont relevées.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">F-01 · Aucun automate d'états</h3>
+              <span class="finding-location">§3, FR-5, FR-7, FR-11, FR-15, FR-32</span>
+            </header>
+            <div class="finding-note">Le PRD empile au moins trois axes d'état indépendants (module × espace, client, instance) sans table de transitions ni de combinaisons. Un client En service à qui l'on ajoute un module au prérequis manquant repasse-t-il En installation alors que tout tourne ? Un prérequis qui disparaît après la mise en service (clé PI-SPI révoquée) fait-il sortir le module du menu en pleine production ? Un module 🟢 en essai et 🔴 au rejeu : quel état ? Une instance à la fois en préavis et en gel de silence : quoi ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une section « États et transitions » : un diagramme par axe, les transitions autorisées avec déclencheur et trace (NFR-4), une matrice des combinaisons. Distinguer « client en service » d'« offre complète ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">F-02 · « Sans perte » contre migration irréversible</h3>
+              <span class="finding-location">FR-18</span>
+            </header>
+            <div class="finding-note">Restaurer la sauvegarde d'avant promotion efface sept jours de saisie : c'est exactement la perte que la phrase précédente interdit. Même réversible, la version N doit lire des données écrites par N+1 (nouveaux champs, <code>topic@2</code> qu'un consommateur revenu en N n'entend pas). Le « retour arrière en un clic, sans rien perdre » du §1 est une promesse que le PRD ne sait pas tenir.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Discipline « étendre puis contracter » écrite au contrat de module comme clause testable (promouvoir, saisir, revenir, tout est lisible). Cas irréversibles : pas de retour arrière annoncé au DSI, ou perte chiffrée et acceptée. Supprimer « sans perte » partout où ce n'est pas garanti.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">F-08 · Un connecteur dans l'essai écrit dans le vrai logiciel du client</h3>
+              <span class="finding-location">FR-8, FR-9, UJ-3</span>
+            </header>
+            <div class="finding-note">FR-9 n'intercepte que SMS, WhatsApp, e-mail et liens de paiement. Un connecteur bidirectionnel branché depuis l'essai écrira dans l'Odoo du distributeur ou dans le core-banking de l'IMF — le système de référence — des décaissements et remboursements fictifs saisis pendant la formation. C'est l'incident le plus grave possible pour une IMF, et rien ne l'empêche.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Depuis l'essai, tout connecteur est en lecture seule ou pointe vers un bac à sable déclaré ; écriture externe refusée côté serveur (code nommé) ; même règle au PRD Connecteurs ; intercepter « toute sortie vers un système tiers », pas une liste de canaux.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">F-16 · Toutes les horloges lisent une horloge que le client contrôle</h3>
+              <span class="finding-location">FR-15, FR-18, FR-19, FR-32, FR-33</span>
+            </header>
+            <div class="finding-note">Sur site hors ligne, la seule horloge est celle du serveur du client. Reculer la date système d'un an prolonge à l'infini le droit d'utiliser, le préavis, l'essai, la grâce et la fenêtre de retour arrière. Le PRD affirme l'inverse de ce qu'il peut garantir. Et « J+30 sans signal » part-il du signal envoyé ou reçu ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Horloge monotone côté instance (plus grande date vue, persistée et signée) ; date système antérieure ⇒ état « horloge incohérente » et gel. Pour chaque délai, l'horloge de référence et l'événement de départ. Test : reculer la date du serveur.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">F-17 · Licence rejouable et clé de signature sans cycle de vie</h3>
+              <span class="finding-location">FR-14, NFR-1</span>
+            </header>
+            <div class="finding-note">Une licence ancienne mais authentique est bien signée. Le client qui reçoit une licence de suspension n'a qu'à redéposer la précédente, gardée dans sa boîte e-mail : elle passe la vérification et lève la suspension. Rotation, expiration et compromission de la clé ne sont pas traitées, alors qu'une licence perpétuelle doit rester vérifiable hors ligne à vie.</div>
+            <div class="finding-fix"><strong>Correction :</strong> <code>numero</code> strictement croissant par instance, refus <code>LICENCE_ANTERIEURE</code>, mémorisation du plus grand numéro. NFR « clés » : chaîne de confiance, rotation sans casser les perpétuelles, révocation par paquet signé, procédure de fuite.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">F-25 · Le canal de données ne s'applique pas à la plateforme Money Vibes</h3>
+              <span class="finding-location">§4.C, FR-26 → FR-30, AD-P16</span>
+            </header>
+            <div class="finding-note">Toute la partie 4.C est écrite comme ce qui sort d'une instance. Pour un distributeur hébergé, rien ne sort : Money Vibes lit déjà la base, et AD-P16 l'y autorise. Le registre des consentements ne garde donc aucune porte réelle sur la plateforme, et SM-4 y est invérifiable. La tension relevée au journal n'a reçu ni décision ni exigence.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Registre des consentements = garde technique sur la plateforme aussi (tout traitement d'apprentissage passe par le même point de contrôle, journalisé) ; borner AD-P16 (lecture d'exploitation ≠ apprentissage) ; ouvrir une question au PO et retirer « aucune question ouverte ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-03 · Échec à mi-chemin d'une installation</h3>
+              <span class="finding-location">FR-4, NFR-6, contrat §3.4</span>
+            </header>
+            <div class="finding-note">L'idempotence dit ce qui se passe quand on rejoue ; rien ne dit ce qui reste quand une installation de 18 modules meurt au 9ᵉ (coupure électrique fréquente sur site) : entitlements à moitié écrits, comptes créés pour certains modules, bilan absent. Même trou pour une promotion interrompue entre la sauvegarde et le contrôle de santé.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Installation = plan persistant d'étapes avec statut, reprenable ; bilan « interrompue à l'étape X ». Une promotion interrompue déclenche le retour arrière automatique. Test de chaos : tuer le processus à chaque étape.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-04 · La désinstallation et la licence contournent l'essai</h3>
+              <span class="finding-location">FR-11, FR-14, SM-3</span>
+            </header>
+            <div class="finding-note">FR-11 ne liste que des ajouts. Retirer, suspendre, appliquer une licence qui retire un droit : ce sont des changements dans le réel sans essai. Soit SM-3 est faux dès le premier impayé, soit une suspension attend une répétition générale, ce qui est absurde. Et une licence qui ajoute un module l'installe-t-elle d'office ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Classer les changements : code/schéma → toujours essai puis promotion ; droits (suspension, révocation, licence) → appliqués directement, journalisés, hors SM-3. Une licence qui ajoute un module le rend seulement installable.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-05 · Données orphelines et copies chez les voisins</h3>
+              <span class="finding-location">§3 « Désinstaller », FR-3, C9</span>
+            </header>
+            <div class="finding-note">Le PRD ne parle que des données du module désinstallé. Les read-models des voisins (<code>enrichiPar</code>) restent-ils affichés ? Désinstaller dans le réel désinstalle-t-il dans l'essai ? Que devient la calibration IA ? Sur site, qui exporte encore les données d'un module révoqué ? Réinstaller après N+3 « retrouve tout » suppose de relire des données de N, contre la fenêtre N/N-1.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une exigence « Désinstallation » : sort des read-models voisins, de l'essai, de la calibration ; export toujours possible ; règle de réinstallation après plus d'une majeure (migration rejouée ou refus nommé).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-06 · « On ne copie jamais l'essai vers le réel » contre « il garde ses réglages »</h3>
+              <span class="finding-location">FR-8, FR-33, NFR-3</span>
+            </header>
+            <div class="finding-note">Rejouer « les mêmes tables de correspondance » dans le réel, c'est lire l'essai pour écrire le réel : NFR-3 l'interdit. Les rôles, zones et comptes réglés pendant la répétition ne figurent pas dans la liste rejouée. La calibration du prospect, apprise dans l'essai sur des données non validées, devrait passer dans le réel : copie interdite par FR-8.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Un objet explicite, versionné et journalisé — la <strong>recette d'installation</strong> — exporté de l'essai et rejoué dans le réel ; amender NFR-3 pour nommer ce seul flux. Calibration : recalculée sur la reprise fraîche (recommandé) ou copiée par exception nommée.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-07 · Le rafraîchissement obligatoire écrase l'essai en cours</h3>
+              <span class="finding-location">FR-10</span>
+            </header>
+            <div class="finding-note">Sur la plateforme, l'essai est partagé : rafraîchir avant une majeure efface les prospects en essai et les répétitions des autres clients. Sur site, il efface la recette d'un module en cours d'ajout. Il copie aussi des données personnelles réelles dans un espace aux contrôles plus lâches, sans traitement au titre de la loi 2019-014, et sans prévoir le disque pour doubler la base.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Rafraîchissement par organisation, jamais par instance ; exclure les essais prospects ; bloquer si une répétition est en cours ; dire qui accède à l'essai et si un masquage s'applique ; capacité disque au bilan d'instance.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-09 · « Le DSI choisit la date » est impossible sur une plateforme mutualisée</h3>
+              <span class="finding-location">FR-13, FR-17, FR-18, FR-20</span>
+            </header>
+            <div class="finding-note">La plateforme Money Vibes est une instance multi-organisations avec une ligne de version : on ne peut pas promouvoir N+1 pour un distributeur et laisser son voisin en N, ni revenir en arrière pour un seul client. Les « mêmes étapes » n'y ont pas de sens, et l'espace d'essai y est commun.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Deux variantes de FR-17/18/20 : sur site (date du DSI, retour arrière par instance) et plateforme (fenêtre fixée par Money Vibes, préavis, retour arrière global). Restreindre FR-13 à ce qui est vraiment identique.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-10 · Une dépendance que le contrat ne couvre pas</h3>
+              <span class="finding-location">FR-2, FR-12, FR-14</span>
+            </header>
+            <div class="finding-note">Le commercial vend « Relances » sans « Facturation » : FR-2 ajoute Facturation, FR-12 la refuse. Rachid est bloqué entre deux règles qui se contredisent, et le PRD ne dit ni laquelle gagne, ni où l'incohérence aurait dû être arrêtée. Sur site, refus hors ligne sans recours avant la prochaine licence.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Même résolution de dépendances à la création du contrat (STORY-727) et à l'émission de la licence ; refus nommé « dépendance non souscrite » avec l'action « faire amender le contrat ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-11 · Une nouvelle version ajoute ou retire une dépendance</h3>
+              <span class="finding-location">FR-17, FR-21, contrat Q5</span>
+            </header>
+            <div class="finding-note">N+1 du module A déclare <code>depends: ['X']</code>, que le client n'a pas souscrit : la mise à jour est-elle bloquée (et l'instance sort de la fenêtre), ou X s'installe-t-il d'office, hors contrat ? Une dépendance retirée laisse X facturé sans raison. La « propagation d'un pack » n'est jamais définie.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Calculer l'écart de dépendances par client avant de déposer une version dans l'essai (refus <code>MISE_A_JOUR_DEPENDANCE_NON_SOUSCRITE</code> ou ajout proposé) ; interdire à une mineure d'ajouter une dépendance dure ; définir la propagation d'un pack.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-18 · Un même mot « gel » pour deux états aux sorties différentes</h3>
+              <span class="finding-location">§3 « Gel », FR-15, FR-32</span>
+            </header>
+            <div class="finding-note">Gel de silence : levé au retour du signal. Gel de fin de maintenance : levé seulement par paiement et rattrapage. Un client figé qui cesse d'envoyer son signal déclenche à vie les alertes J+7, le ticket et l'appel, et gonfle le contre-indicateur. Le retour de son signal « lève le gel » d'après FR-15 : contradiction directe.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Deux termes (<strong>gel</strong> / <strong>version figée</strong>), chacun avec entrée, sortie et alertes ; dire si une instance figée envoie encore un signal.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-19 · N/N-1 contre « figé à vie » et contre « le DSI choisit »</h3>
+              <span class="finding-location">FR-17, FR-21, FR-32</span>
+            </header>
+            <div class="finding-note">N/N-1 autorise une version de retard, « plus de deux » en autorise deux : le chiffre est faux d'un côté. Une instance figée sortira forcément de la fenêtre. Et qu'est-ce qui empêche une instance maintenue de rester en retard si le DSI ne choisit jamais de date ? Une promotion forcée contredit FR-17.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Fixer N-1 au plus ; hors fenêtre = fin du support contractuel (pas de blocage), escalade au DG ; exemption des instances figées ; une promotion forcée, si elle existe, est une seconde exception nommée à FR-17.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-20 · 72 heures incompatibles avec les vagues et le gel</h3>
+              <span class="finding-location">FR-15, FR-18, FR-19, FR-20</span>
+            </header>
+            <div class="finding-note">Un correctif soumis aux vagues met au moins 7 jours à atteindre la 2ᵉ vague ; une instance gelée ne peut pas l'appliquer ; le report rend le délai réel 72 h + 7 j, ce que les indicateurs ignorent. Le DSI peut-il revenir en arrière d'un correctif qu'il n'avait pas le droit de refuser ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Exempter les correctifs de sécurité des vagues ; le gel n'empêche pas un correctif par fichier ; échéance « 72 h, ou 72 h + report » ; encadrer le retour arrière d'un correctif de sécurité.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-21 · Essai : fin, prolongation, signature tardive</h3>
+              <span class="finding-location">FR-33</span>
+            </header>
+            <div class="finding-note">Entre la fin de l'essai et l'effacement : le prospect peut-il encore exporter ? La prolongation se donne-t-elle après la fermeture ? Un prospect qui signe à J+45 retrouve-t-il ses données ? Qui reçoit les rappels ? Les 60 jours partent de quoi ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une chronologie de l'essai : J0 nommé, rappels J-7/J-1, fin, fenêtre d'export, signature tardive, effacement, preuve.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-22 · L'effacement est « hors de ce PRD » mais le PRD en fixe l'échéance</h3>
+              <span class="finding-location">§3 « Effacer », FR-33, C9/Q4</span>
+            </header>
+            <div class="finding-note">Le PRD exige un effacement automatique et daté sans dire qui le construit, ce qu'il couvre (sauvegardes, journal des envois interceptés, journal en ajout seul qui contient des noms, calibration, read-models) ni ce que veut dire « tracé ». Un effacement qui laisse les données dans les sauvegardes n'est pas un effacement au sens de la loi 2019-014.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Porter l'effacement dans ce PRD (périmètre exhaustif, sort des sauvegardes, certificat), ou le renvoyer vers un PRD nommé qui doit exister avant février ; retirer « hors de ce PRD ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-26 · « Pseudonymisé » n'est ni défini ni suffisant</h3>
+              <span class="finding-location">FR-28, FR-30</span>
+            </header>
+            <div class="finding-note">Une donnée pseudonymisée reste personnelle (montant + date + agence suffisent dans une petite IMF). Ni technique, ni détenteur de la clé, ni traitement des champs libres et pièces jointes, ni test. Les dossiers « où l'IA s'est trompée » sont les plus atypiques, donc les plus réidentifiables.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Transformation définie (champs supprimés, hachés avec sel gardé sur l'instance, généralisés) ; champs libres et fichiers exclus par défaut ; seuil de k-anonymat ; test qui échoue si un champ non déclaré sort ; validation juridique en prérequis daté.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-30 · « Empreinte identique » contre « recalibré localement »</h3>
+              <span class="finding-location">FR-24, FR-31</span>
+            </header>
+            <div class="finding-note">Une mise à jour du modèle commun est une mise à jour (FR-31 le dit) et produit une nouvelle calibration : le test d'empreinte de FR-24 échoue par construction. Le retour arrière de code revient-il aussi au modèle précédent ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Distinguer mise à jour de code (calibration intacte) et mise à jour de modèle (nouvelle calibration ajoutée, précédente réactivable) ; appariement modèle ↔ calibration et retour arrière conjoint.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-31 · « En une action, bilan tout vert » est impossible par construction</h3>
+              <span class="finding-location">SM-1, FR-6, FR-8, §7 C4</span>
+            </header>
+            <div class="finding-note">Une organisation vierge n'a ni données à reprendre, ni numéro WhatsApp vérifié, ni clé PI-SPI : FR-5/FR-6 la mettent en 🔴. FR-8 impose essai puis rejeu : deux actions minimum. La démo du 15/01 ne peut être « atteinte » qu'en trichant sur les vérifications — exactement ce que FR-6 interdit.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Réécrire SM-1 : « en une action dans l'espace d'essai, bilan sans 🔴 hors prérequis externes, avec prérequis de démonstration déclarés », et lister les lignes attendues avec leur voyant.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-36 · Le document se contredit sur son propre périmètre</h3>
+              <span class="finding-location">§0, §2.2, §8, FR-33, en-tête</span>
+            </header>
+            <div class="finding-note">§2.2 exclut le libre-service ; FR-33 fait tester le prospect « sans Money Vibes » ; le PRD Reprise prévoit le libre-service en février. §0 met Connecteurs « plus tard », QA-3 « prêt en février ». L'en-tête dit que §4 n'existe pas. Et §8 déclare « aucune question ouverte » alors qu'il en reste (AD-P16, loi 2019-014, contrat client, horloge, clés) : le dire au PO qui valide le 13/11 est la pire des erreurs de forme.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Aligner §0 et §2.2 sur QA-3 et FR-33 (libre-service d'essai dans le périmètre, installation d'une offre signée non) ; supprimer l'en-tête périmé ; remplacer §8 par une liste honnête de questions et de prérequis datés avec propriétaire.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">F-37 · L'accès de l'équipe Money Vibes à une console sur site</h3>
+              <span class="finding-location">FR-13, FR-22, FR-23, §3</span>
+            </header>
+            <div class="finding-note">Rachid et Yao doivent se connecter à la console de l'instance. Avec quel compte, quel fournisseur d'identité ? Un compte Money Vibes permanent sur l'instance est un accès permanent, que FR-23 interdit ; un compte par visite suppose une procédure absente. Qui a le droit de déposer une licence ou un paquet ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Exigence « Identités sur site » : comptes Money Vibes désactivés par défaut, activés par le client pour une durée bornée, journalisés ; rôle nommé côté client pour déposer licence et paquets.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-12 · Comptage des raisons de sélection non défini</h3>
+              <span class="finding-location">FR-1, FR-2</span>
+            </header>
+            <div class="finding-note">Une dépendance ajoutée par FR-2 est-elle « retenue » ? Facturation ajoutée par Relances et par Encaissements : annuler l'ajout décoche-t-il les deux ? Sans règle, deux implémentations donneront deux sélections, et le test est inécrivable.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Sélection = ensemble de raisons par module (pack, manuel, requis par M) ; décoché quand l'ensemble est vide ; lister tous les demandeurs avant de décocher. Un cas de test avec dépendance partagée.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-13 · 🟠 « en attente » contre « reste ouvert »</h3>
+              <span class="finding-location">FR-5, contrat Q3</span>
+            </header>
+            <div class="finding-note">À l'installation, un dépendant d'un module bloqué est fermé ; en exploitation, un dépendant d'un module suspendu reste ouvert (Q3). Deux règles pour le même graphe, et rien sur les dépendants optionnels d'un module 🔴.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Dépendant dur d'un 🔴 = 🟠 (installation seulement) ; optionnel = 🟢 avec emplacement vide ; après mise en service, Q3. Justifier la différence en une phrase.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-14 · Cycle introduit par une nouvelle version</h3>
+              <span class="finding-location">FR-4</span>
+            </header>
+            <div class="finding-note">Un cycle peut naître de la version N+1 de B alors que A est publié : la publication est refusée, la release entière bloquée au dernier moment. Les cycles via <code>enrichiPar</code> ne sont pas traités.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Détection de cycle dans la CI de chaque dépôt de module ; <code>enrichiPar</code> peut être cyclique et n'impose aucun ordre.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-15 · « Quatre chemins » mal énumérés</h3>
+              <span class="finding-location">FR-4</span>
+            </header>
+            <div class="finding-note">La liste oublie la mise à jour, la réinstallation, l'offre d'essai et la promotion. Sur site, le point de décision tourne sur l'instance : c'est un second point de décision, à garder à l'octet près du central.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Lister tous les chemins d'entrée ; une seule implémentation embarquée à l'identique, même suite de conformité.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-23 · La suspension « consulter et exporter » n'est pas spécifiée</h3>
+              <span class="finding-location">FR-32</span>
+            </header>
+            <div class="finding-note">Exporter quoi, dans quel format, par qui ? Une IMF suspendue doit-elle refuser l'argent d'un remboursement ? Les connecteurs synchronisent-ils encore ? Les correctifs de sécurité et les états BCEAO sont-ils produits ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une exigence « Mode suspendu » par catégorie d'action (lecture, export, saisie, envois, connecteurs, tâches, mises à jour) ; un format d'export minimal commun au contrat de module.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-24 · Deux sources de droits, aucune règle de cohérence</h3>
+              <span class="finding-location">FR-12, FR-13, FR-14</span>
+            </header>
+            <div class="finding-note">Sur site, ajouter un module au contrat ne change rien tant qu'une nouvelle licence n'est pas émise et reçue : « sans autre action » est faux. Qui émet la licence quand le contrat change ? Si contrat et licence divergent, lequel fait foi ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Licence dérivée du contrat par émission automatique ; le contrat fait foi sur la plateforme, la licence sur site ; contrôle de supervision « licence en retard sur le contrat ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-27 · « Un test le vérifie sur chaque envoi » est irréalisable</h3>
+              <span class="finding-location">FR-26</span>
+            </header>
+            <div class="finding-note">On ne détecte pas un identifiant arbitraire dans un flux libre, et un agrégat sur trois dossiers est une donnée personnelle.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Schéma fermé du signal (liste blanche de champs typés, refus d'un champ inconnu) et seuil minimal d'effectif.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-28 · Où vit le registre, et qui le falsifie</h3>
+              <span class="finding-location">FR-27, §7 C7</span>
+            </header>
+            <div class="finding-note">Le registre est-il sur l'instance ou chez Money Vibes ? Un administrateur local peut-il insérer un consentement ? « Désigne par écrit » : comment le système le sait-il ? Le droit « donner un consentement » est attribuable par l'administrateur du client, donc pas réservé au DG.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Consentement = document signé contresigné par Money Vibes, stocké des deux côtés ; droit de consentir attribuable par le DG seul ; la porte de sortie vérifie la signature.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-29 · Retrait de consentement et contributions déjà envoyées</h3>
+              <span class="finding-location">FR-30</span>
+            </header>
+            <div class="finding-note">Les contributions reçues mais pas encore utilisées sont-elles purgées ? Combien de temps Money Vibes les garde-t-il ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Purge des contributions non consommées au retrait, durée de conservation maximale, trace visible du client.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-32 · « Moins de 15 minutes » sans conditions de mesure</h3>
+              <span class="finding-location">NFR-5</span>
+            </header>
+            <div class="finding-note">Quelle machine, quelles images en cache, quel réseau, « complet » = 18 modules ou 4 ? Les attentes de réception comptent-elles ? Un test sans ces paramètres passera ou échouera au hasard.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Configuration de référence, état de départ, périmètre exact et bornes du chronomètre ; une cible séparée pour le site.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-33 · Indicateurs sans source de mesure</h3>
+              <span class="finding-location">SM-2, SM-3, SM-4, SM-5</span>
+            </header>
+            <div class="finding-note">Zéro est la valeur qu'affiche toute mesure qui n'existe pas. Rien ne dit quel journal compte les changements ni quel point d'observation voit une sortie non consentie. SM-2 et SM-5 n'ont ni date ni définition.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Pour chaque SM : source, fréquence, date ; pour les « 0 », un test d'intrusion qui prouve que la sonde verrait l'événement.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-34 · « Vérifié » sans critère de réussite</h3>
+              <span class="finding-location">FR-6, FR-9</span>
+            </header>
+            <div class="finding-note">Un nombre n'est pas une vérification : 0 point de vente importé est-il 🟢 ? Et FR-6 exige « l'invitation envoyée » alors que FR-9 intercepte tous les e-mails de l'essai : la vérification ne peut être que fausse ou interceptée.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Chaque vérification porte son critère (attendu, seuil, source de l'attendu) ; dans l'essai, « intercepté » vaut 🟢, l'envoi réel a lieu au rejeu.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-35 · « Réessayer sans effet de bord » contre des vérifications qui envoient</h3>
+              <span class="finding-location">FR-5, NFR-6</span>
+            </header>
+            <div class="finding-note">Une vérification réelle envoie un WhatsApp, génère un lien, crée un compte : la rejouer a un effet de bord par nature. Une vérification échouée après envoi en envoie un deuxième.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « Sans doublon » et une clef d'idempotence par vérification (réutiliser l'envoi, recontrôler la réception).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-38 · Exigences transverses absentes</h3>
+              <span class="finding-location">§5 (NFR-1 → NFR-6)</span>
+            </header>
+            <div class="finding-note">Rien sur la sauvegarde (RPO/RTO, emplacement — le NAS tombe avec le serveur), l'interruption tolérée pendant une promotion, la capacité minimale du serveur client, la rétention du journal, le chiffrement des paquets sur clé USB.</div>
+            <div class="finding-fix"><strong>Correction :</strong> NFR-7 sauvegarde, NFR-8 interruption maximale par promotion, NFR-9 configuration minimale d'un serveur client.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">F-39 · Aucun ordre de priorité pour février</h3>
+              <span class="finding-location">§1, §4</span>
+            </header>
+            <div class="finding-note">33 FR, trois parties, deux hébergements, deux PRD voisins requis en février, et aucune distinction entre 15/01, février et plus tard. Les épics ne pourront pas arbitrer quand le calendrier glissera.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Étiqueter chaque FR ; reports évidents : FR-20, FR-29, FR-30/31.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F-40 · « Suspendre » et « Désinstaller » ont la même définition</h3>
+              <span class="finding-location">§3</span>
+            </header>
+            <div class="finding-note">Le contrat distingue <code>SUSPENDED</code> et <code>REVOKED</code>, avec des effets opposés sur les dépendants (Q2/Q3) ; le vocabulaire « sans synonyme » les rend indiscernables.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Ajouter qui décide, l'effet sur les dépendants, la réversibilité et la présence au menu.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F-41 · La vérification quotidienne « n'envoie aucune donnée »</h3>
+              <span class="finding-location">FR-15, FR-16</span>
+            </header>
+            <div class="finding-note">Pour savoir s'il existe un correctif « pour elle », l'instance doit au moins s'authentifier et dire sa version. Cette requête compte-t-elle comme contact pour le délai de grâce ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Préciser ce qui est transmis et définir « contact » pour FR-15.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F-42 · J+7 avec un signal hebdomadaire</h3>
+              <span class="finding-location">FR-15, FR-16</span>
+            </header>
+            <div class="finding-note">Avec un battement exactement hebdomadaire, un signal retardé de quelques minutes déclenche l'alerte : faux positifs garantis, alertes ignorées ensuite.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Mesurer « deux signaux manqués » (ou J+8) et retenter le signal en cas d'échec.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">F-43 · Ordre des refus non défini</h3>
+              <span class="finding-location">FR-4, FR-7, FR-12, FR-14</span>
+            </header>
+            <div class="finding-note">Un même appel peut cumuler trois causes de refus ; sans ordre, deux implémentations renverront deux codes. « PDF reçu par le dirigeant » n'est pas vérifiable par le système.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Fixer l'ordre d'évaluation ou renvoyer toutes les causes ; « envoyé et journalisé » au lieu de « reçu ».</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>Revue de cohérence : contrat, plan v3, PRD frères, code</h2>
+          <span class="reviewer-source">C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/review-coherence-contrat.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Le PRD couvre bien le <strong>geste d'installation</strong> (dépendances, refus nommés, bilan, répétition générale), et il est fidèle à Q2 et Q5. Il n'est <strong>pas prêt à nourrir la spine de la coque</strong> : il ajoute au cycle de vie d'un module des états qu'aucun contrat ne porte (essai/réel, voyant, gel, préavis, essai prospect), sans dire comment la coque les lit. Il <strong>oublie les droits de tenant</strong>, que le contrat et le plan lui confient. Il <strong>contredit D3 et Q4</strong>. Il décrit la suspension et les chemins d'installation d'une façon que le code dément.</p>
+            <p>Décompte : <strong>1 critical · 11 high · 13 medium · 4 low</strong> (29 constats). Prémisse corrigée par le relecteur : Q1 → Q5 sont <strong>déjà tranchées</strong> (contrat du 2026-11-09, AD-P17 v1.8) ; la question devient « le PRD les respecte-t-il ? ».</p>
+            <p>Ce que l'architecte de la coque devrait aujourd'hui inventer : l'état effectif unique d'un module et son canal (R-20) ; l'état de l'instance (R-20, R-21) ; les droits effectifs d'un membre (R-01) ; le lieu des écrans client et leurs droits (R-22, R-16) ; la correspondance module commercial ↔ code ↔ menu et le sens unique de « pack » (R-14, R-25) ; l'habillage par organisation (R-23) ; la projection de la licence en entitlements (R-24) ; la visibilité des bandeaux et l'export (R-26).</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">R-20 · Le moteur ne dit pas ce qu'il expose à la coque</h3>
+              <span class="finding-location">absence (FR-5, FR-9, FR-15, FR-32, §7 C5/C8)</span>
+            </header>
+            <div class="finding-note">C8 rend la visibilité fonction de « entitlement <code>ACTIVE</code> + droit ». Le PRD ajoute espace, voyant, état du client, essai prospect, préavis, échu en lecture seule, gel, suspension, et en tire des règles de menu et des bandeaux, sans dire par quel canal la coque obtient cet état. La spine de la coque est due le 20/11 et sa première décision porte sur le menu : sans réponse, l'architecte écrit une exigence produit à la place du PO.</div>
+            <div class="finding-fix"><strong>Correction :</strong> FR « Ce que le moteur publie pour la coque » : (1) un état effectif unique par module dans une énumération fermée (<code>EN_SERVICE</code>, <code>EN_ATTENTE</code>, <code>BLOQUE</code>, <code>ESSAI_PROSPECT{finLe}</code>, <code>PREAVIS{finLe}</code>, <code>LECTURE_SEULE</code>, <code>SUSPENDU</code>, <code>NON_INSTALLE</code>), sa règle de menu et son canal (topic versionné + route) ; (2) l'état de l'instance ; (3) la garantie que gate et menu lisent la même énumération.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-01 · Les droits de tenant ne sont pas traités</h3>
+              <span class="finding-location">§4.A, §7 C7</span>
+            </header>
+            <div class="finding-note">Le contrat §7 confie au moteur la « lecture [des droits] depuis les manifestes » (sem. 5), la mesure du filtrage des droits d'un module non installé et la requalification de STORY-365 ; le plan §5 fait de STORY-365 (droits de tenant) le jalon de la semaine 5 et la première story de code de Dev B. Le PRD n'en couvre aucun, et la garde C7 (<code>manifeste.droits ⊂ TENANT_PERMISSION_CATALOG</code>) n'a pas de consommateur.</div>
+            <div class="finding-fix"><strong>Correction :</strong> FR « Les droits suivent l'installation » : droits du manifeste attribuables sans déploiement ; droits d'un module non installé, suspendu ou révoqué hors des droits effectifs ; STORY-365 requalifiée contre 166/167 ; SM « droits visibles sans déploiement ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-02 · Le cycle de vie contredit AD-P17 et C8</h3>
+              <span class="finding-location">§3 « Installer » / « Mettre en service », FR-5, FR-7, FR-8</span>
+            </header>
+            <div class="finding-note">Le PRD redéfinit « installer » (dans l'espace d'essai) alors qu'AD-P17 dit « Installer = entitlement <code>ACTIVE</code> », et ajoute l'espace et le voyant, que l'entitlement ne porte pas. Si l'entitlement d'un module 🔴 est <code>ACTIVE</code>, il apparaît au menu (contre FR-5) et ses dépendants passent la garde 422. Sinon, on ne sait pas quand il le devient. L'espace est-il un déploiement distinct ou une dimension de l'entitlement ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Table d'états du couple (organisation × module) : statut d'entitlement, voyant, visibilité au menu, gate. Dire si essai et réel sont deux déploiements avec chacun son catalogue ; aligner le vocabulaire sur AD-P17.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-03 · La suspension « consulter et exporter » contredit C2, et le code la dément</h3>
+              <span class="finding-location">FR-32, §3 « Préavis »</span>
+            </header>
+            <div class="finding-note"><code>SUSPENDED</code> ferme tout (<code>paiement-access.guard.ts</code>, STORY-280 AC-1). La lecture seule existe, mais pour un droit échu (STORY-727 lot 4, <code>ABONNEMENT_EXPIRE</code>), et elle est immédiate, sans 30 jours de préavis. « Préavis » désigne déjà autre chose dans STORY-280. Au passage, C2 (« expiré ⇒ 403 sans donnée ») est lui aussi démenti par 727 lot 4.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « Expiré (lecture seule) » au lieu de « suspension », citer 727 lot 4 ; dire si les 30 jours décalent l'échéance ou ajoutent un état « en préavis » ; renommer le préavis ; signaler au contrat que C2 doit distinguer expiré et <code>SUSPENDED</code>/<code>REVOKED</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-04 · De nouvelles obligations pèsent sur chaque module, hors contrat</h3>
+              <span class="finding-location">FR-5, FR-6, FR-9, FR-10, FR-16, FR-26, §7 C1</span>
+            </header>
+            <div class="finding-note">Prérequis, vérifications chiffrées, interception des envois en essai, export/import par organisation pour le rafraîchissement, santé par module, indicateurs IA de niveau 0 : aucune des onze lignes du contrat ne les porte. Les PRD des lots 2 à 4, qui remplissent le gabarit du §6, les ignoreront, et le contrôle de préparation ne les verra pas.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Faire amender le contrat par le PO : clause <strong>C12 « installable sous contrôle »</strong> (prérequis, vérifications, santé exposés ; mode essai ; export/import par organisation), ou extension officielle de C1/C10 ; les lister au §7.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-05 · Les parties B et C ne peuvent pas vivre dans le catalogue</h3>
+              <span class="finding-location">frontmatter <code>service</code>, §7 C3, C10</span>
+            </header>
+            <div class="finding-note">Émission de licences, distribution de paquets, supervision, agent de signal, outil de promotion et de retour arrière sur l'instance, registre des consentements, canal sortant : autant d'agrégats et de lieux d'exécution distincts. Un retour arrière de la plateforme ne peut pas être exécuté par un service qu'il remplace. Contrat §4 : « un agrégat distinct, c'est un service distinct ».</div>
+            <div class="finding-fix"><strong>Correction :</strong> « Partie A dans <code>platform-catalog-service</code> ; parties B et C : services à trancher dans la spine » ; ajuster C3 et C10 (agent d'instance dans le socle, hors <code>docker compose</code> des modules).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-09 · D3 est contredite, et le plan n'est pas amendé</h3>
+              <span class="finding-location">partie 4.B, FR-25</span>
+            </header>
+            <div class="finding-note">Plan §8 (D3) et contrat §9 renvoient le packaging client après les 8 semaines ; le journal enregistre D3 révisée (avant février 2027), que le PRD ne mentionne pas. Le plan donne une seule semaine au moteur. Le PRD ne découpe pas 15/01 et février, et la charge des parties B et C n'apparaît pas au plan.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Section « Jalons » qui affecte chaque FR ; inscrire D3 révisée au plan §8, au contrat §9 et à AD-P17, avec ses conséquences sur la charge et l'ordre de sacrifice.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-10 · Q4 est contredite, et le PRD se contredit lui-même</h3>
+              <span class="finding-location">FR-33, §3 « Effacer »</span>
+            </header>
+            <div class="finding-note">FR-33 crée un effacement automatique à échéance, que le PRD spécifie tout en le déclarant hors périmètre, contre Q4 (« sans limite jusqu'à une demande d'effacement »). C3 interdit au moteur d'effacer les collections des autres modules.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Faire acter que la non-signature vaut demande d'effacement (exception écrite à Q4), ou un effacement « proposé » ; dans les deux cas, un contrat d'effacement par organisation dans chaque module (voir R-04).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-14 · « Pack » a deux sens incompatibles</h3>
+              <span class="finding-location">FR-1, QA-1, SM-1, NFR-5, Connecteurs FR-3</span>
+            </header>
+            <div class="finding-note">Le contrat et le code (<code>packs.seed-data.ts</code>) font du pack un <code>VerticalPack</code> (<code>distributeur</code> = 7 codes), clé de l'octroi par vertical et des contrats de packages (727). Le PRD emploie « pack » pour quatre sous-ensembles commerciaux qui n'existent pas au catalogue. SM-1 et NFR-5 deviennent ambigus (7 ou 18 modules ?), et Connecteurs FR-3 hérite de l'ambiguïté.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Un seul sens (« pack » = <code>VerticalPack</code>, « bouquet » pour les sous-ensembles, ou l'inverse avec migration du seed) ; table bouquet → modules commerciaux → codes ; préciser SM-1/NFR-5 ; reporter dans Connecteurs.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-21 · La coque ne sait pas dans quel espace elle tourne</h3>
+              <span class="finding-location">FR-9</span>
+            </header>
+            <div class="finding-note">Bandeau jaune, couleur et titre d'onglet : mais la source de vérité (variable de déploiement, champ d'instance, licence) n'est pas dite, ni si un utilisateur passe d'un espace à l'autre, ni le cas d'un prospect qui n'a que l'essai.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « L'espace est une propriété de l'instance déployée, exposée par le moteur à la coque (route publique de configuration) ; deux URL distinctes ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-22 · D1 ignorée : les écrans côté client n'ont pas de lieu</h3>
+              <span class="finding-location">§7 C8, FR-17, FR-18, FR-19, FR-22, FR-23, FR-27, FR-32, FR-33</span>
+            </header>
+            <div class="finding-note">DG qui consent, DSI qui choisit une date, revient en arrière, dépose un fichier, ouvre un tunnel, prospect en essai, abonné échu qui exporte : tous sont des utilisateurs du client. Les placer dans la console Money Vibes (le CRM interne, plan §1.5) oblige à leur donner des rôles plateforme, ce qui mêle portées plateforme et tenant (AD-P15). Le PRD ne mentionne jamais <code>prospera-app</code>.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Partager C8 : console Money Vibes (offre, installation, bilan, supervision, licences) ; <code>prospera-app</code>, espace « Administration de mon instance » (mises à jour, retour arrière, fichier, tunnel, consentements, export, essai), chaque écran avec son droit de tenant.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">R-27 · Les chemins d'installation réels contredisent le PRD</h3>
+              <span class="finding-location">FR-4, FR-11, FR-12</span>
+            </header>
+            <div class="finding-note">Le code a quatre chemins, mais pas ceux du PRD : <code>PUT :orgId/:moduleCode</code> (opérateur), <code>octroi-par-abonnement</code> (727 lot 2 : une échéance soldée ouvre les modules), <code>propagation-des-packs</code> (lot 6), et <code>octroi-par-vertical</code> (lot 7 : package sans terme, sans contrat, dès <code>identity.org.created</code>). Le PRD oublie l'octroi par vertical, qui installe sans contrat (contre FR-12) et directement (contre FR-11). Appliquée telle quelle, FR-12 casserait les octrois d'opérateur existants.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Lister les cinq chemins (quatre existants + licence) : installe ou rend installable, passe ou non par l'essai, soumis ou non à <code>MODULE_NON_SOUSCRIT</code> ; exceptions nommées (vertical, opérateur, organisation Money Vibes) ; test de mutation de FR-4 sur les cinq.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-06 · Le contrat du moteur lui-même est incomplet</h3>
+              <span class="finding-location">§7 C1, C4, C5, C7, C8</span>
+            </header>
+            <div class="finding-note">C1 décrit ce que le moteur exige des autres, pas son propre manifeste. C5 ne cite aucun topic consommé (feu vert Reprise, santé Connecteurs, <code>echeance.encaissee</code>, <code>identity.org.created/updated</code>). C7 omet les droits du DSI. C8 omet les écrans côté client.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Compléter ces cinq lignes ; une ligne « à nommer dans la spine » liste au moins les faits échangés.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-07 · Aucune FR ne dit comment un manifeste entre au catalogue (Q1)</h3>
+              <span class="finding-location">FR-2, FR-4, §7 C1</span>
+            </header>
+            <div class="finding-note"><code>MANIFESTE_CYCLE</code> suppose une publication de manifeste que le PRD ne décrit pas (qui, quand, quelle garde de comparaison). FR-2 change la forme de <code>depends</code> (code + libellé) sans le dire au contrat.</div>
+            <div class="finding-fix"><strong>Correction :</strong> FR « Publier le manifeste d'une version » ; amender l'exemple de C1 (<code>depends: [{ code, raison }]</code>).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-11 · Q3 n'est pas reprise, et FR-5 peut être lue contre elle</h3>
+              <span class="finding-location">FR-5, FR-14</span>
+            </header>
+            <div class="finding-note">FR-5 traite un prérequis manquant à l'installation, mais rien ne dit qu'une suspension ultérieure ne bascule pas les dépendants en 🟠. L'architecte peut généraliser FR-5 et violer Q3.</div>
+            <div class="finding-fix"><strong>Correction :</strong> À FR-14 : « Une suspension ne change ni le voyant ni la visibilité des modules dépendants (Q3). »</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-12 · Les 18 modules commerciaux n'ont pas de dépôt où tenir leur manifeste</h3>
+              <span class="finding-location">QA-1, contrat Q1</span>
+            </header>
+            <div class="finding-note">La plupart (CRM, Terrain &amp; Tournées, Application mobile…) n'ont ni service ni dépôt, et certains ne correspondent à aucun code du catalogue. Q1 ne dit pas où vit le manifeste d'un module encore sans service.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Correspondance module commercial ↔ codes (R-14) ; manifeste tenu au catalogue avec le statut « non octroyable » (<code>MODULE_NON_OCTROYABLE</code>) jusqu'à la création du dépôt.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-13 · La limite « pas de libre-service » est contredite par FR-33 et Reprise FR-19</h3>
+              <span class="finding-location">§2.2, §8</span>
+            </header>
+            <div class="finding-note">Le §8 dit l'inférence « sans effet sur février » ; or le prospect se sert seul dès février (comptes, import, interface).</div>
+            <div class="finding-fix"><strong>Correction :</strong> « L'installation reste faite par Money Vibes (y compris l'offre d'essai) ; l'usage, l'import et l'essai sont en libre-service dès février » ; retirer la phrase du §8.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-15 · Le feu vert de la Reprise n'a pas de consommateur explicite</h3>
+              <span class="finding-location">FR-6, FR-7, §7 C5</span>
+            </header>
+            <div class="finding-note">Aucune FR ne dit que la ligne Reprise reste 🟠 sans feu vert ; C5 ne cite pas le fait. La « réception définitive », qui déclenche une suppression chez la Reprise, n'est définie dans aucun des deux PRD.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Règle « feu vert ⇒ 🟢 de la ligne Reprise » à FR-7/FR-8 ; « consomme : <code>reprise.feu-vert</code> » au §7 C5 ; définir « réception définitive ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-16 · L'écran de libre-service de février n'a pas de lieu</h3>
+              <span class="finding-location">FR-33, Reprise §7 C8 et FR-19</span>
+            </header>
+            <div class="finding-note">Un prospect n'a pas accès à la console Money Vibes ; les deux PRD supposent un écran client que ni l'un ni l'autre ne place.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Décision PO : import en libre-service et essai prospect dans <code>prospera-app</code> dès février ; corriger Reprise C8.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-17 · Le sort des « réglages » de l'essai contredit la règle de non-copie</h3>
+              <span class="finding-location">FR-8, FR-33</span>
+            </header>
+            <div class="finding-note">Les rôles appartiennent à <code>auth-service</code>, les zones à <code>reseau</code> ; FR-8 ne rejoue que l'offre et les tables. On ne sait pas comment rôles et zones passent dans le réel sans copie.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Lister ce qui est rejoué et par quel contrat de chaque module propriétaire ; corriger « à frais ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-18 · AD-P16 n'est pas conciliée avec la règle de non-mise en commun</h3>
+              <span class="finding-location">partie 4.C, §3</span>
+            </header>
+            <div class="finding-note">Sur site, une console Money Vibes munie des routes AD-P16 est un accès de niveau 2 sans consentement. Sur la plateforme, lecture AD-P16 et niveau 1 se recouvrent. La tension relevée au journal n'est pas tranchée.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Sur site, routes AD-P16 utilisables seulement en session de support ouverte par le client (FR-23) ; sur la plateforme, une lecture AD-P16 ne vaut jamais contribution ; amender AD-P16.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-23 · L'habillage et la configuration par organisation ne sont pas traités</h3>
+              <span class="finding-location">D1, §4.A</span>
+            </header>
+            <div class="finding-note">D1 : « la vertical n'est qu'une configuration : un pack, une marque, un tableau de bord d'accueil ». <code>Entitlement.config</code> existe déjà. Le PRD ne dit pas qui possède marque, logo, couleurs et accueil, ni si l'installation les pose.</div>
+            <div class="finding-fix"><strong>Correction :</strong> FR « L'installation pose la configuration d'accueil » avec propriétaire et lecture par la coque, ou « hors moteur, porté par … ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-24 · La relation entre la licence et les entitlements n'est pas définie</h3>
+              <span class="finding-location">FR-13, FR-14</span>
+            </header>
+            <div class="finding-note">Gates et coque lisent l'entitlement ; on ne sait pas si la licence importée s'y projette (et sur quelle <code>source</code>). <code>miseAJour</code> et le gel n'ont pas d'équivalent dans l'entitlement : ce sont des états d'instance.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « Une licence importée se projette en entitlements (source <code>licence</code>) par le point de décision unique de FR-4 ; <code>usage</code> → <code>terme</code>/<code>echeanceLe</code> ; <code>miseAJour</code> et le gel sont des états d'instance exposés à part ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-25 · Correspondance module commercial ↔ code ↔ dossier d'écran non écrite</h3>
+              <span class="finding-location">QA-1, contrat C8</span>
+            </header>
+            <div class="finding-note">Si un module commercial regroupe plusieurs codes ou si un code n'a pas d'écran propre, la coque ne sait pas si le menu se construit par code ou par module commercial, ni avec quel libellé.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Colonne « dossier d'écran / libellé de menu » dans la table de R-14 ; menu construit par code, libellé commercial en affichage seulement.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">R-28 · La « fenêtre N/N-1 » du catalogue ne règle pas le retard d'une instance</h3>
+              <span class="finding-location">FR-21</span>
+            </header>
+            <div class="finding-note"><code>fenetre-de-support.ts</code> limite les majeures <code>ACTIVE</code> d'un module à la publication ; elle ne mesure aucune instance. « Deux versions en retard » = N-2, hors N/N-1. Et <code>Entitlement.versionCode</code> épingle une version par organisation, alors que le §3 parle d'une ligne de version de plateforme.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « Au plus une majeure de retard (N-1) », règle nouvelle reprenant le principe ; version de plateforme = ensemble figé de <code>versionCode</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">R-08 · La preuve C11 dépend d'un tuyau non décrit</h3>
+              <span class="finding-location">§7 C11, FR-26</span>
+            </header>
+            <div class="finding-note">FR-26 liste les indicateurs, mais aucune FR ne dit comment un module avec IA les remet au signal.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Traiter avec R-04 (clause d'exposition des indicateurs de niveau 0).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">R-19 · Dérive de vocabulaire</h3>
+              <span class="finding-location">UJ-1, UJ-2, PRD Reprise et Connecteurs</span>
+            </header>
+            <div class="finding-note">« Environnement de test », « production », « rapport d'import » ; « bascule » (Reprise, Connecteurs) n'est pas définie au §3 et y recouvre « mise en service ».</div>
+            <div class="finding-fix"><strong>Correction :</strong> Remplacer par les termes du §3 ; définir « bascule » ou la bannir des PRD frères.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">R-26 · Visibilité des bandeaux et fonction d'export non précisées</h3>
+              <span class="finding-location">FR-15, FR-32, FR-33</span>
+            </header>
+            <div class="finding-note">Qui est « administrateur » (quel droit) ? Qui voit l'avertissement de préavis et le compte à rebours de l'essai ? Où vit l'export ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une ligne par bandeau dans la FR de R-20 (public, droit, texte) et une FR « Exporter mes données » avec son propriétaire.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">R-29 · En-tête, numérotation, §3 « Organisation »</h3>
+              <span class="finding-location">en-tête, FR-32, FR-33, §3</span>
+            </header>
+            <div class="finding-note">En-tête périmé, ordre des FR confus ; une instance sur site héberge aussi l'organisation Money Vibes, qui porte les rôles plateforme de la console.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Mettre l'en-tête à jour, renuméroter ou renvoyer, et écrire « sert une organisation cliente (plus l'organisation Money Vibes, pour la console) ».</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <div class="mechanical">
+      <h3>Notes mécaniques</h3>
+      <ul>
+        <li><strong>Bandeau périmé (ligne 16) :</strong> « Brouillon. Sections rédigées : §0, §1, §2, §3. À venir : §4 […] » alors que tout est rédigé. À corriger avant la lecture du PO, car c'est la première chose qu'il lira.</li>
+        <li><strong>Ambiguïté :</strong> FR-33, « la reprise est rejouée à frais ». « À frais » se lit comme « aux frais du client » ; le sens voulu est « fraîche » (FR-8). Le journal porte la même tournure.</li>
+        <li><strong>Dérive de vocabulaire :</strong> UJ-1 étapes 1 et 3 emploient « environnement de test » et « la production », que le §3 bannit. Le §3 donne à <strong>Suspendre</strong> et <strong>Désinstaller</strong> la même définition. « Suspension » a deux comportements : 403 pour un module (contrat C2) et « consulter et exporter » pour une licence (FR-32).</li>
+        <li><strong>Termes absents du glossaire :</strong> offre d'essai, prospect, bilan d'essai, bilan de mise en service, bilan d'instance (FR-25), recette, module commercial (QA-1).</li>
+        <li><strong>Identifiants :</strong> FR-1 → FR-33 sont uniques et sans trou, mais pas dans l'ordre (FR-33 entre FR-13 et FR-14, FR-32 après FR-25). On peut le garder pour la traçabilité, à condition de le signaler. SM-1 → SM-5 et NFR-1 → NFR-6 sont contigus.</li>
+        <li><strong>Niveau de titre :</strong> « ## 2.3 Parcours clés » devrait être <code>###</code> sous « ## 2 ».</li>
+        <li><strong>Codes de refus voisins :</strong> <code>MODULE_NON_SOUSCRIT</code> (FR-12) et <code>MODULE_HORS_LICENCE</code> (FR-14) sont deux 422 pour « le droit ne couvre pas ce module ». Sur site, lequel prime ? (low)</li>
+        <li><strong>FR-14 :</strong> une suspension par litige arrive « par une nouvelle licence, au contact suivant ». Un client à licence perpétuelle peut l'éviter en coupant la liaison, puisque FR-15 ne sanctionne que par le gel. (low, à acter)</li>
+        <li><strong>Frontmatter :</strong> <code>verticales</code> liste Cabinet, que le corps ne traite jamais.</li>
+        <li><strong>Index des hypothèses :</strong> une seule <code>[ASSUMPTION]</code> en ligne (§2.2), reprise au §8 : l'aller-retour tient. Aucun <code>[NOTE FOR PM]</code>.</li>
+        <li><strong>Contrat de module :</strong> bien cité (§0, §3, §7), et le §7 respecte les onze lignes exigées par le §6 du contrat.</li>
+      </ul>
+    </div>
+
+    <footer class="report-footer">
+      <div class="meta">
+        <span>Grille : C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/review-rubric.md</span>
+        <span>Revues : C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/review-adversarial-general.md · C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/review-coherence-contrat.md</span>
+        <span>Jumeau : C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/validation-report.md</span>
+        <span>Généré : 2026-11-10T02:31:30+00:00</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

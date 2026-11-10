@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validation PRD : PRD — Moteur d&#x27;installation (platform-catalog-service)</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --border: #e7e5e4;
+    --text: #1c1917;
+    --muted: #78716c;
+
+    --verdict-strong: #16a34a;
+    --verdict-adequate: #65a30d;
+    --verdict-thin: #d97706;
+    --verdict-broken: #dc2626;
+
+    --sev-low: #64748b;
+    --sev-medium: #ca8a04;
+    --sev-high: #ea580c;
+    --sev-critical: #dc2626;
+
+    --grade-exc: #16a34a;
+    --grade-good: #65a30d;
+    --grade-fair: #d97706;
+    --grade-poor: #dc2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  header.report-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .title h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .title .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .grade {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+  .grade-excellent { background: var(--grade-exc); }
+  .grade-good { background: var(--grade-good); }
+  .grade-fair { background: var(--grade-fair); }
+  .grade-poor { background: var(--grade-poor); }
+
+  .synthesis {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--muted);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    font-size: 15.5px;
+  }
+  .synthesis p { margin: 0 0 10px; }
+  .synthesis p:last-child { margin-bottom: 0; }
+
+  .dimension-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .dim-card .dim-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .dim-card .dim-verdict { font-size: 14px; font-weight: 600; }
+
+  section.dimension, section.reviewer-section { margin-bottom: 14px; }
+  section.dimension details, section.reviewer-section details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  section summary {
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  section summary::-webkit-details-marker { display: none; }
+  section summary::before {
+    content: "▸";
+    display: inline-block;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+  }
+  section details[open] summary::before { transform: rotate(90deg); }
+  section summary h2 {
+    display: inline;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .verdict-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: white;
+  }
+  .verdict-strong { background: var(--verdict-strong); }
+  .verdict-adequate { background: var(--verdict-adequate); }
+  .verdict-thin { background: var(--verdict-thin); }
+  .verdict-broken { background: var(--verdict-broken); }
+
+  .dim-body { padding: 4px 20px 18px; }
+  .dim-judgment { color: var(--text); font-size: 14.5px; }
+  .dim-judgment p { margin: 0 0 10px; }
+
+  .findings-list { padding: 0 20px 4px; }
+  article.finding {
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+  }
+  article.finding:first-child { border-top: none; }
+  article.finding header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+  }
+  .badge-sev-low { background: rgba(100, 116, 139, 0.12); color: var(--sev-low); }
+  .badge-sev-medium { background: rgba(202, 138, 4, 0.14); color: var(--sev-medium); }
+  .badge-sev-high { background: rgba(234, 88, 12, 0.14); color: var(--sev-high); }
+  .badge-sev-critical { background: rgba(220, 38, 38, 0.14); color: var(--sev-critical); }
+  .finding-title { margin: 0; font-size: 15px; font-weight: 500; flex: 1; min-width: 200px; }
+  .finding-location { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: var(--muted); }
+  .finding-note, .finding-fix { margin-top: 6px; font-size: 14px; }
+  .finding-fix strong { color: var(--muted); font-weight: 500; }
+
+  .reviewer-source {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  .mechanical {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .mechanical h3 { margin: 0 0 10px; font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .mechanical ul { margin: 0; padding-left: 20px; }
+  .mechanical li { margin-bottom: 4px; color: var(--text); }
+
+  footer.report-footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  footer .meta { display: flex; gap: 24px; flex-wrap: wrap; }
+
+  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.9em; background: rgba(120,113,108,0.10); padding: 0 4px; border-radius: 3px; }
+  .progress { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--verdict-adequate); border-radius: 8px; padding: 16px 22px; margin-bottom: 24px; font-size: 14px; }
+  .progress h2 { margin: 0 0 10px; font-size: 16px; font-weight: 600; }
+  .progress h3 { margin: 14px 0 6px; font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .progress p { margin: 0 0 8px; }
+  .table-wrap { overflow-x: auto; }
+  table.grid { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  table.grid th, table.grid td { border-bottom: 1px solid var(--border); padding: 6px 8px; text-align: left; vertical-align: top; }
+  table.grid th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; }
+  table.grid td.num { text-align: right; white-space: nowrap; }
+  .label { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-family: ui-monospace, "SF Mono", Menlo, monospace; border: 1px solid var(--border); color: var(--muted); }
+  .label-bloque-coque { color: var(--sev-critical); border-color: var(--sev-critical); }
+  .label-decision-PO { color: var(--sev-high); border-color: var(--sev-high); }
+  .label-reecriture { color: var(--sev-low); border-color: var(--sev-low); }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="report-header">
+      <div class="title">
+        <h1>PRD — Moteur d&#x27;installation (platform-catalog-service) — Rapport de validation (passage 2)</h1>
+        <div class="subtitle">C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/prd.md</div>
+      </div>
+      <div class="grade grade-poor">Poor · Insuffisant</div>
+    </header>
+
+    <div class="synthesis">
+      <p>La réécriture est un vrai saut : le §3.1 (trois axes, huit états publiés, table menu / garde / bandeau), FR-34 → FR-41, C12/C13, NFR-7/NFR-8 et l'horloge scellée referment presque tous les constats de la revue 1, et le texte reflète fidèlement le journal du PO. Ce qui reste à risque, c'est la <strong>jonction avec ce qui tourne déjà sur <code>dev</code></strong> : les chemins de droits 2 → 6 (paiement, socle de vertical, licence) posent un <code>ACTIVE</code> que la table des états publiés ne sait pas représenter — ce qui casse la règle de menu au cœur de la spine de la coque et la décision T-01 du PO pour le distributeur de février — et STORY-280 (impayé ⇒ <code>SUSPENDED</code> automatique, arbitrage PO du 08/11) contredit FR-32/FR-41 sans qu'aucune ligne ne le dise. Les deux se corrigent en une demi-journée de texte ; sans eux, le PRD n'est pas prêt à être consommé.</p>
+      <p>Les deux relecteurs supplémentaires déplacent le tableau. La revue adversariale (37 nouveaux constats, dont 3 critical) montre que les nouveautés <strong>ne sont pas croisées entre elles</strong> : une restauration de sauvegarde rembobine l'horloge scellée, le compteur de licence et le registre des consentements ; les gardes des modules calculent l'échéance sur l'horloge du système, pas sur l'horloge scellée ; les interrupteurs de changement n'ont aucun comportement sur site ; la licence courte de FR-41 fait mentir « le silence ne punit pas ». La revue de cohérence (21 nouveaux constats, dont 1 critical) confronte la table des états au code de <code>dev</code> : six états sur huit s'y projettent, mais <code>PREAVIS</code> et <code>ESSAI_PROSPECT</code> ne se lisent pas sur l'entitlement, la règle « l'axe 2 prime » ferait disparaître du menu <strong>tous les modules existants</strong>, le socle <code>distributeur</code> ouvre 7 codes sans contrat dès la création de l'organisation, et <code>auth-service</code> refuse les droits <code>instance:*</code>.</p>
+      <p>Une fois dédoublonnés, les 88 nouveaux constats (et les 46 constats du passage 1 restés partiels ou non résolus) se ramènent à <strong>28 thèmes</strong> : 4 critical, 15 high, 9 medium — 5 <code>bloque-coque</code>, 11 <code>decision-PO</code>, 12 <code>reecriture</code> (détail dans <code>validation-report.md</code>, section « Constats consolidés du passage 2 »). Aucune dimension n'est plus <em>thin</em> ; la note reste <strong>Poor</strong> à cause des 5 constats critical (4 thèmes). Sans eux, elle serait <em>Fair</em> (des constats high subsistent). Pour la séance du 13/11, trois arbitrages commandent le reste : U-01 (ce que publient les chemins 2 → 6), U-02 (impayé : STORY-280 contre préavis) et U-05 (licence courte contre « le silence ne punit pas »).</p>
+    </div>
+
+    <div class="progress">
+      <h2>Progrès depuis le passage 1</h2>
+      <p><strong>Note :</strong> passage 1 <strong>Poor</strong> (5 thèmes critical, 3 dimensions <em>thin</em>) → passage 2 <strong>Poor</strong> (4 thèmes critical, 0 dimension <em>thin</em>). La note ne bouge pas parce qu'un seul constat critical suffit à la fixer ; sans les 5 constats critical du passage 2, elle serait <em>Fair</em> (des constats high subsistent, et <em>Good</em> exige qu'il n'y en ait plus).</p>
+      <h3>Suivi des constats du passage 1, par revue</h3>
+      <div class="table-wrap"><table class="grid">
+        <tr><th>Revue</th><th>Suivis</th><th>Résolus</th><th>Partiels</th><th>Non résolus</th><th>Nouveaux (c · h · m · l)</th></tr>
+        <tr><td>Grille (<code>review-rubric.md</code>)</td><td class="num">35</td><td class="num">27</td><td class="num">8</td><td class="num">0</td><td>30 (1 · 5 · 14 · 10)</td></tr>
+        <tr><td>Adversariale (<code>review-adversarial-general.md</code>)</td><td class="num">43</td><td class="num">20</td><td class="num">20</td><td class="num">3</td><td>37 (3 · 16 · 14 · 4)</td></tr>
+        <tr><td>Cohérence (<code>review-coherence-contrat.md</code>)</td><td class="num">29</td><td class="num">14</td><td class="num">14</td><td class="num">1</td><td>21 (1 · 5 · 12 · 3)</td></tr>
+        <tr><td><strong>Total</strong></td><td class="num"><strong>107</strong></td><td class="num"><strong>61</strong></td><td class="num"><strong>42</strong></td><td class="num"><strong>4</strong></td><td><strong>88 (5 · 26 · 40 · 17)</strong></td></tr>
+      </table></div>
+      <p>La grille suit 25 constats et 10 notes mécaniques. Elle numérote 26 nouveaux constats ; quatre constats de dimension sans numéro y sont ajoutés ici (G-N-27 à G-N-30), et G-N-23 est porté à medium (sévérité de la dimension Scope).</p>
+      <p><strong>Partiels :</strong> grille G-02, G-04, G-13, G-18, G-19, G-20, M-6, M-10 ; adversariale F-01, F-02, F-04, F-11, F-12, F-15, F-16, F-18, F-20, F-21, F-22, F-25, F-26, F-32, F-33, F-35, F-36, F-37, F-41, F-43 ; cohérence R-02, R-03, R-05, R-06, R-07, R-12, R-14, R-16, R-17, R-18, R-19, R-26, R-27, R-29. <strong>Non résolus :</strong> F-27, F-28, F-29 (canal de données, U-28) ; R-08 (indicateurs IA de niveau 0, U-11).</p>
+      <h3>Verdicts de dimension</h3>
+      <div class="table-wrap"><table class="grid">
+        <tr><th>Dimension</th><th>Passage 1</th><th>Passage 2</th></tr>
+        <tr><td>Decision-readiness</td><td style="color: var(--verdict-adequate)">adequate</td><td style="color: var(--verdict-adequate)"><strong>adequate</strong></td></tr>
+        <tr><td>Substance over theater</td><td style="color: var(--verdict-strong)">strong</td><td style="color: var(--verdict-strong)"><strong>strong</strong></td></tr>
+        <tr><td>Strategic coherence</td><td style="color: var(--verdict-adequate)">adequate</td><td style="color: var(--verdict-adequate)"><strong>adequate</strong></td></tr>
+        <tr><td>Done-ness clarity</td><td style="color: var(--verdict-thin)">thin</td><td style="color: var(--verdict-adequate)"><strong>adequate</strong></td></tr>
+        <tr><td>Scope honesty</td><td style="color: var(--verdict-thin)">thin</td><td style="color: var(--verdict-adequate)"><strong>adequate</strong></td></tr>
+        <tr><td>Downstream usability</td><td style="color: var(--verdict-thin)">thin</td><td style="color: var(--verdict-adequate)"><strong>adequate</strong></td></tr>
+        <tr><td>Shape fit</td><td style="color: var(--verdict-adequate)">adequate</td><td style="color: var(--verdict-adequate)"><strong>adequate</strong></td></tr>
+      </table></div>
+      <h3>Thèmes consolidés</h3>
+      <p>Passage 1 : 30 thèmes (5 critical · 20 high · 5 medium) — 4 <code>bloque-coque</code> · 13 <code>decision-PO</code> · 13 <code>reecriture</code>. Passage 2 : 28 thèmes (4 critical · 15 high · 9 medium · 0 low) — 5 <code>bloque-coque</code> · 11 <code>decision-PO</code> · 12 <code>reecriture</code>.</p>
+      <p><strong>Filiation :</strong> T-01 (états, lecture pour la coque) → U-01, U-03, U-06, U-07 ; T-04 (horloge, licence) → U-04, U-19 ; T-05 (consentement, AD-P16) → U-16 ; T-06 (STORY-727) → U-01, U-10 ; T-07 (droits de tenant) → U-08 ; T-09 (« pack ») → U-10 ; T-10 (obligations de module) → U-11 ; T-11 (feu vert) → U-18 ; T-15 (échu, suspension) → U-02, U-06 ; T-02 (connecteurs) → U-15 ; T-03 (retour arrière) → U-13 ; T-16 et T-20 (gel, version figée, correctifs) → U-14 ; T-13 (plateforme contre DSI) → U-12, U-23 ; T-18 (contrat ↔ dépendances) → U-24 ; T-14 (effacement) → U-07, U-25 ; T-19 (périmètre, §8) → U-20 ; T-21 (sauvegardes) → U-17 ; T-23 (canal de données) → U-28 ; T-28 (indicateurs) → U-22 ; T-30 (vocabulaire) → U-27. T-08, T-12, T-17, T-22, T-24 → T-27 et T-29 n'ont plus de descendant de gravité propre.</p>
+    </div>
+
+    <div class="dimension-summary">
+      <div class="dim-card">
+        <div class="dim-name">Decision-readiness</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Substance over theater</div>
+        <div class="dim-verdict" style="color: var(--verdict-strong)">strong</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Strategic coherence</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Done-ness clarity</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Scope honesty</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Downstream usability</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Shape fit</div>
+        <div class="dim-verdict" style="color: var(--verdict-adequate)">adequate</div>
+      </div>
+    </div>
+
+    <section class="reviewer-section">
+      <details open>
+        <summary>
+          <h2>Constats consolidés du passage 2 (dédoublonnés)</h2>
+          <span class="reviewer-source">28 thèmes · validation-report.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Les 88 nouveaux constats et les 46 constats partiels ou non résolus du passage 1 sont regroupés par sujet, toutes revues confondues. Sévérité d'un thème = la plus haute de ses constats nouveaux (un constat non résolu garde sa sévérité du passage 1 ; un partiel ne relève pas la sévérité, son reste est porté par un constat nouveau). Préfixes : <code>G-N</code> grille, <code>A-N</code> adversariale, <code>C-N</code> cohérence ; <code>G-</code>, <code>M-</code>, <code>F-</code>, <code>R-</code> = constats du passage 1 repris.</p>
+          </div>
+          <div class="table-wrap"><table class="grid">
+            <tr><th>Thème</th><th>Sévérité</th><th>Étiquette</th><th>Titre</th></tr>
+            <tr><td>U-01</td><td><span class="badge badge-sev-critical">critical</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Ce que publient les chemins de droits 2 → 6 : un module ouvert sans installation</td></tr>
+            <tr><td>U-02</td><td><span class="badge badge-sev-critical">critical</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Impayé : STORY-280 (suspension à J+7, arbitrage PO du 08/11) contre préavis 30 j + lecture seule</td></tr>
+            <tr><td>U-03</td><td><span class="badge badge-sev-critical">critical</span></td><td><span class="label label-bloque-coque">bloque-coque</span></td><td>Lire l'état publié : canal, transitions dans le temps, représentation sur l'entitlement</td></tr>
+            <tr><td>U-04</td><td><span class="badge badge-sev-critical">critical</span></td><td><span class="label label-reecriture">reecriture</span></td><td>État de confiance : restauration, horloge scellée en avance, gel à trois définitions</td></tr>
+            <tr><td>U-05</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Licence courte contre « le silence ne punit pas »</td></tr>
+            <tr><td>U-06</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-bloque-coque">bloque-coque</span></td><td>Lecture seule, visibilité et export : C8 et C2 non amendés, trois mécanismes</td></tr>
+            <tr><td>U-07</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-bloque-coque">bloque-coque</span></td><td>Fin de l'essai prospect : 30 jours d'export sans état publié</td></tr>
+            <tr><td>U-08</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-bloque-coque">bloque-coque</span></td><td>Droits <code>instance:*</code> : code de module, intersection, droit de consentir</td></tr>
+            <tr><td>U-09</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-bloque-coque">bloque-coque</span></td><td>Une organisation dans deux espaces : naissance, rejeu, rafraîchissement</td></tr>
+            <tr><td>U-10</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Ce que vend le contrat : socle de vertical = package, « pack distributeur », modules non installables</td></tr>
+            <tr><td>U-11</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-reecriture">reecriture</span></td><td>Obligations nouvelles des modules hors C13, gabarit du contrat à 11 lignes</td></tr>
+            <tr><td>U-12</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Interrupteurs de changement : sur site, empilement, forme des données</td></tr>
+            <tr><td>U-13</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Retour arrière : <code>AVEC_PERTE</code> sur la plateforme et en automatique, promotions rapprochées, durée</td></tr>
+            <tr><td>U-14</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Correctifs critiques pour les versions figées, maintenance datée module par module</td></tr>
+            <tr><td>U-15</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-reecriture">reecriture</span></td><td>Connecteurs en essai : liste blanche, identifiants en lecture seule, aller-retour, messages d'identité</td></tr>
+            <tr><td>U-16</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Apprentissage sur la plateforme : clause d'adhésion, AD-P16, SM-4 aveugle</td></tr>
+            <tr><td>U-17</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Sauvegardes : clé « détenue par le client » contre automatismes, RPO de la plateforme</td></tr>
+            <tr><td>U-18</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-reecriture">reecriture</span></td><td>Feu vert de la Reprise trop large ; jonction avec le PRD Reprise</td></tr>
+            <tr><td>U-19</td><td><span class="badge badge-sev-high">high</span></td><td><span class="label label-reecriture">reecriture</span></td><td>Licence et clés : clé compromise, compteur, vérification quotidienne qui « n'envoie aucune donnée »</td></tr>
+            <tr><td>U-20</td><td><span class="badge badge-sev-medium">medium</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Ordre de sacrifice partiel, §8.2 « Aucun » point ouvert</td></tr>
+            <tr><td>U-21</td><td><span class="badge badge-sev-medium">medium</span></td><td><span class="label label-reecriture">reecriture</span></td><td>§8.4 et amendements du contrat incomplets</td></tr>
+            <tr><td>U-22</td><td><span class="badge badge-sev-medium">medium</span></td><td><span class="label label-reecriture">reecriture</span></td><td>Indicateurs : SM-6 et SM-7 sans instrument</td></tr>
+            <tr><td>U-23</td><td><span class="badge badge-sev-medium">medium</span></td><td><span class="label label-reecriture">reecriture</span></td><td>Plateforme : espace d'essai partagé, majeure, rafraîchissement, vagues, version épinglée</td></tr>
+            <tr><td>U-24</td><td><span class="badge badge-sev-medium">medium</span></td><td><span class="label label-decision-PO">decision-PO</span></td><td>Dépendances : majeure qui ajoute une dépendance non souscrite, propagation d'un pack, cycles</td></tr>
+            <tr><td>U-25</td><td><span class="badge badge-sev-medium">medium</span></td><td><span class="label label-reecriture">reecriture</span></td><td>Effacement du prospect et désinstallation</td></tr>
+            <tr><td>U-26</td><td><span class="badge badge-sev-medium">medium</span></td><td><span class="label label-reecriture">reecriture</span></td><td>Santé d'un module en service : un prérequis qui disparaît</td></tr>
+            <tr><td>U-27</td><td><span class="badge badge-sev-medium">medium</span></td><td><span class="label label-reecriture">reecriture</span></td><td>Parcours, vocabulaire et résidus de texte</td></tr>
+            <tr><td>U-28</td><td><span class="badge badge-sev-medium">medium</span></td><td><span class="label label-reecriture">reecriture</span></td><td>Canal de données : schéma du signal, ré-identification, registre, purge</td></tr>
+          </table></div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">U-01 · Ce que publient les chemins de droits 2 → 6 : un module ouvert sans installation</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-01 (critical), A-N-01 (critical), C-N-03 (high), A-N-03 (high), A-N-08 (medium), C-N-08 (medium), C-N-20 (low) ; repris : G-13 (partiel), G-18 (partiel), R-27 (partiel), F-04 (partiel), F-15 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> §3.1 (axe 2, « L'axe 2 prime », état publié), FR-4, FR-6, FR-11, FR-12, FR-14, FR-34</div>
+            <div class="finding-note">Les trois revues tombent sur la même faille : l'échéance soldée (727 lot 2), la propagation d'un pack, le socle de vertical, l'opérateur et la licence posent <code>ACTIVE</code> sans passer par l'axe 2, et « l'axe 2 prime » les publie <code>NON_INSTALLE</code> : menu caché, garde ouverte. Sur <code>dev</code>, <strong>tous</strong> les droits existants viennent de ces chemins : le jour de la mise en route du moteur, tous les modules disparaissent du menu ; ou bien, si l'on ouvre, le distributeur de février a tous ses modules ouverts dans le réel dès son premier paiement, avant toute répétition générale, contre la décision T-01. Corollaires : les vérifications d'un module en <code>EN_INSTALLATION</code> tournent sans droit (circularité), la liste « il n'en existe pas d'autre » oublie régularisation, offre d'essai, réinstallation, levée de sanction. Bloque aussi la spine de la coque.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO tranche entre deux modèles : (a) <strong>souscrit ≠ ouvert</strong> — les chemins 2 → 6 ne donnent que le droit d'installer (axe 3), <code>ACTIVE</code> n'est posé que par la mise en service (ou directement pour socle et opérateur), état « acquis, à installer » ; ou (b) <strong>un chemin de droits vaut installation</strong> dans l'espace où il s'exécute, un <code>ACTIVE</code> sans trace d'installation se publie <code>EN_SERVICE</code>, avec reprise de l'existant. Puis : table de FR-4 complétée (8 chemins, espace touché, état publié, refus applicables, sort d'un refus asynchrone) ; identité de service pour les vérifications (C2/C13) ; cas « <code>ACTIVE</code> × <code>NON_INSTALLE</code> » dans la matrice de FR-34.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">U-02 · Impayé : STORY-280 (suspension à J+7, arbitrage PO du 08/11) contre préavis 30 j + lecture seule</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> C-N-01 (critical), G-N-02 (high), A-N-14 (high, point 3), A-N-06 (high), C-N-09 (medium), A-N-16 (low) ; repris : R-03 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> §3 « Suspendre », §3.1 axe 3 et table <code>SUSPENDU</code>, FR-13, FR-32, FR-39, FR-41, §8.4</div>
+            <div class="finding-note">Le code de <code>dev</code> (<code>echeancier.ts</code>, <code>suspension-par-impaye.service.ts</code>) suspend <strong>automatiquement</strong> tous les droits du contrat à J+7 d'un impayé, sur arbitrage du PO du 08/11 ; le PRD (décision du 10/11) fait passer l'impayé par 30 jours de préavis puis une lecture seule sans fin, et réserve <code>SUSPENDU</code> à une sanction humaine — tout en citant STORY-280 comme source de <code>SUSPENDU</code>. Aucune ligne ne confronte les deux décisions ; §8.4 ne touche ni 280, ni 281 (grâce), ni le jalon <code>IMPAYE</code>. Le mot <code>PREAVIS</code> a deux sens (J-7 dans <code>paiement</code>, après échéance dans l'état publié) et le renommage est adressé à la mauvaise story. Si la suspension survit, un module <code>SUSPENDU</code> ferme aussi l'export et les états BCEAO (manquement réglementaire chez le client) ; la suspension d'un acheteur payé reste juridiquement fragile.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO tranche : (a) <strong>le PRD l'emporte</strong> — §8.4 « STORY-280/281 : l'impayé ne suspend plus », sort de la grâce de 281 ; ou (b) <strong>le code l'emporte</strong> — §3.1 écrit <code>PREAVIS</code> de J0 à J+7 puis <code>SUSPENDU</code>, FR-32/FR-41 corrigées. Dans les deux cas : « impayé persistant » défini par une durée, un seul parcours identique sur site et plateforme, ce qu'un module suspendu garde ouvert (export, états réglementaires), suspension d'un acheteur payé interdite ou renvoyée au juriste, renommage <code>PREAVIS</code> adressé à 280/281 ou état publié renommé.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">U-03 · Lire l'état publié : canal, transitions dans le temps, représentation sur l'entitlement</h3>
+              <span class="label label-bloque-coque">bloque-coque</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-10 (critical), C-N-02 (high), A-N-02 (high, point 1), C-N-07 (medium)</div>
+            <div class="finding-note"><strong>Touche :</strong> §3.1 (axe 3, ordre de priorité, table publiée), FR-15, FR-34, C2, C5</div>
+            <div class="finding-note">Les passages <code>PREAVIS</code> → <code>LECTURE_SEULE</code>, fin d'essai et fin de grâce sont déclenchés par le temps et n'émettent aucun événement : chaque garde C2 calcule <code>EXPIRED</code> sur l'horloge de <strong>son</strong> conteneur, que le client peut reculer — menu « lecture seule », garde qui accepte les écritures, FR-15 contourné sans toucher au moteur. <code>PREAVIS</code> (« échéance repoussée de 30 j ») et <code>ESSAI_PROSPECT</code> sont indiscernables d'un <code>ACTIF</code> sur l'entitlement ; l'axe 3 hésite entre automate (« état antérieur ») et drapeaux (ordre de priorité). « Une vue, jamais une seconde source » est faux (axe 2, espace, gel ne sont pas dans <code>entitlement.changed</code>) et le canal de lecture (route ? topic ? droit ?) n'est pas nommé. La coque ne peut pas écrire sa lecture.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Axe 3 <strong>calculé</strong> à partir de faits indépendants, sans « état antérieur » ; état publié <strong>calculé à la lecture</strong>, route par organisation et par espace, droit exigé ; représentation de chaque état dans FR-34 (<code>essai: { finLe }</code>, <code>preavis: { echeanceContrat, finLe }</code>, <code>statutEffectif</code> étendu) ; les gardes lisent l'état poussé ou une heure de référence fournie par l'agent, jamais leur horloge ; amender C2 ; cas « date système reculée de 40 jours » dans la matrice de FR-34.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">U-04 · État de confiance : restauration, horloge scellée en avance, gel à trois définitions</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-09 (critical), A-N-11 (high), A-N-12 (medium), A-N-13 (medium), G-N-19 (low) ; repris : F-16 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-14, FR-15, FR-18, FR-19, FR-20, FR-27, FR-33, NFR-4, NFR-7, §3 « Gel », §3.1</div>
+            <div class="finding-note">Horloge scellée, plus haut numéro de licence, registre des consentements et journal vivent sur le disque de l'instance : restaurer une sauvegarde ou un instantané (ou le retour arrière <code>AVEC_PERTE</code> de Money Vibes elle-même) rembobine l'horloge, rend l'ancienne licence acceptable, annule un retrait de consentement et ampute le journal. À l'inverse, une date mise en avance par erreur est acceptée et ne se corrige jamais. « Toutes les échéances sur l'horloge scellée » est faux pour les 72 h, l'essai prospect, J+7 et les 7 jours ; le gel a trois définitions, et un vieux fichier redéposé remet le silence à zéro.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Un <strong>état de confiance</strong> hors périmètre restauré, qui n'avance que et est rapporté à Money Vibes à chaque contact (refus de licence et d'export s'il a reculé) ; avance bornée sans preuve et <strong>correction signée</strong> par Money Vibes ; table « délai → horloge → événement de départ → observateur » ; une seule définition du contact (authentifié, daté, jamais déjà vu). Tests : restauration ancienne, date avancée de 10 ans.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-05 · Licence courte contre « le silence ne punit pas »</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-14 (high, points 1-2), G-N-12 (medium)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-15, FR-32, FR-41, FR-22</div>
+            <div class="finding-note">FR-41 ne donne à un abonné sur site qu'une licence courte, valable jusqu'à sa prochaine échéance payée. Un abonné qui <strong>paie</strong> mais dont la liaison est coupée ne reçoit pas la suivante : préavis, puis lecture seule. Le principe de FR-15 est donc faux pour tous les abonnés sur site, et seul un e-mail manuel les sauve. FR-41 applique en outre le parcours de fin de contrat (FR-32) à chaque échéance de paiement, mensuelle comprise.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO choisit : assumer (conséquence écrite dans FR-15 : « sans licence par fichier, l'échéance tombe ») ou distinguer <strong>échéance de licence</strong> (technique, renouvelée tant que le compte est à jour) et <strong>échéance du droit d'utiliser</strong> (contractuelle, seule à déclencher FR-32), avec alerte Money Vibes à J-7 d'une licence non renouvelée faute de contact et envoi par e-mail.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-06 · Lecture seule, visibilité et export : C8 et C2 non amendés, trois mécanismes</h3>
+              <span class="label label-bloque-coque">bloque-coque</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-03 (high), C-N-11 (medium)</div>
+            <div class="finding-note"><strong>Touche :</strong> §3.1 table, FR-32, FR-33, FR-35, FR-39, §8.4 ; contrat C2, C8 ; STORY-727 lot 4</div>
+            <div class="finding-note">C8 rend une entrée visible <strong>ssi</strong> <code>ACTIVE</code> ; la table publiée rend <code>LECTURE_SEULE</code> visible. C2 refuse toute route hors <code>ACTIVE</code> ; FR-32 ouvre lecture, recherche, export et états réglementaires. Le code (727 lot 4, 8 services) filtre par <strong>verbe HTTP</strong>, FR-32 par <strong>catégorie</strong>, FR-35 par <strong>droit</strong> : un export ou un état BCEAO est un <code>POST</code>, donc refusé. FR-39, FR-33 et FR-32 exportent depuis des états dont la garde rend 403. La spine de la coque part de C8, que §8.4 n'amende pas.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Un seul mécanisme (ex. verbe + liste blanche d'export et d'états déclarée au manifeste, versée dans C13) ; §8.4 « C8 : visible ssi l'état publié ∈ {<code>EN_SERVICE</code>, <code>ESSAI_PROSPECT</code>, <code>PREAVIS</code>, <code>LECTURE_SEULE</code>} et droit » ; route d'export C13 exemptée de la garde, réservée à <code>instance:donnees:exporter</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-07 · Fin de l'essai prospect : 30 jours d'export sans état publié</h3>
+              <span class="label label-bloque-coque">bloque-coque</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-06 (high), A-N-02 (high, points 2-3), C-N-02 (high, point 2) ; repris : F-21 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-33, FR-36, §3.1 axe 3 et table publiée</div>
+            <div class="finding-note">FR-33 : « l'accès se ferme », puis « 30 jours pour exporter ou signer ». « Fermé » n'est ni un état de l'axe 3 ni l'un des huit états publiés ; sur le code, la fin d'essai se lit <code>EXPIRED</code>, donc <code>LECTURE_SEULE</code> (visible, lecture, export), l'inverse de « l'accès se ferme ». La coque ne sait pas quoi afficher pendant 30 jours, et ce que l'espace réel publie pour un prospect n'est pas dit.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> 9ᵉ état <code>ESSAI_TERMINE{effacementLe}</code> (export seul pour l'administrateur du prospect, bandeau « effacement le … »), calculé comme <code>EXPIRED</code>, sans tâche planifiée ; ou dire que c'est <code>LECTURE_SEULE</code>, ou que l'export passe par un fichier envoyé par Money Vibes.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-08 · Droits <code>instance:*</code> : code de module, intersection, droit de consentir</h3>
+              <span class="label label-bloque-coque">bloque-coque</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> C-N-06 (high), A-N-07 (high), G-N-09 (medium), G-N-26 (low) ; repris : G-20 (partiel), R-26 (partiel), F-37 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-27, FR-35, FR-36, §7 C7/C8 ; <code>auth-service</code> (STORY-167 AC 2)</div>
+            <div class="finding-note"><code>auth-service</code> refuse tout droit dont le premier segment n'est pas un module <code>ACTIVE</code> de l'organisation : aucun module <code>instance</code> n'existe, donc ces droits n'entrent dans aucun rôle ; le format refuse aussi les codes à tiret. L'intersection « attribués ∩ modules ouverts » n'existe nulle part (et <code>auth</code> voit un <code>EXPIRED</code> comme <code>ACTIVE</code>) ; si elle s'applique aux droits du moteur, la lecture seule retire au DSI le droit de déposer la licence qui la lèverait. <code>instance:consentement:donner</code> est attribuable par l'administrateur, contre FR-27 (DG ou désigné par écrit). Les publics « administrateurs » et « DG » des bandeaux ne sont pas des droits.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Module <code>instance</code> au socle de toute organisation, sans terme et non suspendable (ou exception nommée dans STORY-167) ; droits <code>instance:*</code> hors intersection, toujours effectifs ; intersection calculée dans la coque et dans C2 à partir de l'état publié ; consentement attribuable par le DG seul, référence de l'écrit au registre ; droit derrière chaque bandeau ; droits sans objet masqués selon l'hébergement ; signaler à C7 la limite du format.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-09 · Une organisation dans deux espaces : naissance, rejeu, rafraîchissement</h3>
+              <span class="label label-bloque-coque">bloque-coque</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> C-N-05 (high), C-N-14 (medium) ; repris : R-17 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-6, FR-8, FR-10, FR-33, §3 « Dossier d'installation », §3.1 axe 1, §7 C3</div>
+            <div class="finding-note">Une organisation naît dans <strong>un</strong> <code>auth-service</code>. Créé dans le réel, le prospect y reçoit le socle <code>distributeur</code> ; créé dans l'essai, sa signature crée l'organisation dans le réel où le chemin 4 ouvre 7 codes avant rejeu et feu vert. Rejeu et rafraîchissement supposent la même identité d'organisation dans les deux déploiements, non dite. Le rejeu écrit chez <code>auth</code> (rôles), <code>reseau</code> (zones) et la Reprise (correspondances) sans contrat nommé, alors que C3 « n'écrit dans aucun autre module » ; les comptes ne sont pas au dossier.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Une FR « Une organisation dans deux espaces » (où elle naît, même identifiant, créée par le moteur dans l'autre espace, chemin 4 suspendu dans le réel avant la mise en service d'une organisation issue d'un essai) ; pour chaque élément du dossier, propriétaire et point d'import ; « comptes et invitations » au dossier ou recréés ; C13 « importer sa part d'un dossier ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-10 · Ce que vend le contrat : socle de vertical = package, « pack distributeur », modules non installables</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> C-N-04 (high), A-N-34 (medium), G-N-20 (low) ; repris : G-19 (partiel), R-14 (partiel), R-12 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> §1, §3 « Socle de vertical », FR-7, FR-12, FR-37, SM-1, SM-2, NFR-5, QA-1</div>
+            <div class="finding-note">Dans le code, le <code>VerticalPack</code> est à la fois le socle offert à la création et l'unité de vente du contrat (le <code>cabinet</code> l'achète) ; le socle <code>distributeur</code> ouvre <code>balance, bilan, pdv, stock, catalogue, commande, facturation</code> sans contrat ni terme. FR-37 n'a pas la colonne « package du contrat → codes », <code>MODULE_NON_SOUSCRIT</code> n'a pas de base, FR-12/FR-8/FR-32 ne s'appliquent pas à ces 7 codes, SM-1 (« organisation vierge », « pack distributeur ») est indémontrable. Un contrat peut aussi vendre un module absent du catalogue : client « En service partiel » pour toujours, NFR-5 inatteignable, 18 manifestes C13 à produire hors de tout jalon.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO tranche : le socle <code>distributeur</code> garde-t-il <code>pdv</code>, <code>stock</code>, <code>commande</code>, <code>facturation</code> « inclus » alors qu'ils sont vendus dans les packs ? Peut-on vendre un module non installable ? Puis : « socle de vertical » redéfini depuis le code, colonne « package → codes » dans FR-37, codes inclus hors FR-12/FR-32 nommés, SM-1 avec la liste exacte des codes et l'organisation de départ, NFR-5 sur les codes installables, « 18 manifestes C13 » au §8.4 avec propriétaire et date.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-11 · Obligations nouvelles des modules hors C13, gabarit du contrat à 11 lignes</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-05 (high), C-N-17 (medium), C-N-18 (medium) ; repris : R-06 (partiel), R-07 (partiel), R-08 (non résolu)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-6, FR-10, FR-17, FR-32, FR-35, FR-38, §0, §7 C1/C12/C13 ; contrat §6</div>
+            <div class="finding-note">La réécriture impose à chaque module, sans clause : un interrupteur de changement par organisation avec date limite, le classement de ses routes pour la lecture seule, une clef d'idempotence par vérification, une route d'export hors garde, l'<strong>import</strong> de la part d'une organisation (rafraîchissement par organisation) — C13 ne prévoit qu'exporter et effacer. Le contrat §6 exige onze lignes (vérifiées par <code>bmad-check-implementation-readiness</code>) ; les PRD Reprise et Connecteurs, premiers débiteurs de C13, ont encore C1 → C11. Toujours rien sur la remise des indicateurs IA de niveau 0 (R-08) ni sur la garde de comparaison du manifeste (R-07). C'est le mécanisme de T-10 : les PRD des lots 2 à 4 l'ignoreront.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Étendre C13 (« exporter, importer et effacer par organisation », classement lecture seule, idempotence des vérifications, export exempté) et C12 (interrupteur déclaré au manifeste, support nommé) ; §8.4 « contrat §6 : 13 lignes » ; C12/C13 dans les deux PRD frères ; C1 décrit le manifeste du moteur lui-même ; une ligne pour les indicateurs IA de niveau 0.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-12 · Interrupteurs de changement : sur site, empilement, forme des données</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-18 (high), A-N-19 (high), C-N-18 (medium, support du mécanisme)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-17 (deux variantes), FR-18, FR-21, C12</div>
+            <div class="finding-note">Une seule ligne de version : les interrupteurs arrivent aussi sur site, où personne ne dit qui les allume ni quand — éteints pour toujours (version cachée par instance), allumés seuls à la date limite (changement dans le réel sans l'accord du DSI) ou allumés à la promotion (non écrit). Sur la plateforme, des fenêtres plus rapprochées que 30 jours empilent les interrupteurs (2ⁿ combinaisons non testées) ; un interrupteur qui change la forme des données, allumé au 10ᵉ jour, sort de la fenêtre C12 ; personne ne classe ce qui est « visible des utilisateurs ».</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO choisit la règle sur site (forcés à leur position finale à la promotion, ou date limite = date choisie par le DSI). Puis : au plus les interrupteurs d'une version ouverts à la fois, date limite antérieure à la fenêtre suivante ; interdiction de changer la forme des données ; manifeste <code>interrupteurs: [...]</code> et revue obligatoire ; test de conformité.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-13 · Retour arrière : <code>AVEC_PERTE</code> sur la plateforme et en automatique, promotions rapprochées, durée</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-20 (high), A-N-21 (high), A-N-23 (medium), A-N-24 (medium), G-N-21 (low) ; repris : F-02 (partiel), F-20 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> §1, FR-17, FR-18, FR-19, FR-40, NFR-7, NFR-9, C12</div>
+            <div class="finding-note">Sur la plateforme, une version <code>AVEC_PERTE</code> est promue sans bandeau et son retour arrière global efface les saisies de tous les distributeurs ; en automatique (santé en échec, promotion interrompue), elle restaure sans que personne l'ait décidé. Deux promotions dans la même fenêtre de 7 jours font perdre des données ; revenir sous un correctif de sécurité rouvre la faille ou est refusé, sans règle. C12 ne couvre que les champs (pas les nouvelles valeurs d'énumération, événements, <code>@2</code>, re-promotion). Un « clic » <code>AVEC_PERTE</code> peut durer 4 h ; un retour arrière interrompu n'a pas d'état. §1 promet encore « sans rien perdre ».</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO choisit : <code>AVEC_PERTE</code> interdite sur la plateforme, ou fenêtre dédiée avec accord écrit et préavis. Puis : l'automatisme d'une version <code>AVEC_PERTE</code> s'arrête et alerte ; une version hérite du pire <code>retourArriere</code> ; contraction seulement quand la fenêtre de la version qui a ajouté est close partout, retour arrière d'un pas ; règle nommée pour les correctifs ; C12 étendue et test « re-promouvoir » ; durées affichées avant le clic ; retour arrière = plan enregistré (FR-40) ; réserve au §1.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-14 · Correctifs critiques pour les versions figées, maintenance datée module par module</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-22 (high), A-N-05 (high), G-N-13 (medium) ; repris : F-18 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> §1, §3.1 axe 1, FR-14, FR-19, FR-21, FR-32, C6, SM-6</div>
+            <div class="finding-note">Livrer les correctifs critiques à toute instance figée revient à maintenir à vie un portage par version figée distincte (N-5, N-3…) : la négation de la ligne unique (C6) et de « sans dix produits », coût absent de l'ordre de sacrifice ; « critique » n'est pas défini. <code>VERSION_FIGEE</code> est un état de l'instance, mais la licence date la maintenance module par module : entre deux dates, l'instance est figée ou non ? On ne dit toujours pas si une instance figée envoie son signal ni si <code>GEL</code> et <code>VERSION_FIGEE</code> cumulés alertent le DG à vie.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO borne l'engagement (fenêtre de support, ex. 24 mois, au-delà « hors correctifs » et DG prévenu ; ou correctifs conditionnés au rattrapage N-1) et choisit maintenance par instance ou par module (gel à la première échéance, échéances alignées par la vente) ; définir « critique » ; inscrire le coût au §8.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-15 · Connecteurs en essai : liste blanche, identifiants en lecture seule, aller-retour, messages d'identité</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-28 (high), G-N-10 (medium), G-N-11 (medium), A-N-29 (medium), A-N-30 (medium), C-N-12 (medium)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-6, FR-9, FR-10, FR-33, UJ-3, UJ-5 ; PRD Connecteurs</div>
+            <div class="finding-note">La cascade de FR-9 fonctionne par liste noire (seules les destinations déclarées du réel sont refusées) et « bac à sable vérifié » n'a pas de critère. La lecture du vrai logiciel exige des identifiants du vrai logiciel, que FR-9 interdit. L'interception casse la synchronisation aller-retour (pas d'accusé) et vaut pourtant 🟢. Le rafraîchissement envoie des données personnelles réelles dans le bac à sable du client. L'interception totale empêche l'invitation et le code de connexion du prospect autonome. Le PRD Connecteurs ne reprend rien de FR-9.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Garde en liste blanche ; critère de « vérifié » (confirmation écrite + base distincte) ; identifiants <strong>en lecture seule</strong> propres à l'essai, écriture testée et refusée ; ligne 🟠 « aller-retour non vérifié » et vérification dans le réel à la mise en service ; accord ou masquage pour le bac à sable ; exception nommée pour les messages d'identité de l'essai ; FR-9 « doit reprendre » et ajouts au PRD Connecteurs (cascade, comportement en <code>LECTURE_SEULE</code>) validés ensemble le 13/11.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-16 · Apprentissage sur la plateforme : clause d'adhésion, AD-P16, SM-4 aveugle</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-31 (high), G-N-17 (medium) ; repris : F-25 (partiel), R-18 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> §4.C, FR-27, SM-4, §8.2, §8.4 ; AD-P16, contrat C11 §5</div>
+            <div class="finding-note">La clause unique du contrat d'abonnement n'est ni libre ni spécifique, ne couvre pas les clients du distributeur, et « Money Vibes reste couverte par la loi » est une conclusion juridique non validée présentée comme acquise. Sur la plateforme, une lecture « d'exploitation » par AD-P16 lit les mêmes données sans passer par la garde du registre : SM-4 vaut zéro par construction. §8.4 n'amende ni AD-P16 ni C11 §5.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO fait de la validation juridique de la clause un point ouvert daté, avec propriétaire ; clause par finalités, une ligne de registre par finalité ; retirer « reste couverte par la loi » ; compte de service IA dédié dont toute lecture passe par la garde, pas d'export en masse pour l'exploitation ; SM-4 alimenté aussi par le journal d'AD-P16 ; §8.4 amende AD-P16 et C11 §5.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-17 · Sauvegardes : clé « détenue par le client » contre automatismes, RPO de la plateforme</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-32 (high), G-N-14 (medium)</div>
+            <div class="finding-note"><strong>Touche :</strong> NFR-7, FR-17, FR-18, FR-25 ; journal l. 85</div>
+            <div class="finding-note">Retour arrière automatique, restauration <code>AVEC_PERTE</code>, test mensuel et bilan d'instance doivent déchiffrer sans personne : la clé est sur l'instance (et « détenue par le client » ne veut rien dire) ou les automatismes sont impossibles ; clé perdue, RTO jamais tenu. Le PO a décidé RPO 1 h sans restriction ; NFR-7 donne à la plateforme « une sauvegarde par jour », soit 24 h de perte possible pour le distributeur de février, marqué seulement <code>[ASSUMPTION]</code>. Le lieu de la copie hors machine n'est pas dit.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO valide un RPO/RTO explicite pour la plateforme (ou l'écart). Puis : clé d'exploitation scellée sur l'instance + clé de secours détenue par le client, séquestre ou procédure de perte ; lieu de la copie hors machine (locaux du client, autre support).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-18 · Feu vert de la Reprise trop large ; jonction avec le PRD Reprise</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-04 (high), C-N-13 (medium) ; repris : R-16 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-7, FR-8, FR-11, §3 « Mettre en service », « Réception définitive » ; PRD Reprise (FR-3, FR-15, FR-19, C8, QR-2)</div>
+            <div class="finding-note">FR-8 refuse toute mise en service sans feu vert de la Reprise, alors que FR-7 rend la Reprise facultative et FR-11 permet de mettre en service le jour même un module sans reprise : un client sans Reprise ne passe jamais En service. Côté Reprise : la réception définitive est par reprise, celle du moteur par sous-ensemble (quels lots libérés ?) ; Reprise C8 met ses écrans « plus tard » dans <code>prospera-app</code> ; l'effacement du prospect n'y figure pas.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> « refusée tant que la Reprise, quand l'offre l'inclut et que le sous-ensemble a un lot de reprise, n'a pas donné son feu vert » ; §3 aligné ; ligne « PRD Reprise » du §8.4 complétée (C8 en <code>prospera-app</code> dès février, réception par sous-ensemble = libération de ses lots, effacement du prospect via C13).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">U-19 · Licence et clés : clé compromise, compteur, vérification quotidienne qui « n'envoie aucune donnée »</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-15 (high), G-N-18 (medium), C-N-16 (medium), A-N-17 (low) ; repris : F-41 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-14, FR-16, FR-41, NFR-8</div>
+            <div class="finding-note">Une licence numéro 2⁶³ signée par une clé compromise verrouille l'instance contre toutes les licences légitimes futures ; le fichier d'urgence ne dit pas qu'il réinitialise le compteur ; une instance coupée ne reçoit jamais la révocation. La vérification quotidienne « n'envoie aucune donnée » mais doit s'identifier pour recevoir la licence de FR-41 « en 24 heures » ; la « réponse au prochain contact » n'existe pas quand le contact est un fichier.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Compteur par clé de signature ou saut borné ; fichier d'urgence signé par la racine qui réinitialise le plus haut numéro et révoque ce que la clé a signé ; clés à validité courte pour les licences courtes ; FR-16 « n'envoie que l'identifiant de l'instance, sa version et le numéro de sa licence » (niveau 0), ou FR-41 ramenée au signal hebdomadaire.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">U-20 · Ordre de sacrifice partiel, §8.2 « Aucun » point ouvert</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-35 (medium), G-N-28 (low) ; repris : G-02 (partiel), M-10 (partiel), F-36 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> §0, §8.2, §8.3, §8.4</div>
+            <div class="finding-note">L'ordre de sacrifice est lui-même un <code>[ASSUMPTION : à valider par le PO]</code>, absent de l'index §8.3 ; environ 25 exigences ne sont ni sacrifiables ni protégées ; sacrifier le poste d'accès (FR-29) retire l'enregistrement de session tout en gardant le niveau 2 ; FR-15 et NFR-7 sont « jamais sacrifiés » sans mécanisme chiffré ; la charge de Dev B n'est chiffrée nulle part. §8.2 annonce « Aucun » point ouvert alors que la clause unique, D3, C12/C13, l'horloge et la suspension d'un acheteur restent ouverts ; §8.3 n'a ni propriétaire ni date ; toujours aucun <code>[NOTE FOR PM]</code>.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO valide l'ordre de sacrifice et classe chaque FR/NFR (jamais / sacrifiable avec ordre / dégradable avec version minimale) ; remplacer le 4ᵉ sacrifice par « niveau 2 fermé jusqu'à FR-29 » ; §8.2 = liste réelle des points ouverts avec propriétaire et date, et <code>[NOTE FOR PM]</code> ; trier §8.3 en « à confirmer vendredi » / « laissé à l'architecture ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">U-21 · §8.4 et amendements du contrat incomplets</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-23 (medium), C-N-15 (medium) ; repris : R-02 (partiel), R-05 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> §8.4, §3 (Installer, Pack, Suspendre), frontmatter ; contrat §0/§1, C1, C6, C8, C11 §5</div>
+            <div class="finding-note">§8.4 n'adresse rien à STORY-280, à <code>paiement-service</code> (topic renommé, dépendances résolues à la vente), à AD-P16, à la garde C6, à C8. Il ne liste pas non plus les définitions du contrat que le PRD change : Installer (« poser <code>ACTIVE</code> » contre « dans l'espace d'essai »), Pack (<code>VerticalPack</code>), Suspendre (« impayé, STORY-280 »), forme de <code>depends</code>. Le frontmatter (<code>service: platform-catalog-service</code>) et le titre parlent encore pour tout le moteur.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Ajouter ces lignes au §8.4 (contrat §0/§1, C1, C8, C11 §5, garde C6, STORY-280/281, <code>paiement-service</code>, AD-P16) ; corriger frontmatter et titre.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">U-22 · Indicateurs : SM-6 et SM-7 sans instrument</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-27 (medium) ; repris : G-04 (partiel), F-32 (partiel), F-33 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> §6 (SM-1, SM-6, SM-7), NFR-5</div>
+            <div class="finding-note">SM-6 se mesure par une « garde C6 en CI » qui n'existe pas et qu'aucune FR ne crée : la cible « 0 » est atteinte par défaut. SM-7 vise « en baisse » sans source ni seuil. Le « journal des promotions » ne voit pas un changement passé hors promotion ; les bornes du chronomètre de NFR-5 ne sont pas fixées.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Garde C6 au §8.4 ; SM-7 mesuré par le plan d'installation (FR-40) avec seuil (2ᵉ ≤ 50 % du 1ᵉʳ) ; bornes de NFR-5 ; test d'intrusion de la sonde.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">U-23 · Plateforme : espace d'essai partagé, majeure, rafraîchissement, vagues, version épinglée</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-16 (medium), A-N-26 (medium), A-N-25 (medium), C-N-21 (low)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-8, FR-10, FR-17, FR-20, FR-21, FR-33, §3 « Version de plateforme »</div>
+            <div class="finding-note">Sur la plateforme, l'essai est partagé : une répétition en cours rejoue un dossier N+1 vers un réel en N, et le rafraîchissement « obligatoire avant une majeure » mais « refusé pendant une répétition » laisse une seule organisation bloquer la majeure de toutes ; les essais prospects ne sont pas migrés. Un pilote qui attend ou un retour arrière de confort bloque toutes les vagues ; la place de la plateforme dans les vagues n'est pas dite. <code>versionCode</code> est épinglé par organisation, la promotion « pour toutes » ne dit pas le réécrire.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Rafraîchissement obligatoire avant que l'organisation n'essaie la majeure ; répétitions et essais prospects migrés ; dossier rejoué vers la même version seulement ; attente du pilote bornée, incident qualifié ; plateforme placée dans les vagues ; promotion = mise à jour journalisée de <code>versionCode</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">U-24 · Dépendances : majeure qui ajoute une dépendance non souscrite, propagation d'un pack, cycles</h3>
+              <span class="label label-decision-PO">decision-PO</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-15 (medium), A-N-27 (medium), C-N-19 (low) ; repris : F-11 (partiel), F-12 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-2, FR-4 (chemin 3), FR-12, FR-21, FR-38</div>
+            <div class="finding-note">FR-38 calcule l'écart de dépendances sans dire la suite : refuser la majeure fait sortir le client de la fenêtre N-1 sans faute de sa part, l'installer d'office contredit « le contrat fait foi ». La propagation d'un pack modifié aux contrats existants n'est pas définie ; l'annulation d'une dépendance partagée par deux demandeurs non plus. Un cycle ne se détecte pas dans la CI d'un seul dépôt.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Le PO choisit : dépendance dure fournie sans facturation (amendement automatique) ou majeure non publiable ; propagation d'un pack aux nouveaux contrats seulement, les autres par avenant. Puis : code nommé ; règle de comptage pour une dépendance partagée ; cycle refusé par le catalogue à la publication.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">U-25 · Effacement du prospect et désinstallation</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-33 (medium), G-N-25 (low), G-N-22 (low), A-N-36 (low) ; repris : F-22 (partiel), F-21 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-33, FR-39, NFR-4, NFR-7, §3 « Rappel »</div>
+            <div class="finding-note">Le certificat d'effacement est remis alors que les sauvegardes gardent les données environ 90 jours ; effacer les journaux nominatifs contredit NFR-4 (ajout seul). La chronologie n'a pas de rappel en cas de prolongation, ni de règle de prolongation après fermeture, ni de destinataire ; « J+23 rappel » emploie un terme défini pour l'abonné. FR-39 garde les copies voisines mais affiche l'emplacement vide, sans durée de conservation.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Certificat daté de l'expiration de la dernière sauvegarde (ou chiffrement par organisation et destruction de clé) ; journaux pseudonymisés ; rappel à J-7 de chaque fin, destinataire nommé, prolongation avant fermeture seulement ; autre mot que « rappel » ; « copies stockées et masquées » ; durée de conservation renvoyée à la politique d'effacement.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">U-26 · Santé d'un module en service : un prérequis qui disparaît</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> A-N-04 (medium) ; repris : F-01 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> §3.1 axe 2, FR-16, FR-34, FR-40</div>
+            <div class="finding-note">Clé PI-SPI révoquée, numéro WhatsApp banni : le module reste <code>EN_SERVICE</code> 🟢. La santé par module de FR-16 n'apparaît ni dans l'état publié, ni dans le bilan, ni dans les bandeaux. Restent aussi sans réponse le module 🟢 en essai et 🔴 au rejeu, et l'état « interrompue » de FR-40.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Attribut <code>sante: OK | DEGRADE{raison, action}</code> orthogonal à l'état publié dans FR-34 (bandeau administrateur, ligne 🔴 dans la supervision), sans fermeture automatique ; état du rejeu en échec et de la promotion interrompue.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">U-27 · Parcours, vocabulaire et résidus de texte</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-07 (medium), G-N-08 (medium), C-N-10 (medium), G-N-24 (low), G-N-30 (low), A-N-37 (low) ; repris : M-6 (partiel), R-19 (partiel), R-29 (partiel), F-35 (partiel), F-43 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> UJ-4, §1, §3, 4.A, 4.B, FR-5, FR-7, FR-11, FR-14, FR-15, FR-22, §4.C</div>
+            <div class="finding-note">UJ-4 installe deux modules hors contrat dans le parcours censé illustrer « le contrat fait foi ». FR-22 met encore l'écran « fichier » dans la console. « Délai de grâce » est l'homonyme de la grâce de <code>paiement</code>. Résidus : §1 « sans rien perdre », 4.A « tout vert », 4.B « mêmes étapes », FR-5 « sans effet de bord », FR-7 « PDF reçu », FR-11 « promu », <code>LICENCE_PERIMEE</code> ; renvoi cassé vers FR-30 ; identifiants de revue (G-09, T-01…) dans le texte produit ; « bascule » toujours hors glossaire ; §3 « cette seule organisation » sur site.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Faire signer à Moussa Terrain &amp; Ventes + Relances + Encaissements ; FR-22 « <code>prospera-app</code>, Administration » ; « délai de silence » ; corriger chaque résidu ; « décision du PO, 2026-11-10 » à la place des identifiants de revue ; définir « bascule » ; passe de recherche des termes du §3.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">U-28 · Canal de données : schéma du signal, ré-identification, registre, purge</h3>
+              <span class="label label-reecriture">reecriture</span>
+            </header>
+            <div class="finding-note"><strong>Origine :</strong> G-N-29 (low) ; non résolus du passage 1 : F-27 (medium), F-28 (medium), F-29 (medium) ; repris : F-26 (partiel)</div>
+            <div class="finding-note"><strong>Touche :</strong> FR-26, FR-27, FR-28, FR-30</div>
+            <div class="finding-note">FR-26 « un test le vérifie sur chaque envoi » reste irréalisable sans schéma fermé du signal ; FR-28 ne dit rien de la ré-identification par recoupement (identifiants de dossier, seuil d'effectif). Où vit le registre, comment est prouvée la désignation écrite, comment est signé le consentement : rien (aggravé par U-08). Ni purge des contributions non consommées, ni durée de conservation chez Money Vibes. La grille juge ce reste non bloquant pour février.</div>
+            <div class="finding-fix"><strong>Correction suggérée :</strong> Schéma fermé du signal et test qui échoue si un champ non déclaré sort ; règle de ré-identification (sel, jointure, k-anonymat) ; lieu et preuve du registre ; purge et durée de conservation des contributions.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Decision-readiness</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Les décisions sont désormais écrites comme des décisions, avec leur raison et parfois leur coût assumé (FR-41 : « C'est assumé : le litige se règle alors par la voie du contrat » ; FR-15 : « le silence ne punit pas » ; FR-17 : deux variantes nommées sur site / plateforme). §0 acte « toutes les FR pour février » et D3 révisée, et §8.4 dit quels documents doivent bouger. Ce qui manque : deux décisions du PO qui se contredisent ne sont pas mises face à face (G-N-02), deux arbitrages ont un coût que le texte ne nomme pas (G-N-12, G-N-13), et §8.2 déclare « Aucun » point ouvert alors que l'ordre de sacrifice lui-même est un <code>[ASSUMPTION : à valider par le PO]</code> et que la charge de Dev B n'est chiffrée nulle part.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-N-02 · Impayé : STORY-280 contre FR-32/FR-41, deux décisions du PO non confrontées</h3>
+              <span class="finding-location">§3 « Suspendre », §3.1 axe 3, FR-32, FR-41, §8.4</span>
+            </header>
+            <div class="finding-note">STORY-280 (<code>Status: done</code>, « arbitrage PO 2026-11-08 ») fait passer <strong>automatiquement</strong> <code>SUSPENDED</code> tous les modules du contrat sur <code>paiement.abonnement.impayee</code> (J+7 après l'échéance). Le PRD dit au contraire « Un impayé suit le chemin de FR-32 (préavis, puis lecture seule). La suspension complète (<code>SUSPENDU</code>) reste une sanction décidée par Money Vibes » (FR-41), tout en citant STORY-280 comme source de <code>SUSPENDU</code>. Le même impayé produit donc <code>SUSPENDED</code> à J+7 sur <code>dev</code> et <code>PREAVIS</code> jusqu'à J+30 dans le PRD. §8.4 amende 727 lot 4 mais pas 280. Le titre de FR-41 annonce en outre un état d'<strong>instance</strong> que le §3.1 n'a pas.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une ligne qui dit laquelle des deux décisions prime ; si FR-32 prime, ajouter STORY-280 au §8.4 ; définir ce qu'est un « impayé décidé » (qui, quand) ; renommer FR-41 « Faire respecter l'échéance hors ligne ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-12 · « Le silence ne punit pas » est faux pour un abonné payé mais coupé</h3>
+              <span class="finding-location">FR-15, FR-41</span>
+            </header>
+            <div class="finding-note">FR-41 donne à un abonné « une licence courte, valable jusqu'à sa prochaine échéance payée ». Un abonné qui <strong>a payé</strong> mais dont la liaison est coupée ne reçoit pas la licence suivante : elle expire sur l'horloge scellée, puis <code>PREAVIS</code>, puis <code>LECTURE_SEULE</code>. C'est peut-être voulu (le remède est la licence par e-mail, FR-22), mais FR-15 promet le contraire en tête de FR.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une conséquence dans FR-15 : « un abonné payé mais coupé reçoit sa licence par fichier ; sans elle, l'échéance tombe ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-13 · Correctifs critiques pour toute version figée : le coût contre la thèse n'est pas nommé</h3>
+              <span class="finding-location">FR-19, FR-32, FR-21, §1, SM-6</span>
+            </header>
+            <div class="finding-note">Décision du PO légitime (journal l. 88). Mais une instance figée peut avoir n majeures de retard : lui livrer un correctif « sans migration » suppose de maintenir un correctif par version figée encore vivante, contre « une seule ligne de version » (§3, FR-21) et « sans dix produits à maintenir » (§1).</div>
+            <div class="finding-fix"><strong>Correction :</strong> Nommer le compromis et le borner (correctifs sur les N dernières majeures seulement, ou « au mieux » au-delà), ou un <code>[NOTE FOR PM]</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-N-28 · §8.2 « Aucun » point ouvert (reste de G-02)</h3>
+              <span class="finding-location">§8.2, §8.3, §8.4</span>
+            </header>
+            <div class="finding-note">Défendable après la séance du 10/11, mais §8.3 liste une vingtaine d'inférences dont plusieurs portent la spine (deux adresses par instance, sens de « pack », liste <code>instance:*</code>, module suspendu caché), sans propriétaire ni date, et l'ordre de sacrifice (§8.4) n'y figure pas.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Trier §8.3 en « à confirmer vendredi » / « laissé à l'architecture ».</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Substance over theater</h2>
+          <span class="verdict-pill verdict-strong">strong</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Toujours rien de décoratif. Les deux nouveaux parcours (UJ-4 Rachid, UJ-5 Koffi) racontent enfin le moteur et renvoient chacun à des FR précises ; les NFR ajoutées sont chiffrées (NFR-7 : 3-2-1, RPO 1 h, RTO 4 h ; NFR-8 : racine hors ligne, rotation, fichier d'urgence ; NFR-9 : 15 min). Un seul accroc de substance, dans UJ-4 (G-N-07, rangé sous Shape fit) : le parcours contredit la FR qu'il illustre.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding"><div class="finding-note">Aucun constat.</div></article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Strategic coherence</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>La thèse (<em>un seul produit, installé par modules, aux deux hébergements, sous le contrôle du client</em>) tient et la partie C est désormais explicitement réduite à un circuit pour février (§0, FR-31). SM-6 et SM-7 mesurent enfin le pari central. Deux réserves : la sonde de SM-6 n'existe pas, et l'arbitrage G-N-13 tire contre la thèse sans le dire.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-27 · SM-6 et SM-7 sans instrument (reste de G-04)</h3>
+              <span class="finding-location">§6</span>
+            </header>
+            <div class="finding-note">SM-6 se mesure par la « garde C6 en CI », mais le contrat constate « ⚠️ règle écrite (pdv AD-8), <strong>aucune garde transverse</strong> », et aucune FR ni §8.4 ne demande de la créer : la cible « 0 » est donc atteinte par défaut. SM-7 a pour cible « en baisse », sans source ni seuil.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Ajouter la garde C6 au §8.4 ; SM-7 « durée mesurée par le plan d'installation (FR-40), 2ᵉ ≤ 50 % du 1ᵉʳ » ou équivalent.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-17 · SM-4 sur la plateforme ne voit que les lectures honnêtes</h3>
+              <span class="finding-location">SM-4, FR-27, §4.C</span>
+            </header>
+            <div class="finding-note">SM-4 compte les lectures sans consentement « vérifiées … par le journal de la garde ». Une lecture qui passe par la route AD-P16 (que §4.C maintient « pour l'exploitation ») n'entre jamais dans ce journal : SM-4 vaut 0 par construction. §8.4 ne demande pas non plus de restreindre AD-P16 à l'exploitation.</div>
+            <div class="finding-fix"><strong>Correction :</strong> §8.4 « AD-P16 : lecture d'exploitation journalisée, finalité déclarée » et SM-4 alimenté aussi par ce journal.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Done-ness clarity</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Saut net depuis « thin » : FR-18 (C12 + <code>AVEC_PERTE</code>), FR-9 (cascade des connecteurs), FR-28 (pseudonymisation par liste de champs), FR-29 (poste d'accès), FR-33 (chronologie J0 → certificat), FR-40 (test de coupure) et FR-15 (« reculer la date du serveur de 40 jours ; l'échéance tombe quand même ») sont testables tels qu'écrits. Restent des conséquences qui se contredisent entre elles ou qui s'arrêtent avant la conséquence.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-N-04 · Le feu vert de la Reprise bloque toute mise en service, même sans Reprise</h3>
+              <span class="finding-location">FR-8, FR-7, FR-11, §3 « Mettre en service »</span>
+            </header>
+            <div class="finding-note">FR-8 : « La mise en service est <strong>refusée</strong> tant que la Reprise de données n'a pas donné son feu vert … <code>MISE_EN_SERVICE_SANS_FEU_VERT</code> (409) ». Or FR-7 : sans Reprise dans l'offre, seulement « un avertissement à lire, non bloquant » ; FR-11 : « Un module sans reprise de données peut être promu le jour même ». Tel qu'écrit, un client sans Reprise ne passe jamais En service, et un module ajouté à un client déjà En service attend un feu vert qui ne viendra pas.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « refusée tant que la Reprise, <strong>quand l'offre l'inclut et que le sous-ensemble mis en service a un lot de reprise</strong>, n'a pas donné son feu vert » ; aligner la définition du §3.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-N-06 · Le prospect après la fin de l'essai : « l'accès se ferme » mais il doit exporter</h3>
+              <span class="finding-location">FR-33, §3.1 axe 3, FR-36</span>
+            </header>
+            <div class="finding-note">FR-33 : « À son terme, l'accès se ferme » puis « → <strong>30 jours pour exporter</strong> ou signer ». Comment exporte-t-il sans accès ? L'axe 3 écrit « fin de l'essai → fermé », un état qui n'existe ni dans l'axe 3 ni parmi les huit états publiés : la coque ne sait pas quoi afficher pendant ces 30 jours.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Un état <code>ESSAI_TERMINE{effaceLe}</code> (export seul, bandeau « effacement le … ») dans l'axe 3 et dans la table publiée, ou dire que l'export passe par Money Vibes.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-10 · FR-9 : lecture du vrai logiciel permise, identifiants du réel interdits</h3>
+              <span class="finding-location">FR-9</span>
+            </header>
+            <div class="finding-note">« La <strong>lecture</strong> depuis le vrai logiciel du client reste permise pendant l'essai » mais « L'espace d'essai n'a <strong>jamais les identifiants</strong> du réel ». Lire le vrai Odoo exige une destination et des identifiants du vrai Odoo.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « des identifiants <strong>en lecture seule</strong>, propres à l'essai, vers le vrai logiciel ; toute écriture par eux est refusée <code>ECRITURE_REELLE_DEPUIS_ESSAI</code> ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-11 · Interception totale contre usage autonome de l'essai</h3>
+              <span class="finding-location">FR-9, FR-6, FR-33, UJ-5 étape 2</span>
+            </header>
+            <div class="finding-note">FR-9 intercepte « SMS, WhatsApp, e-mail » sauf liste blanche de test. Le prospect autonome (FR-33) et les utilisateurs clés (UJ-5) doivent pourtant recevoir <strong>invitation, code de connexion, réinitialisation de mot de passe</strong> de l'espace d'essai ; FR-6 compte l'invitation interceptée comme réussie alors que personne ne la reçoit.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une exception nommée : les messages d'identité aux utilisateurs de l'espace d'essai lui-même partent réellement ; tout le reste est intercepté.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-15 · FR-38 calcule l'écart de dépendances, sans conséquence</h3>
+              <span class="finding-location">FR-38, FR-12, FR-17</span>
+            </header>
+            <div class="finding-note">« l'écart avec le contrat de chaque client est calculé avant la mise à jour ». Et ensuite ? Mise à jour refusée pour ce client, dépendance ajoutée gratuitement au contrat, ou blocage jusqu'à avenant ? Sans réponse, FR-12 (<code>MODULE_NON_SOUSCRIT</code>) et FR-21 (N-1 obligatoire) se contredisent pour ce client.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une conséquence et un code nommé.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-18 · FR-16 « n'envoie aucune donnée » contre FR-41 « en 24 heures »</h3>
+              <span class="finding-location">FR-16, FR-41</span>
+            </header>
+            <div class="finding-note">La vérification quotidienne « n'envoie aucune donnée », mais FR-41 l'utilise pour remettre une licence <strong>propre à l'instance</strong> « dans la réponse au prochain contact ». Il faut au moins l'identité de l'instance et le numéro de licence courant.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « n'envoie que l'identifiant de l'instance, sa version et le numéro de sa licence ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-14 · NFR-7 : le RPO de 1 h décidé par le PO ne s'applique plus à la plateforme</h3>
+              <span class="finding-location">NFR-7 ; journal l. 85</span>
+            </header>
+            <div class="finding-note">Le journal enregistre « sauvegardes 3-2-1 chiffrées, … RPO 1 h, RTO 4 h » sans restriction d'hébergement. NFR-7 rattache ces valeurs au site puis donne à la plateforme « une sauvegarde par jour au moins », soit une perte possible de 24 h pour le distributeur de février, marquée seulement <code>[ASSUMPTION : paliers]</code>.</div>
+            <div class="finding-fix"><strong>Correction :</strong> RPO/RTO explicites pour la plateforme, ou faire valider l'écart par le PO.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-N-29 · Reste de T-23 : test « sur chaque envoi » et ré-identification</h3>
+              <span class="finding-location">FR-26, FR-28</span>
+            </header>
+            <div class="finding-note">FR-26 « un test le vérifie sur chaque envoi » reste irréalisable sur un flux libre (un schéma fermé du signal le rendrait vérifiable) ; FR-28 ne dit rien de la ré-identification par recoupement (montants exacts + année de naissance + agence). Non bloquant pour février si FR-28 reste peu utilisé.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Schéma fermé du signal ; règle de ré-identification (généralisation, seuil d'effectif).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-N-19 · Levée du gel : « premier contact » contre « signal ou licence fraîche »</h3>
+              <span class="finding-location">§3 « Gel », FR-15, FR-19</span>
+            </header>
+            <div class="finding-note">Le §3 lève le gel au premier contact (tout fichier, y compris le correctif de sécurité qui doit justement passer <em>en</em> gel) ; FR-15 exige le retour du signal ou une licence fraîche.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une seule définition du contact qui lève le gel.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-N-21 · « Sans rien perdre pendant 7 jours » sans la réserve <code>AVEC_PERTE</code></h3>
+              <span class="finding-location">§1, titre de FR-18</span>
+            </header>
+            <div class="finding-note">La promesse de la Vision et du titre de FR-18 n'est pas bornée par le cas <code>AVEC_PERTE</code> que FR-18 introduit.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Ajouter la réserve au §1 et au titre.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-N-25 · Certificat d'effacement remis alors que les sauvegardes gardent les données</h3>
+              <span class="finding-location">FR-33, NFR-7</span>
+            </header>
+            <div class="finding-note">Les sauvegardes gardent les données jusqu'à 3 mois après le certificat.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Le certificat date l'expiration de la dernière sauvegarde concernée.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Scope honesty</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>§0 et §2.2 sont alignés (libre-service du prospect assumé, Connecteurs au lot 1), §8.4 liste ce que le PRD demande ailleurs, l'exception à Q4 est écrite (FR-33), les comptes Money Vibes sur site sont fermés par défaut (FR-23). Ce qui reste silencieux : des obligations nouvelles imposées à chaque module hors de C13, et des documents qui devraient figurer au §8.4.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-N-05 · De nouvelles obligations de module échappent à C13</h3>
+              <span class="finding-location">FR-17, FR-32, FR-35, FR-6, FR-38, §0, §7 C13</span>
+            </header>
+            <div class="finding-note">C13 est défini comme « prérequis, vérifications, santé, interception en essai, export et effacement par organisation ». Mais la réécriture impose à chaque module, sans clause : un <strong>interrupteur de changement par organisation</strong> avec date limite (FR-17) ; le <strong>classement de ses routes et de ses droits</strong> en consultation / export / écriture pour la lecture seule (FR-32, FR-35) ; une <strong>clef d'idempotence par vérification</strong> (FR-6) ; l'ouverture de son <strong>export</strong> malgré une garde 403. C'est exactement le mécanisme de T-10 : les PRD des lots 2 à 4 l'ignoreront.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Étendre la liste de C13 (ou C2 pour la lecture seule) et la reporter au §8.4.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-23 · §8.4 incomplet</h3>
+              <span class="finding-location">§8.4, FR-12</span>
+            </header>
+            <div class="finding-note">Manquent : STORY-280 ; <code>paiement-service</code> (le topic <code>paiement.abonnement.preavis.emis</code> devient « rappel », et FR-12 impose que « la vente résout les dépendances comme la console ») ; AD-P16 ; la garde C6 (SM-6) ; l'amendement de C8. (La table de la grille le classe low, la dimension Scope medium : la sévérité la plus haute est retenue.)</div>
+            <div class="finding-fix"><strong>Correction :</strong> Compléter §8.4 de ces cinq lignes.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details open>
+        <summary>
+          <h2>Downstream usability</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>Adequate, avec un constat critique qui bloque la spine. Le premier consommateur trouve enfin ce qu'il venait chercher : une énumération fermée de huit états publiés, une règle « inconnu ⇒ <code>NON_INSTALLE</code> », l'espace dans la lecture (FR-34), deux lieux d'écrans (FR-36), des droits <code>instance:*</code> (FR-35), la correspondance pack → code → menu (FR-37). Le glossaire est complet et sans synonyme. Mais la règle de menu, qui est la première décision de la spine, a un trou sur les chemins qu'emprunte justement le distributeur de février, et elle contredit C8 sans demander son amendement.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">G-N-01 · Les chemins de droits 2 → 6 posent un <code>ACTIVE</code> que l'état publié ne sait pas représenter</h3>
+              <span class="finding-location">§3.1 axe 2 et « état publié », FR-4, FR-11, FR-12, FR-14, FR-34</span>
+            </header>
+            <div class="finding-note">§3.1 : « Le droit <code>ACTIVE</code> n'est posé qu'à l'entrée en <code>INSTALLE</code> … Seuls les chemins de droits nommés de FR-4 font exception », puis « L'axe 2 prime ». Un module ouvert par l'échéance soldée (727 lot 2), le socle de vertical (lot 7), la propagation d'un pack (lot 6) ou la licence est donc <code>ACTIVE</code> au catalogue mais <code>NON_INSTALLE</code> sur l'axe 2 : menu caché, garde ouverte. Le test en matrice de FR-34 échoue par construction. (a) Le distributeur de février paie sa première échéance ⇒ tous ses modules sont ouverts dans l'<strong>espace réel</strong> avant toute répétition générale, contre la décision T-01 du PO ; (b) sur site, la licence est projetée en droits sans dire dans quel espace ; (c) FR-12 dit « devient <strong>installable</strong> », FR-4 et §3.1 « <code>ACTIVE</code> » ; (d) la parenthèse du §3.1 oublie les chemins 3 et 6.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Distinguer <strong>souscrit</strong> (contrat, paiement, licence, socle : droit d'installer) et <strong>ouvert</strong> (<code>ACTIVE</code>, posé par la mise en service, ou directement pour les seuls chemins dont c'est la raison d'être) ; donner, pour chaque chemin de FR-4, l'espace touché et l'état publié obtenu (option (a) de G-13).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">G-N-03 · La règle de visibilité et la lecture seule contredisent C8 et C2, et l'export passe sous une garde 403</h3>
+              <span class="finding-location">§3.1 table, FR-32, FR-33, FR-39, §8.4</span>
+            </header>
+            <div class="finding-note">C8 : « Une entrée est visible <strong>si et seulement si</strong> l'entitlement effectif est <code>ACTIVE</code> » ; la table publiée rend <code>LECTURE_SEULE</code> (<code>EXPIRED</code> calculé) <strong>visible</strong>. C2 : refus de <strong>toute</strong> route métier hors <code>ACTIVE</code>, test e2e « expiré ⇒ 403 » ; FR-32 ouvre lecture, recherche, export et états réglementaires. §8.4 ne demande rien pour C8, or la spine de la coque part de C8. FR-39, FR-33 et FR-32 exportent depuis des états dont la garde rend 403 : par quelle route ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> §8.4 « C8 : visible ssi l'état publié ∈ {<code>EN_SERVICE</code>, <code>ESSAI_PROSPECT</code>, <code>PREAVIS</code>, <code>LECTURE_SEULE</code>} et l'utilisateur a le droit » ; C2 : lecture seule par catégorie ; nommer la route d'export C13 <strong>exemptée de la garde</strong> et réservée au droit <code>instance:donnees:exporter</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-08 · FR-22 place encore « Mettre à jour depuis un fichier » dans la console</h3>
+              <span class="finding-location">FR-22, FR-36, FR-23</span>
+            </header>
+            <div class="finding-note">FR-22 : « le DSI la dépose dans la console de l'instance … ». FR-36 met cet écran dans <code>prospera-app</code> « Administration », et les comptes Money Vibes de la console sont « fermés par défaut » (FR-23).</div>
+            <div class="finding-fix"><strong>Correction :</strong> Remplacer « console » par « <code>prospera-app</code>, Administration (droit <code>instance:fichier:deposer</code>) ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-09 · Le droit de consentir s'attribue comme les autres, contre FR-27</h3>
+              <span class="finding-location">FR-35, FR-27</span>
+            </header>
+            <div class="finding-note">FR-35 : « L'administrateur du client attribue ces droits lui-même », dont <code>instance:consentement:donner</code>. FR-27 : le consentement est donné par le <strong>DG</strong>, ou par une personne qu'il <strong>désigne par écrit</strong>. Un DSI administrateur peut donc s'attribuer le droit de consentir.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Droit attribuable par le DG seul (ou réservé au rôle DG) ; désignation écrite enregistrée au registre.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-16 · Plateforme : un seul espace d'essai partagé, une majeure et des répétitions en cours</h3>
+              <span class="finding-location">FR-10, FR-17, FR-8, FR-33, §3.1 axe 1</span>
+            </header>
+            <div class="finding-note">Sur la plateforme, l'essai est partagé par toutes les organisations et les prospects. Une répétition générale en cours rejoue un dossier préparé en N+1 vers un réel en N ; et le rafraîchissement « obligatoirement avant une majeure » est « refusé pendant une répétition générale en cours » : une seule organisation peut bloquer une majeure de toute la plateforme.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Dire si le rafraîchissement obligatoire vaut sur la plateforme, et la règle de version d'un dossier d'installation (rejoué seulement vers la même version de plateforme).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-N-26 · « instance » n'est pas un code de module</h3>
+              <span class="finding-location">FR-35, §7 C7/C8</span>
+            </header>
+            <div class="finding-note">Les droits <code>instance:*</code> suivent le format <code>&lt;module&gt;:&lt;objet&gt;:&lt;action&gt;</code> (C7), mais aucun module <code>instance</code> n'existe au catalogue, et l'état publié du module d'écran « Administration » n'est pas dit.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Déclarer le moteur comme module du socle, toujours <code>EN_SERVICE</code>.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="dimension">
+      <details>
+        <summary>
+          <h2>Shape fit</h2>
+          <span class="verdict-pill verdict-adequate">adequate</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>La forme est la bonne pour une capacité plateforme chain-top : glossaire, états, FR à conséquences, contrat du moteur, renvois brownfield nombreux et pour la plupart exacts (727 lots 2/4/6/7, STORY-609, 166/167, 365, <code>fenetre-de-support.ts</code> désormais décrit comme « règle nouvelle … qui reprend le principe »). Deux défauts : une citation brownfield fausse (STORY-280, G-N-02) et un parcours qui contredit sa FR.</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">G-N-07 · UJ-4 contredit FR-12</h3>
+              <span class="finding-location">UJ-4, FR-12, FR-2</span>
+            </header>
+            <div class="finding-note">« Moussa … a signé « Terrain &amp; Ventes » plus Facturation » ; puis « Cocher Relances ajoute Facturation » (déjà au contrat, et Relances ne l'est pas : <code>MODULE_NON_SOUSCRIT</code>) ; puis « Encaissements passe 🔴 », hors contrat aussi. Le parcours qui doit illustrer « le contrat fait foi » installe deux modules hors contrat.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Faire signer à Moussa Terrain &amp; Ventes + Relances + Encaissements, et laisser FR-2 ajouter Facturation à la vente.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-N-30 · Renvois à la revue dans le texte produit</h3>
+              <span class="finding-location">§3, FR-7, FR-8, §3.1, FR-34, titres de FR-34 → FR-40</span>
+            </header>
+            <div class="finding-note">« G-09, G-12 », « voir T-16 pour le PO », « T-29 », « T-01 », « T-07 »… Ces identifiants ne se résolvent pas pour la spine ni les stories.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Les remplacer par « décision du PO, 2026-11-10 ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-N-20 · « Un pack distributeur » n'a plus de référent</h3>
+              <span class="finding-location">§1, SM-1</span>
+            </header>
+            <div class="finding-note">Les packs sont désormais Terrain &amp; Ventes… ; le socle de vertical n'est pas un pack.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Nommer la liste exacte de codes démontrés.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-N-22 · « J+23 rappel » emploie un terme défini pour l'abonné seulement</h3>
+              <span class="finding-location">FR-33, §3 « Rappel »</span>
+            </header>
+            <div class="finding-note">Le « rappel » est défini au §3 pour l'échéance d'un abonné.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Employer un autre mot pour le prospect, ou élargir la définition.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">G-N-24 · Renvoi cassé vers FR-30</h3>
+              <span class="finding-location">§4.C</span>
+            </header>
+            <div class="finding-note">« face à des distributeurs concurrents (FR-30) » : FR-30 n'en parle pas.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Corriger le renvoi.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>Revue adversariale (relecteur cynique), passage 2</h2>
+          <span class="reviewer-source">C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/review-adversarial-general.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>La réécriture a fait le gros du travail : il existe maintenant un modèle d'états, une horloge scellée, une licence anti-rejeu, deux variantes de mise à jour, des règles pour les connecteurs en essai et une chronologie d'effacement. Mais les nouveautés <strong>ne sont pas croisées entre elles</strong>. Une restauration de sauvegarde remet l'horloge scellée et le compteur de licence en arrière. Les chemins de droits de FR-4 posent <code>ACTIVE</code> sur des modules que l'axe 2 publie <code>NON_INSTALLE</code>. Les gardes des modules lisent encore l'horloge du système, pas l'horloge scellée. Les interrupteurs de changement n'ont aucun comportement défini sur site. La licence courte de FR-41 contredit le principe « le silence ne punit pas » de FR-15. <strong>Le PRD n'est pas prêt pour la validation du 13/11 tant que les 3 constats critiques et les principaux constats élevés ne sont pas traités.</strong> Les décisions du <code>.memlog.md</code> ne sont pas contestées en elles-mêmes : seules leurs conséquences non traitées sont relevées.</p>
+            <p>Suivi de la revue 1 : <strong>20 résolus · 20 partiels · 3 non résolus</strong> (F-27, F-28, F-29) sur 43. Nouveaux constats : <strong>3 critical · 16 high · 14 medium · 4 low</strong> (37).</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">A-N-01 · Un droit sans installation est soit invisible, soit une porte dérobée</h3>
+              <span class="finding-location">§3.1 « L'état publié », §3.1 axe 2, FR-4 chemins 2 à 6</span>
+            </header>
+            <div class="finding-note">Échéance soldée, socle de vertical, opérateur, licence : chacun pose <code>ACTIVE</code> <strong>sans</strong> passer par l'axe 2 ; comme l'axe 2 prime, l'état publié vaut <code>NON_INSTALLE</code>. Deux lectures, toutes deux fausses : soit ces chemins <strong>n'ouvrent rien</strong> (le socle n'est jamais visible, le paiement de 727 lot 2 déjà codé n'a plus d'effet) ; soit les services lisent <code>entitlement.changed</code>, voient <code>ACTIVE</code> et <strong>ouvrent quand même</strong> — sans prérequis, sans bilan, sans feu vert, menu caché contre garde ouverte. Sur site, une licence peut rendre <code>ACTIVE</code> un module dont le conteneur n'est même pas déployé.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Les chemins 2 à 6 n'agissent <strong>que sur l'axe 3</strong> ; un module payé mais non installé se publie « acquis, à installer » (console Money Vibes seulement) ; le socle de vertical est <strong>installé</strong> par le chemin 1 automatisé ; ajouter à la matrice de FR-34 « droit <code>ACTIVE</code> × axe 2 <code>NON_INSTALLE</code> ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-02 · L'axe 3 est-il un automate ou un jeu de drapeaux ? et l'essai fermé n'a pas d'état</h3>
+              <span class="finding-location">§3.1 axe 3 et ordre de priorité, FR-33</span>
+            </header>
+            <div class="finding-note">La table décrit un <strong>automate</strong> ; un ordre de priorité n'a de sens que si les états <strong>coexistent</strong>. Suspendu pendant le préavis, levée après la date de fin : l'« état antérieur » <code>PREAVIS{finLe}</code> a expiré, on rend un état périmé. « Fermé » n'est ni un état de l'axe 3 ni l'un des huit états publiés, alors que FR-33 promet 30 jours pour exporter après la fermeture ; la règle « inconnu ⇒ <code>NON_INSTALLE</code> » ferme tout. Ce que publie l'espace réel pour un prospect n'est pas dit.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Axe 3 <strong>calculé</strong> à partir de faits indépendants (sanction, échéance, fin du préavis), sans « état antérieur » mémorisé ; 9ᵉ état <code>ESSAI_TERMINE{effacementLe}</code> ou export par un autre canal.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-03 · Les vérifications d'un module tournent sans droit</h3>
+              <span class="finding-location">§3.1, FR-6</span>
+            </header>
+            <div class="finding-note">Pour sortir de <code>EN_INSTALLATION</code>, les vérifications doivent passer ; pour passer, le module doit <strong>fonctionner</strong> (créer des comptes, générer un lien, synchroniser). Mais son droit est absent et sa garde C2 répond 403 : dépendance circulaire. Même problème au rejeu dans le réel.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Identité de service « moteur d'installation » admise par C2 sur les seules routes de vérification déclarées (C13), ou <code>ACTIVE</code> dès le lancement avec fermeture aux utilisateurs par l'état publié seul. Choisir, l'écrire dans C2 et C13.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-04 · Un prérequis qui disparaît après la mise en service</h3>
+              <span class="finding-location">§3.1 axe 2, FR-16</span>
+            </header>
+            <div class="finding-note">Clé PI-SPI révoquée, numéro WhatsApp banni, API du core-banking changée : le module reste <code>EN_SERVICE</code> 🟢 alors qu'il ne marche plus. La « santé par module » de FR-16 n'apparaît ni dans l'état publié, ni dans le bilan, ni dans les bandeaux.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Attribut <code>sante: OK | DEGRADE{raison, action}</code> orthogonal à l'état publié (bandeau administrateur, ligne du bilan repassée 🔴), sans fermeture automatique.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-05 · <code>VERSION_FIGEE</code> est un état de l'instance, mais la maintenance se date module par module</h3>
+              <span class="finding-location">§3.1 axe 1, FR-14, FR-21</span>
+            </header>
+            <div class="finding-note">La licence permet que la maintenance de Sinistres s'arrête en mars et celle de la GED en septembre. Entre les deux, l'instance est-elle figée ? Une version de plateforme se publie d'un bloc : la maintenance encore payée de la GED ne donne rien, ou celle de Sinistres est prolongée gratuitement.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Maintenance portée par <strong>l'instance</strong> (une seule date), ou par module avec gel à la <strong>première</strong> échéance tant qu'elle n'est pas alignée ; la vente aligne les échéances (prorata dans <code>paiement-service</code>).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-06 · Un module suspendu est plus fermé qu'un module en lecture seule ou désinstallé</h3>
+              <span class="finding-location">§3.1 table (<code>SUSPENDU</code>), FR-32, FR-39</span>
+            </header>
+            <div class="finding-note">Un client en <code>SUSPENDU</code> ne peut ni consulter ni exporter ses propres données, alors qu'un client en lecture seule ou qui a désinstallé le peut. Pour une IMF sur site, la sanction commerciale bloque les états BCEAO que FR-32 garde ouverts : elle crée un manquement réglementaire chez le client, en tension avec la loi 2019-014 et avec « jamais d'écran noir ».</div>
+            <div class="finding-fix"><strong>Correction :</strong> Dire ce qu'un module suspendu garde ouvert (au minimum export par l'administrateur et le DG, états réglementaires), ou justifier par écrit, avec validation juridique, que la suspension ferme tout.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-07 · Les droits <code>instance:*</code> peuvent s'annuler eux-mêmes, et le consentement échappe au DG</h3>
+              <span class="finding-location">FR-35, FR-36, FR-27</span>
+            </header>
+            <div class="finding-note">Si l'intersection « attribués ∩ modules ouverts » s'applique aux droits du moteur, la lecture seule ou une suspension retire au DSI le droit de <strong>déposer la licence</strong> qui lèverait l'état : l'instance s'enferme elle-même. <code>instance:consentement:donner</code> est attribuable par l'administrateur, contre FR-27. Sur la plateforme, <code>instance:mise-a-jour:planifier</code> et <code>:revenir</code> n'ont pas d'objet.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Droits <code>instance:*</code> <strong>hors intersection</strong>, toujours effectifs ; consentement attribuable <strong>par le DG seul</strong>, avec la référence de l'écrit au registre ; masquer les droits sans objet selon l'hébergement.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-08 · FR-4 : « il n'en existe pas d'autre » est faux</h3>
+              <span class="finding-location">FR-4</span>
+            </header>
+            <div class="finding-note">Offre d'essai (pose <code>ACTIVE</code> avec <code>finLe</code>), mise en service, réinstallation, levée d'une sanction, signature pendant la fenêtre d'effacement : autant d'ouvertures hors table, donc sans garde. Rien n'exige sur site <strong>la même implémentation</strong>. Et <code>MODULE_NON_SOUSCRIT</code> suppose de lire le contrat sur site, où l'instance ne le connaît pas hors ligne.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Compléter la table en séparant axe 2 et axe 3 ; bibliothèque de décision unique embarquée sur site avec la même suite de conformité ; sur site seul <code>MODULE_HORS_LICENCE</code> s'évalue.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">A-N-09 · Restaurer une sauvegarde rembobine tout ce que le PRD croit irréversible</h3>
+              <span class="finding-location">FR-15, FR-14, FR-18, FR-27, NFR-4, NFR-7</span>
+            </header>
+            <div class="finding-note">Horloge scellée, plus haut numéro de licence vu, registre des consentements et journal en ajout seul vivent <strong>sur le disque de l'instance</strong> ; le client détient la clé des sauvegardes et l'hyperviseur. Restaurer un instantané de six mois donne : une horloge rembobinée, un compteur de licence rembobiné (l'ancienne licence redevient acceptable), un retrait de consentement qui n'a jamais eu lieu, un journal amputé. Pas besoin de tricher : le retour arrière <code>AVEC_PERTE</code> déclenché par Money Vibes produit exactement ces effets.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Un <strong>état de confiance</strong> (horloge, plus haut numéro, registre, journal) hors du périmètre restauré, qui n'avance que, rapporté à Money Vibes à chaque contact ; refus de licence et d'export si l'état a reculé. Tests : restaurer une sauvegarde ancienne, puis vérifier que l'ancienne licence reste refusée, que le retrait tient, que l'échéance tombe à la même date.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">A-N-10 · L'horloge scellée ne protège rien si les gardes lisent l'horloge du système</h3>
+              <span class="finding-location">FR-15, FR-34, §3.1 (<code>EXPIRED</code> calculé, STORY-609)</span>
+            </header>
+            <div class="finding-note">Les passages <code>PREAVIS</code> → <code>LECTURE_SEULE</code>, fin d'essai et fin de grâce sont déclenchés par le <strong>temps</strong> ; personne n'émet <code>entitlement.changed</code> à l'échéance. Chaque garde C2 calcule donc <code>EXPIRED</code> avec l'horloge de <strong>son</strong> conteneur, que le client peut reculer : le menu affiche « lecture seule », la garde accepte les écritures. FR-15 est contourné sans toucher au moteur, et le test « menu et garde ne se contredisent jamais » ne le voit pas. La promesse « en moins d'une minute » de FR-34 tombe aussi.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Le moteur (l'agent sur site) <strong>émet un événement</strong> à chaque transition temporelle, à l'heure scellée ; les gardes ne calculent <strong>jamais</strong> une échéance sur leur propre horloge. Amender C2 ; ajouter à la matrice de FR-34 « date système reculée de 40 jours ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-11 · Une horloge qui ne recule jamais ne se corrige jamais</h3>
+              <span class="finding-location">FR-15</span>
+            </header>
+            <div class="finding-note">Date système mise <strong>en avance</strong> par erreur (NTP, pile du BIOS en 2036, faute de frappe) : l'horloge scellée l'accepte et ne revient plus. Droit d'utiliser expiré, essai fermé, fenêtre de retour arrière perdue. Rien n'est prévu pour corriger, et l'erreur est <strong>honnête</strong>.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Borner l'avance acceptée sans preuve (ex. 48 h d'écart, anomalie tracée) ; <strong>correction signée</strong> par Money Vibes, seule capable de reculer l'horloge. Test : avancer de 10 ans, aucune échéance ne tombe.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-12 · Chaque délai n'a pas d'horloge propriétaire</h3>
+              <span class="finding-location">FR-15, FR-19, FR-20, FR-33, FR-17</span>
+            </header>
+            <div class="finding-note">« <strong>Toutes les échéances</strong> se lisent sur l'horloge scellée » : faux pour les 72 h (départ = un appel téléphonique), l'essai prospect (plateforme, pas d'horloge scellée), J+7 (alerte de Money Vibes contre gel de l'instance), les 7 jours (vagues contre retour arrière, et C12 ne dit pas laquelle borne la rétrocompatibilité).</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une table « délai → horloge de référence → événement de départ → qui l'observe → si observé en retard » ; retirer « toutes ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-13 · Trois définitions du gel</h3>
+              <span class="finding-location">§3 « Gel », §3.1, FR-15, FR-19</span>
+            </header>
+            <div class="finding-note">« sans contact » (§3), « sans signal » (§3.1), « signal ou licence fraîche » (FR-15). Une vérification quotidienne lève-t-elle le gel ? Le correctif reçu par fichier est un « contact » au sens du §3. Si tout fichier compte, redéposer un ancien paquet remet le compteur de silence à zéro indéfiniment.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Un contact = un échange <strong>authentifié et daté par Money Vibes</strong> ; un fichier déjà vu ne compte pas ; aligner §3, §3.1 et FR-15.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-14 · La licence courte fait punir le silence et confond l'impayé avec la fin de contrat</h3>
+              <span class="finding-location">FR-41, FR-15, FR-32, §3 « Suspendre », FR-13</span>
+            </header>
+            <div class="finding-note">(1) Un abonné qui <strong>paie</strong> mais dont la liaison est coupée deux mois ne reçoit pas sa licence suivante : préavis, puis lecture seule. Le silence <strong>punit</strong>, le titre de FR-15 est faux pour tous les abonnés sur site ; seul un e-mail manuel le sauve. (2) FR-32 décrit l'échéance <strong>du contrat</strong> ; FR-41 l'applique à chaque <strong>échéance de paiement</strong> : un retard d'un mois déclenche le parcours d'une fin de contrat. (3) Sur site, impayé ⇒ préavis puis lecture seule ; sur la plateforme (STORY-280), ⇒ <code>SUSPENDU</code> ; FR-13 promet des refus « identiques ».</div>
+            <div class="finding-fix"><strong>Correction :</strong> Distinguer <strong>échéance de licence</strong> (technique, renouvelée à chaque contact tant que le compte est à jour) et <strong>échéance du droit d'utiliser</strong> (contractuelle, seule à déclencher FR-32) ; alerte Money Vibes à J-7 d'une licence non renouvelée faute de contact ; un seul parcours de l'impayé, identique sur site et plateforme.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-15 · Une clé compromise peut verrouiller l'instance contre toutes les licences futures</h3>
+              <span class="finding-location">FR-14, NFR-8</span>
+            </header>
+            <div class="finding-note">L'attaquant qui détient une clé compromise émet une licence numéro 2⁶³ : l'instance la retient et <strong>refuse toutes les licences légitimes futures</strong>. Le fichier d'urgence « ré-émet les licences » sans dire qu'il réinitialise le compteur. Une instance coupée ne reçoit jamais la liste de révocation et continue d'accepter la clé.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Compteur <strong>par clé de signature</strong> ou saut borné ; fichier d'urgence signé par la racine qui <strong>réinitialise</strong> le plus haut numéro ; durée de validité courte des clés qui signent les licences courtes.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">A-N-16 · Suspendre un acheteur entièrement payé</h3>
+              <span class="finding-location">FR-41 (dernière puce), §3.1</span>
+            </header>
+            <div class="finding-note">Le PRD autorise une sanction logicielle sur un droit d'utiliser <strong>perpétuel et payé</strong> : juridiquement fragile (c'est une vente), et contradictoire avec « jamais de suspension » écrit pour la version figée. Le litige n'est pas défini.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Interdire la suspension d'un acheteur payé, ou renvoyer au juriste en point ouvert (§8.2).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">A-N-17 · La vérification quotidienne « n'envoie aucune donnée » mais livre une licence</h3>
+              <span class="finding-location">FR-41, FR-16</span>
+            </header>
+            <div class="finding-note">Pour recevoir <strong>sa</strong> licence, l'instance doit s'authentifier et se nommer ; et « la réponse au prochain contact » n'existe pas quand le contact est un fichier déposé.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Écrire ce que la requête transmet (identifiant, version, plus haut numéro, état de confiance) et retirer « aucune donnée ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-18 · Les interrupteurs de changement n'ont aucun comportement sur site</h3>
+              <span class="finding-location">FR-17 (plateforme et sur site), FR-21</span>
+            </header>
+            <div class="finding-note">Une seule ligne de version : le code qui arrive sur site contient les mêmes interrupteurs. Qui les allume, quand ? Éteints pour toujours : ils survivent à leur date limite et chaque instance dérive vers sa « version cachée ». Allumés seuls à la date limite : le comportement change dans le réel sans l'accord du DSI. Allumés à la promotion : il faut le dire.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Sur site, interrupteurs <strong>forcés à leur position finale à la promotion</strong> (l'essai du DSI tient lieu d'adaptation), ou date limite = date de promotion ; test de conformité.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-19 · Interrupteurs, retour arrière à 7 jours et versions successives</h3>
+              <span class="finding-location">FR-17 (plateforme), FR-18, C12</span>
+            </header>
+            <div class="finding-note">Si les fenêtres reviennent plus souvent que 30 jours, les interrupteurs <strong>s'empilent</strong> : 2ⁿ combinaisons non testées, « version cachée » pendant 30 jours contre 7 pour C12. Un interrupteur qui <strong>écrit des données dans une nouvelle forme</strong>, allumé au 10ᵉ jour, sort de la fenêtre C12. Personne ne décide ce qui est « visible des utilisateurs ».</div>
+            <div class="finding-fix"><strong>Correction :</strong> Plafonner les interrupteurs ouverts (une version à la fois, date limite antérieure à la fenêtre suivante) ; interdire qu'un interrupteur change la <strong>forme</strong> des données ; manifeste <code>interrupteurs: [...]</code> et revue obligatoire.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-20 · <code>AVEC_PERTE</code> sur la plateforme et dans le retour arrière automatique</h3>
+              <span class="finding-location">FR-18, FR-40, FR-17</span>
+            </header>
+            <div class="finding-note">Sur la plateforme, personne ne choisit de date : une version <code>AVEC_PERTE</code> est soit interdite, soit promue sans bandeau, et son retour arrière <strong>global</strong> efface les saisies de <strong>tous</strong> les distributeurs. Le retour arrière <strong>automatique</strong> d'une version <code>AVEC_PERTE</code> restaure la sauvegarde sans que personne l'ait décidé. Et une version de plateforme est <code>AVEC_PERTE</code> dès qu'<strong>un</strong> module l'est, ce que le PRD ne dit pas.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Interdire <code>AVEC_PERTE</code> sur la plateforme, ou fenêtre dédiée avec accord écrit et préavis ; l'automatisme d'une version <code>AVEC_PERTE</code> <strong>s'arrête et alerte</strong> ; la version hérite du pire <code>retourArriere</code> de ses modules.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-21 · Deux promotions dans la même fenêtre de 7 jours</h3>
+              <span class="finding-location">FR-18, C12, FR-19</span>
+            </header>
+            <div class="finding-note">N+1 promue le jour 0, N+2 le jour 3 : la contraction permise par N+2 supprime ce que N+1 avait ajouté, alors que la fenêtre de N+1 court encore. Un correctif de sécurité promu le jour 2 : si le DSI revient à N, le retour arrière <strong>retire le correctif</strong> et rouvre la faille, ou il est refusé — le PRD ne dit ni l'un ni l'autre.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Contraction permise seulement quand la fenêtre de la version qui a ajouté est <strong>close partout</strong> ; retour arrière d'<strong>un</strong> pas ; une nouvelle promotion clôt la fenêtre précédente ; correctifs reportés sur N, ou retour arrière sous la version corrigée refusé avec un code nommé.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-22 · Un correctif pour une version figée, c'est une branche de maintenance par client</h3>
+              <span class="finding-location">FR-19, FR-32, FR-21, C6</span>
+            </header>
+            <div class="finding-note">Une instance figée peut être en N-5 ; deux instances figées sur des versions différentes demandent <strong>deux portages</strong>. Money Vibes maintient <strong>à vie</strong> autant de branches que de versions figées : la négation de la ligne unique (C6), un coût que l'ordre de sacrifice ignore. « Critique » n'est pas défini.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Borner : correctifs seulement pour les versions dans une fenêtre de support (ex. 24 mois), au-delà « hors correctifs » et DG prévenu ; ou correctifs conditionnés à N-1 ; définir « critique » (CVSS ≥ 9, exploitation connue) ; coût au §8.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-23 · La rétrocompatibilité ne couvre que les champs</h3>
+              <span class="finding-location">FR-18, C12</span>
+            </header>
+            <div class="finding-note">Ignorer un champ inconnu ne suffit pas pour une <strong>nouvelle valeur d'énumération</strong> (<code>EN_EXPERTISE</code> écrit par N+1), un <strong>nouveau type d'événement</strong> ou un topic <code>@2</code>. Le test s'arrête au retour : rien ne vérifie les données modifiées par N après le retour, quand N+1 revient.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Étendre C12 (valeur inconnue = « autre », lecture seule ; nouveaux événements ignorés et journalisés) ; test : promouvoir, saisir, revenir, modifier, <strong>re-promouvoir</strong>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-24 · Combien de temps dure un « clic » ?</h3>
+              <span class="finding-location">FR-18, NFR-7, NFR-9, FR-40</span>
+            </header>
+            <div class="finding-note">Un retour arrière <code>AVEC_PERTE</code> est une restauration : jusqu'à 4 heures d'arrêt, que NFR-9 ne borne pas. Un retour arrière <strong>interrompu</strong> n'a pas d'état défini dans FR-40.</div>
+            <div class="finding-fix"><strong>Correction :</strong> NFR-9 : durée maximale du retour arrière sans perte (≤ 15 min) et avec perte (≤ RTO), affichée avant le clic ; le retour arrière est un plan enregistré qui reprend après coupure.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-25 · Un client pilote ou un client mécontent bloque tous les autres</h3>
+              <span class="finding-location">FR-20, FR-17 (sur site)</span>
+            </header>
+            <div class="finding-note">Le DSI du pilote attend six semaines : la vague suivante attend six semaines. N'importe quel retour arrière sans lien avec la version (formation, confort) est un « incident » qui bloque tout le monde. La place de la plateforme dans les vagues n'est pas dite.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Limiter l'attente du pilote ; qualifier l'incident (raison imputée à la version, validée par Money Vibes) ; placer la plateforme dans l'ordre des vagues.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-26 · Le rafraîchissement obligatoire avant une majeure peut bloquer la plateforme</h3>
+              <span class="finding-location">FR-10, FR-17</span>
+            </header>
+            <div class="finding-note">Une majeure de plateforme exige le rafraîchissement de <strong>chaque</strong> organisation, refusé pour celles qui ont une répétition en cours, et jamais appliqué aux essais prospects : une seule répétition bloque la majeure de tous, ou la majeure part sans rafraîchissement, contre FR-10.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Rafraîchissement obligatoire <strong>avant que l'organisation n'essaie</strong> la majeure ; répétitions et essais prospects <strong>migrés</strong> comme le réel ; répétition en cours reportée ou rejouée.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-27 · Une majeure qui ajoute une dépendance non souscrite</h3>
+              <span class="finding-location">FR-38, FR-21, FR-4 chemin 3</span>
+            </header>
+            <div class="finding-note">Refusée au client à qui manque la dépendance, la majeure le laisse en N, hors de la fenêtre N-1 : il perd son support <strong>sans faute de sa part</strong>. Installée d'office, elle contredit FR-12. La « propagation d'un pack modifié » n'est toujours pas définie.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Dépendance dure fournie <strong>sans facturation</strong> (amendement automatique du contrat), ou majeure non publiable ; propagation d'un pack : seuls les <strong>nouveaux</strong> contrats, les autres par avenant.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-28 · La cascade de FR-9 est en « autorisation par défaut », et la lecture réelle exige les identifiants réels</h3>
+              <span class="finding-location">FR-9</span>
+            </header>
+            <div class="finding-note">« Vérifié » n'a pas de critère : une base Odoo de production nommée <code>test</code> passe. Le refus ne porte que sur les destinations <strong>déclarées</strong> pour le réel : une adresse non déclarée (même hôte, autre base, IP au lieu du nom) passe — liste noire. Lire le vrai logiciel exige des identifiants du vrai logiciel ; des identifiants qui peuvent écrire, présents dans l'essai, rouvrent F-08.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Garde en <strong>liste blanche</strong> (bac à sable déclaré <strong>et</strong> distinct de toute destination du réel ; le reste intercepté) ; « vérifié » = confirmation écrite + signature technique distincte ; lecture réelle seulement avec des identifiants <strong>en lecture seule</strong>, dont le droit d'écriture est <strong>testé et refusé</strong>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-29 · L'interception casse une synchronisation dans les deux sens</h3>
+              <span class="finding-location">FR-9, FR-6, UJ-3</span>
+            </header>
+            <div class="finding-note">Une écriture interceptée ne reçoit ni identifiant ni accusé : l'essai accumule des enregistrements sans correspondance externe, en conflit avec les vraies opérations que la lecture fait remonter. La vérification « aller-retour » n'est jamais faite et vaut pourtant 🟢 : pour l'IMF sans bac à sable, la répétition ne teste pas le point le plus risqué.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Ligne 🟠 « aller-retour non vérifié » pour un connecteur intercepté ; vérification aller-retour <strong>dans le réel</strong> à la mise en service ; le PRD Connecteurs dit comment il simule l'accusé.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-30 · Le rafraîchissement envoie des données réelles dans le bac à sable du client</h3>
+              <span class="finding-location">FR-9 (étape 1), FR-10</span>
+            </header>
+            <div class="finding-note">Après un rafraîchissement, les données personnelles réelles partent vers le <strong>bac à sable</strong> du logiciel du client, aux contrôles plus faibles et aux accès tiers. FR-10 garde les règles d'accès dans Prospera, pas au-delà. Le bac à sable diverge à chaque rafraîchissement.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Accord du client, ou masquage des champs personnels vers le bac à sable ; dire ce qui se passe côté bac à sable au rafraîchissement.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-31 · Une clause d'adhésion n'est pas un consentement, et la frontière exploitation / apprentissage n'a pas de garde</h3>
+              <span class="finding-location">§4.C (clause unique), FR-27, SM-4</span>
+            </header>
+            <div class="finding-note">Une clause intégrée au contrat, condition de la vente, n'est ni <strong>libre</strong> ni <strong>spécifique</strong> ; les personnes concernées sont les <strong>clients du distributeur</strong>, qui ne consentent pas à leur place ; « Money Vibes reste couverte par la loi » est une conclusion juridique <strong>non validée</strong> ; les effets du retrait sur l'abonnement ne sont pas dits. Sur la plateforme, une analyse « pour l'exploitation » lit les mêmes données sans garde, et SM-4 ne compte que les lectures déclarées : zéro garanti par construction.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Validation juridique de la clause en <strong>point ouvert daté</strong> (§8.2) ; clause par finalités, une ligne de registre par finalité ; retirer « reste couverte par la loi » ; compte de service IA dédié dont toute lecture passe par la garde, pas d'export en masse pour l'« exploitation » ; SM-4 mesure aussi les extractions hors garde.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">A-N-32 · Une clé de sauvegarde « détenue par le client » est incompatible avec les automatismes</h3>
+              <span class="finding-location">NFR-7, FR-17, FR-18, FR-25</span>
+            </header>
+            <div class="finding-note">Retour arrière automatique, restauration <code>AVEC_PERTE</code>, test mensuel automatique et bilan d'instance exigent de <strong>déchiffrer</strong> sans personne : soit la clé est sur l'instance et « détenue par le client » ne veut rien dire, soit ces automatismes sont impossibles. Clé perdue : aucune restauration, RTO jamais tenu. RPO 1 h contredit par « une sauvegarde par jour » sur la plateforme. La copie hors machine d'un assureur dont les données « ne quittent pas ses locaux » : où ?</div>
+            <div class="finding-fix"><strong>Correction :</strong> <strong>Clé d'exploitation</strong> scellée sur l'instance et <strong>clé de secours</strong> détenue par le client ; séquestre ou procédure de perte ; RPO explicite pour la plateforme ; lieu de la copie hors machine.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-33 · Le certificat d'effacement est remis alors que les données existent encore</h3>
+              <span class="finding-location">FR-33, NFR-4, NFR-7</span>
+            </header>
+            <div class="finding-note">Les données du prospect restent environ 90 jours dans les sauvegardes mensuelles <strong>après</strong> le certificat. Effacer les « journaux nominatifs » contredit NFR-4 (ajout seul) ; l'effacement lui-même doit être journalisé. Pas de rappel en cas de prolongation, prolongation après fermeture indéfinie, destinataire des rappels non défini.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Le certificat date l'expiration de la dernière sauvegarde (ou chiffrement par organisation et destruction de clé) ; journaux <strong>pseudonymisés</strong>, pas supprimés ; rappel à J-7 de chaque fin, destinataire nommé, prolongation seulement avant fermeture.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-34 · Des modules commerciaux vendables qui n'existent pas encore au catalogue</h3>
+              <span class="finding-location">FR-37, QA-1, FR-7, SM-2, NFR-5</span>
+            </header>
+            <div class="finding-note">Un contrat peut inclure un module non installable : le client est <strong>En service partiel pour toujours</strong>, ce qui suffit à SM-2, et En service n'est jamais atteignable. NFR-5 chronomètre « la plateforme complète », qui inclut ces modules. Faire entrer 18 modules et leurs manifestes (C13 compris) avant février est un chantier <strong>caché</strong>.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Interdire la vente d'un module non installable ou l'exclure de l'état (« livraison prévue le … ») ; NFR-5 sur les codes <strong>installables</strong> ; §8.4 « 18 manifestes C13 » avec propriétaire et date.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">A-N-35 · La moitié du PRD n'a pas de priorité, et ce qu'on sacrifie est une garantie juridique</h3>
+              <span class="finding-location">§8.4 (ordre de sacrifice), §8.2, §0</span>
+            </header>
+            <div class="finding-note">Environ 25 exigences ne sont ni sacrifiables ni protégées. Sacrifier le poste d'accès enregistré retire l'enregistrement de session et la coupure du transfert de fichiers tout en gardant le niveau 2. FR-15 et NFR-7 sont « jamais sacrifiés » alors que leur mécanisme n'est pas chiffré. §8.2 annonce « Aucun » point ouvert alors que la clause unique, D3, C12/C13, l'horloge, la suspension d'un acheteur et l'ordre de sacrifice lui-même restent ouverts.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Classer <strong>chaque</strong> FR et NFR (jamais sacrifiée / sacrifiable avec ordre / dégradable avec version minimale) ; « niveau 2 fermé jusqu'à la livraison de FR-29 » ; §8.2 = liste réelle des points ouverts, propriétaire et date.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">A-N-36 · FR-39 : copies gardées, mais emplacement vide</h3>
+              <span class="finding-location">FR-39</span>
+            </header>
+            <div class="finding-note">Si la copie existe, pourquoi l'emplacement est-il vide ? Les données d'un module désinstallé sont conservées <strong>sans limite</strong>, sans durée au regard de la loi 2019-014.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « Les copies restent stockées et <strong>masquées</strong> ; elles réapparaissent à la réinstallation » ; renvoyer la durée de conservation à la politique d'effacement.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">A-N-37 · Résidus de texte qui contredisent les FR réécrites</h3>
+              <span class="finding-location">§1, 4.A, 4.B, FR-5, FR-7, FR-11, FR-14</span>
+            </header>
+            <div class="finding-note">§1 « sans rien perdre » (faux pour <code>AVEC_PERTE</code>) ; 4.A « seulement quand tout est vert » (contre En service partiel) ; 4.B « mêmes étapes » (contre les deux variantes de FR-17) ; FR-5 « sans effet de bord » (FR-6 dit « sans doublon ») ; FR-7 « PDF reçu » (invérifiable) ; FR-11 « promu » (réservé aux versions) ; FR-14 <code>LICENCE_PERIMEE</code> (vise une licence <strong>antérieure</strong>).</div>
+            <div class="finding-fix"><strong>Correction :</strong> Corriger chaque phrase, puis rechercher les termes du §3 employés hors de leur sens.</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <section class="reviewer-section">
+      <details>
+        <summary>
+          <h2>Revue de cohérence : contrat, plan v3, PRD frères, code de dev</h2>
+          <span class="reviewer-source">C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/review-coherence-contrat.md</span>
+        </summary>
+        <div class="dim-body">
+          <div class="dim-judgment">
+            <p>La réécriture a traité le fond de la revue 1 : la table d'états (§3.1), la lecture publiée pour la coque (FR-34), les droits de tenant (FR-35), les deux lieux d'écrans (FR-36), la correspondance pack → menu (FR-37), le manifeste (FR-38) et les six chemins (FR-4). <strong>Elle n'est pas encore cohérente avec le code qu'elle prétend projeter.</strong> Trois points bloquent la spine de la coque : (1) l'<strong>impayé</strong> — le code <strong>suspend</strong> à J+7 (STORY-280, arbitrage PO du 2026-11-08), alors que le PRD fait passer l'impayé par 30 jours de préavis puis une lecture seule, sans demander l'abandon de STORY-280 ; (2) la <strong>règle de priorité</strong> du §3.1 cache au menu tout module ouvert par un chemin de droits, c'est-à-dire <strong>tous les modules qui existent aujourd'hui</strong>, alors que leur garde reste ouverte ; (3) le « <strong>socle de vertical</strong> » est aussi le <strong>package vendu par contrat</strong>, et le socle <code>distributeur</code> ouvre 7 codes sans terme dès la création de l'organisation, ce qui vide SM-1 et FR-12 pour le distributeur.</p>
+            <p>Projection des huit états publiés sur le code (<code>EntitlementStatus</code> = <code>ACTIVE | SUSPENDED | REVOKED</code>, <code>statutEffectif()</code> → <code>EXPIRED</code>) : six tiennent ; <code>ESSAI_PROSPECT</code> et <code>PREAVIS</code> ne se projettent pas sans un nouveau champ, et <code>EN_SERVICE</code> dépend d'une règle de priorité qui ne tient pas. Ce que l'architecte de la coque devrait encore inventer : le sort de l'impayé ; la représentation de <code>ESSAI_PROSPECT</code>, de <code>PREAVIS</code> et de l'essai terminé ; l'état publié d'un droit ouvert sans installation ; le canal de lecture ; le code de module des droits <code>instance:*</code> et le lieu de l'intersection ; les droits derrière « administrateurs » et « DG » ; la règle de garde en lecture seule ; la traduction contrat → menu ; l'identité d'une organisation dans deux espaces ; le support des interrupteurs.</p>
+            <p>Suivi de la revue 1 : <strong>14 résolus · 14 partiels · 1 non résolu</strong> (R-08) sur 29. Nouveaux constats : <strong>1 critical · 5 high · 12 medium · 3 low</strong> (21).</p>
+          </div>
+        </div>
+        <div class="findings-list">
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-critical">critical</span>
+              <h3 class="finding-title">C-N-01 · L'impayé suspend dans le code et la décision du PO, mais le PRD le fait passer par un préavis</h3>
+              <span class="finding-location">§3 « Suspendre », §3.1 axe 3, FR-32, FR-41</span>
+            </header>
+            <div class="finding-note"><code>echeancier.ts</code> pose <code>PREAVIS</code> à J-7 et <code>IMPAYE</code> à J+7 ; <code>IMPAYE</code> publie <code>paiement.abonnement.impayee</code>, et <code>suspension-par-impaye.service.ts</code> passe <strong>automatiquement</strong> en <code>SUSPENDED</code> (<code>motif: IMPAYE</code>) tous les droits à terme du contrat (« arbitrage PO du 2026-11-08 »). Sur la plateforme aujourd'hui : J0 <code>EXPIRED</code>, J+7 <code>SUSPENDED</code> (caché). Le PRD promet 30 jours où « tout fonctionne », puis une lecture seule <strong>sans fin</strong>, et réserve la suspension à une décision humaine. Le memlog (T-15) ne dit pas que la décision du 08/11 est abandonnée ; §8.4 ne cite ni STORY-280, ni 281, ni le jalon <code>IMPAYE</code>, ni le consommateur. La spine ne peut pas savoir si un impayé produit <code>PREAVIS</code> ou <code>SUSPENDU</code>.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Faire trancher le PO. (a) <strong>Le PRD l'emporte</strong> : §8.4 « STORY-280/281 : l'impayé ne suspend plus ; consommateur retiré ou réservé à la sanction », et sort de la grâce de 281. (b) <strong>Le code l'emporte</strong> : §3.1 écrit <code>PREAVIS</code> de J0 à J+7 puis <code>SUSPENDU</code>, FR-32/FR-41 corrigées. Dans les deux cas, définir « impayé persistant » par une durée.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">C-N-02 · Deux états (<code>ESSAI_PROSPECT</code>, <code>PREAVIS</code>) ne se lisent pas sur l'entitlement</h3>
+              <span class="finding-location">§3.1 table « état publié », FR-33</span>
+            </header>
+            <div class="finding-note"><code>PREAVIS</code> = <code>ACTIVE</code> à échéance repoussée de 30 jours : indiscernable d'un <code>ACTIF</code>, et diverge de l'échéance de <code>paiement</code> (<code>terme.ts</code> : « le même calcul des deux côtés »). <code>ESSAI_PROSPECT</code> : à <code>finLe</code>, <code>statutEffectif</code> rend <code>EXPIRED</code>, donc la règle publie <strong><code>LECTURE_SEULE</code></strong> (visible, export) alors que FR-33 dit « l'accès se ferme » ; fermer vraiment exige d'écrire un statut à une date, ce que <code>terme.ts</code> refuse. <code>source</code> n'est porté ni par <code>entitlement.changed</code> ni par FR-34.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Donner dans FR-34 la <strong>représentation</strong> de chaque état (<code>essai: { finLe }</code>, <code>preavis: { echeanceContrat, finLe }</code>, champs additifs v2 ou vue du moteur) ; dire si la fin d'essai donne <code>LECTURE_SEULE</code> ou un état fermé, par statut calculé ; <code>PREAVIS</code> <strong>calculé</strong> (échéance passée de moins de 30 jours) avec un <code>statutEffectif</code> étendu.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">C-N-03 · « L'axe 2 prime » × chemins 2 à 5 × « le menu et la garde ne se contredisent jamais »</h3>
+              <span class="finding-location">§3.1, FR-4, FR-34</span>
+            </header>
+            <div class="finding-note">Les chemins 2, 3 et 4 <strong>créent</strong> des entitlements <code>ACTIVE</code> (<code>decisionDOctroi</code>, <code>decisionVerticale</code>, <code>propagation-des-packs</code>) sans aucune notion d'installation ; tous les droits existants sur <code>dev</code> viennent de ces chemins ou du <code>PUT</code> opérateur. La règle de priorité publie <code>NON_INSTALLE</code> alors que la garde sert le module : le jour de la mise en route du moteur, <strong>tous les modules de toutes les organisations disparaîtraient du menu</strong>.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « Un chemin de droits (2 à 6) pose l'axe 2 à <code>INSTALLE</code> dans l'espace où il s'exécute ; un droit <code>ACTIVE</code> sans trace d'installation se publie <code>EN_SERVICE</code> » ; conséquence testable pour la <strong>reprise de l'existant</strong>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">C-N-04 · Le <code>VerticalPack</code> est aussi le package vendu, et le socle distributeur ouvre 7 codes sans contrat</h3>
+              <span class="finding-location">§3 « Socle de vertical », FR-37, FR-12, SM-1</span>
+            </header>
+            <div class="finding-note">STORY-727 : l'abonnement porte <code>packs</code> (clés <code>VerticalPack</code>) et une échéance soldée ouvre leurs modules ; <code>cabinet</code> <strong>achète</strong> son package. <code>distributeur</code> = <code>balance, bilan, pdv, stock, catalogue, commande, facturation</code>, ouvert <strong>sans terme</strong> dès <code>identity.org.created</code>. Le <code>VerticalPack</code> est donc à la fois le socle offert et l'unité de vente : FR-37 n'a pas la colonne qui traduit l'un en l'autre, et <code>MODULE_NON_SOUSCRIT</code> n'a pas de base définie. FR-12, FR-8 et FR-32 ne s'appliquent pas à ces 7 codes, sans que le PRD le dise ; SM-1 (« organisation <strong>vierge</strong> ») est indémontrable sur une organisation <code>distributeur</code>.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Redéfinir « socle de vertical » depuis le code (<code>VerticalPack</code> = package vendu <strong>ou</strong> inclus) ; colonne « package du contrat → codes » dans FR-37 ; codes inclus hors FR-12 et FR-32 ; SM-1 avec la liste exacte des codes et l'organisation de départ ; faire trancher le PO sur <code>pdv</code>, <code>stock</code>, <code>commande</code>, <code>facturation</code> « inclus » alors qu'ils sont vendus dans les packs.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">C-N-05 · L'organisation du prospect et ses deux déploiements ne sont pas situés</h3>
+              <span class="finding-location">FR-33, §3.1 axe 1, FR-8, FR-10</span>
+            </header>
+            <div class="finding-note">Une organisation naît par <code>identity.org.created</code> dans <strong>un</strong> <code>auth-service</code>. Créé dans le réel, le prospect reçoit aussitôt le socle <code>distributeur</code> <strong>dans le réel</strong>, ce que FR-33 interdit. Créé dans l'essai seulement, sa signature crée l'organisation dans le réel, où le chemin 4 ouvre 7 codes <strong>avant</strong> le rejeu et le feu vert. Rafraîchissement et rejeu supposent la <strong>même identité d'organisation</strong> dans les deux déploiements, ce que le PRD ne dit nulle part.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Une FR « Une organisation dans deux espaces » : où elle naît, comment elle apparaît dans l'autre (même identifiant, créée par le moteur), chemin 4 suspendu dans le réel avant la mise en service d'une organisation issue d'un essai.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-high">high</span>
+              <h3 class="finding-title">C-N-06 · Les droits <code>instance:*</code> et le filtre « attribués ∩ ouverts » ne tiennent pas dans <code>auth-service</code></h3>
+              <span class="finding-location">FR-35</span>
+            </header>
+            <div class="finding-note"><code>moduleDePermission()</code> lit le premier segment comme code de module et <code>exigerModulesSouscrits</code> refuse <code>CODE_TENANT_ROLE_MODULE_NON_SOUSCRIT</code> s'il n'est pas <code>ACTIVE</code> : aucune organisation n'a d'entitlement <code>instance</code>, ces droits n'entrent dans aucun rôle (et contredisent C7). <code>TENANT_PERMISSION_FORMAT</code> refuse les codes à tiret (<code>pi-spi</code>). Le filtre « ∩ modules ouverts » n'existe nulle part ; <code>AbonnementsClient</code> lit le <code>status</code> brut : un module <code>EXPIRED</code> est vu <code>ACTIVE</code> par <code>auth</code>.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Code de module <code>instance</code> au socle de <strong>toute</strong> organisation, sans terme et non suspendable, ou exception nommée dans STORY-167 AC 2 ; intersection calculée dans la coque et la garde de chaque module, à partir de l'état publié, pas dans <code>perms[]</code> ; signaler à C7 la limite du format.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-07 · « Une vue, jamais une seconde source » est faux, et le canal n'est pas nommé</h3>
+              <span class="finding-location">FR-34, §7 C5</span>
+            </header>
+            <div class="finding-note">Axe 2, espace, gel, accueil et droits déclarés <strong>ne sont pas</strong> dans <code>entitlement.changed</code> : l'état publié est une <strong>source</strong> pour ces champs. Les états qui dépendent du temps changent sans événement : « &lt; 1 min » n'est tenable que si l'état est <strong>calculé à la lecture</strong>. Route ou topic, avec quel droit : non dit.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « L'état publié est <strong>calculé à la lecture</strong> (entitlement + faits du moteur) ; une route de lecture par organisation et par espace » ; « jamais une seconde source » réservé au <strong>droit</strong>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-08 · La liste des chemins se dit complète, mais il en manque, et les refus ne sont pas répartis par chemin</h3>
+              <span class="finding-location">FR-4</span>
+            </header>
+            <div class="finding-note"><code>suspension-par-impaye</code> <strong>rétablit</strong> <code>SUSPENDED → ACTIVE</code> sur <code>regularise</code> : une ouverture hors liste. L'offre d'essai pose <code>finLe</code>, ce que le <code>PUT</code> opérateur ne sait pas faire : un septième chemin. Les chemins 2, 3 et 4 sont des consommateurs Kafka : un 422 n'y a personne à qui répondre.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Ajouter « 7. Régularisation » et « 8. Offre d'essai » ; refus applicables par chemin (<code>MODULE_NON_SOUSCRIT</code> ne vaut ni pour 4 ni pour 5) ; refus asynchrone = écart nommé, journalisé, visible au bilan ; FR-12 « <strong>ouvert</strong> au paiement », pas « devient installable ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-09 · Le « rappel » est attribué à la mauvaise story, et <code>PREAVIS</code> change de sens</h3>
+              <span class="finding-location">§8.4 ligne STORY-727, §3 « Rappel » / « Préavis »</span>
+            </header>
+            <div class="finding-note">Le préavis de J-7 appartient à <code>paiement</code> (STORY-280/281 : <code>HORIZON_PREAVIS_JOURS</code>, jalon <code>'PREAVIS'</code>, clef <code>&lt;contrat&gt;:&lt;échéance&gt;:PREAVIS</code>) ; 727 n'en a pas. Renommer la nature change les clefs des jalons posés. Tant que le code garde <code>PREAVIS</code> pour « avant » et l'état publié pour « après », le même mot a deux sens.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Adresser le renommage à STORY-280/281 (paiement + modèles de notification), en gardant la valeur technique ou avec migration des clefs ; à défaut, renommer l'état publié (ex. <code>ECHU_EN_SURSIS</code>).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-10 · « Délai de grâce » entre en collision avec la grâce de <code>paiement</code></h3>
+              <span class="finding-location">§3 « Délai de grâce », FR-15, QB-1</span>
+            </header>
+            <div class="finding-note">Dans <code>paiement</code>, une <strong>grâce</strong> est un délai <strong>accordé</strong> par un humain sur un impayé (<code>paiement:grace:attribuer</code>, 30 j par défaut, 90 au plus). Deux « grâces » de 30 jours dans la même console ; l'homonyme est pire qu'un synonyme.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Renommer le terme du PRD (ex. « délai de silence ») et citer la grâce de paiement au §3.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-11 · Trois définitions de la lecture seule</h3>
+              <span class="finding-location">FR-32, FR-35, §3.1 ligne <code>LECTURE_SEULE</code></span>
+            </header>
+            <div class="finding-note">Par <strong>verbe HTTP</strong> (727 lot 4, livré dans 8 services : <code>GET/HEAD/OPTIONS</code> passent, toute écriture 403 <code>ABONNEMENT_EXPIRE</code>), par <strong>catégorie d'action</strong> (FR-32), par <strong>droit</strong> (FR-35). Produire un état BCEAO ou lancer un export est en général un <code>POST</code>, refusé par le code. Le test en matrice de FR-34 n'a pas d'attendu unique.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Choisir un mécanisme (ex. verbe + <strong>liste blanche déclarée au manifeste</strong> pour export et états, versée dans C13) ; aligner FR-35 ; retirer l'<code>[ASSUMPTION]</code>.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-12 · La règle « reprise » par les Connecteurs n'y est pas</h3>
+              <span class="finding-location">FR-9 × PRD Connecteurs</span>
+            </header>
+            <div class="finding-note">Le PRD Connecteurs, finalisé après le moteur, ne contient ni bac à sable, ni interception, ni <code>ECRITURE_REELLE_DEPUIS_ESSAI</code>, ni identifiants par espace, ni comportement en lecture seule. Pour une IMF dont le logiciel <strong>reste la référence</strong>, couper la synchronisation laisse Prospera se périmer en silence.</div>
+            <div class="finding-fix"><strong>Correction :</strong> FR-9 « <strong>doit</strong> reprendre » ; ajouter au PRD Connecteurs la cascade et le comportement en <code>LECTURE_SEULE</code> ; valider les deux ensemble le 13/11.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-13 · Jonction avec le PRD Reprise : réception, écrans, effacement</h3>
+              <span class="finding-location">FR-8, §3 « Réception définitive » × PRD Reprise</span>
+            </header>
+            <div class="finding-note">La Reprise garde ses fichiers « jusqu'à la réception définitive » <strong>par reprise</strong> ; le moteur l'enregistre <strong>par sous-ensemble</strong> : aucun PRD ne dit quels lots une réception partielle libère. Reprise C8 dit « plus tard dans <code>prospera-app</code> » alors que le moteur met le libre-service en février. L'effacement du prospect n'apparaît pas dans la Reprise. Le feu vert, lui, concorde.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Compléter la ligne « PRD Reprise » du §8.4 : C8 en <code>prospera-app</code> dès février ; réception par sous-ensemble = libération de ses lots ; effacement du prospect (C13).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-14 · Le rejeu écrit chez d'autres propriétaires sans contrat nommé</h3>
+              <span class="finding-location">§3 « Dossier d'installation », FR-33, §7 C3</span>
+            </header>
+            <div class="finding-note">Rôles (<code>auth-service</code>), zones (<code>reseau</code>), tables de correspondance (Reprise) : rejouer le dossier, c'est écrire chez chacun par un contrat C5 qu'aucun PRD ne nomme, alors que C3 dit « n'écrit dans aucun autre module ». Les <strong>comptes</strong> ne figurent pas au dossier.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Pour chaque élément du dossier, son propriétaire et son point d'import ; ajouter « comptes et invitations » ou dire qu'ils sont recréés ; gabarit C13 « importer la part d'un dossier qui vous appartient ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-15 · §8.4 : les définitions du contrat que le PRD change ne sont pas listées</h3>
+              <span class="finding-location">§8.4 ligne « Contrat de module »</span>
+            </header>
+            <div class="finding-note">Le PRD redéfinit <strong>Installer</strong> (contrat : « poser <code>ACTIVE</code> »), <strong>Pack</strong> (contrat : <code>VerticalPack</code>), <strong>Suspendre</strong> (contrat : « impayé, STORY-280 »), la forme de <code>depends</code> (C1) et ajoute le préavis. §8.4 ne demande que C2, C12, C13, Q4 et §9.</div>
+            <div class="finding-fix"><strong>Correction :</strong> Ajouter : « §0 et §1 : Installer, Pack, Suspendre, Expiré (préavis) ; C1 : <code>depends: [{ code, raison }]</code> et nouveaux champs ; C11 §5 : clause unique de la plateforme ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-16 · La vérification quotidienne transporte une licence alors qu'elle « n'envoie aucune donnée »</h3>
+              <span class="finding-location">FR-41 × FR-16</span>
+            </header>
+            <div class="finding-note">Pour recevoir <strong>sa</strong> licence, l'instance doit s'identifier (donnée de niveau 0). La promesse « en 24 heures » repose sur une requête qui change de nature.</div>
+            <div class="finding-fix"><strong>Correction :</strong> La vérification quotidienne porte l'identifiant et le numéro de licence (niveau 0, FR-26), ou FR-41 ramenée à « au prochain signal hebdomadaire (7 jours) ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-17 · Les nouvelles clauses ne sont reportées ni au gabarit ni à leurs premiers débiteurs</h3>
+              <span class="finding-location">§0, FR-38, §7 C12/C13</span>
+            </header>
+            <div class="finding-note">Le contrat §6 impose <strong>onze lignes</strong> (vérifiées par <code>bmad-check-implementation-readiness</code>) : avec C12 et C13 il en faut treize. FR-10 (rafraîchissement par organisation) exige que chaque module sache <strong>importer</strong> la part d'une organisation ; C13 ne prévoit qu'« exporter et effacer ». Les PRD Reprise et Connecteurs ont encore un tableau C1 → C11.</div>
+            <div class="finding-fix"><strong>Correction :</strong> C13 = « exporter, <strong>importer</strong> et effacer par organisation » ; §8.4 « contrat §6, 13 lignes » ; C12 et C13 aux deux PRD frères.</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-medium">medium</span>
+              <h3 class="finding-title">C-N-18 · Les interrupteurs de changement sont une obligation de module hors contrat</h3>
+              <span class="finding-location">FR-17, variante plateforme</span>
+            </header>
+            <div class="finding-note">Chaque module doit lire un interrupteur par organisation, avec date limite, et prouver qu'il ne lui survit pas : ni dans C12, ni dans C13, ni au manifeste. Le support n'est pas nommé (<code>Entitlement.config</code> existe). Même défaut que R-04.</div>
+            <div class="finding-fix"><strong>Correction :</strong> L'ajouter à C12 (interrupteur déclaré au manifeste) et nommer son support (<code>config.interrupteurs</code> dans <code>entitlement.changed</code>, ou la vue de FR-34).</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">C-N-19 · Un cycle ne se détecte pas dans la CI d'un seul dépôt</h3>
+              <span class="finding-location">FR-4</span>
+            </header>
+            <div class="finding-note">Un cycle traverse plusieurs manifestes ; un dépôt ne voit que le sien. Seul le catalogue voit le graphe.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « Le catalogue refuse à la publication ; la CI d'un dépôt vérifie son manifeste contre la copie publiée du graphe ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">C-N-20 · <code>EN_INSTALLATION</code>, colonne « Droit » : la réinstallation</h3>
+              <span class="finding-location">§3.1</span>
+            </header>
+            <div class="finding-note">Pour une réinstallation, l'entitlement existe déjà en <code>REVOKED</code> ; les chemins 2, 3 et 4 ne rouvrent jamais un <code>REVOKED</code>, seul le <code>PUT</code> opérateur le fait.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « absent, ou <code>REVOKED</code> pour une réinstallation ; seul le chemin 1 le rouvre ».</div>
+          </article>
+          <article class="finding">
+            <header>
+              <span class="badge badge-sev-low">low</span>
+              <h3 class="finding-title">C-N-21 · La version de plateforme coexiste avec une version épinglée par organisation</h3>
+              <span class="finding-location">§3 « Version de plateforme », FR-17, FR-21</span>
+            </header>
+            <div class="finding-note"><code>Entitlement.versionCode</code> épingle une version par organisation et par module ; deux organisations ouvertes à deux dates peuvent avoir deux versions. FR-17 suppose que la promotion réécrit <code>versionCode</code> pour tous, sans le dire.</div>
+            <div class="finding-fix"><strong>Correction :</strong> « Une promotion de version de plateforme met à jour <code>versionCode</code> de tous les droits concernés (une seule écriture, journalisée) ».</div>
+          </article>
+        </div>
+      </details>
+    </section>
+
+    <div class="mechanical">
+      <h3>Mechanical notes</h3>
+      <ul>
+        <li><strong>Identifiants :</strong> FR-1 → FR-41 uniques et sans trou (ordre non séquentiel assumé au §0) ; NFR-1 → NFR-10 et SM-1 → SM-7 contigus ; QA-1 → QA-4, QB-1/2, QC-1 se résolvent. UJ-1 → UJ-5 nommés, protagonistes présents.</li>
+        <li><strong>Renvois vers la revue</strong> dans le texte produit (G-09, G-12, T-01, T-07, T-09, T-10, T-16, T-21, T-24, T-29) : à remplacer par « décision du PO, 2026-11-10 ».</li>
+        <li><strong>Frontmatter :</strong> <code>validation: validation-report.md</code> pointait vers un fichier archivé dans <code>revue-1/</code> ; le présent rapport le remplace à cet emplacement.</li>
+        <li><strong>Niveaux de titre :</strong> UJ-1 → UJ-5 en <code>###</code>, frères de « ### 2.3 » au lieu d'en être les enfants ; UJ-4 et UJ-5 n'ont pas de ligne vide après le titre.</li>
+        <li><strong>Termes employés hors glossaire :</strong> feu vert (central pour FR-8 et C5), vague, client pilote, bac à sable, liste blanche de test, plan d'installation (FR-40), poste d'accès contrôlé (FR-29), certificat d'effacement, état publié (défini au §3.1 seulement). Le PRD Reprise emploie « bascule », que ce glossaire ne relie pas à « mise en service ».</li>
+        <li><strong>« Bilan d'instance » :</strong> défini comme le bilan qui <em>clôt le montage</em> (§3, FR-25), mais NFR-7 le fait « passer en orange » chaque mois : c'est le voyant de santé de l'instance (FR-16), pas ce bilan.</li>
+        <li><strong>§7 C3 :</strong> « Possède : … licences, consentements » parle pour tout le moteur alors que l'en-tête du §7 confie B et C à d'autres services.</li>
+        <li><strong>Index des hypothèses :</strong> l'aller-retour tient pour toutes les marques en ligne, sauf l'ordre de sacrifice (§8.4), absent du §8.3. FR-22 utilise une marque non standard (<code>[hors périmètre du produit : décision commerciale]</code>) ; NFR-8 « changent chaque année » n'est ni au journal ni marqué.</li>
+        <li><strong>§8.1 :</strong> la liste des thèmes tranchés le 10/11 ne dit pas <em>ce qui</em> a été tranché ; pour la séance du 13/11, une table thème → choix → FR éviterait au PO de rouvrir le journal.</li>
+        <li><strong>§3.1 :</strong> la parenthèse « (paiement, socle de vertical, opérateur) » ne reprend que trois des cinq chemins d'exception de FR-4.</li>
+        <li><strong>Contrat de module :</strong> cité et respecté (onze lignes + C12/C13 au §7) ; demandes d'amendement au §8.4, à compléter pour C8 (U-06) et pour les définitions du §0/§1 (U-21).</li>
+      </ul>
+    </div>
+
+    <footer class="report-footer">
+      <div class="meta">
+        <span>Rubric: C:/Users/thier/Documents/.claude/skills/bmad-prd/assets/prd-validation-checklist.md</span>
+        <span>Generated: 2026-11-10T13:25:55+00:00</span>
+        <span>Revues : C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/review-rubric.md · review-adversarial-general.md · review-coherence-contrat.md</span>
+        <span>Passage 1 : C:/Users/thier/AppData/Local/Temp/claude/9bbf1c22b9374251/0ae42633-f0a2-4ec7-a361-b981128c3d88/scratchpad/wt/stories/prds/prd-moteur-installation-2026-11-09/revue-1/validation-report.md</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
