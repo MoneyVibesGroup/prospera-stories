@@ -339,14 +339,270 @@ Chaque module installé exécute ses vérifications et en rend le résultat chif
 - « Envoyer le bilan au client » produit un PDF reçu par le dirigeant du client.
 - Le bilan est conservé : on peut le rouvrir et voir qui a installé quoi, quand, et avec quels résultats.
 
-**Questions ouvertes de la partie A**
-- **QA-1** : l'offre commerciale du distributeur compte **18 modules** et **4 packs** (plus un add-on
-  Freelance) ; le catalogue en compte **7 codes** dans le pack `distributeur` (`balance`, `bilan`, `pdv`,
-  `stock`, `catalogue`, `commande`, `facturation`). Lequel des deux la console montre-t-elle, et comment se
-  correspondent-ils ?
-- **QA-2** : où se place l'**espace d'essai** dans ce parcours ? Le bilan « En service » est-il la mise en
-  service dans l'espace réel ?
-- **QA-3** : la synchronisation Odoo aller-retour du bilan est du ressort du module **Connecteurs**. Le
-  distributeur de février en a-t-il besoin ? Si oui, Connecteurs entre au lot 1.
-- **QA-4** : la sélection de Rachid doit-elle concorder avec le contrat ou l'abonnement du client (la console
-  refuse un module non acheté), ou est-ce elle qui fait foi ?
+#### FR-8 : La répétition générale, puis la mise en service
+Toute installation se joue d'abord **dans l'espace d'essai**, puis est **rejouée** dans l'espace réel.
+Réalise UJ-1, UJ-2, UJ-3.
+
+**Conséquences (testables) :**
+- Dans l'espace d'essai : offre installée, reprise de données, comptes, connecteurs, puis **bilan d'essai**.
+- Une **date de mise en service** est fixée avec le client.
+- Le jour venu, la **même offre** et les **mêmes tables de correspondance** sont rejouées dans l'espace réel,
+  avec une reprise **fraîche** : on ne copie jamais l'essai vers le réel.
+- Le **bilan de mise en service** est distinct du bilan d'essai ; seul le premier fait passer le client
+  **En service** (FR-7).
+
+#### FR-9 : Un espace d'essai qu'on ne peut pas confondre avec le réel
+**Conséquences (testables) :**
+- L'espace d'essai porte en permanence un **bandeau jaune** (« ESPACE D'ESSAI : rien de ce que vous faites
+  ici n'est réel »), une couleur différente et un **titre d'onglet différent**.
+- **Aucun envoi réel ne part de l'espace d'essai** : SMS, WhatsApp, e-mail et liens de paiement sont
+  interceptés, sauf vers une **liste blanche de test**, et restent consultables dans un journal.
+- L'interdit est vérifié côté serveur : un envoi réel demandé depuis l'essai est refusé, quel que soit
+  l'écran.
+
+#### FR-10 : Un espace d'essai qui ressemble au réel
+**Conséquences (testables) :**
+- L'espace d'essai se **rafraîchit depuis l'espace réel** à la demande, et obligatoirement avant une mise à
+  jour majeure.
+- La copie reste **sur le même hébergement** et **cloisonnée par organisation**.
+- Un rafraîchissement ne modifie jamais l'espace réel, et les envois restent interceptés (FR-9).
+
+#### FR-11 : Un seul chemin pour tout changement
+Premier module, module ajouté plus tard, mise à jour de version : **toujours** essai, bilan, puis promotion
+dans le réel.
+
+**Conséquences (testables) :**
+- Il n'existe aucune commande qui installe ou met à jour directement dans l'espace réel.
+- Un module **sans reprise de données** peut être promu le jour même de son installation en essai.
+
+#### FR-12 : Le contrat fait foi
+L'offre installée doit **concorder avec le contrat ou l'abonnement** du client (vente directe aux
+institutions).
+
+**Conséquences (testables) :**
+- À l'ouverture de l'installation, la console **précharge l'offre** depuis le contrat du client
+  (contrat de `paiement-service`, STORY-727) ; Rachid ajuste dans ses limites.
+- Installer un module que le contrat ne couvre pas est refusé : `MODULE_NON_SOUSCRIT` (422).
+- Un module ajouté au contrat devient installable sans autre action.
+
+**Hors périmètre :** la place de marché, où la sélection du client ferait foi (plus tard).
+
+#### FR-13 : Le même geste sur la plateforme Money Vibes et sur site
+**Conséquences (testables) :**
+- La console, les voyants, le bilan et les refus sont **identiques** pour un distributeur hébergé chez
+  Money Vibes et pour un assureur sur ses serveurs.
+- Sur une instance sur site, la console tourne **sur l'instance** et les droits viennent de la **licence**
+  (FR-14).
+
+**Questions de la partie A, tranchées le 2026-11-10**
+- **QA-1** : la console montre les **modules commerciaux** (18 pour le distributeur, 4 packs, add-on
+  Freelance). Le catalogue technique est incomplet **par choix** : **chacun de ces modules doit y entrer**,
+  avec son manifeste. « Bundle » et « pack » désignent la même chose.
+- **QA-2** : la répétition générale (FR-8 à FR-11).
+- **QA-3** : **Connecteurs** doit être prêt en février ; son PRD entre au lot 1.
+- **QA-4** : le contrat ou l'abonnement fait foi (FR-12).
+
+### 4.B Livrer et mettre à jour l'instance
+
+**Description.** Chez un assureur ou une IMF, Yao et Koffi (DSI) installent l'instance sur le serveur du
+client : socle, modules de l'offre, deux espaces, sauvegardes (réalise UJ-1). L'instance n'accepte
+**aucune connexion entrante** ; c'est elle qui appelle Money Vibes pour recevoir sa licence et ses mises à
+jour, et pour dire comment elle va. Quand une version sort, Money Vibes la dépose d'abord dans l'espace
+d'essai du client, la vérifie, puis prévient Koffi ; quelques utilisateurs clés l'essaient sur leurs vrais
+dossiers ; Koffi choisit la date ; la promotion se fait avec sauvegarde avant, contrôle après et retour
+arrière automatique en cas d'échec. Pour un distributeur, tout cela se passe sur les serveurs de Money
+Vibes, avec les mêmes étapes.
+
+#### FR-14 : La licence signée
+**Conséquences (testables) :**
+- Money Vibes émet pour chaque instance sur site une **licence signée** : organisations, modules,
+  échéances. L'instance vérifie la signature **hors ligne**.
+- Une licence altérée ou mal signée est refusée, et l'instance garde la précédente.
+- Un module absent de la licence ne s'installe pas : `MODULE_HORS_LICENCE` (422).
+- Une suspension (impayé, litige) ou un ajout de module arrive par une **nouvelle licence**, au contact
+  suivant.
+
+#### FR-15 : Fonctionner coupé de Money Vibes
+**Conséquences (testables) :**
+- Une instance sur site fonctionne normalement sans joindre Money Vibes pendant le **délai de grâce**
+  `[ASSUMPTION : 30 jours]`.
+- Le DSI et Money Vibes sont alertés à partir de `[ASSUMPTION : J+7]` sans contact.
+- À l'expiration : `[QUESTION QB-1 : que se passe-t-il ?]`
+
+#### FR-16 : Connexion sortante uniquement, et supervision
+**Conséquences (testables) :**
+- L'instance n'ouvre **aucun port entrant** ; toutes les liaisons sont initiées par elle, en HTTPS.
+- Elle envoie un **battement** à intervalle régulier `[ASSUMPTION : toutes les 15 minutes]` : version, santé
+  par module, licence, indicateurs de niveau 0.
+- Money Vibes dispose d'une **vue de supervision** de toutes les instances : version, santé, dernier contact,
+  mises à jour en attente.
+
+#### FR-17 : Mises à jour tirées, essayées, puis promues à la date du client
+**Conséquences (testables) :**
+- L'instance voit les versions disponibles, télécharge des **paquets signés** et refuse un paquet dont la
+  signature est invalide.
+- La version s'installe **d'abord dans l'espace d'essai** ; Money Vibes y joue la recette.
+- Le DSI reçoit un message en langage simple : ce qui change, ce qu'il faut essayer, la date proposée.
+- Le DSI **choisit la date** de promotion ; sans son accord, rien ne change dans l'espace réel (sauf FR-19).
+- Avant la promotion : **sauvegarde automatique** ; après : **contrôle de santé** ; en cas d'échec :
+  **retour arrière automatique**.
+
+#### FR-18 : Retour arrière en un clic, sans perte
+**Conséquences (testables) :**
+- Après une promotion, le DSI peut revenir à la version précédente en une action, pendant
+  `[ASSUMPTION : 7 jours]`.
+- Les données saisies depuis la promotion sont conservées ; une mise à jour dont la migration de données
+  n'est pas réversible ne peut pas être publiée sans sauvegarde restaurable.
+
+#### FR-19 : Le chemin rapide des correctifs de sécurité
+**Conséquences (testables) :**
+- Un correctif de sécurité passe par l'essai **et** la promotion dans un délai court
+  `[ASSUMPTION : 72 heures]`, avec retour arrière automatique.
+- Le DSI est prévenu avant ; `[QUESTION QB-2 : peut-il refuser ou reporter ?]`
+
+#### FR-20 : Déploiement par vagues
+**Conséquences (testables) :**
+- Money Vibes fixe l'ordre : un **client pilote** d'abord, puis les autres.
+- Une version ne passe à la vague suivante qu'après `[ASSUMPTION : 7 jours]` de santé sans incident sur la
+  précédente.
+
+#### FR-21 : Une seule ligne de version
+**Conséquences (testables) :**
+- Aucune branche de code propre à un client (contrat de module C6).
+- Une instance ne peut pas rester plus de **deux versions majeures** en retard : c'est la fenêtre de support
+  N/N-1 déjà appliquée par le catalogue (`fenetre-de-support.ts`).
+
+#### FR-22 : Mise à jour hors ligne
+**Conséquences (testables) :**
+- Le **même paquet signé** peut être apporté sur clé USB lors d'une visite et appliqué par le même chemin
+  (essai, puis promotion).
+
+#### FR-23 : Support à distance à la demande
+**Conséquences (testables) :**
+- Un tunnel de support n'existe que **si le client l'ouvre**, pour une durée limitée, et chaque session est
+  journalisée (qui, quand, combien de temps).
+- Aucun accès permanent de Money Vibes à une instance sur site.
+
+#### FR-24 : Les modèles d'IA du client sont intouchables
+**Conséquences (testables) :**
+- Une mise à jour ne modifie jamais une **calibration locale** : son empreinte est identique avant et après
+  (contrat de module C11).
+- La calibration est sauvegardée et restaurée avec les données (FR-17, FR-18).
+
+#### FR-25 : Monter une instance sur site
+**Conséquences (testables) :**
+- À partir d'un serveur livré, une procédure scriptée monte le socle, les deux espaces et les modules de la
+  licence, chacun par son **profil** (contrat de module C10), avec sauvegardes automatiques.
+- La procédure se termine par un **bilan d'instance** : espaces actifs, licence valide, battement reçu par
+  Money Vibes, sauvegarde testée par une restauration.
+
+### 4.C Données et apprentissage
+
+**Description.** Par défaut, rien de ce qui appartient au client ne sort de son instance : seuls partent des
+indicateurs. Pour améliorer l'IA, Money Vibes peut demander plus, et chaque niveau supplémentaire exige le
+**consentement** du client. Le but déclaré est un **modèle commun** nourri par les historiques des clients
+qui l'acceptent, le plus tôt possible ; chaque client le recalibre ensuite chez lui. Ces règles valent
+aussi pour les distributeurs hébergés chez Money Vibes : avoir leurs données sur nos serveurs ne donne pas
+le droit de les mettre en commun.
+
+#### FR-26 : Niveau 0, des indicateurs seulement
+**Conséquences (testables) :**
+- Sortent automatiquement : version, santé, licence, et **indicateurs IA agrégés** (taux d'erreur par
+  modèle, nombre de corrections, dérive).
+- Aucun indicateur ne contient un identifiant de personne ou de dossier ; un test le vérifie sur chaque
+  envoi.
+
+#### FR-27 : Le registre des consentements
+**Conséquences (testables) :**
+- Un consentement porte : organisation, **finalité**, **niveau** (1, 2 ou 3), auteur, date, référence de la
+  clause du contrat client.
+- Il est donné par `[QUESTION QC-1 : quel rôle chez le client ?]` ; il se **retire** à tout moment.
+- Chaque don et chaque retrait sont journalisés ; le client consulte ce journal.
+- Sans contrat client signé portant la clause correspondante, aucun consentement ne s'enregistre.
+
+#### FR-28 : Niveau 1, l'échantillon pseudonymisé
+**Conséquences (testables) :**
+- Money Vibes demande un échantillon (par exemple les dossiers où l'IA s'est trompée) ; le client
+  **approuve chaque export** ; l'échantillon est pseudonymisé avant de sortir.
+- Le client voit dans le journal ce qui est sorti, quand et pour quoi.
+
+#### FR-29 : Niveau 2, l'accès encadré
+**Conséquences (testables) :**
+- L'analyse se fait sur place, ou par le tunnel ouvert par le client (FR-23) ; rien n'est copié hors de
+  l'instance.
+
+#### FR-30 : Niveau 3, la contribution au modèle commun
+**Conséquences (testables) :**
+- L'entraînement s'exécute **sur l'instance** et produit une **contribution** (jeu d'entraînement
+  pseudonymisé en première étape).
+- Une contribution ne sort que sous consentement valide ; sinon, refus `CONSENTEMENT_ABSENT` et rien ne
+  sort.
+- Un consentement retiré exclut l'organisation du **prochain** tour d'entraînement ; il ne défait pas un
+  modèle déjà produit (le contrat client le dit).
+
+#### FR-31 : Le modèle commun redescend comme une mise à jour
+**Conséquences (testables) :**
+- Le modèle commun est livré comme un paquet signé, par le chemin de FR-17 (essai, puis promotion).
+- Chaque instance le **recalibre localement** ; la calibration précédente reste disponible pour un retour
+  arrière.
+
+**Hors périmètre de 4.C :** l'apprentissage fédéré (deuxième étape, quand le nombre de clients le
+justifie) ; la remise commerciale accordée à ceux qui partagent ; la rédaction du contrat client (prérequis
+juridique, loi togolaise 2019-014).
+
+---
+
+## 5. Exigences transverses
+
+- **NFR-1, signature** : licences, paquets de version et modèles communs sont signés par Money Vibes ;
+  l'instance refuse tout ce qui ne l'est pas.
+- **NFR-2, aucune entrée** : aucune instance sur site n'expose de port entrant vers internet.
+- **NFR-3, cloisonnement** : l'espace d'essai ne lit ni n'écrit jamais l'espace réel, sauf le
+  rafraîchissement (FR-10), qui va dans un seul sens.
+- **NFR-4, traçabilité** : installations, mises en service, promotions, retours arrière, consentements,
+  exports et sessions de support sont journalisés en **ajout seul**.
+- **NFR-5, rapidité** : le pack distributeur complet s'installe dans l'espace d'essai en moins de
+  `[ASSUMPTION : 15 minutes]`, hors reprise de données.
+- **NFR-6, idempotence** : rejouer une installation, une promotion ou un « Réessayer » ne crée aucun doublon.
+
+## 6. Indicateurs de réussite
+
+| # | Indicateur | Cible |
+|---|---|---|
+| SM-1 | Démo du 15/01 : le pack distributeur installé **en une action** sur une organisation vierge, bilan tout vert | atteint |
+| SM-2 | Clients **En service** en février 2027 | 2 (un assureur sur site, un distributeur chez Money Vibes) |
+| SM-3 | Changements arrivés dans un espace réel **sans** passer par l'essai | 0 |
+| SM-4 | Données sorties d'une instance **sans** consentement valide | 0 |
+| SM-5 | Clients installés la première année | ≈ 10 |
+
+**Contre-indicateurs** (à surveiller pour qu'on ne triche pas avec les cibles) :
+- nombre de **retours arrière** par version (une promotion trop rapide se paie ici) ;
+- modules restés **🟠 en attente plus de 7 jours** (un bilan « presque vert » n'est pas un client servi) ;
+- instances **au-delà du délai de grâce**.
+
+## 7. Contrat de module du moteur lui-même
+
+Le moteur vit dans `platform-catalog-service` ; il applique le contrat qu'il fait respecter.
+
+| Clause | Pour le moteur |
+|---|---|
+| C1 | Le manifeste s'enrichit : raison par dépendance, prérequis, vérifications, champ `ia` |
+| C2 | Socle existant du catalogue (droits plateforme `entitlement:*`) |
+| C3 | Possède : offres, bilans, licences, consentements, journal ; n'écrit dans aucun autre module |
+| C4 | Sans Reprise ni Connecteurs, le bilan déclare leurs lignes « non installé », jamais vertes |
+| C5 | Publie `entitlement.changed` (existant) ; topics de bilan et de licence à nommer dans la spine |
+| C6 | Aucune règle propre à un client ; tout passe par le contrat et la licence |
+| C7 | Droits plateforme existants ; droit client à créer pour donner un consentement (FR-27) |
+| C8 | Écrans dans la console Money Vibes (installation, bilan, supervision, consentements) |
+| C9 | Désinstaller ne supprime rien (existant : `DELETE` = `REVOKED`) |
+| C10 | Socle minimal : démarre toujours, sans profil |
+| C11 | Sans objet : le moteur n'embarque pas d'IA ; il transporte les contributions (4.C) |
+
+## 8. Questions ouvertes
+
+| # | Question | Bloque |
+|---|---|---|
+| QB-1 | À l'expiration du délai de grâce, que fait l'instance ? (continuer et alerter / lecture seule / arrêt) | FR-15 |
+| QB-2 | Le DSI peut-il refuser ou reporter un correctif de sécurité, et jusqu'à quand ? | FR-19 |
+| QC-1 | Qui, chez le client, donne un consentement (DG, DSI, délégué à la protection des données) ? | FR-27 |
+| — | Les valeurs marquées `[ASSUMPTION]` : délai de grâce 30 j, alerte à J+7, battement 15 min, retour arrière 7 j, correctif 72 h, vague 7 j, installation 15 min | à confirmer en bloc |
