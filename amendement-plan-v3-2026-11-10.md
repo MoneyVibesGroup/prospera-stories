@@ -1,6 +1,6 @@
-# Amendement du plan v3 : le moteur d'installation et l'instance sur site avant février · **proposition à valider le 13/11**
+# Amendement du plan v3 : le moteur d'installation et l'instance sur site avant février · **validé le 2026-11-11**
 
-> **Date :** 2026-11-10 · **Statut :** 🟡 **proposé par Dev B, à valider par le PO le 13/11**
+> **Date :** 2026-11-10 · **Statut :** ✅ **VALIDÉ par le PO le 2026-11-11** (séance avancée du 13/11 ; réponses au §9)
 > **Amende :** `PLAN-2-DEVS-8-SEMAINES-2026-10-26.md` (v3 du 2026-11-09), **sans le modifier** : ce document
 > est lu avec lui. Une fois validé, le plan renvoie ici pour §0, §5, §7, §8 et §9.
 > **Source :** `prds/prd-moteur-installation-2026-11-09/prd.md` (§0, §8.1, §8.4) et `.memlog.md`
@@ -31,8 +31,8 @@ vitesse de Dev A (80 à 100 points par semaine).
 | Raison | Tenir le cadrage des 3 projets | **Février 2027 a deux clients** : une assurance **sur ses serveurs**, un distributeur **sur les serveurs de Money Vibes**. Les deux modes d'hébergement doivent être prêts |
 | Ce qui reste vrai | Le profil compose (C10) est la première brique et sert à la recette | idem |
 
-À reporter dans : plan v3 §8 (D3), contrat de module §9 (✅ fait le 2026-11-10), AD-P17 de
-`architecture-prospera-ecosystem-2026-07-04.md`.
+À reporter dans : plan v3 §8 (D3, ✅ fait le 2026-11-11), contrat de module §9 (✅ fait le 2026-11-10), AD-P17 de
+`architecture-prospera-ecosystem-2026-07-04.md` (✅ fait le 2026-11-11).
 
 ---
 
@@ -62,7 +62,7 @@ Décision du PO (2026-11-10), classement de la salle. Il **s'adapte au fil du pr
 
 | Groupe | Exigences | Version minimale si on dégrade |
 |---|---|---|
-| **Jamais sacrifiées** | FR-1 → FR-9, FR-11, FR-12, FR-14, FR-15, FR-17 (sur site), FR-18, FR-19, FR-22, FR-23, FR-24 (IA calibrée de l'assureur), FR-25, FR-32 → FR-38, FR-40, FR-41 ; NFR-1 → NFR-4, NFR-6 → NFR-8 ; FR-42, FR-43 et NFR-11 *(classement à confirmer)* | — |
+| **Jamais sacrifiées** | FR-1 → FR-9, FR-11, FR-12, FR-14, FR-15, FR-17 (sur site), FR-18, FR-19, FR-22, FR-23, FR-24 (IA calibrée de l'assureur), FR-25, FR-32 → FR-38, FR-40, FR-41 ; NFR-1 → NFR-4, NFR-6 → NFR-8 ; FR-42, FR-43 et NFR-11 *(classement confirmé par le PO le 2026-11-11)* | — |
 | **Dégradables** | FR-10 | rafraîchissement par un script lancé à la demande |
 | | FR-13 | même console ; les écarts sont listés |
 | | FR-16 | supervision réduite à la liste des instances et au dernier contact |
@@ -231,3 +231,22 @@ Une version majeure sort donc avec sa **date de fin de maintenance**, trois ans 
 8. **La validation juridique** des clauses d'apprentissage et du contrat client (loi 2019-014) : le juriste
    est-il identifié, pour une réponse avant la signature du premier contrat en février ?
 9. **Qui amende AD-P17** dans `architecture-prospera-ecosystem-2026-07-04.md` pour y inscrire D3 révisée ?
+
+### Réponses du PO (2026-11-11, séance avancée)
+
+| # | Question | Réponse du PO |
+|:-:|---|---|
+| 1 | Couvrir l'écart de charge | **Charger les deux développeurs** : quatre chantiers chacun par semaine au minimum ; Dev A prend six épics du moteur (155, 160 et le backend de 153, 154, 156, 158) ; **tous les écrans par Dev B**. Plan semaine par semaine et carte des dépôts : `epics-moteur-installation-2026-11-11.md`. Le sort du CRM interne, des sinistres et de la GED se lit au chiffrage du 04/12. |
+| 2 | Le noyau assurance du 15/01 | **Non maintenu tel quel** : la démo montre l'assurance **telle qu'elle est aujourd'hui dans le code** (polices, sinistres de `DECLARE` à `CLOTURE`), sans GED ni OCR de lot. |
+| 3 | Le démarrage de la microfinance le 18/01 | **Maintenu** (S9 du plan des épics du moteur). |
+| 4 | FR-42, FR-43 et NFR-11 parmi les jamais sacrifiées | **Oui, confirmé** (§3). |
+| 5 | Q3 du contrat de module | **Reconfirmée et étendue** : le module qui dépend d'une dépendance dure **reste ouvert**. Dépendance en **lecture seule** (son contrat est impayé) : il la lit normalement, sans y écrire. Dépendance **suspendue** (sanction décidée) : ce qu'il en lit se déclare `SUSPENDU`. Raison : on ne punit pas un module payé à cause d'un autre. |
+| 6 | C12 et C13 | **Validées**, avec le test « promouvoir, saisir, revenir, tout se relit » obligatoire à la prochaine gate de chaque service existant (gardes posées par EPIC-155). |
+| 7 | Les manifestes | **Dev B les écrit tous (44), le plus tôt possible** : ceux des modules déjà codés et de la démo **avant le 20/11** ; les autres avec le PRD de leur lot (20/11, 27/11, 04/12) ; Reprise et Connecteurs avec leurs spines, cette semaine. Écrits dans `prospera-stories`, chargés au catalogue par EPIC-143 ; le fichier `module.manifest.ts` de chaque dépôt est copié par son propriétaire de la semaine. Dates : `manifestes-a-produire.md`. |
+| 8 | Le juriste (loi 2019-014) | **Le PO s'en charge au moment venu.** Aucun développement n'est bloqué : sans contrat signé portant la clause, aucun consentement ne s'enregistre (spine du moteur, AD-13). |
+| 9 | Qui amende AD-P17 | **Dev B, comme correction de cohérence** : fait le 2026-11-11 (installer = un plan du moteur, treize clauses, D3 révisée). |
+
+**Également décidé le 2026-11-11 :**
+- le contrôle `bmad-check-implementation-readiness` du moteur n'est **pas** passé cette semaine (pas nécessaire) ;
+- **Reprise et Connecteurs** reçoivent leurs spines et leurs épics les 12 et 13/11, avant le lot 2 (ils n'étaient dans
+  aucun lot du plan, et la mise en service des clients de février exige le feu vert de la Reprise).

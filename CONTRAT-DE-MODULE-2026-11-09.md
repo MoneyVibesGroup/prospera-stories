@@ -5,6 +5,9 @@
 > « module avec IA »**, issue de la table ronde du PRD moteur d'installation.
 > **Amendé le 2026-11-11** par la spine du moteur d'installation : C1, C2, C5, C7, C10, C11 (point 5) et
 > C13 (voir leurs paragraphes « Amendement (2026-11-11) »).
+> **Séance du PO du 2026-11-11** (avancée du 13/11) : **C12 et C13 validées**, avec le test « promouvoir,
+> saisir, revenir, tout se relit » obligatoire à la prochaine gate de chaque service existant ; **Q3
+> reconfirmée**, étendue à la dépendance en lecture seule (§8).
 > **Auteur :** Dev B (lot 1 du cadrage, `PLAN-2-DEVS-8-SEMAINES-2026-10-26.md` §1.3 et §4)
 > **Décision de programme :** **AD-P17**, inscrite dans `architecture-prospera-ecosystem-2026-07-04.md`.
 > **S'applique à :** tout module du programme, à partir d'**EPIC-045** chez Dev A. **Chaque PRD écrit
@@ -27,7 +30,7 @@
 > | **C8** | Visible en `EN_SERVICE`, `ESSAI_PROSPECT`, `PREAVIS` ; en `LECTURE_SEULE` : visible, lecture et export seulement |
 > | **C9, Q4** | Deux exceptions écrites à la règle « sans limite jusqu'à une demande d'effacement » |
 > | **C11** | Une clause par finalité ; remise des indicateurs de niveau 0 à l'agent d'instance |
-> | **Q3** | Sa raison (« l'impayé suspend déjà tous les droits ») n'est plus vraie ; la décision est à reconfirmer |
+> | **Q3** | ✅ Reconfirmée le 2026-11-11 : le dépendant reste ouvert ; dépendance en lecture seule = lue normalement, sans écriture ; suspendue = se déclare `SUSPENDU` |
 > | **§0, §1** | Installer = tout octroi passe par le moteur ; Pack = mot commercial ; socle de vertical ; Suspendre n'est pas Désinstaller |
 > | **§6, §7** | Section « Contrat de module » de **treize** lignes ; nouveaux écarts mesurés |
 > | **§9** | Suit la révision de D3 (instance sur site prête avant février 2027) |
@@ -474,8 +477,9 @@ l'appelle à l'étape de migration d'une promotion, sous verrou, et le rejouer n
 5. **Désinstaller un module dont un autre a besoin** (Q2, ✅ tranchée) : **refusé**, **409
    `MODULE_REQUIS_PAR`**, avec la liste des modules qui en dépendent. Pas de cascade silencieuse.
 6. **Une dépendance dure est une garantie d'installation, pas un couplage d'exécution.** Le module lit
-   sa dépendance par ses read-models (C3). Si elle est suspendue (Q3, ✅ tranchée), il ne s'arrête pas : ce qu'il en
-   lit se déclare `SUSPENDU`, sur le patron de l'emplacement vide.
+   sa dépendance par ses read-models (C3). Si elle est suspendue (Q3, ✅ reconfirmée le 2026-11-11), il ne s'arrête
+   pas : ce qu'il en lit se déclare `SUSPENDU`, sur le patron de l'emplacement vide. Si elle est en **lecture seule**,
+   il la lit normalement et n'y écrit rien.
 
 ---
 
@@ -550,7 +554,7 @@ livre la gate livre aussi le test aller-retour (C9).**
 |---|---|---|---|
 | **Q1** | Où vit le manifeste ? | **Dans le dépôt du service** (source), **copié au catalogue par version**, avec une garde de comparaison | Le propriétaire du module le tient ; le moteur lit le catalogue ; le patron « copie + garde » est déjà payé |
 | **Q2** | Désinstaller un module dont un autre dépend ? | **Refuser (409 `MODULE_REQUIS_PAR`)**, en nommant les modules qui en dépendent | Une cascade silencieuse ferme des écrans que personne n'a choisi de fermer |
-| **Q3** | Une dépendance dure est **suspendue** (impayé) : que fait le module qui en dépend ? | **Il reste ouvert** ; ce qu'il lit d'elle se déclare `SUSPENDU` | L'impayé suspend déjà **tous les droits à échéance ouverts par le même contrat** (STORY-280). Le cas restant est une dépendance suspendue **seule** : un litige décidé par un opérateur, ou un module pris sur un autre contrat. Fermer le dépendant punirait un module payé. ⚠️ **Amendé le 2026-11-10 :** la raison « l'impayé suspend déjà tous les droits » n'est **plus vraie** (l'impayé ne suspend plus : préavis de 30 jours, puis lecture seule ; `SUSPENDU` est une sanction décidée). La décision tient pour une dépendance suspendue ou en lecture seule, mais le PO la **reconfirme le 13/11** |
+| **Q3** | Une dépendance dure est **suspendue** (impayé) : que fait le module qui en dépend ? | **Il reste ouvert** ; ce qu'il lit d'elle se déclare `SUSPENDU` ; une dépendance en **lecture seule** se lit normalement, sans écriture | L'impayé suspend déjà **tous les droits à échéance ouverts par le même contrat** (STORY-280). Le cas restant est une dépendance suspendue **seule** : un litige décidé par un opérateur, ou un module pris sur un autre contrat. Fermer le dépendant punirait un module payé. ⚠️ **Amendé le 2026-11-10 :** la raison « l'impayé suspend déjà tous les droits » n'est **plus vraie** (l'impayé ne suspend plus : préavis de 30 jours, puis lecture seule ; `SUSPENDU` est une sanction décidée). La décision tient pour une dépendance suspendue ou en lecture seule. ✅ **Reconfirmée par le PO le 2026-11-11**, avec une seule raison : on ne punit pas un module payé à cause d'un autre |
 | **Q4** | Combien de temps garde-t-on les données après désinstallation ? | **Sans limite jusqu'à une demande d'effacement**, qui est un acte séparé et tracé | Réinstaller sans perte (C9) l'exige. ⚠️ Risque résiduel, non bloquant : une revue juridique des données personnelles pourra imposer une durée ; elle s'appliquerait à l'effacement, pas au contrat. ⚡ **Deux exceptions écrites le 2026-11-10** (PRD moteur FR-33 et FR-32) : **(1)** l'essai d'un prospect qui ne signe pas est effacé 30 jours après sa fin, avec trace et certificat d'effacement, l'export restant possible avant ; ouvrir l'essai vaut accepter cet effacement. **(2)** L'acheteur hébergé sur la plateforme qui arrête son abonnement d'hébergement et de maintenance a un préavis de 30 jours, puis **90 jours de lecture seule** avec export de ses données, puis ses données sont **supprimées par Money Vibes** selon la loi 2019-014 (ou il passe sur site) |
 | **Q5** | Une dépendance se déclare par code ou par version ? | **Par code** en v1 | La même règle que les référentiels (STORY-148) ; la version du topic porte les ruptures |
 

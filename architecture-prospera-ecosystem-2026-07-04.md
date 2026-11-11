@@ -2,7 +2,7 @@
 
 **Date :** 2026-07-04 (rev 1.3 : 2026-07-10)
 **Architecte :** vivian
-**Version :** 1.7 *(le corps porte 1.8 et 1.9 depuis le 2026-11-09 et le 2026-11-11, voir l'historique)*  *(⚠️ l'en-tête était resté à **1.3** alors que le corps porte 1.4, 1.5 et 1.6 depuis le 2026-08-15 — corrigé le 2026-08-16)*
+**Version :** 1.7 *(le corps porte 1.8, 1.9 et 1.10 depuis le 2026-11-09 et le 2026-11-11, voir l'historique)*  *(⚠️ l'en-tête était resté à **1.3** alors que le corps porte 1.4, 1.5 et 1.6 depuis le 2026-08-15 — corrigé le 2026-08-16)*
 **Type :** Architecture programme (niveau écosystème, au-dessus des architectures de service)
 **Statut :** Draft
 
@@ -431,7 +431,7 @@ stock, et ceux à venir.
    fonds de commerce ; il doit savoir qui la voit. *Action produit, hors architecture — mais elle
    conditionne la légitimité de la garantie.*
 
-### ⚡ AD-P17 — Un module est l'unité d'installation, et il tient un contrat en dix clauses
+### ⚡ AD-P17 — Un module est l'unité d'installation, et il tient un contrat en treize clauses
 
 > **Décision PO du 2026-11-09.** Détail, preuves et état mesuré : `CONTRAT-DE-MODULE-2026-11-09.md`.
 > Origine : `PLAN-2-DEVS-8-SEMAINES-2026-10-26.md` §1 (« un service est un module installable, façon Odoo »).
@@ -439,16 +439,20 @@ stock, et ceux à venir.
 - **Un module est l'unité de vente et d'installation** (un `code` au catalogue) ; **un service est l'unité
   de déploiement**. Plusieurs modules peuvent vivre dans un service s'ils partagent un agrégat, chacun
   derrière sa propre gate.
-- **Installer = entitlement `ACTIVE` ; désinstaller = `REVOKED`, sans rien supprimer.** L'effacement est
-  un acte séparé, demandé et tracé (Q4).
+- **Installer = un plan exécuté par le moteur d'installation** (spine du moteur, AD-23) : le droit est
+  **projeté** depuis la licence (sur site) ou le contrat (plateforme), et **seul le moteur pose `ACTIVE`** ;
+  les quatre autres chemins d'octroi sont retirés. **Désinstaller ne supprime rien** (`REVOKED`) ;
+  l'effacement est un acte séparé, demandé et tracé (Q4). *(Corrigé le 2026-11-11, cohérence : la version
+  du 2026-11-09 disait « installer = entitlement `ACTIVE` ».)*
 - **Chaque version de module porte un manifeste** : `depends` (dures, bloquent l'installation),
   `enrichiPar` (optionnelles, emplacement déclaré vide), familles de référentiels, droits, topics publiés
   et consommés, profil compose. Source dans le dépôt du service, copie au catalogue par version, garde de
   comparaison (Q1). Dépendance **par code**, jamais par version (Q5). Pas de cycle.
 - **Désinstaller un module requis par un autre est refusé** (409 `MODULE_REQUIS_PAR`, avec les modules
   dépendants) (Q2). **Une dépendance dure suspendue ne ferme pas le dépendant** : ce qu'il en lit se
-  déclare `SUSPENDU` (Q3).
-- **Les dix clauses** (C1 manifeste · C2 socle · C3 données possédées · C4 fonctionne seul · C5 contrats
+  déclare `SUSPENDU` ; une dépendance en lecture seule se lit normalement, sans écriture (Q3, reconfirmée le
+  2026-11-11).
+- **Les dix premières clauses** (C1 manifeste · C2 socle · C3 données possédées · C4 fonctionne seul · C5 contrats
   nommés · C6 paramétrage par données · C7 droits de tenant · C8 module d'écran dans `prospera-app` ·
   C9 aller-retour sans perte · C10 profil `docker compose`) sont la **définition de « fini »** de tout
   module. **Chaque PRD porte une section « Contrat de module »** ; le premier épic d'un module est son
@@ -459,6 +463,14 @@ stock, et ceux à venir.
   (0 indicateurs agrégés · 1 échantillon pseudonymisé · 2 accès encadré · 3 mise en commun consentie), **y
   compris quand l'instance est hébergée chez Money Vibes**. But déclaré du PO : un modèle commun aux
   clients, le plus tôt possible.
+- **C12 et C13, ajoutées le 2026-11-10, validées le 2026-11-11** : migrations rétrocompatibles pendant 7 jours
+  (exception déclarée `AVEC_PERTE`, interdite sur la plateforme) ; installable sous contrôle (prérequis,
+  vérifications, santé, interception en essai, export, import et effacement par organisation). Le test
+  « promouvoir, saisir, revenir, tout se relit » est obligatoire à la prochaine gate de chaque service.
+- **D3 révisée** (PO, 2026-11-09 ; amendement du plan v3 §1, validé le 2026-11-11) : l'**installation
+  complète chez le client** (licence, mise à jour, retour arrière, supervision, canal de données) est prête
+  **avant février 2027**, pour deux clients : une assurance sur ses serveurs, un distributeur hébergé par
+  Money Vibes. Le profil `docker compose` par module (C10) en est la première brique.
 - **Amende** le principe « 18 modules → 18 services » (P12) : le module n'est plus synonyme de service.
 
 ### ⚡ AD-P18 — Autorité métier extérieure : quand le logiciel du client reste propriétaire d'un domaine
@@ -577,6 +589,7 @@ que `STORY-356`/`236`/`357` ne sont pas livrées.
 | 1.1 | 2026-07-07 | vivian | **Modules partagés & versioning par organisation** : `bilan-service` (capacité partagée, 2 axes version de code ⊥ référentiel packagé, gate d'accès en relying party) et `catalog-service` (entitlements `(org × module)`, topic `entitlement.changed`, `admin-panel` BFF pour FR-012). Amende l'ownership map (entitlement → catalog ; abonnement reste vertical) ; ajoute **P7/P8** ; insère catalog + bilan dans la roadmap ; risques N/N-1 & routage multi-version. JWT/A3 inchangés. |
 | 1.2 | 2026-07-07 | vivian | **Couche edge/exécution** : décisions **P9** (schema registry adopté maintenant — compatibilité BACKWARD en CI) et **P10** (mono-repo maintenant, poly-repo différé) ; ajout du doc `architecture-gateway` (validation JWT fail-fast à l'edge + services souverains, routage par préfixe, résolution multi-version, services sans port public). Risque #4 (schema registry) passé de « envisager » à « planifié ». |
 | 1.3 | 2026-07-10 | vivian | **Alignement PLAN FINAL** (`docs/synthese-services-prospera-2026-07-10.md`) : décisions **P11** (dogfooding interne d'abord — Money Vibes = client zéro ; N/N-1 & routage multi-version différés jusqu'au 1er client externe, **DG-1** ; chaîne KYC livrée d'abord, **AD-2**) et **P12** (18 modules → 18 services suivant le moule unique ; **NC-1** `catalog-service` → `platform-catalog-service` ; **NB-1** Bilan par import de balance + prévisionnel ; **PA-1** checkout/webhooks → `paiement-service`). Ordre de construction et backlog des 18 modules → `program_backlog` de `sprint-status.yaml`. Invariants inchangés. |
+| **1.10** | **2026-11-11** | Dev B + Claude | **AD-P17 corrigée (cohérence, réponse 9 au §9 de l'amendement du plan v3)** : installer = un plan du moteur (seul le moteur pose `ACTIVE`) ; treize clauses (C12, C13 validées) ; Q3 étendue à la lecture seule ; D3 révisée inscrite. |
 | **1.9** | **2026-11-11** | PO + Claude | ⚡ **AD-P18 — autorité métier extérieure** (le propriétaire d'un domaine a toujours raison ; mouvements « en attente de confirmation » ; deux services Reprise et Connecteurs, une bibliothèque `prospera-adaptateurs`). Reports de la spine du moteur d'installation : **P9** précisé (Karapace 6.2 dans le socle de chaque espace) ; **P10** corrigé (19 dépôts git, pas de mono-dépôt ; dépôts `prospera-plateforme` et `prospera-adaptateurs`) ; client Kafka `@confluentinc/kafka-javascript`, Node 24, MongoDB 8.0 ; **AD-P16** précisé (routes de lecture inaccessibles sur site hors tunnel ouvert, jamais utilisées pour l'apprentissage). |
 | **1.8** | **2026-11-09** | PO + Claude | ⚡ **AD-P17 — le module installable, façon Odoo.** Le module devient l'unité de vente et d'installation, le service l'unité de déploiement ; contrat en dix clauses (`CONTRAT-DE-MODULE-2026-11-09.md`), manifeste par version de module (`depends` / `enrichiPar`), désinstallation refusée si le module est requis, aucune suppression à la désinstallation. Décisions D1/D2/D3 du plan à deux développeurs et Q1 → Q5 du contrat. Amende P12. |
 | **1.7** | **2026-08-16** | PO + Claude | ⚡ **AUDIT DE LA CHAÎNE DOCUMENTAIRE** — nouvelle section *« État de la chaîne documentaire »* : elle fixe la **règle** (un module à construire suit PRD → spine → épics → stories ; un module **livré** ne reçoit **ni PRD ni doc d'épics rétroactifs**, seulement une spine rétroactive s'il n'a aucune architecture ou qu'elle est devenue fausse) et l'**état des 11 modules**. ⛔ **Ce que l'audit a trouvé n'était pas un problème de format** : les notes `bilan-service` (07/07) et `expert-comptable` (02/07) portaient **zéro occurrence du mot « dossier »** et décrivaient l'isolation par le seul `orgId` — elles **encodaient l'ancienne vérité et la gardaient active**, six semaines après `AD-P13`. Les deux portent désormais un **encadré de réancrage** distinguant ce qui tombe de ce qui survit (traitement de la note Assistant IA du 20/07). ⚠️ Le vrai risque reste nommé : `bilan-service` expose toujours `POST /bilan/exercices` alors que `dossier-service` fait foi — **deux écritures possibles pour un même fait** tant que STORY-356/236/357 ne sont pas livrées. + en-tête de version corrigée (elle était restée à 1.3). |
