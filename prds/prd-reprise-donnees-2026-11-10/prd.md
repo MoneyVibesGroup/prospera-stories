@@ -15,7 +15,7 @@ mode: coaching
 # PRD — Reprise de données
 
 *Brouillon rédigé à partir du récit du PO (2026-11-10). Les décisions et leurs raisons sont dans
-`.memlog.md` ; les inférences non confirmées portent la marque `[ASSUMPTION]` et sont indexées au §8.4.*
+`.memlog.md` ; les inférences, toutes confirmées le 2026-11-11, sont récapitulées au §8.5.*
 
 *Corrections du 2026-11-11 après `controle-cible.md` : décisions du PO QC-1 → QC-10 intégrées (module
 installable, tables de correspondance, paquet d'adaptateurs commun, relais à Connecteurs, comptage du stock
@@ -94,7 +94,7 @@ polices en vigueur, 312 sinistres ouverts, et 27 sinistres **requalifiés** : l'
 pas de montant chiffré validé : ils sont signalés, et le gestionnaire le saisira avec un motif. Koffi et le
 responsable sinistres relisent la liste ; le DG de l'assureur, ou la personne qu'il a désignée par écrit, la
 valide (FR-13). Le jour J, Yao rejoue la même reprise sur un export frais, et le DG valide le lot du réel.
-`[ASSUMPTION : chiffres illustratifs]`
+*(chiffres illustratifs)*
 
 **UJ-5. Awa charge 200 nouveaux points de vente toute seule.** *(libre-service : dès février pour le
 prospect en essai, ensuite pour le client)*
@@ -189,7 +189,7 @@ pas, tout est effacé (FR-22).
   publié par le moteur). Chaque lot est rattaché à un ou plusieurs sous-ensembles. Un fichier n'est supprimé
   qu'à la réception de **tous** les sous-ensembles qu'il alimente.
 - **Imports courants** (après la mise en service) : aucune réception ne les clôt. Leurs fichiers sont
-  supprimés `[ASSUMPTION : 30 jours]` après la validation et l'import réussi du lot, la suppression étant
+  supprimés **30 jours** (décision du PO, 2026-11-11) après la validation et l'import réussi du lot, la suppression étant
   tracée.
 - Les fichiers de l'**essai** ne passent jamais dans l'espace réel : seul le dossier d'installation y passe
   (FR-16). Ceux d'un prospect non signé sont effacés (FR-22).
@@ -204,7 +204,7 @@ pas, tout est effacé (FR-22).
   construit ; elles sont enregistrées avec le lot et **rejouées telles quelles** le jour de la mise en
   service.
 - Une table de correspondance ne contient que des **codes et libellés de référence** (produit, état,
-  agence), jamais un montant ni l'identité d'une personne `[ASSUMPTION]` : c'est ce qui lui permet de
+  agence), jamais un montant ni l'identité d'une personne : c'est ce qui lui permet de
   figurer au dossier d'installation (PRD moteur FR-42, addendum A-7).
 - La Reprise **importe sa part du dossier d'installation** par sa propre route d'import ; rejouée deux
   fois, elle ne crée rien de plus. Si la version du dossier diffère de celle de l'essai, le moteur refuse
@@ -274,7 +274,7 @@ c'est ce qui rend l'IA utile (saisons des ventes, cycles de crédit, délais de 
   (décision du PO, 2026-11-10, QR-5) ; la Reprise la pré-remplit par le point d'import du module Stock, car
   elle n'écrit jamais chez la cible (FR-14).
 - Le stock d'ouverture est le **comptage physique**, par entrepôt, fait **avant la mise en service**, dans
-  l'espace réel, la veille ou le matin même `[ASSUMPTION]` (décision du PO, 2026-11-11, QC-6).
+  l'espace réel, la veille au soir ou le matin même, au choix du client, sans aucun mouvement entre le comptage et la mise en service (décisions du PO, 2026-11-11, QC-6).
 - Le module Stock est alors `EN_INSTALLATION` : la saisie de la feuille de comptage est une route
   d'import déclarée à son manifeste, ouverte par l'exception nommée du moteur (FR-42) et du contrat (C13).
 - **« Comptage clos » vaut feu vert du stock** : la Reprise le publie dans le feu vert du sous-ensemble
@@ -297,7 +297,7 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 **Conséquences (testables) :**
 - La reprise détecte les doublons probables et les présente regroupés. Un doublon est **probable** quand
   deux lignes ont le même identifiant national ou le même téléphone, ou le même nom et la même date de
-  naissance (raison sociale et adresse pour une personne morale) après normalisation `[ASSUMPTION]`.
+  naissance (raison sociale et adresse pour une personne morale) après normalisation ; la fusion reste sous contrôle humain (critère confirmé par le PO le 2026-11-11, ajustable par Yao et Rachid avant le 07/12).
 - L'intégrateur fusionne et marque ce qu'il a fusionné ; rien n'est fusionné sans trace.
 
 #### FR-13 : Le client valide avant que rien n'entre
@@ -361,6 +361,10 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 - Rapports, validations, fichiers et feux verts de l'essai **ne passent jamais** dans le réel : seul le
   dossier d'installation passe (PRD moteur NFR-3). Le lot du réel a son rapport, sa validation (FR-13) et
   son feu vert.
+- **Qui saisit pendant le rejeu** (décision du PO, 2026-11-11, OQ-4) : la Reprise est **mise en service la première** dans le
+  réel ; elle n'a pas de lot à elle, donc pas de feu vert à attendre (PRD moteur FR-11). Le **comptage d'ouverture** et la
+  **validation du lot du réel** (FR-13) se saisissent dans **ses** écrans ; elle livre ensuite aux modules cibles, encore
+  `EN_INSTALLATION`, par l'exception nommée. Aucun utilisateur n'appelle une route d'un module en installation.
 - Rejouer un lot ne crée aucun doublon.
 
 #### FR-17 : La marche en parallèle
@@ -369,7 +373,7 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
   le nouveau système tournent **en parallèle** pendant une période fixée (une semaine, un cycle de
   remboursement).
 - Pendant cette période, c'est **Connecteurs** (mode temporaire) qui synchronise les mouvements ; la
-  Reprise **compare les deux états une fois par jour** `[ASSUMPTION : quotidien]` et produit le **rapport
+  Reprise **compare les deux états chaque nuit** (décision du PO, 2026-11-11) et produit le **rapport
   d'écarts de la période**. Le contrôle de concordance de Connecteurs reste un contrôle de synchronisation,
   non un rapport de reprise.
 - La mise en service attend l'écart nul.
@@ -489,8 +493,8 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 - **NFR-3, confidentialité et cloisonnement** : sur site, aucune donnée reprise ni aucun fichier source ne
   quitte l'instance. L'essai et le réel sont cloisonnés : seul le dossier d'installation passe de l'un à
   l'autre (FR-16).
-- **NFR-4, volume** : un lot de `[ASSUMPTION : 100 000 objets]` se traite (lecture, rapport) en moins de
-  `[ASSUMPTION : 10 minutes]` sur le serveur de référence du client.
+- **NFR-4, volume** : un lot de **100 000 objets** se traite (lecture, rapport) en moins de
+  **10 minutes** sur le serveur de référence du client (cible confirmée le 2026-11-11, mesurée à l'Integration Gate).
 - **NFR-5, reprise sur incident** : un lot interrompu reprend où il s'était arrêté, sans recommencer ni
   doubler.
 - **NFR-6, téléversement** : l'envoi d'un fichier volumineux (Excel, 100 000 objets) affiche sa progression
@@ -522,7 +526,7 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 | C4 | Fonctionne sans aucun module cible installé (rapport seul) ; une cible fermée (état) est déclarée au rapport (FR-14) |
 | C5 | Contrats nommés (topics et routes à nommer dans la spine) : point d'import de chaque cible (avec champ de provenance) ; **feu vert** par sous-ensemble, lu par le moteur ; consommation de la **réception définitive** ; **clés de rattachement** à la GED ; événement **« historique livré »** ; copie des tables de correspondance à Connecteurs (FR-24) ; route de vérification « données importées » |
 | C6 | Correspondances et traductions d'état sont des **données** par lot, jamais du code par client, et même schéma pour toutes les organisations |
-| C7 | Droits de tenant `<code>:<objet>:<action>` : `reprise:lot:importer`, `reprise:lot:valider`, `reprise:doublon:fusionner`, `reprise:rapport:consulter` ; l'export reste réservé à `instance:donnees:exporter`. Le rôle du DSI les contient (FR-19) |
+| C7 | Droits de tenant `<code>:<objet>:<action>` : `reprise:lot:importer`, `reprise:lot:valider`, `reprise:doublon:fusionner`, `reprise:rapport:consulter` ; l'export reste réservé à `instance:donnees:exporter`. Le rôle du DSI les contient (FR-19). Un **rôle prédéfini « Responsable de la reprise »** porte `importer`, `fusionner` et `consulter`, **jamais** `reprise:lot:valider` (réservé au DG ou au désigné par écrit, QC-9) ; l'administrateur du client l'attribue (décision du PO, 2026-11-11) |
 | C8 | Écrans dans la **console Money Vibes** (équipe) **et** module d'écran `reprise` dans `prospera-app` **dès février** (libre-service du prospect : dépôt, rapport, validation, import), entrées déclarées dans `ecran.ts` avec leur droit ; l'Administration de la coque y renvoie par un lien (spine AD-14) |
 | C9 | Désinstaller ne supprime ni lots ni rapports ; la suppression des fichiers suit la réception définitive (FR-3), l'effacement suit FR-22 |
 | C10 | Profil compose `reprise` ; démarre seule |
@@ -556,26 +560,24 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 | Mise en service | Qui déclenche la mise en service | Acte de Money Vibes sur le feu vert, même si le DSI ou le prospect a fait la reprise (FR-19) ; marque « à confirmer » levée |
 | Amont | Import pendant `EN_INSTALLATION` ; écrans de février | **Exception nommée** du moteur (FR-42) et du contrat (C13) pour les routes d'import ; module d'écran `reprise` dans `prospera-app` dès février, vers lequel l'Administration renvoie (C8) |
 
-### 8.3 Restent ouvertes
+### 8.3 Tranchées le 2026-11-11 (questions restantes)
 
-| # | Question | Propriétaire, date |
+| # | Question | Décision |
 |---|---|---|
-| OQ-1 | Spine de la coque : emplacement du paquet d'adaptateurs commun (QC-4) ; noms des topics et routes (feu vert, « historique livré », réception définitive, clés de rattachement) | Dev B, avant le 07/12 |
-| OQ-2 | Spine de la coque : protection **par objet** (`historique`, `montantASaisir`) que les écrans des cibles honorent (AD-7 ne lit que le module) ; emplacement du lien « ligne de la source » (AD-16) | Dev B, avant le 07/12 |
-| OQ-3 | Spine de la coque : téléversement volumineux (multipart, limite du proxy, progression, reprise d'envoi : NFR-6) ; écrans du réel (DSI, administrateur) dans le module d'écran `reprise` | Dev A et Dev B, avant le 07/12 |
-| OQ-4 | Module Stock : la route de saisie de la feuille de comptage est déclarée route d'import ; l'exception nommée suffit-elle pour une saisie humaine, ou seulement pour l'identité de service ? Même question pour la validation du lot du réel (FR-13) | Dev B avec le PRD moteur, avant le 07/12 |
-| OQ-5 | Charge de Dev A pour les écrans de février, à ajouter à l'amendement du plan v3 ; ligne `reprise` à ajouter à la liste `manifestes-a-produire.md` (qui la dit encore « service de projet ») | Dev B, 13/11 |
-| OQ-6 | Cabinet : confirmer qu'aucune reprise n'est prévue (PRD moteur FR-7) | PO, 13/11 |
-| OQ-7 | Délai de suppression des fichiers d'un import courant (FR-3) | PO, 13/11 |
+| OQ-4 | Saisie humaine pendant le rejeu | La Reprise est mise en service la première dans le réel ; comptage et validation se saisissent dans ses écrans ; elle livre par l'exception nommée (FR-16) |
+| OQ-5 | Charge de Dev A pour les écrans de février | Chiffrée au 04/12 avec le reste ; la ligne M44 de `manifestes-a-produire.md` est faite |
+| OQ-6 | Reprise pour le cabinet | **Non en v1** : le cabinet importe ses balances par l'Atelier de balance (PRD moteur FR-7) |
+| OQ-7 | Suppression des fichiers d'un import courant | **30 jours** après la validation de l'import (FR-3) |
+| Rôle | Rôle dédié du journal | Rôle prédéfini « Responsable de la reprise », sans le droit de valider (C7) |
 
-### 8.4 Inférences (`[ASSUMPTION]`)
+### 8.4 Orientations validées, à écrire dans les spines (Dev B, avant le 07/12)
 
-| Où | Inférence | À confirmer par, date |
+| # | Sujet | Orientation validée par le PO le 2026-11-11 |
 |---|---|---|
-| UJ-4 | Chiffres illustratifs (1 830 assurés, 2 410 polices, 312 sinistres…) | PO, 13/11 |
-| FR-3 | Suppression des fichiers d'un import courant 30 jours après import validé | PO, 13/11 (OQ-7) |
-| FR-4 | Une table de correspondance ne contient que des codes et libellés de référence | Dev B, avant le 07/12 |
-| FR-10 | Comptage la veille ou le matin même de la mise en service | PO, 13/11 |
-| FR-12 | Critère de doublon probable (identifiant, téléphone, nom + date de naissance) | Yao et Rachid, avant le 07/12 |
-| FR-17 | Comparaison quotidienne pendant la marche en parallèle | PO, 13/11 |
-| NFR-4 | 100 000 objets en moins de 10 minutes | Dev B, avant le 07/12 |
+| OQ-1 | Service et paquet d'adaptateurs ; noms des topics et routes | **Deux services** (Reprise et Connecteurs : agrégats distincts, contrat §4) ; **paquet d'adaptateurs** = bibliothèque commune versionnée avec la plateforme ; topics et routes nommés par la spine |
+| OQ-2 | Protection par objet (`historique`, `montantASaisir`) | Les API des modules cibles renvoient ces marqueurs **par objet** ; la coque fournit `<ProtectionObjet>` (nouvelle AD-25 de la spine `prospera-app`) |
+| OQ-3 | Téléversement volumineux (NFR-6) | Envoi **par morceaux de 10 Mo, avec reprise**, sur la seule route `/api/reprise/v1/televersements` ; la limite du proxy n'est relevée que pour elle |
+
+### 8.5 Inférences
+
+Toutes les inférences de ce PRD ont été **confirmées par le PO le 2026-11-11** : chiffres de UJ-4 illustratifs ; 30 jours ; contenu des tables de correspondance ; moment du comptage ; critère de doublon ; comparaison chaque nuit ; 100 000 objets en 10 minutes. Il ne reste aucune inférence ouverte.
