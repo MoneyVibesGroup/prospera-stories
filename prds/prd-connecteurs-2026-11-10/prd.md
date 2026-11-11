@@ -262,8 +262,9 @@ Réalise UJ-7.
 - Toute discordance entre dans la file des écarts.
 - Ce contrôle prolonge **sans intervention humaine** la vérification de la marche en parallèle (PRD Reprise,
   FR-17).
-- Pendant la marche en parallèle, c'est **la file des écarts qui fait foi** : le feu vert de la Reprise
-  (écart à zéro) se lit comme « aucun écart ouvert » dans cette file `[A-5]`.
+- Pendant la marche en parallèle, c'est **la file des écarts qui fait foi** pour l'arrêt de la synchro
+  (QC-8). Le feu vert de la Reprise (écart de reprise nul) est une **autre condition** : il ne se lit pas dans cette file
+  (hypothèse A-5 rejetée par le PO, 2026-11-11).
 
 ### 4.D Quand le lien tombe
 
@@ -497,12 +498,14 @@ Le passage du « une fois » au « permanent » (PRD Reprise, FR-1) a une fronti
 - **Produits, prix et stock** (décision du PO, 2026-11-11, QC-5) : la Reprise les **charge** ; Connecteurs
   prend le **relais à partir d'un point de relais daté**. Les mouvements antérieurs à ce point ne sont pas
   rejoués ; le premier échange part du point de relais (curseur), sans doublon avec le lot repris.
-- **Quand la synchro démarre** : après la réception définitive du lot par la Reprise `[A-11]`.
+- **Quand la synchro démarre** : **au point de relais**, c'est-à-dire à la mise en service du sous-ensemble (hypothèse A-11
+  modifiée par le PO, 2026-11-11) ; pas à la réception définitive, qui peut venir des semaines plus tard.
 - **Stock d'ouverture** (décision du PO, 2026-11-11) : quand Odoo est propriétaire du stock, le **comptage
-  d'ouverture** se saisit dans l'écran Stock de Prospera et part vers Odoo comme **mouvement d'ajustement**
+  d'ouverture** se saisit dans les écrans de la Reprise, mise en service la première dans le réel (PRD Reprise FR-16,
+  décision du PO du 2026-11-11), puis il est livré au module Stock et part vers Odoo comme **mouvement d'ajustement**
   « en attente de confirmation ».
 - **Identifiants** : le connecteur ne reprend pas les identifiants de la Reprise (FR-1). À la réception
-  définitive, la Reprise retire les siens `[A-11]`.
+  définitive, la Reprise retire les siens (A-11 modifiée).
 
 #### FR-21 : Mise à jour et retour arrière
 Concerne la clause C12 (PRD moteur, FR-17 et FR-18).
@@ -597,14 +600,16 @@ attente de confirmation (FR-2). C'est le premier cas de ce genre ; la spine devr
 | QK-12 | Fraîcheur et bandeaux dans la coque | ✅ tranchée le 2026-11-11 (« Amont ») : champs normalisés, table de seuils et ligne « file d'envoi » dans la spine (AD-7) ; le module ne rend pas de bandeau (FR-11, FR-12) |
 | QK-13 | Comportement en `LECTURE_SEULE`, `SUSPENDU`, `ESSAI_TERMINE` | ✅ tranchée le 2026-11-11 (selon la recommandation du contrôle ciblé) : FR-19 |
 | QK-14 | Stock d'ouverture quand Odoo est propriétaire du stock | ✅ tranchée le 2026-11-11 (selon la recommandation) : comptage saisi dans Prospera, ajustement « en attente de confirmation » (FR-20) |
-| QK-15 | Service de Connecteurs et lieu du paquet d'adaptateurs | **Ouverte** : à trancher dans la spine ; porteur Dev B ; avant la validation du 13/11 |
-| QK-16 | Règle de doctrine « autorité métier extérieure » | **Ouverte** : la spine l'écrit ; porteur Dev B ; avant la validation du 13/11 |
-| QK-17 | Répartition des propriétaires chez l'assureur | **Ouverte** : après examen de son logiciel ; porteur : le PO ; pas de date, hors février |
-| QK-18 | Date du connecteur de l'IMF | **Ouverte** : avec le premier client IMF ; porteur : le PO ; pas de date |
-| QK-19 | Événement poussé par le logiciel du client vers la plateforme (webhook) au regard d'AD-8 | **Ouverte** : l'interrogation sortante est la règle (FR-1) ; porteur Dev B avec la spine ; avant la validation du 13/11 |
-| QK-20 | Amendements des documents voisins : lignes d'AD-7 de la spine (champs de fraîcheur, table de seuils, bandeau « file d'envoi ») et PRD Reprise (C1 → C13, adaptateurs et tables, écrans en `prospera-app`) **faits le 2026-11-11** dans la même PR ; reste le schéma fermé de FR-26 du moteur (compteurs du connecteur) | **Ouverte pour FR-26** : porteur Dev B ; à valider avec le moteur le 13/11 |
+| QK-15 | Service de Connecteurs et lieu du paquet d'adaptateurs | ✅ orientation validée le 2026-11-11 : **deux services** (Reprise et Connecteurs), paquet d'adaptateurs = bibliothèque commune versionnée avec la plateforme ; la spine du moteur l'écrit (Dev B, avant le 07/12) |
+| QK-16 | Règle de doctrine « autorité métier extérieure » | ✅ orientation validée le 2026-11-11 : décision de programme **AD-P18** ; les utilisateurs ne saisissent que des mouvements en attente de confirmation, et la coque les affiche « en attente » ; à écrire par Dev B avant le 07/12 |
+| QK-17 | Répartition des propriétaires chez l'assureur | **Ouverte** (réponse du PO reportée, 2026-11-11) : après examen de son logiciel ; porteur : le PO ; pas de date, hors février |
+| QK-18 | Date du connecteur de l'IMF | **Ouverte** (réponse du PO reportée, 2026-11-11) : avec le premier client IMF ; porteur : le PO ; pas de date |
+| QK-19 | Webhook entrant sur la plateforme | ✅ tranchée le 2026-11-11 : **non en v1**, interrogation sortante seulement (AD-8 de la spine `prospera-app`) ; une interrogation à la minute tient le délai immédiat de 5 min |
+| QK-20 | Amendements des documents voisins | Spine AD-7 et PRD Reprise **faits le 2026-11-11** ; schéma fermé de FR-26 du moteur : ✅ validé le 2026-11-11, on y **ajoute les compteurs** par domaine (envoyés, refusés, écarts ouverts, longueur de la file, dernier échange) |
 
 ### 8.2 Hypothèses `[A-n]`
+
+**Confirmées par le PO le 2026-11-11**, sauf **A-5, rejetée** (le feu vert de la Reprise ne se lit pas dans la file des écarts) et **A-11, modifiée** (la synchro démarre au point de relais, à la mise en service). Les renvois `[A-n]` restent dans le texte comme traces.
 
 | # | Hypothèse | Où |
 |---|---|---|

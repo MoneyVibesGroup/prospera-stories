@@ -267,6 +267,12 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 - **Prevents:** chaque module qui invente son `console.error` ; un support qui n'a rien à lire.
 - **Rule:** `creerClient` pose un `X-Request-Id` sur chaque appel ; `ApiError` le porte et l'écran d'erreur l'affiche. Toute erreur inattendue passe par `signaler(erreur)` de la coque : un journal structuré aujourd'hui, branchable sur un collecteur plus tard.
 
+### AD-25 — Un objet protégé se protège par la coque
+
+- **Binds:** les modules cibles de la Reprise, PRD Reprise (OQ-2, `historique`, `montantASaisir`), AD-7
+- **Prevents:** un écran qui laisse modifier un historique repris ou qui cache un montant à saisir, quand un autre écran les protège.
+- **Rule:** L'API d'un module cible renvoie, **par objet**, les marqueurs `historique` (lecture seule) et `montantASaisir` (montant manquant, à compléter). Un écran n'interprète jamais ces marqueurs lui-même : il enveloppe l'objet dans `<ProtectionObjet>` de la coque, qui retire les actions d'écriture d'un objet `historique` et signale un `montantASaisir`, sur le patron d'`<Ecriture>` (décision du PO, 2026-11-11).
+
 ## Consistency Conventions
 
 | Concern | Convention |
@@ -380,6 +386,7 @@ sequenceDiagram
 | FR-15, FR-17 gel, interrupteurs, version figée | `coque/bandeaux`, `useModule().interrupteur` | AD-5, AD-7, AD-20 |
 | FR-33 essai prospect | bandeaux, `modules/instance/` (compte à rebours, export), `modules/reprise/` (import en autonomie) | AD-7, AD-12, AD-14 |
 | PRD Reprise et Connecteurs : écrans du client | `modules/reprise/`, `modules/connecteurs/` ; fraîcheur et file d'envoi rendues par la coque | AD-3, AD-7, AD-14 |
+| Objets repris protégés (`historique`, `montantASaisir`) | `<ProtectionObjet>` de la coque | AD-25 |
 | C4 emplacement vide, `enrichiPar` | `coque/emplacements/` | AD-2, AD-16 |
 | C8 module d'écran | `modules/<code>/ecran.ts` | AD-1, AD-3, AD-4 |
 | D1 verticale = configuration | `coque/habillage/`, emplacement `accueil` | AD-13 |

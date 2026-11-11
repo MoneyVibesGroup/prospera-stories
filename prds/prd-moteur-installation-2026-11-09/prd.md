@@ -1343,6 +1343,9 @@ passe par la garde du registre (FR-27). La validation juridique de ces clauses e
 - Aucun indicateur ne contient un identifiant de personne ou de dossier ; un test le vérifie sur chaque
   envoi.
 - Chaque module avec IA remet ses indicateurs agrégés à l'agent d'instance par un contrat nommé (C11, C5).
+- Le module Connecteurs y ajoute ses **compteurs**, par domaine : mouvements envoyés et refusés, écarts
+  ouverts, longueur de la file d'envoi, date du dernier échange ; jamais un contenu métier (PRD Connecteurs
+  FR-13, QK-20 ; décision du PO, 2026-11-11). Sur site, ils remontent aussi par la vérification quotidienne.
 
 #### FR-27 : Le registre des consentements
 **Conséquences (testables) :**
