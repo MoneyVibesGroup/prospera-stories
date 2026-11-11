@@ -147,7 +147,7 @@ c'est la première tâche de Dev A en semaine 1.
 au catalogue reçoit les champs du manifeste : les **dépendances** (`depends`, avec leur raison), les
 **droits**, les **événements** publiés et consommés, les **vérifications** (route, critère), `retourArriere`,
 les **interrupteurs**, les **routes de lecture seule**, les **migrations** (un point d'entrée `migrer`
-idempotent, C13) et les **schémas d'événements** (JSON Schema, enregistrés au registre par l'agent à
+idempotent, C12) et les **schémas d'événements** (JSON Schema, enregistrés au registre par l'agent à
 l'étape de migration). Le manifeste signé de la version de plateforme les reprend tels quels. La garde de
 test qui compare la source à la copie du catalogue couvre ces champs aussi.
 

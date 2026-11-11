@@ -110,8 +110,8 @@ semaines sont des valeurs de départ, à confirmer au chiffrage du 04/12.
 
 | Service | Ajustement | Quand |
 |---|---|---|
-| **`platform-catalog-service`** | Redis et BullMQ entrent dans son périmètre (émission d'`etat-publie.changed` à l'heure dite) ; verrou de l'outbox ; champs de manifeste dans `ModuleVersion` (C1) ; retrait des **quatre chemins d'octroi** d'un droit et réamorçage des données de test ; consommateur d'impayé | semaine 5 |
-| **`paiement-service`** | contrat consommé par la centrale (faits de paiement relayés par l'agent de la plateforme) ; **read-model de manifestes** pour la vente ; topics `paiement.abonnement.*` ; jalons J-7 et J+7 = relances, sur son horloge | semaines 5 et 6 |
+| **`platform-catalog-service`** | Redis et BullMQ entrent dans son périmètre (émission d'`etat-publie.changed` à l'heure dite) ; verrou de l'outbox ; champs de manifeste dans `ModuleVersion` (C1) ; retrait des **quatre chemins d'octroi** d'un droit et réamorçage des données de test ; consommateur d'impayé (retiré sur site, gardé pour un hébergé : parcours de l'impayé, jamais `SUSPENDU`, AD-19 et AD-42 de la spine du moteur) ; émission du contrat `catalogue.manifeste.publie` (AD-17) | semaine 5 |
+| **`paiement-service`** | faits de paiement relayés par l'agent de la plateforme (la centrale ne consomme pas le bus) ; **read-model de manifestes** pour la vente, alimenté par le contrat `catalogue.manifeste.publie` (AD-17) ; topics `paiement.abonnement.*` ; jalons J-7 et J+7 = relances, sur son horloge | semaines 5 et 6 |
 | **`prospera-microfinance-service`**, **`bilan-service`**, **`notification-service`**, **`balance-service`** | **double lecture** de l'état publié dans la garde (la doublure d'abord, la vraie route ensuite) ; `entitlement.changed` cesse de fermer | semaine 6 pour ceux que Dev A livre d'ici le 15/01, sinon à leur prochaine gate ; la doublure est éteinte au premier gate |
 | **Tous les services** | migration de `kafkajs` vers `@confluentinc/kafka-javascript`, **Node 24** et schémas enregistrés au registre, dans la version de plateforme 1.0 ; MongoDB 8.0 dans le gabarit d'instance | avant février |
 
