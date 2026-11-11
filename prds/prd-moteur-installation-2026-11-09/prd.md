@@ -498,7 +498,7 @@ Les faits : une sanction, l'échéance payée, la fin du préavis et les dates d
 | État publié | Menu de `prospera-app` | Garde du module (C2 amendée) | Bandeau, et pour qui (FR-35) |
 |---|---|---|---|
 | `NON_INSTALLE` | caché ; URL saisie → écran « module non installé » | 403 `<MODULE>_NOT_ENTITLED` | — |
-| `EN_INSTALLATION` | caché ; URL saisie → « module en cours d'installation » | 403, sauf l'identité de service du moteur sur les routes de vérification (FR-6) et l'export (FR-43) | administrateurs : lien vers le bilan |
+| `EN_INSTALLATION` | caché ; URL saisie → « module en cours d'installation » | 403, sauf l'identité de service du moteur sur les routes de vérification (FR-6), l'identité de service du moteur et celle de la Reprise de données sur les routes d'import déclarées pendant un rejeu (FR-42), et l'export (FR-43) | administrateurs : lien vers le bilan |
 | `DESINSTALLE` | caché ; URL saisie → « module non installé » | 403, sauf l'export (FR-43) | — |
 | `EN_SERVICE` | visible | ouvert | — |
 | `ESSAI_PROSPECT{finLe}` | visible | ouvert | **tous** : compte à rebours |
@@ -984,6 +984,10 @@ identité** ; c'est le moteur qui la fait naître.
 - **Rejeu** : chaque élément du dossier d'installation a un **propriétaire**, qui l'importe (détail : addendum §A-7). Les comptes de l'essai sont recréés dans
   le réel avec le même identifiant de membre ; leurs invitations partent à la mise en service. Rejoué deux
   fois, le dossier ne crée rien de plus (NFR-6).
+- **Importer pendant `EN_INSTALLATION`** (décision du PO, 2026-11-11) : les modules du réel sont encore
+  `EN_INSTALLATION` pendant le rejeu. Leurs **routes d'import déclarées au manifeste** (C13) laissent donc
+  passer l'identité de service du moteur et celle de la Reprise de données, qui livre ses lots aux modules
+  cibles (PRD Reprise) ; aucun utilisateur n'y accède, et toutes les autres routes restent fermées (§3.1).
 - **Rafraîchissement** (FR-10) : il s'appuie sur la même identité ; aucune table de correspondance
   d'identifiants n'est nécessaire.
 - Un membre présent dans les deux espaces passe de l'un à l'autre par un lien de la coque ; chaque espace

@@ -168,7 +168,9 @@ que le moteur lui pousse (neuf états : `NON_INSTALLE`, `EN_INSTALLATION`, `DESI
   droit du client, et une sanction commerciale ne crée pas de manquement réglementaire chez lui. Seul
   `NON_INSTALLE` la refuse (403 `<MODULE>_NOT_ENTITLED`, aucune donnée).
 - **Pendant `EN_INSTALLATION`**, les routes de vérification déclarées au manifeste laissent passer
-  l'**identité de service du moteur**, et elle seule.
+  l'**identité de service du moteur**, et elle seule. Pendant un **rejeu** du dossier d'installation, les
+  **routes d'import** déclarées au manifeste (C13) laissent passer l'identité de service du moteur et celle
+  de la Reprise de données, et elles seules (amendement du 2026-11-11, PRD moteur FR-42).
 - **Preuve ajoutée.** Une matrice : pour chacun des neuf états et chaque sorte de route (lecture,
   écriture, export, état réglementaire), **un seul attendu**, et le menu de la coque (C8) concorde avec la
   garde.

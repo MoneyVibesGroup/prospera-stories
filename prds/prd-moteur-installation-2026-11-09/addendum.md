@@ -132,8 +132,12 @@ Elle passe par le chemin 1 de FR-4 et pose `essai: { finLe, effacementLe }` sur 
 
 - Une lecture rend :
   - **l'instance** : espace (`ESSAI` | `REEL`), état (`NORMAL` | `GEL`), `VERSION_FIGEE` oui/non, version
-    de plateforme, heure de référence ;
-  - **chaque module** connu du catalogue : son `code` ; son **état publié** (énumération fermée de neuf
+    de plateforme, heure de référence ; `hebergement` (`PLATEFORME` | `SITE`) ; `fuseau` de
+    l'organisation (identifiant IANA) ; `retourArriereEnCours`, s'il y en a un (étape et avancement,
+    FR-40) ; `miseAJourAnnoncee`, s'il y en a une (version, `retourArriere` `SANS_PERTE` | `AVEC_PERTE`,
+    date, FR-17, FR-18) *(champs ajoutés le 2026-11-11 pour la coque, spine `prospera-app` AD-7 et AD-14)* ;
+  - **chaque module** connu du catalogue : son `code` ; le **libellé de son module commercial** (FR-37,
+    ajouté le 2026-11-11) ; son **état publié** (énumération fermée de neuf
     valeurs, §3.1) ; la date que l'état porte (`finLe` ou `effacementLe`) ; `acquis` (oui quand le contrat
     ou la licence le donne sans qu'il soit installé ; lu par la console seulement) ; sa version de code ;
     ses **interrupteurs** `{ code, allume, dateLimite }` (FR-17) ; sa **santé** `OK` |
@@ -232,7 +236,7 @@ Le format d'`auth-service` refuse aujourd'hui un code de module à tiret (`pi-sp
 
 **Depuis FR-35 : où se calcule l'intersection**
 
-L'intersection se calcule **dans la coque** (menu) et **dans la garde de chaque module** (C2), à partir de l'état publié ; jamais dans `perms[]`, qu'`auth-service` remplit sans appeler le catalogue.
+L'intersection se calcule **dans le moteur**, qui la rend dans la lecture (`utilisateur.droitsEffectifs`, §A-2). La coque, l'app expert-comptable et l'app mobile la **lisent** sans la recalculer (spine `prospera-app` AD-6, amendé le 2026-11-11) ; la garde de chaque module ferme ses routes quand son module n'est pas ouvert (C2) et vérifie le droit de chaque route. Jamais dans `perms[]`, qu'`auth-service` remplit sans appeler le catalogue.
 
 **Depuis FR-35 : le module `instance` au catalogue**
 
@@ -271,6 +275,8 @@ La CI d'un dépôt peut vérifier son manifeste contre la copie publiée du grap
 - Les vérifications s'exécutent sous l'**identité de service du moteur**, que la garde du module laisse
   passer sur les seules routes de vérification déclarées au manifeste, tant que le module est
   `EN_INSTALLATION` (C2 et C13 amendées). Aucun utilisateur n'y accède.
+- Pendant un rejeu (FR-42), les **routes d'import** déclarées au manifeste laissent passer, de la même
+  façon, l'identité de service du moteur et celle de la Reprise de données (décision du PO, 2026-11-11).
 
 **Depuis FR-38 : les champs du manifeste**
 

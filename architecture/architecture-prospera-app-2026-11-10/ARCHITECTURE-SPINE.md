@@ -7,7 +7,7 @@ paradigm: 'application modulaire unique (monolithe modulaire côté front, faço
 scope: 'Client web unique des verticales assurance, distributeur et microfinance : menu, garde d''écran, écrans d''état, bandeaux, habillage, écrans publics et Administration, construits sur l''état publié du moteur d''installation ; forme et frontières des modules d''écran (C8). Hors champ : la console Money Vibes (installation, offres, CRM n°8), l''app expert-comptable, l''app mobile.'
 status: final
 created: '2026-11-10'
-updated: '2026-11-10'
+updated: '2026-11-11'
 binds: [FR-9, FR-15, FR-17, FR-33, FR-34, FR-35, FR-36, FR-37, FR-42, FR-43, C2, C4, C7, C8, C13, SM-1, UJ-3, D1]
 sources:
   - prds/prd-moteur-installation-2026-11-09/prd.md (§3.1, FR-9, FR-15, FR-17, FR-33 → FR-43)
@@ -81,7 +81,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
   | `interrupteurs` | les noms d'interrupteurs, identiques au manifeste (FR-17) |
   | `routesPubliques` | les écrans sans session (AD-18) |
 
-  `src/coque/registre.ts` importe chaque `ecran.ts` explicitement. Un test vérifie que `src/modules/*`, le registre et `src/app/(app)/m/*` coïncident, qu'aucun `chemin` ne sort de son préfixe et que chaque droit commence par `<code>:` (C7). Le **libellé de premier niveau** est celui du module commercial (FR-37), lu dans l'état publié ; en attendant ce champ, il vient de `modules['<code>'].titre`.
+  `src/coque/registre.ts` importe chaque `ecran.ts` explicitement. Un test vérifie que `src/modules/*`, le registre et `src/app/(app)/m/*` coïncident, qu'aucun `chemin` ne sort de son préfixe et que chaque droit commence par `<code>:` (C7). Le **libellé de premier niveau** est celui du module commercial (FR-37), lu dans l'état publié (`libelle` du module, addendum §A-2) ; s'il manque, la coque affiche `modules['<code>'].titre`.
 
 ### AD-4 — Une seule garde, sous `/m/` `[ADOPTED]`
 
@@ -106,7 +106,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 
 - **Binds:** FR-35, C7, A-2, A-5
 - **Prevents:** une intersection calculée deux fois (coque et mobile) qui diverge ; un module qui masque une action par droit et un autre qui laisse le bouton et attend le 403.
-- **Rule:** Une entrée, une action ou une contribution n'est visible que si le module est ouvert (AD-5) **et** que son droit figure dans `utilisateur.droitsEffectifs` de la lecture. Un module teste un droit par `useDroit('<code>:<objet>:<action>')`, seule voie d'accès à ces droits. Toute action d'écriture porte un droit nommé en plus de `<Ecriture>`. La coque ne lit jamais `perms[]` du jeton pour afficher quoi que ce soit. L'écran des rôles ne propose que les droits que la lecture déclare pour les modules ouverts et pour `instance`. *(Addendum §A-5 à amender : l'intersection est calculée par le moteur et rendue par la lecture.)*
+- **Rule:** Une entrée, une action ou une contribution n'est visible que si le module est ouvert (AD-5) **et** que son droit figure dans `utilisateur.droitsEffectifs` de la lecture. Un module teste un droit par `useDroit('<code>:<objet>:<action>')`, seule voie d'accès à ces droits. Toute action d'écriture porte un droit nommé en plus de `<Ecriture>`. La coque ne lit jamais `perms[]` du jeton pour afficher quoi que ce soit. L'écran des rôles ne propose que les droits que la lecture déclare pour les modules ouverts et pour `instance`. *(Addendum §A-5 amendé le 2026-11-11 : l'intersection est calculée par le moteur et rendue par la lecture.)*
 
 ### AD-7 — Écriture, actions hors garde et bandeaux : la coque décide, le module obéit `[ADOPTED]`
 
@@ -129,8 +129,13 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
   | Instance gelée | `instance.etat: GEL` | administrateurs |
   | Version figée, fin de maintenance | `instance.versionFigee` | administrateurs et DG |
   | Changement à venir, date limite | `interrupteurs[].dateLimite` | administrateurs |
+  | Mise à jour annoncée, avertissement si `AVEC_PERTE` | `instance.miseAJourAnnoncee` | administrateurs |
+  | Retour arrière en cours, avancement | `instance.retourArriereEnCours` | administrateurs |
+  | File d'envoi d'un connecteur en attente | `etat-synchro` du module `connecteurs` | administrateurs |
+  | Données synchronisées en retard (orange ou rouge) | `etat-synchro` du module `connecteurs` | utilisateurs de l'écran concerné |
 
-  « Administrateurs » = détenteurs de `instance:bilan:consulter` ; « DG » = l'indicateur `utilisateur.estDG` de la lecture (FR-35). Un écran qui montre des données synchronisées affiche leur fraîcheur avec `<Fraicheur depuis>`, et la date vient de l'API du module.
+  « Administrateurs » = détenteurs de `instance:bilan:consulter` ; « DG » = l'indicateur `utilisateur.estDG` de la lecture (FR-35).
+  - **Fraîcheur des données synchronisées** (PRD Connecteurs, décision du PO du 2026-11-11) : quand `connecteurs` est ouvert, la coque lit `GET /api/connecteurs/v1/etat-synchro`, au rythme de l'état publié (AD-5). La réponse a une forme normalisée : par domaine et par sens, `dernierEchangeLe`, le niveau de fraîcheur (`IMMEDIAT` | `HEURE` | `NUIT`), la source (`API` | `EXPORT`) et la file d'envoi (`enAttente`, `plusAncienLe`). Un écran déclare le domaine qu'il montre et rend `<Fraicheur domaine>`. La coque y applique **sa table de seuils** orange et rouge par niveau (valeurs QK-3 du PRD Connecteurs, FR-11), avec le « maintenant » d'AD-5, et choisit le message et la clef de libellé d'action du domaine. Le module `connecteurs` ne rend ni bandeau ni mention de fraîcheur.
 
 ### AD-8 — Une seule origine : `/api/*` appartient au proxy `[ADOPTED]`
 
@@ -192,9 +197,10 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
   - **Bilan d'installation.**
   - **Rôles et droits.**
   - **Interrupteurs** : quand les utilisateurs voient un changement, avant sa date limite.
-  - **Pour le prospect** : l'import en autonomie, le compte à rebours, l'export pendant `ESSAI_TERMINE`.
+  - **Reprise des données** : un renvoi vers le module d'écran **`reprise`** (`/m/reprise/…`, droits `reprise:*`), qui porte l'import, en autonomie pour le prospect dès février (décision du PO, 2026-11-11). L'Administration ne recode pas l'import.
+  - **Pour le prospect** : le compte à rebours, l'export pendant `ESSAI_TERMINE`.
 
-  Les entrées qui n'ont pas d'objet sur la plateforme (planifier, revenir, fichier, support) n'apparaissent que sur site.
+  Les entrées qui n'ont pas d'objet sur la plateforme (planifier, revenir, fichier, support) n'apparaissent que si `instance.hebergement` vaut `SITE`.
 
 ### AD-15 — Les contrats se génèrent et se partagent, ils ne se recopient pas `[ADOPTED]`
 
@@ -266,7 +272,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 | Concern | Convention |
 | --- | --- |
 | Nommage | dossier, segment d'URL, espace de messages (`modules['<code>']`) et préfixe de clé de requête = **code du catalogue** ; API de la coque en français (`useModule`, `useDroit`, `<Ecriture>`, `creerClient`, `lienVers`, `signaler`) |
-| Données | dates ISO 8601 telles que rendues, affichées avec `Intl` dans la langue d'`accueil`, au fuseau de l'organisation (champ à ajouter à la lecture ; `Africa/Lome` par défaut) ; montants = couple (entier d'unité mineure, devise), décimales du référentiel (notification AD-16) |
+| Données | dates ISO 8601 telles que rendues, affichées avec `Intl` dans la langue d'`accueil`, au fuseau de l'organisation (`instance.fuseau` de la lecture ; `Africa/Lome` s'il manque) ; montants = couple (entier d'unité mineure, devise), décimales du référentiel (notification AD-16) |
 | Erreurs | `ApiError` de la coque ; un code nommé s'affiche par son message traduit, jamais par le texte brut du serveur ; l'identifiant de corrélation est visible |
 | État côté client | serveur = TanStack Query uniquement ; aucun store global ; formulaires React Hook Form + zod ; aucun `localStorage` pour un état métier ou un jeton ; un `queryFn` qui résout `undefined` est une requête en erreur (piège déjà payé) |
 | Session | patron de l'app expert-comptable, déplacé de `/api/auth/*` vers `/coque/session/*` : refresh en cookie httpOnly, access en mémoire, une reprise partagée sur 401 |
@@ -318,6 +324,7 @@ prospera-app/
     modules/
       instance/               # Administration (AD-14)
       reseau/ pdv/ catalogue/ stock/   # les 4 modules de Dev A pour le 15/01
+      reprise/ connecteurs/            # requis en février (PRD Reprise, PRD Connecteurs)
   contrat/
     etat-publie.openapi.json  # copie gardée (AD-15)
     matrice-etats.json
@@ -371,7 +378,8 @@ sequenceDiagram
 | FR-43 lecture seule et export | `<Ecriture>`, `actionsHorsGarde`, `modules/instance/` | AD-7, AD-14 |
 | FR-9, FR-42 deux espaces | `coque/espace/`, configuration d'exécution | AD-10, AD-12, AD-19 |
 | FR-15, FR-17 gel, interrupteurs, version figée | `coque/bandeaux`, `useModule().interrupteur` | AD-5, AD-7, AD-20 |
-| FR-33 essai prospect | bandeaux, `modules/instance/` (import, export) | AD-7, AD-12, AD-14 |
+| FR-33 essai prospect | bandeaux, `modules/instance/` (compte à rebours, export), `modules/reprise/` (import en autonomie) | AD-7, AD-12, AD-14 |
+| PRD Reprise et Connecteurs : écrans du client | `modules/reprise/`, `modules/connecteurs/` ; fraîcheur et file d'envoi rendues par la coque | AD-3, AD-7, AD-14 |
 | C4 emplacement vide, `enrichiPar` | `coque/emplacements/` | AD-2, AD-16 |
 | C8 module d'écran | `modules/<code>/ecran.ts` | AD-1, AD-3, AD-4 |
 | D1 verticale = configuration | `coque/habillage/`, emplacement `accueil` | AD-13 |
@@ -390,6 +398,5 @@ sequenceDiagram
 | Hors-ligne et PWA | porté par l'app mobile | — |
 | Contrôle du contraste des couleurs de marque | se fait là où la marque est saisie | spine de la console |
 | Table de routage du proxy (générée depuis les manifestes, C10), montage de l'instance, certificats | relèvent du moteur, partie B (FR-25) | spine du moteur, due avant le 07/12 |
-| Champs manquants à la lecture : libellé du module commercial, hébergement `PLATEFORME`/`SITE`, fuseau de l'organisation, avancement d'un retour arrière, version `AVEC_PERTE`, noms d'interrupteurs | contournés par des valeurs par défaut sûres (AD-3, AD-5, AD-14, conventions) | amendement de l'addendum §A-2, avant le 07/12 |
 | Collecteur d'erreurs et télémétrie | `signaler()` en fixe le point d'entrée (AD-24) | supervision (FR-16) |
 | Montée à Vitest 5, TypeScript 7, ESLint 10, Node 26 | pile alignée sur l'app expert-comptable | première montée de version de la coque |
