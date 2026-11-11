@@ -94,7 +94,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 - **Binds:** FR-34, §3.1, A-2, FR-17, SM-1
 - **Prevents:** une coque qui calcule une échéance sur l'horloge du navigateur ; deux écrans qui affichent deux états différents ; un module réinstallé qui réaffiche un cache périmé ; un module qui s'ouvre parce que la lecture a échoué.
 - **Rule:**
-  - **Source unique** : `GET /api/instance/v1/etat-publie/{organisationId}`, sous une seule clé `['coque', 'etat-publie']`.
+  - **Source unique** : `GET /api/instance/v1/etat-publie/{organisationId}`, sous une seule clé `['coque', 'etat-publie']`. Un état publié et un topic par espace (essai, réel) : la coque lit celui de l'espace où elle se trouve. Les fichiers `contrat/etat-publie.openapi.json` et `contrat/matrice-etats.json` appartiennent à `platform-catalog-service` (spine du moteur, AD-24) : la coque en garde une copie testée, elle ne les édite pas.
   - **Relecture** : toutes les **30 s** quand l'onglet est visible (`refetchIntervalInBackground: false`), au retour sur l'onglet, à la connexion et après un refus nommé (AD-9). Une seule lecture en vol à la fois.
   - **Échec de lecture** : le dernier état connu reste affiché. Sans état connu, rien n'est ouvert et l'écran « service momentanément indisponible » s'affiche.
   - **Table unique** : la correspondance « état publié → ouvert, écriture, bandeau, destinataire » vit dans un seul fichier, transcription du §3.1. Un module y accède par `useModule(code)` → `{ ouvert, peutEcrire, sante, interrupteur(nom) }`, jamais par la valeur brute.
@@ -106,7 +106,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 
 - **Binds:** FR-35, C7, A-2, A-5
 - **Prevents:** une intersection calculée deux fois (coque et mobile) qui diverge ; un module qui masque une action par droit et un autre qui laisse le bouton et attend le 403.
-- **Rule:** Une entrée, une action ou une contribution n'est visible que si le module est ouvert (AD-5) **et** que son droit figure dans `utilisateur.droitsEffectifs` de la lecture. Un module teste un droit par `useDroit('<code>:<objet>:<action>')`, seule voie d'accès à ces droits. Toute action d'écriture porte un droit nommé en plus de `<Ecriture>`. La coque ne lit jamais `perms[]` du jeton pour afficher quoi que ce soit. L'écran des rôles ne propose que les droits que la lecture déclare pour les modules ouverts et pour `instance`. *(Addendum §A-5 amendé le 2026-11-11 : l'intersection est calculée par le moteur et rendue par la lecture.)*
+- **Rule:** Une entrée, une action ou une contribution n'est visible que si le module est ouvert (AD-5) **et** que son droit figure dans `utilisateur.droitsEffectifs` de la lecture. Un module teste un droit par `useDroit('<code>:<objet>:<action>')`, seule voie d'accès à ces droits. Toute action d'écriture porte un droit nommé en plus de `<Ecriture>`. La coque ne lit jamais `perms[]` du jeton pour afficher quoi que ce soit. L'écran des rôles ne propose que les droits que la lecture déclare pour les modules ouverts et pour `instance`. *(Addendum §A-5 amendé le 2026-11-11 : l'intersection est calculée par le moteur et rendue par la lecture.)* `droitsEffectifs` est calculé par **intersection des droits du jeton de l'appelant avec l'état des modules** (spine du moteur, AD-24) : la lecture est propre à l'appelant, jamais partagée entre deux utilisateurs.
 
 ### AD-7 — Écriture, actions hors garde et bandeaux : la coque décide, le module obéit `[ADOPTED]`
 
@@ -206,7 +206,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 
 - **Binds:** `prospera-app`, l'app expert-comptable, l'app mobile, le moteur, tous les services
 - **Prevents:** trois lectures de l'état publié qui dérivent ; des types écrits à la main qui mentent sur une route.
-- **Rule:** Les types de **toute** API appelée (état publié compris) sont générés depuis l'OpenAPI du service (`openapi-typescript`), jamais écrits à la main. La **matrice des neuf états** (état → menu, garde par sorte de route, bandeau, destinataire) est un fichier JSON versionné publié par le moteur. La coque en garde une copie qu'un test compare à la source, et son test de concordance menu/garde la joue entièrement. Une version de matrice inconnue d'un consommateur le fait fermer, jamais ouvrir.
+- **Rule:** Les types de **toute** API appelée (état publié compris) sont générés depuis l'OpenAPI du service (`openapi-typescript`), jamais écrits à la main. La **matrice des neuf états** (état → menu, garde par sorte de route, bandeau, destinataire) est un fichier JSON versionné publié par le moteur, et c'est `platform-catalog-service` qui le possède, avec `contrat/etat-publie.openapi.json` (spine du moteur, AD-24) ; il y a un état publié et un topic par espace. La coque en garde une copie qu'un test compare à la source, et son test de concordance menu/garde la joue entièrement. Une version de matrice inconnue d'un consommateur le fait fermer, jamais ouvrir.
 
 ### AD-16 — Le contrat d'un emplacement
 
@@ -259,7 +259,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 
 - **Binds:** squelette de la coque (S3), modules de Dev A (S3 → S5), tests de la coque
 - **Prevents:** une coque construite avant le moteur sur une forme d'état inventée, puis qui casse à son arrivée.
-- **Rule:** Tant que le moteur ne sert pas `GET /etat-publie`, le développement et les tests utilisent une **doublure**, construite par Dev A dans PRA-01, qui sert la route au même chemin, derrière le Traefik de dev. Elle est générée depuis `contrat/etat-publie.openapi.json` et `contrat/matrice-etats.json`, avec un scénario par état publié. Elle n'entre jamais dans l'image. C'est une dette nommée, éteinte au premier Integration Gate de la coque, qui se joue sur le vrai moteur, sans aucun mock.
+- **Rule:** Tant que le moteur ne sert pas `GET /etat-publie`, le développement et les tests utilisent une **doublure**, construite par Dev A dans PRA-01, qui sert la route au même chemin, derrière le Traefik de dev. Elle est générée depuis `contrat/etat-publie.openapi.json` et `contrat/matrice-etats.json`, avec un scénario par état publié. Elle n'entre jamais dans l'image. C'est une dette nommée, éteinte au premier Integration Gate de la coque, qui se joue sur le vrai moteur, sans aucun mock. La **vraie route** est servie par `platform-catalog-service` **avant le 15/01/2027** (spine du moteur, AD-41) ; la doublure est éteinte à ce premier gate, pas après.
 
 ### AD-24 — Une erreur se retrouve
 

@@ -99,11 +99,30 @@ réamorcées à la mise en route du moteur. **Pas de reprise de l'existant.**
 | **STORY-280** (`paiement-service`, catalogue) | l'impayé **ne suspend plus** (le jalon `IMPAYE` à J+7 ne produit plus `SUSPENDED`) ; le consommateur `suspension-par-impaye` sert à la **sanction décidée** | partie A |
 | **STORY-281** | le préavis de J-7 est **renommé `RAPPEL`** (service paiement et modèles de notification) ; la régularisation sort du préavis ou de la lecture seule ; la grâce reporte l'échéance du droit d'utiliser *(à confirmer)* | partie A |
 | **STORY-365** | requalifiée contre 166/167 : reste le filtrage par modules ouverts et la lecture des droits depuis les manifestes | semaine 5 |
-| **`auth-service`** (STORY-167) | création des organisations **à la demande du moteur**, dans chaque espace, avec le même identifiant ; module `instance` traité comme les autres ; droit de **consentir** attribuable par le DG seul ; format de droit élargi aux codes de module à tiret | avant la mise en service d'un module à tiret |
+| **`auth-service`** (STORY-167) | création des organisations **à la demande du moteur**, dans chaque espace, avec le même identifiant ; module `instance` traité comme les autres ; droit de **consentir** attribuable par le DG seul ; format de droit élargi aux codes de module à tiret ; **route interne réservée à l'identité de service du moteur, `organisationId` imposé** (décision du PO, 2026-11-11, spine du moteur AD-15) | **avant la semaine 5** (décision du PO, 2026-11-11 ; démo du 15/01), et non « avant le premier module à tiret » |
 | **`paiement-service`** (vente) | résoudre les dépendances dures **comme la console** ; refuser un élément non installable ; avenant automatique quand une majeure ajoute une dépendance ; un seul mode d'acquisition par élément ; **licence envoyée par e-mail à chaque paiement** | partie A, puis partie B |
 
 > Le PRD (§8.4) cite les lots 2, 4, 6 et 7 de STORY-727 ; la demande de cadrage n'en citait que 2, 6 et 7.
 > Le lot 4 est conservé ici : c'est lui qui porte le préavis de 30 jours.
+
+**Ajustements par service, ajoutés le 2026-11-11 (spine du moteur d'installation, AD-42 et AD-23).** Les
+semaines sont des valeurs de départ, à confirmer au chiffrage du 04/12.
+
+| Service | Ajustement | Quand |
+|---|---|---|
+| **`platform-catalog-service`** | Redis et BullMQ entrent dans son périmètre (émission d'`etat-publie.changed` à l'heure dite) ; verrou de l'outbox ; champs de manifeste dans `ModuleVersion` (C1) ; retrait des **quatre chemins d'octroi** d'un droit et réamorçage des données de test ; consommateur d'impayé | semaine 5 |
+| **`paiement-service`** | contrat consommé par la centrale (faits de paiement relayés par l'agent de la plateforme) ; **read-model de manifestes** pour la vente ; topics `paiement.abonnement.*` ; jalons J-7 et J+7 = relances, sur son horloge | semaines 5 et 6 |
+| **`prospera-microfinance-service`**, **`bilan-service`**, **`notification-service`**, **`balance-service`** | **double lecture** de l'état publié dans la garde (la doublure d'abord, la vraie route ensuite) ; `entitlement.changed` cesse de fermer | semaine 6 pour ceux que Dev A livre d'ici le 15/01, sinon à leur prochaine gate ; la doublure est éteinte au premier gate |
+| **Tous les services** | migration de `kafkajs` vers `@confluentinc/kafka-javascript`, **Node 24** et schémas enregistrés au registre, dans la version de plateforme 1.0 ; MongoDB 8.0 dans le gabarit d'instance | avant février |
+
+**Stories à ouvrir avant la semaine 5 (07/12)** (backlog `prospera-stories`, sans numéro encore) :
+- `auth-service` : route de naissance à identifiant imposé, réservée à l'identité de service du moteur ; format de droit élargi aux codes de module à tiret ;
+- `platform-catalog-service` : Redis et BullMQ, verrou de l'outbox, champs de manifeste de `ModuleVersion`, retrait des quatre chemins d'octroi et réamorçage ;
+- double lecture de l'état publié dans les gardes de `paiement-service`, `prospera-microfinance-service`, `bilan-service`, `notification-service` et `balance-service` ;
+- `prospera-plateforme` : dépôt, CI de publication, contrats agent-centrale-partie A et vecteurs signés ;
+- socle d'espace : Karapace, MongoDB 8.0, Node 24 ;
+- migration de `kafkajs` vers `@confluentinc/kafka-javascript` dans la version 1.0 ;
+- `paiement-service` : contrat consommé par la centrale et read-model de manifestes pour la vente.
 
 ---
 
@@ -124,7 +143,17 @@ du PRD. Il sera remplacé par le chiffrage consolidé du 04/12 (plan §4).
 puis 04/01 → 26/02, pause des fêtes déduite). Le plan v3 les emploie déjà : moteur (sem. 5), CRM interne
 (sem. 6), sinistres (sem. 7), GED (sem. 8).
 
-**Écart : 7 à 10 semaines**, avant deux ajouts du PO du 2026-11-10 et du 2026-11-11, non chiffrés : la mise à la règle C8 de l'app expert-comptable (Dev B, pour février) et le module d'écran `reprise` dans `prospera-app` dès février (Reprise devenue module installable, M44). Ils **creusent** l'écart. Trois façons de le couvrir, non exclusives (question 1) :
+**Ajouts de la spine du moteur (2026-11-11), non compris dans le total ci-dessus.** La spine découpe le
+moteur en quatre unités (centrale, agent d'instance, partie A, apprentissage) et ajoute :
+- **≈ 39 points de socle** : centrale, agent d'instance et service d'apprentissage ;
+- **l'infrastructure** : registre d'images, autorité de certificats, cérémonie des clés (deux clés
+  matérielles hors ligne, deux détenteurs), second hôte pour la centrale, second support de sauvegarde sur
+  site (aucun TPM en v1, décision du PO, 2026-11-11) ;
+- **les migrations** : `kafkajs` vers `@confluentinc/kafka-javascript`, Node 24, MongoDB 8.0, registre de
+  schémas Karapace ;
+- **les stories d'alignement** des services existants (ci-dessus, §4).
+
+**Écart : 7 à 10 semaines**, qui **s'aggrave** de ces ajouts, avant deux ajouts du PO du 2026-11-10 et du 2026-11-11, non chiffrés : la mise à la règle C8 de l'app expert-comptable (Dev B, pour février) et le module d'écran `reprise` dans `prospera-app` dès février (Reprise devenue module installable, M44). Ils **creusent** l'écart. Trois façons de le couvrir, non exclusives (question 1) :
 - **retirer** de Dev B le CRM interne, les sinistres et la GED, qui passent **après février** (≈ 3 semaines) ;
 - **renforcer** par Dev A à partir du 18/01, au prix du démarrage de la microfinance prévu ce jour-là
   (question 3), sur les parties B et C (≈ 5 à 6 semaines) ;
@@ -146,6 +175,15 @@ non pour que la charge se découvre en janvier.
 | **6** (14/12 → 18/12) | Moteur, partie A (essai, bilan, mise en service) **au lieu du CRM interne** ⇒ le CRM interne **glisse** (question 1) |
 | **7 et 8** (04/01 → 15/01) | Moteur, parties A puis B (licence, agent d'instance) **au lieu des sinistres et de la GED** ⇒ le noyau assurance du 15/01 **est réduit** (question 1). **Démo du 15/01 : la partie A** (SM-1), sur le pack commercial |
 | **Après le 15/01** | Parties B et C jusqu'en février ; recette des deux modes d'hébergement ; microfinance (démarrage prévu le 18/01) à reconfirmer |
+
+**Ajouts du 2026-11-11 (spine du moteur d'installation, AD-41).**
+- **Tranche de départ, semaines 5 et 6** : les contrats signés avec leurs vecteurs, un agent simulé qui
+  contacte une centrale simulée, vérifie un état voulu signé et applique une licence, avec le test croisé.
+  La **démo du 15/01** montre la partie A sur l'espace d'essai de la plateforme, le port d'heure branché sur
+  l'horloge système de Money Vibes ; l'agent complet de la plateforme est monté avant février.
+- **Recette croisée des deux modes d'hébergement** (sur la plateforme et sur site) : une instance de test
+  complète, deux espaces, qui contacte une centrale de recette par le réseau puis par fichier ; elle ferme
+  le moteur en février.
 
 Le plan §6 (« ce que fini veut dire ») perd sa ligne **CRM interne en service** et réduit sa ligne
 **Assurance** tant que la question 1 n'est pas tranchée.

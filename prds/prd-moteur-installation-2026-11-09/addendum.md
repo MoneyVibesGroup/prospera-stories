@@ -2,7 +2,7 @@
 title: "Addendum au PRD — Moteur d'installation"
 status: draft
 created: 2026-11-10
-updated: 2026-11-10
+updated: 2026-11-11
 prd: prd.md
 ---
 
@@ -32,7 +32,7 @@ Le moteur les calcule sur l'**horloge de référence** (horloge scellée sur sit
   | Délai de silence : alerte de J+7 | horloge de Money Vibes | dernier contact connu de Money Vibes | Money Vibes |
   | Délai de silence : gel de J+30 | horloge scellée | dernier contact vu par l'instance | l'agent d'instance ; le moteur de l'instance publie le gel (FR-34) |
   | Retour arrière et rétrocompatibilité C12 (7 jours) | horloge de l'instance qui promeut (scellée sur site) | promotion | l'agent d'instance |
-  | Correctif de sécurité (72 h) | horloge de Money Vibes | client prévenu (FR-19) | Money Vibes, qui appelle le DSI |
+  | Correctif de sécurité (72 h) | horloge de Money Vibes | client prévenu (FR-19) : l'e-mail est parti et le ticket d'appel est ouvert (spine du moteur, AD-31) | Money Vibes, qui appelle le DSI ; passé le délai, le correctif s'applique seul |
   | Vague (7 jours sans incident) | horloge de Money Vibes | promotion dans la vague | Money Vibes |
 
 **Depuis FR-15 : la borne de l'horloge scellée et le temps machine éteinte**
@@ -43,8 +43,10 @@ Le moteur les calcule sur l'**horloge de référence** (horloge scellée sur sit
   Test : avancer la date du serveur de 10 ans ; aucune échéance ne tombe. `[ASSUMPTION : borne de
   48 heures]`
 - Une horloge logicielle ne sait pas combien de temps la machine est restée **éteinte** : pour ce temps-là,
-  elle ne croit la date du serveur que si elle avance, dans la borne ci-dessus. Le mécanisme (puce de
-  sécurité ou non) est laissé à l'architecture.
+  elle ne croit la date du serveur que si elle avance, dans la borne ci-dessus. Le mécanisme est tranché
+  par la spine du moteur (AD-4) : **aucune puce de sécurité en v1** (décision du PO, 2026-11-11), une
+  horloge logicielle bornée et Money Vibes pour témoin. Le gel reste à 30 jours de silence pour toutes les
+  instances.
 
 ## §A-2 État publié : faits, calcul, canaux, forme et projection sur le droit
 
@@ -193,6 +195,14 @@ Sur site, une **clé d'exploitation scellée sur l'instance** permet les automat
 
 Une **clé racine hors ligne**, au coffre, qui ne sert qu'à certifier les clés de signature ; les clés de signature **changent chaque année** `[ASSUMPTION : rythme]`.
 
+**Depuis NFR-8 : la clé d'exécution de la centrale**
+
+La **centrale** signe les licences, l'état voulu, les sanctions et les jetons d'export avec une **clé
+d'exécution** qui lui est propre (décision du PO, 2026-11-11 ; spine du moteur, AD-28). Elle est certifiée
+par la clé racine, son usage restreint est inscrit dans son certificat, elle est scellée sur l'hôte de la
+centrale et se renouvelle chaque trimestre. Les clés de la chaîne de publication ne signent que les images,
+le manifeste et l'agent : une clé de CI compromise ne peut donc pas émettre une licence.
+
 **Depuis NFR-8 : le fichier d'urgence**
 
 Une clé compromise est révoquée par un **fichier d'urgence** signé par la clé racine : il **réinitialise le plus haut numéro** retenu pour cette clé (et l'heure de la dernière licence acceptée, si cette clé l'avait signée), révoque tout ce qu'elle a signé, ré-émet les licences sous une nouvelle clé et passe par le chemin rapide (FR-19).
@@ -211,7 +221,7 @@ Ce que transporte chaque contact, et comment Money Vibes voit qu'un état de con
 
 **Depuis FR-16 : la vérification quotidienne et le contact par fichier**
 
-Cette requête n'envoie que l'identifiant de l'instance, sa version, le numéro de sa licence et l'empreinte de son état de confiance (niveau 0) ; sa réponse porte, s'il y a lieu, une nouvelle licence, la liste de révocation (NFR-8) et l'heure de référence. - Quand le contact est un fichier, rien ne répond : le fichier porte lui-même la licence, la liste de révocation et l'heure de référence (FR-22).
+Cette requête n'envoie que l'identifiant de l'instance, sa version, le numéro de sa licence, l'empreinte de son état de confiance **avec son compteur et l'empreinte précédente**, la `versionProtocole`, l'ancrage (un seul niveau, logiciel, en v1) et, sur site, les **compteurs de Connecteurs** (FR-26), alignés sur le signal (niveau 0) ; sa réponse porte, s'il y a lieu, une nouvelle licence, la liste de révocation (NFR-8) et l'heure de référence. - Quand le contact est un fichier, rien ne répond : le fichier porte lui-même la licence, la liste de révocation et l'heure de référence (FR-22).
 
 **Depuis NFR-11 : de quoi l'état de confiance est fait, et son ancrage**
 
@@ -222,7 +232,7 @@ Cette requête n'envoie que l'identifiant de l'instance, sa version, le numéro 
 
 **Depuis NFR-11 : l'empreinte rapportée et le rétablissement**
 
-Son empreinte est rapportée à Money Vibes à chaque contact ; si elle a reculé, Money Vibes refuse toute licence et tout export de niveau 1 à 3 pour cette instance, et ouvre un ticket. Après la perte du serveur, il est rétabli depuis la dernière empreinte connue de Money Vibes, par un fichier signé.
+Son empreinte est rapportée à Money Vibes à chaque contact, avec un compteur qui n'avance que ; si elle a reculé (compteur plus bas) ou bifurqué (deux empreintes au même compteur), Money Vibes refuse toute licence et tout export de niveau 1 à 3 pour cette instance, et ouvre un ticket ; une lacune (contacts manqués, centrale restaurée) est consignée sans sanction (décision du PO, 2026-11-11 ; spine du moteur, AD-4). Après la perte du serveur, il est rétabli par un fichier de rétablissement signé, sur demande écrite du DSI, qui porte la dernière empreinte connue de Money Vibes, la licence, la copie signée du registre des consentements et la tête du journal ; l'époque change et l'événement est journalisé des deux côtés (AD-35).
 
 ## §A-5 Module `instance` et droits de tenant
 
