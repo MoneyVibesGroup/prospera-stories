@@ -299,7 +299,7 @@ font en bac à sable.
 |---|---|---|---|
 | D1 | **Une coque unique** `prospera-app`, ou une app par vertical | ✅ **TRANCHÉE le 2026-11-09 : la coque unique.** Une seule app déployée ; l'organisation de l'utilisateur décide du menu (modules installés), des données (cloisonnement) et de l'habillage (configuration) | ✅ |
 | D2 | Le **niveau des dépendances** : une dépendance dure bloque l'installation, une optionnelle donne un emplacement vide | ✅ **TRANCHÉE le 2026-11-09 : les deux niveaux**, déclarés au manifeste (`depends`, `enrichi_par`) | ✅ |
-| D3 | L'**installation chez le client** (sur site) : dans les 8 semaines ou après | ✅ **TRANCHÉE le 2026-11-09 : le profil `docker compose` par module dans les 8 semaines** (il sert aussi à la recette) ; le packaging client complet après | ✅ |
+| D3 | L'**installation chez le client** (sur site) : dans les 8 semaines ou après | ✅ **TRANCHÉE le 2026-11-09 : le profil `docker compose` par module dans les 8 semaines** (il sert aussi à la recette) ; le packaging client complet après. ⚠️ **RÉVISÉE** : l'installation complète chez le client est prête **avant février 2027** (`amendement-plan-v3-2026-11-10.md` §1, validé le 2026-11-11) | ✅ |
 | D4 | React Native ou Flutter pour `prospera-terrain` | à trancher au lot 2, avec le module n°9 | sem. 2 |
 | D5 | L'ancien monolithe `prospera-backend` (Prisma) | **Le geler**, et le garder comme source de règles à reprendre dans les modules IMF | sem. 3 |
 | D6 | Le palier 2 de l'assurance (provisions techniques) | **Hors plan** tant qu'aucun actuaire n'est mobilisé | — |
