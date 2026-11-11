@@ -238,3 +238,28 @@ Entrées : `reviews/controle-cible.md` (6 constats partiels P-1 → P-5 au total
 | N-18 | validé → AD-37 (`[ADOPTED]` ajouté) |
 | N-19 | validé → AD-41 (`[ADOPTED]` ajouté) |
 | N-20 | validé → AD-42 (`[ADOPTED]` gardé) |
+
+## Vérification finale du 2026-11-11
+
+Entrées : `reviews/verification-finale-prd-rubric.md`, `reviews/verification-finale-code-versions-adversaire.md`, `reviews/verification-finale-controle-et-documents.md`. Une ligne par point corrigé.
+
+| Point | Disposition |
+|---|---|
+| E-13 (PRD) | corrigé → AD-11 : sur site, la promotion fait passer tous les interrupteurs à leur position finale ; un interrupteur ne change jamais la forme des données |
+| C-4 (rubrique) | corrigé → AD-9, AD-13, AD-17, AD-35 : l'agent joint la copie signée du registre au contact à chaque changement (retrait compris), la centrale la garde pour le fichier de rétablissement ; ligne ajoutée à AD-17 |
+| M-5 | corrigé → AD-32 : une version de l'agent suit les vagues (pilote d'abord) ; un incident remonté suspend la vague suivante |
+| M-10 | corrigé → AD-38 : à la fin d'un contrat sur site, l'agent exporte puis efface le magasin ; seul le journal est gardé, pseudonymisé |
+| E-07 et T-6 (contrat-code) | corrigé → AD-42 : la ligne du format de droit porte « story livrée avant la semaine 5, avec la route de naissance » |
+| Adversaire n° 10 | corrigé → AD-34 : routes d'export et d'import C13 exposées à l'agent seul par le Traefik de l'instance, sous l'identité de service de l'espace |
+| P-4 et NC-1 | corrigé → AD-17 (trois lignes aux noms réels `paiement.abonnement.echeance.encaissee`, `.impayee`, `.regularise`), AD-19, AD-42 : parcours de l'impayé (préavis 30 jours, lecture seule), jamais `SUSPENDU` ; noms vérifiés dans `prospera-paiement-service` et `platform-catalog-service` |
+| NC-2 | corrigé → AD-24 (`etat-publie.changed.essai` ou `.reel`) ; AD-17 (ligne du fichier d'urgence) |
+| NC-3 | corrigé → AD-36 : tunnel de support et copie hors machine côté contact, sur ordre de l'exécuteur |
+| NC-4 (D-18) | corrigé → AD-31 : passé les 72 heures, ou le report, le correctif s'applique seul |
+| NC-5 | corrigé → AD-17 : contrat `catalogue.manifeste.publie` (partie A vers `paiement-service`) ; read-model gardé au plan v3 §4 |
+| N-7, N-8 | corrigé → `[ADOPTED]` ajouté aux titres d'AD-13 et d'AD-14 (D-15) |
+| Écart PRD §3.1 / FR-32 / FR-41 contre AD-19 et AD-42 | corrigé dans la spine (le PRD est juste) |
+| Écart addendum A-3 | corrigé : « les clés de la chaîne de publication (CI) changent chaque année » |
+| Écart contrat C1 | corrigé : point d'entrée `migrer` rattaché à C12 |
+| Écart P10 (écosystème) | corrigé : titre « Topologie du code : 19 dépôts, pas de mono-dépôt (corrigé le 2026-11-11) » |
+| Écart plan v3 §4 (paiement-service, catalogue) | corrigé : faits relayés par l'agent de la plateforme, contrat de manifestes, consommateur d'impayé retiré sur site et gardé pour un hébergé |
+| Écart spine de la coque AD-23 | corrigé : renvoi « AD-24 et AD-41 » |

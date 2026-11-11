@@ -188,6 +188,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   - **Signal hebdomadaire** : **schéma fermé et publié** (FR-26). Il porte la santé de chaque module (`OK` ou `DEGRADE`), le voyant de l'instance (dont le test de restauration), le niveau et les anomalies de l'état de confiance (codes), les mises à jour en attente, les écarts nommés (codes, sans contenu métier), l'avancement d'un retour arrière et les **incidents** (retour arrière demandé, anomalie grave, contrôle de santé en échec après promotion). Un test échoue si un champ non déclaré ou un identifiant de personne sort.
   - **Fichier** : le même contenu, dans les deux sens.
   - **Gel** : le seuil est une valeur de l'état voulu, `gelApresJours`, **30 jours pour toutes les instances** en v1. L'agent compte depuis le dernier contact qu'il a vu (horloge scellée), émet le fait `instance.etat.modifie` (type gel) que la partie A publie sans le calculer, et le lève au premier contact. Un seuil modifié par l'état voulu vaut au contact réussi suivant et ne raccourcit jamais un silence déjà écoulé.
+  - **Registre des consentements** : à chaque changement du registre (retrait compris), l'agent joint sa copie signée au contact suivant ; la centrale la garde pour le fichier de rétablissement (AD-13, AD-35).
   - **Alertes de silence** : la centrale alerte à **J+7** depuis le dernier contact qu'**elle** a vu, au DSI et à Money Vibes.
   - **Panne de la centrale** : voir AD-35.
 
@@ -215,6 +216,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   - **Retour arrière** : pendant 7 jours, il **relance les empreintes de la version précédente au niveau de correctif courant** (le manifeste de cette version corrigée), sur la même base. Il ne retire jamais un correctif de sécurité. Aucune restauration. Un retour arrière interrompu reprend à son étape.
   - **`AVEC_PERTE`** : une promotion interrompue revient d'elle-même, sauf pour une version `AVEC_PERTE` : l'agent s'arrête et alerte, et seul le DSI décide de la restauration (FR-18). Elle n'est permise que sur site, jamais en vague, et le catalogue la refuse sur la plateforme (`AVEC_PERTE_INTERDIT_PLATEFORME`). La restauration suit AD-16.
   - **Calibration d'IA** : une promotion ne touche pas aux modèles calibrés (AD-39).
+  - **Interrupteurs** : sur site, la promotion fait passer tous les interrupteurs à leur position finale ; un interrupteur ne change jamais la forme des données (test éteint/allumé, conventions).
   - **Pas deux promotions** dans une même fenêtre de 7 jours, sauf un correctif (AD-31) ; l'agent le refuse sur site, la centrale le tient pour la plateforme.
 
 ### AD-12 — Le journal : chaîné, écrit par l'agent seul, une seule enveloppe `[ADOPTED]`
@@ -228,18 +230,19 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   - **Pseudonymisation** : elle remplace `acteurRef` par un pseudonyme stable ; la chaîne porte sur le pseudonyme. La table de correspondance nominative est **hors chaîne**, et seule elle est effaçable. Le journal d'un prospect effacé est pseudonymisé, jamais supprimé.
   - **Rétention** : le journal survit à la fin d'un contrat selon la durée légale ; à l'effacement final (AD-38), seule la table de correspondance disparaît.
 
-### AD-13 — Les consentements vivent sur l'instance ; Money Vibes n'en a qu'une copie signée
+### AD-13 — Les consentements vivent sur l'instance ; Money Vibes n'en a qu'une copie signée `[ADOPTED]`
 
 - **Binds:** FR-27, FR-28 → FR-30, FR-35, AD-P16, C11
 - **Prevents:** une donnée qui sort sans consentement en vigueur ; un consentement retiré qui revient avec une sauvegarde ou qui est ignoré entre deux contacts ; une lecture d'IA sans garde sur la plateforme.
 - **Rule:**
   - Le registre des consentements appartient à l'agent ; sa tête est dans l'état de confiance (AD-4). Seul le DG de l'organisation, identité enregistrée par Money Vibes à la signature et transmise à l'agent par l'état voulu, ou la personne qu'il désigne par écrit, le modifie ; le refus est `CONSENTEMENT_RESERVE_AU_DG` (403), appliqué par `auth-service` (PRD §8.4). Sans contrat client signé portant la clause, aucun consentement ne s'enregistre.
   - Le **vocabulaire des finalités** est fermé et versionné avec les contrats (AD-26). Chaque **échantillon** envoyé porte `teteRegistre` et la copie signée **complète** du registre au moment de l'envoi.
+  - **Copie au contact** : l'agent joint la copie signée du registre au contact à **chaque changement du registre** (retrait compris), sans attendre un échantillon ; la centrale la garde pour le fichier de rétablissement (AD-35).
   - **Retrait** : l'agent vide sa file d'export de la finalité retirée **avant** d'écrire le retrait au registre. `apprentissage-service` refuse toute donnée dont la finalité n'est pas couverte par la copie la plus récente par `rangRegistre`, et **met en quarantaine ou supprime**, journalisé, toute donnée reçue pour une finalité qu'une copie ultérieure retire. Une copie plus ancienne que 14 jours n'autorise rien.
   - **Plateforme** : le registre de la plateforme est tenu par l'agent de la plateforme et alimenté à la signature du contrat d'abonnement par le contrat `abonnement.contrat.signe` de `paiement-service` (AD-17), que l'agent consomme : une ligne de niveau 3 par finalité. L'IA lit par un **compte de service dédié** (contrat C11 amendé, pas AD-P16) dont **toute lecture passe par la garde du registre** (`CONSENTEMENT_ABSENT`). Les lectures d'exploitation (AD-P16) sont journalisées à part, jamais pour l'apprentissage, et comptent dans SM-4. Les routes AD-P16 sont inaccessibles sur site hors tunnel ouvert (AD-20).
   - La console lit le registre par `apprentissage-service` (AD-17).
 
-### AD-14 — La partie C : un service à part, des données qui ne sortent que préparées
+### AD-14 — La partie C : un service à part, des données qui ne sortent que préparées `[ADOPTED]`
 
 - **Binds:** FR-26 → FR-31, FR-27, FR-28, A-10, NFR-3, SM-4
 - **Prevents:** un export non pseudonymisé ; un accès de niveau 2 sans trace ; un modèle commun qui arrive par un autre chemin que les versions ; un export après un recul d'empreinte.
@@ -307,7 +310,10 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   | route interne de création d'organisation (identifiant imposé, identité de service du moteur) | `auth-service` | partie A de chaque espace |
   | `identity.org.created` | `auth-service` | partie A de chaque espace |
   | ordre de naissance d'une organisation (`POST /api/instance/v1/naissances`) | partie A | console Money Vibes |
-  | `paiement.abonnement.echeance.encaissee`, `.impayee`, `.regularise` | paiement-service | partie A (plateforme : échéances et impayé d'un hébergé), agent de la plateforme (relais) |
+  | `paiement.abonnement.echeance.encaissee` | paiement-service | partie A (plateforme : échéances d'un hébergé), agent de la plateforme (relais) |
+  | `paiement.abonnement.impayee` | paiement-service | partie A (plateforme : parcours de l'impayé d'un hébergé), agent de la plateforme (relais) |
+  | `paiement.abonnement.regularise` | paiement-service | partie A (plateforme : régularisation d'un hébergé), agent de la plateforme (relais) |
+  | `catalogue.manifeste.publie` (manifeste d'une version : modules, dépendances, prix, `ModuleVersion` de C1) | partie A (catalogue) | paiement-service (read-model de manifestes pour la vente, qui résout les dépendances comme la console) |
   | `abonnement.contrat.signe` (une ligne de niveau 3 par finalité acceptée) | paiement-service | agent de la plateforme (registre, AD-13) |
   | relais de paiement : section « faits de paiement » du contact, avec `eventId` | agent de la plateforme | centrale-service |
   | contrat d'envoi existant de `notification-service` (licence, paquet de correctif, avis de fin d'essai) | notification-service | centrale-service, partie A de la plateforme |
@@ -315,6 +321,8 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   | contact (`/v1/contact`, mTLS) : vérification quotidienne, signal hebdomadaire (schéma fermé), réponse portant l'**état voulu** (JWS, AD-22) et le jeton d'export | agent ; centrale | centrale ; agent, apprentissage-service |
   | jeton d'enrôlement à usage unique (montage, rétablissement) | centrale-service (émis à la demande de la console) | agent |
   | fichier de rétablissement et fichier de prolongation (JWS) | centrale-service | agent |
+  | fichier d'urgence (JWS de la racine, hors ligne, AD-7) | Money Vibes (cérémonie de la racine) | agent |
+  | copie signée du registre des consentements, jointe au contact à chaque changement du registre (retrait compris) | agent | centrale-service (la garde pour le fichier de rétablissement, AD-35) |
   | approbation d'export du responsable des données, élément `approbationsExport` de l'état voulu | centrale-service | agent |
   | envoi d'échantillons (mTLS) | agent | apprentissage-service |
   | lecture du registre des consentements, et copie signée du registre | apprentissage-service ; agent | console Money Vibes ; apprentissage-service |
@@ -331,7 +339,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
 - **Prevents:** un deuxième chemin de code pour la plateforme ; une plateforme qui se gèle ; deux sources d'échéance pour un client hébergé.
 - **Rule:** La plateforme a un agent, deux espaces, des promotions et un journal, comme une instance sur site. Elle diffère par ces points, et par aucun autre :
   - son horloge de référence est celle de Money Vibes ;
-  - **la seule source d'échéance et d'impayé d'un client hébergé est le contrat de `paiement-service`**, lu par la partie A de la plateforme : elle consomme `paiement.abonnement.echeance.impayee` et `.regularise` (AD-17) et en déduit la suspension et la reprise de l'hébergé (la sanction par la licence ne vaut que sur site, AD-8) ; la centrale n'émet **aucune licence** pour une organisation hébergée (elle l'inscrit au parc et la supervise). Le jour où un hébergé passe sur site, sa licence porte l'`echeanceLe` copiée du contrat avec `origineContrat`, jamais recalculée ;
+  - **la seule source d'échéance et d'impayé d'un client hébergé est le contrat de `paiement-service`**, lu par la partie A de la plateforme : elle consomme `paiement.abonnement.impayee` et `paiement.abonnement.regularise` (AD-17) et en déduit le parcours de l'impayé (préavis de 30 jours, puis lecture seule, FR-32 et FR-41) et la régularisation ; un impayé ne produit jamais `SUSPENDU`, qui reste une sanction décidée (la sanction par la licence ne vaut que sur site, AD-8) ; la centrale n'émet **aucune licence** pour une organisation hébergée (elle l'inscrit au parc et la supervise). Le jour où un hébergé passe sur site, sa licence porte l'`echeanceLe` copiée du contrat avec `origineContrat`, jamais recalculée ;
   - elle n'entre jamais en `GEL` ni en `VERSION_FIGEE` ;
   - **FR-17** : la fenêtre de mise à jour est fixée par Money Vibes, avec annonce 7 jours avant ; les interrupteurs sont allumés par l'administrateur de chaque organisation, avec date limite ; le retour arrière est **global** et décidé par Money Vibes ;
   - **FR-18** : `AVEC_PERTE` est interdite (AD-11) ;
@@ -382,7 +390,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
 - **Rule:**
   - **Forme** : par (organisation × module), l'état parmi les neuf, `finLe`, `preavisJusquau`, `effacementLe`, `essai`, `sante`, `retourArriere`, `interrupteurs` (code, état, `dateLimite`). Par instance : `espace`, `hebergement`, gel (`NORMAL` ou `GEL`), `VERSION_FIGEE`, version de plateforme, `heureDeReference` (instant, numéro, `horlogeId`), `retourArriereEnCours` (étape, avancement), `miseAJourAnnoncee` (date, `SANS_PERTE` ou `AVEC_PERTE`). Par utilisateur appelant : `droitsEffectifs`.
   - **`droitsEffectifs`** : intersection des droits que le jeton de l'appelant porte déjà (résolus par `auth-service`) avec l'état des modules. La partie A ne tient aucun read-model des membres.
-  - **Un état publié par espace** : chaque partie A émet sur le topic de son espace ; le message porte `espace` et `instanceId` ; l'`eventId` les contient, avec `epoque`. Chaque service ne consomme que les messages de son espace.
+  - **Un état publié par espace** : chaque partie A émet sur le topic de son espace (`etat-publie.changed.essai` ou `.reel`, AD-17) ; le message porte `espace` et `instanceId` ; l'`eventId` les contient, avec `epoque`. Chaque service ne consomme que les messages de son espace.
   - **Source unique** : la garde applique l'**état publié seul**. `entitlement.changed` ne sert plus à fermer : `echeanceLe` n'est plus lu pour décider. Chaque consommateur existant (paiement, microfinance, bilan, notification, balance) joue un test de conformité en **double lecture** avant le retrait.
   - **Contrats** : `contrat/etat-publie.openapi.json` et `contrat/matrice-etats.json` appartiennent à la partie A, dans `platform-catalog-service`, versionnés (ajouts seulement), publiés dans la semaine 5 (avant le 11/12/2026). La vraie route est servie avant la démo du 15/01/2027, au plus tard au premier gate de la coque.
 
@@ -460,14 +468,14 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
 - **Rule:**
   - La centrale publie un artefact `CORRECTIF` pour **chaque version majeure encore dans sa durée de maintenance**, jamais au-delà. Il ne porte **jamais de migration** ; son retour arrière est toujours sans perte. Il est **critique** si CVSS ≥ 9 ou si la faille est exploitée.
   - L'annonce part dans la réponse quotidienne. Money Vibes prévient le DSI par e-mail (demande à `notification-service`) et par un ticket d'appel téléphonique.
-  - L'horloge de **72 heures** est tenue par la centrale ; son départ est le moment où le client est prévenu. Le DSI peut **reporter une seule fois, de 7 jours au plus**, tracé au journal ; il ne peut pas refuser. L'essai et la promotion se font dans les 72 heures, avec retour arrière automatique.
+  - L'horloge de **72 heures** est tenue par la centrale ; son départ est le moment où le client est prévenu. Le DSI peut **reporter une seule fois, de 7 jours au plus**, tracé au journal ; il ne peut pas refuser : passé les 72 heures, ou le report, le correctif s'applique seul. L'essai et la promotion se font dans les 72 heures, avec retour arrière automatique.
   - Hors vagues (AD-32). Un retour arrière ne le retire jamais (AD-11). En version figée, seul un correctif **critique** passe (AD-30) ; pendant un gel, il ne passe que **par fichier** (AD-1).
 
 ### AD-32 — Les vagues et les incidents
 
 - **Binds:** FR-20, FR-17, A-1, §3
 - **Prevents:** une version qui passe à tout le parc avant d'avoir été vue ; deux promotions dans la même semaine.
-- **Rule:** La centrale fixe l'ordre : un **client pilote** d'abord, la plateforme comptant comme une instance. Une version passe à la vague suivante après **7 jours sans incident**, avec un plafond d'attente de **14 jours** par instance qui ne promeut pas. Un **incident** est un retour arrière demandé, une anomalie grave ou bloquante imputée à la version, ou un contrôle de santé en échec après promotion ; il remonte par le signal (AD-9). La centrale peut arrêter une vague. Les correctifs ne suivent pas les vagues. La centrale tient « pas deux promotions en 7 jours » pour la plateforme, et la garde « une seule version d'interrupteurs ouverte à la fois ».
+- **Rule:** La centrale fixe l'ordre : un **client pilote** d'abord, la plateforme comptant comme une instance. Une version passe à la vague suivante après **7 jours sans incident**, avec un plafond d'attente de **14 jours** par instance qui ne promeut pas. Un **incident** est un retour arrière demandé, une anomalie grave ou bloquante imputée à la version, ou un contrôle de santé en échec après promotion ; il remonte par le signal (AD-9). La centrale peut arrêter une vague. Une version de l'agent suit les mêmes vagues (pilote d'abord) ; un incident remonté suspend la vague suivante jusqu'à décision de Money Vibes. Les correctifs ne suivent pas les vagues. La centrale tient « pas deux promotions en 7 jours » pour la plateforme, et la garde « une seule version d'interrupteurs ouverte à la fois ».
 
 ### AD-33 — Les migrations : déclarées au manifeste, jouées par l'agent, sous verrou
 
@@ -481,14 +489,14 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
 - **Prevents:** un état d'agent dans la base d'un espace ; une agent qui voit les deux espaces par une porte ouverte ; un journal perdu quand Kafka s'arrête.
 - **Rule:**
   - **Magasin** : **SQLite chiffré**, journal à écriture anticipée, sur un volume dédié de l'agent. Il porte le journal, l'état de confiance, le registre des consentements, les plans et le bail (AD-3). La **clé du SQLite est rangée sur le second support**, sur le volume dédié du miroir (AD-4). Ce niveau est **plus faible** : qui détient le serveur et son second support lit le magasin ; il est dit dans la supervision (AD-4, AD-40). Le format de la version N est lisible par N-1, ou N ne migre qu'après sa validation.
-  - **Raccordement** : un réseau Docker dédié rattache l'agent à chaque projet d'espace, avec seulement le Kafka de l'espace et le point `GET /heure` exposés entre eux. Les espaces ne se voient pas. L'agent a un client Kafka par espace, avec des identifiants distincts (NFR-3).
+  - **Raccordement** : un réseau Docker dédié rattache l'agent à chaque projet d'espace, avec seulement le Kafka de l'espace et le point `GET /heure` exposés entre eux, plus les routes d'export et d'import C13 des modules de l'espace, exposées par le Traefik de l'instance à l'agent seul, sous l'identité de service de cet espace (le rafraîchissement, AD-15, n'a pas d'autre chemin). Les espaces ne se voient pas. L'agent a un client Kafka par espace, avec des identifiants distincts (NFR-3).
 
 ### AD-35 — Le ré-ancrage après sinistre, et la continuité de la centrale `[ADOPTED]`
 
 - **Binds:** NFR-7, NFR-11, FR-15, A-4
 - **Prevents:** une instance dont le serveur est perdu et qui reste refusée ; un consentement retiré qui revient ; une centrale restaurée qui voit de faux reculs ; un parc gelé par la faute de Money Vibes.
 - **Rule:**
-  - **Ré-ancrage** : après la perte du serveur, sur **demande écrite du DSI**, la centrale émet un **fichier de rétablissement signé**, à usage unique, lié à la nouvelle machine, portant la dernière empreinte connue, le dernier compteur, la licence, la copie signée du registre des consentements, la tête du journal et un **jeton d'enrôlement** à usage unique (AD-29). L'agent reprend l'état, fixe son compteur à **`dernier + 1`** (la centrale ne voit donc pas de recul), marque un trou dans la chaîne du journal, incrémente l'époque et journalise l'événement des deux côtés. La nouvelle machine obtient son certificat par le jeton d'enrôlement (AD-29), le renouvellement étant refusé après recul. Le miroir du second support (AD-4) accélère le cas où le second support survit mais ne remplace pas le fichier.
+  - **Ré-ancrage** : après la perte du serveur, sur **demande écrite du DSI**, la centrale émet un **fichier de rétablissement signé**, à usage unique, lié à la nouvelle machine, portant la dernière empreinte connue, le dernier compteur, la licence, la copie signée du registre des consentements (la dernière jointe au contact, AD-9 et AD-13), la tête du journal et un **jeton d'enrôlement** à usage unique (AD-29). L'agent reprend l'état, fixe son compteur à **`dernier + 1`** (la centrale ne voit donc pas de recul), marque un trou dans la chaîne du journal, incrémente l'époque et journalise l'événement des deux côtés. La nouvelle machine obtient son certificat par le jeton d'enrôlement (AD-29), le renouvellement étant refusé après recul. Le miroir du second support (AD-4) accélère le cas où le second support survit mais ne remplace pas le fichier.
   - **Centrale** : pas de haute disponibilité en février ; sauvegarde 3-2-1 de sa base, de la CA et du registre, remise en route 4 h, copie hors machine sur l'hôte de la plateforme. L'empreinte portant un **compteur**, une centrale restaurée ne voit pas de faux recul : une lacune de compteur est journalisée, jamais sanctionnée (AD-4).
   - **Panne imputable** à Money Vibes plus longue que 3 jours : la centrale publie un fichier de **prolongation** (heure de référence signée et seuil de gel allongé), joint par e-mail aux DSI.
 
@@ -498,7 +506,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
 - **Prevents:** une faille de l'agent qui vaut root sur le serveur de l'assureur ; un secret dans un fichier versionné ; une image signée mais vulnérable.
 - **Rule:**
   - **Deux processus** : un **exécuteur** minimal, seul à avoir le socket Docker, qui n'accepte que des plans signés vérifiés localement et une liste blanche de commandes `docker compose` ; un processus de **contact** sans privilège et sans socket. Aucun n'écrit dans le système de fichiers hors de ses volumes.
-  - **Répartition** : l'**exécuteur** porte le magasin et son miroir, l'état de confiance, l'horloge scellée, `GET /heure`, les clients Kafka par espace, la vérification des signatures, le chargement des images dans le démon et `docker compose`. Le **contact** porte la liaison réseau sortante (clé mTLS, contact, envoi d'échantillons, relais de paiement) et le **tirage des images et des fichiers reçus vers un volume de dépôt** ; il ne vérifie ni n'applique rien. Ils échangent par ce volume et un socket local : le contact remet à l'exécuteur ce qu'il a tiré et reçoit de lui la charge du contact (version, numéro de licence, empreinte, signal, **faits de paiement à relayer**, échantillons préparés). Le contact n'a **aucun client Kafka** : c'est l'exécuteur qui consomme les faits de paiement sur le bus de l'espace réel et les range dans le magasin, d'où le contact les relaie.
+  - **Répartition** : le **tunnel de support** (AD-20) et la **copie hors machine** (AD-16) sortent sur le réseau : ils sont côté **contact**, sur ordre de l'exécuteur par le socket local. L'**exécuteur** porte le magasin et son miroir, l'état de confiance, l'horloge scellée, `GET /heure`, les clients Kafka par espace, la vérification des signatures, le chargement des images dans le démon et `docker compose`. Le **contact** porte la liaison réseau sortante (clé mTLS, contact, envoi d'échantillons, relais de paiement) et le **tirage des images et des fichiers reçus vers un volume de dépôt** ; il ne vérifie ni n'applique rien. Ils échangent par ce volume et un socket local : le contact remet à l'exécuteur ce qu'il a tiré et reçoit de lui la charge du contact (version, numéro de licence, empreinte, signal, **faits de paiement à relayer**, échantillons préparés). Le contact n'a **aucun client Kafka** : c'est l'exécuteur qui consomme les faits de paiement sur le bus de l'espace réel et les range dans le magasin, d'où le contact les relaie.
   - **Gabarits signés** : ils interdisent `privileged`, les montages de l'hôte, `network_mode: host` et les capacités ajoutées ; un test de conformité du manifeste le vérifie.
   - **Secrets** : fichiers sous contrôle de l'agent, générés au montage, jamais dans l'environnement du Compose versionné. Disque, Mongo, MinIO et sauvegardes sont chiffrés au repos ; le montage refuse un disque non chiffré. Les identifiants des connecteurs du client restent dans les secrets de `connecteurs-service`.
   - **Hôte** : aucun port entrant d'internet ; la mise à jour de l'OS et de Docker relève du DSI, selon la liste du bilan ; les images de base sont dans la ligne de version.
@@ -522,6 +530,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   - L'**effacement** est un plan enregistré et idempotent de la partie A, qui appelle la route d'effacement C13 de **chaque propriétaire** (données, copies chez les voisins, calibration, Reprise comprise). Les journaux sont pseudonymisés (AD-12).
   - Le **certificat d'effacement** est signé et porte la date d'expiration de la dernière sauvegarde qui contient les données (AD-16).
   - La même mécanique supprime les données d'un acheteur hébergé après 90 jours de lecture seule (FR-32).
+  - À la fin d'un contrat sur site, l'agent exporte puis efface le magasin (état de confiance, registre des consentements) ; seul le journal est gardé, pseudonymisé (AD-12).
 
 ### AD-39 — L'IA du client est intouchable
 
@@ -557,8 +566,8 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   | 19 dépôts git, pas de mono-dépôt (P10 est fausse) | changé : `prospera-plateforme` et `prospera-adaptateurs` (AD-26) |
   | Catalogue sans Redis ni BullMQ ; outbox à `setInterval`, mono-instance | changé : Redis et BullMQ entrent au catalogue ; l'outbox prend un verrou |
   | `terme.ts` : statut lu, jamais écrit | ratifié (AD-6) |
-  | Consommateur d'impayé dans le catalogue (`suspension-par-impaye`) | changé : sur site il disparaît, la sanction est portée par la licence (AD-8) ; sur la plateforme, la partie A consomme `.impayee` et `.regularise` pour un hébergé (AD-19) ; les jalons de relance restent à `paiement-service` |
-  | Format de droit `^[a-z]+:[a-z-]+:[a-z]+$` refuse les codes à tiret | changé : élargi dans `auth-service` avant `pi-spi`, `conformite-bceao`, `finance-transactions`, `support-client` |
+  | Consommateur d'impayé dans le catalogue (`suspension-par-impaye`) | changé : sur site il disparaît, la sanction est portée par la licence (AD-8) ; sur la plateforme, la partie A consomme `paiement.abonnement.impayee` et `paiement.abonnement.regularise` pour un hébergé et en déduit le parcours de l'impayé (préavis, lecture seule), jamais `SUSPENDU` (AD-19) ; les jalons de relance restent à `paiement-service` |
+  | Format de droit `^[a-z]+:[a-z-]+:[a-z]+$` refuse les codes à tiret | changé : élargi dans `auth-service` avant `pi-spi`, `conformite-bceao`, `finance-transactions`, `support-client` ; **story livrée avant la semaine 5**, avec la route de naissance (amendement du plan §4) |
   | `auth-service` sans route d'organisation à identifiant imposé | changé : route interne réservée à l'identité de service du moteur, **story livrée avant la semaine 5** |
   | `mongo:7` en jeu de réplicas à un nœud | changé : **MongoDB 8.0** dans le gabarit 1.0, compose de développement aligné |
   | `node:20-slim` | changé : **Node 24** pour tous les services dans la version 1.0, avant février |
