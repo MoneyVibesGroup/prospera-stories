@@ -124,7 +124,7 @@ du PRD. Il sera remplacé par le chiffrage consolidé du 04/12 (plan §4).
 puis 04/01 → 26/02, pause des fêtes déduite). Le plan v3 les emploie déjà : moteur (sem. 5), CRM interne
 (sem. 6), sinistres (sem. 7), GED (sem. 8).
 
-**Écart : 7 à 10 semaines.** Trois façons de le couvrir, non exclusives (question 1) :
+**Écart : 7 à 10 semaines**, avant deux ajouts du PO du 2026-11-10 et du 2026-11-11, non chiffrés : la mise à la règle C8 de l'app expert-comptable (Dev B, pour février) et le module d'écran `reprise` dans `prospera-app` dès février (Reprise devenue module installable, M44). Ils **creusent** l'écart. Trois façons de le couvrir, non exclusives (question 1) :
 - **retirer** de Dev B le CRM interne, les sinistres et la GED, qui passent **après février** (≈ 3 semaines) ;
 - **renforcer** par Dev A à partir du 18/01, au prix du démarrage de la microfinance prévu ce jour-là
   (question 3), sur les parties B et C (≈ 5 à 6 semaines) ;

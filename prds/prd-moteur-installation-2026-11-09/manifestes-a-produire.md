@@ -6,7 +6,7 @@ source: prospera_pricing.md, PROSPERA_MODULES_ET_ROADMAP.md, prospera_pricing_di
 
 # Manifestes à produire
 
-Un module sans manifeste au catalogue ne se vend pas (exigences FR-12 et FR-38 du PRD moteur) : ce tableau liste les 43 modules commerciaux à doter d'un manifeste, chacun écrit avec la première story du module (contrat de module C1).
+Un module sans manifeste au catalogue ne se vend pas (exigences FR-12 et FR-38 du PRD moteur) : ce tableau liste les 44 modules commerciaux à doter d'un manifeste, chacun écrit avec la première story du module (contrat de module C1).
 
 Légende : ✅ = code présent à `modules.seed-data.ts` ; ❌ = code à créer. Les n° sont ceux de la séquence v2 du plan (§4), qui diffèrent de la numérotation 1-29 de `PROSPERA_MODULES_ET_ROADMAP.md`. « Après le chiffrage du 04/12 » = aucune story datée au plan (cadrage de Dev B en semaines 2 à 4, code non planifié avant le 15/01).
 
@@ -54,28 +54,29 @@ Légende : ✅ = code présent à `modules.seed-data.ts` ; ❌ = code à créer.
 | M40 | Immobilisations & amortissements | distributeur, cabinet [À CONFIRMER] | Option rattachée au bilan [À CONFIRMER] | ❌ immobilisations | à créer (à créer) | — | Dev B [À CONFIRMER] | après le chiffrage du 04/12 | non | Rattachement au bilan ou module dédié à trancher |
 | M41 | Paie & déclarations sociales | microfinance, cabinet [À CONFIRMER] | Option non datée | ❌ paie | à créer (à créer) | — | Dev B [À CONFIRMER] | après le chiffrage du 04/12 | non | Périmètre à trancher (décision ouverte) |
 | M42 | Add-on Réseau Freelance | distributeur | Add-on (Grand et Moyen ; option des 4 bundles) | ❌ freelance | à créer (transverse aux modules D) (à créer) | — | Dev B [À CONFIRMER] | après le chiffrage du 04/12 | non | Add-on, non un module : manifeste ou option de pack [À CONFIRMER] |
-| M43 | Connecteurs & intégrations (Odoo, banques, Mobile Money, OTR, signature) | distributeur, microfinance, assurance, cabinet | Inclus dans l'offre D (connecteur Odoo) ; transverse | ❌ connecteurs | à créer (à créer) | — | Dev B [À CONFIRMER] | après le chiffrage du 04/12 | oui (prd-connecteurs) | Chantier continu |
+| M43 | Connecteurs & intégrations (Odoo, banques, Mobile Money, OTR, signature) | distributeur, microfinance, assurance, cabinet | Un seul module commercial, ajouté d'office dès que le contrat déclare un logiciel du client ; inclus dans la plateforme complète (décision du PO, 2026-11-11) | ❌ connecteurs | à créer (à créer) | — | Dev B [À CONFIRMER] | après le chiffrage du 04/12 | oui (prd-connecteurs) | Chantier continu ; requis en février (QA-3) |
+| M44 | Reprise de données | distributeur, microfinance, assurance | Module installable, ouvert d'office dans l'essai du prospect (décision du PO, 2026-11-11) ; offre [À CONFIRMER] | ❌ reprise | à trancher par la spine (patron D13 de balance-service) | — | Dev B [À CONFIRMER] | avant février 2027 | oui (prd-reprise-donnees) | Requis en février (QA-3) ; module d'écran `reprise` dans `prospera-app` |
 
 ## Récapitulatif
 
-Total : **43 modules**.
+Total : **44 modules** (M44 Reprise de données ajouté le 2026-11-11).
 
 Par vertical (un module partagé compte dans chacune de ses verticales) :
 
-- distributeur : 26
-- microfinance : 25
-- assurance : 14
+- distributeur : 27
+- microfinance : 26
+- assurance : 15
 - cabinet : 11
 
-Code catalogue existant ✅ : **20** sur 43 (dont 3 dépréciés à réactiver : support-client, equipe, dashboard) ; à créer : 23.
+Code catalogue existant ✅ : **20** sur 44 (dont 3 dépréciés à réactiver : support-client, equipe, dashboard) ; à créer : 24.
 
-Par propriétaire : Dev A = 4 ; Dev B = 39 (dont 15 attribués par déduction [À CONFIRMER]).
+Par propriétaire : Dev A = 4 ; Dev B = 40 (dont 16 attribués par déduction [À CONFIRMER]).
 
-Manifestes datés au plan, avant le 15/01/2027 : **7** (Réseau, CRM Points de Vente & Pipeline, Support client & CRM interne, Catalogue, Gestion des sinistres, Stock & logistique, GED). Les 36 autres n'ont pas de première story datée au plan : ils tombent « après le chiffrage du 04/12 » et, faute de code planifié, après le 15/01.
+Manifestes datés au plan, avant le 15/01/2027 : **7** (Réseau, CRM Points de Vente & Pipeline, Support client & CRM interne, Catalogue, Gestion des sinistres, Stock & logistique, GED). Les 37 autres n'ont pas de première story datée au plan : ils tombent « après le chiffrage du 04/12 » et, faute de code planifié, après le 15/01.
 
 ## Points [À CONFIRMER]
 
-Modules portant au moins un marqueur : **34**. Détail :
+Modules portant au moins un marqueur : **35**. Détail :
 
 - M01 Réseau, agences & zones : bundles
 - M03 Support client & CRM interne : verticales, bundles
@@ -111,9 +112,9 @@ Modules portant au moins un marqueur : **34**. Détail :
 - M41 Paie & déclarations sociales : verticales, propriétaire
 - M42 Add-on Réseau Freelance : propriétaire, remarque
 - M43 Connecteurs & intégrations : propriétaire
+- M44 Reprise de données : bundles, propriétaire
 
 ## Hors liste
 
 - `fiscalite` (déprécié au catalogue, remplacé par `declarations` et `conseil`) et le socle (auth, catalogue, moteur d'installation, coque `prospera-app`) ne sont pas des modules commerciaux.
-- La reprise de données (prd-reprise-donnees) est un service de projet, pas un module vendu.
 - L'offre assurance v4 ne détaille pas de modules : les lignes A sont déduites de ses phases 1-3 et du lot 4 du plan.
