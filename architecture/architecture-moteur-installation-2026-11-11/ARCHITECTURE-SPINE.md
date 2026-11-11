@@ -567,8 +567,8 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va du poste 
   | Catalogue sans Redis ni BullMQ ; outbox à `setInterval`, mono-instance | changé : Redis et BullMQ entrent au catalogue ; l'outbox prend un verrou |
   | `terme.ts` : statut lu, jamais écrit | ratifié (AD-6) |
   | Consommateur d'impayé dans le catalogue (`suspension-par-impaye`) | changé : sur site il disparaît, la sanction est portée par la licence (AD-8) ; sur la plateforme, la partie A consomme `paiement.abonnement.impayee` et `paiement.abonnement.regularise` pour un hébergé et en déduit le parcours de l'impayé (préavis, lecture seule), jamais `SUSPENDU` (AD-19) ; les jalons de relance restent à `paiement-service` |
-  | Format de droit `^[a-z]+:[a-z-]+:[a-z]+$` refuse les codes à tiret | changé : élargi dans `auth-service` avant `pi-spi`, `conformite-bceao`, `finance-transactions`, `support-client` ; **story livrée avant la semaine 5**, avec la route de naissance (amendement du plan §4) |
-  | `auth-service` sans route d'organisation à identifiant imposé | changé : route interne réservée à l'identité de service du moteur, **story livrée avant la semaine 5** |
+  | Format de droit `^[a-z]+:[a-z-]+:[a-z]+$` refuse les codes à tiret | changé : élargi dans `auth-service` avant `pi-spi`, `conformite-bceao`, `finance-transactions`, `support-client` ; **livré en semaine 5, dans EPIC-142**, avec la route de naissance (amendement du plan §4 ; décision du PO du 2026-11-11 : Dev A tient `auth-service` en semaine 4 pour le socle) |
+  | `auth-service` sans route d'organisation à identifiant imposé | changé : route interne réservée à l'identité de service du moteur, **livrée en semaine 5, dans EPIC-142** |
   | `mongo:7` en jeu de réplicas à un nœud | changé : **MongoDB 8.0** dans le gabarit 1.0, compose de développement aligné |
   | `node:20-slim` | changé : **Node 24** pour tous les services dans la version 1.0, avant février |
   | `kafkajs` 2.2 (non maintenu depuis 2023) | changé : `@confluentinc/kafka-javascript` (AD-27) |
