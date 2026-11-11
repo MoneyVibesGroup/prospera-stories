@@ -574,7 +574,7 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 
 | # | Sujet | Orientation validée par le PO le 2026-11-11 |
 |---|---|---|
-| OQ-1 | Service et paquet d'adaptateurs ; noms des topics et routes | **Deux services** (Reprise et Connecteurs : agrégats distincts, contrat §4) ; **paquet d'adaptateurs** = bibliothèque commune versionnée avec la plateforme ; topics et routes nommés par la spine |
+| OQ-1 | Service et paquet d'adaptateurs ; noms des topics et routes | **Deux services** (Reprise et Connecteurs : agrégats distincts, contrat §4) ; **paquet d'adaptateurs** = bibliothèque commune versionnée avec la plateforme ; topics et routes nommés par la spine. **Tranché par la spine du moteur (AD-18, AD-26, 2026-11-11)** : la bibliothèque vit dans le dépôt neuf **`prospera-adaptateurs`** (paquet npm privé), et non dans un dossier `packages/adaptateurs` d'un mono-dépôt (il n'y en a pas) ; les routes d'export, d'import et d'effacement du contrat C13 sont consommées par la partie A du moteur |
 | OQ-2 | Protection par objet (`historique`, `montantASaisir`) | Les API des modules cibles renvoient ces marqueurs **par objet** ; la coque fournit `<ProtectionObjet>` (nouvelle AD-25 de la spine `prospera-app`) |
 | OQ-3 | Téléversement volumineux (NFR-6) | Envoi **par morceaux de 10 Mo, avec reprise**, sur la seule route `/api/reprise/v1/televersements` ; la limite du proxy n'est relevée que pour elle |
 

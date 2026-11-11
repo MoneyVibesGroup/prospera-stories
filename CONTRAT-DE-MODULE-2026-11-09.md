@@ -3,6 +3,8 @@
 > **Date :** 2026-11-09 · **Statut :** ✅ **VALIDÉ par le PO le 2026-11-09**, avec ses cinq choix
 > Q1 → Q5 (§8), quatre jours avant l'échéance du 13/11. **Amendé le 2026-11-10 par le PO : clause C11
 > « module avec IA »**, issue de la table ronde du PRD moteur d'installation.
+> **Amendé le 2026-11-11** par la spine du moteur d'installation : C1, C2, C5, C7, C10, C11 (point 5) et
+> C13 (voir leurs paragraphes « Amendement (2026-11-11) »).
 > **Auteur :** Dev B (lot 1 du cadrage, `PLAN-2-DEVS-8-SEMAINES-2026-10-26.md` §1.3 et §4)
 > **Décision de programme :** **AD-P17**, inscrite dans `architecture-prospera-ecosystem-2026-07-04.md`.
 > **S'applique à :** tout module du programme, à partir d'**EPIC-045** chez Dev A. **Chaque PRD écrit
@@ -141,6 +143,14 @@ dépendance, aucun droit, aucun événement déclaré.** Le refus d'un module in
 cette famille de codes. ⚠️ **`reseau` n'est pas enregistré au catalogue** (seed `modules.seed-data.ts`) :
 c'est la première tâche de Dev A en semaine 1.
 
+**Amendement (2026-11-11, spine du moteur d'installation, AD-23 et AD-42).** Le schéma de `ModuleVersion`
+au catalogue reçoit les champs du manifeste : les **dépendances** (`depends`, avec leur raison), les
+**droits**, les **événements** publiés et consommés, les **vérifications** (route, critère), `retourArriere`,
+les **interrupteurs**, les **routes de lecture seule**, les **migrations** (un point d'entrée `migrer`
+idempotent, C13) et les **schémas d'événements** (JSON Schema, enregistrés au registre par l'agent à
+l'étape de migration). Le manifeste signé de la version de plateforme les reprend tels quels. La garde de
+test qui compare la source à la copie du catalogue couvre ces champs aussi.
+
 ### C2 : le socle (entitlement, gate, cloisonnement)
 
 **Règle.** Le module projette `entitlement.changed` dans un read-model local et refuse **toute** route
@@ -174,6 +184,11 @@ que le moteur lui pousse (neuf états : `NON_INSTALLE`, `EN_INSTALLATION`, `DESI
 - **Preuve ajoutée.** Une matrice : pour chacun des neuf états et chaque sorte de route (lecture,
   écriture, export, état réglementaire), **un seul attendu**, et le menu de la coque (C8) concorde avec la
   garde.
+
+**Amendement (2026-11-11, spine du moteur d'installation, AD-24).** La garde lit **l'état publié seul**.
+`entitlement.changed` ne sert plus à fermer un module, et `echeanceLe` n'est plus lu pour décider : le
+moteur calcule l'état publié à la lecture et émet `etat-publie.changed` à l'heure dite. Il y a **un état
+publié par espace** (essai, réel), et un topic par espace.
 
 ### C3 : le module possède ses données
 
@@ -219,6 +234,9 @@ est **idempotent** sur `eventId`. Jamais d'accès à la base d'un autre module.
 **Preuve.** Le **consommateur** exécute en CI la suite de conformité du producteur. C'est ce que fait
 déjà la spine de `pdv` avec celle de `reseau` (pdv, AD sur la portée).
 
+**Amendement (2026-11-11, spine du moteur d'installation, AD-27).** Les **nouveaux** contrats écrivent
+`organisationId`, une seule graphie. L'existant garde la sienne, service par service ; un renommage passe par un topic `@2`, jamais par un changement de champ en place (C12).
+
 ### C6 : se paramétrer par des données
 
 **Règle.** Ce qui varie d'un client à l'autre passe par des **référentiels versionnés** ou des **règles
@@ -260,6 +278,10 @@ organisation. Ses droits `instance:*` (dont `instance:donnees:exporter`) s'attri
 ne dépendent d'aucun autre module installé. Le droit de **consentir** (C11) ne s'attribue que par le DG.
 ⚠️ Le format de droit d'`auth-service` refuse les codes de module **à tiret** : à élargir. Les droits
 d'un manifeste, lus par le moteur, remplacent à terme l'`enum` fermé.
+
+**Amendement (2026-11-11, spine du moteur d'installation).** Le format de droit s'élargit aux **codes de
+module à tiret** (`<module>:<objet>:<action>` où le module peut contenir un tiret). La story `auth-service` qui l'élargit se livre **avant la semaine 5**, avec la route de
+naissance à identifiant imposé (PRD moteur, FR-42).
 
 ### C8 : le module d'écran
 
@@ -307,6 +329,12 @@ passer sa recette.
 première brique de l'installation chez le client (D3).
 
 **Preuve.** La commande ci-dessus, lancée à chaque gate, puis la recette du module.
+
+**Amendement (2026-11-11, spine du moteur d'installation, AD-10 et AD-27).** Le **socle d'un espace**
+inclut, en plus de ce qui précède, le **registre de schémas** (Karapace), **Redis** (jobs BullMQ) et
+**MinIO**, un jeu par espace. **L'agent d'instance** n'est pas dans le socle ni dans un profil : il vit
+dans son propre projet Compose, `<instance>-agent`, hors profils, et remplace les images des services sans
+être remplacé par eux.
 
 ### C11 : le module avec IA (ajoutée le 2026-11-10)
 
@@ -357,6 +385,14 @@ canal de données sont portés par le PRD du moteur d'installation (partie C).
   nombre de corrections, dérive) à l'agent d'instance par un **contrat nommé** (C5), sous un schéma fermé.
   Aucun indicateur ne contient un identifiant de personne ou de dossier.
 - **Preuve ajoutée.** Un test échoue si un champ non déclaré sort dans l'indicateur.
+
+**Amendement (2026-11-11, spine du moteur d'installation, AD-13 et AD-14 ; point 5).**
+- Le **compte de service IA de la plateforme** est un compte dédié, qui ne lit que par la **garde du
+  registre** : une lecture sans consentement valide pour la finalité est refusée `CONSENTEMENT_ABSENT`, et
+  rien ne sort. Les **lectures d'exploitation** des routes de lecture d'un module (assistance, support)
+  sont **journalisées**, sans export en masse, et ne servent **jamais** à l'apprentissage : cette règle
+  tient lieu de référence à AD-P16 pour la partie C (AD-P16 reste la règle de l'exploitation).
+- Sur site, ces routes de lecture ne sont atteignables que pendant un tunnel de support ouvert par le DSI.
 
 ### C12 : migrations rétrocompatibles pendant 7 jours (ajoutée le 2026-11-10)
 
@@ -418,6 +454,11 @@ peut que si chaque module **dit ce qu'il lui faut, prouve qu'il marche, et rend 
 
 **État mesuré.** ⛔ Aucun manifeste ne déclare ces obligations. Le moteur d'installation (module
 `instance`) est le premier à les tenir ; les modules existants s'y mettent à leur prochaine gate.
+
+**Amendement (2026-11-11, spine du moteur d'installation, AD-17 et AD-33).** Le manifeste **nomme** les
+routes d'**export**, d'**import**, d'**effacement** et de **vérification** de la clause (point 7), et la
+route de lecture de l'état publié ; il déclare un **point d'entrée `migrer`**, **idempotent** : l'agent
+l'appelle à l'étape de migration d'une promotion, sous verrou, et le rejouer ne double rien (C12).
 
 ---
 

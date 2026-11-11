@@ -829,7 +829,8 @@ prêt en février (PRD Reprise de données, FR-19).
   sources, tables de correspondance). Les journaux nominatifs sont **pseudonymisés**, pas supprimés : le
   journal reste en ajout seul (NFR-4).
 - Le **certificat d'effacement** est remis à l'effacement ; il dit la date à laquelle la dernière
-  sauvegarde qui contient encore ces données expire (NFR-7).
+  sauvegarde qui contient encore ces données expire (NFR-7), **calculée sur la rétention de NFR-7**
+  (spine du moteur, AD-38).
 - Ses données restent **cloisonnées** et ne **sortent jamais** vers l'IA commune sans son consentement
   (partie C) : la règle limite ce qui sort, pas ce qu'il utilise.
 
@@ -881,7 +882,8 @@ de dates ou de statuts bruts, ni ne lit l'horloge de son propre conteneur.
   à une personne qu'il désigne par écrit ; la référence de l'écrit est rangée au registre (FR-27). Un
   administrateur qui tente de l'attribuer reçoit `CONSENTEMENT_RESERVE_AU_DG` (403).
 - **Chaque bandeau a un droit** : « administrateurs » désigne les détenteurs de `instance:bilan:consulter` ;
-  « DG » désigne le dirigeant enregistré au registre (FR-27).
+  « DG » désigne le dirigeant enregistré au registre (FR-27). Le DG de l'organisation est **l'identité
+  enregistrée à la signature** du contrat, transmise à l'agent dans l'état voulu (spine du moteur, AD-22).
 - L'écran des rôles de `prospera-app` ne **propose** que les droits des modules ouverts et ceux
   d'`instance`. Un droit attribué pour un module désinstallé reste enregistré, n'ouvre rien, et revient tel
   quel à la réinstallation (C9).
@@ -1069,7 +1071,9 @@ ses interrupteurs de changement quand elle est prête (FR-17).
   modules en abonnement. Elle ne touche **jamais** un module perpétuel : une instance mixte (achat et
   abonnement) garde ses modules achetés quand la licence expire. À chaque paiement, la licence suivante est **envoyée
   automatiquement par e-mail** au DSI et reste **téléchargeable par un lien sécurisé à durée limitée** ;
-  l'instance la reçoit aussi d'elle-même au contact suivant.
+  l'instance la reçoit aussi d'elle-même au contact suivant. Le fait de paiement qui la déclenche va de
+  `paiement-service` à la centrale **par l'agent de la plateforme**, dans son contact sortant et signé ;
+  aucun service de module ne parle à la centrale (décision du PO, 2026-11-11 ; spine du moteur, AD-25).
 - Une licence plus ancienne que la dernière acceptée est refusée, même authentique : `LICENCE_ANTERIEURE`.
   Redéposer la licence d'avant une sanction ne lève donc rien (détail : addendum §A-3).
 - L'instance refuse aussi, **toutes clés confondues**, une licence dont l'heure de référence signée est
@@ -1213,7 +1217,10 @@ Deux variantes, parce qu'une plateforme partagée par plusieurs organisations n'
   vérification quotidienne.
 - Un correctif de sécurité passe par l'essai **et** la promotion en **72 heures** à partir du moment où le
   client est prévenu, avec retour arrière automatique.
-- Le DSI peut le **reporter une seule fois, de 7 jours au plus** ; il ne peut pas le refuser.
+- Le DSI peut le **reporter une seule fois, de 7 jours au plus** ; il ne peut pas le refuser. Passé ce délai,
+  **le correctif s'applique seul** (spine du moteur, AD-31).
+- Le « téléphone » est un **ticket d'appel** ouvert par Money Vibes, pas un canal automatique ; l'horloge de
+  72 heures part quand le client est prévenu (addendum §A-1).
 - Un correctif de sécurité ne porte **jamais de migration** : son retour arrière est toujours sans perte.
 - Il passe **hors vagues** (FR-20).
 - Un correctif est publié pour chaque version majeure **encore dans sa durée de maintenance publiée**
@@ -1314,7 +1321,8 @@ leur origine.
   achetés ont pour `echeanceLe` celle de cet abonnement (§3.1). S'il l'arrête :
   **préavis** de 30 jours, puis **lecture seule** pendant laquelle il **exporte ses données** (FR-43), puis
   **suppression** de ses données par Money Vibes selon les règles de protection des données en vigueur (loi
-  togolaise 2019-014), avec certificat. C'est une exception écrite au §3 « Effacer » et à Q4 (§8.4). Il
+  togolaise 2019-014), avec certificat, qui porte la date d'expiration de la dernière sauvegarde contenant
+  encore ses données, calculée sur la rétention de NFR-7. C'est une exception écrite au §3 « Effacer » et à Q4 (§8.4). Il
   peut aussi **passer sur site**, où sa version peut être figée. (validé par le PO, 2026-11-10 : 90 jours de
   lecture seule avant la suppression).
 - **Revenir à la maintenance se paie, avec le rattrapage de la période manquée** (comme SAP ; décision du
@@ -1443,21 +1451,37 @@ juridique, loi togolaise 2019-014).
   client**. Les sauvegardes sont chiffrées. Sur site, le client détient seul la clé qui restaure sur une autre machine (détail : addendum §A-3). Perte maximale tolérée **1 heure, sur site comme sur
   la plateforme** (journal des opérations) ; remise en route **4 heures**, sur site comme sur
   la plateforme (validé par le PO, 2026-11-10). Un **test de restauration automatique chaque mois**, dont l'échec fait passer le
-  **voyant de santé de l'instance** en orange (FR-16). Sur la plateforme, conservation par paliers
-  (7 quotidiennes, 4 hebdomadaires, 3 mensuelles). **Une sauvegarde ne restaure
-  jamais l'état de confiance** (NFR-11).
+  **voyant de santé de l'instance** en orange (FR-16). Conservation par paliers par défaut, **sur site comme
+  sur la plateforme** (7 quotidiennes, 4 hebdomadaires, 3 mensuelles ; spine du moteur, AD-16). **Une sauvegarde ne restaure
+  jamais l'état de confiance** (NFR-11). La **centrale** de Money Vibes se remet en route en **4 heures**
+  (décision du PO, 2026-11-11) ; sa copie hors machine est **croisée** entre l'hôte de la plateforme et
+  celui du poste central.
 - **NFR-8, clés de signature** (décision du PO, 2026-11-10) : les clés de signature sont certifiées par une clé racine hors
   ligne et changent régulièrement (détail : addendum §A-3) ; la **liste de révocation** voyage dans le signal hebdomadaire, dans la réponse
   quotidienne **et** dans chaque fichier de mise à jour. Une clé compromise est révoquée par un **fichier d'urgence** signé par la clé racine (détail : addendum §A-3).
+  La **centrale** de Money Vibes signe licences, état voulu, sanctions et jetons d'export avec sa **clé
+  d'exécution**, distincte des clés de la chaîne de publication : celles-ci ne signent que les images, le
+  manifeste et l'agent (décision du PO, 2026-11-11 ; spine du moteur, AD-28).
 - **NFR-9, interruption** : une promotion n'interrompt pas le travail plus de **15 minutes**, annoncées.
 - **NFR-10, serveur du client** : une configuration minimale publiée (processeur, mémoire, disque,
   second support de sauvegarde) ; la procédure de FR-25 refuse un serveur qui ne la respecte pas.
-  `[ASSUMPTION : chiffres à fixer par l'architecture]`
+  `[ASSUMPTION : chiffres à fixer par l'architecture]` **Aucun TPM** dans la configuration minimale de la
+  v1 : l'ancrage de l'état de confiance y est logiciel (NFR-11) et la puce de sécurité est **différée**
+  (décision du PO, 2026-11-11). Le second support est donc obligatoire.
 - **NFR-11, état de confiance** (ajoutée le 2026-11-10) : l'**état de confiance** de l'instance (§3) est ancré **hors des sauvegardes**
   (détail : addendum §A-4). Il n'avance que. Un recul est vu par Money Vibes au contact suivant (détail : addendum §A-4). Tests : restaurer une sauvegarde
   de six mois, puis vérifier que l'ancienne licence reste refusée, que le retrait d'un consentement tient,
-  et que l'échéance tombe à la même date. Le mécanisme d'ancrage (puce de sécurité, support séparé) est
-  laissé à l'architecture (§8.2).
+  et que l'échéance tombe à la même date. Le mécanisme d'ancrage est tranché par la spine du moteur (AD-4,
+  §8.2) : en v1, un état de confiance logiciel avec un miroir sur le second support, et Money Vibes pour
+  témoin.
+  **Compteur d'empreinte** : l'empreinte de l'état de confiance porte un compteur qui n'avance que. Une
+  valeur plus basse est un **recul**, deux empreintes différentes au même compteur sont une
+  **bifurcation**, un saut de compteur est une **lacune** ; Money Vibes les voit au contact suivant et les
+  consigne. L'état de confiance porte aussi une **époque**, qui change au ré-ancrage. **Ré-ancrage après la
+  perte du serveur** (décision du PO, 2026-11-11) : un **fichier de rétablissement** signé par Money Vibes,
+  délivré sur demande écrite du DSI, fait repartir l'état de confiance ; il est journalisé des deux côtés.
+  Le miroir du second support n'avance que : ce n'est pas une sauvegarde. Aucune réinitialisation de la
+  puce de sécurité (`TPM2_Clear`) n'entre dans le mécanisme (aucun TPM en v1, spine du moteur, AD-4).
 
 ## 6. Indicateurs de réussite
 
@@ -1552,7 +1576,9 @@ Chaque décision et sa raison sont au `.memlog.md` ; le texte ci-dessus les appl
   du 15/01 ; le reste selon la liste.
 - `[NOTE FOR PM]` **Mécanisme d'ancrage de l'état de confiance et de l'horloge scellée** (puce de sécurité
   ou support séparé), et son coût. Propriétaire : l'architecte de la spine du moteur. Date : spine du
-  moteur, avant la semaine 5 (07/12).
+  moteur, avant la semaine 5 (07/12). **Tranché** le 2026-11-11 par la spine du moteur : ancrage logiciel
+  avec un miroir sur le second support et Money Vibes pour témoin, sans TPM en v1 (AD-4) ; découpage en
+  quatre unités (AD-2).
 
 ### 8.3 Inférences
 
@@ -1578,7 +1604,7 @@ exigences jamais sacrifiées reste marqué `[ASSUMPTION : classement à confirme
 | Plan v3 (§8) et AD-P17 | Acter **D3 révisée** (sur site avant février) et **toutes les FR pour février** (table du §0) ; chiffrer dans cet amendement la charge réelle de Dev B ; ordre de sacrifice (ci-dessous, décidé) |
 | STORY-727 | Lots 2, 4, 6 et 7 ajustés à ce PRD ; droits de test réamorcés (détail : addendum §A-9) |
 | STORY-280 et STORY-281 (`paiement-service`, catalogue) | L'impayé ne suspend plus ; le rappel de J-7 est renommé ; la régularisation sort du préavis ou de la lecture seule (détail : addendum §A-9) |
-| `paiement-service` (vente) | Résoudre les dépendances dures comme la console (FR-12) ; refuser un élément non installable ; avenant automatique quand une majeure ajoute une dépendance ; un seul mode d'acquisition par élément ; envoi de la licence par e-mail à chaque paiement (FR-14) |
+| `paiement-service` (vente) | Résoudre les dépendances dures comme la console (FR-12) ; refuser un élément non installable ; avenant automatique quand une majeure ajoute une dépendance ; un seul mode d'acquisition par élément ; fait de paiement relayé à la centrale par l'agent de la plateforme, qui émet et envoie la licence par e-mail à chaque paiement (FR-14, AD-25) |
 | `auth-service` (STORY-167) | Création des organisations à la demande du moteur, dans chaque espace, avec le même identifiant (FR-42) ; module `instance` traité comme les autres ; droit de consentir attribuable par le DG seul (FR-35) |
 | AD-P16 | Lecture d'exploitation journalisée, sans export en masse, jamais pour l'apprentissage ; l'IA lit par un compte dédié qui passe par la garde du registre (FR-27) |
 | App expert-comptable | Lire l'état publié (FR-34) et porter les écrans d'Administration du cabinet (FR-36) |
