@@ -259,7 +259,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 
 - **Binds:** squelette de la coque (S3), modules de Dev A (S3 → S5), tests de la coque
 - **Prevents:** une coque construite avant le moteur sur une forme d'état inventée, puis qui casse à son arrivée.
-- **Rule:** Tant que le moteur ne sert pas `GET /etat-publie`, le développement et les tests utilisent une **doublure**, construite par Dev A dans PRA-01, qui sert la route au même chemin, derrière le Traefik de dev. Elle est générée depuis `contrat/etat-publie.openapi.json` et `contrat/matrice-etats.json`, avec un scénario par état publié. Elle n'entre jamais dans l'image. C'est une dette nommée, éteinte au premier Integration Gate de la coque, qui se joue sur le vrai moteur, sans aucun mock. La **vraie route** est servie par `platform-catalog-service` **avant le 15/01/2027** (spine du moteur, AD-41) ; la doublure est éteinte à ce premier gate, pas après.
+- **Rule:** Tant que le moteur ne sert pas `GET /etat-publie`, le développement et les tests utilisent une **doublure**, construite par Dev A dans PRA-01, qui sert la route au même chemin, derrière le Traefik de dev. Elle est générée depuis `contrat/etat-publie.openapi.json` et `contrat/matrice-etats.json`, avec un scénario par état publié. Elle n'entre jamais dans l'image. C'est une dette nommée, éteinte au premier Integration Gate de la coque, qui se joue sur le vrai moteur, sans aucun mock. La **vraie route** est servie par `platform-catalog-service` **avant le 15/01/2027** (spine du moteur, AD-24 et AD-41) ; la doublure est éteinte à ce premier gate, pas après.
 
 ### AD-24 — Une erreur se retrouve
 

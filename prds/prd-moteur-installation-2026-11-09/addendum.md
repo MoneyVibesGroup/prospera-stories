@@ -193,7 +193,7 @@ Sur site, une **clé d'exploitation scellée sur l'instance** permet les automat
 
 **Depuis NFR-8 : la clé racine et le rythme des clés**
 
-Une **clé racine hors ligne**, au coffre, qui ne sert qu'à certifier les clés de signature ; les clés de signature **changent chaque année** `[ASSUMPTION : rythme]`.
+Une **clé racine hors ligne**, au coffre, qui ne sert qu'à certifier les clés de signature ; les clés de la chaîne de publication (CI) **changent chaque année** `[ASSUMPTION : rythme]`.
 
 **Depuis NFR-8 : la clé d'exécution de la centrale**
 
