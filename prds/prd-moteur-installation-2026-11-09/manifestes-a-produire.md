@@ -55,11 +55,13 @@ Légende : ✅ = code présent à `modules.seed-data.ts` ; ❌ = code à créer.
 | M41 | Paie & déclarations sociales | microfinance, cabinet [À CONFIRMER] | Option non datée | ❌ paie | à créer (à créer) | — | Dev B | 04/12/2026 (lot 4) | non | Périmètre à trancher (décision ouverte) |
 | M42 | Add-on Réseau Freelance | distributeur | Add-on (Grand et Moyen ; option des 4 bundles) | ❌ freelance | à créer (transverse aux modules D) (à créer) | — | Dev B | 04/12/2026 (lot 4) | non | Add-on, non un module : manifeste ou option de pack [À CONFIRMER] |
 | M43 | Connecteurs & intégrations (Odoo, banques, Mobile Money, OTR, signature) | distributeur, microfinance, assurance, cabinet | Un seul module commercial, ajouté d'office dès que le contrat déclare un logiciel du client ; inclus dans la plateforme complète (décision du PO, 2026-11-11) | ❌ connecteurs | à créer (à créer) | — | Dev B | 13/11/2026 (avec sa spine) | oui (prd-connecteurs) | Chantier continu ; requis en février (QA-3) |
-| M44 | Reprise de données | distributeur, microfinance, assurance | Module installable, ouvert d'office dans l'essai du prospect (décision du PO, 2026-11-11) ; offre [À CONFIRMER] | ❌ reprise | à trancher par la spine (patron D13 de balance-service) | — | Dev B | 13/11/2026 (avec sa spine) | oui (prd-reprise-donnees) | Requis en février (QA-3) ; module d'écran `reprise` dans `prospera-app` |
+| M44 | Reprise de données | distributeur, microfinance, assurance | Module installable, ouvert d'office dans l'essai du prospect (décision du PO, 2026-11-11) ; offre [À CONFIRMER] | ❌ reprise | `reprise-service` (dépôt neuf, spine `architecture-reprise-donnees-2026-11-11`) | — | Dev B | 13/11/2026 (avec sa spine) : **écrit le 2026-11-11**, `manifestes/reprise.manifest.ts` | oui (prd-reprise-donnees) | Requis en février (QA-3) ; module d'écran `reprise` dans `prospera-app` |
 
 ## Récapitulatif
 
 Total : **44 modules** (M44 Reprise de données ajouté le 2026-11-11).
+
+Les manifestes s'écrivent dans `prospera-stories/manifestes/<code>.manifest.ts` (premier écrit : `reprise.manifest.ts`, le 2026-11-11). Un module qui reçoit des données reprises déclare **`objetsDeReprise`** dès l'écriture de son manifeste (C1, amendement du 2026-11-11) : pour février, `pdv`, `catalogue`, `reseau`, `stock`, `facturation`, `polices` et `sinistres` (spine de la Reprise, AD-23).
 
 Par vertical (un module partagé compte dans chacune de ses verticales) :
 

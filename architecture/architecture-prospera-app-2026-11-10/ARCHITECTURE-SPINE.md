@@ -21,6 +21,8 @@ companions: [.memlog.md, reviews/]
 
 # Architecture Spine — `prospera-app`, la coque
 
+*Amendée le 2026-11-11 par la spine de la Reprise de données (`architecture-reprise-donnees-2026-11-11`, AD-22) : AD-8 (téléversement, code du module dans le chemin du service), AD-25 (lien de provenance), Stack (`tus-js-client`).*
+
 Remise de Dev B à Dev A, **ven. 20/11/2026**, avant le squelette de la coque (semaine 3). Préfixe des stories : **`PRA-`**.
 
 ## Design Paradigm
@@ -143,11 +145,11 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 - **Prevents:** des adresses de services dans le code ou la configuration ; des CORS par service et par espace ; un relais qui masque le navigateur à l'IdP ; deux modules d'un même service mal gardés.
 - **Rule:**
   - **Une origine** : le navigateur et l'app mobile n'appellent qu'une origine.
-  - **Routage** : le proxy d'instance réécrit `/api/<code>/v1/…` en `/api/v1/…` du service qui porte `<code>` (Traefik `replacePathRegex`). Plusieurs codes peuvent viser un même service ; `<code>` est un code du catalogue ou un nom du socle (`auth`).
+  - **Routage** : le proxy d'instance réécrit `/api/<code>/v1/…` en `/api/v1/…` du service qui porte `<code>` (Traefik `replacePathRegex`). Plusieurs codes peuvent viser un même service ; `<code>` est un code du catalogue ou un nom du socle (`auth`). Un service qui porte plusieurs modules remet le code dans son propre chemin pour les routes d'instance et de reprise (`/api/v1/instance/<code>/…`, `/api/v1/reprise/<code>/…`, contrat C13).
   - **En-têtes** : le proxy transmet `User-Agent` et `X-Forwarded-For` (proxies de confiance déclarés).
   - **Garde côté service** : le code dans l'URL ne sert **qu'au routage**. La garde du service applique le module de sa propre route, jamais celui de l'URL.
   - **Préfixes réservés** : tout `/api/*` appartient au proxy. Les routes du serveur Next vivent sous `/coque/*` (`src/app/coque/…`), jamais sous `/api/` ni dans un dossier préfixé `_`, qui est privé et non routable dans Next.
-  - **Client unique** : chaque module construit son client avec `creerClient(code)`, qui seul ajoute le jeton, le préfixe, l'identifiant de corrélation (AD-24) et une reprise unique sur 401, partagée par toutes les requêtes en vol. Aucune URL de service n'apparaît dans `src/`.
+  - **Client unique** : chaque module construit son client avec `creerClient(code)`, qui seul ajoute le jeton, le préfixe, l'identifiant de corrélation (AD-24) et une reprise unique sur 401, partagée par toutes les requêtes en vol. Aucune URL de service n'apparaît dans `src/`. Un gros fichier s'envoie par `creerTeleversement(code)` (protocole tus, `tus-js-client`), qui emprunte au client le jeton, le préfixe et la reprise sur 401 (spine de la Reprise, AD-15).
 
 ### AD-9 — Un refus de droit d'utiliser relit l'état, il ne s'interprète pas
 
@@ -271,7 +273,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 
 - **Binds:** les modules cibles de la Reprise, PRD Reprise (OQ-2, `historique`, `montantASaisir`), AD-7
 - **Prevents:** un écran qui laisse modifier un historique repris ou qui cache un montant à saisir, quand un autre écran les protège.
-- **Rule:** L'API d'un module cible renvoie, **par objet**, les marqueurs `historique` (lecture seule) et `montantASaisir` (montant manquant, à compléter). Un écran n'interprète jamais ces marqueurs lui-même : il enveloppe l'objet dans `<ProtectionObjet>` de la coque, qui retire les actions d'écriture d'un objet `historique` et signale un `montantASaisir`, sur le patron d'`<Ecriture>` (décision du PO, 2026-11-11).
+- **Rule:** L'API d'un module cible renvoie, **par objet**, les marqueurs `historique` (lecture seule) et `montantASaisir` (montant manquant, à compléter). Un écran n'interprète jamais ces marqueurs lui-même : il enveloppe l'objet dans `<ProtectionObjet>` de la coque, qui retire les actions d'écriture d'un objet `historique` et signale un `montantASaisir`, sur le patron d'`<Ecriture>` (décision du PO, 2026-11-11). La `provenance` d'un objet repris (lot, ligne) ouvre, dans l'écran de la cible, le lien vers la ligne de la source tant que le lot existe (PRD Reprise FR-2).
 
 ## Consistency Conventions
 
@@ -305,6 +307,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 | Vitest + Playwright | 4.x + 1.6x |
 | axe-core pour Playwright | 4.x |
 | Traefik (proxy d'instance et de dev) | 3.7.x |
+| tus-js-client (téléversement, `creerTeleversement`) | 4.3.x |
 
 ## Structural Seed
 

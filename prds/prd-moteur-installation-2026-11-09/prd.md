@@ -2,7 +2,7 @@
 title: "PRD — Moteur d'installation"
 status: draft  # 2ᵉ réécriture le 2026-11-10 après le passage 2 de validation ; validation PO le 13/11
 created: 2026-11-09
-updated: 2026-11-10
+updated: 2026-11-11  # amendé par la spine de la Reprise (AD-22) : feu vert par module, Reprise mise en service la première, routes de reprise ouvertes pendant le rejeu
 project: prospera
 service: platform-catalog-service  # partie A ; les services des parties B et C sont tranchés par la spine (§7)
 position_sequence: 26
@@ -224,8 +224,8 @@ ils sont construits à partir des FR, pas racontés par le PO. Relus et validés
   3. Il branche le connecteur Odoo **sur le bac à sable** d'Odoo déclaré et vérifié par le client (FR-9) ;
      la Reprise importe les données ; Awa et Moussa valident.
   4. Le bilan d'essai liste ce qui reste. Une date de mise en service est fixée **pour ce qui est vert**.
-  5. Le jour venu, le dossier d'installation est rejoué dans l'espace réel ; la Reprise donne son feu vert
-     sur le lot rejoué ; le client passe **En service partiel** (FR-8, §3). Encaissements suivra quand la
+  5. Le jour venu, le dossier d'installation est rejoué dans l'espace réel ; la Reprise donne son feu vert,
+     module par module, sur les lots rejoués ; le client passe **En service partiel** (FR-8, §3). Encaissements suivra quand la
      banque aura livré la clé.
 - **Moment gagné :** Moussa reçoit par e-mail le bilan de mise en service en PDF ; ses commerciaux voient
   dans leur menu exactement ce qu'il a acheté, et rien d'autre.
@@ -297,8 +297,8 @@ ils sont construits à partir des FR, pas racontés par le PO. Relus et validés
   pour le module `instance`, posé à la naissance de l'organisation (chemin 0).
 - **Installer** : rendre un module disponible pour une organisation **dans l'espace d'essai**.
 - **Mettre en service** : rendre un module disponible **dans l'espace réel**, une fois ses conditions
-  remplies : recette passée, et feu vert de la Reprise quand l'offre en comporte une pour ce sous-ensemble
-  (FR-8). Installé ≠ en service. Le PRD Reprise dit « bascule » : c'est la mise en service.
+  remplies : recette passée, et feu vert de la Reprise pour chacun de ses modules qu'un lot de reprise
+  alimente (FR-8). Installé ≠ en service. Le PRD Reprise dit « bascule » : c'est la mise en service.
 - **Acquis, à installer** : un module que le contrat ou la licence donne, mais qui n'est pas encore
   installé. Il ne s'ouvre pas tant que le moteur ne l'a pas installé (FR-4).
 - **Suspendre** : une **sanction décidée** par un opérateur Money Vibes nommé (litige, fraude, ou impayé
@@ -316,16 +316,18 @@ ils sont construits à partir des FR, pas racontés par le PO. Relus et validés
   passent ; toute écriture est refusée, sauf les routes d'export et d'états réglementaires que le module
   déclare à son manifeste.
 - **Réception définitive** : la signature, par le client, de la fin de l'installation d'un sous-ensemble de
-  l'offre. Elle autorise la Reprise de données à supprimer les fichiers sources des lots de ce
-  sous-ensemble.
+  l'offre. Elle est publiée avec la liste des modules du sous-ensemble ; la Reprise de données supprime les
+  fichiers sources d'un lot quand tous les modules qu'il a alimentés ont la leur.
 - **Recette** : les tests qui valident une version ou une installation (automatiques, ou par l'accès
   encadré, FR-17).
-- **Feu vert** : le fait publié par la Reprise de données quand un lot est réconcilié (écart nul). Il
-  autorise la mise en service du sous-ensemble concerné (FR-8).
+- **Feu vert** : l'état publié par la Reprise de données **par module cible** (`reprise.feu-vert.changed` :
+  `ATTENDU` ou `VERT`), `VERT` quand les lots rejoués dans le réel pour ce module sont réconciliés (écart
+  nul). Un sous-ensemble se met en service quand chacun de ses modules attendus est `VERT` (FR-8).
 - **Bilan d'instance** : le bilan qui clôt le montage d'une instance sur site (FR-25). À ne pas confondre
   avec le **voyant de santé de l'instance** (FR-16), qui vit ensuite.
-- **Dossier d'installation** : ce qui se rejoue de l'essai vers le réel : offre, tables de correspondance,
-  rôles, zones, réglages, comptes à créer. Nommé, versionné, journalisé. **Aucune donnée métier** n'y
+- **Dossier d'installation** : ce qui se rejoue de l'essai vers le réel : offre, part de la Reprise
+  (gabarits, correspondances, traductions d'état, critères de doublon, liste des modules attendus), rôles,
+  zones, réglages, comptes à créer. Nommé, versionné, journalisé. **Aucune donnée métier** n'y
   figure (FR-8). Chaque élément a un propriétaire, qui l'importe (FR-42).
 - **Plan d'installation** : la liste enregistrée des étapes d'une installation, d'une promotion ou d'un
   retour arrière ; il permet de reprendre après une coupure (FR-40).
@@ -498,7 +500,7 @@ Les faits : une sanction, l'échéance payée, la fin du préavis et les dates d
 | État publié | Menu de `prospera-app` | Garde du module (C2 amendée) | Bandeau, et pour qui (FR-35) |
 |---|---|---|---|
 | `NON_INSTALLE` | caché ; URL saisie → écran « module non installé » | 403 `<MODULE>_NOT_ENTITLED` | — |
-| `EN_INSTALLATION` | caché ; URL saisie → « module en cours d'installation » | 403, sauf l'identité de service du moteur sur les routes de vérification (FR-6), l'identité de service du moteur et celle de la Reprise de données sur les routes d'import déclarées pendant un rejeu (FR-42), et l'export (FR-43) | administrateurs : lien vers le bilan |
+| `EN_INSTALLATION` | caché ; URL saisie → « module en cours d'installation » | 403, sauf l'identité de service du moteur sur les routes de vérification (FR-6), l'identité de service du moteur et celle de la Reprise de données sur les routes d'import déclarées pendant un rejeu, la Reprise sur les routes de reprise déclarées (point d'import, valeurs de contrôle) (FR-42), et l'export (FR-43) | administrateurs : lien vers le bilan |
 | `DESINSTALLE` | caché ; URL saisie → « module non installé » | 403, sauf l'export (FR-43) | — |
 | `EN_SERVICE` | visible | ouvert | — |
 | `ESSAI_PROSPECT{finLe}` | visible | ouvert | **tous** : compte à rebours |
@@ -698,17 +700,23 @@ Réalise UJ-1, UJ-2, UJ-3.
   C'est le **seul** flux de l'essai vers le réel (NFR-3) : aucune donnée métier de l'essai n'est copiée. La
   naissance de l'organisation dans le réel vient de la console, pas de l'essai (FR-42, NFR-3).
   Chaque élément du dossier est importé par son propriétaire (FR-42).
-- La mise en service d'un sous-ensemble est **refusée** tant que la Reprise de données n'a pas donné son
-  **feu vert** sur le lot rejoué dans le réel, **quand l'offre comporte une Reprise et que ce sous-ensemble a
-  un lot de reprise** : `MISE_EN_SERVICE_SANS_FEU_VERT` (409). Sans lot de reprise, le sous-ensemble se met
-  en service sans feu vert (FR-11). La ligne Reprise du bilan ne passe 🟢 qu'à ce feu vert (PRD Reprise).
+- Dans le réel, la **Reprise de données est mise en service la première**, par le plan, juste après
+  l'import du dossier : elle n'a pas de lot à elle, donc pas de feu vert à attendre, et le comptage
+  d'ouverture comme la validation du lot du réel se saisissent dans ses écrans (PRD Reprise OQ-4 ; spine de
+  la Reprise, AD-17 et AD-22).
+- La mise en service d'un sous-ensemble est **refusée** tant qu'un de ses modules **attendus** par la Reprise
+  (listés par sa part du dossier d'installation) n'est pas `VERT` : `MISE_EN_SERVICE_SANS_FEU_VERT` (409).
+  Avant toute mise en service, le moteur relit l'état par la vérification « données importées » de la
+  Reprise. Un module qu'aucun lot n'alimente se met en service sans feu vert. La ligne de chaque module
+  attendu au bilan ne passe 🟢 qu'à son feu vert (spine de la Reprise, AD-12).
 - Si une étape du rejeu échoue, le sous-ensemble n'est pas mis en service : ses modules restent
   `EN_INSTALLATION` dans le réel, le bilan de mise en service est 🔴 avec l'étape en cause, et rien n'est
   ouvert à moitié. « Reprendre » continue le plan (FR-40).
 - Le **bilan de mise en service** est distinct du bilan d'essai ; seul le premier compte pour l'état du
   client (FR-7).
 - La **réception définitive** (§3) est enregistrée par sous-ensemble ; elle est publiée pour la Reprise de
-  données, qui libère alors les lots de ce sous-ensemble.
+  données avec la liste des modules du sous-ensemble (`reception-definitive.enregistree`), et la Reprise
+  supprime les fichiers d'un lot quand tous les modules qu'il a alimentés l'ont reçue.
 
 #### FR-9 : Un espace d'essai qu'on ne peut pas confondre avec le réel
 **Conséquences (testables) :**
@@ -989,7 +997,10 @@ identité** ; c'est le moteur qui la fait naître.
 - **Importer pendant `EN_INSTALLATION`** (décision du PO, 2026-11-11) : les modules du réel sont encore
   `EN_INSTALLATION` pendant le rejeu. Leurs **routes d'import déclarées au manifeste** (C13) laissent donc
   passer l'identité de service du moteur et celle de la Reprise de données, qui livre ses lots aux modules
-  cibles (PRD Reprise) ; aucun utilisateur n'y accède, et toutes les autres routes restent fermées (§3.1).
+  cibles (PRD Reprise) ; la Reprise passe aussi sur leurs **routes de reprise** déclarées (point d'import en
+  simulation et en application, valeurs de contrôle), avec un jeton de service limité à l'organisation
+  (contrat C2, amendement du 2026-11-11) ; aucun utilisateur n'y accède, et toutes les autres routes
+  restent fermées (§3.1).
 - **Rafraîchissement** (FR-10) : il s'appuie sur la même identité ; aucune table de correspondance
   d'identifiants n'est nécessaire.
 - Un membre présent dans les deux espaces passe de l'un à l'autre par un lien de la coque ; chaque espace
@@ -1514,7 +1525,7 @@ dans la spine d'architecture. Un retour arrière ne peut pas être exécuté par
 | C2 | Socle existant du catalogue (droits plateforme `entitlement:*`). **Amendée pour tous** : la garde lit l'état publié poussé (FR-34), jamais l'horloge de son conteneur ; lecture seule selon FR-43 ; route d'export exemptée ; identité de service du moteur sur les routes de vérification (FR-6) |
 | C3 | La partie A possède : offres, dossiers d'installation, plans d'installation, bilans, état publié et ses faits (installation, espace, santé, interrupteurs). Elle est le **seul émetteur** de l'état publié ; sur site, elle lit l'horloge scellée auprès de l'agent d'instance, qui la tient (parties B et C). Licences, état de confiance, consentements et journal appartiennent aux services des parties B et C. Le moteur n'écrit dans aucun autre module : le rejeu passe par le contrat d'import de chaque propriétaire (FR-42) |
 | C4 | Sans Reprise ni Connecteurs dans l'offre, leurs lignes sont grisées « hors offre » et ne bloquent rien (FR-7) |
-| C5 | Publie `entitlement.changed` (existant) et `etat-publie.changed`, dont la partie A est le seul émetteur, transitions dues au temps comprises (FR-34) ; consomme le feu vert de la Reprise ; topics de bilan, de licence et de réception définitive à nommer dans la spine (détail : addendum §A-2) |
+| C5 | Publie `entitlement.changed` (existant) et `etat-publie.changed`, dont la partie A est le seul émetteur, transitions dues au temps comprises (FR-34) ; consomme le feu vert de la Reprise (`reprise.feu-vert.changed`, par module) ; topics de bilan, de licence et de réception définitive à nommer dans la spine (détail : addendum §A-2) |
 | C6 | Aucune règle propre à un client ; tout passe par le contrat et la licence. Un module, le moteur compris, a **le même schéma de données pour toutes les organisations** : aucune variante par client (C6, C11) |
 | C7 | Droits plateforme existants ; droits de tenant `instance:*` du module `instance` pour les écrans du client (FR-35) |
 | C8 | Trois lieux (FR-36) : console Money Vibes pour Money Vibes ; module d'écran « Administration » dans `prospera-app` pour le client ; mêmes écrans dans l'app expert-comptable pour le cabinet |
@@ -1609,7 +1620,7 @@ exigences jamais sacrifiées reste marqué `[ASSUMPTION : classement à confirme
 | AD-P16 | Lecture d'exploitation journalisée, sans export en masse, jamais pour l'apprentissage ; l'IA lit par un compte dédié qui passe par la garde du registre (FR-27) |
 | App expert-comptable | Lire l'état publié (FR-34) et porter les écrans d'Administration du cabinet (FR-36) |
 | PRD Connecteurs | **Doit** reprendre FR-9 : liste blanche, bac à sable vérifié, identifiants en lecture seule propres à l'essai, ligne « aller-retour non vérifié », `ECRITURE_REELLE_DEPUIS_ESSAI` ; comportement en `LECTURE_SEULE` (FR-43) ; C12 et C13 à son tableau. À valider avec ce PRD le 13/11 |
-| PRD Reprise de données | Le feu vert et la réception définitive sont consommés par le moteur (FR-8) ; une réception par sous-ensemble libère les lots de ce sous-ensemble ; C8 : écrans dans `prospera-app` **dès février** (libre-service du prospect) ; effacement du prospect et import de sa part du dossier d'installation (C13, FR-33, FR-42) ; C12 et C13 à son tableau ; « bascule » = mise en service |
+| PRD Reprise de données | Le feu vert (par module cible) est consommé par le moteur, la réception définitive (avec la liste des modules) par la Reprise (FR-8) ; un lot est libéré quand tous les modules qu'il a alimentés sont reçus ; la Reprise est mise en service la première dans le réel ; C8 : écrans dans `prospera-app` **dès février** (libre-service du prospect) ; effacement du prospect et import de sa part du dossier d'installation (C13, FR-33, FR-42) ; C12 et C13 à son tableau ; « bascule » = mise en service |
 
 **Ordre de sacrifice, si février glisse** (décision du PO, 2026-11-10, classement de la salle ; il
 s'adapte au fil du projet). FR-17 **sur site** est classée parmi les jamais sacrifiées : le DSI de
