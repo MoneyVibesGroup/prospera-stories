@@ -83,6 +83,7 @@ export const MANIFESTE_PDV = {
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
     'etat-publie.changed.reel@1',
     'reseau.portee.changed@1', // suite de conformité de reseau jouée en CI, inscription au registre (AD-15)
+    'reseau.commercial.changed@1', // commercial visé par l'affectation : compte lié, zones, départ
     'connecteurs.domaine.changed@1', // propriétaire du domaine pdv.points-de-vente (spine de Connecteurs, AD-3)
     'identity.*', // topics existants, nom sans suffixe de version
     'kyc.status.changed',
@@ -159,9 +160,12 @@ export const MANIFESTE_PDV = {
   //   (NON_GEOLOCALISE), nature, plafond et conditions. Régimes VIVANT (ouvert) et HISTORIQUE (fermé avant la
   //   reprise). Valeurs de contrôle : nature (etat), statut ouvert/fermé (etat), plafond (montant, ou
   //   PLAFOND_SANS_OBJET pour un magasin propre). Doublons : téléphone d'abord, proximité ensuite (FR-V06).
-  // - affectation : point de vente → commercial titulaire, datée (AD-2, AD-4). Le commercial est une personne
-  //   (compte d'auth-service) ; reseau porte son affectation à une zone (PRD reseau FR-R20). L'objet visé par la
-  //   référence se décide avec le manifeste de reseau [À CONFIRMER : spine de la Reprise AD-23].
+  // - affectation : point de vente → commercial titulaire, datée (AD-2, AD-4). La référence vise l'objet
+  //   `reseau.commercial@1` (manifeste de reseau, 2026-11-12, proposition à valider par le PO) : la personne à
+  //   inviter et ses zones, repris AVANT le point de vente ; le compte d'auth-service est créé ensuite, par
+  //   invitation. pdv garde l'identifiant stable du commercial, jamais un userId ; il lit le compte lié dans
+  //   `reseau.commercial.changed@1` (chemin « mon portefeuille », AD-3). Un commercial sans compte garde ses
+  //   points de vente : ils ne sont pas `SANS_COMMERCIAL`.
   // - L'état du pipeline n'est pas repris : il se recalcule par les règles du distributeur (décision du PO,
   //   2026-11-12 ; à vérifier en recette sur un lot repris).
   objetsDeReprise: ['pdv.point-de-vente@1', 'pdv.affectation@1'],
