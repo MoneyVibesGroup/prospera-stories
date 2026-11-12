@@ -24,8 +24,11 @@
 // - Le point d'import et les valeurs de contrôle de la Reprise (C13, tableau des chemins) viennent du kit des
 //   cibles (EPIC-161), dans le « fini » de pdv (EPIC-165, en S5) ; pdv est la cible minimale de la démo du
 //   15/01 (spine de la Reprise, AD-23).
-// - Import par fichier propre au module (FR-V40) : remplacé par la Reprise [À CONFIRMER] ; s'il reste, il
-//   passe par le même point d'écriture que la reprise (dédoublonnage FR-V06, tout ou rien).
+// - Import par fichier propre au module (FR-V40) : remplacé par la Reprise ou gardé [À CONFIRMER : le PO
+//   tranchera plus tard, 2026-11-12] ; s'il reste, il passe par le même point d'écriture que la reprise
+//   (dédoublonnage FR-V06, tout ou rien).
+// - Carte de couverture : fond de carte Google Maps (décision du PO, 2026-11-12). Seul le fond de carte est
+//   chargé chez Google, par le navigateur ; les points de vente sont dessinés côté client.
 
 export const MANIFESTE_PDV = {
   code: 'pdv',
@@ -52,8 +55,8 @@ export const MANIFESTE_PDV = {
   referentielFamilies: [],
 
   // C7 : droits de tenant. Les six de FR-V38, plus trois actes que le PRD réserve à un « rôle habilité »
-  // (nature FR-V02, correction d'une transition FR-V20, départ FR-V13) [À CONFIRMER]. L'export reste réservé à
-  // instance:donnees:exporter (C2).
+  // (nature FR-V02, correction d'une transition FR-V20, départ FR-V13), gardés pour le moment (décision du PO,
+  // 2026-11-12). L'export reste réservé à instance:donnees:exporter (C2).
   droits: [
     'pdv:portefeuille:consulter', // ses propres points de vente (chemin « mon portefeuille », AD-3)
     'pdv:reseau:consulter', // tout le réseau, raffiné par la portée de reseau, fail-closed (AD-15)
@@ -93,8 +96,10 @@ export const MANIFESTE_PDV = {
   prerequis: [
     {
       code: 'fond-de-carte',
-      description: "Un fond de carte joignable depuis le poste de l'utilisateur, pour la carte de couverture (FR-V27) [À CONFIRMER : fournisseur]",
-      action: "Ouvrir l'accès au fournisseur de fond de carte ; sans lui la carte est vide, la liste reste utilisable.",
+      description:
+        "Google Maps joignable depuis le poste de l'utilisateur (décision du PO, 2026-11-12) : clé de l'API Maps JavaScript de l'espace, facturation active, clé restreinte au domaine de l'application (FR-V27)",
+      action:
+        "Renseigner une clé Google Maps valide et ouvrir l'accès à Google depuis les postes ; sans elle la carte est vide, la liste reste utilisable.",
     },
   ],
 
@@ -154,9 +159,11 @@ export const MANIFESTE_PDV = {
   //   (NON_GEOLOCALISE), nature, plafond et conditions. Régimes VIVANT (ouvert) et HISTORIQUE (fermé avant la
   //   reprise). Valeurs de contrôle : nature (etat), statut ouvert/fermé (etat), plafond (montant, ou
   //   PLAFOND_SANS_OBJET pour un magasin propre). Doublons : téléphone d'abord, proximité ensuite (FR-V06).
-  // - affectation : point de vente → commercial titulaire, datée (AD-2, AD-4). La référence au commercial vise
-  //   l'objet de reseau [À CONFIRMER : spine de la Reprise AD-23, « commerciaux : reseau (à confirmer) »].
-  // - L'état du pipeline n'est pas repris : il se calcule par les règles du distributeur [À CONFIRMER].
+  // - affectation : point de vente → commercial titulaire, datée (AD-2, AD-4). Le commercial est une personne
+  //   (compte d'auth-service) ; reseau porte son affectation à une zone (PRD reseau FR-R20). L'objet visé par la
+  //   référence se décide avec le manifeste de reseau [À CONFIRMER : spine de la Reprise AD-23].
+  // - L'état du pipeline n'est pas repris : il se recalcule par les règles du distributeur (décision du PO,
+  //   2026-11-12 ; à vérifier en recette sur un lot repris).
   objetsDeReprise: ['pdv.point-de-vente@1', 'pdv.affectation@1'],
 
   // C1, amendement du 2026-11-12 (spine de Connecteurs, AD-2) : Prospera propriétaire par défaut (PRD
