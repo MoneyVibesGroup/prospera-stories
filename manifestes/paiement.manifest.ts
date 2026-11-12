@@ -11,8 +11,11 @@
 //              facturation de la consommation) ; STORY-650/651 (délégation) ; PRD Connecteurs §4.F et FR-17.
 //
 // ✅ CODE DU MODULE : `paiement` (décision du PO du 2026-11-12). Le module `paiement`, ce sont les
-// paiements ET les moyens de paiement ; PI-SPI est l'un de ces moyens (avec Mobile Money, l'espèce et le
-// virement déclarés), pas un module.
+// paiements ET les moyens de paiement. Les moyens raccordés sur origin/dev sont DEUX fournisseurs :
+// PI-SPI (adaptateur `API_BUSINESS`) et FEDAPAY (adaptateur `fedapay`, barème `fedapay-bj-2026-09-05`, webhook
+// signé `x-fedapay-signature`) ; s'y ajoutent les encaissements déclarés (espèces, virement). Aucun n'est
+// un module : un fournisseur de plus est un adaptateur et une ligne du registre des fournisseurs
+// (plateforme), jamais un code au catalogue. ⚠️ Ne jamais écrire « PI-SPI » pour dire « paiement ».
 // - Le service ouvre déjà ses routes sur l'entitlement `paiement` (`PAIEMENT_MODULE_CODE`), refus
 //   `PAIEMENT_NOT_ENTITLED`, et ses droits de tenant sont déjà `paiement:*` dans `TenantPermission`.
 // - Le code `pi-spi` du catalogue n'est donc pas un module. Sa fiche décrit en plus autre chose
@@ -28,7 +31,8 @@
 //   Collecte » (Caisse & Mobile Money) [À CONFIRMER]. Le lien de paiement figure aussi à l'application
 //   terrain (M12).
 // - NFR-1, structurante : Prospera ne détient JAMAIS les fonds. Le client encaisse sur SON compte, chez SON
-//   fournisseur (PI-SPI, Mobile Money) ; Prospera émet la demande, constate, rapproche et prouve.
+//   fournisseur (PI-SPI ou FedaPay, Mobile Money compris) ; Prospera émet la demande, constate, rapproche
+//   et prouve.
 // - Écrans : module d'écran `paiement` dans `prospera-app` (C8), tous les écrans par Dev B.
 // - C11 : sans objet.
 // - Gate existante : `@RequiresPaiementAccess` sur la CLASSE de chaque contrôleur (e-mail vérifié → KYC
@@ -132,7 +136,7 @@ export const MANIFESTE_PAIEMENT = {
       code: 'compte-encaissement-verifie',
       route: 'POST /api/v1/instance/paiement/{organisationId}/verifications/compte-encaissement-verifie',
       critere:
-        "Comptes d'encaissement vérifiés auprès de leur fournisseur (épreuve passée) : ≥ 1 🟢 ; 0 🟠 « seul l'encaissement déclaré est possible » (aucun lien PI-SPI ou Mobile Money ne peut être émis).",
+        "Comptes d'encaissement vérifiés auprès de leur fournisseur, PI-SPI ou FedaPay (épreuve passée) : ≥ 1 🟢 ; 0 🟠 « seul l'encaissement déclaré est possible » (aucun lien de paiement ne peut être émis).",
     },
     {
       code: 'mode-sandbox-en-essai',
