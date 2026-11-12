@@ -303,8 +303,8 @@ trentaine de modules cibles en février, sans coder trente fois la même garde, 
 ## Le plan semaine par semaine : ce que la Reprise y ajoute
 
 Ce tableau **s'ajoute** au plan des épics du moteur (`epics-moteur-installation-2026-11-11.md`), qui reste la référence. Il ne
-montre que les chantiers de la Reprise et de Connecteurs, et ce qu'ils déplacent. Placement `[PROPOSÉ]`, à trancher par le PO
-(questions 1 et 2).
+montre que les chantiers de la Reprise et de Connecteurs. **Décision du PO du 2026-11-12 : rien n'est retiré** (« ne retire
+rien, on va y arriver ») : ces chantiers s'**ajoutent** à ceux du plan du moteur, sans en déplacer aucun.
 
 | Semaine | Dev A | Dev B | Croisement et fin de semaine |
 |---|---|---|---|
@@ -312,8 +312,8 @@ montre que les chantiers de la Reprise et de Connecteurs, et ce qu'ils déplacen
 | **S5** 07/12 → 11/12 | EPIC-165 : point d'import de **`pdv`** (dans PDV bloc 1) et de `reseau` (dans sa finition) | **EPIC-169** (dans `prospera-plateforme`, avec EPIC-142) ; le kit passe sur la matrice publiée (ligne d'EPIC-145) | 🔁 **11/12** : le kit rejoue la matrice publiée ; `seuils-fraicheur@1` lu par la coque ; `pdv` passe la suite de conformité de la reprise |
 | **S6** 14/12 → 18/12 | EPIC-165 : `catalogue`, `stock` (dans leurs semaines) ; coque : `creerTeleversement(code)` et `tus-js-client` (mécanique) | `auth-service` (sa semaine du dépôt, EPIC-146) : identité de service de `reprise-service`, droits `reprise:*`, `reprise:lot:valider` attribuable par le DG seul | 🔁 **18/12** : trois cibles vertes ; la Reprise a son identité et ses droits |
 | *pause* 21/12 → 01/01 | — | — | — |
-| **S7** 04/01 → 08/01 | **EPIC-162 et EPIC-163, tranche du 15/01**, à la place de « microfinance : modules d'écran et jeu de démonstration » | écrans d'EPIC-163 (5ᵉ chantier) ; réglages tus de Traefik dans le gabarit de `prospera-plateforme` | 🔁 **08/01** : dans l'essai d'un prospect, un fichier de points de vente donne son rapport |
-| **S8** 11/01 → 15/01 | **EPIC-164, tranche du 15/01**, à la place de « recette de la démo microfinance » | écrans d'EPIC-164 (5ᵉ chantier) | 🎯 **15/01** : le prospect dépose ses fichiers, lit le rapport, valide et retrouve ses points de vente |
+| **S7** 04/01 → 08/01 | **EPIC-162 et EPIC-163, tranche du 15/01**, en plus de ses quatre chantiers (microfinance comprise) | écrans d'EPIC-163 (5ᵉ chantier) ; réglages tus de Traefik dans le gabarit de `prospera-plateforme` | 🔁 **08/01** : dans l'essai d'un prospect, un fichier de points de vente donne son rapport |
+| **S8** 11/01 → 15/01 | **EPIC-164, tranche du 15/01**, en plus de ses quatre chantiers (recette de la démo microfinance comprise) | écrans d'EPIC-164 (5ᵉ chantier) | 🎯 **15/01** : le prospect dépose ses fichiers, lit le rapport, valide et retrouve ses points de vente |
 | **S9** 18/01 → 22/01 | EPIC-162, 163, 164 : **tranche de février** ; EPIC-165 : polices et sinistres | écrans de février (correspondances, fusion des doublons, montants à saisir) | |
 | **S10** 25/01 → 29/01 | **EPIC-166**, **EPIC-167** | écrans d'EPIC-166 et 167 (montage de l'instance de l'assureur : inchangé) | 🔁 **29/01** : la partie A lit le feu vert ; l'effacement de la Reprise est prêt avant la fin du premier essai prospect (≈ 14/02) |
 | **S11 → S13** 01/02 → 19/02 | **EPIC-168** : les deux reprises, puis les imports courants | écrans d'EPIC-168 ; mise en service des deux clients (inchangé) | 🎯 **Reprise SM-5 = 2** |
@@ -329,13 +329,15 @@ en chantiers d'une semaine :
 | 04/01 → 15/01 | **3** (162, 163, 164, tranches du 15/01) | **2** (écrans, en 5ᵉ chantier) |
 | 18/01 → 19/02 | **≈ 5** (tranches de février, 166, 167, 168, polices et sinistres) | **≈ 3** (écrans) |
 
-**Ce qui cède, si le PO suit la recommandation** (question 2) :
-- chez Dev A, en S7 et S8, la **démo microfinance du 15/01** passe après le 15/01. C'est l'ordre de priorité du PO (« la
-  microfinance en dernier, là où il reste du temps à gagner ») ; aucun client microfinance n'est attendu en février ;
-- chez Dev A, en S9 et S10, **EPIC-158 puis EPIC-156** glissent, dans l'ordre de sacrifice du plan v3 §3 ;
-- chez Dev B, un **5ᵉ chantier** d'écrans de S7 à S10, comme le permet la décision du PO du 2026-11-11 (« quatre au minimum,
-  davantage quand une tranche l'exige »). L'écart de charge de Dev B (7 à 10 semaines, question 1 du 13/11) n'est pas réglé
-  par ce découpage : il s'en aggrave d'environ cinq chantiers d'écrans.
+**Rien ne cède (décision du PO du 2026-11-12).** La démo microfinance du 15/01, EPIC-156 et EPIC-158 restent à leur place.
+Conséquence, dite pour qu'elle soit suivie et non découverte :
+- **Dev A** porte cinq à six chantiers par semaine de S7 à S10 (ses quatre du plan, plus ceux de la Reprise) ;
+- **Dev B** porte un **5ᵉ chantier** d'écrans de S7 à S10 (décision du PO du 2026-11-11 : « quatre au minimum, davantage
+  quand une tranche l'exige ») ; son écart de charge (7 à 10 semaines, question 1 du 13/11) s'aggrave d'environ cinq
+  chantiers d'écrans ;
+- l'**ordre de sacrifice du plan v3 §3** (EPIC-158 niveau 3 et modèle commun, puis EPIC-156) reste la seule réserve si une
+  semaine glisse : il ne s'applique qu'à ce moment-là, pas d'avance. Les croisements du 08/01 et du 22/01 sont les points où
+  l'on mesure si la charge tient.
 
 ## Carte des dépôts : ce qui s'ajoute
 
@@ -1080,7 +1082,7 @@ AD-26, AD-35 · Dépôts : `connecteurs-service`, `prospera-app`.
 | # | Question | Recommandation |
 |---|---|---|
 | 1 | Qui porte le **backend de la Reprise** (EPIC-162 → 164, 166 → 168) ? | **Dev A**. Les premières cibles (`pdv`, `catalogue`, `stock`, polices, sinistres) sont à lui : source et cible tiennent dans une tête. Dev B porte déjà le moteur avec un écart de 7 à 10 semaines ; il garde tous les écrans, le kit et les contrats. C'est le patron d'EPIC-153 et 154 (backend Dev A, écrans Dev B). |
-| 2 | Qu'est-ce qui **cède** chez Dev A ? | En S7 et S8, la **démo microfinance du 15/01** passe après le 15/01 (votre ordre : « la microfinance en dernier ») ; en S9 et S10, **EPIC-158 puis EPIC-156** glissent (ordre de sacrifice du plan v3 §3). Sinon, Dev A à cinq ou six chantiers par semaine de S7 à S10. |
+| 2 | Qu'est-ce qui **cède** chez Dev A ? | ✅ **Tranché par le PO le 2026-11-12 : rien.** « Ne retire rien, on va y arriver. » La démo microfinance du 15/01, EPIC-156 et EPIC-158 restent ; Dev A porte cinq à six chantiers par semaine de S7 à S10, Dev B un 5ᵉ chantier d'écrans. |
 | 3 | Le **kit** en S4 chez Dev B ? | **Oui** : seule semaine avant le 21/12 où le dépôt n'est à personne et où Dev B n'a pas déjà quatre chantiers de code. Les stories d'EPIC-142 → 147 et 159 se finissent en S3. À défaut : S6 en 5ᵉ chantier de Dev B, et `pdv` reçoit son point d'import en S6. |
 | 4 | Qui **valide** un lot dans l'essai du prospect ? | L'administrateur du prospect reçoit `reprise:lot:valider` par le rôle que l'offre d'essai installe (moteur FR-35) : un essai n'a pas de désignation écrite, et aucune validation de l'essai ne vaut dans le réel (Reprise AD-8). La règle « attribuable par le DG seul » (AD-26) s'applique au réel. |
 | 5 | Connecteurs **non placé**, chiffré le 04/12 ? | **Oui**. Le chiffrage d'EPIC-170 → 179 donne le délai de construction à annoncer avant de signer un client qui garde Odoo ; la part échange du kit passe en premier, comme la part reprise. |

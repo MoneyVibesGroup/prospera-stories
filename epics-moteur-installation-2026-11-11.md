@@ -29,7 +29,7 @@ février, spine de Connecteurs AD-32).
 
 *Amendé le 2026-11-12 par la spine de Connecteurs (`architecture-connecteurs-2026-11-12`, AD-31) : EPIC-142 (matrice : échange entrant, contrôles à deux identités), EPIC-143 (`domainesEchange`, association objet → domaine), EPIC-157 (Connecteurs producteur des compteurs).*
 
-*Amendé le 2026-11-12 par les épics de la Reprise et de Connecteurs (`epics-reprise-connecteurs-2026-11-12.md`, EPIC-161 → 179) : EPIC-146 (risque des points d'import porté par EPIC-161 et EPIC-165). Ce document y ajoute les chantiers de la Reprise au plan semaine par semaine et à la carte des dépôts, sans rien retirer ici tant que le PO n'a pas tranché ses questions 1 et 2.*
+*Amendé le 2026-11-12 par les épics de la Reprise et de Connecteurs (`epics-reprise-connecteurs-2026-11-12.md`, EPIC-161 → 179) : EPIC-146 (risque des points d'import porté par EPIC-161 et EPIC-165). Ce document y ajoute les chantiers de la Reprise au plan semaine par semaine et à la carte des dépôts, **sans rien retirer ici : décision du PO du 2026-11-12** (« ne retire rien, on va y arriver »). Les chantiers de la Reprise s'ajoutent aux quatre chantiers par semaine de chaque développeur.*
 
 **Identifiants.** Épics **EPIC-142 → EPIC-160**, pris dans la plage réservée à Dev B et inscrits au registre le jour du
 découpage. **Aucun `story_id` n'est réservé ici** : chaque fiche prend le suivant de la plage de celui qui la code
