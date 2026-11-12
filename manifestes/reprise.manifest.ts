@@ -23,8 +23,9 @@ export const MANIFESTE_REPRISE = {
 
   // Modules qui déclarent `objetsDeReprise` (C1, amendement du 2026-11-11). Une cible absente donne des
   // lignes « non installé » au rapport. Liste de février (propriétaires présumés, spine AD-23) :
-  // `approvisionnement` quand il existe (spine AD-23).
-  enrichiPar: ['pdv', 'catalogue', 'reseau', 'stock', 'facturation', 'polices', 'sinistres'],
+  // `approvisionnement` quand il existe (spine AD-23). Les polices sont reçues par `assurance` : pas de code
+  // `polices` (décision du PO, 2026-11-12).
+  enrichiPar: ['pdv', 'catalogue', 'reseau', 'stock', 'facturation', 'assurance', 'sinistres'],
 
   referentielFamilies: [],
 
