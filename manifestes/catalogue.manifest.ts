@@ -10,7 +10,8 @@
 //              spine de la Reprise (AD-2, AD-4, AD-23), spine de Connecteurs (AD-2, AD-4, AD-11), PRD
 //              Connecteurs FR-14 (produits et prix : Odoo propriétaire si les achats y travaillent).
 //
-// ⚡ Le code du module est `catalogue`, pas `catalogue-produits` [À CONFIRMER par le PO].
+// ⚡ Le code du module est `catalogue`, pas `catalogue-produits` (décision du PO, 2026-11-12 : « Garde
+// catalogue » ; le renommage d'AD-14 est abandonné).
 // - La spine (AD-14, arbitrage du PO du 2026-08-15) voulait renommer le code en `catalogue-produits`. Le
 //   renommage n'a jamais été livré : `platform-catalog-service` sème `catalogue` (modules.seed-data.ts,
 //   STORY-366, avec la mention « le renommage n'est pas livré »), quatre packs le citent, et pdv le déclare
@@ -26,9 +27,12 @@
 //
 // Hors manifeste, pour mémoire :
 // - Offre : bundles distributeur « Terrain & Ventes » et « Plateforme ». La ligne M04 cite aussi les
-//   « Produits financiers » de la microfinance [À CONFIRMER] : ce PRD ne les couvre pas (unités entières,
-//   grilles par zone, prix freelance). Recommandation : les produits de crédit et d'épargne restent dans
-//   `microfinance` et `credit` ; ce manifeste ne décrit que le catalogue du distributeur.
+//   « Produits financiers » de l'offre microfinance (bundle « Croissance & Opérations ») [À CONFIRMER] : ce
+//   sont les produits que l'IMF vend à ses membres (types de crédit : montants, taux, durée, garanties,
+//   frais ; produits d'épargne). Ce PRD ne les couvre pas (unités entières, grilles par zone, prix
+//   freelance), et `prospera-microfinance-service` les porte déjà : `ProduitCredit` (module
+//   `credits/produits`). Recommandation : ils vont au manifeste `credit` (et l'épargne à `microfinance`) ;
+//   ce manifeste ne décrit que le catalogue du distributeur.
 // - Écrans : module d'écran `catalogue` dans `prospera-app` (C8), tous les écrans par Dev B. Chaque entrée
 //   de menu exige un des droits ci-dessous ; l'écran « Mes prix » du freelance n'exige aucun droit, il exige
 //   d'être le propriétaire (AD-6).
@@ -40,10 +44,10 @@
 //   `catalogue:promotion:gerer` ; DAF = + `catalogue:grille:gerer`.
 // - Droits : le catalogue des droits de tenant existe (STORY-166, `tenant-permission.enum.ts`, où ces quatre
 //   codes s'ajoutent, C7) ; STORY-365 (RBAC de tenant porté jusqu'au contrôle des routes, AD-P15) est encore
-//   `not_started` au 2026-11-12, et FR-C48 en dépend (spine, « Ce que cette spine impose ailleurs »).
-// - Import par fichier propre au module (FR-C45) : même question que FR-V40 de pdv et FR-R37 de reseau,
-//   remplacé par la Reprise ou gardé [À CONFIRMER : le PO tranchera les trois ensemble] ; s'il reste, il
-//   passe par le même point d'écriture que la reprise (compte rendu avant persistance, tout ou rien).
+//   `not_started` au 2026-11-12, et FR-C48 en dépend ; le PO l'intègre au planning (décision du 2026-11-12).
+// - Import par fichier propre au module (FR-C45) : GARDÉ pour le moment (décision du PO, 2026-11-12), comme
+//   FR-V40 de pdv et FR-R37 de reseau ; remplacé par la Reprise « au bon moment ». D'ici là, il passe par le
+//   même point d'écriture que la reprise (compte rendu avant persistance, tout ou rien).
 //
 // ⛔ Étanchéité des prix freelance (NFR-4, AD-6), appliquée à chaque champ de ce manifeste :
 // - aucun fait publié ne porte un prix freelance, pas même `instance.journal@1` (le journal freelance reste
@@ -202,7 +206,7 @@ export const MANIFESTE_CATALOGUE = {
   //   société, freelance ») est lu comme le prix AUQUEL le freelance achète : une grille société de catégorie
   //   de client « freelance » (FR-C32), visible de tous. Les prix que le freelance pratique chez ses
   //   détaillants ne sont jamais repris : la société ne les connaît pas et ne doit pas les voir (NFR-4) ; le
-  //   freelance les saisit lui-même. [À CONFIRMER sur le fichier du distributeur.]
+  //   freelance les saisit lui-même. Lecture confirmée par le PO le 2026-11-12.
   // - Promotions : non reprises en février (aucune n'est demandée) ; une promotion en cours à la bascule se
   //   recrée dans Prospera [À CONFIRMER].
   objetsDeReprise: ['catalogue.article@1', 'catalogue.grille@1'],
