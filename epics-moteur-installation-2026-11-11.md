@@ -29,6 +29,8 @@ février, spine de Connecteurs AD-32).
 
 *Amendé le 2026-11-12 par la spine de Connecteurs (`architecture-connecteurs-2026-11-12`, AD-31) : EPIC-142 (matrice : échange entrant, contrôles à deux identités), EPIC-143 (`domainesEchange`, association objet → domaine), EPIC-157 (Connecteurs producteur des compteurs).*
 
+*Amendé le 2026-11-12 par les épics de la Reprise et de Connecteurs (`epics-reprise-connecteurs-2026-11-12.md`, EPIC-161 → 179) : EPIC-146 (risque des points d'import porté par EPIC-161 et EPIC-165). Ce document y ajoute les chantiers de la Reprise au plan semaine par semaine et à la carte des dépôts, sans rien retirer ici tant que le PO n'a pas tranché ses questions 1 et 2.*
+
 **Identifiants.** Épics **EPIC-142 → EPIC-160**, pris dans la plage réservée à Dev B et inscrits au registre le jour du
 découpage. **Aucun `story_id` n'est réservé ici** : chaque fiche prend le suivant de la plage de celui qui la code
 (`STORY-900 → 1199` pour Dev B, `STORY-730 → 899` pour Dev A), au moment de l'écrire. Relevé du 2026-11-11 : aucune branche distante n'emploie EPIC-142+ ni STORY-900+, et le checkout partagé n'a aucun fichier non suivi.
@@ -586,6 +588,10 @@ FR-11, FR-42 · NFR-3 · AD-10, AD-15, AD-17, AD-21 · Dépôts : `platform-cata
 - ⚠️ Risque ouvert : les points d'import et les valeurs de contrôle des modules cibles (spine de la Reprise, AD-4 et AD-13)
   ne sont portés par aucun épic du moteur ; ils entrent dans les épics de la Reprise (EPIC-161 et suivants), et la charge
   qu'ils ajoutent aux propriétaires des modules cibles se mesure au chiffrage du 04/12.
+  **Amendement (2026-11-12, `epics-reprise-connecteurs-2026-11-12.md`)** : porté par EPIC-161 (le kit des cibles, fini le
+  04/12) et EPIC-165 (le point d'import dans le « fini » de chaque module cible). Les contrats de la Reprise (feu vert,
+  vérification `donnees-importees`) sont publiés le 04/12 : cet épic joue le refus `MISE_EN_SERVICE_SANS_FEU_VERT` sur leur
+  doublure en S6, avant `reprise-service`.
 - Le parcours « naissance → essai → répétition → mise en service » se joue **depuis la console**, sur le vrai backend.
 
 ### EPIC-147 : Le prospect essaie avant de signer (montré le 15/01 : la démo-vente) · à chiffrer au 04/12

@@ -645,4 +645,4 @@ sequenceDiagram
 | Commande `reprise:dossier:reimporter` | le refus `DOSSIER_VERSION_DIFFERENTE` protège (AD-7) | premier dossier modifié après une validation |
 | Séparation des tâches (valideur différent de l'auteur) | arbitrage de gouvernance du PO | premier audit, ou exigence d'un assureur |
 | Réponse 202 et `jobId` d'un `SIMULER` de plus de 30 s | la borne de 30 s et le morceau réduit (AD-4) suffisent | premier module qui dépasse la borne |
-| Qui construit, quand | relève des épics de la Reprise (EPIC-161+) ; l'écart de charge de Dev A est un risque ouvert du plan v3 | écriture des épics |
+| ~~Qui construit, quand~~ | **Écrit le 2026-11-12** : `epics-reprise-connecteurs-2026-11-12.md`, EPIC-161 → 168 (kit des cibles en S4, démo du 15/01 en S7-S8, février en S9-S13) ; le propriétaire du backend et ce qui cède chez Dev A restent à trancher par le PO (questions 1 et 2 de ce document) | questions 1 et 2 tranchées |
