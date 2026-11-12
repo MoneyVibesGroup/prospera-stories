@@ -17,6 +17,11 @@ mode: coaching
 *Brouillon rédigé à partir du récit du PO (2026-11-10). Les décisions et leurs raisons sont dans
 `.memlog.md` ; les inférences, toutes confirmées le 2026-11-11, sont récapitulées au §8.5.*
 
+*Amendements du 2026-11-11 par la spine de la Reprise (`architecture/architecture-reprise-donnees-2026-11-11/`,
+AD-22) : FR-1 (export Sage, fichiers pour février), FR-10 et QR-5 (comptage = lot de la Reprise), FR-11
+(gravité des écarts), FR-12 (doublons avec l'existant), FR-13 (droit de valider attribué par le DG seul),
+FR-15 (feu vert par module cible, retrait avant la mise en service), FR-17 (comparaison de nuit).*
+
 *Corrections du 2026-11-11 après `controle-cible.md` : décisions du PO QC-1 → QC-10 intégrées (module
 installable, tables de correspondance, paquet d'adaptateurs commun, relais à Connecteurs, comptage du stock
 avant la mise en service, validation, essai du prospect, exception d'import pendant `EN_INSTALLATION`,
@@ -142,8 +147,8 @@ pas, tout est effacé (FR-22).
   requalifications. Le client le **valide** (FR-13).
 - **Validation** : l'acte du client qui accepte la liste finale **avant** l'import. Ce n'est pas la
   **réception définitive** du moteur, qui est la signature de la fin d'installation d'un sous-ensemble.
-- **Feu vert** : le fait publié par la Reprise, **par sous-ensemble** et sur le lot rejoué dans le réel,
-  que le moteur lit avant la mise en service (FR-15).
+- **Feu vert** : l'état publié par la Reprise **par module cible** (`ATTENDU` ou `VERT`), sur les lots
+  rejoués dans le réel, que le moteur regroupe par sous-ensemble avant la mise en service (FR-15).
 - **Clé de rattachement** : l'identifiant (n° de police, n° de sinistre) qui permet à la GED de relier un
   document numérisé à un dossier repris.
 - **Orphelin** : un document ou un objet qu'aucune clé ne relie ; il va dans une file « à rattacher ».
@@ -168,6 +173,11 @@ pas, tout est effacé (FR-22).
 - La Reprise bénéficie de la même couverture des **versions d'Odoo** que Connecteurs (détection de version,
   deux API, matrice de tests du PRD Connecteurs) et du même prérequis (plan Custom d'Odoo Online) ; ce
   prérequis est déclaré au manifeste (§7, C13).
+- Un **export Sage** est un fichier, lu par un gabarit Sage : aucune connexion à la base Sage. Le
+  distributeur de février quitte Sage pour Prospera (décision du PO, 2026-11-11, spine D-13).
+- **Pour février**, seuls les fichiers sont requis : l'assureur fournit un export Excel, le distributeur des
+  fichiers par clé USB ou un export Sage. Les adaptateurs Odoo et API viennent après février, avec
+  Connecteurs (spine de la Reprise, AD-18 et AD-23).
 
 #### FR-2 : Chaque objet garde sa trace d'origine
 **Conséquences (testables) :**
@@ -260,8 +270,8 @@ l'historique que le client peut fournir**, avec un **objectif de 3 ans ou plus**
 c'est ce qui rend l'IA utile (saisons des ventes, cycles de crédit, délais de sinistres).
 
 **Conséquences (testables) :**
-- Un prêt en cours sans échéancier complet est un écart bloquant : sans échéancier, pas de portefeuille à
-  risque.
+- Un prêt en cours sans échéancier complet est une **erreur** (`ECHEANCIER_INCOMPLET`, spine AD-24) : il
+  n'entre pas, et sans échéancier, pas de portefeuille à risque.
 - Aucune borne haute ne limite l'historique repris.
 - Un historique de **moins de 3 ans** est signalé au rapport (« historique court : l'IA démarrera avec
   moins de recul ») ; il ne bloque jamais la mise en service.
@@ -270,13 +280,16 @@ c'est ce qui rend l'IA utile (saisons des ventes, cycles de crédit, délais de 
 
 #### FR-10 : Le stock d'ouverture se compte, il ne se reprend pas
 **Conséquences (testables) :**
-- Le fichier de stock ne sert qu'à **pré-remplir la feuille de comptage**, un écran du **module Stock**
-  (décision du PO, 2026-11-10, QR-5) ; la Reprise la pré-remplit par le point d'import du module Stock, car
-  elle n'écrit jamais chez la cible (FR-14).
+- Le fichier de stock ne sert qu'à **pré-remplir la feuille de comptage**. La feuille est un **lot de
+  comptage de la Reprise**, une feuille par entrepôt, saisi dans **ses** écrans (décision du PO du
+  2026-11-11, OQ-4, qui remplace QR-5) ; « comptage clos » est la validation de ce lot, qui est ensuite
+  livré au module Stock par son point d'import, car la Reprise n'écrit jamais chez la cible (FR-14 ; spine
+  de la Reprise, AD-11).
 - Le stock d'ouverture est le **comptage physique**, par entrepôt, fait **avant la mise en service**, dans
   l'espace réel, la veille au soir ou le matin même, au choix du client, sans aucun mouvement entre le comptage et la mise en service (décisions du PO, 2026-11-11, QC-6).
-- Le module Stock est alors `EN_INSTALLATION` : la saisie de la feuille de comptage est une route
-  d'import déclarée à son manifeste, ouverte par l'exception nommée du moteur (FR-42) et du contrat (C13).
+- Le module Stock est alors `EN_INSTALLATION` : aucun utilisateur ne peut y passer de mouvement. Le
+  comptage clos lui est livré par la Reprise, par l'exception nommée du moteur (FR-42) et du contrat
+  (C2, C13).
 - **« Comptage clos » vaut feu vert du stock** : la Reprise le publie dans le feu vert du sous-ensemble
   (FR-15). Le stock sort de la règle « écart nul ».
 - L'écart entre le fichier et le comptage figure au rapport, **à titre d'information** ; il ne bloque rien.
@@ -289,6 +302,12 @@ c'est ce qui rend l'IA utile (saisons des ventes, cycles de crédit, délais de 
   requalifications, les montants à saisir.
 - Chaque écart pointe vers les lignes de la source concernées.
 - Le rapport est le **livrable** du lot : il se télécharge en PDF et se conserve.
+- Chaque écart a une **gravité fixée par le produit**, jamais par le client : **erreur** (l'objet n'entre
+  pas), **avertissement** (l'objet entre, signalé), **information**. La validation accepte les
+  avertissements ; les objets sans erreur sont livrés, et un **fichier des lignes en erreur** se télécharge
+  pour corriger la source et livrer de nouveau. On n'écarte pas une ligne à la main : on l'exclut par une
+  règle de filtre du gabarit, rejouée et visible au rapport (décision du PO, 2026-11-11 : « comme les grands
+  éditeurs », spine D-26).
 - Les rapports de l'essai ne passent jamais dans le réel : chaque lot du réel a son propre rapport (FR-16).
 
 #### FR-12 : Les doublons se fusionnent sous contrôle
@@ -298,6 +317,9 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 - La reprise détecte les doublons probables et les présente regroupés. Un doublon est **probable** quand
   deux lignes ont le même identifiant national ou le même téléphone, ou le même nom et la même date de
   naissance (raison sociale et adresse pour une personne morale) après normalisation ; la fusion reste sous contrôle humain (critère confirmé par le PO le 2026-11-11, ajustable par Yao et Rachid avant le 07/12).
+- Les doublons avec des objets **déjà présents** dans le module cible (UJ-5) sont signalés par la cible
+  lors de la simulation ; l'intégrateur rattache alors la ligne à l'objet existant ou crée un nouvel objet
+  (décision du PO, 2026-11-11, spine D-28).
 - L'intégrateur fusionne et marque ce qu'il a fusionné ; rien n'est fusionné sans trace.
 
 #### FR-13 : Le client valide avant que rien n'entre
@@ -308,6 +330,9 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 - **Imports courants** et imports du prospect : les valide un **détenteur du droit de valider**
   (`reprise:lot:valider`), **désigné une fois par écrit** par le DG ; la désignation est tracée (décision du
   PO, 2026-11-11, QC-9).
+- Le droit `reprise:lot:valider` n'est **attribuable que par le DG**, comme le droit de consentir ;
+  l'attribution est tracée avec la référence de la désignation écrite (décision du PO, 2026-11-11, spine
+  D-27).
 - La validation enregistre qui, quand, et la version exacte du rapport validé.
 - Toute modification après validation exige une nouvelle validation.
 - La validation obtenue dans l'essai **ne vaut pas** pour le réel : elle est refaite sur le lot rejoué
@@ -328,7 +353,8 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
   jamais reportée en silence (FR-21).
 - Pendant le rejeu dans l'espace réel, les modules cibles sont `EN_INSTALLATION` : la livraison passe par
   leur point d'import, route déclarée à leur manifeste et ouverte à l'identité de service de la Reprise
-  par l'exception nommée du moteur (FR-42) et du contrat (C13).
+  par l'exception nommée du moteur (FR-42) et du contrat (C2, C13), comme la route de leurs valeurs de
+  contrôle (spine de la Reprise, AD-4 et AD-13).
 
 ### 4.E Réconcilier et mettre en service
 
@@ -337,14 +363,20 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 - Pour les données vivantes, la reprise **réconcilie** avec la source : soldes de prêts et d'épargne au
   franc près, créances, polices et sinistres ouverts. Le stock a son propre critère : le comptage clos
   (FR-10).
-- Le **feu vert est par sous-ensemble** (PRD moteur FR-8) et rattaché au **lot rejoué dans le réel**,
-  jamais à un lot de l'essai. Tant qu'un écart reste ouvert sur les données vivantes de ce sous-ensemble,
-  ou que son comptage de stock n'est pas clos, la Reprise ne donne **pas** son feu vert, et le moteur
-  refuse la mise en service du sous-ensemble (`MISE_EN_SERVICE_SANS_FEU_VERT`, 409).
+- Le **feu vert est donné par module cible** (`reprise.feu-vert.changed`, état absolu `ATTENDU` ou
+  `VERT`, spine de la Reprise AD-12) et rattaché aux **lots rejoués dans le réel**, jamais à un lot de
+  l'essai ; le moteur en déduit celui de chaque sous-ensemble (PRD moteur FR-8). Tant qu'un écart reste
+  ouvert sur les données vivantes d'un module, ou que le comptage de stock n'est pas clos, la Reprise ne
+  donne **pas** son feu vert à ce module, et le moteur refuse la mise en service du sous-ensemble qui le
+  contient (`MISE_EN_SERVICE_SANS_FEU_VERT`, 409). Un écart ouvert, c'est notamment un objet vivant resté en
+  erreur, un objet en trop ou une valeur de contrôle différente (spine de la Reprise, AD-24).
+- Un feu vert se **retire** avant la mise en service par une action journalisée d'un détenteur de
+  `reprise:lot:valider`, avec un motif ; le module repasse à `ATTENDU` (décision du PO, 2026-11-11, spine
+  D-24).
 - Un sous-ensemble **sans lot de reprise** n'a pas besoin de feu vert (PRD moteur FR-8 et FR-11).
 - Le feu vert est un fait publié, lisible par le moteur, avec le lot et le rapport qui le fondent ; sa
-  forme (topic ou route) est nommée dans la spine (§8.3). La ligne Reprise du bilan de mise en service ne
-  passe 🟢 qu'à ce feu vert.
+  forme est nommée par la spine de la Reprise (AD-12, AD-21). La ligne de chaque module cible au bilan de
+  mise en service ne passe 🟢 qu'à son feu vert.
 - La Reprise déclare une **vérification « données importées »** au manifeste : route appelée sous
   l'identité de service du moteur (PRD moteur FR-6), critère chiffré (nombre d'objets reçus égal au nombre
   de lignes retenues de la source, seuil nul pour les données vivantes), clef d'idempotence.
@@ -377,6 +409,9 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
   d'écarts de la période**. Le contrôle de concordance de Connecteurs reste un contrôle de synchronisation,
   non un rapport de reprise.
 - La mise en service attend l'écart nul.
+- L'ordonnancement de la comparaison de nuit se décide avec la spine de Connecteurs ; la comparaison lit
+  les valeurs de contrôle de la cible (spine de la Reprise, AD-13). Les deux clients de février migrent et
+  n'ont pas de marche en parallèle.
 
 ### 4.F Le lien avec la GED
 
@@ -524,7 +559,7 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 | C2 | Gate et cloisonnement par organisation ; refus `REPRISE_NOT_ENTITLED` ; un seul attendu par état publié et par sorte de route (lecture, écriture, export) selon la matrice de FR-21 ; l'état se lit sur l'état publié poussé, jamais sur l'horloge du conteneur |
 | C3 | Possède : fichiers déposés, index de provenance, lots, tables de correspondance, rapports, validations, feux verts, journal de fusion, clés de rattachement ; n'écrit chez aucun module cible. Service distinct : agrégat que nul module cible n'écrit |
 | C4 | Fonctionne sans aucun module cible installé (rapport seul) ; une cible fermée (état) est déclarée au rapport (FR-14) |
-| C5 | Contrats nommés (topics et routes à nommer dans la spine) : point d'import de chaque cible (avec champ de provenance) ; **feu vert** par sous-ensemble, lu par le moteur ; consommation de la **réception définitive** ; **clés de rattachement** à la GED ; événement **« historique livré »** ; copie des tables de correspondance à Connecteurs (FR-24) ; route de vérification « données importées » |
+| C5 | Contrats nommés (topics et routes à nommer dans la spine) : point d'import de chaque cible (avec champ de provenance) et ses valeurs de contrôle ; **feu vert** par module cible, lu par le moteur ; consommation de la **réception définitive** ; **clés de rattachement** à la GED ; événement **« historique livré »** ; copie des tables de correspondance à Connecteurs (FR-24) ; route de vérification « données importées » |
 | C6 | Correspondances et traductions d'état sont des **données** par lot, jamais du code par client, et même schéma pour toutes les organisations |
 | C7 | Droits de tenant `<code>:<objet>:<action>` : `reprise:lot:importer`, `reprise:lot:valider`, `reprise:doublon:fusionner`, `reprise:rapport:consulter` ; l'export reste réservé à `instance:donnees:exporter`. Le rôle du DSI les contient (FR-19). Un **rôle prédéfini « Responsable de la reprise »** porte `importer`, `fusionner` et `consulter`, **jamais** `reprise:lot:valider` (réservé au DG ou au désigné par écrit, QC-9) ; l'administrateur du client l'attribue (décision du PO, 2026-11-11) |
 | C8 | Écrans dans la **console Money Vibes** (équipe) **et** module d'écran `reprise` dans `prospera-app` **dès février** (libre-service du prospect : dépôt, rapport, validation, import), entrées déclarées dans `ecran.ts` avec leur droit ; l'Administration de la coque y renvoie par un lien (spine AD-14) |
@@ -544,7 +579,7 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
 | QR-2 | Fichiers source | Gardés **jusqu'à la réception définitive**, puis supprimés, suppression tracée (FR-3, précisé le 2026-11-11 : par sous-ensemble) |
 | QR-3 | Libre-service | **Prêt en février** pour le distributeur, y compris pour un **prospect en essai** (FR-19) |
 | QR-4 | Qui valide | Le **DG**, ou une personne qu'il désigne par écrit (FR-13, précisé par QC-9) |
-| QR-5 | Feuille de comptage | Écran du **module Stock** ; la reprise la pré-remplit (FR-10) |
+| QR-5 | Feuille de comptage | Écran du **module Stock** ; la reprise la pré-remplit (FR-10). **Remplacée le 2026-11-11 par OQ-4** : la feuille est un lot de comptage de la Reprise, saisi dans ses écrans (spine AD-11) |
 
 ### 8.2 Tranchées le 2026-11-11 (contrôle ciblé)
 

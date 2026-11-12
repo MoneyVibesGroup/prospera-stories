@@ -5,6 +5,8 @@
 > « module avec IA »**, issue de la table ronde du PRD moteur d'installation.
 > **Amendé le 2026-11-11** par la spine du moteur d'installation : C1, C2, C5, C7, C10, C11 (point 5) et
 > C13 (voir leurs paragraphes « Amendement (2026-11-11) »).
+> **Spine de la Reprise de données (2026-11-11)** : C1 (`objetsDeReprise`), C2 (exception nommée élargie
+> aux routes de reprise, jeton de service limité à une organisation), C13 (noms des routes).
 > **Séance du PO du 2026-11-11** (avancée du 13/11) : **C12 et C13 validées**, avec le test « promouvoir,
 > saisir, revenir, tout se relit » obligatoire à la prochaine gate de chaque service existant ; **Q3
 > reconfirmée**, étendue à la dépendance en lecture seule (§8).
@@ -154,6 +156,12 @@ idempotent, C12) et les **schémas d'événements** (JSON Schema, enregistrés a
 l'étape de migration). Le manifeste signé de la version de plateforme les reprend tels quels. La garde de
 test qui compare la source à la copie du catalogue couvre ces champs aussi.
 
+**Amendement (2026-11-11, spine de la Reprise de données, AD-2 et AD-16).** Un module qui reçoit des
+données reprises déclare à son manifeste **`objetsDeReprise`** : la liste de ses schémas d'objets
+(`<code>.<objet>@<majeure>`, un fichier par majeure ; l'enveloppe d'import porte aussi la mineure), rangés dans `prospera-plateforme/contrats/objets/<code>/`, JSON Schema
+draft-07). Il expose alors le point d'import et les valeurs de contrôle de la Reprise (C13) et joue la suite
+de conformité de la reprise.
+
 ### C2 : le socle (entitlement, gate, cloisonnement)
 
 **Règle.** Le module projette `entitlement.changed` dans un read-model local et refuse **toute** route
@@ -183,7 +191,8 @@ que le moteur lui pousse (neuf états : `NON_INSTALLE`, `EN_INSTALLATION`, `DESI
 - **Pendant `EN_INSTALLATION`**, les routes de vérification déclarées au manifeste laissent passer
   l'**identité de service du moteur**, et elle seule. Pendant un **rejeu** du dossier d'installation, les
   **routes d'import** déclarées au manifeste (C13) laissent passer l'identité de service du moteur et celle
-  de la Reprise de données, et elles seules (amendement du 2026-11-11, PRD moteur FR-42).
+  de la Reprise de données, et elles seules (amendement du 2026-11-11, PRD moteur FR-42). Exception élargie aux
+  routes de reprise le même jour : voir l'amendement de la spine de la Reprise, plus bas.
 - **Preuve ajoutée.** Une matrice : pour chacun des neuf états et chaque sorte de route (lecture,
   écriture, export, état réglementaire), **un seul attendu**, et le menu de la coque (C8) concorde avec la
   garde.
@@ -192,6 +201,19 @@ que le moteur lui pousse (neuf états : `NON_INSTALLE`, `EN_INSTALLATION`, `DESI
 `entitlement.changed` ne sert plus à fermer un module, et `echeanceLe` n'est plus lu pour décider : le
 moteur calcule l'état publié à la lecture et émet `etat-publie.changed` à l'heure dite. Il y a **un état
 publié par espace** (essai, réel), et un topic par espace.
+
+**Amendement (2026-11-11, spine de la Reprise de données, D-29 et D-33).**
+- **L'exception nommée s'élargit aux routes de reprise.** Pendant `EN_INSTALLATION` dans l'espace réel, l'identité de service
+  de la Reprise passe sur les **routes de reprise déclarées** : le point d'import, en mode `SIMULER` comme
+  en mode `APPLIQUER`, et les valeurs de contrôle. Elle passe aussi sur la route d'import C13 de sa part du
+  dossier. Aucune autre identité ne passe, et aucun utilisateur n'appelle une route de reprise.
+- **Un jeton de service vaut pour une organisation.** Le jeton d'une identité de service porte la claim
+  `organisationId`. Toute route dont le chemin porte un autre `{organisationId}` refuse l'appel :
+  **403 `ORGANISATION_HORS_JETON`**. Cette règle vaut pour la Reprise, pour Connecteurs et pour les appels
+  C13 du moteur. Le jeton est émis par l'`auth-service` de l'espace.
+- **Matrice.** La matrice des neuf états compte une sorte de route de plus, les **routes de reprise** :
+  ouvertes à la seule identité de la Reprise en `EN_SERVICE`, `ESSAI_PROSPECT`, `PREAVIS`, et en
+  `EN_INSTALLATION` dans le réel ; refusées dans les autres états avec le code de la garde du module.
 
 ### C3 : le module possède ses données
 
@@ -462,6 +484,23 @@ peut que si chaque module **dit ce qu'il lui faut, prouve qu'il marche, et rend 
 routes d'**export**, d'**import**, d'**effacement** et de **vérification** de la clause (point 7), et la
 route de lecture de l'état publié ; il déclare un **point d'entrée `migrer`**, **idempotent** : l'agent
 l'appelle à l'étape de migration d'une promotion, sous verrou, et le rejouer ne double rien (C12).
+
+**Amendement (2026-11-11, spine de la Reprise de données, AD-16).** Les routes de cette clause portent le
+code du module **après** `/v1/`, car le proxy retire le code de tête (spine de la coque, AD-8) et un service
+peut porter plusieurs modules. Chemins vus par le service :
+
+| Route | Chemin du service | Appelants |
+|---|---|---|
+| export | `GET /api/v1/instance/<code>/{organisationId}/export` | partie A ; utilisateur détenteur de `instance:donnees:exporter`, par le chemin public |
+| import de sa part du dossier | `POST /api/v1/instance/<code>/{organisationId}/import` | partie A, Reprise (rejeu) |
+| effacement | `POST /api/v1/instance/<code>/{organisationId}/effacement` | partie A |
+| vérification | `POST /api/v1/instance/<code>/{organisationId}/verifications/<code-de-verification>` | partie A |
+| santé | `GET /api/v1/instance/<code>/{organisationId}/sante` (`OK` ou `DEGRADE`) | partie A, agent |
+| point d'import de la reprise (si `objetsDeReprise`) | `POST /api/v1/reprise/<code>/{organisationId}/objets/<objet>` | Reprise |
+| valeurs de contrôle (si `objetsDeReprise`) | `POST /api/v1/reprise/<code>/{organisationId}/controles/<objet>` | Reprise |
+
+Le chemin public est `/api/<code>/v1/…` devant le chemin du service. Les appels d'un service à un autre
+passent par le proxy de l'espace.
 
 ---
 

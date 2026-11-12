@@ -122,7 +122,7 @@ Elle passe par le chemin 1 de FR-4 et pose `essai: { finLe, effacementLe }` sur 
 
 **Depuis §7, clause C5 : ce que publie et sert le moteur**
 
-| C5 | Publie `entitlement.changed` (existant ; champs additifs `preavisJusquau` et `essai`) et `etat-publie.changed`, dont la partie A est le seul émetteur, transitions dues au temps comprises (FR-34) ; sert `GET /etat-publie/{organisationId}` (FR-34) ; consomme le feu vert de la Reprise ; topics de bilan, de licence et de réception définitive à nommer dans la spine |
+| C5 | Publie `entitlement.changed` (existant ; champs additifs `preavisJusquau` et `essai`) et `etat-publie.changed`, dont la partie A est le seul émetteur, transitions dues au temps comprises (FR-34) ; sert `GET /etat-publie/{organisationId}` (FR-34) ; consomme le feu vert de la Reprise (`reprise.feu-vert.changed`, par module cible, spine de la Reprise AD-12) ; topics de bilan, de licence et de réception définitive à nommer dans la spine |
 
 **Depuis FR-34 : de quoi l'état publié est calculé**
 
@@ -287,6 +287,9 @@ La CI d'un dépôt peut vérifier son manifeste contre la copie publiée du grap
   `EN_INSTALLATION` (C2 et C13 amendées). Aucun utilisateur n'y accède.
 - Pendant un rejeu (FR-42), les **routes d'import** déclarées au manifeste laissent passer, de la même
   façon, l'identité de service du moteur et celle de la Reprise de données (décision du PO, 2026-11-11).
+  La Reprise passe aussi sur les **routes de reprise** déclarées (point d'import en simulation et en
+  application, valeurs de contrôle), tant que le module est `EN_INSTALLATION` dans le réel, avec un jeton
+  limité à l'organisation (contrat C2, amendement du 2026-11-11 ; spine de la Reprise, AD-4, AD-13, AD-27).
 
 **Depuis FR-38 : les champs du manifeste**
 
@@ -318,8 +321,9 @@ Pour **lire** le vrai logiciel du client, ce qui reste permis pendant l'essai, i
 **Depuis FR-42 : le propriétaire de chaque élément du dossier**
 
 - **Rejeu** : chaque élément du dossier d'installation a un **propriétaire**, qui l'importe par un contrat
-  nommé (C5, C13) : offre (moteur) ; rôles et comptes (`auth-service`) ; zones (`reseau`) ; tables de
-  correspondance (Reprise de données) ; réglages (chaque module).
+  nommé (C5, C13) : offre (moteur) ; rôles et comptes (`auth-service`) ; zones (`reseau`) ; part de la Reprise
+  de données (gabarits, correspondances de valeurs de référence, traductions d'état, critères de doublon,
+  liste des modules attendus ; spine de la Reprise, AD-7) ; réglages (chaque module).
 
 ## §A-8 Mises à jour : interrupteurs, version de plateforme, rétrocompatibilité, fenêtre N-1
 

@@ -448,6 +448,8 @@ figé le 11/12) · FR-34 et FR-42 (socle) · AD-6, AD-15, AD-17, AD-24, AD-26, A
   `AVEC_PERTE_INTERDIT_PLATEFORME`. `reseau` est enregistré au nouveau format ; le moteur est le module `instance`,
   `depends: []`.
 - Publication du contrat **`catalogue.manifeste.publie`** (AD-17).
+- Champ **`objetsDeReprise`** dans `ModuleVersion` (C1 amendé le 2026-11-11, spine de la Reprise AD-2 et AD-16), couvert
+  par la garde source/copie ; le manifeste M44 (`reprise`) est le premier écrit, dans `prospera-stories/manifestes/`.
 - `paiement-service` : **read-model de manifestes** pour la vente, qui résout les dépendances dures **comme la console**,
   refuse un élément non installable, un seul mode d'acquisition par élément (amendement §4).
 - FR-12, le contrat fait foi : un pack modifié ne s'applique qu'aux **nouveaux contrats**, la propagation ne crée plus de
@@ -548,8 +550,9 @@ FR-11, FR-42 · NFR-3 · AD-10, AD-15, AD-17, AD-21 · Dépôts : `platform-cata
   liste blanche des sorties et le journal des interceptions ; chaque module intercepte (C13) :
   `ECRITURE_REELLE_DEPUIS_ESSAI`.
 - **Répétition générale, puis mise en service** (FR-8) : le dossier d'installation passe de l'essai au réel **sans donnée
-  métier**, rejoué par la route d'import C13 de chaque propriétaire ; sans `reprise.feu-vert.donne`,
-  `MISE_EN_SERVICE_SANS_FEU_VERT` ; bilan de mise en service ; `reception-definitive.enregistree`.
+  métier**, rejoué par la route d'import C13 de chaque propriétaire ; la Reprise mise en service la première dans le réel ;
+  tant qu'un module attendu n'est pas `VERT` (`reprise.feu-vert.changed`, par module, relu par la vérification
+  `donnees-importees`), `MISE_EN_SERVICE_SANS_FEU_VERT` (spine de la Reprise, AD-12) ; bilan de mise en service ; `reception-definitive.enregistree`.
 - **Rafraîchissement** (FR-10) : par organisation, vers un essai `ESSAI_CLIENT` seulement, jamais `ESSAI_PROSPECT` ; refusé
   pendant une répétition générale ; ordres `SUSPENDRE_ECHEANCES` et `REPRENDRE_ECHEANCES` ; masquage des champs personnels.
   ⚡ La partie A l'écrit en S6, l'agent l'exécute dès EPIC-148.
@@ -565,8 +568,12 @@ FR-11, FR-42 · NFR-3 · AD-10, AD-15, AD-17, AD-21 · Dépôts : `platform-cata
 
 **Fin de l'épic**
 - Une organisation née deux fois n'en fait qu'une, avec le même identifiant dans les deux espaces.
-- Une écriture vers le réel depuis l'essai est refusée et journalisée ; une mise en service sans feu vert est refusée, et la
-  console affiche le refus nommé.
+- Une écriture vers le réel depuis l'essai est refusée et journalisée ; la Reprise est mise en service la première dans le
+  réel ; un sous-ensemble dont un module attendu par la Reprise n'est pas `VERT` (relu par la vérification
+  `donnees-importees`) est refusé, et la console affiche le refus nommé.
+- ⚠️ Risque ouvert : les points d'import et les valeurs de contrôle des modules cibles (spine de la Reprise, AD-4 et AD-13)
+  ne sont portés par aucun épic du moteur ; ils entrent dans les épics de la Reprise (EPIC-161 et suivants), et la charge
+  qu'ils ajoutent aux propriétaires des modules cibles se mesure au chiffrage du 04/12.
 - Le parcours « naissance → essai → répétition → mise en service » se joue **depuis la console**, sur le vrai backend.
 
 ### EPIC-147 : Le prospect essaie avant de signer (montré le 15/01 : la démo-vente) · à chiffrer au 04/12
