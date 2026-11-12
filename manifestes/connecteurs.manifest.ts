@@ -27,10 +27,12 @@ export const MANIFESTE_CONNECTEURS = {
 
   // Raisons (spine AD-27) :
   // - reprise : crée les tables de correspondance et le point de coupure, cédés à Connecteurs (AD-20) ;
-  // - pdv, catalogue, stock, facturation, pi-spi (encaissements), approvisionnement : modules du distributeur
+  // - pdv, catalogue, stock, facturation, paiement (encaissements), approvisionnement : modules du distributeur
   //   avec Odoo (PRD FR-14) qui déclarent `domainesEchange` et reçoivent ou émettent les échanges.
   // La liste est à confirmer par les manifestes des cibles. Un module absent : domaine « non installé » (C4).
-  enrichiPar: ['reprise', 'pdv', 'catalogue', 'stock', 'facturation', 'pi-spi', 'approvisionnement'],
+  // `paiement` et non `pi-spi` : PI-SPI est un moyen de paiement du module `paiement` (décision du PO,
+  // 2026-11-12) ; c'est `paiement` qui déclare le domaine `paiement.encaissements`.
+  enrichiPar: ['reprise', 'pdv', 'catalogue', 'stock', 'facturation', 'paiement', 'approvisionnement'],
 
   referentielFamilies: [],
 
