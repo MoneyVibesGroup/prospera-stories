@@ -10,13 +10,16 @@
 //              (AD-1 → AD-18) ; épics epics-paiement-2026-08-03.md ; STORY-647/649 (arrêté → créance,
 //              facturation de la consommation) ; STORY-650/651 (délégation) ; PRD Connecteurs §4.F et FR-17.
 //
-// ⛔ CODE DU MODULE : `paiement`, PAS `pi-spi` [À CONFIRMER par le PO].
-// - Le service ouvre ses routes sur l'entitlement `paiement` (`PAIEMENT_MODULE_CODE`), refus
-//   `PAIEMENT_NOT_ENTITLED`, et ses droits de tenant sont déjà `paiement:*` dans `TenantPermission`
-//   (auth-service). C7 veut que le préfixe des droits soit le code du module : le code est donc `paiement`.
-// - Le code `pi-spi` du catalogue décrit tout autre chose (« indicateurs prudentiels et états périodiques
-//   exigés des SFD », famille `sfd-bceao`, pack imf-sfd) et AUCUN service ne le lit. C'est du prudentiel
-//   SFD : il attend le PRD microfinance, avec `microfinance`, `credit` et `collecte`.
+// ✅ CODE DU MODULE : `paiement` (décision du PO du 2026-11-12). Le module `paiement`, ce sont les
+// paiements ET les moyens de paiement ; PI-SPI est l'un de ces moyens (avec Mobile Money, l'espèce et le
+// virement déclarés), pas un module.
+// - Le service ouvre déjà ses routes sur l'entitlement `paiement` (`PAIEMENT_MODULE_CODE`), refus
+//   `PAIEMENT_NOT_ENTITLED`, et ses droits de tenant sont déjà `paiement:*` dans `TenantPermission`.
+// - Le code `pi-spi` du catalogue n'est donc pas un module. Sa fiche décrit en plus autre chose
+//   (« indicateurs prudentiels et états périodiques exigés des SFD », famille `sfd-bceao`, pack imf-sfd), et
+//   AUCUN service ne le lit. À retirer de l'offre comme `fiscalite` (STORY-549 : `DEPRECATED`, jamais
+//   supprimé, pour ne révoquer aucun octroi) et à remplacer par `paiement` dans les packs ; le prudentiel
+//   SFD qu'il décrit va au PRD microfinance. Story de catalogue à ouvrir.
 // - ⚠️ `paiement` (comme `notification`) n'est PAS semé au catalogue (`modules.seed-data.ts`) : la recette le
 //   déclare à la main avant l'octroi. EPIC-143 (chargement des manifestes) le corrige.
 //
