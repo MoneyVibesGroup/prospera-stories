@@ -255,13 +255,13 @@ NFR-5 → EPIC-177 ; NFR-6 → EPIC-171, 175, 176, 173.
 | Épic | Titre | FR | Propriétaire | Semaine |
 |---|---|---|---|---|
 | **EPIC-161** | **Le kit des cibles : une cible reçoit une reprise en déclarant ses objets** (premier chantier, avec les contrats de la Reprise) | Reprise FR-14 ; C2, C5, C13 | Dev B | **S4, fini le 04/12** |
-| EPIC-162 | `prospera-adaptateurs` : lire un fichier du client sans le trahir | Reprise FR-1, FR-6, FR-23 | Dev A `[PROPOSÉ]` | S7 (tranche du 15/01), S9 (février) |
-| EPIC-163 | Le lot de la Reprise : déposer, lire, contrôler, rapporter | Reprise FR-2 → FR-5, FR-7, FR-11, FR-21 | Dev A `[PROPOSÉ]` (écrans : Dev B) | S7 (tranche du 15/01), S9 (février) |
-| EPIC-164 | Valider, livrer, retrouver ses données (**montré le 15/01**) | Reprise FR-8, FR-12 → FR-14, FR-20 | Dev A `[PROPOSÉ]` (écrans : Dev B) | S8 (tranche du 15/01), S9 (février) |
+| EPIC-162 | `prospera-adaptateurs` : lire un fichier du client sans le trahir | Reprise FR-1, FR-6, FR-23 | Dev A | S7 (tranche du 15/01), S9 (février) |
+| EPIC-163 | Le lot de la Reprise : déposer, lire, contrôler, rapporter | Reprise FR-2 → FR-5, FR-7, FR-11, FR-21 | Dev A (écrans : Dev B) | S7 (tranche du 15/01), S9 (février) |
+| EPIC-164 | Valider, livrer, retrouver ses données (**montré le 15/01**) | Reprise FR-8, FR-12 → FR-14, FR-20 | Dev A (écrans : Dev B) | S8 (tranche du 15/01), S9 (février) |
 | EPIC-165 | Les modules cibles reçoivent la reprise : un point d'import dans le « fini » de chacun | Reprise FR-9 ; cibles | le propriétaire de chaque module cible | S5 → S10, à la semaine de chaque module (`pdv` en S5) |
-| EPIC-166 | Essai puis réel : le dossier, la reprise fraîche, l'écart nul et le feu vert | Reprise FR-15, FR-16, FR-21, FR-22 | Dev A `[PROPOSÉ]` (écrans : Dev B) | S10 |
-| EPIC-167 | Le comptage d'ouverture du stock | Reprise FR-10 | Dev A `[PROPOSÉ]` (écrans : Dev B) | S10 |
-| EPIC-168 | Les deux reprises de février, de bout en bout, et les imports courants en libre-service | Reprise FR-19, SM-1 → SM-5 | Dev A `[PROPOSÉ]` (écrans : Dev B) | S11 → S13 |
+| EPIC-166 | Essai puis réel : le dossier, la reprise fraîche, l'écart nul et le feu vert | Reprise FR-15, FR-16, FR-21, FR-22 | Dev A (écrans : Dev B) | S10 |
+| EPIC-167 | Le comptage d'ouverture du stock | Reprise FR-10 | Dev A (écrans : Dev B) | S10 |
+| EPIC-168 | Les deux reprises de février, de bout en bout, et les imports courants en libre-service | Reprise FR-19, SM-1 → SM-5 | Dev A (écrans : Dev B) | S11 → S13 |
 | **EPIC-169** | Les contrats de Connecteurs et la règle du point d'écriture unique, avant février | Connecteurs FR-5, FR-11 ; C1 | Dev B | S5 (avec EPIC-142) |
 | EPIC-170 | Le kit des cibles, part échange | Connecteurs FR-2, FR-4, FR-10, FR-19 | à décider au déclencheur | après février |
 | EPIC-171 | `connecteurs-service` : un module installable, des domaines, un propriétaire chacun | Connecteurs FR-2, FR-3, FR-19 | à décider au déclencheur | après février |
@@ -285,7 +285,7 @@ Connecteurs vit dans **une** bibliothèque NestJS, `kit-cible`, publiée par `pr
 le module déclare ses objets, comme l'import d'Odoo (`base_import`, `load()` de l'ORM). C'est ce qui rend possible une
 trentaine de modules cibles en février, sans coder trente fois la même garde, la même idempotence et la même simulation.
 
-**Placement `[PROPOSÉ]` : Dev B, semaine 4 (30/11 → 04/12), une semaine, en entier.**
+**Placement : Dev B, semaine 4 (30/11 → 04/12), une semaine, en entier** (décision du PO du 2026-11-12, question 3).
 - C'est la **seule semaine avant le 21/12** où le chantier tient sans croiser un autre : Dev A fait le passage du socle dans
   les dépôts existants (« rien ne sort »), et `prospera-plateforme` n'appartient encore à personne. Dev B le crée une semaine
   plus tôt qu'EPIC-142, qui y ajoute en S5 les contrats du moteur.
@@ -298,7 +298,7 @@ trentaine de modules cibles en février, sans coder trente fois la même garde, 
 - **Seule la part reprise** est construite en S4. La part échange (EPIC-170) attend le déclencheur de Connecteurs ; le kit lui
   réserve sa place.
 - ⚠️ **Ce que cela coûte** : Dev B devait finir en S4 les stories d'EPIC-142 → 147 et 159, le PRD du lot 4 et le chiffrage du
-  04/12. Ces stories passent en S3 (question 3).
+  04/12. Ces stories passent en S3 (décision du PO du 2026-11-12).
 
 ## Le plan semaine par semaine : ce que la Reprise y ajoute
 
@@ -508,7 +508,7 @@ AD-12 · Dépôt : `prospera-plateforme` (créé ici).
 
 ### EPIC-162 : `prospera-adaptateurs` : lire un fichier du client sans le trahir · à chiffrer au 04/12
 
-**Dev A `[PROPOSÉ]` · S7 (tranche du 15/01), S9 (tranche de février) · Autonome : oui · Amont : EPIC-161 (schémas d'objets)** ·
+**Dev A · S7 (tranche du 15/01), S9 (tranche de février) · Autonome : oui · Amont : EPIC-161 (schémas d'objets)** ·
 Reprise FR-1, FR-2, FR-6, FR-7, FR-23 ; NFR-4 · Reprise AD-6, AD-9, AD-13, AD-14, AD-18, AD-29, AD-32 · Dépôt :
 `prospera-adaptateurs` (neuf, paquet npm privé).
 
@@ -547,7 +547,7 @@ Reprise FR-1, FR-2, FR-6, FR-7, FR-23 ; NFR-4 · Reprise AD-6, AD-9, AD-13, AD-1
 
 ### EPIC-163 : Le lot de la Reprise : déposer, lire, contrôler, rapporter · à chiffrer au 04/12
 
-**Dev A `[PROPOSÉ]` (écrans : Dev B) · S7 (tranche du 15/01), S9 (tranche de février) · Autonome : non · Amont : EPIC-161,
+**Dev A (écrans : Dev B) · S7 (tranche du 15/01), S9 (tranche de février) · Autonome : non · Amont : EPIC-161,
 EPIC-162, EPIC-165 (`pdv`) ; moteur EPIC-144 et EPIC-145** · Reprise FR-2, FR-3, FR-4, FR-5, FR-7, FR-11, FR-12 (détection),
 FR-19, FR-21 ; NFR-1, NFR-3, NFR-4, NFR-5, NFR-6 · Reprise AD-1, AD-5, AD-6, AD-8 (rapport), AD-10, AD-15, AD-16, AD-17, AD-24,
 AD-26, AD-29, AD-30, AD-31, AD-32 · Dépôts : `reprise-service` (neuf), `prospera-plateforme` (Traefik, Dev B),
@@ -606,7 +606,7 @@ AD-26, AD-29, AD-30, AD-31, AD-32 · Dépôts : `reprise-service` (neuf), `prosp
 
 ### EPIC-164 : Valider, livrer, retrouver ses données (montré le 15/01) · à chiffrer au 04/12
 
-**Dev A `[PROPOSÉ]` (écrans : Dev B) · S8 (tranche du 15/01), S9 (tranche de février) · Autonome : non · Amont : EPIC-163,
+**Dev A (écrans : Dev B) · S8 (tranche du 15/01), S9 (tranche de février) · Autonome : non · Amont : EPIC-163,
 EPIC-165** · Reprise FR-8, FR-12, FR-13, FR-14, FR-20 ; NFR-1, NFR-2 · Reprise AD-3, AD-4, AD-8, AD-9, AD-19, AD-24, AD-26,
 AD-30 · Dépôts : `reprise-service`, `prospera-app`.
 
@@ -618,8 +618,10 @@ AD-30 · Dépôts : `reprise-service`, `prospera-app`.
   `ECART_DE_LIVRAISON` jusqu'à une nouvelle validation ; un refus de garde le met en `LIVRAISON_PARTIELLE` et le travail reprend
   seul ; `LIVRE` exige tous les morceaux acquittés.
 - Faits du journal `reprise.lot.valide`, `reprise.livraison` (identifiants et comptes, jamais un contenu de cellule).
-- ⚠️ **À fixer avant la première story** (question 4) : qui détient `reprise:lot:valider` dans l'essai du prospect, puisque le
-  prospect valide lui-même (UJ-5, variante du prospect).
+- **Validation dans l'essai du prospect** (décision du PO du 2026-11-12, question 4) : l'administrateur du prospect reçoit
+  `reprise:lot:valider` par le rôle que l'offre d'essai installe (moteur FR-35), puisque le prospect valide lui-même (UJ-5,
+  variante du prospect). Aucune validation de l'essai ne vaut dans le réel (AD-8) ; la règle « attribuable par le DG seul »
+  (AD-26) s'applique au réel.
 
 **Backend — tranche de février**
 - **Doublons** : ceux du lot et les `doublonsProbables` de la cible ; **fusion** (`reprise:doublon:fusionner`, nouvelle
@@ -694,7 +696,7 @@ Le cabinet ne déclare aucun `objetsDeReprise` (OQ-6) ; les schémas de la micro
 
 ### EPIC-166 : Essai puis réel : le dossier, la reprise fraîche, l'écart nul et le feu vert · à chiffrer au 04/12
 
-**Dev A `[PROPOSÉ]` (écrans : Dev B) · S10 · Autonome : non · Amont : EPIC-164 ; moteur EPIC-146 (mise en service, réception
+**Dev A (écrans : Dev B) · S10 · Autonome : non · Amont : EPIC-164 ; moteur EPIC-146 (mise en service, réception
 définitive), EPIC-147 (plan d'effacement), EPIC-148 (journal)** · Reprise FR-15, FR-16, FR-21, FR-22 ; NFR-2, NFR-3 · Reprise
 AD-7, AD-8, AD-12, AD-13, AD-15, AD-16, AD-17, AD-25, AD-31, AD-33 · Dépôts : `reprise-service`, `prospera-app`, console.
 
@@ -736,7 +738,7 @@ AD-7, AD-8, AD-12, AD-13, AD-15, AD-16, AD-17, AD-25, AD-31, AD-33 · Dépôts :
 
 ### EPIC-167 : Le comptage d'ouverture du stock · à chiffrer au 04/12
 
-**Dev A `[PROPOSÉ]` (écrans : Dev B) · S10 · Autonome : non · Amont : EPIC-166 (feu vert), EPIC-165 (`stock`)** · Reprise FR-10 ·
+**Dev A (écrans : Dev B) · S10 · Autonome : non · Amont : EPIC-166 (feu vert), EPIC-165 (`stock`)** · Reprise FR-10 ·
 Reprise AD-11, AD-12 ; Connecteurs AD-20 · Dépôts : `reprise-service`, dépôt de `stock`, `prospera-app`.
 
 **Backend**
@@ -760,7 +762,7 @@ Reprise AD-11, AD-12 ; Connecteurs AD-20 · Dépôts : `reprise-service`, dépô
 
 ### EPIC-168 : Les deux reprises de février, de bout en bout, et les imports courants en libre-service · à chiffrer au 04/12
 
-**Dev A `[PROPOSÉ]` (écrans : Dev B) · S11 → S13 · Autonome : non · Amont : EPIC-166, EPIC-167 ; moteur EPIC-148, EPIC-150,
+**Dev A (écrans : Dev B) · S11 → S13 · Autonome : non · Amont : EPIC-166, EPIC-167 ; moteur EPIC-148, EPIC-150,
 EPIC-153 (instance de l'assureur)** · Reprise FR-1, FR-9, FR-19 ; SM-1 → SM-5 ; NFR-3, NFR-4 · Reprise AD-23, AD-26, AD-34 ·
 Dépôts : `reprise-service`, `prospera-recette`, `prospera-app`, console.
 
@@ -1077,12 +1079,12 @@ AD-26, AD-35 · Dépôts : `connecteurs-service`, `prospera-app`.
 
 ---
 
-## Questions au PO (réponse en bloc)
+## Questions au PO : toutes tranchées le 2026-11-12
 
-| # | Question | Recommandation |
+| # | Question | Décision du PO (2026-11-12) |
 |---|---|---|
-| 1 | Qui porte le **backend de la Reprise** (EPIC-162 → 164, 166 → 168) ? | **Dev A**. Les premières cibles (`pdv`, `catalogue`, `stock`, polices, sinistres) sont à lui : source et cible tiennent dans une tête. Dev B porte déjà le moteur avec un écart de 7 à 10 semaines ; il garde tous les écrans, le kit et les contrats. C'est le patron d'EPIC-153 et 154 (backend Dev A, écrans Dev B). |
+| 1 | Qui porte le **backend de la Reprise** (EPIC-162 → 164, 166 → 168) ? | ✅ **Dev A**, comme recommandé. Les premières cibles (`pdv`, `catalogue`, `stock`, polices, sinistres) sont à lui : source et cible tiennent dans une tête. Dev B porte déjà le moteur avec un écart de 7 à 10 semaines ; il garde tous les écrans, le kit et les contrats. C'est le patron d'EPIC-153 et 154 (backend Dev A, écrans Dev B). |
 | 2 | Qu'est-ce qui **cède** chez Dev A ? | ✅ **Tranché par le PO le 2026-11-12 : rien.** « Ne retire rien, on va y arriver. » La démo microfinance du 15/01, EPIC-156 et EPIC-158 restent ; Dev A porte cinq à six chantiers par semaine de S7 à S10, Dev B un 5ᵉ chantier d'écrans. |
-| 3 | Le **kit** en S4 chez Dev B ? | **Oui** : seule semaine avant le 21/12 où le dépôt n'est à personne et où Dev B n'a pas déjà quatre chantiers de code. Les stories d'EPIC-142 → 147 et 159 se finissent en S3. À défaut : S6 en 5ᵉ chantier de Dev B, et `pdv` reçoit son point d'import en S6. |
-| 4 | Qui **valide** un lot dans l'essai du prospect ? | L'administrateur du prospect reçoit `reprise:lot:valider` par le rôle que l'offre d'essai installe (moteur FR-35) : un essai n'a pas de désignation écrite, et aucune validation de l'essai ne vaut dans le réel (Reprise AD-8). La règle « attribuable par le DG seul » (AD-26) s'applique au réel. |
-| 5 | Connecteurs **non placé**, chiffré le 04/12 ? | **Oui**. Le chiffrage d'EPIC-170 → 179 donne le délai de construction à annoncer avant de signer un client qui garde Odoo ; la part échange du kit passe en premier, comme la part reprise. |
+| 3 | Le **kit** en S4 chez Dev B ? | ✅ **Oui**, comme recommandé : seule semaine avant le 21/12 où le dépôt n'est à personne et où Dev B n'a pas déjà quatre chantiers de code. Les stories d'EPIC-142 → 147 et 159 se finissent en S3. |
+| 4 | Qui **valide** un lot dans l'essai du prospect ? | ✅ Comme recommandé : l'administrateur du prospect reçoit `reprise:lot:valider` par le rôle que l'offre d'essai installe (moteur FR-35) : un essai n'a pas de désignation écrite, et aucune validation de l'essai ne vaut dans le réel (Reprise AD-8). La règle « attribuable par le DG seul » (AD-26) s'applique au réel. |
+| 5 | Connecteurs **non placé**, chiffré le 04/12 ? | ✅ **Oui** : Connecteurs reste hors du calendrier. Le chiffrage d'EPIC-170 → 179 donne le délai de construction à annoncer avant de signer un client qui garde Odoo ; la part échange du kit passe en premier, comme la part reprise. |
