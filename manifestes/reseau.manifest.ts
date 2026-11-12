@@ -27,7 +27,8 @@
 //   Reprise ou gardé [À CONFIRMER : le PO tranchera avec FR-V40] ; s'il reste, il passe par le même point
 //   d'écriture que la reprise (compte rendu avant persistance, tout ou rien).
 //
-// ⚡ L'objet « commercial » (proposition, à valider par le PO ; amende le PRD reseau, voir FR-R23 ci-dessous).
+// ⚡ L'objet « commercial » (VALIDÉ par le PO le 2026-11-12, « pour le moment » ; amende le PRD reseau, voir
+// FR-R23 ci-dessous).
 // - Le besoin : la Reprise de février apporte des commerciaux (spine de la Reprise AD-23 : « commerciaux →
 //   reseau, à confirmer ») et pdv rattache chaque point de vente à son commercial. Or un commercial repris n'a
 //   pas encore de compte : les comptes vivent dans auth-service, qui ne reçoit pas de reprise.
@@ -40,12 +41,23 @@
 //   service à service : reseau n'appelle jamais auth-service, et auth-service n'appelle jamais reseau (AD-5).
 //   L'invitation publie `identity.user.registered` (e-mail en minuscules) et `identity.membership.changed`
 //   dans la même transaction (vérifié dans auth-service, invitation.service.ts) ; reseau les consomme et lie
-//   le commercial au compte par (organisation, e-mail). État du compte : `A_INVITER`, `INVITE`, `ACTIF`,
-//   `SUSPENDU`, ou `SANS_EMAIL`.
-// - ⚠️ `SANS_EMAIL` : l'invitation d'auth-service EXIGE un e-mail (`InviteUserDto.email`). Un commercial qui
-//   n'a qu'un téléphone ne peut pas être invité aujourd'hui ; il reste listé, ses points de vente restent
-//   rattachés, mais il ne se connecte pas. [À CONFIRMER : invitation par SMS dans auth-service, ou e-mail
-//   exigé dans le gabarit de reprise des commerciaux.]
+//   le commercial au compte par (organisation, e-mail), ou (organisation, téléphone) pour une invitation par
+//   SMS. État du compte : `A_INVITER`, `INVITE`, `ACTIF`, `SUSPENDU`, ou `SANS_CONTACT` (ni e-mail ni
+//   téléphone : il reste listé, ses points de vente restent rattachés, il ne se connecte pas).
+// - ⚡ Invitation par SMS (décision du PO, 2026-11-12) : un commercial qui n'a qu'un téléphone est invité par
+//   SMS ; l'e-mail reste facultatif dans le gabarit de reprise. Travail dans auth-service, une story à part
+//   (l'invitation n'existe aujourd'hui que par e-mail, `InviteUserDto.email` obligatoire). Ce que le code
+//   montre au 2026-11-12 :
+//   · `User.email` est obligatoire, unique, et c'est l'identifiant de connexion (`POST /auth/login`) ; le
+//     téléphone (`User.phone`, STORY-123) est facultatif et non unique ⇒ il faut un identifiant de connexion
+//     par téléphone (normalisé E.164, unique) et l'e-mail facultatif ;
+//   · le jeton porte `emailVerified`, exigé par la gate de chaque service (`emailVerified` + KYC + droit au
+//     module) ⇒ un téléphone vérifié à l'acceptation doit valoir vérification, sinon le commercial invité par
+//     SMS est refusé partout ; c'est le point le plus large de la story ;
+//   · le lien d'invitation part par SMS via notification-service (MV détient le module `notification`) ;
+//     le mot de passe oublié suit le même canal ;
+//   · `identity.user.registered` doit porter le téléphone, pour que reseau lie le commercial au compte.
+//   Jusqu'à cette story, un commercial sans e-mail reste `A_INVITER` : rattaché, sans connexion.
 // - Pas d'invitation automatique : aucune invitation ne part pendant une simulation, ni dans l'espace d'essai
 //   (un prospect de la démo du 15/01 ne doit pas écrire à quarante commerciaux), ni à la livraison. Inviter
 //   est un acte humain, après le feu vert.
@@ -138,7 +150,7 @@ export const MANIFESTE_RESEAU = {
       code: 'commerciaux-sans-compte',
       route: 'POST /api/v1/instance/reseau/{organisationId}/verifications/commerciaux-sans-compte',
       critere:
-        "Commerciaux actifs sans compte actif : 0 🟢 ; ≥ 1 🟠 avec deux nombres, « à inviter » et « sans e-mail » (ils ne se connectent pas ; leurs points de vente restent rattachés).",
+        "Commerciaux actifs sans compte actif : 0 🟢 ; ≥ 1 🟠 avec deux nombres, « à inviter » et « sans contact » (ils ne se connectent pas ; leurs points de vente restent rattachés).",
     },
   ],
 
@@ -186,7 +198,7 @@ export const MANIFESTE_RESEAU = {
   //   départ est créée par la première livraison. Valeur de contrôle : statut ouvert/fermé (etat). Le
   //   distributeur n'a pas d'agences (A4) : l'objet `agence` viendra en version mineure avec la microfinance,
   //   après février.
-  // - commercial : clé d'origine (code vendeur de Sage), prénom, nom, e-mail (facultatif, `SANS_EMAIL` sinon),
+  // - commercial : clé d'origine (code vendeur de Sage), prénom, nom, e-mail et téléphone (au moins un des deux, sinon `SANS_CONTACT`),
   //   téléphone, statut salarié ou indépendant, affectations à des zones avec date de début et de fin (FR-R20,
   //   FR-R22). Régimes VIVANT (en poste) et HISTORIQUE (parti avant la reprise : il reste référencé par
   //   l'historique d'affectation des points de vente). Valeur de contrôle : statut en poste/parti (etat).
