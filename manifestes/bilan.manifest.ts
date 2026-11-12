@@ -26,12 +26,11 @@
 // - Référentiel : choisi PAR DOSSIER (MNV-729) : un cabinet produit la liasse SFD ou CIMA d'un client IMF ou
 //   assureur. Un dossier dont le référentiel est ambigu rend 409 (STORY-728 : référentiel à l'option seule).
 // - La consolidation (épics de consolidation : agrégat, éliminations, mise en équivalence, impôts différés,
-//   états consolidés) vit ici, sous la gate `bilan`. [À CONFIRMER] : fonctionnalité du module `bilan` ou
-//   module commercial à part (elle ne sert qu'aux groupes). Recommandation (2026-11-12, en attente du PO) :
-//   module à part `consolidation`, `depends: ['bilan']`, dans bilan-service derrière sa propre gate
-//   (`CONSOLIDATION_NOT_ENTITLED`), sur le patron du conseil ; Odoo et Sage la vendent aussi à part.
+//   états consolidés) vit dans bilan-service, aujourd'hui sous la gate `bilan`. ✅ Décision du PO du
+//   2026-11-12 : c'est un MODULE À PART, `consolidation` (voir `consolidation.manifest.ts`), dans le même
+//   service, derrière sa propre gate. Ses routes, son droit et le topic de périmètre sortent de ce manifeste.
 // - Rôles proposés (à confirmer avec les rôles du cabinet) : collaborateur = consulter, produire,
-//   previsionnel ; expert-comptable = + valider, mapping, exercice, depot ; consolidation = droit à part.
+//   previsionnel ; expert-comptable = + valider, mapping, exercice, depot.
 
 export const MANIFESTE_BILAN = {
   code: 'bilan',
@@ -63,7 +62,6 @@ export const MANIFESTE_BILAN = {
     'bilan:mapping:arbitrer', // ajustements compte → poste, validés ou rejetés (FR-008)
     'bilan:exercice:clore', // clore et rouvrir un exercice (FR-016)
     'bilan:previsionnel:construire', // hypothèses, versions, verrouillage, rebasage (FR-018 → FR-021)
-    'bilan:consolidation:realiser', // appariements, éliminations, retraitements, états consolidés
   ],
 
   // C5 : faits publiés et consommés, tels qu'ils existent sur origin/dev (topics sans suffixe de version).
@@ -86,7 +84,6 @@ export const MANIFESTE_BILAN = {
     'fiscal.declaration.deposee', // émis par fiscal-service (module `declarations`)
     'dossier.created',
     'dossier.updated',
-    'dossier.perimetre.arrete', // périmètre de consolidation
     'dossier.exercice.ouvert',
     'dossier.exercice.clos',
     'dossier.exercice.rouvert',
