@@ -23,6 +23,8 @@ companions: [.memlog.md, reviews/]
 
 *Amendée le 2026-11-11 par la spine de la Reprise de données (`architecture-reprise-donnees-2026-11-11`, AD-22) : AD-8 (téléversement, code du module dans le chemin du service), AD-25 (lien de provenance), Stack (`tus-js-client`).*
 
+*Amendée le 2026-11-12 par la spine de Connecteurs (`architecture-connecteurs-2026-11-12`, AD-31) : AD-7 (seuils lus de `seuils-fraicheur@1`, `ageSecondes` et échéance de nuit, bandeau de la file pour `connecteurs:file:consulter`), AD-8 (troisième préfixe de route `echange`), AD-14 (l'Administration renvoie vers le module d'écran `connecteurs`), AD-15 (copie épinglée de `seuils-fraicheur@1`), AD-25 (marqueurs `autoriteExterieure` et `mouvementsEnAttente`), Structural Seed (arbre : `connecteurs` n'est plus requis en février).*
+
 Remise de Dev B à Dev A, **ven. 20/11/2026**, avant le squelette de la coque (semaine 3). Préfixe des stories : **`PRA-`**.
 
 ## Design Paradigm
@@ -133,11 +135,12 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
   | Changement à venir, date limite | `interrupteurs[].dateLimite` | administrateurs |
   | Mise à jour annoncée, avertissement si `AVEC_PERTE` | `instance.miseAJourAnnoncee` | administrateurs |
   | Retour arrière en cours, avancement | `instance.retourArriereEnCours` | administrateurs |
-  | File d'envoi d'un connecteur en attente | `etat-synchro` du module `connecteurs` | administrateurs |
+  | File d'envoi d'un connecteur en attente | `etat-synchro` du module `connecteurs` | ~~administrateurs~~ détenteurs de `connecteurs:file:consulter` (amendement 2026-11-12, spine de Connecteurs, AD-16 et PRD Connecteurs FR-12) |
   | Données synchronisées en retard (orange ou rouge) | `etat-synchro` du module `connecteurs` | utilisateurs de l'écran concerné |
 
   « Administrateurs » = détenteurs de `instance:bilan:consulter` ; « DG » = l'indicateur `utilisateur.estDG` de la lecture (FR-35).
   - **Fraîcheur des données synchronisées** (PRD Connecteurs, décision du PO du 2026-11-11) : quand `connecteurs` est ouvert, la coque lit `GET /api/connecteurs/v1/etat-synchro`, au rythme de l'état publié (AD-5). La réponse a une forme normalisée : par domaine et par sens, `dernierEchangeLe`, le niveau de fraîcheur (`IMMEDIAT` | `HEURE` | `NUIT`), la source (`API` | `EXPORT`) et la file d'envoi (`enAttente`, `plusAncienLe`). Un écran déclare le domaine qu'il montre et rend `<Fraicheur domaine>`. La coque y applique **sa table de seuils** orange et rouge par niveau (valeurs QK-3 du PRD Connecteurs, FR-11), avec le « maintenant » d'AD-5, et choisit le message et la clef de libellé d'action du domaine. Le module `connecteurs` ne rend ni bandeau ni mention de fraîcheur.
+  - **Amendement (2026-11-12, spine de Connecteurs, AD-16).** La table de seuils n'est pas écrite à la main dans la coque : elle est **générée** depuis le contrat `seuils-fraicheur@1` (`prospera-plateforme/contrats/seuils-fraicheur.json`), que lit aussi Connecteurs (une seule source). Le contrat porte, par niveau, le champ `messageDes` : le message d'action est rendu dès l'orange pour `IMMEDIAT` et `HEURE`, dès 06 h pour `NUIT`. La réponse d'`etat-synchro` porte aussi `ageSecondes` (calculé par Connecteurs à la réponse, pour que la coque ne compare pas deux horloges) et, pour le niveau `NUIT`, l'échéance (`nuit.attendueAvant`, `nuit.arriveeLe`) ; la file (`enAttente`, `plusAncienLe`) n'est rendue qu'à qui détient `connecteurs:file:consulter` : le bandeau de la file d'envoi s'adresse à ces détenteurs, et non plus aux « administrateurs ».
 
 ### AD-8 — Une seule origine : `/api/*` appartient au proxy `[ADOPTED]`
 
@@ -145,7 +148,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 - **Prevents:** des adresses de services dans le code ou la configuration ; des CORS par service et par espace ; un relais qui masque le navigateur à l'IdP ; deux modules d'un même service mal gardés.
 - **Rule:**
   - **Une origine** : le navigateur et l'app mobile n'appellent qu'une origine.
-  - **Routage** : le proxy d'instance réécrit `/api/<code>/v1/…` en `/api/v1/…` du service qui porte `<code>` (Traefik `replacePathRegex`). Plusieurs codes peuvent viser un même service ; `<code>` est un code du catalogue ou un nom du socle (`auth`). Un service qui porte plusieurs modules remet le code dans son propre chemin pour les routes d'instance et de reprise (`/api/v1/instance/<code>/…`, `/api/v1/reprise/<code>/…`, contrat C13).
+  - **Routage** : le proxy d'instance réécrit `/api/<code>/v1/…` en `/api/v1/…` du service qui porte `<code>` (Traefik `replacePathRegex`). Plusieurs codes peuvent viser un même service ; `<code>` est un code du catalogue ou un nom du socle (`auth`). Un service qui porte plusieurs modules remet le code dans son propre chemin pour les routes d'instance et de reprise (`/api/v1/instance/<code>/…`, `/api/v1/reprise/<code>/…`, contrat C13) ; **amendement (2026-11-12, spine de Connecteurs, AD-10) : un troisième préfixe, `echange`** (`/api/v1/echange/<code>/…`, route d'échange de Connecteurs vers une cible).
   - **En-têtes** : le proxy transmet `User-Agent` et `X-Forwarded-For` (proxies de confiance déclarés).
   - **Garde côté service** : le code dans l'URL ne sert **qu'au routage**. La garde du service applique le module de sa propre route, jamais celui de l'URL.
   - **Préfixes réservés** : tout `/api/*` appartient au proxy. Les routes du serveur Next vivent sous `/coque/*` (`src/app/coque/…`), jamais sous `/api/` ni dans un dossier préfixé `_`, qui est privé et non routable dans Next.
@@ -200,6 +203,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
   - **Rôles et droits.**
   - **Interrupteurs** : quand les utilisateurs voient un changement, avant sa date limite.
   - **Reprise des données** : un renvoi vers le module d'écran **`reprise`** (`/m/reprise/…`, droits `reprise:*`), qui porte l'import, en autonomie pour le prospect dès février (décision du PO, 2026-11-11). L'Administration ne recode pas l'import.
+  - **Connecteurs** (amendement 2026-11-12, spine de Connecteurs, AD-28) : un renvoi vers le module d'écran **`connecteurs`** (`/m/connecteurs/…`, droits `connecteurs:*`), qui porte la configuration, la file des écarts, les refus, la file d'envoi et les interceptions de l'essai. L'Administration ne recode pas la configuration.
   - **Pour le prospect** : le compte à rebours, l'export pendant `ESSAI_TERMINE`.
 
   Les entrées qui n'ont pas d'objet sur la plateforme (planifier, revenir, fichier, support) n'apparaissent que si `instance.hebergement` vaut `SITE`.
@@ -208,7 +212,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 
 - **Binds:** `prospera-app`, l'app expert-comptable, l'app mobile, le moteur, tous les services
 - **Prevents:** trois lectures de l'état publié qui dérivent ; des types écrits à la main qui mentent sur une route.
-- **Rule:** Les types de **toute** API appelée (état publié compris) sont générés depuis l'OpenAPI du service (`openapi-typescript`), jamais écrits à la main. La **matrice des neuf états** (état → menu, garde par sorte de route, bandeau, destinataire) est un fichier JSON versionné publié par le moteur, et c'est `platform-catalog-service` qui le possède, avec `contrat/etat-publie.openapi.json` (spine du moteur, AD-24) ; il y a un état publié et un topic par espace. La coque en garde une copie qu'un test compare à la source, et son test de concordance menu/garde la joue entièrement. Une version de matrice inconnue d'un consommateur le fait fermer, jamais ouvrir.
+- **Rule:** Les types de **toute** API appelée (état publié compris) sont générés depuis l'OpenAPI du service (`openapi-typescript`), jamais écrits à la main. La **matrice des neuf états** (état → menu, garde par sorte de route, bandeau, destinataire) est un fichier JSON versionné publié par le moteur, et c'est `platform-catalog-service` qui le possède, avec `contrat/etat-publie.openapi.json` (spine du moteur, AD-24) ; il y a un état publié et un topic par espace. La coque en garde une copie qu'un test compare à la source, et son test de concordance menu/garde la joue entièrement. Une version de matrice inconnue d'un consommateur le fait fermer, jamais ouvrir. **Amendement (2026-11-12, spine de Connecteurs, AD-16) :** il en va de même pour `seuils-fraicheur@1` : la coque en garde une copie épinglée qu'un test compare à la source, et génère sa table de seuils de cette copie.
 
 ### AD-16 — Le contrat d'un emplacement
 
@@ -274,6 +278,7 @@ Une flèche = « peut importer ou appeler ». Aucun module ne pointe vers un aut
 - **Binds:** les modules cibles de la Reprise, PRD Reprise (OQ-2, `historique`, `montantASaisir`), AD-7
 - **Prevents:** un écran qui laisse modifier un historique repris ou qui cache un montant à saisir, quand un autre écran les protège.
 - **Rule:** L'API d'un module cible renvoie, **par objet**, les marqueurs `historique` (lecture seule) et `montantASaisir` (montant manquant, à compléter). Un écran n'interprète jamais ces marqueurs lui-même : il enveloppe l'objet dans `<ProtectionObjet>` de la coque, qui retire les actions d'écriture d'un objet `historique` et signale un `montantASaisir`, sur le patron d'`<Ecriture>` (décision du PO, 2026-11-11). La `provenance` d'un objet repris (lot, ligne) ouvre, dans l'écran de la cible, le lien vers la ligne de la source tant que le lot existe (PRD Reprise FR-2).
+  **Amendement (2026-11-12, spine de Connecteurs, AD-11).** L'API de la cible rend aussi, par objet, les marqueurs **`autoriteExterieure`** (domaine dont le propriétaire est le logiciel du client) et **`mouvementsEnAttente`** ; `<ProtectionObjet>` retire alors les actions de modification directe de l'objet et affiche « en attente ».
 
 ## Consistency Conventions
 
@@ -333,7 +338,7 @@ prospera-app/
     modules/
       instance/               # Administration (AD-14)
       reseau/ pdv/ catalogue/ stock/   # les 4 modules de Dev A pour le 15/01
-      reprise/ connecteurs/            # requis en février (PRD Reprise, PRD Connecteurs)
+      reprise/ connecteurs/            # reprise : février ; connecteurs : au premier contrat qui garde un logiciel (spine de Connecteurs, AD-32)
   contrat/
     etat-publie.openapi.json  # copie gardée (AD-15)
     matrice-etats.json

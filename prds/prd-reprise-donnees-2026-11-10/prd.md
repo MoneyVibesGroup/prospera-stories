@@ -22,6 +22,8 @@ AD-22) : FR-1 (export Sage, fichiers pour février), FR-10 et QR-5 (comptage = l
 (gravité des écarts), FR-12 (doublons avec l'existant), FR-13 (droit de valider attribué par le DG seul),
 FR-15 (feu vert par module cible, retrait avant la mise en service), FR-17 (comparaison de nuit).*
 
+*Amendée le 2026-11-12 par la spine de Connecteurs (`architecture/architecture-connecteurs-2026-11-12/`, AD-31) : FR-17 (marche en parallèle dans l'essai avant la mise en service, rapport d'écarts de la période, arrêt de la synchro), FR-23 (renvois sur le bac à sable et les identifiants).*
+
 *Corrections du 2026-11-11 après `controle-cible.md` : décisions du PO QC-1 → QC-10 intégrées (module
 installable, tables de correspondance, paquet d'adaptateurs commun, relais à Connecteurs, comptage du stock
 avant la mise en service, validation, essai du prospect, exception d'import pendant `EN_INSTALLATION`,
@@ -408,8 +410,22 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
   Reprise **compare les deux états chaque nuit** (décision du PO, 2026-11-11) et produit le **rapport
   d'écarts de la période**. Le contrôle de concordance de Connecteurs reste un contrôle de synchronisation,
   non un rapport de reprise.
-- La mise en service attend l'écart nul.
-- L'ordonnancement de la comparaison de nuit se décide avec la spine de Connecteurs ; la comparaison lit
+- **La mise en service attend l'écart nul** de la période, **dans l'essai** : la marche en parallèle y est une
+  répétition (PRD moteur, FR-33), avant la mise en service. Elle attend aussi, comme toujours, le feu vert de la
+  Reprise du réel (écart de reprise nul sur le lot frais, spine de la Reprise AD-12) : deux conditions distinctes.
+- **Amendement (2026-11-12, spine de Connecteurs, AD-15, AD-33 et QC-8).** Précision, sans inversion. Le connecteur
+  de l'essai relève le vrai logiciel du client en lecture seule (rien n'est écrit chez lui) ; les domaines concernés
+  sont en **mode ombre** dans l'essai (les modules de l'essai recalculent pour comparer leurs règles, exception
+  limitée à l'essai). Chaque nuit, la Reprise de l'essai construit son **rapport d'écarts de la période** à partir
+  du rapport de concordance que désigne le fait `connecteurs.nuit.terminee` (lu par
+  `GET /api/connecteurs/v1/concordances/{id}`, avec l'identité de la Reprise), sans relire elle-même le logiciel
+  du client ; une nuit signalée par `connecteurs.nuit.absente` est « non couverte » dans ce rapport. Les règles
+  corrigées pendant la période sont des réglages : elles passent au réel par le dossier d'installation. Dans le
+  réel, la synchro démarre à la mise en service ; l'**arrêt de la synchro** d'un domaine d'argent attend la file
+  des écarts de Connecteurs sans écart ouvert sur ce domaine. Le contrôle de Connecteurs reste un contrôle de
+  synchronisation, non un rapport de reprise. La comptabilité d'Odoo vers Prospera attend.
+- L'ordonnancement de la comparaison de nuit se décide avec la spine de Connecteurs (**fait** : une seule lecture
+  nocturne du logiciel du client, celle de Connecteurs, AD-15) ; la comparaison lit
   les valeurs de contrôle de la cible (spine de la Reprise, AD-13). Les deux clients de février migrent et
   n'ont pas de marche en parallèle.
 
@@ -503,6 +519,9 @@ Leçon du parcours distributeur : la clé USB contient trois versions incomplèt
   à l'essai** ; une écriture tentée est refusée (décision du PO, 2026-11-11, QC-10 ; PRD moteur FR-9 et
   addendum A-7). Il n'y a pas de bac à sable sans Money Vibes.
 - Les écritures vers le logiciel du client relèvent du seul module Connecteurs (interceptées en essai).
+- **Amendement (2026-11-12, spine de Connecteurs, AD-18 et AD-20).** La Reprise ne lit **jamais le bac à sable** :
+  elle lit le réel avec ses propres identifiants. Elle retire ses identifiants à la réception définitive ; le
+  connecteur ne les reprend jamais.
 
 #### FR-24 : Le relais à Connecteurs, à un point de coupure daté
 **Conséquences (testables) :**

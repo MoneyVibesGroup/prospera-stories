@@ -314,6 +314,8 @@ Comment l'essai vérifie un bac à sable et lit le logiciel réel du client, com
 
 Pour **lire** le vrai logiciel du client, ce qui reste permis pendant l'essai, il reçoit des identifiants **en lecture seule**, propres à l'essai ; à leur déclaration, une écriture de test est tentée et doit être refusée par le logiciel du client, sinon les identifiants sont rejetés.
 
+**Amendement (2026-11-12, spine de Connecteurs, AD-18).** La lecture seule se prouve d'abord par le **contrôle de droits natif** du logiciel, selon son profil de version (Odoo : `check_access_rights` jusqu'à la 17, `has_access` à partir de la 18). L'**écriture de test** n'a lieu que sur un **objet de test déclaré** par l'adaptateur (archivé et supprimable), qui doit être refusée ; sans contrôle natif ni objet de test, aucune écriture de test n'est faite et la preuve est marquée « non démontrée » au bilan.
+
 **Depuis FR-42 : qui crée l'organisation**
 
 `[ASSUMPTION : le moteur demande la création à l'auth-service de chaque espace, qui publie identity.org.created]`
