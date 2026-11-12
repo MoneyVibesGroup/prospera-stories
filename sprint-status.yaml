@@ -80,7 +80,7 @@ reserved_ranges:
 
   - range: "EPIC-161 → EPIC-179"
     status: "RÉSERVÉ"
-    owner: "Reprise de données (161 → 168) et Connecteurs (169 → 179) — Dev B : 161 (kit des cibles, S4), 169 et TOUS les écrans ; 165 : le propriétaire de chaque module cible ; backend de 162 → 164 et 166 → 168 : Dev A proposé (question 1 au PO) ; 170 → 179 : propriétaire décidé au déclencheur (premier contrat qui déclare un logiciel du client)"
+    owner: "Reprise de données (161 → 168) et Connecteurs (169 → 179) — Dev B : 161 (kit des cibles, S4), 169 et TOUS les écrans ; 165 : le propriétaire de chaque module cible ; backend de 162 → 164 et 166 → 168 : Dev A (décision du PO du 2026-11-12) ; 170 → 179 : propriétaire décidé au déclencheur (premier contrat qui déclare un logiciel du client)"
     source_doc: "prospera-stories/epics-reprise-connecteurs-2026-11-12.md"
     reserved_on: "2026-11-12"
     story_ids: "AUCUN — chaque fiche est écrite par celui qui code la story, juste avant de la coder (STORY-900 → 1199 pour Dev B, STORY-730 → 899 pour Dev A)"
