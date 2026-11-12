@@ -24,9 +24,10 @@
 // - Le point d'import et les valeurs de contrôle de la Reprise (C13, tableau des chemins) viennent du kit des
 //   cibles (EPIC-161), dans le « fini » de pdv (EPIC-165, en S5) ; pdv est la cible minimale de la démo du
 //   15/01 (spine de la Reprise, AD-23).
-// - Import par fichier propre au module (FR-V40) : remplacé par la Reprise ou gardé [À CONFIRMER : le PO
-//   tranchera plus tard, 2026-11-12] ; s'il reste, il passe par le même point d'écriture que la reprise
-//   (dédoublonnage FR-V06, tout ou rien).
+// - Import par fichier propre au module (FR-V40) : GARDÉ pour le moment (décision du PO, 2026-11-12) ; il
+//   sera remplacé par la Reprise « au bon moment », pour pdv, reseau et catalogue ensemble. D'ici là, il passe
+//   par le même point d'écriture que la reprise (dédoublonnage FR-V06, tout ou rien), pour que le
+//   remplacement ne change aucune règle.
 // - Carte de couverture : fond de carte Google Maps (décision du PO, 2026-11-12). Seul le fond de carte est
 //   chargé chez Google, par le navigateur ; les points de vente sont dessinés côté client.
 

@@ -23,9 +23,9 @@
 //   plus sensible du module, borné par la portée de celui qui l'exerce (FR-R36, AD-8).
 // - « Portée » est un homonyme : `PorteeReseau` (ici) n'est jamais `PorteeDossier` (dossier-service). Tout
 //   nom porte `reseau` (AD-15).
-// - Import du réseau par fichier propre au module (FR-R37) : même question que FR-V40 de pdv, remplacé par la
-//   Reprise ou gardé [À CONFIRMER : le PO tranchera avec FR-V40] ; s'il reste, il passe par le même point
-//   d'écriture que la reprise (compte rendu avant persistance, tout ou rien).
+// - Import du réseau par fichier propre au module (FR-R37) : GARDÉ pour le moment (décision du PO,
+//   2026-11-12), comme FR-V40 de pdv ; remplacé par la Reprise « au bon moment ». D'ici là, il passe par le
+//   même point d'écriture que la reprise (compte rendu avant persistance, tout ou rien).
 //
 // ⚡ L'objet « commercial » (VALIDÉ par le PO le 2026-11-12, « pour le moment » ; amende le PRD reseau, voir
 // FR-R23 ci-dessous).
@@ -45,8 +45,8 @@
 //   SMS. État du compte : `A_INVITER`, `INVITE`, `ACTIF`, `SUSPENDU`, ou `SANS_CONTACT` (ni e-mail ni
 //   téléphone : il reste listé, ses points de vente restent rattachés, il ne se connecte pas).
 // - ⚡ Invitation par SMS (décision du PO, 2026-11-12) : un commercial qui n'a qu'un téléphone est invité par
-//   SMS ; l'e-mail reste facultatif dans le gabarit de reprise. Travail dans auth-service, une story à part
-//   (l'invitation n'existe aujourd'hui que par e-mail, `InviteUserDto.email` obligatoire). Ce que le code
+//   SMS ; l'e-mail reste facultatif dans le gabarit de reprise. Travail dans auth-service : STORY-900 (PR
+//   prospera-stories #416), non slottée, entre au planning avec STORY-365 (l'invitation n'existe aujourd'hui que par e-mail, `InviteUserDto.email` obligatoire). Ce que le code
 //   montre au 2026-11-12 :
 //   · `User.email` est obligatoire, unique, et c'est l'identifiant de connexion (`POST /auth/login`) ; le
 //     téléphone (`User.phone`, STORY-123) est facultatif et non unique ⇒ il faut un identifiant de connexion
@@ -57,7 +57,7 @@
 //   · le lien d'invitation part par SMS via notification-service (MV détient le module `notification`) ;
 //     le mot de passe oublié suit le même canal ;
 //   · `identity.user.registered` doit porter le téléphone, pour que reseau lie le commercial au compte.
-//   Jusqu'à cette story, un commercial sans e-mail reste `A_INVITER` : rattaché, sans connexion.
+//   Jusqu'à STORY-900, un commercial sans e-mail reste `A_INVITER` : rattaché, sans connexion.
 // - Pas d'invitation automatique : aucune invitation ne part pendant une simulation, ni dans l'espace d'essai
 //   (un prospect de la démo du 15/01 ne doit pas écrire à quarante commerciaux), ni à la livraison. Inviter
 //   est un acte humain, après le feu vert.
