@@ -123,7 +123,7 @@ Les termes ci-dessous s'emploient tels quels dans tout le PRD et dans les docume
 - **Commande** et **Ligne de commande** : ce qu'un point de vente achète, article par article.
 - **Stock réservé** : la quantité qu'une commande validée bloque dans un point de stock.
 - **Point de stock** : un entrepôt ou un dépôt (Lomé Port, Kara).
-- **Bon de livraison** : le document qui accompagne la marchandise d'une commande.
+- **Bon de livraison** : le document émis à la validation d'une commande, sur lequel le camion sort de l'usine ou de l'entrepôt et qui accompagne la marchandise ; le terrain l'appelle aussi « bon de commande ». Signé, il devient la preuve de livraison. La facture naît à la livraison, sur les quantités servies.
 - **Facture**, **Avoir**, **Proforma**, **E-facture** : les documents commerciaux de la partie 2.
 - **Créance** : ce qu'un tiers doit. Une facture en ouvre une ; à l'IMF, une échéance de prêt en ouvre une. **Source de créance** : ce qui l'a ouverte.
 - **Encaissement** : un paiement reçu, par un **moyen de paiement** : PI-SPI, FedaPay (Mobile Money compris), espèces ou virement déclarés. Les encaissements appartiennent au module `paiement`.
@@ -163,13 +163,12 @@ Tout bouton d'action d'un écran crée ou modifie un objet enregistré côté se
 
 #### FR-2 : Les boutons pas encore branchés sont « bientôt »
 
-Un bouton dont la capacité n'est pas encore livrée s'affiche **« bientôt »** avec la date prévue, et ne fait rien d'autre qu'expliquer pourquoi. Aucun bouton ne simule un effet.
+Un bouton dont la capacité n'est pas encore livrée s'affiche **« bientôt »**, sans date (décision du PO du 2026-11-12 : « on va voir en évoluant »), et ne fait rien d'autre qu'expliquer ce qu'il fera. Aucun bouton ne simule un effet.
 
 **Conséquences (testables) :**
-- Un inventaire des boutons d'action, tenu avec le produit, donne pour chacun : écran, libellé, état (`BRANCHÉ` ou `BIENTÔT`), date prévue, exigence qui le branche.
+- Un inventaire des boutons d'action, tenu avec le produit, donne pour chacun : écran, libellé, état (`BRANCHÉ` ou `BIENTÔT`), exigence qui le branche.
 - Un test parcourt chaque écran et échoue si un bouton n'est ni branché ni marqué « bientôt ».
-- Un bouton « bientôt » passé sa date est signalé au PO, pas masqué.
-- En essai prospect, un bouton « bientôt » affiche « Disponible en <mois> ».
+- Un bouton « bientôt » n'affiche jamais de date promise au client.
 
 #### FR-3 : Les enchaînements entre rôles sont des étapes enregistrées
 
@@ -360,7 +359,7 @@ Cette partie décrit sept modules qui n'existent que pour un distributeur ou un 
 Deux modules sont ★ : le client de février en a besoin (Commande, Facturation). Les cinq autres sont écrits en entier, mais leur livraison suit les deux premiers.
 
 Règles communes à tous les modules de cette partie :
-- **Bouton « bientôt ».** Un bouton dont la capacité n'est pas branchée est visible, désactivé, et porte « bientôt » suivi d'une date. Jamais un bouton qui simule. Les dates ci-dessous sont des propositions. [ASSUMPTION: calendrier du plan v3 : démo le 15/01/2027, client de février en février 2027 ; toute date « bientôt » est à confirmer par le PO.]
+- **Bouton « bientôt ».** Un bouton dont la capacité n'est pas branchée est visible, désactivé, et porte « bientôt », sans date (décision du PO du 2026-11-12). Jamais un bouton qui simule.
 - **Emplacement déclaré vide.** Si un module dont on dépend n'est pas installé, la donnée s'affiche « non installé », jamais 0. Exemple : marge d'une commande quand le coût d'achat n'est pas disponible ; solde de trésorerie quand aucun module financier n'est installé.
 - **Jeu de démonstration.** Les exemples chiffrés viennent du grossiste fictif « Grossiste du Golfe » : Lomé Port et dépôt Kara, zones Lomé Centre, Golfe Nord et Plateaux, 12 commerciaux dont 3 freelances, environ 600 points de vente, jus et boissons, XOF, TVA 18 %.
 - **Moyens de paiement.** Tout encaissement passe par le module `paiement` (renvoi, partie 4) : PI-SPI et FedaPay, plus espèces et virement déclarés. Aucune exigence de cette partie ne se limite à PI-SPI.
@@ -463,7 +462,7 @@ Le propriétaire de la commande ou le bureau peut modifier une commande `BROUILL
 
 #### FR-36 : Produire le bon de livraison
 
-À la validation, le module crée le bon de livraison que l'entrepôt prépare. Le bon est imprimable en PDF. Réalise UJ-1.
+À la validation, le module crée le bon de livraison que l'entrepôt prépare. C'est **sur ce bon que le camion sort** de l'usine ou de l'entrepôt ; sur le terrain, on l'appelle aussi « bon de commande » (PO, 2026-11-12). Le bon est imprimable en PDF. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Un bon `BL-AAAA-NNNNNN` est créé pour chaque Point de stock source concerné. Une commande servie par deux points de stock a deux bons.
@@ -494,7 +493,7 @@ Un chargé de bureau ou un commercial peut enregistrer une commande reçue par W
 **Conséquences (testables) :**
 - Le canal `WHATSAPP` est une valeur de la commande. La commande suit ensuite le même cycle que toute autre.
 - Le message d'origine peut être collé dans un champ « message du client » et reste attaché à la commande.
-- La réception automatique du message, son analyse et la proposition des lignes ne font pas partie de février. Le bouton « Créer depuis un message WhatsApp » est affiché désactivé avec « bientôt (après février 2027) ». [ASSUMPTION: dépend du connecteur WhatsApp du module `notification`.]
+- La réception automatique du message, son analyse et la proposition des lignes ne font pas partie de février. Le bouton « Créer depuis un message WhatsApp » est affiché désactivé avec « bientôt ». [ASSUMPTION: dépend du connecteur WhatsApp du module `notification`.]
 - L'envoi de la confirmation de commande au client par WhatsApp passe par le module `notification`. S'il n'est pas branché, le bouton affiche « bientôt » et la confirmation peut se télécharger en PDF.
 
 #### FR-39 : Prix société, prix freelance et marge
@@ -555,8 +554,8 @@ Quand le servi est inférieur au commandé, le responsable stock ou le bureau d�
 | Valider la commande | n'existe pas | FR-33 |
 | Annuler, modifier | n'existent pas | FR-35 |
 | Bon de livraison : générer, imprimer | n'existe pas | FR-36 |
-| Créer depuis un message WhatsApp | n'existe pas | bientôt (après février 2027) |
-| Signature du destinataire à l'écran | n'existe pas | bientôt (après février 2027) |
+| Créer depuis un message WhatsApp | n'existe pas | bientôt |
+| Signature du destinataire à l'écran | n'existe pas | bientôt |
 
 **Notes.**
 - **Décision à trancher.** Où vivent les prix propres à chaque client (reprise de février) ? La grille du module `catalogue` ne connaît que zone, catégorie de client et seuil de volume. Option A : une grille dont la condition est « ce client » (amendement du PRD `catalogue`). Option B : une catégorie de client à un seul membre. [ASSUMPTION: option A, car B multiplie les catégories pour un client de plusieurs centaines de prix négociés.] Ce module consomme le prix, il ne le stocke pas.
@@ -595,7 +594,7 @@ Quand le servi est inférieur au commandé, le responsable stock ou le bureau d�
 Un chargé de facturation ou un DAF peut créer et émettre la facture d'une commande en un clic. Réalise UJ-1.
 
 **Conséquences (testables) :**
-- Le bouton « Facturer » est actif sur une commande `LIVREE` ou sur un bon `LIVRE` non encore facturé. [ASSUMPTION: facturation à la livraison par défaut ; une option par organisation permet de facturer dès `VALIDEE`.]
+- Le bouton « Facturer » est actif sur une commande `LIVREE` ou sur un bon `LIVRE` non encore facturé. (Décision du PO du 2026-11-12 : la facture naît à la livraison, sur les quantités servies ; une option par organisation permet de facturer dès `VALIDEE`.)
 - Les lignes de la facture reprennent les quantités servies, les prix figés de la commande et la TVA de chaque article. L'utilisateur ne retape rien.
 - Un deuxième clic sur la même commande ne crée pas de deuxième facture : il ouvre la première (idempotence).
 - Une facture peut couvrir une livraison partielle. Le reliquat livré plus tard donne une seconde facture. Le lien commande ↔ factures est visible dans les deux sens.
@@ -659,7 +658,7 @@ Un chargé de facturation peut envoyer la facture par e-mail, et par WhatsApp ou
 **Conséquences (testables) :**
 - L'envoi passe par le module `notification`. Le statut d'envoi (`ENVOYE`, `ECHEC`, avec la raison) est enregistré sur la facture avec la date et l'auteur.
 - Le PDF de FR-46 est joint (e-mail) ou accessible par un lien à durée limitée (WhatsApp, SMS).
-- Un canal non branché affiche son bouton désactivé : « Envoyer par WhatsApp : bientôt (février 2027) ». [ASSUMPTION: e-mail disponible en février ; WhatsApp et SMS dépendent de `notification`.]
+- Un canal non branché affiche son bouton désactivé : « Envoyer par WhatsApp : bientôt ». [ASSUMPTION: e-mail disponible en février ; WhatsApp et SMS dépendent de `notification`.]
 - Un envoi échoué ne passe jamais pour réussi. L'utilisateur voit l'échec et peut réessayer.
 - Si `notification` n'est pas installé, tous les boutons d'envoi affichent « non installé » et le téléchargement reste disponible.
 - Le client sans adresse e-mail ni numéro est signalé avant l'envoi.
@@ -781,7 +780,7 @@ Un commercial ou un responsable des ventes peut convertir une proforma acceptée
 Le module porte le suivi de l'e-facture. En février la certification OTR n'est pas exigée et la plateforme n'est pas branchée. Réalise UJ-1 (partie fiscale, plus tard).
 
 **Conséquences (testables) :**
-- Tant que la plateforme OTR n'est pas branchée, toute facture est `NON_TRANSMISE`. L'onglet « E-facturation » affiche le bandeau « Plateforme OTR non branchée : bientôt (date à fixer avec le client) » et ne montre aucun chiffre de certification.
+- Tant que la plateforme OTR n'est pas branchée, toute facture est `NON_TRANSMISE`. L'onglet « E-facturation » affiche le bandeau « Plateforme OTR non branchée : bientôt » et ne montre aucun chiffre de certification.
 - Interdit : afficher `TRANSMISE`, `CERTIFIEE` ou `REJETEE` sans réponse réelle de la plateforme. Interdit : un numéro de certification, un hash ou un QR fabriqués. (La démo dérivait ces statuts de l'ancienneté de l'impayé.)
 - Les boutons « Transmettre », « Corriger et retransmettre » et « Télécharger l'archive » sont désactivés avec « bientôt ».
 - Contrôles préalables à la transmission, exécutables avant la plateforme : NIF du client présent, taux de TVA cohérent, code de nomenclature de chaque article présent. Chaque échec nomme la facture et la fiche à compléter : `NIF_CLIENT_ABSENT`, `TVA_INCOHERENTE`, `NOMENCLATURE_ABSENTE`. En février ils sont des avertissements, pas des blocages.
@@ -829,17 +828,17 @@ Un administrateur de l'organisation peut charger les factures impayées de l'anc
 | (absent) Enregistrer un paiement sur une facture | n'existe pas | FR-49 (via `paiement`) |
 | (absent) Créer un avoir | n'existe pas | FR-48 |
 | Imprimer / PDF | SIMULÉ (`window.print()`) | FR-46 |
-| Envoyer au client | SIMULÉ (proforma locale) | FR-47 ; WhatsApp et SMS : bientôt (février 2027) |
+| Envoyer au client | SIMULÉ (proforma locale) | FR-47 ; WhatsApp et SMS : bientôt |
 | Créer une proforma | local | FR-54 |
 | Convertir en commande | SIMULÉ (deux références vides) | FR-56 |
 | Relancer par {canal} | SIMULÉ (compteur) | FR-55 |
-| Corriger et retransmettre (e-facture) | SIMULÉ | bientôt (date à fixer, plateforme OTR) |
-| Transmettre à la plateforme, télécharger l'archive | n'existe pas | bientôt (date à fixer, plateforme OTR) |
-| Exporter vers Sage | n'existe pas | bientôt (après février 2027) |
+| Corriger et retransmettre (e-facture) | SIMULÉ | bientôt |
+| Transmettre à la plateforme, télécharger l'archive | n'existe pas | bientôt |
+| Exporter vers Sage | n'existe pas | bientôt |
 
 **Notes.**
-- **Décision à trancher.** Quel module porte la Créance : `facturation` (nouveau) ou `paiement` (`paiement.creance@1`) ? La spine de la reprise dit « à confirmer ». [ASSUMPTION: `facturation` émet les factures et la suite de numérotation ; la Créance est l'objet commun de la partie 3, alimenté par `facturation` et réduit par `paiement`.]
-- **Décision à trancher.** Nombre de séries : une ou plusieurs (par entrepôt, par canal) ? [ASSUMPTION: une série par organisation en février, pour garder « sans trou ni doublon » simple à contrôler.]
+- **Tranchée (PO, 2026-11-12).** La Créance est portée par `paiement` (`paiement.creance@1`, registre unique de la partie 3) ; `facturation` émet les factures et la suite de numérotation, et chaque facture émise y ouvre une Créance de source `FACTURE`.
+- **Tranchée (PO, 2026-11-12).** Une seule série par organisation, continue d'année en année, qui reprend le dernier numéro de Sage à la bascule.
 - **Question ouverte.** Les factures de vente comptoir sans commande : une facture manuelle suffit-elle ? [ASSUMPTION: oui, FR-42.]
 - **Question ouverte.** Le client de février garde-t-il Sage en parallèle ? Si oui, l'export de factures et de paiements est hors périmètre de la phase démontrable et vient après.
 - **Question ouverte.** Les factures du client de février contiennent-elles des remises sur plusieurs niveaux, des consignes, des frais de transport ? À obtenir avec le modèle de facture Sage.
@@ -1012,8 +1011,8 @@ Un DAF, un comptable ou un DG voit ce que l'organisation doit à ses fournisseur
 | (absent) Créer ou éditer un fournisseur | n'existe pas | FR-59 |
 | (absent) Éditer une règle, Déclencher maintenant | n'existent pas | FR-61 |
 | (absent) Commande manuelle | n'existe pas | FR-62 |
-| (absent) Payer une échéance | n'existe pas | FR-67 (saisie) ; virement réel : bientôt (après février 2027) |
-| (absent) Relancer un fournisseur | n'existe pas | bientôt (après février 2027) |
+| (absent) Payer une échéance | n'existe pas | FR-67 (saisie) ; virement réel : bientôt |
+| (absent) Relancer un fournisseur | n'existe pas | bientôt |
 | Envoyer la commande au fournisseur | n'existe pas | FR-62 (e-mail via `notification`) |
 
 **Notes.**
@@ -1085,7 +1084,7 @@ Un magasinier ou un responsable stock charge des bons préparés dans un camion 
 - La feuille de route du chauffeur s'imprime (PDF) : arrêts, clients, adresses, encaissement attendu pour chaque arrêt.
 - Le chauffeur peut confirmer une livraison et saisir l'encaissement reçu en espèces ; ce montant est ensuite une remise à rapprocher (module Terrain et caisse, partie 3).
 - Un camion indisponible se déclare avec le motif ; il sort du plan.
-- La signature du client sur l'écran du chauffeur est « bientôt (après février 2027) » ; la photo du bon signé est possible en février.
+- La signature du client sur l'écran du chauffeur est « bientôt » ; la photo du bon signé est possible en février.
 
 #### FR-71 : Réception unique de marchandises (contrôle au quai)
 
@@ -1178,7 +1177,7 @@ Le gestionnaire d'entrepôt ne voit que son entrepôt, sans prix. Réalise UJ-1.
 | Ouvrir ou replier un bon | LECTURE | FR-68 |
 | (absent) Imprimer le bon, valider une ligne servie, accepter un substitut | n'existent pas | FR-68 |
 | (absent) Démarrer une vague | n'existe pas | FR-69 |
-| (absent) Valider le départ camion, feuille de route, signature | n'existent pas | FR-70 ; signature : bientôt (après février 2027) |
+| (absent) Valider le départ camion, feuille de route, signature | n'existent pas | FR-70 ; signature : bientôt |
 | Saisie des quantités reçues (pré-remplies) | SIMULÉ | FR-71 (jamais pré-remplies) |
 | Valider le contrôle au quai | SIMULÉ (rien n'est mis en stock) | FR-71 |
 | Annuler (réception, comptage) | SIMULÉ | FR-71, FR-74 (correction par ajustement tracé) |
@@ -1384,8 +1383,8 @@ Un DG, un DC ou un responsable des ventes lit le mix produit et la marge du pér
 | (absent) Faire avancer d'étape, marquer perdu | n'existent pas | FR-77 |
 | (absent) Nouveau prospect, créer l'ouverture | n'existent pas | FR-77, FR-80 |
 | (absent) Saisir ou réallouer un quota | n'existe pas | FR-84 |
-| (absent) Simuler une réallocation | n'existe pas | bientôt (après février 2027) |
-| Rendre un arbitrage (« Transférer 1 commercial ») | texte seul | bientôt (après février 2027) |
+| (absent) Simuler une réallocation | n'existe pas | bientôt |
+| Rendre un arbitrage (« Transférer 1 commercial ») | texte seul | bientôt |
 
 **Notes.**
 - **Décision à trancher.** Les statuts de zone `COUVERTE` et `ABANDONNEE` : qui les pose et sur quels critères ? [ASSUMPTION: le responsable des ventes, à la main, avec motif.]
@@ -1444,7 +1443,7 @@ Le responsable marketing valide un post, qui devient prêt à partir. Réalise U
 **Conséquences (testables) :**
 - « Valider et programmer » passe le post de `A_VALIDER` à `PROGRAMME` (réseau connecté) ou à `A_PUBLIER_A_LA_MAIN` (réseau non connecté). L'auteur et l'heure sont tracés.
 - **Ce qui part réellement en février :** rien automatiquement. Un post `A_PUBLIER_A_LA_MAIN` affiche le texte, les hashtags et le visuel à copier, avec le rappel de l'heure choisie. Le responsable le publie lui-même puis marque « Publié ».
-- Pour chaque réseau, un bouton « Publier automatiquement » est désactivé avec « bientôt » : WhatsApp (via `notification`) bientôt (février 2027) ; Facebook, Instagram et TikTok bientôt (après février 2027) ; chacun dépend de la connexion du compte et de l'API du réseau.
+- Pour chaque réseau, un bouton « Publier automatiquement » est désactivé avec « bientôt » : WhatsApp (via `notification`) bientôt ; Facebook, Instagram et TikTok bientôt ; chacun dépend de la connexion du compte et de l'API du réseau.
 - Jamais le statut `PUBLIE` ne s'affiche sans un retour réel du réseau ou une confirmation manuelle de l'utilisateur, étiquetée « marqué publié à la main ».
 - Un échec de publication passe le post à `ECHEC` avec la raison, et alerte le responsable.
 - Un post avec une remise au-dessus du seuil de validation du DG attend l'accord du DG (`EN_ATTENTE_DG`).
@@ -1457,7 +1456,7 @@ Le responsable marketing et le bureau voient les messages de tous les réseaux d
 **Conséquences (testables) :**
 - Chaque message a une intention (commande, réclamation, prix, disponibilité, partenariat, spam) et un délai de réponse cible : 1 h pour commande et réclamation, 2 h pour prix et disponibilité, 24 h pour partenariat. Un message hors délai est marqué.
 - Le spam est écarté de la liste principale.
-- **Ce qui entre réellement en février :** la saisie manuelle d'un message (copier-coller depuis le téléphone) avec son réseau et son auteur. La réception automatique des messages est un bouton « bientôt (après février 2027) » par réseau. [ASSUMPTION: dépend des connecteurs WhatsApp Business, Meta et TikTok.]
+- **Ce qui entre réellement en février :** la saisie manuelle d'un message (copier-coller depuis le téléphone) avec son réseau et son auteur. La réception automatique des messages est un bouton « bientôt » par réseau. [ASSUMPTION: dépend des connecteurs WhatsApp Business, Meta et TikTok.]
 - La classification d'intention est faite par règles de mots-clés ; l'écran affiche sa confiance et dit « classement automatique ». L'utilisateur peut la corriger.
 - Un message d'un client en impayé ne reçoit pas de réponse automatique : il est transféré au recouvrement (FR-91).
 - Un message de commande peut ouvrir une commande (FR-38, canal `WHATSAPP`).
@@ -1505,14 +1504,14 @@ Depuis un message d'intérêt, un responsable marketing crée un prospect dans l
 | Dupliquer vers un autre réseau | BRANCHÉ (objet local) | FR-87 |
 | Réécrire (3 accroches) | SIMULÉ | FR-88 |
 | Éditer à la main, replanifier, supprimer | SIMULÉ | FR-87 |
-| Valider et programmer | SIMULÉ (rien publié) | FR-89 ; publication automatique : bientôt (WhatsApp février 2027, autres réseaux après) |
+| Valider et programmer | SIMULÉ (rien publié) | FR-89 ; publication automatique : bientôt |
 | Annuler la dernière action | SIMULÉ | FR-87 (historique) |
-| Envoyer la réponse | SIMULÉ (aucun message ne part) | FR-91 ; envoi réel : bientôt (WhatsApp février 2027) |
+| Envoyer la réponse | SIMULÉ (aucun message ne part) | FR-91 ; envoi réel : bientôt |
 | Modifier la réponse | SIMULÉ (sans éditeur) | FR-91 |
 | Créer le lead | SIMULÉ (aucun lead) | FR-92 |
-| Réponse automatique | MORT | bientôt (après février 2027) |
-| Connecter un compte (Instagram) | MORT | bientôt (après février 2027) |
-| Réception automatique des messages | n'existe pas | bientôt (après février 2027) |
+| Réponse automatique | MORT | bientôt |
+| Connecter un compte (Instagram) | MORT | bientôt |
+| Réception automatique des messages | n'existe pas | bientôt |
 
 **Notes.**
 - Ce module n'est pas ★. Il dépend de comptes et d'API tiers qui ne sont pas branchés. La règle du PO s'applique : aucun bouton qui simule.
@@ -1531,7 +1530,7 @@ Depuis un message d'intérêt, un responsable marketing crée un prospect dans l
 - **Chiffres à ne pas reprendre :** la rémunération du freelance (`ca_jour × 22 + marge_jour × 22`, somme du CA société et de la marge) est incohérente.
 - **Prix de l'add-on (grille tarifaire) :** forfait Grand / Moyen / Petit, plus un prix par freelance actif (+25 000 / +16 000 / +10 000 F par mois en abonnement). [Voir la fiche de l'offre en partie 1.]
 
-**Ce que le module fait.** Il permet au distributeur de travailler avec des commerciaux indépendants. Le freelance achète à la société au prix de la grille société, qu'il ne peut pas modifier, et revend à ses propres détaillants au prix qu'il fixe. La société ne voit jamais le prix du freelance. Chaque freelance a un portefeuille isolé, ses créances sont séparées, et son plafond de crédit est propre. Le module gère aussi les commissions et les reversements. Il réalise UJ-2 (la tournée d'un freelance) et UJ-1 (la facture d'un freelance à la société).
+**Ce que le module fait.** Il permet au distributeur de travailler avec des commerciaux indépendants. La société fixe le prix société, que le freelance ne peut pas modifier. **Quand c'est le freelance qui vend, c'est lui qui facture le détaillant**, au prix qu'il a négocié. Le système enregistre **les deux prix** ; la société ne voit que le prix société. **La société verse au freelance une commission calculée sur le prix société** ; la différence entre son prix et le prix société lui revient, car il l'a gagnée par sa négociation (décision du PO du 2026-11-12). Exemple : prix société 14 000 F, vendu 15 000 F ; la société voit 14 000 F, la commission se calcule sur 14 000 F, et les 1 000 F sont au freelance. Chaque freelance a un portefeuille isolé, ses créances sont séparées, et son plafond de crédit est propre. Le module gère aussi les commissions et les reversements. Il réalise UJ-2 (la tournée d'un freelance) et UJ-1 (la facture d'un freelance à la société).
 
 **Objets.**
 - **Freelance** : lien vers un commercial du module `reseau` de type `FREELANCE`, `actif` (compté pour la facturation de l'add-on), `grille_applicable`, `plafond_de_credit`, `marge_minimale_pct`, `date_activation`.
@@ -1542,7 +1541,8 @@ Depuis un message d'intérêt, un responsable marketing crée un prospect dans l
 - **Créance du freelance** : ce que le freelance doit à la société (Créance, partie 3).
 - **Créance de son client** : ce qu'un détaillant doit au freelance. Visible du freelance seul.
 - **Reversement** : `freelance`, `periode`, `montant_du_a_la_societe`, `montant_verse`, `statut` (`A_VERSER | VERSE | PARTIEL | EN_RETARD`).
-- **Commission** : `freelance`, `periode`, `base`, `taux`, `montant`. [ASSUMPTION: voir FR-98.]
+- **Commission** : `freelance`, `periode`, `base` (CA au prix société), `taux`, `montant`, `statut` (`CALCULEE | VALIDEE | VERSEE`).
+- **Vente du freelance** : facture émise par le freelance à son détaillant ; chaque ligne porte le prix société et le prix freelance. La société n'en lit que le prix société.
 
 #### FR-93 : Double tarification : la grille société est intouchable
 
@@ -1589,7 +1589,8 @@ Un freelance passe une commande à la société à prix société, et vend à se
 - Un freelance crée une commande (5.1) dont le client, pour la société, est le freelance, au prix société. Le panier minimal est un paramètre (2 à 4 M XOF dans la démo, bandeau « paniers 2-4 M »).
 - La société facture le freelance (FR-42) au prix société. Le freelance reçoit la facture et le bon de livraison.
 - Le freelance a un écran « Mes commandes grossiste » avec la liste de ses commandes à la société. Il crée une commande depuis cet écran. (La démo l'interdisait.)
-- La revente du freelance à ses détaillants se fait hors du système de la société : le freelance peut tenir ses ventes dans son propre espace (commandes, créances de ses clients). [ASSUMPTION: la facturation du freelance à ses détaillants est hors périmètre de février. Question ouverte au PO : qui facture le détaillant final ?]
+- **Quand le freelance vend, il facture le détaillant dans Prospera** (décision du PO du 2026-11-12) : sa facture porte, ligne par ligne, le prix freelance (15 000 F) et le prix société (14 000 F). Le détaillant reçoit la facture au prix freelance. Les écrans et les réponses du serveur destinés à la société ne contiennent que le prix société (FR-94).
+- Le montant au prix société de chaque vente du freelance entre dans son CA société et dans ce qu'il doit à la société (FR-98). [ASSUMPTION: le freelance doit le prix société à la société même si son détaillant ne le paie pas ; c'est lui qui porte le risque de son client.]
 - Les contrôles de la commande (stock, plafond de crédit du freelance, créance échue) s'appliquent à la commande du freelance (FR-33).
 - Le stock réservé par un freelance est géré comme celui des autres commandes.
 
@@ -1600,7 +1601,7 @@ La dette du freelance envers la société et les dettes de ses détaillants enve
 **Conséquences (testables) :**
 - Le plafond de crédit d'un freelance est le sien (champ du freelance), distinct du plafond de ses détaillants. Il se règle par le DAF.
 - L'encours du freelance = restes dus des factures émises au freelance (FR-52). Il bloque ses commandes au-delà du plafond : `PLAFOND_CREDIT_DEPASSE`.
-- Les créances que les détaillants du freelance lui doivent sont visibles du freelance seul. La société ne les voit pas ; elles n'entrent pas dans sa balance clients.
+- Les créances que les détaillants du freelance lui doivent naissent de ses propres factures (FR-96) ; elles sont visibles du freelance seul. La société ne les voit pas ; elles n'entrent pas dans sa balance clients.
 - La balance âgée de la société contient la créance du freelance et pas celles de ses détaillants.
 - Un freelance en retard de règlement est bloqué comme tout client (FR-33).
 - Le freelance règle ses factures par PI-SPI, FedaPay, espèces ou virement, comme tout client (module `paiement`).
@@ -1613,8 +1614,9 @@ Le module calcule ce que le freelance doit reverser à la société et, si le di
 - Le reversement = ce que le freelance doit à la société au titre des factures du période, selon le prix société. Le module suit le montant dû, versé, restant, par période.
 - Le freelance voit son état : à verser, versé, restant, en retard.
 - Le règlement d'un reversement passe par un Encaissement du module `paiement` (FR-49) et réduit la Créance du freelance.
-- **Commission :** le modèle économique de la démo est que le freelance gagne la différence entre son prix et le prix société ; il n'y a pas de commission payée par la société. La formule de rémunération de la démo (`ca_jour × 22 + marge_jour × 22`) est incohérente et n'est pas reprise.
-- Si le distributeur veut verser une commission ou une prime à un freelance (par exemple un bonus sur objectif), le taux est un paramètre de l'organisation, appliqué au CA société du freelance. [ASSUMPTION: option désactivée par défaut ; décision à trancher avec le PO.]
+- **Commission (décision du PO du 2026-11-12) :** la société verse au freelance une commission **calculée sur le prix société** de ce qu'il a vendu (14 000 F dans l'exemple), jamais sur son prix de vente. Le taux est un paramètre de l'organisation, réglable par freelance. La commission passe de `CALCULEE` à `VALIDEE` (DAF), puis `VERSEE` par un ordre du module `paiement`.
+- **La marge de négociation** (prix freelance − prix société, 1 000 F dans l'exemple) appartient au freelance et n'est visible que de lui. Elle n'entre ni dans la base de la commission ni dans aucun chiffre de la société.
+- La formule de rémunération de la démo (`ca_jour × 22 + marge_jour × 22`) est incohérente et n'est pas reprise.
 - Un freelance ne voit pas la rémunération des autres. Le superviseur et le contrôleur de gestion ne voient pas les rémunérations individuelles.
 - Les reversements et commissions s'exportent en CSV pour le DAF.
 
@@ -1650,7 +1652,7 @@ Les freelances sont classés à part des salariés, et l'add-on se compte par fr
 | (absent) Fixer mon prix de vente | n'existe pas | FR-93 |
 | (absent) Nouvelle commande depuis « Mes commandes grossiste » | n'existe pas | FR-96 |
 | Marge visible par la société (« Marge free. ») | affichée | supprimée : FR-94 |
-| (absent) Simulateur de marge | n'existe pas | bientôt (après février 2027) |
+| (absent) Simulateur de marge | n'existe pas | bientôt |
 | (absent) Blocage d'une proforma sous marge minimale | n'existe pas | FR-93 (avertissement) ; blocage : décision à trancher |
 | (absent) Suivi des reversements | n'existe pas | FR-98 |
 | (absent) Activer ou désactiver un freelance | n'existe pas | FR-99 |
@@ -1881,7 +1883,7 @@ Un administrateur ou un superviseur peut déconnecter à distance l'appareil d'u
 | Rejeu de la journée | branché (données simulées) | FR-106 |
 | Reporter, Annuler la visite, Ajouter une visite | absents | FR-100 |
 | Enregistrer une remise de caisse, Valider l'écart, Rappeler l'agent | absents | FR-105 |
-| Compte-rendu vocal | absent (promis par la documentation) | « bientôt » (date à fixer par le PO ; proposition : 31/03/2027) |
+| Compte-rendu vocal | absent (promis par la documentation) | « bientôt » |
 | Appeler, Réaffecter des PDV, Planifier un coaching | absents | « bientôt » ; la planification d'un coaching est FR-125 |
 
 **Notes.**
@@ -2213,7 +2215,7 @@ Un superviseur ou un responsable des ventes peut identifier les agents à coache
 - La règle affiche sa provenance : « règle de coaching, version, date » (FR-16). Le texte « coaching IA » de la démo, écrit à la main pour 4 noms, disparaît ; une phrase de coaching est composée des points de la règle qui ont joué.
 - « Planifier un coaching » crée un Plan de coaching (agent, motif, date, actions) lisible de l'agent.
 - Un plan fait ou abandonné reste dans l'historique de l'agent. Le superviseur voit ceux de son Périmètre.
-- Appeler et Réaffecter des points de vente sont des boutons « bientôt » (date à fixer).
+- Appeler et Réaffecter des points de vente sont des boutons « bientôt ».
 
 #### FR-126 : Salariés, freelances et rémunération privée
 
@@ -2262,7 +2264,7 @@ Un DG ou un rôle habilité peut saisir le barème de commission et de prime. R�
 | Valider / Refuser (demandes de remise) | mort | FR-127 |
 | Planifier un coaching | absent | FR-125 |
 | Fixer un objectif | absent | FR-122 |
-| Valider une prime | absent | FR-128 ; la validation d'une prime est « bientôt » (date à fixer) |
+| Valider une prime | absent | FR-128 ; la validation d'une prime est « bientôt » |
 | Réaffecter des points de vente | absent | « bientôt » |
 
 **Notes.**
@@ -2345,7 +2347,7 @@ Un comptable ou un DAF peut soumettre la balance d'une période à `balance`. R�
 - La somme des soldes débiteurs égale la somme des soldes créditeurs, sinon la soumission est refusée `BALANCE_DESEQUILIBREE`. Le solde du 411 égale le total de la balance clients (FR-50) : écart affiché en rouge.
 - Sans module `balance` installé, le bouton est « non installé ».
 - Le module ne tient pas de grand livre légal et ne clôture pas l'exercice au sens légal. Il le dit à l'écran.
-- L'export des factures et des paiements dans un format importable par Sage est un bouton « bientôt » (décision du PO du 12/11/2026 : après le démarrage). [ASSUMPTION: date proposée : mars 2027, à confirmer.]
+- L'export des factures et des paiements dans un format importable par Sage est un bouton « bientôt ». [ASSUMPTION: date proposée : mars 2027, à confirmer.]
 
 #### FR-132 : Lettrage et suspens
 
@@ -2368,7 +2370,7 @@ Un comptable peut préparer la déclaration de TVA de la période. Réalise UJ-1
 - La déclaration affiche ses **bloquants** calculés : factures d'achat non saisies pour des réceptions de la période, avoirs clients à émettre pour un écart de livraison. Chaque bloquant porte son impact en francs. Un bloquant non levé empêche le statut `PRETE`.
 - Les statuts sont `A_PREPARER`, `PRETE`, `DECLAREE`, `PAYEE`. « Déclarée » et « Payée » sont posés à la main avec la référence du justificatif ; le produit n'en est pas témoin.
 - Une Alerte (FR-14) arrive à 7 jours de la date limite si la déclaration n'est pas prête.
-- « Télédéclarer sur le portail OTR » est un bouton « bientôt » : il relèvera du module `declarations` (partie 4). Il ne simule rien. [ASSUMPTION: date proposée : à fixer avec le PO ; non demandé pour février.]
+- « Télédéclarer sur le portail OTR » est un bouton « bientôt » : il relèvera du module `declarations` (partie 4). Il ne simule rien. (Non demandé pour février.)
 - Les majorations de retard (TVA, cotisations sociales, impôt sur les sociétés) sont des paramètres de l'Organisation, pas du texte libre.
 
 #### FR-134 : Factures d'achat
@@ -3134,7 +3136,7 @@ La démo cadre le responsable des ventes et le superviseur en **lecture** seulem
 Une zone blanche est une zone sans rattachement actif (FR-R32). La démo la montre seulement dans l'audit (« zones blanches », `AUDIT_PERSONAS_AMELIORATIONS.md:266`) et la conquête (`conquete-objectifs`) la travaille. La carte étant Google Maps (FR-192), `reseau` fournit la liste des zones blanches et `pdv` les dessine.
 **Conséquences (testables) :** (1) sur le jeu de test, créer une zone sans aucun point de vente la fait apparaître dans la liste des zones blanches en moins d'une actualisation de lecture, et la fait disparaître dès qu'un point de vente actif s'y rattache ; (2) `conquete-objectifs`, installé ou non, ne crée jamais de zone : il lit la liste ; (3) une zone fermée n'est pas une zone blanche.
 
-**Ce que le PRD exige et que la démo ne montre pas.** Tous ces écrans sont à créer, car aucun n'existe dans la démo : redécoupage versionné (FR-R05, FR-R05b) ; agences, horaires, paramètres (FR-R06 à FR-R10) ; déplacement d'un nœud avec compte rendu (FR-R14) ; rattachement des lieux aux zones, desserte principale et de secours (FR-R16 à FR-R18) ; affectations datées et nœud sans responsable (FR-R20 à FR-R22) ; attribution d'une portée, droit le plus sensible (FR-R36) ; import (FR-R37) ; audit (FR-R40). Décision : pour la recette de février, seuls l'écran de zones (créer, fermer, rattacher un entrepôt), l'affectation datée d'un commercial et l'attribution de portée (FR-R36) sont exigés ; le redécoupage versionné, les agences et le déplacement avec compte rendu sont `bientôt`. [ASSUMPTION : réduction de périmètre de février proposée par ce PRD, sans source ; à confirmer par le PO.]
+**Ce que le PRD exige et que la démo ne montre pas.** Tous ces écrans sont à créer, car aucun n'existe dans la démo : redécoupage versionné (FR-R05, FR-R05b) ; agences, horaires, paramètres (FR-R06 à FR-R10) ; déplacement d'un nœud avec compte rendu (FR-R14) ; rattachement des lieux aux zones, desserte principale et de secours (FR-R16 à FR-R18) ; affectations datées et nœud sans responsable (FR-R20 à FR-R22) ; attribution d'une portée, droit le plus sensible (FR-R36) ; import (FR-R37) ; audit (FR-R40). **Tous ces écrans sont voulus** (décision du PO du 2026-11-12 : « pour le moment je veux les voir tous ; en fonction de l'évolution on va voir »).
 
 ---
 
@@ -3180,7 +3182,7 @@ La fiche de la démo calcule CA du mois, évolution, CA moyen sur 6 mois, panier
 La démo dessine la carte avec Leaflet et OpenStreetMap (`CarteCommercialDG.tsx:3-5`). La décision du PO du 2026-11-12, déjà au manifeste `pdv` (prérequis `fond-de-carte`), est Google Maps. Cette décision, postérieure et explicite, l'emporte sur la démo. Toute carte du produit (points de vente, équipe en temps réel, zones blanches, tournées) utilise le même fond.
 **Conséquences (testables) :** (1) le prérequis `fond-de-carte` du manifeste est vérifié à l'installation, et son échec laisse la liste utilisable avec une carte vide et le message d'action ; (2) aucune dépendance Leaflet ni tuile OpenStreetMap dans le module d'écran livré (analyse des dépendances) ; (3) `terrain` n'embarque pas son propre fond de carte : il appelle le composant commun.
 
-**Ce que le PRD exige et que la démo ne montre pas.** Écrans à créer : géolocalisation et photos du point de vente (FR-V03, FR-V04) ; dédoublonnage et fusion (FR-V06) ; fermeture (FR-V07) ; propriété du portefeuille, réaffectation par lot, départ d'un commercial et révélation des prix d'un indépendant, points sans commercial (FR-V09 à FR-V14) ; transition expliquée, correction avec motif, historique (FR-V16 à FR-V21) ; source et fraîcheur de chaque élément (FR-V23) ; cache hors connexion du portefeuille (FR-V25, FR-V25b ; la démo ne parle que de la file d'attente d'une proforma) ; zones blanches (FR-V28) ; plafond et suspension (FR-V30 à FR-V33) ; droits et règles de pipeline (FR-V38, FR-V39) ; import (FR-V40) ; audit (FR-V43). Pour février : création, fiche, plafond, conditions, réaffectation et import sont exigés ; la révélation des prix à un départ (FR-V13) n'est exigée qu'avec l'add-on `freelance` ; le cache hors connexion est `bientôt` avec l'application mobile.
+**Ce que le PRD exige et que la démo ne montre pas.** Écrans à créer : géolocalisation et photos du point de vente (FR-V03, FR-V04) ; dédoublonnage et fusion (FR-V06) ; fermeture (FR-V07) ; propriété du portefeuille, réaffectation par lot, départ d'un commercial et révélation des prix d'un indépendant, points sans commercial (FR-V09 à FR-V14) ; transition expliquée, correction avec motif, historique (FR-V16 à FR-V21) ; source et fraîcheur de chaque élément (FR-V23) ; cache hors connexion du portefeuille (FR-V25, FR-V25b ; la démo ne parle que de la file d'attente d'une proforma) ; zones blanches (FR-V28) ; plafond et suspension (FR-V30 à FR-V33) ; droits et règles de pipeline (FR-V38, FR-V39) ; import (FR-V40) ; audit (FR-V43). **Tous ces écrans sont voulus** (décision du PO du 2026-11-12 : « pour le moment je veux les voir tous ; en fonction de l'évolution on va voir »). Le cache hors connexion vient avec l'application terrain.
 
 ---
 
@@ -3214,7 +3216,7 @@ La démo range le catalogue dans `/stock?tab=catalogue`. Un module `catalogue` i
 Marge par article, « rentabilité » (`DEFICITAIRE`, `TENSION`, `CORRECTE`), rotation en jours, engouement et ruptures sur 3 mois (`CatalogueView.tsx:154-160`) sont de l'analyse. Le coût de revient (`cout_revient`, `catalogue-dg-builder.ts:64`) vient de la valorisation du stock (FR-S23, FR-S24), non du catalogue. Ce PRD place cette analyse dans `dashboard` (écran « Pilotage catalogue & assortiment »), qui lit `catalogue`, `stock`, `facturation`.
 **Conséquences (testables) :** (1) sans `stock`, l'écran n'affiche ni coût de revient ni marge (`NON_INSTALLE`) ; (2) `catalogue` ne contient aucun champ de coût (test de schéma) ; (3) la rentabilité d'un article se recalcule quand la valorisation du stock change.
 
-**Ce que le PRD exige et que la démo ne montre pas.** Écrans à créer : références stables, identifiants externes, médias (FR-C02 à FR-C04) ; unité de base et conditionnements (FR-C06 à FR-C12, voir FR-194) ; grilles, conditions, priorité, versions (FR-C13b à FR-C17) ; cumul, plafonds de promotion, résolution du prix, simulation (FR-C20 à FR-C27) ; prix figé (FR-C25) ; « pas de prix » (FR-C26) ; cycle de vie et remplacement d'un article (FR-C41 à FR-C44) ; import et export (FR-C45 à FR-C47) ; droits et audit (FR-C48, FR-C49) ; l'écran « Mes prix » du freelance (FR-C28 à FR-C30). Pour février : fiche article avec conditionnements, grille société, grille « point de vente » (FR-193) et import sont exigés ; promotions, simulation et remplacement d'article sont `bientôt` sauf l'écran de simulation de prix, utile à la recette.
+**Ce que le PRD exige et que la démo ne montre pas.** Écrans à créer : références stables, identifiants externes, médias (FR-C02 à FR-C04) ; unité de base et conditionnements (FR-C06 à FR-C12, voir FR-194) ; grilles, conditions, priorité, versions (FR-C13b à FR-C17) ; cumul, plafonds de promotion, résolution du prix, simulation (FR-C20 à FR-C27) ; prix figé (FR-C25) ; « pas de prix » (FR-C26) ; cycle de vie et remplacement d'un article (FR-C41 à FR-C44) ; import et export (FR-C45 à FR-C47) ; droits et audit (FR-C48, FR-C49) ; l'écran « Mes prix » du freelance (FR-C28 à FR-C30). **Tous ces écrans sont voulus** (décision du PO du 2026-11-12 : « pour le moment je veux les voir tous ; en fonction de l'évolution on va voir »).
 
 ---
 
@@ -3248,7 +3250,7 @@ La démo dit elle-même qu'elle ne réserve pas (`PreparationPanel.tsx:277`, « 
 `StockView.tsx:186,339` montre le taux de service et `:189,408` les ruptures sur 3 mois ; le PRD stock n'a pas ces indicateurs. Ils combinent des lignes de commande servies ou non (`commande`, `entrepot`) et des alertes de rupture (`stock`) : ils sont produits par `dashboard`, qui les lit. 
 **Conséquences (testables) :** (1) le taux de service est le quotient des quantités livrées sur les quantités commandées de la période, avec la formule affichée à côté du chiffre ; (2) sans `commande`, il affiche `NON_INSTALLE`, jamais 100 % ; (3) `stock` n'expose aucun champ de taux de service.
 
-**Ce que le PRD exige et que la démo ne montre pas.** Écrans à créer : emplacements, contraintes, capacités (FR-S02 à FR-S04) ; stock négatif (FR-S09) ; stock à une date passée (FR-S10) ; mouvement idempotent et ajustement avec motif et seuil de validation (FR-S14 à FR-S16) ; lots, FEFO, échéances (FR-S17 à FR-S22) ; valorisation et clôture d'exercice (FR-S23 à FR-S34) ; relevé du commercial contre estimation déduite (FR-S56 à FR-S60) ; droit de valorisation (FR-S61, FR-S62) ; audit (FR-S65). Pour février : mouvements, ajustement avec motif, stock à date, comptage d'ouverture (FR-10 de la Reprise), valorisation CUMP et lots à date limite sont exigés ; emplacements, FIFO et relevé du commercial sont `bientôt`. [ASSUMPTION : réduction de périmètre de février proposée par ce PRD, à confirmer par le PO.]
+**Ce que le PRD exige et que la démo ne montre pas.** Écrans à créer : emplacements, contraintes, capacités (FR-S02 à FR-S04) ; stock négatif (FR-S09) ; stock à une date passée (FR-S10) ; mouvement idempotent et ajustement avec motif et seuil de validation (FR-S14 à FR-S16) ; lots, FEFO, échéances (FR-S17 à FR-S22) ; valorisation et clôture d'exercice (FR-S23 à FR-S34) ; relevé du commercial contre estimation déduite (FR-S56 à FR-S60) ; droit de valorisation (FR-S61, FR-S62) ; audit (FR-S65). **Tous ces écrans sont voulus** (décision du PO du 2026-11-12 : « pour le moment je veux les voir tous ; en fonction de l'évolution on va voir »).
 
 ---
 
@@ -3377,7 +3379,7 @@ Le brain dump du PO et le PRD Reprise disent que le client de février **quitte 
 | OQ-4-3 | Le « fichier banque » du run DAF est-il remplacé par des ordres `paiement`, ou gardé en plus ? | PO | FR-209 |
 | OQ-4-4 | `montant_client` est-il vraiment exposé au DG dans la vue de commande ? À mesurer sur la démo avant la recette. | Dev B | FR-195 |
 | OQ-4-5 | Quel module reçoit l'historique des ventes et des paiements par client ? | PO | FR-216 |
-| OQ-4-6 | Les écrans de `reseau`, `pdv`, `catalogue` et `stock` réduits pour février (marqués « bientôt ») sont-ils acceptables ? | PO | 7.1 à 7.4 |
+| OQ-4-6 | ~~Les écrans de `reseau`, `pdv`, `catalogue` et `stock` réduits pour février ?~~ **Tranchée (PO, 2026-11-12) : non, tous les écrans sont voulus ; on ajustera selon l'évolution.** | PO | 7.1 à 7.4 |
 | OQ-4-7 | Le format des numéros de facture Sage, et le dernier numéro émis. | PO / client | FR-217 |
 
 ---
@@ -3421,7 +3423,7 @@ Le brain dump du PO et le PRD Reprise disent que le client de février **quitte 
 
 ### 10.1 Dans le périmètre
 
-Tout ce que la démo présente (20 modules, en 4 familles), en vrai, selon les parties 2, 3 et 4. `[ASSUMPTION: ordre de livraison proposé, à valider par le PO : (a) d'abord les deux parcours n° 1, les rôles et périmètres, le jeu de démonstration et les modules ★ (commande, facturation, encaissements, relances, points de vente, catalogue, stock) ; (b) puis terrain hors connexion, entrepôt, approvisionnement, conquête ; (c) puis le pilotage, le marketing, le studio, les automatisations et le contrôle de gestion. Ce qui n'est pas livré est « bientôt », jamais simulé.]`
+Tout ce que la démo présente (20 modules, en 4 familles), en vrai, selon les parties 2, 3 et 4. Aucun ordre ni aucune date ne sont figés (décision du PO du 2026-11-12) : on avance selon l'évolution, en commençant naturellement par ce qui sert les deux parcours n° 1 et le client de février (modules ★). Ce qui n'est pas livré est « bientôt », jamais simulé.
 
 ### 10.2 Hors périmètre pour l'instant
 
@@ -3453,15 +3455,15 @@ Tout ce que la démo présente (20 modules, en 4 familles), en vrai, selon les p
 6. **Mentions légales de la facture** au Togo (NIF, RCCM, régime, pénalités de retard) : à valider par l'expert-comptable.
 7. **Tranches de la balance âgée** : la démo en a deux versions (4 et 5 tranches) ; les parties 2 et 3 retiennent 5 tranches paramétrables.
 
-**Décisions bloquantes à prendre par le PO avant l'architecture** (issues de l'assemblage) :
+**Décisions du PO du 2026-11-12, prises sur le brouillon :**
 
-8. **Qui porte la Créance ?** Proposition de la partie 3 : un seul registre, tenu par `paiement` (qui a déjà la créance projetée et le solde), ouvert par sa source (facture, échéance de prêt, prime), lu par `recouvrement`. Demande un amendement du PRD paiement (tiers, source, périmètre).
-9. **Quand naît la facture ?** Proposition de la partie 2 : à la livraison, sur les quantités réellement servies ; autre choix : à la validation de la commande.
-10. **La numérotation des factures** : une suite continue d'année en année ou remise à zéro chaque année ? Une seule série par organisation (proposé) ou une par entrepôt ou par canal ? Elle reprend le dernier numéro Sage à la bascule.
-11. **Le freelance** : qui facture le détaillant final (le freelance, hors du système, proposé) ? Une commission lui est-elle versée par la société ? Bloque FR-96 et FR-98.
-12. **Le blocage du crédit** : à plus de 60 jours ou au-delà du plafond (proposé), J+30 devenant une alerte à la direction ; ou dès J+30 comme dans l'écran des relances de la démo.
-13. **Le périmètre de février des modules déjà cadrés** : la partie 4 propose de marquer « bientôt » une part des écrans de `reseau`, `pdv`, `catalogue` et `stock` (OQ-4-6).
-14. **Les dates des boutons « bientôt »** et l'ordre de livraison du §10.1.
+8. **La Créance est portée par `paiement`** : un registre unique, ouvert par sa source (facture, échéance de prêt, prime), soldé par les encaissements, lu par `recouvrement`. Amendement du PRD paiement à écrire (tiers, source, périmètre).
+9. **La facture naît à la livraison**, sur les quantités servies. Le camion sort de l'usine ou de l'entrepôt sur le bon émis à la validation (le terrain l'appelle « bon de commande »).
+10. **Numérotation** : une seule série par organisation, continue d'année en année, qui reprend le dernier numéro de Sage.
+11. **Freelance** : quand il vend, il facture le détaillant ; le système enregistre son prix et le prix société ; la société ne voit que le prix société et lui verse une commission calculée dessus ; la différence lui revient.
+12. **Blocage du crédit** au-delà de 60 jours ou du plafond ; alerte à la direction à J+30 ; jamais de déblocage automatique.
+13. **Tous les écrans** des modules déjà cadrés (`reseau`, `pdv`, `catalogue`, `stock`) sont voulus pour l'instant ; on ajustera selon l'évolution.
+14. **Pas de date** sur les boutons « bientôt », ni d'ordre de livraison figé.
 
 ---
 
@@ -3472,13 +3474,11 @@ Tout ce que la démo présente (20 modules, en 4 familles), en vrai, selon les p
 - §4.3 FR-9 : catalogue du jeu de 60 à 80 articles en 5 familles.
 - §4.3 FR-10 : chargement d'une taille en moins de 10 minutes.
 - §8 NFR-7 : seuils de performance.
-- §10.1 : ordre de livraison en trois temps.
 - §10.2 : consignes hors v1.
 
 
 **Partie 2**
 
--  : calendrier du plan v3 : démo le 15/01/2027, client de février en février 2027 ; toute date « bientôt » est à confirmer par le PO.
 - 5.1 Commande (`commande`, M08) ★ : `TRANSMISE` est ajouté aux 5 statuts de la démo ; le brouillon `BROUILLON` de la démo n'était jamais produit.
 - FR-30 : Créer une commande au bureau : « dans la minute » sert de critère de test.
 - FR-31 : Ligne de commande typée et prix figé : le seuil de la démo pour les combos est 12 % ; il est repris comme valeur par défaut de ce garde-fou.
@@ -3493,7 +3493,6 @@ Tout ce que la démo présente (20 modules, en 4 familles), en vrai, selon les p
 - FR-41 : Livraison partielle et reliquat : par défaut à la livraison, sur les quantités servies (FR-42), paramétrable.
 - FR-41 : Livraison partielle et reliquat : les consignes sont hors v1.
 - FR-41 : Livraison partielle et reliquat : une adresse, celle du point de vente.
-- FR-42 : Créer la facture depuis la commande, en un clic : facturation à la livraison par défaut ; une option par organisation permet de facturer dès `VALIDEE`.
 - FR-42 : Créer la facture depuis la commande, en un clic : la saisie manuelle sert à la reprise et aux ventes comptoir.
 - FR-43 : Numérotation continue qui reprend la suite de Sage : le format exact de Sage est inconnu ; il est saisi à la bascule d'après la dernière facture Sage. Exemple de test : dernier numéro Sage `FAC-2026-0412`, premièr…
 - FR-43 : Numérotation continue qui reprend la suite de Sage : continue, avec l'année dans le format. À valider par l'expert-comptable du client.
@@ -3507,8 +3506,6 @@ Tout ce que la démo présente (20 modules, en 4 familles), en vrai, selon les p
 - FR-51 : Balance âgée : 5 tranches, comme la version « comptable » de la démo ; la version des relances n'en avait que 4. Décision à trancher.
 - FR-52 : Encours, plafond de crédit et conditions de règlement par client : ces plafonds sont du texte libre dans la démo ; ils ne sont repris que comme suggestions modifiables.
 - FR-58 : Reprendre les factures impayées à la bascule : nom et version à fixer au manifeste, `facturation.facture-ouverte@1`
-- FR-58 : Reprendre les factures impayées à la bascule : `facturation` émet les factures et la suite de numérotation ; la Créance est l'objet commun de la partie 3, alimenté par `facturation` et réduit par `paiement`.
-- FR-58 : Reprendre les factures impayées à la bascule : une série par organisation en février, pour garder « sans trou ni doublon » simple à contrôler.
 - FR-58 : Reprendre les factures impayées à la bascule : oui, FR-42.
 - FR-59 : Registre des fournisseurs : la démo ne l'excluait pas du choix.
 - FR-59 : Registre des fournisseurs : alerte, pas blocage ; la démo l'écrit en spécification sans le contrôler.
@@ -3536,12 +3533,10 @@ Tout ce que la démo présente (20 modules, en 4 familles), en vrai, selon les p
 - FR-88 : Accroches proposées : module `assistant` (assistant-service) branché plus tard ; en février, gabarits.
 - FR-90 : Boîte de réception unique : dépend des connecteurs WhatsApp Business, Meta et TikTok.
 - FR-92 : Créer un lead qui devient un prospect : les messages sont conservés 12 mois.
-- 5.7 Add-on Réseau Freelance (`freelance`, M42) : voir FR-98.
 - FR-93 : Double tarification : la grille société est intouchable : avertir sans bloquer, comme la démo.
 - FR-95 : Portefeuille isolé : règle du module `pdv`.
 - FR-95 : Portefeuille isolé : décision à trancher : la société sait-elle quels détaillants le freelance sert ?
-- FR-96 : Commande à double flux : la facturation du freelance à ses détaillants est hors périmètre de février. Question ouverte au PO : qui facture le détaillant final ?
-- FR-98 : Commissions et reversements : option désactivée par défaut ; décision à trancher avec le PO.
+- FR-96 : Commande à double flux : le freelance doit le prix société à la société même si son détaillant ne le paie pas ; c'est lui qui porte le risque de son client.
 - FR-99 : Classements séparés et activation de l'add-on : crédit avec plafond propre, comme tout client.
 - FR-99 : Classements séparés et activation de l'add-on : non.
 - FR-99 : Classements séparés et activation de l'add-on : non en v1.
@@ -3557,17 +3552,19 @@ Tout ce que la démo présente (20 modules, en 4 familles), en vrai, selon les p
 - 6.2 Relances et recouvrement (`recouvrement`, M19) : raisons : (a) `paiement` est déjà codé et calcule déjà le solde ; (b) `facturation` a besoin du reste dû même sans `recouvrement` (FR-49) ; (c) `recouvrement` s…
 - 6.2 Relances et recouvrement (`recouvrement`, M19) : un dossier par tiers évite de relancer trois fois le même client pour trois factures ; le dossier par créance reste possible en paramètre.
 - 6.2 Relances et recouvrement (`recouvrement`, M19) : chez l'IMF, le PAR et les pénalités de retard sont réglementés. Le noyau ne calcule ni pénalité ni intérêt de retard ni classement réglementaire : la Source `EC…
+- FR-114 : Échelle d'escalade paramétrable : fusion des deux échelles de la démo
 - FR-114 : Échelle d'escalade paramétrable : le blocage est à plus de 60 jours, pas à J+30. À J+30 on alerte la direction. La démo avait les deux ; 30 jours bloquerait tout client qui paie avec un mois de …
 - FR-115 : Une relance part vraiment : à confirmer par le juriste.
 - FR-117 : Probabilité, prévision d'encaissement, provision : les seuils 35 et 40 sont ceux de la démo, deux seuils proches ; à unifier avec le PO.
 - FR-119 : Le blocage du crédit bloque la commande : pas de coupure de livraison déjà préparée sans décision du DG.
 - FR-121 : Planifier une visite de recouvrement : la Créance est tenue par `paiement` ; amendement du PRD `paiement` à écrire (FR-P13). Alternative écartée : un registre propre à `recouvrement` obligerait `fact…
 - FR-121 : Planifier une visite de recouvrement : relances à la date d'échéance, pas à la date d'émission, comme la balance âgée.
+- FR-125 : Coaching enregistré : score de poste
+- FR-127 : Valider ou refuser une demande de remise : l'agent jusqu'à son seuil ; le superviseur jusqu'à un seuil intermédiaire ; au-delà de 12 % la validation revient au DG, comme pour les combos de stock
 - FR-128 : Barème de commission : la commission porte sur l'encaissé, pas sur le facturé ; à confirmer par le PO.
 - FR-128 : Barème de commission : les KPI de poste des rôles propres au distributeur (stock, entrepôt, prospection) sont définis dans leurs modules de la partie 2 ; ce module les agrège.
 - 6.4 Comptabilité et finance (`finance-transactions`, M22) : le contrat de balance canonique n'a pas de devise ; la devise de l'organisation (XOF) est une convention déclarée par l'Organisation, pas par la balance.
 - FR-131 : La balance soumise, et l'export qui vient après : date proposée : mars 2027, à confirmer.
-- FR-133 : Déclaration de TVA préparée, télédéclaration « bientôt » : date proposée : à fixer avec le PO ; non demandé pour février.
 - FR-135 : Clôture de période : ce n'est pas la clôture légale de l'exercice.
 - FR-138 : BFR : le DPO de la démo rapporte le solde total de dette aux achats du mois, sans lien avec les délais réels de paiement ; cette formule est reprise telle quelle tant…
 - FR-141 : Run fournisseurs et ordres de paiement : les ristournes fournisseurs, les lignes bancaires et les covenants (statuts et calculs de la démo) sont lus mais non modifiables en première version ; aucun bou…
@@ -3578,12 +3575,35 @@ Tout ce que la démo présente (20 modules, en 4 familles), en vrai, selon les p
 - FR-156 : Périmètre du contrôle de gestion : l'axe « famille » exige que `catalogue` porte la famille de produits (partie 2) ; sans `catalogue`, l'axe est « non installé ».
 - FR-164 : Un badge qui compte le travail réel : la démo utilise 150 ; paramétrable
 - FR-164 : Un badge qui compte le travail réel : une file d'arbitrage unique pour toutes les règles, au lieu d'une par cockpit ; chaque cockpit en affiche sa part.
+- FR-166 : Les 8 chiffres du DG : seuil sur objectif quotidien
+- FR-166 : Les 8 chiffres du DG : seuil sur objectif
 - FR-170 : PDF et Envoyer, pour de vrai : récurrence hebdomadaire seulement en première version.
 - FR-171 : Exports et courrier de gestion : le code `dashboard` est « déprécié » au catalogue (M28) ; ce module est à réactiver. Les cockpits restent une composition de lectures et ne possèdent pas de don…
 - FR-171 : Exports et courrier de gestion : les seuils des 8 chiffres sont des garde-fous paramétrables (valeurs de la démo) ; en absolu, ils ne conviennent qu'à un grand grossiste.
 
-**Partie 4 et annexe A**
+**Partie 4**
 
+- FR-184 : Le score de santé ne s'affiche qu'avec sa provenance, et il a un producteur dès le premier jour : producteur et nom de version proposés, sans source ; le PO tranche si le producteur est `dashboard` ou le futur module de scoring différé de FR-V36
+- FR-184 : Le score de santé ne s'affiche qu'avec sa provenance, et il a un producteur dès le premier jour : seuil de 30 jours proposé, sans source
+- FR-193 : Le prix négocié d'un client est une grille dont la condition est « ce point de vente » : ordre de priorité proposé, à fixer dans FR-C16
+- FR-196 : La visibilité de la marge par rôle (société) manque au PRD catalogue : nom du droit proposé, sans source.
+- FR-206 : Le vocabulaire « Mobile Money » est corrigé : le chèque de la démo est déclaré par l'utilisateur comme espèces et virement
+- FR-209 : Le « fichier banque » du run DAF est remplacé par des ordres de paiement : décision proposée, car aucune source ne tranche entre les deux mécanismes ; le PO le dit.
+- FR-210 : Les modes et conditions de règlement d'une pièce sont séparés : périmètre de février proposé par ce PRD.
+- FR-217 : La suite de numérotation des factures de Sage reprend sans trou ni doublon : le format exact des numéros Sage du client de février n'est pas connu ; à obtenir avec l'export des factures ouvertes.
+
+**Annexe A**
+
+-  : …
+- A.1 Commande (`commande`, M08) : dépendances dures proposées, sans source
+- A.1 Commande (`commande`, M08) : offre « recommandation de panier, détection d'erreurs » ; la démo est déterministe ; moteur à trancher
+- A.2 Facturation, proforma et e-facture (`facturation`, M09) : offre « scoring crédit, score d'acceptation, prévision 7/30 jours »
+- A.2 Facturation, proforma et e-facture (`facturation`, M09) : proposés, voir FR-216 et FR-217
+- A.3 Approvisionnement et fournisseurs (`approvisionnement`, M10) : la spine de la Reprise désigne `approvisionnement` « à créer » ; module non codé, « non installé » possible en février
+- A.5 Conquête, territoires, objectifs et quotas (`conquete-objectifs`, M13) : offre « scoring prospects, suggestions d'allocation »
+- A.8 Commercial terrain et application mobile (`terrain`, M12) : offre « optimisation de tournées, voice-to-CRM, géofencing » ; voice-to-CRM hors périmètre
+- A.9 Relances et recouvrement (`recouvrement`, M19) : chaque vertical lit sa source par `enrichiPar`
+- A.15 Tableau de bord et pilotage (`dashboard`, M28) : le « Copilot conversationnel » de l'offre n'a pas d'écran dans la démo
 
 ---
 
