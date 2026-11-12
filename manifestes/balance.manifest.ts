@@ -30,11 +30,12 @@
 //   · `balance` (AB-01 → AB-06, AB-08) : ce manifeste ;
 //   · `conseil` (AB-07 : scénarios d'optimisation, comparatif, dossier de justification) : voir
 //     `conseil.manifest.ts`. Tant que les routes AB-07 n'ont pas leur propre gate, le conseil se donne avec
-//     la balance, alors que le PO a décidé qu'ils se vendent séparément (STORY-549) ;
-//   · `immobilisations` (M40, code à créer, rattachement au bilan ou module dédié à trancher) : registre,
-//     plans, cessions, dotations publiées par `immobilisations.tableau.publie`. Gardé ici sous `balance`
-//     jusqu'à la décision ; s'il devient un module, ses routes et ses droits passent sous `immobilisations:`
-//     en version majeure.
+//     la balance, alors que le PO a décidé qu'ils se vendent séparément (STORY-549). ✅ Constat confirmé par
+//     le PO le 2026-11-12 : la gate `CONSEIL_NOT_ENTITLED` est à poser ;
+//   · les immobilisations : registre, plans, cessions, dotations publiées par
+//     `immobilisations.tableau.publie`. ✅ Décision du PO du 2026-11-12 : elles RESTENT dans `balance`,
+//     parce qu'elles servent à faire le bilan (tableau des immobilisations, dotations, notes annexes). Ce
+//     n'est pas un module à part : M40 est couvert par `balance`, sans code `immobilisations`.
 // - Données par DOSSIER (`dossierId` dans l'URL, vérifié contre la portée serveur). Le cabinet tient les
 //   balances de ses clients, dont celle d'un client IMF au référentiel du client (MNV-729). dossier-service
 //   est du socle, pas un module : il n'entre pas dans `depends`. document-service (OCR des pièces, des
@@ -87,7 +88,7 @@ export const MANIFESTE_BALANCE = {
     'balance.etat.document.change',
     'cahier.piece.rattachee', // une pièce OCR rattachée à une ligne de cahier
     'profil.societe.consolide', // profil société validé par l'humain (FR-A02)
-    'immobilisations.tableau.publie', // tableau des immobilisations et dotations, lu par bilan-service (voir M40)
+    'immobilisations.tableau.publie', // tableau des immobilisations et dotations, lu par bilan-service (M40 couvert par balance)
     'instance.journal@1', // validations, rejets, changements de rattachement, export, effacement (à ajouter)
   ],
   consomme: [
