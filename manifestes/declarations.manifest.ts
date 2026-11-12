@@ -23,8 +23,9 @@
 //   mais reste lu pour les octrois existants.
 //   ⚠️ Écarts à combler à la prochaine gate du service :
 //   · le refus devrait se nommer `DECLARATIONS_NOT_ENTITLED` (C2 : `<MODULE>_NOT_ENTITLED`) ; renommer un
-//     code de refus est un changement visible : `FISCAL_NOT_ENTITLED` reste lu jusqu'à la sortie de
-//     `fiscalite`, puis on passe [À CONFIRMER] ;
+//     code de refus est un changement visible : `FISCAL_NOT_ENTITLED` reste en place tant que `fiscalite`
+//     est lu ; ✅ décision du PO du 2026-11-12 : on renomme en `DECLARATIONS_NOT_ENTITLED` quand `fiscalite`
+//     sort (version majeure du manifeste, écrans prévenus : ils lisent le code) ;
 //   · la garde lit `entitlement.changed`, pas l'état publié (C2, AD-24) ; aucune route
 //     `instance/declarations/…` (C13) ; aucun profil compose (C10 : le service n'est même pas au compose) ;
 //   · rôles TENANT_ADMIN / TENANT_USER seulement : les six habilitations graduées de FR-F59 (lecture,

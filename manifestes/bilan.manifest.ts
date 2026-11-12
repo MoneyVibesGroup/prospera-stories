@@ -27,7 +27,9 @@
 //   assureur. Un dossier dont le référentiel est ambigu rend 409 (STORY-728 : référentiel à l'option seule).
 // - La consolidation (épics de consolidation : agrégat, éliminations, mise en équivalence, impôts différés,
 //   états consolidés) vit ici, sous la gate `bilan`. [À CONFIRMER] : fonctionnalité du module `bilan` ou
-//   module commercial à part (elle ne sert qu'aux groupes).
+//   module commercial à part (elle ne sert qu'aux groupes). Recommandation (2026-11-12, en attente du PO) :
+//   module à part `consolidation`, `depends: ['bilan']`, dans bilan-service derrière sa propre gate
+//   (`CONSOLIDATION_NOT_ENTITLED`), sur le patron du conseil ; Odoo et Sage la vendent aussi à part.
 // - Rôles proposés (à confirmer avec les rôles du cabinet) : collaborateur = consulter, produire,
 //   previsionnel ; expert-comptable = + valider, mapping, exercice, depot ; consolidation = droit à part.
 

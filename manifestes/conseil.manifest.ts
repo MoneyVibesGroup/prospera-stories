@@ -25,7 +25,8 @@
 //   c'est saisir le retraitement RÉEL dans balance (`POST …/fiscal/retraitements`, droit
 //   `balance:fiscal:calculer`), avec base légale et pièce. Le conseil optimise la base par des leviers
 //   légaux ; il ne minore jamais une base réelle.
-// - Écarts à combler (portés par la prochaine story de balance-service sur AB-07) :
+// - Écarts à combler (portés par la prochaine story de balance-service sur AB-07 ; constat et gate
+//   confirmés par le PO le 2026-11-12) :
 //   1. ⛔ gate `conseil` sur les routes de scénarios et de justification, refus `CONSEIL_NOT_ENTITLED`.
 //      Aujourd'hui, une organisation qui a `balance` a le conseil sans l'avoir acheté ; une organisation
 //      qui a acheté `conseil` sans `balance` ne peut pas l'avoir (d'où la dépendance dure) ;
