@@ -1,4 +1,4 @@
-// Manifeste M44 — Reprise de données (format du contrat de module, clause C1, amendée le 2026-11-10 et le 2026-11-11).
+// Manifeste M44 — Reprise de données (format du contrat de module, clause C1, amendée le 2026-11-10, le 2026-11-11 et le 2026-11-12).
 // Source : prospera-stories (décision du PO du 2026-11-11, réponse 7 au §9 de l'amendement du plan v3).
 // Le propriétaire du dépôt `reprise-service` le copie dans `src/module.manifest.ts` la semaine où il y travaille ;
 // une garde de test compare ensuite le fichier du dépôt à la copie du catalogue (C1).
@@ -49,6 +49,8 @@ export const MANIFESTE_REPRISE = {
     'etat-publie.changed.essai@1', // l'espace du service seulement (spine du moteur, AD-24)
     'etat-publie.changed.reel@1',
     'reception-definitive.enregistree@1', // réel seulement
+    'connecteurs.nuit.terminee@1', // amendement du 2026-11-12, spine de Connecteurs (AD-15) : marche en parallèle, rapport d'écarts de la période
+    'connecteurs.nuit.absente@1', // idem : nuit « non couverte » au rapport de la période
   ],
 
   profilCompose: 'reprise',
@@ -99,4 +101,7 @@ export const MANIFESTE_REPRISE = {
 
   // C1, amendement du 2026-11-11 : la Reprise ne reçoit elle-même aucun objet repris.
   objetsDeReprise: [],
+
+  // C1, amendement du 2026-11-12 (spine de Connecteurs, AD-2 et AD-31) : la Reprise ne déclare aucun domaine d'échange.
+  domainesEchange: [],
 } as const;

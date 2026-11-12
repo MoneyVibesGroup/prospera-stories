@@ -7,6 +7,9 @@
 > C13 (voir leurs paragraphes « Amendement (2026-11-11) »).
 > **Spine de la Reprise de données (2026-11-11)** : C1 (`objetsDeReprise`), C2 (exception nommée élargie
 > aux routes de reprise, jeton de service limité à une organisation), C13 (noms des routes).
+> **Spine de Connecteurs (2026-11-12)** : C1 (`domainesEchange`, `avertissementDesinstallation`), C2 (route d'échange par
+> opération), C13 (route des contrôles ouverte à Connecteurs, chemins de la route d'échange), §6 (règle de
+> construction : un seul point d'écriture par domaine).
 > **Séance du PO du 2026-11-11** (avancée du 13/11) : **C12 et C13 validées**, avec le test « promouvoir,
 > saisir, revenir, tout se relit » obligatoire à la prochaine gate de chaque service existant ; **Q3
 > reconfirmée**, étendue à la dépendance en lecture seule (§8).
@@ -162,6 +165,18 @@ données reprises déclare à son manifeste **`objetsDeReprise`** : la liste de 
 draft-07). Il expose alors le point d'import et les valeurs de contrôle de la Reprise (C13) et joue la suite
 de conformité de la reprise.
 
+**Amendement (2026-11-12, spine de Connecteurs, AD-2, AD-21 et AD-31).** Le manifeste gagne deux champs.
+- **`domainesEchange`** : pour chaque domaine d'échange du module, `code` (`<module>.<domaine>`), `objets`
+  (schémas d'objets `<code>.<objet>@<majeure>`), `sorte` (`MOUVEMENT`, `OBJET_DATE` ou `LECTURE`), `argent`,
+  `controle`, `niveauParDefaut`, `cleLibelleAction` et `publie` (les faits que le module émet pour le sens
+  sortant). Règles refusées par le catalogue : `objets` ⊆ les schémas de `contrats/objets/<code>/` (sans devoir
+  figurer dans `objetsDeReprise`) ; **`argent` implique `controle`** (sauf sorte `LECTURE`, jamais comparée) ; un
+  domaine `controle` exige les valeurs de contrôle de ses objets. Le module qui le déclare consomme
+  `connecteurs.domaine.changed@1` et applique la règle du **point d'écriture unique par domaine** (voir §6).
+- **`avertissementDesinstallation`** : le texte de l'avertissement avant désinstallation (C9), lu par la partie A.
+- **`prerequis[].action`** (champ facultatif de chaque `prerequis`) : ce que l'intégrateur fait si le prérequis
+  échoue (message d'action lu par l'écran du dossier).
+
 ### C2 : le socle (entitlement, gate, cloisonnement)
 
 **Règle.** Le module projette `entitlement.changed` dans un read-model local et refuse **toute** route
@@ -206,14 +221,28 @@ publié par espace** (essai, réel), et un topic par espace.
 - **L'exception nommée s'élargit aux routes de reprise.** Pendant `EN_INSTALLATION` dans l'espace réel, l'identité de service
   de la Reprise passe sur les **routes de reprise déclarées** : le point d'import, en mode `SIMULER` comme
   en mode `APPLIQUER`, et les valeurs de contrôle. Elle passe aussi sur la route d'import C13 de sa part du
-  dossier. Aucune autre identité ne passe, et aucun utilisateur n'appelle une route de reprise.
+  dossier. Aucune autre identité ne passe (sauf Connecteurs, en lecture, sur la route des contrôles : amendement du 2026-11-12 ci-dessous), et aucun utilisateur n'appelle une route de reprise.
 - **Un jeton de service vaut pour une organisation.** Le jeton d'une identité de service porte la claim
   `organisationId`. Toute route dont le chemin porte un autre `{organisationId}` refuse l'appel :
   **403 `ORGANISATION_HORS_JETON`**. Cette règle vaut pour la Reprise, pour Connecteurs et pour les appels
   C13 du moteur. Le jeton est émis par l'`auth-service` de l'espace.
 - **Matrice.** La matrice des neuf états compte une sorte de route de plus, les **routes de reprise** :
   ouvertes à la seule identité de la Reprise en `EN_SERVICE`, `ESSAI_PROSPECT`, `PREAVIS`, et en
-  `EN_INSTALLATION` dans le réel ; refusées dans les autres états avec le code de la garde du module.
+  `EN_INSTALLATION` dans le réel ; refusées dans les autres états avec le code de la garde du module (route des contrôles : voir l'amendement du 2026-11-12 ci-dessous).
+
+**Amendement (2026-11-12, spine de Connecteurs, AD-10 et AD-21).**
+- **Route d'échange.** Un module cible qui déclare `domainesEchange` expose la route d'échange de Connecteurs
+  (C13, tableau des chemins), appelée par la seule **identité de service de Connecteurs**, limitée à
+  l'organisation (`ORGANISATION_HORS_JETON`). La garde la juge **par opération** : en `LECTURE_SEULE`,
+  `APPLIQUER_OBJET`, `ENREGISTRER_MOUVEMENT`, `CONFIRMER` et `REFUSER` passent, `CORRIGER` est refusé
+  `ABONNEMENT_EXPIRE` ; dans les autres états, voir « Matrice » ci-après.
+- **Route des contrôles.** Elle est ouverte **en lecture** aux identités de la Reprise **et** de Connecteurs en
+  `EN_SERVICE`, `PREAVIS`, `ESSAI_PROSPECT` et `LECTURE_SEULE`, à la **Reprise seule** en `EN_INSTALLATION` du
+  réel ; refusée dans les autres états.
+- **Matrice.** La matrice des neuf états compte **deux lignes de plus** : la route d'échange (par opération) et
+  la route des contrôles. La route d'échange est ouverte en `EN_SERVICE`, `PREAVIS` et `ESSAI_PROSPECT` (toutes
+  les opérations), partiellement en `LECTURE_SEULE` (ci-dessus), refusée en `NON_INSTALLE`, `EN_INSTALLATION`,
+  `SUSPENDU`, `ESSAI_TERMINE` et `DESINSTALLE`.
 
 ### C3 : le module possède ses données
 
@@ -497,7 +526,9 @@ peut porter plusieurs modules. Chemins vus par le service :
 | vérification | `POST /api/v1/instance/<code>/{organisationId}/verifications/<code-de-verification>` | partie A |
 | santé | `GET /api/v1/instance/<code>/{organisationId}/sante` (`OK` ou `DEGRADE`) | partie A, agent |
 | point d'import de la reprise (si `objetsDeReprise`) | `POST /api/v1/reprise/<code>/{organisationId}/objets/<objet>` | Reprise |
-| valeurs de contrôle (si `objetsDeReprise`) | `POST /api/v1/reprise/<code>/{organisationId}/controles/<objet>` | Reprise |
+| valeurs de contrôle (si `objetsDeReprise`) | `POST /api/v1/reprise/<code>/{organisationId}/controles/<objet>` | Reprise ; **amendement (2026-11-12, spine de Connecteurs, AD-10 et AD-21)** : route de **lecture**, aussi ouverte à Connecteurs (si `domainesEchange` avec `controle`, même sans `objetsDeReprise`) |
+| échange (si `domainesEchange`) | `POST /api/v1/echange/<code>/{organisationId}/objets/<objet>` (enveloppe `echange-enveloppe@1`) | Connecteurs |
+| mouvements en attente (si `domainesEchange`) | `GET /api/v1/echange/<code>/{organisationId}/en-attente` | Connecteurs |
 
 Le chemin public est `/api/<code>/v1/…` devant le chemin du service. Les appels d'un service à un autre
 passent par le proxy de l'espace.
@@ -563,6 +594,12 @@ jamais « sans objet » sans raison écrite).
 
 **Le premier épic de chaque module est son socle :** C1, C2, C3 et C10. C'est ce qui manquait aux PRD et
 coûtait les 13 points oubliés.
+
+**Amendement (2026-11-12, spine de Connecteurs, AD-11 et AD-32). Règle de construction, dès maintenant.** Dans chaque module
+cible construit d'ici là, chaque domaine a **un seul point d'écriture** : une fonction de service par domaine
+déclaré dans `domainesEchange`, dont les faits portent l'**identifiant stable de l'objet** et un **`rang`**
+(version monotone par objet attribuée dans la transaction de la saisie). Le passage aux mouvements en attente
+de confirmation se fera alors en un seul endroit, sans reprise du module.
 
 **Dans chaque fiche de story,** la définition de « fini » cite les clauses qu'elle touche. **La story qui
 livre la gate livre aussi le test aller-retour (C9).**

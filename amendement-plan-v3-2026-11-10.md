@@ -52,7 +52,8 @@ Précisions du PO :
   PDV, catalogue, stock) est **connu et assumé**.
 - Pour FR-30 et FR-31, février livre le **circuit** ; le premier modèle commun arrive quand les données le
   permettent, **au plus tôt au 2ᵉ semestre 2027**.
-- **Reprise de données** et **Connecteurs** ont **leur propre PRD**, au lot 1, requis en février.
+- **Reprise de données** et **Connecteurs** ont **leur propre PRD**, au lot 1 ; la Reprise est requise en février, ~~Connecteurs aussi~~.
+  **Amendement (2026-11-12, spine de Connecteurs, AD-32).** Connecteurs **sort du chemin critique de février** : aucun des deux clients de février ne garde son logiciel (l'assureur fournit un export Excel, le distributeur quitte Sage). Le distributeur **avec Odoo** vient après, au premier contrat signé qui déclare un logiciel du client, avec un délai de construction chiffré avant signature. **Sans dispense** du manifeste de Connecteurs (13/11), de ses contrats ni du kit des cibles, dont la part qui sert la Reprise reste due avant février.
 
 ---
 

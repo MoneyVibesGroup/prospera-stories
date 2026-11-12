@@ -23,6 +23,8 @@ companions: [.memlog.md, reviews/]
 
 # Architecture Spine — Reprise de données
 
+*Amendée le 2026-11-12 par la spine de Connecteurs (`architecture-connecteurs-2026-11-12`, AD-31) : AD-3 (code du système d'origine déclaré par l'intégrateur), AD-4, AD-13 et AD-21 (kit des cibles, route des contrôles ouverte à Connecteurs, contrats ajoutés), AD-7 et AD-33 (code du système d'origine au dossier, tables de correspondance, effacement des tables cédées), AD-11 (comptage d'ouverture), AD-18 (paquet d'adaptateurs et écriture), AD-20 et AD-28 (domaine d'une correspondance, point de coupure), AD-23 (liste des objets de février), Deferred (adaptateur `odoo` et nuit résolus).*
+
 Requise pour février : la mise en service des deux clients attend le feu vert de la Reprise. L'**assureur** (sur site) fournit un export Excel ; le **distributeur** (hébergé) fournit des fichiers ou un export Sage, et quitte Sage. Raisons au `.memlog.md` (D-1 → D-36, N-1 → N-6). `[ADOPTED]` = tranché par le PO.
 
 ## Design Paradigm
@@ -132,7 +134,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
 - **Binds:** FR-2, FR-12, FR-24, NFR-1
 - **Prevents:** un objet chargé deux fois, par la Reprise puis par Connecteurs ; une table d'identifiants Prospera tenue par la Reprise ; une fiche absorbée qui reparaît.
 - **Rule:**
-  - `cleOrigine = { source, objet, identifiant }`. `source` est le code stable du système d'origine, déclaré par le gabarit (`sage-100`, `export-assureur`), jamais un nom de fichier ; `identifiant` est celui de la ligne dans ce système, sous la forme canonique d'AD-32. Une source sans identifiant stable reçoit du gabarit une règle de composition, elle aussi une donnée.
+  - `cleOrigine = { source, objet, identifiant }`. `source` est le code stable du système d'origine, déclaré par le gabarit (`sage-100`, `export-assureur`), jamais un nom de fichier ; **amendement (2026-11-12, spine de Connecteurs, AD-5) : ce code est déclaré par l'intégrateur, une fois par organisation, et partagé avec Connecteurs (ex. `odoo-principal`) ; la source n'est jamais `odoo:<connecteurId>`** ; `identifiant` est celui de la ligne dans ce système, sous la forme canonique d'AD-32. Une source sans identifiant stable reçoit du gabarit une règle de composition, elle aussi une donnée.
   - Une **référence** entre objets s'écrit par clé d'origine ; la cible la résout, y compris vers un alias.
   - La cible range la clé d'origine dans un **index unique** (organisation, objet, source, identifiant), avec les **alias** (AD-9) dans le même index.
   - Livrer un objet dont la clé existe déjà le **met à jour** : la réponse dit `CREE`, `MODIFIE` ou `INCHANGE`, par comparaison de l'empreinte de contenu. Un objet `HISTORIQUE` n'est jamais modifié : 409 `OBJET_HISTORIQUE`.
@@ -143,6 +145,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
 - **Binds:** FR-14, FR-16, FR-19, C2, C3, C5, C13, NFR-1
 - **Prevents:** une écriture dans la base d'une cible ; une livraison qui contourne la garde ou la validation ; un doublon au rejeu ; une création partielle.
 - **Rule:**
+  - **Amendement (2026-11-12, spine de Connecteurs, AD-12).** La mécanique commune de ce point d'import (garde d'identité de service et d'organisation, exceptions nommées par état, validation de l'enveloppe et du schéma, magasin d'idempotence, index de clé d'origine et d'alias, `SIMULER` par transaction annulée, comparaison au verdict validé, refus 413) vit dans le **kit des cibles**, `kit-cible`, bibliothèque NestJS de `prospera-plateforme` ; le module déclare ses objets et, pour un objet de référence simple, un raccord vers sa collection. **Le point d'import fait partie de la définition de « fini » de chaque module cible** (schémas d'objets, raccord ou fonctions, suite de conformité de la reprise verte) ; ce n'est plus un passage d'une semaine dans les dépôts cibles.
   - Route de service : `POST /api/v1/reprise/<code>/{organisationId}/objets/<objet>` (public : `/api/<code>/v1/reprise/<code>/{organisationId}/objets/<objet>`, AD-16), appelée par la seule identité de service de la Reprise (AD-10), limitée à l'organisation (AD-27). Enveloppe : `lotId`, `versionLot`, `schema`, `mode` (`SIMULER` ou `APPLIQUER`), `acteur`, `objets` (500 au plus, corps ≤ 1 Mio), chacun avec `cleOrigine`, `alias`, `regime`, `provenance` (`lotId`, `ligne`, `empreinteLigne`), `montantsASaisir`, `rattacherA` (AD-9) et ses champs. En `APPLIQUER` s'ajoutent `validationId`, `empreinteLivrable` et le **verdict validé** de chaque objet.
   - Réponse **par objet** : `cleOrigine`, `resultat` (`CREE`, `MODIFIE`, `INCHANGE`, `REQUALIFIE`, `REFUSE`), `code`, `etatRetenu`, `referencesNonResolues`, `doublonsProbables` (`SIMULER`), identifiant Prospera. Un corps trop gros rend 413 `LOT_TROP_GROS` avec `maxObjets` et `maxOctets` ; la Reprise réduit le morceau. Un `SIMULER` de 500 objets répond en moins de 30 s (conformité).
   - `APPLIQUER` sans `validationId` et `empreinteLivrable` : 422 `VALIDATION_ABSENTE`. La cible **n'écrit un objet que si son verdict recalculé égale le verdict validé** ; sinon `REFUSE` `VERDICT_DIFFERENT`, sans écriture, et le lot passe en `ECART_DE_LIVRAISON` (AD-30). Un `APPLIQUER` d'une `versionLot` plus ancienne du même lot rend `INCHANGE` (`VERSION_ANTERIEURE`).
@@ -175,7 +178,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
 - **Binds:** FR-4, FR-13, FR-16, FR-23, NFR-3
 - **Prevents:** une donnée métier ou une identité qui franchit le cloisonnement ; un réel qui rejoue des règles différentes de l'essai ; un module mis en service sans ses données.
 - **Rule:**
-  - La part de la Reprise au **dossier d'installation** : gabarits (sans identifiants de connexion), correspondances, traductions d'état, critères de doublon, et la **liste des modules attendus** (modules qu'un lot a alimentés dans l'essai). Codes et libellés seulement : aucun montant, aucune identité de personne, aucun identifiant d'origine ; à l'export, une valeur de correspondance hors du **domaine de valeurs** déclaré par le gabarit est rejetée ; un test cherche une valeur d'origine témoin dans le dossier.
+  - La part de la Reprise au **dossier d'installation** : gabarits (sans identifiants de connexion), **code du système d'origine** (amendement 2026-11-12, spine de Connecteurs, AD-5 et AD-19 : il passe au dossier, partagé avec Connecteurs), correspondances (leur **propriétaire à l'export** est la Reprise avant la cession, Connecteurs après ; l'import du réel n'écrase jamais une table cédée), traductions d'état, critères de doublon, et la **liste des modules attendus** (modules qu'un lot a alimentés dans l'essai). Codes et libellés seulement : aucun montant, aucune identité de personne, aucun identifiant d'origine ; à l'export, une valeur de correspondance hors du **domaine de valeurs** déclaré par le gabarit est rejetée ; un test cherche une valeur d'origine témoin dans le dossier.
   - La partie A l'importe par la route C13 `import` de la Reprise (AD-16), idempotente par version du dossier ; une version supérieure est refusée (`DOSSIER_VERSION_DIFFERENTE`) dès qu'un lot du réel a été validé. À l'import, la Reprise publie `ATTENDU` pour chaque module listé (AD-12).
   - Séquence du réel : import du dossier, mise en service de la Reprise par le plan (sans feu vert, AD-17), lots, `VERT` par module, mise en service des modules cibles.
   - Ne passent jamais : fichiers, lignes, objets, rapports, validations, fusions, feux verts, identifiants de connexion. Dans le réel, le rapport propose de nouveau les doublons regroupés ; les fusions se refont. La Reprise ne participe pas au rafraîchissement de l'essai du moteur : les lots, rapports et fichiers de l'essai sont supprimés, le dossier est gardé.
@@ -213,6 +216,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
   - Un lot `COMPTAGE` du réel porte **une feuille par entrepôt**. Elle est pré-remplie par le fichier de stock (quantité du fichier, pour information) ; la **quantité comptée** se saisit par article dans les écrans de la Reprise (`reprise:comptage:saisir`) : c'est sa source. Tant que le comptage n'est pas clos, la saisie est un **brouillon mutable** ; « comptage clos » **fige une version** et est la validation du lot (AD-8).
   - Livré au module `stock` comme objet `stock.stock-ouverture@1` par son point d'import, pendant que `stock` est `EN_INSTALLATION` : aucun utilisateur ne peut y passer de mouvement. L'ouverture est **remplaçante** (jamais additive) par (entrepôt, article) et refusée une fois `stock` `EN_SERVICE` (`OUVERTURE_CLOSE`). Sa valeur de contrôle est la **quantité comptée**. La livraison attend que les lots des modules référencés (articles, entrepôts) soient `LIVRE`.
   - L'écart entre le fichier et le comptage figure au rapport en `INFORMATION`, sans rien bloquer ; le stock sort de la règle « écart nul ». Les inventaires suivants appartiennent au module `stock`.
+  - **Amendement (2026-11-12, spine de Connecteurs, AD-20).** Le comptage livré à `stock` est **gardé par `stock` comme un ajustement en attente**, et **publié à la mise en service** si Odoo possède le stock ; Connecteurs le capte alors et l'envoie à Odoo comme ajustement d'inventaire en quantité comptée, jamais additionné.
 
 ### AD-12 — Le feu vert : par module cible, un état absolu `[ADOPTED]`
 
@@ -235,7 +239,8 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
   - Chaque schéma d'objet déclare ses **valeurs de contrôle** (prêt : capital restant dû, jours de retard, nombre d'échéances ; police : prime, échéance ; créance : reste dû), comme **champs de l'objet canonique** que la source fournit à l'étape 2 et que la cible recalcule. Types fermés : `montant {unitesMineures, devise}`, `date` `AAAA-MM-JJ`, `entier`, `etat`. Aucune valeur ne dépend de l'horloge hors `dateDeValeur`, jour fixé par le lot et rejoué.
   - La cible les rend par `POST /api/v1/reprise/<code>/{organisationId}/controles/<objet>` (public : `/api/<code>/v1/reprise/<code>/…`), identité de la Reprise, lecture seule, 500 clés au plus, avec `dateDeValeur`.
   - La Reprise compare aux valeurs de la source par **une seule fonction**, dans `prospera-adaptateurs`, avec vecteurs par devise. La comparaison porte sur l'`etatRetenu` validé : une requalification acceptée à la validation est une exception tracée, pas un écart ; un `montantASaisir` est exclu de la comparaison et listé. Écart nul = même nombre d'objets `VIVANT` livrés et aucune valeur différente (`VALEUR_DE_CONTROLE_DIFFERENTE`).
-  - La comparaison de nuit de la marche en parallèle (FR-17) réutilise cette route ; son ordonnancement se décide avec Connecteurs (Deferred).
+  - La comparaison de nuit de la marche en parallèle (FR-17) réutilise cette route ; son ordonnancement se décide avec Connecteurs (Deferred ; résolu le 2026-11-12 : spine de Connecteurs, AD-15).
+  - **Amendement (2026-11-12, spine de Connecteurs, AD-10, AD-13 et AD-21).** Cette route est de **lecture** et reste **la seule route de contrôle** : elle est ouverte aux identités de la Reprise **et** de Connecteurs (en `EN_SERVICE`, `PREAVIS`, `ESSAI_PROSPECT` et `LECTURE_SEULE`, la Reprise seule en `EN_INSTALLATION` du réel). Elle vit dans le kit des cibles. Connecteurs la lit pour sa concordance de nuit et compare avec la même fonction unique de `prospera-adaptateurs` ; l'écart nommé `VALEUR_DE_CONTROLE_DIFFERENTE` est partagé. La comparaison de nuit de la marche en parallèle est désormais **résolue** : la Reprise lit le rapport de concordance de Connecteurs (`connecteurs.nuit.terminee`), sans relire elle-même le logiciel du client.
 
 ### AD-14 — Les dates d'origine voyagent sans glisser
 
@@ -288,7 +293,8 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
 - **Prevents:** un adaptateur écrit deux fois ; une bibliothèque qui garde des données ; une écriture vers le logiciel du client.
 - **Rule:**
   - `prospera-adaptateurs` exporte l'interface `Adaptateur` : `decrire()`, `verifierAcces(connexion)`, `lire(source, gabarit, curseur)`, qui rend un flux asynchrone de lignes lues (`ligne`, `brut`, `empreinte`). Elle exporte aussi les fonctions **pures** d'application des règles (gabarit, correspondances, traductions d'état, conformité au schéma, normalisation des doublons, comparaison des valeurs de contrôle), pour que la Reprise et Connecteurs appliquent les mêmes. Un adaptateur de démonstration s'ajoute sans toucher aux autres.
-  - La bibliothèque n'a ni base ni état ; elle ne touche le réseau que pour lire une source. Paquet en semver, majeure alignée sur celle des schémas d'objets, version épinglée par service, jamais deux majeures actives dans un espace.
+  - **Amendement (2026-11-12, spine de Connecteurs, AD-23).** Le paquet porte aussi l'**écriture** : l'interface `AdaptateurEcriture` étend `Adaptateur` (elle garde `decrire`, `verifierAcces` et `lire`, et ajoute `detecter`, `verifierLectureSeule`, `relever`, `ecrire`, `lireValeurs`). La Reprise importe `lire`, `decrire` et `verifierAcces` seulement.
+  - La bibliothèque n'a ni base ni état ; elle ne touche le réseau que pour lire une source (**amendement 2026-11-12, spine de Connecteurs, AD-23 : cette phrase vaut pour l'interface `Adaptateur`** ; l'extension d'écriture appartient à Connecteurs). Paquet en semver, majeure alignée sur celle des schémas d'objets, version épinglée par service, jamais deux majeures actives dans un espace.
   - Adaptateur `fichier` pour février : `.xlsx` lu en flux (`WorkbookReader`), CSV, JSON ; le `.xls` binaire est refusé avec un message lisible. `odoo` et `api` après février (Deferred).
   - La Reprise n'importe de la bibliothèque **aucune fonction d'écriture** ; une garde de test le vérifie (FR-23). Un corpus d'exports Sage partagé est joué par la bibliothèque et par `balance-service`.
   - Les **identifiants de connexion** (Odoo, API) appartiennent à chaque service, par espace, chiffrés au repos ; ils n'apparaissent ni au dossier, ni à l'export, ni dans un journal. Dans l'essai, ce sont des identifiants en lecture seule propres à l'essai.
@@ -308,6 +314,8 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
 - **Prevents:** deux propriétaires d'une table de correspondance ; un objet repris puis reçu une seconde fois en mouvement ; des tables copiées qui divergent.
 - **Rule:** `POST /api/reprise/v1/correspondances/{organisationId}/cessions`, appelable par la seule identité de service de Connecteurs (limitée à l'organisation), idempotente par (organisation, domaine). Elle est **atomique** : copie des tables de valeurs de référence du domaine, lecture du **point de coupure** de la version livrée (instant de début de l'extraction de la source fraîche du lot du réel, enregistré au lot, **immuable** une fois le lot `LIVRE`) et marque `CEDEE`, dans une transaction ; elle rend les tables, le point de coupure, `versionCession` et le hachage des tables que Connecteurs compare. Ensuite la Reprise refuse de les modifier (409 `CORRESPONDANCE_CEDEE`) et tout lot sur le domaine (AD-28). Une nouvelle extraction après livraison crée un lot `COURANTE` à son propre point. Connecteurs ignore tout mouvement dont l'horodatage source est ≤ au point de coupure. La copie vit chez Connecteurs et survit à la réception définitive comme à la désinstallation de la Reprise ; son manifeste déclare `reprise` dans `enrichiPar`. Aucune cession n'est attendue avant les connecteurs Odoo et microfinance.
 
+  - **Amendement (2026-11-12, spine de Connecteurs, AD-20 et AD-31).** Le **domaine** d'une correspondance est celui qui liste l'objet dont elle remplit un champ ; la Reprise tient l'association **objet → domaine** depuis le catalogue (`domainesEchange` des manifestes). Le **point de coupure** (début de l'extraction du lot du réel) est le point d'où part le premier relevé de Connecteurs ; la **mise en service** reste ce qui rend le domaine `ACTIF`.
+
 ### AD-21 — Les contrats nommés de la Reprise
 
 - **Binds:** C5, FR-3, FR-8, FR-15, FR-18, FR-20, FR-24, NFR-2
@@ -318,7 +326,9 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
   |---|---|---|
   | schémas d'objets `prospera-plateforme/contrats/objets/<code>/<objet>@<n>.<m>.json` et suite de conformité | module propriétaire | reprise-service, prospera-adaptateurs, connecteurs-service |
   | `POST /api/<code>/v1/reprise/<code>/{organisationId}/objets/<objet>` (`SIMULER`, `APPLIQUER` ; service : `/api/v1/reprise/<code>/…`) | module cible | reprise-service |
-  | `POST /api/<code>/v1/reprise/<code>/{organisationId}/controles/<objet>` | module cible | reprise-service |
+  | `POST /api/<code>/v1/reprise/<code>/{organisationId}/controles/<objet>` (**amendement 2026-11-12, spine de Connecteurs, AD-21 et AD-29** : route de lecture, aussi ouverte à Connecteurs) | module cible (kit) | reprise-service, connecteurs-service |
+  | **Amendement (2026-11-12, spine de Connecteurs, AD-29).** `connecteurs.nuit.terminee`, `connecteurs.nuit.absente` | connecteurs-service | reprise-service (marche en parallèle dans l'essai, avant la mise en service, FR-17) |
+  | **Amendement (2026-11-12, spine de Connecteurs, AD-29).** `GET /api/connecteurs/v1/concordances/{id}` (rapport de concordance de la nuit) | connecteurs-service | reprise-service (identité de la Reprise), module d'écran |
   | `reprise.feu-vert.changed` (état absolu par module, réel seulement) | reprise-service | partie A du réel |
   | `reprise.historique.livre` | reprise-service | modules cibles avec IA |
   | `reprise.cles-rattachement.publiees` (nom réservé ; charge décidée avec le PRD de la GED) | reprise-service | GED |
@@ -354,7 +364,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
   | PRD Reprise, FR-10 et QR-5 | le comptage d'ouverture est un lot de la Reprise, saisi dans ses écrans (OQ-4) ; QR-5 remplacée |
   | PRD Reprise, FR-13 | `reprise:lot:valider` attribuable par le DG seul, désignation écrite tracée (AD-26) |
   | PRD Reprise, FR-15 | feu vert par module cible, regroupé par la partie A ; aucun objet `VIVANT` en `ERREUR` ; réouverture possible tant que le module n'est pas `EN_SERVICE` (AD-24, AD-25) |
-  | PRD Reprise, FR-17 | la comparaison de nuit se règle avec Connecteurs |
+  | PRD Reprise, FR-17 | la comparaison de nuit se règle avec Connecteurs (résolu le 2026-11-12 : spine de Connecteurs, AD-15) |
   | `manifestes-a-produire.md`, M44 et les 43 autres manifestes | M44 : service porteur `reprise-service`, manifeste écrit ; un paragraphe rappelle que chaque module cible déclare `objetsDeReprise` dès l'écriture de son manifeste |
 
 ### AD-23 — La tranche de février `[ADOPTED]`
@@ -364,6 +374,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
 - **Rule:**
   - **Pour février** : adaptateur `fichier` ; modèles de gabarit `sage-100` et `export-assureur` ; lots `INITIALE`, `COURANTE` et `COMPTAGE` ; simulation, rapport, validation, livraison, réconciliation, feu vert ; module d'écran `reprise` (dépôt, rapport, fusion, validation, comptage, suivi), tous les écrans par Dev B.
   - **Ordre** : le distributeur d'abord (démo du 15/01 : un prospect dépose ses fichiers dans son essai, lit le rapport, valide et retrouve ses données ; client hébergé ; minimum : une cible, `pdv`), l'assurance ensuite (assureur sur site, export Excel). Microfinance après février.
+  - **Amendement (2026-11-12, spine de Connecteurs, AD-12 et AD-32).** La liste d'objets de février **n'est plus présumée à sept modules** : chaque manifeste tranche son cas, jusqu'à une trentaine de modules cibles ; **le point d'import est dans la définition de « fini »** de chaque module cible (AD-4), porté par le kit des cibles.
   - **Objets et modules présumés** (le manifeste du module tranche, AD-2) :
 
     | Métier | Objets | Module présumé |
@@ -414,7 +425,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
 
 - **Binds:** FR-4, FR-24
 - **Prevents:** deux écrivains d'un même domaine dont la valeur ancienne écrase la récente.
-- **Rule:** Pour (organisation, domaine), la Reprise écrit jusqu'à la cession (AD-20), Connecteurs ensuite. Après la cession, la Reprise refuse tout lot sur le domaine, imports courants compris : 409 `DOMAINE_CEDE`.
+- **Rule:** Pour (organisation, domaine), la Reprise écrit jusqu'à la cession (AD-20), Connecteurs ensuite. Après la cession, la Reprise refuse tout lot sur le domaine, imports courants compris : 409 `DOMAINE_CEDE`. **Amendement (2026-11-12, spine de Connecteurs, AD-20 et AD-31) :** `DOMAINE_CEDE` se **calcule par objet** (le domaine d'un objet est celui que l'association objet → domaine du catalogue lui donne) ; le point de coupure est celui d'AD-20.
 
 ### AD-29 — Les fichiers non fiables `[ADOPTED]`
 
@@ -458,7 +469,7 @@ Une flèche = « peut appeler ou écrire vers ». Aucune flèche ne va d'une cib
 - **Binds:** FR-3, FR-22, NFR-3
 - **Prevents:** un document recréé après l'accusé ; un accusé invérifiable ; une suppression prise pour un effacement des sauvegardes.
 - **Rule:**
-  - L'**effacement** (FR-22) est une transition d'état : `EFFACEMENT_EN_COURS` refuse toute écriture, draine les travaux, annule les verrous, vide l'outbox, supprime fichiers, zone de transit, index de provenance, lots, rapports, validations, fusions, feux verts, read-model, correspondances non cédées, identifiants de connexion et envois tus ; puis balaie collections et buckets et vérifie zéro reste. Idempotent : rejoué, il rend le même accusé. Les entrées nominatives du journal sont pseudonymisées par le mécanisme du moteur, jamais supprimées. Le plan de la partie A appelle aussi l'effacement de Connecteurs pour les correspondances cédées ; valable pour l'essai prospect et l'acheteur hébergé.
+  - L'**effacement** (FR-22) est une transition d'état : `EFFACEMENT_EN_COURS` refuse toute écriture, draine les travaux, annule les verrous, vide l'outbox, supprime fichiers, zone de transit, index de provenance, lots, rapports, validations, fusions, feux verts, read-model, correspondances non cédées, identifiants de connexion et envois tus ; puis balaie collections et buckets et vérifie zéro reste. Idempotent : rejoué, il rend le même accusé. Les entrées nominatives du journal sont pseudonymisées par le mécanisme du moteur, jamais supprimées. Le plan de la partie A appelle aussi l'effacement de Connecteurs pour les correspondances cédées ; valable pour l'essai prospect et l'acheteur hébergé. **Amendement (2026-11-12, spine de Connecteurs, AD-26) :** l'effacement de Connecteurs supprime les tables de correspondance cédées (avec ses identifiants, curseurs, liaisons, files, écarts et rapports) et rend son propre accusé au format de cette spine.
   - **Accusé** : organisation, instant, `[{collection, supprimes, restants}]` trié par nom, buckets balayés, envois tus purgés, et l'empreinte SHA-256 du JCS de cette liste. Une écriture après l'accusé échoue à la conformité ; un test cherche une valeur témoin dans toutes les collections et tous les journaux.
   - La suppression d'un fichier ou l'effacement ne touche pas les sauvegardes : elles suivent la rétention du moteur (AD-16 du moteur), que le certificat d'effacement énonce (AD-38 du moteur).
 
@@ -610,7 +621,7 @@ sequenceDiagram
 | Livraison (FR-14) | point d'import des cibles | AD-4, AD-10, AD-27, AD-30 |
 | Écart nul, feu vert (FR-15) | `reprise-service`, valeurs de contrôle des cibles | AD-12, AD-13, AD-25 |
 | Essai puis réel (FR-16) | dossier d'installation | AD-7 |
-| Marche en parallèle (FR-17) | valeurs de contrôle ; ordonnancement avec Connecteurs | AD-13, Deferred |
+| Marche en parallèle (FR-17) | valeurs de contrôle ; ordonnancement avec Connecteurs (résolu le 2026-11-12 : spine de Connecteurs, AD-15) | AD-13, Deferred (résolu) |
 | Clés de rattachement (FR-18) | nom réservé | AD-21, Deferred |
 | Deux publics, libre-service (FR-19) | même API, console et module d'écran | AD-10, AD-17, AD-23 |
 | Module installable, états, effacement (FR-21, FR-22) | `reprise-service` | AD-16, AD-17, AD-31, AD-33 |
@@ -623,8 +634,8 @@ sequenceDiagram
 
 | Point | Pourquoi il peut attendre | Revoir quand |
 | --- | --- | --- |
-| Adaptateurs `odoo` et `api` | les deux clients de février donnent des fichiers ; ils se construisent avec Connecteurs, à qui revient aussi la matrice des versions d'Odoo | spine de Connecteurs, premier client qui garde Odoo ou son logiciel de microfinance |
-| Ordonnancement de la comparaison de nuit (FR-17) et rapport d'écarts de la période | la marche en parallèle suppose Connecteurs ; les deux clients de février migrent ; la brique (AD-13) est fixée | spine de Connecteurs |
+| Adaptateurs `odoo` et `api` | les deux clients de février donnent des fichiers ; ils se construisent avec Connecteurs, à qui revient aussi la matrice des versions d'Odoo. **Amendement (2026-11-12, spine de Connecteurs) : l'adaptateur `odoo` est résolu par cette spine (AD-23) ; l'adaptateur `api` (IMF) reste différé (QK-18).** | spine de Connecteurs, premier client qui garde Odoo ou son logiciel de microfinance |
+| ~~Ordonnancement de la comparaison de nuit (FR-17) et rapport d'écarts de la période~~ | **Résolu le 2026-11-12 par la spine de Connecteurs (AD-15)** : un seul ordonnancement de la nuit, une seule lecture du logiciel du client, et la Reprise construit son rapport d'écarts de la période à partir du rapport de concordance de Connecteurs | spine de Connecteurs |
 | Contrat des clés de rattachement à la GED (FR-18) | la GED n'a pas de PRD ; l'assurance de février tourne sans GED ; le nom est réservé ; les clés seront les `identifiant` des objets `polices` et `sinistres`, `VIVANT` avant `HISTORIQUE` | PRD de la GED |
 | Schémas d'objets de la microfinance (prêts, échéanciers, épargne, garanties) | microfinance après février ; règle à reporter : un prêt en cours sans échéancier complet est une `ERREUR` (AD-24) | PRD et manifestes du lot microfinance |
 | Analyse antivirus des fichiers déposés | les fichiers ne sont jamais exécutés, seulement lus dans un processus isolé (AD-29) | premier dépôt par un client en libre-service hors Money Vibes, ou exigence d'un assureur |

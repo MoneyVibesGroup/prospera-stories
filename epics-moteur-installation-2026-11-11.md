@@ -24,7 +24,10 @@ porte la majorité des épics et **tous les écrans** ; Dev A porte le socle (EP
 Périmètre : backend **et** écrans (tranches verticales, voir plus bas) des quatre unités du moteur (partie A dans
 `platform-catalog-service`, `agent-instance`, `centrale-service`, `apprentissage-service`), le dépôt `prospera-plateforme`, et les
 ajustements que le moteur impose à `auth-service`, `prospera-paiement-service` et aux gardes des modules existants.
-**Hors périmètre** : l'intérieur de Reprise et de Connecteurs (leurs propres épics).
+**Hors périmètre** : l'intérieur de Reprise et de Connecteurs (leurs propres épics ; Connecteurs n'est plus requis en
+février, spine de Connecteurs AD-32).
+
+*Amendé le 2026-11-12 par la spine de Connecteurs (`architecture-connecteurs-2026-11-12`, AD-31) : EPIC-142 (matrice : échange entrant, contrôles à deux identités), EPIC-143 (`domainesEchange`, association objet → domaine), EPIC-157 (Connecteurs producteur des compteurs).*
 
 **Identifiants.** Épics **EPIC-142 → EPIC-160**, pris dans la plage réservée à Dev B et inscrits au registre le jour du
 découpage. **Aucun `story_id` n'est réservé ici** : chaque fiche prend le suivant de la plage de celui qui la code
@@ -410,6 +413,11 @@ figé le 11/12) · FR-34 et FR-42 (socle) · AD-6, AD-15, AD-17, AD-24, AD-26, A
 - Dépôt **`prospera-plateforme`** créé : les contrats entre agent, centrale et partie A en **JSON Schema**, avec leurs
   **vecteurs signés** (JWS compact Ed25519, charge en JCS, champs `kid`, `iat`, `numero`, `instanceId`, `audience`), et le
   paquet `point-de-decision` amorcé (sa logique arrive avec EPIC-144).
+- **Amendement (2026-11-12, spine de Connecteurs, AD-21 et AD-31).** La matrice `contrat/matrice-etats.json` (partie A, à
+  sa publication) compte, en lecture seule (PRD moteur FR-43), une **troisième famille de routes autorisées**, l'**échange
+  entrant** : quatre opérations passent (`APPLIQUER_OBJET`, `ENREGISTRER_MOUVEMENT`, `CONFIRMER`, `REFUSER`), `CORRIGER` non.
+  Elle compte aussi deux **sortes de route** de plus : « échange » (par opération) et « contrôles à deux identités »
+  (Reprise et Connecteurs, la Reprise seule en `EN_INSTALLATION` du réel).
 - ⛔ Les vecteurs sont signés par une **racine de test** ; un agent de production refusera toute racine qui n'est pas de
   production (AD-28).
 - `platform-catalog-service` : **Redis et BullMQ** entrent dans son périmètre ; l'outbox prend un **verrou** (AD-42).
@@ -450,6 +458,10 @@ figé le 11/12) · FR-34 et FR-42 (socle) · AD-6, AD-15, AD-17, AD-24, AD-26, A
 - Publication du contrat **`catalogue.manifeste.publie`** (AD-17).
 - Champ **`objetsDeReprise`** dans `ModuleVersion` (C1 amendé le 2026-11-11, spine de la Reprise AD-2 et AD-16), couvert
   par la garde source/copie ; le manifeste M44 (`reprise`) est le premier écrit, dans `prospera-stories/manifestes/`.
+- **Amendement (2026-11-12, spine de Connecteurs, AD-2 et AD-31).** Champ **`domainesEchange`** dans `ModuleVersion` (C1
+  amendé le 2026-11-12), couvert par la même garde source/copie ; le catalogue refuse un manifeste qui viole les règles
+  de la spine de Connecteurs (`argent` sans `controle`, `objets` hors de `contrats/objets/<code>/`). **L'association
+  objet → domaine** (le domaine d'un objet est celui qui le liste) est **rendue à la Reprise** depuis le catalogue.
 - `paiement-service` : **read-model de manifestes** pour la vente, qui résout les dépendances dures **comme la console**,
   refuse un élément non installable, un seul mode d'acquisition par élément (amendement §4).
 - FR-12, le contrat fait foi : un pack modifié ne s'applique qu'aux **nouveaux contrats**, la propagation ne crée plus de
@@ -896,6 +908,9 @@ console, coque (dossier `instance`).
   dédié dont toute lecture passe par la garde du registre (`CONSENTEMENT_ABSENT`).
 - **Niveau 0** (FR-26) : indicateurs agrégés sur `instance.indicateurs`, portés par le signal au **schéma fermé** ; un test
   échoue si un champ non déclaré ou un identifiant de personne sort.
+- **Amendement (2026-11-12, spine de Connecteurs, AD-17 et AD-31).** **Connecteurs devient producteur** des compteurs par
+  domaine (dont `niveau` et santé) sur `instance.indicateurs` ; le schéma fermé du signal les porte et le test cherche un
+  numéro, un montant ou un nom dans les compteurs. Le producteur n'existe qu'au premier contrat qui garde un logiciel du client.
 
 **Écrans**
 - Coque, dossier `instance` (Dev B) : consentement du DG et registre.

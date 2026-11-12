@@ -2,7 +2,7 @@
 
 **Date :** 2026-07-04 (rev 1.3 : 2026-07-10)
 **Architecte :** vivian
-**Version :** 1.7 *(le corps porte 1.8, 1.9 et 1.10 depuis le 2026-11-09 et le 2026-11-11, voir l'historique)*  *(⚠️ l'en-tête était resté à **1.3** alors que le corps porte 1.4, 1.5 et 1.6 depuis le 2026-08-15 — corrigé le 2026-08-16)*
+**Version :** 1.7 *(le corps porte 1.8, 1.9, 1.10 et 1.11 depuis le 2026-11-09, le 2026-11-11 et le 2026-11-12, voir l'historique)*  *(⚠️ l'en-tête était resté à **1.3** alors que le corps porte 1.4, 1.5 et 1.6 depuis le 2026-08-15 — corrigé le 2026-08-16)*
 **Type :** Architecture programme (niveau écosystème, au-dessus des architectures de service)
 **Statut :** Draft
 
@@ -481,9 +481,15 @@ stock, et ceux à venir.
 - **Le propriétaire d'un domaine a toujours raison.** Quand un logiciel du client (Odoo, ou un autre) est
   déclaré propriétaire d'un domaine, Prospera n'en est pas l'autorité : il reçoit, il affiche, il propose.
   Le propriétaire est fixé **domaine par domaine**, dans le dossier d'installation.
+  **Amendement (2026-11-12, spine de Connecteurs, AD-14).** « A toujours raison » vaut pour la **synchronisation
+  automatique**. Pour un écart d'argent, la **décision humaine prime** (la valeur retenue par la personne
+  habilitée) et peut corriger le propriétaire lui-même, par le chemin normal, jamais par un chemin de code.
 - **Un utilisateur de Prospera ne modifie pas directement une donnée d'un domaine extérieur.** Il saisit un
   **mouvement**, qui part vers le propriétaire et reste **« en attente de confirmation »** jusqu'à son
   acceptation. La coque (`prospera-app`) affiche cet état « en attente ».
+  **Amendement (2026-11-12, spine de Connecteurs, AD-11).** Ces mouvements en attente **vivent chez la cible** :
+  le kit des cibles (`kit-cible`, publié par `prospera-plateforme`) range l'écriture de l'utilisateur comme
+  mouvement `EN_ATTENTE`, sans modifier aucun solde ni attribut, jusqu'à la réponse du propriétaire.
 - **Deux services, une bibliothèque.** `reprise-service` et `connecteurs-service` sont deux services
   (agrégats distincts). Ils partagent la bibliothèque d'adaptateurs du dépôt `prospera-adaptateurs`
   (paquet npm privé versionné avec la plateforme) ; chacun garde ses identifiants de connexion.
@@ -589,6 +595,7 @@ que `STORY-356`/`236`/`357` ne sont pas livrées.
 | 1.1 | 2026-07-07 | vivian | **Modules partagés & versioning par organisation** : `bilan-service` (capacité partagée, 2 axes version de code ⊥ référentiel packagé, gate d'accès en relying party) et `catalog-service` (entitlements `(org × module)`, topic `entitlement.changed`, `admin-panel` BFF pour FR-012). Amende l'ownership map (entitlement → catalog ; abonnement reste vertical) ; ajoute **P7/P8** ; insère catalog + bilan dans la roadmap ; risques N/N-1 & routage multi-version. JWT/A3 inchangés. |
 | 1.2 | 2026-07-07 | vivian | **Couche edge/exécution** : décisions **P9** (schema registry adopté maintenant — compatibilité BACKWARD en CI) et **P10** (mono-repo maintenant, poly-repo différé) ; ajout du doc `architecture-gateway` (validation JWT fail-fast à l'edge + services souverains, routage par préfixe, résolution multi-version, services sans port public). Risque #4 (schema registry) passé de « envisager » à « planifié ». |
 | 1.3 | 2026-07-10 | vivian | **Alignement PLAN FINAL** (`docs/synthese-services-prospera-2026-07-10.md`) : décisions **P11** (dogfooding interne d'abord — Money Vibes = client zéro ; N/N-1 & routage multi-version différés jusqu'au 1er client externe, **DG-1** ; chaîne KYC livrée d'abord, **AD-2**) et **P12** (18 modules → 18 services suivant le moule unique ; **NC-1** `catalog-service` → `platform-catalog-service` ; **NB-1** Bilan par import de balance + prévisionnel ; **PA-1** checkout/webhooks → `paiement-service`). Ordre de construction et backlog des 18 modules → `program_backlog` de `sprint-status.yaml`. Invariants inchangés. |
+| **1.11** | **2026-11-12** | Dev B + Claude | **AD-P18 amendée par la spine de Connecteurs (`architecture-connecteurs-2026-11-12`, AD-31)** : « a toujours raison » vaut pour la synchronisation automatique ; pour l'argent, la décision humaine prime et peut corriger le propriétaire (AD-14) ; les mouvements en attente vivent chez la cible, par le kit des cibles (AD-11). |
 | **1.10** | **2026-11-11** | Dev B + Claude | **AD-P17 corrigée (cohérence, réponse 9 au §9 de l'amendement du plan v3)** : installer = un plan du moteur (seul le moteur pose `ACTIVE`) ; treize clauses (C12, C13 validées) ; Q3 étendue à la lecture seule ; D3 révisée inscrite. |
 | **1.9** | **2026-11-11** | PO + Claude | ⚡ **AD-P18 — autorité métier extérieure** (le propriétaire d'un domaine a toujours raison ; mouvements « en attente de confirmation » ; deux services Reprise et Connecteurs, une bibliothèque `prospera-adaptateurs`). Reports de la spine du moteur d'installation : **P9** précisé (Karapace 6.2 dans le socle de chaque espace) ; **P10** corrigé (19 dépôts git, pas de mono-dépôt ; dépôts `prospera-plateforme` et `prospera-adaptateurs`) ; client Kafka `@confluentinc/kafka-javascript`, Node 24, MongoDB 8.0 ; **AD-P16** précisé (routes de lecture inaccessibles sur site hors tunnel ouvert, jamais utilisées pour l'apprentissage). |
 | **1.8** | **2026-11-09** | PO + Claude | ⚡ **AD-P17 — le module installable, façon Odoo.** Le module devient l'unité de vente et d'installation, le service l'unité de déploiement ; contrat en dix clauses (`CONTRAT-DE-MODULE-2026-11-09.md`), manifeste par version de module (`depends` / `enrichiPar`), désinstallation refusée si le module est requis, aucune suppression à la désinstallation. Décisions D1/D2/D3 du plan à deux développeurs et Q1 → Q5 du contrat. Amende P12. |

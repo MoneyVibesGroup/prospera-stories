@@ -16,6 +16,8 @@ mode: coaching
 
 *Brouillon rédigé à partir du récit du PO (2026-11-10). Décisions et raisons dans `.memlog.md`.*
 
+*Amendé le 2026-11-12 par la spine de Connecteurs (`architecture-connecteurs-2026-11-12`, AD-31) : §0, FR-2, FR-3, FR-5, FR-7, FR-8, FR-9, FR-13, FR-14, FR-17, FR-18, FR-20, UJ-8, NFR-2, SM-5, C3, C5, C7, C8, C9, C11, C13 (point 2), §3 (écart), QK-1, QK-7, QK-14, QK-20, A-11. Chaque amendement est signalé « Amendement (2026-11-12, spine de Connecteurs, AD-n) ».*
+
 *Corrections du 2026-11-11 après `controle-cible.md` : décisions du PO QC-2 → QC-11 intégrées (module commercial, tables de correspondance, adaptateurs, relais de la Reprise, retour arrière, écart bloquant, prospect, supervision sur site, bandeaux rendus par la coque) ; nouvelles FR-18 à FR-21 ; contrat de module à 13 clauses. Les hypothèses non décidées sont marquées `[A-n]` et indexées au §8.*
 
 ---
@@ -36,7 +38,11 @@ hors de ce PRD : le connecteur relie Prospera **au logiciel du client**.
 **ajouté d'office** à tout contrat qui déclare un logiciel du client, et il est **inclus dans la plateforme
 complète**. Sans lui, le moteur ne peut ni le vendre ni décider du mode permanent ou temporaire (FR-3).
 
-**Échéance.** Requis en **février** pour l'Odoo du distributeur (PRD moteur, QA-3 ; FR-17). Le connecteur de
+**Échéance.** ~~Requis en **février** pour l'Odoo du distributeur (PRD moteur, QA-3 ; FR-17).~~ **Amendement (2026-11-12, spine de Connecteurs, AD-32).**
+Connecteurs n'est plus requis en février : aucun des deux clients de février ne garde son logiciel (l'assureur
+fournit un export Excel, le distributeur quitte Sage). Il est requis **au premier contrat signé qui déclare un
+logiciel du client**, avec un délai de construction chiffré avant signature. Le manifeste (13/11), les contrats
+de la spine et la part du kit des cibles qui sert la Reprise restent dus avant février. Le connecteur de
 l'IMF (FR-15) n'a pas de date : elle se fixe avec le premier client IMF (porteur : le PO) `[A-1]`.
 
 ## 1. Vision
@@ -89,8 +95,14 @@ sources. Awa vérifie le relevé de l'opérateur, retient 45 000 F, et la correc
 À l'installation, dans l'espace d'essai, Rachid fixe, domaine par domaine, qui est propriétaire : Prospera
 pour les points de vente et les encaissements terrain, Odoo pour les écritures comptables ; ces réglages
 sont rejoués dans l'espace réel à la mise en service. Chez un client qui a pris la plateforme complète,
-l'ordre est celui du moteur et de la Reprise : semaine en parallèle, écart nul, **mise en service**, puis
-Rachid **arrête la synchro** des domaines un par un ; Odoo s'arrête quand le dernier domaine est arrêté.
+l'ordre est celui du moteur et de la Reprise : semaine en parallèle (dans l'espace d'essai), écart nul, **mise en
+service**, puis Rachid **arrête la synchro** des domaines un par un ; Odoo s'arrête quand le dernier domaine est arrêté.
+
+**Amendement (2026-11-12, spine de Connecteurs, AD-15, AD-28 et AD-33).** Rachid fixe les propriétaires et arrête
+les domaines dans le **module d'écran `connecteurs`**, sur la plateforme comme sur site (la console ne garde que la
+vue du parc). La marche en parallèle se joue **dans l'espace d'essai, avant** la mise en service (ordre du PO conservé ; domaines en mode ombre, AD-15) ; dans le réel, l'arrêt d'un domaine d'argent attend
+que la file des écarts de Connecteurs n'ait aucun écart ouvert sur ce domaine, et suit le protocole de bascule
+d'AD-33.
 
 ## 3. Vocabulaire
 
@@ -127,7 +139,9 @@ Rachid **arrête la synchro** des domaines un par un ; Odoo s'arrête quand le d
   avec sa raison. À distinguer des refus nommés d'un serveur Prospera (`ABONNEMENT_EXPIRE`,
   `ECRITURE_REELLE_DEPUIS_ESSAI`…).
 - **Écart de concordance** (« écart » dans la suite) : une différence d'argent ou de quantités entre les deux
-  logiciels. À distinguer des écarts nommés du moteur et des écarts de reprise. La **file des écarts** les
+  logiciels. *(Amendement 2026-11-12, spine de Connecteurs, AD-13 : un écart se ferme aussi `RESORBE`, sans
+  décision, quand les deux valeurs redeviennent égales ; une discordance sur une valeur `LECTURE`, calculée par
+  le propriétaire et seulement lue, n'est pas un écart.)* À distinguer des écarts nommés du moteur et des écarts de reprise. La **file des écarts** les
   présente côte à côte, en attente d'une décision humaine.
 - **Contrôle de concordance** : la comparaison nocturne des totaux (stock par entrepôt, encours par agence).
 - **Niveau de fraîcheur** : le délai cible d'un domaine : **immédiat** (quelques minutes), **dans
@@ -163,7 +177,9 @@ Rachid **arrête la synchro** des domaines un par un ; Odoo s'arrête quand le d
 Réalise UJ-8.
 
 **Conséquences (testables) :**
-- À l'installation, dans l'**espace d'essai**, l'intégrateur fixe dans la console, **domaine par domaine**,
+- À l'installation, dans l'**espace d'essai**, l'intégrateur fixe ~~dans la console~~ dans le module d'écran
+  `connecteurs` (amendement 2026-11-12, spine de Connecteurs, AD-28 : sur la plateforme comme sur site ; la
+  console garde la vue du parc), **domaine par domaine**,
   le propriétaire : Prospera ou le logiciel du client. Ces réglages font partie du **dossier d'installation**
   et sont rejoués dans l'espace réel à la mise en service (FR-18).
 - Le propriétaire a **toujours raison** ; l'autre logiciel ne fait que recevoir.
@@ -172,6 +188,10 @@ Réalise UJ-8.
   confirmation** jusqu'à son acceptation.
 - Changer le propriétaire d'un domaine est un acte tracé, avec un contrôle de concordance juste avant ; pour
   un domaine d'argent, **aucun écart ouvert** sur ce domaine `[A-2]`.
+- **Amendement (2026-11-12, spine de Connecteurs, AD-3).** Un propriétaire **inconnu** vaut refus, jamais
+  « Prospera » : tant que Connecteurs est installé pour l'organisation et que la cible ne connaît pas l'état du
+  domaine, toute écriture d'un utilisateur sur ce domaine est refusée (`PROPRIETAIRE_INCONNU`, réessayable). Le
+  propriétaire est publié dès l'import du dossier (domaine `PREPARE`), avant la mise en service.
 
 #### FR-3 : Permanent par défaut, temporaire par offre
 **Conséquences (testables) :**
@@ -181,14 +201,20 @@ Réalise UJ-8.
   **inclus dans la plateforme complète**. Sans cette ligne, il ne se vend pas.
 - **Mode temporaire** (client qui a pris la plateforme complète, ou le pack Finance & Recouvrement) : le
   connecteur ne sert que le temps du passage. L'ordre est celui du moteur et de la Reprise : marche en
-  parallèle, écart nul (PRD Reprise, FR-17), **mise en service**, puis l'intégrateur **arrête la synchro**
+  parallèle dans l'essai, écart nul (PRD Reprise, FR-17), **mise en service**, puis l'intégrateur **arrête la synchro**
   des domaines un par un ; le logiciel du client s'arrête quand le dernier domaine est arrêté.
+  **Amendement (2026-11-12, spine de Connecteurs, AD-15).** Précision : la marche en parallèle se joue **dans
+  l'espace d'essai, avant** la mise en service (le connecteur de l'essai relève le vrai logiciel en lecture seule ;
+  domaines en mode ombre) ; dans le réel, la synchro démarre à la mise en service.
 - **Arrêt de la synchro d'un domaine d'argent** (décision du PO, 2026-11-11) : refusé tant qu'un **écart est
   ouvert** sur ce domaine ; il exige un contrôle de concordance juste avant, sans écart.
+  **Amendement (2026-11-12, spine de Connecteurs, AD-33).** L'arrêt attend la file des écarts de Connecteurs
+  sans écart ouvert sur ce domaine d'argent (le rapport d'écarts de la période de la Reprise n'est pas cette
+  condition) et suit le protocole de bascule en cinq étapes d'AD-33.
 - **Mode permanent** (client qui a pris seulement Terrain & Ventes, ou Stock & Logistique ; cas le plus
   fréquent) : le client garde son logiciel pour ce que Prospera ne couvre pas chez lui, le plus souvent la
   comptabilité.
-- Le mode **découle de l'offre** du client ; la console le propose, l'intégrateur le confirme.
+- Le mode **découle de l'offre** du client ; l'écran de configuration du module `connecteurs` le propose, l'intégrateur le confirme.
 
 ### 4.B Échanger sans s'écraser
 
@@ -206,11 +232,16 @@ Réalise UJ-8.
 
 | Niveau | Délai cible | Données |
 |---|---|---|
-| **Immédiat** | **5 minutes** au plus (avec API ; impossible avec un export du logiciel du client) | remboursements et encaissements ; blocage de crédit ; stock disponible au moment de valider une commande (lu chez le propriétaire du stock) |
+| **Immédiat** | **5 minutes** au plus (avec API ; impossible avec un export du logiciel du client) | remboursements et encaissements ; blocage de crédit ; stock disponible au moment de valider une commande (~~lu chez le propriétaire du stock~~ lu sur la valeur relevée à 60 s, amendement 2026-11-12, AD-4) |
 | **Dans l'heure** | < 1 heure | nouveaux clients et points de vente ; produits ; changements de prix (toujours avec une **date d'effet**) |
 | **La nuit** | avant 6 h | écritures comptables ; historique pour l'IA ; contrôle de concordance ; préparation des états BCEAO |
 
 **Conséquences (testables) :**
+- **Amendement (2026-11-12, spine de Connecteurs, AD-2 et AD-4).** Le stock disponible lu au moment de valider une
+  commande est la valeur `LECTURE` du domaine, relevée à 60 s (niveau `IMMEDIAT`) avec sa mention de fraîcheur :
+  aucune lecture synchrone du logiciel du client ne se trouve sur le chemin d'une saisie. La table « donnée →
+  niveau » ci-dessus est la **somme des `niveauParDefaut`** déclarés par les modules cibles à leur manifeste et des
+  répartitions livrées avec `prospera-adaptateurs`.
 - Chaque domaine porte son niveau de fraîcheur.
 - Les données de nuit sont arrivées **avant 6 h**, parce que l'IA prépare la nuit les priorités du matin.
   Ce « 6 h » se lit sur l'**heure de référence** de la plateforme (spine, AD-5) et dans le **fuseau de
@@ -237,6 +268,11 @@ Réalise UJ-8.
 - Un bouton **« Corriger et renvoyer »** permet de corriger puis de renvoyer le mouvement ; il est enveloppé
   dans `<Ecriture>` (spine, AD-7) : fermé en lecture seule, la consultation reste ouverte.
 - Un refus n'est jamais ignoré : il reste visible tant qu'il n'est pas traité.
+- **Amendement (2026-11-12, spine de Connecteurs, AD-9).** « Corriger et renvoyer » suit l'une de deux voies : une
+  **règle** de Connecteurs corrigée (correspondance, liaison), et le **même** mouvement repart avec le même
+  identifiant ; ou l'**objet source** corrigé dans son module, et la cible publie un **nouveau** mouvement qui
+  remplace le refusé (le refusé passe `ABANDONNE`, le remplaçant garde le `rang` du remplacé). Connecteurs ne
+  modifie jamais le contenu d'un mouvement d'une cible.
 
 ### 4.C Ne jamais corriger l'argent en silence
 
@@ -249,8 +285,18 @@ Réalise UJ-7.
 - L'écart entre dans la **file des écarts**, avec les **deux valeurs côte à côte** et leurs sources.
 - Une personne habilitée **tranche** : la comptable chez le distributeur, le chef d'agence à l'IMF. Le
   droit de trancher est un droit de tenant (contrat de module C7).
-- Chaque décision est tracée (qui, quand, valeur retenue, motif) ; la correction part vers le propriétaire.
-- Trancher est une écriture (la correction part vers le propriétaire) : l'action est enveloppée dans
+- Chaque décision est tracée (qui, quand, valeur retenue, motif) ; ~~la correction part vers le propriétaire~~
+  **Amendement (2026-11-12, spine de Connecteurs, AD-14).** la correction part vers **chaque logiciel dont la
+  valeur diffère de la valeur retenue**, de valeur absolue, par le chemin normal (un mouvement dans la file
+  d'envoi vers le logiciel du client, une opération `CORRIGER` vers la cible). Pour un domaine d'argent, la
+  décision humaine prime sur « le propriétaire a toujours raison » et peut corriger le propriétaire lui-même. Une
+  décision est refusée tant qu'un mouvement est en vol sur la clé de l'écart.
+- **Amendement (2026-11-12, spine de Connecteurs, AD-13).** Un écart se ferme aussi **`RESORBE`**, sans décision,
+  quand une concordance suivante trouve les deux valeurs égales (journalisé, visible au rapport ; pour un domaine
+  d'argent, visible 30 jours dans la file). Une discordance sur une valeur `LECTURE` n'est **pas** un écart : c'est
+  un retard de fraîcheur.
+- Trancher est une écriture (la correction part vers **chaque logiciel dont la valeur diffère de la valeur
+  retenue**, amendement 2026-11-12, spine de Connecteurs, AD-14) : l'action est enveloppée dans
   `<Ecriture>` (spine, AD-7). En `LECTURE_SEULE`, les écarts restent **consultables mais non tranchables**
   (FR-19).
 - Un écart ouvert **bloque l'arrêt de la synchro** d'un domaine d'argent (FR-3).
@@ -259,11 +305,17 @@ Réalise UJ-7.
 **Conséquences (testables) :**
 - Chaque nuit, avant 6 h, une comparaison globale des totaux (stock par entrepôt, encours par agence…)
   vérifie que les deux logiciels concordent.
-- Toute discordance entre dans la file des écarts.
+- Toute discordance entre dans la file des écarts (amendement 2026-11-12, spine de Connecteurs, AD-13 : sauf
+  sur une valeur `LECTURE`, jamais comparée).
+- **Amendement (2026-11-12, spine de Connecteurs, AD-13).** La concordance compare **objet par objet**, puis
+  agrège les totaux au rapport (stock par entrepôt, encours par agence) ; une clé qui a un mouvement non confirmé
+  est listée « en vol », jamais en écart.
 - Ce contrôle prolonge **sans intervention humaine** la vérification de la marche en parallèle (PRD Reprise,
   FR-17).
-- Pendant la marche en parallèle, c'est **la file des écarts qui fait foi** pour l'arrêt de la synchro
-  (QC-8). Le feu vert de la Reprise (écart de reprise nul) est une **autre condition** : il ne se lit pas dans cette file
+- **Dans le réel, après la mise en service, c'est la file des écarts de Connecteurs qui fait foi** pour l'arrêt
+  de la synchro (QC-8, précisé par l'amendement 2026-11-12, spine de Connecteurs, AD-15 : la marche en parallèle se
+  joue avant, dans l'essai, où la même concordance alimente le rapport d'écarts de la période de la Reprise ; la
+  mise en service attend l'écart nul de cette période, D-48). Le feu vert de la Reprise (écart de reprise nul) est une **autre condition** : il ne se lit pas dans cette file
   (hypothèse A-5 rejetée par le PO, 2026-11-11).
 
 ### 4.D Quand le lien tombe
@@ -329,7 +381,9 @@ Réalise UJ-6.
 - **Sur site** (décision du PO, 2026-11-11) : **seuls des compteurs** remontent à Money Vibes, par le
   **contrôle quotidien** de l'instance (PRD moteur, FR-16 et FR-26) : état du connecteur, niveau de
   fraîcheur, longueur de la file d'envoi, nombre de refus et d'écarts. Le schéma est **fermé** et ne
-  contient **aucune donnée métier** (ni numéro de facture, ni montant, ni nom). L'alerte à l'**administrateur
+  contient **aucune donnée métier** (ni numéro de facture, ni montant, ni nom). **Amendement (2026-11-12, spine de
+  Connecteurs, AD-17 et AD-30).** Les compteurs par domaine comptent aussi le `niveau` et la santé, et le signal
+  porte aussi les compteurs de Connecteurs (`instance.indicateurs`, schéma fermé). L'alerte à l'**administrateur
   du client reste sur l'instance** et part à 30 minutes. La console Money Vibes ne montre, sur site, **ni
   refus ni écarts au contenu métier**. Le délai réel d'alerte de Money Vibes sur site est donc celui du
   contrôle quotidien (jusqu'à 24 h), et non 30 minutes. Les champs du connecteur sont à ajouter au schéma de
@@ -352,9 +406,9 @@ Exemple chez un distributeur qui garde Odoo pour la comptabilité :
 | Écritures comptables, lettrage | Odoo | le comptable y travaille |
 
 **Conséquences (testables) :**
-- Cette répartition est la **proposition par défaut** de la console pour un distributeur avec Odoo ;
+- Cette répartition est la **proposition par défaut** de l'écran de configuration du module `connecteurs` pour un distributeur avec Odoo ;
   l'intégrateur l'ajuste.
-- Chaque domaine du distributeur a un propriétaire dans cette table : la console refuse de mettre en
+- Chaque domaine du distributeur a un propriétaire dans cette table : l'écran de configuration du module `connecteurs` refuse de mettre en
   service un domaine sans propriétaire.
 
 **Toutes les versions d'Odoo (décision du PO, 2026-11-10).** Odoo change de forme d'une version à
@@ -373,6 +427,11 @@ l'autre ; le connecteur doit donc s'adapter à celle qu'il trouve :
   **version détectée** et les **droits du compte** sont aussi des prérequis vérifiés (C13) ;
 - chaque version effectivement rencontrée chez un client entre dans la **matrice de tests** du connecteur ;
   une version jamais testée est signalée à l'installation, sans être refusée `[A-9]`.
+- **Amendement (2026-11-12, spine de Connecteurs, AD-23).** **XML-RPC est différé** : JSON-RPC (`execute_kw`) est
+  présent de la version 8.0 à la 19.0 et sert d'ancienne API ; XML-RPC ne sert que pour une version plus
+  ancienne. **JSON-2** est utilisée dès qu'elle existe (Odoo 19 et suivants), **derrière l'interrupteur
+  `odoo-json2`**. Les deux API anciennes sont annoncées en retrait d'Odoo 22 (automne 2028) et d'Odoo Online 21.1
+  (hiver 2027).
 
 #### FR-15 : IMF
 **Conséquences (testables) :**
@@ -393,10 +452,12 @@ l'autre ; le connecteur doit donc s'adapter à celle qu'il trouve :
   logiciel de l'assureur**, que le PO n'a pas encore vu (porteur : le PO ; pas de date). Non requis en
   février.
 
-### 4.F Février : l'ordre de livraison du connecteur Odoo
+### 4.F L'ordre de livraison du connecteur Odoo (au premier contrat qui garde un logiciel)
 
 #### FR-17 : Livrer par étapes
-Requis en février, pour l'Odoo du distributeur (§0). **Trois étapes** :
+~~Requis en février, pour l'Odoo du distributeur (§0).~~ **Amendement (2026-11-12, spine de Connecteurs, AD-32).**
+Requis au **premier contrat signé qui déclare un logiciel du client**, plus en février (§0) ; les trois étapes
+ci-dessous donnent l'ordre de construction à ce moment-là. **Trois étapes** :
 
 **Conséquences (testables) :**
 1. **Clients et produits**, avec les prix (le relais de la Reprise se fait à un point de relais daté, FR-20).
@@ -431,7 +492,11 @@ que son FR-6 attribue à Connecteurs (PRD moteur, §8.4). Les mots « bac à sab
 - **Identifiants en lecture seule propres à l'essai.** Pour **lire** le vrai logiciel du client pendant
   l'essai (ce qui est permis), le connecteur reçoit un jeu d'identifiants **en lecture seule, distinct** de
   celui du réel. À leur déclaration, une **écriture de test** est tentée ; le logiciel du client doit la
-  **refuser**, sinon les identifiants sont **rejetés**.
+  **refuser**, sinon les identifiants sont **rejetés**. **Amendement (2026-11-12, spine de Connecteurs,
+  AD-18).** La preuve de lecture seule est d'abord le **contrôle de droits natif** du logiciel, selon le profil de
+  version (Odoo : `check_access_rights` jusqu'à la 17, `has_access` dès la 18). Une **écriture de test** n'a lieu
+  que sur un **objet de test déclaré** par l'adaptateur ; sans contrôle natif ni objet de test, aucune écriture
+  de test n'est faite et la preuve est marquée « non démontrée » au bilan.
 - **Jamais d'identifiant d'écriture du réel dans l'essai.** Le serveur refuse toute destination déclarée
   pour l'espace réel avec le refus nommé `ECRITURE_REELLE_DEPUIS_ESSAI`, **quel que soit l'écran**. Test :
   déclarer une destination réelle dans l'essai ; le refus est rendu côté serveur.
@@ -455,7 +520,8 @@ que son FR-6 attribue à Connecteurs (PRD moteur, §8.4). Les mots « bac à sab
   efface ses identifiants, ses files d'envoi et d'écarts, ses copies de données et ses tables ; le journal
   reste en ajout seul, **pseudonymisé** ; il rend un certificat à l'appel du moteur.
 - **Qui lit quoi.** Pendant l'essai, la Reprise lit **le vrai logiciel** avec ses propres identifiants en
-  lecture seule (QK-6) ; le connecteur lit avec les siens ; aucun bac à sable n'est lu par la Reprise `[A-10]`.
+  lecture seule (QK-6) ; le connecteur lit avec les siens ; aucun bac à sable n'est lu par la Reprise `[A-10]`
+  (renvoi, amendement 2026-11-12, spine de Connecteurs, AD-18 : la Reprise lit le réel, jamais le bac à sable).
 
 #### FR-19 : Le connecteur selon l'état publié
 Le connecteur lit **l'état publié** poussé par le moteur (PRD moteur, §3.1), jamais l'horloge de son
@@ -500,12 +566,22 @@ Le passage du « une fois » au « permanent » (PRD Reprise, FR-1) a une fronti
   rejoués ; le premier échange part du point de relais (curseur), sans doublon avec le lot repris.
 - **Quand la synchro démarre** : **au point de relais**, c'est-à-dire à la mise en service du sous-ensemble (hypothèse A-11
   modifiée par le PO, 2026-11-11) ; pas à la réception définitive, qui peut venir des semaines plus tard.
+  **Amendement (2026-11-12, spine de Connecteurs, AD-20).** Le point de relais se scinde en **deux points** : le
+  **point de coupure** (début de l'extraction du lot du réel), d'où part le premier relevé, un enregistrement
+  antérieur étant ignoré et un enregistrement relu en double reconnu par sa clé d'origine ; et la **mise en
+  service**, qui reste ce qui rend le domaine `ACTIF`. Sans Reprise dans l'offre, ou sans lot sur le domaine, le
+  premier relevé d'un domaine `OBJET_DATE` ou `LECTURE` part **de zéro** (synchronisation initiale).
 - **Stock d'ouverture** (décision du PO, 2026-11-11) : quand Odoo est propriétaire du stock, le **comptage
   d'ouverture** se saisit dans les écrans de la Reprise, mise en service la première dans le réel (PRD Reprise FR-16,
   décision du PO du 2026-11-11), puis il est livré au module Stock et part vers Odoo comme **mouvement d'ajustement**
-  « en attente de confirmation ».
+  « en attente de confirmation ». **Amendement (2026-11-12, spine de Connecteurs, AD-20).** Le comptage n'est
+  **jamais additionné** chez Odoo : il part comme **ajustement d'inventaire en quantité comptée** (une quantité
+  comptée par entrepôt et article, que l'adaptateur applique comme un inventaire du propriétaire), en attente de
+  confirmation ; la Reprise le livre à `stock`, qui le garde comme ajustement en attente et le publie à la mise
+  en service.
 - **Identifiants** : le connecteur ne reprend pas les identifiants de la Reprise (FR-1). À la réception
-  définitive, la Reprise retire les siens (A-11 modifiée).
+  définitive, la Reprise retire les siens (A-11 modifiée ; renvoi, amendement 2026-11-12, spine de Connecteurs,
+  AD-20 : le connecteur ne les reprend jamais).
 
 #### FR-21 : Mise à jour et retour arrière
 Concerne la clause C12 (PRD moteur, FR-17 et FR-18).
@@ -531,7 +607,11 @@ Concerne la clause C12 (PRD moteur, FR-17 et FR-18).
 ## 5. Exigences transverses
 
 - **NFR-1, idempotence** : un mouvement reçu ou envoyé deux fois ne s'applique qu'une fois.
-- **NFR-2, ordre** : au sein d'un domaine, les mouvements s'appliquent dans l'ordre de leur création.
+- **NFR-2, ordre** : ~~au sein d'un domaine, les mouvements s'appliquent dans l'ordre de leur création~~.
+  **Amendement (2026-11-12, spine de Connecteurs, AD-6).** L'ordre garanti est celui de **chaque objet** : le
+  `rang` est attribué par la cible dans la transaction de la saisie, et Connecteurs ordonne par (objet, `rang`) ;
+  les **dépendances** (un encaissement attend la facture qu'il règle) se résolvent tous domaines du connecteur
+  confondus. Un refus bloque son objet et ce qui en dépend, pas le reste du domaine.
 - **NFR-3, argent** : aucun chemin de code ne corrige automatiquement un solde ou un encaissement ; un test de
   mutation le vérifie.
 - **NFR-4, résistance** : file d'envoi et file des écarts survivent à un redémarrage.
@@ -548,7 +628,7 @@ Concerne la clause C12 (PRD moteur, FR-17 et FR-18).
 | SM-2 | Mouvements perdus ou appliqués deux fois | 0 |
 | SM-3 | Mouvements du niveau « immédiat » arrivés dans le délai cible (avec API) | ≥ 95 % `[A-12]` |
 | SM-4 | Contrôles de concordance terminés avant 6 h | 100 % |
-| SM-5 | Connecteur Odoo du distributeur de février en service, étapes 1 à 3 de FR-17 | atteint |
+| SM-5 | ~~Connecteur Odoo du distributeur de février en service, étapes 1 à 3 de FR-17~~ **Amendement (2026-11-12, spine de Connecteurs, AD-32).** Connecteur Odoo du premier client qui garde Odoo en service, étapes 1 à 3 de FR-17 (plus requis en février) | atteint |
 
 **Contre-indicateurs** :
 - écarts restés **plus de 48 h** dans la file sans décision `[A-13]` ;
@@ -562,17 +642,17 @@ Concerne la clause C12 (PRD moteur, FR-17 et FR-18).
 |---|---|
 | C1 | Manifeste `connecteurs`, **module commercial** (FR-3). `depends: []` : il peut être vendu sans la Reprise. `enrichiPar` : `reprise` (raison : elle crée les tables de correspondance et charge produits, prix et stock avant le point de relais, FR-20 ; code à fixer par le PRD Reprise) et les modules dont les domaines circulent (raison : ils reçoivent les mouvements). Prérequis : accès au logiciel du client **joignable**, version détectée, droits du compte, plan Custom d'Odoo Online. Déclare aussi : vérifications (code, route, critère), `retourArriere: SANS_PERTE`, `interrupteurs`, `routesLectureSeule`, routes d'export, droits nommés |
 | C2 | Gate et cloisonnement par organisation ; refus `CONNECTEURS_NOT_ENTITLED`. Lit l'**état publié poussé**, jamais l'horloge du conteneur ; `LECTURE_SEULE` : écriture refusée `ABONNEMENT_EXPIRE` sauf les routes déclarées ; export toujours ouvert ; identité de service du moteur admise sur les routes de vérification ; matrice des 9 états : FR-19 |
-| C3 | Possède (service distinct des modules cibles et de la Reprise, contrat §4 ; QK-15) : configuration des domaines et propriétaires, identifiants du connecteur, files d'envoi et d'écarts, journal, et les **tables de correspondance** une fois copiées de la Reprise (FR-20). Livre aux modules par un **contrat de mouvements nommé et versionné** (C5), n'écrit chez aucun d'eux. L'import de masse reste à la Reprise |
+| C3 | Possède (service distinct des modules cibles et de la Reprise, contrat §4 ; QK-15) : configuration des domaines et propriétaires, identifiants du connecteur, files d'envoi et d'écarts, journal, et les **tables de correspondance** une fois copiées de la Reprise (FR-20). Livre aux modules par un **contrat de mouvements nommé et versionné** (C5), n'écrit chez aucun d'eux. **Amendement (2026-11-12, spine de Connecteurs, AD-10 et AD-29).** Ce contrat est la **route d'échange** de la cible (enveloppe `echange-enveloppe@1`) et les faits déclarés par les domaines ; Connecteurs n'écrit toujours chez aucun module. L'import de masse reste à la Reprise |
 | C4 | Un module cible absent : son domaine est déclaré « non installé », jamais synchronisé ailleurs |
-| C5 | Contrats nommés et versionnés : `mouvements-echange@1` (vers les modules cibles et depuis eux) ; `fraicheur-domaine@1` (date du dernier échange, niveau, source, longueur de la file d'envoi, lus par la coque) ; `etat-connecteur@1` (santé, nombre de refus et d'écarts) |
+| C5 | Contrats nommés et versionnés : ~~`mouvements-echange@1` (vers les modules cibles et depuis eux) ; `fraicheur-domaine@1` (date du dernier échange, niveau, source, longueur de la file d'envoi, lus par la coque) ; `etat-connecteur@1` (santé, nombre de refus et d'écarts)~~. **Amendement (2026-11-12, spine de Connecteurs, AD-10, AD-16, AD-17 et AD-29).** `mouvements-echange@1` est remplacé par la **route d'échange** de la cible (enveloppe `echange-enveloppe@1`), les faits déclarés par les domaines et `connecteurs.domaine.changed` ; `fraicheur-domaine@1` par la route `etat-synchro` (coque AD-7) ; `etat-connecteur@1` par la route `sante` et `instance.indicateurs`. `domainesEchange` est un champ nouveau du manifeste, pas un renommage |
 | C6 | Propriétaires, niveaux de fraîcheur et correspondances sont des données par client, jamais du code ; schéma de données identique pour toutes les organisations |
-| C7 | Droits nommés `connecteurs:<objet>:<action>` `[A-7]` : `connecteurs:configuration:administrer` (droit de **plateforme**, Rachid, FR-2) ; droits de **tenant** : `connecteurs:ecart:trancher`, `connecteurs:refus:renvoyer`, `connecteurs:file:consulter` |
-| C8 | Écrans client dans `prospera-app`, module d'écran `connecteurs` (`src/modules/connecteurs/`) : file des écarts, refus avec « Corriger et renvoyer », file d'envoi ; actions enveloppées dans `<Ecriture>`, consultation ouverte en lecture seule. Les **mentions de fraîcheur** et les **bandeaux** (file d'envoi, fraîcheur dégradée) sont rendus par la **coque** (spine, AD-7), pas par le module. Écrans Money Vibes (configuration, santé, vue par client) dans la console (FR-36) |
-| C9 | Désinstaller coupe les échanges sans rien supprimer. Avertissement avant désinstallation : « le logiciel du client cessera de recevoir les mouvements de Prospera ». La file d'envoi et les écarts sont **figés** ; à la réinstallation, rien ne repart seul : la file figée est présentée à l'intégrateur, qui la rejoue ou l'écarte `[A-14]` |
+| C7 | Droits nommés `connecteurs:<objet>:<action>` `[A-7]` : `connecteurs:configuration:administrer` (droit de **plateforme**, Rachid, FR-2) ; droits de **tenant** : `connecteurs:ecart:trancher`, `connecteurs:refus:renvoyer`, `connecteurs:file:consulter`. **Amendement (2026-11-12, spine de Connecteurs, AD-27).** Un quatrième droit de tenant, `connecteurs:file:reprendre` (le DSI, après un retour arrière) ; le rôle du DSI contient les quatre dès l'installation, et la comptable et le chef d'agence reçoivent `connecteurs:ecart:trancher` de l'administrateur du client |
+| C8 | Écrans client dans `prospera-app`, module d'écran `connecteurs` (`src/modules/connecteurs/`) : file des écarts, refus avec « Corriger et renvoyer », file d'envoi ; actions enveloppées dans `<Ecriture>`, consultation ouverte en lecture seule. Les **mentions de fraîcheur** et les **bandeaux** (file d'envoi, fraîcheur dégradée) sont rendus par la **coque** (spine, AD-7), pas par le module. Écrans Money Vibes (configuration, santé, vue par client) dans la console (FR-36). **Amendement (2026-11-12, spine de Connecteurs, AD-28 et D-10).** La **configuration** (connecteur, propriétaires, niveaux, correspondances, bac à sable, bascule et arrêt de la synchro) vit dans le module d'écran `connecteurs`, sur la plateforme comme sur site, derrière `connecteurs:configuration:administrer` ; la console garde la **vue du parc** (complète sur la plateforme, réduite aux compteurs sur site) |
+| C9 | Désinstaller coupe les échanges sans rien supprimer. Avertissement avant désinstallation : « le logiciel du client cessera de recevoir les mouvements de Prospera » (**amendement 2026-11-12, spine de Connecteurs, AD-21** : texte fixé, donnée du manifeste `avertissementDesinstallation` lue par la partie A : « Le logiciel du client cessera de recevoir les mouvements de Prospera ; la file d'envoi sera figée, rien ne sera supprimé. »). La file d'envoi et les écarts sont **figés** ; à la réinstallation, rien ne repart seul : la file figée est présentée à l'intégrateur, qui la rejoue ou l'écarte `[A-14]` |
 | C10 | Profil compose `connecteurs` |
-| C11 | **Sans objet pour le module lui-même** : pas de champ `ia` au manifeste, pas de modèle. Il **achemine** l'historique de nuit vers les modules cibles par `mouvements-echange@1` ; les modèles, journaux de prédictions et consentements vivent dans ces modules. L'historique initial est acheminé par la Reprise (PRD Reprise, FR-20). Rien ne sort de l'instance sans consentement |
+| C11 | **Sans objet pour le module lui-même** : pas de champ `ia` au manifeste, pas de modèle. Il **achemine** l'historique de nuit vers les modules cibles par la route d'échange de la cible et les faits déclarés par les domaines ; les modèles, journaux de prédictions et consentements vivent dans ces modules. L'historique initial est acheminé par la Reprise (PRD Reprise, FR-20). Rien ne sort de l'instance sans consentement. **Amendement (2026-11-12, spine de Connecteurs, AD-10 et AD-29).** `mouvements-echange@1` n'existe plus : l'acheminement passe par la route d'échange de la cible et les faits déclarés par les domaines. |
 | C12 | `retourArriere: SANS_PERTE` pour les données Prospera du connecteur : migrations **additives** pendant 7 jours, lecteur tolérant, topics `@2` si incompatible. **Un connecteur qui a écrit chez le client n'est pas réversible** : l'état d'envoi de chaque mouvement est relu par la version précédente ; les mouvements inverses sont **proposés**, jamais automatiques ; déduplication déclarée par adaptateur ; file d'envoi suspendue pendant la fenêtre tant que le DSI n'a pas confirmé. Interrupteurs : JSON-2 « dès qu'elle existe », comportement des adaptateurs ; jamais de changement de forme (FR-21) |
-| C13 | (1) prérequis : logiciel du client joignable (une lecture de test aboutit en moins de 30 secondes `[A-15]`), version détectée, droits du compte, plan Custom ; (2) vérifications chiffrées sous l'identité de service du moteur : version détectée, nombre d'objets lus, écriture de test acceptée sur bac à sable ou refusée sur les identifiants en lecture seule, aller-retour (🟠 « non vérifié » en essai) ; (3) santé `OK | DEGRADE` selon la règle de FR-10, sans fermeture ; (4) état publié lu (C2) ; (5) routes en lecture seule : export, consultation des écarts et des refus ; (6) interception en essai et `ECRITURE_REELLE_DEPUIS_ESSAI` (FR-18) ; (7) export CSV/JSON, import des réglages du dossier d'installation, effacement par organisation ; (8) clef d'idempotence par vérification ; (9) un prérequis en échec marque le connecteur rouge et ses dépendants orange, sans bloquer le reste |
+| C13 | (1) prérequis : logiciel du client joignable (une lecture de test aboutit en moins de 30 secondes `[A-15]`), version détectée, droits du compte, plan Custom ; (2) vérifications chiffrées sous l'identité de service du moteur : version détectée, nombre d'objets lus, écriture de test acceptée sur bac à sable ou refusée sur les identifiants en lecture seule, aller-retour (🟠 « non vérifié » en essai) (**amendement 2026-11-12, spine de Connecteurs, AD-18** : lecture seule prouvée par le contrôle de droits natif selon le profil de version ; écriture de test seulement sur un objet de test déclaré) ; (3) santé `OK | DEGRADE` selon la règle de FR-10, sans fermeture ; (4) état publié lu (C2) ; (5) routes en lecture seule : export, consultation des écarts et des refus ; (6) interception en essai et `ECRITURE_REELLE_DEPUIS_ESSAI` (FR-18) ; (7) export CSV/JSON, import des réglages du dossier d'installation, effacement par organisation ; (8) clef d'idempotence par vérification ; (9) un prérequis en échec marque le connecteur rouge et ses dépendants orange, sans bloquer le reste |
 
 ⚡ **Note pour la doctrine.** Quand le propriétaire d'un domaine est le logiciel du client, le module
 Prospera qui stocke ces données reste le seul à écrire sa base (C3), mais **l'autorité métier est
@@ -586,26 +666,26 @@ attente de confirmation (FR-2). C'est le premier cas de ce genre ; la spine devr
 
 | # | Question | État |
 |---|---|---|
-| QK-1 | Versions d'Odoo | ✅ **Toutes** (PO) ; exigences d'adaptation dans FR-14 |
+| QK-1 | Versions d'Odoo | ✅ **Toutes** (PO) ; exigences d'adaptation dans FR-14. **Amendement (2026-11-12, spine de Connecteurs, AD-23)** : XML-RPC différé, JSON-RPC présent de 8.0 à 19.0 |
 | QK-2 | Propositions du récit | ✅ **Gardées** (PO), avec trois améliorations **validées** par le PO : file des écarts livrée **avec** l'étape 3 (FR-17) ; alerte « pas arrivé à 6 h » pour la nuit (FR-13) ; seuils de couleur (FR-11) |
 | QK-3 | Délai immédiat et seuils | **5 min** ; orange au délai cible, **rouge à 3 fois** (15 min, 3 h), **6 h fixe** pour la nuit (FR-11) : ✅ **validé** par le PO |
 | QK-4 | Connecteurs dans l'offre | ✅ tranchée le 2026-11-11 (QC-2) : module commercial, ajouté d'office, inclus dans la plateforme complète (FR-3) |
 | QK-5 | Tables de correspondance : un seul propriétaire | ✅ tranchée le 2026-11-11 (QC-3) : créées par la Reprise, copiées par Connecteurs, qui en est ensuite seul propriétaire (FR-20) |
 | QK-6 | Adaptateurs et identifiants partagés avec la Reprise | ✅ tranchée le 2026-11-11 (QC-4) : paquet commun, identifiants propres à chaque module (FR-1) |
-| QK-7 | Produits, prix et stock : qui charge, qui relaie | ✅ tranchée le 2026-11-11 (QC-5) : la Reprise charge, Connecteurs relaie à un point de relais daté (FR-20) |
+| QK-7 | Produits, prix et stock : qui charge, qui relaie | ✅ tranchée le 2026-11-11 (QC-5) : la Reprise charge, Connecteurs relaie à un point de relais daté (FR-20). **Amendement (2026-11-12, spine de Connecteurs, AD-20)** : le point de relais se scinde en point de coupure (début de l'extraction) et mise en service |
 | QK-8 | Retour arrière d'un connecteur qui a écrit chez le client | ✅ tranchée le 2026-11-11 (QC-7) : écritures laissées intactes, `SANS_PERTE` côté Prospera, mouvements inverses proposés, file suspendue (FR-21, C12) |
 | QK-9 | Un écart ouvert bloque-t-il l'arrêt d'un domaine ? | ✅ tranchée le 2026-11-11 (QC-8) : oui, pour un domaine d'argent (FR-3) |
 | QK-10 | Un prospect peut-il brancher un connecteur ? | ✅ tranchée le 2026-11-11 (QC-10) : lecture seule, identifiants dédiés, écritures interceptées, pas de bac à sable sans Money Vibes (FR-18) |
 | QK-11 | Supervision sur site | ✅ tranchée le 2026-11-11 (QC-11) : compteurs seuls par le contrôle quotidien ; alerte à l'administrateur sur l'instance (FR-13) |
 | QK-12 | Fraîcheur et bandeaux dans la coque | ✅ tranchée le 2026-11-11 (« Amont ») : champs normalisés, table de seuils et ligne « file d'envoi » dans la spine (AD-7) ; le module ne rend pas de bandeau (FR-11, FR-12) |
 | QK-13 | Comportement en `LECTURE_SEULE`, `SUSPENDU`, `ESSAI_TERMINE` | ✅ tranchée le 2026-11-11 (selon la recommandation du contrôle ciblé) : FR-19 |
-| QK-14 | Stock d'ouverture quand Odoo est propriétaire du stock | ✅ tranchée le 2026-11-11 (selon la recommandation) : comptage saisi dans Prospera, ajustement « en attente de confirmation » (FR-20) |
+| QK-14 | Stock d'ouverture quand Odoo est propriétaire du stock | ✅ tranchée le 2026-11-11 (selon la recommandation) : comptage saisi dans Prospera, ajustement « en attente de confirmation » (FR-20). **Amendement (2026-11-12, spine de Connecteurs, AD-20)** : ajustement d'inventaire en quantité comptée, jamais additionné chez Odoo |
 | QK-15 | Service de Connecteurs et lieu du paquet d'adaptateurs | ✅ orientation validée le 2026-11-11 : **deux services** (Reprise et Connecteurs), paquet d'adaptateurs = bibliothèque commune versionnée avec la plateforme ; la spine du moteur l'écrit (Dev B, avant le 07/12). **Fait le 2026-11-11** (spine du moteur, AD-18 et AD-26) : le paquet vit dans le dépôt neuf **`prospera-adaptateurs`** (paquet npm privé), le même que pour la Reprise ; `connecteurs-service` est un service à part |
 | QK-16 | Règle de doctrine « autorité métier extérieure » | ✅ orientation validée le 2026-11-11 : décision de programme **AD-P18** ; les utilisateurs ne saisissent que des mouvements en attente de confirmation, et la coque les affiche « en attente » ; à écrire par Dev B avant le 07/12. **Écrite le 2026-11-11** dans `architecture-prospera-ecosystem-2026-07-04.md` (AD-P18, décision du PO, 2026-11-11) |
 | QK-17 | Répartition des propriétaires chez l'assureur | **Ouverte** (réponse du PO reportée, 2026-11-11) : après examen de son logiciel ; porteur : le PO ; pas de date, hors février |
 | QK-18 | Date du connecteur de l'IMF | **Ouverte** (réponse du PO reportée, 2026-11-11) : avec le premier client IMF ; porteur : le PO ; pas de date |
 | QK-19 | Webhook entrant sur la plateforme | ✅ tranchée le 2026-11-11 : **non en v1**, interrogation sortante seulement (AD-8 de la spine `prospera-app`) ; une interrogation à la minute tient le délai immédiat de 5 min. Les **compteurs** de Connecteurs sur site remontent aussi par la **vérification quotidienne** (spine du moteur, AD-9), pas seulement par le signal hebdomadaire |
-| QK-20 | Amendements des documents voisins | Spine AD-7 et PRD Reprise **faits le 2026-11-11** ; schéma fermé de FR-26 du moteur : ✅ validé le 2026-11-11, on y **ajoute les compteurs** par domaine (envoyés, refusés, écarts ouverts, longueur de la file, dernier échange) |
+| QK-20 | Amendements des documents voisins | Spine AD-7 et PRD Reprise **faits le 2026-11-11** ; schéma fermé de FR-26 du moteur : ✅ validé le 2026-11-11, on y **ajoute les compteurs** par domaine (envoyés, refusés, écarts ouverts, longueur de la file, dernier échange). **Amendement (2026-11-12, spine de Connecteurs, AD-17, AD-30 et moteur AD-9)** : le `niveau` et la santé s'ajoutent aux compteurs ; le signal porte aussi les compteurs de Connecteurs (`instance.indicateurs`, schéma fermé) |
 
 ### 8.2 Hypothèses `[A-n]`
 
@@ -623,7 +703,7 @@ attente de confirmation (FR-2). C'est le premier cas de ce genre ; la spine devr
 | A-8 | Propriétaires par défaut des domaines ajoutés (créances, commerciaux, fournisseurs, KYC, garanties, clients IMF) | FR-14, FR-15 |
 | A-9 | Une version d'Odoo jamais testée est signalée, sans être refusée | FR-14 |
 | A-10 | Pendant l'essai, la Reprise ne lit pas le bac à sable, seulement le vrai logiciel en lecture seule | FR-18 |
-| A-11 | La synchro démarre après la réception définitive du lot ; la Reprise retire alors ses identifiants | FR-20 |
+| A-11 | La synchro démarre après la réception définitive du lot ; la Reprise retire alors ses identifiants. *(Modifiée par le PO le 2026-11-11 ; amendement 2026-11-12, spine de Connecteurs, AD-20 : point de coupure puis mise en service.)* | FR-20 |
 | A-12 | SM-3 : au moins 95 % | §6 |
 | A-13 | Contre-indicateurs : 48 h pour les écarts, 24 h pour les refus | §6 |
 | A-14 | À la réinstallation, la file figée est présentée à l'intégrateur, qui la rejoue ou l'écarte | C9 |

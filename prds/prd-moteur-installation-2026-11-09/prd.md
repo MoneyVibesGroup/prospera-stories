@@ -2,7 +2,7 @@
 title: "PRD — Moteur d'installation"
 status: draft  # 2ᵉ réécriture le 2026-11-10 après le passage 2 de validation ; validation PO le 13/11
 created: 2026-11-09
-updated: 2026-11-11  # amendé par la spine de la Reprise (AD-22) : feu vert par module, Reprise mise en service la première, routes de reprise ouvertes pendant le rejeu
+updated: 2026-11-12  # amendé par la spine de la Reprise (AD-22, 2026-11-11) : feu vert par module, Reprise mise en service la première, routes de reprise ouvertes pendant le rejeu ; puis par la spine de Connecteurs (AD-31, 2026-11-12) : Connecteurs hors février, échange et contrôles à la matrice, lecture seule, signal
 project: prospera
 service: platform-catalog-service  # partie A ; les services des parties B et C sont tranchés par la spine (§7)
 position_sequence: 26
@@ -58,7 +58,7 @@ droits présents sur `dev` sont des données de test, réamorcées à la mise en
 livré (STORY-280, 281, 727) est ajusté à ce PRD (§8.4).
 
 Deux modules voisins ont **leur propre PRD**, et ce document ne fait que s'y raccorder : **Reprise de
-données** et **Connecteurs** (synchronisation permanente), tous deux au lot 1 et requis en février (QA-3).
+données** et **Connecteurs** (synchronisation permanente), tous deux au lot 1 ; la Reprise est requise en février (QA-3), ~~Connecteurs aussi~~ **Amendement (2026-11-12, spine de Connecteurs, AD-32) :** Connecteurs **sort du chemin critique de février** : aucun des deux clients de février ne garde son logiciel (l'assureur fournit un export Excel, le distributeur quitte Sage). Le distributeur **avec Odoo** vient après, au premier contrat signé qui déclare un logiciel du client, **sans dispense** du manifeste de Connecteurs (13/11), de ses contrats ni du kit des cibles (la part qui sert la Reprise).
 
 **Jalons (décision du PO, 2026-11-10).** **Toutes les FR de ce PRD sont dues pour février 2027.** La démo
 du 15/01 en montre la partie A (SM-1). Cela suppose la **révision de D3** (instance sur site prête avant
@@ -99,7 +99,8 @@ l'accord de chacun, rendent le modèle d'IA commun **meilleur à chaque client s
 **Échéances :** la démo du **15/01/2027** installe le pack Terrain & Ventes sur une organisation
 distributeur neuve, **en une action dans l'espace d'essai** (SM-1) ; en **février 2027**, tout ce PRD est
 livré et deux premiers clients sont servis : un **assureur sur ses serveurs** et un **distributeur sur les
-serveurs de Money Vibes**.
+serveurs de Money Vibes**. *(Amendement 2026-11-12, spine de Connecteurs, AD-32 : ces deux clients n'ont pas
+besoin de Connecteurs en février ; le distributeur avec Odoo vient après.)*
 
 ## 2. Pour qui
 
@@ -154,6 +155,9 @@ Les trois parcours ont été racontés par le PO le 2026-11-10. Chacun a un **me
   résumé (pièces manquantes, expertise en cours, montant chiffré). La réception définitive est signée.
 - **Cas d'échec :** la compagnie déploie un nouveau logiciel métier dont l'API n'est pas prête. Prospera
   fonctionne seul sur les données reprises, et l'API se branche dès qu'elle existe (clause du contrat).
+  *(Amendement 2026-11-12, spine de Connecteurs, AD-32 : en février, l'assureur fournit un export et ne garde
+  pas de synchronisation ; le branchement d'une API relève de Connecteurs, requis au premier contrat qui garde un
+  logiciel, pas en février.)*
 
 #### UJ-2. Ibrahim finit sa tournée sans rien ressaisir
 
@@ -197,6 +201,8 @@ Les trois parcours ont été racontés par le PO le 2026-11-10. Chacun a un **me
      relances.
   4. Kodjo active le mode hors ligne et le GPS, et part en mission dans les villages.
   5. Les états BCEAO et la comptabilité SYSCOHADA se préparent à partir des données synchronisées.
+- *(Amendement 2026-11-12, spine de Connecteurs, AD-32 : ce parcours suppose le connecteur de l'IMF, qui n'est
+  pas requis en février et n'a pas de date, PRD Connecteurs QK-18.)*
 - **Moment gagné :** un client rembourse à l'agence le matin ; quelques minutes plus tard, Kodjo le voit et
   ne le relance pas pour rien ; le PAR 30/60/90, qui demandait une demi-journée, s'affiche en quelques
   secondes ; Mariam (DG) l'ouvre en réunion ; le premier rapport réglementaire du mois sort sans ressaisie.
@@ -206,6 +212,9 @@ Les trois parcours ont été racontés par le PO le 2026-11-10. Chacun a un **me
   - à l'amorçage, quelques dizaines de soldes divergent (pénalités calculées autrement) : **pas de mise en
     service tant que l'écart n'est pas nul** ; les deux systèmes tournent en parallèle sur un cycle de
     remboursement, le temps d'aligner les règles.
+  - **Amendement (2026-11-12, spine de Connecteurs, AD-15).** Ce parcours est conforme : la marche en parallèle se
+    joue **dans l'espace d'essai, avant la mise en service** (répétition, FR-33), le connecteur de l'essai relevant
+    le vrai logiciel en lecture seule ; la mise en service attend l'écart nul de la période.
 
 *Les trois parcours ci-dessus racontent les verticales. Les deux suivants racontent **le moteur lui-même** :
 ils sont construits à partir des FR, pas racontés par le PO. Relus et validés par le PO le 2026-11-10.*
@@ -508,6 +517,8 @@ Les faits : une sanction, l'échéance payée, la fin du préavis et les dates d
 | `PREAVIS{finLe}` | visible | ouvert | **administrateurs et DG** : date de passage en lecture seule |
 | `LECTURE_SEULE` | visible | lecture seule (FR-43) : écriture refusée `ABONNEMENT_EXPIRE`, sauf export et états déclarés | **tous** : « lecture seule », pour qu'on ne croie pas à une panne |
 | `SUSPENDU` | **caché** ; URL saisie → « module suspendu, voir votre administrateur » | 403, aucune donnée, sauf l'export et les états réglementaires déclarés (FR-43) | **administrateurs et DG** : la raison et l'action |
+
+**Amendement (2026-11-12, spine de Connecteurs, AD-10 et AD-21).** La matrice des neuf états compte **deux lignes de plus** : la **route d'échange** d'un module cible, jouée **par opération**, et la **route des contrôles** (valeurs de contrôle de la cible, en lecture). La route d'échange est ouverte à la seule identité de service de Connecteurs, et seulement avec le module `EN_SERVICE`, `PREAVIS` ou `ESSAI_PROSPECT` (toutes les opérations) ; en `LECTURE_SEULE`, `APPLIQUER_OBJET`, `ENREGISTRER_MOUVEMENT`, `CONFIRMER` et `REFUSER` passent, `CORRIGER` est refusé `ABONNEMENT_EXPIRE` ; elle est refusée en `NON_INSTALLE`, `EN_INSTALLATION`, `SUSPENDU`, `ESSAI_TERMINE` et `DESINSTALLE`. La route des contrôles est ouverte en lecture aux identités de la **Reprise et de Connecteurs** en `EN_SERVICE`, `PREAVIS`, `ESSAI_PROSPECT` et `LECTURE_SEULE`, à la **Reprise seule** en `EN_INSTALLATION` du réel, et refusée ailleurs.
 
 Statut du droit au catalogue derrière chaque état publié (détail : addendum §A-2).
 
@@ -906,6 +917,12 @@ sont dans la **console Money Vibes**. Aucun utilisateur d'un client n'a besoin d
 - **Console Money Vibes** (droits plateforme) : offre, installation, modules « acquis, à installer »,
   bilans, supervision des instances, licences, sanctions, création d'une offre d'essai prospect, lecture du
   registre des consentements.
+- **Amendement (2026-11-12, spine de Connecteurs, AD-28 et D-10).** La **configuration** de Connecteurs
+  (connecteur, propriétaires, niveaux, correspondances, bac à sable, bascule et arrêt de la synchro) vit dans le
+  module d'écran `connecteurs` de `prospera-app`, sur la plateforme comme sur site, derrière
+  `connecteurs:configuration:administrer` ; la console garde la **vue du parc** (dernier échange, file, refus,
+  écarts, santé par client). C'est un cas de plus pour « chaque épic porte ses écrans » : les écrans de
+  Connecteurs sont portés par ses épics.
 - **`prospera-app`, « Administration »** (droits `instance:*`, FR-35) : voir les mises à jour, essayer,
   choisir la date, revenir en arrière ; mettre à jour depuis un fichier ; ouvrir le tunnel de support ;
   donner ou retirer un consentement (DG) ; exporter ses données ; consulter le bilan de son installation ;
@@ -1018,6 +1035,11 @@ matrice de FR-34.
 - Saisir, encaisser, envoyer et synchroniser **vers** le logiciel du client sont des écritures : fermés.
   Une synchronisation **entrante** (depuis un logiciel qui reste la référence, UJ-3) continue, et l'écran
   dit sa fraîcheur.
+- **Amendement (2026-11-12, spine de Connecteurs, AD-10 et AD-21).** Une **troisième famille** de routes est
+  autorisée en lecture seule, l'**échange entrant**, en plus de l'export et des états déclarés : les
+  opérations d'échange `APPLIQUER_OBJET`, `ENREGISTRER_MOUVEMENT`, `CONFIRMER` et `REFUSER` passent
+  (la vérité du propriétaire et la réponse à un mouvement né avant la lecture seule) ; `CORRIGER`, qui est une
+  écriture décidée par un humain, est refusée `ABONNEMENT_EXPIRE`.
 - **L'export passe toujours** : chaque module expose une route d'export par organisation (C13), exemptée de
   la garde et réservée au détenteur de `instance:donnees:exporter`. Elle est ouverte partout où le module
   peut garder des données de l'organisation, réinstallation comprise ; un seul attendu par état publié :
@@ -1043,7 +1065,7 @@ matrice de FR-34.
   Freelance). Le catalogue technique est incomplet **par choix** : **chacun de ces modules doit y entrer**,
   avec son manifeste. « Bundle » et « pack » désignent la même chose.
 - **QA-2** : la répétition générale (FR-8 à FR-11).
-- **QA-3** : **Connecteurs** doit être prêt en février ; son PRD entre au lot 1.
+- **QA-3** : **Connecteurs** ~~doit être prêt en février~~ ; son PRD entre au lot 1. **Amendement (2026-11-12, spine de Connecteurs, AD-32) :** Connecteurs n'est plus requis en février ; il est requis au premier contrat signé qui déclare un logiciel du client. Le manifeste (13/11), les contrats de sa spine et la part reprise du kit des cibles restent dus avant février.
 - **QA-4** : le contrat ou l'abonnement fait foi (FR-12).
 
 ### 4.B Livrer et mettre à jour l'instance
@@ -1365,6 +1387,9 @@ passe par la garde du registre (FR-27). La validation juridique de ces clauses e
 - Le module Connecteurs y ajoute ses **compteurs**, par domaine : mouvements envoyés et refusés, écarts
   ouverts, longueur de la file d'envoi, date du dernier échange ; jamais un contenu métier (PRD Connecteurs
   FR-13, QK-20 ; décision du PO, 2026-11-11). Sur site, ils remontent aussi par la vérification quotidienne.
+  **Amendement (2026-11-12, spine de Connecteurs, AD-17 et moteur AD-9).** Ces compteurs, dont le `niveau` et la
+  santé de chaque domaine, sont portés par `instance.indicateurs` ; le **signal** les porte aussi, à son schéma
+  fermé (un test échoue si un numéro, un montant ou un nom en sort).
 
 #### FR-27 : Le registre des consentements
 **Conséquences (testables) :**
