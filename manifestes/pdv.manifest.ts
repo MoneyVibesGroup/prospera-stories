@@ -161,7 +161,7 @@ export const MANIFESTE_PDV = {
   //   reprise). Valeurs de contrôle : nature (etat), statut ouvert/fermé (etat), plafond (montant, ou
   //   PLAFOND_SANS_OBJET pour un magasin propre). Doublons : téléphone d'abord, proximité ensuite (FR-V06).
   // - affectation : point de vente → commercial titulaire, datée (AD-2, AD-4). La référence vise l'objet
-  //   `reseau.commercial@1` (manifeste de reseau, 2026-11-12, proposition à valider par le PO) : la personne à
+  //   `reseau.commercial@1` (manifeste de reseau, validé par le PO le 2026-11-12) : la personne à
   //   inviter et ses zones, repris AVANT le point de vente ; le compte d'auth-service est créé ensuite, par
   //   invitation. pdv garde l'identifiant stable du commercial, jamais un userId ; il lit le compte lié dans
   //   `reseau.commercial.changed@1` (chemin « mon portefeuille », AD-3). Un commercial sans compte garde ses
