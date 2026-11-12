@@ -547,6 +547,7 @@ Décision du PO du 2026-11-12 : le kit est adopté, et il paie son chantier avec
   - **Le point d'import de chaque cible** (schémas, raccord ou fonctions, conformité verte) est dans sa définition de « fini » (AD-12) ; la liste de février n'est pas bornée par cette spine.
   - **Déclencheur** : le premier contrat signé qui déclare un logiciel du client, **avec un délai de construction chiffré** avant signature. Ordre alors (FR-17) : (1) clients et produits avec les prix, relais de la Reprise ; (2) stock en lecture ; (3) factures et encaissements vers la comptabilité, **avec** la file des écarts et l'écran de santé. Puis le connecteur de l'IMF (QK-18), puis l'assureur après examen de son logiciel (QK-17).
   - Qui construit, quand : épics de Connecteurs (EPIC-161 et suivantes, avec ceux de la Reprise), chiffrés le 04/12.
+    **Écrit le 2026-11-12** (`epics-reprise-connecteurs-2026-11-12.md`) : EPIC-161 (kit, part reprise, S4) et EPIC-169 (contrats et point d'écriture unique, S5) avant février ; EPIC-170 → 179 chiffrés, non placés, au déclencheur.
 
 ### AD-33 — Bascule de propriétaire et arrêt de la synchro : un protocole `[PROPOSÉ]`
 
@@ -756,4 +757,4 @@ sequenceDiagram
 | Rattacher à la main un objet Prospera à un enregistrement existant chez le client | la liaison se crée à l'envoi ; un doublon devient un écart | premier doublon réel |
 | Plusieurs sociétés Odoo pour une organisation | une société par connecteur | premier client multi-sociétés |
 | Banques, Mobile Money, OTR, signature | intégrations des modules métier, hors M43 | PRD de chacun |
-| Qui construit, quand | épics de Connecteurs (EPIC-161 et suivantes) | écriture des épics, chiffrage du 04/12 |
+| ~~Qui construit, quand~~ | **Écrit le 2026-11-12** : EPIC-169 → 179 (`epics-reprise-connecteurs-2026-11-12.md`) ; 170 → 179 non placés | chiffrage du 04/12 ; premier contrat qui déclare un logiciel du client |
