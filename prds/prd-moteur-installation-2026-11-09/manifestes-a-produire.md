@@ -13,7 +13,7 @@ Légende : ✅ = code présent à `modules.seed-data.ts` ; ❌ = code à créer.
 | # | Module commercial | Verticales | Bundles | Code catalogue | Service porteur | N° v2 | Propriétaire | Date du manifeste | Cadré (PRD) | Remarques |
 |--:|---|---|---|---|---|:-:|---|---|---|---|
 | M01 | Réseau, agences & zones | distributeur, microfinance, assurance | M: Croissance & Opérations (Équipes & Réseau d'Agences) ; D: Plateforme [À CONFIRMER] | ❌ reseau | reseau-service (à créer) | — (EPIC-044→053) | Dev B | 20/11/2026 | oui (prd-reseau-zones) | Commun aux 3 projets ; semaine 1 du plan |
-| M02 | CRM Points de Vente & Pipeline | distributeur | D: Terrain & Ventes, Plateforme | ✅ pdv | pdv-service (à créer) | — (EPIC-085→094) | Dev B | 20/11/2026 | oui (prd-pdv) | Bloc 1 en semaine 4 |
+| M02 | CRM Points de Vente & Pipeline | distributeur | D: Terrain & Ventes, Plateforme | ✅ pdv | pdv-service (à créer) | — (EPIC-085→094) | Dev B | 20/11/2026 : **écrit le 2026-11-12**, `manifestes/pdv.manifest.ts` | oui (prd-pdv) | Bloc 1 en semaine 4 |
 | M03 | Support client & CRM interne | distributeur, microfinance, assurance, cabinet [À CONFIRMER] | Aucun bundle commercial [À CONFIRMER] | ✅ support-client (déprécié, à réactiver) | support-crm-service (à créer) | n°8 | Dev B | 04/12/2026 (lot 4) | non |  |
 | M04 | Catalogue, produits & tarification (Prise de commande & Catalogue ; Produits Financiers) | distributeur, microfinance | D: Terrain & Ventes, Plateforme ; M: Croissance & Opérations (Produits Financiers) [À CONFIRMER] | ✅ catalogue | catalogue-produits-service (à créer) | — (EPIC-065→070) | Dev B | 20/11/2026 | oui (prd-catalogue-produits) | Fusion D/M à confirmer |
 | M05 | Gestion des sinistres | assurance | A: offre unique (phases 1-2) | ❌ sinistres | prospera-assurance-service (dossiers sinistres) (existant) | — (cycle DECLARE→CLOTURE) | Dev B | 20/11/2026 | non (epics-assurance seulement) | Noyau en semaine 7 |
@@ -28,7 +28,7 @@ Légende : ✅ = code présent à `modules.seed-data.ts` ; ❌ = code à créer.
 | M14 | Caisse, guichet & trésorerie réseau (Caisse & Mobile Money) | microfinance | M: Terrain & Collecte, Plateforme | ❌ caisse | prospera-microfinance-service (à étendre) [À CONFIRMER] (partiel) | n°15 | Dev B | 27/11/2026 (lot 3) | non (epics-microfinance) |  |
 | M15 | Crédit : cycle, comité & BIC | microfinance | M: Crédit, Plateforme | ✅ credit | prospera-microfinance-service (crédits) (existant) | n°19 | Dev B | 20/11/2026 | non (epics-microfinance) |  |
 | M16 | Collecte terrain | microfinance | M: Terrain & Collecte [À CONFIRMER] | ✅ collecte | prospera-microfinance-service [À CONFIRMER] (partiel) | n°20 | Dev B | 20/11/2026 | non (epics-microfinance) | Absent des 13 modules du pricing ; présent au pack imf-sfd |
-| M17 | Épargne & dépôts | microfinance | M: Croissance & Opérations, Plateforme | ❌ epargne [À CONFIRMER] | prospera-microfinance-service (dépôts) (existant) | n°22 | Dev B | 20/11/2026 | non (epics-microfinance) | Code à créer ou couvert par `microfinance` [À CONFIRMER] |
+| M17 | Épargne & dépôts | microfinance | M: Croissance & Opérations, Plateforme | ✅ microfinance (décision du PO, 2026-11-12) | prospera-microfinance-service (dépôts) (existant) | n°22 | Dev B | 20/11/2026 | non (epics-microfinance) | Couvert par `microfinance` (décision du PO, 2026-11-12) : pas de code `epargne`, un seul manifeste avec M32 |
 | M18 | Risque, PAR & provisionnement | microfinance | M: Risque & Conformité [À CONFIRMER], Plateforme | ❌ risque-par | prospera-microfinance-service (prudentiel) (partiel) | n°23 | Dev B | 27/11/2026 (lot 3) | non (epics-microfinance) |  |
 | M19 | Relances & Recouvrement | distributeur, microfinance | D: Finance & Recouvrement, Plateforme ; M: Terrain & Collecte (Relances), Risque & Conformité (Recouvrement) | ✅ recouvrement | à créer (s'appuie sur notification-service + paiement-service) [À CONFIRMER] (à créer) | n°24 | Dev B | 27/11/2026 (lot 3) | non | Relances et Recouvrement IMF : une ou deux fiches ? [À CONFIRMER] |
 | M20 | Conformité BCEAO, audit & LCB/FT | microfinance | M: Risque & Conformité, Plateforme | ✅ conformite-bceao | prospera-microfinance-service (prudentiel) (partiel) | n°27 | Dev B | 27/11/2026 (lot 3) | non (epics-microfinance) |  |
@@ -41,9 +41,9 @@ Légende : ✅ = code présent à `modules.seed-data.ts` ; ❌ = code à créer.
 | M27 | Assistant IA & analyse de dossier (résumé, recherche sémantique, détection d'anomalies) | assurance | A: offre unique (phases 2-3) | ❌ assistant-ia | assistant-service (à créer) | — | Dev B | 04/12/2026 (lot 4) | oui (prd-assistant-ia) | Absent du plan ; PRD existant |
 | M28 | Dashboard & pilotage | distributeur, microfinance, assurance, cabinet [À CONFIRMER] | D: Stock & Logistique, Plateforme ; M: Crédit ; A: offre unique (tableau de bord direction) | ✅ dashboard (déprécié, à réactiver) | à créer (à créer) | n°29 | Dev B | 04/12/2026 (lot 4) | non |  |
 | M29 | Expertises & intervenants (experts, médecins, portail expert) | assurance | A: offre unique | ❌ expertises | prospera-assurance-service (à étendre) (partiel) | — | Dev B | 04/12/2026 (lot 4) | non |  |
-| M30 | Production & polices | assurance | A: offre unique (reprise clients/polices) | ❌ polices [À CONFIRMER] | prospera-assurance-service (contrats) (existant) | — | Dev B | 20/11/2026 | non (epics-assurance) | Code à créer ou couvert par `assurance` [À CONFIRMER] |
+| M30 | Production & polices | assurance | A: offre unique (reprise clients/polices) | ✅ assurance (décision du PO, 2026-11-12) | prospera-assurance-service (contrats) (existant) | — | Dev B | 20/11/2026 | non (epics-assurance) | Couvert par `assurance` (décision du PO, 2026-11-12) : pas de code `polices`, un seul manifeste avec M31 ; la cible de reprise des polices est `assurance` |
 | M31 | Comptes techniques, provisions & réassurance CIMA | assurance | A: pack assurance-cima | ✅ assurance | prospera-assurance-service (existant) | — | Dev B | 20/11/2026 | non (epics-assurance) | Rétro-saisie du manifeste ; palier 2 (EPIC-131) hors cadrage |
-| M32 | CRM Emprunteurs, KYC & membres | microfinance | M: Crédit, Plateforme | ✅ microfinance [À CONFIRMER] | prospera-microfinance-service (membres) + kyc-service [À CONFIRMER] (existant) | — | Dev B | 20/11/2026 | non (epics-microfinance) | Correspondance code/nom déduite |
+| M32 | CRM Emprunteurs, KYC & membres | microfinance | M: Crédit, Plateforme | ✅ microfinance (décision du PO, 2026-11-12) | prospera-microfinance-service (membres) + kyc-service [À CONFIRMER] (partiel) | — | Dev B | 20/11/2026 | non (epics-microfinance) | Couvert par `microfinance` (décision du PO, 2026-11-12). ⚠️ Le dépôt actuel porte surtout la partie comptable : le manifeste décrit ce qui existe (rétro-saisie), la partie membres/KYC reste à coder |
 | M33 | Encaissements & PI-SPI (liens de paiement, Mobile Money) | distributeur, microfinance | D: Finance & Recouvrement, Plateforme ; M: Terrain & Collecte (Caisse & Mobile Money) [À CONFIRMER] | ✅ pi-spi [À CONFIRMER] | prospera-paiement-service (existant) | — | Dev B | 20/11/2026 | oui (prd-paiement-service) | Le seed décrit `pi-spi` comme prudentiel : description à corriger [À CONFIRMER] |
 | M34 | Canaux & notifications (WhatsApp, SMS, e-mail) | distributeur, microfinance, assurance, cabinet | Transverse, non vendu seul [À CONFIRMER] | ❌ notification | prospera-notification-service (existant) | — | Dev B | 20/11/2026 | oui (prd-notification-service) | À détenir par Money Vibes à l'amorçage |
 | M35 | Atelier de balance | distributeur, microfinance, assurance, cabinet | Pack de chaque vertical | ✅ balance | balance-service (existant) | — | Dev B | 20/11/2026 | oui (prd-atelier-balance) | Rétro-saisie du manifeste |
@@ -61,7 +61,7 @@ Légende : ✅ = code présent à `modules.seed-data.ts` ; ❌ = code à créer.
 
 Total : **44 modules** (M44 Reprise de données ajouté le 2026-11-11).
 
-Les manifestes s'écrivent dans `prospera-stories/manifestes/<code>.manifest.ts` (premier écrit : `reprise.manifest.ts`, le 2026-11-11). Un module qui reçoit des données reprises déclare **`objetsDeReprise`** dès l'écriture de son manifeste (C1, amendement du 2026-11-11) : pour février, `pdv`, `catalogue`, `reseau`, `stock`, `facturation`, `polices` et `sinistres` (spine de la Reprise, AD-23).
+Les manifestes s'écrivent dans `prospera-stories/manifestes/<code>.manifest.ts` (premier écrit : `reprise.manifest.ts`, le 2026-11-11). Un module qui reçoit des données reprises déclare **`objetsDeReprise`** dès l'écriture de son manifeste (C1, amendement du 2026-11-11) : pour février, `pdv`, `catalogue`, `reseau`, `stock`, `facturation`, `polices` (reçues par `assurance`, décision du PO du 2026-11-12) et `sinistres` (spine de la Reprise, AD-23).
 
 **Amendement (2026-11-12, spine de Connecteurs, AD-2, AD-11, AD-12 et AD-32).** La liste de sept modules ci-dessus n'est plus présumée : elle devient « **chaque module cible de février, jusqu'à une trentaine** ; schémas d'objets écrits avec les manifestes du 20/11 », chaque manifeste tranchant son cas (le point d'import est dans la définition de « fini » de chaque cible). Chaque module cible déclare en outre à son manifeste **`domainesEchange`** (C1, amendement du 2026-11-12), avec `publie` (les faits de domaine qu'il émet) et `consomme: connecteurs.domaine.changed@1`, et applique la règle du **point d'écriture unique** par domaine : une fonction de service par domaine déclaré, dont les faits portent l'identifiant stable de l'objet et un `rang`.
 
@@ -72,7 +72,9 @@ Par vertical (un module partagé compte dans chacune de ses verticales) :
 - assurance : 15
 - cabinet : 11
 
-Code catalogue existant ✅ : **20** sur 44 (dont 3 dépréciés à réactiver : support-client, equipe, dashboard) ; à créer : 24.
+Code catalogue existant ✅ : **22** sur 44 (dont 3 dépréciés à réactiver : support-client, equipe, dashboard ; M17 et M30 rattachés à un code existant le 2026-11-12) ; à créer : 22.
+
+**Décisions du PO du 2026-11-12 (codes partagés).** `polices` (M30) est couvert par `assurance` (M31) et `epargne` (M17) par `microfinance` (M32) : un code, donc **un seul manifeste** pour chaque paire. Les 18 modules codés et de la démo donnent **16 manifestes**. ⚠️ Le dépôt `prospera-microfinance-service` porte surtout la partie comptable : le manifeste `microfinance` décrit ce qui existe, la partie membres/KYC reste à coder.
 
 Par propriétaire : **Dev B = 44** (décision du PO du 2026-11-11).
 
@@ -80,7 +82,7 @@ Manifestes datés : **44 sur 44, tous au plus tard le 04/12/2026** (décision du
 
 ## Points [À CONFIRMER]
 
-Modules portant au moins un marqueur : **27**. Détail :
+Modules portant au moins un marqueur : **25** (27 avant les décisions du 2026-11-12). Détail :
 
 - M01 Réseau, agences & zones : bundles
 - M03 Support client & CRM interne : verticales, bundles
@@ -93,7 +95,6 @@ Modules portant au moins un marqueur : **27**. Détail :
 - M13 Conquête, territoires, objectifs & quotas : remarque
 - M14 Caisse, guichet & trésorerie réseau : service
 - M16 Collecte terrain : bundles, service
-- M17 Épargne & dépôts : code, remarque
 - M18 Risque, PAR & provisionnement : bundles
 - M19 Relances & Recouvrement : service, remarque
 - M22 Comptabilité & Finance : service
@@ -101,8 +102,7 @@ Modules portant au moins un marqueur : **27**. Détail :
 - M25 Contrôle de gestion : verticales
 - M26 Automatisations & Copilot IA : service
 - M28 Dashboard & pilotage : verticales
-- M30 Production & polices : code, remarque
-- M32 CRM Emprunteurs, KYC & membres : code, service
+- M32 CRM Emprunteurs, KYC & membres : service
 - M33 Encaissements & PI-SPI : bundles, code, remarque
 - M34 Canaux & notifications : bundles
 - M40 Immobilisations & amortissements : verticales, bundles
