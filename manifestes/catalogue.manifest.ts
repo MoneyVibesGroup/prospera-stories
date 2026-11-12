@@ -27,12 +27,12 @@
 //
 // Hors manifeste, pour mémoire :
 // - Offre : bundles distributeur « Terrain & Ventes » et « Plateforme ». La ligne M04 cite aussi les
-//   « Produits financiers » de l'offre microfinance (bundle « Croissance & Opérations ») [À CONFIRMER] : ce
+//   « Produits financiers » de l'offre microfinance (bundle « Croissance & Opérations ») : ce
 //   sont les produits que l'IMF vend à ses membres (types de crédit : montants, taux, durée, garanties,
 //   frais ; produits d'épargne). Ce PRD ne les couvre pas (unités entières, grilles par zone, prix
 //   freelance), et `prospera-microfinance-service` les porte déjà : `ProduitCredit` (module
-//   `credits/produits`). Recommandation : ils vont au manifeste `credit` (et l'épargne à `microfinance`) ;
-//   ce manifeste ne décrit que le catalogue du distributeur.
+//   `credits/produits`). Décision du PO (2026-11-12) : ils vont au manifeste `credit` (et l'épargne à
+//   `microfinance`) ; ce manifeste ne décrit que le catalogue du distributeur.
 // - Écrans : module d'écran `catalogue` dans `prospera-app` (C8), tous les écrans par Dev B. Chaque entrée
 //   de menu exige un des droits ci-dessous ; l'écran « Mes prix » du freelance n'exige aucun droit, il exige
 //   d'être le propriétaire (AD-6).
