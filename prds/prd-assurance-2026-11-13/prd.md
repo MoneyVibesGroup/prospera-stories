@@ -4554,7 +4554,7 @@ Ces points ne bloquent pas l'écriture, mais chacun doit être tranché avant l'
 | A-9 | **Préparer la séance d'immersion** : ordre du jour tiré des défauts H du §13.1 (les bloquants d'abord), jeu de démonstration prêt, liste des décisions à valider en séance. | — | §13.1 | GARDER ; mettre en tête les cinq ajustements (délégations, voie rapide, litige, accusé, convention d'indemnisation directe). |
 | A-10 | **Demander l'amendement du PRD Reprise** : l'adaptateur API de l'assurance (FR-214) est au premier jour, alors que le PRD Reprise ne requiert que les fichiers en février. | Fichiers sans condition ; adaptateur d'API écrit dès que le LC est connu. | reprise par API | GARDER : fichiers d'abord, API ensuite. |
 | A-11 | **Chiffrer l'adaptateur Mobile Money sortant de `paiement`** (T-Money, Flooz) ; `paiement` n'a aujourd'hui que le virement et PI-SPI (FR-223). | Tant qu'un opérateur n'a pas d'adaptateur sortant, son canal est « bientôt » et le dossier propose le chèque ou le virement, sans rien simuler (FR-223). | règlements Mobile Money | GARDER ; canal « bientôt » sans simulation (le Mobile Money règle déjà des sinistres sur le marché ivoirien). |
-| A-12 | **Saisir les tables du barème corporel** : valeur du point d'incapacité permanente, capitalisation, barème médical, barème de responsabilité. Ce sont des **images** dans le PDF officiel : leur saisie est une tâche du plan, relue une à une par un second agent, puis validée par un actuaire ou un juriste (FR-24, FR-70, J-33). **Option de repli, le mode dégradé** : si les tables ne sont pas validées à la mise en service, le volet corporel fonctionne en **saisie manuelle motivée** (le gestionnaire arrête le montant avec un motif), échéances légales actives, écart tracé (`TABLE_NON_VALIDEE`). | Calcul corporel impossible sans elles ; le mode dégradé reste disponible. | évaluation du corporel | GARDER : saisie relue par un second agent, mode dégradé inclus. |
+| A-12 | **Saisir les tables du barème corporel** : valeur du point d'incapacité permanente, capitalisation, barème médical, barème de responsabilité. Ce sont des **images** dans le PDF officiel : leur saisie est une tâche du plan, relue une à une par un second agent, puis validée par un actuaire ou un juriste (FR-24, FR-70, J-33). **Option de repli, le mode dégradé** : si les tables ne sont pas validées à la mise en service, le volet corporel fonctionne en **saisie manuelle motivée** (le gestionnaire arrête le montant avec un motif), échéances légales actives, écart tracé (`TABLE_NON_VALIDEE`). **✅ Fait le 2026-11-13** (décision du PO) : tables saisies deux fois de façon indépendante (PDF officiel ; HTML officiel recoupé avec la FANAF), concordantes, dans `referentiels/cima-bareme-corporel/` (annexe F). Reste : validation du juriste et ses 5 anomalies de source. Le barème de responsabilité n'est pas une table CIMA : il relève de la convention de place (A-23). | Calcul corporel impossible sans elles ; le mode dégradé reste disponible. | évaluation du corporel | GARDER : saisie relue par un second agent, mode dégradé inclus. |
 | A-13 | **Confirmer l'existence d'un fonds de garantie automobile au Togo** (FR-14, FR-111). | Paramètre « fonds actif » désactivé par défaut. | alertes du FGA | GARDER : paramètre désactivé tant que le fonds n'est pas confirmé. |
 | A-14 | **Perte maximale et temps de reprise** (RPO, RTO) : alignés sur la spine du moteur, AD-16 (FR-236, FR-252). | Valeurs du PRD moteur, sans engagement (perte maximale 1 h, reprise en 4 h : spine du moteur, AD-16). | contrat, PRD moteur | GARDER : 24 h et 8 heures ouvrées, sans engagement. |
 | A-15 | **Organiser la revue juridique** avant la mise en service : une ligne par point du §13.2, avec son **propriétaire** (désigné par le PO), sa date et son issue ; **date cible : 4 semaines avant la mise en service** (FR-24). | Défauts prudents du §13.2. | **mise en service** | GARDER : revue obligatoire avant la mise en service. |
@@ -5979,3 +5979,31 @@ Le guide de la démo liste **21 refus** à provoquer pendant le parcours (le cor
 | 21 | Verser deux fois | le dossier n'est plus proposé au versement | FR-168 |
 
 Les refus nouveaux décidés par le PRD (cumuls 13 à 16 de FR-7, condition `DELAI_DENONCIATION_ECOULE`, code `OPPOSITION_NON_ENREGISTREE`, état de règlement `INCONNU`, numéro reçu pour une `DEC-` déjà numérotée) s'ajoutent à cette liste dans la recette de FR-16.
+
+## Annexe F. Les barèmes : le barème légal CIMA et le catalogue par type de sinistre
+
+**Le barème légal du corporel automobile est saisi et vérifié** (action A-12, décision du PO du 2026-11-13). Il vit dans le référentiel versionné `referentiels/cima-bareme-corporel/` du dépôt `prospera-stories` :
+
+| Fichier | Contenu |
+|---|---|
+| `bareme-corporel-cima-2014.json` | les tables du Code CIMA, Livre II, art. 258 à 266 (version modifiée le 03/04/2014, Code 2019) : valeur du point d'incapacité permanente (art. 260), échelle souffrance et esthétique (art. 262), répartition entre ayants droit (art. 265), préjudice moral des ayants droit (art. 266), plafonds en prose, conversion des rentes (table 60/64 MHK, 6,50 %), acuité visuelle, audition, barème fonctionnel indicatif (264 séquelles) |
+| `README.md` | source, méthode de vérification, règles d'usage |
+| `ANOMALIES.md` | 5 anomalies de la source officielle, reproduites telles qu'imprimées (dont la rente viagère masculine à 80 ans) ; chacune bloque le calcul automatique de sa cellule jusqu'à la décision du juriste |
+| `CATALOGUE-DES-BAREMES.md` | le barème applicable selon le type de sinistre |
+
+**Vérification.** Deux saisies indépendantes, comparées par script cellule par cellule : aucun écart de valeur (776 cellules de calcul, 169 + 49 cellules des tableaux de la vue et de l'audition, 264 lignes du barème fonctionnel). Les tables passent donc de `TABLE_NON_VALIDEE` à « double saisie concordante » ; la **validation du juriste** reste exigée avant la mise en service (FR-24, A-15).
+
+**Règles.** Le référentiel est une **donnée datée**, jamais du code (FR-4) ; un dossier est calculé avec la version en vigueur à sa **date de survenance** : cette version vaut pour les accidents survenus à partir du 01/08/2014 ; avant, calcul manuel motivé. Le **SMIG** est un paramètre daté par pays, hors du référentiel. La compagnie lit ces tables sans pouvoir les modifier ; une nouvelle version de la CIMA arrive par **correctif réglementaire** (spine assurance). **L'IA ne propose jamais un montant corporel** (FR-11).
+
+**Catalogue des barèmes par type de sinistre.**
+
+| Type de sinistre | Barème | Nature | État |
+|---|---|---|---|
+| Corporel, accident de la circulation | Barème CIMA (ce référentiel) | légal, plancher de l'offre (art. 231) | saisi et vérifié ; validation du juriste à faire |
+| Fonds de garantie automobile | Le même, plafonds nationaux (art. 603) | légal | idem |
+| Corporel hors circulation (RC générale, RC exploitation) | Droit commun ; barème CIMA comme référence | jurisprudence | à confirmer par le juriste |
+| Individuelle accident, capital accident | Barème contractuel d'invalidité du contrat | contractuel | à fournir par la compagnie |
+| Matériel automobile | Expertise, grille de vétusté, franchise ; barème de responsabilité du constat entre assureurs | contractuel et convention | à fournir (A-5, A-23) ; valeurs de démo marquées comme telles |
+| Incendie, multirisque habitation, vol, transport | Capitaux, franchises, vétusté, règle proportionnelle (FR-69) | contractuel | spécifié |
+| Accident du travail | Hors assureur IARD, sauf contrat individuel | — | hors périmètre |
+
