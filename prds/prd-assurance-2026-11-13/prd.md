@@ -1,6 +1,6 @@
 ---
 title: "PRD — Prospera Assurance (chaîne sinistres)"
-status: draft
+status: draft (relectures appliquées, lot 1)
 created: 2026-11-13
 updated: 2026-11-13
 project: prospera
@@ -12,7 +12,7 @@ mode: rapide
 
 # PRD — Prospera Assurance (chaîne sinistres)
 
-*Brouillon complet (2026-11-13), rédigé en mode rapide à partir du récit du PO (`brain-dump-po-2026-11-13.md`), du plan de rédaction et de ses décisions D1-D21 prises par recommandation (`plan-redaction.md`), et de cinq extraits (`extract-*.md`). Décisions et raisons dans `.memlog.md`. Fin du PRD et annexes assemblées ; passe de cohérence faite (`coherence.md`). Reste à faire : réconciliation avec les sources, relectures, tri des hypothèses, passe de style.*
+*Brouillon complet (2026-11-13), rédigé en mode rapide à partir du récit du PO (`brain-dump-po-2026-11-13.md`), du plan de rédaction et de ses décisions D1-D21 prises par recommandation (`plan-redaction.md`), et de cinq extraits (`extract-*.md`). Décisions et raisons dans `.memlog.md`. Fin du PRD et annexes assemblées ; passe de cohérence faite (`coherence.md`). Relectures et réconciliations faites ; corrections appliquées (arbitrages R1 à R15). Reste à faire : séance d'immersion avec la compagnie, revue juridique (§13.2), volumes réels, tri final des hypothèses, passe de style.*
 
 ---
 
@@ -28,7 +28,7 @@ Ce PRD décrit **Prospera Assurance** : l'outil qui sert une compagnie d'assuran
 
 **La démo existante ne tourne que dans le navigateur.** Le front de démo `prospera-assurance` montre le circuit en entier, mais il n'enregistre rien côté serveur : le portefeuille d'environ 3 500 dossiers est généré à chaque chargement, les actions sont gardées dans le navigateur de chacun, l'IA est faite de règles et d'expressions régulières, et rien n'est envoyé ni payé. **C'est le serveur qu'il faut construire.** Ce PRD exige en vrai ce que la démo montre, et corrige ses écarts (franchise déduite, contrôle de garantie qui ne se saute pas, offre et accord de l'assuré comme étape, recours en parallèle, validation à plusieurs niveaux, lecture réelle des scans). **Le premier risque du projet est la reprise des données** : les archives de la compagnie, leur format, leur volume et le logiciel d'où elles partent ne sont pas connus à cette date (§12 ; module `reprise`).
 
-**La compagnie a vu une vraie démonstration.** Elle a dit qu'**il manque des éléments, mais de débuter dessus**. Une **séance d'immersion** avec elle suivra, pour parfaire certaines étapes et faire des ajouts. Le but, dit le PO, est de **finaliser un vrai processus qui peut évoluer après, mais qui doit d'abord être présent, intégré et vraiment testé**. Ce PRD est donc écrit pour **évoluer par paramètres** : tout seuil, délai, liste ou règle de la compagnie est un paramètre (FR-4), et chaque décision prise sans parole de la compagnie porte la balise `[ASSUMPTION: … ; à confirmer à la séance d'immersion]`. Le PO a demandé de trancher soi-même les points restants « pour qu'on finisse » : ces choix sont des recommandations, pas des engagements de la compagnie.
+**La compagnie a vu une vraie démonstration.** Elle a dit qu'**il manque des éléments, mais de débuter dessus**. Une **séance d'immersion** avec elle suivra, pour parfaire certaines étapes et faire des ajouts. Le but, dit le PO, est de **finaliser un vrai processus qui peut évoluer après, mais qui doit d'abord être présent, intégré et vraiment testé**. Ce PRD est donc écrit pour **évoluer par paramètres** : tout seuil, délai, liste ou règle de la compagnie est un paramètre (FR-4), et chaque décision prise sans parole de la compagnie porte la balise *(défaut H-001 : … ; à confirmer à la séance d'immersion)*. Le PO a demandé de trancher soi-même les points restants « pour qu'on finisse » : ces choix sont des recommandations, pas des engagements de la compagnie.
 
 **Ce PRD réutilise le PRD distributeur et le PRD microfinance.** Les règles transverses du premier (PRD-D §4) s'appliquent ici (FR-1). La partie 4 reprend les modules partagés par renvoi et dit seulement ce que l'assurance exige en plus ; elle s'inspire de la partie 4 du PRD microfinance pour l'installation chez le client et l'IA commune.
 
@@ -45,7 +45,11 @@ Suivent les exigences transverses (§8), les indicateurs (§9), le périmètre (
 
 **Sources et décisions.** Le récit du PO (`brain-dump-po-2026-11-13.md`), le plan de rédaction et ses 21 décisions de cadrage (`plan-redaction.md`), le code et les parcours de la démo, la proposition commerciale v2 (la référence commerciale), la SPEC métier, et la recherche réglementaire (`extract-recherche-cima.md`). En cas d'écart, l'ordre de priorité est : le récit du PO, le plan, le code de la démo, les parcours validés, la proposition v2, la SPEC, puis les autres pièces ; **la réglementation l'emporte sur tout pour les obligations légales**. Le code de la démo l'emporte sur la SPEC, qui est en retard sur lui (elle décrit 9 statuts et 2 sorties). Les questions du fichier de retour personnel de la démo (`99-retour-personnel.md`) sont imaginées par le PO : elles ne sont pas des propos de la compagnie. Ce que la compagnie a dit est connu de seconde main, par trois documents : l'atelier avec le service sinistres (dont il reste six constats), l'offre v4 et la proposition v2.
 
-**Pièces de référence qui ne sont pas togolaises.** La convention d'expertise du dossier est tunisienne, le mémoire de 2014 porte sur une compagnie du même groupe au Sénégal, et les formulaires du fonds de garantie sont sénégalais : ce sont des modèles et des jeux de test, pas des règles du Togo. Les règles du Togo viennent du Code CIMA et de la loi togolaise sur les données personnelles. Seuls les textes que la recherche a lus (marqués SÛR) sont cités avec leur numéro ; le reste est « à vérifier par le juriste » (FR-24).
+**Pièces de référence qui ne sont pas togolaises.** La convention d'expertise du dossier est tunisienne, les procédures reprises du mémoire de 2014 sont celles de la compagnie étudiée par le mémoire de 2014 (zone CIMA), et les formulaires du fonds de garantie sont sénégalais : ce sont des modèles et des jeux de test, pas des règles du Togo. Les règles du Togo viennent du Code CIMA et de la loi togolaise sur les données personnelles. Seuls les textes que la recherche a lus (marqués SÛR) sont cités avec leur numéro ; le reste est « à vérifier par le juriste » (FR-24).
+
+**Numéro attribué tout de suite.** Le récit du PO écrit « numéro attribué tout de suite ». Le PRD le réalise par la **référence `DEC-` immédiate** ; le numéro officiel vient du logiciel de la compagnie (FR-2, décision D3).
+
+**Numéros créés ou réservés par la relecture.** FR-26 à FR-29 (principes transverses), FR-229 (vue finance et vue exploitation), FR-240 (mise en service) et FR-242 (réversibilité) sont créés par la relecture ; FR-243 et FR-247 à FR-249 restent réservés. Dans tout le PRD, un identifiant `FR-n` sans préfixe désigne une exigence de ce PRD ; les exigences des autres PRD portent toujours leur préfixe (`PRD-D FR-n`, `PRD moteur FR-n`).
 
 ---
 
@@ -55,13 +59,15 @@ Une compagnie d'assurance vit de la confiance de ses assurés au moment du sinis
 
 **La phrase à faire disparaître est : « Je vais vérifier et je vous rappelle. »**
 
+Une décision n'est bonne que si elle est **défendable** : devant l'assuré, l'auditeur ou le juge, elle montre ses pièces, sa règle, son motif et son auteur, sans reconstitution (FR-26).
+
 Prospera Assurance donne à chaque acteur du sinistre **une seule histoire du dossier**, enregistrée pas à pas : de l'agent d'accueil qui reçoit la déclaration au responsable qui valide, de la comptable qui émet le chèque à l'archiviste qui verse le dossier au fonds. Le gestionnaire répond à l'assuré **pendant l'appel**, depuis la fiche. Le responsable voit les dossiers bloqués, les délais qui expirent et la charge de chacun. Le contrôle interne et la CRCA trouvent le journal sans reconstitution. Il le fait **à côté du logiciel de la compagnie, sans le remplacer** : le logiciel tient le contrat, Prospera tient le sinistre.
 
 **Les promesses de la proposition v2** (la référence commerciale, 15 septembre 2026), et ce que le PRD en fait :
 
 | # | Promesse (proposition v2) | Ce que le PRD mesure (§9) |
 |---|---|---|
-| 1 | Une recherche unique par nom, numéro de police, téléphone, référence sinistre ou numéro d'archivage, « en quelques secondes » | résultat en moins de 5 secondes au 95e centile sur le volume repris ; moins de 1 seconde visé (défaut, annexe D) `[ASSUMPTION: la v2 ne chiffre pas ; la cible de 5 s vient du deck du 12/09 et du PO ; 1 s est la cible du deck]` |
+| 1 | Une recherche unique par nom, numéro de police, téléphone, référence sinistre ou numéro d'archivage, « en quelques secondes » | résultat en moins de 5 secondes au 95e centile sur le volume repris ; moins de 1 seconde visé (défaut, annexe D) *(défaut H-002 : la v2 ne chiffre pas ; la cible de 5 s vient du deck du 12/09 et du PO ; 1 s est la cible du deck)* |
 | 2 | Chaque étape tracée : qui, quand, pourquoi ; 100 % des actions horodatées et attribuées | part des actions du journal avec auteur et horodatage serveur (cible 100 %) ; part des refus et classements avec motif (cible 100 %) |
 | 3 | Aucun règlement sans validation, aucun montant payé deux fois | nombre d'ordres sans validation (cible 0) ; nombre de doublons de règlement détectés avant émission |
 | 4 | Délais du Code CIMA respectés ; audits et contrôles de la CRCA « préparés sans reconstitution » | part des dossiers corporels avec une échéance légale active et alertée ; temps pour produire le journal d'un dossier ou d'une période |
@@ -73,6 +79,18 @@ Prospera Assurance donne à chaque acteur du sinistre **une seule histoire du do
 
 Les promesses du deck du 12/09 qui ne figurent ni dans la v2 ni dans l'offre v4 (assistant conversationnel en français et en anglais, 24 h sur 24, côté assuré) sont **« bientôt »** (FR-22).
 
+**Promesses du deck et de la v2 non tenues ou transformées, par décision du PO.**
+
+| # | Promesse du deck ou de la v2 | Ce que le PRD en fait |
+|---|---|---|
+| 1 | Blocage de l'ouverture tant que les pièces manquent | **Transformée** : on ouvre « en attente de pièces » ; l'ouverture n'est jamais bloquée (FR-39) |
+| 2 | Reprise du stock papier par scan | **Non retenue** : le papier reste tenu (FR-21) |
+| 3 | Numéro de sinistre immédiat | **Transformée** : la référence `DEC-` est immédiate ; le numéro officiel vient du logiciel de la compagnie (FR-2) |
+| 4 | Import initial seulement | **Remplacée** par la resynchronisation nocturne (FR-2, §6.4) |
+| 5 | Appel pris en compte dans la déclaration assistée | **Transformée** : l'accueil saisit pendant l'appel ; la déclaration assistée lit WhatsApp et l'e-mail, jamais la voix (FR-10) |
+| 6 | Téléversement par l'assuré depuis son téléphone | **Non tenue** : il n'y a pas de portail assuré (§2.2, FR-22) |
+| 7 | Prescription « art. 28 » | **Gardée comme terme à vérifier** par le juriste (FR-14) |
+
 ---
 
 ## 2. Pour qui
@@ -83,8 +101,8 @@ La compagnie travaille avec **quatorze rôles** (décision de cadrage D14 ; le p
 
 | Code | Rôle | Périmètre | Ce qu'il fait dans Prospera |
 |---|---|---|---|
-| DG | Direction générale | tous les dossiers | pilote ; valide seule les règlements à titre commercial ; siège au comité s'il le décide ; certifie une reconstitution ; lit les données de santé pour une décision |
-| DT | Directeur technique (opérationnel) | tous les dossiers | donne son visa sur les montants qui passent au comité ; siège au comité sinistres ; lit les données de santé pour une décision |
+| DG | Direction générale | tous les dossiers | pilote ; valide seule les règlements à titre commercial ; siège au comité s'il le décide ; certifie une reconstitution ; lit une donnée de santé par un accès par dossier ouvert à la validation, journalisé (FR-9) |
+| DT | Directeur technique (opérationnel) | tous les dossiers | donne son visa sur les montants qui passent au comité ; siège au comité sinistres ; lit une donnée de santé par un accès par dossier ouvert à la validation, journalisé (FR-9) |
 | RESP | Responsable du service sinistres | tous les dossiers du service | attribue les dossiers, ordonne une contre-expertise (comme `DG` et `DT`), valide jusqu'au seuil de sa délégation, préside le comité, rend l'arbitrage ; réaffecte la charge |
 | GEST | Gestionnaire sinistres | les dossiers de **son volet** (corporel, matériel ou risques divers) | instruit, demande les pièces, mène les expertises, arrête l'évaluation, prépare l'offre, clôt |
 | GREC | Gestionnaire recours | les dossiers en recours | mène le recours contre le tiers ou son assureur : mise en cause, relances, mise en demeure, encaissement |
@@ -98,7 +116,7 @@ La compagnie travaille avec **quatorze rôles** (décision de cadrage D14 ; le p
 | AUD | Contrôle interne | tous les dossiers, **en lecture seule pour les décisions** | contrôle, lit le journal des changements et des consultations, prépare les contrôles de la CRCA ; **signale** une suspicion de fraude et rend un **avis écrit** (obligatoire avant la confirmation d'une fraude) ; ne décide jamais |
 | ADMIN | Administrateur informatique de la compagnie | comptes et paramètres | crée les comptes, règle les paramètres, installe les mises à jour ; **ne lit aucune donnée métier** |
 
-Le **comité sinistres** n'est pas un rôle : c'est une instance de décision, composée de personnes qui portent déjà un rôle (FR-8). Les **quatorze gestionnaires** de la démo (trois en corporel, cinq en matériel, trois en risques divers, trois en recours) sont un chiffre de **démonstration**, pas l'effectif réel de la compagnie (FR-15). Il n'y a pas de rôle « assuré » : l'assuré n'a pas d'application (§2.2).
+Le **comité sinistres** n'est pas un rôle : c'est une instance de décision, composée de personnes qui portent déjà un rôle (FR-8). Le **responsable LBC** n'est pas un quinzième rôle : c'est une désignation faite par `AUD`, jamais par `ADMIN` seul (FR-225). Dans l'espace d'essai, un **sélecteur de rôle de démonstration** change de profil sans déconnexion (FR-15). Le directeur administratif et financier de la compagnie (DAF) se sert de la vue finance, tenue pour `CPT` et `DG` (FR-229) ; le DSI porte le rôle `ADMIN`, qui **ne lit aucune donnée métier**. Les **quatorze gestionnaires** de la démo (trois en corporel, cinq en matériel, trois en risques divers, trois en recours) sont un chiffre de **démonstration**, pas l'effectif réel de la compagnie (FR-15). Il n'y a pas de rôle « assuré » : l'assuré n'a pas d'application (§2.2).
 
 ### 2.2 Hors cible (v1)
 
@@ -114,9 +132,9 @@ Les noms sont ceux du jeu de démonstration (FR-15) ; ils sont modifiables. Les 
 
 **UJ-1 — « Où en est mon dossier ? » : la réponse pendant l'appel.** Mawuli Dogbe appelle le guichet des sinistres : sa Nissan a été heurtée sur la route de Kpalimé et il n'a plus de nouvelles depuis plusieurs semaines. Afi, chargée d'accueil, tape son nom ; la fiche s'affiche en moins de 5 secondes. Elle lit : le dossier est **en validation** chez le responsable ; les cinq pièces obligatoires sont reçues ; le **montant évalué** est arrêté, **déjà payé** est zéro, le **reste à payer** est donc égal au montant validé à venir ; la dernière action est l'envoi en validation, hier, par Estelle, la gestionnaire. Afi répond tout de suite, sans « je vous rappelle ». Elle ajoute une note ; sa consultation est enregistrée à son nom. Elle ne voit rien du contenu médical d'autres dossiers et ne peut pas modifier le montant.
 
-**UJ-2 — Un accident déclaré au guichet.** Dzifa Amouzou entre au guichet après un accrochage. Afi saisit la déclaration : police, date, lieu, véhicule, tiers. Le dossier reçoit **immédiatement** une référence de déclaration `DEC-` (exemple de format : `DEC-2027-00018`), imprimée sur l'accusé de réception remis à Dzifa. Prospera vérifie qu'il n'existe pas déjà une déclaration pour la même police, la même date, la même immatriculation et la même victime, dans Prospera **et** dans les sinistres reçus du logiciel de la compagnie. L'écran affiche **la liste exacte des pièces à fournir** pour ce type de sinistre ; Dzifa n'en a qu'une partie sur elle. Afi les scanne ; l'application lit chacune, la reconnaît, la rattache à la pièce attendue. Le dossier passe en **pièces attendues** et Dzifa reçoit un SMS qui liste les pièces qui manquent. La déclaration part vers le logiciel de la compagnie ; le lendemain matin, il renvoie le **numéro de sinistre officiel**, que Prospera rattache et affiche désormais partout. Dzifa est prévenue par SMS.
+**UJ-2 — Un accident déclaré au guichet.** Dzifa Amouzou entre au guichet après un accrochage. Afi saisit la déclaration : police, date, lieu, véhicule, tiers. Le dossier reçoit **immédiatement** une référence de déclaration `DEC-` (exemple de format : `DEC-2027-00018`), imprimée sur l'accusé de réception remis à Dzifa. Prospera vérifie qu'il n'existe pas déjà une déclaration pour la même police, la même date, la même immatriculation et la même victime, dans Prospera **et** dans les sinistres reçus du logiciel de la compagnie. L'écran affiche **la liste exacte des pièces à fournir** pour ce type de sinistre ; Dzifa n'en a qu'une partie sur elle. Afi les scanne ; l'application lit chacune, la reconnaît, la rattache à la pièce attendue. Le dossier passe en **pièces attendues** et Dzifa reçoit un SMS qui liste les pièces qui manquent. La déclaration part vers le logiciel de la compagnie ; après un délai variable selon le LC (FR-198), il renvoie le **numéro de sinistre officiel**, que Prospera rattache et affiche désormais partout. Dzifa est prévenue par SMS.
 
-**UJ-3 — Le matériel de bout en bout, sur le modèle de `SIN-2026-9002`.** Collision à Lomé, véhicule de Mawuli Dogbe (police auto tous risques, franchise 10 %, minimum 50 000 FCFA), responsabilité partagée avec un tiers. Afi **déclare** et ouvre le dossier en attente de pièces ; le dépôt des sept pièces de l'assuré complète le dossier, qui passe **ouvert**. Komi, le responsable, **attribue** le dossier à Estelle, avec un motif. Estelle **instruit**. Le cabinet de l'expert initial remet son rapport par courrier ; Estelle le saisit, joint le PDF, le marque « saisi pour le cabinet ». Le rapport retient 445 500 FCFA contre un devis de garage de 1 273 000 : **l'écart** (65 %) est signalé avec la question à poser à l'expert. Estelle demande un complément ; Komi ordonne une **contre-expertise** (le gestionnaire ne peut pas), confiée à un autre cabinet que celui du premier rapport, qui dépose son rapport depuis le portail expert et confirme 445 500. Une lecture interne des circonstances, proposée par l'assistant et retenue par Estelle, fixe la part du tiers à 70 %. Estelle enregistre la **décision de garantie** (garantie acquise, motif écrit, déclaration tardive notée en réserve), puis **évalue** : le décompte part du chiffrage validé de 445 500 FCFA, passe par la vétusté, **déduit la franchise** (10 %, minimum 50 000 FCFA) et vérifie le plafond ; l'**évaluation** arrêtée est le résultat de ce décompte (395 500 FCFA `[ASSUMPTION: exemple de calcul ; le jeu de démonstration fixe la valeur exacte]`) et la provision est révisée. Le montant est sous le seuil de délégation du responsable : Komi **valide** avec un motif. Prospera envoie l'**offre** à Mawuli sous 48 heures ouvrées ; Mawuli l'**accepte** et signe ; l'accord est enregistré. Pascal, le comptable, qui n'a pas décidé, **émet** le règlement par chèque (numéro et banque saisis). Afi **remet** le chèque contre quittance signée et pièce d'identité du retirant : le dossier est **réglé**, reste à payer zéro. Estelle **clôt** avec un motif écrit. Mensah, l'archiviste, **verse** le dossier au fonds : le numéro d'archivage `ARC-…` est attribué, la cote physique de la chemise est notée. Le recours contre le tiers continue seul (UJ-5). *Ce parcours est le parcours n° 1 : il doit se mener **à la main, rôle après rôle**, dans la démo, sur un dossier créé à l'écran (FR-16).*
+**UJ-3 — Le matériel de bout en bout, sur le modèle de `SIN-2026-9002`.** Collision à Lomé, véhicule de Mawuli Dogbe (police auto tous risques, franchise 10 %, minimum 50 000 FCFA), responsabilité partagée avec un tiers. Afi **déclare** et ouvre le dossier en attente de pièces ; le dépôt des sept pièces de l'assuré complète le dossier, qui passe **ouvert**. Komi, le responsable, **attribue** le dossier à Estelle, avec un motif. Estelle **instruit**. Le cabinet de l'expert initial remet son rapport par courrier ; Estelle le saisit, joint le PDF, le marque « saisi pour le cabinet ». Le rapport retient 445 500 FCFA contre un devis de garage de 1 273 000 : **l'écart** (65 %) est signalé avec la question à poser à l'expert. Estelle demande un complément ; Komi ordonne une **contre-expertise** (le gestionnaire ne peut pas), confiée à un autre cabinet que celui du premier rapport, qui dépose son rapport depuis le portail expert et confirme 445 500. Une lecture interne des circonstances, proposée par l'assistant et retenue par Estelle, fixe la part du tiers à 70 %. Estelle enregistre la **décision de garantie** (garantie acquise, motif écrit, déclaration tardive notée en réserve), puis **évalue** : le décompte part du chiffrage validé de 445 500 FCFA, passe par la vétusté, **déduit la franchise** (10 %, minimum 50 000 FCFA) et vérifie le plafond ; l'**évaluation** est le **montant arrêté par Estelle, au franc près** ; le décompte est son repère, et un écart avec lui exige un motif (395 500 FCFA *(défaut H-003 : exemple de calcul ; le jeu de démonstration fixe la valeur exacte)*) ; la provision est révisée. Le montant est sous le seuil de délégation du responsable : Komi **valide** avec un motif. Prospera envoie l'**offre** à Mawuli sous 48 heures ouvrées ; Mawuli l'**accepte** et signe ; l'accord est enregistré. Pascal, le comptable, qui n'a pas décidé, **émet** le règlement par chèque (numéro et banque saisis). Afi **remet** le chèque contre quittance signée et pièce d'identité du retirant : le dossier est **réglé**, reste à payer zéro. Estelle **clôt** avec un motif écrit. Mensah, l'archiviste, **verse** le dossier au fonds : le numéro d'archivage `ARC-…` est attribué, la cote physique de la chemise est notée. Le recours contre le tiers continue seul (UJ-5). *Ce parcours est le parcours n° 1 : il doit se mener **à la main, rôle après rôle**, dans la démo, sur un dossier créé à l'écran (FR-16).*
 
 **UJ-4 — Un préjudice corporel grave.** Kokou, motard, est renversé par un véhicule dont l'assureur de responsabilité est la compagnie. Le dossier corporel est suivi par Edoh, gestionnaire corporel. Le **chronomètre légal** se déclenche à la date de l'accident : l'offre est due dans les **12 mois** suivant l'accident, ou dans les **8 mois** suivant le décès si la victime meurt (Code CIMA, art. 231) ; la pénalité de **5 % par mois** de retard est affichée (art. 233, 236). À six mois, la consolidation n'est pas connue : Prospera propose une **offre provisionnelle**, et suit le délai de l'offre définitive. Les pièces médicales vont au **médecin-conseil** ; Afi, à l'accueil, voit seulement qu'un certificat est reçu. **L'IA ne propose aucun montant** : l'évaluation est le calcul poste par poste du barème corporel, saisi par Edoh avec l'avis du médecin-conseil. Le dossier dépasse le seuil du responsable : il passe au **comité sinistres**, puis reçoit le **visa du directeur technique**. L'accord de la victime est enregistré par un **procès-verbal de transaction**, qui rappelle son droit de le dénoncer dans les 15 jours (art. 235). Le règlement est libellé au nom de la victime (art. 232).
 
@@ -124,7 +142,7 @@ Les noms sont ceux du jeu de démonstration (FR-15) ; ils sont modifiables. Les 
 
 **UJ-6 — Le responsable sinistres, un lundi matin.** Komi ouvre son **brief du matin** : dossiers à risque, délais légaux qui expirent cette semaine, anomalies de la nuit, dossiers sans action depuis 30 jours, pièces attendues, règlements en attente de validation. Il voit la **charge** de chacun des gestionnaires et un dossier **bloqué** depuis plusieurs jours en attente d'un complément d'expert. Il relance l'expert, puis **réaffecte** les dossiers de Yao, absent, à Sélom, en un geste, avec un motif. Les dossiers réaffectés gardent tout leur historique. Il pose une question au Copilot (« Quels dossiers auto sont bloqués ? ») : la réponse cite ses chiffres et leur source.
 
-**UJ-7 — Le contrôle interne prépare un contrôle de la CRCA.** Yawa, du contrôle interne, apprend qu'un contrôle sur pièces est annoncé. Elle exporte, pour l'exercice demandé, la liste des dossiers corporels avec leurs échéances légales, les **états de sinistres** par exercice de survenance, la provision dossier par dossier, et le **journal chaîné** de quelques dossiers tirés au sort : changements **et consultations**, au nom des agents. Elle repère un dossier où l'instructeur a validé son propre règlement : le contrôle bloque ce cas, elle vérifie qu'il n'a pas eu lieu. Rien n'est reconstitué à la main ; le dossier de contrôle est prêt en une journée `[ASSUMPTION: durée non mesurée ; à confirmer à la séance d'immersion]`.
+**UJ-7 — Le contrôle interne prépare un contrôle de la CRCA.** Yawa, du contrôle interne, apprend qu'un contrôle sur pièces est annoncé. Elle exporte, pour l'exercice demandé, la liste des dossiers corporels avec leurs échéances légales, les **états de sinistres** par exercice de survenance, la provision dossier par dossier, et le **journal chaîné** de quelques dossiers tirés au sort : changements **et consultations**, au nom des agents. Elle repère un dossier où l'instructeur a validé son propre règlement : le contrôle bloque ce cas, elle vérifie qu'il n'a pas eu lieu. Rien n'est reconstitué à la main ; le dossier de contrôle est prêt en une journée *(défaut H-004 : durée non mesurée ; à confirmer à la séance d'immersion)*.
 
 **UJ-8 — L'informaticien suit la reprise et la resynchronisation.** Kossi, de la DSI de la compagnie, suit la **reprise des archives** que l'équipe de Money Vibes a lancée sur les dossiers en cours, puis sur l'historique. Il lit le **rapport de reprise** : dossiers récupérés, rejetés avec leur raison, écarts. Chaque nuit, la **resynchronisation** avec le logiciel de la compagnie s'exécute ; le matin, il voit combien de sinistres elle a rattachés et quels enregistrements elle a rejetés, par exemple faute de police. Il corrige la table de correspondance et relance. À aucun moment il ne lit le contenu d'un dossier : il voit des comptes, des états et des motifs de rejet.
 
@@ -140,7 +158,7 @@ Le vocabulaire commun est celui du PRD distributeur (PRD-D §3). Les termes prop
 |---|---|
 | **Dossier sinistre** | L'histoire d'un sinistre, de sa déclaration à sa clôture et à son archivage, tenue par Prospera. |
 | **Déclaration** | L'acte par lequel l'assuré ou son représentant informe la compagnie d'un sinistre. Elle crée le dossier. |
-| **Référence de déclaration (`DEC-AAAA-NNNNN`)** | La référence que Prospera donne **immédiatement** à la déclaration, avant tout numéro officiel. Elle reste un critère de recherche. |
+| **Référence de déclaration (`DEC-AAAA-NNNNN`)** | La référence que Prospera donne **immédiatement** à la déclaration, avant tout numéro officiel. Elle reste un critère de recherche. C'est le « numéro attribué tout de suite » du récit du PO ; le numéro officiel vient du logiciel de la compagnie. |
 | **Numéro de sinistre** | Le numéro **officiel**, détenu par le logiciel de la compagnie. Il s'affiche partout une fois reçu (FR-2). Un paramètre permet de basculer l'attribution vers Prospera plus tard. |
 | **Numéro d'archivage (`ARC-AAAA-CCCC-NNNNN`)** | Le numéro attribué à un dossier **clos** quand il est versé au fonds ; il n'est jamais réattribué. Il est conservé tel quel à la reprise s'il existe. |
 | **Cote physique** | L'emplacement du dossier papier : boîte, rang, chemise de couleur par branche. Le papier reste tenu (FR-21). |
@@ -154,10 +172,11 @@ Le vocabulaire commun est celui du PRD distributeur (PRD-D §3). Les termes prop
 | **Contre-expertise** | Une **expertise demandée par la compagnie pour contrôler le rapport d'une première expertise**, confiée à un autre expert. Interne à la compagnie. |
 | **Expertise contradictoire** | Une expertise **menée entre assureurs** (ou avec la partie adverse), dans le cadre d'un recours. **Ne pas confondre avec la contre-expertise** : ce sont deux sens distincts. |
 | **Décompte** | Le calcul qui mène du dommage à l'indemnité : dommage, vétusté, règle proportionnelle, plafond, franchise. |
-| **Évaluation** | Le montant arrêté par le gestionnaire au terme du décompte. Une évaluation arrêtée n'est **jamais recalculée** si un barème change. |
+| **Évaluation** | Le montant arrêté par le gestionnaire, **au franc près** ; le décompte est son repère. Une évaluation arrêtée n'est **jamais recalculée** si un barème change. |
 | **Provision** | La charge estimée du dossier, tenue **dossier par dossier**, posée à l'ouverture et revue à chaque événement, avec motif (FR-2). |
 | **Délégation** | Le pouvoir de valider un montant. Une matrice paramétrable fixe qui valide quoi (FR-8). |
 | **Comité sinistres** | L'instance qui décide au-delà du seuil du responsable. Ce n'est pas un rôle. |
+| **Partie au dossier** | Toute personne qui a accompli l'un des actes de la liste fermée de FR-29 (affecter, instruire, évaluer, valider, contrôler, enregistrer l'accord, émettre, remettre, rapprocher). |
 | **Offre** | La proposition d'indemnité faite à l'assuré : **provisionnelle** (consolidation inconnue) ou **définitive**. |
 | **Accord** | La réponse favorable de l'assuré à l'offre, **enregistrée** (offre signée, ou procès-verbal de transaction au corporel). Aucun ordre de règlement sans accord enregistré. |
 | **Procès-verbal de transaction** | L'acte qui constate l'accord de la victime sur l'indemnité d'un dommage corporel. |
@@ -176,11 +195,13 @@ Le vocabulaire commun est celui du PRD distributeur (PRD-D §3). Les termes prop
 
 | Montant | Sens |
 |---|---|
-| **Évalué** | Le montant arrêté par le gestionnaire au terme du décompte. |
+| **Évalué** | Le montant arrêté par le gestionnaire ; le décompte est son repère ; un écart avec le décompte exige un motif. |
 | **Proposé** | Le montant de l'**offre** faite à l'assuré. |
 | **Validé** | Le montant approuvé par la personne ou l'instance qui a la délégation. |
 | **Payé** | Ce qui a été réglé, tous règlements confondus. |
 | **Reste à payer** | Le validé moins le payé. Le dossier passe à `REGLE` quand il est zéro. |
+
+**Arrondi.** L'arrondi à 5 000 FCFA ne vaut que pour les montants **calculés par le système** (provision d'ouverture, indemnité proposée par un formulaire d'instruction). Le montant **arrêté** par le gestionnaire est **au franc près** (395 500 FCFA pour `SIN-2026-9002`).
 
 À côté de ces cinq montants, la **provision** est une charge estimée tenue pour l'exercice : elle n'est ni l'évalué, ni le proposé, ni le validé. Le dossier de référence `SIN-2026-9002` montre pourquoi : devis du garage 1 273 000, chiffrage de l'expert 445 500, évaluation arrêtée 395 500 (445 500 moins la franchise minimale de 50 000, D15), provision d'ouverture 780 000 puis réajustée à l'évaluation, estimation par comparables 555 000 : **aucun de ces chiffres n'est fondu avec un autre**.
 
@@ -217,7 +238,7 @@ Le logiciel de la compagnie (LC) fait foi pour les contrats (décision de cadrag
 | Règlements : ordre, quittance, chèque émis, remis, paiement | **Prospera** (l'exécution passe par `paiement`, §7.1) | le LC reçoit les règlements pour sa comptabilité, par le contrat d'échange |
 | Recours contre les tiers | **Prospera** | le LC reçoit les encaissements de recours |
 | Archives : pièces, numéro d'archivage, cote physique | **Prospera** (`ged`) | le LC reçoit les références utiles |
-| Traités de réassurance et clés de coassurance du référentiel | **Prospera** tient un référentiel daté, saisi ou importé de la compagnie `[ASSUMPTION: les traités ne sont pas dans le LC ; à confirmer à la séance d'immersion]` | la cession et la coassurance sont calculées par Prospera sur le dossier |
+| Traités de réassurance et clés de coassurance du référentiel | **Prospera** tient un référentiel daté, saisi ou importé de la compagnie *(défaut H-005 : les traités ne sont pas dans le LC ; à confirmer à la séance d'immersion)* | la cession et la coassurance sont calculées par Prospera sur le dossier |
 | **Comptabilité officielle**, écritures, primes, réassurance comptable | **la compagnie** (hors de Prospera) | Prospera fournit un **état et un export** ; le rapprochement bancaire des chèques et du Mobile Money se fait dans `paiement` (FR-224) |
 | Journal du dossier | **Prospera** | — |
 
@@ -239,29 +260,33 @@ Prospera lit les polices et les garanties par une **projection datée** du LC. L
 **Conséquences (testables) :**
 - Aucun appel de Prospera n'écrit dans les contrats du LC ; un test inspecte les échanges sortants vers le LC fictif et n'y trouve aucune écriture sur un contrat.
 - La transition vers l'évaluation est **refusée** sans décision de garantie enregistrée ; un test tente de la sauter avec chaque rôle.
-- La projection a un âge maximal paramétrable ; au-delà, le contrôle de recevabilité affiche « données du … » et demande une relecture (défaut, annexe D `[ASSUMPTION: 15 minutes avec une interface, 1 jour avec des fichiers ; valeurs reprises du modèle de la microfinance]`).
+- La projection a un âge maximal paramétrable ; au-delà, le contrôle de recevabilité affiche « données du … » et demande une relecture (`liaison.age_max`, annexe D : **5 minutes** avec une interface, **24 heures** avec des fichiers *(défaut H-006 : valeurs de l'annexe D reprises du modèle de la microfinance ; à confirmer à la séance d'immersion)*).
 - Une déclaration tardive n'entraîne **jamais** une déchéance automatique : la réserve et son motif sont enregistrés, le responsable décide (décision D15 ; Code CIMA art. 20, qui exige la preuve d'un préjudice).
 
 ### 4.3 Tout seuil est un paramètre de la compagnie
 
 #### FR-4 : Les seuils de la démo sont des valeurs par défaut
 
-Tout seuil, délai, montant, taux, tolérance ou liste métier (pièces obligatoires par type de sinistre, barèmes de vétusté, franchises, seuils de délégation, délais de relance, seuils d'expertise, listes d'experts, modèles de courriers) est un **paramètre de la compagnie**, réglé par l'administrateur **sous la validation d'un rôle métier**, versionné et daté. Les valeurs de la démo, du plan et des sources sont les **valeurs par défaut**. Toutes les valeurs par défaut sont rassemblées dans **l'annexe D**, qui fait foi en cas d'écart avec une FR. C'est ce qui permet au PRD d'évoluer à la séance d'immersion sans reprise du code.
+Tout seuil, délai, montant, taux, tolérance ou liste métier (pièces obligatoires par type de sinistre, barèmes de vétusté, franchises, seuils de délégation, délais de relance, seuils d'expertise, listes d'experts) et tout **modèle de document** (lettres, quittances, lettre de mission, bordereaux, chèques) est un **paramètre de la compagnie**, paramétrable et versionné,, réglé par l'administrateur **sous la validation d'un rôle métier**, versionné et daté. Les valeurs de la démo, du plan et des sources sont les **valeurs par défaut**. Toutes les valeurs par défaut sont rassemblées dans **l'annexe D**, qui fait foi en cas d'écart avec une FR. C'est ce qui permet au PRD d'évoluer à la séance d'immersion sans reprise du code. Quand une FR et l'annexe D divergent, on corrige la FR pour qu'elle porte la valeur de l'annexe D (sauf sous un plancher légal : le plancher légal l'emporte partout) ; en cas de doute, une FR écrit « voir `paramètre`, annexe D ». Le **référentiel légal** (D.5), que la compagnie ne modifie pas, se met à jour par une procédure écrite : fournisseur du texte, relecture du juriste, **date d'effet**, double contrôle, journal.
 
 **Conséquences (testables) :**
 - Changer un paramètre ne modifie pas un dossier déjà engagé : un dossier garde les règles en vigueur à sa **date de survenance** pour ce qui est légal (FR-14), et à son **ouverture** pour ce qui est interne.
 - Chaque changement de paramètre est enregistré : ancienne valeur, nouvelle valeur, auteur, validateur, date.
 - Aucun seuil du PRD n'est écrit dans le code : un test change chaque paramètre listé à l'annexe D et vérifie l'effet.
 - Les **délais légaux** (FR-14) ne sont pas des paramètres de la compagnie : ils sont un référentiel versionné qu'elle ne modifie pas.
+- Chaque mise à jour du référentiel légal est journalisée : fournisseur du texte, relecteur juriste, date d'effet, auteur du double contrôle.
+- Un modèle de document modifié crée une **nouvelle version** ; les documents déjà émis gardent la version d'origine.
+- Test de recette : aucune valeur numérique d'un paramètre de l'annexe D n'est écrite en dur dans une FR ; une valeur citée renvoie à son `paramètre`, annexe D.
 
 #### FR-5 : Les seuils d'alerte se calibrent sur les données reprises
 
-Les **seuils d'alerte** (retard, provision, charge, silence d'un dossier, écart d'expertise, concentration d'émission, signaux de fraude) ne sont pas figés sur les valeurs de la démo, qui sont des chiffres de jeu. À la reprise des données, Prospera calcule une **proposition de seuil** par alerte à partir de l'historique repris de la compagnie, un humain la valide, et la proposition est recalculée à intervalle régulier, par percentiles de la compagnie (défaut, annexe D `[ASSUMPTION: chaque trimestre ; modèle de la microfinance]`).
+Les **seuils d'alerte** (retard, provision, charge, silence d'un dossier, écart d'expertise, concentration d'émission, signaux de fraude) ne sont pas figés sur les valeurs de la démo, qui sont des chiffres de jeu. À la reprise des données, Prospera calcule une **proposition de seuil** par alerte à partir de l'historique repris de la compagnie, un humain la valide, et la proposition est recalculée à intervalle régulier, par percentiles de la compagnie (défaut, annexe D *(défaut H-007 : chaque trimestre ; modèle de la microfinance)*). Les **grilles de provision** se calibrent par des paramètres propres : marge de fiabilité, amplitude, occupation, concentration, ancienneté, tranches mortes *(défaut H-008 : valeurs de la démo comme défauts ; à confirmer à la séance d'immersion)*. Une **alerte de grille périmée** prévient le rôle qui possède la grille quand elle n'a pas été revue dans le délai fixé.
 
 **Conséquences (testables) :**
 - Chaque seuil d'alerte affiche sa source : « valeur de démonstration », « calculé sur vos données du … », ou « fixé par … le … ».
 - Un seuil calculé n'entre en vigueur qu'après validation par le rôle qui possède l'alerte.
 - Les valeurs de la démo (par exemple l'écart d'expertise de 15 % et 35 %, le silence d'un dossier à 8, 15 et 30 jours) ne sont reprises qu'en l'**absence** de données reprises.
+- Un test change chaque paramètre de calibration d'une grille de provision et vérifie l'effet sur la provision proposée ; une grille non revue depuis son délai lève l'alerte « grille périmée ».
 
 ### 4.4 Rôles, périmètres et séparation des tâches
 
@@ -273,19 +298,21 @@ Les quatorze rôles du §2.1 existent dès l'installation. Chacun voit son péri
 - Un GEST du volet matériel qui interroge un dossier corporel reçoit « introuvable », sans donnée.
 - EXPE ne voit que ses missions : ni la provision, ni les autres missions, ni le reste du dossier ; un test ouvre le portail avec un cabinet et vérifie chaque écran.
 - Un filtre vide ne retombe jamais sur « tous les dossiers ».
-- Les comptes sont créés par ADMIN ; les rôles qui instruisent, décident ou autorisent de l'argent (GEST, GREC, MED, RESP, DT, DG, CPT) ne sont actifs qu'après la validation d'un **rôle métier** (DG), jamais d'un second administrateur `[ASSUMPTION: règle reprise de la microfinance ; à confirmer à la séance d'immersion]` ; AUD lit le journal des créations et des retraits.
+- Les comptes sont créés par ADMIN ; les rôles qui instruisent, décident ou autorisent de l'argent (GEST, GREC, MED, RESP, DT, DG, CPT) ne sont actifs qu'après la validation d'un **rôle métier** (DG), jamais d'un second administrateur *(défaut H-009 : règle reprise de la microfinance ; à confirmer à la séance d'immersion)* ; AUD lit le journal des créations et des retraits.
 - **ADMIN ne lit aucune donnée métier par l'application** : un test ouvre chaque écran métier avec ce rôle et vérifie le refus. L'accès direct à la base sur un serveur que la compagnie administre elle-même reste un **risque résiduel assumé** : il est réduit par le chiffrement des champs sensibles (pièces d'identité, téléphones, données de santé) et par le journal chaîné (FR-13).
+- Les écrans d'administration de `ADMIN` comprennent, en plus des comptes et des paramètres, le **simulateur et l'impression des grilles** et la **liste des courriers sortants avec impression groupée** ; ils ne donnent aucune lecture métier.
 - Les rôles s'attribuent par les droits du contrat de module, sans déploiement (PRD-D FR-4).
 
 #### FR-7 : Séparation des tâches
 
-Une même personne ne peut pas cumuler, **sur un même dossier**, les actes suivants. Chaque cumul interdit est refusé par le serveur avec le code `SEPARATION_DES_TACHES` et un libellé clair.
+Une même personne ne peut pas cumuler, **sur un même dossier**, les actes suivants. Chaque cumul interdit est refusé par le serveur avec le code `SEPARATION_DES_TACHES` et un libellé clair. Les actes qui rendent une personne **partie au dossier** sont ceux de la liste fermée de FR-29.
 
-- **SEP-01 : l'instructeur ne valide pas.** Le gestionnaire qui a instruit le dossier ne valide pas son évaluation ni son règlement, et ne siège pas pour le valider au comité.
+- **SEP-01 : l'instructeur ne valide pas.** Une personne qui a instruit le dossier (acte de partie, FR-29) ne valide pas son évaluation ni son règlement, et ne siège pas pour le valider au comité.
 - **SEP-02 : celui qui décide ne paie pas.** Celui qui valide un règlement ne l'émet pas, ne saisit pas son chèque et ne le remet pas ; le comptable n'a aucun droit de décision sur un règlement.
-- **SEP-03 : délégation et anti-fractionnement.** Un montant se valide au niveau que la matrice de délégation lui fixe (FR-8) ; **le cumul des montants validés d'un même dossier décide du niveau**, de sorte qu'on ne contourne pas un seuil en fractionnant.
+- **SEP-03 : délégation et anti-fractionnement.** Un montant se valide au niveau que la matrice de délégation lui fixe (FR-8). Le cumul qui décide du niveau est la somme des montants **acceptés et ordonnés non annulés** du dossier, plus le montant **en cours de validation** ; une offre remplacée et jamais payée ne compte pas. On ne contourne donc pas un seuil en fractionnant.
+- **SEP-04 : l'ordre de règlement a un second contrôle.** L'ordre préparé par un `CPT` est **validé par une autre personne** : un **second `CPT`**, distinct de celui qui prépare ; au-dessus d'un seuil paramétré (`reglement.second_controle_seuil`, défaut *(défaut H-010 : 5 000 000 FCFA)*), le `DG` le valide aussi. Ce second contrôle n'est pas une décision de règlement.
 
-La liste complète des cumuls interdits, valable pour **tous** les moyens de paiement :
+La liste complète des **16 cumuls interdits**, valable pour **tous** les moyens de paiement :
 
 | # | Cumul interdit sur un même dossier | Règle |
 |---|---|---|
@@ -293,44 +320,74 @@ La liste complète des cumuls interdits, valable pour **tous** les moyens de pai
 | 2 | Décider (valider) et émettre le règlement | SEP-02 |
 | 3 | Émettre le règlement et le remettre au bénéficiaire | chaîne **ordre, chèque, remise** assurée par trois personnes différentes ; `ACC` remet, `CPT` ne remet que ce qu'il n'a pas émis |
 | 4 | Décider et remettre le chèque | SEP-02 |
-| 5 | Émettre un règlement et en rapprocher le paiement | deux personnes `[ASSUMPTION: règle de contrôle interne ; à confirmer]` |
-| 6 | Modifier les coordonnées bancaires d'un bénéficiaire et émettre le règlement à son profit | deux personnes `[ASSUMPTION: règle de contrôle interne, liée à l'alerte de changement de coordonnées avant paiement ; à confirmer]` |
-| 7 | S'attribuer à soi-même un dossier | l'attribution est un acte du RESP |
+| 5 | Émettre un règlement et en rapprocher le paiement | deux personnes *(défaut H-011 : règle de contrôle interne ; à confirmer)* |
+| 6 | Modifier les coordonnées bancaires d'un bénéficiaire et émettre le règlement à son profit | deux personnes *(défaut H-012 : règle de contrôle interne, liée à l'alerte de changement de coordonnées avant paiement ; à confirmer)* |
+| 7 | S'attribuer à soi-même un dossier | l'attribution est un acte du `RESP`, **sans exception** ; un dossier non affecté depuis 1 jour ouvré va au `RESP` ; si le `RESP` instruit lui-même, il ne valide pas et ne siège pas au comité pour ce dossier |
 | 8 | Ordonner une contre-expertise sans en avoir le droit | seuls RESP, DG et DT l'ordonnent ; le gestionnaire ne peut pas |
 | 9 | Juger la contestation d'un rapport en étant son auteur | le cabinet ou l'expert **auteur du rapport contesté** ne fait pas la contre-expertise ; l'expert interne ne reçoit pas une contre-expertise |
 | 10 | Reconstituer un dossier et certifier sa reconstitution | la certifient DG, RESP ou AUD, **jamais celui qui l'a reconstitué** |
-| 11 | Valider un dossier dont on est l'assuré, la victime ou le bénéficiaire | conflit d'intérêts `[ASSUMPTION: règle de prudence ; à confirmer]` |
+| 11 | Valider un dossier dont on est l'assuré, la victime ou le bénéficiaire | conflit d'intérêts *(défaut H-013 : règle de prudence ; à confirmer)* |
 | 12 | Verser au fonds sans être archiviste | seul ARCH verse au fonds |
+| 13 | Instruire et enregistrer l'accord de l'assuré | l'accord est enregistré par `ACC` ou par un agent qui n'est pas partie au dossier (FR-29), sur la pièce originale signée |
+| 14 | Valider et enregistrer l'accord de l'assuré | même règle que la ligne 13 |
+| 15 | Émettre le règlement et faire signer la quittance | la quittance est marquée `SIGNEE` par un agent distinct de celui qui a émis |
+| 16 | Lever un blocage fraude `BLOQUE` après avoir affecté, instruit, validé ou siégé au comité de ce dossier | le relecteur n'est pas partie au dossier ; l'avis écrit d'`AUD` est obligatoire |
 
 **Conséquences (testables) :**
-- Chaque ligne du tableau est un test : le serveur refuse l'acte du second rôle, avec le code `SEPARATION_DES_TACHES`.
-- Un dossier dont le cumul des montants validés dépasse le seuil du niveau qui a validé les premiers est **remonté** au niveau supérieur ; un test fractionne un règlement en tranches chacune sous le seuil et vérifie la remontée.
+- Chaque ligne du tableau (les **16** cumuls) est un test : le serveur refuse l'acte du second rôle, avec le code `SEPARATION_DES_TACHES`.
+- Un dossier dont le cumul (montants acceptés et ordonnés non annulés, plus le montant en cours de validation) dépasse le seuil du niveau qui a validé les premiers est **remonté** au niveau supérieur ; un test fractionne un règlement en tranches chacune sous le seuil et vérifie la remontée.
+- Une offre remplacée jamais payée ne compte pas dans le cumul : un test remplace une offre de 800 000 FCFA par une autre de 800 000 FCFA et ne voit aucune remontée ; avec la première offre payée, la remontée a lieu.
+- Un ordre dont le second contrôle est fait par la personne qui l'a préparé est refusé ; au-dessus du seuil `reglement.second_controle_seuil`, un ordre sans validation du `DG` est refusé.
+- Un dossier non affecté depuis 1 jour ouvré apparaît dans la file du `RESP` ; un `GEST` ne peut pas se l'attribuer ; un `RESP` qui a instruit ne peut ni valider ni siéger au comité pour ce dossier.
 - Un contrôle d'anomalie (plan de contrôle du contrôle interne, §6.7) recherche les cumuls qui auraient échappé : la tolérance est **zéro**, la gravité est **critique** pour SEP-01 et SEP-02.
 - La personne qui s'absente peut **déléguer** (le DG pour le responsable, par exemple) par une **délégation explicite**, datée, motivée et tracée ; hors de ses dates, elle n'agit plus ; AUD la voit dans le journal.
 
 #### FR-8 : La matrice de délégation est un paramètre
 
-Qui valide quoi se lit dans une **matrice paramétrable** : niveau, rôles signataires, quorum, plage de montant, volet, nature (indemnité, honoraires, acompte, règlement à titre commercial). Les défauts, `[ASSUMPTION: délégations réelles à obtenir de la compagnie ; défauts repris de la procédure d'une compagnie du même groupe au Sénégal ; à confirmer à la séance d'immersion]`, sont : **jusqu'à 1 000 000 FCFA**, le responsable sinistres ; **au-delà de 1 000 000 FCFA**, le **comité sinistres** (quatre membres dont le responsable sinistres et le directeur technique ; quorum de trois), puis le **visa du directeur technique** ; un **règlement à titre commercial** (hors garantie) est décidé par le **DG seul**, quel que soit le montant. Le seuil unique de 2 000 000 FCFA de la démo n'est pas repris. Le détail du circuit de décision est au §5.7 (FR-77 à FR-81).
+Qui valide quoi se lit dans une **matrice paramétrable** : niveau, rôles signataires, quorum, plage de montant, volet, nature (indemnité, honoraires, acompte, règlement à titre commercial). Les défauts, *(défaut H-014 : délégations réelles à obtenir de la compagnie ; défauts repris de la procédure de la compagnie étudiée par le mémoire de 2014 (zone CIMA) ; à confirmer à la séance d'immersion)*, sont :
+
+- **Niveau 1, jusqu'à 1 000 000 FCFA** (1 000 000 inclus) : proposition de l'instructeur, **contrôle** par un second agent du volet (un autre `GEST` désigné contrôleur, ou le `RESP`), **validation** par le `RESP`. Le contrôleur et le validateur sont deux personnes distinctes de l'instructeur *(défaut H-015 : procédure décrite dans le récit du PO ; tout est paramétrable)*.
+- **Au-delà de 1 000 000 FCFA** : le **comité sinistres** (quatre membres dont le responsable sinistres et le directeur technique ; quorum de trois), puis le **visa du directeur technique**.
+- **Règlement à titre commercial** (hors garantie) : décidé par le **DG seul**, quel que soit le montant.
+- **Honoraires** : un **plafond d'honoraires par niveau** ; au-dessus, le comité. Le visa des honoraires est donné par le `RESP`, **jamais par le `CPT`**.
+
+Le **comité** a une composition et des règles écrites : ses **membres sont nommés à la mise en service** (liste obligatoire, un suppléant par siège, nommé par la matrice) ; en cas d'**égalité**, la voix du président l'emporte ; son **délai de tenue** est paramétré (défaut 5 jours ouvrés), avec une alerte et un repli par délibération écrite ; si le `DT` a voté au comité, le **visa est donné par le `DG`**.
+
+**Frontière.** 1 000 000 FCFA exactement relève du niveau 1 (« jusqu'à »). Le mémoire de 2014 écrit « à partir de 1 000 000 = collégial » : l'écart est signalé *(défaut H-016 : frontière retenue par le PRD ; à confirmer à la séance d'immersion)*. Le seuil unique de 2 000 000 FCFA de la démo n'est pas repris. Le détail du circuit de décision est au §5.7 (FR-77 à FR-81).
 
 **Conséquences (testables) :**
 - Changer le seuil, le quorum ou les membres du comité prend effet sur les **nouvelles** validations, pas sur celles déjà prises ; chaque changement est tracé (FR-4).
 - Un montant au-dessus du seuil du responsable ne peut pas être validé par lui : le serveur refuse, la fiche part au comité.
+- Un montant de 1 000 000 FCFA exactement suit le niveau 1.
+- Le niveau 1 refuse une validation sans contrôle fait par une troisième personne : le contrôleur et le validateur sont deux personnes distinctes de l'instructeur.
+- Un visa d'honoraires donné par `CPT` est refusé ; un honoraire au-dessus du plafond de son niveau part au comité.
 - Un règlement à titre commercial refuse toute validation autre que celle du DG.
 - Le quorum non atteint empêche la décision du comité ; un test valide avec deux membres sur quatre et vérifie le refus.
+- Une mise en service sans liste de membres du comité (titulaires et suppléants) est refusée.
 
 ### 4.5 Les données de santé
 
 #### FR-9 : Les données de santé sont des données sensibles
 
-Un dossier corporel contient des **données de santé** : certificats médicaux, taux d'incapacité, rapports d'expertise médicale, pièces du médecin-conseil. Elles sont des **données sensibles** au sens de la loi togolaise n° 2019-014 (art. 21 : le traitement est interdit en principe, sauf les exceptions de l'art. 22, dont le consentement écrit, la défense d'un droit en justice, l'exécution du contrat ou une obligation légale). Prospera **étiquette** chaque champ et chaque pièce de santé et en restreint l'accès : elles sont **lisibles par MED, par le GEST corporel affecté au dossier et par RESP**, et par DG et DT **pour une décision** ; ACC **voit qu'une pièce médicale est reçue, jamais son contenu** ; **chaque lecture est journalisée** (art. 52 : traçabilité des personnes qui accèdent aux données lues). Aucune donnée de santé ne sort de la compagnie (FR-12, FR-232).
+Un dossier corporel contient des **données de santé** : certificats médicaux, taux d'incapacité, rapports d'expertise médicale, pièces du médecin-conseil. Elles sont des **données sensibles** au sens de la loi togolaise n° 2019-014 (art. 21 : le traitement est interdit en principe, sauf les exceptions de l'art. 22, dont le consentement écrit, la défense d'un droit en justice, l'exécution du contrat ou une obligation légale). Prospera **étiquette** chaque champ et chaque pièce de santé et en restreint l'accès :
+
+- elles sont **lisibles par MED, par le GEST corporel affecté au dossier et par RESP** ;
+- **DG et DT** les lisent par un **accès par dossier ouvert à la validation**, journalisé ;
+- **ACC et NUM voient le type et l'existence** d'une pièce médicale, **jamais son contenu** : ni aperçu, ni extrait de l'IA, ni résumé ;
+- le **contrôle de qualité** d'une pièce médicale se limite à la **lisibilité de l'image** (ou est fait par MED, ou par ARCH pour cette seule lisibilité) ;
+- **chaque lecture est journalisée** (art. 52 : traçabilité des personnes qui accèdent aux données lues) ;
+- aucune donnée de santé ne sort de la compagnie (FR-12, FR-232).
+
+**Base légale.** Le traitement des données de santé pour indemniser relève de l'**obligation légale** d'offre et de l'**exécution du contrat**. Le consentement est recueilli à la déclaration, mais **son absence ne bloque jamais** une obligation légale (offre, délais) ni le chronomètre *(point juridique J-01 : base légale retenue ; à valider par le juriste, §13.2)*.
 
 **Conséquences (testables) :**
-- Un test ouvre une pièce médicale avec chaque rôle : MED, GEST corporel affecté, RESP, DG et DT (pour une décision) la lisent ; ACC, NUM, CPT, ARCH, AUD, ADMIN n'en voient que l'existence et la date ; un GEST d'un autre dossier n'y a aucun accès.
+- Un test ouvre une pièce médicale avec chaque rôle : MED, GEST corporel affecté et RESP la lisent ; DG et DT la lisent par un accès par dossier ouvert à la validation, journalisé ; ACC et NUM n'en voient que le **type et l'existence** (ni aperçu, ni extrait de l'IA, ni résumé) ; CPT, ARCH, AUD, ADMIN n'en voient que l'existence et la date ; un GEST d'un autre dossier n'y a aucun accès.
+- Le contrôle de qualité d'une pièce médicale par `ACC` ou `NUM` ne montre que la lisibilité de l'image : un test vérifie qu'aucun texte lu n'est affiché.
 - Chaque lecture d'une donnée de santé crée une entrée du journal : qui, quand, quel dossier, quelle pièce (FR-13) ; AUD la lit.
-- Le **consentement écrit** (ou l'autre base légale retenue) est tracé **par dossier** ; sans lui, la pièce médicale n'est pas versée au dossier et le motif est écrit `[ASSUMPTION: la base légale retenue par défaut est le consentement écrit ; à valider par le juriste, FR-24]`.
+- Le **consentement écrit** est tracé **par dossier**. Son absence ne bloque pas le dossier : une offre due, un délai légal et le chronomètre continuent ; l'absence est notée au dossier.
 - Les champs et pièces de santé sont **chiffrés** au repos ; leur durée de conservation est une règle par catégorie (annexe D).
-- Un cabinet d'expertise médicale externe ne reçoit que les pièces **nécessaires à sa mission** `[ASSUMPTION: règle de minimisation ; à confirmer à la séance d'immersion]`.
-- Ce que le gestionnaire lit des travaux du médecin-conseil est limité par défaut aux **conclusions** nécessaires à l'évaluation, pas au dossier médical complet `[ASSUMPTION: règle du secret médical à confirmer par le médecin-conseil et le juriste]`.
+- Un cabinet d'expertise médicale externe ne reçoit que les pièces **nécessaires à sa mission** *(défaut H-017 : règle de minimisation ; à confirmer à la séance d'immersion)*.
+- Ce que le gestionnaire lit des travaux du médecin-conseil est limité par défaut aux **conclusions** nécessaires à l'évaluation, pas au dossier médical complet *(point juridique J-02 : règle du secret médical à confirmer par le médecin-conseil et le juriste)*.
 - Le régime exact de formalité auprès de l'instance de protection des données (déclaration ou autorisation) pour les dossiers corporels est **à vérifier par le juriste** (FR-24).
 
 ### 4.6 L'IA dans le processus
@@ -344,7 +401,7 @@ Les capacités d'IA font partie du produit de la compagnie, **sur tout le circui
 | # | Usage | Ce que l'IA fait (entrée, sortie, destinataire) | Spécifié en |
 |---|---|---|---|
 | 1 | **Déclaration assistée** | message **WhatsApp** ou **e-mail** de l'assuré (jamais l'appel) → fiche de déclaration pré-remplie, chaque champ avec sa confiance, questions à poser ; destinataire : ACC | §5.1 |
-| 2 | **Lecture et classement des pièces** | pièce scannée ou téléversée, par **OCR réel** → type reconnu, données relevées avec l'extrait d'où chacune a été lue, rattachement à la pièce attendue ; destinataire : le déposant (ACC, NUM, GEST) | §6.2 |
+| 2 | **Lecture et classement des pièces** | pièce scannée ou téléversée, par **OCR réel** → type reconnu, données relevées avec l'extrait d'où chacune a été lue (**jamais montré à `ACC` ni à `NUM` pour une pièce médicale**, FR-9), rattachement à la pièce attendue ; destinataire : le déposant (ACC, NUM, GEST) | §6.2 |
 | 3 | **Contrôle des pièces** | pièces du dossier → incohérences (propriétaire de la carte grise, dates, photo déjà utilisée ailleurs), signalées avant l'instruction ; destinataire : GEST | §5.4 |
 | 4 | **Pièces manquantes et relances** | dossier → liste des pièces manquantes, relance rédigée pour le canal (SMS, WhatsApp, e-mail) ; destinataire : ACC, GEST | §5.2 |
 | 5 | **Résumé sourcé du dossier** | dossier → résumé où chaque information renvoie à sa pièce d'origine ; destinataire : GEST, RESP | §6.1 |
@@ -359,7 +416,7 @@ Les capacités d'IA font partie du produit de la compagnie, **sur tout le circui
 | 14 | **Qualité du dossier et simulation « et si… »** | dossier → note de qualité ; paramètres → effet d'une décision sur la charge ; destinataire : direction, contrôle | §6.7 |
 | + | **Orientation d'expertise assistée**, **complétude d'un rapport d'expert**, **comparaison au portefeuille** | dossier ou rapport → besoin d'expertise proposé (« à confirmer »), points manquants du rapport, écart au portefeuille ; destinataire : GEST | §5.5 |
 
-**Ce que l'IA ne fait pas au premier jour (FR-22).** Toute **dictée, transcription d'appel ou synthèse vocale** : la « déclaration assistée » prend le texte de WhatsApp et de l'e-mail, pas la voix. Le **chatbot de l'assuré** est « bientôt » `[ASSUMPTION: la proposition v2 ne le prévoit pas, le deck du 12/09 oui ; à confirmer à la séance d'immersion]`.
+**Ce que l'IA ne fait pas au premier jour (FR-22).** Toute **dictée, transcription d'appel ou synthèse vocale** : la « déclaration assistée » prend le texte de WhatsApp et de l'e-mail, pas la voix. Le **chatbot de l'assuré** est « bientôt » *(défaut H-018 : la proposition v2 ne le prévoit pas, le deck du 12/09 oui ; à confirmer à la séance d'immersion)*.
 
 **Règles communes à toutes ces capacités :**
 - **Provenance** affichée sur chaque proposition : règle ou modèle, version, date de calcul, **source jusqu'à la pièce** (PRD-D FR-16). Le mot « IA » ne s'affiche que pour un **modèle** ; **tant qu'un modèle n'existe pas, la capacité est servie par des règles explicables et le dit**.
@@ -380,11 +437,13 @@ Les capacités d'IA font partie du produit de la compagnie, **sur tout le circui
 Les garde-fous de la proposition v2 sont tous exigés.
 
 - **Aucune décision automatique.** L'IA extrait, analyse et recommande ; **valider, refuser ou payer reste toujours un acte humain** (loi n° 2019-014, art. 27 : aucune décision à effet juridique ne repose sur le seul traitement automatisé).
-- **Aucune proposition de montant sur un préjudice corporel.** Ni le gestionnaire ni le médecin-conseil ne reçoivent de l'IA un montant, une fourchette, une médiane de comparables ou une offre suggérée sur un dossier corporel. Le calcul du barème corporel est un calcul poste par poste fait par un humain (§5.6).
+- **Aucune proposition de montant sur un préjudice corporel.** Ni le gestionnaire ni le médecin-conseil ne reçoivent de l'IA un montant, une fourchette, une médiane de comparables ou une offre suggérée sur un dossier corporel. Le calcul du barème corporel est un calcul poste par poste fait par un humain (§5.6). Un **filtre par volet** s'applique à toutes les comparaisons, aux écarts à la provision d'ouverture et aux fiches de décision : liste blanche des volets (matériel, risques divers) ; jamais de médiane, de comparable ni d'écart en pourcentage sur un dossier `corporel`. La provision d'ouverture corporelle est **saisie par l'humain**, avec motif (FR-49).
 - **Chaque information est sourcée** jusqu'à la pièce, au paragraphe ou au champ d'où elle vient ; une information sans source n'est pas affichée (« rien n'est inventé »).
 - **L'IA n'est jamais bloquante** : si elle est coupée ou lente, son emplacement le dit et le circuit avance sur l'analyse humaine.
 - **Un signal n'est pas une accusation** : un signal de fraude ouvre une **revue humaine** ; ce n'est pas l'IA qui bloque un paiement, c'est la règle de garde-fou (PRD-D FR-13) appliquée à la revue.
 - **Un humain qui s'écarte d'une recommandation écrit un motif** ; l'écart et le motif sont enregistrés et renvoyés comme correction à l'apprentissage (FR-12).
+- **Un motif proposé par l'IA n'est jamais repris par un clic seul** : c'est un texte que l'humain relit et modifie. Le **taux de motifs identiques à la proposition** est mesuré et signalé à `AUD`. Un motif proposé par l'IA est **interdit** pour les validations au-dessus du seuil du `RESP` (FR-8).
+- **Toute décision reste défendable** (FR-26) : l'IA explique et cite ses sources ; elle ne remplace ni la pièce, ni la règle, ni le motif, ni l'auteur.
 
 **Conséquences (testables) :**
 - Sur un dossier corporel, un test appelle chaque capacité d'estimation (comparables, « pourquoi ce montant », orientation, simulation) : aucune ne rend de montant proposé, de fourchette ni de médiane ; le serveur refuse la demande avec un code nommé.
@@ -392,14 +451,17 @@ Les garde-fous de la proposition v2 sont tous exigés.
 - Une proposition sans source n'est pas affichée : un test supprime la source d'une proposition et vérifie qu'elle disparaît.
 - Un test coupe l'IA en pleine instruction : le gestionnaire finit l'évaluation à la main, sans message d'erreur bloquant.
 - Un refus de proposition (rejet) sans motif est refusé quand la proposition est une **recommandation** ; il peut être sans motif pour une **extraction**.
+- Le filtre par volet est testé **par écran**, pas par usage : la fiche, la comparaison, l'écart à la provision d'ouverture, la fiche de décision et le tableau de bord ouvrent chacun un dossier `corporel` et n'y montrent ni médiane, ni comparable, ni écart en pourcentage.
+- Un motif de validation proposé par l'IA, validé par un clic seul, est refusé ; au-dessus du seuil du `RESP`, un motif proposé par l'IA est refusé ; le taux de motifs identiques à la proposition figure dans le rapport d'`AUD`.
 
 #### FR-12 : Le registre de l'IA et l'instance locale
 
-Chaque action de l'IA est inscrite au **registre de l'IA** : **entrée, sortie, niveau de confiance, sources, niveau** (`EXTRACTION`, `ANALYSE` ou `RECOMMANDATION` ; le niveau « décision » n'existe pas), **statut** (`PROPOSEE`, `ACCEPTEE`, `MODIFIEE` ou `REJETEE`) et **auteur de la décision**. L'agent accepte, modifie ou rejette ; le registre le garde. Le registre est lu par AUD et RESP. Chez la compagnie tourne une **instance locale** de l'IA commune, sur son serveur (§7.4) : elle prédit à partir des seules données de la compagnie, **enregistre l'écart** entre ses prédictions et ce qui arrive, **anonymise** ces écarts, et **reçoit ses mises à jour** par un tunnel sécurisé sortant. **Aucune donnée nominative et aucune donnée médicale ne sort de la compagnie.** L'IA **ne se met pas à jour seule** : une mise à jour est versionnée, essayée, retirable.
+Chaque action de l'IA est inscrite au **registre de l'IA** : **entrée, sortie, niveau de confiance, sources, niveau** (`EXTRACTION`, `ANALYSE` ou `RECOMMANDATION` ; le niveau « décision » n'existe pas), **statut** (`PROPOSEE`, `ACCEPTEE`, `MODIFIEE` ou `REJETEE`) et **auteur de la décision**. L'agent accepte, modifie ou rejette ; le registre le garde. La fiche d'un dossier montre la **chaîne de décision**, lue dans le registre : suggestion de l'IA, modifiée, validée, émise, par qui et quand. Le registre est lu par AUD et RESP. Chez la compagnie tourne une **instance locale** de l'IA commune, sur son serveur (§7.4) : elle prédit à partir des seules données de la compagnie, **enregistre l'écart** entre ses prédictions et ce qui arrive, **anonymise** ces écarts, et **reçoit ses mises à jour** par un tunnel sécurisé sortant. **Aucune donnée nominative et aucune donnée médicale ne sort de la compagnie.** L'IA **ne se met pas à jour seule** : une mise à jour est versionnée, essayée, retirable.
 
 **Conséquences (testables) :**
 - Aucune action de l'IA n'échappe au registre : un test compare le nombre de propositions affichées au nombre d'entrées du registre.
 - Le niveau `DECISION` n'est jamais produit : un test le cherche dans le registre d'une installation de démonstration.
+- La fiche d'un dossier montre, pour chaque proposition de l'IA, la chaîne suggestion, modification, validation, émission, avec l'auteur et l'heure de chaque maillon ; un test la compare au registre.
 - Un test inspecte un envoi sortant vers l'IA commune et n'y trouve **aucun identifiant, aucun nom, aucun téléphone, aucune donnée de santé** ; un test sur une installation sans consentement (FR-19) ne trouve **aucun envoi**.
 - Une mise à jour de modèle reçue est **versionnée**, essayée dans l'espace d'essai, puis promue à la date que la compagnie choisit, et **retirable** ; le modèle d'avant est conservé.
 - Le registre est conservé **dix ans** comme le journal (FR-13).
@@ -408,15 +470,16 @@ Chaque action de l'IA est inscrite au **registre de l'IA** : **entrée, sortie, 
 
 #### FR-13 : Qui a fait quoi, qui a lu quoi, et quand
 
-Chaque **changement** d'état d'un dossier, d'un règlement, d'un paramètre ou d'un droit, et **chaque consultation** d'un dossier ou d'une pièce, est inscrit au **journal**, **horodaté par le serveur**, **au nom de l'agent** (jamais un compte partagé), avec son rôle, l'état d'avant et d'après, et le **motif** quand il en faut un (tout refus, tout classement, toute décision sensible). Le journal ne peut pas être modifié par l'application ; il est **chaîné** (chaque entrée scelle la précédente) et conservé **au moins dix ans** (Code CIMA art. 404 : conservation de dix ans au moins des pièces justificatives et de la correspondance ; art. 406-407 : impossibilité d'insertions ou de suppressions ultérieures pour une comptabilité informatisée). Le journal des **consultations** est celui que la loi exige pour les données lues (loi n° 2019-014, art. 52).
+Chaque **changement** d'état d'un dossier, d'un règlement, d'un paramètre ou d'un droit, et **chaque consultation** d'un dossier ou d'une pièce, est inscrit au **journal**, **horodaté par le serveur** (une **horloge unique et croissante**, côté serveur), **au nom de l'agent** (jamais un compte partagé), avec son rôle, l'état d'avant et d'après, et le **motif** quand il en faut un (tout refus, tout classement, toute décision sensible). Le journal ne peut pas être modifié par l'application ; il est **chaîné** (chaque entrée scelle la précédente) et conservé **au moins dix ans** (Code CIMA art. 404 : conservation de dix ans au moins des pièces justificatives et de la correspondance ; art. 406-407 : impossibilité d'insertions ou de suppressions ultérieures pour une comptabilité informatisée). Le journal des **consultations** est celui que la loi exige pour les données lues (loi n° 2019-014, art. 52).
 
 **Conséquences (testables) :**
 - L'historique d'un dossier se lit de bout en bout, dans l'ordre, sur une seule page, avec pour chaque ligne : le profil, le geste, l'avant et l'après, le motif.
 - **100 %** des actions portent un auteur et un horodatage serveur ; **100 %** des refus et classements portent un motif : un test parcourt le journal d'une installation de démonstration.
-- Aucune entrée du journal ne peut être modifiée ni supprimée par l'application, même par ADMIN ; une tentative est elle-même tracée. Le chaînage rend une modification directe en base **détectable** ; l'empreinte du journal est déposée régulièrement **hors du serveur** de la compagnie (défaut, annexe D `[ASSUMPTION: chaque jour ; modèle de la microfinance]`).
+- Aucune entrée du journal ne peut être modifiée ni supprimée par l'application, même par ADMIN ; une tentative est elle-même tracée. Le chaînage rend une modification directe en base **détectable** ; l'empreinte du journal est déposée régulièrement **hors du serveur** de la compagnie (défaut, annexe D *(défaut H-019 : chaque jour ; modèle de la microfinance)*).
 - La **consultation** d'un dossier et d'une pièce crée une entrée : qui, quand, quoi ; une consultation d'une donnée de santé est marquée comme telle (FR-9).
 - AUD exporte le journal d'un dossier, d'un agent ou d'une période, sans reconstitution (UJ-7) ; **la piste d'audit** (qui a changé quoi) est lisible par AUD, RESP et DG ; le **journal des consultations** par AUD seul.
 - Les versions successives d'un document sont conservées ; une pièce remplacée n'est jamais écrasée.
+- L'horloge du serveur ne recule jamais ; une séquence de numéros (`DEC-`, chèques, quittances) est **sans réutilisation** et les **trous dus à une annulation sont consignés** avec leur motif.
 - Un agent sans aucune trace depuis un nombre de jours paramétrable est signalé à AUD (défaut, annexe D, valeur de la démo).
 
 ### 4.8 Les délais
@@ -425,21 +488,39 @@ Chaque **changement** d'état d'un dossier, d'un règlement, d'un paramètre ou 
 
 Prospera tient **deux familles de délais, jamais mélangées**, chacune avec son **point de départ** et son **point d'arrêt** explicites.
 
-**Les délais légaux** du corporel automobile, issus du Code CIMA (art. 231, 233 et 236, lus et sûrs) : l'offre d'indemnité est présentée dans les **12 mois** suivant l'accident ; en cas de décès, dans les **8 mois** suivant le décès ; l'offre peut être **provisionnelle** quand l'assureur n'a pas été informé de la consolidation dans les 6 mois de l'accident, et l'offre définitive doit alors suivre dans les 6 mois de l'information ; la victime peut saisir l'assureur d'une demande motivée, qui a 30 jours pour y répondre ; l'offre tardive ou le paiement tardif produit de plein droit un intérêt de **5 % par mois de retard**. Ces délais s'appliquent à l'atteinte à la personne causée par un véhicule terrestre à moteur ; **ils ne s'appliquent pas aux dommages aux biens** (art. 231, dernier alinéa). Ils sont des **alertes réglementaires**, **jamais modifiables par la compagnie**. Leurs **suspensions et prorogations** (assureur non avisé dans le mois, décès tardif, pièces demandées non reçues dans les 6 semaines, expertise médicale contestée, victime à l'étranger ; art. 247 à 253) sont **tracées** dans le dossier. La **base de calcul de la pénalité** (l'indemnité, le solde ou le montant offert) est un point d'interprétation **à faire valider par le juriste** (FR-24).
+**Les délais légaux** du corporel automobile (véhicule terrestre à moteur, VTM), issus du Code CIMA (art. 231, 233, 235 et 236, lus et sûrs) :
 
-**Les délais internes** du matériel et des autres branches ne sont **pas fixés par le Code** : ils sont **contractuels ou internes**, paramétrés par produit. Les délais internes de la démo (accusé de réception ; offre depuis le dossier complet ; règlement après accord ; délai de traitement par volet) et les délais de la procédure de référence (offre validée envoyée sous 48 heures ouvrées ; rapport d'expert sous 7 à 10 jours ; paiement sous 72 heures après l'accord enregistré (au corporel automobile, après la fin du délai de dénonciation de 15 jours) ; relance du recours tous les 15 jours) sont les **valeurs par défaut** de ces délais internes (annexe D `[ASSUMPTION: délais d'une compagnie du même groupe au Sénégal en 2014 ; à confirmer pour la compagnie]`). Les délais du **fonds de garantie automobile** (par exemple la déclaration au fonds dans les 3 mois de la réclamation, art. 608) ne s'appliquent que **si un fonds existe au Togo** `[ASSUMPTION: existence non confirmée ; le paramètre « fonds actif » est désactivé par défaut ; à vérifier par le juriste]`.
+- L'offre d'indemnité est présentée dans les **12 mois** suivant l'accident ; en cas de décès, dans les **8 mois** suivant le décès.
+- L'offre peut être **provisionnelle** quand l'assureur n'a pas été informé de la consolidation dans les 6 mois de l'accident ; l'offre définitive doit alors suivre dans les 6 mois de l'information.
+- La victime peut saisir l'assureur d'une demande motivée, qui a 30 jours pour y répondre.
+- L'offre tardive ou le paiement tardif produit de plein droit un intérêt de **5 % par mois de retard**.
+- Au corporel VTM, **aucun règlement issu d'une transaction n'est émis avant la fin du délai de dénonciation de 15 jours** (art. 235) : la condition `DELAI_DENONCIATION_ECOULE` garde les transitions d'émission (FR-220). Le délai de paiement d'un mois (art. 236) court **depuis la fin de la dénonciation**.
+- Ces délais s'appliquent à l'atteinte à la personne causée par un véhicule terrestre à moteur ; **ils ne s'appliquent pas aux dommages aux biens** (art. 231, dernier alinéa).
+- Ils sont des **alertes réglementaires**, **jamais modifiables par la compagnie**.
+- Leurs **suspensions et prorogations** (assureur non avisé dans le mois, décès tardif, pièces demandées non reçues dans les 6 semaines, expertise médicale contestée, victime à l'étranger ; art. 247 à 253) sont **tracées** dans le dossier.
+- La **base de calcul de la pénalité** s'écrit d'**une seule façon** : le paramètre `penalite.base` (offre, indemnité ou solde ; défaut : le montant de l'offre *(point juridique J-03 : base d'interprétation ; à valider par le juriste, FR-24)*). Tant que le juriste n'a pas tranché, la pénalité s'affiche comme « **estimation, base non validée** » et n'entre dans aucun état.
+
+**Les délais internes** du matériel et des autres branches ne sont **pas fixés par le Code** : ils sont **contractuels ou internes**, paramétrés par produit.
+
+- Les délais internes de la démo (accusé de réception ; offre depuis le dossier complet ; règlement après accord ; délai de traitement par volet) et les délais de la procédure de référence sont les **valeurs par défaut** de ces délais internes (annexe D *(défaut H-020 : délais de la compagnie étudiée par le mémoire de 2014 (zone CIMA) ; à confirmer pour la compagnie)*).
+- Offre validée envoyée sous **48 heures ouvrées** ; rapport d'expert sous **7 jours** (le bas de la fourchette de 7 à 10 jours du mémoire ; voir FR-184) ; paiement sous **72 heures ouvrées** après l'accord enregistré (au corporel automobile, après la fin du délai de dénonciation de 15 jours) ; relance du recours tous les 15 jours.
+- Les « heures ouvrées » suivent le calendrier ouvré de la compagnie *(défaut H-021 : calendrier ouvré de la compagnie, A-18 ; à confirmer à la séance d'immersion)*.
+- **Délai de déclaration** par l'assuré : **au moins 5 jours ouvrés, 48 heures pour le vol** (art. 12-4°). Le plancher légal l'emporte sur toute valeur de l'annexe D.
+- Les délais du **fonds de garantie automobile** (par exemple la déclaration au fonds dans les 3 mois de la réclamation, art. 608) ne s'appliquent que **si un fonds existe au Togo** *(point juridique J-04 : existence non confirmée ; le paramètre « fonds actif » est désactivé par défaut ; à vérifier par le juriste)*.
 
 Un dossier est **jugé selon le référentiel en vigueur à sa date de survenance** : le référentiel des délais légaux est **versionné** (date d'effet, source, validateur, statut), et un sinistre d'avant une nouvelle version garde l'ancienne.
 
 **Conséquences (testables) :**
 - Un dossier corporel porte un **chronomètre légal** : date d'accident, date de réception de l'avis, date du décès, date d'information de consolidation ; les échéances sont calculées (accident plus 12 mois, décès plus 8 mois, consolidation plus 6 mois, réponse à la demande motivée plus 30 jours) ; chaque échéance affiche son point de départ, son point d'arrêt et les jours restants.
 - Une suspension ou une prorogation est **saisie avec son article et son motif** ; elle déplace l'échéance, et le déplacement est inscrit **au journal**, jamais silencieusement.
-- Une échéance légale **proche** (défaut : 45 jours, valeur de la veille de la démo) alerte le gestionnaire et le responsable ; une échéance **dépassée** calcule la **pénalité de 5 % par mois** et la montre, avec la saisie du motif de réduction ou d'annulation « circonstances non imputables à l'assureur ».
+- Une échéance légale **proche** (défaut : 45 jours, valeur de la veille de la démo) alerte le gestionnaire et le responsable ; une échéance **dépassée** montre une **estimation de pénalité** (5 % par mois, base `penalite.base`, « estimation, base non validée »), avec la saisie du motif de réduction ou d'annulation « circonstances non imputables à l'assureur ».
+- Un dossier corporel VTM dont l'accord est une transaction : l'émission du règlement est refusée du jour 1 au jour 14 après la conclusion (`DELAI_DENONCIATION_ECOULE`), acceptée au jour 16.
 - Un test change la valeur d'un délai interne (par exemple 60 à 40 jours) : l'alerte suit ; un test tente de changer le délai de 12 mois : le serveur refuse.
+- Un test configure un délai de déclaration sous le plancher (moins de 5 jours ouvrés, ou moins de 48 heures pour le vol) : la configuration est refusée.
 - Un test charge un sinistre de survenance ancienne : il est jugé selon la version de référentiel en vigueur **à sa date de survenance**, même si une version plus récente existe.
 - Une **évaluation arrêtée n'est jamais recalculée** quand un barème change (le dossier garde les règles de son ouverture, FR-4).
 - Le **dommage matériel** n'a aucun délai légal affiché ; son échéance est interne et s'affiche comme telle.
-- La **prescription** (action dérivant du contrat : 2 ans, art. 28 ; action en responsabilité civile extra-contractuelle : 5 ans, art. 256) est suivie comme un **terme à vérifier**, avec alerte avant l'échéance, jamais comme une conclusion juridique.
+- La **prescription** (action dérivant du contrat : 2 ans, art. 28 ; action en responsabilité civile extra-contractuelle : 5 ans, art. 256) est suivie comme un **terme à vérifier par le juriste**, avec alerte avant l'échéance, jamais comme une conclusion juridique.
 - Les valeurs de délais du code de la démo ne sont reprises comme délais **légaux** que si elles sont lues dans le Code CIMA ; les autres sont des délais **internes**, ou **à vérifier par le juriste**.
 
 ### 4.9 Le jeu de démonstration
@@ -449,10 +530,11 @@ Un dossier est **jugé selon le référentiel en vigueur à sa date de survenanc
 La démo tourne sur une **compagnie fictive** branchée sur le **logiciel de compagnie fictif** (§6.6), comme l'IMF de la microfinance est branchée sur son cœur fictif (décision de cadrage D19). Elle compte **14 gestionnaires** (3 en corporel, 5 en matériel, 3 en risques divers, 3 en recours), un portefeuille d'environ **3 500 dossiers** sur **tous les statuts** (ordre de grandeur de la démo actuelle), les polices et garanties des **sept produits** de la démo, des experts (un expert interne en automobile, un médecin-conseil, des cabinets externes) et un personnel pour chacun des quatorze rôles. Les quatre scénarios `SIN-2026-9001` à `SIN-2026-9004` (accident avec blessé et deux expertises ; matériel avec contre-expertise ; gros incendie et règle de délégation ; accident mortel, archive et reconstitution) sont **rejouables**. Les noms, les chiffres et les dates sont **fictifs** : le jeu ne reprend aucun assuré réel, et les noms sont modifiables.
 
 **Conséquences (testables) :**
-- Le jeu couvre chacun des onze statuts et chacune des quatre sorties au moins dix fois `[ASSUMPTION: seuil de couverture repris de la microfinance]`, chaque volet, et chacun des sept produits ; les quatre scénarios repartent de l'état « déclaré » à chaque remise à zéro.
+- Le jeu couvre chacun des onze statuts et chacune des quatre sorties au moins dix fois *(défaut H-022 : seuil de couverture repris de la microfinance)*, chaque volet, et chacun des sept produits ; les quatre scénarios repartent de l'état « déclaré » à chaque remise à zéro.
 - Chacun des quatorze rôles a un compte de démonstration et ne voit que son périmètre (FR-6) ; l'effectif de 14 gestionnaires est un paramètre du jeu, pas une règle (§2.1).
-- Les **104 vérifications** du second rejeu de la démo actuelle deviennent des **tests de recette** du vrai serveur ; la recette échoue si une seule d'entre elles échoue.
-- La remise à zéro du jeu est une opération du **serveur**, propre à l'espace d'essai (la démo actuelle la fait navigateur par navigateur) `[ASSUMPTION: opération réservée à ADMIN dans l'espace d'essai ; à confirmer]`.
+- Les **104 vérifications** du second rejeu de la démo actuelle sont reprises dans une **table de reprise** (annexe E) qui dit, pour chacune, si elle est **gardée**, **réécrite** (nouvelle valeur attendue) ou **retirée** (décision citée). La recette du vrai serveur exige **104 sur 104 de la table réécrite**.
+- Un **sélecteur de profil de démonstration** permet de changer de profil sans se déconnecter ; il n'existe que dans l'espace d'essai.
+- La remise à zéro du jeu est une opération du **serveur**, propre à l'espace d'essai (la démo actuelle la fait navigateur par navigateur) *(défaut H-023 : opération réservée à ADMIN dans l'espace d'essai ; à confirmer)*. La remise à zéro est **réservée à `ADMIN`, en espace d'essai seulement**.
 
 #### FR-16 : Dans la démo, on crée pour de vrai, rôle après rôle
 
@@ -460,7 +542,7 @@ Dans la démonstration, on peut **créer un vrai dossier** : déclarer un sinist
 
 **Conséquences (testables) :**
 - Un dossier créé à la main traverse les huit phases et les onze statuts du chemin nominal, jusqu'à `CLOTURE` puis au versement au fonds, **sans intervention de Money Vibes**.
-- Les **refus** du circuit se provoquent à la main : ouvrir sans les pièces, s'attribuer un dossier, ordonner une contre-expertise sans en avoir le droit, valider son propre dossier, émettre un règlement sans l'avoir décidé, remettre un chèque sans pièce d'identité, verser au fonds sans être archiviste ; chacun est refusé par le serveur (FR-7) avec son libellé.
+- Les **refus** du circuit se provoquent à la main : les **21 refus** de la démo, dont la liste est à l'annexe E ; chacun est refusé par le serveur (FR-7) avec son libellé.
 - Un dossier créé apparaît sans autre manipulation dans les corbeilles des rôles concernés, dans le tableau de bord de la direction et dans le journal (FR-13).
 - Aucun écran du parcours n'est simulé : un test rejoue le parcours avec le logiciel de compagnie fictif **coupé** pour la liste « à saisir » (FR-2), puis **rebranché** pour le rattachement du numéro.
 
@@ -473,52 +555,56 @@ Les chiffres du jeu se recoupent. La somme des provisions des dossiers donne l'�
 - Pour chaque dossier du jeu, évalué, proposé, validé, payé et reste à payer vérifient leurs relations (le reste à payer est le validé moins le payé ; il est zéro au statut `REGLE`) ; **la provision n'est confondue avec aucun des cinq** (§3).
 - L'état des provisions respecte brut égal cédé plus net, pour chaque dossier et pour le total, au franc près.
 - Aucun indicateur du jeu n'est une constante (PRD-D FR-15) ; la fraîcheur de chaque chiffre est affichée.
+- L'arrondi à 5 000 FCFA ne vaut que pour les montants **calculés par le système** ; le montant **arrêté** par le gestionnaire est **au franc près** (395 500 FCFA pour `SIN-2026-9002`, voir FR-73).
 - Deux consultations successives de la même analyse d'un dossier rendent le même résultat tant que le dossier n'a pas changé.
 
 ### 4.10 Messages, données personnelles et consentements
 
 #### FR-18 : Les messages passent par `notification`
 
-Tout message (cloche et e-mail pour le personnel ; **SMS, WhatsApp et e-mail pour l'assuré et les tiers**) passe par le module `notification` ; aucun module n'envoie lui-même (§7.2). **L'assuré est prévenu à chaque étape qui le concerne** : accusé de déclaration (avec la référence `DEC-`), liste des pièces manquantes, dossier ouvert, numéro de sinistre officiel reçu, convocation à une expertise, offre envoyée, accord enregistré, chèque prêt à retirer et rappel s'il n'est pas retiré, règlement effectué, clôture. Le **courtier** et les **coassureurs** sont informés à l'ouverture. Le français est la langue par défaut ; l'anglais est « bientôt » (FR-22).
+Tout message (cloche et e-mail pour le personnel ; **SMS, WhatsApp et e-mail pour l'assuré et les tiers**) passe par le module `notification` ; aucun module n'envoie lui-même (§7.2). **L'assuré est prévenu à chaque étape qui le concerne** : accusé de déclaration (avec la référence `DEC-`), liste des pièces manquantes, dossier ouvert, numéro de sinistre officiel reçu, convocation à une expertise, offre envoyée, accord enregistré, chèque prêt à retirer et rappel s'il n'est pas retiré, règlement effectué, clôture. Le **courtier** et les **coassureurs** sont informés à l'ouverture. Le français est la langue par défaut ; l'anglais est « bientôt » (FR-22). Le courrier et le SMS ont un **suivi de distribution** (remis, retourné, non remis) : `notification` rend l'état de distribution lisible par le dossier.
 
 **Conséquences (testables) :**
 - Chaque message envoyé est consultable : destinataire, canal, contenu, date, statut de remise ; le message d'une étape est rattaché à l'étape du dossier.
+- Un courrier retourné ou un SMS non remis apparaît sur le dossier avec son état de distribution ; un test simule un pli retourné et un SMS non remis.
 - Un test fait passer un dossier du statut « déclaré » à « clôturé » et vérifie, étape par étape, le message de l'assuré prévu à la matrice « qui est prévenu de quoi » (annexe B).
 - Un assuré qui refuse un canal ne reçoit plus de message sur ce canal ; un message de service n'est jamais une prospection (loi n° 2019-014, art. 26 : la prospection directe exige un consentement préalable) ; Prospera n'envoie **aucune prospection**.
-- Les comptes SMS et le numéro WhatsApp Business sont **ceux de la compagnie** et à sa charge `[ASSUMPTION: la proposition v2 prévoit des comptes SMS fournis par la compagnie ; la v4 prévoit WhatsApp « si retenu » ; à confirmer à la séance d'immersion]`.
+- Les comptes SMS et le numéro WhatsApp Business sont **ceux de la compagnie** et à sa charge *(défaut H-024 : la proposition v2 prévoit des comptes SMS fournis par la compagnie ; la v4 prévoit WhatsApp « si retenu » ; à confirmer à la séance d'immersion)*.
 
 #### FR-19 : Données personnelles et consentements
 
-Les données du sinistre sont des données personnelles. La compagnie est **responsable du traitement** ; Money Vibes n'est sous-traitant que pour ce qui passe par ses relais (§7.5). Le consentement est recueilli **par finalité**, tracé **par dossier** : traitement du sinistre, **données de santé** (consentement écrit, FR-9), messages à l'assuré par canal, **envoi à l'IA commune d'écarts anonymisés** (consentement de la compagnie, §7.4). Les données restent sur les serveurs de la compagnie (§7.5) ; **tout transfert hors de la compagnie** (relais, tunnel de l'IA commune, support) est inscrit à un **registre des transferts**. La loi lue ne contient pas d'obligation de localiser les dossiers au Togo ; elle encadre les transferts vers un pays tiers (art. 28 à 31), ce qui est **à faire vérifier par le juriste** (FR-24).
+Les données du sinistre sont des données personnelles. La compagnie est **responsable du traitement** ; Money Vibes n'est sous-traitant que pour ce qui passe par ses relais (§7.5). Le consentement est recueilli **par finalité**, tracé **par dossier** : traitement du sinistre, **données de santé** (consentement écrit, FR-9), messages à l'assuré par canal, **envoi à l'IA commune d'écarts anonymisés** (consentement de la compagnie, §7.4). Les données restent sur les serveurs de la compagnie (§7.5) ; **tout transfert hors de la compagnie** (relais, tunnel de l'IA commune, support) est inscrit à un **registre des transferts**. La loi lue ne contient pas d'obligation de localiser les dossiers au Togo ; elle encadre les transferts vers un pays tiers (art. 28 à 31). Les **transferts hors Togo** et la **notification des violations de données** sont **à faire vérifier par le juriste** (FR-24).
 
 **Conséquences (testables) :**
 - Une donnée n'est utilisée que pour une finalité consentie ; un test retire un consentement (canal de messages, par exemple) et vérifie l'arrêt de l'usage.
 - Le registre des transferts liste chaque destination sortante (relais, tunnel de l'IA commune, support), son contenu, son sous-traitant et sa date de mise en service.
 - L'**effacement** d'une donnée sous **conservation** (FR-21, FR-236) est refusé avec un code nommé ; l'effacement d'une donnée hors conservation est tracé avec un certificat.
 - La **durée de conservation** de dix ans (Code CIMA art. 404) et le principe de conservation limitée de la loi sur les données personnelles (art. 53) doivent être conciliés ; le **point de départ** de la durée (la clôture du dossier ?) est **à faire préciser par le juriste** (FR-24).
-- Les droits des personnes (accès, rectification, opposition) sont servis par un écran du responsable ; leur régime exact est **à vérifier par le juriste** `[ASSUMPTION: les articles de droits de la loi n'ont pas été relus ; à vérifier]`.
+- Les droits des personnes (accès, rectification, opposition) sont servis par un écran du responsable ; leur régime exact est **à vérifier par le juriste** *(point juridique J-05 : les articles de droits de la loi n'ont pas été relus ; à vérifier)*.
 
 ### 4.11 Modules installables
 
 #### FR-20 : Les modules de la compagnie s'installent un par un
 
-Chaque module de ce PRD respecte le contrat de module (C1 à C13 ; annexe A) : il s'installe seul, déclare ses dépendances, et affiche un emplacement vide quand une dépendance facultative manque. Les modules propres à l'assurance sont : `sinistres` (M05), `ged` (M07), `expertises` (M29), `assurance` (M30, M31), `liaison-assureur` (M48 `[ASSUMPTION: code et numéro proposés ; à valider avec le contrat de module]`), `assureur-fictif` (démo seulement) et `reprise` (M44). Les modules partagés sont : `paiement` (M33), `notification` (M34), `dashboard` (M28), `reseau` (M01), l'IA commune et `connecteurs` (M43) (§7). Le paquet de la compagnie installe au moins `sinistres`, `ged`, `expertises`, `assurance`, `liaison-assureur`, `paiement`, `notification` et leurs dépendances.
+Chaque module de ce PRD respecte le contrat de module (C1 à C13 ; annexe A) : il s'installe seul, déclare ses dépendances, et affiche un emplacement vide quand une dépendance facultative manque. Les modules propres à l'assurance sont : `sinistres` (M05), `ged` (M07), `expertises` (M29), `assurance` (M30, M31), `liaison-assureur` (M48 *(défaut H-025 : code et numéro proposés ; à valider avec le contrat de module)*), `assureur-fictif` (démo seulement) et `reprise` (M44). Les modules partagés sont : `paiement` (M33), `notification` (M34), `dashboard` (M28), `reseau` (M01), l'IA commune et `connecteurs` (M43) (§7). Le paquet de la compagnie installe au moins `sinistres`, `ged`, `expertises`, `assurance`, `liaison-assureur`, `paiement`, `notification` et leurs dépendances. La **mise en service de chaque module** se décide par un **feu vert**, comme la reprise (FR-218), avec la liste des entrées de la compagnie nécessaires et leur **date limite de livraison** ; une entrée manquante est un **risque tracé**, pas un retrait de périmètre. Aucune fonction ne passe en « bientôt » sans décision du PO.
 
 **Conséquences (testables) :**
 - Le parcours UJ-3 marche avec ces seuls modules et le socle ; sans `reprise`, sans `dashboard` et sans IA commune, le circuit va quand même jusqu'à l'archive.
 - Chaque emplacement vide a un test ; l'emplacement d'un module absent le dit.
 - `assureur-fictif` n'est jamais installé en production réelle (annexe A).
 - Le contrat de module est **la seule façon** d'installer ou de retirer un module (PRD moteur d'installation).
+- Chaque module a son feu vert de mise en service, avec la liste de ses entrées et leur date limite ; une entrée en retard apparaît au registre des risques, et aucune fonction n'est passée en « bientôt » à cause d'elle.
 
 ### 4.12 Le double support, et ce qui n'est pas encore là
 
 #### FR-21 : Le papier reste tenu, le numérique sert
 
-Le dossier existe **en deux supports** : le **numérique**, qui sert au travail, et le **papier**, qui reste tenu (décision du PO : le scan du stock papier n'est pas la voie de reprise, le dossier papier se tient en parallèle). Chaque dossier porte sa **cote physique** (boîte, rang, chemise de couleur par branche), sa **sortie** et sa **restitution** (défaut : 15 jours). Les nouvelles pièces sont **scannées ou téléversées** au guichet ou par NUM, avec un **contrôle avant archivage**. La **valeur juridique de chaque pièce** est notée (original irremplaçable, original rééditable, copie) ; **les originaux irremplaçables** (acte de décès, jugement d'hérédité, procès-verbal) **restent conservés en papier** tant que le juriste n'a pas confirmé la valeur probante de la copie numérisée (FR-24). Le dossier est conservé **dix ans au moins** (Code CIMA art. 404) ; les durées par nature de dossier sont des paramètres (annexe D) ; **la destruction est une décision visée et tracée, jamais un défaut**.
+Le dossier existe **en deux supports** : le **numérique**, qui sert au travail, et le **papier**, qui reste tenu (décision du PO : le scan du stock papier n'est pas la voie de reprise, le dossier papier se tient en parallèle). Chaque dossier porte sa **cote physique** (boîte, rang, chemise de couleur par branche), sa **sortie** et sa **restitution** (défaut : 15 jours). Les nouvelles pièces sont **scannées ou téléversées** au guichet ou par NUM, avec un **contrôle avant archivage**. La **valeur juridique de chaque pièce** est notée (original irremplaçable, original rééditable, copie) ; **les originaux irremplaçables** (acte de décès, jugement d'hérédité, procès-verbal) **restent conservés en papier** tant que le juriste n'a pas confirmé la valeur probante de la copie numérisée (FR-24). **Le papier fait foi tant que le juriste n'a pas validé la valeur probante de la copie numérisée** ; le scellement (FR-169) ne change pas le support de référence. Le dossier est conservé **dix ans au moins** (Code CIMA art. 404) ; les durées par nature de dossier sont des paramètres (annexe D) ; **la destruction est une décision visée et tracée, jamais un défaut**.
 
 **Conséquences (testables) :**
 - Un dossier versé au fonds porte son numéro d'archivage `ARC-…` et sa cote physique ; chaque sortie du papier est datée, attribuée et suivie d'une restitution ; une chemise sortie depuis plus de 15 jours est signalée.
 - Une pièce porte sa valeur juridique ; un test tente de marquer « destructible » une pièce irremplaçable : refusé.
+- Tant que le juriste n'a pas validé la valeur probante de la copie numérisée, le support de référence d'une pièce reste le papier, scellement compris : un test scelle une pièce et vérifie que son support de référence n'a pas changé.
 - Aucune destruction n'est lancée sans visa : un test cherche une destruction automatique dans le journal.
 - Un dossier versé au fonds n'est plus versable ; un dossier **non clos** ne se verse pas.
 - Un export d'archive se fait sur un support de la compagnie, avec une somme de contrôle (§7.5).
@@ -537,7 +623,7 @@ Une capacité qui n'est pas livrée au premier jour s'affiche **« bientôt »**
 
 #### FR-23 : Une hypothèse de dimensionnement, à remplacer par les vrais volumes
 
-Les volumes de la compagnie sont **inconnus** : ni la proposition v2, ni le deck, ni l'offre v4 n'en donnent un seul. Le PRD pose une **hypothèse de dimensionnement**, à remplacer par les vrais volumes dès qu'ils sont connus : `[ASSUMPTION: 5 000 sinistres par an, 50 000 dossiers archivés, 1,5 million de pages, 60 utilisateurs simultanés, un site central et des guichets ; à remplacer par les volumes réels de la compagnie (stock en cours, archives, dossiers par an), à demander avant la séance d'immersion]`. **La recherche d'un dossier rend son résultat en moins de 5 secondes au 95e centile** sur le volume repris ; moins de 1 seconde est visé `[ASSUMPTION: cible de 1 s reprise du deck du 12/09 ; la v2 dit « quelques secondes »]`.
+Les volumes de la compagnie sont **inconnus** : ni la proposition v2, ni le deck, ni l'offre v4 n'en donnent un seul. Le PRD pose une **hypothèse de dimensionnement**, à remplacer par les vrais volumes dès qu'ils sont connus : *(défaut H-026 : 5 000 sinistres par an, 50 000 dossiers archivés, 1,5 million de pages, 60 utilisateurs simultanés, un site central et des guichets ; à remplacer par les volumes réels de la compagnie (stock en cours, archives, dossiers par an), à demander avant la séance d'immersion)*. **La recherche d'un dossier rend son résultat en moins de 5 secondes au 95e centile** sur le volume repris ; moins de 1 seconde est visé *(défaut H-027 : cible de 1 s reprise du deck du 12/09 ; la v2 dit « quelques secondes »)*. La compagnie **livre ses volumes réels avant la date limite** fixée au feu vert de FR-20 ; sans eux, l'hypothèse de dimensionnement reste valable et le risque est tracé.
 
 **Conséquences (testables) :**
 - Un jeu au volume de l'hypothèse (50 000 dossiers archivés, 1,5 million de pages) est chargé sur une installation de référence ; la recherche par nom, par police, par numéro de sinistre, par immatriculation ou par numéro d'archivage rend son résultat en moins de 5 secondes au 95e centile ; un test mesure chaque critère.
@@ -549,25 +635,71 @@ Les volumes de la compagnie sont **inconnus** : ni la proposition v2, ni le deck
 
 #### FR-24 : Revue juridique obligatoire avant la mise en service
 
-Comme pour l'IMF, une **revue juridique est obligatoire avant la mise en service** (décision de cadrage D21). Elle porte sur : les **délais CIMA** (version à jour du Code, suspensions, base de la pénalité de 5 % par mois) ; le **barème corporel** (art. 257 à 266 ; SMIG, sens du SMIG « annuel ») ; l'existence et le régime du **fonds de garantie automobile** au Togo ; les **conventions inter-compagnies** et le recours (existence d'une convention d'indemnisation directe, rôle de l'association des assureurs, constat amiable, règles sur les experts automobiles) ; les **données de santé** (loi n° 2019-014 : consentement écrit, formalité auprès de l'instance de protection des données, transferts) ; la **valeur probante de la copie numérisée** et la signature électronique (loi sur les transactions électroniques de 2017, **non lue** à cette date) ; la **LBC/FT** (loi uniforme et loi nationale, seuils, traitement du Mobile Money) ; la **conservation** (point de départ de la durée de dix ans) ; les circulaires de la CRCA sur les provisions et les états. Les **tables du barème corporel** (valeur du point d'incapacité permanente, capitalisation, barème médical, barème de responsabilité) sont des **images** dans le PDF officiel : leur **saisie** est une **tâche du plan**, pas une hypothèse.
+Comme pour l'IMF, une **revue juridique est obligatoire avant la mise en service** (décision de cadrage D21). Elle porte sur : les **délais CIMA** (version à jour du Code, suspensions, base de la pénalité de 5 % par mois) ; le **barème corporel** (art. 257 à 266 ; SMIG, sens du SMIG « annuel ») ; l'existence et le régime du **fonds de garantie automobile** au Togo ; les **conventions inter-compagnies** et le recours (existence d'une convention d'indemnisation directe, rôle de l'association des assureurs, constat amiable, règles sur les experts automobiles) ; les **données de santé** (loi n° 2019-014 : consentement écrit, formalité auprès de l'instance de protection des données, transferts hors Togo, notification des violations de données) ; la **valeur probante de la copie numérisée** et la signature électronique (loi sur les transactions électroniques de 2017, **non lue** à cette date) ; la **LBC/FT** (loi uniforme et loi nationale, seuils, traitement du Mobile Money) ; la **conservation** (point de départ de la durée de dix ans) ; les circulaires de la CRCA sur les provisions et les états. Les **tables du barème corporel** (valeur du point d'incapacité permanente, capitalisation, barème médical, barème de responsabilité) sont des **images** dans le PDF officiel : leur **saisie** est une **tâche du plan**, pas une hypothèse.
+
+La revue a un **propriétaire** et une **date cible** *(défaut H-028 : le PO désigne le propriétaire ; date cible = 4 semaines avant la mise en service)*. Un **mode dégradé** est prévu : si les tables du barème corporel ne sont pas validées à la mise en service, le volet corporel fonctionne en **saisie manuelle motivée** (montant arrêté par le gestionnaire, avec motif), les échéances légales restent actives et l'écart est tracé.
 
 **Conséquences (testables) :**
 - Chaque point de cette revue est une ligne du registre des points juridiques (§12) avec son propriétaire, sa date et son issue ; la mise en service est **bloquée** tant qu'une ligne obligatoire est ouverte.
 - Tout texte réglementaire cité dans le PRD est soit **lu et sûr** (numéro d'article donné), soit marqué **à vérifier par le juriste** ; aucun texte non vérifié n'est cité avec un numéro.
 - Un référentiel (délais, barèmes) ne devient « en vigueur » qu'après un **validateur** nommé (FR-14).
 - Les tables du barème corporel saisies sont relues une à une par un second agent avant mise en service.
+- La revue a un propriétaire nommé et une date cible visibles au registre des points juridiques.
+- Un dossier corporel s'ouvre avec des tables non validées (état `TABLE_NON_VALIDEE`, FR-70) : le montant se saisit à la main avec motif, les échéances légales courent, l'écart est tracé.
 
 ### 4.15 L'accès
 
 #### FR-25 : Authentification, sessions et double authentification
 
-Les comptes sont authentifiés par le **serveur** (la démo actuelle a un mot de passe unique et un cookie contenant l'identifiant). La **double authentification est obligatoire** pour DG, DT, RESP, CPT, AUD et ADMIN ; une session dure 8 heures au plus et se ferme après 30 minutes d'inactivité (paramètres) `[ASSUMPTION: valeurs reprises de la microfinance ; à confirmer à la séance d'immersion]`. Les comptes des cabinets d'expertise externes sont **séparés** et n'ouvrent que le portail expert.
+Les comptes sont authentifiés par le **serveur** (la démo actuelle a un mot de passe unique et un cookie contenant l'identifiant). La **double authentification est obligatoire** pour **tout rôle autorisé à lire une donnée de santé ou à enregistrer un accord** (donc aussi `GEST`, `MED`, `ACC`, `NUM`, `GREC` dès qu'ils ont ces accès), en plus de DG, DT, RESP, CPT, AUD, ADMIN et EXPE : la règle se pose **par capacité**, pas par liste figée ; une session dure 8 heures au plus et se ferme après 30 minutes d'inactivité (paramètres) *(défaut H-029 : valeurs reprises de la microfinance ; à confirmer à la séance d'immersion)*. Les comptes des cabinets d'expertise externes sont **séparés** et n'ouvrent que le portail expert.
 
 **Conséquences (testables) :**
 - Aucun compte de démonstration n'a de mot de passe commun ; l'espace d'essai a ses propres comptes (FR-15).
-- Un test ouvre une session de 8 heures et une session inactive : elles se ferment.
+- Un test ouvre une session de 8 heures et une session inactive : elles se ferment ; l'écran est perdu et aucune donnée métier ne reste dans le navigateur.
+- Un compte d'un rôle soumis à la double authentification, sans second facteur, ne peut pas ouvrir de session ; la remise à zéro d'un second facteur est tracée et visible d'AUD.
+- Un test donne à un `ACC` ou à un `GREC` un accès à une donnée de santé ou à l'enregistrement d'un accord : la double authentification lui devient obligatoire.
 - Le compte d'un cabinet ne peut ouvrir aucun écran hors du portail expert (FR-6).
 - Les comptes de Money Vibes sont **fermés par défaut** sur l'installation de la compagnie (§7.5).
+
+### 4.16 Défendabilité, évolution, concurrence, partie au dossier
+
+#### FR-26 : Toute décision est défendable
+
+Toute décision (évaluation, offre, refus, classement, provision, règlement) porte ses **pièces, sa règle, son motif et son auteur**, lisibles par un tiers (l'assuré, l'auditeur, le juge) **sans reconstitution**. C'est le principe de l'IA (elle explique et cite ses sources, FR-11) et du journal (FR-13).
+
+**Conséquences (testables) :**
+- Un auditeur ouvre un dossier clos et retrouve, pour chaque décision, les quatre éléments : les pièces, la règle, le motif, l'auteur.
+- Une décision sans l'un des quatre éléments est refusée à l'enregistrement, avec le nom de l'élément manquant.
+- Un tiers lit la décision seule, sans ouvrir un autre écran ni demander une explication à l'agent.
+
+#### FR-27 : Le processus évolue par paramètres, puis par version
+
+Les **11 statuts et 42 transitions** sont ceux du premier jour. La compagnie fait évoluer le processus **par paramètres** (délais, seuils, délégations, pièces, modèles) sans développement. Un changement de statut ou de transition se fait par **amendement versionné**, décidé à la séance d'immersion, avec rejeu des tests de FR-139.
+
+**Conséquences (testables) :**
+- Un paramètre de processus (délai, seuil, délégation, liste de pièces, modèle) se change sans développement ; l'effet se vérifie sur un nouveau dossier (FR-4).
+- Un statut ou une transition ne s'ajoute, ne se retire et ne se modifie que par un amendement versionné ; la livraison est refusée si les tests de FR-139 ne sont pas rejoués et verts.
+- La table des 42 transitions porte sa version ; un dossier garde la version de son ouverture.
+
+#### FR-28 : Deux agents, un dossier
+
+Deux agents peuvent ouvrir le même dossier en même temps.
+
+- Le dossier porte un **numéro de version**. Un enregistrement fait sur une version périmée est **refusé**, avec le message « modifié par X à hh:mm » ; la saisie de l'agent n'est pas perdue.
+- Un geste met à jour l'écran des rôles concernés **sans rechargement**.
+
+**Conséquences (testables) :**
+- Deux agents ouvrent le même dossier ; le premier enregistre ; le second enregistre sur la version périmée : refus nommé, message « modifié par X à hh:mm », saisie du second conservée à l'écran.
+- Un agent exécute un geste (par exemple une validation) ; l'écran de l'autre rôle concerné se met à jour sans rechargement ; la recette le vérifie dans un navigateur réel, rôle après rôle.
+
+#### FR-29 : Partie au dossier
+
+Une personne est **partie au dossier** quand elle accomplit l'un des actes de la liste **fermée** suivante : **affecter**, **instruire**, **évaluer**, **valider** (siéger au comité pour décider est valider), **contrôler** (le contrôle du niveau 1 de FR-8), **enregistrer l'accord**, **émettre**, **remettre**, **rapprocher**. **Contrôler la qualité d'une pièce n'est pas un acte de partie.** Un gestionnaire **réaffecté** en cours de route reste partie pour ses actes passés. FR-7, FR-81 et FR-93 renvoient à cette liste.
+
+**Conséquences (testables) :**
+- Un test par acte de la liste : la personne qui l'a accompli est partie ; le serveur lui refuse les cumuls interdits de FR-7 qui en découlent.
+- Le contrôle de qualité d'une pièce ne rend pas partie : un `NUM` qui a contrôlé une pièce peut enregistrer l'accord sur ce dossier.
+- Un gestionnaire réaffecté reste partie : il ne peut pas valider le dossier après l'avoir instruit, même s'il n'en est plus le titulaire.
 
 ---
 
@@ -584,7 +716,7 @@ Un mot sur les sources. Le **récit du PO** fait foi pour la forme du circuit (8
 
 #### FR-30 : Le dossier avance par 8 phases et 11 statuts, et chaque pas est gardé
 
-Un dossier sinistre n'a qu'un statut à la fois, parmi onze. Il passe d'un statut à l'autre par une **transition** nommée. Chaque transition porte : le **droit** qu'il faut détenir, les **conditions** à remplir, et un **motif écrit** quand elle refuse, classe ou renvoie. L'écran affiche aussi les actions **fermées**, avec la raison du blocage dite en clair (« vous ne pouvez pas évaluer : il manque le rapport de police »). Rien ne s'enregistre contre ces règles : le serveur revérifie droit, conditions et motif, quel que soit l'écran qui appelle. Un statut non terminal n'est jamais une impasse : toute transition de sortie existe, et un test le vérifie. La table complète des transitions est en §5.13 (FR-135) ; ce paragraphe fixe le cadre.
+Un dossier sinistre n'a qu'un statut à la fois, parmi onze. Il passe d'un statut à l'autre par une **transition** nommée. Chaque transition porte : le **droit** qu'il faut détenir, les **conditions** à remplir, et un **motif écrit** quand elle refuse, classe ou renvoie. L'écran affiche aussi les actions **fermées**, avec la raison du blocage dite en clair (« vous ne pouvez pas évaluer : il manque le rapport de police »). Rien ne s'enregistre contre ces règles : le serveur revérifie droit, conditions et motif, quel que soit l'écran qui appelle. Un statut non terminal n'est jamais une impasse : toute transition de sortie existe, et un test le vérifie. La table complète des **42 transitions** est en §5.13 (FR-135) ; ce paragraphe fixe le cadre.
 
 | Phase | Statut(s) | Qui | Ce qui se passe | Ce qui bloque |
 |---|---|---|---|---|
@@ -632,6 +764,8 @@ Quatre règles valent partout, sans exception ni écran qui les contourne. Elles
 3. **Chaque action est horodatée** et attribuée à un utilisateur identifié, avec son rôle (qui, quoi, quand, sur quelle pièce). Le journal ne s'efface pas et ne se modifie pas.
 4. **Une évaluation déjà arrêtée n'est pas recalculée** quand le barème change (FR-75).
 
+Ces règles incluent celle-ci : **l'argent n'est libéré qu'après un accord enregistré par un tiers** (FR-86) **et, au corporel, après la fin du délai de dénonciation** (`DELAI_DENONCIATION_ECOULE`, FR-136).
+
 **Conséquences (testables) :**
 - Pour chaque règle, un test tente de la violer par chaque rôle et par appel direct, et obtient le refus attendu.
 - Les quatre règles se retrouvent dans la matrice d'accès (annexe B) et dans les contrôles du contrôle interne (`AUD`, §6.7).
@@ -640,18 +774,19 @@ Quatre règles valent partout, sans exception ni écran qui les contourne. Elles
 
 #### FR-34 : Le sinistre se déclare par quatre canaux, avec un mode de saisie commun
 
-Un sinistre se déclare **au guichet**, **au téléphone**, **par WhatsApp ou par e-mail**, ou **par un courtier**. Les quatre canaux aboutissent au même formulaire de déclaration. Au téléphone, l'agent de l'accueil saisit la déclaration pendant l'appel : **aucun appel n'est enregistré ni transcrit** (la voix est hors périmètre, FR-35). Le canal d'origine est conservé sur le dossier. La déclaration d'un courtier est reçue comme celle de l'assuré, avec le courtier identifié. Prospera sert **à consulter et à déclarer** dès le premier jour : l'assuré voit l'avancement par la compagnie, il ne modifie jamais son dossier directement `[ASSUMPTION: pas de portail assuré en libre-service au premier jour ; le chatbot de l'assuré est « bientôt » ; à confirmer à la séance d'immersion]`.
+Un sinistre se déclare **au guichet**, **au téléphone**, **par WhatsApp ou par e-mail**, ou **par un courtier**. Les quatre canaux aboutissent au même formulaire de déclaration. Quand le système est indisponible, un **formulaire papier de secours numéroté** reçoit la déclaration ; l'agent la saisit ensuite en **saisie différée**, avec les deux dates (réception réelle et saisie), et le numéro du formulaire papier est reporté au dossier. Un canal « agence » s'ajoute si la compagnie a des agences *(défaut H-030 : canal « agence » à ajouter si la compagnie a des agences ; à confirmer à la séance d'immersion)*. Au téléphone, l'agent de l'accueil saisit la déclaration pendant l'appel : **aucun appel n'est enregistré ni transcrit** (la voix est hors périmètre, FR-35). Le canal d'origine est conservé sur le dossier. La déclaration d'un courtier est reçue comme celle de l'assuré, avec le courtier identifié. Prospera sert **à consulter et à déclarer** dès le premier jour : l'assuré voit l'avancement par la compagnie, il ne modifie jamais son dossier directement *(défaut H-031 : pas de portail assuré en libre-service au premier jour ; le chatbot de l'assuré est « bientôt » ; à confirmer à la séance d'immersion)*.
 
 **Conséquences (testables) :**
 - Le formulaire de déclaration contient au minimum : police, assuré, victime, téléphone, type de sinistre, date et heure de survenance, lieu, circonstances, tiers impliqué, estimation du déclarant (facultative), canal.
 - Le canal prend les valeurs `GUICHET`, `TELEPHONE`, `WHATSAPP`, `EMAIL`, `COURTIER` (et `COURRIER` pour une déclaration reçue sur papier) ; il est obligatoire.
 - Une déclaration par courtier porte l'identifiant du courtier, repris du logiciel de la compagnie ; un courtier inconnu est enregistré « à rattacher » sans bloquer la saisie.
 - La **confirmation écrite** d'une déclaration verbale est demandée à l'assuré (pièce « déclaration signée ») ; son absence ne bloque pas la déclaration mais bloque l'évaluation (FR-44).
-- Une déclaration saisie après coup porte deux dates : celle de la réception réelle et celle de la saisie ; un écart de plus de 1 jour ouvré est signalé au `RESP` `[ASSUMPTION: seuil de 1 jour ouvré]` (le mémoire de 2014 relève des enregistrements faits 3 à 4 jours après réception).
+- Un formulaire papier de secours porte un numéro unique ; sa saisie différée le reporte sur le dossier, avec les deux dates, et un numéro de formulaire saisi deux fois est refusé (`FORMULAIRE_SECOURS_DEJA_SAISI`).
+- Une déclaration saisie après coup porte deux dates : celle de la réception réelle et celle de la saisie ; un écart de plus de 1 jour ouvré est signalé au `RESP` *(défaut H-032 : seuil de 1 jour ouvré)* (le mémoire de 2014 relève des enregistrements faits 3 à 4 jours après réception).
 
 #### FR-35 : Déclaration assistée par l'IA depuis un message WhatsApp ou un e-mail (usage n°1)
 
-Quand un assuré ou un courtier écrit sa déclaration (message WhatsApp, e-mail, courrier numérisé), l'agent d'accueil peut demander à l'IA commune de **pré-remplir la fiche de déclaration**.
+Quand un assuré ou un courtier écrit sa déclaration (message WhatsApp, e-mail, courrier numérisé), l'agent d'accueil peut demander à l'IA commune de **pré-remplir la fiche de déclaration**. La v2 promettait la déclaration depuis l'appel ; elle est retirée : **l'accueil saisit pendant l'appel**, sans voix (D13).
 
 - **Entrée :** le texte du message (et le numéro ou l'adresse d'origine). **Texte seulement** : aucun fichier audio, aucune transcription d'appel, aucune dictée ; un vocal reçu est rangé comme pièce, non lu.
 - **Sortie :** les champs de la fiche proposés, **chacun avec sa confiance** et l'extrait du message d'où il vient ; la police retrouvée par numéro de police, immatriculation ou téléphone ; le type et la gravité probables ; la date (y compris « hier », « avant-hier ») ; une liste de **questions à poser** à l'assuré et d'**alertes** (police inconnue, type incertain).
@@ -668,24 +803,27 @@ Quand un assuré ou un courtier écrit sa déclaration (message WhatsApp, e-mail
 
 #### FR-36 : Une référence de déclaration immédiate et un accusé de déclaration
 
-À l'enregistrement, la déclaration reçoit **tout de suite** une **référence de déclaration** `DEC-AAAA-NNNNN` (année de la déclaration, séquence sans trou ni réutilisation). Cette référence est remise à l'assuré sur un **accusé de déclaration** (papier au guichet, message ou e-mail sinon), qui rappelle : le canal, la date et l'heure, un résumé de ce qui a été déclaré, la liste des pièces à fournir (FR-46) et le contact du service. La référence reste un critère de recherche une fois le numéro officiel connu (FR-37).
+À l'enregistrement, la déclaration reçoit **tout de suite** une **référence de déclaration** `DEC-AAAA-NNNNN` (année de la déclaration, séquence **sans réutilisation** ; un trou dû à une annulation est **consigné** avec son motif). Cette référence est remise à l'assuré sur un **accusé de déclaration** (papier au guichet, message ou e-mail sinon), qui rappelle : le canal, la date et l'heure, un résumé de ce qui a été déclaré, la liste des pièces à fournir (FR-46) et le contact du service. La référence `DEC-` est le numéro « attribué tout de suite » du récit du PO ; le numéro officiel vient du LC (D3). Elle reste un critère de recherche une fois le numéro officiel connu (FR-37). Elle est aussi l'**identifiant d'idempotence** envoyé au LC (champ obligatoire de l'annexe C) : le LC renvoie le numéro existant pour une `DEC-` déjà reçue *(défaut H-033 : capacité à exiger du LC ; sinon contrôle de doublon par Prospera avant tout rattachement ; à confirmer à la séance d'immersion)*.
 
 **Conséquences (testables) :**
 - Deux déclarations enregistrées au même instant reçoivent deux références différentes ; une référence n'est jamais réattribuée, même après rejet ou annulation d'une saisie.
 - L'accusé de déclaration est généré à l'enregistrement et classé au dossier ; son envoi (canal, date, heure) est journalisé.
 - Rechercher `DEC-…` retrouve le dossier en moins de 5 secondes (recherche, §6.1).
-- Un trou dans la séquence des références est détectable par le contrôle interne (contrôle de séquence recommandé par l'audit de 2014).
+- Un trou dans la séquence des références est détectable par le contrôle interne (contrôle de séquence recommandé par l'audit de 2014) ; le contrôle ne signale que les trous **non consignés** : un trou dû à une annulation, consigné avec son motif, ne produit pas de faux positif. Le test de séquence figure au plan de contrôle (FR-210).
+- Une `DEC-` envoyée deux fois au LC ne crée pas deux sinistres : le LC renvoie le numéro existant, ou Prospera détecte le doublon avant tout rattachement.
 
 #### FR-37 : Le numéro de sinistre officiel vient du logiciel de la compagnie
 
-La déclaration part vers le **logiciel de la compagnie** (LC) par le contrat d'échange (annexe C), qui renvoie le **numéro de sinistre officiel**. Prospera rattache ce numéro au dossier, et **c'est lui qui s'affiche partout** ensuite ; la référence `DEC-` reste cherchable. Si le LC ne sait pas recevoir une déclaration (pas d'interface, interface en panne), le dossier entre dans une liste **« à saisir dans le logiciel de la compagnie »** : un agent y saisit la déclaration, puis **reporte le numéro obtenu** dans Prospera. Un dossier sans numéro officiel depuis plus de **1 jour ouvré** est une **alerte** au `RESP`. Un paramètre **« qui attribue le numéro »** (LC ou Prospera) existe pour permettre un basculement plus tard, sans reprise du code `[ASSUMPTION: le LC attribue le numéro au démarrage, comme l'a dit le PO « pour un début » ; Prospera ne génère un numéro officiel que si la compagnie bascule le paramètre]`.
+La déclaration part vers le **logiciel de la compagnie** (LC) par le contrat d'échange (annexe C), qui renvoie le **numéro de sinistre officiel**. Prospera rattache ce numéro au dossier, et **c'est lui qui s'affiche partout** ensuite ; la référence `DEC-` reste cherchable. Si le LC ne sait pas recevoir une déclaration (pas d'interface, interface en panne), le dossier entre dans une liste **« à saisir dans le logiciel de la compagnie »** : un agent y saisit la déclaration, puis **reporte le numéro obtenu** dans Prospera. Une déclaration est dans **une seule voie** : l'envoi automatique **ou** la liste « à saisir ». Le passage à la liste **annule d'abord l'envoi en attente** (état de déclaration `SAISIE_MANUELLE`) ; une déclaration de la liste n'est **jamais renvoyée automatiquement** ; son rattachement se fait par report du numéro. Un dossier sans numéro officiel depuis plus de **1 jour ouvré** est une **alerte** au `RESP`. Un paramètre **« qui attribue le numéro »** (LC ou Prospera) existe pour permettre un basculement plus tard, sans reprise du code *(défaut H-034 : le LC attribue le numéro au démarrage, comme l'a dit le PO « pour un début » ; Prospera ne génère un numéro officiel que si la compagnie bascule le paramètre)*. Si la compagnie bascule la numérotation dans Prospera, le numéro porte un **préfixe distinct** (`PRO-`) de ceux du LC, et un **contrôle d'unicité** contre les numéros déjà reçus du LC (C-9) s'exécute au basculement.
 
 **Conséquences (testables) :**
 - Avec un LC joignable, le numéro officiel reçu apparaît sur le dossier et dans les listes ; la référence `DEC-` n'y figure plus qu'en second.
 - Avec un LC injoignable, le dossier figure dans la liste « à saisir », sans numéro officiel, et n'est pas bloqué dans le circuit ; le report du numéro retire le dossier de la liste et journalise qui l'a reporté et quand.
 - Un numéro reporté déjà porté par un autre dossier est refusé (`NUMERO_OFFICIEL_DEJA_ATTRIBUE`).
+- Un numéro reçu du LC pour une `DEC-` déjà numérotée est un **écart** : il entre dans la file des écarts et n'est **jamais** un second rattachement. La procédure de traitement est écrite : qui traite (le `RESP`), sous quel délai (2 jours ouvrés *(défaut H-035 : 2 jours ouvrés ; à confirmer à la séance d'immersion)*), et la décision (garder le numéro existant ou corriger) est enregistrée avec son motif.
+- Le passage d'une déclaration à la liste « à saisir » annule l'envoi en attente et pose l'état `SAISIE_MANUELLE` ; une déclaration `SAISIE_MANUELLE` n'est jamais renvoyée automatiquement (un test tente le renvoi : il est refusé).
 - Un dossier sans numéro officiel depuis plus de 1 jour ouvré (paramètre `delai_alerte_numero_officiel_jours_ouvres`) apparaît dans les alertes du `RESP` avec son ancienneté.
-- Le basculement du paramètre « qui attribue le numéro » à « Prospera » n'exige aucune modification des dossiers existants.
+- Le basculement du paramètre « qui attribue le numéro » à « Prospera » n'exige aucune modification des dossiers existants ; les numéros générés portent le préfixe `PRO-`, et le basculement est refusé tant que le contrôle d'unicité contre les numéros du LC signale un conflit.
 
 #### FR-38 : Le doublon se contrôle à la déclaration, dans Prospera et dans le LC
 
@@ -696,6 +834,11 @@ La déclaration part vers le **logiciel de la compagnie** (LC) par le contrat d'
 - Garder la déclaration comme nouvelle sans motif est refusé (`MOTIF_ECRIT`) ; le motif est conservé.
 - Un sinistre déjà connu du LC mais absent de Prospera est trouvé par le contrôle (test avec un sinistre fourni par le logiciel de compagnie fictif).
 - Un doublon n'empêche jamais l'enregistrement : il oblige seulement l'agent à choisir en connaissance de cause (FR-39).
+
+**Sous-règle : fusion de deux dossiers et doublon de règlement.**
+- La **fusion** de deux dossiers est réservée au `RESP`, avec motif obligatoire et ligne de journal. Un seul dossier survit, avec un seul numéro LC ; les pièces, provisions, offres et règlements des deux dossiers sont réunis. La fusion est refusée si un règlement `EN_COURS` existe sur l'un des deux (`REGLEMENT_EN_COURS`).
+- Le contrôle de doublon de **règlement** porte sur le **même bénéficiaire et le même sinistre** (date, police, immatriculation), non sur le montant (FR-100).
+- Test : fusionner sans motif est refusé (`MOTIF_ECRIT`) ; fusionner par un `GEST` est refusé (`DROIT_INSUFFISANT`) ; fusionner avec un règlement `EN_COURS` est refusé.
 
 #### FR-39 : Une déclaration s'enregistre toujours ; les contrôles donnent des réserves
 
@@ -709,24 +852,27 @@ La déclaration ne se refuse **jamais** pour une raison de contrôle : police in
 
 #### FR-40 : Urgence corporelle et responsabilité initiale
 
-À la déclaration, le dossier reçoit deux marques provisoires. L'**urgence corporelle** est posée quand le sinistre est un accident corporel automobile ou un accident du travail de gravité **grave** ou **mortelle** : le dossier monte en tête des files et prévient le `RESP` et le gestionnaire du volet corporel. La **responsabilité initiale** vaut `INDETERMINEE` si un tiers est saisi, `ASSURE_FAUTIF` sinon ; elle est requalifiée à l'instruction (FR-54). Une gravité mortelle déclenche, côté expertise, la proposition d'une mission post-mortem (FR-58).
+À la déclaration, le dossier reçoit deux marques provisoires. L'**urgence corporelle** est posée quand le sinistre est un accident corporel automobile ou un accident du travail de gravité **grave** ou **mortelle** : le dossier monte en tête des files et prévient le `RESP` et le gestionnaire du volet corporel. La **responsabilité initiale** vaut `INDETERMINEE` si un tiers est saisi, `ASSURE_FAUTIF` sinon ; elle est requalifiée à l'instruction (FR-54). Une gravité mortelle déclenche, côté expertise, la proposition d'une mission post-mortem (FR-58). Au-delà de la marque, l'urgence corporelle ouvre un **parcours d'urgence** saisi par l'agent : signalé, secours, orientation, admission, évaluation, soins, hospitalisation, suivi. Deux alertes le surveillent : « admission non confirmée » et « accord assureur non transmis » *(défaut H-036 : aucune interface avec les hôpitaux ; données saisies par l'agent ; à confirmer à la séance d'immersion)*.
 
 **Conséquences (testables) :**
 - Un accident corporel auto de gravité grave ou mortelle est marqué « urgence corporelle » dès l'enregistrement et prévient `RESP` et le `GEST` corporel (module `notification`).
 - Une déclaration avec un tiers saisi a la responsabilité `INDETERMINEE` ; sans tiers, `ASSURE_FAUTIF`.
 - La responsabilité initiale ne déclenche aucune décision et ne ferme aucune transition à elle seule.
+- Le parcours d'urgence se saisit étape par étape par l'agent ; une admission non confirmée au-delà du délai paramétré lève l'alerte « admission non confirmée » au `RESP`, et un accord de l'assureur non transmis lève « accord assureur non transmis ». Aucune donnée ne vient d'une interface hospitalière.
 - L'urgence corporelle ne saute aucun contrôle : elle ne change que le rang dans les files et les délais d'alerte.
 
 ### 5.2 Ouvrir (`PIECES_ATTENDUES`, `OUVERT`)
 
 #### FR-41 : La recevabilité répond à quatre questions, sur les contrats lus
 
-L'ouverture s'appuie sur un contrôle de **recevabilité** en quatre questions distinctes, calculées sur la **projection des contrats lue dans le LC** (polices, garanties, primes ; jamais modifiés par Prospera) : (1) le **contrat** est-il valide (police en vigueur, sinistre entre la date d'effet et l'échéance, prime payée) ? (2) la **garantie** est-elle souscrite et applicable au type de sinistre ? (3) la **déclaration** est-elle dans le délai contractuel de la garantie ? (4) que reste-t-il à écarter : **exclusions**, **plafond**, **franchise** ? L'écran affiche la **date de la dernière lecture** du LC. Le résultat est `RECEVABLE`, `A_EXAMINER` (réserves) ou `IRRECEVABLE` (au moins un point bloquant). Une police suspendue, résiliée ou expirée suspend toutes les garanties dans la projection, la RC obligatoire comprise ; pour une **victime de dommage corporel causé par un véhicule terrestre à moteur**, le juriste doit confirmer ce qui reste opposable (le Code CIMA, art. 210 et son interprétation du 11/04/2011, rend inopposables à la victime la plupart des suspensions de garantie, sauf la suspension régulière pour non-paiement de prime). Le **type de garantie qui répond** à chaque type de sinistre est un paramètre (table type de sinistre → garanties, valeurs de la démo reprises).
+L'ouverture s'appuie sur un contrôle de **recevabilité** en quatre questions distinctes, calculées sur la **projection des contrats lue dans le LC** (polices, garanties, primes ; jamais modifiés par Prospera) : (1) le **contrat** est-il valide (police en vigueur, sinistre entre la date d'effet et l'échéance, prime payée) ? (2) la **garantie** est-elle souscrite et applicable au type de sinistre ? (3) la **déclaration** est-elle dans le délai contractuel de la garantie ? (4) que reste-t-il à écarter : **exclusions**, **plafond**, **franchise** ? L'écran affiche la **date de la dernière lecture** du LC. Le résultat est `RECEVABLE`, `A_EXAMINER` (réserves) ou `IRRECEVABLE` (au moins un point bloquant). Pour le **corporel VTM**, la condition `CONTRAT_VERIFIE` produit une **réserve**, jamais un blocage (art. 210 : suspension inopposable à la victime *(point juridique J-06 : à valider par le juriste, §13.2)*). Une **projection de police périmée** (âge supérieur au seuil) est « à relire », jamais un refus. Le refus de garantie n'arrive que par la décision `REFUS_DE_GARANTIE` (FR-42). Si l'assuré produit une **attestation valable à la date du sinistre** (art. 215-216 ; attestation provisoire de 1 mois), la réserve « police non retrouvée » n'est pas un refus. Une police suspendue, résiliée ou expirée suspend toutes les garanties dans la projection, la RC obligatoire comprise ; pour une **victime de dommage corporel causé par un véhicule terrestre à moteur**, le juriste doit confirmer ce qui reste opposable (le Code CIMA, art. 210 et son interprétation du 11/04/2011, rend inopposables à la victime la plupart des suspensions de garantie, sauf la suspension régulière pour non-paiement de prime). Le **type de garantie qui répond** à chaque type de sinistre est un paramètre (table type de sinistre → garanties, valeurs de la démo reprises).
 
 **Conséquences (testables) :**
 - Chacune des quatre questions a son propre résultat, sa raison et ses sources (police, garantie, date) affichés.
 - Une garantie « non souscrite » (réponse normale pour une garantie facultative) est distinguée d'une garantie « hors branche » (déclaration probablement mal orientée, par exemple un dégât des eaux sur une police auto).
 - La date de dernière lecture du LC est affichée à côté du résultat ; au-delà d'un âge paramétré (`age_max_lecture_contrats_heures`), l'écran avertit que la lecture est ancienne.
+- Au corporel VTM, une police non valide dans la projection produit une réserve `CONTRAT_VERIFIE` et laisse l'ouverture possible ; une projection plus ancienne que le seuil est marquée « à relire » et ne produit aucun refus.
+- Un dossier dont la police est introuvable mais dont l'assuré produit une attestation valable à la date du sinistre ne reçoit pas de refus : la réserve est levée sur décision motivée.
 - Si le LC est injoignable, la recevabilité reste calculable sur la dernière projection, avec cet avertissement ; elle n'est jamais bloquée.
 - Le résultat de recevabilité est conservé avec le dossier à la date de calcul ; une relecture ultérieure en crée un nouveau sans effacer l'ancien.
 
@@ -743,17 +889,18 @@ Avant d'**évaluer** un dossier, il existe sur le dossier une **décision de gar
 
 #### FR-43 : Une déclaration tardive donne une réserve et un motif, jamais une déchéance automatique
 
-Quand la déclaration dépasse le délai de déclaration de la garantie (défaut de la démo : 5 jours ; 2 jours pour le vol ; 3 jours pour le transport de marchandises `[ASSUMPTION: valeurs de la démo, à confirmer dans les conditions générales de la compagnie]`), le dossier reçoit une **réserve « déclaration tardive »** avec le motif du retard saisi. **La déchéance n'est jamais automatique** : le Code CIMA (art. 12-4° et 20) fixe un délai contractuel qui ne peut être inférieur à 5 jours ouvrés (48 heures en cas de vol) et n'autorise la déchéance pour retard que si l'assureur **prouve un préjudice**. Le `RESP` décide si la réserve est levée, maintenue ou transformée en refus motivé. La réserve apparaît dans la fiche de décision (FR-77).
+Quand la déclaration dépasse le délai de déclaration de la garantie (défaut : **au moins 5 jours ouvrés, 48 heures pour le vol**, planchers de l'art. 12-4° ; la valeur de 3 jours de la démo pour le transport de marchandises est sous le plancher et est relevée à 5 jours ouvrés *(défaut H-037 : valeurs des conditions générales de la compagnie à confirmer à la séance d'immersion ; le plancher légal l'emporte)*), le dossier reçoit une **réserve « déclaration tardive »** avec le motif du retard saisi. **La déchéance n'est jamais automatique** : le Code CIMA (art. 12-4° et 20) fixe un délai contractuel qui ne peut être inférieur à 5 jours ouvrés (48 heures en cas de vol) et n'autorise la déchéance pour retard que si l'assureur **prouve un préjudice**. Le `RESP` décide si la réserve est levée, maintenue ou transformée en refus motivé. La réserve apparaît dans la fiche de décision (FR-77).
 
 **Conséquences (testables) :**
 - Une déclaration au-delà du délai de la garantie enregistre la réserve, sans changer le statut ni refuser l'ouverture.
 - Un refus de garantie fondé sur le retard exige un motif qui consigne le préjudice subi par la compagnie ; sans ce texte le refus est refusé (`PREJUDICE_NON_ETABLI`).
+- Une valeur de délai sous le plancher (moins de 5 jours ouvrés, moins de 48 heures pour le vol) est refusée à la configuration (`DELAI_SOUS_PLANCHER_LEGAL`) ; le plancher l'emporte sur l'annexe D.
 - Les délais de déclaration sont lus par garantie dans la projection du LC ; le minimum légal (5 jours ouvrés ; 48 h pour le vol) est un plancher que le paramétrage ne peut pas franchir.
 - La réserve et sa décision sont lisibles de `AUD`.
 
 #### FR-44 : Les pièces obligatoires et complémentaires dépendent du type de sinistre
 
-Pour chaque **type de sinistre** (automobile corporel, automobile matériel, automobile collision, incendie, dégât des eaux, multirisque habitation, vol, transport, responsabilité civile générale, accident du travail, décès, divers), la compagnie paramètre une liste de **pièces obligatoires** et une liste de **pièces complémentaires**. Les listes de la démo sont reprises par défaut (annexe D). Les pièces obligatoires bloquent l'**évaluation** et conditionnent l'ouverture directe (FR-45) ; les complémentaires ne bloquent rien. Le rapport d'expertise n'est **pas** une pièce obligatoire : c'est un document que la procédure produit, non une pièce apportée par l'assuré. Le **volet par défaut** découle du type : corporel, accident du travail et décès vont au volet corporel ; matériel et collision au volet matériel ; les autres au volet risques divers. Pour les dossiers de dommage corporel, la liste intègre les pièces que le Code CIMA demande à la victime ou aux ayants droit (art. 240 et 241 : pièce d'identité, extrait d'acte de naissance, acte de mariage, certificat médical initial ; certificat de décès, jugement d'hérédité, certificat de vie, certificat de genre de mort) `[ASSUMPTION: liste de la démo complétée par les art. 240-241 ; à valider par le juriste avant mise en service]`.
+Pour chaque **type de sinistre** (automobile corporel, automobile matériel, automobile collision, incendie, dégât des eaux, multirisque habitation, vol, transport, responsabilité civile générale, accident du travail, décès, divers), la compagnie paramètre une liste de **pièces obligatoires** et une liste de **pièces complémentaires**. Les listes de la démo sont reprises par défaut (annexe D). Les pièces obligatoires bloquent l'**évaluation** et conditionnent l'ouverture directe (FR-45) ; les complémentaires ne bloquent rien. Le rapport d'expertise n'est **pas** une pièce obligatoire : c'est un document que la procédure produit, non une pièce apportée par l'assuré. Le **volet par défaut** découle du type : corporel, accident du travail et décès vont au volet corporel ; matériel et collision au volet matériel ; les autres au volet risques divers. Pour les dossiers de dommage corporel, la liste intègre les pièces que le Code CIMA demande à la victime ou aux ayants droit (art. 240 et 241 : pièce d'identité, extrait d'acte de naissance, acte de mariage, certificat médical initial ; certificat de décès, jugement d'hérédité, certificat de vie, certificat de genre de mort) *(point juridique J-07 : liste de la démo complétée par les art. 240-241 ; à valider par le juriste avant mise en service)*.
 
 **Conséquences (testables) :**
 - Chaque type de sinistre a une liste de pièces obligatoires et une liste de pièces complémentaires lisibles et modifiables par `ADMIN` sans nouvelle version du produit ; une modification vaut pour les dossiers ouverts après elle.
@@ -764,23 +911,25 @@ Pour chaque **type de sinistre** (automobile corporel, automobile matériel, aut
 
 #### FR-45 : Ouvrir « en attente de pièces », puis reprendre le circuit
 
-La phase d'ouverture a deux issues. Si toutes les pièces obligatoires sont reçues, l'agent **ouvre** le dossier (`DECLARE → OUVERT`, transition 1). Sinon, il l'**ouvre en attente de pièces** (`DECLARE → PIECES_ATTENDUES`, transition 2) : le dossier reçoit son numéro, sa provision et ses échéances **sans attendre les pièces** (faute corrigée dans la démo : un dossier déclaré le soir sans constat restait « déclaré », sans gestionnaire ni provision). Quand les pièces obligatoires sont reçues, l'action « Reprendre le circuit » (`PIECES_ATTENDUES → OUVERT`, transition 3) devient possible. Si l'assuré reste injoignable, le dossier peut être classé `SANS_SUITE` avec motif (FR-31). L'ouverture exige que le **contrat soit vérifié** (FR-41, question 1) ; elle n'exige pas que la garantie soit acquise.
+La phase d'ouverture a deux issues. Si toutes les pièces obligatoires sont reçues, l'agent **ouvre** le dossier (`DECLARE → OUVERT`, transition 1). Sinon, il l'**ouvre en attente de pièces** (`DECLARE → PIECES_ATTENDUES`, transition 2) : le dossier reçoit son numéro, sa provision et ses échéances **sans attendre les pièces** (faute corrigée dans la démo : un dossier déclaré le soir sans constat restait « déclaré », sans gestionnaire ni provision). Quand les pièces obligatoires sont reçues, l'action « Reprendre le circuit » (`PIECES_ATTENDUES → OUVERT`, transition 3) devient possible. Si l'assuré reste injoignable, le dossier peut être classé `SANS_SUITE` avec motif (FR-31). La vérification du **contrat** (FR-41, question 1) produit une **réserve**, jamais un blocage de l'ouverture ; l'ouverture n'exige pas non plus que la garantie soit acquise.
 
 **Conséquences (testables) :**
 - Ouvrir directement sans toutes les pièces obligatoires est refusé (`PIECES_COMPLETES`) et le refus nomme les pièces manquantes ; l'action « ouvrir en attente de pièces » reste ouverte.
 - L'ouverture en attente de pièces donne une provision d'ouverture (FR-49) et fait courir l'accusé de réception (FR-48).
 - « Reprendre le circuit » est fermée tant qu'une pièce obligatoire est à l'état `ATTENDUE`, avec la liste des pièces manquantes comme raison.
-- Un contrat non valide (police hors période ou non en vigueur) ferme l'ouverture avec le code `CONTRAT_VERIFIE` ; le dossier reste `DECLARE` et la sortie ouverte est `REJETE` motivé.
+- Un contrat non valide (police hors période ou non en vigueur) ne ferme pas l'ouverture : il porte la réserve `CONTRAT_VERIFIE` au dossier (FR-41). Le refus de garantie n'arrive que par la décision `REFUS_DE_GARANTIE` (FR-42), puis `REJETE` motivé.
 - L'accueil peut ouvrir et reprendre ; il ne peut pas affecter (FR-50).
 
 #### FR-46 : La liste exacte des pièces est remise à l'assuré, avec un courrier de demande
 
-À l'ouverture, Prospera produit pour l'assuré la **liste exacte des pièces à fournir**, tirée du type de sinistre, avec pour chaque pièce **qui doit la fournir** : l'assuré, l'expert, l'administration (police, gendarmerie, état civil) ou un tiers. Il prépare le **courrier de demande de pièces** (modèle `DEMANDE_PIECES`) adressé au bon interlocuteur, et le range au dossier. Les pièces demandées à l'assuré sont aussi remises sur l'accusé de déclaration (FR-36). Pour les dommages corporels, la correspondance rappelle : l'assuré peut obtenir copie du procès-verbal et se faire assister d'un conseil à ses frais (art. 232), le nom du gestionnaire du dossier et les conséquences d'un défaut de réponse (art. 242). Tous les courriers sont des **modèles de la compagnie** : leur texte est à obtenir à la séance d'immersion `[ASSUMPTION: modèles de la démo à remplacer par ceux de la compagnie]`.
+À l'ouverture, Prospera produit pour l'assuré la **liste exacte des pièces à fournir**, tirée du type de sinistre, avec pour chaque pièce **qui doit la fournir** : l'assuré, l'expert, l'administration (police, gendarmerie, état civil) ou un tiers. Il prépare le **courrier de demande de pièces** (modèle `DEMANDE_PIECES`) adressé au bon interlocuteur, et le range au dossier. Les pièces demandées à l'assuré sont aussi remises sur l'accusé de déclaration (FR-36). Pour les dommages corporels, la correspondance rappelle : l'assuré peut obtenir copie du procès-verbal et se faire assister d'un conseil à ses frais (art. 232), le nom du gestionnaire du dossier et les conséquences d'un défaut de réponse (art. 242). La **copie** de chaque courrier envoyé est **archivée automatiquement** au dossier. Un lot de courriers `A_IMPRIMER` s'imprime en **impression groupée**, avec un **bordereau de départ** : chaque courrier passe `ENVOYE` à la remise au courrier, avec l'agent et l'heure. Un **registre unique des courriers sortants** les rassemble. Le catalogue des 7 modèles est listé en D.3, avec leurs mentions légales ; il comprend un modèle de **courrier FGA / exception de garantie** (avis à la victime avec le numéro du contrat, actif si `FGA_ACTIF`) et un modèle de **convocation d'expertise matérielle** (date, lieu, documents à apporter, préavis de 48 h). Tous les courriers sont des **modèles de la compagnie** : leur texte est à obtenir à la séance d'immersion *(défaut H-038 : modèles de la démo à remplacer par ceux de la compagnie)*.
 
 **Conséquences (testables) :**
 - La liste remise ne contient que les pièces obligatoires et complémentaires du type de sinistre, sans une de plus ni de moins, chacune avec son destinataire.
 - Le courrier de demande est classé au dossier avec son canal, sa date de départ et son statut (`BROUILLON`, `A_IMPRIMER`, `ENVOYE`, `REMIS`, `RETOURNE`).
 - Le courrier d'un dossier corporel contient les mentions des art. 232 et 242 ; un modèle corporel sans ces mentions est refusé à l'enregistrement du modèle (`MENTION_LEGALE_ABSENTE`).
+- Un courrier envoyé est archivé en copie sans action de l'agent ; un lot `A_IMPRIMER` produit un bordereau de départ, et chaque courrier passe `ENVOYE` avec l'agent et l'heure de la remise au courrier. Le registre unique des courriers sortants contient chaque courrier une seule fois.
+- Un modèle de convocation d'expertise matérielle sans date, lieu, documents ou préavis de 48 h est refusé à l'enregistrement du modèle (`MENTION_LEGALE_ABSENTE`) ; le modèle FGA n'est proposé que si `FGA_ACTIF`.
 - La date de présentation de la demande est horodatée : elle sert de point de départ au calcul des suspensions du délai d'offre (FR-85).
 
 #### FR-47 : Pièces manquantes et relances rédigées par l'IA (usage n°4)
@@ -788,8 +937,8 @@ La phase d'ouverture a deux issues. Si toutes les pièces obligatoires sont reç
 Pour un dossier `PIECES_ATTENDUES`, l'IA commune **identifie les pièces manquantes** et **rédige la relance** adaptée au canal.
 
 - **Entrée :** le dossier (type, pièces attendues et reçues, nombre et dates des relances, canal préféré, gravité).
-- **Sortie :** le message de relance (SMS, WhatsApp, e-mail ou script d'appel), la liste des pièces manquantes, le **moment conseillé** (appel à midi si l'assuré a déjà été relancé deux fois ou si le dossier est corporel ; WhatsApp sinon), et au troisième message un délai explicite `[ASSUMPTION: « sous 15 jours » comme dans la démo]`.
-- **Destinataire :** le gestionnaire ou l'accueil, qui **envoie lui-même** et trace la relance ; rien ne part seul.
+- **Sortie :** le message de relance (SMS, WhatsApp, e-mail ou script d'appel), la liste des pièces manquantes, le **moment conseillé** (appel à midi si l'assuré a déjà été relancé deux fois ou si le dossier est corporel ; WhatsApp sinon), et au troisième message un délai explicite *(défaut H-039 : « sous 15 jours » comme dans la démo)*.
+- **Destinataire :** le gestionnaire ou l'accueil. La relance est **rédigée par l'IA et envoyée en un clic** par l'agent, qui la trace ; elle peut aussi être **envoyée automatiquement à l'échéance** (5 jours entre deux relances, 3 sans effet) *(défaut H-040 : envoi automatique à confirmer à la séance d'immersion)* ; sans ce paramètre, rien ne part seul.
 - **Garde-fou :** les pièces citées sont celles du type de sinistre ; le message ne contient ni diagnostic ni donnée médicale ; **après 3 relances sans effet**, le système propose un arbitrage (classement sans suite, appel, visite) au lieu d'une relance de plus ; l'intervalle minimal entre deux relances d'un même interlocuteur est de 5 jours (paramètres).
 - Servi par l'**IA commune** ; sans modèle, des modèles de messages à variables remplissent la même fonction.
 
@@ -799,24 +948,26 @@ Pour un dossier `PIECES_ATTENDUES`, l'IA commune **identifie les pièces manquan
 - À la troisième relance sans effet, l'écran propose l'arbitrage et n'ajoute pas de relance par défaut.
 - Chaque relance est journalisée (canal, date, auteur) et son texte est conservé au dossier ; l'usage est inscrit au registre de l'IA (niveau `RECOMMANDATION`).
 - Le texte d'une relance corporelle ne contient aucune information médicale du dossier.
+- Un clic sur « envoyer » envoie la relance rédigée et la journalise ; avec l'envoi automatique activé, la relance part à l'échéance avec la même trace (canal, date, texte), et jamais avant l'intervalle minimal de 5 jours.
 
 #### FR-48 : Accusé de réception sous 10 jours, courtier et coassureurs informés
 
-À l'ouverture, Prospera produit l'**accusé de réception du dossier** (modèle `ACCUSE_RECEPTION`) à envoyer à l'assuré, **sous 10 jours** après la déclaration (**délai interne**, paramétrable : le Code CIMA n'en fixe pas pour les sinistres non VTM `[ASSUMPTION: 10 jours, valeur de la démo]`). Le **courtier** qui a apporté le contrat est informé de l'ouverture. Si la police est en **coassurance**, les **coassureurs** sont informés selon la clé de répartition lue dans le LC ; si la compagnie est apériteur, elle instruit pour tous et les coassureurs remboursent leur quote-part (module `assurance`, §6.4). Le mémoire de 2014 relève des accusés de réception « jamais envoyés » : l'échéance est donc un indicateur de contrôle.
+À l'ouverture, Prospera produit l'**accusé de réception du dossier** (modèle `ACCUSE_RECEPTION`) à envoyer à l'assuré, **sous 10 jours** après la déclaration (**délai interne**, paramétrable : le Code CIMA n'en fixe pas pour les sinistres non VTM *(défaut H-041 : 10 jours, valeur de la démo)*). Le **courtier** qui a apporté le contrat est informé de l'ouverture. Si la police est en **coassurance**, les **coassureurs** sont informés selon la clé de répartition lue dans le LC ; si la compagnie est apériteur, elle instruit pour tous et les coassureurs remboursent leur quote-part (module `assurance`, §6.4). Le mémoire de 2014 relève des accusés de réception « jamais envoyés » : l'échéance est donc un indicateur de contrôle.
 
 **Conséquences (testables) :**
 - À l'ouverture, un accusé de réception est généré ; l'échéance de 10 jours court depuis la date de déclaration et s'arrête à l'envoi journalisé de l'accusé.
-- Un accusé non envoyé au 8e jour `[ASSUMPTION: alerte au 8e jour]` apparaît dans les alertes de l'agent ; au-delà de 10 jours, dans celles du `RESP`.
+- Un accusé non envoyé au 8e jour *(défaut H-042 : alerte au 8e jour)* apparaît dans les alertes de l'agent ; au-delà de 10 jours, dans celles du `RESP`.
 - L'ouverture d'un dossier avec courtier crée une information au courtier (notification) avec la référence du dossier ; elle ne contient aucune donnée de santé.
 - Pour une police en coassurance, la liste des coassureurs et leurs parts apparaît sur le dossier, lue dans le LC, non modifiable dans Prospera.
 - Le délai d'accusé est un paramètre par volet ; sa modification ne change pas les dossiers déjà ouverts.
 
 #### FR-49 : La provision d'ouverture est posée à l'ouverture
 
-À l'ouverture (y compris en attente de pièces), le dossier reçoit une **provision d'ouverture** : la charge estimée du sinistre, posée **sans attendre les pièces**. Elle est le **milieu de la tranche** de la grille d'ouverture qui correspond à la **gravité** (grilles par volet de la démo, reprises en paramètres), arrondi à 5 000 FCFA, ou l'**estimation du déclarant** si elle est saisie `[ASSUMPTION: grilles en tranches de la démo reprises pour la provision d'ouverture seulement ; à remplacer par les règles de provisionnement de la compagnie]`. Elle est revue à chaque événement (FR-76). L'état des provisions du dossier est produit pour la comptabilité et le LC (module `assurance`, §6.4).
+À l'ouverture (y compris en attente de pièces), le dossier reçoit une **provision d'ouverture** : la charge estimée du sinistre, posée **sans attendre les pièces**. Au **corporel**, la provision d'ouverture est **saisie par l'humain avec un motif** : la machine ne calcule pas de milieu de tranche pour un préjudice corporel (FR-71). Pour les autres volets, elle est le **milieu de la tranche** de la grille d'ouverture qui correspond à la **gravité** (grilles par volet de la démo, reprises en paramètres), arrondi à 5 000 FCFA, ou l'**estimation du déclarant** si elle est saisie *(défaut H-043 : grilles en tranches de la démo reprises pour la provision d'ouverture seulement ; à remplacer par les règles de provisionnement de la compagnie)*. Elle est revue à chaque événement (FR-76). L'état des provisions du dossier est produit pour la comptabilité et le LC (module `assurance`, §6.4).
 
 **Conséquences (testables) :**
 - Un dossier ouvert sans estimation reçoit la provision du milieu de la tranche de sa gravité, arrondie au multiple de 5 000 FCFA.
+- Sur un dossier du volet corporel, aucune provision d'ouverture n'est calculée par la machine : le gestionnaire la saisit avec un motif, et l'enregistrement sans motif est refusé (`MOTIF_ECRIT`).
 - Une estimation du déclarant saisie remplace le milieu de tranche et est conservée comme source (« estimation du déclarant »).
 - Le mouvement d'ouverture figure dans l'historique des provisions du dossier (jamais écrasé : une ligne ajoutée à chaque révision).
 - Un dossier ouvert « en attente de pièces » a une provision ; un dossier sans provision depuis l'ouverture est une anomalie remontée au `RESP`.
@@ -825,14 +976,15 @@ Pour un dossier `PIECES_ATTENDUES`, l'IA commune **identifie les pièces manquan
 
 #### FR-50 : Le responsable affecte le dossier ; l'accueil oriente, il n'affecte jamais
 
-Un dossier `OUVERT` n'a pas de gestionnaire tant que le **responsable du service sinistres** (`RESP`) ne l'a pas **affecté** à un `GEST` du bon volet. L'**accueil oriente** (il vérifie le volet déduit du type de sinistre, ouvre, reprend le circuit) mais **n'affecte jamais** : le choix de qui instruit n'est pas un acte de guichet. Un gestionnaire ou un gestionnaire recours qui fait avancer un dossier sans titulaire le **prend lui-même** (seule exception, tracée). L'attribution se fait depuis la file « à affecter » du `RESP`, qui propose les gestionnaires du volet avec leur charge (FR-51). Le **motif** d'une affectation est facultatif à la première attribution et **obligatoire à toute réaffectation** (FR-51).
+Un dossier `OUVERT` n'a pas de gestionnaire tant que le **responsable du service sinistres** (`RESP`) ne l'a pas **affecté** à un `GEST` du bon volet. L'**accueil oriente** (il vérifie le volet déduit du type de sinistre, ouvre, reprend le circuit) mais **n'affecte jamais** : le choix de qui instruit n'est pas un acte de guichet. Aucun gestionnaire ne **se prend** un dossier lui-même : un dossier non affecté depuis 1 jour ouvré est **remonté au `RESP`** (alerte existante). L'attribution se fait depuis la file « à affecter » du `RESP`, qui propose les gestionnaires du volet avec leur charge (FR-51). Le **motif** d'une affectation est facultatif à la première attribution et **obligatoire à toute réaffectation** (FR-51).
 
 **Conséquences (testables) :**
 - Une tentative de « prendre en instruction » (`OUVERT → EN_INSTRUCTION`) sur un dossier non affecté est refusée (`DOSSIER_AFFECTE`) ; la raison affichée est « le dossier doit avoir été attribué par l'encadrement ».
 - Un `ACC` qui tente d'affecter reçoit `DROIT_INSUFFISANT` ; l'action n'est pas proposée à son écran.
+- Un `GEST` ou `GREC` qui tente de prendre en instruction un dossier non affecté est refusé (`DOSSIER_AFFECTE`) : il n'existe plus d'exception « il le prend lui-même ».
 - Le gestionnaire affecté ne figure que dans la liste de son volet : un `GEST` du volet matériel ne peut pas être affecté à un dossier du volet corporel (`VOLET_INCOMPATIBLE`).
 - Le journal porte « affectation : non affecté → [nom] », l'auteur, la date et l'heure.
-- Un dossier `OUVERT` non affecté depuis plus de 1 jour ouvré apparaît dans les alertes du `RESP` `[ASSUMPTION: 1 jour ouvré]`.
+- Un dossier `OUVERT` non affecté depuis plus de 1 jour ouvré apparaît dans les alertes du `RESP` *(défaut H-044 : 1 jour ouvré)*.
 
 #### FR-51 : La charge pondérée guide l'affectation ; la réaffectation exige un motif
 
@@ -849,10 +1001,11 @@ La file « à affecter » affiche, pour chaque gestionnaire du volet, sa **charg
 
 #### FR-52 : Prendre le dossier en instruction
 
-Le gestionnaire affecté **prend le dossier en instruction** (`OUVERT → EN_INSTRUCTION`, transition 5). Pendant l'instruction, il rassemble les pièces, requalifie la responsabilité, oriente et suit les expertises, prépare l'évaluation. Un dossier en instruction n'a qu'un titulaire. Le gestionnaire ne peut jamais valider son propre dossier ni émettre son règlement (FR-33, FR-81).
+Le gestionnaire affecté **prend le dossier en instruction** (`OUVERT → EN_INSTRUCTION`, transition 5). Pendant l'instruction, il rassemble les pièces, requalifie la responsabilité, oriente et suit les expertises, prépare l'évaluation. Un dossier en instruction n'a qu'un titulaire. Le gestionnaire ne peut jamais valider son propre dossier ni émettre son règlement (FR-33, FR-81). Si le `RESP` instruit lui-même (transition 5), il **ne valide pas** ce dossier (SEP-01) et **ne siège pas au comité** pour lui.
 
 **Conséquences (testables) :**
 - `OUVERT → EN_INSTRUCTION` (transition 5) exige : droit `GEST`, `GREC` ou `RESP` ; dossier affecté ; sinon refus `DOSSIER_AFFECTE`.
+- Un `RESP` qui a pris le dossier en instruction se voit refuser la validation du même dossier (`SEPARATION_DES_TACHES`, SEP-01) et ne figure pas parmi les votants du comité pour ce dossier.
 - Le passage fixe la date de début d'instruction, qui sert aux indicateurs de délai (§6.7, FR-213).
 - Un `GEST` ne voit et n'instruit que les dossiers de son volet ; un dossier d'un autre volet lui est refusé avec `VOLET_INCOMPATIBLE`.
 - Le dossier `EN_INSTRUCTION` affiche en permanence : étape, pièces reçues et manquantes, montant évalué, déjà payé, reste à payer, dernière action.
@@ -864,7 +1017,7 @@ Quand une pièce est versée, l'IA commune **contrôle sa cohérence** avec le d
 - **Entrée :** la pièce (texte lu, champs extraits par la lecture des pièces §6.2) et le dossier (police, immatriculation, dates, noms).
 - **Sortie :** des **constats** de deux sortes : `CERTAIN` (calculés par règle : date hors période de la police, police non en vigueur, déclaration antérieure au sinistre, propriétaire de la carte grise différent de l'assuré, immatriculation différente de celle de la police) et `PROBABLE` (jugés par l'IA : incohérence de dates ou de noms, signature absente d'un constat, **photo déjà utilisée** dans un autre dossier). Chaque constat nomme sa source (pièce, extrait, police) et se termine par une **question à poser**, jamais par un verdict.
 - **Destinataire :** le gestionnaire du dossier ; les constats `PROBABLE` à fort enjeu sont aussi visibles de `AUD` et alimentent le graphe de liens (§5.12).
-- **Garde-fou :** un signal n'est pas une accusation ; **aucun rejet ni blocage automatique** d'une pièce ; seule la décision humaine passe la pièce à `VALIDEE` ou `REJETEE` ; la réutilisation de photo se mesure par empreinte d'image calculée en local `[ASSUMPTION: comparaison d'empreintes d'images à construire ; la démo la simule]` ; le contenu médical des pièces n'est jamais affiché hors des rôles autorisés (FR-9, FR-153).
+- **Garde-fou :** un signal n'est pas une accusation ; **aucun rejet ni blocage automatique** d'une pièce ; seule la décision humaine passe la pièce à `VALIDEE` ou `REJETEE` ; la réutilisation de photo se mesure par empreinte d'image calculée en local *(défaut H-045 : comparaison d'empreintes d'images à construire ; la démo la simule)* ; le contenu médical des pièces n'est jamais affiché hors des rôles autorisés (FR-9, FR-153). Pour une **pièce médicale**, `ACC` et `NUM` ne voient **aucun extrait ni contenu** : le contrôle de qualité porte sur la **lisibilité de l'image seulement**, et la pièce est numérisée sous un type « médical », sans aperçu.
 - Servi par l'**IA commune** (local). Tant qu'un modèle de vision n'est pas installé, les constats `CERTAIN` seuls sont servis, par règles ; l'écran dit que la photo n'est pas contrôlée.
 
 **Conséquences (testables) :**
@@ -872,6 +1025,7 @@ Quand une pièce est versée, l'IA commune **contrôle sa cohérence** avec le d
 - Une photo déjà versée dans un autre dossier produit un constat `PROBABLE` qui nomme l'autre dossier à `AUD` et au `RESP` seulement ; le gestionnaire voit le constat sans le contenu de l'autre dossier.
 - Aucune pièce ne change d'état sans l'action d'un agent ; un constat sans suite reste visible et ne bloque rien.
 - Chaque constat accepté, ignoré ou rejeté va au registre de l'IA avec son auteur.
+- Pour une pièce médicale, `ACC` et `NUM` voient le type et l'existence de la pièce, jamais un extrait, un aperçu ni un constat qui en reprend le contenu ; le contrôle de qualité ne retourne que la lisibilité de l'image.
 - Avec l'IA coupée, les constats `CERTAIN` sont toujours calculés et la pièce se valide comme avant.
 
 #### FR-54 : La responsabilité se qualifie à l'instruction, et ouvre le recours
@@ -887,7 +1041,7 @@ Le gestionnaire **requalifie la responsabilité** : `ASSURE_FAUTIF`, `TIERS_FAUT
 
 #### FR-55 : Un formulaire d'instruction par type de sinistre
 
-L'instruction technique se fait dans un **formulaire propre à chaque famille de sinistre** : véhicule (automobile matériel, collision, corporel), biens (incendie, dégât des eaux, multirisque habitation), vol, transport, responsabilité civile, divers. Chaque formulaire porte ses champs, ses calculs (FR-69, FR-72, FR-73) et ses alertes (`BLOQUANT`, `ALERTE`, `INFO`). L'accident du travail et le décès ne passent pas par un formulaire de calcul : ils relèvent du barème corporel (FR-70). Les alertes levées par défaut, reprises de la démo, sont : assuré fautif sur une garantie RC seule (indemnité nulle, bloquant) ; sinistre moins de 30 jours après la souscription ; autres sinistres sur la même immatriculation ; véhicule de plus de 15 ans ; usage taxi, moto-taxi ou marchandises (vérifier la couverture) ; origine criminelle d'un incendie (plainte et enquête) ; vol sans plainte (bloquant) ; plainte déposée plus de 2 jours après les faits ; transport sans réserve à la livraison (analyser le recours) ; prescription du recours contre le transporteur à 1 an après la livraison (2 ans en aérien), affichée comme terme à vérifier `[ASSUMPTION: alertes et seuils de la démo ; chaque seuil est un paramètre de la compagnie]`. Les enregistrements du formulaire sont versionnés : chaque mise à jour est une ligne du journal.
+L'instruction technique se fait dans un **formulaire propre à chaque famille de sinistre** : véhicule (automobile matériel, collision, corporel), biens (incendie, dégât des eaux, multirisque habitation), vol, transport, responsabilité civile, divers. Chaque formulaire porte ses champs, ses calculs (FR-69, FR-72, FR-73) et ses alertes (`BLOQUANT`, `ALERTE`, `INFO`). L'accident du travail et le décès ne passent pas par un formulaire de calcul : ils relèvent du barème corporel (FR-70). Les alertes levées par défaut, reprises de la démo, sont : assuré fautif sur une garantie RC seule (indemnité nulle, bloquant) ; sinistre moins de 30 jours après la souscription ; autres sinistres sur la même immatriculation ; véhicule de plus de 15 ans ; usage taxi, moto-taxi ou marchandises (vérifier la couverture) ; origine criminelle d'un incendie (plainte et enquête) ; vol sans plainte (bloquant) ; plainte déposée plus de 2 jours après les faits ; transport sans réserve à la livraison (analyser le recours) ; prescription du recours contre le transporteur à 1 an après la livraison (2 ans en aérien), affichée comme terme à vérifier *(défaut H-046 : alertes et seuils de la démo ; chaque seuil est un paramètre de la compagnie)*. Les enregistrements du formulaire sont versionnés : chaque mise à jour est une ligne du journal.
 
 **Conséquences (testables) :**
 - Chaque type de sinistre ouvre son formulaire ; un type sans formulaire de calcul (accident du travail, décès) renvoie vers le décompte corporel.
@@ -901,9 +1055,9 @@ L'instruction technique se fait dans un **formulaire propre à chaque famille de
 L'IA commune **reporte dans le formulaire d'instruction** ce que disent les pièces reçues.
 
 - **Entrée :** les pièces reçues (texte lu, OCR inclus) et le formulaire en cours.
-- **Sortie :** les valeurs de champs tirées des pièces (carte grise : immatriculation, marque, année ; permis ; devis ou facture : pièces et main-d'œuvre ; rapport d'expert : valeur vénale, valeur d'épave ; procès-verbal ou plainte : circonstances d'un vol), avec **la pièce source de chaque champ** ; à défaut de valeur vénale, un repère « cote du marché local de l'occasion » signalé comme tel.
-- **Destinataire :** le gestionnaire, qui relit, modifie et enregistre.
-- **Garde-fou :** rien n'est enregistré sans l'action du gestionnaire ; chaque champ affiche sa source ; la valeur issue d'une pièce non lue ou d'un champ de confiance basse est marquée « à confirmer » ; le pré-remplissage est journalisé (« instruction pré-remplie depuis la pièce X »). Il ne remplit **aucun champ de montant corporel** (FR-71).
+- **Sortie :** les valeurs de champs tirées des pièces (carte grise : immatriculation, marque, année ; permis ; devis ou facture : pièces et main-d'œuvre ; rapport d'expert : valeur vénale, valeur d'épave ; constat amiable : parties, assureur et numéro de police de chaque partie, circonstances, croquis, signatures ; procès-verbal ou plainte : circonstances d'un vol), avec **la pièce source de chaque champ** ; à défaut de valeur vénale, un repère « cote du marché local de l'occasion » signalé comme tel.
+- **Destinataire :** le gestionnaire, qui relit, modifie et enregistre. L'« assureur et le numéro de police du tiers » lus du constat sont la **source du débiteur du recours** (FR-108). Le constat reste un paramètre : le Code CIMA n'en parle pas.
+- **Garde-fou :** rien n'est enregistré sans l'action du gestionnaire ; chaque champ affiche sa source ; pour une pièce médicale, les données extraites d'un rapport médical sont **validées champ par champ par `MED`** avant tout usage (FR-64) ; la valeur issue d'une pièce non lue ou d'un champ de confiance basse est marquée « à confirmer » ; le pré-remplissage est journalisé (« instruction pré-remplie depuis la pièce X »). Il ne remplit **aucun champ de montant corporel** (FR-71).
 - Servi par l'**IA commune** ; sans modèle, des règles de correspondance par type de pièce font le même travail sur les champs structurés.
 
 **Conséquences (testables) :**
@@ -911,6 +1065,7 @@ L'IA commune **reporte dans le formulaire d'instruction** ce que disent les piè
 - Accepter, modifier ou rejeter un champ est journalisé au registre de l'IA (niveau `EXTRACTION`).
 - Aucun champ n'est écrit tant que le gestionnaire n'a pas enregistré le formulaire.
 - Un formulaire de dommage corporel n'est jamais pré-rempli sur un champ de montant.
+- Après versement d'un constat amiable, l'assureur et le numéro de police de chaque partie sont proposés avec la pièce source, et alimentent le débiteur du recours (FR-108) après acceptation par le gestionnaire.
 - Avec l'IA coupée, le formulaire se remplit à la main sans autre changement.
 
 #### FR-57 : Demander des pièces complémentaires pendant l'instruction
@@ -920,8 +1075,19 @@ Pendant l'instruction, le gestionnaire peut **demander des pièces complémentai
 **Conséquences (testables) :**
 - La transition est ouverte au gestionnaire ou au responsable ; elle liste les pièces demandées ; sans pièce nommée elle est refusée (`PIECES_NON_NOMMEES`).
 - Le courrier de demande (FR-46) est préparé, et le dossier réapparaît dans la file des dossiers en attente.
-- La reprise (`PIECES_ATTENDUES → OUVERT`) conserve le gestionnaire déjà affecté : il reprend l'instruction sans nouvelle affectation `[ASSUMPTION: le titulaire est conservé pendant l'attente de pièces ; à confirmer]`.
+- La reprise (`PIECES_ATTENDUES → OUVERT`) conserve le gestionnaire déjà affecté : il reprend l'instruction sans nouvelle affectation *(défaut H-047 : le titulaire est conservé pendant l'attente de pièces ; à confirmer)*.
 - Les pièces demandées et leur date de présentation sont conservées pour le calcul des suspensions (FR-85).
+
+#### FR-57a : Les sinistres majeurs
+
+Un dossier dont l'enjeu atteint le **seuil de sinistre majeur** (paramètre `sinistre_majeur.seuil_fcfa`, défaut *(défaut H-048 : 20 000 000 FCFA ; à confirmer à la séance d'immersion)*) passe en **suivi renforcé**. Au franchissement du seuil, trois choses se déclenchent : l'**avis au réassureur selon le traité** (FR-190), la convocation d'un **comité de suivi**, et des **rapports périodiques** (quotidien ou hebdomadaire, au choix du `RESP`). Le dossier porte un **niveau de criticité** et un **contrôle de sous-assurance**. Une **vue dédiée** « sinistres majeurs » existe dans la corbeille de pilotage (FR-147). Le suivi renforcé ne change ni le circuit, ni les droits, ni les seuils de délégation (FR-78).
+
+**Conséquences (testables) :**
+- Le scénario `SIN-2026-9003` franchit le seuil et déclenche le suivi renforcé : avis au réassureur préparé, comité de suivi convoqué, premier rapport périodique planifié.
+- Un dossier sous le seuil ne déclenche rien ; le franchissement par une révision de provision ou d'évaluation le déclenche une seule fois.
+- Le niveau de criticité et le résultat du contrôle de sous-assurance sont visibles sur le dossier et dans la vue « sinistres majeurs ».
+- Un rapport périodique non produit à son échéance remonte au `RESP` (alerte « rapport de sinistre majeur en retard »).
+- Le seuil se modifie sans nouvelle version ; la modification ne change pas les dossiers déjà en suivi.
 
 ### 5.5 Expertise et accord sur devis
 
@@ -946,12 +1112,14 @@ Sur un dossier en instruction, l'IA commune propose une **orientation d'expertis
 
 #### FR-59 : Les seuils d'expertise et la voie « accord sur devis »
 
-Les règles suivantes sont des **paramètres** (valeurs de la démo, sauf accord sur devis, tiré du mémoire de 2014 et du PO). **Aucune expertise n'est requise** sous **250 000 FCFA**. L'expertise **externe** est **obligatoire** au-dessus de **3 000 000 FCFA**. L'expertise externe est aussi **impérative** pour une contre-expertise ou une expertise contradictoire, une fraude suspectée, un dossier contentieux, et un domaine que le panel interne ne couvre pas (la démo couvre en interne l'automobile matériel, le médical et la responsabilité, dans les zones de Lomé, Tsévié et Aného). Elle est **conseillée** si la zone n'est pas desservie ou si le panel interne est saturé. La **voie « accord sur devis »** permet de **retenir un devis de garage sans mission d'expertise** quand le sinistre est un **dommage matériel automobile** dont le **dossier est inférieur ou égal à 300 000 FCFA** et le **devis inférieur ou égal à 200 000 FCFA**, après le **contrôle du devis** (FR-60) `[ASSUMPTION: 300 000 et 200 000 FCFA tirés du mémoire de 2014 sur une compagnie du même groupe au Sénégal ; à confirmer pour la compagnie]`. L'accord sur devis est une **décision du gestionnaire**, avec motif, tracée comme l'équivalent d'une expertise close.
+Les règles suivantes sont des **paramètres** (valeurs de la démo, sauf accord sur devis, tiré du mémoire de 2014 et du PO). **Aucune expertise n'est requise** sous **250 000 FCFA**. L'expertise **externe** est **obligatoire** au-dessus de **3 000 000 FCFA**. L'expertise externe est aussi **impérative** pour une contre-expertise ou une expertise contradictoire, une fraude suspectée, un dossier contentieux, et un domaine que le panel interne ne couvre pas (la démo couvre en interne l'automobile matériel, le médical et la responsabilité, dans les zones de Lomé, Tsévié et Aného). Elle est **conseillée** si la zone n'est pas desservie ou si le panel interne est saturé. La **voie « accord sur devis »** permet de **retenir un devis de garage sans mission d'expertise** quand le sinistre est un **dommage matériel automobile** dont le **dossier est inférieur ou égal à 300 000 FCFA** et le **devis inférieur ou égal à 200 000 FCFA**, après le **contrôle du devis** (FR-60) *(défaut H-049 : 300 000 et 200 000 FCFA tirés du mémoire de 2014 sur la compagnie étudiée par le mémoire de 2014 (zone CIMA) ; à confirmer pour la compagnie)*. La voie exige aussi qu'**aucun recours ne soit ouvert ou envisagé** : un dossier avec tiers responsable ne passe pas par l'accord sur devis. Deux paramètres complètent la voie : un **inspecteur technique présent à l'expertise** si le devis dépasse 1 000 000 FCFA *(défaut H-050 : valeur de la compagnie étudiée par le mémoire de 2014 (zone CIMA), défaut vide, à confirmer à la séance d'immersion)*, et des **photos après réparation** *(défaut H-051 : défaut vide ; à confirmer à la séance d'immersion)*. L'accord sur devis est une **décision du gestionnaire**, avec motif, tracée comme l'équivalent d'une expertise close.
 
 **Conséquences (testables) :**
 - Un dossier de 120 000 FCFA n'exige aucune mission ; un dossier de 3 500 000 FCFA impose une mission externe et l'écran dit pourquoi.
 - Un dossier matériel de 280 000 FCFA avec un devis de 190 000 FCFA ouvre l'action « retenir le devis » ; avec un devis de 210 000 FCFA, elle est fermée (`SEUIL_ACCORD_SUR_DEVIS_DEPASSE`).
 - « Retenir le devis » sans contrôle de devis préalable est refusé (`CONTROLE_DEVIS_ABSENT`) ; le contrôle est une action, pas un automatisme.
+- Un dossier avec un recours ouvert ou envisagé (tiers responsable saisi) ne peut pas passer par l'accord sur devis : l'action est fermée (`RECOURS_OUVERT_OU_ENVISAGE`).
+- Avec le paramètre « inspecteur technique » renseigné à 1 000 000 FCFA, un devis de 1 200 000 FCFA exige la présence de l'inspecteur à l'expertise ; avec le paramètre vide, aucune exigence ne s'applique ; il en va de même du paramètre « photos après réparation ».
 - L'accord sur devis exige un motif ; il vaut « expertise validée » pour l'évaluation (FR-61) ; il est visible dans le dossier et dans les états.
 - Les seuils sont modifiables sans nouvelle version ; la modification ne change pas les dossiers déjà évalués.
 
@@ -962,7 +1130,7 @@ Quand un devis de réparation est versé, l'IA commune l'**analyse** poste par p
 - **Entrée :** le devis (pièces, main-d'œuvre, zones endommagées, marque, usage du véhicule), le catalogue de références de prix de pièces, et l'**historique interne** des devis comparables (au moins 5 observations) et du garage.
 - **Sortie :** pour chaque poste, la **fourchette de référence** (catalogue de pièces du marché local, coefficients par catégorie de véhicule), la **main-d'œuvre attendue** (heures x taux horaire) et le **surcoût** éventuel ; une alerte quand le surcoût dépasse 10 % du devis ; la **distribution** des prix observés dans le portefeuille (quartiles, rang du devis) avec la phrase « une comparaison n'est pas une règle » ; l'historique du garage (devis qui dépassent le marché).
 - **Destinataire :** le gestionnaire, et la direction pour les statistiques.
-- **Garde-fou :** **jamais de refus automatique** d'un devis ; le gestionnaire négocie avec le garage ou demande un second devis ; la fourchette cite sa source (catalogue ou historique) ; l'analyse d'un dossier **ne change pas entre deux consultations** (pas de tirage au sort : défaut corrigé dans la démo) ; le catalogue de prix est un paramètre de la compagnie `[ASSUMPTION: catalogue de pièces et taux horaire à obtenir de la compagnie ou construits pendant la reprise des archives ; valeurs de la démo (par exemple pare-chocs 60 000 à 150 000 FCFA, taux horaire 8 000 FCFA) non retenues comme référence]`.
+- **Garde-fou :** **jamais de refus automatique** d'un devis ; le gestionnaire négocie avec le garage ou demande un second devis ; la fourchette cite sa source (catalogue ou historique) ; l'analyse d'un dossier **ne change pas entre deux consultations** (pas de tirage au sort : défaut corrigé dans la démo) ; le catalogue de prix est un paramètre de la compagnie *(défaut H-052 : catalogue de pièces et taux horaire à obtenir de la compagnie ou construits pendant la reprise des archives ; valeurs de la démo (par exemple pare-chocs 60 000 à 150 000 FCFA, taux horaire 8 000 FCFA) non retenues comme référence)*.
 - Servi par l'**IA commune** ; sans historique suffisant (moins de 5 comparables), seule la fourchette du catalogue est servie, avec la mention « historique insuffisant ».
 
 **Conséquences (testables) :**
@@ -974,9 +1142,10 @@ Quand un devis de réparation est versé, l'IA commune l'**analyse** poste par p
 
 #### FR-61 : La mission d'expertise a sa propre machine d'états
 
-Une **mission** a un **domaine** (automobile matériel, médical, responsabilité, fraude, incendie, transport, bâtiment, perte d'exploitation), un **type** (`INITIALE`, `COMPLEMENTAIRE`, `CONTRADICTOIRE`, `CONTRE_EXPERTISE`), une **priorité** (`URGENTE`, `NORMALE`, `DIFFEREE`), un objet, des **points à traiter** et des **éléments à examiner**. Sa machine, réécrite à partir de celle de la démo, est : `SUGGEREE → A_DESIGNER → EXPERT_DESIGNE → ACCEPTEE → [TRANSMISE] → EN_COURS → RAPPORT_ATTENDU → RAPPORT_RECU → [COMPLEMENT_DEMANDE] → VALIDEE`, avec les sorties `CONTESTEE`, puis `ARBITREE` (la contestation est tranchée par une contre-expertise), et `ANNULEE`. `TRANSMISE` n'existe que pour un expert externe : les pièces sortent de la compagnie, par le portail, un courriel sécurisé ou un dossier papier, avec lettre de mission et accusé de réception. Pour un expert interne, `ACCEPTEE` est un geste simple de prise en charge. **Toute décision sur un rapport est humaine** : accepter, demander un complément, demander une expertise complémentaire, contester, escalader, avec motif. Le gestionnaire ne peut évaluer (`EVALUE`) que si **toutes les missions non annulées sont `VALIDEE` ou `ARBITREE`**.
+Une **mission** a un **domaine** (automobile matériel, médical, responsabilité, fraude, incendie, transport, bâtiment, perte d'exploitation), un **type** (`INITIALE`, `COMPLEMENTAIRE`, `CONTRADICTOIRE`, `CONTRE_EXPERTISE`), une **priorité** (`URGENTE`, `NORMALE`, `DIFFEREE`), un objet, des **points à traiter** et des **éléments à examiner**. Elle a **une seule machine d'états**, réécrite à partir de celle de la démo : `SUGGEREE → A_DESIGNER → EXPERT_DESIGNE → ACCEPTEE → [TRANSMISE] → EN_COURS → RAPPORT_ATTENDU → RAPPORT_RECU → [COMPLEMENT_DEMANDE] → VALIDEE`, avec les sorties `CONTESTEE`, puis `ARBITREE` (la contestation est tranchée par une contre-expertise), et `ANNULEE`. Pour une mission médicale, la même machine porte des **sous-étapes médicales** (`A_DESIGNER`, `CONVOCATION_ENVOYEE`, `EXAMEN_REALISE`, `RAPPORT_ATTENDU`, `RAPPORT_RECU`, `EN_ANALYSE`), insérées entre `ACCEPTEE` et `VALIDEE` (FR-63) ; il n'existe pas de seconde machine pour le médical. `TRANSMISE` n'existe que pour un expert externe : les pièces sortent de la compagnie, par le portail, un courriel sécurisé ou un dossier papier, avec lettre de mission et accusé de réception. Pour un expert interne, `ACCEPTEE` est un geste simple de prise en charge. **Toute décision sur un rapport est humaine** : accepter, demander un complément, demander une expertise complémentaire, contester, escalader, avec motif. Le gestionnaire ne peut évaluer (`EVALUE`) que si **toutes les missions non annulées sont `VALIDEE` ou `ARBITREE`**.
 
 **Conséquences (testables) :**
+- La condition `EXPERTISE_VALIDEE` (« toutes les missions non annulées sont `VALIDEE` ou `ARBITREE` ») s'évalue sur cette machine unique, y compris pour les missions médicales.
 - Les transitions de la mission sont gardées par rôle, comme celles du dossier (§5.0) ; une transition hors graphe est refusée (`TRANSITION_MISSION_INTERDITE`).
 - L'évaluation d'un dossier avec une mission ouverte (ni `VALIDEE`, ni `ARBITREE`, ni `ANNULEE`) est refusée (`EXPERTISE_VALIDEE`) ; la raison affichée nomme la mission en attente.
 - Un dossier sans mission n'est pas bloqué : toutes les affaires n'ont pas d'expertise.
@@ -986,7 +1155,7 @@ Une **mission** a un **domaine** (automobile matériel, médical, responsabilit�
 
 #### FR-62 : Désigner l'expert, interne ou externe
 
-Le gestionnaire ou le responsable **désigne** l'expert de la mission parmi le référentiel (§6.3), avec un **classement** qui tient compte du domaine, de la zone, de la charge pondérée, du délai annoncé, du coût estimé et de l'indépendance. L'expert est **interne** (salarié ou vacataire, sans honoraires supplémentaires) ou **externe** (cabinet agréé). Le choix d'un expert interne quand l'externe est classé premier est une **décision motivée** (« expert interne : aucun honoraire à engager »). Le délai de rapport ne court qu'à l'**acceptation** de la mission par l'expert (il peut aussi la décliner : la mission retourne à `A_DESIGNER`). Les règles dures sont dans l'action, pas seulement dans la liste : un expert hors agrément, hors domaine ou en conflit est refusé (`EXPERT_NON_ELIGIBLE`), la contre-expertise a ses propres interdits (FR-66).
+Le gestionnaire ou le responsable **désigne** l'expert de la mission parmi le référentiel (§6.3), avec un **classement** qui tient compte du domaine, de la zone, de la charge pondérée, du délai annoncé, du coût estimé et de l'indépendance. L'expert est **interne** (salarié ou vacataire, sans honoraires supplémentaires) ou **externe** (cabinet agréé). Le choix d'un expert interne quand l'externe est classé premier est une **décision motivée** (« expert interne : aucun honoraire à engager »). Au-delà d'un **seuil d'honoraires ou d'enjeu** (paramètres), la **désignation est validée par `RESP`** ; un choix **hors classement** exige un motif, lu par `AUD`. Le délai de rapport ne court qu'à l'**acceptation** de la mission par l'expert (il peut aussi la décliner : la mission retourne à `A_DESIGNER`). Les règles dures sont dans l'action, pas seulement dans la liste : un expert hors agrément, hors domaine ou en conflit est refusé (`EXPERT_NON_ELIGIBLE`), la contre-expertise a ses propres interdits (FR-66).
 
 **Conséquences (testables) :**
 - Désigner un expert dont l'agrément a expiré ou qui ne couvre pas le domaine est refusé (`EXPERT_NON_ELIGIBLE`).
@@ -994,10 +1163,11 @@ Le gestionnaire ou le responsable **désigne** l'expert de la mission parmi le r
 - Un expert décline : la mission revient à `A_DESIGNER` avec le refus et son motif conservés ; l'expert décliné n'est plus proposé pour cette mission.
 - Le délai de rapport attendu est calculé à l'acceptation ; avant elle, la mission affiche « délai non commencé ».
 - La charge d'un expert (missions actives, en retard, taux d'occupation) est affichée avant désignation.
+- Au-delà du seuil d'honoraires ou d'enjeu, la désignation n'est effective qu'après validation du `RESP` (`VALIDATION_DESIGNATION_REQUISE`) ; un choix hors classement sans motif est refusé (`MOTIF_ECRIT`) et, avec motif, apparaît dans la vue d'`AUD`.
 
 #### FR-63 : L'expertise médicale : convocation, examen, rapport, médecin-conseil
 
-Pour un dommage corporel, la mission médicale suit sa propre chronologie : `A_DESIGNER`, `EXPERT_DESIGNE`, `MISSION_ACCEPTEE`, `CONVOCATION_ENVOYEE`, `EXAMEN_REALISE`, `RAPPORT_ATTENDU`, `RAPPORT_RECU`, `EN_ANALYSE`, `VALIDEE`, `CONTESTEE`. Les **types** sont : initiale, contradictoire, contre-expertise, consolidation, aggravation. La **convocation** de la victime se fait **au moins 15 jours avant l'examen** et mentionne l'identité et les titres du médecin, l'objet, la date, le lieu, le nom de l'assureur, et le droit pour la victime de se faire assister d'un médecin de son choix à ses frais (art. 244 du Code CIMA, SÛR). Le rapport est transmis à la compagnie, à la victime et à son médecin **dans les 20 jours de l'examen** (art. 245). Le **médecin-conseil** (`MED`) lit, analyse et valide le fond médical (lésions, séquelles, taux d'incapacité permanente proposé, incapacité temporaire, consolidation, soins futurs, aggravation possible), mais **ne chiffre pas** de montant à la place du gestionnaire (FR-71). Les **certificats médicaux** ont un suivi : demandé, relancé, reçu, vérifié, non conforme, avec des **délais d'attente** par type (initial 8 jours, prolongation 8, arrêt de travail 8, reprise 10, guérison 12, consolidation 15, descriptif des séquelles 12, aggravation 12, rechute 10, complémentaire 8 ; valeurs de la démo en paramètres). La **qualification de l'expert** (expert judiciaire inscrit, diplômes appropriés ou 5 ans d'activité ininterrompue : art. 272) est vérifiée à sa désignation. Si la victime refuse l'examen ou conteste les conclusions, l'**expert commun** de l'art. 252 est proposé ; le délai d'offre est prorogé d'un mois (FR-85).
+Pour un dommage corporel, la mission médicale suit la **machine unique** des missions (FR-61), avec ses sous-étapes : `A_DESIGNER`, `EXPERT_DESIGNE`, `ACCEPTEE`, `CONVOCATION_ENVOYEE`, `EXAMEN_REALISE`, `RAPPORT_ATTENDU`, `RAPPORT_RECU`, `EN_ANALYSE`, `VALIDEE`, `CONTESTEE`, puis `ARBITREE`. Les **types** sont : initiale, contradictoire, contre-expertise, consolidation, aggravation. La **convocation** de la victime se fait **au moins 15 jours avant l'examen** et mentionne l'identité et les titres du médecin, l'objet, la date, le lieu, le nom de l'assureur, et le droit pour la victime de se faire assister d'un médecin de son choix à ses frais (art. 244 du Code CIMA, SÛR). Le rapport est transmis à la compagnie, à la victime et à son médecin **dans les 20 jours de l'examen** (art. 245). Le **médecin-conseil** (`MED`) lit, analyse et valide le fond médical (lésions, séquelles, taux d'incapacité permanente proposé, incapacité temporaire, consolidation, soins futurs, aggravation possible), mais **ne chiffre pas** de montant à la place du gestionnaire (FR-71). Les **certificats médicaux** ont un suivi : demandé, relancé, reçu, vérifié, non conforme, avec des **délais d'attente** par type (initial 8 jours, prolongation 8, arrêt de travail 8, reprise 10, guérison 12, consolidation 15, descriptif des séquelles 12, aggravation 12, rechute 10, complémentaire 8 ; valeurs de la démo en paramètres). La **qualification de l'expert** (expert judiciaire inscrit, diplômes appropriés ou 5 ans d'activité ininterrompue : art. 272) est vérifiée à sa désignation. Si la victime refuse l'examen ou conteste les conclusions, l'**expert commun** de l'art. 252 est proposé ; le délai d'offre est prorogé d'un mois (FR-85).
 
 **Conséquences (testables) :**
 - La convocation d'un examen daté moins de 15 jours après son envoi est refusée (`CONVOCATION_TROP_TARDIVE`) ; elle contient les mentions de l'art. 244.
@@ -1005,33 +1175,59 @@ Pour un dommage corporel, la mission médicale suit sa propre chronologie : `A_D
 - Le contenu médical d'une mission (certificats, rapports, conclusions) n'est lisible que de `MED`, du `GEST` corporel affecté, du `RESP`, et de `DG` ou `DT` pour une décision ; `ACC` voit seulement qu'une pièce médicale est reçue ; chaque lecture est journalisée.
 - Un certificat non reçu dans son délai passe à « relance nécessaire » puis « en retard », avec relance (FR-47).
 - Une désignation d'expert médical sans vérification de sa qualification (art. 272) est refusée (`QUALIFICATION_NON_VERIFIEE`).
+- Une mission médicale n'a qu'un seul statut à la fois, pris dans la machine unique de FR-61 ; aucun statut propre au médical n'existe en dehors de ses sous-étapes.
+
+#### FR-63a : Le suivi médical du dossier corporel
+
+Le suivi médical d'un dossier corporel complète FR-63. Il comprend huit sous-règles *(défaut H-053 : motifs, jalons et types repris de la démo ; à confirmer avec le médecin-conseil)*.
+
+1. **Certificats.** Chaque certificat passe un **contrôle de conformité** : date, médecin, signature, cachet, original ou copie, durée d'arrêt. Le verdict est `COMPLET` ou `NON_CONFORME`, avec motif. Chaque type de certificat a ses destinataires, son niveau d'impact (bloquant, limité, aucun) et son canal de relance.
+2. **Chronologie médicale.** Le dossier porte une chronologie dont les natures d'événement sont : accident, soins, hospitalisation, consolidation, rechute, et les autres natures paramétrées.
+3. **Convocation.** L'envoi est tracé (SMS et e-mail) ; la victime confirme ; son **absence** déclenche une **nouvelle convocation**, au moins 15 jours avant le nouvel examen (FR-63).
+4. **Compte rendu d'examen.** Il consigne la présence, les documents présentés, les antécédents, les lésions et les examens réalisés ; les **séquelles** sont codées, avec leur taux.
+5. **Suivi après consolidation.** Il porte le prochain examen, l'IPP initiale contre la nouvelle, l'écart, l'aggravation et la rechute.
+6. **Missions médicales.** Les motifs de mission et un planning à jalons avec échéances sont paramétrés.
+7. **Contestation médicale.** Elle est structurée : auteur, point contesté, valeur initiale et valeur revendiquée, statut.
+8. **Statut d'évaluation de chaque expertise** : `RETENUE`, `ECARTEE`, `CONTESTEE` ou `ANCIENNE`.
+
+Le contenu médical reste lisible des seuls rôles de FR-63 ; `ACC` et `NUM` voient le type et l'existence d'une pièce (FR-53). Le **médecin-conseil** (`MED`) valide chaque donnée extraite d'un rapport médical, champ par champ, avant usage (FR-64).
+
+**Conséquences (testables) :**
+- Un certificat sans cachet ni durée d'arrêt est `NON_CONFORME` avec ce motif ; un certificat complet est `COMPLET`.
+- Une victime absente à l'examen ouvre une nouvelle convocation ; l'envoi (canal, date, heure) et la confirmation sont journalisés.
+- Un dossier en suivi après consolidation affiche le prochain examen et l'écart entre l'IPP initiale et la nouvelle ; une aggravation ou une rechute y est consignée.
+- Une contestation médicale sans auteur ou sans point contesté est refusée (`CONTESTATION_INCOMPLETE`).
+- Deux expertises d'un même dossier ne peuvent pas être toutes deux `RETENUE` pour le même point ; une expertise supplantée passe à `ANCIENNE`.
 
 #### FR-64 : Contrôle de complétude d'un rapport d'expertise, assisté par l'IA
 
 Quand un rapport est reçu, l'IA commune contrôle sa **complétude** : la **forme**, pas le fond.
 
 - **Entrée :** le rapport (rubriques saisies ou texte lu) et le domaine de la mission.
-- **Sortie :** une grille de **points attendus par domaine**, chacun `PRESENT`, `INSUFFISANT` ou `ABSENT`, un **verdict** `EXPLOITABLE`, `EXPLOITABLE_SOUS_RESERVE` ou `NON_EXPLOITABLE`, un score, et des **demandes de complément** rédigées à cocher. Points types : automobile (méthode d'évaluation, valeur vénale, caractère économiquement réparable), médical (lésions, incapacité temporaire et permanente, consolidation, taux et barème retenu, souffrance, préjudice esthétique, tierce personne, réserves), responsabilité (séquence reconstituée, imputation motivée, **part du tiers chiffrée**), incendie (origine, tiers, inventaire chiffré, adéquation du capital), transport (quantités, réserves au déchargement), fraude (faisceau d'indices, position de l'assuré), bâtiment (cause, chiffrage), perte d'exploitation (période, marge brute), post-mortem (genre de mort, causalité, délai, examen, état antérieur).
+- **Sortie :** une grille de **points attendus par domaine**, chacun `PRESENT`, `INSUFFISANT` ou `ABSENT`, un **verdict** `EXPLOITABLE`, `EXPLOITABLE_SOUS_RESERVE` ou `NON_EXPLOITABLE`, un score, et des **demandes de complément** rédigées à cocher. Points types : automobile (méthode d'évaluation, valeur vénale, caractère économiquement réparable, **dommages préexistants distingués**, **photo du point de choc et de l'immatriculation**), médical (lésions, incapacité temporaire et permanente, consolidation, taux et barème retenu, souffrance, préjudice esthétique, tierce personne, réserves), responsabilité (séquence reconstituée, imputation motivée, **part du tiers chiffrée**), incendie (origine, tiers, inventaire chiffré, adéquation du capital), transport (quantités, réserves au déchargement), fraude (faisceau d'indices, position de l'assuré), bâtiment (cause, chiffrage), perte d'exploitation (période, marge brute), post-mortem (genre de mort, causalité, délai, examen, état antérieur).
 - **Destinataire :** le gestionnaire, qui décide.
-- **Garde-fou :** un rapport sans signature, sans chiffrage, sans conclusion ou sans identification du bien est **inexploitable quel que soit son score** ; le contrôle **lit les rubriques présentes mais vides** (« non précisée », « non renseignée ») ; il ne produit **jamais d'estimation concurrente** de celle de l'expert.
+- **Garde-fou :** un rapport sans signature, sans chiffrage, sans conclusion ou sans identification du bien est **inexploitable quel que soit son score** ; le contrôle **lit les rubriques présentes mais vides** (« non précisée », « non renseignée ») ; il ne produit **jamais d'estimation concurrente** de celle de l'expert ; les données extraites d'un **rapport médical** sont **validées champ par champ par `MED`** avant tout usage.
 - Servi par l'**IA commune** ; sans modèle, une grille de règles par domaine sert le contrôle et le dit.
 
 **Conséquences (testables) :**
 - Un rapport dont la rubrique « valeur vénale » contient « non renseignée » est classé « sous réserve » avec ce point en rouge, même s'il est présent.
 - Un rapport sans signature est `NON_EXPLOITABLE` quel que soit le score.
 - Un rapport de responsabilité dont la part du tiers n'est pas chiffrée est refusé au dépôt (`PART_TIERS_NON_CHIFFREE`).
+- Un rapport automobile sans distinction des dommages préexistants, ou sans photo du point de choc et de l'immatriculation, est `EXPLOITABLE_SOUS_RESERVE` avec ces points en rouge.
+- Une donnée extraite d'un rapport médical ne sert à aucun calcul ni écran tant que `MED` ne l'a pas validée champ par champ.
 - Le verdict ne change pas le statut de la mission : la décision du gestionnaire (accepter, compléter, contester, escalader) le fait.
 - Chaque contrôle va au registre de l'IA (niveau `ANALYSE`) avec ses sources.
 
 #### FR-65 : L'écart entre le rapport et le dossier : 15 % d'attention, 35 % bloquant
 
-À la réception d'un rapport, Prospera le **confronte aux pièces et aux référentiels du dossier**, jamais à une estimation concurrente : devis versé, provision, médiane des missions comparables (au moins 5), pièce absente. Un **écart** a une nature (`MONTANT`, `PIECE_ABSENTE`, `CONTRADICTION`, `DELAI`, `PERIMETRE`), un niveau (`INFO`, `ATTENTION`, `BLOQUANT`), la valeur du rapport, la valeur de référence, sa source, et une **question** à poser ; il ne conclut jamais par un verdict. Pour le montant, l'écart est **ATTENTION au-delà de 15 %** et **BLOQUANT au-delà de 35 %** (valeurs de la démo, paramètres). Un écart **BLOQUANT** n'interdit rien en soi : il oblige le gestionnaire à **prendre une décision motivée** sur le rapport (accepter avec motif, demander un complément, contester) avant de valider la mission. L'écart du dossier d'exemple (chiffrage de l'expert inférieur de 65 % au devis du garage) est le cas type. La **médiane des dossiers comparables** (au moins 12 comparables, écart significatif 25 %) est affichée comme repère, à côté de l'instruction technique et du montant validé, **sans jamais fondre les trois chiffres**.
+À la réception d'un rapport, Prospera le **confronte à des contreparties nommées et sourcées** : devis versé, provision, médiane d'au moins 5 missions comparables, pièce absente. Prospera ne fabrique **jamais** sa propre estimation du dommage. L'écart se termine par une **question, jamais par un verdict** *(défaut H-054 : à trancher avec le PO ; recommandation de la rédaction)*. Le filtre `volet = corporel` s'applique : sur un dossier corporel, aucune médiane, aucun comparable et aucun écart en pourcentage n'est affiché (liste blanche des volets : matériel, risques divers ; FR-71). Un **écart** a une nature (`MONTANT`, `PIECE_ABSENTE`, `CONTRADICTION`, `DELAI`, `PERIMETRE`), un niveau (`INFO`, `ATTENTION`, `BLOQUANT`), la valeur du rapport, la valeur de référence, sa source, et une **question** à poser ; il ne conclut jamais par un verdict. Pour le montant, l'écart est **ATTENTION au-delà de 15 %** et **BLOQUANT au-delà de 35 %** (valeurs de la démo, paramètres). Un écart **BLOQUANT** n'interdit rien en soi : il oblige le gestionnaire à **prendre une décision motivée** sur le rapport (accepter avec motif, demander un complément, contester) avant de valider la mission. L'écart du dossier d'exemple (chiffrage de l'expert inférieur de 65 % au devis du garage) est le cas type. La **médiane des dossiers comparables** (au moins 12 comparables, écart significatif 25 %) est affichée comme repère, à côté de l'instruction technique et du montant validé, **sans jamais fondre les trois chiffres**.
 
 **Conséquences (testables) :**
 - Un rapport à 445 500 FCFA face à un devis de 1 273 000 FCFA produit un écart de 65 %, de niveau `BLOQUANT`, avec la question « quels postes du devis avez-vous écartés, et pour quel motif ? ».
 - Valider une mission avec un écart `BLOQUANT` sans motif est refusé (`MOTIF_ECRIT`).
 - Un rapport remis après la date attendue produit un écart `DELAI` qui nomme le nombre de jours.
-- Chaque écart nomme sa contrepartie et sa source ; aucun texte d'écart ne contient de verdict de fraude.
+- Chaque écart nomme sa contrepartie et sa source ; aucun texte d'écart ne contient de verdict de fraude, ni une estimation propre à Prospera.
+- Sur un dossier du volet corporel, l'écran du rapport n'affiche ni médiane, ni comparable, ni écart en pourcentage ; sur un dossier matériel ou risques divers, la médiane s'affiche avec sa source.
 - Les seuils de 15 % et 35 % sont des paramètres ; leur modification ne change pas les écarts déjà décidés.
 
 #### FR-66 : La contre-expertise ne revient ni au cabinet initial ni au panel interne
@@ -1058,7 +1254,7 @@ Quand le gestionnaire demande un **complément** à l'expert (`COMPLEMENT_DEMAND
 
 #### FR-68 : Délais de rapport par domaine et honoraires d'expert
 
-À l'acceptation, la mission reçoit une **date de rapport attendue**, selon le domaine (valeurs de la démo, paramètres) : automobile matériel 7 jours, médical 21, responsabilité 14, fraude 30, incendie 21, transport 14, bâtiment 21, perte d'exploitation 30. Le mémoire de 2014 donne 7 jours pour les dommages et 10 jours pour la responsabilité civile à compter de la réception de tous les éléments `[ASSUMPTION: valeurs de la démo retenues ; à confirmer avec la liste des experts agréés et leurs conventions]`. Les **honoraires** suivent **cinq montants** : budget prévisionnel, honoraires convenus, facturés, visés, payés. Le **budget indicatif** est calculé : (socle du domaine + le moindre de 2 % de l'enjeu et du plafond moins le socle) x coefficient de type (initiale 1, complémentaire 0,5, contradictoire 1,5, contre-expertise 1,5), arrondi à 5 000 FCFA, puis confirmé ou ajusté par le gestionnaire. **Viser** au-delà du convenu exige un **motif** ; le visa est donné par `RESP` ou `CPT` ; les honoraires ne sont jamais calculés au prorata de l'indemnité (écart relevé par l'audit de 2014). Un expert interne ne génère aucun honoraire. Les honoraires s'ajoutent à l'état des règlements (§5.8, règlement vers un tiers).
+À l'acceptation, la mission reçoit une **date de rapport attendue**, selon le domaine (valeurs de la démo, paramètres) : automobile matériel 7 jours, médical 21, responsabilité 14, fraude 30, incendie 21, transport 14, bâtiment 21, perte d'exploitation 30. Le mémoire de 2014 donne 7 jours pour les dommages et 10 jours pour la responsabilité civile à compter de la réception de tous les éléments *(défaut H-055 : valeurs de la démo retenues ; à confirmer avec la liste des experts agréés et leurs conventions)*. Trois paramètres complètent les délais : une **information écrite du retard à l'expert à 45 jours**, un **procès-verbal de carence à 75 jours** et un **délai de validation du rapport de 72 heures ouvrées** *(défaut H-056 : défauts de la compagnie étudiée par le mémoire de 2014 (zone CIMA) ; à confirmer à la séance d'immersion)*. Les **honoraires** suivent **cinq montants** : budget prévisionnel, honoraires convenus, facturés, visés, payés. Le **budget indicatif** est calculé : (socle du domaine + le moindre de 2 % de l'enjeu et du plafond moins le socle) x coefficient de type (initiale 1, complémentaire 0,5, contradictoire 1,5, contre-expertise 1,5), arrondi à 5 000 FCFA, puis confirmé ou ajusté par le gestionnaire. **Viser** au-delà du convenu exige un **motif** ; le visa est donné par `RESP` (jamais par `CPT`), seulement si le **rapport est validé** et la facture rapprochée de la lettre de mission ; un **budget dépassé** est **bloquant** au-delà d'une tolérance paramétrée *(défaut H-057 : 10 % ; à confirmer à la séance d'immersion)*, et non plus seulement signalé ; les honoraires ne sont jamais calculés au prorata de l'indemnité (écart relevé par l'audit de 2014). Un expert interne ne génère aucun honoraire. Les honoraires s'ajoutent à l'état des règlements (§5.8, règlement vers un tiers).
 
 **Conséquences (testables) :**
 - La date de rapport attendue est calculée à l'acceptation, selon le domaine ; un rapport non reçu à cette date apparaît dans les alertes du gestionnaire et du `RESP` (« rapport en retard »).
@@ -1073,7 +1269,7 @@ Chiffrer, c'est établir le **décompte** : de quoi est fait le montant que la c
 
 #### FR-69 : Le décompte suit un ordre fixe : dommage, vétusté, règle proportionnelle, plafond, franchise
 
-Pour les sinistres qui ne sont pas du dommage corporel, le **décompte** enchaîne, dans cet ordre : le **dommage** constaté, la **vétusté**, la **règle proportionnelle** si elle s'applique, le **plafond** de la garantie, puis la **franchise** (ordre du code de la démo). Chaque étape est affichée avec sa valeur et sa source. La **franchise est déduite** du montant arrêté (écart avec la démo, où la déduction était une décision manuelle) : franchise retenue = le moindre du dommage et du plus grand de (dommage x taux de franchise) et (franchise minimale), le taux et le minimum étant lus sur la garantie souscrite. Le **plafond** est celui de la garantie ; la part au-dessus du plafond reste à la charge de l'assuré et est affichée. La **règle proportionnelle** (sous-assurance : capital assuré inférieur à la valeur réelle) multiplie par le rapport capital sur valeur et déclenche une alerte de sous-assurance `[ASSUMPTION: ordre de la démo ; à confirmer par la compagnie, ses conditions générales pouvant prévoir un autre ordre]`. Les plafonds, taux de franchise, minimums et délais viennent de la projection des contrats lue dans le LC (D4) ; Prospera ne les modifie pas.
+Pour les sinistres qui ne sont pas du dommage corporel, le **décompte** enchaîne, dans cet ordre : le **dommage** constaté, la **vétusté**, la **règle proportionnelle** si elle s'applique, le **plafond** de la garantie, puis la **franchise** (ordre du code de la démo). Chaque étape est affichée avec sa valeur et sa source. La **franchise est déduite** du montant arrêté (écart avec la démo, où la déduction était une décision manuelle) : franchise retenue = le moindre du dommage et du plus grand de (dommage x taux de franchise) et (franchise minimale), le taux et le minimum étant lus sur la garantie souscrite. Le **plafond** est celui de la garantie ; la part au-dessus du plafond reste à la charge de l'assuré et est affichée. La **règle proportionnelle** (sous-assurance : capital assuré inférieur à la valeur réelle) multiplie par le rapport capital sur valeur et déclenche une alerte de sous-assurance *(défaut H-058 : ordre de la démo ; à confirmer par la compagnie, ses conditions générales pouvant prévoir un autre ordre)*. Les plafonds, taux de franchise, minimums et délais viennent de la projection des contrats lue dans le LC (D4) ; Prospera ne les modifie pas.
 
 **Conséquences (testables) :**
 - Pour un dommage de 780 000 FCFA avec une franchise de 10 % et un minimum de 50 000 FCFA, la franchise retenue est 78 000 FCFA et l'indemnité 702 000 FCFA ; avec un dommage de 300 000 FCFA, la franchise est 50 000 FCFA (le minimum).
@@ -1084,16 +1280,47 @@ Pour les sinistres qui ne sont pas du dommage corporel, le **décompte** enchaî
 
 #### FR-70 : Le corporel se calcule poste par poste, selon le Code CIMA (art. 257 à 266)
 
-Pour les dommages corporels (accident corporel de la circulation, accident du travail, décès), le décompte est un **calcul poste par poste** : « les seuls préjudices susceptibles d'être indemnisés sont ceux mentionnés aux articles 258 à 266 » (art. 257, SÛR), et le moteur n'en connaît **pas d'autres**. Les **postes** sont : frais (art. 258, plafonnés à 2 fois le tarif le plus élevé des hôpitaux publics du pays de l'accident, 1 fois en cas d'évacuation sanitaire) ; incapacité temporaire (art. 259, indemnité mensuelle plafonnée à 6 fois le SMIG annuel) ; incapacité permanente, en **trois postes** : physiologique (taux de 0 à 100 % selon le barème médical annexé, multiplié par la valeur du point, elle-même exprimée en pourcentage du SMIG annuel selon le taux et l'âge), économique (seulement si le taux est de 50 % au moins, plafond 10 fois le SMIG annuel), moral (seulement si le taux est de 80 % au moins, 2 fois le SMIG annuel) (art. 260) ; tierce personne (art. 261, si le taux est de 80 % au moins, sur prescription médicale confirmée par expertise, plafonnée à 50 % de l'indemnité d'incapacité) ; souffrance physique et préjudice esthétique, **indemnisés séparément** (art. 262, échelle en pourcentage du SMIG annuel) ; pertes de gains professionnels futurs (art. 263) ; préjudice scolaire (art. 263-1, 12 mois de bourse officielle) ; en cas de **décès** : frais funéraires (art. 264, plafond 2 fois le SMIG annuel), préjudice économique de chaque ayant droit (art. 265, capital de rente, revenu fictif d'un SMIG annuel à défaut de revenus justifiés, plafond global 85 fois le SMIG annuel), préjudice moral par bénéficiaire (art. 266). Le **SMIG** est un **paramètre daté** : celui du pays de l'accident ou, s'il est plus élevé, celui du pays de résidence de la victime (art. 259 et suivants) ; il n'est jamais codé en dur. Les **plafonds** sont des multiples du SMIG, paramétrés. Les **tables** (valeur du point d'incapacité permanente par taux et par âge, clés de répartition entre ayants droit, table de conversion des rentes, barème médical d'incapacité) sont des **images** du PDF officiel : leur **saisie** (double saisie et relecture, puis jeux d'essai chiffrés validés par un actuaire ou un juriste) est une **tâche du plan**, et la revue juridique précède la mise en service. Une offre **ne peut pas être inférieure** au barème (art. 231, al. 2) ; un écart sous le plancher est une alerte `OFFRE_SOUS_BAREME`. L'offre affiche chaque chef de préjudice (art. 243) et les créances des tiers payeurs (art. 246, 254-255). `[ASSUMPTION: SMIG du Togo 52 500 FCFA par mois depuis le 1er janvier 2023 (sources secondaires, texte officiel non trouvé), SMIG annuel = 12 fois le mensuel ; tout est paramètre daté, à confirmer par le juriste ; la lecture du plafond de l'art. 263 (« six mois de revenus plafonnés à trente-six fois ») est ambiguë et à faire valider]`.
+Pour les dommages corporels (accident corporel de la circulation, accident du travail, décès), le décompte est un **calcul poste par poste** : « les seuls préjudices susceptibles d'être indemnisés sont ceux mentionnés aux articles 258 à 266 » (art. 257, SÛR), et le moteur n'en connaît **pas d'autres**. Chaque poste porte son état **retenu** ou **contesté** ; pour l'incapacité, il porte aussi la **période datée** (incapacité temporaire totale ou partielle, ITT ou ITP). La **consolidation enregistrée** ouvre l'échéance de l'**offre définitive** (FR-141). Les postes sont, article par article :
+
+- **Art. 258, frais.** Plafonnés à 2 fois le tarif le plus élevé des hôpitaux publics du pays de l'accident, 1 fois en cas d'évacuation sanitaire. Sur demande, une **lettre de garantie de frais médicaux** est émise : son modèle est au catalogue des courriers (FR-46).
+- **Art. 259, incapacité temporaire.** Indemnité mensuelle plafonnée à 6 fois le SMIG annuel.
+- **Art. 260, incapacité permanente, en trois postes.** Physiologique : taux de 0 à 100 % selon le barème médical annexé, multiplié par la valeur du point, elle-même exprimée en pourcentage du SMIG annuel selon le taux et l'âge. Économique : seulement si le taux est de 50 % au moins, plafond 10 fois le SMIG annuel. Moral : seulement si le taux est de 80 % au moins, 2 fois le SMIG annuel.
+- **Art. 261, tierce personne.** Si le taux est de 80 % au moins, sur prescription médicale confirmée par expertise, plafonnée à 50 % de l'indemnité d'incapacité.
+- **Art. 262, souffrance physique et préjudice esthétique.** Indemnisés séparément, échelle en pourcentage du SMIG annuel.
+- **Art. 263, pertes de gains professionnels futurs.**
+- **Art. 263-1, préjudice scolaire.** 12 mois de bourse officielle.
+- **Art. 264, frais funéraires** (décès). Plafond 2 fois le SMIG annuel.
+- **Art. 265, préjudice économique de chaque ayant droit** (décès). Capital de rente, revenu fictif d'un SMIG annuel à défaut de revenus justifiés, plafond global 85 fois le SMIG annuel.
+- **Art. 266, préjudice moral par bénéficiaire** (décès).
+- **Art. 229, personne à la charge effective.** Une catégorie « personne à la charge effective » est prévue, ou la question est renvoyée au §13.2 *(point juridique J-08 : catégorie à valider par le juriste, §13.2)*.
+- **SMIG.** Le SMIG est un **paramètre daté** : celui du pays de l'accident ou, s'il est plus élevé, celui du pays de résidence de la victime (art. 259 et suivants) ; il n'est jamais codé en dur. Les **plafonds** sont des multiples du SMIG, paramétrés.
+- **Tables.** La valeur du point d'incapacité permanente par taux et par âge, les clés de répartition entre ayants droit, la table de conversion des rentes et le barème médical d'incapacité sont des **images** du PDF officiel : leur **saisie** (double saisie et relecture, puis jeux d'essai chiffrés validés par un actuaire ou un juriste) est une **tâche du plan**, et la revue juridique précède la mise en service.
+- **Mode dégradé.** Si les tables sont `TABLE_NON_VALIDEE` à la mise en service, le volet corporel s'ouvre en **saisie manuelle motivée** : les échéances légales restent actives et l'écart avec le barème est tracé (§1, A-12).
+- **Plancher et tiers payeurs.** Une offre **ne peut pas être inférieure** au barème (art. 231, al. 2) ; un écart sous le plancher est une alerte `OFFRE_SOUS_BAREME`. L'offre affiche chaque chef de préjudice (art. 243) et les créances des tiers payeurs (art. 246, 254-255).
+
+*(point juridique J-09 : SMIG du Togo 52 500 FCFA par mois depuis le 1er janvier 2023 (sources secondaires, texte officiel non trouvé), SMIG annuel = 12 fois le mensuel ; tout est paramètre daté, à confirmer par le juriste ; la lecture du plafond de l'art. 263 (« six mois de revenus plafonnés à trente-six fois ») est ambiguë et à faire valider)* *(action A-12 au §12.2)*.
 
 **Conséquences (testables) :**
 - Le décompte corporel affiche un poste par chef de préjudice de la liste de l'art. 257 à 266 et aucun autre ; ajouter un poste hors liste est refusé (`POSTE_HORS_BAREME`).
 - Le préjudice économique de l'incapacité permanente est refusé sous 50 % de taux (`CONDITION_POSTE_NON_REMPLIE`) ; le préjudice moral et la tierce personne le sont sous 80 %.
 - Changer la valeur du SMIG daté change les nouveaux décomptes ; il ne change pas ceux qui sont arrêtés (FR-75).
-- Les tables saisies (valeur du point, répartition, conversion des rentes, barème médical) portent leur version, leur date, et deux saisies concordantes ; une table sans double saisie bloque l'utilisation du poste en production (`TABLE_NON_VALIDEE`).
+- Les tables saisies (valeur du point, répartition, conversion des rentes, barème médical) portent leur version, leur date, et deux saisies concordantes ; une table sans double saisie bloque l'utilisation du poste en production (`TABLE_NON_VALIDEE`), sauf en mode dégradé : le volet s'ouvre alors en saisie manuelle motivée, les échéances légales courent et l'écart au barème est tracé.
+- Chaque poste porte `RETENU` ou `CONTESTE` ; un poste d'incapacité sans période datée est refusé (`PERIODE_NON_DATEE`) ; l'enregistrement de la consolidation ouvre l'échéance de l'offre définitive.
+- Une lettre de garantie de frais médicaux se génère sur demande depuis le catalogue des courriers.
 - Une offre inférieure au barème est signalée et ne part pas sans motif du responsable (FR-77).
 - Les créances de tiers payeurs sont saisies par poste ; un tiers payeur qui n'a pas produit sa créance dans les 6 mois de la demande est déchu (art. 254-255) : l'échéance est suivie.
 - Les pièces et champs médicaux du dossier ne sont lisibles que des rôles de FR-63.
+
+#### FR-70a : Le registre des décès et des ayants droit
+
+Pour un dossier **mortel**, Prospera tient un **registre des ayants droit**. Chaque ligne porte : la qualité, le fondement du droit, la vérification, la part successorale, et, pour un **mineur**, le représentant légal et l'autorisation du juge. Elle porte aussi le RIB vérifié et les documents : acte de naissance, hérédité, non-remariage, tutelle. Un règlement à un ayant droit exige sa ligne **vérifiée**. Pour un mineur, la transaction est soumise aux parents ou au juge des tutelles (art. 234 *(point juridique J-10 : à valider par le juriste, §13.2)*). Le registre s'appuie sur les postes de décès de FR-70 et alimente les contrôles de règlement (FR-86, FR-91, FR-100).
+
+**Conséquences (testables) :**
+- Un règlement à un ayant droit dont la ligne n'est pas vérifiée est refusé (`AYANT_DROIT_NON_VERIFIE`).
+- Une ligne d'ayant droit mineur sans représentant légal ni autorisation du juge ne peut pas être vérifiée ; la transaction n'est pas enregistrée tant qu'elle manque.
+- Un RIB d'ayant droit non vérifié ferme le règlement par virement pour cet ayant droit.
+- La somme des parts successorales vérifiées ne dépasse pas 100 % (`PARTS_SUPERIEURES_A_100`).
+- Le registre est lisible des seuls rôles de FR-63 pour les données de santé ; il ne contient aucune donnée médicale.
 
 #### FR-71 : L'IA ne propose jamais de montant sur un préjudice corporel
 
@@ -1107,9 +1334,10 @@ Pour les dommages corporels (accident corporel de la circulation, accident du tr
 
 #### FR-72 : Le matériel automobile : vétusté sur pièces selon l'âge, et épave
 
-Pour un dommage matériel automobile, la **vétusté s'applique aux pièces seulement**, selon l'**âge du véhicule** (grille indicative de la démo, en paramètre : jusqu'à 1 an 0 % ; jusqu'à 2 ans 10 % ; jusqu'à 3 ans 20 % ; jusqu'à 5 ans 30 % ; jusqu'à 8 ans 40 % ; au-delà 50 %). **Réparation retenue** = pièces x (1 moins la vétusté) + main-d'œuvre. Si le coût de remise en état (pièces plus main-d'œuvre) **dépasse la valeur vénale**, le véhicule est une **épave** : indemnité brute = valeur vénale moins valeur de l'épave ; la **décision de véhicule** (`A_DECIDER`, `REPARATION`, `EPAVE`) est validée, puis la **cession de l'épave** est préparée et son produit enregistré comme récupération. La franchise s'applique ensuite (FR-69), nulle en garantie RC seule `[ASSUMPTION: grille de vétusté indicative de la démo ; à remplacer par la grille de la compagnie]`. La **réparation** est suivie (véhicule entré, travaux, facture reçue, contrôle avant règlement) ; le montant que le garage peut facturer est le **montant autorisé**, tout supplément exigeant une demande motivée.
+Pour un dommage matériel automobile, la **vétusté s'applique aux pièces seulement**, selon l'**âge du véhicule** (grille indicative de la démo, en paramètre : jusqu'à 1 an 0 % ; jusqu'à 2 ans 10 % ; jusqu'à 3 ans 20 % ; jusqu'à 5 ans 30 % ; jusqu'à 8 ans 40 % ; au-delà 50 %). **Réparation retenue** = pièces x (1 moins la vétusté) + main-d'œuvre. Si le coût de remise en état (pièces plus main-d'œuvre) **dépasse la valeur vénale**, le véhicule est une **épave** : indemnité brute = valeur vénale moins valeur de l'épave ; la **décision de véhicule** (`A_DECIDER`, `REPARATION`, `EPAVE`) est validée, puis la **cession de l'épave** est préparée et son produit enregistré comme récupération. La franchise s'applique ensuite (FR-69), nulle en garantie RC seule *(défaut H-059 : grille de vétusté indicative de la démo ; à remplacer par la grille de la compagnie)*. La **réparation** est suivie (véhicule entré, travaux, facture reçue, contrôle avant règlement) ; le montant que le garage peut facturer est le **montant autorisé**, tout supplément exigeant une demande motivée.
 
 **Conséquences (testables) :**
+- Les postes d'un dossier matériel (réparation, vétusté, immobilisation, remorquage, valeur de remplacement) portent chacun leur état (FR-73).
 - Un véhicule de 4 ans a une vétusté de 30 % sur les pièces et de 0 % sur la main-d'œuvre.
 - Un véhicule dont pièces plus main-d'œuvre dépassent la valeur vénale passe en décision « épave » ; l'indemnité brute est la valeur vénale moins la valeur d'épave.
 - Un montant facturé par le garage au-delà du montant autorisé sans demande motivée est refusé au contrôle avant règlement (`SUPPLEMENT_NON_AUTORISE`).
@@ -1118,11 +1346,15 @@ Pour un dommage matériel automobile, la **vétusté s'applique aux pièces seul
 
 #### FR-73 : Les autres types de sinistre, et l'arrondi
 
-Les autres formulaires d'instruction calculent comme suit (valeurs de la démo, paramètres) : **biens** (incendie, dégât des eaux, habitation) : (dommage du bâtiment plus du contenu) x (1 moins la vétusté), plus un supplément éventuel (recherche de fuite), règle proportionnelle, plafond du capital, moins la franchise (25 000 FCFA par défaut) ; **vol** : valeur des objets x (1 moins la vétusté), plafonnée au capital, moins la franchise ; **transport** : valeur assurée x taux d'avarie, moins la franchise ; **responsabilité civile** : montant réclamé x part de responsabilité de l'assuré, plafonné à la garantie, moins la franchise, un dommage corporel renvoyant au décompte de FR-70 ; **divers** : montant réclamé x (1 moins l'abattement de 10 % par défaut), moins la franchise. Les montants sont **arrondis au multiple de 5 000 FCFA le plus proche** ; les montants du **corporel** sont arrondis **au franc** : le barème légal n'est pas arrondi `[ASSUMPTION: arrondi à 5 000 FCFA pour les non-corporels comme dans la démo, au franc pour le corporel ; à confirmer]`. Les délais de règlement et d'offre des autres branches ne sont **pas fixés par le Code CIMA** (pas de délai légal d'offre pour les seuls dommages aux biens, art. 231, dernier alinéa) : ils sont **contractuels ou internes**, paramétrés par produit (FR-85).
+Les autres formulaires d'instruction calculent comme suit (valeurs de la démo, paramètres) : **biens** (incendie, dégât des eaux, habitation) : (dommage du bâtiment plus du contenu) x (1 moins la vétusté), plus un supplément éventuel (recherche de fuite), règle proportionnelle, plafond du capital, moins la franchise (25 000 FCFA par défaut) ; **vol** : valeur des objets x (1 moins la vétusté), plafonnée au capital, moins la franchise ; **transport** : valeur assurée x taux d'avarie, moins la franchise ; **responsabilité civile** : montant réclamé x part de responsabilité de l'assuré, plafonné à la garantie, moins la franchise, un dommage corporel renvoyant au décompte de FR-70 ; **divers** : montant réclamé x (1 moins l'abattement de 10 % par défaut), moins la franchise. L'**arrondi à 5 000 FCFA** (multiple le plus proche) ne vaut que pour les montants **calculés par le système** : la provision d'ouverture et l'indemnité proposée par un formulaire d'instruction. Le **montant arrêté** par le gestionnaire est au **franc près** (395 500 FCFA pour `SIN-2026-9002`), et les montants du **corporel** ne sont jamais arrondis : le barème légal n'est pas arrondi *(défaut H-060 : arrondi à 5 000 FCFA pour les montants calculés non corporels comme dans la démo, au franc pour le montant arrêté et le corporel ; à confirmer)*. Les délais de règlement et d'offre des autres branches ne sont **pas fixés par le Code CIMA** (pas de délai légal d'offre pour les seuls dommages aux biens, art. 231, dernier alinéa) : ils sont **contractuels ou internes**, paramétrés par produit (FR-85).
+
+**Postes hors corporel.** Chaque poste d'indemnisation hors corporel porte un **état** : `A_EVALUER`, `EVALUE`, `A_VERIFIER` ou `JUSTIFICATIFS_ATTENDUS`. Les postes du **matériel** sont : réparation, vétusté, immobilisation, remorquage, valeur de remplacement (FR-72). Ceux des **risques divers** sont : bâtiment, contenu, perte d'exploitation, sauvetage. L'alerte « **évaluation incomplète** » reste levée tant qu'un poste est `A_EVALUER` (FR-136, FR-145).
 
 **Conséquences (testables) :**
 - Pour un vol de 400 000 FCFA d'objets avec 20 % de vétusté et une franchise de 25 000 FCFA, l'indemnité calculée est 295 000 FCFA, arrondie au multiple de 5 000.
 - Un montant corporel n'est pas arrondi à 5 000 : le décompte du poste est au franc.
+- Le montant arrêté par le gestionnaire est enregistré au franc près : pour `SIN-2026-9002`, 395 500 FCFA est conservé tel quel, alors que l'indemnité calculée par le formulaire d'instruction (702 000 FCFA dans le cas de FR-69) est un repère déjà arrondi au multiple de 5 000 ; un montant calculé de 297 400 FCFA par le système s'affiche arrondi à 295 000 FCFA, et un montant arrêté de 297 400 FCFA reste 297 400 FCFA.
+- Un dossier matériel dont le poste « remorquage » est `A_EVALUER` affiche l'alerte « évaluation incomplète » ; elle disparaît quand tous les postes sont `EVALUE` ou `A_VERIFIER` explicitement.
 - Chaque formulaire affiche l'indemnité calculée comme **repère** et ne l'écrit pas d'office dans le montant arrêté (FR-75).
 - Les abattements, franchises par défaut et taux d'avarie sont des paramètres ; leur modification ne change pas les évaluations arrêtées.
 
@@ -1131,7 +1363,7 @@ Les autres formulaires d'instruction calculent comme suit (valeurs de la démo, 
 Sur un dossier évalué, l'IA commune **explique le montant** : d'où il vient, poste par poste.
 
 - **Entrée :** le décompte arrêté (FR-69 à FR-73), la garantie souscrite (plafond, franchise, exclusions), les expertises validées et le dossier.
-- **Sortie :** une explication en langage clair : la garantie qui répond, le dommage retenu et sa source, la vétusté et son calcul, la franchise, le plafond, la règle proportionnelle, le barème et la tranche pour le pilotage, la part du tiers, la comparaison au portefeuille (comparables du même type, du même volet et de la même gravité, au moins 12) avec l'écart en pourcentage ; **chaque phrase renvoie à sa source** (pièce, police, barème, mission). Pour un dossier corporel, l'IA explique le **calcul** déjà établi par le gestionnaire (postes, SMIG, taux) sans le refaire.
+- **Sortie :** une explication en langage clair : la garantie qui répond, le dommage retenu et sa source, la vétusté et son calcul, la franchise, le plafond, la règle proportionnelle, le barème et la tranche pour le pilotage, la part du tiers, la comparaison au portefeuille (comparables du même type, du même volet et de la même gravité, au moins 12) avec l'écart en pourcentage, **réservée aux volets de la liste blanche (matériel, risques divers)** ; **chaque phrase renvoie à sa source** (pièce, police, barème, mission). Pour un dossier corporel, l'IA explique le **calcul** déjà établi par le gestionnaire (postes, SMIG, taux) sans le refaire.
 - **Destinataire :** le gestionnaire, le responsable qui valide, l'assuré qui demande, l'auditeur, le juge : le montant doit être « défendable devant l'assuré, l'auditeur ou le juge ».
 - **Garde-fou :** lecture seule ; **le texte ne contient aucun chiffre qui ne soit dans le décompte** ; il ne change pas entre deux consultations ; une comparaison n'est pas une règle ; aucun montant corporel n'est produit (FR-71).
 - Servi par l'**IA commune** ; sans modèle, un gabarit de texte alimenté par le décompte fait le même travail et le dit.
@@ -1139,25 +1371,26 @@ Sur un dossier évalué, l'IA commune **explique le montant** : d'où il vient, 
 **Conséquences (testables) :**
 - Pour chaque dossier évalué, l'explication reprend, dans l'ordre, les lignes du décompte avec les mêmes valeurs ; un test compare les chiffres du texte à ceux du décompte.
 - Chaque phrase de l'explication a un lien vers sa source ; une phrase sans source n'est pas produite.
-- L'explication d'un dossier corporel ne contient aucun montant absent du décompte du gestionnaire.
+- L'explication d'un dossier corporel ne contient aucun montant absent du décompte du gestionnaire, aucune médiane, aucun comparable et aucun écart en pourcentage (filtre `volet = corporel`) ; un test le vérifie sur chaque écran : fiche, comparaison, décision, tableau de bord.
 - Deux consultations successives donnent le même texte tant que le dossier n'a pas changé.
 - L'usage va au registre de l'IA (niveau `ANALYSE`).
 
 #### FR-75 : Une évaluation arrêtée n'est jamais recalculée ; les cinq montants ne se confondent pas
 
-Le gestionnaire **enregistre l'évaluation** (`EN_INSTRUCTION → EVALUE`, transition 7) en **arrêtant un montant**. Le champ est **pré-rempli avec le chiffrage validé par l'expertise** quand il existe ; le calcul d'instruction technique est affiché comme **repère**, jamais écrit d'office ; **s'il diffère** du chiffrage validé, un **motif est obligatoire**. Il faut : toutes les pièces obligatoires, toutes les expertises closes (FR-61), la garantie décidée (FR-42), un montant supérieur à zéro, et aucune alerte bloquante non levée. L'évaluation **mémorise** le barème, la tranche, la valeur du SMIG, les grilles et les paramètres du moment. **Une évaluation arrêtée n'est jamais recalculée** quand le barème, le SMIG ou une grille change : un changement ne s'applique qu'aux dossiers évalués après lui. Le dossier est jugé selon le **référentiel en vigueur à sa date de survenance**. Si le gestionnaire doit corriger, il **arrête une nouvelle évaluation** (nouvelle version, avec motif) ; l'ancienne reste consultable. Cinq montants sont toujours affichés séparément : **évalué** (le décompte), **proposé** (l'offre faite à l'assuré), **validé** (la décision selon la délégation), **payé**, **reste à payer** ; plus la **provision**.
+Le gestionnaire **enregistre l'évaluation** (`EN_INSTRUCTION → EVALUE`, transition 7) en **arrêtant un montant**. Le champ est **pré-rempli avec le chiffrage validé par l'expertise** quand il existe ; le calcul d'instruction technique est affiché comme **repère**, jamais écrit d'office ; **s'il diffère** du chiffrage validé, un **motif est obligatoire**. Il faut : toutes les pièces obligatoires, toutes les expertises closes (FR-61), la garantie décidée (FR-42), un montant supérieur à zéro, et aucune alerte bloquante non levée. L'évaluation **mémorise** le barème, la tranche, la valeur du SMIG, les grilles et les paramètres du moment. **Une évaluation arrêtée n'est jamais recalculée** quand le barème, le SMIG ou une grille change : un changement ne s'applique qu'aux dossiers évalués après lui. Le dossier est jugé selon le **référentiel en vigueur à sa date de survenance**. Si le gestionnaire doit corriger, il **arrête une nouvelle évaluation** (nouvelle version, avec motif) ; l'ancienne reste consultable. Cinq montants sont toujours affichés séparément : **évalué** (le montant arrêté par le gestionnaire au terme du décompte), **proposé** (le montant de l'offre faite à l'assuré), **validé** (le montant approuvé par la personne ou l'instance qui a la délégation), **payé**, **reste à payer** ; plus la **provision**. Le **montant validé** est un **champ saisi par le signataire**, au plus égal au montant évalué ; un **motif** est obligatoire s'il diffère de l'évalué ; **la délégation s'applique à ce montant** (FR-78). Le **reste à payer** se calcule sur le montant **accepté** par l'assuré une fois l'accord enregistré (FR-86), et sur le montant validé avant cet accord.
 
 **Conséquences (testables) :**
 - Passer en `EVALUE` sans montant ou avec un montant nul est refusé (`MONTANT_EVALUE`) ; avec une pièce obligatoire manquante, `PIECES_COMPLETES` ; avec une expertise ouverte, `EXPERTISE_VALIDEE` ; sans décision de garantie, `GARANTIE_ENGAGEABLE`.
 - Un montant différent du chiffrage validé par l'expertise sans motif est refusé (`MOTIF_ECRIT`).
 - Après changement du barème ou du SMIG, un dossier déjà évalué garde le montant, les références et les valeurs du moment ; un test change la grille et vérifie que l'évaluation ne bouge pas.
 - Une nouvelle évaluation crée une version avec motif ; l'ancienne reste lisible ; l'historique des versions est visible.
-- Les cinq montants s'affichent côte à côte sur la fiche ; aucun écran ne les fond ; le reste à payer = validé moins payé.
+- Les cinq montants s'affichent côte à côte sur la fiche ; aucun écran ne les fond ; le reste à payer = montant accepté moins payé (avant l'accord : validé moins payé).
+- Un montant validé supérieur au montant évalué est refusé (`MONTANT_VALIDE_SUPERIEUR_A_EVALUE`) ; un montant validé inférieur à l'évalué sans motif est refusé (`MOTIF_ECRIT`) ; la délégation (FR-78) se calcule sur le montant validé, et les cinq montants restent affichés.
 - Un dossier est calculé selon la version du référentiel en vigueur à sa date de survenance, pas à sa date d'évaluation.
 
 #### FR-76 : La provision est revue à chaque événement, avec un motif
 
-La **provision du dossier** (la charge estimée) est **revue à chaque événement** : rapport d'expertise, devis, certificat médical, rapport de police, application du barème, validation hiérarchique, régularisation, clôture. À l'**évaluation**, la provision s'aligne sur le montant évalué, avec une **ligne distincte** « provision réajustée à l'évaluation » (avant, après, motif). Chaque mouvement est **ajouté**, **jamais écrasé** : numéro d'ordre, date, montant avant et après, motif, auteur, pièce justificative. Le **motif est obligatoire** et le nouveau montant doit différer de l'actuel. Un **écart supérieur ou égal à 2 000 000 FCFA** entre ancienne et nouvelle provision **attend le responsable** quand c'est un gestionnaire qui le propose `[ASSUMPTION: 2 000 000 FCFA, valeur de la démo ; à confirmer avec la matrice de délégation]`. Une provision **sans mouvement depuis 90 jours** et une provision **de plus de 15 % d'écart** avec l'estimation sont signalées « à revoir ». Prospera produit l'**état** de ces provisions par dossier, par exercice de survenance, brut, cédé et net selon les traités de réassurance et les clés de coassurance (D12) : la comptabilité officielle reste hors de Prospera.
+La **provision du dossier** (la charge estimée) est **revue à chaque événement** : rapport d'expertise, devis, certificat médical, rapport de police, application du barème, validation hiérarchique, régularisation, clôture. À l'**évaluation**, la provision s'aligne sur le montant évalué, avec une **ligne distincte** « provision réajustée à l'évaluation » (avant, après, motif). Chaque mouvement est **ajouté**, **jamais écrasé** : numéro d'ordre, date, montant avant et après, motif, auteur, pièce justificative. Le **motif est obligatoire** et le nouveau montant doit différer de l'actuel. Un **écart supérieur ou égal à 2 000 000 FCFA** entre ancienne et nouvelle provision **attend le responsable** quand c'est un gestionnaire qui le propose *(défaut H-061 : 2 000 000 FCFA, valeur de la démo ; à confirmer avec la matrice de délégation)*. Ce seuil s'applique au **cumul glissant par dossier**, et non à chaque révision prise isolément ; l'**alignement à l'évaluation** de la provision est soumis au même seuil. Une **revue de provision ne se reporte pas** quand un délai légal est actif. La provision porte un poste **« risque de pénalité »**, motif et ligne séparée de la provision du dossier, alimenté par l'échéance légale dépassée (art. 334-12, FR-85). Une provision **sans mouvement depuis 90 jours** et une provision **de plus de 15 % d'écart** avec l'estimation sont signalées « à revoir ». Prospera produit l'**état** de ces provisions par dossier, par exercice de survenance, brut, cédé et net selon les traités de réassurance et les clés de coassurance (D12) : la comptabilité officielle reste hors de Prospera.
 
 **Conséquences (testables) :**
 - Réviser sans motif est refusé (`MOTIF_ECRIT`) ; réviser au même montant est refusé (`MONTANT_INCHANGE`).
@@ -1165,41 +1398,52 @@ La **provision du dossier** (la charge estimée) est **revue à chaque événeme
 - Une révision de 2 500 000 FCFA proposée par un gestionnaire passe `EN_ATTENTE_RESP` et ne change pas la provision courante tant que le `RESP` ne l'a pas acceptée ; sous le seuil, elle est immédiate.
 - Une requalification de la responsabilité ou un rapport d'expertise déclenche une alerte « provision à revoir » si l'écart avec le dernier chiffrage dépasse 15 %.
 - Une provision sans mouvement depuis 90 jours apparaît dans la liste « à revoir » du `RESP`.
+- Trois révisions successives de 800 000 FCFA proposées par un gestionnaire sur le même dossier : la troisième, qui porte le cumul glissant à 2 400 000 FCFA, passe `EN_ATTENTE_RESP` ; l'alignement à l'évaluation d'un écart de 2 500 000 FCFA attend aussi le `RESP`.
+- Reporter la revue d'une provision d'un dossier dont un délai légal est actif est refusé (`REPORT_REVUE_INTERDIT`).
+- Un dépassement de l'échéance légale d'offre crée une ligne « risque de pénalité », distincte de la provision du dossier, avec son motif.
 
 ### 5.7 Décider et offrir (`EN_VALIDATION`, `OFFRE_ENVOYEE`)
 
-Dans la démo, le circuit passe de la validation à l'ordre de règlement ; l'offre n'existe que comme modèle de courrier. Ici, **l'offre et l'accord de l'assuré sont une étape** : on ne prépare le paiement qu'après l'accord enregistré. C'est la procédure du groupe (offre validée envoyée sous 48 h ouvrées, paiement préparé après accord) et le Code CIMA pour le corporel. Conventions de la table du §5.13 (FR-135), qui fait foi : la validation par la délégation (`RESP`, comité, visa du `DT`, `DG`) se fait **dans** `EN_VALIDATION` ; l'envoi de l'offre porte la transition 10 ; l'accord enregistré porte la transition 14 ; `ORDRE_EMIS`, `CHEQUE_A_REMETTRE` et `REGLE` sont dérivés des règlements (FR-92).
+Dans la démo, le circuit passe de la validation à l'ordre de règlement ; l'offre n'existe que comme modèle de courrier. Ici, **l'offre et l'accord de l'assuré sont une étape** : on ne prépare le paiement qu'après l'accord enregistré. C'est la procédure de la compagnie étudiée par le mémoire de 2014 (zone CIMA) (offre validée envoyée sous 48 h ouvrées, paiement préparé après accord) et le Code CIMA pour le corporel. Conventions de la table du §5.13 (FR-135), qui fait foi : la validation par la délégation (`RESP`, comité, visa du `DT`, `DG`) se fait **dans** `EN_VALIDATION` ; l'envoi de l'offre porte la transition 10 ; l'accord enregistré porte la transition 14 ; `ORDRE_EMIS`, `CHEQUE_A_REMETTRE` et `REGLE` sont dérivés des règlements (FR-92).
 
 #### FR-77 : Envoyer en validation avec une fiche de décision préparée
 
-Quand le montant est arrêté (`EVALUE`), le gestionnaire **envoie le dossier en validation** (`EVALUE → EN_VALIDATION`, transition 8). Prospera prépare une **fiche de décision** pour le signataire : points forts (pièces complètes, expertises closes, cohérence avec les dossiers comparables, aucun signal de fraude significatif, part du tiers arrêtée et montant du recours à engager) et **points de vigilance** (dossier hors délai et de combien de jours, déclaration tardive, franchise, plafond, exclusions à écarter, sous-assurance, offre sous le barème au corporel, écart au chiffrage de l'expert, prescription de deux ans de l'action dérivant du contrat : art. 28 du Code CIMA, SÛR, à vérifier par le juriste pour chaque cas). Le signataire peut demander à l'IA commune de **proposer un texte de motif** ; **le motif reste obligatoire et humain** : le signataire le relit, le modifie et le confirme.
+Quand le montant est arrêté (`EVALUE`), le gestionnaire **envoie le dossier en validation** (`EVALUE → EN_VALIDATION`, transition 8). Prospera prépare une **fiche de décision** pour le signataire : points forts (pièces complètes, expertises closes, cohérence avec les dossiers comparables (volets matériel et risques divers seulement ; au corporel, aucun comparable ni écart en pourcentage n'est affiché), aucun signal de fraude significatif, part du tiers arrêtée et montant du recours à engager) et **points de vigilance** (dossier hors délai et de combien de jours, déclaration tardive, franchise, plafond, exclusions à écarter, sous-assurance, offre sous le barème au corporel, écart au chiffrage de l'expert, prescription de deux ans de l'action dérivant du contrat : art. 28 du Code CIMA, SÛR, à vérifier par le juriste pour chaque cas). Le signataire peut demander à l'IA commune de **proposer un texte de motif** ; **le motif reste obligatoire et humain** : le signataire le relit, le modifie et le confirme. Un motif proposé par l'IA n'est **jamais validé par un simple clic** : le texte est modifiable, le **taux de motifs identiques** par signataire est signalé à `AUD`, et la proposition de motif est **interdite** pour les validations au-dessus du seuil du `RESP`.
 
 **Conséquences (testables) :**
 - `EVALUE → EN_VALIDATION` exige un montant arrêté ; sans montant, refus `MONTANT_EVALUE`.
 - La fiche de décision liste les points forts et les vigilances avec leur source (pièce, police, mission, comparable) ; elle ne contient aucun montant corporel produit par l'IA (FR-71).
 - Confirmer une décision sans motif est refusé (`MOTIF_ECRIT`) ; un motif proposé par l'IA n'est pas enregistré tant que le signataire ne l'a pas confirmé, et son auteur final est le signataire.
 - Le gestionnaire qui a instruit voit la décision en lecture ; l'action « valider » lui est fermée avec la raison (FR-81).
+- Un motif proposé par l'IA ne se confirme pas par un clic seul : le signataire doit modifier ou saisir le texte ; la proposition n'est pas offerte pour une validation au-dessus du seuil du `RESP` ; le taux de motifs identiques d'un signataire apparaît dans la vue de `AUD`.
+- La fiche d'un dossier corporel n'affiche aucune médiane, aucun comparable ni écart en pourcentage ; celle d'un dossier matériel les affiche avec leur source.
 - La fiche est conservée avec la décision et lisible de `AUD`.
 
 #### FR-78 : Une matrice de délégation à plusieurs niveaux, paramétrable
 
-La validation se fait selon une **matrice de délégation** paramétrable. Une ligne de la matrice porte : un **niveau**, les **rôles signataires**, le **quorum**, la **plage de montant**, le **volet** et la **nature** (indemnité, honoraires, acompte, règlement à titre commercial). Les défauts, **à remplacer par les délégations réelles de la compagnie** `[ASSUMPTION: défauts tirés de la procédure de la compagnie du même groupe au Sénégal (mémoire de 2014 et récit du PO) ; délégations réelles à obtenir à la séance d'immersion]`, sont : **jusqu'à 1 000 000 FCFA** : le responsable des sinistres ; **au-dessus de 1 000 000 FCFA** : le **comité sinistres** (FR-79), puis le **visa du directeur technique** ; **règlement à titre commercial** (hors garantie, motivé par la compagnie) : le **DG seul**, quel que soit le montant. Le **cumul des montants validés d'un même dossier** décide du niveau : c'est la règle **anti-fractionnement** (un dossier en tranches chacune sous le seuil mais dont le cumul le dépasse relève du niveau supérieur). Un montant qui dépasse la délégation du signataire est refusé, avec le niveau requis nommé.
+La validation se fait selon une **matrice de délégation** paramétrable. Une ligne de la matrice porte : un **niveau**, les **rôles signataires**, le **quorum**, la **plage de montant**, le **volet** et la **nature** (indemnité, honoraires, acompte, règlement à titre commercial). Les défauts, **à remplacer par les délégations réelles de la compagnie** *(défaut H-062 : défauts tirés de la procédure de la compagnie étudiée par le mémoire de 2014 (zone CIMA) et du récit du PO ; délégations réelles à obtenir à la séance d'immersion)*, sont : **jusqu'à 1 000 000 FCFA** : la **validation à trois** : la proposition de l'instructeur, le **contrôle** par un second agent du volet (un autre `GEST` désigné contrôleur, ou le `RESP`), puis la **validation** par le `RESP` ; le contrôleur et le validateur sont deux personnes distinctes de l'instructeur et distinctes entre elles *(défaut H-063 : procédure décrite dans le récit du PO ; tout est paramétrable)* ; **au-dessus de 1 000 000 FCFA** : le **comité sinistres** (FR-79), puis le **visa du directeur technique** ; **règlement à titre commercial** (hors garantie, motivé par la compagnie) : le **DG seul**, quel que soit le montant. Les **honoraires** entrent dans la matrice : ils sont soumis à leur **plafond par niveau** ; au-delà, comité. Le **cumul anti-fractionnement** d'un même dossier est la somme des montants **acceptés et ordonnés non annulés**, plus le montant en cours de validation : il décide du niveau (un dossier en tranches chacune sous le seuil mais dont le cumul le dépasse relève du niveau supérieur). Une **contre-proposition** remplace l'offre précédente : l'offre n°1 jamais payée ne compte plus. Un montant qui dépasse la délégation du signataire est refusé, avec le niveau requis nommé.
 
 **Conséquences (testables) :**
 - Une indemnité de 900 000 FCFA est validée par `RESP` seul ; elle est refusée au `GEST` (`DROIT_INSUFFISANT`).
 - Une indemnité de 1 500 000 FCFA ne se valide pas par `RESP` seul : la validation exige la décision du comité et le visa du `DT` ; sinon `VALIDATION_ACQUISE`, avec « niveau requis : comité sinistres ».
 - Un règlement à titre commercial n'est validé que par le `DG`, même pour 50 000 FCFA ; un autre rôle reçoit `VALIDATION_ACQUISE`.
 - Deux validations de 800 000 FCFA sur le même dossier déclenchent le niveau du cumul de 1 600 000 FCFA ; la seconde est refusée au niveau `RESP` seul (`VALIDATION_ACQUISE`).
+- Un montant de 800 000 FCFA remplacé par une contre-proposition de 800 000 FCFA ne monte pas au comité ; un montant de 800 000 FCFA payé, suivi d'un nouveau de 800 000 FCFA, y monte.
+- Au niveau 1 (jusqu'à 1 000 000 FCFA), la validation est refusée sans le contrôle d'une troisième personne, distincte de l'instructeur et du validateur (`CONTROLE_ABSENT`) ; au-delà, comité de 4 et visa du `DT`.
+- Des honoraires d'expert au-dessus du plafond de leur niveau montent au comité ; la matrice porte une ligne « honoraires » par niveau.
 - La matrice est modifiable par `ADMIN` avec double contrôle du `DG` ; une modification ne change pas les décisions déjà prises et est journalisée avec auteur et date.
 - L'état des délégations exercées (dossiers validés par niveau sur 30 jours) est visible du `DG` et de `AUD`.
 
 #### FR-79 : Le comité sinistres : quorum, votes, procès-verbal de séance
 
-Le **comité sinistres** est une **instance** (non un rôle). Défauts : **4 membres** dont le responsable des sinistres et le directeur technique, **quorum de 3** `[ASSUMPTION: composition et quorum du comité du groupe au Sénégal ; à confirmer]`. Le comité se réunit sur une **liste de dossiers** préparée par le `RESP` ; chaque dossier est présenté avec sa fiche de décision. **Chaque membre présent vote** (`POUR`, `CONTRE`, `ABSTENTION`) avec son nom ; la décision est prise à la **majorité des membres présents** `[ASSUMPTION: majorité simple des présents ; à confirmer]`. Un membre ne vote pas sur un dossier qu'il a instruit lui-même. À la fin de la séance, Prospera produit le **procès-verbal de séance** : date, membres convoqués et présents, quorum, dossiers examinés, vote de chacun, décision et motifs ; il est signé et rangé au dossier de chaque sinistre examiné et aux archives du comité. Après la décision du comité, le **visa du directeur technique** est demandé ; il est refusé ou accordé avec motif.
+Le **comité sinistres** est une **instance** (non un rôle). Défauts : **4 membres** dont le responsable des sinistres et le directeur technique, **quorum de 3** *(défaut H-064 : composition et quorum du comité de la compagnie étudiée par le mémoire de 2014 (zone CIMA) ; à confirmer)*. La **liste des membres** est obligatoire à la mise en service : au moins un **titulaire et un suppléant** par siège. Le **président** est le `RESP`, sinon le `DG` ; en cas d'égalité, sa **voix prépondérante** tranche. Le comité se tient dans un **délai paramétré** (défaut 5 jours ouvrés), avec une alerte au 3e jour et un repli par **délibération écrite**. L'**instructeur est exclu du vote**. Si le `DT` a voté au comité, le **visa est donné par le `DG`**. Le comité se réunit sur une **liste de dossiers** préparée par le `RESP` ; chaque dossier est présenté avec sa fiche de décision. **Chaque membre présent vote** (`POUR`, `CONTRE`, `ABSTENTION`) avec son nom ; la décision est prise à la **majorité des membres présents** *(défaut H-065 : majorité simple des présents ; à confirmer)*. Un membre ne vote pas sur un dossier qu'il a instruit lui-même (FR-29). À la fin de la séance, Prospera produit le **procès-verbal de séance** : date, membres convoqués et présents, quorum, dossiers examinés, vote de chacun, décision et motifs ; il est signé et rangé au dossier de chaque sinistre examiné et aux archives du comité. Après la décision du comité, le **visa du directeur technique** est demandé ; il est refusé ou accordé avec motif.
 
 **Conséquences (testables) :**
 - Une séance avec 2 membres présents sur 4 ne peut pas statuer : `QUORUM_NON_ATTEINT` ; aucune décision n'est enregistrée.
 - Le vote de chaque membre est enregistré avec son nom ; un membre qui a instruit le dossier est exclu du vote de ce dossier (`SEPARATION_DES_TACHES`).
+- Trois membres présents dont l'instructeur donnent deux votants ; en cas d'égalité, la décision est prise par la voix du président.
+- Une mise en service sans liste de membres complète (un titulaire et un suppléant par siège) est refusée (`COMITE_INCOMPLET`) ; un comité non tenu au 3e jour ouvré lève une alerte, puis bascule en délibération écrite à l'échéance.
+- Un `DT` qui a voté au comité ne peut pas donner le visa : le `DG` le donne (`VISA_DT_INTERDIT`).
 - Le procès-verbal de séance est généré avec tous les dossiers examinés et reste lisible de `AUD` ; il ne se modifie pas après signature.
 - Sans visa du `DT` après la décision du comité, le dossier ne passe pas à `OFFRE_ENVOYEE` (`VALIDATION_ACQUISE`).
 - Une décision « refus du comité » exige un motif et renvoie le dossier selon FR-80.
@@ -1207,21 +1451,23 @@ Le **comité sinistres** est une **instance** (non un rôle). Défauts : **4 mem
 
 #### FR-80 : Tolérances affichées au signataire, et renvoi motivé
 
-Au moment de décider, l'écran affiche des **tolérances**, sous forme de **réserves non bloquantes** : écart entre le **montant arrêté** et la **proposition de l'expert** (10 % par défaut) ; écart entre l'**indemnité** et la **provision** (25 % par défaut). Elles informent le signataire, elles n'interdisent rien ; **seul un signal de fraude bloquant** non écarté ferme la décision. Le signataire peut aussi : **renvoyer en instruction** pour réévaluation (`EN_VALIDATION → EN_INSTRUCTION`, transition 11), **demander des pièces avant validation** (`EN_VALIDATION → PIECES_ATTENDUES`, transition 12), ou **refuser la prise en charge** (`EN_VALIDATION → REJETE`, transition 13, refus motivé, courrier de refus §5.11). Chacune de ces issues exige un **motif écrit**.
+Au moment de décider, l'écran affiche des **tolérances**, sous forme de **réserves non bloquantes** : écart entre le **montant arrêté** et la **proposition de l'expert** (10 % par défaut) ; écart entre l'**indemnité** et la **provision** (25 % par défaut), cet écart en pourcentage n'étant affiché que pour les volets de la liste blanche (matériel, risques divers) : au corporel, aucun écart en pourcentage n'est calculé ni affiché. Elles informent le signataire, elles n'interdisent rien ; **seul un signal de fraude bloquant** non écarté ferme la décision. Le signataire peut aussi : **renvoyer en instruction** pour réévaluation (`EN_VALIDATION → EN_INSTRUCTION`, transition 11), **demander des pièces avant validation** (`EN_VALIDATION → PIECES_ATTENDUES`, transition 12), ou **refuser la prise en charge** (`EN_VALIDATION → REJETE`, transition 13, refus motivé, courrier de refus §5.11). Chacune de ces issues exige un **motif écrit**.
 
 **Conséquences (testables) :**
 - Un montant arrêté s'écartant de 12 % de la proposition de l'expert affiche la réserve « écart au chiffrage de l'expert » ; la décision reste possible.
 - Un dossier dont le signal de fraude est bloquant et non écarté ne peut pas être validé (`AUCUN_SIGNAL_BLOQUANT`).
 - Renvoyer en instruction sans motif est refusé (`MOTIF_ECRIT`) ; le motif est affiché au gestionnaire dans sa file.
 - Un refus de prise en charge à ce stade met le reste à payer à zéro, et le dossier devient `REJETE`.
+- Sur un dossier corporel, l'écran de décision n'affiche pas l'écart entre indemnité et provision ; sur un dossier matériel, il l'affiche.
 - Les seuils de 10 % et 25 % sont des paramètres ; leur modification ne change pas les décisions déjà prises.
 
 #### FR-81 : Séparation des tâches : celui qui décide ne paie pas
 
-Trois règles de séparation sont gardées côté serveur, quel que soit l'écran : **(1)** le gestionnaire qui a instruit le dossier **ne valide pas** son propre règlement ni sa propre indemnité ; **(2)** **celui qui décide ne paie pas** : le signataire de la validation n'émet pas l'ordre de règlement (la comptabilité émet) ; **(3)** le **seuil de délégation** est respecté (FR-78). Chaque règle a un contrôle permanent du contrôle interne : un constat est `CONFORME`, `ALERTE` ou `VIOLATION`, avec la règle et le détail. Le défaut relevé par l'audit de 2014 (le même rédacteur qui instruit et ordonnance l'indemnité) est ainsi fermé.
+Trois règles de séparation sont gardées côté serveur, quel que soit l'écran : **(1)** celui qui est **partie** au dossier au sens de FR-29 (liste des actes qui rendent partie) **ne valide pas** son propre règlement ni sa propre indemnité ; l'**accord** de l'assuré est enregistré par un agent qui n'a ni instruit, ni validé le dossier (FR-86) ; **(2)** **celui qui décide ne paie pas** : le signataire de la validation n'émet pas l'ordre de règlement (la comptabilité émet) ; **(3)** le **seuil de délégation** est respecté (FR-78). Chaque règle a un contrôle permanent du contrôle interne : un constat est `CONFORME`, `ALERTE` ou `VIOLATION`, avec la règle et le détail. Le défaut relevé par l'audit de 2014 (le même rédacteur qui instruit et ordonnance l'indemnité) est ainsi fermé.
 
 **Conséquences (testables) :**
-- Un `GEST` qui a instruit un dossier ne peut pas le valider, quel que soit son niveau de délégation : refus `SEPARATION_DES_TACHES`.
+- Un `GEST` qui a instruit un dossier ne peut pas le valider, quel que soit son niveau de délégation : refus `SEPARATION_DES_TACHES`. Un test existe **par acte** de la liste de FR-29.
+- Instruire **et** enregistrer l'accord est refusé ; valider **et** enregistrer l'accord est refusé ; émettre **et** faire signer la quittance est refusé (`SEPARATION_DES_TACHES`, lignes 13 à 15 de FR-7).
 - Un `RESP` qui a validé l'indemnité ne peut pas émettre le règlement ; seul `CPT` émet (§5.8).
 - Un utilisateur qui cumule deux rôles ne peut pas tenir les deux fonctions incompatibles sur un même dossier (le contrôle regarde la personne, pas le rôle).
 - Chaque refus pour séparation des tâches crée un constat visible de `AUD`, avec la règle et le détail.
@@ -1229,11 +1475,15 @@ Trois règles de séparation sont gardées côté serveur, quel que soit l'écra
 
 #### FR-82 : L'offre est préparée, définitive ou provisionnelle
 
-Après validation, Prospera **prépare l'offre** (modèle `OFFRE_INDEMNISATION`) à partir du décompte : bénéficiaire, montant **proposé**, détail du décompte (dommage, vétusté, règle proportionnelle, plafond, franchise ; ou, au corporel, **chaque chef de préjudice** de l'art. 243 avec les sommes revenant au bénéficiaire, les limitations et exclusions retenues et leurs motifs, et les **créances de chaque tiers payeur** avec copie des décomptes : art. 246), l'excédent éventuel à la charge de l'assuré, le **délai pour répondre**, le nom du gestionnaire du dossier (art. 242) et les **mentions légales** du corporel : possibilité d'obtenir la copie du procès-verbal et de se faire assister d'un conseil à ses frais (art. 232), **droit de dénoncer la transaction par lettre recommandée dans les 15 jours, en caractères très apparents, à peine de nullité relative** (art. 235) ; le paiement est libellé **au nom de la victime ou des ayants droit** (art. 232). L'offre est **provisionnelle** au corporel quand la consolidation n'est pas connue 6 mois après l'accident (FR-85) : elle couvre alors ce qui est déjà établi (frais, incapacité temporaire) et l'offre **définitive** suit après la consolidation. Au corporel, l'accord prend la forme d'un **procès-verbal de transaction**.
+Après validation, Prospera **prépare l'offre** (modèle `OFFRE_INDEMNISATION`) à partir du décompte : bénéficiaire, montant **proposé**, détail du décompte (dommage, vétusté, règle proportionnelle, plafond, franchise ; ou, au corporel, **chaque chef de préjudice** de l'art. 243 avec les sommes revenant au bénéficiaire, les limitations et exclusions retenues et leurs motifs, et les **créances de chaque tiers payeur** avec copie des décomptes : art. 246), l'excédent éventuel à la charge de l'assuré, le **délai pour répondre**, le nom du gestionnaire du dossier (art. 242) et les **mentions légales** du corporel : possibilité d'obtenir la copie du procès-verbal et de se faire assister d'un conseil à ses frais (art. 232), **droit de dénoncer la transaction par lettre recommandée dans les 15 jours, en caractères très apparents, à peine de nullité relative** (art. 235) ; le paiement est libellé **au nom de la victime ou des ayants droit** (art. 232). L'offre est **provisionnelle** au corporel quand la consolidation n'est pas connue 6 mois après l'accident (FR-85) : elle couvre alors ce qui est déjà établi (frais, incapacité temporaire) et l'offre **définitive** suit après la consolidation. Au corporel, l'accord prend la forme d'un **procès-verbal de transaction**. Les états de l'offre, alignés sur la démo, sont : `A_PREPARER`, `EN_VALIDATION`, `PRETE`, `ENVOYEE`, `ACCEPTEE`, `REFUSEE`, `EN_NEGOCIATION`, auxquels s'ajoutent `EXPIREE` (offre sans réponse au terme) et `RETOURNEE` (pli non distribué).
+
+**Corporel à plusieurs véhicules.** Le dossier saisit les **véhicules et assureurs impliqués**. Il désigne l'**assureur qui présente l'offre pour compte commun** (art. 231 al. 6, 267 à 270 *(point juridique J-11 : à valider par le juriste, §13.2)*) ; les **intérêts de retard sont à sa charge**, et la **répartition entre assureurs** est tracée. Le dossier bascule en « mandat pour compte d'autrui ». Le **barème de responsabilité** est un paramètre, à numériser (D21).
 
 **Conséquences (testables) :**
 - L'offre n'existe qu'à partir d'une validation selon la délégation ; sans validation, la préparation est refusée (`VALIDATION_ACQUISE`).
-- Le montant proposé de l'offre est celui du montant validé ; un écart entre le montant proposé et le montant validé est refusé.
+- Le montant proposé de l'offre est celui du montant validé ; un écart entre le montant proposé et le montant validé est refusé sans motif (`MOTIF_ECRIT`).
+- Un dossier corporel à deux véhicules désigne un seul assureur meneur ; les intérêts de retard sont imputés à lui, et la répartition entre assureurs est enregistrée ; une seconde désignation sur le même dossier est refusée (`ASSUREUR_MENEUR_DEJA_DESIGNE`).
+- Une offre sans réponse au terme passe `EXPIREE` ; un pli non distribué la passe `RETOURNEE` et lève l'alerte « offre retournée » ; une offre `RETOURNEE` ou `EXPIREE` ne laisse jamais courir le délai légal sans alerte.
 - L'offre corporelle contient les mentions de l'art. 232, le nom du gestionnaire, le droit de dénonciation de l'art. 235 en caractères très apparents ; un modèle d'offre corporelle sans l'une de ces mentions est refusé (`MENTION_LEGALE_ABSENTE`).
 - L'offre provisionnelle est marquée comme telle, ne couvre que les postes établis, et est suivie d'une offre définitive dans le délai de FR-85.
 - Un bénéficiaire de paiement différent de la victime ou des ayants droit sur un dossier corporel est refusé au moment de l'ordre (§5.8).
@@ -1257,22 +1507,49 @@ Le courrier d'offre est **rédigé par l'IA commune** à partir du modèle de la
 
 #### FR-84 : L'offre validée part sous 48 heures ouvrées
 
-Une fois la décision prise (visa du `DT` compris), l'offre doit être **envoyée sous 48 heures ouvrées** (paramètre, valeur du mémoire `[ASSUMPTION: 48 heures ouvrées, comme dans la procédure du groupe]`). L'envoi (`EN_VALIDATION → OFFRE_ENVOYEE`, transition 10 ; la validation par la délégation a eu lieu avant, dans `EN_VALIDATION`) est un acte qui enregistre : le **canal** (remise en main propre, courrier, e-mail, SMS pour l'avis, WhatsApp), la **date et l'heure**, la **personne** qui envoie et la **preuve** d'envoi (accusé, décharge, récépissé). Un dossier validé et non envoyé après 48 heures ouvrées est une **alerte** au `RESP`. Au corporel, le **procès-verbal de transaction** est communiqué aux bénéficiaires ou à leur avocat **sous 24 heures** après sa soumission au directeur technique `[ASSUMPTION: 24 heures, valeur du mémoire de 2014]`.
+Une fois la décision prise (visa du `DT` compris), l'offre doit être **envoyée sous 48 heures ouvrées** (paramètre, valeur du mémoire *(défaut H-066 : 48 heures ouvrées, comme dans la procédure de la compagnie étudiée par le mémoire de 2014 (zone CIMA))*). L'envoi (`EN_VALIDATION → OFFRE_ENVOYEE`, transition 10 ; la validation par la délégation a eu lieu avant, dans `EN_VALIDATION`) est un acte qui enregistre : le **canal** (remise en main propre, courrier, e-mail, SMS pour l'avis, WhatsApp), la **date et l'heure**, la **personne** qui envoie et la **preuve** d'envoi (accusé, décharge, récépissé). Un dossier validé et non envoyé après 48 heures ouvrées est une **alerte** au `RESP`. Au corporel, le **procès-verbal de transaction** est communiqué aux bénéficiaires ou à leur avocat **sous 24 heures ouvrées** après sa soumission au directeur technique *(défaut H-067 : 24 heures, valeur du mémoire de 2014)*.
 
 **Conséquences (testables) :**
 - `EN_VALIDATION → OFFRE_ENVOYEE` (transition 10) exige : une décision validée selon la délégation, la signature de l'agent, un canal et une preuve ; sinon refus `VALIDATION_ACQUISE` ou `PREUVE_ENVOI_ABSENTE`.
 - Un dossier validé depuis plus de 48 heures ouvrées sans envoi apparaît dans les alertes du `RESP`, avec le retard en heures.
 - La date et l'heure d'envoi servent de point de départ aux relances (FR-89) et au délai de réponse de l'assuré.
+- Le courrier d'offre porte le statut `REMIS` (avec preuve) ou `RETOURNE` (pli non distribué, FR-122) ; `RETOURNE` passe l'offre à `RETOURNEE` et lève l'alerte « offre retournée ».
 - Un envoi sur un canal inconnu du dossier (téléphone ou adresse absents) est refusé (`CANAL_INJOIGNABLE`).
 - L'offre envoyée est classée au dossier, non modifiable ; une correction passe par une nouvelle offre (FR-87).
 
 #### FR-85 : Les délais légaux du corporel et la pénalité de 5 % par mois, séparés des délais internes
 
-Pour les victimes d'une **atteinte à la personne causée par un véhicule terrestre à moteur** (art. 225 et 231 du Code CIMA, SÛR), le dossier corporel porte un **chronomètre réglementaire** : **offre dans les 12 mois de l'accident** ; en cas de **décès**, offre aux ayants droit **dans les 8 mois du décès** ; **offre provisionnelle** quand l'assureur n'a pas été informé de la consolidation dans les 6 mois de l'accident, l'**offre définitive** devant alors être faite **dans les 6 mois de l'information de consolidation** ; **réponse** à une demande motivée de la victime **sous 30 jours** (art. 231). Les délais sont **prorogés ou suspendus**, et chaque suspension est tracée avec sa cause et ses dates : assureur non avisé dans le mois (art. 247) ; décès plus d'un mois après l'accident (art. 248) ; pièces demandées non reçues ou incomplètes dans les **6 semaines** de la présentation de la demande (art. 249 et 250) ; nouvelle demande dans le mois suivant une réponse incomplète (art. 251) ; refus d'examen ou contestation médicale et expert commun, **+1 mois** (art. 252 et 252 bis) ; victime résidant à l'étranger (art. 253). Passé le délai, **l'indemnité produit de plein droit un intérêt de retard de 5 % par mois de retard** (art. 233), que Prospera **calcule et affiche** ; la pénalité est **réduite ou annulée** pour circonstances non imputables à l'assureur, avec un motif saisi ; la **base de calcul** (l'indemnité) est un point d'interprétation à faire valider `[ASSUMPTION: pénalité calculée sur le montant de l'offre ; provision du risque de pénalité tenue dans le dossier ; à faire valider par le juriste]`. Ces délais sont **réglementaires et non modifiables** par la compagnie. Les délais du **matériel et des autres branches** ne sont pas fixés par le Code CIMA : ils sont **contractuels ou internes**, paramétrés par produit. Les délais internes de la démo sont repris en défauts, comme **alertes internes**, avec leur point de départ et d'arrêt : accusé de réception 10 jours depuis la déclaration, arrêté à l'ouverture ; offre **90 jours** (corporel), **60** (matériel), **75** (autre) depuis la réception du dossier complet, arrêtée à l'envoi de l'offre ; délai de traitement du volet **45**, **21**, **30** et **90 jours** (recours) depuis la déclaration. Un dossier est jugé selon le référentiel en vigueur à sa **date de survenance**.
+Pour les victimes d'une **atteinte à la personne causée par un véhicule terrestre à moteur** (art. 225 et 231 du Code CIMA, SÛR), le dossier corporel porte un **chronomètre réglementaire** :
+
+- **Offre** dans les **12 mois** de l'accident.
+- **Décès** : offre aux ayants droit **dans les 8 mois du décès**.
+- **Consolidation** : **offre provisionnelle** quand l'assureur n'a pas été informé de la consolidation dans les 6 mois de l'accident ; l'**offre définitive** est alors due **dans les 6 mois de l'information de consolidation**.
+- **Réponse** à une demande motivée de la victime **sous 30 jours** (art. 231).
+
+Les délais sont **prorogés ou suspendus**, et chaque suspension est tracée avec sa cause et ses dates :
+
+- assureur non avisé dans le mois (art. 247) ;
+- décès plus d'un mois après l'accident (art. 248) ;
+- pièces demandées non reçues ou incomplètes dans les **6 semaines** de la présentation de la demande (art. 249 et 250) ;
+- nouvelle demande dans le mois suivant une réponse incomplète (art. 251) ;
+- refus d'examen ou contestation médicale et expert commun, **+1 mois** (art. 252 et 252 bis) ;
+- victime résidant à l'étranger (art. 253).
+
+**Pénalité.** Passé le délai, **l'indemnité produit de plein droit un intérêt de retard de 5 % par mois de retard** (art. 233), que Prospera **calcule et affiche**. La pénalité est **réduite ou annulée** pour circonstances non imputables à l'assureur, avec un motif saisi. La **base de calcul** est le paramètre `penalite.base`, défaut « montant de l'offre » *(point juridique J-12 : base à faire valider par le juriste)* ; l'affichage porte le libellé « estimation, base non validée ». Le **risque de pénalité** est provisionné sur une ligne séparée de la provision (FR-76), alimentée par l'échéance légale dépassée (art. 334-12).
+
+**Délais réglementaires et délais internes.** Les délais légaux sont **réglementaires et non modifiables** par la compagnie. Les délais du **matériel et des autres branches** ne sont pas fixés par le Code CIMA : ils sont **contractuels ou internes**, paramétrés par produit. Les délais internes de la démo sont repris en défauts, comme **alertes internes**, avec leur point de départ et d'arrêt :
+
+- accusé de réception **10 jours** depuis la déclaration, arrêté à l'ouverture ;
+- offre **90 jours** (corporel), **60** (matériel), **75** (autre) depuis la réception du dossier complet, arrêtée à l'envoi de l'offre ;
+- délai de traitement du volet **45**, **21**, **30** et **90 jours** (recours) depuis la déclaration.
+
+Un dossier est jugé selon le référentiel en vigueur à sa **date de survenance**. Quand le dossier corporel implique **plusieurs véhicules**, l'assureur qui présente l'offre pour compte commun supporte les intérêts de retard (FR-82).
 
 **Conséquences (testables) :**
 - Un dossier corporel VTM avec accident au 1er mars affiche l'échéance d'offre au 1er mars de l'année suivante ; un décès au 10 avril sur un accident du 1er avril affiche 8 mois à compter du décès.
 - Une demande de pièces présentée le 1er mai et non satisfaite suspend le délai à partir de la 6e semaine, avec la cause (art. 249) ; la reprise de réponse lève la suspension.
+- Une réponse incomplète reçue dans les 6 semaines, suivie d'une nouvelle demande dans les 15 jours, suspend le délai ; sans nouvelle demande dans les 15 jours après cette réponse, il n'y a pas de suspension.
+- Le calcul de la pénalité lit le paramètre `penalite.base` ; l'affichage porte le libellé « estimation, base non validée » tant que le juriste n'a pas validé la base.
 - Un dossier corporel sans offre au-delà de l'échéance calcule et affiche la pénalité de 5 % par mois ; saisir « circonstances non imputables » avec un motif réduit ou annule la pénalité et journalise l'auteur.
 - Les délais légaux ne figurent pas dans la liste des paramètres modifiables de la compagnie ; un `ADMIN` ne peut pas les changer (`PARAMETRE_REGLEMENTAIRE`).
 - Un dossier matériel affiche des échéances **internes** (offre à 60 jours après dossier complet) et non une pénalité légale ; l'alerte dit « délai interne ».
@@ -1281,12 +1558,16 @@ Pour les victimes d'une **atteinte à la personne causée par un véhicule terre
 
 #### FR-86 : L'accord est enregistré ; aucun ordre sans accord
 
-L'accord de l'assuré ou de la victime est **enregistré** dans le dossier : l'**offre signée**, ou, au corporel, le **procès-verbal de transaction** signé, avec la date. Seul cet enregistrement fait passer le dossier de `OFFRE_ENVOYEE` à `ORDRE_EMIS` (transition 14) : **aucun ordre de règlement sans accord enregistré**. Au corporel, la victime peut **dénoncer** la transaction par lettre recommandée dans les 15 jours de sa conclusion (art. 235) : le paiement n'est dû qu'après ce délai et son échéance est calculée (§5.8). Pour un **mineur** ou un **incapable**, la transaction est soumise aux parents vivants ou au juge des tutelles ou au conseil de famille, avec avis au juge au moins 15 jours avant le paiement d'une somme ou du premier arrérage de rente ; sans cela, transaction et paiement sont annulables (art. 234) `[ASSUMPTION: workflow mineurs et incapables : pièce d'autorisation exigée avant l'ordre ; à valider par le juriste]`.
+L'accord de l'assuré ou de la victime est **enregistré** dans le dossier : l'**offre signée**, ou, au corporel, le **procès-verbal de transaction** signé (même accord sous deux noms), avec la date. L'enregistrement est fait par l'**accueil (`ACC`)** ou par un agent **qui n'a ni instruit, ni validé le dossier** (FR-29), sur la **pièce originale signée**, scannée et rattachée, avec **contrôle d'identité du signataire** ; l'**empreinte** de la version d'offre signée est conservée. Au-dessus d'un seuil paramétré, l'accord est **enregistré deux fois** par deux agents *(défaut H-068 : 3 000 000 FCFA ; à confirmer à la séance d'immersion)*. Seul cet enregistrement fait passer le dossier de `OFFRE_ENVOYEE` à `ORDRE_EMIS` (transition 14, rôle `ACC` ou agent non partie, jamais `GEST` ni `RESP`) : **aucun ordre de règlement sans accord enregistré**. Au corporel, la victime peut **dénoncer** la transaction par lettre recommandée dans les 15 jours de sa conclusion (art. 235). La dénonciation n'est reçue qu'avec une **preuve de réception** par un moyen listé en paramètre ; le recommandé électronique n'est pas accepté tant que le juriste n'a pas tranché. Pour tout dossier corporel VTM dont l'accord est une **transaction** (offre définitive ou provisionnelle acceptée), la **date d'éligibilité à l'émission** est la date de conclusion plus 15 jours, **calculée et non modifiable**. L'ordre est créé à l'accord, mais il reste **« différé »** (non émis) jusqu'à cette date : la condition `DELAI_DENONCIATION_ECOULE` garde les transitions d'émission (FR-135, FR-136). La transition 42 (dénonciation) part de `ORDRE_EMIS`, puisque rien n'est émis avant. Pour un **mineur** ou un **incapable**, la transaction est soumise aux parents vivants ou au juge des tutelles ou au conseil de famille, avec avis au juge au moins 15 jours avant le paiement d'une somme ou du premier arrérage de rente ; sans cela, transaction et paiement sont annulables (art. 234) *(point juridique J-13 : workflow mineurs et incapables : pièce d'autorisation exigée avant l'ordre ; à valider par le juriste)*.
 
 **Conséquences (testables) :**
 - `OFFRE_ENVOYEE → ORDRE_EMIS` (transition 14) exige un accord enregistré (offre signée ou procès-verbal de transaction) ; sans lui, refus `ACCORD_ENREGISTRE`.
-- Un accord enregistré sans pièce signée jointe est refusé (`PIECE_ACCORD_ABSENTE`).
-- Au corporel, une transaction enregistrée affiche la date limite de dénonciation (15 jours) ; si la victime dénonce dans ce délai, le dossier repasse en `EN_INSTRUCTION` (transition 42, motif obligatoire, règlements non remis `ANNULE`) et une nouvelle offre repart de `EN_INSTRUCTION`, avec sa nouvelle échéance.
+- Un accord enregistré sans pièce signée jointe est refusé (`PIECE_ACCORD_ABSENTE`) ; l'enregistrement sans contrôle d'identité du signataire est refusé (`IDENTITE_SIGNATAIRE_NON_CONTROLEE`).
+- Un `GEST` ou un `RESP` qui tente d'enregistrer l'accord reçoit `DROIT_INSUFFISANT` ; un agent qui a instruit ou validé le dossier reçoit `SEPARATION_DES_TACHES` (FR-29, FR-81) ; l'empreinte de la version d'offre signée figure au dossier.
+- Au-dessus du seuil de double enregistrement, un accord enregistré une seule fois ne libère aucun ordre (`DOUBLE_ENREGISTREMENT_REQUIS`).
+- Un accord de transaction corporel VTM crée un ordre « différé » : l'émission est refusée (`DELAI_DENONCIATION_ECOULE`) du jour 1 au jour 14, et acceptée au jour 16 ; le test est répété pour chaque moyen de paiement (chèque, virement, paiement mobile) ; la date d'éligibilité n'est modifiable par aucun rôle.
+- Une dénonciation reçue sans preuve de réception par un moyen listé est refusée (`PREUVE_RECEPTION_ABSENTE`).
+- Au corporel, une transaction enregistrée affiche la date limite de dénonciation (15 jours) ; si la victime dénonce dans ce délai, le dossier repasse en `EN_INSTRUCTION` (transition 42, depuis `ORDRE_EMIS`, motif obligatoire, ordres différés ou règlements non remis `ANNULE`) et une nouvelle offre repart de `EN_INSTRUCTION`, avec sa nouvelle échéance.
 - Pour un bénéficiaire mineur ou incapable sans pièce d'autorisation, l'ordre est refusé (`AUTORISATION_REPRESENTANT_ABSENTE`).
 - L'accord est horodaté avec le nom de l'agent qui l'a enregistré.
 
@@ -1308,16 +1589,17 @@ Si l'assuré ou la victime **refuse l'offre** (sans contre-proposition chiffrée
 - Enregistrer un refus sans motif est refusé (`MOTIF_ECRIT`) ; le dossier passe `LITIGE` et le motif est conservé.
 - Un `GEST` ne peut pas constater un litige (`DROIT_INSUFFISANT`) ; `RESP`, `DG` ou `DT` le peuvent (transition 16).
 - Un refus avec demande de contre-expertise ouvre l'action d'ordonner la contre-expertise aux seuls `RESP`, `DG`, `DT`.
-- Pendant le `LITIGE`, aucun ordre de règlement ne peut être émis sur le montant refusé et aucune nouvelle offre globale n'est préparée ; seul un règlement d'acompte de la part non contestée (validation selon la délégation, accord du bénéficiaire sur cette part) est possible, sans changer le statut `LITIGE`.
+- Pendant le `LITIGE`, aucun ordre de règlement ne peut être émis, acompte compris, et aucune nouvelle offre globale n'est préparée : l'acompte en litige est **retiré** du circuit (la table des 42 transitions n'a pas de passage de `LITIGE` vers `ORDRE_EMIS`). La part non contestée se règle après la sortie du litige : retour à `EN_INSTRUCTION`, puis offre sur cette part.
 - Un litige résolu rouvre `EN_INSTRUCTION` avec motif.
 
 #### FR-89 : Une offre sans réponse déclenche des relances et une alerte
 
-Une offre envoyée sans réponse est **relancée** : première **relance à 15 jours** après l'envoi, **alerte au responsable à 30 jours** (paramètres `delai_relance_offre_jours` et `delai_alerte_offre_jours`) `[ASSUMPTION: J+15 et J+30 comme dans la décision de cadrage ; à confirmer]`. Le texte de la relance est rédigé comme en FR-47 (envoi par l'agent, jamais seul). À la **troisième relance sans effet**, le système propose un arbitrage : classement `SANS_SUITE` motivé (transition 27), appel, visite. Au corporel, le silence ne dispense pas la compagnie de son **délai légal** : le chronomètre de FR-85 continue de courir, et une pénalité peut s'afficher.
+Une offre envoyée sans réponse est **relancée** : première **relance à 15 jours** après l'envoi, **alerte au responsable à 30 jours** (paramètres `delai_relance_offre_jours` et `delai_alerte_offre_jours`) *(défaut H-069 : J+15 et J+30 comme dans la décision de cadrage ; à confirmer)*. Le texte de la relance est rédigé comme en FR-47 (envoi en un clic par l'agent, ou envoi automatique à l'échéance si le paramètre l'autorise). Une offre sans réponse au terme passe `EXPIREE` ; un pli non distribué la passe `RETOURNEE` avec l'alerte « offre retournée ». À la **troisième relance sans effet**, le système propose un arbitrage : classement `SANS_SUITE` motivé (transition 27), appel, visite. Au corporel, le silence ne dispense pas la compagnie de son **délai légal** : le chronomètre de FR-85 continue de courir, et une pénalité peut s'afficher.
 
 **Conséquences (testables) :**
 - Une offre envoyée depuis 15 jours sans réponse produit une relance proposée ; à 30 jours, une alerte au `RESP` avec l'ancienneté.
-- La relance est journalisée (canal, date, auteur) ; aucun envoi automatique.
+- La relance est journalisée (canal, date, auteur) ; elle part par un clic de l'agent, ou automatiquement seulement si le paramètre d'envoi automatique de FR-47 est activé.
+- Une offre sans réponse au terme passe à l'état `EXPIREE` ; une offre dont le pli revient passe à `RETOURNEE` avec l'alerte « offre retournée » ; aucune des deux n'arrête le chronomètre légal du corporel.
 - À la troisième relance sans effet, l'écran propose l'arbitrage et n'ajoute pas de relance par défaut.
 - Classer `SANS_SUITE` exige un motif et la trace des relances effectuées (`RELANCES_EPUISEES` sinon).
 - Un dossier corporel avec offre sans réponse continue d'afficher son chronomètre légal.
@@ -1356,13 +1638,17 @@ Deux mots à ne pas confondre dans cette section : l'**ordre de règlement** est
 
 #### FR-90 : L'ordre de règlement naît de l'accord enregistré, jamais sans
 
-Le serveur ne crée un ordre de règlement d'indemnité qu'à l'enregistrement de l'**accord** de l'assuré ou de la victime (décision D6). L'accord est enregistré par le gestionnaire (`GEST`) ou le responsable (`RESP`), avec la pièce qui le prouve : offre signée, ou procès-verbal de transaction au corporel. Cet enregistrement déclenche la transition `OFFRE_ENVOYEE → ORDRE_EMIS` (§5.13, transition 14). Les **honoraires d'expert** échappent à l'accord de l'assuré, car leur bénéficiaire n'est pas l'assuré : ce sont des règlements de nature `HONORAIRES`, nés du visa des honoraires par `RESP` ou `CPT` (FR-182, FR-91), qui **ne changent pas le statut du dossier** et ne passent pas par la transition 14. Le règlement **à titre commercial** est décidé par le `DG` seul (§5.7, D8), mais **l'accord du bénéficiaire reste exigé** : il passe par l'offre et par la transition 14 comme les autres. Un acompte et une offre provisionnelle suivent la règle de l'indemnité : ils sont proposés par une offre, et leur accord est enregistré [ASSUMPTION: un acompte passe par une offre d'acompte avec accord enregistré ; à confirmer à la séance d'immersion].
+Le serveur ne crée un ordre de règlement d'indemnité qu'à l'enregistrement de l'**accord** de l'assuré ou de la victime (décision D6). L'accord est enregistré par l'**accueil (`ACC`)** ou par un agent qui n'a ni instruit ni validé le dossier (FR-86, FR-29), avec la pièce originale signée qui le prouve : offre signée, ou procès-verbal de transaction au corporel. Cet enregistrement déclenche la transition `OFFRE_ENVOYEE → ORDRE_EMIS` (§5.13, transition 14). Au corporel VTM, quand l'accord est une transaction (offre définitive ou provisionnelle acceptée), l'ordre est créé à l'accord mais reste **« différé »** (non émis) jusqu'à la **date d'éligibilité** (date de conclusion plus 15 jours, calculée et non modifiable) : la condition `DELAI_DENONCIATION_ECOULE` garde l'émission (FR-86, FR-136). Les **honoraires d'expert** échappent à l'accord de l'assuré, car leur bénéficiaire n'est pas l'assuré : ce sont des règlements de nature `HONORAIRES`, nés du **visa des honoraires par `RESP`** (jamais par `CPT`), donné seulement si le **rapport est validé** et la facture rapprochée de la lettre de mission (FR-182, FR-91, FR-68) ; `CPT` émet seulement. Ils **ne changent pas le statut du dossier** et ne passent pas par la transition 14. Le règlement **à titre commercial** est décidé par le `DG` seul (§5.7, D8), mais **l'accord du bénéficiaire reste exigé** : il passe par l'offre et par la transition 14 comme les autres. Un acompte et une offre provisionnelle suivent la règle de l'indemnité : ils sont proposés par une offre, et leur accord est enregistré *(défaut H-070 : un acompte passe par une offre d'acompte avec accord enregistré ; à confirmer à la séance d'immersion)*.
 
 **Conséquences (testables) :**
 - Créer un ordre de règlement d'indemnité sur un dossier dont l'accord n'est pas enregistré est refusé avec le code `ACCORD_ENREGISTRE`.
 - L'accord enregistré porte : la pièce jointe (obligatoire), la date de l'accord, l'auteur de l'enregistrement, le montant accepté. Sans pièce, l'enregistrement est refusé (`ACCORD_ENREGISTRE`).
 - Le montant de l'ordre est égal au montant accepté ; il ne peut pas dépasser le montant validé (§5.7). Un ordre de montant supérieur est refusé (`MONTANT_VALIDE`).
-- Au corporel, une dénonciation de la transaction reçue dans les 15 jours qui suivent sa conclusion (Code CIMA, art. 235, SÛR) est enregistrée sur le dossier (lettre de dénonciation versée comme pièce) ; tant qu'aucun règlement n'est remis, elle annule les règlements non remis (statut `ANNULE`, motif tracé) et le dossier repasse en `EN_INSTRUCTION` (transition 42) ; une nouvelle offre repart de `EN_INSTRUCTION`.
+- Un ordre d'accord de transaction corporel VTM est créé « différé » ; son émission est refusée tant que `DELAI_DENONCIATION_ECOULE` n'est pas vrai (jours 1 à 14), et acceptée au jour 16.
+- Un accord enregistré par un `GEST` ou un `RESP` est refusé (`DROIT_INSUFFISANT`) ; par un agent qui a instruit ou validé, il est refusé (`SEPARATION_DES_TACHES`).
+- Un ordre d'honoraires visé par `CPT` est refusé (`DROIT_INSUFFISANT`) ; un visa sans rapport validé ou sans facture rapprochée de la lettre de mission est refusé (`HONORAIRES_NON_VISES`).
+- Un accord partiel ou un acompte permet au dossier de passer `REGLE` quand le reste à payer, calculé sur le montant **accepté**, est zéro.
+- Au corporel, une dénonciation de la transaction reçue dans les 15 jours qui suivent sa conclusion (Code CIMA, art. 235, SÛR) est enregistrée sur le dossier (lettre de dénonciation versée comme pièce) ; tant qu'aucun règlement n'est remis, elle annule les ordres différés et les règlements non remis (statut `ANNULE`, motif tracé) et le dossier repasse en `EN_INSTRUCTION` (transition 42) ; une nouvelle offre repart de `EN_INSTRUCTION`.
 - Un ordre d'honoraires sans visa des honoraires est refusé (`HONORAIRES_NON_VISES`) ; le visa ne peut pas dépasser le montant facturé, et exige un motif au-delà de la lettre de mission (démo, §5.5).
 - Le règlement à titre commercial sans décision du `DG` enregistrée est refusé (`VALIDATION_ACQUISE`) ; sans accord enregistré du bénéficiaire, il est refusé comme tout ordre (`ACCORD_ENREGISTRE`).
 - Un règlement d'honoraires créé ou payé ne change ni le statut du dossier ni le reste à payer de l'indemnité.
@@ -1370,11 +1656,12 @@ Le serveur ne crée un ordre de règlement d'indemnité qu'à l'enregistrement d
 
 #### FR-91 : Un dossier peut porter plusieurs règlements
 
-Un dossier peut avoir **plusieurs règlements** (décision D11) : un acompte, une offre provisionnelle puis une offre définitive, plusieurs bénéficiaires (victime, ayants droit, garage, représentant), les honoraires d'expert. Chaque règlement a sa nature (`INDEMNITE`, `ACOMPTE`, `PROVISIONNEL`, `HONORAIRES`, `COMMERCIAL`), son bénéficiaire, son montant, son moyen, son **état** (FR-92) et sa **quittance**. Le serveur tient en permanence trois montants du dossier : le montant **validé**, le montant **payé** (somme des règlements `PAYE`), le **reste à payer** (validé moins payé ; jamais négatif). Ces montants ne se confondent jamais avec l'évalué, le proposé (l'offre) ni la provision (vocabulaire du PRD, §3).
+Un dossier peut avoir **plusieurs règlements** (décision D11) : un acompte, une offre provisionnelle puis une offre définitive, plusieurs bénéficiaires (victime, ayants droit, garage, représentant), les honoraires d'expert. Chaque règlement a sa nature (`INDEMNITE`, `ACOMPTE`, `PROVISIONNEL`, `HONORAIRES`, `COMMERCIAL`), son bénéficiaire, son montant, son moyen, son **état** (FR-92) et sa **quittance**. Le serveur tient en permanence trois montants du dossier : le montant **validé**, le montant **payé** (somme des règlements `PAYE`), le **reste à payer** (montant **accepté** moins payé ; jamais négatif). Ces montants ne se confondent jamais avec l'évalué, le proposé (l'offre) ni la provision (vocabulaire du PRD, §3).
 
 **Conséquences (testables) :**
 - La somme des règlements d'indemnité non annulés d'un dossier ne dépasse jamais le montant validé : un règlement qui le ferait dépasser est refusé (`MONTANT_VALIDE`).
-- Les honoraires se suivent à part : ils n'entrent ni dans le reste à payer de l'indemnité ni dans le calcul de la délégation de l'assuré, mais figurent dans le coût du dossier.
+- Les honoraires se suivent à part : ils n'entrent pas dans le reste à payer de l'indemnité, mais ils sont soumis à leur **plafond par niveau** de la matrice de délégation (au-delà, comité, FR-78) et figurent dans le coût du dossier.
+- Un règlement à un ayant droit exige sa ligne vérifiée au registre de FR-70a (`AYANT_DROIT_NON_VERIFIE`).
 - Une quittance par règlement ; un règlement annulé garde sa quittance en état `ANNULEE` (jamais supprimée).
 - Au corporel, le règlement est libellé exclusivement au nom de la victime ou des ayants droit, même en présence d'un conseil (Code CIMA, art. 232, SÛR) : un règlement corporel dont le bénéficiaire n'est ni la victime ni un ayant droit enregistré est refusé (`BENEFICIAIRE_CONFORME`).
 - Quand le bénéficiaire est un mineur ou un incapable, le serveur exige l'enregistrement de l'avis au juge des tutelles ou au conseil de famille au moins 15 jours avant le paiement (Code CIMA, art. 234, SÛR), faute de quoi l'émission est refusée (`AVIS_TUTELLE`).
@@ -1382,15 +1669,18 @@ Un dossier peut avoir **plusieurs règlements** (décision D11) : un acompte, un
 
 #### FR-92 : États du règlement, états de la quittance, statut du dossier
 
-Chaque règlement suit une machine à états, et sa quittance une autre (décision D11). Le statut du dossier en découle : il n'est jamais saisi à la main.
+Chaque règlement suit une machine à états, et sa quittance une autre (décision D11). Le statut du dossier en découle : il n'est jamais saisi à la main. Il n'existe qu'**un seul jeu d'états du règlement** : `A_PAYER`, `EN_COURS`, `INCONNU`, `PARTIEL`, `PAYE`, `ECHEC`. Chaque règlement porte une **clé d'idempotence** unique, transmise à `paiement` et **conservée à chaque nouvelle tentative**.
 
 | État du règlement | Sens | Ce qui le fait naître |
 |---|---|---|
 | `A_PAYER` | l'ordre est émis, la comptabilité ne l'a pas encore pris | création de l'ordre |
 | `EN_COURS` | chèque émis non remis, ou paiement électronique lancé | émission par `CPT` |
 | `PARTIEL` | une partie de la somme est payée (paiement électronique partiel, ou remise en plusieurs fois) | confirmation partielle |
+| `INCONNU` | l'issue du paiement électronique n'est pas confirmée par `paiement` (délai dépassé, réponse perdue) | absence de confirmation |
 | `PAYE` | remis au bénéficiaire (chèque, espèces) ou confirmé par `paiement` (virement, Mobile Money) | remise ou confirmation |
-| `ECHEC` | le paiement électronique est refusé, ou une anomalie est signalée | rejet ou signalement |
+| `ECHEC` | le paiement électronique est refusé explicitement par le fournisseur, ou une anomalie est signalée | refus explicite ou signalement |
+
+**Règles de l'état `INCONNU` et de l'état `ECHEC`.** Un règlement `INCONNU` ne se relance pas et ne s'annule pas tant que le **rapprochement** n'a pas posé `PAYE` ou `ECHEC` ; le rapprochement est fait par une personne qui n'a pas lancé le paiement. `ECHEC` n'est posé que sur refus explicite du fournisseur ; il ne se relance qu'avec la **même clé d'idempotence**, après confirmation de `paiement`. Un règlement `EN_COURS` ou `INCONNU` se résout d'abord : il ne s'annule pas.
 
 | État de la quittance | Sens |
 |---|---|
@@ -1399,25 +1689,42 @@ Chaque règlement suit une machine à états, et sa quittance une autre (décisi
 | `SIGNEE` | signée par le bénéficiaire (FR-96) |
 | `REMISE` | le règlement a été remis ou confirmé contre cette quittance |
 | `ENCAISSEE` | l'encaissement est confirmé (rapprochement bancaire, `paiement`) |
-| `ANNULEE` | annulée avant remise [ASSUMPTION: état repris de la démo, à ajouter aux cinq états de D11] |
+| `ANNULEE` | annulée avant remise *(défaut H-071 : état repris de la démo, à ajouter aux cinq états de D11)* |
 
-Statut du dossier dérivé (les règlements d'honoraires sont exclus de ce calcul, FR-90) : `ORDRE_EMIS` tant qu'au moins un règlement d'indemnité est `A_PAYER` ou `ECHEC` ; `CHEQUE_A_REMETTRE` quand tous les règlements sont émis et qu'au moins un chèque attend sa remise ; `REGLE` quand tous les règlements sont `PAYE` et que le reste à payer de l'indemnité validée est **zéro**.
+Statut du dossier dérivé (les règlements d'honoraires sont exclus de ce calcul, FR-90). Le **reste à payer** est le montant **accepté** moins le payé. La **table de vérité** couvre tous les cas des règlements d'indemnité non annulés, évalués dans cet ordre :
+
+| Règlements d'indemnité non annulés | Statut du dossier |
+|---|---|
+| au moins un `A_PAYER` ou `ECHEC` | `ORDRE_EMIS` |
+| aucun `A_PAYER` ni `ECHEC` ; au moins un paiement électronique `EN_COURS`, ou un règlement `PARTIEL` ou `INCONNU` | `ORDRE_EMIS` (le dossier garde `ORDRE_EMIS` : le seul règlement `EN_COURS`, `PARTIEL` ou `INCONNU` ne fait pas avancer le statut) |
+| aucun des cas précédents ; au moins un chèque `EN_COURS` (émis, non remis) | `CHEQUE_A_REMETTRE` |
+| tous `PAYE` et reste à payer **zéro** | `REGLE` |
+| tous `PAYE` et reste à payer supérieur à zéro | `ORDRE_EMIS` (reste à ordonner) |
+
+La table de test est **générée à partir de ce tableau**, non écrite à la main. La **transition 42** (dénonciation) part de `ORDRE_EMIS`, et, tant que `DELAI_DENONCIATION_ECOULE` est faux, aussi de `CHEQUE_A_REMETTRE` et de `REGLE` (règlement non encaissé) : aucune nouvelle transition n'est créée, la ligne 42 du tableau de FR-135 couvre ces trois départs.
 
 **Conséquences (testables) :**
 - Un dossier avec deux règlements dont un seul est `PAYE` n'est pas `REGLE`.
 - Une remise sur un dossier déjà plus avancé (acompte, règlement partiel) ne change que la quittance et l'état du règlement, pas le statut du dossier.
 - Le passage `ORDRE_EMIS → REGLE` sans chèque (virement, Mobile Money) n'a lieu qu'à la confirmation de `paiement` (transition 18) ; il est refusé tant que la quittance n'est pas `SIGNEE` (`QUITTANCE_SIGNEE`).
 - Un règlement `ECHEC` reste visible dans la file de la comptabilité avec la cause du refus ; le dossier ne passe pas en `REGLE`.
+- Deux envois du même ordre à `paiement` avec la même clé d'idempotence ne produisent qu'un paiement ; une nouvelle tentative après `ECHEC` reprend la même clé et exige la confirmation de `paiement` (`CONFIRMATION_PAIEMENT_REQUISE`).
+- Un règlement `INCONNU` refuse toute relance et toute annulation (`ETAT_REGLEMENT`) tant que le rapprochement n'a pas posé `PAYE` ou `ECHEC` ; le rapprochement est refusé à la personne qui a lancé le paiement (`SEPARATION_DES_TACHES`).
+- Un dossier dont le seul règlement est `EN_COURS` (paiement électronique), `PARTIEL` ou `INCONNU` garde `ORDRE_EMIS` ; un test par ligne de la table de vérité, générée du tableau, vérifie le statut dérivé.
+- Un acompte payé avec un reste à payer positif sur le montant accepté garde `ORDRE_EMIS` ; quand le reste à payer de l'accepté est zéro, le dossier passe `REGLE`, y compris après un accord partiel.
 - Après un règlement provisionnel payé et un reste à payer nul sur le montant validé, le dossier passe en `REGLE` ; il peut ensuite repasser en `EN_INSTRUCTION` pour l'offre définitive (transition 23).
 - Aucun écran ne permet de changer à la main l'état d'un règlement ou le statut du dossier ; seuls les gestes de ce chapitre les font évoluer.
+- Une quittance n'est marquée `SIGNEE` que par un agent distinct de celui qui a émis le règlement (`SEPARATION_DES_TACHES`).
 
 #### FR-93 : La comptabilité émet le règlement, et seule la comptabilité
 
-L'émission du règlement (le chèque, l'ordre de virement, l'ordre Mobile Money) est faite par `CPT` seul. Le service sinistres, le responsable, la direction et le contrôle interne **voient** les ordres et les règlements, ils ne les émettent pas (séparation SEP-02 de la démo : aucune sortie de trésorerie sans l'intervention d'un comptable qui n'a pas décidé). Un gestionnaire qui a instruit ou validé le dossier ne peut pas non plus enregistrer l'émission, même s'il détient aussi le rôle `CPT` (cumul de rôles, SEP-01 et SEP-02).
+L'émission du règlement (le chèque, l'ordre de virement, l'ordre Mobile Money) est faite par `CPT` seul. La comptabilité **prépare** l'ordre ; un **second `CPT`, distinct** de celui qui l'a préparé, le **valide** avant exécution ; au-dessus d'un seuil paramétré, le `DG` le valide aussi *(défaut H-072 : 5 000 000 FCFA ; à confirmer à la séance d'immersion)*. Le service sinistres, le responsable, la direction et le contrôle interne **voient** les ordres et les règlements, ils ne les émettent pas (séparation SEP-02 de la démo : aucune sortie de trésorerie sans l'intervention d'un comptable qui n'a pas décidé). Un gestionnaire qui a instruit ou validé le dossier ne peut pas non plus enregistrer l'émission, même s'il détient aussi le rôle `CPT` (cumul de rôles, SEP-01 et SEP-02).
 
 **Conséquences (testables) :**
 - Une demande d'émission par un autre rôle que `CPT` est refusée (`DROIT_INSUFFISANT`).
-- Une demande d'émission par un utilisateur qui a instruit, évalué, validé ou enregistré l'accord du dossier est refusée (`SEPARATION_DES_TACHES`) ; la tentative est tracée.
+- Une demande d'émission par un utilisateur qui est partie au dossier au sens de FR-29 (instruit, évalué, validé, contrôlé, enregistré l'accord) est refusée (`SEPARATION_DES_TACHES`) ; la tentative est tracée.
+- Un ordre préparé par un `CPT` et exécuté sans validation d'un second `CPT` distinct est refusé (`VALIDATION_ORDRE_REQUISE`) ; au-dessus du seuil, l'absence de validation du `DG` le refuse aussi.
+- Au corporel VTM, l'émission est refusée tant que `DELAI_DENONCIATION_ECOULE` n'est pas vrai (transitions 17, 18 et 20).
 - L'émission est refusée si un signal de fraude `BLOQUE` n'est pas écarté (`AUCUN_SIGNAL_BLOQUANT`, §5.12).
 - L'émission est refusée si l'un des contrôles de FR-100 est en alerte non levée (`CONTROLE_LBC_FT`).
 - Le `CPT` qui a émis un règlement ne peut pas le remettre au bénéficiaire (`SEPARATION_DES_TACHES`, FR-7 ligne 3, FR-97).
@@ -1426,7 +1733,7 @@ L'émission du règlement (le chèque, l'ordre de virement, l'ordre Mobile Money
 
 #### FR-94 : Le règlement par chèque
 
-Pour un chèque, `CPT` saisit la **banque**, le **numéro du chèque** et le **montant**. Si la compagnie utilise un gabarit, Prospera **imprime la lettre-chèque** sur ce gabarit (nom du bénéficiaire, montant en chiffres et en lettres, référence du dossier) ; sinon le chèque est rempli à la main et seul son numéro est saisi. Le chèque passe alors `CHEQUE_A_REMETTRE` (transition 17) et attend la remise du FR-97. Le gabarit est un paramètre de la compagnie ; Prospera n'en invente aucun [ASSUMPTION: la compagnie fournit son gabarit de lettre-chèque ; à défaut, remplissage manuel].
+Pour un chèque, `CPT` saisit la **banque**, le **numéro du chèque** et le **montant**. Si la compagnie utilise un gabarit, Prospera **imprime la lettre-chèque** sur ce gabarit (nom du bénéficiaire, montant en chiffres et en lettres, référence du dossier) ; sinon le chèque est rempli à la main et seul son numéro est saisi ; au **corporel**, le gabarit de lettre-chèque est **imposé**, et un chèque rempli à la main sans gabarit est contrôlé à la remise (FR-97). Le chèque passe alors `CHEQUE_A_REMETTRE` (transition 17) et attend la remise du FR-97. Le gabarit est un paramètre de la compagnie ; Prospera n'en invente aucun *(défaut H-073 : la compagnie fournit son gabarit de lettre-chèque ; à défaut, remplissage manuel)*.
 
 **Conséquences (testables) :**
 - Une émission de chèque sans numéro, sans banque ou sans montant est refusée avec le code `ORDRE_COMPLET`, et le message nomme le champ manquant.
@@ -1435,37 +1742,42 @@ Pour un chèque, `CPT` saisit la **banque**, le **numéro du chèque** et le **m
 - Le montant du chèque est égal au montant du règlement ; un écart est refusé (`MONTANT_VALIDE`).
 - La lettre-chèque imprimée est versée au dossier comme pièce, avec son numéro.
 - Aucun chèque n'est émis à l'ordre d'un garage ou d'un conseil au corporel (art. 232, FR-91).
+- Un contrôle **mensuel** relève les numéros de chèque annulés non rapprochés et les présente à la comptabilité et à `AUD`.
+- Au corporel, l'émission d'un chèque sans gabarit de lettre-chèque est refusée (`GABARIT_IMPOSE_AU_CORPOREL`).
 
 #### FR-95 : Le règlement par virement, PI-SPI ou Mobile Money
 
-Les moyens électroniques sont **exécutés par le module `paiement`** (§7.1) : virement bancaire, PI-SPI, et Mobile Money (T-Money, Flooz ; les opérateurs sont paramétrables par pays). `CPT` déclenche le paiement depuis l'ordre ; `paiement` l'exécute, le rapproche et renvoie sa confirmation à Prospera. Sur confirmation, le règlement passe `PAYE` et, s'il est le dernier, le dossier passe `REGLE` (transition 18). Il n'y a pas de remise au guichet pour ces moyens : la quittance est signée **avant** le paiement (FR-96).
+Les moyens électroniques sont **exécutés par le module `paiement`** (§7.1) : virement bancaire, PI-SPI, et Mobile Money (T-Money, Flooz ; les opérateurs sont paramétrables par pays). `CPT` déclenche le paiement depuis l'ordre ; `paiement` l'exécute, le rapproche et renvoie sa confirmation à Prospera. Sur confirmation, le règlement passe `PAYE` et, s'il est le dernier, le dossier passe `REGLE` (transition 18). Il n'y a pas de remise au guichet pour ces moyens : la quittance est signée **avant** le paiement (FR-96). La **confirmation manuelle** d'un virement hors PI-SPI exige un **justificatif bancaire joint** et un **second `CPT`** ; elle ne peut pas être faite par celui qui a lancé le virement. L'ordre est préparé, puis validé par un second `CPT` avant exécution (FR-93).
 
 **Conséquences (testables) :**
 - Le lancement d'un paiement électronique est refusé tant que la quittance n'est pas `SIGNEE` (`QUITTANCE_SIGNEE`).
 - Le lancement est refusé si les coordonnées du bénéficiaire (RIB, numéro Mobile Money) ne sont pas **vérifiées** : numéro de compte au nom du bénéficiaire, ou numéro Mobile Money dont l'identité du porteur correspond au bénéficiaire (`COORDONNEES_VERIFIEES`).
-- Chaque demande à `paiement` porte une référence unique (la référence du règlement) : un même règlement relancé deux fois ne paie qu'une fois.
-- Un refus de `paiement` passe le règlement `ECHEC` avec le motif reçu ; `CPT` peut relancer après correction des coordonnées, avec motif.
+- Chaque demande à `paiement` porte une **clé d'idempotence** unique (celle du règlement, FR-92), conservée à chaque tentative : un même règlement relancé deux fois ne paie qu'une fois.
+- Un refus **explicite** de `paiement` passe le règlement `ECHEC` avec le motif reçu ; `CPT` peut relancer après correction des coordonnées, avec motif et **avec la même clé**, après confirmation de `paiement`. Une issue non confirmée passe le règlement `INCONNU`, sans relance.
+- La confirmation manuelle d'un virement hors PI-SPI sans justificatif bancaire est refusée (`JUSTIFICATIF_BANCAIRE_ABSENT`) ; par celui qui a lancé le virement, elle est refusée (`SEPARATION_DES_TACHES`) ; sans second `CPT`, elle est refusée (`VALIDATION_ORDRE_REQUISE`).
 - Le rapprochement bancaire des virements et du Mobile Money se fait dans `paiement` ; un écart de rapprochement de plus de 60 jours alerte la comptabilité (paramètre ; décision D16).
 - Si `paiement` est indisponible, l'ordre reste `A_PAYER` ; aucun statut n'est avancé sans confirmation.
 
 #### FR-96 : La quittance, signée avant tout paiement électronique
 
-Chaque règlement a sa **quittance**, numérotée. Elle porte : le numéro, le dossier, le bénéficiaire, son téléphone, le montant en chiffres et en lettres, le moyen, la banque et le numéro de chèque s'il y a lieu, les dates d'édition et de signature, la référence de la transaction pour un paiement électronique, l'auteur de l'émission. Au corporel, le texte rappelle que le règlement vaut exécution de la transaction (le droit de dénonciation est déjà purgé, FR-90). La signature est **manuscrite** : au guichet, ou sur la quittance imprimée, signée puis scannée ou photographiée et retournée par l'assuré. L'**acceptation électronique par code à usage unique** est une option, activable seulement après validation juridique de la valeur de la signature électronique (loi 2017-007 non lue ; revue juridique obligatoire, D21).
+Chaque règlement a sa **quittance**, numérotée. Elle porte : le numéro, le dossier, le bénéficiaire, son téléphone, le montant en chiffres et en lettres, le moyen, la banque et le numéro de chèque s'il y a lieu, les dates d'édition et de signature, la référence de la transaction pour un paiement électronique, l'auteur de l'émission. Au corporel, le texte rappelle que le règlement vaut exécution de la transaction (le droit de dénonciation est déjà purgé **par construction** : l'émission n'a lieu qu'après `DELAI_DENONCIATION_ECOULE`, FR-86, FR-90). La signature est **manuscrite** : au guichet, ou sur la quittance imprimée, signée puis scannée ou photographiée et retournée par l'assuré. L'**acceptation électronique par code à usage unique** est une option, activable seulement après validation juridique de la valeur de la signature électronique (loi 2017-007 non lue ; revue juridique obligatoire, D21).
 
 **Conséquences (testables) :**
 - Une quittance `SIGNEE` sans pièce de signature jointe (scan ou photo) est refusée (`QUITTANCE_SIGNEE`).
-- L'acceptation électronique est indisponible tant que le paramètre n'est pas activé par l'administrateur sur décision du `DG` ; si elle est activée, le code à usage unique est envoyé au numéro enregistré du bénéficiaire, valable 10 minutes [ASSUMPTION: durée de validité du code], et la preuve (date, numéro, résultat) est versée à la quittance.
+- L'acceptation électronique est indisponible tant que le paramètre n'est pas activé par l'administrateur sur décision du `DG` ; si elle est activée, le code à usage unique est envoyé au numéro enregistré du bénéficiaire, valable 10 minutes *(défaut H-074 : durée de validité du code)*, et la preuve (date, numéro, résultat) est versée à la quittance.
 - Une quittance ne passe `REMISE` qu'avec le geste de remise (FR-97) ou la confirmation de `paiement` (FR-95).
+- Une quittance `SIGNEE` par l'agent qui a émis le règlement est refusée (`SEPARATION_DES_TACHES`, ligne 15 de FR-7) : la signature est marquée par un agent distinct.
 - Une quittance `ANNULEE` ne peut plus être signée ni remise ; sa ré-émission crée une nouvelle quittance, numérotée.
 - La quittance signée est versée au dossier et figure au bordereau de versement aux archives (§6.2).
 
 #### FR-97 : La remise du chèque au guichet
 
-À la remise, `ACC` enregistre (`CPT` seulement pour un règlement qu'il n'a pas lui-même émis, FR-7, FR-93) : l'**identité** de la personne qui retire et le **numéro de sa pièce d'identité**, et la **quittance signée** (FR-96). Le champ « retiré par » n'est jamais pré-rempli (constat de la démo). Si le retirant n'est pas le bénéficiaire (procuration, représentant légal, avocat), la pièce de pouvoir est jointe et le lien est saisi. La remise fait passer le règlement `PAYE` et, s'il est le dernier, le dossier `REGLE` (transition 20).
+À la remise, `ACC` enregistre (`CPT` seulement pour un règlement qu'il n'a pas lui-même émis, FR-7, FR-93) : l'**identité** de la personne qui retire et le **numéro de sa pièce d'identité**, et la **quittance signée** (FR-96). Pour un chèque rempli à la main, `ACC` saisit aussi le **nom et le montant lus sur le chèque** : le serveur les compare à l'ordre, et la **photo du chèque** est obligatoire au dossier. Le champ « retiré par » n'est jamais pré-rempli (constat de la démo). Si le retirant n'est pas le bénéficiaire (procuration, représentant légal, avocat), la pièce de pouvoir est jointe et le lien est saisi. La remise fait passer le règlement `PAYE` et, s'il est le dernier, le dossier `REGLE` (transition 20).
 
 **Conséquences (testables) :**
 - Une remise sans identité du retirant est refusée (`IDENTITE_RETIRANT`) ; une remise avec un nom mais sans numéro de pièce d'identité l'est aussi.
 - Une remise sans quittance signée est refusée (`QUITTANCE_SIGNEE`).
+- Un chèque dont le nom ou le montant lus diffère de l'ordre est refusé (`CHEQUE_NON_CONFORME_A_L_ORDRE`) ; une remise sans photo du chèque est refusée (`PHOTO_CHEQUE_ABSENTE`).
 - Une remise à une personne autre que le bénéficiaire sans pièce de pouvoir est refusée (`POUVOIR_REQUIS`) ; au corporel, le chèque reste libellé au nom de la victime ou des ayants droit (art. 232).
 - La remise est refusée si un signal de fraude `BLOQUE` n'est pas écarté (`AUCUN_SIGNAL_BLOQUANT`) ; le chèque est alors mis en attente et `CPT` est alerté.
 - La remise est tracée : retirant, numéro de pièce, accusé signé (oui ou non), observation, auteur, date et heure. La copie de la pièce d'identité est conservée 10 ans au moins (LBC/FT, règlement CIMA n° 0004/CIMA/PCMA/PCE/SG/08, art. 13, SÛR).
@@ -1473,7 +1785,7 @@ Chaque règlement a sa **quittance**, numérotée. Elle porte : le numéro, le d
 
 #### FR-98 : Les espèces sont plafonnées
 
-Le règlement en espèces est un moyen exceptionnel, plafonné à **500 000 FCFA** par règlement et par bénéficiaire (paramètre ; valeur de la démo) [ASSUMPTION: la loi togolaise ne fixe aucun plafond trouvé pour les assureurs ; à valider par le juriste, D21]. Au-delà, le moyen doit être traçable (chèque, virement, Mobile Money).
+Le règlement en espèces est un moyen exceptionnel, plafonné à **500 000 FCFA** par règlement et par bénéficiaire (paramètre ; valeur de la démo) *(point juridique J-14 : la loi togolaise ne fixe aucun plafond trouvé pour les assureurs ; à valider par le juriste, D21)*. Au-delà, le moyen doit être traçable (chèque, virement, Mobile Money).
 
 **Conséquences (testables) :**
 - Un règlement en espèces supérieur au plafond est refusé avec le code `PLAFOND_ESPECES`.
@@ -1483,22 +1795,24 @@ Le règlement en espèces est un moyen exceptionnel, plafonné à **500 000 FCFA
 
 #### FR-99 : La comptabilité peut rejeter l'ordre
 
-Quand `CPT` constate une anomalie comptable (bénéficiaire mal orthographié, montant incohérent avec la décision, coordonnées manifestement fausses, doublon), il **rejette l'ordre** avec un motif écrit. Le dossier repasse en `EN_VALIDATION` (transition 19), et la décision de payer doit être reprise par le circuit de validation (§5.7).
+Quand `CPT` constate une anomalie comptable (bénéficiaire mal orthographié, montant incohérent avec la décision, coordonnées manifestement fausses, doublon), il **rejette l'ordre** avec un motif écrit. Le rejet n'agit que sur le règlement visé. Le dossier repasse en `EN_VALIDATION` (transition 19), et la décision de payer doit être reprise par le circuit de validation (§5.7).
 
 **Conséquences (testables) :**
 - Un rejet sans motif d'au moins 10 caractères est refusé (`MOTIF_ECRIT`).
-- Un rejet n'est possible que sur un règlement `A_PAYER` ou `ECHEC` ; sur un règlement `PAYE`, il est refusé (`ETAT_REGLEMENT`).
-- Le rejet annule les règlements non payés du dossier et leurs quittances (`ANNULEE`), sans toucher aux règlements déjà `PAYE`.
-- L'accord de l'assuré n'est pas perdu : la nouvelle validation s'appuie sur l'accord enregistré tant que le montant validé ne dépasse pas le montant accepté ; si la nouvelle validation fixe un montant différent, une nouvelle offre est requise et le dossier suit `EN_VALIDATION → OFFRE_ENVOYEE`.
+- Un rejet n'est possible que sur un règlement `A_PAYER` ou `ECHEC` ; sur un règlement `PAYE`, `EN_COURS`, `INCONNU` ou `PARTIEL`, il est refusé (`ETAT_REGLEMENT`).
+- Le rejet annule le règlement visé et sa quittance (`ANNULEE`), sans toucher aux règlements déjà `PAYE` ni à un règlement `EN_COURS`, `INCONNU` ou `PARTIEL`.
+- L'accord de l'assuré n'est pas perdu : la nouvelle validation s'appuie sur l'accord enregistré tant que le montant validé ne dépasse pas le montant accepté ; si la nouvelle validation fixe un montant **supérieur** au montant accepté, une nouvelle offre est requise et le dossier suit `EN_VALIDATION → OFFRE_ENVOYEE` ; un montant validé **inférieur** au montant accepté reste valable sans nouvelle offre : la transition 10 est alors dispensée de l'envoi (ligne 10a, validation, sans ligne 10b).
 - Le gestionnaire et le responsable reçoivent une notification avec le motif (§5.15).
 
 #### FR-100 : Les contrôles LBC/FT avant paiement
 
-Avant toute émission (FR-93), le serveur exécute les contrôles de lutte contre le blanchiment et le financement du terrorisme issus de la démo et du cadre CIMA : (1) **bénéficiaire vérifié** : identité et pièce d'identité du bénéficiaire en dossier ; (2) **coordonnées bancaires modifiées** dans les 5 jours qui précèdent le paiement : alerte ; (3) **doublon de règlement** : même bénéficiaire, même montant, sur 30 jours ; (4) **concentration d'émission** : un même utilisateur `CPT` émet plus de 60 % du volume sur la période ; (5) **bénéficiaire différent de la victime** sans mandat enregistré ; (6) **cumul par bénéficiaire** supérieur au seuil national LBC/FT [ASSUMPTION: seuil national non lu, paramètre vide donc alerte inactive tant qu'il n'est pas saisi ; D21]. Les contrôles 1, 3 et 5 **bloquent** ; les contrôles 2, 4 et 6 **alertent** le responsable LBC et le contrôle interne, et exigent une levée motivée avant l'émission (sauf 4, qui alerte seulement). Un journal des **paiements de sinistres** (bénéficiaire réel, moyen, origine, destination, cumul par client) est tenu et exportable pour le responsable LBC, conservé 10 ans au moins (règlement CIMA n° 0004, art. 4.5 et 13, SÛR). Le mécanisme de déclaration de soupçon relève du responsable LBC de la compagnie ; Prospera conserve l'alerte et la trace de sa suite [ASSUMPTION: la déclaration de soupçon se fait hors Prospera ; à confirmer].
+Avant toute émission (FR-93), le serveur exécute les contrôles de lutte contre le blanchiment et le financement du terrorisme issus de la démo et du cadre CIMA : (1) **bénéficiaire vérifié** : identité et pièce d'identité du bénéficiaire en dossier ; (2) **coordonnées bancaires modifiées** dans les 5 jours qui précèdent le paiement : alerte ; (3) **doublon de règlement** : même bénéficiaire et même **sinistre** (date, police, immatriculation), le montant n'entrant pas dans la définition (FR-38, FR-224) ; (4) **concentration d'émission** : un même utilisateur `CPT` émet plus de 60 % du volume sur la période ; (5) **bénéficiaire différent de la victime** sans mandat enregistré ; (6) **cumul par bénéficiaire** supérieur au seuil national LBC/FT *(défaut H-075 : seuil national non lu, paramètre vide donc alerte inactive tant qu'il n'est pas saisi ; D21)*. Les contrôles 1, 3 et 5 **bloquent**, mais une **levée motivée par `AUD`** est possible (comme pour le doublon), de sorte qu'un expert ou un garage mandaté ne reste jamais dans un blocage sans issue ; les contrôles 2, 4 et 6 **alertent** le **responsable LBC** (FR-225, et non un rôle inexistant) et le contrôle interne, et exigent une levée motivée avant l'émission (sauf 4, qui alerte seulement). Le contrôle 6 est marqué **« non actif »** à l'écran tant que son paramètre est vide. Un journal des **paiements de sinistres** (bénéficiaire réel, moyen, origine, destination, cumul par client) est tenu et exportable pour le responsable LBC, conservé 10 ans au moins (règlement CIMA n° 0004, art. 4.5 et 13, SÛR). Le mécanisme de déclaration de soupçon relève du responsable LBC de la compagnie ; Prospera conserve l'alerte et la trace de sa suite *(défaut H-076 : la déclaration de soupçon se fait hors Prospera ; à confirmer)*.
 
 **Conséquences (testables) :**
 - Une émission vers un bénéficiaire dont l'identité n'est pas vérifiée est refusée (`BENEFICIAIRE_VERIFIE`).
-- Une émission qui reproduit un règlement du même bénéficiaire, au même montant, dans les 30 jours est refusée (`DOUBLON_REGLEMENT`) ; une dérogation motivée du responsable est possible et tracée.
+- Une émission qui reproduit un règlement du même bénéficiaire pour le même sinistre (date, police, immatriculation) est refusée (`DOUBLON_REGLEMENT`), quel que soit le montant ; une dérogation motivée du responsable est possible et tracée.
+- Un blocage de contrôle 1 ou 5 sur un expert ou un garage mandaté est levé par une levée motivée de `AUD` ; sans levée, l'émission est refusée (`CONTROLE_LBC_FT`).
+- Les alertes 2, 4 et 6 arrivent au responsable LBC ; le contrôle 6 s'affiche « non actif » tant que le seuil national n'est pas saisi.
 - Un changement de RIB ou de numéro Mobile Money enregistré dans les 5 jours avant l'émission déclenche une alerte au contrôle interne et exige la levée motivée de `RESP` ; sans levée, l'émission est refusée (`COORDONNEES_VERIFIEES`).
 - Une émission dont le bénéficiaire n'est ni l'assuré, ni la victime, ni l'ayant droit, ni un expert, ni un garage mandaté, sans mandat enregistré, est refusée (`BENEFICIAIRE_CONFORME`).
 - La part de volume de `CPT` en émissions est calculée par semaine ; au-dessus de 60 %, l'alerte apparaît dans la file du contrôle interne (`AUD`).
@@ -1510,25 +1824,26 @@ Un chèque `CHEQUE_A_REMETTRE` non retiré se suit par son ancienneté depuis l'
 
 **Conséquences (testables) :**
 - Au 8e jour sans remise, le chèque entre dans la liste d'appels du guichet avec le nom du bénéficiaire et son téléphone ; au 22e, il entre dans l'alerte de circulation longue ; au 31e, il entre dans l'état des expositions.
-- `CPT` peut **annuler** un chèque non retiré et **ré-émettre** : la quittance passe `ANNULEE`, une nouvelle quittance est créée, le dossier repasse `ORDRE_EMIS` (transition 21), avec motif obligatoire (`MOTIF_ECRIT`).
-- Un chèque annulé ne peut plus être remis ; le numéro annulé reste visible dans la série de la banque.
+- `CPT` peut **annuler** un chèque non retiré et **ré-émettre**, mais seulement après l'**opposition bancaire enregistrée** (référence et date) : le chèque passe d'abord à l'état `CHEQUE_EN_OPPOSITION`. L'annulation-réémission sans opposition enregistrée est refusée (`OPPOSITION_NON_ENREGISTREE`). Une fois l'opposition enregistrée, la quittance passe `ANNULEE`, une nouvelle quittance est créée, le dossier repasse `ORDRE_EMIS` (transition 21), avec motif obligatoire (`MOTIF_ECRIT`) ; aucun chèque de remplacement n'est émis avant l'opposition.
+- Un chèque annulé ne peut plus être remis ; le numéro annulé reste visible dans la série de la banque. Un **contrôle mensuel** relève les numéros de chèque annulés non rapprochés (FR-94).
 - L'exposition apparaît dans l'état pour la comptabilité (FR-103) avec le compte d'attente concerné, sans écriture passée par Prospera.
 - Le bénéficiaire qui ne retire jamais son chèque n'est pas relancé indéfiniment : après 3 relances sans effet, une proposition d'arbitrage (annulation, versement par un autre moyen, classement) est faite au responsable (§5.14, FR-143).
 
 #### FR-102 : Le paiement sous 72 heures après l'accord
 
-La cible interne de la compagnie est de payer **dans les 72 heures qui suivent l'accord** (procédure du groupe, mémoire de 2014, reprise comme valeur par défaut ; paramètre). Le point de départ est l'accord enregistré ; le point d'arrêt est le dernier règlement `PAYE`. Au **corporel automobile**, la loi ajoute ses propres délais : le paiement des sommes convenues se fait dans le mois qui suit l'expiration du délai de dénonciation de 15 jours (Code CIMA, art. 235 et 236, SÛR), et le retard produit de plein droit un intérêt de **5 % par mois** de retard sur le montant de l'indemnité (art. 236, SÛR ; la base de calcul est à faire valider par le juriste, D21). Pour ce régime, le point de départ de la cible interne est la fin du délai de dénonciation [ASSUMPTION: la compagnie n'émet pas avant la fin du délai de dénonciation de 15 jours au corporel ; à valider par le juriste].
+La cible interne de la compagnie est de payer **dans les 72 heures ouvrées qui suivent l'accord** (procédure de la compagnie étudiée par le mémoire de 2014 (zone CIMA), reprise comme valeur par défaut ; paramètre ; calendrier de la compagnie, A-18). Le point de départ est l'accord enregistré ; le point d'arrêt est le dernier règlement `PAYE`. Au **corporel automobile**, la loi ajoute ses propres délais : le paiement des sommes convenues se fait dans le mois qui suit l'expiration du délai de dénonciation de 15 jours (Code CIMA, art. 235 et 236, SÛR), et le retard produit de plein droit un intérêt de **5 % par mois** de retard (art. 236, SÛR ; base de calcul : paramètre `penalite.base`, défaut « montant de l'offre », libellé « estimation, base non validée », à faire valider par le juriste, D21, FR-85). Pour ce régime, le **délai de paiement court depuis la fin du délai de dénonciation** : l'émission n'a lieu qu'après `DELAI_DENONCIATION_ECOULE`, par construction (FR-86).
 
 **Conséquences (testables) :**
 - Le dossier affiche, pour chaque règlement : la date limite interne, la date limite légale s'il y a lieu, le temps restant (négatif si dépassé), et la nature (légale, interne) de l'échéance (§5.14).
 - Une alerte jaune apparaît à 48 heures de la cible interne, une alerte rouge au dépassement, dans la file de `CPT` et celle de `RESP`.
 - Au corporel automobile, le dépassement du délai légal affiche la pénalité cumulée (5 % de l'indemnité par mois de retard, base paramétrable) et exige, pour la réduire ou l'annuler, un motif « circonstances non imputables à l'assureur » enregistré par `RESP` (art. 233, SÛR).
 - Un dossier dont la dénonciation est ouverte n'a pas d'échéance légale de paiement avant sa fin ; la date de fin est calculée depuis la date de conclusion de la transaction.
-- Les échéances légales ne sont pas modifiables par la compagnie ; la cible de 72 heures l'est.
+- Les échéances légales ne sont pas modifiables par la compagnie ; la cible de 72 heures ouvrées l'est.
+- Au corporel VTM, le délai de paiement d'un mois et la cible interne de 72 heures ouvrées partent de la fin du délai de dénonciation, et non de la date de l'accord ; un test le vérifie.
 
 #### FR-103 : L'état et l'export pour la comptabilité
 
-La comptabilité officielle reste hors de Prospera (décision D16). Prospera produit un **état** et un **export** des règlements émis et remis, des honoraires d'expert, des provisions du dossier (§6.4, module `assurance`), des recours encaissés (FR-117) et des cessions. Le format suit le contrat d'échange (annexe C). L'état distingue : les règlements remis, les chèques émis non retirés (comptes d'attente), les règlements annulés à ré-émettre, les honoraires visés. La démo mettait en regard un plan de comptes CIMA ; ce plan est celui de la compagnie, il n'est jamais fixé dans Prospera [ASSUMPTION: les comptes sont saisis par la compagnie ; Prospera exporte des natures d'opération, la compagnie les affecte à ses comptes].
+La comptabilité officielle reste hors de Prospera (décision D16). Prospera produit un **état** et un **export** des règlements émis et remis, des honoraires d'expert, des provisions du dossier (§6.4, module `assurance`), des recours encaissés (FR-117) et des cessions. Le format suit le contrat d'échange (annexe C). L'état distingue : les règlements remis, les chèques émis non retirés (comptes d'attente), les règlements annulés à ré-émettre, les honoraires visés. Une **prévision hebdomadaire des règlements** (ordres `A_PAYER`, chèques à remettre, honoraires visés) est remise à la comptabilité chaque semaine. Les **engagements de décaissement** sont présentés en **deux colonnes séparées**, « exigible » et « à confirmer », **jamais sommées** ; ils sont alimentés par l'indemnité arrêtée, les missions confiées et les chèques non retirés. La **fraîcheur** de l'état est continue pour la file `CPT` et quotidienne pour l'export. La démo mettait en regard un plan de comptes CIMA ; ce plan est celui de la compagnie, il n'est jamais fixé dans Prospera *(défaut H-077 : les comptes sont saisis par la compagnie ; Prospera exporte des natures d'opération, la compagnie les affecte à ses comptes)*.
 
 **Conséquences (testables) :**
 - L'export d'une période liste, pour chaque mouvement : date, dossier, numéro de sinistre officiel, nature (indemnité, acompte, honoraires, recours encaissé), bénéficiaire, moyen, montant, référence du chèque ou de la transaction, statut, auteur.
@@ -1536,6 +1851,8 @@ La comptabilité officielle reste hors de Prospera (décision D16). Prospera pro
 - Le total de l'export d'une période est égal à la somme des règlements `PAYE` de cette période ; un test de recette le vérifie sur le jeu de démonstration.
 - L'export est disponible en fichier (Excel, JSON) ou par échange avec le logiciel de la compagnie (annexe C), dans les deux cas avec la date et l'heure de génération.
 - L'état et l'export sont réservés à `CPT`, `RESP`, `DG`, `DT` et `AUD` ; `ACC` n'y a pas accès.
+- La prévision hebdomadaire est remise chaque semaine à la comptabilité ; les engagements s'affichent en deux colonnes, « exigible » et « à confirmer » ; un test vérifie qu'aucun total n'additionne les deux colonnes.
+- La file `CPT` se met à jour en continu ; l'export est rafraîchi chaque jour.
 - Prospera n'affiche aucun solde bancaire : la position en banque appartient à la comptabilité de la compagnie.
 
 ### 5.9 Clore : solde à zéro, motif écrit, archives
@@ -1565,6 +1882,7 @@ Le gestionnaire (`GEST`, `GREC`) ou le responsable (`RESP`) clôture un dossier 
 - Un gestionnaire qui tente de verser le dossier aux archives obtient le refus `DROIT_INSUFFISANT` avec le message « Le versement relève de l'archiviste ».
 - Le dossier clos reste consultable en lecture par tous les rôles qui y avaient accès, et toute lecture est journalisée.
 - La date de clôture ne se modifie pas ; seule une réouverture (FR-107) la remplace, l'ancienne date restant dans l'historique.
+- La clôture ajoute au dossier la mention « réouverture tracée » (FR-107, inchangé) ; un dossier clos se retrouve par la référence `DEC-` **et** par le numéro de sinistre officiel : les deux restent des critères de recherche.
 
 #### FR-106 : Le recours continue seul quand le dossier est clos
 
@@ -1573,7 +1891,7 @@ Un dossier clos peut avoir un recours **encore actif** (décision D10). Le dossi
 **Conséquences (testables) :**
 - Un dossier `CLOTURE` avec un recours `NEGOCIATION` affiche les deux états côte à côte, et la corbeille de `GREC` continue de le montrer.
 - Clôturer le dossier ne modifie ni les échéances du recours, ni ses relances, ni sa prescription.
-- Les pièces ajoutées au recours après le versement du dossier aux archives sont conservées dans un **bordereau complémentaire** rattaché au même numéro d'archivage [ASSUMPTION: bordereau complémentaire pour les pièces tardives du recours ; à confirmer avec l'archiviste].
+- Les pièces ajoutées au recours après le versement du dossier aux archives sont conservées dans un **bordereau complémentaire** rattaché au même numéro d'archivage *(défaut H-078 : bordereau complémentaire pour les pièces tardives du recours ; à confirmer avec l'archiviste)*.
 - Un encaissement de recours sur un dossier clos est possible ; il n'altère pas le solde du dossier sinistre (reste à payer, provision).
 - Un recours `RECUPERE` ou `ABANDONNE` ne rouvre pas le dossier.
 
@@ -1594,10 +1912,11 @@ Dans la démo, passer en recours faisait sortir le dossier du circuit. Désormai
 
 #### FR-108 : Le recours naît dès l'ouverture quand un tiers est en cause
 
-À l'ouverture du dossier (§5.2), si un **tiers est en cause** (un autre véhicule, un autre assuré, un responsable identifié), le serveur crée le **recours** dans le statut `A_QUALIFIER`, le rattache au dossier et l'attribue au pôle recours (`GREC`). Un dossier peut porter **plusieurs recours**, un par tiers ou assureur débiteur [ASSUMPTION: la démo n'en porte qu'un par dossier ; un accident à plusieurs véhicules en demande plusieurs]. Un gestionnaire peut aussi le créer plus tard, dès qu'un tiers apparaît (rapport de police, rapport de responsabilité). Si l'instruction conclut qu'aucun tiers n'est en cause, le gestionnaire enregistre la décision « aucun tiers en cause » avec motif ; elle lève la condition de clôture du FR-104.
+À l'ouverture du dossier (§5.2), si un **tiers est en cause** (un autre véhicule, un autre assuré, un responsable identifié), le serveur crée le **recours** dans le statut `A_QUALIFIER`, le rattache au dossier et l'attribue au pôle recours (`GREC`). Un dossier peut porter **plusieurs recours**, un par tiers ou assureur débiteur *(défaut H-079 : la démo n'en porte qu'un par dossier ; un accident à plusieurs véhicules en demande plusieurs)*. Un gestionnaire peut aussi le créer plus tard, dès qu'un tiers apparaît (rapport de police, rapport de responsabilité). Au **corporel à plusieurs véhicules**, le dossier est en « mandat pour compte d'autrui » (FR-82) : le recours se calcule après la répartition entre assureurs, et l'assureur meneur désigné porte les intérêts de retard. Si l'instruction conclut qu'aucun tiers n'est en cause, le gestionnaire enregistre la décision « aucun tiers en cause » avec motif ; elle lève la condition de clôture du FR-104.
 
 **Conséquences (testables) :**
 - À l'ouverture d'un dossier avec un tiers déclaré, un recours `A_QUALIFIER` existe sans aucun geste du gestionnaire, avec la date de naissance, le débiteur présumé et la responsabilité déclarée.
+- Sur un dossier corporel à deux véhicules, le recours porte sur la part répartie à l'assureur du tiers, après désignation de l'assureur meneur (FR-82).
 - Un recours sans action depuis plus de 30 jours est signalé à `GREC` et à `RESP` (paramètre).
 - Un recours `A_QUALIFIER` depuis plus de 60 jours est signalé comme « nouveau recours non traité » (paramètre, démo).
 - Créer un recours ne change ni le statut du dossier ni son volet : le dossier reste sur son volet (corporel, matériel, risques divers), et la lettre du FR-109 part en parallèle.
@@ -1614,11 +1933,11 @@ Dès l'ouverture, une **lettre de mise en cause** est préparée pour le tiers o
 - Si le débiteur n'est pas encore identifié, la lettre reste `A_PREPARER` et la ligne « identifier le tiers » de la checklist (FR-112) est ouverte.
 - Chaque envoi enregistre : canal (courrier avec accusé, e-mail, huissier, remise en main propre), preuve d'envoi, preuve de réception quand elle existe.
 - La lettre porte la référence de déclaration, le numéro de sinistre officiel s'il est connu, et le nom de `GREC` (art. 242 : nom du gestionnaire en correspondance, SÛR, pour le corporel automobile).
-- Une lettre non envoyée dans les 5 jours ouvrés après l'ouverture est signalée au responsable [ASSUMPTION: 5 jours ouvrés ; la procédure du groupe dit « dès l'ouverture » sans chiffre].
+- Une lettre non envoyée dans les 5 jours ouvrés après l'ouverture est signalée au responsable *(défaut H-080 : 5 jours ouvrés ; la procédure de la compagnie étudiée par le mémoire de 2014 (zone CIMA) dit « dès l'ouverture » sans chiffre)*.
 
 #### FR-110 : Le recours se relance tous les 15 jours
 
-Tant que le débiteur n'a pas répondu, puis jusqu'au recouvrement, le recours est **relancé tous les 15 jours** (paramètre ; procédure du groupe, mémoire de 2014). Le point de départ est l'envoi de la lettre de mise en cause, puis de chaque relance ; le point d'arrêt est la réponse du débiteur, puis, pour le second cycle, l'encaissement complet.
+Tant que le débiteur n'a pas répondu, puis jusqu'au recouvrement, le recours est **relancé tous les 15 jours** (paramètre ; procédure de la compagnie étudiée par le mémoire de 2014 (zone CIMA)). Le point de départ est l'envoi de la lettre de mise en cause, puis de chaque relance ; le point d'arrêt est la réponse du débiteur, puis, pour le second cycle, l'encaissement complet.
 
 **Conséquences (testables) :**
 - Quinze jours après l'envoi d'une lettre sans réponse, le recours entre dans la liste « à relancer » de `GREC`.
@@ -1636,7 +1955,7 @@ La réclamation du **remboursement** ne part qu'**après le paiement de l'assur�
 - Le montant réclamé ne dépasse pas la somme des règlements `PAYE` de l'indemnité multipliée par la part du tiers (FR-113) ; un montant supérieur est refusé (`MONTANT_RECLAME`).
 - Trente jours après le dernier règlement `PAYE`, un recours encore sans réclamation envoyée est signalé à `GREC` et `RESP`.
 - Quand l'assuré est payé en plusieurs fois, une réclamation complémentaire peut suivre chaque règlement, sur la même créance.
-- Quand le débiteur est inconnu ou non assuré, la qualification enregistre « auteur inconnu » ou « auteur non assuré » : si un fonds de garantie automobile existe et est activé (paramètre par pays), le serveur ouvre l'échéancier du fonds (procès-verbal transmis dans les 60 jours de l'accident, déclaration dans les 3 mois de la réclamation, Code CIMA art. 606 et 608, SÛR) ; sinon la règle de l'art. 274 s'applique (part supportée par les autres assureurs à parts égales). Au Togo, l'existence du fonds n'est pas confirmée [ASSUMPTION: fonds de garantie automobile désactivé par défaut ; D21].
+- Quand le débiteur est inconnu ou non assuré, la qualification enregistre « auteur inconnu » ou « auteur non assuré » : si un fonds de garantie automobile existe et est activé (paramètre par pays), le serveur ouvre l'échéancier du fonds : transaction dans le mois (art. 605) et procès-verbal transmis dans les 60 jours de l'accident (art. 606, SÛR) ; la **déclaration au fonds dans les 3 mois** (art. 608, SÛR) ne vaut que pour l'« **exception de garantie invoquée** » (FR-121) et ne s'applique pas à « auteur inconnu ou non assuré » ; le paramètre s'appelle `legal.fga_declaration_mois` ; sinon la règle de l'art. 274 s'applique (part supportée par les autres assureurs à parts égales). Au Togo, l'existence du fonds n'est pas confirmée *(défaut H-081 : fonds de garantie automobile désactivé par défaut ; D21)*.
 
 #### FR-112 : La machine du recours
 
@@ -1660,7 +1979,7 @@ Le recours a sa propre machine, reprise de la démo et complétée. Un recours p
 | R14 | `ACCORD → RECUPERE` | Tout est encaissé | GREC | `TOUT_RAPPROCHE` | non |
 | R15 | tout statut non terminal `→ ABANDONNE` | Abandonner le recours | RESP, sur proposition de GREC | issue de clôture choisie | oui |
 
-`RECUPERE` et `ABANDONNE` sont terminaux. L'état `EN_ARBITRAGE` (R12, R13) et la possibilité d'abandonner depuis les premiers états (R15 élargie) sont des ajouts à la démo [ASSUMPTION: la démo n'abandonne que depuis RECLAMATION_ENVOYEE, NEGOCIATION et CONTENTIEUX, et n'a pas d'arbitrage].
+`RECUPERE` et `ABANDONNE` sont terminaux. L'état `EN_ARBITRAGE` (R12, R13) et la possibilité d'abandonner depuis les premiers états (R15 élargie) sont des ajouts à la démo *(défaut H-082 : la démo n'abandonne que depuis RECLAMATION_ENVOYEE, NEGOCIATION et CONTENTIEUX, et n'a pas d'arbitrage)*.
 
 **Conséquences (testables) :**
 - Toute transition hors de ce tableau est refusée (`TRANSITION_INCONNUE`) ; toute transition dont une condition n'est pas remplie est refusée avec le nom de la condition.
@@ -1672,10 +1991,10 @@ Le recours a sa propre machine, reprise de la démo et complétée. Un recours p
 
 #### FR-113 : La créance et ses trois montants
 
-Chaque recours porte une **créance**, numérotée, avec trois montants qui ne se confondent jamais : le montant **réclamé** (ce que la compagnie demande), le montant **accepté** (ce que le débiteur reconnaît), le montant **encaissé** (ce qui est reçu et rapproché). La créance a ses états : `A_ETABLIR`, `ETABLIE`, `RECLAMEE`, `CONTESTEE`, `PARTIELLEMENT_RECUPEREE`, `SOLDEE`, `ABANDONNEE`. Le montant réclamé se calcule ainsi : somme des règlements d'indemnité `PAYE` du dossier, multipliée par la **part du tiers** arrêtée (responsabilité du dossier, requalifiée sur rapport d'expertise). Pour les accidents entre véhicules assurés, la part est celle du **barème de responsabilité** annexé au Livre II du Code CIMA (art. 274, SÛR), dont les tables sont à saisir (D21) ; quand la responsabilité est indéterminable, le partage par parts égales ou la règle de l'art. 275 s'applique `[à vérifier par le juriste]`. Les honoraires d'expert sont ajoutés à la base seulement si le paramètre l'autorise [ASSUMPTION: honoraires non inclus par défaut].
+Chaque recours porte une **créance**, numérotée, avec trois montants qui ne se confondent jamais : le montant **réclamé** (ce que la compagnie demande), le montant **accepté** (ce que le débiteur reconnaît), le montant **encaissé** (ce qui est reçu et rapproché). La créance a ses états : `A_ETABLIR`, `ETABLIE`, `RECLAMEE`, `CONTESTEE`, `PARTIELLEMENT_RECUPEREE`, `SOLDEE`, `ABANDONNEE`. Le montant réclamé se calcule ainsi : somme des règlements d'indemnité `PAYE` du dossier, multipliée par la **part du tiers** arrêtée (responsabilité du dossier, requalifiée sur rapport d'expertise). Pour les accidents entre véhicules assurés, la part est celle du **barème de responsabilité** annexé au Livre II du Code CIMA (art. 274, SÛR), dont les tables sont à saisir (D21) ; quand la responsabilité est indéterminable, le partage par parts égales ou la règle de l'art. 275 s'applique `[à vérifier par le juriste]`. Les honoraires d'expert sont ajoutés à la base seulement si le paramètre l'autorise *(défaut H-083 : honoraires non inclus par défaut)*.
 
 **Conséquences (testables) :**
-- Une part du tiers égale à 70 % sur 395 500 FCFA payés (l'évaluation arrêtée de `SIN-2026-9002`, franchise déduite, comme en UJ-3) donne un montant réclamé de 276 850 FCFA (chiffre recalculé sur le dossier de la démo, rejoué en recette) `[ASSUMPTION: règlement égal à l'évaluation arrêtée, 395 500 FCFA ; le jeu de démonstration fixe la valeur exacte]`.
+- Une part du tiers égale à 70 % sur 395 500 FCFA payés (l'évaluation arrêtée de `SIN-2026-9002`, franchise déduite, comme en UJ-3) donne un montant réclamé de 276 850 FCFA (chiffre recalculé sur le dossier de la démo, rejoué en recette) *(défaut H-084 : règlement égal à l'évaluation arrêtée, 395 500 FCFA ; le jeu de démonstration fixe la valeur exacte)*.
 - Une responsabilité `PARTAGEE` sans part chiffrée du tiers ne se réclame pas : la condition `RESPONSABILITE_TIERS` refuse le passage en `MONTANT_A_CALCULER` tant que la part n'est pas saisie.
 - Le montant accepté ne peut pas dépasser le montant réclamé sans motif ; le montant encaissé ne peut pas dépasser le montant accepté (`MONTANT_ENCAISSE`).
 - Les intérêts entre assureurs (taux de l'escompte à compter du mois qui suit la demande, art. 277, SÛR) sont affichés à part, avec la date de la demande comme point de départ ; ils ne sont jamais fondus dans le montant réclamé.
@@ -1689,6 +2008,7 @@ La **mise en demeure** a sa propre machine : `A_PREPARER → A_VALIDER → A_ENV
 **Conséquences (testables) :**
 - Une mise en demeure `A_ENVOYER` ne peut passer `ENVOYEE` sans mode d'envoi ni preuve d'envoi ; sans preuve de réception, elle ne passe pas `RECEPTION_CONFIRMEE`.
 - La validation par l'utilisateur qui l'a rédigée est refusée (`SEPARATION_DES_TACHES`) : `GREC` rédige, `RESP` valide.
+- Une mise en demeure ou une dénonciation n'est reçue qu'avec une **preuve de réception** par un moyen listé en paramètre ; le recommandé électronique n'est pas accepté tant que le juriste n'a pas tranché (`PREUVE_RECEPTION_ABSENTE`).
 - À l'échéance du délai accordé sans paiement, la mise en demeure passe `SANS_REPONSE` et le recours entre dans la liste d'arbitrage de `RESP` (négociation, contentieux, arbitrage, abandon).
 - Le texte généré par l'IA n'est jamais envoyé sans la relecture et la signature d'un humain ; le brouillon est conservé avec la version finale.
 - Un paiement partiel reçu avant l'échéance est enregistré sur la mise en demeure (montant payé) et sur la créance.
@@ -1701,7 +2021,7 @@ La **négociation** consigne les offres et contre-offres (émetteur `TIERS` ou `
 - Une offre du tiers saisie fait apparaître l'écart à la somme réclamée, en pourcentage et en FCFA.
 - Un accord ne peut être enregistré (`ACCORD_CONCLU`) qu'avec la pièce de l'accord jointe et le montant accepté ; il est refusé sinon.
 - `ECHEC` ouvre une proposition d'arbitrage à `RESP` ; `SUSPENDUE` demande un motif et une date de reprise.
-- Un accord qui abandonne une partie de la créance au-delà d'un seuil de perte exige la validation de `DG` ou `DT` [ASSUMPTION: seuil de perte à obtenir de la compagnie ; paramètre vide, validation de RESP seule tant qu'il n'est pas saisi].
+- Un accord qui abandonne une partie de la créance au-delà d'un seuil de perte exige la validation de `DG` ou `DT` *(défaut H-085 : seuil de perte à obtenir de la compagnie ; paramètre vide, validation de RESP seule tant qu'il n'est pas saisi)*.
 - L'historique complet des offres reste lisible sur la fiche, jamais écrasé.
 
 #### FR-116 : Le contentieux
@@ -1717,7 +2037,7 @@ Le **contentieux** a sa machine : `A_ENGAGER → ENGAGE → EN_ATTENTE_DECISION 
 
 #### FR-117 : Les encaissements se rapprochent avant d'être imputés
 
-Un **encaissement de recours** est reçu (virement, chèque, espèces, compensation entre assureurs), déclaré par `CPT` avec sa référence bancaire et son justificatif, puis **rapproché** (`A_RAPPROCHER → RAPPROCHE | ECART`). Il n'est **imputé** à une créance qu'après la validation de son rapprochement ; il peut en solder plusieurs. Le rapprochement passe par `paiement` quand le relevé y est disponible, sinon il est confirmé à la main avec justificatif [ASSUMPTION: rapprochement des encaissements de recours dans `paiement` quand le relevé est importé, sinon confirmation manuelle ; à préciser avec le module]. Les recours encaissés alimentent l'export de la comptabilité (FR-103).
+Un **encaissement de recours** est reçu (virement, chèque, espèces, compensation entre assureurs), déclaré par `CPT` avec sa référence bancaire et son justificatif, puis **rapproché** (`A_RAPPROCHER → RAPPROCHE | ECART`). Il n'est **imputé** à une créance qu'après la validation de son rapprochement ; il peut en solder plusieurs. Le rapprochement passe par `paiement` quand le relevé y est disponible, sinon il est confirmé à la main avec justificatif *(défaut H-086 : rapprochement des encaissements de recours dans `paiement` quand le relevé est importé, sinon confirmation manuelle ; à préciser avec le module)*. Les recours encaissés alimentent l'export de la comptabilité (FR-103).
 
 **Conséquences (testables) :**
 - Un encaissement non rapproché n'augmente pas le montant encaissé de la créance.
@@ -1729,7 +2049,7 @@ Un **encaissement de recours** est reçu (virement, chèque, espèces, compensat
 
 #### FR-118 : La prescription, un terme à vérifier
 
-Le recours affiche un **terme de prescription indicatif** : la date du sinistre plus 730 jours (« prescription biennale », paramètre), avec la mention « à vérifier » et une **alerte à 90 jours** du terme. Le serveur ne déclare jamais un recours « prescrit » ni « non prescrit » : il affiche le terme et les actes enregistrés (mise en demeure, reconnaissance de dette). Les textes lus du Code CIMA donnent une prescription de 2 ans pour l'action dérivant du contrat d'assurance (art. 28, SÛR) et de 5 ans pour l'action en responsabilité extra-contractuelle du Livre II (art. 256, SÛR) ; le recours d'un assureur subrogé relève de l'un ou de l'autre selon son fondement. Le terme applicable à chaque fondement est donc **un point de revue juridique** (D21), et le paramètre garde la valeur prudente la plus courte [ASSUMPTION: 730 jours par défaut, valeur de la démo et la plus prudente].
+Le recours affiche un **terme de prescription indicatif** : la date du sinistre plus 730 jours (« prescription biennale », paramètre), avec la mention « à vérifier » et une **alerte à 90 jours** du terme. Le serveur ne déclare jamais un recours « prescrit » ni « non prescrit » : il affiche le terme et les actes enregistrés (mise en demeure, reconnaissance de dette). Les textes lus du Code CIMA donnent une prescription de 2 ans pour l'action dérivant du contrat d'assurance (art. 28, SÛR) et de 5 ans pour l'action en responsabilité extra-contractuelle du Livre II (art. 256, SÛR) ; le recours d'un assureur subrogé relève de l'un ou de l'autre selon son fondement. Le terme applicable à chaque fondement est donc **un point de revue juridique** (D21), et le paramètre garde la valeur prudente la plus courte *(défaut H-087 : 730 jours par défaut, valeur de la démo et la plus prudente)*.
 
 **Conséquences (testables) :**
 - Un recours dont le sinistre date de plus de 640 jours, sans réclamation envoyée, figure en alerte rouge (90 jours avant le terme indicatif).
@@ -1740,7 +2060,7 @@ Le recours affiche un **terme de prescription indicatif** : la date du sinistre 
 
 #### FR-119 : L'arbitrage entre assureurs et les conventions, en paramètre
 
-Les conflits nés des recours entre assureurs sont, selon le Code CIMA (art. 276, SÛR), **obligatoirement soumis à la Commission nationale d'arbitrage** : trois assureurs étrangers au litige, sentence dans le mois de la saisine ; les intérêts courent au taux de l'escompte à compter du mois qui suit la demande (art. 277, SÛR). Le champ de ces articles est l'indemnisation des victimes d'un véhicule terrestre à moteur ; la mise en place de la commission au Togo n'est pas confirmée [ASSUMPTION: arbitrage activé pour les recours entre assureurs automobiles, par un paramètre ; à vérifier auprès de l'association des assureurs ; D21]. Les **conventions de place** (indemnisation directe de type IDA, forfait inter-compagnies) ne sont pas supposées : aucune convention togolaise n'a été trouvée. Elles sont des **paramètres** : convention active ou non, forfait, délai de règlement entre compagnies, bordereau de recours. Le forfait de la démo (350 000 FCFA) est une valeur d'exemple, inactive par défaut.
+Les conflits nés des recours entre assureurs sont, selon le Code CIMA (art. 276, SÛR), **obligatoirement soumis à la Commission nationale d'arbitrage** : trois assureurs étrangers au litige, sentence dans le mois de la saisine ; les intérêts courent au taux de l'escompte à compter du mois qui suit la demande (art. 277, SÛR). Le champ de ces articles est l'indemnisation des victimes d'un véhicule terrestre à moteur ; la mise en place de la commission au Togo n'est pas confirmée *(défaut H-088 : arbitrage activé pour les recours entre assureurs automobiles, par un paramètre ; à vérifier auprès de l'association des assureurs ; D21)*. Les **conventions de place** (indemnisation directe de type IDA, forfait inter-compagnies) ne sont pas supposées : aucune convention togolaise n'a été trouvée. Elles sont des **paramètres** : convention active ou non, forfait, délai de règlement entre compagnies, bordereau de recours. Le forfait de la démo (350 000 FCFA) est une valeur d'exemple, inactive par défaut.
 
 **Conséquences (testables) :**
 - Avec la convention désactivée (défaut), aucun forfait n'est appliqué au montant réclamé ; avec elle activée, le forfait s'applique aux dossiers éligibles selon la règle d'éligibilité saisie par la compagnie.
@@ -1757,7 +2077,7 @@ Les règles de la démo sont les valeurs par défaut : écart à l'offre de 15 %
 
 **Conséquences (testables) :**
 - Pour une créance de 276 850 FCFA (celle de `SIN-2026-9002`) et une offre de 200 000 FCFA, l'écart affiché est de 76 850 FCFA (environ 27,8 %), l'appréciation est « négociable », et la contre-proposition suit la formule des trois nombres, sans dépasser le montant réclamé.
-- Sur un recours rattaché à un dossier corporel, aucune contre-proposition chiffrée n'est proposée ; l'analyse et les arguments restent fournis [ASSUMPTION: garde-fou du PO sur le corporel étendu au recours ; à confirmer].
+- Sur un recours rattaché à un dossier corporel, aucune contre-proposition chiffrée n'est proposée ; l'analyse et les arguments restent fournis *(défaut H-089 : garde-fou du PO sur le corporel étendu au recours ; à confirmer)*.
 - Un brouillon de mise en demeure généré n'est jamais envoyé : l'envoi demande la relecture, la validation de `RESP` et la signature.
 - Chaque suggestion porte ses sources (pièce, créance, offre), consultables ; une suggestion sans source n'est pas affichée.
 - Le registre de l'IA contient, pour chaque suggestion : entrée, sortie, confiance, sources, niveau, statut, auteur de la décision.
@@ -1774,10 +2094,11 @@ Un dossier est refusé quand la garantie ne couvre pas le sinistre, que le contr
 **Conséquences (testables) :**
 - Un refus sans motif d'au moins 10 caractères est refusé (`MOTIF_ECRIT`) ; un refus par un rôle autre que `RESP`, `DG` ou `DT` est refusé (`DROIT_INSUFFISANT`).
 - Un refus de garantie sans décision de garantie `REFUS_DE_GARANTIE` enregistrée est refusé (`DECISION_GARANTIE`).
-- Au passage `REJETE`, le reste à payer et la provision du dossier passent à zéro, avec une ligne d'historique de provision (motif « refus »).
+- Au passage `REJETE`, le reste à payer passe à zéro. **Au corporel VTM**, un refus de garantie, un classement sans suite ou un rejet **ne remet pas la provision à zéro** tant que l'obligation légale d'offre demeure (art. 237 : « pour le compte de qui il appartiendra *(point juridique J-15 : à valider par le juriste, §13.2)*) : elle est maintenue ou ramenée à l'estimation de l'offre légale, avec motif et visa. **Ailleurs**, la provision est ramenée à zéro, avec motif « refus » et visa, et une ligne d'historique de provision.
+- Test : le refus d'un dossier corporel VTM laisse une provision non nulle ; le refus d'un dossier matériel la ramène à zéro. L'état des provisions à payer (FR-189) reprend la provision maintenue.
 - La décision de refus par un utilisateur qui a instruit le dossier est refusée (`SEPARATION_DES_TACHES`) : le gestionnaire propose, le responsable décide.
-- Un dossier `REJETE` sans courrier de refus envoyé après 2 jours ouvrés est signalé au responsable [ASSUMPTION: 2 jours ouvrés ; la procédure du groupe parle de 48 heures pour la décision et 72 heures pour l'information de l'assuré].
-- Un refus de garantie sur un dossier **corporel automobile** ne supprime pas les obligations légales : l'assureur qui invoque une exception de garantie doit tout de même respecter les art. 231 à 236 « pour le compte de qui il appartiendra » (Code CIMA, art. 237, SÛR) ; le dossier garde donc ses échéances d'offre en alerte (§5.14), et, si un fonds de garantie automobile est activé, l'alerte « déclaration au fonds sous 3 mois de la réclamation » (art. 608, SÛR) `[à vérifier par le juriste : traitement du dossier refusé au corporel]`.
+- Un dossier `REJETE` sans courrier de refus envoyé après 2 jours ouvrés est signalé au responsable *(défaut H-090 : 2 jours ouvrés ; la procédure du mémoire de 2014 (zone CIMA) parle de 48 heures pour la décision et 72 heures pour l'information de l'assuré)*. Deux échéances internes s'y ajoutent : la **décision d'exclusion soumise** sous 48 heures ouvrées, et le **courrier de refus sous 72 heures ouvrées**, ou justifier 2 jours ouvrés *(défaut H-091 : procédure du mémoire ; à confirmer à la séance d'immersion)*.
+- Un refus de garantie sur un dossier **corporel automobile** ne supprime pas les obligations légales : l'assureur qui invoque une exception de garantie doit tout de même respecter les art. 231 à 236 « pour le compte de qui il appartiendra » (Code CIMA, art. 237, SÛR) ; le dossier garde donc ses échéances d'offre en alerte (§5.14), et, si un fonds de garantie automobile est activé, l'alerte « déclaration au fonds sous 3 mois » (art. 608, SÛR, valable pour l'exception de garantie invoquée ; paramètre `legal.fga_declaration_mois`) `[à vérifier par le juriste : traitement du dossier refusé au corporel]`.
 - Un recours ouvert sur un dossier refusé, sans aucun règlement `PAYE`, est proposé à l'abandon au responsable (FR-112, R15) ; il n'est jamais abandonné automatiquement.
 
 #### FR-122 : Le courrier de refus est rédigé par l'IA, relu et signé (usage n° 11)
@@ -1790,18 +2111,22 @@ Le courrier de refus est un **brouillon rédigé par l'IA commune** (usage n° 1
 - Sur un dossier corporel automobile, le courrier porte le nom du gestionnaire du dossier (art. 242, SÛR).
 - Le registre de l'IA contient l'entrée, la sortie, la confiance, les sources, le niveau, le statut et l'auteur de la décision ; un test de recette rejoue un refus avec chaque statut.
 - Aucune donnée médicale n'est lue par la fonction de rédaction ; si le refus s'appuie sur une pièce médicale, le motif est écrit par un humain habilité (`MED`, `RESP`, `DG`, `DT`).
-- Le courrier part par un canal qui laisse une preuve (courrier avec accusé, remise en main propre, e-mail avec accusé) ; le canal et la preuve sont enregistrés.
+- Le courrier part par un canal qui laisse une preuve (courrier avec accusé, remise en main propre, e-mail avec accusé) ; le canal et la preuve sont enregistrés. Le statut du courrier prend `REMIS` ou `RETOURNE` **avec preuve** ; un courrier `RETOURNE` lève une alerte et n'est pas tenu pour notifié.
+- La copie du courrier de refus signé est archivée automatiquement au dossier et au registre unique des courriers sortants (FR-46).
 
 #### FR-123 : Le classement sans suite quand l'assuré est injoignable
 
-Un dossier est classé **sans suite** (`SANS_SUITE`) quand l'assuré (ou la victime) est injoignable après les relances réglementées du FR-143 : au moins 3 relances sans effet, par au moins deux canaux, et 15 jours sans réponse après la dernière [ASSUMPTION: 15 jours après la dernière relance, d'après le texte de la 3e relance de la démo]. Le classement se fait depuis `PIECES_ATTENDUES`, `EN_INSTRUCTION` ou `OFFRE_ENVOYEE`, par `GEST` ou `RESP`, avec motif. Un dernier courrier de classement est envoyé à la dernière adresse connue. Au corporel automobile, où l'offre est due « indépendamment de la réclamation de la victime » (Code CIMA, art. 231, SÛR), le classement sans suite exige la décision de `DG` ou `DT` et n'efface pas les échéances légales [ASSUMPTION: classement sans suite d'un dossier corporel réservé à la direction ; à valider par le juriste].
+Un dossier est classé **sans suite** (`SANS_SUITE`) quand l'assuré (ou la victime) est injoignable après les relances réglementées du FR-143 : au moins 3 relances sans effet, par au moins deux canaux, et 15 jours sans réponse après la dernière *(défaut H-092 : 15 jours après la dernière relance, d'après le texte de la 3e relance de la démo)*. Le classement se fait depuis `PIECES_ATTENDUES`, `EN_INSTRUCTION` ou `OFFRE_ENVOYEE`, par `GEST` ou `RESP`, avec motif. Les relances sont **tracées par le serveur** : l'envoi réel passe par `notification`, et le gestionnaire ne les déclare pas à la main. Au-delà d'un seuil de provision, un **second contrôle du `RESP`** est exigé *(défaut H-093 : 500 000 FCFA ; à confirmer à la séance d'immersion)*. Le classement est visible dans la file du responsable. Un dernier courrier de classement est envoyé à la dernière adresse connue. Au corporel automobile, où l'offre est due « indépendamment de la réclamation de la victime » (Code CIMA, art. 231, SÛR), le classement sans suite exige la décision de `DG` ou `DT` et n'efface pas les échéances légales *(point juridique J-16 : classement sans suite d'un dossier corporel réservé à la direction ; à valider par le juriste)*.
 
 **Conséquences (testables) :**
 - Un classement avec moins de 3 relances enregistrées, ou avec 3 relances sur un seul canal, est refusé (`RELANCES_EPUISEES`).
 - Un classement sans motif est refusé (`MOTIF_ECRIT`).
+- Des relances seulement déclarées par le gestionnaire, sans envoi réel tracé par `notification`, ne comptent pas : le classement est refusé (`RELANCES_EPUISEES`).
+- Un classement d'un dossier dont la provision dépasse le seuil est refusé sans second contrôle du `RESP` (`SECOND_CONTROLE_RESP`) ; tout classement apparaît dans la file du responsable.
+- Au **corporel VTM**, un classement sans suite ne remet pas la provision à zéro tant que l'obligation légale d'offre demeure (FR-121).
 - Un classement sans suite d'un dossier corporel automobile par `GEST` ou `RESP` est refusé (`DECISION_DIRECTION`).
-- Au classement, la provision du dossier passe à zéro avec motif ; les échéances internes s'arrêtent ; les échéances légales du corporel restent affichées en alerte au responsable.
-- Un dossier classé sans suite n'entre pas dans la file « à verser aux archives » avant 30 jours [ASSUMPTION: délai de grâce de 30 jours avant versement, pour laisser l'assuré se manifester].
+- Au classement (hors corporel VTM, FR-121), la provision du dossier passe à zéro avec motif ; les échéances internes s'arrêtent ; les échéances légales du corporel restent affichées en alerte au responsable.
+- Un dossier classé sans suite n'entre pas dans la file « à verser aux archives » avant 30 jours *(défaut H-094 : délai de grâce de 30 jours avant versement, pour laisser l'assuré se manifester)*.
 - Le classement est tracé : relances enregistrées (canal, date, résultat), motif, signataire, courrier de classement.
 
 #### FR-124 : Le litige quand l'offre est refusée ou contestée
@@ -1811,7 +2136,7 @@ Un dossier passe en **litige** (`LITIGE`) quand l'assuré refuse l'offre (avec c
 **Conséquences (testables) :**
 - Un passage en litige sans motif est refusé (`MOTIF_ECRIT`) ; par un rôle autre que `RESP`, `DG` ou `DT`, il est refusé (`DROIT_INSUFFISANT`).
 - Un litige est résolu par une transition `LITIGE → EN_INSTRUCTION` avec motif ; sans motif, elle est refusée.
-- En litige, aucune nouvelle offre globale ni aucun ordre pour la part contestée n'est possible tant que le litige n'est pas résolu (`ACCORD_ENREGISTRE`, `TRANSITION_INCONNUE`) ; un règlement d'acompte sur la part non contestée reste permis (validation selon la délégation, accord du bénéficiaire sur cette part, FR-88), le dossier restant `LITIGE`.
+- En litige, aucune nouvelle offre globale ni aucun ordre, acompte compris, n'est possible tant que le litige n'est pas résolu (`ACCORD_ENREGISTRE`, `TRANSITION_INCONNUE`) : l'acompte en litige est retiré du circuit, car la table de FR-135 ne connaît pas de passage de `LITIGE` vers `ORDRE_EMIS` (FR-88). La part non contestée se règle après la résolution du litige.
 - À l'entrée en litige, la provision est revue avec motif ; un écart de 2 000 000 FCFA ou plus attend le responsable (paramètre, §6.4, FR-188).
 - Les échéances légales du corporel continuent de courir pendant le litige ; les suspensions et prorogations légales (expert commun, +1 mois, art. 252 et 252 bis, SÛR) se saisissent à la main et se tracent (§5.14).
 - Au corporel automobile, le litige ne peut être porté en justice avant l'expiration du délai d'offre de l'art. 231 (art. 239, SÛR) : le dossier l'affiche.
@@ -1819,11 +2144,12 @@ Un dossier passe en **litige** (`LITIGE`) quand l'assuré refuse l'offre (avec c
 
 #### FR-125 : La fraude suspectée suspend le paiement sans le dire à l'assuré
 
-Un dossier passe `FRAUDE_SUSPECTEE` quand un humain **signale** une suspicion de fraude : `GEST`, `GREC`, `RESP`, `DG`, `DT` ou `AUD`, avec motif, depuis `EN_INSTRUCTION`, `EVALUE`, `EN_VALIDATION`, `OFFRE_ENVOYEE`, `ORDRE_EMIS` ou `CHEQUE_A_REMETTRE` (la démo n'offrait que les deux premiers [ASSUMPTION: extension aux états de paiement, car une suspicion peut naître à tout moment]). Dans cet état, aucun geste de paiement n'est possible. Le dossier sort par l'écartement de la suspicion (retour `EN_INSTRUCTION`) ou par la confirmation (passage `REJETE`), décrits aux FR-129 et FR-133. La suspicion n'est **jamais révélée** à l'assuré ni au courtier : les écrans et les messages qui leur sont destinés disent « dossier en cours d'instruction ».
+Un dossier passe `FRAUDE_SUSPECTEE` quand un humain **signale** une suspicion de fraude : `GEST`, `GREC`, `RESP`, `DG`, `DT` ou `AUD`, avec motif, depuis `DECLARE`, `PIECES_ATTENDUES`, `OUVERT`, `EN_INSTRUCTION`, `EVALUE`, `EN_VALIDATION`, `OFFRE_ENVOYEE`, `ORDRE_EMIS`, `CHEQUE_A_REMETTRE`, `LITIGE` ou `REGLE` (la démo n'offrait que les deux premiers *(défaut H-095 : extension à tous les états non terminaux et à `REGLE`, car une suspicion peut naître à tout moment)*). Les transitions 31 à 36 portent ces départs (FR-135). Dans cet état, aucun geste de paiement n'est possible. Le dossier sort par l'écartement de la suspicion (retour `EN_INSTRUCTION`) ou par la confirmation (passage `REJETE`), décrits aux FR-129 et FR-133. La suspicion n'est **jamais révélée** à l'assuré ni au courtier : les écrans et les messages qui leur sont destinés disent « dossier en cours d'instruction ».
 
 **Conséquences (testables) :**
 - Un signalement sans motif est refusé (`MOTIF_ECRIT`).
-- Depuis `CHEQUE_A_REMETTRE`, le signalement suspend la remise ; la comptabilité reçoit une alerte pour décider d'une opposition sur le chèque, et la quittance passe `ANNULEE` si l'opposition est faite.
+- Depuis `CHEQUE_A_REMETTRE`, le signalement **suspend la remise** ; un chèque déjà émis d'un dossier devenu `FRAUDE_SUSPECTEE` est **mis en opposition** (état `CHEQUE_EN_OPPOSITION`, FR-101), la comptabilité reçoit l'alerte, et la quittance passe `ANNULEE` quand l'opposition est enregistrée (`OPPOSITION_NON_ENREGISTREE` tant qu'elle ne l'est pas).
+- Un signalement est possible depuis `DECLARE`, `PIECES_ATTENDUES`, `OUVERT`, `LITIGE` et `REGLE` ; un dossier `REGLE` avec un règlement non encaissé met ce règlement en opposition.
 - Dans l'état `FRAUDE_SUSPECTEE`, une demande d'émission, de remise ou de paiement est refusée (`AUCUN_SIGNAL_BLOQUANT`) ; l'accord de l'assuré, s'il est reçu, est enregistré mais ne crée pas d'ordre.
 - La vue de l'assuré, le message de suivi, et toute notification externe n'emploient aucun mot qui évoque la fraude ; un test lit chaque modèle de message sortant.
 - Les échéances légales du corporel continuent de courir ; elles sont affichées en alerte au responsable et à `AUD`.
@@ -1831,7 +2157,7 @@ Un dossier passe `FRAUDE_SUSPECTEE` quand un humain **signale** une suspicion de
 
 #### FR-126 : La réouverture des sorties
 
-Les dossiers `REJETE` et `SANS_SUITE` peuvent être **rouverts** par `RESP`, `DG` ou `DT`, avec motif écrit : sur contestation de l'assuré après un refus (transition 40), ou parce que l'assuré se manifeste après un classement sans suite (transition 41, ajout à la démo [ASSUMPTION: la démo ne rouvre pas SANS_SUITE]). Le dossier repasse `EN_INSTRUCTION`. Les contestations sont des réclamations (§6.1) rattachées au dossier.
+Les dossiers `REJETE` et `SANS_SUITE` peuvent être **rouverts** par `RESP`, `DG` ou `DT`, avec motif écrit : sur contestation de l'assuré après un refus (transition 40), ou parce que l'assuré se manifeste après un classement sans suite (transition 41, ajout à la démo *(défaut H-096 : la démo ne rouvre pas SANS_SUITE)*). Le dossier repasse `EN_INSTRUCTION`. Les contestations sont des réclamations (§6.1) rattachées au dossier.
 
 **Conséquences (testables) :**
 - Une réouverture sans motif est refusée (`MOTIF_ECRIT`) ; par un autre rôle, elle est refusée (`DROIT_INSUFFISANT`).
@@ -1839,7 +2165,7 @@ Les dossiers `REJETE` et `SANS_SUITE` peuvent être **rouverts** par `RESP`, `DG
 - À la réouverture, la provision est reposée par le gestionnaire avec motif ; le délai interne d'instruction repart d'un nouveau point de départ daté.
 - Le courrier de refus initial reste au dossier ; la réouverture crée un courrier d'accusé à l'assuré (§5.15).
 - Si le dossier avait été versé aux archives, la sortie de la chemise suit les mêmes règles qu'à FR-107.
-- Chaque réouverture figure dans le journal avec son motif ; un dossier rouvert plus de deux fois est signalé à `AUD` [ASSUMPTION: alerte à la 3e ouverture].
+- Chaque réouverture figure dans le journal avec son motif ; un dossier rouvert plus de deux fois est signalé à `AUD` *(défaut H-097 : alerte à la 3e ouverture)*.
 
 ### 5.12 La fraude : un score qui ouvre une revue humaine
 
@@ -1870,7 +2196,7 @@ Neuf signaux sont calculés sur chaque dossier, avec les poids de la démo comme
 
 #### FR-128 : Le score est plafonné à 100 et se lit en quatre niveaux
 
-Le **score** d'un dossier est la somme des poids des signaux présents, **plafonnée à 100**. Il se lit en quatre niveaux : `NORMAL` (moins de 20), `ATTENTION` (20 et plus), `SUSPECT` (45 et plus), `BLOQUE` (70 et plus). Les seuils sont des paramètres. À partir de `SUSPECT`, une **revue** est ouverte (FR-129) ; à `BLOQUE`, l'ordre et le paiement sont suspendus (FR-130) [ASSUMPTION: la démo ne dit pas à partir de quel niveau la revue s'ouvre ; SUSPECT par recommandation].
+Le **score** d'un dossier est la somme des poids des signaux présents, **plafonnée à 100**. Il se lit en quatre niveaux : `NORMAL` (moins de 20), `ATTENTION` (20 et plus), `SUSPECT` (45 et plus), `BLOQUE` (70 et plus). Les seuils sont des paramètres. À partir de `SUSPECT`, une **revue** est ouverte (FR-129) ; à `BLOQUE`, l'ordre et le paiement sont suspendus (FR-130) *(défaut H-098 : la démo ne dit pas à partir de quel niveau la revue s'ouvre ; SUSPECT par recommandation)*.
 
 **Conséquences (testables) :**
 - Des signaux de poids 40, 30 et 30 donnent un score de 100, pas 100 plus 0 : le plafond s'applique ; un test le vérifie.
@@ -1881,25 +2207,28 @@ Le **score** d'un dossier est la somme des poids des signaux présents, **plafon
 
 #### FR-129 : La revue humaine est obligatoire et motivée
 
-La revue de fraude suit `NON_REVU → EN_REVUE → ECARTE | CONFIRME`. Un dossier `SUSPECT` ou `BLOQUE` entre en `NON_REVU` dans la file du contrôle interne. Un relecteur (`AUD`, `RESP`, `DG` ou `DT`) **prend** la revue (`EN_REVUE`). `AUD` rend un **avis écrit**, visible et **obligatoire avant toute confirmation** ; il ne conclut pas. La revue conclut : **écarter** (`RESP`, `DG`, `DT`) ou **confirmer** (`DG`, `DT`, FR-133), avec une **conclusion écrite**. Le relecteur n'est jamais le gestionnaire du dossier [ASSUMPTION: séparation du relecteur et du gestionnaire].
+La revue de fraude suit `NON_REVU → EN_REVUE → ECARTE | CONFIRME`. Un dossier `SUSPECT` ou `BLOQUE` entre en `NON_REVU` dans la file du contrôle interne. Un relecteur (`AUD`, `RESP`, `DG` ou `DT`) **prend** la revue (`EN_REVUE`). `AUD` rend un **avis écrit**, visible et **obligatoire avant toute confirmation** ; il ne conclut pas. La revue conclut : **écarter** (`RESP`, `DG`, `DT`) ou **confirmer** (`DG`, `DT`, FR-133), avec une **conclusion écrite**. **Écarter un blocage `BLOQUE`** exige l'**avis écrit d'`AUD`** et un relecteur qui n'a **ni validé, ni affecté, ni siégé au comité** du dossier (ligne 16 de FR-7). Le relecteur n'est jamais le gestionnaire du dossier *(défaut H-099 : séparation du relecteur et du gestionnaire)*.
 
 **Conséquences (testables) :**
 - Une conclusion sans texte est refusée (`MOTIF_ECRIT`).
 - Une conclusion par le gestionnaire ou le gestionnaire recours du dossier est refusée (`SEPARATION_DES_TACHES`).
+- Écarter un dossier `BLOQUE` sans avis écrit d'`AUD` est refusé (`AVIS_AUD_REQUIS`) ; par un relecteur qui a validé, affecté ou siégé au comité de ce dossier, il est refusé (`SEPARATION_DES_TACHES`, ligne 16 de FR-7).
+- Un indicateur « blocages levés par le validateur » figure au journal ; sa valeur attendue est zéro.
 - Une confirmation par `RESP` ou `AUD` est refusée (`DROIT_INSUFFISANT`) ; un écartement par `GEST` ou `AUD` l'est aussi.
-- Un dossier `BLOQUE` non revu depuis plus de 3 jours ouvrés est signalé au responsable et à `AUD` [ASSUMPTION: 3 jours ouvrés].
+- Un dossier `BLOQUE` non revu depuis plus de 3 jours ouvrés est signalé au responsable et à `AUD` *(défaut H-100 : 3 jours ouvrés)*.
 - Une revue `ECARTE` garde ses signaux visibles, avec la conclusion et l'auteur ; elle ne les supprime pas. Un nouvel événement qui change le score d'un niveau ouvre une nouvelle revue.
 - Chaque changement d'état de la revue est tracé (auteur, rôle, date et heure, conclusion).
 
 #### FR-130 : Un dossier BLOQUE non écarté suspend l'ordre et le paiement
 
-Tant qu'un dossier `BLOQUE` n'a pas une revue `ECARTE`, le serveur refuse : la validation et l'envoi de l'offre (transition 10), l'enregistrement de l'accord qui crée l'ordre (14), l'émission du règlement (17, 18) et la remise ou la confirmation du paiement (20). L'instruction (pièces, expertise, évaluation) continue. Le blocage ne se contourne ni par un écran ni par un cumul de rôles.
+Tant qu'un dossier `BLOQUE` n'a pas une revue `ECARTE`, le serveur refuse : la validation et l'envoi de l'offre (transition 10), l'enregistrement de l'accord qui crée l'ordre (14), l'émission du règlement (17, 18) et la remise ou la confirmation du paiement (20). L'instruction (pièces, expertise, évaluation) continue. Le blocage ne se contourne ni par un écran ni par un cumul de rôles. **Au corporel VTM**, un signal n'est pas un blocage sans **décision humaine sous délai** : la revue est menée sous N jours ouvrés (défaut 3 *(défaut H-101 : 3 jours ouvrés ; à confirmer à la séance d'immersion)*), sinon le dossier est **escaladé au `DG` et à `AUD`**. Un blocage de plus de N jours avant l'échéance légale d'offre est escaladé de la même façon, et la **décision** (laisser courir la pénalité, adresser une offre motivée, ou une offre sous réserve) est **enregistrée** avec son motif.
 
 **Conséquences (testables) :**
 - Chacune des transitions 10, 14, 17, 18 et 20 d'un dossier `BLOQUE` non écarté est refusée avec le code `AUCUN_SIGNAL_BLOQUANT` et le message « Dossier suspendu par le contrôle interne ».
-- La levée du blocage n'est possible que par une revue `ECARTE` ; ni `RESP`, ni `DG` ne peuvent forcer une transition sans elle.
+- La levée du blocage n'est possible que par une revue `ECARTE`, rendue avec l'avis écrit d'`AUD` (FR-129) ; ni `RESP`, ni `DG` ne peuvent forcer une transition sans elle.
+- Au corporel VTM, un dossier dont la revue n'est pas conclue au bout de 3 jours ouvrés est escaladé au `DG` et à `AUD` ; un blocage de plus de 3 jours ouvrés avant l'échéance légale d'offre est escaladé de même, et la décision prise (pénalité qui court, offre motivée, offre sous réserve) est enregistrée.
 - Le gestionnaire voit « dossier suspendu » sans voir le détail de la revue ; la comptabilité voit l'ordre suspendu et sa raison générique.
-- Un dossier devenu `BLOQUE` après l'émission d'un chèque suspend la remise, sans annuler le chèque (FR-125).
+- Un dossier devenu `BLOQUE` après l'émission d'un chèque **suspend la remise** et met le chèque en opposition (état `CHEQUE_EN_OPPOSITION`, FR-125, FR-101) ; la quittance passe `ANNULEE` quand l'opposition est enregistrée.
 - Un indicateur « paiements faits sur un dossier `SUSPECT` ou `BLOQUE` non revu » est calculé pour `AUD` (FR-131) ; sa valeur cible est zéro.
 
 #### FR-131 : La priorisation des revues
@@ -1915,12 +2244,12 @@ Le contrôle interne ne peut pas tout revoir : la file de revue est **ordonnée*
 
 #### FR-132 : Le graphe des liens par l'IA (usage n° 10)
 
-L'IA commune (instance locale) construit pour chaque dossier un **graphe de liens** avec les autres dossiers du portefeuille sur une fenêtre de 12 mois (paramètre). Les entités rapprochées sont : **mêmes témoins**, **mêmes garages** (dont les devis dépassent de plus de 20 % la moyenne du marché, paramètre), **mêmes photos** (empreinte visuelle identique ou proche), **mêmes téléphones**, ainsi que le même véhicule, la même victime sur plusieurs contrats, et le même bénéficiaire ou le même compte de paiement [ASSUMPTION: bénéficiaire et compte de paiement ajoutés aux entités de la démo]. La sortie est un graphe de dossiers liés avec, pour chaque lien, l'entité commune, un score de lien et la **source** (pièces, journal, portefeuille). Le destinataire est le contrôle interne et le relecteur. Garde-fous : un lien n'est qu'un indice ; le graphe ne modifie pas le score (FR-128) tant que la compagnie n'a pas fixé de poids [ASSUMPTION: les liens nourrissent la revue, pas le score] ; l'IA ne décide rien ; chaque lien est inscrit au registre de l'IA (niveau `ANALYSE`) ; aucune donnée nominative ni médicale ne sort de l'instance locale ; si l'IA est coupée, les liens exacts (téléphone, immatriculation, compte de paiement) restent servis par des règles explicables, et la comparaison de photos est « indisponible » [ASSUMPTION: la démo simulait l'empreinte de photo ; sans modèle de vision, seule l'identité exacte du fichier est comparée].
+L'IA commune (instance locale) construit pour chaque dossier un **graphe de liens** avec les autres dossiers du portefeuille sur une fenêtre de 12 mois (paramètre). Les entités rapprochées sont : **mêmes témoins**, **mêmes garages** (dont les devis dépassent de plus de 20 % la moyenne du marché, paramètre), **mêmes photos** (empreinte visuelle identique ou proche), **mêmes téléphones**, ainsi que le même véhicule, la même victime sur plusieurs contrats, et le même bénéficiaire ou le même compte de paiement *(défaut H-102 : bénéficiaire et compte de paiement ajoutés aux entités de la démo)*. La sortie est un graphe de dossiers liés avec, pour chaque lien, l'entité commune, un score de lien et la **source** (pièces, journal, portefeuille). Le destinataire est le contrôle interne et le relecteur. Garde-fous : un lien n'est qu'un indice ; le graphe ne modifie pas le score (FR-128) tant que la compagnie n'a pas fixé de poids *(défaut H-103 : les liens nourrissent la revue, pas le score)* ; l'IA ne décide rien ; chaque lien est inscrit au registre de l'IA (niveau `ANALYSE`) ; aucune donnée nominative ni médicale ne sort de l'instance locale ; si l'IA est coupée, les liens exacts (téléphone, immatriculation, compte de paiement) restent servis par des règles explicables, et la comparaison de photos est « indisponible » *(défaut H-104 : la démo simulait l'empreinte de photo ; sans modèle de vision, seule l'identité exacte du fichier est comparée)*.
 
 **Conséquences (testables) :**
 - Deux dossiers qui partagent un numéro de téléphone, une immatriculation ou un compte de paiement sont reliés dans le graphe, avec l'entité commune et un lien vers chaque dossier.
 - Un lien sans source (pièce ou donnée) n'est pas affiché.
-- Un garage dont les devis dépassent de plus de 20 % la moyenne du marché sur au moins 5 dossiers est signalé comme entité partagée [ASSUMPTION: 5 dossiers minimum ; la démo fixe 20 % mais pas le nombre minimum].
+- Un garage dont les devis dépassent de plus de 20 % la moyenne du marché sur au moins 5 dossiers est signalé comme entité partagée *(défaut H-105 : 5 dossiers minimum ; la démo fixe 20 % mais pas le nombre minimum)*.
 - Un test rejoue un réseau de trois dossiers (même téléphone, même garage, même photo) et vérifie que le graphe les relie, que le score n'est pas modifié, et que le registre de l'IA contient les trois liens.
 - Le graphe n'est lisible que par `AUD`, `RESP`, `DG`, `DT` et le relecteur de la revue en cours ; chaque consultation est journalisée.
 - Le graphe ne contient aucun champ de santé.
@@ -1932,14 +2261,14 @@ La **confirmation** de la fraude est réservée à `DG` et `DT`, avec une conclu
 **Conséquences (testables) :**
 - Une confirmation par `RESP`, `GEST`, `GREC` ou `AUD` est refusée (`DROIT_INSUFFISANT`) ; une confirmation sans avis écrit de `AUD` au dossier est refusée (`AVIS_AUD_REQUIS`).
 - Une confirmation sans conclusion écrite est refusée (`MOTIF_ECRIT`).
-- À la confirmation, le dossier est conservé comme dossier de fraude (conservation longue), sa provision passe à zéro, et le responsable de la lutte contre le blanchiment est alerté pour décider d'une déclaration de soupçon (règlement CIMA n° 0004, art. 14 et 15, SÛR) ; Prospera n'envoie aucune déclaration lui-même.
-- Si de l'argent a déjà été versé, le dossier porte une alerte « indu à examiner » pour `RESP` et `DG` ; Prospera n'ouvre pas de créance sur l'assuré [ASSUMPTION: la récupération d'un indu est hors périmètre du premier jour ; à traiter à la séance d'immersion].
-- Le refus qui suit la confirmation ne mentionne pas la fraude ; il emploie le motif retenu par la direction, dans les termes du FR-125.
+- À la confirmation, le dossier est conservé comme dossier de fraude (conservation longue), sa provision passe à zéro (sauf au corporel VTM tant que l'obligation légale d'offre demeure, FR-121), et le responsable de la lutte contre le blanchiment est alerté pour décider d'une déclaration de soupçon (règlement CIMA n° 0004, art. 14 et 15, SÛR) ; Prospera n'envoie aucune déclaration lui-même.
+- Si de l'argent a déjà été versé, le dossier porte une alerte « indu à examiner » pour `RESP` et `DG` ; Prospera n'ouvre pas de créance sur l'assuré *(défaut H-106 : la récupération d'un indu est **hors périmètre**, dite au §10.2 avec un **responsable désigné** (L4-04) ; à traiter à la séance d'immersion)*. Un chèque déjà émis est mis en opposition (FR-101, FR-125).
+- Le refus qui suit la confirmation est écrit avec le **vrai motif juridiquement exigé**, ou suit une procédure d'information définie par le juriste ; il n'est plus écrit sans le mot fraude par défaut *(point juridique J-17 : à valider par le juriste, §13.2)*. Les messages de la **suspicion** (FR-125) restent sans le mot fraude.
 - Un écartement garde la conclusion et ne supprime ni le score ni les signaux ; un nouveau signal du même type n'ouvre pas de revue tant que le score n'a pas changé de niveau.
 
 ### 5.13 La machine à états complète du dossier
 
-Cette section rassemble la **machine à états du dossier sinistre** : les 11 statuts, les 4 sorties, toutes les transitions, les conditions qui les gardent et les rôles qui les déclenchent. Elle réécrit les 31 transitions de la démo sur les 11 statuts du circuit de référence (décision D5), avec les changements de l'offre et de l'accord (D6), du recours en parallèle (D10) et des règlements multiples (D11). Les sections 5.2 à 5.12 décrivent le contenu de chaque geste ; cette section est la **table de vérité** que le serveur applique. En cas d'écart entre une phrase d'une autre section et cette table, la table fait foi.
+Cette section rassemble la **machine à états du dossier sinistre** : les 11 statuts, les 4 sorties, les 42 transitions, les conditions qui les gardent et les rôles qui les déclenchent. Elle réécrit les 31 transitions de la démo sur les 11 statuts du circuit de référence (décision D5), avec les changements de l'offre et de l'accord (D6), du recours en parallèle (D10) et des règlements multiples (D11). Les sections 5.2 à 5.12 décrivent le contenu de chaque geste ; cette section est la **table de vérité** que le serveur applique. En cas d'écart entre une phrase d'une autre section et cette table, la table fait foi.
 
 #### FR-134 : Les statuts du dossier
 
@@ -1954,7 +2283,7 @@ Le dossier est toujours dans **un seul** statut. Onze statuts forment le circuit
 | `EVALUE` | 5 Chiffrer | le décompte est arrêté (dommage, vétusté, règle proportionnelle, plafond, franchise) | non |
 | `EN_VALIDATION` | 6 Décider | la décision attend les signatures de la délégation | non |
 | `OFFRE_ENVOYEE` | 6 Décider | l'offre validée est partie chez l'assuré ; on attend son accord | non |
-| `ORDRE_EMIS` | 7 Payer | l'accord est enregistré, l'ordre de règlement est émis, la comptabilité n'a pas fini | non |
+| `ORDRE_EMIS` | 7 Payer | l'accord est enregistré, l'ordre de règlement est créé (« différé » jusqu'à la fin du délai de dénonciation au corporel VTM), la comptabilité n'a pas fini | non |
 | `CHEQUE_A_REMETTRE` | 7 Payer | le chèque est émis et attend sa remise au guichet | non |
 | `REGLE` | 7 Payer | tous les règlements sont remis ou confirmés, le reste à payer est zéro | non |
 | `CLOTURE` | 8 Clore | le dossier est clos, le recours éventuel continue seul | oui (rouvrable) |
@@ -1974,62 +2303,67 @@ La phase 3 « Attribuer » n'est pas un statut : c'est `OUVERT` avec un gestionn
 
 #### FR-135 : Les transitions
 
-Voici **toutes** les transitions autorisées. Les rôles sont ceux du PRD (§2) ; « comité » est l'instance de la matrice de délégation, pas un rôle (§5.7). Une transition absente du tableau est interdite.
+Voici **les 42 transitions** autorisées, et toutes. La transition 10 est présentée sur **deux lignes** (10a, la validation selon la délégation ; 10b, l'envoi de l'offre) pour que la séparation soit testable : elle reste **une** transition, et le nombre de transitions reste 42. Les rôles sont ceux du PRD (§2) ; « comité » est l'instance de la matrice de délégation, pas un rôle (§5.7). Une transition absente du tableau est interdite.
 
 | # | Depuis → vers | Libellé | Rôle(s) | Conditions | Motif obligatoire |
 |---|---|---|---|---|---|
-| 1 | `DECLARE → OUVERT` | Ouvrir et orienter vers le volet | ACC, GEST, GREC, RESP | `CONTRAT_VERIFIE`, `PIECES_COMPLETES` | non |
-| 2 | `DECLARE → PIECES_ATTENDUES` | Ouvrir en attente de pièces | ACC, GEST, GREC, RESP | `CONTRAT_VERIFIE` | non |
+| 1 | `DECLARE → OUVERT` | Ouvrir et orienter vers le volet | ACC, GEST, GREC, RESP | `PIECES_COMPLETES` ; `CONTRAT_VERIFIE` produit une réserve, jamais un blocage (FR-41) | non |
+| 2 | `DECLARE → PIECES_ATTENDUES` | Ouvrir en attente de pièces | ACC, GEST, GREC, RESP | aucune ; `CONTRAT_VERIFIE` produit une réserve, jamais un blocage (FR-41) | non |
 | 3 | `PIECES_ATTENDUES → OUVERT` | Reprendre le circuit : pièces reçues | ACC, GEST, GREC, RESP | `PIECES_COMPLETES` | non |
-| 4 | `DECLARE → REJETE` | Refuser : sinistre non garanti | RESP, DG, DT | `DECISION_GARANTIE` | oui |
-| 5 | `OUVERT → EN_INSTRUCTION` | Prendre le dossier en instruction | GEST, GREC, RESP | `DOSSIER_AFFECTE` | non |
+| 4 | `DECLARE → REJETE` | Refuser : sinistre non garanti (seule la décision `REFUS_DE_GARANTIE` refuse, FR-42) | RESP, DG, DT | `DECISION_GARANTIE` | oui |
+| 5 | `OUVERT → EN_INSTRUCTION` | Prendre le dossier en instruction (aucune exception : personne ne se l'attribue) | GEST, GREC, RESP | `DOSSIER_AFFECTE` ; si le `RESP` instruit, il ne valide pas et ne siège pas au comité pour ce dossier | non |
 | 6 | `EN_INSTRUCTION → PIECES_ATTENDUES` | Demander des pièces complémentaires | GEST, GREC, RESP | — | non |
 | 7 | `EN_INSTRUCTION → EVALUE` | Enregistrer l'évaluation au décompte | GEST, GREC, RESP | `PIECES_COMPLETES`, `EXPERTISE_VALIDEE`, `GARANTIE_ENGAGEABLE`, `MONTANT_EVALUE` | non (oui si le montant diffère du chiffrage validé) |
 | 8 | `EVALUE → EN_VALIDATION` | Envoyer en validation | GEST, GREC, RESP | `MONTANT_EVALUE` | non |
 | 9 | `EVALUE → EN_INSTRUCTION` | Reprendre l'instruction avant validation | GEST, GREC, RESP | — | oui |
-| 10 | `EN_VALIDATION → OFFRE_ENVOYEE` | Valider selon la délégation et envoyer l'offre | validation : RESP, comité, DT, DG selon §5.7 ; envoi : GEST, RESP | `VALIDATION_ACQUISE`, `SEPARATION_DES_TACHES`, `COMPLEMENT_EXPERT_RECU`, `AUCUN_SIGNAL_BLOQUANT` | oui |
+| 10a | `EN_VALIDATION` (sans changement de statut) | Valider selon la délégation | RESP, comité, DT, DG selon §5.7 | `VALIDATION_ACQUISE`, `SEPARATION_DES_TACHES`, `CONTROLE_ABSENT` (niveau 1 : contrôle par un second agent fait), `COMPLEMENT_EXPERT_RECU`, `AUCUN_SIGNAL_BLOQUANT` | oui |
+| 10b | `EN_VALIDATION → OFFRE_ENVOYEE` | Envoyer l'offre (dispensée si le montant validé est inférieur au montant accepté, FR-99) | GEST, RESP | validation 10a acquise (`VALIDATION_ACQUISE`), `PREUVE_ENVOI_ABSENTE`, `AUCUN_SIGNAL_BLOQUANT` | non |
 | 11 | `EN_VALIDATION → EN_INSTRUCTION` | Renvoyer en instruction : réévaluation demandée | RESP, comité, DT, DG | — | oui |
 | 12 | `EN_VALIDATION → PIECES_ATTENDUES` | Demander des pièces avant validation | RESP, comité, DT, DG | — | oui |
 | 13 | `EN_VALIDATION → REJETE` | Refuser la prise en charge | RESP, DG, DT | `DECISION_GARANTIE` | oui |
-| 14 | `OFFRE_ENVOYEE → ORDRE_EMIS` | Enregistrer l'accord et émettre l'ordre de règlement | GEST, RESP | `ACCORD_ENREGISTRE`, `MONTANT_VALIDE`, `AUCUN_SIGNAL_BLOQUANT` | non |
+| 14 | `OFFRE_ENVOYEE → ORDRE_EMIS` | Enregistrer l'accord et créer l'ordre de règlement (« différé » au corporel VTM jusqu'à la date d'éligibilité) | ACC, ou un agent qui n'a ni instruit ni validé (jamais GEST ni RESP, FR-29) | `ACCORD_ENREGISTRE` (pièce originale signée, identité contrôlée), `MONTANT_VALIDE`, `SEPARATION_DES_TACHES`, `AUCUN_SIGNAL_BLOQUANT` | non |
 | 15 | `OFFRE_ENVOYEE → EN_INSTRUCTION` | Reprendre : contre-proposition de l'assuré | GEST, RESP | contre-proposition enregistrée | oui |
 | 16 | `OFFRE_ENVOYEE → LITIGE` | Constater le refus de l'offre | RESP, DG, DT | refus enregistré | oui |
-| 17 | `ORDRE_EMIS → CHEQUE_A_REMETTRE` | Émettre le règlement : chèque | CPT | `ORDRE_COMPLET`, `CONTROLE_LBC_FT`, `AUCUN_SIGNAL_BLOQUANT`, `SEPARATION_DES_TACHES` | non |
-| 18 | `ORDRE_EMIS → REGLE` | Constater le paiement électronique | CPT lance, `paiement` confirme | `QUITTANCE_SIGNEE`, `COORDONNEES_VERIFIEES`, `CONTROLE_LBC_FT`, `AUCUN_SIGNAL_BLOQUANT` | non |
+| 17 | `ORDRE_EMIS → CHEQUE_A_REMETTRE` | Émettre le règlement : chèque | CPT | `DELAI_DENONCIATION_ECOULE` (corporel VTM, transaction), `ORDRE_COMPLET`, `CONTROLE_LBC_FT`, `AUCUN_SIGNAL_BLOQUANT`, `SEPARATION_DES_TACHES` | non |
+| 18 | `ORDRE_EMIS → REGLE` | Constater le paiement électronique | CPT lance, `paiement` confirme | `DELAI_DENONCIATION_ECOULE` (corporel VTM, transaction), `QUITTANCE_SIGNEE`, `COORDONNEES_VERIFIEES`, `CONTROLE_LBC_FT`, `AUCUN_SIGNAL_BLOQUANT` | non |
 | 19 | `ORDRE_EMIS → EN_VALIDATION` | Rejeter l'ordre : anomalie comptable | CPT | — | oui |
-| 20 | `CHEQUE_A_REMETTRE → REGLE` | Constater la remise au bénéficiaire | ACC ; CPT seulement s'il n'a pas émis ce règlement | `REGLEMENT_EMIS`, `IDENTITE_RETIRANT`, `QUITTANCE_SIGNEE`, `AUCUN_SIGNAL_BLOQUANT`, `SEPARATION_DES_TACHES` | non |
-| 21 | `CHEQUE_A_REMETTRE → ORDRE_EMIS` | Annuler le chèque non retiré et ré-émettre | CPT | — | oui |
+| 20 | `CHEQUE_A_REMETTRE → REGLE` | Constater la remise au bénéficiaire | ACC ; CPT seulement s'il n'a pas émis ce règlement | `DELAI_DENONCIATION_ECOULE` (corporel VTM, transaction), `REGLEMENT_EMIS`, `IDENTITE_RETIRANT`, `QUITTANCE_SIGNEE`, `AUCUN_SIGNAL_BLOQUANT`, `SEPARATION_DES_TACHES` | non |
+| 21 | `CHEQUE_A_REMETTRE → ORDRE_EMIS` | Annuler le chèque non retiré et ré-émettre | CPT | `OPPOSITION_NON_ENREGISTREE` (opposition bancaire enregistrée : référence, date ; état `CHEQUE_EN_OPPOSITION`) | oui |
 | 22 | `REGLE → CLOTURE` | Clôturer après règlement | GEST, GREC, RESP | `REGLEMENT_REMIS`, `SOLDE_APURE`, `EXPERTISE_VALIDEE`, `RECOURS_QUALIFIE` | oui |
 | 23 | `REGLE → EN_INSTRUCTION` | Reprendre après règlement provisionnel | GEST, RESP | règlement provisionnel remis, consolidation attendue | oui |
 | 24 | `EN_INSTRUCTION → REJETE` | Notifier un refus de prise en charge | RESP, DG, DT | `DECISION_GARANTIE` | oui |
-| 25 | `EN_INSTRUCTION → SANS_SUITE` | Classer sans suite | GEST, RESP (DG ou DT au corporel automobile) | `RELANCES_EPUISEES` | oui |
-| 26 | `PIECES_ATTENDUES → SANS_SUITE` | Classer sans suite : assuré injoignable | GEST, RESP (DG ou DT au corporel automobile) | `RELANCES_EPUISEES` | oui |
-| 27 | `OFFRE_ENVOYEE → SANS_SUITE` | Classer sans suite : offre sans réponse | GEST, RESP (DG ou DT au corporel automobile) | `RELANCES_EPUISEES`, offre sans réponse depuis 30 jours | oui |
+| 25 | `EN_INSTRUCTION → SANS_SUITE` | Classer sans suite | GEST, RESP (DG ou DT au corporel automobile) | `RELANCES_EPUISEES` (relances tracées par le serveur), `SECOND_CONTROLE_RESP` au-delà du seuil de provision | oui |
+| 26 | `PIECES_ATTENDUES → SANS_SUITE` | Classer sans suite : assuré injoignable | GEST, RESP (DG ou DT au corporel automobile) | `RELANCES_EPUISEES` (relances tracées par le serveur), `SECOND_CONTROLE_RESP` au-delà du seuil de provision | oui |
+| 27 | `OFFRE_ENVOYEE → SANS_SUITE` | Classer sans suite : offre sans réponse | GEST, RESP (DG ou DT au corporel automobile) | `RELANCES_EPUISEES` (relances tracées par le serveur), `SECOND_CONTROLE_RESP` au-delà du seuil de provision, offre sans réponse depuis 30 jours | oui |
 | 28 | `EVALUE → LITIGE` | Constater un litige | RESP, DG, DT | — | oui |
 | 29 | `EN_VALIDATION → LITIGE` | Constater un litige | RESP, DG, DT | — | oui |
 | 30 | `LITIGE → EN_INSTRUCTION` | Litige résolu : reprendre l'instruction | RESP, DG, DT | — | oui |
-| 31 | `EN_INSTRUCTION → FRAUDE_SUSPECTEE` | Signaler une suspicion de fraude | GEST, GREC, RESP, DG, DT, AUD | — | oui |
-| 32 | `EVALUE → FRAUDE_SUSPECTEE` | Signaler une suspicion de fraude | idem | — | oui |
+| 31 | `DECLARE`, `PIECES_ATTENDUES`, `OUVERT` ou `EN_INSTRUCTION → FRAUDE_SUSPECTEE` | Signaler une suspicion de fraude | GEST, GREC, RESP, DG, DT, AUD | — | oui |
+| 32 | `EVALUE` ou `LITIGE → FRAUDE_SUSPECTEE` | Signaler une suspicion de fraude | idem | — | oui |
 | 33 | `EN_VALIDATION → FRAUDE_SUSPECTEE` | Signaler une suspicion de fraude | idem | — | oui |
 | 34 | `OFFRE_ENVOYEE → FRAUDE_SUSPECTEE` | Signaler une suspicion de fraude | idem | — | oui |
 | 35 | `ORDRE_EMIS → FRAUDE_SUSPECTEE` | Signaler une suspicion de fraude | idem | — | oui |
-| 36 | `CHEQUE_A_REMETTRE → FRAUDE_SUSPECTEE` | Signaler une suspicion de fraude | idem | — | oui |
-| 37 | `FRAUDE_SUSPECTEE → EN_INSTRUCTION` | Écarter la suspicion et reprendre | RESP, DG, DT | revue `ECARTE` | oui |
-| 38 | `FRAUDE_SUSPECTEE → REJETE` | Confirmer la fraude et refuser | DG, DT | revue `CONFIRME`, `AVIS_AUD_REQUIS` (avis écrit de `AUD` au dossier) | oui |
+| 36 | `CHEQUE_A_REMETTRE` ou `REGLE` (règlement non encaissé) `→ FRAUDE_SUSPECTEE` | Signaler une suspicion de fraude ; un chèque déjà émis est mis en opposition | idem | — | oui |
+| 37 | `FRAUDE_SUSPECTEE → EN_INSTRUCTION` | Écarter la suspicion et reprendre | RESP, DG, DT | revue `ECARTE` ; pour un blocage `BLOQUE`, `AVIS_AUD_REQUIS` et relecteur sans acte sur le dossier (ligne 16 de FR-7) | oui |
+| 38 | `FRAUDE_SUSPECTEE → REJETE` | Confirmer la fraude et refuser (le refus porte le vrai motif juridiquement exigé, FR-133) | DG, DT | revue `CONFIRME`, `AVIS_AUD_REQUIS` (avis écrit de `AUD` au dossier) | oui |
 | 39 | `CLOTURE → EN_INSTRUCTION` | Rouvrir le dossier | RESP, DG, DT | — | oui |
 | 40 | `REJETE → EN_INSTRUCTION` | Rouvrir sur contestation | RESP, DG, DT | — | oui |
 | 41 | `SANS_SUITE → EN_INSTRUCTION` | Rouvrir : l'assuré se manifeste | RESP, DG, DT | — | oui |
-| 42 | `ORDRE_EMIS → EN_INSTRUCTION` | Transaction dénoncée par la victime dans les 15 jours | GEST, RESP | `DENONCIATION_RECUE` (lettre de dénonciation reçue, versée comme pièce), `AUCUN_REGLEMENT_REMIS` ; les règlements non remis passent `ANNULE` | oui |
+| 42 | `ORDRE_EMIS`, `CHEQUE_A_REMETTRE` ou `REGLE` (règlement non encaissé) `→ EN_INSTRUCTION` | Transaction dénoncée par la victime dans les 15 jours (départs depuis `CHEQUE_A_REMETTRE` et `REGLE` tant que `DELAI_DENONCIATION_ECOULE` est faux) | GEST, RESP | `DENONCIATION_RECUE` (lettre de dénonciation reçue, versée comme pièce, avec preuve de réception), `AUCUN_REGLEMENT_REMIS` (ou règlement non encaissé) ; les ordres différés et les règlements non remis passent `ANNULE` | oui |
 
-**Correspondance avec les 31 transitions de la démo.** Reprises à l'identique, sur les nouveaux noms de statuts : 1 à 8 de la démo (devenues 1 à 8), 10 à 12 (devenues 11, 12, 13), 15 (devenue 20), 17 à 19 (devenues 24, 25, 26), 22 et 23 (devenues 28, 29), 24 et 25 (devenues 31, 32), 26 à 28 (devenues 37, 38, 30), 30 et 31 (devenues 39, 40). Remaniées : la transition 9 de la démo (valider et émettre l'ordre) est **scindée** en deux, valider et envoyer l'offre (10), puis enregistrer l'accord et émettre l'ordre (14), sur la décision D6 ; la 13 de la démo (émettre quittance et chèque) devient 17 ; la 14 (rejet de l'ordre) devient 19 ; la 16 (clôture) devient 22 avec la condition `RECOURS_QUALIFIE`. **Supprimées** : les 20, 21 et 29 de la démo (passage au recours), le recours étant désormais un suivi parallèle (D10). **Nouvelles** : 9, 15, 16, 18, 21, 23, 27, 33 à 36, 41 et 42 [ASSUMPTION: 9, 21, 23, 27, 33 à 36, 41 et 42 sont des ajouts de rédaction pour qu'aucun état n'ait de cul-de-sac et que le paiement puisse être arrêté ; 15, 16 et 18 découlent de D6 et D11].
+**Correspondance avec les 31 transitions de la démo.** Reprises à l'identique, sur les nouveaux noms de statuts : 1 à 8 de la démo (devenues 1 à 8), 10 à 12 (devenues 11, 12, 13), 15 (devenue 20), 17 à 19 (devenues 24, 25, 26), 22 et 23 (devenues 28, 29), 24 et 25 (devenues 31, 32), 26 à 28 (devenues 37, 38, 30), 30 et 31 (devenues 39, 40). Remaniées : la transition 9 de la démo (valider et émettre l'ordre) est **scindée** en deux, valider et envoyer l'offre (10), puis enregistrer l'accord et émettre l'ordre (14), sur la décision D6 ; la 13 de la démo (émettre quittance et chèque) devient 17 ; la 14 (rejet de l'ordre) devient 19 ; la 16 (clôture) devient 22 avec la condition `RECOURS_QUALIFIE`. **Supprimées** : les 20, 21 et 29 de la démo (passage au recours), le recours étant désormais un suivi parallèle (D10). **Nouvelles** : 9, 15, 16, 18, 21, 23, 27, 33 à 36, 41 et 42 ; la transition 10 est scindée en deux lignes, 10a et 10b *(défaut H-107 : 9, 21, 23, 27, 33 à 36, 41 et 42 sont des ajouts de rédaction pour qu'aucun état n'ait de cul-de-sac et que le paiement puisse être arrêté ; 15, 16 et 18 découlent de D6 et D11)*.
 
 **Conséquences (testables) :**
-- Le tableau contient 42 lignes ; un test de recette les énumère et vérifie, pour chacune, un cas réussi et un cas refusé par condition.
+- Le tableau contient 42 transitions, soit 43 lignes parce que la transition 10 est écrite sur deux lignes (10a et 10b) ; un test de recette les énumère et vérifie, pour chacune, un cas réussi et un cas refusé par condition, la table de test étant **générée à partir du tableau**.
 - Toute transition demandée hors du tableau est refusée avec le code `TRANSITION_INCONNUE` ; la réponse nomme le statut courant et les transitions possibles pour le rôle.
 - Une transition demandée par un rôle absent de sa ligne est refusée (`DROIT_INSUFFISANT`), même si le même utilisateur a un autre rôle qui y serait autorisé et qu'il n'agit pas sous celui-ci.
 - Une transition marquée « motif obligatoire » sans motif de 10 caractères au moins est refusée (`MOTIF_ECRIT`).
-- Un dossier `OUVERT` jugé non garanti passe par `EN_INSTRUCTION` avant d'être refusé : le refus depuis `OUVERT` n'existe pas, car personne n'a encore la charge du dossier [ASSUMPTION: refus d'un dossier non attribué non prévu ; à confirmer à la séance d'immersion].
+- Un dossier `OUVERT` jugé non garanti passe par `EN_INSTRUCTION` avant d'être refusé : le refus depuis `OUVERT` n'existe pas, car personne n'a encore la charge du dossier *(défaut H-108 : refus d'un dossier non attribué non prévu ; à confirmer à la séance d'immersion)*.
 - Les transitions 14, 17, 18 et 20 sont refusées si le montant de l'ordre n'est pas celui de l'accord (`MONTANT_VALIDE`).
+- Les transitions 17, 18 et 20 sont refusées pour tout dossier corporel VTM dont l'accord est une transaction tant que `DELAI_DENONCIATION_ECOULE` est faux ; un test par moyen de paiement (chèque, virement, paiement mobile) vérifie le refus du jour 1 au jour 14 et l'acceptation au jour 16.
+- Les lignes 10a et 10b sont testées séparément : la validation sans l'envoi ne change pas le statut ; l'envoi sans validation acquise est refusé (`VALIDATION_ACQUISE`) ; au niveau 1, la validation sans contrôle par une troisième personne est refusée (`CONTROLE_ABSENT`).
+- La transition 14 par `GEST` ou `RESP` est refusée (`DROIT_INSUFFISANT`) ; par un agent qui a instruit ou validé, elle est refusée (`SEPARATION_DES_TACHES`).
+- Aucun acompte n'est émis depuis `LITIGE` : il n'existe pas de transition de `LITIGE` vers `ORDRE_EMIS`.
 
 #### FR-136 : Les conditions nommées et leur texte
 
@@ -2037,19 +2371,23 @@ Chaque condition a un **code** et un **texte** que le serveur renvoie tel quel �
 
 | Code | Texte opposé à l'utilisateur | Définition |
 |---|---|---|
-| `PIECES_COMPLETES` | Toutes les pièces obligatoires doivent être reçues. | aucune pièce obligatoire au statut « attendue » |
-| `CONTRAT_VERIFIE` | La police doit être en vigueur à la date du sinistre. | police en vigueur et date du sinistre entre prise d'effet et échéance, d'après la dernière lecture du logiciel de la compagnie (date affichée) |
+| `PIECES_COMPLETES` | Toutes les pièces obligatoires doivent être reçues. | aucune pièce obligatoire au statut « attendue » ; une pièce « en contrôle » est « attendue » tant que le contrôle humain n'a pas rendu la pièce « reçue » (FR-145) |
+| `CONTRAT_VERIFIE` | La police doit être en vigueur à la date du sinistre. | police en vigueur et date du sinistre entre prise d'effet et échéance, d'après la dernière lecture du logiciel de la compagnie (date affichée) ; **produit une réserve, jamais un blocage** (au corporel VTM : art. 210, FR-41) ; une projection périmée est « à relire », jamais un refus |
 | `GARANTIE_ENGAGEABLE` | La garantie doit être acquise, ou une décision motivée enregistrée. | garantie acquise, ou décision `GARANTIE_ACQUISE`, `SOUS_RESERVE` ; un `REFUS_DE_GARANTIE` la ferme (jamais sautée, D4) |
 | `DECISION_GARANTIE` | Une décision de garantie motivée est requise. | décision `REFUS_DE_GARANTIE` enregistrée avec motif |
-| `DOSSIER_AFFECTE` | Le dossier doit avoir été attribué à un gestionnaire par l'encadrement. | gestionnaire désigné par `RESP` ; l'accueil n'attribue jamais |
-| `EXPERTISE_VALIDEE` | Toute expertise ouverte doit avoir rendu son rapport et être validée. | toutes les missions non annulées sont validées ou arbitrées |
+| `DOSSIER_AFFECTE` | Le dossier doit avoir été attribué à un gestionnaire par l'encadrement. | gestionnaire désigné par `RESP` ; l'accueil n'attribue jamais ; aucun gestionnaire ne se l'attribue (aucune exception) |
+| `EXPERTISE_VALIDEE` | Toute expertise ouverte doit avoir rendu son rapport et être validée. | toutes les missions non annulées sont validées ou arbitrées, évalué sur la machine unique des missions (FR-61) |
 | `COMPLEMENT_EXPERT_RECU` | Un complément demandé à l'expert n'est pas revenu. | aucun complément en attente, sauf passage outre du `RESP` avec motif (D15) |
 | `MONTANT_EVALUE` | Saisissez le montant arrêté au décompte. | montant évalué supérieur à zéro |
-| `VALIDATION_ACQUISE` | La validation exigée par la délégation n'est pas complète. | signatures du niveau requis par le cumul des montants validés du dossier (§5.7) |
+| `VALIDATION_ACQUISE` | La validation exigée par la délégation n'est pas complète. | signatures du niveau requis par le cumul anti-fractionnement : montants acceptés et ordonnés non annulés, plus le montant en cours de validation (§5.7) |
+| `CONTROLE_ABSENT` | Le contrôle par un second agent n'est pas fait. | au niveau 1, un contrôleur distinct de l'instructeur et du validateur a enregistré son contrôle (FR-78) |
 | `MONTANT_VALIDE` | Le montant dépasse le montant validé. | montant du règlement ou de l'ordre inférieur ou égal au validé |
-| `SEPARATION_DES_TACHES` | Celui qui instruit ne valide pas ; celui qui décide ne paie pas. | l'utilisateur n'a pas exercé une fonction incompatible sur ce dossier (SEP-01, SEP-02) |
+| `SEPARATION_DES_TACHES` | Celui qui instruit ne valide pas ; celui qui décide ne paie pas. | l'utilisateur n'est pas « partie » par une fonction incompatible sur ce dossier (SEP-01, SEP-02 ; FR-7, FR-29), y compris : instruire et enregistrer l'accord, valider et enregistrer l'accord, émettre et faire signer la quittance |
 | `AUCUN_SIGNAL_BLOQUANT` | Dossier suspendu par le contrôle interne. | aucun dossier de fraude `BLOQUE` sans revue `ECARTE` |
-| `ACCORD_ENREGISTRE` | L'accord de l'assuré n'est pas enregistré. | accord rattaché avec sa pièce et son montant (§5.8, FR-90) |
+| `ACCORD_ENREGISTRE` | L'accord de l'assuré n'est pas enregistré. | accord enregistré par un tiers (`ACC` ou agent non partie), rattaché avec sa pièce originale signée, son contrôle d'identité et son montant (§5.8, FR-86, FR-90) |
+| `DELAI_DENONCIATION_ECOULE` | Le délai de dénonciation de 15 jours n'est pas écoulé. | date d'éligibilité atteinte : date de conclusion de la transaction plus 15 jours, calculée et non modifiable ; garde l'émission (transitions 17, 18, 20) pour tout dossier corporel VTM dont l'accord est une transaction (FR-86) |
+| `OPPOSITION_NON_ENREGISTREE` | L'opposition bancaire doit être enregistrée avant d'annuler ou de remplacer ce chèque. | opposition enregistrée (référence, date) ; chèque à l'état `CHEQUE_EN_OPPOSITION` (transition 21, FR-101) |
+| `SECOND_CONTROLE_RESP` | Un second contrôle du responsable est exigé pour ce classement. | au-delà du seuil de provision (500 000 FCFA, paramètre), second contrôle du `RESP` enregistré (FR-123) |
 | `ORDRE_COMPLET` | Indiquez la banque, le numéro du chèque et le montant. | champs obligatoires du moyen de règlement saisis |
 | `QUITTANCE_SIGNEE` | La quittance doit être signée. | quittance `SIGNEE` avec pièce de signature |
 | `COORDONNEES_VERIFIEES` | Les coordonnées de paiement ne sont pas vérifiées. | compte ou numéro Mobile Money vérifié au nom du bénéficiaire, sans changement récent non levé |
@@ -2108,7 +2446,7 @@ Les conditions du recours (`TIERS_IDENTIFIE`, `PIECE_PROBANTE`, `CREANCE_ETABLIE
 | `PARAMETRE_REGLEMENTAIRE` | Un délai légal ne se modifie pas. | FR-85 |
 | `DENONCIATION_RECUE` | Joignez la lettre de dénonciation de la transaction. | FR-86, FR-90, FR-135 |
 | `AUCUN_REGLEMENT_REMIS` | Un règlement a déjà été remis : la transaction ne peut plus être annulée. | FR-90, FR-135 |
-| `AVIS_AUD_REQUIS` | L'avis écrit du contrôle interne est requis avant de confirmer une fraude. | FR-129, FR-133, FR-135 |
+| `AVIS_AUD_REQUIS` | L'avis écrit du contrôle interne est requis avant de confirmer une fraude ou d'écarter un blocage. | FR-129, FR-133, FR-135 |
 | `PIECE_ACCORD_ABSENTE` | Joignez la pièce signée qui prouve l'accord. | FR-86 |
 | `AUTORISATION_REPRESENTANT_ABSENTE` | Joignez la pièce d'autorisation du représentant du mineur ou de l'incapable. | FR-86 |
 | `MONTANT_CONTRE_PROPOSITION_ABSENT` | Indiquez le montant demandé par l'assuré. | FR-87 |
@@ -2128,6 +2466,29 @@ Les conditions du recours (`TIERS_IDENTIFIE`, `PIECE_PROBANTE`, `CREANCE_ETABLIE
 | `ECHEANCE_REGLEMENTAIRE` | Une échéance réglementaire ne se modifie pas. | FR-140 |
 | `SUSPENSION_NON_MOTIVEE` | Une suspension exige son article, ses dates et son motif. | FR-141 |
 | `CANAL_ABSENT` | Aucun canal ni numéro n'est enregistré pour ce destinataire. | FR-146 |
+| `FORMULAIRE_SECOURS_DEJA_SAISI` | Ce numéro de formulaire papier de secours est déjà saisi. | FR-34 |
+| `REGLEMENT_EN_COURS` | Un règlement est en cours : la fusion des dossiers est refusée. | FR-38 |
+| `DELAI_SOUS_PLANCHER_LEGAL` | Ce délai est inférieur au plancher légal (5 jours ouvrés ; 48 heures pour le vol). | FR-43 |
+| `RECOURS_OUVERT_OU_ENVISAGE` | Un recours est ouvert ou envisagé : l'accord sur devis est fermé. | FR-59 |
+| `VALIDATION_DESIGNATION_REQUISE` | La désignation de cet expert exige la validation du responsable. | FR-62 |
+| `CONTESTATION_INCOMPLETE` | Une contestation médicale exige son auteur et le point contesté. | FR-63a |
+| `PERIODE_NON_DATEE` | Un poste d'incapacité exige sa période datée. | FR-70 |
+| `AYANT_DROIT_NON_VERIFIE` | La ligne de cet ayant droit n'est pas vérifiée. | FR-70a, FR-91 |
+| `PARTS_SUPERIEURES_A_100` | La somme des parts successorales dépasse 100 %. | FR-70a |
+| `MONTANT_VALIDE_SUPERIEUR_A_EVALUE` | Le montant validé ne peut pas dépasser le montant évalué. | FR-75 |
+| `REPORT_REVUE_INTERDIT` | La revue de provision ne se reporte pas : un délai légal est actif. | FR-76 |
+| `COMITE_INCOMPLET` | La liste des membres du comité n'est pas complète (un titulaire et un suppléant par siège). | FR-79 |
+| `VISA_DT_INTERDIT` | Le `DT` a voté au comité : le visa est donné par le `DG`. | FR-79 |
+| `ASSUREUR_MENEUR_DEJA_DESIGNE` | Un assureur meneur est déjà désigné pour ce dossier. | FR-82 |
+| `IDENTITE_SIGNATAIRE_NON_CONTROLEE` | L'identité du signataire de l'accord n'est pas contrôlée. | FR-86 |
+| `DOUBLE_ENREGISTREMENT_REQUIS` | Au-dessus du seuil, l'accord se double d'un second enregistrement. | FR-86 |
+| `PREUVE_RECEPTION_ABSENTE` | Joignez la preuve de réception par un moyen autorisé. | FR-86, FR-114 |
+| `CONFIRMATION_PAIEMENT_REQUISE` | Une nouvelle tentative exige la confirmation de `paiement` et reprend la même clé. | FR-92 |
+| `VALIDATION_ORDRE_REQUISE` | L'ordre doit être validé par un second `CPT` (et le `DG` au-dessus du seuil) avant exécution. | FR-93, FR-95 |
+| `GABARIT_IMPOSE_AU_CORPOREL` | Le gabarit de lettre-chèque est imposé au corporel. | FR-94 |
+| `JUSTIFICATIF_BANCAIRE_ABSENT` | Joignez le justificatif bancaire de ce virement. | FR-95 |
+| `CHEQUE_NON_CONFORME_A_L_ORDRE` | Le nom ou le montant du chèque ne correspond pas à l'ordre. | FR-97 |
+| `PHOTO_CHEQUE_ABSENTE` | La photo du chèque est obligatoire. | FR-97 |
 
 Les synonymes sont abandonnés au profit des codes du premier tableau : `MOTIF_ECRIT` (et non `MOTIF_OBLIGATOIRE`), `PIECES_COMPLETES`, `DOSSIER_AFFECTE`, `GARANTIE_ENGAGEABLE`, `MONTANT_EVALUE`, `VALIDATION_ACQUISE` (délégation insuffisante, visa du `DT` manquant, fractionnement, décision du `DG` absente, offre sans validation), `AUCUN_SIGNAL_BLOQUANT`, `ACCORD_ENREGISTRE`, `CONTRAT_VERIFIE`, `EXPERTISE_VALIDEE`, `COMPLEMENT_EXPERT_RECU`, `RELANCES_EPUISEES`.
 
@@ -2162,7 +2523,7 @@ Chaque transition réussie **et chaque refus** écrit une ligne d'audit, non mod
 
 #### FR-139 : Aucun état non terminal sans issue
 
-Le graphe des transitions est **vérifié automatiquement** : chaque statut non terminal a au moins une sortie, chaque statut est atteignable depuis `DECLARE`, et il existe un chemin nominal de `DECLARE` à `CLOTURE`. Les statuts et les transitions sont **fixes** ; la compagnie règle les seuils, les délégations, les délais et les droits par rôle, dans la limite des séparations de fonctions, mais ne crée pas de statut [ASSUMPTION: statuts et transitions non paramétrables par la compagnie au premier jour ; à confirmer à la séance d'immersion].
+Le graphe des transitions est **vérifié automatiquement** : chaque statut non terminal a au moins une sortie, chaque statut est atteignable depuis `DECLARE`, et il existe un chemin nominal de `DECLARE` à `CLOTURE`. Les statuts et les transitions sont **fixes** ; la compagnie règle les seuils, les délégations, les délais et les droits par rôle, dans la limite des séparations de fonctions, mais ne crée pas de statut *(défaut H-109 : statuts et transitions non paramétrables par la compagnie au premier jour ; à confirmer à la séance d'immersion)*.
 
 **Conséquences (testables) :**
 - Un test calcule, pour chaque statut non terminal (`DECLARE`, `PIECES_ATTENDUES`, `OUVERT`, `EN_INSTRUCTION`, `EVALUE`, `EN_VALIDATION`, `OFFRE_ENVOYEE`, `ORDRE_EMIS`, `CHEQUE_A_REMETTRE`, `REGLE`, `LITIGE`, `FRAUDE_SUSPECTEE`), ses transitions de sortie et échoue s'il y en a zéro.
@@ -2198,23 +2559,27 @@ Le Code CIMA fixe des délais pour **l'indemnisation des victimes d'atteintes à
 | Offre provisionnelle | date de l'accident | offre provisionnelle envoyée | si la consolidation n'est pas connue à 6 mois | art. 231 al. 5 (SÛR) | l'offre définitive suit |
 | Offre définitive après consolidation | date où l'assureur est informé de la consolidation | offre définitive envoyée | 6 mois | art. 231 al. 5 (SÛR) | idem |
 | Réponse à la demande motivée de la victime | réception de la demande | réponse envoyée | 30 jours | art. 231 al. 7 (SÛR) | alerte au responsable |
-| Dénonciation de la transaction | conclusion de la transaction | expiration du délai | 15 jours | art. 235 (SÛR) | la victime peut dénoncer ; paiement attendu après |
+| Dénonciation de la transaction | conclusion de la transaction | expiration du délai | 15 jours | art. 235 (SÛR) | la victime peut dénoncer ; aucun règlement n'est émis avant la fin (`DELAI_DENONCIATION_ECOULE`) |
 | Paiement des sommes convenues | fin du délai de dénonciation | dernier règlement `PAYE` | 1 mois | art. 235 (SÛR) | intérêt de 5 % par mois (art. 236, SÛR) |
-| Pénalité d'offre tardive | échéance de l'offre dépassée | offre envoyée | 5 % par mois de retard | art. 233 (SÛR) | calcul affiché ; réduction motivée par `RESP` |
+| Pénalité d'offre tardive | échéance de l'offre dépassée | offre envoyée | 5 % par mois de retard | art. 233 (SÛR) | calcul affiché, libellé « estimation, base non validée » ; réduction motivée par `RESP` |
+| Procès-verbal d'accident corporel | date de l'accident | procès-verbal reçu | 3 mois | art. 230 (SÛR) | nature « suivi » : ce n'est pas un délai réglementaire opposable à la compagnie ; alerte au gestionnaire |
 
-À ces échéances s'ajoutent les **suspensions et prorogations** que le dossier doit pouvoir tracer : assureur non avisé de l'accident dans le mois (art. 247) ; décès de la victime plus d'un mois après l'accident (art. 248, délai prorogé du temps écoulé) ; pièces demandées non reçues dans les 6 semaines (art. 249 et 250) ; réponse incomplète, nouvelle demande dans le mois (art. 251) ; refus d'examen médical ou contestation du médecin, expert commun, un mois de plus (art. 252 et 252 bis) ; victime résidant à l'étranger, un mois de plus (art. 253) ; tous SÛR. Quand un **fonds de garantie automobile** est activé pour le pays (FR-111), s'ajoutent : transmission du procès-verbal dans les 60 jours (art. 606), déclaration au fonds dans les 3 mois de la réclamation (art. 608), notification d'une transaction avec un responsable non assuré dans le mois (art. 605), tous SÛR. L'arbitrage entre assureurs (sentence dans le mois de la saisine, art. 276, SÛR) suit les recours (FR-119). La **base de calcul** de la pénalité de 5 % (indemnité totale, solde ou montant offert) est un point de revue du juriste.
+À ces échéances s'ajoutent les **suspensions et prorogations** que le dossier doit pouvoir tracer : assureur non avisé de l'accident dans le mois (art. 247) ; décès de la victime plus d'un mois après l'accident (art. 248, délai prorogé du temps écoulé) ; pièces demandées non reçues dans les 6 semaines (art. 249 et 250) ; réponse incomplète, nouvelle demande dans le mois (art. 251) ; refus d'examen médical ou contestation du médecin, expert commun, un mois de plus (art. 252 et 252 bis) ; victime résidant à l'étranger, un mois de plus (art. 253) ; tous SÛR. Quand un **fonds de garantie automobile** est activé pour le pays (FR-111), s'ajoutent : transmission du procès-verbal dans les 60 jours (art. 606), notification d'une transaction avec un responsable non assuré dans le mois (art. 605), tous SÛR. La déclaration au fonds dans les 3 mois (art. 608, SÛR) ne vaut que pour l'**exception de garantie invoquée** (FR-121) ; le paramètre s'appelle `legal.fga_declaration_mois`. L'arbitrage entre assureurs (sentence dans le mois de la saisine, art. 276, SÛR) suit les recours (FR-119). La **base de calcul** de la pénalité de 5 % (indemnité totale, solde ou montant offert) est le paramètre `penalite.base`, défaut « montant de l'offre » ; elle est un point de revue du juriste, et l'affichage porte le libellé « estimation, base non validée » (FR-85).
 
 **Conséquences (testables) :**
 - Un dossier corporel automobile ouvert affiche, dès l'ouverture, la date limite de l'offre : accident plus 12 mois, ou décès plus 8 mois pour un décès.
 - Un dossier corporel dont la consolidation n'est pas connue à 6 mois de l'accident reçoit une alerte « offre provisionnelle possible » ; l'information de consolidation enregistrée ouvre l'échéance de l'offre définitive à 6 mois.
 - Un dossier dont l'offre légale est dépassée affiche la pénalité cumulée (5 % de l'indemnité par mois de retard) et le motif de réduction éventuel saisi par `RESP`.
 - Une suspension saisie avec son article, ses dates et son motif décale l'échéance ; sans article, elle est refusée (`SUSPENSION_NON_MOTIVEE`).
+- Pas de suspension si aucune nouvelle demande n'est faite dans les 15 jours après une réponse incomplète reçue dans les 6 semaines (art. 251) ; avec une nouvelle demande dans ce délai, le délai est suspendu.
+- Le suivi du procès-verbal d'accident corporel (3 mois, art. 230) part de la date de l'accident et s'arrête à la réception du procès-verbal ; sa nature est « suivi », il n'apparaît pas comme échéance réglementaire opposable.
+- Les échéances de paiement légales (un mois) et internes (72 heures ouvrées) partent de la fin du délai de dénonciation au corporel VTM.
 - Les échéances ne s'appliquent pas à un dossier matériel ou de risques divers ; un test vérifie qu'un dossier de dommages aux biens n'affiche aucune échéance de ce tableau.
 - Un dossier jugé sous une version antérieure du référentiel garde ses échéances d'origine (sinistre survenu avant la date d'effet de la nouvelle version).
 
 #### FR-142 : Les échéances internes, le matériel et les autres branches
 
-Les échéances **internes** de la compagnie sont des paramètres : leurs valeurs par défaut viennent de la démo et du mémoire d'audit de 2014 (procédure d'une compagnie du groupe au Sénégal, à confirmer pour le Togo). Les délais d'**offre** et de **règlement** par volet de la démo sont conservés comme délais internes ; au corporel automobile, la loi (FR-141) prime.
+Les échéances **internes** de la compagnie sont des paramètres : leurs valeurs par défaut viennent de la démo et du mémoire d'audit de 2014 (procédure de la compagnie étudiée par le mémoire de 2014 (zone CIMA), à confirmer pour le Togo). Les délais d'**offre** et de **règlement** par volet de la démo sont conservés comme délais internes ; au corporel automobile, la loi (FR-141) prime.
 
 | Échéance | Point de départ | Point d'arrêt | Défaut | Conséquence |
 |---|---|---|---|---|
@@ -2224,7 +2589,11 @@ Les échéances **internes** de la compagnie sont des paramètres : leurs valeur
 | Offre validée envoyée | dernière signature de la délégation | offre envoyée | 48 heures ouvrées | alerte au gestionnaire et au responsable |
 | Offre sans réponse (relance) | offre envoyée | réponse enregistrée | 15 jours | relance de l'assuré |
 | Offre sans réponse (alerte) | offre envoyée | réponse enregistrée | 30 jours | alerte au responsable ; proposition de classement sans suite |
-| Paiement (cible) | accord enregistré ; au corporel automobile, fin du délai de dénonciation de 15 jours | dernier règlement `PAYE` | 72 heures | alerte comptabilité et responsable (§5.8, FR-102) |
+| Paiement (cible) | accord enregistré ; au corporel automobile, fin du délai de dénonciation de 15 jours | dernier règlement `PAYE` | 72 heures ouvrées | alerte comptabilité et responsable (§5.8, FR-102) |
+| Clôture après le dernier règlement | dernier règlement `PAYE` | dossier clos (transition 22) | 15 jours | indicateur « clôture en retard » *(défaut H-110 : 15 jours ; à confirmer à la séance d'immersion)* |
+| Honoraires d'expert payés | rapport reçu | règlement d'honoraires `PAYE` | 30 jours (un mois) | alerte à la comptabilité *(défaut H-111 : 30 jours ; à confirmer à la séance d'immersion)* |
+| Décision d'exclusion soumise | refus envisagé | décision soumise au `RESP` | 48 heures ouvrées | alerte au responsable (FR-121) *(défaut H-112 : procédure du mémoire)* |
+| Courrier de refus | décision de refus | courrier de refus envoyé | 72 heures ouvrées, ou justifier 2 jours ouvrés | alerte au responsable (FR-121) |
 | Règlement (limite interne) | accord enregistré | dernier règlement `PAYE` | corporel 45 j, matériel 30 j, autres 30 j | alerte rouge |
 | Délai de traitement (SLA) par volet | déclaration enregistrée | statut `REGLE`, `REJETE` ou `SANS_SUITE` | corporel 45 j, matériel 21 j, risques divers 30 j, recours 90 j | indicateur et alerte |
 | Chèque non retiré | émission du chèque | remise ou annulation | relance 7 j, circulation longue 21 j, exposition 30 j | liste d'appels, alerte, état (§5.8, FR-101) |
@@ -2234,16 +2603,18 @@ Les échéances **internes** de la compagnie sont des paramètres : leurs valeur
 | Rapport d'expert | mission acceptée, éléments transmis | rapport reçu | selon le domaine (§5.5) | alerte au gestionnaire |
 
 **Conséquences (testables) :**
-- Le délai de traitement du volet recours (90 jours) se compte depuis la déclaration, comme les autres volets [ASSUMPTION: la SPEC ne définit ni départ ni arrêt du délai cible ; départ à la déclaration, arrêt à REGLE, REJETE ou SANS_SUITE].
+- Le délai de traitement du volet recours (90 jours) se compte depuis la déclaration, comme les autres volets *(défaut H-113 : la SPEC ne définit ni départ ni arrêt du délai cible ; départ à la déclaration, arrêt à REGLE, REJETE ou SANS_SUITE)*.
 - Chaque ligne du tableau est un paramètre de la compagnie, versionné et daté ; un test change chaque valeur et vérifie les jours restants d'un dossier ouvert après le changement.
 - L'échéance « offre (interne) » s'arrête à l'envoi de l'offre, non à l'évaluation comme dans la démo ; un test le vérifie.
 - Une échéance interne dépassée change la couleur du dossier dans les files et alimente l'indicateur « hors délai » du pilotage.
 - Au matériel, un dossier ne montre aucune échéance réglementaire ; il montre ses échéances internes et, si le produit le fixe, son délai contractuel (paramétré par produit).
-- La cible de 10 jours entre évaluation et paiement de la démo n'est plus reprise : elle est remplacée par la cible de 72 heures après l'accord enregistré (au corporel automobile, après la fin du délai de dénonciation de 15 jours).
+- La cible de 10 jours entre évaluation et paiement de la démo n'est plus reprise : elle est remplacée par la cible de 72 heures ouvrées après l'accord enregistré (au corporel automobile, après la fin du délai de dénonciation de 15 jours).
+- Un dossier `REGLE` dont le dernier règlement `PAYE` date de plus de 15 jours sans clôture entre dans l'indicateur « clôture en retard » ; des honoraires d'expert non payés 30 jours après la réception du rapport lèvent l'alerte « honoraires en retard ».
+- Les durées de 48 heures, 72 heures et 24 heures des échéances de ce tableau et de FR-84, FR-102 s'écrivent « heures **ouvrées** » partout, selon le calendrier de la compagnie (A-18).
 
 #### FR-143 : Les relances : 5 jours entre deux, 3 sans effet, puis un arbitrage
 
-Une **relance** est un message à un interlocuteur qui doit agir : l'assuré (pièces, accord), un cabinet d'expertise (rapport), un tiers (recours), la comptabilité (paiement). Elle est enregistrée avec son **canal** (appel, SMS, e-mail, WhatsApp, courrier), son destinataire, sa date, son texte, son résultat. **Cinq jours** séparent deux relances d'un même interlocuteur sur le même sujet ; au bout de **trois relances sans effet** (ni réponse, ni pièce reçue), le serveur ne propose plus une relance de plus : il propose un **arbitrage** au responsable (classement sans suite, appel du responsable, courrier recommandé, désignation d'un autre cabinet, mise en demeure). Le recours suit son propre rythme de 15 jours (FR-110). La rédaction des relances est assistée par l'IA commune (usage n° 4, §5.2) ; l'agent envoie lui-même et trace.
+Une **relance** est un message à un interlocuteur qui doit agir : l'assuré (pièces, accord), un cabinet d'expertise (rapport), un tiers (recours), la comptabilité (paiement). Elle est enregistrée avec son **canal** (appel, SMS, e-mail, WhatsApp, courrier), son destinataire, sa date, son texte, son résultat. **Cinq jours** séparent deux relances d'un même interlocuteur sur le même sujet ; au bout de **trois relances sans effet** (ni réponse, ni pièce reçue), le serveur ne propose plus une relance de plus : il propose un **arbitrage** au responsable (classement sans suite, appel du responsable, courrier recommandé, désignation d'un autre cabinet, mise en demeure). Le recours suit son propre rythme de 15 jours (FR-110). La rédaction des relances est assistée par l'IA commune (usage n° 4, §5.2) ; la relance est **rédigée par l'IA et envoyée en un clic**, ou **envoyée automatiquement à l'échéance** (5 jours entre deux relances, 3 sans effet) *(défaut H-114 : envoi automatique à confirmer à la séance d'immersion)*, et dans les deux cas tracée.
 
 **Conséquences (testables) :**
 - Une deuxième relance au même interlocuteur sur le même sujet avant 5 jours est refusée (`RELANCE_TROP_PROCHE`) ; une dérogation motivée de `RESP` est possible.
@@ -2255,7 +2626,7 @@ Une **relance** est un message à un interlocuteur qui doit agir : l'assuré (pi
 
 #### FR-144 : Les dossiers muets se détectent à 8, 15 et 30 jours
 
-Un dossier non terminal **sans action** depuis 8 jours est « à surveiller », depuis 15 jours « à relancer », depuis 30 jours « muet ». Le point de départ est la dernière **action d'écriture** du dossier (transition, pièce reçue, relance, note, décision) ; une simple **consultation** ne compte pas [ASSUMPTION: la consultation n'interrompt pas le silence, pour qu'elle ne masque pas l'inactivité]. Le point d'arrêt est l'action suivante. Un agent sans trace d'écriture depuis 10 jours est signalé à son responsable et à `AUD`.
+Un dossier non terminal **sans action** depuis 8 jours est « à surveiller », depuis 15 jours « à relancer », depuis 30 jours « muet ». Le point de départ est la dernière **action d'écriture** du dossier (transition, pièce reçue, relance, note, décision) ; une simple **consultation** ne compte pas *(défaut H-115 : la consultation n'interrompt pas le silence, pour qu'elle ne masque pas l'inactivité)*. Le point d'arrêt est l'action suivante. Un agent sans trace d'écriture depuis 10 jours est signalé à son responsable et à `AUD`.
 
 **Conséquences (testables) :**
 - Un dossier `EN_INSTRUCTION` sans action pendant 8 jours entre dans la liste « à surveiller » du gestionnaire ; à 15 jours, dans la file du responsable ; à 30 jours, il est « muet » et notifié à `RESP`, `DT` et `AUD`.
@@ -2266,10 +2637,12 @@ Un dossier non terminal **sans action** depuis 8 jours est « à surveiller », 
 
 #### FR-145 : Les pièces bloquantes, et les vues des échéances
 
-Une **pièce bloquante** est une pièce obligatoire qui empêche une transition (l'évaluation, l'envoi de l'offre, l'émission du règlement : un relevé d'identité bancaire illisible bloque le virement, le certificat médical final bloque l'offre au corporel, le procès-verbal fonde le montant). Une pièce bloquante en attente depuis plus de **30 jours** est une alerte au gestionnaire et au responsable, avec proposition de classement sans suite après les relances du FR-143. Le gestionnaire dispose de deux vues : **mes délais** (dossiers groupés par ce qu'il reste avant le terme, la cause, le porteur, le geste à faire) et **mes attentes** (dossiers groupés par tiers attendu : assuré, cabinet d'expertise, comptabilité, responsable).
+La condition `PIECES_COMPLETES` (FR-136) tient une pièce « **en contrôle** » pour **attendue** tant que le contrôle humain de FR-165 n'a pas rendu la pièce « reçue ». Une **pièce bloquante** est une pièce obligatoire qui empêche une transition (l'évaluation, l'envoi de l'offre, l'émission du règlement : un relevé d'identité bancaire illisible bloque le virement, le certificat médical final bloque l'offre au corporel, le procès-verbal fonde le montant). Une pièce bloquante en attente depuis plus de **30 jours** est une alerte au gestionnaire et au responsable, avec proposition de classement sans suite après les relances du FR-143. Le gestionnaire dispose de deux vues : **mes délais** (dossiers groupés par ce qu'il reste avant le terme, la cause, le porteur, le geste à faire) et **mes attentes** (dossiers groupés par tiers attendu : assuré, cabinet d'expertise, comptabilité, responsable).
 
 **Conséquences (testables) :**
 - Une pièce obligatoire en attente depuis 31 jours, sur un dossier non terminal, figure dans l'alerte « pièces bloquantes » avec le nom de la pièce, la transition qu'elle bloque et le nombre de relances faites.
+- Une pièce obligatoire à l'état « en contrôle » compte comme attendue : `PIECES_COMPLETES` refuse la transition tant que le contrôle humain n'est pas rendu.
+- L'alerte « **évaluation incomplète** » (au moins un poste hors corporel à l'état `A_EVALUER`, FR-73) apparaît sur le dossier et dans la corbeille du gestionnaire ; elle ne bloque pas `EVALUE` seule, mais elle est visible du signataire.
 - La vue « mes délais » classe un dossier selon son échéance la plus proche, réglementaire ou interne, et affiche la cause du retard et la personne qui détient le geste suivant.
 - La vue « mes attentes » regroupe par tiers attendu ; un dossier attendu de deux tiers apparaît dans deux groupes.
 - Les deux vues sont filtrées par rôle : `GEST` voit ses dossiers, `RESP` ceux de son service, `GREC` ceux de son pôle ; aucune donnée médicale n'y est lisible par `ACC`.
@@ -2281,7 +2654,7 @@ Les notifications sont envoyées par le module partagé `notification` (§7.2) ;
 
 #### FR-146 : Les notifications du circuit
 
-Le circuit émet les notifications suivantes. Le canal par défaut est indiqué ; il se règle par événement dans le module `notification`. Les canaux sont : **cloche** (dans l'application), **e-mail**, **SMS**, **WhatsApp**, **courrier** (papier, avec preuve). Le canal choisi par l'assuré à la déclaration est le canal de ses notifications ; à défaut, le SMS [ASSUMPTION: canal par défaut de l'assuré = SMS].
+Le circuit émet les notifications suivantes. Le canal par défaut est indiqué ; il se règle par événement dans le module `notification`. Les canaux sont : **cloche** (dans l'application), **e-mail**, **SMS**, **WhatsApp**, **courrier** (papier, avec preuve). Le canal choisi par l'assuré à la déclaration est le canal de ses notifications ; à défaut, le SMS *(défaut H-116 : canal par défaut de l'assuré = SMS)*. Les messages à l'assuré sont en **langage clair, sans jargon CIMA** ; un délai de **première réponse** à l'assuré est suivi, et la **distribution** de chaque message est suivie (accusé de transmission, pli remis ou retourné).
 
 | Événement | Destinataire | Canal |
 |---|---|---|
@@ -2294,10 +2667,11 @@ Le circuit émet les notifications suivantes. Le canal par défaut est indiqué 
 | Mission d'expertise désignée | cabinet d'expertise (portail) ou expert interne | portail, e-mail |
 | Rapport d'expertise reçu ou complément demandé | gestionnaire | cloche |
 | Dossier envoyé en validation | signataires de la délégation | cloche, file de validation |
-| Validation complète, offre à envoyer sous 48 h ouvrées | gestionnaire ; `RESP` en alerte à 24 h [ASSUMPTION: alerte à mi-délai des 48 h ouvrées] | cloche |
+| Validation complète, offre à envoyer sous 48 h ouvrées | gestionnaire ; `RESP` en alerte à 24 h *(défaut H-117 : alerte à mi-délai des 48 h ouvrées)* | cloche |
 | Offre envoyée | assuré | courrier, e-mail |
 | Offre sans réponse à 15 jours | assuré | SMS, e-mail, WhatsApp |
 | Offre sans réponse à 30 jours | `RESP` | cloche, e-mail |
+| Offre retournée (pli non distribué) ou expirée | gestionnaire ; `RESP` | cloche |
 | Accord enregistré, ordre de règlement émis | `CPT` ; gestionnaire | cloche, file de la comptabilité |
 | Ordre rejeté par la comptabilité | gestionnaire ; `RESP` | cloche, e-mail |
 | Chèque prêt à remettre | assuré ; `ACC` (liste d'appels) | SMS, WhatsApp |
@@ -2319,6 +2693,7 @@ Le circuit émet les notifications suivantes. Le canal par défaut est indiqué 
 **Conséquences (testables) :**
 - Chaque ligne du tableau est jouée en recette sur un dossier de démonstration : l'événement se produit, la notification part, au bon destinataire, par le bon canal.
 - Aucune notification à l'assuré ou au courtier ne contient le mot « fraude », une donnée médicale ni un montant d'indemnité ; un test lit tous les modèles sortants. Un message d'offre dit qu'un courrier est disponible.
+- Les modèles de message à l'assuré ne contiennent pas de jargon CIMA (liste de termes interdits, paramétrable) ; un test lit chaque modèle. Le délai de première réponse à l'assuré est mesuré et affiché ; un pli retourné ou un message non distribué lève une alerte au gestionnaire.
 - Une notification externe n'est jamais envoyée sans le canal et le numéro enregistrés pour l'assuré ; sinon elle est refusée (`CANAL_ABSENT`) et le dossier entre dans la liste « à contacter autrement ».
 - Une notification de relance suit l'intervalle de 5 jours (FR-143) ; une notification de courrier garde sa preuve d'envoi.
 - Le module `notification` renvoie l'accusé de transmission ; Prospera l'inscrit au journal du dossier.
@@ -2328,15 +2703,18 @@ Le circuit émet les notifications suivantes. Le canal par défaut est indiqué 
 
 **Corbeille du gestionnaire (`GEST`).** Le gestionnaire, rattaché à un volet (corporel, matériel, risques divers), voit : **mes dossiers en charge** (corbeille personnelle) ; la **corbeille de service** de son volet (tous les dossiers actifs, sans distinction d'agent : absence, reprise) ; **mes délais** et **mes attentes** (FR-145) ; les dossiers à instruire, les pièces à réclamer, les expertises à suivre, les devis à contrôler, les évaluations à arrêter, les offres sans réponse, les règlements en échec. Chaque ligne montre : numéro de sinistre officiel (ou référence de déclaration), assuré, statut, échéance la plus proche, dernière action. Sur chaque dossier, les gestes **ouverts** s'affichent, et les gestes **fermés** s'affichent aussi avec leur motif de blocage (FR-136).
 
+**Vues complémentaires.** La corbeille offre aussi la **vue par étape** (les 11 statuts), et les vues « **tiers externes** », « **sinistres majeurs** » (FR-57a), « **dommages lourds** » et « **réparations** » (FR-72), chacune filtrée par rôle.
+
 **File du responsable (`RESP`).** Le responsable voit : les dossiers **à attribuer** (statut `OUVERT` sans gestionnaire) et la charge de chaque gestionnaire ; les dossiers **à valider** à son niveau de délégation ; les **blocages** et les **litiges** ; les dossiers **hors délai** ; les dossiers **muets** ; les **offres sans réponse** à 30 jours ; les **honoraires à viser** ; les **provisions** à revoir ; les **recours** à arbitrer ; les **règlements** qui dépassent leur échéance ; les dossiers sans numéro officiel. Il réattribue un dossier avec motif.
 
 **Conséquences (testables) :**
+- La vue par étape regroupe les dossiers par chacun des 11 statuts ; la vue « sinistres majeurs » liste les dossiers qui ont franchi le seuil de FR-57a ; les vues « tiers externes », « dommages lourds » et « réparations » ne montrent aucune donnée de santé.
 - Un gestionnaire ne voit dans sa corbeille personnelle que ses dossiers ; dans la corbeille de service, que les dossiers actifs de son volet ; il n'ouvre pas un dossier d'un autre volet (`DROIT_INSUFFISANT`).
 - Un gestionnaire corporel est le seul, avec `MED`, `RESP`, `DG` et `DT` pour une décision, à lire les pièces de santé ; chaque lecture est journalisée.
 - Une action fermée s'affiche avec son motif en clair, « réservée à : responsable, direction » ou « le dossier doit avoir été attribué à un gestionnaire » ; elle n'est pas masquée.
 - Le responsable attribue un dossier `OUVERT` à un gestionnaire avec un motif obligatoire ; une réattribution sans motif est refusée (`MOTIF_ECRIT`) ; un responsable ne s'attribue pas un dossier qu'il doit valider seul.
 - La file du responsable trie par échéance la plus proche, puis par ancienneté ; un test vérifie l'ordre sur le jeu de démonstration.
-- La recherche d'un dossier depuis ces files donne un résultat en moins de 5 secondes au 95e centile (§4.13, FR-23) [ASSUMPTION: volume de dimensionnement de D20].
+- La recherche d'un dossier depuis ces files donne un résultat en moins de 5 secondes au 95e centile (§4.13, FR-23) *(défaut H-118 : volume de dimensionnement de D20)*.
 
 #### FR-148 : La file de validation, la file de la comptabilité, le guichet de remise
 
@@ -2359,9 +2737,12 @@ Le circuit émet les notifications suivantes. Le canal par défaut est indiqué 
 
 **Pôle recours (`GREC`).** Le gestionnaire recours voit : **mes recours** ; les **nouveaux recours** (`A_QUALIFIER`) ; les recours **à relancer** (15 jours) ; les **mises en demeure** à préparer, à envoyer, sans réponse ; les **créances** (anciennes, contestées) ; les **négociations** (offres et contre-offres) ; les **contentieux** ; les **encaissements** à rapprocher ; les recours dont la **prescription** approche ; les recours à ouvrir (avec export de la sélection). Il lit les dossiers sinistres liés à ses recours, même clos.
 
+**Écarts de source.** Une **file des écarts de source** (numéro reçu du LC pour une `DEC-` déjà numérotée, FR-37 ; autres écarts entre Prospera et le LC) est lisible du `RESP` et de `AUD`.
+
 **Contrôle interne (`AUD`).** Le contrôle interne voit : la **file de revue de fraude** (FR-129, FR-131) ; le **graphe des liens** (FR-132) ; le **plan de contrôle** : séparation des fonctions (SEP-01, SEP-02, SEP-03), décaissements, traçabilité, dossier ; la **piste d'audit** (FR-138) ; les **modifications sensibles** ; les paiements sur dossier `SUSPECT` ou `BLOQUE` non revu ; les concentrations d'émission (FR-100). Il lit presque tout, n'écrit que ses conclusions de revue et ses constats.
 
 **Conséquences (testables) :**
+- La file des écarts de source liste chaque écart avec sa nature, sa date, le dossier et le traitement attendu (qui, délai, décision) ; un écart traité en sort avec sa décision au journal.
 - Un `GREC` ne voit pas les pièces de santé ; il voit la créance, les pièces probantes (procès-verbal, constat, rapport de police) et les règlements.
 - `AUD` ne peut déclencher aucune transition du circuit autre que le signalement, l'écartement ou la confirmation de fraude ; toute autre tentative est refusée (`DROIT_INSUFFISANT`).
 - La file de revue de fraude est ordonnée comme au FR-131 ; un test le vérifie.
@@ -2418,10 +2799,11 @@ Un champ de recherche unique, présent sur tous les écrans de travail, retrouve
 
 **Conséquences (testables) :**
 - Pour chacun des 7 critères, la saisie d'une valeur exacte d'un dossier de test le renvoie en tête de liste.
-- Sur le jeu de démonstration (environ 3 500 dossiers) et sur le volume de dimensionnement (50 000 dossiers archivés, `[ASSUMPTION: volumes de D20, à remplacer par les vrais volumes]`), 95 % des recherches rendent leur résultat en moins de 5 secondes ; la mesure est faite à la recette sur un poste d'accueil. Une cible de moins de 1 seconde est visée `[ASSUMPTION: cible du deck, non contractuelle]`.
+- Sur le jeu de démonstration (environ 3 500 dossiers) et sur le volume de dimensionnement (50 000 dossiers archivés, *(défaut H-119 : volumes de D20, à remplacer par les vrais volumes)*), 95 % des recherches rendent leur résultat en moins de 5 secondes ; la mesure est faite à la recette sur un poste d'accueil. Une cible de moins de 1 seconde est visée *(défaut H-120 : cible du deck, non contractuelle)*.
 - Chaque ligne de résultat dit d'où elle vient : « dossier Prospera », « dossier repris », « police du LC seulement » (aucun sinistre encore).
 - Une valeur qui correspond à plusieurs objets (une police avec trois sinistres) renvoie les trois, groupés sous la police.
 - La **cote physique** s'affiche sur le résultat mais n'est pas un critère de recherche : on retrouve le dossier, puis on lit sa cote.
+- On retrouve un dossier archivé par ses **références métier** (nom, sinistre, police, immatriculation) ; **jamais par la cote**, qui sert seulement à localiser le papier.
 - Une recherche sans résultat affiche « aucun résultat pour [critère saisi] » et ne propose jamais un dossier au hasard.
 
 #### FR-151 : La recherche tolère les fautes et respecte les droits
@@ -2434,11 +2816,11 @@ La recherche ignore les accents, les majuscules et la ponctuation, et tolère un
 - Les filtres sont : volet, étape (11 statuts), gestionnaire, pièces manquantes, hors délai, chèque à remettre, sans gestionnaire.
 - Un `GEST` rattaché au volet matériel ne voit pas dans les résultats un dossier du volet corporel, sauf droit de lecture de volet accordé par le `RESP` ; `ACC`, `RESP`, `DG`, `DT`, `AUD` voient tous les volets ; `EXPE` n'a pas la recherche générale : il ne voit que ses missions (§6.3) ; `ADMIN` ne lit aucune donnée métier (D14).
 - Une ligne de résultat montre l'étape et la dernière action **sans ouvrir** le dossier.
-- Un terme de moins de 3 caractères n'est pas cherché `[ASSUMPTION: longueur minimale de saisie = 3, paramètre]`.
+- Un terme de moins de 3 caractères n'est pas cherché *(défaut H-121 : longueur minimale de saisie = 3, paramètre)*.
 
 #### FR-152 : La fiche « répondre pendant l'appel »
 
-Le dossier a une fiche qui répond, en un écran, aux quatre questions de l'assuré : « Où en est mon dossier ? », « Avez-vous reçu mon document ? », « Quel est le montant prévu ? », « Pourquoi n'est-il pas réglé ? ». La fiche affiche : l'identité (assuré, police, numéro de sinistre officiel, référence de déclaration, numéro d'archivage), **l'étape** (statut et phase), les **pièces reçues et manquantes** (x sur y, avec la liste), les montants **évalué, proposé, validé, payé et reste à payer**, la **dernière action** et la **prochaine** (qui, quoi, pour quand), le gestionnaire et son contact, la **date de dernière lecture du LC**, le téléphone masqué. La **provision** n'y figure que pour les rôles autorisés (`GEST`, `RESP`, `DG`, `DT`, `CPT`, `AUD`).
+Le dossier a une fiche qui répond, en un écran, aux quatre questions de l'assuré : « Où en est mon dossier ? », « Avez-vous reçu mon document ? », « Quel est le montant prévu ? », « Pourquoi n'est-il pas réglé ? ». La fiche affiche : l'identité (assuré, police, numéro de sinistre officiel, référence de déclaration, numéro d'archivage), **l'étape** (statut et phase), les **pièces reçues et manquantes** (x sur y, avec la liste), les montants **évalué, proposé, validé, payé et reste à payer**, la **dernière action** et la **prochaine** (qui, quoi, pour quand), le gestionnaire et son contact, la **date de dernière lecture du LC**, le téléphone masqué, l'**origine du dossier** (repris par API ou par fichier, ou né dans Prospera) et l'**historique des échanges et des relances** envoyés (relance SMS comprise). La **provision** n'y figure que pour les rôles autorisés (`GEST`, `RESP`, `DG`, `DT`, `CPT`, `AUD`).
 
 **Conséquences (testables) :**
 - Les cinq montants sont des champs distincts, jamais additionnés ni confondus ; un montant non encore connu affiche « non encore évalué », jamais zéro.
@@ -2448,28 +2830,33 @@ Le dossier a une fiche qui répond, en un écran, aux quatre questions de l'assu
 - `ACC` voit une fiche à lecture limitée (sans provision, sans instruction, sans contenu de pièce médicale) ; la fiche se lit sans changer de page.
 - Les valeurs de la fiche sont recalculées à chaque ouverture depuis les données : modifier un montant dans le dossier change la fiche sans autre geste.
 - La fiche s'imprime (« Imprimer la fiche »), avec la mention de l'heure d'impression et de l'auteur.
+- La fiche dit si le dossier est **repris** (API ou fichier, avec son lot) ou **né dans Prospera** ; l'historique des échanges liste chaque courrier, SMS ou relance envoyé, avec sa date, son canal et son auteur.
 
 #### FR-153 : Téléphone masqué et données de santé protégées
 
-Le téléphone et la pièce d'identité s'affichent masqués. Les données de santé d'une victime (certificat, taux d'incapacité, rapport médical) ne sont lisibles que par les rôles de D14 : `MED`, le `GEST` corporel affecté, `RESP`, et `DG` ou `DT` pour une décision. Ces données sont sensibles : la loi togolaise n° 2019-014 les met dans une catégorie à protection renforcée (art. 21 et 22, texte lu).
+Le téléphone et la pièce d'identité s'affichent masqués. Les données de santé d'une victime (certificat, taux d'incapacité, rapport médical) ne sont lisibles que par les rôles de D14 : `MED`, le `GEST` corporel affecté, `RESP`, et `DG` ou `DT` par un **accès par dossier ouvert à la validation**, journalisé (FR-9). `ACC` et `NUM` voient seulement le **type** et l'**existence** d'une pièce médicale, jamais son contenu. Ces données sont sensibles : la loi togolaise n° 2019-014 les met dans une catégorie à protection renforcée (art. 21 et 22, texte lu).
 
 **Conséquences (testables) :**
-- Le téléphone s'affiche avec ses deux derniers chiffres seulement `[ASSUMPTION: 2 chiffres visibles, paramètre]` ; le révéler est un geste explicite, qui écrit une ligne au journal (FR-158) ; `ACC` peut le révéler pour rappeler l'assuré.
-- `ACC` voit « une pièce médicale est reçue », jamais son contenu ni son nom de fichier.
+- Le téléphone s'affiche avec ses deux derniers chiffres seulement *(défaut H-122 : 2 chiffres visibles, paramètre)* ; le révéler est un geste explicite, qui écrit une ligne au journal (FR-158) ; `ACC` peut le révéler pour rappeler l'assuré.
+- `ACC` et `NUM` voient « une pièce médicale est reçue » (type et existence), jamais son contenu ni son nom de fichier : ni aperçu, ni extrait de l'IA, ni résumé.
+- Une pièce médicale est classée sous un type « médical » qui ne s'affiche **jamais en aperçu**.
+- Un test par rôle sur chaque écran qui touche une pièce médicale (fiche, liste de pièces, lot, résumé, recherche) vérifie que `ACC` et `NUM` ne reçoivent aucun contenu.
 - Un `GEST` du volet matériel qui ouvre un dossier corporel voit la fiche sans le contenu médical.
 - Chaque lecture d'une pièce ou d'un champ de santé écrit une ligne distincte au journal, avec son auteur (art. 52 de la loi 2019-014 : traçabilité de l'identité des accédants et des données lues).
 - Le consentement écrit à l'examen médical et à la communication du rapport est une pièce du dossier (type dédié) ; sa base légale exacte est renvoyée au juriste (D21).
+- Base légale : le traitement des données de santé pour indemniser relève de l'**obligation légale** d'offre et de l'**exécution du contrat** ; le consentement est recueilli à la déclaration, mais **son absence ne bloque jamais** une obligation légale (offre, délais) ni le chronomètre *(point juridique J-18 : à valider par le juriste, §13.2)*.
 
 #### FR-154 : Le résumé sourcé du dossier (IA, usage n° 5)
 
-À la demande, l'IA commune résume un dossier en 5 à 6 lignes : survenance, lieu, canal, victime ; étape et ancienneté contre le délai cible ; pièces reçues et manquantes ; montants ; dates limites ; prochaine action. **Chaque phrase renvoie à sa source** : la pièce, la ligne du journal, la règle ou le calcul d'où elle vient. **Entrée** : le dossier et ses pièces lues (§6.2). **Sortie** : le résumé et ses renvois. **Destinataire** : `GEST`, `RESP`, `DG`, `DT` ; une version sans donnée de santé pour `ACC`. **Garde-fou** : lecture seule ; aucun montant n'est proposé sur un préjudice corporel (D13) ; aucune information sans source ; le résumé est journalisé au registre de l'IA.
+À la demande, l'IA commune résume un dossier en 5 à 6 lignes : survenance, lieu, canal, victime ; étape et ancienneté contre le délai cible ; pièces reçues et manquantes ; montants ; dates limites ; prochaine action. **Chaque phrase renvoie à sa source** : la pièce, la ligne du journal, la règle ou le calcul d'où elle vient. **Entrée** : le dossier et ses pièces lues (§6.2). **Sortie** : le résumé et ses renvois. **Destinataire** : `GEST`, `RESP`, `DG`, `DT` ; une version **sans aucun champ de santé** pour `ACC`, `NUM` et tout rôle hors FR-9. **Garde-fou** : lecture seule ; aucun montant n'est proposé sur un préjudice corporel (D13) ; aucune information sans source ; le résumé est journalisé au registre de l'IA.
 
 **Conséquences (testables) :**
 - Un clic sur une phrase du résumé ouvre la pièce, la ligne du journal ou la règle citée ; une phrase sans source n'est pas affichée.
-- Le résumé d'un dossier de 40 pages est rendu en moins de 5 minutes `[ASSUMPTION: « quelques minutes » de la proposition v2 chiffré à 5 minutes, paramètre]`.
+- Le résumé d'un dossier de 40 pages est rendu en moins de 5 minutes *(défaut H-123 : « quelques minutes » de la proposition v2 chiffré à 5 minutes, paramètre)*.
 - Le résumé d'un dossier corporel ne contient aucun montant d'indemnité proposé ; les montants qu'il cite sont ceux que le gestionnaire ou le médecin-conseil ont déjà enregistrés, avec leur auteur.
 - Le registre de l'IA reçoit une ligne (entrée, sortie, confiance, sources, niveau `ANALYSE`, statut, auteur de la décision) ; l'agent peut marquer le résumé « rejeté » avec un motif.
 - IA commune coupée : la fiche (FR-152) reste complète ; le résumé affiche « non installé » ou est remplacé par un résumé par règles, qui le dit.
+- Le résumé **exclut les champs de santé** (gravité, lésions, taux d'incapacité, texte médical) pour les rôles hors FR-9 ; `DG` et `DT` n'y accèdent que par dossier ouvert à la validation, journalisé.
 
 #### FR-155 : La recherche en langage naturel (IA, usage n° 6)
 
@@ -2482,7 +2869,8 @@ Un agent peut poser sa question en français, **par écrit** : « Où en est le 
 - Chaque groupe de résultats s'exporte en tableur.
 - Une question qui dépasse le périmètre du rôle (un `GEST` qui demande les dossiers d'un autre volet) ne renvoie que les dossiers qu'il a le droit de voir, et le dit.
 - La saisie vocale n'existe pas ; aucune question n'est transcrite d'un appel (D13).
-- Seize questions types de comité de direction, en quatre familles (argent, risque, délais, exploitation), sont proposées comme suggestions `[ASSUMPTION: liste de la démo, modifiable]`.
+- La recherche **ne filtre ni ne retourne** aucun champ de santé hors des rôles de FR-9 : « dossiers avec incapacité > 30 % » est refusée à ces rôles, avec le motif.
+- Seize questions types de comité de direction, en quatre familles (argent, risque, délais, exploitation), sont proposées comme suggestions *(défaut H-124 : liste de la démo, modifiable)*.
 
 #### FR-156 : Les réclamations des assurés
 
@@ -2490,7 +2878,7 @@ Une réclamation d'un assuré (ou d'une victime) est une demande enregistrée, r
 
 **Conséquences (testables) :**
 - L'accusé part sous **5 jours**, la réponse sous **30 jours**, l'escalade au-delà de **60 jours** (paramètres, valeurs de la démo, annexe D).
-- Une réclamation sans accusé à J+5, sans réponse à J+30, ou encore ouverte à J+60, lève une alerte au `RESP` ; à J+60, l'alerte monte au `DG` `[ASSUMPTION: l'escalade monte au DG, à confirmer]`.
+- Une réclamation sans accusé à J+5, sans réponse à J+30, ou encore ouverte à J+60, lève une alerte au `RESP` ; à J+60, l'alerte monte au `DG` *(défaut H-125 : l'escalade monte au DG, à confirmer)*.
 - Chaque réclamation porte : canal d'arrivée, date de réception, motif, dossier concerné, agent traitant, verdict « fondée / non fondée » avec la preuve citée du dossier.
 - Au moins 3 réclamations sur un même motif, dans la fenêtre d'analyse de 365 jours (paramètres), créent une ligne au plan d'action de la qualité, lisible par `RESP`, `DG`, `AUD`.
 - La date de réception est celle de l'arrivée du courrier ou du message, pas celle de sa saisie ; un écart entre les deux exige un motif.
@@ -2517,7 +2905,7 @@ Chaque ouverture d'un dossier, d'une fiche ou d'une pièce, et chaque résultat 
 - Un `AUD` lit le journal des consultations d'un dossier ou d'un agent ; un agent lit « mon historique » ; personne ne peut supprimer ou modifier une ligne, y compris `ADMIN`.
 - Une tentative d'accès refusée (droit manquant) écrit aussi une ligne.
 - Le journal est exportable pour le contrôle interne (§6.7) et pour un contrôle de la CRCA (FR-211).
-- Le journal des consultations est conservé 10 ans `[ASSUMPTION: aligné sur le plancher de l'art. 404, à confirmer par le juriste]`.
+- Le journal des consultations est conservé 10 ans *(point juridique J-19 : aligné sur le plancher de l'art. 404, à confirmer par le juriste)*.
 
 ---
 
@@ -2547,7 +2935,7 @@ La compagnie fixe les formats acceptés et la taille maximale d'un fichier. Un f
 - Défauts de la démo : `image/jpeg`, `image/png`, `image/webp`, `application/pdf` ; taille maximale 8 Mo par fichier ; ils sont modifiables par `ADMIN` (annexe D).
 - Un fichier d'un autre type, ou trop lourd, est refusé avec « format non accepté » ou « fichier trop lourd (limite : X Mo) » ; rien n'est enregistré.
 - Un fichier dont l'extension ne correspond pas à son contenu est refusé.
-- Un fichier est analysé par un antivirus de la compagnie avant enregistrement `[ASSUMPTION: antivirus fourni par la compagnie, à confirmer en séance d'immersion]` ; un fichier détecté est mis en quarantaine, jamais ouvert.
+- Un fichier est analysé par un antivirus de la compagnie avant enregistrement *(défaut H-126 : antivirus fourni par la compagnie, à confirmer en séance d'immersion)* ; un fichier détecté est mis en quarantaine, jamais ouvert.
 - La liste des types de pièces (constat amiable, déclaration signée, certificat médical initial et final, rapport de police, carte grise, permis, devis, facture, RIB, certificat de décès, photos…) est un paramètre ; ajouter un type n'exige aucune livraison.
 
 #### FR-161 : Une pièce a des versions, jamais écrasées
@@ -2559,6 +2947,9 @@ Une pièce remplacée (meilleur scan, document corrigé, rapport complémentaire
 - Chaque version porte son auteur, sa date et le motif du remplacement (obligatoire).
 - Une pièce déjà citée par une décision (évaluation, offre, règlement) ne peut pas être supprimée : seule une nouvelle version peut la remplacer.
 - Un document officiel complémentaire (procès-verbal, rapport d'autorité) remplace le précédent comme « version actuelle » et conserve la chaîne `document précédent`.
+- **Registre des documents officiels** : les procès-verbaux de police et de gendarmerie et les rapports d'autorité sont tenus dans un registre qui porte, pour chacun : le type, l'autorité émettrice, le **statut de vérification** (`RECU`, `A_VERIFIER`, `VERIFIE`, `SOUS_RESERVE`, `REJETE`, `OBSOLETE`), « original » ou « copie », et le **document attendu**, relancé avec une échéance.
+- Les **informations clés** d'un document officiel sont affichées comme « **déclarées dans le PV** » ; le registre ne porte **jamais une conclusion de responsabilité**.
+- Ces documents servent la preuve du recours (§5.10) et le vol ou l'incendie ; un document attendu non reçu à son échéance remonte dans la file de relance.
 
 #### FR-162 : Les lots de numérisation
 
@@ -2571,6 +2962,7 @@ L'opérateur de numérisation (`NUM`) numérise par lots : arrivée du lot, num�
 - Les pièces arrivées depuis moins de 48 heures sont mises en avant avec ce qu'elles bloquent (un RIB illisible bloque le virement, un certificat médical final bloque l'offre, un procès-verbal d'expertise fonde le montant).
 - Le taux de numérisation du fonds (pièces numérisées sur pièces attendues) est calculé depuis les données (FR-213).
 - Un lot n'est jamais fermé tant que l'une de ses pièces n'a pas passé le contrôle de FR-165 ou n'a pas été placée en anomalie.
+- Le suivi du lot affiche un compteur « **N lus sur M** » : N pièces lues par l'OCR sur M pièces du lot (FR-165 : le bouton « verser » en dépend).
 
 #### FR-163 : L'OCR est réel, y compris sur les pièces scannées
 
@@ -2583,7 +2975,7 @@ Toute pièce image ou PDF scanné est lue par un OCR installé chez la compagnie
 - L'OCR ne modifie jamais l'image d'origine ; le texte lu est en plus.
 - Le seuil de 60 caractères par page est un paramètre (annexe D).
 - L'OCR tourne sur le serveur de la compagnie : aucune image ni texte ne sort de l'instance, en particulier aucune pièce de santé (D1).
-- Le temps de lecture d'une page est mesuré et affiché dans le suivi du lot ; une page non lue après un délai `[ASSUMPTION: 2 minutes par page, paramètre]` passe en `ECHEC`.
+- Le temps de lecture d'une page est mesuré et affiché dans le suivi du lot ; une page non lue après un délai *(défaut H-127 : 2 minutes par page, paramètre)* passe en `ECHEC`.
 
 #### FR-164 : L'IA lit et classe les pièces (usage n° 2)
 
@@ -2591,9 +2983,9 @@ L'IA commune lit chaque pièce reçue, en propose le **type**, en extrait les ch
 
 **Conséquences (testables) :**
 - Chaque proposition affiche sa confiance et, pour chaque champ lu, l'extrait de la pièce d'où il vient ; un champ sans extrait n'est pas proposé.
-- Une proposition dont la confiance est inférieure au seuil bas (0,60 par défaut `[ASSUMPTION: seuils 0,60 et 0,90, paramètres]`) n'est pas pré-sélectionnée ; au-dessus du seuil haut (0,90), elle est pré-sélectionnée et attend quand même la confirmation de FR-165.
+- Une proposition dont la confiance est inférieure au seuil bas (0,60 par défaut *(défaut H-128 : seuils 0,60 et 0,90, paramètres)*) n'est pas pré-sélectionnée ; au-dessus du seuil haut (0,90), elle est pré-sélectionnée et attend quand même la confirmation de FR-165.
 - Un type, un rattachement ou un champ corrigé par l'agent est conservé avec la version corrigée ; le registre reçoit le statut `MODIFIEE` et la valeur finale.
-- Une pièce médicale est lue et classée dans l'instance ; son contenu n'est jamais affiché à `ACC` (FR-153).
+- Une pièce médicale est lue et classée dans l'instance ; son contenu, ses champs lus et ses extraits ne sont **jamais affichés** à `ACC` ni à `NUM` (FR-153) : ils voient le type et l'existence seulement.
 - L'IA commune est coupée : le classement est manuel, la lecture OCR continue (FR-163), le circuit n'est pas retardé.
 - Le contrôle de cohérence des pièces (propriétaire de la carte grise, photo déjà utilisée ailleurs, usage n° 3) n'est pas ici : il est au §5.4.
 
@@ -2607,6 +2999,8 @@ Aucune pièce n'est archivée sans un contrôle avant archivage par une personne
 - Le contrôleur de la pièce est tracé ; l'IA ne contrôle ni ne valide jamais seule.
 - Une pièce n'est comptée comme « reçue » pour l'ouverture du dossier (§5.2) qu'après le contrôle ; avant, elle est « reçue, en contrôle ».
 - Le temps moyen entre réception et contrôle est un indicateur du pilotage (FR-213).
+- Le **contrôle de qualité d'une pièce médicale** porte sur la **lisibilité de l'image seulement** (ou il est fait par `ARCH` ou `MED`) : le contrôleur `ACC` ou `NUM` ne reçoit aucun extrait de son contenu (FR-153).
+- Le bouton « **verser** » reste **grisé tant qu'une lecture est en cours** sur une pièce du dossier ou du lot ; il affiche « N lus sur M » (FR-162).
 
 #### FR-166 : Les pièces non rattachées ont une file
 
@@ -2614,7 +3008,7 @@ Une pièce dont la clé de rattachement (numéro de police, numéro de sinistre,
 
 **Conséquences (testables) :**
 - Chaque pièce de la file a un âge, un auteur, une proposition de rattachement (FR-164) et un état.
-- Une pièce de la file de plus de 3 jours ouvrés lève une alerte à `NUM` et au `RESP` `[ASSUMPTION: 3 jours ouvrés, paramètre]`.
+- Une pièce de la file de plus de 3 jours ouvrés lève une alerte à `NUM` et au `RESP` *(défaut H-129 : 3 jours ouvrés, paramètre)*.
 - Rattacher une pièce écrit le rattachement, l'auteur et la date au journal ; la pièce ne change pas.
 - La reprise (§6.8) y dépose les documents dont la clé est illisible ou inconnue ; la mise en service n'attend pas qu'elle soit vide.
 
@@ -2628,6 +3022,7 @@ Chaque dossier versé au fonds reçoit un **numéro d'archivage** `ARC-AAAA-CCCC
 - Un numéro d'archivage repris d'un autre système est **conservé tel quel**, dans son format d'origine, et sert de critère de recherche (§6.8) ; les nouveaux numéros de Prospera sautent ceux qui existent déjà.
 - Le numéro se cherche dans la recherche unique (FR-150).
 - La reconstitution d'un dossier garde son numéro suffixé `/R1`, `/R2` : un fonds ne se renumérote pas (FR-173).
+- Le **format de chaque numéro** de Prospera est fixé en D.3 (« Formats de numéros ») : `QUI-` (quittance), `ORD-` (ordre de règlement), `REC-` (recours), `CRE-` (créance), `MED-` (mise en demeure), `CTX-` (contentieux), `ENC-` (encaissement de recours), `CRR-` (courrier) et `LM-` (lettre de mission). Chaque préfixe et chaque longueur de séquence sont **paramétrables** *(défaut H-130 : formats de la démo comme défauts ; à confirmer à la séance d'immersion)*.
 
 #### FR-168 : Verser un dossier clos au fonds
 
@@ -2643,12 +3038,13 @@ Un dossier terminé est **versé au fonds** : un bordereau fixe le contenu pièc
 
 #### FR-169 : Le scellement par empreinte, et le support de référence
 
-Quand **toutes** les pièces du bordereau sont numérisées, contrôlées et indexées, l'image du dossier est **scellée** : Prospera calcule une empreinte de l'ensemble et l'enregistre avec la date. Le **support de référence** du dossier passe alors du papier au numérique ; la bascule est une décision tracée.
+Quand **toutes** les pièces du bordereau sont numérisées, contrôlées et indexées, l'image du dossier est **scellée** : Prospera calcule une empreinte de l'ensemble et l'enregistre avec la date. Le **support de référence** du dossier **ne change pas** : le scellement garantit l'intégrité de l'image ; il ne remplace pas le papier.
 
 **Conséquences (testables) :**
 - Une image incomplète n'est pas scellée : le bouton est refusé tant qu'une pièce manque ou est en contrôle.
 - Après scellement, toute modification d'une pièce du dossier fait échouer la vérification d'empreinte et le signale ; un ajout se fait par une nouvelle version, qui ouvre un nouveau scellement lié à l'ancien.
-- Le support de référence est visible sur la fiche d'archive : « papier » (tant que l'image n'est pas scellée) ou « numérique » (après) ; un seul support fait foi à la fois.
+- Le support de référence est visible sur la fiche d'archive, à côté de l'état du scellement ; **après scellement, il ne change pas** : le papier fait foi tant que le juriste n'a pas validé la valeur probante de la copie numérisée (FR-172).
+- La **valeur probante** de la copie numérisée, l'**horodatage qualifié** et le **recommandé électronique** sont des lignes du §13.2 (revue du juriste).
 - La vérification de l'empreinte peut être lancée à tout moment par `ARCH` et `AUD` ; une vérification en échec lève une alerte.
 - Les originaux irremplaçables (acte de décès, jugement d'hérédité, procès-verbal, constat signé, quittance acquittée) restent en papier tant que la valeur probante de la copie numérisée n'est pas confirmée par le juriste (D21).
 - L'horodatage de scellement par un prestataire qualifié est une option, à valider par le juriste ; elle est décrite à l'addendum.
@@ -2660,9 +3056,12 @@ Le dossier papier a une **cote physique** : local, travée, tablette, boîte, ra
 **Conséquences (testables) :**
 - Chaque dossier versé porte l'état de son papier : `EN_RAYONNAGE`, `COMMUNIQUE`, `TRANSFERE_EXTERNE`, `INTROUVABLE`, `DETRUIT`, `JAMAIS_CONSTITUE` ; un changement d'état est tracé.
 - Une boîte contient au plus 2 500 pages (paramètre) ; l'archiviste est alerté à l'approche de la limite.
-- Les couleurs de chemise par branche sont un paramètre de la compagnie ; Prospera n'en invente aucune `[ASSUMPTION: couleurs à fournir par la compagnie]`.
-- La dernière vérification physique de chaque boîte est datée ; une boîte non vérifiée depuis plus d'un an `[ASSUMPTION: 12 mois, paramètre]` est listée.
+- Les couleurs de chemise par branche sont un paramètre de la compagnie ; Prospera n'en invente aucune *(défaut H-131 : couleurs à fournir par la compagnie)*.
+- La dernière vérification physique de chaque boîte est datée ; une boîte non vérifiée depuis plus d'un an *(défaut H-132 : 12 mois, paramètre)* est listée.
 - La cote se lit sur la fiche et l'étiquette s'imprime ; la cote ne sert jamais à retrouver un dossier (FR-150).
+- L'**étiquette** de la chemise et celle de la boîte portent un **code de lecture** (code-barres ou QR) qui ouvre la fiche d'archive ; la lecture du code à la sortie et à la restitution écrit la ligne de FR-171.
+- Les **sous-chemises** (déclaration et correspondances, police, dommages, devis et rapport, règlement) sont un paramètre *(défaut H-133 : si la compagnie les garde ; à confirmer à la séance d'immersion)*.
+- Le **coût de numérisation** (45 FCFA la page) est un paramètre de pilotage (D.3), pas une règle du circuit.
 
 #### FR-171 : La sortie et la restitution du papier
 
@@ -2671,21 +3070,22 @@ Un dossier papier qui sort du local est une **sortie d'archive**, avec un demand
 **Conséquences (testables) :**
 - Les motifs de sortie sont : instruction, expertise, contentieux, contrôle interne, réclamation, contrôle de la CRCA.
 - Une sortie sans demandeur ni motif est refusée ; elle écrit au journal.
-- Une chemise non rendue après 15 jours (paramètre) lève une alerte au demandeur et à `ARCH`, puis au `RESP` à 30 jours `[ASSUMPTION: 30 jours, paramètre]`.
+- Une chemise non rendue après 15 jours (paramètre) lève une alerte au demandeur et à `ARCH`, puis au `RESP` à 30 jours *(défaut H-134 : 30 jours, paramètre)*.
 - Une chemise transmise à un expert externe est une sortie d'archive tracée avec la mission (§6.3) ; c'est la première cause de chemise non restituée.
 - La restitution se constate à la remise sur l'étagère ; elle remet l'état du papier à `EN_RAYONNAGE`.
 - Un papier sorti n'empêche jamais de lire l'image numérique du dossier.
+- La sortie et la restitution se constatent par **lecture du code de l'étiquette** de la chemise (FR-170) ; une lecture sans motif de sortie est refusée.
 
 #### FR-172 : Le papier reste obligatoire (double support)
 
-Le dossier papier est tenu en parallèle du numérique ; le numérique **ne le remplace pas** pour l'instant. Chaque dossier sait à tout moment où est son papier et quel support fait foi.
+Le dossier papier est tenu en parallèle du numérique ; le numérique **ne le remplace pas**. **Le papier fait foi tant que le juriste n'a pas validé la valeur probante de la copie numérisée.** Chaque dossier sait à tout moment où est son papier et quel support fait foi.
 
 **Conséquences (testables) :**
 - Un dossier n'est pas déclaré « sans papier » : l'état `JAMAIS_CONSTITUE` n'est posé que par décision motivée de `ARCH`.
 - La fiche d'archive affiche les deux supports : état papier et état numérique (`ABSENT`, `PARTIEL`, `COMPLET`, `SCELLE`).
 - Le papier d'un dossier dont l'image est complète peut sortir du local ; il n'est détruit que dans le cadre de FR-175.
-- Les nouvelles pièces reçues sur papier sont scannées par `ACC` ou `NUM` ; les pièces nées numériques (e-mail, rapport d'expert déposé) sont imprimées au dossier papier à la clôture `[ASSUMPTION: impression à la clôture, à confirmer en séance d'immersion]`.
-- Le stock papier historique n'est pas scanné pour la reprise (D17) ; sa cote est reprise, ses pièces ne sont numérisées que si le dossier est rouvert ou consulté `[ASSUMPTION: numérisation à la demande, paramètre]`.
+- Les nouvelles pièces reçues sur papier sont scannées par `ACC` ou `NUM` ; les pièces nées numériques (e-mail, rapport d'expert déposé) sont imprimées au dossier papier à la clôture *(défaut H-135 : impression à la clôture, à confirmer en séance d'immersion)*.
+- Le stock papier historique n'est pas scanné pour la reprise (D17) ; sa cote est reprise, ses pièces ne sont numérisées que si le dossier est rouvert ou consulté *(défaut H-136 : numérisation à la demande, paramètre)*.
 
 #### FR-173 : Reconstituer un dossier perdu
 
@@ -2704,8 +3104,8 @@ Le dossier et ses pièces sont conservés **au moins 10 ans** : les entreprises 
 
 **Conséquences (testables) :**
 - La durée effective d'un dossier est la **plus longue** entre le plancher de 10 ans et la durée de sa nature ; une durée paramétrée plus courte que le plancher n'est pas acceptée par le formulaire.
-- Les durées par nature, valeurs de la démo : sinistre mortel 30 ans, conservation définitive ; corporel 10 ans, conservation définitive ; contentieux, recours ou litige 10 ans, conservation définitive ; fraude suspectée 10 ans, conservation définitive ; pièces comptables (quittances, ordres, chèques) 10 ans. Pour le matériel, les risques divers, le classé sans suite et le refusé, la démo met 5 ans ; **ce défaut est inférieur au plancher** : la valeur de départ de Prospera est 10 ans `[ASSUMPTION: plancher de l'art. 404 appliqué ; les 5 ans de la démo ne s'appliquent que si le juriste le confirme (D21)]`.
-- Le point de départ de la durée est la date de clôture ; le point de départ exact est confirmé par le juriste `[ASSUMPTION: date de clôture]`.
+- Les durées par nature, valeurs de la démo : sinistre mortel 30 ans, conservation définitive ; corporel 10 ans, conservation définitive ; contentieux, recours ou litige 10 ans, conservation définitive ; fraude suspectée 10 ans, conservation définitive ; pièces comptables (quittances, ordres, chèques) 10 ans. Pour le matériel, les risques divers, le classé sans suite et le refusé, la démo met 5 ans ; **ce défaut est inférieur au plancher** : la valeur de départ de Prospera est 10 ans *(point juridique J-20 : plancher de l'art. 404 appliqué ; les 5 ans de la démo ne s'appliquent que si le juriste le confirme (D21))*.
+- Le point de départ de la durée est la date de clôture ; le point de départ exact est confirmé par le juriste *(défaut H-137 : date de clôture)*.
 - L'échéance d'un dossier est affichée sur sa fiche d'archive (« à examiner à partir du [date] ») ; un dossier en conservation définitive n'a pas d'échéance.
 - La durée de conservation des données personnelles n'excède pas ce qui est nécessaire (art. 53 de la loi 2019-014) : la justification de chaque durée est écrite dans la table des paramètres.
 
@@ -2715,7 +3115,7 @@ Aucun dossier, aucune pièce n'est détruit par défaut ni par un automatisme. L
 
 **Conséquences (testables) :**
 - Un dossier est « destructible » seulement si sa durée de conservation est écoulée **et** que sa nature n'est pas en conservation définitive **et** que son image est scellée ; la liste est proposée par `ARCH`.
-- La destruction exige un bordereau de destruction, visé par le `RESP` puis par le `DG` `[ASSUMPTION: double visa, à confirmer en séance d'immersion]`, avec la liste des dossiers et la date.
+- La destruction exige un bordereau de destruction, visé par le `RESP` puis par le `DG` *(défaut H-138 : double visa, à confirmer en séance d'immersion)*, avec la liste des dossiers et la date.
 - Aucun bouton « supprimer » n'existe sur une pièce ou un dossier pour aucun rôle, y compris `ADMIN`.
 - Un dossier détruit garde son numéro d'archivage, son état `DETRUIT`, la date, les visas et le bordereau ; son numéro n'est jamais réutilisé.
 - Une destruction demandée sur un dossier sous contrôle, litige ou sortie d'archive est refusée.
@@ -2727,10 +3127,10 @@ Les fichiers sont stockés sur le **NAS** de la compagnie, à côté du serveur 
 **Conséquences (testables) :**
 - Une pièce déposée se retrouve après une panne du serveur applicatif (le NAS conserve les fichiers) ; elle se retrouve après la restauration d'une sauvegarde.
 - La sauvegarde quotidienne est vérifiée chaque jour ; un échec lève une alerte à `ADMIN`.
-- Une restauration est testée au moins une fois avant la mise en service, puis au moins une fois par an `[ASSUMPTION: test annuel, paramètre]` ; le compte rendu est conservé.
-- L'espace disque du NAS est surveillé ; à 80 % d'occupation `[ASSUMPTION: 80 %, paramètre]` une alerte part à `ADMIN`.
-- Le dimensionnement de départ est de 50 000 dossiers archivés et 1,5 million de pages `[ASSUMPTION: hypothèse de D20, à remplacer par les vrais volumes]`.
-- Le format d'archive est un format pérenne (PDF/A) `[ASSUMPTION: PDF/A, à confirmer]` ; l'image d'origine reste conservée.
+- Une restauration est testée au moins une fois avant la mise en service, puis **chaque mois**, comme au FR-236 *(défaut H-139 : test mensuel, paramètre)* ; le compte rendu est conservé. Les compteurs (`DEC-`, numéros de chèque et de quittance) et l'état « restauration en cours : aucune émission » sont ceux de FR-236.
+- L'espace disque du NAS est surveillé ; à 80 % d'occupation *(défaut H-140 : 80 %, paramètre)* une alerte part à `ADMIN`.
+- Le dimensionnement de départ est de 50 000 dossiers archivés et 1,5 million de pages *(défaut H-141 : hypothèse de D20, à remplacer par les vrais volumes)*.
+- Le format d'archive est un format pérenne (PDF/A) *(défaut H-142 : PDF/A, à confirmer)* ; l'image d'origine reste conservée.
 
 ---
 
@@ -2740,7 +3140,7 @@ Les fichiers sont stockés sur le **NAS** de la compagnie, à côté du serveur 
 
 #### FR-177 : Le référentiel des experts
 
-Prospera tient la liste des experts et des cabinets que la compagnie peut mandater. Chaque fiche porte : nom, nature (**interne** ou **externe**), cabinet, domaines couverts, zones couvertes, téléphone, e-mail, numéro d'agrément et sa date de fin, mode d'honoraires (salarié, forfait, barème, vacation), tarif de référence, délai de rapport annoncé, capacité, état actif ou inactif avec motif. La liste de départ est celle que la compagnie fournit (liste des experts agréés, §6.8).
+Prospera tient la liste des experts et des cabinets que la compagnie peut mandater. Chaque fiche porte : nom, nature (**interne** ou **externe**), cabinet, domaines couverts, zones couvertes, téléphone, e-mail, numéro d'agrément et sa date de fin, mode d'honoraires (salarié, forfait, barème, vacation), tarif de référence, délai de rapport annoncé, capacité, état actif ou inactif avec motif. La liste de départ est celle que la compagnie fournit (liste des experts agréés, §6.8). Prospera tient aussi le **référentiel des garages et prestataires** (agrément, historique de devis) et celui des **assureurs adverses** : l'analyse de devis (FR-60) et le graphe de fraude (FR-132) en dépendent.
 
 **Conséquences (testables) :**
 - Un expert se crée, se modifie et se désactive avec un motif ; il ne se supprime pas : ses missions passées restent liées à sa fiche.
@@ -2748,6 +3148,8 @@ Prospera tient la liste des experts et des cabinets que la compagnie peut mandat
 - Le référentiel enregistre la qualification de l'expert ou du médecin (diplôme, inscription, années d'activité), en rapport avec l'art. 272 du Code CIMA (qualification du médecin ou de l'expert technique mandaté ; répertoire tenu par chaque État, texte lu) ; le contrôle exact est renvoyé au juriste (D21).
 - Seuls `RESP` et `DT` créent ou désactivent un expert ; `GEST` ne voit que les experts désignables pour son volet.
 - Un expert désactivé n'apparaît plus dans la liste de désignation (§5.5) et reste visible dans l'historique.
+- Le référentiel des **garages et prestataires** porte : nom, zone, numéro d'agrément et sa date de fin, **historique des devis** (date, dossier, montant, écart à l'expertise) ; le référentiel des **assureurs adverses** porte : nom, contact, délai moyen de réponse. Les deux se créent, se modifient et se désactivent sans suppression, comme un expert.
+- Un garage ou un assureur adverse du référentiel est choisi dans la liste de l'analyse de devis (FR-60) et du recours (§5.10) ; le graphe de fraude (FR-132) s'appuie sur eux.
 
 #### FR-178 : Un agrément échu rend l'expert non désignable
 
@@ -2755,10 +3157,12 @@ L'agrément d'un expert externe a une date de fin. Un agrément échu rend l'exp
 
 **Conséquences (testables) :**
 - Une désignation d'un expert dont la date de fin d'agrément est dépassée est refusée avec le motif « agrément échu le [date] ».
-- Une alerte part au `RESP` 60 jours avant la fin de l'agrément `[ASSUMPTION: 60 jours, paramètre]`.
+- Une alerte part au `RESP` 60 jours avant la fin de l'agrément *(défaut H-143 : 60 jours, paramètre)*.
 - Un expert dont l'agrément échoit entre la désignation et le rapport garde sa mission en cours ; une nouvelle mission lui est refusée.
 - Prolonger un agrément exige la nouvelle date et la pièce justificative (copie de l'agrément) ; l'action est tracée.
 - Prospera ne fixe pas qui est agréé : il applique la liste et les dates de la compagnie ; la réglementation des experts automobiles (agrément, tarifs) n'a pas été trouvée et est renvoyée au juriste (D21).
+- Le **contrôle des qualifications** d'un médecin ou d'un expert technique mandaté (art. 272 du Code CIMA) est fait à la désignation et à chaque renouvellement d'agrément ; les **conventions de place** entre assureurs sont une ligne du §13.2 (revue du juriste).
+- Une désignation **hors classement** de la liste de désignation (§5.5) exige un motif, lu par `AUD` (FR-62).
 
 #### FR-179 : Le panel interne et le médecin-conseil
 
@@ -2768,9 +3172,11 @@ La compagnie a des **experts internes** (`EXPI`), avec leurs domaines et leurs z
 - Un `EXPI` ouvre seulement les missions qui lui sont confiées et les dossiers de ces missions ; il n'a pas la recherche générale.
 - Le `MED` lit les données de santé des dossiers dont il a une mission (D14) ; chaque lecture est journalisée (FR-153).
 - Un expert interne ne facture pas d'honoraires (FR-182).
-- Le référentiel dit quels domaines et quelles zones le panel interne couvre ; dans le jeu de démonstration : auto-matériel, médical, responsabilité, en zones de Lomé, Tsévié et Aného `[ASSUMPTION: jeu de démonstration seulement]`.
+- Le référentiel dit quels domaines et quelles zones le panel interne couvre ; dans le jeu de démonstration : auto-matériel, médical, responsabilité, en zones de Lomé, Tsévié et Aného *(défaut H-144 : jeu de démonstration seulement)*.
 - Les règles qui imposent un expert externe (au-dessus d'un seuil, contre-expertise, fraude, contentieux, domaine non couvert) sont au §5.5 ; le référentiel leur fournit les domaines et les zones.
 - Un expert interne qui change de rôle perd l'accès à ses missions ouvertes ; elles sont réaffectées avec motif.
+- L'expert interne a un écran « **mes visites** » : l'agenda de ses visites (date, lieu, dossier, mission), avec la date de rapport attendue.
+- L'expert interne **lit les grilles** (grille de complétude du rapport, FR-64 ; barèmes de référence) depuis l'écran de la mission, sans quitter le rapport.
 
 #### FR-180 : Le portail du cabinet externe
 
@@ -2781,10 +3187,14 @@ Un cabinet externe qui a un compte (`EXPE`) travaille dans un **portail** qui ne
 - Décliner exige un motif ; la mission retourne « à désigner » (§5.5) et le cabinet est exclu de la liste de cette mission, avec son refus conservé.
 - Les pièces transmises sont **une liste choisie** par le gestionnaire pour cette mission ; le cabinet n'en voit pas d'autres ; il accuse réception, et la date d'accusé est tracée.
 - Le rapport se dépose de deux façons : **rédigé en ligne par rubriques** (le portail génère le PDF, versé comme pièce de la mission) ou **téléversé** (fichier du cabinet) ; les conclusions sont obligatoires dans les deux cas.
+- Le **PDF du rapport rédigé en ligne** contient au minimum : l'identification (dossier, mission, expert, cabinet), les rubriques, l'imputation, les conclusions, la signature et la version ; il est versé comme pièce de la mission et **figure au bordereau de versement** du dossier (FR-168).
+- La **lettre de mission** (référence `LM-`) est **générée par le serveur**, avec sa référence ; elle est visible de l'expert dans le portail et versée au dossier.
 - Chaque dépôt crée une version du rapport (FR-161) ; les versions antérieures restent lisibles par le gestionnaire.
 - Les accès du cabinet sont tracés comme ceux d'un agent (FR-158) ; une mission terminée est en lecture seule pour lui après le délai de FR-184.
-- Le compte d'un cabinet exige une authentification renforcée (identifiant et second facteur) `[ASSUMPTION: second facteur obligatoire pour EXPE, à confirmer]`.
-- Le portail ne donne accès ni aux montants de l'évaluation de la compagnie, ni à la provision, ni à l'instruction.
+- Le compte d'un cabinet exige une authentification renforcée (identifiant et second facteur) *(défaut H-145 : second facteur obligatoire pour EXPE, à confirmer)*.
+- Le portail ne donne accès ni aux montants de l'évaluation de la compagnie, ni à la provision, ni à l'instruction : le cabinet ne voit que ses missions et **jamais la provision**.
+- Le portail est **hébergé par le relais Money Vibes** (FR-239), les pièces de mission sont **chiffrées et à durée limitée** *(point juridique J-21 : voir FR-239 ; Money Vibes déclaré sous-traitant ; à confirmer à la séance d'immersion et par le juriste)* ; la voie `TRANSMISE` (courriel sécurisé ou papier, FR-181) reste le repli.
+- **Aucune pièce médicale n'y transite**, sauf nécessité de la mission (FR-9) ; quand elle transite, la transmission est journalisée.
 
 #### FR-181 : Un cabinet sans compte : le gestionnaire saisit
 
@@ -2796,17 +3206,22 @@ Un cabinet n'a pas obligatoirement de compte. Quand son rapport arrive par courr
 - Les mêmes contrôles que pour un rapport déposé sur le portail s'appliquent (§5.5) ; il n'y a pas deux circuits.
 - La désignation, l'acceptation (par téléphone ou courrier) et l'accusé de réception sont saisis par le gestionnaire avec leur date et leur moyen.
 - Un cabinet sans compte peut recevoir un compte plus tard sans perdre l'historique de ses missions.
+- La lettre de mission (`LM-`) d'un cabinet sans compte est générée par le serveur comme les autres, puis imprimée ou envoyée par la voie `TRANSMISE` ; sa date et son moyen d'envoi sont saisis.
 
 #### FR-182 : Les honoraires de l'expert : note, visa, jamais au-delà du facturé
 
-L'expert externe enregistre sa **note d'honoraires** (ou le gestionnaire la saisit pour lui). Un **visa** par le `RESP` ou le `CPT` la valide. Le montant visé ne dépasse **jamais** le montant facturé. Le paiement se fait par le circuit des règlements (§5.8), comme une nature « honoraires » (D8, D11).
+L'expert externe enregistre sa **note d'honoraires** (ou le gestionnaire la saisit pour lui). Un **visa** par le `RESP` — **jamais** par le `CPT` — la valide, dans la limite du **plafond d'honoraires** du niveau de la matrice de délégation (FR-91) ; au-dessus du plafond, le comité décide. Le montant visé ne dépasse **jamais** le montant facturé. Le paiement se fait par le circuit des règlements (§5.8), comme une nature « honoraires » (D8, D11).
 
 **Conséquences (testables) :**
 - Cinq montants suivent la mission, distincts : **budget prévisionnel**, **honoraires convenus** (lettre de mission), **facturés**, **visés**, **payés**.
 - Viser un montant supérieur au facturé est refusé.
-- Viser au-delà du convenu exige un motif ; un dépassement du budget prévisionnel est signalé au `RESP` avec le motif du dépassement.
+- Viser au-delà du convenu exige un motif ; un dépassement du budget prévisionnel est signalé au `RESP` avec le motif du dépassement, et il est **bloquant** au-delà de la tolérance de FR-185.
+- Le visa suppose un **rapport validé** : pas de visa tant que le rapport de la mission n'est pas validé (FR-68).
+- Le visa suppose le **rapprochement de trois pièces** : la **facture**, la **lettre de mission** (`LM-`) et le **rapport reçu** ; un écart entre la facture et la lettre de mission est affiché avant le visa.
+- Le **plafond d'honoraires par niveau** de la matrice est un paramètre (`deleg.honoraires.plafond.niveau1..n`, annexe D) ; un honoraire au-dessus du plafond de son niveau passe au comité.
 - Une note sans pièce jointe (facture) est refusée ; sa date et son numéro de facture sont enregistrés.
-- Celui qui vise ne paie pas (règle du circuit, D8) : le `CPT` qui a visé n'émet pas le règlement de la même note.
+- `CPT` **émet seulement** : il ne vise jamais une note d'honoraires (règle du circuit, D8, FR-7) ; le règlement d'honoraires naît du visa du `RESP`.
+- Les règlements d'honoraires se rapprochent comme les autres règlements, avec l'état comptable (FR-224).
 - Un expert interne n'a pas de note ; un expert à vacation ou à forfait applique son mode d'honoraires du référentiel.
 - Les honoraires visés et payés alimentent l'export comptable (FR-193) et le pilotage (FR-207).
 
@@ -2816,7 +3231,7 @@ Le responsable voit, pour chaque expert, **combien il a de missions**, **ce qu'e
 
 **Conséquences (testables) :**
 - Trois lectures sont disponibles par expert : nombre de missions (actives, en attente d'acceptation, rapports attendus, en retard, terminées), **charge pondérée** contre capacité, échéancier des rapports dus à 7 et 15 jours.
-- Le poids d'une mission est : poids du domaine × coefficient de type de mission × coefficient de gravité du sinistre (léger ou modéré 1, grave 1,3, mortel 1,6), arrondi au demi-point ; le poids par domaine et les coefficients sont des paramètres (annexe D) `[ASSUMPTION: poids par domaine à fournir par la compagnie]`.
+- Le poids d'une mission est : poids du domaine × coefficient de type de mission × coefficient de gravité du sinistre (léger ou modéré 1, grave 1,3, mortel 1,6), arrondi au demi-point ; le poids par domaine et les coefficients sont des paramètres (annexe D) *(défaut H-146 : poids par domaine à fournir par la compagnie)*.
 - Un expert à plus de 1,2 fois sa capacité est « surchargé » ; à moins de 0,8, « disponible » (paramètres de la démo).
 - Le taux d'occupation, le délai moyen de rapport, le taux de respect du délai, le taux de rapports avec complément demandé et le taux de contestation sont calculés depuis les missions, jamais saisis.
 - La liste de désignation (§5.5) classe les experts désignables avec leur charge, leur délai estimé, leur coût estimé et les raisons du classement ; elle ne désigne pas toute seule.
@@ -2826,11 +3241,12 @@ Le responsable voit, pour chaque expert, **combien il a de missions**, **ce qu'e
 Chaque mission a un **délai de rapport attendu**, qui dépend de son domaine. Un rapport en retard est relancé, puis arbitré.
 
 **Conséquences (testables) :**
-- Les délais par défaut, en jours, sont ceux de la démo : auto-matériel 7, médical 21, responsabilité 14, fraude 30, incendie 21, transport 14, bâtiment 21, perte d'exploitation 30 ; ce sont des paramètres de la compagnie, par domaine.
+- Les délais par défaut, en jours, sont ceux de la démo : auto-matériel 7 (c'est le **bas de la fourchette de 7 à 10 jours** du mémoire de 2014), médical 21, responsabilité 14, fraude 30, incendie 21, transport 14, bâtiment 21, perte d'exploitation 30 ; ce sont des paramètres de la compagnie, par domaine.
 - La date de rapport attendu est calculée depuis la visite (ou depuis l'acceptation s'il n'y a pas de visite) ; un point de départ et un point d'arrêt sont visibles sur la mission.
 - Un rapport en retard est relancé (jours entre deux relances : 5 par défaut) ; après 3 relances sans effet, le système propose un arbitrage (changer d'expert, escalader) plutôt qu'une relance de plus.
 - Pour une expertise **médicale** après un accident corporel de la circulation, le rapport est transmis à l'assureur, à la victime et à son médecin dans les **20 jours** de l'examen (art. 245 du Code CIMA, texte lu) : cette échéance **réglementaire** est affichée en plus du délai interne, et la compagnie ne la modifie pas ; l'avis à la victime d'au moins 15 jours avant l'examen (art. 244) est géré au §5.5.
 - Un rapport rendu hors délai reste exploitable ; le retard est enregistré dans les indicateurs de l'expert (FR-183).
+- La **validation du rapport** par le gestionnaire se fait sous **72 heures** (`rapport.validation_delai`, annexe D ; FR-68) *(défaut H-147 : défaut de la compagnie étudiée par le mémoire de 2014 (zone CIMA) ; à confirmer à la séance d'immersion)*.
 
 #### FR-185 : Le budget indicatif d'une mission
 
@@ -2840,8 +3256,20 @@ Chaque mission a un **délai de rapport attendu**, qui dépend de son domaine. U
 - Le budget est : (socle du domaine + le plus petit de 2 % de l'enjeu et du plafond moins le socle) × coefficient du type de mission, arrondi à 5 000 FCFA ; plafond 1 200 000 FCFA ; coefficients de type : initiale 1, complémentaire 0,5, contradictoire 1,5, contre-expertise 1,5.
 - Les socles par domaine sont ceux de la démo : auto-matériel 45 000, médical 120 000, responsabilité 75 000, fraude 250 000, incendie 200 000, transport 120 000, bâtiment 150 000, perte d'exploitation 300 000 FCFA ; ces valeurs sont **à remplacer** par le tarif des experts de la compagnie.
 - Le budget affiché porte la mention « indicatif » ; il n'est jamais envoyé comme engagement à un cabinet.
-- Une mission dont les honoraires convenus dépassent le budget indicatif demande un motif au visa (FR-182).
+- Une mission dont les honoraires convenus dépassent le budget indicatif demande un motif au visa (FR-182) ; un dépassement **au-delà de la tolérance** (`honoraires.tolerance_budget`, annexe D, défaut 10 % *(défaut H-148 : 10 % ; à confirmer à la séance d'immersion)*, FR-90) est **bloquant** : le visa est refusé tant que le `RESP` ou le comité (selon le plafond du niveau) n'a pas décidé.
 - Tous les montants du calcul sont des paramètres modifiables et datés ; un budget déjà calculé n'est pas recalculé quand les paramètres changent.
+
+#### FR-185a : Les intervenants tiers des risques divers
+
+Un sinistre de risques divers appelle d'autres personnes que l'assuré et l'expert : un syndic, un transporteur, une partie adverse, une administration, un prestataire, un avocat, un courtier, une compagnie adverse. Chacune est un **intervenant** du dossier. Prospera le suit comme une attente : ce qu'on attend de lui, quand, et ce que coûte son retard.
+
+**Conséquences (testables) :**
+- Un intervenant porte : son **type** (syndic, transporteur, partie adverse, administration, prestataire, avocat, courtier, compagnie adverse), son **rôle** dans le dossier, l'**action attendue**, la **date cible**, l'**impact du retard** (ce que le retard bloque), et la **relance** (canal, date, auteur).
+- Un intervenant a un statut : `EN_ATTENTE`, `RELANCE`, `RECU` ou `SANS_SUITE` ; chaque changement écrit une ligne au journal avec son auteur.
+- Un intervenant alimente la vue « mes attentes » du gestionnaire et la file « tiers externes » (FR-145, FR-147).
+- Un intervenant **sans réponse à l'échéance** remonte dans la file du gestionnaire puis du `RESP` ; la relance est tracée.
+- Un intervenant classé `SANS_SUITE` exige un motif ; il reste visible sur le dossier.
+- Un intervenant ne reçoit aucun accès à Prospera : ses échanges passent par courrier, SMS ou e-mail du dossier (FR-146).
 
 ---
 
@@ -2857,10 +3285,11 @@ Prospera garde une **projection** de ce que le LC tient : assurés, polices (num
 - Aucun écran de Prospera ne permet de créer, modifier ou supprimer une police, une garantie, une prime, un intermédiaire ou un coassureur ; les montants et les statuts viennent du LC.
 - Chaque donnée affichée porte la date de sa dernière lecture du LC ; plus vieille que le double de la fraîcheur par défaut (§6.5), elle est marquée « périmée ».
 - Chaque objet reçu garde l'identifiant stable du LC ; Prospera ne le remplace jamais.
-- Prospera ne tient ni primes ni production : il ne lit que ce qu'il faut au circuit (l'état de paiement de la prime, pas son montant d'émission) ; aucun indicateur de Prospera n'utilise la prime `[ASSUMPTION: la prime n'entre dans aucun indicateur sinistre, comme dans la démo]`.
+- Prospera ne tient ni primes ni production : il ne lit que ce qu'il faut au circuit (l'état de paiement de la prime, pas son montant d'émission) ; aucun indicateur de Prospera n'utilise la prime *(défaut H-149 : la prime n'entre dans aucun indicateur sinistre, comme dans la démo)*.
 - Un objet reçu qui ne respecte pas les champs minimaux de l'annexe C est refusé avec un motif en clair et placé dans la file des écarts (§6.5).
-- La projection est amorcée par la reprise (§6.8, fichier de polices) puis tenue à jour par l'échange (§6.5) `[ASSUMPTION: la reprise amorce la projection ; à confirmer avec le plan de la reprise]`.
+- La projection est amorcée par la reprise (§6.8, fichier de polices) puis tenue à jour par l'échange (§6.5) *(défaut H-150 : la reprise amorce la projection ; à confirmer avec le plan de la reprise)*.
 - Une police absente de la projection est signalée « police inconnue du LC » ; le dossier peut se déclarer (§5.1) mais l'ouverture exige la décision motivée de FR-187.
+- Une projection **périmée** (plus vieille que l'âge maximal de lecture) donne un état « **à relire** » du contrôle de recevabilité, **jamais un refus** (FR-41, FR-201).
 
 #### FR-187 : Les garanties qui répondent d'un type de sinistre
 
@@ -2871,22 +3300,24 @@ Une **table de correspondance** dit, pour chaque type de sinistre, **quelles gar
 - Le contrôle donne un verdict par point (police, période, prime, garantie, plafond et franchise, délai de déclaration) avec la valeur lue et sa date de lecture.
 - **Le contrôle de garantie ne peut pas être sauté** (écart corrigé de la démo, D4) : si une information manque, le gestionnaire enregistre une **décision motivée** `GARANTIE_ACQUISE`, `SOUS_RESERVE` ou `REFUS_DE_GARANTIE`, avec un motif d'au moins 10 caractères ; elle est visible de `AUD`.
 - Une déclaration hors du délai contractuel donne une **réserve et un motif**, jamais une déchéance automatique : la déchéance suppose un préjudice établi, et le `RESP` décide (D15 ; art. 20 du Code CIMA, texte lu : le retard n'est opposable que si l'assureur prouve qu'il lui a causé un préjudice).
-- Pour un accident de la circulation, l'état de la police (suspendue, prime impayée) est affiché avec l'alerte « opposabilité à la victime à vérifier » ; le Code limite l'opposabilité des suspensions de garantie aux victimes (art. 210 et son interprétation, texte lu) ; la décision revient au `RESP` et la règle exacte au juriste (D21).
+- Pour un accident de la circulation, l'état de la police (suspendue, prime impayée) est affiché avec l'alerte « opposabilité à la victime à vérifier » ; cette alerte est affichée sur **toute réserve `CONTRAT_VERIFIE`** du corporel VTM ; le Code limite l'opposabilité des suspensions de garantie aux victimes (art. 210 et son interprétation, texte lu) ; la décision revient au `RESP` et la règle exacte au juriste (D21).
 - Les plafonds, franchises et délais de déclaration viennent de la garantie souscrite lue du LC, jamais d'une saisie du gestionnaire.
 
 #### FR-188 : La provision, dossier par dossier
 
-Prospera tient, pour chaque dossier, la **provision** : la charge estimée du sinistre. Elle est posée à l'**ouverture** (milieu de tranche selon la gravité, ou estimation du gestionnaire), puis **revue à chaque événement** : rapport d'expertise, devis, certificat médical, rapport de police, évaluation, validation, offre, règlement. Chaque révision porte un motif. La provision est calculée **en brut** ; les recours à exercer sont évalués à part (art. 334-12 du Code CIMA, texte lu : provision exercice par exercice, dossier par dossier, sans tenir compte des recours à exercer).
+Prospera tient, pour chaque dossier, la **provision** : la charge estimée du sinistre. Elle est posée à l'**ouverture** (milieu de tranche selon la gravité, ou estimation du gestionnaire), puis **revue à chaque événement** : rapport d'expertise, devis, certificat médical, rapport de police, évaluation, validation, offre, règlement. Chaque révision porte un motif. La provision comprend l'**indemnité estimée et les frais individualisables** (honoraires convenus, frais de justice ; art. 334-8 et 334-12 du Code CIMA). La provision est calculée **en brut** ; les recours à exercer sont évalués à part (art. 334-12 du Code CIMA, texte lu : provision exercice par exercice, dossier par dossier, sans tenir compte des recours à exercer).
 
 **Conséquences (testables) :**
 - Un mouvement de provision n'est **jamais écrasé** : il s'ajoute, avec séquence, date, montant avant et après, motif, auteur et pièce justificative.
 - Les motifs sont : ouverture, rapport d'expertise, devis de réparation, certificat médical, rapport de police, barème appliqué, validation hiérarchique, régularisation, clôture.
 - Un nouveau montant égal à l'ancien, ou sans motif, est refusé.
-- Une révision dont l'écart atteint ou dépasse 2 000 000 FCFA attend le `RESP` avant d'être effective (D12) ; le `GEST` ne la valide pas lui-même.
+- Une révision dont l'écart, **cumulé de façon glissante par dossier**, atteint ou dépasse 2 000 000 FCFA (paramètre) attend le `RESP` avant d'être effective (D12, FR-76) ; le `GEST` ne la valide pas lui-même.
 - Un dossier dont la provision s'écarte de plus de 15 % de l'estimation de référence (expert, devis, médiane des comparables) est signalé « à revoir » ; un dossier sans mouvement de provision depuis 90 jours est signalé, et une provision de plus de 365 jours est « ancienne » (paramètres de la démo).
 - La provision d'ouverture vient d'une **grille par volet et par gravité**, paramétrée par la compagnie ; elle sert à l'ouverture et au pilotage, pas au barème d'indemnisation, qui est un calcul poste par poste (D15).
-- Le `GEST` peut reporter une revue de provision de X jours avec motif ; le dossier sort de la file « à revoir » jusqu'au terme ; l'`AUD` voit les reports.
+- Le `GEST` peut reporter une revue de provision de X jours avec motif ; le dossier sort de la file « à revoir » jusqu'au terme ; l'`AUD` voit les reports. **Aucun report** n'est permis tant qu'un délai légal est actif sur le dossier.
+- La provision a un poste distinct « **risque de pénalité** » (motif et ligne séparés de la provision d'indemnité, FR-76), alimenté quand une échéance légale est dépassée ou menacée (art. 334-12, FR-85).
 - Clôturer un dossier ramène sa provision à zéro avec le motif « clôture » ; le reste à payer d'un dossier clos doit être nul (§5.9).
+- Au corporel VTM, un **refus de garantie** ou un **classement** ne remet **pas** la provision à zéro tant que l'obligation légale d'offre demeure (art. 237) ; ailleurs, la provision est ramenée à zéro avec motif et visa (FR-121, FR-123).
 
 #### FR-189 : L'état des provisions (PSAP), par exercice de survenance, brut, cédé, net
 
@@ -2897,8 +3328,13 @@ Prospera produit l'**état des provisions** : dossier par dossier, regroupé par
 - Le total de l'état est égal à la somme des provisions des dossiers, au franc près ; un écart est un défaut.
 - Un dossier est classé selon l'exercice de sa **date de survenance**, jamais celle de sa déclaration ou de son import (§6.8).
 - La date d'arrêté se choisit ; l'état d'une date passée est reconstruit depuis les mouvements, sans recalcul avec les paramètres du jour.
-- Les sinistres survenus mais non déclarés (IBNR) sont estimés selon des modalités fixées par une circulaire de la CRCA (art. 334-12) : Prospera **ne calcule pas l'IBNR officiel** ; l'état a une colonne que la compagnie renseigne ou importe `[ASSUMPTION: l'IBNR est estimé hors de Prospera au premier jour ; à confirmer avec le juriste et la direction technique]`.
+- Les sinistres survenus mais non déclarés (IBNR) sont estimés selon des modalités fixées par une circulaire de la CRCA (art. 334-12) : Prospera **ne calcule pas l'IBNR officiel** ; l'état a une colonne que la compagnie renseigne ou importe *(point juridique J-22 : l'IBNR est estimé hors de Prospera au premier jour ; à confirmer avec le juriste et la direction technique)*.
 - L'état s'exporte en tableur ; `DT`, `DG`, `CPT`, `AUD` le lisent.
+- Un sinistre **non payé dont l'obligation légale court** (corporel VTM) reste **provisionné, non nul**, même après un refus de garantie ou un classement (art. 237 ; FR-188). Le motif « **risque de pénalité 5 %** » est un motif de provision de l'état.
+- **États techniques de la direction**, tous recalculés depuis les données : le **triangle de liquidation** ; le **taux de liquidation** ; le **coût moyen** ; l'état **par branche et par exercice de survenance** ; le **boni et le mali de liquidation** (écart entre la provision et le payé final des dossiers soldés), avec un seuil significatif *(défaut H-151 : 250 000 FCFA, paramètre boni_mali.seuil ; à confirmer avec la direction technique)* ; la **charge nette** après coassurance et réassurance (FR-190, FR-191).
+- Une **note de synthèse** de direction est **générée depuis les données** et **rejouable** à une date d'arrêté : analyse, lecture par domaine, position au regard des règles CIMA, décisions à prendre classées par priorité, **projection à 30 jours**.
+- Une **revue mensuelle** de direction est **imprimable** ; elle reprend ces états et la note de synthèse.
+- Le **parapheur** de direction s'exporte avec : l'engagement, la charge nette et les réserves de chaque dossier soumis.
 
 #### FR-190 : La réassurance, par traité et par millésime
 
@@ -2912,6 +3348,7 @@ La **cession** de chaque sinistre suit le **traité en vigueur à sa date de sur
 - Une cession recalculée à une nouvelle provision ou à un règlement est enregistrée comme un mouvement, avec le traité utilisé.
 - Les traités sont saisis par `DT` ou `DG` ; `GEST` et `CPT` les lisent.
 - Les traités peuvent aussi être reçus du LC s'il les tient (annexe C, flux facultatif).
+- À l'atteinte du **seuil de sinistre majeur** (`majeur.seuil`, FR-57a), Prospera **avise le réassureur selon le traité** applicable : l'avis part au contact du traité, avec le dossier, la provision brute et la part du réassureur ; l'envoi et son accusé sont tracés.
 
 #### FR-191 : La coassurance, par clé de répartition
 
@@ -2923,26 +3360,29 @@ Une police en coassurance a une **clé de répartition** : les parts de chaque c
 - Quand la compagnie est apériteur, la part des coassureurs est calculée sur chaque règlement et produit une ligne « à réclamer aux coassureurs » ; quand elle est coassureur, Prospera n'instruit pas : il tient la quote-part qu'elle doit.
 - L'état de FR-189 sépare la part de la compagnie et celle des coassureurs.
 - Les coassureurs sont informés à l'ouverture du dossier (§5.2).
+- Le **rapport périodique** d'un sinistre majeur (FR-57a) donne la **charge nette après clé de coassurance** : part de la compagnie, part des coassureurs, puis part cédée.
 
 #### FR-192 : Les données des états pour le contrôle de la CRCA
 
 La CRCA contrôle sur pièces et sur place, et peut demander à la compagnie toutes les informations qu'elle juge nécessaires (art. 310 et 405 du Code CIMA, texte lu). Les états annuels que la compagnie remet comprennent notamment les états par exercice de survenance, de paiements et de provisions, et le suivi des sinistres de grande ampleur non clôturés, notamment C10, C10a, C10b et C10d (art. 422, liste lue) ; ils sont remis au plus tard le 1er juin (art. 405). **Le contenu exact et le format de ces états sont à préciser par le juriste (D21, circulaires de la CRCA).** Prospera ne prétend pas produire l'état officiel : il **fournit, pour chaque dossier, les données dont ces états se nourrissent**.
 
 **Conséquences (testables) :**
-- Chaque dossier sait produire, à une date d'arrêté : exercice de survenance, catégorie ou sous-catégorie, nombre de sinistres, paiements cumulés, provision, recours encaissés et prévus, coût moyen, et un drapeau « grande ampleur non clôturé » ; le seuil du drapeau est un paramètre `[ASSUMPTION: seuil à fixer avec la compagnie]`.
+- Chaque dossier sait produire, à une date d'arrêté : exercice de survenance, catégorie ou sous-catégorie, nombre de sinistres, paiements cumulés, provision, recours encaissés et prévus, coût moyen, et un drapeau « grande ampleur non clôturé » ; le seuil du drapeau est un paramètre *(défaut H-152 : seuil à fixer avec la compagnie)*.
 - L'export s'obtient en tableur, par exercice et par catégorie, daté, avec le nom de celui qui l'a demandé.
 - Les colonnes de l'export sont versionnées ; une colonne ajoutée par le juriste ne change pas les exports passés.
+- Un **registre chronologique exportable** liste les déclarations **dans l'ordre d'arrivée** : exercice de survenance, date de l'opération, date de réception, catégorie, bénéficiaire, référence de règlement, recours, observation. Le registre coté et paraphé du mémoire de 2014 devient le **journal chaîné** de FR-13 ; le contenu exact des états C10 reste « à vérifier par le juriste » (§13.2).
 - Aucun état n'est présenté comme « officiel » : il porte la mention « données de base pour l'état réglementaire ».
 - L'export est lisible par `DT`, `DG`, `AUD` ; la production d'un dossier de contrôle complet est décrite en FR-211.
 
 #### FR-193 : L'export pour la comptabilité
 
-Prospera produit, pour la comptabilité de la compagnie, un **état et un export** de ce que le circuit a fait : règlements émis et remis, honoraires visés et payés, provisions (dotations et reprises), recours encaissés, cessions (D16). Le format suit le contrat d'échange (annexe C). La comptabilité garde la comptabilité : Prospera ne passe pas d'écriture au grand livre.
+Prospera produit, pour la comptabilité de la compagnie, un **état et un export**, qui sont une **proposition de mouvements pour la comptabilité** (jamais une écriture passée au grand livre), de ce que le circuit a fait : règlements émis et remis, honoraires visés et payés, provisions (dotations et reprises), recours encaissés, cessions (D16). Le format suit le contrat d'échange (annexe C). La comptabilité garde la comptabilité : Prospera ne passe pas d'écriture au grand livre.
 
 **Conséquences (testables) :**
 - Chaque ligne de l'export porte : date, journal, compte, libellé, débit, crédit, pièce justificative ; le compte vient d'une **table de correspondance** nature de l'opération vers compte, paramétrée par la compagnie : **le plan de comptes de la compagnie fait foi** ; la table de la démo est remplacée à la mise en service.
 - Un export a un numéro, une période et un auteur ; en demander un second pour la même période ne duplique aucune ligne chez la comptabilité (idempotence par clé d'origine).
-- La somme des débits égale la somme des crédits de chaque export.
+- La somme des débits égale la somme des crédits de chaque export : c'est le **contrôle de l'export**, non une écriture de grand livre.
+- L'export comporte l'**état de liquidation** : provision à l'ouverture, provision au bilan, réglé, reprise, charge nette, écart d'évaluation, soldé.
 - Un règlement émis, remis, rejeté ou annulé produit la ligne correspondante ; un règlement bloqué par un contrôle (fraude, séparation des fonctions) n'en produit aucune.
 - Le rapprochement bancaire des chèques et du Mobile Money se fait dans le module `paiement` ; un écart de rapprochement de plus de 60 jours est une alerte (D16, démo).
 - Prospera fournit aussi un état mensuel : règlements émis, remis, en attente, en circulation, comptes d'attente à justifier, honoraires, dotations et reprises de provision.
@@ -2952,7 +3392,7 @@ Prospera produit, pour la comptabilité de la compagnie, un **état et un export
 
 ### 6.5 L'échange avec le logiciel de la compagnie (`liaison-assureur` [proposition], M48 [proposition])
 
-**Ce que ça veut dire.** Le LC tient les contrats de la compagnie et, pour un début, le **numéro de sinistre officiel** (récit du PO, §1). Prospera se branche **à côté**, pour le dossier sinistre. Le module `liaison-assureur` porte le **contrat d'échange** (annexe C) : il reçoit du LC ce que le LC tient, il lui renvoie ce que Prospera décide, et il dit à chaque écran quelle est la fraîcheur de ce qu'il montre. **Le PRD ne dit rien du LC réel** : son nom, son API et son format ne seront connus qu'en janvier. Le contrat ne dépend d'aucun produit. L'échange passe par une API si le LC en offre une, sinon par des fichiers Excel ou JSON, dans les deux sens. Le connecteur d'un produit précis se fera quand le LC sera connu ; le contrat d'échange et le LC fictif (§6.6) sont, eux, au premier jour `[ASSUMPTION: transposition de la décision de la microfinance (PRD-MF §6.5, décision A9) ; à confirmer]`.
+**Ce que ça veut dire.** Le LC tient les contrats de la compagnie et, pour un début, le **numéro de sinistre officiel** (récit du PO, §1). Prospera se branche **à côté**, pour le dossier sinistre. Le module `liaison-assureur` porte le **contrat d'échange** (annexe C) : il reçoit du LC ce que le LC tient, il lui renvoie ce que Prospera décide, et il dit à chaque écran quelle est la fraîcheur de ce qu'il montre. **Le PRD ne dit rien du LC réel** : son nom, son API et son format ne seront connus qu'en janvier. Le contrat ne dépend d'aucun produit. L'échange passe par une API si le LC en offre une, sinon par des fichiers Excel ou JSON, dans les deux sens. Le connecteur d'un produit précis se fera quand le LC sera connu ; le contrat d'échange et le LC fictif (§6.6) sont, eux, au premier jour *(défaut H-153 : transposition de la décision de la microfinance (PRD-MF §6.5, décision A9) ; à confirmer)*.
 
 #### FR-194 : Le LC fait foi pour les contrats et le numéro de sinistre ; Prospera tient le dossier
 
@@ -2982,15 +3422,17 @@ Prospera envoie au LC, chacun avec sa **clé d'origine** et son **état** : les 
 
 **Conséquences (testables) :**
 - Une déclaration part dès sa création (§5.1) ; une évaluation ou une provision part à chaque changement validé (§6.4) ; un règlement part à l'émission puis à la remise (§5.8) ; un recours encaissé part à son rapprochement (§5.10) ; une clôture part à la clôture (§5.9).
-- Chaque envoi porte une clé d'origine unique et l'identité de l'auteur de la décision.
+- Chaque envoi porte une clé d'origine unique et l'identité de l'auteur de la décision ; l'envoi d'une déclaration porte la référence `DEC-`, **champ obligatoire** (annexe C, C-13).
+- Tout **motif** d'un message vers le LC est un **motif codé**, pris dans une liste fermée (D.3) ; **jamais un texte libre**.
 - Chaque envoi a un état visible : à envoyer, envoyé, accepté, refusé (avec le motif du LC), jamais confirmé après un délai (24 heures par défaut, paramètre).
 - Un refus du LC remonte au rôle concerné (`GEST`, `GREC` ou `RESP`) dans sa file, avec le motif.
 - Chaque message sortant du corps du PRD (« envoyé au LC ») a une ligne dans l'annexe C avec son sens, sa clé d'origine et ses états ; un test parcourt l'annexe et le corps pour vérifier qu'aucun message n'a été oublié.
-- Prospera n'envoie jamais de donnée de santé au LC : un envoi d'évaluation ou de clôture ne contient que le montant, la garantie, le statut et les références, pas le contenu des pièces médicales `[ASSUMPTION: aucune donnée de santé vers le LC ; à confirmer]`.
+- Le LC ne reçoit **aucune donnée médicale** : ni gravité, ni nature des lésions, ni texte libre ; seulement le **volet**, les **montants** et des **motifs codés** *(point juridique J-23 : aucune donnée de santé vers le LC ; base légale à valider par le juriste, §13.2)*. Un envoi d'évaluation ou de clôture ne contient que le montant, la garantie, le statut, le code de volet et les références.
+- Test sur le LC fictif : parmi tous les échanges sortants d'un dossier corporel, aucun champ ne porte une donnée de santé (gravité, type de sinistre corporel, nom de la victime si le LC n'en a pas strictement besoin, texte libre).
 
 #### FR-197 : API ou fichier, dans les deux sens
 
-Le contrat d'échange est servi par deux transports interchangeables : une **API** que Prospera interroge, ou des **fichiers Excel ou JSON** que Prospera relève ou dépose dans un emplacement partagé du réseau de la compagnie. Les deux transports valent dans les deux sens. **Prospera tire et dépose ; il n'ouvre aucun port entrant pour cet échange** `[ASSUMPTION: règle de la microfinance reprise, décision A10 ; à confirmer à la séance d'immersion]`.
+Le contrat d'échange est servi par deux transports interchangeables : une **API** que Prospera interroge, ou des **fichiers Excel ou JSON** que Prospera relève ou dépose dans un emplacement partagé du réseau de la compagnie. Les deux transports valent dans les deux sens. **Prospera tire et dépose ; il n'ouvre aucun port entrant pour cet échange** *(défaut H-154 : règle de la microfinance reprise, décision A10 ; à confirmer à la séance d'immersion)*.
 
 **Conséquences (testables) :**
 - Les deux transports portent le même contrat ; changer de transport ne change aucun écran ni aucune exigence.
@@ -3006,11 +3448,13 @@ Le contrat d'échange est servi par deux transports interchangeables : une **API
 **Conséquences (testables) :**
 - La référence `DEC-` est attribuée sans attendre le LC, sans trou ni doublon, même si le LC est coupé.
 - Un dossier sans numéro officiel depuis plus de **1 jour ouvré** lève une alerte au `RESP` (paramètre).
-- Le **paramètre « qui attribue le numéro de sinistre »** vaut « le LC » par défaut ou « Prospera » : basculer ne demande pas de reprise du code ; quand Prospera attribue, le numéro suit un format paramétré (défaut `SIN-AAAA-NNNN`) `[ASSUMPTION: format de la démo]`.
+- Le **paramètre « qui attribue le numéro de sinistre »** vaut « le LC » par défaut ou « Prospera » : basculer ne demande pas de reprise du code ; quand Prospera attribue, le numéro porte un **préfixe distinct** de ceux du LC (`PRO-`) et suit un format paramétré (défaut `SIN-AAAA-NNNN`, soit `PRO-SIN-AAAA-NNNN`) *(défaut H-155 : format de la démo ; préfixe PRO- à confirmer)* ; un **contrôle d'unicité** contre les numéros reçus du LC (C-9) est fait au basculement.
 - Prospera n'impose aucun format au numéro officiel du LC : il accepte le texte reçu, dans une limite de longueur paramétrée.
 - Le **contrôle de doublon** porte sur la police, la date de survenance, l'immatriculation et la victime ; il cherche dans les dossiers de Prospera **et** dans les sinistres reçus du LC ; un doublon probable est signalé au gestionnaire, qui décide ; Prospera ne fusionne jamais seul.
 - Un dossier déclaré au LC avant Prospera (par un autre canal) se rattache à son numéro officiel ; il n'a pas de référence `DEC-` tant qu'il n'a pas été déclaré dans Prospera.
-- Le numéro officiel reçu du LC pour un dossier déjà numéroté est refusé comme écart, sauf si le dossier n'avait pas de numéro.
+- Un numéro reçu pour une `DEC-` **déjà numérotée** est un **écart** (file des écarts, FR-200), **jamais un second rattachement** ; le dossier garde son premier numéro, et le rattachement d'un numéro n'a lieu que si le dossier n'avait pas de numéro.
+- La référence `DEC-` est l'**identifiant d'idempotence** envoyé au LC : le LC renvoie le numéro existant pour une `DEC-` déjà reçue *(défaut H-156 : capacité à exiger du LC ; sinon contrôle de doublon par Prospera avant tout rattachement)*.
+- Une déclaration est dans **une seule voie** à la fois : envoi automatique **ou** liste « à saisir » (FR-199) ; elle n'a jamais deux numéros.
 
 #### FR-199 : Quand le LC ne sait pas recevoir, Prospera sort la liste « à saisir dans le logiciel de la compagnie »
 
@@ -3018,9 +3462,11 @@ Si le LC ne sait pas recevoir un flux (ni API, ni fichier), Prospera produit cha
 
 **Conséquences (testables) :**
 - La liste est un fichier lisible (tableur) et un écran ; chaque ligne porte : référence (`DEC-` ou numéro officiel), nature, montant, date, auteur, clé d'origine à recopier.
-- Une déclaration quitte la liste quand le numéro officiel est reporté dans Prospera ; une autre ligne quitte la liste quand le LC renvoie sa trace (flux de FR-195) ; si le LC ne peut rien renvoyer, l'agent la marque « saisie » avec son nom et la date, et la ligne reste visible « saisie, non confirmée » `[ASSUMPTION: confirmation par marquage de l'agent quand le LC ne renvoie rien]`.
-- Une ligne qui reste dans la liste plus d'un jour ouvré (déclaration) ou plus de 72 heures (autre nature) lève une alerte au `RESP` (paramètres ; le second est transposé de la microfinance `[ASSUMPTION]`).
-- La liste est la même que le LC reçoive ou non par la suite : elle sert aussi de preuve de ce qui a été demandé.
+- Une déclaration quitte la liste quand le numéro officiel est reporté dans Prospera ; une autre ligne quitte la liste quand le LC renvoie sa trace (flux de FR-195) ; si le LC ne peut rien renvoyer, l'agent la marque « saisie » avec son nom et la date, et la ligne reste visible « saisie, non confirmée » *(défaut H-157 : confirmation par marquage de l'agent quand le LC ne renvoie rien)*.
+- Une ligne qui reste dans la liste plus d'un jour ouvré (déclaration) ou plus de 72 heures (autre nature) lève une alerte au `RESP` (paramètres ; le second est transposé de la microfinance *(défaut H-158)*).
+- La **liste** est la même que le LC reçoive ou non par la suite : elle sert aussi de preuve de ce qui a été demandé. Cette règle ne vaut que pour la liste : une déclaration est dans **une seule voie** à la fois, envoi automatique **ou** liste « à saisir ».
+- Le passage d'une déclaration à la liste **annule d'abord l'envoi en attente** : la déclaration prend l'état `SAISIE_MANUELLE` ; elle n'est **jamais renvoyée automatiquement** ensuite.
+- Le report du numéro obtenu dans le LC **clôt la voie `SAISIE_MANUELLE`** (annexe C, C-18) ; le numéro reporté suit la règle de FR-198 (écart s'il existe déjà).
 - Reporter un numéro déjà attribué à un autre dossier est refusé et va dans la file des écarts.
 
 #### FR-200 : L'idempotence, le rejet motivé et la file des écarts sont des capacités du contrat
@@ -3029,7 +3475,7 @@ Chaque objet échangé porte une **clé d'origine**. Présenter deux fois le mê
 
 **Conséquences (testables) :**
 - Rejouer un lot déjà intégré ne change aucun dossier, aucune provision, aucun règlement affiché.
-- Une coupure du lien ne perd aucun envoi : les envois attendent dans une file et partent dans l'ordre à la reprise.
+- Une coupure du lien ne perd aucun envoi : les envois attendent dans une file et partent dans l'ordre à la reprise, **sauf** les déclarations passées à la liste « à saisir », dont l'envoi en attente est **annulé** (état `SAISIE_MANUELLE`, FR-199) ; une déclaration de la liste n'est jamais renvoyée automatiquement.
 - Un refus porte un **code** et un **motif en clair**, la date, l'objet et sa clé ; il est visible du rôle concerné (FR-196).
 - Un doublon présenté par le LC (même clé d'origine) est reconnu et compté dans la file, pas appliqué.
 - Une annulation arrive comme un fait inverse daté ; Prospera n'efface aucun fait envoyé ou reçu.
@@ -3041,11 +3487,11 @@ Chaque objet échangé porte une **clé d'origine**. Présenter deux fois le mê
 Chaque écran qui montre une donnée du LC affiche la date et l'heure de la **dernière lecture** et le transport utilisé. Quand le LC est indisponible, Prospera continue de servir la dernière donnée connue, marquée **périmée**, et met en file ce qu'il doit envoyer.
 
 **Conséquences (testables) :**
-- Fraîcheur par défaut : au plus 5 minutes avec une API ; à l'heure ou de nuit (avant 6 h) avec des fichiers (paramètres).
+- Fraîcheur par défaut : au plus **5 minutes** avec une API (interface) ; au plus **24 heures** avec des fichiers, lus à l'heure ou de nuit (avant 6 h) (paramètres de l'annexe D ; FR-3 et FR-41 s'alignent sur ces valeurs).
 - Une donnée plus vieille que le double de sa fraîcheur par défaut est signalée « périmée ».
 - Un bandeau « LC indisponible depuis [heure] » apparaît sur les écrans des rôles concernés et se retire à la reprise.
-- LC coupé : on peut déclarer (référence `DEC-`), joindre des pièces, instruire, évaluer, valider, payer ; les envois attendent la reprise ; l'ouverture d'un dossier sur une police lue depuis plus de l'âge maximal (24 heures par défaut `[ASSUMPTION: âge maximal de lecture pour l'ouverture, paramètre]`) exige la décision motivée de FR-187.
-- Le numéro officiel d'un dossier déclaré pendant la coupure arrive à la reprise ; l'alerte de FR-198 ne compte pas les jours de coupure déclarée `[ASSUMPTION: horloge de l'alerte suspendue pendant une coupure déclarée]`.
+- LC coupé : on peut déclarer (référence `DEC-`), joindre des pièces, instruire, évaluer, valider, payer ; **payer revérifie la police** sur la dernière projection datée (âge inférieur ou égal à l'âge maximal) avant d'émettre ; sinon l'émission est bloquée « à relire » ; les envois attendent la reprise ; l'ouverture d'un dossier sur une police lue depuis plus de l'âge maximal (24 heures par défaut *(défaut H-159 : âge maximal de lecture pour l'ouverture, paramètre)*) exige la décision motivée de FR-187.
+- Le numéro officiel d'un dossier déclaré pendant la coupure arrive à la reprise ; l'alerte de FR-198 ne compte pas les jours de coupure déclarée *(défaut H-160 : horloge de l'alerte suspendue pendant une coupure déclarée)*.
 - La date de dernière lecture est celle de la dernière réponse **valide** du LC, pas celle de la dernière tentative.
 
 ---
@@ -3061,7 +3507,7 @@ Le LC fictif tient les assurés, les polices, les garanties, les produits, l'ét
 **Conséquences (testables) :**
 - Chaque objet de l'annexe C marqué « LC → Prospera » est produit par le LC fictif avec ses champs minimaux.
 - Chaque objet marqué « Prospera → LC » est accepté, refusé ou ignoré (doublon) par le LC fictif, avec un code de refus en clair.
-- Le jeu porte les polices et les garanties des **7 produits de la démo**, en nombre suffisant pour les 3 500 dossiers du portefeuille de démonstration (environ 25 000 contrats d'après la démo `[ASSUMPTION: ordre de grandeur de la démo]`), tous statuts de police représentés (en vigueur, suspendue, résiliée, expirée), dont des primes impayées et des polices en coassurance.
+- Le jeu porte les polices et les garanties des **7 produits de la démo**, en nombre suffisant pour les 3 500 dossiers du portefeuille de démonstration (environ 25 000 contrats d'après la démo *(défaut H-161 : ordre de grandeur de la démo)*), tous statuts de police représentés (en vigueur, suspendue, résiliée, expirée), dont des primes impayées et des polices en coassurance.
 - Les données sont fictives de bout en bout (noms, immatriculations, téléphones) ; un test vérifie qu'aucune ne provient d'une personne réelle.
 - Le LC fictif peut produire un jeu de sinistres existants avec leurs documents, pour tester la reprise (§6.8).
 
@@ -3073,7 +3519,7 @@ Le LC fictif reçoit les déclarations de Prospera et **renvoie un numéro de si
 - Une déclaration envoyée reçoit un numéro officiel au plus tard après le délai simulé ; Prospera le rattache au dossier et l'affiche partout (FR-198).
 - Le même `DEC-` présenté deux fois reçoit le même numéro : un doublon est reconnu, pas attribué deux fois.
 - Les numéros attribués sont sans trou ni doublon et suivent un format propre au LC fictif, différent de celui de Prospera (pour montrer que Prospera n'impose pas le sien).
-- Le LC fictif détecte un doublon probable (même police, même date de survenance, même immatriculation) et le signale dans sa réponse, sans le refuser `[ASSUMPTION: signal de doublon côté LC fictif, pour la démonstration du contrôle]`.
+- Le LC fictif détecte un doublon probable (même police, même date de survenance, même immatriculation) et le signale dans sa réponse, sans le refuser *(défaut H-162 : signal de doublon côté LC fictif, pour la démonstration du contrôle)*.
 
 #### FR-204 : Le LC fictif sait tomber en panne et refuser
 
@@ -3115,6 +3561,9 @@ Le `RESP`, le `DT` et le `DG` ont un tableau de bord qui montre : les **dossiers
 - Cliquer sur un nombre ouvre la liste des dossiers ; le nombre de la liste égale le nombre cliqué.
 - Les vues par volet (corporel, matériel, risques divers) et pour le pôle recours sont disponibles ; le `GEST` voit son volet, le `GREC` ses recours.
 - La vue de la direction regroupe : vue d'ensemble, exploitation, recours, technique et réglementaire.
+- L'onglet « **technique et réglementaire** » a des indicateurs fixés : la **charge après coassurance et réassurance** (FR-189), les **engagements restants** à décaisser (FR-207) et la **conformité aux délais CIMA** (part des délais légaux tenus, FR-213) ; il renvoie aux états techniques de FR-189 (triangle, boni et mali, note de synthèse, revue mensuelle).
+- L'**état hebdomadaire des déclarations** est généré au **jour et à l'heure paramétrés** (`etat_hebdo.jour_heure`), **visé par `RESP`**, remis au `DT` puis au `DG`, avec la trace du visa.
+- L'**état hebdomadaire des recours par débiteur** (FR-110) est généré ici, au même rythme.
 - Les chiffres illustratifs de la proposition (214 ouverts, 23 bloqués…) ne sont pas des cibles : la valeur affichée est celle des données.
 
 #### FR-207 : La charge, les pièces attendues, les règlements en attente, les délais qui expirent
@@ -3128,13 +3577,15 @@ Le tableau de bord montre aussi : la **charge et les montants par gestionnaire**
 - Les délais qui expirent regroupent les délais **légaux** du corporel (alertes réglementaires, non modifiables par la compagnie) et les délais **internes** ; chacun a son point de départ, son point d'arrêt et le jour restant (§5.14).
 - Les honoraires d'expert à viser (FR-182) et les experts surchargés (FR-183) figurent sur la même vue.
 - Chaque ligne indique l'âge de la donnée.
+- La vue **engagements à décaisser** donne, par bénéficiaire, le **validé moins le payé**, et les **honoraires à décaisser** ; elle a **deux colonnes séparées, « exigible » et « à confirmer », jamais sommées** : le total n'additionne jamais les deux colonnes (test).
+- **Fraîcheur** : la charge de chaque gestionnaire et les retards sont **recalculés à la lecture** ; les états de quittances et de chèques sont **continus** pour la file `CPT` et **quotidiens** pour l'export (le « J+1 » du deck devient « quotidien »).
 
 #### FR-208 : Le brief du matin et la veille (IA, usage n° 13)
 
 Chaque matin, l'IA commune prépare un **brief** : dossiers à risque, **délais qui expirent**, **anomalies de la nuit**, activité de la veille (traités, clôtures, déclarations, règlements), anomalie dominante, suggestion. En continu, une **veille** signale les dossiers qui méritent attention. **Entrée** : les dossiers, le journal et les délais du périmètre du lecteur. **Sortie** : le brief et des alertes, chacune avec sa suggestion et sa source. **Destinataire** : `DG`, `RESP` ; chaque `GEST` reçoit le sien sur son périmètre. **Garde-fou** : lecture seule ; périmètre du rôle ; chaque alerte renvoie à ses dossiers ; l'IA ne contacte personne et ne modifie rien.
 
 **Conséquences (testables) :**
-- Le brief est disponible à une heure paramétrée (07:00 par défaut `[ASSUMPTION: 07:00, paramètre]`) et se relit dans la journée.
+- Le brief est disponible à une heure paramétrée (07:00 par défaut *(défaut H-163 : 07:00, paramètre)*) et se relit dans la journée.
 - Les familles d'alertes sont : délais, provision, pièces, règlement, recours, fraude, conformité.
 - Règles de départ de la veille (valeurs de la démo, paramètres) : délai à moins de 2 jours sans action depuis au moins 5 jours (critique) ; provision inférieure de plus de 30 % à l'estimation de l'expert ; chèque non retiré depuis 14 jours ou plus ; mise en demeure sans réponse ; offre corporelle à présenter dans 45 jours ou moins avant son terme légal ; fraude bloquante non revue.
 - Chaque ligne du brief renvoie au dossier concerné ; un chiffre du brief égale celui du tableau de bord au même instant.
@@ -3169,6 +3620,9 @@ Le contrôle interne (`AUD`) dispose d'un **plan de contrôle** exécuté sur le
 - Le plan est organisé en familles : séparation, décaissement, traçabilité, dossier ; chaque test a sa population, sa tolérance, sa gravité (critique ou majeure) ; un écart est **qualifié** puis **justifié ou corrigé**, avec l'auteur.
 - `AUD` lit le journal de tout (FR-158) et lit les règlements ; `AUD` ne modifie aucun dossier.
 - Les seuils sont des paramètres (annexe D).
+- **Trou ou doublon** : un test cherche un **trou** ou un **doublon** dans la série des `DEC-` et dans les numéros officiels reçus du LC ; **tolérance zéro**, gravité **majeure**, responsable `AUD` ; les trous consignés avec motif (FR-36) sont exclus.
+- **Revue mensuelle** de **tous les dossiers vivants** (statut, provision, dernière action, échéance), **visée par `RESP`** avec trace (qui, quand) ; une alerte part si elle n'est pas faite à **M+5 jours** (`revue_mensuelle.delai`).
+- **Veille de 3 jours** avant le règlement d'un dossier sensible : le règlement d'un dossier du registre de surveillance est rappelé à `RESP` et `AUD` trois jours avant son échéance.
 
 #### FR-211 : Un dossier prêt pour un contrôle de la CRCA, sans reconstitution
 
@@ -3178,10 +3632,12 @@ La CRCA peut contrôler sur pièces et sur place, et exiger les documents et le 
 - À partir d'un numéro de sinistre ou d'un lot (exercice, branche, période), `AUD` ou `DT` obtient un **dossier de contrôle** en un seul export (document et tableur), avec l'horodatage et l'auteur de la demande.
 - Le dossier de contrôle contient : la fiche (FR-152), la liste des pièces avec leur version, leur empreinte et leur cote papier, les décisions avec auteur et motif, la délégation appliquée, les mouvements de provision, les règlements et leurs quittances, le journal (FR-158), le numéro d'archivage, les sorties d'archive.
 - Un contrôle de **complétude** s'exécute avant l'export : il liste ce qui manque (pièce attendue absente, décision sans motif, quittance non signée, empreinte en échec) pour que la compagnie le voie avant la CRCA.
-- Un lot de 100 dossiers est produit en moins de 30 minutes `[ASSUMPTION: cible de temps, paramètre]`.
+- Un lot de 100 dossiers est produit en moins de 30 minutes *(défaut H-164 : cible de temps, paramètre)*.
 - Le journal produit est celui du serveur : sans insertion ni suppression ultérieure ; le Code CIMA demande, pour la comptabilité informatisée, des états datés, l'impossibilité d'insertions ou suppressions ultérieures et un droit d'accès du contrôleur (art. 406 et 407, texte lu) ; **l'application de ces articles à un dossier de sinistre est à confirmer par le juriste (D21)**.
-- La CRCA n'a pas de compte dans Prospera : la compagnie lui remet l'export `[ASSUMPTION: pas de compte pour la CRCA]`.
+- La CRCA n'a pas de compte dans Prospera : la compagnie lui remet l'export *(défaut H-165 : pas de compte pour la CRCA)*.
 - Les chemises papier sorties pour un contrôle de la CRCA suivent FR-171.
+- Les **pièces médicales** du dossier de contrôle ne figurent que par leur **type** et leur **existence** pour les rôles hors FR-9 ; leur contenu n'est remis que par un rôle de FR-9, par dossier ouvert à la validation, journalisé ; un test par rôle le vérifie.
+- Un dossier « prêt pour la CRCA en **une journée** » est une intention *(défaut H-166 : non mesurée ; à mesurer à la première revue)* : ce n'est pas une cible de recette.
 
 #### FR-212 : Tout indicateur se recalcule depuis les données
 
@@ -3190,11 +3646,12 @@ Aucun chiffre de pilotage n'est une constante, un tirage ou une saisie. Chaque i
 **Conséquences (testables) :**
 - Modifier un dossier de test (montant, étape, date) change l'indicateur qui l'utilise, sans autre geste ; un test le vérifie pour chaque indicateur de FR-206, FR-207 et FR-213.
 - Le même indicateur affiche le même chiffre sur tous les écrans, au même instant (une seule source).
-- Chaque indicateur affiche l'heure du calcul ; l'actualisation est d'au plus 5 minutes `[ASSUMPTION: 5 minutes, paramètre]`.
+- Chaque indicateur affiche l'heure du calcul ; l'actualisation est d'au plus 5 minutes *(défaut H-167 : 5 minutes, paramètre)*.
 - Chaque indicateur est décomposable : un nombre mène à la liste des dossiers, un montant à la liste des lignes.
 - Les délais se calculent depuis les horodatages du journal ; une étape sans horodatage n'entre pas dans une moyenne et est comptée à part.
 - Les chiffres d'une simulation (FR-209) ne rentrent dans aucun indicateur.
 - Un indicateur dont la source est le LC affiche la date de dernière lecture (FR-201).
+- Chaque indicateur du §9 a une **fiche** qui porte : sa **requête de calcul**, sa **source de donnée** et son **propriétaire** (rôle) ; un indicateur **sans source** est supprimé (par exemple « appels traités pendant l'appel » : aucun appel n'est enregistré dans Prospera).
 
 #### FR-213 : Les indicateurs de délai et de qualité du circuit
 
@@ -3205,8 +3662,10 @@ Le pilotage fournit les indicateurs que le service attend, tous calculés depuis
 - Ancienneté du stock actif (aging), par tranche : 7 jours ou moins, 8 à 30, 31 à 90, plus de 90.
 - Taux de numérisation du fonds, temps moyen entre réception d'une pièce et contrôle (FR-165), pièces à rattacher (FR-166).
 - Écarts de règlement ouverts, chèques à remettre et ancienneté, règlements en attente de valideur.
-- Part d'accusés de réception envoyés dans le délai et d'offres envoyées dans le délai interne (§5.7) : ce sont les défauts relevés par l'audit de la procédure d'indemnisation d'une compagnie du même groupe au Sénégal (mémoire de 2014) ; ils sont mesurés ici pour être traités `[ASSUMPTION: transposition à confirmer pour le Togo]`.
+- Part d'accusés de réception envoyés dans le délai et d'offres envoyées dans le délai interne (§5.7) : ce sont les défauts relevés par l'audit de la procédure d'indemnisation de la compagnie étudiée par le mémoire de 2014 (zone CIMA) ; ils sont mesurés ici pour être traités *(défaut H-168 : transposition à confirmer pour le Togo)*.
 - Chaque délai cible est un paramètre par volet ; la valeur de la démo (SLA par volet) est reprise comme défaut interne (§5.14).
+- **Compteurs du mémoire** : délai déclaration à enregistrement, ouverture à validation, rapport à offre, offre à paiement ; une **alerte** part sur l'**écart anormal entre le rapport et la quittance** (délai rapport-quittance au-delà de la norme du volet).
+- Le **doublon de règlement** se définit comme dans FR-224 : même bénéficiaire et même sinistre (date, police, immatriculation), **jamais le montant** ; l'indicateur « règlements payés deux fois » compte ces doublons.
 - Les indicateurs s'exportent en tableur.
 
 ---
@@ -3219,10 +3678,12 @@ La source de la reprise n'est pas connue : le PRD ne spécule pas dessus (récit
 
 #### FR-214 : La reprise lit une API ou un fichier Excel ou JSON, et traduit sans trahir
 
+*(action A-10 au §12.2)*
+
 La reprise lit les données de la compagnie par **API**, ou par **fichier Excel ou JSON** déposé chez la compagnie ; elle les traduit vers le format commun de Prospera. Elle reprend : les **métadonnées** (assuré, police, sinistre, date, type de pièce), les **fichiers** des pièces, et, pour chaque objet, sa trace d'origine. Pour les contrats, la reprise **amorce** la projection du LC (§6.4).
 
 **Conséquences (testables) :**
-- Au premier jour, **les deux voies** existent (décision du PO) : les **fichiers** (Excel, JSON ; CSV accepté) sans condition, et l'**API** du LC, dont l'adaptateur est écrit dès que le LC est connu (janvier) et livré avant la mise en service. Si le LC n'expose pas d'API, les fichiers suffisent et rien ne bloque `[ASSUMPTION: le PRD Reprise (FR-1, spine AD-23) ne requiert que les fichiers en février ; un amendement est demandé pour l'adaptateur API de l'assurance (§12.2)]`.
+- Au premier jour, **les deux voies** existent (décision du PO) : les **fichiers** (Excel, JSON ; CSV accepté) sans condition, et l'**API** du LC, dont l'adaptateur est écrit dès que le LC est connu (janvier) et livré avant la mise en service. Si le LC n'expose pas d'API, les fichiers suffisent et rien ne bloque *(défaut H-169 : le PRD Reprise (FR-1, spine AD-23) ne requiert que les fichiers en février ; un amendement est demandé pour l'adaptateur API de l'assurance (§12.2))*.
 - Chaque objet repris garde sa **source**, son **lot**, sa **ligne ou son identifiant d'origine** ; depuis un dossier repris, on retrouve la ligne de la source dont il vient (PRD Reprise FR-2).
 - Chaque état de la source est **traduit** vers un état valide du circuit ; un objet qui ne satisfait pas les conditions de l'état traduit est **requalifié** (un sinistre « ouvert » sans pièces devient « pièces attendues ») et le rapport le liste (PRD Reprise FR-5).
 - Les **dates d'origine** sont reprises : déclaration, survenance, expertise, décision, règlement ; un délai calculé sur un dossier repris est identique à celui de la source (PRD Reprise FR-6) ; un dossier est jugé selon le référentiel en vigueur à sa **date de survenance** (D7).
@@ -3242,10 +3703,12 @@ L'ordre de reprise est : **les dossiers en cours d'abord**, l'**historique ensui
 - La reprise **fournit** à la GED les clés de rattachement (numéro de police, numéro de sinistre) ; la GED les consomme ; un document dont la clé est illisible ou inconnue va dans la file « à rattacher » (FR-166) et ne bloque pas la mise en service.
 - Le papier historique n'est pas numérisé pour la reprise : sa **cote** (local, travée, tablette, boîte, rang) et sa chemise sont reprises ; il se numérise s'il est rouvert ou consulté (FR-172).
 - L'historique repris porte un marqueur « historique » : il ne se modifie pas depuis l'application ; il se consulte, se cherche et s'archive.
-- Un historique de moins de 3 ans est signalé au rapport (« l'IA démarrera avec moins de recul ») sans bloquer ; **aucune borne haute** ne limite l'historique repris (PRD Reprise FR-9 ; objectif de 3 à 5 ans pour l'IA `[ASSUMPTION: 3 à 5 ans de la proposition v2]`).
+- Un historique de moins de 3 ans est signalé au rapport (« l'IA démarrera avec moins de recul ») sans bloquer ; **aucune borne haute** ne limite l'historique repris (PRD Reprise FR-9 ; objectif de 3 à 5 ans pour l'IA *(défaut H-170 : 3 à 5 ans de la proposition v2)*).
 - Les nouvelles pièces **postérieures** à la reprise sont scannées ou téléversées au guichet ou par `NUM`, avec le contrôle de FR-165.
 
 #### FR-216 : Le rapport de reprise, validé avant que rien n'entre
+
+*(action A-10 au §12.2)*
 
 Pour chaque lot, un **rapport de reprise** dit ce qui est **récupéré**, ce qui est **rejeté avec sa raison**, et les **écarts**. Rien n'entre dans Prospera tant que la liste finale n'a pas été validée par la compagnie.
 
@@ -3260,17 +3723,20 @@ Pour chaque lot, un **rapport de reprise** dit ce qui est **récupéré**, ce qu
 
 #### FR-217 : La resynchronisation nocturne, et le dossier qui change des deux côtés
 
-Pendant la période où les deux systèmes vivent ensemble, la reprise **resynchronise** chaque nuit (paramètre) ce que la source a fait depuis la dernière fois. La resynchronisation est **idempotente**. Un dossier est **suivi** depuis la source tant que personne ne l'a pris en main dans Prospera ; il devient **tenu par Prospera** à sa première action de dossier.
+Pendant la période où les deux systèmes vivent ensemble, la reprise **resynchronise** chaque nuit (paramètre) ce que la source a fait depuis la dernière fois. La resynchronisation est **idempotente**. Un dossier est **suivi** depuis la source tant que personne ne l'a pris en main dans Prospera ; il devient **tenu par Prospera** à sa **prise en main**, définie par une **liste fermée** : l'**affectation** du dossier à un gestionnaire, ou sa **première transition** de statut. Une consultation, une note ou un dépôt de pièce ne déclenchent **pas** la prise en main.
 
 **Conséquences (testables) :**
 - Rejouer la même resynchronisation ne crée ni doublon ni changement (clé d'origine et empreinte de ligne) ; une ligne supprimée côté source est marquée « retirée de la source », jamais supprimée de Prospera.
 - Un dossier **suivi** est mis à jour chaque nuit depuis la source, sans écraser aucun champ saisi dans Prospera ; l'écran dit « suivi depuis le système de la compagnie ».
-- À la **première action** d'un agent sur un dossier dans Prospera (prise en main), le dossier est **tenu par Prospera** pour tous les champs du dossier : instruction, pièces, expertise, évaluation, provision, décision, règlement, journal ; les contrats et le numéro de sinistre restent ceux du LC `[ASSUMPTION: bascule par dossier à la première action ; à confirmer à la séance d'immersion]`.
+- À la **prise en main** (affectation ou première transition, jamais une simple consultation, note ou dépôt de pièce), le dossier est **tenu par Prospera** pour tous les champs du dossier : instruction, pièces, expertise, évaluation, provision, décision, règlement, journal ; les contrats et le numéro de sinistre restent ceux du LC *(défaut H-171 : bascule par dossier à la première action ; à confirmer à la séance d'immersion)*.
 - Si la source change, après la prise en main, un champ du dossier tenu par Prospera, le changement **n'est pas appliqué** : il va dans la file des écarts (FR-200) avec les deux valeurs ; le `GEST` le reporte à la main avec motif, ou le rejette avec motif.
 - Si la source change un **contrat** (police, garantie, prime) d'un dossier tenu par Prospera, le LC l'emporte : la projection est mise à jour, le gestionnaire est averti, et la recevabilité est ré-affichée avec la nouvelle donnée ; la décision déjà prise n'est pas modifiée toute seule.
 - Un dossier modifié des deux côtés **sur le même champ** garde la valeur de Prospera ; l'écart montre les deux valeurs et sa résolution (qui, quand, motif) est tracée.
-- La resynchronisation nocturne produit un **rapport d'écarts de la période** ; la date de fin du parallèle est fixée par la compagnie à la mise en service `[ASSUMPTION: date de fin fixée à la mise en service ; la nuit continue tant qu'aucune date n'est posée]`.
-- L'heure de la resynchronisation est un paramètre (avant 6 h par défaut `[ASSUMPTION]`) ; une nuit non couverte est signalée « non couverte » dans le rapport.
+- Un **règlement**, une **annulation** ou une **clôture** venant du LC sur un dossier tenu par Prospera est un **fait reçu** : il **bloque les ordres** du dossier et s'affiche en **alerte rouge** (annexe C, C-15 dans le sens inverse).
+- Un dossier modifié par le LC **après la prise en main** passe en **« litige de source »** : **aucun paiement** tant que l'écart n'est pas résolu (qui, quand, motif).
+- Les « **montants payés** » lus du LC (annexe C, C-9) ne remplacent pas le payé de Prospera : **le payé fait foi dans Prospera** ; la mise à jour nocturne n'écrase **jamais** une provision revue à la main.
+- La resynchronisation nocturne produit un **rapport d'écarts de la période** ; la date de fin du parallèle est fixée par la compagnie à la mise en service *(défaut H-172 : date de fin fixée à la mise en service ; la nuit continue tant qu'aucune date n'est posée)*.
+- L'heure de la resynchronisation est un paramètre (avant 6 h par défaut *(défaut H-173)*) ; une nuit non couverte est signalée « non couverte » dans le rapport.
 
 #### FR-218 : Le feu vert de la reprise, module par module
 
@@ -3278,16 +3744,17 @@ Le **feu vert** de la reprise est donné **par module cible**. Tant qu'un écart
 
 **Conséquences (testables) :**
 - Le feu vert de `sinistres`, de `ged` et de `assurance` est rattaché aux **lots rejoués dans l'espace réel**, jamais à un lot de l'essai.
-- Un écart ouvert, c'est : un objet vivant resté en erreur, un objet en trop, ou une valeur de contrôle différente ; les valeurs de contrôle de départ sont : nombre de sinistres ouverts, somme des provisions des sinistres ouverts, nombre de polices en vigueur, nombre de pièces rattachées `[ASSUMPTION: valeurs de contrôle de départ, à fixer avec la compagnie]`.
+- Un écart ouvert, c'est : un objet vivant resté en erreur, un objet en trop, ou une valeur de contrôle différente ; les valeurs de contrôle de départ sont : nombre de sinistres ouverts, somme des provisions des sinistres ouverts, nombre de polices en vigueur, nombre de pièces rattachées *(défaut H-174 : valeurs de contrôle de départ, à fixer avec la compagnie)*.
 - Les écarts de l'**historique** figurent au rapport et ne bloquent jamais le feu vert.
 - Un feu vert se **retire** avant la mise en service par une action journalisée d'un détenteur du droit de valider, avec un motif ; le module repasse à « attendu ».
 - Un lot se joue d'abord dans l'**espace d'essai** (répétition générale) ; le jour de la mise en service, le dossier d'installation (adaptateurs réglés, tables de correspondance, règles de traduction) est **rejoué** sur une source **fraîche**, et le lot est rejoué sans créer de doublon.
 - La ligne de chaque module au bilan de mise en service ne passe au vert qu'à son feu vert (PRD moteur d'installation, §7).
 - Le LC fictif sert à répéter la reprise dans l'espace d'essai (FR-202).
+- Le **feu vert module par module** s'étend au **circuit `sinistres`**, comme à la reprise : une **liste de contrôle de mise en service** (entrées de la compagnie livrées, tests de recette passés, formation de FR-240 faite) précède le feu vert ; le feu vert est donné **par le PO et par la compagnie**, **jamais par défaut** ; **aucun module n'est retiré** du périmètre.
 
 #### FR-219 : Ce que la compagnie doit fournir, et le premier risque
 
-La reprise ne peut commencer que si la compagnie fournit certains éléments. **Si la reprise est en retard, incomplète ou mal rattachée, la promesse « retrouver un dossier en moins de 5 secondes » et « répondre pendant l'appel » ne tient pas le premier jour**, quelle que soit la qualité du reste : c'est le premier risque du projet `[ASSUMPTION: premier risque désigné par l'équipe de rédaction ; à reporter au §12 et à confirmer à la séance d'immersion]`.
+La reprise ne peut commencer que si la compagnie fournit certains éléments. **Si la reprise est en retard, incomplète ou mal rattachée, la promesse « retrouver un dossier en moins de 5 secondes » et « répondre pendant l'appel » ne tient pas le premier jour**, quelle que soit la qualité du reste : c'est le premier risque du projet *(défaut H-175 : premier risque désigné par l'équipe de rédaction ; à reporter au §12 et à confirmer à la séance d'immersion)*.
 
 La compagnie fournit, dans l'ordre du PO :
 1. le **manuel de procédures sinistres** ;
@@ -3302,17 +3769,27 @@ La compagnie fournit, dans l'ordre du PO :
 Pour la reprise elle-même : l'**export** des assurés, des polices et des sinistres ouverts (Excel, CSV ou JSON), les **documents** avec leurs **métadonnées**, la **règle de numérotation actuelle** des sinistres et des archives, un **interlocuteur technique** (DSI ou éditeur), et des **accès de test** si une API existe.
 
 **Conséquences (testables) :**
-- Le bilan de préparation de la reprise liste ces éléments avec leur état (reçu, à recevoir, sans objet) et leur date ; le `DG` et `ADMIN` le lisent `[ASSUMPTION: le bilan s'appuie sur le bilan du moteur d'installation ; à confirmer avec le PRD §7]`.
-- Un élément absent à la date fixée à la séance d'immersion est signalé comme **décalant le premier jour** ; le PRD ne fixe pas de remplacement : sans les délégations, les défauts de D8 s'appliquent et sont marqués « non confirmés » ; sans les barèmes, la provision d'ouverture et le décompte ne sont pas utilisables en production.
+- Le bilan de préparation de la reprise liste ces éléments avec leur état (reçu, à recevoir, sans objet) et leur date ; le `DG` et `ADMIN` le lisent *(défaut H-176 : le bilan s'appuie sur le bilan du moteur d'installation ; à confirmer avec le PRD §7)*.
+- Un élément absent à la date fixée à la séance d'immersion est signalé comme **décalant le premier jour** ; le PRD ne fixe pas de remplacement. Chaque entrée a une **date limite de livraison** et une **conséquence** précises (tableau ci-dessous) ; aucune fonction ne part en « bientôt » à cause d'une entrée manquante : le risque est **tracé**, pas un retrait de périmètre (FR-20).
+- Sans les barèmes, le corporel fonctionne en **mode dégradé** (FR-24) : saisie manuelle motivée du montant arrêté, échéances légales actives, écart tracé *(action A-12 au §12.2)*.
+
+| Entrée de la compagnie | Date limite de livraison | Conséquence si elle manque |
+|---|---|---|
+| Barèmes saisis (grilles de vétusté, barème corporel, grille de provision d'ouverture) | *(défaut H-177 : date fixée à la séance d'immersion ; sinon 4 semaines avant la mise en service)* | Le corporel fonctionne en **mode dégradé** (FR-24) ; la provision d'ouverture est saisie à la main avec motif. |
+| Délégations réelles (matrice, seuils) | idem | Les défauts de D8 s'appliquent et sont marqués « non confirmés ». |
+| Liste des experts agréés | idem | La désignation d'un cabinet est impossible (FR-178) ; le panel interne de la démonstration n'est jamais utilisé en réel. |
+| Documentation du LC (API, formats) | idem | L'échange passe par les fichiers (FR-197) ; le connecteur du LC réel est livré après sa connaissance. |
+| Volumes (dossiers par an, stock en cours, archives) | idem | Le dimensionnement de D20 reste une hypothèse balisée (FR-23). |
+
 - Sans la liste des experts agréés, la désignation d'un cabinet est impossible (FR-178) ; le panel interne de la démonstration n'est jamais utilisé en réel.
 - Chaque élément reçu est daté et rattaché au dossier d'installation ; il ne contient aucune donnée personnelle sans nécessité.
-- Un test de la **répétition générale** (FR-218) est exécuté sur les éléments réellement reçus ; son résultat est lu au comité de pilotage `[ASSUMPTION: comité de pilotage, proposé par la proposition v2]`.
+- Un test de la **répétition générale** (FR-218) est exécuté sur les éléments réellement reçus ; son résultat est lu au comité de pilotage *(défaut H-178 : comité de pilotage, proposé par la proposition v2)*.
 
 ---
 
 ## 7. Partie 4 — Les modules partagés et cadrés
 
-**Règles de lecture.** Ces modules ont déjà leur PRD, leur spine et leur manifeste, ou sont cadrés par le PRD distributeur et le PRD microfinance ; ce PRD n'en réécrit rien. Chaque fiche dit ce qui s'applique tel quel, puis les **écarts de l'assurance**, chacun devenu une exigence. Un écart est **à porter au PRD du module** : son propriétaire l'amende ou le refuse ; tant que ce n'est pas fait, l'exigence tient ici et se code dans le module qui la porte, jamais à sa place. Les identifiants `FR-Pnn`, `FR-Nnn`, `FR-Rnn` renvoient au PRD du module ; `PRD-D FR-n` au PRD distributeur ; `PRD moteur FR-n` au PRD du moteur d'installation ; `Reprise FR-n` et `Connecteurs FR-n` aux PRD Reprise et Connecteurs.
+**Règles de lecture.** Ces modules ont déjà leur PRD, leur spine et leur manifeste, ou sont cadrés par le PRD distributeur et le PRD microfinance ; ce PRD n'en réécrit rien. Chaque fiche dit ce qui s'applique tel quel, puis les **écarts de l'assurance**, chacun devenu une exigence. Un écart est **à porter au PRD du module** : son propriétaire l'amende ou le refuse ; tant que ce n'est pas fait, l'exigence tient ici et se code dans le module qui la porte, jamais à sa place. Les identifiants `FR-Pnn`, `FR-Nnn`, `FR-Rnn` renvoient au PRD du module ; `PRD-D FR-n` au PRD distributeur ; `PRD moteur FR-n` au PRD du moteur d'installation ; `Reprise FR-n` et `Connecteurs FR-n` aux PRD Reprise et Connecteurs. Un identifiant `FR-n` sans préfixe désigne une exigence de ce PRD.
 
 | Module | Code | Réf. M | PRD | Manifeste |
 |---|---|---|---|---|
@@ -3330,22 +3807,24 @@ Pour la reprise elle-même : l'**export** des assurés, des polices et des sinis
 
 #### FR-220 : Paiement : `sinistres` ordonne, `paiement` exécute
 
-**Ce qui s'applique tel quel.** Deux fournisseurs, PI-SPI et FedaPay, derrière un même contrat, routés par pays, devise et méthode (FR-P08, FR-P09, FR-P12 ; PRD-D FR-205) ; le paiement sortant : un ordre est préparé, validé par une **autre** personne, part une fois, depuis le compte de l'organisation sous ses identifiants (FR-P65 à FR-P69, NFR-1d) ; l'idempotence et le même `txId` rejoué (FR-P19 à FR-P22) ; l'essai : paiements de test seulement (PRD-D FR-24). « Mobile Money » s'affiche « paiement mobile » ou le mode précis (PRD-D FR-206).
+**Ce qui s'applique tel quel.** Deux fournisseurs, PI-SPI et FedaPay, derrière un même contrat, routés par pays, devise et méthode (FR-P08, FR-P09, FR-P12 ; PRD-D FR-205) ; le paiement sortant : un ordre est préparé, validé par une **autre** personne (un second `CPT`, et au-dessus du seuil `reglement.second_controle_seuil`, le `DG` : FR-7), part une fois, depuis le compte de l'organisation sous ses identifiants (FR-P65 à FR-P69, NFR-1d) ; l'idempotence et le même `txId` rejoué (FR-P19 à FR-P22) ; l'essai : paiements de test seulement (PRD-D FR-24). « Mobile Money » s'affiche « paiement mobile » ou le mode précis (PRD-D FR-206).
 
 **Écarts de l'assurance, à porter au PRD `paiement`.** Réalise UJ-3 et UJ-4.
 
 **Conséquences (testables) :**
-- **`sinistres` émet l'ordre de règlement** après décision et accord enregistré ; **`paiement` l'exécute** (virement, PI-SPI, paiement mobile) ou **l'enregistre** (chèque). Aucun ordre ne part sans accord enregistré de l'assuré (§5.8, FR-90).
-- Un dossier peut avoir **plusieurs règlements** (acompte, offre provisionnelle, plusieurs bénéficiaires, honoraires d'expert). Chaque règlement a **son état** (`A_PAYER`, `EN_COURS`, `PARTIEL`, `PAYE`, `ECHEC`) et **sa quittance** (`PRETE`, `EDITEE`, `SIGNEE`, `REMISE`, `ENCAISSEE`).
+- **`sinistres` émet l'ordre de règlement** après décision et accord enregistré ; **`paiement` l'exécute** (virement, PI-SPI, paiement mobile) ou **l'enregistre** (chèque). Aucun ordre ne part sans accord enregistré de l'assuré (§5.8, FR-90) et, **au corporel VTM, aucun règlement n'est émis avant la fin du délai de dénonciation de 15 jours** (art. 235) : la condition `DELAI_DENONCIATION_ECOULE` garde les transitions d'émission (FR-14).
+- Un dossier peut avoir **plusieurs règlements** (acompte, offre provisionnelle, plusieurs bénéficiaires, honoraires d'expert). Chaque règlement a **son état** (`A_PAYER`, `EN_COURS`, `INCONNU`, `PARTIEL`, `PAYE`, `ECHEC`) et **sa quittance** (`PRETE`, `EDITEE`, `SIGNEE`, `REMISE`, `ENCAISSEE`).
 - Le dossier passe à `REGLE` quand le **reste à payer** de l'indemnité validée est **zéro** (§3).
-- Un ordre ne part que par **un seul** moyen : un test envoie deux fois le même ordre et vérifie que l'argent ne part qu'une fois. Un ordre dont l'issue est **inconnue** passe à l'état `INCONNU` ; il est **rapproché du relevé du fournisseur avant toute réémission**, avec sa clé d'idempotence d'origine (un ordre déjà parti n'est jamais réémis par erreur).
+- Un ordre ne part que par **un seul** moyen. Chaque règlement porte une **clé d'idempotence** unique, transmise à `paiement` et **gardée à chaque nouvelle tentative** : un test envoie deux fois le même ordre et vérifie que l'argent ne part qu'une fois.
+- Un règlement dont l'issue n'est pas confirmée par `paiement` passe à l'état `INCONNU`. Il **ne se relance pas et ne s'annule pas** tant que le rapprochement ne l'a pas tranché (`PAYE` ou `ECHEC` confirmé), et il est **rapproché du relevé du fournisseur avant toute réémission**.
+- `ECHEC` n'est posé que sur **refus explicite** du fournisseur ; il ne se relance qu'avec la **même clé**, après confirmation de `paiement`. Un règlement `EN_COURS` ou `INCONNU` se résout d'abord : il ne s'annule pas.
 - Le droit de **décider** d'un règlement et le droit de **l'exécuter** sont **distincts** : le comptable n'a aucun droit de décision (FR-7).
-- Les **honoraires d'expert** sont un règlement comme un autre : visés par RESP ou CPT, jamais pour un expert interne (aucun honoraire à engager).
+- Les **honoraires d'expert** sont un règlement comme un autre : visés par `RESP` (jamais par `CPT`, qui émet seulement), et jamais pour un expert interne (aucun honoraire à engager).
 - En espace d'essai, aucun ordre réel ne part ; les paiements sont marqués « test » (PRD-D FR-24).
 
 #### FR-221 : Le chèque est enregistré, pas exécuté
 
-Le **chèque** est le moyen de règlement du premier jour dans la proposition v2 (« de la déclaration au chèque »). **CPT saisit** la banque, le numéro et le montant ; sans numéro, l'émission est refusée. Prospera **imprime la lettre-chèque** sur un gabarit si la compagnie l'utilise ; sinon le chèque est rempli à la main et son **numéro saisi** `[ASSUMPTION: la compagnie a ou non un gabarit bancaire d'impression ; à confirmer]`. `CHEQUE_A_REMETTRE` ne vaut que pour le chèque. La **remise** se fait au guichet contre la **quittance signée** et l'**identité du retirant** (nom et numéro de pièce d'identité), tous deux obligatoires. Réalise UJ-3.
+Le **chèque** est le moyen de règlement du premier jour dans la proposition v2 (« de la déclaration au chèque »). **CPT saisit** la banque, le numéro et le montant ; sans numéro, l'émission est refusée. Prospera **imprime la lettre-chèque** sur un gabarit si la compagnie l'utilise ; sinon le chèque est rempli à la main et son **numéro saisi** *(défaut H-179 : la compagnie a ou non un gabarit bancaire d'impression ; à confirmer)*. **Au corporel, le gabarit de lettre-chèque est imposé.** Pour un chèque rempli à la main, `ACC` saisit à la remise le **nom et le montant lus sur le chèque** ; le serveur les compare à l'ordre ; une **copie du chèque (photo)** est obligatoire au dossier. `CHEQUE_A_REMETTRE` ne vaut que pour le chèque. La **remise** se fait au guichet contre la **quittance signée** et l'**identité du retirant** (nom et numéro de pièce d'identité), tous deux obligatoires. Réalise UJ-3.
 
 **Conséquences (testables) :**
 - Un test tente d'émettre sans numéro de chèque : refus « Indiquez le numéro du chèque émis ». Un test tente la remise sans identité ou sans numéro de pièce d'identité : refus, avec le champ nommé.
@@ -3354,15 +3833,18 @@ Le **chèque** est le moyen de règlement du premier jour dans la proposition v2
 - Un chèque non retiré **depuis plus de 7 jours** est relancé (liste d'appels du matin) ; **depuis plus de 30 jours**, il est signalé comme exposition ; une circulation de chèque de plus de 21 jours est signalée (valeurs de la démo, annexe D ; calibrées selon FR-5).
 - L'état **mensuel** des chèques émis, remis et en attente est produit pour la comptabilité, avec détection des écarts **avant** clôture (FR-224).
 - Le **numéro** de chèque et sa **banque** ne sont jamais posés d'office : un test vérifie qu'ils viennent d'une saisie de CPT.
+- Un chèque rempli à la main dont le nom ou le montant lu à la remise diffère de l'ordre est refusé (`CHEQUE_NON_CONFORME_A_L_ORDRE`) ; une remise sans photo du chèque est refusée ; au corporel, un chèque hors gabarit est refusé.
+- Un **chèque annulé** exige l'**opposition bancaire enregistrée** (référence, date) ou la restitution physique du chèque avant tout chèque de remplacement : le chèque passe à l'état `CHEQUE_EN_OPPOSITION` ; sans cette opposition, l'émission du chèque de remplacement est refusée (`OPPOSITION_NON_ENREGISTREE`).
 
 #### FR-222 : Virement bancaire et PI-SPI
 
-Le **virement bancaire** et le règlement par **PI-SPI** sont exécutés par `paiement`. L'ordre est préparé par CPT après la décision, validé par **une autre** personne, et part une seule fois. `ORDRE_EMIS` passe à `REGLE` à la **confirmation de `paiement`** ; la **quittance est signée avant**, au guichet ou par acceptation électronique avec code à usage unique `[ASSUMPTION: l'acceptation électronique n'est offerte qu'après validation juridique, FR-24 ; sinon la quittance se signe au guichet]`. Les **banques** sont jointes par PI-SPI : le bénéficiaire d'un virement vers une autre banque est une adresse du schéma ; un virement vers un compte que le schéma ne joint pas est préparé par `paiement` et **exécuté par la comptabilité de la compagnie** auprès de sa banque, sa confirmation étant saisie `[ASSUMPTION: la compagnie n'a pas de cœur bancaire ; à revérifier à l'adhésion à PI-SPI]`. Réalise UJ-3.
+Le **virement bancaire** et le règlement par **PI-SPI** sont exécutés par `paiement`. L'ordre est préparé par CPT après la décision, validé par **une autre** personne (un second `CPT`, distinct de celui qui prépare, et au-dessus du seuil `reglement.second_controle_seuil` le `DG`, FR-7), et part une seule fois. `ORDRE_EMIS` passe à `REGLE` à la **confirmation de `paiement`** ; la **quittance est signée avant**, au guichet ou par acceptation électronique avec code à usage unique *(point juridique J-24 : l'acceptation électronique n'est offerte qu'après validation juridique, FR-24 ; sinon la quittance se signe au guichet)*. Les **banques** sont jointes par PI-SPI : le bénéficiaire d'un virement vers une autre banque est une adresse du schéma ; un virement vers un compte que le schéma ne joint pas est préparé par `paiement` et **exécuté par la comptabilité de la compagnie** auprès de sa banque, sa confirmation étant saisie *(défaut H-180 : la compagnie n'a pas de cœur bancaire ; à revérifier à l'adhésion à PI-SPI)*. Réalise UJ-3.
 
 **Conséquences (testables) :**
 - Une **modification des coordonnées bancaires** du bénéficiaire dans les 5 jours qui précèdent un paiement est une **alerte** au responsable et bloque l'ordre jusqu'à sa vérification (valeur de la démo, annexe D) ; celui qui a modifié les coordonnées n'émet pas l'ordre (FR-7).
 - Un virement suit le **délai de coupure** de la banque (paramètre).
-- Un virement n'est jamais payé deux fois : le contrôle de doublon porte sur le bénéficiaire, le montant et le dossier, sur 30 jours (valeur de la démo, annexe D).
+- La **confirmation manuelle** d'un virement hors PI-SPI exige un **justificatif bancaire joint** et un second `CPT` ; elle ne peut pas être faite par celui qui a lancé le virement.
+- Un virement n'est jamais payé deux fois : le contrôle de doublon porte sur le **bénéficiaire et le sinistre** (date, police, immatriculation), non sur le montant, sur 30 jours (valeur de la démo, annexe D ; définition de FR-224).
 - Le statut juridique d'une initiation de paiement par une compagnie d'assurance est **à faire confirmer par un juriste** (FR-24).
 
 #### FR-223 : Mobile Money sortant : T-Money et Flooz
@@ -3371,32 +3853,47 @@ Les règlements par **Mobile Money** (T-Money, Flooz ; opérateurs paramétrable
 
 **Conséquences (testables) :**
 - **Février.** Tant qu'un opérateur n'a pas d'adaptateur sortant, son canal est **« bientôt »** pour ce pays, le dossier propose un autre moyen (chèque, virement), et **rien n'est simulé** (FR-22). Dans l'essai, un paiement mobile est **de test**, marqué « test » (PRD-D FR-24).
-- Le Mobile Money est un moyen à **vérification renforcée** : le numéro et l'identité du porteur sont saisis et rapprochés du bénéficiaire du dossier `[ASSUMPTION: le Règlement CIMA sur la LBC/FT ne cite pas le Mobile Money ; traitement par analogie aux moyens à vérification minutieuse, à valider par le juriste]`.
+- Le Mobile Money est un moyen à **vérification renforcée** : le numéro et l'identité du porteur sont saisis et rapprochés du bénéficiaire du dossier *(point juridique J-25 : le Règlement CIMA sur la LBC/FT ne cite pas le Mobile Money ; traitement par analogie aux moyens à vérification minutieuse, à valider par le juriste)*.
 - Un règlement Mobile Money au corporel est libellé au nom de la victime ou des ayants droit (art. 232) ; un numéro dont le porteur n'est pas le bénéficiaire est bloqué.
 - Le statut juridique du règlement par Mobile Money par une compagnie d'assurance est **à faire confirmer par un juriste** (FR-24).
 
 #### FR-224 : Rapprochement des règlements
 
-Le **rapprochement** des chèques, des virements et des paiements mobiles se fait dans `paiement`, par CPT, **pas par la comptabilité officielle** (qui est hors de Prospera, FR-2). Les paiements **non rapprochés** forment une file ; un écart de rapprochement ancien de **60 jours** est une alerte (valeur de la démo, annexe D). Le rapprochement fournit l'**état mensuel consolidé** (chèques émis, remis, en attente ; paiements mobiles ; détection des écarts avant clôture) et son export au format de la comptabilité de la compagnie. Réalise UJ-7.
+Le **rapprochement** des chèques, des virements et des paiements mobiles se fait dans `paiement`, par CPT, **pas par la comptabilité officielle** (qui est hors de Prospera, FR-2). Les paiements **non rapprochés** forment une file ; un écart de rapprochement ancien de **60 jours** est une alerte (valeur de la démo, annexe D). Le rapprochement fournit l'**état mensuel consolidé** (chèques émis, remis, en attente ; paiements mobiles ; détection des écarts avant clôture) et son export au format de la comptabilité de la compagnie. Une **période comptable ne se clôt pas** tant qu'il reste un règlement non rapproché, une remise sans accusé signé ou un chèque émis non retiré au-delà de 7 jours. Les règlements de nature `HONORAIRES` se rapprochent comme les autres. Le **doublon de règlement** a une **définition unique** (la même que FR-100) : même bénéficiaire et même **sinistre** (date, police, immatriculation), **non le montant**. Réalise UJ-7.
 
 **Conséquences (testables) :**
 - Chaque règlement émis finit **rapproché ou en écart** : un test émet un lot de règlements, en rapproche une partie et vérifie que le reste est dans la file, avec son âge.
 - Un écart de plus de 60 jours lève une alerte à CPT et à RESP (§6.7).
-- Le **doublon** de règlement (même bénéficiaire, même montant, même dossier) sur 30 jours est détecté avant émission ; **une concentration d'émission** sur une seule personne au-delà d'une part du volume (défaut : 60 %, valeur de la démo) est signalée à AUD.
+- Le **doublon** de règlement (même bénéficiaire et même sinistre, non le montant) sur 30 jours est détecté avant émission ; **une concentration d'émission** sur une seule personne au-delà d'une part du volume (défaut : 60 %, valeur de la démo) est signalée à AUD.
 - Celui qui rapproche n'est pas celui qui a émis le règlement (FR-7).
+- La clôture d'une période comptable est refusée s'il reste un règlement non rapproché, une remise sans accusé signé ou un chèque émis non retiré depuis plus de 7 jours ; un règlement `HONORAIRES` non rapproché bloque la clôture comme les autres.
+- Un contrôle **mensuel** recherche les numéros de chèque annulés non rapprochés ; chaque écart est une alerte à `CPT`, `RESP` et `AUD`.
 - L'état mensuel et l'export sont produits sans ressaisie (FR-2) ; leur format suit le contrat d'échange (annexe C).
 
 #### FR-225 : Plafond d'espèces et LBC/FT
 
-Un règlement en **espèces** est plafonné à **500 000 FCFA** (paramètre) ; au-delà, le règlement passe par un moyen traçable. La **lutte contre le blanchiment et le financement du terrorisme** s'applique aux règlements de sinistres. Le Règlement CIMA n° 0004/CIMA/PCMA/PCE/SG/08, lu et sûr, demande que le système permette de suivre les **règlements de sinistres** par date, montant, origine, destination et cumul par client, de recenser les clients qui dépassent le minimum cumulé fixé par la réglementation, et de **détecter les opérations suspectes** (art. 4.5) ; il impose une **vérification minutieuse de l'identité** pour les espèces, les virements et les chèques (art. 11) et la **conservation dix ans au moins** de l'identité, de la forme du versement ou du retrait, des dates et montants, de l'origine et de la destination des fonds et de la piste d'audit (art. 13). Réalise UJ-3 et UJ-7.
+Un règlement en **espèces** est plafonné à **500 000 FCFA** (paramètre) ; au-delà, le règlement passe par un moyen traçable. La **lutte contre le blanchiment et le financement du terrorisme** s'applique aux règlements de sinistres. Le Règlement CIMA n° 0004/CIMA/PCMA/PCE/SG/08, lu et sûr, **recommande** que le système permette (le texte dit « devrait permettre ») de suivre les **règlements de sinistres** par date, montant, origine, destination et cumul par client, de recenser les clients qui dépassent le minimum cumulé fixé par la réglementation, et de **détecter les opérations suspectes** (art. 4.5). L'art. 11 liste les moyens à vérification minutieuse (espèces, virements, chèques de banque, chèques endossés…) ; son application aux règlements de sinistres est une **transposition, à confirmer par le juriste** (FR-24). Le texte impose la **conservation dix ans au moins** de l'identité, de la forme du versement ou du retrait, des dates et montants, de l'origine et de la destination des fonds et de la piste d'audit (art. 13). Réalise UJ-3 et UJ-7.
+
+Le **responsable LBC** est une désignation faite par `AUD` (un rôle ou une personne), **jamais par `ADMIN` seul**. Chaque alerte a son destinataire écrit *(défaut H-181 : répartition proposée ; à confirmer à la séance d'immersion)* :
+
+| Alerte | Reçoit |
+|---|---|
+| Bénéficiaire différent de la victime | responsable LBC ; `AUD` en copie |
+| Espèces élevées | responsable LBC ; `AUD` en copie |
+| Fractionnement de règlements sous un seuil | responsable LBC ; `RESP` du dossier |
+| Ayant droit douteux | responsable LBC ; `RESP` du dossier |
+| Changement de coordonnées avant paiement | `RESP` (vérification, FR-222) ; responsable LBC en copie |
+| Cumul par client au-dessus du seuil national | responsable LBC ; `AUD` |
 
 **Conséquences (testables) :**
 - Le journal des **règlements de sinistres** donne, par bénéficiaire réel (avec sa pièce d'identité archivée), le moyen de paiement, l'origine, la destination et le **cumul par client** ; il s'exporte pour le responsable LBC/FT.
 - Un test émet un règlement en espèces au-dessus du plafond : refusé avec un code nommé.
-- **Alertes** : bénéficiaire différent de la victime, espèces élevées, fractionnement de règlements pour passer sous un seuil, ayant droit douteux, changement de coordonnées avant paiement. Chacune ouvre un dossier de contrôle.
-- Le **seuil cumulé** de la réglementation nationale est un paramètre **à saisir** quand le texte national aura été obtenu (annexe D) ; il n'est pas écrit en dur `[ASSUMPTION: la valeur nationale n'est pas trouvée ; le paramètre est vide par défaut et l'alerte de cumul est inactive tant qu'il l'est]`.
+- **Alertes** : bénéficiaire différent de la victime, espèces élevées, fractionnement de règlements pour passer sous un seuil, ayant droit douteux, changement de coordonnées avant paiement. Chacune ouvre un dossier de contrôle et va à son destinataire du tableau.
+- Le **seuil cumulé** de la réglementation nationale est un paramètre **à saisir** quand le texte national aura été obtenu (annexe D) ; il n'est pas écrit en dur *(défaut H-182 : la valeur nationale n'est pas trouvée ; le paramètre est vide par défaut et l'alerte de cumul est inactive tant qu'il l'est)*. Tant qu'il est vide, le contrôle de cumul (contrôle n° 6 de FR-100) s'affiche « **non actif** » à l'écran.
+- Un test désigne un responsable LBC avec le compte `ADMIN` seul : refusé ; avec `AUD` : accepté.
+- Un **export annuel** des alertes et de leurs suites est produit pour le responsable LBC et `AUD`.
 - Un **dossier de soupçon** (alerte interne, responsable LBC, déclaration à la cellule nationale de renseignements financiers) est **préparé et tracé** par Prospera avec horodatage ; **la déclaration est faite par le responsable interne**, pas par Prospera ; la conservation est de dix ans. La règle de non-information du client est **à confirmer par le juriste** (FR-24).
-- Le **plafond d'espèces national** des assureurs n'a pas été trouvé : 500 000 FCFA est la valeur de la démo `[ASSUMPTION: à confirmer par le juriste]`.
+- Le **plafond d'espèces national** des assureurs n'a pas été trouvé : 500 000 FCFA est la valeur de la démo *(point juridique J-26 : à confirmer par le juriste)*.
 
 ### 7.2 `notification` : prévenir l'assuré
 
@@ -3408,6 +3905,7 @@ Un règlement en **espèces** est plafonné à **500 000 FCFA** (paramètre) ; a
 
 **Conséquences (testables) :**
 - **Personnel** : cloche et e-mail. **Assuré, victime, ayants droit** : SMS, WhatsApp et e-mail ; **courtier, coassureurs, assureur du tiers** : e-mail. Français d'abord (FR-18).
+- **Suivi de distribution** : `notification` rend, pour le courrier et le SMS, un **état de distribution** (remis, retourné, non remis) lisible par le dossier ; un test simule un pli retourné et un SMS non remis et les retrouve sur le dossier.
 - Les **modèles WhatsApp** de la compagnie (accusé de déclaration, pièces manquantes, offre envoyée, chèque à retirer, règlement effectué) sont **soumis à l'approbation avant la mise en service** (FR-N11) : le délai est externe ; un modèle non approuvé n'est jamais choisi, le SMS part, et le journal le dit.
 - Le **numéro WhatsApp Business** et la **passerelle SMS** (identifiant d'expéditeur enregistré) sont **ceux de la compagnie et à sa charge** ; leurs identifiants sont chiffrés ; les coûts d'envoi sont mesurés (FR-N57 à FR-N63).
 - Les **relances de pièces** sont espacées d'un intervalle paramétrable (valeur de la démo : 5 jours) ; après trois relances sans effet, Prospera propose au gestionnaire un **arbitrage** plutôt qu'une relance de plus (valeur de la démo, annexe D).
@@ -3420,8 +3918,9 @@ Un message à l'assuré ne contient **jamais** de donnée de santé : un SMS ou 
 
 **Conséquences (testables) :**
 - Un test déclenche chaque modèle de message du volet corporel et n'y trouve aucune donnée de santé : ni libellé de certificat, ni taux d'incapacité, ni lésion.
+- Aucun message (SMS, WhatsApp, e-mail) ne cite la **gravité**, la **nature des lésions** ni un **texte libre** : un message ne contient que des contenus autorisés (statut, référence, pièce attendue ou reçue, date, lieu, montant) et des **motifs codés seulement** (liste fermée, jamais libre).
 - Les modèles sont revus par RESP et le juriste avant approbation (FR-24).
-- Un message qui demande une pièce médicale dit « un document médical » sans plus ; le détail est donné **au guichet** ou **par courrier** à l'assuré `[ASSUMPTION: règle de minimisation ; à confirmer à la séance d'immersion]`.
+- Un message qui demande une pièce médicale dit « un document médical » sans plus ; le détail est donné **au guichet** ou **par courrier** à l'assuré *(défaut H-183 : règle de minimisation ; à confirmer à la séance d'immersion)*.
 
 ### 7.3 `dashboard` : le pilotage
 
@@ -3429,13 +3928,27 @@ Un message à l'assuré ne contient **jamais** de donnée de santé : un SMS ou 
 
 **Ce qui s'applique tel quel.** Le module `dashboard` (M28) ne possède aucune donnée : un **cockpit par rôle relu des modules** (PRD-D FR-165), les **alertes du jour** (PRD-D FR-167), les **décisions à trancher** (PRD-D FR-168), le **rapport de direction** (PRD-D FR-169), les **PDF et envois** (PRD-D FR-170), les **exports** (PRD-D FR-171). **Le pilotage de l'assurance (brief du matin, charge, délais légaux qui expirent, dossiers bloqués, sans action depuis 30 jours, pièces attendues, règlements en attente, qualité du dossier, simulation « et si… », plan de contrôle) est spécifié au §6.7** : cette fiche n'en réécrit rien.
 
-**Écarts de l'assurance.** Réalise UJ-6 et UJ-7.
+**Écarts de l'assurance.** Réalise UJ-6 et UJ-7. La vue finance et la vue exploitation sont spécifiées en FR-229.
 
 **Conséquences (testables) :**
 - Chaque chiffre d'un cockpit est calculé depuis les dossiers (FR-17) et affiche la date de sa dernière lecture du LC quand il en dépend (FR-2).
 - Chaque rôle a **son** cockpit : la direction, le responsable, le gestionnaire (sa corbeille), le recours, le contrôle interne, l'accueil, la comptabilité ; aucun rôle ne voit le cockpit d'un autre (FR-6, PRD-D FR-7).
-- Le **tableau de bord n'affiche pas de primes** ni de ratio sinistres sur primes : les primes relèvent du logiciel de la compagnie (FR-2) ; un reliquat de la démo qui en affiche est retiré `[ASSUMPTION: confirmé par le README de la démo ; à confirmer à la séance d'immersion]`.
+- Le **tableau de bord n'affiche pas de primes** ni de ratio sinistres sur primes : les primes relèvent du logiciel de la compagnie (FR-2) ; un reliquat de la démo qui en affiche est retiré *(défaut H-184 : confirmé par le README de la démo ; à confirmer à la séance d'immersion)*.
 - Sans `dashboard` installé, les écrans métier fonctionnent et l'emplacement du cockpit s'affiche vide (FR-20).
+
+#### FR-229 : Vue finance et vue exploitation
+
+Le cockpit offre deux vues propres à ceux qui pilotent l'argent et la machine. Réalise UJ-6 et UJ-8.
+
+- La vue **finance** (`CPT`, `DG`) montre : les **engagements à décaisser** en deux colonnes séparées, **exigible** et **à confirmer**, jamais sommées ; les provisions ; les honoraires à payer ; les chèques en circulation ; les rapprochements en retard. Le DAF de la compagnie s'en sert par ces deux rôles.
+- La vue **exploitation** (`ADMIN`, DSI) montre l'**état technique seulement** : sauvegardes, versions, alertes de service, espace disque. Elle ne montre **aucune donnée métier**.
+- Une vue **réseau** (courtiers, réclamations) est **hors du périmètre du premier jour** *(défaut H-185 : vue réseau hors périmètre du premier jour, dite au §10.2 ; à confirmer à la séance d'immersion)*.
+
+**Conséquences (testables) :**
+- Un test ouvre la vue finance avec `CPT` et `DG` : les engagements s'affichent en deux colonnes ; le total n'additionne jamais l'exigible et le « à confirmer ».
+- Un test ouvre la vue finance avec chaque autre rôle : refus sans donnée.
+- Un test ouvre la vue exploitation avec `ADMIN` : il n'y trouve ni nom d'assuré, ni montant de dossier, ni pièce ; avec un rôle métier : refus.
+- Chaque chiffre de la vue finance se recalcule depuis les données (FR-17) et affiche sa fraîcheur (FR-207).
 
 ### 7.4 L'IA commune
 
@@ -3447,7 +3960,7 @@ Un message à l'assuré ne contient **jamais** de donnée de santé : un SMS ou 
 
 La compagnie **fournit** à l'IA commune, sous son consentement écrit (FR-19), des données **par finalité** : dossiers et pièces (par lecture sur place), devis et garages, expertises, règlements, recours, liens entre dossiers, délais ; elle **reçoit** des propositions : lecture de pièces, contrôles, relances, résumés, analyses de devis, explications de montant, signaux de fraude, brief du matin, simulation (FR-10). Réalise UJ-6.
 
-Les **finalités** consommées par les modules de ce PRD sont déclarées module par module à la clause C11 de l'annexe A. Les finalités de **cette partie** sont proposées `[ASSUMPTION: noms de finalités proposés ; à valider avec le contrat de module]` : `declaration-assistee`, `lecture-pieces`, `controle-pieces`, `relance-pieces`, `resume-dossier`, `recherche-langage-naturel`, `preremplissage-instruction`, `analyse-devis`, `explication-montant`, `detection-fraude`, `redaction-courriers`, `recours-assiste`, `brief-du-matin`, `qualite-et-simulation`, `orientation-expertise`, `completude-rapport`, `comparaison-portefeuille`.
+Les **finalités** consommées par les modules de ce PRD sont déclarées module par module à la clause C11 de l'annexe A. Les finalités de **cette partie** sont proposées *(défaut H-186 : noms de finalités proposés ; à valider avec le contrat de module)* : `declaration-assistee`, `lecture-pieces`, `controle-pieces`, `relance-pieces`, `resume-dossier`, `recherche-langage-naturel`, `preremplissage-instruction`, `analyse-devis`, `explication-montant`, `detection-fraude`, `redaction-courriers`, `recours-assiste`, `brief-du-matin`, `qualite-et-simulation`, `orientation-expertise`, `completude-rapport`, `comparaison-portefeuille`.
 
 **Conséquences (testables) :**
 - **Sans consentement**, rien ne sort des serveurs de la compagnie vers l'IA commune : l'instance locale prédit, enregistre ses écarts et sert le Copilot sur les seules données de la compagnie, sans rien renvoyer ; un test sur une installation sans consentement le vérifie (FR-12).
@@ -3464,12 +3977,12 @@ L'IA commune est **calibrée sur 3 à 5 années d'historique** de la compagnie, 
 - Le calibrage prend un **historique de 3 à 5 ans** (paramètres, annexe D) ; avant calibrage, les capacités servent des **règles explicables** et le disent (FR-10).
 - Le réentraînement a lieu **une fois par mois** ; un test le déclenche, vérifie que le modèle d'avant est conservé et que le nouveau est **essayé** avant promotion (FR-233).
 - Le **rapport mensuel** est produit sans saisie : un test le génère sur le jeu de démonstration et y retrouve, pour chaque usage de FR-10, les trois parts.
-- La **configuration du serveur** inclut l'instance locale : elle tourne sur une machine ou une machine virtuelle à part, dont le dimensionnement est **chiffré au devis des serveurs avec la compagnie** `[ASSUMPTION: modèle de la microfinance ; la v4 parle d'un serveur « capable d'héberger à terme le calcul de l'IA locale »]`.
+- La **configuration du serveur** inclut l'instance locale : elle tourne sur une machine ou une machine virtuelle à part, dont le dimensionnement est **chiffré au devis des serveurs avec la compagnie** *(défaut H-187 : modèle de la microfinance ; la v4 parle d'un serveur « capable d'héberger à terme le calcul de l'IA locale »)*.
 - Le calibrage ne lit pas les données de santé (FR-232).
 
 #### FR-232 : Rien de nominatif ni de médical ne sort
 
-Ce qui sort, avec consentement, est un **écart anonymisé** : finalité, version du modèle, valeur prédite, valeur observée, caractéristiques agrégées ou généralisées. **Aucun nom, téléphone, identifiant ni montant individuel identifiant, et aucune donnée de santé, n'en fait partie.** **Aucun écart construit à partir d'une donnée de santé ne sort**, même anonymisé `[ASSUMPTION: lecture stricte de « aucune donnée médicale ne sort » ; à confirmer]`. Le **tunnel sortant** n'est ouvert que par l'instance : **aucun port entrant** n'est ouvert chez la compagnie.
+Ce qui sort, avec consentement, est un **écart anonymisé** : finalité, version du modèle, valeur prédite, valeur observée, caractéristiques agrégées ou généralisées. **Aucun nom, téléphone, identifiant ni montant individuel identifiant, et aucune donnée de santé, n'en fait partie.** Rien de nominatif ni de médical ne part vers l'IA commune ; le relais ne porte aucune donnée médicale (FR-239). **Aucun écart construit à partir d'une donnée de santé ne sort**, même anonymisé *(défaut H-188 : lecture stricte de « aucune donnée médicale ne sort » ; à confirmer)*. Le **tunnel sortant** n'est ouvert que par l'instance : **aucun port entrant** n'est ouvert chez la compagnie.
 
 **Conséquences (testables) :**
 - Un test inspecte un lot sortant sur le jeu de démonstration et n'y trouve **aucun identifiant, aucun nom, aucun téléphone, aucune donnée de santé** ; il inspecte aussi le lot d'un dossier corporel et n'y trouve aucun écart issu de pièces médicales.
@@ -3506,29 +4019,32 @@ Les mises à jour arrivent à distance, tirées par l'agent de l'instance (AD-1)
 
 **Conséquences (testables) :**
 - L'administrateur reçoit une mise à jour, la teste dans l'espace d'essai (jeu de la démonstration, FR-15), choisit la date, l'applique et peut revenir en arrière en un clic ; il ne voit **aucune donnée métier** à aucun moment (FR-238).
-- Une mise à jour n'est **jamais appliquée sans la date choisie** par la compagnie, sauf un **correctif de sécurité critique**, que la compagnie peut accepter dans un délai fixé par le contrat (défaut : 72 heures ; un correctif réglementaire est livré avant la date d'effet du texte) `[ASSUMPTION: valeurs reprises de la microfinance ; à confirmer]`.
+- Une mise à jour n'est **jamais appliquée sans la date choisie** par la compagnie, sauf un **correctif de sécurité critique**, que la compagnie peut accepter dans un délai fixé par le contrat (défaut : 72 heures ; un correctif réglementaire est livré avant la date d'effet du texte) *(défaut H-189 : valeurs reprises de la microfinance ; à confirmer)*.
 - La coupure de service d'une mise à jour est de **15 minutes au plus** (PRD moteur NFR-9).
 - Un **correctif de délai légal** (nouvelle version du référentiel, FR-14) est livré comme une mise à jour de référentiel : le dossier jugé selon sa date de survenance garde l'ancienne version.
-- Le **régime de licence** (usage perpétuel ou non) et le contrat de maintenance sont des clauses du **contrat commercial**, **hors de ce PRD** ; ce PRD n'engage ni prix ni durée `[ASSUMPTION: gel après 30 jours sans contact et version figée comme les autres installations sur site (PRD moteur FR-15, FR-32) ; à confirmer au contrat]`.
+- Le **régime de licence** (usage perpétuel ou non) et le contrat de maintenance sont des clauses du **contrat commercial**, **hors de ce PRD** ; ce PRD n'engage ni prix ni durée *(défaut H-190 : gel après 30 jours sans contact et version figée comme les autres installations sur site (PRD moteur FR-15, FR-32) ; à confirmer au contrat)*.
 
 #### FR-236 : Sauvegarde quotidienne, restauration testée, conservation
 
-La **sauvegarde est automatique et quotidienne** (proposition v2), sur le NAS et sur un second support dans les locaux de la compagnie (3-2-1, PRD moteur NFR-7). La **restauration est testée** à intervalle régulier (défaut : une fois par mois, `[ASSUMPTION: modèle de la microfinance]`) et l'échec allume un voyant. Les valeurs de perte maximale (RPO) et de reprise (RTO) sont celles du PRD moteur (NFR-7), **sans engagement de la proposition v2, qui n'en chiffre aucun** : **point non tranché** (§12). La **rétention technique** des sauvegardes n'est **pas** la conservation réglementaire : le **journal, les dossiers et les pièces** sont conservés **dix ans au moins** (Code CIMA art. 404) dans la base de l'installation et ses archives, pas seulement dans des sauvegardes qui tournent. Réalise UJ-8.
+La **sauvegarde est automatique et quotidienne** (proposition v2), sur le NAS et sur un second support dans les locaux de la compagnie (3-2-1, PRD moteur NFR-7). La **restauration est testée** avant la mise en service, puis à intervalle régulier (défaut : **une fois par mois**, *(défaut H-191 : modèle de la microfinance)*) et l'échec allume un voyant. Les valeurs de perte maximale (RPO) et de reprise (RTO) sont celles du PRD moteur (NFR-7) ; la proposition v2 n'en chiffre aucune. Valeurs provisoires : **RPO 24 h, RTO 8 heures ouvrées** *(défaut H-192 : RPO 24 h, RTO 8 heures ouvrées ; à confirmer avec le test de FR-23)* (§12). La **rétention technique** des sauvegardes n'est **pas** la conservation réglementaire : le **journal, les dossiers et les pièces** sont conservés **dix ans au moins** (Code CIMA art. 404) dans la base de l'installation et ses archives, pas seulement dans des sauvegardes qui tournent. **Après une restauration**, les **compteurs** (références `DEC-`, numéros de chèque, numéros de quittance) se reprennent au **maximum** entre la base restaurée et ce que détiennent le LC, `paiement` et le relais. L'instance passe en état « **restauration en cours : aucune émission** », qui bloque toute émission de règlement, de chèque et de quittance jusqu'au rapprochement ; les déclarations ne se refusent pas (FR-39) : une déclaration saisie pendant cet état reçoit sa référence `DEC-` dès que le compteur est repris. Réalise UJ-8.
 
 **Conséquences (testables) :**
 - Une sauvegarde automatique a lieu chaque jour ; un test arrête le serveur, restaure la sauvegarde la plus récente sur un serveur de référence et vérifie le retour de l'état du dernier jour, **y compris les chaînages du journal** (FR-13).
 - Après une restauration, avant de reprendre tout règlement, l'instance **rapproche les règlements de la période perdue** du relevé du fournisseur ; un règlement dont l'issue est inconnue passe à `INCONNU` et n'est pas réémis avant ce rapprochement (FR-220).
+- Après une restauration, un test crée un règlement, un chèque et une quittance : leurs numéros reprennent au maximum entre la base restaurée et le LC, `paiement` et le relais ; aucun numéro n'est réutilisé.
+- Pendant l'état « restauration en cours : aucune émission », toute émission de règlement, de chèque ou de quittance est refusée ; elle redevient possible après le rapprochement.
 - La rotation des sauvegardes n'efface jamais une donnée soumise à la conservation de dix ans.
 - L'effacement d'une donnée **sous conservation** est refusé avec un code nommé (FR-19).
 - Un export d'archive d'un dossier, d'un assuré ou d'une période se fait sur un support de la compagnie, avec une somme de contrôle.
 
 #### FR-237 : L'accès des guichets au serveur central
 
-Les guichets et les sites accèdent au serveur central **par navigateur, sur le réseau de la compagnie** (liaison privée ou dédiée, **à la charge de la compagnie**). Le guichet travaille **en ligne**. Les **hypothèses** de dimensionnement retiennent **un site central et des guichets** (FR-23). Réalise UJ-1 et UJ-2.
+Les guichets et les sites accèdent au serveur central **par navigateur, sur le réseau de la compagnie** (liaison privée ou dédiée, **à la charge de la compagnie**). Le guichet travaille **en ligne**. Les **hypothèses** de dimensionnement retiennent **un site central et des guichets** (FR-23). Quand la liaison d'un guichet tombe, le repli est un **formulaire papier de secours numéroté** : la déclaration est saisie plus tard, avec une **double date** (FR-34), et sa référence `DEC-` est attribuée à la saisie différée et rappelée sur l'accusé (FR-39 : une déclaration ne se refuse jamais). Le **portail du cabinet d'expertise externe** n'est pas servi par ce serveur : il est hébergé par le relais (FR-239). Réalise UJ-1 et UJ-2.
 
 **Conséquences (testables) :**
-- Le port du serveur est joignable depuis **le réseau interne de la compagnie et ses guichets**, jamais depuis internet.
+- Le port du serveur est joignable depuis **le réseau interne de la compagnie et ses guichets**, jamais depuis internet ; le cabinet d'expertise externe n'atteint que son portail, hébergé par le relais (FR-239), jamais ce serveur.
 - Quand la liaison d'un guichet tombe, l'écran affiche « hors liaison » et ne simule rien ; la saisie de la déclaration n'est pas faussement acceptée ; au retour de la liaison, rien n'est perdu.
+- Un guichet hors liaison remet un **formulaire papier numéroté** ; à la saisie différée, la déclaration porte sa **double date** (survenance, saisie), reçoit sa référence `DEC-` et l'accusé la rappelle ; un test saisit le formulaire n° N après la coupure et vérifie qu'aucune référence n'a été attribuée avant.
 - Le scan de pièces au guichet passe par le **poste de numérisation** (§6.2) ; une pièce déposée sans liaison n'est pas rattachée à un dossier avant le retour de la liaison.
 - La plateforme est accessible **depuis les postes existants** de la compagnie (navigateurs récents ; appareils de référence fixés à la recette).
 - Aucune exigence de bande passante n'est posée avant la taille réelle de la compagnie (FR-23).
@@ -3539,24 +4055,34 @@ L'installation est **exploitée par l'équipe informatique de la compagnie** (sa
 
 **Conséquences (testables) :**
 - Un test ouvre avec ADMIN chaque écran métier : refus sans donnée (FR-6). L'export et la restauration passent par l'outil d'administration, sans ouvrir de table métier.
-- La création d'un administrateur et l'attribution d'un droit d'instance demandent **deux personnes** `[ASSUMPTION: règle reprise de la microfinance ; à confirmer]`.
+- La création d'un administrateur et l'attribution d'un droit d'instance demandent **deux personnes** *(défaut H-193 : règle reprise de la microfinance ; à confirmer)*.
 - ADMIN voit des **comptes, des états, des motifs de rejet** (par exemple le rapport de reprise), pas le contenu d'un dossier (UJ-8).
 - Un **manuel d'exploitation** (démarrage, arrêt, mise à jour, restauration, supervision, astreinte) est livré à l'installation ; la supervision locale est lisible sans internet : l'état des services, des sauvegardes, de l'échange avec le LC, du tunnel de l'IA commune.
 - Un événement de l'installation (échec de mise à jour, sauvegarde en échec, relais injoignable) est une alerte à ADMIN.
 
 #### FR-239 : Le relais Money Vibes, parce qu'aucun port n'est ouvert chez la compagnie
 
-Le PRD moteur interdit tout port entrant d'internet sur une instance sur site. Or deux chemins de la compagnie viennent d'internet : les **réponses et accusés WhatsApp** des assurés, et les **notifications des fournisseurs de paiement** (PI-SPI) qui confirment un virement. Comme pour l'IMF, ces flux passent par un **relais** tenu par Money Vibes, qui les reçoit, les met en file, et que **le serveur de la compagnie tire** (« l'agent tire »). Réalise UJ-3. `[ASSUMPTION: relais repris du modèle de la microfinance ; à confirmer à l'installation]`
+Le PRD moteur interdit tout port entrant d'internet sur une instance sur site. Or trois chemins de la compagnie viennent d'internet : les **réponses et accusés WhatsApp** des assurés, les **notifications des fournisseurs de paiement** (PI-SPI) qui confirment un virement, et le **portail du cabinet d'expertise externe**. Comme pour l'IMF, ces flux passent par un **relais** tenu par Money Vibes, qui les reçoit, les met en file, et que **le serveur de la compagnie tire** (« l'agent tire »). Réalise UJ-3. *(défaut H-194 : relais repris du modèle de la microfinance ; à confirmer à l'installation)* *(point juridique J-27 : le portail du cabinet externe est hébergé par le relais Money Vibes, pièces de mission chiffrées et à durée limitée, Money Vibes déclaré sous-traitant ; aucune pièce médicale n'y transite sauf nécessité de la mission ; à confirmer à la séance d'immersion et par le juriste)*
 
 **Conséquences (testables) :**
 - **Accusé de réception après écriture** : le relais n'accuse réception d'un événement au fournisseur qu'après l'avoir écrit durablement ; l'instance n'acquitte un événement tiré qu'après l'avoir écrit chez elle ; un événement non acquitté est rejoué sans doublon d'effet.
 - **Rapprochement quotidien** : chaque jour, l'instance rapproche les paiements reçus par le relais du relevé du fournisseur ; un écart entre dans la file de rapprochement (FR-224).
-- **Money Vibes est déclaré sous-traitant** de la compagnie pour le traitement des flux du relais (finalité, contenu, durée de conservation, localisation), dans le registre des traitements (FR-19) ; le relais purge un événement tiré après un délai (défaut : 7 jours, annexe D `[ASSUMPTION: modèle de la microfinance]`).
-- L'interrogation du relais est un **contact sortant** de l'instance, ajouté à la liste des destinations sortantes déclarées (FR-19) ; la fréquence est un paramètre (défaut : 1 minute `[ASSUMPTION: modèle de la microfinance]`).
+- **Money Vibes est déclaré sous-traitant** de la compagnie pour le traitement des flux du relais (finalité, contenu, durée de conservation, localisation), dans le registre des traitements (FR-19) ; le relais purge un événement tiré après un délai (défaut : 7 jours, annexe D *(défaut H-195 : modèle de la microfinance)*).
+- L'interrogation du relais est un **contact sortant** de l'instance, ajouté à la liste des destinations sortantes déclarées (FR-19) ; la fréquence est un paramètre (défaut : 1 minute *(défaut H-196 : modèle de la microfinance)*).
 - Un balayage de l'extérieur ne trouve aucun port entrant.
 - Si le relais est injoignable, le circuit continue ; les confirmations de virement s'affichent « en attente du relais » ; la file se vide au retour.
-- Aucune donnée de santé ne transite par le relais (FR-227).
+- **Portail du cabinet externe** : le relais porte aussi ce portail (FR-180). Les pièces de mission y sont **chiffrées et à durée limitée** ; le cabinet ne voit que ses missions ; Money Vibes est déclaré sous-traitant pour ce flux. La voie `TRANSMISE` (courriel sécurisé ou papier) reste le repli.
+- Aucune donnée de santé ne transite par le relais pour les messages (FR-227) ni pour les paiements ; sur le portail du cabinet, **aucune pièce médicale n'y transite sauf nécessité de la mission** (FR-9).
 - En espace d'essai, le relais n'envoie rien de réel.
+
+#### FR-240 : Mise en service
+
+La mise en service comprend, pour chaque profil de la compagnie : une **formation par profil** (accueil, gestionnaires, responsable, direction, administrateurs, comptabilité, numérisation, archives, contrôle interne), une **documentation d'usage** par rôle, une **aide en ligne** et un **accompagnement sur site** pendant les premières semaines. Les durées et le nombre de sessions sont à fixer *(défaut H-197 : durées et nombre de sessions à confirmer avec la compagnie)*. Réalise UJ-1 et UJ-8.
+
+**Conséquences (testables) :**
+- Test de recette **par rôle** : chaque profil exécute son parcours de FR-16 sans aide.
+- La documentation d'usage existe pour chacun des quatorze rôles (§2.1) ; l'aide en ligne s'ouvre depuis chaque écran.
+- La formation est une ligne de la liste de contrôle du feu vert de mise en service (FR-20, FR-218) : sans elle, le feu vert n'est pas donné.
 
 #### FR-241 : Le support à distance est ouvert par la compagnie seule
 
@@ -3567,6 +4093,15 @@ Le support de Money Vibes à une installation passe par le **tunnel de support**
 - Pendant le tunnel, Money Vibes **ne lit aucune donnée métier** : l'accès est celui de l'administration de l'instance (FR-238) ; l'accès à un écran métier est refusé.
 - Le journal du tunnel (qui, quand, combien de temps, quelles actions) est lisible par ADMIN et par AUD.
 - Le support d'usage (formation, questions) relève de FR-246 et du contrat de maintenance.
+
+#### FR-242 : Réversibilité et remise d'exploitation
+
+À la réception de l'installation et sur demande, la compagnie reçoit : un **export complet** des dossiers, des pièces, du journal et des paramètres, en **format ouvert** (JSON, CSV et fichiers d'origine) ; la **documentation d'exploitation** ; l'**accès administrateur remis** à l'équipe informatique de la compagnie. Réalise UJ-8.
+
+**Conséquences (testables) :**
+- L'export complet est rejoué dans un environnement vide et les compteurs concordent : nombre de dossiers, de pièces, d'entrées du journal, sommes de contrôle, chaînage du journal vérifiable.
+- L'export passe par l'outil d'administration, sans ouvrir de table métier à `ADMIN` (FR-238).
+- Après la remise, les comptes administrateur de la compagnie ouvrent l'administration de l'instance ; la documentation d'exploitation couvre démarrage, arrêt, mise à jour, restauration, supervision, astreinte (FR-238).
 
 ### 7.6 Réseau, connecteurs, support
 
@@ -3592,16 +4127,16 @@ Le support de Money Vibes à une installation passe par le **tunnel de support**
 - Le **connecteur nommé** du logiciel de la compagnie est **hors février** : le logiciel est inconnu et libre en janvier ; le **contrat d'échange générique** (annexe C), par interface ou par fichier, est du **premier jour** (§6.5, `liaison-assureur`) ; le **logiciel de compagnie fictif** le parle (§6.5).
 - Aucun bouton de la démo ne promet une intégration à un produit nommé : « bientôt », sans date (FR-22).
 - L'état « lecture seule, propriété du logiciel externe » vaut pour tout objet que le LC possède : assurés, polices, garanties, primes, intermédiaires, coassureurs, numéro de sinistre (FR-2) ; la section « Intégrations » du menu n'apparaît que si `connecteurs` est installé.
-- Le domaine d'échange déclare ses **valeurs de contrôle** dès le manifeste (nombre d'objets, sommes), pour que le passage au connecteur nommé n'oblige pas à reprendre du code `[ASSUMPTION: règle du point d'écriture unique par domaine reprise des PRD distributeur et microfinance]`.
+- Le domaine d'échange déclare ses **valeurs de contrôle** dès le manifeste (nombre d'objets, sommes), pour que le passage au connecteur nommé n'oblige pas à reprendre du code *(défaut H-198 : règle du point d'écriture unique par domaine reprise des PRD distributeur et microfinance)*.
 
 #### FR-246 : Support : une anomalie bloquante prise en charge en 4 heures ouvrées
 
-Le **seul engagement de support chiffré** des sources est la **prise en charge d'une anomalie bloquante sous 4 heures ouvrées** (proposition v2 et offre v4). Les anomalies sont classées **bloquante, majeure, mineure** (offre initiale). La maintenance comprend les correctifs, la sécurité, le contrôle des sauvegardes, les **mises à jour des barèmes, des règles et des évolutions CIMA**, une **visite mensuelle sur site**, le réentraînement mensuel de l'IA et son rapport mensuel (FR-231) `[ASSUMPTION: contenu de la maintenance repris de la proposition v2 ; prix et durée au contrat, hors PRD]`. Les **heures ouvrées** sont celles de la compagnie, fixées au contrat. Réalise UJ-8.
+Le **seul engagement de support chiffré** des sources est la **prise en charge d'une anomalie bloquante sous 4 heures ouvrées** (proposition v2 et offre v4). Les anomalies sont classées **bloquante, majeure, mineure** (offre initiale). La maintenance comprend les correctifs, la sécurité, le contrôle des sauvegardes, les **mises à jour des barèmes, des règles et des évolutions CIMA**, une **visite mensuelle sur site**, le réentraînement mensuel de l'IA et son rapport mensuel (FR-231) *(défaut H-199 : contenu de la maintenance repris de la proposition v2 ; prix et durée au contrat, hors PRD)*. Les **heures ouvrées** sont celles de la compagnie, fixées au contrat. Réalise UJ-8.
 
 **Conséquences (testables) :**
 - Un ticket d'anomalie **bloquante** a un délai de **prise en charge** mesuré à l'heure ouvrée ; un test simule une anomalie bloquante et vérifie que le compteur démarre à la création du ticket et s'arrête à la prise en charge.
 - Une anomalie **bloquante** est définie par ce qu'elle empêche : un parcours **jamais « bientôt »** (FR-22) devenu impossible, un règlement bloqué à tort, une perte de données ; la définition est remise à la compagnie à l'installation.
-- Aucun engagement de **disponibilité** chiffré n'existe dans les sources `[ASSUMPTION: objectif de conception de 99,5 % du temps ouvré, sans engagement, repris de la microfinance ; à confirmer à la séance d'immersion]`.
+- Aucun engagement de **disponibilité** chiffré n'existe dans les sources *(défaut H-200 : objectif de conception de 99,5 % du temps ouvré, sans engagement, repris de la microfinance ; à confirmer à la séance d'immersion)*.
 - Le support à distance suit FR-241 ; le support d'usage suit le contrat de maintenance.
 
 ---
@@ -3610,13 +4145,24 @@ Le **seul engagement de support chiffré** des sources est la **prise en charge 
 
 Les exigences transverses du PRD distributeur (PRD-D §8) et celles du PRD microfinance s'appliquent (FR-1). Celles-ci s'y ajoutent ou les précisent pour une installation chez la compagnie. Elles **ne répètent pas** une FR déjà écrite : elles la **renvoient** (« voir FR-n »). Tout chiffre est un paramètre de la compagnie (FR-4, annexe D).
 
+**Tableau de renvois : exigence transverse, puis l'exigence qui la porte.** Les numéros de cette section restent réservés.
+
+| Exigence transverse | Numéro réservé | Exigence porteuse |
+|---|---|---|
+| Sauvegarde quotidienne et restauration testée | FR-252 | FR-236 |
+| Double authentification et sessions | FR-254 | FR-25 |
+| Journal, trace et lecture des consultations | FR-255 | FR-13 |
+| Conservation de dix ans au moins | FR-256 | FR-174 |
+| Données personnelles, hébergement et aucun port entrant | FR-257 | FR-232 et FR-234 |
+
 #### FR-250 : Performance de la recherche et des écrans de travail
 
-La recherche d'un dossier rend son résultat **en moins de 5 secondes au 95e centile**, sur le volume repris (voir FR-23, FR-150, §4.13). Les sources ne chiffrent aucune autre durée d'écran : les écrans de travail (corbeilles, fiche du dossier, files) sont mesurés **sur le jeu au volume de l'hypothèse de FR-23**, et la valeur mesurée devient la cible de recette de chaque écran. Aucune cible n'est inventée avant cette mesure.
+La recherche d'un dossier rend son résultat **en moins de 5 secondes au 95e centile**, sur le volume repris (voir FR-23, FR-150, §4.13). Les autres écrans de travail ont des **cibles provisoires**, mesurées sur le jeu au volume de l'hypothèse de FR-23 : la **fiche du dossier** s'ouvre en moins de **3 secondes** (95e centile) ; l'**OCR d'un lot de 50 pages** rend son résultat en moins de **10 minutes** ; la **resynchronisation nocturne** avec le LC est terminée avant **6 h** pour le volume de FR-23 ; l'**export de FR-193** est produit en moins de **2 minutes** *(défaut H-201 : valeurs provisoires ; à confirmer avec le test de FR-23)*.
 
 **Conséquences (testables) :**
 - Le test de FR-23 mesure la recherche par chaque critère (nom, police, numéro de sinistre, immatriculation, numéro d'archivage) ; un résultat au-dessus de 5 secondes au 95e centile fait échouer la recette.
-- Le même jeu mesure l'ouverture de la fiche, de chaque corbeille et de chaque file ; le compte rendu de mesure est remis à la compagnie avec la configuration minimale du serveur (voir FR-234).
+- Le même jeu mesure l'ouverture de la fiche (moins de 3 secondes au 95e centile), l'OCR d'un lot de 50 pages (moins de 10 minutes), la resynchronisation nocturne (terminée avant 6 h) et l'export de FR-193 (moins de 2 minutes) ; chaque dépassement fait échouer la recette tant que la compagnie n'a pas fixé d'autre valeur.
+- Les corbeilles et les files sont mesurées sur le même jeu, avec la cible de la fiche (moins de 3 secondes) ; le compte rendu de mesure est remis à la compagnie avec la configuration minimale du serveur (voir FR-234).
 - Un indicateur de pilotage se recalcule à la demande depuis les données ; son actualisation est celle de FR-212.
 
 #### FR-251 : Disponibilité pendant les heures d'ouverture
@@ -3630,12 +4176,7 @@ Le serveur central est disponible pendant les **heures d'ouverture** de la compa
 
 #### FR-252 : Sauvegarde quotidienne et restauration testée
 
-La sauvegarde est **automatique et quotidienne**, sur le NAS et sur un second support dans les locaux de la compagnie ; la **restauration est testée** avant la mise en service, puis à intervalle régulier (voir FR-236, FR-176). La perte maximale (RPO) et le temps de reprise (RTO) ne sont **pas tranchés** : le PRD moteur en fixe des valeurs, la proposition commerciale v2 n'en chiffre aucune (§12.2).
-
-**Conséquences (testables) :**
-- Un test restaure la sauvegarde la plus récente sur un serveur de référence et retrouve l'état du dernier jour, chaînage du journal compris (voir FR-236).
-- Un échec de sauvegarde ou de restauration lève une alerte à ADMIN (voir FR-176).
-- Après une restauration, aucun règlement n'est réémis avant son rapprochement avec le relevé du fournisseur (voir FR-236, FR-220).
+Numéro réservé. Voir **FR-236** (sauvegarde, restauration testée avant la mise en service puis chaque mois, RPO et RTO provisoires, compteurs repris au maximum après restauration, état « restauration en cours : aucune émission »).
 
 #### FR-253 : Chiffrement des pièces et des données sensibles
 
@@ -3649,39 +4190,19 @@ Les **pièces** du dossier, les **données de santé**, les **pièces d'identit�
 
 #### FR-254 : Double authentification et sessions
 
-La **double authentification** est obligatoire pour les rôles sensibles : DG, DT, RESP, CPT, AUD et ADMIN ; une session dure 8 heures au plus et se ferme après 30 minutes d'inactivité (voir FR-25). Les comptes des cabinets externes sont séparés et n'ouvrent que le portail expert (voir FR-180).
-
-**Conséquences (testables) :**
-- Un compte d'un rôle sensible sans second facteur ne peut pas ouvrir de session ; la remise à zéro d'un second facteur est tracée et visible d'AUD.
-- Aucun compte partagé n'existe ; aucun compte de démonstration n'a de mot de passe commun (voir FR-25).
-- Un test vérifie que la fermeture de session après 30 minutes d'inactivité fait perdre l'écran, sans donnée métier gardée dans le navigateur.
+Numéro réservé. Voir **FR-25** (double authentification obligatoire pour tout rôle autorisé à lire une donnée de santé ou à enregistrer un accord, par capacité ; sessions) et **FR-180** (comptes des cabinets externes).
 
 #### FR-255 : Journal, trace et lecture des consultations
 
-Toute modification et **toute consultation** est inscrite au **journal chaîné**, au nom de l'agent, horodaté par le serveur, non modifiable par l'application (voir FR-13, FR-138). Le journal des consultations est lu par AUD seul ; la piste d'audit par AUD, RESP et DG (voir annexe B).
-
-**Conséquences (testables) :**
-- Une tentative de modifier ou de supprimer une entrée du journal est refusée et tracée, même par ADMIN (voir FR-13).
-- L'empreinte du journal est déposée régulièrement hors du serveur de la compagnie ; une altération directe en base est détectée au contrôle suivant.
-- L'export du journal d'un dossier, d'un agent ou d'une période se fait sans reconstitution (voir UJ-7).
+Numéro réservé. Voir **FR-13**.
 
 #### FR-256 : Conservation de dix ans au moins
 
-Les dossiers, les pièces, le journal, le registre de l'IA et les ordres de règlement sont conservés **dix ans au moins** (Code CIMA, art. 404, texte lu). La durée d'un dossier est la plus longue entre ce plancher et la durée de sa nature (voir FR-174, FR-21, FR-236). La rotation des sauvegardes n'efface jamais une donnée sous conservation. Le point de départ de la durée est à confirmer par le juriste (voir FR-24).
-
-**Conséquences (testables) :**
-- Un test tente d'effacer une donnée sous conservation : refus avec un code nommé (voir FR-19).
-- Une durée paramétrée sous le plancher est refusée par le formulaire (voir FR-174).
-- Le journal et le registre de l'IA se lisent encore dix ans après leur écriture, sur une installation de référence (voir FR-12).
+Numéro réservé. Voir **FR-174** (durées de conservation), FR-21 et FR-236.
 
 #### FR-257 : Données personnelles, hébergement et aucun port entrant
 
-Les données restent sur le serveur et le NAS de la compagnie ; aucune donnée nominative et aucune donnée médicale ne sort (voir FR-19, FR-232). Aucun port n'est ouvert vers l'extérieur ; les flux venus d'internet passent par le relais que le serveur interroge (voir FR-239). Chaque destination sortante est inscrite au registre des transferts.
-
-**Conséquences (testables) :**
-- Un balayage de l'extérieur ne trouve aucun port entrant (voir FR-234, FR-239).
-- Un test inspecte chaque envoi sortant : aucun nom, téléphone, identifiant ni donnée de santé (voir FR-12).
-- Le registre des transferts liste le relais, le tunnel de l'IA commune et le support, chacun avec son contenu (voir FR-19).
+Numéro réservé. Voir **FR-232** et **FR-234** (aucun port entrant ; relais, FR-239).
 
 #### FR-258 : Accessibilité depuis les postes existants
 
@@ -3690,6 +4211,7 @@ La plateforme s'utilise **depuis un navigateur récent**, sur les **postes exist
 **Conséquences (testables) :**
 - La recette passe sur les navigateurs et les postes de référence que la compagnie désigne ; un écran qui ne s'affiche pas sur l'un d'eux fait échouer la recette.
 - Aucune installation n'est exigée sur un poste de travail ordinaire.
+- Les écrans d'administration de `ADMIN` (comptes, paramètres, simulateur et impression des grilles, liste des courriers sortants avec impression groupée) ne donnent aucune lecture métier (FR-6) ; la recette les parcourt.
 - Aucune donnée métier n'est gardée dans le navigateur après la fermeture de la session (voir FR-1).
 
 #### FR-259 : Le travail se fait en ligne ; le hors connexion n'est pas requis
@@ -3711,7 +4233,7 @@ L'interface, les courriers, les messages et les états sont **en français**. L'
 
 #### FR-261 : Exploitation par l'équipe informatique de la compagnie
 
-L'installation est exploitée par l'**équipe informatique de la compagnie** (rôle ADMIN), qui ne lit aucune donnée métier (voir FR-238). Elle dispose d'un manuel d'exploitation, d'une supervision lisible sans internet et d'un support de Money Vibes que la compagnie ouvre seule (voir FR-241, FR-246).
+L'installation est exploitée par l'**équipe informatique de la compagnie** (rôle ADMIN), qui ne lit aucune donnée métier (voir FR-238). Elle dispose d'un manuel d'exploitation, d'une supervision lisible sans internet et d'un support de Money Vibes que la compagnie ouvre seule (voir FR-241, FR-246). La formation, la documentation d'usage et l'accompagnement sur site sont en FR-240 ; l'export complet et la remise d'exploitation sont en FR-242.
 
 **Conséquences (testables) :**
 - Un test ouvre chaque écran métier avec ADMIN : refus, sans donnée (voir FR-6).
@@ -3720,7 +4242,7 @@ L'installation est exploitée par l'**équipe informatique de la compagnie** (r�
 
 #### FR-262 : Exactitude des montants et des indicateurs
 
-Un montant se calcule **sans arrondi caché** (la règle d'arrondi est celle de FR-73) et se retrouve à l'identique à l'écran, dans l'offre, dans l'ordre et dans l'export. Les **cinq montants** (évalué, proposé, validé, payé, reste à payer) ne se confondent jamais (voir FR-75). Tout indicateur se **recalcule depuis les données** (voir FR-212).
+Un montant se calcule **sans arrondi caché** : l'arrondi à 5 000 FCFA ne vaut que pour les montants **calculés par le système**, et le montant **arrêté** par le gestionnaire est **au franc près** (la règle d'arrondi est celle de FR-73) et se retrouve à l'identique à l'écran, dans l'offre, dans l'ordre et dans l'export. Les **cinq montants** (évalué, proposé, validé, payé, reste à payer) ne se confondent jamais (voir FR-75). Tout indicateur se **recalcule depuis les données** (voir FR-212).
 
 **Conséquences (testables) :**
 - Un test compare, pour un dossier du jeu de démonstration, le montant évalué, proposé, validé, payé et le reste à payer à l'écran, dans l'offre, dans l'ordre de règlement et dans l'export : ils sont identiques (voir FR-103).
@@ -3738,12 +4260,13 @@ Tout fichier déposé est vérifié avant enregistrement : type, taille, corresp
 
 #### FR-264 : Évolution par paramètres, et recette sur le vrai serveur
 
-Le PRD évolue **sans reprise du code** : tout seuil, délai ou liste est un paramètre versionné (voir FR-4). La recette se joue **sur le vrai serveur**, sur le jeu de démonstration, en reprenant les vérifications du second rejeu de la démo actuelle (voir FR-15, FR-16) ; elle échoue si une seule échoue.
+Le PRD évolue **sans reprise du code** : tout seuil, délai ou liste est un paramètre versionné (voir FR-4). Le processus lui-même évolue par paramètres, puis par amendement versionné (voir FR-27). La recette se joue **sur le vrai serveur**, sur le jeu de démonstration, en rejouant les 104 vérifications du second rejeu de la démo actuelle **telles que la table de reprise les réécrit** (annexe E ; voir FR-15, FR-16) : elle exige **104 sur 104 de la table réécrite** et échoue si une seule échoue.
 
 **Conséquences (testables) :**
 - Un test change chaque paramètre de l'annexe D et vérifie l'effet sur un nouveau dossier, pas sur un dossier engagé (voir FR-4).
 - Le parcours de `SIN-2026-9002` se joue à la main, rôle après rôle, de la déclaration à l'archive, sur le vrai serveur (voir FR-16).
 - La répétition générale de la reprise est jouée avant la mise en service (voir FR-218).
+- Un test de **parcours d'écran**, dans un navigateur réel et rôle après rôle, est rejoué à chaque livraison, en plus des tests de logique : les tests de logique ne voient pas l'écran (voir FR-28).
 
 ---
 
@@ -4173,8 +4696,8 @@ Ce qui change pour l'assurance :
 | Clause | Valeur pour ce module |
 |---|---|
 | C1 Manifeste | `code: 'sinistres'`, `version: '1.0.0'`. `depends: [{ged, "Chaque pièce d'un dossier vit dans la GED ; sinistres n'en tient aucune copie et lit les pièces par leur référence (§6.2)."}]` (dépendance **proposée**, à valider par le PO et par la spine). `enrichiPar: [assurance (projection des contrats lus, grille et mouvements de la provision, cession, états), expertises (missions, experts, médecin-conseil, portail expert, honoraires), liaison-assureur (numéro de sinistre officiel, contrats, envois au logiciel de la compagnie), paiement (exécution des règlements, rapprochement), notification (cloche, SMS, WhatsApp, e-mail), dashboard (cockpits par rôle), reseau (site central, guichets, rattachement des agents), reprise (dossiers en cours et historique), IA commune (les 14 usages du FR-10), connecteurs (hors février)]`. Service porteur : à cadrer par la spine d'assurance [À CONFIRMER, D18] ; le backend de la démo (`prospera-assurance`) ne compte pas comme service. Contient le **recours** (suivi parallèle, FR-32, FR-108 à FR-120), la fraude (FR-125 à FR-133) et la recherche et la fiche du dossier (FR-150 à FR-158). |
-| C2 Socle | Gate `SINISTRES_NOT_ENTITLED`. Cloisonnement par `organisationId` et par **portée** : le **volet** (corporel, matériel, risques divers) est une portée de `GEST`, le **pôle recours** une autre, tenues par `sinistres` et **lues** par `reseau` (FR-244) ; une portée vide est vide, jamais « tout ». `DG`, `DT`, `RESP`, `AUD` voient tous les dossiers (`AUD` en lecture seule) ; `GEST` son volet ; `GREC` ses recours ; `MED` et `EXPI` leurs missions ; `ACC` la recherche et la réception, sans le contenu médical (FR-153) ; `CPT` les ordres et les règlements, sans donnée de santé (FR-148) ; `ADMIN` aucune donnée métier. **Le serveur évalue seul** le rôle, la table des 41 transitions, les conditions nommées et le motif obligatoire ; un écran ne peut pas forcer ce que le serveur refuse (FR-137). Données de santé : lisibles de `MED`, du `GEST` corporel affecté, de `RESP`, et de `DG`/`DT` pour une décision ; chaque lecture est journalisée (FR-9, FR-158). Double authentification pour `DG`, `DT`, `RESP`, `CPT`, `AUD`, `ADMIN` (FR-25). |
-| C3 Données possédées | Dossiers sinistres (8 phases, **11 statuts** : `DECLARE`, `PIECES_ATTENDUES`, `OUVERT`, `EN_INSTRUCTION`, `EVALUE`, `EN_VALIDATION`, `OFFRE_ENVOYEE`, `ORDRE_EMIS`, `CHEQUE_A_REMETTRE`, `REGLE`, `CLOTURE`, et les 4 sorties `REJETE`, `SANS_SUITE`, `LITIGE`, `FRAUDE_SUSPECTEE`, FR-30, FR-31, FR-134), déclarations et leur référence `DEC-AAAA-NNNNN`, numéro de sinistre officiel rattaché, formulaires d'instruction par type, recevabilité et décisions de garantie motivées, qualification de la responsabilité, évaluations arrêtées et leur décompte ligne à ligne (ordre : dommage, vétusté, règle proportionnelle, plafond, franchise, FR-69 ; poste par poste au corporel, FR-70), les cinq montants distincts (évalué, proposé, validé, payé, reste à payer, FR-75), matrice de délégation, séances et procès-verbaux du comité, fiches de décision, offres (provisionnelle, définitive), accords et procès-verbaux de transaction, ordres et règlements (`A_PAYER`, `EN_COURS`, `PARTIEL`, `PAYE`, `ECHEC`), quittances (`PRETE`, `EDITEE`, `SIGNEE`, `REMISE`, `ENCAISSEE`), remises de chèque, clôtures et réouvertures, recours et leur machine (`A_QUALIFIER` à `RECUPERE` ou `ABANDONNE`), créances à trois montants, mises en demeure, signaux et scores de fraude, revues, réclamations, files et corbeilles, échéances légales et internes, notifications émises, plan de contrôle et constats de `AUD`, **registre de l'IA** (entrée, sortie, confiance, sources, niveau, statut, auteur de la décision, FR-12), **journal horodaté et chaîné** de chaque transition et de chaque lecture sensible (FR-13, FR-138). **Lues seulement** : polices, garanties, primes, intermédiaires, coassureurs, traités (projection d'`assurance`, source : le logiciel de la compagnie), pièces (`ged`), missions, experts et rapports (`expertises`), état des moyens de paiement (`paiement`), nœuds et portées (`reseau`), propositions de l'IA commune. **Aucun contrat, aucune comptabilité.** |
+| C2 Socle | Gate `SINISTRES_NOT_ENTITLED`. Cloisonnement par `organisationId` et par **portée** : le **volet** (corporel, matériel, risques divers) est une portée de `GEST`, le **pôle recours** une autre, tenues par `sinistres` et **lues** par `reseau` (FR-244) ; une portée vide est vide, jamais « tout ». `DG`, `DT`, `RESP`, `AUD` voient tous les dossiers (`AUD` en lecture seule) ; `GEST` son volet ; `GREC` ses recours ; `MED` et `EXPI` leurs missions ; `ACC` la recherche et la réception, sans le contenu médical (FR-153) ; `CPT` les ordres et les règlements, sans donnée de santé (FR-148) ; `ADMIN` aucune donnée métier. **Le serveur évalue seul** le rôle, la table des 42 transitions, les conditions nommées et le motif obligatoire ; un écran ne peut pas forcer ce que le serveur refuse (FR-137). Données de santé : lisibles de `MED`, du `GEST` corporel affecté, de `RESP`, et de `DG`/`DT` par **dossier ouvert à la validation** ; `ACC` et `NUM` voient le **type** et l'**existence** d'une pièce médicale, jamais son contenu ; chaque lecture est journalisée (FR-9, FR-158). Double authentification pour tout rôle autorisé à lire une donnée de santé ou à enregistrer un accord (FR-25, `MFA_ROLES`, annexe D). |
+| C3 Données possédées | Dossiers sinistres (8 phases, **11 statuts** : `DECLARE`, `PIECES_ATTENDUES`, `OUVERT`, `EN_INSTRUCTION`, `EVALUE`, `EN_VALIDATION`, `OFFRE_ENVOYEE`, `ORDRE_EMIS`, `CHEQUE_A_REMETTRE`, `REGLE`, `CLOTURE`, et les 4 sorties `REJETE`, `SANS_SUITE`, `LITIGE`, `FRAUDE_SUSPECTEE`, FR-30, FR-31, FR-134), déclarations et leur référence `DEC-AAAA-NNNNN`, numéro de sinistre officiel rattaché, formulaires d'instruction par type, recevabilité et décisions de garantie motivées, qualification de la responsabilité, évaluations arrêtées et leur décompte ligne à ligne (ordre : dommage, vétusté, règle proportionnelle, plafond, franchise, FR-69 ; poste par poste au corporel, FR-70), les cinq montants distincts (évalué, proposé, validé, payé, reste à payer, FR-75), matrice de délégation, séances et procès-verbaux du comité, fiches de décision, offres (provisionnelle, définitive), accords et procès-verbaux de transaction, ordres et règlements (`A_PAYER`, `EN_COURS`, `INCONNU`, `PARTIEL`, `PAYE`, `ECHEC` : **six états**, chaque règlement portant sa **clé d'idempotence** ; un règlement `EN_COURS` ou `INCONNU` ne s'annule pas), états de chèque (dont `CHEQUE_EN_OPPOSITION`), condition d'émission `DELAI_DENONCIATION_ECOULE`, état de déclaration `SAISIE_MANUELLE`, quittances (`PRETE`, `EDITEE`, `SIGNEE`, `REMISE`, `ENCAISSEE`), remises de chèque, clôtures et réouvertures, recours et leur machine (`A_QUALIFIER` à `RECUPERE` ou `ABANDONNE`), créances à trois montants, mises en demeure, signaux et scores de fraude, revues, réclamations, files et corbeilles, échéances légales et internes, notifications émises, plan de contrôle et constats de `AUD`, **registre de l'IA** (entrée, sortie, confiance, sources, niveau, statut, auteur de la décision, FR-12), **journal horodaté et chaîné** de chaque transition et de chaque lecture sensible (FR-13, FR-138). **Lues seulement** : polices, garanties, primes, intermédiaires, coassureurs, traités (projection d'`assurance`, source : le logiciel de la compagnie), pièces (`ged`), missions, experts et rapports (`expertises`), état des moyens de paiement (`paiement`), nœuds et portées (`reseau`), propositions de l'IA commune. **Aucun contrat, aucune comptabilité.** |
 | C4 Emplacements vides | `ged` est une dépendance dure. `assurance` absent : la projection des contrats est `{etat: NON_INSTALLE, module: assurance}` ; le contrôle de garantie **ne se saute pas** (FR-42) : le gestionnaire enregistre la décision motivée `GARANTIE_ACQUISE`, `SOUS_RESERVE` ou `REFUS_DE_GARANTIE` (motif de 10 caractères au moins), visible de `AUD` ; la provision du dossier est `NON_INSTALLE` (le dossier avance, l'écran dit « provision non tenue ») [À CONFIRMER par la spine : si la provision doit rester une dépendance dure de `sinistres`, FR-188]. `liaison-assureur` absent : numéro officiel `{etat: NON_INSTALLE}` ; la référence `DEC-` est attribuée quand même, la déclaration apparaît dans la liste « à saisir dans le logiciel de la compagnie » (FR-199) et l'agent reporte le numéro obtenu. `expertises` absent : missions et portail `NON_INSTALLE` ; la voie « accord sur devis » (FR-59) et les types sans expertise obligatoire avancent, un dossier qui exige une expertise attend (le motif est affiché) [À CONFIRMER avec le PO]. `paiement` absent : chèque enregistré à la main (FR-221), virement, PI-SPI et Mobile Money `NON_INSTALLE` (FR-222, FR-223), le dossier propose un autre moyen. `notification` absent : cloche interne seule, SMS, WhatsApp et e-mail `NON_INSTALLE` ; le courrier papier reste possible (FR-146). `dashboard` absent : l'emplacement du cockpit est vide, les files de FR-147 à FR-149 restent (FR-228). `reseau` absent : un seul site, volet et pôle recours lus des affectations de `sinistres` (FR-244) [À CONFIRMER]. `reprise` absent : pas de dossier repris, le circuit va quand même jusqu'à l'archive (FR-20). **IA commune absente : les usages d'IA du circuit (FR-10) = `NON_DISPONIBLE`, une règle explicable ou la saisie à la main prend le relais, aucun parcours n'est bloqué** (FR-10, FR-11, FR-230). Un test par entrée de `enrichiPar`. |
 | C5 Contrats nommés | Publie `sinistres.declaration.enregistree@1` (référence `DEC-`, police, date de survenance, volet ; pour `liaison-assureur`), `sinistres.dossier.changed@1` (état absolu du dossier : statut, volet, gestionnaire, montants, échéances), `sinistres.dossier.ouvert@1`, `sinistres.dossier.attribue@1`, `sinistres.garantie.decidee@1`, `sinistres.evaluation.arretee@1` (pour `liaison-assureur`), `sinistres.provision.revisee@1` (montant, motif, pièce ; pour `assurance`), `sinistres.decision.validee@1`, `sinistres.offre.envoyee@1`, `sinistres.accord.enregistre@1`, `sinistres.reglement.ordonne@1` (pour `paiement`, un par règlement), `sinistres.reglement.changed@1` (états du règlement et de sa quittance ; pour `liaison-assureur` et l'export comptable), `sinistres.dossier.cloture@1`, `sinistres.dossier.rouvert@1`, `sinistres.sortie.decidee@1` (rejet, sans suite, litige), `sinistres.fraude.signalee@1` (jamais vers l'assuré ni le courtier), `sinistres.recours.changed@1`, `sinistres.recours.encaisse@1`, `sinistres.echeance.alerte@1` (délai légal ou interne, pour `notification` et `dashboard`), `sinistres.portee.volet.changed@1` (pour `reseau`), `sinistres.reclamation.changed@1`, `sinistres.ia.proposition.enregistree@1`. Consomme `ged.piece.recue@1`, `ged.piece.controlee@1`, `ged.dossier.verse@1`, `assurance.police.changed@1`, `assurance.garantie.changed@1`, `liaison-assureur.numero-sinistre.attribue@1`, `liaison-assureur.envoi.etat@1`, `liaison-assureur.ecart.ouvert@1`, `expertises.mission.changed@1`, `expertises.rapport.depose@1`, `expertises.honoraires.vises@1`, `paiement.reglement.execute@1`, `paiement.reglement.echoue@1`, `paiement.reglement.inconnu@1`, `paiement.reglement.rapproche@1` (noms **proposés** ; `paiement` n'a pas encore d'adaptateur sortant, FR-223), `notification.envoi.delivre@1`, `reseau.portee.changed@1`, `reseau.noeud.changed@1`, `reprise.feu-vert.changed@1`, `etat-publie.changed.reel@1` et `.essai@1`. Les noms sont des propositions. |
 | C6 Paramètres | Tout seuil, délai, montant, taux ou liste est un paramètre de la compagnie (FR-4) : voir l'**annexe D** (D.1 règles transverses, D.2 circuit, D.5 référentiel légal). Les principaux : qui attribue le numéro de sinistre (LC ou Prospera) et le délai d'alerte du numéro (1 jour ouvré) ; matrice de délégation (≤ 1 000 000 FCFA responsable ; au-delà, comité de 4 membres, quorum 3, puis visa du directeur technique ; règlement à titre commercial : direction générale seule ; cumul des montants du dossier, FR-8) ; voie « accord sur devis » (dossier ≤ 300 000, devis ≤ 200 000 FCFA, FR-59) ; seuils d'expertise (aucune sous 250 000, externe obligatoire au-dessus de 3 000 000) ; seuil d'écart de rapport (15 % attention, 35 % bloquant, FR-65) ; grille de provision d'ouverture par volet et gravité, seuil d'écart de provision (2 000 000 FCFA, FR-188) ; offre sous 48 h, relances d'offre à J+15 et J+30 ; paiement sous 72 h après l'accord ; plafond d'espèces 500 000 FCFA ; fenêtres LBC/FT (5 jours, 30 jours, 60 %) ; relance de recours tous les 15 jours, alerte de prescription à 90 jours ; poids et seuils des signaux de fraude (FR-127, FR-128) ; délais internes par produit ; relances (5 jours entre deux, 3 sans effet, 8/15/30 jours de silence) ; réclamations (5, 30, 60 jours) ; délais de recherche (5 s au 95e centile). Les **délais légaux du corporel** (art. 231, 233, 236, pénalité de 5 % par mois) sont un **référentiel daté, non modifiable** par la compagnie (FR-14, annexe D.5). Données, jamais code. |
@@ -4184,14 +4707,14 @@ Ce qui change pour l'assurance :
 | C10 Démarrer seul | `profiles: ["sinistres"]` ; socle + `ged`. Sans autre module, un dossier va de `DECLARE` à `CLOTURE` : le contrôle de garantie par décision motivée, la saisie à la main des experts, le chèque rempli à la main et la liste « à saisir dans le logiciel de la compagnie » tiennent lieu des modules absents. Avec `assurance`, `liaison-assureur` et `assureur-fictif` (espace d'essai seulement), le parcours de `SIN-2026-9002` se mène rôle après rôle, de la déclaration à l'archive (FR-205). Sans `reprise`, sans `dashboard` et sans IA commune, le circuit va jusqu'à l'archive (FR-20). |
 | C11 IA | `ia: { modeles: ['declaration-assistee', 'controle-pieces', 'relance-pieces', 'pre-remplissage-instruction', 'analyse-devis', 'explication-montant', 'detection-fraude-liens', 'redaction-courrier', 'appreciation-recours', 'resume-dossier', 'recherche-langage-naturel', 'brief-du-matin', 'qualite-dossier-simulation'], finalites: ['declaration-assistee', 'controle-pieces', 'relance-pieces', 'preremplissage-instruction', 'analyse-devis', 'explication-montant', 'detection-fraude', 'redaction-courrier', 'recours', 'resume-dossier', 'recherche-langage-naturel', 'brief-du-matin-et-veille', 'qualite-et-simulation'] }`. L'orientation d'expertise assistée, la complétude d'un rapport d'expert et la comparaison au portefeuille (FR-58, FR-64) sont déclarées par `expertises` (A.3). Le module **spécifie** ces capacités (FR-35, FR-47, FR-53, FR-56, FR-60, FR-74, FR-83, FR-120, FR-122, FR-132, FR-154, FR-155, FR-157, FR-208, FR-209) ; le **moteur est l'IA commune**, en instance locale chez la compagnie (FR-10, FR-230). Le module définit entrées, sorties, destinataire et affichage, et **ne calcule aucun score lui-même**. Garde-fous : **aucune décision automatique** ; **jamais de montant proposé sur un préjudice corporel**, ni à `GEST` ni à `MED` (FR-71) : c'est une règle du service, pas seulement de l'écran ; chaque information est **sourcée** jusqu'à la pièce ; chaque proposition va au **registre de l'IA** (niveau `EXTRACTION`, `ANALYSE` ou `RECOMMANDATION`, statut `PROPOSEE`, `ACCEPTEE`, `MODIFIEE`, `REJETEE`) ; le score de fraude n'est qu'un signal, la revue humaine est obligatoire et motivée (FR-129) ; aucune dictée ni transcription d'appel (déclaration assistée = WhatsApp et e-mail) ; aucune donnée de santé ne sort de l'instance (FR-232). Tant qu'un modèle n'existe pas : règle explicable, et l'écran n'écrit pas « IA » (FR-10). |
 | C12 Migrations | `retourArriere: 'SANS_PERTE'`. Migration additive. Interrupteurs : `declaration-assistee-ia`, `analyse-devis-ia`, `graphe-des-liens-ia`, `numero-attribue-par-prospera` (bascule du paramètre « qui attribue le numéro » sans reprise de code, FR-198). La forme du journal, du registre de l'IA, des états du règlement et de la quittance ne change jamais dans la fenêtre de sept jours ; un statut, un état ou un motif ajouté est lu comme **inconnu** par la version précédente, qui refuse la transition plutôt que de la deviner. Un dossier est jugé selon le référentiel en vigueur à sa **date de survenance** (FR-14, FR-235). |
-| C13 Installable sous contrôle | Prérequis : `ged` en service ; (recommandés) `assurance` et `liaison-assureur` en service. Vérifications : `transitions-gardees` (🟢 si, sur un dossier d'essai, le chemin nominal atteint les 11 statuts dans l'ordre, si une transition absente de la table des 41 est refusée par le serveur et si aucun statut non terminal n'est sans issue, FR-135, FR-139 ; 🔴 sinon) ; `garantie-non-sautable` (🟢 si l'ouverture d'un dossier sans contrôle de garantie ni décision motivée est refusée ; 🔴 sinon, FR-42) ; `aucun-ordre-sans-accord` (🟢 si un ordre de règlement est refusé tant que l'accord n'est pas enregistré, FR-90 ; 🔴 sinon) ; `separation-des-taches` (🟢 si l'instructeur ne valide pas son propre dossier, si celui qui décide n'émet ni ne paie, et si le cumul des montants du dossier décide du niveau de validation, FR-7, FR-81 ; 🔴 sinon) ; `delegation-parametree` (🟢 si ≤ 1 000 000 FCFA est signé par le responsable, un montant au-dessus est refusé au responsable seul et passe au comité puis au visa du directeur technique, un règlement à titre commercial n'est signé que par la direction générale ; 🔴 sinon, FR-8, FR-78) ; `decompte-dans-l-ordre` (🟢 si un dossier d'essai donne 702 000 FCFA pour un dommage de 780 000, franchise 10 % et minimum 50 000 ; 🔴 sinon, FR-69) ; `corporel-sans-montant-ia` (🟢 si aucun point d'entrée n'accepte un montant proposé par l'IA sur un dossier corporel ; 🔴 sinon, FR-71) ; `plafond-especes` (🟢 si un règlement en espèces au-dessus du plafond est refusé avec un code nommé ; 🔴 sinon, FR-98). Lecture seule : consultation, journal, export. **`objetsDeReprise: ['sinistres.dossier@1']** : les **dossiers sinistres** en cours d'abord, l'historique ensuite (état traduit, dates d'origine, montants, provisions, expert désigné, trace de la source), repris selon FR-214 et FR-215 ; valeurs de contrôle : nombre de sinistres ouverts, somme des provisions des sinistres ouverts (FR-218). `domainesEchange: ['sinistres.dossiers']` (`MOUVEMENT`, `argent: true`, `controle: true`), servi par `liaison-assureur` et décrit à l'annexe C [À CONFIRMER avec le contrat de Connecteurs]. Essai : aucun message réel n'est envoyé, aucun ordre réel ne part, les sorties sont interceptées et comptées (FR-205). |
+| C13 Installable sous contrôle | Prérequis : `ged` en service ; (recommandés) `assurance` et `liaison-assureur` en service. Vérifications : `transitions-gardees` (🟢 si, sur un dossier d'essai, le chemin nominal atteint les 11 statuts dans l'ordre, si une transition absente de la table des 42 est refusée par le serveur et si aucun statut non terminal n'est sans issue, FR-135, FR-139 ; 🔴 sinon) ; `garantie-non-sautable` (🟢 si l'ouverture d'un dossier sans contrôle de garantie ni décision motivée est refusée ; 🔴 sinon, FR-42) ; `aucun-ordre-sans-accord` (🟢 si un ordre de règlement est refusé tant que l'accord n'est pas enregistré, FR-90 ; 🔴 sinon) ; `separation-des-taches` (🟢 si l'instructeur ne valide pas son propre dossier, si celui qui décide n'émet ni ne paie, et si le cumul des montants du dossier décide du niveau de validation, FR-7, FR-81 ; 🔴 sinon) ; `delegation-parametree` (🟢 si ≤ 1 000 000 FCFA est signé par le responsable, un montant au-dessus est refusé au responsable seul et passe au comité puis au visa du directeur technique, un règlement à titre commercial n'est signé que par la direction générale ; 🔴 sinon, FR-8, FR-78) ; `decompte-dans-l-ordre` (🟢 si un dossier d'essai donne 702 000 FCFA pour un dommage de 780 000, franchise 10 % et minimum 50 000 ; 🔴 sinon, FR-69) ; `corporel-sans-montant-ia` (🟢 si aucun point d'entrée n'accepte un montant proposé par l'IA sur un dossier corporel ; 🔴 sinon, FR-71) ; `plafond-especes` (🟢 si un règlement en espèces au-dessus du plafond est refusé avec un code nommé ; 🔴 sinon, FR-98). Lecture seule : consultation, journal, export. **`objetsDeReprise: ['sinistres.dossier@1']** : les **dossiers sinistres** en cours d'abord, l'historique ensuite (état traduit, dates d'origine, montants, provisions, expert désigné, trace de la source), repris selon FR-214 et FR-215 ; valeurs de contrôle : nombre de sinistres ouverts, somme des provisions des sinistres ouverts (FR-218). `domainesEchange: ['sinistres.dossiers']` (`MOUVEMENT`, `argent: true`, `controle: true`), servi par `liaison-assureur` et décrit à l'annexe C [À CONFIRMER avec le contrat de Connecteurs]. Essai : aucun message réel n'est envoyé, aucun ordre réel ne part, les sorties sont interceptées et comptées (FR-205). |
 
 ### A.2 ★ Pièces, numérisation et archives (`ged`, M07)
 
 | Clause | Valeur pour ce module |
 |---|---|
 | C1 Manifeste | `code: 'ged'`, `version: '1.0.0'`. `depends: []` (aucune dépendance dure : la GED reçoit, lit, classe, conserve et retrouve des pièces sans autre module ; une pièce enregistrée sans dossier va dans la file « à rattacher », FR-159, FR-166). `enrichiPar: [sinistres (dossiers, pièces attendues, clés de rattachement), expertises (rapports et pièces transmises à une mission), assurance (polices, pièces contractuelles), liaison-assureur (documents de sinistre existants, numéro d'archivage d'origine), reprise (pièces historiques, clés de rattachement, numéro d'archivage conservé), notification (alertes de file et de chemise), reseau (postes de numérisation des guichets), IA commune (lecture et classement des pièces)]`. Service porteur : `document-service` étendu (D18), qui est déjà `prospera-ocr-service` [À CONFIRMER par la spine : quelle part du service existant sert l'OCR réel des scans et la gestion du fonds papier]. |
-| C2 Socle | Gate `GED_NOT_ENTITLED`. Cloisonnement par `organisationId` et par portée du dossier auquel la pièce appartient (volet, FR-6). `ACC` reçoit une pièce et ne la lit pas si elle est médicale (FR-153, FR-159) ; `NUM` ses lots ; `ARCH` le fonds, les versements, la cote, les sorties ; `GEST` corporel, `MED`, `RESP`, `DG`/`DT` pour une décision lisent les pièces de santé, chaque lecture étant journalisée (FR-9) ; `EXPE` ne voit que la **liste de pièces choisie** pour sa mission (FR-180) ; `AUD` lit sans modifier ; `ADMIN` ne lit aucune pièce. **Aucun bouton « supprimer »** pour aucun rôle, `ADMIN` compris (FR-175). Les fichiers ne sortent pas du site : stockage sur le NAS de la compagnie (FR-176). |
+| C2 Socle | Gate `GED_NOT_ENTITLED`. Cloisonnement par `organisationId` et par portée du dossier auquel la pièce appartient (volet, FR-6). `ACC` reçoit une pièce et ne la lit pas si elle est médicale (FR-153, FR-159) ; `NUM` ses lots (type et existence d'une pièce médicale, jamais son contenu) ; `ARCH` le fonds, les versements, la cote, les sorties ; `GEST` corporel, `MED`, `RESP`, `DG`/`DT` par dossier ouvert à la validation lisent les pièces de santé, chaque lecture étant journalisée (FR-9) ; `EXPE` ne voit que la **liste de pièces choisie** pour sa mission (FR-180) ; `AUD` lit sans modifier ; `ADMIN` ne lit aucune pièce. **Aucun bouton « supprimer »** pour aucun rôle, `ADMIN` compris (FR-175). Les fichiers ne sortent pas du site : stockage sur le NAS de la compagnie (FR-176). |
 | C3 Données possédées | Pièces et leurs **versions** (jamais écrasées, FR-161), source, date de réception réelle, auteur, pages, responsable de fourniture, empreinte, statut de lecture (`NON_TRAITE`, `EN_COURS`, `OK`, `PARTIEL`, `ECHEC`) et texte lu stocké **en plus** de l'image (FR-163), types de pièces, lots de numérisation (`EN_ATTENTE`, `SCAN_EN_COURS`, `INDEXATION`, `CONTROLE_QUALITE`, `ARCHIVE`, `ANOMALIE`, FR-162), contrôles avant archivage et leur auteur (FR-165), file « à rattacher » (FR-166), numéros d'archivage `ARC-AAAA-CCCC-NNNNN` jamais réutilisés (FR-167), bordereaux de versement avec la valeur de chaque pièce (`ORIGINAL_IRREMPLACABLE`, `ORIGINAL_REEDITABLE`, `COPIE`, FR-168), scellements par empreinte et support de référence (FR-169), cotes physiques (local, travée, tablette, boîte, rang), chemises de couleur par branche, état du papier (`EN_RAYONNAGE`, `COMMUNIQUE`, `TRANSFERE_EXTERNE`, `INTROUVABLE`, `DETRUIT`, `JAMAIS_CONSTITUE`, FR-170), sorties et restitutions d'archive (FR-171), reconstitutions et constats de carence (FR-173), durées de conservation par nature (FR-174), bordereaux de destruction et leurs visas (FR-175), journal des lectures et registre de l'IA du classement. **Lues seulement** : dossiers, statuts et pièces attendues (`sinistres`), polices (`assurance`), missions (`expertises`), clés de rattachement (`reprise`), propositions de classement de l'IA commune. |
 | C4 Emplacements vides | Aucune dépendance dure. `sinistres` absent : les pièces se reçoivent et se rangent mais ne se rattachent à aucun dossier, elles vont dans la file « à rattacher » ; `{etat: NON_INSTALLE, module: sinistres}` pour les pièces attendues. `reprise` absent : pas de pièce historique, numéros d'archivage attribués par la GED seule. `expertises` absent : aucune liste de pièces transmises. `assurance` absent : pas de rattachement par police. `notification` absent : alertes en cloche interne seule. `reseau` absent : un seul poste de numérisation, pas de guichet. **IA commune absente : lecture et classement des pièces = `NON_DISPONIBLE`, le classement est manuel, l'OCR continue (il n'est pas de l'IA, il tourne sur le serveur de la compagnie), le circuit n'est pas retardé** (FR-164). Un test par entrée de `enrichiPar`. |
 | C5 Contrats nommés | Publie `ged.piece.recue@1` (pièce reçue, « reçue, en contrôle »), `ged.piece.controlee@1` (« reçue » au sens de l'ouverture du dossier, FR-165), `ged.piece.versionnee@1`, `ged.piece.rattachee@1`, `ged.piece.a-rattacher@1` (alerte à 3 jours ouvrés), `ged.lot.changed@1`, `ged.dossier.verse@1` (numéro d'archivage, bordereau), `ged.dossier.scelle@1` (support de référence), `ged.empreinte.echec@1`, `ged.sortie-archive.changed@1` (alerte à 15 et 30 jours), `ged.dossier.reconstitue@1`, `ged.destruction.decidee@1`, `ged.stockage.alerte@1` (sauvegarde en échec, NAS à 80 %). Consomme `sinistres.dossier.changed@1` (statut, clôture : le dossier clos à verser), `sinistres.dossier.cloture@1`, `sinistres.dossier.rouvert@1` (sortie de chemise), `expertises.rapport.depose@1` (pièce de la mission), `reprise.cles-rattachement.publiees@1` (numéro de police, numéro de sinistre, FR-215), `reprise.historique.livre@1`, `liaison-assureur.document.recu@1` (documents de sinistres existants), `notification.envoi.delivre@1`, `etat-publie.changed.reel@1` et `.essai@1`. Les noms sont des propositions. |
@@ -4209,7 +4732,7 @@ Ce qui change pour l'assurance :
 | Clause | Valeur pour ce module |
 |---|---|
 | C1 Manifeste | `code: 'expertises'`, `version: '1.0.0'`. `depends: [{sinistres, "Une mission d'expertise est rattachée à un dossier sinistre et à une question distincte (véhicule, blessures, responsabilité) ; sans dossier, pas de mission (§5.5)."}, {ged, "Le rapport d'expertise, les photos et les pièces transmises à un expert sont des pièces du dossier ; expertises n'en tient aucune copie (FR-180)."}]` (dépendances **proposées**, à valider par le PO et par la spine). `enrichiPar: [assurance (provision et estimation de référence), paiement (honoraires d'expert réglés par le circuit des règlements), notification (désignation, rapport reçu, complément demandé), reseau (zones des experts), dashboard (charge et délais des experts), IA commune (orientation, complétude, comparaison)]`. Service porteur : `prospera-assurance-service` étendu (D18) [À CONFIRMER par la spine : la machine des missions est écrite en §5.5, les personnes et les cabinets en §6.3]. |
-| C2 Socle | Gate `EXPERTISES_NOT_ENTITLED`. Cloisonnement par `organisationId` et par portée de la **mission** : `EXPE` (cabinet externe avec compte) ne voit **que ses missions**, via le portail, sans recherche générale, sans montant d'évaluation, sans provision, sans instruction (FR-180) ; `EXPI` ses missions et leurs dossiers (FR-179) ; `MED` les missions médicales ; `GEST` désigne pour son volet et ne voit que les experts désignables ; `RESP` et `DT` créent et désactivent un expert (FR-177) ; `CPT` ou `RESP` visent les honoraires (FR-182) ; `AUD` lit. Second facteur obligatoire pour `EXPE` [ASSUMPTION du PRD, FR-180]. Les accès d'un cabinet sont tracés comme ceux d'un agent (FR-158). |
+| C2 Socle | Gate `EXPERTISES_NOT_ENTITLED`. Cloisonnement par `organisationId` et par portée de la **mission** : `EXPE` (cabinet externe avec compte) ne voit **que ses missions**, via le portail, sans recherche générale, sans montant d'évaluation, sans provision, sans instruction (FR-180) ; `EXPI` ses missions et leurs dossiers (FR-179) ; `MED` les missions médicales ; `GEST` désigne pour son volet et ne voit que les experts désignables ; `RESP` et `DT` créent et désactivent un expert (FR-177) ; `CPT` ou `RESP` visent les honoraires (FR-182) ; `AUD` lit. Second facteur obligatoire pour `EXPE` (défaut du PRD, FR-180). Les accès d'un cabinet sont tracés comme ceux d'un agent (FR-158). |
 | C3 Données possédées | Référentiel des experts et des cabinets (nature interne ou externe, domaines, zones, agrément et sa date de fin, mode d'honoraires, tarif de référence, délai annoncé, capacité, état avec motif, qualification, FR-177), missions et leur machine d'états propre (FR-61), désignations et refus motivés, convocations et examens médicaux (FR-63), rapports et leurs versions (FR-161), compléments demandés, contre-expertises et expertises contradictoires (deux sens distincts), notes d'honoraires, visas, les **cinq montants** de la mission (budget prévisionnel, convenu, facturé, visé, payé, FR-182), budget indicatif (FR-185), charge pondérée et capacité (FR-183), relances de rapport (FR-184), journal des accès des cabinets, registre de l'IA des propositions d'expertise. **Lues seulement** : dossiers, volet, gravité, enjeu (`sinistres`), pièces et rapports déposés (`ged`), provision et estimation de référence (`assurance`), propositions de l'IA commune. |
 | C4 Emplacements vides | `sinistres` et `ged` sont des dépendances dures. `paiement` absent : les honoraires visés restent « à payer » ; moyen de paiement `NON_INSTALLE`, chèque enregistré à la main. `notification` absent : désignation et relance en cloche interne et courrier ; le portail se consulte. `reseau` absent : zones d'expert en texte libre. `assurance` absent : estimation de référence `NON_INSTALLE`, le budget indicatif se calcule sur l'enjeu du dossier. `dashboard` absent : charge visible dans la liste des experts seulement. **IA commune absente : orientation d'expertise assistée, complétude du rapport, comparaison au portefeuille = `NON_DISPONIBLE` ; le gestionnaire désigne et contrôle le rapport à la main, une liste de contrôle fixe tient lieu de complétude, rien n'est bloqué** (FR-58, FR-64). Cabinet sans compte : le gestionnaire saisit la désignation, l'acceptation, l'accusé et le rapport reçu (pièce jointe obligatoire, FR-181). Un test par entrée de `enrichiPar`. |
 | C5 Contrats nommés | Publie `expertises.mission.changed@1` (état absolu : domaine, expert, état, échéance du rapport), `expertises.mission.designee@1`, `expertises.mission.refusee@1`, `expertises.rapport.depose@1` (rapport en ligne ou téléversé ou saisi pour le cabinet ; pour `sinistres` et `ged`), `expertises.complement.demande@1`, `expertises.complement.revenu@1`, `expertises.rapport.retard@1`, `expertises.honoraires.notes@1`, `expertises.honoraires.vises@1` (pour `paiement` et l'export comptable), `expertises.agrement.echu@1` (alerte 60 jours avant), `expertises.expert.changed@1`, `expertises.charge.changed@1` (pour `dashboard`), `expertises.ia.proposition.enregistree@1`. Consomme `sinistres.dossier.changed@1`, `sinistres.evaluation.arretee@1`, `sinistres.sortie.decidee@1` (litige : contre-expertise), `ged.piece.controlee@1`, `assurance.provision.changed@1`, `paiement.reglement.execute@1` (honoraires payés), `reseau.noeud.changed@1`, `etat-publie.changed.reel@1` et `.essai@1`. Les noms sont des propositions. |
@@ -4246,7 +4769,7 @@ Ce qui change pour l'assurance :
 |---|---|
 | C1 Manifeste | `code: 'liaison-assureur'`, `version: '1.0.0'` (code et numéro M48 **proposés**, FR-20 ; à valider avec le contrat de module). `depends: []` (le module porte le contrat d'échange générique de l'annexe C et marche sans autre module : file des écarts, liste « à saisir », fraîcheur). `enrichiPar: [sinistres (déclarations, évaluations, règlements, recours encaissés, clôtures envoyés ; numéro officiel reçu), assurance (réception des objets de contrat, envoi des provisions, export comptable), ged (documents de sinistres existants), reprise (sinistres et polices existants), notification (alerte « sans numéro officiel », écarts), dashboard (fraîcheur), reseau (nœuds), connecteurs (le connecteur nommé du vrai LC, hors février), assureur-fictif (essai et démonstration)]`. Service porteur : à cadrer par la spine [À CONFIRMER, D18] ; un service d'échange **commun** avec la microfinance (`coeur-sfd`) est une option que la spine peut retenir, le contrat d'assurance en restant distinct. **Aucun nom de logiciel** dans le manifeste (FR-194). |
 | C2 Socle | Gate `LIAISON_ASSUREUR_NOT_ENTITLED`. Cloisonnement par `organisationId`. File des écarts lisible par `RESP`, le `GEST` concerné, `CPT` (écarts de règlement), `AUD` (FR-200) ; configuration du transport par `ADMIN` (sans lire de donnée métier). **Prospera tire et dépose : aucun port entrant n'est ouvert pour l'échange** (FR-197). Aucune écriture sur un contrat du LC, aucun compte technique d'écriture (addendum). Le serveur seul évalue les droits. |
-| C3 Données possédées | Journal des échanges (chaque lot, chaque fichier : identifiant de lot, version du contrat, objet, empreinte), **file d'envoi** (déclarations, évaluations et provisions, règlements, recours encaissés, clôtures, rejets, classements sans suite, réouvertures) et leurs états (`à envoyer`, `envoyé`, `accepté`, `refusé`, jamais confirmé après 24 heures, FR-196), **file des écarts** (objet, clé d'origine, nature, date, auteur de la résolution, FR-200), **liste « à saisir dans le logiciel de la compagnie »** (FR-199), état de **fraîcheur** par objet et transport utilisé (FR-201), numéros de sinistre attribués rattachés à leur référence `DEC-` (FR-198), paramètres d'échange (transport, fréquences, délais), table de correspondance des états du LC. **Aucun contrat n'est tenu comme vérité** : les objets reçus sont publiés par fait vers `assurance` et `sinistres`. **Lues seulement** : faits de `sinistres` et d'`assurance` à envoyer. **Aucune donnée de santé n'est envoyée au LC** [ASSUMPTION du PRD, FR-196]. |
+| C3 Données possédées | Journal des échanges (chaque lot, chaque fichier : identifiant de lot, version du contrat, objet, empreinte), **file d'envoi** (déclarations, évaluations et provisions, règlements, recours encaissés, clôtures, rejets, classements sans suite, réouvertures) et leurs états (`à envoyer`, `envoyé`, `accepté`, `refusé`, jamais confirmé après 24 heures, FR-196), **file des écarts** (objet, clé d'origine, nature, date, auteur de la résolution, FR-200), **liste « à saisir dans le logiciel de la compagnie »** (FR-199), état de **fraîcheur** par objet et transport utilisé (FR-201), numéros de sinistre attribués rattachés à leur référence `DEC-` (FR-198), paramètres d'échange (transport, fréquences, délais), table de correspondance des états du LC. **Aucun contrat n'est tenu comme vérité** : les objets reçus sont publiés par fait vers `assurance` et `sinistres`. **Lues seulement** : faits de `sinistres` et d'`assurance` à envoyer. **Aucune donnée de santé n'est envoyée au LC** (défaut du PRD, FR-196). **Idempotence et voie unique** : la référence `DEC-` est la **clé d'idempotence** de la déclaration (champ obligatoire de C-13) ; une déclaration est dans **une seule voie** à la fois, envoi automatique ou liste « à saisir » ; le passage à la liste annule d'abord l'envoi en attente (état `SAISIE_MANUELLE`) ; un numéro reçu pour une `DEC-` déjà numérotée est un **écart**, jamais un second rattachement ; les motifs envoyés au LC sont des **motifs codés** (D.3), jamais un texte libre ; les numéros attribués par Prospera portent un préfixe distinct (`PRO-`). |
 | C4 Emplacements vides | Aucune dépendance dure. `sinistres` absent : rien à envoyer, les objets reçus se rangent dans le journal ; état `NON_INSTALLE`. `assurance` absent : les objets de contrat reçus sont conservés au journal et ne sont lus par personne. `ged` absent : documents reçus conservés au journal, non rattachés. `notification` absent : alertes en cloche interne seule. `reprise` absent : pas de sinistre existant livré. `connecteurs` absent : le contrat générique par interface ou par fichier suffit (le connecteur nommé est hors février, FR-245). **LC absent ou injoignable : tous les objets en `{etat: PERIME, depuis}` ; Prospera continue de servir la dernière donnée connue et met les envois en file, qui partent dans l'ordre à la reprise, sans perte** (FR-201). **IA commune absente : sans objet, ce module n'embarque aucun emplacement d'IA ; la détection de doublon probable est une règle** (FR-198). Un test par entrée de `enrichiPar`. |
 | C5 Contrats nommés | Publie `liaison-assureur.assure.recu@1`, `liaison-assureur.police.recue@1`, `liaison-assureur.garantie.recue@1`, `liaison-assureur.prime.recue@1`, `liaison-assureur.intermediaire.recu@1`, `liaison-assureur.coassurance.recue@1`, `liaison-assureur.traite.recu@1` (facultatif), `liaison-assureur.sinistre-existant.recu@1`, `liaison-assureur.document.recu@1`, `liaison-assureur.numero-sinistre.attribue@1` (référence `DEC-` et numéro officiel, avec l'indicateur de doublon), `liaison-assureur.envoi.etat@1` (état absolu d'un envoi : accepté, refusé avec code et motif, jamais confirmé), `liaison-assureur.ecart.ouvert@1`, `liaison-assureur.ecart.resolu@1`, `liaison-assureur.fraicheur.changed@1`, `liaison-assureur.liste-a-saisir.changed@1`, `liaison-assureur.sans-numero.alerte@1` (plus de 1 jour ouvré, horloge suspendue pendant une coupure déclarée, FR-198, FR-201). Consomme `sinistres.declaration.enregistree@1`, `sinistres.evaluation.arretee@1`, `sinistres.reglement.changed@1`, `sinistres.recours.encaisse@1`, `sinistres.dossier.cloture@1`, `sinistres.dossier.rouvert@1`, `sinistres.sortie.decidee@1`, `assurance.provision.changed@1`, `assurance.export-comptable.produit@1`, `reprise.feu-vert.changed@1`, `etat-publie.changed.reel@1` et `.essai@1`. Chaque message sortant du corps du PRD a sa ligne à l'annexe C (C-13 à C-19) ; les noms sont des propositions. |
 | C6 Paramètres | Voir l'**annexe D** (D.3). Les principaux : qui attribue le numéro de sinistre (LC ou Prospera, FR-198) et le format de Prospera (`SIN-AAAA-NNNN`), longueur maximale du numéro du LC ; transport (API ou fichiers) et emplacement partagé ; fraîcheur par objet (5 minutes avec une API ; heure ou nuit avant 6 h avec des fichiers) et seuil « périmé » (le double) ; délai avant « jamais confirmé » (24 heures) ; alerte « sans numéro officiel » (1 jour ouvré) ; ancienneté d'une ligne de la liste « à saisir » (1 jour ouvré pour une déclaration, 72 heures pour une autre nature) ; âge maximal de lecture pour ouvrir un dossier (24 heures) ; fuseau de la compagnie ; version du contrat acceptée. Données, jamais code. |
@@ -4264,7 +4787,7 @@ Ce qui change pour l'assurance :
 |---|---|
 | C1 Manifeste | `code: 'assureur-fictif'`, `version: '1.0.0'`. `depends: []` (il n'a besoin que du socle pour servir l'API et les fichiers du contrat d'échange). `enrichiPar: [liaison-assureur (sa seule contrepartie : il parle le contrat de l'annexe C dans les deux sens), sinistres (parcours de démonstration), assurance (polices et garanties des 7 produits), ged (documents de sinistres existants), reprise (répétition de la reprise dans l'espace d'essai, FR-218)]`. Service porteur : à cadrer [À CONFIRMER, D18], comme le cœur fictif de la microfinance (`coeur-sfd`, FR-166). **Jamais installé dans un espace réel** : l'installation réelle ne le contient pas et **refuse de l'activer** (FR-205). Il n'est pas un produit : c'est un outil de démonstration et de recette. |
 | C2 Socle | Gate `ASSUREUR_FICTIF_NOT_ENTITLED`, accordée **aux espaces d'essai seulement** ; le moteur d'installation refuse de l'activer dans un espace réel, quelle que soit la licence. Cloisonnement par `organisationId` : aucun identifiant du LC fictif n'est accepté par un espace réel, aucune donnée d'essai ne passe dans un espace réel (FR-205). Réglages de panne réservés au compte d'essai de démonstration ; aucun rôle métier de la compagnie n'y accède. |
-| C3 Données possédées | Jeu **fictif de bout en bout** (noms, immatriculations, téléphones : aucune donnée d'une personne réelle, FR-202) : assurés, polices et garanties des **7 produits de la démo** (environ 25 000 contrats d'après la démo [ASSUMPTION du PRD]), tous statuts de police (en vigueur, suspendue, résiliée, expirée), primes impayées, polices en coassurance, intermédiaires, coassureurs et clés, sinistres existants et leurs documents, **numéros de sinistre attribués** (format propre au LC fictif, différent de celui de Prospera, FR-203), journal des envois reçus, **réglages d'essai** (coupure, refus motivé, doublon, écart, retard, mode « ne reçoit pas », changement d'une police après l'ouverture d'un dossier, FR-204). **Lues seulement** : rien (il ne lit aucune donnée réelle). |
+| C3 Données possédées | Jeu **fictif de bout en bout** (noms, immatriculations, téléphones : aucune donnée d'une personne réelle, FR-202) : assurés, polices et garanties des **7 produits de la démo** (environ 25 000 contrats d'après la démo (défaut du PRD)), tous statuts de police (en vigueur, suspendue, résiliée, expirée), primes impayées, polices en coassurance, intermédiaires, coassureurs et clés, sinistres existants et leurs documents, **numéros de sinistre attribués** (format propre au LC fictif, différent de celui de Prospera, FR-203), journal des envois reçus, **réglages d'essai** (coupure, refus motivé, doublon, écart, retard, mode « ne reçoit pas », changement d'une police après l'ouverture d'un dossier, FR-204). **Lues seulement** : rien (il ne lit aucune donnée réelle). |
 | C4 Emplacements vides | Aucune dépendance. `liaison-assureur` absent : le LC fictif tourne et sert son API et ses fichiers, mais personne ne les lit. `sinistres` et `assurance` absents : le jeu se charge et se consulte seul. `reprise` absent : pas de répétition de reprise. **IA commune absente : sans objet, aucun emplacement d'IA.** Chaque écran branché sur lui affiche « données fictives » (FR-205). Un test par entrée de `enrichiPar`. |
 | C5 Contrats nommés | Publie `assureur-fictif.jeu.charge@1`, `assureur-fictif.jeu.remis-a-zero@1`, `assureur-fictif.reglage.changed@1` (coupure, refus, retard, mode « ne reçoit pas »). Il parle le contrat de l'annexe C par son **transport** (API et fichiers), pas par des faits : les objets C-1 à C-12 sortent par l'API et les fichiers, les messages C-13 à C-19 y entrent. Consomme `etat-publie.changed.essai@1` (il n'écoute jamais `.reel`). Les noms sont des propositions. |
 | C6 Paramètres | Voir l'**annexe D** (D.4). Les principaux : délai simulé d'attribution du numéro, format du numéro du LC fictif, taille du jeu (environ 3 500 dossiers du portefeuille de démonstration, polices pour les couvrir), part de polices suspendues, impayées ou en coassurance, réglages de panne (par défaut aucun). Données, jamais code ; aucune de ces valeurs n'entre dans un espace réel. |
@@ -4294,7 +4817,7 @@ Le manifeste `manifestes/reprise.manifest.ts` et le PRD Reprise de données port
 | C10 Démarrer seul | Inchangé : sans aucune cible, rapport seul. Pour l'assurance, avec `assureur-fictif` dans l'espace d'essai, la répétition générale joue un lot complet (polices avant sinistres, sinistres avant pièces, FR-214, FR-218) sans autre module de la compagnie. |
 | C11 IA | Inchangé : `reprise` ne déclare aucun modèle. **Ce que l'assurance ajoute** : l'historique repris (3 à 5 ans) est la matière de **calibrage de l'IA commune** (FR-231) ; il n'est lu par l'IA qu'avec le consentement de la compagnie, et **aucune donnée de santé** n'entre dans le calibrage (FR-232). L'IA est absente pendant la reprise sans conséquence : le rapport se produit sans elle. |
 | C12 Migrations | Inchangé : `retourArriere: 'SANS_PERTE'`. La version du format de traduction d'un lot est portée par le lot ; un lot est rejouable sans doublon (clé d'origine et empreinte de ligne, FR-217). |
-| C13 Installable sous contrôle | Vérifications inchangées ; **à ajouter pour l'assurance** : `ordre-polices-avant-sinistres` (🟢 si, sur le jeu de contrôle, les polices sont livrées avant les sinistres et les sinistres avant les pièces ; 🔴 sinon, FR-214) ; `montant-absent-jamais-zero` (🟢 si un sinistre dont le montant validé manque est marqué « montant à saisir » au lieu de zéro ; 🔴 sinon, FR-214) ; `numero-archivage-conserve` (🟢 si un numéro d'archivage repris garde son format d'origine, si un doublon est refusé avec motif et si les séquences de la GED sautent les numéros repris ; 🔴 sinon, FR-215) ; `rejeu-sans-doublon` (🟢 si la même resynchronisation rejouée ne crée ni doublon ni changement ; 🔴 sinon, FR-217). **`objetsDeReprise` des cibles de l'assurance** : `sinistres.dossier@1` (A.1), `ged.piece@1` et `ged.archive@1` (A.2), `assurance.assure@1`, `assurance.police@1` et `assurance.provision-ouverte@1` (A.4), `expertises.expert@1` (A.3) ; valeurs de contrôle de départ : nombre de sinistres ouverts, somme de leurs provisions, nombre de polices en vigueur, nombre de pièces rattachées ; **écart nul sur les données vivantes**, l'historique entre protégé et ses écarts figurent au rapport sans bloquer (FR-214, FR-218). **Écarts à porter au PRD Reprise** : (1) le PRD ne requiert que les fichiers en février alors que le PO retient « API ou fichier » au premier jour (FR-214) ; (2) le **papier** reste tenu et sa cote est reprise sans numérisation du stock (FR-172, FR-215) ; (3) la bascule « suivi puis tenu par Prospera » à la première action d'un agent, par dossier (FR-217) [ASSUMPTION du PRD]. |
+| C13 Installable sous contrôle | Vérifications inchangées ; **à ajouter pour l'assurance** : `ordre-polices-avant-sinistres` (🟢 si, sur le jeu de contrôle, les polices sont livrées avant les sinistres et les sinistres avant les pièces ; 🔴 sinon, FR-214) ; `montant-absent-jamais-zero` (🟢 si un sinistre dont le montant validé manque est marqué « montant à saisir » au lieu de zéro ; 🔴 sinon, FR-214) ; `numero-archivage-conserve` (🟢 si un numéro d'archivage repris garde son format d'origine, si un doublon est refusé avec motif et si les séquences de la GED sautent les numéros repris ; 🔴 sinon, FR-215) ; `rejeu-sans-doublon` (🟢 si la même resynchronisation rejouée ne crée ni doublon ni changement ; 🔴 sinon, FR-217). **`objetsDeReprise` des cibles de l'assurance** : `sinistres.dossier@1` (A.1), `ged.piece@1` et `ged.archive@1` (A.2), `assurance.assure@1`, `assurance.police@1` et `assurance.provision-ouverte@1` (A.4), `expertises.expert@1` (A.3) ; valeurs de contrôle de départ : nombre de sinistres ouverts, somme de leurs provisions, nombre de polices en vigueur, nombre de pièces rattachées ; **écart nul sur les données vivantes**, l'historique entre protégé et ses écarts figurent au rapport sans bloquer (FR-214, FR-218). **Écarts à porter au PRD Reprise** : (1) le PRD ne requiert que les fichiers en février alors que le PO retient « API ou fichier » au premier jour (FR-214) ; (2) le **papier** reste tenu et sa cote est reprise sans numérisation du stock (FR-172, FR-215) ; (3) la bascule « suivi puis tenu par Prospera » à la première action d'un agent, par dossier (FR-217) (défaut du PRD). |
 
 ### A.8 Modules cadrés : renvoi aux manifestes
 
@@ -4302,13 +4825,28 @@ Les modules suivants ont déjà leurs treize clauses dans leur manifeste ou dans
 
 | Module | Manifeste ou annexe | Ce que l'assurance exige en plus | Point à reporter |
 |---|---|---|---|
-| `paiement` (M33) | `manifestes/paiement.manifest.ts` | **`sinistres` ordonne, `paiement` exécute** (virement, PI-SPI, Mobile Money T-Money et Flooz) ou **enregistre** (chèque : banque, numéro, montant saisis par `CPT`) ; plusieurs règlements par dossier, chacun avec son état (`A_PAYER`, `EN_COURS`, `PARTIEL`, `PAYE`, `ECHEC`) ; ordre d'issue inconnue `INCONNU` rapproché du relevé avant toute réémission, avec sa clé d'idempotence ; **aucun adaptateur Mobile Money sortant** : « bientôt » en février, **à chiffrer au plan** ; rapprochement des chèques, virements et paiements mobiles par `CPT`, alerte à 60 jours ; honoraires d'expert réglés comme un règlement ; plafond d'espèces 500 000 FCFA ; changement de coordonnées bancaires dans les 5 jours = alerte et blocage ; confirmations de virement tirées par le relais (FR-239). Faits proposés `paiement.reglement.execute@1`, `.echoue@1`, `.inconnu@1`, `.rapproche@1` (le manifeste actuel ne publie que des faits d'encaissement) | FR-220 à FR-225 ; écarts **à porter au PRD `paiement`** (paiement sortant, chèque, Mobile Money sortant) |
+| `paiement` (M33) | `manifestes/paiement.manifest.ts` | **`sinistres` ordonne, `paiement` exécute** (virement, PI-SPI, Mobile Money T-Money et Flooz) ou **enregistre** (chèque : banque, numéro, montant saisis par `CPT`) ; plusieurs règlements par dossier, chacun avec son état (`A_PAYER`, `EN_COURS`, `INCONNU`, `PARTIEL`, `PAYE`, `ECHEC`) ; un règlement d'issue inconnue (`INCONNU`) est rapproché du relevé avant toute réémission, avec sa clé d'idempotence gardée à chaque tentative ; **aucun adaptateur Mobile Money sortant** : « bientôt » en février, **à chiffrer au plan** ; rapprochement des chèques, virements et paiements mobiles par `CPT`, alerte à 60 jours ; honoraires d'expert réglés comme un règlement ; plafond d'espèces 500 000 FCFA ; changement de coordonnées bancaires dans les 5 jours = alerte et blocage ; confirmations de virement tirées par le relais (FR-239). Faits proposés `paiement.reglement.execute@1`, `.echoue@1`, `.inconnu@1`, `.rapproche@1` (le manifeste actuel ne publie que des faits d'encaissement) | FR-220 à FR-225 ; écarts **à porter au PRD `paiement`** (paiement sortant, chèque, Mobile Money sortant) |
 | `notification` (M34) | `manifestes/notification.manifest.ts` | SMS, WhatsApp, e-mail, cloche et courrier avec preuve ; **modèles WhatsApp de la compagnie** (accusé de déclaration, pièces manquantes, offre envoyée, chèque à retirer, règlement effectué) approuvés avant la mise en service ; numéro WhatsApp Business et passerelle SMS **à la charge de la compagnie** ; relances de pièces espacées de 5 jours, arbitrage après trois sans effet ; **aucune donnée de santé dans un message** (« un document médical » sans plus) ; aucun message à l'assuré ne contient « fraude » ni un montant d'indemnité ; réponses entrantes par le relais | FR-18, FR-146, FR-226, FR-227 ; matrice « qui est prévenu de quoi » à l'annexe B |
 | `dashboard` (M28) | `manifestes/dashboard.manifest.ts` | Un **cockpit par rôle**, spécifié au §6.7 : dossiers par statut, bloqués et pourquoi, sans action depuis 30 jours, charge, pièces attendues, règlements en attente et valideur attendu, délais qui expirent (légaux et internes séparés), indicateurs **recalculés depuis les données**, jamais constants ; **aucune prime ni ratio sinistres sur primes** (les primes relèvent du LC) ; sans `dashboard`, l'emplacement du cockpit est vide et les files de `sinistres` restent | FR-206 à FR-213, FR-228 |
 | `reseau` (M01) | `manifestes/reseau.manifest.ts` | Un **site central** et des **guichets** ; le **volet** (corporel, matériel, risques divers) et le pôle recours sont des **portées tenues par `sinistres`** et lues par `reseau` (`sinistres.portee.volet.changed@1`) ; intermédiaires et coassureurs **non tenus** par `reseau` (objets du LC) ; transfert d'un agent d'un guichet à un autre daté et tracé ; une portée vide est vide, jamais « tout » | FR-244 ; amendement à porter au PRD `reseau` (portée par volet, action du §12) ; objets de reprise `reseau.zone@1` et `reseau.commercial@1` inchangés |
 | `connecteurs` (M43) | `manifestes/connecteurs.manifest.ts` | Le **connecteur nommé** du logiciel de la compagnie est **hors février** (le logiciel est libre en janvier) ; le **contrat d'échange générique** (annexe C) est du **premier jour**, porté par `liaison-assureur` ; objet en **lecture seule** quand le LC en est propriétaire (assurés, polices, garanties, primes, intermédiaires, coassureurs, numéro de sinistre) ; la section « Intégrations » n'apparaît que si `connecteurs` est installé ; valeurs de contrôle des domaines d'échange déclarées dès le manifeste | FR-245 ; domaines `sinistres.dossiers`, `assurance.contrats`, `ged.documents-sinistres` [À CONFIRMER] |
 | IA commune | `prd-assistant-ia-2026-08-02`, note de vision `vision-ia-sectorielle-2026-11-10`, PRD moteur FR-24 à FR-31 | **Instance locale chez la compagnie** : prédit sur ses seules données, enregistre l'écart, anonymise, renvoie par tunnel sécurisé sortant sous consentement par finalité ; **aucune donnée nominative ni de santé ne sort** ; calibrée sur 3 à 5 ans d'historique repris ; réentraînement mensuel et rapport mensuel de performance (acceptées, modifiées, rejetées par usage) ; mises à jour signées, essayées dans l'espace d'essai, retirables ; tunnel distinct du tunnel de support | FR-10, FR-12, FR-230 à FR-233 ; finalités et modèles déclarés module par module à la clause C11 |
 | `instance` (moteur d'installation) | PRD moteur d'installation | **Serveur applicatif et NAS distincts chez la compagnie**, sans nuage étranger ; mises à jour essayées, promues à la date choisie, retour arrière en un clic, fichier signé hors ligne ; sauvegarde quotidienne, restauration testée ; guichets par navigateur sur le réseau de la compagnie ; exploitation par la DSI de la compagnie (`ADMIN` ne lit pas le métier) ; **relais Money Vibes** pour les réponses WhatsApp et les notifications PI-SPI, sans port entrant ; support à distance ouvert par la compagnie seule ; une anomalie bloquante prise en charge en 4 heures ouvrées | FR-234 à FR-241, FR-246 ; régime de licence et contrat de maintenance : contrat commercial, hors de ce PRD (FR-235) |
+
+### A.9 Ordre de construction recommandé (sans valeur de périmètre)
+
+Cette table ajoute à chaque fiche A.1 à A.8 une colonne **« Ordre de construction recommandé »** : **1** = le chemin de la démo (déclarer, ouvrir, instruire, chiffrer, décider, offrir, accord, payer, clore, archiver) ; **2** = recours, fraude, états techniques ; **3** = IA avancée. **Cet ordre n'a aucune valeur de périmètre** : le périmètre du premier jour reste complet (tout le circuit au premier jour, §10 ordre de construction recommandé), et aucune fonction ne passe en « bientôt » à cause de cet ordre. Il aide à planifier ; il ne retire rien.
+
+| Fiche | Ordre de construction recommandé : 1 (chemin de la démo) | 2 (recours, fraude, états techniques) | 3 (IA avancée) |
+|---|---|---|---|
+| A.1 `sinistres` | déclarer, ouvrir, instruire, chiffrer, décider, offrir, accord, payer, clore (FR-30 à FR-107, FR-134 à FR-149) | recours (FR-108 à FR-120), fraude (FR-125 à FR-133) | usages d'IA du circuit, résumé, recherche en langage naturel, brief (FR-154, FR-155, FR-208, FR-209) |
+| A.2 `ged` | recevoir, contrôler, archiver, verser (FR-159, FR-161 à FR-168) | scellement, reconstitution, destruction (FR-169, FR-173 à FR-175) | lecture et classement par l'IA (FR-164) |
+| A.3 `expertises` | référentiel, désignation, rapport, honoraires (FR-177, FR-178, FR-181, FR-182) | portail du cabinet, charge et délais (FR-180, FR-183 à FR-185a) | orientation assistée, complétude du rapport (FR-58, FR-64) |
+| A.4 `assurance` | projection des contrats, garanties, provision (FR-186 à FR-188) | PSAP, réassurance, coassurance, états, export (FR-189 à FR-193) | — |
+| A.5 `liaison-assureur` | numéro de sinistre, envois, liste « à saisir » (FR-194 à FR-199) | file des écarts, fraîcheur et coupure (FR-200, FR-201) | connecteur du LC nommé (hors février) |
+| A.6 `assureur-fictif` | contrats et numéros de sinistre (FR-202, FR-203) | pannes et refus simulés (FR-204, FR-205) | — |
+| A.7 `reprise` | fichiers, dossiers en cours (FR-214, FR-215) | rapport, resynchronisation, feu vert (FR-216 à FR-218) | adaptateur API (si le LC en expose une) |
+| A.8 modules cadrés | ordre de leurs manifestes | — | — |
 
 ## Annexe B. Matrice d'accès
 
@@ -4332,14 +4870,17 @@ Rôles : DG direction générale ; DT directeur technique ; RESP responsable du 
 | Évaluer : arrêter le montant (décompte, barème) | — | — | É | É | É | L | — | — | — | — | — | — | L | — | 11 |
 | Réviser la provision du dossier | L | L | D | É | — | — | — | — | — | — | — | — | L | — | 12 |
 | **Circuit : décider et offrir** | | | | | | | | | | | | | | | |
+| Contrôler la proposition (niveau 1, sous 1 000 000 FCFA) | — | — | D | É | — | — | — | — | — | — | — | — | L | — | 42 |
 | Valider selon la délégation | D | D | D | — | — | — | — | — | — | — | — | — | L | — | 13 |
 | Siéger et voter au comité sinistres (instance) | D | D | D | — | — | — | — | — | — | — | — | — | — | — | 14 |
 | Envoyer l'offre | — | — | É | É | — | — | — | — | — | — | — | — | — | — | 15 |
-| Enregistrer l'accord de l'assuré ou de la victime | — | — | É | É | — | — | — | — | — | — | — | — | — | — | 16 |
+| Enregistrer l'accord de l'assuré ou de la victime (sur la pièce originale signée) | — | — | É | É | — | — | — | — | É | — | — | — | — | — | 16 |
 | **Circuit : payer, clore, rouvrir** | | | | | | | | | | | | | | | |
 | Émettre le règlement (chèque, virement, PI-SPI, Mobile Money) | L | L | L | L | L | — | — | — | — | — | — | É | L | — | 17 |
 | Remettre le chèque contre quittance signée | — | — | — | — | — | — | — | — | É | — | — | É | — | — | 18 |
-| Viser la note d'honoraires d'un expert | — | — | D | — | — | — | — | É | — | — | — | D | — | — | 19 |
+| Signer la quittance (la marquer `SIGNEE`) : agent distinct de l'émetteur | — | — | — | — | — | — | — | — | É | — | — | É | — | — | 43 |
+| Valider l'ordre de règlement : second `CPT`, distinct de celui qui prépare (`DG` au-dessus du seuil) | D | — | — | — | — | — | — | — | — | — | — | D | L | — | 44 |
+| Viser la note d'honoraires d'un expert | — | — | D | — | — | — | — | É | — | — | — | — | — | — | 19 |
 | Clore un dossier réglé | — | — | É | É | É | — | — | — | — | — | — | — | — | — | 20 |
 | Rouvrir un dossier clos, rejeté ou classé sans suite | D | D | D | — | — | — | — | — | — | — | — | — | — | — | 21 |
 | **Sorties, recours, fraude** | | | | | | | | | | | | | | | |
@@ -4348,10 +4889,11 @@ Rôles : DG direction générale ; DT directeur technique ; RESP responsable du 
 | Constater un litige, le résoudre | D | D | D | — | — | — | — | — | — | — | — | — | — | — | 24 |
 | Recours : qualifier, établir la créance, mettre en demeure, négocier | L | L | D | É | É | — | — | — | — | — | — | — | L | — | 25 |
 | Fraude : signaler une suspicion | É | É | É | É | É | — | — | — | — | — | — | — | É | — | 26 |
-| Fraude : écarter la suspicion | D | D | D | — | — | — | — | — | — | — | — | — | D | — | 27 |
+| Fraude : écarter un blocage ou une suspicion (avis d'AUD, relecteur non partie) | D | D | D | — | — | — | — | — | — | — | — | — | É | — | 27 |
 | Fraude : confirmer | D | D | — | — | — | — | — | — | — | — | — | — | D | — | 28 |
 | **Données de santé, pièces, archives** | | | | | | | | | | | | | | | |
 | Lire une donnée de santé (pièce médicale, taux, rapport) | L | L | L | L | — | L | — | L | — | — | — | — | — | — | 29 |
+| Voir le type et l'existence d'une pièce médicale (jamais son contenu) | — | — | — | — | — | — | — | — | L | L | L | L | L | L | 41 |
 | Scanner, téléverser, rattacher une pièce | — | — | É | É | É | — | — | — | É | É | — | — | — | — | 30 |
 | Contrôler une pièce avant archivage | — | — | — | É | É | — | — | — | É | É | — | — | — | — | 31 |
 | Verser un dossier clos au fonds (numéro d'archivage, cote physique) | — | — | — | É | — | — | — | — | — | — | É | — | — | — | 32 |
@@ -4360,6 +4902,7 @@ Rôles : DG direction générale ; DT directeur technique ; RESP responsable du 
 | **Paramètres, comptes, contrôle** | | | | | | | | | | | | | | | |
 | Paramétrer (seuils, délais, listes, matrice de délégation) | D | — | — | — | — | — | — | — | — | — | — | — | L | É | 35 |
 | Créer les comptes, attribuer les rôles | D | — | — | — | — | — | — | — | — | — | — | — | L | É | 36 |
+| Désigner le responsable LBC et la liste « qui reçoit quelle alerte » | L | — | — | — | — | — | — | — | — | — | — | — | D | — | 45 |
 | Lire le journal des accès (consultations) | — | — | — | — | — | — | — | — | — | — | — | — | L | — | 37 |
 | Lire la piste d'audit (qui a changé quoi) | L | — | L | — | — | — | — | — | — | — | — | — | L | — | 38 |
 | Lire le registre de l'IA | — | — | L | — | — | — | — | — | — | — | — | — | L | — | 39 |
@@ -4379,13 +4922,13 @@ Rôles : DG direction générale ; DT directeur technique ; RESP responsable du 
 10. **Complément non revenu** (FR-67) : la validation est bloquée (`COMPLEMENT_NON_REVENU`) sauf passage outre de RESP avec motif, visible d'AUD.
 11. **Évaluer** (FR-75, FR-7) : transition 7 de FR-135 (GEST, GREC, RESP). Au corporel, le calcul est poste par poste, **sans montant proposé par l'IA** (FR-70, FR-71) ; MED rend son avis, le gestionnaire arrête le montant. Une évaluation arrêtée n'est jamais recalculée.
 12. **Provision** (FR-76) : GEST la propose et la révise avec un motif ; un écart supérieur ou égal à 2 000 000 FCFA (défaut) **attend RESP** ; DG et DT lisent. Chaque mouvement s'ajoute, jamais écrasé.
-13. **Validation** (FR-78, FR-8) : défauts : jusqu'à 1 000 000 FCFA, RESP ; au-dessus, le comité puis le **visa de DT** ; un règlement **à titre commercial**, DG seul, quel que soit le montant. Le **cumul des montants validés** du dossier décide du niveau (SEP-03). **GEST et GREC ne valident jamais** (SEP-01) ; un dossier dont on est l'assuré, la victime ou le bénéficiaire ne se valide pas (séparation n° 11). Les délégations réelles sont à obtenir (§12.2, A-2).
+13. **Validation** (FR-78, FR-8) : défauts : jusqu'à 1 000 000 FCFA, **proposition de l'instructeur, contrôle d'un second agent du volet et validation du RESP** (trois personnes distinctes) ; au-dessus, le comité puis le **visa de DT** ; un règlement **à titre commercial**, DG seul, quel que soit le montant. Le **cumul des montants validés** du dossier décide du niveau (SEP-03). **GEST et GREC ne valident jamais** (SEP-01) ; un dossier dont on est l'assuré, la victime ou le bénéficiaire ne se valide pas (séparation n° 11). Les délégations réelles sont à obtenir (§12.2, A-2).
 14. **Comité** (FR-79) : par défaut 4 membres dont RESP et DT, quorum de 3 ; chaque membre présent vote avec son nom ; un membre ne vote pas sur un dossier qu'il a instruit ; DG siège s'il le décide (§2.1). Le quorum non atteint empêche la décision.
 15. **Offre** (FR-84) : l'envoi est fait par GEST ou RESP ; le signataire de la validation est celui de la ligne « Valider selon la délégation » (transition 10 de FR-135). L'offre part sous 48 heures (défaut) ; l'IA la rédige, l'agent la relit et la signe (FR-83).
-16. **Accord** (FR-86, FR-90) : seul l'enregistrement de l'accord (offre signée, ou procès-verbal de transaction au corporel), par GEST ou RESP, fait passer le dossier à `ORDRE_EMIS` ; **aucun ordre sans accord enregistré**. Font exception les honoraires d'expert et le règlement à titre commercial (FR-90).
+16. **Accord** (FR-86, FR-90) : seul l'enregistrement de l'accord (offre signée, ou procès-verbal de transaction au corporel) fait passer le dossier à `ORDRE_EMIS` ; il est fait par `ACC`, ou par un agent (GEST ou RESP) qui **n'a ni instruit ni validé** le dossier, sur la **pièce originale signée**, scannée et rattachée, avec contrôle d'identité du signataire (R4, FR-86, FR-90) ; **aucun ordre sans accord enregistré**. Font exception les honoraires d'expert et le règlement à titre commercial (FR-90).
 17. **Émission** (FR-93) : **CPT seul** émet ; service sinistres, responsable, direction et contrôle interne **voient** les ordres et les règlements, ils ne les émettent pas. CPT peut **rejeter l'ordre** avec motif (FR-99). Un GEST qui a instruit ou validé ne peut pas enregistrer l'émission, même s'il porte aussi le rôle CPT (SEP-01, SEP-02). Si le dossier est `BLOQUE` et non écarté, l'émission est refusée (FR-130).
 18. **Remise** (FR-97) : ACC ou CPT enregistre l'identité et le numéro de pièce du retirant et la quittance signée ; le champ « retiré par » n'est jamais pré-rempli. **Celui qui émet ne remet pas** : la chaîne ordre, chèque, remise est assurée par trois personnes différentes (séparation n° 3) ; celui qui décide ne remet pas (n° 4).
-19. **Honoraires** (FR-182) : l'expert dépose (ou le gestionnaire saisit) la note ; RESP ou CPT la vise ; le montant visé ne dépasse jamais le montant facturé. Le paiement suit le circuit des règlements.
+19. **Honoraires** (FR-182) : l'expert dépose (ou le gestionnaire saisit) la note ; **RESP seul** la vise, jamais CPT (CPT émet seulement) ; le visa suppose un rapport validé et le rapprochement facture, lettre de mission et rapport ; le montant visé ne dépasse jamais le montant facturé. Le paiement suit le circuit des règlements.
 20. **Clôture** (FR-104) : GEST, GREC ou RESP, avec un motif écrit, si le reste à payer est zéro, les règlements sont remis, aucune mission n'est ouverte et la question du recours est tranchée.
 21. **Réouverture** (FR-107, FR-126) : RESP, DG ou DT, avec un motif écrit (transitions 39, 40, 41).
 22. **Refus** (FR-121) : RESP, DG ou DT, sur la base d'une décision de garantie ; courrier motivé rédigé par l'IA, relu et signé (FR-122).
@@ -4393,20 +4936,25 @@ Rôles : DG direction générale ; DT directeur technique ; RESP responsable du 
 24. **Litige** (FR-124) : RESP, DG ou DT, avec motif ; le litige se résout par un retour à `EN_INSTRUCTION`.
 25. **Recours** (FR-108, FR-112) : GREC mène le recours ; GEST peut le **créer** quand un tiers apparaît ; RESP valide la créance, engage le contentieux, saisit l'arbitrage et décide de l'abandon. **GREC ne valide pas sa propre créance** ; l'abandon n'est pas décidé par qui l'a proposé (`SEPARATION_DES_TACHES`).
 26. **Signaler une fraude** (FR-125) : GEST, GREC, RESP, DG, DT ou AUD, avec motif. La suspicion n'est jamais révélée à l'assuré ni au courtier.
-27. **Écarter** (FR-129) : RESP, DG, DT ou AUD, avec une conclusion écrite ; **le relecteur n'est jamais le gestionnaire du dossier**.
+27. **Écarter** (FR-129) : RESP, DG ou DT décident, avec une conclusion écrite et l'**avis d'AUD** ; **le relecteur n'est jamais une partie du dossier** (ni le gestionnaire, ni celui qui l'a instruit, validé ou affecté).
 28. **Confirmer** (FR-133) : DG, DT ou AUD seulement, avec une conclusion écrite ; elle mène à `REJETE`. Un dossier `BLOQUE` non écarté suspend la validation, l'accord, l'émission et la remise (FR-130).
-29. **Données de santé** (FR-9, FR-153) : lisibles par MED, par le GEST corporel affecté au dossier et par RESP, et par DG et DT **pour une décision** ; **chaque lecture est journalisée**. ACC, NUM, ARCH, CPT, AUD et ADMIN voient qu'une pièce médicale existe, sa date, jamais son contenu. EXPE ne reçoit que les pièces nécessaires à sa mission médicale. Aucune donnée de santé dans un message (FR-227) ni vers le LC (FR-196).
+29. **Données de santé** (FR-9, FR-153) : lisibles par MED, par le GEST corporel affecté au dossier et par RESP, et par DG et DT par **dossier ouvert à la validation** ; **chaque lecture est journalisée**. ACC et NUM voient le **type** et l'**existence** d'une pièce médicale, jamais son contenu ; ARCH, CPT, AUD et ADMIN voient qu'elle existe et sa date, jamais son contenu. EXPE ne reçoit que les pièces nécessaires à sa mission médicale. Aucune donnée de santé dans un message (FR-227) ni vers le LC (FR-196).
 30. **Pièces** (FR-159) : six sources (scanner de guichet, téléversement, photo, lot de NUM, courrier numérisé, message reçu) ; l'agent rattache la pièce. La FR ne nomme pas les rôles : défaut ACC, NUM, GEST, GREC, RESP. Les experts déposent leur rapport par la ligne 8, pas ici.
 31. **Contrôle avant archivage** (FR-165) : NUM pour un lot ; l'agent qui a reçu la pièce pour un dépôt au guichet.
 32. **Versement** (FR-168) : GEST **propose** à la clôture, ARCH **exécute** ; le fonds ne reçoit que du terminé ; séparation n° 12 : seul ARCH verse.
 33. **Reconstitution** (FR-173) : ARCH reconstitue ; DG, RESP ou AUD **certifie**, jamais celui qui a reconstitué (séparation n° 10).
 34. **Destruction** (FR-175) : ARCH propose la liste ; le bordereau est visé par RESP puis par DG (défaut). **Aucun bouton « supprimer » n'existe, pour aucun rôle, ADMIN compris.** Elle est refusée sur un dossier sous contrôle, en litige ou sorti de l'archive.
-35. **Paramétrage** (FR-4) : ADMIN règle, **sous la validation d'un rôle métier**, versionné et daté ; qui valide quel paramètre est à fixer à l'annexe D (le DG au minimum pour les droits, FR-6). Les **délais légaux** ne sont pas des paramètres de la compagnie (FR-14). AUD lit le journal des changements.
-36. **Comptes** (FR-6) : ADMIN crée les comptes ; un rôle sensible n'est actif qu'après validation par DG ; AUD lit les créations et les retraits. La création d'un administrateur demande deux personnes (FR-238). Double authentification obligatoire pour DG, DT, RESP, CPT, AUD et ADMIN (FR-25).
+35. **Paramétrage** (FR-4) : ADMIN règle, **sous la validation d'un rôle métier**, versionné et daté ; qui valide quel paramètre est fixé à l'annexe D (le DG au minimum pour les droits, FR-6) ; **la matrice de délégation n'est pas approuvée par le seul DG qu'elle engage** : double contrôle du DG et d'AUD. Les **délais légaux** ne sont pas des paramètres de la compagnie (FR-14). AUD lit le journal des changements.
+36. **Comptes** (FR-6) : ADMIN crée les comptes ; un rôle sensible n'est actif qu'après validation par DG ; AUD lit les créations et les retraits. La création d'un administrateur demande deux personnes (FR-238). Double authentification obligatoire pour tout rôle autorisé à lire une donnée de santé ou à enregistrer un accord (FR-25, `MFA_ROLES`, annexe D).
 37. **Journal des accès** (FR-13) : le journal des consultations est lu par **AUD seul**. Nul ne peut le modifier, ADMIN compris ; la tentative est tracée.
 38. **Piste d'audit** (FR-13, FR-138) : lisible par AUD, RESP et DG.
 39. **Registre de l'IA** (FR-12) : lu par AUD et RESP.
 40. **Reprise** (FR-219, §6.8) : le bilan de préparation est lu par DG et ADMIN ; ADMIN voit les comptes, les états et les motifs de rejet du rapport de reprise, pas le contenu des dossiers (UJ-8).
+41. **Type et existence d'une pièce médicale** (FR-9, FR-153) : ACC, NUM, ARCH, CPT, AUD et ADMIN la voient exister (type, date), jamais son contenu ni un extrait de l'IA ; DG et DT par dossier ouvert à la validation.
+42. **Contrôle de niveau 1** (FR-8) : sous 1 000 000 FCFA, un second agent du volet (un autre GEST désigné contrôleur) ou RESP contrôle la proposition ; le contrôleur est distinct de l'instructeur et du validateur.
+43. **Quittance signée** (FR-97, FR-7, séparation n° 15) : la quittance est marquée `SIGNEE` par un agent distinct de celui qui a émis le règlement.
+44. **Second CPT** (FR-222, FR-7) : l'ordre est validé par un second CPT distinct de celui qui prépare ; au-dessus du seuil `reglement.second_controle_seuil`, DG.
+45. **Responsable LBC** (FR-225) : désigné par AUD (jamais par ADMIN seul) ; la liste « qui reçoit quelle alerte » est lue par DG.
 
 **Séparation des tâches** (FR-7, FR-137). Chaque ligne est un test : le serveur refuse l'acte du second rôle avec le code `SEPARATION_DES_TACHES`.
 
@@ -4424,6 +4972,10 @@ Rôles : DG direction générale ; DT directeur technique ; RESP responsable du 
 | 10 | Reconstituer un dossier et certifier sa reconstitution | FR-173 |
 | 11 | Valider un dossier dont on est l'assuré, la victime ou le bénéficiaire | conflit d'intérêts (FR-7) |
 | 12 | Verser au fonds sans être archiviste | FR-168 |
+| 13 | Instruire et enregistrer l'accord de l'assuré | FR-86, FR-90 (R4) |
+| 14 | Valider et enregistrer l'accord de l'assuré | FR-86, FR-90 (R4) |
+| 15 | Émettre le règlement et faire signer la quittance | FR-97 (R4) |
+| 16 | Lever un blocage fraude `BLOQUE` après avoir affecté, instruit, validé ou siégé au comité du même dossier | FR-129, FR-130 |
 
 Règles complémentaires :
 - **SEP-03 : anti-fractionnement.** Le cumul des montants validés d'un même dossier décide du niveau de délégation ; un règlement fractionné en tranches sous le seuil est remonté au niveau supérieur (FR-7, FR-78).
@@ -4452,8 +5004,10 @@ Cette annexe définit l'échange entre Prospera et le logiciel de la compagnie (
 - **Lot.** Un fichier est un **lot** : identifiant de lot, date de génération, objet, nombre de lignes, empreinte. Un lot déjà intégré (même identifiant) n'est pas intégré deux fois.
 - **Ordre de dépendance à la lecture.** assurés et produits, puis polices, puis garanties, primes, intermédiaires, coassureurs, puis sinistres existants, puis documents. Une ligne dont le parent est inconnu est refusée avec `IDENTIFIANT_INCONNU` et rejouée quand le parent arrive.
 - **Champs minimaux.** Un objet qui ne les respecte pas est refusé. Tout champ en plus est conservé s'il est connu, ignoré sinon.
-- **Données de santé.** Aucune donnée de santé n'est envoyée au LC ; un envoi ne contient que références, montants, garanties, états et motifs (FR-196) `[ASSUMPTION: à confirmer à la séance d'immersion]`.
-- **Numéro de sinistre.** La référence de déclaration `DEC-AAAA-NNNNN` est la clé d'origine de la déclaration ; le numéro officiel renvoyé est le numéro du LC, dans son format (FR-198). Le paramètre « qui attribue le numéro » se lit dans la déclaration envoyée (C-13).
+- **Données de santé.** Le LC ne reçoit **aucune donnée médicale** : ni gravité, ni nature des lésions, ni texte libre ; un envoi ne contient que références, **code de volet**, montants, garanties, états et **motifs codés** (FR-196) *(point juridique J-28 : à confirmer à la séance d'immersion ; base légale à valider par le juriste, §13.2)*.
+- **Motif codé.** Tout motif d'un message vers le LC est un **motif codé**, pris dans une liste fermée (D.3), jamais un texte libre.
+- **Faits reçus du LC sur un dossier tenu par Prospera.** Un règlement, une annulation ou une clôture reçu du LC (le sens inverse de C-15 et de C-17, lu par C-9) est un **fait reçu** : il bloque les ordres du dossier et s'affiche en alerte rouge ; un dossier modifié par le LC après la prise en main passe en « litige de source » (FR-217).
+- **Numéro de sinistre.** La référence de déclaration `DEC-AAAA-NNNNN` est la clé d'origine de la déclaration ; le numéro officiel renvoyé est le numéro du LC, dans son format (FR-198). Le paramètre « qui attribue le numéro » se lit dans la déclaration envoyée (C-13). La `DEC-` est le **champ obligatoire** et l'**identifiant d'idempotence** de la déclaration : le LC renvoie le numéro existant pour une `DEC-` déjà reçue *(défaut H-202 : capacité à exiger du LC ; sinon contrôle de doublon par Prospera avant tout rattachement)*. Quand Prospera attribue le numéro, il porte le préfixe distinct `PRO-` et un **contrôle d'unicité** contre C-9 est fait au basculement ; le format `SIN-AAAA-NNNN` ne vaut que dans ce cas (FR-198).
 - **Gabarit de fichier.** Excel : un onglet par objet, première ligne = nom des champs de cette annexe, une ligne par objet, un onglet `lot` (version du contrat, identifiant de lot, date, objet, nombre de lignes, empreinte). JSON : le même contenu, un tableau par objet.
 
 ### C.2 Ce que Prospera reçoit du LC
@@ -4464,25 +5018,25 @@ Cette annexe définit l'échange entre Prospera et le logiciel de la compagnie (
 | C-2 | Police | LC → Prospera | numéro de police | en vigueur, suspendue, résiliée, expirée | le LC | numéro, identifiant de l'assuré, souscripteur, branche, produit, date d'effet, date d'échéance, statut, immatriculation (si automobile), intermédiaire, capitaux garantis, coassurance (oui, non), date de dernière mise à jour | heure ; 5 min avec API | API ou fichier | `IDENTIFIANT_INCONNU` (assuré ou produit inconnu) ; `FORMAT_INVALIDE` (échéance avant effet) | Tient les polices des 7 produits, tous statuts ; peut suspendre ou résilier une police après l'ouverture d'un dossier (FR-204) |
 | C-3 | Garantie souscrite | LC → Prospera | numéro de police + code de garantie | acquise, non souscrite, suspendue | le LC | numéro de police, code, libellé, statut, plafond (FCFA), franchise en taux (%), franchise minimale (FCFA), délai de déclaration (jours), exclusions | heure | API ou fichier | `IDENTIFIANT_INCONNU` (police inconnue) ; `MONTANT_INCOHERENT` (taux hors 0-100) | Porte les garanties de chaque produit avec plafonds et franchises |
 | C-4 | Produit | LC → Prospera | code produit du LC | publié, retiré | le LC | code, libellé, branche, liste des codes de garantie | nuit | API ou fichier | `CHAMP_MINIMAL_ABSENT` | Tient les 7 produits de la démo |
-| C-5 | État de paiement de la prime | LC → Prospera | numéro de police + période | payée, impayée, partielle `[ASSUMPTION: état « partielle » à confirmer]` | le LC | numéro de police, début et fin de période, état, date de paiement, date de lecture | heure ; 5 min avec API | API ou fichier | `IDENTIFIANT_INCONNU` ; `FORMAT_INVALIDE` (période incohérente) | Génère des primes payées et impayées ; peut basculer une prime en impayée |
+| C-5 | État de paiement de la prime | LC → Prospera | numéro de police + période | payée, impayée, partielle *(défaut H-203 : état « partielle » à confirmer)* | le LC | numéro de police, début et fin de période, état, date de paiement, date de lecture | heure ; 5 min avec API | API ou fichier | `IDENTIFIANT_INCONNU` ; `FORMAT_INVALIDE` (période incohérente) | Génère des primes payées et impayées ; peut basculer une prime en impayée |
 | C-6 | Intermédiaire | LC → Prospera | identifiant de l'intermédiaire | actif, inactif | le LC | identifiant, nom, type (courtier, agent), statut, coordonnées de contact | nuit | API ou fichier | `CHAMP_MINIMAL_ABSENT` | Tient des courtiers et agents rattachés aux polices |
 | C-7 | Coassureur et clé de coassurance | LC → Prospera | numéro de police | en vigueur, close | le LC | numéro de police, liste des parts (compagnie, rôle apériteur ou coassureur, taux), part de la compagnie, apériteur | heure | API ou fichier | `MONTANT_INCOHERENT` (somme des taux différente de 100) ; `IDENTIFIANT_INCONNU` | Porte des polices en coassurance avec deux clés différentes |
 | C-8 | Traité de réassurance (facultatif) | LC → Prospera | identifiant du traité + millésime | en vigueur, échu | le LC s'il le tient, sinon Prospera (FR-190) | millésime, type (quote-part, excédent de sinistre), branche, taux de cession ou rétention et portée, réassureur | nuit | API ou fichier | `CHAMP_MINIMAL_ABSENT` ; `MONTANT_INCOHERENT` (taux hors 0-100, rétention supérieure à la portée) | Fournit un jeu de traités de démonstration, marqués « démo » |
-| C-9 | Sinistre existant | LC → Prospera | numéro de sinistre du LC | états du LC (traduits par une table de correspondance, PRD Reprise FR-4) | le LC pour son numéro et ses montants lus ; Prospera pour le dossier qu'il tient (FR-217) | numéro, numéro de police, date de survenance, date de déclaration, type, garantie, état, montant évalué et provision lus, montants payés, assuré, victime, immatriculation, date de clôture | nuit (reprise et resynchronisation) ; heure | API ou fichier | `IDENTIFIANT_INCONNU` (police inconnue) ; `ETAT_INCOMPATIBLE` (état sans correspondance) ; `DOUBLON` | Tient des sinistres existants à tous les états, pour tester la reprise et le contrôle de doublon |
+| C-9 | Sinistre existant | LC → Prospera | numéro de sinistre du LC | états du LC (traduits par une table de correspondance, PRD Reprise FR-4) | le LC pour son numéro et ses montants lus ; Prospera pour le dossier qu'il tient (FR-217) ; **les « montants payés » lus du LC ne remplacent pas le payé de Prospera** (le payé fait foi dans Prospera) et **la mise à jour nocturne n'écrase jamais une provision revue à la main** | numéro, numéro de police, date de survenance, date de déclaration, type, garantie, état, montant évalué et provision lus, montants payés, assuré, victime, immatriculation, date de clôture | nuit (reprise et resynchronisation) ; heure | API ou fichier | `IDENTIFIANT_INCONNU` (police inconnue) ; `ETAT_INCOMPATIBLE` (état sans correspondance) ; `DOUBLON` | Tient des sinistres existants à tous les états, pour tester la reprise et le contrôle de doublon |
 | C-10 | Document de sinistre existant | LC → Prospera | identifiant du document | reçu, rattaché, à rattacher | le LC pour la source ; Prospera ensuite | identifiant, numéro de sinistre ou de police, type de pièce, date du document, fichier ou lien, pages, **numéro d'archivage d'origine** (s'il existe), nature (original, copie) | nuit | API (fichier par lien) ou fichier avec dossier de pièces | `IDENTIFIANT_INCONNU` (clé illisible : va à « à rattacher », FR-166) ; `FORMAT_INVALIDE` (type de fichier refusé, FR-160) | Fournit des documents de démonstration (PDF né numérique et scans) |
-| C-11 | Numéro de sinistre attribué | LC → Prospera | référence de déclaration `DEC-` | attribué, refusé | le LC | référence de déclaration, numéro de sinistre officiel, date d'attribution, indicateur de doublon (et numéro existant s'il y en a un) | 5 min avec API ; heure | API ou fichier | `DOUBLON` (numéro déjà attribué à un autre dossier) ; `IDENTIFIANT_INCONNU` (référence `DEC-` inconnue) | Attribue les numéros après un délai paramétré, sans trou ni doublon (FR-203) |
+| C-11 | Numéro de sinistre attribué | LC → Prospera | référence de déclaration `DEC-` | attribué, refusé | le LC | référence de déclaration, numéro de sinistre officiel, date d'attribution, indicateur de doublon (et numéro existant s'il y en a un) : la réponse « doublon + numéro existant » est traitée comme un **écart** (FR-37), jamais comme un second rattachement | 5 min avec API ; heure | API ou fichier | `DOUBLON` (numéro déjà attribué à un autre dossier) ; `NUMERO_OFFICIEL_DEJA_ATTRIBUE` (numéro reçu pour une `DEC-` déjà numérotée : écart) ; `IDENTIFIANT_INCONNU` (référence `DEC-` inconnue) | Attribue les numéros après un délai paramétré, sans trou ni doublon (FR-203) |
 | C-12 | Accusé du LC | LC → Prospera | clé d'origine de l'envoi accusé | accepté, refusé, doublon | le LC | clé d'origine, état, code de refus, motif en clair, date, référence du LC | 5 min avec API ; heure | API ou fichier | `IDENTIFIANT_INCONNU` (clé non envoyée par Prospera) | Accepte, refuse avec un code, ou reconnaît un doublon, pour chaque envoi (FR-202, FR-204) |
 
 ### C.3 Ce que Prospera envoie au LC
 
 | Ref | Objet | Sens | Clé d'origine | États | Qui fait foi | Champs minimaux | Fréquence | Mode | Règles de rejet | Ce que fait le LC fictif |
 |---|---|---|---|---|---|---|---|---|---|---|
-| C-13 | Déclaration (pour obtenir un numéro) | Prospera → LC | référence de déclaration `DEC-AAAA-NNNNN` | à envoyer, envoyée, acceptée (numéro renvoyé en C-11), refusée, annulée | Prospera (la déclaration) ; le LC (le numéro) | référence `DEC-`, numéro de police, date de survenance, date de déclaration, lieu, type de sinistre, gravité (léger, modéré, grave, mortel), nom et téléphone de la victime ou du déclarant, immatriculation, tiers éventuel, canal de déclaration, auteur, **paramètre « qui attribue le numéro »** | à l'événement (à la déclaration) | API ou fichier | `IDENTIFIANT_INCONNU` (police inconnue : le LC refuse, le dossier se déclare quand même) ; `DOUBLON` (même police, date, immatriculation, victime) ; `FORMAT_INVALIDE` | Renvoie le numéro officiel ; reconnaît un doublon ; refuse avec un code ; peut retarder (FR-204) |
-| C-14 | Évaluation et provision | Prospera → LC | numéro de sinistre (ou `DEC-`) + séquence du mouvement | à envoyer, envoyé, accepté, refusé | Prospera (le dossier) | numéro de sinistre ou `DEC-`, séquence, date de valeur, montant évalué, montant validé, provision avant et après, motif, garantie retenue, franchise appliquée, auteur | à l'événement (à chaque changement validé) | API ou fichier | `IDENTIFIANT_INCONNU` (numéro inconnu) ; `MONTANT_INCOHERENT` (montant négatif) ; `ETAT_INCOMPATIBLE` (dossier clos au LC) | Enregistre le fait ; refuse un fait sur un sinistre clos |
-| C-15 | Règlement | Prospera → LC | identifiant du règlement | à payer, en cours, partiel, payé, échec, annulé | Prospera (la décision et l'ordre) ; le moyen de paiement (l'exécution, FR-193) | numéro de sinistre, identifiant du règlement, bénéficiaire (nom), nature (indemnité, acompte, honoraires d'expert, à titre commercial), montant brut, moyen (chèque, virement, Mobile Money, espèces), référence (numéro de chèque ou de transaction), date, numéro de quittance, niveau de validation | à l'événement (émission, remise, échec, annulation) | API ou fichier | `IDENTIFIANT_INCONNU` ; `MONTANT_INCOHERENT` (règlement supérieur au reste à payer validé) ; `DOUBLON` (même règlement envoyé sous une autre clé : écart, jamais payé deux fois) | Enregistre le règlement ; reconnaît un doublon ; peut refuser |
+| C-13 | Déclaration (pour obtenir un numéro) | Prospera → LC | référence de déclaration `DEC-AAAA-NNNNN` (**champ obligatoire**, clé d'idempotence) | à envoyer, envoyée, acceptée (numéro renvoyé en C-11), refusée, annulée, `SAISIE_MANUELLE` (passée à la liste « à saisir » : l'envoi en attente est annulé) | Prospera (la déclaration) ; le LC (le numéro) | référence `DEC-`, numéro de police, date de survenance, date de déclaration, lieu, **code de volet** (corporel, matériel, risques divers), type de sinistre et gravité (léger, modéré, grave, mortel) **sauf pour un dossier corporel**, nom et téléphone du déclarant (pour un dossier corporel : **ni la gravité, ni le type de sinistre corporel, ni le nom de la victime**, si le LC n'en a pas strictement besoin ; aucune donnée médicale), immatriculation, tiers éventuel, canal de déclaration, auteur, **paramètre « qui attribue le numéro »** | à l'événement (à la déclaration) | API ou fichier | `IDENTIFIANT_INCONNU` (police inconnue : le LC refuse, le dossier se déclare quand même) ; `DOUBLON` (même police, date, immatriculation, victime) ; `FORMAT_INVALIDE` | Renvoie le numéro officiel ; reconnaît un doublon ; refuse avec un code ; peut retarder (FR-204) |
+| C-14 | Évaluation et provision | Prospera → LC | numéro de sinistre (ou `DEC-`) + séquence du mouvement | à envoyer, envoyé, accepté, refusé | Prospera (le dossier) | numéro de sinistre ou `DEC-`, séquence, date de valeur, montant évalué, montant validé, provision avant et après, **motif codé** (liste fermée, D.3), garantie retenue, franchise appliquée, auteur | à l'événement (à chaque changement validé) | API ou fichier | `IDENTIFIANT_INCONNU` (numéro inconnu) ; `MONTANT_INCOHERENT` (montant négatif) ; `ETAT_INCOMPATIBLE` (dossier clos au LC) | Enregistre le fait ; refuse un fait sur un sinistre clos |
+| C-15 | Règlement | Prospera → LC | identifiant du règlement (**clé d'idempotence**, gardée à chaque nouvelle tentative) | à payer, en cours, inconnu, partiel, payé, échec, annulé | Prospera (la décision et l'ordre) ; le moyen de paiement (l'exécution, FR-193) | numéro de sinistre, identifiant du règlement, bénéficiaire (nom), nature (indemnité, acompte, honoraires d'expert, à titre commercial), montant brut, moyen (chèque, virement, Mobile Money, espèces), référence (numéro de chèque ou de transaction), date, numéro de quittance, niveau de validation | à l'événement (émission, remise, échec, annulation) | API ou fichier | `IDENTIFIANT_INCONNU` ; `MONTANT_INCOHERENT` (règlement supérieur au reste à payer validé) ; `DOUBLON` (même règlement envoyé sous une autre clé : écart, jamais payé deux fois) | Enregistre le règlement ; reconnaît un doublon ; peut refuser |
 | C-16 | Recours encaissé | Prospera → LC | identifiant de l'encaissement | à rapprocher, rapproché, écart | Prospera (le recours) ; le LC (la comptabilisation) | numéro de sinistre, identifiant du recours, débiteur (nom, type : assureur ou tiers), montant encaissé, mode, date de valeur, référence | à l'événement (au rapprochement) | API ou fichier | `IDENTIFIANT_INCONNU` ; `MONTANT_INCOHERENT` | Enregistre l'encaissement ; reconnaît un doublon |
-| C-17 | Clôture, rejet, sans suite, réouverture | Prospera → LC | identifiant de la décision | à envoyer, envoyée, acceptée, refusée | Prospera (la décision) | numéro de sinistre, nature (clôture, rejet, classement sans suite, réouverture), date, motif, total payé, reste à payer, provision finale, auteur | à l'événement | API ou fichier | `ETAT_INCOMPATIBLE` (réouverture d'un dossier non clos, clôture avec reste à payer non nul) ; `IDENTIFIANT_INCONNU` | Clôt ou rouvre le sinistre ; refuse une clôture avec reste à payer |
-| C-18 | Liste « à saisir dans le LC » | Prospera → opérateur du LC (fichier) | numéro de ligne + clé d'origine de l'objet | à saisir, saisie, confirmée | Prospera (la liste) ; le LC (la saisie) | référence (`DEC-` ou numéro de sinistre), nature (déclaration, évaluation et provision, règlement, recours encaissé, clôture), montant, date, auteur, clé d'origine à recopier | chaque jour, avant l'ouverture des bureaux (paramètre) ; seulement si le LC ne sait pas recevoir | fichier (tableur) et écran | sans objet : c'est une sortie ; le retour est le numéro reporté dans Prospera ou la trace renvoyée par C-9, C-11, C-12 | Propose un mode « ne reçoit pas » pour montrer la liste (FR-204) |
+| C-17 | Clôture, rejet, sans suite, réouverture | Prospera → LC | identifiant de la décision | à envoyer, envoyée, acceptée, refusée | Prospera (la décision) | numéro de sinistre, nature (clôture, rejet, classement sans suite, réouverture), date, **motif codé** (liste fermée, D.3), total payé, reste à payer, provision finale, auteur | à l'événement | API ou fichier | `ETAT_INCOMPATIBLE` (réouverture d'un dossier non clos, clôture avec reste à payer non nul) ; `IDENTIFIANT_INCONNU` | Clôt ou rouvre le sinistre ; refuse une clôture avec reste à payer |
+| C-18 | Liste « à saisir dans le LC » | Prospera → opérateur du LC (fichier) | numéro de ligne + clé d'origine de l'objet | à saisir, saisie, confirmée ; le report du numéro obtenu **clôt la voie `SAISIE_MANUELLE`** | Prospera (la liste) ; le LC (la saisie) | référence (`DEC-` ou numéro de sinistre), nature (déclaration, évaluation et provision, règlement, recours encaissé, clôture), montant, date, auteur, clé d'origine à recopier | chaque jour, avant l'ouverture des bureaux (paramètre) ; seulement si le LC ne sait pas recevoir | fichier (tableur) et écran | sans objet : c'est une sortie ; le retour est le numéro reporté dans Prospera ou la trace renvoyée par C-9, C-11, C-12 | Propose un mode « ne reçoit pas » pour montrer la liste (FR-204) |
 | C-19 | Export pour la comptabilité | Prospera → comptabilité de la compagnie | numéro d'export + numéro de ligne | produit, remis, rejoué | la comptabilité (les écritures) ; Prospera (l'état) | numéro d'export, période, date, journal, compte, libellé, débit, crédit, pièce justificative | mensuel et à la demande | fichier (tableur) | sans objet côté Prospera ; un export dont débits et crédits diffèrent n'est pas produit (FR-193) | Reçoit l'export et accuse réception |
 
 ### C.4 Codes de rejet (liste de départ)
@@ -4497,6 +5051,7 @@ Cette annexe définit l'échange entre Prospera et le logiciel de la compagnie (
 | `MONTANT_INCOHERENT` | montant négatif, somme des parts différente de 100, règlement supérieur au reste à payer validé |
 | `VERSION_CONTRAT_INCONNUE` | la version du contrat n'est pas connue du destinataire : le lot entier est refusé |
 | `LOT_DEJA_INTEGRE` | l'identifiant du lot a déjà été intégré : rien n'est ré-intégré |
+| `NUMERO_OFFICIEL_DEJA_ATTRIBUE` | un numéro officiel est reçu pour une référence `DEC-` déjà numérotée : écart, jamais un second rattachement (FR-37, FR-198) |
 
 Chaque refus porte en plus un **motif en clair** et la **date** ; un lot partiel intègre ses lignes valides et refuse les autres, ligne par ligne ; rien n'est ignoré en silence (FR-195). Les codes sont une liste de départ : un LC peut en ajouter, la table de correspondance les rattache à ceux-ci.
 
@@ -4509,386 +5064,468 @@ Chaque refus porte en plus un **motif en clair** et la **date** ; un lot partiel
 
 ## Annexe D. Table des paramètres
 
-**Cette annexe fait foi en cas d'écart avec une FR.** Tous les seuils du PRD sont des **paramètres de la compagnie** (FR-4), versionnés et datés ; un dossier garde les valeurs en vigueur à sa décision. Toutes les valeurs sont des **valeurs par défaut** modifiables, **sauf** celles de D.5, qui sont un référentiel légal. Les seuils d'**alerte** sont calibrés sur les données de la compagnie après la reprise (FR-5). Une valeur marquée `[A]` est une `[ASSUMPTION]` à confirmer à la séance d'immersion. Une ligne par paramètre : quand deux FR donnaient le même seuil sous deux codes, l'autre code est noté en **alias** ; les écarts de valeur sont listés dans « Conflits résolus ».
+**Cette annexe fait foi en cas d'écart avec une FR.** Tous les seuils du PRD sont des **paramètres de la compagnie** (FR-4), versionnés et datés ; un dossier garde les valeurs en vigueur à sa décision. Toutes les valeurs sont des **valeurs par défaut** modifiables, **sauf** celles de D.5, qui sont un référentiel légal. Les seuils d'**alerte** sont calibrés sur les données de la compagnie après la reprise (FR-5). Une valeur marquée `[A]` est une *(défaut H-204)* à confirmer à la séance d'immersion. Une ligne par paramètre : quand deux FR donnaient le même seuil sous deux codes, l'autre code est noté en **alias** ; les écarts de valeur sont listés dans « Conflits résolus ».
 
-Sources : PO = récit du PO ; D3, D8, D9… = décision de cadrage du plan ; DEMO ou démo = code de la démo (valeur reprise comme défaut, à confirmer) ; MEM ou mémoire 2014 = mémoire d'une compagnie du même groupe au Sénégal (à confirmer pour le Togo) ; ASSUMPTION ou `[A]` = défaut posé par ce PRD, à confirmer ; CIMA = Code CIMA 2019, article lu (SÛR).
+Sources : PO = récit du PO ; D3, D8, D9… = décision de cadrage du plan ; DEMO ou démo = code de la démo (valeur reprise comme défaut, à confirmer) ; MEM ou mémoire 2014 = mémoire de 2014 sur la compagnie étudiée (zone CIMA) (à confirmer pour le Togo) ; ASSUMPTION ou `[A]` = défaut posé par ce PRD, à confirmer ; CIMA = Code CIMA 2019, article lu (SÛR).
+
+**Gouvernance des paramètres.** Chaque ligne de chaque table de cette annexe porte trois colonnes en plus : le **propriétaire** (le rôle qui tient la valeur), le **validateur** (le rôle qui l'approuve) et la **périodicité de revue**. `ADMIN` règle sous la validation d'un rôle métier (FR-4). **La matrice de délégation n'est pas approuvée par le seul `DG` qu'elle engage** : elle exige le **double contrôle du `DG` et d'`AUD`**. Une valeur de D.5 (référentiel légal que la compagnie ne modifie pas) suit la procédure de mise à jour de la ligne `referentiel.mise_a_jour`.
 
 ### D.1 Règles transverses (partie 1)
 
-Rôles, sessions, délégations, données de santé, trace, jeu de démonstration. La matrice de délégation (FR-8, FR-78) est un paramètre de la compagnie ; ses défauts sont des `[ASSUMPTION]` à confirmer par les délégations réelles.
+Rôles, sessions, délégations, données de santé, trace, jeu de démonstration. La matrice de délégation (FR-8, FR-78) est un paramètre de la compagnie ; ses défauts sont des *(défaut H-205)* à confirmer par les délégations réelles.
 
-| code | libellé | défaut | unité | source | FR |
-|---|---|---|---|---|---|
-| `CALIB_PERIODE` | Période de recalcul des propositions de seuils d'alerte | 3 | mois | [A] modèle microfinance | FR-5 |
-| `ACTIVATION_ROLES_SENSIBLES` | Rôles activés seulement après validation d'un rôle métier | GEST, GREC, MED, RESP, DT, DG, CPT | liste | [A] modèle microfinance | FR-6 |
-| `SEP_TOLERANCE` | Tolérance sur les cumuls interdits (SEP-01, SEP-02) | 0 | cumul | extrait démo (plan de contrôle) | FR-7 |
-| `DELEG_COMITE_COMPOSITION` | Rôles obligatoires au comité | RESP, DT (plus deux autres membres) | liste | plan D8 [A] | FR-8 |
-| `DELEG_VISA_DT` | Visa du directeur technique après le comité | oui | oui/non | plan D8 [A] | FR-8 |
-| `SANTE_CONSENTEMENT_BASE` | Base légale par défaut du traitement des données de santé | consentement écrit | liste | [A] loi 2019-014 art. 22 | FR-9 |
-| `SANTE_LECTURE_GEST` | Étendue de ce que le gestionnaire lit du médecin-conseil | conclusions seulement | liste | [A] | FR-9 |
-| `TRACE_CONSERVATION` (alias : `journal.consultation_conservation`) | Durée de conservation du journal, du registre de l'IA et des pièces justificatives | 10 | ans (au moins) | Code CIMA art. 404 (SÛR) | FR-12, FR-13, FR-158 |
-| `TRACE_ANCRAGE_PERIODE` | Période de dépôt de l'empreinte du journal hors du serveur | 1 | jour | [A] modèle microfinance | FR-13 |
-| `DEMO_COUVERTURE_MIN` | Dossiers minimum par statut et par sortie dans le jeu | 10 | dossiers | [A] modèle microfinance | FR-15 |
-| `DEMO_NB_DOSSIERS` | Dossiers du portefeuille de démonstration | 3 500 | dossiers | code de la démo, plan D19 | FR-15 |
-| `DEMO_NB_GESTIONNAIRES` (alias : `fictif.jeu_demo`) | Gestionnaires de la compagnie fictive : corporel / matériel / risques divers / recours | 3 / 5 / 3 / 3 (total 14) | personnes | récit du PO (chiffre de démo) | FR-15, FR-202, FR-205 |
-| `DEMO_NB_PRODUITS` | Produits du jeu de démonstration | 7 | produits | code de la démo, plan D19 | FR-15 |
-| `DEMO_VERIFICATIONS_RECETTE` | Vérifications du rejeu de la démo devenues tests de recette | 104 | vérifications | extrait parcours démo (rejeu 2) | FR-15 |
-| `NOTIF_LANGUE` | Langue par défaut des messages | français | langue | récit PO, v2 | FR-18 |
-| `DIM_DOSSIERS_ARCHIVES` (alias : `ged.dimensionnement`) | Hypothèse : dossiers archivés [ged.dimensionnement regroupe les cinq lignes DIM_*] | 50 000 | dossiers | plan D20 [A] | FR-23, FR-176 |
-| `DIM_PAGES` | Hypothèse : pages archivées | 1 500 000 | pages | plan D20 [A] | FR-23 |
-| `DIM_SINISTRES_AN` | Hypothèse : sinistres par an | 5 000 | sinistres | plan D20 [A] | FR-23 |
-| `DIM_SITES` | Hypothèse : sites | 1 central + guichets | sites | plan D20 [A] | FR-23, FR-237 |
-| `DIM_UTILISATEURS_SIMULTANES` | Hypothèse : utilisateurs simultanés | 60 | utilisateurs | plan D20 [A] | FR-23 |
-| `MFA_ROLES` | Rôles à double authentification obligatoire | DG, DT, RESP, CPT, AUD, ADMIN | liste | [A] | FR-25 |
-| `SESSION_DUREE_MAX` | Durée maximale d'une session | 8 | heures | [A] modèle microfinance | FR-25 |
-| `SESSION_INACTIVITE` | Fermeture après inactivité | 30 | minutes | [A] modèle microfinance | FR-25 |
-| `delegation_commercial` (alias : `DELEG_COMMERCIAL`) | Règlement à titre commercial : DG seul | oui, tout montant | règle | D8 | FR-8, FR-78 |
-| `delegation_cumul_par_dossier` (alias : `DELEG_CUMUL_DOSSIER`) | Le cumul des montants validés d'un dossier décide du niveau | oui | règle | D8 (SEP-03 démo) | FR-7, FR-8, FR-78 |
-| `delegation_niveau_comite` | Au-delà du plafond : comité sinistres puis visa du DT | oui | règle | D8 | FR-78, FR-79 |
-| `delegation_responsable_max_fcfa` (alias : `DELEG_SEUIL_RESP`) | Plafond de validation du responsable des sinistres seul | 1 000 000 | FCFA | D8, MEM | FR-8, FR-78 |
-| `comite_membres` (alias : `DELEG_COMITE_MEMBRES`) | Membres du comité sinistres | 4 (dont le responsable et le DT) | membres | D8, MEM | FR-8, FR-79 |
-| `comite_quorum` (alias : `DELEG_COMITE_QUORUM`) | Quorum du comité | 3 | membres | D8 | FR-8, FR-79 |
-| `comite_regle_majorite` | Règle de décision du comité | majorité simple des présents | règle | ASSUMPTION | FR-79 |
+| code | libellé | défaut | unité | source | FR | propriétaire | validateur | revue |
+|---|---|---|---|---|---|---|---|---|
+| `CALIB_PERIODE` | Période de recalcul des propositions de seuils d'alerte | 3 | mois | [A] modèle microfinance | FR-5 | `RESP` | `DT` | après la reprise, puis tous les 3 mois |
+| `ACTIVATION_ROLES_SENSIBLES` | Rôles activés seulement après validation d'un rôle métier | GEST, GREC, MED, RESP, DT, DG, CPT | liste | [A] modèle microfinance | FR-6 | `ADMIN` | `DG` | annuelle |
+| `SEP_TOLERANCE` | Tolérance sur les cumuls interdits (SEP-01, SEP-02) | 0 | cumul | extrait démo (plan de contrôle) | FR-7 | `ADMIN` | `RESP` | à chaque mise en service |
+| `DELEG_COMITE_COMPOSITION` | Rôles obligatoires au comité | RESP, DT (plus deux autres membres) | liste | plan D8 [A] | FR-8 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `DELEG_VISA_DT` | Visa du directeur technique après le comité | oui | oui/non | plan D8 [A] | FR-8 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `SANTE_CONSENTEMENT_BASE` | Base légale par défaut du traitement des données de santé | consentement écrit | liste | [A] loi 2019-014 art. 22 | FR-9 | `ADMIN` | `DG` | annuelle |
+| `SANTE_LECTURE_GEST` | Étendue de ce que le gestionnaire lit du médecin-conseil | conclusions seulement | liste | [A] | FR-9 | `ADMIN` | `DG` | annuelle |
+| `TRACE_CONSERVATION` (alias : `journal.consultation_conservation`) | Durée de conservation du journal, du registre de l'IA et des pièces justificatives | 10 | ans (au moins) | Code CIMA art. 404 (SÛR) | FR-12, FR-13, FR-158 | `ADMIN` | `DG` | annuelle |
+| `TRACE_ANCRAGE_PERIODE` | Période de dépôt de l'empreinte du journal hors du serveur | 1 | jour | [A] modèle microfinance | FR-13 | `ADMIN` | `DG` | annuelle |
+| `DEMO_COUVERTURE_MIN` | Dossiers minimum par statut et par sortie dans le jeu | 10 | dossiers | [A] modèle microfinance | FR-15 | `ADMIN` | `RESP` | à chaque mise en service |
+| `DEMO_NB_DOSSIERS` | Dossiers du portefeuille de démonstration | 3 500 | dossiers | code de la démo, plan D19 | FR-15 | `ADMIN` | `RESP` | à chaque mise en service |
+| `DEMO_NB_GESTIONNAIRES` (alias : `fictif.jeu_demo`) | Gestionnaires de la compagnie fictive : corporel / matériel / risques divers / recours | 3 / 5 / 3 / 3 (total 14) | personnes | récit du PO (chiffre de démo) | FR-15, FR-202, FR-205 | `ADMIN` | `RESP` | à chaque mise en service |
+| `DEMO_NB_PRODUITS` | Produits du jeu de démonstration | 7 | produits | code de la démo, plan D19 | FR-15 | `ADMIN` | `RESP` | à chaque mise en service |
+| `DEMO_VERIFICATIONS_RECETTE` | Vérifications du rejeu de la démo devenues tests de recette | 104 | vérifications | extrait parcours démo (rejeu 2) | FR-15 | `ADMIN` | `RESP` | à chaque mise en service |
+| `NOTIF_LANGUE` | Langue par défaut des messages | français | langue | récit PO, v2 | FR-18 | `ADMIN` | `RESP` | à chaque mise en service |
+| `DIM_DOSSIERS_ARCHIVES` (alias : `ged.dimensionnement`) | Hypothèse : dossiers archivés [ged.dimensionnement regroupe les cinq lignes DIM_*] | 50 000 | dossiers | plan D20 [A] | FR-23, FR-176 | `ADMIN` | `RESP` | à chaque mise en service |
+| `DIM_PAGES` | Hypothèse : pages archivées | 1 500 000 | pages | plan D20 [A] | FR-23 | `ADMIN` | `RESP` | à chaque mise en service |
+| `DIM_SINISTRES_AN` | Hypothèse : sinistres par an | 5 000 | sinistres | plan D20 [A] | FR-23 | `ADMIN` | `RESP` | à chaque mise en service |
+| `DIM_SITES` | Hypothèse : sites | 1 central + guichets | sites | plan D20 [A] | FR-23, FR-237 | `ADMIN` | `RESP` | à chaque mise en service |
+| `DIM_UTILISATEURS_SIMULTANES` | Hypothèse : utilisateurs simultanés | 60 | utilisateurs | plan D20 [A] | FR-23 | `ADMIN` | `RESP` | à chaque mise en service |
+| `MFA_ROLES` | Rôles à double authentification obligatoire : **tout rôle autorisé à lire une donnée de santé ou à enregistrer un accord** (règle par capacité, pas liste figée) | DG, DT, RESP, CPT, AUD, ADMIN, EXPE, GEST, MED, GREC, ACC, NUM | liste | [A] ; ADV F-29 | FR-25, FR-254 | `ADMIN` | `DG` | annuelle |
+| `SESSION_DUREE_MAX` | Durée maximale d'une session | 8 | heures | [A] modèle microfinance | FR-25 | `ADMIN` | `DG` | annuelle |
+| `SESSION_INACTIVITE` | Fermeture après inactivité | 30 | minutes | [A] modèle microfinance | FR-25 | `ADMIN` | `DG` | annuelle |
+| `delegation_commercial` (alias : `DELEG_COMMERCIAL`) | Règlement à titre commercial : DG seul | oui, tout montant | règle | D8 | FR-8, FR-78 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `delegation_cumul_par_dossier` (alias : `DELEG_CUMUL_DOSSIER`) | Le cumul des montants validés d'un dossier décide du niveau | oui | règle | D8 (SEP-03 démo) | FR-7, FR-8, FR-78 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `delegation_niveau_comite` | Au-delà du plafond : comité sinistres puis visa du DT | oui | règle | D8 | FR-78, FR-79 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `delegation_responsable_max_fcfa` (alias : `DELEG_SEUIL_RESP`) | Plafond de validation du responsable des sinistres seul | 1 000 000 | FCFA | D8, MEM | FR-8, FR-78 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `comite_membres` (alias : `DELEG_COMITE_MEMBRES`) | Membres du comité sinistres | 4 (dont le responsable et le DT) | membres | D8, MEM | FR-8, FR-79 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `comite_quorum` (alias : `DELEG_COMITE_QUORUM`) | Quorum du comité | 3 | membres | D8 | FR-8, FR-79 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `comite_regle_majorite` | Règle de décision du comité | majorité simple des présents | règle | ASSUMPTION | FR-79 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `deleg.niveau1.controle` | Contrôle de niveau 1 par un second agent du volet, sous le seuil du responsable (un autre `GEST` désigné contrôleur, ou le `RESP`) | oui | oui/non | [A] récit du PO (validation à trois) ; R6 | FR-8, FR-78 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `deleg.comite.delai_tenue` | Délai de tenue du comité sinistres (alerte au 3e jour, repli : délibération écrite) | 5 | jour ouvré | [A] | FR-78, FR-79 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `deleg.honoraires.plafond.niveau1..n` | Plafond d'honoraires d'expert par niveau de la matrice de délégation (au-delà, comité) | à fixer avec la compagnie | FCFA par niveau | [A] | FR-78, FR-91, FR-182 | `DG` | `DG` et `AUD` (double contrôle) | annuelle et à chaque changement d'organisation |
+| `calibration.*` | Calibration des grilles de provision : marge de fiabilité, amplitude, occupation, concentration, ancienneté, tranches mortes ; alerte de grille périmée | valeurs de la démo | — | [A] démo | FR-4, FR-5 | `RESP` | `DT` | après la reprise, puis tous les 3 mois |
 
 ### D.2 Circuit sinistre (partie 2, §5)
 
 Valeurs du circuit : déclaration et numéro de sinistre, ouverture, instruction, expertise (seuils), chiffrage, provision, offre, règlement, clôture, recours, sorties, fraude, délais internes et relances. Les délais internes sont modifiables par produit ; les délais légaux sont en D.5.
 
-| code | libellé | défaut | unité | source | FR |
-|---|---|---|---|---|---|
-| `ecart_alerte_reception_saisie_jours_ouvres` | Écart réception réelle / saisie qui alerte le responsable | 1 | jour ouvré | ASSUMPTION (défaut relevé par MEM) | FR-34 |
-| `delai_alerte_numero_officiel_jours_ouvres` (alias : `NUM_DELAI_ALERTE`, `delais.numero_officiel_jours_ouvres`, `sinistre.delai_numero`) | Délai avant alerte « dossier sans numéro officiel » | 1 | jour ouvré | D3 | FR-2, FR-37, FR-142, FR-198 |
-| `qui_attribue_numero_sinistre` (alias : `NUM_ATTRIBUTION`, `sinistre.qui_attribue`) | Qui attribue le numéro de sinistre officiel | LC (logiciel de la compagnie) | LC ou Prospera | D3, PO | FR-2, FR-37, FR-198 |
-| `delai_declaration_jours_defaut` | Délai de déclaration d'une garantie (lu dans le LC par garantie) | 5 | jour | DEMO | FR-43 |
-| `delai_declaration_transport_jours` | Délai de déclaration, transport de marchandises | 3 | jour | DEMO | FR-43 |
-| `delai_declaration_vol_jours` | Délai de déclaration en cas de vol | 2 | jour | DEMO | FR-43 |
-| `pieces_complementaires_par_type` | Liste des pièces complémentaires par type | listes de la démo | liste | DEMO | FR-44 |
-| `pieces_corporel_cima` | Pièces à demander à la victime et aux ayants droit (art. 240, 241) | pièce d'identité, acte de naissance, acte de mariage, certificat médical initial ; certificat de décès, jugement d'hérédité, certificat de vie, certificat de genre de mort | liste | CIMA, ASSUMPTION (à valider par le juriste) | FR-44 |
-| `pieces_obligatoires_par_type` | Liste des pièces obligatoires par type de sinistre (12 types) | listes de la démo (annexe D) | liste | DEMO | FR-44 |
-| `volet_par_type` | Volet par défaut de chaque type de sinistre | corporel : auto corporel, accident du travail, décès ; matériel : auto matériel, collision ; risques divers : les autres | table | DEMO | FR-44 |
-| `delai_troisieme_relance_jours` | Délai écrit dans le troisième message | 15 | jour | DEMO | FR-47 |
-| `alerte_accuse_gestionnaire_jours` | Jour où l'accusé non envoyé alerte l'agent | 8 | jour | ASSUMPTION | FR-48 |
-| `delai_accuse_reception_jours` (alias : `DELAI_ACCUSE_RECEPTION`, `delais.accuse_reception_jours`) | Accusé de réception du dossier (délai interne) | 10 | jour | DEMO | FR-14, FR-48, FR-142 |
-| `arrondi_provision_fcfa` | Arrondi de la provision d'ouverture | 5 000 | FCFA | DEMO | FR-49 |
-| `alerte_dossier_non_affecte_jours_ouvres` | Délai avant alerte « dossier ouvert non affecté » | 1 | jour ouvré | ASSUMPTION | FR-50 |
-| `poids_charge_domaine_type` | Poids de charge par domaine et par type de mission | à saisir (grille de la démo non extraite) | poids | DEMO, à compléter | FR-51 |
-| `poids_charge_gravite` | Coefficient de gravité du poids de charge | léger et modéré 1 ; grave 1,3 ; mortel 1,6 | coefficient | DEMO | FR-51 |
-| `seuil_disponible_gestionnaire` | Charge pondérée / capacité sous laquelle un gestionnaire est disponible | 0,8 | ratio | DEMO | FR-51 |
-| `seuil_surcharge_gestionnaire` | Charge pondérée / capacité au-delà de laquelle un gestionnaire est surchargé | 1,2 | ratio | DEMO | FR-51 |
-| `alertes_instruction` | Seuils des alertes d'instruction : sinistre moins de 30 jours après souscription ; véhicule de plus de 15 ans ; montant de plus de 5 000 000 FCFA (contre-expertise recommandée) ; plainte de vol déposée plus de 2 jours après les faits ; réserves de transport plus de 3 jours après livraison ; prescription du recours transporteur 1 an (2 ans en aérien) | valeurs de la démo | seuils | DEMO | FR-55 |
-| `franchise_defaut_biens_fcfa` | Franchise par défaut du formulaire biens et divers | 25 000 | FCFA | DEMO | FR-55, FR-73 |
-| `orientation_declaration_tardive_jours` | Déclaration tardive qui déclenche l'orientation « fraude » | 15 | jour | DEMO | FR-58 |
-| `orientation_souscription_recente_jours` | Souscription récente qui déclenche l'orientation « fraude » | 60 | jour | DEMO | FR-58 |
-| `accord_devis_dossier_max_fcfa` | Voie accord sur devis : montant maximal du dossier | 300 000 | FCFA | D9, MEM | FR-59 |
-| `accord_devis_montant_max_fcfa` | Voie accord sur devis : montant maximal du devis | 200 000 | FCFA | D9, MEM | FR-59 |
-| `panel_interne_domaines` (alias : `expert.panel_interne_demo`) | Domaines couverts par le panel interne [l'alias expert.panel_interne_demo couvre aussi panel_interne_zones] | automobile matériel, médical, responsabilité | liste | DEMO | FR-59, FR-179 |
-| `panel_interne_zones` | Zones desservies par le panel interne | Lomé, Tsévié, Aného | liste | DEMO | FR-59 |
-| `seuil_expertise_externe_fcfa` | Expertise externe obligatoire au-dessus | 3 000 000 | FCFA | DEMO | FR-59 |
-| `seuil_expertise_requise_fcfa` | Aucune expertise requise sous ce montant | 250 000 | FCFA | DEMO | FR-59 |
-| `catalogue_prix_pieces` | Catalogue de fourchettes de prix des pièces, taux horaire, coefficients de catégorie | à constituer (valeurs de la démo non retenues) | table | ASSUMPTION | FR-60 |
-| `comparables_devis_min` | Observations minimales pour l'historique des devis | 5 | observations | DEMO | FR-60 |
-| `devis_surcout_alerte_pct` | Surcoût d'un poste qui alerte, en pourcentage du devis | 10 | % | DEMO | FR-60 |
-| `delai_certificat_medical_jours` | Délai d'attente par type de certificat | initial 8 ; prolongation 8 ; arrêt de travail 8 ; reprise 10 ; guérison 12 ; consolidation 15 ; descriptif des séquelles 12 ; aggravation 12 ; rechute 10 ; complémentaire 8 | jour | DEMO | FR-63 |
-| `comparables_dossiers_min` | Dossiers comparables minimaux pour la médiane | 12 | dossiers | DEMO | FR-65, FR-74 |
-| `comparables_missions_min` | Missions comparables minimales pour la médiane | 5 | missions | DEMO | FR-65 |
-| `ecart_comparables_significatif_pct` | Écart significatif à la médiane des comparables | 25 | % | DEMO | FR-65 |
-| `ecart_expert_attention_pct` | Écart expert / dossier : niveau attention | 15 | % | DEMO | FR-65 |
-| `ecart_expert_bloquant_pct` | Écart expert / dossier : niveau bloquant | 35 | % | DEMO | FR-65 |
-| `decompte.ordre` | Ordre du décompte des sinistres non corporels (la franchise est déduite du montant arrêté, jamais avant la règle proportionnelle) | dommage, vétusté, règle proportionnelle, plafond, franchise | ordre | code de la démo, corrigé le 2026-11-13 (plan D15) | FR-69, FR-75 |
-| `grille_vetuste_auto` | Vétusté sur pièces selon l'âge du véhicule | jusqu'à 1 an 0 % ; 2 ans 10 % ; 3 ans 20 % ; 5 ans 30 % ; 8 ans 40 % ; au-delà 50 % | % | DEMO (« indicative ») | FR-72 |
-| `abattement_divers_pct` | Abattement du formulaire divers | 10 | % | DEMO | FR-73 |
-| `arrondi_indemnite_fcfa` | Arrondi des montants non corporels | 5 000 (corporel : au franc) | FCFA | DEMO, ASSUMPTION | FR-73 |
-| `tolerance_expert_pct` | Tolérance affichée : montant arrêté / proposition de l'expert | 10 | % | DEMO | FR-80 |
-| `tolerance_provision_pct` | Tolérance affichée : indemnité / provision | 25 | % | DEMO | FR-80 |
-| `delai_communication_pv_transaction_heures` | Communication du procès-verbal de transaction aux bénéficiaires | 24 | heure | MEM, ASSUMPTION | FR-84 |
-| `delai_envoi_offre_heures` (alias : `DELAI_OFFRE_VALIDEE_ENVOI`, `delais.offre_envoi_heures`) | Délai d'envoi de l'offre validée | 48 | heure | D6, MEM | FR-14, FR-84, FR-142 |
-| `delai_alerte_offre_jours` (alias : `delais.offre_alerte_jours`) | Alerte au responsable d'une offre sans réponse | 30 | jour | D6 | FR-89, FR-142 |
-| `delai_relance_offre_jours` (alias : `delais.offre_relance_jours`) | Première relance d'une offre sans réponse | 15 | jour | D6 | FR-89, FR-142 |
-| `reglement.honoraires_motif_au_dela_lettre` | Visa d'honoraires : motif exigé au-delà de la lettre de mission | OUI | oui/non | démo | FR-90 |
-| `reglement.gabarit_lettre_cheque` | Gabarit de lettre-chèque de la compagnie | aucun (remplissage manuel) | fichier | [ASSUMPTION] | FR-94 |
-| `reglement.ecart_rapprochement_jours` (alias : `RAPPROCHEMENT_ECART_ANCIEN`, `compta.rapprochement_ancien`) | Écart de rapprochement ancien = alerte (dans `paiement`) | 60 | jours | démo, D16 | FR-95, FR-193, FR-224 |
-| `reglement.operateurs_mobile_money` (alias : `MOBILE_MONEY_OPERATEURS`) | Opérateurs Mobile Money autorisés | T-Money, Flooz | liste | D11 | FR-95, FR-223 |
-| `reglement.code_usage_unique_minutes` | Validité du code à usage unique | 10 | minutes | [ASSUMPTION] | FR-96 |
-| `reglement.signature_electronique_quittance` | Acceptation électronique de la quittance par code à usage unique | désactivée | oui/non | D11, D21 | FR-96 |
-| `reglement.fenetre_cumul_especes_jours` | Fenêtre de cumul du plafond espèces | 30 | jours | [ASSUMPTION] | FR-98 |
-| `reglement.plafond_especes` (alias : `PLAFOND_ESPECES`) | Plafond d'un règlement en espèces (par règlement et par bénéficiaire, cumul sur 30 j) | 500000 | FCFA | démo PLAFOND_ESPECES, D11 | FR-98, FR-225 |
-| `dossier.motif_min_caracteres` (alias : `GARANTIE_MOTIF_LONGUEUR_MIN`, `garantie.motif_min`) | Longueur minimale d un motif écrit | 10 | caractères | démo (décision de garantie) | FR-3, FR-99, FR-104, FR-187 |
-| `reglement.fenetre_coordonnees_jours` (alias : `FENETRE_COORDONNEES`, `controle.coordonnees_bancaires`) | Changement de coordonnées avant paiement = alerte | 5 | jours | démo FENETRE_COORDONNEES_JOURS | FR-100, FR-210, FR-222 |
-| `reglement.fenetre_doublon_jours` (alias : `DOUBLON_REGLEMENT_FENETRE`, `controle.doublon_reglement`) | Fenêtre de détection du doublon de règlement | 30 | jours | démo | FR-100, FR-210, FR-222, FR-224 |
-| `reglement.part_concentration_pct` (alias : `CONCENTRATION_EMISSION`, `controle.concentration`) | Part du volume émis par un même comptable déclenchant l'alerte | 60 | % | démo PART_CONCENTRATION | FR-100, FR-210, FR-224 |
-| `reglement.seuil_cumul_lbc` (alias : `LBC_SEUIL_CUMUL_CLIENT`) | Cumul par bénéficiaire déclenchant l'alerte LBC/FT | (vide, alerte inactive) | FCFA | [ASSUMPTION] valeur nationale non lue | FR-100, FR-225 |
-| `reglement.cheque_circulation_longue_jours` (alias : `CHEQUE_CIRCULATION_LONGUE`) | Chèque non retiré : circulation longue | 21 | jours | démo | FR-101, FR-221 |
-| `reglement.cheque_exposition_jours` (alias : `CHEQUE_EXPOSITION`) | Chèque non retiré : exposition | 30 | jours | démo DELAI_GUICHET_JOURS | FR-101, FR-221 |
-| `reglement.cheque_relance_jours` (alias : `CHEQUE_RELANCE_GUICHET`) | Chèque non retiré : relance | 7 | jours | démo RELANCE_GUICHET_JOURS | FR-101, FR-221 |
-| `reglement.alerte_avant_echeance_heures` | Alerte jaune avant la cible de paiement | 48 | heures | [ASSUMPTION] | FR-102 |
-| `reglement.attendre_fin_denonciation` | Au corporel automobile, ne pas émettre avant la fin du délai de dénonciation | OUI | oui/non | [ASSUMPTION] | FR-102 |
-| `reglement.delai_paiement_heures` (alias : `DELAI_PAIEMENT_APRES_ACCORD`) | Paiement après accord (cible interne) | 72 | heures | mémoire 2014 (D7) | FR-14, FR-102 |
-| `recours.nouveau_non_traite_jours` | Nouveau recours non traité = alerte | 60 | jours | démo | FR-108 |
-| `recours.sans_action_jours` | Recours sans action = alerte | 30 | jours | démo | FR-108 |
-| `recours.delai_lettre_mise_en_cause_jours_ouvres` | Envoi de la lettre de mise en cause après ouverture | 5 | jours ouvrés | [ASSUMPTION] | FR-109 |
-| `recours.relance_jours` (alias : `DELAI_RELANCE_RECOURS`, `delai_relance_recours_jours`) | Relance du recours tant que sans réponse puis jusqu au recouvrement | 15 | jours | mémoire 2014, D10 | FR-14, FR-54, FR-110 |
-| `recours.delai_reclamation_apres_paiement_jours` | Réclamation du remboursement après paiement de l assuré | 30 | jours | démo (délai de transmission) | FR-111 |
-| `recours.creance_ancienne_jours` | Créance non soldée ancienne = alerte | 90 | jours | démo | FR-113 |
-| `recours.inclure_honoraires_base` | Honoraires d expert inclus dans la base du montant réclamé | NON | oui/non | [ASSUMPTION] | FR-113 |
-| `recours.delai_mise_en_demeure_jours` | Délai accordé au débiteur par la mise en demeure | 30 | jours | démo | FR-114 |
-| `recours.seuil_perte_validation_direction` | Perte sur créance exigeant la validation DG ou DT | (vide) | FCFA | [ASSUMPTION] | FR-115 |
-| `recours.alerte_prescription_jours` | Alerte avant le terme indicatif | 90 | jours | démo | FR-118 |
-| `recours.arbitrage_obligatoire` | Arbitrage inter-assureurs activé (art. 276) | OUI (à vérifier) | oui/non | Code CIMA art. 276 (SÛR), [ASSUMPTION] | FR-119 |
-| `recours.convention_active` | Convention de place active (indemnisation directe, forfait) | NON | oui/non | [ASSUMPTION] | FR-119 |
-| `recours.convention_delai_reglement_jours` | Délai de règlement entre compagnies sous convention | (vide) | jours | recherche (exemple 30 j, non togolais) | FR-119 |
-| `recours.convention_forfait` | Forfait inter-compagnies (valeur d exemple) | 350000 | FCFA | démo R1 | FR-119 |
-| `recours.contre_proposition_formule` | Contre-proposition : max(offre x 1,15 ; moyenne offre et réclamé ; 80 % du réclamé) | formule démo | formule | démo | FR-120 |
-| `recours.ecart_accord_rapide_pct` | Écart à l offre : accord rapide jusqu à | 15 | % | démo | FR-120 |
-| `recours.ecart_negociable_pct` | Écart à l offre : négociable jusqu à | 35 | % | démo | FR-120 |
-| `sortie.delai_decision_refus_heures` | Décision de refus soumise au responsable ou à la direction | 48 | heures | mémoire 2014 (D7) | FR-121 |
-| `sortie.delai_information_refus_jours_ouvres` | Courrier de refus envoyé après la décision | 2 | jours ouvrés | mémoire 2014 (72 h), [ASSUMPTION] | FR-121 |
-| `sortie.attente_apres_derniere_relance_jours` | Attente après la dernière relance avant classement | 15 | jours | démo (3e relance) , [ASSUMPTION] | FR-123 |
-| `sortie.canaux_min_sans_suite` | Canaux de relance distincts avant classement | 2 | canaux | [ASSUMPTION] | FR-123 |
-| `sortie.delai_grace_versement_sans_suite_jours` | Délai avant versement aux archives d un dossier sans suite | 30 | jours | [ASSUMPTION] | FR-123 |
-| `sortie.relances_avant_sans_suite` | Relances sans effet avant classement sans suite | 3 | relances | démo RELANCES_SANS_EFFET | FR-123 |
-| `sortie.sans_suite_corporel_decision_direction` | Classement sans suite d un corporel automobile réservé à la direction | OUI | oui/non | Code CIMA art. 231 (SÛR), [ASSUMPTION] | FR-123 |
-| `sortie.reouvertures_alerte` | Nombre de réouvertures déclenchant l alerte au contrôle interne | 3 | réouvertures | [ASSUMPTION] | FR-126 |
-| `fraude.poids.beneficiaire_multiple` | Poids du signal BENEFICIAIRE_MULTIPLE | 15 | points | démo | FR-127 |
-| `fraude.poids.contrat_non_actif` | Poids du signal CONTRAT_NON_ACTIF | 40 | points | démo | FR-127 |
-| `fraude.poids.declaration_tardive` | Poids du signal DECLARATION_TARDIVE | 10 | points | démo | FR-127 |
-| `fraude.poids.incoherence_dates` | Poids du signal INCOHERENCE_DATES | 30 | points | démo | FR-127 |
-| `fraude.poids.montant_atypique` | Poids du signal MONTANT_ATYPIQUE | 20 | points | démo | FR-127 |
-| `fraude.poids.sinistre_precoce` | Poids du signal SINISTRE_PRECOCE | 30 | points | démo | FR-127 |
-| `fraude.poids.sinistres_repetes` | Poids du signal SINISTRES_REPETES | 25 | points | démo | FR-127 |
-| `fraude.poids.telephone_partage` | Poids du signal TELEPHONE_PARTAGE | 15 | points | démo | FR-127 |
-| `fraude.poids.vehicule_recurrent` | Poids du signal VEHICULE_RECURRENT | 20 | points | démo | FR-127 |
-| `fraude.seuil.beneficiaire_multiple` | Dossiers pour le même bénéficiaire | 3 | dossiers | démo | FR-127 |
-| `fraude.seuil.declaration_tardive_jours` | Déclaration tardive | 45 | jours | démo | FR-127 |
-| `fraude.seuil.montant_atypique_coefficient` | Évaluation / coût moyen de la branche | 4 | x | démo | FR-127 |
-| `fraude.seuil.sinistre_precoce_jours` | Sinistre précoce après la prise d effet | 30 | jours | démo | FR-127 |
-| `fraude.seuil.sinistres_repetes` | Nombre de sinistres sur la police | 3 | sinistres | démo | FR-127 |
-| `fraude.seuil.telephone_partage` | Assurés sur le même téléphone | 3 | assurés | démo | FR-127 |
-| `fraude.seuil.vehicule_recurrent` | Dossiers sur la même immatriculation | 3 | dossiers | démo | FR-127 |
-| `fraude.niveau.attention` | Seuil du niveau ATTENTION | 20 | points | démo | FR-128 |
-| `fraude.niveau.bloque` | Seuil du niveau BLOQUE (suspend ordre et paiement) | 70 | points | démo | FR-128 |
-| `fraude.niveau.suspect` | Seuil du niveau SUSPECT (ouvre la revue) | 45 | points | démo, [ASSUMPTION] pour l ouverture de revue | FR-128 |
-| `fraude.plafond_score` | Plafond du score | 100 | points | démo | FR-128 |
-| `fraude.delai_revue_bloque_jours_ouvres` | Dossier BLOQUE non revu = alerte | 3 | jours ouvrés | [ASSUMPTION] | FR-129 |
-| `fraude.tranches_anciennete_jours` | Tranches d ancienneté des revues | 7 / 30 / 90 | jours | démo | FR-131 |
-| `fraude.fenetre_graphe_mois` | Fenêtre du graphe de liens | 12 | mois | démo (portefeuille 12 mois) | FR-132 |
-| `fraude.garage_dossiers_min` | Dossiers minimum pour signaler un garage | 5 | dossiers | [ASSUMPTION] | FR-132 |
-| `fraude.garage_ecart_marche_pct` | Devis de garage au-dessus de la moyenne du marché | 20 | % | démo | FR-132 |
-| `delais.alerte_interne_pct` | Alerte à la part du délai interne écoulée | 85 | % | démo (seuil d alerte délai) | FR-140 |
-| `delais.alerte_legale_jours` (alias : `ALERTE_ECHEANCE_LEGALE`, `veille.offre_corporelle`) | Alerte avant une échéance réglementaire | 45 | jours | démo (veille : offre corporelle à présenter dans 45 j) | FR-14, FR-140, FR-208 |
-| `delais.offre_autres_jours` | Offre interne, autres branches | 75 | jours | démo | FR-142 |
-| `delais.offre_corporel_jours` (alias : `DELAI_OFFRE_DOSSIER_COMPLET`, `delai_interne_offre_jours`) | Offre interne, corporel (départ : dossier complet) [les alias combinés couvrent aussi delais.offre_materiel_jours et delais.offre_autres_jours] | 90 | jours | démo (§3.7) | FR-14, FR-85, FR-142 |
-| `delais.offre_materiel_jours` | Offre interne, matériel | 60 | jours | démo | FR-142 |
-| `delais.reglement_autres_jours` | Règlement après accord, limite interne, autres | 30 | jours | démo | FR-142 |
-| `delais.reglement_corporel_jours` (alias : `DELAI_REGLEMENT_APRES_ACCORD`, `delai_interne_reglement_jours`) | Règlement après accord, limite interne, corporel [les alias combinés couvrent aussi delais.reglement_materiel_jours et delais.reglement_autres_jours] | 45 | jours | démo | FR-14, FR-85, FR-142 |
-| `delais.reglement_materiel_jours` | Règlement après accord, limite interne, matériel | 30 | jours | démo | FR-142 |
-| `delais.sla_corporel_jours` (alias : `SLA_VOLET`, `delai_interne_traitement_jours`, `pilotage.delai_cible_volet`) | Délai de traitement du volet corporel [les alias combinés couvrent aussi les trois autres volets (delais.sla_*)] | 45 | jours | démo SLA_PAR_VOLET | FR-14, FR-85, FR-142, FR-213 |
-| `delais.sla_materiel_jours` | Délai de traitement du volet matériel | 21 | jours | démo | FR-142 |
-| `delais.sla_recours_jours` | Délai de traitement du volet recours | 90 | jours | démo | FR-142 |
-| `delais.sla_risques_divers_jours` | Délai de traitement du volet risques divers | 30 | jours | démo | FR-142 |
-| `relance.canaux` | Canaux de relance | appel, SMS, e-mail, WhatsApp, courrier | liste | démo CanalRelance | FR-143 |
-| `relance.intervalle_jours` (alias : `NOTIF_INTERVALLE_RELANCE_PIECES`, `intervalle_relance_min_jours`, `relance.intervalle`) | Intervalle entre deux relances d un même interlocuteur | 5 | jours | démo DELAI_ENTRE_RELANCES | FR-47, FR-143, FR-184, FR-226 |
-| `relance.sans_effet_max` (alias : `NOTIF_RELANCES_AVANT_ARBITRAGE`, `relances_sans_effet_max`, `relance.sans_effet`) | Relances sans effet avant proposition d arbitrage | 3 | relances | démo RELANCES_SANS_EFFET | FR-47, FR-143, FR-184, FR-226 |
-| `muet.a_relancer_jours` | Dossier sans action : à relancer | 15 | jours | démo | FR-144 |
-| `muet.a_surveiller_jours` (alias : `controle.silences`) | Dossier sans action : à surveiller [controle.silences couvre aussi muet.a_relancer_jours et muet.muet_jours] | 8 | jours | démo | FR-144, FR-210 |
-| `muet.agent_sans_trace_jours` (alias : `TRACE_AGENT_SANS_TRACE`, `controle.agent_sans_trace`) | Agent sans trace d écriture | 10 | jours | démo | FR-13, FR-144, FR-210 |
-| `muet.muet_jours` (alias : `pilotage.sans_action`) | Dossier sans action : muet | 30 | jours | démo | FR-144, FR-206 |
-| `pieces.bloquante_jours` (alias : `pilotage.pieces_bloquantes`) | Pièce bloquante en attente = alerte | 30 | jours | démo JOURS_PIECES_BLOQUANTES | FR-145, FR-207 |
-| `notif.alerte_offre_a_envoyer_heures` | Alerte au responsable avant la fin des 48 h d envoi de l offre | 24 | heures | [ASSUMPTION] | FR-146 |
-| `notif.canal_defaut_assure` | Canal de notification par défaut de l assuré | SMS | canal | [ASSUMPTION] | FR-146 |
+| code | libellé | défaut | unité | source | FR | propriétaire | validateur | revue |
+|---|---|---|---|---|---|---|---|---|
+| `ecart_alerte_reception_saisie_jours_ouvres` | Écart réception réelle / saisie qui alerte le responsable | 1 | jour ouvré | ASSUMPTION (défaut relevé par MEM) | FR-34 | `DT` | `DG` | annuelle |
+| `delai_alerte_numero_officiel_jours_ouvres` (alias : `NUM_DELAI_ALERTE`, `delais.numero_officiel_jours_ouvres`, `sinistre.delai_numero`) | Délai avant alerte « dossier sans numéro officiel » | 1 | jour ouvré | D3 | FR-2, FR-37, FR-142, FR-198 | `RESP` | `DT` | annuelle |
+| `qui_attribue_numero_sinistre` (alias : `NUM_ATTRIBUTION`, `sinistre.qui_attribue`) | Qui attribue le numéro de sinistre officiel | LC (logiciel de la compagnie) | LC ou Prospera | D3, PO | FR-2, FR-37, FR-198 | `RESP` | `DT` | annuelle |
+| `delai_declaration_jours_defaut` | Délai de déclaration d'une garantie (lu dans le LC par garantie) ; **jamais sous le plancher légal de D.5** : une valeur sous le plancher est refusée à la configuration (test) | 5 | jour ouvré | DEMO ; plancher légal (art. 12-4°) | FR-43 | `RESP` | `DT` | annuelle |
+| `delai_declaration_transport_jours` | Délai de déclaration, transport de marchandises (valeur gardée) | 3 | jour | DEMO | FR-43 | `RESP` | `DT` | annuelle |
+| `delai_declaration_vol_heures` (alias : `delai_declaration_vol_jours`) | Délai de déclaration en cas de vol ; **jamais sous le plancher légal de 48 heures** (art. 12-4°) | 48 | heure | DEMO (2 jours) ; plancher légal | FR-43 | `RESP` | `DT` | annuelle |
+| `pieces_complementaires_par_type` | Liste des pièces complémentaires par type | listes de la démo | liste | DEMO | FR-44 | `RESP` | `DT` | annuelle |
+| `pieces_corporel_cima` | Pièces à demander à la victime et aux ayants droit (art. 240, 241) | pièce d'identité, acte de naissance, acte de mariage, certificat médical initial ; certificat de décès, jugement d'hérédité, certificat de vie, certificat de genre de mort | liste | CIMA, ASSUMPTION (à valider par le juriste) | FR-44 | `RESP` | `DT` | annuelle |
+| `pieces_obligatoires_par_type` | Liste des pièces obligatoires par type de sinistre (12 types) | listes de la démo (annexe D) | liste | DEMO | FR-44 | `RESP` | `DT` | annuelle |
+| `volet_par_type` | Volet par défaut de chaque type de sinistre | corporel : auto corporel, accident du travail, décès ; matériel : auto matériel, collision ; risques divers : les autres | table | DEMO | FR-44 | `RESP` | `DT` | annuelle |
+| `delai_troisieme_relance_jours` | Délai écrit dans le troisième message | 15 | jour | DEMO | FR-47 | `RESP` | `DT` | annuelle |
+| `alerte_accuse_gestionnaire_jours` | Jour où l'accusé non envoyé alerte l'agent | 8 | jour | ASSUMPTION | FR-48 | `RESP` | `DT` | annuelle |
+| `delai_accuse_reception_jours` (alias : `DELAI_ACCUSE_RECEPTION`, `delais.accuse_reception_jours`) | Accusé de réception du dossier (délai interne) | 10 | jour | DEMO | FR-14, FR-48, FR-142 | `RESP` | `DT` | annuelle |
+| `arrondi_provision_fcfa` | Arrondi de la provision d'ouverture | 5 000 | FCFA | DEMO | FR-49 | `DT` | `DG` | annuelle |
+| `alerte_dossier_non_affecte_jours_ouvres` | Délai avant alerte « dossier ouvert non affecté » | 1 | jour ouvré | ASSUMPTION | FR-50 | `RESP` | `DT` | annuelle |
+| `poids_charge_domaine_type` | Poids de charge par domaine et par type de mission | à saisir (grille de la démo non extraite) | poids | DEMO, à compléter | FR-51 | `RESP` | `DT` | annuelle |
+| `poids_charge_gravite` | Coefficient de gravité du poids de charge | léger et modéré 1 ; grave 1,3 ; mortel 1,6 | coefficient | DEMO | FR-51 | `RESP` | `DT` | annuelle |
+| `seuil_disponible_gestionnaire` | Charge pondérée / capacité sous laquelle un gestionnaire est disponible | 0,8 | ratio | DEMO | FR-51 | `RESP` | `DT` | annuelle |
+| `seuil_surcharge_gestionnaire` | Charge pondérée / capacité au-delà de laquelle un gestionnaire est surchargé | 1,2 | ratio | DEMO | FR-51 | `RESP` | `DT` | annuelle |
+| `alertes_instruction` | Seuils des alertes d'instruction : sinistre moins de 30 jours après souscription ; véhicule de plus de 15 ans ; montant de plus de 5 000 000 FCFA (contre-expertise recommandée) ; plainte de vol déposée plus de 2 jours après les faits ; réserves de transport plus de 3 jours après livraison ; prescription du recours transporteur 1 an (2 ans en aérien) | valeurs de la démo | seuils | DEMO | FR-55 | `RESP` | `DT` | annuelle |
+| `franchise_defaut_biens_fcfa` | Franchise par défaut du formulaire biens et divers | 25 000 | FCFA | DEMO | FR-55, FR-73 | `RESP` | `DT` | annuelle |
+| `orientation_declaration_tardive_jours` | Déclaration tardive qui déclenche l'orientation « fraude » | 15 | jour | DEMO | FR-58 | `RESP` | `DT` | annuelle |
+| `orientation_souscription_recente_jours` | Souscription récente qui déclenche l'orientation « fraude » | 60 | jour | DEMO | FR-58 | `RESP` | `DT` | annuelle |
+| `accord_devis_dossier_max_fcfa` | Voie accord sur devis : montant maximal du dossier | 300 000 | FCFA | D9, MEM | FR-59 | `CPT` | `RESP` | annuelle |
+| `accord_devis_montant_max_fcfa` | Voie accord sur devis : montant maximal du devis | 200 000 | FCFA | D9, MEM | FR-59 | `CPT` | `RESP` | annuelle |
+| `panel_interne_domaines` (alias : `expert.panel_interne_demo`) | Domaines couverts par le panel interne [l'alias expert.panel_interne_demo couvre aussi panel_interne_zones] | automobile matériel, médical, responsabilité | liste | DEMO | FR-59, FR-179 | `RESP` | `DT` | annuelle |
+| `panel_interne_zones` | Zones desservies par le panel interne | Lomé, Tsévié, Aného | liste | DEMO | FR-59 | `RESP` | `DT` | annuelle |
+| `seuil_expertise_externe_fcfa` | Expertise externe obligatoire au-dessus | 3 000 000 | FCFA | DEMO | FR-59 | `RESP` | `DT` | annuelle |
+| `seuil_expertise_requise_fcfa` | Aucune expertise requise sous ce montant | 250 000 | FCFA | DEMO | FR-59 | `RESP` | `DT` | annuelle |
+| `catalogue_prix_pieces` | Catalogue de fourchettes de prix des pièces, taux horaire, coefficients de catégorie | à constituer (valeurs de la démo non retenues) | table | ASSUMPTION | FR-60 | `RESP` | `DT` | annuelle |
+| `comparables_devis_min` | Observations minimales pour l'historique des devis | 5 | observations | DEMO | FR-60 | `RESP` | `DT` | annuelle |
+| `devis_surcout_alerte_pct` | Surcoût d'un poste qui alerte, en pourcentage du devis | 10 | % | DEMO | FR-60 | `RESP` | `DT` | annuelle |
+| `delai_certificat_medical_jours` | Délai d'attente par type de certificat | initial 8 ; prolongation 8 ; arrêt de travail 8 ; reprise 10 ; guérison 12 ; consolidation 15 ; descriptif des séquelles 12 ; aggravation 12 ; rechute 10 ; complémentaire 8 | jour | DEMO | FR-63 | `RESP` | `DT` | annuelle |
+| `comparables_dossiers_min` | Dossiers comparables minimaux pour la médiane | 12 | dossiers | DEMO | FR-65, FR-74 | `RESP` | `DT` | annuelle |
+| `comparables_missions_min` | Missions comparables minimales pour la médiane | 5 | missions | DEMO | FR-65 | `RESP` | `DT` | annuelle |
+| `ecart_comparables_significatif_pct` | Écart significatif à la médiane des comparables | 25 | % | DEMO | FR-65 | `DT` | `DG` | annuelle |
+| `ecart_expert_attention_pct` | Écart expert / dossier : niveau attention | 15 | % | DEMO | FR-65 | `DT` | `DG` | annuelle |
+| `ecart_expert_bloquant_pct` | Écart expert / dossier : niveau bloquant | 35 | % | DEMO | FR-65 | `DT` | `DG` | annuelle |
+| `decompte.ordre` | Ordre du décompte des sinistres non corporels (la franchise est déduite du montant arrêté, jamais avant la règle proportionnelle) | dommage, vétusté, règle proportionnelle, plafond, franchise | ordre | code de la démo, corrigé le 2026-11-13 (plan D15) | FR-69, FR-75 | `RESP` | `DT` | annuelle |
+| `grille_vetuste_auto` | Vétusté sur pièces selon l'âge du véhicule | jusqu'à 1 an 0 % ; 2 ans 10 % ; 3 ans 20 % ; 5 ans 30 % ; 8 ans 40 % ; au-delà 50 % | % | DEMO (« indicative ») | FR-72 | `RESP` | `DT` | annuelle |
+| `abattement_divers_pct` | Abattement du formulaire divers | 10 | % | DEMO | FR-73 | `RESP` | `DT` | annuelle |
+| `arrondi_indemnite_fcfa` | Arrondi des montants non corporels | 5 000 (corporel : au franc) | FCFA | DEMO, ASSUMPTION | FR-73 | `RESP` | `DT` | annuelle |
+| `tolerance_expert_pct` | Tolérance affichée : montant arrêté / proposition de l'expert | 10 | % | DEMO | FR-80 | `RESP` | `DT` | annuelle |
+| `tolerance_provision_pct` | Tolérance affichée : indemnité / provision | 25 | % | DEMO | FR-80 | `DT` | `DG` | annuelle |
+| `delai_communication_pv_transaction_heures` | Communication du procès-verbal de transaction aux bénéficiaires | 24 | heure | MEM, ASSUMPTION | FR-84 | `RESP` | `DT` | annuelle |
+| `delai_envoi_offre_heures` (alias : `DELAI_OFFRE_VALIDEE_ENVOI`, `delais.offre_envoi_heures`) | Délai d'envoi de l'offre validée | 48 | heure | D6, MEM | FR-14, FR-84, FR-142 | `RESP` | `DT` | annuelle |
+| `delai_alerte_offre_jours` (alias : `delais.offre_alerte_jours`) | Alerte au responsable d'une offre sans réponse | 30 | jour | D6 | FR-89, FR-142 | `RESP` | `DT` | annuelle |
+| `delai_relance_offre_jours` (alias : `delais.offre_relance_jours`) | Première relance d'une offre sans réponse | 15 | jour | D6 | FR-89, FR-142 | `RESP` | `DT` | annuelle |
+| `reglement.honoraires_motif_au_dela_lettre` | Visa d'honoraires : motif exigé au-delà de la lettre de mission | OUI | oui/non | démo | FR-90 | `RESP` | `DT` | annuelle |
+| `reglement.gabarit_lettre_cheque` | Gabarit de lettre-chèque de la compagnie | aucun (remplissage manuel) | fichier | *(défaut H-206)* | FR-94 | `CPT` | `RESP` | annuelle |
+| `reglement.ecart_rapprochement_jours` (alias : `RAPPROCHEMENT_ECART_ANCIEN`, `compta.rapprochement_ancien`) | Écart de rapprochement ancien = alerte (dans `paiement`) | 60 | jours | démo, D16 | FR-95, FR-193, FR-224 | `DT` | `DG` | annuelle |
+| `reglement.operateurs_mobile_money` (alias : `MOBILE_MONEY_OPERATEURS`) | Opérateurs Mobile Money autorisés | T-Money, Flooz | liste | D11 | FR-95, FR-223 | `RESP` | `DT` | annuelle |
+| `reglement.code_usage_unique_minutes` | Validité du code à usage unique | 10 | minutes | *(défaut H-207)* | FR-96 | `RESP` | `DT` | annuelle |
+| `reglement.signature_electronique_quittance` | Acceptation électronique de la quittance par code à usage unique | désactivée | oui/non | D11, D21 | FR-96 | `CPT` | `RESP` | annuelle |
+| `reglement.fenetre_cumul_especes_jours` | Fenêtre de cumul du plafond espèces | 30 | jours | *(défaut H-208)* | FR-98 | `AUD` | `DG` | semestrielle |
+| `reglement.plafond_especes` (alias : `PLAFOND_ESPECES`) | Plafond d'un règlement en espèces (par règlement et par bénéficiaire, cumul sur 30 j) | 500000 | FCFA | démo PLAFOND_ESPECES, D11 | FR-98, FR-225 | `AUD` | `DG` | semestrielle |
+| `dossier.motif_min_caracteres` (alias : `GARANTIE_MOTIF_LONGUEUR_MIN`, `garantie.motif_min`) | Longueur minimale d un motif écrit | 10 | caractères | démo (décision de garantie) | FR-3, FR-99, FR-104, FR-187 | `RESP` | `DT` | annuelle |
+| `reglement.fenetre_coordonnees_jours` (alias : `FENETRE_COORDONNEES`, `controle.coordonnees_bancaires`) | Changement de coordonnées avant paiement = alerte | 5 | jours | démo FENETRE_COORDONNEES_JOURS | FR-100, FR-210, FR-222 | `AUD` | `DG` | semestrielle |
+| `reglement.fenetre_doublon_jours` (alias : `DOUBLON_REGLEMENT_FENETRE`, `controle.doublon_reglement`) | Fenêtre de détection du doublon de règlement | 30 | jours | démo | FR-100, FR-210, FR-222, FR-224 | `AUD` | `DG` | semestrielle |
+| `reglement.part_concentration_pct` (alias : `CONCENTRATION_EMISSION`, `controle.concentration`) | Part du volume émis par un même comptable déclenchant l'alerte | 60 | % | démo PART_CONCENTRATION | FR-100, FR-210, FR-224 | `RESP` | `DT` | annuelle |
+| `reglement.seuil_cumul_lbc` (alias : `LBC_SEUIL_CUMUL_CLIENT`) | Cumul par bénéficiaire déclenchant l'alerte LBC/FT | (vide, alerte inactive) | FCFA | *(défaut H-209)* valeur nationale non lue | FR-100, FR-225 | `AUD` | `DG` | semestrielle |
+| `reglement.cheque_circulation_longue_jours` (alias : `CHEQUE_CIRCULATION_LONGUE`) | Chèque non retiré : circulation longue | 21 | jours | démo | FR-101, FR-221 | `CPT` | `RESP` | annuelle |
+| `reglement.cheque_exposition_jours` (alias : `CHEQUE_EXPOSITION`) | Chèque non retiré : exposition | 30 | jours | démo DELAI_GUICHET_JOURS | FR-101, FR-221 | `CPT` | `RESP` | annuelle |
+| `reglement.cheque_relance_jours` (alias : `CHEQUE_RELANCE_GUICHET`) | Chèque non retiré : relance | 7 | jours | démo RELANCE_GUICHET_JOURS | FR-101, FR-221 | `CPT` | `RESP` | annuelle |
+| `reglement.alerte_avant_echeance_heures` | Alerte jaune avant la cible de paiement | 48 | heures | *(défaut H-210)* | FR-102 | `RESP` | `DT` | annuelle |
+| `reglement.attendre_fin_denonciation` | Au corporel automobile, ne pas émettre avant la fin du délai de dénonciation | OUI | oui/non | *(défaut H-211)* | FR-102 | `RESP` | `DT` | annuelle |
+| `reglement.delai_paiement_heures` (alias : `DELAI_PAIEMENT_APRES_ACCORD`) | Paiement après accord (cible interne) | 72 | heures | mémoire 2014 (D7) | FR-14, FR-102 | `CPT` | `RESP` | annuelle |
+| `recours.nouveau_non_traite_jours` | Nouveau recours non traité = alerte | 60 | jours | démo | FR-108 | `RESP` | `DT` | annuelle |
+| `recours.sans_action_jours` | Recours sans action = alerte | 30 | jours | démo | FR-108 | `RESP` | `DT` | annuelle |
+| `recours.delai_lettre_mise_en_cause_jours_ouvres` | Envoi de la lettre de mise en cause après ouverture | 5 | jours ouvrés | *(défaut H-212)* | FR-109 | `RESP` | `DT` | annuelle |
+| `recours.relance_jours` (alias : `DELAI_RELANCE_RECOURS`, `delai_relance_recours_jours`) | Relance du recours tant que sans réponse puis jusqu au recouvrement | 15 | jours | mémoire 2014, D10 | FR-14, FR-54, FR-110 | `RESP` | `DT` | annuelle |
+| `recours.delai_reclamation_apres_paiement_jours` | Réclamation du remboursement après paiement de l assuré | 30 | jours | démo (délai de transmission) | FR-111 | `RESP` | `DT` | annuelle |
+| `recours.creance_ancienne_jours` | Créance non soldée ancienne = alerte | 90 | jours | démo | FR-113 | `RESP` | `DT` | annuelle |
+| `recours.inclure_honoraires_base` | Honoraires d expert inclus dans la base du montant réclamé | NON | oui/non | *(défaut H-213)* | FR-113 | `RESP` | `DT` | annuelle |
+| `recours.delai_mise_en_demeure_jours` | Délai accordé au débiteur par la mise en demeure | 30 | jours | démo | FR-114 | `RESP` | `DT` | annuelle |
+| `recours.seuil_perte_validation_direction` | Perte sur créance exigeant la validation DG ou DT | (vide) | FCFA | *(défaut H-214)* | FR-115 | `RESP` | `DT` | annuelle |
+| `recours.alerte_prescription_jours` | Alerte avant le terme indicatif | 90 | jours | démo | FR-118 | `RESP` | `DT` | annuelle |
+| `recours.arbitrage_obligatoire` | Arbitrage inter-assureurs activé (art. 276) | OUI (à vérifier) | oui/non | Code CIMA art. 276 (SÛR), *(défaut H-215)* | FR-119 | `RESP` | `DT` | annuelle |
+| `recours.convention_active` | Convention de place active (indemnisation directe, forfait) | NON | oui/non | *(défaut H-216)* | FR-119 | `RESP` | `DT` | annuelle |
+| `recours.convention_delai_reglement_jours` | Délai de règlement entre compagnies sous convention | (vide) | jours | recherche (exemple 30 j, non togolais) | FR-119 | `RESP` | `DT` | annuelle |
+| `recours.convention_forfait` | Forfait inter-compagnies (valeur d exemple) | 350000 | FCFA | démo R1 | FR-119 | `RESP` | `DT` | annuelle |
+| `recours.contre_proposition_formule` | Contre-proposition : max(offre x 1,15 ; moyenne offre et réclamé ; 80 % du réclamé) | formule démo | formule | démo | FR-120 | `RESP` | `DT` | annuelle |
+| `recours.ecart_accord_rapide_pct` | Écart à l offre : accord rapide jusqu à | 15 | % | démo | FR-120 | `DT` | `DG` | annuelle |
+| `recours.ecart_negociable_pct` | Écart à l offre : négociable jusqu à | 35 | % | démo | FR-120 | `DT` | `DG` | annuelle |
+| `sortie.delai_decision_refus_heures` | Décision de refus soumise au responsable ou à la direction | 48 | heures | mémoire 2014 (D7) | FR-121 | `RESP` | `DT` | annuelle |
+| `sortie.delai_information_refus_jours_ouvres` | Courrier de refus envoyé après la décision | 2 | jours ouvrés | mémoire 2014 (72 h), *(défaut H-217)* | FR-121 | `RESP` | `DT` | annuelle |
+| `sortie.attente_apres_derniere_relance_jours` | Attente après la dernière relance avant classement | 15 | jours | démo (3e relance) , *(défaut H-218)* | FR-123 | `RESP` | `DT` | annuelle |
+| `sortie.canaux_min_sans_suite` | Canaux de relance distincts avant classement | 2 | canaux | *(défaut H-219)* | FR-123 | `RESP` | `DT` | annuelle |
+| `sortie.delai_grace_versement_sans_suite_jours` | Délai avant versement aux archives d un dossier sans suite | 30 | jours | *(défaut H-220)* | FR-123 | `RESP` | `DT` | annuelle |
+| `sortie.relances_avant_sans_suite` | Relances sans effet avant classement sans suite | 3 | relances | démo RELANCES_SANS_EFFET | FR-123 | `RESP` | `DT` | annuelle |
+| `sortie.sans_suite_corporel_decision_direction` | Classement sans suite d un corporel automobile réservé à la direction | OUI | oui/non | Code CIMA art. 231 (SÛR), *(défaut H-221)* | FR-123 | `RESP` | `DT` | annuelle |
+| `sortie.reouvertures_alerte` | Nombre de réouvertures déclenchant l alerte au contrôle interne | 3 | réouvertures | *(défaut H-222)* | FR-126 | `RESP` | `DT` | annuelle |
+| `fraude.poids.beneficiaire_multiple` | Poids du signal BENEFICIAIRE_MULTIPLE | 15 | points | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.poids.contrat_non_actif` | Poids du signal CONTRAT_NON_ACTIF | 40 | points | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.poids.declaration_tardive` | Poids du signal DECLARATION_TARDIVE | 10 | points | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.poids.incoherence_dates` | Poids du signal INCOHERENCE_DATES | 30 | points | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.poids.montant_atypique` | Poids du signal MONTANT_ATYPIQUE | 20 | points | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.poids.sinistre_precoce` | Poids du signal SINISTRE_PRECOCE | 30 | points | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.poids.sinistres_repetes` | Poids du signal SINISTRES_REPETES | 25 | points | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.poids.telephone_partage` | Poids du signal TELEPHONE_PARTAGE | 15 | points | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.poids.vehicule_recurrent` | Poids du signal VEHICULE_RECURRENT | 20 | points | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.seuil.beneficiaire_multiple` | Dossiers pour le même bénéficiaire | 3 | dossiers | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.seuil.declaration_tardive_jours` | Déclaration tardive | 45 | jours | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.seuil.montant_atypique_coefficient` | Évaluation / coût moyen de la branche | 4 | x | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.seuil.sinistre_precoce_jours` | Sinistre précoce après la prise d effet | 30 | jours | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.seuil.sinistres_repetes` | Nombre de sinistres sur la police | 3 | sinistres | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.seuil.telephone_partage` | Assurés sur le même téléphone | 3 | assurés | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.seuil.vehicule_recurrent` | Dossiers sur la même immatriculation | 3 | dossiers | démo | FR-127 | `AUD` | `DG` | semestrielle |
+| `fraude.niveau.attention` | Seuil du niveau ATTENTION | 20 | points | démo | FR-128 | `AUD` | `DG` | semestrielle |
+| `fraude.niveau.bloque` | Seuil du niveau BLOQUE (suspend ordre et paiement) | 70 | points | démo | FR-128 | `AUD` | `DG` | semestrielle |
+| `fraude.niveau.suspect` | Seuil du niveau SUSPECT (ouvre la revue) | 45 | points | démo, *(défaut H-223)* pour l ouverture de revue | FR-128 | `AUD` | `DG` | semestrielle |
+| `fraude.plafond_score` | Plafond du score | 100 | points | démo | FR-128 | `AUD` | `DG` | semestrielle |
+| `fraude.delai_revue_bloque_jours_ouvres` | Dossier BLOQUE non revu = alerte | 3 | jours ouvrés | *(défaut H-224)* | FR-129 | `AUD` | `DG` | semestrielle |
+| `fraude.tranches_anciennete_jours` | Tranches d ancienneté des revues | 7 / 30 / 90 | jours | démo | FR-131 | `AUD` | `DG` | semestrielle |
+| `fraude.fenetre_graphe_mois` | Fenêtre du graphe de liens | 12 | mois | démo (portefeuille 12 mois) | FR-132 | `AUD` | `DG` | semestrielle |
+| `fraude.garage_dossiers_min` | Dossiers minimum pour signaler un garage | 5 | dossiers | *(défaut H-225)* | FR-132 | `AUD` | `DG` | semestrielle |
+| `fraude.garage_ecart_marche_pct` | Devis de garage au-dessus de la moyenne du marché | 20 | % | démo | FR-132 | `AUD` | `DG` | semestrielle |
+| `delais.alerte_interne_pct` | Alerte à la part du délai interne écoulée | 85 | % | démo (seuil d alerte délai) | FR-140 | `RESP` | `DT` | annuelle |
+| `delais.alerte_legale_jours` (alias : `ALERTE_ECHEANCE_LEGALE`, `veille.offre_corporelle`) | Alerte avant une échéance réglementaire | 45 | jours | démo (veille : offre corporelle à présenter dans 45 j) | FR-14, FR-140, FR-208 | `RESP` | `DT` | annuelle |
+| `delais.offre_autres_jours` | Offre interne, autres branches | 75 | jours | démo | FR-142 | `RESP` | `DT` | annuelle |
+| `delais.offre_corporel_jours` (alias : `DELAI_OFFRE_DOSSIER_COMPLET`, `delai_interne_offre_jours`) | Offre interne, corporel (départ : dossier complet) [les alias combinés couvrent aussi delais.offre_materiel_jours et delais.offre_autres_jours] | 90 | jours | démo (§3.7) | FR-14, FR-85, FR-142 | `RESP` | `DT` | annuelle |
+| `delais.offre_materiel_jours` | Offre interne, matériel | 60 | jours | démo | FR-142 | `RESP` | `DT` | annuelle |
+| `delais.reglement_autres_jours` | Règlement après accord, limite interne, autres | 30 | jours | démo | FR-142 | `RESP` | `DT` | annuelle |
+| `delais.reglement_corporel_jours` (alias : `DELAI_REGLEMENT_APRES_ACCORD`, `delai_interne_reglement_jours`) | Règlement après accord, limite interne, corporel [les alias combinés couvrent aussi delais.reglement_materiel_jours et delais.reglement_autres_jours] | 45 | jours | démo | FR-14, FR-85, FR-142 | `CPT` | `RESP` | annuelle |
+| `delais.reglement_materiel_jours` | Règlement après accord, limite interne, matériel | 30 | jours | démo | FR-142 | `RESP` | `DT` | annuelle |
+| `delais.sla_corporel_jours` (alias : `SLA_VOLET`, `delai_interne_traitement_jours`, `pilotage.delai_cible_volet`) | Délai de traitement du volet corporel [les alias combinés couvrent aussi les trois autres volets (delais.sla_*)] | 45 | jours | démo SLA_PAR_VOLET | FR-14, FR-85, FR-142, FR-213 | `RESP` | `DT` | annuelle |
+| `delais.sla_materiel_jours` | Délai de traitement du volet matériel | 21 | jours | démo | FR-142 | `RESP` | `DT` | annuelle |
+| `delais.sla_recours_jours` | Délai de traitement du volet recours | 90 | jours | démo | FR-142 | `RESP` | `DT` | annuelle |
+| `delais.sla_risques_divers_jours` | Délai de traitement du volet risques divers | 30 | jours | démo | FR-142 | `RESP` | `DT` | annuelle |
+| `relance.canaux` | Canaux de relance | appel, SMS, e-mail, WhatsApp, courrier | liste | démo CanalRelance | FR-143 | `RESP` | `DT` | annuelle |
+| `relance.intervalle_jours` (alias : `NOTIF_INTERVALLE_RELANCE_PIECES`, `intervalle_relance_min_jours`, `relance.intervalle`) | Intervalle entre deux relances d un même interlocuteur | 5 | jours | démo DELAI_ENTRE_RELANCES | FR-47, FR-143, FR-184, FR-226 | `RESP` | `DT` | annuelle |
+| `relance.sans_effet_max` (alias : `NOTIF_RELANCES_AVANT_ARBITRAGE`, `relances_sans_effet_max`, `relance.sans_effet`) | Relances sans effet avant proposition d arbitrage | 3 | relances | démo RELANCES_SANS_EFFET | FR-47, FR-143, FR-184, FR-226 | `RESP` | `DT` | annuelle |
+| `muet.a_relancer_jours` | Dossier sans action : à relancer | 15 | jours | démo | FR-144 | `RESP` | `DT` | annuelle |
+| `muet.a_surveiller_jours` (alias : `controle.silences`) | Dossier sans action : à surveiller [controle.silences couvre aussi muet.a_relancer_jours et muet.muet_jours] | 8 | jours | démo | FR-144, FR-210 | `RESP` | `DT` | annuelle |
+| `muet.agent_sans_trace_jours` (alias : `TRACE_AGENT_SANS_TRACE`, `controle.agent_sans_trace`) | Agent sans trace d écriture | 10 | jours | démo | FR-13, FR-144, FR-210 | `RESP` | `DT` | annuelle |
+| `muet.muet_jours` (alias : `pilotage.sans_action`) | Dossier sans action : muet | 30 | jours | démo | FR-144, FR-206 | `RESP` | `DT` | annuelle |
+| `pieces.bloquante_jours` (alias : `pilotage.pieces_bloquantes`) | Pièce bloquante en attente = alerte | 30 | jours | démo JOURS_PIECES_BLOQUANTES | FR-145, FR-207 | `RESP` | `DT` | annuelle |
+| `notif.alerte_offre_a_envoyer_heures` | Alerte au responsable avant la fin des 48 h d envoi de l offre | 24 | heures | *(défaut H-226)* | FR-146 | `RESP` | `DT` | annuelle |
+| `notif.canal_defaut_assure` | Canal de notification par défaut de l assuré | SMS | canal | *(défaut H-227)* | FR-146 | `RESP` | `DT` | annuelle |
+| `reglement.second_controle_seuil` | Seuil au-dessus duquel le `DG` est le second contrôle de l'ordre de règlement (en dessous : un second `CPT`) | 5 000 000 | FCFA | [A] | FR-7, FR-220, FR-222 | `CPT` | `RESP` | annuelle |
+| `accord.double_enregistrement_seuil` | Seuil au-dessus duquel l'accord de l'assuré est enregistré par deux personnes | 3 000 000 | FCFA | [A] | FR-86, FR-90 | `CPT` | `RESP` | annuelle |
+| `penalite.base` | Base de calcul de la pénalité de retard (offre, indemnité ou solde) ; libellé « estimation, base non validée » | montant de l'offre | liste | [A] à valider par le juriste | FR-14, FR-85, FR-102, FR-141 | `RESP` | `DT` | annuelle |
+| `fraude.revue_delai` | Délai de revue d'un signal de fraude avant escalade au `DG` et à `AUD` | 3 | jour ouvré | [A] | FR-127, FR-130 | `AUD` | `DG` | semestrielle |
+| `sans_suite.seuil_second_controle` | Seuil de provision au-dessus duquel un classement sans suite exige le second contrôle du `RESP` | 500 000 | FCFA | [A] | FR-123 | `CPT` | `RESP` | annuelle |
+| `majeur.seuil` | Seuil de sinistre majeur (avis au réassureur, comité de suivi, rapports) | 20 000 000 | FCFA | [A] | FR-57a, FR-190 | `RESP` | `DT` | annuelle |
+| `majeur.rapport_frequence` | Fréquence du rapport périodique d'un sinistre majeur | hebdomadaire | liste (quotidien, hebdomadaire) | [A] | FR-57a, FR-191 | `RESP` | `DT` | annuelle |
+| `expertise.inspecteur_seuil_devis` | Devis au-dessus duquel un inspecteur technique est présent à l'expertise | vide (aucun seuil) | FCFA | [A] valeur de la compagnie étudiée par le mémoire de 2014, à confirmer | FR-59 | `RESP` | `DT` | annuelle |
+| `expertise.photos_apres_reparation` | Photos après réparation exigées pour l'accord sur devis | vide (non exigées) | oui/non | [A] | FR-59 | `RESP` | `DT` | annuelle |
+| `cloture.apres_dernier_reglement` | Clôture du dossier après le dernier règlement `PAYE` | 15 | jour | [A] mémoire de 2014 | FR-104, FR-142 | `RESP` | `DT` | annuelle |
+| `pv.suivi_mois` | Suivi du procès-verbal d'accident corporel (nature « suivi », non réglementaire contre la compagnie) | 3 | mois | Code CIMA art. 230 | FR-141 | `RESP` | `DT` | annuelle |
+| `exclusion.decision_soumise` | Décision d'exclusion soumise (le courrier de refus part sous 72 heures ouvrées, ou le retard est justifié 2 jours ouvrés) | 48 | heure ouvrée | [A] procédure du mémoire de 2014 | FR-121, FR-84, FR-102 | `RESP` | `DT` | annuelle |
 
 ### D.3 Modules propres à l'assurance (partie 3, §6)
 
 Recherche, réclamations, pièces et archives (conservation par nature : jamais en dessous du plancher de D.5), experts et leurs budgets, contrats lus et provisions, échange avec le logiciel de la compagnie, pilotage et contrôle interne, reprise.
 
-| code | libellé | défaut | unité | source | FR |
-|---|---|---|---|---|---|
-| `recherche.delai_max` (alias : `RECHERCHE_DELAI_P95`) | Délai maximal d'un résultat de recherche (95e centile) | 5 | secondes | plan D20 (v2, PO) | FR-23, FR-150 |
-| `recherche.delai_vise` (alias : `RECHERCHE_DELAI_VISE`) | Délai visé d'un résultat de recherche | 1 | seconde | deck [ASSUMPTION : cible non contractuelle] | FR-23, FR-150 |
-| `recherche.longueur_min` | Longueur minimale d'un terme cherché | 3 | caractères | [ASSUMPTION] | FR-151 |
-| `recherche.prefixe_min` | Longueur de mot à partir de laquelle la tolérance de fin de mot s'applique | 3 (mot de plus de 3 lettres) | lettres | démo (`rechercherDossiers`) | FR-151 |
-| `fiche.telephone_visible` | Nombre de chiffres du téléphone visibles quand il est masqué | 2 | chiffres | [ASSUMPTION] | FR-153 |
-| `ia.resume_delai_max` | Délai maximal du résumé d'un dossier de 40 pages | 5 | minutes | v2 « quelques minutes » [ASSUMPTION] | FR-154 |
-| `reclamation.accuse_delai` | Délai d'accusé de réception d'une réclamation | 5 | jours | démo (`qualite-reclamations`) | FR-156 |
-| `reclamation.escalade_delai` | Délai d'escalade d'une réclamation | 60 | jours | démo | FR-156 |
-| `reclamation.fenetre_analyse` | Fenêtre d'analyse des réclamations récurrentes | 365 | jours | démo | FR-156 |
-| `reclamation.recurrence_seuil` | Nombre de réclamations sur un même motif qui ouvre une ligne au plan d'action | 3 | réclamations | démo | FR-156 |
-| `reclamation.reponse_delai` | Délai de réponse à une réclamation | 30 | jours | démo | FR-156 |
-| `ged.antivirus` | Analyse antivirus avant enregistrement | oui (fournie par la compagnie) | oui/non | [ASSUMPTION] | FR-160 |
-| `ged.formats_acceptes` | Types de fichiers acceptés | image/jpeg, image/png, image/webp, application/pdf | liste | démo (`fichiers-store`) | FR-160 |
-| `ged.taille_max` | Taille maximale d'un fichier | 8 | Mo | démo | FR-160 |
-| `ged.types_pieces` | Liste des types de pièces | 20 types de la démo (constat amiable, déclaration signée, certificats médicaux, rapport de police, carte grise, permis, devis, facture, RIB, certificat de décès, photos…) | liste | démo (`PieceType`) | FR-160 |
-| `ged.pieces_recentes` | Fenêtre « arrivé aujourd'hui » de l'opérateur | 48 | heures | démo | FR-162 |
-| `ocr.couche_texte_min` | Caractères par page en dessous desquels une page est traitée comme image | 60 | caractères | démo (`lecture-documents`) | FR-163 |
-| `ocr.delai_page` | Délai maximal de lecture d'une page avant `ECHEC` | 2 | minutes | [ASSUMPTION] | FR-163 |
-| `ocr.numerisation_dpi` | Résolution de numérisation conseillée | 300 | dpi | démo (consigne GED) | FR-163 |
-| `ia.classement_seuil_bas` | Confiance en dessous de laquelle la proposition de classement n'est pas pré-sélectionnée | 0,60 | confiance (0-1) | [ASSUMPTION] | FR-164 |
-| `ia.classement_seuil_haut` | Confiance au-dessus de laquelle la proposition est pré-sélectionnée (confirmation humaine quand même) | 0,90 | confiance (0-1) | [ASSUMPTION] | FR-164 |
-| `ged.a_rattacher_delai` | Âge d'une pièce « à rattacher » qui lève une alerte | 3 | jours ouvrés | [ASSUMPTION] | FR-166 |
-| `archive.format_numero` | Format du numéro d'archivage (AAAA = année de clôture ; CCCC = CORP, MATL, DIVR, RECS) | ARC-AAAA-CCCC-NNNNN | format | plan D17 ; démo | FR-167 |
-| `archive.delai_versement` (alias : `dossier.delai_versement_jours`) | Délai de versement au fonds après clôture avant alerte | 75 | jours | démo (`DELAI_VERSEMENT_JOURS`) | FR-105, FR-168 |
-| `archive.cm_par_boite` | Épaisseur d'une boîte | 10 | cm | démo | FR-170 |
-| `archive.couleurs_chemise` | Couleur de chemise par branche | à fournir par la compagnie | liste | [ASSUMPTION] (mémoire, chap. V) | FR-170 |
-| `archive.pages_par_boite` | Pages maximales par boîte | 2 500 | pages | démo (`archives-hub`) | FR-170 |
-| `archive.verification_boite` | Périodicité de vérification physique d'une boîte | 12 | mois | [ASSUMPTION] | FR-170 |
-| `archive.motifs_sortie` | Motifs de sortie d'archive | instruction, expertise, contentieux, contrôle interne, réclamation, contrôle de la CRCA | liste | démo (`MotifSortie`) | FR-171 |
-| `archive.restitution_delai` (alias : `ARCH_RESTITUTION_JOURS`, `dossier.restitution_chemise_jours`) | Délai de restitution d'une chemise sortie | 15 | jours | démo (`JOURS_RESTITUTION`) ; plan D17 | FR-21, FR-107, FR-171 |
-| `archive.restitution_escalade` | Âge d'une sortie non restituée qui alerte le RESP | 30 | jours | [ASSUMPTION] | FR-171 |
-| `archive.papier_numerise_a_la_demande` | Numérisation du papier historique | à la demande (réouverture ou consultation) | règle | [ASSUMPTION] | FR-172 |
-| `conservation.contentieux_recours` | Durée, contentieux, recours, litige | 10, conservation définitive | ans | démo | FR-174 |
-| `conservation.corporel` | Durée, corporel | 10, conservation définitive | ans | démo | FR-174 |
-| `conservation.fraude` | Durée, fraude suspectée | 10, conservation définitive | ans | démo | FR-174 |
-| `conservation.materiel` | Durée, matériel (la démo met 5) | 10 | ans | plancher art. 404 ; [ASSUMPTION] | FR-174 |
-| `conservation.mortel` (alias : `CONSERV_MORTEL`) | Durée, sinistre mortel | 30, conservation définitive | ans | démo (`referentiel-archives`) | FR-21, FR-174 |
-| `conservation.pieces_comptables` | Durée, quittances, ordres, chèques | 10 | ans | démo | FR-174 |
-| `conservation.risques_divers` | Durée, risques divers (la démo met 5) | 10 | ans | plancher art. 404 ; [ASSUMPTION] | FR-174 |
-| `conservation.sans_suite_refuse` | Durée, classé sans suite ou refusé (la démo met 5) | 10 | ans | plancher art. 404 ; [ASSUMPTION] | FR-174 |
-| `destruction.visas` (alias : `CONSERV_DESTRUCTION_VISA`) | Visas d'un bordereau de destruction | RESP puis DG | rôles | [ASSUMPTION] | FR-21, FR-175 |
-| `ged.format_archive` | Format d'archive | PDF/A (l'image d'origine reste conservée) | format | [ASSUMPTION] | FR-176 |
-| `nas.seuil_occupation` | Taux d'occupation du NAS qui alerte ADMIN | 80 | % | [ASSUMPTION] | FR-176 |
-| `expert.domaines` | Domaines d'expertise | auto-matériel, médical, responsabilité, fraude, incendie, transport, bâtiment, perte d'exploitation | liste | démo (`DomaineMission`) | FR-177 |
-| `expert.agrement_alerte` | Alerte avant la fin d'agrément d'un expert | 60 | jours | [ASSUMPTION] | FR-178 |
-| `expert.second_facteur` | Second facteur obligatoire pour le compte d'un cabinet externe (EXPE) | oui | oui/non | [ASSUMPTION] | FR-180 |
-| `expert.visa_honoraires` | Rôles qui visent une note d'honoraires | RESP ou CPT | rôles | plan D8, démo | FR-182 |
-| `expert.arrondi_poids` | Arrondi du poids d'une mission | 0,5 | point | démo | FR-183 |
-| `expert.coef_gravite` | Coefficient de gravité du sinistre dans le poids de charge | léger 1 ; modéré 1 ; grave 1,3 ; mortel 1,6 | facteur | démo (`responsable-hub`) | FR-183 |
-| `expert.disponible` | Taux de charge sous lequel un expert est « disponible » | 0,8 | × capacité | démo | FR-183 |
-| `expert.echeances_rapports` | Fenêtres de l'échéancier des rapports dus | 7 et 15 | jours | démo | FR-183 |
-| `expert.poids_domaine` | Poids d'une mission par domaine (grille de charge) | à fournir par la compagnie | points | démo (grille paramétrable) [ASSUMPTION] | FR-183 |
-| `expert.surcharge` | Taux de charge qui rend un expert « surchargé » | 1,2 | × capacité | démo | FR-183 |
-| `expert.delai_rapport.auto_materiel` (alias : `DELAI_RAPPORT_EXPERT`, `delai_rapport_expert_jours`) | Délai de rapport attendu, auto-matériel [l'alias delai_rapport_expert_jours couvre les huit domaines (expert.delai_rapport.*)] | 7 | jours | démo ; mémoire (7 à 10 j) | FR-14, FR-68, FR-184 |
-| `expert.delai_rapport.batiment` | Délai de rapport attendu, bâtiment | 21 | jours | démo | FR-184 |
-| `expert.delai_rapport.fraude` | Délai de rapport attendu, fraude | 30 | jours | démo | FR-184 |
-| `expert.delai_rapport.incendie` | Délai de rapport attendu, incendie | 21 | jours | démo | FR-184 |
-| `expert.delai_rapport.medical` | Délai de rapport attendu, médical | 21 | jours | démo | FR-184 |
-| `expert.delai_rapport.perte_exploitation` | Délai de rapport attendu, perte d'exploitation | 30 | jours | démo | FR-184 |
-| `expert.delai_rapport.responsabilite` | Délai de rapport attendu, responsabilité | 14 | jours | démo | FR-184 |
-| `expert.delai_rapport.transport` | Délai de rapport attendu, transport | 14 | jours | démo | FR-184 |
-| `expert.budget_arrondi` (alias : `arrondi_budget_fcfa`) | Arrondi du budget indicatif | 5 000 | FCFA | démo | FR-68, FR-185 |
-| `expert.budget_coef_type` (alias : `budget_coefficient_type`) | Coefficient du budget par type de mission | initiale 1 ; complémentaire 0,5 ; contradictoire 1,5 ; contre-expertise 1,5 | facteur | démo | FR-66, FR-68, FR-185 |
-| `expert.budget_part_enjeu` (alias : `budget_part_enjeu_pct`) | Part de l'enjeu ajoutée au socle du domaine | 2 | % | démo | FR-68, FR-185 |
-| `expert.budget_plafond` (alias : `budget_plafond_fcfa`) | Plafond du budget indicatif d'une mission | 1 200 000 | FCFA | démo | FR-68, FR-185 |
-| `expert.budget_socle.auto_materiel` (alias : `budget_socle_domaine_fcfa`) | Socle du budget, auto-matériel (à remplacer par le tarif de la compagnie) [l'alias budget_socle_domaine_fcfa couvre les huit domaines (expert.budget_socle.*)] | 45 000 | FCFA | démo | FR-68, FR-185 |
-| `expert.budget_socle.batiment` | Socle du budget, bâtiment | 150 000 | FCFA | démo | FR-185 |
-| `expert.budget_socle.fraude` | Socle du budget, fraude | 250 000 | FCFA | démo | FR-185 |
-| `expert.budget_socle.incendie` | Socle du budget, incendie | 200 000 | FCFA | démo | FR-185 |
-| `expert.budget_socle.medical` | Socle du budget, médical | 120 000 | FCFA | démo | FR-185 |
-| `expert.budget_socle.perte_exploitation` | Socle du budget, perte d'exploitation | 300 000 | FCFA | démo | FR-185 |
-| `expert.budget_socle.responsabilite` | Socle du budget, responsabilité | 75 000 | FCFA | démo | FR-185 |
-| `expert.budget_socle.transport` | Socle du budget, transport | 120 000 | FCFA | démo | FR-185 |
-| `assurance.table_garanties` (alias : `table_type_sinistre_garanties`) | Table type de sinistre vers garanties qui répondent | table de la démo (16 codes de garantie) | table | démo (`garanties-hub`) ; plan (table en paramètre) | FR-41, FR-187 |
-| `garantie.decisions` | Décisions de garantie possibles | GARANTIE_ACQUISE, SOUS_RESERVE, REFUS_DE_GARANTIE | liste | plan D4 | FR-187 |
-| `provision.ancienne` | Ancienneté d'une provision dite « ancienne » | 365 | jours | démo | FR-188 |
-| `provision.ecart_estimation` (alias : `provision_ecart_estimation_pct`) | Écart provision / estimation qui classe « à revoir » | 15 | % | démo (`ECART_PROVISION`) | FR-76, FR-188 |
-| `provision.ecart_validation` (alias : `revision_provision_attente_resp_fcfa`, `sortie.ecart_provision_attente_responsable`) | Écart de révision de provision qui attend le RESP | 2 000 000 | FCFA | plan D12 ; démo | FR-76, FR-124, FR-188 |
-| `provision.grille_ouverture` (alias : `grille_provision_ouverture`) | Grille de provision d'ouverture par volet et gravité (milieu de tranche) | grilles de la démo (4 barèmes en tranches) | table | démo (`BAREMES`) ; plan D15 | FR-49, FR-188 |
-| `provision.motifs` | Motifs de mouvement de provision | ouverture, rapport d'expertise, devis de réparation, certificat médical, rapport de police, barème appliqué, validation hiérarchique, régularisation, clôture | liste | démo (`MotifProvision`) | FR-188 |
-| `provision.sans_mouvement` (alias : `provision_sans_mouvement_jours`) | Ancienneté sans mouvement de provision qui alerte | 90 | jours | démo (`exercices-hub`) | FR-76, FR-188 |
-| `ibnr.source` | Estimation des sinistres survenus non déclarés | hors Prospera (colonne renseignée ou importée) | règle | art. 334-12 (SÛR) ; [ASSUMPTION] | FR-189 |
-| `reassurance.traites_demo` | Traités du jeu de démonstration, millésime 2026 | excédent automobile 12 M xs 3 M ; quote-part incendie/MRH 40 % ; quote-part transport 55 % ; excédent RC 20 M xs 2 M ; quote-part accident individuel 30 % ; excédent risques divers 10 M xs 2,5 M | FCFA ; % | démo (jeu de démonstration seulement) | FR-190 |
-| `reassurance.traites_demo_2025` | Traités du jeu de démonstration, millésime 2025 | excédent automobile 10 M xs 2,5 M ; quote-part incendie/MRH 35 % ; quote-part transport 50 % | FCFA ; % | démo (jeu de démonstration seulement) | FR-190 |
-| `coassurance.somme_parts` | Somme des parts d'une clé de coassurance | 100 | % | démo | FR-191 |
-| `etat_crca.seuil_grande_ampleur` | Seuil du drapeau « grande ampleur non clôturé » | à fixer avec la compagnie | FCFA | art. 422 (C10d) ; [ASSUMPTION] | FR-192 |
-| `compta.table_comptes` | Table nature d'opération vers compte | table de la démo, à remplacer par le plan de comptes de la compagnie | table | démo (`arrete-comptable`) | FR-193 |
-| `echange.sans_confirmation` | Délai au-delà duquel un envoi sans confirmation du LC alerte | 24 | heures | transposé de la microfinance [ASSUMPTION] | FR-196 |
-| `declaration.format_reference` | Format de la référence de déclaration | DEC-AAAA-NNNNN | format | plan D3 | FR-198 |
-| `sinistre.format_numero` | Format du numéro quand Prospera l'attribue | SIN-AAAA-NNNN | format | démo [ASSUMPTION] | FR-198 |
-| `sinistre.longueur_numero_max` | Longueur maximale d'un numéro officiel reçu du LC | 40 | caractères | [ASSUMPTION] | FR-198 |
-| `echange.saisie_delai` | Âge d'une ligne « à saisir » (hors déclaration) qui alerte | 72 | heures | transposé de la microfinance [ASSUMPTION] | FR-199 |
-| `echange.age_max_ouverture` (alias : `age_max_lecture_contrats`, `LC_AGE_MAX_LECTURE_INTERFACE`, `LC_AGE_MAX_LECTURE_FICHIER`) | Âge maximal de la lecture d'une police pour ouvrir sans décision motivée | 24 | heures | [ASSUMPTION] | FR-3, FR-41, FR-201 |
-| `echange.fraicheur_api` (alias : `assurance.fraicheur_lecture`) | Fraîcheur par défaut avec une API [l'alias assurance.fraicheur_lecture couvre aussi echange.fraicheur_fichier] | 5 | minutes | transposé de la microfinance [ASSUMPTION] | FR-186, FR-201 |
-| `echange.fraicheur_fichier` | Fraîcheur par défaut avec des fichiers | à l'heure ou de nuit (avant 6 h) | — | transposé de la microfinance [ASSUMPTION] | FR-201 |
-| `echange.perime_facteur` | Facteur de fraîcheur au-delà duquel une donnée est « périmée » | 2 | × fraîcheur | transposé de la microfinance [ASSUMPTION] | FR-201 |
-| `fictif.delai_numero` | Délai simulé d'attribution du numéro par le LC fictif | 5 | secondes | [ASSUMPTION] | FR-203 |
-| `brief.heure` | Heure de production du brief du matin | 07:00 | heure | [ASSUMPTION] | FR-208 |
-| `veille.cheque_non_retire` | Ancienneté d'un chèque non retiré qui alerte | 14 | jours | démo | FR-208 |
-| `veille.delai_restant` | Délai restant en dessous duquel un dossier inactif est critique | 2 | jours | démo (`surveillerPortefeuille`) | FR-208 |
-| `veille.ecart_provision` | Écart provision / estimation d'expert qui lève une alerte | 30 | % | démo | FR-208, FR-209 |
-| `veille.inactivite` | Inactivité qui rend critique un dossier à délai proche | 5 | jours | démo | FR-208 |
-| `qualite.declaration_tardive` | Retard de déclaration qui lève un constat certain | 30 | jours | démo (`analyserCoherence`) | FR-209 |
-| `qualite.provision_haute` | Provision supérieure à l'estimation avant expertise qui lève un constat | 150 | % | démo | FR-209 |
-| `controle.amplitude` | Amplitude forte d'un dossier | 25 % ou 1 000 000 | % ; FCFA | démo | FR-210 |
-| `controle.echantillon` | Taille de l'échantillon de revue par période | 12 | dossiers | démo (`audit-sensibles`) | FR-210 |
-| `controle.sensible_ecart` | Écart évaluation / provision d'un dossier sensible | 500 000 et 1,5 fois | FCFA ; facteur | démo (`dossiers-sensibles`) | FR-210 |
-| `crca.lot_delai` | Temps de production d'un dossier de contrôle de 100 dossiers | 30 | minutes | [ASSUMPTION] | FR-211 |
-| `pilotage.actualisation` | Actualisation maximale des indicateurs | 5 | minutes | [ASSUMPTION] | FR-212 |
-| `pilotage.aging_tranches` | Tranches d'ancienneté du stock actif | 7 ; 8-30 ; 31-90 ; plus de 90 | jours | démo (`controle-responsable`) | FR-213 |
-| `reprise.fichiers_conservation` | Conservation des fichiers d'un lot courant après import réussi | 30 | jours | PRD Reprise FR-3 | FR-214 |
-| `reprise.sources_jour1` | Sources lues au premier jour | fichiers Excel, CSV, JSON ; API quand la source en offre une | liste | PRD Reprise FR-1 ; plan D17 [ASSUMPTION] | FR-214 |
-| `reprise.historique_cible` (alias : `IA_HISTORIQUE_MAX`) | Objectif de profondeur d'historique pour l'IA | 3 à 5 | ans | v2 [ASSUMPTION] | FR-215, FR-231 |
-| `reprise.historique_min` (alias : `IA_HISTORIQUE_MIN`) | Profondeur d'historique en dessous de laquelle le rapport avertit | 3 | ans | PRD Reprise FR-9 | FR-215, FR-231 |
-| `reprise.bascule_dossier` | Moment où un dossier devient « tenu par Prospera » | première action de dossier dans Prospera | règle | [ASSUMPTION] | FR-217 |
-| `reprise.fin_parallele` | Date de fin du parallèle | fixée par la compagnie à la mise en service | date | PRD Reprise FR-17 [ASSUMPTION] | FR-217 |
-| `reprise.resync_frequence` | Fréquence de la resynchronisation pendant le parallèle | chaque nuit | — | plan D17 | FR-217 |
-| `reprise.resync_heure` | Heure limite de la resynchronisation nocturne | avant 6 h | heure | transposé de la microfinance [ASSUMPTION] | FR-217 |
-| `reprise.valeurs_controle` | Valeurs de contrôle du feu vert | nombre de sinistres ouverts ; somme des provisions des sinistres ouverts ; nombre de polices en vigueur ; nombre de pièces rattachées | liste | [ASSUMPTION] | FR-218 |
+| code | libellé | défaut | unité | source | FR | propriétaire | validateur | revue |
+|---|---|---|---|---|---|---|---|---|
+| `recherche.delai_max` (alias : `RECHERCHE_DELAI_P95`) | Délai maximal d'un résultat de recherche (95e centile) | 5 | secondes | plan D20 (v2, PO) | FR-23, FR-150 | `RESP` | `DT` | annuelle |
+| `recherche.delai_vise` (alias : `RECHERCHE_DELAI_VISE`) | Délai visé d'un résultat de recherche | 1 | seconde | deck (cible non contractuelle) | FR-23, FR-150 | `RESP` | `DT` | annuelle |
+| `recherche.longueur_min` | Longueur minimale d'un terme cherché | 3 | caractères | *(défaut H-228)* | FR-151 | `RESP` | `DT` | annuelle |
+| `recherche.prefixe_min` | Longueur de mot à partir de laquelle la tolérance de fin de mot s'applique | 3 (mot de plus de 3 lettres) | lettres | démo (`rechercherDossiers`) | FR-151 | `RESP` | `DT` | annuelle |
+| `fiche.telephone_visible` | Nombre de chiffres du téléphone visibles quand il est masqué | 2 | chiffres | *(défaut H-229)* | FR-153 | `RESP` | `DT` | annuelle |
+| `ia.resume_delai_max` | Délai maximal du résumé d'un dossier de 40 pages | 5 | minutes | v2 « quelques minutes » *(défaut H-230)* | FR-154 | `RESP` | `DT` | annuelle |
+| `reclamation.accuse_delai` | Délai d'accusé de réception d'une réclamation | 5 | jours | démo (`qualite-reclamations`) | FR-156 | `RESP` | `DT` | annuelle |
+| `reclamation.escalade_delai` | Délai d'escalade d'une réclamation | 60 | jours | démo | FR-156 | `RESP` | `DT` | annuelle |
+| `reclamation.fenetre_analyse` | Fenêtre d'analyse des réclamations récurrentes | 365 | jours | démo | FR-156 | `RESP` | `DT` | annuelle |
+| `reclamation.recurrence_seuil` | Nombre de réclamations sur un même motif qui ouvre une ligne au plan d'action | 3 | réclamations | démo | FR-156 | `RESP` | `DT` | annuelle |
+| `reclamation.reponse_delai` | Délai de réponse à une réclamation | 30 | jours | démo | FR-156 | `RESP` | `DT` | annuelle |
+| `ged.antivirus` | Analyse antivirus avant enregistrement | oui (fournie par la compagnie) | oui/non | *(défaut H-231)* | FR-160 | `ARCH` | `RESP` | annuelle |
+| `ged.formats_acceptes` | Types de fichiers acceptés | image/jpeg, image/png, image/webp, application/pdf | liste | démo (`fichiers-store`) | FR-160 | `ARCH` | `RESP` | annuelle |
+| `ged.taille_max` | Taille maximale d'un fichier | 8 | Mo | démo | FR-160 | `ARCH` | `RESP` | annuelle |
+| `ged.types_pieces` | Liste des types de pièces | 20 types de la démo (constat amiable, déclaration signée, certificats médicaux, rapport de police, carte grise, permis, devis, facture, RIB, certificat de décès, photos…) | liste | démo (`PieceType`) | FR-160 | `ARCH` | `RESP` | annuelle |
+| `ged.pieces_recentes` | Fenêtre « arrivé aujourd'hui » de l'opérateur | 48 | heures | démo | FR-162 | `ARCH` | `RESP` | annuelle |
+| `ocr.couche_texte_min` | Caractères par page en dessous desquels une page est traitée comme image | 60 | caractères | démo (`lecture-documents`) | FR-163 | `ARCH` | `RESP` | annuelle |
+| `ocr.delai_page` | Délai maximal de lecture d'une page avant `ECHEC` | 2 | minutes | *(défaut H-232)* | FR-163 | `ARCH` | `RESP` | annuelle |
+| `ocr.numerisation_dpi` | Résolution de numérisation conseillée | 300 | dpi | démo (consigne GED) | FR-163 | `ARCH` | `RESP` | annuelle |
+| `ia.classement_seuil_bas` | Confiance en dessous de laquelle la proposition de classement n'est pas pré-sélectionnée | 0,60 | confiance (0-1) | *(défaut H-233)* | FR-164 | `RESP` | `DT` | annuelle |
+| `ia.classement_seuil_haut` | Confiance au-dessus de laquelle la proposition est pré-sélectionnée (confirmation humaine quand même) | 0,90 | confiance (0-1) | *(défaut H-234)* | FR-164 | `RESP` | `DT` | annuelle |
+| `ged.a_rattacher_delai` | Âge d'une pièce « à rattacher » qui lève une alerte | 3 | jours ouvrés | *(défaut H-235)* | FR-166 | `ARCH` | `RESP` | annuelle |
+| `archive.format_numero` | Format du numéro d'archivage (AAAA = année de clôture ; CCCC = CORP, MATL, DIVR, RECS) | ARC-AAAA-CCCC-NNNNN | format | plan D17 ; démo | FR-167 | `ARCH` | `RESP` | annuelle |
+| `archive.delai_versement` (alias : `dossier.delai_versement_jours`) | Délai de versement au fonds après clôture avant alerte | 75 | jours | démo (`DELAI_VERSEMENT_JOURS`) | FR-105, FR-168 | `ARCH` | `RESP` | annuelle |
+| `archive.cm_par_boite` | Épaisseur d'une boîte | 10 | cm | démo | FR-170 | `ARCH` | `RESP` | annuelle |
+| `archive.couleurs_chemise` | Couleur de chemise par branche | à fournir par la compagnie | liste | *(défaut H-236)* (mémoire, chap. V) | FR-170 | `ARCH` | `RESP` | annuelle |
+| `archive.pages_par_boite` | Pages maximales par boîte | 2 500 | pages | démo (`archives-hub`) | FR-170 | `ARCH` | `RESP` | annuelle |
+| `archive.verification_boite` | Périodicité de vérification physique d'une boîte | 12 | mois | *(défaut H-237)* | FR-170 | `ARCH` | `RESP` | annuelle |
+| `archive.motifs_sortie` | Motifs de sortie d'archive | instruction, expertise, contentieux, contrôle interne, réclamation, contrôle de la CRCA | liste | démo (`MotifSortie`) | FR-171 | `ARCH` | `RESP` | annuelle |
+| `archive.restitution_delai` (alias : `ARCH_RESTITUTION_JOURS`, `dossier.restitution_chemise_jours`) | Délai de restitution d'une chemise sortie | 15 | jours | démo (`JOURS_RESTITUTION`) ; plan D17 | FR-21, FR-107, FR-171 | `ARCH` | `RESP` | annuelle |
+| `archive.restitution_escalade` | Âge d'une sortie non restituée qui alerte le RESP | 30 | jours | *(défaut H-238)* | FR-171 | `ARCH` | `RESP` | annuelle |
+| `archive.papier_numerise_a_la_demande` | Numérisation du papier historique | à la demande (réouverture ou consultation) | règle | *(défaut H-239)* | FR-172 | `ARCH` | `RESP` | annuelle |
+| `conservation.contentieux_recours` | Durée, contentieux, recours, litige | 10, conservation définitive | ans | démo | FR-174 | `ARCH` | `RESP` | annuelle |
+| `conservation.corporel` | Durée, corporel | 10, conservation définitive | ans | démo | FR-174 | `ARCH` | `RESP` | annuelle |
+| `conservation.fraude` | Durée, fraude suspectée | 10, conservation définitive | ans | démo | FR-174 | `ARCH` | `RESP` | annuelle |
+| `conservation.materiel` | Durée, matériel (la démo met 5) | 10 | ans | plancher art. 404 ; *(défaut H-240)* | FR-174 | `ARCH` | `RESP` | annuelle |
+| `conservation.mortel` (alias : `CONSERV_MORTEL`) | Durée, sinistre mortel | 30, conservation définitive | ans | démo (`referentiel-archives`) | FR-21, FR-174 | `ARCH` | `RESP` | annuelle |
+| `conservation.pieces_comptables` | Durée, quittances, ordres, chèques | 10 | ans | démo | FR-174 | `ARCH` | `RESP` | annuelle |
+| `conservation.risques_divers` | Durée, risques divers (la démo met 5) | 10 | ans | plancher art. 404 ; *(défaut H-241)* | FR-174 | `ARCH` | `RESP` | annuelle |
+| `conservation.sans_suite_refuse` | Durée, classé sans suite ou refusé (la démo met 5) | 10 | ans | plancher art. 404 ; *(défaut H-242)* | FR-174 | `ARCH` | `RESP` | annuelle |
+| `destruction.visas` (alias : `CONSERV_DESTRUCTION_VISA`) | Visas d'un bordereau de destruction | RESP puis DG | rôles | *(défaut H-243)* | FR-21, FR-175 | `ARCH` | `RESP` | annuelle |
+| `ged.format_archive` | Format d'archive | PDF/A (l'image d'origine reste conservée) | format | *(défaut H-244)* | FR-176 | `ARCH` | `RESP` | annuelle |
+| `nas.seuil_occupation` | Taux d'occupation du NAS qui alerte ADMIN | 80 | % | *(défaut H-245)* | FR-176 | `ARCH` | `RESP` | annuelle |
+| `expert.domaines` | Domaines d'expertise | auto-matériel, médical, responsabilité, fraude, incendie, transport, bâtiment, perte d'exploitation | liste | démo (`DomaineMission`) | FR-177 | `RESP` | `DT` | annuelle |
+| `expert.agrement_alerte` | Alerte avant la fin d'agrément d'un expert | 60 | jours | *(défaut H-246)* | FR-178 | `RESP` | `DT` | annuelle |
+| `expert.second_facteur` | Second facteur obligatoire pour le compte d'un cabinet externe (EXPE) | oui | oui/non | *(défaut H-247)* | FR-180 | `RESP` | `DT` | annuelle |
+| `expert.visa_honoraires` | Rôles qui visent une note d'honoraires | RESP ou CPT | rôles | plan D8, démo | FR-182 | `RESP` | `DT` | annuelle |
+| `expert.arrondi_poids` | Arrondi du poids d'une mission | 0,5 | point | démo | FR-183 | `RESP` | `DT` | annuelle |
+| `expert.coef_gravite` | Coefficient de gravité du sinistre dans le poids de charge | léger 1 ; modéré 1 ; grave 1,3 ; mortel 1,6 | facteur | démo (`responsable-hub`) | FR-183 | `RESP` | `DT` | annuelle |
+| `expert.disponible` | Taux de charge sous lequel un expert est « disponible » | 0,8 | × capacité | démo | FR-183 | `RESP` | `DT` | annuelle |
+| `expert.echeances_rapports` | Fenêtres de l'échéancier des rapports dus | 7 et 15 | jours | démo | FR-183 | `RESP` | `DT` | annuelle |
+| `expert.poids_domaine` | Poids d'une mission par domaine (grille de charge) | à fournir par la compagnie | points | démo (grille paramétrable) *(défaut H-248)* | FR-183 | `RESP` | `DT` | annuelle |
+| `expert.surcharge` | Taux de charge qui rend un expert « surchargé » | 1,2 | × capacité | démo | FR-183 | `RESP` | `DT` | annuelle |
+| `expert.delai_rapport.auto_materiel` (alias : `DELAI_RAPPORT_EXPERT`, `delai_rapport_expert_jours`) | Délai de rapport attendu, auto-matériel [l'alias delai_rapport_expert_jours couvre les huit domaines (expert.delai_rapport.*)] | 7 | jours | démo ; mémoire (7 à 10 j) | FR-14, FR-68, FR-184 | `RESP` | `DT` | annuelle |
+| `expert.delai_rapport.batiment` | Délai de rapport attendu, bâtiment | 21 | jours | démo | FR-184 | `RESP` | `DT` | annuelle |
+| `expert.delai_rapport.fraude` | Délai de rapport attendu, fraude | 30 | jours | démo | FR-184 | `RESP` | `DT` | annuelle |
+| `expert.delai_rapport.incendie` | Délai de rapport attendu, incendie | 21 | jours | démo | FR-184 | `RESP` | `DT` | annuelle |
+| `expert.delai_rapport.medical` | Délai de rapport attendu, médical | 21 | jours | démo | FR-184 | `RESP` | `DT` | annuelle |
+| `expert.delai_rapport.perte_exploitation` | Délai de rapport attendu, perte d'exploitation | 30 | jours | démo | FR-184 | `RESP` | `DT` | annuelle |
+| `expert.delai_rapport.responsabilite` | Délai de rapport attendu, responsabilité | 14 | jours | démo | FR-184 | `RESP` | `DT` | annuelle |
+| `expert.delai_rapport.transport` | Délai de rapport attendu, transport | 14 | jours | démo | FR-184 | `RESP` | `DT` | annuelle |
+| `expert.budget_arrondi` (alias : `arrondi_budget_fcfa`) | Arrondi du budget indicatif | 5 000 | FCFA | démo | FR-68, FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_coef_type` (alias : `budget_coefficient_type`) | Coefficient du budget par type de mission | initiale 1 ; complémentaire 0,5 ; contradictoire 1,5 ; contre-expertise 1,5 | facteur | démo | FR-66, FR-68, FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_part_enjeu` (alias : `budget_part_enjeu_pct`) | Part de l'enjeu ajoutée au socle du domaine | 2 | % | démo | FR-68, FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_plafond` (alias : `budget_plafond_fcfa`) | Plafond du budget indicatif d'une mission | 1 200 000 | FCFA | démo | FR-68, FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_socle.auto_materiel` (alias : `budget_socle_domaine_fcfa`) | Socle du budget, auto-matériel (à remplacer par le tarif de la compagnie) [l'alias budget_socle_domaine_fcfa couvre les huit domaines (expert.budget_socle.*)] | 45 000 | FCFA | démo | FR-68, FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_socle.batiment` | Socle du budget, bâtiment | 150 000 | FCFA | démo | FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_socle.fraude` | Socle du budget, fraude | 250 000 | FCFA | démo | FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_socle.incendie` | Socle du budget, incendie | 200 000 | FCFA | démo | FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_socle.medical` | Socle du budget, médical | 120 000 | FCFA | démo | FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_socle.perte_exploitation` | Socle du budget, perte d'exploitation | 300 000 | FCFA | démo | FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_socle.responsabilite` | Socle du budget, responsabilité | 75 000 | FCFA | démo | FR-185 | `RESP` | `DT` | annuelle |
+| `expert.budget_socle.transport` | Socle du budget, transport | 120 000 | FCFA | démo | FR-185 | `RESP` | `DT` | annuelle |
+| `assurance.table_garanties` (alias : `table_type_sinistre_garanties`) | Table type de sinistre vers garanties qui répondent | table de la démo (16 codes de garantie) | table | démo (`garanties-hub`) ; plan (table en paramètre) | FR-41, FR-187 | `RESP` | `DT` | annuelle |
+| `garantie.decisions` | Décisions de garantie possibles | GARANTIE_ACQUISE, SOUS_RESERVE, REFUS_DE_GARANTIE | liste | plan D4 | FR-187 | `RESP` | `DT` | annuelle |
+| `provision.ancienne` | Ancienneté d'une provision dite « ancienne » | 365 | jours | démo | FR-188 | `RESP` | `DT` | annuelle |
+| `provision.ecart_estimation` (alias : `provision_ecart_estimation_pct`) | Écart provision / estimation qui classe « à revoir » | 15 | % | démo (`ECART_PROVISION`) | FR-76, FR-188 | `RESP` | `DT` | annuelle |
+| `provision.ecart_validation` (alias : `revision_provision_attente_resp_fcfa`, `sortie.ecart_provision_attente_responsable`) | Écart de révision de provision qui attend le RESP | 2 000 000 | FCFA | plan D12 ; démo | FR-76, FR-124, FR-188 | `RESP` | `DT` | annuelle |
+| `provision.grille_ouverture` (alias : `grille_provision_ouverture`) | Grille de provision d'ouverture par volet et gravité (milieu de tranche) | grilles de la démo (4 barèmes en tranches) | table | démo (`BAREMES`) ; plan D15 | FR-49, FR-188 | `RESP` | `DT` | annuelle |
+| `provision.motifs` | Motifs de mouvement de provision | ouverture, rapport d'expertise, devis de réparation, certificat médical, rapport de police, barème appliqué, validation hiérarchique, régularisation, clôture | liste | démo (`MotifProvision`) | FR-188 | `RESP` | `DT` | annuelle |
+| `provision.sans_mouvement` (alias : `provision_sans_mouvement_jours`) | Ancienneté sans mouvement de provision qui alerte | 90 | jours | démo (`exercices-hub`) | FR-76, FR-188 | `RESP` | `DT` | annuelle |
+| `ibnr.source` | Estimation des sinistres survenus non déclarés | hors Prospera (colonne renseignée ou importée) | règle | art. 334-12 (SÛR) ; *(défaut H-249)* | FR-189 | `RESP` | `DT` | annuelle |
+| `reassurance.traites_demo` | Traités du jeu de démonstration, millésime 2026 | excédent automobile 12 M xs 3 M ; quote-part incendie/MRH 40 % ; quote-part transport 55 % ; excédent RC 20 M xs 2 M ; quote-part accident individuel 30 % ; excédent risques divers 10 M xs 2,5 M | FCFA ; % | démo (jeu de démonstration seulement) | FR-190 | `RESP` | `DT` | annuelle |
+| `reassurance.traites_demo_2025` | Traités du jeu de démonstration, millésime 2025 | excédent automobile 10 M xs 2,5 M ; quote-part incendie/MRH 35 % ; quote-part transport 50 % | FCFA ; % | démo (jeu de démonstration seulement) | FR-190 | `RESP` | `DT` | annuelle |
+| `coassurance.somme_parts` | Somme des parts d'une clé de coassurance | 100 | % | démo | FR-191 | `RESP` | `DT` | annuelle |
+| `etat_crca.seuil_grande_ampleur` | Seuil du drapeau « grande ampleur non clôturé » | à fixer avec la compagnie | FCFA | art. 422 (C10d) ; *(défaut H-250)* | FR-192 | `RESP` | `DT` | annuelle |
+| `compta.table_comptes` | Table nature d'opération vers compte | table de la démo, à remplacer par le plan de comptes de la compagnie | table | démo (`arrete-comptable`) | FR-193 | `RESP` | `DT` | annuelle |
+| `echange.sans_confirmation` | Délai au-delà duquel un envoi sans confirmation du LC alerte | 24 | heures | transposé de la microfinance *(défaut H-251)* | FR-196 | `ADMIN` | `RESP` | à chaque changement de LC |
+| `declaration.format_reference` | Format de la référence de déclaration | DEC-AAAA-NNNNN | format | plan D3 | FR-198 | `RESP` | `DT` | annuelle |
+| `sinistre.format_numero` | Format du numéro quand Prospera l'attribue | SIN-AAAA-NNNN | format | démo *(défaut H-252)* | FR-198 | `RESP` | `DT` | annuelle |
+| `sinistre.longueur_numero_max` | Longueur maximale d'un numéro officiel reçu du LC | 40 | caractères | *(défaut H-253)* | FR-198 | `RESP` | `DT` | annuelle |
+| `echange.saisie_delai` | Âge d'une ligne « à saisir » (hors déclaration) qui alerte | 72 | heures | transposé de la microfinance *(défaut H-254)* | FR-199 | `ADMIN` | `RESP` | à chaque changement de LC |
+| `echange.age_max_ouverture` (alias : `liaison.age_max`, `age_max_lecture_contrats`, `LC_AGE_MAX_LECTURE_INTERFACE`, `LC_AGE_MAX_LECTURE_FICHIER`) | Âge maximal de la lecture d'une police pour ouvrir sans décision motivée (au-delà : « à relire », jamais un refus) | 5 minutes (interface) ; 24 heures (fichiers) | minutes ; heures | *(défaut H-255)* ; L1-26 | FR-3, FR-41, FR-201 | `ADMIN` | `RESP` | à chaque changement de LC |
+| `echange.fraicheur_api` (alias : `assurance.fraicheur_lecture`) | Fraîcheur par défaut avec une API [l'alias assurance.fraicheur_lecture couvre aussi echange.fraicheur_fichier] | 5 | minutes | transposé de la microfinance *(défaut H-256)* | FR-186, FR-201 | `ADMIN` | `RESP` | à chaque changement de LC |
+| `echange.fraicheur_fichier` | Fraîcheur par défaut avec des fichiers | à l'heure ou de nuit (avant 6 h) | — | transposé de la microfinance *(défaut H-257)* | FR-201 | `ADMIN` | `RESP` | à chaque changement de LC |
+| `echange.perime_facteur` | Facteur de fraîcheur au-delà duquel une donnée est « périmée » | 2 | × fraîcheur | transposé de la microfinance *(défaut H-258)* | FR-201 | `ADMIN` | `RESP` | à chaque changement de LC |
+| `fictif.delai_numero` | Délai simulé d'attribution du numéro par le LC fictif | 5 | secondes | *(défaut H-259)* | FR-203 | `ADMIN` | `RESP` | à chaque changement de LC |
+| `brief.heure` | Heure de production du brief du matin | 07:00 | heure | *(défaut H-260)* | FR-208 | `RESP` | `DT` | annuelle |
+| `veille.cheque_non_retire` | Ancienneté d'un chèque non retiré qui alerte | 14 | jours | démo | FR-208 | `RESP` | `DT` | annuelle |
+| `veille.delai_restant` | Délai restant en dessous duquel un dossier inactif est critique | 2 | jours | démo (`surveillerPortefeuille`) | FR-208 | `RESP` | `DT` | annuelle |
+| `veille.ecart_provision` | Écart provision / estimation d'expert qui lève une alerte | 30 | % | démo | FR-208, FR-209 | `RESP` | `DT` | annuelle |
+| `veille.inactivite` | Inactivité qui rend critique un dossier à délai proche | 5 | jours | démo | FR-208 | `RESP` | `DT` | annuelle |
+| `qualite.declaration_tardive` | Retard de déclaration qui lève un constat certain | 30 | jours | démo (`analyserCoherence`) | FR-209 | `RESP` | `DT` | annuelle |
+| `qualite.provision_haute` | Provision supérieure à l'estimation avant expertise qui lève un constat | 150 | % | démo | FR-209 | `RESP` | `DT` | annuelle |
+| `controle.amplitude` | Amplitude forte d'un dossier | 25 % ou 1 000 000 | % ; FCFA | démo | FR-210 | `RESP` | `DT` | annuelle |
+| `controle.echantillon` | Taille de l'échantillon de revue par période | 12 | dossiers | démo (`audit-sensibles`) | FR-210 | `RESP` | `DT` | annuelle |
+| `controle.sensible_ecart` | Écart évaluation / provision d'un dossier sensible | 500 000 et 1,5 fois | FCFA ; facteur | démo (`dossiers-sensibles`) | FR-210 | `RESP` | `DT` | annuelle |
+| `crca.lot_delai` | Temps de production d'un dossier de contrôle de 100 dossiers | 30 | minutes | *(défaut H-261)* | FR-211 | `RESP` | `DT` | annuelle |
+| `pilotage.actualisation` | Actualisation maximale des indicateurs | 5 | minutes | *(défaut H-262)* | FR-212 | `RESP` | `DT` | annuelle |
+| `pilotage.aging_tranches` | Tranches d'ancienneté du stock actif | 7 ; 8-30 ; 31-90 ; plus de 90 | jours | démo (`controle-responsable`) | FR-213 | `RESP` | `DT` | annuelle |
+| `reprise.fichiers_conservation` | Conservation des fichiers d'un lot courant après import réussi | 30 | jours | PRD Reprise FR-3 | FR-214 | `ARCH` | `RESP` | annuelle |
+| `reprise.sources_jour1` | Sources lues au premier jour | fichiers Excel, CSV, JSON ; API quand la source en offre une | liste | PRD Reprise FR-1 ; plan D17 *(défaut H-263)* | FR-214 | `ADMIN` | `DG` | à chaque lot |
+| `reprise.historique_cible` (alias : `IA_HISTORIQUE_MAX`) | Objectif de profondeur d'historique pour l'IA | 3 à 5 | ans | v2 *(défaut H-264)* | FR-215, FR-231 | `ADMIN` | `DG` | à chaque lot |
+| `reprise.historique_min` (alias : `IA_HISTORIQUE_MIN`) | Profondeur d'historique en dessous de laquelle le rapport avertit | 3 | ans | PRD Reprise FR-9 | FR-215, FR-231 | `ADMIN` | `DG` | à chaque lot |
+| `reprise.bascule_dossier` | Moment où un dossier devient « tenu par Prospera » | première action de dossier dans Prospera | règle | *(défaut H-265)* | FR-217 | `ADMIN` | `DG` | à chaque lot |
+| `reprise.fin_parallele` | Date de fin du parallèle | fixée par la compagnie à la mise en service | date | PRD Reprise FR-17 *(défaut H-266)* | FR-217 | `ADMIN` | `DG` | à chaque lot |
+| `reprise.resync_frequence` | Fréquence de la resynchronisation pendant le parallèle | chaque nuit | — | plan D17 | FR-217 | `ADMIN` | `DG` | à chaque lot |
+| `reprise.resync_heure` | Heure limite de la resynchronisation nocturne | avant 6 h | heure | transposé de la microfinance *(défaut H-267)* | FR-217 | `ADMIN` | `DG` | à chaque lot |
+| `reprise.valeurs_controle` | Valeurs de contrôle du feu vert | nombre de sinistres ouverts ; somme des provisions des sinistres ouverts ; nombre de polices en vigueur ; nombre de pièces rattachées | liste | *(défaut H-268)* | FR-218 | `ADMIN` | `DG` | à chaque lot |
+| `honoraires.tolerance_budget` | Tolérance de dépassement du budget d'une mission : au-delà, le visa est bloqué | 10 | % | [A] | FR-90, FR-182, FR-185 | `RESP` | `DT` | annuelle |
+| `rapport.validation_delai` | Délai de validation du rapport d'expert par le gestionnaire | 72 | heure | [A] mémoire de 2014, à confirmer | FR-68, FR-184 | `RESP` | `DT` | annuelle |
+| `expert.carence_info` | Information écrite du retard d'un expert | 45 | jour | [A] mémoire de 2014, à confirmer | FR-68 | `RESP` | `DT` | annuelle |
+| `expert.carence_pv` | Procès-verbal de carence d'un expert | 75 | jour | [A] mémoire de 2014, à confirmer | FR-68 | `RESP` | `DT` | annuelle |
+| `honoraires.paiement_delai` | Paiement des honoraires après réception du rapport | 30 | jour | [A] mémoire de 2014 | FR-142, FR-182 | `RESP` | `DT` | annuelle |
+| `boni_mali.seuil` | Seuil significatif du boni et du mali de liquidation | 250 000 | FCFA | [A] | FR-189 | `RESP` | `DT` | annuelle |
+| `numerisation.cout_page` | Coût de numérisation d'une page (paramètre de pilotage, pas une règle du circuit) | 45 | FCFA par page | [A] démo | FR-170 | `ARCH` | `RESP` | annuelle |
+| `revue_mensuelle.delai` | Délai d'alerte quand la revue mensuelle des dossiers vivants n'est pas faite | M+5 | jour | [A] mémoire de 2014 | FR-210 | `RESP` | `DT` | annuelle |
+| `etat_hebdo.jour_heure` | Jour et heure de génération de l'état hebdomadaire des déclarations | à fixer avec la compagnie | jour, heure | [A] | FR-206 | `RESP` | `DT` | annuelle |
+
+#### D.3.1 Formats de numéros
+
+Chaque préfixe, chaque année et chaque longueur de séquence sont **paramétrables** (FR-167). Un numéro n'est jamais réutilisé.
+
+| préfixe | objet | format par défaut | source | propriétaire | validateur | revue |
+|---|---|---|---|---|---|---|
+| `DEC-` | référence de déclaration | `DEC-AAAA-NNNNN` | PO ; FR-198 | `ADMIN` | `RESP` | annuelle |
+| `ARC-` | numéro d'archivage | `ARC-AAAA-CCCC-NNNNN` | FR-167 | `ARCH` | `RESP` | annuelle |
+| `PRO-` | numéro de sinistre attribué par Prospera (quand il attribue) | `PRO-SIN-AAAA-NNNN` `[A]` | FR-198 | `ADMIN` | `RESP` | à chaque basculement |
+| `QUI-` | quittance | `QUI-AAAA-Dnnnn` | démo | `CPT` | `RESP` | annuelle |
+| `ORD-` | ordre de règlement | `ORD-AAAA-NNNNN` `[A]` | démo (à confirmer) | `CPT` | `RESP` | annuelle |
+| `REC-` | recours | `REC-AAAA-NNNN` | démo | `RESP` | `DT` | annuelle |
+| `CRE-` | créance | `CRE-AAAA-NNNNN` | démo | `RESP` | `DT` | annuelle |
+| `MED-` | mise en demeure | `MED-AAAA-NNNN` | démo | `RESP` | `DT` | annuelle |
+| `CTX-` | contentieux | `CTX-AAAA-NNNN` | démo | `RESP` | `DT` | annuelle |
+| `ENC-` | encaissement de recours | `ENC-AAAA-NNNN` | démo | `CPT` | `RESP` | annuelle |
+| `CRR-` | courrier | `CRR-AAAA-NNNN` | démo | `RESP` | `DT` | annuelle |
+| `LM-` | lettre de mission d'un expert | `LM-AAAA-NNNN` `[A]` | démo (à confirmer) | `RESP` | `DT` | annuelle |
+
+#### D.3.2 Catalogue des modèles de courrier
+
+Chaque modèle est paramétrable et versionné (FR-4). Les mentions légales du corporel sont une **liste de départ** *(point juridique J-29 : à valider par le juriste, §13.2)*. Les paramètres du sinistre majeur (`majeur.seuil`, `majeur.rapport_frequence`), de l'expertise (`expertise.inspecteur_seuil_devis`, `expertise.photos_apres_reparation`) et du rapport (`rapport.validation_delai`, `expert.carence_info`, `expert.carence_pv`) sont dans D.2 et D.3.
+
+| code | modèle | FR | mentions légales obligatoires au corporel | propriétaire | validateur | revue |
+|---|---|---|---|---|---|---|
+| `COURRIER_ACCUSE` | accusé de déclaration | FR-36 | référence `DEC-`, date de réception | `RESP` | `DT` | annuelle |
+| `COURRIER_PIECES` | demande de pièces | §5.2 | liste des pièces ; effet de la réponse incomplète sur les délais (art. 249 à 251) | `RESP` | `DT` | annuelle |
+| `COURRIER_OFFRE` | offre (provisionnelle ou définitive) | FR-84 | montants poste par poste ; délai de dénonciation de 15 jours (art. 235) ; délai de paiement ; pénalité de retard (art. 233, 236) | `RESP` | `DT` | annuelle |
+| `COURRIER_REFUS` | refus de garantie ou de prise en charge | FR-121, FR-122 | motif légalement exigé (procédure d'information à fixer par le juriste, FR-125) | `RESP` | `DT` | annuelle |
+| `COURRIER_RELANCE` | relance (pièces, accord, retrait du chèque) | FR-146 | sans objet | `RESP` | `DT` | annuelle |
+| `COURRIER_CONVOCATION_MEDICALE` | convocation d'expertise médicale | FR-63 | préavis d'au moins 15 jours avant l'examen (art. 244) | `RESP` | `DT` | annuelle |
+| `COURRIER_CONVOCATION_MATERIELLE` | convocation d'expertise matérielle | FR-61 | sans objet | `RESP` | `DT` | annuelle |
+| `COURRIER_MISE_EN_DEMEURE` | mise en demeure (recours) | FR-114 | preuve de réception par un moyen listé en paramètre | `RESP` | `DT` | annuelle |
+| `COURRIER_GARANTIE_FRAIS_MEDICAUX` | lettre de garantie de frais médicaux | FR-70 | dans les tarifs (art. 258) | `RESP` | `DT` | annuelle |
+| `COURRIER_FGA` | courrier au fonds de garantie automobile (si `FGA_ACTIF`) | FR-111 | délais des art. 605, 606 et 608 | `RESP` | `DT` | annuelle |
+| `COURRIER_LETTRE_MISSION` | lettre de mission d'un expert (`LM-`) | FR-180 | sans objet | `RESP` | `DT` | annuelle |
+
+#### D.3.3 Motifs codés vers le LC (liste fermée)
+
+Tout message vers le LC porte un motif de cette liste, jamais un texte libre (FR-196, annexe C). Aucun motif ne porte de donnée de santé. La liste est une **liste de départ fermée** *(défaut H-269 : à confirmer à la séance d'immersion)* ; un ajout est une modification de paramètre, validée par `RESP` et `DT`.
+
+| message (annexe C) | motifs codés | propriétaire | validateur | revue |
+|---|---|---|---|---|
+| C-14 évaluation et provision | `OUVERTURE`, `RAPPORT_EXPERTISE`, `DEVIS_REPARATION`, `CERTIFICAT_MEDICAL`, `RAPPORT_POLICE`, `BAREME_APPLIQUE`, `VALIDATION`, `REGULARISATION`, `CLOTURE` | `RESP` | `DT` | annuelle |
+| C-17 rejet | `GARANTIE_NON_ACQUISE`, `POLICE_NON_EN_VIGUEUR`, `HORS_DELAI_DECLARATION`, `EXCLUSION_CONTRAT`, `DECISION_RESPONSABLE` | `RESP` | `DT` | annuelle |
+| C-17 classement sans suite | `PIECES_NON_FOURNIES`, `ASSURE_SANS_REPONSE` | `RESP` | `DT` | annuelle |
+| C-17 clôture | `REGLE_SOLDE`, `ABANDON` | `RESP` | `DT` | annuelle |
+| C-17 réouverture | `ELEMENT_NOUVEAU`, `RECOURS_ENGAGE` | `RESP` | `DT` | annuelle |
 
 ### D.4 Modules partagés, IA et installation (partie 4, §7)
 
-Paiement, notification, IA commune, installation, relais, support. Les valeurs reprises du PRD microfinance sont des `[ASSUMPTION]`.
+Paiement, notification, IA commune, installation, relais, support. Les valeurs reprises du PRD microfinance sont des *(défaut H-270)*.
 
-| code | libellé | défaut | unité | source | FR |
-|---|---|---|---|---|---|
-| `PAIEMENT_DELAI_COUPURE` | Heure limite de validation d'un virement selon la banque | à saisir par banque | heure | [A] | FR-222 |
-| `IA_CONSENTEMENT_ECARTS` | Envoi d'écarts anonymisés à l'IA commune | non (tant que la compagnie n'a pas consenti) | oui/non | décision PO, plan D1 | FR-230, FR-232 |
-| `IA_NIVEAU_APPRENTISSAGE` | Niveau d'apprentissage choisi par la compagnie | celui que le PRD moteur ouvre | liste | PRD moteur | FR-230 |
-| `IA_RAPPORT_PERIODE` | Période du rapport de performance de l'IA | 1 | mois | proposition v2 | FR-231 |
-| `IA_REENTRAINEMENT_PERIODE` | Période de réentraînement | 1 | mois | proposition v2 | FR-231 |
-| `IA_ECARTS_SANTE` | Envoi d'écarts issus d'une donnée de santé | jamais | — | décision PO (aucune donnée médicale ne sort) | FR-232 |
-| `CORRECTIF_SECURITE_DELAI` | Délai d'acceptation d'un correctif de sécurité critique | 72 | heures | [A] modèle microfinance | FR-235 |
-| `COUPURE_MAJ_MAX` | Coupure maximale d'une mise à jour | 15 | minutes | PRD moteur NFR-9 | FR-235 |
-| `GEL_SANS_CONTACT` | Gel après absence de contact avec Money Vibes | 30 | jours | PRD moteur FR-15 [A] | FR-235 |
-| `RESTAURATION_TEST_PERIODE` (alias : `nas.test_restauration`) | Période du test de restauration | 1 | mois | [A] modèle microfinance | FR-176, FR-236 |
-| `RPO / RTO` | Perte maximale de données / durée maximale de reprise | 1 h / 4 h | heures | PRD moteur NFR-7 ; point non tranché | FR-236 |
-| `SAUVEGARDE_FREQUENCE` (alias : `nas.sauvegarde`) | Fréquence de la sauvegarde automatique | 1 | jour | proposition v2 | FR-176, FR-236 |
-| `ADMIN_DEUX_PERSONNES` | Création d'un administrateur ou d'un droit d'instance par deux personnes | oui | oui/non | [A] modèle microfinance | FR-238 |
-| `RELAIS_INTERROGATION` | Fréquence d'interrogation du relais | 1 | minute | [A] modèle microfinance | FR-239 |
-| `RELAIS_PURGE` | Purge d'un événement du relais après tirage | 7 | jours | [A] modèle microfinance | FR-239 |
-| `DISPONIBILITE_CIBLE` | Objectif de disponibilité en temps ouvré (sans engagement) | 99,5 | % | [A] modèle microfinance | FR-246 |
-| `SUPPORT_PRISE_EN_CHARGE_BLOQUANTE` | Prise en charge d'une anomalie bloquante | 4 | heures ouvrées | proposition v2, offre v4 | FR-246 |
+| code | libellé | défaut | unité | source | FR | propriétaire | validateur | revue |
+|---|---|---|---|---|---|---|---|---|
+| `PAIEMENT_DELAI_COUPURE` | Heure limite de validation d'un virement selon la banque | à saisir par banque | heure | [A] | FR-222 | `ADMIN` | `DG` | annuelle |
+| `IA_CONSENTEMENT_ECARTS` | Envoi d'écarts anonymisés à l'IA commune | non (tant que la compagnie n'a pas consenti) | oui/non | décision PO, plan D1 | FR-230, FR-232 | `ADMIN` | `DG` | annuelle |
+| `IA_NIVEAU_APPRENTISSAGE` | Niveau d'apprentissage choisi par la compagnie | celui que le PRD moteur ouvre | liste | PRD moteur | FR-230 | `ADMIN` | `DG` | annuelle |
+| `IA_RAPPORT_PERIODE` | Période du rapport de performance de l'IA | 1 | mois | proposition v2 | FR-231 | `ADMIN` | `DG` | annuelle |
+| `IA_REENTRAINEMENT_PERIODE` | Période de réentraînement | 1 | mois | proposition v2 | FR-231 | `ADMIN` | `DG` | annuelle |
+| `IA_ECARTS_SANTE` | Envoi d'écarts issus d'une donnée de santé | jamais | — | décision PO (aucune donnée médicale ne sort) | FR-232 | `ADMIN` | `DG` | annuelle |
+| `CORRECTIF_SECURITE_DELAI` | Délai d'acceptation d'un correctif de sécurité critique | 72 | heures | [A] modèle microfinance | FR-235 | `ADMIN` | `DG` | annuelle |
+| `COUPURE_MAJ_MAX` | Coupure maximale d'une mise à jour | 15 | minutes | PRD moteur NFR-9 | FR-235 | `ADMIN` | `DG` | annuelle |
+| `GEL_SANS_CONTACT` | Gel après absence de contact avec Money Vibes | 30 | jours | PRD moteur FR-15 [A] | FR-235 | `ADMIN` | `DG` | annuelle |
+| `RESTAURATION_TEST_PERIODE` (alias : `nas.test_restauration`) | Période du test de restauration | 1 | mois | [A] modèle microfinance | FR-176, FR-236 | `ADMIN` | `DG` | annuelle |
+| `rpo` (alias : `RPO`) | Perte maximale de données | 24 | heure | [A] valeur provisoire, à confirmer avec le test de FR-23 ; PRD moteur NFR-7 | FR-23, FR-236 | `ADMIN` | `DG` | annuelle |
+| `rto` (alias : `RTO`) | Durée maximale de reprise | 8 | heure ouvrée | [A] valeur provisoire, à confirmer avec le test de FR-23 ; PRD moteur NFR-7 | FR-23, FR-236 | `ADMIN` | `DG` | annuelle |
+| `SAUVEGARDE_FREQUENCE` (alias : `nas.sauvegarde`) | Fréquence de la sauvegarde automatique | 1 | jour | proposition v2 | FR-176, FR-236 | `ADMIN` | `DG` | annuelle |
+| `ADMIN_DEUX_PERSONNES` | Création d'un administrateur ou d'un droit d'instance par deux personnes | oui | oui/non | [A] modèle microfinance | FR-238 | `ADMIN` | `DG` | annuelle |
+| `RELAIS_INTERROGATION` | Fréquence d'interrogation du relais | 1 | minute | [A] modèle microfinance | FR-239 | `ADMIN` | `DG` | annuelle |
+| `RELAIS_PURGE` | Purge d'un événement du relais après tirage | 7 | jours | [A] modèle microfinance | FR-239 | `ADMIN` | `DG` | annuelle |
+| `DISPONIBILITE_CIBLE` | Objectif de disponibilité en temps ouvré (sans engagement) | 99,5 | % | [A] modèle microfinance | FR-246 | `ADMIN` | `DG` | annuelle |
+| `SUPPORT_PRISE_EN_CHARGE_BLOQUANTE` | Prise en charge d'une anomalie bloquante | 4 | heures ouvrées | proposition v2, offre v4 | FR-246 | `ADMIN` | `DG` | annuelle |
+| `fiche.ouverture_p95` | Ouverture de la fiche du dossier (95e centile) | 3 | seconde | [A] valeur provisoire, à confirmer avec le test de FR-23 | FR-250 | `ADMIN` | `DG` | annuelle |
+| `ocr.lot50` | Lecture par l'OCR d'un lot de 50 pages | 10 | minute | [A] valeur provisoire, à confirmer avec le test de FR-23 | FR-250, FR-163 | `ADMIN` | `DG` | annuelle |
+| `resync.fin` | Fin de la resynchronisation nocturne, au volume de FR-23 | avant 6 | heure | [A] valeur provisoire, à confirmer avec le test de FR-23 | FR-250, FR-217 | `ADMIN` | `DG` | annuelle |
+| `formation.*` | Formation par profil (sessions, durées), documentation d'usage par rôle, aide en ligne, accompagnement sur site | à confirmer avec la compagnie | sessions ; heures | [A] | FR-240 | `ADMIN` | `DG` | annuelle |
 
 ### D.5 Référentiel légal (non modifiable par la compagnie)
 
 Valeurs du Code CIMA (texte lu, SÛR) et de la réglementation. La compagnie **ne les modifie pas** : un correctif est livré comme mise à jour de référentiel, versionné avec date d'effet (FR-14, FR-235) ; un dossier est jugé selon la version en vigueur à sa date de survenance. Seules la valeur du SMIG daté et les tables du barème corporel se saisissent, avec leur source et une double saisie (FR-70). Plancher de conservation : art. 404 du Code CIMA.
 
-| code | libellé | défaut | unité | source | FR |
-|---|---|---|---|---|---|
-| `FGA_ACTIF` (alias : `recours.fga_active`) | Un fonds de garantie automobile existe-t-il au Togo | non | oui/non | [A] existence non confirmée | FR-14, FR-111 |
-| `REF_PRESCRIPTION_CONTRAT` (alias : `recours.prescription_jours`) | Prescription de l'action dérivant du contrat (terme à vérifier) | 2 | ans | Code CIMA art. 28 (SÛR), non modifiable | FR-14, FR-118 |
-| `REF_PRESCRIPTION_RC` | Prescription de l'action en responsabilité civile (terme à vérifier) | 5 | ans | Code CIMA art. 256 (SÛR), non modifiable | FR-14 |
-| `plancher_delai_declaration` | Plancher légal du délai de déclaration : 5 jours ouvrés ; 48 heures pour le vol (RÈGLEMENTAIRE, art. 12-4° et 20) | 5 ; 48 h | jour ouvré ; heure | CIMA | FR-43 |
-| `delai_rapport_medical_jours` | Transmission du rapport médical après l'examen (RÈGLEMENTAIRE, art. 245) | 20 | jour | CIMA | FR-63 |
-| `preavis_convocation_examen_jours` | Préavis minimal de convocation à l'examen médical (RÈGLEMENTAIRE, art. 244) | 15 | jour | CIMA | FR-63 |
-| `qualification_expert` | Qualification exigée (RÈGLEMENTAIRE, art. 272) : expert judiciaire inscrit, ou diplômes appropriés, ou 5 ans d'activité | 5 | ans | CIMA | FR-63 |
-| `delai_creance_tiers_payeur_mois` | Délai de production de la créance d'un tiers payeur avant déchéance (RÈGLEMENTAIRE, art. 254-255) | 6 | mois | CIMA | FR-70 |
-| `avis_juge_tutelles_jours` (alias : `reglement.avis_tutelle_jours`) | Avis au juge des tutelles avant paiement à un représentant légal (RÈGLEMENTAIRE, art. 234) | 15 | jour | CIMA | FR-86, FR-91 |
-| `legal.arbitrage_sentence_mois` | Arbitrage entre assureurs : sentence dans | 1 | mois | Code CIMA art. 276 (SÛR) | FR-119, FR-141 |
-| `legal.demande_motivee_jours` (alias : `REF_DELAI_DEMANDE_MOTIVEE`, `delai_reponse_demande_motivee_jours`) | Réponse à la demande motivée de la victime (RÉGLEMENTAIRE) | 30 | jours | Code CIMA art. 231 al. 7 (SÛR) | FR-14, FR-85, FR-141 |
-| `legal.denonciation_jours` (alias : `REF_DELAI_DENONCIATION`, `delai_denonciation_transaction_jours`) | Dénonciation de la transaction (RÉGLEMENTAIRE) | 15 | jours | Code CIMA art. 235 (SÛR) | FR-14, FR-82, FR-86, FR-141 |
-| `legal.etranger_mois` | Victime résidant à l étranger : prorogation (RÉGLEMENTAIRE) | 1 | mois | Code CIMA art. 253 (SÛR) | FR-141 |
-| `legal.expert_commun_mois` | Expert commun : prorogation (RÉGLEMENTAIRE) | 1 | mois | Code CIMA art. 252, 252 bis (SÛR) | FR-141 |
-| `legal.fga_declaration_mois` (alias : `FGA_DELAI_DECLARATION`) | FGA : déclaration au fonds après la réclamation (si FGA activé) | 3 | mois | Code CIMA art. 608 (SÛR) | FR-14, FR-141 |
-| `legal.fga_pv_jours` | FGA : procès-verbal transmis dans (si FGA activé) | 60 | jours | Code CIMA art. 606 (SÛR) | FR-141 |
-| `legal.fga_transaction_mois` | FGA : notification d une transaction avec un responsable non assuré | 1 | mois | Code CIMA art. 605 (SÛR) | FR-141 |
-| `legal.nouvelle_demande_mois` | Réponse incomplète : nouvelle demande dans (RÉGLEMENTAIRE) | 1 | mois | Code CIMA art. 251 (SÛR) | FR-141 |
-| `legal.offre_corporel_mois` (alias : `REF_DELAI_OFFRE_ACCIDENT`, `delai_offre_corporel_mois`) | Offre corporel automobile depuis l accident (RÉGLEMENTAIRE, non modifiable) | 12 | mois | Code CIMA art. 231 (SÛR) | FR-14, FR-85, FR-141 |
-| `legal.offre_deces_mois` (alias : `REF_DELAI_OFFRE_DECES`, `delai_offre_deces_mois`) | Offre aux ayants droit depuis le décès (RÉGLEMENTAIRE) | 8 | mois | Code CIMA art. 231, 265-266 (SÛR) | FR-14, FR-85, FR-141 |
-| `legal.offre_definitive_mois` (alias : `REF_DELAI_OFFRE_APRES_CONSOLIDATION`) | Offre définitive après information de consolidation (RÉGLEMENTAIRE) | 6 | mois | Code CIMA art. 231 al. 5 (SÛR) | FR-14, FR-141 |
-| `legal.paiement_apres_denonciation_mois` (alias : `REF_DELAI_PAIEMENT_APRES_DENONCIATION`) | Paiement des sommes convenues après la fin de la dénonciation (RÉGLEMENTAIRE) | 1 | mois | Code CIMA art. 235 (SÛR) | FR-14, FR-141 |
-| `legal.penalite_pct_par_mois` (alias : `REF_PENALITE_RETARD`, `penalite_retard_pct_mois`) | Intérêt de retard (offre tardive, paiement tardif) (RÉGLEMENTAIRE) | 5 | % par mois | Code CIMA art. 233, 236 (SÛR) | FR-14, FR-85, FR-141 |
-| `legal.provisionnelle_mois` (alias : `REF_CONSOLIDATION_INFO`, `delai_consolidation_mois`) | Consolidation non connue : offre provisionnelle possible à partir de (RÉGLEMENTAIRE) | 6 | mois | Code CIMA art. 231 al. 5 (SÛR) | FR-14, FR-85, FR-141 |
-| `legal.suspension_avis_mois` (alias : `suspensions_delai_offre`) | Assureur non avisé : suspension à l expiration d un mois (RÉGLEMENTAIRE) | 1 | mois | Code CIMA art. 247 (SÛR) | FR-85, FR-141 |
-| `legal.suspension_pieces_semaines` (alias : `REF_SUSPENSION_PIECES`) | Pièces non reçues : suspension après (RÉGLEMENTAIRE) | 6 | semaines | Code CIMA art. 249-250 (SÛR) | FR-14, FR-141 |
-| `bareme_medical_ip` | Barème médical d'incapacité permanente (annexe du Livre II) | à numériser | table | CIMA (D21) | FR-70 |
-| `echelle_souffrance_esthetique` | Échelle de souffrance et de préjudice esthétique en % du SMIG annuel (art. 262) : très léger 5 ; léger 10 ; modéré 20 ; moyen 40 ; assez important 60 ; important 100 ; très important 150 ; exceptionnel 300 | valeurs du Code | % du SMIG annuel | CIMA | FR-70 |
-| `moral_deces_pct_smig` | Préjudice moral par bénéficiaire du décès (art. 266) : conjoint 150 ; enfant mineur 100 ; enfant majeur 75 ; ascendant 75 ; frère ou sœur 50 | valeurs du Code | % du SMIG annuel | CIMA | FR-70 |
-| `plafonds_corporel_multiples_smig` | Plafonds en multiples du SMIG annuel (RÈGLEMENTAIRES, art. 259 à 266) : incapacité temporaire mensuelle 6 ; préjudice économique d'incapacité permanente 10 (si taux ≥ 50 %) ; préjudice moral 2 (si taux ≥ 80 %) ; gains futurs 36 ; frais funéraires 2 ; ayants droit du décédé 85 au total ; moral des bénéficiaires du décès 20 au total ; tierce personne 50 % de l'incapacité (si taux ≥ 80 %) | valeurs du Code | multiple | CIMA | FR-70 |
-| `smig_annuel_multiplicateur` | SMIG annuel = mensuel x | 12 | mois | ASSUMPTION | FR-70 |
-| `smig_togo_mensuel` | SMIG du Togo, paramètre daté (pays de l'accident, ou de résidence s'il est plus élevé) | 52 500 depuis le 01/01/2023 (PROBABLE, sources secondaires) | FCFA par mois | CIMA (principe), ASSUMPTION (valeur) | FR-70 |
-| `table_conversion_rentes` | Table de conversion des rentes | à saisir | table | CIMA (D21) | FR-70 |
-| `table_repartition_ayants_droit` | Clés de répartition entre ayants droit (art. 265) | à saisir (valeurs lisibles partiellement, à valider) | table | CIMA (D21) | FR-70 |
-| `table_valeur_point_ipp` | Valeur du point d'incapacité permanente par taux et par âge (art. 260) | à saisir depuis l'image du PDF officiel, double saisie | table | CIMA (D21) | FR-70 |
-| `conservation.depart` | Point de départ de la durée | date de clôture | règle | démo ; [ASSUMPTION] (juriste, point 11) | FR-174 |
-| `conservation.plancher` (alias : `CONSERV_DOSSIER_DEFAUT`, `dossier.conservation_ans`) | Durée minimale de conservation | 10 | ans | art. 404 (SÛR) ; plan D17 | FR-21, FR-105, FR-174 |
+| code | libellé | défaut | unité | source | FR | propriétaire | validateur | revue |
+|---|---|---|---|---|---|---|---|---|
+| `FGA_ACTIF` (alias : `recours.fga_active`) | Un fonds de garantie automobile existe-t-il au Togo | non | oui/non | [A] existence non confirmée | FR-14, FR-111 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `REF_PRESCRIPTION_CONTRAT` (alias : `recours.prescription_jours`) | Prescription de l'action dérivant du contrat (terme à vérifier) | 2 | ans | Code CIMA art. 28 (SÛR), non modifiable | FR-14, FR-118 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `REF_PRESCRIPTION_RC` | Prescription de l'action en responsabilité civile (terme à vérifier) | 5 | ans | Code CIMA art. 256 (SÛR), non modifiable | FR-14 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `plancher_delai_declaration` | Plancher légal du délai de déclaration : 5 jours ouvrés ; 48 heures pour le vol (RÈGLEMENTAIRE, art. 12-4° et 20) | 5 ; 48 h | jour ouvré ; heure | CIMA | FR-43 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `delai_rapport_medical_jours` | Transmission du rapport médical après l'examen (RÈGLEMENTAIRE, art. 245) | 20 | jour | CIMA | FR-63 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `preavis_convocation_examen_jours` | Préavis minimal de convocation à l'examen médical (RÈGLEMENTAIRE, art. 244) | 15 | jour | CIMA | FR-63 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `qualification_expert` | Qualification exigée (RÈGLEMENTAIRE, art. 272) : expert judiciaire inscrit, ou diplômes appropriés, ou 5 ans d'activité | 5 | ans | CIMA | FR-63 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `delai_creance_tiers_payeur_mois` | Délai de production de la créance d'un tiers payeur avant déchéance (RÈGLEMENTAIRE, art. 254-255) | 6 | mois | CIMA | FR-70 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `avis_juge_tutelles_jours` (alias : `reglement.avis_tutelle_jours`) | Avis au juge des tutelles avant paiement à un représentant légal (RÈGLEMENTAIRE, art. 234) | 15 | jour | CIMA | FR-86, FR-91 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.arbitrage_sentence_mois` | Arbitrage entre assureurs : sentence dans | 1 | mois | Code CIMA art. 276 (SÛR) | FR-119, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.demande_motivee_jours` (alias : `REF_DELAI_DEMANDE_MOTIVEE`, `delai_reponse_demande_motivee_jours`) | Réponse à la demande motivée de la victime (RÉGLEMENTAIRE) | 30 | jours | Code CIMA art. 231 al. 7 (SÛR) | FR-14, FR-85, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.denonciation_jours` (alias : `REF_DELAI_DENONCIATION`, `delai_denonciation_transaction_jours`) | Dénonciation de la transaction (RÉGLEMENTAIRE) | 15 | jours | Code CIMA art. 235 (SÛR) | FR-14, FR-82, FR-86, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.etranger_mois` | Victime résidant à l étranger : prorogation (RÉGLEMENTAIRE) | 1 | mois | Code CIMA art. 253 (SÛR) | FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.expert_commun_mois` | Expert commun : prorogation (RÉGLEMENTAIRE) | 1 | mois | Code CIMA art. 252, 252 bis (SÛR) | FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.fga_exception_garantie_mois` (alias : `legal.fga_declaration_mois`, `FGA_DELAI_DECLARATION`) | FGA : déclaration au fonds dans les 3 mois, **seulement quand une exception de garantie est invoquée** (si FGA activé ; « auteur inconnu ou non assuré » relève des art. 605 et 606) | 3 | mois | Code CIMA art. 608 (SÛR) | FR-14, FR-111, FR-121, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.fga_pv_jours` | FGA : procès-verbal transmis dans (si FGA activé) | 60 | jours | Code CIMA art. 606 (SÛR) | FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.fga_transaction_mois` | FGA : notification d une transaction avec un responsable non assuré | 1 | mois | Code CIMA art. 605 (SÛR) | FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.nouvelle_demande_mois` | Réponse incomplète : nouvelle demande dans (RÉGLEMENTAIRE) | 1 | mois | Code CIMA art. 251 (SÛR) | FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.offre_corporel_mois` (alias : `REF_DELAI_OFFRE_ACCIDENT`, `delai_offre_corporel_mois`) | Offre corporel automobile depuis l accident (RÉGLEMENTAIRE, non modifiable) | 12 | mois | Code CIMA art. 231 (SÛR) | FR-14, FR-85, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.offre_deces_mois` (alias : `REF_DELAI_OFFRE_DECES`, `delai_offre_deces_mois`) | Offre aux ayants droit depuis le décès (RÉGLEMENTAIRE) | 8 | mois | Code CIMA art. 231, 265-266 (SÛR) | FR-14, FR-85, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.offre_definitive_mois` (alias : `REF_DELAI_OFFRE_APRES_CONSOLIDATION`) | Offre définitive après information de consolidation (RÉGLEMENTAIRE) | 6 | mois | Code CIMA art. 231 al. 5 (SÛR) | FR-14, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.paiement_apres_denonciation_mois` (alias : `REF_DELAI_PAIEMENT_APRES_DENONCIATION`) | Paiement des sommes convenues après la fin de la dénonciation (RÉGLEMENTAIRE) | 1 | mois | Code CIMA art. 235 (SÛR) | FR-14, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.penalite_pct_par_mois` (alias : `REF_PENALITE_RETARD`, `penalite_retard_pct_mois`) | Intérêt de retard (offre tardive, paiement tardif) (RÉGLEMENTAIRE) | 5 | % par mois | Code CIMA art. 233, 236 (SÛR) | FR-14, FR-85, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.provisionnelle_mois` (alias : `REF_CONSOLIDATION_INFO`, `delai_consolidation_mois`) | Consolidation non connue : offre provisionnelle possible à partir de (RÉGLEMENTAIRE) | 6 | mois | Code CIMA art. 231 al. 5 (SÛR) | FR-14, FR-85, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.suspension_avis_mois` (alias : `suspensions_delai_offre`) | Assureur non avisé : suspension à l expiration d un mois (RÉGLEMENTAIRE) | 1 | mois | Code CIMA art. 247 (SÛR) | FR-85, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `legal.suspension_pieces_semaines` (alias : `REF_SUSPENSION_PIECES`) | Pièces non reçues : suspension après (RÉGLEMENTAIRE) | 6 | semaines | Code CIMA art. 249-250 (SÛR) | FR-14, FR-141 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `bareme_medical_ip` | Barème médical d'incapacité permanente (annexe du Livre II) | à numériser | table | CIMA (D21) | FR-70 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `echelle_souffrance_esthetique` | Échelle de souffrance et de préjudice esthétique en % du SMIG annuel (art. 262) : très léger 5 ; léger 10 ; modéré 20 ; moyen 40 ; assez important 60 ; important 100 ; très important 150 ; exceptionnel 300 | valeurs du Code | % du SMIG annuel | CIMA | FR-70 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `moral_deces_pct_smig` | Préjudice moral par bénéficiaire du décès (art. 266) : conjoint 150 ; enfant mineur 100 ; enfant majeur 75 ; ascendant 75 ; frère ou sœur 50 | valeurs du Code | % du SMIG annuel | CIMA | FR-70 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `plafonds_corporel_multiples_smig` | Plafonds en multiples du SMIG annuel (RÈGLEMENTAIRES, art. 259 à 266) : incapacité temporaire mensuelle 6 ; préjudice économique d'incapacité permanente 10 (si taux ≥ 50 %) ; préjudice moral 2 (si taux ≥ 80 %) ; gains futurs 36 ; frais funéraires 2 ; ayants droit du décédé 85 au total ; moral des bénéficiaires du décès 20 au total ; tierce personne 50 % de l'incapacité (si taux ≥ 80 %) | valeurs du Code | multiple | CIMA | FR-70 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `smig_annuel_multiplicateur` | SMIG annuel = mensuel x | 12 | mois | ASSUMPTION | FR-70 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `smig_togo_mensuel` | SMIG du Togo, paramètre daté (pays de l'accident) ; **SMIG du pays de résidence s'il est plus élevé** (question au §13.2) | 52 500 depuis le 01/01/2023 (PROBABLE, sources secondaires) | FCFA par mois | CIMA (principe), ASSUMPTION (valeur) | FR-70 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `table_conversion_rentes` | Table de conversion des rentes | à saisir | table | CIMA (D21) | FR-70 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `table_repartition_ayants_droit` | Clés de répartition entre ayants droit (art. 265) | à saisir (valeurs lisibles partiellement, à valider) | table | CIMA (D21) | FR-70 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `table_valeur_point_ipp` | Valeur du point d'incapacité permanente par taux et par âge (art. 260) | à saisir depuis l'image du PDF officiel, double saisie | table | CIMA (D21) | FR-70 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `conservation.depart` | Point de départ de la durée | date de clôture | règle | démo ; *(défaut H-271)* (juriste, point 11) | FR-174 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `conservation.plancher` (alias : `CONSERV_DOSSIER_DEFAUT`, `dossier.conservation_ans`) | Durée minimale de conservation | 10 | ans | art. 404 (SÛR) ; plan D17 | FR-21, FR-105, FR-174 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
+| `referentiel.mise_a_jour` | Mise à jour du référentiel légal (que la compagnie ne modifie pas) : fournisseur du texte, relecture du juriste, date d'effet, double contrôle, journal | fournisseur : Money Vibes ; relecture : juriste ; date d'effet datée | procédure | [A] ; L1-30 | FR-4, FR-14, FR-235 | juriste (par le `DG`) | juriste | à chaque publication ; au moins annuelle |
 
 ### Conflits résolus
 
@@ -4896,9 +5533,157 @@ Chaque ligne donne la valeur **gardée** (celle de la FR qui définit le paramè
 
 | paramètre | valeur gardée | valeur écartée | pourquoi |
 |---|---|---|---|
-| `echange.age_max_ouverture` (alias `LC_AGE_MAX_LECTURE_INTERFACE`, `LC_AGE_MAX_LECTURE_FICHIER`, `age_max_lecture_contrats`) | 24 heures (FR-201, FR-198) | 15 minutes avec une interface et 1 jour avec des fichiers (FR-3, `[A]` modèle microfinance) ; « à définir, aucun défaut chiffré » (FR-41) | FR-201 définit l'âge maximal de la lecture d'une police pour ouvrir un dossier. L'avertissement « données du … » est déjà porté par la fraîcheur (5 minutes avec une API, heure ou nuit avec des fichiers) et par le seuil « périmé » (le double, `echange.perime_facteur`) : trois seuils pour le même sens se contrediraient. |
-| `RESTAURATION_TEST_PERIODE` (alias `nas.test_restauration`) | 1 mois (FR-236, installation) | annuelle, plus un test avant la mise en service (FR-176, NAS de la GED) | FR-236 fixe la politique de sauvegarde et de restauration de toute l'installation. L'« au moins une fois par an » de FR-176 est un plancher compatible, pas une valeur concurrente ; le test avant la mise en service reste exigé. |
-| `expert.delai_rapport.auto_materiel` (alias `DELAI_RAPPORT_EXPERT`, `delai_rapport_expert_jours`) | 7 jours (FR-184, une valeur par domaine) | 7 à 10 jours (mémoire 2014, FR-14) | FR-184 est la FR qui définit les délais par domaine ; la fourchette du mémoire décrit la pratique d'une autre compagnie du groupe, à confirmer pour le Togo. |
+| `echange.age_max_ouverture` (alias `LC_AGE_MAX_LECTURE_INTERFACE`, `LC_AGE_MAX_LECTURE_FICHIER`, `age_max_lecture_contrats`) | 5 minutes avec une interface, 24 heures avec des fichiers (FR-201 ; FR-3 et FR-41 s'alignent, FR-198) | 15 minutes avec une interface et 1 jour avec des fichiers (FR-3 avant alignement, `[A]` modèle microfinance) ; « à définir, aucun défaut chiffré » (FR-41) | FR-201 définit l'âge maximal de la lecture d'une police pour ouvrir un dossier. L'avertissement « données du … » est déjà porté par la fraîcheur (5 minutes avec une API, heure ou nuit avec des fichiers) et par le seuil « périmé » (le double, `echange.perime_facteur`) : trois seuils pour le même sens se contrediraient. |
+| `RESTAURATION_TEST_PERIODE` (alias `nas.test_restauration`) | 1 mois (FR-236, installation) | annuelle, plus un test avant la mise en service (FR-176 avant alignement, NAS de la GED) | FR-236 fixe la politique de sauvegarde et de restauration de toute l'installation. FR-176 est alignée sur FR-236 (test mensuel) ; le test avant la mise en service reste exigé. |
+| `expert.delai_rapport.auto_materiel` (alias `DELAI_RAPPORT_EXPERT`, `delai_rapport_expert_jours`) | 7 jours (FR-184, une valeur par domaine) | 7 à 10 jours (mémoire 2014, FR-14) | FR-184 est la FR qui définit les délais par domaine ; 7 jours est le **bas** de la fourchette de 7 à 10 jours du mémoire de 2014, qui décrit la pratique de la compagnie étudiée par le mémoire de 2014 (zone CIMA), à confirmer pour le Togo ; FR-14 s'aligne sur FR-184. |
 | `delegation_responsable_max_fcfa` (alias `DELEG_SEUIL_RESP`) | 1 000 000 FCFA pour le responsable sinistres ; comité sinistres au-delà, puis visa du directeur technique ; direction générale seule pour un règlement à titre commercial (D8, FR-8, FR-78) | 2 000 000 FCFA, seuil unique de validation de la démo | La démo n'a qu'un seuil ; D8 le remplace par une matrice à plusieurs niveaux (FR-78, écarts relevés). Le chiffre 2 000 000 FCFA survit ailleurs, comme **autre** paramètre : l'écart de provision qui attend le responsable (`provision.ecart_validation`, FR-188). |
 | `conservation.materiel`, `conservation.risques_divers`, `conservation.sans_suite_refuse` | 10 ans, point de départ la clôture (FR-174, art. 404 du Code CIMA, plancher de `conservation.plancher`) | 5 ans (code de la démo) | Une durée inférieure au plancher légal n'est pas acceptée par le formulaire (FR-174) ; les 5 ans de la démo ne s'appliquent que si le juriste le confirme (D21). Le sinistre mortel garde 30 ans, définitifs. |
 | `decompte.ordre` | dommage, vétusté, règle proportionnelle, plafond, franchise ; la franchise est déduite du montant arrêté (FR-69, code de la démo) | franchise appliquée avant la règle proportionnelle (rédaction initiale de D15 dans le plan) | D15 a été corrigé le 2026-11-13 d'après le code de la démo et la pratique ; FR-69, FR-75, FR-134 et le vocabulaire (§3) portent l'ordre retenu. |
+| `delai_declaration_*` (alias `plancher_delai_declaration`) | au moins 5 jours ouvrés ; 48 heures pour le vol (art. 12-4°) ; 3 jours pour le transport de marchandises (valeur gardée) (FR-43, FR-14) | 5 jours et 2 jours de la démo, comptés en jours sans distinction d'unité | Le plancher légal l'emporte partout (R10) : la valeur de la démo pour le vol (2 jours) est ramenée à 48 heures, et le défaut général est compté en jours ouvrés ; une valeur sous le plancher est refusée à la configuration. |
+
+## Annexe E. Table de reprise des vérifications de la démo
+
+La démo a rejoué le parcours de `SIN-2026-9002` deux fois ; le second rejeu (`rejeu-2/verifications.txt`) compte **104 vérifications**, réparties en 19 blocs (0 à 18). Le PRD décide de plusieurs écarts avec la démo (franchise déduite, offre et accord avant l'ordre, recours parallèle, statuts renommés, remise à zéro réservée à `ADMIN`, sélecteur de profil). Une vérification qui contredit une décision du PRD ne peut pas rester telle quelle : cette annexe dit, **pour chacune**, si elle est **gardée**, **réécrite** (nouvelle valeur attendue) ou **retirée** (décision citée).
+
+**Règle de recette (FR-15, FR-264).** La recette exige **104 sur 104 de la table réécrite**, c'est-à-dire des vérifications gardées et des vérifications dans leur forme réécrite. Elle n'exige pas « 104 sur 104 » du rejeu d'origine.
+
+### E.1 Les 104 vérifications du rejeu 2
+
+Bilan : **92 gardées, 12 réécrites, 0 retirées.** Les vérifications gardées sont rejouées telles quelles ; les réécrites portent la nouvelle valeur attendue. Aucune vérification n'est retirée : chaque contradiction a une forme réécrite. Les quatre vérifications « sans rechargement » restent valides au titre de FR-28.
+
+| n° | bloc du rejeu | vérification de la démo | sort | nouvelle valeur attendue ou précision | FR du PRD |
+|---|---|---|---|---|---|
+| 1 | 0. Préparation | Le bouton « Réinitialiser la démo » est toujours visible | **réécrite** | Le bouton est visible pour `ADMIN` seulement, et seulement dans l'espace d'essai ; un autre rôle ne le voit pas (FR-15). | FR-15 |
+| 2 | 0. Préparation | Bouton de remise à zéro grisé quand la démo est vierge | **gardée** | pour `ADMIN`, en espace d'essai (FR-15) | FR-15 |
+| 3 | 0. Préparation | Le dossier est DÉCLARÉ | **gardée** | — | FR-15 |
+| 4 | 0. Préparation | « Changer de profil » est dans la barre latérale | **réécrite** | Un **sélecteur de profil de démonstration** (changer de profil sans se déconnecter) est dans la barre latérale, dans l'espace d'essai seulement (FR-15). | FR-15 |
+| 5 | 1. Accueil | « Ouvrir et orienter » est fermée avec son motif | **gardée** | — | FR-39, FR-45, FR-134 |
+| 6 | 1. Accueil | « Ouvrir en attente de pièces » est ouverte | **gardée** | — | FR-39, FR-45, FR-134 |
+| 7 | 1. Accueil | Le dossier passe à PIÈCES INCOMPLÈTES | **réécrite** | Le dossier passe à `PIECES_ATTENDUES` (statut renommé, FR-134). | FR-39, FR-45, FR-134 |
+| 8 | 1. Accueil | « Reprendre le circuit » est fermée tant que les pièces manquent | **gardée** | — | FR-39, FR-45, FR-134 |
+| 9 | 2. Accueil | La zone de dépôt multiple est proposée à l’Accueil | **gardée** | — | FR-159 à FR-165 |
+| 10 | 2. Accueil | Le devis renommé est reconnu comme devis de réparation | **gardée** | — | FR-159 à FR-165 |
+| 11 | 2. Accueil | Le total du devis est lu (1 273 000 FCFA) | **gardée** | — | FR-159 à FR-165 |
+| 12 | 2. Accueil | 7 documents lus, prêts à verser | **gardée** | — | FR-159 à FR-165 |
+| 13 | 2. Accueil | Complétude 100 % après versement | **gardée** | — | FR-159 à FR-165 |
+| 14 | 2. Accueil | OCR « Texte extrait » sur les 7 pièces | **gardée** | l'OCR est réel, y compris sur les scans (FR-163) | FR-159 à FR-165 |
+| 15 | 3. Accueil | Le dossier est OUVERT | **gardée** | — | FR-45, FR-50 |
+| 16 | 3. Accueil | Aucun gestionnaire désigné | **gardée** | — | FR-45, FR-50 |
+| 17 | 4. Responsable | Instruction fermée : le dossier doit avoir été attribué | **gardée** | — | FR-50, FR-51 |
+| 18 | 4. Responsable | Aucun gestionnaire présélectionné | **gardée** | — | FR-50, FR-51 |
+| 19 | 4. Responsable | Attribuer sans motif : bouton grisé | **gardée** | — | FR-50, FR-51 |
+| 20 | 4. Responsable | Le dossier porte Estelle Lawson | **gardée** | — | FR-50, FR-51 |
+| 21 | 4. Responsable | Le journal dit « Affectation du dossier » | **gardée** | — | FR-50, FR-51 |
+| 22 | 5. Estelle | Le dossier est EN ÉTUDE | **réécrite** | Le dossier est `EN_INSTRUCTION` (statut renommé, FR-134). | FR-135, FR-75 |
+| 23 | 5. Estelle | L’évaluation est fermée : expertise ouverte | **gardée** | — | FR-135, FR-75 |
+| 24 | 6. Estelle | Complétude 88 %, sous réserve | **gardée** | — | FR-54, FR-61 à FR-68 |
+| 25 | 6. Estelle | Montant pré-rempli 445 500 | **gardée** | montant retenu par l'expert, avant franchise (bloc 6) | FR-54, FR-61 à FR-68 |
+| 26 | 6. Estelle | Bandeau « Rapport enregistré » | **gardée** | — | FR-54, FR-61 à FR-68 |
+| 27 | 6. Estelle | La fiche se met à jour sans rechargement : « Décider » visible | **gardée** | gardée au titre de FR-28 (mise à jour de l'écran sans rechargement) | FR-54, FR-61 à FR-68 |
+| 28 | 6. Estelle | Statut affiché « Rapport à analyser » | **gardée** | — | FR-54, FR-61 à FR-68 |
+| 29 | 7. Estelle | Écart de 65 % affiché | **gardée** | — | FR-54, FR-61 à FR-68 |
+| 30 | 7. Estelle | La puce nomme la pièce et son effectif | **gardée** | — | FR-54, FR-61 à FR-68 |
+| 31 | 7. Estelle | L’histogramme dessine des barres | **gardée** | — | FR-54, FR-61 à FR-68 |
+| 32 | 7. Estelle | Trois demandes pré-rédigées | **gardée** | — | FR-54, FR-61 à FR-68 |
+| 33 | 7. Estelle | Complément demandé | **gardée** | — | FR-54, FR-61 à FR-68 |
+| 34 | 7. Estelle | Sans rechargement, le statut affiché est « Complément demandé » | **gardée** | gardée au titre de FR-28 (mise à jour de l'écran sans rechargement) | FR-54, FR-61 à FR-68 |
+| 35 | 8. La contestation | Avertissement : le complément n’a pas été reçu | **gardée** | — | FR-66 |
+| 36 | 8. La contestation | Estelle ne peut pas ordonner la contre-expertise | **gardée** | — | FR-66 |
+| 37 | 8. La contestation | Le responsable conteste : 9201 CONTESTÉE | **gardée** | — | FR-66 |
+| 38 | 8. La contestation | Le bouton « Arbitrer la contestation » lui est proposé | **gardée** | — | FR-66 |
+| 39 | 8. La contestation | Une contre-expertise est ouverte | **gardée** | — | FR-66 |
+| 40 | 8. La contestation | Le cabinet initial est affiché écarté, avec le motif | **gardée** | — | FR-66 |
+| 41 | 8. La contestation | Le panel interne est refusé | **gardée** | — | FR-66 |
+| 42 | 8. La contestation | SAREX désigné | **gardée** | — | FR-66 |
+| 43 | 8. La contestation | Sans rechargement, la fiche affiche « Expert désigné » | **gardée** | gardée au titre de FR-28 (mise à jour de l'écran sans rechargement) | FR-66 |
+| 44 | 9. SAREX | La contre-expertise est en tête de « Missions à accepter » | **gardée** | — | FR-61 à FR-68, FR-180 |
+| 45 | 9. SAREX | Le portail ouvre sa propre mission | **gardée** | — | FR-61 à FR-68, FR-180 |
+| 46 | 9. SAREX | Mission acceptée | **gardée** | — | FR-61 à FR-68, FR-180 |
+| 47 | 9. SAREX | Le rapport est reconnu comme contre-expertise | **gardée** | — | FR-61 à FR-68, FR-180 |
+| 48 | 9. SAREX | Complétude 100 % | **gardée** | — | FR-61 à FR-68, FR-180 |
+| 49 | 9. SAREX | 445 500 FCFA lus | **gardée** | montant retenu par l'expert, avant franchise (bloc 9) | FR-61 à FR-68, FR-180 |
+| 50 | 9. SAREX | Rapport de contre-expertise déposé | **gardée** | — | FR-61 à FR-68, FR-180 |
+| 51 | 9. SAREX | Le cabinet ne voit pas la provision | **gardée** | — | FR-61 à FR-68, FR-180 |
+| 52 | 10. Estelle | Contre-expertise validée | **gardée** | — | FR-66, FR-68 |
+| 53 | 10. Estelle | 9201 est ARBITRÉE | **gardée** | — | FR-66, FR-68 |
+| 54 | 10. Estelle | La fiche 9201 dit « Contestation tranchée » | **gardée** | — | FR-66, FR-68 |
+| 55 | 11. Estelle | Le libellé de responsabilité est un libellé | **gardée** | — | FR-61, FR-62 |
+| 56 | 11. Estelle | Un seul besoin à retenir : responsabilité | **gardée** | — | FR-61, FR-62 |
+| 57 | 11. Estelle | EXP-2026-D0001 créée | **gardée** | — | FR-61, FR-62 |
+| 58 | 11. Estelle | Retenir deux fois est impossible | **gardée** | — | FR-61, FR-62 |
+| 59 | 12. Komlan | Komlan désigné | **gardée** | — | FR-67, FR-179, FR-180 |
+| 60 | 12. Komlan | Sans rechargement, « Rédiger mon rapport » apparaît | **gardée** | gardée au titre de FR-28 (mise à jour de l'écran sans rechargement) | FR-67, FR-179, FR-180 |
+| 61 | 12. Komlan | La grille de responsabilité ne demande pas de méthode d’évaluation | **gardée** | — | FR-67, FR-179, FR-180 |
+| 62 | 12. Komlan | Complétude 100 % à mesure de la saisie | **gardée** | — | FR-67, FR-179, FR-180 |
+| 63 | 12. Komlan | Sans la part du tiers, le dépôt est bloqué | **gardée** | — | FR-67, FR-179, FR-180 |
+| 64 | 12. Komlan | La part saisie annonce le recours fondé à 70 % | **gardée** | — | FR-67, FR-179, FR-180 |
+| 65 | 12. Komlan | Rapport déposé | **gardée** | — | FR-67, FR-179, FR-180 |
+| 66 | 12. Komlan | Le message annonce le PDF dans les pièces | **gardée** | — | FR-67, FR-179, FR-180 |
+| 67 | 12. Komlan | Le PDF du rapport rédigé est stocké sous la pièce | **gardée** | — | FR-67, FR-179, FR-180 |
+| 68 | 12. Komlan | La pièce « Rapport d’expertise | **gardée** | — | FR-67, FR-179, FR-180 |
+| 69 | 12. Komlan | D0001 validée | **gardée** | — | FR-67, FR-179, FR-180 |
+| 70 | 12. Komlan | La responsabilité du dossier est requalifiée : 70 % au tiers | **gardée** | — | FR-67, FR-179, FR-180 |
+| 71 | 12. Komlan | Le badge du dossier porte « 70 % au tiers » | **gardée** | — | FR-67, FR-179, FR-180 |
+| 72 | 13. Estelle | Décision de garantie enregistrée | **gardée** | — | FR-69 à FR-76 |
+| 73 | 13. Estelle | L’évaluation est ouverte (3 missions closes) | **gardée** | — | FR-69 à FR-76 |
+| 74 | 13. Estelle | Le montant pré-rempli est le chiffrage validé : 445 500 | **réécrite** | Le montant pré-rempli est le **montant du décompte** : chiffrage validé 445 500, moins la franchise de 50 000 (minimum), soit **395 500** (D15, FR-69 ; arrêté au franc près, R8). | FR-69 à FR-76 |
+| 75 | 13. Estelle | Le calcul d’instruction est affiché en repère | **gardée** | — | FR-69 à FR-76 |
+| 76 | 13. Estelle | Évaluer sans montant est refusé | **gardée** | — | FR-69 à FR-76 |
+| 77 | 13. Estelle | Un autre montant exige un motif (bouton grisé) | **gardée** | — | FR-69 à FR-76 |
+| 78 | 13. Estelle | L’écart avec le chiffrage validé est signalé | **réécrite** | L'écart avec le montant du décompte (395 500) est signalé ; la franchise déduite n'est pas un écart (D15). | FR-69 à FR-76 |
+| 79 | 13. Estelle | Dossier ÉVALUÉ à 445 500, barème BAR-MAT | **réécrite** | Dossier `EVALUE` à **395 500**, barème BAR-MAT (franchise déduite, D15, FR-69). | FR-69 à FR-76 |
+| 80 | 13. Estelle | Provision réajustée à 445 500 | **réécrite** | Provision réajustée à **395 500** (D15, FR-76). | FR-69 à FR-76 |
+| 81 | 13. Estelle | Envoyé en validation | **gardée** | — | FR-69 à FR-76 |
+| 82 | 13. Estelle | Pour Estelle, la validation est fermée | **gardée** | — | FR-69 à FR-76 |
+| 83 | 14. Responsable | Fiche : 3 expertises closes, 2 validées, 1 arbitrée | **gardée** | — | FR-78, FR-82, FR-86, FR-90 |
+| 84 | 14. Responsable | Fiche : pièces 5/5, tranche M2, comparables | **gardée** | — | FR-78, FR-82, FR-86, FR-90 |
+| 85 | 14. Responsable | Fiche : déclaration tardive et franchise en vigilance | **gardée** | — | FR-78, FR-82, FR-86, FR-90 |
+| 86 | 14. Responsable | Fiche : part du tiers et recours à engager | **réécrite** | Fiche : part du tiers de 70 % et recours **déjà ouvert** depuis l'ouverture du dossier (D10, FR-32). | FR-78, FR-82, FR-86, FR-90 |
+| 87 | 14. Responsable | Confirmer grisé sans motif | **réécrite** | La validation par le `RESP` est grisée sans motif ; elle suit le **contrôle de niveau 1** d'un second agent du volet, sous 1 000 000 FCFA (R6, FR-8). | FR-78, FR-82, FR-86, FR-90 |
+| 88 | 14. Responsable | Ordre de règlement émis | **réécrite** | Après la validation, l'**offre est envoyée** (`OFFRE_ENVOYEE`) et l'**accord de l'assuré est enregistré** par `ACC` sur la pièce originale signée ; l'ordre n'est émis qu'ensuite (D6 ; R4 ; FR-82, FR-86, FR-90). Au corporel, rien n'est émis avant `DELAI_DENONCIATION_ECOULE` (R1). | FR-78, FR-82, FR-86, FR-90 |
+| 89 | 15. Comptable | Émettre sans numéro de chèque est refusé | **gardée** | — | FR-93, FR-94 |
+| 90 | 15. Comptable | Quittance créée avec le chèque saisi | **gardée** | — | FR-93, FR-94 |
+| 91 | 16. La remise et la clôture | « Retiré par » n’est pas pré-rempli | **gardée** | — | FR-97, FR-104 |
+| 92 | 16. La remise et la clôture | Remise sans identité refusée | **gardée** | — | FR-97, FR-104 |
+| 93 | 16. La remise et la clôture | Remise sans pièce d’identité refusée | **gardée** | — | FR-97, FR-104 |
+| 94 | 16. La remise et la clôture | Dossier RÉGLÉ | **gardée** | la quittance est marquée `SIGNEE` par un agent distinct de l'émetteur (FR-97, R4) | FR-97, FR-104 |
+| 95 | 16. La remise et la clôture | Le recours est ouvert : « Transmettre au pôle recours » n’est plus fermée | **réécrite** | Le recours existe depuis l'ouverture du dossier (suivi parallèle, FR-32, FR-108) ; sa créance est de **276 850** sur 395 500 (70 %) (D10). Il n'y a plus de bouton « Transmettre au pôle recours » après le règlement. | FR-97, FR-104 |
+| 96 | 16. La remise et la clôture | Clôturer sans motif : bouton grisé | **gardée** | — | FR-97, FR-104 |
+| 97 | 16. La remise et la clôture | Dossier CLÔTURÉ | **gardée** | — | FR-97, FR-104 |
+| 98 | 16. La remise et la clôture | Pour Estelle, le versement relève de l’archiviste | **gardée** | — | FR-97, FR-104 |
+| 99 | 17. GED | Numéro d’archivage attribué | **gardée** | — | FR-167 à FR-170 |
+| 100 | 17. GED | L’archive est datée après la clôture | **gardée** | — | FR-167 à FR-170 |
+| 101 | 17. GED | Bordereau de 11 pièces (dont les trois rapports), image scellée | **gardée** | la valeur de chaque pièce figure au bordereau (FR-168) | FR-167 à FR-170 |
+| 102 | 17. GED | Le rapport rédigé en ligne est au bordereau | **gardée** | — | FR-167 à FR-170 |
+| 103 | 17. GED | Verser deux fois est impossible : le dossier n’est plus proposé | **gardée** | — | FR-167 à FR-170 |
+| 104 | 18. Remise à zéro | Après remise à zéro : DÉCLARÉ, démo vierge | **gardée** | remise à zéro par `ADMIN` en espace d'essai (FR-15) | FR-15 |
+
+### E.2 Les 21 refus à provoquer
+
+Le guide de la démo liste **21 refus** à provoquer pendant le parcours (le corps du PRD, FR-16, n'en cite que 7). La recette les provoque tous.
+
+| n° | refus à provoquer | message ou état attendu | FR du PRD |
+|---|---|---|---|
+| 1 | Ouvrir sans les pièces | action fermée, avec le motif « pièces manquantes » | FR-45, FR-135 (transition 2) |
+| 2 | Verser pendant la lecture | bouton « verser » grisé tant qu'une lecture est en cours ; compteur « N lus sur M » | FR-165, FR-162 |
+| 3 | Un gestionnaire s'attribue le dossier | carte d'attribution non proposée ; refus `SEPARATION_DES_TACHES` (séparation n° 7) | FR-50, FR-7 |
+| 4 | Instruire avant attribution | action fermée : « le dossier doit avoir été attribué » | FR-50, FR-135 |
+| 5 | Attribuer sans motif | bouton grisé (motif obligatoire à la réaffectation) | FR-51 |
+| 6 | Évaluer avec une expertise ouverte | action fermée : une mission est ouverte | FR-75, FR-135 |
+| 7 | Un gestionnaire ordonne la contre-expertise | refus `DROIT_INSUFFISANT` (RESP, DG ou DT seuls) | FR-66 |
+| 8 | Contre-expertise confiée au panel interne | refus `CONTRE_EXPERTISE_NON_AUTORISEE` | FR-66 |
+| 9 | Contre-expertise confiée au cabinet initial | cabinet non proposé : « écarté : a produit le rapport contesté » | FR-66 |
+| 10 | Deux fois le même besoin d'expertise | « Mission déjà ouverte » | FR-61 |
+| 11 | Évaluer sans montant | « Saisissez le montant arrêté au barème » | FR-75 |
+| 12 | Un autre montant que celui du décompte | motif obligatoire ; bouton grisé sans motif (le décompte arrête 395 500, D15) | FR-69, FR-75 |
+| 13 | Le gestionnaire valide l'indemnisation | action fermée ; refus `SEPARATION_DES_TACHES` (SEP-01) | FR-7, FR-78 |
+| 14 | Valider sans motif | bouton grisé | FR-78 |
+| 15 | Le gestionnaire émet le règlement | action fermée ; `CPT` seul émet (SEP-02) | FR-7, FR-93 |
+| 16 | Émettre sans numéro de chèque | « Indiquez le numéro du chèque émis » | FR-93, FR-221 |
+| 17 | Remise sans identité | refus avec le champ nommé ; « retiré par » n'est jamais pré-rempli | FR-97 |
+| 18 | Remise sans pièce d'identité | refus avec le champ nommé | FR-97 |
+| 19 | Clôturer sans motif | bouton grisé | FR-104 |
+| 20 | Le gestionnaire verse au fonds | « Le versement relève de l'archiviste » (séparation n° 12) | FR-168, FR-7 |
+| 21 | Verser deux fois | le dossier n'est plus proposé au versement | FR-168 |
+
+Les refus nouveaux décidés par le PRD (cumuls 13 à 16 de FR-7, condition `DELAI_DENONCIATION_ECOULE`, code `OPPOSITION_NON_ENREGISTREE`, état de règlement `INCONNU`, numéro reçu pour une `DEC-` déjà numérotée) s'ajoutent à cette liste dans la recette de FR-16.
