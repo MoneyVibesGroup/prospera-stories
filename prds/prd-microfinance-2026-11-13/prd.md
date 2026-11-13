@@ -12,7 +12,7 @@ mode: rapide
 
 # PRD — Prospera Microfinance
 
-*Brouillon complet, rédigé en mode rapide le 2026-11-13 à partir du récit du PO (`brain-dump-po-2026-11-13.md`), de ses réponses aux 71 questions (`questions-po-2026-11-13.md`), de sept extraits de la démo, des documents, de la plateforme et de la réglementation (`extract-*.md`), et du plan de rédaction (`plan-redaction.md`). Décisions et raisons dans `.memlog.md`. Les hypothèses restantes sont indexées au §13 ; les actions qui restent au PO sont au §12.2. Reste à faire : réconciliation avec les sources, relectures, tri des hypothèses, passe de style.*
+*Brouillon complet, corrigé après réconciliation et relectures, rédigé en mode rapide le 2026-11-13 à partir du récit du PO (`brain-dump-po-2026-11-13.md`), de ses réponses aux 71 questions (`questions-po-2026-11-13.md`), de sept extraits de la démo, des documents, de la plateforme et de la réglementation (`extract-*.md`), et du plan de rédaction (`plan-redaction.md`). Décisions et raisons dans `.memlog.md`. Les hypothèses restantes sont indexées au §13 ; les actions qui restent au PO sont au §12.2. Reste à faire : réconciliation avec les sources, relectures, tri des hypothèses, passe de style.*
 
 ---
 
@@ -22,7 +22,7 @@ Ce PRD décrit **Prospera Microfinance** : l'outil qui sert une institution de m
 
 **Le client visé** est une grande IMF à plusieurs agences, au stade du pré-contrat. Le PRD ne la nomme jamais : il écrit « l'IMF ». Elle démarre en **février 2027**, en même temps que les autres clients Prospera, **sur ses propres serveurs** (§7.9).
 
-**Prospera ne remplace pas le logiciel de l'IMF.** Ce logiciel, appelé ici **« le cœur »**, garde les comptes, l'épargne, la caisse du guichet et la comptabilité officielle. **Il fait foi pour l'argent.** Prospera se branche à côté, surtout pour le crédit et le pilotage (FR-2). Le cœur de l'IMF n'est pas encore connu : le PRD définit les échanges sans dépendre d'un produit (§6.5, annexe C). Pour la démonstration, Money Vibes livre un **cœur fictif** qui parle ce contrat (§6.6) ; le vrai connecteur viendra plus tard.
+**Prospera ne remplace pas le logiciel de l'IMF.** Ce logiciel, appelé ici **« le cœur »**, garde les comptes, l'épargne, la caisse du guichet et la comptabilité officielle. **Il fait foi pour l'argent.** Prospera se branche à côté, surtout pour le crédit et le pilotage (FR-2). Le cœur de l'IMF n'est pas encore connu : le PRD définit les échanges sans dépendre d'un produit (§6.5, annexe C). Pour la démonstration, Money Vibes livre un **cœur fictif** qui parle ce contrat (§6.6), **pour que l'IMF comprenne** comment Prospera vit à côté de son logiciel. Le vrai connecteur sera fait pour la démo propre à l'IMF, **pas maintenant** (décision du PO).
 
 **La priorité absolue est le crédit, détaillé de bout en bout** (partie 2). Tout le reste de la plateforme doit aussi fonctionner au premier jour, sauf la comptabilité, qui n'est pas prioritaire : au mieux, un export des écritures vers le cœur (§7.6).
 
@@ -41,9 +41,9 @@ Le document se lit en quatre parties :
 | **3. Les autres modules propres à l'IMF** | produits financiers, clients et KYC, collecte, caisse des collecteurs, échange avec le cœur, cœur fictif, risque de portefeuille, conformité BCEAO, reprise du portefeuille | §6 |
 | **4. Les modules partagés et cadrés** | fiches de renvoi vers le PRD distributeur et les PRD existants, avec ce que l'IMF exige en plus ; l'installation chez l'IMF | §7 |
 
-Suivent les exigences transverses (§8), les indicateurs (§9), le périmètre (§10), les non-objectifs (§11), les décisions, actions et risques (§12), les hypothèses (§13), puis trois annexes : **A** le contrat de module (13 lignes par module), **B** la matrice d'accès, **C** le contrat d'échange avec le cœur.
+Suivent les exigences transverses (§8), les indicateurs (§9), le périmètre (§10), les non-objectifs (§11), les décisions, actions et risques (§12), les hypothèses (§13), puis quatre annexes : **A** le contrat de module (13 lignes par module), **B** la matrice d'accès, **C** le contrat d'échange avec le cœur, **D** la table des paramètres. Les choix techniques renvoyés hors du PRD sont dans `addendum.md`.
 
-**Sources et décisions.** Le récit du PO (`brain-dump-po-2026-11-13.md`), ses réponses aux 71 questions (`questions-po-2026-11-13.md`), le journal `.memlog.md`, et sept extraits de la démo, des documents, de la plateforme et de la réglementation (`extract-*.md`). En cas d'écart, l'ordre de priorité est : le récit du PO, puis ses réponses, puis la démo, puis les cahiers, puis les sources secondaires.
+**Sources et décisions.** Le récit du PO (`brain-dump-po-2026-11-13.md`), ses réponses aux 71 questions (68, puis 3 ajoutées ; `questions-po-2026-11-13.md`), ses arbitrages sur les relectures (`corrections.md`), le journal `.memlog.md`, et sept extraits de la démo, des documents, de la plateforme et de la réglementation (`extract-*.md`). En cas d'écart, l'ordre de priorité est : le récit du PO, puis ses réponses, puis la démo, puis les cahiers, puis les sources secondaires.
 
 ---
 
@@ -202,7 +202,7 @@ Le cœur de l'IMF fait foi pour l'argent (décision du PO). Prospera ne tient ja
 
 #### FR-3 : Les seuils de la démo sont des valeurs par défaut
 
-Tout seuil métier (montants, nombres de cautions et de visites, quorum, délais de relance, rayons de présence, scores minimum, taux, tolérances) est un **paramètre de l'IMF**, réglé par l'administrateur sous la validation d'un rôle métier, versionné et daté. Les valeurs de la démo et des réponses du PO sont les valeurs par défaut (décision du PO).
+Tout seuil métier (montants, nombres de cautions et de visites, quorum, délais de relance, rayons de présence, scores minimum, taux, tolérances) est un **paramètre de l'IMF**, réglé par l'administrateur sous la validation d'un rôle métier, versionné et daté. Les valeurs de la démo et des réponses du PO sont les valeurs par défaut (décision du PO). Toutes les valeurs par défaut sont rassemblées dans **l'annexe D**, qui fait foi en cas d'écart avec une FR.
 
 **Conséquences (testables) :**
 - Changer un paramètre ne modifie pas un dossier déjà engagé : un dossier garde les règles en vigueur à sa soumission (même principe que les produits, §6.1).
@@ -225,13 +225,13 @@ Les seize rôles du §2.1 existent dès l'installation. Chacun voit son périmè
 
 **Conséquences (testables) :**
 - Un RA qui interroge un dossier d'une autre agence reçoit un refus, sans donnée.
-- Les comptes sont créés par ADMIN_IMF ; les rôles DAF, AUD et ROC ne sont actifs qu'après la validation du DG ; chaque création ou retrait de rôle fait intervenir deux personnes (décision F7).
-- ADMIN_IMF ne lit aucune donnée métier : un test ouvre chaque écran métier avec ce rôle et vérifie le refus.
+- Les comptes sont créés par ADMIN_IMF ; les rôles DAF, AUD et ROC ne sont actifs qu'après la validation du DG (décision F7). Tout rôle qui instruit, décide ou autorise de l'argent (CC, ROC, RA, CPT, DAF, DG, COLL) n'est actif qu'après la validation d'un **rôle métier** (DG, ou RA pour son agence), jamais d'un second administrateur ; l'AUD lit le journal des créations et retraits.
+- ADMIN_IMF ne lit aucune donnée métier **par l'application** : un test ouvre chaque écran métier avec ce rôle et vérifie le refus. Sur un serveur que l'IMF administre elle-même, l'accès direct à la base reste un **risque résiduel assumé** : il est réduit par le chiffrement des champs sensibles (pièces d'identité, téléphones, positions) et par le journal chaîné de FR-9 [ASSUMPTION : clés de chiffrement tenues hors du compte ADMIN_IMF ; détail → addendum].
 - La double authentification est obligatoire pour DG, DAF, ROC, CPT, AUD et ADMIN_IMF ; une session dure 8 h au plus et se ferme après 30 minutes d'inactivité (paramètres ; décision F9).
 
 #### FR-6 : Séparation des tâches et délégation tracée
 
-Une même personne ne peut pas, sur un même dossier : créer la fiche et valider le KYC ; instruire (avis CC) et décider (ROC) ; décider (ROC) et autoriser le décaissement en espèces (CPT ou DAF) ; saisir un paiement et le valider. Le DG ne décide pas à la place du ROC, sauf **délégation explicite**, datée, motivée et tracée, en cas d'absence (décision C4). Ces règles suivent l'instruction BCEAO n° 017-12-2010 sur le contrôle interne des SFD.
+Une même personne ne peut pas, sur un même dossier : créer la fiche et valider le KYC ; instruire (avis CC) et décider (ROC) ; décider (ROC) et autoriser le décaissement en espèces (CPT ou DAF) ; saisir un paiement et le valider. Le DG ne décide pas à la place du ROC, sauf **délégation explicite**, datée, motivée et tracée, en cas d'absence (décision C4). Ces règles suivent l'instruction BCEAO n° 017-12-2010 sur le contrôle interne des SFD. Pour le crédit, la liste complète des combinaisons interdites, valable pour **tous** les canaux de décaissement, est en FR-82 (visiteur, auteur de la demande, émetteur et valideur de l'ordre, ROC décideur).
 
 **Conséquences (testables) :**
 - Chaque combinaison interdite est refusée par le serveur avec un code neutre (`SEPARATION_DES_TACHES`) et un libellé clair.
@@ -278,45 +278,48 @@ Les capacités d'IA font partie du produit de l'IMF, **sur tout le processus** (
 - **Provenance** affichée sur chaque proposition : règle ou modèle, version, date de calcul, données utilisées (PRD-D FR-16). Le mot « IA » ne s'affiche que pour un modèle ; tant qu'un modèle n'existe pas, la capacité est servie par des **règles explicables** et le dit (décision F6).
 - **L'IA propose, un humain décide** : aucune proposition n'engage l'IMF (spine microfinance, AD-12). Un humain qui s'écarte d'une proposition écrit un motif ; l'écart et le motif sont enregistrés et renvoyés comme correction.
 - **Le secteur d'activité** (FR-7) et les données **micro** (client, activité, flux) et **macro** (prix, inflation, saison, conjoncture par secteur et par zone) sont des entrées de premier rang. Les données macro viennent de sources datées et citées [ASSUMPTION : sources de départ — indices de prix et d'inflation publics, calendrier agricole, données agrégées de l'IA commune (Pulse) quand elles existent].
-- **Consentement** : une donnée de l'IMF ne quitte ses serveurs vers l'IA commune qu'avec son accord écrit ; l'apprentissage est fédéré (« on met en commun l'apprentissage, pas les données » ; PRD moteur d'installation). Sans consentement, l'IA tourne sur les seules données de l'IMF, sur ses serveurs.
+- **Une instance locale de l'IA commune** tourne sur les serveurs de l'IMF (décision du PO, P9, conforme à la salle) : elle produit les propositions et le Copilot, **enregistre l'écart** entre chaque prédiction et ce qui s'est réellement passé, **anonymise** ces écarts, les **renvoie** à l'IA commune pour l'apprentissage, et **reçoit ses mises à jour** de modèle, le tout par un **tunnel sécurisé sortant** (aucun port entrant chez l'IMF). Aucune donnée nominative ne part ; ce qui part est prévu au contrat avec l'IMF (« on met en commun l'apprentissage, pas les données » ; PRD moteur d'installation).
+- **Équité** : une liste fermée de variables est autorisée dans le score et dans tout modèle ; le genre, la situation matrimoniale, la nationalité et la religion n'y figurent jamais, et les variables qui peuvent les remplacer (nom, quartier) sont auditées. Les taux d'acceptation et de refus par genre, zone et secteur sont suivis et lus par l'AUD et le RSQ. Le client peut connaître le motif d'un refus.
 - **Jamais bloquant** : si une capacité d'IA est indisponible, son emplacement le dit et le processus avance sur l'analyse humaine.
 
 **Conséquences (testables) :**
 - Chaque capacité du tableau a au moins une exigence dans la section indiquée, avec ses entrées, sa sortie et son rôle destinataire.
 - Chaque proposition affichée porte origine, version, date et données utilisées ; un test vérifie qu'aucune n'en manque.
 - Couper l'IA commune ne bloque aucun parcours : UJ-1 va jusqu'à EN_GESTION sans score ni recommandation.
-- Sans consentement de l'IMF, aucune donnée ne sort vers l'IA commune ; un test sur une installation sans consentement le vérifie.
+- Seuls les écarts anonymisés partent vers l'IA commune, par le tunnel sécurisé ; un test inspecte un envoi et n'y trouve aucune donnée nominative. Une mise à jour de modèle reçue est versionnée et peut être retirée.
+- Un test vérifie qu'aucune variable interdite n'entre dans le score, et que l'indicateur d'équité est calculé chaque mois.
 - Une analyse macro-économique cite ses sources et leur date ; une source de plus de 90 jours est signalée « ancienne » (paramètre).
 
 ### 4.7 La trace
 
 #### FR-9 : Qui a fait quoi, et quand
 
-Chaque changement d'état d'un dossier, d'un prêt, d'un paiement, d'un paramètre ou d'un droit est **horodaté**, avec son auteur, son rôle, l'état d'avant et l'état d'après, et son motif quand il en faut un (récit §4). Le journal est infalsifiable et conservé **au moins dix ans** (instruction BCEAO n° 017-12-2010).
+Chaque changement d'état d'un dossier, d'un prêt, d'un paiement, d'un paramètre ou d'un droit est **horodaté**, avec son auteur, son rôle, l'état d'avant et l'état d'après, et son motif quand il en faut un (récit §4). Le journal ne peut pas être modifié par l’application, il est chaîné, et il est conservé **au moins dix ans** (instruction BCEAO n° 017-12-2010).
 
 **Conséquences (testables) :**
 - L'historique d'un dossier se lit de bout en bout, dans l'ordre, sur une seule page.
-- Aucune entrée du journal ne peut être modifiée ni supprimée, même par ADMIN_IMF ; une tentative est elle-même tracée.
+- Aucune entrée du journal ne peut être modifiée ni supprimée par l'application, même par ADMIN_IMF ; une tentative est elle-même tracée. Le journal est **chaîné** (chaque entrée scelle la précédente) et son empreinte est déposée régulièrement **hors du serveur de l'IMF**, pour qu'une modification directe en base soit détectable.
 - L'AUD peut exporter le journal d'un dossier, d'un agent ou d'une période.
-- Le journal des accès (qui a consulté quoi) est lisible par l'AUD seul.
+- La **piste d'audit** (qui a changé quoi) est lisible par l'AUD et le DG ; le **journal des accès** (qui a consulté quoi) par l'AUD seul.
 
 ### 4.8 Le plafond d'usure
 
 #### FR-10 : Aucun prêt au-dessus du plafond d'usure
 
-Le **plafond d'usure** est un paramètre daté, par pays et par catégorie d'institution. Sa valeur pour les IMF de l'UMOA est **24 % par an** (décision du PO ; Décision n° 19 du 29/12/2025/CM/UMOA, en vigueur le 01/06/2026). Il s'applique au **TEG** : taux actuariel annuel, frais et assurance compris, pénalités et impôts exclus. Prospera calcule le TEG à la simulation, à la décision du ROC et au comité, et **refuse** tout dossier dont le TEG dépasse le plafond en vigueur à la date du comité.
+Le **plafond d'usure** est un paramètre daté, par pays et par catégorie d'institution. Sa valeur pour les IMF de l'UMOA est **24 % par an** (décision du PO ; Décision n° 19 du 29/12/2025/CM/UMOA, en vigueur le 01/06/2026). Il s'applique au **TEG**, calculé selon une **méthode figée** : le taux actuariel de la période qui égalise le montant net reçu par le client (montant accordé moins les frais retenus au décaissement) et la valeur actuelle des échéances (assurance obligatoire comprise), multiplié par le nombre de périodes de l'année (« taux actuariel annuel proportionnel »). Pénalités et impôts sont exclus. Prospera calcule le TEG à la simulation, à la décision du ROC et au comité, et **refuse** tout dossier dont le TEG dépasse le plafond en vigueur à la date du comité.
 
 **Conséquences (testables) :**
-- Un produit dont les conditions par défaut donnent un TEG supérieur au plafond ne peut pas être publié (§6.1).
+- Un produit ne peut pas être publié si **son pire cas** (durée la plus courte, frais les plus élevés, assurance comprise) donne un TEG supérieur au plafond (§6.1). Exemple de contrôle : 1,5 % par mois avec 1 % de frais donne 24,2 % sur 3 mois et 19,9 % sur 12 mois ; le produit est refusé tant que la durée de 3 mois est permise.
+- La méthode et ses exclusions sont **à faire valider par un juriste** (§12.3). En attendant, le blocage s'applique tel quel et le motif affiché cite la méthode employée ; changer de méthode est un paramètre daté, sans reprise du code.
 - Un dossier dont les conditions modifiées par le ROC ou le comité dépassent le plafond est bloqué avec `TEG_AU_DELA_DU_PLAFOND`, et le TEG calculé est affiché.
-- Chaque type de frais porte une case « inclus dans le TEG » ; un test vérifie le TEG d'un prêt d'exemple avec une précision de 0,01 point.
+- Chaque type de frais porte une case « inclus dans le TEG » ; un tableau de TEG de référence (durées de 3, 6, 12 et 24 mois × frais de 0, 1 et 2 %) sert de jeu d'essai, à 0,01 point près.
 - Le produit d'exemple de la démo (2,5 % par mois, TEG affiché 36,4 %) n'est pas repris ; le jeu de démonstration n'a que des produits conformes (FR-13).
 
 ### 4.9 Le jeu de démonstration
 
 #### FR-11 : L'IMF de démonstration
 
-La démo tourne sur une **IMF fictive** branchée sur le **cœur fictif** (§6.6) : **3 agences, 10 agents, 1 000 prêts actifs** (décision B4), avec leurs clients, leurs groupes solidaires, leur historique de paiements et de retards, leurs produits et leurs paramètres. Pays par défaut : le Togo, avec Flooz et Mixx comme opérateurs Mobile Money et PI-SPI pour les banques ; le pays et les opérateurs sont des paramètres [ASSUMPTION : agences fictives Lomé-Centre, Kpalimé, Kara ; nom de l'IMF fictive à choisir par le PO].
+La démo tourne sur une **IMF fictive** branchée sur le **cœur fictif** (§6.6) : **3 agences, 10 agents, 1 000 prêts actifs** (décision B4), avec leurs clients, leurs groupes solidaires, leur historique de paiements et de retards, leurs produits et leurs paramètres. Pays et opérateurs sont des paramètres ; le jeu de démonstration prend le Togo, avec Flooz et Mixx pour le Mobile Money et PI-SPI pour les banques [ASSUMPTION : pays de la démo déduit des opérateurs de la démo ; agences fictives Lomé-Centre, Kpalimé, Kara ; nom de l'IMF fictive à choisir par le PO].
 
 **Conséquences (testables) :**
 - Le jeu couvre chaque statut de dossier et de recouvrement au moins dix fois, chaque secteur d'activité principal, et un PAR 30 réaliste (entre 5 % et 15 %).
@@ -333,7 +336,7 @@ Dans la démonstration, on peut **créer une agence, créer un agent, et créer 
 
 #### FR-13 : Un jeu cohérent au centime
 
-Les chiffres du jeu se recoupent : la somme des encours par agence donne l'encours du réseau ; le PAR se recalcule depuis les échéances du cœur fictif ; chaque échéancier se recalcule depuis ses conditions ; chaque produit a un TEG inférieur au plafond d'usure.
+Les chiffres du jeu se recoupent : la somme des encours par agence donne l'encours du réseau ; le PAR se recalcule depuis les échéances du cœur fictif ; chaque échéancier se recalcule depuis ses conditions ; chaque produit a un TEG inférieur au plafond d'usure **dans son pire cas** (durée la plus courte, frais les plus élevés, assurance comprise ; §6.1).
 
 **Conséquences (testables) :**
 - Un test recalcule chaque indicateur du tableau de bord du DG depuis les données brutes et trouve le même nombre.
@@ -379,11 +382,11 @@ Le module `credit` porte le **dossier de crédit** de la demande jusqu'à la cl�
 
 **Ce qu'il ne fait pas.**
 - Il **ne tient ni le compte de prêt officiel ni la caisse** : le cœur fait foi pour l'argent (soldes, encours officiel, échéancier officiel après décaissement, pénalités, écritures, caisse du guichet). C'est la décision qui commande tout ce PRD (plan §6).
-- Il **spécifie ce que l'IA fait dans le crédit** (score du dossier, décision suggérée, analyse narrative, alertes, analyse étendue micro et macro-économique et par secteur d'activité, conditions optimales) : FR-49 et FR-95 à FR-99. Le **moteur est l'IA commune** (module Risque et agents métier), qui dit comment ; ce PRD dit quoi. L'IA propose, le CC, le ROC et le comité décident ; sans elle, le dossier avance sur l'analyse humaine.
+- Il **spécifie ce que l'IA fait dans le crédit** (score du dossier, décision suggérée, analyse narrative, alertes, analyse étendue micro et macro-économique et par secteur d'activité, conditions optimales) : FR-49 et FR-95 à FR-99. Le **moteur est l'IA commune** (module Risque et agents métier), qui dit comment ; ce PRD dit quoi. L'IA propose, le CC, le ROC et le comité décident ; sans elle, le dossier avance sur l'analyse humaine. Le score est une **information et une alerte** : il ne refuse jamais un dossier et ne fixe jamais un prix en v1. Les **seuls blocages automatiques** du crédit sont : KYC, plafond d'usure, ancienneté, taux d'effort et blocage de recouvrement (FR-34).
 - Il ne mène pas le recouvrement : après EN_GESTION, les retards et le contentieux sont un second axe de statuts, détaillé en partie 4a (PRD-D §6.2 et ses écarts). Le crédit en reçoit le résultat (clôture, perte) et lui donne ses données.
 - Il ne tient pas la fiche client elle-même (partie 3a), ni les produits (partie 3a), ni l'échange avec le cœur (partie 3b).
 
-**Rôles du crédit** (plan §3) : agent terrain (AT) et commercial (COM) créent les demandes ; CC instruit ; RSQ donne un avis consultatif ; ROC décide ; comité = ROC + (DG ou RA) ; GP suit le prêt ; CPT et DAF autorisent le décaissement en espèces ; AUD lit.
+**Rôles du crédit** (plan §3) : agent terrain (AT) et commercial (COM) créent les demandes ; CC instruit ; RSQ donne un avis consultatif ; ROC décide ; comité = ROC + (DG ou RA) par défaut, ou la composition que le DG fixe pour le dossier (FR-56) ; GP suit le prêt ; CPT et DAF autorisent le décaissement en espèces ; AUD lit.
 
 **Seuils.** Tout seuil de cette partie est un **paramètre de l'IMF**, avec sa valeur par défaut (réponses du PO, démo, cahier crédit). Le PRD ne code aucune valeur en dur (FR-86).
 
@@ -393,16 +396,16 @@ La création du prospect, la fiche (identité, activité, photos, position GPS),
 
 #### FR-30 : Une demande n'existe que sur un client dont la fiche est utilisable
 
-Le crédit lit la fiche du client dans `microfinance` et refuse de créer une demande si le client est absent, si son KYC est EXPIRE, REJETE ou INCOMPLET au sens de la partie 3a, ou si une suspension de nouvelle demande est en vigueur (dossier BLOQUE, perte définitive : partie 4a). Réalise UJ-1.
+Le crédit lit la fiche du client dans `microfinance` et refuse de créer une demande si le client est absent, si son **KYC n'est pas validé** (statut COMPLET, partie 3a) ou si une suspension de nouvelle demande est en vigueur (dossier BLOQUE, perte définitive : partie 4a). **Une seule règle pour tout le PRD** : le KYC est validé **avant** la demande (récit du PO, phase 1) ; FR-43, FR-66, FR-78 et FR-120 la reprennent sans l'assouplir. Réalise UJ-1.
 
 **Conséquences (testables) :**
-- Créer une demande sur un client au KYC REJETE est refusé avec le motif lisible « KYC non valide » ; le client n'est pas modifié.
-- Le KYC « valide » est exigé **avant le décaissement** au plus tard (FR-66) ; une demande peut être créée pendant que le KYC est EN_VERIFICATION.
+- Créer une demande sur un client dont le KYC est EN_VERIFICATION, INCOMPLET, REJETE ou EXPIRE est refusé avec le motif lisible « KYC non valide » et le statut du KYC ; le client n'est pas modifié.
+- Le KYC est relu à DOSSIER_COMPLET, pour le demandeur et ses cautions (FR-43), puis juste avant l'ordre de décaissement (FR-66) : un KYC expiré entre-temps bloque l'étape.
 - Le score du client affiché sur la demande est celui de l'IA commune avec sa provenance (FR-49) ; s'il est absent, la mention « score non évalué » s'affiche et rien d'autre ne change.
 
 #### FR-31 : Le crédit se branche sur les prospects venus du terrain et du commercial
 
-Le prospect créé par un commercial ou un agent terrain (partie 3a, partie 4a) peut devenir une demande de crédit sans ressaisie : le crédit reprend l'identifiant du client, le rôle auteur et la zone. Réalise UJ-1.
+Le prospect créé par un commercial ou un agent terrain (partie 3a, partie 4a) peut devenir une demande de crédit sans ressaisie : le crédit reprend l'identifiant du client, le rôle auteur et la zone.
 
 **Conséquences (testables) :**
 - Depuis la fiche d'un prospect, l'action « Demander un crédit » ouvre la demande préremplie ; aucune donnée d'identité n'est retapée.
@@ -429,48 +432,53 @@ La demande est refusée à la saisie si le montant ou la durée sort des bornes 
 
 #### FR-34 : L'éligibilité du client est contrôlée avant la création
 
-Le client doit être éligible au produit : **score minimum** (paramètre du produit ; défaut : 45) et **ancienneté minimum** d'activité ou de relation (paramètre du produit ; défaut : 3 mois). Un client inéligible est **bloqué** ; seule une dérogation motivée du ROC, tracée, débloque (décision C10 ; FR-84).
+Le client doit être éligible au produit. Les **seuls blocages automatiques** du crédit sont : le **KYC** non validé (FR-30), le **plafond d'usure** (FR-36), l'**ancienneté minimum** d'activité ou de relation (paramètre du produit ; défaut : 3 mois), le **taux d'effort** au-dessus du plafond (FR-47) et le **blocage de recouvrement** (partie 4a). Un client qui ne remplit pas l'ancienneté ou le taux d'effort est **bloqué** ; seule une dérogation motivée du ROC, tracée, débloque ces deux critères (décision C10 ; FR-84) ; ni l'usure, ni le KYC, ni le blocage de recouvrement ne se dérogent. Le **score** est une **information et une alerte** (arbitrage du PO, 13/11/2026) : il ne refuse jamais une demande et ne fixe jamais un prix en v1. Le **seuil d'alerte de score** est un paramètre du produit (défaut : 45) ; en dessous, une alerte « score sous le seuil » s'affiche au CC, au ROC et au comité. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Le refus d'éligibilité nomme le critère non rempli et sa valeur.
 - Une dérogation enregistre le ROC, la date, le critère et le motif ; la demande créée par dérogation porte un drapeau visible jusqu'au comité.
-- Si le score est absent (IA commune non installée), le critère de score est marqué « non évalué » et ne bloque pas ; le critère d'ancienneté reste bloquant. [ASSUMPTION]
+- Un client dont le score est 38 peut créer sa demande : l'alerte « score sous le seuil » s'affiche, rien ne bloque.
+- **Premier emprunteur sans historique** : la composante « paiement » du score est absente, le score se calcule sur les autres composantes, et l'écran le dit (FR-49) ; l'absence d'historique ne bloque ni ne pénalise.
+- Score absent (IA commune non installée) : la mention « score non évalué » s'affiche ; l'ancienneté reste bloquante.
 
 #### FR-35 : La simulation affiche l'échéancier prévu et le TEG
 
-Avant de soumettre, l'agent obtient une **simulation** : mensualités, part d'intérêts, frais de dossier, assurance si le produit en a, coût total du crédit, **TEG actuariel**, date prévue de la première échéance. La simulation n'enregistre rien tant qu'elle n'est pas retenue ; retenue, elle est jointe au dossier comme *proposition* (l'échéancier contractuel naît au comité seul, FR-61). Réalise UJ-1.
+Avant de soumettre, l'agent obtient une **simulation** : mensualités, part d'intérêts, frais de dossier, assurance si le produit en a, coût total du crédit, **TEG** (méthode de FR-36), **taux d'effort** (FR-47), date prévue de la première échéance. La simulation n'enregistre rien tant qu'elle n'est pas retenue ; retenue, elle est jointe au dossier comme *proposition* (l'échéancier contractuel naît au comité seul, FR-61). Réalise UJ-1.
 
 **Conséquences (testables) :**
 - La simulation de l'exemple de test donne les mêmes chiffres que l'échéancier généré par le comité pour les mêmes conditions (écart 0 FCFA, hors arrondi de dernière échéance).
 - Les frais de dossier et l'assurance sont montrés séparément et inclus dans le TEG ; les pénalités n'y figurent pas.
 - La simulation fonctionne hors ligne dans l'application terrain pour le calcul, et seule la soumission exige le réseau (FR-37).
 
-#### FR-36 : Le TEG est actuariel et le plafond d'usure bloque l'octroi
+#### FR-36 : Le TEG est actuariel annuel proportionnel et le plafond d'usure bloque l'octroi
 
-Le TEG est calculé **sur le vrai échéancier** : taux actuariel de période, ramené à l'année par proportionnalité, **frais, assurance et coût des garanties inclus, pénalités exclues** (Décret TEG annexé à la loi uniforme sur l'usure ; Guide BCEAO DSF-001/2015). Le **plafond d'usure** est un paramètre **daté** par catégorie d'institution (défaut : **24 % par an** pour une IMF, en vigueur depuis le 01/06/2026, Décision n° 19 du 29/12/2025/CM/UMOA) ; l'historique des plafonds est conservé. Un TEG au-dessus du plafond **bloque l'octroi** : la simulation l'affiche en rouge, le dossier ne peut pas être soumis au comité ni décaissé. Réalise UJ-1.
+Le TEG est calculé **sur le vrai échéancier**, par la méthode **« actuariel annuel proportionnel »** : on cherche le **taux actuariel de la période** qui égalise le montant net reçu par le client (montant accordé moins les frais retenus au décaissement) et la valeur actuelle de tous ses versements (capital, intérêts, assurance), puis on le **multiplie par le nombre de périodes dans l'année** (12 pour un échéancier mensuel). Sont **inclus** : les frais retenus au décaissement et l'**assurance obligatoire** ; les autres frais, seulement si leur case « inclus dans le TEG » est cochée (FR-103) ; les **pénalités sont exclues** (Décret TEG annexé à la loi uniforme sur l'usure ; Guide BCEAO DSF-001/2015). **La méthode reste à faire valider par un juriste (§12.3)** ; tant que ce n'est pas fait, le blocage s'applique quand même et son motif l'affiche (« TEG de x % au-dessus du plafond de 24 % ; méthode à valider »). Le **plafond d'usure** est un paramètre **daté** par catégorie d'institution (défaut : **24 % par an** pour une IMF, en vigueur depuis le 01/06/2026, Décision n° 19 du 29/12/2025/CM/UMOA) ; l'historique des plafonds est conservé. Un TEG au-dessus du plafond **bloque l'octroi** : la simulation l'affiche en rouge, le dossier ne peut pas être soumis au comité ni décaissé. Réalise UJ-1.
 
 **Conséquences (testables) :**
-- Cas de test : 1,5 % par mois dégressif sur 12 mois et 1 % de frais donnent un TEG d'environ 20 % et passent ; 2,5 % par mois donnent plus de 24 % et sont bloqués.
+- Cas de test : 1,5 % par mois dégressif sur 12 mois et 1 % de frais donnent un TEG d'environ 20 % (19,9 %) et passent ; les mêmes conditions sur **3 mois** donnent 24,2 % et sont bloquées ; 2,5 % par mois donnent plus de 24 % et sont bloqués.
+- **Contrôle au pire cas** : la publication d'un produit vérifie le TEG sur la durée la plus courte, les frais les plus élevés et l'assurance comprise (FR-108) ; un produit qui ne passe pas ne se publie pas.
 - Le blocage se produit à trois endroits : simulation, soumission au comité, ordre de décaissement ; il se produit aussi après tout rééchelonnement qui change le TEG.
 - Changer la date d'effet d'un plafond n'affecte que les dossiers dont la décision du comité est postérieure ; un dossier déjà décidé n'est pas rouvert, mais une alerte de conformité est émise si son TEG dépasse un nouveau plafond. [ASSUMPTION]
 - Le contrat imprimé porte le TEG et le tableau d'amortissement (FR-62).
-- Le produit d'exemple de la démo (2,5 % par mois, TEG 36,4 %) est **illégal** : le jeu de démo prend des produits conformes (FR-10, FR-13).
+- Le produit d'exemple de la démo (2,5 % par mois, TEG 36,4 %) est **illégal** : le jeu de démo prend des produits conformes (FR-10, FR-13, FR-111), par exemple « Crédit Commerce » à 1,25 % par mois, 1 % de frais, 6 à 24 mois (TEG d'environ 16 % à 18,5 %) ; aucune durée de 3 mois avec frais.
 
 #### FR-37 : La demande se saisit en brouillon hors ligne
 
 Dans l'application terrain, l'agent saisit une demande en **brouillon** hors connexion ; elle se synchronise au retour du réseau. Aucune décision, aucun avis, aucune approbation ne se prend hors ligne (décision T2).
 
 **Conséquences (testables) :**
-- Un brouillon synchronisé crée le dossier SOUMIS une seule fois (idempotence) ; les contrôles de FR-33, FR-34 et FR-36 sont rejoués à la synchronisation, et un brouillon qui échoue revient à son auteur avec le motif.
+- Un brouillon synchronisé crée le dossier SOUMIS une seule fois (idempotence) ; les contrôles de FR-30, FR-33, FR-34 et FR-36 sont rejoués à la synchronisation, et un brouillon qui échoue revient à son auteur avec le motif.
 - Les boutons de décision (avis CC, décision ROC, comité, décaissement) sont absents du mode hors ligne.
 
 #### FR-38 : Le client peut renoncer : statut ANNULE
 
-Le client qui renonce avant le décaissement fait passer le dossier à **ANNULE** (motif obligatoire, auteur, date), depuis tout statut avant EN_GESTION. L'annulation est distincte du refus (REFUSE). Réalise UJ-1.
+Le client qui renonce avant que le décaissement soit **confirmé** fait passer le dossier à **ANNULE** (motif obligatoire, auteur, date), depuis tout statut jusqu'à **EN_GESTION compris tant que le sous-état de décaissement n'est pas CONFIRME** (FR-78, table 2). L'annulation est distincte du refus (REFUSE). Quand le cœur a déjà reçu le dossier accordé (FR-63) ou l'ordre (FR-64), le crédit lui envoie un **message d'annulation** (annexe C) et n'annule qu'après son **accusé** : l'ordre n'est pas exécuté.
 
 **Conséquences (testables) :**
 - Un dossier ANNULE n'est plus dans aucune file de travail et reste consultable ; ses cautions et garanties sont libérées par le crédit (dépôt de garantie : demande de déblocage au cœur).
-- Annuler un dossier dont un ordre de décaissement est déjà confirmé par le cœur est refusé : le prêt est en gestion.
+- Annuler un dossier EN_GESTION dont le décaissement est À_ORDONNER ou ORDONNE envoie le message d'annulation au cœur ; le dossier passe à ANNULE quand le cœur a accusé réception et que l'ordre n'a pas été exécuté.
+- Un ordre EXECUTE ou INCONNU n'est pas annulable avant son rapprochement (FR-64) : l'argent a pu partir. Si le relevé du fournisseur le confirme, le sous-état passe à CONFIRME et l'annulation est refusée : le prêt est en gestion.
+- Annuler un dossier dont le décaissement est CONFIRME est refusé : le prêt est en gestion.
 
 ### 5.3 Constitution du dossier
 
@@ -521,10 +529,11 @@ Chaque exigence a un état (OK, MANQUANT, PARTIEL, NON_REQUIS), calculé, jamais
 
 #### FR-43 : Le dossier passe seul à DOSSIER_COMPLET et le score est recalculé
 
-Quand les pièces du produit sont acceptées, que les cautions et les garanties exigées sont OK et que le KYC est au moins EN_VERIFICATION, le dossier passe **seul** à **DOSSIER_COMPLET** et une demande de **recalcul du score** part à l'IA commune. Réalise UJ-1.
+Quand les pièces du produit sont acceptées, que les cautions et les garanties exigées sont OK et que le **KYC du demandeur et celui de ses cautions sont COMPLET** (règle unique de FR-30 ; FR-120), le dossier passe **seul** à **DOSSIER_COMPLET** et une demande de **recalcul du score** part à l'IA commune. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Le passage est fait par le système, sans action du CC, dans la minute qui suit la dernière pièce ; il est tracé avec la mention « système » (FR-80).
+- Un dossier dont une caution a un KYC EN_VERIFICATION, INCOMPLET ou EXPIRE reste EN_ATTENTE_DOCUMENTS ; la liste des manques nomme la caution.
 - Retirer une pièce acceptée ou une garantie fait repasser le dossier à EN_ATTENTE_DOCUMENTS tant qu'il n'est pas en VISITES_PLANIFIEES ; après, l'action exige un motif du CC.
 - IA commune absente : le recalcul est sans objet, l'emplacement de score reste vide, le passage a lieu.
 
@@ -541,19 +550,21 @@ Le CC enregistre le résultat de la consultation du bureau d'information sur le 
 
 #### FR-45 : Le CC planifie les visites à l'adresse et sur le lieu d'activité
 
-Le CC planifie les visites d'instruction (statut **VISITES_PLANIFIEES**) : une visite au **lieu d'activité** pour tout dossier, une visite au **domicile** en plus au-dessus du seuil de visites (paramètre ; défaut : **500 000 FCFA ; 2 visites minimum au-dessus, 1 visite sous le seuil**, décision C13). La visite peut être faite par le CC ou par un agent terrain désigné. Réalise UJ-1.
+Le CC planifie les visites d'instruction (statut **VISITES_PLANIFIEES**) : une visite au **lieu d'activité** pour tout dossier, une visite au **domicile** en plus au-dessus du seuil de visites (paramètre ; défaut : **500 000 FCFA ; 2 visites minimum au-dessus, 1 visite sous le seuil**, décision C13). La visite peut être faite par le CC ou par un agent terrain désigné, **autre que le créateur de la fiche du client et que l'auteur de la demande** (FR-46, FR-82). Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Pour 500 000 FCFA ou moins, une seule visite (activité) suffit ; pour 500 001 FCFA, deux sont requises.
 - La visite apparaît dans l'agenda du CC et dans la tournée de l'agent désigné (module `terrain`) ; le bouton « Planifier » de l'agenda est branché (écart de démo, 5.15).
 - Une visite planifiée à un agent absent est réaffectable par le RA, avec trace.
+- Désigner pour une visite l'agent qui a créé la fiche du client ou rédigé la demande est refusé (`SEPARATION_DES_TACHES`).
 
 #### FR-46 : Une visite d'instruction exige une photo et un GPS dans le rayon
 
-La visite est saisie dans l'application terrain (module `terrain`, type visite d'instruction) avec **au moins une photo**, la **position GPS** et un compte rendu (revenus observés, stock, état de l'activité). Le **rayon de tolérance** entre la position de la visite et l'adresse du client est un paramètre (défaut : **100 m**, décision T7). Hors rayon, la visite est marquée « hors zone », **refusée comme preuve mais jamais effacée**. Réalise UJ-1.
+La visite est saisie dans l'application terrain (module `terrain`, type visite d'instruction) avec **au moins une photo**, la **position GPS** et un compte rendu (revenus observés, stock, état de l'activité). Le **rayon de tolérance** entre la position de la visite et l'adresse du client est un paramètre (défaut : **100 m**, décision T7). Hors rayon, la visite est marquée « hors zone », **refusée comme preuve mais jamais effacée**. Le **visiteur est une personne différente du créateur de la fiche du client et de l'auteur de la demande** : sans cela, un faux client visité par celui qui a posé sa position passerait le contrôle des 100 m. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Une visite sans photo ou sans GPS ne peut pas être clôturée.
+- Une visite saisie par le créateur de la fiche ou par l'auteur de la demande est enregistrée mais **ne compte pas** comme preuve d'instruction ; elle porte la mention « visiteur = créateur de la fiche » ou « visiteur = auteur de la demande », et le CC en désigne un autre.
 - Une visite à 150 m est enregistrée « hors zone » et ne compte pas dans le total exigé par FR-45 ; le CC la voit et peut en refaire une.
 - Une visite validée à plus de 500 m de toute adresse connue du client déclenche une alerte d'audit (paramètre ; défaut : 500 m).
 - Le mode hors ligne enregistre la visite (photo, GPS) et la synchronise par lot avec idempotence ; le contrôle de rayon est rejoué côté serveur.
@@ -561,50 +572,79 @@ La visite est saisie dans l'application terrain (module `terrain`, type visite d
 
 #### FR-47 : Le rapport d'analyse porte la grille des 5C et les indicateurs calculés
 
-Le CC lit et complète le **rapport d'analyse** du dossier. La grille des **5C** (Caractère, Capacité, Capital, Collatéral, Conditions) est **renseignée par le CC**, critère par critère, sur une échelle fixée par l'IMF ; elle est l'analyse humaine, distincte du score de l'IA commune (décision C11). Le rapport affiche en plus des **indicateurs calculés** : taux d'effort (mensualité ÷ revenu), endettement externe, couverture des cautions, historique de remboursement du client. Réalise UJ-1.
+Le CC lit et complète le **rapport d'analyse** du dossier. La grille des **5C** (Caractère, Capacité, Capital, Collatéral, Conditions) est **renseignée par le CC**, critère par critère, sur une échelle fixée par l'IMF ; elle est l'analyse humaine, distincte du score de l'IA commune (décision C11). Le rapport affiche en plus des **indicateurs calculés** : taux d'effort, endettement externe, couverture des cautions, historique de remboursement du client. Le **taux d'effort** est la somme des **mensualités de tous les prêts connus** du client (prêts de l'IMF lus du cœur, engagements déclarés, résultat du BIC saisi, et le prêt demandé) divisée par son **revenu net mensuel**. Il est **plafonné et bloquant** (paramètre ; défaut : **40 %**) : seule une **dérogation motivée du ROC**, tracée (FR-84), débloque. Réalise UJ-1.
 
 **Conséquences (testables) :**
-- Seuils d'alerte d'indicateurs (paramètres ; calibrés sur les données de l'IMF, décision E5 ; défauts de démo : taux d'effort critique au-dessus de **33 %** des revenus ; endettement externe d'alerte au-dessus de **50 %** des revenus).
+- Seuils d'alerte d'indicateurs (paramètres ; calibrés sur les données de l'IMF, décision E5 ; défauts de démo : taux d'effort **critique** au-dessus de **33 %** des revenus, **sous** le plafond bloquant de 40 % ; endettement externe d'alerte au-dessus de **50 %** des revenus).
+- **Plafond bloquant** : pour un revenu net de 200 000 FCFA, 30 000 de mensualités connues et un prêt demandé à 55 000 de mensualité (42,5 %), la demande est bloquée avec le motif « taux d'effort 42,5 % au-dessus du plafond de 40 % » ; à 48 000 (39 %), elle passe avec l'alerte critique du seuil de 33 %.
+- Le plafond est contrôlé à la simulation, à la décision du ROC et au comité quand les conditions changent (FR-54, FR-59) ; une dérogation du ROC est visible au comité.
 - Le rapport est figé quand le CC rend son avis ; la version figée reste consultable par le ROC et l'AUD.
 - La démo a deux grilles incompatibles (5C sur 100, huit dimensions sur 110) ; ce PRD retient les **5C pour l'analyse du CC** et le score /100 de l'IA commune pour le reste (FR-49).
 
 #### FR-48 : Les alertes d'instruction sont affichées avec leur règle
 
-Le rapport affiche les **alertes** qui s'appliquent au dossier : dépôt inhabituel, gonflement récent du solde (moins de 30 jours avant le rendez-vous), dépôt suspect 24 à 72 h avant le rendez-vous d'analyse, cautions insuffisantes, concentration sectorielle, endettement élevé, taux d'effort excessif, compte de transit, échantillon de comparaison faible (neuf codes de la démo). Chaque alerte donne : code, gravité (information, attention, critique), la règle qui l'a levée, les données qui la fondent.
+Le rapport affiche les **alertes** qui s'appliquent au dossier : dépôt inhabituel, gonflement récent du solde (moins de 30 jours avant le rendez-vous), dépôt suspect 24 à 72 h avant le rendez-vous d'analyse, cautions insuffisantes, concentration sectorielle, endettement élevé, taux d'effort excessif, compte de transit, échantillon de comparaison faible (neuf codes de la démo). Chaque alerte donne : code, gravité (information, attention, critique), la règle qui l'a levée, les données qui la fondent. Les règles sont **chiffrées** (paramètres ; calibrés sur les données de l'IMF, décision E5) :
+
+| Alerte | Règle (défaut) | Gravité |
+|---|---|---|
+| Dépôt suspect | un dépôt supérieur à **15 % du montant demandé**, constaté entre **24 h et 72 h avant le rendez-vous d'analyse** (démo) | critique |
+| Gonflement récent du solde | solde supérieur à 2 fois le solde moyen des 90 jours précédents, constaté dans les **30 jours** avant le rendez-vous | attention |
+| Dépôt inhabituel | un dépôt supérieur à 3 fois la médiane des dépôts de la période observée (3 mois) | information |
+| Cautions insuffisantes | taux de couverture inférieur à 1 (FR-41) | attention |
+| Concentration sectorielle | part du secteur supérieure à **35 %** de l'encours de l'agence (FR-97) | attention |
+| Endettement élevé | endettement externe supérieur à **50 %** des revenus (FR-47) | attention |
+| Taux d'effort excessif | taux d'effort supérieur à **33 %** des revenus ; au-delà de 40 %, blocage (FR-47) | critique |
+| Compte de transit | au moins 80 % des dépôts de la période ressortent en retrait sous 48 h et le solde moyen reste sous 10 % des dépôts | attention |
+| Échantillon de comparaison faible | comparaison fondée sur moins de **30 dossiers** (FR-97) | information |
+
+Les valeurs du dépôt suspect (15 %, 24 à 72 h), de la concentration, de l'endettement, du taux d'effort et de l'échantillon viennent de la démo et des réponses du PO ; les gravités et les règles du gonflement, du dépôt inhabituel et du compte de transit sont des défauts de départ. [ASSUMPTION]
 
 **Conséquences (testables) :**
+- Pour une demande de 600 000 FCFA, un dépôt de 100 000 FCFA (16,7 %) à 48 h du rendez-vous lève « dépôt suspect » en critique ; un dépôt de 80 000 FCFA (13,3 %) ne la lève pas.
 - Une alerte critique est commentée par le CC avant l'avis (FR-51) ; ne pas la commenter bloque l'avis favorable.
 - Les alertes sont calculées par les règles du crédit (indicateurs, dates) ou proposées par l'IA (FR-98) avec provenance ; aucune alerte n'est affichée sans règle ou modèle nommé.
 - Une alerte ne refuse jamais seule : elle informe.
 
 #### FR-49 : Le score du dossier et la décision suggérée sont proposés par l'IA, avec provenance
 
-Le dossier affiche, dans des **emplacements dédiés**, le **score consolidé 0-100** du dossier avec sa **décomposition** (paiement 40, capacité 30, activité 20, terrain 10, décision C11 ; classe de risque et probabilité de défaut), et la **décision suggérée** parmi quatre : APPROUVER, APPROUVER_REDUIT, DEMANDER_GARANTIES, REFUSER. Ils sont fournis par l'IA commune (module Risque) ; **tant que son modèle n'existe pas, une règle explicable versionnée les sert** [ASSUMPTION]. Chaque affichage porte sa **provenance** : règle ou modèle, version, date, données utilisées. Le mot « IA » n'est affiché que pour un modèle. Réalise UJ-1.
+Le dossier affiche, dans des **emplacements dédiés**, le **score consolidé 0-100** du dossier avec sa **décomposition** (paiement 40, capacité 30, activité 20, terrain 10 : barème de départ, H-30) [ASSUMPTION], la **classe de risque à l'octroi**, la probabilité de défaut, et la **décision suggérée** parmi quatre : APPROUVER, APPROUVER_REDUIT, DEMANDER_GARANTIES, REFUSER. Ils sont fournis par l'IA commune (module Risque) ; **tant que son modèle n'existe pas, une règle explicable versionnée les sert** [ASSUMPTION]. Chaque affichage porte sa **provenance** : règle ou modèle, version, date, données utilisées. Le mot « IA » n'est affiché que pour un modèle.
+
+**Le score est une information et une alerte** (arbitrage du PO, 13/11/2026) : jamais un refus automatique, jamais un levier de prix en v1. Les seuls blocages automatiques du crédit sont ceux de FR-34.
+
+**Classe de risque à l'octroi.** Le crédit utilise **deux échelles distinctes et nommées**. La **classe de risque à l'octroi** est lue sur le score à cinq niveaux, aux bornes **75 / 55 / 35 / 15** (paramètres) : classe 1 à 75 et plus, classe 2 de 55 à 74, classe 3 de 35 à 54, classe 4 de 15 à 34, classe 5 sous 15. Elle sert **à l'information seulement**, filtre la liste d'analyse et ne décide de rien. Les **classes réglementaires** du pays (paramètres ; barème SFD par défaut, par ancienneté de l'impayé) ne s'appliquent qu'à un prêt décaissé et vivent dans les parties 3b et 4a ; la **classe réglementaire prévue** (estimation, FR-125) s'affiche à part, sous ce nom, jamais sous celui de classe de risque à l'octroi.
 
 **Conséquences (testables) :**
 - **L'IA propose, l'humain décide** : un score ou une suggestion ne change jamais seul un statut ; le CC, le ROC et le comité voient la même proposition.
-- Un écart du CC, du ROC ou du comité avec la décision suggérée exige un **motif** (FR-51, FR-54) ; le motif est renvoyé à l'IA commune comme correction.
+- **La décision suggérée s'affiche au CC après son premier avis** : le CC enregistre d'abord son avis (favorable ou défavorable, notes), puis la suggestion apparaît ; il confirme ou change son avis avant de le rendre définitif (FR-51). Le ROC et le comité la voient dès l'ouverture de leur étape.
+- Un écart du CC, du ROC ou du comité avec la décision suggérée exige un **motif** (FR-51, FR-54) ; le motif est renvoyé à l'IA commune comme correction. Une **alerte à l'AUD** est levée quand la part d'alignement d'un décideur avec la suggestion dépasse un seuil (paramètre ; défaut : 95 % sur au moins 50 décisions) [ASSUMPTION].
+- Un dossier dont le score est 30 (classe 4) va jusqu'au comité : l'alerte s'affiche, aucun refus ni majoration de taux n'a lieu.
+- **Premier emprunteur sans historique** : la composante « paiement » est **absente**, le score se calcule sur les trois autres composantes (poids renormalisés) et l'écran écrit « composante paiement absente : premier emprunteur ».
+- Le score n'utilise que la **liste fermée des variables autorisées** (FR-8) ; le motif d'un refus reste communicable au client sans révéler le score (FR-88).
 - IA indisponible ou sans réponse : les emplacements montrent « non disponible », aucune erreur ne bloque l'écran, et le dossier avance sur l'analyse humaine.
 - Aucune donnée du dossier ne part vers l'IA commune sans le consentement de l'IMF prévu au PRD moteur (apprentissage fédéré).
 - Le **secteur d'activité**, la zone, le montant, la durée et le produit sont fournis à l'IA comme données structurées (décision F2).
-- Le score est recalculé à chaque transition utile (soumission, dossier complet, fin des visites, avis du CC, décision du ROC) ; son historique est conservé par dossier.
+- Le score est recalculé à chaque transition utile (soumission, dossier complet, fin des visites, avis du CC, décision du ROC) ; son historique est conservé par dossier et affiché par étape.
+- Étoiles et sentiment (FR-95) suivent la même règle d'affichage que la décision suggérée : absents de la carte d'un dossier en instruction tant que le CC n'a pas enregistré son premier avis.
 
 #### FR-50 : La checklist d'instruction doit être complète à 100 % avant l'avis
 
-La **checklist d'instruction** est une liste de contrôles définie par produit (par défaut : identité vérifiée, KYC, pièces conformes, visites effectuées, cautions contactées, garanties valorisées, BIC consulté si exigé, plafond d'usure respecté, parties liées vérifiées, alertes critiques commentées). Elle doit être **complète à 100 %** pour qu'un avis favorable soit accepté. Réalise UJ-1.
+La **checklist d'instruction** est une liste de contrôles définie par produit (par défaut : identité vérifiée, KYC, pièces conformes, visites effectuées, cautions contactées, **cautions visitées**, **dossier de chaque caution reçu**, garanties valorisées, BIC consulté si exigé, plafond d'usure respecté, taux d'effort sous le plafond, parties liées vérifiées, alertes critiques commentées). Elle doit être **complète à 100 %** pour qu'un avis favorable soit accepté. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Un avis favorable avec une checklist à 90 % est refusé avec la liste des cases manquantes.
 - Une case se coche avec auteur et date ; certaines se cochent seules quand la donnée existe (visites valides, pièces acceptées).
 - Les quatre cases de la démo (cautions, visites des cautions, dossiers des cautions reçus, prêt pour l'avis) deviennent des lignes d'une liste plus large.
+- **Cautions visitées** : une visite par caution (domicile ou activité), saisie dans l'application terrain avec photo et GPS ; elle ne compte pas dans le nombre de visites du client (FR-45) et le visiteur obéit à la même règle (FR-46).
+- **Dossier de chaque caution reçu** : la case se coche par caution, avec date, auteur et note de réception ; un avis favorable alors que le dossier d'une des deux cautions n'est pas reçu est refusé, avec la caution nommée.
 
 #### FR-51 : Le CC rend un avis favorable ou défavorable, motivé
 
-Le CC rend un **avis favorable ou défavorable** (deux valeurs, décision C3), avec notes et, s'il est favorable, des **conditions proposées** (montant réduit, garanties supplémentaires, durée). S'il s'écarte de la recommandation de l'IA commune (FR-49), il **justifie** son écart dans un champ obligatoire. Avis favorable : le dossier passe à **VALIDE_CHARGE** ; avis défavorable : le dossier passe à **REFUSE** avec motif et l'agent est prévenu (décision C2). Réalise UJ-1.
+Le CC rend un **avis favorable ou défavorable** (deux valeurs, décision C3), avec notes et, s'il est favorable, des **conditions proposées** (montant réduit, garanties supplémentaires, durée). Il enregistre d'abord son **premier avis** ; la recommandation de l'IA commune s'affiche alors (FR-49), puis il rend l'avis définitif. S'il s'écarte de la recommandation, il **justifie** son écart dans un champ obligatoire. Avis favorable : le dossier passe à **VALIDE_CHARGE** ; avis défavorable : le dossier passe à **REFUSE** avec motif et l'agent est prévenu (décision C2). Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Un avis qui diffère de la recommandation sans justification est refusé.
-- Après un refus par avis défavorable, **un seul réexamen** est possible, à la demande du RA, motivé ; le dossier repart alors à EN_ANALYSE et l'événement est tracé.
+- Après un refus par avis défavorable, **un seul réexamen** est possible (REFUSE vers EN_ANALYSE, FR-78 table 1), à la demande du RA, motivé ; le dossier repart alors à EN_ANALYSE et l'événement est tracé.
+- Le premier avis enregistré reste dans le journal (FR-80) à côté de l'avis définitif : un changement d'avis après la suggestion est visible de l'AUD.
 - Seul le CC (ou le CC délégué, FR-85) rend l'avis ; l'analyste risque ne le peut pas (la démo lui ouvre les mêmes boutons que le CC : corrigé).
 - L'avis est rendu avec l'identité du CC, la date et le contenu du rapport à cet instant.
 
@@ -614,16 +654,16 @@ Ces cinq exigences complètent FR-49. Elles disent **ce que l'IA fait pour le CC
 
 #### FR-95 : Le dossier porte une analyse narrative, des étoiles et un sentiment
 
-Pour chaque dossier, l'IA propose une **analyse narrative complète** : synthèse, forces, faiblesses, questions à poser au client, points à vérifier avant le comité. Elle propose aussi une **priorité (1 à 3 étoiles)** et un **sentiment** (positif, neutre, négatif, critique) affichés sur la carte du pipeline. Entrées : dossier, fiche client, historique, garanties, visites, alertes. Sortie : texte et deux valeurs, avec provenance. Réalise UJ-1.
+Pour chaque dossier, l'IA propose une **analyse narrative complète** : synthèse, forces, faiblesses, questions à poser au client, points à vérifier avant le comité. Elle propose aussi une **priorité (1 à 3 étoiles)** et un **sentiment** (positif, neutre, négatif, critique) affichés sur la carte du pipeline. Entrées : dossier, fiche client, historique, garanties, visites, alertes. Sortie : texte et deux valeurs, avec provenance.
 
 **Conséquences (testables) :**
 - L'analyse est lue par le CC avant l'avis et par le ROC dans son rapport ; sa version est figée avec le rapport à l'avis du CC.
-- Étoiles et sentiment sont recalculés à chaque transition ; le CC peut les corriger avec un motif.
+- Étoiles et sentiment sont recalculés à chaque transition ; le CC peut les corriger avec un motif ; pour un dossier en instruction, ils ne s'affichent qu'après le premier avis du CC (FR-49).
 - Les textes figés de la démo sont remplacés par une sortie qui change quand les données changent ; sans IA, la carte n'affiche ni étoile ni sentiment.
 
 #### FR-96 : L'analyse étendue couvre six volets, du micro au macro
 
-Le dossier affiche une **analyse étendue en six volets** proposée par l'IA : (1) **transactions et retraits** ; (2) **comportement du client** (micro : paiement, usage de l'épargne, activité) ; (3) **contexte macro-économique** (inflation, prix, conjoncture du secteur et de la zone) ; (4) **saison** (saisonnalité de l'activité et du remboursement) ; (5) **historique de recouvrement** du client et de ses cautions ; (6) **saturation du secteur** (FR-97). Chaque volet donne un constat, un niveau (favorable, neutre, défavorable) et ses données. Réalise UJ-1.
+Le dossier affiche une **analyse étendue en six volets** proposée par l'IA : (1) **transactions et retraits** ; (2) **comportement du client** (micro : paiement, usage de l'épargne, activité) ; (3) **contexte macro-économique** (inflation, prix, conjoncture du secteur et de la zone) ; (4) **saison** (saisonnalité de l'activité et du remboursement) ; (5) **historique de recouvrement** du client et de ses cautions ; (6) **saturation du secteur** (FR-97). Chaque volet donne un constat, un niveau (favorable, neutre, défavorable) et ses données.
 
 **Conséquences (testables) :**
 - Les volets s'affichent dans le rapport du CC et du ROC ; un volet sans donnée affiche « non évalué », jamais un chiffre inventé.
@@ -633,7 +673,7 @@ Le dossier affiche une **analyse étendue en six volets** proposée par l'IA : (
 
 #### FR-97 : Le crédit analyse le secteur d'activité et sa saturation dans le portefeuille
 
-Le **secteur d'activité** du client est une dimension de toute analyse. Pour chaque demande, l'IA fournit la **part du secteur dans le portefeuille de l'agence** (et du réseau), la comparaison avec les clients du même secteur (taux d'incident, taux de clôture, échantillon) et une **alerte de saturation** au-dessus d'un seuil (paramètre ; calibré sur les données de l'IMF ; défaut de démo : **35 %** du portefeuille de l'agence). Réalise UJ-1.
+Le **secteur d'activité** du client est une dimension de toute analyse. Pour chaque demande, l'IA fournit la **part du secteur dans le portefeuille de l'agence** (et du réseau), la comparaison avec les clients du même secteur (taux d'incident, taux de clôture, échantillon) et une **alerte de saturation** au-dessus d'un seuil (paramètre ; calibré sur les données de l'IMF ; défaut de démo : **35 %** du portefeuille de l'agence).
 
 **Conséquences (testables) :**
 - Pour une agence dont le commerce de détail pèse 38 % de l'encours, une nouvelle demande du secteur affiche l'alerte CONCENTRATION_SECTORIELLE avec les deux chiffres.
@@ -643,27 +683,38 @@ Le **secteur d'activité** du client est une dimension de toute analyse. Pour ch
 
 #### FR-98 : L'IA lève des alertes de fraude, de conformité et de comportement de crédit
 
-L'IA propose des **alertes actives** sur le dossier : fraude suspectée (incohérence de revenus, faux documents, dépôt gonflé avant le rendez-vous), garanties insuffisantes, dépassement de seuils réglementaires (usure, parties liées, plafond de dossier), transaction inhabituelle, et une **vérification du comportement de crédit** (historique interne, BIC saisi, autres engagements déclarés). Entrées : dossier, mouvements lus du cœur, BIC, visites. Sortie : alertes avec code, gravité, règle ou modèle, données. Réalise UJ-1.
+L'IA propose des **alertes actives** sur le dossier : fraude suspectée (incohérence de revenus, faux documents, dépôt gonflé avant le rendez-vous), garanties insuffisantes, dépassement de seuils réglementaires (usure, parties liées, plafond de dossier), transaction inhabituelle, et une **vérification du comportement de crédit** (historique interne, BIC saisi, autres engagements déclarés) dont la **sortie est une note et ses facteurs** (chaque facteur avec son poids et sa donnée), jamais un refus. Entrées : dossier, mouvements lus du cœur, BIC, visites. Sortie : alertes avec code, gravité, règle ou modèle, données ; et, pour le comportement de crédit, la note et ses facteurs.
 
 **Conséquences (testables) :**
 - Les alertes de l'IA s'ajoutent à celles des règles du crédit (FR-48) dans la même liste, avec la même obligation de commentaire pour une alerte critique.
 - Une alerte de fraude critique prévient l'AUD et le ROC ; elle ne bloque pas le dossier : l'humain décide.
 - Un faux positif classé par le CC est renvoyé à l'IA comme correction.
+- La vérification du comportement de crédit affiche une note sur 100 et au moins ses trois facteurs principaux avec leur poids ; sans historique, la note le dit (« premier emprunteur ») et ne pénalise pas.
 
 #### FR-99 : À la simulation, l'IA recommande un produit et des conditions optimales
 
-Lors de la simulation (FR-35), l'IA peut proposer le **produit** le mieux adapté au profil de l'emprunteur, et des **conditions optimales** (montant, durée, périodicité, garanties) qui respectent les bornes du produit, le plafond d'usure et le taux d'effort du client. Elle remplace l'« ajustement du taux par le score » de la démo, qui est supprimé s'il ferait dépasser le plafond d'usure (FR-36). Réalise UJ-1.
+Lors de la simulation (FR-35), l'IA peut proposer le **produit** le mieux adapté au profil de l'emprunteur, et des **conditions optimales** (montant, durée, périodicité, garanties) qui respectent les bornes du produit, le plafond d'usure et le plafond de taux d'effort du client (FR-47). L'« ajustement du taux par le score » de la démo n'existe pas en v1 : le score ne fixe jamais un prix (FR-34).
 
 **Conséquences (testables) :**
 - La proposition s'affiche à côté de la saisie de l'agent, avec sa provenance ; l'agent la retient ou la rejette, sans motif obligatoire à ce stade.
 - Une proposition qui ferait dépasser les bornes du produit ou le plafond d'usure n'est jamais émise.
 - IA absente : la simulation fonctionne avec les seules valeurs saisies.
 
+#### FR-270 : L'onglet « Client » du dossier montre le client tel que le CC doit le lire
+
+La fiche du dossier porte un onglet **« Client »**, lu des modules sources, jamais ressaisi : (1) **identité et contacts** (contact d'urgence, « client depuis », personnes à charge, WhatsApp, numéro secondaire : partie 3a) ; (2) **mouvements du compte** sur la période (paramètre ; défaut : 3 mois) avec type (dépôt, retrait, virement, frais, Mobile Money), solde après le mouvement et **drapeau** (normal, inhabituel, suspect) issu des règles de FR-48 ; (3) **quatre indicateurs** calculés sur ces mouvements : nombre de mouvements, **ratio de dépôts**, total des dépôts, solde maximal ; (4) **localisations** du domicile et du lieu de travail, marquées « vérifiée terrain » quand une visite valide les confirme (FR-46), avec la distance à l'agence ; (5) **prêts antérieurs** (référence, montant, durée réelle de remboursement, retards avec motif, anomalies, PAR atteint) ; (6) **couverture des garanties** en pourcentage du montant, et cautions avec revenus déclarés et solvabilité (FR-41).
+
+**Conséquences (testables) :**
+- Les mouvements du compte sont lus du cœur (`coeur-sfd`). Les **flux Mobile Money** du client que le cœur ne tient pas sont **déclarés par le client avec pièce** (relevé), marqués « déclaré » ; sans l'un ni l'autre, l'indicateur affiche « non évalué ». La source de chaque flux est dans l'annexe C.
+- Les quatre indicateurs se recalculent quand un mouvement arrive ; aucun chiffre n'est saisi à la main, aucune valeur n'est constante.
+- Les prêts antérieurs sont lus du cœur et du recouvrement ; un client sans prêt antérieur affiche « premier emprunteur » (FR-49).
+- Un rôle ne voit l'onglet que selon la matrice onglet par rôle de FR-92.
+
 ### 5.5 Avis consultatif du risque
 
 #### FR-52 : L'analyste risque donne un avis consultatif au-dessus d'un seuil
 
-Au-dessus d'un **seuil de montant** (paramètre ; défaut : **2 000 000 FCFA** [ASSUMPTION], aucun seuil fixé par le PO), un dossier VALIDE_CHARGE est présenté à l'analyste risque (RSQ), qui rend un **avis consultatif** : favorable, réservé, défavorable, avec notes. L'avis est **non bloquant** : il n'empêche pas le dossier d'aller au ROC (décision C5). Il ne change jamais le statut. Réalise UJ-1 pour les dossiers concernés.
+Au-dessus d'un **seuil de montant** (paramètre ; défaut : **2 000 000 FCFA** [ASSUMPTION], aucun seuil fixé par le PO), un dossier VALIDE_CHARGE est présenté à l'analyste risque (RSQ), qui rend un **avis consultatif** : favorable, réservé, défavorable, avec notes. L'avis est **non bloquant** : il n'empêche pas le dossier d'aller au ROC (décision C5). Il ne change jamais le statut.
 
 **Conséquences (testables) :**
 - Le dossier reste au statut VALIDE_CHARGE pendant que l'avis est attendu, jusqu'à l'avis ou jusqu'au délai (paramètre ; défaut : **48 h**, comme le SLA de la démo) ; il passe alors à EN_ANALYSE_ROC avec la mention « avis du risque non rendu » si le délai est dépassé.
@@ -675,10 +726,12 @@ Au-dessus d'un **seuil de montant** (paramètre ; défaut : **2 000 000 FCFA** [
 
 #### FR-53 : Le ROC lit un rapport complet avec une proposition
 
-Quand l'étape précédente est terminée, le dossier passe **seul** à **EN_ANALYSE_ROC** et un **rapport du ROC** est généré : synthèse, score et recommandation avec provenance (FR-49), avis du CC, avis du risque s'il existe, alertes, indicateurs, garanties, BIC, visites, et une **proposition de montant, de taux et de durée** (celle du CC si elle existe, sinon la demande). Réalise UJ-1.
+Quand l'étape précédente est terminée, le dossier passe **seul** à **EN_ANALYSE_ROC** et un **rapport du ROC** est généré : synthèse, score et recommandation avec provenance (FR-49), avis du CC, avis du risque s'il existe, alertes, indicateurs, garanties, BIC, visites, la **perte attendue** du dossier, et une **proposition de montant, de taux et de durée**. L'**IA propose au ROC un montant, une durée et un taux, chacun avec sa justification**, bornés par le produit, le plafond d'usure (FR-36) et le plafond de taux d'effort (FR-47) ; **sans IA, la proposition est celle du CC** (sinon la demande). Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Le rapport est figé à l'ouverture et reste consultable après la décision ; la proposition n'est ni un échéancier ni une condition figée.
+- **Perte attendue par dossier** = encours (le montant proposé) × probabilité de défaut × perte en cas de défaut ; la perte en cas de défaut se tire de la valeur retenue des garanties. Elle est marquée **« estimation »**, avec sa provenance, jamais « comptabilisée » ni « provision » ; pour 550 000 FCFA, une probabilité de défaut de 8 % et des garanties retenues de 165 000 FCFA (perte en cas de défaut 70 %), elle vaut 30 800 FCFA. Sans IA commune : « non évaluée ». Elle figure aussi sur la fiche du client.
+- Une proposition de l'IA qui sortirait des bornes du produit, de l'usure ou du taux d'effort n'est jamais émise ; un écart du ROC avec elle exige un motif (FR-49).
 - L'action du ROC n'est ouverte qu'au statut EN_ANALYSE_ROC (la démo l'ouvre dès VALIDE_CHARGE : corrigé).
 - Le ROC voit tous les dossiers de toutes les agences ; il ne voit pas ceux qu'il a lui-même ouverts comme CC sans délégation (séparation des tâches, FR-82).
 
@@ -687,7 +740,7 @@ Quand l'étape précédente est terminée, le dossier passe **seul** à **EN_ANA
 Le ROC a **trois choix** : approuver, refuser, demander des garanties. S'il **approuve**, il fixe le **montant accordé, le taux et la durée**, **désigne le GP** qui suivra le prêt, ajoute des notes ; le dossier passe à **EN_COMITE_CREDIT**. **Règle impérative : l'accord du ROC ne crée aucun échéancier.** Réalise UJ-1.
 
 **Conséquences (testables) :**
-- Le taux saisi est contrôlé : TEG recalculé sur les conditions du ROC, au-dessus du plafond d'usure l'approbation est refusée (FR-36).
+- Le taux saisi est contrôlé : TEG recalculé sur les conditions du ROC, au-dessus du plafond d'usure l'approbation est refusée (FR-36) ; le taux d'effort est recalculé sur les mêmes conditions et, au-dessus du plafond, l'approbation est refusée sauf dérogation motivée du ROC (FR-47, FR-84).
 - Un montant accordé supérieur au montant demandé est refusé ; un montant inférieur est accepté et motivé.
 - Aucun échéancier n'existe après l'approbation : l'onglet « Échéancier » affiche « visible après le comité » ; un test vérifie l'absence de tout échéancier contractuel avant la décision du comité.
 - Le GP désigné est un utilisateur de rôle GP, dans le périmètre de l'agence ou de la région du client ; il est notifié (FR-87).
@@ -695,7 +748,7 @@ Le ROC a **trois choix** : approuver, refuser, demander des garanties. S'il **ap
 
 #### FR-55 : Le ROC refuse ou demande des garanties
 
-S'il **refuse**, le dossier passe à **REFUSE**, le motif est obligatoire, l'agent et le CC sont prévenus. S'il **demande des garanties**, il précise lesquelles ; le dossier retourne à **EN_ATTENTE_DOCUMENTS** et le circuit des pièces, cautions et garanties reprend (FR-39 à FR-43), puis l'instruction et l'avis. Réalise UJ-1.
+S'il **refuse**, le dossier passe à **REFUSE**, le motif est obligatoire, l'agent et le CC sont prévenus. S'il **demande des garanties**, il précise lesquelles ; le dossier retourne à **EN_ATTENTE_DOCUMENTS** et le circuit des pièces, cautions et garanties reprend (FR-39 à FR-43), puis l'instruction et l'avis.
 
 **Conséquences (testables) :**
 - Un refus sans motif est refusé ; la démo propose « Valider avec réserves » et « Renvoyer au CC » : ils n'existent pas ; la demande de garanties les remplace.
@@ -706,17 +759,18 @@ S'il **refuse**, le dossier passe à **REFUSE**, le motif est obligatoire, l'age
 
 #### FR-56 : Le comité délibère avec un quorum paramétrable
 
-Le **comité de crédit** examine **tous les dossiers** approuvés par le ROC. Le **quorum** est le **ROC plus un membre de la direction (DG ou RA)**, paramétrable. Le comité n'est pas un rôle : la séance enregistre qui est présent (nom, rôle, date), qui vote quoi, et les notes. Réalise UJ-1.
+Le **comité de crédit** examine **tous les dossiers** approuvés par le ROC. Sa **composition par défaut** est le **ROC plus un membre de la direction (DG ou RA)**, paramétrable ; c'est aussi le **quorum**. Le **DG peut définir le comité d'un dossier** : il en choisit les membres, pour faciliter ; la composition choisie est tracée et doit encore respecter le niveau d'approbation du montant (FR-57) et l'exclusion des conflits d'intérêts. Le comité n'est pas un rôle : la séance enregistre qui est présent (nom, rôle, date), **le vote de chaque membre** et les notes. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Une décision sans quorum est refusée : le message dit qui manque.
-- Chaque dossier porte la liste des présents et le vote de chacun ; l'AUD les lit.
+- Chaque dossier porte la liste des présents et **le vote de chacun, une voix par membre** (le ROC compte pour une voix, comme les autres) ; l'AUD les lit.
+- Quand le DG définit le comité d'un dossier, la liste de ses membres, qui l'a choisie et quand sont dans le journal ; une décision d'une autre composition est refusée.
 - Un membre n'est jamais juge de son propre dossier ni de celui d'un parent déclaré dans la fiche (conflit d'intérêts) : il est exclu du vote et le quorum se recalcule.
 - Le prochain comité affiche sa date, le nombre de dossiers et le montant total ; un dossier en attente de comité depuis plus de **72 h** (paramètre ; défaut de démo) lève une alerte « comité absent ».
 
 #### FR-57 : Le niveau d'approbation dépend du montant
 
-Les **niveaux de comité** sont des paramètres par tranche de montant (défaut : **DG obligatoire au-dessus de 5 000 000 FCFA** ; dessous, ROC plus RA ou DG). Aucune tranche ne dispense du ROC. Réalise UJ-1.
+Les **niveaux de comité** sont des paramètres par tranche de montant (défaut : **DG obligatoire au-dessus de 5 000 000 FCFA** ; dessous, ROC plus RA ou DG). Aucune tranche ne dispense du ROC.
 
 **Conséquences (testables) :**
 - Un dossier de 6 000 000 FCFA sans le DG parmi les présents ne peut pas être décidé.
@@ -725,7 +779,7 @@ Les **niveaux de comité** sont des paramètres par tranche de montant (défaut 
 
 #### FR-58 : Les prêts aux parties liées passent par le conseil
 
-Le dossier porte une case **« partie liée »** (dirigeant, administrateur, membre du personnel, ou apparenté : cochée par le CC et vérifiée par le comité). Un prêt à une partie liée exige l'**approbation de l'organe délibérant** (conseil d'administration), saisie dans le dossier avec sa pièce, et respecte un **plafond réglementaire** (défaut : **10 %** des fonds propres pour les dirigeants, paramétrable ; Instruction BCEAO n° 010-08-2010). Décision C17. Réalise UJ-1.
+Le dossier porte une case **« partie liée »** (dirigeant, administrateur, membre du personnel, ou apparenté : cochée par le CC et vérifiée par le comité). Un prêt à une partie liée exige l'**approbation de l'organe délibérant** (conseil d'administration), saisie dans le dossier avec sa pièce, et respecte un **plafond réglementaire** (défaut : **10 %** des fonds propres pour les dirigeants, paramétrable ; Instruction BCEAO n° 010-08-2010). Décision C17.
 
 **Conséquences (testables) :**
 - Un dossier « partie liée » ne peut pas être décidé tant que l'approbation du conseil n'est pas jointe.
@@ -738,13 +792,13 @@ Si la décision est favorable, le comité **fige les conditions finales** : mont
 
 **Conséquences (testables) :**
 - La date de la première échéance est saisie par le comité (défaut : un mois après la date prévue de décaissement [ASSUMPTION]).
-- Une modification d'un champ du dossier après la décision du comité (pièce, garantie, montant) est refusée sans nouvelle décision, et l'alerte « dossier modifié après comité » est levée à l'AUD.
+- Une modification d'un champ du dossier après la décision du comité (pièce, garantie, montant, **bénéficiaire du décaissement**) est refusée sans nouvelle décision, et l'alerte « dossier modifié après comité » est levée à l'AUD ; changer le bénéficiaire exige un double contrôle (FR-64).
 - La bannière des conditions finales de la fiche affiche **tous** ces champs ; la démo n'en affiche que quatre (écart 5.15).
-- Le TEG figé est celui du FR-36 sur l'échéancier du FR-61 ; au-dessus du plafond, la décision est refusée.
+- Le TEG figé est celui du FR-36 sur l'échéancier du FR-61 ; au-dessus du plafond, la décision est refusée ; le taux d'effort figé est celui de FR-47 sur la mensualité figée, avec la dérogation du ROC s'il y en a une.
 
 #### FR-60 : Un refus du comité est final pour la séance, avec motif
 
-Une décision défavorable passe le dossier à **REFUSE**, avec motif et notes du comité ; l'agent, le CC et le ROC sont prévenus. Le client peut redéposer une demande (nouveau dossier) ; le réexamen unique de FR-51 ne s'applique pas à un refus du comité. Réalise UJ-1.
+Une décision défavorable passe le dossier à **REFUSE**, avec motif et notes du comité ; l'agent, le CC et le ROC sont prévenus. Le client peut redéposer une demande (nouveau dossier) ; le réexamen unique de FR-51 ne s'applique pas à un refus du comité.
 
 **Conséquences (testables) :**
 - Un refus du comité n'ouvre aucun échéancier, aucun ordre de décaissement.
@@ -763,7 +817,7 @@ C'est le **comité, et lui seul**, qui génère l'**échéancier contractuel** (
 
 #### FR-62 : Le contrat imprimé porte le TEG et le tableau d'amortissement
 
-Après la décision favorable, le crédit produit le **contrat de prêt** en PDF réel : parties, conditions figées, **TEG**, tableau d'amortissement, garanties, cautions solidaires. Il s'imprime et s'archive avec le dossier ; la signature se fait hors Prospera. Cette exigence reprend l'obligation de transparence (nouvelle loi microfinance, art. 90-91). Réalise UJ-1.
+Après la décision favorable, le crédit produit le **contrat de prêt** en PDF réel : parties, conditions figées, **TEG**, tableau d'amortissement, garanties, cautions solidaires. Il s'imprime et s'archive avec le dossier ; la signature se fait hors Prospera. Cette exigence reprend l'obligation de transparence (nouvelle loi microfinance, art. 90-91).
 
 **Conséquences (testables) :**
 - Le PDF est généré (la démo simule l'export par une minuterie) ; il porte la version du produit, la date et la référence du dossier.
@@ -779,20 +833,24 @@ Après la décision favorable, le crédit produit le **contrat de prêt** en PDF
 - Le crédit ne tient **jamais** de solde, d'encours officiel, de pénalités, de caisse ; il lit.
 - Dans la démo, le **cœur fictif** reçoit le dossier accordé, exécute le décaissement et renvoie le mouvement.
 - Si le cœur est injoignable, l'envoi est mis en file et la décision du comité n'est pas annulée.
+- Un dossier annulé avant la confirmation du décaissement (FR-38) fait envoyer au cœur un **message d'annulation** du dossier accordé (annexe C) ; le cœur n'a créé aucun prêt tant que l'ordre n'est pas exécuté.
 
 ### 5.8 Ordre de décaissement
 
-**Sous-état de décaissement.** Comme le dit le récit du PO, c'est le comité seul qui génère l'échéancier, et **le dossier passe alors à EN_GESTION** (FR-70). Le décaissement se déroule ensuite **dans** EN_GESTION, par un **sous-état de décaissement** (À_ORDONNER, ORDONNE, EXECUTE, CONFIRME) qui n'est pas un statut de plus. Le prêt n'existe officiellement dans le cœur qu'à CONFIRME : tant que le sous-état n'est pas CONFIRME, le dossier EN_GESTION est affiché « en attente de décaissement » et n'entre ni dans l'encours, ni dans le PAR, ni dans les relances.
+**Sous-état de décaissement.** Comme le dit le récit du PO, c'est le comité seul qui génère l'échéancier, et **le dossier passe alors à EN_GESTION** (FR-70). Le décaissement se déroule ensuite **dans** EN_GESTION, par un **sous-état de décaissement** qui n'est pas un statut de plus : **À_ORDONNER** (aucun ordre en cours), **ORDONNE** (ordre émis, exécution inconnue), **EXECUTE** (l'exécutant dit « exécuté », le mouvement du cœur n'est pas encore lu), **CONFIRME** (le cœur a renvoyé le mouvement) et **INCONNU** (l'ordre est resté sans réponse : expiré, réponse perdue, redémarrage ; le rapprochement est obligatoire, FR-64). Les transitions du sous-état sont dans la table 2 de FR-78. Le prêt n'existe officiellement dans le cœur qu'à CONFIRME : tant que le sous-état n'est pas CONFIRME, le dossier EN_GESTION est affiché « en attente de décaissement » et n'entre ni dans l'encours, ni dans le PAR, ni dans les relances.
 
 #### FR-64 : Le crédit émet un ordre de décaissement avec son canal
 
-Quand les gardes de FR-66 sont remplies, le crédit émet l'**ordre de décaissement** : bénéficiaire, **montant net** (montant accordé moins les frais prélevés), **canal** (espèces au guichet, virement, Mobile Money, PI-SPI), compte ou numéro de destination, référence unique, date prévue. Réalise UJ-1.
+Quand les gardes de FR-66 sont remplies, le crédit émet l'**ordre de décaissement** : bénéficiaire, **montant net** (montant accordé moins les frais prélevés), **canal** (espèces au guichet, virement, Mobile Money, PI-SPI), compte ou numéro de destination, référence unique, date prévue. Le **bénéficiaire est celui pré-enregistré au KYC** du client (titulaire du compte ou du portefeuille, numéro vérifié) : un ordre ne porte jamais un numéro saisi à la volée. L'ordre porte une **clé d'idempotence** créée une seule fois, **jamais régénérée**, même quand l'ordre est réémis. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Les canaux disponibles sont une liste **par pays et par opérateur** (Mobile Money : Flooz, Mixx dans la démo ; banques par PI-SPI), paramétrée par l'IMF.
 - Un ordre est émis une seule fois par dossier ; une relance du même ordre est idempotente.
-- Un ordre non exécuté après un délai (paramètre ; défaut : **24 h** [ASSUMPTION]) lève une alerte au CPT et au ROC.
-- Annuler un ordre non exécuté est possible par le ROC, avec motif ; le dossier reste accordé.
+- Tout **changement de bénéficiaire**, avant ou après l'émission, passe en **double contrôle** : deux personnes distinctes, dont aucune n'a émis l'ordre ; le changement et ses deux auteurs sont dans le journal (FR-80).
+- Un ordre **rejeté** par le cœur ou par l'opérateur fait revenir le sous-état à **À_ORDONNER avec le motif du rejet** ; il se réémet avec la même clé d'idempotence ou, après rapprochement, par un autre canal.
+- Un ordre **expiré** ou resté sans réponse après un délai (paramètre ; défaut : **24 h** [ASSUMPTION]) passe à **INCONNU** et lève une alerte au CPT et au ROC. **Aucune réémission avant le rapprochement** de l'ordre contre le relevé du fournisseur (cœur, opérateur ou banque) : relevé « exécuté », le sous-état devient EXECUTE puis CONFIRME à la lecture du mouvement du cœur ; relevé « rien », il revient à À_ORDONNER avec le motif « expiré ».
+- Au **redémarrage** du service ou après une **restauration**, les ordres de la dernière heure (paramètre) sont rapprochés avant toute nouvelle émission.
+- Annuler un ordre non exécuté est possible par le ROC, avec motif ; le sous-état revient à À_ORDONNER et le dossier reste accordé. Un dossier EN_GESTION dont le décaissement échoue (rejets répétés, bénéficiaire invalide, renonciation du client) peut être **ANNULE** (FR-38) ; tant qu'il n'est ni CONFIRME ni ANNULE, l'alerte reste affichée à la file du CPT et du ROC.
 
 #### FR-65 : Les frais et l'assurance sont prélevés au décaissement
 
@@ -804,30 +862,31 @@ Les **frais de dossier** (défaut de démo : 2 % pour le microcrédit individuel
 
 #### FR-66 : Aucun décaissement tant que les gardes ne sont pas toutes vertes
 
-L'ordre de décaissement est **refusé** si l'une des conditions suivantes manque : décision favorable du comité avec quorum ; KYC **valide** ; visite d'instruction valide au nombre exigé ; cautions et garanties OK, **dépôt de garantie constaté par le cœur** ; assurance décès-invalidité souscrite si le produit l'impose ; TEG sous le plafond ; approbation du conseil si partie liée ; pas de blocage LBC/FT (sanctions, PPE sans accord) selon la partie 3a. Réalise UJ-1.
+L'ordre de décaissement est **refusé** si l'une des conditions suivantes manque : décision favorable du comité avec quorum ; KYC **COMPLET et non expiré**, du client et de ses cautions (règle de FR-30), et **approbation du ROC si le KYC est renforcé** (FR-119) ; visite d'instruction valide au nombre exigé ; cautions et garanties OK, **dépôt de garantie constaté par le cœur** ; assurance décès-invalidité souscrite si le produit l'impose ; TEG sous le plafond ; taux d'effort sous le plafond ou dérogation du ROC ; **bénéficiaire pré-enregistré au KYC** ; approbation du conseil si partie liée ; pas de blocage LBC/FT (sanctions, PPE sans accord) selon la partie 3a. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - La liste des gardes manquantes est affichée au CPT et au CC ; la démo (« Dossiers incomplets bloquent décaissement ») est généralisée.
 - Chaque garde est lue depuis son module source (KYC dans `microfinance`, dépôt dans le cœur) ; une garde illisible vaut « non remplie ».
 - Un décaissement sans visite validée est impossible ; l'alerte d'audit « décaissement sans visite validée » ne peut donc que signaler un contournement.
 
-#### FR-67 : Le décaissement en espèces est autorisé par le comptable ou le DAF
+#### FR-67 : Tout décaissement est autorisé par le comptable ou le DAF, jamais par celui qui l'a préparé ou décidé
 
-Pour le canal **espèces**, l'ordre doit être **autorisé par le comptable-caissier (CPT) ou le DAF**, jamais par le CC, le ROC ou le GP (décision A3 ; cahier terrain). L'autorisation est un acte enregistré. Réalise UJ-1.
+Pour le canal **espèces**, l'ordre doit être **autorisé par le comptable-caissier (CPT) ou le DAF**, jamais par le CC, le ROC ou le GP (décision A3 ; cahier terrain). La règle vaut pour **tous les canaux** : virement, Mobile Money et PI-SPI exigent aussi cette autorisation, qui est le **second valideur** demandé par `paiement`. Le **préparateur** (qui émet l'ordre), le **décideur** (le ROC qui a approuvé) et le **valideur** (CPT ou DAF) sont **trois personnes distinctes** sur un dossier. L'autorisation est un acte enregistré. Réalise UJ-1.
 
 **Conséquences (testables) :**
-- Un ordre en espèces sans autorisation n'est pas transmis au cœur.
-- Le CPT qui autorise n'est ni le CC ni le GP du dossier (séparation des tâches, FR-82).
+- Un ordre, quel que soit son canal, sans autorisation n'est transmis ni au cœur ni à `paiement`.
+- Le CPT qui autorise n'est ni le CC ni le GP du dossier, ni l'émetteur de l'ordre, ni le ROC qui a décidé (séparation des tâches, FR-82) ; le refus porte le code `SEPARATION_DES_TACHES`.
 - L'autorisation porte l'identité, la date et le montant ; elle est en 2FA pour le CPT et le DAF (décision F9).
 - Le CPT agit sur les dossiers de son agence ; le DAF sur tout le réseau.
 
 #### FR-68 : Espèces et virement sont exécutés par le cœur sur l'ordre de Prospera
 
-Pour les canaux **espèces** et **virement**, le crédit transmet l'ordre au cœur, qui **exécute** : caisse du guichet, compte, écriture. Le crédit n'exécute rien de lui-même. Réalise UJ-1.
+Pour les canaux **espèces** et **virement**, le crédit transmet l'ordre au cœur, qui **exécute** : caisse du guichet, compte, écriture. Le crédit n'exécute rien de lui-même.
 
 **Conséquences (testables) :**
 - L'ordre transmis garde le mode d'échange : interface si le cœur sait, fichier sinon (partie 3b).
-- Tant que le cœur n'a pas confirmé, le sous-état est ORDONNE, jamais EXECUTE.
+- Tant que le cœur n'a pas renvoyé l'état « exécuté », le sous-état est ORDONNE, jamais EXECUTE ; il n'est CONFIRME que lorsque le cœur a renvoyé le mouvement.
+- Un rejet du cœur remet le sous-état à À_ORDONNER avec le motif ; une absence de réponse le met à INCONNU (FR-64).
 - Le cœur fictif de la démo exécute l'ordre et renvoie la confirmation en quelques secondes.
 
 #### FR-69 : Mobile Money et PI-SPI passent par `paiement`, puis sont déclarés au cœur
@@ -836,7 +895,7 @@ Pour **Mobile Money** et **PI-SPI**, le crédit demande à `paiement` (PRD paiem
 
 **Conséquences (testables) :**
 - `paiement` absent : l'option est marquée « non installé » et seuls les canaux du cœur restent offerts.
-- Un décaissement PI-SPI confirmé est irrévocable ; un refus ou un délai de l'opérateur laisse le dossier à ORDONNE avec l'alerte du FR-64.
+- Un décaissement PI-SPI confirmé est irrévocable ; un **refus** de l'opérateur remet le sous-état à À_ORDONNER avec le motif ; un **délai** ou une réponse perdue le met à INCONNU, avec l'alerte du FR-64 et le rapprochement contre le relevé de l'opérateur avant toute réémission (la clé d'idempotence ne change pas).
 - Le décaissement par `paiement` est déclaré au cœur avec son identifiant de transaction ; un doublon est reconnu et n'est pas redéclaré.
 
 #### FR-70 : Le comité fait passer le dossier à EN_GESTION ; le cœur confirme le décaissement
@@ -848,15 +907,18 @@ La décision favorable du comité génère l'échéancier contractuel et fait pa
 - Un dossier EN_GESTION dont le décaissement n'est pas CONFIRME est affiché « en attente de décaissement » et n'entre ni dans l'encours, ni dans le PAR, ni dans les relances.
 - L'échéancier officiel du cœur est lu et rapproché de l'échéancier contractuel ; un écart sur un montant ou une date ouvre une alerte (FR-63).
 - Le dossier apparaît dans le portefeuille du GP dès EN_GESTION ; il quitte la file des ordres à la confirmation du décaissement.
+- Deux événements distincts : la **décision du comité** prévient le personnel (GP, ROC, agent) ; le **décaissement CONFIRME** prévient le client et le responsable commercial (FR-87).
+- Un dossier EN_GESTION dont le décaissement échoue reste annulable tant qu'il n'est pas CONFIRME (FR-38, FR-64).
 - Pour la démo : le dossier créé, instruit, décidé et décaissé au cœur fictif atteint EN_GESTION sans intervention technique.
 
 #### FR-71 : Le GP suit le prêt EN_GESTION et saisit les remboursements sans doublon
 
-Le GP lit dans le dossier l'état du prêt (solde, prochaine échéance, retards, pénalités : valeurs du cœur). Un remboursement reçu par Prospera (guichet, collecte terrain, Mobile Money validé) est **renvoyé au cœur s'il sait les recevoir** ; sinon il figure sur la liste **« à saisir dans le cœur »** et n'est confirmé que par le mouvement du cœur (décision A1, correction du PO). L'imputation est **pénalités, intérêts, capital** (paramétrable, A5) ; un paiement dont l'écart avec l'échéance est inférieur à **1 %** est rattaché automatiquement, sinon il va dans la file du comptable, jamais refusé (A6). Le détail du recouvrement et de la caisse est en parties 3a et 4a. Réalise UJ-1.
+Le GP lit dans le dossier l'état du prêt (solde, prochaine échéance, retards, pénalités : valeurs du cœur). Un remboursement reçu par Prospera (guichet, collecte terrain, Mobile Money validé) est **renvoyé au cœur s'il sait les recevoir** ; sinon il figure sur la liste **« à saisir dans le cœur »** et n'est confirmé que par le mouvement du cœur (décision A1, correction du PO). L'imputation est **pénalités, intérêts, capital** (paramétrable, A5) ; un paiement dont l'écart avec l'échéance est inférieur à **1 %** est rattaché automatiquement **à cette échéance, sans la solder** : tout écart est un paiement partiel ou un trop-perçu, et les relances ne s'arrêtent que lorsque le reste dû lu du cœur est nul ; une **tolérance d'arrondi** de quelques FCFA, distincte de ce 1 %, est un paramètre aligné sur celui du cœur ; au-delà, le paiement va dans la file du comptable, jamais refusé (A6). Le détail du recouvrement et de la caisse est en parties 3a et 4a.
 
 **Conséquences (testables) :**
 - L'action « Encaisser » de la démo, qui affiche « enregistré » sans rien écrire, est remplacée par un enregistrement réel avec canal et statut (EN_ATTENTE, VALIDE, REJETE).
 - Un paiement en attente du cœur est affiché comme tel ; le solde affiché reste celui du cœur.
+- Un paiement de 49 800 FCFA pour une échéance de 50 000 (écart 0,4 %) est rattaché à l'échéance, qui reste « partiellement payée » avec 200 FCFA dus ; les relances continuent jusqu'au reste dû nul.
 - Le GP enregistre une promesse de paiement ; les relances sont suspendues jusqu'à la date promise (partie 4a).
 
 ### 5.9 Crédit de groupe solidaire (C14)
@@ -887,22 +949,25 @@ Si un membre est en retard, la **solidarité** du groupe est invoquée selon la 
 **Conséquences (testables) :**
 - Un membre EXCLU garde sa dette mais est retiré de tout nouveau cycle du groupe.
 - Le crédit ne calcule pas la répartition d'un impayé : le cœur détient les soldes de chaque membre.
+- **Cohésion du groupe** : l'IA propose au CC et au ROC un **score de cohésion de 0 à 100** (ponctualité des membres, présence aux réunions, épargne régulière) et une **alerte de contagion** quand, dans le groupe, deux membres ou 20 % des membres (le plus petit des deux) sont en retard de cotisation ou d'épargne depuis plus de 7 jours (paramètres) [ASSUMPTION]. Les deux portent leur provenance ; sans IA commune, « non évalué » ; l'alerte informe, elle ne refuse jamais seule (FR-48).
 
 ### 5.10 Clôture et nouveau cycle côté crédit (C15)
 
 #### FR-75 : La clôture est confirmée par le cœur et libère les garanties
 
-Un prêt passe à **CLOTURE** quand le **cœur confirme** un solde nul (mouvement ou état lu). Le crédit libère alors les cautions et demande la restitution du dépôt de garantie au cœur, qui le restitue. Un prêt radié (perte définitive, partie 4a) ne se clôture pas par ce chemin. Réalise UJ-1 (fin de cycle).
+Un prêt passe à **CLOTURE** quand le **cœur confirme** un solde nul (mouvement ou état lu). Le crédit libère alors les cautions et demande la restitution du dépôt de garantie au cœur, qui le restitue. Un prêt **radié** (perte définitive, partie 4a) se clôture lui aussi quand le cœur confirme un solde nul (« radié puis recouvré ») : le statut de recouvrement garde la trace de la perte.
 
 **Conséquences (testables) :**
 - Le passage est tracé avec la source « cœur » ; le système est l'acteur dans le journal.
 - Les cautions du dossier passent à « libérées » ; une caution engagée sur un autre prêt reste engagée sur celui-ci.
 - Le client et le GP sont prévenus (FR-87).
 - Un prêt clôturé après paiement anticipé réduit la durée sans pénalité sauf règle du produit (A5).
+- Un prêt perdu dont un recouvrement ultérieur ramène le solde à zéro passe à CLOTURE avec la source « cœur » ; la perte reste visible dans l'historique de recouvrement.
+- Un prêt soldé par un refinancement est clôturé avec la source « refinancement » (FR-271).
 
 #### FR-76 : Un nouveau cycle est proposé selon une règle
 
-Dès la clôture, le client peut **repartir sur un nouveau cycle** si aucun retard de plus de **30 jours** n'a été relevé au cycle précédent (paramètre ; défaut : 30 jours), avec un **montant maximal** de **1,5 fois** le cycle précédent (paramètre ; défaut : 1,5) (décision C15). Le crédit propose le renouvellement au CC et au client ; la demande suit tout le circuit. Réalise UJ-1, UJ-2.
+Dès la clôture, le client peut **repartir sur un nouveau cycle** si aucun retard de plus de **30 jours** n'a été relevé au cycle précédent (paramètre ; défaut : 30 jours), avec un **montant maximal** de **1,5 fois** le cycle précédent (paramètre ; défaut : 1,5) (décision C15). Le crédit propose le renouvellement au CC et au client ; la demande suit tout le circuit.
 
 **Conséquences (testables) :**
 - Le renouvellement d'un prêt de 300 000 FCFA est proposé jusqu'à 450 000 FCFA ; au-dessus, la demande est refusée à la saisie.
@@ -912,44 +977,82 @@ Dès la clôture, le client peut **repartir sur un nouveau cycle** si aucun reta
 
 #### FR-77 : Le crédit lit les retours du recouvrement sans les ranger dans ses statuts
 
-Le suivi après EN_GESTION (EN_RETARD, EN_RECOUVREMENT, PLAN_ETALEMENT, REGULARISE, BLOQUE, CONTENTIEUX_JUDICIAIRE, PERTE_DEFINITIVE) est un **second axe** de statuts tenu par le recouvrement (partie 4a) : il **n'ajoute aucun statut** aux 12 du dossier. Le crédit les **lit** et les affiche sur le dossier. Un plan d'étalement produit un nouvel échéancier ; ce nouvel échéancier est envoyé au cœur (partie 4a). Réalise UJ-1.
+Le suivi après EN_GESTION (EN_RETARD, EN_RECOUVREMENT, PLAN_ETALEMENT, REGULARISE, BLOQUE, CONTENTIEUX_JUDICIAIRE, PERTE_DEFINITIVE) est un **second axe** de statuts tenu par le recouvrement (partie 4a) : il **n'ajoute aucun statut** aux 12 du dossier. Le crédit les **lit** et les affiche sur le dossier. Un plan d'étalement produit un nouvel échéancier ; ce nouvel échéancier est envoyé au cœur (partie 4a).
 
 **Conséquences (testables) :**
 - Le dossier EN_GESTION affiche à la fois son statut de crédit et son statut de recouvrement.
 - Les quatre vocabulaires de la démo (statuts de base, colonnes du Kanban ROC, statuts de statistiques, étapes du cycle) sont remplacés par les statuts de FR-78 et des **vues** (filtres), jamais des statuts supplémentaires.
 
+#### FR-271 : Un refinancement est un nouveau dossier qui solde l'ancien prêt
+
+Un client peut **refinancer** un prêt en cours : la demande est un **nouveau dossier** qui suit tout le circuit (mêmes statuts, mêmes gardes, mêmes avis, même comité, même ordre de décaissement), porte la mention **« refinancement »** et nomme le prêt à solder. Le crédit calcule l'**économie mensuelle** (mensualité de l'ancien prêt moins mensualité du nouveau) et l'affiche à la simulation, au rapport du ROC et à la fiche. Le cœur **solde l'ancien prêt au décaissement CONFIRME** du nouveau (FR-70) ; avant cela, l'ancien prêt reste inchangé. Le refinancement est **interdit** sur un prêt en **contentieux** ou en **perte** (partie 4a).
+
+**Conséquences (testables) :**
+- Une demande de refinancement d'un prêt au statut de recouvrement CONTENTIEUX_JUDICIAIRE ou PERTE_DEFINITIVE est refusée avec le motif « refinancement interdit : prêt en contentieux ou en perte ».
+- Pour un ancien prêt à 40 000 FCFA par mois et un nouveau à 32 000, l'économie affichée est de 8 000 FCFA par mois ; si le nouveau prêt coûte plus cher par mois, l'écran affiche « augmentation » et le montant.
+- Le nouveau dossier subit les contrôles habituels sur son montant total : usure (FR-36), taux d'effort (FR-47), éligibilité (FR-34) ; le prêt à solder compte dans les engagements connus mais sa mensualité est retirée du taux d'effort du nouveau prêt.
+- Un dossier de refinancement ANNULE ou dont le décaissement échoue (FR-64) laisse l'ancien prêt intact ; à CONFIRME, le solde de l'ancien prêt est lu du cœur, l'ancien prêt passe à CLOTURE avec la source « refinancement » (FR-75), et l'ancien dossier garde son historique.
+- Le solde de l'ancien prêt est retenu sur le montant net versé au client (ordre net = montant accordé moins frais moins solde de l'ancien prêt) [ASSUMPTION].
+
 ### 5.11 Machine à états et piste d'audit
 
 #### FR-78 : Le dossier suit douze statuts, plus ANNULE
 
-Les statuts, dans l'ordre : **SOUMIS → RDV_PROGRAMME → EN_ATTENTE_DOCUMENTS → DOSSIER_COMPLET → VISITES_PLANIFIEES → EN_ANALYSE → VALIDE_CHARGE → EN_ANALYSE_ROC → EN_COMITE_CREDIT → EN_GESTION → CLOTURE**, plus **REFUSE** (douzième) et **ANNULE** (le client renonce, hors des douze). Pas de REFUSE_CHARGE : un avis défavorable du CC mène à REFUSE (décision C2). Réalise UJ-1.
+Les statuts, dans l'ordre : **SOUMIS → RDV_PROGRAMME → EN_ATTENTE_DOCUMENTS → DOSSIER_COMPLET → VISITES_PLANIFIEES → EN_ANALYSE → VALIDE_CHARGE → EN_ANALYSE_ROC → EN_COMITE_CREDIT → EN_GESTION → CLOTURE**, plus **REFUSE** (douzième) et **ANNULE** (le client renonce, hors des douze). Pas de REFUSE_CHARGE : un avis défavorable du CC mène à REFUSE (décision C2). **EN_GESTION est posé à la décision du comité** (récit du PO) ; le décaissement se déroule ensuite dans un **sous-état**. Deux tables disent **tout** ce qui est permis, avec l'acteur et la garde de chaque ligne. Réalise UJ-1.
 
-| De | Vers | Déclenche | Garde |
+**Table 1 : statuts de crédit.**
+
+| De | Vers | Acteur | Garde |
 |---|---|---|---|
-| création | SOUMIS | agent, commercial | client utilisable, montant et durée dans les bornes, éligible, TEG sous le plafond (FR-30 à FR-36) |
+| création | SOUMIS | agent, commercial | KYC COMPLET, client utilisable, montant et durée dans les bornes, éligible (ancienneté, taux d'effort), TEG sous le plafond (FR-30 à FR-36) |
 | SOUMIS | RDV_PROGRAMME | CC | rendez-vous saisi |
 | SOUMIS, RDV_PROGRAMME | EN_ATTENTE_DOCUMENTS | CC | liste de pièces manquantes |
-| EN_ATTENTE_DOCUMENTS | DOSSIER_COMPLET | système | pièces acceptées, cautions et garanties OK, KYC au moins en vérification (FR-43) |
-| DOSSIER_COMPLET | VISITES_PLANIFIEES | CC | nombre de visites planifiées atteint (FR-45) |
+| EN_ATTENTE_DOCUMENTS | DOSSIER_COMPLET | système | pièces acceptées, cautions et garanties OK, KYC COMPLET du demandeur et de ses cautions (FR-43) |
+| DOSSIER_COMPLET | EN_ATTENTE_DOCUMENTS | système ; CC avec motif | une exigence n'est plus remplie : pièce expirée ou retirée, garantie retirée, membre de groupe ajouté (FR-40, FR-43, FR-72) |
+| DOSSIER_COMPLET | VISITES_PLANIFIEES | CC | nombre de visites planifiées atteint, visiteurs conformes (FR-45, FR-46) |
 | VISITES_PLANIFIEES | EN_ANALYSE | système | visites valides en nombre exigé, BIC saisi si exigé (FR-44, FR-46) |
-| EN_ANALYSE | VALIDE_CHARGE | CC | avis favorable, checklist à 100 %, alertes critiques commentées (FR-50, FR-51) |
-| EN_ANALYSE | REFUSE | CC | avis défavorable avec motif |
-| VALIDE_CHARGE | EN_ANALYSE_ROC | système | avis du risque rendu ou délai écoulé ou seuil non atteint (FR-52) |
-| EN_ANALYSE_ROC | EN_COMITE_CREDIT | ROC | montant, taux, durée, GP ; TEG sous plafond (FR-54) |
-| EN_ANALYSE_ROC | REFUSE | ROC | motif (FR-55) |
-| EN_ANALYSE_ROC | EN_ATTENTE_DOCUMENTS | ROC | garanties demandées (FR-55) |
-| EN_COMITE_CREDIT | EN_GESTION | comité | décision favorable, quorum, échéancier généré (FR-56 à FR-63, FR-70) ; le décaissement suit dans le sous-état (FR-64 à FR-70) |
-| EN_COMITE_CREDIT | REFUSE | comité | motif (FR-60) |
-| EN_GESTION | CLOTURE | système, sur confirmation du cœur | solde nul (FR-75) |
-| tout statut avant EN_GESTION | REFUSE ou ANNULE | rôle habilité | motif obligatoire |
+| SOUMIS, RDV_PROGRAMME, EN_ATTENTE_DOCUMENTS, DOSSIER_COMPLET, VISITES_PLANIFIEES | REFUSE | CC ou RA | motif obligatoire (refus avant avis) |
+| EN_ANALYSE | VALIDE_CHARGE | CC | avis favorable, checklist à 100 %, alertes critiques commentées, motif si écart avec la suggestion (FR-49, FR-50, FR-51) |
+| EN_ANALYSE | REFUSE | CC | avis défavorable avec motif (FR-51) |
+| REFUSE (par avis défavorable du CC) | EN_ANALYSE | RA | **réexamen unique**, motivé ; jamais après un refus du ROC ou du comité (FR-51, FR-60) |
+| VALIDE_CHARGE | EN_ANALYSE_ROC | système | avis du risque rendu, ou délai écoulé, ou seuil non atteint, ou pas d'analyste (FR-52) |
+| VALIDE_CHARGE, EN_ANALYSE_ROC | REFUSE | ROC | motif (FR-55) |
+| EN_ANALYSE_ROC | EN_COMITE_CREDIT | ROC | montant au plus égal au demandé, taux, durée, GP ; TEG et taux d'effort sous le plafond ou dérogation (FR-54) |
+| EN_ANALYSE_ROC | EN_ATTENTE_DOCUMENTS | ROC | garanties demandées, dans la limite des retours (FR-55) |
+| EN_COMITE_CREDIT | EN_GESTION | comité (séance) | décision favorable, quorum, conditions figées, échéancier généré (FR-56 à FR-63, FR-70) ; entre dans le sous-état À_ORDONNER (table 2) |
+| EN_COMITE_CREDIT | REFUSE | comité (séance) | motif (FR-60) |
+| EN_GESTION | REFUSE | ROC | **tant que le décaissement n'est pas CONFIRME** ; motif obligatoire (fraude, garde devenue fausse) ; message d'annulation au cœur et alerte à l'AUD |
+| tout statut jusqu'à EN_ANALYSE | ANNULE | CC ou RA | le client renonce ; motif obligatoire (FR-38) |
+| EN_ANALYSE_ROC, EN_COMITE_CREDIT, EN_GESTION | ANNULE | ROC | le client renonce ; **tant que le décaissement n'est pas CONFIRME** ; message d'annulation au cœur, puis accusé (FR-38) |
+| EN_GESTION | CLOTURE | système, sur confirmation du cœur | solde nul, y compris après une perte (« radié puis recouvré ») ou un refinancement (FR-75, FR-271) |
+
+**Après CONFIRME**, ni REFUSE ni ANNULE : le prêt est en gestion, et le recouvrement, second axe de statuts (FR-77), prend le relais.
+
+**Table 2 : sous-état de décaissement** (dans EN_GESTION ; ce n'est pas un statut de plus).
+
+| De | Vers | Acteur | Garde |
+|---|---|---|---|
+| entrée dans EN_GESTION | À_ORDONNER | système, à la décision du comité | échéancier généré, dossier accordé envoyé au cœur (FR-63) |
+| À_ORDONNER | ORDONNE | préparateur de l'ordre, puis autorisation du CPT ou du DAF | toutes les gardes de FR-66 vertes ; autorisation d'une troisième personne (FR-67) ; bénéficiaire pré-enregistré au KYC (FR-64) ; ordre transmis au cœur ou à `paiement` |
+| ORDONNE | EXECUTE | cœur (espèces, virement) ; `paiement` (Mobile Money, PI-SPI) | état « exécuté » reçu (FR-68, FR-69) |
+| EXECUTE | CONFIRME | système, sur le mouvement du cœur | prêt et échéancier officiel créés, mouvement lu (FR-70) |
+| ORDONNE | À_ORDONNER | cœur ou opérateur (rejet) ; ROC (annulation de l'ordre) | motif obligatoire (FR-64) |
+| ORDONNE | INCONNU | système | aucune réponse après le délai, redémarrage ou restauration (FR-64) |
+| INCONNU | EXECUTE | CPT | rapprochement : le relevé du fournisseur montre l'ordre exécuté |
+| INCONNU | À_ORDONNER | CPT | rapprochement : le relevé ne montre aucune exécution ; motif « expiré » ; même clé d'idempotence |
+| À_ORDONNER, ORDONNE | (statut ANNULE ou REFUSE, table 1) | selon la table 1 | message d'annulation accusé par le cœur ; EXECUTE et INCONNU ne s'annulent qu'après rapprochement (FR-38) |
+
+Pour un dossier de groupe, le sous-état est tenu par membre ; le groupe n'est CONFIRME que lorsque tous les membres le sont (FR-73).
 
 **Conséquences (testables) :**
-- Toute transition absente de la table est refusée, par n'importe quel écran ou n'importe quel rôle, avec le motif « transition interdite ».
+- Toute transition absente des deux tables est refusée, par n'importe quel écran ou n'importe quel rôle, avec le motif « transition interdite ».
+- Chaque ligne a son test : l'acteur de la ligne réussit quand la garde est verte, échoue avec la liste des gardes manquantes sinon, et tout autre rôle est refusé.
 - Aucune autre colonne de Kanban, aucun autre statut n'est créé (APPROUVE, DECAISSEMENT de la démo deviennent des vues).
+- Le chemin nominal compte **onze statuts** (de SOUMIS à CLOTURE) ; REFUSE et ANNULE sont les sorties.
 
 #### FR-79 : Chaque transition a un acteur autorisé et des gardes évaluées au serveur
 
-Chaque transition de FR-78 n'est faisable que par le **rôle** de la table et les gardes sont évaluées par le serveur au moment de l'action. Un clic sur un bouton hors droits ou hors garde est refusé avec la liste des conditions manquantes. Réalise UJ-1.
+Chaque transition de FR-78 (tables 1 et 2) n'est faisable que par le **rôle** de la table et les gardes sont évaluées par le serveur au moment de l'action. Un clic sur un bouton hors droits ou hors garde est refusé avec la liste des conditions manquantes. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Le DG ne décide pas à la place du ROC (FR-54) ; le RSQ ne rend pas l'avis du CC (FR-51) ; le comité n'est pas un rôle mais une séance (FR-56).
@@ -958,7 +1061,7 @@ Chaque transition de FR-78 n'est faisable que par le **rôle** de la table et le
 
 #### FR-80 : Chaque changement est horodaté : qui a fait quoi, et quand
 
-Chaque **transition** et chaque acte du dossier (avis, décision, vote, pièce, caution, visite, autorisation, ordre, confirmation) est enregistré avec **auteur, rôle, date et heure, état avant et après, motif**. La piste est **infalsifiable** (aucune modification ni suppression) et **conservée au moins 10 ans** (Instruction BCEAO n° 017-12-2010, annexe II.2.2). Les acteurs « système » et « cœur » sont nommés. Réalise UJ-1.
+Chaque **transition** et chaque acte du dossier (avis, décision, vote, pièce, caution, visite, autorisation, ordre, confirmation) est enregistré avec **auteur, rôle, date et heure, état avant et après, motif**. La piste ne peut être **ni modifiée ni supprimée par l’application** (journal chaîné, FR-9) et **conservée au moins 10 ans** (Instruction BCEAO n° 017-12-2010, annexe II.2.2). Les acteurs « système » et « cœur » sont nommés. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Le journal d'un dossier se lit de la création à la clôture sur un seul écran, dans l'ordre, sans trou ; l'AUD le lit sans pouvoir le modifier.
@@ -967,33 +1070,35 @@ Chaque **transition** et chaque acte du dossier (avis, décision, vote, pièce, 
 
 #### FR-81 : Les retours en arrière sont limités et tracés
 
-Le **seul retour** autorisé est EN_ANALYSE_ROC vers EN_ATTENTE_DOCUMENTS (garanties demandées, FR-55), plus le **réexamen unique** du FR-51. Reculer librement d'une colonne, comme le permet la démo, est supprimé. REFUSE et ANNULE sont possibles à tout moment avant EN_GESTION, avec motif. Réalise UJ-1.
+Les **seuls retours** autorisés sont ceux des tables de FR-78 : DOSSIER_COMPLET vers EN_ATTENTE_DOCUMENTS (une exigence n'est plus remplie : FR-40, FR-43, FR-72), EN_ANALYSE_ROC vers EN_ATTENTE_DOCUMENTS (garanties demandées, FR-55), le **réexamen unique** REFUSE vers EN_ANALYSE (FR-51), et, dans le sous-état de décaissement, ORDONNE ou INCONNU vers À_ORDONNER (FR-64). Reculer librement d'une colonne, comme le permet la démo, est supprimé. REFUSE et ANNULE sont possibles **tant que le décaissement n'est pas CONFIRME**, avec motif.
 
 **Conséquences (testables) :**
-- Un dossier REFUSE ou ANNULE ne rouvre pas, sauf le réexamen unique ; une nouvelle demande est un nouveau dossier.
+- Un dossier REFUSE ou ANNULE ne rouvre pas, sauf le réexamen unique après un avis défavorable du CC ; une nouvelle demande est un nouveau dossier.
+- Passé VISITES_PLANIFIEES, retirer une pièce ou une garantie exige un motif du CC et ne fait pas reculer le statut : la checklist redevient incomplète et bloque l'avis (FR-50).
 - Un retour est visible dans le journal avec son motif.
 
 #### FR-82 : La séparation des tâches est contrôlée
 
-Le crédit applique la **séparation des tâches** : la personne qui a créé le dossier n'en rend pas l'avis, celle qui a rendu l'avis du CC ne décide pas au ROC, celle qui instruit n'autorise pas le décaissement en espèces ; le comité exclut les membres en conflit (FR-56). Des **alertes d'audit** sont levées : dossier modifié après le comité, décaissement sans visite valide, même personne qui valide un paiement Mobile Money et modifie l'échéance du même client sous 1 h. Réalise UJ-1.
+Le crédit applique la **séparation des tâches** : la personne qui a créé le dossier n'en rend pas l'avis, celle qui a rendu l'avis du CC ne décide pas au ROC, celle qui instruit n'autorise pas le décaissement ; le **visiteur d'instruction n'est ni le créateur de la fiche du client ni l'auteur de la demande** (FR-46) ; le **préparateur** de l'ordre, le **décideur** (ROC) et le **valideur** (CPT ou DAF) sont trois personnes distinctes **pour tous les canaux** (FR-67) ; le comité exclut les membres en conflit (FR-56). Des **alertes d'audit** sont levées : dossier modifié après le comité, décaissement sans visite valide, même personne qui valide un paiement Mobile Money et modifie l'échéance du même client sous 1 h.
 
 **Conséquences (testables) :**
-- Une action qui violerait la séparation est refusée avec le motif, sauf délégation explicite tracée (FR-85).
+- Une action qui violerait la séparation est refusée avec le motif, sauf délégation explicite tracée (FR-85) ; une délégation ne rend jamais une visite recevable pour un visiteur qui est le créateur de la fiche, ni une autorisation pour l'émetteur de l'ordre.
+- Les combinaisons interdites sont : visiteur = créateur de la fiche ; visiteur = auteur de la demande ; émetteur de l'ordre = valideur ; valideur = ROC décideur ; émetteur = ROC décideur, sur le même dossier, quel que soit le canal.
 - Les alertes d'audit sont envoyées à l'AUD et au DG ; leur seuil de délai (1 h par défaut) est un paramètre.
 
 #### FR-83 : Les délais de traitement sont mesurés sur les horodatages
 
-Le **délai** de chaque étape est calculé à partir du journal (FR-80) : attente par statut, délai de traitement du CC (objectif : **24 h** ; paramètre), délai entre la demande et le décaissement (objectif : **9 jours** ; paramètre), **SLA** d'un dossier en attente (alerte au-delà de **48 h** ; paramètre). Les taux d'approbation par tranche de montant et les motifs de refus sont calculés sur les dossiers réels. Réalise UJ-1.
+Le **délai** de chaque étape est calculé à partir du journal (FR-80) : attente par statut, délai de traitement du CC (objectif : **24 h** ; paramètre), délai entre la demande et le décaissement (objectif : **9 jours** ; paramètre), **SLA** d'un dossier en attente (alerte au-delà de **48 h** ; paramètre). Les taux d'approbation par tranche de montant et les motifs de refus sont calculés sur les dossiers réels.
 
 **Conséquences (testables) :**
-- Un dossier en attente depuis 48 h ou plus affiche « SLA dépassé » et remonte au supérieur (FR-87).
+- Un dossier en attente depuis 48 h ou plus affiche « SLA dépassé » et remonte au supérieur (FR-87) ; l'écran « demandes en attente depuis plus de 48 h » (FR-90) les liste pour le ROC.
 - Les chiffres du tableau de bord ROC viennent de ces calculs ; les constantes de la démo (38 h, 11 jours, répartitions fixes) sont supprimées.
 
 ### 5.12 Dérogations et délégations (C4, C10)
 
 #### FR-84 : Une dérogation est motivée, limitée et tracée
 
-Trois dérogations existent : **d'éligibilité** (FR-34 ; par le ROC), **de plafond de dossier** (FR-57 ; par le DG), **de nouveau cycle après perte** (FR-76 ; par le DG). Chaque dérogation enregistre qui, quand, quoi, pourquoi, et pour quelle valeur. Elles sont listées pour l'AUD et le DG. Aucune dérogation ne s'applique au plafond d'usure (FR-36) ni au KYC refusé. Réalise UJ-1.
+Quatre dérogations existent : **d'éligibilité**, pour l'ancienneté (FR-34 ; par le ROC), **de taux d'effort** (FR-47 ; par le ROC, motivée), **de plafond de dossier** (FR-57 ; par le DG), **de nouveau cycle après perte** (FR-76 ; par le DG). Chaque dérogation enregistre qui, quand, quoi, pourquoi, et pour quelle valeur. Elles sont listées pour l'AUD et le DG. Aucune dérogation ne s'applique au plafond d'usure (FR-36), au KYC non validé ni au blocage de recouvrement.
 
 **Conséquences (testables) :**
 - Une dérogation sans motif est refusée.
@@ -1001,7 +1106,7 @@ Trois dérogations existent : **d'éligibilité** (FR-34 ; par le ROC), **de pla
 
 #### FR-85 : En cas d'absence, un rôle peut être délégué, explicitement
 
-Le **DG ne remplace pas le ROC** (décision C4). En cas d'absence du ROC ou du CC, une **délégation explicite** est créée par le DG (ou par le RA pour le CC de son agence) : délégataire, rôle délégué, début, fin, motif. Elle est tracée dans chaque acte rendu. Réalise UJ-1.
+Le **DG ne remplace pas le ROC** (décision C4). En cas d'absence du ROC ou du CC, une **délégation explicite** est créée par le DG (ou par le RA pour le CC de son agence) : délégataire, rôle délégué, début, fin, motif. Elle est tracée dans chaque acte rendu.
 
 **Conséquences (testables) :**
 - Une délégation expire à sa fin sans action ; aucun acte n'est possible après.
@@ -1015,24 +1120,30 @@ Les seuils de cette partie sont des paramètres, avec leur défaut, modifiables 
 | Paramètre | Défaut | FR |
 |---|---|---|
 | Plafond d'usure (TEG, par an) | 24 %, daté | FR-36 |
-| Score minimum, ancienneté minimum | 45 ; 3 mois | FR-34 |
+| Seuil d'alerte de score (information) ; ancienneté minimum (bloquante) | 45 ; 3 mois | FR-34 |
+| Classe de risque à l'octroi : bornes du score | 75 / 55 / 35 / 15 | FR-49 |
+| Part d'alignement qui alerte l'AUD | 95 % sur 50 décisions [ASSUMPTION] | FR-49 |
 | Cautions minimales, seuil | 2 ; 300 000 FCFA | FR-41 |
 | Dépôt de garantie | 10 % (> 300 000) ; 15 % (> 1 000 000) | FR-42 |
 | Garantie réelle | 30 % (> 500 000) ; 50 % (> 1 000 000) | FR-42 |
 | Visites : seuil et nombre | 500 000 FCFA ; 1 sous, 2 au-dessus | FR-45 |
 | Rayon de visite, alerte d'audit | 100 m ; 500 m | FR-46 |
-| Taux d'effort, endettement | 33 % ; 50 % | FR-47 |
+| Taux d'effort : alerte critique ; plafond bloquant ; endettement externe | 33 % ; 40 % ; 50 % | FR-47 |
+| Règles d'alerte d'instruction (dépôt suspect, gonflement, inhabituel, transit) | 15 % du montant demandé, 24 à 72 h ; 2 fois le solde moyen, 30 j ; 3 fois la médiane ; 80 % et 48 h [ASSUMPTION sauf 15 % et 24 à 72 h] | FR-48 |
+| Période des mouvements de l'onglet Client | 3 mois | FR-270 |
 | Seuil de l'avis du risque ; délai | 2 000 000 FCFA [ASSUMPTION] ; 48 h | FR-52 |
 | Retours pour garanties | 2 [ASSUMPTION] | FR-55 |
-| Quorum ; DG obligatoire au-dessus de | ROC + (DG ou RA) ; 5 000 000 FCFA | FR-56, FR-57 |
+| Composition par défaut du comité (le DG peut la définir par dossier) ; DG obligatoire au-dessus de | ROC + (DG ou RA) ; 5 000 000 FCFA | FR-56, FR-57 |
 | Plafond parties liées | 10 % des fonds propres | FR-58 |
 | Méthode d'échéancier | annuité constante mensuelle | FR-61 |
-| Délai d'ordre non exécuté | 24 h [ASSUMPTION] | FR-64 |
+| Délai d'ordre non exécuté ; fenêtre de rapprochement au redémarrage | 24 h [ASSUMPTION] ; 1 h | FR-64 |
+| Écart de rattachement d'un paiement ; tolérance d'arrondi | 1 % ; quelques FCFA, aligné sur le cœur | FR-71 |
 | Membres d'un groupe | 5 à 30 | FR-72 |
+| Contagion du groupe : membres en retard ; délai | 2 membres ou 20 % ; 7 jours [ASSUMPTION] | FR-74 |
 | Retard max au cycle précédent ; plafond du cycle suivant | 30 jours ; 1,5 fois | FR-76 |
 | Conservation de la piste | 10 ans | FR-80 |
 | Objectifs de délai ; SLA | CC 24 h ; décaissement 9 jours ; 48 h | FR-83 |
-| Saturation sectorielle | 35 % (calibré sur les données de l'IMF) | FR-97 |
+| Saturation sectorielle ; échantillon faible | 35 % (calibré sur les données de l'IMF) ; 30 dossiers | FR-97 |
 
 **Conséquences (testables) :**
 - Aucune de ces valeurs n'est écrite dans le code d'un écran : la modification d'un paramètre change le comportement sans nouvelle version.
@@ -1052,20 +1163,23 @@ Le crédit publie ses événements ; le module `notification` (PRD notification)
 | Dossier chez le ROC | ROC | cloche, e-mail |
 | Refus (CC, ROC, comité) | agent, CC ; client | cloche, e-mail ; SMS, WhatsApp pour le client |
 | Garanties demandées | CC, agent | cloche, e-mail |
-| Décision du comité favorable ; GP désigné | GP, ROC, agent | cloche, e-mail |
+| **Décision du comité favorable** (EN_GESTION, décaissement à venir) ; GP désigné | GP, ROC, agent (le personnel seulement) | cloche, e-mail |
 | Ordre de décaissement à autoriser | CPT ou DAF | cloche, e-mail |
-| Passage à EN_GESTION | client, GP, agent, responsable commercial | SMS, WhatsApp pour le client ; cloche, e-mail pour le personnel |
+| Ordre rejeté, expiré ou INCONNU (FR-64) | CPT, ROC | cloche, e-mail |
+| **Décaissement CONFIRME** par le cœur | client, GP, agent, responsable commercial | SMS, WhatsApp pour le client ; cloche, e-mail pour le personnel |
+| Dossier annulé après envoi au cœur (FR-38) | CC, agent, ROC | cloche, e-mail |
 | SLA dépassé (48 h) | supérieur du responsable | cloche, e-mail |
 | Clôture | client, GP | idem |
 
 **Conséquences (testables) :**
 - Chaque événement du tableau produit une notification, avec l'identifiant du dossier ; aucun événement n'a un destinataire en dur.
+- **Deux événements distincts** : le personnel est prévenu à la décision du comité ; le **client ne l'est qu'au décaissement CONFIRME**, jamais « en gestion » avant d'avoir reçu l'argent (FR-70).
 - Le français est la langue d'abord ; les gabarits sont des paramètres de l'IMF.
 - `notification` absent : le crédit affiche une cloche interne et signale « canal non installé » ; il n'échoue pas.
 
 #### FR-88 : Un message au client respecte son consentement et son canal
 
-Un SMS ou un message WhatsApp au client n'est envoyé que s'il a **consenti** à ce canal (fiche, partie 3a) ; sinon aucun message n'est envoyé au client et le CC est invité à le prévenir par un autre moyen, noté au dossier. Le contenu ne révèle jamais le motif détaillé d'un refus ni de score. Réalise UJ-1.
+Un SMS ou un message WhatsApp au client n'est envoyé que s'il a **consenti** à ce canal (fiche, partie 3a) ; sinon aucun message n'est envoyé au client et le CC est invité à le prévenir par un autre moyen, noté au dossier. Le contenu ne révèle jamais le motif détaillé d'un refus ni de score.
 
 **Conséquences (testables) :**
 - Un refus notifié par SMS dit « votre demande n'a pas été retenue » et invite à voir le chargé de crédit.
@@ -1075,24 +1189,28 @@ Un SMS ou un message WhatsApp au client n'est envoyé que s'il a **consenti** à
 
 #### FR-89 : Les écrans conservés de la démo deviennent réels
 
-Les écrans suivants de la démo sont conservés et **branchés** : `/credit` (RA : agence, PAR ; ROC et RSQ : tableau ROC), pipeline Kanban, liste des dossiers, fiche dossier (frise, onglets Workflow, Client, Instruction CC, Rapport CC, Rapport ROC, Score, Comité, Échéancier, Recouvrement), analyse (liste et rapport), cycle de crédit, réseau (ROC), plus les écrans voisins `/clients/nouveau`, `/kyc`, `/calendrier`, `/produits`, `/groupes`, `/emprunteurs/[id]`. Réalise UJ-1.
+Les écrans suivants de la démo sont conservés et **branchés** : `/credit` (RA : agence, PAR ; ROC et RSQ : tableau ROC), pipeline Kanban, liste des dossiers, fiche dossier (frise, onglets Workflow, Client, Instruction CC, Rapport CC, Rapport ROC, Score, Comité, Échéancier, Recouvrement), analyse (liste et rapport), cycle de crédit, réseau (ROC), **demandes en attente depuis plus de 48 h** (FR-90), plus les écrans voisins `/clients/nouveau`, `/kyc`, `/calendrier`, `/produits`, `/groupes`, `/emprunteurs/[id]`. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Le Kanban agence (4 colonnes) et ROC (statuts de FR-78) s'alimentent des dossiers réels ; un glisser-déposer n'est permis que si la transition de FR-78 l'est, et il n'est plus gardé en navigateur.
 - Les KPI du cycle sont calculés (FR-83), plus aucune constante.
+- L'onglet « Client » est celui de FR-270 ; l'onglet « Rapport ROC » porte la perte attendue et la proposition de l'IA (FR-53) ; la visibilité de chaque onglet par rôle est la matrice de FR-92.
+- L'écran réseau du ROC (`/credit/reseau`) porte le **contrôle quotidien** du ROC, défini au §7.3 (diagnostic par agence) ; le crédit y apporte ses compteurs de dossiers et de délais (FR-83).
 - Un test parcourt chaque écran et échoue si un bouton n'est ni branché ni « bientôt » (PRD-D FR-2).
 
 #### FR-90 : Les écrans qui manquent sont créés
 
-Sont à **créer** : **création de la demande** (produit du catalogue, simulation, FR-32 à FR-36) ; **pièces** (liste, téléversement, acceptation) ; **cautions et garanties** ; **visites d'instruction** (planification, saisie photo et GPS) ; **checklist d'instruction** ; **avis du CC, avis du risque, décision du ROC** (trois choix) ; **séance de comité** (présents, votes, conditions figées, génération de l'échéancier, impression du contrat) ; **ordre de décaissement** (canal, autorisation CPT/DAF, état) ; **dérogations et délégations** ; **clôture et renouvellement** ; **dossier de groupe**. Réalise UJ-1, UJ-2.
+Sont à **créer** : **création de la demande** (produit du catalogue, simulation, FR-32 à FR-36) ; **pièces** (liste, téléversement, acceptation) ; **cautions et garanties** ; **visites d'instruction** (planification, saisie photo et GPS) ; **checklist d'instruction** ; **avis du CC, avis du risque, décision du ROC** (trois choix) ; **séance de comité** (présents, votes, conditions figées, génération de l'échéancier, impression du contrat) ; **ordre de décaissement** (canal, autorisation CPT/DAF, état) ; **dérogations et délégations** ; **clôture et renouvellement** ; **dossier de groupe** ; **demande de refinancement** (FR-271) ; **demandes en attente depuis plus de 48 h**. Réalise UJ-1, UJ-2.
 
 **Conséquences (testables) :**
 - Chaque écran a ses droits (FR-92) et chaque action est une transition ou un acte tracé (FR-80).
 - Aucun de ces écrans n'existe dans `credit/` aujourd'hui : cette liste est l'écart principal entre la démo et le récit (5.15).
+- **Demandes en attente depuis plus de 48 h** (écran du ROC, lié au SLA de FR-83) : la liste des dossiers, chacun avec « bloqué depuis », l'étape, la **raison** (pièce manquante, avis attendu, comité absent, KYC non validé), les pièces manquantes, l'historique des étapes, les **actions proposées** au ROC et un lien vers l'espace d'analyse. La raison et les actions viennent des règles (étape, garde manquante) ; l'IA peut y ajouter une analyse du blocage, avec provenance, et rien ne change sans l'action du ROC. Sans IA, l'écran fonctionne.
+- Un dossier de 3 jours à EN_ATTENTE_DOCUMENTS avec une caution au KYC INCOMPLET figure à l'écran avec la raison « KYC de la caution non validé » ; il en sort quand l'attente passe sous 48 h ou que le dossier change d'étape.
 
 #### FR-91 : Les boutons décoratifs deviennent branchés ou « bientôt »
 
-Les boutons décoratifs de la démo sont inventoriés : avis CC, décision ROC, comité, planifier un rendez-vous, encaisser, promesse, relance, réception d'une caution, export PDF et Excel. Chacun est **branché** (exigences de cette partie) ou **« bientôt »** sans date (PRD-D FR-2), jamais simulé. Réalise UJ-1.
+Les boutons décoratifs de la démo sont inventoriés : avis CC, décision ROC, comité, planifier un rendez-vous, encaisser, promesse, relance, réception d'une caution, export PDF et Excel. Chacun est **branché** (exigences de cette partie) ou **« bientôt »** sans date (PRD-D FR-2), jamais simulé.
 
 **Conséquences (testables) :**
 - « Export PDF » du rapport génère un fichier réel ou affiche « bientôt » ; « Export Excel » idem.
@@ -1100,19 +1218,36 @@ Les boutons décoratifs de la démo sont inventoriés : avis CC, décision ROC, 
 
 #### FR-92 : Chacun ne voit que son périmètre
 
-Le DG voit le réseau, le RA son agence, le CC les dossiers de son agence et sa file, le ROC toutes les agences, le GP son portefeuille, l'agent sa zone, le RSQ tout en lecture, l'AUD tout en lecture avec le journal d'accès, le CPT son agence (autorisation de décaissement, validation de paiements). Le filtrage est fait par le serveur, par organisation et par portée lue dans `reseau`. Réalise UJ-1.
+Le DG voit le réseau, le RA son agence, le CC les dossiers de son agence et sa file, le ROC toutes les agences, le GP son portefeuille, l'agent sa zone, le RSQ tout en lecture, l'AUD tout en lecture avec le journal d'accès, le CPT son agence (autorisation de décaissement, validation de paiements). Le filtrage est fait par le serveur, par organisation et par portée lue dans `reseau`.
 
 **Conséquences (testables) :**
 - Un RA qui ouvre par URL un dossier d'une autre agence reçoit un refus sans contenu.
 - Le filtre par nom d'agence en dur de la démo disparaît.
+- **Matrice onglet par rôle de la fiche dossier**, appliquée par le serveur dans le périmètre de chacun (L = lecture, A = lecture et action, — = onglet absent et donnée non renvoyée) :
+
+| Onglet | DG | ROC | RA | CC | GP | AT | RSQ | AUD | CPT | DAF |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Workflow (frise, actions) | L | A | L | A | L | L | L | L | L | L |
+| Client (FR-270) | L | L | L | A | L | L (identité) | L | L | — | — |
+| Instruction CC (pièces, cautions, visites, checklist) | L | L | L | A | L | A (pièces, visites) | L | L | — | — |
+| Rapport CC | L | L | L | A | — | — | L | L | — | — |
+| Rapport ROC (perte attendue, proposition) | L | A | L | — | L | — | L | L | — | L |
+| Score | L | L | L | L | L | — | L | L | — | — |
+| Comité | A | A | A | L | L | — | L | L | — | L |
+| Échéancier | L | L | L | L | L | L | L | L | L | L |
+| Décaissement (ordre, autorisation) | L | A (annule l'ordre) | L | A* | L | — | — | L | A | A |
+| Recouvrement | L | L | L | L | A | — | L | L | — | L |
+
+A* : le préparateur est le titulaire du droit `credit:decaissement:ordonner`, attribué par le DG. L'annexe B reprend cette matrice ; l'échéancier n'est lisible qu'après la décision du comité (FR-54).
+- Un rôle qui ouvre par URL un onglet marqué « — » reçoit un refus sans contenu ; l'AUD lit tous les onglets sans pouvoir les modifier.
 
 #### FR-93 : Le parcours UJ-1 est le test d'acceptation du crédit
 
-Dans la démo, un utilisateur crée une agence et un agent, puis un client, puis une demande de crédit, et la mène **de SOUMIS à EN_GESTION** en jouant les rôles CC, ROC, comité et CPT, avec le **cœur fictif** qui exécute le décaissement et confirme (décision B4). Réalise UJ-1.
+Dans la démo, un utilisateur crée une agence et un agent, puis un client dont le KYC est validé, puis une demande de crédit, et la mène **de SOUMIS à EN_GESTION**, puis jusqu'au décaissement CONFIRME, en jouant les rôles CC, ROC, comité et CPT, avec le **cœur fictif** qui exécute le décaissement et confirme (décision B4). Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Le parcours passe sans aucune intervention technique ni donnée préparée à la main ; il dure moins de 30 minutes en jouant tous les rôles (objectif de démonstration ; paramètre).
-- Chaque statut de FR-78 est atteint dans l'ordre ; la piste d'audit (FR-80) montre onze lignes d'acteurs identifiés.
+- Chaque statut du chemin nominal de FR-78, de SOUMIS à EN_GESTION, est atteint dans l'ordre (RDV_PROGRAMME est facultatif) et le sous-état de décaissement va de À_ORDONNER à CONFIRME ; la piste d'audit (FR-80) montre une ligne par transition des deux tables, chacune avec son acteur identifié (agent, CC, système, ROC, comité, CPT, cœur), et le préparateur, le ROC et le CPT sont trois personnes distinctes (FR-67).
 - Le même parcours se rejoue avec l'IA commune absente.
 
 #### FR-94 : Le parcours UJ-2 mène un prêt de groupe jusqu'à EN_GESTION
@@ -1137,26 +1272,36 @@ Dans la démo, un groupe solidaire de 5 membres obtient un crédit de groupe : d
 | Conditions finales : 4 champs sur 10 | tous les champs (FR-59) |
 | Notifications : aucune | table des événements (FR-87) |
 | Décaissement : une colonne Kanban seulement | ordre, autorisation, exécution par le cœur ou `paiement`, confirmation (FR-64 à FR-70) |
-| Score, 5C, alertes : constantes saisies ; 8 dimensions sur 110 et sur 100 ; deux échelles de classes | 5C par le CC ; score et analyses par l'IA, 0-100, une échelle de classes (FR-47, FR-49, FR-95 à FR-98) |
+| Score, 5C, alertes : constantes saisies ; 8 dimensions sur 110 et sur 100 ; deux échelles de classes | 5C par le CC ; score et analyses par l'IA, 0-100, information et alerte seulement ; **classe de risque à l'octroi** à 5 niveaux (75 / 55 / 35 / 15), distincte des classes réglementaires (FR-47, FR-49, FR-95 à FR-98) |
 | Avis CC à 2 ou 4 valeurs | 2 valeurs + conditions proposées (FR-51) |
 | Écart à l'IA sans justification | motif obligatoire (FR-49, FR-51) |
 | Décision d'IA à 5 valeurs (TRANSMETTRE_ROC) | 4 valeurs (FR-49) |
-| Checklist de 4 cases | liste par produit, 100 % (FR-50) |
+| Checklist de 4 cases | liste par produit, 100 %, avec cautions visitées et dossier de chaque caution reçu (FR-50) |
 | Création du prospect à 8 champs, sans GPS ni photo | partie 3a ; le crédit lit la fiche (5.1) |
 | Retour libre d'une colonne du Kanban | un seul retour, tracé (FR-81) |
 | KPI et délais constants | calculés (FR-83) |
 | Statut du récit : EN_GESTION à la génération de l'échéancier ; démo : après décaissement | EN_GESTION à la décision du comité, comme le récit ; décaissement dans un sous-état confirmé par le cœur (FR-70) |
 | Groupe : lecture seule, 5 à 15 membres | 5 à 30, dossier de groupe, échéancier par membre (FR-72, FR-73) |
+| Onglet « Client » : mouvements du compte sur 3 mois, indicateurs, localisations vérifiées, prêts antérieurs | exigence propre, avec la source des flux Mobile Money (FR-270) |
+| Rapport du ROC : perte attendue et conditions recommandées | perte attendue par dossier, « estimation » ; l'IA propose montant, durée et taux justifiés (FR-53) |
+| « Ajustement du taux par le score » (démo) | supprimé : le score ne fixe jamais un prix en v1 (FR-34, FR-99) |
+| Alertes sans définition chiffrée (dépôt suspect, transit…) | règles chiffrées, paramétrables (FR-48) |
+| Surendettement : aucune limite | plafond bloquant de taux d'effort, 40 %, dérogation motivée du ROC (FR-47, FR-84) |
+| Refinancement montré sans exigence | nouveau dossier qui solde l'ancien prêt (FR-271) |
+| Cohésion du groupe et contagion : montrées sans exigence | proposées par l'IA au CC et au ROC (FR-74) |
+| « Dossiers bloqués > 48 h » : écran sans exigence | écran des demandes en attente depuis plus de 48 h (FR-90) |
+| Visibilité des onglets par rôle : non écrite | matrice onglet par rôle (FR-92) |
+| Chemin d'échec du décaissement et annulation après EN_GESTION : absents | table de transitions complète, sous-état INCONNU et rapprochement (FR-64, FR-78) |
 
 ---
 
 ## 6. Partie 3 — Les autres modules propres à l'IMF
 
-Cette partie décrit les modules qui portent le client, le produit et l'argent du terrain : les sections 6.1 à 6.4 (`produits-financiers`, `microfinance`, `collecte`, `caisse`) ; les sections 6.5 à 6.8 sont écrites à part (échange avec le cœur, import du portefeuille, risque, conformité BCEAO). Règle commune : **le cœur de l'IMF fait foi pour l'argent** (soldes, épargne, caisse du guichet, écritures). Prospera tient ce que le cœur ne tient pas : le catalogue commercial des produits, la fiche de relation (activité, photos, GPS, KYC, groupes), la collecte et la caisse des collecteurs. Dans la démo de février, le cœur fictif (6.5) tient tout ce qui revient au cœur. Tout seuil est un paramètre de l'IMF ; tout bouton non branché est « bientôt » (PRD-D FR-2).
+Cette partie décrit les modules qui portent le client, le produit et l'argent du terrain : les sections 6.1 à 6.4 (`produits-financiers`, `microfinance`, `collecte`, `caisse`) ; les sections 6.5 à 6.8 sont écrites à part (échange avec le cœur, import du portefeuille, risque, conformité BCEAO). Règle commune : **le cœur de l'IMF fait foi pour l'argent** (soldes, épargne, caisse du guichet, écritures). Prospera tient ce que le cœur ne tient pas : le catalogue commercial des produits, la fiche de relation (activité, photos, GPS, KYC, groupes), la collecte et la caisse des collecteurs. Dans la démo de février, le cœur fictif (6.5) tient tout ce qui revient au cœur. Tout seuil est un paramètre de l'IMF, listé dans l'annexe D des paramètres (valeur de départ, unité, FR propriétaire) ; tout bouton non branché est « bientôt » (PRD-D FR-2).
 
 Parcours cités : **UJ-1** (premier prêt de bout en bout), **UJ-2** (prêt de groupe), **UJ-4** (journée d'un collecteur hors ligne).
 
-**Règles communes des capacités d'IA de cette partie.** Le moteur est l'**IA commune** (famille de modules à part : Risque, Agents métier, Relation client, Pulse) : ce PRD dit **ce que l'IA fait pour l'IMF**, l'IA commune dit comment. Pour chaque capacité : (1) la **provenance** s'affiche (règle ou modèle, version, date, données utilisées) et le mot « IA » n'est affiché que pour un modèle ; tant qu'un modèle n'existe pas, une règle explicable sert la capacité ; (2) **l'IA propose, un humain décide** ; l'écart à une proposition de **décision de crédit** exige un motif (partie 2), renvoyé comme correction ; pour les suggestions d'aide (produit, ordre de visite, zones), le choix de l'humain est enregistré sans motif ; (3) si l'IA est indisponible, **rien ne bloque** : la règle de base ou l'analyse humaine prend le relais ; (4) des données de l'IMF ne partent vers l'IA commune **qu'avec le consentement** de la finalité (FR-132) ; (5) le **secteur d'activité** (FR-117) alimente les analyses ; (6) les seuils d'alerte sont des paramètres calibrés sur les données de l'IMF (décision E5).
+**Règles communes des capacités d'IA de cette partie.** Le moteur est l'**IA commune** (famille de modules à part : Risque, Agents métier, Relation client, Pulse) : ce PRD dit **ce que l'IA fait pour l'IMF**, l'IA commune dit comment. Pour chaque capacité : (1) la **provenance** s'affiche (règle ou modèle, version, date, données utilisées) et le mot « IA » n'est affiché que pour un modèle ; tant qu'un modèle n'existe pas, une règle explicable sert la capacité ; (2) **l'IA propose, un humain décide** ; l'écart à une proposition de **décision de crédit** exige un motif (partie 2), renvoyé comme correction ; pour les suggestions d'aide (produit, ordre de visite, zones), le choix de l'humain est enregistré sans motif ; (3) si l'IA est indisponible, **rien ne bloque** : la règle de base ou l'analyse humaine prend le relais ; (4) **l'IA commune tourne en instance locale chez l'IMF**, sur les données de l'IMF, qui ne sortent pas : elle prédit, **enregistre l'écart** entre ses prédictions et ce qui se passe, **anonymise** ces écarts, les **renvoie** pour l'apprentissage commun **seulement avec le consentement** de la finalité (FR-132), et **reçoit ses mises à jour** par un **tunnel sécurisé sortant** (aucun port ouvert chez l'IMF) ; le Copilot tourne dans cette instance ; (5) le **secteur d'activité** (FR-117) alimente les analyses ; (6) les seuils d'alerte sont des paramètres calibrés sur les données de l'IMF (décision E5).
 
 ### 6.1 Produits financiers (`produits-financiers`, M46 [proposition]) ★
 
@@ -1178,18 +1323,18 @@ L'administrateur de l'IMF (ADMIN_IMF) ou le DAF crée et modifie un produit ; le
 - Un agent terrain ne voit aucun bouton de création ou de modification ; il voit les produits et simule.
 - Chaque création, modification et publication est dans le journal d'accès (auteur, date, version).
 
-#### FR-101 : Un produit de crédit porte ses bornes, son taux, son ajustement de risque et sa périodicité
+#### FR-101 : Un produit de crédit porte ses bornes, son taux et sa périodicité
 
 Une version de produit de crédit définit : le montant minimum et maximum (pas de saisie compris), la durée minimum et maximum, le type de taux (mensuel, annuel, dégressif), le taux nominal, la périodicité de remboursement (hebdomadaire, bimensuelle, mensuelle), le différé éventuel, le public (individuel ou groupe, avec 5 à 30 membres pour un groupe : décision C14), la pénalité de retard (valeur transmise au cœur, qui la calcule : décision A4). Réalise UJ-1, UJ-2.
 
-Une version peut déclarer un ajustement de risque : si le score du client est sous un seuil (défaut : 60), le taux monte de N points (défaut : 2 ; paramétrable de 1 à 5) ou la durée maximum est réduite. L'ajustement est une grille par score, jamais un taux négocié client par client.
+**Le score n'entre pas dans le prix.** Le taux d'une version est le même pour tous les clients : aucune majoration du taux par le score, aucune durée réduite par le score (décision du PO, P2 : le score est une information et une alerte, jamais un refus ni un levier de prix en v1). Une grille de taux selon le profil est un autre produit, décidé par des humains.
 
 **Conséquences (testables) :**
 - Une demande de montant ou de durée hors des bornes de la version est refusée avec le motif et la borne violée.
 - Le pas de saisie du montant par défaut est de 10 000 FCFA et le montant minimum de démo de 50 000 FCFA (paramètres de la version).
 - Une version de crédit de groupe refuse un groupe de 4 membres et un groupe de 31 membres (bornes 5 et 30 : paramètres).
-- Un client de score 55 sur un produit à 18 % avec ajustement de +2 points voit 20 % dans sa simulation, avec la ligne « ajustement de risque +2 points ».
-- Si le taux ajusté porterait le TEG au-dessus du plafond d'usure en vigueur, la simulation et le dossier sont bloqués (FR-10) ; l'ajustement n'est pas écrêté en silence.
+- Un client de score 30 et un client de score 90 voient le même taux sur le même produit ; la simulation n'affiche aucune ligne d'ajustement de risque.
+- Aucune version de produit ne porte de champ de majoration par le score.
 
 #### FR-102 : La méthode d'amortissement est un choix du produit
 
@@ -1201,22 +1346,24 @@ La version dit comment le capital est rendu : **annuité constante** (défaut, m
 
 #### FR-103 : Frais, assurance et garanties de frais sont typés, avec le drapeau « inclus dans le TEG »
 
-Chaque frais de la version (dossier, assurance, coût de garantie, frais de transfert, tenue de compte) a un type, un mode (pourcentage ou montant), un moment (décaissement ou échéance) et un drapeau **« inclus dans le TEG »**. Par défaut : dossier, assurance et coût de garantie sont inclus ; pénalités, impôts et taxes, frais de transfert et de tenue de compte non anormaux sont exclus (décret TEG annexé à la loi uniforme sur l'usure, guide BCEAO DSF-001/2015). Réalise UJ-1.
+Chaque frais de la version (dossier, assurance, coût de garantie, frais de transfert, tenue de compte) a un type, un mode (pourcentage ou montant), un moment (décaissement ou échéance) et un drapeau **« inclus dans le TEG »**. Par défaut : dossier, assurance et coût de garantie sont inclus ; pénalités, impôts et taxes, frais de transfert et de tenue de compte non anormaux sont exclus (décret TEG annexé à la loi uniforme sur l'usure, guide BCEAO DSF-001/2015). Le TEG se calcule par la méthode figée de FR-108. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Passer « assurance obligatoire » à vrai ajoute sa prime au TEG calculé de la simulation (FR-109).
 - Une pénalité ne peut pas être marquée « incluse dans le TEG » : le champ est verrouillé à « exclue ».
 - Le contrat et la simulation affichent la liste des frais avec leur drapeau.
 
-#### FR-104 : L'éligibilité d'un client à un produit se juge sur le score et l'ancienneté
+#### FR-104 : L'éligibilité d'un client à un produit se juge sur l'ancienneté ; le score alerte
 
-Une version de produit fixe un **score minimum** (défaut de démo : 45) et une **ancienneté minimum** du client (défaut de démo : 3 mois), en paramètres (décision C10). Quand un agent choisit un client, les produits dont il n'est pas éligible s'affichent grisés avec le motif ; la demande est bloquée ; le ROC peut accorder une **dérogation motivée et tracée**. Le score vient du module Risque de l'IA commune ou, à défaut, de la règle v0 (FR-124). Réalise UJ-1.
+Une version de produit fixe une **ancienneté minimum** du client (défaut de démo : 3 mois) et un **score d'alerte** (défaut de démo : 45), en paramètres (décision C10). Quand un agent choisit un client, les produits dont il n'est pas éligible par l'**ancienneté** s'affichent grisés avec le motif ; la demande est bloquée ; le ROC peut accorder une **dérogation motivée et tracée**.
+
+**Le score n'est jamais un blocage** (décision du PO, P2). Sous le score d'alerte, la demande passe et le dossier porte une **alerte** visible du CC, du ROC et du comité, avec les facteurs du score. Les seuls blocages automatiques d'une demande sont : KYC non validé (FR-120), plafond d'usure (FR-108), ancienneté, taux d'effort au-dessus du plafond bloquant du crédit (partie 2) et blocage de recouvrement (partie 4a). Le score vient du module Risque de l'IA commune ou, à défaut, de la règle v0 (FR-124) ; sans score, il est « non évalué » et ne bloque pas non plus. Un **premier emprunteur** n'a pas d'historique de paiement : la composante « paiement » est absente, le score se calcule sur les autres composantes, et l'écran le dit (FR-124). Réalise UJ-1.
 
 **Conséquences (testables) :**
-- Un client de score 40 et un produit à 45 : la demande est bloquée avec « score 40 < 45 ».
-- Le ROC accorde la dérogation avec un motif ; la demande passe, et la dérogation (qui, quand, motif) est visible sur le dossier.
-- Un client de 2 mois d'ancienneté est bloqué sur un produit à 3 mois ; ni le CC ni l'agent ne peuvent lever le blocage.
-- Sans score disponible (IA commune absente et règle non calculable), la demande est refusée avec « score indisponible » ; elle n'est jamais acceptée par défaut.
+- Un client de score 40 et un produit au score d'alerte 45 : la demande passe, avec l'alerte « score 40 < 45 » visible du CC, du ROC et du comité ; aucune dérogation n'est requise.
+- Un client de 2 mois d'ancienneté est bloqué sur un produit à 3 mois ; ni le CC ni l'agent ne peuvent lever le blocage ; le ROC accorde la dérogation avec un motif, et la dérogation (qui, quand, motif) est visible sur le dossier.
+- Sans score disponible (règle non calculable), le score est « non évalué » et la demande passe avec cette alerte ; une demande n'est jamais acceptée ou refusée sur un score inventé.
+- Un premier emprunteur sans historique de paiement voit son score avec la mention « composante paiement absente » ; il n'est ni bloqué ni pénalisé de ce fait.
 
 #### FR-105 : Le produit dit quelles cautions et quelles garanties il exige
 
@@ -1246,41 +1393,57 @@ Publier un produit crée une version **horodatée et signée** (auteur). Un doss
 - Un produit retiré n'apparaît plus dans la demande, mais reste lisible sur les dossiers qui le portent.
 - Les conditions figées par le comité ne sont modifiables que par l'administrateur, avec une entrée de journal (cahier crédit).
 
-#### FR-108 : Une version qui dépasse le plafond d'usure ne se publie pas
+#### FR-108 : Une version qui dépasse le plafond d'usure, au pire cas, ne se publie pas
 
-À la publication d'une version de produit de crédit, le module calcule le **TEG actuariel** (méthode et drapeaux de FR-103) sur les cas extrêmes de la version : montant et durée minimum et maximum, avec frais, assurance et ajustement de risque maximum. Si l'un des cas dépasse le **plafond d'usure en vigueur à la date de publication** (24 % par an pour une IMF, Décision n° 19 du 29/12/2025/CM/UMOA, en vigueur le 01/06/2026 ; plafond paramétrable daté, partie 1), la publication est refusée avec le cas fautif. Si le plafond baisse plus tard, les versions publiées qui le dépassent passent à « à revoir » et ne sont plus proposées pour de nouvelles demandes.
+**Méthode du TEG, figée** (même méthode pour la publication, la simulation, le dossier, le contrat et le contrôle du portefeuille : FR-10, FR-36, FR-109, FR-189). Le TEG est le **taux actuariel de la période, multiplié par le nombre de périodes dans l'année** (« actuariel annuel proportionnel » : 12 pour une périodicité mensuelle, 24 bimensuelle, 52 hebdomadaire). Le taux de la période est celui qui égalise le **montant net versé au client** (montant du crédit moins les **frais retenus au décaissement** marqués « inclus dans le TEG », FR-103) et la valeur actuelle des échéances, chacune comptée avec son capital, ses intérêts, l'**assurance obligatoire** et les frais à l'échéance marqués « inclus ». Les pénalités, impôts et taxes sont exclus. Le résultat est arrondi à 0,01 point. Cette méthode est **à faire valider par un juriste** (§12.3, FR-195) ; tant que ce n'est pas fait, le blocage est appliqué et le motif affiche « méthode du TEG en attente de validation ».
+
+À la publication d'une version de produit de crédit, le module calcule le TEG **au pire cas** : la **durée la plus courte** de la version avec les **frais les plus élevés**, assurance comprise (un frais fixe pèse le plus au montant minimum ; la version est aussi calculée aux autres bornes). Si l'un des cas dépasse le **plafond d'usure en vigueur à la date de publication** (24 % par an pour une IMF, Décision n° 19 du 29/12/2025/CM/UMOA, en vigueur le 01/06/2026 ; plafond paramétrable daté, partie 1), la publication est refusée avec le cas fautif. Si le plafond baisse plus tard, les versions publiées qui le dépassent passent à « à revoir » et ne sont plus proposées pour de nouvelles demandes.
 
 **Conséquences (testables) :**
 - Un produit à 24 % nominal avec 2 % de frais de dossier est refusé à la publication, avec « TEG 25,x % > plafond 24 % ».
-- Un produit à 1,5 %/mois avec 1 % de frais de dossier sur 12 mois se publie.
+- Un produit à 1,5 %/mois avec 1 % de frais de dossier, de 3 à 12 mois, est refusé (TEG 24,2 % au cas de 3 mois) ; le même produit de 6 à 12 mois se publie (21,6 % au pire cas).
+- Un produit à 1,25 %/mois avec 1 % de frais, de 6 à 24 mois, se publie (TEG de 16,0 % à 18,5 % : tableau de référence de FR-111).
 - Changer le plafond daté à 22 % marque « à revoir » les versions dépassant 22 % ; les dossiers déjà accordés ne bougent pas.
-- Le refus affiche le TEG calculé, le plafond, sa date d'effet et le cas (montant, durée) qui dépasse.
+- Le refus affiche le TEG calculé, le plafond, sa date d'effet et le cas (montant, durée, frais) qui dépasse.
+- Le tableau de référence de FR-111 est le jeu d'essai de la méthode : un écart de plus de 0,1 point rend le test rouge.
 
 #### FR-109 : La simulation montre l'échéancier, les frais et le TEG, sans rien enregistrer
 
-Avant la demande, l'agent simule : montant, durée, produit, client (pour l'ajustement de FR-101). La simulation affiche mensualité, intérêts totaux, frais, coût total, **TEG** et échéancier. Elle ne crée aucun dossier. Réalise UJ-1.
+Avant la demande, l'agent simule : montant, durée, produit, client. La simulation affiche mensualité, intérêts totaux, frais, coût total, **TEG** et échéancier. Elle ne crée aucun dossier. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Le résultat s'affiche en moins de 500 ms pour 36 échéances.
 - La simulation est refusée avec le même motif que la demande si le montant, la durée ou le TEG sort des bornes (FR-101, FR-108).
 - La simulation fonctionne **hors ligne** à partir du catalogue téléchargé sur l'appareil ; elle affiche la version de produit utilisée.
-- Le TEG de la simulation et le TEG imprimé au contrat sont calculés par la même méthode.
+- Le TEG de la simulation et le TEG imprimé au contrat sont calculés par la même méthode (FR-108).
 
 #### FR-110 : Le code produit est commun avec le cœur ; les conditions figées lui sont renvoyées
 
-Chaque produit porte le **code produit du cœur** (clé de correspondance). Au passage EN_GESTION d'un dossier, Prospera envoie au cœur le code produit et les conditions figées (version, taux, frais, méthode, TEG). Un produit sans code du cœur peut être publié, mais aucun dossier qui le porte ne peut être accordé : le dossier reste « en attente du code produit ». Les codes sont fournis par le cœur (ou par le cœur fictif) ; le contrat d'échange est en 6.5.
+Chaque produit porte le **code produit du cœur** (clé de correspondance). À la décision du comité (le dossier passe EN_GESTION), Prospera envoie au cœur le code produit et les conditions figées (version, taux, frais, méthode, TEG). Un produit sans code du cœur peut être publié, mais aucun dossier qui le porte ne peut être accordé : le dossier reste « en attente du code produit ». Les codes sont fournis par le cœur (ou par le cœur fictif) ; le contrat d'échange est en 6.5.
 
 **Conséquences (testables) :**
 - Un produit sans code cœur affiche « code du cœur manquant » ; la tentative d'octroi sur ce produit est refusée avec ce motif.
 - Le message envoyé au cœur contient la version de produit du dossier, pas la version courante du catalogue.
 
-#### FR-111 : Le jeu de démonstration prend des produits conformes à 24 %
+#### FR-111 : Le jeu de démonstration prend des produits conformes, au pire cas
 
-Le jeu de démo de l'IMF fictive (partie 1) contient des produits dont le TEG est **inférieur ou égal à 24 %** pour tous leurs cas, vérifié par FR-108 à la mise en place. Le produit d'exemple de la démo (2,5 %/mois, TAEG 36,4 %) et le microcrédit à 28 % ne sont pas repris. Produit de référence : microcrédit individuel à 1,5 %/mois, 1 % de frais de dossier, de 50 000 à 2 000 000 FCFA, 3 à 12 mois, TEG d'environ 20 %. Les produits « 24 % pile » de la démo (crédit individuel, PME) sont ramenés à un taux nominal qui laisse la place aux frais. [ASSUMPTION : les taux exacts des autres produits du jeu de démo sont fixés à la rédaction du jeu, sous contrainte du test ci-dessous.]
+Le jeu de démo de l'IMF fictive (partie 1) contient des produits dont le TEG, calculé par la méthode de FR-108, est **inférieur ou égal à 24 %** au pire cas, vérifié par FR-108 à la mise en place. Le produit d'exemple de la démo (2,5 %/mois, TAEG 36,4 %) et le microcrédit à 28 % ne sont pas repris. **Produit de référence : « Crédit Commerce »**, 1,25 %/mois, 1 % de frais de dossier retenus au décaissement, de 6 à 24 mois, sans assurance obligatoire, TEG de **16,0 % à 18,5 %** selon la durée. **Aucun produit de démo n'a une durée de 3 mois avec des frais** : à 3 mois, 1 % de frais suffit à dépasser les 24 % pour un taux de 1,5 %/mois. Les produits « 24 % pile » de la démo (crédit individuel, PME) sont ramenés à un taux nominal qui laisse la place aux frais. [ASSUMPTION : les taux exacts des autres produits du jeu de démo sont fixés à la rédaction du jeu, sous contrainte du test ci-dessous.]
+
+**Tableau de TEG de référence** (taux 1,25 %/mois, annuité constante, sans assurance ; TEG annuel en %, méthode de FR-108). C'est le jeu d'essai de la méthode ; il se régénère par la formule et se vérifie à 0,1 point près.
+
+| Frais de dossier retenus au décaissement | 3 mois | 6 mois | 12 mois | 24 mois |
+|---|---|---|---|---|
+| 0 % | 15,0 | 15,0 | 15,0 | 15,0 |
+| 1 % | 21,2 | 18,5 | 16,9 | 16,0 |
+| 2 % | 27,4 | 22,1 | 18,9 | 17,1 |
+
+Lecture : à 2 % de frais, un produit de 3 mois à 1,25 %/mois est refusé (27,4 % > 24 %) ; à 1 % il passe (21,2 %). Avec une assurance obligatoire de 1,2 % par an sur le capital, le cas « 2 % de frais, 3 mois » monte à 29,2 % et le cas « 1 % de frais, 6 mois » à 20,6 %. [ASSUMPTION : les valeurs du tableau sont calculées pour ce PRD par la méthode figée ; elles sont à recalculer et à faire valider avec la méthode par un juriste.]
 
 **Conséquences (testables) :**
-- Un test recalcule le TEG de chaque produit du jeu de démo et échoue si l'un dépasse 24 %.
-- Aucun produit de démo n'a un taux nominal de 28 % ou de 2,5 %/mois.
+- Un test recalcule le TEG de chaque produit du jeu de démo au pire cas et échoue si l'un dépasse 24 %.
+- « Crédit Commerce » donne 18,5 % à 6 mois et 16,0 % à 24 mois (à 0,1 point près).
+- Aucun produit de démo n'a un taux nominal de 28 % ou de 2,5 %/mois, ni une durée de 3 mois avec des frais.
+- Les valeurs du tableau de référence sont reproduites par le calcul, case par case.
 
 #### FR-112 : Le module recommande un produit selon le profil du client
 
@@ -1294,7 +1457,7 @@ Quand un agent prépare une demande, l'IA commune propose au **CC, à l'agent te
 
 #### FR-113 : La simulation propose les conditions optimales
 
-À la simulation (FR-109), l'IA commune peut proposer au CC et à l'agent un **montant et une durée** qui tiennent dans la **capacité de remboursement estimée** du client : mensualité au plus égale à une part du revenu net estimé (paramètre ; défaut : 40 % [ASSUMPTION : valeur de départ ; à calibrer sur les données de l'IMF]). **Entrées :** revenus et charges de la fiche, saison de l'activité, produit, bornes de la version (FR-101), plafond du TEG (FR-108). **Sortie :** un couple montant-durée, la mensualité, le TEG, et la raison. L'agent peut accepter, modifier ou ignorer. Réalise UJ-1.
+À la simulation (FR-109), l'IA commune peut proposer au CC et à l'agent un **montant et une durée** qui tiennent dans la **capacité de remboursement estimée** du client : mensualité telle que le **taux d'effort** du client (mensualités de tous les prêts connus ÷ revenu net estimé) reste sous le **plafond bloquant du crédit** (partie 2 ; défaut : 40 %, annexe D) ; ce module ne définit pas de seuil propre. **Entrées :** revenus et charges de la fiche, saison de l'activité, produit, bornes de la version (FR-101), plafond du TEG (FR-108). **Sortie :** un couple montant-durée, la mensualité, le TEG, et la raison. L'agent peut accepter, modifier ou ignorer. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Une proposition respecte toujours les bornes de la version et un TEG inférieur ou égal au plafond d'usure ; sinon elle n'est pas affichée.
@@ -1328,7 +1491,7 @@ La conversion demande : identité (nom, prénom, genre, date de naissance, natio
 
 #### FR-116 : Une personne, une fiche, un identifiant du cœur
 
-Un client épargnant et emprunteur a **une seule fiche** (décision T4). Sa clé de correspondance est l'**identifiant du cœur** (numéro de client). À la conversion, Prospera demande au cœur de créer le client s'il n'existe pas, ou lie la fiche à celui qui existe ; en attendant la réponse, la fiche porte « en attente du cœur » et le client peut être instruit, mais **aucun décaissement ni dépôt** ne lui est destiné. La fiche affiche, de façon distincte, ce qui vient du cœur (identité légale, numéro, comptes, soldes) et ce que Prospera ajoute (activité, photos, GPS, score, KYC). [ASSUMPTION : la clé de correspondance est le numéro de client du cœur ; le détail du contrat est en 6.5.]
+Un client épargnant et emprunteur a **une seule fiche** (décision T4). Sa clé de correspondance est l'**identifiant du cœur** (numéro de client). À la conversion, Prospera demande au cœur de créer le client s'il n'existe pas (objet « Création de client » de l'annexe C), ou lie la fiche à celui qui existe ; en attendant la réponse, la fiche porte « en attente du cœur » et le client peut être instruit, mais **aucun décaissement ni dépôt** ne lui est destiné. La fiche affiche, de façon distincte, ce qui vient du cœur (identité légale, numéro, comptes, soldes) et ce que Prospera ajoute (activité, photos, GPS, score, KYC). [ASSUMPTION : la clé de correspondance est le numéro de client du cœur ; le détail du contrat est en 6.5.]
 
 **Conséquences (testables) :**
 - Une personne qui a un compte d'épargne au cœur et demande un crédit retrouve sa fiche (même identifiant), sans seconde fiche.
@@ -1369,29 +1532,34 @@ Chaque client a un **niveau de KYC** : **simplifié**, **standard** ou **renforc
 - Un client en « renforcé » sans l'approbation du ROC ne peut pas voir son dossier passer à EN_COMITE_CREDIT.
 - Aucun compte ni client anonyme : une fiche sans pièce d'identité valide ne se convertit pas.
 
-#### FR-120 : Le KYC est validé par un autre que le créateur de la fiche
+#### FR-120 : Le KYC est validé par un autre que le créateur de la fiche, avant la demande
 
-Le KYC est validé, ou rejeté avec un motif, par le **CC** ou par un utilisateur doté de l'**habilitation de conformité** de l'agence ; jamais par celui qui a créé ou complété la fiche (décision T3). Statuts : EN_VERIFICATION, COMPLET, INCOMPLET, REJETE, EXPIRE. La validation se fait en ligne (pas hors ligne). [ASSUMPTION : « agent conformité » n'est pas l'un des 16 rôles ; c'est une habilitation accordée par le DG (rôle sensible, F7) à un CC, un RA ou un comptable, pas un 17e rôle.] Réalise UJ-1.
+Le KYC est validé, ou rejeté avec un motif, par le **CC** ou par un utilisateur doté de l'**habilitation de conformité** de l'agence ; jamais par celui qui a créé ou complété la fiche (décision T3). Statuts : EN_VERIFICATION, COMPLET, INCOMPLET, REJETE, EXPIRE. La validation se fait en ligne (pas hors ligne). **Le KYC du demandeur est COMPLET avant la création de la demande de crédit** (phase 1 du récit : prospect, fiche, KYC validé, puis score) : il n'existe pas de demande dont le KYC est seulement « en vérification ». Celui des cautions et des membres d'un groupe est COMPLET au plus tard au passage à DOSSIER_COMPLET. [ASSUMPTION : « agent conformité » n'est pas l'un des 16 rôles ; c'est une habilitation accordée par le DG (rôle sensible, F7) à un CC, un RA ou un comptable, pas un 17e rôle.] Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Un CC qui a créé la fiche voit « valider » désactivé avec « vous êtes le créateur » ; un autre CC de l'agence peut valider.
 - Un rejet sans motif est refusé ; le créateur est prévenu avec le motif.
-- Un dossier de crédit ne passe pas à DOSSIER_COMPLET (partie 2) si le KYC du demandeur et celui de ses cautions ne sont pas COMPLET.
+- Une demande de crédit ne peut pas être créée si le KYC du demandeur n'est pas COMPLET ; elle est refusée avec le motif « KYC non validé ».
+- Un dossier de crédit ne passe pas à DOSSIER_COMPLET (partie 2) si le KYC de l'une de ses cautions n'est pas COMPLET.
 - Chaque validation est journalisée : qui, quand, niveau, pièces vues.
 
 #### FR-121 : Les listes de sanctions sont rafraîchies, et tout le fichier est refiltré
 
 Le filtrage contre les **listes de sanctions** (listes de l'IMF : ONU, UEMOA, nationales ; sources paramétrables) se fait à la création de la fiche, à tout changement d'identité, **et à chaque rafraîchissement d'une liste**, sur l'ensemble des clients, cautions et bénéficiaires effectifs. Le rafraîchissement est régulier (paramètre ; défaut : quotidien) ; chaque liste porte sa date de dernière mise à jour. Une correspondance possible **bloque** le client (ni octroi, ni décaissement ; remboursements et dépôts jamais refusés) et ouvre une revue par la conformité. La décision (faux positif ou vrai) est motivée et journalisée. Le gel éventuel de fonds est une décision de l'IMF, exécutée dans le cœur. [ASSUMPTION : sources de listes et fréquence : à valider ; Prospera n'en choisit pas pour l'IMF. Le filtrage est un calcul sur des listes fournies, sans modèle.]
 
+**Procédure « correspondance confirmée »** (la revue conclut à un vrai positif). Elle a trois étapes tracées, chacune avec son auteur et sa date : (1) le client reste bloqué ; (2) le **gel des fonds** est décidé par le DG ou la personne désignée par l'IMF à cet effet, et exécuté dans le cœur ; Prospera n'envoie qu'une demande de gel et lit le résultat ; (3) la **déclaration** à l'autorité compétente est préparée par l'export de FR-123 et faite par l'IMF hors Prospera ; Prospera enregistre « déclarée », avec la date et la référence que l'IMF saisit. Deux délais sont des paramètres : le délai maximal entre la confirmation et la demande de gel, et le délai maximal entre la confirmation et la déclaration. [ASSUMPTION : valeurs de départ de 24 heures pour le gel et de 72 heures pour la déclaration ; la procédure et ces délais sont **à valider par un juriste** avant la mise en service.] Aucun message au client ne mentionne la déclaration [ASSUMPTION : à valider par un juriste].
+
 **Conséquences (testables) :**
 - Un client déjà actif dont le nom apparaît dans une liste mise à jour est signalé dans l'heure qui suit le rafraîchissement (paramètre), sans nouvelle saisie.
 - Le tableau de conformité affiche, par liste, la date de dernier rafraîchissement ; une liste plus ancienne que sa fréquence par défaut passe en alerte.
 - Un client « correspondance possible » ne peut pas être décaissé ; un remboursement le concernant est encaissé normalement.
 - Un faux positif levé n'est pas re-signalé pour la même entrée de liste, mais l'est pour une nouvelle entrée.
+- Une correspondance confirmée affiche ses trois étapes (bloqué, gel demandé et résultat lu du cœur, déclaration préparée puis déclarée hors Prospera), avec le délai écoulé depuis la confirmation ; un délai dépassé alerte le DG.
+- Après une correspondance confirmée, un remboursement ou un dépôt du client est encore encaissé, mais aucun retrait ni décaissement ne lui est destiné tant que le gel n'est pas levé.
 
 #### FR-122 : Le KYC est revu périodiquement
 
-Chaque fiche a une **date de prochaine revue** selon son niveau (paramètre ; défauts : renforcé 12 mois, standard 24 mois, simplifié 36 mois) [ASSUMPTION : durées à faire valider par la conformité de l'IMF]. À l'approche de l'échéance, la fiche entre dans la **file de revue** du CC ou de l'agent de conformité : pièces expirées à renouveler, identité, activité et contacts à reconfirmer, notation de risque recalculée. Une revue en retard met le KYC à « à renouveler ». Un KYC à renouveler **bloque un nouvel octroi et un nouveau décaissement**, jamais un remboursement ni un dépôt. Un client qui revient pour un nouveau cycle de crédit passe par la revue avant l'octroi.
+Chaque fiche a une **date de prochaine revue** selon son niveau (paramètre ; défauts : renforcé 12 mois, standard 24 mois, simplifié 36 mois) [ASSUMPTION : durées à faire valider par la conformité de l'IMF]. À l'approche de l'échéance, la fiche entre dans la **file de revue** du CC ou de l'agent de conformité : pièces expirées à renouveler, identité, activité et contacts à reconfirmer, notation de risque recalculée. Une revue en retard met le KYC à « à renouveler ». Un KYC à renouveler **bloque une nouvelle demande, un nouvel octroi et un nouveau décaissement**, jamais un remboursement ni un dépôt. Un client qui revient pour un nouveau cycle de crédit passe par la revue avant l'octroi.
 
 **Conséquences (testables) :**
 - Une fiche en « renforcé » validée il y a 12 mois entre dans la file de revue ; sans revue 30 jours après (paramètre), elle passe à « à renouveler ».
@@ -1403,27 +1571,39 @@ Chaque fiche a une **date de prochaine revue** selon son niveau (paramètre ; d�
 
 Prospera surveille les opérations qu'il voit (collecte espèces, dépôts, remboursements en espèces, et celles que le cœur lui remonte) par rapport à des **seuils paramétrables** : seuil de déclaration des transactions en espèces (défaut : 15 000 000 FCFA, loi uniforme LBC/FT/FP art. 72 selon une source secondaire ; Décision n° 021 du 21/12/2023/CM/UMOA ; **à confirmer par un juriste**) et seuil d'alerte interne sur le **cumul d'opérations fractionnées** par client sur une période (paramètre ; calibré sur les données de l'IMF ; défaut de démo : 80 % du seuil sur 7 jours). Le dépassement crée une alerte pour l'agent de conformité ; Prospera produit un **export de déclaration** ; la déclaration à la CENTIF est faite par l'IMF, hors Prospera (décision E3).
 
+**Scénarios de soupçon propres à la microfinance.** Au-delà des seuils, des règles lisibles et paramétrables lèvent une alerte pour l'agent de conformité, sans jamais bloquer seules : (1) **remboursement anticipé massif**, ou solde d'un prêt en une fois peu après le décaissement, sans lien avec l'activité ; (2) **remboursement par un tiers** sans lien avec le client (numéro Mobile Money ou payeur différent, répété) ; (3) **opérations fractionnées** sous le seuil (ci-dessus) ; (4) **prêts enchaînés** : un prêt soldé aussitôt par un dépôt d'espèces non justifié, puis un nouveau prêt demandé ; (5) **flux incohérents avec l'activité** déclarée (dépôts sans rapport avec le chiffre d'affaires estimé) ; (6) **identifiants partagés** : même téléphone, même adresse ou même numéro Mobile Money sur plusieurs clients sans lien déclaré ; (7) **compte d'épargne en transit** : dépôts suivis de retraits rapides ; (8) **groupe dont les cotisations sont payées par une seule personne** extérieure. [ASSUMPTION : liste de départ, à compléter avec la conformité de l'IMF et à valider par un juriste ; chaque scénario est un paramètre qu'on active, désactive et règle.]
+
 **Conséquences (testables) :**
 - Un client dont les collectes sur 7 jours atteignent 80 % du seuil crée une alerte ; une alerte traitée a un motif de clôture.
+- Un prêt soldé en une fois dans les 30 jours après le décaissement (paramètre) crée l'alerte « remboursement anticipé massif » ; il n'est pas bloqué.
+- Trois remboursements du même prêt payés depuis un numéro Mobile Money qui n'est pas celui du client créent l'alerte « payeur tiers ».
 - L'export contient, pour chaque opération signalée : client, identifiant du cœur, montant, date, canal, collecteur.
 - Aucun bouton ne prétend déclarer à la CENTIF : la déclaration est « hors Prospera ».
 
 #### FR-124 : Le score du client et la notation de risque LBC sont explicables, avec leur provenance
 
-Le score /100 est **dynamique** : il est recalculé quand le dossier devient complet et à chaque événement qui change ses facteurs (mouvement du cœur, collecte, visite). Chaque client a une **notation de risque LBC** (faible, moyen, élevé) calculée par règles lisibles (PPE, secteur, pays, niveau de KYC, volumes inhabituels), et un **score de crédit /100** fourni par le module Risque de l'IA commune ; tant que son modèle n'existe pas, un score par règles explicables (v0) le remplace. La fiche affiche, pour chaque note : la valeur, les facteurs avec leur poids, la **provenance** (règle ou modèle, version, date). Le moteur est l'IA commune (famille de modules à part). Sans elle, l'emplacement du score affiche la règle v0 ou « indisponible » ; rien d'autre ne casse. L'humain décide toujours. [ASSUMPTION : barème du score v0 = paiement 40, capacité 30, activité 20, terrain 10 (recommandation C11 du PO) ; il est défini et versionné par la partie 1 et le module Risque.]
+Le score /100 est **dynamique** : il est recalculé quand le dossier devient complet et à chaque événement qui change ses facteurs (mouvement du cœur, collecte, visite). Chaque client a une **notation de risque LBC** (faible, moyen, élevé) calculée par règles lisibles (PPE, secteur, pays, niveau de KYC, volumes inhabituels), et un **score de crédit /100** fourni par le module Risque de l'IA commune ; tant que son modèle n'existe pas, un score par règles explicables (v0) le remplace. La fiche affiche, pour chaque note : la valeur, les facteurs avec leur poids, la **provenance** (règle ou modèle, version, date). Le moteur est l'IA commune, en instance locale chez l'IMF. Sans elle, l'emplacement du score affiche la règle v0 ou « indisponible » ; rien d'autre ne casse. L'humain décide toujours. [ASSUMPTION : barème du score v0 = paiement 40, capacité 30, activité 20, terrain 10 (recommandation C11 du PO) ; il est défini et versionné par la partie 1 et le module Risque.]
+
+**Le score est une information et une alerte** (décision du PO, P2) : il ne produit jamais un refus automatique ni un levier de prix en v1 (FR-101, FR-104). **Premier emprunteur** : sans historique de paiement, la composante « paiement » (40 % du barème) est **absente** ; le score se calcule sur les composantes restantes, rapportées à 100, et la fiche dit « composante paiement absente : score sur capacité, activité et terrain ».
+
+**Équité.** Le score n'utilise que des variables d'une **liste fermée**, versionnée : historique de paiement, retards et leur ancienneté, mouvements du compte (nombre, ratio de dépôts, solde moyen), capacité de remboursement (revenus et charges estimés, taux d'effort), ancienneté et régularité de l'activité, secteur d'activité et saison, garanties et cautions, localisation « vérifiée terrain » (oui ou non), prêts antérieurs. **Ne sont jamais des variables du score : le genre, la situation matrimoniale, la nationalité, la religion** (ni aucune variable qui en est une copie directe). Ajouter une variable à la liste est décidé par le DG, informé l'AUD et le RSQ, et journalisé. Un **suivi des taux d'acceptation** des demandes **par genre, par zone et par secteur** est calculé chaque mois à partir des décisions du comité ; il est lu par l'**AUD et le RSQ** (vue d'audit, FR-192), avec l'alerte d'un écart anormal (paramètre ; défaut : écart de plus de 10 points entre un groupe et la moyenne, sur au moins 30 demandes [ASSUMPTION : à calibrer]). Le **motif** d'un refus ou d'une alerte de score est exprimé en facteurs de la liste fermée et **communicable au client** en termes clairs (FR-88 : sans révéler le détail du score).
 
 **Conséquences (testables) :**
 - Un client dont le score vient de la règle v0 affiche « règle, version, date » ; un client scoré par le modèle affiche « modèle, version, date ».
-- Retirer le consentement à l'IA commune (FR-132) ou ne pas l'installer laisse la fiche fonctionnelle : le score est celui de la règle v0.
+- Ne pas installer l'IA commune laisse la fiche fonctionnelle : le score est celui de la règle v0. Retirer le consentement « IA commune » d'un client arrête le renvoi de ses écarts pour l'apprentissage ; son score local reste calculé.
 - Aucun octroi, rejet ou blocage n'est décidé par la note seule ; la note est une information et un motif de revue.
+- Un premier emprunteur sans historique de paiement obtient un score sur trois composantes, avec la mention de la composante absente.
+- Un test sur la liste fermée échoue si une variable « genre », « situation matrimoniale », « nationalité » ou « religion » apparaît dans les facteurs d'un score.
+- La vue d'équité affiche, par genre, zone et secteur, le nombre de demandes, le taux d'acceptation et l'écart à la moyenne ; l'AUD et le RSQ la lisent, aucun autre rôle n'y a accès.
+- Le motif communicable à un client refusé ne contient que des facteurs de la liste fermée.
 
-#### FR-125 : La probabilité de défaut et la classe BCEAO estimée se recalculent à chaque événement
+#### FR-125 : La probabilité de défaut et la classe réglementaire estimée se recalculent à chaque événement
 
-Pour chaque client ayant un crédit en cours, la fiche affiche une **probabilité de défaut (PD)** en pourcentage et une **classe BCEAO estimée** (saine, à surveiller, en souffrance, selon les règles de classement : déclassement dès un impayé, provisions et seuils du module de risque, partie 3b). **Entrées :** score (FR-124), comportement de paiement et retards lus du cœur, mouvements d'épargne lus du cœur, secteur et saison, collectes du terrain. **Sortie :** PD, classe estimée, **facteurs** avec leur poids, date de calcul. Le calcul se refait dans les **15 minutes** (paramètre) qui suivent un événement (nouveau mouvement du cœur, collecte, retard). La classe **officielle** reste celle du cœur ; en cas d'écart, la classe du cœur gagne et l'écart est signalé au GP. Destinataires : GP, CC, RA, analyste risque, ROC. Réalise UJ-1.
+Pour chaque client ayant un crédit en cours, la fiche affiche une **probabilité de défaut (PD)** en pourcentage, une **classe réglementaire estimée** (celle du barème du pays, paramétrable, FR-175 : classement par ancienneté de l'impayé) et la **classe prévue à 30 jours** (paramètre) si le client ne paie pas. Cette classe est distincte de la **classe de risque à l'octroi**, qui s'applique à un dossier non décaissé (partie 2). **Entrées :** score (FR-124), comportement de paiement et retards lus du cœur, mouvements d'épargne lus du cœur, secteur et saison, collectes du terrain. **Sortie :** PD, classe estimée, classe prévue, **facteurs** avec leur poids, date de calcul. Le calcul se refait dans les **15 minutes** (paramètre) qui suivent un événement (nouveau mouvement du cœur, collecte, retard). La classe **officielle** reste celle du cœur ; en cas d'écart, la classe du cœur gagne et l'écart est signalé au GP. Destinataires : GP, CC, RA, analyste risque, ROC. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Un paiement du cœur qui solde une échéance en retard met à jour la PD et la classe estimée sur la fiche dans le délai du paramètre.
-- La classe estimée affiche « estimée » ; la classe officielle du cœur s'affiche à côté quand elle est disponible, et un écart crée un signal au GP.
+- La classe estimée affiche « estimée » ; la classe prévue affiche « prévue » ; la classe officielle du cœur (objet « Classe officielle et provisions » de l'annexe C) s'affiche à côté quand elle est disponible, et un écart crée un signal au GP.
 - Tant que le modèle n'existe pas, PD et classe viennent de règles explicables et le libellé dit « règle », sans le mot « IA ».
 - Aucune PD ni classe estimée ne bloque ni ne décide un octroi, un décaissement ou une provision comptabilisée.
 
@@ -1436,6 +1616,8 @@ Pour les clients actifs, l'IA commune repère les **signaux faibles** avant l'im
 - L'alerte est traitée par un humain (suivie, ou classée sans suite **avec un motif**) ; ce motif est renvoyé comme correction à l'IA commune.
 - Une alerte ne change aucun statut du dossier et ne déclenche aucune relance seule.
 - Sans IA commune, aucune alerte de signaux faibles : les alertes de retard ordinaires de la partie 4a continuent.
+
+**Cohésion du groupe et contagion.** Pour un groupe solidaire (FR-129), l'IA commune propose au CC et au ROC un **score de cohésion** de 0 à 100 (régularité des cotisations et de l'épargne, présence aux réunions, retards des membres, ancienneté du groupe) et une **alerte de contagion** quand des membres sont en retard de cotisation ou d'épargne alors que la caution mutuelle porte les autres. Sortie : score, facteurs avec leur poids, membres concernés, provenance. Elle ne change aucun statut et ne bloque aucun membre ; sans IA commune, les retards des membres restent visibles sur la fiche du groupe, sans score ni alerte.
 
 #### FR-127 : Chaque fiche porte une analyse par secteur, micro et macro-économique
 
@@ -1473,33 +1655,39 @@ Ajouter, retirer ou exclure un membre, changer le président ou le trésorier, p
 - Les boutons « Tirage au sort » et « Créer une tontine » portent « bientôt ».
 - L'historique de composition est consultable (qui est entré, sorti, quand, par qui).
 
-#### FR-130 : L'épargne se lit du cœur, sur la fiche, avec sa date
+#### FR-130 : L'épargne se lit du cœur : fiche, liste des comptes, vue consolidée du DG et statistiques
 
 La fiche d'un client (et celle d'un groupe) affiche ses **comptes d'épargne lus du cœur** : numéro, produit, statut (actif, dormant, bloqué), solde, dernier mouvement, et la liste des mouvements (dépôts, retraits, intérêts, frais, avec canal). Chaque valeur porte **« à jour au »** (date et heure de la dernière lecture). Prospera n'écrit ni solde ni mouvement. Si le cœur est injoignable, la fiche affiche le dernier état connu, daté, avec « cœur injoignable » ; elle ne l'invente jamais. La **dormance** se constate sur le dernier mouvement du cœur, avec le délai du produit (FR-106) ; Prospera peut relancer le client dormant. Dans la démo, le cœur fictif sert ces lectures. Réalise UJ-1.
+
+**Écran « Épargne ».** Le GP, le RA, le CPT, le DAF et le DG, et l'auditeur en lecture, voient dans leur périmètre : (1) la **liste des comptes d'épargne**, lue du cœur, filtrable par produit, statut, agence, GP et indicateur de fidélité (FR-131), avec numéro, client, produit, agence, GP, statut, solde, dernier mouvement et « à jour au » ; (2) la **vue consolidée du DG** : encours d'épargne total et par produit et par agence, nombre de comptes actifs, dormants et bloqués, collecte nette du mois (dépôts moins retraits) ; (3) les **statistiques** : évolution mensuelle de l'encours, nombre de dépôts et de retraits, solde moyen par compte, part des comptes dormants. Tout est lu du cœur : Prospera ne fait que sommer, filtrer et dater les mouvements lus, et n'écrit aucun solde.
 
 **Conséquences (testables) :**
 - Un dépôt passé au cœur apparaît sur la fiche à la lecture suivante, avec le nouveau solde et « à jour au ».
 - Cœur coupé : la fiche reste ouverte avec le dernier solde, la date de sa lecture et un bandeau.
 - Aucun écran du module ne permet de corriger un solde ou un mouvement ; la page « Ouvrir compte » est une demande envoyée au cœur (FR-106) ou « bientôt ».
 - Un client sans compte d'épargne n'affiche pas de zéro : il affiche « aucun compte ».
+- La liste des comptes se filtre par produit, statut, agence et GP ; un RA ne voit que les comptes de son agence ; le total de la vue du DG est égal à la somme des soldes lus, au franc près.
+- Chaque chiffre de la vue consolidée et des statistiques porte « à jour au » ; cœur coupé, la dernière valeur s'affiche, datée.
 
-#### FR-131 : Les analyses d'épargne repèrent les dormants, recommandent un produit et notent la fidélité
+#### FR-131 : Les analyses d'épargne repèrent les dormants, recommandent un produit, notent la fidélité, prévoient l'encours et segmentent les épargnants
 
-À partir des comptes **lus du cœur** (FR-130), l'IA commune produit trois sorties pour le **GP, le RA, le collecteur et le DG** : (1) les **comptes dormants** (inactivité selon le délai du produit, FR-106) avec leur potentiel ; (2) une **recommandation de produit d'épargne** selon le profil (par exemple un dépôt à terme pour un client qui laisse un solde stable) ; (3) un **score de fidélité** 0-100 par client, avec ses facteurs (régularité des dépôts, ancienneté, usage de plusieurs produits). L'IA ne modifie aucun compte. Une relance de dormant est **proposée** ; un humain l'envoie.
+À partir des comptes **lus du cœur** (FR-130), l'IA commune produit cinq sorties pour le **GP, le RA, le collecteur et le DG** : (1) les **comptes dormants** (inactivité selon le délai du produit, FR-106) avec leur potentiel ; (2) une **recommandation de produit d'épargne** selon le profil (par exemple un dépôt à terme pour un client qui laisse un solde stable) ; (3) un **score de fidélité** 0-100 par client, avec ses facteurs (régularité des dépôts, ancienneté, usage de plusieurs produits) ; (4) une **prévision de l'encours d'épargne** à 1 et 3 mois, par réseau et par agence, avec un intervalle (pour le DG et le DAF) ; (5) une **segmentation des épargnants** en segments nommés et définis par leur critère (par exemple réguliers, saisonniers, gros déposants, dormants probables) pour le GP, le RA et le DG. L'IA ne modifie aucun compte. Une relance de dormant est **proposée** ; un humain l'envoie.
 
 **Conséquences (testables) :**
 - Un compte à vue sans mouvement depuis le délai du produit apparaît dans la liste des dormants avec la date du dernier mouvement du cœur.
 - Le score de fidélité affiche ses facteurs et « règle ou modèle, version, date ».
-- Un client sans compte d'épargne n'apparaît dans aucune de ces trois sorties.
-- Sans IA commune, la liste des dormants est calculée par la règle du délai (sans potentiel ni recommandation) ; le score de fidélité s'affiche « indisponible ».
+- Un client sans compte d'épargne n'apparaît dans aucune de ces cinq sorties.
+- La prévision de l'encours affiche, par agence, la valeur à 1 et 3 mois et son intervalle, la période d'historique utilisée et l'écart entre la prévision précédente et l'encours réel ; elle est rangée sous « estimation ».
+- Chaque épargnant appartient à un segment, et chaque segment affiche son critère et son effectif ; un segment n'est jamais un refus ni un prix.
+- Sans IA commune, la liste des dormants est calculée par la règle du délai (sans potentiel ni recommandation) ; la prévision est une moyenne glissante marquée « règle » ; la segmentation applique des seuils de solde et de régularité marqués « règle » ; le score de fidélité s'affiche « indisponible ».
 
 #### FR-132 : Les consentements sont horodatés, par finalité, et retirables
 
-La fiche porte des **consentements** distincts : **données personnelles** (traitement par l'IMF, obligatoire à la création), **géolocalisation** (position du client, de l'agent en visite de ce client), **IA commune** (envoi de données structurées, dont le secteur d'activité, à la famille IA commune), **marketing** (partie 4b), **consultation du bureau de crédit** (BIC, saisie manuelle au jour 1 : décision C18). Chaque consentement a sa date, son recueil (preuve : signature ou case cochée par l'agent avec photo/horodatage), sa version de texte, et son retrait. **Aucune donnée ne part vers l'IA commune sans le consentement de la finalité** (apprentissage fédéré du moteur d'installation). Le retrait d'un consentement arrête l'usage futur et n'efface pas ce que la loi impose de conserver. [ASSUMPTION : durées de conservation et texte des consentements à faire valider par l'IMF et un juriste ; hébergement local par pays : non établi.]
+La fiche porte des **consentements** distincts : **données personnelles** (traitement par l'IMF, obligatoire à la création), **géolocalisation** (position du client, de l'agent en visite de ce client), **IA commune** (renvoi d'écarts anonymisés, dont le secteur d'activité, à la famille IA commune pour l'apprentissage), **marketing** (partie 4b), **consultation du bureau de crédit** (BIC, saisie manuelle au jour 1 : décision C18). Chaque consentement a sa date, son recueil (preuve : signature ou case cochée par l'agent avec photo/horodatage), sa version de texte, et son retrait. L'IA commune tourne en instance locale chez l'IMF : les données du client n'en sortent pas. **Aucun écart du client n'est renvoyé pour l'apprentissage commun sans le consentement de la finalité**, et les écarts renvoyés sont anonymisés (apprentissage fédéré du moteur d'installation). Le retrait d'un consentement arrête l'usage futur et n'efface pas ce que la loi impose de conserver. [ASSUMPTION : durées de conservation et texte des consentements à faire valider par l'IMF et un juriste ; hébergement local par pays : non établi.]
 
 **Conséquences (testables) :**
 - Une fiche sans consentement « données personnelles » ne se convertit pas.
-- Un client sans consentement « IA commune » : aucune de ses données n'est dans le lot envoyé à l'IA commune (test sur le lot).
+- Un client sans consentement « IA commune » : aucune de ses données n'est dans les écarts renvoyés pour l'apprentissage commun (test sur le lot renvoyé), et les écarts renvoyés ne portent aucun identifiant direct.
 - Retirer la géolocalisation efface la position de la fiche (FR-118) et empêche de nouvelles positions pour ce client.
 - Chaque consentement liste, sur la fiche : finalité, date, version du texte, état.
 
@@ -1527,19 +1715,20 @@ L'application terrain (Flutter, comme PRD-D FR-109) permet hors connexion : cré
 
 **Dans la démo.** Il n'y a **aucun écran de saisie d'un encaissement terrain** hors API : la visite n'a pas de champ « montant collecté ». La démo affiche des agrégats de collecte (jour, mois, objectif) et crédite « le solde client » à la validation, ce qui doublonne le cœur. Les chiffres de la file hors ligne se contredisent (165 000 contre 120 000). Rien n'est vraiment mis en file : le bouton « Synchroniser » attend 1,5 s.
 
-**Ce que ça veut dire.** Le collecteur ramasse de l'argent chez des clients : remboursements d'échéances et dépôts d'épargne. Prospera **enregistre le geste** (qui, quoi, combien, où, quand, preuve), **remet un reçu**, **renvoie au cœur** ; le cœur fait foi pour l'imputation, le solde et l'écriture (décisions A1, A5, A8). La collecte reste « déclarée » tant que le cœur ne l'a pas confirmée. Les collectes de tontine (cotisation rotative) sont **« bientôt »**. Le noyau Terrain de PRD-D §6.1 fournit la visite, la tournée, la position et la remise d'espèces ; ce module y ajoute l'argent collecté du côté IMF.
+**Ce que ça veut dire.** Le collecteur ramasse de l'argent chez des clients : remboursements d'échéances et dépôts d'épargne. Prospera **enregistre le geste** (qui, quoi, combien, où, quand, preuve), **remet un reçu**, **renvoie au cœur** ; le cœur fait foi pour l'imputation, le solde et l'écriture (décisions A1, A5, A8). **La collecte est un encaissement fait pour le compte de l'IMF**, à la date où le collecteur reçoit l'argent ; elle n'est pas un dépôt du collecteur. Elle reste « déclarée » tant que le cœur ne l'a pas confirmée. Les collectes de tontine (cotisation rotative) sont **« bientôt »**. Le noyau Terrain de PRD-D §6.1 fournit la visite, la tournée, la position et la remise d'espèces ; ce module y ajoute l'argent collecté du côté IMF.
 
 #### FR-135 : Le collecteur enregistre un remboursement ou un dépôt d'épargne et remet un reçu
 
 Le collecteur (COLL), ou l'agent terrain, enregistre pour un client de sa zone : le **type** (remboursement d'une échéance de prêt, dépôt d'épargne), le **montant**, le **canal** (espèces, Mobile Money : FR-140), la date et l'heure, la position (si consentie, FR-118) et le **compte ou l'échéance visés**. Un remboursement vise l'échéance due du prêt EN_GESTION du client (lue du cœur) ; un dépôt vise un compte d'épargne du client (lu du cœur). L'enregistrement est un geste de Prospera : il ne crée ni ne modifie aucun solde. Réalise UJ-4.
 
-Le client reçoit un **reçu** à chaque collecte : papier et/ou SMS selon ses contacts, avec numéro, date, montant, type, agent, compte ou échéance. Le reçu est **numéroté sans trou par collecteur** ; il est marqué « provisoire » tant que le cœur n'a pas confirmé, puis le client peut recevoir la confirmation. Un reçu n'est jamais supprimé : une erreur se corrige par une collecte d'annulation justifiée (FR-139).
+Le client reçoit un **reçu** à chaque collecte : papier et/ou SMS selon ses contacts, avec numéro, date, montant, type, agent, compte ou échéance. Le reçu est **numéroté sans trou par collecteur** ; ce **numéro de reçu Prospera** est la **clé d'appariement obligatoire** de la collecte avec le cœur et avec la remise (FR-138, annexe C). Le reçu est marqué « provisoire » tant que le cœur n'a pas confirmé, puis le client peut recevoir la confirmation. Un reçu n'est jamais supprimé : une erreur se corrige par une collecte d'annulation justifiée (FR-139).
 
 **Conséquences (testables) :**
 - Un collecteur ne peut enregistrer une collecte que pour un client de sa zone et de ses clients de collecte.
 - Un montant nul ou négatif est refusé ; un remboursement supérieur au restant dû est accepté (le surplus devient un crédit du client : règle de la partie 2) et signalé.
 - Après l'enregistrement, le solde du client affiché reste celui du cœur jusqu'à la confirmation (FR-137).
 - Un client dont le KYC est « à renouveler » ou en correspondance de sanctions peut rembourser et déposer ; la collecte est acceptée (FR-121, FR-122).
+- Un envoi au cœur ou une ligne de la liste « à saisir dans le cœur » sans numéro de reçu est refusé.
 - Le numéro de reçu est continu pour un collecteur ; hors ligne, il est attribué sur l'appareil à partir d'une plage réservée (paramètre).
 - Un reçu affiche « provisoire » tant que la collecte n'est pas confirmée.
 - Le client qui conteste présente son reçu ; le GP retrouve la collecte par son numéro en moins de 3 clics.
@@ -1558,7 +1747,7 @@ Hors connexion, la collecte est une action de la file de l'appareil, avec une **
 
 Prospera propose le rattachement : l'échéance due la plus ancienne, avec l'ordre d'imputation **pénalités, intérêts, capital** (paramétrable ; décisions A4, A5). Un paiement **anticipé** réduit la durée (règle de la partie 2) ; le **trop-perçu** devient un crédit du client. L'imputation **officielle** est celle du cœur ; en cas d'écart entre la proposition de Prospera et celle du cœur, **le cœur gagne** et l'écart est signalé au GP. Les pénalités et intérêts de retard sont calculés par le cœur (le cœur fictif dans la démo) ; Prospera les lit. Réalise UJ-4.
 
-Chaque collecte suit les états : DECLAREE (enregistrée), ENVOYEE (transmise au cœur), CONFIRMEE (mouvement du cœur reçu), REFUSEE (le cœur la rejette, avec motif). Prospera tire toujours ; aucun port n'est ouvert chez l'IMF (décision A10). **Si le cœur sait recevoir** un remboursement ou un dépôt, Prospera l'envoie comme « paiement à comptabiliser » ; **sinon**, Prospera produit la liste **« à saisir dans le cœur »** (par agence et par jour, exportable) et attend le mouvement du cœur pour confirmer (décision A1, « si possible »). Le contrat d'échange est en 6.5.
+Chaque collecte suit les états : DECLAREE (enregistrée), ENVOYEE (transmise au cœur), CONFIRMEE (mouvement du cœur reçu), REFUSEE (le cœur la rejette, avec motif). Prospera tire toujours ; aucun port n'est ouvert chez l'IMF (décision A10). **Si le cœur sait recevoir** un remboursement ou un dépôt, Prospera l'envoie comme « paiement à comptabiliser » avec le numéro de reçu Prospera ; **sinon**, Prospera produit la liste **« à saisir dans le cœur »** (par agence et par jour, exportable) et attend le mouvement du cœur pour confirmer (décision A1, « si possible »). Le contrat d'échange est en 6.5.
 
 **Conséquences (testables) :**
 - Une collecte de 30 000 FCFA sur une échéance en retard avec pénalité 2 000, intérêts 8 000, capital 25 000 est proposée : pénalité 2 000, intérêts 8 000, capital 20 000.
@@ -1567,26 +1756,31 @@ Chaque collecte suit les états : DECLAREE (enregistrée), ENVOYEE (transmise au
 - Un cœur en panne : les collectes restent DECLAREE ou ENVOYEE ; rien n'est perdu ; à son retour elles partent, sans doublon (clé d'idempotence).
 - Un cœur qui ne sait pas recevoir : la liste « à saisir dans le cœur » du jour contient chaque collecte DECLAREE, avec client, identifiant du cœur, montant, canal, collecteur, numéro de reçu ; une collecte quitte la liste quand le mouvement du cœur la confirme.
 - Une collecte confirmée n'est plus modifiable.
+- Une collecte envoyée au cœur porte son numéro de reçu Prospera ; le cœur la renvoie avec ce numéro, et le mouvement est apparié sur lui.
 - Une collecte REFUSEE par le cœur apparaît dans la file du comptable et du GP avec le motif.
 
-#### FR-138 : Le collecteur remet les espèces au guichet, contre une remise contresignée
+#### FR-138 : Le collecteur remet les espèces au guichet : un transfert de caisse, contre une remise contresignée
 
-Le collecteur **remet** au guichet de l'agence (comptable-caissier, CPT) les espèces collectées. La remise liste les collectes concernées (ou le total), est **comptée par le CPT** et **contresignée** : la remise a un montant déclaré par le collecteur, un montant compté par le CPT, et un écart (FR-145). Une collecte en espèces n'est « remise » que lorsque la remise qui la porte est contresignée. L'entrée d'argent au guichet (dépôt ou remboursement au guichet) est ensuite une opération du cœur, saisie par le CPT ; Prospera la lit (6.4). Réalise UJ-4.
+Le collecteur **remet** au guichet de l'agence (comptable-caissier, CPT) les espèces collectées. La collecte a déjà été comptabilisée comme un encaissement pour le compte de l'IMF (FR-137) : **la remise est un transfert de caisse** du collecteur vers le guichet. **Elle ne crédite aucun client une seconde fois** et ne crée ni remboursement ni dépôt. Côté cœur, elle déplace l'argent du compte d'attente du collecteur vers la caisse du guichet (objet « Remise d'espèces » de l'annexe C). La remise liste les collectes concernées, chacune par son **numéro de reçu Prospera** (clé d'appariement obligatoire, que l'opérateur du cœur recopie quand le cœur ne reçoit pas de Prospera) ; elle est **comptée par le CPT** et **contresignée** : la remise a un montant déclaré par le collecteur, un montant compté par le CPT, et un écart (FR-145). Une collecte en espèces n'est « remise » que lorsque la remise qui la porte est contresignée. Un dépôt ou un remboursement fait **directement par un client au guichet** est, lui, une opération du cœur saisie par le CPT ; Prospera la lit (6.4). Réalise UJ-4.
 
 **Conséquences (testables) :**
 - Le collecteur ne peut pas contresigner sa propre remise.
 - Une remise dont le montant compté diffère du montant déclaré crée un écart nommé, avec les deux montants.
+- Une remise ne produit aucun mouvement de paiement ni d'épargne sur le compte d'un client ; elle ne change aucun reste dû.
+- Une remise dont une collecte n'a pas de numéro de reçu Prospera est refusée ; une collecte ne peut pas figurer dans deux remises.
+- Le total des remises d'un collecteur sur une journée, ajouté à ce qu'il détient, est égal aux espèces collectées plus le fonds (FR-143), au franc près.
 - Une collecte en espèces non remise depuis plus de 1 jour (paramètre) apparaît dans la liste « espèces non remises » du RA.
 - La remise est possible en ligne seulement (le CPT compte ; il n'y a pas de remise hors ligne).
 
 #### FR-139 : La collecte est rapprochée du cœur et de la remise, et se corrige par contre-passation
 
-Le **rapprochement** compare, pour chaque jour et chaque collecteur : les collectes enregistrées, les remises contresignées, et les mouvements du cœur. Les écarts : collecte sans mouvement du cœur (en attente), mouvement du cœur sans collecte, montants différents. Un paiement Mobile Money est rattaché à l'échéance **automatiquement** si |payé − échéance| ÷ échéance < 1 % ; sinon il entre dans la **file de rapprochement du comptable** ; **aucun paiement reçu n'est refusé** (décision A6). Les **doublons** (même client, même montant à ± 100 FCFA, fenêtre de 5 minutes : paramètres) sont signalés et bloquent la validation automatique. Réalise UJ-4.
+Le **rapprochement** compare, pour chaque jour et chaque collecteur : les collectes enregistrées, les remises contresignées, et les mouvements du cœur. Les écarts : collecte sans mouvement du cœur (en attente), mouvement du cœur sans collecte, montants différents. Un paiement Mobile Money est rattaché à l'échéance **automatiquement** si |payé − échéance| ÷ échéance < 1 % ; sinon il entre dans la **file de rapprochement du comptable**. **Le rattachement choisit l'échéance, il ne la solde pas** : tout écart reste un paiement partiel (reste dû) ou un trop-perçu (crédit du client), et la relance ne s'arrête que quand le reste dû est nul ; une **tolérance d'arrondi** de quelques FCFA, paramètre distinct (défaut : 5 FCFA [ASSUMPTION]), est la seule exception ; **aucun paiement reçu n'est refusé** (décision A6). Les **doublons** (même client, même montant à ± 100 FCFA, fenêtre de 5 minutes : paramètres) sont signalés et bloquent la validation automatique. Réalise UJ-4.
 
-Une collecte confirmée ne se modifie pas. Une erreur de montant ou de client se corrige par **annulation** (collecte inverse) et nouvelle collecte, avec **motif obligatoire**, validées par le RA ; l'annulation est envoyée au cœur selon l'état (FR-137). Avant la confirmation du cœur (état DECLAREE), le collecteur peut corriger avec un motif tant que la remise n'est pas contresignée.
+Une collecte confirmée ne se modifie pas. Une erreur de montant ou de client se corrige par **annulation** (collecte inverse) et nouvelle collecte, avec **motif obligatoire**, validées par le RA ; l'annulation est envoyée au cœur selon l'état (FR-137 ; objet « Annulation de collecte » de l'annexe C). Avant la confirmation du cœur (état DECLAREE), le collecteur peut corriger avec un motif tant que la remise n'est pas contresignée.
 
 **Conséquences (testables) :**
-- Un paiement de 49 800 FCFA pour une échéance de 50 000 (écart 0,4 %) est rattaché sans intervention ; un paiement de 45 000 va dans la file du comptable.
+- Un paiement de 49 800 FCFA pour une échéance de 50 000 (écart 0,4 %) est rattaché à cette échéance sans intervention, qui garde un reste dû de 200 FCFA et reste en relance ; un paiement de 45 000 va dans la file du comptable.
+- Un paiement de 50 003 FCFA pour une échéance de 50 000 est soldé, 3 FCFA étant sous la tolérance d'arrondi.
 - Deux collectes du même client, 30 000 FCFA et 30 050 FCFA, à 3 minutes d'écart sont signalées comme doublon possible ; la seconde n'est pas validée automatiquement.
 - L'écran de rapprochement liste les écarts ouverts avec leur ancienneté ; l'écart résolu a un motif et un auteur.
 - Une annulation sans motif est refusée.
@@ -1726,7 +1920,7 @@ Le **DAF** (le DG et le RA en lecture) voit, pour chaque agence, une **prévisio
 | Produits | `catalogue` : articles, grilles de prix, conditionnements (PRD-D §7.3) | Module distinct `produits-financiers` : bornes, taux, frais, versions, éligibilité (décision T5) ; le `catalogue` reste celui des articles | FR-100 à FR-111 |
 | Plafond d'usure | Démo : produit à 2,5 %/mois, microcrédit à 28 %, « 24 % pile » | Contrôle du TEG à la publication ; jeu de démo conforme | FR-108, FR-111 |
 | Amortissement | Démo : capital constant ; cahier : mensualité constante | Méthode choisie par produit ; annuité constante par défaut | FR-102 |
-| Éligibilité | Démo : non contrôlée | Score et ancienneté ; dérogation du ROC | FR-104 |
+| Éligibilité | Démo : non contrôlée | L'ancienneté bloque (dérogation du ROC) ; le score alerte, il ne bloque pas | FR-104 |
 | Client | PRD-D : Tiers / point de vente (`pdv`) | Fiche de relation `microfinance` : KYC, LBC/FT, secteur, consentements, groupes ; une personne = une fiche | FR-114 à FR-134 |
 | KYC | Démo : lecture seule | Niveaux, validation par un autre que le créateur, revue périodique, filtrage des listes rafraîchies | FR-119 à FR-122 |
 | Groupe solidaire | PRD-D §6.0 : capacité du noyau « Tiers collectif » ; démo : lecture seule | Écrit, créé, tracé ; compte du groupe au cœur ; tontines « bientôt » | FR-129 |
@@ -1736,11 +1930,11 @@ Le **DAF** (le DG et le RA en lecture) voit, pour chaque agence, une **prévisio
 | Preuve de présence | PRD-D FR-102 : 200 m, signalement | Rayon et blocage : voir partie 4a (visite d'instruction) | partie 4a |
 | Caisse | PRD-D §6.0 : caisse de guichet hors périmètre ; démo : caisse complète tenue par Prospera | Guichet **lu du cœur** ; Prospera tient la caisse des collecteurs et la clôture du jour | FR-143 à FR-146 |
 | Mobile Money | Démo : Flooz et Mixx ; cahier : un seul opérateur | Opérateur par pays, banques via PI-SPI ; validation du comptable avant crédit | FR-140 |
-| IA | Démo : scores constants | Capacités d'IA servies par l'IA commune, provenance affichée, jamais bloquantes | FR-112, FR-113, FR-124 à FR-128, FR-131, FR-142, FR-147 à FR-149 |
+| IA | Démo : scores constants | Capacités d'IA servies par l'IA commune en instance locale chez l'IMF, provenance affichée, jamais bloquantes | FR-112, FR-113, FR-124 à FR-128, FR-131, FR-142, FR-147 à FR-149 |
 
 ---
 
-Les sections 6.5 à 6.9 décrivent ce que Prospera échange avec le logiciel cœur de l'IMF, le cœur fictif livré pour la démonstration, le risque de portefeuille et le reporting BCEAO. Elle numérote FR-150 à FR-199 (FR-199 est rangée dans §6.5 ; FR-180, FR-181, FR-190 et FR-194 portent les capacités d'IA). Elle suit la partie 3a (§6.1 à §6.4). Les modules marqués ★ sont dans la démo de février (récit §5, décision B5).
+Les sections 6.5 à 6.9 décrivent ce que Prospera échange avec le logiciel cœur de l'IMF, le cœur fictif livré pour la démonstration, le risque de portefeuille et le reporting BCEAO. Elle numérote FR-150 à FR-199 (FR-199 est rangée dans §6.5 ; FR-272 est ajoutée dans §6.7 et sera renumérotée par la synthèse ; FR-180, FR-181, FR-190 et FR-194 portent les capacités d'IA). Elle suit la partie 3a (§6.1 à §6.4). Les modules marqués ★ sont dans la démo de février (récit §5, décision B5).
 
 Trois règles valent pour toute la partie.
 
@@ -1758,15 +1952,20 @@ Parcours : UJ-3 (le DG pilote le réseau : ses chiffres viennent du cœur, avec 
 
 Prospera tient : le dossier de crédit jusqu'au comité, l'échéancier **contractuel** décidé par le comité, l'ordre de décaissement, les relances, le recouvrement, le pilotage et la caisse des collecteurs. Le cœur tient : les soldes, l'encours officiel, l'échéancier officiel après décaissement, les pénalités et intérêts de retard, l'épargne et la caisse du guichet. Réalise UJ-3, UJ-5.
 
+**Le reste dû a un seul porteur de vérité : le cœur.** Le module `paiement` reste **propriétaire de la Créance** (PRD paiement), mais le **montant exigible** de la Créance se **recale sur la dernière lecture du cœur** (reste dû de l'échéance). Un **lien de paiement n'est émis qu'après relecture du reste dû** ; la lecture ne doit pas être plus vieille qu'un âge maximal (paramètre, annexe D). Un **mouvement du cœur sans paiement Prospera correspondant** (un client a payé au guichet du cœur) **réduit ou ferme la Créance** avant le prochain envoi de lien ou de relance. En cas d'écart entre le montant de la Créance et celui du cœur, **le client voit le montant du cœur**, et l'écart va dans la file des écarts (FR-159). Le risque évité : un client qui paie deux fois.
+
 **Conséquences (testables) :**
 - Aucun écran de Prospera ne permet de saisir ou de modifier un solde, un encours, un montant de pénalité ou un solde d'épargne.
 - Tout montant d'argent affiché porte sa source (« cœur » ou « Prospera ») et sa date de dernière lecture.
 - Un montant calculé par Prospera (provision proposée, PAR) porte la mention « calculé par Prospera sur les données du cœur du [date] », jamais « comptabilisé ».
 - Une écriture comptable n'est jamais produite par Prospera dans le cœur ; l'export des écritures est un lot séparé, non prioritaire (partie 4b).
+- Un client qui paie 50 000 FCFA au guichet du cœur : à la lecture suivante, la Créance de `paiement` de cette échéance est fermée ; le lien de paiement prévu à J-3 n'est pas émis.
+- Un lien de paiement n'est émis que si le reste dû a été relu depuis moins de l'âge maximal ; sinon il attend la relecture.
+- Une Créance à 50 000 FCFA quand le cœur dit 30 000 : le client voit 30 000, et une ligne de la file des écarts nomme les deux montants.
 
 #### FR-151 : Prospera reçoit du cœur les objets de l'argent
 
-Prospera reçoit du cœur : les clients (identité, agence, statut), les prêts (encours, taux, durée, jours de retard, garanties), les échéanciers officiels, les mouvements de paiement, les pénalités, les comptes d'épargne et leurs mouvements, la caisse du guichet, et, si le cœur la fournit, la balance au plan comptable SFD (décision E1). Chaque objet est défini à l'annexe C. Réalise UJ-3, UJ-5.
+Prospera reçoit du cœur : les clients (identité, agence, statut), les prêts (encours, taux, durée, jours de retard, garanties), les échéanciers officiels, les mouvements de paiement, les pénalités, les comptes d'épargne et leurs mouvements, la caisse du guichet, la **classe réglementaire officielle** et les **provisions comptabilisées**, les dépôts de garantie bloqués, les flux Mobile Money du compte du client quand le cœur les distingue, le reste dû de chaque échéance, et, si le cœur la fournit, la balance au plan comptable SFD (décision E1). Chaque objet est défini à l'annexe C. Réalise UJ-3, UJ-5.
 
 **Conséquences (testables) :**
 - Chaque objet reçu garde l'identifiant stable que le cœur lui donne ; Prospera ne le remplace jamais.
@@ -1776,13 +1975,14 @@ Prospera reçoit du cœur : les clients (identité, agence, statut), les prêts 
 
 #### FR-152 : Prospera renvoie au cœur ce qu'il décide
 
-Prospera renvoie au cœur : les dossiers accordés (avec l'échéancier contractuel du comité), les ordres de décaissement à exécuter, et, si le cœur sait les recevoir, les remboursements saisis dans Prospera (FR-155). Réalise UJ-3.
+Prospera renvoie au cœur, chacun avec sa clé d'origine et son état (annexe C) : la création d'un client, la demande d'ouverture d'un compte d'épargne, les dossiers accordés (avec l'échéancier contractuel du comité), l'annulation d'un dossier ou d'un ordre, les ordres de décaissement à exécuter, la déclaration d'un décaissement exécuté par `paiement`, et, si le cœur sait les recevoir, les remboursements saisis dans Prospera (FR-155), les annulations de collecte, les remises d'espèces, le plan d'étalement, le transfert au contentieux, la perte définitive et le blocage ou la restitution d'un dépôt de garantie. Réalise UJ-3.
 
 **Conséquences (testables) :**
-- Un dossier n'est envoyé au cœur qu'à l'état EN_GESTION, jamais avant la décision du comité.
+- Un dossier n'est envoyé au cœur qu'à la décision du comité (état EN_GESTION), jamais avant. **Le cœur ne crée le prêt et l'échéancier officiel qu'à l'exécution de l'ordre de décaissement**, pas à l'acceptation du dossier accordé.
 - Chaque envoi porte une clé d'origine unique et l'identité de l'auteur de la décision.
 - Chaque envoi a un état visible : à envoyer, envoyé, accepté, refusé (avec le motif du cœur), jamais confirmé après un délai (paramètre ; défaut : 24 h).
 - Un refus du cœur remonte au rôle concerné (CC ou ROC) dans sa file, avec le motif.
+- Chaque message sortant du corps du PRD (« envoyé au cœur ») a une ligne dans l'annexe C avec son sens, sa clé d'origine et ses états ; un test parcourt l'annexe et le corps pour vérifier qu'aucun message n'a été oublié.
 
 #### FR-153 : Le dossier accordé part avec l'échéancier contractuel
 
@@ -1792,14 +1992,15 @@ Le comité génère l'échéancier contractuel (partie 2). Le dossier accordé l
 - Un dossier à l'état EN_ANALYSE_ROC ou EN_COMITE_CREDIT n'apparaît jamais dans les envois.
 - L'envoi contient l'échéancier contractuel complet, ligne par ligne (date, capital, intérêts, frais, assurance).
 - Un dossier dont le TEG dépasse le plafond d'usure en vigueur à son octroi n'est pas envoyé (FR-10, FR-36) et lève une alerte.
-- Après acceptation par le cœur, le prêt reçoit l'identifiant du cœur ; il est lié au dossier de Prospera pour toujours.
+- Après acceptation du dossier par le cœur, le dossier est « accepté » mais aucun prêt n'existe encore au cœur ; le prêt naît à l'exécution de l'ordre, reçoit alors l'identifiant du cœur, et est lié au dossier de Prospera pour toujours.
 
 #### FR-154 : L'ordre de décaissement est exécuté par le cœur, ou par `paiement`
 
 Prospera émet un ordre de décaissement par dossier accordé. Les décaissements en espèces au guichet et par virement sont **exécutés par le cœur** sur cet ordre ; l'espèces est autorisé par le comptable-caissier (CPT) ou le DAF. Les décaissements par Mobile Money et PI-SPI sont exécutés par le module `paiement` (PRD paiement FR-P65 à FR-P69, deux personnes distinctes), puis **déclarés** au cœur (décision A3). Réalise UJ-3.
 
 **Conséquences (testables) :**
-- Un ordre a un des états : à exécuter, exécuté (avec date de valeur et référence du cœur ou du paiement), rejeté (avec motif), expiré.
+- Un ordre a un des états : à exécuter, exécuté (avec date de valeur et référence du cœur ou du paiement), rejeté (avec motif), expiré, **inconnu** (l'ordre est parti et le résultat n'est pas connu : rapprochement obligatoire contre le relevé du fournisseur ou du cœur avant toute réémission).
+- Un ordre rejeté ou expiré revient « à ordonner » avec son motif ; sa clé d'idempotence n'est jamais régénérée ; au redémarrage ou après restauration, les ordres de la dernière heure sont rapprochés avant tout renvoi.
 - Un même ordre ne produit jamais deux décaissements : une clé unique par ordre est refusée à la seconde présentation (FR-160).
 - Un décaissement Mobile Money ou PI-SPI exécuté par `paiement` est transmis au cœur comme « décaissement exécuté hors du cœur » ; tant que le cœur ne l'a pas enregistré, l'écran dit « en attente du cœur ».
 - Un ordre en espèces refusé par le cœur ne bascule jamais seul sur un autre canal.
@@ -1811,7 +2012,7 @@ Un remboursement saisi dans Prospera (collecte terrain, guichet, Mobile Money va
 
 **Conséquences (testables) :**
 - Un remboursement renvoyé reste « en attente du cœur » jusqu'à ce que le mouvement correspondant arrive du cœur ; il ne réduit alors l'encours officiel que par ce mouvement.
-- Le rapprochement entre le paiement de Prospera et le mouvement du cœur suit la règle de la partie 2 (écart inférieur à 1 % : rattachement automatique ; sinon file du comptable ; jamais refusé).
+- Le rapprochement entre le paiement de Prospera et le mouvement du cœur suit la règle de la partie 2 (écart inférieur à 1 % : rattachement automatique, qui choisit l'échéance sans la solder ; sinon file du comptable ; jamais refusé) et s'apparie sur le numéro de reçu Prospera (annexe C).
 - Un remboursement qui reste sans mouvement du cœur au-delà d'un délai (paramètre ; calibré sur les données de l'IMF ; défaut de démo : 48 h) apparaît dans la file des écarts.
 
 #### FR-156 : Quand le cœur ne sait pas recevoir, Prospera sort la liste « à saisir dans le cœur »
@@ -1819,7 +2020,7 @@ Un remboursement saisi dans Prospera (collecte terrain, guichet, Mobile Money va
 Si le cœur ne sait recevoir ni les remboursements ni les dossiers, Prospera produit chaque jour, par agence, la liste des éléments à saisir dans le cœur, et attend le mouvement du cœur pour confirmer. Réalise UJ-3.
 
 **Conséquences (testables) :**
-- La liste est un fichier lisible (tableur) et un écran, par agence, avec : référence, client, montant, date, canal, auteur.
+- La liste est un fichier lisible (tableur) et un écran, par agence, avec : référence, numéro de reçu Prospera (à recopier par l'opérateur du cœur : clé d'appariement), client, montant, date, canal, auteur.
 - Un élément quitte la liste quand le cœur renvoie le mouvement correspondant, jamais sur déclaration d'un utilisateur de Prospera.
 - Un élément resté dans la liste au-delà d'un délai (paramètre ; calibré sur les données de l'IMF ; défaut de démo : 72 h) lève une alerte au RA de l'agence.
 - La liste est la même, que le cœur reçoive ou non par la suite : elle sert aussi de preuve de ce qui a été demandé.
@@ -1852,6 +2053,7 @@ Chaque écran qui montre une donnée du cœur affiche la date et l'heure de la d
 - Une donnée plus vieille que le double de sa fraîcheur par défaut est signalée « périmée » sur l'écran.
 - Chaque ligne de la file porte : objet, clé d'origine, nature de l'écart, date, auteur de la résolution quand elle a lieu.
 - Résoudre un écart n'efface pas la ligne : elle passe « résolue » avec l'auteur et le motif.
+- Un écart de montant entre la Créance de `paiement` et le reste dû du cœur crée une ligne qui nomme les deux montants ; l'écran du client montre celui du cœur (FR-150).
 
 #### FR-160 : L'idempotence et le rejeu sont des capacités du contrat
 
@@ -1865,12 +2067,13 @@ Chaque objet échangé porte une clé d'origine. Présenter deux fois le même o
 
 #### FR-161 : Prospera reçoit des mouvements, jamais des totaux
 
-Pour les paiements, les pénalités et l'épargne, Prospera reçoit des **mouvements** (un fait, une date de valeur, un montant), pas des totaux à remplacer. Les soldes affichés se déduisent des mouvements reçus et sont comparés aux valeurs de contrôle que le cœur envoie. Réalise UJ-3.
+Pour les paiements, les pénalités et l'épargne, Prospera reçoit des **mouvements** (un fait, une date de valeur, un montant), pas des totaux à remplacer. Les soldes affichés sont des **projections** : l'encours officiel lu du cœur, plus les mouvements postérieurs reçus. Elles sont comparées aux valeurs de contrôle que le cœur envoie, et la valeur du cœur l'emporte toujours. Réalise UJ-3.
 
 **Conséquences (testables) :**
-- Un solde de prêt de Prospera est recalculé à partir de l'encours officiel et des mouvements postérieurs ; il est égal au solde de contrôle du cœur au franc près, sinon une ligne naît dans la file des écarts.
+- La projection du solde d'un prêt (encours officiel plus mouvements postérieurs) est égale au solde de contrôle du cœur au franc près, sinon une ligne naît dans la file des écarts et l'écran affiche la valeur du cœur.
 - Un mouvement antidaté du cœur est intégré avec sa date de valeur et déclenche le recalcul des jours de retard.
 - Un mouvement n'est jamais modifié ; une annulation du cœur arrive comme un mouvement inverse.
+- Un mouvement de paiement du cœur sans paiement Prospera correspondant réduit ou ferme la Créance de `paiement` correspondante (FR-150).
 
 #### FR-162 : L'échéancier contractuel est comparé à l'échéancier officiel
 
@@ -1907,7 +2110,8 @@ Quand le cœur a des codes d'agence, Prospera les reprend et les range dans le m
 L'indisponibilité du cœur ne coupe jamais Prospera : les écrans continuent à servir la dernière donnée connue, marquée périmée (FR-159). Les décisions qui engagent de l'argent sont suspendues, pas les autres. Réalise UJ-3.
 
 **Conséquences (testables) :**
-- Le dossier se prépare, s'instruit et passe en comité même si le cœur est coupé ; l'envoi attend la reprise (FR-160).
+- Le dossier se prépare, s'instruit et passe en comité, qui décide (EN_GESTION), même si le cœur est coupé ; l'envoi au cœur attend la reprise (FR-160).
+- Le cœur coupé, aucun lien de paiement n'est émis dont le reste dû n'a pas été relu dans l'âge maximal (FR-150) ; les écrans disent « reste dû à confirmer ».
 - Le décaissement n'est ni lancé ni marqué exécuté tant que le cœur n'a pas répondu.
 - Un bandeau « cœur indisponible depuis [heure] » apparaît sur les écrans des rôles concernés et se retire à la reprise.
 - Les relances automatiques continuent sur la dernière échéance connue ; elles s'arrêtent pour un client dont un remboursement est « en attente du cœur » (paramètre).
@@ -1921,11 +2125,11 @@ Pour CPT, le DAF et le ROC, l'IA détecte, dans les échanges (FR-159), les **é
 - Un doublon certain (même clé d'origine) est traité par la règle d'idempotence (FR-160) sans IA ; l'IA ne traite que les doublons probables (même client, même montant, dates voisines).
 - Chaque proposition affiche sa confiance et les mouvements comparés.
 - Sans IA commune, la file des écarts fonctionne par règles (FR-159) ; la cause probable affiche « non installé » ; l'échange n'est jamais bloqué.
-- Règles de cette capacité : la provenance est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, un humain décide** ; un écart à une proposition exige un motif, renvoyé comme correction ; si l'IA est indisponible, rien ne bloque et le travail avance sur l'analyse humaine ; le mot « IA » n'est affiché que pour un modèle, une règle explicable sert tant que le modèle n'existe pas. Le moteur est l'IA commune (famille de modules à part) : ce PRD dit ce que l'IA fait pour l'IMF, pas comment. Aucune donnée n'y part sans le consentement de l'IMF (PRD moteur, apprentissage fédéré).
+- Règles de cette capacité : la provenance est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, un humain décide** ; un écart à une proposition exige un motif, renvoyé comme correction ; si l'IA est indisponible, rien ne bloque et le travail avance sur l'analyse humaine ; le mot « IA » n'est affiché que pour un modèle, une règle explicable sert tant que le modèle n'existe pas. Le moteur est l'IA commune, en instance locale chez l'IMF (règles communes de la partie 3) : ce PRD dit ce que l'IA fait pour l'IMF, pas comment. Rien ne sort de l'instance, sinon des écarts anonymisés, avec le consentement de l'IMF (PRD moteur, apprentissage fédéré).
 
 ### 6.6 Le cœur fictif de démonstration ★
 
-**Ce que ça veut dire.** Le logiciel cœur de l'IMF n'est pas connu. Pour que la démo soit crédible, Money Vibes livre un **cœur fictif** qui parle le contrat d'échange (annexe C). Il vit dans l'espace d'essai (PRD moteur) et sert la démo de l'IMF fictive : 3 agences, 10 agents, 1 000 prêts actifs (décision B4). Il est dans février malgré la spine Connecteurs AD-32 (décision A9) ; le vrai connecteur est hors février. Parcours : UJ-6 (le prospect découvre la démo).
+**Ce que ça veut dire.** Le logiciel cœur de l'IMF n'est pas connu. Money Vibes livre un **cœur fictif** qui parle le contrat d'échange (annexe C), **pour que l'IMF comprenne** ce que Prospera fait à côté de son logiciel, sans y toucher. Le **vrai connecteur** est pour « leur démo » (la démo faite avec leur logiciel), **pas maintenant**. Il vit dans l'espace d'essai (PRD moteur) et sert la démo de l'IMF fictive : 3 agences, 10 agents, 1 000 prêts actifs (décision B4). Il est dans février malgré la spine Connecteurs AD-32 (décision A9) ; le vrai connecteur est hors février, et pour leur démo. Parcours : UJ-6 (le prospect découvre la démo).
 
 #### FR-166 : Le cœur fictif tient ce que tient un vrai cœur
 
@@ -1951,7 +2155,7 @@ Le cœur fictif n'existe que dans l'espace d'essai et dans la démo. Une install
 Le cœur fictif reçoit les ordres de décaissement, les exécute après un délai simulé, et sait en rejeter selon des cas prévus. Réalise UJ-6.
 
 **Conséquences (testables) :**
-- Un ordre accepté passe « exécuté » avec une date de valeur et une référence du cœur fictif ; le prêt apparaît actif avec son échéancier officiel.
+- Un ordre accepté passe « exécuté » avec une date de valeur et une référence du cœur fictif ; le prêt apparaît actif avec son échéancier officiel **à ce moment seulement** : l'acceptation du dossier accordé ne crée ni prêt ni échéancier.
 - Un rejet simulé (compte inactif, plafond de caisse) renvoie un motif en clair que Prospera affiche.
 - Un doublon d'ordre est reconnu et compté.
 - Les délais et les cas de rejet sont des paramètres de l'espace d'essai.
@@ -1963,8 +2167,8 @@ Le cœur fictif produit, chaque jour de démo, des paiements, des pénalités et
 **Conséquences (testables) :**
 - Une proportion de prêts paie à l'heure, une proportion paie en retard, une proportion ne paie pas ; les proportions sont des paramètres de l'espace d'essai.
 - Les prêts en retard reçoivent des pénalités calculées par le cœur fictif, selon l'ordre d'imputation pénalités, intérêts, capital (paramétrable).
-- Le PAR1, PAR30 et PAR90 de la démo (FR-173) sont non nuls et varient d'un jour à l'autre sans intervention.
-- Les produits du jeu de démo respectent le plafond d'usure (TEG actuariel de 24 % par an au plus ; FR-10).
+- Les PAR 1, 7, 30, 60 et 90 de la démo (FR-173) sont non nuls et varient d'un jour à l'autre sans intervention.
+- Les produits du jeu de démo respectent le plafond d'usure (TEG de 24 % par an au plus, par la méthode de FR-108, au pire cas ; FR-10).
 - Le jeu est reproductible : un même réglage produit la même évolution.
 
 #### FR-170 : Le cœur fictif offre l'API et les fichiers, et sait tomber en panne
@@ -1987,7 +2191,7 @@ Le cœur fictif se remet à zéro à la demande d'un administrateur de l'espace 
 
 #### FR-172 : Dans la démo, un dossier créé va jusqu'à EN_GESTION
 
-Dans la démo, un utilisateur peut créer une agence, un agent et un vrai dossier de prêt, et le mener jusqu'à EN_GESTION : le comité décide, le dossier part au cœur fictif, l'ordre de décaissement est exécuté, l'échéancier officiel revient (décision B4). Réalise UJ-6.
+Dans la démo, un utilisateur peut créer une agence, un agent et un vrai dossier de prêt, et le mener jusqu'à EN_GESTION : le comité décide, le dossier part au cœur fictif, l'ordre de décaissement est exécuté, le prêt naît au cœur fictif avec son échéancier officiel, qui revient (décision B4). Réalise UJ-6.
 
 **Conséquences (testables) :**
 - Une agence créée dans la démo reçoit un code de Prospera (FR-164) et est connue du cœur fictif.
@@ -2000,12 +2204,13 @@ Dans la démo, un utilisateur peut créer une agence, un agent et un vrai dossie
 
 #### FR-173 : Le PAR est calculé en encours, de façon cumulative
 
-PAR1, PAR30 et PAR90 sont cumulatifs et se calculent sur l'**encours entier** des prêts en retard (pas sur les seuls montants échus, pas en nombre de dossiers). Le retard se mesure sur l'échéance impayée la plus ancienne (décision D5). Réalise UJ-3, UJ-5.
+PAR 1, PAR 7, PAR 30, PAR 60 et PAR 90 sont cumulatifs et se calculent sur l'**encours entier** des prêts en retard (pas sur les seuls montants échus, pas en nombre de dossiers). Le retard se mesure sur l'échéance impayée la plus ancienne (décision D5). **Un seul jeu de seuils de départ** (alerte et critique de chaque PAR) vit dans la table des paramètres, **annexe D** ; aucun FR, écran ni rapport n'en redéfinit un autre : ils la citent (FR-179, FR-185, FR-230, FR-231). Ces valeurs de départ sont calibrées sur les données de l'IMF (FR-178). Réalise UJ-3, UJ-5.
 
 **Conséquences (testables) :**
-- PAR30 = encours des prêts dont l'impayé le plus ancien dépasse 30 jours, divisé par l'encours total ; PAR90 est inclus dans PAR30, qui est inclus dans PAR1.
-- Les seuils de jours (1, 30, 90) sont des paramètres ; un PAR180 s'ajoute sans changement de code.
+- PAR30 = encours des prêts dont l'impayé le plus ancien dépasse 30 jours, divisé par l'encours total ; PAR90 est inclus dans PAR60, inclus dans PAR30, inclus dans PAR7, inclus dans PAR1.
+- Les seuils de jours (1, 7, 30, 60, 90) sont des paramètres ; un PAR180 s'ajoute sans changement de code.
 - Chaque ratio affiche son numérateur, son dénominateur, sa date d'arrêté et la fraîcheur du cœur.
+- Les seuils d'alerte et critique affichés sur un écran, un rapport ou une alerte sont ceux de l'annexe D ; un test échoue si un autre jeu de valeurs est codé ailleurs.
 - Un prêt sans échéancier officiel n'est pas compté : il est listé « échéancier manquant » (renvoi : FR-197).
 
 #### FR-174 : Le PAR se ventile par agence, agent, secteur d'activité et produit
@@ -2018,37 +2223,54 @@ Le DG et le ROC descendent du réseau à la région, l'agence, l'agent et le cli
 - Une ligne sans secteur d'activité renseigné est comptée « secteur non renseigné » et listée.
 - Les ventilations alimentent le tableau de bord (partie 4b) sans recalcul.
 
-#### FR-175 : Le classement suit le barème réglementaire SFD par défaut
+#### FR-272 : Le tableau de risque du DG : entonnoir d'ancienneté, carte de chaleur et taux
 
-Chaque prêt est classé selon l'ancienneté de son impayé le plus ancien. Dès **une échéance impayée**, la totalité de l'encours est déclassée (Référentiel comptable des SFD, compte 29, décision D6). La règle et ses bornes sont un jeu de paramètres versionné. Réalise UJ-5.
+Le DG, le ROC, le RSQ et le DAF voient, calculés sur les prêts du cœur par `risque-par`, dans leur périmètre : (1) l'**entonnoir d'ancienneté** de l'impayé en six tranches (à jour ; 1 à 6 jours ; 7 à 29 ; 30 à 59 ; 60 à 89 ; 90 jours et plus), avec l'encours et le nombre de prêts par tranche ; (2) la **carte de chaleur PAR × agence** (les PAR 1, 7, 30, 60 et 90 en lignes, les agences en colonnes, la couleur selon les seuils de l'annexe D) ; (3) le **taux de recouvrement** du mois (part des montants échus et impayés au début du mois qui ont été payés dans le mois) ; (4) le **taux de défaut** (part de l'encours à jour au début de la période qui passe à plus de 90 jours de retard dans la période) ; (5) le **taux de perte** (pertes définitives de la période ÷ encours moyen) ; (6) les **prêts restructurés du mois** (nombre et encours des prêts passés en plan d'étalement) ; (7) le **taux de couverture du PAR** (provisions comptabilisées lues de la balance du cœur ÷ encours du PAR 30), en alerte sous 80 % et critique sous 60 % (valeurs de départ de la démo, annexe D). [ASSUMPTION : les définitions des taux (3) à (5) et de la couverture (7) sont des définitions de départ, à confirmer avec le DG de l'IMF ; elles sont écrites ici pour être testables.] Réalise UJ-3.
 
 **Conséquences (testables) :**
-- Un prêt avec une échéance impayée est classé « en souffrance » pour son encours entier, échu ou non.
-- Les tranches par défaut sont : impayé de 6 mois au plus, de plus de 6 à 12 mois, de plus de 12 à 24 mois ; la perte à 24 mois.
+- La somme des encours des six tranches de l'entonnoir est égale à l'encours total, au franc près ; le PAR 30 est la somme des tranches 30 à 59, 60 à 89 et 90 et plus, divisée par l'encours total.
+- La carte de chaleur d'une agence reprend le PAR de l'agence (FR-174) ; sa couleur est celle du seuil d'alerte ou critique de l'annexe D.
+- Sans balance du cœur, le taux de couverture du PAR affiche « en attente des données du cœur », jamais une valeur inventée.
+- Chaque taux affiche son numérateur, son dénominateur et sa période ; chacun est rangé sous « calculé par Prospera sur les données du cœur » (FR-150).
+- Un prêt rééchelonné compte dans les restructurés du mois où le plan est enregistré, une seule fois.
+
+#### FR-175 : Le classement suit les classes réglementaires du pays, barème SFD par défaut
+
+Chaque prêt est classé selon l'ancienneté de son impayé le plus ancien. Les **classes réglementaires** sont celles du pays : un **jeu de paramètres versionné et daté** (FR-195) qui fixe les tranches d'ancienneté, leur libellé et leur taux de provision. **Barème par défaut** (Référentiel comptable des SFD, comptes 2991 à 2993, décision D6) : impayé de **3 mois au plus** (provision facultative), de **plus de 3 à 6 mois** (40 %), de **plus de 6 à 12 mois** (80 %), de **plus de 12 à 24 mois** (100 %), **perte au-delà de 24 mois**. Dès **une échéance impayée**, la totalité de l'encours du prêt est classée, échu ou non. Le jeu de classes est celui du pays et se remplace par un autre jeu sans changement de code. Réalise UJ-5.
+
+**Deux échelles distinctes, jamais mélangées** dans un écran ou un rapport : la **classe réglementaire** (ci-dessus : après décaissement, selon l'ancienneté de l'impayé, elle sert au rapport BCEAO et à la provision) et la **classe de risque à l'octroi** (partie 2 : un dossier non décaissé, selon son score, pour information seulement). Le rapport BCEAO utilise les tranches de l'état DIMF 2010 : ≤ 3 mois, > 3 à ≤ 6, > 6 à ≤ 12, > 12 à ≤ 24 mois (FR-185).
+
+**Conséquences (testables) :**
+- Un prêt avec une échéance impayée est classé pour son encours entier, échu ou non : dans la tranche « 3 mois au plus » s'il est impayé depuis 1 à 90 jours.
+- Les tranches par défaut sont : impayé de 3 mois au plus, de plus de 3 à 6 mois, de plus de 6 à 12 mois, de plus de 12 à 24 mois ; la perte au-delà de 24 mois.
 - Un prêt rééchelonné est classé « rééchelonné » et reste en souffrance jusqu'à trois échéances honorées (partie 4a, plan d'étalement).
-- L'option « déclassement facultatif jusqu'à 3 mois d'impayé » est un paramètre de l'IMF (défaut : déclassement dès un impayé).
+- La provision de la tranche « 3 mois au plus » est un paramètre de l'IMF (défaut : facultative, 0 %).
+- Changer le jeu de classes du pays (paramètre versionné) reclasse le portefeuille à la date d'effet, sans changement de code ; l'ancien jeu reste lisible.
 - Une migration de classe est datée et conservée ; elle alimente le rapport BCEAO (FR-185).
+- La classe de risque à l'octroi d'un dossier n'apparaît jamais dans la colonne « classe » d'un prêt décaissé.
 
 #### FR-176 : Les provisions sont proposées, jamais comptabilisées
 
-Prospera propose, pour chaque prêt, une provision : 40 % pour un impayé de 6 mois au plus, 80 % de plus de 6 à 12 mois, 100 % de plus de 12 à 24 mois, perte à 24 mois (décision D6, Référentiel comptable des SFD, comptes 2991 à 2993). Le DAF valide le montant proposé ; le **cœur comptabilise**. Réalise UJ-5.
+Prospera propose, pour chaque prêt, une provision au barème de FR-175 : facultative (défaut : 0 %) pour un impayé de 3 mois au plus, 40 % de plus de 3 à 6 mois, 80 % de plus de 6 à 12 mois, 100 % de plus de 12 à 24 mois, perte au-delà de 24 mois (décision D6, Référentiel comptable des SFD, comptes 2991 à 2993). Une provision sur l'encours sain est un paramètre (défaut : 0 %). Le DAF valide le montant proposé ; le **cœur comptabilise**. Réalise UJ-5.
 
 **Conséquences (testables) :**
 - La base de provision est l'encours moins le dépôt de garantie du débiteur et de sa caution, quand le cœur le fournit.
 - Le barème (bornes en jours, taux) est un jeu de paramètres versionné et daté ; une provision est jugée au barème en vigueur à sa date d'arrêté.
+- Un prêt en retard d'un jour n'est pas provisionné au taux de 40 % : il est dans la tranche facultative.
 - Un écran de provisions affiche : total proposé, total validé par le DAF, total comptabilisé lu de la balance du cœur quand elle est là ; il n'affiche jamais « proposé » comme « comptabilisé ».
-- La perte à 24 mois est **proposée** au ROC et au DG (partie 4a) ; elle ne se produit jamais seule.
+- La perte au-delà de 24 mois est **proposée** au ROC et au DG (partie 4a) ; elle ne se produit jamais seule.
 - Le barème de départ est celui du référentiel SFD ; il est à faire confirmer par un praticien SFD avant la mise en service (FR-195).
 
 #### FR-177 : La concentration est mesurée et alertée
 
-Le module mesure la concentration par secteur d'activité, par agence, par agent (part de dossiers approuvés), par produit, et par plus gros emprunteur. Réalise UJ-3.
+Le module mesure la concentration par secteur d'activité, par agence, par agent (part de dossiers approuvés), par produit, et par plus gros emprunteur. Il mesure aussi la **concentration des retards** : la part de l'encours en retard de plus de 30 jours du réseau (ou de l'agence) que porte un agent ou une zone. Réalise UJ-3.
 
 **Conséquences (testables) :**
 - Chaque mesure donne sa part (encours du segment sur encours du réseau), son seuil d'alerte et son seuil critique.
 - Seuils de démo (paramètres ; calibrés sur les données de l'IMF) : secteur 28 % alerte, 35 % critique ; agence 25 % ; agent 50 % alerte, 60 % critique ; le plus gros emprunteur suit la norme prudentielle (FR-187).
 - Un segment au-dessus de son seuil apparaît dans la file d'alertes avec la part, le seuil et la date.
 - Les prêts aux dirigeants, au personnel et aux personnes liées sont mesurés à part (case « partie liée », FR-58).
+- **Alerte de concentration des retards** : si un agent ou une zone porte une part de l'encours en retard supérieure aux seuils de concentration de l'agent ou de l'agence ci-dessus (mêmes valeurs de départ, annexe D), une alerte nomme l'agent ou la zone, la part, le seuil et les prêts ; elle part au RA et au ROC, et ne sanctionne personne.
 
 #### FR-178 : Les seuils d'alerte sont calibrés sur les données de l'IMF
 
@@ -2064,14 +2286,14 @@ Les seuils d'alerte de risque ne sont pas ceux de la démo, qui n'en est que le 
 
 #### FR-179 : Une alerte est traitée dans un délai, puis remontée ; les migrations sont listées
 
-Une alerte de risque est adressée au rôle du périmètre (RSQ, ROC, RA, DG selon la nature). Sans traitement, elle remonte au supérieur (décision F12). Réalise UJ-3.
+Une alerte de risque est adressée au rôle du périmètre (RSQ, ROC, RA, DG selon la nature). Sans traitement, elle remonte au supérieur (décision F12). Les seuils de PAR sont ceux de l'annexe D (un seul jeu, FR-173). Réalise UJ-3.
 
 **Conséquences (testables) :**
 - Une alerte sans prise en charge après 48 h (paramètre) remonte au rôle supérieur et lève une notification.
 - Une alerte se clôt avec un motif ou une action (décision, dérogation, plan) ; elle n'est jamais supprimée.
-- Le PAR30 d'une agence au-dessus de 5 % passe « alerte » et au-dessus de 10 % passe « critique » (paramètres ; calibrés sur les données de l'IMF ; défaut de démo : 5 % et 10 %).
-- Un PAR30 du réseau au-dessus de 12 % lève une alerte au DG avec un délai d'action de 15 jours (paramètres ; défaut de démo).
-- Une liste mensuelle donne, par agence, les prêts qui ont changé de classe (ancienne classe, nouvelle classe, jours de retard, motif) ; une agence dont le PAR30 dépasse celui du réseau de plus de 0,8 point (paramètre ; défaut de démo) est listée « hausse anormale » ; plus de 15 % de l'encours qui migre vers la tranche de plus de 30 jours en un mois lève une alerte (paramètres ; défaut de démo).
+- Le PAR d'une agence passe « alerte » puis « critique » aux seuils de l'annexe D (PAR 30 : 5 % et 10 % au départ ; paramètres calibrés sur les données de l'IMF).
+- Un PAR du réseau au seuil critique de l'annexe D lève une alerte au DG avec un délai d'action de 15 jours (paramètre ; défaut de démo).
+- Une liste mensuelle donne, par agence, les prêts qui ont changé de classe (ancienne classe, nouvelle classe, jours de retard, motif) ; une agence dont le PAR30 dépasse celui du réseau de plus de 0,8 point (paramètre ; défaut de démo [ASSUMPTION : valeur de départ]) est listée « hausse anormale » ; plus de 15 % de l'encours qui migre vers la tranche de plus de 30 jours en un mois lève une alerte (paramètres ; défaut de démo).
 
 #### FR-180 : L'IA analyse le risque par secteur d'activité et par conjoncture
 
@@ -2083,19 +2305,26 @@ Pour le DG, le ROC, l'analyste risque (RSQ) et le DAF, l'IA analyse le risque de
 - Une proposition d'action n'est jamais appliquée seule : l'octroi dans un secteur n'est limité que par une décision humaine (ROC ou DG) avec motif.
 - Les analyses se ventilent par agence et par zone, dans le périmètre du rôle.
 - Sans IA commune, la concentration et la saturation restent calculées par règles (FR-177) ; l'analyse de conjoncture affiche « non installé » ; rien ne bloque.
-- Règles de cette capacité : la provenance est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, un humain décide** ; un écart à une proposition exige un motif, renvoyé comme correction ; si l'IA est indisponible, rien ne bloque et le travail avance sur l'analyse humaine ; le mot « IA » n'est affiché que pour un modèle, une règle explicable sert tant que le modèle n'existe pas. Le moteur est l'IA commune (famille de modules à part) : ce PRD dit ce que l'IA fait pour l'IMF, pas comment. Aucune donnée n'y part sans le consentement de l'IMF (PRD moteur, apprentissage fédéré).
+- Règles de cette capacité : la provenance est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, un humain décide** ; un écart à une proposition exige un motif, renvoyé comme correction ; si l'IA est indisponible, rien ne bloque et le travail avance sur l'analyse humaine ; le mot « IA » n'est affiché que pour un modèle, une règle explicable sert tant que le modèle n'existe pas. Le moteur est l'IA commune, en instance locale chez l'IMF (règles communes de la partie 3) : ce PRD dit ce que l'IA fait pour l'IMF, pas comment. Rien ne sort de l'instance, sinon des écarts anonymisés, avec le consentement de l'IMF (PRD moteur, apprentissage fédéré).
 
 #### FR-181 : L'IA prévoit le PAR, la perte attendue et analyse les provisions
 
-Pour le DG, le DAF, le ROC et l'analyste risque (RSQ), l'IA propose : (a) la **prévision du PAR** (tendance et projection à 1, 3 et 6 mois, par réseau, agence et zone) ; (b) la **perte attendue** du portefeuille et le **coût du risque** ; (c) le **secteur moteur du risque** (celui qui explique la plus grande part de la hausse du PAR ou de la perte attendue) ; (d) l'**analyse des provisions** : écart entre la provision proposée par barème (FR-176), la provision comptabilisée lue de la balance du cœur et la provision requise. Entrées : prêts, échéanciers officiels, paiements et classes reçus du cœur, historique de PAR, secteur, garanties. Sortie : une valeur et un intervalle par prévision, la perte attendue par agence, le coût du risque en % de l'encours moyen, le secteur moteur, l'écart de provision en FCFA avec sa cause. Réalise UJ-3, UJ-5.
+Pour le DG, le DAF, le ROC et l'analyste risque (RSQ), l'IA propose : (a) la **prévision du PAR** (tendance et projection à 1, 3 et 6 mois, par réseau, agence et zone) en **deux scénarios** : **« sans action »** (la tendance en l'état) et **« avec actions »** (les relances, plans d'étalement et actions proposées appliqués, avec l'effet de chaque action estimé sur le recouvrement passé de l'IMF), l'écart entre les deux étant montré ; (b) la **perte attendue** et le **coût du risque** ; (c) le **secteur moteur du risque** (celui qui explique la plus grande part de la hausse du PAR ou de la perte attendue) ; (d) l'**analyse des provisions** : écart entre la provision proposée par barème (FR-176), la provision comptabilisée lue de la balance du cœur et la provision requise.
+
+**Perte attendue** = **encours × probabilité de défaut (PD, FR-125) × perte en cas de défaut (LGD)**. La LGD est **tirée des garanties** : LGD = 1 − (valeur retenue des garanties ÷ encours), plancher 0, où la valeur retenue est la valeur de chaque garantie lue du cœur, diminuée d'une décote par nature de garantie (paramètre), plus le dépôt de garantie bloqué. [ASSUMPTION : décote de départ à 0 % par nature, à calibrer sur l'historique de recouvrement de l'IMF.] Le calcul se fait **par dossier** (il fige la ligne « perte attendue » du rapport du ROC et de la fiche, partie 2), puis s'additionne par client, agence et réseau ; chaque valeur est marquée « estimation ».
+
+Entrées : prêts, échéanciers officiels, paiements et classes reçus du cœur, historique de PAR, secteur, garanties et leur valeur. Sortie : pour chaque prévision, une valeur et un intervalle ; la perte attendue par dossier, client et agence ; le coût du risque en % de l'encours moyen ; le secteur moteur ; l'écart de provision en FCFA avec sa cause. Réalise UJ-3, UJ-5.
 
 **Conséquences (testables) :**
 - Chaque prévision affiche son intervalle, sa date de calcul, la période d'historique utilisée et l'écart entre la prévision précédente et le PAR réel.
+- Les scénarios « sans action » et « avec actions » s'affichent côte à côte à 1, 3 et 6 mois ; l'effet de chaque action est listé avec sa source ; aucune action n'est lancée par la prévision.
+- Pour un prêt de 1 000 000 FCFA d'encours, de PD 20 % et de garanties retenues à 600 000 FCFA, la perte attendue est de 1 000 000 × 0,20 × 0,40 = 80 000 FCFA.
+- Un prêt sans garantie a une LGD de 100 % ; la perte attendue du réseau est égale à la somme des pertes attendues de ses dossiers, au franc près.
 - La perte attendue et le coût du risque sont rangés sous « estimation » ; aucun n'est présenté comme une provision ni comme une écriture (FR-176).
 - L'écart de provision n'est calculé que si la balance du cœur est là ; sinon « en attente des données du cœur » (FR-187).
 - Une prévision n'ouvre aucune décision de crédit, de blocage ou de provision : le DAF valide les provisions, le ROC et le DG décident le reste.
-- Sans IA commune, la tendance du PAR est servie par une règle explicable (moyenne glissante, marquée « règle ») ; la perte attendue, le coût du risque et le secteur moteur affichent « non installé » ; rien ne bloque.
-- Règles de cette capacité : la provenance est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, un humain décide** ; un écart à une proposition exige un motif, renvoyé comme correction ; si l'IA est indisponible, rien ne bloque et le travail avance sur l'analyse humaine ; le mot « IA » n'est affiché que pour un modèle, une règle explicable sert tant que le modèle n'existe pas. Le moteur est l'IA commune (famille de modules à part) : ce PRD dit ce que l'IA fait pour l'IMF, pas comment. Aucune donnée n'y part sans le consentement de l'IMF (PRD moteur, apprentissage fédéré).
+- Sans IA commune, la tendance du PAR (scénario « sans action ») est servie par une règle explicable (moyenne glissante, marquée « règle ») ; le scénario « avec actions », la perte attendue, le coût du risque et le secteur moteur affichent « non installé » ; rien ne bloque.
+- Règles de cette capacité : la provenance est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, un humain décide** ; un écart à une proposition exige un motif, renvoyé comme correction ; si l'IA est indisponible, rien ne bloque et le travail avance sur l'analyse humaine ; le mot « IA » n'est affiché que pour un modèle, une règle explicable sert tant que le modèle n'existe pas. Le moteur est l'IA commune, en instance locale chez l'IMF (règles communes de la partie 3) : ce PRD dit ce que l'IA fait pour l'IMF, pas comment. Rien ne sort de l'instance, sinon des écarts anonymisés, avec le consentement de l'IMF (PRD moteur, apprentissage fédéré).
 
 [ASSUMPTION] Le score de risque de la version 0, par règles explicables, suit le barème de la partie 2 (paiement 40, capacité 30, activité 20, terrain 10) ; le PAR et la provision de ce module n'en dépendent pas.
 
@@ -2127,20 +2356,38 @@ Le module génère les indicateurs périodiques de l'Instruction BCEAO n° 020-1
 
 La catégorie de supervision de l'IMF est un paramètre de l'installation (décision E2). Elle commande la périodicité : mensuelle pour une institution au-dessus du seuil de supervision de la Commission Bancaire (l'ancien « article 44 », encours de dépôts ou de crédits de 2 milliards de FCFA ou plus), trimestrielle pour les autres, avec un délai de 30 jours après la fin de la période. Réalise UJ-5.
 
+**Calendrier réglementaire.** Le calendrier liste les états de l'IMF ; chacun a une **périodicité paramétrable** et un réglage « produit par Prospera » ou « fait hors Prospera » (l'IMF le choisit par état ; un état « fait hors Prospera » reste au calendrier pour suivre l'échéance). Liste de départ, reprise de la démo :
+
+| État | Périodicité de départ | Produit par Prospera en v1 |
+|---|---|---|
+| Indicateurs périodiques (FR-183) | mensuelle, ou trimestrielle selon la catégorie | oui |
+| Rapport de portefeuille et de provisions (FR-185) | mensuelle | oui |
+| PAR trimestriel consolidé | trimestrielle | « bientôt » ; l'échéance est suivie |
+| Liquidité à court terme | hebdomadaire | « bientôt » ou hors Prospera, au choix de l'IMF |
+| LBC/FT | mensuelle | export de FR-123 ; déclaration hors Prospera |
+| État semestriel | semestrielle | « bientôt » ou hors Prospera |
+| Plan de redressement | à la demande | hors Prospera |
+| États annuels DIMF | annuelle | par le module `bilan` quand il est installé ; sinon hors Prospera |
+
+Aucun état « bientôt » ne simule un contenu.
+
 **Conséquences (testables) :**
 - La démo est réglée sur « grande IMF », reporting mensuel (décision E2).
-- Un calendrier des échéances affiche, par état, la date limite et son statut : à produire, généré, validé, déposé.
+- Changer la périodicité d'un état, ou le passer à « fait hors Prospera », ne demande aucun changement de code ; l'échéance reste affichée.
+- Un calendrier des échéances affiche, par état de la liste ci-dessus, la date limite et son statut : à produire, généré, validé, déposé.
 - La catégorie et le seuil ne sont jamais codés en dur : la nouvelle loi remplace l'article 44 par un seuil fixé par la Banque Centrale (FR-195).
 - Un état en retard de plus de 5 jours avant l'échéance lève une alerte au DG et au DAF (paramètre).
 
 #### FR-185 : Le rapport mensuel de portefeuille et de provisions est produit par Prospera
 
-Le rapport mensuel BCEAO comprend : la synthèse du portefeuille, les indicateurs PAR, la classification des créances, les provisions par agence, les migrations de classe du mois, le détail des dossiers. Il s'appuie sur `risque-par`. Réalise UJ-5.
+Le rapport mensuel BCEAO comprend : la synthèse du portefeuille ; les indicateurs **PAR 30, 60 et 90 jours**, chacun avec son seuil (annexe D) et son statut CONFORME ou NON CONFORME ; la **classification des créances par les tranches réglementaires de l'état DIMF 2010** (impayé de 3 mois au plus, de plus de 3 à 6, de plus de 6 à 12, de plus de 12 à 24 mois, selon le jeu de classes du pays, FR-175) ; les provisions par agence, avec un statut CONFORME, ATTENTION ou NON CONFORME ; les migrations de classe du mois ; le détail de chaque prêt. Il s'appuie sur `risque-par` : **tous les chiffres viennent de `risque-par` et du cœur**, jamais d'un modèle (FR-190). Réalise UJ-5.
 
 **Conséquences (testables) :**
 - Les totaux du rapport sont égaux à ceux de `risque-par` à la date d'arrêté.
 - Le rapport affiche le nombre d'agences actives correct (celui du réseau à la date) et une colonne de taux contenant un pourcentage, jamais un montant.
-- Un contrôle avant l'envoi donne : complétude des données du cœur, couverture des provisions, migrations détectées ; une donnée absente bloque la validation du DG, avec la raison.
+- Le statut d'une agence est CONFORME si son PAR 30 est au plus au seuil d'alerte de l'annexe D, ATTENTION entre le seuil d'alerte et le seuil critique, NON CONFORME au-dessus du seuil critique.
+- La classification du rapport porte les quatre tranches DIMF 2010 et la perte ; elle ne porte pas la classe de risque à l'octroi.
+- Un contrôle avant l'envoi donne : complétude des données du cœur, couverture des provisions (taux de couverture du PAR, FR-272), migrations détectées ; une donnée absente bloque la validation du DG, avec la raison.
 - Les mentions de texte de référence du rapport (instruction, article) viennent d'un tableau de paramètres, pas du code.
 
 #### FR-186 : Le DG valide, l'IMF signe et dépose hors de Prospera
@@ -2183,22 +2430,23 @@ Chaque rapport s'exporte en PDF et en CSV. Le PDF est un document mis en page, d
 
 **Conséquences (testables) :**
 - Le plafond est une table datée par catégorie d'institution (24 % par an pour les IMF dès le 01/06/2026, Décision n° 19 du 29/12/2025/CM/UMOA) ; un prêt est jugé au plafond en vigueur à son octroi.
-- Le TEG est actuariel, annualisé, frais et assurance inclus, pénalités exclues ; l'inclusion de chaque type de frais est un paramètre.
+- Le TEG est celui de la méthode figée de FR-108 (actuariel annuel proportionnel, frais retenus au décaissement et assurance obligatoire inclus, pénalités exclues) ; l'inclusion de chaque type de frais est un paramètre.
 - Un prêt importé du cœur dont le TEG ne peut pas être calculé (frais manquants) est listé « TEG indéterminé » ; il n'est pas déclaré conforme.
 - La liste des prêts au-dessus du plafond est transmise à l'auditeur interne et au DG ; elle ne modifie aucun prêt.
 - Le détail du calcul du TEG est dans l'addendum (→ addendum).
 
-#### FR-190 : L'IA calcule le score de conformité, alerte tôt et prépare le rapport BCEAO
+#### FR-190 : L'IA calcule le score de conformité, alerte tôt et rédige le commentaire du rapport BCEAO
 
-Pour le DG, le DAF et l'auditeur interne (AUD), l'IA fournit trois capacités. (a) Un **score de conformité global de 0 à 100**, décomposé par dimension (PAR, provisions, liquidité, KYC, traçabilité), avec le poids de chaque dimension. (b) Des **alertes réglementaires proactives** : une non-conformité probable (ratio qui approche son seuil, échéance de rapport, liste de sanctions périmée, plafond d'usure) est signalée avec un **délai d'action recommandé**. (c) La **génération du rapport BCEAO** : l'IA remplit le gabarit (FR-185), repère les données manquantes et propose le texte de synthèse. Entrées : indicateurs, ratios, état du KYC et des listes, calendrier, paramètres réglementaires (FR-195). Sortie : un score, des alertes datées avec délai, un rapport prêt pour validation. Réalise UJ-5.
+Pour le DG, le DAF et l'auditeur interne (AUD), l'IA fournit trois capacités. (a) Un **score de conformité global de 0 à 100**, décomposé par dimension (PAR, provisions, liquidité, KYC, traçabilité), avec le poids de chaque dimension. (b) Des **alertes réglementaires proactives** : une non-conformité probable (ratio qui approche son seuil, échéance de rapport, liste de sanctions périmée, plafond d'usure) est signalée avec un **délai d'action recommandé**. (c) La **préparation du rapport BCEAO** : **tous les chiffres du rapport viennent de `risque-par` et du cœur** (FR-185), **jamais du modèle** ; l'IA n'écrit que le **commentaire** (texte de synthèse) et repère les données manquantes. Entrées : indicateurs, ratios, état du KYC et des listes, calendrier, paramètres réglementaires (FR-195). Sortie : un score, des alertes datées avec délai, un commentaire de rapport prêt pour validation. Réalise UJ-5.
 
 **Conséquences (testables) :**
 - Le score affiche ses dimensions, leurs poids et leurs entrées ; il n'est jamais présenté comme une norme réglementaire.
 - Une alerte proactive donne la règle visée, la valeur actuelle, le seuil et le délai d'action recommandé ; elle se clôt avec une action ou un motif.
 - Le rapport généré n'est jamais validé, signé ni déposé par l'IA : le DG valide (FR-186), l'IMF signe et dépose hors de Prospera.
+- Un chiffre du rapport n'est jamais produit par le modèle : un test compare chaque valeur du rapport à `risque-par` et au cœur ; chaque nombre cité dans le commentaire doit être égal à une valeur du rapport, sinon le commentaire est refusé avant la validation du DG.
 - Un champ que l'IA ne peut pas remplir reste vide et signalé ; elle n'invente aucune valeur.
-- Sans IA commune, le score, les alertes sur seuils et le rapport sont servis par règles (calcul des ratios, calendrier) ; la synthèse rédigée affiche « non installé » ; la génération du rapport n'est jamais bloquée.
-- Règles de cette capacité : la provenance est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, un humain décide** ; un écart à une proposition exige un motif, renvoyé comme correction ; si l'IA est indisponible, rien ne bloque et le travail avance sur l'analyse humaine ; le mot « IA » n'est affiché que pour un modèle, une règle explicable sert tant que le modèle n'existe pas. Le moteur est l'IA commune (famille de modules à part) : ce PRD dit ce que l'IA fait pour l'IMF, pas comment. Aucune donnée n'y part sans le consentement de l'IMF (PRD moteur, apprentissage fédéré).
+- Sans IA commune, le score, les alertes sur seuils et le rapport (tous ses chiffres) sont servis par règles (calcul des ratios, calendrier) ; le commentaire rédigé affiche « non installé » ; la génération du rapport n'est jamais bloquée.
+- Règles de cette capacité : la provenance est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, un humain décide** ; un écart à une proposition exige un motif, renvoyé comme correction ; si l'IA est indisponible, rien ne bloque et le travail avance sur l'analyse humaine ; le mot « IA » n'est affiché que pour un modèle, une règle explicable sert tant que le modèle n'existe pas. Le moteur est l'IA commune, en instance locale chez l'IMF (règles communes de la partie 3) : ce PRD dit ce que l'IA fait pour l'IMF, pas comment. Rien ne sort de l'instance, sinon des écarts anonymisés, avec le consentement de l'IMF (PRD moteur, apprentissage fédéré).
 
 #### FR-191 : La piste d'audit est ajoutée seulement et conservée 10 ans
 
@@ -2215,11 +2463,14 @@ Toute action sur un dossier, un paiement, un seuil, un paramètre réglementaire
 
 La séparation des tâches est définie par FR-6. Ce module la **contrôle** après coup : il détecte les cas où la règle a été contournée et les remonte à l'auditeur. Réalise UJ-5.
 
+Les **vues de l'auditeur interne** (AUD) sont en lecture seule : **crédit** (dossiers incomplets, retards suspects), **caisse** (écarts), **agences**, **BCEAO**, séparation des tâches, anomalies, **équité** (taux d'acceptation, FR-124) et journal d'accès. La vue **audit agences** liste, par agence, les contrôles suivants (seuils en paramètres, annexe D) : visite d'instruction manquante, objectif réalisé à moins de 70 %, dossier sans GP, transaction non rapprochée depuis plus de 7 jours, paiement Mobile Money en attente depuis plus de 48 heures, retrait supérieur au plafond. La vue **audit BCEAO** montre, pour chaque état du calendrier (FR-184), son statut et sa date limite, puis les ratios et le plafond d'usure du portefeuille (FR-187, FR-189), la fraîcheur des listes LBC/FT (FR-193) et l'accès aux rapports figés.
+
 **Conséquences (testables) :**
 - Sont détectés : un dossier validé par son instructeur, un paiement validé et une échéance modifiée par la même personne dans l'heure, un décaissement en espèces non autorisé par CPT ou DAF, une modification après décision du comité.
 - Chaque cas détecté est une ligne du journal d'audit et une alerte à l'auditeur (AUD) ; l'auditeur ne peut pas corriger.
 - Les règles détectées sont des paramètres de l'IMF (fenêtre d'une heure, seuil d'écart de caisse, nombre de crédits actifs simultanés).
-- Les vues d'audit de l'auditeur interne (AUD) sont en lecture seule : crédit (dossiers incomplets, retards suspects), caisse (écarts), séparation des tâches, anomalies, journal d'accès ; aucune n'offre un bouton qui modifie une donnée (un bouton non branché affiche « bientôt », PRD-D FR-2) ; une consultation du journal par l'auditeur est elle-même inscrite au journal.
+- Une agence dont une transaction reste non rapprochée depuis 8 jours apparaît dans la vue « audit agences » avec la transaction ; la vue « audit BCEAO » affiche le statut de chaque état du calendrier sans bouton de dépôt.
+- Les vues d'audit de l'auditeur interne (AUD) sont en lecture seule : crédit (dossiers incomplets, retards suspects), caisse (écarts), agences, BCEAO, équité, séparation des tâches, anomalies, journal d'accès ; aucune n'offre un bouton qui modifie une donnée (un bouton non branché affiche « bientôt », PRD-D FR-2) ; une consultation du journal par l'auditeur est elle-même inscrite au journal.
 
 #### FR-193 : La LBC/FT est mise à jour régulièrement et exportée
 
@@ -2240,11 +2491,11 @@ Pour l'auditeur interne (AUD) et le DG, l'IA détecte les **anomalies et risques
 - Une anomalie a un statut : ouverte, en examen, classée avec motif ; l'IA ne classe jamais seule.
 - L'IA ne corrige, ne bloque et ne sanctionne rien ; aucune donnée ne se modifie à partir d'une anomalie.
 - Les anomalies par règle (FR-192) fonctionnent sans IA ; la corrélation affiche « non installé » sans elle ; rien ne bloque.
-- Règles de cette capacité : la provenance est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, un humain décide** ; un écart à une proposition exige un motif, renvoyé comme correction ; si l'IA est indisponible, rien ne bloque et le travail avance sur l'analyse humaine ; le mot « IA » n'est affiché que pour un modèle, une règle explicable sert tant que le modèle n'existe pas. Le moteur est l'IA commune (famille de modules à part) : ce PRD dit ce que l'IA fait pour l'IMF, pas comment. Aucune donnée n'y part sans le consentement de l'IMF (PRD moteur, apprentissage fédéré).
+- Règles de cette capacité : la provenance est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, un humain décide** ; un écart à une proposition exige un motif, renvoyé comme correction ; si l'IA est indisponible, rien ne bloque et le travail avance sur l'analyse humaine ; le mot « IA » n'est affiché que pour un modèle, une règle explicable sert tant que le modèle n'existe pas. Le moteur est l'IA commune, en instance locale chez l'IMF (règles communes de la partie 3) : ce PRD dit ce que l'IA fait pour l'IMF, pas comment. Rien ne sort de l'instance, sinon des écarts anonymisés, avec le consentement de l'IMF (PRD moteur, apprentissage fédéré).
 
 #### FR-195 : Les textes réglementaires sont des paramètres par pays, à faire vérifier
 
-Tout ce qui vient d'un texte est un paramètre versionné par pays, par date d'effet et par texte : plafond d'usure, barème de classement et de provision, normes prudentielles, périodicité, seuil de supervision, durées de conservation, seuils CENTIF. La loi uniforme de microfinance du 21/12/2023 abroge la loi de 2007, mais maintient les instructions existantes tant qu'elles ne sont pas abrogées ; chaque État la transpose à sa date. Réalise UJ-5.
+Tout ce qui vient d'un texte est un paramètre versionné par pays, par date d'effet et par texte : plafond d'usure, classes réglementaires du pays et barème de provision, normes prudentielles, périodicité, seuil de supervision, durées de conservation, seuils CENTIF. La loi uniforme de microfinance du 21/12/2023 abroge la loi de 2007, mais maintient les instructions existantes tant qu'elles ne sont pas abrogées ; chaque État la transpose à sa date. Réalise UJ-5.
 
 **Conséquences (testables) :**
 - Chaque paramètre réglementaire affiche son texte source, sa date d'effet et son statut (« vérifié par un juriste » ou « à vérifier »).
@@ -2363,6 +2614,9 @@ L'application `prospera-terrain` fonctionne sans réseau (PRD-D FR-109) ; elle e
 - La synchronisation envoie les visites urgentes de recouvrement en premier ; 50 visites sont synchronisées en moins de 30 secondes (cahier terrain, paramètre).
 - Un brouillon ou une visite en file depuis plus de 7 jours alerte l'agent (paramètre). Le stockage local est limité à 500 Mo (paramètre) ; une photo de KYC est compressée sur l'appareil avant envoi.
 - Un solde ne change jamais tant que le serveur n'a pas validé la synchronisation : un encaissement hors ligne reste « à envoyer » puis « envoyé », jamais « confirmé » avant le mouvement du cœur (FR-137).
+- **Données locales chiffrées et verrouillage** (A27). Tout ce que l'application garde sur le téléphone (fiches, photos, visites, collectes et brouillons en file) est **chiffré sur l'appareil**. L'application se **verrouille** après une inactivité (paramètre ; défaut : 5 minutes [ASSUMPTION : valeur non décidée]) et se rouvre par le code ou la biométrie de l'appareil ; une session expirée ne rouvre rien sans connexion préalable.
+- **Effacement après un délai sans connexion.** Au-delà d'un délai sans connexion au serveur (paramètre ; défaut : 14 jours [ASSUMPTION : valeur non décidée]), l'application se bloque et **efface** les données locales déjà synchronisées ; les éléments encore « à envoyer » restent chiffrés et inutilisables jusqu'à la prochaine connexion, qui les envoie puis efface le reste [ASSUMPTION : sort des éléments non envoyés, pour ne pas perdre une collecte].
+- **État « appareil perdu ».** Le RA de l'agent (ou ADMIN_IMF depuis l'administration, sans lire le métier) déclare un appareil **perdu** : le serveur **révoque** sa session, refuse toute synchronisation de cet appareil, et ordonne l'effacement local à sa prochaine connexion ; la déclaration est tracée (FR-9). Sans connexion, le délai d'effacement ci-dessus s'applique. Un test déclare un appareil perdu et vérifie que sa file n'est plus acceptée.
 
 #### FR-205 : Rôles, périmètres, carte et ce que l'IMF n'a pas
 
@@ -2375,7 +2629,7 @@ Chez l'IMF, « agent de terrain » recouvre l'AT, le COLL et le COM ; le « supe
 - Aucun écran du module n'affiche de catalogue, de prix, de stock ni de panier ; un test parcourt l'application avec chaque rôle IMF et n'en trouve aucun.
 
 #### L'IA (terrain)
-Règles communes (FR-8) : la **provenance** est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, l'humain décide** ; un écart exige un motif, renvoyé comme correction ; **rien ne bloque** si l'IA est indisponible, l'emplacement le dit ; le **moteur** est l'IA commune. Les positions GPS des agents ne servent qu'avec la finalité consentie et pendant le service (FR-15). Cette section dit ce que l'IA fait ; l'IA commune dit comment.
+Règles communes (FR-8) : la **provenance** est affichée (règle ou modèle, version, date, données utilisées) ; **l'IA propose, l'humain décide** ; un écart exige un motif, renvoyé comme correction ; **rien ne bloque** si l'IA est indisponible, l'emplacement le dit ; le **moteur** est l'IA commune, qui tourne chez l'IMF dans une **instance locale** (§7.8, FR-260) : « IA commune absente » signifie instance locale non installée ou indisponible. Les positions GPS des agents ne servent qu'avec la finalité consentie et pendant le service (FR-15). Cette section dit ce que l'IA fait ; l'IA commune dit comment.
 
 #### FR-206 : L'IA propose l'ordre de visite optimal et alerte quand un client en retard est proche
 
@@ -2395,8 +2649,9 @@ En préparant le plan (FR-200), l'IA commune propose à l'agent l'ordre de visit
 **Conséquences (testables) :**
 - L'agent relit et valide chaque champ rempli par la dictée avant l'enregistrement ; aucun champ n'est enregistré sans lui. Un champ qu'il corrige est renvoyé comme correction.
 - L'enregistrement audio n'est pas conservé après la conversion en texte [ASSUMPTION : à confirmer avec l'avis juridique sur les données de voix, §12.3]. La dictée demande une connexion ; hors connexion, le champ se saisit au clavier.
+- **La reconnaissance vocale est désactivée sans consentement propre** de l'IMF (finalité `saisie-vocale`, distincte des autres finalités de FR-260 ; FR-15) : la voix est une donnée à part, et le consentement aux autres finalités ne la couvre pas. Sans ce consentement, le bouton de dictée est « bientôt » à l'écran et le champ se saisit au clavier.
 - Le rapport du soir ne cite que des chiffres lus des visites et du cœur (avec leur date) ; chaque chiffre renvoie à sa source. Le rapport du RA agrège ceux de ses agents sans exposer la rémunération (PRD-D FR-8).
-- IA commune absente : le rapport est un tableau des mêmes chiffres, sans texte rédigé ni conseil ; la dictée est « bientôt » à l'écran, sans simulation (PRD-D FR-2). Elle est « bientôt » dans le PRD distributeur ; chez l'IMF, elle est exigée dès que l'IA commune la sert.
+- IA commune absente (instance locale indisponible) : le rapport est un tableau des mêmes chiffres, sans texte rédigé ni conseil ; la dictée est « bientôt » à l'écran, sans simulation (PRD-D FR-2). Elle est « bientôt » dans le PRD distributeur ; chez l'IMF, elle est exigée dès que l'instance locale la sert et que le consentement propre est donné.
 
 #### FR-208 : L'IA suggère des zones de prospection et la réaffectation des agents
 
@@ -2436,7 +2691,7 @@ L'IA commune propose au RCC, au RA et au DG les **zones où prospecter** et les 
 - Crédit du tiers : un paiement reçu n'est jamais refusé, l'excédent est un crédit (PRD-D FR-172).
 - Dossier de recouvrement à journal non modifiable, seulement complété (PRD-D FR-113).
 - Échelle d'escalade paramétrable : paliers, canaux, mode AUTO ou À VALIDER, gabarits, repli SMS, aucun délai dans le code (PRD-D FR-114) ; les valeurs de l'IMF sont en FR-212.
-- Une relance part vraiment, par `notification`, avec un lien de paiement (PRD-D FR-115) ; la relance de recouvrement est un message transactionnel que le refus de la publicité n'éteint pas ; un paiement partiel suspend la relance, un paiement total l'arrête (PRD-D FR-116).
+- Une relance part vraiment, par `notification`, avec un lien de paiement (PRD-D FR-115) ; la relance de recouvrement est un message transactionnel que le refus de la publicité n'éteint pas ; un paiement partiel suspend la relance (PRD-D FR-116) ; chez l'IMF, **la relance ne s'arrête que quand le reste dû est nul** (FR-210).
 - Promesse de paiement : montant, date, canal, auteur ; rappel la veille ; délai de grâce de 24 h ; accord écrit après deux promesses rompues ; fiabilité = tenues ÷ faites (PRD-D FR-118).
 - File du jour priorisée par valeur espérée, bornée par une capacité par agent (PRD-D FR-120) ; visite de recouvrement planifiée par `terrain` (PRD-D FR-121, FR-203).
 - Le blocage du crédit est publié comme un fait et lu par le module d'engagement (PRD-D FR-119) : chez l'IMF, c'est le module `credit` qui le lit (FR-218).
@@ -2444,22 +2699,24 @@ L'IA commune propose au RCC, au RA et au DG les **zones où prospecter** et les 
 #### Exigences propres à l'IMF (recouvrement)
 #### FR-209 : Le remboursement est reçu du cœur ou saisi dans Prospera, et le cœur fait foi
 
-Le recouvrement lit du cœur, via `coeur-sfd`, ce qui touche à l'argent d'un prêt : reste dû, échéances impayées, pénalités, intérêts de retard, et les mouvements de paiement. Les remboursements saisis dans Prospera (guichet, collecte terrain, Mobile Money validé) sont renvoyés au cœur **s'il sait les recevoir** ; sinon ils figurent sur la liste « à saisir dans le cœur » (décision A1 ; FR-155, FR-156). Les créances (échéances de prêt) appartiennent à `paiement`, **seul propriétaire** (PRD-D FR-247 ; décision du PO du 2026-11-13, Q2) ; les faits du cœur (pénalités, mouvements) alimentent ses composantes. Réalise UJ-7.
+Le recouvrement lit du cœur, via `coeur-sfd`, ce qui touche à l'argent d'un prêt : reste dû, échéances impayées, pénalités, intérêts de retard, et les mouvements de paiement. Les remboursements saisis dans Prospera (guichet, collecte terrain, Mobile Money validé) sont renvoyés au cœur **s'il sait les recevoir** ; sinon ils figurent sur la liste « à saisir dans le cœur » (décision A1 ; FR-155, FR-156). Les créances (échéances de prêt) appartiennent à `paiement`, **seul propriétaire** (PRD-D FR-247 ; décision du PO du 2026-11-13, Q2) ; les faits du cœur (pénalités, mouvements) alimentent ses composantes, et son **montant exigible est recalé sur la dernière lecture du cœur** (décision du PO du 2026-11-13, P1 ; FR-257). Réalise UJ-7.
 
 **Conséquences (testables) :**
 - Le cœur calcule les pénalités et les intérêts de retard (décision A4) ; le cœur fictif les calcule pour la démo. Prospera n'en calcule aucun et n'en affiche aucun sans la date de la dernière lecture du cœur (FR-2). La convention de la démo (pénalités = 15 % de la mensualité) n'est pas reprise.
-- L'imputation est pénalités, puis intérêts, puis capital (paramétrable, décision A5). Un paiement anticipé réduit la durée ; un trop-perçu devient un crédit du client (FR-137). Un écart entre l'imputation de `paiement` et celle du cœur est signalé au GP et au CPT dans la file des écarts (FR-159) ; la règle d'arbitrage sera fixée avec le connecteur réel (FR-257).
-- Un remboursement saisi reste « en attente du cœur » tant que le cœur n'a pas renvoyé le mouvement ; il n'est jamais compté deux fois (FR-2). Le dossier de recouvrement lit le reste dû de la Créance de `paiement`, pas la somme des saisies non confirmées.
+- L'imputation est pénalités, puis intérêts, puis capital (paramétrable, décision A5). Un paiement anticipé réduit la durée ; un trop-perçu devient un crédit du client (FR-137). Un écart entre l'imputation de `paiement` et celle du cœur est signalé au GP et au CPT dans la file des écarts (FR-159) ; **le client voit le montant du cœur** (FR-257).
+- Un remboursement saisi reste « en attente du cœur » tant que le cœur n'a pas renvoyé le mouvement ; il n'est jamais compté deux fois (FR-2). Le dossier de recouvrement lit le reste dû de la Créance de `paiement`, **recalée sur la dernière lecture du cœur** (FR-257), pas la somme des saisies non confirmées ; si cette lecture est plus vieille que l'âge maximal (FR-257), le reste dû s'affiche « à relire » avec sa date.
 - Un remboursement saisi ou validé, en attente du mouvement du cœur, **suspend** la prochaine relance automatique de l'échéance concernée pendant 48 h (paramètre ; valeur du délai d'un remboursement sans mouvement du cœur, FR-159) [ASSUMPTION : suspension pendant l'attente, pour ne pas relancer un client qui a payé]. Passé le délai sans mouvement, la relance reprend et une alerte va au CPT.
-- Un remboursement partiel suspend la relance sur le solde (PRD-D FR-116) ; le reste dû affiché est celui de la Créance de `paiement`.
+- Un remboursement partiel suspend la relance sur le solde (PRD-D FR-116) ; le reste dû affiché est celui du cœur, par la Créance recalée (FR-257).
+- **Mouvement du cœur sans paiement Prospera correspondant** (P1). Un client qui paie au guichet du cœur n'a laissé aucun paiement dans Prospera : au prochain cycle de lecture, ce mouvement **réduit ou ferme la Créance** de `paiement` et suspend les relances de l'échéance ; un lien de paiement déjà envoyé n'est plus honoré pour un montant périmé (FR-256). Un test paie au guichet du cœur fictif et vérifie que la Créance se réduit, que la relance de J-3 ne part pas pour le montant ancien, et que le client ne peut pas payer deux fois.
 
 #### FR-210 : Le Mobile Money déclaré est validé par le comptable, et le rapprochement se fait à moins de 1 %
 
-Un remboursement Mobile Money déclaré, et un virement sans référence, restent **EN_ATTENTE** jusqu'à la validation du CPT (décision A7 ; FR-140). Un paiement PI-SPI, irrévocable et confirmé par le fournisseur, ne demande pas cette validation. Le rapprochement rattache un paiement validé à son échéance quand |payé − échéance| ÷ échéance est inférieur à **1 %** (paramètre ; décision A6). Réalise UJ-7.
+Un remboursement Mobile Money déclaré, et un virement sans référence, restent **EN_ATTENTE** jusqu'à la validation du CPT (décision A7 ; FR-140). Un paiement PI-SPI, irrévocable et confirmé par le fournisseur, ne demande pas cette validation. Le rapprochement **choisit l'échéance** à laquelle rattacher un paiement validé quand |payé − échéance| ÷ échéance est inférieur à **1 %** (paramètre ; décision A6) ; il **ne la solde pas** : l'imputation est celle du cœur (FR-209), et **tout écart est un paiement partiel** (payé inférieur) **ou un trop-perçu** (payé supérieur). Réalise UJ-7.
 
 **Conséquences (testables) :**
-- Un paiement de 52 300 FCFA sur une échéance de 52 000 FCFA (écart de 0,6 %) est rattaché automatiquement et l'échéance passe à « payée en attente du cœur ». Un paiement de 50 000 FCFA (écart de 3,8 %) va dans la **file de rapprochement du CPT**, qui le rattache, le scinde ou le range en crédit du client. **Il n'est jamais refusé** (PRD-D FR-172).
-- Un paiement validé met fin aux relances ouvertes de l'échéance (statut de relance « clôturée ») ; un paiement rejeté, avec son motif, ne les arrête pas et l'agent est prévenu.
+- Un paiement de 52 300 FCFA sur une échéance de 52 000 FCFA (écart de 0,6 %) est **rattaché** à cette échéance, qu'il ne solde pas par magie : 52 000 FCFA l'imputent selon l'ordre du cœur, et les **300 FCFA de trop** sont un trop-perçu, crédit du client (FR-209). Un paiement de 51 700 FCFA est rattaché de même, et les **300 FCFA manquants** sont un paiement partiel : l'échéance reste due pour ce reste. Un paiement de 50 000 FCFA (écart de 3,8 %) va dans la **file de rapprochement du CPT**, qui le rattache, le scinde ou le range en crédit du client. **Il n'est jamais refusé** (PRD-D FR-172).
+- **La relance ne s'arrête que quand le reste dû est nul** (valeur du cœur, FR-209) : un paiement partiel la suspend sur le solde sans la clore (FR-212) ; un paiement validé qui solde l'échéance la clôture (statut de relance « clôturée ») ; un paiement rejeté, avec son motif, ne l'arrête pas et l'agent est prévenu.
+- La **tolérance d'arrondi** est un paramètre **distinct** du seuil de 1 % (défaut : 5 FCFA [ASSUMPTION : « quelques FCFA », valeur non fixée]) : un reste dû inférieur ou égal à la tolérance est traité comme nul, ce qui clôt la relance ; elle ne sert jamais à rattacher un paiement.
 - Le déclarant ne valide jamais son propre paiement (FR-6). Les opérateurs et le pays sont une liste paramétrable ; changer d'opérateur ne demande aucun changement du module.
 - L'IA aide le CPT à valider et à rapprocher (doublons, erreurs : FR-147) ; elle ne valide jamais seule.
 - Un paiement Mobile Money en attente depuis plus de 24 h est en tête de la file du CPT et alerte le RA (FR-140).
@@ -2495,7 +2752,8 @@ L'IMF dispose d'une échelle d'escalade (PRD-D FR-114) dont les valeurs par déf
 - Les envois automatiques partent à 6 h et à 14 h (paramètre) ; jamais en dehors de la fenêtre horaire de `notification`, ni vers un client qui a refusé le canal (FR-14, FR-88).
 - Le canal par défaut est WhatsApp si le client répond à 60 % de ses messages ou plus (paramètre), sinon SMS ; après **trois échecs** de relance numérique (message non remis ou sans réponse), une mission terrain est créée (décision D11).
 - Le ton monte avec le retard ; le gabarit est modifiable : « Bonjour {prénom}, votre échéance de {montant} FCFA du {date} est {statut}. Réglez maintenant : {lien de paiement}. Merci. » La mise en demeure n'est jamais envoyée sans validation humaine (FR-217).
-- Un paiement total arrête les relances ; un paiement partiel les suspend sur le solde ; une promesse les suspend jusqu'à sa date (FR-213).
+- Les relances ne s'arrêtent que quand le **reste dû est nul** (valeur du cœur, tolérance d'arrondi comprise, FR-210) ; un paiement partiel les suspend sur le solde ; une promesse les suspend jusqu'à sa date (FR-213).
+- **Le lien de paiement n'est émis qu'après relecture du reste dû** du cœur (P1) : si la dernière lecture est plus vieille que l'âge maximal (paramètre ; défaut : 15 minutes [ASSUMPTION : valeur non décidée]), le serveur relit avant d'émettre, et le lien porte le montant relu ; si le cœur ne répond pas, **aucun lien n'est émis**, le message part sans lien (rappel de la date seulement) et le journal le dit (FR-257).
 - Un test place des prêts à J-3, J+1, J+3, J+7 et J+10 : seuls J-3 et J+1 partent sans action du GP ; chaque autre palier attend son validateur.
 
 #### FR-213 : Une promesse de paiement suspend les relances jusqu'à sa date
@@ -2511,34 +2769,42 @@ Le GP enregistre une promesse (montant, date, canal d'obtention) sur le dossier 
 
 #### FR-214 : Les statuts de recouvrement, un second axe décidé par des rôles
 
-Chaque prêt EN_GESTION en retard porte un **statut de recouvrement** : `EN_RETARD` → `EN_RECOUVREMENT` → `PLAN_ETALEMENT` / `REGULARISE` / `BLOQUE` → `CONTENTIEUX_JUDICIAIRE` / `PERTE_DEFINITIVE` (récit du PO). Contrairement à M19, où les statuts se dérivent du journal, ces transitions sont **décidées** par un rôle ou constatées par le système, et chacune est une entrée du journal (FR-9). Réalise UJ-7, UJ-8.
+Chaque prêt EN_GESTION en retard porte un **statut de recouvrement** : `EN_RETARD` → `EN_RECOUVREMENT` → `PLAN_ETALEMENT` / `REGULARISE` / `BLOQUE` → `CONTENTIEUX_JUDICIAIRE` / `PERTE_DEFINITIVE` (récit du PO). Contrairement à M19, où les statuts se dérivent du journal, ces transitions sont **décidées** par un rôle ou constatées par le système, et chacune est une entrée du journal (FR-9). La table ci-dessous est **complète** : une transition qui n'y figure pas est refusée. Réalise UJ-7, UJ-8.
 
-| Transition | Qui | Condition |
-|---|---|---|
-| → `EN_RETARD` | système | échéance impayée depuis plus de 7 jours (FR-211) |
-| `EN_RETARD` → `EN_RECOUVREMENT` | ROC ou RA | un agent de recouvrement est assigné (FR-216) |
-| → `PLAN_ETALEMENT` | ROC, avec l'accord signé du client | plan valide (FR-220) |
-| → `REGULARISE` | système | le cœur confirme qu'aucune échéance n'est impayée ; pour un plan : trois échéances honorées |
-| → `BLOQUE` | ROC seul, motif obligatoire | blocage manuel (FR-218) |
-| `BLOQUE` → `EN_RECOUVREMENT` ou `REGULARISE` | ROC seul, motif obligatoire | déblocage (FR-218) |
-| `BLOQUE` → `CONTENTIEUX_JUDICIAIRE` | ROC propose, **DG décide** | FR-219 |
-| `BLOQUE` → `PERTE_DEFINITIVE` | ROC propose, **DG décide** | FR-221 |
+| # | Transition | Qui | Garde |
+|---|---|---|---|
+| T1 | (aucun) → `EN_RETARD` | système | échéance impayée depuis plus de 7 jours (FR-211) |
+| T2 | `EN_RETARD` → `EN_RECOUVREMENT` | ROC ou RA | un agent de recouvrement est assigné (FR-216) |
+| T3 | `EN_RETARD` ou `EN_RECOUVREMENT` → `PLAN_ETALEMENT` | ROC | accord signé du client, plan valide, **confirmation du cœur** (FR-220) |
+| T4 | `EN_RETARD` ou `EN_RECOUVREMENT` → `REGULARISE` | système | le cœur confirme qu'aucune échéance n'est impayée |
+| T5 | `PLAN_ETALEMENT` → `REGULARISE` | système | trois échéances du plan honorées (FR-220) |
+| T6 | `PLAN_ETALEMENT` → `EN_RETARD` | système | une échéance du plan est impayée : le plan n'est pas tenu (FR-220) |
+| T7 | `EN_RETARD`, `EN_RECOUVREMENT` ou `PLAN_ETALEMENT` → `BLOQUE` | ROC seul | motif obligatoire (FR-218) |
+| T8 | `BLOQUE` → `EN_RECOUVREMENT` | ROC seul | déblocage, motif obligatoire (FR-218) |
+| T9 | `BLOQUE` → `REGULARISE` | ROC seul | déblocage, motif obligatoire, **et** le cœur confirme qu'aucune échéance n'est impayée |
+| T10 | `BLOQUE` → `CONTENTIEUX_JUDICIAIRE` | ROC propose, **DG décide** | proposition du ROC, dossier complet, mise en demeure datée (FR-219) |
+| T11 | `BLOQUE` ou `CONTENTIEUX_JUDICIAIRE` → `PERTE_DEFINITIVE` | ROC propose, **DG décide** ; au-dessus du seuil du conseil, le conseil (FR-221) | 24 mois d'impayé (paramètre) ou décision motivée ; **la perte passe toujours par `BLOQUE` ou par `CONTENTIEUX_JUDICIAIRE`**, jamais directement depuis `EN_RETARD` ou `EN_RECOUVREMENT` |
+| T12 | `CONTENTIEUX_JUDICIAIRE` → `REGULARISE` | système | le cœur confirme un solde nul (règlement, jugement exécuté) |
+| T13 | `PERTE_DEFINITIVE` → `REGULARISE` | système | le cœur confirme un **solde nul** après la radiation : « **radié puis recouvré** » (FR-221, FR-225) |
+| T14 | `REGULARISE` → `EN_RETARD` | système | une nouvelle échéance impayée depuis plus de 7 jours : nouveau cycle de retard |
 
 **Conséquences (testables) :**
 - Le statut de recouvrement s'affiche à côté du statut de crédit sur le dossier (FR-77) ; il n'ajoute aucun statut aux douze du dossier.
-- Une transition hors du tableau est refusée par le serveur ; l'IA ne pose jamais un statut (FR-8).
-- Un prêt `REGULARISE` qui retombe en retard rouvre un dossier `EN_RETARD` ; l'historique des cycles de retard est conservé (fiche du mauvais payeur, FR-222).
+- Une transition hors du tableau est refusée par le serveur ; l'IA ne pose jamais un statut (FR-8). Un rôle autre que celui de la colonne « Qui » est refusé, même s'il a le droit de lire.
+- **La perte définitive passe par `BLOQUE` ou par `CONTENTIEUX_JUDICIAIRE`** : le ROC bloque d'abord (T7) avec son motif, puis propose la perte au DG (T11). Un test tente `EN_RECOUVREMENT` → `PERTE_DEFINITIVE` et reçoit un refus.
+- **La clôture se fait par solde nul, même après la perte.** `PERTE_DEFINITIVE` n'est pas un état final : si le cœur constate un solde nul, T13 ramène le dossier à `REGULARISE`, puis le crédit clôture le prêt (FR-75) ; l'historique garde « radié puis recouvré » avec la source « cœur » (FR-225). Un test paie intégralement un prêt radié dans le cœur fictif et vérifie T13 puis la clôture.
+- Un prêt `REGULARISE` qui retombe en retard (T14) rouvre un dossier `EN_RETARD` ; l'historique des cycles de retard est conservé (fiche du mauvais payeur, FR-222).
 - Le jeu de démonstration contient au moins dix prêts dans chaque statut (FR-11).
 
 #### FR-215 : Le ROC voit le réseau trié par PAR et descend jusqu'au dossier
 
-Le ROC (et le DG) ouvre une vue du recouvrement du réseau : agences **triées par PAR décroissant**, avec PAR 1, 30 et 90 (cumulatifs, sur l'encours entier ; FR-173), encours en retard, taux de collecte du jour, promesses du jour et honorées, agents assignés. Il **descend** agence → agent → client → dossier, avec les mêmes filtres que le pilotage : région, agence, zone, agent, statut de recouvrement, score (sous 30, de 30 à 60, plus de 60), ancienneté du retard, **secteur d'activité** (FR-7). Réalise UJ-8.
+Le ROC (et le DG) ouvre une vue du recouvrement du réseau : agences **triées par PAR décroissant**, avec PAR 1, 7, 30, 60 et 90 (cumulatifs, sur l'encours entier ; FR-173), encours en retard, taux de collecte du jour, promesses du jour et honorées, agents assignés. Il **descend** agence → agent → client → dossier, avec les mêmes filtres que le pilotage : région, agence, zone, agent, statut de recouvrement, score (sous 30, de 30 à 60, plus de 60), ancienneté du retard, **secteur d'activité** (FR-7). Réalise UJ-8.
 
 **Conséquences (testables) :**
 - Le tri est par PAR, pas par impayés comme dans la démo. Le PAR du réseau est la somme pondérée de celui des agences, au franc près (FR-174).
 - Chaque niveau n'est lisible que dans le périmètre du rôle : le RA ne voit que son agence ; le REC que ses zones ; l'AUD lit sans modifier (FR-5).
-- Une **alerte de concentration** signale une agence dont plus de 30 % du PAR tient à un agent ou à une zone (paramètre ; calibré sur les données de l'IMF ; défaut de démo : 30 %). Les seuils d'alerte de PAR sont ceux de FR-178.
-- Une fiche d'agent de recouvrement montre ses dossiers, sa collecte du jour rapportée à l'objectif, ses promesses honorées et son statut (`BON`, `VIGILANCE`, `CRITIQUE`) selon des seuils paramétrables (calibrés sur les données de l'IMF ; défauts de démo : taux de collecte 55 % et 75 %).
+- Une **alerte de concentration** signale une agence dont plus de 30 % du PAR tient à un agent ou à une zone (paramètre ; calibré sur les données de l'IMF ; valeur de départ : annexe D des paramètres). Les seuils d'alerte de PAR sont ceux de l'annexe D (FR-178) : un seul jeu de seuils, cité par chaque exigence.
+- Une fiche d'agent de recouvrement montre ses dossiers, sa collecte du jour rapportée à l'objectif, ses promesses honorées et son statut (`BON`, `VIGILANCE`, `CRITIQUE`) selon des seuils paramétrables (calibrés sur les données de l'IMF ; valeurs de départ : annexe D, taux de collecte 55 % et 75 %).
 - Les chiffres sont lus du cœur et des relances de Prospera, avec la date de lecture ; aucun n'est une constante.
 - La carte des zones en retard utilise Google Maps (PRD-D FR-121) ; un client sans position figure dans la liste.
 
@@ -2564,14 +2830,16 @@ Les actions possibles sont : appel, visite au domicile, visite sur l'activité, 
 - Une action non tracée n'existe pas ; le journal ne peut ni être modifié ni être supprimé (FR-9).
 - Un résultat d'action qui ajoute une promesse réarme la surveillance de la date promise.
 
-#### FR-218 : Le blocage d'un dossier, par le ROC seul, avec motif, suspend les demandes du client et de ses cautions
+#### FR-218 : Le blocage d'un dossier, par le ROC seul, avec motif, suspend les demandes du client, et celles de ses cautions appelées
 
-Le ROC **bloque** un dossier : le statut de recouvrement passe à `BLOQUE`, avec un **motif obligatoire**. Seul le ROC bloque ; seul le ROC **débloque**, aussi avec un motif (récit du PO). Un dossier `BLOQUE` **suspend toute nouvelle demande de crédit du client et de ses cautions** (décision D1). Il n'y a **pas de blocage d'agence**. Réalise UJ-8.
+Le ROC **bloque** un dossier : le statut de recouvrement passe à `BLOQUE`, avec un **motif obligatoire**. Seul le ROC bloque ; seul le ROC **débloque**, aussi avec un motif (récit du PO). Un dossier `BLOQUE` **suspend toute nouvelle demande de crédit du client** (décision D1, amendée par le PO le 2026-11-13, P7). **Une caution n'est frappée que si elle a été appelée** (état `APPELE`, FR-223) : une caution simplement inscrite au dossier n'est jamais bloquée. Il n'y a **pas de blocage d'agence**. Réalise UJ-8.
 
 **Conséquences (testables) :**
 - Le blocage est **manuel** : ni l'IA, ni la règle des 60 jours de M19 ne bloquent. L'interrupteur `blocage-automatique-au-seuil` du module est **éteint** chez l'IMF.
-- Le blocage porte sur le **dossier de crédit** ; le module publie un fait `recouvrement.credit.bloque` portant le dossier, le client et ses cautions (écart avec M19, où le blocage porte sur le tiers). Le module `credit` le lit : une nouvelle demande du client ou d'une de ses cautions est refusée à la création (`CREDIT_BLOQUE`, FR-30), au serveur, quel que soit le canal. Une demande déjà en cours est suspendue : ni décision, ni décaissement tant que le blocage dure.
-- Un client dont une caution est bloquée ne perd pas ses prêts en cours ; seules ses nouvelles demandes sont suspendues.
+- Le blocage porte sur le **dossier de crédit** ; le module publie un fait `recouvrement.credit.bloque` portant le dossier, le client et ses seules cautions appelées (écart avec M19, où le blocage porte sur le tiers). Le module `credit` le lit : une nouvelle demande du client ou d'une de ses cautions appelées est refusée à la création (`CREDIT_BLOQUE`, FR-30), au serveur, quel que soit le canal. Une demande déjà en cours est suspendue : ni décision, ni décaissement tant que le blocage dure.
+- Un client dont une caution appelée est bloquée ne perd pas ses prêts en cours ; seules ses nouvelles demandes sont suspendues. La suspension d'une caution tombe avec le blocage ou dès que l'appel est clos (FR-223). Un test bloque un dossier à deux cautions dont une seule est `APPELE` : seule celle-ci voit sa demande refusée.
+- **Recours du client bloqué.** Le client bloqué est informé du blocage et de son motif (FR-88) et peut former un **recours** auprès de son agence (RA, GP) ; le recours est examiné par le **DG**, qui n'a pas posé le blocage, dans un délai fixé par l'IMF (paramètre ; aucune valeur par défaut [ASSUMPTION : délai à fixer par l'IMF]). La décision est motivée, tracée, et peut lever le blocage (T8 ou T9, FR-214) ; le client en est informé.
+- **Réexamen au plus tard tous les 6 mois** (paramètre) : un blocage non réexaminé dans ce délai par le ROC, avec un motif daté de maintien ou de levée, remonte aux décisions à trancher du DG (FR-236) et alerte l'AUD.
 - Chaque blocage et déblocage est une entrée du journal : auteur (ROC), motif, date, dossier. Le GP, le RA, le client (par le message prévu au FR-88) et le DAF sont notifiés ; le DAF reçoit la proposition de provision calculée au barème du classement (FR-176), pas un taux fixé par ce module.
 - Le motif ne peut ni être modifié ni supprimé. Un déblocage sans motif est refusé (`MOTIF_REQUIS`).
 - Les « dossiers bloqués plus de 48 h » de la démo (demandes en instruction) sont renommés « demandes en attente depuis plus de 48 h » et relèvent du crédit (FR-83), pas du recouvrement.
@@ -2607,8 +2875,8 @@ Le ROC propose un **plan d'étalement** à un client en retard : un nouvel éch�
 - La perte ne se décide jamais seule : ni l'IA, ni la règle de 24 mois n'y suffisent (FR-176).
 - Le seuil de passage au conseil est un paramètre de l'IMF [ASSUMPTION : aucune valeur par défaut, l'IMF la fixe avant la mise en service].
 - La décision est **envoyée au cœur**, qui passe la créance en perte (FR-152) ; Prospera ne comptabilise rien (FR-2).
-- Le statut devient `PERTE_DEFINITIVE` ; le client est **inéligible** à tout nouveau crédit ; une dérogation du DG, motivée et tracée, est la seule voie (FR-84).
-- Un prêt radié ne se clôture pas par le chemin de la clôture ordinaire (FR-75). Un paiement reçu après la perte est enregistré normalement (le cœur fait foi) et la fiche l'indique.
+- Le statut devient `PERTE_DEFINITIVE` **depuis `BLOQUE` ou `CONTENTIEUX_JUDICIAIRE`** (T11, FR-214) : un dossier `EN_RETARD` ou `EN_RECOUVREMENT` est d'abord bloqué par le ROC, avec son motif ; le client est **inéligible** à tout nouveau crédit ; une dérogation du DG, motivée et tracée, est la seule voie (FR-84).
+- Un prêt radié ne se clôture pas par le chemin de la clôture ordinaire (FR-75) tant que le cœur n'a pas confirmé un solde nul. Un paiement reçu après la perte est enregistré normalement (le cœur fait foi) et la fiche l'indique ; quand le cœur constate un solde nul, le dossier passe `PERTE_DEFINITIVE` → `REGULARISE` (« radié puis recouvré », T13, FR-214), puis le crédit le clôture (FR-75). L'inéligibilité du client demeure, sauf dérogation du DG (FR-84).
 
 #### FR-222 : La fiche du mauvais payeur est ouverte par règle, par client, et se ferme
 
@@ -2620,6 +2888,7 @@ Prospera ouvre une **fiche de mauvais payeur par client** (décision D7) : au pr
 - Une fiche fermée reste consultable (historique) mais sort de la liste ; si un nouveau retard dépasse 30 jours, la même fiche se rouvre.
 - Un client en retard sur un prêt a sa fiche même s'il est à jour sur un autre.
 - La fiche remplace le booléen « mauvais payeur » de la démo, qui n'avait aucune règle.
+- **À l'ouverture de la fiche**, un bloc « comportement de retard » affiche l'**analyse du comportement de retard** du client (profil de retard, causes probables, tendance, FR-228) avec sa provenance et sa date ; sans moteur, le bloc affiche « analyse non disponible » et les chiffres de la fiche restent complets.
 
 #### FR-223 : L'appel des cautions et la saisie de garantie sont tracés
 
@@ -2628,7 +2897,7 @@ Le recouvrement peut **appeler une caution** et **saisir une garantie**. Le ROC 
 **Conséquences (testables) :**
 - Une caution a un état : `ACTIF`, `APPELE`, `INJOIGNABLE`, `REALISE`, `REFUSE` ; une garantie : `ACTIF`, `REALISE`, `INSUFFISANT`, `MANQUANT` (démo). Un appel de caution enregistre la date, le moyen, la réponse ; une caution injoignable est signalée au ROC.
 - Une saisie de garantie (stock, matériel, bien) enregistre : type, évaluation, accord du client, date, pièce. Le ROC décide ; l'exécution (huissier, enlèvement) se fait hors Prospera ; le produit de la réalisation est reçu par le cœur et lu (FR-2).
-- La caution est elle-même un client dont les demandes sont suspendues quand le dossier est `BLOQUE` (FR-218) ; elle est informée de l'appel par un message (FR-88).
+- La caution est elle-même un client ; **ses demandes ne sont suspendues que si elle a été appelée** (état `APPELE`) pendant que le dossier est `BLOQUE` (FR-218, P7) ; elle est informée de l'appel par un message (FR-88). Une caution non appelée n'est jamais bloquée.
 - Le dépôt de garantie est restitué ou imputé par le cœur ; Prospera ne manipule aucun solde de garantie.
 - L'exemple de la démo (« caution restante 120 000 FCFA ») est recalculé depuis les valeurs du dossier, jamais saisi.
 
@@ -2639,12 +2908,12 @@ Quand une membre d'un groupe solidaire est en retard, la relance vise **d'abord 
 **Conséquences (testables) :**
 - À J+7 sans paiement ni promesse de la membre, les autres membres et la responsable du groupe reçoivent un message ; le statut de paiement de la membre passe à `RETARD` (ou `EXCLU` selon la règle, FR-74).
 - La balance en retard d'un groupe est la somme de celles de ses membres (PRD-D §6.0). Le recouvrement ne répartit pas l'impayé : le cœur détient le solde de chaque membre (FR-74).
-- Un blocage posé sur le dossier d'une membre suspend ses nouvelles demandes et celles de ses cautions, qui sont les autres membres du groupe (FR-218).
+- Un blocage posé sur le dossier d'une membre suspend ses nouvelles demandes ; celles des autres membres du groupe, qui sont ses cautions, ne le sont que si leur caution a été appelée (FR-223, FR-218).
 - Une promesse faite par le groupe pour une membre est une promesse de la membre, avec le nom de la personne qui l'a faite.
 
 #### FR-225 : La clôture du prêt et le nouveau cycle, côté recouvrement
 
-Un dossier de recouvrement se ferme quand le **cœur confirme un solde nul** (décision D10) : le prêt passe `REGULARISE`, puis le crédit le clôture (FR-75) ; le cœur restitue le dépôt de garantie et libère les cautions. Le recouvrement garde l'historique des retards pour la fiche (FR-222). Réalise UJ-1, UJ-7.
+Un dossier de recouvrement se ferme quand le **cœur confirme un solde nul** (décision D10), **même après une perte définitive** (« radié puis recouvré », T13, FR-214) : le prêt passe `REGULARISE`, puis le crédit le clôture (FR-75) ; le cœur restitue le dépôt de garantie et libère les cautions. Le recouvrement garde l'historique des retards pour la fiche (FR-222). Réalise UJ-1, UJ-7.
 
 **Conséquences (testables) :**
 - La fermeture a la source « cœur » dans le journal ; aucun rôle ne ferme un dossier à la main.
@@ -2652,6 +2921,18 @@ Un dossier de recouvrement se ferme quand le **cœur confirme un solde nul** (d�
 - Un prêt passé par un plan d'étalement suit la règle de nouveau cycle du crédit (FR-76) : un retard de plus de 30 jours au cycle précédent exclut le renouvellement ; le recouvrement n'ajoute aucune règle.
 - Un client dont un dossier est `BLOQUE` ne peut pas repartir sur un nouveau cycle (FR-30) ; au déblocage, la règle de FR-76 s'applique.
 - Le recouvrement n'envoie rien au cœur à la clôture : le cœur la constate.
+
+#### FR-274 : L'onglet Preuves des relances, les campagnes de relance et la correspondance des workflows de la démo
+
+Le dossier de recouvrement porte un onglet **Preuves** : pour chaque relance, ce qui permet de la **démontrer**. Le ROC ou le RA peut aussi lancer une **campagne de relance** sur une sélection de dossiers. Ce que la démo montre sous les onglets « Preuves », « Workflows » et « Campagnes », le produit le fait. Réalise UJ-7, UJ-8.
+
+**Conséquences (testables) :**
+- **Preuves.** Une preuve est : une relance envoyée (canal, gabarit et texte exact, destinataire, heure, accusé de remise ou de non-remise, réponse), un appel (durée, résultat), une visite (position, photo), un reçu de paiement mobile, un accord écrit ou une mise en demeure (FR-217), avec type, date, fichier ou référence, **valide** (oui ou non) et l'auteur de la vérification. Le lien de paiement émis porte le reste dû relu et la date de lecture (FR-212). Une preuve ne se modifie ni ne se supprime (FR-9). Le dossier s'exporte en PDF scellé, utilisable au contentieux (FR-219).
+- Lecture : GP, REC, RA, ROC, DG ; AUD en lecture seule ; chaque consultation est journalisée. Une **vérification assistée** d'une pièce (reçu, capture) est facultative, porte sa provenance, et un humain la confirme ; elle ne rend jamais une preuve « valide » seule (FR-8).
+- **Campagne de relance** : nom, cible (filtre de dossiers : agence, tranche de retard, secteur, score), canal, statut (brouillon, active, terminée), nombre de messages envoyés, remis, en échec, taux de réponse, promesses obtenues et paiements reçus, **tous calculés** sur des faits (les taux constants de la démo ne sont pas repris). Les messages suivent le calendrier et les paliers de FR-212 : le GP valide les paliers « à valider », en lot ; l'envoi part par `notification`, en lots avec reprise (FR-258).
+- Une campagne de relance est un **message transactionnel** et n'est pas plafonnée comme une campagne commerciale (FR-245) ; elle **exclut** les dossiers avec promesse en cours (FR-213) et ceux dont le reste dû est nul. Le ROC lance dans tout le réseau, le RA dans son agence (FR-5).
+- **Correspondance des workflows de la démo** : NOUVEAU = `EN_RETARD` ; RELANCE_1 et RELANCE_2 = paliers de FR-212 ; ESCALADE = `EN_RECOUVREMENT` ; CONTENTIEUX = `CONTENTIEUX_JUDICIAIRE` (FR-219) ; CLOTURE = `REGULARISE`. Aucun second système de statuts n'existe.
+- La performance par canal et l'évolution sur 7 jours sont **calculées** sur les relances réelles ; sans historique, elles affichent « pas assez de données » (FR-226).
 
 #### L'IA (recouvrement)
 Règles communes (FR-8) : provenance affichée ; l'IA propose, l'humain décide ; un écart exige un motif ; rien ne bloque si l'IA est indisponible ; le moteur est l'IA commune. **Aucune IA ne bloque un dossier, ne décide un contentieux, une perte ni un étalement** (FR-218, FR-219, FR-220, FR-221). Tant qu'un modèle n'existe pas, la capacité est servie par des **règles explicables** et le dit à l'écran (décision F6).
@@ -2669,7 +2950,7 @@ L'IA commune propose au GP, au REC et au ROC, pour chaque dossier ou échéance 
 
 #### FR-227 : Le score de recouvrement est la probabilité de récupérer, explicable, avec ses poids
 
-Le **score de recouvrement** (0 à 100) et la **probabilité de récupérer** le dû sous 30 jours sont calculés pour tout dossier de retard de plus de 7 jours (cahier). Le score est une **somme pondérée de facteurs, dont les poids sont affichés** ; la probabilité suit la règle explicable du noyau (PRD-D FR-117), pas un modèle (décision D8). Chaque facteur est affiché avec sa valeur et sa contribution. Réalise UJ-8.
+Le **score de recouvrement** (0 à 100) et la **probabilité de récupérer** le dû sous 30 jours sont calculés pour tout dossier de retard de plus de 7 jours (cahier). Le score est une **somme pondérée de facteurs, dont les poids sont affichés** ; la probabilité suit d'abord la **règle explicable du noyau** (PRD-D FR-117, « v0 »), puis un **modèle** de l'IA commune, qui la remplace avec sa provenance et sa version dès qu'il existe (décision D8 : règle v0 puis modèle ; le modèle ne change ni le score ni les facteurs affichés, il fournit la probabilité). Chaque facteur est affiché avec sa valeur et sa contribution. Réalise UJ-8.
 
 **Conséquences (testables) :**
 - Facteurs et poids de départ, totalisant **100 %** : historique de paiement 25, ancienneté du retard 20, réactivité aux relances 15, capacité financière 15, flux Mobile Money 10, garanties 10, saisonnalité 5 [ASSUMPTION : poids de la démo, dont la ligne « capacité financière » était doublée pour un total de 105 % ; à calibrer sur les données de l'IMF]. Les poids sont des paramètres versionnés.
@@ -2678,7 +2959,7 @@ Le **score de recouvrement** (0 à 100) et la **probabilité de récupérer** le
 - Le score alimente : la priorité des relances (FR-226), l'alerte au ROC à J+7 (sous 50), la proposition J+90 (sous 20, FR-219), la fiche du mauvais payeur (FR-222), la file du jour (PRD-D FR-120). Il n'a **aucun effet automatique sur un statut**.
 - Ce score est **distinct** du score du client à l'octroi (paiement 40, capacité 30, activité 20, terrain 10, FR-124). Les deux ne se mélangent jamais dans un affichage.
 - Les scores sont gardés 5 ans (paramètre) ; l'analyse s'affiche en moins de 5 secondes.
-- IA commune absente : la règle explicable v0 sert ; la mention « règle, version, date » remplace « modèle ».
+- Un modèle n'entre en service qu'avec ses propres **facteurs expliqués** et son écart mesuré contre la règle v0 (FR-8, FR-260) ; tant qu'il n'existe pas, ou si l'instance locale est indisponible, la règle explicable v0 sert ; la mention « règle, version, date » remplace « modèle ».
 
 #### FR-228 : L'IA propose la stratégie par agence et analyse le comportement de retard
 
@@ -2688,6 +2969,7 @@ L'IA commune prépare au ROC un **projet de stratégie par agence** : priorités
 - La stratégie est un **projet** : elle n'engage rien avant la validation du ROC (FR-216). Le ROC qui s'écarte écrit un motif.
 - Chaque priorité affiche son gain attendu en FCFA et sa raison ; les cartes « méthode actuelle », « rendement », « méthode suggérée » de la démo sont recalculées sur les données, jamais saisies.
 - Une analyse de comportement cite ses sources et leur date ; une source de plus de 90 jours est signalée « ancienne » (FR-8).
+- **L'analyse du comportement de retard d'un client s'affiche à l'ouverture de la fiche du mauvais payeur** (FR-222), sans action de l'utilisateur ; elle est recalculée si la dernière analyse a plus de 7 jours (paramètre) [ASSUMPTION : cadence non décidée].
 - L'analyse par secteur lit le même PAR par secteur que `risque-par` (FR-174, FR-180) : un test compare les deux.
 - Aucune proposition ne suspend l'octroi d'une agence : il n'y a pas de blocage d'agence (FR-218) ; l'IA peut seulement le signaler au ROC comme point à discuter.
 - IA commune absente : la vue du ROC affiche les chiffres sans projet de stratégie ni analyse rédigée.
@@ -2706,17 +2988,17 @@ L'IA commune propose, pour un dossier, des **scripts** d'appel et de visite adap
 #### Écarts tranchés (recouvrement)
 | M19 (PRD-D §6.2) | IMF | Décision |
 |---|---|---|
-| Blocage sur le **tiers**, automatique à plus de 60 jours ou au plafond ; levé par le DAF seul | Blocage d'un **dossier**, manuel, par le ROC seul, avec motif ; levé par le ROC | Blocage de dossier par le ROC ; interrupteur automatique éteint ; effet sur les demandes du client et de ses cautions (FR-218, D1) |
+| Blocage sur le **tiers**, automatique à plus de 60 jours ou au plafond ; levé par le DAF seul | Blocage d'un **dossier**, manuel, par le ROC seul, avec motif ; levé par le ROC | Blocage de dossier par le ROC ; interrupteur automatique éteint ; effet sur les demandes du client, et des cautions appelées (FR-218, D1, P7) |
 | Statuts dérivés du journal | Statuts nommés `EN_RETARD` à `PERTE_DEFINITIVE`, décidés | Second axe, transitions décidées (FR-214) |
 | Un dossier par tiers | Statuts, blocage et plan par prêt | Un dossier par prêt, regroupés sur la fiche client (FR-211) |
 | Échelle J-3, J+1, J+7, J+15, J+30, blocage | J-3, J+1 à J+3, J+7, 3 échecs, J+90 | Échelle de l'IMF en donnée (FR-212, D11) |
 | Visite à J+15, À VALIDER | Mission terrain à J+7 | Paramètre ; J+7 à valider par le GP |
 | Mise en demeure à J+30, palier « direction » | Décision du ROC, courrier signé du DG, envoi hors Prospera | Action tracée (FR-217) |
 | Contentieux proposé si probabilité sous 40 | J+90 ou score sous 20, proposé au ROC, DG pour le judiciaire | FR-219 (D2) |
-| Reste dû : `paiement` propriétaire de la créance | Le cœur fait foi pour l'argent | `paiement` reste **seul propriétaire** des créances (décision du PO du 2026-11-13, Q2) ; l'articulation avec le cœur est analysée à l'ajout du connecteur réel (FR-209, FR-257) |
+| Reste dû : `paiement` propriétaire de la créance | Le cœur fait foi pour l'argent | `paiement` reste **seul propriétaire** des créances (décision du PO du 2026-11-13, Q2) ; son montant exigible est **recalé sur la dernière lecture du cœur**, le client voit le montant du cœur (P1 ; FR-209, FR-257) |
 | Confirmation de PI-SPI sans action humaine | Mobile Money validé par le comptable | PI-SPI sans validation ; Mobile Money et virement sans référence validés (FR-210, A7) |
-| Probabilité par règle sur le score du point de vente | Score de recouvrement à facteurs, poids affichés | FR-227 (D8) |
-| PAR en tranches et PAR cumulatif (incohérence interne) | PAR 1, 30, 90 cumulatifs sur l'encours entier | Cumulatif seul (FR-173) |
+| Probabilité par règle sur le score du point de vente | Score de recouvrement à facteurs, poids affichés | FR-227 (D8 : règle v0 puis modèle) |
+| PAR en tranches et PAR cumulatif (incohérence interne) | PAR 1, 7, 30, 60, 90 cumulatifs sur l'encours entier ; un seul jeu de seuils (annexe D) | Cumulatif seul (FR-173) |
 | Pas de plan d'étalement, de perte, de caution, de clôture | Plan, perte, cautions, clôture | FR-220, FR-221, FR-223, FR-225 (D3, D4, D10) |
 | Statuts de promesse `EN_ATTENTE`, `TENUE`, `PARTIELLEMENT_TENUE`, `ROMPUE` | `ACTIVE`, `NON_TENUE`, `PARTIELLE` en démo ; `PROMISE_*` au cahier | Statuts du noyau, table de correspondance (FR-213) |
 | Rôles `RECOUVREMENT`, commercial | REC, GP, ROC, RA, DG | Rôles IMF (§2.1) |
@@ -2731,7 +3013,7 @@ L'IA commune propose, pour un dossier, des **scripts** d'appel et de visite adap
 
 #### FR-230 : Chacun des seize rôles a son tableau de bord, composé en données
 
-Chaque rôle de l'IMF (§2.1) ouvre un tableau de bord composé pour lui, lu sur le serveur dans son périmètre (FR-5). La composition est une donnée de paramétrage, pas du code. Aucun écran ne s'intitule « Vue DG » pour un autre rôle : la « direction commerciale » et la « direction des engagements » sont des **vues** du DG (onglets Commercial et Crédit), pas des comptes (§2.1). Réalise UJ-3.
+Chaque rôle de l'IMF (§2.1) ouvre un tableau de bord composé pour lui, lu sur le serveur dans son périmètre (FR-5). La composition est une donnée de paramétrage, pas du code. L'écran **Opérations bancaires** (FR-89, FR-90) est un lien du tableau de bord du DG, du ROC, du COM, du CPT et du DAF (FR-273). Aucun écran ne s'intitule « Vue DG » pour un autre rôle : la « direction commerciale » et la « direction des engagements » sont des **vues** du DG (onglets Commercial et Crédit), pas des comptes (§2.1). Réalise UJ-3.
 
 **Composition initiale** (valeurs de la démo ; éléments lus des modules, chacun avec sa date de lecture du cœur quand il porte de l'argent, FR-2) :
 
@@ -2739,10 +3021,10 @@ Chaque rôle de l'IMF (§2.1) ouvre un tableau de bord composé pour lui, lu sur
 |---|---|
 | DG | les douze chiffres de FR-231 ; onglets Crédit, Commercial, Financier, Opérationnel, Terrain ; cartes d'agence ; alertes ; décisions à trancher ; synthèse du DG (FR-236) ; matrice des postes ; Copilot |
 | DAF | trésorerie et liquidité (lues du cœur), résultat, coût du risque, coefficient d'exploitation ; tableau Budget et Rentabilité (FR-253) ; prévision de trésorerie à 7 jours (FR-254) ; rapports BCEAO à valider ; décisions « en attente de votre signature » |
-| ROC | pipeline des dossiers ; file de validation ROC ; PAR 1, 7 et 30 jours ; impayés ; dossiers bloqués ; recouvrement du réseau trié par PAR ; performance des agents de recouvrement ; contrôle quotidien (§7.5) |
+| ROC | pipeline des dossiers ; file de validation ROC ; PAR 1, 7, 30, 60 et 90 jours ; impayés ; dossiers bloqués ; demandes en attente depuis plus de 48 h ; recouvrement du réseau trié par PAR ; performance des agents de recouvrement ; contrôle quotidien et écran réseau (FR-273) |
 | RA | huit chiffres de l'agence (emprunteurs, encours, PAR 30, taux de remboursement, collecte du jour, couverture des agents, transactions, liquidité lue du cœur) ; classement des agents du jour ; écart à l'objectif (FR-241) ; équipe |
 | CC | ma file de dossiers ; délais ; alertes d'instruction (FR-48) ; calendrier des visites ; moi contre l'équipe des CC |
-| GP | mon portefeuille (clients, encours, PAR 30, recouvrement, retards) ; vieillissement des retards ; promesses du jour ; relances ; boîte des réponses WhatsApp (FR-247) |
+| GP | mon portefeuille (écran Portefeuille du GP, FR-273 : clients, encours, PAR 30, recouvrement, retards) ; vieillissement des retards ; promesses du jour ; relances ; boîte des réponses WhatsApp (FR-247) |
 | AT, COLL | ma journée (à visiter, à collecter, en retard, objectif, atteinte) ; tournée ; prospects ; caisse du jour pour COLL |
 | COM, RCC | prospects, conversion, nouveaux clients contre objectif ; zones sous-couvertes ; calendrier des agents ; promesses et retards de la collecte |
 | RSQ | PAR par agence, zone, secteur et produit ; signaux faibles ; concentration ; dossiers au-dessus du seuil d'avis |
@@ -2779,9 +3061,10 @@ Le DG lit douze chiffres en trois familles, chacun avec sa valeur, sa variation 
 
 **Conséquences (testables) :**
 - Les formules de la démo (revenus = collecte × 0,22, profit net = revenus × 0,33, épargne = encours × 0,283, transactions = décaissements × 54,7) sont écartées. Un chiffre que le cœur ne fournit pas (résultat net sans balance, liquidité sans trésorerie) affiche « en attente des données du cœur » (FR-150), jamais une estimation déguisée.
-- Chaque seuil de statut est un paramètre de l'IMF, calibré sur ses données (FR-4) ; défauts de la démo : PAR 30 d'agence rouge au-dessus de 10 % (seuil BCEAO), orange au-dessus de 8 % (seuil interne) ; collecte verte à 90 % de l'objectif, orange à 70 % ; score de santé d'agence vert à 80, orange à 65.
+- Chaque seuil de statut est un paramètre de l'IMF, calibré sur ses données (FR-4). Les **valeurs de départ sont celles de l'annexe D des paramètres**, un seul jeu cité par toutes les exigences : PAR 30 d'agence rouge au-dessus de 10 % (seuil BCEAO), orange au-dessus de 8 % (seuil interne) ; collecte verte à 90 % de l'objectif, orange à 70 % ; score de santé d'agence vert à 80, orange à 65.
+- Les chiffres **PAR 1, 7, 30, 60 et 90** sont tous disponibles (FR-173) : le bandeau du DG montre PAR 30 et PAR 90, les autres se lisent par la descente (FR-232) et dans le recouvrement (FR-215).
 - Un chiffre CRITIQUE crée une alerte (FR-234). Un chiffre SAIN n'en crée pas.
-- Chaque chiffre porte la date de la dernière lecture du cœur (FR-2). Le délai entre un événement et son effet sur le tableau de bord est mesuré (promesse « piloter en temps réel », §1) ; la cible est un rafraîchissement toutes les 5 minutes (paramètre).
+- Chaque chiffre porte la date de la dernière lecture du cœur (FR-2). Le délai entre un événement et son effet sur le tableau de bord est mesuré (promesse « piloter en temps réel », §1) ; la cible est un rafraîchissement toutes les 5 minutes (paramètre [ASSUMPTION : valeur non décidée]).
 - Export CSV du bandeau, dans le périmètre du lecteur (PRD-D FR-171).
 
 #### FR-232 : Le DG descend du réseau jusqu'au client, par la géographie
@@ -2816,7 +3099,7 @@ Une alerte est l'objet unique de PRD-D FR-14 (domaine, sévérité, titre, déta
 
 #### FR-235 : Les déclencheurs d'alerte sont des règles, aux seuils calibrés
 
-Les déclencheurs ci-dessous sont des règles enregistrées. Leurs **seuils sont calibrés sur les données de l'IMF** après la reprise, proposés, validés par le rôle qui possède l'alerte, et recalculés chaque trimestre (FR-4, décision E5) ; la colonne « défaut » est la valeur de la démo, utilisée tant que le calibrage n'a pas eu lieu. Réalise UJ-3.
+Les déclencheurs ci-dessous sont des règles enregistrées. Leurs **seuils sont calibrés sur les données de l'IMF** après la reprise, proposés, validés par le rôle qui possède l'alerte, et recalculés chaque trimestre (FR-4, décision E5) ; la colonne « défaut » est la valeur de départ de l'annexe D (reprise de la démo), utilisée tant que le calibrage n'a pas eu lieu. Réalise UJ-3.
 
 | Déclencheur | Défaut de démo (paramètre ; calibré sur les données de l'IMF) | Destinataire |
 |---|---|---|
@@ -2824,7 +3107,7 @@ Les déclencheurs ci-dessous sont des règles enregistrées. Leurs **seuils sont
 | PAR d'une agence en hausse | +2 points contre le mois précédent | RA, ROC, DG |
 | PAR d'une zone | au-dessus du seuil, ou +2 points | RA, DG |
 | Collecte d'une agence sous l'objectif | moins de 80 % | RA, DG |
-| Dossier bloqué dans une étape | 48 heures | ROC, CC |
+| Demande en attente dans une étape (« demandes en attente depuis plus de 48 h », FR-83) | 48 heures | ROC, CC |
 | Écart de performance d'un agent | moins de 25 % sous l'objectif projeté | RA (FR-241) |
 | Concentration d'un secteur | 30 % du portefeuille | DG, RSQ, AUD |
 | Écart de caisse | caisse physique différente de la caisse système | RA, DAF, AUD, CPT |
@@ -2858,13 +3141,33 @@ Le tableau de bord du DG et du DAF liste les **décisions à trancher** (décisi
 Un **Copilot** par rôle répond en langage courant à des questions sur le périmètre de l'utilisateur, **dès le premier jour** (décision F3). Il est servi par `assistant-service` (moteur : l'IA commune, famille Agents métier). Il **lit seulement** : il n'exécute aucune action, ne décide rien et ne modifie aucune donnée. Chaque question reçoit en contexte le rôle, le périmètre, **la page ouverte et l'entité consultée** (le client, le dossier, l'agence, l'agent). Chaque réponse cite, pour **chaque chiffre**, sa source (module), sa date de calcul et son périmètre. Réalise UJ-3.
 
 **Conséquences (testables) :**
-- Cinq questions suggérées par profil de rôle, et la saisie libre. Questions types du DG : priorités du jour ; évolution du PAR du réseau ; agence en alerte ; liquidité et caisse ; actions recommandées de la semaine ; concentration par secteur. Équivalents pour RA, GP, AT, COM, RCC, COMM, DAF.
+- Cinq questions suggérées par profil de rôle, et la saisie libre. **Chacun des seize rôles** (§2.1) dispose de ses questions types, qui ne portent que sur son périmètre :
+
+| Rôle | Questions types |
+|---|---|
+| DG | priorités du jour ; évolution du PAR du réseau ; agence en alerte ; liquidité et caisse ; actions recommandées de la semaine ; concentration par secteur |
+| DAF | prévision de trésorerie à 7 jours ; perte attendue du portefeuille ; écart entre provisions proposées et comptabilisées ; rapports BCEAO à valider (FR-254) |
+| ROC | dossiers à décider aujourd'hui ; agences au PAR le plus élevé ; blocages à réexaminer ; perte attendue des dossiers en retard |
+| RA | état de mon agence aujourd'hui ; agents sous l'objectif ; échéances impayées de l'agence ; caisse de l'agence |
+| CC | mes dossiers à instruire ; pièces manquantes ; visites à faire ; justification du score d'un de mes dossiers |
+| GP | clients à relancer aujourd'hui ; promesses du jour ; mes clients à risque ; mon PAR |
+| AT | ma tournée de demain ; clients en retard près de moi ; prospects à rappeler |
+| COLL | ma collecte du jour restante ; clients à collecter ; écart de ma caisse |
+| COM | mes prospects à rappeler ; prospects non convertis ; zones à prospecter |
+| RCC | conversion de mon équipe ; agents sous-performants ; prospects non assignés |
+| RSQ | signaux faibles ; concentration par secteur et par zone ; dossiers au-dessus du seuil d'avis |
+| REC | ma file de recouvrement ; probabilité de récupérer un dossier ; cautions à appeler |
+| AUD | anomalies et opérations hors horaires ; écarts de caisse ; dossiers incomplets (lecture seule) |
+| CPT | paiements à valider ; file de rapprochement ; remboursements à saisir dans le cœur |
+| COMM | campagnes en cours et leur retour ; budget consommé ; prospects par source |
+| ADMIN_IMF | **Copilot d'installation**, sans aucun chiffre métier : santé de l'installation, dernière sauvegarde testée, mises à jour disponibles, état du relais |
+
 - Une réponse dont un chiffre n'a pas de source affichée est un défaut de recette : un test balaie un lot de questions et vérifie que chaque nombre cité porte source, date et périmètre.
 - Si la donnée manque, le Copilot répond « Données non disponibles pour {entité} » ; il ne la devine jamais.
 - Il ne donne jamais une donnée hors du périmètre du lecteur : un RA qui interroge une autre agence reçoit un refus, sans donnée (FR-5). ADMIN_IMF n'a pas de Copilot métier (FR-5) ; l'AUD en dispose en lecture seule de la piste d'audit [ASSUMPTION : la démo exclut l'auditeur du Copilot ; le PO tranche].
 - Il propose des liens vers l'écran concerné (« Voir le dossier », « Ouvrir l'agence »), sous le contrôle de la table d'accès du rôle ; ces boutons n'agissent pas à la place de l'utilisateur.
 - Aucune décision réglementaire ou financière n'est prise par le Copilot ; une proposition de décision porte la mention « proposition » (FR-8).
-- Si le moteur de langage tourne hors des serveurs de l'IMF, le Copilot n'est actif qu'avec le consentement de l'IMF à la transmission de données à l'IA commune (FR-8, FR-15) ; sans lui, l'emplacement affiche « bientôt » et les questions suggérées restent servies par des règles [ASSUMPTION : lieu d'exécution du moteur de langage à trancher avec l'IA commune].
+- **Le Copilot tourne dans l'instance locale de l'IMF** (P9 ; FR-260), sur ses seules données : il ne demande aucun consentement à la transmission de données pour répondre. Le consentement (FR-15) ne gouverne que le renvoi des écarts anonymisés vers l'IA commune. Si l'instance locale n'est pas installée ou ne tourne pas, l'emplacement affiche « bientôt » et les questions suggérées restent servies par des règles : **le Copilot est réel si le moteur tourne chez l'IMF**. La reconnaissance vocale reste désactivée sans consentement propre (FR-207).
 - L'indisponibilité du Copilot ne bloque aucun parcours (FR-8).
 
 **L'IA.** Copilot (module Agents métier). Entrées : les lectures des modules dans le périmètre de l'utilisateur et le contexte de page. Sortie : un texte avec chiffres sourcés et liens. Destinataire : l'utilisateur qui pose la question.
@@ -2950,13 +3253,24 @@ L'IA commune propose aux responsables d'équipe : (1) la **prévision du PAR par
 
 #### FR-244 : Comptes, droits et journal d'accès
 
-L'écran « Utilisateurs » permet à ADMIN_IMF de créer les comptes, de changer rôle et agence, de suspendre, de réinitialiser le mot de passe et d'activer la double authentification ; le DG valide les rôles sensibles (DAF, AUD, ROC) ; il y a deux personnes à chaque création ou retrait de rôle (FR-5, décisions F7 et F9). La liste des rôles créables par rôle est un paramètre. Les comptes d'agents terrain naissent par une invitation SMS (voir §7.7). Réalise UJ-9.
+L'écran « Utilisateurs » permet à ADMIN_IMF de créer les comptes, de changer rôle et agence, de suspendre, de réinitialiser le mot de passe et d'activer la double authentification ; la création d'un rôle qui touche à l'argent ou à la décision (DAF, AUD, ROC, CPT, DG) est **validée par un rôle métier** (DG ou RA), **pas par un second administrateur** (FR-5, A26 ; décisions F7 et F9). La liste des rôles créables par rôle est un paramètre. Les comptes d'agents terrain naissent par une invitation SMS (voir §7.7). Réalise UJ-9.
 
 **Conséquences (testables) :**
-- La démo ne permet de créer ni DAF, ni AUD, ni COMM, ni RSQ : les seize rôles sont créables selon la règle de FR-5.
+- La démo ne permet de créer ni DAF, ni AUD, ni COMM, ni RSQ : les seize rôles sont créables selon la règle de FR-5. Un administrateur qui tente de valider lui-même la création d'un rôle sensible est refusé : il faut la validation du DG ou du RA.
 - Les indicateurs (comptes actifs, suspendus, sans double authentification, connexions du jour) sont calculés, jamais constants.
-- Le **journal d'accès** (qui a consulté quoi) est complet, infalsifiable et lisible par l'AUD seul (FR-9) ; ADMIN_IMF lit le journal des **actions d'administration**, pas des données métier.
+- Le **journal d'accès** (qui a consulté quoi) est complet, non modifiable par l’application, chaîné, et lisible par l’AUD seul (FR-9) ; ADMIN_IMF lit le journal des **actions d'administration**, pas des données métier.
 - Un changement de rôle ou de périmètre s'applique à la requête suivante (PRD-D FR-6).
+
+#### FR-273 : Contrôle quotidien du ROC, écran réseau, demandes en attente, portefeuille du GP et Opérations bancaires
+
+Les écrans que la démo montre aux rôles de pilotage et que le tableau de bord (FR-230) cite sans les définir. Chacun lit des modules, n'invente aucun chiffre et dit « non installé » ou « en attente des données du cœur » quand la source manque. Réalise UJ-3, UJ-7.
+
+**Conséquences (testables) :**
+- **Contrôle quotidien du ROC** : un diagnostic **par agence** : PAR 30 et PAR 90 (FR-173), tension de trésorerie et prévision à 24 heures lues du cœur (avec leur date), décaissements prévus, transactions échouées, opérations annulées, dossiers incomplets, agences actives, alertes ouvertes, et les compteurs « tickets d'incident » et « disponibilité du système » (« non installé » sans `support-client`, FR-251). Une section « actions recommandées » est une proposition avec sa provenance (règle ou modèle, FR-8) ; l'humain l'écarte avec un motif.
+- **Écran réseau du ROC** : la **carte de chaleur du PAR par agence** (rouge au-dessus du seuil de l'annexe D multiplié par 1,3, orange au-dessus du seuil, jaune au-dessus du seuil multiplié par 0,7 [ASSUMPTION : coefficients de la démo]), le classement des agences, la tension de trésorerie, et la descente agence → agent → client → dossier (FR-215) ; le tri est par PAR.
+- **Demandes en attente depuis plus de 48 h** : liste des demandes de crédit restées plus de 48 heures dans une étape (seuil en paramètre ; annexe D), avec l'étape, le responsable et l'âge ; elle relève du crédit (FR-83) et n'a aucun rapport avec le blocage de recouvrement (FR-218). Elle lève l'alerte de FR-235 vers le ROC et le CC.
+- **Portefeuille du GP** : la liste de ses clients en grille et en tableau avec recherche, l'onglet « mauvais payeurs » (fiches de FR-222 de son portefeuille), la carte de ses clients (uniquement avec le consentement de géolocalisation, FR-132), et la fiche emprunteur ; il ne voit que son portefeuille (FR-5).
+- **Opérations bancaires** : écran de lecture (prêts actifs, décaissements en attente avec l'heure limite de la banque, échéancier du réseau) défini en FR-89 et FR-90 ; il est accessible au DG, au ROC, au COM, au CPT et au DAF, chacun dans son périmètre, par un lien du tableau de bord (FR-230). Aucune action n'y est possible qui n'existe pas déjà dans le module propriétaire.
 
 ---
 
@@ -3002,12 +3316,12 @@ Le **chatbot WhatsApp** qui qualifie un prospect en cinq questions (prénom, act
 
 #### FR-248 : L'IA du marketing : segmentation, ciblage, notes de prospects, propositions de campagnes
 
-L'IA commune (module Relation client) propose : (1) une **segmentation** comportementale des clients (clusters sur des données agrégées et anonymisées, sans donnée personnelle dans le cluster) ; (2) le **ciblage** d'une campagne (quels clients, quel canal, quel moment) ; (3) la **note de chaque prospect** (FR-246) ; (4) des **propositions de campagnes** (renouvellement pour les bons payeurs, réactivation pour les comptes dormants, nouveau produit) ; (5) les **zones de prospection** sous-couvertes, avec le potentiel (voir le terrain, §7.1, et FR-128). Réalise UJ-1.
+L'IA commune (module Relation client) propose : (1) une **segmentation** comportementale des clients, **dont les épargnants** (clusters sur des données agrégées et anonymisées, sans donnée personnelle dans le cluster) ; (2) le **ciblage** d'une campagne (quels clients, quel canal, quel moment) ; (3) la **note de chaque prospect** (FR-246) ; (4) des **propositions de campagnes** (renouvellement pour les bons payeurs, réactivation pour les comptes dormants, nouveau produit) ; (5) les **zones de prospection** sous-couvertes, avec le potentiel (voir le terrain, §7.1, et FR-128) ; (6) un **Copilot marketing** en lecture seule pour COMM, RCC et COM, comme celui de FR-237 : questions types (campagnes en cours et leur retour, budget consommé, prospects par source, clients à réactiver), chiffres sourcés, aucune action. Réalise UJ-1.
 
 **Conséquences (testables) :**
 - Une proposition de campagne affiche segment, canal, message pré-rédigé, impact attendu et provenance ; COMM la valide, l'ajuste ou l'écarte avec un motif (FR-8).
 - Le client en retard, au dossier BLOQUE ou ayant retiré son consentement n'est jamais dans une proposition (FR-245, FR-15).
-- Une segmentation ne sort pas des serveurs de l'IMF sans le consentement de FR-15 ; sans consentement, elle tourne sur les seules données de l'IMF (FR-8).
+- La segmentation et le Copilot marketing tournent dans l'**instance locale** de l'IMF (FR-260) : aucune donnée de client n'en sort ; seuls des écarts anonymisés peuvent être renvoyés, avec le consentement de FR-15 (FR-8).
 - Sans modèle, des règles servent la note de prospect (FR-246) et le ciblage, et le disent.
 
 **L'IA.** Segmentation, ciblage, notes de prospects, propositions de campagnes (module Relation client ; zones de prospection : Agents métier). Entrées : clients, prospects, historique de campagnes, carte de couverture, secteur d'activité. Sortie : segments, listes ordonnées, propositions. Destinataires : COMM, RCC, COM.
@@ -3052,7 +3366,7 @@ L'IMF ajoute à PRD-D FR-157 les règles suivantes, fournies par leur module (va
 
 #### FR-251 : Le support client est inscrit, sans écran au premier jour
 
-Le module `support-client` (M03) est **inscrit pour la complétude**, comme chez le distributeur (PRD-D §6.9) : la démo de l'IMF n'a aucun écran de support. Les seules traces sont, dans le « contrôle quotidien » du ROC, les compteurs « tickets d'incident » et « disponibilité du système ». Ses écrans sont à concevoir et sont hors du premier jour ; ses boutons sont « bientôt », sans date.
+Le module `support-client` (M03) est **inscrit pour la complétude**, comme chez le distributeur (PRD-D §6.9) : la démo de l'IMF n'a aucun écran de support. Les seules traces sont, dans le « contrôle quotidien » du ROC (FR-273), les compteurs « tickets d'incident » et « disponibilité du système ». Ses écrans sont à concevoir et sont hors du premier jour ; ses boutons sont « bientôt », sans date.
 
 **Conséquences (testables) :**
 - Tant que le module n'est pas installé, le compteur « tickets d'incident » du ROC affiche « non installé », jamais 0.
@@ -3074,6 +3388,7 @@ Prospera n'est pas un grand livre : il ne tient ni écriture officielle, ni repo
 - Les remboursements, décaissements et dépôts sont comptabilisés **par le cœur** (FR-2, FR-155) : Prospera n'en exporte aucune écriture, ce qui évite le doublon.
 - Un export est un fichier ou un échange par `coeur-sfd` (FR-157) : Prospera tire, jamais de port entrant (§7.9).
 - Sans `coeur-sfd`, l'export est « non installé » ; le téléchargement du fichier reste possible.
+- **Les sous-onglets de comptabilité de la démo** (balance, journal, grand livre, résultat, bilan, rapprochements, suspens) sont **inventoriés « bientôt »**, sans date : la comptabilité officielle est celle du cœur, et Prospera n'en tient aucun. Ils s'affichent « bientôt », sans chiffre ni simulation (PRD-D FR-2) ; un test ouvre chacun et ne trouve aucun nombre. Seuls les écrans de lecture de la trésorerie et de la balance du cœur (FR-150) sont servis, quand le cœur les fournit.
 
 #### FR-253 : Pas de contrôle de gestion ; le DAF garde son tableau Budget et Rentabilité
 
@@ -3084,6 +3399,7 @@ Le module `controle-gestion` (M25) **n'est pas installé** chez l'IMF (décision
 - Le réalisé vient du cœur ; sans balance du cœur, la rentabilité affiche « en attente des données du cœur » (FR-150).
 - Sans budget saisi, l'écart affiche « budget non saisi », jamais 0.
 - Les prévisions glissantes, les budgets figés par comité et le rapport au comité du module `controle-gestion` (PRD-D FR-150 à FR-156) ne sont pas fournis ; ils sont « bientôt ».
+- **Le contrôle de gestion est « bientôt »**, sans date, y compris son **alerte** (écart du réalisé au budget au-delà d'un seuil, anomalie de coût) : l'emplacement s'affiche « bientôt », rien n'est simulé (PRD-D FR-2). Seul l'écart simple « budget saisi contre réalisé lu du cœur » ci-dessus est servi.
 
 #### FR-254 : L'IA du DAF : prévision de trésorerie à 7 jours et perte attendue, sur les données du cœur
 
@@ -3093,6 +3409,7 @@ Le DAF lit une **prévision de trésorerie à 7 jours** (entrées : échéances 
 - Chaque prévision affiche sa provenance, sa version, sa date, la date de la dernière lecture du cœur et sa confiance (FR-8, PRD-D FR-137) ; le jour du pic de sortie est identifié.
 - La perte attendue est celle de `risque-par` (FR-181) : un seul calcul, lu ici.
 - Le DAF n'agit pas depuis la prévision : le rééquilibrage de caisse entre agences se lit et ne s'exécute pas (FR-149).
+- **Copilot du DAF** : il répond en lecture seule (FR-237) sur la trésorerie, la prévision à 7 jours et la perte attendue, avec la source, la date et la date de lecture du cœur de chaque chiffre. La **perte attendue** est toujours présentée comme une **estimation** (encours × probabilité de défaut × perte en cas de défaut, FR-181), jamais comme une provision comptabilisée.
 - Sans lecture récente du cœur, la prévision affiche « données du … » et n'est pas recalculée sur des données périmées (FR-165).
 
 **L'IA.** Prévision de trésorerie à 7 jours et perte attendue (modules Risque et Pulse ; finalités `prevision-de-cash` et `perte-attendue`). Entrées : échéanciers officiels, historique de collecte, trésorerie du cœur. Sortie : courbe sur 7 jours et montant. Destinataire : DAF.
@@ -3135,10 +3452,11 @@ Le DAF lit une **prévision de trésorerie à 7 jours** (entrées : échéances 
 **Écarts de l'IMF, à porter au PRD `paiement`.** Réalise UJ-1 et UJ-7.
 
 **Conséquences (testables) :**
-- **Décaisser.** Le décaissement par **Mobile Money** et par **PI-SPI** est exécuté par `paiement`, sur l'ordre de décaissement de `credit` (FR-69), puis **déclaré au cœur** (FR-154). Le décaissement en **espèces** et par **virement** est exécuté par le cœur (FR-68). Un ordre de décaissement ne part que par **un seul** canal : un test envoie deux fois le même ordre et vérifie que l'argent ne part qu'une fois.
+- **Décaisser.** Le décaissement par **Mobile Money** et par **PI-SPI** est exécuté par `paiement`, sur l'ordre de décaissement de `credit` (FR-69), puis **déclaré au cœur** (FR-154). Le décaissement en **espèces** et par **virement** est exécuté par le cœur (FR-68). Un ordre de décaissement ne part que par **un seul** canal : un test envoie deux fois le même ordre et vérifie que l'argent ne part qu'une fois. Un ordre rejeté, expiré ou **à l'état inconnu** (aucune réponse certaine) passe à l'état **INCONNU** : il est **rapproché du relevé du fournisseur avant toute réémission**, et sa **clé d'idempotence n'est jamais régénérée** ; un ordre rejeté revient « à ordonner » avec son motif (A4, FR-64 à FR-70).
 - **Mobile Money par pays et par opérateur** (décision du PO) : le pays et les opérateurs sont des **paramètres de l'IMF** (FR-11). Le routage par opérateur est une exigence nouvelle pour `paiement`, qui ne pilote pas encore par opérateur (PRD-D FR-206). Tant qu'un opérateur n'a pas d'adaptateur sortant, son canal de décaissement est « bientôt » pour ce pays, le dossier propose un autre canal, et rien n'est simulé.
 - **Les banques** sont jointes par **PI-SPI** : le bénéficiaire d'un virement vers une autre banque est une adresse du schéma ; le virement vers un compte que le schéma ne joint pas est exécuté par le cœur [ASSUMPTION : le bac à sable PI-SPI n'expose pas l'IBAN].
-- **Encaisser.** Un remboursement par lien (J-3 : WhatsApp avec lien) ou déclaré par la collecte se rattache à l'échéance quand |payé − échéance| ÷ échéance < 1 % (décision A6) ; au-delà, il entre dans la **file de rapprochement** du CPT et n'est **jamais refusé**. La règle de 1 % remplace, pour les échéances de prêt, la tolérance d'un jour de FR-P38 [ASSUMPTION : à porter au PRD `paiement`]. L'ordre d'imputation (pénalités, intérêts, capital) est paramétrable (décision A5) ; un trop-perçu devient un crédit du client (PRD-D FR-248).
+- **Encaisser.** Un remboursement par lien (J-3 : WhatsApp avec lien) ou déclaré par la collecte est **rattaché à une échéance** (le rapprochement la choisit, il ne la solde pas) quand |payé − échéance| ÷ échéance < 1 % (décision A6) ; tout écart est un **paiement partiel** ou un **trop-perçu** (crédit du client), et au-delà du seuil il entre dans la **file de rapprochement** du CPT ; il n'est **jamais refusé**. La relance ne s'arrête que quand le reste dû est nul ; la tolérance d'arrondi est un paramètre distinct (FR-210). La règle de 1 % remplace, pour les échéances de prêt, la tolérance d'un jour de FR-P38 [ASSUMPTION : à porter au PRD `paiement`]. L'ordre d'imputation (pénalités, intérêts, capital) est paramétrable (décision A5) ; un trop-perçu devient un crédit du client (PRD-D FR-248).
+- **Lien de paiement et reste dû** (P1). Un lien n'est émis qu'après **relecture du reste dû du cœur** (âge maximal de la lecture en paramètre, FR-212) ; il porte le montant relu ; si le cœur ne répond pas, aucun lien n'est émis. Un lien déjà émis dont la Créance a été réduite ou fermée par un mouvement du cœur (FR-257) est invalidé, et le client voit le montant du cœur.
 - **Validation du comptable.** Un paiement Mobile Money **déclaré** et un virement **sans référence** restent « en attente » jusqu'à la validation du **CPT** ; un paiement PI-SPI confirmé n'en a pas besoin (irrévocable, décision A7). Le droit de valider un encaissement et le droit de préparer ou valider un ordre de décaissement sont **distincts** : on ne valide pas l'encaissement et l'ordre qui lui correspond (FR-6, FR-P66).
 - **Février (décision du PO du 2026-11-13, Q1).** `paiement` n'a pas encore d'adaptateur Mobile Money sortant : dans la démo, le décaissement Mobile Money est exécuté par le **cœur fictif** ; l'adaptateur sortant de `paiement` est chiffré au plan.
 - Un décaissement suit le **délai de coupure** de la banque (par exemple « valider avant 16 h » dans la démo ; paramètre).
@@ -3149,13 +3467,15 @@ Le DAF lit une **prévision de trésorerie à 7 jours** (entrées : échéances 
 
 **Ce qui s'applique tel quel.** La Créance a un tiers, une source, un périmètre et des composantes (principal, intérêt, pénalité, frais) ; elle publie `paiement.creance.changed@1`, `…soldee`, `…cloturee` ; l'ordre d'imputation est paramétrable ; l'argent sans créance devient un crédit du tiers ; `paiement` est le **propriétaire unique** de la Créance (PRD-D FR-247, PRD-D FR-248).
 
-**Décision du PO (2026-11-13, Q2).** Pour l'IMF aussi, **`paiement` est le seul propriétaire des créances**, y compris les échéances de prêt (source `ECHEANCE_DE_PRET`). Le PRD `paiement` et PRD-D FR-247 ne sont **pas** amendés. Le cœur reste la comptabilité officielle de l'IMF ; **l'articulation entre les créances de `paiement` et le compte de prêt du cœur sera analysée quand le connecteur réel sera ajouté** (§10.2). Réalise UJ-7.
+**Décision du PO (2026-11-13, Q2).** Pour l'IMF aussi, **`paiement` est le seul propriétaire des créances**, y compris les échéances de prêt (source `ECHEANCE_DE_PRET`). Le PRD `paiement` et PRD-D FR-247 ne sont **pas** amendés. Le cœur reste la comptabilité officielle de l'IMF ; **l'articulation technique entre les créances de `paiement` et le compte de prêt du cœur sera analysée quand le connecteur réel sera ajouté** (§10.2). La **règle d'articulation est fixée** (P1) : `paiement` garde la propriété de la Créance, mais **son montant exigible est recalé sur la dernière lecture du cœur** (conséquences ci-dessous). Réalise UJ-7.
 
 **Conséquences (testables) :**
 - La Créance d'une échéance s'ouvre sur l'**échéancier contractuel** du comité quand le dossier passe à EN_GESTION, et devient exigible à la confirmation du décaissement (FR-70). Le module `credit` ne possède aucune Créance ; il la fait ouvrir par `paiement`.
 - Les pénalités et intérêts de retard, calculés par le cœur (décision A4 ; le cœur fictif dans la démo), entrent dans la Créance comme composantes, avec leur source et leur date.
 - Un encaissement validé (paiement mobile, PI-SPI, collecte, guichet) réduit la Créance selon l'ordre d'imputation (décision A5) ; il n'est jamais compté deux fois (FR-2, FR-155).
-- Un écart entre la Créance de `paiement` et un montant renvoyé par le cœur ouvre une ligne de la file des écarts (FR-159), visible du GP et du CPT ; la règle d'arbitrage sera fixée avec le connecteur réel.
+- **Recalage sur le cœur.** À chaque lecture du cœur (FR-157), le montant exigible de la Créance est recalé sur le reste dû du cœur. **En cas d'écart de montant, la valeur affichée au client est celle du cœur**, et l'écart ouvre une ligne de la file des écarts (FR-159), visible du GP et du CPT.
+- **Un lien de paiement n'est émis qu'après relecture du reste dû** : l'âge maximal de la lecture est un paramètre (défaut : 15 minutes [ASSUMPTION : valeur non décidée]) ; au-delà, le serveur relit avant d'émettre ; sans réponse du cœur, aucun lien n'est émis (FR-212, FR-256).
+- **Un mouvement du cœur sans paiement Prospera correspondant** (paiement fait au guichet du cœur) **réduit ou ferme la Créance** au prochain cycle de lecture, publie `paiement.creance.changed@1` (ou `…soldee`), et invalide tout lien émis pour l'ancien montant. Un test paie au guichet du cœur fictif, relance un cycle de lecture et vérifie qu'un client ne peut pas payer deux fois.
 - Les cinq capacités du noyau que PRD-D §6.0 demande de valider sont **validées ici** : Créance à composantes ; PAR sur l'encours entier (FR-173) ; groupe solidaire, tiers collectif (FR-129) ; blocage d'un dossier, décision du ROC seul (FR-218) ; épargne lue du cœur (FR-130).
 - La source `ECHEANCE_DE_PRET`, « réservée » dans PRD-D FR-247, est **ouverte** pour la microfinance.
 
@@ -3170,6 +3490,7 @@ Le DAF lit une **prévision de trésorerie à 7 jours** (entrées : échéances 
 - Les **modèles WhatsApp** de l'IMF (rappel J-3 avec lien de paiement, relance, promesse, annonce de décaissement) sont **soumis à l'approbation avant la mise en service** (FR-N11) : le délai est externe ; un modèle non approuvé n'est jamais choisi, le SMS part et le journal le dit (PRD-D FR-249).
 - Le **numéro WhatsApp Business** et la **passerelle SMS** (identifiant d'expéditeur enregistré) sont **ceux de l'IMF et à sa charge** ; leurs identifiants sont chiffrés ; les coûts d'envoi sont mesurés (FR-N57 à FR-N63).
 - Les **réponses entrantes** (accusés, réponses de clients) et le **lien de paiement** (page publique ouverte par le téléphone du client) passent par le **relais Money Vibes** (FR-263, FR-158) : le serveur de l'IMF les tire, il n'est jamais joint directement.
+- Un **lien de paiement** est émis après relecture du reste dû (FR-212, FR-257) : le relais ne sert jamais un lien dont le montant n'a pas été relu dans l'âge maximal.
 - Les relances automatiques du matin sur tout le portefeuille sont un **envoi en lots avec reprise** (FR-N30 à FR-N32) ; un rappel d'échéance est transactionnel (hors plafond) et la publicité est plafonnée (FR-245). Les messages aux **cautions** d'un prêt en retard demandent un cadre de consentement à faire vérifier [ASSUMPTION : cadre juridique des messages à un tiers ; §12.3].
 - Un SMS en caractères non latins est limité à 70 caractères et coûte davantage : l'écran de modèle l'affiche (FR-N14).
 - La matrice « qui est prévenu de quoi » est celle de FR-234 et de l'annexe B ; `notification` ne la porte pas.
@@ -3190,7 +3511,9 @@ Le DAF lit une **prévision de trésorerie à 7 jours** (entrées : échéances 
 
 ### 7.8 L'IA commune
 
-**Ce qui s'applique tel quel.** La note de vision `vision-ia-sectorielle-2026-11-10` : l'IA est une **famille de modules à part** (Risque, Agents métier, Relation client, Pulse), commune à toutes les verticales ; elle apprend de leurs angles, sous le consentement de chacune, par **apprentissage fédéré** (PRD moteur FR-26 à FR-31 ; les modèles de l'IMF sont intouchables, PRD moteur FR-24). Ce PRD ne crée **aucune IA propre** (décision du PO) : il **fournit les données**, **affiche les propositions** et **marche sans elle** (emplacement vide). Les règles communes (provenance, l'IA propose et l'humain décide, motif d'un écart, jamais bloquant, le mot « IA » réservé à un modèle) sont celles de FR-8 et ne sont pas répétées.
+**Ce qui s'applique tel quel.** La note de vision `vision-ia-sectorielle-2026-11-10` : l'IA est une **famille de modules à part** (Risque, Agents métier, Relation client, Pulse), commune à toutes les verticales ; elle apprend de leurs angles, sous le consentement de chacune, par **apprentissage fédéré** (PRD moteur FR-26 à FR-31 ; les modèles de l'IMF sont intouchables, PRD moteur FR-24). Ce PRD **n'écrit pas les modèles** (ils relèvent de la famille de modules d'IA et du PRD moteur) : il **fournit les données**, **affiche les propositions**, **héberge l'instance locale** de l'IA commune et **marche sans elle** (emplacement vide). Les règles communes (provenance, l'IA propose et l'humain décide, motif d'un écart, jamais bloquant, le mot « IA » réservé à un modèle) sont celles de FR-8 et ne sont pas répétées.
+
+**Où elle tourne (décision du PO, P9).** Le moteur est l'**IA commune**, comme décidé en salle. Chez l'IMF tourne une **instance locale** de cette IA, sur le serveur de l'IMF. Cette instance : (1) **prédit** (score, relances, prévisions, priorités) à partir des seules données de l'IMF ; (2) **enregistre l'écart** entre ses prédictions et ce qui se passe réellement ; (3) **anonymise** ces écarts ; (4) les **renvoie** à l'IA commune pour l'apprentissage, sous le consentement de l'IMF (FR-15) ; (5) **reçoit ses mises à jour** (modèles) par un **tunnel sécurisé sortant**, ouvert par l'instance (aucun port entrant, FR-263 ; ce tunnel est distinct du tunnel de support, FR-269). Le **Copilot tourne dans cette instance** (FR-237).
 
 #### FR-260 : Ce que l'IMF fournit à l'IA commune, ce qu'elle en reçoit, et sous quel consentement
 
@@ -3199,12 +3522,14 @@ L'IMF **fournit** à l'IA commune, sous son consentement écrit (FR-15), des don
 **Les finalités consommées** par les modules de ce PRD sont déclarées module par module à la clause C11 de l'annexe A. **Le tableau de FR-8 donne, pour chaque moment du processus, la capacité et la section qui la spécifie** : il n'est pas recopié ici. Les finalités de **cette partie** sont : `pilotage-assiste` (Copilot), `priorites-du-jour`, `anomalie-d-agence`, `rapport-de-direction`, `coaching-individuel`, `benchmark-bonnes-pratiques`, `prevision-du-risque-par-zone` (§7.3) ; `segmentation`, `ciblage-campagne`, `note-de-prospect`, `proposition-de-campagne`, `zone-de-prospection` (§7.4) ; `prevision-de-cash`, `perte-attendue` (§7.6).
 
 **Conséquences (testables) :**
-- **Sans consentement**, aucune donnée ne sort des serveurs de l'IMF vers l'IA commune ; l'IA tourne sur les seules données de l'IMF, sur ses serveurs ; un test sur une installation sans consentement le vérifie (FR-8).
+- **Sans consentement**, rien ne sort des serveurs de l'IMF vers l'IA commune : l'instance locale prédit, enregistre ses écarts et sert le Copilot sur les seules données de l'IMF, sans rien renvoyer ; un test sur une installation sans consentement le vérifie (FR-8). La **reconnaissance vocale** est désactivée tant que l'IMF n'a pas donné un consentement **propre** à la voix (FR-207).
+- **Ce qui sort, avec consentement**, est un **écart anonymisé** : finalité, version du modèle, valeur prédite, valeur observée, caractéristiques agrégées ou généralisées. Aucun nom, téléphone, identifiant ni montant individuel identifiant n'en fait partie : un test inspecte un lot sortant et n'y trouve aucun identifiant. Le **tunnel sortant** n'est ouvert que par l'instance ; la mise à jour du modèle qui y arrive est signée et appliquée dans l'espace d'essai avant d'être promue (FR-262) [ASSUMPTION : les modèles reçus par le tunnel sont des mises à jour au sens du contrat de maintenance, FR-261 ; le tunnel est un contact sortant de plus à porter au spine moteur, AD-9].
 - Le consentement est **par finalité** et **retirable** : le retirer arrête l'envoi des données qui servent cette finalité ; l'apprentissage déjà mis en commun l'a été « sans les données », et le retrait est tracé (FR-15).
 - L'IMF choisit le **niveau d'apprentissage** parmi ceux que le PRD moteur ouvre (le niveau 2 y est fermé) ; le choix est affiché dans l'écran des consentements.
 - Le **secteur d'activité** (FR-7) et les données micro et macro-économiques (FR-8) sont les entrées de premier rang ; les données macro citent leur source et leur date.
-- Chaque emplacement d'IA est **vide sans l'IA commune** : un test coupe l'IA commune et vérifie qu'aucun parcours ne bloque et que les règles explicables restent servies, en le disant (FR-8).
+- Chaque emplacement d'IA est **vide sans l'IA commune** (instance locale arrêtée) : un test coupe l'instance locale et vérifie qu'aucun parcours ne bloque et que les règles explicables restent servies, en le disant (FR-8).
 - Un modèle affiné sur les données de l'IMF n'est jamais lu par Money Vibes (PRD moteur FR-24).
+- L'instance locale consomme des ressources du serveur de l'IMF : le test à dix fois la taille (FR-266) la fait tourner, et la configuration minimale l'inclut [ASSUMPTION : dimensionnement de l'instance locale non chiffré].
 
 ---
 
@@ -3220,7 +3545,7 @@ L'IMF détient une **licence à vie** (décision B3). **Aucune coupure, aucun ge
 - Un test place l'horloge de l'instance 30, 90 et 360 jours après le dernier signal vers Money Vibes : l'installation reste en écriture complète, sans bandeau de gel.
 - La suspension à distance d'une installation à licence à vie est **refusée** par le poste central avec un code nommé ; aucun écran de la console ne la propose pour l'IMF.
 - Ne pas contacter Money Vibes n'arrête rien ; l'absence de signal ne produit qu'un voyant de supervision (PRD moteur FR-16).
-- Les **mises à jour sont liées au contrat de maintenance** : sans contrat, l'IMF garde l'usage perpétuel de la version installée et ne reçoit plus de mises à jour [ASSUMPTION : lecture de la salle, séance 4 ; la licence ne couvre pas les évolutions]. La livraison des **correctifs de sécurité** sans contrat de maintenance n'est **pas tranchée** (§12.2).
+- **Licence à vie et contrat de maintenance** (décision du PO du 2026-11-13, P5). En plus de la licence à vie, l'IMF a un **contrat de maintenance payé chaque mois**. Les **mises à jour** et les **correctifs** (sécurité, réglementation : plafond d'usure, listes, textes BCEAO) sont **livrés sous ce contrat**. Un contrat non payé n'enlève rien à l'usage : l'installation reste en écriture complète, sans gel (ci-dessus) ; seules les livraisons s'arrêtent, avec un message qui le dit.
 
 #### FR-262 : Les mises à jour : essai, date choisie par l'IMF, retour arrière, fichier signé
 
@@ -3231,7 +3556,7 @@ Les mises à jour arrivent à distance, tirées par l'agent de l'instance (AD-1)
 - Une mise à jour n'est **jamais appliquée sans la date choisie par l'IMF**, sauf un correctif de sécurité critique, que l'IMF peut accepter dans un délai fixé par le contrat [ASSUMPTION : délai à fixer au contrat de maintenance].
 - La coupure de service d'une mise à jour est de **15 minutes au plus** (PRD moteur NFR-9).
 - Une sauvegarde ne restaure jamais un état de confiance (PRD moteur NFR-11).
-- Une mise à jour reçue **sans contrat de maintenance valide** est refusée avec un message qui dit pourquoi (FR-261).
+- Une mise à jour reçue **sans contrat de maintenance valide** (le contrat mensuel, FR-261) est refusée avec un message qui dit pourquoi ; l'usage de la version installée n'en est pas touché.
 - Les listes de sanctions LBC/FT ne passent pas par ce canal (FR-268).
 
 #### FR-263 : Le relais Money Vibes, parce qu'aucun port n'est ouvert chez l'IMF
@@ -3239,6 +3564,10 @@ Les mises à jour arrivent à distance, tirées par l'agent de l'instance (AD-1)
 Le PRD moteur interdit tout port entrant d'internet sur une instance sur site (NFR-2 ; toutes les liaisons sont initiées par l'instance, FR-16). Or trois chemins de l'IMF viennent d'internet : les **notifications des fournisseurs de paiement** (PI-SPI, FedaPay), les **accusés et réponses WhatsApp**, et le **lien de paiement** que le téléphone du client ouvre. Cette contradiction est **levée** (décision B1) par un **relais** tenu par Money Vibes, qui reçoit ces trois flux, les met en file, et que **le serveur de l'IMF tire** (« l'agent tire »). Le relais **sert le lien de paiement**. Réalise UJ-7.
 
 **Conséquences (testables) :**
+- **Contenu minimal du lien de paiement** : un **jeton opaque** (aucun nom, aucune donnée de client), le **montant** (relu du cœur, FR-212), une **durée de vie** (paramètre ; défaut : 72 heures [ASSUMPTION : valeur non décidée]) et un **usage unique** : un lien déjà payé ou expiré affiche son état et ne permet pas de payer une seconde fois.
+- **Accusé de réception après écriture.** Le relais n'accuse réception d'un événement au fournisseur qu'**après l'avoir écrit durablement** dans sa file ; l'instance n'acquitte un événement tiré qu'**après l'avoir écrit chez elle**. Un événement non acquitté est **rejoué** à la prochaine interrogation, sans doublon d'effet (signature et identifiant, FR-160).
+- **Rapprochement avec le relevé du fournisseur.** Chaque jour, et après toute coupure du relais, l'instance rapproche les paiements reçus par le relais du **relevé du fournisseur** ; un paiement du relevé sans événement reçu, ou l'inverse, entre dans la file des écarts (FR-159) et n'est jamais ignoré.
+- **Money Vibes est déclaré sous-traitant** de l'IMF pour le traitement des flux du relais (finalité, contenu, durée de conservation, localisation), dans le contrat et le registre des traitements (FR-15) ; le relais purge un événement tiré après un délai (paramètre ; défaut : 7 jours [ASSUMPTION : valeur non décidée]). Le cadre juridique est à faire vérifier (§12.3).
 - **Aucun port entrant** n'est ouvert sur le serveur de l'IMF : un balayage de l'extérieur n'en trouve aucun, et NFR-2 reste vrai.
 - Un paiement du client par le lien arrive à Prospera au plus tard à la prochaine interrogation du relais (paramètre ; défaut : 1 minute) ; le relais ne garde que le strict nécessaire à la mise en file, et un événement tiré n'est plus servi à la même instance (FR-158).
 - Si le relais est injoignable, le crédit et les relances continuent ; les paiements par lien s'affichent « en attente du relais » (FR-158) ; la file se vide au retour.
@@ -3281,9 +3610,10 @@ L'installation est **exploitée par l'équipe informatique de l'IMF**, qui n'est
 
 #### FR-267 : Sauvegardes de l'IMF et conservation de dix ans
 
-Les **sauvegardes 3-2-1** suivent PRD moteur NFR-7 (chiffrées, second support dans les locaux de l'IMF, clé de restauration détenue par l'IMF, test de restauration mensuel : un échec allume un voyant orange). La **rétention technique** des sauvegardes (7 quotidiennes, 4 hebdomadaires, 3 mensuelles : spine moteur AD-16) **n'est pas la conservation réglementaire** : la **piste d'audit, les dossiers de crédit et les pièces KYC sont conservés au moins dix ans** (FR-9, FR-191 ; instruction BCEAO n° 017-12-2010). Réalise UJ-9.
+Les **sauvegardes 3-2-1** suivent PRD moteur NFR-7 (chiffrées, second support dans les locaux de l'IMF, clé de restauration détenue par l'IMF, test de restauration **mensuel**, une seule fréquence, la même que PRD moteur NFR-7 et que NFR-4 du présent PRD : un échec allume un voyant orange). La **rétention technique** des sauvegardes (7 quotidiennes, 4 hebdomadaires, 3 mensuelles : spine moteur AD-16) **n'est pas la conservation réglementaire** : la **piste d'audit, les dossiers de crédit et les pièces KYC sont conservés au moins dix ans** (FR-9, FR-191 ; instruction BCEAO n° 017-12-2010 [ASSUMPTION : citation rattachée à FR-195, à faire vérifier par un juriste, §12.3]). Réalise UJ-9.
 
 **Conséquences (testables) :**
+- **Après un redémarrage ou une restauration**, avant de reprendre tout décaissement, l'instance **rapproche les ordres de décaissement de la dernière heure** (paramètre, égal au RPO) du **relevé du fournisseur** ; tout ordre dont l'issue est inconnue passe à l'état INCONNU et n'est **réémis qu'après ce rapprochement**, avec sa clé d'idempotence d'origine (A4, FR-256). Un test restaure une sauvegarde plus ancienne qu'un ordre parti et vérifie qu'aucun second envoi n'a lieu.
 - La **rotation** des sauvegardes n'efface jamais une donnée soumise à la conservation de dix ans : cette donnée vit dans la base de l'installation et ses archives, pas seulement dans des sauvegardes qui tournent.
 - Un export d'archive d'un dossier, d'un client ou d'une période (FR-9) se fait sur un support de l'IMF, avec sa somme de contrôle.
 - L'effacement d'une donnée **sous conservation** est refusé avec un code nommé ; l'effacement d'une donnée hors conservation (droit à l'oubli d'un prospect) est tracé avec un certificat (annexe A, conventions).
@@ -3318,12 +3648,12 @@ Les exigences transverses du PRD distributeur (PRD-D §8) s'appliquent. Celles-c
 
 | # | Domaine | Exigence | Mesure |
 |---|---|---|---|
-| NFR-1 | Performance | Le tableau de bord d'un rôle s'affiche en moins de 3 s sur une connexion 4G ; une liste en moins de 500 ms au 95ᵉ centile ; le rapport BCEAO s'exporte en PDF en moins de 10 s ; 50 visites hors ligne se synchronisent en moins de 30 s (cahier Prospera Web). | mesuré sur le jeu de démonstration, puis sur dix fois sa taille (décision B4) |
+| NFR-1 | Performance | [ASSUMPTION : valeurs reprises du cahier de la démo, à confirmer avec la taille réelle] Le tableau de bord d'un rôle s'affiche en moins de 3 s sur une connexion 4G ; une liste en moins de 500 ms au 95ᵉ centile ; le rapport BCEAO s'exporte en PDF en moins de 10 s ; 50 visites hors ligne se synchronisent en moins de 30 s (cahier Prospera Web). | mesuré sur le jeu de démonstration, puis sur dix fois sa taille (décision B4) |
 | NFR-2 | Fraîcheur | Un événement saisi dans Prospera apparaît dans les tableaux de bord des rôles concernés en moins de 5 s ; un mouvement du cœur, au plus tard une période d'échange après son arrivée (paramètre ; défaut : 15 min) [ASSUMPTION]. Chaque chiffre affiche la date de sa dernière lecture du cœur (FR-2). | horodatage affiché, test de bout en bout |
-| NFR-3 | Disponibilité | Le serveur central est disponible 99,5 % du temps ouvré de l'IMF ; l'application terrain fonctionne sans réseau (UJ-4) ; une panne du lien avec le cœur ne bloque ni l'instruction ni le recouvrement, elle retarde seulement les mouvements (§6.5). | supervision chez l'IMF (§7.9) |
-| NFR-4 | Sauvegarde | Sauvegardes 3-2-1, perte de données maximale d'une heure, reprise en quatre heures (PRD moteur NFR-7). Une restauration est essayée au moins une fois par trimestre. | rapport de restauration |
-| NFR-5 | Sécurité | Chiffrement en transit et au repos ; double authentification pour les rôles sensibles (FR-5) ; aucun port entrant chez l'IMF (relais Money Vibes, décision B1) ; fichiers déposés vérifiés (type, antivirus) ; aucune donnée métier dans le navigateur (PRD-D FR-1). | test d'intrusion avant février |
-| NFR-6 | Trace | Journal infalsifiable conservé au moins dix ans (FR-9). | contrôle de l'auditeur |
+| NFR-3 | Disponibilité | Le serveur central est disponible 99,5 % du temps ouvré de l'IMF [ASSUMPTION : cible reprise du cahier de la démo ; l'IMF exploite ses serveurs] ; l'application terrain fonctionne sans réseau (UJ-4) ; une panne du lien avec le cœur ne bloque ni l'instruction ni le recouvrement, elle retarde seulement les mouvements (§6.5). | supervision chez l'IMF (§7.9) |
+| NFR-4 | Sauvegarde | Sauvegardes 3-2-1, perte de données maximale d'une heure, reprise en quatre heures (PRD moteur NFR-7). Une restauration est essayée au moins une fois par mois (FR-267). Au redémarrage ou après une restauration, les ordres de décaissement de la dernière heure sont rapprochés avec le fournisseur avant toute réémission (§5.8). | rapport de restauration |
+| NFR-5 | Sécurité | Chiffrement en transit et au repos ; double authentification pour les rôles sensibles (FR-5) ; aucun port entrant chez l'IMF (relais Money Vibes, décision B1) ; fichiers déposés vérifiés (type, antivirus) ; aucune donnée métier dans le navigateur (PRD-D FR-1). | test d'intrusion avant février [ASSUMPTION] |
+| NFR-6 | Trace | Journal non modifiable par l’application, chaîné et ancré hors du serveur, conservé au moins dix ans (FR-9). | contrôle de l'auditeur |
 | NFR-7 | Données personnelles | Consentements par finalité (FR-15) ; données sur les serveurs de l'IMF ; règles de chaque pays en paramètres, à faire vérifier par un juriste. | revue juridique |
 | NFR-8 | Hors ligne | Une saisie hors ligne porte un identifiant unique : la rejouer ne crée jamais de doublon ; elle ne change aucun solde avant validation par le serveur (cahier Prospera Web). | test de double synchronisation |
 | NFR-9 | Appareils et langue | Navigateurs récents (Chrome, Firefox, Edge, Safari iOS) ; application terrain sur téléphone Android d'entrée de gamme [ASSUMPTION] ; interface en français. | recette sur appareils de référence |
@@ -3343,7 +3673,7 @@ Les exigences transverses du PRD distributeur (PRD-D §8) s'appliquent. Celles-c
 | Rôles de démonstration qui voient exactement leur périmètre | 16 sur 16 |
 | Propositions de l'IA affichées avec leur provenance | 100 % |
 
-**Pour l'IMF en service** (les cinq promesses, mesurées depuis une valeur de départ prise au démarrage) :
+**Pour l'IMF en service** (les cinq promesses, mesurées depuis une valeur de départ prise au démarrage). Les gains chiffrés des documents commerciaux (heures gagnées, visites en plus, millions de FCFA) sont **illustratifs** : ils ne sont pas des exigences.
 
 | Promesse | Indicateur | Cible annoncée |
 |---|---|---|
@@ -3368,7 +3698,7 @@ Les exigences transverses du PRD distributeur (PRD-D §8) s'appliquent. Celles-c
 
 - Toute la plateforme de la démo `prospera-web`, en vrai, avec le crédit de bout en bout comme priorité absolue (partie 2).
 - Les modules ★ dans la démo de février : `credit`, `produits-financiers`, `microfinance`, `collecte`, `coeur-sfd` et le cœur fictif, `risque-par`, `recouvrement`, `terrain`, plus le tableau de bord et le socle.
-- Les autres modules au premier jour de l'IMF : `caisse` (collecteurs), `conformite-bceao`, équipes, marketing, automatisations, support, export des écritures.
+- Les autres modules au premier jour de l'IMF : `caisse` (collecteurs), `conformite-bceao`, équipes, marketing, automatisations, support, et **au mieux** l'export des écritures. Le ★ marque la démo de février ; ce n'est pas un ordre de priorité entre les autres exigences.
 - Les capacités d'IA du processus (FR-8), servies par l'IA commune.
 - L'installation sur les serveurs de l'IMF et son exploitation par son équipe (§7.9).
 - Le contrat d'échange avec le cœur, neutre de produit (annexe C), et le cœur fictif de démonstration.
@@ -3376,7 +3706,7 @@ Les exigences transverses du PRD distributeur (PRD-D §8) s'appliquent. Celles-c
 
 ### 10.2 Hors périmètre pour l'instant
 
-- Le **connecteur réel** vers le cœur de l'IMF : il sera fait pour l'IMF, plus tard, quand son logiciel sera connu (décision A9).
+- Le **connecteur réel** vers le cœur de l'IMF : il sera fait pour la démo propre à l'IMF, **pas maintenant** (décision du PO, A9) ; l'articulation entre les créances de `paiement` et le compte de prêt du cœur sera analysée à ce moment (FR-257).
 - La **tenue de comptes**, de l'épargne, de la caisse du guichet et de la comptabilité officielle : c'est le cœur (FR-2).
 - `prospera-microfinance-service` (paquet comptable SFD) chez cette IMF (décision A11).
 - Le chatbot WhatsApp d'acquisition, les tontines, la fidélisation (NPS), les langues locales : « bientôt ».
@@ -3401,7 +3731,7 @@ Les exigences transverses du PRD distributeur (PRD-D §8) s'appliquent. Celles-c
 
 ### 12.1 Décisions prises
 
-Toutes les décisions sont datées et motivées dans `.memlog.md` ; les 71 questions et leurs réponses sont dans `questions-po-2026-11-13.md`. Les décisions qui commandent le PRD :
+Toutes les décisions sont datées et motivées dans `.memlog.md` ; les 71 questions et leurs réponses sont dans `questions-po-2026-11-13.md` ; les arbitrages sur les relectures (P1 à P9, A1 à A35) dans `corrections.md`. Les décisions qui commandent le PRD :
 
 | # | Décision du PO (2026-11-13) | Où |
 |---|---|---|
@@ -3420,11 +3750,20 @@ Toutes les décisions sont datées et motivées dans `.memlog.md` ; les 71 quest
 | D-13 | Licence à vie : jamais de coupure ni de gel. | §7.9 |
 | D-14 | Démo : 3 agences, 10 agents, 1 000 prêts actifs ; on y crée une agence, un agent et un vrai dossier jusqu'à EN_GESTION. | FR-11, FR-12 |
 | D-15 | LBC/FT au jour 1, avec sa mise à jour régulière. | §6.2 |
-| D-16 | Copilot réel au jour 1 ; chatbot WhatsApp, tontines et BIC direct « bientôt ». | §7.3, §10.2 |
+| D-16 | Copilot réel au jour 1, dans l'instance locale de l'IA commune ; chatbot WhatsApp, tontines et BIC direct « bientôt ». | §7.3, §7.8, §10.2 |
+| D-17 | `paiement` reste seul propriétaire des créances ; le montant exigible se recale sur la dernière lecture du cœur avant tout lien de paiement (Q2, P1). | FR-209, FR-257 |
+| D-18 | Le score informe et alerte ; il ne refuse pas et ne fixe pas le prix en v1 (P2). Taux d'effort plafonné, 40 % par défaut, dérogation du ROC (P8). | §5.2, §5.4 |
+| D-19 | Deux échelles : classe de risque à l'octroi (information) et classes réglementaires du pays (barème SFD par défaut) ; les classes du rapport d'exemple sont retirées (P3). | §5.4, §6.7, §6.8 |
+| D-20 | Refinancement exigé : un nouveau dossier qui solde l'ancien (P4). | §5.10 |
+| D-21 | Contrat de maintenance payé chaque mois : mises à jour et correctifs livrés sous ce contrat (P5). | §7.9 |
+| D-22 | Le DG peut définir le comité d'un dossier ; le vote de chaque membre est enregistré (P6). | §5.7 |
+| D-23 | Une caution n'est bloquée que si elle a été appelée ; recours et réexamen tous les 6 mois (P7). | FR-218 |
+| D-24 | L'IA commune tourne en instance locale : elle enregistre l'écart entre prédiction et réalité, anonymise, renvoie pour l'apprentissage, reçoit ses mises à jour par un tunnel sécurisé sortant (P9). | FR-8, §7.8 |
+| D-25 | Décaissement Mobile Money de la démo par le cœur fictif ; pas d'amendement de la spine Connecteurs ; charge de février inchangée (Q1, Q3, Q4). | FR-256, §12.3 |
 
 ### 12.2 Actions qui restent au PO
 
-Ces points ne bloquent pas l'écriture du brouillon, mais chacun doit être tranché avant l'architecture ou les épics. Ils sont rangés du plus lourd au plus léger. **Q1 à Q4 sont tranchées (2026-11-13)** ; Q5 à Q13 restent ouvertes, avec la proposition du brouillon comme valeur par défaut.
+Ces points ne bloquent pas l'écriture du brouillon, mais chacun doit être tranché avant l'architecture ou les épics. Ils sont rangés du plus lourd au plus léger. **Q1 à Q4 et Q9 sont tranchées (2026-11-13)** ; les autres restent ouvertes, avec la proposition du brouillon comme valeur par défaut.
 
 | # | Question | Proposition du brouillon | Bloque |
 |---|---|---|---|
@@ -3434,9 +3773,9 @@ Ces points ne bloquent pas l'écriture du brouillon, mais chacun doit être tran
 | Q4 | **La charge de février** : l'IMF est le troisième client de février et Dev B est déjà au-delà de sa capacité (17-20 semaines pour 10). | **Tranché (PO, 2026-11-13) :** pas de souci, **rien n'est modifié** ; l'équipe tient février. | — |
 | Q5 | Codes et numéros des nouveaux modules : `produits-financiers` (M46) et `coeur-sfd` (M47). Leurs tirets attendent l'élargissement du format de droits (amendement C7). | Codes et numéros proposés. | manifestes |
 | Q6 | Le dossier de recouvrement est **par prêt** chez l'IMF, **par tiers** dans le module partagé (FR-211). | Par prêt, avec une vue par client. | module `recouvrement` |
-| Q7 | Trois lectures de tes réponses : E5 (seuils calculés sur les données après la reprise, validés, recalculés chaque trimestre) ; B3 (mises à jour liées au contrat de maintenance) ; score v0 par règles, barème 40/30/20/10. | Ces trois lectures. | — |
+| Q7 | Deux lectures de ses réponses restent à confirmer : E5 (seuils d'alerte calculés sur les données de l'IMF après la reprise, validés par un humain, recalculés chaque trimestre) ; barème du score v0 par règles (paiement 40, capacité 30, activité 20, terrain 10). La lecture B3 est **confirmée** par P5 (contrat de maintenance mensuel). | Ces deux lectures. | — |
 | Q8 | Perte définitive : seuil de passage au conseil ; pénalités gelées ou non pendant un étalement. | Sans défaut ; le cœur décide des pénalités. | recette du recouvrement |
-| Q9 | Le Copilot sans consentement à l'IA commune : où tourne le moteur de langage ? L'auditeur a-t-il un Copilot ? | Sur les serveurs de l'IMF ; Copilot de l'auditeur en lecture de la piste d'audit. | architecture IA |
+| Q9 | Où tourne le Copilot ? L'auditeur a-t-il un Copilot ? | **Tranché (PO, 2026-11-13, P9) :** dans l'instance locale de l'IA commune chez l'IMF (tunnel sécurisé sortant). Reste ouvert : le Copilot de l'auditeur, proposé en lecture de la piste d'audit. | — |
 | Q10 | Sources des données macro-économiques (prix, inflation, saison). | Sources publiques datées, puis Pulse quand il existe. | IA commune |
 | Q11 | Seuil de l'avis du risque (2 000 000 FCFA, 48 h), nombre de retours pour garanties (2), délai d'un ordre non exécuté (24 h). | Ces défauts. | — |
 | Q12 | Nom de l'IMF fictive, de ses agences et des protagonistes des parcours. | Lomé-Centre, Kpalimé, Kara ; noms des parcours. | jeu de démo |
@@ -3452,86 +3791,118 @@ Ces points ne bloquent pas l'écriture du brouillon, mais chacun doit être tran
 | **La promesse « zéro manipulation d'espèces »** n'est pas tenable : le guichet et la collecte manient des espèces. | Promesse commerciale trompeuse. | Elle devient un indicateur de part numérique, pas une règle (§1, §9). |
 | **La démo n'enregistre rien** et ses chiffres sont des constantes. | Tout est à construire, y compris des écrans absents (visite, pièces, cautions, simulation, comité, décaissement). | Le PRD exige le vrai et liste les écrans à créer (§5.14). |
 | **Le produit d'exemple de la démo est illégal** (TEG 36,4 %). | Montrer ce produit à l'IMF serait une faute. | Le jeu de démo n'a que des produits conformes (FR-10, FR-13). |
-| **La charge de février** (Q4). | La démo de l'IMF peut glisser. | La démo de février est délimitée (★) ; le reste suit sans changer le PRD. |
+| **La charge de février** (Q4). | Charge élevée pour deux développeurs. | Le PO maintient le périmètre (Q4 : rien n'est modifié) ; le ★ marque la démo de février. |
 
 ---
 
 ## 13. Hypothèses
 
-Index généré depuis le texte du PRD : chaque `[ASSUMPTION]` est une valeur ou une règle déduite sans décision du PO. Elle vaut **valeur par défaut modifiable** tant que le PO ne l'a pas tranchée. Les plus lourdes sont reprises au §12.2.
+Index généré depuis le texte du PRD (hors annexes) : chaque `[ASSUMPTION]` est une valeur ou une règle déduite sans décision du PO. Elle vaut **valeur par défaut modifiable** tant que le PO ne l'a pas tranchée ; les valeurs chiffrées sont reprises dans l'annexe D. Les plus lourdes sont au §12.2.
 
 | # | Où | Hypothèse |
 |---|---|---|
-| H-1 | §1 | …30 en % de l'encours, mesuré depuis les échéances du cœur ; la baisse s'entend en **valeur relative** (un PAR de 12 % qui passe à 9-10 %) |
+| H-1 | §1 | …% / PAR 30 en % de l'encours, mesuré depuis les échéances du cœur ; la baisse s'entend en **valeur relative** (un PAR de 12 % qui passe à 9-10 %) |
 | H-2 | §2.3 | noms fictifs à valider par le PO |
 | H-3 | FR-4 | méthode et fréquence de calcul |
-| H-4 | FR-7 | nomenclature de départ inspirée de la classification des activités de l'UEMOA, à valider |
-| H-5 | FR-8 | sources de départ — indices de prix et d'inflation publics, calendrier agricole, données agrégées de l'IA commune (Pulse) quand elles existent |
-| H-6 | FR-11 | agences fictives Lomé-Centre, Kpalimé, Kara ; nom de l'IMF fictive à choisir par le PO |
-| H-7 | FR-14 | langues locales « bientôt » |
-| H-8 | FR-34 | …(IA commune non installée), le critère de score est marqué « non évalué » et ne bloque pas ; le critère d'ancienneté reste bloquant. |
-| H-9 | FR-36 | …postérieure ; un dossier déjà décidé n'est pas rouvert, mais une alerte de conformité est émise si son TEG dépasse un nouveau plafond. |
-| H-10 | FR-44 | …un paramètre par pays et par produit (défaut : non obligatoire), car l'obligation légale n'est pas confirmée (extrait réglementaire §5). |
-| H-11 | FR-49 | …Ils sont fournis par l'IA commune (module Risque) ; **tant que son modèle n'existe pas, une règle explicable versionnée les sert** |
-| H-12 | FR-52 | Au-dessus d'un **seuil de montant** (paramètre ; défaut : **2 000 000 FCFA** |
-| H-13 | FR-55 | - Le nombre de retours pour garanties est limité (paramètre ; défaut : **2**) ; au-delà, le ROC doit refuser ou approuver. |
-| H-14 | FR-58 | …des fonds propres : si le cœur ne les fournit pas, la mention « plafond non vérifiable » s'affiche et le contrôle est manuel (comité). |
-| H-15 | FR-59 | - La date de la première échéance est saisie par le comité (défaut : un mois après la date prévue de décaissement |
-| H-16 | FR-64 | - Un ordre non exécuté après un délai (paramètre ; défaut : **24 h** |
-| H-17 | FR-73 | …cas de défaut et la règle de vote d'un groupe ne sont pas définies par les sources : le comité les enregistre dans les notes de séance. |
-| H-18 | FR-86 | / Seuil de l'avis du risque ; délai / 2 000 000 FCFA |
-| H-19 | FR-86 | / Retours pour garanties / 2 |
-| H-20 | FR-86 | / Délai d'ordre non exécuté / 24 h |
-| H-21 | FR-100 | la séparation auteur et publicateur est déduite de la séparation des tâches de l'instruction BCEAO n° 017-12-2010 ; le cahier de la démo dit seulement « administrateur ou DAF gèrent ». |
-| H-22 | FR-102 | la démo montre deux méthodes contradictoires (capital constant dans l'exemple du cœur de la démo, mensualité constante dans le cahier) ; l'annuité constante est le défaut retenu par la recommandation C8 du PO. |
-| H-23 | FR-111 | les taux exacts des autres produits du jeu de démo sont fixés à la rédaction du jeu, sous contrainte du test ci-dessous. |
-| H-24 | FR-113 | valeur de départ ; à calibrer sur les données de l'IMF |
-| H-25 | FR-116 | la clé de correspondance est le numéro de client du cœur ; le détail du contrat est en 6.5. |
-| H-26 | FR-119 | les pièces exigées par niveau et les seuils de montant sont des défauts à faire valider par l'IMF ; le texte des instructions du 18/03/2025 n'a pas été lu en détail. |
-| H-27 | FR-120 | « agent conformité » n'est pas l'un des 16 rôles ; c'est une habilitation accordée par le DG (rôle sensible, F7) à un CC, un RA ou un comptable, pas un 17e rôle. |
-| H-28 | FR-121 | sources de listes et fréquence : à valider ; Prospera n'en choisit pas pour l'IMF. Le filtrage est un calcul sur des listes fournies, sans modèle. |
-| H-29 | FR-122 | durées à faire valider par la conformité de l'IMF |
-| H-30 | FR-124 | barème du score v0 = paiement 40, capacité 30, activité 20, terrain 10 (recommandation C11 du PO) ; il est défini et versionné par la partie 1 et le module Risque. |
-| H-31 | FR-132 | durées de conservation et texte des consentements à faire valider par l'IMF et un juriste ; hébergement local par pays : non établi. |
-| H-32 | FR-143 | le plafond de détention et le montant de démo sont des valeurs de départ ; ils sont calibrés sur les données de l'IMF après la reprise. |
-| H-33 | FR-178 | Le calibrage statistique reste une règle explicable (percentiles de l'IMF, pas un modèle) tant que l'IA commune n'en fournit pas un (FR-181). |
-| H-34 | FR-181 | Le score de risque de la version 0, par règles explicables, suit le barème de la partie 2 (paiement 40, capacité 30, activité 20, terrain 10) ; le PAR et la pr |
-| H-35 | FR-187 | La balance est livrée par le cœur en postes au plan comptable SFD de l'installation ; la table de correspondance entre les comptes du cœur et ces postes est à |
-| H-36 | FR-198 | Le point de coupure entre l'import et l'échange permanent est daté par l'IMF à la mise en service ; il n'est pas défini ailleurs pour la microfinance. |
-| H-37 | FR-207 | à confirmer avec l'avis juridique sur les données de voix, §12.3 |
-| H-38 | FR-209 | suspension pendant l'attente, pour ne pas relancer un client qui a payé |
-| H-39 | FR-212 | lecture de D11, « au-delà de J+1 » |
-| H-40 | FR-217 | signature du DG, d'après la ligne « rédigée, signature DG » de la démo |
-| H-41 | FR-217 | …(PRD-D FR-114). Il n'y a pas de rôle « juriste » : un juriste de l'IMF peut rédiger hors Prospera, et le courrier est joint au dossier |
-| H-42 | FR-219 | cadence de rappel |
-| H-43 | FR-220 | sort des pénalités laissé au cœur, non décidé |
-| H-44 | FR-221 | aucune valeur par défaut, l'IMF la fixe avant la mise en service |
-| H-45 | FR-226 | …s'applique ; l'IMF peut activer « canal et moment choisis par la proposition de l'IA » pour ces paliers (paramètre ; défaut : éteint) |
-| H-46 | FR-227 | poids de la démo, dont la ligne « capacité financière » était doublée pour un total de 105 % ; à calibrer sur les données de l'IMF |
-| H-47 | FR-234 | chaîne de remontée à valider par le PO |
-| H-48 | FR-237 | la démo exclut l'auditeur du Copilot ; le PO tranche |
-| H-49 | FR-237 | lieu d'exécution du moteur de langage à trancher avec l'IA commune |
-| H-50 | FR-240 | la démo ne donne aucun poids ; les poids ci-dessous sont des propositions à valider par le PO |
-| H-51 | FR-242 | la gamification n'est pas dans les réponses du PO ; elle reste « bientôt » |
-| H-52 | FR-245 | le cahier de la démo ne fixe pas de plafond ; à valider par l'IMF |
-| H-53 | FR-245 | base du calcul à valider par le DAF ; la démo calcule revenu généré ÷ budget, qui n'est ni une marge ni un gain net et s'affiche sous le nom « retour brut » |
-| H-54 | FR-247 | règle d'affectation par la zone du numéro non connue ; à défaut, la boîte du RCC |
-| H-55 | FR-253 | le budget est une donnée de `finance-transactions` ; la démo n'a aucun budget saisi |
-| H-56 | FR-255 | à porter au PRD `reseau` |
-| H-57 | FR-256 | le bac à sable PI-SPI n'expose pas l'IBAN |
-| H-58 | FR-256 | à porter au PRD `paiement` |
-| H-59 | FR-258 | cadre juridique des messages à un tiers ; §12.3 |
-| H-60 | FR-261 | lecture de la salle, séance 4 ; la licence ne couvre pas les évolutions |
-| H-61 | FR-262 | délai à fixer au contrat de maintenance |
-| H-62 | FR-263 | à porter au spine moteur, AD-9 |
-| H-63 | FR-263 | AD-9 ne couvre que deux noms ; liste à fixer à l'installation |
-| H-64 | FR-264 | le 443 publié par le serveur est limité au réseau interne ; nom et adresse choisis par l'IMF |
-| H-65 | FR-265 | la supervision du PRD moteur est surtout côté Money Vibes ; la lecture locale par l'équipe de l'IMF est à porter au PRD moteur |
-| H-66 | FR-266 | valeurs du cahier, à confirmer avec la taille réelle |
-| H-67 | FR-266 | règle « au-delà d'un serveur » à fixer avec la taille réelle |
-| H-68 | §8 | …concernés en moins de 5 s ; un mouvement du cœur, au plus tard une période d'échange après son arrivée (paramètre ; défaut : 15 min) |
-| H-69 | §8 | …et langue / Navigateurs récents (Chrome, Firefox, Edge, Safari iOS) ; application terrain sur téléphone Android d'entrée de gamme |
-| H-70 | §9 | horizon |
+| H-4 | FR-5 | clés de chiffrement tenues hors du compte ADMIN_IMF ; détail → addendum |
+| H-5 | FR-7 | nomenclature de départ inspirée de la classification des activités de l'UEMOA, à valider |
+| H-6 | FR-8 | sources de départ — indices de prix et d'inflation publics, calendrier agricole, données agrégées de l'IA commune (Pulse) quand elles existent |
+| H-7 | FR-11 | pays de la démo déduit des opérateurs de la démo ; agences fictives Lomé-Centre, Kpalimé, Kara ; nom de l'IMF fictive à choisir par le PO |
+| H-8 | FR-14 | langues locales « bientôt » |
+| H-9 | FR-36 | …comité est postérieure ; un dossier déjà décidé n'est pas rouvert, mais une alerte de conformité est émise si son TEG dépasse un nouveau plafond. |
+| H-10 | FR-44 | …est un paramètre par pays et par produit (défaut : non obligatoire), car l'obligation légale n'est pas confirmée (extrait réglementaire §5). |
+| H-11 | FR-48 | …la démo et des réponses du PO ; les gravités et les règles du gonflement, du dépôt inhabituel et du compte de transit sont des défauts de départ. |
+| H-12 | FR-49 | …le **score consolidé 0-100** du dossier avec sa **décomposition** (paiement 40, capacité 30, activité 20, terrain 10 : barème de départ, H-30) |
+| H-13 | FR-49 | …REFUSER. Ils sont fournis par l'IA commune (module Risque) ; **tant que son modèle n'existe pas, une règle explicable versionnée les sert** |
+| H-14 | FR-49 | …est levée quand la part d'alignement d'un décideur avec la suggestion dépasse un seuil (paramètre ; défaut : 95 % sur au moins 50 décisions) |
+| H-15 | FR-52 | Au-dessus d'un **seuil de montant** (paramètre ; défaut : **2 000 000 FCFA** |
+| H-16 | FR-55 | - Le nombre de retours pour garanties est limité (paramètre ; défaut : **2**) ; au-delà, le ROC doit refuser ou approuver. |
+| H-17 | FR-58 | …dépend des fonds propres : si le cœur ne les fournit pas, la mention « plafond non vérifiable » s'affiche et le contrôle est manuel (comité). |
+| H-18 | FR-59 | - La date de la première échéance est saisie par le comité (défaut : un mois après la date prévue de décaissement |
+| H-19 | FR-64 | - Un ordre **expiré** ou resté sans réponse après un délai (paramètre ; défaut : **24 h** |
+| H-20 | FR-73 | …en cas de défaut et la règle de vote d'un groupe ne sont pas définies par les sources : le comité les enregistre dans les notes de séance. |
+| H-21 | FR-74 | …le groupe, deux membres ou 20 % des membres (le plus petit des deux) sont en retard de cotisation ou d'épargne depuis plus de 7 jours (paramètres) |
+| H-22 | FR-271 | - Le solde de l'ancien prêt est retenu sur le montant net versé au client (ordre net = montant accordé moins frais moins solde de l'ancien prêt) |
+| H-23 | FR-86 | / Part d'alignement qui alerte l'AUD / 95 % sur 50 décisions |
+| H-24 | FR-86 | sauf 15 % et 24 à 72 h |
+| H-25 | FR-86 | / Seuil de l'avis du risque ; délai / 2 000 000 FCFA |
+| H-26 | FR-86 | / Retours pour garanties / 2 |
+| H-27 | FR-86 | / Délai d'ordre non exécuté ; fenêtre de rapprochement au redémarrage / 24 h |
+| H-28 | FR-86 | / Contagion du groupe : membres en retard ; délai / 2 membres ou 20 % ; 7 jours |
+| H-29 | FR-100 | la séparation auteur et publicateur est déduite de la séparation des tâches de l'instruction BCEAO n° 017-12-2010 ; le cahier de la démo dit seulement « administrateur ou DAF gèrent ». |
+| H-30 | FR-102 | la démo montre deux méthodes contradictoires (capital constant dans l'exemple du cœur de la démo, mensualité constante dans le cahier) ; l'annuité constante est le défaut retenu par la recommandation C8 du PO. |
+| H-31 | FR-111 | les taux exacts des autres produits du jeu de démo sont fixés à la rédaction du jeu, sous contrainte du test ci-dessous. |
+| H-32 | FR-111 | les valeurs du tableau sont calculées pour ce PRD par la méthode figée ; elles sont à recalculer et à faire valider avec la méthode par un juriste. |
+| H-33 | FR-116 | la clé de correspondance est le numéro de client du cœur ; le détail du contrat est en 6.5. |
+| H-34 | FR-119 | les pièces exigées par niveau et les seuils de montant sont des défauts à faire valider par l'IMF ; le texte des instructions du 18/03/2025 n'a pas été lu en détail. |
+| H-35 | FR-120 | « agent conformité » n'est pas l'un des 16 rôles ; c'est une habilitation accordée par le DG (rôle sensible, F7) à un CC, un RA ou un comptable, pas un 17e rôle. |
+| H-36 | FR-121 | sources de listes et fréquence : à valider ; Prospera n'en choisit pas pour l'IMF. Le filtrage est un calcul sur des listes fournies, sans modèle. |
+| H-37 | FR-121 | valeurs de départ de 24 heures pour le gel et de 72 heures pour la déclaration ; la procédure et ces délais sont **à valider par un juriste** avant la mise en service. |
+| H-38 | FR-121 | à valider par un juriste |
+| H-39 | FR-122 | durées à faire valider par la conformité de l'IMF |
+| H-40 | FR-123 | liste de départ, à compléter avec la conformité de l'IMF et à valider par un juriste ; chaque scénario est un paramètre qu'on active, désactive et règle. |
+| H-41 | FR-124 | barème du score v0 = paiement 40, capacité 30, activité 20, terrain 10 (recommandation C11 du PO) ; il est défini et versionné par la partie 1 et le module Risque. |
+| H-42 | FR-124 | à calibrer |
+| H-43 | FR-132 | durées de conservation et texte des consentements à faire valider par l'IMF et un juriste ; hébergement local par pays : non établi. |
+| H-44 | FR-139 | …et la relance ne s'arrête que quand le reste dû est nul ; une **tolérance d'arrondi** de quelques FCFA, paramètre distinct (défaut : 5 FCFA |
+| H-45 | FR-143 | le plafond de détention et le montant de démo sont des valeurs de départ ; ils sont calibrés sur les données de l'IMF après la reprise. |
+| H-46 | FR-272 | les définitions des taux (3) à (5) et de la couverture (7) sont des définitions de départ, à confirmer avec le DG de l'IMF ; elles sont écrites ici pour être testables. |
+| H-47 | FR-178 | Le calibrage statistique reste une règle explicable (percentiles de l'IMF, pas un modèle) tant que l'IA commune n'en fournit pas un (FR-181). |
+| H-48 | FR-179 | valeur de départ |
+| H-49 | FR-181 | décote de départ à 0 % par nature, à calibrer sur l'historique de recouvrement de l'IMF. |
+| H-50 | FR-181 | Le score de risque de la version 0, par règles explicables, suit le barème de la partie 2 (paiement 40, capacité 30, activité 20, terrain 10) ; le PAR et la pr |
+| H-51 | FR-187 | La balance est livrée par le cœur en postes au plan comptable SFD de l'installation ; la table de correspondance entre les comptes du cœur et ces postes est à |
+| H-52 | FR-198 | Le point de coupure entre l'import et l'échange permanent est daté par l'IMF à la mise en service ; il n'est pas défini ailleurs pour la microfinance. |
+| H-53 | FR-204 | valeur non décidée |
+| H-54 | FR-204 | valeur non décidée |
+| H-55 | FR-204 | sort des éléments non envoyés, pour ne pas perdre une collecte |
+| H-56 | FR-207 | à confirmer avec l'avis juridique sur les données de voix, §12.3 |
+| H-57 | FR-209 | suspension pendant l'attente, pour ne pas relancer un client qui a payé |
+| H-58 | FR-210 | « quelques FCFA », valeur non fixée |
+| H-59 | FR-212 | lecture de D11, « au-delà de J+1 » |
+| H-60 | FR-212 | valeur non décidée |
+| H-61 | FR-217 | signature du DG, d'après la ligne « rédigée, signature DG » de la démo |
+| H-62 | FR-217 | …humaine (PRD-D FR-114). Il n'y a pas de rôle « juriste » : un juriste de l'IMF peut rédiger hors Prospera, et le courrier est joint au dossier |
+| H-63 | FR-218 | délai à fixer par l'IMF |
+| H-64 | FR-219 | cadence de rappel |
+| H-65 | FR-220 | sort des pénalités laissé au cœur, non décidé |
+| H-66 | FR-221 | aucune valeur par défaut, l'IMF la fixe avant la mise en service |
+| H-67 | FR-226 | …du calendrier s'applique ; l'IMF peut activer « canal et moment choisis par la proposition de l'IA » pour ces paliers (paramètre ; défaut : éteint) |
+| H-68 | FR-227 | poids de la démo, dont la ligne « capacité financière » était doublée pour un total de 105 % ; à calibrer sur les données de l'IMF |
+| H-69 | FR-228 | cadence non décidée |
+| H-70 | FR-231 | valeur non décidée |
+| H-71 | FR-234 | chaîne de remontée à valider par le PO |
+| H-72 | FR-237 | la démo exclut l'auditeur du Copilot ; le PO tranche |
+| H-73 | FR-240 | la démo ne donne aucun poids ; les poids ci-dessous sont des propositions à valider par le PO |
+| H-74 | FR-242 | la gamification n'est pas dans les réponses du PO ; elle reste « bientôt » |
+| H-75 | FR-273 | coefficients de la démo |
+| H-76 | FR-245 | le cahier de la démo ne fixe pas de plafond ; à valider par l'IMF |
+| H-77 | FR-245 | base du calcul à valider par le DAF ; la démo calcule revenu généré ÷ budget, qui n'est ni une marge ni un gain net et s'affiche sous le nom « retour brut » |
+| H-78 | FR-247 | règle d'affectation par la zone du numéro non connue ; à défaut, la boîte du RCC |
+| H-79 | FR-253 | le budget est une donnée de `finance-transactions` ; la démo n'a aucun budget saisi |
+| H-80 | FR-255 | à porter au PRD `reseau` |
+| H-81 | FR-256 | le bac à sable PI-SPI n'expose pas l'IBAN |
+| H-82 | FR-256 | à porter au PRD `paiement` |
+| H-83 | FR-257 | valeur non décidée |
+| H-84 | FR-258 | cadre juridique des messages à un tiers ; §12.3 |
+| H-85 | FR-260 | les modèles reçus par le tunnel sont des mises à jour au sens du contrat de maintenance, FR-261 ; le tunnel est un contact sortant de plus à porter au spine moteur, AD-9 |
+| H-86 | FR-260 | dimensionnement de l'instance locale non chiffré |
+| H-87 | FR-262 | délai à fixer au contrat de maintenance |
+| H-88 | FR-263 | valeur non décidée |
+| H-89 | FR-263 | valeur non décidée |
+| H-90 | FR-263 | à porter au spine moteur, AD-9 |
+| H-91 | FR-263 | AD-9 ne couvre que deux noms ; liste à fixer à l'installation |
+| H-92 | FR-264 | le 443 publié par le serveur est limité au réseau interne ; nom et adresse choisis par l'IMF |
+| H-93 | FR-265 | la supervision du PRD moteur est surtout côté Money Vibes ; la lecture locale par l'équipe de l'IMF est à porter au PRD moteur |
+| H-94 | FR-266 | valeurs du cahier, à confirmer avec la taille réelle |
+| H-95 | FR-266 | règle « au-delà d'un serveur » à fixer avec la taille réelle |
+| H-96 | FR-267 | citation rattachée à FR-195, à faire vérifier par un juriste, §12.3 |
+| H-97 | §8 | valeurs reprises du cahier de la démo, à confirmer avec la taille réelle |
+| H-98 | §8 | …bord des rôles concernés en moins de 5 s ; un mouvement du cœur, au plus tard une période d'échange après son arrivée (paramètre ; défaut : 15 min) |
+| H-99 | §8 | cible reprise du cahier de la démo ; l'IMF exploite ses serveurs |
+| H-100 | §8 | …décision B1) ; fichiers déposés vérifiés (type, antivirus) ; aucune donnée métier dans le navigateur (PRD-D FR-1). / test d'intrusion avant février |
+| H-101 | §8 | / NFR-9 / Appareils et langue / Navigateurs récents (Chrome, Firefox, Edge, Safari iOS) ; application terrain sur téléphone Android d'entrée de gamme |
+| H-102 | §9 | horizon |
 
 ---
 
@@ -3540,7 +3911,7 @@ Index généré depuis le texte du PRD : chaque `[ASSUMPTION]` est une valeur ou
 Le contrat `CONTRAT-DE-MODULE-2026-11-09.md` (§6) demande à chaque PRD treize lignes par module, une par clause C1 à C13. **Les règles de lecture et les conventions communes sont celles du PRD distributeur (PRD-D annexe A)**, sans être recopiées : aucune cellule vide ; gate `<CODE>_NOT_ENTITLED` ; cloisonnement par `organisationId` et par portée ; profil compose `profiles: ["<code>"]` ; version `1.0.0` ; routes C13 de l'instance ; lecture seule, essai, export et effacement comme au PRD-D.
 
 Ce qui change pour l'IMF :
-- **Licence à vie** (D-13) : la lecture seule pour abonnement échu ne s'applique pas à cette IMF ; elle reste une capacité de la plateforme pour les autres clients.
+- **Licence à vie et contrat de maintenance mensuel** (D-13, D-21) : la lecture seule pour abonnement échu ne s'applique pas à cette IMF ; elle reste une capacité de la plateforme pour les autres clients. Mises à jour et correctifs sont livrés sous le contrat de maintenance.
 - **Installation chez l'IMF** : chaque module tourne sur ses serveurs ; aucune route n'est ouverte vers l'extérieur ; les entrées passent par le relais (§7.9).
 - **Codes à tiret** : `produits-financiers`, `coeur-sfd`, `risque-par` et `conformite-bceao` attendent l'élargissement du format de droits d'`auth-service` (amendement C7), comme les cinq codes à tiret du distributeur.
 - **C11 IA** : chaque module déclare ses modèles et ses finalités ; le moteur est l'IA commune (FR-8). Les noms de modèles et de finalités sont des propositions.
@@ -3552,19 +3923,19 @@ Ce qui change pour l'IMF :
 |---|---|
 | C1 Manifeste | `code: 'credit'`, `version: '1.0.0'`. `depends: [{produits-financiers, "Une demande vise un produit de crédit versionné ; ses bornes, son éligibilité, ses garanties et ses conditions sont figées par dossier."}, {microfinance, "Un dossier appartient à un client (personne ou groupe solidaire) dont la fiche, le KYC et la LBC/FT sont tenus par microfinance."}]` (dépendances **proposées**, à valider par le PO). `enrichiPar: [coeur-sfd (envoi du dossier accordé, exécution et confirmation du décaissement, échéancier officiel, clôture), paiement (décaissement Mobile Money et PI-SPI), notification (événements du processus), terrain (visites d'instruction, agenda, hors ligne), risque-par (part du secteur dans le portefeuille, classement), IA commune (score, décision suggérée, analyses), recouvrement (statuts de retard lus), reseau (agences, zones, portée)]`. Service porteur : un service `credit` [À CONFIRMER, M15 : à construire, le backend de démo ne compte pas]. |
 | C2 Socle | Gate `CREDIT_NOT_ENTITLED`. Cloisonnement par `organisationId` et par portée lue dans `reseau.portee.changed@1` : DG réseau, RA son agence, CC les dossiers de son agence et sa file, ROC toutes les agences, GP son portefeuille, agent sa zone, RSQ et AUD en lecture, CPT son agence. Le serveur évalue seul les rôles et les gardes de chaque transition. |
-| C3 Données possédées | Dossiers de crédit (12 statuts + ANNULE), dossiers de groupe et sous-dossiers, demandes et simulations retenues, pièces, cautions, garanties, visites d'instruction (preuves photo et GPS), checklists, grilles 5C, avis du CC et du risque, décisions du ROC, séances de comité (présents, votes, conditions figées), échéanciers contractuels, ordres de décaissement et leur sous-état, dérogations, délégations, résultats BIC saisis, journal infalsifiable des transitions. **Lues seulement** : produits (`produits-financiers`), clients et KYC (`microfinance`), soldes, encours, échéancier officiel, pénalités, caisse, dépôts (le cœur, via `coeur-sfd`), propositions de l'IA commune. **Aucun compte de prêt officiel, aucune caisse.** |
-| C4 Emplacements vides | `produits-financiers` et `microfinance` sont des dépendances dures. `coeur-sfd` absent : l'envoi du dossier, l'ordre de décaissement et la confirmation sont `{etat: NON_INSTALLE, module: coeur-sfd}` ; la décision du comité reste possible, **le décaissement et le passage à EN_GESTION sont refusés** (`COEUR_NON_INSTALLE`). `paiement` absent : canaux Mobile Money et PI-SPI `NON_INSTALLE`, les canaux du cœur restent. `notification` absent : cloche interne seule, `NON_INSTALLE` pour SMS, WhatsApp, e-mail. `terrain` absent : visites saisies depuis le web, pas d'hors ligne (`NON_INSTALLE`). `risque-par` absent : part du secteur dans le portefeuille `NON_EVALUE`. **IA commune absente : tous les emplacements d'IA (score, décision suggérée, analyse narrative, analyse étendue, alertes IA, conditions optimales, étoiles, sentiment) = `NON_DISPONIBLE`, le dossier avance sur l'analyse humaine, jamais bloqué.** `recouvrement` absent : statut de retard `NON_INSTALLE`. `assurance` absent : garde « assurance souscrite » non remplie si le produit l'impose. Un test par entrée de `enrichiPar`. |
-| C5 Contrats nommés | Publie `credit.dossier.changed@1`, `credit.dossier.soumis@1`, `credit.dossier.accorde@1` (conditions figées et échéancier contractuel, pour `coeur-sfd`), `credit.decaissement.ordonne@1`, `credit.decaissement.declare@1` (canaux `paiement`, déclaré au cœur), `credit.dossier.refuse@1`, `credit.dossier.cloture@1`, `credit.derogation.accordee@1`, `credit.alerte-audit.emise@1`. Consomme `produits-financiers.produit.publie@1`, `microfinance.client.changed@1`, `microfinance.kyc.changed@1`, `coeur-sfd.decaissement.confirme@1`, `coeur-sfd.pret.changed@1`, `coeur-sfd.pret.solde-nul@1`, `paiement.virement.execute@1`, `terrain.visite.terminee@1`, `recouvrement.dossier.changed@1`, `reseau.portee.changed@1`, `risque.proposition.emise@1` (IA commune), `etat-publie.changed.reel@1` et `.essai@1`. Les noms sont des propositions. |
-| C6 Paramètres | Le tableau de FR-86 : plafond d'usure daté (24 %), éligibilité (45 ; 3 mois), cautions (2 au-dessus de 300 000 FCFA), garanties (10 / 15 % ; 30 / 50 %), visites (500 000 FCFA ; 100 m), taux d'effort 33 %, endettement 50 %, seuil de l'avis du risque et son délai, quorum et niveaux du comité (DG au-dessus de 5 000 000 FCFA), plafond des parties liées (10 %), méthode d'échéancier (annuité constante) et ses options, délai d'ordre non exécuté, taille d'un groupe (5 à 30), règle de renouvellement (30 jours ; 1,5 fois), conservation de la piste (10 ans), objectifs de délai (24 h ; 9 jours ; SLA 48 h), seuil de saturation sectorielle (35 %), canaux de décaissement par pays et par opérateur, gabarits de notification et de contrat. Données, jamais code. |
-| C7 Droits | `credit:demande:saisir`, `credit:dossier:consulter`, `credit:dossier:instruire`, `credit:avis:rendre` (CC), `credit:avis:conseiller` (RSQ), `credit:decision:approuver` (ROC), `credit:comite:decider`, `credit:decaissement:ordonner`, `credit:decaissement:autoriser` (CPT, DAF), `credit:derogation:accorder`, `credit:delegation:gerer`, `credit:parametre:administrer`, `credit:journal:consulter` (AUD). Format conforme à `^[a-z]+:[a-z-]+:[a-z]+$`. Chaque droit demande une PR `auth-service` (catalogue fermé). |
-| C8 Module d'écran | `src/modules/credit/` : `/credit` (tableaux RA, ROC, RSQ), `/credit/pipeline`, `/credit/dossiers` et `/credit/dossiers/[id]` (frise et onglets), `/credit/analyse`, `/credit/cycle`, `/credit/reseau` ; **à créer** : demande avec simulation, pièces, cautions et garanties, visites d'instruction, checklist, avis, décision du ROC, séance de comité, ordre de décaissement, dérogations et délégations, clôture et renouvellement, dossier de groupe. Entrées de menu par droit (`credit:dossier:consulter`, `credit:demande:saisir`, `credit:comite:decider`, `credit:decaissement:autoriser`). Boutons non branchés de la démo : « bientôt » (PRD-D FR-2). |
+| C3 Données possédées | Dossiers de crédit (12 statuts + ANNULE), dossiers de groupe et sous-dossiers, demandes et simulations retenues, dossiers de refinancement (prêt à solder, économie mensuelle), pièces, cautions, garanties, visites d'instruction (preuves photo et GPS), checklists, grilles 5C, avis du CC et du risque, décisions du ROC, séances de comité (présents, composition fixée par le DG, vote de chaque membre, conditions figées), échéanciers contractuels, ordres de décaissement, leur clé d'idempotence et leur sous-état (À_ORDONNER, ORDONNE, EXECUTE, CONFIRME, INCONNU), rapprochements, dérogations (éligibilité, taux d'effort, plafond de dossier, nouveau cycle), délégations, résultats BIC saisis, flux Mobile Money déclarés avec pièce, journal chaîné des transitions (FR-9). **Lues seulement** : produits (`produits-financiers`), clients et KYC (`microfinance`), soldes, encours, échéancier officiel, pénalités, caisse, dépôts, mouvements du compte du client et flux Mobile Money qu'il tient (le cœur, via `coeur-sfd`), propositions de l'IA commune (score, classe de risque à l'octroi, perte attendue, conditions proposées au ROC, cohésion du groupe). **Aucun compte de prêt officiel, aucune caisse.** |
+| C4 Emplacements vides | `produits-financiers` et `microfinance` sont des dépendances dures. `coeur-sfd` absent : l'envoi du dossier, l'ordre de décaissement et la confirmation sont `{etat: NON_INSTALLE, module: coeur-sfd}` ; la décision du comité reste possible et **fait passer le dossier à EN_GESTION** (récit du PO ; sous-état À_ORDONNER), mais **l'ordre de décaissement est refusé** (`COEUR_NON_INSTALLE`) : le dossier reste « en attente de décaissement », hors encours, et peut être annulé (FR-38). Le cœur fictif crée le prêt et l'échéancier officiel **à l'exécution de l'ordre**, pas à l'acceptation du dossier accordé (annexe C). `paiement` absent : canaux Mobile Money et PI-SPI `NON_INSTALLE`, les canaux du cœur restent. `notification` absent : cloche interne seule, `NON_INSTALLE` pour SMS, WhatsApp, e-mail. `terrain` absent : visites saisies depuis le web, pas d'hors ligne (`NON_INSTALLE`). `risque-par` absent : part du secteur dans le portefeuille `NON_EVALUE`. **IA commune absente : tous les emplacements d'IA (score, décision suggérée, analyse narrative, analyse étendue, alertes IA, conditions optimales, étoiles, sentiment) = `NON_DISPONIBLE`, le dossier avance sur l'analyse humaine, jamais bloqué.** `recouvrement` absent : statut de retard `NON_INSTALLE`. `assurance` absent : garde « assurance souscrite » non remplie si le produit l'impose. Un test par entrée de `enrichiPar`. |
+| C5 Contrats nommés | Publie `credit.dossier.changed@1`, `credit.dossier.soumis@1`, `credit.dossier.accorde@1` (conditions figées et échéancier contractuel, pour `coeur-sfd`), `credit.decaissement.ordonne@1`, `credit.decaissement.declare@1` (canaux `paiement`, déclaré au cœur), `credit.dossier.refuse@1`, `credit.dossier.cloture@1`, `credit.dossier.annule@1` (message d'annulation vers le cœur, avec accusé), `credit.decaissement.inconnu@1` (ordre sans réponse, à rapprocher), `credit.derogation.accordee@1`, `credit.alerte-audit.emise@1`. Consomme `produits-financiers.produit.publie@1`, `microfinance.client.changed@1`, `microfinance.kyc.changed@1`, `coeur-sfd.decaissement.confirme@1`, `coeur-sfd.pret.changed@1`, `coeur-sfd.pret.solde-nul@1`, `paiement.virement.execute@1`, `terrain.visite.terminee@1`, `recouvrement.dossier.changed@1`, `reseau.portee.changed@1`, `risque.proposition.emise@1` (IA commune), `etat-publie.changed.reel@1` et `.essai@1`. Les noms sont des propositions. |
+| C6 Paramètres | Le tableau de FR-86 : plafond d'usure daté (24 %), éligibilité (ancienneté 3 mois, bloquante ; seuil d'alerte de score 45, qui n'est jamais un blocage), classe de risque à l'octroi (bornes 75 / 55 / 35 / 15), cautions (2 au-dessus de 300 000 FCFA), garanties (10 / 15 % ; 30 / 50 %), visites (500 000 FCFA ; 100 m), taux d'effort (alerte critique 33 %, plafond bloquant 40 %), endettement 50 %, règles d'alerte d'instruction (dépôt suspect 15 % du montant demandé à 24-72 h, gonflement, dépôt inhabituel, transit), part d'alignement qui alerte l'AUD, période des mouvements du compte (3 mois), fenêtre de rapprochement des ordres (1 h), tolérance d'arrondi et écart de rattachement des paiements (1 %), contagion d'un groupe, seuil de l'avis du risque et son délai, composition par défaut, quorum et niveaux du comité (DG au-dessus de 5 000 000 FCFA ; le DG peut fixer la composition d'un dossier), plafond des parties liées (10 %), méthode d'échéancier (annuité constante) et ses options, délai d'ordre non exécuté, taille d'un groupe (5 à 30), règle de renouvellement (30 jours ; 1,5 fois), conservation de la piste (10 ans), objectifs de délai (24 h ; 9 jours ; SLA 48 h), seuil de saturation sectorielle (35 %), canaux de décaissement par pays et par opérateur, gabarits de notification et de contrat. Données, jamais code. |
+| C7 Droits | `credit:demande:saisir`, `credit:dossier:consulter`, `credit:dossier:instruire`, `credit:avis:rendre` (CC), `credit:avis:conseiller` (RSQ), `credit:decision:approuver` (ROC), `credit:comite:decider`, `credit:decaissement:ordonner`, `credit:decaissement:autoriser` (CPT, DAF), `credit:decaissement:rapprocher` (CPT), `credit:comite:composer` (DG), `credit:derogation:accorder`, `credit:delegation:gerer`, `credit:parametre:administrer`, `credit:journal:consulter` (AUD). Format conforme à `^[a-z]+:[a-z-]+:[a-z]+$`. Chaque droit demande une PR `auth-service` (catalogue fermé). |
+| C8 Module d'écran | `src/modules/credit/` : `/credit` (tableaux RA, ROC, RSQ), `/credit/pipeline`, `/credit/dossiers` et `/credit/dossiers/[id]` (frise et onglets), `/credit/analyse`, `/credit/cycle`, `/credit/reseau` ; **à créer** : demande avec simulation (dont le refinancement), onglet « Client » du dossier, demandes en attente depuis plus de 48 h, rapprochement des ordres de décaissement, pièces, cautions et garanties, visites d'instruction, checklist, avis, décision du ROC, séance de comité, ordre de décaissement, dérogations et délégations, clôture et renouvellement, dossier de groupe. Entrées de menu par droit (`credit:dossier:consulter`, `credit:demande:saisir`, `credit:comite:decider`, `credit:decaissement:autoriser`). Boutons non branchés de la démo : « bientôt » (PRD-D FR-2). |
 | C9 Installer/désinstaller | Désinstaller ne supprime rien : dossiers, journal, échéanciers contractuels restent stockés et masqués ; test aller-retour. Les ordres de décaissement déjà exécutés restent valides chez le cœur. Avertissement : « Plus aucun dossier de crédit ne sera saisissable ni décidé ; les prêts déjà décaissés restent tenus par le cœur. » |
-| C10 Démarrer seul | `profiles: ["credit"]` ; socle + `produits-financiers` + `microfinance` + `reseau`. Avec le cœur fictif de la démo, le dossier va de SOUMIS à EN_GESTION sans autre module. |
-| C11 IA | `ia: { modeles: ['score-dossier', 'decision-suggeree', 'analyse-dossier', 'analyse-macro-sectorielle', 'detection-fraude-dossier', 'recommandation-conditions'], finalites: ['aide-a-la-decision-credit', 'analyse-du-dossier', 'detection-des-alertes', 'analyse-sectorielle-et-macro', 'recommandation-de-produit'] }`. Le crédit **spécifie** ces capacités (FR-49, FR-95 à FR-99) ; le **moteur est l'IA commune** (module Risque et agents métier), qui apprend entre verticales sous consentement de l'IMF (PRD moteur). Le module n'embarque aucun modèle. Provenance affichée : règle ou modèle, version, date, données utilisées ; règle explicable (v0) tant que le modèle n'existe pas [ASSUMPTION]. L'IA propose, le CC, le ROC et le comité décident ; un écart exige un motif renvoyé comme correction ; aucune donnée ne sort sans consentement. |
+| C10 Démarrer seul | `profiles: ["credit"]` ; socle + `produits-financiers` + `microfinance` + `reseau`. Avec le cœur fictif de la démo installé (`coeur-sfd`), le dossier va de SOUMIS à EN_GESTION, puis jusqu'au décaissement CONFIRME, sans autre module. |
+| C11 IA | `ia: { modeles: ['score-dossier', 'decision-suggeree', 'analyse-dossier', 'analyse-macro-sectorielle', 'detection-fraude-dossier', 'comportement-de-credit', 'perte-attendue-dossier', 'cohesion-groupe', 'recommandation-conditions'], finalites: ['aide-a-la-decision-credit', 'analyse-du-dossier', 'detection-des-alertes', 'analyse-sectorielle-et-macro', 'recommandation-de-produit', 'proposition-au-roc'] }`. Le crédit **spécifie** ces capacités (FR-49, FR-53, FR-74, FR-95 à FR-99) ; le **moteur est l'IA commune** (module Risque et agents métier) : une **instance locale chez l'IMF** prédit, enregistre l'écart entre ses prédictions et ce qui se passe, anonymise, renvoie ces écarts pour l'apprentissage et reçoit ses mises à jour par un tunnel sécurisé sortant (PRD moteur). Le crédit définit les entrées, les sorties et l'affichage ; il ne calcule aucun score lui-même. Le score est une information et une alerte, jamais un refus ni un prix en v1. Provenance affichée : règle ou modèle, version, date, données utilisées ; règle explicable (v0) tant que le modèle n'existe pas [ASSUMPTION]. L'IA propose, le CC, le ROC et le comité décident ; la décision suggérée s'affiche au CC après son premier avis ; un écart exige un motif renvoyé comme correction ; aucune donnée ne sort sans consentement. |
 | C12 Migrations | `retourArriere: 'SANS_PERTE'`. Migration additive. Interrupteurs : `analyse-etendue` (six volets, éteint tant que les sources macro d'un pays ne sont pas paramétrées), `avis-du-risque-obligatoire`, `echeancier-methode-par-produit`. La forme du journal et de l'échéancier contractuel ne change jamais dans la fenêtre de sept jours. Un statut ou un sous-état ajouté est lu comme inconnu par la version précédente. |
-| C13 Installable sous contrôle | Prérequis : `produits-financiers` et `microfinance` en service ; plafond d'usure daté publié. Vérifications : `usure-bloquante` (🟢 si un produit d'essai au TEG supérieur au plafond est refusé aux trois points : simulation, comité, décaissement ; 🔴 sinon) ; `echeancier-concordant` (🟢 si l'échéancier d'un dossier d'essai somme à son capital, écart 0 FCFA, et si la simulation et l'échéancier du comité concordent ; 🔴 sinon) ; `statuts-et-transitions` (🟢 si les 12 statuts sont atteints dans l'ordre sur un dossier d'essai et si une transition interdite est refusée). Lecture seule : consultation, journal, export. **`objetsDeReprise: ['credit.pret-en-cours@1']** : les **prêts en cours** (montant décaissé, encours, intérêts courus, pénalités, dates, canal, échéancier, cautions), repris selon la **partie 3b** (import du portefeuille) ; valeur de contrôle : encours total (donnée, vérifié contre le cœur). `domainesEchange` : `credit.dossiers-accordes` (`MOUVEMENT`, `argent: true`, `controle: true`, publie `credit.dossier.accorde@1`), un seul point d'écriture, identifiant stable ; le propriétaire de l'argent reste le cœur [À CONFIRMER avec la partie 3b]. Essai : tout ordre de décaissement réel est intercepté et compté. |
+| C13 Installable sous contrôle | Prérequis : `produits-financiers` et `microfinance` en service ; plafond d'usure daté publié. Vérifications : `usure-bloquante` (🟢 si un produit d'essai au TEG supérieur au plafond est refusé aux trois points : simulation, comité, décaissement ; 🔴 sinon) ; `echeancier-concordant` (🟢 si l'échéancier d'un dossier d'essai somme à son capital, écart 0 FCFA, et si la simulation et l'échéancier du comité concordent ; 🔴 sinon) ; `statuts-et-transitions` (🟢 si les statuts du chemin nominal sont atteints dans l'ordre sur un dossier d'essai, si le sous-état de décaissement va de À_ORDONNER à CONFIRME et si une transition absente des deux tables de FR-78 est refusée ; 🔴 sinon) ; `decaissement-rapproche` (🟢 si un ordre d'essai sans réponse passe à INCONNU, n'est pas réémis avant son rapprochement et garde sa clé d'idempotence ; 🔴 sinon). Lecture seule : consultation, journal, export. **`objetsDeReprise: ['credit.pret-en-cours@1']** : les **prêts en cours** (montant décaissé, encours, intérêts courus, pénalités, dates, canal, échéancier, cautions), repris selon la **partie 3b** (import du portefeuille) ; valeur de contrôle : encours total (donnée, vérifié contre le cœur). `domainesEchange` : `credit.dossiers-accordes` (`MOUVEMENT`, `argent: true`, `controle: true`, publie `credit.dossier.accorde@1`), un seul point d'écriture, identifiant stable ; le propriétaire de l'argent reste le cœur [À CONFIRMER avec la partie 3b]. Essai : tout ordre de décaissement réel est intercepté et compté. |
 
-*Conventions de lecture (celles de PRD-D annexe A) : une cellule n'est jamais vide ; gate `<CODE>_NOT_ENTITLED` (code en majuscules, tiret remplacé par `_`) ; `organisationId` sur chaque lecture et écriture ; `profiles: ["<code>"]` ; version `1.0.0` ; `retourArriere` à `SANS_PERTE` sauf mention. Les noms de codes, droits, topics, modèles et finalités sont des **propositions**. Le code `produits-financiers` a un **tiret** : ses droits ne passent le format de droit que depuis l'élargissement prévu par l'amendement C7 du 2026-11-11. L'IA est celle de l'IA commune : ces modules la **consomment** (C11 déclare les modèles et finalités demandés) et n'en ont aucune propre.*
+*Conventions de lecture (celles de PRD-D annexe A) : une cellule n'est jamais vide ; gate `<CODE>_NOT_ENTITLED` (code en majuscules, tiret remplacé par `_`) ; `organisationId` sur chaque lecture et écriture ; `profiles: ["<code>"]` ; version `1.0.0` ; `retourArriere` à `SANS_PERTE` sauf mention. Les noms de codes, droits, topics, modèles et finalités sont des **propositions**. Le code `produits-financiers` a un **tiret** : ses droits ne passent le format de droit que depuis l'élargissement prévu par l'amendement C7 du 2026-11-11. L'IA est celle de l'IA commune : ces modules la **consomment** (C11 déclare les modèles et finalités demandés).*
 
 ### A.2 ★ Produits financiers (`produits-financiers`, M46 [proposition])
 
@@ -3573,16 +3944,16 @@ Ce qui change pour l'IMF :
 | C1 Manifeste | `code: 'produits-financiers'`, `version: '1.0.0'`. `depends: []` (aucun module n'est requis pour tenir un catalogue). `enrichiPar: [coeur-sfd (code produit du cœur, FR-110), microfinance (score et ancienneté pour l'éligibilité, FR-104), credit (consomme les versions et fige les conditions, partie 2), risque-par (taux et frais pour la lecture du portefeuille), ia-commune (recommandation, conditions optimales)]`. Code de module et service porteur : proposition [À CONFIRMER, M46]. |
 | C2 Socle | Gate `PRODUITS_FINANCIERS_NOT_ENTITLED`. Cloisonnement par `organisationId` ; le catalogue est celui de l'IMF, lu par tous les rôles du crédit, écrit par l'administrateur ou le DAF, publié par le DG ou le ROC (FR-100). ADMIN_IMF ne lit aucune donnée de client. |
 | C3 Données possédées | Produits de crédit et d'épargne, **versions horodatées** (taux, bornes, périodicité, méthode d'amortissement, frais et drapeaux « inclus dans le TEG », assurance, éligibilité, cautions et garanties exigées), statut (brouillon, publié, retiré, à revoir), code produit du cœur, journal de publication. Lues seulement : plafond d'usure daté (partie 1), score (IA commune), identifiant et code du cœur. |
-| C4 Emplacements vides | `coeur-sfd` absent : code produit du cœur = `{etat: NON_INSTALLE, module: coeur-sfd}` ; un produit se publie, **aucun dossier qui le porte ne peut être accordé** (FR-110). `microfinance` absent : éligibilité = `NON_INSTALLE`, la demande n'est pas contrôlée et est refusée par défaut (garde-fou non vérifiable). `ia-commune` absente : recommandation et conditions optimales = « indisponible » ; simulation manuelle complète. `credit` absent : le catalogue se tient seul. Un test par dépendance de `enrichiPar`. |
+| C4 Emplacements vides | `coeur-sfd` absent : code produit du cœur = `{etat: NON_INSTALLE, module: coeur-sfd}` ; un produit se publie, **aucun dossier qui le porte ne peut être accordé** (FR-110). `microfinance` absent : éligibilité = `NON_INSTALLE` ; l'ancienneté n'est pas vérifiable et la demande est refusée par défaut (garde-fou non vérifiable) ; le score, lui, n'a jamais été un blocage. `ia-commune` absente : recommandation et conditions optimales = « indisponible » ; simulation manuelle complète. `credit` absent : le catalogue se tient seul. Un test par dépendance de `enrichiPar`. |
 | C5 Contrats nommés | Publie `produits-financiers.produit.publie@1` (version figeable par `credit`), `produits-financiers.produit.retire@1`, `produits-financiers.produit.a-revoir@1` (plafond d'usure abaissé), `produits-financiers.produit.changed@1`. Consomme `etat-publie.changed.*@1`, `coeur-sfd.produit.code@1` (code du cœur), `microfinance.client.changed@1` (éligibilité), le plafond d'usure daté de la partie 1. |
-| C6 Paramètres | Bornes par version ; pas de saisie du montant (10 000 FCFA) ; montant minimum de démo (50 000 FCFA) ; score minimum (45) et ancienneté minimum (3 mois) ; seuil d'ajustement de risque (score 60, +2 points, +1 à +5) ; cautions (2 au-dessus de 300 000), dépôt (10 %, 15 % au-dessus de 1 000 000), garantie réelle (30 %, 50 %) ; capacité de remboursement (40 % du revenu net estimé) ; durée de dormance par produit (6 mois) ; plafond d'usure (24 %, daté, partie 1). Données, jamais code. |
+| C6 Paramètres | Bornes par version ; pas de saisie du montant (10 000 FCFA) ; montant minimum de démo (50 000 FCFA) ; score d'alerte (45, information seulement) et ancienneté minimum (3 mois) ; méthode du TEG figée (actuariel annuel proportionnel, périodes par an, inclusion de chaque type de frais) et écart toléré du tableau de référence (0,1 point) ; cautions (2 au-dessus de 300 000), dépôt (10 %, 15 % au-dessus de 1 000 000), garantie réelle (30 %, 50 %) ; taux d'effort : celui du plafond bloquant du crédit (40 %, annexe D), pas un seuil propre à ce module ; durée de dormance par produit (6 mois) ; plafond d'usure (24 %, daté, partie 1). Données, jamais code. |
 | C7 Droits | `produits-financiers:produit:consulter`, `produits-financiers:produit:gerer`, `produits-financiers:produit:publier`, `produits-financiers:derogation:accorder` (éligibilité, ROC), `produits-financiers:simulation:lancer`. Forme élargie (tiret dans le module). |
 | C8 Module d'écran | `src/modules/produits-financiers/` : `/produits` (catalogue, fiche de version, historique, simulation). Entrées : « Produits » (`produits-financiers:produit:consulter`). Boutons : « Nouveau produit », « Publier », « Simuler » branchés ; famille tontine et assurance : « bientôt ». |
 | C9 Installer/désinstaller | Désinstaller ne supprime rien ; produits et versions restent stockés, masqués ; **les dossiers accordés gardent leurs conditions figées** (stockées dans `credit`). Avertissement : « Plus aucun produit ne sera proposé ; les dossiers en cours gardent leurs conditions. » |
 | C10 Démarrer seul | `profiles: ["produits-financiers"]` ; socle + `reseau`. Le catalogue se tient sans le cœur. |
-| C11 IA | `ia: { modeles: ['recommandation-produit', 'conditions-optimales'], finalites: ['recommandation-de-produit', 'proposition-de-conditions'] }` : capacités FR-112 et FR-113, servies par l'IA commune (module Relation client et module Risque). **Aucune IA propre à ce module.** Données fournies à l'IA commune : profil du client (secteur, ancienneté, revenus estimés), produits éligibles, uniquement **sous le consentement « IA commune »** du client. L'IA propose, l'agent choisit ; indisponible, rien ne bloque. |
+| C11 IA | `ia: { modeles: ['recommandation-produit', 'conditions-optimales'], finalites: ['recommandation-de-produit', 'proposition-de-conditions'] }` : capacités FR-112 et FR-113, servies par l'IA commune (module Relation client et module Risque). Le moteur est l'IA commune, en instance locale chez l'IMF ; le module n'embarque aucun modèle. Données lues par l'instance : profil du client (secteur, ancienneté, revenus estimés), produits éligibles ; seuls des écarts anonymisés repartent pour l'apprentissage, **sous le consentement « IA commune »** du client ; l'instance reçoit ses mises à jour par un tunnel sortant. L'IA propose, l'agent choisit ; indisponible, rien ne bloque. |
 | C12 Migrations | `retourArriere: 'SANS_PERTE'` (une version publiée ne change jamais de forme). Interrupteurs : `controle-usure-publication` (allumé, jamais éteint en production), `recommandation-produit`. Un champ de produit ajouté est lu comme inconnu par la version précédente. |
-| C13 Installable sous contrôle | Prérequis : plafond d'usure publié (partie 1). Vérifications : `produits-conformes` (🟢 si le TEG de tous les cas extrêmes de chaque version publiée est ≤ au plafond ; 🔴 si un seul le dépasse) ; `jeu-de-demo-conforme` (🟢 si les produits du jeu de démo sont tous ≤ 24 %) ; `code-cœur-present` (🟠 si un produit publié n'a pas de code du cœur). Lecture seule : catalogue, versions, export. Export, import, effacement par organisation ; `objetsDeReprise: ['produits-financiers.produit@1']` (produits en cours, si le cœur ne les fournit pas) [À CONFIRMER avec la Reprise] ; `domainesEchange: ['produits']` (propriétaire : le cœur pour le code et le plan comptable, Prospera pour le catalogue commercial). |
+| C13 Installable sous contrôle | Prérequis : plafond d'usure publié (partie 1). Vérifications : `produits-conformes` (🟢 si le TEG au pire cas — durée la plus courte, frais les plus élevés, assurance comprise — de chaque version publiée est ≤ au plafond ; 🔴 si un seul le dépasse) ; `jeu-de-demo-conforme` (🟢 si les produits du jeu de démo sont tous ≤ 24 % au pire cas) ; `teg-reference` (🟢 si le tableau de TEG de référence de FR-111 est reproduit à 0,1 point près ; 🔴 sinon) ; `code-cœur-present` (🟠 si un produit publié n'a pas de code du cœur). Lecture seule : catalogue, versions, export. Export, import, effacement par organisation ; `objetsDeReprise: ['produits-financiers.produit@1']` (produits en cours, si le cœur ne les fournit pas) [À CONFIRMER avec la Reprise] ; `domainesEchange: ['produits']` (propriétaire : le cœur pour le code et le plan comptable, Prospera pour le catalogue commercial). |
 
 ### A.3 ★ Clients, KYC et LBC/FT (`microfinance`, M32)
 
@@ -3590,17 +3961,17 @@ Ce qui change pour l'IMF :
 |---|---|
 | C1 Manifeste | `code: 'microfinance'`, `version: '1.0.0'`. `depends: [{reseau, "Un client appartient à une agence et à une zone ; le périmètre de lecture vient de la portée du réseau."}]`. `enrichiPar: [coeur-sfd (identifiant du cœur, comptes d'épargne et mouvements lus, FR-116 et FR-130), produits-financiers (éligibilité), credit (dossiers, cautions, partie liée), terrain (visites, position), collecte, notification (alertes de revue et de sanctions), ia-commune (score, PD, signaux faibles, analyses, zones, épargne)]`. Le paquet comptable `prospera-microfinance-service` n'est pas installé chez cette IMF au jour 1 (A11) ; on en réutilise les règles seulement. Service porteur [À CONFIRMER, M32]. |
 | C2 Socle | Gate `MICROFINANCE_NOT_ENTITLED`. Cloisonnement par `organisationId` et par portée (zone, agence, portefeuille, réseau) : DG réseau, RA agence, CC ses dossiers, GP son portefeuille, agent terrain, commercial et collecteur leur zone, auditeur lecture seule ; **ADMIN_IMF ne lit aucune donnée métier** (FR-133). Accès journalisé. |
-| C3 Données possédées | Prospects, clients (personnes) et groupes solidaires (composition, rôles, caution mutuelle, réunions), fiche (identité, secteur d'activité, photos, position), pièces et expirations, niveaux et statuts de KYC, PPE et bénéficiaire effectif, listes de sanctions importées et leurs correspondances, files de revue, alertes CENTIF, consentements par finalité, notation de risque LBC, journal d'accès. Lues seulement : comptes, soldes, mouvements d'épargne et identifiant (cœur) ; score, PD, analyses (IA commune) ; produits (`produits-financiers`). |
+| C3 Données possédées | Prospects, clients (personnes) et groupes solidaires (composition, rôles, caution mutuelle, réunions), fiche (identité, secteur d'activité, photos, position), pièces et expirations, niveaux et statuts de KYC, PPE et bénéficiaire effectif, listes de sanctions importées et leurs correspondances, files de revue, alertes CENTIF, consentements par finalité, notation de risque LBC, étapes de la procédure « correspondance confirmée » (gel, déclaration, délais), suivi d'équité (taux d'acceptation par genre, zone et secteur), journal d'accès. Lues seulement : comptes, soldes, mouvements d'épargne et identifiant (cœur) ; score, PD, analyses (IA commune) ; produits (`produits-financiers`). |
 | C4 Emplacements vides | `coeur-sfd` absent : comptes d'épargne et identifiant = `{etat: NON_INSTALLE, module: coeur-sfd}` ; la fiche s'ouvre, **aucun décaissement** n'est possible (client « en attente du cœur », FR-116) ; `ia-commune` absente : score = règle v0 ou « indisponible », PD, signaux faibles, analyse étendue, zones suggérées, épargne = « indisponible » (FR-124 à FR-131) ; `produits-financiers` absent : éligibilité = `NON_INSTALLE` ; `credit` absent : cautions et dossiers = `NON_INSTALLE` ; `terrain` absent : visites et position lues de la fiche seule ; `notification` absent : alertes dans l'écran seulement. Un test par dépendance de `enrichiPar`. |
-| C5 Contrats nommés | Publie `microfinance.client.changed@1`, `microfinance.client.converti@1`, `microfinance.kyc.changed@1` (niveau, statut, expiration), `microfinance.groupe.changed@1`, `microfinance.sanctions.correspondance@1`, `microfinance.consentement.changed@1`, `microfinance.alerte-centif.creee@1`, `microfinance.revue.echue@1`. Consomme `coeur-sfd.client.changed@1`, `coeur-sfd.epargne.changed@1`, `coeur-sfd.mouvement.recu@1`, `credit.dossier.changed@1`, `collecte.collecte.changed@1`, `reseau.portee.changed@1`, `etat-publie.changed.*@1`. Émet vers l'IA commune, sous consentement, le lot de données structurées (secteur d'activité inclus). |
-| C6 Paramètres | Pièces par niveau de KYC ; périodicité de revue (renforcé 12, standard 24, simplifié 36 mois) ; délai avant « à renouveler » (30 jours) ; alerte d'expiration (30 jours) ; seuil CENTIF (15 000 000 FCFA) et cumul fractionné (80 %, 7 jours) ; fréquence de rafraîchissement des listes (quotidien) ; sources de listes ; nombre de membres d'un groupe (5 à 30) ; un groupe actif par personne ; seuils d'alerte de signaux faibles (calibrés sur les données de l'IMF, défaut 0,7) ; délai de recalcul de la PD (15 minutes) ; nomenclature des secteurs ; durées de conservation (≥ 10 ans pour la piste d'audit). Données, jamais code. |
-| C7 Droits | `microfinance:client:consulter`, `microfinance:client:creer`, `microfinance:client:convertir`, `microfinance:kyc:valider`, `microfinance:kyc:consulter`, `microfinance:sanctions:traiter`, `microfinance:groupe:gerer`, `microfinance:epargne:consulter`, `microfinance:analyse:consulter`, `microfinance:consentement:gerer`, `microfinance:journal:consulter` (auditeur). Format conforme. L'habilitation de conformité est le droit `microfinance:kyc:valider` + `microfinance:sanctions:traiter`, accordé par le DG (FR-120). |
-| C8 Module d'écran | `src/modules/microfinance/` : `/clients` (liste, prospects), `/clients/nouveau`, `/clients/[id]` (fiche : identité, activité, KYC, groupe, épargne lue, analyse), `/groupes`, `/kyc` (file de validation, revues, sanctions), `/zones-risque` (carte). Entrées selon les droits. Boutons non branchés de la démo (« Nouveau emprunteur », « Ajouter un document ») sont **branchés** ; tontines, rapprochement BIC direct : « bientôt ». |
+| C5 Contrats nommés | Publie `microfinance.client.changed@1`, `microfinance.client.converti@1`, `microfinance.kyc.changed@1` (niveau, statut, expiration), `microfinance.groupe.changed@1`, `microfinance.sanctions.correspondance@1`, `microfinance.consentement.changed@1`, `microfinance.alerte-centif.creee@1`, `microfinance.revue.echue@1`. Consomme `coeur-sfd.client.changed@1`, `coeur-sfd.epargne.changed@1`, `coeur-sfd.mouvement.recu@1`, `credit.dossier.changed@1`, `collecte.collecte.changed@1`, `reseau.portee.changed@1`, `etat-publie.changed.*@1`. Renvoie à l'IA commune, sous consentement, des écarts anonymisés (secteur d'activité inclus) ; l'instance locale reçoit ses mises à jour par un tunnel sortant. |
+| C6 Paramètres | Pièces par niveau de KYC ; périodicité de revue (renforcé 12, standard 24, simplifié 36 mois) ; délai avant « à renouveler » (30 jours) ; alerte d'expiration (30 jours) ; seuil CENTIF (15 000 000 FCFA) et cumul fractionné (80 %, 7 jours) ; fréquence de rafraîchissement des listes (quotidien) ; sources de listes ; nombre de membres d'un groupe (5 à 30) ; un groupe actif par personne ; seuils d'alerte de signaux faibles (calibrés sur les données de l'IMF, défaut 0,7) ; délai de recalcul de la PD (15 minutes) ; nomenclature des secteurs ; liste fermée des variables du score (versionnée) ; écart d'équité alertant (10 points, sur 30 demandes) ; scénarios de soupçon LBC/FT (activables, réglables) ; délais de la procédure « correspondance confirmée » (gel 24 h, déclaration 72 h) ; durées de conservation (≥ 10 ans pour la piste d'audit). Données, jamais code. |
+| C7 Droits | `microfinance:client:consulter`, `microfinance:client:creer`, `microfinance:client:convertir`, `microfinance:kyc:valider`, `microfinance:kyc:consulter`, `microfinance:sanctions:traiter`, `microfinance:groupe:gerer`, `microfinance:epargne:consulter`, `microfinance:analyse:consulter`, `microfinance:consentement:gerer`, `microfinance:journal:consulter` (auditeur), `microfinance:equite:consulter` (AUD, RSQ), `microfinance:sanctions:confirmer` (DG ou personne désignée : correspondance confirmée et gel). Format conforme. L'habilitation de conformité est le droit `microfinance:kyc:valider` + `microfinance:sanctions:traiter`, accordé par le DG (FR-120). |
+| C8 Module d'écran | `src/modules/microfinance/` : `/clients` (liste, prospects), `/clients/nouveau`, `/clients/[id]` (fiche : identité, activité, KYC, groupe, épargne lue, analyse), `/groupes`, `/kyc` (file de validation, revues, sanctions), `/zones-risque` (carte), `/epargne` (liste des comptes, vue consolidée du DG, statistiques : lecture du cœur, FR-130), `/equite` (taux d'acceptation par genre, zone et secteur : AUD et RSQ). Entrées selon les droits. Boutons non branchés de la démo (« Nouveau emprunteur », « Ajouter un document ») sont **branchés** ; tontines, rapprochement BIC direct : « bientôt ». |
 | C9 Installer/désinstaller | Désinstaller ne supprime rien ; fiches, pièces, consentements et journal restent stockés et masqués (la piste d'audit se conserve ≥ 10 ans) ; test aller-retour. Avertissement : « Les fiches clients ne seront plus consultables ni vérifiables ; les dossiers en cours restent. » |
 | C10 Démarrer seul | `profiles: ["microfinance"]` ; socle + `reseau`. |
-| C11 IA | `ia: { modeles: ['score-client', 'probabilite-defaut', 'signaux-faibles-client', 'analyse-sectorielle-micro-macro', 'couverture-zones-prospection', 'comptes-dormants', 'recommandation-epargne', 'fidelite-epargne'], finalites: ['evaluation-du-risque-client', 'alerte-precoce', 'analyse-du-secteur', 'suggestion-de-zones', 'animation-de-l-epargne'] }` : capacités FR-124 à FR-128 et FR-131, servies par l'IA commune (module Risque, Agents métier, Pulse). **Aucune IA propre à ce module.** Données fournies à l'IA commune : fiche structurée (secteur et sous-secteur d'activité, ancienneté, revenus estimés, localisation si consentie), historique de paiement et d'épargne lu du cœur, uniquement **sous le consentement « IA commune »** (FR-132) ; retirer le consentement arrête l'envoi. Provenance affichée ; l'IA propose, l'humain décide ; absente, la règle v0 ou « indisponible » sert et rien ne bloque. |
+| C11 IA | `ia: { modeles: ['score-client', 'probabilite-defaut', 'signaux-faibles-client', 'analyse-sectorielle-micro-macro', 'couverture-zones-prospection', 'comptes-dormants', 'recommandation-epargne', 'fidelite-epargne', 'prevision-encours-epargne', 'segmentation-epargnants', 'cohesion-groupe'], finalites: ['evaluation-du-risque-client', 'alerte-precoce', 'analyse-du-secteur', 'suggestion-de-zones', 'animation-de-l-epargne', 'prevision-de-l-epargne', 'alerte-de-cohesion'] }` : capacités FR-124 à FR-128 et FR-131 (dont la cohésion du groupe, FR-126), servies par l'IA commune (module Risque, Agents métier, Pulse). Le moteur est l'IA commune, en instance locale chez l'IMF ; le module n'embarque aucun modèle. Données lues par l'instance : fiche structurée (secteur et sous-secteur d'activité, ancienneté, revenus estimés, localisation si consentie), historique de paiement et d'épargne lu du cœur ; seuls des écarts anonymisés repartent pour l'apprentissage, **sous le consentement « IA commune »** (FR-132) ; retirer le consentement arrête ce renvoi, pas le score local, qui est une information et une alerte, jamais un refus ni un prix (variables de la liste fermée, FR-124). Provenance affichée ; l'IA propose, l'humain décide ; absente, la règle v0 ou « indisponible » sert et rien ne bloque. |
 | C12 Migrations | `retourArriere: 'SANS_PERTE'`. Migration additive (la nomenclature des secteurs évolue par correspondance d'anciens codes, FR-117). Interrupteurs : `filtrage-sanctions` (allumé, jamais éteint en production), `analyse-etendue`, `signaux-faibles`. Un champ de fiche ajouté est lu comme inconnu par la version précédente. |
-| C13 Installable sous contrôle | Prérequis : `reseau` en service ; au moins une liste de sanctions chargée. Vérifications : `listes-a-jour` (🟢 si chaque liste est plus récente que sa fréquence ; 🔴 si une liste a plus de 3 fois sa fréquence) ; `kyc-par-niveau` (🟢 si chaque niveau a ses pièces définies) ; `consentements-lus` (🟢 si un client sans consentement « IA commune » n'est dans aucun lot, sur le jeu de contrôle) ; `identifiant-cœur` (🟠 si une fiche liée n'a pas d'identifiant du cœur). Lecture seule : consultation des fiches, export. Export, import, effacement par organisation (l'effacement respecte la conservation légale). `objetsDeReprise: ['microfinance.client@1', 'microfinance.groupe@1', 'microfinance.kyc@1']` [À CONFIRMER avec le PRD Reprise, M44] ; `domainesEchange: ['clients', 'comptes-epargne']` (propriétaire : le cœur pour l'identité légale, les comptes et les soldes ; Prospera pour l'activité, les photos, la position, le KYC et les groupes). |
+| C13 Installable sous contrôle | Prérequis : `reseau` en service ; au moins une liste de sanctions chargée. Vérifications : `listes-a-jour` (🟢 si chaque liste est plus récente que sa fréquence ; 🔴 si une liste a plus de 3 fois sa fréquence) ; `kyc-par-niveau` (🟢 si chaque niveau a ses pièces définies) ; `consentements-lus` (🟢 si un client sans consentement « IA commune » n'est dans aucun écart renvoyé pour l'apprentissage, sur le jeu de contrôle) ; `identifiant-cœur` (🟠 si une fiche liée n'a pas d'identifiant du cœur) ; `variables-du-score` (🟢 si aucun facteur du score, sur le jeu de contrôle, n'est le genre, la situation matrimoniale, la nationalité ou la religion ; 🔴 sinon). Lecture seule : consultation des fiches, export. Export, import, effacement par organisation (l'effacement respecte la conservation légale). `objetsDeReprise: ['microfinance.client@1', 'microfinance.groupe@1', 'microfinance.kyc@1']` [À CONFIRMER avec le PRD Reprise, M44] ; `domainesEchange: ['clients', 'comptes-epargne']` (propriétaire : le cœur pour l'identité légale, les comptes et les soldes ; Prospera pour l'activité, les photos, la position, le KYC et les groupes). |
 
 ### A.4 ★ Collecte (`collecte`, M16)
 
@@ -3608,15 +3979,15 @@ Ce qui change pour l'IMF :
 |---|---|
 | C1 Manifeste | `code: 'collecte'`, `version: '1.0.0'`. `depends: [{microfinance, "Une collecte vise un client ou un groupe et son compte ou son échéance."}, {reseau, "Un collecteur travaille dans sa zone."}]`. `enrichiPar: [coeur-sfd (échéancier, comptes, renvoi et confirmation, FR-137), terrain (visite, position, application hors ligne), paiement (Mobile Money, PI-SPI, FR-140), caisse (remise et clôture), notification (reçu par SMS), ia-commune (priorités du jour)]`. Service porteur [À CONFIRMER, M16]. |
 | C2 Socle | Gate `COLLECTE_NOT_ENTITLED`. `organisationId` et portée : le collecteur lit et enregistre pour sa zone et ses clients de collecte ; le RA son agence ; le RCC son agence ou sa région ; le CPT les remises de son agence ; l'auditeur lit. |
-| C3 Données possédées | Collectes (type, montant, canal, client, compte ou échéance, collecteur, date serveur et date appareil, position, clé d'idempotence, état DECLAREE / ENVOYEE / CONFIRMEE / REFUSEE), reçus numérotés, remises d'espèces et leur contresignature, annulations avec motif, rapprochements et écarts, listes « à saisir dans le cœur », plans du jour. Lues seulement : échéances, soldes, mouvements (cœur) ; clients (`microfinance`). |
+| C3 Données possédées | Collectes (type, montant, canal, client, compte ou échéance, collecteur, date serveur et date appareil, position, clé d'idempotence, état DECLAREE / ENVOYEE / CONFIRMEE / REFUSEE), reçus numérotés (le numéro de reçu Prospera est la clé d'appariement avec le cœur et avec la remise), remises d'espèces (transferts de caisse, jamais un crédit de client) et leur contresignature, annulations avec motif, rapprochements et écarts, listes « à saisir dans le cœur », plans du jour. Lues seulement : échéances, soldes, mouvements (cœur) ; clients (`microfinance`). |
 | C4 Emplacements vides | `coeur-sfd` absent : échéancier et confirmation = `{etat: NON_INSTALLE, module: coeur-sfd}` ; la collecte s'enregistre et reste DECLAREE ; la liste « à saisir dans le cœur » sert (FR-137) ; `paiement` absent : collecte Mobile Money = `NON_INSTALLE` (espèces seulement) ; `caisse` absente : la remise s'enregistre sans clôture du jour ; `terrain` absent : pas de plan préchargé ni de position ; `notification` absent : reçu papier seulement ; `ia-commune` absente : ordre des priorités = règle de base (retards, J-3, prospects). Un test par dépendance de `enrichiPar`. |
 | C5 Contrats nommés | Publie `collecte.collecte.changed@1`, `collecte.collecte.confirmee@1`, `collecte.collecte.refusee@1`, `collecte.remise.contresignee@1`, `collecte.ecart.detecte@1`, `collecte.liste-a-saisir.changed@1`. Consomme `coeur-sfd.echeancier.changed@1`, `coeur-sfd.mouvement.recu@1` (confirmation), `microfinance.client.changed@1`, `paiement.encaissement.changed@1`, `terrain.visite.changed@1`, `reseau.portee.changed@1`, `etat-publie.changed.*@1`. |
-| C6 Paramètres | Ordre d'imputation (pénalités, intérêts, capital) ; écart de rattachement automatique (1 %) ; fenêtre et tolérance de doublon (5 minutes, ± 100 FCFA) ; plage de numéros de reçu par appareil ; âge maximum d'une collecte en file (7 jours) ; espèces non remises (1 jour) ; lot de synchronisation (50 collectes en 30 s) ; heures d'envoi du plan (veille au soir) ; priorités du plan. Données, jamais code. |
+| C6 Paramètres | Ordre d'imputation (pénalités, intérêts, capital) ; écart de rattachement automatique (1 %, qui choisit l'échéance sans la solder) ; tolérance d'arrondi (5 FCFA) ; fenêtre et tolérance de doublon (5 minutes, ± 100 FCFA) ; plage de numéros de reçu par appareil ; âge maximum d'une collecte en file (7 jours) ; espèces non remises (1 jour) ; lot de synchronisation (50 collectes en 30 s) ; heures d'envoi du plan (veille au soir) ; priorités du plan. Données, jamais code. |
 | C7 Droits | `collecte:collecte:saisir`, `collecte:collecte:consulter`, `collecte:collecte:annuler` (RA), `collecte:remise:contresigner` (CPT), `collecte:rapprochement:traiter`, `collecte:plan:consulter`, `collecte:agence:consulter`. Format conforme. |
 | C8 Module d'écran | `src/modules/collecte/` : `/collecte` (plan du jour, saisie, reçus, file de synchronisation), `/collecte/remises`, `/collecte/rapprochement`, `/collecte/a-saisir`. Application terrain hors ligne (Flutter, PRD-D FR-109). Collecte de tontine : « bientôt ». |
 | C9 Installer/désinstaller | Désinstaller ne supprime rien ; collectes, reçus et remises restent stockés et masqués ; **la suite de numéros de reçu est conservée** (réinstaller reprend sans trou ni doublon). Avertissement : « La collecte terrain s'arrête ; les collectes non confirmées ne seront plus envoyées au cœur. » |
 | C10 Démarrer seul | `profiles: ["collecte"]` ; socle + `reseau` + `microfinance`. |
-| C11 IA | `ia: { modeles: ['priorites-du-jour'], finalites: ['ordre-de-visite-propose'] }` : capacité FR-142, servie par l'IA commune (module Agents métier). **Aucune IA propre à ce module.** Données fournies à l'IA commune : échéances et retards (lus du cœur), promesses, score, signaux faibles, secteur, distance, uniquement **sous le consentement « IA commune »** ; l'ordre est une proposition réordonnable. Absente, la règle de base sert. |
+| C11 IA | `ia: { modeles: ['priorites-du-jour'], finalites: ['ordre-de-visite-propose'] }` : capacité FR-142, servie par l'IA commune (module Agents métier). Le moteur est l'IA commune, en instance locale chez l'IMF ; le module n'embarque aucun modèle. Données lues par l'instance : échéances et retards (lus du cœur), promesses, score, signaux faibles, secteur, distance ; seuls des écarts anonymisés repartent, **sous le consentement « IA commune »** ; l'ordre est une proposition réordonnable. Absente, la règle de base sert. |
 | C12 Migrations | `retourArriere: 'SANS_PERTE'` (le compteur de reçus ne change jamais de forme dans la fenêtre de 7 jours). Interrupteurs : `renvoi-automatique-au-coeur` (éteint tant que le cœur ne sait pas recevoir : la liste « à saisir » sert), `priorites-ia`. |
 | C13 Installable sous contrôle | Prérequis : `microfinance` et `reseau` en service. Vérifications : `recus-continus` (🟢 si la suite de reçus de chaque collecteur n'a ni trou ni doublon sur les 100 derniers ; 🔴 sinon) ; `idempotence` (🟢 si le renvoi de la même collecte 5 fois n'en crée qu'une, sur le jeu de contrôle) ; `collectes-concordantes` (🟢 si, sur le jeu de contrôle, chaque collecte CONFIRMEE a un mouvement du cœur de même montant ; 🔴 sinon). Lecture seule : consultation, liste « à saisir », export. `objetsDeReprise: []` (aucune collecte passée n'est reprise ; l'historique vient du cœur) [À CONFIRMER avec le PRD Reprise] ; `domainesEchange: ['paiements-collectes']` (propriétaire : le cœur pour l'imputation et les écritures ; Prospera pour l'enregistrement, le reçu et la remise). |
 
@@ -3634,7 +4005,7 @@ Ce qui change pour l'IMF :
 | C8 Module d'écran | `src/modules/caisse/` : `/caisse` (position, clôtures, écarts, vue du réseau), `/caisse/guichet` (lecture du cœur), `/caisse/previsions`. Entrées selon les droits. Boutons « bientôt » : exécution des virements entre agences, rapprochement du float Mobile Money avec le relevé de l'opérateur, réserve obligatoire et tension par agence, caisse des tontines. |
 | C9 Installer/désinstaller | Désinstaller ne supprime rien ; clôtures, écarts et fonds restent stockés et masqués ; les écarts ouverts restent résolubles à la réinstallation. Avertissement : « Les clôtures du jour des collecteurs ne seront plus faites ; les écarts ouverts restent. » |
 | C10 Démarrer seul | `profiles: ["caisse"]` ; socle + `reseau` + `collecte` + `microfinance`. |
-| C11 IA | `ia: { modeles: ['validation-mobile-money', 'anomalies-caisse', 'prevision-tresorerie-7j', 'reequilibrage-agences'], finalites: ['aide-a-la-validation', 'detection-d-anomalies', 'prevision-de-tresorerie', 'suggestion-de-reequilibrage'] }` : capacités FR-147 à FR-149, servies par l'IA commune (module Agents métier, module Risque). **Aucune IA propre à ce module.** Données fournies à l'IA commune : paiements Mobile Money, collectes, remises, écarts, annulations, lectures de la caisse du guichet (cœur), sous consentement de l'IMF pour la mutualisation entre verticales (apprentissage fédéré). L'IA ne valide jamais un paiement, ne passe aucune écriture, ne déplace aucun fonds ; une alerte n'est pas une accusation. Absente, les seuils d'écart et les règles de doublon restent actifs. |
+| C11 IA | `ia: { modeles: ['validation-mobile-money', 'anomalies-caisse', 'prevision-tresorerie-7j', 'reequilibrage-agences'], finalites: ['aide-a-la-validation', 'detection-d-anomalies', 'prevision-de-tresorerie', 'suggestion-de-reequilibrage'] }` : capacités FR-147 à FR-149, servies par l'IA commune (module Agents métier, module Risque). Le moteur est l'IA commune, en instance locale chez l'IMF ; le module n'embarque aucun modèle. Données lues par l'instance : paiements Mobile Money, collectes, remises, écarts, annulations, lectures de la caisse du guichet (cœur) ; seuls des écarts anonymisés repartent, sous consentement de l'IMF, pour la mutualisation entre verticales (apprentissage fédéré). L'IA ne valide jamais un paiement, ne passe aucune écriture, ne déplace aucun fonds ; une alerte n'est pas une accusation. Absente, les seuils d'écart et les règles de doublon restent actifs. |
 | C12 Migrations | `retourArriere: 'SANS_PERTE'`. Interrupteurs : `blocage-cloture-non-faite`, `alerte-recurrence`, `ia-caisse`. Les seuils proposés par recalcul ne s'appliquent jamais sans validation humaine. |
 | C13 Installable sous contrôle | Prérequis : `collecte` en service. Vérifications : `cloture-complete` (🟢 si, sur le jeu de contrôle, une clôture refuse un collecteur avec une collecte non synchronisée ou sans remise ni motif) ; `ecart-calcule` (🟢 si le déclaré 450 000 et le compté 441 000 donnent un écart de 9 000 et une alerte au RA, au DAF et à l'auditeur ; 🔴 sinon) ; `lecture-guichet` (🟠 si la dernière lecture du cœur a plus de 24 h). Lecture seule : consultation, export. `objetsDeReprise: []` (la caisse du guichet est celle du cœur ; les clôtures passées de collecteurs ne sont pas reprises) [À CONFIRMER] ; `domainesEchange: ['caisse-guichet']` (propriétaire : le cœur ; Prospera lit seulement). |
 
@@ -3644,17 +4015,17 @@ Ce qui change pour l'IMF :
 |---|---|
 | C1 Manifeste | `code: 'coeur-sfd'`, `version: '1.0.0'`. `depends: [{reseau, "Une agence du cœur se range dans le réseau ; son code est celui du cœur s'il existe (FR-164)."}, {produits-financiers, "Un prêt reçu du cœur se rattache à un produit versionné."}]`. `enrichiPar: [credit (dossier accordé, ordre de décaissement), microfinance (clients, épargne lue), collecte (remboursements saisis), caisse (caisse du guichet lue), recouvrement (échéancier officiel, pénalités), risque-par (prêts, paiements), conformite-bceao (balance), paiement (décaissement Mobile Money et PI-SPI déclaré au cœur), reprise (import du portefeuille), connecteurs (vrai connecteur, hors février)]`. Service porteur : à créer [À CONFIRMER] ; le cœur fictif est livré à côté (FR-166), jamais dans un espace réel (FR-167). |
 | C2 Socle | Gate `COEUR_SFD_NOT_ENTITLED`. Cloisonnement par `organisationId`. Lecture de la file des écarts : CPT, DAF, ROC (agence pour CPT). Aucune porte entrante : Prospera tire toujours (FR-157). |
-| C3 Données possédées | Journal des échanges, file d'envoi (dossiers accordés, ordres, remboursements à renvoyer), états d'envoi, file des écarts, listes « à saisir dans le cœur », état de fraîcheur par objet, état de rapprochement trimestriel, paramètres d'échange (transport, fraîcheur, délais). **Aucun solde** : l'argent reste au cœur ; les objets reçus sont publiés par fait, pas conservés comme vérité. Lues seulement : agences (`reseau`), produits (`produits-financiers`), dossiers (`credit`). |
+| C3 Données possédées | Journal des échanges, file d'envoi (dossiers accordés, ordres, remboursements à renvoyer, et les autres messages sortants de l'annexe C), états d'envoi, file des écarts, listes « à saisir dans le cœur », état de fraîcheur par objet, état de rapprochement trimestriel, paramètres d'échange (transport, fraîcheur, délais). **Aucun solde** : l'argent reste au cœur ; les objets reçus sont publiés par fait, pas conservés comme vérité. Lues seulement : agences (`reseau`), produits (`produits-financiers`), dossiers (`credit`). |
 | C4 Emplacements vides | `credit` absent : aucun dossier accordé ni ordre à envoyer, état `NON_INSTALLE` ; `paiement` absent : décaissement Mobile Money et PI-SPI = `NON_INSTALLE`, seuls espèces et virement par le cœur restent ; `microfinance` absent : clients lus seulement comme références de prêt ; `caisse` absente : caisse du guichet = `NON_INSTALLE` ; `risque-par` et `conformite-bceao` absents : aucune lecture dérivée. Cœur absent ou injoignable : tous les objets en `{etat: PERIME, depuis}` (FR-165). Un test par dépendance de `enrichiPar`. |
-| C5 Contrats nommés | Publie `coeur-sfd.pret.changed@1`, `coeur-sfd.echeancier.changed@1`, `coeur-sfd.paiement.recu@1`, `coeur-sfd.penalite.recue@1`, `coeur-sfd.epargne.changed@1`, `coeur-sfd.caisse-guichet.changed@1`, `coeur-sfd.balance.recue@1`, `coeur-sfd.ecart.ouvert@1`, `coeur-sfd.ordre-decaissement.etat@1`, `coeur-sfd.dossier-accorde.etat@1`, `coeur-sfd.fraicheur.changed@1`, `coeur-sfd.ecart.propose@1`. Consomme `credit.dossier.accorde@1`, `credit.ordre-decaissement.emis@1`, `collecte.remboursement.saisi@1`, `paiement.decaissement.execute@1`, `reseau.agence.changed@1`, `etat-publie.changed.reel@1` et `.essai@1`. Noms proposés. |
-| C6 Paramètres | Transport (API ou fichiers) ; fraîcheur par objet (5 min, heure, nuit) ; délai de confirmation d'un envoi (24 h) ; délai d'un remboursement sans mouvement du cœur (48 h) ; délai d'un élément de la liste « à saisir dans le cœur » (72 h) ; tolérance d'écart d'échéancier (0 FCFA sur les dates, 1 % sur les montants) ; fréquence de l'interrogation du relais (1 min) ; trimestre du rapprochement et écart toléré (30 jours) ; code d'agence du cœur ou de Prospera. Données, jamais code. |
+| C5 Contrats nommés | Publie `coeur-sfd.pret.changed@1`, `coeur-sfd.echeancier.changed@1`, `coeur-sfd.paiement.recu@1`, `coeur-sfd.penalite.recue@1`, `coeur-sfd.epargne.changed@1`, `coeur-sfd.caisse-guichet.changed@1`, `coeur-sfd.balance.recue@1`, `coeur-sfd.ecart.ouvert@1`, `coeur-sfd.ordre-decaissement.etat@1`, `coeur-sfd.dossier-accorde.etat@1`, `coeur-sfd.fraicheur.changed@1`, `coeur-sfd.ecart.propose@1`. Publie aussi `coeur-sfd.client.cree@1`, `coeur-sfd.compte-epargne.ouvert@1`, `coeur-sfd.classe-officielle.recue@1`, `coeur-sfd.remise.changed@1`, `coeur-sfd.depot-garantie.changed@1`. Consomme `credit.dossier.accorde@1`, `credit.dossier.annule@1`, `credit.ordre-decaissement.emis@1`, `credit.plan-etalement.decide@1`, `recouvrement.contentieux.transfere@1`, `recouvrement.perte.decidee@1`, `collecte.remboursement.saisi@1`, `collecte.collecte.annulee@1`, `collecte.remise.contresignee@1`, `microfinance.client.converti@1`, `microfinance.sanctions.gel-demande@1`, `paiement.decaissement.execute@1`, `reseau.agence.changed@1`, `etat-publie.changed.reel@1` et `.essai@1`. Noms proposés. |
+| C6 Paramètres | Transport (API ou fichiers) ; fraîcheur par objet (5 min, heure, nuit) ; délai de confirmation d'un envoi (24 h) ; délai d'un remboursement sans mouvement du cœur (48 h) ; délai d'un élément de la liste « à saisir dans le cœur » (72 h) ; âge maximal de la lecture du reste dû avant l'émission d'un lien de paiement (15 minutes avec une API, 1 heure avec des fichiers [ASSUMPTION]) ; tolérance d'écart d'échéancier (0 FCFA sur les dates, 1 % sur les montants) ; fréquence de l'interrogation du relais (1 min) ; trimestre du rapprochement et écart toléré (30 jours) ; code d'agence du cœur ou de Prospera. Données, jamais code. |
 | C7 Droits | `coeur-sfd:echange:consulter`, `coeur-sfd:echange:configurer`, `coeur-sfd:ecart:consulter`, `coeur-sfd:ecart:resoudre`, `coeur-sfd:rapprochement:consulter`, `coeur-sfd:rapprochement:valider`, `coeur-sfd:liste-a-saisir:exporter`. Format conforme (module en lettres et tiret admis seulement après l'élargissement du format de droit ; le code `coeur-sfd` a un tiret : même condition que dans PRD-D annexe A, §« Format des droits »). |
 | C8 Module d'écran | `src/modules/coeur-sfd/` : `/echange` (état par objet, fraîcheur), `/echange/ecarts` (file des écarts), `/echange/a-saisir` (liste par agence), `/echange/rapprochement` (trimestriel), `/echange/parametres`. Entrées : « Échange avec le cœur » (`coeur-sfd:echange:consulter`), « Écarts » (`coeur-sfd:ecart:consulter`). Boutons non branchés : « bientôt ». |
 | C9 Installer/désinstaller | Désinstaller ne supprime rien : le journal, la file et les écarts restent stockés et masqués ; test aller-retour. Avertissement : « Plus aucun dossier accordé ni ordre ne partira vers le cœur ; ce qui est en file reste en file. » |
 | C10 Démarrer seul | `profiles: ["coeur-sfd"]` ; socle + `reseau` + `produits-financiers`. Le cœur fictif s'y ajoute dans un espace d'essai seulement. |
-| C11 IA | `ia: { modeles: ['detection-ecarts-doublons'], finalites: ['rapprochement-assiste'] }` : détection des écarts et des doublons probables entre Prospera et le cœur, avec cause probable et confiance (FR-199). Le moteur est l'IA commune ; sans elle, la file des écarts fonctionne par règles et rien ne bloque. L'IA propose, un humain rapproche ; l'IA ne corrige jamais de l'argent. Provenance affichée (règle ou modèle, version, date) ; données vers l'IA commune seulement avec le consentement de l'IMF. |
+| C11 IA | `ia: { modeles: ['detection-ecarts-doublons'], finalites: ['rapprochement-assiste'] }` : détection des écarts et des doublons probables entre Prospera et le cœur, avec cause probable et confiance (FR-199). Le moteur est l'IA commune ; sans elle, la file des écarts fonctionne par règles et rien ne bloque. L'IA propose, un humain rapproche ; l'IA ne corrige jamais de l'argent. Provenance affichée (règle ou modèle, version, date) ; l'IA commune tourne en instance locale chez l'IMF ; seuls des écarts anonymisés repartent, avec le consentement de l'IMF. |
 | C12 Migrations | `retourArriere: 'SANS_PERTE'`. Migration additive. Version du contrat d'échange portée par chaque objet ; un objet d'une version plus récente est refusé « version inconnue » et va dans la file des écarts. Interrupteur : `echange-par-fichiers` (transport seulement, jamais la forme des données). |
-| C13 Installable sous contrôle | Prérequis : `reseau` et `produits-financiers` en service. Vérifications : `cœur-joignable` (🟢 si la dernière interrogation a réussi depuis moins de deux fois la fraîcheur par défaut ; 🟠 si périmée ; 🔴 si jamais) ; `aucun-port-entrant` (🟢 si aucun port n'est ouvert pour l'échange ; 🔴 sinon) ; `envoi-idempotent` (🟢 si un lot rejoué ne change aucun compte du jeu de contrôle) ; `solde-de-controle` (🟢 si 100 % des prêts du jeu de contrôle ont le solde du cœur au franc près) ; `coeur-fictif-absent-du-reel` (🔴 si le cœur fictif est actif dans un espace réel). Lecture seule : `GET` sur la file et l'état, export. Export, import, effacement par organisation ; `objetsDeReprise: ['client', 'pret', 'echeance', 'garantie', 'compte-epargne']` (schémas à déclarer, FR-196) ; `domainesEchange: ['clients', 'prets', 'echeances', 'paiements', 'penalites', 'epargne', 'caisse-guichet', 'balance', 'dossiers-accordes', 'ordres-decaissement', 'remboursements-saisis']`, propriétaire de l'argent = le cœur. |
+| C13 Installable sous contrôle | Prérequis : `reseau` et `produits-financiers` en service. Vérifications : `cœur-joignable` (🟢 si la dernière interrogation a réussi depuis moins de deux fois la fraîcheur par défaut ; 🟠 si périmée ; 🔴 si jamais) ; `aucun-port-entrant` (🟢 si aucun port n'est ouvert pour l'échange ; 🔴 sinon) ; `envoi-idempotent` (🟢 si un lot rejoué ne change aucun compte du jeu de contrôle) ; `solde-de-controle` (🟢 si 100 % des prêts du jeu de contrôle ont le solde du cœur au franc près) ; `coeur-fictif-absent-du-reel` (🔴 si le cœur fictif est actif dans un espace réel). Lecture seule : `GET` sur la file et l'état, export. Export, import, effacement par organisation ; `objetsDeReprise: ['client', 'pret', 'echeance', 'garantie', 'compte-epargne']` (schémas à déclarer, FR-196) ; `domainesEchange: ['clients', 'prets', 'echeances', 'paiements', 'penalites', 'epargne', 'caisse-guichet', 'balance', 'dossiers-accordes', 'ordres-decaissement', 'remboursements-saisis', 'creation-client', 'ouverture-compte-epargne', 'annulations', 'remises-especes', 'etalements', 'contentieux-et-pertes', 'depots-de-garantie', 'classe-officielle', 'flux-mobile-money']`, propriétaire de l'argent = le cœur. |
 
 ### A.7 ★ Risque de portefeuille (`risque-par`, M18)
 
@@ -3664,14 +4035,14 @@ Ce qui change pour l'IMF :
 | C2 Socle | Gate `RISQUE_PAR_NOT_ENTITLED`. Cloisonnement par `organisationId` et par portée : DG et RSQ le réseau, ROC le réseau, RA son agence, GP son portefeuille, AT sa zone (ventilation limitée). L'analyste risque lit sans modifier. |
 | C3 Données possédées | Classes de chaque prêt à chaque arrêté, migrations de classe, provisions proposées et validées par le DAF, alertes de risque et leur traitement, seuils d'alerte et leurs versions, jeux de paramètres de barème (versionnés). **Aucun prêt, aucun solde, aucun paiement** : lus du cœur. Lues seulement : prêts, échéanciers, paiements, garanties (`coeur-sfd`), agences (`reseau`), secteur (`microfinance`). |
 | C4 Emplacements vides | `coeur-sfd` absent : n'est pas possible (dépendance dure) ; `produits-financiers` absent : ventilation par produit = `NON_INSTALLE` ; `microfinance` absent : secteur d'activité = « non renseigné » avec `{etat: NON_INSTALLE, module: microfinance}` ; `recouvrement` absent : statuts de recouvrement = `NON_INSTALLE` ; `notification` absent : alertes visibles à l'écran, aucun envoi ; IA commune absente : score = `NON_INSTALLE`, le PAR et la provision restent calculés. Un test par dépendance de `enrichiPar`. |
-| C5 Contrats nommés | Publie `risque-par.par.calcule@1`, `risque-par.classe.changed@1`, `risque-par.provision.proposee@1`, `risque-par.provision.validee@1`, `risque-par.perte.proposee@1`, `risque-par.alerte.ouverte@1`, `risque-par.alerte.remontee@1`, `risque-par.seuil.propose@1`, `risque-par.seuil.valide@1`, `risque-par.prevision.calculee@1`, `risque-par.analyse-secteur.calculee@1`. Consomme `coeur-sfd.pret.changed@1`, `coeur-sfd.echeancier.changed@1`, `coeur-sfd.paiement.recu@1`, `reseau.agence.changed@1`, `recouvrement.dossier.changed@1`, `etat-publie.changed.*@1`. Noms proposés. |
-| C6 Paramètres | Seuils de jours du PAR (1, 30, 90, 180) ; bornes de classement et taux de provision (40/80/100 %), seuil de perte (24 mois), déclassement facultatif jusqu'à 3 mois (non par défaut) ; seuils d'alerte de PAR (défaut de démo 5 % alerte, 10 % critique) ; seuils de concentration (secteur 28/35 %, agence 25 %, agent 50/60 %) ; seuils de hausse anormale (0,8 point) et de migration (15 %) ; délai de traitement d'une alerte (48 h) ; périodicité de recalcul des seuils (trimestre). Seuils d'alerte calibrés sur les données de l'IMF (E5). Données, jamais code. |
+| C5 Contrats nommés | Publie `risque-par.par.calcule@1`, `risque-par.classe.changed@1`, `risque-par.provision.proposee@1`, `risque-par.provision.validee@1`, `risque-par.perte.proposee@1`, `risque-par.alerte.ouverte@1`, `risque-par.alerte.remontee@1`, `risque-par.seuil.propose@1`, `risque-par.seuil.valide@1`, `risque-par.prevision.calculee@1`, `risque-par.scenario.calcule@1`, `risque-par.perte-attendue.calculee@1`, `risque-par.analyse-secteur.calculee@1`. Consomme `coeur-sfd.pret.changed@1`, `coeur-sfd.echeancier.changed@1`, `coeur-sfd.paiement.recu@1`, `reseau.agence.changed@1`, `recouvrement.dossier.changed@1`, `etat-publie.changed.*@1`. Noms proposés. |
+| C6 Paramètres | Seuils de jours du PAR (1, 7, 30, 60, 90, 180) ; jeu de classes réglementaires du pays (tranches et taux de provision : 3 mois au plus facultatif, plus de 3 à 6 mois 40 %, plus de 6 à 12 mois 80 %, plus de 12 à 24 mois 100 %, perte au-delà de 24 mois), provision de la tranche facultative (0 %), provision sur l'encours sain (0 %), décote par nature de garantie (0 %) ; seuils d'alerte et critique de chaque PAR (jeu unique, annexe D : PAR 30 à 5 % et 10 %) ; seuils de couverture du PAR (80 % alerte, 60 % critique) ; seuils de concentration (secteur 28/35 %, agence 25 %, agent 50/60 %) ; seuils de hausse anormale (0,8 point) et de migration (15 %) ; délai de traitement d'une alerte (48 h) ; périodicité de recalcul des seuils (trimestre). Seuils d'alerte calibrés sur les données de l'IMF (E5). Données, jamais code. |
 | C7 Droits | `risque-par:portefeuille:consulter`, `risque-par:reseau:consulter`, `risque-par:provision:valider`, `risque-par:seuil:valider`, `risque-par:alerte:traiter`, `risque-par:parametre:configurer`. Format conforme (code `risque-par` avec tiret : même condition que dans PRD-D annexe A, §« Format des droits »). |
-| C8 Module d'écran | `src/modules/risque-par/` : `/risque` (vue DG : PAR, aging, concentration, hausse anormale), `/risque/provisions` (proposé, validé, comptabilisé), `/risque/alertes`, `/risque/seuils`. Entrées : « Risque » (`risque-par:portefeuille:consulter` ou `:reseau:consulter`). L'export d'analyse du risque est branché ou « bientôt », jamais décoratif. |
+| C8 Module d'écran | `src/modules/risque-par/` : `/risque` (vue DG : PAR 1, 7, 30, 60 et 90, entonnoir d'ancienneté, carte de chaleur PAR × agence, taux de recouvrement, de défaut et de perte, restructurés du mois, couverture du PAR, concentration, concentration des retards, hausse anormale : FR-272), `/risque/provisions` (proposé, validé, comptabilisé), `/risque/alertes`, `/risque/seuils`. Entrées : « Risque » (`risque-par:portefeuille:consulter` ou `:reseau:consulter`). L'export d'analyse du risque est branché ou « bientôt », jamais décoratif. |
 | C9 Installer/désinstaller | Désinstaller ne supprime rien : classes, provisions proposées, alertes et seuils restent stockés et masqués ; test aller-retour. Avertissement : « Plus aucun PAR ni aucune alerte de risque ne sera calculé ; les rapports BCEAO perdent leurs indicateurs de portefeuille. » |
 | C10 Démarrer seul | `profiles: ["risque-par"]` ; socle + `coeur-sfd` + `reseau` (dépendances dures installées par le moteur). |
-| C11 IA | `ia: { modeles: ['prevision-par', 'perte-attendue', 'secteur-moteur-risque', 'analyse-provisions', 'analyse-risque-sectoriel', 'analyse-macro-conjoncture'], finalites: ['prevision-du-portefeuille-a-risque', 'estimation-de-la-perte-attendue-et-du-cout-du-risque', 'analyse-de-l-ecart-de-provisions', 'analyse-du-risque-par-secteur-d-activite', 'analyse-de-conjoncture'] }` (FR-180, FR-181). Le moteur est l'IA commune (module Risque) ; le module n'a pas d'IA propre. Tant que le modèle n'existe pas : la tendance du PAR est une règle explicable, la concentration est calculée par règle, le reste affiche `NON_INSTALLE`. L'IA propose, le DAF valide les provisions, le ROC et le DG décident ; un écart à une proposition exige un motif, renvoyé comme correction ; rien ne bloque si l'IA est absente. Provenance affichée (règle ou modèle, version, date, données utilisées) ; données vers l'IA commune seulement avec le consentement de l'IMF. |
-| C12 Migrations | `retourArriere: 'SANS_PERTE'`. Migration additive. Un nouveau jeu de paramètres de barème est versionné ; la version précédente reste lisible et jugée à sa date d'effet. Interrupteur : `declassement-facultatif` (comportement seulement). |
+| C11 IA | `ia: { modeles: ['prevision-par', 'scenarios-par', 'perte-attendue', 'secteur-moteur-risque', 'analyse-provisions', 'analyse-risque-sectoriel', 'analyse-macro-conjoncture'], finalites: ['prevision-du-portefeuille-a-risque', 'scenarios-de-par-avec-ou-sans-actions', 'estimation-de-la-perte-attendue-et-du-cout-du-risque', 'analyse-de-l-ecart-de-provisions', 'analyse-du-risque-par-secteur-d-activite', 'analyse-de-conjoncture'] }` (FR-180, FR-181). Le moteur est l'IA commune (module Risque), en instance locale chez l'IMF ; le module n'embarque aucun modèle. Perte attendue = encours × PD × LGD tirée des garanties (FR-181). Tant que le modèle n'existe pas : la tendance du PAR est une règle explicable, la concentration est calculée par règle, le reste affiche `NON_INSTALLE`. L'IA propose, le DAF valide les provisions, le ROC et le DG décident ; un écart à une proposition exige un motif, renvoyé comme correction ; rien ne bloque si l'IA est absente. Provenance affichée (règle ou modèle, version, date, données utilisées) ; l'IA commune tourne en instance locale chez l'IMF ; seuls des écarts anonymisés repartent, avec le consentement de l'IMF. |
+| C12 Migrations | `retourArriere: 'SANS_PERTE'`. Migration additive. Un nouveau jeu de paramètres de barème est versionné ; la version précédente reste lisible et jugée à sa date d'effet. Interrupteur : `provision-tranche-facultative` (comportement seulement). |
 | C13 Installable sous contrôle | Prérequis : `coeur-sfd` et `reseau` en service. Vérifications : `par-recalcul` (🟢 si le PAR30 du jeu de contrôle est égal à celui du paquet comptable SFD à l'unité de franc ; 🔴 sinon) ; `somme-agences` (🟢 si le PAR du réseau égale la somme pondérée des agences) ; `provision-non-comptabilisee` (🟢 si aucun écran n'affiche une provision proposée comme comptabilisée) ; `echeancier-manquant` (🟠 si des prêts du jeu n'ont pas d'échéancier officiel). Lecture seule : `GET` sur PAR, classes, provisions, export. Export, import, effacement par organisation ; `objetsDeReprise: []` (les classes sont recalculées après la reprise des prêts) ; `domainesEchange: []` (rien ne revient du module vers le cœur : le cœur comptabilise, FR-176). |
 
 ### A.8 Conformité BCEAO (`conformite-bceao`, M20)
@@ -3683,12 +4054,12 @@ Ce qui change pour l'IMF :
 | C3 Données possédées | Rapports générés, versions, statuts (généré, validé par le DG, signé et déposé), calendrier des échéances, paramètres réglementaires versionnés par pays et par date (plafond d'usure, barème, normes, périodicité, seuil de supervision, conservation), résultats de ratios, listes d'anomalies d'audit, journal d'audit ajouté seulement, état de fraîcheur des listes LBC/FT. Lues seulement : PAR, classes, provisions (`risque-par`), prêts, balance, rapprochement (`coeur-sfd`), KYC (`microfinance`). |
 | C4 Emplacements vides | `balance` du cœur absente : chaque ratio = « en attente des données du cœur » (FR-187), jamais « conforme » ; `microfinance` absent : LBC/FT et KYC = `NON_INSTALLE`, le rapport l'indique ; `credit` absent : comité et parties liées = `NON_INSTALLE` ; `caisse` absente : écarts de caisse = `NON_INSTALLE` ; `bilan` absent : états annuels non générés, `NON_INSTALLE` ; `notification` absent : échéances visibles à l'écran, aucun envoi. Un test par dépendance de `enrichiPar`. |
 | C5 Contrats nommés | Publie `conformite-bceao.rapport.genere@1`, `conformite-bceao.rapport.valide@1`, `conformite-bceao.rapport.depose@1`, `conformite-bceao.ratio.calcule@1`, `conformite-bceao.usure.depassee@1`, `conformite-bceao.separation.contournee@1`, `conformite-bceao.parametre.changed@1`, `conformite-bceao.score.calcule@1`, `conformite-bceao.anomalie.detectee@1`. Consomme `risque-par.par.calcule@1`, `risque-par.classe.changed@1`, `risque-par.provision.validee@1`, `coeur-sfd.balance.recue@1`, `coeur-sfd.pret.changed@1`, `coeur-sfd.ecart.ouvert@1`, `microfinance.kyc.changed@1`, `etat-publie.changed.*@1`. Noms proposés. |
-| C6 Paramètres | Catégorie de supervision et seuil (démo : grande IMF, mensuel) ; périodicité et délai (30 jours) par état ; plafond d'usure daté (24 % par an dès le 01/06/2026) et inclusion de chaque type de frais dans le TEG ; normes prudentielles et leur catégorie (liquidité 100/80/60 %) ; seuils de séparation des tâches (fenêtre 1 heure, écart de caisse, nombre de crédits actifs) ; périodicité des listes de sanctions (7 jours) et de la revue KYC ; durées de conservation (10 ans) ; délai d'alerte avant échéance (5 jours) ; mentions du texte de référence du rapport. Par pays et par texte, à faire vérifier par un juriste. Données, jamais code. |
+| C6 Paramètres | Catégorie de supervision et seuil (démo : grande IMF, mensuel) ; périodicité et délai (30 jours) par état, avec le réglage « produit par Prospera » ou « fait hors Prospera » (FR-184) ; plafond d'usure daté (24 % par an dès le 01/06/2026), méthode du TEG figée (FR-108) et inclusion de chaque type de frais dans le TEG ; normes prudentielles et leur catégorie (liquidité 100/80/60 %) ; seuils de séparation des tâches (fenêtre 1 heure, écart de caisse, nombre de crédits actifs) ; seuils de l'audit des agences (objectif 70 %, transaction non rapprochée 7 jours, Mobile Money en attente 48 heures, plafond de retrait) ; périodicité des listes de sanctions (7 jours) et de la revue KYC ; durées de conservation (10 ans) ; délai d'alerte avant échéance (5 jours) ; mentions du texte de référence du rapport. Par pays et par texte, à faire vérifier par un juriste. Données, jamais code. |
 | C7 Droits | `conformite-bceao:rapport:generer`, `conformite-bceao:rapport:valider`, `conformite-bceao:rapport:consulter`, `conformite-bceao:rapport:exporter`, `conformite-bceao:parametre:configurer`, `conformite-bceao:audit:consulter`, `conformite-bceao:journal:consulter`. Format conforme (code `conformite-bceao` avec tiret : même condition que dans PRD-D annexe A, §« Format des droits »). Valider et générer sont deux droits attribués à deux personnes. |
-| C8 Module d'écran | `src/modules/conformite-bceao/` : `/conformite` (vue DG et vue DAF), `/conformite/rapports` (calendrier, génération, validation), `/conformite/ratios`, `/conformite/usure`, `/conformite/lbc-ft`, `/audit/*` (vues de l'auditeur, lecture seule), `/audit/tracabilite`. Entrées : « Conformité » (`conformite-bceao:rapport:consulter`), « Audit » (`conformite-bceao:audit:consulter`). Aucun bouton de dépôt à l'autorité ; « Investiguer » est branché ou « bientôt ». |
+| C8 Module d'écran | `src/modules/conformite-bceao/` : `/conformite` (vue DG et vue DAF), `/conformite/rapports` (calendrier, génération, validation), `/conformite/ratios`, `/conformite/usure`, `/conformite/lbc-ft`, `/audit/*` (vues de l'auditeur, lecture seule : crédit, caisse, agences, BCEAO, équité, séparation des tâches, anomalies), `/audit/tracabilite`. Entrées : « Conformité » (`conformite-bceao:rapport:consulter`), « Audit » (`conformite-bceao:audit:consulter`). Aucun bouton de dépôt à l'autorité ; « Investiguer » est branché ou « bientôt ». |
 | C9 Installer/désinstaller | Désinstaller ne supprime rien : rapports, versions, paramètres et journal d'audit restent stockés (conservation 10 ans) et masqués ; test aller-retour. Avertissement : « Plus aucun état réglementaire ne sera généré ; les états déjà validés restent conservés. » |
 | C10 Démarrer seul | `profiles: ["conformite-bceao"]` ; socle + `risque-par` + `coeur-sfd` + `reseau` (dépendances dures installées par le moteur). |
-| C11 IA | `ia: { modeles: ['score-conformite', 'alertes-reglementaires', 'generation-rapport-bceao', 'detection-anomalies-operationnelles', 'correlation-evenements-trace'], finalites: ['score-de-conformite-global', 'alerte-reglementaire-proactive', 'preparation-du-rapport', 'detection-d-anomalies', 'correlation-d-evenements-suspects'] }` (FR-190, FR-194). Le moteur est l'IA commune. L'IA ne valide, ne signe et ne dépose jamais un rapport, et ne classe aucune anomalie seule. Sans elle : ratios, alertes sur seuils, anomalies par règle et rapport par gabarit fonctionnent ; la synthèse rédigée et la corrélation affichent `NON_INSTALLE` ; rien ne bloque. Provenance affichée (règle ou modèle, version, date, données utilisées) ; données vers l'IA commune seulement avec le consentement de l'IMF. |
+| C11 IA | `ia: { modeles: ['score-conformite', 'alertes-reglementaires', 'commentaire-rapport-bceao', 'detection-anomalies-operationnelles', 'correlation-evenements-trace'], finalites: ['score-de-conformite-global', 'alerte-reglementaire-proactive', 'commentaire-du-rapport', 'detection-d-anomalies', 'correlation-d-evenements-suspects'] }` (FR-190, FR-194). Le moteur est l'IA commune. L'IA ne valide, ne signe et ne dépose jamais un rapport, ne produit aucun chiffre du rapport (ils viennent de `risque-par` et du cœur ; elle n'écrit que le commentaire), et ne classe aucune anomalie seule. Sans elle : ratios, alertes sur seuils, anomalies par règle et rapport par gabarit fonctionnent ; la synthèse rédigée et la corrélation affichent `NON_INSTALLE` ; rien ne bloque. Provenance affichée (règle ou modèle, version, date, données utilisées) ; l'IA commune tourne en instance locale chez l'IMF ; seuls des écarts anonymisés repartent, avec le consentement de l'IMF. |
 | C12 Migrations | `retourArriere: 'SANS_PERTE'`. Migration additive. Un nouveau gabarit de rapport est un jeu de paramètres versionné ; un rapport validé reste figé dans la version de son gabarit. Interrupteur : `seuil-supervision-banque-centrale` (remplace l'article 44 par le seuil fixé par la Banque Centrale ; comportement seulement). |
 | C13 Installable sous contrôle | Prérequis : `risque-par` et `coeur-sfd` en service. Vérifications : `rapport-sans-trou` (🟢 si le rapport du jeu de contrôle n'a aucun champ rempli par défaut silencieux ; 🔴 sinon) ; `total-egal-risque` (🟢 si les totaux du rapport égalent ceux de `risque-par`) ; `ratios-en-attente` (🟢 si, sans balance, chaque ratio dit « en attente » ; 🔴 si un ratio est calculé sans balance) ; `journal-ajout-seul` (🟢 si une écriture du journal ne peut ni être modifiée ni supprimée, 🔴 sinon) ; `usure-portefeuille` (🟢 si les prêts du jeu au-dessus du plafond sont tous listés). Lecture seule : `GET` sur rapports, ratios, journal, export. Export, import, effacement par organisation (effacement du journal refusé avant 10 ans) ; `objetsDeReprise: []` ; `domainesEchange: []` (le dépôt à l'autorité est hors Prospera). |
 
@@ -3703,13 +4074,13 @@ Le module est le même service que celui du PRD distributeur : le vocabulaire es
 | C3 Données possédées | Comme PRD-D A.8, plus : visites d'instruction (photo, position, distance au client, statut « hors zone » conservé, jamais effacé), missions de recouvrement et leurs résultats, comptes rendus dictés, rapports du soir, propositions de zones de prospection et de réaffectation avec les décisions prises. Pas de relevé de stock ni de panier. |
 | C4 Emplacements vides | Comme PRD-D A.8 pour `pdv`, `commande`, `stock` et `paiement`, avec ces différences : « Prendre une commande » et « Relevé de stock » sont toujours `NON_INSTALLE` chez l'IMF ; `credit` absent : visite d'instruction = `NON_INSTALLE` ; `collecte` absent : collecte en visite = `NON_INSTALLE` ; `recouvrement` absent : mission de recouvrement = `NON_INSTALLE` ; IA commune absente : ordre de visite par règle, alerte de proximité par règle, rapport du soir en tableau, dictée « bientôt », zones sans suggestion. Un test par dépendance. |
 | C5 Contrats nommés | Comme PRD-D A.8. Publie en plus (propositions) `terrain.visite-instruction.cloturee@1` (avec le statut de preuve ou « hors zone ») et `terrain.mission-recouvrement.cloturee@1`. Consomme en plus `credit.visite.planifiee@1`, `recouvrement.mission.creee@1`, `coeur-sfd.echeancier.changed@1`, `reseau.affectation.changed@1`. |
-| C6 Paramètres | Comme PRD-D A.8 (vocabulaire par verticale, durée de visite, barème de caisse). Rayon de présence : 200 m pour les visites ordinaires, **100 m** pour la visite d'instruction (T7). S'ajoutent : photo (JPEG ou PNG, 5 Mo), rayon de l'alerte de proximité (200 m), heure du rapport du soir (18 h) et seuil de coaching (80 %), expiration d'une file hors ligne (7 jours), stockage local (500 Mo), seuils de zones de prospection (densité de clients actifs au km², visites minimales, charge maximale, calibrés sur les données de l'IMF, E5), rangs de priorité des motifs IMF. |
-| C7 Droits | Comme PRD-D A.8. S'ajoutent : `terrain:instruction:realiser`, `terrain:mission:realiser`, `terrain:prospection:consulter`, `terrain:prospection:decider` (RA, RCC, DG). Format conforme. |
+| C6 Paramètres | Comme PRD-D A.8 (vocabulaire par verticale, durée de visite, barème de caisse). Rayon de présence : 200 m pour les visites ordinaires, **100 m** pour la visite d'instruction (T7). Appareil (A27, FR-204) : inactivité avant verrouillage (5 minutes) et délai sans connexion avant effacement local (14 jours), valeurs de départ [ASSUMPTION]. S'ajoutent : photo (JPEG ou PNG, 5 Mo), rayon de l'alerte de proximité (200 m), heure du rapport du soir (18 h) et seuil de coaching (80 %), expiration d'une file hors ligne (7 jours), stockage local (500 Mo), seuils de zones de prospection (densité de clients actifs au km², visites minimales, charge maximale, calibrés sur les données de l'IMF, E5), rangs de priorité des motifs IMF. |
+| C7 Droits | Comme PRD-D A.8. S'ajoutent : `terrain:instruction:realiser`, `terrain:mission:realiser`, `terrain:prospection:consulter`, `terrain:prospection:decider` (RA, RCC, DG), `terrain:appareil:declarer-perdu` (RA ; ADMIN_IMF, sans lecture du métier). Format conforme. |
 | C8 Module d'écran | Comme PRD-D A.8 (« Ma journée », « Tournées », « Équipe », carte Google Maps). S'ajoutent : « Mes visites d'instruction », « Missions de recouvrement », « Zones de prospection » (`terrain:prospection:consulter`), rapport du soir. « Y aller » et « Clôturer » aboutissent en février. **L'application `prospera-terrain`, hors connexion, est exigée** (UJ-4), jamais « bientôt ». |
 | C9 Installer/désinstaller | Comme PRD-D A.8 : rien n'est supprimé ; visites, positions et preuves de visite conservées. Avertissement ajouté : « Les visites d'instruction exigées par les dossiers de crédit et les missions de recouvrement cesseront. » |
 | C10 Démarrer seul | Comme PRD-D A.8 : `profiles: ["terrain"]` ; socle + `reseau`. |
-| C11 IA | `ia: { modeles: ['optimisation-tournees', 'alerte-proximite', 'saisie-vocale', 'rapport-du-soir', 'zones-de-prospection', 'validation-geofencing'], finalites: ['planification-de-tournee', 'alerte-proximite-client-en-retard', 'saisie-vocale-de-visite', 'rapport-quotidien-agent', 'suggestion-de-zones-de-prospection', 'controle-de-presence'] }`. `recommandation-panier` et `aide-a-la-commande` ne sont pas déclarés (pas de commande). Moteur : IA commune. L'IA propose, l'humain décide ; provenance affichée ; rien ne bloque sans IA (FR-206, FR-207, FR-208). Données de position : consentement de niveau 0 par défaut, information de l'agent, conservation de 90 jours glissants ; la dictée ne conserve pas l'audio [ASSUMPTION, avis juridique]. |
-| C12 Migrations | Comme PRD-D A.8 : `SANS_PERTE` ; l'appareil tolère un champ inconnu. Interrupteurs : `mode-hors-ligne`, `optimisation-automatique`, `saisie-vocale`, `zones-de-prospection`. |
+| C11 IA | `ia: { modeles: ['optimisation-tournees', 'alerte-proximite', 'saisie-vocale', 'rapport-du-soir', 'zones-de-prospection', 'validation-geofencing'], finalites: ['planification-de-tournee', 'alerte-proximite-client-en-retard', 'saisie-vocale-de-visite', 'rapport-quotidien-agent', 'suggestion-de-zones-de-prospection', 'controle-de-presence'] }`. `recommandation-panier` et `aide-a-la-commande` ne sont pas déclarés (pas de commande). Moteur : IA commune, qui tourne dans l'**instance locale** de l'IMF (FR-260). L'IA propose, l'humain décide ; provenance affichée ; rien ne bloque sans IA (FR-206, FR-207, FR-208). Données de position : consentement de niveau 0 par défaut, information de l'agent, conservation de 90 jours glissants ; la dictée ne conserve pas l'audio [ASSUMPTION, avis juridique]. **La reconnaissance vocale est désactivée sans consentement propre** de l'IMF (finalité `saisie-vocale`, FR-207). |
+| C12 Migrations | Comme PRD-D A.8 : `SANS_PERTE` ; l'appareil tolère un champ inconnu. Interrupteurs : `mode-hors-ligne`, `optimisation-automatique`, `saisie-vocale` (éteint sans consentement propre à la voix), `zones-de-prospection`, `effacement-hors-connexion` (allumé ; chiffrement local, verrouillage et état « appareil perdu », FR-204). |
 | C13 Installable sous contrôle | Comme PRD-D A.8 (prérequis `reseau`, Google Maps ; vérifications `zones-lues`, `fond-de-carte`, `purge-positions`). S'ajoute la vérification `rayon-instruction` (🟢 si le rayon de la visite d'instruction est paramétré et inférieur ou égal à 200 m). Essai : position simulée et marquée « position simulée » ; elle est acceptée comme preuve d'instruction pour que le parcours UJ-1 aille à EN_GESTION (FR-201). `objetsDeReprise: []`, `domainesEchange: []`. |
 
 ### A.10 ★ Recouvrement (`recouvrement`, M19) — écarts IMF
@@ -3720,15 +4091,15 @@ Même service que celui du PRD distributeur, vocabulaire en donnée. « Comme PR
 |---|---|
 | C1 Manifeste | Comme PRD-D A.9 (`code: 'recouvrement'`, `1.0.0`, `depends: [paiement, notification]`). `enrichiPar` précise pour l'IMF : `credit` (source `ECHEANCE_DE_PRET`, prêt EN_GESTION, blocage lu, plan d'étalement, clôture), `coeur-sfd` (reste dû, pénalités, mouvements, échéancier officiel : **le cœur fait foi** pour l'argent ; `paiement` reste seul propriétaire des créances, FR-209, FR-257), `microfinance` (clients, groupes, cautions), `terrain` (missions, FR-203), `risque-par` (PAR, classes, provisions proposées), `reseau` (agences, zones, affectation des REC), IA commune. `pdv` et `facturation` ne sont pas utilisés. |
 | C2 Socle | Comme PRD-D A.9, avec la portée de l'IMF : ROC et DG le réseau, RA son agence, GP son portefeuille, REC ses zones affectées, CPT la file de rapprochement de son agence, AUD en lecture. Gate `RECOUVREMENT_NOT_ENTITLED`. |
-| C3 Données possédées | Comme PRD-D A.9, plus : dossiers de recouvrement **par prêt** (statut de recouvrement décidé, FR-211, FR-214), stratégies par agence et leur validation, affectations des REC par zone, actions et résultats (appel, visite, mise en demeure, saisie), plans d'étalement et leur accord signé, appels de caution, propositions de contentieux et de perte avec leurs décisions, fiches de mauvais payeur, scores de recouvrement et leurs facteurs, décisions de blocage et de déblocage avec motif. La balance âgée et les montants sont **lus** (cœur via `coeur-sfd`, puis `paiement`), jamais recopiés. |
+| C3 Données possédées | Comme PRD-D A.9, plus : dossiers de recouvrement **par prêt** (statut de recouvrement décidé, FR-211, FR-214), stratégies par agence et leur validation, affectations des REC par zone, actions et résultats (appel, visite, mise en demeure, saisie), plans d'étalement et leur accord signé, appels de caution, propositions de contentieux et de perte avec leurs décisions, fiches de mauvais payeur, scores de recouvrement et leurs facteurs, décisions de blocage et de déblocage avec motif, recours et réexamens de blocage, **preuves de relance** (onglet Preuves) et **campagnes de relance** (FR-274). La balance âgée et les montants sont **lus** (cœur via `coeur-sfd`, puis `paiement`), jamais recopiés. |
 | C4 Emplacements vides | Comme PRD-D A.9, avec : `credit` absent : source IMF `NON_INSTALLE` ; `coeur-sfd` absent : reste dû, pénalités et mouvements `NON_INSTALLE`, aucun montant affiché ; `terrain` absent : mission = `NON_INSTALLE` ; `risque-par` absent : PAR et classe `NON_INSTALLE` ; IA commune absente : relances par règle de base, score par règle explicable v0, stratégie et analyse sans texte, scripts en gabarits, Copilot « bientôt ». Un test par dépendance. |
-| C5 Contrats nommés | Comme PRD-D A.9 : `recouvrement.dossier.changed@1` (porte le statut de recouvrement), `recouvrement.credit.bloque@1` et `recouvrement.credit.debloque@1` (**portent le dossier, le client et ses cautions**, niveau dossier, FR-218), `recouvrement.promesse.changed@1`, `recouvrement.alerte-direction.emise@1`. S'ajoutent (propositions) : `recouvrement.plan-etalement.valide@1`, `recouvrement.perte.decidee@1`, `recouvrement.contentieux.decide@1`, `recouvrement.mission.creee@1`. Consomme en plus `coeur-sfd.pret.changed@1`, `coeur-sfd.echeancier.changed@1`, `coeur-sfd.paiement.recu@1`, `coeur-sfd.penalite.recue@1`, `credit.dossier.changed@1`, `terrain.mission-recouvrement.cloturee@1`. |
-| C6 Paramètres | Comme PRD-D A.9 (table de seuils, échelle, tranches, gabarits, vocabulaire). Valeurs IMF : entrée en retard à J+7 ; J-3 et J+1 automatiques, au-delà à valider ; envois à 6 h et 14 h ; 3 échecs avant mission terrain ; réponse WhatsApp de 60 % ; alerte ROC à J+7 sous un score de 50 ; proposition de contentieux à J+90 ou score sous 20 ; perte proposée à 24 mois d'impayé et seuil du conseil (sans défaut) ; plan d'étalement de 12 mois au plus, un par prêt ; fiche mauvais payeur à 30 jours ou 2 promesses rompues, fermée après 6 mois ; grâce de promesse de 24 h ; tolérance de rapprochement de 1 % ; ordre d'imputation pénalités, intérêts, capital ; poids du score de recouvrement ; seuils d'alerte de PAR et de concentration (calibrés, E5). |
-| C7 Droits | Comme PRD-D A.9, avec ces changements : `recouvrement:credit:bloquer` et `recouvrement:credit:debloquer` sont attribués au **ROC seul** (le DAF seul de PRD-D A.9 ne s'applique pas à l'IMF). S'ajoutent : `recouvrement:affectation:definir` (ROC, RA), `recouvrement:strategie:valider` (ROC), `recouvrement:plan:proposer` (ROC), `recouvrement:contentieux:decider` et `recouvrement:perte:decider` (DG), `recouvrement:caution:appeler` (ROC), `recouvrement:fiche:consulter`. Format conforme. |
-| C8 Module d'écran | Comme PRD-D A.9 (`/relances`, balance âgée), plus : vue réseau du ROC par PAR avec descente agence, agent, client, dossier ; fiche d'agent de recouvrement ; fiche mauvais payeur ; stratégie ; affectation des REC ; plan d'étalement ; file « propositions J+90 et perte ». Menus : « Mes dossiers » (`recouvrement:dossier:traiter`), « Recouvrement réseau » (ROC), « Mauvais payeurs » (`recouvrement:fiche:consulter`). « Relancer », « Bloquer » et « Débloquer » aboutissent en février ; les actions non encore livrées (mise en demeure, saisie) sont « bientôt », sans simulation. |
-| C9 Installer/désinstaller | Comme PRD-D A.9 : rien n'est supprimé ; dossiers, promesses et décisions conservés. Avertissement : « Les dossiers bloqués le restent, et les demandes de leurs clients et de leurs cautions restent suspendues, jusqu'à déblocage par le ROC. » |
+| C5 Contrats nommés | Comme PRD-D A.9 : `recouvrement.dossier.changed@1` (porte le statut de recouvrement), `recouvrement.credit.bloque@1` et `recouvrement.credit.debloque@1` (**portent le dossier, le client et ses cautions appelées**, niveau dossier, FR-218), `recouvrement.promesse.changed@1`, `recouvrement.alerte-direction.emise@1`. S'ajoutent (propositions) : `recouvrement.plan-etalement.valide@1`, `recouvrement.perte.decidee@1`, `recouvrement.contentieux.decide@1`, `recouvrement.mission.creee@1`. Consomme en plus `coeur-sfd.pret.changed@1`, `coeur-sfd.echeancier.changed@1`, `coeur-sfd.paiement.recu@1`, `coeur-sfd.penalite.recue@1`, `credit.dossier.changed@1`, `terrain.mission-recouvrement.cloturee@1`. |
+| C6 Paramètres | Comme PRD-D A.9 (table de seuils, échelle, tranches, gabarits, vocabulaire). Valeurs IMF : entrée en retard à J+7 ; J-3 et J+1 automatiques, au-delà à valider ; envois à 6 h et 14 h ; 3 échecs avant mission terrain ; réponse WhatsApp de 60 % ; alerte ROC à J+7 sous un score de 50 ; proposition de contentieux à J+90 ou score sous 20 ; perte proposée à 24 mois d'impayé et seuil du conseil (sans défaut) ; plan d'étalement de 12 mois au plus, un par prêt ; fiche mauvais payeur à 30 jours ou 2 promesses rompues, fermée après 6 mois ; grâce de promesse de 24 h ; seuil de rapprochement de 1 % (il choisit l'échéance, il ne la solde pas) et **tolérance d'arrondi distincte** (5 FCFA) ; âge maximal de la lecture du reste dû avant l'émission d'un lien de paiement (15 minutes) ; réexamen d'un blocage (6 mois) ; ordre d'imputation pénalités, intérêts, capital ; poids du score de recouvrement ; seuils d'alerte de PAR et de concentration (calibrés, E5 ; valeurs de départ : annexe D). Les valeurs non décidées (tolérance, âge maximal) sont marquées [ASSUMPTION] à FR-210 et FR-212. |
+| C7 Droits | Comme PRD-D A.9, avec ces changements : `recouvrement:credit:bloquer` et `recouvrement:credit:debloquer` sont attribués au **ROC seul** (le DAF seul de PRD-D A.9 ne s'applique pas à l'IMF). S'ajoutent : `recouvrement:affectation:definir` (ROC, RA), `recouvrement:strategie:valider` (ROC), `recouvrement:plan:proposer` (ROC), `recouvrement:contentieux:decider` et `recouvrement:perte:decider` (DG), `recouvrement:caution:appeler` (ROC), `recouvrement:fiche:consulter`, `recouvrement:recours:examiner` (DG), `recouvrement:campagne:lancer` (ROC, RA). Format conforme. |
+| C8 Module d'écran | Comme PRD-D A.9 (`/relances`, balance âgée), plus : vue réseau du ROC par PAR avec descente agence, agent, client, dossier ; fiche d'agent de recouvrement ; fiche mauvais payeur ; stratégie ; affectation des REC ; plan d'étalement ; file « propositions J+90 et perte » ; onglet **Preuves** du dossier et **campagnes de relance** (FR-274). Menus : « Mes dossiers » (`recouvrement:dossier:traiter`), « Recouvrement réseau » (ROC), « Mauvais payeurs » (`recouvrement:fiche:consulter`). « Relancer », « Bloquer » et « Débloquer » aboutissent en février ; les actions non encore livrées (mise en demeure, saisie) sont « bientôt », sans simulation. |
+| C9 Installer/désinstaller | Comme PRD-D A.9 : rien n'est supprimé ; dossiers, promesses et décisions conservés. Avertissement : « Les dossiers bloqués le restent, et les demandes de leurs clients et de leurs cautions appelées restent suspendues, jusqu'à déblocage par le ROC. » |
 | C10 Démarrer seul | Comme PRD-D A.9 : `profiles: ["recouvrement"]` ; socle + `paiement` + `notification`. |
-| C11 IA | `ia: { modeles: ['priorisation-par-probabilite', 'choix-du-canal', 'declenchement-par-profil', 'score-recouvrement', 'strategie-par-agence', 'analyse-comportement-retard', 'scripts-de-relance', 'copilot-recouvrement'], finalites: ['priorisation-des-dossiers', 'choix-du-canal-et-du-moment', 'declenchement-des-relances', 'score-de-recouvrement', 'strategie-de-recouvrement', 'analyse-du-comportement-de-retard', 'aide-a-la-relance', 'conseil-par-role'] }`. Moteur : IA commune. **Le blocage, le contentieux, la perte et le plan d'étalement ne sont jamais décidés par un modèle** : ils suivent des décisions humaines (FR-218 à FR-221). Score par règle explicable v0 tant qu'aucun modèle n'existe. |
+| C11 IA | `ia: { modeles: ['priorisation-par-probabilite', 'choix-du-canal', 'declenchement-par-profil', 'score-recouvrement', 'strategie-par-agence', 'analyse-comportement-retard', 'scripts-de-relance', 'copilot-recouvrement'], finalites: ['priorisation-des-dossiers', 'choix-du-canal-et-du-moment', 'declenchement-des-relances', 'score-de-recouvrement', 'strategie-de-recouvrement', 'analyse-du-comportement-de-retard', 'aide-a-la-relance', 'conseil-par-role'] }`. Moteur : IA commune. **Le blocage, le contentieux, la perte et le plan d'étalement ne sont jamais décidés par un modèle** : ils suivent des décisions humaines (FR-218 à FR-221). Score : règle explicable v0, puis modèle de l'IA commune avec sa provenance (FR-227) ; le moteur tourne dans l'instance locale de l'IMF (FR-260). |
 | C12 Migrations | Comme PRD-D A.9 : `SANS_PERTE`. Interrupteurs : `blocage-automatique-au-seuil` (**éteint** chez l'IMF), `relance-automatique` (allumé pour J-3 et J+1 seulement), `canal-choisi-par-ia` (éteint). À la reprise du portefeuille (FR-196), les dossiers de recouvrement se recréent depuis les échéances impayées reprises. |
 | C13 Installable sous contrôle | Comme PRD-D A.9 (prérequis `paiement`, `notification` ; vérifications `source-creances`, `canal-utilisable`). S'ajoutent : `lecture-du-coeur` (🟢 si `coeur-sfd` répond et que la dernière lecture date de moins de la fraîcheur paramétrée) et `affectation-des-rec` (🟠 si une zone en retard n'a aucun REC). Essai : aucune relance réelle partie. `objetsDeReprise: []`, `domainesEchange: []` (promesses, relances et décisions de recouvrement = Prospera ; reste dû, pénalités et mouvements = cœur). |
 
@@ -3741,15 +4112,15 @@ Les conventions de l'annexe A (gate, cloisonnement, profil, version, routes C13,
 | C1 Manifeste | Comme PRD-D A.15 (`code: 'dashboard'`, `depends: []`). `enrichiPar` propre à l'IMF : `credit`, `recouvrement`, `terrain`, `collecte`, `caisse`, `risque-par`, `conformite-bceao`, `microfinance`, `coeur-sfd`, `equipe`, `marketing`, `finance-transactions`, `paiement`, `reseau`, `notification`. Cinq verticales dont la microfinance. |
 | C2 Socle | Gate `DASHBOARD_NOT_ENTITLED`. Portée : réseau, région, agence, zone, portefeuille (FR-5, FR-255) ; chaque rôle ne reçoit que les cartes que ses droits sur les modules sources autorisent. ADMIN_IMF ne reçoit aucune carte métier. |
 | C3 Données possédées | Comme PRD-D A.15 (cartes et KPI par rôle, alertes du jour, rapports de direction). **En plus** : composition des seize cockpits, règles de déclenchement des alertes et leurs seuils calibrés (FR-235), historique des remontées à 48 h (FR-234). Pas de copie des données d'argent : le cœur les tient (FR-2). |
-| C4 Emplacements vides | Comme PRD-D A.15. **En plus** : `coeur-sfd` absent, chaque chiffre d'argent = `NON_INSTALLE` ; balance du cœur absente, résultat et rentabilité = « en attente des données du cœur » ; `risque-par` absent, PAR = `NON_INSTALLE` ; `assistant-service` ou IA commune absents, Copilot = « bientôt » ; `finance-transactions` absent, budget = `NON_INSTALLE`. Un test par module de `enrichiPar`. |
+| C4 Emplacements vides | Comme PRD-D A.15. **En plus** : `coeur-sfd` absent, chaque chiffre d'argent = `NON_INSTALLE` ; balance du cœur absente, résultat et rentabilité = « en attente des données du cœur » ; `risque-par` absent, PAR = `NON_INSTALLE` ; `assistant-service` ou instance locale de l'IA absents, Copilot = « bientôt » ; `finance-transactions` absent, budget = `NON_INSTALLE`. Un test par module de `enrichiPar`. |
 | C5 Contrats nommés | Publie `dashboard.rapport.genere@1`, `dashboard.alerte.changed@1`, `dashboard.alerte.remontee@1`. Consomme les faits des modules sources, dont `risque-par.alerte.changed@1`, `coeur-sfd.fraicheur.changed@1`, `reseau.portee.changed@1`, leurs décisions (`<module>.decision.changed@1`) et `etat-publie.changed.*@1`. `dashboard.score-pdv.calcule@1` sans objet chez l'IMF (pas de point de vente). |
-| C6 Paramètres | Composition par rôle ; douze chiffres du DG et leurs seuils de statut (FR-231) ; seuils d'alerte et leur source (démo, calculé, fixé : FR-4) ; délai de remontée (48 h) ; heure du rapport (06:00) ; fréquence de rafraîchissement (5 min) ; seuil de concentration d'un secteur ; voisinage d'agences pour la comparaison (± 20 % d'encours). Données, jamais code. |
+| C6 Paramètres | Composition par rôle ; douze chiffres du DG et leurs seuils de statut (FR-231) ; seuils d'alerte et leur source (démo, calculé, fixé : FR-4) ; délai de remontée (48 h) ; heure du rapport (06:00) ; fréquence de rafraîchissement (5 min [ASSUMPTION]) ; PAR 1, 7, 30, 60 et 90 ; valeurs de départ des seuils : annexe D (un seul jeu) ; seuil de concentration d'un secteur ; voisinage d'agences pour la comparaison (± 20 % d'encours). Données, jamais code. |
 | C7 Droits | `dashboard:tableau:consulter`, `dashboard:vue-direction:consulter` (DG, onglets Crédit et Commercial compris), `dashboard:rapport:envoyer`, `dashboard:alerte:configurer`, `dashboard:copilot:interroger`, `dashboard:secteur:consulter`. Trancher une décision exige le droit du module qui la possède. Format conforme. |
-| C8 Module d'écran | `/dashboard` (seize cockpits par rôle), descente géographique et par secteur, tiroir Copilot, courrier des rapports. Entrées : « Tableau de bord » (`dashboard:tableau:consulter`), « Copilot » (`dashboard:copilot:interroger`). Boutons non branchés : « bientôt » (PRD-D FR-2) ; « N alertes critiques », « Exporter rapport DG », « PDF », « Envoyer » doivent aboutir. |
+| C8 Module d'écran | `/dashboard` (seize cockpits par rôle), descente géographique et par secteur, tiroir Copilot, courrier des rapports. Entrées : « Tableau de bord » (`dashboard:tableau:consulter`), « Copilot » (`dashboard:copilot:interroger`). Écrans de FR-273 : contrôle quotidien et écran réseau du ROC, demandes en attente depuis plus de 48 h, portefeuille du GP, lien vers Opérations bancaires. Boutons non branchés : « bientôt » (PRD-D FR-2) ; « N alertes critiques », « Exporter rapport DG », « PDF », « Envoyer » doivent aboutir. |
 | C9 Installer/désinstaller | Comme PRD-D A.15 : rien supprimé, alertes et rapports conservés. Avertissement : « Les tableaux de bord disparaissent du menu ; aucune donnée métier n'est touchée. » |
 | C10 Démarrer seul | `profiles: ["dashboard"]` ; socle seul. |
-| C11 IA | `ia: { modeles: ['copilot-par-role', 'priorites-du-jour', 'anomalie-agence', 'synthese-narrative'], finalites: ['pilotage-assiste', 'priorites-du-jour', 'anomalie-d-agence', 'rapport-de-direction'] }`. Servi par l'IA commune (Agents métier pour le Copilot et les priorités, Pulse pour la synthèse et la comparaison d'agences) ; le module n'a pas de modèle propre (FR-8). Le Copilot est réel au premier jour, en lecture seule, chiffres sourcés (FR-237). Chaque proposition porte origine, version, date, données utilisées ; sans modèle, des règles servent et le disent. Données vers l'IA commune seulement avec consentement (FR-260). |
-| C12 Migrations | `SANS_PERTE`. Interrupteurs : `rapport-quotidien-dg`, `copilot` (éteint sans consentement à l'IA commune). Le seuil d'une alerte n'est jamais changé en silence : il passe par la validation de FR-4. |
+| C11 IA | `ia: { modeles: ['copilot-par-role', 'priorites-du-jour', 'anomalie-agence', 'synthese-narrative'], finalites: ['pilotage-assiste', 'priorites-du-jour', 'anomalie-d-agence', 'rapport-de-direction'] }`. Servi par l'IA commune (Agents métier pour le Copilot et les priorités, Pulse pour la synthèse et la comparaison d'agences), qui tourne dans l'**instance locale** de l'IMF (FR-260) ; les modèles ne sont pas écrits dans ce module (FR-8). Le Copilot est réel au premier jour, en lecture seule, chiffres sourcés, avec des questions types pour chacun des seize rôles (FR-237). Chaque proposition porte origine, version, date, données utilisées ; sans modèle, des règles servent et le disent. Seuls des écarts anonymisés sortent vers l'IA commune, avec consentement (FR-260). |
+| C12 Migrations | `SANS_PERTE`. Interrupteurs : `rapport-quotidien-dg`, `copilot` (éteint seulement si l'instance locale de l'IA ne tourne pas : « bientôt », FR-237). Le seuil d'une alerte n'est jamais changé en silence : il passe par la validation de FR-4. |
 | C13 Installable sous contrôle | Prérequis : aucun module obligatoire. Vérifications : `cartes-resolues` (🟢 si ≥ 80 % des cartes d'un cockpit d'essai se résolvent, les autres `NON_INSTALLE`) ; `chiffres-recoupes` (🟢 si les douze chiffres du DG se recalculent depuis le cœur fictif à l'identique, FR-239). Lecture seule : tous les cockpits, export. `objetsDeReprise: []`, `domainesEchange: []`. |
 
 ### A.12 Équipes et performance (`equipe`, M21)
@@ -3788,13 +4159,13 @@ Comme PRD-D A.12 pour tout ce qui n'est pas ci-dessous. Sans objet chez l'IMF : 
 | C8 Module d'écran | `/marketing` (campagnes, entonnoir des prospects, segments, couverture du territoire). Entrées : « Campagnes » (`marketing:campagne:gerer`), « Prospects » (`marketing:prospect:consulter`). **Chatbot WhatsApp, NPS, présence digitale, fidélisation, défis : « bientôt »** (décisions F4 et F10 ; FR-247, FR-249). |
 | C9 Installer/désinstaller | Comme PRD-D A.12 : rien supprimé, campagnes conservées. Avertissement : « Les campagnes en cours ne seront plus envoyées. » |
 | C10 Démarrer seul | `profiles: ["marketing"]` ; socle + `notification` + `reseau`. |
-| C11 IA | `ia: { modeles: ['segmentation-comportementale', 'ciblage-campagne', 'note-de-prospect', 'proposition-de-campagne', 'zone-de-prospection'], finalites: ['segmentation', 'ciblage-campagne', 'note-de-prospect', 'proposition-de-campagne', 'zone-de-prospection'] }`. Servi par l'IA commune (Relation client ; Agents métier pour les zones). Segments agrégés et anonymisés ; aucune donnée ne sort sans consentement (FR-248, FR-260). Le chatbot WhatsApp de qualification est « bientôt » et n'a pas de modèle déclaré. |
+| C11 IA | `ia: { modeles: ['segmentation-comportementale', 'ciblage-campagne', 'note-de-prospect', 'proposition-de-campagne', 'zone-de-prospection'], finalites: ['segmentation', 'ciblage-campagne', 'note-de-prospect', 'proposition-de-campagne', 'zone-de-prospection'] }`. Servi par l'IA commune (Relation client ; Agents métier pour les zones). Segments agrégés et anonymisés, calculés dans l'instance locale de l'IMF ; seuls des écarts anonymisés sortent, avec consentement (FR-248, FR-260). Le **Copilot marketing** (lecture seule, COMM, RCC, COM) est servi de la même façon (FR-248). Le chatbot WhatsApp de qualification est « bientôt » et n'a pas de modèle déclaré. |
 | C12 Migrations | `SANS_PERTE`. Interrupteurs : `exclusion-clients-en-retard` (active par défaut, jamais éteinte en silence), `validation-dg-campagnes`. |
 | C13 Installable sous contrôle | Prérequis : `notification` avec un canal utilisable ; modèles WhatsApp approuvés (FR-258). Vérifications : `audience-resolue` (🟢 si l'audience d'essai se résout, les exclusions sont comptées et un opt-out n'est jamais ciblé). Essai : aucun message réel. `objetsDeReprise: []`, `domainesEchange: []`. |
 
 ### A.14 Comptabilité : export des écritures (`finance-transactions`, M22)
 
-Comme PRD-D A.11 pour tout ce qui n'est pas ci-dessous. **Hors périmètre du premier jour** (comptabilité non prioritaire, récit §3).
+Comme PRD-D A.11 pour tout ce qui n'est pas ci-dessous. **Hors périmètre du premier jour** (comptabilité non prioritaire, récit §3). Les sous-onglets de comptabilité de la démo (balance, journal, grand livre, résultat, bilan, rapprochements, suspens) et le contrôle de gestion, alerte comprise, sont inventoriés **« bientôt »** (FR-252, FR-253).
 
 | Clause | Valeur pour ce module |
 |---|---|
@@ -3805,10 +4176,10 @@ Comme PRD-D A.11 pour tout ce qui n'est pas ci-dessous. **Hors périmètre du pr
 | C5 Contrats nommés | Publie `finance-transactions.ecriture.proposee@1`, `finance-transactions.budget.changed@1`, `finance-transactions.tresorerie.changed@1`. Consomme `coeur-sfd.balance.recue@1`, `coeur-sfd.caisse-guichet.changed@1`, `risque-par.provision.proposee@1`, `caisse.remise.constatee@1`. |
 | C6 Paramètres | Plan comptable du cœur (correspondance des comptes), journal d'export, horizon de prévision (7 jours), plancher de liquidité, périodicité d'export. Données, jamais code. |
 | C7 Droits | `finance-transactions:ecriture:exporter`, `finance-transactions:budget:saisir`, `finance-transactions:tresorerie:consulter`. Format conforme (code à tiret). |
-| C8 Module d'écran | Tableau Budget et Rentabilité du DAF (dans le cockpit du DAF, FR-253), export des écritures proposées, prévision de trésorerie. Boutons non branchés : « bientôt », sans date ; en particulier l'export, tant que le module n'est pas livré. |
+| C8 Module d'écran | Tableau Budget et Rentabilité du DAF (dans le cockpit du DAF, FR-253), export des écritures proposées, prévision de trésorerie. Boutons non branchés : « bientôt », sans date ; en particulier l'export, tant que le module n'est pas livré, et les sous-onglets de démo listés ci-dessus. |
 | C9 Installer/désinstaller | Comme PRD-D A.11 : rien supprimé, budgets et écritures proposées conservés. Avertissement : « L'export des écritures cesse ; la comptabilité reste dans le cœur. » |
 | C10 Démarrer seul | `profiles: ["finance-transactions"]` ; socle + `paiement`. |
-| C11 IA | `ia: { modeles: ['prevision-tresorerie', 'perte-attendue'], finalites: ['prevision-de-cash', 'perte-attendue'] }`. Prévision de trésorerie à 7 jours et perte attendue, sur des données lues du cœur (modules Risque et Pulse de l'IA commune ; la perte attendue est celle de `risque-par`, lue ici : FR-254). La réconciliation automatique et la détection d'anomalies comptables de PRD-D A.11 sont sans objet : l'IMF ne tient pas de lettrage. |
+| C11 IA | `ia: { modeles: ['prevision-tresorerie', 'perte-attendue'], finalites: ['prevision-de-cash', 'perte-attendue'] }`. Prévision de trésorerie à 7 jours et perte attendue, sur des données lues du cœur (modules Risque et Pulse de l'IA commune, dans l'instance locale ; la perte attendue est celle de `risque-par`, lue ici et marquée « estimation » : FR-254). Le Copilot du DAF lit ces deux chiffres (FR-254). La réconciliation automatique et la détection d'anomalies comptables de PRD-D A.11 sont sans objet : l'IMF ne tient pas de lettrage. |
 | C12 Migrations | `SANS_PERTE`. Interrupteur : `export-ecritures`. Un budget publié ne change pas les périodes closes. |
 | C13 Installable sous contrôle | Prérequis : `paiement`. Vérification : `ecritures-equilibrees` (🟢 si chaque écriture proposée du jeu d'essai est équilibrée au franc près, sinon 🔴 `ECRITURE_DESEQUILIBREE`). Lecture seule : consultation, export. `objetsDeReprise: []` ; `domainesEchange: ['finance-transactions.ecritures']` déclaré pour plus tard (vrai connecteur hors février, décision A9). |
 
@@ -3819,19 +4190,19 @@ Les modules suivants ont déjà leurs treize clauses dans leur manifeste ou dans
 | Module | Manifeste ou annexe | Ce que l'IMF ajoute ou change | Point à reporter |
 |---|---|---|---|
 | `reseau` | `manifestes/reseau.manifest.ts` | quatre échelons (réseau, région, agence, zone) ; code d'agence du cœur sinon celui de Prospera ; zones et régions en polygones ; invitation SMS (STORY-900) ; zones blanches pour la prospection | FR-255 ; objets de reprise `reseau.zone@1`, `reseau.commercial@1` inchangés |
-| `paiement` | `manifestes/paiement.manifest.ts` | décaissement Mobile Money et PI-SPI par pays et par opérateur, banques par PI-SPI ; rattachement à moins de 1 % ; validation du CPT ; Créance `ECHEANCE_DE_PRET` ouverte, `paiement` seul propriétaire (décision du PO du 2026-11-13) | FR-256, FR-257 ; pas d'amendement du PRD `paiement` |
-| `notification` | `manifestes/notification.manifest.ts` | WhatsApp et SMS aux frais de l'IMF ; modèles approuvés avant la mise en service ; réponses et lien de paiement par le relais | FR-258 |
+| `paiement` | `manifestes/paiement.manifest.ts` | décaissement Mobile Money et PI-SPI par pays et par opérateur, banques par PI-SPI ; rattachement à moins de 1 % (il choisit l'échéance, il ne la solde pas) ; validation du CPT ; Créance `ECHEANCE_DE_PRET` ouverte, `paiement` seul propriétaire, montant exigible recalé sur la dernière lecture du cœur, lien de paiement émis après relecture du reste dû (décisions du PO du 2026-11-13, Q2 et P1) ; ordre de décaissement inconnu rapproché avant réémission | FR-256, FR-257 ; pas d'amendement du PRD `paiement` |
+| `notification` | `manifestes/notification.manifest.ts` | WhatsApp et SMS aux frais de l'IMF ; modèles approuvés avant la mise en service ; réponses et lien de paiement par le relais (accusé après écriture, rejeu, rapprochement avec le relevé du fournisseur) | FR-258 |
 | `reprise` | `manifestes/reprise.manifest.ts` | portefeuille de prêts en cours ; format de départ non tranché | FR-259, FR-196 à FR-198 |
 | `connecteurs` | `manifestes/connecteurs.manifest.ts` | le vrai connecteur du cœur est hors février ; contrat d'échange neutre en annexe C ; cœur fictif | FR-259, FR-166 |
-| `automatisations` | PRD-D A.14 | règles de relance de l'IMF ; **aucune règle AUTO de blocage** : seul le ROC bloque (mode SUGGESTION) | FR-250 ; C11 : sans modèle propre, les capacités d'IA des relances relèvent de `recouvrement` |
+| `automatisations` | PRD-D A.14 | règles de relance de l'IMF ; **aucune règle AUTO de blocage** : seul le ROC bloque (mode SUGGESTION) | FR-250 ; C11 : les capacités d'IA des relances relèvent de `recouvrement`, servies par l'IA commune |
 | `support-client` | PRD-D A.16 | inscrit sans écran au premier jour ; compteur « tickets d'incident » du ROC = `NON_INSTALLE` | FR-251 ; C11 : sans objet, aucun modèle promis |
-| `instance` (moteur d'installation) | PRD moteur d'installation | licence à vie sans gel ni coupure ; relais pour PI-SPI, FedaPay, WhatsApp et le lien de paiement ; accès des agences par navigateur ; exploitation par ADMIN_IMF ; sauvegardes et conservation de dix ans ; listes de sanctions sans port entrant | FR-261 à FR-269 ; écarts à porter au PRD moteur : FR-41 et FR-15 ne s'appliquent pas, AD-9 gagne le nom du relais |
+| `instance` (moteur d'installation) | PRD moteur d'installation | licence à vie sans gel ni coupure, **plus un contrat de maintenance payé chaque mois** (mises à jour et correctifs de sécurité et de réglementation, P5) ; relais pour PI-SPI, FedaPay, WhatsApp et le lien de paiement (Money Vibes sous-traitant) ; **instance locale de l'IA commune** et tunnel sécurisé sortant pour ses mises à jour (P9) ; accès des agences par navigateur ; exploitation par ADMIN_IMF ; sauvegardes et conservation de dix ans ; listes de sanctions sans port entrant | FR-261 à FR-269 ; écarts à porter au PRD moteur : FR-41 et FR-15 ne s'appliquent pas, AD-9 gagne le nom du relais et le tunnel de l'IA commune |
 
 ---
 
 ## Annexe B. Matrice d'accès
 
-Lecture : **D** décide ou valide ; **A** agit (crée, saisit, modifie) ; **L** lit son périmètre ; **—** aucun accès. Le périmètre de chaque rôle est celui du §2.1 (FR-5). Le serveur applique la matrice (PRD-D FR-5) ; la séparation des tâches (FR-6) s'ajoute à elle. ADMIN_IMF ne lit aucune donnée métier : il gère les comptes et les paramètres.
+Lecture : **D** décide ou valide ; **A** agit (crée, saisit, modifie) ; **L** lit son périmètre ; **—** aucun accès. Le périmètre de chaque rôle est celui du §2.1 (FR-5). Le serveur applique la matrice (PRD-D FR-5) ; la séparation des tâches (FR-6) s'ajoute à elle. ADMIN_IMF ne lit aucune donnée métier par l'application : il gère les comptes et les paramètres (FR-5). Un rôle qui instruit, décide ou autorise de l'argent n'est actif qu'après la validation d'un rôle métier.
 
 | Module / objet | DG | DAF | ROC | RA | CC | GP | AT | COLL | COM | RCC | RSQ | REC | AUD | CPT | COMM | ADMIN_IMF |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -3844,6 +4215,8 @@ Lecture : **D** décide ou valide ; **A** agit (crée, saisit, modifie) ; **L** 
 | Avis consultatif du risque | L | — | L | — | — | — | — | — | — | — | A | — | L | — | — | — |
 | Décision du ROC | L | — | D | L | L | — | — | — | — | — | L | — | L | — | — | — |
 | Comité de crédit | D | — | D | D | L | L | — | — | — | — | L | — | L | — | — | — |
+| Composition du comité d'un dossier (décision P6) | D | — | L | L | — | — | — | — | — | — | — | — | L | — | — | — |
+| Bénéficiaire du décaissement : changement (double contrôle) | L | D | A | L | A | — | — | — | — | — | — | — | L | D | — | — |
 | Ordre de décaissement (espèces) | L | D | L | L | L | L | — | — | — | — | — | — | L | D | — | — |
 | Ordre de décaissement (Mobile Money, PI-SPI, virement) | L | L | A | L | L | L | — | — | — | — | — | — | L | A | — | — |
 | Collecte terrain | L | L | — | L | — | L | A | A | — | L | — | — | L | L | — | — |
@@ -3871,33 +4244,404 @@ Les écrans de chaque module, et le rôle qui y accède, sont listés dans chaqu
 
 ## Annexe C. Contrat d'échange avec le cœur
 
-Cette annexe définit l'échange entre Prospera et le logiciel cœur de l'IMF (§6.5), sans nom de produit. Elle fait foi pour le cœur fictif (§6.6) et pour tout futur connecteur. Elle décrit des **objets et des champs minimaux**, pas des routes ni des formats : le détail technique est dans l'addendum (→ addendum).
+Cette annexe définit l'échange entre Prospera et le logiciel cœur de l'IMF (§6.5), sans nom de produit. Elle fait foi pour le cœur fictif (§6.6) et pour tout futur connecteur. Elle décrit des **objets et des champs minimaux**, pas des routes ni des formats : le détail technique est dans l'addendum (→ addendum). Elle recense **tout ce que le corps du PRD envoie au cœur ou en lit** : un message du corps (« envoyé au cœur », « demande au cœur », « lu du cœur ») qui n'a pas de ligne ici est un oubli (test de FR-152).
 
 **Règles communes à tous les objets.**
-- **Identifiant** : chaque objet porte l'identifiant stable donné par son propriétaire (clé d'origine). Il ne change jamais.
-- **Montants** : en FCFA entiers (unité mineure), avec la devise. Dates avec date de valeur.
+- **Identifiant** : chaque objet porte l'identifiant stable donné par son propriétaire (clé d'origine, colonne dédiée). Il ne change jamais.
+- **Sens** : « cœur → Prospera » (Prospera lit) ou « Prospera → cœur » (Prospera envoie, en tirant ou en déposant : jamais de port entrant).
+- **États** : chaque objet a ses états (colonne dédiée) ; un objet envoyé par Prospera est visible dans les états à envoyer, envoyé, accepté, refusé (avec le motif du cœur), jamais confirmé après un délai (FR-152) ; un objet reçu qui ne respecte pas ses champs minimaux est refusé et va dans la file des écarts (FR-159).
+- **Montants** : en FCFA entiers (unité mineure), avec la devise. Dates avec date de valeur. **Brut et net** : « montant » d'un prêt ou d'un paiement est toujours le montant **brut** (accordé, ou reçu) ; les frais retenus au décaissement et le net versé au client sont des champs à part ; un champ ne mélange jamais le brut et le net.
 - **Mouvements** : les objets d'argent (paiement, pénalité, mouvement d'épargne) sont des mouvements datés, jamais des totaux (FR-161). Une annulation est un mouvement inverse.
 - **Idempotence** : présenter deux fois le même objet ne le crée pas deux fois (FR-160).
 - **Refus** : un objet refusé revient avec un code et un motif en clair (FR-152, FR-159).
 - **Transport** : une API que Prospera interroge, ou des fichiers que Prospera relève ou dépose ; Prospera tire toujours, aucun port entrant (FR-157).
-- **Fréquences par défaut** : « 5 min » (API seulement), « heure », « nuit » (avant 6 h). Ce sont des paramètres (FR-159). Un cœur sans API est limité à « heure » et « nuit ».
+- **Fréquences par défaut** : « 5 min » (API seulement), « heure », « nuit » (avant 6 h). Ce sont des paramètres (FR-159, annexe D). Un cœur sans API est limité à « heure » et « nuit ».
 - **Champs minimaux** : un objet qui ne les respecte pas est refusé et va dans la file des écarts. Tout champ en plus est conservé s'il est connu, ignoré sinon.
 - **Code d'agence** : celui du cœur s'il en a un, sinon celui de Prospera (FR-164).
+- **Moment de la création du prêt.** Le cœur crée le **prêt** et l'**échéancier officiel** à l'**exécution de l'ordre de décaissement**, pas à l'acceptation du dossier accordé : le dossier accordé, accepté par le cœur, ne crée aucun prêt ; la confirmation d'exécution (ou la déclaration d'un décaissement exécuté hors du cœur) renvoie l'identifiant du prêt.
+- **Clé d'appariement des espèces.** Le **numéro de reçu Prospera** est obligatoire sur tout objet qui porte de l'argent collecté ou saisi dans Prospera (remboursement saisi, mouvement d'épargne renvoyé, remise d'espèces, annulation de collecte) ; le cœur le recopie sur le mouvement qu'il comptabilise (ou l'opérateur du cœur le recopie, quand le cœur ne reçoit pas de Prospera), et c'est sur lui que Prospera apparie.
+- **Collecte et remise.** La collecte est un **encaissement pour le compte de l'IMF**, comptabilisé à la date de la collecte, contre un **compte d'attente du collecteur** du cœur. La remise au guichet est un **transfert de caisse** (compte d'attente du collecteur vers caisse du guichet) : elle ne crédite aucun client une seconde fois.
+- **Reste dû** (P1). Le cœur envoie le reste dû de chaque échéance (valeur de contrôle) avec sa date de lecture. Le montant exigible de la Créance de `paiement` se recale sur la dernière lecture ; un lien de paiement n'est émis qu'après une relecture plus récente que l'âge maximal (annexe D) ; un mouvement de paiement du cœur sans paiement Prospera correspondant réduit ou ferme la Créance ; en cas d'écart de montant, le cœur gagne, le client voit le montant du cœur, et l'écart va dans la file des écarts (FR-150, FR-159).
 
-| Objet | Sens | Qui fait foi | Champs minimaux | Fréquence par défaut | Ce que fait le cœur fictif |
-|---|---|---|---|---|---|
-| Client | cœur → Prospera | le cœur (identité, statut) ; Prospera pour le KYC terrain et la fiche enrichie (partie 3a) | identifiant du cœur, nom, type (personne, groupe), date de naissance ou de création, pièce d'identité (type, numéro), téléphone, agence, statut (actif, clos), date de création | heure | Tient les clients du jeu de démo ; crée un client à la demande de la démo ; produit le fichier d'export |
-| Agence | cœur → Prospera | le cœur s'il a des codes d'agence ; sinon Prospera (FR-164) | code d'agence, nom, région, statut | nuit | Tient 3 agences ; accepte l'agence créée dans la démo avec le code de Prospera |
-| Produit | cœur → Prospera (référence) ; Prospera → cœur (produit créé dans Prospera) | Prospera (produit de crédit et d'épargne versionné, partie 3a) ; le cœur pour le code de produit comptable | code produit du cœur, libellé, type (crédit, épargne), version, taux, durée, périodicité | nuit | Tient les produits du jeu de démo, tous conformes au plafond d'usure (TEG actuariel de 24 % par an au plus) |
-| Prêt | cœur → Prospera | le cœur (encours, statut, jours de retard après décaissement) ; Prospera pour le dossier de crédit jusqu'au comité | identifiant du prêt, identifiant du client, agence, produit, montant décaissé, encours, taux, durée, date de décaissement, statut (actif, soldé, en souffrance, rééchelonné, perte), jours de retard, solde de contrôle, garanties (nature, valeur) | heure ; 5 min avec une API | Tient 1 000 prêts actifs ; fait vivre leur retard et leur solde (FR-169) ; accepte un prêt issu d'un dossier de la démo |
-| Échéance (échéancier officiel) | cœur → Prospera | le cœur après décaissement ; avant, le comité de Prospera (échéancier contractuel) | identifiant du prêt, numéro d'échéance, date d'échéance, capital, intérêts, frais, assurance, montant payé, statut (à venir, payée, impayée) | heure | Génère l'échéancier officiel à l'acceptation d'un dossier ; peut dévier volontairement de l'échéancier contractuel pour montrer l'alerte d'écart (FR-162) |
-| Mouvement de paiement | cœur → Prospera | le cœur (le paiement comptabilisé) | identifiant du mouvement, identifiant du prêt, identifiant du client, date de valeur, montant, canal (espèces, Mobile Money, virement, PI-SPI, collecte), imputation (pénalités, intérêts, capital), référence de la pièce, identifiant du paiement d'origine si renvoyé par Prospera | 5 min avec une API ; sinon heure | Génère des paiements quotidiens (à l'heure, en retard, absents) ; reconnaît un doublon ; renvoie le mouvement d'un paiement saisi dans Prospera (FR-155) |
-| Pénalité | cœur → Prospera | le cœur (calcul des pénalités et des intérêts de retard) | identifiant de la pénalité, identifiant du prêt, identifiant de l'échéance, date de valeur, montant, base de calcul (jours, taux), statut (due, payée, annulée) | heure | Calcule les pénalités sur les prêts en retard et les paie par l'ordre d'imputation paramétré |
-| Compte d'épargne | cœur → Prospera | le cœur | identifiant du compte, identifiant du client, produit, agence, date d'ouverture, solde de contrôle, statut | heure | Tient des comptes d'épargne pour une partie des clients ; certains clients sont épargnants et emprunteurs |
-| Mouvement d'épargne | cœur → Prospera ; Prospera → cœur (collecte renvoyée, si le cœur sait recevoir) | le cœur | identifiant du mouvement, identifiant du compte, date de valeur, montant, sens (dépôt, retrait), canal, identifiant de la collecte d'origine si renvoyé | heure | Génère des dépôts et retraits ; reconnaît un doublon ; accepte une collecte renvoyée |
-| Caisse du guichet | cœur → Prospera | le cœur | identifiant de la caisse, agence, date, solde d'ouverture, mouvements (entrées, sorties), solde de clôture, écart | heure ; à la clôture du jour | Tient une caisse par agence ; produit un écart de démo à la clôture |
-| Balance | cœur → Prospera (facultatif) | le cœur | date d'arrêté, plan comptable (code du plan), postes (code, libellé, solde débiteur, solde créditeur), total débit et total crédit | nuit ; à la clôture du mois | Fournit une balance au plan comptable SFD, équilibrée, avec fonds propres, actif net, ressources stables, passif exigible (FR-166, FR-187) |
-| Dossier accordé | Prospera → cœur | Prospera (décision du comité, conditions et échéancier contractuel) | identifiant de dossier (clé d'origine), identifiant du client, produit et version, agence, GP, montant, taux, durée, mensualité, frais, TEG, date de la première échéance, échéancier contractuel (lignes), garanties, date et participants de la décision du comité | à la décision du comité (5 min avec une API ; sinon heure) | Accepte ou refuse (avec motif) ; crée le prêt et l'échéancier officiel ; reconnaît un doublon |
-| Ordre de décaissement | Prospera → cœur | Prospera (l'ordre) ; le cœur (l'exécution en espèces et par virement) | identifiant de l'ordre (clé unique), identifiant du dossier, identifiant du prêt, montant, canal (espèces, virement, Mobile Money, PI-SPI), bénéficiaire (nom, compte ou numéro), date prévue, autorisé par (CPT ou DAF pour les espèces) | à l'émission | Exécute espèces et virement après un délai simulé ; rejette selon des cas paramétrés ; reçoit en déclaration les décaissements Mobile Money et PI-SPI exécutés par `paiement` |
-| Confirmation d'exécution | cœur → Prospera | le cœur | identifiant de l'ordre, état (exécuté, rejeté, expiré), date de valeur, référence d'exécution du cœur, motif de rejet | 5 min avec une API ; sinon heure | Renvoie l'état de chaque ordre ; simule un rejet et un doublon |
-| Remboursement saisi dans Prospera | Prospera → cœur, si le cœur sait recevoir ; sinon liste « à saisir dans le cœur » | le cœur (le paiement comptabilisé) ; Prospera (la saisie) | identifiant du remboursement (clé d'origine), identifiant du prêt, montant, date de valeur, canal, collecteur ou caissier, référence de la pièce | à la validation (5 min avec une API ; sinon heure) ; liste quotidienne | Accepte et renvoie le mouvement correspondant ; une option de démo le met en mode « ne reçoit pas » pour montrer la liste à saisir (FR-156) |
+| Objet | Sens | Clé d'origine | États | Qui fait foi | Champs minimaux | Fréquence par défaut | Ce que fait le cœur fictif |
+|---|---|---|---|---|---|---|---|
+| Client | cœur → Prospera | identifiant du client du cœur | actif, clos | le cœur (identité, statut) ; Prospera pour le KYC terrain et la fiche enrichie (partie 3a) | identifiant du cœur, nom, type (personne, groupe), date de naissance ou de création, pièce d'identité (type, numéro), téléphone, agence, statut, date de création | heure | Tient les clients du jeu de démo ; produit le fichier d'export |
+| Création de client | Prospera → cœur | identifiant de la fiche Prospera | à envoyer, envoyée, acceptée (identifiant du cœur renvoyé), refusée | le cœur (l'identifiant) ; Prospera (la fiche) | identifiant de la fiche, nom, type, date de naissance ou de création, pièce d'identité (type, numéro), téléphone, agence | à la conversion du prospect (5 min avec une API ; sinon heure) | Crée le client ou lie la fiche à celui qui existe (même pièce) ; reconnaît un doublon ; refuse avec un motif |
+| Agence | cœur → Prospera ; Prospera → cœur dans l'espace d'essai seulement (agence créée dans la démo, FR-172) | code d'agence | active, fermée | le cœur s'il a des codes d'agence ; sinon Prospera (FR-164) | code d'agence, nom, région, statut | nuit | Tient 3 agences ; accepte l'agence créée dans la démo avec le code de Prospera |
+| Produit | cœur → Prospera (référence) ; Prospera → cœur (produit créé dans Prospera) | code produit du cœur | publié, retiré | Prospera (produit de crédit et d'épargne versionné, partie 3a) ; le cœur pour le code de produit comptable | code produit du cœur, libellé, type (crédit, épargne), version, taux, durée, périodicité | nuit | Tient les produits du jeu de démo, tous conformes au plafond d'usure (TEG de 24 % par an au plus, au pire cas, méthode de FR-108) |
+| Prêt | cœur → Prospera | identifiant du prêt | actif, soldé, en souffrance, rééchelonné, contentieux, perte | le cœur (encours, statut, jours de retard après décaissement) ; Prospera pour le dossier de crédit jusqu'au comité | identifiant du prêt, identifiant du client, agence, produit, montant décaissé (brut accordé), frais retenus au décaissement, net versé, encours, taux, durée, date de décaissement, statut, jours de retard, retard maximal, date de solde, solde de contrôle, garanties (nature, valeur) | heure ; 5 min avec une API | Tient 1 000 prêts actifs ; fait vivre leur retard et leur solde (FR-169) ; **crée un prêt à l'exécution d'un ordre de décaissement**, pas à l'acceptation d'un dossier ; fournit des prêts soldés pour l'historique du client |
+| Échéance (échéancier officiel) | cœur → Prospera | identifiant du prêt + numéro d'échéance | à venir, payée, impayée, soldée partiellement | le cœur après exécution du décaissement ; avant, le comité de Prospera (échéancier contractuel) | identifiant du prêt, numéro d'échéance, date d'échéance, capital, intérêts, frais, assurance, montant payé, **reste dû**, date de lecture du reste dû, statut | heure | Génère l'échéancier officiel **à l'exécution de l'ordre de décaissement** ; peut dévier volontairement de l'échéancier contractuel pour montrer l'alerte d'écart (FR-162) |
+| Mouvement de paiement | cœur → Prospera | identifiant du mouvement | reçu ; annulé (par un mouvement inverse) | le cœur (le paiement comptabilisé) | identifiant du mouvement, identifiant du prêt, identifiant du client, date de valeur, montant (brut), canal (espèces, Mobile Money, virement, PI-SPI, collecte), imputation (pénalités, intérêts, capital), référence de la pièce, **numéro de reçu Prospera** et identifiant du paiement d'origine si renvoyé par Prospera | 5 min avec une API ; sinon heure | Génère des paiements quotidiens (à l'heure, en retard, absents), dont certains **au guichet du cœur sans paiement Prospera correspondant** (pour montrer la Créance qui se ferme) ; reconnaît un doublon ; renvoie le mouvement d'un paiement saisi dans Prospera (FR-155) |
+| Pénalité | cœur → Prospera | identifiant de la pénalité | due, payée, annulée | le cœur (calcul des pénalités et des intérêts de retard) | identifiant de la pénalité, identifiant du prêt, identifiant de l'échéance, date de valeur, montant, base de calcul (jours, taux), statut | heure | Calcule les pénalités sur les prêts en retard et les paie par l'ordre d'imputation paramétré |
+| Classe officielle et provisions | cœur → Prospera | identifiant du prêt + date d'arrêté | reçue | le cœur (classe réglementaire officielle, provision comptabilisée) | identifiant du prêt, date d'arrêté, code de la classe (du jeu de classes du pays), provision comptabilisée ; provision comptabilisée par agence | nuit ; à la clôture du mois | Fournit la classe et la provision de chaque prêt, selon le jeu de classes réglementaires par défaut, avec un écart volontaire pour le démontrer (FR-125) |
+| Compte d'épargne | cœur → Prospera | identifiant du compte | actif, dormant, bloqué, clos | le cœur | identifiant du compte, identifiant du client, produit, agence, date d'ouverture, solde de contrôle, statut | heure | Tient des comptes d'épargne pour une partie des clients ; certains clients sont épargnants et emprunteurs |
+| Ouverture de compte d'épargne | Prospera → cœur | identifiant de la demande | à envoyer, envoyée, acceptée (identifiant du compte renvoyé), refusée | le cœur (le compte) ; Prospera (la demande) | identifiant de la demande, identifiant du client, produit d'épargne, agence | à la demande (5 min avec une API ; sinon heure) ; si le cœur ne sait pas recevoir : « bientôt » (FR-106) | Ouvre le compte et renvoie son identifiant ; refuse avec un motif (client « en attente du cœur ») |
+| Mouvement d'épargne | cœur → Prospera ; Prospera → cœur (collecte renvoyée, si le cœur sait recevoir) | identifiant du mouvement | reçu ; en attente du cœur (côté Prospera) ; annulé | le cœur | identifiant du mouvement, identifiant du compte, date de valeur, montant, sens (dépôt, retrait), canal, **numéro de reçu Prospera** et identifiant de la collecte d'origine si renvoyé | heure | Génère des dépôts et retraits ; reconnaît un doublon ; accepte une collecte renvoyée |
+| Flux Mobile Money du client | cœur → Prospera (facultatif) | identifiant du mouvement | reçu | le cœur, quand il distingue le canal Mobile Money dans les mouvements du compte | identifiant du mouvement, identifiant du client, date de valeur, montant, sens (entrée, sortie), opérateur | heure | Marque une partie des mouvements du jeu de démo « Mobile Money » pour l'onglet « Client » du dossier (indicateurs : nombre de mouvements, ratio de dépôts, total des dépôts, solde maximal) |
+| Dépôt de garantie | Prospera → cœur (blocage, restitution) ; cœur → Prospera (statut) | identifiant du dossier + type (blocage, restitution) | à envoyer, envoyé, bloqué, restitué, appelé, refusé | le cœur (le blocage du compte) ; Prospera (la décision) | identifiant du dossier, identifiant du compte d'épargne, montant, type, motif (accord, clôture du prêt, appel de la caution) | à la décision (5 min avec une API ; sinon heure) | Bloque le dépôt à l'exécution du décaissement, le restitue à la clôture du prêt, le laisse appelé sur décision de recouvrement |
+| Caisse du guichet | cœur → Prospera | identifiant de la caisse + date | ouverte, clôturée | le cœur | identifiant de la caisse, agence, date, solde d'ouverture, mouvements (entrées, sorties), solde de clôture, écart, **solde bancaire de l'agence**, **solde du compte de l'opérateur Mobile Money** (si fourni) | heure ; à la clôture du jour | Tient une caisse par agence ; produit un écart de démo à la clôture |
+| Remise d'espèces | Prospera → cœur, si le cœur sait recevoir ; sinon liste « à saisir dans le cœur » | numéro de remise | à envoyer, envoyée, acceptée, refusée | le cœur (le transfert comptabilisé) ; Prospera (le comptage et la contresignature) | numéro de remise, identifiant du collecteur, agence, date, montant déclaré, montant compté, écart, contresignataire (CPT), **liste des numéros de reçu Prospera** remis | à la contresignature (5 min avec une API ; sinon heure) ; liste quotidienne | Déplace l'argent du compte d'attente du collecteur vers la caisse du guichet ; refuse une remise dont un numéro de reçu manque ou a déjà été remis ; ne crédite aucun client |
+| Balance | cœur → Prospera (facultatif) | date d'arrêté + code du plan | reçue | le cœur | date d'arrêté, plan comptable (code du plan), postes (code, libellé, solde débiteur, solde créditeur), total débit et total crédit | nuit ; à la clôture du mois | Fournit une balance au plan comptable SFD, équilibrée, avec fonds propres, actif net, ressources stables, passif exigible (FR-166, FR-187) |
+| Dossier accordé | Prospera → cœur | identifiant de dossier | à envoyer, envoyé, accepté (aucun prêt encore), refusé (avec motif), annulé | Prospera (décision du comité, conditions et échéancier contractuel) | identifiant de dossier, identifiant du client, produit et version, agence, GP, montant (brut accordé), frais retenus au décaissement, taux, durée, mensualité, TEG, date de la première échéance, échéancier contractuel (lignes), garanties, date et participants de la décision du comité | à la décision du comité, c'est-à-dire à EN_GESTION (5 min avec une API ; sinon heure) | Accepte ou refuse (avec motif) ; **ne crée pas le prêt** ; reconnaît un doublon |
+| Annulation d'un dossier ou d'un ordre | Prospera → cœur | identifiant du dossier ou de l'ordre + « annulation » | à envoyer, envoyée, acceptée (rien n'a été exécuté), refusée (déjà exécuté : le recouvrement prend le relais) | Prospera (la décision) ; le cœur (l'état d'exécution) | identifiant du dossier, identifiant de l'ordre s'il existe, date, auteur, motif | à la décision (5 min avec une API ; sinon heure) | Annule le dossier accepté ou l'ordre non exécuté ; refuse si l'ordre est exécuté |
+| Ordre de décaissement | Prospera → cœur | identifiant de l'ordre (clé unique, jamais régénérée, transmise au fournisseur comme identifiant de transaction) | à exécuter, exécuté, rejeté, expiré, inconnu (rapprochement obligatoire contre le relevé avant toute réémission) | Prospera (l'ordre) ; le cœur (l'exécution en espèces et par virement) | identifiant de l'ordre, identifiant du dossier, montant (brut accordé), frais retenus, net à verser, canal (espèces, virement, Mobile Money, PI-SPI), bénéficiaire (nom, compte ou numéro), date prévue, autorisé par (CPT ou DAF pour les espèces) | à l'émission | Exécute espèces et virement après un délai simulé ; rejette selon des cas paramétrés ; reçoit en déclaration les décaissements Mobile Money et PI-SPI exécutés par `paiement` |
+| Confirmation d'exécution | cœur → Prospera | identifiant de l'ordre | exécuté, rejeté, expiré, inconnu | le cœur | identifiant de l'ordre, état, date de valeur, référence d'exécution du cœur, **identifiant du prêt créé** (si exécuté), motif de rejet | 5 min avec une API ; sinon heure | Renvoie l'état de chaque ordre et crée le prêt à l'exécution ; simule un rejet, un doublon et un résultat inconnu |
+| Décaissement exécuté hors du cœur | Prospera → cœur (déclaration par Prospera du décaissement exécuté par `paiement`) | identifiant de transaction du fournisseur | déclaré, enregistré, refusé | le fournisseur et `paiement` (l'exécution) ; le cœur (l'enregistrement) | identifiant de l'ordre, canal (Mobile Money, PI-SPI), montant, date de valeur, référence de la transaction, **compte de l'opérateur (contrepartie)**, bénéficiaire | à l'exécution par `paiement` (5 min avec une API ; sinon heure) | Enregistre le décaissement contre le compte de l'opérateur, crée le prêt et l'échéancier officiel ; reconnaît un doublon |
+| Remboursement saisi dans Prospera | Prospera → cœur, si le cœur sait recevoir ; sinon liste « à saisir dans le cœur » | identifiant du remboursement | à envoyer, envoyé, en attente du cœur, confirmé (par le mouvement du cœur), refusé | le cœur (le paiement comptabilisé) ; Prospera (la saisie) | identifiant du remboursement, identifiant du prêt, montant (brut), date de valeur, canal, collecteur ou caissier, **numéro de reçu Prospera** (obligatoire pour une collecte) | à la validation (5 min avec une API ; sinon heure) ; liste quotidienne | Accepte et renvoie le mouvement correspondant avec le numéro de reçu ; une option de démo le met en mode « ne reçoit pas » pour montrer la liste à saisir (FR-156) |
+| Annulation de collecte | Prospera → cœur, si le cœur sait recevoir ; sinon liste | identifiant de l'annulation | à envoyer, envoyée, acceptée, refusée | Prospera (la décision du RA) ; le cœur (le mouvement inverse) | identifiant de l'annulation, **numéro de reçu Prospera** annulé, motif, valideur (RA), date | à la validation (5 min avec une API ; sinon heure) | Passe le mouvement inverse et renvoie un mouvement d'annulation |
+| Plan d'étalement | Prospera → cœur | identifiant du plan | à envoyer, envoyé, accepté (nouvel échéancier officiel renvoyé), refusé | Prospera (la décision du ROC) ; le cœur (l'échéancier officiel) | identifiant du plan, identifiant du prêt, nouvel échéancier contractuel (lignes), date d'effet, décideur | à la décision (5 min avec une API ; sinon heure) | Remplace l'échéancier officiel et le renvoie |
+| Transfert au contentieux | Prospera → cœur | identifiant du transfert | à envoyer, envoyé, accepté, refusé | Prospera (la décision) ; le cœur (le statut du prêt) | identifiant du prêt, date, décideur, motif | à la décision (5 min avec une API ; sinon heure) | Marque le prêt « contentieux » |
+| Perte définitive | Prospera → cœur | identifiant de la décision | à envoyer, envoyée, acceptée, refusée | Prospera (la décision du DG) ; le cœur (l'écriture) | identifiant du prêt, montant en perte (capital restant dû), date, décideur (DG) | à la décision (5 min avec une API ; sinon heure) | Passe la créance en perte ; Prospera ne comptabilise rien |
+
+---
+
+## Annexe D. Table des paramètres
+
+Tous les seuils du PRD sont des **paramètres de l'IMF** (FR-3), versionnés et datés ; un dossier garde les valeurs en vigueur à sa soumission ou à sa décision. Les seuils d'**alerte** sont **calibrés** sur les données de l'IMF après la reprise, puis validés par un humain (FR-4, décision E5) : la valeur ci-dessous n'est alors que celle de la démonstration. Chaque FR cite cette table au lieu de redéfinir une valeur ; en cas d'écart entre une FR et cette table, la table fait foi et l'écart est une erreur à corriger. `[ASSUMPTION]` marque une valeur que le PO n'a pas décidée.
+
+### D.1 Règles transverses (partie 1)
+
+| Paramètre | Valeur par défaut | Unité | FR propriétaire |
+|---|---|---|---|
+| Plafond d'usure (IMF de l'UMOA, daté, par pays et catégorie) | 24 | % par an, sur le TEG | FR-10 |
+| Méthode du TEG | actuariel annuel proportionnel, frais retenus et assurance obligatoire inclus | — | FR-10 |
+| Session : durée maximale ; inactivité | 8 ; 30 | heures ; minutes | FR-5 |
+| Double authentification obligatoire | DG, DAF, ROC, CPT, AUD, ADMIN_IMF | rôles | FR-5 |
+| Recalcul des propositions de seuils d'alerte [ASSUMPTION] | chaque trimestre | — | FR-4 |
+| Âge maximal d'une source macro-économique avant le signalement « ancienne » | 90 | jours | FR-8 |
+| Conservation de la piste d'audit | 10 | ans | FR-9 |
+| Jeu de démonstration : agences ; agents ; prêts actifs | 3 ; 10 ; 1 000 | — | FR-11 |
+| Jeu de démonstration : PAR 30 visé | 5 à 15 | % | FR-11 |
+| Langue par défaut | français | — | FR-14 |
+
+### D.2 Crédit (partie 2)
+
+Règle commune (FR-86) : chaque valeur est un paramètre de l'IMF, modifiable par le DG ou le ROC ; chaque changement est daté, tracé et ne touche pas les dossiers déjà décidés, qui gardent les valeurs en vigueur le jour de la décision. `[ASSUMPTION]` : défaut déduit, aucune décision du PO.
+
+| Paramètre | Valeur par défaut | Unité | FR propriétaire |
+|---|---|---|---|
+| Plafond d'usure (TEG), daté, par catégorie d'institution | 24 | % par an | FR-36 |
+| Méthode du TEG | actuariel annuel proportionnel (frais retenus au décaissement et assurance obligatoire inclus, pénalités exclues) ; à faire valider par un juriste (§12.3) | méthode | FR-36 |
+| Bornes de montant et de durée par produit (défauts de démo) | microcrédit individuel 50 000 à 2 000 000 FCFA, 3 à 12 mois ; crédit de groupe 500 000 à 5 000 000 FCFA, 6 à 24 mois | FCFA ; mois | FR-33 |
+| Ancienneté minimum d'activité ou de relation (bloquante) | 3 | mois | FR-34 |
+| Seuil d'alerte de score (information, jamais un blocage) | 45 | points sur 100 | FR-34 |
+| Barème de départ du score | paiement 40, capacité 30, activité 20, terrain 10 [ASSUMPTION] | points | FR-49 |
+| Classe de risque à l'octroi : bornes du score | 75 / 55 / 35 / 15 (cinq classes) | points | FR-49 |
+| Part d'alignement avec la suggestion qui alerte l'AUD | 95 sur au moins 50 décisions [ASSUMPTION] | % ; décisions | FR-49 |
+| Consultation du BIC obligatoire | non, par pays et par produit | oui / non | FR-44 |
+| Nombre minimal de cautions ; seuil de montant | 2 ; au-dessus de 300 000 | cautions ; FCFA | FR-41 |
+| Taux de couverture des cautions (alerte) | 1 | ratio | FR-41 |
+| Dépôt de garantie | 10 % au-dessus de 300 000 ; 15 % au-dessus de 1 000 000 | % du montant ; FCFA | FR-42 |
+| Garantie réelle | 30 % au-dessus de 500 000 ; 50 % au-dessus de 1 000 000 | % du montant ; FCFA | FR-42 |
+| Liste des pièces exigées par produit | CNI, justificatif de domicile, photo, justificatif de revenu, registre de commerce, fiche visite terrain | liste | FR-39 |
+| Seuil de visites ; nombre de visites | 500 000 ; 1 visite sous le seuil, 2 au-dessus | FCFA ; visites | FR-45 |
+| Rayon de tolérance de la visite | 100 | m | FR-46 |
+| Alerte d'audit : visite validée loin de toute adresse connue | 500 | m | FR-46 |
+| Taux d'effort : seuil d'alerte critique | 33 | % du revenu net | FR-47 |
+| Taux d'effort : plafond bloquant (dérogation motivée du ROC) | 40 | % du revenu net | FR-47 |
+| Endettement externe : seuil d'alerte | 50 | % du revenu | FR-47 |
+| Période d'observation des mouvements du compte (alertes, onglet Client) | 3 | mois | FR-48, FR-270 |
+| Alerte « dépôt suspect » | dépôt supérieur à 15 % du montant demandé, 24 à 72 h avant le rendez-vous d'analyse | % ; heures | FR-48 |
+| Alerte « gonflement récent du solde » [ASSUMPTION] | solde supérieur à 2 fois le solde moyen de 90 jours, dans les 30 jours avant le rendez-vous | facteur ; jours | FR-48 |
+| Alerte « dépôt inhabituel » [ASSUMPTION] | dépôt supérieur à 3 fois la médiane des dépôts de la période | facteur | FR-48 |
+| Alerte « compte de transit » [ASSUMPTION] | 80 % des dépôts ressortent sous 48 h et solde moyen sous 10 % des dépôts | % ; heures | FR-48 |
+| Gravité par défaut des neuf alertes d'instruction [ASSUMPTION] | dépôt suspect et taux d'effort : critique ; gonflement, cautions, concentration, endettement, transit : attention ; dépôt inhabituel, échantillon faible : information | niveau | FR-48 |
+| Seuil de montant de l'avis consultatif du risque [ASSUMPTION] | 2 000 000 | FCFA | FR-52 |
+| Délai de l'avis du risque | 48 | heures | FR-52 |
+| Retours pour garanties du ROC [ASSUMPTION] | 2 | retours | FR-55 |
+| Délai d'alerte « comité absent » | 72 | heures | FR-56 |
+| Composition par défaut du comité (le DG peut la définir par dossier) | ROC + (DG ou RA) | rôles | FR-56 |
+| Niveau d'approbation : DG obligatoire au-dessus de | 5 000 000 | FCFA | FR-57 |
+| Plafond de prêts aux parties liées | 10 | % des fonds propres | FR-58 |
+| Date de la première échéance (par défaut) [ASSUMPTION] | un mois après la date prévue de décaissement | mois | FR-59 |
+| Méthode d'échéancier | annuité constante mensuelle ; options : capital constant, in fine, hebdomadaire, bimensuelle, différé | méthode | FR-61 |
+| Jour d'échéance | celui de la première échéance | jour du mois | FR-61 |
+| Langue du contrat | français | langue | FR-62 |
+| Frais de dossier (défauts de démo) | 2 % microcrédit individuel ; 1,5 % crédit de groupe | % du montant | FR-65 |
+| Assurance décès-invalidité (défaut de démo) | 1,2 | % par an | FR-65 |
+| Canaux de décaissement par pays et par opérateur | Togo : espèces, virement, Mobile Money (Flooz, Mixx), PI-SPI | liste | FR-64 |
+| Délai d'ordre non exécuté (passage à INCONNU) [ASSUMPTION] | 24 | heures | FR-64 |
+| Fenêtre de rapprochement des ordres au redémarrage ou après restauration | 1 | heure | FR-64 |
+| Écart de rattachement automatique d'un paiement à une échéance (sans la solder) | moins de 1 | % de l'échéance | FR-71 |
+| Tolérance d'arrondi (distincte du 1 %, alignée sur le cœur) | quelques FCFA, valeur à fixer avec le cœur | FCFA | FR-71 |
+| Membres d'un groupe solidaire | 5 à 30 | membres | FR-72 |
+| Contagion d'un groupe : membres en retard ; délai [ASSUMPTION] | 2 membres ou 20 % (le plus petit) ; 7 jours | membres ; jours | FR-74 |
+| Nouveau cycle : retard maximal au cycle précédent | 30 | jours | FR-76 |
+| Nouveau cycle : plafond du montant | 1,5 fois le cycle précédent | facteur | FR-76 |
+| Conservation de la piste d'audit | 10 | ans | FR-80 |
+| Alerte d'audit : même personne valide un paiement Mobile Money et modifie l'échéance du même client | 1 | heure | FR-82 |
+| Objectif de délai de traitement du CC | 24 | heures | FR-83 |
+| Objectif de délai demande à décaissement | 9 | jours | FR-83 |
+| SLA d'un dossier en attente (« SLA dépassé ») | 48 | heures | FR-83 |
+| Seuil de saturation sectorielle (calibré sur les données de l'IMF) | 35 | % de l'encours de l'agence | FR-97 |
+| Échantillon faible pour une comparaison de secteur | 30 | dossiers | FR-97 |
+| Gabarits de notification et de contrat | à fournir par l'IMF | gabarit | FR-62, FR-87 |
+| Liste de référence des motifs de refus | revenus insuffisants, activité non vérifiable, endettement, garanties, historique, faux documents, taux d'effort, concentration, plus champ libre | liste | FR-60 |
+| Durée cible du parcours UJ-1 en démonstration | 30 | minutes | FR-93 |
+
+### D.3 Modules propres à l'IMF (partie 3)
+
+Toute valeur est une valeur de départ, modifiable par l'IMF, jamais codée en dur. « Calibré » : recalculé sur les données de l'IMF après la reprise, validé par un humain (décision E5, FR-178). Les valeurs marquées [ASSUMPTION] ne sont décidées nulle part ; elles sont à confirmer.
+
+#### Produits financiers (§6.1)
+
+| Paramètre | Valeur par défaut | Unité | FR propriétaire |
+|---|---|---|---|
+| Pas de saisie du montant | 10 000 | FCFA | FR-101 |
+| Montant minimum de démo | 50 000 | FCFA | FR-101 |
+| Membres d'un groupe (bornes) | 5 et 30 | membres | FR-101, FR-129 |
+| Ancienneté minimum du client pour un produit | 3 | mois | FR-104 |
+| Score d'alerte (information, jamais un blocage) | 45 | points sur 100 | FR-104 |
+| Cautions exigées | 2 au-dessus de 300 000 | nombre ; FCFA | FR-105 |
+| Dépôt de garantie | 10 % ; 15 % au-dessus de 1 000 000 | % du montant ; FCFA | FR-105 |
+| Garantie réelle | 30 % ; 50 % au-dessus de 1 000 000 | % du montant ; FCFA | FR-105 |
+| Délai de dormance, épargne à vue | 6 | mois sans mouvement | FR-106 |
+| Délai de dormance, dépôt à terme | 3 | mois après l'échéance non renouvelée | FR-106 |
+| Inclusion de chaque type de frais dans le TEG | dossier, assurance, coût de garantie inclus ; pénalités, impôts et taxes exclus | par type de frais | FR-103 |
+| Méthode du TEG | actuariel annuel proportionnel (taux de la période × périodes par an) | méthode figée, à valider par un juriste | FR-108 |
+| Périodes par an pour le TEG | 12 (mensuelle), 24 (bimensuelle), 52 (hebdomadaire) | périodes | FR-108 |
+| Arrondi du TEG | 0,01 | point | FR-108 |
+| Plafond d'usure (daté, par catégorie d'institution) | 24, en vigueur au 01/06/2026 | % par an | partie 1 ; FR-108, FR-189, FR-195 |
+| Écart toléré au tableau de TEG de référence | 0,1 | point | FR-108, FR-111 |
+| Taux d'effort, plafond bloquant du crédit | 40 | % du revenu net estimé | partie 2 ; renvoi FR-113 |
+| Délai de simulation | 500 | ms pour 36 échéances | FR-109 |
+
+#### Clients, KYC et LBC/FT (§6.2)
+
+| Paramètre | Valeur par défaut | Unité | FR propriétaire |
+|---|---|---|---|
+| Pièces exigées par niveau de KYC (simplifié, standard, renforcé) | à définir par l'IMF | liste | FR-119 |
+| Seuil de simplification du KYC | à définir par l'IMF | FCFA | FR-119 |
+| Alerte avant expiration d'une pièce | 30 | jours | FR-118 |
+| Taille maximale d'une photo | 5 | Mo | FR-118 |
+| Taille d'une photo compressée hors ligne | moins de 500 | Ko | FR-118 |
+| Revue du KYC, niveau renforcé | 12 | mois | FR-122 |
+| Revue du KYC, niveau standard | 24 | mois | FR-122 |
+| Revue du KYC, niveau simplifié | 36 | mois | FR-122 |
+| Délai avant « à renouveler » après l'échéance de revue | 30 | jours | FR-122 |
+| Rafraîchissement des listes de sanctions | quotidien | fréquence | FR-121 |
+| Délai de signalement après un rafraîchissement | 1 | heure | FR-121 |
+| Alerte de liste de sanctions périmée | 7 | jours | FR-193 |
+| Délai maximal entre une correspondance confirmée et la demande de gel [ASSUMPTION] | 24 | heures | FR-121 |
+| Délai maximal entre une correspondance confirmée et la déclaration [ASSUMPTION] | 72 | heures | FR-121 |
+| Seuil de déclaration des transactions en espèces (CENTIF) | 15 000 000 | FCFA | FR-123 |
+| Seuil d'alerte sur les opérations fractionnées | 80 % du seuil sur 7 jours | % ; jours | FR-123 |
+| Scénarios de soupçon LBC/FT (huit, activables) | tous actifs [ASSUMPTION] | oui/non par scénario | FR-123 |
+| Remboursement anticipé massif : fenêtre après le décaissement | 30 | jours | FR-123 |
+| Écart d'équité qui alerte (taux d'acceptation d'un groupe contre la moyenne) [ASSUMPTION] | 10 points sur au moins 30 demandes | points ; demandes | FR-124 |
+| Liste fermée des variables du score | historique de paiement, retards, mouvements du compte, capacité, activité, secteur et saison, garanties, localisation vérifiée terrain, prêts antérieurs ; jamais genre, situation matrimoniale, nationalité, religion | liste versionnée | FR-124 |
+| Barème du score v0 | paiement 40, capacité 30, activité 20, terrain 10 | points | FR-124 |
+| Délai de recalcul de la PD et de la classe estimée | 15 | minutes | FR-125 |
+| Horizon de la classe prévue | 30 | jours | FR-125 |
+| Seuil d'alerte des signaux faibles (calibré) | 0,7 | intensité de 0 à 1 | FR-126 |
+| Groupes à crédit actif par personne | 1 | groupe | FR-129 |
+| Âge d'un brouillon en file qui alerte | 7 | jours | FR-134 |
+| Âge d'un indicateur macro « périmé » | à définir par l'IMF | jours | FR-127 |
+| Horizons de la prévision de l'encours d'épargne | 1 et 3 | mois | FR-131 |
+| Durée de conservation de la piste d'audit et des pièces | 10 | ans | FR-133, FR-191 |
+
+#### Collecte (§6.3)
+
+| Paramètre | Valeur par défaut | Unité | FR propriétaire |
+|---|---|---|---|
+| Plage de numéros de reçu réservée par appareil | à définir | numéros | FR-135 |
+| Âge d'une collecte en file qui alerte | 7 | jours | FR-136 |
+| Lot de synchronisation (test) | 50 collectes en 30 secondes | collectes ; s | FR-136 |
+| Ordre d'imputation | pénalités, intérêts, capital | ordre | FR-137 |
+| Écart de rattachement automatique (choisit l'échéance, ne la solde pas) | 1 | % | FR-139 |
+| Tolérance d'arrondi (distincte de l'écart de rattachement) [ASSUMPTION] | 5 | FCFA | FR-139 |
+| Fenêtre de détection de doublon | 5 minutes ; ± 100 FCFA | minutes ; FCFA | FR-139 |
+| Âge d'un paiement Mobile Money en attente qui alerte | 24 | heures | FR-140 |
+| Espèces non remises : seuil de la liste du RA | 1 | jour | FR-138, FR-145 |
+| Heure d'envoi du plan de collecte | la veille au soir | heure | FR-141 |
+
+#### Caisse des collecteurs (§6.4)
+
+| Paramètre | Valeur par défaut | Unité | FR propriétaire |
+|---|---|---|---|
+| Plafond de détention d'un fonds de caisse (calibré) | 100 000 | FCFA | FR-143 |
+| Plafond d'alerte de l'argent détenu (calibré) | 500 000 | FCFA | FR-143 |
+| Blocage de l'ouverture si la clôture de la veille n'est pas faite | 1 | jour | FR-144 |
+| Heure du rapport du soir | 18 h 00 | heure | FR-144 |
+| Seuil d'alerte d'écart de caisse (calibré, validé par le DAF ou le DG) | 5 000 | FCFA | FR-145 |
+| Récurrence d'écarts non résolus | 3 en 30 jours | écarts ; jours | FR-145 |
+| Rechargement du tableau des clôtures | moins de 5 | secondes | FR-145 |
+| Horizon de la prévision de trésorerie | 7 | jours | FR-149 |
+
+#### Échange avec le cœur (§6.5 et §6.6)
+
+| Paramètre | Valeur par défaut | Unité | FR propriétaire |
+|---|---|---|---|
+| Transport de l'échange | API ou fichiers | choix | FR-157 |
+| Fraîcheur par défaut | 5 minutes (API seulement), heure, nuit (avant 6 h) | fréquence | FR-159 |
+| Seuil « périmée » d'une donnée | 2 fois la fraîcheur par défaut | multiple | FR-159 |
+| Délai avant « jamais confirmé » d'un envoi | 24 | heures | FR-152 |
+| Délai d'un remboursement sans mouvement du cœur | 48 | heures | FR-155 |
+| Délai d'un élément de la liste « à saisir dans le cœur » | 72 | heures | FR-156 |
+| Interrogation du relais | 1 | minute | FR-158 |
+| Âge maximal de la lecture du reste dû avant l'émission d'un lien de paiement [ASSUMPTION] | 15 minutes avec une API ; 1 heure avec des fichiers | durée | FR-150 |
+| Tolérance d'écart d'échéancier | 0 FCFA sur les dates ; 1 % sur les montants | FCFA ; % | FR-162 |
+| Écart non résolu du rapprochement trimestriel | 30 | jours | FR-163 |
+| Délais et cas de rejet du cœur fictif | à régler dans l'espace d'essai | durée ; cas | FR-168 |
+| Proportions de prêts qui paient à l'heure, en retard, pas du tout (cœur fictif) | à régler dans l'espace d'essai | % | FR-169 |
+| Remise à zéro de la démo | moins de 10 | minutes | FR-171 |
+
+#### Risque de portefeuille (§6.7)
+
+| Paramètre | Valeur par défaut | Unité | FR propriétaire |
+|---|---|---|---|
+| Seuils de jours du PAR | 1, 7, 30, 60, 90 (180 ajoutable) | jours | FR-173 |
+| PAR 1 : alerte ; critique [ASSUMPTION : alerte à la moitié du critique] | 7,5 ; 15 | % de l'encours | FR-173 |
+| PAR 7 : alerte ; critique [ASSUMPTION] | 6 ; 12 | % de l'encours | FR-173 |
+| PAR 30 : alerte ; critique (décision D5) | 5 ; 10 | % de l'encours | FR-173, FR-179 |
+| PAR 60 : alerte ; critique [ASSUMPTION] | 3 ; 6 | % de l'encours | FR-173 |
+| PAR 90 : alerte ; critique [ASSUMPTION] | 2 ; 4 | % de l'encours | FR-173 |
+| Classes réglementaires du pays, barème SFD par défaut : impayé de 3 mois au plus | provision facultative, 0 | % de la base | FR-175, FR-176 |
+| Classe de plus de 3 à 6 mois | 40 | % de la base | FR-175, FR-176 |
+| Classe de plus de 6 à 12 mois | 80 | % de la base | FR-175, FR-176 |
+| Classe de plus de 12 à 24 mois | 100 | % de la base | FR-175, FR-176 |
+| Seuil de perte | plus de 24 | mois d'impayé | FR-175, FR-176 |
+| Tranches de l'état DIMF 2010 du rapport BCEAO | 3 au plus ; plus de 3 à 6 ; plus de 6 à 12 ; plus de 12 à 24 | mois d'impayé | FR-185 |
+| Provision sur l'encours sain | 0 | % | FR-176 |
+| Rééchelonné : échéances honorées avant de sortir de la souffrance | 3 | échéances | FR-175 |
+| Concentration par secteur : alerte ; critique | 28 ; 35 | % de l'encours | FR-177, FR-180 |
+| Concentration par agence : alerte | 25 | % de l'encours | FR-177 |
+| Concentration par agent : alerte ; critique | 50 ; 60 | % de l'encours | FR-177 |
+| Concentration des retards sur un agent ou une zone | mêmes valeurs que la concentration par agent et par agence | % de l'encours en retard | FR-177 |
+| Recalcul périodique des seuils (calibré) | trimestriel | fréquence | FR-178 |
+| Délai de prise en charge d'une alerte de risque | 48 | heures | FR-179 |
+| Délai d'action d'une alerte critique du réseau | 15 | jours | FR-179 |
+| Hausse anormale du PAR 30 d'une agence [ASSUMPTION] | plus de 0,8 | point au-dessus du réseau | FR-179 |
+| Migration vers plus de 30 jours qui alerte | plus de 15 | % de l'encours en un mois | FR-179 |
+| Couverture du PAR : alerte ; critique | sous 80 ; sous 60 | % | FR-272 |
+| Tranches de l'entonnoir d'ancienneté | à jour ; 1-6 ; 7-29 ; 30-59 ; 60-89 ; 90 et plus | jours | FR-272 |
+| Décote par nature de garantie pour la perte en cas de défaut [ASSUMPTION] | 0 | % | FR-181 |
+| Horizons de la prévision du PAR | 1, 3 et 6 | mois | FR-181 |
+
+#### Conformité BCEAO (§6.8)
+
+| Paramètre | Valeur par défaut | Unité | FR propriétaire |
+|---|---|---|---|
+| Catégorie de supervision | grande IMF (démo) | catégorie | FR-184 |
+| Seuil de supervision (ancien « article 44 ») | 2 milliards, dépôts ou crédits | FCFA | FR-184 |
+| Périodicité du rapport | mensuelle pour la grande IMF, trimestrielle sinon | fréquence | FR-184 |
+| Délai de remise après la fin de la période | 30 | jours | FR-184 |
+| Alerte avant l'échéance d'un état | 5 | jours | FR-184 |
+| Calendrier des états : périodicité et réglage « produit par Prospera » ou « fait hors Prospera » | indicateurs mensuels, rapport mensuel, PAR trimestriel, liquidité hebdomadaire, LBC/FT mensuel, semestriel, plan de redressement à la demande, états annuels | par état | FR-184 |
+| Génération du PDF d'un rapport complet | moins de 15 | secondes pour 50 000 prêts | FR-188 |
+| Normes prudentielles (limitation des risques 200 %, couverture des emplois 100 %, prêts aux dirigeants 10 %, risque sur une signature 10 %, liquidité 100/80/60 %, autres opérations 5 %, réserve générale 15 %, capitalisation 15 %, participations 25 %) | seuils de l'Instruction BCEAO n° 010-08-2010 | % | FR-187 |
+| Fenêtre de contrôle de la séparation des tâches | 1 | heure | FR-192 |
+| Audit des agences : objectif réalisé qui alerte | moins de 70 | % | FR-192 |
+| Audit des agences : transaction non rapprochée | plus de 7 | jours | FR-192 |
+| Audit des agences : paiement Mobile Money en attente | plus de 48 | heures | FR-192 |
+| Audit des agences : retrait au-dessus d'un plafond | à définir par l'IMF | FCFA | FR-192 |
+| Collecte inhabituelle pour l'anomalie d'audit | plus de 2 fois la moyenne | multiple | FR-194 |
+| Paramètres réglementaires (texte source, date d'effet, statut de vérification) | par pays | versionné | FR-195 |
+
+### D.4 Modules partagés et cadrés, installation (partie 4)
+
+`[ASSUMPTION]` = valeur non décidée par le PO, marquée `[ASSUMPTION]` dans le texte. Les autres valeurs viennent du récit, des cahiers ou de la démo (voir le texte de la FR).
+
+| Paramètre | Valeur par défaut | Unité | FR propriétaire |
+|---|---|---|---|
+| Rang de priorité des motifs de visite | recouvrement, urgente, instruction, collecte d'échéance, collecte d'épargne, suivi de groupe, prospection, routinière | liste ordonnée | FR-200 |
+| Retard avant motif « recouvrement » et avant ouverture du dossier de recouvrement (EN_RETARD) | 7 | jours | FR-200, FR-211, FR-214 |
+| Rayon de la visite d'instruction | 100 | mètres | FR-201 |
+| Rayon des autres visites | 200 | mètres | FR-201 |
+| Taille maximale d'une photo (JPEG, PNG) | 5 | Mo | FR-201 |
+| Synchronisation de 50 visites | 30 | secondes (au plus) | FR-204, FR-264 |
+| Alerte de visite ou brouillon en file | 7 | jours | FR-204 |
+| Stockage local de l'application | 500 | Mo | FR-204 |
+| Inactivité avant verrouillage de l'application [ASSUMPTION] | 5 | minutes | FR-204 |
+| Délai sans connexion avant effacement local [ASSUMPTION] | 14 | jours | FR-204 |
+| Rayon de l'alerte de proximité | 200 | mètres | FR-206 |
+| Heure du rapport du soir | 18 h | heure | FR-207 |
+| Seuil de conseil de coaching du rapport du soir | 80 | % de l'objectif du jour | FR-207 |
+| Consentement propre à la voix (reconnaissance vocale) | absent = dictée désactivée | consentement | FR-207, FR-260 |
+| Positions GPS d'agents conservées | 90 | jours glissants | §7.1 (PRD-D FR-106) |
+| Seuils de zone de prospection (densité de clients actifs au km², visites minimales, charge maximale d'un agent) | calibrés sur les données de l'IMF | calibrage (E5) | FR-208 |
+| Couverture sous laquelle une zone est « à renforcer » | 70 | % | FR-208 |
+| Suspension de relance pendant l'attente du mouvement du cœur | 48 | heures | FR-209 |
+| Âge maximal de la lecture du reste dû avant l'émission d'un lien de paiement [ASSUMPTION] | 15 | minutes | FR-212, FR-257 |
+| Seuil de rapprochement (choisit l'échéance, ne la solde pas) | 1 | % de l'échéance | FR-210, FR-256 |
+| Tolérance d'arrondi du reste dû (distincte du seuil de 1 %) [ASSUMPTION] | 5 | FCFA | FR-210 |
+| Attente d'un paiement Mobile Money avant tête de file du CPT | 24 | heures | FR-210 |
+| Regroupement des messages d'un client le même jour | activé | interrupteur | FR-211 |
+| Calendrier de relances : préventif, courtois, SMS, ferme, mission, alerte ROC | J-3, J+1, J+3 (sans réponse sous 24 h), J+7, J+7, J+7 | jours | FR-212 |
+| Score de recouvrement déclenchant l'alerte au ROC à J+7 | sous 50 | points | FR-212 |
+| Horaires des envois automatiques | 6 h et 14 h | heures | FR-212, FR-250 |
+| Taux de réponse du client pour le canal WhatsApp par défaut | 60 | % | FR-212, FR-226 |
+| Échecs de relance numérique avant mission terrain | 3 | échecs | FR-212 |
+| Délai de grâce d'une promesse | 24 | heures | FR-213 |
+| Rupture de promesse avant alerte au ROC | 3 | jours | FR-213 |
+| Promesses rompues avant accord écrit et fiche du mauvais payeur | 2 | promesses | FR-213, FR-222 |
+| Statuts de recouvrement : retard avant EN_RETARD | 7 | jours | FR-214 |
+| Taux de collecte de l'agent : seuils VIGILANCE et CRITIQUE (calibrés) | 75 et 55 | % | FR-215 |
+| Concentration du PAR d'une agence sur un agent ou une zone | 30 | % | FR-215 |
+| Capacité d'un REC | à fixer par l'IMF | dossiers par jour | FR-216 |
+| Réexamen d'un blocage de dossier | 6 | mois (au plus) | FR-218 |
+| Délai d'examen d'un recours de client bloqué [ASSUMPTION] | aucune valeur par défaut, fixée par l'IMF | jours | FR-218 |
+| Passage au contentieux proposé | J+90, ou score sous 20 | jours, points | FR-219 |
+| Rappel d'une proposition de contentieux refusée [ASSUMPTION] | 120 | jours (J+120) | FR-219 |
+| Durée maximale supplémentaire d'un plan d'étalement | 12 | mois | FR-220 |
+| Plans d'étalement par prêt | 1 | plan | FR-220 |
+| Échéances honorées pour régulariser un plan | 3 | échéances | FR-214, FR-220 |
+| Perte définitive proposée | 24 | mois d'impayé | FR-221 |
+| Seuil de passage de la perte devant le conseil [ASSUMPTION] | aucune valeur par défaut, fixée par l'IMF | FCFA | FR-221 |
+| Ouverture de la fiche du mauvais payeur | plus de 30 jours de retard, ou 2 promesses rompues | jours, promesses | FR-222 |
+| Fermeture de la fiche du mauvais payeur | 6 | mois sans retard | FR-222 |
+| Délai de relecture de l'analyse du comportement de retard [ASSUMPTION] | 7 | jours | FR-228 |
+| Ancienneté d'une source jugée « ancienne » | 90 | jours | FR-228 |
+| Poids du score de recouvrement (historique 25, ancienneté 20, réactivité 15, capacité 15, flux Mobile Money 10, garanties 10, saisonnalité 5) [ASSUMPTION] | total 100 | % | FR-227 |
+| Score de recouvrement : rouge, orange | sous 35, sous 50 | points | FR-227 |
+| Verdict de probabilité : probable, incertain | 50 % et plus, 30 à 49 % | % | FR-227 |
+| Conservation des scores | 5 | ans | FR-227 |
+| Analyse affichée en | 5 | secondes (au plus) | FR-227 |
+| PAR disponibles | 1, 7, 30, 60, 90 (cumulatifs) | jours | FR-173, FR-215, FR-230, FR-231 |
+| Seuil d'alerte PAR 30 d'agence : orange, rouge | 8 et 10 | % | FR-231, FR-235 (jeu unique) |
+| Collecte d'agence : verte, orange | 90 et 70 | % de l'objectif | FR-231 |
+| Score de santé d'agence : vert, orange | 80 et 65 | points | FR-231 |
+| Rafraîchissement du tableau de bord [ASSUMPTION] | 5 | minutes | FR-231 |
+| Concentration d'un secteur dans le portefeuille | 30 (une seule valeur par IMF) | % | FR-233, FR-235 |
+| Remontée d'une alerte non prise en charge | 48 | heures | FR-234 |
+| PAR d'agence ou de zone en hausse | +2 | points sur le mois précédent | FR-235 |
+| Collecte d'agence sous l'objectif (alerte) | moins de 80 | % | FR-235 |
+| Écart de performance d'un agent (alerte) | moins de 25 sous l'objectif projeté | % | FR-235, FR-241 |
+| Demande en attente dans une étape (alerte) | 48 | heures | FR-235, FR-273 |
+| Lead non assigné (alerte) | 24 | heures | FR-235, FR-246 |
+| Rapport de direction | 06:00 | heure | FR-236 |
+| Coefficients de la carte de chaleur du PAR par agence [ASSUMPTION] | seuil × 1,3 (rouge), seuil (orange), seuil × 0,7 (jaune) | multiplicateur | FR-273 |
+| Voisinage d'agences pour la comparaison | ± 20 | % d'encours | FR-238 |
+| Barème d'équipe : EXCELLENT, BON, À SURVEILLER | 90, 75, 60 | points | FR-240 |
+| Plafond d'atteinte d'un KPI | 130 | % | FR-240 |
+| Poids des KPI de poste (huit postes) [ASSUMPTION] | total 100 par poste | % | FR-240 |
+| Date limite de fixation des objectifs | le 5 du mois | jour du mois | FR-241 |
+| Niveaux de l'écart à l'objectif | 10 (jaune), 25 (orange à rouge) | % | FR-241 |
+| Budget exigeant la validation du DG | à fixer par l'IMF | FCFA | FR-245 |
+| Exclusion des envois commerciaux pour retard | J+30 | jours | FR-245 |
+| Plafond de messages commerciaux par client [ASSUMPTION] | 2 par semaine | messages | FR-245 |
+| Délai d'attribution d'une campagne | campagne + 7 | jours | FR-245 |
+| Envoi à 500 prospects | 10 | minutes (au plus) | FR-245 |
+| Tentatives avant disqualification d'un prospect | 3 | tentatives | FR-246 |
+| Poids du score de prospect (zone 25, secteur 25, montant 20, rapidité 15, source 15) | total 100 | % | FR-246 |
+| Priorité de rappel d'un prospect | 80-100 : 24 h ; 60-79 : 48 h ; 40-59 : une semaine | score, délai | FR-246 |
+| Plafond des campagnes de relance | aucun (message transactionnel) | — | FR-274 |
+| Délai de coupure bancaire (« valider avant ») | à fixer par l'IMF (16 h dans la démo) | heure | FR-256 |
+| Canal « choisi par la proposition de l'IA » pour J-3 et J+1 | éteint [ASSUMPTION] | interrupteur | FR-226 |
+| Interrogation du relais | 1 | minute | FR-263 |
+| Durée de vie d'un lien de paiement [ASSUMPTION] | 72 | heures | FR-263 |
+| Purge d'un événement tiré du relais [ASSUMPTION] | 7 | jours | FR-263 |
+| Rapprochement des événements du relais avec le relevé du fournisseur | quotidien et après toute coupure | fréquence | FR-263 |
+| Rapprochement des ordres de décaissement après redémarrage ou restauration | dernière heure (égale au RPO) | heure | FR-267, FR-256 |
+| Coupure d'une mise à jour | 15 | minutes (au plus) | FR-262 |
+| Délai d'acceptation d'un correctif de sécurité critique [ASSUMPTION] | fixé au contrat de maintenance | jours | FR-262 |
+| Contrat de maintenance | payé chaque mois, en plus de la licence à vie | mensuel | FR-261 |
+| Sauvegardes : quotidiennes, hebdomadaires, mensuelles | 7, 4, 3 | copies | FR-267 |
+| Test de restauration | mensuel (une seule fréquence) | mois | FR-267 |
+| RPO, RTO | 1 et 4 | heures | FR-266, FR-267 |
+| Conservation de la piste d'audit, des dossiers de crédit et des pièces KYC | 10 au moins | ans | FR-267 |
+| Rafraîchissement des listes de sanctions | tous les jours | jours | FR-268 |
+| Liste de sanctions périmée (alerte) | 7 | jours | FR-268 |
+| Taille testée de la démonstration | ×10 (30 agences, 100 agents, 10 000 prêts actifs) | multiple | FR-266 |
+| Objectifs de performance (tableau de bord, liste au 95e centile, export PDF BCEAO) [ASSUMPTION] | 3 s, 500 ms, 10 s | secondes | FR-266 |
+| Niveau d'apprentissage et finalités consenties | choisis par l'IMF (niveau 2 fermé) | consentement | FR-260 |
