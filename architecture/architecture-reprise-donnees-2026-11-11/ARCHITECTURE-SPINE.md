@@ -23,6 +23,8 @@ companions: [.memlog.md, reviews/]
 
 # Architecture Spine — Reprise de données
 
+*Amendée le 2026-11-13 par le PRD Assurance (`prds/prd-reprise-donnees-2026-11-10/amendement-2026-11-13-assurance.md`) : API de l'assurance au premier jour quand le logiciel de la compagnie en expose une, charge de `reprise.cles-rattachement.publiees@1`, resynchronisation nocturne par `liaison-assureur`.*
+
 *Amendée le 2026-11-12 par la spine de Connecteurs (`architecture-connecteurs-2026-11-12`, AD-31) : AD-3 (code du système d'origine déclaré par l'intégrateur), AD-4, AD-13 et AD-21 (kit des cibles, route des contrôles ouverte à Connecteurs, contrats ajoutés), AD-7 et AD-33 (code du système d'origine au dossier, tables de correspondance, effacement des tables cédées), AD-11 (comptage d'ouverture), AD-18 (paquet d'adaptateurs et écriture), AD-20 et AD-28 (domaine d'une correspondance, point de coupure), AD-23 (liste des objets de février), Deferred (adaptateur `odoo` et nuit résolus).*
 
 Requise pour février : la mise en service des deux clients attend le feu vert de la Reprise. L'**assureur** (sur site) fournit un export Excel ; le **distributeur** (hébergé) fournit des fichiers ou un export Sage, et quitte Sage. Raisons au `.memlog.md` (D-1 → D-36, N-1 → N-6). `[ADOPTED]` = tranché par le PO.
