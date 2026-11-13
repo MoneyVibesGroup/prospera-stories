@@ -74,7 +74,10 @@ export const MANIFESTE_CATALOGUE = {
   //   (AD-8) ; sans lui, le volet freelance est `NON_INSTALLE` et le hook de révélation reste inerte ;
   // - stock, commande : le retrait d'un article qui porte du stock ou des commandes en cours est refusé
   //   (FR-C43) ; sans eux, le compte rendu de retrait dit « stock : non installé », jamais « 0 ».
-  enrichiPar: ['reseau', 'pdv', 'stock', 'commande'],
+  // - freelance (décision du PO du 2026-11-13, D-24 du PRD distributeur, FR-99) : SANS lui, tout le volet freelance est `NON_INSTALLE` : pas de
+  //   grilles freelance, pas d'écran « Mes prix », pas de hook de révélation ; aucune société sans freelances
+  //   ne voit un prix freelance vide sur un article.
+  enrichiPar: ['reseau', 'pdv', 'stock', 'commande', 'freelance'],
 
   // Le régime de taxe de l'article (FR-C13d) porte son taux ; il n'est pas lu dans un référentiel fiscal au
   // v1 [À CONFIRMER : le brancher sur le référentiel fiscal du Togo quand fiscal-service le publiera].
