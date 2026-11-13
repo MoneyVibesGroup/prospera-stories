@@ -29,8 +29,8 @@ Ce PRD décrit **l'IA commune de Prospera** : l'unique intelligence artificielle
 | Ce qui existait | Ce que ce PRD en fait |
 |---|---|
 | Le **PRD assistant-ia** (2 août 2026, amendé le 16 août) et la spine `assistant-service` (AD-1 à AD-23, jamais codée) | **Étendu et repris** : `assistant-service` devient `prospera-ia-service` (port :3417), qui porte trois modules (`ia`, `assistant`, `automatisations`). La doctrine, le contrat de Proposition, le mandat, le catalogue des types d'action, le RAG et l'audit sont repris ; le contrat est unifié (FR-12). |
-| Les **tableaux d'IA des PRD de verticale** (distributeur, microfinance, assurance, cabinet) | **Réunis** : chaque ligne devient une capacité de l'IA commune, rangée dans une famille (partie 3). Les PRD de verticale gardent ce que l'IA fait pour leur métier ; l'IA commune dit **comment**. En cas d'écart, **ce PRD fait foi pour le moteur et les garde-fous**, le PRD de verticale pour le métier. |
-| La note de **vision** locale du 10 au 11 novembre 2026 | **Reprise** pour la doctrine et la feuille de route ; ses produits (Risque comme produit, Pulse, Météo des prix, etc.) ne sont **pas** du premier jour (partie 3, feuille de route). |
+| Les **tableaux d'IA des PRD de verticale** (distributeur, microfinance, assurance, cabinet) | **Réunis** : chaque ligne devient une capacité de l'IA commune, rangée dans une famille (§10, FR-90 et FR-130). Les PRD de verticale gardent ce que l'IA fait pour leur métier ; l'IA commune dit **comment**. En cas d'écart, **ce PRD fait foi pour le moteur et les garde-fous**, le PRD de verticale pour le métier. |
+| La note de **vision** locale du 10 au 11 novembre 2026 | **Reprise** pour la doctrine et la feuille de route ; ses produits (Risque comme produit, Pulse, Météo des prix, etc.) ne sont **pas** du premier jour (§13, FR-146). |
 | La **spine de la microfinance** (PropositionPort) et le **registre de l'IA** de l'assurance | **Absorbés** dans le contrat unique de proposition et le registre de l'IA (FR-12, FR-17). |
 
 **Le document se lit en quatre parties.**
@@ -38,9 +38,9 @@ Ce PRD décrit **l'IA commune de Prospera** : l'unique intelligence artificielle
 | Partie | Contenu | Sections |
 |---|---|---|
 | **1. Le produit** | objet, vision, pour qui, vocabulaire, doctrine et garde-fous | §0 à §4 (FR-1 à FR-29) |
-| **2. Une IA, deux façons de tourner, et comment elle apprend** | en ligne et en local ; premières informations ; apprendre et se mettre à jour ; données et consentement ; exploitation, licence, absence de contact | §5 à §9 |
-| **3. Ce que l'IA fait pour chaque logiciel** | le catalogue des capacités par famille ; Copilot et agents ; lecture de pièces ; feuille de route | §10 à §13 |
-| **4. Le reste** | exigences transverses, indicateurs, périmètre, non-objectifs, décisions, hypothèses | §14 et suivants |
+| **2. Une IA, deux façons de tourner, et comment elle apprend** | en ligne et en local ; premières informations ; apprendre et se mettre à jour ; données et consentement ; exploitation, licence, absence de contact | §5 à §9 (FR-30 à FR-89) |
+| **3. Ce que l'IA fait pour chaque logiciel** | le catalogue des capacités par famille ; Copilot et agents ; lecture de pièces ; feuille de route | §10 à §13 (FR-90 à FR-159) |
+| **4. Le reste** | exigences transverses, indicateurs, périmètre, non-objectifs, décisions, hypothèses | §14 (FR-160 à FR-174), §15 à §20 (FR-175 et suivantes) |
 
 Quatre **annexes** : **A** le contrat de module (`ia`, `assistant`, `automatisations`, et la centrale de Money Vibes) ; **B** le contrat de proposition ; **C** ce qui sort d'une instance et ce qui n'en sort jamais ; **D** la table des paramètres. Les choix techniques renvoyés hors du PRD sont dans l'addendum.
 
@@ -50,7 +50,7 @@ Quatre **annexes** : **A** le contrat de module (`ia`, `assistant`, `automatisat
 
 #### FR-1 : Une seule IA Prospera, quatre logiciels, deux façons de tourner
 
-L'IA commune est **un seul produit, avec un seul code**. Les quatre logiciels (cabinet, distributeur, microfinance, assurance) la **consomment**. Aucun d'eux ne fabrique, n'entraîne ni n'héberge sa propre IA. Elle sert aussi toute verticale future, sans modification du noyau. Elle tourne **en ligne** (service multi-organisations de Money Vibes) ou **en local** (instance sur le serveur du client), avec les **mêmes contrats** (D1, D10). Les clauses d'exploitation (où, comment, quel dimensionnement) sont en partie 2.
+L'IA commune est **un seul produit, avec un seul code**. Les quatre logiciels (cabinet, distributeur, microfinance, assurance) la **consomment**. Aucun d'eux ne fabrique, n'entraîne ni n'héberge sa propre IA. Elle sert aussi toute verticale future, sans modification du noyau. Elle tourne **en ligne** (service multi-organisations de Money Vibes) ou **en local** (instance sur le serveur du client), avec les **mêmes contrats** (D1, D10). Les clauses d'exploitation (où, comment, quel dimensionnement) sont au §5 (FR-30, FR-32, FR-35, FR-41).
 
 **Conséquences (testables) :**
 - Un test déploie le même artefact en ligne et en local ; les mêmes jeux de requêtes rendent le même contrat de proposition (FR-12), aux valeurs près.
@@ -62,13 +62,13 @@ L'IA commune est **un seul produit, avec un seul code**. Les quatre logiciels (c
 Ce PRD **étend** le PRD assistant-ia (D2) et **remplace**, pour le moteur et les garde-fous de l'IA, les tableaux d'IA des PRD de verticale. Il ne réécrit **pas** le métier des verticales : la lecture d'une pièce de sinistre, le barème d'un score de crédit ou l'ordre de visite d'un commercial restent décrits dans leur PRD ; ce PRD les range dans une capacité et fixe ce qu'elles ont en commun. La note d'architecture du 20 juillet de l'assistant et sa règle « rien n'est appliqué sans validation humaine » sont **dépassées** : la doctrine est celle de FR-13 et FR-14.
 
 **Conséquences (testables) :**
-- Chaque ligne d'IA des PRD de verticale (distributeur, microfinance, assurance, cabinet) est reprise dans le catalogue des capacités avec sa FR d'origine : une table de correspondance (partie 3) n'a aucune ligne orpheline.
+- Chaque ligne d'IA des PRD de verticale (distributeur, microfinance, assurance, cabinet) est reprise dans le catalogue des capacités avec sa FR d'origine : une table de correspondance (FR-130) n'a aucune ligne orpheline.
 - Un contrôle de cohérence entre ce PRD et un PRD de verticale ne trouve aucun garde-fou plus faible dans la verticale que dans ce PRD ; s'il en trouve un, ce PRD l'emporte et le PRD de verticale est amendé.
 - Le PRD assistant d'août n'est plus cité comme source de doctrine dans un épic ou une story postérieure à ce PRD.
 
 #### FR-3 : Comment ce PRD se lit, se numérote et évolue
 
-Les FR 1 à 29 sont de la partie 1 ; les plages suivantes appartiennent aux parties 2 et 3 (voir le plan de rédaction). Tout seuil, délai, liste ou borne de l'IA est un **paramètre** (annexe D, table `code | libellé | défaut | unité | source | FR`), jamais une valeur codée en dur. Tout choix technique (framework d'apprentissage, registre de modèles, passerelle, version d'un outil) est dans l'**addendum**, pas ici. `[ASSUMPTION : les valeurs par défaut des paramètres sont des recommandations ; le PO les confirme ou les change à la relecture et à la séance de calibrage avec chaque client]`
+Les FR sont numérotées d'un seul tenant : FR-1 à FR-29 (§0 à §4), FR-30 à FR-89 (§5 à §9), FR-90 à FR-159 (§10 à §13), FR-160 à FR-174 (§14), FR-175 et suivantes (§15). Tout seuil, délai, liste ou borne de l'IA est un **paramètre** (annexe D, table `code | libellé | défaut | unité | source | FR`), jamais une valeur codée en dur. Tout choix technique (framework d'apprentissage, registre de modèles, passerelle, version d'un outil) est dans l'**addendum**, pas ici. `[ASSUMPTION : les valeurs par défaut des paramètres sont des recommandations ; le PO les confirme ou les change à la relecture et à la séance de calibrage avec chaque client]`
 
 **Conséquences (testables) :**
 - Une recherche de nombre dans le texte des FR ne trouve que des nombres qui sont soit des valeurs de loi citées, soit un renvoi à un paramètre de l'annexe D.
@@ -90,7 +90,7 @@ Les PME d'Afrique de l'Ouest et leurs partenaires (cabinets, distributeurs, inst
 
 **On met en commun l'apprentissage, pas les données.** Les fiches clients, les pièces, les textes libres et les données de santé **restent chez leur propriétaire**. Ce qui voyage vers Money Vibes est un **niveau d'export « apprentissage »** : des agrégats et des écarts sans identité, sous un seuil d'effectif minimal, tirés sous une **finalité consentie** au contrat. Ce qui revient est un **modèle signé**, jamais une donnée. C'est aussi ce qu'un acteur à produit unique ne peut pas copier : l'avantage vient de la somme de ce que quatre métiers apprennent, pas de la somme de leurs données.
 
-**Ce que ce PRD promet, et ne promet pas.** Il promet une IA **utile le premier jour**, **honnête** sur sa provenance et **jamais bloquante**. Il ne promet ni un modèle commun entraîné au premier jour (le premier modèle commun est annoncé au mieux au second semestre 2027, `[ASSUMPTION : date de la note de vision, à confirmer]`), ni la voix, ni les produits de la vision, qui sont la feuille de route (partie 3).
+**Ce que ce PRD promet, et ne promet pas.** Il promet une IA **utile le premier jour**, **honnête** sur sa provenance et **jamais bloquante**. Il ne promet ni un modèle commun entraîné au premier jour (le premier modèle commun est annoncé au mieux au second semestre 2027, `[ASSUMPTION : date de la note de vision, à confirmer]`), ni la voix pour tous les logiciels (c'est un réglage du pack de secteur, §14 : saisie vocale de terrain au premier jour pour la microfinance, sans voix pour l'assurance, « bientôt » pour le distributeur et le cabinet ; FR-138, FR-161), ni les produits de la vision, qui sont la feuille de route (§13, FR-146).
 
 #### FR-4 : Une seule IA, une seule façon de se présenter
 
@@ -111,7 +111,7 @@ Chaque capacité livre, **dès l'installation, sans historique du client**, au m
 
 #### FR-6 : Apprendre toujours, se mettre à jour, atteindre ses objectifs
 
-L'IA **apprend en continu** (boucle locale) et **se met à jour périodiquement** (boucle commune), mais **seulement pour atteindre ses objectifs** (la mécanique est décrite en partie 2). Chaque capacité porte ses objectifs mesurés (qualité, usage, effet métier, équité) ; une version nouvelle n'est promue que si elle bat la version en place sur ces objectifs sans régression d'équité ; un **rapport mensuel** par capacité et par client (en local) et un rapport global (chez Money Vibes) disent l'objectif et le réalisé. Les cibles chiffrées sont des paramètres.
+L'IA **apprend en continu** (boucle locale) et **se met à jour périodiquement** (boucle commune), mais **seulement pour atteindre ses objectifs** (la mécanique est décrite au §7, FR-56 à FR-75). Chaque capacité porte ses objectifs mesurés (qualité, usage, effet métier, équité) ; une version nouvelle n'est promue que si elle bat la version en place sur ces objectifs sans régression d'équité ; un **rapport mensuel** par capacité et par client (en local) et un rapport global (chez Money Vibes) disent l'objectif et le réalisé. Les cibles chiffrées sont des paramètres.
 
 **Conséquences (testables) :**
 - Une capacité sans fiche d'objectifs (indicateurs, cible, seuil minimal, fenêtre) ne peut pas être déclarée : le contrôle d'installation la refuse.
@@ -120,7 +120,7 @@ L'IA **apprend en continu** (boucle locale) et **se met à jour périodiquement*
 
 #### FR-7 : On met en commun l'apprentissage, pas les données
 
-Aucune donnée d'un client ne sert à l'IA d'un autre client. Ce qui est mis en commun est **l'apprentissage** : des écarts agrégés et anonymisés, au niveau d'export « apprentissage », sous la finalité « apprentissage commun » (FR-3 et partie 2). Une donnée n'entraîne jamais un modèle **hors de sa finalité** ; un client qui n'a pas consenti à la finalité ne remonte rien et reçoit tout de même les mises à jour du modèle commun. `[ASSUMPTION : recevoir le modèle commun sans y contribuer reste permis ; le PO peut en faire une contrepartie commerciale]` Money Vibes **ne promet jamais « vos données ne servent jamais à entraîner »** sans dire à quoi elles servent : les grands éditeurs ont tous des exceptions agrégées ou consenties, et ce PRD dit les siennes (FR-29).
+Aucune donnée d'un client ne sert à l'IA d'un autre client. Ce qui est mis en commun est **l'apprentissage** : des écarts agrégés et anonymisés, au niveau d'export « apprentissage », sous la finalité « apprentissage commun » (FR-76, FR-77). Une donnée n'entraîne jamais un modèle **hors de sa finalité** ; un client qui n'a pas consenti à la finalité ne remonte rien et reçoit tout de même les mises à jour du modèle commun. `[ASSUMPTION : recevoir le modèle commun sans y contribuer reste permis ; le PO peut en faire une contrepartie commerciale]` Money Vibes **ne promet jamais « vos données ne servent jamais à entraîner »** sans dire à quoi elles servent : les grands éditeurs ont tous des exceptions agrégées ou consenties, et ce PRD dit les siennes (FR-29).
 
 **Conséquences (testables) :**
 - Un test inspecte tout envoi sortant d'une instance : il ne contient ni identifiant, ni nom, ni téléphone, ni texte libre, ni donnée de santé, ni pièce ; il respecte le seuil d'effectif minimal (paramètre IA-P04).
@@ -142,7 +142,7 @@ L'IA n'a pas d'écran à elle : elle se montre dans les écrans des quatre logic
 | AUD | **Auditeur** (contrôle interne, audit externe, commissaire aux comptes) | lit le **registre de l'IA** et le **journal des accès**, **en lecture seule** ; vérifie le taux de motifs identiques à la proposition ; ne décide jamais |
 | DSI | **DSI du client** (administrateur informatique) | choisit la **date** de promotion d'une nouvelle version de modèle, la met en ombre, la retire ; règle les paramètres de l'instance ; **ne lit aucune donnée métier** par ce rôle |
 | IA-MV | **Équipe IA de Money Vibes** | entraîne le modèle commun, l'évalue, le **signe** et le publie ; lit les rapports globaux ; **ne voit jamais** une donnée d'un client, seulement les agrégats |
-| JUR | **Juriste** de Money Vibes et du client | tranche les points juridiques ouverts (§13 du PRD) ; relit les finalités, les clauses et la revue obligatoire avant la mise en service d'un score de crédit ou d'assurance (FR-28) |
+| JUR | **Juriste** de Money Vibes et du client | tranche les points juridiques ouverts (§20.2 du PRD) ; relit les finalités, les clauses et la revue obligatoire avant la mise en service d'un score de crédit ou d'assurance (FR-28) |
 | DPD | **Délégué à la protection des données** (ou personne qui en tient lieu) | tient le registre des finalités et des consentements ; répond aux demandes d'accès, d'opposition et d'observation des personnes concernées (FR-21, FR-22) ; lit le journal des accès |
 | PC | **Personne concernée** (client d'une IMF, assuré, client final) | n'utilise pas l'IA ; peut présenter ses **observations** et s'opposer à un profilage (FR-22) |
 
@@ -150,12 +150,12 @@ Les droits viennent du rôle **métier** de l'utilisateur dans le logiciel conce
 
 ### 2.2 Hors cible (v1)
 
-- **La personne concernée n'a pas d'application d'IA à elle** : elle reçoit des messages et présente ses observations par le canal de l'institution (FR-22). Le **chatbot de l'assuré ou du client**, la **voix** et les **langues locales** sont « bientôt ».
+- **La personne concernée n'a pas d'application d'IA à elle** : elle reçoit des messages et présente ses observations par le canal de l'institution (FR-22). Le **chatbot de l'assuré ou du client** et les **langues locales** sont « bientôt » ; la **voix** est un réglage du pack de secteur (FR-138, FR-161).
 - **L'IA ne remplace personne qui décide** : pas de crédit, de sinistre, de paiement, de refus ou de blocage décidés par l'IA seule (FR-13).
-- **Les produits de la vision** (Risque comme produit, Pulse, Météo des prix, distribution en pilote automatique, facture certifiée qui vaut crédit, argent programmable, assurance embarquée, Relation client commune, passeport, modèle de fondation sectoriel) ne sont pas du premier jour (partie 3).
+- **Les produits de la vision** (Risque comme produit, Pulse, Météo des prix, distribution en pilote automatique, facture certifiée qui vaut crédit, argent programmable, assurance embarquée, Relation client commune, passeport, modèle de fondation sectoriel) ne sont pas du premier jour (§13, FR-146).
 - **Le croisement d'une même PME entre verticales** (IMF, distributeur, cabinet) exige un consentement explicite et une identité partagée : horizon, pas jour 1.
 - **Money Vibes ne prête ni n'assure** : elle propose, l'institution décide.
-- La reconnaissance de caractères (OCR) reste dans `document-service` ; ce PRD ne la décrit pas (partie 3, lecture de pièces).
+- La reconnaissance de caractères (OCR) reste dans `document-service` ; ce PRD ne la décrit pas (§12, FR-140).
 
 ### 2.3 Parcours clés
 
@@ -189,10 +189,10 @@ Les huit rôles du §2.1 sont les seuls qui touchent l'IA. Chacun a un **périm�
 
 #### FR-9 : Ce que l'IA ne fait pas au premier jour
 
-Ne sont **pas** du premier jour : la **voix** (dictée, transcription d'appel, synthèse vocale), le **chatbot** de l'assuré ou du client (WhatsApp), les **langues locales**, le **croisement d'une même PME entre verticales**, l'**apprentissage fédéré** et les produits de la vision (D14). Leur emplacement dans l'interface s'affiche « bientôt ». `[ASSUMPTION : le Copilot, en revanche, est du premier jour pour les quatre logiciels, en texte et en lecture seule (D12) ; le PRD distributeur le mettait « bientôt », la décision du PO sur l'IA commune le remonte]`
+Ne sont **pas** du premier jour : la **voix** dans tout pack de secteur qui ne l'a pas activée (FR-138, FR-161 : au premier jour, seul le pack de la microfinance l'active, pour la saisie vocale de terrain ; l'assurance est sans voix ; le distributeur et le cabinet l'ont « bientôt »), le **chatbot** de l'assuré ou du client (WhatsApp), les **langues locales**, le **croisement d'une même PME entre verticales**, l'**apprentissage fédéré** et les produits de la vision (D14). Leur emplacement dans l'interface s'affiche « bientôt ». `[ASSUMPTION : le Copilot, en revanche, est du premier jour pour les quatre logiciels, en texte et en lecture seule (D12) ; le PRD distributeur le mettait « bientôt », la décision du PO sur l'IA commune le remonte]`
 
 **Conséquences (testables) :**
-- Aucun écran des quatre logiciels ne propose de dictée, de transcription d'appel ou de synthèse vocale ; l'emplacement du chatbot affiche « bientôt ».
+- Aucun écran ne propose de dictée, de transcription d'appel ou de synthèse vocale si le pack de son secteur n'a pas activé la voix (FR-138) ; au premier jour seul le pack de la microfinance l'active ; l'emplacement du chatbot affiche « bientôt ».
 - Un test cherche, dans le catalogue des capacités livrées au premier jour, une capacité à croisement inter-verticales : il n'en trouve aucune ; la demande d'une telle capacité est refusée avec un code nommé.
 - Le Copilot est disponible dans les quatre logiciels dès l'installation ; un test l'appelle dans chacun, en lecture seule.
 
@@ -215,7 +215,7 @@ Le vocabulaire commun est celui des PRD de verticale et du PRD moteur d'installa
 |---|---|
 | **IA commune** | L'unique IA de Prospera, un seul code, servie en ligne et en local à tous les logiciels (FR-1). Elle correspond au service `prospera-ia-service` et à la centrale de Money Vibes. |
 | **Capacité** | Une fonction d'IA **versionnée et déclarée** (par exemple « lire une pièce », « noter un tiers », « prévoir un impayé »). Elle a une fiche : entrées, sorties, destinataire, garde-fou, niveau au premier jour, objectifs. Chaque module métier **déclare** les capacités qu'il consomme dans son manifeste. |
-| **Famille** | Un regroupement de capacités de même nature (score d'un tiers, lecture de pièces, anomalie et fraude, prévision, rédaction, Copilot, etc.). Le catalogue en compte dix-neuf (partie 3). |
+| **Famille** | Un regroupement de capacités de même nature (score d'un tiers, lecture de pièces, anomalie et fraude, prévision, rédaction, Copilot, etc.). Le catalogue en compte dix-neuf (§10, FR-90). |
 | **Proposition** | Ce que l'IA rend : une proposition **immuable**, avec origine, niveau, statut, provenance, confiance, sources et explication (FR-12). L'IA ne décide pas ; elle propose. |
 | **Origine** | D'où vient une proposition : `REGLE` (règle experte), `MODELE` (modèle statistique ou appris), `LANGAGE` (modèle de langage). |
 | **Niveau d'une proposition** | `EXTRACTION` (lire), `ANALYSE` (qualifier), `RECOMMANDATION` (conseiller). Il n'existe **pas** de niveau « décision ». |
@@ -438,7 +438,7 @@ Aucune communication, aucun contrat, aucun écran ne promet « **vos données ne
 
 ## 5. Une seule IA, en ligne et en local
 
-Prospera n'a qu'une IA. Le cabinet d'expert-comptable, le distributeur, la microfinance et l'assurance la consomment ; aucun ne fabrique la sienne. Cette section dit **où elle tourne** et **ce qu'elle ne fait jamais**. Les chiffres cités sont des paramètres (annexe D, `params-w2.md`) ; les choix d'outils sont dans `addendum-w2.md`.
+Prospera n'a qu'une IA. Le cabinet d'expert-comptable, le distributeur, la microfinance et l'assurance la consomment ; aucun ne fabrique la sienne. Cette section dit **où elle tourne** et **ce qu'elle ne fait jamais**. Les chiffres cités sont des paramètres (annexe D) ; les choix d'outils sont dans l'addendum.
 
 Deux mots à fixer. **En ligne** : l'organisation est hébergée par Money Vibes (cabinet, distributeur) et l'IA tourne sur la plateforme. **En local** : l'organisation a son instance sur ses propres serveurs (microfinance, assurance) et l'IA tourne **dans cette instance**. Le « service » est `prospera-ia-service` (port 3417), avec les modules `ia`, `assistant` et `automatisations` ; la « centrale de l'IA » est `prospera-ia-centrale`, qui tourne **seulement chez Money Vibes** (plan, D2).
 
@@ -454,7 +454,7 @@ L'IA commune est **un seul code**, livré par la même ligne de version que le r
 
 #### FR-31 : En ligne, une organisation ne voit jamais l'IA d'une autre
 
-En ligne, tout ce que l'IA tient (propositions, calibration, journal, files d'inférence, indicateurs) appartient à **une organisation** : la route porte l'`organisationId` du jeton, et une route dont le chemin porte une autre organisation est refusée (`ORGANISATION_HORS_JETON`). Aucun chemin de lecture ne regroupe deux organisations côté service ; **seule la centrale** (§7, §8) agrège, et seulement des écarts préparés au niveau « apprentissage » (FR-77). Un dossier hors de la portée de l'utilisateur rend 404, jamais 403.
+En ligne, tout ce que l'IA tient (propositions, calibration, journal, files d'inférence, indicateurs) appartient à **une organisation** : la route porte l'`organisationId` du jeton, et une route dont le chemin porte une autre organisation est refusée (`ORGANISATION_HORS_JETON`). Aucun chemin de lecture ne regroupe deux organisations côté service ; **seule la centrale** (FR-61, FR-62, FR-77) agrège, et seulement des écarts préparés au niveau « apprentissage » (FR-77). Un dossier hors de la portée de l'utilisateur rend 404, jamais 403.
 
 **Conséquences (testables) :**
 - Un test avec le jeton de l'organisation A sur une route de l'organisation B rend `ORGANISATION_HORS_JETON`, sans donnée ; un test sur un dossier hors portée rend 404.
@@ -504,7 +504,7 @@ En local, les capacités de langage utilisent un **modèle ouvert exécuté sur 
 - Aucune requête sortante vers un fournisseur de modèle ne part d'une instance locale (test d'inspection du trafic, comme FR-32).
 - Le modèle ouvert est un artefact signé de la ligne de modèles (FR-83) ; sa licence est vérifiée **modèle par modèle** à son entrée dans le catalogue (`ia.licence_modele_verifiee`) ; un modèle sans licence vérifiée n'entre pas au catalogue.
 - Une instance dont le matériel est sous le palier le plus bas démarre en repli complet et l'indique à l'installation (écran « ce que votre serveur permet »).
-- `[ASSUMPTION : classes de modèles et besoins de mémoire retenus comme paliers de départ — 8 Go de mémoire graphique pour la classe 7-8 milliards de paramètres, 24 Go pour la classe 27-35 milliards en quantification — d'après la recherche du 2026-11-13 (PROBABLE) ; à mesurer sur le matériel réel en recette. Le « vocal » n'est pas servi (hors périmètre, §0).]`
+- `[ASSUMPTION : classes de modèles et besoins de mémoire retenus comme paliers de départ — 8 Go de mémoire graphique pour la classe 7-8 milliards de paramètres, 24 Go pour la classe 27-35 milliards en quantification — d'après la recherche du 2026-11-13 (PROBABLE) ; à mesurer sur le matériel réel en recette. La reconnaissance vocale n'est servie que si le pack du secteur l'active (FR-138, FR-161) ; son empreinte s'ajoute alors au palier de ce pack.]`
 
 #### FR-36 : Rien de médical ne sort de l'instance
 
@@ -518,10 +518,10 @@ Une donnée classée **santé** par le registre de classification (versionné, �
 
 #### FR-37 : Les modules métier déclarent les capacités qu'ils consomment
 
-Un module métier **déclare** dans son manifeste (clause C11) les **capacités** qu'il consomme : code, version minimale, verticale, vocabulaire, entrées qu'il fournit, droits requis, finalités d'apprentissage éventuelles, interdictions de sortie (par exemple « jamais de montant corporel »). Le module n'appelle **jamais** un modèle ni ne code de règle de score : il demande une proposition par le **port unique** (contrat de proposition, §4). La demande porte les **paramètres** de la capacité (barème, seuils, listes) avec leur version : l'IA **ne les stocke pas** ; une proposition dont la version de paramètres diffère de la demande est refusée par le consommateur. Le noyau reste neutre ; **chaque capacité a un vocabulaire par verticale**, déclaré avec elle.
+Un module métier **déclare** dans son manifeste (clause C11) les **capacités** qu'il consomme : code, version minimale, verticale, vocabulaire, entrées qu'il fournit, droits requis, finalités d'apprentissage éventuelles, interdictions de sortie (par exemple « jamais de montant corporel »). Le module n'appelle **jamais** un modèle ni ne code de règle de score : il demande une proposition par le **port unique** (contrat de proposition, FR-12 et annexe B). La demande porte les **paramètres** de la capacité (barème, seuils, listes) avec leur version : l'IA **ne les stocke pas** ; une proposition dont la version de paramètres diffère de la demande est refusée par le consommateur. Le noyau reste neutre ; **chaque capacité a un vocabulaire par verticale**, déclaré avec elle.
 
 **Conséquences (testables) :**
-- Un module qui demande une capacité **non déclarée** à son manifeste reçoit `CAPACITE_NON_DECLAREE` ; un test l'établit pour chaque capacité du catalogue (§10).
+- Un module qui demande une capacité **non déclarée** à son manifeste reçoit `CAPACITE_NON_DECLAREE` ; un test l'établit pour chaque capacité du catalogue (§10, FR-90).
 - Une recherche dans le code d'un module métier ne trouve **aucun appel direct** à un fournisseur de modèle, ni constante de barème de score (garde de balayage C6).
 - Une proposition rendue avec une version de paramètres différente de celle de la demande est **refusée** par le consommateur, qui garde sa règle de base.
 - Retirer un module de l'instance retire ses capacités du catalogue de l'instance ; les propositions déjà rendues restent lisibles au registre.
@@ -536,7 +536,7 @@ L'IA **ne se connecte à la base d'aucun module**. Elle reçoit, de chaque deman
 - Une demande dont les données utilisées contiennent un champ non déclaré par la capacité est refusée (`ENTREE_NON_DECLAREE`).
 - Une lecture de l'IA sans consentement en vigueur sur la plateforme rend `CONSENTEMENT_ABSENT` (FR-88).
 - Le **contexte brut** d'une demande de langage est purgé à l'échéance courte `ia.retention_contexte_brut_jours` ; la **trace opposable** (provenance, source, décision) est gardée plus longtemps (FR-89).
-- `[ASSUMPTION : les noms des faits « prédiction » et « réalité » ne figurent dans aucun catalogue de faits aujourd'hui ; l'architecture doit les ajouter au catalogue des contrats nommés (trou T-12, partie contrat fermée en FR-57).]`
+- `[ASSUMPTION : les noms des faits « prédiction » et « réalité » ne figurent dans aucun catalogue de faits aujourd'hui ; l'architecture doit les ajouter au catalogue des contrats nommés (trou T-12, côté contrat de proposition fermé en FR-57).]`
 
 #### FR-39 : Chaque capacité tourne avec les droits de celui qui la demande
 
@@ -608,7 +608,7 @@ Le PO veut que l'IA donne des informations utiles **dès le premier jour**, avan
 
 #### FR-45 : Trois niveaux par capacité, jamais confondus
 
-Chaque capacité du catalogue (§10) existe aux niveaux N0, N1 et N2, **chacun avec le même contrat de proposition** : l'origine rendue est `REGLE` pour N0 et `MODELE` pour N1 et N2 (ou `LANGAGE` pour un modèle de langage). Une capacité sert **un seul niveau à la fois** pour une même demande : le plus élevé que sa fiche autorise et que son évaluation justifie (FR-52). L'écran n'emploie le mot « IA » que pour N1, N2 et `LANGAGE` ; N0 se présente comme « règle ».
+Chaque capacité du catalogue (§10, FR-90) existe aux niveaux N0, N1 et N2, **chacun avec le même contrat de proposition** : l'origine rendue est `REGLE` pour N0 et `MODELE` pour N1 et N2 (ou `LANGAGE` pour un modèle de langage). Une capacité sert **un seul niveau à la fois** pour une même demande : le plus élevé que sa fiche autorise et que son évaluation justifie (FR-52). L'écran n'emploie le mot « IA » que pour N1, N2 et `LANGAGE` ; N0 se présente comme « règle ».
 
 **Conséquences (testables) :**
 - Pour chaque capacité, un test demande une proposition à chaque niveau et vérifie `origine`, `version` et `niveau` dans la réponse ; une capacité qui n'a pas de N0 n'entre pas au catalogue.
@@ -621,13 +621,13 @@ Le niveau N0 est un ensemble de **règles déterministes explicables** : score �
 
 **Conséquences (testables) :**
 - Une règle N0 modifiée par paramètre (sans livraison de code) change la proposition suivante et sa `parametresVersion` ; l'ancienne proposition garde l'ancienne version.
-- Un test de chaque capacité prouve que **chaque facteur** de la règle est restitué avec son poids et sa contribution (explication, §10).
+- Un test de chaque capacité prouve que **chaque facteur** de la règle est restitué avec son poids et sa contribution (explication, FR-120).
 - Un balayage du code de l'IA ne trouve aucune valeur réglementaire écrite en dur.
 - Les jeux de départ par pays et par verticale sont **listés** à l'annexe D ; ajouter un pays n'exige pas de modifier le code d'une règle.
 
 #### FR-47 : N1, un modèle commun pré-entraîné, jamais sur les données d'un client sans sa finalité
 
-Un modèle N1 est entraîné par Money Vibes à partir de **sources publiques**, de **données synthétiques**, de **données de démonstration**, puis, à mesure qu'elles existent, de l'**apprentissage commun** consenti (§7, §8). **Jamais sur les données d'un client sans sa finalité consentie** (FR-76). Un N1 n'est servi que s'il a passé son **évaluation** : il bat le N0 de la même capacité sur le jeu d'évaluation de la capacité, sans régression d'équité (FR-69, FR-70). Une capacité sans N1 prêt reste servie au niveau N0 : **ce n'est pas un défaut**, c'est dit à l'écran.
+Un modèle N1 est entraîné par Money Vibes à partir de **sources publiques**, de **données synthétiques**, de **données de démonstration**, puis, à mesure qu'elles existent, de l'**apprentissage commun** consenti (FR-62, FR-76, FR-77). **Jamais sur les données d'un client sans sa finalité consentie** (FR-76). Un N1 n'est servi que s'il a passé son **évaluation** : il bat le N0 de la même capacité sur le jeu d'évaluation de la capacité, sans régression d'équité (FR-69, FR-70). Une capacité sans N1 prêt reste servie au niveau N0 : **ce n'est pas un défaut**, c'est dit à l'écran.
 
 **Conséquences (testables) :**
 - La fiche de chaque capacité dit : N1 existant ou non, version, jeu d'évaluation, résultat contre N0 ; une capacité servie en N1 sans évaluation consignée est refusée à la publication.
@@ -643,7 +643,7 @@ Une calibration ou un modèle **propre à l'organisation** (N2) n'est créé et 
 - Une capacité dont les trois conditions ne sont pas toutes vraies ne sert jamais N2 ; un test les fait varier condition par condition.
 - Le seuil de chaque capacité est une **donnée** de sa fiche (annexe D), pas une constante de code ; une valeur non renseignée empêche la capacité d'entrer au catalogue.
 - Un N2 qui perd contre le niveau en place à une évaluation ultérieure est **retiré** et la capacité retombe au niveau précédent (FR-53), avec une ligne au journal.
-- `[ASSUMPTION : aucun seuil publié « règle vers modèle » n'existe ; les valeurs sont posées par capacité à l'écriture des fiches (§10) et mesurées à la recette.]`
+- `[ASSUMPTION : aucun seuil publié « règle vers modèle » n'existe ; les valeurs sont posées par capacité à l'écriture des fiches (§10, FR-91) et mesurées à la recette.]`
 
 #### FR-49 : Ce que chaque proposition dit de son niveau
 
@@ -658,10 +658,10 @@ Toute proposition affiche : le niveau (« règle », « modèle commun », « mo
 
 | Logiciel | Au jour 1 | Ce qu'il ne voit pas encore |
 |---|---|---|
-| **Cabinet d'expert-comptable** | N0 sur toutes les capacités qu'il déclare (contrôles, rapprochements, explications, leviers fiscaux avec base légale citée) ; **Copilot en texte, lecture seule**, ancré sur le corpus légal ; lecture et classement de pièces par N0 et OCR | Modèle propre (N2) ; voix ; vision de documents |
-| **Distributeur** | N0 sur les scores (santé d'un point de vente, fournisseur, relances), prévisions par règle (3 mois, saisonnalité à partir de 12 mois), brief et rapport par gabarit ; Copilot texte lecture seule | Modèle de demande ; routage réel ; voix |
-| **Microfinance** | N0 sur le score de crédit (barème de la verticale), la probabilité de paiement et les relances, la détection d'anomalie par règles, la prévision du PAR par tendance ; Copilot texte lecture seule pour les 16 rôles | Modèle de risque N1 ou N2 ; reconnaissance vocale ; langues locales |
-| **Assurance** | N0 sur l'orientation d'expertise, la fraude à neuf signaux, la qualité de dossier, le contrôle de cohérence ; lecture de pièces par OCR et classement sur l'instance ; Copilot texte lecture seule | Modèle de fraude N1 ou N2 ; chatbot de l'assuré ; voix |
+| **Cabinet d'expert-comptable** | N0 sur toutes les capacités qu'il déclare (contrôles, rapprochements, explications, leviers fiscaux avec base légale citée) ; **Copilot en texte, lecture seule**, ancré sur le corpus légal ; lecture et classement de pièces par N0 et OCR | Modèle propre (N2) ; voix (« bientôt », réglage du pack) ; vision de documents |
+| **Distributeur** | N0 sur les scores (santé d'un point de vente, fournisseur, relances), prévisions par règle (3 mois, saisonnalité à partir de 12 mois), brief et rapport par gabarit ; Copilot texte lecture seule | Modèle de demande ; routage réel ; voix (« bientôt », réglage du pack) |
+| **Microfinance** | N0 sur le score de crédit (barème de la verticale), la probabilité de paiement et les relances, la détection d'anomalie par règles, la prévision du PAR par tendance ; Copilot texte lecture seule pour les 16 rôles ; **saisie vocale de terrain** (réglage du pack, FR-138) | Modèle de risque N1 ou N2 ; langues locales |
+| **Assurance** | N0 sur l'orientation d'expertise, la fraude à neuf signaux, la qualité de dossier, le contrôle de cohérence ; lecture de pièces par OCR et classement sur l'instance ; Copilot texte lecture seule | Modèle de fraude N1 ou N2 ; chatbot de l'assuré (le pack est sans voix, décision du PO) |
 
 `[ASSUMPTION : le Copilot est au premier jour pour les quatre logiciels, en texte et en lecture seule (décision D12 du plan) ; le PRD distributeur le mettait « bientôt », ce PRD l'amende.]`
 
@@ -712,7 +712,7 @@ Certaines capacités ont besoin de **jeux de référence datés** (indices de pr
 - Un jeu signé par une clé dont l'usage ne le couvre pas est refusé entier ; un jeu modifié après signature est refusé.
 - Une analyse sectorielle appuyée sur un indice daté de plus de 90 jours porte la mention « source ancienne ».
 - Une instance locale installe un jeu par fichier et par le tunnel : le contenu et la version installés sont **identiques**.
-- `[ASSUMPTION : le canal des jeux de référence suit celui des modèles (FR-83, FR-84) ; la source de repli « données agrégées de Pulse » est de l'horizon (§13). Le trou T-13 est fermé quant au canal, pas quant au contenu des jeux.]`
+- `[ASSUMPTION : le canal des jeux de référence suit celui des modèles (FR-83, FR-84) ; la source de repli « données agrégées de Pulse » est de l'horizon (§13, FR-152). Le trou T-13 est fermé quant au canal, pas quant au contenu des jeux.]`
 
 ## 7. Apprendre en continu et se mettre à jour
 
@@ -722,7 +722,7 @@ Le PO veut une IA qui **continue d'apprendre** et **se met à jour** pour attein
 |---|---|---|
 | Rythme | **Continue** (chaque nuit) | **Périodique** (ligne de modèles, au plus hebdomadaire) |
 | Où | Dans l'instance ou l'espace de l'organisation | Chez Money Vibes (`prospera-ia-centrale`) |
-| Ce qu'elle lit | Les écarts de l'organisation, **sur place** | Des écarts **agrégés, anonymisés**, au niveau « apprentissage » (§8) |
+| Ce qu'elle lit | Les écarts de l'organisation, **sur place** | Des écarts **agrégés, anonymisés**, au niveau « apprentissage » (FR-77) |
 | Ce qu'elle produit | Une **calibration** (donnée du client) | Un **modèle commun** signé (code de Money Vibes) |
 | Qui peut l'arrêter | L'organisation (retour à la calibration précédente) | Money Vibes (retour arrière), le DSI (date) |
 | Sans contact | **Continue** | S'arrête pour cette instance (rien ne remonte, rien ne descend) |
@@ -748,7 +748,7 @@ Pour qu'un écart ait une « réalité », le module qui sait ce qui s'est pass�
 - Un fait de réalité rejoué (livraison au moins une fois) ne crée pas un second rattachement (idempotence par `eventId`).
 - Un test de contrat joue le fait côté module et côté IA avec les mêmes vecteurs ; un champ non déclaré fait échouer le test.
 - Le délai de constat est un paramètre de la capacité ; tant qu'il n'est pas échu, l'écart est « en attente de réalité » et **ne compte pas** dans l'évaluation.
-- `[ASSUMPTION : les noms exacts des faits sont fixés par l'architecture ; le PRD fixe leur existence et leur propriétaire (le module qui sait). Ferme le trou T-12 pour la partie contrat.]`
+- `[ASSUMPTION : les noms exacts des faits sont fixés par l'architecture ; le PRD fixe leur existence et leur propriétaire (le module qui sait). Ferme le trou T-12 pour le contrat de proposition (FR-12, annexe B).]`
 
 #### FR-58 : Le motif d'un écart est codé, jamais libre
 
@@ -774,7 +774,7 @@ Chaque nuit (heure paramétrée, hors des heures d'ouverture), l'IA **recalibre*
 
 #### FR-60 : La calibration validée est intouchable ; une nouvelle calibration naît à côté
 
-La calibration **en service** (validée) est un volume **versionné et hors de la migration** : une promotion de plateforme ne l'ouvre pas en écriture (moteur AD-39). Chaque recalibration nocturne **n'écrit pas** dedans : elle produit une **calibration sœur**, **évaluée** contre la calibration en service sur le jeu de validation de l'organisation (FR-69). Elle ne devient la calibration **active** que si elle gagne, par une décision journalisée ; **la précédente est conservée** pour le retour arrière (FR-67), au moins `ia.calibrations_conservees` versions et au moins 7 jours. Un nouveau **modèle commun** (§7.2) crée de même une calibration sœur, calculée **dans l'essai d'abord**. Le format de la calibration reste **lisible par la version précédente du code** ; son **empreinte** se calcule de façon déterministe.
+La calibration **en service** (validée) est un volume **versionné et hors de la migration** : une promotion de plateforme ne l'ouvre pas en écriture (moteur AD-39). Chaque recalibration nocturne **n'écrit pas** dedans : elle produit une **calibration sœur**, **évaluée** contre la calibration en service sur le jeu de validation de l'organisation (FR-69). Elle ne devient la calibration **active** que si elle gagne, par une décision journalisée ; **la précédente est conservée** pour le retour arrière (FR-67), au moins `ia.calibrations_conservees` versions et au moins 7 jours. Un nouveau **modèle commun** (FR-62) crée de même une calibration sœur, calculée **dans l'essai d'abord**. Le format de la calibration reste **lisible par la version précédente du code** ; son **empreinte** se calcule de façon déterministe.
 
 **Conséquences (testables) :**
 - Le test d'empreinte du moteur : l'empreinte de la calibration active est **identique avant et après** une mise à jour de code.
@@ -804,7 +804,7 @@ La centrale de l'IA entraîne les modèles communs, **capacité par capacité**,
 - Une tournée sans les écarts d'une organisation dont le consentement a été retiré **ne contient aucune** de ses données (FR-79).
 - Un entraînement rejoué avec la même fiche de composition et la même semence redonne le **même modèle** (empreinte identique) pour les familles où c'est possible, et la fiche dit lesquelles.
 - La centrale refuse de lancer une tournée si moins de `k` organisations contribuent à un groupe (FR-77).
-- `[ASSUMPTION : l'entraînement n'est pas fédéré (hors périmètre, §0) ; le premier modèle réel apparaît au plus tôt au deuxième semestre 2027 (réserve du moteur). Le fédéré et la confidentialité différentielle sont une option ultérieure ; le mot « différentielle » n'est employé qu'avec un budget tracé. Trou T-04 : cadence et rétention fermées, jeu de test et critère fermés en FR-65.]`
+- `[ASSUMPTION : l'entraînement n'est pas fédéré (hors périmètre, FR-9) ; le premier modèle réel apparaît au plus tôt au deuxième semestre 2027 (réserve du moteur). Le fédéré et la confidentialité différentielle sont une option ultérieure ; le mot « différentielle » n'est employé qu'avec un budget tracé. Trou T-04 : cadence et rétention fermées, jeu de test et critère fermés en FR-65.]`
 
 #### FR-63 : Une ligne de modèles, distincte de la ligne de la plateforme
 
@@ -843,7 +843,7 @@ Pour chaque capacité, la fiche écrit **avant** toute promotion les **portes** 
 - Une capacité dont les portes ne sont pas toutes renseignées (valeur, tolérance, fenêtre) n'entre pas au catalogue.
 - Un candidat qui échoue **une seule** porte n'est pas promu ; un test fait échouer chaque porte tour à tour.
 - Une modification de portes est inscrite avec son auteur et sa date, et n'est effective que pour les plans **ouverts après** elle.
-- `[ASSUMPTION : « qui valide » est l'équipe IA de Money Vibes (rôle défini en §2), avec double signature pour une capacité qui touche une personne ; ferme le trou T-04 sur le critère de publication et le jeu de test.]`
+- `[ASSUMPTION : « qui valide » est l'équipe IA de Money Vibes (rôle défini en FR-8), avec double signature pour une capacité qui touche une personne ; ferme le trou T-04 sur le critère de publication et le jeu de test.]`
 
 #### FR-66 : La date est celle du DSI en local, un interrupteur de changement en ligne
 
@@ -944,7 +944,7 @@ Une proposition **modifiée ou rejetée** par un humain, ou **acceptée alors qu
 - Un test fige l'horloge **avant** l'horizon : aucun pourcentage ne contient le désaccord ; après l'horizon, il entre dans le calcul, **une seule fois** (rejouer le fait de réalité ne le double pas).
 - Un désaccord dont la réalité n'est pas observable (prêt refusé, sinistre non déclaré) est classé `INDECIDABLE` et **n'est jamais** compté comme une raison pour l'IA ou pour l'humain.
 - La règle « qui avait raison » d'une capacité est **versionnée** ; un changement de règle ne reclasse pas les désaccords déjà tranchés, il vaut pour les suivants (la version de règle est portée par chaque classement).
-- `[ASSUMPTION : les valeurs d'horizon et les seuils de la règle (par exemple le retard de plus de 30 jours) sont des paramètres posés avec chaque capacité à l'écriture des fiches (§10) ; ils ne sont pas dans la parole du PO, qui cite les retards d'échéance (PAR 30) à 3, 6 et 12 mois pour le crédit.]`
+- `[ASSUMPTION : les valeurs d'horizon et les seuils de la règle (par exemple le retard de plus de 30 jours) sont des paramètres posés avec chaque capacité à l'écriture des fiches (§10, FR-92) ; ils ne sont pas dans la parole du PO, qui cite les retards d'échéance (PAR 30) à 3, 6 et 12 mois pour le crédit.]`
 
 #### FR-75 : Le taux « qui avait raison », sur une période glissante, par capacité, agent, agence, client et en global
 
@@ -1035,7 +1035,7 @@ Le contrat dit en toutes lettres : **un retrait arrête l'usage futur, il ne dé
 
 #### FR-82 : Le croisement entre verticales est un horizon ; ce qu'un modèle n'apprend jamais
 
-Le **croisement d'une même PME entre verticales** (microfinance, distributeur, cabinet), pour lui donner un score ou une alerte, est **de l'horizon** (§13). Il exige un **consentement explicite de la PME** et une **identité partagée** (passeport de la vision) ; **aucun** pseudonyme ne se joint d'un export à l'autre, et **aucune** donnée d'une instance ne sert à une autre. Au premier jour, **chaque capacité n'apprend que dans sa verticale**. Sont **exclus de tout apprentissage**, quelle que soit la finalité : les **données de santé** (FR-36), les **prix et marges d'un freelance**, les **chiffres réglementaires** (plafond d'usure, provisions, montants corporels) comme sortie d'un modèle, les **variables interdites** d'un score, et les **lectures d'exploitation** de la plateforme.
+Le **croisement d'une même PME entre verticales** (microfinance, distributeur, cabinet), pour lui donner un score ou une alerte, est **de l'horizon** (§13, FR-151). Il exige un **consentement explicite de la PME** et une **identité partagée** (passeport de la vision) ; **aucun** pseudonyme ne se joint d'un export à l'autre, et **aucune** donnée d'une instance ne sert à une autre. Au premier jour, **chaque capacité n'apprend que dans sa verticale**. Sont **exclus de tout apprentissage**, quelle que soit la finalité : les **données de santé** (FR-36), les **prix et marges d'un freelance**, les **chiffres réglementaires** (plafond d'usure, provisions, montants corporels) comme sortie d'un modèle, les **variables interdites** d'un score, et les **lectures d'exploitation** de la plateforme.
 
 **Conséquences (testables) :**
 - Deux lots envoyés par la même organisation à deux dates ne contiennent aucun identifiant commun ; un test de jointure échoue.
@@ -1122,16 +1122,16 @@ Cette section décrit ce que l'IA commune **fait** pour les quatre logiciels : l
 
 Pour chaque famille, la section donne : ce que la capacité prend, ce qu'elle rend, à qui, son garde-fou, son niveau au premier jour (voir FR-91), ses objectifs mesurés (voir FR-92) et un tableau « logiciel | usage | FR d'origine | vocabulaire ». Les « FR d'origine » sont les exigences des PRD des logiciels (distributeur, microfinance, assurance), du PRD de l'assistant d'août (« PRD-AIA ») ou du PRD de l'atelier de balance (« AB »), qui demandaient déjà la capacité. La section se termine par le tableau de contrôle (FR-130) qui relie chacune des 95 capacités recensées à son FR.
 
-Les règles qui s'appliquent à toutes les capacités (l'IA propose et l'humain décide, la provenance, l'IA jamais bloquante, l'équité, la santé) sont posées au §4 ; elles sont rappelées ici seulement quand une famille les durcit.
+Les règles qui s'appliquent à toutes les capacités (l'IA propose et l'humain décide, la provenance, l'IA jamais bloquante, l'équité, la santé) sont posées au §4 (FR-12 à FR-29) ; elles sont rappelées ici seulement quand une famille les durcit.
 
 #### FR-90 : Chaque capacité est déclarée, versionnée, et porte un vocabulaire par logiciel
 
-Une capacité existe quand elle est **inscrite au catalogue de l'IA** avec : un code stable, une version, une famille, ses entrées (les faits qu'elle lit), sa sortie (le type de proposition qu'elle rend, voir le contrat du §4), le public qui la reçoit, son garde-fou, son niveau (FR-91), ses objectifs (FR-92), sa **vérité terrain** (l'événement qui tranche un désaccord entre l'IA et l'humain, et son horizon ; voir §7) et un **vocabulaire par logiciel** (libellés, unités, seuils affichés). Un module métier ne peut appeler que les capacités qu'il **déclare** dans la clause C11 de son manifeste ; il peut y déclarer une capacité servie par une « règle v0 » sans le mot « modèle » (cela lève la contradiction du distributeur, dont l'annexe A nommait des modèles alors que son PRD dit « règle, pas IA »). Les droits sont ceux de l'utilisateur qui demande : une capacité ne lit jamais plus que lui.
+Une capacité existe quand elle est **inscrite au catalogue de l'IA** avec : un code stable, une version, une famille, ses entrées (les faits qu'elle lit), sa sortie (le type de proposition qu'elle rend, voir FR-12 et l'annexe B), le public qui la reçoit, son garde-fou, son niveau (FR-91), ses objectifs (FR-92), sa **vérité terrain** (l'événement qui tranche un désaccord entre l'IA et l'humain, et son horizon ; voir FR-74 et FR-75) et un **vocabulaire par logiciel** (libellés, unités, seuils affichés). Un module métier ne peut appeler que les capacités qu'il **déclare** dans la clause C11 de son manifeste ; il peut y déclarer une capacité servie par une « règle v0 » sans le mot « modèle » (cela lève la contradiction du distributeur, dont l'annexe A nommait des modèles alors que son PRD dit « règle, pas IA »). Les droits sont ceux de l'utilisateur qui demande : une capacité ne lit jamais plus que lui.
 
 **Conséquences (testables) :**
 - Un appel à une capacité que le module appelant n'a pas déclarée en C11 est refusé avec le code `CAPACITE_NON_DECLAREE`.
 - Le catalogue expose, pour chaque capacité : code, version, famille, niveau courant, vocabulaire par logiciel ; une capacité sans famille ou sans objectif (FR-92) ne peut pas être publiée.
-- Deux versions d'une même capacité peuvent coexister ; chaque proposition inscrit la version utilisée (provenance, §4).
+- Deux versions d'une même capacité peuvent coexister ; chaque proposition inscrit la version utilisée (provenance, FR-16).
 - La clause C11 accepte la valeur de niveau `REGLE` (règle v0) ; un manifeste qui déclare `REGLE` n'est pas refusé faute de modèle.
 - Une capacité sans vérité terrain déclarée (événement et horizon) ne peut pas être publiée.
 - Une capacité appelée avec les droits d'un utilisateur ne rend aucun fait que cet utilisateur ne pourrait pas lire lui-même (test : même appel avec deux rôles, résultats différents).
@@ -1149,21 +1149,21 @@ Chaque capacité a trois niveaux possibles (décision D6) : **N0** une règle ex
 
 #### FR-92 : Chaque capacité a des objectifs mesurés, et un rapport mensuel
 
-Chaque capacité déclare ses **objectifs** selon quatre axes (décision D8) : la **qualité** (précision, rappel, calibration), l'**usage** (taux de propositions acceptées, modifiées, rejetées), l'**effet métier** (ce que le logiciel gagne : baisse du retard de paiement, délai d'un sinistre, taux de recouvrement, temps gagné) et l'**équité** (écart entre groupes). Le PRD fixe les indicateurs, famille par famille, dans les FR qui suivent ; les **cibles chiffrées sont des paramètres** (`params-w3.md`, codes `ia.objectif.*`) que Money Vibes et le client règlent. Un rapport est produit chaque mois par capacité et par client, et un rapport global par Money Vibes. Un taux d'acceptation très élevé n'est pas un succès : au-delà du seuil `ia.objectif.acceptation_facade_pct` sur 30 jours, la capacité est signalée « validation de façade » à l'auditeur du client.
+Chaque capacité déclare ses **objectifs** selon quatre axes (décision D8) : la **qualité** (précision, rappel, calibration), l'**usage** (taux de propositions acceptées, modifiées, rejetées), l'**effet métier** (ce que le logiciel gagne : baisse du retard de paiement, délai d'un sinistre, taux de recouvrement, temps gagné) et l'**équité** (écart entre groupes). Le PRD fixe les indicateurs, famille par famille, dans les FR qui suivent ; les **cibles chiffrées sont des paramètres** (annexe D, codes `ia.objectif.*`) que Money Vibes et le client règlent. Un rapport est produit chaque mois par capacité et par client, et un rapport global par Money Vibes. Un taux d'acceptation très élevé n'est pas un succès : au-delà du seuil `ia.objectif.acceptation_facade_pct` sur 30 jours, la capacité est signalée « validation de façade » à l'auditeur du client.
 
 **Conséquences (testables) :**
 - Le rapport mensuel d'une capacité donne, pour la période : volume de propositions, taux accepté / modifié / rejeté / expiré, motifs d'écart les plus fréquents, indicateur de qualité, indicateur d'effet métier, indicateur d'équité, niveau servi.
 - Une nouvelle version n'est promue que si, sur le jeu d'évaluation de la capacité, elle bat la version en place sur l'indicateur de qualité et ne dégrade aucun indicateur d'équité au-delà de `ia.objectif.equite_regression_max`.
-- Le rapport d'un client (instance locale) ne contient que les données de ce client ; le rapport global ne contient que des agrégats (seuil d'effectif minimal du §8).
+- Le rapport d'un client (instance locale) ne contient que les données de ce client ; le rapport global ne contient que des agrégats (seuil d'effectif minimal, FR-77).
 - Un taux d'acceptation supérieur à `ia.objectif.acceptation_facade_pct` pendant 30 jours déclenche une alerte à l'auditeur et la mention « à vérifier : validation de façade » dans le rapport.
-- Pour chaque capacité, le rapport mensuel compare, quand l'humain s'est écarté de la proposition, la proposition de l'IA et la décision humaine à la **vérité terrain** constatée à l'horizon déclaré (détail et conservation au §7) ; ce rapport est une donnée vendable au client.
+- Pour chaque capacité, le rapport mensuel compare, quand l'humain s'est écarté de la proposition, la proposition de l'IA et la décision humaine à la **vérité terrain** constatée à l'horizon déclaré (détail : FR-74, FR-75 ; conservation : FR-89) ; ce rapport est une donnée vendable au client.
 - Les cibles sont lues des paramètres : changer une cible ne demande aucun déploiement.
 
 ### 10.1 Famille 1 : le score de risque ou de santé d'un tiers
 
 Un score sur un tiers (client, dossier de crédit, point de vente, prospect, fournisseur, groupe solidaire, épargnant). Il prend des faits que le module consommateur lui donne, il rend une note de 0 à 100 avec ses **facteurs** et leur poids, une classe et, quand le logiciel le prévoit, une décision suggérée. Il est reçu par le commercial, le directeur financier, le chargé de clientèle, le comité de crédit. Niveau au premier jour : **N0** (règle v0) pour toutes les capacités de la famille ; N1 plus tard.
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : quand l'agent de crédit accorde un prêt que la règle ou l'IA jugeait non solvable (ou refuse un prêt qu'elle jugeait sûr), la réalité qui tranche est le **comportement de remboursement** : retards d'échéance et portefeuille à risque (PAR 30) du prêt à 3, 6 et 12 mois ; pour le distributeur, la facture payée ou non à l'échéance et le retard constaté ; pour un point de vente, l'évolution de ses achats à 90 jours.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : quand l'agent de crédit accorde un prêt que la règle ou l'IA jugeait non solvable (ou refuse un prêt qu'elle jugeait sûr), la réalité qui tranche est le **comportement de remboursement** : retards d'échéance et portefeuille à risque (PAR 30) du prêt à 3, 6 et 12 mois ; pour le distributeur, la facture payée ou non à l'échéance et le retard constaté ; pour un point de vente, l'évolution de ses achats à 90 jours.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1196,7 +1196,7 @@ Pour tout score qui note une **personne** (un emprunteur, un épargnant, un memb
 - Une règle ou un modèle qui lit une variable hors de la liste fermée est refusé à la publication (`VARIABLE_NON_AUTORISEE`) ; la liste est portée par le logiciel et versionnée.
 - Les variables interdites n'apparaissent dans aucune entrée de score, y compris en substitut direct (test sur le jeu d'entrées d'un modèle).
 - Le rapport mensuel d'équité de chaque score contient l'écart de note et de décision suggérée entre groupes, et le dépassement de `ia.objectif.equite_regression_max` bloque la promotion d'une version.
-- Une personne notée peut obtenir, par le logiciel, le motif de la décision humaine qui l'a concernée et présenter ses observations (art. 27 de la loi 2019-014 ; le droit est outillé au §4).
+- Une personne notée peut obtenir, par le logiciel, le motif de la décision humaine qui l'a concernée et présenter ses observations (art. 27 de la loi 2019-014 ; le droit est outillé par FR-22).
 - Le logiciel distributeur est refusé à la publication d'un score de personne sans liste fermée déclarée.
 
 #### FR-95 : Un score est une information : il ne refuse pas, ne bloque pas et ne fixe pas de prix
@@ -1214,7 +1214,7 @@ Aucun score de la famille ne produit à lui seul un refus, un blocage ou un tari
 
 La probabilité qu'une créance ou une proforma soit payée, la priorité des relances et le canal. Elle prend le retard, les promesses, les paiements partiels, le score du tiers (famille 1) ; elle rend une probabilité 0-100 étiquetée « estimation », une valeur espérée, une file triée et une action recommandée. Elle est reçue par le responsable du recouvrement, le directeur financier, le gestionnaire de portefeuille. Niveau au premier jour : **N0** ; le modèle de langage rédige les messages (famille 8).
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : la facture ou l'échéance **payée ou non**, et le délai effectif de paiement, à 30 jours (recouvrement) ; pour la proforma, la commande passée ou non à 15 jours.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : la facture ou l'échéance **payée ou non**, et le délai effectif de paiement, à 30 jours (recouvrement) ; pour la proforma, la commande passée ou non à 15 jours.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1229,7 +1229,7 @@ La probabilité qu'une créance ou une proforma soit payée, la priorité des re
 
 #### FR-96 : La probabilité de paiement ou de recouvrement est une règle versionnée, puis un modèle sous le même contrat
 
-La capacité rend une probabilité (5 à 98 pour le recouvrement) à partir du retard, de la provision, du paiement partiel et du **score du tiers** ; sans score du tiers, l'ajustement vaut 0 et la réponse le dit. La règle v0 du noyau (celle du PRD distributeur, `0,25 × (score − 60)` appliqué au score) sert aussi la microfinance ; un modèle viendra sous le même contrat sans changer le score ni les facteurs. Le résultat porte « règle, version, date ». La probabilité de défaut et la classe estimée de la microfinance ne bloquent ni n'accordent un octroi, un décaissement ou une provision comptabilisée. Deux scores de client existent aujourd'hui (celui du point de vente du distributeur, celui de la microfinance) : l'IA commune les sert comme **deux capacités distinctes**, sans définition commune au premier jour (le croisement entre logiciels est de l'horizon, §13).
+La capacité rend une probabilité (5 à 98 pour le recouvrement) à partir du retard, de la provision, du paiement partiel et du **score du tiers** ; sans score du tiers, l'ajustement vaut 0 et la réponse le dit. La règle v0 du noyau (celle du PRD distributeur, `0,25 × (score − 60)` appliqué au score) sert aussi la microfinance ; un modèle viendra sous le même contrat sans changer le score ni les facteurs. Le résultat porte « règle, version, date ». La probabilité de défaut et la classe estimée de la microfinance ne bloquent ni n'accordent un octroi, un décaissement ou une provision comptabilisée. Deux scores de client existent aujourd'hui (celui du point de vente du distributeur, celui de la microfinance) : l'IA commune les sert comme **deux capacités distinctes**, sans définition commune au premier jour (le croisement entre logiciels est de l'horizon, §13, FR-151).
 
 **Conséquences (testables) :**
 - Une probabilité est toujours entre les bornes de la règle (5 et 98 pour le recouvrement) et est libellée « estimation ».
@@ -1261,9 +1261,9 @@ Pour la microfinance, la capacité prépare un **projet de stratégie de recouvr
 
 ### 10.3 Famille 3 : lecture de pièces
 
-Extraire, classer et pré-remplir à partir d'une pièce (scan, photo, PDF, e-mail, message). Le détail de la chaîne (reconnaissance de caractères, lecture, classement) est au §12 ; ici, la capacité telle que les logiciels l'appellent. Elle prend un fichier ; elle rend le type de la pièce, les champs lus avec **un extrait source et une confiance par champ**, le rattachement à la pièce attendue ; niveau de proposition **EXTRACTION**, jamais une validation. Reçue par l'accueil, le gestionnaire, le comptable, l'agent de crédit. Niveau au premier jour : **N1** (lecture par modèle de langage sur le texte reconnu) avec repli **N0** (reconnaissance de caractères et règles de classement).
+Extraire, classer et pré-remplir à partir d'une pièce (scan, photo, PDF, e-mail, message). Le détail de la chaîne (reconnaissance de caractères, lecture, classement) est au §12 (FR-140 à FR-142) ; ici, la capacité telle que les logiciels l'appellent. Elle prend un fichier ; elle rend le type de la pièce, les champs lus avec **un extrait source et une confiance par champ**, le rattachement à la pièce attendue ; niveau de proposition **EXTRACTION**, jamais une validation. Reçue par l'accueil, le gestionnaire, le comptable, l'agent de crédit. Niveau au premier jour : **N1** (lecture par modèle de langage sur le texte reconnu) avec repli **N0** (reconnaissance de caractères et règles de classement).
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : le champ **confirmé ou corrigé par l'humain** puis, pour une pièce utilisée dans un calcul, la valeur retenue en fin de dossier ; horizon : à la clôture du dossier.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : le champ **confirmé ou corrigé par l'humain** puis, pour une pièce utilisée dans un calcul, la valeur retenue en fin de dossier ; horizon : à la clôture du dossier.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1289,11 +1289,11 @@ La capacité rend, pour une pièce : son **type**, les **champs** lus, pour chaq
 
 #### FR-100 : Un message entrant est lu comme une pièce : déclaration assistée, commande, lead
 
-Un message reçu (message de messagerie, e-mail, courrier numérisé) est lu par la capacité : en assurance, pour **pré-remplir la déclaration** avec une confiance par champ et les questions à poser ; en distributeur, pour **proposer des lignes de commande** (bientôt) ; en microfinance et en distributeur, pour **qualifier un lead** par un chatbot (bientôt, §11). **L'appel téléphonique n'est jamais lu** : l'accueil saisit pendant l'appel, sans voix.
+Un message reçu (message de messagerie, e-mail, courrier numérisé) est lu par la capacité : en assurance, pour **pré-remplir la déclaration** avec une confiance par champ et les questions à poser ; en distributeur, pour **proposer des lignes de commande** (bientôt) ; en microfinance et en distributeur, pour **qualifier un lead** par un chatbot (bientôt, §11). **L'appel téléphonique n'est jamais lu** : l'accueil saisit pendant l'appel (en assurance, le pack est sans voix : FR-138).
 
 **Conséquences (testables) :**
 - Une déclaration assistée est créée en brouillon ; elle ne devient un sinistre que par la validation d'un agent.
-- La capacité n'accepte pas de fichier audio au premier jour (`FORMAT_NON_SUPPORTE`).
+- La capacité n'accepte pas de fichier audio au premier jour (`FORMAT_NON_SUPPORTE`) ; la dictée de terrain d'un pack qui l'a activée relève de FR-138, pas de la lecture de pièces.
 - La lecture des commandes par message et le chatbot de qualification de leads sont affichés comme « bientôt » avec le bouton prévu, sans appel réel.
 - La lecture dépend du connecteur de réception du module de notification ; s'il est absent, la capacité rend « non installé ».
 
@@ -1301,7 +1301,7 @@ Un message reçu (message de messagerie, e-mail, courrier numérisé) est lu par
 
 Le contrôle d'un dossier, d'une pièce ou d'une saisie contre les règles et contre le portefeuille. Elle prend les pièces, le dossier, le panier habituel, les écritures ; elle rend des **incohérences** avec gravité et action proposée. Elle **signale sans bloquer** (sauf la règle déterministe du logiciel qui, elle, peut bloquer). Reçue par le gestionnaire, le saisisseur de commande, le comptable, le conformité. Niveau au premier jour : **N0** règles ; le volet « assistance » est N1.
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : l'anomalie **confirmée ou écartée** par le gestionnaire ou, au cabinet, par l'expert-comptable ; horizon : à l'instruction du dossier, ou à la clôture de l'exercice pour la balance.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : l'anomalie **confirmée ou écartée** par le gestionnaire ou, au cabinet, par l'expert-comptable ; horizon : à l'instruction du dossier, ou à la clôture de l'exercice pour la balance.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1337,7 +1337,7 @@ Pour le distributeur, la capacité compare une commande saisie au panier habitue
 
 Un signal sur un comportement inhabituel : caisse, dossier, paiement, traces d'audit, client actif, groupe. Elle prend le journal, les mouvements, les dossiers, le portefeuille ; elle rend une alerte (code, gravité, règle ou modèle, lignes concernées). Reçue par l'auditeur, le responsable, le directeur financier. Niveau au premier jour : **N0** (règles à signaux) ; le graphe de liens est N1 (calcul sur le portefeuille).
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : la **fraude confirmée ou écartée** à l'issue de la revue humaine (assurance, caisse, piste d'audit) ; horizon : à la clôture de la revue, et à 12 mois pour les cas restés sans suite.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : la **fraude confirmée ou écartée** à l'issue de la revue humaine (assurance, caisse, piste d'audit) ; horizon : à la clôture de la revue, et à 12 mois pour les cas restés sans suite.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1376,7 +1376,7 @@ Pour l'assurance, la capacité construit à la demande un **graphe de dossiers l
 
 Prévoir la trésorerie, le chiffre d'affaires, la demande, l'encours, le retard de portefeuille. Elle prend les historiques, les échéances, la saisonnalité ; elle rend une prévision avec **intervalle ou scénarios**, une précision mesurée et la provenance. Reçue par le directeur financier, la direction, le responsable de portefeuille. Niveau au premier jour : **N0** (moyenne glissante, saisonnalité, règle de trésorerie), libellée « règle ». Aucune prévision n'est un chiffre officiel.
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : la **valeur réalisée** (trésorerie, chiffre d'affaires, demande, PAR, encours) comparée à la prévision à son échéance ; horizon : 7 jours, 1, 3 et 6 mois selon la capacité.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : la **valeur réalisée** (trésorerie, chiffre d'affaires, demande, PAR, encours) comparée à la prévision à son échéance ; horizon : 7 jours, 1, 3 et 6 mois selon la capacité.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1423,7 +1423,7 @@ Pour le cabinet, les ratios, les tendances et les points d'attention d'un bilan,
 
 Proposer une liste classée : produit, panier, conditions de crédit, fournisseur, expertise, levier fiscal, rattachement de compte. Elle prend le profil du client, l'historique, les contraintes dures du logiciel ; elle rend une liste classée avec la **raison en une phrase** et la source. L'humain choisit ; son écart est renvoyé avec motif. Reçue par l'agent, le commercial, le gestionnaire, le comptable. Niveau au premier jour : **N0**.
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : l'**effet constaté** de la recommandation suivie ou écartée : panier et marge réalisés, prêt remboursé, surcoût confirmé, mission d'expertise utile ; horizon propre à chaque recommandation (90 jours en crédit).
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : l'**effet constaté** de la recommandation suivie ou écartée : panier et marge réalisés, prêt remboursé, surcoût confirmé, mission d'expertise utile ; horizon propre à chaque recommandation (90 jours en crédit).
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1483,7 +1483,7 @@ Pour le cabinet, la capacité de **rattachement d'un compte non reconnu à un po
 
 Rédiger un brouillon : relance, accroche, réponse à un client, courrier d'offre ou de refus, mise en demeure, note annexe. Elle prend le dossier, l'objectif, le canal, le gabarit ; elle rend un **brouillon relu, modifié et signé par un humain**, qui ne part jamais seul. Reçue par le gestionnaire, le marketing, le recouvrement, le comptable. Niveau au premier jour : **N0** (gabarits) et **N1** (modèle de langage via la passerelle).
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : la **réponse obtenue** : message lu, promesse tenue, paiement reçu, courrier accepté sans contestation ; horizon : 30 jours.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : la **réponse obtenue** : message lu, promesse tenue, paiement reçu, courrier accepté sans contestation ; horizon : 30 jours.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1494,7 +1494,7 @@ Rédiger un brouillon : relance, accroche, réponse à un client, courrier d'off
 
 #### FR-112 : Un brouillon n'est jamais envoyé seul ; gabarit ou modèle de langage, il le dit
 
-La capacité rend un **brouillon** avec ses sources, étiqueté « proposé par gabarit » ou « rédigé par modèle » (nom, version, date). **L'IA propose, l'humain relit, modifie, signe** ; aucun envoi automatique. Règles par logiciel : en assurance, les courriers à valeur juridique (offre d'indemnité, refus motivé, réclamation, mise en demeure) ne promettent aucun montant, ne contiennent aucun montant ni donnée de santé corporels, ne reprennent pas d'un clic un motif proposé par l'IA, et ne partent pas sans le responsable au-delà de son seuil ; en microfinance, les messages restent **dans le calendrier de l'IMF** ; en distributeur, la **réponse automatique est interdite** pour un client en impayé et la publication demande une validation humaine ; au cabinet, les notes annexes sont sourcées et validées. Les gabarits sont servis au premier jour ; le **modèle de langage** (passerelle ou modèle local, §5) rédige quand il est disponible et que le client a activé la capacité ; sinon le gabarit sert.
+La capacité rend un **brouillon** avec ses sources, étiqueté « proposé par gabarit » ou « rédigé par modèle » (nom, version, date). **L'IA propose, l'humain relit, modifie, signe** ; aucun envoi automatique. Règles par logiciel : en assurance, les courriers à valeur juridique (offre d'indemnité, refus motivé, réclamation, mise en demeure) ne promettent aucun montant, ne contiennent aucun montant ni donnée de santé corporels, ne reprennent pas d'un clic un motif proposé par l'IA, et ne partent pas sans le responsable au-delà de son seuil ; en microfinance, les messages restent **dans le calendrier de l'IMF** ; en distributeur, la **réponse automatique est interdite** pour un client en impayé et la publication demande une validation humaine ; au cabinet, les notes annexes sont sourcées et validées. Les gabarits sont servis au premier jour ; le **modèle de langage** (passerelle ou modèle local, FR-33, FR-35) rédige quand il est disponible et que le client a activé la capacité ; sinon le gabarit sert.
 
 **Conséquences (testables) :**
 - Aucune route de la capacité n'envoie un message ; l'envoi passe par le service de notification, sur action d'un humain.
@@ -1508,7 +1508,7 @@ La capacité rend un **brouillon** avec ses sources, étiqueté « proposé par 
 
 Résumer un dossier, un portefeuille, une situation. Elle prend le dossier et les pièces lues, ou les chiffres déjà calculés ; elle rend un **résumé de cinq à six lignes dont chaque phrase renvoie à sa source**, une analyse narrative ou un rapport. Reçue par le gestionnaire, le comité, la direction. Niveau au premier jour : **N0** (gabarit) ; **N1** (modèle de langage) quand il est disponible.
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : la **fidélité du résumé** relevée à l'échantillon par un relecteur, et les corrections apportées par l'humain ; horizon : mensuel.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : la **fidélité du résumé** relevée à l'échantillon par un relecteur, et les corrections apportées par l'humain ; horizon : mensuel.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1520,7 +1520,7 @@ Résumer un dossier, un portefeuille, une situation. Elle prend le dossier et le
 
 #### FR-113 : Un résumé dit d'où vient chaque phrase, et omet ce que l'utilisateur ne peut pas voir
 
-La capacité rend un résumé dont **chaque phrase renvoie à sa source** (pièce, ligne, calcul) ; une information sans source n'est pas affichée. Une **version sans champ de santé** est rendue aux rôles qui ne sont pas autorisés à lire la santé (§8 et FR-143). Aucun montant sur un préjudice corporel (FR-110). Pour la microfinance, l'analyse narrative rend synthèse, forces, faiblesses, questions et points à vérifier, avec une étoile de 1 à 3 et un sentiment **quand un modèle l'a rédigée** ; **sans modèle, ni étoile ni sentiment** (les textes figés de la démonstration sont remplacés).
+La capacité rend un résumé dont **chaque phrase renvoie à sa source** (pièce, ligne, calcul) ; une information sans source n'est pas affichée. Une **version sans champ de santé** est rendue aux rôles qui ne sont pas autorisés à lire la santé (FR-36 et FR-143). Aucun montant sur un préjudice corporel (FR-110). Pour la microfinance, l'analyse narrative rend synthèse, forces, faiblesses, questions et points à vérifier, avec une étoile de 1 à 3 et un sentiment **quand un modèle l'a rédigée** ; **sans modèle, ni étoile ni sentiment** (les textes figés de la démonstration sont remplacés).
 
 **Conséquences (testables) :**
 - Une phrase sans renvoi à une source est rejetée par le contrat de proposition (`PHRASE_SANS_SOURCE`).
@@ -1541,9 +1541,9 @@ Le rapport de direction et le commentaire d'un rapport réglementaire sont d'abo
 
 ### 10.10 Famille 10 : Copilot et recherche en langage naturel
 
-Poser une question en langage naturel et obtenir une réponse sourcée, **en lecture seule**. Elle prend la question, le rôle, le périmètre, la page et l'entité consultées ; elle rend une réponse avec, pour chaque chiffre, la source, la date de calcul et le périmètre. Reçue par tous les rôles. Niveau au premier jour : **N1** (modèle de langage) avec repli **N0** (recherche par règles et gabarits de réponses) si le modèle ne tourne pas. Le détail est au §11.
+Poser une question en langage naturel et obtenir une réponse sourcée, **en lecture seule**. Elle prend la question, le rôle, le périmètre, la page et l'entité consultées ; elle rend une réponse avec, pour chaque chiffre, la source, la date de calcul et le périmètre. Reçue par tous les rôles. Niveau au premier jour : **N1** (modèle de langage) avec repli **N0** (recherche par règles et gabarits de réponses) si le modèle ne tourne pas. Le détail est en FR-131 à FR-133.
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : l'utilisateur qui **corrige, ou confirme par un clic, la réponse** et l'exactitude des chiffres retrouvés dans leur source à l'échantillon ; horizon : mensuel.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : l'utilisateur qui **corrige, ou confirme par un clic, la réponse** et l'exactitude des chiffres retrouvés dans leur source à l'échantillon ; horizon : mensuel.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1565,7 +1565,7 @@ La capacité « Copilot » est **une seule** pour les quatre logiciels (résolut
 
 Un brief lu chaque matin et la liste des priorités. Elle prend les dossiers, le journal, les délais et les indicateurs du **périmètre du rôle** ; elle rend une liste où **une ligne égale un dossier** et des alertes par famille. Lecture seule. Reçue par le directeur, le responsable, chaque gestionnaire ou collecteur pour son périmètre. Niveau au premier jour : **N0** (règles à seuil) ; le modèle de langage rédige la phrase en N1.
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : la ligne du brief **traitée ou écartée avec motif**, et l'événement qu'elle annonçait (délai dépassé ou non) ; horizon : 7 jours.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : la ligne du brief **traitée ou écartée avec motif**, et l'événement qu'elle annonçait (délai dépassé ou non) ; horizon : 7 jours.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1598,7 +1598,7 @@ Pour la microfinance, la capacité rend les **priorités de la journée** et les
 
 Ordonner les visites, détecter la présence, suggérer les zones. Elle prend le plan, les positions **consenties**, les retards, la densité ; elle rend l'ordre proposé avec motif, le gain de distance, les zones. Reçue par l'agent, le superviseur, le responsable de couverture. Niveau au premier jour : **N0** (règle de base, calcul local).
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : la visite **réalisée, la promesse obtenue** ou la zone effectivement couverte, comparées à la proposition ; horizon : la journée, puis 30 jours pour une zone.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : la visite **réalisée, la promesse obtenue** ou la zone effectivement couverte, comparées à la proposition ; horizon : la journée, puis 30 jours pour une zone.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1632,7 +1632,7 @@ Le contrôle de présence (géofencing) et la carte de couverture lisent la **po
 
 Répondre à « pourquoi ce chiffre ? ». Elle prend le calcul ou le score ; elle rend les **facteurs, leurs poids et leur contribution** et le texte d'explication. Reçue par le gestionnaire, le responsable, le client final (pour le motif). Niveau au premier jour : **N0** (la règle expose ses facteurs) ; le texte est N1 quand un modèle est disponible.
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : l'explication **consultée, contestée ou acceptée**, et la concordance entre les facteurs affichés et les facteurs réels (test automatique) ; horizon : mensuel.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : l'explication **consultée, contestée ou acceptée**, et la concordance entre les facteurs affichés et les facteurs réels (test automatique) ; horizon : mensuel.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1656,7 +1656,7 @@ La capacité d'explication affiche les facteurs d'un score, leur poids et leur c
 
 Regrouper les clients, les prospects, les épargnants en segments, cibler une campagne et, pour le distributeur, **composer des packages de vente puis mesurer leur effet**. Elle prend les clients, les comportements, les ventes, le stock, les marges ; elle rend des **segments agrégés ou anonymes**, des campagnes et des packages proposés, puis des rapports d'impact. Reçue par le marketing, le responsable commercial, la direction. Niveau au premier jour : **N0** (segmentation et calculs par règles).
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : l'**impact mesuré** d'un package ou d'une campagne (ventes, marge, panier, points de vente touchés, avant/après, contre groupe témoin) ; horizon : la durée du package puis 30 jours.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : l'**impact mesuré** d'un package ou d'une campagne (ventes, marge, panier, points de vente touchés, avant/après, contre groupe témoin) ; horizon : la durée du package puis 30 jours.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1689,13 +1689,13 @@ Pour le distributeur, la capacité propose des **packages de vente** : un lot de
 - Le groupe témoin est tiré parmi des points de vente comparables (segment, zone, historique) et non exposés, avec une taille minimale `ia.impact.temoin_minimal` ; en dessous, le rapport dit « sans témoin, impact estimé ».
 - Un rapport sans témoin n'entre dans aucun indicateur d'apprentissage au même poids qu'un rapport avec témoin (poids paramétré `ia.impact.poids_sans_temoin`).
 - Le package ou la campagne n'est jamais présenté comme « efficace » sans écart mesuré positif au seuil `ia.impact.seuil_succes_pct`.
-- Vérité terrain : l'impact mesuré est la réalité qui tranche (§7) ; objectifs : effet métier = marge incrémentale par package ; qualité = part de packages proposés dont l'impact mesuré est positif ; usage = taux de validation.
+- Vérité terrain : l'impact mesuré est la réalité qui tranche (FR-74) ; objectifs : effet métier = marge incrémentale par package ; qualité = part de packages proposés dont l'impact mesuré est positif ; usage = taux de validation.
 
 ### 10.15 Famille 15 : coaching et performance d'équipe
 
 Préparer un entretien, repérer qui a besoin d'appui. Elle prend la couverture, les visites hors zone, le score de poste, les impayés, l'objectif ; elle rend une **priorité de coaching** et une phrase composée des points qui ont joué. Reçue par le superviseur, le responsable d'agence. Niveau au premier jour : **N0** (règle à points paramétrable avec provenance).
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : l'évolution des indicateurs de l'agent **après l'entretien** de coaching ; horizon : 30 et 90 jours.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : l'évolution des indicateurs de l'agent **après l'entretien** de coaching ; horizon : 30 et 90 jours.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1717,7 +1717,7 @@ La capacité calcule une **priorité de coaching** par une règle à points para
 
 Rapprocher des paiements, des écritures, des mouvements. Elle prend le paiement, l'historique, les échéances ouvertes, les relevés ; elle rend un **rattachement proposé** et une cause probable de l'écart. Reçue par le comptable, le directeur financier. Niveau au premier jour : **N0** (règles de rapprochement).
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : le rattachement **confirmé ou rejeté** par le comptable, et l'écart effectivement résolu ; horizon : à la clôture du mois.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : le rattachement **confirmé ou rejeté** par le comptable, et l'écart effectivement résolu ; horizon : à la clôture du mois.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1741,7 +1741,7 @@ La capacité propose un rattachement, un lettrage ou une cause d'écart ; **elle
 
 Tester une hypothèse sans toucher au réel. Elle prend le dossier et des hypothèses saisies ; elle rend un résultat **étiqueté « simulation »**, séparé du réel. Reçue par le responsable, la direction, le cabinet. Niveau au premier jour : **N0** (calcul déterministe sur hypothèses).
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : l'écart entre la **simulation et le réel** observé après la décision ; horizon : 3 mois.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : l'écart entre la **simulation et le réel** observé après la décision ; horizon : 3 mois.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1764,31 +1764,31 @@ La capacité rend un résultat marqué « simulation » : **jamais dans un indic
 
 Situer un client, un secteur, un portefeuille dans son environnement. Elle prend les flux, l'historique, les séries de prix et d'inflation, le calendrier agricole ; elle rend un constat avec un niveau (favorable, neutre, défavorable), la tendance et la **source datée et citée**. Reçue par l'agent de crédit, le comité, la direction, le responsable des risques. Niveau au premier jour : **N0** (règles de concentration, séries publiques) ; seule la microfinance l'écrit en détail.
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : l'**évolution constatée** du secteur (PAR du secteur, prix) comparée au constat ; horizon : 3 et 6 mois.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : l'**évolution constatée** du secteur (PAR du secteur, prix) comparée au constat ; horizon : 3 et 6 mois.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
 | microfinance | analyse étendue en six volets ; analyse sectorielle micro et macro sur la fiche client | FR-96, FR-127 ; §6 règle F2 | « analyse sectorielle » |
 | microfinance | saturation d'un secteur (seuil 35 % par défaut) ; risque par secteur et par conjoncture | FR-97, FR-177 ; FR-180 | « saturation », « note de risque par secteur » |
 | microfinance | stratégie de recouvrement (comportement de retard et macro, famille 2) | FR-228, FR-218 à FR-221 | « conjoncture » |
-| distributeur, cabinet | non écrit au premier jour (observatoire sectoriel : §13) | — | sans objet |
+| distributeur, cabinet | non écrit au premier jour (observatoire sectoriel : §13, FR-153) | — | sans objet |
 
 #### FR-126 : L'analyse sectorielle cite des sources datées et n'est qu'une information
 
-La capacité rend un constat par volet (transactions, comportement micro, macro, saison, recouvrement passé, saturation), le niveau et les données. Chaque série externe est **datée et citée** ; une source de plus de `ia.secteur.source_ancienne_jours` jours (défaut 90) est marquée « ancienne » ; une série absente rend « non installé », jamais une valeur de repli. **L'analyse est une information, pas une décision.** Pour la saturation, le seuil de 35 % est un paramètre calibré sur le portefeuille du client. **Seules les données des clients consentants alimentent l'apprentissage commun** (§8) ; l'analyse du client lui-même s'affiche sans ce consentement.
+La capacité rend un constat par volet (transactions, comportement micro, macro, saison, recouvrement passé, saturation), le niveau et les données. Chaque série externe est **datée et citée** ; une source de plus de `ia.secteur.source_ancienne_jours` jours (défaut 90) est marquée « ancienne » ; une série absente rend « non installé », jamais une valeur de repli. **L'analyse est une information, pas une décision.** Pour la saturation, le seuil de 35 % est un paramètre calibré sur le portefeuille du client. **Seules les données des clients consentants alimentent l'apprentissage commun** (FR-76, FR-77) ; l'analyse du client lui-même s'affiche sans ce consentement.
 
 **Conséquences (testables) :**
 - Chaque constat affiche source et date ; sans source, il n'est pas affiché.
 - Une source plus ancienne que `ia.secteur.source_ancienne_jours` est étiquetée « ancienne ».
 - La saturation d'un secteur déclenche une alerte quand la part dépasse `ia.secteur.saturation_pct`.
-- L'analyse d'un client sans consentement à l'apprentissage s'affiche, mais ses données n'alimentent pas le niveau d'export « apprentissage » (§8).
+- L'analyse d'un client sans consentement à l'apprentissage s'affiche, mais ses données n'alimentent pas le niveau d'export « apprentissage » (FR-77).
 - Objectifs : qualité = fraîcheur des sources ; usage = taux de consultation par dossier ; effet métier = écart entre la saturation détectée et l'évolution du retard de paiement du secteur.
 
 ### 10.19 Famille 19 : le moteur d'automatisation par règles
 
-Faire exécuter, sous contrôle, des règles de gestion. Elle prend des faits datés du module détenteur ; elle rend des **cibles** (avec score et message prêt) selon un **mode** : `SUGGESTION`, `VALIDATION`, `AUTO` ou `AUTO_SOUS_MANDAT`, et une file d'arbitrage. Reçue par le responsable de la règle. Niveau au premier jour : **N0** (grammaire fermée). Les agents sont au §11.
+Faire exécuter, sous contrôle, des règles de gestion. Elle prend des faits datés du module détenteur ; elle rend des **cibles** (avec score et message prêt) selon un **mode** : `SUGGESTION`, `VALIDATION`, `AUTO` ou `AUTO_SOUS_MANDAT`, et une file d'arbitrage. Reçue par le responsable de la règle. Niveau au premier jour : **N0** (grammaire fermée). Les agents sont en FR-134 à FR-137.
 
-**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail au §7) : l'exécution **annulée, contestée ou maintenue**, et la décision humaine de la file d'arbitrage ; horizon : 30 jours.
+**Vérité terrain** (qui avait raison, l'IA ou l'humain ? détail : FR-74 et FR-75) : l'exécution **annulée, contestée ou maintenue**, et la décision humaine de la file d'arbitrage ; horizon : 30 jours.
 
 | logiciel | usage | FR d'origine | vocabulaire |
 |---|---|---|---|
@@ -1799,7 +1799,7 @@ Faire exécuter, sous contrôle, des règles de gestion. Elle prend des faits da
 
 #### FR-127 : Le moteur d'automatisation est un seul moteur, dont le mode le plus strict est le défaut
 
-Un seul moteur, de grammaire fermée (aucune évaluation dynamique d'expression), sert les quatre logiciels (le mandat est au §11). Chaque règle porte un mode ; **le défaut est le régime le plus strict**. On peut abaisser un mode, jamais l'élever sans contrôle. Une règle qui contacte une personne porte un **quota de sollicitation**. La **file d'arbitrage** plafonne la décision groupée (25 par défaut, 100 au plus, motif au-delà du défaut) ; un taux d'acceptation de plus de 90 % sur 30 jours signale une validation de façade (FR-92). L'assurance n'active que `SUGGESTION` ; la microfinance n'a aucune règle `AUTO` de blocage ; le distributeur et le cabinet peuvent avoir `AUTO` pour les types d'action du catalogue qui le permettent (FR-134).
+Un seul moteur, de grammaire fermée (aucune évaluation dynamique d'expression), sert les quatre logiciels (le mandat : FR-135). Chaque règle porte un mode ; **le défaut est le régime le plus strict**. On peut abaisser un mode, jamais l'élever sans contrôle. Une règle qui contacte une personne porte un **quota de sollicitation**. La **file d'arbitrage** plafonne la décision groupée (25 par défaut, 100 au plus, motif au-delà du défaut) ; un taux d'acceptation de plus de 90 % sur 30 jours signale une validation de façade (FR-92). L'assurance n'active que `SUGGESTION` ; la microfinance n'a aucune règle `AUTO` de blocage ; le distributeur et le cabinet peuvent avoir `AUTO` pour les types d'action du catalogue qui le permettent (FR-134).
 
 **Conséquences (testables) :**
 - Une règle contenant une expression à évaluer est refusée à l'enregistrement (`GRAMMAIRE_FERMEE`).
@@ -1812,7 +1812,7 @@ Un seul moteur, de grammaire fermée (aucune évaluation dynamique d'expression)
 
 #### FR-128 : Ce qui est « bientôt », « plus tard » ou exclu est inscrit au catalogue, avec son bouton
 
-Les capacités demandées qui ne sont pas du premier jour sont **inscrites au catalogue** avec le statut `BIENTOT`, `PLUS_TARD` ou `EXCLU` ; les écrans portent le bouton « bientôt » prévu (aucun appel réel). Sont **bientôt** : le chatbot de qualification de leads (distributeur, microfinance), la lecture d'une commande par message (distributeur), le chatbot de l'assuré, la dictée vocale de la microfinance, la fraude sur espèces du distributeur, la détection de départ d'un client, la comparaison avec d'autres distributeurs, le routage routier réel. Sont **plus tard** : le conseil fiscal, l'analyse financière, les notes annexes et l'assistance à la revue KYC du cabinet, la rédaction du rapport de direction par modèle tant qu'aucun modèle n'est branché. Sont **exclus** : la dictée, la transcription d'appel et la synthèse vocale de l'assurance au premier jour, la recommandation de prix au revendeur indépendant, l'OCR par modèle de vision (§12).
+Les capacités demandées qui ne sont pas du premier jour sont **inscrites au catalogue** avec le statut `BIENTOT`, `PLUS_TARD` ou `EXCLU` ; les écrans portent le bouton « bientôt » prévu (aucun appel réel). Sont **bientôt** : le chatbot de qualification de leads (distributeur, microfinance), la lecture d'une commande par message (distributeur), le chatbot de l'assuré, la voix du distributeur et du cabinet (réglage de leur pack, FR-138), la fraude sur espèces du distributeur, la détection de départ d'un client, la comparaison avec d'autres distributeurs, le routage routier réel. Sont **plus tard** : le conseil fiscal, l'analyse financière, les notes annexes et l'assistance à la revue KYC du cabinet, la rédaction du rapport de direction par modèle tant qu'aucun modèle n'est branché. Sont **exclus** : la dictée, la transcription d'appel et la synthèse vocale de l'assurance (décision du PO : le pack de l'assurance est sans voix), la recommandation de prix au revendeur indépendant, l'OCR par modèle de vision (FR-145).
 
 **Conséquences (testables) :**
 - Le catalogue contient les statuts `BIENTOT`, `PLUS_TARD`, `EXCLU` ; une capacité de ces statuts rend `NON_INSTALLE` à tout appel.
@@ -1825,18 +1825,18 @@ Les PRD des logiciels se contredisaient sur seize points ; la décision du PO su
 
 | # | Contradiction | Résolution | Où |
 |---|---|---|---|
-| X1 | Où tourne l'IA | même code, même contrat, en ligne et en local | §5 |
-| X2 | Copilot : quatre statuts différents | texte, lecture seule, au premier jour pour les quatre logiciels | FR-115, §11 |
-| X3 | Agir seul ou jamais | action autonome seulement pour un type d'action non engageant et réversible, sous mandat ; jamais pour crédit, garantie, sinistre, paiement, refus, blocage | §11 |
+| X1 | Où tourne l'IA | même code, même contrat, en ligne et en local | FR-30 |
+| X2 | Copilot : quatre statuts différents | texte, lecture seule, au premier jour pour les quatre logiciels | FR-115, FR-131 |
+| X3 | Agir seul ou jamais | action autonome seulement pour un type d'action non engageant et réversible, sous mandat ; jamais pour crédit, garantie, sinistre, paiement, refus, blocage | FR-14, FR-134 |
 | X4 | Scoring et prévision « autre métier, plus tard » | servis par l'IA commune, en règle v0 au premier jour | FR-93, FR-105 |
-| X5 | Deux contrats de proposition | un seul contrat (origine, niveau, statut, décideur) | §4 |
-| X6 | OCR : où et quoi | OCR dans le service de documents ; lecture et classement dans l'IA | §12 |
-| X7 | Voix : réelle, exclue ou bientôt | bientôt pour tous ; la dictée vocale de la microfinance est reportée [ASSUMPTION: décision D12 ; le PRD microfinance la spécifiait au premier jour avec consentement propre ; à confirmer par le PO] | FR-138 |
+| X5 | Deux contrats de proposition | un seul contrat (origine, niveau, statut, décideur) | FR-12 |
+| X6 | OCR : où et quoi | OCR dans le service de documents ; lecture et classement dans l'IA | FR-140 |
+| X7 | Voix : réelle, exclue ou bientôt | réglage du pack de secteur (FR-161) : microfinance, saisie vocale de terrain au premier jour (comme son PRD validé) ; assurance, sans voix (décision du PO) ; distributeur et cabinet, bientôt [ASSUMPTION: la durée de conservation du son n'est pas tranchée ; elle est un paramètre du pack, FR-138] | FR-138, FR-161 |
 | X8 | Chatbot | bientôt pour tous | FR-138 |
 | X9 | Assurance : « tout au premier jour » contre un ordre de construction en trois phases | tout reste dû au premier jour ; l'ordre de construction place l'analyse des devis, la simulation et la comparaison en dernier [ASSUMPTION] | FR-110, FR-125 |
-| X10 | Deux scores de client sans définition commune | deux capacités distinctes ; le croisement est de l'horizon (passeport) | FR-96, §13 |
+| X10 | Deux scores de client sans définition commune | deux capacités distinctes ; le croisement est de l'horizon (passeport) | FR-96, FR-151 |
 | X11 | Équité écrite seulement chez la microfinance et le score de fraude | liste fermée et suivi mensuel pour tout score sur une personne, quatre logiciels | FR-94 |
-| X12 | Consentement à l'IA | finalité « apprentissage commun » au contrat, registre des consentements | §8 |
+| X12 | Consentement à l'IA | finalité « apprentissage commun » au contrat, registre des consentements | FR-76 |
 | X13 | Rédaction : gabarit ou modèle de langage | gabarit au premier jour et en repli ; modèle quand il est branché ; la provenance le dit | FR-112 |
 | X14 | Le conseil fiscal | reste dans le service de balance au premier jour ; la justification rédigée vient ensuite | FR-111 |
 | X15 | Dénominations (« Copilot », « recherche », « assistant ») | un nom de capacité, un vocabulaire par logiciel | FR-115 |
@@ -1955,17 +1955,17 @@ Toute capacité demandée par un PRD de logiciel a sa ligne dans le catalogue. L
 
 ## 11. Copilot et agents
 
-Cette section décrit les deux façons dont l'IA parle et agit pour l'utilisateur : le **Copilot**, qui répond à une question en lisant seulement, et les **agents sous mandat**, qui peuvent exécuter une action mais seulement si elle ne l'engage pas et qu'on peut la défaire. Elle reprend le contenu du PRD de l'assistant d'août, qui devient le module `assistant` de l'IA commune (§5). La doctrine (l'IA propose, l'humain décide) est au §4 ; elle n'est pas répétée.
+Cette section décrit les deux façons dont l'IA parle et agit pour l'utilisateur : le **Copilot**, qui répond à une question en lisant seulement, et les **agents sous mandat**, qui peuvent exécuter une action mais seulement si elle ne l'engage pas et qu'on peut la défaire. Elle reprend le contenu du PRD de l'assistant d'août, qui devient le module `assistant` de l'IA commune (FR-30, annexe A). La doctrine (l'IA propose, l'humain décide) est en FR-13 et FR-14 ; elle n'est pas répétée.
 
 #### FR-131 : Le Copilot est servi au premier jour aux quatre logiciels, en texte et en lecture seule
 
-Le Copilot répond en texte, en français, à une question posée dans le logiciel (cabinet, distributeur, microfinance, assurance). Il est **en lecture seule** : il ne crée, ne modifie, n'envoie et ne supprime rien. Il est servi **au premier jour pour les quatre logiciels** (décision D12) [ASSUMPTION: le PRD distributeur le mettait « bientôt » et celui de l'assistant d'août « plus tard » ; la décision du PO le remonte]. Il n'y a **pas de voix** au premier jour (FR-138). Quand il ne sait pas, il le dit : « je n'ai pas encore de réponse fiable » ou « données non disponibles » plutôt que de deviner.
+Le Copilot répond en texte, en français, à une question posée dans le logiciel (cabinet, distributeur, microfinance, assurance). Il est **en lecture seule** : il ne crée, ne modifie, n'envoie et ne supprime rien. Il est servi **au premier jour pour les quatre logiciels** (décision D12) [ASSUMPTION: le PRD distributeur le mettait « bientôt » et celui de l'assistant d'août « plus tard » ; la décision du PO le remonte]. Il n'a **pas d'entrée vocale** au premier jour ; la voix est un réglage du pack de secteur, qui sert la dictée de terrain et non le Copilot (FR-138). Quand il ne sait pas, il le dit : « je n'ai pas encore de réponse fiable » ou « données non disponibles » plutôt que de deviner.
 
 **Conséquences (testables) :**
 - Une question dans chacun des quatre logiciels reçoit une réponse au premier jour, ou le message « je n'ai pas encore de réponse fiable » (test sur les quatre logiciels).
 - Aucune route du Copilot n'écrit dans un module métier (test : le compte de service du Copilot n'a aucun droit d'écriture sur les données métier).
 - Une question hors du périmètre de l'utilisateur reçoit « données non disponibles » et non une réponse partielle.
-- Le Copilot n'accepte pas d'entrée audio au premier jour.
+- Le Copilot n'accepte pas d'entrée audio au premier jour, même dans un pack qui a activé la voix : la saisie vocale de terrain sert la dictée, pas le Copilot (FR-138).
 
 #### FR-132 : Le Copilot a les droits de l'utilisateur, cite ses sources et donne le périmètre de chaque chiffre
 
@@ -1980,7 +1980,7 @@ Le Copilot lit **ce que l'utilisateur peut lire**, rien de plus : il hérite de 
 
 #### FR-133 : Le Copilot a un vocabulaire et des rôles par logiciel, et marche sans modèle de langage
 
-Le Copilot est une capacité unique (FR-115) avec un **vocabulaire par logiciel** et, pour la microfinance, une **liste de seize rôles**, plus un Copilot d'installation sans chiffre métier pour l'administrateur. Les questions de l'assurance en « recherche en langage naturel » rendent des **critères visibles et corrigeables**, une synthèse chiffrée et des listes, sans filtrer ni retourner de champ de santé hors des rôles autorisés. Le modèle de langage est servi, **en ligne**, par la passerelle unique de l'IA (masquage, journal de chaque envoi, aucune rétention chez le fournisseur) et, **en local**, par un modèle ouvert sur le serveur du client (§5). Si le modèle n'est pas disponible, le Copilot **se replie** sur la recherche par règles et sur des gabarits de réponse, et le dit ; le produit reste utile sans modèle de langage. **Aucune donnée de santé ne part vers un modèle hors de l'instance.**
+Le Copilot est une capacité unique (FR-115) avec un **vocabulaire par logiciel** et, pour la microfinance, une **liste de seize rôles**, plus un Copilot d'installation sans chiffre métier pour l'administrateur. Les questions de l'assurance en « recherche en langage naturel » rendent des **critères visibles et corrigeables**, une synthèse chiffrée et des listes, sans filtrer ni retourner de champ de santé hors des rôles autorisés. Le modèle de langage est servi, **en ligne**, par la passerelle unique de l'IA (masquage, journal de chaque envoi, aucune rétention chez le fournisseur) et, **en local**, par un modèle ouvert sur le serveur du client (FR-35). Si le modèle n'est pas disponible, le Copilot **se replie** sur la recherche par règles et sur des gabarits de réponse, et le dit ; le produit reste utile sans modèle de langage. **Aucune donnée de santé ne part vers un modèle hors de l'instance.**
 
 **Conséquences (testables) :**
 - Le catalogue du Copilot porte la liste des rôles de chaque logiciel ; un rôle sans entrée de vocabulaire est refusé à la publication.
@@ -2033,14 +2033,15 @@ Le même mécanisme sert les quatre logiciels avec des plafonds différents. **A
 - Une règle de distributeur touchant une remise est créée en `VALIDATION` ; la passer en `AUTO` est refusé.
 - L'interrupteur général d'un client coupe toutes les exécutions autonomes à la prochaine évaluation (fail-closed).
 
-#### FR-138 : La voix, le chatbot de messagerie et les langues locales sont « bientôt »
+#### FR-138 : La voix est un réglage du pack de secteur ; le chatbot de messagerie et les langues locales sont « bientôt »
 
-Sont **bientôt**, sans date : la **voix** (dictée, transcription, synthèse vocale), le **chatbot de messagerie** de l'assuré, du client ou du prospect, et les **langues locales**. Ils sont inscrits au catalogue avec le statut `BIENTOT` (FR-128) et leurs écrans portent un bouton « bientôt ». La dictée vocale de la microfinance, spécifiée dans son PRD, est reportée par cette décision [ASSUMPTION: voir X7, FR-129]. Quand ils viendront, ils seront des surfaces sous mandat (FR-134, FR-135), avec un humain toujours joignable et une mesure de satisfaction, pas seulement du coût.
+La **voix** (dictée, transcription, synthèse vocale) n'est ni partout, ni nulle part : c'est un **réglage du pack de secteur** (FR-161), à trois valeurs : `ACTIVEE`, `BIENTOT`, `SANS_VOIX`. Au premier jour : la **microfinance** est `ACTIVEE` pour la **saisie vocale de terrain** (dictée de l'agent et du collecteur, rapport du soir : M26), comme le prévoit son PRD validé par le PO, avec le consentement propre qu'il demande ; l'**assurance** est `SANS_VOIX` (décision du PO : ni dictée, ni transcription d'appel, ni synthèse) ; le **distributeur** et le **cabinet** sont `BIENTOT`, sans date. Une dictée est une **extraction proposée** (FR-12) : le texte transcrit est montré à l'agent, qui le confirme ou le corrige avant qu'il n'entre au dossier ; la transcription est servie comme un modèle de langage (FR-33, FR-35), jamais sur une donnée de santé hors de l'instance (FR-36). Sont **bientôt** pour tous les secteurs, sans date : le **chatbot de messagerie** de l'assuré, du client ou du prospect, et les **langues locales**. Ils sont inscrits au catalogue avec le statut `BIENTOT` (FR-128) et leurs écrans portent un bouton « bientôt ». Quand ils viendront, ils seront des surfaces sous mandat (FR-134, FR-135), avec un humain toujours joignable et une mesure de satisfaction, pas seulement du coût.
 
 **Conséquences (testables) :**
-- Aucun écran du premier jour n'enregistre de son ni ne propose de saisie vocale.
+- Un écran n'enregistre de son et ne propose de saisie vocale que si le pack du secteur est `ACTIVEE` ; au premier jour, un test vérifie que seul le pack de la microfinance l'est, que le pack `BIENTOT` montre un bouton « bientôt » sans appel réel, et que le pack `SANS_VOIX` n'a aucun emplacement de voix.
+- Une dictée n'entre jamais au dossier sans la confirmation de l'agent ; elle porte l'origine `MODELE` et le niveau `EXTRACTION` (annexe B) ; sans le consentement propre, aucun son n'est capté. `[ASSUMPTION : durée de conservation du son nulle au-delà de la transcription, paramètre du pack à confirmer par le PO]`
 - Aucun chatbot ne répond à un message entrant au premier jour ; le message est lu seulement quand le logiciel le prévoit (FR-100).
-- Les trois capacités répondent `NON_INSTALLE` à un appel.
+- Le chatbot et les langues locales répondent `NON_INSTALLE` à un appel ; la voix répond `NON_INSTALLE` dans un pack qui ne l'a pas activée.
 
 #### FR-139 : Le Copilot et les agents ont leurs objectifs mesurés et leurs quotas
 
@@ -2050,7 +2051,7 @@ Le Copilot et les agents sont des capacités comme les autres (FR-92). Indicateu
 - Le rapport mensuel du Copilot donne les quatre indicateurs ci-dessus par logiciel.
 - Le nombre de propositions appliquées sans validation hors `AUTO` autorisé est zéro (contrôle sur le décideur typé) ; une valeur non nulle déclenche une alerte à Money Vibes.
 - Un client qui dépasse son quota reçoit `QUOTA_INFERENCE_DEPASSE` et les autres clients ne sont pas ralentis (test de charge à deux organisations).
-- Vérité terrain : pour une exécution autonome, la réalité qui tranche est l'annulation ou la contestation constatée ; l'indicateur est calculé sur 30 jours (§7).
+- Vérité terrain : pour une exécution autonome, la réalité qui tranche est l'annulation ou la contestation constatée ; l'indicateur est calculé sur 30 jours (FR-75).
 
 ## 12. Lecture de pièces
 
@@ -2087,7 +2088,7 @@ Chaque champ lu porte une **confiance** et un **extrait source** ; chaque pièce
 
 #### FR-143 : Les pièces médicales ne quittent jamais l'instance, et leur texte est une donnée de santé
 
-Le **texte lu d'une pièce médicale** (certificat, rapport, ordonnance) est classé **donnée de santé** dès sa lecture, selon le registre unique de classification santé du logiciel d'assurance. Il n'est **jamais** montré à l'accueil ni à la numérisation ; il n'est jamais envoyé à un **modèle hébergé hors de l'instance** (§5) ; **aucun écart issu de la santé**, même anonymisé, ne remonte vers l'IA centrale (§8) ; aucune pièce ne sort. La lecture d'une pièce médicale est donc faite **dans l'instance**, par le service de documents et un modèle local. Si l'instance ne peut pas faire tourner un modèle de langage, la pièce médicale est classée par règles et la saisie reste humaine.
+Le **texte lu d'une pièce médicale** (certificat, rapport, ordonnance) est classé **donnée de santé** dès sa lecture, selon le registre unique de classification santé du logiciel d'assurance. Il n'est **jamais** montré à l'accueil ni à la numérisation ; il n'est jamais envoyé à un **modèle hébergé hors de l'instance** (FR-33, FR-36) ; **aucun écart issu de la santé**, même anonymisé, ne remonte vers l'IA centrale (FR-77) ; aucune pièce ne sort. La lecture d'une pièce médicale est donc faite **dans l'instance**, par le service de documents et un modèle local. Si l'instance ne peut pas faire tourner un modèle de langage, la pièce médicale est classée par règles et la saisie reste humaine.
 
 **Conséquences (testables) :**
 - Le texte d'une pièce classée médicale n'apparaît dans aucune réponse rendue à un rôle non autorisé (test : accueil, numérisation).
@@ -2120,14 +2121,14 @@ La vision de Money Vibes (note du 10 au 11 novembre 2026) dépasse les quatre lo
 
 #### FR-146 : La feuille de route classe chaque produit de la vision, avec son statut
 
-Le tableau est la référence. Colonnes : ce que le produit fait ; les **familles de capacités** (§10) dont il dépend ; ce qui manque ; le statut donné par le PO.
+Le tableau est la référence. Colonnes : ce que le produit fait ; les **familles de capacités** (§10, FR-90) dont il dépend ; ce qui manque ; le statut donné par le PO.
 
 | produit | ce qu'il fait | familles | ce qui manque | statut du PO |
 |---|---|---|---|---|
 | Risque | note la PME et le ménage en temps réel par interface pour institutions financières ; plafonds et explication | 1, 2, 13, 18 | données de plusieurs sources, consentement, juriste, institution décideuse | oui |
 | Finance de la chaîne | crédit de stock, affacturage, financement fournisseur dans la commande du distributeur | 1, 2, 6, 7 | partenaire qui prête, contrôle du surendettement | à prendre vite |
 | Assurance embarquée | souscription à l'achat ou au crédit, paiement sur indice | 1, 3, 5, 7 | assureur partenaire, agrément, données d'indice | oui |
-| Agents IA métier | souscripteur, analyste crédit, recouvreur, comptable-fiscaliste, commercial | 8, 10, 19 | surfaces sous mandat, voix, mandat délivré par le client | adorés |
+| Agents IA métier | souscripteur, analyste crédit, recouvreur, comptable-fiscaliste, commercial | 8, 10, 19 | surfaces sous mandat, voix (réglage du pack, FR-138), mandat délivré par le client | adorés |
 | Passeport financier | identité et données partagées par la PME elle-même | 1, 3 | identité partagée, consentement, registre | c'était un but |
 | Pulse | indicateurs agrégés et prévision d'activité pour le secteur public | 6, 18 | seuil d'effectif, agrégation, accords | oui |
 | Météo des prix et de la demande | prix et demande à 1 à 3 mois par produit, marché, pays | 6, 18 | séries de prix, historique multi-clients | retenu |
@@ -2176,7 +2177,7 @@ Elle propose une assurance à l'achat ou au crédit et, plus tard, un paiement s
 
 #### FR-150 : Les agents métier sont des surfaces sous mandat, avec un humain toujours joignable
 
-Souscripteur, analyste de crédit, recouvreur, comptable-fiscaliste, commercial par messagerie et voix : chacun est une **surface** (gabarit et configuration) du module `assistant`, avec le catalogue de types d'action (FR-134) et un mandat délivré par le client (FR-135). Il dépend des familles 8, 10 et 19. Il manque : la voix et les langues locales (FR-138), l'exécution des actions de crédit et d'assurance (engageantes par nature : jamais autonomes), les modules exécutants qui publient leurs types d'action.
+Souscripteur, analyste de crédit, recouvreur, comptable-fiscaliste, commercial par messagerie et voix : chacun est une **surface** (gabarit et configuration) du module `assistant`, avec le catalogue de types d'action (FR-134) et un mandat délivré par le client (FR-135). Il dépend des familles 8, 10 et 19. Il manque : la voix hors du pack de la microfinance, et les langues locales (FR-138), l'exécution des actions de crédit et d'assurance (engageantes par nature : jamais autonomes), les modules exécutants qui publient leurs types d'action.
 
 **Conséquences (testables) :**
 - Aucun agent métier n'a de type d'action engageant en `AUTO`.
@@ -2185,12 +2186,12 @@ Souscripteur, analyste de crédit, recouvreur, comptable-fiscaliste, commercial 
 
 #### FR-151 : Le passeport financier suppose une identité partagée et un consentement explicite
 
-Le passeport permet à la PME de partager elle-même ses données vérifiées entre institutions. Il dépend des familles 1 et 3. Il manque : une **identité partagée** entre logiciels, un score commun entre logiciels (aujourd'hui deux scores distincts, FR-96), un **consentement explicite par finalité** et un registre qui le porte (§8). Le croisement d'une même PME entre le distributeur, l'IMF et le cabinet n'est **pas** du premier jour.
+Le passeport permet à la PME de partager elle-même ses données vérifiées entre institutions. Il dépend des familles 1 et 3. Il manque : une **identité partagée** entre logiciels, un score commun entre logiciels (aujourd'hui deux scores distincts, FR-96), un **consentement explicite par finalité** et un registre qui le porte (FR-76). Le croisement d'une même PME entre le distributeur, l'IMF et le cabinet n'est **pas** du premier jour.
 
 **Conséquences (testables) :**
 - Aucune capacité du premier jour ne croise les données d'une même PME entre deux logiciels.
 - Le croisement n'est possible que pour une PME qui a consenti à la finalité correspondante et dont l'identité est partagée.
-- Un retrait de consentement arrête l'usage futur ; il ne « désentraîne » pas un modèle déjà publié (§8).
+- Un retrait de consentement arrête l'usage futur ; il ne « désentraîne » pas un modèle déjà publié (FR-81).
 
 #### FR-152 : Pulse ne publie jamais une donnée individuelle ni un concurrent
 
@@ -2203,7 +2204,7 @@ Pulse publie des indicateurs agrégés et des prévisions d'activité pour les b
 
 #### FR-153 : La Météo des prix et de la demande est retenue, et dépend de données multi-clients
 
-Elle prévoit le prix et la demande à un à trois mois par produit, marché et pays ; commerçants par messagerie ou voix, tableau de bord pour les distributeurs, interface pour banques, assureurs et États. Elle dépend des familles 6 et 18. Il manque : des séries de prix, un historique multi-clients (donc la finalité d'apprentissage commun, §8), et la voix. Statut : retenu. Elle est le « cerveau » de la distribution en pilote automatique.
+Elle prévoit le prix et la demande à un à trois mois par produit, marché et pays ; commerçants par messagerie ou voix, tableau de bord pour les distributeurs, interface pour banques, assureurs et États. Elle dépend des familles 6 et 18. Il manque : des séries de prix, un historique multi-clients (donc la finalité d'apprentissage commun, FR-76), et la voix. Statut : retenu. Elle est le « cerveau » de la distribution en pilote automatique.
 
 **Conséquences (testables) :**
 - La Météo n'est servie qu'à partir de données agrégées au seuil d'effectif minimal.
@@ -2248,7 +2249,7 @@ Prélèvement intelligent, séquestre et crédit sur le rail de paiement. Statut
 
 #### FR-158 : Le modèle de fondation sectoriel et le transfrontalier ne sont pas tranchés
 
-Le **modèle de fondation sectoriel** est un petit modèle entraîné par apprentissage fédéré sur le vocabulaire du métier (SYSCOHADA, CIMA, BCEAO, factures, sinistres, langues locales), déployable sur site. Le **transfrontalier** finance le commerce entre pays avec le module de transit (PI-SPI, PAPSS), horizon 2029. La note de vision n'a recueilli aucune décision du PO sur ces deux produits : ils sont listés **sans engagement**. Pour le modèle de fondation : il manque un entraînement fédéré spécifié (qui entraîne, qui agrège, quelle garantie contre la fuite par les poids), un jeu d'évaluation, un responsable ; le premier modèle commun n'est pas promis avant le second semestre 2027. L'apprentissage fédéré est une phase ultérieure (§7).
+Le **modèle de fondation sectoriel** est un petit modèle entraîné par apprentissage fédéré sur le vocabulaire du métier (SYSCOHADA, CIMA, BCEAO, factures, sinistres, langues locales), déployable sur site. Le **transfrontalier** finance le commerce entre pays avec le module de transit (PI-SPI, PAPSS), horizon 2029. La note de vision n'a recueilli aucune décision du PO sur ces deux produits : ils sont listés **sans engagement**. Pour le modèle de fondation : il manque un entraînement fédéré spécifié (qui entraîne, qui agrège, quelle garantie contre la fuite par les poids), un jeu d'évaluation, un responsable ; le premier modèle commun n'est pas promis avant le second semestre 2027. L'apprentissage fédéré est une phase ultérieure (FR-62).
 
 **Conséquences (testables) :**
 - Aucune capacité ni aucun écran du premier jour ne nomme ces deux produits comme disponibles.
@@ -2262,7 +2263,7 @@ Quatre garde-fous valent pour tout produit de la feuille de route. **Money Vibes
 **Conséquences (testables) :**
 - Aucun flux de fonds de prêt ou de prime ne transite par un compte de Money Vibes (test sur les flux).
 - Aucune proposition de crédit n'est rendue sans le résultat du contrôle du surendettement.
-- Aucune donnée d'une fiche cliente ne quitte l'instance de son propriétaire ; seuls des écarts agrégés au niveau « apprentissage » (§8) le font.
+- Aucune donnée d'une fiche cliente ne quitte l'instance de son propriétaire ; seuls des écarts agrégés au niveau « apprentissage » (FR-77) le font.
 - Toute sortie agrégée respecte l'effectif minimal, sans donnée individuelle.
 
 ---
@@ -2285,13 +2286,14 @@ L'IA commune est **fermée à la modification, ouverte à l'ajout** : brancher u
 
 #### FR-161 : Le pack de secteur, déclaratif et versionné
 
-Un secteur se déclare dans un **pack de secteur** : un ensemble de fichiers **déclaratifs** (pas de code exécutable de secteur dans le socle), **versionné**, **signé** par Money Vibes, livré comme une mise à jour de module (même mécanique que les manifestes). Un pack contient au moins : (1) le **vocabulaire** du secteur (FR-162) ; (2) les **capacités consommées** parmi les familles existantes, avec les **règles N0** (FR-163) ; (3) ses **objectifs** mesurés et ses **vérités terrain** (FR-164) ; (4) ses **paramètres par pays** (FR-171) ; (5) ses **garde-fous propres** (FR-165) ; (6) ses **exigences de résidence de données** (FR-172). Un pack a un identifiant, une version, une compatibilité déclarée avec la version du catalogue et du contrat de proposition, et un **état** (`BROUILLON`, `ESSAI`, `ACTIF`, `RETIRE`).
+Un secteur se déclare dans un **pack de secteur** : un ensemble de fichiers **déclaratifs** (pas de code exécutable de secteur dans le socle), **versionné**, **signé** par Money Vibes, livré comme une mise à jour de module (même mécanique que les manifestes). Un pack contient au moins : (1) le **vocabulaire** du secteur (FR-162) ; (2) les **capacités consommées** parmi les familles existantes, avec les **règles N0** (FR-163), et le **réglage de la voix** (`ACTIVEE`, `BIENTOT` ou `SANS_VOIX`, FR-138) ; (3) ses **objectifs** mesurés et ses **vérités terrain** (FR-164) ; (4) ses **paramètres par pays** (FR-171) ; (5) ses **garde-fous propres** (FR-165) ; (6) ses **exigences de résidence de données** (FR-172). Un pack a un identifiant, une version, une compatibilité déclarée avec la version du catalogue et du contrat de proposition, et un **état** (`BROUILLON`, `ESSAI`, `ACTIF`, `RETIRE`).
 
 **Conséquences (testables) :**
 - Un test charge un pack auquel il manque une des six sections : le chargement est refusé avec un code nommé qui dit laquelle manque.
 - Un pack dont la signature est absente ou invalide n'est pas installé en `ACTIF` ; un pack dont la compatibilité de catalogue n'est pas satisfaite est refusé sans effet sur les autres packs.
 - Un test installe deux versions du même pack en parallèle (essai chez une organisation, actif chez une autre) : chacune ne voit que la sienne.
 - Un contrôle automatique rejette tout fichier d'un pack qui n'est pas une déclaration au schéma publié (FR-173) : aucun code exécutable.
+- Un pack sans réglage de voix est refusé ; un pack qui déclare `ACTIVEE` sans consentement propre ni confirmation humaine de la dictée est refusé (FR-138).
 
 #### FR-162 : Le vocabulaire du secteur se rattache à un noyau neutre
 
@@ -2314,7 +2316,7 @@ Le pack déclare les **capacités qu'il consomme** parmi celles du catalogue (FR
 
 #### FR-164 : Les objectifs et les vérités terrain du secteur
 
-Le pack déclare, pour chaque capacité consommée, ses **objectifs mesurés** (qualité, usage, effet métier, équité : FR-92) et ses **vérités terrain**, c'est-à-dire **ce qui tranche « qui avait raison »** et **à quel horizon**. Exemples : pour le score d'un ménage abonné à un kit solaire, la vérité terrain est le **retard de plus de 30 jours** observé à l'horizon de six mois (IA-P84) ; pour une probabilité de paiement de cotisation, la **cotisation reçue** à la date du tour ; pour un résumé, la **correction de l'utilisateur**. Quand l'humain et l'IA ne sont pas d'accord, le **désaccord est conservé** et, à l'horizon déclaré, confronté à la réalité : le pourcentage « l'IA avait raison / l'humain avait raison » se calcule **par capacité et par secteur**, comme pour les quatre logiciels (journal des désaccords, partie 2). Sans vérité terrain déclarée, une capacité d'un secteur reste **à N0** : elle ne peut pas être promue (FR-167).
+Le pack déclare, pour chaque capacité consommée, ses **objectifs mesurés** (qualité, usage, effet métier, équité : FR-92) et ses **vérités terrain**, c'est-à-dire **ce qui tranche « qui avait raison »** et **à quel horizon**. Exemples : pour le score d'un ménage abonné à un kit solaire, la vérité terrain est le **retard de plus de 30 jours** observé à l'horizon de six mois (IA-P84) ; pour une probabilité de paiement de cotisation, la **cotisation reçue** à la date du tour ; pour un résumé, la **correction de l'utilisateur**. Quand l'humain et l'IA ne sont pas d'accord, le **désaccord est conservé** et, à l'horizon déclaré, confronté à la réalité : le pourcentage « l'IA avait raison / l'humain avait raison » se calcule **par capacité et par secteur**, comme pour les quatre logiciels (journal des désaccords, FR-74). Sans vérité terrain déclarée, une capacité d'un secteur reste **à N0** : elle ne peut pas être promue (FR-167).
 
 **Conséquences (testables) :**
 - Un test charge un pack dont une capacité n'a pas de vérité terrain : la capacité est acceptée **à N0 seulement**, avec le motif « non mesurable », et ne peut atteindre ni N1 ni N2.
@@ -2334,7 +2336,7 @@ Un pack déclare ses **garde-fous propres** : les **variables interdites** pour 
 
 #### FR-166 : Les modèles et les calibrations d'un secteur sont versionnés à part
 
-Chaque modèle et chaque calibration est rangé sous une **clé de secteur** : `secteur / capacité / version`. Une calibration N2 est la **donnée d'une organisation** (clause C11, point 3) **et** d'un secteur ; un modèle commun N1 a **une ligne par secteur** quand il est propre au secteur, ou une **ligne transverse** quand la famille est déclarée telle (FR-168). Le registre des modèles (partie 2) ne fait **jamais** d'alias partagé entre deux secteurs : un secteur promeut, retient ou **retire en une action** sa propre version sans que l'alias d'un autre secteur bouge. Une organisation qui porte deux secteurs (un distributeur qui active aussi un module de tontine, par exemple) a **deux calibrations séparées**.
+Chaque modèle et chaque calibration est rangé sous une **clé de secteur** : `secteur / capacité / version`. Une calibration N2 est la **donnée d'une organisation** (clause C11, point 3) **et** d'un secteur ; un modèle commun N1 a **une ligne par secteur** quand il est propre au secteur, ou une **ligne transverse** quand la famille est déclarée telle (FR-168). Le registre des modèles (FR-63, FR-83) ne fait **jamais** d'alias partagé entre deux secteurs : un secteur promeut, retient ou **retire en une action** sa propre version sans que l'alias d'un autre secteur bouge. Une organisation qui porte deux secteurs (un distributeur qui active aussi un module de tontine, par exemple) a **deux calibrations séparées**.
 
 **Conséquences (testables) :**
 - Un test publie une nouvelle version du modèle d'un secteur : les alias `champion` et `challenger` des autres secteurs ne changent pas, et leurs propositions sur un jeu figé sont identiques.
@@ -2344,7 +2346,7 @@ Chaque modèle et chaque calibration est rangé sous une **clé de secteur** : `
 
 #### FR-167 : Non-régression obligatoire, champion et challenger par secteur
 
-Aucune version (modèle, règle, pack, extension du catalogue) n'est promue sans deux preuves. **D'abord**, une **non-régression sur chaque secteur déjà en place** : un jeu de dossiers figés par secteur, rejoué à chaque candidat, doit donner les mêmes propositions pour tout secteur que le candidat **ne devait pas** toucher (IA-P80). **Ensuite**, un **champion/challenger par secteur** : un challenger n'est promu que s'il bat le champion **du même secteur** sur les objectifs de ce secteur (FR-164, FR-92), sans régression d'équité (FR-18). L'ordre de promotion (hors ligne, ombre, canari, général) est celui de la partie 2, imposé ici **secteur par secteur**, jamais globalement. Un secteur sans jeu de non-régression (IA-P81) ne peut pas être promu et ne peut pas être ajouté `ACTIF`.
+Aucune version (modèle, règle, pack, extension du catalogue) n'est promue sans deux preuves. **D'abord**, une **non-régression sur chaque secteur déjà en place** : un jeu de dossiers figés par secteur, rejoué à chaque candidat, doit donner les mêmes propositions pour tout secteur que le candidat **ne devait pas** toucher (IA-P80). **Ensuite**, un **champion/challenger par secteur** : un challenger n'est promu que s'il bat le champion **du même secteur** sur les objectifs de ce secteur (FR-164, FR-92), sans régression d'équité (FR-18). L'ordre de promotion (hors ligne, ombre, canari, général) est celui de FR-64, imposé ici **secteur par secteur**, jamais globalement. Un secteur sans jeu de non-régression (IA-P81) ne peut pas être promu et ne peut pas être ajouté `ACTIF`.
 
 **Conséquences (testables) :**
 - Une promotion qui change la sortie d'un secteur non visé sur son jeu figé au-delà de IA-P80 est **refusée** par la chaîne de livraison, avec le nom du secteur et des dossiers qui ont bougé.
@@ -2447,3 +2449,812 @@ Pour la **tontine** (cotisations, ordre de passage, pénalités), le schéma est
 - Un test ajoute « solaire » puis « tontine », puis dans l'ordre inverse : l'état final des quatre secteurs d'origine est identique dans les deux cas (FR-167).
 - La coupure à distance d'un kit, demandée par l'IA, est refusée avec un code nommé : seul un humain, avec un motif, peut la commander (FR-13, FR-14).
 - Un pays de démonstration ajouté au secteur « solaire » n'altère ni un score, ni une explication, ni une alerte d'équité d'un secteur qui ne l'a pas.
+
+---
+
+## 15. Exigences transverses (non fonctionnelles)
+
+Ces exigences s'ajoutent à celles du PRD de chaque logiciel (distributeur, microfinance, assurance, cabinet) et à celles du moteur d'installation. Elles **ne répètent pas** une FR déjà écrite : elles la **renvoient** (« voir FR-n »). Tout chiffre est un **paramètre** (annexe D, codes `ia.perf.*`, `ia.dispo.*`, `ia.cout.*`, `ia.obs.*`) ; les valeurs par défaut sont des recommandations `[ASSUMPTION]` à mesurer à la recette, jamais des promesses commerciales (FR-29).
+
+**Tableau de renvois : exigence transverse, puis l'exigence qui la porte.**
+
+| Exigence transverse | Exigence porteuse |
+|---|---|
+| Une capacité n'est jamais bloquante | FR-15, FR-40 |
+| Isolation entre organisations (en ligne) et entre secteurs | FR-31, FR-42, FR-166 |
+| Les droits de l'utilisateur, jamais ceux de l'IA | FR-25, FR-39 |
+| Aucune donnée de santé hors de l'instance | FR-19, FR-36, FR-143 |
+| Aucun port entrant en local ; destinations sortantes déclarées | FR-32 |
+| Passerelle de langage : masquage, journal, aucune rétention | FR-33, FR-34 |
+| Modèle signé, paquet vérifié, retour arrière en une action | FR-67, FR-83, FR-84 |
+| Registre inaltérable, trace opposable, journal des accès | FR-17, FR-23, FR-89 |
+| Sauvegarde et restauration avec les données | FR-87 |
+| Supervision par la route de santé | FR-86 |
+| Dimensionnement du matériel local | FR-35, FR-41 |
+| Jamais de modèle ni de règle de score dans un module métier | FR-37, FR-44 |
+
+#### FR-175 : Performance des propositions de règle et de modèle
+
+Une proposition de niveau N0 (règle) est rendue en **moins de `ia.perf.n0_p95_ms` au 95e centile**, une proposition de niveau N1 ou N2 (modèle statistique) en **moins de `ia.perf.n1_p95_ms`**, mesurées sur l'instance ou sur le service, **hors réseau du client**. Au-delà du délai `ia.delai_reponse_max_s` (FR-40), la capacité rend l'état `INDISPONIBLE` et le parcours poursuit sur la règle de base du module ; au-delà du délai de repli IA-P07 (FR-15), l'écran reprend la main sans attendre. Une capacité ne dépasse jamais le plafond de calcul de la recalibration nocturne en heures ouvrées (FR-59).
+
+**Conséquences (testables) :**
+- Un jeu de 1 000 demandes par capacité, rejoué à la recette sur le matériel du palier déclaré (FR-41), donne un 95e centile sous les deux plafonds ; un dépassement fait échouer la recette de cette capacité, pas celle du logiciel.
+- Une capacité qui dépasse `ia.delai_reponse_max_s` rend `INDISPONIBLE`, ne laisse aucune proposition à moitié écrite au registre (FR-17) et laisse le parcours aller au bout (FR-40).
+- La mesure est faite par le service lui-même et exposée en indicateur (FR-184), pas déclarée.
+- `[ASSUMPTION : 300 ms pour une règle et 1,5 s pour un modèle statistique au 95e centile, sur le palier P1 ; les valeurs sont posées par ce PRD, à mesurer avant le premier devis]`
+
+#### FR-176 : Performance du Copilot et des capacités de langage
+
+Le Copilot affiche un **premier élément de réponse en moins de `ia.perf.copilot_premier_s`** et la **réponse complète en moins de `ia.perf.copilot_p95_s` au 95e centile**, sur une question à périmètre normal ; la valeur visée de l'objectif est `ia.objectif.copilot.temps_reponse_s` (FR-139). Le plafond d'une capacité de langage est celui de FR-40 (60 secondes). Quand le modèle de langage ne tient pas ces délais ou n'est pas disponible, le Copilot **se replie** sur la recherche par règles et gabarits et le dit (FR-35, FR-133), au lieu d'attendre.
+
+**Conséquences (testables) :**
+- Un jeu de 200 questions types (par logiciel) mesure le premier élément et la réponse complète au 95e centile sur le matériel du palier déclaré ; un dépassement est rapporté dans le rapport mensuel (FR-71), et fait échouer la recette si le plafond de FR-40 est dépassé.
+- Une panne ou une lenteur du modèle de langage ne bloque ni l'écran ni les autres capacités (FR-40, FR-86) ; l'état `DEGRADE` est visible.
+- `[ASSUMPTION : 3 secondes pour le premier élément et 20 secondes au 95e centile pour la réponse complète, en ligne ; en local sur modèle ouvert, la valeur dépend du palier et se fixe au devis]`
+
+#### FR-177 : Disponibilité de l'IA et de ce qui en dépend
+
+**En ligne**, le service d'IA est disponible **`ia.dispo.cible_pct` du temps par mois** ; une indisponibilité n'en est pas une du logiciel (FR-15). La reprise après panne du service se fait en **moins de `ia.dispo.rto_min` minutes** avec une perte de données de calibration et d'écarts de **moins de `ia.dispo.rpo_min` minutes** (sauvegarde horaire, FR-87). **En local**, la disponibilité de l'IA est celle de l'instance : elle redémarre avec l'agent (FR-32) et elle est surveillée comme le reste (FR-86). La panne de la **centrale de Money Vibes** n'a **aucun effet** sur le service rendu par une instance (FR-53, FR-85).
+
+**Conséquences (testables) :**
+- Un test coupe le service d'IA en ligne et vérifie que les parcours des quatre logiciels vont au bout (test de chaos par logiciel, FR-40) ; la disponibilité mensuelle est calculée depuis la route `sante` (FR-86).
+- Un test coupe la liaison avec la centrale pendant 45 jours : l'instance sert avec son dernier modèle et sa calibration, rien ne s'arrête (FR-61, FR-85).
+- Un test restaure la sauvegarde la plus récente après arrêt brutal : la perte maximale de calibration et d'écarts est sous `ia.dispo.rpo_min`.
+- `[ASSUMPTION : 99,5 % par mois, reprise en 60 minutes, perte maximale de 60 minutes ; en local, aucun engagement de disponibilité n'est pris au-delà de celui de l'instance]`
+
+#### FR-178 : Isolation entre organisations, entre secteurs et entre capacités
+
+En ligne, **aucune requête, aucun cache, aucune file, aucun journal ni aucun modèle de calibration** ne mélange deux organisations ; la saturation de l'une ne retarde pas l'autre au-delà de `ia.iso_delai_max_pct` (FR-31). Une calibration est la donnée **d'une organisation et d'un secteur** (FR-42, FR-166). Un module ne lit pas la proposition d'un autre module que ses droits ne lui ouvrent pas (FR-39), et l'IA ne lit la base d'aucun module (FR-38).
+
+**Conséquences (testables) :**
+- Un test de fuite lance, avec le jeton de l'organisation A, des demandes qui visent des identifiants de l'organisation B : refus `ORGANISATION_HORS_JETON`, aucune donnée de B dans la réponse, le journal ni le cache (FR-31).
+- Un test sature l'organisation A et mesure le délai de l'organisation B : l'allongement reste sous `ia.iso_delai_max_pct`.
+- Un test rejoue une calibration de secteur sur un autre secteur : refusée (FR-166).
+
+#### FR-179 : Sécurité de l'IA
+
+L'IA applique les règles de la plateforme (authentification, droits par code, clés, secrets) et y ajoute les siennes : (1) **aucun secret de fournisseur** dans le code, la configuration d'un module ou un journal ; la passerelle seule détient les clés des fournisseurs de langage (FR-33) ; (2) **tout paquet de modèle est vérifié** (signature, période de validité, compatibilité) avant de servir (FR-83) ; (3) **aucun port entrant** en local (FR-32) ; (4) les **demandes de langage** sont traitées comme des entrées **non fiables** : un texte reçu (pièce, message, question) ne peut **ni changer les droits, ni déclencher une action, ni modifier une instruction** de la capacité (injection d'invite) ; (5) l'**accès au registre et aux journaux** est en lecture seule pour l'auditeur (FR-17, FR-23) ; (6) la **chaîne d'approvisionnement des modèles** est tracée : licence vérifiée, version épinglée, empreinte (FR-35, FR-83).
+
+**Conséquences (testables) :**
+- Un test d'inspection ne trouve aucun secret de fournisseur hors de la passerelle ; un test de balayage de ports ne trouve aucun port entrant (FR-32).
+- Un jeu de textes piégés (instructions cachées dans une pièce, un message, un nom de fichier) est rejoué à chaque promotion d'une version de capacité de langage : aucun ne produit d'action, ne change un droit ni ne fait sortir une donnée ; un échec bloque la promotion (FR-65).
+- Un paquet au contenu modifié d'un octet est refusé (FR-83).
+- `[ASSUMPTION : le jeu de textes piégés est constitué et maintenu par l'équipe IA de Money Vibes ; son contenu et sa taille (au moins 100 cas à la première version) se fixent avec le responsable de la sécurité]`
+
+#### FR-180 : Journalisation de l'IA
+
+Chaque appel laisse une ligne de journal : organisation, capacité, version, auteur ou règle, taille, durée, résultat (`OK`, refus nommé, `INDISPONIBLE`), et, pour une capacité de langage, le fournisseur et le pays d'hébergement. Le journal **ne contient jamais** de contenu de proposition en clair, de donnée de santé, de secret ni de texte libre d'utilisateur : le contenu masqué d'un envoi de langage se conserve `ia.retention_contenu_passerelle_jours` pour l'audit (FR-34) et le contexte brut `ia.retention_contexte_brut_jours` (FR-38). Les **refus nommés** (annexe B) sont comptés et exposés.
+
+**Conséquences (testables) :**
+- Un test inspecte 1 000 lignes de journal d'un jeu qui contient des données de santé et des textes libres : zéro octet de ces contenus.
+- Chaque refus nommé de l'annexe B apparaît dans le journal avec son code et son compteur ; un code inconnu du contrat est un défaut.
+- Les horodatages suivent l'horloge scellée de l'instance (moteur) ; deux horloges (trace opposable, contexte brut) restent distinctes (FR-17).
+
+#### FR-181 : Conservation du registre, des écarts et des journaux
+
+Le **registre de l'IA** (trace opposable) est conservé **`ia.retention_registre_annees` ans** (FR-89, IA-P06). Les **observations de la personne concernée** sont conservées avec le dossier (IA-P13). Le **contexte brut** et le rendu figé sont purgés à leur échéance courte (FR-17, FR-38). Le **journal des écarts** est une donnée de l'organisation, conservé et sauvegardé avec elle (FR-56, FR-87) ; il suit l'**effacement** de l'organisation (FR-89). Une **désinstallation** du module `ia` ne supprime rien : le registre, les écarts et les calibrations restent stockés et masqués (annexe A, C9).
+
+**Conséquences (testables) :**
+- Un test avance l'horloge de `ia.retention_registre_annees` : la trace opposable est encore lisible la veille, purgée selon la règle d'effacement le lendemain, jamais avant.
+- Un test désinstalle puis réinstalle `ia` : aucune entrée du registre n'est perdue (FR-43).
+- `[ASSUMPTION : dix ans partout, aligné sur le journal de l'assurance ; durée à valider par le juriste, point J-IA-06 du §20.2]`
+
+#### FR-182 : Dimensionnement du matériel local
+
+Le **palier de matériel** (P0 repli complet, P1 capacités de calcul et petits modèles, P2 modèle de langage ouvert) est **publié** avec ses besoins (calcul, mémoire, mémoire graphique, disque, latence, débit) et **entre dans le devis** de chaque client en local (FR-41). Une instance sous le palier le plus bas démarre en **repli complet** (règles et gabarits) et **le dit** à l'installation (FR-35). L'ajout d'un **secteur** ou d'une **famille** n'augmente pas silencieusement l'empreinte : un pack déclare son empreinte additionnelle (FR-161) et un avertissement apparaît au-delà du volume testé.
+
+**Conséquences (testables) :**
+- Un test de charge sur chaque palier, avec le volume de dossiers de l'hypothèse du devis, mesure les délais de FR-175 et FR-176 ; le résultat est écrit dans la fiche d'empreinte.
+- Une instance sous le palier P0 rend `DEGRADE` pour la capacité de langage et le dit à l'écran ; un parcours métier va au bout (FR-35, FR-40).
+- Installer un pack de secteur dont l'empreinte dépasse le palier de l'instance affiche l'avertissement avant la mise en service, sans l'empêcher.
+- `[ASSUMPTION : voir FR-35 et FR-41 ; les valeurs d'empreinte se fixent par mesure avant le premier devis]`
+
+#### FR-183 : Coût d'inférence maîtrisé
+
+Chaque organisation a un **quota d'inférence** mensuel, **ferme**, fixé au contrat (`ia.cout.quota_mensuel`) : au-delà, `QUOTA_INFERENCE_DEPASSE` (429) et la capacité retombe sur la règle (FR-31, FR-139). Une **alerte** prévient le responsable à `ia.cout.alerte_pct` du quota. Le **coût de chaque proposition de langage** (jetons, durée, fournisseur) est mesuré et rapporté par capacité et par organisation (FR-71) ; en local, le coût est celui du matériel du palier. L'IA **préfère toujours la règle ou le modèle statistique** quand ils suffisent, et n'appelle le modèle de langage que pour les capacités qui le demandent (FR-45, FR-112).
+
+**Conséquences (testables) :**
+- Un test épuise le quota d'une organisation : les propositions de langage retombent sur la règle, les autres organisations ne sont pas ralenties (FR-31) ; l'alerte part à `ia.cout.alerte_pct`.
+- Le rapport mensuel d'une capacité de langage donne le nombre de propositions, le coût et le coût par proposition acceptée (FR-71).
+- Aucune capacité qui peut être servie par N0 ou N1 n'appelle un modèle de langage : un test d'inspection le vérifie par capacité.
+- `[ASSUMPTION : le quota par organisation est posé au contrat avec le client ; le défaut est « illimité en N0 et N1, plafonné en langage »]`
+
+#### FR-184 : Observabilité de l'IA
+
+L'IA expose, par organisation, capacité et version : le **nombre de propositions** et leur statut, les **latences**, le **taux de repli** sur la règle, le **taux de refus nommés**, le **taux d'acceptation, de modification et de rejet** (FR-68), l'**âge du modèle et de la calibration** en service, la **dérive** (FR-73) et le **coût** (FR-183). Les métriques sont **agrégées**, **sans contenu** ni identifiant de personne, conservées `ia.obs.retention_jours` ; seuls les **indicateurs de niveau 0** quittent l'instance, en schéma fermé (FR-86). Un **tableau de bord** par rôle (responsable, DSI, équipe IA de Money Vibes pour les agrégats) les montre.
+
+**Conséquences (testables) :**
+- Un test remplit le signal hebdomadaire d'une instance : aucun champ libre, aucun identifiant, aucun contenu métier (FR-86).
+- Chaque indicateur du §16 se **recalcule depuis les données** (journal, écarts, faits de réalité) ; un test recalcule et compare.
+- Une alerte (dérive, quota, service muet, modèle refusé) a un destinataire, un délai et une consigne ; une alerte sans destinataire est un défaut.
+- `[ASSUMPTION : 13 mois de conservation des métriques agrégées, pour comparer une année à la précédente]`
+
+#### FR-185 : Montée en charge en ligne et ajout de clients
+
+Le service en ligne **monte en charge par ajout d'instances** sans changer les contrats : l'ajout d'une organisation ne demande ni redémarrage ni migration des autres (FR-30, FR-31). La **calibration nocturne** de toutes les organisations se répartit dans la nuit pour ne pas dépasser `ia.recalibration_cpu_max_pct` de la capacité en heures ouvrées de la plus chargée (FR-59). L'ajout d'un secteur ou d'un pays ne touche pas aux autres (FR-160, FR-167).
+
+**Conséquences (testables) :**
+- Un test ajoute une organisation à un service chargé : aucune interruption, aucune dégradation mesurée des autres au-delà de FR-178.
+- Un test lance la recalibration de 50 organisations simulées : la charge en heures ouvrées reste sous la borne et la tournée est finie avant l'heure d'ouverture.
+- `[ASSUMPTION : l'ordre de grandeur de dimensionnement (nombre d'organisations, volume de propositions par jour) est donné par l'équipe commerciale ; faute de chiffre, la recette se fait sur 50 organisations simulées]`
+
+#### FR-186 : Compatibilité et évolution des contrats
+
+Le **contrat de proposition** (annexe B), le **catalogue des capacités** et le **pack de secteur** sont **versionnés** ; un changement incompatible est une **nouvelle version majeure**, et **`ia.catalogue.versions_maintenues`** versions du catalogue sont servies en parallèle (IA-P85, FR-169). Une version du code lit les données de la précédente (« N et N-1 », moteur AD-33) ; « promouvoir, saisir, revenir » passe pour chaque migration. Un champ ou un code ajouté est lu comme **inconnu** par la version précédente, qui **refuse** la transition plutôt que de la deviner.
+
+**Conséquences (testables) :**
+- Un test joue le contrat de proposition de la version N-1 contre le service en version N : lecture sans perte ; un code d'erreur nouveau est refusé proprement par un consommateur ancien.
+- Un test installe deux versions du catalogue : chaque module voit la sienne (FR-161).
+- Un retour arrière de code ou de modèle tient en une action, dans `ia.retour_arriere_max_min` (FR-67).
+
+#### FR-187 : Accessibilité, langue et lisibilité
+
+Toute proposition, provenance, explication et motif s'affiche **en français clair**, sans jargon (FR-4, FR-24), dans des **composants communs** accessibles au clavier et lisibles à l'écran sur un poste modeste ; le **vocabulaire** est celui du logiciel (FR-90, FR-162). Les **langues locales** ne sont pas du premier jour (FR-138). Un chiffre porte son unité, sa source et sa date (FR-132). Le mot « IA » n'est utilisé que pour N1, N2 et le langage (FR-24).
+
+**Conséquences (testables) :**
+- Un test parcourt chaque composant d'affichage d'une proposition au clavier seul : tous les gestes (accepter, modifier, rejeter, voir pourquoi) sont atteignables.
+- Un test de glossaire compare les libellés affichés au vocabulaire du logiciel (FR-11) : aucun libellé hors vocabulaire.
+
+#### FR-188 : Résilience, sauvegarde et restauration
+
+Les **modèles en service et précédent**, la **calibration**, le **journal des écarts**, le **registre** et les **fiches de capacité** se sauvegardent et se restaurent **avec les données** de l'organisation (FR-87). Un **modèle absent** après restauration est réinstallé depuis le paquet signé ; en attendant, l'IA retombe sur N0 (FR-53). Le **test de restauration mensuel** inclut l'IA ; il vérifie l'empreinte de la calibration et la **même** proposition de référence. Le **registre des consentements n'est jamais restauré** (FR-87).
+
+**Conséquences (testables) :**
+- Le test mensuel de restauration inclut l'IA : l'empreinte de la calibration et la proposition de référence sont identiques à celles de la sauvegarde.
+- Un test restaure une instance sans son modèle : retour sur N0 visible, puis réinstallation depuis le paquet signé sans perte.
+
+#### FR-189 : La conformité se prouve par des tests rejoués à chaque livraison
+
+La chaîne de livraison rejoue, à **chaque version** du code, d'un modèle, d'une règle ou d'un pack : (1) la **suite de contrat** de la proposition, à l'identique en ligne et en local (FR-30) ; (2) la **non-régression par secteur** sur le jeu de dossiers figés (FR-167) ; (3) l'**équité** (FR-70) ; (4) les **textes piégés** (FR-179) ; (5) la **recherche de secrets, de ports et de connexions de base** (FR-32, FR-38) ; (6) la **complétude du catalogue** : une capacité, un vocabulaire, un objectif de chaque famille, un fait de réalité (FR-57, FR-68, FR-90) ; (7) le **tableau de contrôle** de FR-130. Un échec **bloque la promotion**.
+
+**Conséquences (testables) :**
+- Un candidat qui échoue à l'une des sept familles de test n'est pas promu ; le refus nomme la famille.
+- Le rapport de livraison est conservé avec la version et lisible par l'auditeur.
+
+---
+
+## 16. Indicateurs de réussite
+
+La phrase à faire disparaître est : **« L'IA a dit quelque chose, mais on ne sait pas si elle avait raison. »** Tout indicateur se **recalcule depuis les données** (FR-184) ; aucun n'est saisi. Chaque indicateur porte un identifiant **SM-n**, une **requête de calcul**, une **source** et un **propriétaire**. Les **valeurs de départ** se mesurent au démarrage et sur les premières semaines de chaque client ; les **cibles chiffrées sont des paramètres** fixés avec lui à la séance de calibrage (annexe D). Aucun indicateur n'est un engagement commercial tant qu'il n'a pas été mesuré (FR-29).
+
+### 16.1 L'indicateur phare : « qui avait raison ? »
+
+| Id | Indicateur | Mesure | Cible | Source et propriétaire |
+|---|---|---|---|---|
+| **SM-1** | **Taux « qui avait raison » : sur une période glissante, parmi les désaccords entre l'IA et l'humain tranchés par la réalité, part où l'IA avait raison, part où l'humain avait raison, part indécidable** | par capacité, agent, agence, client et en global ; avec l'**effectif**, l'intervalle d'incertitude et la date de mise à jour ; période `ia.desaccord_periode_mois` (12 mois) ; non significatif sous `ia.desaccord_min_cas` | **aucune valeur promise.** Cible de présence : un taux publié, avec effectif, pour **chaque capacité** qui a un fait de réalité déclaré, après la première échéance de constat ; la valeur cible se fixe avec chaque client | FR-74, FR-75 ; recalculé depuis les écarts et les faits de réalité ; propriétaire : le responsable de la capacité, et l'équipe IA de Money Vibes pour le global |
+
+**Pourquoi c'est l'indicateur phare.** Il est à la fois (1) la **preuve** que l'IA s'améliore ou non, (2) la **donnée d'apprentissage** la plus précieuse (là où l'humain avait raison, le modèle se corrige, FR-75) et (3) la **preuve commerciale** : une phrase exportable, agrégée et anonymisée, que le client peut montrer à qui il veut (« sur 12 mois, quand l'IA et l'humain étaient en désaccord, l'IA avait raison dans X % des cas, sur N cas, dans M organisations »). L'export ne contient **aucun nom** ni identifiant ; un groupe sous `k` n'est pas publié (FR-75, FR-77). **Garde-fous de la preuve :** elle n'est jamais publiée sans son effectif ; un taux sur peu de cas se dit « non significatif » ; le biais de sélection des instances isolées est dit (FR-61) ; le taux ne change **aucune décision** et n'évalue **aucun employé** par l'IA seule (FR-75, point J-IA-03). `[ASSUMPTION : le taux de désaccord par agent n'est visible que du responsable et de l'agent, jamais des pairs ; son usage en droit du travail est un point juridique, §20.2]`
+
+### 16.2 Les autres indicateurs
+
+| Id | Indicateur | Mesure | Cible | Source et propriétaire |
+|---|---|---|---|---|
+| SM-2 | Couverture par la vérité terrain | part des capacités à propos d'un tiers, d'une prévision ou d'une recommandation qui ont un fait de réalité déclaré et un horizon | 100 % | FR-57, FR-74, FR-164 ; fiche de capacité ; équipe IA |
+| SM-3 | Usage : acceptation, modification, rejet, expiration | taux par capacité sur 30 jours ; signal de validation de façade au-dessus de `ia.acceptation_facade_pct` | taux publiés ; **aucune alerte de façade non traitée** | FR-68, FR-27 ; rapport mensuel ; responsable |
+| SM-4 | Effet métier | par capacité : baisse du PAR, délai d'un sinistre, taux de recouvrement, temps gagné, marge incrémentale d'un package | par capacité, fixé avec le client ; mesuré **avant** et **contre un témoin** quand c'est possible | FR-68, FR-92, FR-122 ; faits de réalité ; client |
+| SM-5 | Qualité | précision, rappel, calibration par capacité ; écart avec la règle N0 sur le jeu d'évaluation | le modèle bat la règle avant de servir | FR-69 ; jeu d'évaluation ; équipe IA |
+| SM-6 | Équité | écart de taux d'acceptation, de refus et de score par sous-groupe (genre, zone, secteur) | **aucune régression** à la promotion ; écart sous `ia.equite_ecart_max_pts` | FR-70 ; rapport mensuel ; responsable et juriste |
+| SM-7 | Jamais bloquante | parcours terminés avec l'IA coupée, par logiciel | 100 % | FR-15, FR-40 ; test de chaos ; équipe IA |
+| SM-8 | Rapidité | 95e centile des délais de proposition et de réponse du Copilot | sous les plafonds de FR-175 et FR-176 | FR-175, FR-176 ; mesure du service |
+| SM-9 | Fraîcheur | âge du modèle commun et de la calibration en service ; part des instances à jour ; part des instances en gel | publiés par instance et en global | FR-63, FR-66, FR-72, FR-85 ; rapport global |
+| SM-10 | Retour arrière | durée d'un retour arrière ; nombre de retours par trimestre | sous `ia.retour_arriere_max_min` | FR-67 ; journal de promotion |
+| SM-11 | Dérive | délai entre l'apparition d'une dérive et son alerte ; nombre d'incidents de régression de qualité ou d'équité | sous `ia.derive_delai_alerte_h` | FR-73 ; supervision |
+| SM-12 | Adoption du socle | part des appels d'IA des quatre logiciels qui passent par le port unique ; nombre d'appels directs à un fournisseur de modèle ou de constantes de barème dans un module | 100 % ; **0** | FR-37 ; garde de balayage |
+| SM-13 | Registre complet | propositions affichées sans entrée du registre | **0** | FR-17 ; test de comparaison |
+| SM-14 | Ouverture d'un secteur | secteurs ajoutés sans modifier le noyau, avec zéro régression sur les secteurs en place ; durée de la checklist | tous ; durée mesurée à chaque ajout | FR-160, FR-167, FR-174 ; chaîne de livraison |
+| SM-15 | Coût | coût d'inférence par organisation et par proposition acceptée ; consommation du quota | sous le quota du contrat | FR-183 ; rapport mensuel |
+
+### 16.3 Contre-indicateurs
+
+Un indicateur qui monte peut cacher un mal. Chaque contre-indicateur est **surveillé avec** l'indicateur qu'il garde ; **une amélioration de l'indicateur ne compte pas** tant que son contre-indicateur se dégrade.
+
+| Id | Contre-indicateur | Ce qu'il garde | Seuil d'alerte |
+|---|---|---|---|
+| CI-1 | **Validation de façade** : taux d'acceptation très élevé et motifs identiques à la proposition | SM-3 (usage) et SM-1 | taux sur 30 jours au-dessus de `ia.acceptation_facade_pct` ; motifs identiques au-dessus de IA-P08 (FR-27) |
+| CI-2 | **Biais d'automatisation** : acceptation sans consultation de la provenance ni de l'explication | SM-3 | part des propositions acceptées sans ouverture de l'explication ; seuil par capacité |
+| CI-3 | **Biais de sélection de la preuve** : le taux « qui avait raison » ne vient que d'instances connectées ou de cas faciles | SM-1 | part des instances isolées et des cas indécidables publiée avec le taux (FR-61, FR-72) |
+| CI-4 | **Désaccords qui s'évitent** : les humains cessent de contredire l'IA pour ne pas écrire de motif | SM-1 | baisse brutale du nombre de désaccords sans baisse du nombre de propositions |
+| CI-5 | **Motif « autre » en hausse** : la liste fermée de motifs ne couvre plus la réalité | FR-58 | part de « autre » au-dessus d'un seuil par capacité |
+| CI-6 | **« Je ne sais pas » en excès** : l'IA se tait pour ne pas se tromper | SM-5 | taux d'abstention au-dessus d'un seuil par capacité (FR-54) |
+| CI-7 | **Précision qui baisse sous masquage** | SM-5 | écart masqué contre non masqué mesuré à la recette (FR-34) |
+| CI-8 | **Opposition et observations** : demandes d'opposition à un profilage (art. 27) en hausse | SM-3 | nombre mensuel par capacité (FR-21, FR-22) |
+| CI-9 | **Coût qui explose** sans gain de qualité ni d'effet | SM-15 | coût par proposition acceptée au-dessus d'un seuil du contrat |
+| CI-10 | **Régression sur un secteur non visé** à la promotion | SM-14 | tout écart au-dessus de IA-P80 (FR-167) |
+
+---
+
+## 17. Périmètre
+
+### 17.1 Dans le périmètre au premier jour
+
+1. **Le socle `ia`** : contrat de proposition unique (FR-12), registre de l'IA (FR-17), catalogue des capacités versionné avec vocabulaire par logiciel (FR-90), niveaux N0, N1 et N2 sous un même contrat (FR-45 à FR-54), calibration locale nocturne bornée (FR-59, FR-60), écarts et faits de réalité (FR-56 à FR-58), évaluation et objectifs (FR-68 à FR-73), désaccords confrontés à la réalité et taux « qui avait raison » (FR-74, FR-75).
+2. **Les 19 familles de capacités** du catalogue, en règle N0 partout, en modèle commun N1 là où il est prêt, pour les quatre logiciels (§10, FR-91) ; le tableau de contrôle ne laisse aucune ligne orpheline (FR-130).
+3. **Le Copilot en texte, en lecture seule**, pour les quatre logiciels (FR-115, FR-131 à FR-133), et les **agents sous mandat** pour les actions non engageantes et réversibles (FR-134 à FR-137).
+4. **La lecture de pièces** par OCR dans `document-service` et classement dans l'IA (§12).
+5. **En ligne et en local, un seul code** (FR-30) : isolation (FR-31), instance sous l'agent sans port entrant (FR-32), passerelle de langage (FR-33, FR-34), modèle ouvert local ou repli (FR-35), santé hors instance (FR-36).
+6. **Les modules** `ia`, `assistant` et `automatisations`, et la **centrale** chez Money Vibes (annexe A), avec la boucle commune : finalité « apprentissage commun » (FR-76), niveau d'export propre (FR-77), jeton quotidien (FR-78), modèle signé sur une ligne distincte, plan de promotion, retour arrière (FR-62 à FR-67).
+7. **La voix comme réglage du pack de secteur** : saisie vocale de terrain pour la microfinance au premier jour ; sans voix pour l'assurance ; `BIENTOT` pour le distributeur et le cabinet (FR-138, FR-161).
+8. **Le format de pack de secteur et son isolation** (§14, FR-160 à FR-174) : les quatre logiciels sont les quatre premiers packs.
+9. **Les exigences transverses** du §15 et les indicateurs du §16.
+10. **Les packages de vente du distributeur et la mesure de leur impact** (FR-122).
+
+### 17.2 « Bientôt » (sans date, bouton « bientôt » à l'écran, aucun appel réel)
+
+- Le **chatbot de messagerie** de l'assuré, du client ou du prospect, et les **langues locales** (FR-138).
+- La **voix** du distributeur et du cabinet (réglage de leur pack).
+- Les capacités marquées `BIENTOT` du catalogue (FR-128) : qualification de leads par chatbot, lecture d'une commande par message, fraude sur espèces du distributeur, détection de départ d'un client, comparaison avec d'autres distributeurs, routage routier réel.
+- Le **modèle de vision** pour la lecture de pièces (FR-145), le **premier modèle commun réellement entraîné** sur de l'apprentissage commun (au mieux au second semestre 2027, FR-47, FR-91).
+- Un **catalogue de modèles ouverts** plus large pour les langues locales.
+
+### 17.3 Horizon (feuille de route de la vision, sans PRD ni engagement)
+
+Risque comme produit, Pulse, Météo des prix et de la demande, distribution en pilote automatique, facture certifiée qui vaut crédit, argent programmable sur PI-SPI, assurance embarquée, Relation client commune, passeport financier, agents IA métier à grande échelle, modèle de fondation sectoriel et transfrontalier (FR-146 à FR-159) ; le **croisement d'une même PME entre verticales**, qui exige une identité partagée et un consentement explicite (FR-82, FR-151) ; l'**apprentissage fédéré** (FR-62) ; la **place de marché de packs** et le partage des revenus (FR-173).
+
+### 17.4 Ordre de construction recommandé (sans valeur de périmètre)
+
+Le PO a demandé de **tout charger dans le plan sans regarder la capacité** (« on va y arriver »). L'ordre ci-dessous est une recommandation de séquence, pas un retrait de périmètre.
+
+1. **Le contrat de proposition, le registre, le catalogue et la règle N0** (sans eux, rien d'autre ne tient) ; le port unique et `CAPACITE_NON_DECLAREE`.
+2. **Les capacités N0 par logiciel**, dans l'ordre où le logiciel en a besoin au démarrage ; l'**affichage commun** de la provenance.
+3. **Le Copilot en texte** sur le corpus de chaque logiciel ; la passerelle ; le repli.
+4. **Les écarts, les faits de réalité et la calibration locale**, puis les **rapports** et le **taux « qui avait raison »**.
+5. **La centrale** : agrégation, entraînement, signature, plan de promotion ; le premier modèle commun vient en dernier.
+6. **Les packs de secteur** : les quatre premiers servent de preuve du format avant d'en ouvrir un cinquième.
+
+**Critère de mise en service pour un client.** Une capacité est mise en service quand : sa fiche est complète (objectifs, fait de réalité, vocabulaire, interdictions de sortie) ; la **suite de contrat** passe (FR-189) ; son mode `NON_INSTALLE` ou `INDISPONIBLE` est testé ; et, pour un score de crédit ou d'assurance, la **revue juridique** est faite (FR-28).
+
+---
+
+## 18. Non-objectifs
+
+1. **L'IA ne décide pas.** Aucune décision à effet juridique ou financier sur une personne (crédit, garantie, sinistre, paiement, refus, blocage) n'est prise par l'IA ; il n'existe ni décideur « système » ni niveau « décision » (FR-12, FR-13).
+2. **Aucune action autonome sur un type engageant ou irréversible**, même sous mandat (FR-14, FR-134).
+3. **Pas d'IA par client** : aucune variante de code, aucun modèle propre à un seul module ; une différence passe par les paramètres et la calibration (FR-30).
+4. **Pas d'entraînement sur les données d'un client hors de sa finalité consentie**, et aucune donnée d'un client au service de l'IA d'un autre (FR-7, FR-76).
+5. **Aucune donnée de santé** vers un modèle hors de l'instance, aucune dans un lot d'apprentissage, même anonymisée (FR-19, FR-36, FR-143).
+6. **Pas d'apprentissage fédéré** au premier jour (FR-62) ; **pas de croisement inter-verticales** sans identité partagée et consentement explicite (FR-82, FR-151).
+7. **Pas de désapprentissage d'un modèle déjà publié** : le retrait d'un consentement arrête l'usage futur ; c'est dit au contrat (FR-79, FR-81).
+8. **Pas de promesse de gain chiffré** avant la première mesure ; aucun taux ni aucune cible n'est une garantie (FR-29, FR-68).
+9. **Pas de reproche nominatif aux pairs** : le chiffre d'un agent n'est visible que de lui et de son responsable, et ne l'évalue jamais seul (FR-75).
+10. **Pas d'application d'IA pour la personne concernée** : elle reçoit des messages et présente ses observations par le canal de l'institution (FR-22).
+11. **Pas de remplacement de l'OCR** : la reconnaissance de caractères reste dans `document-service` (FR-140).
+12. **Pas de tenue de comptabilité, de police ou de crédit par l'IA** : elle ne crée aucune écriture au grand livre, aucun contrat, aucun prêt ; Money Vibes **ne prête ni n'assure** (FR-147 à FR-149).
+13. **Pas de montant proposé sur un objet interdit** (corporel en assurance), ni de prix au revendeur indépendant (FR-20, FR-128).
+14. **Pas de modèle de fondation entraîné de zéro** par Money Vibes au premier jour ; les grands modèles de langage sont hébergés ou ouverts (FR-33, FR-35, FR-158).
+15. **Pas de place de marché de modèles** ni de partage de revenus fixé ici (FR-173).
+
+---
+
+## 19. Décisions, actions et risques
+
+### 19.1 Décisions du PO (récit et ajouts, 2026-11-13)
+
+`.memlog.md` date les décisions du PO. Le 2026-11-13, le PO a demandé, en mode rapide : « on va sur tes recommandations ». Les décisions D1 à D14 du §19.2 sont donc des **recommandations retenues** ; les décisions ci-dessous sont **de sa parole**.
+
+| # | Décision du PO | Où |
+|---|---|---|
+| DP-1 | L'IA sert les **quatre logiciels** (expert-comptable, distributeur, microfinance, assurance) ; elle fournit les **premières informations dès le premier jour**, puis **continue d'apprendre et se met à jour** pour atteindre ses objectifs | FR-1, FR-5, FR-6 |
+| DP-2 | **Une seule IA Prospera** pour tous ses logiciels, **en local** (instance chez le client) comme **en ligne** (SaaS) | FR-1, FR-30 |
+| DP-3 | **Garder chaque désaccord humain/IA** (ex. : l'IA dit « client non solvable », la chargée de crédit la contredit), le **confronter à la réalité** (retards d'échéance pour une IMF, à l'horizon), et publier le **pourcentage « qui avait raison »** par période, capacité, agent, agence et client ; **donnée d'apprentissage ET preuve commerciale** exportable, agrégée et anonymisée (« surtout pour vendre ») | FR-74, FR-75, SM-1 |
+| DP-4 | Côté **distributeur**, l'IA aide au **marketing** : création de **packages de vente** (lots, prix, cibles) et **mesure de leur impact** (ventes, marge, panier, points de vente touchés, avant/après, groupe témoin), avec rapport par package et par campagne | FR-122 |
+| DP-5 | **Ajouter un secteur ou un pays doit être facile sans rien perturber**, en tenant compte de la vision de la salle (Prospera partout dans le monde, kit public, place de marché, « on ouvre le format, on garde l'IA ») | §14, FR-160 à FR-174 |
+| DP-6 | Mode **rapide** : tout est chargé dans le plan sans regarder la capacité (« on va y arriver ») ; après le PRD : spine, épics, plan, manifestes restants | §17.4 |
+| DP-7 | **La voix se règle par pack de secteur** : saisie vocale de terrain pour la **microfinance** au premier jour (comme son PRD validé) ; **assurance** sans voix ; **distributeur et cabinet** : bientôt (correction de D12) | FR-138, FR-161 |
+| DP-8 | Doctrines reprises : l'IA propose, l'humain décide ; provenance affichée ; règles explicables sans modèle ; jamais bloquante ; écarts anonymisés par tunnel sortant et mises à jour versionnées retirables ; aucune donnée nominative ni médicale ne sort ; jamais de montant corporel proposé | §4 |
+
+### 19.2 Décisions de cadrage D1 à D14 (par recommandation)
+
+| # | Décision retenue | Où |
+|---|---|---|
+| D1 | Une seule IA, un seul code, en ligne et en local ; quatre logiciels clients ; verticales futures servies sans toucher au noyau | FR-1, FR-30 |
+| D2 | `prospera-ia-service` (port :3417, ancien `assistant-service` jamais codé, dont il reprend et étend le PRD et la spine) porte les modules `ia`, `assistant` et `automatisations` ; `prospera-ia-centrale` tourne **seulement chez Money Vibes** | FR-43, annexe A |
+| D3 | Capacités versionnées en 19 familles, déclarées par les modules (clause C11), vocabulaire par logiciel, droits de l'utilisateur | FR-37, FR-90, §10 |
+| D4 | Un contrat de proposition unique : origine `REGLE | MODELE | LANGAGE`, niveau, statut, décideur, provenance, confiance, sources, explication ; immuable et chaîné | FR-12, annexe B |
+| D5 | L'IA propose, l'humain décide ; autonomie seulement non engageante, réversible, sous mandat ; jamais bloquante | FR-13, FR-14, FR-15 |
+| D6 | Trois niveaux par capacité : N0 règles expertes, N1 modèle commun là où prêt, N2 calibration ou modèle propre au seuil mesuré ; le mot « IA » seulement pour N1 et N2 | FR-45 à FR-54 |
+| D7 | Boucle locale continue (recalibration nocturne bornée) et boucle commune périodique (modèle signé, ligne distincte, plan de promotion, retour arrière) ; sans contact, l'IA sert indéfiniment | FR-59 à FR-67, FR-85 |
+| D8 | Objectifs mesurés par capacité (qualité, usage, effet métier, équité) ; champion/challenger sans régression d'équité ; rapports mensuels local et global | FR-68 à FR-73 |
+| D9 | Finalité « apprentissage commun » consentie au contrat ; niveau d'export « apprentissage » propre ; croisement inter-verticales en horizon ; retrait d'un consentement = arrêt de l'usage futur | FR-76 à FR-82 |
+| D10 | Même code, mêmes contrats en ligne et en local ; passerelle unique en ligne, modèle ouvert sur le serveur du client en local, repli dit ; aucune donnée de santé hors de l'instance | FR-32 à FR-36 |
+| D11 | Garde-fous généralisés : provenance, registre, jamais bloquante, équité, santé, « interdit de proposer un montant », explication, opposition, journal des accès | FR-16 à FR-23 |
+| D12 | Copilot au premier jour pour les quatre logiciels, en texte, en lecture seule ; agents sous mandat pour les actions non engageantes ; **la voix est un réglage du pack de secteur** (microfinance : saisie vocale de terrain au jour 1 ; assurance : sans voix ; distributeur et cabinet : bientôt) ; chatbot de messagerie et langues locales : bientôt `[ASSUMPTION : le PRD distributeur mettait le Copilot « bientôt » ; la décision du PO sur l'IA commune le remonte]` | FR-115, FR-131 à FR-138 |
+| D13 | OCR dans `document-service` ; lecture et classement dans l'IA ; modèle de vision plus tard | FR-140 à FR-145 |
+| D14 | Les produits de la vision sont de la feuille de route, avec les familles dont chacun dépend ; garde-fous de la vision repris ; Money Vibes ne prête ni n'assure | FR-146 à FR-159 |
+
+### 19.3 Actions qui restent
+
+Ces points ne bloquent pas l'écriture, mais chacun doit être tranché avant l'architecture ou les épics. Les quatre premiers sont des **amendements de la spine du moteur d'installation**.
+
+| # | Action | Ce que le PRD fait en attendant | Bloque | Où |
+|---|---|---|---|---|
+| A-1 | **Spine du moteur : une ligne de modèles distincte** de la ligne de la plateforme, avec sa propre cadence au plus hebdomadaire (amende AD-3 et AD-32) | le PRD dit que la ligne est distincte ; la mécanique de signature et de plan de promotion est celle du moteur | épics de la centrale | FR-63 |
+| A-2 | **Spine du moteur : un usage « modèle »** ajouté à la chaîne de clés de la famille `ci` (amende AD-7 et AD-28) | le PRD dit que tout modèle est signé par une clé dont l'usage le couvre | signature des modèles | FR-83 |
+| A-3 | **Spine du moteur : une régression de qualité ou d'équité est comptée comme un incident** de la liste du moteur (T-11) | le PRD l'écrit en FR-73 ; le moteur n'a que les incidents de plateforme | alertes et astreinte | FR-73 |
+| A-4 | **Spine du moteur : les faits « prédiction » et « réalité »** ajoutés au catalogue des contrats nommés (T-12), schéma versionné testé des deux côtés | le PRD fixe l'existence et le propriétaire des faits ; leurs noms sont ceux de l'architecture | boucle d'apprentissage | FR-38, FR-57 |
+| A-5 | **Spine du moteur : le niveau d'export « apprentissage »** et le **manifeste type** approuvé une fois (niveau 3, T-06) | le PRD le décrit ; à confirmer dans l'architecture et par le juriste | envoi des écarts | FR-77 |
+| A-6 | **Spine du moteur : la machine d'IA à part**, gérée par l'agent comme dernier recours (T-02) | le PRD la permet sans la rendre normale | dimensionnement local | FR-32 |
+| A-7 | **Amendement du PRD distributeur : le Copilot passe au premier jour** (il le mettait « bientôt ») ; ses tableaux d'IA sont repris dans le catalogue avec leur FR d'origine | FR-115 et FR-131 font foi pour le moteur et les garde-fous ; le PRD distributeur garde le métier | recette distributeur | FR-2, FR-115 |
+| A-8 | **Amendement du PRD assistant (août)** : remplacé sur le socle par l'IA commune, qui reprend ses agents sous mandat et son catalogue de types d'action | FR-2 dit ce qui est remplacé, étendu ou laissé | spine de l'IA | FR-2, FR-134 |
+| A-9 | **Revue juridique** avant la mise en service d'un score de crédit ou d'assurance, et avant l'export du taux « qui avait raison » ; points J-IA du §20.2 | le PRD pose des défauts prudents | mise en service | FR-28, §20.2 |
+| A-10 | **Nommer le responsable de publication** du catalogue des types d'action et les **validateurs par ligne** de modèles | défauts du PRD | publication | FR-134, FR-174 |
+| A-11 | **Mesurer les paliers de matériel** P0-P1-P2 avant le premier devis | valeurs à fixer par mesure | devis en local | FR-41, FR-182 |
+| A-12 | **Déclarer la devise du contrat de balance** avant le deuxième pays | le PRD l'impose en exigence | pays suivant | FR-171 |
+| A-13 | **Confirmer la date du premier modèle commun** (au mieux second semestre 2027) avec la note de vision | aucun score n'est annoncé « IA » au premier jour | communication commerciale | FR-91 |
+| A-14 | **Séance de calibrage avec chaque client** : cibles chiffrées, horizons de vérité terrain, seuils d'équité | défauts de l'annexe D | première mesure | FR-68, FR-74 |
+| A-15 | **Déclarer la clause C11** dans le manifeste de chacun des quatre logiciels et écrire les **manifestes** de `ia`, `assistant`, `automatisations` et de la centrale | annexe A | installation | FR-37, FR-43 |
+| A-16 | **Suite : spine de l'IA, épics, plan** | le PRD est la source | — | §17.4 |
+
+### 19.4 Risques assumés
+
+| Risque | Effet | Ce que le PRD fait |
+|---|---|---|
+| **Le premier jour n'a pas de modèle appris.** Les règles N0 peuvent paraître pauvres ou sembler « pas de l'IA ». | Déception du client ; pression pour appeler « IA » une règle. | Le mot « IA » seulement pour N1 et N2 (FR-24) ; N0 présentée comme règle ; ce que ce PRD ne promet pas est écrit (FR-29). |
+| **Peu de vérité terrain au début.** Les retards d'échéance se constatent à 3, 6 et 12 mois ; le taux « qui avait raison » est lent à naître. | Le phare reste « non significatif » longtemps. | Plusieurs échéances par capacité (FR-74) ; publication « non significatif » sous `ia.desaccord_min_cas` ; autres indicateurs (SM-3 à SM-5) dès le premier mois. |
+| **Biais de sélection** : les instances isolées ne remontent rien ; les clients connectés sont surreprésentés. | Preuve commerciale trop flatteuse. | La part des instances isolées est publiée avec le taux (FR-61, FR-72) ; CI-3. |
+| **Validation de façade** : l'humain accepte tout. | L'IA a l'air juste parce qu'on ne la contredit pas. | CI-1, CI-2 ; alerte à 90 % sur 30 jours (FR-27, FR-68). |
+| **Fuite de donnée de santé ou personnelle** vers un modèle hébergé. | Atteinte grave. | Refus nommé `SANTE_HORS_INSTANCE` ; passerelle qui masque, journalise et ne retient rien ; transferts déclarés (FR-34, FR-36, FR-80). |
+| **Dépendance à un fournisseur de langage** (prix, indisponibilité, pays). | Coût ou arrêt du Copilot. | Repli sur règles et gabarits (FR-35, FR-133) ; quota ferme (FR-183) ; fournisseur remplaçable derrière la passerelle. |
+| **Matériel local insuffisant** pour un modèle ouvert. | Copilot dégradé chez l'IMF ou l'assureur. | Paliers publiés, devis, repli complet dit à l'écran (FR-41, FR-182). |
+| **Régression sur un secteur non visé** à la promotion d'un modèle ou d'un pack. | Un client perd en qualité sans le savoir. | Non-régression par secteur obligatoire (FR-167) ; contre-indicateur CI-10. |
+| **Points de droit non lus** : art. 27 de la loi 2019-014 sur les décisions automatisées, transfert d'une invite hors du pays, usage du taux par agent en droit du travail, niveau 3 des écarts. | Un défaut prudent peut être trop ou pas assez prudent. | **Revue juridique obligatoire** avant la mise en service d'un score de crédit ou d'assurance ; défauts prudents du §20.2 ; textes non lus signalés « à vérifier par le juriste ». |
+| **La preuve commerciale est mal comprise ou mal utilisée** (« l'IA a raison à X % » lue comme une garantie). | Engagement implicite. | Effectif et date toujours publiés ; phrase gabarit figée ; aucune promesse (FR-29, FR-75). |
+| **Charge de l'équipe** : tout est chargé dans le plan sans regarder la capacité. | Retard ou dette. | Ordre de construction recommandé (§17.4) ; suite : spine, épics, plan, avec la charge réelle. |
+| **Confusion entre l'IA commune et les IA de verticale** si un PRD de verticale se ré-écrit seul. | Retour de plusieurs IA. | FR-2 : en cas d'écart, ce PRD fait foi pour le moteur et les garde-fous ; amendements A-7 et A-8. |
+| **Un modèle commun publié ne se désapprend pas** : un client qui retire son consentement garde une trace dans un modèle déjà publié. | Plainte. | Dit au contrat (FR-79, FR-81) ; composition tracée ; point J-IA-05. |
+
+---
+
+## 20. Hypothèses
+
+Dans le brouillon, chaque choix incertain porte une balise `[ASSUMPTION : …]` dans le texte. Le PO a délégué ces choix à la rédaction : les balises sont des **défauts retenus sur recommandation**. Ce §20 les **indexe toutes**, par thème, avec la FR ou la section qui les porte, pour qu'il n'y en ait **aucune cachée**. Les défauts **H-IA-nn** sont des choix de gestion ou de conception ; ils se **confirment à la séance de calibrage avec chaque client** (propriétaire : le PO avec le client) ou à l'architecture. Les points **J-IA-nn** sont des points de droit ; ils se **tranchent à la revue juridique** avant la mise en service d'un score de crédit ou d'assurance (§20.2). Un défaut **confirmé ou changé** se met à jour dans l'annexe D, **sans reprise du code**.
+
+### 20.1 Défauts retenus sur recommandation
+
+| Id | Où | Thème | Défaut retenu |
+|---|---|---|---|
+| H-IA-01 | FR-3 | Cadre | les valeurs par défaut des paramètres sont des recommandations ; le PO les confirme à la relecture et à la séance de calibrage |
+| H-IA-02 | §0, FR-3 | Cadre | un `FR-n` sans préfixe est une exigence de ce PRD ; les autres PRD portent leur préfixe |
+| H-IA-03 | §1 | Cadre | le premier modèle commun réel au mieux au second semestre 2027 (date de la note de vision, à confirmer) |
+| H-IA-04 | FR-5 | Cadre | cible du délai d'aide à fixer avec le moteur d'installation |
+| H-IA-05 | FR-12 | Contrat | le contrat unifie la Proposition de l'assistant et le PropositionPort de la microfinance et ajoute l'origine `MODELE` |
+| H-IA-06 | FR-7, FR-9 | Produit | recevoir le modèle commun sans y contribuer reste permis ; le PO peut en faire une contrepartie commerciale |
+| H-IA-07 | FR-9, FR-50, FR-115, FR-131 | Produit | le Copilot est au premier jour pour les quatre logiciels, en texte et en lecture seule (le PRD distributeur le mettait « bientôt ») |
+| H-IA-08 | FR-129 (X9) | Produit | assurance : tout reste dû au premier jour ; l'ordre de construction place l'analyse des devis, la simulation et la comparaison en dernier |
+| H-IA-09 | FR-129 (X7), FR-138, FR-161 | Voix | la durée de conservation du son est nulle au-delà de la transcription ; paramètre du pack, à confirmer par le PO |
+| H-IA-10 | FR-18, FR-70 | Équité | la liste des variables interdites et proxy est fixée à la relecture ; sous-groupes observés : ceux que le module recueille déjà |
+| H-IA-11 | FR-28 | Équité | traitement « haut risque » des scores de crédit et d'assurance par anticipation |
+| H-IA-12 | FR-93 | Scores | renormalisation des poids restants quand une composante manque |
+| H-IA-13 | FR-95 | Scores | motif obligatoire dès le premier écart pour le crédit |
+| H-IA-14 | FR-111 | Capacités | le conseil fiscal est codé dans le service de balance sans porte d'installation ; sa reprise par l'IA est à décider |
+| H-IA-15 | FR-119 | Capacités | 90 jours de conservation des positions repris pour la microfinance |
+| H-IA-16 | FR-134 | Agents | types « engageant, non autonomisable » déclarés au catalogue ; propriétaire du catalogue à nommer |
+| H-IA-17 | FR-32 | Exploitation | la machine d'IA à part est un dernier recours de dimensionnement, géré par l'agent |
+| H-IA-18 | FR-34 | Exploitation | la précision peut baisser sous masquage fort ; la recette mesure l'écart sur un jeu synthétique |
+| H-IA-19 | FR-35, FR-41 | Exploitation | trois paliers P0-P1-P2 ; classes de modèles et mémoire graphique de départ, à mesurer |
+| H-IA-20 | FR-88 | Exploitation | la garde du registre est une bibliothèque commune appelée par les interfaces, à confirmer dans l'architecture |
+| H-IA-21 | FR-89, FR-181 | Exploitation | dix ans partout pour le registre, faute de durée fixée ailleurs |
+| H-IA-22 | FR-55 | Niveaux | le canal des jeux de référence suit celui des modèles ; source de repli « données agrégées de Pulse » en horizon |
+| H-IA-23 | FR-47, FR-91 | Niveaux | aucun N1 réellement entraîné avant le second semestre 2027 ; aucun score n'est annoncé « IA » au premier jour |
+| H-IA-24 | FR-48 | Niveaux | aucun seuil publié « règle vers modèle » n'existe ; valeurs posées par capacité |
+| H-IA-25 | FR-57, FR-38 | Apprentissage | noms exacts des faits « prédiction » et « réalité » fixés par l'architecture |
+| H-IA-26 | FR-58 | Apprentissage | le motif libre « exigé » par certains PRD devient un commentaire gardé dans le module, le code étant exigé en plus |
+| H-IA-27 | FR-59 | Apprentissage | cadence nocturne, bornes et part de ressources posées par ce PRD |
+| H-IA-28 | FR-61 | Apprentissage | biais de sélection des instances isolées publié dans le rapport global |
+| H-IA-29 | FR-62 | Apprentissage | l'entraînement n'est pas fédéré |
+| H-IA-30 | FR-63 | Apprentissage | la ligne de modèles est distincte de la ligne de la plateforme (amende AD-3 et AD-32) |
+| H-IA-31 | FR-65 | Apprentissage | « qui valide » est l'équipe IA de Money Vibes, avec double signature pour une capacité qui touche une personne |
+| H-IA-32 | FR-66 | Apprentissage | un nouveau modèle qui change des scores affichés est un comportement visible à déclarer (interrupteur) |
+| H-IA-33 | FR-68 | Objectifs | cibles par capacité à fixer avec chaque client ; aucun chiffre d'effet promis avant la première mesure |
+| H-IA-34 | FR-73 | Objectifs | seuils de dérive et de gravité à régler sur les premières mesures ; la régression de qualité est un incident |
+| H-IA-35 | FR-74 | Objectifs | valeurs d'horizon et seuils de la règle « qui avait raison » posés par capacité |
+| H-IA-36 | FR-75, §16 | Objectifs | le taux par agent est visible du responsable et de l'agent seulement |
+| H-IA-37 | FR-76 | Données | la finalité est posée dans le vocabulaire fermé ; sa rédaction juridique relève du juriste |
+| H-IA-38 | FR-81 | Données | forme exacte de la fiche de composition d'un modèle dans l'addendum |
+| H-IA-39 | FR-83 | Données | le modèle commun relève de la famille `ci` avec un usage « modèle » (amende AD-7 et AD-28) |
+| H-IA-40 | §14 | Secteurs | les quatre logiciels sont les quatre premiers packs de secteur |
+| H-IA-41 | FR-168 | Secteurs | listes des familles transverses et « par secteur » : recommandation à valider |
+| H-IA-42 | FR-171 | Secteurs | le contrat de balance n'a pas de devise déclarée ; à payer avant le deuxième pays |
+| H-IA-43 | FR-172 | Secteurs | « souveraineté des données pays par pays » est une parole de la salle |
+| H-IA-44 | FR-173 | Secteurs | modalités commerciales de la place de marché non fixées |
+| H-IA-45 | FR-174 | Secteurs | validateurs par ligne : recommandation ; noms fixés une fois l'équipe constituée |
+| H-IA-46 | FR-175, FR-176 | Transverses | plafonds de latence des règles, des modèles et du Copilot |
+| H-IA-47 | FR-177 | Transverses | 99,5 % par mois, reprise en 60 minutes, perte maximale de 60 minutes en ligne ; en local, pas d'engagement au-delà de l'instance |
+| H-IA-48 | FR-179 | Transverses | jeu de textes piégés d'au moins 100 cas à la première version, tenu par l'équipe IA |
+| H-IA-49 | FR-183 | Transverses | quota d'inférence posé au contrat ; défaut « illimité en N0 et N1, plafonné en langage » |
+| H-IA-50 | FR-184 | Transverses | 13 mois de conservation des métriques agrégées |
+| H-IA-51 | FR-185 | Transverses | dimensionnement en ligne : recette sur 50 organisations simulées faute de chiffre commercial |
+
+### 20.2 Points juridiques : défauts prudents en attendant le juriste
+
+Seule la loi togolaise n° 2019-014 du 29 octobre 2019 (articles 20, 27, 28, 29, 30 et 31) a été lue. Tout le reste (droit sénégalais, ivoirien, BCEAO, CIMA, règlement européen) est **« à vérifier par le juriste »**.
+
+| Id | Où | Point | Défaut prudent en attendant |
+|---|---|---|---|
+| J-IA-01 | FR-33, FR-34, FR-80 | **Transfert d'une invite vers un grand modèle de langage hors du pays** : l'envoi d'une demande masquée à un fournisseur hébergé hors du pays est-il un « transfert » au sens des art. 28 et 29 ? Faut-il l'information préalable de l'autorité ? | traité comme un transfert à déclarer, par prudence ; aucun envoi tant que le transfert n'est pas inscrit « informé » (`TRANSFERT_NON_DECLARE`) |
+| J-IA-02 | FR-77, FR-78 | **Niveau 3 des écarts sous manifeste type** : les écarts agrégés au niveau « apprentissage » sont-ils des contributions de niveau 3 du moteur, approuvées une fois, ou chaque lot exige-t-il une approbation ? Sont-ils des données anonymes ? | contributions de niveau 3 sous un manifeste type approuvé une fois par le DG et le responsable des données de Money Vibes ; refus de tout lot hors manifeste (`LOT_HORS_MANIFESTE`) |
+| J-IA-03 | FR-75, §16.1 | **Usage du taux de désaccord par agent en droit du travail** : peut-il entrer dans l'évaluation d'un employé ? Que doit dire le contrat du client ? | visible du responsable et de l'agent seulement ; n'évalue jamais seul ; ne change aucune décision ; exclu de toute règle d'automatisation |
+| J-IA-04 | FR-13, FR-14, FR-21, FR-22, FR-28 | **Décisions automatisées, art. 27** : aucune décision de justice, ni produisant des effets juridiques à l'égard d'une personne, sur le seul fondement d'un traitement automatisé destiné à définir son profil. Un score d'aide à la décision, avec décideur humain réel, est-il hors du champ ? Le contrôle de l'humain est-il « réel » (FR-27) ? | l'IA propose, l'humain décide ; droit d'opposition et d'observation ; aucune décision à effet juridique ou financier prise par l'IA ; alerte de validation de façade |
+| J-IA-05 | FR-76, FR-79, FR-81, FR-82 | **Consentements** : rédaction de la finalité « apprentissage commun » ; consentement de l'organisation ou des personnes concernées ; effet d'un retrait sur un modèle **déjà publié** (non désentraîné) ; consentement distinct pour les données de santé et pour la voix ; croisement inter-verticales | consentement au contrat par le DG ; retrait = arrêt de l'usage futur dans IA-P14 (24 heures) ; modèle publié non désentraîné, composition tracée ; pas de santé ; croisement exclu du premier jour |
+| J-IA-06 | FR-89, FR-181 | **Durée de conservation du registre** et de la trace opposable (dix ans) ; effacement face à une demande d'une personne | dix ans, aligné sur le journal de l'assurance ; effacement par la règle de l'organisation (FR-89) |
+| J-IA-07 | FR-18, FR-70, FR-94 | **Variables interdites et variables qui s'y substituent** (genre, situation matrimoniale, nationalité, religion ; nom, quartier, prénom) pour tout score sur une personne | liste fermée ; variables proxy auditées ; test d'impact disparate avant mise en service |
+| J-IA-08 | FR-138 | **Dictée vocale de la microfinance** : consentement propre de l'agent et du client ; conservation du son ; localisation de la transcription | consentement propre ; son conservé zéro au-delà de la transcription ; transcription sur l'instance ou par la passerelle déclarée |
+| J-IA-09 | FR-35, FR-83 | **Licence des modèles ouverts** et conditions d'usage commercial ; propriété d'un modèle entraîné sur l'apprentissage commun | licence vérifiée avant l'entrée au catalogue (`ia.licence_modele_verifiee`) ; modèle commun propriété de Money Vibes, à confirmer |
+| J-IA-10 | FR-76, FR-77 | **Qualité de Money Vibes** (sous-traitant, responsable conjoint ou responsable) pour le modèle commun | sous-traitant pour la plateforme ; responsable pour l'apprentissage commun consenti ; à trancher |
+| J-IA-11 | FR-30, FR-80, FR-172 | **Résidence et souveraineté des données** par pays (zone monétaire, textes ouest-africains non lus) | aucun envoi hors du pays sans inscription ; pack déclare ses exigences de résidence |
+
+---
+
+## Annexe A. Contrat de module (13 lignes par module)
+
+Le contrat de module demande à chaque PRD treize lignes par module, une par clause **C1 à C13**. **Les règles de lecture et les conventions communes sont celles du PRD distributeur (annexe A)**, sans être recopiées : aucune cellule vide ; gate `<CODE>_NOT_ENTITLED` ; cloisonnement par `organisationId` ; droits au format `^[a-z]+:[a-z-]+:[a-z]+$` ; faits publiés `module.objet.evenement@1`.
+
+Ce qui change pour l'IA commune :
+- **Un seul service, trois modules.** `prospera-ia-service` (port `:3417`, l'ancien `assistant-service` jamais codé, dont il reprend et étend le PRD et la spine : FR-2) porte **trois modules** installables séparément (FR-43) : `ia` (le socle), `assistant` (Copilot et agents sous mandat) et `automatisations` (module M26 selon le plan de rédaction, D2). `assistant` et `automatisations` **dépendent** de `ia` ; installer l'un sans `ia` est refusé (`MODULE_DEPENDANCE_MANQUANTE`).
+- **Une fiche à part pour la centrale.** `prospera-ia-centrale` tourne **seulement chez Money Vibes** ; elle **n'est pas installable** chez un client et n'a pas de manifeste d'instance (A.4). Ses clauses sont données pour que le contrat soit complet.
+- **Clause C11.** L'IA **est** le moteur : elle est la cible de la clause C11 des autres modules, elle ne la déclare pas pour elle-même au sens des quatre logiciels. Les noms de capacités et de finalités sont des **propositions** (FR-37, FR-90), modifiables avant le manifeste ; `[À CONFIRMER]` marque ce que la spine de l'IA doit trancher.
+- **Désinstaller ne supprime rien** (FR-181, FR-43) : registre, écarts, calibrations et rapports restent stockés et masqués.
+- **Les rôles** cités à la clause C7 sont ceux du §2.1 : UM, RM, AUD, DSI, IA-MV, JUR, DPD ; l'IA **n'a aucun droit propre** et **n'ouvre aucune donnée** que l'utilisateur ne peut voir (FR-25, FR-39). Les droits propres au module ne portent que sur le **réglage, la consultation du registre et la promotion**.
+
+### A.1 ★ Le socle (`ia`, service `prospera-ia-service` :3417)
+
+| Clause | Valeur pour ce module |
+|---|---|
+| C1 Manifeste | `code: 'ia'`, `version: '1.0.0'`, service porteur `prospera-ia-service`. `depends: []` (socle de la plateforme seulement). `enrichiPar: [assistant, automatisations]` ; les quatre logiciels le **consomment** par la clause C11, sans le déclarer en dépendance dure (FR-40, FR-43). Droit de module `ia`. Profil de déploiement : en ligne (service multi-organisations) ou en local (sous l'agent, sans port entrant : FR-30, FR-32). |
+| C2 Socle | Gate `IA_NOT_ENTITLED`. Cloisonnement par `organisationId` : en ligne, aucune requête, aucun cache et aucun journal ne mélangent deux organisations (`ORGANISATION_HORS_JETON`, FR-31) ; une calibration est la donnée d'**une organisation et d'un secteur** (FR-42, FR-166). Les droits et l'échéance sont ceux de la plateforme (moteur AD-19). Aucune connexion à la base d'un autre module (FR-38). |
+| C3 Données possédées | **Catalogue de l'instance** (capacités déclarées par les modules, version, maturité N0/N1/N2 en service, fiche d'objectifs, vocabulaire par logiciel : FR-90) ; **registre de l'IA** inaltérable, chaîné, à deux horloges (FR-17) ; **propositions** (immuables, chaînées : FR-12) ; **journal des écarts** et faits de réalité rattachés (FR-56, FR-57) ; **calibrations** (courante, sœurs conservées : FR-59, FR-60) ; **modèles installés** (courant et précédent : FR-67, FR-83) ; **désaccords tranchés** et taux « qui avait raison » (FR-74, FR-75) ; **registre des transferts** (FR-80) ; **journal des accès** (FR-23) ; **rapports mensuels** (FR-71) ; **observations de la personne concernée** (FR-22) ; **packs de secteur installés** (FR-161). |
+| C4 Emplacements vides | Aucune dépendance dure. Un module métier **absent** : ses capacités sont retirées du catalogue de l'instance (FR-37). Un **fait de réalité absent** : la capacité reste N0 ou N1 et la fiche le dit (FR-57). `document-service` absent : la lecture de pièces rend `NON_INSTALLE` (FR-140). Le **modèle de langage absent ou trop petit** : capacité de langage `DEGRADE`, repli sur gabarit et règle, dit à l'écran (FR-35, FR-133). Un emplacement d'IA sans IA rend `NON_INSTALLE` ou `INDISPONIBLE`, jamais une erreur (FR-40). |
+| C5 Contrats nommés | **Publie** (propositions de noms) : `ia.proposition.rendue@1` (identifiant, capacité, version, maturité, origine, niveau, statut) ; `ia.proposition.decidee@1` (statut, décideur, motif codé, par le module consommateur) ; `ia.ecart.enregistre@1` ; `ia.desaccord.tranche@1` (qui avait raison, horizon) ; `ia.capacite.changed@1` (état absolu d'une capacité : coupée, dégradée, en service) ; `ia.modele.promu@1` et `ia.modele.retire@1` ; `ia.derive.alertee@1`. **Consomme** : les faits **« prédiction »** et **« réalité »** nommés des modules, schéma versionné testé des deux côtés (FR-57, `[À CONFIRMER]`, trou T-12 : amendement A-4). |
+| C6 Paramètres | Tout seuil, délai, taux, borne ou liste est un paramètre (FR-3) : voir l'**annexe D** (D.1 doctrine et contrat, D.2 exploitation et apprentissage, D.3 catalogue, D.4 secteurs, D.5 transverses). Les principaux : `ia.confiance_min`, `seuil_n2`, `ia.recalibration_borne_pct`, `ia.k_min`, `ia.desaccord_horizon`, `ia.delai_reponse_max_s`, `ia.retention_registre_annees`. |
+| C7 Droits | Droits **propres au module** (propositions, au format de la plateforme) : `ia:registre:lire` (AUD, RM), `ia:journal:lire` (AUD, DPD), `ia:capacite:consulter` (UM, RM, DSI, DG), `ia:capacite:couper` (RM pour son périmètre ; DG pour toute l'organisation), `ia:rapport:lire` (RM, DSI), `ia:desaccord:lire` (RM et l'agent pour ses propres désaccords seulement : FR-75), `ia:observation:enregistrer` (UM, pour la personne concernée : FR-22), `ia:version:promouvoir` et `ia:version:retirer` (DSI : FR-66, FR-67), `ia:parametre:regler` (DSI, RM selon le paramètre), `ia:consentement:modifier` (DG ou désigné par écrit : `CONSENTEMENT_RESERVE_AU_DG`, FR-76). **Aucun droit n'ouvre une donnée métier** ; l'IA applique les droits de l'utilisateur qui demande (FR-25, FR-39). |
+| C8 Module d'écran | `src/modules/ia/` : **composant commun** d'affichage d'une proposition (provenance, explication, gestes accepter, modifier, rejeter, voir pourquoi : FR-4, FR-21) ; `/ia/capacites` (page « Mes capacités » : code, niveau, version, date de mise en service) ; `/ia/registre` (AUD, RM) ; `/ia/rapports` (RM, DSI) ; `/ia/versions` (DSI : ombre, promotion, retrait, date) ; `/ia/consentements` (DG, DPD) ; `/ia/transferts` (DG, DPD). Aucune règle métier dans l'écran ; l'IA se branche aux emplacements des modules (FR-44). |
+| C9 Installer/désinstaller | Désinstaller ne supprime **rien** : registre, écarts, calibrations, modèles, rapports restent stockés et masqués ; aucun bouton « supprimer » n'existe ; test aller-retour. Avertissement : « Plus aucune proposition d'IA ne sera rendue ; les règles de base de chaque module continuent de servir ; le registre est conservé. » La conservation du registre (`ia.retention_registre_annees`) vaut après désinstallation (FR-181). Aucun parcours des quatre logiciels ne casse (FR-43). |
+| C10 Démarrer seul | `profiles: ["ia"]` ; socle seul. Avec **un seul** module métier qui déclare une capacité, l'IA rend une proposition N0 à l'identique en ligne et en local, l'inscrit au registre et la lit au catalogue (FR-30, FR-45). Sans modèle, sans centrale et sans langage, elle sert en règles et gabarits (FR-53, FR-85). |
+| C11 IA | Sans objet au sens habituel : **c'est le moteur**. Elle déclare, pour la centrale et pour l'apprentissage : `ia: { modeles: [<un par capacité à maturité N1>], finalites: ['apprentissage-commun'] }`. Les **19 familles** du catalogue (codes proposés) : `score-tiers`, `probabilite-paiement`, `lecture-pieces`, `controle-coherence`, `anomalie-fraude`, `prevision`, `recommandation`, `redaction`, `resume-source`, `copilot`, `brief-priorites`, `terrain`, `explication`, `segmentation-packages`, `coaching`, `rapprochement`, `simulation`, `analyse-sectorielle`, `automatisation` (§10, FR-90). Aucun module n'embarque de modèle (FR-37). |
+| C12 Migrations | `retourArriere: 'SANS_PERTE'` dans la fenêtre de **sept jours**. Migration additive ; le journal des écarts, le registre et les calibrations sont **hors** de la migration de promotion et lisibles par la version précédente (N et N-1 : FR-56, FR-186). Interrupteurs : `copilot-ia`, `langage-ia`, `apprentissage-commun`, `modele-commun`, `voix-terrain` (réglage du pack : FR-138), `versions-de-catalogue`. Un nouveau modèle qui change des scores affichés se déclare comme **comportement visible** (FR-66). Un statut, un code ou un champ ajouté est lu comme **inconnu** par la version précédente, qui refuse la transition plutôt que de la deviner. |
+| C13 Installable sous contrôle | Prérequis : socle de la plateforme ; (recommandés) au moins un module métier qui déclare une capacité. Routes d'**export, d'import, d'effacement et de vérification** du contrat (FR-43) ; route `sante` : `OK` ou `DEGRADE` par capacité et par moteur (règles, modèles, langage, recalibration, tunnel : FR-86). Vérifications : `registre-complet` (🟢 si le nombre de propositions affichées égale le nombre d'entrées du registre ; FR-17) ; `jamais-bloquante` (🟢 si, l'IA coupée, un parcours d'essai de chaque logiciel va au bout ; FR-40) ; `port-unique` (🟢 si aucun appel direct à un fournisseur de modèle ni constante de barème n'est trouvé ; FR-37) ; `aucun-port-entrant` (🟢 si le balayage de ports ne trouve rien en local ; FR-32) ; `sante-hors-instance` (🟢 si une demande classée santé vers un modèle hébergé est refusée : `SANTE_HORS_INSTANCE` ; FR-36) ; `contrat-identique` (🟢 si la suite de contrat rend les mêmes propositions en ligne et en local ; FR-30) ; `equite` (🟢 si une variable hors liste est refusée : `VARIABLE_NON_AUTORISEE` ; FR-70). |
+
+### A.2 ★ Copilot et agents sous mandat (`assistant`)
+
+| Clause | Valeur pour ce module |
+|---|---|
+| C1 Manifeste | `code: 'assistant'`, `version: '1.0.0'`, service porteur `prospera-ia-service` (:3417). `depends: [{ia, « le contrat de proposition, le registre, le catalogue et la calibration vivent dans ia »}]` (dépendance **dure** ; `MODULE_DEPENDANCE_MANQUANTE` sans elle : FR-43). `enrichiPar:` les modules métier qui publient des **types d'action** (FR-134). Reprend et étend le PRD assistant d'août (FR-2). |
+| C2 Socle | Gate `ASSISTANT_NOT_ENTITLED`. Cloisonnement par `organisationId` et par **périmètre du rôle** : le Copilot lit **ce que l'utilisateur peut lire**, rien de plus (FR-132) ; un agent agit **dans le périmètre de son mandat** (FR-135). Les droits viennent du rôle métier, jamais d'un rôle IA (FR-25). |
+| C3 Données possédées | **Catalogue des types d'action** (code, module exécutant, réversible oui/non/sous conditions, engageant, moyen d'annulation, autonomisable : FR-134) ; **mandats** (délégation bornée, plafond cumulé réservé puis confirmé, échéance `IA-P15` : FR-135) ; **exécutions** (demande par événement, idempotente, annulable par compensation : FR-136) ; **file d'arbitrage** ; **sessions du Copilot** (contexte brut purgé à l'échéance courte : FR-38). |
+| C4 Emplacements vides | `ia` est une dépendance dure. Module exécutant **absent** : son type d'action n'est pas publié ; l'agent n'a pas cette action (FR-137). Modèle de langage absent : le Copilot **se replie** sur la recherche par règles et gabarits et le dit (FR-133). |
+| C5 Contrats nommés | **Publie** (propositions) : `assistant.mandat.delivre@1`, `assistant.mandat.revoque@1`, `assistant.execution.demandee@1`, `assistant.execution.annulee@1`, `assistant.arbitrage.decide@1`. **Consomme** : `<module>.action.executee@1` et `<module>.action.annulee@1` des modules exécutants (publiés par eux, sous leur propre manifeste) ; la sortie de l'assistant est un **ordre**, jamais une écriture directe dans la base d'un module (FR-136). |
+| C6 Paramètres | Annexe D.5 et D.3 : `IA-P15` (plafond de durée d'un mandat, 90 jours), `ia.arbitrage.plafond_lot` (plafond dur d'une décision groupée), `IA-P09` (annulations qui déclenchent l'alerte), `ia.objectif.copilot.temps_reponse_s`, `ia.perf.copilot_p95_s`, `ia.cout.quota_mensuel`. |
+| C7 Droits | `assistant:copilot:interroger` (UM, RM ; une question n'ouvre aucun droit supplémentaire), `assistant:mandat:delivrer` et `assistant:mandat:revoquer` (RM ou DG ; `AUTORITE_INSUFFISANTE` sinon : FR-135), `assistant:execution:annuler` (RM), `assistant:arbitrage:decider` (RM), `assistant:catalogue:publier` (responsable de publication à nommer, action A-10 : FR-134). |
+| C8 Module d'écran | `src/modules/assistant/` : emplacement du **Copilot** dans les quatre logiciels (texte, lecture seule, chiffres sourcés : FR-131, FR-132) ; `/assistant/mandats` (délivrer, révoquer, plafond, échéance) ; `/assistant/executions` (suivi, annulation) ; `/assistant/arbitrage` (file, décision groupée). Aucune saisie vocale dans le Copilot au premier jour (FR-138). |
+| C9 Installer/désinstaller | Désinstaller ne supprime rien : mandats, exécutions et sessions restent stockés ; les **exécutions en cours** sont **annulées par compensation** ou terminées avant l'arrêt (FR-136). Avertissement : « Plus aucune action autonome ne sera exécutée ; les mandats sont suspendus. » `ia` continue de servir les propositions. |
+| C10 Démarrer seul | `profiles: ["assistant"]` ; socle + `ia`. Sans module exécutant, le Copilot répond en lecture seule et aucun agent n'a d'action (FR-137). |
+| C11 IA | Familles servies : `copilot` et, pour les agents, `redaction`, `automatisation` et `brief-priorites` (FR-131 à FR-137) ; modèle de langage par la passerelle en ligne et par un modèle ouvert en local (FR-33, FR-35). `finalites: []` : aucun apprentissage commun propre ; le Copilot lit « plus large » par un **compte de service dédié** sous la garde du registre des consentements (FR-38, FR-88). |
+| C12 Migrations | `retourArriere: 'SANS_PERTE'`. Interrupteurs : `copilot`, `agents-sous-mandat`, `mode-auto` (jamais pour un type engageant). Un type d'action ajouté au catalogue est lu comme **inconnu** par la version précédente, qui le **refuse**. |
+| C13 Installable sous contrôle | Prérequis : `ia` en service. Vérifications : `copilot-lecture-seule` (🟢 si le Copilot ne crée, ne modifie, n'envoie et ne supprime rien ; FR-131) ; `type-engageant-non-autonome` (🟢 si un type engageant ou irréversible en `AUTO` ou `AUTO_SOUS_MANDAT` est refusé : `TYPE_NON_AUTONOMISABLE` ; FR-134) ; `mandat-plafonne` (🟢 si l'exécution au-delà du plafond cumulé est refusée ; FR-135) ; `droits-de-l'utilisateur` (🟢 si le Copilot ne rend rien que l'utilisateur ne puisse voir ; FR-132) ; `assurance-sans-auto` (🟢 si l'activation du mode `AUTO` pour l'assurance est refusée : `MODE_NON_PERMIS_ASSURANCE` ; FR-127). |
+
+### A.3 ★ Automatisations par règles (`automatisations`, M26 [À CONFIRMER])
+
+| Clause | Valeur pour ce module |
+|---|---|
+| C1 Manifeste | `code: 'automatisations'`, `version: '1.0.0'`, service porteur `prospera-ia-service` (:3417). `depends: [{ia, « les règles proposent par le port unique et inscrivent leurs actions au registre »}]` (dure). Le moteur d'automatisation est **un seul moteur** pour les quatre logiciels (FR-127). |
+| C2 Socle | Gate `AUTOMATISATIONS_NOT_ENTITLED`. Cloisonnement par `organisationId` ; un travail planifié s'exécute sous le **compte d'une règle** dont le responsable garde son droit ; il s'arrête et notifie s'il le perd (FR-25). |
+| C3 Données possédées | **Règles** (déclencheur, conditions en grammaire fermée, action, mode) ; **modes** (`SUGGESTION`, `VALIDATION`, `AUTO`, `AUTO_SOUS_MANDAT` : le mode le plus strict est le défaut) ; **exécutions** ; **file d'arbitrage** ; **journal des déclenchements**. |
+| C4 Emplacements vides | `ia` est dure. Un module exécutant absent : l'action n'est pas proposée dans l'éditeur de règles. Sans `assistant`, les règles tournent en `SUGGESTION` et `VALIDATION` seulement pour les types engageants. |
+| C5 Contrats nommés | **Publie** (propositions) : `automatisations.regle.changed@1`, `automatisations.execution.demandee@1`, `automatisations.execution.annulee@1`. **Consomme** : les faits des modules qui déclenchent les règles (`<module>.<objet>.<evenement>@1`) et les `action.executee`. |
+| C6 Paramètres | `ia.arbitrage.plafond_lot` (25 par défaut, 100 au plus), `IA-P09`, `ia.objectif.agent.annulees_pct`, plus les paramètres propres à chaque règle (déclarés par le client). |
+| C7 Droits | `automatisations:regle:ecrire` (RM), `automatisations:regle:activer` (RM ; mode `AUTO` pour les seuls types qui le permettent), `automatisations:arbitrage:decider` (RM), `automatisations:execution:annuler` (RM). |
+| C8 Module d'écran | `src/modules/automatisations/` : `/automatisations` (éditeur à grammaire fermée, aucun code libre), `/automatisations/arbitrage` (décision groupée), `/automatisations/historique`. |
+| C9 Installer/désinstaller | Désinstaller **suspend** toutes les règles (aucune ne s'exécute) et ne supprime rien ; avertissement : « Plus aucune règle ne se déclenchera ; les exécutions en cours sont annulées par compensation. » |
+| C10 Démarrer seul | `profiles: ["automatisations"]` ; socle + `ia`. Une règle de démonstration en `SUGGESTION` produit une proposition et l'inscrit au registre. |
+| C11 IA | Famille `automatisation` (FR-127). Aucun modèle de langage n'évalue une condition : la **grammaire est fermée** (`GRAMMAIRE_FERMEE`) ; une règle qui contient une expression à évaluer est refusée à l'enregistrement. |
+| C12 Migrations | `retourArriere: 'SANS_PERTE'`. Interrupteurs : `regles-en-auto`, `decision-groupee`. Un mode ou un type ajouté est lu comme **inconnu** par la version précédente, qui refuse la règle plutôt que de la deviner. |
+| C13 Installable sous contrôle | Prérequis : `ia`. Vérifications : `grammaire-fermee` (🟢 si une règle contenant du code libre est refusée ; FR-127) ; `mode-strict-par-defaut` (🟢 si toute règle neuve est en `SUGGESTION` ou `VALIDATION` ; FR-127) ; `assurance-sans-auto` (🟢 si le mode `AUTO` est refusé en assurance : `MODE_NON_PERMIS_ASSURANCE`) ; `jamais-engageant-en-auto` (🟢 si un type engageant en `AUTO` est refusé : `TYPE_NON_AUTONOMISABLE`). |
+
+### A.4 Fiche : `prospera-ia-centrale` (Money Vibes seulement ; **non installable chez un client**)
+
+La centrale n'est **pas un module** d'un état voulu d'instance : elle n'a pas de manifeste client, pas de profil de déploiement chez un client et pas de droit livré à une organisation. Ses clauses sont données pour la complétude du contrat et pour que la spine de l'IA les reprenne.
+
+| Clause | Valeur |
+|---|---|
+| C1 Manifeste | **Sans objet côté client.** Service interne de Money Vibes (`prospera-ia-centrale`), déployé dans le poste central ; **absent** de tout état voulu d'une instance (FR-30, D2). `[À CONFIRMER : nom et port]` |
+| C2 Socle | Poste central de Money Vibes. **Aucune connexion à un autre service du poste central** que la voie du jeton d'export (FR-78) ; un test d'inspection de sa configuration le confirme. Elle ne lit **jamais** une donnée d'un client : elle reçoit des agrégats au niveau « apprentissage » (FR-77). |
+| C3 Données possédées | **Registre des modèles** (versions, signatures, ligne de modèles, composition tracée : FR-62, FR-81, FR-83) ; **agrégats d'écarts** reçus (k minimal, sans identité) ; **jeux d'évaluation** et résultats champion/challenger (FR-69) ; **rapports globaux** (FR-72) ; **plan de promotion** et journal (FR-64, FR-65) ; **taux « qui avait raison » en global** (FR-75). |
+| C4 Emplacements vides | Sans instance qui envoie : aucun entraînement ; les instances **continuent de servir** avec leur dernier modèle (FR-85). |
+| C5 Contrats nommés | **Reçoit** : `ia.contribution.recue@1` (lot d'agrégats, par morceaux repris, clé d'idempotence : FR-78). **Publie** : `ia.modele.signe@1` et `ia.modele.publie@1` sur la **ligne de modèles distincte** (FR-63), `ia.jeton.export@1` (jeton quotidien remis dans la réponse du contact : FR-78). |
+| C6 Paramètres | `ia.cadence_entrainement_jours_min`, `ia.cadence_publication_jours_min`, `ia.k_min`, `ia.equite_ecart_max_pts`, `ia.duree_ombre_jours`, `ia.part_canari_pct`, `IA-P80` à `IA-P86`. |
+| C7 Droits | Rôle **IA-MV** seulement (équipe IA de Money Vibes) : `ia-centrale:modele:entrainer`, `ia-centrale:modele:signer` (**double signature** pour une capacité qui touche une personne : FR-65), `ia-centrale:modele:publier`, `ia-centrale:rapport:lire` (agrégats seulement). Aucun droit sur une donnée de client. |
+| C8 Module d'écran | Interne : tableau de bord de l'équipe IA (rapports globaux, plan de promotion, dérive). Aucun écran chez un client. |
+| C9 Installer/désinstaller | **Sans objet** (non installable chez un client). Côté Money Vibes, l'arrêt de la centrale n'arrête aucune instance (FR-85). |
+| C10 Démarrer seul | Elle démarre sans client : registre vide, entraînement impossible, publication désactivée. |
+| C11 IA | Elle **est** l'entraînement : modèle commun N1 par ligne et par secteur (FR-166, FR-168) ; aucune capacité servie à un utilisateur. Le premier modèle réel apparaît au plus tôt au second semestre 2027 (FR-47, FR-91). |
+| C12 Migrations | Même discipline N et N-1 ; **retour arrière d'un modèle en une action**, en moins de `ia.retour_arriere_max_min`, avec conservation du modèle précédent `ia.retour_arriere_conservation_jours` (FR-67). |
+| C13 Installable sous contrôle | **Sans objet** pour un client. Vérifications internes avant toute publication : signature par une clé dont l'usage « modèle » le couvre (FR-83) ; double signature ; non-régression par secteur (FR-167) ; équité (FR-70) ; k respecté (FR-77) ; plan de promotion respecté (`PROMOTION_ETAPE_MANQUANTE`, FR-64). |
+
+---
+
+## Annexe B. Contrat de proposition
+
+Toute sortie de l'IA présentée à un utilisateur est une **proposition** au sens de ce contrat (FR-12). Il est **unique** : il remplace la Proposition de l'assistant d'août et le PropositionPort de la microfinance (FR-2). Les noms de champs sont des propositions ; leurs valeurs fermées sont **contractuelles**. Le contrat est versionné (FR-186) ; un code ou un champ ajouté est lu comme **inconnu** par la version précédente, qui **refuse** plutôt que de deviner.
+
+**Deux notions qu'il ne faut pas confondre.** Le **niveau** d'une proposition (`EXTRACTION`, `ANALYSE`, `RECOMMANDATION`) dit **ce que fait** la proposition ; la **maturité** (`N0`, `N1`, `N2`) dit **ce qui l'a produite** (règle, modèle commun, modèle ou calibration du client : FR-45). Il n'existe **aucun** niveau « décision » et **aucun** décideur « système » (FR-12).
+
+### B.1 Champs
+
+| Champ | Type | Obligatoire | Règle | FR |
+|---|---|---|---|---|
+| `id` | identifiant | oui | unique ; immuable | FR-12 |
+| `organisationId` | identifiant | oui | cloisonnement ; figé à l'appel | FR-31 |
+| `capacite` | `{code, version, famille}` | oui | déclarée au catalogue et au manifeste du module (C11) ; sinon `CAPACITE_NON_DECLAREE` | FR-37, FR-90 |
+| `vocabulaire` | code | oui | celui du logiciel consommateur | FR-90, FR-162 |
+| `objetRef` | `{type, id}` | oui | référence d'objet neutre (dossier, client, police, point de vente) déclarée par la verticale | FR-12 |
+| `origine` | énumération | oui | `REGLE`, `MODELE`, `LANGAGE` | FR-12 |
+| `niveau` | énumération | oui | `EXTRACTION`, `ANALYSE`, `RECOMMANDATION` | FR-12 |
+| `maturite` | énumération | oui | `N0` (règle), `N1` (modèle commun), `N2` (calibration ou modèle du client) ; sert à l'affichage « règle », « modèle commun », « modèle de votre structure » | FR-45, FR-49 |
+| `statut` | énumération | oui | `PROPOSEE`, `ACCEPTEE`, `MODIFIEE`, `REJETEE`, `EXPIREE` ; transitions B.3 | FR-12 |
+| `decideur` | énumération | à la décision | `HUMAIN`, `REGLE` (règle déterministe approuvée), `MANDAT` (action sous mandat) ; jamais « système » | FR-12, FR-14 |
+| `decision` | `{auteur, date, motifCode, valeurRetenue}` | à la décision | écrite par le **module consommateur** ; `motifCode` d'une **liste fermée** de la capacité, versionnée ; commentaire libre gardé **dans le module** | FR-12, FR-58 |
+| `mode` | énumération | si automatisation ou agent | `SUGGESTION`, `VALIDATION`, `AUTO`, `AUTO_SOUS_MANDAT` ; le plus strict est le défaut | FR-127, FR-134 |
+| `provenance` | `{versionRegleOuModele, versionLangage, dateCalcul, donneesUtilisees[], versionParametres}` | oui | la version de paramètres de la proposition égale celle de la demande, sinon refus par le consommateur | FR-16, FR-37 |
+| `confiance` | nombre 0 à 1 | oui | affichée ; **n'ouvre aucune autonomie** ; sous `ia.confiance_min` (IA-P12), « je ne sais pas » | FR-12, FR-54 |
+| `sources[]` | `{type, ref, extrait, date}` | pour `ANALYSE` et `LANGAGE` | sans source, **non affichée** (`NON_SOURCEE`) | FR-16 |
+| `explication` | `{facteurs[{nom, poids, contribution}] \| regleAppliquee \| sourcesCitees}` | oui | restitue ce qui a **réellement pesé** ; pas de modèle de substitution | FR-16 |
+| `contenu` | charge utile typée par famille | oui | schéma par capacité ; un nombre du texte se retrouve dans les entrées | FR-26, FR-132 |
+| `interdictions[]` | liste de `{objet, nature}` | si déclarées | ex. montant interdit sur un objet corporel ; la sortie n'en contient pas | FR-20 |
+| `simulation` | booléen | si simulation | marqueur « simulation » ; n'entre dans aucun indicateur ni état | FR-125 |
+| `remplace` | identifiant | si ré-proposition | cite la proposition précédente ; ré-proposer crée une **nouvelle** proposition | FR-12 |
+| `expireLe` | date | oui | `IA-P01` (30 jours) ; expiration par travail idempotent, pas à la lecture | FR-12 |
+| `condensat`, `condensatPrecedent` | empreintes | oui | chaînage du registre ; inaltérable | FR-17 |
+
+### B.2 Énumérations
+
+| Énumération | Valeurs | FR |
+|---|---|---|
+| `origine` | `REGLE`, `MODELE`, `LANGAGE` | FR-12 |
+| `niveau` | `EXTRACTION`, `ANALYSE`, `RECOMMANDATION` | FR-12 |
+| `maturite` | `N0`, `N1`, `N2` | FR-45 |
+| `statut` | `PROPOSEE`, `ACCEPTEE`, `MODIFIEE`, `REJETEE`, `EXPIREE` ; état de registre `NON_SOURCEE` (non acceptable) | FR-12, FR-16 |
+| `decideur` | `HUMAIN`, `REGLE`, `MANDAT` | FR-12 |
+| `mode` | `SUGGESTION`, `VALIDATION`, `AUTO`, `AUTO_SOUS_MANDAT` ; niveau de confiance de la capacité `AUTO`, `A_VALIDER`, `SUGGESTION` (verticale distributeur) | FR-120, FR-127 |
+| catégorie d'effet | `JURIDIQUE_OU_FINANCIER` et non engageant ; une proposition dont le décideur est `REGLE` ou `MANDAT` est refusée si la catégorie est `JURIDIQUE_OU_FINANCIER` | FR-13, FR-14 |
+| état d'une capacité | `OK`, `DEGRADE`, `INDISPONIBLE`, `NON_INSTALLE` | FR-40, FR-86 |
+| statut de catalogue | en service ; `BIENTOT`, `PLUS_TARD`, `EXCLU` | FR-128 |
+| état d'un pack de secteur | `BROUILLON`, `ESSAI`, `ACTIF`, `RETIRE` | FR-161 |
+| réglage de la voix d'un pack | `ACTIVEE`, `BIENTOT`, `SANS_VOIX` | FR-138, FR-161 |
+| issue d'un désaccord | `IA_AVAIT_RAISON`, `HUMAIN_AVAIT_RAISON`, `INDECIDABLE` | FR-74 |
+| joignabilité du tunnel | `OK`, `INJOIGNABLE` | FR-32 |
+
+### B.3 Transitions de statut
+
+| De | Vers | Qui |
+|---|---|---|
+| `PROPOSEE` | `ACCEPTEE`, `MODIFIEE`, `REJETEE` | l'utilisateur (via le module consommateur) ; `decideur` = `HUMAIN`, ou `REGLE` / `MANDAT` pour un type non engageant et réversible |
+| `PROPOSEE` | `EXPIREE` | travail idempotent à `expireLe` |
+| tout autre | tout | **refusée** : une proposition ne se modifie jamais ; une nouvelle proposition cite la précédente (`remplace`) |
+
+### B.4 Codes d'erreur et états nommés
+
+Chaque refus est **nommé**, compté et inscrit au journal (FR-180). Le code HTTP est une **proposition** `[ASSUMPTION : à fixer par l'architecture]`, sauf les deux valeurs données par le PRD (429 et 403).
+
+| Code | HTTP proposé | Cas | FR |
+|---|---|---|---|
+| `MONTANT_INTERDIT` | 422 | une capacité est déclarée interdite de proposer un montant (valeur, fourchette, médiane, offre suggérée, écart en pourcentage) sur l'objet demandé ; **généralise** `MONTANT_CORPOREL_INTERDIT`, qui en est le **cas assurance** (volet corporel) et reste valable comme alias | FR-20, FR-110, FR-120 |
+| `TYPE_NON_AUTONOMISABLE` | 422 | un type d'action engageant ou irréversible est demandé en `AUTO` ou `AUTO_SOUS_MANDAT` | FR-134 |
+| `SANTE_HORS_INSTANCE` | 422 | une demande dont un champ est classé santé vise un modèle hébergé hors de l'instance, ou un contenu classé santé est envoyé à la passerelle ; **aucun octet** ne part. `DONNEE_SANTE_HORS_INSTANCE` (FR-36) en est un **alias à retirer** | FR-36, FR-143 |
+| `QUOTA_INFERENCE_DEPASSE` | 429 | quota d'inférence de l'organisation épuisé ; la capacité retombe sur la règle | FR-31, FR-139, FR-183 |
+| `CAPACITE_NON_DECLAREE` | 403 | le module demande une capacité absente de la clause C11 de son manifeste | FR-37, FR-90 |
+| `ENTREE_NON_DECLAREE` | 422 | les données utilisées contiennent un champ non déclaré par la capacité | FR-38 |
+| `CONSENTEMENT_ABSENT` | 403 | lecture de l'IA sans consentement en vigueur sur la plateforme | FR-38, FR-88 |
+| `CONSENTEMENT_RESERVE_AU_DG` | 403 | un consentement est modifié par un autre que le DG ou son désigné par écrit | FR-76 |
+| `ORGANISATION_HORS_JETON` | 403 | un chemin vise une autre organisation que celle du jeton | FR-31 |
+| `VARIABLE_NON_AUTORISEE` | 422 | une variable hors liste fermée entre dans une capacité de score sur une personne | FR-70, FR-94 |
+| `TRANSFERT_NON_DECLARE` | 403 | envoi vers un fournisseur dont le pays d'hébergement n'est pas inscrit « informé » pour l'organisation | FR-80 |
+| `LOT_HORS_MANIFESTE` | 422 | un lot d'apprentissage contient un champ absent du manifeste type | FR-77 |
+| `PROMOTION_ETAPE_MANQUANTE` | 409 | passer en canari sans ombre, en général sans canari | FR-64 |
+| `MODULE_DEPENDANCE_MANQUANTE` | 409 | installation d'`assistant` ou d'`automatisations` sans `ia` | FR-43 |
+| `GRAMMAIRE_FERMEE` | 422 | une règle contient une expression à évaluer hors grammaire | FR-127 |
+| `MODE_NON_PERMIS_ASSURANCE` | 403 | activation du mode `AUTO` pour un logiciel d'assurance | FR-127 |
+| `AUTORITE_INSUFFISANTE` | 403 | un mandat est délivré par un utilisateur sans l'autorité correspondante | FR-135 |
+| `ROLE_NON_AUTORISE` | 403 | un rôle non prévu appelle une capacité réservée | FR-104 |
+| `HORS_CALENDRIER` | 422 | une relance hors calendrier de l'établissement | FR-97 |
+| `REPONSE_AUTO_INTERDITE` | 422 | réponse automatique à un message d'un client dont une créance est échue | FR-112 |
+| `PHRASE_SANS_SOURCE` | 422 | une phrase de résumé sans renvoi à une source | FR-113 |
+| `CHIFFRE_NON_SOURCE` | 422 | un nombre du texte ne se retrouve pas dans les entrées | FR-102, FR-132 |
+| `PIECE_ILLISIBLE` | 200 avec motif | pièce corrompue ou illisible : mise de côté, le lot continue, le dossier avance sur la saisie humaine | FR-141 |
+| `FORMAT_NON_SUPPORTE` | 415 | fichier audio ou format non lu au premier jour | FR-100 |
+| état `NON_INSTALLE` | 200 (état) | module facultatif non installé, ou voix non activée dans un pack ; **jamais une erreur** | FR-40, FR-138 |
+| état `INDISPONIBLE` | 200 (état) | module installé mais coupé, ou plafond de réponse dépassé | FR-40 |
+| état `DEGRADE` | 200 (état) | capacité de langage sans modèle ou palier insuffisant ; repli dit | FR-35, FR-86 |
+| état `NON_SOURCEE` | — | proposition d'analyse sans source : non affichée, non acceptable | FR-16 |
+
+**Codes du catalogue de départ à confirmer par l'architecture** `[ASSUMPTION]` : un code de refus pour une calibration discordante, un modèle refusé à la signature, un palier insuffisant (écarts nommés du signal hebdomadaire : FR-86) ; ils partent en **schéma fermé**, sans champ libre.
+
+---
+
+## Annexe C. Ce qui sort d'une instance, et ce qui n'en sort jamais
+
+« Instance » : le serveur du client en local, ou l'espace d'une organisation en ligne. « Sortir » : franchir la frontière de l'instance vers Money Vibes ou vers un fournisseur. **Tout passe par l'agent et le tunnel déclaré** en local (FR-32) ; l'IA dépose, l'agent envoie.
+
+### C.1 Ce qui peut sortir, sous condition
+
+| Donnée | Vers | Condition | Fréquence | FR |
+|---|---|---|---|---|
+| **Écarts agrégés** (niveau d'export « apprentissage ») : agrégats et écarts sans identité, motifs codés | la centrale de l'IA | finalité « apprentissage commun » consentie au contrat par le DG ; consentement distinct du client final pour une institution financière ; effectif minimal `k` (`ia.k_min`) par groupe ; manifeste type approuvé une fois ; **jeton d'export** valide ; copie signée du registre datant de moins de 14 jours ; lot préparé **sur l'instance** (pseudonyme salé par envoi) ; aucune donnée de santé, aucun texte libre, aucune pièce, aucune variable interdite | au plus un envoi par jour, par morceaux repris | FR-61, FR-76, FR-77, FR-78 |
+| **Indicateurs de niveau 0** de l'IA (santé, version, âge du modèle, écarts nommés par code) | la supervision de Money Vibes | schéma **fermé**, sans champ libre ni identifiant ni contenu | hebdomadaire | FR-86 |
+| **Joignabilité du tunnel** (`OK` ou `INJOIGNABLE`) | la supervision | sans contenu | avec le signal | FR-32 |
+| **Demande de langage masquée** | un fournisseur de modèle de langage **hébergé** (en ligne seulement, par la passerelle) | **jamais en local** par défaut (modèle ouvert sur le serveur du client) ; masquage ; aucune rétention chez le fournisseur ; journal ; **transfert déclaré** pour le pays de l'organisation (`TRANSFERT_NON_DECLARE` sinon) ; **jamais de donnée de santé** (`SANTE_HORS_INSTANCE`) ; quota respecté | à la demande | FR-33, FR-34, FR-80, FR-183 |
+| **Taux « qui avait raison » agrégé et anonymisé** (preuve commerciale) | le client lui-même, ou le public par la centrale | produit **par la centrale** à partir d'agrégats consentis, avec `k` organisations au minimum, ou, pour un client seul, **par son instance** à partir de ses chiffres ; aucun nom d'agent, d'agence, de client ni d'organisation ; effectif et date toujours publiés | à la demande | FR-75 |
+| **Cartes anonymisées de Pulse** (horizon) | des tiers | consentement ; effectif `ia.pulse.effectif_minimal` ; jamais une donnée individuelle ni un concurrent | horizon | FR-152 |
+
+### C.2 Ce qui n'en sort jamais
+
+| Donnée | Pourquoi | FR |
+|---|---|---|
+| **Donnée de santé**, même anonymisée ; **pièce médicale** et le texte lu qui en vient | classement santé ; jamais vers un modèle hors de l'instance ; jamais dans un lot ; `SANTE_HORS_INSTANCE` | FR-19, FR-36, FR-143 |
+| **Identifiant, nom, téléphone, adresse, photo, coordonnée, position précise** d'une personne | niveau d'export « apprentissage » ; date de naissance ramenée à l'année | FR-77 |
+| **Texte libre** (commentaire d'un utilisateur, motif libre) | le motif est **codé** ; le commentaire reste dans le module | FR-58, FR-77 |
+| **Pièce, image, document** | aucune pièce ne sort ; le contenu reste dans `document-service` | FR-77, FR-140 |
+| **Variable interdite** d'un score (genre, situation matrimoniale, nationalité, religion) | liste fermée de variables | FR-70, FR-77 |
+| **Prix et marges d'un freelance** | exclus de tout lot | FR-77 |
+| **Contexte brut** d'une demande de langage, **rendu figé**, **contenu masqué** d'un envoi | purgés à leur échéance courte ; restent sur l'instance | FR-17, FR-34, FR-38 |
+| **Registre de l'IA** et **journal des accès** | trace opposable de l'organisation ; lus par son auditeur | FR-17, FR-23 |
+| **Registre des consentements** (autre que sa **copie signée** de moins de 14 jours) | il vit sur l'instance ; il **n'est jamais restauré** par une sauvegarde | FR-76, FR-87 |
+| **Calibration et journal des écarts** (en clair) | donnée de l'organisation ; seuls des agrégats consentis remontent | FR-56, FR-60 |
+| **Donnée d'un client pour l'IA d'un autre client** | aucune donnée d'un client ne sert à l'IA d'un autre ; seul l'apprentissage commun consenti est mis en commun | FR-7 |
+| **Croisement d'une même PME entre verticales** | horizon : identité partagée et consentement explicite | FR-82, FR-151 |
+| **Donnée hors de sa finalité** | une donnée n'entraîne jamais un modèle hors de sa finalité consentie | FR-7, FR-76 |
+| **Lecture de la base d'un module** | l'IA n'a aucune chaîne de connexion ; elle reçoit des données préparées | FR-38 |
+| **Secret d'un fournisseur de modèle** | détenu par la passerelle seule | FR-179 |
+
+### C.3 Ce qui entre dans l'instance
+
+| Donnée | Depuis | Condition | FR |
+|---|---|---|---|
+| **Modèle commun signé**, **pack de secteur**, **jeux de référence datés** | la ligne de modèles de Money Vibes, par le réseau ou **par fichier** | signature vérifiée par une clé dont l'usage « modèle » le couvre ; période de validité ; compatibilité ; **date choisie par le DSI** en local ; retour arrière en une action | FR-55, FR-63 à FR-67, FR-83, FR-84 |
+| **Jeton d'export** quotidien | la centrale | signé, à courte durée ; refusé après un recul ou une bifurcation de l'état de confiance | FR-78 |
+| **Modèle ouvert de langage** | le catalogue de modèles de Money Vibes | licence vérifiée à l'entrée au catalogue ; dimensionné au contrat | FR-35 |
+
+---
+
+## Annexe D. Paramètres
+
+Tout seuil, délai, liste ou borne de l'IA est un **paramètre**, jamais une valeur codée en dur (FR-3). Un défaut `[ASSUMPTION]` se **confirme ou se change** à la séance de calibrage avec chaque client, **sans reprise du code**. Format : `code | libellé | défaut | unité | source | FR`. Source : PO = parole du PO ; D = décision du plan ; MOT = spine du moteur ; REC = recherche du 2026-11-13 ; ASSUMPTION = défaut posé par ce PRD ; PRD-D, PRD-MF, PRD-A = PRD distributeur, microfinance, assurance. « par capacité » = valeur dans la fiche de la capacité. **Les alias** (anciens codes des quatre rédactions) sont nommés pour que rien ne se perde ; chaque paramètre n'a qu'**un code canonique**. Cette annexe est la fusion dédoublonnée des tables de W1 (`IA-P01` à `IA-P15`), W2 (§5 à §9), W3 (§10 à §13) et W4 (`IA-P80` à `IA-P86`) et des paramètres du §15 ; les conflits sont listés après les tables.
+
+### D.1 Doctrine, contrat et garde-fous (§1 à §4)
+
+| code | libellé | défaut | unité | source | FR |
+|---|---|---|---|---|---|
+| `IA-P01` | Durée avant expiration d'une proposition non traitée | 30 | jours | ASSUMPTION | FR-12 |
+| `ia.acceptation_facade_pct` (alias `IA-P02`, `ia.objectif.acceptation_facade_pct`) | Taux d'acceptation signalant une validation de façade | 90 | % sur la fenêtre | spine assistant CM-1 | FR-27, FR-68, FR-92, FR-127 |
+| `ia.acceptation_fenetre_jours` (alias `IA-P03`) | Fenêtre de mesure du taux d'acceptation | 30 | jours | spine assistant AD-23 | FR-27, FR-68 |
+| `ia.k_min` (alias `IA-P04`) | Effectif minimal `k` d'un groupe, d'un agrégat sortant ou d'un nombre d'organisations | **5** | personnes, objets ou organisations | MOT (A-10) ; conflit C-1 | FR-7, FR-19, FR-70, FR-72, FR-75, FR-77, FR-168 |
+| `ia.cadence_publication_jours_min` (alias `IA-P05`) | Intervalle minimal entre deux publications atteignant une instance | 7 | jours | D7 ; MOT (fenêtre 7 jours) | FR-6, FR-63 |
+| `ia.retention_registre_annees` (alias `IA-P06`) | Conservation de la trace opposable, du registre et du journal des accès | 10 | ans | PRD-A FR-12 ; ASSUMPTION ailleurs | FR-17, FR-23, FR-89, FR-181 |
+| `IA-P07` | Délai à partir duquel l'écran reprend la main sur l'analyse humaine | 5 | secondes | ASSUMPTION ; conflit C-2 | FR-15 |
+| `IA-P08` | Taux de motifs identiques à la proposition signalé à l'auditeur | 80 | % sur la fenêtre | ASSUMPTION | FR-27 |
+| `IA-P09` (alias `ia.objectif.agent.annulees_pct`) | Exécutions autonomes annulées ou contestées déclenchant une alerte (maximum) | 1 | % | assistant SM-4 | FR-14, FR-139 |
+| `IA-P10` | Conservation du **rendu figé** dans le registre | 90 | jours | ASSUMPTION ; conflit C-3 | FR-17 |
+| `IA-P11` | Écart d'équité entre sous-groupes, à un instant, avant alerte | 20 | % d'écart relatif | ASSUMPTION ; conflit C-4 | FR-18 |
+| `ia.confiance_min` (alias `IA-P12`) | Confiance minimale sous laquelle l'IA dit « je ne sais pas » | 0,5 par capacité | indice 0-1 | ASSUMPTION | FR-16, FR-49, FR-54 |
+| `IA-P13` | Conservation des observations de la personne concernée | durée du dossier + 10 | ans | ASSUMPTION | FR-22, FR-181 |
+| `IA-P14` | Délai d'arrêt des envois après retrait du consentement « apprentissage commun » | 24 | heures | ASSUMPTION | FR-7, FR-79, FR-168 |
+| `IA-P15` | Plafond de durée d'un mandat | 90 | jours | ASSUMPTION | FR-14, FR-135 |
+
+### D.2 Exploitation, niveaux, apprentissage, objectifs et données (§5 à §9)
+
+| code | libellé | défaut | unité | source | FR |
+|---|---|---|---|---|---|
+| `ia.iso_delai_max_pct` | Allongement maximal du délai d'une organisation causé par la saturation d'une autre | 20 | % | ASSUMPTION | FR-31, FR-178 |
+| `ia.delai_reponse_max_s` | Plafond de réponse d'une capacité avant « indisponible » | 10 (langage : 60) | s | ASSUMPTION ; conflit C-2 | FR-40, FR-175, FR-176 |
+| `ia.retention_contenu_passerelle_jours` | Conservation du contenu masqué d'un envoi de langage (audit) | 30 | jours | ASSUMPTION | FR-34, FR-180 |
+| `ia.retention_contexte_brut_jours` | Conservation du **contexte brut** d'une demande de langage | 7 | jours | ASSUMPTION (aligné sur l'assistant : échéance courte) ; conflit C-3 | FR-38, FR-180 |
+| `ia.licence_modele_verifiee` | Licence du modèle ouvert vérifiée avant l'entrée au catalogue | obligatoire | oui/non | REC | FR-35 |
+| `palier_ia` (P0, P1, P2) | Paliers d'empreinte : calcul, mémoire, mémoire graphique, disque, latence, débit | à mesurer avant le premier devis | table | ASSUMPTION | FR-41, FR-182 |
+| `ia.age_max_source_jours` | Âge au-delà duquel un jeu de référence est « ancien » | 90 | jours | D (assistant, microfinance) | FR-55 |
+| `seuil_n2` (alias `ia.seuil.donnees.<capacite>`, `IA-P86`) | Seuil de passage au N2 : volume, durée, gain, **par capacité** | fixé par capacité | exemples ; jours ; points | D6 ; ASSUMPTION | FR-48, FR-91, FR-170 |
+| `ia.recalibration_heure` | Heure de la recalibration nocturne | 02:00 | heure locale | ASSUMPTION | FR-59 |
+| `ia.recalibration_borne_pct` | Variation maximale d'un paramètre de calibration par nuit | par capacité (défaut 5) | % | ASSUMPTION | FR-59 |
+| `ia.recalibration_cpu_max_pct` | Part de calcul maximale en heures ouvrées | 20 | % | ASSUMPTION | FR-59, FR-185 |
+| `ia.calibrations_conservees` | Calibrations conservées après remplacement | 3 (et au moins 7 jours) | versions | MOT (7 jours) ; ASSUMPTION | FR-60 |
+| `ia.cadence_entrainement_jours_min` | Intervalle minimal entre deux tournées d'entraînement d'une ligne | 7 | jours | D7 | FR-62 |
+| `ia.duree_ombre_jours` | Durée de l'ombre | 14 | jours | ASSUMPTION | FR-64 |
+| `ia.part_canari_pct` | Part des demandes servie par le canari | 5 | % | REC (1 à 5 %) | FR-64 |
+| `ia.interrupteur_date_limite_jours` | Date limite d'un interrupteur de changement | 30 | jours | MOT | FR-66 |
+| `ia.retour_arriere_max_min` | Durée maximale d'un retour arrière de modèle | 15 | minutes | MOT | FR-67, FR-186 |
+| `ia.retour_arriere_conservation_jours` | Conservation du modèle et de la calibration précédents | 7 | jours | MOT | FR-67 |
+| `ia.eval_min_exemples` | Exemples minimaux pour évaluer un challenger | par capacité | exemples | ASSUMPTION | FR-69 |
+| `ia.equite_ecart_max_pts` | Dégradation d'équité maximale d'une version par rapport à la précédente (blocage de promotion) | par capacité (défaut 2) | points | ASSUMPTION ; conflit C-4 | FR-70, FR-94 |
+| `ia.objectif.equite_regression_max` | **Cible** : dégradation d'équité visée d'une version | 0 | points | ASSUMPTION ; conflit C-4 | FR-92, FR-94 |
+| `ia.derive_seuils` | Seuils de dérive et de gravité | par capacité | indice | ASSUMPTION | FR-73 |
+| `ia.derive_delai_alerte_h` | Délai d'alerte de dérive | 24 | heures | ASSUMPTION | FR-73, SM-11 |
+| `ia.desaccord_horizon` | Horizon(s) de confrontation d'un désaccord | par capacité (crédit : 3, 6, 12) | mois | PO | FR-74 |
+| `ia.desaccord_regle` | Règle « qui avait raison » | par capacité (crédit : retard de plus de 30 jours) | règle | PO (PAR 30) ; ASSUMPTION | FR-74 |
+| `ia.desaccord_periode_mois` | Période glissante du taux « qui avait raison » | 12 | mois | PO | FR-75 |
+| `ia.desaccord_min_cas` | Effectif en dessous duquel le taux est « non significatif » | 30 | cas | ASSUMPTION | FR-75 |
+| `ia.copie_registre_validite_jours` | Validité de la copie signée du registre des consentements | 14 | jours | MOT | FR-76 |
+| `ia.contribution_purge_jours` | Péremption d'un lot non transmis | 30 | jours | MOT | FR-78 |
+| `ia.paquet_poids_max_go` | Poids maximal d'un paquet de modèle | à fixer | Go | ASSUMPTION | FR-83 |
+| `ia.cache_consentement_s` | Durée maximale d'un cache de consentement (hébergé) | 60 | s | ASSUMPTION | FR-88 |
+
+### D.3 Catalogue des capacités, Copilot et agents, lecture de pièces, vision (§10 à §13)
+
+| code | libellé | défaut | unité | source | FR |
+|---|---|---|---|---|---|
+| `ia.objectif.score.calibration_ecart_max` | Écart de calibration maximal d'un score | cible à fixer avec le client | points | D8 | FR-93 |
+| `ia.objectif.score.effet_retard_pct` | Baisse visée du retard de paiement du portefeuille noté | cible à fixer | % | D8 | FR-93 |
+| `ia.score.peremption_jours` | Âge au-delà duquel un score est « périmé » | 30 | jours | PRD-D FR-184 | FR-93 |
+| `ia.ecart.motif_obligatoire` | Motif obligatoire quand l'humain s'écarte d'une décision suggérée (crédit) | dès le 1er écart | écarts | ASSUMPTION | FR-95 |
+| `ia.ecart.alerte_audit_nb` | Écarts répétés en 30 jours qui alertent l'auditeur | 5 | écarts | ASSUMPTION | FR-95 |
+| `ia.recouvrement.capacite_jour` | Nombre de relances traitables par jour (par équipe) | propre au client | relances | PRD-D FR-120 | FR-97 |
+| `ia.objectif.recouvrement.taux_30j_pct` | Taux de recouvrement à 30 jours visé | cible à fixer | % | D8 | FR-96 |
+| `ia.lecture.confiance_minimale` | Confiance sous laquelle un champ lu est proposé vide | 0,6 | 0 à 1 | ASSUMPTION | FR-99, FR-142 |
+| `ia.objectif.lecture.champs_exacts_pct` | Part de champs exacts visée par type de pièce | cible à fixer par type | % | D8 | FR-99 |
+| `ia.alerte.signal_faible_seuil` | Seuil d'alerte des signaux faibles d'un client actif | 0,7 | 0 à 1 | PRD-MF FR-126 | FR-103 |
+| `ia.objectif.prevision.erreur_max_pct` | Erreur absolue moyenne maximale d'une prévision | cible à fixer | % | D8 | FR-105 |
+| `ia.objectif.par.baisse_pts` | Baisse du PAR visée sur les agences qui suivent les actions | cible à fixer | points | D8 | FR-106 |
+| `ia.comparaison.min_missions` | Missions comparables minimales pour une comparaison au portefeuille | 5 | missions | PRD-A FR-65 | FR-110 |
+| `ia.combo.max_lignes` | Nombre maximal de combos de stock lent par liste | 6 | combos | PRD-D FR-144 | FR-109 |
+| `ia.objectif.resume.fidelite_pct` | Part de phrases de résumé fidèles à leur source (échantillon) | cible à fixer | % | D8 | FR-113 |
+| `ia.brief.heure` | Heure du brief du matin | 07:00 | heure | PRD-A FR-208 | FR-116 |
+| `ia.objectif.brief.delais_depasses_pct` | Baisse visée des délais dépassés | cible à fixer | % | D8 | FR-116 |
+| `ia.terrain.proximite_metres` | Distance de l'alerte de proximité | 200 | mètres | PRD-MF FR-206 | FR-118 |
+| `ia.terrain.conservation_jours` | Conservation des positions consenties | 90 | jours glissants | PRD-D FR-102 | FR-119 |
+| `ia.segment.effectif_minimal` | Effectif minimal d'un segment ou d'une comparaison | 5 | personnes | spine microfinance (groupes < 5 retirés) | FR-121, FR-123 |
+| `ia.package.marge_plancher_pct` | Marge minimale d'un package de vente | marge plancher du logiciel | % | ASSUMPTION | FR-122 |
+| `ia.impact.temoin_minimal` | Taille minimale du groupe témoin d'un package | 10 | points de vente | ASSUMPTION | FR-122 |
+| `ia.impact.poids_sans_temoin` | Poids d'un rapport sans témoin dans l'apprentissage | 0,3 | 0 à 1 | ASSUMPTION | FR-122 |
+| `ia.impact.seuil_succes_pct` | Écart mesuré minimal pour dire qu'un package « marche » | 5 | % | ASSUMPTION | FR-122 |
+| `ia.coaching.seuil_points` | Seuil de priorité de coaching | 20 | points | PRD-D FR-125 | FR-123 |
+| `ia.secteur.source_ancienne_jours` | Âge d'une source macro jugée « ancienne » | 90 | jours | PRD-MF FR-96 | FR-126 |
+| `ia.secteur.saturation_pct` | Part d'un secteur déclenchant l'alerte de saturation | 35 | % | PRD-MF FR-97 | FR-126 |
+| `ia.arbitrage.plafond_lot` | Plafond **dur** d'une décision groupée (le défaut d'usage est 25) | 100 | décisions | spine assistant AD-23 | FR-127 |
+| `ia.objectif.copilot.temps_reponse_s` | Temps de réponse **visé** du Copilot | cible à fixer | secondes | D8 | FR-139 |
+| `ia.pulse.effectif_minimal` | Effectif minimal d'une case publiée par Pulse | `ia.k_min` | entreprises | D9 | FR-152 |
+
+Rappels de paramètres du contrat de la microfinance et du distributeur, tous paramétrables par le client : usure de **24 % par an** et taux d'effort bloquant **40 %** (PRD-MF), seuil de contentieux **40** (PRD-D FR-117).
+
+### D.4 Ajout d'un secteur ou d'un pays (§14)
+
+| code | libellé | défaut | unité | source | FR |
+|---|---|---|---|---|---|
+| `IA-P80` | Écart toléré d'une promotion sur un secteur non visé (jeu de dossiers figés) | 0 | % de propositions modifiées | ASSUMPTION | FR-167 |
+| `IA-P81` | Taille minimale du jeu de dossiers figés par secteur et par capacité | 200 | dossiers | ASSUMPTION | FR-167, FR-174 |
+| `IA-P82` | Durée minimale de l'état `ESSAI` (ombre puis canari) d'un secteur avant `ACTIF` | 60 | jours | ASSUMPTION | FR-174 |
+| `IA-P83` | Pertinence minimale d'un modèle transverse hérité par un secteur neuf, mesurée sur sa vérité terrain | 0,6 | indice 0-1 | ASSUMPTION | FR-170 |
+| `IA-P84` | Horizon par défaut d'une vérité terrain de crédit ou de paiement | 180 | jours | ASSUMPTION, à fixer par pack | FR-164 |
+| `ia.catalogue.versions_maintenues` (alias `IA-P85`) | Nombre de versions du catalogue maintenues en parallèle | 3 | versions | ASSUMPTION | FR-169, FR-186 |
+
+### D.5 Exigences transverses (§15, nouveaux paramètres)
+
+| code | libellé | défaut | unité | source | FR |
+|---|---|---|---|---|---|
+| `ia.perf.n0_p95_ms` | Délai d'une proposition de règle au 95e centile | 300 | ms | ASSUMPTION | FR-175 |
+| `ia.perf.n1_p95_ms` | Délai d'une proposition de modèle statistique au 95e centile | 1500 | ms | ASSUMPTION | FR-175 |
+| `ia.perf.copilot_premier_s` | Délai du premier élément de réponse du Copilot | 3 | s | ASSUMPTION | FR-176 |
+| `ia.perf.copilot_p95_s` | Délai de la réponse complète du Copilot au 95e centile | 20 | s | ASSUMPTION | FR-176 |
+| `ia.dispo.cible_pct` | Disponibilité mensuelle du service en ligne | 99,5 | % | ASSUMPTION | FR-177 |
+| `ia.dispo.rto_min` | Reprise après panne du service en ligne | 60 | minutes | ASSUMPTION | FR-177 |
+| `ia.dispo.rpo_min` | Perte maximale de calibration et d'écarts | 60 | minutes | ASSUMPTION (sauvegarde horaire, FR-87) | FR-177 |
+| `ia.cout.quota_mensuel` | Quota d'inférence de langage par organisation | posé au contrat | propositions par mois | ASSUMPTION | FR-183, FR-31, FR-139 |
+| `ia.cout.alerte_pct` | Part du quota qui déclenche l'alerte au responsable | 80 | % | ASSUMPTION | FR-183 |
+| `ia.obs.retention_jours` | Conservation des métriques agrégées | 395 | jours | ASSUMPTION | FR-184 |
+
+### Conflits résolus
+
+Chaque ligne donne la valeur **gardée**, la valeur **écartée** et la raison. Les cas où les deux valeurs **coexistent** avec des rôles distincts sont marqués « coexistent » : ils sont à vérifier par l'architecture.
+
+| # | Paramètre | Valeur gardée | Valeur écartée | Pourquoi |
+|---|---|---|---|---|
+| C-1 | `ia.k_min` (effectif minimal) | **5** (alias `IA-P04`), conforme à la spine du moteur (A-10) et au test de FR-77 (« par défaut 5 ») | 20 (W1, « recommandation à fixer en partie 2 ») | W1 renvoyait la valeur à la partie 2 ; la partie 2 la fixe à 5 en reprenant le moteur ; `ia.segment.effectif_minimal` et `ia.comparaison.min_missions` valent aussi 5 mais sont des paramètres **distincts** (un segment, une comparaison) |
+| C-2 | Délai de réponse : `IA-P07` (5 s, FR-15) et `ia.delai_reponse_max_s` (10 s, langage 60 s, FR-40) | **coexistent** : 5 s est le délai à partir duquel **l'écran reprend la main** ; 10 s (60 s en langage) est le **plafond** au-delà duquel la capacité rend `INDISPONIBLE` | une seule valeur de 5 s ou de 10 s | deux événements différents (l'écran n'attend pas ; la capacité déclare son indisponibilité) ; `[ASSUMPTION : à confirmer par l'architecture]` |
+| C-3 | Conservation du contexte brut : `IA-P10` (90 jours) et `ia.retention_contexte_brut_jours` (7 jours) | **coexistent** : 7 jours pour le **contexte brut** d'une demande de langage (échéance courte, FR-38) ; 90 jours pour le **rendu figé** de la proposition dans le registre (FR-17) | 90 jours pour le contexte brut (formulation de W1) | l'assistant d'août exigeait une échéance courte pour le contexte ; la trace opposable reste 10 ans (`ia.retention_registre_annees`) ; `IA-P10` est donc restreint au rendu figé |
+| C-4 | Équité : `IA-P11` (20 % relatif), `ia.equite_ecart_max_pts` (2 points), `ia.objectif.equite_regression_max` (0 point) | **coexistent** : `IA-P11` = écart **entre sous-groupes à un instant** (alerte) ; `ia.equite_ecart_max_pts` = **dégradation d'une version** qui bloque la promotion (borne, FR-70) ; `ia.objectif.equite_regression_max` = **cible** de la fiche (aucune régression visée) | une seule valeur | trois mesures de nature différente ; la **porte de promotion** applique la borne de FR-70 ; la cible de 0 est un objectif rapporté ; `[ASSUMPTION : si le PO veut « aucune régression » comme porte, la borne passe à 0]` |
+| C-5 | Taux d'acceptation de façade : `IA-P02`, `ia.acceptation_facade_pct`, `ia.objectif.acceptation_facade_pct` | un seul code `ia.acceptation_facade_pct`, 90 % sur 30 jours | trois codes pour la même valeur | doublon pur |
+| C-6 | Seuil de passage au N2 : `seuil_n2`, `ia.seuil.donnees.<capacite>`, `IA-P86` | un seul : `seuil_n2` par capacité | trois noms | doublon pur ; le défaut est « fixé par capacité à l'écriture des fiches » (FR-48) |
+| C-7 | Versions du catalogue maintenues : `IA-P85` et `ia.catalogue.versions_maintenues` | un seul code, `ia.catalogue.versions_maintenues` (alias `IA-P85`), 3 | deux noms | doublon pur (introduit par le §15) |
+| C-8 | Exécutions autonomes annulées : `IA-P09` et `ia.objectif.agent.annulees_pct` | un seul, `IA-P09` (alias), 1 % | deux noms | doublon pur (assistant SM-4) |
+| C-9 | Cadence : `IA-P05` et `ia.cadence_publication_jours_min` ; `ia.cadence_entrainement_jours_min` | `ia.cadence_publication_jours_min` (alias `IA-P05`) = 7 ; l'entraînement a **son propre** paramètre, 7 | — | deux étapes de la chaîne (entraîner, publier), même valeur par défaut |
+| C-10 | Conservation du registre : `IA-P06` et `ia.retention_registre_annees` | un seul, `ia.retention_registre_annees` (alias `IA-P06`), 10 ans | deux noms | doublon pur ; point de droit J-IA-06 |
+| C-11 | Confiance minimale : `IA-P12` et `ia.confiance_min` ; `ia.lecture.confiance_minimale` (0,6) | `ia.confiance_min` (alias `IA-P12`) = 0,5 par capacité ; la lecture de pièces garde **sa** valeur de 0,6 (champ proposé vide) | — | la lecture de pièces est une capacité qui **fixe sa propre valeur** dans sa fiche |
+| C-12 | Âge d'une source : `ia.age_max_source_jours` (jeux de référence) et `ia.secteur.source_ancienne_jours` (source macro) | **coexistent**, 90 jours chacun | — | deux objets ; même défaut |
+| C-13 | Plafond d'une décision groupée : `ia.arbitrage.plafond_lot` | plafond **dur** de 100 ; **défaut d'usage 25** (spine assistant AD-23) | — | le défaut est celui du moteur d'automatisation ; le plafond est la borne de FR-127 |
+| C-14 | Code d'erreur santé : `DONNEE_SANTE_HORS_INSTANCE` (FR-36) et `SANTE_HORS_INSTANCE` (FR-143) | `SANTE_HORS_INSTANCE` (annexe B) | l'ancien | un seul code ; l'ancien est un alias à retirer |
+| C-15 | Code d'erreur de montant : `MONTANT_CORPOREL_INTERDIT` (FR-110, FR-120) | `MONTANT_INTERDIT` (généralisé : FR-20) ; `MONTANT_CORPOREL_INTERDIT` reste le cas assurance | — | la doctrine est généralisée ; le code spécifique reste lisible côté assurance |
