@@ -1,6 +1,6 @@
 ---
 title: "PRD — Prospera Distributeur"
-status: draft
+status: final
 created: 2026-11-12
 updated: 2026-11-13
 project: prospera
@@ -20,7 +20,7 @@ mode: rapide
 
 Ce PRD décrit **Prospera Distributeur** : l'outil qui pilote un distributeur ou un grossiste au Togo et dans l'UEMOA, du terrain à la finance. Il s'adresse au PO, à Dev A et Dev B, et aux auteurs des PRD microfinance et assurance, qui s'écrivent juste après lui.
 
-**Sa source est le front de démo** `prospera-font-end/prospera-distributeur` (23 écrans, environ 47 600 lignes). Le PO l'a décidé : ce que la démo présente, le produit doit le faire. Mais la démo n'enregistre rien. Elle n'a ni serveur ni base de données, ses indicateurs sont souvent des constantes, et sur les 36 boutons d'action relevés par l'audit de juillet 2026, aucun n'agit vraiment. L'analyse et les rapports de la démo sont riches et propres à chaque rôle ; la partie qui sert à agir manque. **Ce PRD exige donc tout ce que la démo montre, en vrai** : enregistré, relu par les autres rôles, calculé depuis les données saisies. La démo sert aussi de maquette : il n'y a pas de maquettes séparées.
+**Sa source est le front de démo** `prospera-font-end/prospera-distributeur` (23 écrans, environ 47 600 lignes). Le PO l'a décidé : ce que la démo présente, le produit doit le faire. Mais la démo n'enregistre rien. Elle n'a ni serveur ni base de données. Ses indicateurs sont souvent des constantes. Sur les 36 boutons d'action relevés par l'audit de juillet 2026, aucun n'agit vraiment. L'analyse et les rapports de la démo sont riches et propres à chaque rôle ; la partie qui sert à agir manque. **Ce PRD exige donc tout ce que la démo montre, en vrai** : enregistré, relu par les autres rôles, calculé depuis les données saisies. La démo sert aussi de maquette : il n'y a pas de maquettes séparées.
 
 Le brain dump du PO parle de 18 modules en 4 bundles ; la démo présente 20 modules en 4 familles. Ce PRD suit les 20 modules de la démo ; le découpage en offres est une affaire commerciale, dont le PRD ne dépend pas (§12).
 
@@ -275,7 +275,7 @@ Prospera fournit un jeu de démonstration, **« Grossiste du Golfe »**, grossis
 
 #### FR-10 : Trois tailles
 
-Le jeu existe en trois tailles : **petit** (1 entrepôt, 4 agents, 120 points de vente), **moyen** (le §FR-9, par défaut), **grand** (4 points de stock, 40 agents, 2 000 points de vente). Les trois sont générés par la même règle.
+Le jeu existe en trois tailles : **petit** (1 entrepôt, 4 agents, 120 points de vente), **moyen** (celui de FR-9, par défaut), **grand** (4 points de stock, 40 agents, 2 000 points de vente). Les trois sont générés par la même règle.
 
 **Conséquences (testables) :**
 - Chaque taille se charge dans une organisation vierge en moins de 10 minutes (objectif de test par défaut, modifiable).
@@ -287,7 +287,7 @@ Les chiffres du jeu se vérifient entre eux.
 
 **Conséquences (testables) :**
 - Pour chaque facture : total HT par taux, TVA = taux × total HT arrondi une seule fois par taux (NFR-2), HT + TVA = TTC, au franc près. Le jeu contient des factures à plusieurs lignes où ce calcul diffère d'un arrondi ligne par ligne.
-- Les encaissements sans facture (acomptes) sont des crédits de tiers, et ils figurent dans l'encours du tiers.
+- Les encaissements sans facture (acomptes) sont des crédits du tiers ; ils figurent dans l'encours du tiers.
 - Les numéros de facture suivent un seul format et une seule suite, sans trou ni doublon.
 - Le stock d'un article = entrées − sorties depuis l'ouverture, pour chaque point de stock.
 - La balance âgée = somme des créances ouvertes ; chaque créance = facture − encaissements − avoirs.
@@ -312,15 +312,15 @@ Les seuils de la démo deviennent des **paramètres de l'organisation**, avec le
 | Garde-fou | Valeur par défaut (démo) | Ce qu'il bloque | Qui peut passer outre |
 |---|---|---|---|
 | Plafond de crédit d'un point de vente | par point de vente, jugé sur l'encours | la validation d'une commande si l'encours dépasse le plafond | DAF (dérogation tracée) |
-| Rappel de retard | J+1 | rien : un rappel part | : |
-| Alerte à la direction | J+30 | rien : la direction est alertée | : |
+| Rappel de retard | J+1 | rien : un rappel part | — |
+| Alerte à la direction | J+30 | rien : la direction est alertée | — |
 | Blocage du crédit | créance échue depuis plus de 60 jours, ou encours au-dessus du plafond | toute nouvelle commande du tiers (blocage automatique, règle auditée, exception explicite à FR-158) | DAF seul ; le déblocage n'est jamais automatique |
-| Marge minimale du freelance | 12 % | rien : l'envoi n'est pas bloqué, un avertissement s'affiche | : |
+| Marge minimale du freelance | 12 % | rien : l'envoi n'est pas bloqué, un avertissement s'affiche | — |
 | Plafond de crédit à la 1re commande | 1,5 M | la 1re commande d'une ouverture | DC |
 | Plancher de trésorerie | 40 M | une commande fournisseur ou un paiement qui le franchit | DAF, puis DG |
 | Plafonds de validation d'un achat | 5 M (resp. stock), 20 M (DAF), DG au-delà | la validation d'une commande fournisseur | le niveau suivant |
 | Seuil de remise soumise au DG | 12 % | une remise ou un combo au-delà | DG |
-| Géofencing de clôture de visite | 200 m | rien : la clôture hors rayon reste possible, avec un **motif obligatoire**, et elle est signalée au superviseur | : |
+| Géofencing de clôture de visite | 200 m | rien : la clôture hors rayon reste possible, avec un **motif obligatoire**, et elle est signalée au superviseur | — |
 | Distance maximale rentable d'une ouverture | 35 km | la création d'un prospect au-delà | DC |
 
 **Conséquences (testables) :**
@@ -455,7 +455,7 @@ Deux données personnelles suivent une règle fixée par le PO (décisions du 20
 
 Cette partie décrit sept modules qui n'existent que pour un distributeur ou un grossiste : Commande, Facturation, Approvisionnement, Opérations entrepôt, Conquête et objectifs, Studio réseaux sociaux, Réseau Freelance. Le front de démo `prospera-distributeur` les définit. Le PRD exige tout ce que la démo présente, mais en vrai : chaque action est enregistrée côté serveur et relue par les autres rôles. Aujourd'hui rien n'est enregistré.
 
-Deux modules de cette partie sont ★ : le client de février en a besoin (Commande, Facturation). Les autres modules ★ (`paiement`, `recouvrement`, `pdv`, `catalogue`, `stock`, `terrain`) sont décrits aux parties 3 et 4. Les cinq autres modules de cette partie sont écrits en entier ; aucun ordre de livraison n'est figé (décision du PO du 2026-11-12 : on avance selon l'évolution).
+Deux modules de cette partie sont ★ : le client de février en a besoin (Commande, Facturation). Les autres modules ★ (`paiement`, `recouvrement`, `pdv`, `catalogue`, `stock`, `terrain`) sont décrits aux parties 3 et 4. Pour les cinq autres modules de cette partie, aucun ordre de livraison n'est figé (décision du PO du 2026-11-12 : on avance selon l'évolution).
 
 Règles communes à tous les modules de cette partie :
 - **Bouton « bientôt ».** Un bouton dont la capacité n'est pas branchée est visible, désactivé, et porte « bientôt », sans date (décision du PO du 2026-11-12). Jamais un bouton qui simule.
@@ -481,7 +481,7 @@ Règles communes à tous les modules de cette partie :
 
 **Objets.**
 - **Commande** : `numero` (`CMD-AAAA-NNNNNN`, continu par organisation), `point_de_vente` (référence au module `pdv`, jamais un texte), `commercial`, `canal` (`BUREAU | TERRAIN | WHATSAPP | TELEPHONE | COMPTOIR`), `point_de_stock_source`, `date_livraison_souhaitee`, `conditions_reglement`, `montant_ht`, `montant_tva`, `montant_ttc`, `statut`, `motif_annulation`, `visite` (optionnelle), `id_client_appareil` (clé d'idempotence), `factures` (liste : une commande servie par deux bons peut avoir deux factures), `freelance` (rempli quand la vente est celle d'un freelance, §5.7). Champs lus, non saisis : `type_client` et `zone` (depuis `pdv`).
-  - Statuts : `BROUILLON`, `TRANSMISE` (reçue du terrain ou de WhatsApp, pas encore validée), `VALIDEE`, `PREPARATION`, `LIVREE`, `ANNULEE`. `TRANSMISE` est ajouté aux 5 statuts de la démo (comportement par défaut, modifiable) ; le brouillon `BROUILLON` de la démo n'était jamais produit.
+  - Statuts : `BROUILLON`, `TRANSMISE` (reçue du terrain ou de WhatsApp, pas encore validée), `VALIDEE`, `PREPARATION`, `LIVREE`, `ANNULEE`. `TRANSMISE` est ajouté aux 5 statuts de la démo (comportement par défaut, modifiable). Dans la démo, `BROUILLON` n'était jamais produit.
 - **Ligne de commande** : `article`, `quantite_commandee`, `unite`, `prix_unitaire_ht` (figé à la saisie, toujours au prix de la société), `origine_du_prix` (`GRILLE_SOCIETE | PRIX_NEGOCIE_CLIENT`), `remise_pct`, `quantite_reservee`, `quantite_servie`, `quantite_livree`, `quantite_facturee`, `taux_tva`, `cout_unitaire` (si disponible), `lot` (optionnel, voir module `stock`). Le prix d'un freelance n'est jamais une ligne de commande vue de la société : il vit dans l'espace privé du freelance (FR-94, FR-96).
 - **Bon de livraison** (le « bon de commande » du terrain) : `numero` (`BL-AAAA-NNNNNN`), `commande`, `point_de_stock`, `lignes` (article, quantité servie, quantité livrée, quantité refusée et motif, lot), `statut` (`EN_PREPARATION | EXPEDIE | LIVRE | AVEC_ECART | ANNULE`), `date_expedition`, `date_livraison`, `camion`, `livraison_confirmee_par`, `preuve_de_livraison`. Un bon annulé garde son numéro.
 - **Réservation** : vit dans le module `stock` (Stock réservé). `commande` la demande et la libère ; il ne la stocke pas.
@@ -550,7 +550,7 @@ Un rôle de bureau qui a le droit de valider (par défaut DC, RESP_VENTES, COMPT
 - Deux validations simultanées sur le dernier stock : une réussit, l'autre reçoit `STOCK_INSUFFISANT`.
 - L'annulation d'une commande `VALIDEE` ou `PREPARATION` libère la réservation immédiatement.
 - La sortie de stock est écrite quand le chargement est validé (bon `EXPEDIE`, FR-70) : la réservation devient un mouvement de sortie dans le module `stock`. La livraison confirme ensuite les quantités livrées et déclenche la facture (FR-42).
-- Une commande `VALIDEE` non préparée au bout de N jours est signalée au bureau ; la réservation n'expire pas toute seule. N = 7 jours par défaut (paramètre) ; il n'y a pas d'expiration automatique : la réservation reste jusqu'à décision du bureau (comportement par défaut, modifiable).
+- Une commande `VALIDEE` non préparée au bout de N jours est signalée au bureau. N = 7 jours par défaut (paramètre). La réservation n'expire pas : elle reste jusqu'à décision du bureau (comportement par défaut, modifiable).
 - Si le crédit du client est bloqué après la validation, la réservation reste posée jusqu'à l'annulation de la commande ou au déblocage du crédit. Au-delà de 7 jours (défaut, paramètre), une alerte va au responsable des ventes. La préparation de cette commande est suspendue (FR-68).
 - La réservation se fait à la validation ; l'allocation du matin par priorité ne porte que sur les commandes en attente de stock (FR-220, décision du PO du 2026-11-12).
 
@@ -592,7 +592,7 @@ Un commercial, un freelance ou un chargé de prospection peut créer une command
 - Le panier d'un agent est un brouillon gardé sur l'appareil, non transmis. Il survit à la coupure du réseau et au redémarrage de l'appareil. Il n'est pas visible du serveur avant la transmission ; il devient `TRANSMISE` à l'envoi (file d'envoi, partie 3).
 - Le bouton « Transmettre » enregistre la commande côté serveur à l'état `TRANSMISE`. Elle apparaît dans la file du bureau. Le commercial la voit avec son statut, qui change quand le bureau la valide.
 - La commande porte le lien vers la visite en cours si elle existe (module `visites`, partie 3). La clôture de visite affiche le montant réel de la commande, pas une saisie libre.
-- Une transmission répétée avec le même `id_client_appareil` ne crée qu'une commande (idempotence). Ceci est indispensable pour l'application terrain hors connexion (partie 3, M12).
+- Une transmission répétée avec le même `id_client_appareil` ne crée qu'une commande (idempotence). Elle est indispensable à l'application terrain hors connexion (partie 3, M12).
 - Le contrôle de plafond de FR-33 s'affiche en avertissement dès la saisie ; le blocage a lieu à la validation du bureau.
 - Un commercial ne voit ni la marge de la société, ni la priorité « BLOQUÉE IA » d'autres clients (écart de la démo : la carte de commande exposait la marge brute).
 - Un freelance saisit sa vente de la même façon. Il voit aussi, dans son espace privé, son prix de vente par ligne (FR-93) ; la commande transmise à la société ne porte que le prix société.
@@ -757,7 +757,6 @@ Le DAF peut déclarer à la bascule le dernier numéro de facture émis sous Sag
 - Une facture émise ne se supprime pas et ne se modifie plus. Une erreur se corrige par un avoir (FR-48).
 - Les avoirs ont leur propre suite continue. Les proformas aussi (sans valeur fiscale).
 - Une facture reprise de Sage (FR-58) garde son numéro d'origine et n'avance pas la suite.
-- **Tranchée (PO, 2026-11-12).** Une seule série par organisation, continue d'année en année ; l'année peut figurer dans le format sans remettre le compteur à zéro.
 - Les factures émises par un freelance ont leur propre série, une par freelance (FR-224). Elles n'entrent jamais dans la série de la société.
 
 #### FR-44 : Mentions légales sur chaque facture
@@ -782,7 +781,7 @@ Les montants d'une facture, d'un avoir et d'une proforma suivent une règle uniq
 - Une remise de ligne se déduit du prix avant calcul de la TVA. La TVA se calcule sur le HT remisé. (La démo avait un cas à 17,4 %.)
 - La devise est XOF et se déclare sur le document.
 - Exemple de test (Grossiste du Golfe) : 40 caisses de jus de mangue à 7 500 HT + 25 caisses de boisson gazeuse à 5 200 HT = 300 000 + 130 000 = 430 000 HT, TVA 77 400, TTC 507 400.
-- **Hors périmètre :** TVA multi-pays, exonérations partielles, taxes spécifiques (accises). Brain dump du PO : « TVA 18 % ». En février, un taux unique à 18 % ; la règle par taux reste écrite pour qu'un second taux ne demande pas de nouveau calcul.
+- **Hors périmètre :** TVA multi-pays, exonérations partielles, taxes spécifiques (accises). Le PO a demandé « TVA 18 % ». En février, un taux unique à 18 % ; la règle par taux reste écrite pour qu'un second taux ne demande pas de nouveau calcul.
 
 #### FR-46 : Imprimer et télécharger la facture en PDF
 
@@ -1005,7 +1004,7 @@ Le freelance émet dans Prospera la facture de sa vente à son détaillant. Il e
 - Émetteur : la fiche du freelance (nom ou raison sociale, adresse, NIF s'il en a un, régime fiscal). Les mentions suivent la liste de travail de FR-44, appliquée à cet émetteur. Une mention manquante bloque l'émission : `MENTION_OBLIGATOIRE_MANQUANTE`.
 - Série propre à chaque freelance, continue, sans trou ni doublon, avec les règles de FR-43 (format paramétrable). Elle n'entre jamais dans la série de la société.
 - La TVA suit le régime fiscal déclaré sur la fiche du freelance (par défaut : assujetti ou non, lu de sa fiche ; taux du paquet fiscal du pays) et la règle de calcul de FR-45.
-- Le PDF remis au détaillant porte le prix du freelance seul. Il ne porte jamais le prix société, ni la marge de négociation. Test : le texte du PDF ne contient pas le prix société d'aucune ligne.
+- Le PDF remis au détaillant porte le prix du freelance seul. Il ne porte jamais le prix société, ni la marge de négociation. Test : le texte du PDF ne contient le prix société d'aucune ligne.
 - L'envoi suit FR-47 (e-mail, WhatsApp).
 - Aucun rôle de la société ne lit cette facture, ni à l'écran, ni par une réponse du serveur, ni par un export de l'organisation. Elle n'entre pas dans la balance clients de la société (FR-50) ; ce que le détaillant doit au freelance est suivi dans l'espace du freelance (FR-97).
 - Le freelance corrige sa facture par un avoir de sa propre série. Cet avoir ne change pas ce qu'il doit à la société (FR-96).
@@ -1229,7 +1228,7 @@ Un DAF, un comptable ou un DG voit ce que l'organisation doit à ses fournisseur
 | Envoyer la commande au fournisseur | n'existe pas | FR-62 (e-mail via `notification`) |
 
 **Notes.**
-- Ce module n'est pas ★ : le client de février peut acheter à la main. Il est écrit en entier parce que la démo le montre.
+- Ce module n'est pas ★ : le client de février peut acheter à la main.
 - Un seul processus de réception : l'écran de l'entrepôt (FR-71). L'onglet « Commandes fournisseurs » de l'achat affiche le résultat, il ne saisit pas.
 - Par défaut, achats en XOF seulement ; l'import (devises, douane, transit) est hors périmètre.
 - Le plancher de 40 M est la valeur de la démo ; le plancher du client de février se saisit au paramétrage de son organisation.
@@ -1464,7 +1463,7 @@ Un chargé de prospection voit les zones non couvertes et recense les commerces 
 - Le point de vente `PROSPECT` reçoit les conditions de règlement par défaut de l'organisation et, pour plafond, le garde-fou de la première commande (FR-79). Il porte le chargé de prospection comme commercial.
 - Doublon : un commerce de même téléphone, ou à moins de 30 mètres avec un nom proche d'un prospect ou d'un point de vente existant, est signalé avant création. Seuil de proximité par défaut : 30 m, paramètre ; la clé primaire du dédoublonnage est le téléphone (PRD pdv FR-V06) et la proximité est un contrôle secondaire.
 - Chaque zone affiche : statut, distance au dépôt, coût de desserte mensuel, potentiel, concurrent installé, recensement (recensés / estimés), conversion (ouverts / recensés).
-- La rentabilité de la desserte = `cout_service_mois / potentiel_ca_mois`; rouge au-dessus de 15 %. La conversion est verte à 20 % et plus.
+- La rentabilité de la desserte = `cout_service_mois / potentiel_ca_mois` ; rouge au-dessus de 15 %. La conversion est verte à 20 % et plus.
 - Le chargé de prospection modifie le statut d'une zone (démarrer le recensement, mettre en conquête, abandonner) avec un motif.
 
 #### FR-77 : Carnet de prospects
@@ -1578,7 +1577,7 @@ Le module projette le résultat du mois à partir du rythme réel. Réalise UJ-1
 - `ca_realise` = factures émises (HT) du périmètre sur le mois à date, avoirs du mois déduits. `rythme_actuel_jour = ca_realise / jours ouvrés écoulés`. `atterrissage = rythme_actuel_jour × jours ouvrés du mois`. `ecart_projete = atterrissage − quota`. `rythme_requis_jour = max(quota − réalisé, 0) / jours ouvrés restants`.
 - Les jours ouvrés viennent d'un calendrier de l'organisation (dimanche non travaillé, jours fériés déclarés). La démo posait 11 sur 26 en dur.
 - Statut de zone : `TIENT` si atterrissage ≥ quota, `JUSTE` si ≥ 92 % du quota, sinon `DECROCHE`.
-- Les chiffres lisent les factures du module `facturation`; sans lui : « non installé ».
+- Les chiffres lisent les factures du module `facturation` ; sans lui : « non installé ».
 - Une zone sans objectif n'a pas de statut.
 - Les arbitrages à rendre (zone qui décroche : exécution ou panier ; surperformance : réallouer ; CA non encaissé : geler le crédit) sont recalculés sur ces chiffres. Chaque arbitrage est une proposition, pas une action.
 - Règles des arbitrages (paramètres) : zone qui décroche et couverture des visites < 80 % : « le problème est l'exécution, renforcer l'effectif » ; couverture ≥ 80 % : « le problème est le panier, pousser le mix à meilleure marge » ; zone dont les créances échues dépassent 25 % du CA : « geler les livraisons à crédit au-delà de 30 jours » ; 4 arbitrages au plus.
@@ -1636,7 +1635,7 @@ Un DG, un DC ou un responsable des ventes lit le mix produit et la marge du pér
 - Par défaut, le responsable des ventes pose les statuts de zone `COUVERTE` et `ABANDONNEE`, à la main, avec motif.
 - **Voulue (PO).** La segmentation actifs, dormants et VIP des points de vente : exigence du module `pdv` (FR-V26), voir la partie 4.
 - La conquête n'est pas ★ pour février. Le rythme d'ouvertures visé par le client de février se saisit en objectifs (FR-84).
-- Le score de santé 0 à 100 d'un point de vente n'a pas de formule dans la démo. Au premier jour, c'est une règle de `dashboard`, déposée dans `pdv` avec sa provenance (décision du PO du 2026-11-12).
+- Le score de santé 0 à 100 d'un point de vente n'a pas de formule dans la démo. La règle retenue est décrite en FR-77.
 - Les indicateurs d'équipe (classements, rémunération) sont au module Équipes et performance (partie 3). Droit par défaut : la rémunération individuelle n'est visible que des rôles qui ont ce droit explicite (pas superviseur ni contrôle de gestion) ; c'est un écart de la démo (`/equipe`) corrigé dans la partie 3.
 
 ---
@@ -1650,7 +1649,7 @@ Un DG, un DC ou un responsable des ventes lit le mix produit et la marge du pér
 - **« IA » :** les trois accroches proposées sont des gabarits par angle (`social-builder.ts:382-440`), pas un modèle de langage. Le calendrier de 7 jours est généré à partir des combos de stock, de la disponibilité et des zones blanches.
 - **Chiffres :** coût mensuel de 420 000 F et marge incrémentale de 13 % en dur.
 
-**Ce que le module fait.** Il prépare des publications pour WhatsApp, Facebook, TikTok et Instagram à partir de ce que le distributeur doit écouter ou vendre : stock à écouler, produits disponibles, zones à conquérir. Le responsable marketing valide chaque publication. Il reçoit les messages des clients dans une boîte unique, y répond, et transforme un message d'intérêt en prospect. **Ce qui part réellement en février : rien automatiquement.** Un post validé est rangé « À publier » avec son texte et son visuel prêts à copier ; la publication automatique par réseau est un bouton « bientôt ». La réponse à un client sur WhatsApp part par le module `notification` ; les autres réseaux restent « bientôt ». Le module réalise UJ-7 (le lead qui devient un prospect) et nourrit UJ-1 (promotion d'un stock à écouler).
+**Ce que le module fait.** Il prépare des publications pour WhatsApp, Facebook, TikTok et Instagram à partir de ce que le distributeur doit écouter ou vendre : stock à écouler, produits disponibles, zones à conquérir. Le responsable marketing valide chaque publication. Il reçoit les messages des clients dans une boîte unique, y répond, et transforme un message d'intérêt en prospect. **En février, rien ne part automatiquement** : un post validé est rangé « À publier » (FR-89). La réponse à un client sur WhatsApp part par le module `notification` ; les autres réseaux restent « bientôt ». Le module réalise UJ-7 (le lead qui devient un prospect) et nourrit UJ-1 (promotion d'un stock à écouler).
 
 **Objets.**
 - **Compte social** : `reseau` (`WHATSAPP | FACEBOOK | TIKTOK | INSTAGRAM`), `identifiant`, `connecte` (`vrai | faux`), `date_connexion`.
@@ -1921,7 +1920,6 @@ Les freelances sont classés à part des salariés, et l'add-on se compte par fr
 - **Tranchée (PO, 2026-11-12).** Le freelance facture son détaillant dans Prospera, à son prix ; la société ne voit que le prix société.
 - **Tranchée (PO, 2026-11-12).** La société verse au freelance une commission calculée sur le prix société, acquise à la facturation ; la marge de négociation est à lui.
 - **Tranchée (PO, 2026-11-12).** Le freelance doit le prix société à la société, même si son détaillant ne le paie pas. Il a un crédit avec un plafond propre, bloqué comme tout client.
-- Les points de vente d'un freelance restent à l'entreprise : la société voit la liste de ses détaillants (nom, adresse), sans ses prix (PRD pdv FR-V09 ; PRD catalogue FR-C29b).
 - **Écart de l'offre.** Les trois documents de l'offre ne concordent pas sur le prix de l'add-on et le nombre de modules ; l'arbitrage appartient à la partie 1.
 
 ---
@@ -2001,6 +1999,7 @@ Règles du noyau :
 - Un encaissement est toujours relié à une visite ou à une Tournée. Il est imputé à une Créance s'il en existe une, sinon il crée un crédit du tiers (FR-172).
 
 **Vocabulaire par verticale.**
+
 | Noyau | Distributeur | IMF | Assurance |
 |---|---|---|---|
 | Agent de terrain | commercial, freelance, chargé de prospection | agent de crédit, agent de collecte | agent général, courtier |
@@ -2267,6 +2266,7 @@ Un superviseur reçoit les alertes de tournée de son périmètre ; un agent sai
 5. **L'argent sans facture** devient un crédit du tiers (FR-172) ; il n'est jamais refusé quand il est déjà reçu.
 
 **Vocabulaire par verticale.**
+
 | Noyau | Distributeur | IMF | Assurance |
 |---|---|---|---|
 | Tiers | point de vente, client | membre, client, groupe solidaire | assuré |
@@ -2524,6 +2524,7 @@ Règles du noyau : un KPI se calcule depuis ses données (FR-15) ; un score dont
 Le DG n'a pas de KPI de poste ; il lit la matrice de tous les postes (FR-124). Sources des KPI de RESP_STOCK et GEST_ENTREPOT : taux de service (FR-204) ; ruptures, rotation et valeur immobilisée (`stock`) ; réapprovisionnement dans le délai (FR-62) ; délai de préparation, expéditions, erreur de picking, bons en attente (`entrepot`, FR-68, FR-70). Chaque module de la partie 2 fournit la requête de ses KPI ; ce module les agrège.
 
 **Vocabulaire par verticale.**
+
 | Noyau | Distributeur | IMF | Assurance |
 |---|---|---|---|
 | Agent de terrain salarié | commercial salarié | agent de crédit salarié | agent salarié |
@@ -2678,6 +2679,7 @@ Ce module regroupe le poste du comptable (`/comptabilite`) et le pilotage financ
 - **Ligne de run** : `fournisseur`, `montant_du`, `echeance`, `recommandation` (`PAYER`, `PARTIEL`, `REPORTER`), `montant_arbitre`. Le **run** est un état de préparation. L'**ordre de paiement** appartient à `paiement` (voir son PRD, FR-P65 à FR-P69).
 
 **Vocabulaire par verticale.**
+
 | Noyau | Distributeur | IMF | Assurance |
 |---|---|---|---|
 | Référentiel comptable | SYSCOHADA révisé | plan comptable des SFD de l'UEMOA | CIMA, une amorce |
@@ -2928,6 +2930,7 @@ Le DG, le DC, le DAF et le responsable du recouvrement lisent, sans pouvoir écr
 Règles du noyau : un envoi de masse passe par `notification` (voir son PRD, section E : liste, préparation, échantillon, reprise, interruption, validation) ; le consentement et le désabonnement sont ceux de `notification` (section H) ; la conservation des messages WhatsApp et le consentement suivent le PRD notification, §9.2 (décision du PO du 2026-11-12) ; une Campagne n'envoie rien à un Tiers exclu (FR-148).
 
 **Vocabulaire par verticale.**
+
 | Noyau | Distributeur | IMF | Assurance |
 |---|---|---|---|
 | Tiers | point de vente | membre, client, groupe solidaire | assuré, prospect |
@@ -3080,6 +3083,7 @@ Une commande peut être attribuée à une campagne ; le marketing peut lire le C
 Règles du noyau : « le DAF arbitre, le contrôleur contrôle » : le contrôle de gestion mesure, alerte et propose ; il ne décide pas. Une proposition à arbitrer est une Décision à trancher adressée au DAF (FR-14).
 
 **Vocabulaire par verticale.**
+
 | Noyau | Distributeur | IMF | Assurance |
 |---|---|---|---|
 | Axe « lieu » | zone | agence | agence |
@@ -3216,6 +3220,7 @@ Le rôle CONTROLE_GESTION a une vue de lecture et de proposition ; elle respecte
 Règles du noyau : les règles sont **définies par les modules métier** (le recouvrement définit ses paliers, FR-114 ; le marketing ses règles) ; le module `automatisations` est le moteur, la file d'arbitrage et le journal. Une règle n'est jamais une case décorative : elle produit des cibles réelles, enregistrées. Aucune règle ne contient de branche par verticale (une règle est une donnée).
 
 **Vocabulaire par verticale.**
+
 | Noyau | Distributeur | IMF | Assurance |
 |---|---|---|---|
 | Tiers | point de vente | membre, client | assuré |
@@ -3547,16 +3552,15 @@ Ce module est **hors de ce PRD, à cadrer au lot 4**. La démo `prospera-distrib
 
 ## 7. Partie 4 — Les modules déjà cadrés : fiches de renvoi
 
-Huit modules dont le distributeur a besoin ont déjà leur PRD, leur spine et leur manifeste : `reseau`, `pdv`, `catalogue`, `stock`, `paiement`, `notification`, `reprise`, `connecteurs`. **Ce PRD n'en réécrit rien.** Chaque fiche ci-dessous dit trois choses : ce que la démo montre et que le PRD du module couvre déjà (renvoi par identifiant, pas de recopie) ; ce que la démo exige en plus ou autrement (les écarts, chacun devenu une exigence numérotée, FR-180 à FR-219 puis FR-240 à FR-259, avec sa conséquence testable) ; ce que le PRD du module exige et que la démo ne montre pas (les écrans à créer, que la démo ne définit pas).
+Huit modules dont le distributeur a besoin ont déjà leur PRD, leur spine et leur manifeste : `reseau`, `pdv`, `catalogue`, `stock`, `paiement`, `notification`, `reprise`, `connecteurs`. **Ce PRD n'en réécrit rien.** Chaque fiche dit trois choses. D'abord, ce que la démo montre et que le PRD du module couvre déjà (renvoi par identifiant, sans recopie). Ensuite, ce que la démo exige en plus ou autrement : les écarts, chacun devenu une exigence numérotée (FR-180 à FR-219, puis FR-240 à FR-259) avec sa conséquence testable. Enfin, ce que le PRD du module exige et que la démo ne montre pas : les écrans à créer, que la démo ne définit pas.
 
 Quatre de ces modules sont ★ (besoins du premier jour du client de février) : `pdv`, `catalogue`, `stock` et `paiement` (encaissements). Leur fiche porte ★.
 
 Règles de lecture, valables pour tout le chapitre.
 
 - La démo (`prospera-font-end/prospera-distributeur`) définit le produit. Sa seule exception est une décision postérieure et explicite du PO (carte Google Maps, PI-SPI **et** FedaPay, Créance tenue par `paiement`).
-- Une exigence ci-dessous est un **écart à porter au PRD du module**. **Porteur** : le propriétaire du PRD du module nommé dans la fiche, qui l'amende (ou la refuse) avant la validation du lot. **Statut** : proposé, jusqu'à cet amendement. Tant qu'il n'est pas écrit, l'exigence tient ici et ne se code pas à la place du module.
-- Ces exigences ne s'ajoutent pas à la charge de ce PRD : elles se codent dans le module qui les porte.
-- La démo n'a ni serveur ni base : tout écran « absent de la démo » est à concevoir, jamais à deviner. Les boutons non branchés sont **« bientôt »**, sans date, pas des fonctions.
+- Une exigence ci-dessous est un **écart à porter au PRD du module**. **Porteur** : le propriétaire du PRD du module nommé dans la fiche, qui l'amende (ou la refuse) avant la validation du lot. **Statut** : proposé, jusqu'à cet amendement. Tant qu'il n'est pas écrit, l'exigence tient ici ; elle se code dans le module qui la porte, jamais à sa place, et n'ajoute rien à la charge de ce PRD.
+- - La démo n'a ni serveur ni base : tout écran « absent de la démo » est à concevoir, jamais à deviner. Les boutons non branchés sont **« bientôt »**, sans date, pas des fonctions.
 - Le client de février est un grossiste qui quitte Sage ; il n'est pas nommé ici. Le jeu de test est le grossiste fictif « Grossiste du Golfe » (jus et boissons), défini en partie 1.
 - Les identifiants de la forme `FR-Cnn`, `FR-Vnn`, `FR-Snn`, `FR-Pnn`, `FR-Nnn`, `FR-Rnn` renvoient au PRD du module nommé dans la fiche ; `Reprise FR-n` et `Connecteurs FR-n` au PRD Reprise ou Connecteurs. Les identifiants `FR-180` à `FR-219` et `FR-240` à `FR-259` sont ceux de ce PRD.
 
@@ -3723,7 +3727,7 @@ La démo classe chaque article par rentabilité et par engouement (`catalogue-dg
 **Écarts à porter au PRD du module.**
 
 #### FR-199 : Le stock est une somme de mouvements, la démo tient un compteur
-La démo porte le stock comme un champ modifié en place (`ProduitStock.stock`, `types/index.ts:91`). Le PRD exige que le stock soit la somme de ses mouvements (FR-S11, FR-S13). Écart de fond, invisible à l'écran. Ce PRD l'inscrit comme condition de recette : aucun écran ne modifie un solde.
+La démo porte le stock comme un champ modifié en place (`ProduitStock.stock`, `types/index.ts:91`). Le PRD exige que le stock soit la somme de ses mouvements (FR-S11, FR-S13). Écart de fond, invisible à l'écran : ce PRD l'inscrit comme condition de recette : aucun écran ne modifie un solde.
 **Conséquences (testables) :** (1) recalculer le stock d'un article à partir de ses mouvements redonne exactement la valeur affichée ; (2) corriger un stock se fait par un ajustement avec motif (FR-S16), jamais par l'édition d'un nombre ; (3) la validation d'un inventaire (« Valider », `InventairePanel.tsx`) **produit** un ajustement, alors que la démo ne corrige rien (`AUDIT:58`) ; (4) un mouvement rejoué avec le même identifiant ne double pas le solde (FR-S14).
 
 #### FR-200 : Lots, numéros de lot et dates limites : à créer
@@ -3913,7 +3917,7 @@ Amendement du 2026-11-12 (spine de Connecteurs, AD-32) : Connecteurs est hors f�
 **Conséquences (testables) :** (1) aucun écran du distributeur ne déclenche un échange avec un logiciel externe en février ; (2) la section « Intégrations » du menu n'apparaît que si `connecteurs` est installé ; (3) un domaine d'échange déclaré (par exemple `facturation.factures`) a une seule fonction d'écriture de service, vérifiée par la suite de conformité ; (4) `connecteurs.enrichiPar` ne contient plus `pi-spi`.
 
 #### FR-219 : Le logiciel quitté est Sage ; le document tarifaire est à corriger
-Décision du PO : le client de février **quitte Sage**. Le brain dump du PO et le PRD Reprise le disent. La documentation commerciale classait le même client « Odoo complet » (`prospera_pricing_distribution.md:16`) : ce document est faux sur ce point et **est à corriger**. Ce n'est plus une question. Conséquence : aucun connecteur Odoo en février (déjà acté par AD-32), et une reprise par fichiers au gabarit Sage (Connecteurs FR-1). La ligne « distributeur et Odoo » de Connecteurs FR-14 reste valable pour un futur client qui garde Odoo ; elle ne concerne pas le client de février.
+Décision du PO : le client de février **quitte Sage**. Le brain dump du PO et le PRD Reprise le disent. La documentation commerciale classait le même client « Odoo complet » (`prospera_pricing_distribution.md:16`) : ce document est faux sur ce point et **est à corriger**. Conséquence : aucun connecteur Odoo en février (déjà acté par AD-32), et une reprise par fichiers au gabarit Sage (Connecteurs FR-1). La ligne « distributeur et Odoo » de Connecteurs FR-14 reste valable pour un futur client qui garde Odoo ; elle ne concerne pas le client de février.
 **Conséquences (testables) :** (1) le gabarit de reprise livré en février est celui de Sage ; (2) aucun test de recette ne suppose Odoo ; (3) le document tarifaire ne classe plus le client de février « Odoo complet » (correction tracée dans le dépôt de la démo) ; (4) « Intégration Odoo » reste un bouton « bientôt », sans date.
 
 **Ce que le PRD exige et que la démo ne montre pas.** Tous les écrans de Connecteurs sont à créer et sont hors février : configuration du logiciel du client (4.A), échanges et file des écarts (4.B, 4.C), panne du lien (4.D), ordre de livraison du connecteur Odoo (4.F). Un seul écran est utile dès que le premier domaine existera : l'état **« lecture seule, propriété du logiciel externe »**, qui bloque l'édition d'un objet dont le client a gardé la propriété (enveloppe `<ProtectionObjet>`) ; la démo ne le prévoit pas, et ce PRD l'inscrit pour le module d'écran de chaque domaine d'échange.
@@ -3933,8 +3937,6 @@ Toutes les questions de la partie 4 sont tranchées. Il ne reste qu'une donnée 
 | OQ-4-5 | Qui reçoit l'historique des ventes et des paiements ? | Personne en février : il n'est pas repris (la reprise demandée par le PO ne le cite pas). | FR-216 |
 | OQ-4-6 | Écrans de `reseau`, `pdv`, `catalogue`, `stock` réduits pour février ? | Non : tous les écrans sont voulus ; on ajustera selon l'évolution (PO, 2026-11-12). | 7.1 à 7.4 |
 | OQ-4-7 | Format des numéros Sage et dernier numéro émis | Donnée à obtenir avec l'export des factures ouvertes (action du PO auprès du client). | FR-217 |
-
----
 
 ---
 
@@ -4137,8 +4139,8 @@ Le contrat `CONTRAT-DE-MODULE-2026-11-09.md` (§6) demande à chaque PRD une sec
 | C9 Installer/désinstaller | Rien supprimé ; commandes fournisseurs en cours conservées ; avertissement : « Les suggestions de réapprovisionnement cessent ; les commandes ouvertes ne sont plus suivies. » |
 | C10 Démarrer seul | `profiles: ["approvisionnement"]` ; socle + `catalogue` + `stock`. |
 | C11 IA | `ia: { modeles: ['prevision-demande', 'scoring-fournisseur-explicable'], finalites: ['reapprovisionnement-propose', 'choix-fournisseur-justifie'] }`. Le garde-fou de trésorerie est une règle, non un modèle ; il n'est jamais contourné par la prédiction. |
-| C12 | `SANS_PERTE`. Interrupteurs : `envoi-automatique-commande-fournisseur` (éteint par défaut), `escalade-daf`. |
-| C13 | Prérequis : `stock` en service. Vérifications : `articles-lies` (🟢 si 100 % des articles suggérés existent au catalogue) ; `regle-valide` (🟢 si chaque règle a un seuil ≥ 0). Lecture seule : registre, commandes, export. **`objetsDeReprise: ['approvisionnement.fournisseur@1']`** : la spine de la Reprise désigne `approvisionnement` « à créer » (`ARCHITECTURE-SPINE.md` l. 387) ; `reprise.enrichiPar` le cite (PR #420) ; module non codé, « non installé » possible en février. `domainesEchange` : rien en février (Connecteurs hors février). Déclaré pour plus tard : `approvisionnement.fournisseurs` (propriétaire : le logiciel externe d'un client qui en garde un ; aucun pour le client de février, qui quitte Sage). |
+| C12 Migrations | `SANS_PERTE`. Interrupteurs : `envoi-automatique-commande-fournisseur` (éteint par défaut), `escalade-daf`. |
+| C13 Installable sous contrôle | Prérequis : `stock` en service. Vérifications : `articles-lies` (🟢 si 100 % des articles suggérés existent au catalogue) ; `regle-valide` (🟢 si chaque règle a un seuil ≥ 0). Lecture seule : registre, commandes, export. **`objetsDeReprise: ['approvisionnement.fournisseur@1']`** : la spine de la Reprise désigne `approvisionnement` « à créer » (`ARCHITECTURE-SPINE.md` l. 387) ; `reprise.enrichiPar` le cite (PR #420) ; module non codé, « non installé » possible en février. `domainesEchange` : rien en février (Connecteurs hors février). Déclaré pour plus tard : `approvisionnement.fournisseurs` (propriétaire : le logiciel externe d'un client qui en garde un ; aucun pour le client de février, qui quitte Sage). |
 
 ### A.4 Opérations entrepôt (`entrepot`, M11)
 
@@ -4152,11 +4154,11 @@ Le contrat `CONTRAT-DE-MODULE-2026-11-09.md` (§6) demande à chaque PRD une sec
 | C6 Paramètres | Poids, volume et palettes par camion (attributs d'article, FR-242) ; coupure camion (heure limite : 15:30 à Lomé Port, 14:00 à Kara dans le jeu de démonstration) ; taille de vague ; seuil d'écart de réception ; fréquence d'inventaire tournant par classe ABC. |
 | C7 Droits | `entrepot:preparation:realiser`, `entrepot:expedition:gerer`, `entrepot:chargement:gerer`, `entrepot:reception:controler`, `entrepot:inventaire:planifier`, `entrepot:livraison:confirmer`. La décision de liquider appartient à `stock` (FR-246). Format conforme. |
 | C8 Module d'écran | `/entrepot` (« Mon entrepôt » pour le gestionnaire, vue réseau pour le responsable). Entrées : Préparation, Expéditions, Réceptions, Inventaire (droits ci-dessus). « Valider » un inventaire produit un ajustement via `stock` (FR-199). |
-| C9 | Rien supprimé ; expéditions en cours conservées. Avertissement : « Les préparations en cours ne seront plus suivies. » |
-| C10 | `profiles: ["entrepot"]` ; socle + `catalogue` + `stock` + `commande` + `pdv` + `reseau`. |
-| C11 | Sans objet : picking, vagues et plan d'expédition sont des règles déterministes paramétrées (C6), sans modèle appris ; l'« ordre de picking » de l'offre est un tri par règle. Si un modèle est introduit, la clause s'applique et `ia` est déclaré. |
-| C12 | `SANS_PERTE`. Interrupteurs : `coupure-camion-stricte`, `controle-quai-obligatoire`. |
-| C13 | Prérequis : `stock`, `commande`. Vérifications : `entrepots-lies` (🟢 si chaque entrepôt de `reseau` a un point de stock). Lecture seule : consultation des expéditions, export. `objetsDeReprise: []` (aucun objet repris : le stock d'ouverture est dans `stock`). `domainesEchange: []` (opérations internes). |
+| C9 Installer/désinstaller | Rien supprimé ; expéditions en cours conservées. Avertissement : « Les préparations en cours ne seront plus suivies. » |
+| C10 Démarrer seul | `profiles: ["entrepot"]` ; socle + `catalogue` + `stock` + `commande` + `pdv` + `reseau`. |
+| C11 IA | Sans objet : picking, vagues et plan d'expédition sont des règles déterministes paramétrées (C6), sans modèle appris ; l'« ordre de picking » de l'offre est un tri par règle. Si un modèle est introduit, la clause s'applique et `ia` est déclaré. |
+| C12 Migrations | `SANS_PERTE`. Interrupteurs : `coupure-camion-stricte`, `controle-quai-obligatoire`. |
+| C13 Installable sous contrôle | Prérequis : `stock`, `commande`. Vérifications : `entrepots-lies` (🟢 si chaque entrepôt de `reseau` a un point de stock). Lecture seule : consultation des expéditions, export. `objetsDeReprise: []` (aucun objet repris : le stock d'ouverture est dans `stock`). `domainesEchange: []` (opérations internes). |
 
 ### A.5 Conquête, territoires, objectifs et quotas (`conquete-objectifs`, M13)
 
@@ -4167,14 +4169,14 @@ Le contrat `CONTRAT-DE-MODULE-2026-11-09.md` (§6) demande à chaque PRD une sec
 | C3 Données possédées | Carnet de prospects, recensements de zone, suivi des ouvertures (actif à M+1, M+3), passations au secteur, objectifs et quotas par zone, mix produit et marge cibles, arbitrages. |
 | C4 Emplacements vides | `commande`/`facturation` absents : atterrissage et première commande = `NON_INSTALLE` (jamais 0 % ni 100 %) ; `terrain` absent : visites du prospect = `NON_INSTALLE`. |
 | C5 Contrats nommés | Publie `conquete-objectifs.prospect.changed@1`, `conquete-objectifs.passation.effectuee@1`, `conquete-objectifs.objectif.changed@1`. Consomme `reseau.noeud.created@1`, `reseau.portee.changed@1`, `pdv.point-de-vente.changed@1`, `commande.commande.validee@1`, `facturation.facture.emise@1`. |
-| C6 | Garde-fou de première commande (montant maximal, crédit refusé à un nouveau client) ; barème de survie M+1/M+3 ; règle de répartition des quotas. Données. |
-| C7 | `conquete-objectifs:prospect:gerer`, `conquete-objectifs:zone-blanche:recenser`, `conquete-objectifs:passation:declarer`, `conquete-objectifs:objectif:definir`, `conquete-objectifs:objectif:consulter` (écrits dans la forme élargie, en attente de l'amendement de format). |
-| C8 | `/prospection`, `/objectifs`. Entrées : « Prospection » (`…:prospect:gerer`), « Objectifs » (`…:objectif:consulter`). « Transférer » (passation) est exigé en février ; le recensement de zone sur carte (Google Maps) l'est aussi. |
-| C9 | Rien supprimé ; prospects et objectifs conservés. Avertissement : « Les objectifs et prospects ne seront plus accessibles ; leurs données sont conservées. » |
-| C10 | `profiles: ["conquete-objectifs"]` ; socle + `reseau` + `pdv`. |
-| C11 | `ia: { modeles: ['scoring-prospects', 'allocation-quotas'], finalites: ['priorisation-prospects', 'suggestion-allocation'] }` : offre « scoring prospects, suggestions d'allocation » (cahier des charges du bundle Croissance et Opérations). |
-| C12 | `SANS_PERTE`. Interrupteur : `passation-automatique`. |
-| C13 | Prérequis : `reseau`, `pdv`. Vérification : `zones-chargees` (🟢 si ≥ 1 zone lue). Lecture seule : consultation, export. `objetsDeReprise: []` : les prospects ne sont pas repris en février ; la reprise demandée par le PO porte sur clients, articles, tarifs, factures ouvertes et numérotation (brain dump, §2). `domainesEchange: []`. |
+| C6 Paramètres | Garde-fou de première commande (montant maximal, crédit refusé à un nouveau client) ; barème de survie M+1/M+3 ; règle de répartition des quotas. Données. |
+| C7 Droits | `conquete-objectifs:prospect:gerer`, `conquete-objectifs:zone-blanche:recenser`, `conquete-objectifs:passation:declarer`, `conquete-objectifs:objectif:definir`, `conquete-objectifs:objectif:consulter` (écrits dans la forme élargie, en attente de l'amendement de format). |
+| C8 Module d'écran | `/prospection`, `/objectifs`. Entrées : « Prospection » (`…:prospect:gerer`), « Objectifs » (`…:objectif:consulter`). « Transférer » (passation) est exigé en février ; le recensement de zone sur carte (Google Maps) l'est aussi. |
+| C9 Installer/désinstaller | Rien supprimé ; prospects et objectifs conservés. Avertissement : « Les objectifs et prospects ne seront plus accessibles ; leurs données sont conservées. » |
+| C10 Démarrer seul | `profiles: ["conquete-objectifs"]` ; socle + `reseau` + `pdv`. |
+| C11 IA | `ia: { modeles: ['scoring-prospects', 'allocation-quotas'], finalites: ['priorisation-prospects', 'suggestion-allocation'] }` : offre « scoring prospects, suggestions d'allocation » (cahier des charges du bundle Croissance et Opérations). |
+| C12 Migrations | `SANS_PERTE`. Interrupteur : `passation-automatique`. |
+| C13 Installable sous contrôle | Prérequis : `reseau`, `pdv`. Vérification : `zones-chargees` (🟢 si ≥ 1 zone lue). Lecture seule : consultation, export. `objetsDeReprise: []` : les prospects ne sont pas repris en février ; la reprise demandée par le PO porte sur clients, articles, tarifs, factures ouvertes et numérotation (brain dump, §2). `domainesEchange: []`. |
 
 ### A.6 Studio réseaux sociaux (`studio-social`, M24)
 
@@ -4185,14 +4187,14 @@ Le contrat `CONTRAT-DE-MODULE-2026-11-09.md` (§6) demande à chaque PRD une sec
 | C3 Données possédées | Calendrier éditorial, publications (brouillon, validée, programmée, publiée), comptes connectés (jetons chiffrés), boîte de réception, réponses automatiques, mesure de ROI incrémental. |
 | C4 Emplacements vides | `stock` absent : « suggestions depuis le stock » = `NON_INSTALLE` ; `marketing` absent : rattachement à une campagne = `NON_INSTALLE` ; `commande` absent : ROI incrémental = `NON_INSTALLE`. |
 | C5 Contrats nommés | Publie `studio-social.publication.changed@1`, `studio-social.message.recu@1`. Consomme `stock.alerte.changed@1`, `marketing.campagne.changed@1`, `recouvrement.dossier.changed@1`, `etat-publie.changed.*@1`. |
-| C6 | Réseaux activés (Facebook, Instagram, TikTok, WhatsApp), fenêtres de publication, charte éditoriale, règle de validation avant publication. Données. |
-| C7 | `studio-social:publication:programmer`, `studio-social:publication:valider`, `studio-social:compte:connecter`, `studio-social:message:repondre` (forme élargie, en attente du format). |
-| C8 | `/marketing/social`. Entrées : « Calendrier » (`…:publication:programmer`), « Boîte de réception » (`…:message:repondre`). « Valider et programmer » et « Envoyer » : « bientôt » tant que l'OAuth Meta n'est pas raccordé. |
-| C9 | Rien supprimé ; les jetons des comptes sont révoqués à la désinstallation et à la réinstallation il faut reconnecter ; avertissement le dit. |
-| C10 | `profiles: ["studio-social"]` ; socle seul. |
-| C11 | `ia: { modeles: ['accroches-posts', 'classification-messages'], finalites: ['redaction-assistee', 'tri-de-la-boite'] }`. Toute accroche générée porte sa provenance et reste validée par un humain avant publication. |
-| C12 | `SANS_PERTE`. Interrupteur : `reponse-automatique`. |
-| C13 | Prérequis : application Meta approuvée, jetons valides [À CONFIRMER]. Vérification : `compte-joignable` (🟢 si l'appel de test au réseau répond en moins de 5 s). Interception en essai : aucune publication réelle ; lecture seule : calendrier, export. `objetsDeReprise: []`, `domainesEchange: []`. Hors périmètre de février : le module n'est pas parmi ceux dont le client de février a besoin (brain dump, §3). |
+| C6 Paramètres | Réseaux activés (Facebook, Instagram, TikTok, WhatsApp), fenêtres de publication, charte éditoriale, règle de validation avant publication. Données. |
+| C7 Droits | `studio-social:publication:programmer`, `studio-social:publication:valider`, `studio-social:compte:connecter`, `studio-social:message:repondre` (forme élargie, en attente du format). |
+| C8 Module d'écran | `/marketing/social`. Entrées : « Calendrier » (`…:publication:programmer`), « Boîte de réception » (`…:message:repondre`). « Valider et programmer » et « Envoyer » : « bientôt » tant que l'OAuth Meta n'est pas raccordé. |
+| C9 Installer/désinstaller | Rien supprimé ; les jetons des comptes sont révoqués à la désinstallation et à la réinstallation il faut reconnecter ; avertissement le dit. |
+| C10 Démarrer seul | `profiles: ["studio-social"]` ; socle seul. |
+| C11 IA | `ia: { modeles: ['accroches-posts', 'classification-messages'], finalites: ['redaction-assistee', 'tri-de-la-boite'] }`. Toute accroche générée porte sa provenance et reste validée par un humain avant publication. |
+| C12 Migrations | `SANS_PERTE`. Interrupteur : `reponse-automatique`. |
+| C13 Installable sous contrôle | Prérequis : application Meta approuvée, jetons valides [À CONFIRMER]. Vérification : `compte-joignable` (🟢 si l'appel de test au réseau répond en moins de 5 s). Interception en essai : aucune publication réelle ; lecture seule : calendrier, export. `objetsDeReprise: []`, `domainesEchange: []`. Hors périmètre de février : le module n'est pas parmi ceux dont le client de février a besoin (brain dump, §3). |
 
 ### A.7 Réseau freelance (`freelance`, M42)
 
@@ -4203,176 +4205,176 @@ Le contrat `CONTRAT-DE-MODULE-2026-11-09.md` (§6) demande à chaque PRD une sec
 | C3 Données possédées | Statut de l'indépendant (activation, départ), classement séparé, commissions (taux × montant **au prix société** de ses ventes, acquises à la facturation). Décisions du PO : le stock reste à la société jusqu'à la livraison au détaillant ; le freelance doit le prix société à la société, même si son détaillant ne paie pas ; cette somme est une Créance de `paiement` dont le tiers est le freelance (FR-247). Ses factures à ses détaillants et leurs créances vivent dans son espace propre (`facturation`, `paiement`, périmètre « freelance »), invisibles de la société. **Ses prix au détaillant appartiennent à `catalogue`, jamais ici.** |
 | C4 Emplacements vides | `commande`/`facturation` absents : ventes et commissions du freelance = `NON_INSTALLE` ; `paiement` absent : prix société dû = `NON_INSTALLE` ; `equipe` absent : classement = `NON_INSTALLE`. |
 | C5 Contrats nommés | Publie `freelance.freelance.active@1`, `freelance.commission.acquise@1` (base : prix société facturé). Le départ d'un freelance n'a qu'une source, `pdv.commercial.parti@1`. Consomme `reseau.commercial.changed@1`, `pdv.commercial.parti@1`, `catalogue.profil.changed@1`, `facturation.facture.emise@1` (vente facturée du freelance). |
-| C6 | Barème d'abonnement par freelance actif (add-on), règles d'activation, taux de commission, plafond d'encours du freelance. Marge minimale : elle avertit, elle ne bloque pas. Données. |
-| C7 | `freelance:portefeuille:consulter` (le sien), `freelance:creance:consulter` (les siennes), `freelance:commission:consulter` (la sienne ; la direction par droit explicite), `freelance:classement:consulter`, `freelance:freelance:activer`. Aucun droit ne donne à la société la lecture de ses prix au détaillant ni de sa marge. |
-| C8 | Cockpit du freelance (`DashboardFreelance`), « Mon portefeuille », « Mes prix » (écran servi par `catalogue`), « Mes ventes » (ventes pour le compte de la société, prix société dû, commission). « Mes commandes grossiste » n'existe pas : le freelance n'achète pas de stock. La marge n'est visible que du freelance (FR-195). |
-| C9 | Rien supprimé ; au départ d'un freelance, la révélation des prix suit le seul processus de `pdv` (`pdv.commercial.parti@1`). Avertissement : « Désinstaller l'add-on ne révèle aucun prix à la société. » |
-| C10 | `profiles: ["freelance"]` ; socle + `catalogue` + `pdv` + `reseau`. |
-| C11 | Sans objet au premier jour : « recommandation de prix client » et « marge optimale » (offre) supposeraient d'apprendre sur des prix que la société n'a pas le droit de voir (FR-C29). Aucune finalité d'apprentissage ne lit un prix de freelance ; tout modèle futur exige une décision du PO et un consentement du freelance. |
-| C12 | `SANS_PERTE`. Interrupteur : `activation-par-freelance` (facturation de l'add-on). |
-| C13 | Prérequis : `catalogue`, `pdv`. Vérification : `etancheite-prix` (🟢 si un compte « société » du jeu de contrôle reçoit 0 champ de prix de revente sur 20 requêtes d'API ; 🔴 sinon). Export par organisation : **l'export de la société exclut les prix du freelance au détaillant et les factures qu'il émet** (FR-C29) ; l'export du freelance lui est propre. `objetsDeReprise: []`, `domainesEchange: []` (jamais d'échange : les prix du freelance ne sortent pas). |
+| C6 Paramètres | Barème d'abonnement par freelance actif (add-on), règles d'activation, taux de commission, plafond d'encours du freelance. Marge minimale : elle avertit, elle ne bloque pas. Données. |
+| C7 Droits | `freelance:portefeuille:consulter` (le sien), `freelance:creance:consulter` (les siennes), `freelance:commission:consulter` (la sienne ; la direction par droit explicite), `freelance:classement:consulter`, `freelance:freelance:activer`. Aucun droit ne donne à la société la lecture de ses prix au détaillant ni de sa marge. |
+| C8 Module d'écran | Cockpit du freelance (`DashboardFreelance`), « Mon portefeuille », « Mes prix » (écran servi par `catalogue`), « Mes ventes » (ventes pour le compte de la société, prix société dû, commission). « Mes commandes grossiste » n'existe pas : le freelance n'achète pas de stock. La marge n'est visible que du freelance (FR-195). |
+| C9 Installer/désinstaller | Rien supprimé ; au départ d'un freelance, la révélation des prix suit le seul processus de `pdv` (`pdv.commercial.parti@1`). Avertissement : « Désinstaller l'add-on ne révèle aucun prix à la société. » |
+| C10 Démarrer seul | `profiles: ["freelance"]` ; socle + `catalogue` + `pdv` + `reseau`. |
+| C11 IA | Sans objet au premier jour : « recommandation de prix client » et « marge optimale » (offre) supposeraient d'apprendre sur des prix que la société n'a pas le droit de voir (FR-C29). Aucune finalité d'apprentissage ne lit un prix de freelance ; tout modèle futur exige une décision du PO et un consentement du freelance. |
+| C12 Migrations | `SANS_PERTE`. Interrupteur : `activation-par-freelance` (facturation de l'add-on). |
+| C13 Installable sous contrôle | Prérequis : `catalogue`, `pdv`. Vérification : `etancheite-prix` (🟢 si un compte « société » du jeu de contrôle reçoit 0 champ de prix de revente sur 20 requêtes d'API ; 🔴 sinon). Export par organisation : **l'export de la société exclut les prix du freelance au détaillant et les factures qu'il émet** (FR-C29) ; l'export du freelance lui est propre. `objetsDeReprise: []`, `domainesEchange: []` (jamais d'échange : les prix du freelance ne sortent pas). |
 
 ### A.8 ★ Commercial terrain et application mobile (`terrain`, M12)
 
 | Clause | Valeur pour ce module |
 |---|---|
 | C1 Manifeste | `code: 'terrain'`, `1.0.0`. `depends: [{reseau, "Les tournées, la carte d'équipe et la couverture se rattachent aux zones."}]`. `enrichiPar: [pdv (clients visités), commande, catalogue, stock (relevé du commercial, FR-S56), paiement (encaissement terrain), recouvrement (tournée de recouvrement), facturation, notification]`. **Un seul service pour deux verticales** (distributeur et microfinance : agents terrain, collecte) : le vocabulaire (« visite », « client » ou « membre », « tournée ») est une **donnée** (C6), pas deux modules. Application mobile `prospera-terrain`. |
-| C2 | Gate `TERRAIN_NOT_ENTITLED`. `organisationId` et portée ; le commercial ne voit que sa tournée ; le superviseur son équipe. |
-| C3 | Tournées (PJP), missions, visites et leur clôture (résultat, commentaire, photos géolocalisées), positions GPS d'équipe, remises d'espèces et écarts de caisse, agenda. |
-| C4 | `pdv` absent : la visite vise un lieu libre, « point de vente » = `NON_INSTALLE` ; `commande` absent : « Prendre une commande » = `NON_INSTALLE` ; `stock` absent : relevé de stock = `NON_INSTALLE` ; `paiement` absent : encaissement = `NON_INSTALLE`. Test par dépendance. |
-| C5 | Publie `terrain.visite.cloturee@1`, `terrain.remise.declaree@1`, `terrain.position.changed@1`, `terrain.releve-stock.saisi@1`. Consomme `reseau.noeud.created@1`, `reseau.portee.changed@1`, `pdv.point-de-vente.changed@1`, `commande.commande.validee@1`, `paiement.encaissement.valide`. |
-| C6 | Vocabulaire par verticale (libellés en donnée), durée d'une visite, rayon de géofencing, barème de caisse (seuil d'écart), fenêtre d'optimisation de tournée. |
-| C7 | `terrain:visite:realiser`, `terrain:tournee:planifier`, `terrain:equipe:consulter`, `terrain:mission:affecter`, `terrain:remise:declarer`, `terrain:remise:valider`. Format conforme. |
-| C8 | `/commercial` (carte GPS d'équipe, coaching), `/tournees` (PJP, strike rate, caisse), `/mon-activite` (« Ma journée », clôture de visite). Fond de carte Google Maps commun (FR-192). Menus : « Ma journée » (`terrain:visite:realiser`), « Tournées » (`terrain:tournee:planifier`), « Équipe » (`terrain:equipe:consulter`). « Y aller » et « Clôturer » doivent aboutir en février. **L'application terrain Flutter `prospera-terrain`, hors connexion, est exigée** (parcours UJ-2), jamais « bientôt » : elle se distribue au prospect de l'essai par un lien de téléchargement, avec une connexion par rôle à un clic dans l'essai. |
-| C9 | Rien supprimé ; visites et positions conservées. Avertissement : « Les tournées et la clôture de visite cesseront ; l'application mobile ne se synchronisera plus. » |
-| C10 | `profiles: ["terrain"]` ; socle + `reseau`. |
-| C11 | `ia: { modeles: ['optimisation-tournees', 'recommandation-panier', 'validation-geofencing'], finalites: ['planification-de-tournee', 'aide-a-la-commande', 'controle-de-presence'] }` : offre « optimisation de tournées, géofencing » ; le compte rendu vocal (voice-to-CRM) est affiché « bientôt », sans date. Données de position, décision du PO du 2026-11-12 : niveau de consentement 0 par défaut, information de l'agent à l'embauche, conservation de 90 jours glissants puis purge ; un avis juridique est à obtenir. |
-| C12 | `SANS_PERTE`. La **synchronisation de l'appareil** doit lire deux versions : l'appareil tolère un champ inconnu. Interrupteurs : `mode-hors-ligne`, `optimisation-automatique`. |
-| C13 | Prérequis : `reseau` ; Google Maps pour la carte. Vérifications : `zones-lues` (🟢 si ≥ 1 zone) ; `fond-de-carte` (🟢 si la clé Google Maps répond). Lecture seule : consultation des visites, export. Essai : aucune position réelle collectée ; un mode « démonstration » simule la position, de façon visible à l'écran, calée sur les points de vente du jeu. Vérification `purge-positions` (🟢 si aucune position n'a plus de 90 jours). `objetsDeReprise: []`, `domainesEchange: []` (visites et commandes terrain = Prospera, FR-14). |
+| C2 Socle | Gate `TERRAIN_NOT_ENTITLED`. `organisationId` et portée ; le commercial ne voit que sa tournée ; le superviseur son équipe. |
+| C3 Données possédées | Tournées (PJP), missions, visites et leur clôture (résultat, commentaire, photos géolocalisées), positions GPS d'équipe, remises d'espèces et écarts de caisse, agenda. |
+| C4 Emplacements vides | `pdv` absent : la visite vise un lieu libre, « point de vente » = `NON_INSTALLE` ; `commande` absent : « Prendre une commande » = `NON_INSTALLE` ; `stock` absent : relevé de stock = `NON_INSTALLE` ; `paiement` absent : encaissement = `NON_INSTALLE`. Test par dépendance. |
+| C5 Contrats nommés | Publie `terrain.visite.cloturee@1`, `terrain.remise.declaree@1`, `terrain.position.changed@1`, `terrain.releve-stock.saisi@1`. Consomme `reseau.noeud.created@1`, `reseau.portee.changed@1`, `pdv.point-de-vente.changed@1`, `commande.commande.validee@1`, `paiement.encaissement.valide`. |
+| C6 Paramètres | Vocabulaire par verticale (libellés en donnée), durée d'une visite, rayon de géofencing, barème de caisse (seuil d'écart), fenêtre d'optimisation de tournée. |
+| C7 Droits | `terrain:visite:realiser`, `terrain:tournee:planifier`, `terrain:equipe:consulter`, `terrain:mission:affecter`, `terrain:remise:declarer`, `terrain:remise:valider`. Format conforme. |
+| C8 Module d'écran | `/commercial` (carte GPS d'équipe, coaching), `/tournees` (PJP, strike rate, caisse), `/mon-activite` (« Ma journée », clôture de visite). Fond de carte Google Maps commun (FR-192). Menus : « Ma journée » (`terrain:visite:realiser`), « Tournées » (`terrain:tournee:planifier`), « Équipe » (`terrain:equipe:consulter`). « Y aller » et « Clôturer » doivent aboutir en février. **L'application terrain Flutter `prospera-terrain`, hors connexion, est exigée** (parcours UJ-2), jamais « bientôt » : elle se distribue au prospect de l'essai par un lien de téléchargement, avec une connexion par rôle à un clic dans l'essai. |
+| C9 Installer/désinstaller | Rien supprimé ; visites et positions conservées. Avertissement : « Les tournées et la clôture de visite cesseront ; l'application mobile ne se synchronisera plus. » |
+| C10 Démarrer seul | `profiles: ["terrain"]` ; socle + `reseau`. |
+| C11 IA | `ia: { modeles: ['optimisation-tournees', 'recommandation-panier', 'validation-geofencing'], finalites: ['planification-de-tournee', 'aide-a-la-commande', 'controle-de-presence'] }` : offre « optimisation de tournées, géofencing » ; le compte rendu vocal (voice-to-CRM) est affiché « bientôt », sans date. Données de position, décision du PO du 2026-11-12 : niveau de consentement 0 par défaut, information de l'agent à l'embauche, conservation de 90 jours glissants puis purge ; un avis juridique est à obtenir. |
+| C12 Migrations | `SANS_PERTE`. La **synchronisation de l'appareil** doit lire deux versions : l'appareil tolère un champ inconnu. Interrupteurs : `mode-hors-ligne`, `optimisation-automatique`. |
+| C13 Installable sous contrôle | Prérequis : `reseau` ; Google Maps pour la carte. Vérifications : `zones-lues` (🟢 si ≥ 1 zone) ; `fond-de-carte` (🟢 si la clé Google Maps répond). Lecture seule : consultation des visites, export. Essai : aucune position réelle collectée ; un mode « démonstration » simule la position, de façon visible à l'écran, calée sur les points de vente du jeu. Vérification `purge-positions` (🟢 si aucune position n'a plus de 90 jours). `objetsDeReprise: []`, `domainesEchange: []` (visites et commandes terrain = Prospera, FR-14). |
 
 ### A.9 ★ Relances et recouvrement (`recouvrement`, M19)
 
 | Clause | Valeur pour ce module |
 |---|---|
 | C1 Manifeste | `code: 'recouvrement'`, `1.0.0`. **Deux verticales** (distributeur : factures impayées ; microfinance : impayés de crédit, PAR), même service, **vocabulaire en donnée**. `depends: [{paiement, "La Créance (registre unique), les promesses et les liens de paiement sont portés par paiement."}, {notification, "Les relances multicanal partent par notification."}]`. La Créance est tenue par `paiement` (décision du PO du 2026-11-12) ; `recouvrement` la **lit**, il n'en possède aucune copie. Chaque verticale alimente la source par `enrichiPar`. `enrichiPar: [facturation (source FACTURE), credit (impayés IMF ; proposition, à valider par le PRD microfinance), pdv (blocage du crédit chez le distributeur), terrain (tournée de recouvrement), finance-transactions (provisions, plus tard)]`. |
-| C2 | Gate `RECOUVREMENT_NOT_ENTITLED`. `organisationId` et portée : le recouvrement ne voit que ses dossiers (`/relances` « Mes dossiers »), le commercial « Mes relances ». |
-| C3 | Dossiers de recouvrement (un par tiers, qui liste ses créances, par défaut), séquence d'escalade, promesses de paiement, décision de blocage ou déblocage du crédit avec trace de surcharge, journal d'actions. La balance âgée est lue dans `paiement` (FR-247), jamais recopiée. |
-| C4 | Aucune Créance de source `FACTURE` (`facturation` absent) : dossiers du distributeur vides, `NON_INSTALLE` ; `pdv` absent (cas d'une autre verticale) : le blocage du crédit est publié (`recouvrement.credit.bloque@1`) et lu directement par les modules qui en ont besoin ; `terrain` absent : « visite de recouvrement » = `NON_INSTALLE` ; `credit` absent : source IMF = `NON_INSTALLE`. |
-| C5 | Publie `recouvrement.dossier.changed@1`, `recouvrement.credit.bloque@1`, `recouvrement.credit.debloque@1`, `recouvrement.promesse.changed@1`, `recouvrement.alerte-direction.emise@1`. Consomme `paiement.creance.materialisee`, `paiement.creance.changed@1`, `paiement.creance.soldee`, `paiement.credit-tiers.changed@1`, `paiement.promesse.constatee`, `notification.reponse.recue`, `pdv.plafond.changed@1`. |
-| C6 | Une seule table de seuils, paramétrable : J+1, rappel ; J+30, alerte à la direction ; créance échue depuis plus de 60 jours ou encours au-dessus du plafond, blocage automatique du crédit (règle auditée) ; déblocage jamais automatique. Séquence d'escalade par défaut (FR-114 : WhatsApp, repli SMS, visite, direction) en données ; `SEUIL_EXCLUSION_JOURS` (30 jours) ; cinq tranches de balance âgée ; modèles de message ; vocabulaire par verticale. |
-| C7 | `recouvrement:dossier:traiter`, `recouvrement:relance:envoyer`, `recouvrement:promesse:enregistrer`, `recouvrement:credit:bloquer`, `recouvrement:credit:debloquer` (DAF seul par défaut), `recouvrement:regle:definir`, `recouvrement:balance:consulter`. Format conforme. |
-| C8 | `/relances`, balance âgée, blocage de crédit avec trace. Menus : « Mes dossiers » (`recouvrement:dossier:traiter`), « Balance âgée » (`recouvrement:balance:consulter`). « Relancer » et « Bloquer le crédit » doivent aboutir en février. |
-| C9 | Rien supprimé ; promesses et dossiers conservés ; les crédits suspendus restent suspendus chez `pdv`. Avertissement : « Les crédits déjà bloqués le restent jusqu'à déblocage manuel dans les points de vente. » |
-| C10 | `profiles: ["recouvrement"]` ; socle + `paiement` + `notification`. |
-| C11 | `ia: { modeles: ['priorisation-par-probabilite', 'choix-du-canal'], finalites: ['priorisation-des-dossiers', 'choix-du-canal-de-relance'] }`. Le blocage du crédit n'est jamais décidé par le modèle seul : il suit la règle chiffrée de C6. |
-| C12 | `SANS_PERTE`. Interrupteurs : `blocage-automatique-au-seuil` (allumé par défaut), `relance-automatique`. |
-| C13 | Prérequis : `paiement`, `notification` en service. Vérifications : `source-creances` (🟢 si le registre des Créances de `paiement` répond et qu'au moins une source est installée) ; `canal-utilisable` (hérité de `notification`). Essai : aucune relance réelle partie. `objetsDeReprise: []` : les promesses ne sont pas reprises ; la reprise demandée par le PO ne les cite pas (brain dump, §2). `domainesEchange: []` (promesses et relances = Prospera). |
+| C2 Socle | Gate `RECOUVREMENT_NOT_ENTITLED`. `organisationId` et portée : le recouvrement ne voit que ses dossiers (`/relances` « Mes dossiers »), le commercial « Mes relances ». |
+| C3 Données possédées | Dossiers de recouvrement (un par tiers, qui liste ses créances, par défaut), séquence d'escalade, promesses de paiement, décision de blocage ou déblocage du crédit avec trace de surcharge, journal d'actions. La balance âgée est lue dans `paiement` (FR-247), jamais recopiée. |
+| C4 Emplacements vides | Aucune Créance de source `FACTURE` (`facturation` absent) : dossiers du distributeur vides, `NON_INSTALLE` ; `pdv` absent (cas d'une autre verticale) : le blocage du crédit est publié (`recouvrement.credit.bloque@1`) et lu directement par les modules qui en ont besoin ; `terrain` absent : « visite de recouvrement » = `NON_INSTALLE` ; `credit` absent : source IMF = `NON_INSTALLE`. |
+| C5 Contrats nommés | Publie `recouvrement.dossier.changed@1`, `recouvrement.credit.bloque@1`, `recouvrement.credit.debloque@1`, `recouvrement.promesse.changed@1`, `recouvrement.alerte-direction.emise@1`. Consomme `paiement.creance.materialisee`, `paiement.creance.changed@1`, `paiement.creance.soldee`, `paiement.credit-tiers.changed@1`, `paiement.promesse.constatee`, `notification.reponse.recue`, `pdv.plafond.changed@1`. |
+| C6 Paramètres | Une seule table de seuils, paramétrable : J+1, rappel ; J+30, alerte à la direction ; créance échue depuis plus de 60 jours ou encours au-dessus du plafond, blocage automatique du crédit (règle auditée) ; déblocage jamais automatique. Séquence d'escalade par défaut (FR-114 : WhatsApp, repli SMS, visite, direction) en données ; `SEUIL_EXCLUSION_JOURS` (30 jours) ; cinq tranches de balance âgée ; modèles de message ; vocabulaire par verticale. |
+| C7 Droits | `recouvrement:dossier:traiter`, `recouvrement:relance:envoyer`, `recouvrement:promesse:enregistrer`, `recouvrement:credit:bloquer`, `recouvrement:credit:debloquer` (DAF seul par défaut), `recouvrement:regle:definir`, `recouvrement:balance:consulter`. Format conforme. |
+| C8 Module d'écran | `/relances`, balance âgée, blocage de crédit avec trace. Menus : « Mes dossiers » (`recouvrement:dossier:traiter`), « Balance âgée » (`recouvrement:balance:consulter`). « Relancer » et « Bloquer le crédit » doivent aboutir en février. |
+| C9 Installer/désinstaller | Rien supprimé ; promesses et dossiers conservés ; les crédits suspendus restent suspendus chez `pdv`. Avertissement : « Les crédits déjà bloqués le restent jusqu'à déblocage manuel dans les points de vente. » |
+| C10 Démarrer seul | `profiles: ["recouvrement"]` ; socle + `paiement` + `notification`. |
+| C11 IA | `ia: { modeles: ['priorisation-par-probabilite', 'choix-du-canal'], finalites: ['priorisation-des-dossiers', 'choix-du-canal-de-relance'] }`. Le blocage du crédit n'est jamais décidé par le modèle seul : il suit la règle chiffrée de C6. |
+| C12 Migrations | `SANS_PERTE`. Interrupteurs : `blocage-automatique-au-seuil` (allumé par défaut), `relance-automatique`. |
+| C13 Installable sous contrôle | Prérequis : `paiement`, `notification` en service. Vérifications : `source-creances` (🟢 si le registre des Créances de `paiement` répond et qu'au moins une source est installée) ; `canal-utilisable` (hérité de `notification`). Essai : aucune relance réelle partie. `objetsDeReprise: []` : les promesses ne sont pas reprises ; la reprise demandée par le PO ne les cite pas (brain dump, §2). `domainesEchange: []` (promesses et relances = Prospera). |
 
 ### A.10 Équipes et performance (`equipe`, M21)
 
 | Clause | Valeur pour ce module |
 |---|---|
-| C1 | `code: 'equipe'`, `1.0.0`. Deux verticales (distributeur, microfinance). `depends: [{reseau, "Les équipes et leurs commerciaux viennent du réseau."}]`. `enrichiPar: [pdv, commande, terrain, conquete-objectifs, freelance, facturation]`. Code déjà au catalogue, déprécié, à réactiver. |
-| C2 | Gate `EQUIPE_NOT_ENTITLED`. `organisationId` et portée de zone : le responsable des ventes lit sa région, le superviseur son équipe. |
-| C3 | Indicateurs individuels calculés, classements, plans de coaching, matrice des postes, benchmarks, typologie salarié/freelance (copie de `reseau.commercial`). Commission des salariés calculée sur l'**encaissé** (décision du PO du 2026-11-12) ; celle du freelance vient de `freelance` (prix société facturé). Le score d'un freelance vu de la société ne dépend jamais de sa marge. |
-| C4 | Chaque indicateur dont la source est absente = `NON_INSTALLE` ; `freelance` absent : classement freelance = `NON_INSTALLE`. |
-| C5 | Publie `equipe.coaching.changed@1`. Consomme `reseau.commercial.changed@1`, `commande.commande.validee@1`, `facturation.facture.emise@1`, `terrain.visite.cloturee@1`, `conquete-objectifs.objectif.changed@1`. |
-| C6 | Définition des KPI, barèmes de classement, matrice des postes. Données. |
-| C7 | `equipe:indicateur:consulter`, `equipe:classement:consulter`, `equipe:coaching:gerer`. La validation des demandes de remise appartient à `commande` (`commande:remise:valider`) ; l'écran « Validations » l'appelle. |
-| C8 | `/equipe` (`EquipeView`, `MatricePostesPanel`). Menus : « Équipe » (`equipe:indicateur:consulter`). Le superviseur et le responsable ne voient plus la « Vue DG » (FR-186). |
-| C9 | Rien supprimé ; coachings conservés. Avertissement : « Les classements ne seront plus calculés. » |
-| C10 | `profiles: ["equipe"]` ; socle + `reseau`. |
-| C11 | `ia: { modeles: ['ecart-de-performance', 'coaching-cible'], finalites: ['coaching-individuel', 'benchmark-bonnes-pratiques'] }`. « Recommandation de prix client (freelance) » exclue (FR-C29). |
-| C12 | `SANS_PERTE`. Interrupteur : `classement-public-equipe`. |
-| C13 | Prérequis : `reseau`. Vérification : `commerciaux-lus` (🟢 si ≥ 1 commercial). Lecture seule : consultation, export. `objetsDeReprise: []`, `domainesEchange: []`. |
+| C1 Manifeste | `code: 'equipe'`, `1.0.0`. Deux verticales (distributeur, microfinance). `depends: [{reseau, "Les équipes et leurs commerciaux viennent du réseau."}]`. `enrichiPar: [pdv, commande, terrain, conquete-objectifs, freelance, facturation]`. Code déjà au catalogue, déprécié, à réactiver. |
+| C2 Socle | Gate `EQUIPE_NOT_ENTITLED`. `organisationId` et portée de zone : le responsable des ventes lit sa région, le superviseur son équipe. |
+| C3 Données possédées | Indicateurs individuels calculés, classements, plans de coaching, matrice des postes, benchmarks, typologie salarié/freelance (copie de `reseau.commercial`). Commission des salariés calculée sur l'**encaissé** (décision du PO du 2026-11-12) ; celle du freelance vient de `freelance` (prix société facturé). Le score d'un freelance vu de la société ne dépend jamais de sa marge. |
+| C4 Emplacements vides | Chaque indicateur dont la source est absente = `NON_INSTALLE` ; `freelance` absent : classement freelance = `NON_INSTALLE`. |
+| C5 Contrats nommés | Publie `equipe.coaching.changed@1`. Consomme `reseau.commercial.changed@1`, `commande.commande.validee@1`, `facturation.facture.emise@1`, `terrain.visite.cloturee@1`, `conquete-objectifs.objectif.changed@1`. |
+| C6 Paramètres | Définition des KPI, barèmes de classement, matrice des postes. Données. |
+| C7 Droits | `equipe:indicateur:consulter`, `equipe:classement:consulter`, `equipe:coaching:gerer`. La validation des demandes de remise appartient à `commande` (`commande:remise:valider`) ; l'écran « Validations » l'appelle. |
+| C8 Module d'écran | `/equipe` (`EquipeView`, `MatricePostesPanel`). Menus : « Équipe » (`equipe:indicateur:consulter`). Le superviseur et le responsable ne voient plus la « Vue DG » (FR-186). |
+| C9 Installer/désinstaller | Rien supprimé ; coachings conservés. Avertissement : « Les classements ne seront plus calculés. » |
+| C10 Démarrer seul | `profiles: ["equipe"]` ; socle + `reseau`. |
+| C11 IA | `ia: { modeles: ['ecart-de-performance', 'coaching-cible'], finalites: ['coaching-individuel', 'benchmark-bonnes-pratiques'] }`. « Recommandation de prix client (freelance) » exclue (FR-C29). |
+| C12 Migrations | `SANS_PERTE`. Interrupteur : `classement-public-equipe`. |
+| C13 Installable sous contrôle | Prérequis : `reseau`. Vérification : `commerciaux-lus` (🟢 si ≥ 1 commercial). Lecture seule : consultation, export. `objetsDeReprise: []`, `domainesEchange: []`. |
 
 ### A.11 Comptabilité et finance, transactions (`finance-transactions`, M22)
 
 | Clause | Valeur pour ce module |
 |---|---|
-| C1 | `code: 'finance-transactions'` (**code à tiret**), `1.0.0`. Trois verticales (distributeur, microfinance, assurance). `depends: [{paiement, "Rapprochement et ordres de paiement reposent sur les encaissements et les ordres de paiement."}]`. `enrichiPar: [facturation (lettrage 411), approvisionnement (factures d'achat, run fournisseurs), balance (écritures, atelier de balance), connecteurs (export comptable plus tard)]`. Service à créer [À CONFIRMER, M22]. **Hors périmètre de février** (décision du PO du 2026-11-12 : la comptabilité n'est pas considérée pour février ; aucune comptabilité de référence n'y est exigée). Les exigences du module restent dans le PRD pour après. **Le produit ne passe pas d'écritures de grand livre à ce jour** (note M22) : le périmètre est le rapprochement, la trésorerie et le run de paiement. En février, les ordres de paiement aux fournisseurs vivent dans `paiement` (FR-209). |
-| C2 | Gate `FINANCE_TRANSACTIONS_NOT_ENTITLED`. `organisationId` ; droits financiers par rôle (DAF, comptable). |
-| C3 | Rapprochements bancaires d'un compte de trésorerie, suspens, écritures de caisse des remises d'espèces (la remise elle-même est un objet de `terrain`, sa validation un encaissement de `paiement`), prévision de trésorerie à 7 jours, BFR, run de paiement (état, jamais l'ordre : il appartient à `paiement`). |
-| C4 | `facturation` absent : lettrage = `NON_INSTALLE` ; `approvisionnement` absent : run fournisseurs = `NON_INSTALLE` ; `balance` absent : écritures = `NON_INSTALLE`. |
-| C5 | Publie `finance-transactions.tresorerie.changed@1`, `finance-transactions.rapprochement.effectue@1`. Consomme `paiement.encaissement.valide`, `paiement.encaissement.ecart.constate`, `paiement.creance.changed@1`, `approvisionnement.commande-fournisseur.changed@1`. |
-| C6 | Plancher de trésorerie, horizon de prévision, règles de lettrage automatique (montant et référence), tolérance d'arrondi. |
-| C7 | `finance-transactions:rapprochement:effectuer`, `finance-transactions:tresorerie:consulter`, `finance-transactions:run:consulter`, `finance-transactions:suspens:traiter`. Préparer et valider un ordre exigent en plus `paiement:*` (deux droits, deux personnes, FR-P66). |
-| C8 | `/comptabilite`, `/pilotage-financier` (DAF). Menus : « Rapprochement » (`…:rapprochement:effectuer`), « Trésorerie » (`…:tresorerie:consulter`), « Run fournisseurs » (`…:run:consulter`). Module hors février : ses boutons « Accorder », « Refuser » et « Télédéclarer sur le portail OTR » restent « bientôt », sans date. « Payer » un fournisseur passe par les ordres de `paiement` (FR-209), exigés en février. |
-| C9 | Rien supprimé ; rapprochements conservés. Avertissement : « Les rapprochements cessent ; les paiements restent chez le module paiement. » |
-| C10 | `profiles: ["finance-transactions"]` ; socle + `paiement`. |
-| C11 | `ia: { modeles: ['reconciliation-auto', 'detection-anomalies', 'prevision-tresorerie'], finalites: ['lettrage-assiste', 'alerte-anomalie', 'prevision-de-cash'] }`. Un rapprochement proposé est toujours confirmé par un humain en v1. |
-| C12 | `SANS_PERTE`. Interrupteurs : `lettrage-automatique`, `alerte-doublon`. |
-| C13 | Prérequis : `paiement`. Vérification : `suspens-bornes` (🟢 si le montant en suspens ≤ seuil de l'organisation). Lecture seule : consultation, export. `objetsDeReprise: []`. `domainesEchange: []` en février (Connecteurs hors février). |
+| C1 Manifeste | `code: 'finance-transactions'` (**code à tiret**), `1.0.0`. Trois verticales (distributeur, microfinance, assurance). `depends: [{paiement, "Rapprochement et ordres de paiement reposent sur les encaissements et les ordres de paiement."}]`. `enrichiPar: [facturation (lettrage 411), approvisionnement (factures d'achat, run fournisseurs), balance (écritures, atelier de balance), connecteurs (export comptable plus tard)]`. Service à créer [À CONFIRMER, M22]. **Hors périmètre de février** (décision du PO du 2026-11-12 : la comptabilité n'est pas considérée pour février ; aucune comptabilité de référence n'y est exigée). Les exigences du module restent dans le PRD pour après. **Le produit ne passe pas d'écritures de grand livre à ce jour** (note M22) : le périmètre est le rapprochement, la trésorerie et le run de paiement. En février, les ordres de paiement aux fournisseurs vivent dans `paiement` (FR-209). |
+| C2 Socle | Gate `FINANCE_TRANSACTIONS_NOT_ENTITLED`. `organisationId` ; droits financiers par rôle (DAF, comptable). |
+| C3 Données possédées | Rapprochements bancaires d'un compte de trésorerie, suspens, écritures de caisse des remises d'espèces (la remise elle-même est un objet de `terrain`, sa validation un encaissement de `paiement`), prévision de trésorerie à 7 jours, BFR, run de paiement (état, jamais l'ordre : il appartient à `paiement`). |
+| C4 Emplacements vides | `facturation` absent : lettrage = `NON_INSTALLE` ; `approvisionnement` absent : run fournisseurs = `NON_INSTALLE` ; `balance` absent : écritures = `NON_INSTALLE`. |
+| C5 Contrats nommés | Publie `finance-transactions.tresorerie.changed@1`, `finance-transactions.rapprochement.effectue@1`. Consomme `paiement.encaissement.valide`, `paiement.encaissement.ecart.constate`, `paiement.creance.changed@1`, `approvisionnement.commande-fournisseur.changed@1`. |
+| C6 Paramètres | Plancher de trésorerie, horizon de prévision, règles de lettrage automatique (montant et référence), tolérance d'arrondi. |
+| C7 Droits | `finance-transactions:rapprochement:effectuer`, `finance-transactions:tresorerie:consulter`, `finance-transactions:run:consulter`, `finance-transactions:suspens:traiter`. Préparer et valider un ordre exigent en plus `paiement:*` (deux droits, deux personnes, FR-P66). |
+| C8 Module d'écran | `/comptabilite`, `/pilotage-financier` (DAF). Menus : « Rapprochement » (`…:rapprochement:effectuer`), « Trésorerie » (`…:tresorerie:consulter`), « Run fournisseurs » (`…:run:consulter`). Module hors février : ses boutons « Accorder », « Refuser » et « Télédéclarer sur le portail OTR » restent « bientôt », sans date. « Payer » un fournisseur passe par les ordres de `paiement` (FR-209), exigés en février. |
+| C9 Installer/désinstaller | Rien supprimé ; rapprochements conservés. Avertissement : « Les rapprochements cessent ; les paiements restent chez le module paiement. » |
+| C10 Démarrer seul | `profiles: ["finance-transactions"]` ; socle + `paiement`. |
+| C11 IA | `ia: { modeles: ['reconciliation-auto', 'detection-anomalies', 'prevision-tresorerie'], finalites: ['lettrage-assiste', 'alerte-anomalie', 'prevision-de-cash'] }`. Un rapprochement proposé est toujours confirmé par un humain en v1. |
+| C12 Migrations | `SANS_PERTE`. Interrupteurs : `lettrage-automatique`, `alerte-doublon`. |
+| C13 Installable sous contrôle | Prérequis : `paiement`. Vérification : `suspens-bornes` (🟢 si le montant en suspens ≤ seuil de l'organisation). Lecture seule : consultation, export. `objetsDeReprise: []`. `domainesEchange: []` en février (Connecteurs hors février). |
 
 ### A.12 Marketing et campagnes (`marketing`, M23)
 
 | Clause | Valeur pour ce module |
 |---|---|
-| C1 | `code: 'marketing'`, `1.0.0`. Deux verticales. `depends: [{pdv, "L'audience est une liste de points de vente (FR-V29)."}, {notification, "Un envoi de campagne part par notification."}]`. `enrichiPar: [stock (combos d'écoulement), recouvrement (exclusion des clients en défaut, FR-211), facturation (créance la plus ancienne), catalogue (promotions), studio-social]`. |
-| C2 | Gate `MARKETING_NOT_ENTITLED`. `organisationId` et portée de zone ; le responsable marketing voit « Mon audience ». |
-| C3 | Campagnes, segments (copie des critères, jamais des personnes), combos stock → promotions, validations DG, résultats et ROI, scoring de leads. |
-| C4 | `recouvrement`/`facturation` absents : exclusion des clients en défaut = « non évaluée » (**jamais** « aucun client exclu »), confirmation explicite avant envoi ; `stock` absent : combos = `NON_INSTALLE`. |
-| C5 | Publie `marketing.campagne.changed@1`, `marketing.combo.valide@1`. Consomme `pdv.point-de-vente.changed@1`, `stock.alerte.changed@1`, `stock.liquidation.lancee@1` (combo né d'un plan de liquidation, FR-246), `recouvrement.credit.bloque@1`, `paiement.creance.changed@1`, `notification.envoi.delivre`, `notification.reponse.recue`. |
-| C6 | `SEUIL_EXCLUSION_JOURS` (lu), plafond de messages par destinataire (porté par `notification`, FR-212), seuil de remise exigeant une validation DG, canaux d'une campagne. |
-| C7 | `marketing:campagne:gerer`, `marketing:campagne:valider`, `marketing:combo:proposer`, `marketing:combo:valider`, `marketing:segment:gerer`, `marketing:audience:consulter`. Format conforme. |
-| C8 | `/marketing` (vue opérateur, vue DG), `CombosStockPanel`. Menus : « Campagnes » (`marketing:campagne:gerer`), « Combos » (`marketing:combo:proposer`), « Mon audience » (`marketing:audience:consulter`). « Lancer », « Modifier », « Ignorer » doivent aboutir pour le circuit combos stock en février ; le chatbot WhatsApp : « bientôt ». |
-| C9 | Rien supprimé ; campagnes conservées. Avertissement : « Les campagnes en cours ne seront plus envoyées. » |
-| C10 | `profiles: ["marketing"]` ; socle + `pdv` + `notification` + `reseau`. |
-| C11 | `ia: { modeles: ['scoring-leads', 'segmentation-comportementale'], finalites: ['ciblage-campagne', 'segmentation'] }`. |
-| C12 | `SANS_PERTE`. Interrupteurs : `exclusion-clients-en-defaut` (active par défaut, jamais éteinte en silence), `validation-dg-combos`. |
-| C13 | Prérequis : `notification` canal utilisable. Vérification : `audience-resolue` (🟢 si l'audience d'essai se résout et les exclusions sont comptées). Essai : aucun message réel. `objetsDeReprise: []`, `domainesEchange: []`. |
+| C1 Manifeste | `code: 'marketing'`, `1.0.0`. Deux verticales. `depends: [{pdv, "L'audience est une liste de points de vente (FR-V29)."}, {notification, "Un envoi de campagne part par notification."}]`. `enrichiPar: [stock (combos d'écoulement), recouvrement (exclusion des clients en défaut, FR-211), facturation (créance la plus ancienne), catalogue (promotions), studio-social]`. |
+| C2 Socle | Gate `MARKETING_NOT_ENTITLED`. `organisationId` et portée de zone ; le responsable marketing voit « Mon audience ». |
+| C3 Données possédées | Campagnes, segments (copie des critères, jamais des personnes), combos stock → promotions, validations DG, résultats et ROI, scoring de leads. |
+| C4 Emplacements vides | `recouvrement`/`facturation` absents : exclusion des clients en défaut = « non évaluée » (**jamais** « aucun client exclu »), confirmation explicite avant envoi ; `stock` absent : combos = `NON_INSTALLE`. |
+| C5 Contrats nommés | Publie `marketing.campagne.changed@1`, `marketing.combo.valide@1`. Consomme `pdv.point-de-vente.changed@1`, `stock.alerte.changed@1`, `stock.liquidation.lancee@1` (combo né d'un plan de liquidation, FR-246), `recouvrement.credit.bloque@1`, `paiement.creance.changed@1`, `notification.envoi.delivre`, `notification.reponse.recue`. |
+| C6 Paramètres | `SEUIL_EXCLUSION_JOURS` (lu), plafond de messages par destinataire (porté par `notification`, FR-212), seuil de remise exigeant une validation DG, canaux d'une campagne. |
+| C7 Droits | `marketing:campagne:gerer`, `marketing:campagne:valider`, `marketing:combo:proposer`, `marketing:combo:valider`, `marketing:segment:gerer`, `marketing:audience:consulter`. Format conforme. |
+| C8 Module d'écran | `/marketing` (vue opérateur, vue DG), `CombosStockPanel`. Menus : « Campagnes » (`marketing:campagne:gerer`), « Combos » (`marketing:combo:proposer`), « Mon audience » (`marketing:audience:consulter`). « Lancer », « Modifier », « Ignorer » doivent aboutir pour le circuit combos stock en février ; le chatbot WhatsApp : « bientôt ». |
+| C9 Installer/désinstaller | Rien supprimé ; campagnes conservées. Avertissement : « Les campagnes en cours ne seront plus envoyées. » |
+| C10 Démarrer seul | `profiles: ["marketing"]` ; socle + `pdv` + `notification` + `reseau`. |
+| C11 IA | `ia: { modeles: ['scoring-leads', 'segmentation-comportementale'], finalites: ['ciblage-campagne', 'segmentation'] }`. |
+| C12 Migrations | `SANS_PERTE`. Interrupteurs : `exclusion-clients-en-defaut` (active par défaut, jamais éteinte en silence), `validation-dg-combos`. |
+| C13 Installable sous contrôle | Prérequis : `notification` canal utilisable. Vérification : `audience-resolue` (🟢 si l'audience d'essai se résout et les exclusions sont comptées). Essai : aucun message réel. `objetsDeReprise: []`, `domainesEchange: []`. |
 
 ### A.13 Contrôle de gestion (`controle-gestion`, M25)
 
 | Clause | Valeur pour ce module |
 |---|---|
-| C1 | `code: 'controle-gestion'` (**code à tiret**), `1.0.0`. Distributeur ; microfinance [À CONFIRMER, M25]. `depends: []`. `enrichiPar: [facturation (réel), commande, stock (coût), reseau (axes zone), finance-transactions, notification (envoi de rapports)]`. Hors bundle (écart d'offre, §4.5). |
-| C2 | Gate `CONTROLE_GESTION_NOT_ENTITLED`. `organisationId` ; poste exclusif (le contrôleur de gestion n'arbitre ni la trésorerie ni le crédit). |
-| C3 | Budgets par axe (zone, canal, famille), versions, atterrissage, forecast glissant 3 mois, rapports préparés et envoyés. |
-| C4 | Réel absent (`facturation`, `commande`) : colonne réel = `NON_INSTALLE` ; budget seul reste utilisable. |
-| C5 | Publie `controle-gestion.rapport.envoye@1`, `controle-gestion.budget.fige@1`. Consomme `facturation.facture.emise@1`, `reseau.noeud.created@1`, `stock.valorisation.publiee@1`. |
-| C6 | Axes d'analyse, bande d'alerte (±3 %), modèles de rapport. |
-| C7 | `controle-gestion:budget:fixer`, `controle-gestion:budget:consulter`, `controle-gestion:rapport:envoyer`, `controle-gestion:prevision:gerer` (forme élargie). |
-| C8 | `/controle-gestion` (6 onglets), boîte de rapports chez DG/DAF. Menus : « Budgets » (`…:budget:consulter`), « Rapports » (`…:rapport:envoyer`). |
-| C9 | Rien supprimé ; budgets conservés. Avertissement : « Les budgets ne seront plus comparés au réel. » |
-| C10 | `profiles: ["controle-gestion"]` ; socle seul. |
-| C11 | `ia: { modeles: ['synthese-ecarts'], finalites: ['explication-des-ecarts', 'alerte-de-bande'] }`. |
-| C12 | `SANS_PERTE`. Interrupteur : `envoi-automatique-rapports`. |
-| C13 | Prérequis : aucun module. Vérification : `budget-charge` (🟢 si ≥ 1 budget). Lecture seule : consultation, export. `objetsDeReprise: []`, `domainesEchange: []`. |
+| C1 Manifeste | `code: 'controle-gestion'` (**code à tiret**), `1.0.0`. Distributeur ; microfinance [À CONFIRMER, M25]. `depends: []`. `enrichiPar: [facturation (réel), commande, stock (coût), reseau (axes zone), finance-transactions, notification (envoi de rapports)]`. Hors bundle (écart d'offre, §4.5). |
+| C2 Socle | Gate `CONTROLE_GESTION_NOT_ENTITLED`. `organisationId` ; poste exclusif (le contrôleur de gestion n'arbitre ni la trésorerie ni le crédit). |
+| C3 Données possédées | Budgets par axe (zone, canal, famille), versions, atterrissage, forecast glissant 3 mois, rapports préparés et envoyés. |
+| C4 Emplacements vides | Réel absent (`facturation`, `commande`) : colonne réel = `NON_INSTALLE` ; budget seul reste utilisable. |
+| C5 Contrats nommés | Publie `controle-gestion.rapport.envoye@1`, `controle-gestion.budget.fige@1`. Consomme `facturation.facture.emise@1`, `reseau.noeud.created@1`, `stock.valorisation.publiee@1`. |
+| C6 Paramètres | Axes d'analyse, bande d'alerte (±3 %), modèles de rapport. |
+| C7 Droits | `controle-gestion:budget:fixer`, `controle-gestion:budget:consulter`, `controle-gestion:rapport:envoyer`, `controle-gestion:prevision:gerer` (forme élargie). |
+| C8 Module d'écran | `/controle-gestion` (6 onglets), boîte de rapports chez DG/DAF. Menus : « Budgets » (`…:budget:consulter`), « Rapports » (`…:rapport:envoyer`). |
+| C9 Installer/désinstaller | Rien supprimé ; budgets conservés. Avertissement : « Les budgets ne seront plus comparés au réel. » |
+| C10 Démarrer seul | `profiles: ["controle-gestion"]` ; socle seul. |
+| C11 IA | `ia: { modeles: ['synthese-ecarts'], finalites: ['explication-des-ecarts', 'alerte-de-bande'] }`. |
+| C12 Migrations | `SANS_PERTE`. Interrupteur : `envoi-automatique-rapports`. |
+| C13 Installable sous contrôle | Prérequis : aucun module. Vérification : `budget-charge` (🟢 si ≥ 1 budget). Lecture seule : consultation, export. `objetsDeReprise: []`, `domainesEchange: []`. |
 
 ### A.14 Automatisations (`automatisations`, M26)
 
 | Clause | Valeur pour ce module |
 |---|---|
-| C1 | `code: 'automatisations'`, `1.0.0`. `depends: []`. `enrichiPar: [recouvrement, marketing, stock, approvisionnement, commande, notification, dashboard]`. Porté par `assistant-service` [À CONFIRMER, M26]. |
-| C2 | Gate `AUTOMATISATIONS_NOT_ENTITLED`. `organisationId` ; une règle ne s'exécute que sur les données que son auteur peut lire. |
-| C3 | Règles (grammaire fermée : grandeur × comparateur × seuil × état), niveaux AUTO / À VALIDER / SUGGESTION, file d'arbitrage, journal « cette nuit ». |
-| C4 | Un module source absent désactive ses règles, avec `NON_INSTALLE` à l'écran ; la règle n'est pas supprimée. |
-| C5 | Publie `automatisations.cible.decidee@1`, `automatisations.regle.changed@1`. Consomme les faits des modules sources (`recouvrement.dossier.changed@1`, `stock.alerte.changed@1`, `commande.commande.validee@1`, `marketing.campagne.changed@1`). |
-| C6 | Règles = données à grammaire fermée, sans `eval` ; garde-fous explicites (plafond de crédit, plancher de trésorerie, remise maximale). |
-| C7 | `automatisations:regle:gerer`, `automatisations:regle:activer`, `automatisations:cible:valider`, `automatisations:journal:consulter`. Format conforme. |
-| C8 | `/automatisations`, « cette nuit » dans trois cockpits. « Valider » et « Reporter » doivent persister en février. |
-| C9 | Rien supprimé ; règles et journal conservés mais **suspendus** (aucune exécution). Avertissement : « Plus aucune règle ne s'exécutera. » |
-| C10 | `profiles: ["automatisations"]` ; socle seul. |
-| C11 | Sans objet : le centre de règles n'embarque aucun modèle ; les modèles vivent dans les modules producteurs de cibles (C11 de chacun) et ce module journalise leurs sorties et les décisions humaines. Si un orchestrateur appris est ajouté, `ia` sera déclaré. |
-| C12 | `SANS_PERTE`. Interrupteur : `orchestration-nocturne`. |
-| C13 | Prérequis : au moins un module source (valeur par défaut). Vérification : `regles-valides` (🟢 si 100 % des règles respectent la grammaire fermée). Essai : les règles ne produisent aucune action réelle (interceptées). `objetsDeReprise: []`, `domainesEchange: []`. |
+| C1 Manifeste | `code: 'automatisations'`, `1.0.0`. `depends: []`. `enrichiPar: [recouvrement, marketing, stock, approvisionnement, commande, notification, dashboard]`. Porté par `assistant-service` [À CONFIRMER, M26]. |
+| C2 Socle | Gate `AUTOMATISATIONS_NOT_ENTITLED`. `organisationId` ; une règle ne s'exécute que sur les données que son auteur peut lire. |
+| C3 Données possédées | Règles (grammaire fermée : grandeur × comparateur × seuil × état), niveaux AUTO / À VALIDER / SUGGESTION, file d'arbitrage, journal « cette nuit ». |
+| C4 Emplacements vides | Un module source absent désactive ses règles, avec `NON_INSTALLE` à l'écran ; la règle n'est pas supprimée. |
+| C5 Contrats nommés | Publie `automatisations.cible.decidee@1`, `automatisations.regle.changed@1`. Consomme les faits des modules sources (`recouvrement.dossier.changed@1`, `stock.alerte.changed@1`, `commande.commande.validee@1`, `marketing.campagne.changed@1`). |
+| C6 Paramètres | Règles = données à grammaire fermée, sans `eval` ; garde-fous explicites (plafond de crédit, plancher de trésorerie, remise maximale). |
+| C7 Droits | `automatisations:regle:gerer`, `automatisations:regle:activer`, `automatisations:cible:valider`, `automatisations:journal:consulter`. Format conforme. |
+| C8 Module d'écran | `/automatisations`, « cette nuit » dans trois cockpits. « Valider » et « Reporter » doivent persister en février. |
+| C9 Installer/désinstaller | Rien supprimé ; règles et journal conservés mais **suspendus** (aucune exécution). Avertissement : « Plus aucune règle ne s'exécutera. » |
+| C10 Démarrer seul | `profiles: ["automatisations"]` ; socle seul. |
+| C11 IA | Sans objet : le centre de règles n'embarque aucun modèle ; les modèles vivent dans les modules producteurs de cibles (C11 de chacun) et ce module journalise leurs sorties et les décisions humaines. Si un orchestrateur appris est ajouté, `ia` sera déclaré. |
+| C12 Migrations | `SANS_PERTE`. Interrupteur : `orchestration-nocturne`. |
+| C13 Installable sous contrôle | Prérequis : au moins un module source (valeur par défaut). Vérification : `regles-valides` (🟢 si 100 % des règles respectent la grammaire fermée). Essai : les règles ne produisent aucune action réelle (interceptées). `objetsDeReprise: []`, `domainesEchange: []`. |
 
 ### A.15 Tableau de bord et pilotage (`dashboard`, M28)
 
 | Clause | Valeur pour ce module |
 |---|---|
-| C1 | `code: 'dashboard'`, `1.0.0`. Quatre verticales. `depends: []`. `enrichiPar:` tous les modules du distributeur (`commande`, `facturation`, `stock`, `pdv`, `recouvrement`, `terrain`, `paiement`, …). Code au catalogue, déprécié, à réactiver. Aucun module n'en dépend en dur. |
-| C2 | Gate `DASHBOARD_NOT_ENTITLED`. `organisationId` et portée : chaque rôle ne reçoit que les cartes que ses droits sur les modules sources autorisent. |
-| C3 | Définitions de cartes et de KPI par rôle, alertes du jour, rapports de direction générés, règle du score de santé et scores calculés (déposés dans `pdv` avec leur provenance, FR-184), diagnostics d'article (rentabilité, engouement, FR-243). **Les décisions à trancher ne sont pas à lui** : chaque module possède les siennes (même schéma, FR-14) ; `dashboard` les liste. Pas de copie des données des autres modules (agrégation à la demande). |
-| C4 | Chaque carte dont la source est absente = `NON_INSTALLE` ; un cockpit s'affiche avec ses seules cartes disponibles. |
-| C5 | Publie `dashboard.rapport.genere@1`, `dashboard.score-pdv.calcule@1` (lu par `pdv`, FR-184), `dashboard.article.diagnostic@1` (FR-243). Consomme les faits des modules sources, dont leurs décisions (`<module>.decision.changed@1`), et `etat-publie.changed.*@1`. |
-| C6 | Cartes par rôle (en donnée), seuils d'alerte, huit chiffres du DG, modèle du rapport. |
-| C7 | `dashboard:tableau:consulter`, `dashboard:vue-direction:consulter` (DG et DC seulement, FR-7), `dashboard:rapport:envoyer`, `dashboard:alerte:configurer`. Trancher une décision exige le droit du module qui la possède (par exemple `commande:remise:valider`). Format conforme. |
-| C8 | `/dashboard` (15 cockpits par rôle), rapport IA. Le DG « voit tout » ; une carte « Vue DG » est conditionnée par `dashboard:vue-direction:consulter` (FR-186). Boutons « PDF », « Envoyer », décisions « Valider » / « Reporter » doivent aboutir en février ; « Valider » et « Reporter » appellent le module qui possède la décision. |
-| C9 | Rien supprimé ; définitions et décisions conservées. Avertissement : « Les tableaux de bord disparaissent du menu ; aucune donnée métier n'est touchée. » |
-| C10 | `profiles: ["dashboard"]` ; socle seul. |
-| C11 | `ia: { modeles: ['synthese-narrative', 'prevision-ca', 'scoring-sante-pdv'], finalites: ['rapport-de-direction', 'prevision-ca-trimestrielle', 'score-de-sante'] }`. Le « Copilot conversationnel » de l'offre n'a pas d'écran dans la démo (seulement des encarts « DAF Copilot ») : il est affiché « bientôt », sans date. Tout score porte source, date et version (FR-184). |
-| C12 | `SANS_PERTE`. Interrupteurs : `rapport-ia-quotidien`, `scoring-sante-pdv`. |
-| C13 | Prérequis : aucun module obligatoire. Vérification : `cartes-resolues` (🟢 si ≥ 80 % des cartes d'un cockpit d'essai se résolvent, les autres affichant `NON_INSTALLE`). Lecture seule : tous les cockpits, export. `objetsDeReprise: []`, `domainesEchange: []`. |
+| C1 Manifeste | `code: 'dashboard'`, `1.0.0`. Quatre verticales. `depends: []`. `enrichiPar:` tous les modules du distributeur (`commande`, `facturation`, `stock`, `pdv`, `recouvrement`, `terrain`, `paiement`, …). Code au catalogue, déprécié, à réactiver. Aucun module n'en dépend en dur. |
+| C2 Socle | Gate `DASHBOARD_NOT_ENTITLED`. `organisationId` et portée : chaque rôle ne reçoit que les cartes que ses droits sur les modules sources autorisent. |
+| C3 Données possédées | Définitions de cartes et de KPI par rôle, alertes du jour, rapports de direction générés, règle du score de santé et scores calculés (déposés dans `pdv` avec leur provenance, FR-184), diagnostics d'article (rentabilité, engouement, FR-243). **Les décisions à trancher ne sont pas à lui** : chaque module possède les siennes (même schéma, FR-14) ; `dashboard` les liste. Pas de copie des données des autres modules (agrégation à la demande). |
+| C4 Emplacements vides | Chaque carte dont la source est absente = `NON_INSTALLE` ; un cockpit s'affiche avec ses seules cartes disponibles. |
+| C5 Contrats nommés | Publie `dashboard.rapport.genere@1`, `dashboard.score-pdv.calcule@1` (lu par `pdv`, FR-184), `dashboard.article.diagnostic@1` (FR-243). Consomme les faits des modules sources, dont leurs décisions (`<module>.decision.changed@1`), et `etat-publie.changed.*@1`. |
+| C6 Paramètres | Cartes par rôle (en donnée), seuils d'alerte, huit chiffres du DG, modèle du rapport. |
+| C7 Droits | `dashboard:tableau:consulter`, `dashboard:vue-direction:consulter` (DG et DC seulement, FR-7), `dashboard:rapport:envoyer`, `dashboard:alerte:configurer`. Trancher une décision exige le droit du module qui la possède (par exemple `commande:remise:valider`). Format conforme. |
+| C8 Module d'écran | `/dashboard` (15 cockpits par rôle), rapport IA. Le DG « voit tout » ; une carte « Vue DG » est conditionnée par `dashboard:vue-direction:consulter` (FR-186). Boutons « PDF », « Envoyer », décisions « Valider » / « Reporter » doivent aboutir en février ; « Valider » et « Reporter » appellent le module qui possède la décision. |
+| C9 Installer/désinstaller | Rien supprimé ; définitions et décisions conservées. Avertissement : « Les tableaux de bord disparaissent du menu ; aucune donnée métier n'est touchée. » |
+| C10 Démarrer seul | `profiles: ["dashboard"]` ; socle seul. |
+| C11 IA | `ia: { modeles: ['synthese-narrative', 'prevision-ca', 'scoring-sante-pdv'], finalites: ['rapport-de-direction', 'prevision-ca-trimestrielle', 'score-de-sante'] }`. Le « Copilot conversationnel » de l'offre n'a pas d'écran dans la démo (seulement des encarts « DAF Copilot ») : il est affiché « bientôt », sans date. Tout score porte source, date et version (FR-184). |
+| C12 Migrations | `SANS_PERTE`. Interrupteurs : `rapport-ia-quotidien`, `scoring-sante-pdv`. |
+| C13 Installable sous contrôle | Prérequis : aucun module obligatoire. Vérification : `cartes-resolues` (🟢 si ≥ 80 % des cartes d'un cockpit d'essai se résolvent, les autres affichant `NON_INSTALLE`). Lecture seule : tous les cockpits, export. `objetsDeReprise: []`, `domainesEchange: []`. |
 
 ### A.16 Support client et CRM interne (`support-client`, M03)
 
 | Clause | Valeur pour ce module |
 |---|---|
-| C1 | `code: 'support-client'` (**code à tiret**), `1.0.0`. Quatre verticales [À CONFIRMER, M03], service `support-crm-service` à créer. `depends: []`. `enrichiPar: [pdv (fiche client), commande, facturation, entrepot (litiges de livraison), notification]` (liens proposés, modifiables : aucune source du distributeur ne décrit ce module). **Aucune source du distributeur ne décrit ce module** : la démo n'a pas d'écran de support. Il est inscrit pour la complétude des seize modules. |
-| C2 | Gate `SUPPORT_CLIENT_NOT_ENTITLED`. `organisationId`. |
-| C3 | Dossiers de support (réclamation, litige de livraison, facture contestée), échanges, statuts. Données proposées, modifiables ; le module est inscrit pour la complétude des seize modules. |
-| C4 | Chaque module lié absent : lien du dossier = `NON_INSTALLE`. |
-| C5 | Publie `support-client.dossier.changed@1`. Consomme `pdv.point-de-vente.changed@1`, `commande.commande.changed@1`, `facturation.facture.changed@1`. |
-| C6 | Types de dossier, délais de réponse, modèles de réponse. |
-| C7 | `support-client:dossier:ouvrir`, `support-client:dossier:traiter`, `support-client:dossier:cloturer`. |
-| C8 | Aucun écran dans la démo ni dans la liste du PO : écrans **à concevoir**, hors périmètre de février (brain dump, §3). |
-| C9 | Rien supprimé ; dossiers conservés. Avertissement : « Les dossiers ouverts ne seront plus suivis. » |
-| C10 | `profiles: ["support-client"]` ; socle seul. |
-| C11 | Sans objet : aucun modèle n'est promis par l'offre pour ce module ; tout résumé automatique de dossier ouvrirait la clause. |
-| C12 | `SANS_PERTE`. `interrupteurs: []`. |
-| C13 | Prérequis : aucun. Vérification : `dossier-cree` (🟢 si un dossier d'essai se crée et se relit). Lecture seule : consultation, export. `objetsDeReprise: []`, `domainesEchange: []`. |
+| C1 Manifeste | `code: 'support-client'` (**code à tiret**), `1.0.0`. Quatre verticales [À CONFIRMER, M03], service `support-crm-service` à créer. `depends: []`. `enrichiPar: [pdv (fiche client), commande, facturation, entrepot (litiges de livraison), notification]` (liens proposés, modifiables : aucune source du distributeur ne décrit ce module). **Aucune source du distributeur ne décrit ce module** : la démo n'a pas d'écran de support. Il est inscrit pour la complétude des seize modules. |
+| C2 Socle | Gate `SUPPORT_CLIENT_NOT_ENTITLED`. `organisationId`. |
+| C3 Données possédées | Dossiers de support (réclamation, litige de livraison, facture contestée), échanges, statuts. Données proposées, modifiables ; le module est inscrit pour la complétude des seize modules. |
+| C4 Emplacements vides | Chaque module lié absent : lien du dossier = `NON_INSTALLE`. |
+| C5 Contrats nommés | Publie `support-client.dossier.changed@1`. Consomme `pdv.point-de-vente.changed@1`, `commande.commande.changed@1`, `facturation.facture.changed@1`. |
+| C6 Paramètres | Types de dossier, délais de réponse, modèles de réponse. |
+| C7 Droits | `support-client:dossier:ouvrir`, `support-client:dossier:traiter`, `support-client:dossier:cloturer`. |
+| C8 Module d'écran | Aucun écran dans la démo ni dans la liste du PO : écrans **à concevoir**, hors périmètre de février (brain dump, §3). |
+| C9 Installer/désinstaller | Rien supprimé ; dossiers conservés. Avertissement : « Les dossiers ouverts ne seront plus suivis. » |
+| C10 Démarrer seul | `profiles: ["support-client"]` ; socle seul. |
+| C11 IA | Sans objet : aucun modèle n'est promis par l'offre pour ce module ; tout résumé automatique de dossier ouvrirait la clause. |
+| C12 Migrations | `SANS_PERTE`. `interrupteurs: []`. |
+| C13 Installable sous contrôle | Prérequis : aucun. Vérification : `dossier-cree` (🟢 si un dossier d'essai se crée et se relit). Lecture seule : consultation, export. `objetsDeReprise: []`, `domainesEchange: []`. |
 
 ### A.17 Les huit modules de la partie 4 : renvoi aux manifestes
 
