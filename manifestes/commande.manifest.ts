@@ -28,9 +28,9 @@
 //     portée) ;
 //   · `commande:remise:valider` : SUPERVISEUR, RESP_VENTES, DC ;
 //   · `commande:bon-livraison:emettre` : DC, RESP_VENTES, SUPERVISEUR, COMPTABLE, RESP_STOCK.
-//   La dérogation à un refus de plafond (DG et DAF par défaut, FR-33) est un droit attribuable à d'autres
-//   rôles ; elle n'est pas dans l'annexe A.1 et n'est PAS ajoutée ici [À CONFIRMER : droit propre ou
-//   `commande:commande:valider` à portée élargie].
+//   · `commande:plafond:deroger` : DG, DAF (FR-33 ; droit propre, décision du PO du 2026-11-13). Celui qui valide n'est pas
+//     celui qui déroge : le comptable valide par défaut, il ne déroge pas. La portée reste un périmètre, jamais
+//     un niveau de pouvoir.
 // - Service porteur : `commande-service` [À CONFIRMER, M08].
 // - Cloisonnement (C2) : par `organisationId` et par portée (zone, portefeuille), lue dans
 //   `reseau.portee.changed@1` ; un commercial ne lit que ses commandes, un freelance que les siennes (FR-C30),
@@ -85,6 +85,11 @@ export const MANIFESTE_COMMANDE = {
     'commande:reseau:consulter', // pilotage sous portée : zone, portefeuilles (FR-40)
     'commande:remise:valider', // décision d'une demande de remise au-dessus du seuil (FR-31, FR-127)
     'commande:bon-livraison:emettre', // bon de livraison, reliquat (FR-36, FR-41)
+    // Droit propre, décision du PO du 2026-11-13 (absent de l'annexe A.1) : déroger au refus PLAFOND_CREDIT_DEPASSE pour UNE
+    // commande, avec un motif, tracé (qui, quand, motif, montant) dans instance.journal@1 (FR-33). Sert aussi à
+    // la conversion d'une proforma au-delà du plafond (FR-54, §5.2). Ne lève JAMAIS un crédit bloqué (déblocage
+    // = procédure de `recouvrement`). Distinct de `pdv:plafond:modifier`, qui change le plafond du client.
+    'commande:plafond:deroger',
   ],
 
   // C5 : faits publiés et consommés. Noms de l'annexe A.1, à figer par la story de publication. Chaque fait

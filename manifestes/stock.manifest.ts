@@ -88,7 +88,7 @@ export const MANIFESTE_STOCK = {
   // unique, §6). Toute quantité est `{ valeur, unite }`, en unité de base, avec le facteur utilisé (AD-4).
   publie: [
     'stock.point-de-stock.changed@1', // entrepôt ou magasin propre, lien au point de vente, zones desservies, fermeture
-    'stock.mouvement.enregistre@1', // un mouvement, ou sa contre-passation
+    'stock.mouvement.enregistre@1', // un mouvement, ou sa contre-passation ; une entrée RECEPTION_FOURNISSEUR porte la référence de la commande fournisseur (sans entrepot, lue par approvisionnement, décision du PO du 2026-11-13)
     'stock.disponible.changed@1', // état absolu par (point de stock, article) : physique, réservé, disponible, reservationBranchee
     'stock.alerte.changed@1', // rupture, couverture excessive, péremption, dormant, surstock, invendu, saisonnier ; coût de portage
     'stock.valorisation.publiee@1', // arrêté d'exercice : méthode, date, périmètre, checksum, version (AD-7)

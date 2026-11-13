@@ -14,18 +14,19 @@
 //   acheter à la main (§5.3, notes).
 // - Écrans : module d'écran `approvisionnement` dans `prospera-app` (C8), tous les écrans par Dev B. Route
 //   `/approvisionnement`, quatre onglets : Réappro IA, Commandes fournisseurs, Fournisseurs, Règles. Les entrées
-//   sont visibles avec `approvisionnement:fournisseur:gerer` ou `approvisionnement:commande-fournisseur:valider`
-//   (annexe A.3, C8) ; onglet d'entrée : RESP_STOCK et DG = réapprovisionnement, DAF et COMPTABLE = fournisseurs
+//   sont visibles avec `approvisionnement:fournisseur:gerer`, `approvisionnement:commande-fournisseur:valider`
+//   ou `approvisionnement:commande-fournisseur:consulter` (annexe A.3, C8 ; lecture ajoutée par décision du PO du 2026-11-13) ; onglet d'entrée : RESP_STOCK et DG = réapprovisionnement, DAF et COMPTABLE = fournisseurs
 //   (FR-61). « Basculer sur le fournisseur alternatif » : « bientôt » (annexe A.3, C8) ; « Relancer un
 //   fournisseur » : « bientôt ». « Payer une échéance » : saisie (FR-67) ; l'ordre de paiement vient de
 //   `paiement` (FR-209), « non installé » sans lui.
 // - Rôles du socle distributeur, tirés de l'annexe B.2, à confirmer avec les rôles du vertical :
 //   `fournisseur:gerer` = RESP_STOCK, DAF ; `commande-fournisseur:suggerer` = RESP_STOCK ;
 //   `commande-fournisseur:valider` = RESP_STOCK sous son plafond de validation, au-delà DAF, puis DG (FR-63) ;
-//   `reception:enregistrer` = GEST_ENTREPOT, RESP_STOCK ; `regle:definir` = DG, RESP_STOCK. Les plafonds sont
+//   `commande-fournisseur:consulter` = DG, DAF, COMPTABLE, CONTROLE_GESTION (décision du PO du 2026-11-13) ;
+//   `regle:definir` = DG, RESP_STOCK. Les plafonds sont
 //   des paramètres par organisation (C6). Le magasinier n'a accès ni aux fiches fournisseurs ni à
-//   l'approvisionnement ; DG, RESP_STOCK, DAF et COMPTABLE lisent les fiches (FR-59), COMPTABLE sans droit
-//   d'écriture en B.2 [lecture sans droit nommé : à confirmer, voir la note de C7 ci-dessous].
+//   l'approvisionnement ; DG, RESP_STOCK, DAF et COMPTABLE lisent les fiches (FR-59) par
+//   `commande-fournisseur:consulter`.
 // - Service porteur : à créer [À CONFIRMER : l'annexe A.3 ne nomme pas le dépôt ; le PRD dit « module non
 //   codé »].
 // - Périmètre : par entrepôt pour le responsable stock (annexe A.3, C2). Achats en XOF seulement ; l'import
@@ -56,22 +57,27 @@ export const MANIFESTE_APPROVISIONNEMENT = {
   // - finance-transactions : plancher de trésorerie, hors février ; sans lui, le plancher = `NON_INSTALLE`
   //   (l'écran le dit, garde-fou non vérifié) ;
   // - notification : alerte au DAF ; sans elle, l'escalade reste visible à l'écran seulement ;
-  // - entrepot : réception physique (FR-71) ; sans lui, la réception se saisit directement dans `stock` ;
+  // - entrepot : SEUL propriétaire de la réception (FR-71 « un seul écran de réception », §5.3 « les achats
+  //   affichent le résultat, ils ne saisissent pas », décision du PO du 2026-11-13). approvisionnement consomme
+  //   `entrepot.reception.enregistree@1` et met à jour la commande fournisseur (RECUE_PARTIELLE, RECUE,
+  //   LITIGE), la dette (FR-67) et la note du fournisseur (FR-60). Sans entrepot, la réception se saisit dans
+  //   `stock` comme une entrée de motif RECEPTION_FOURNISSEUR portant la référence de la commande fournisseur,
+  //   et approvisionnement la lit dans `stock.mouvement.enregistre@1` ;
   // - connecteurs : fournisseurs tenus par le logiciel d'un client qui en garde un, plus tard.
   enrichiPar: ['paiement', 'finance-transactions', 'notification', 'entrepot', 'connecteurs'],
 
   // Aucun numéro de compte ici : l'annexe A.3 n'en déclare pas (la comptabilité des achats est hors février).
   referentielFamilies: [],
 
-  // C7 : droits de tenant, les cinq de l'annexe A.3 (format `^[a-z]+:[a-z-]+:[a-z]+$`, conforme). Chaque droit
-  // demande une PR `auth-service` à la livraison du module (catalogue fermé, C7).
-  // Note : aucun droit de lecture n'est déclaré ; la lecture des fiches par DG, DAF, COMPTABLE (FR-59) passe par
-  // les droits ci-dessous ou par la portée du rôle. À trancher avec B.2 [À CONFIRMER].
+  // C7 : droits de tenant (format `^[a-z]+:[a-z-]+:[a-z]+$`, conforme). Chaque droit demande une PR
+  // `auth-service` à la livraison du module (catalogue fermé, C7). Par rapport à l'annexe A.3 (décision du PO du 2026-11-13) :
+  // `reception:enregistrer` RETIRÉ (la réception appartient à entrepot, droit `entrepot:reception:controler`) ;
+  // `commande-fournisseur:consulter` AJOUTÉ (lire sans pouvoir agir, comme `stock:etat:consulter`).
   droits: [
     'approvisionnement:fournisseur:gerer', // créer, modifier, suspendre, évaluer ; lire les fiches (FR-59)
     'approvisionnement:commande-fournisseur:valider', // échelle par montant, plafonds paramétrables (FR-63) ; plancher de trésorerie (FR-64)
     'approvisionnement:commande-fournisseur:suggerer', // proposer et préparer une commande, y compris manuelle (FR-61, FR-62)
-    'approvisionnement:reception:enregistrer', // enregistrer le résultat d'une réception (FR-71, côté entrepôt)
+    'approvisionnement:commande-fournisseur:consulter', // lecture seule : commandes fournisseurs, résultats de réception, fiches, dettes et échéances (FR-59, FR-67)
     'approvisionnement:regle:definir', // règles de réapprovisionnement : seuil, couverture, mode, niveau d'automatisme (FR-61)
   ],
 
@@ -79,7 +85,6 @@ export const MANIFESTE_APPROVISIONNEMENT = {
   publie: [
     'approvisionnement.commande-fournisseur.changed@1', // cycle SUGGEREE → RECUE, statut de paiement (FR-62)
     'approvisionnement.fournisseur.changed@1', // registre, statut, note recalculée à chaque réception (FR-59, FR-60)
-    'approvisionnement.reception.enregistree@1', // résultat d'une réception, écarts compris (FR-71)
     'approvisionnement.escalade.demandee@1', // montée vers le DAF : plancher franchi ou plafond dépassé (FR-63, FR-64)
     'approvisionnement.retour.changed@1', // demande de retour fournisseur née d'un scénario de liquidation (FR-246)
     'instance.journal@1', // proposition (cité par le manifeste de stock, absent de l'annexe A.3) : suggestions et décisions
@@ -89,6 +94,8 @@ export const MANIFESTE_APPROVISIONNEMENT = {
     'stock.disponible.changed@1', // disponible, seuil et couverture (FR-61)
     'stock.liquidation.lancee@1', // fait À AJOUTER au manifeste de stock (annexe A.17 : « faits à ajouter ») ; origine du retour fournisseur (FR-246)
     'catalogue.article.changed@1', // articles et conditionnements visés par une commande fournisseur
+    'entrepot.reception.enregistree@1', // SEUL fait de réception (décision du PO du 2026-11-13) : statut, dette, note
+    'stock.mouvement.enregistre@1', // sans entrepot : entrée RECEPTION_FOURNISSEUR avec la référence de la commande fournisseur
     'finance-transactions.tresorerie.changed@1', // plancher de trésorerie, hors février ; sans lui `NON_INSTALLE`
     'etat-publie.changed.*@1', // l'espace du service seulement (spine du moteur, AD-24)
   ],
