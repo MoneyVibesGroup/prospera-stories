@@ -80,7 +80,7 @@ export const MANIFESTE_CATALOGUE = {
   // v1 [À CONFIRMER : le brancher sur le référentiel fiscal du Togo quand fiscal-service le publiera].
   referentielFamilies: [],
 
-  // C7 : droits de tenant, les quatre de FR-C48. « Gérer son propre tarif freelance » n'est pas un droit mais
+  // C7 : droits de tenant, les quatre de FR-C48, plus `marge:consulter` (FR-196 du PRD distributeur). « Gérer son propre tarif freelance » n'est pas un droit mais
   // une propriété : le dépôt exige le userId propriétaire (AD-6). L'export reste réservé à
   // instance:donnees:exporter (C2).
   droits: [
@@ -88,6 +88,10 @@ export const MANIFESTE_CATALOGUE = {
     'catalogue:article:gerer', // créer, modifier, suspendre, retirer, remplacer un article ; conditionnements et facteurs
     'catalogue:grille:gerer', // grilles société : prix, devise, HT/TTC, conditions, priorité, versions
     'catalogue:promotion:gerer', // promotions de ligne et de pied de commande, plafonds, cumul déclaré
+    // Ajouté le 2026-11-13 (PRD distributeur, annexe A.17, ajouté le 2026-11-13, FR-196, annexe B.2) : prix de revient et marge SOCIÉTÉ, distinct de
+    // `article:consulter` ; par défaut DG, DC, DAF, CONTROLE_GESTION (le responsable de stock arbitre en coût
+    // d'achat, sans marge). Ne donne JAMAIS la marge ni les prix de revente d'un freelance (NFR-4).
+    'catalogue:marge:consulter',
   ],
 
   // C5 : faits publiés et consommés. Noms proposés ici, à figer par la story de publication (EPIC-074).

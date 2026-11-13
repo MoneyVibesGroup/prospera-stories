@@ -51,7 +51,14 @@ export const MANIFESTE_PDV = {
   //   leur ancienneté, visites, relances ; AD-6) et les consommateurs du plafond ;
   // - catalogue : étape de révélation des prix au départ d'un indépendant (AD-5) ; sans lui, le départ se
   //   réduit à la réaffectation et l'étape s'écrit « non installé ».
-  enrichiPar: ['stock', 'commande', 'facturation', 'terrain', 'recouvrement', 'catalogue'],
+  // Ajoutés le 2026-11-13 (PRD distributeur, annexe A.17, ajouté le 2026-11-13) :
+  // - dashboard : producteur du score de santé (règle `règles-1.0`, FR-184) ; pdv PORTE le score, il ne le
+  //   calcule pas (FR-V34 → V36). Sans dashboard, le champ est `NON_INSTALLE` ; un score sans source, date et
+  //   version s'affiche « non évalué », jamais en chiffre ;
+  // - paiement : encours du tiers (créances ouvertes + commandes validées non facturées − crédit du tiers,
+  //   FR-187, FR-247, FR-248) ; la fiche montre plafond − encours = disponible à crédit. Sans paiement (ou sans
+  //   commande), encours et disponible sont `NON_INSTALLE`, jamais 0.
+  enrichiPar: ['stock', 'commande', 'facturation', 'terrain', 'recouvrement', 'catalogue', 'dashboard', 'paiement'],
 
   referentielFamilies: [],
 
