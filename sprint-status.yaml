@@ -113,7 +113,7 @@ reserved_ranges:
     note: >
       21 épics. Plage prise LE JOUR DU DÉCOUPAGE, sous-plage de EPIC-142 → 299 : relevé du 2026-11-13 sur
       toutes les branches distantes, marque haute EPIC-200. Les 21 épics sont du premier jour (décision du PO) ; ★ = chemin de la démo construit en premier (ordre de
-      construction : PRD §10.3 et spine) ; les autres suivent sans date figée (le périmètre ne se réduit pas).
+      construction : PRD §10.3 et spine) ; les autres suivent avant la mise en service.
       Chemin critique : EPIC-201 → 205 → 206 → 207 → 209 → 210 → 211 → 214. NON SLOTTÉ : le plan et la carte
       des dépôts sont dans le document source.
 
