@@ -1,6 +1,6 @@
 ---
 title: "Addendum — PRD Prospera Microfinance"
-status: draft
+status: final
 created: 2026-11-13
 updated: 2026-11-13
 ---
