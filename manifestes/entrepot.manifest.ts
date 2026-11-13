@@ -90,7 +90,7 @@ export const MANIFESTE_ENTREPOT = {
     'entrepot.preparation.commencee@1', // première ligne servie d'un bon (la commande passe PREPARATION chez `commande`)
     'entrepot.preparation.terminee@1', // bon PREPARE ; lu par `commande` (A.1)
     'entrepot.expedition.livree@1', // livraison confirmée, quantités livrées et refusées ; lu par `commande` (A.1)
-    'entrepot.reception.enregistree@1', // réception validée, lignes acceptées, mouvement d'entrée demandé à `stock`
+    'entrepot.reception.enregistree@1', // SEUL fait de réception (décision du PO du 2026-11-13) : lignes acceptées, mouvement d'entrée demandé à `stock` ; lu par approvisionnement (statut, dette, note)
     'entrepot.litige.ouvert@1', // un litige par ligne LITIGE ou REFUS (FR-71, FR-72)
     'entrepot.inventaire.compte@1', // comptage terminé, écart calculé ; l'ajustement est écrit par `stock` (FR-74)
     'instance.journal@1', // départ de camion, validation de réception, clôture de litige, export, effacement
