@@ -10,6 +10,22 @@
 //              (AD-1 → AD-18) ; épics epics-paiement-2026-08-03.md ; STORY-647/649 (arrêté → créance,
 //              facturation de la consommation) ; STORY-650/651 (délégation) ; PRD Connecteurs §4.F et FR-17.
 //
+// ✅ MIS À JOUR LE 2026-11-13 (décision du PO, 21e séance de la salle : points 1 et 2) :
+// - PRD distributeur, annexe A.17 et point 11 : registre des Créances (FR-247) et crédit du tiers (FR-248),
+//   deux droits nouveaux (annexe B), `enrichiPar` + `commande` ; amendement du PRD `paiement` écrit le même
+//   jour (`prds/prd-paiement-service-2026-08-02/amendement-2026-11-13-creances-distributeur.md`).
+// - Spine de la microfinance (architecture-microfinance-imf-2026-11-13, AD-5, AD-6, AD-8, AD-9, AD-25) : source
+//   `ECHEANCE_DE_PRET`, exécution des ordres de décaissement, relecture ciblée du cœur.
+// - Freelance (D-24, FR-98) : compteur de l'add-on et ordre de versement de la commission.
+// - ⚠️ Suffixe de version : les topics DÉJÀ codés gardent leur graphie sans `@1` (C5 amendé ; les renommer
+//   casserait les consommateurs en place). Seuls les faits NOUVEAUX ci-dessous portent `@1`.
+// - Faits d'état : `paiement.creance.changed@1` et `paiement.encaissement.changed@1` donnent l'état ABSOLU
+//   (comme `credit.dossier.changed@1` à côté de `credit.dossier.accorde@1`). Les faits fins existants restent.
+// - Sorties d'argent : un fait d'état par nature d'ordre, `paiement.ordre-<nature>.changed@1` (motif fixé par
+//   la spine de la microfinance) : `ordre-decaissement` (prêt), `ordre-versement` (commission du freelance).
+//   Les ordres de l'amendement du 2026-09-21 (fournisseurs, remboursement d'un crédit du tiers) ne publient
+//   encore aucun fait : `paiement.ordre-paiement.changed@1` le jour où un module en a besoin [À CONFIRMER].
+//
 // ✅ CODE DU MODULE : `paiement` (décision du PO du 2026-11-12). Le module `paiement`, ce sont les
 // paiements ET les moyens de paiement. Les moyens raccordés sur origin/dev sont DEUX fournisseurs :
 // PI-SPI (adaptateur `API_BUSINESS`) et FEDAPAY (adaptateur `fedapay`, barème `fedapay-bj-2026-09-05`, webhook
@@ -56,7 +72,9 @@
 //   `encaissement:valider` (valider) : des droits `paiement:ordre:*` seraient plus lisibles [À CONFIRMER].
 // - Rôles du socle distributeur (STORY-166), proposition : commercial = `demande:emettre` ; recouvrement =
 //   + `encaissement:declarer`, `lien:revoquer` ; DAF = `encaissement:valider`, `annulation:enregistrer`,
-//   `journal:consulter` ; DG ou DIST_ADMIN = `compte:administrer`.
+//   `journal:consulter` ; DG ou DIST_ADMIN = `compte:administrer`. Annexe B du PRD distributeur :
+//   `creance:consulter` à DG, DC, RESP_VENTES, SUPERVISEUR, DAF, COMPTABLE, CONTROLE_GESTION, RECOUVREMENT
+//   (COMMERCIAL et FREELANCE pour leur portefeuille) ; `credit-tiers:imputer` à COMPTABLE et DAF.
 
 export const MANIFESTE_PAIEMENT = {
   code: 'paiement',
@@ -70,8 +88,16 @@ export const MANIFESTE_PAIEMENT = {
   //   remis à la main (copier, QR) et l'envoi s'écrit `NON_INSTALLE`, jamais « envoyé » [À CONFIRMER : le
   //   comportement actuel quand le client n'a pas `notification`] ;
   // - facturation : source des créances d'un distributeur (une facture ouverte devient une créance à
-  //   encaisser). Le PRD du distributeur (lot 2) tranche qui porte la créance [À CONFIRMER].
-  enrichiPar: ['notification', 'facturation'],
+  //   encaisser) : `paiement` ouvre la Créance de source `FACTURE` sur `facturation.facture.emise@1`, la réduit
+  //   sur `facturation.avoir.emis@1` (FR-247, tranché par le PO le 2026-11-12) ;
+  // - commande : ajouté pour suivre l'annexe A.17 (encours, FR-187). ⚠️ L'encours se calcule chez `commande`
+  //   et `pdv`, qui lisent les faits de `paiement` ; `paiement` ne consomme aucun fait de `commande`. Si la
+  //   story de l'encours ne lui trouve aucun usage ici, le retirer (un enrichiPar sans lecture ne sert à rien) ;
+  // - freelance : créances du périmètre « freelance » (dû du freelance à la société, créances de son espace
+  //   propre sur ses détaillants, FR-97) et compteur de l'add-on (D-24). Sans lui, aucun périmètre freelance ;
+  // - credit, coeur-sfd (microfinance) : source `ECHEANCE_DE_PRET` (spine IMF AD-6) et ordres de décaissement
+  //   (AD-5). Sans eux, la source n'est pas proposée et aucun ordre de décaissement n'est reçu.
+  enrichiPar: ['notification', 'facturation', 'commande', 'freelance', 'credit', 'coeur-sfd'],
 
   referentielFamilies: [],
 
@@ -85,6 +111,9 @@ export const MANIFESTE_PAIEMENT = {
     'paiement:annulation:enregistrer', // annulation et régularisation (groupe I)
     'paiement:compte:administrer', // comptes d'encaissement, secrets de notification, routage, raccordements, points de vente QR
     'paiement:journal:consulter', // journal opposable par créance et par chaîne (NFR-4)
+    // Nouveaux (PRD distributeur, annexe B), à ajouter à `TenantPermission` (auth-service) :
+    'paiement:creance:consulter', // registre des Créances, reste dû, balance âgée (FR-247) ; portée appliquée par le serveur
+    'paiement:credit-tiers:imputer', // imputer un crédit du tiers sur une Créance désignée (FR-248) ; rembourser = un ordre
   ],
 
   // C5 : faits publiés et consommés, tels qu'ils existent sur origin/dev (outbox ; topics sans suffixe de
@@ -105,6 +134,13 @@ export const MANIFESTE_PAIEMENT = {
     'paiement.creance.cloturee',
     'paiement.creance.troppercu.constate',
     'paiement.creance.anomalie.constatee',
+    // Nouveaux, 2026-11-13 (voir l'en-tête) :
+    'paiement.creance.changed@1', // état absolu : tiers, source, périmètre, composantes, reste dû, montantExigible, lueLe, échéance, ancienneté (FR-247 ; IMF AD-6)
+    'paiement.credit-tiers.changed@1', // solde, origine (avance, acompte, trop-perçu, avoir), imputations (FR-248)
+    'paiement.encaissement.changed@1', // état absolu d'un encaissement ; consommé par la microfinance (spine IMF, AD-9)
+    'paiement.ordre-decaissement.changed@1', // ordreId, numeroEssai, état EN_COURS, EXECUTE, REJETE ou INCONNU (spine IMF AD-5)
+    'paiement.ordre-versement.changed@1', // versement de la commission d'un freelance : mêmes états (FR-98, D-24)
+    'paiement.relecture.demandee@1', // relecture ciblée du reste dû auprès du cœur avant un lien de paiement (spine IMF AD-6)
     // Abonnements Prospera (facturation de la plateforme, voir l'en-tête) : consommés par le catalogue,
     // seul écrivain des entitlements (AD-13).
     'paiement.abonnement.engage',
@@ -123,6 +159,22 @@ export const MANIFESTE_PAIEMENT = {
     'identity.org.updated',
     'notification.consommation.arretee', // facturation de la consommation de messages (STORY-649)
     'connecteurs.domaine.changed@1', // domaine `paiement.encaissements` (ci-dessous)
+    // Sources de créance, distributeur (FR-247, FR-216) :
+    'facturation.facture.emise@1', // ouvre la Créance `FACTURE` ; émetteur freelance ⇒ périmètre du freelance (FR-224)
+    'facturation.avoir.emis@1', // réduit la Créance, ou crée un crédit du tiers sur une facture payée (FR-248)
+    'facturation.facture.reprise@1', // ouvre la Créance au reste dû repris de Sage (FR-216)
+    // ⚠️ Le relevé de vente qui constate le dû du freelance (FR-97) n'a pas encore de fait nommé chez
+    // `facturation` : à ajouter à son manifeste par la story du relevé [À CONFIRMER].
+    // Freelance (D-24, FR-98) :
+    'freelance.freelance.active@1', // COMPTEUR de l'add-on : prix par freelance actif (abonnements Prospera)
+    'freelance.commission.acquise@1', // commission à verser : le DAF prépare l'ordre de versement, un second valide (FR-P66)
+    // Microfinance (spine IMF AD-5, AD-6, AD-8) :
+    'credit.dossier.accorde@1', // échéancier contractuel ⇒ Créances `ECHEANCE_DE_PRET` (upsert idempotent)
+    'credit.ordre-decaissement.emis@1', // canal électronique : `paiement` exécute l'essai
+    'coeur-sfd.ordre-decaissement.confirme@1', // les échéances deviennent exigibles
+    'coeur-sfd.echeancier.changed@1', // recalage du montant exigible (AJUSTEMENT_COEUR, en ajout seul)
+    'coeur-sfd.fraicheur.changed@1', // réponse à une relecture ; lien désactivé si le transport est trop lent
+    'coeur-sfd.mouvement.apparie@1', // seul fait qui passe un encaissement de EN_ATTENTE_COEUR à confirmé
   ],
 
   profilCompose: 'paiement',
@@ -197,7 +249,8 @@ export const MANIFESTE_PAIEMENT = {
   // Domaine d'argent : jamais corrigé automatiquement (NFR-3 de Connecteurs) ; un encaissement attend la
   // facture qu'il règle (`EN_ATTENTE_DEPENDANCE`). Les créances ouvertes appartiennent à Odoo tant qu'il
   // tient la comptabilité ; promesses et relances restent à Prospera : domaine à déclarer quand la
-  // créance aura son porteur [À CONFIRMER, PRD distributeur].
+  // créance aura son porteur. ✅ Porteur tranché (FR-247 : `paiement`) ; le domaine `paiement.creances`
+  // reste « déclaré pour plus tard » (annexe A.17), avec Connecteurs, hors février.
   domainesEchange: [
     {
       code: 'paiement.encaissements',

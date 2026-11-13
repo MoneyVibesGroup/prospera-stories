@@ -133,12 +133,9 @@ export const MANIFESTE_FREELANCE = {
     // Absents de la ligne C5 de l'annexe A.7. Propositions à figer par la story de consommation, sans quoi
     // `freelance:creance:consulter` (dû, réglé, restant, retard : FR-97, FR-98) et le passage de la commission
     // à VERSEE n'ont pas de source :
-    'paiement.creance.materialisee', // [proposition, FR-97 ; nom publié par `paiement`, sans suffixe @1 à ce jour] ouverture du dû (tiers = freelance)
-    'paiement.creance.soldee', // [proposition, FR-97 ; idem]
-    // [proposition, non publié à ce jour] fait de `paiement` confirmant l'ordre qui verse la commission
-    // (VALIDEE → VERSEE, FR-98). `paiement` publie des faits d'encaissement et de créance, aucun de
-    // versement : nom à créer dans `paiement`, par exemple `paiement.ordre.execute@1` [À CONFIRMER].
-    'paiement.ordre.execute@1',
+    // ✅ Noms fixés le 2026-11-13 (décision du PO, 21e séance) et publiés par le manifeste `paiement` :
+    'paiement.creance.changed@1', // dû, réglé, restant, retard du freelance (tiers = freelance, FR-97, FR-98)
+    'paiement.ordre-versement.changed@1', // EXECUTE ⇒ commission VALIDEE → VERSEE (FR-98) ; motif `ordre-<nature>` de la microfinance
   ],
 
   // C10 : `profiles: ["freelance"]`, socle + `catalogue` + `pdv` + `reseau` (annexe A.7).
