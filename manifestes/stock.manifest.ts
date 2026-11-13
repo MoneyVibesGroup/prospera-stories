@@ -56,13 +56,19 @@ export const MANIFESTE_STOCK = {
   //   n'est publiée, donc le groupe K rend zéro enregistrement (fail-closed, AD-13) et s'écrit « non installé » ;
   // - terrain : relevé du commercial en visite (FR-S56), première des deux sources du groupe K ; sans lui,
   //   seule l'estimation déduite existe, et le relevé s'écrit « non installé », jamais un écart nul.
-  enrichiPar: ['balance', 'commande', 'pdv', 'reseau', 'terrain'],
+// Ajoutés le 2026-11-13 (PRD distributeur, annexe A.17, FR-245, FR-246) :
+// - entrepot : la navette d'un transfert (FR-245) est préparée et chargée par entrepot ; sans lui, le
+//   transfert reste un mouvement de stock saisi à la main ;
+// - approvisionnement et marketing : scénarios d'un plan de liquidation (FR-246 : retour fournisseur, combo) ;
+//   sans eux, ces scénarios s'écrivent « non installé » et seuls TRANSFERT et REBUT restent proposés.
+  enrichiPar: ['balance', 'commande', 'pdv', 'reseau', 'terrain', 'entrepot', 'approvisionnement', 'marketing'],
 
   // Aucun numéro de compte ici : le rattachement article → compte appartient à balance-service (AD-8). Seul le
   // compte 38 (transit) est nommé, et il passe par une catégorie transmise, jamais par un numéro (AD-9).
   referentielFamilies: [],
 
-  // C7 : droits de tenant, les six de FR-S61 (vocabulaire fermé, AD-16). L'export reste réservé à
+  // C7 : droits de tenant, les six de FR-S61 (vocabulaire fermé, AD-16), plus trois ajoutés par le PRD
+  // distributeur (annexe B.2). L'export reste réservé à
   // instance:donnees:exporter (C2).
   droits: [
     'stock:etat:consulter', // stock par point de stock, à une date, valeurs, alertes, dormant, groupe K sous portée
@@ -71,6 +77,10 @@ export const MANIFESTE_STOCK = {
     'stock:inventaire:realiser', // comptages tournants ou complets ; un comptage produit un écart (FR-S49)
     'stock:valorisation:configurer', // méthode par exercice, droit restreint : décision comptable (FR-S62)
     'stock:entrepot:administrer', // points de stock, capacités, zones desservies, fermeture gardée (AD-11)
+    // Ajoutés le 2026-11-13 (PRD distributeur, annexe B.2) :
+    'stock:valeur-achat:consulter', // coût d'achat et valeur d'achat du stock (FR-196) : DG, DC, DAF, responsable de stock
+    'stock:transfert:lancer', // « Lancer la navette » entre points de stock (FR-245)
+    'stock:liquidation:lancer', // « Lancer le scénario » d'un plan de liquidation (FR-246)
   ],
 
   // C5 : faits publiés et consommés. Noms proposés ici, à figer par la story de publication (EPIC-084).
@@ -83,6 +93,8 @@ export const MANIFESTE_STOCK = {
     'stock.alerte.changed@1', // rupture, couverture excessive, péremption, dormant, surstock, invendu, saisonnier ; coût de portage
     'stock.valorisation.publiee@1', // arrêté d'exercice : méthode, date, périmètre, checksum, version (AD-7)
     'stock.ouverture.publiee@1', // comptage d'ouverture rendu à la mise en service, si Odoo possède le stock (Connecteurs AD-20)
+    'stock.transfert.lance@1', // navette lancée entre deux points de stock (FR-245) ; consommé par entrepot (2026-11-13, annexe A.17)
+    'stock.liquidation.lancee@1', // scénario d'un plan de liquidation lancé (FR-246) ; consommé par approvisionnement et marketing
     'balance.submitted', // topic existant (adaptateur #1 du hub), sans suffixe ; origine STOCK, à ajouter par EPIC-081
     'instance.journal@1', // ajustements validés, changements de méthode, fermetures d'entrepôt, export, effacement
   ],
