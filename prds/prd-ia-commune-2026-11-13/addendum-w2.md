@@ -1,0 +1,16 @@
+# Addendum — partie W2 (§5 à §9, FR-30 à FR-89)
+
+Choix techniques et pistes. **Ne crée aucune exigence.** L'architecture de l'IA tranche.
+
+1. **Registre des modèles (FR-64, FR-67, FR-69)** : piste MLflow (3.18.0 lu le 2026-11-13), avec **alias** `champion` et `challenger` (les stages sont dépréciés depuis 2.9) ; chargement par `models:/nom@champion` ; retour arrière = déplacement d'alias. À la centrale seulement ; sur l'instance, un registre local minimal (manifeste signé + alias) suffit, sans MLflow.
+2. **Ombre et canari (FR-64)** : copie du trafic puis sorties comparées ; coût = double inférence ; portes écrites avant l'essai ; retour arrière répété pendant le canari.
+3. **Dérive (FR-73)** : piste Evidently (libre, rapports par segment) ; Alibi Detect pour les données non tabulaires ; ne réentraîner que si la dérive touche la performance ; fausses alertes pendant un canari.
+4. **Fédéré et confidentialité différentielle (FR-62)** : écartés du premier jour (avec 5 à 50 institutions, la garantie formelle coûte en utilité). Si repris : NVIDIA FLARE 2.9.0 (le client initie, aucune connexion entrante, cohérent avec le tunnel) ou Flower 1.43.0 (DP « préliminaire ») ; écarter TensorFlow Federated (inactif depuis 2024) ; budget de confidentialité tracé selon NIST SP 800-226.
+5. **Modèles de langage (FR-33, FR-35)** : port unique `LlmProvider` sur API standard (`LLM_BASE_URL`, `LLM_MODEL`) ; exécution locale par un serveur d'inférence quantifié (famille llama.cpp ou vLLM selon matériel) ; deux files (interactive, différée) avec tourniquet ; classes 7-8 Md (8 Go) et 27-35 Md (24 Go) en quantification 4 bits comme point de départ ; chiffrer trois scénarios (API, SaaS hébergé, GPU local) avant de promettre le local.
+6. **Calibration (FR-59, FR-60)** : fichier versionné à schéma JSON, empreinte SHA-256 de la forme canonique JCS ; sœur écrite dans un répertoire daté ; l'« active » est un pointeur ; calcul incrémental par lots.
+7. **Fiche de composition (FR-81)** : champs en piste : identifiant du modèle, empreinte du jeu d'entrée, identifiants de pseudonyme de la centrale par organisation, finalité, rang de registre, plage de dates, version du code, semence, métriques, signataires.
+8. **Désaccords (FR-74, FR-75)** : table `desaccord` (capacité, version, niveau, agent, agence, organisation, décision, motif, échéances attendues) ; un job idempotent par échéance lit les faits de réalité ; classement versionné par règle ; agrégats par coupe recalculés chaque nuit ; l'export commercial est un document signé généré par la centrale (ou par l'instance pour un client seul).
+9. **Ligne de modèles (FR-63)** : manifeste signé distinct du manifeste de plateforme ; contrat de modèle en N et N-1 ; amendements à porter au moteur : AD-3, AD-7, AD-28, AD-32.
+10. **Masquage (FR-34)** : bibliothèque de la plateforme (moteur AD-15, AD-26) ; jetons réversibles côté service ; reconstitution à la réponse.
+11. **Garde du registre hébergé (FR-88)** : bibliothèque cliente appelée par chaque interface de lecture ; décision en cache court ; suite de tests commune.
+12. **Jeux d'évaluation (FR-69)** : figés par version de capacité, tirés dans le temps pour le N2 ; jeux synthétiques étiquetés par les règles pour le N1 initial (enseignant-élève).
