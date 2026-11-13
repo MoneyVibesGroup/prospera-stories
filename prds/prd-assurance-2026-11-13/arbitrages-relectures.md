@@ -1,0 +1,37 @@
+# Arbitrages de l'assembleur sur les relectures (2026-11-13)
+
+Pris sur délégation du PO (« analyse et complète toi-même »). Ils font foi pour `corrections.md`. Chaque arbitrage reste à confirmer à la séance d'immersion quand il touche une pratique de la compagnie (balise `[ASSUMPTION]`).
+
+## Les cinq critiques de la relecture adversariale
+
+**R1 — Rien n'est payé pendant le délai de dénonciation.** Au corporel, aucun règlement issu d'une transaction (offre définitive ou provisionnelle acceptée) n'est **émis** avant la fin du délai de dénonciation de 15 jours (art. 235). Condition bloquante `DELAI_DENONCIATION_ECOULE` sur les transitions d'émission. La transition 42 (dénonciation) reste depuis `ORDRE_EMIS`, puisque rien n'est émis avant. Le délai de paiement court depuis la fin de la dénonciation (arbitrage 9 de `coherence.md`).
+
+**R2 — Jamais deux fois le même paiement.** Chaque règlement porte une **clé d'idempotence** unique, transmise à `paiement` et gardée à chaque nouvelle tentative. L'état `INCONNU` (issue non confirmée par `paiement`) entre dans la matrice des états du règlement : **aucune nouvelle tentative** tant que le rapprochement ne l'a pas tranché (`PAYE` ou `ECHEC` confirmé). Un `ECHEC` n'est relancé qu'avec la même clé, après confirmation de `paiement`. Un règlement `EN_COURS` ou `INCONNU` ne s'annule pas : il se résout d'abord. Un **chèque annulé** exige l'**opposition bancaire enregistrée** (référence, date) avant tout chèque de remplacement. Les FR qui se contredisent sur l'annulation du chèque s'alignent sur cette règle.
+
+**R3 — Un seul numéro de sinistre par déclaration.** La référence `DEC-` est l'**identifiant d'idempotence** envoyé au logiciel de la compagnie (champ obligatoire de l'annexe C) : le LC renvoie le numéro existant pour une `DEC-` déjà reçue `[ASSUMPTION: capacité à exiger du LC ; sinon contrôle de doublon par Prospera avant tout rattachement]`. Une déclaration est dans **une seule voie** à la fois : envoi automatique **ou** liste « à saisir ». Le passage à la liste annule d'abord l'envoi en attente ; une déclaration de la liste n'est jamais renvoyée automatiquement ; un numéro reçu pour une `DEC-` déjà numérotée est un **écart** (file des écarts), jamais un second rattachement. Si la compagnie bascule plus tard la numérotation dans Prospera, les numéros Prospera ont un **préfixe distinct** de ceux du LC.
+
+**R4 — L'accord qui libère l'argent n'est pas enregistré par l'instructeur.** L'accord de l'assuré (offre signée, procès-verbal de transaction) est **enregistré par l'accueil (`ACC`)** ou par un agent qui n'a ni instruit ni validé le dossier, sur la **pièce originale signée**, scannée et rattachée, avec contrôle d'identité du signataire. Ajouter à la liste des cumuls interdits : instruire **et** enregistrer l'accord ; valider **et** enregistrer l'accord ; émettre **et** faire signer la quittance.
+
+**R5 — Les données de santé ne fuient pas.** `ACC` et `NUM` voient le **type** et l'**existence** d'une pièce médicale, jamais son contenu : la lecture par l'IA et le contrôle de qualité d'une pièce médicale ne leur montrent aucun extrait (contrôle de qualité = lisibilité de l'image seulement). Le **LC ne reçoit aucune donnée médicale** : ni gravité, ni nature des lésions, ni texte libre ; seulement le volet, les montants et des **motifs codés**. Base légale : le traitement des données de santé pour indemniser relève de l'obligation légale d'offre et de l'exécution du contrat ; le consentement est recueilli à la déclaration, mais **son absence ne bloque jamais** une obligation légale (offre, délais) `[ASSUMPTION: à valider par le juriste, §13.2]`.
+
+## Autres arbitrages
+
+**R6 — Validation à trois sous 1 000 000 FCFA** (procédure du groupe dans le récit du PO). Défaut : la proposition de l'instructeur, le **contrôle** d'un second agent du volet (un autre `GEST` désigné comme contrôleur, ou le `RESP`), et la **validation** du `RESP` ; le contrôleur et le validateur sont deux personnes distinctes de l'instructeur. Au-delà : comité de 4 + visa du `DT` (D8 inchangé). Tout est paramétrable `[ASSUMPTION]`.
+
+**R7 — Pas de réduction du périmètre.** Le PO a dit « tout le circuit au premier jour » et, pour l'IMF, « charge de février : ne rien modifier ». Le PRD ne coupe rien. Il ajoute au §10 un **ordre de construction recommandé** (chemin de la démo d'abord : déclarer → ouvrir → instruire → chiffrer → décider → offrir → accord → payer → clore → archiver ; puis recours, fraude, états techniques, IA avancée), sans valeur de périmètre. A-16 reste une question au PO.
+
+**R8 — Arrondi.** L'arrondi à 5 000 FCFA ne vaut que pour les montants **calculés par le système** (provision d'ouverture, indemnité proposée par un formulaire d'instruction). Le **montant arrêté** par le gestionnaire est au **franc près** (395 500 FCFA pour `SIN-2026-9002`).
+
+**R9 — Les 104 vérifications du rejeu.** Une table de reprise dit, pour chaque vérification touchée par une décision du PRD, si elle est **gardée**, **réécrite** (nouvelle valeur attendue) ou **retirée** (décision citée). La recette exige 104 sur 104 **de la table réécrite**.
+
+**R10 — Annexe D et corps.** Quand une FR et l'annexe D divergent, on corrige **la FR** pour qu'elle porte la valeur de l'annexe D (et pas l'inverse), sauf si la valeur de l'annexe D est sous un plancher légal : alors le plancher légal l'emporte partout. Délai de déclaration : **au moins 5 jours ouvrés, 48 heures pour le vol** (art. 12-4°). « 42 transitions » partout.
+
+**R11 — Provision au refus.** Au corporel VTM, un refus de garantie ou un classement ne remet **pas** la provision à zéro tant que l'obligation légale d'offre demeure (art. 237) ; ailleurs, la provision est ramenée à zéro avec motif et visa.
+
+**R12 — Corporel à plusieurs véhicules.** Ajouter une exigence : désignation de l'assureur qui présente l'offre pour compte commun, intérêts de retard à sa charge, répartition entre assureurs (art. 231 al. 6, 267 à 270, si SÛR).
+
+**R13 — Ajouts demandés par les réconciliations, retenus** : mise en service (formation par profil, documentation d'usage, accompagnement sur site) ; réversibilité (export complet en format ouvert, documentation d'exploitation, accès administrateur remis) ; registre des décès et des ayants droit ; suivi médical complet (certificats, chronologie, absence et nouvelle convocation, suivi après consolidation, urgence corporelle) ; sinistres majeurs (avis au réassureur selon le traité, comité de suivi, rapports périodiques) ; états techniques de la direction (liquidation, boni/mali, note de synthèse, revue mensuelle) ; contrôles du mémoire (contrôle de séquence des numéros, revue mensuelle des dossiers vivants, état hebdomadaire des déclarations, prévisions hebdomadaires de règlement) ; engagements de décaissement en deux colonnes (exigible / à confirmer, jamais sommées) ; courriers archivés en copie et impression groupée ; boucle offre expirée ou retournée, courrier retourné ; vues DAF et DSI ; écarts au deck dits au §1 ; « défendable devant l'assuré, l'auditeur ou le juge » comme principe de l'IA et du journal ; processus qui évolue par paramètres (pas « figé »).
+
+**R14 — Anonymat.** Remplacer « compagnie du même groupe au Sénégal » et ses variantes par « la compagnie étudiée par le mémoire de 2014 (zone CIMA) ».
+
+**R15 — Ce qui n'est pas retenu sans avis du PO** : toute réduction de périmètre ; tout changement de D1-D3 (numéro du LC, contrats lus).
