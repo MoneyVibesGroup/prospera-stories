@@ -1,7 +1,7 @@
 // Manifeste M42 — Réseau freelance (format du contrat de module, clause C1, amendée le 2026-11-10, le
 // 2026-11-11 et le 2026-11-12).
 // Source : PRD distributeur (prds/prd-distributeur-2026-11-12), annexe A.7, treize clauses C1 → C13 tranchées.
-// Le propriétaire du dépôt `freelance-service` [À CONFIRMER, M42] le copie dans `src/module.manifest.ts` la
+// Le propriétaire du dépôt `pdv-service` (hôte du module, D-24) le copie dans `src/module.manifest.ts` la
 // semaine où il y travaille ; une garde de test compare ensuite le fichier du dépôt à la copie du catalogue (C1).
 // Références : PRD distributeur §5.7 (FR-93 → FR-99), FR-8 (droit explicite de la direction), FR-33 et FR-45,
 //              FR-52 et FR-224 (facture du freelance), FR-247 (Créance dont le tiers est le freelance),
@@ -10,24 +10,22 @@
 //              spine de Connecteurs (AD-2 : `domainesEchange: []`).
 // Dépendances dures validées par le PO le 2026-11-12 (annexe A.7, C1) : `catalogue` et `pdv`.
 //
-// ⚠️ DÉCISION DE CADRAGE : PROPOSITION, À VALIDER PAR LE PO.
-// L'annexe A.7 laisse ouvert « add-on : manifeste ou option de pack ? » (A.7 C1, A.17 point 10, ligne M42 de
-// manifestes-a-produire.md). Remarque de Dev B (2026-11-13) : un freelance n'est pas obligatoire dans une
-// société. On retient donc, comme PROPOSITION, un MODULE INSTALLABLE À PART (code `freelance`, manifeste
-// propre), selon le principe d'Odoo : ce que toutes les sociétés n'utilisent pas s'installe à part. Le §5.7
-// (FR-99) le dit déjà : « l'add-on est un module installable : sans lui, le type de commercial `FREELANCE`
-// n'est pas proposé et les écrans freelance n'existent pas ». Commercialement, il reste VENDU comme add-on
-// (option des quatre bundles distributeur, Grand et Moyen ; forfait plus prix par freelance actif, grille de
-// la partie 1) : « add-on » désigne l'offre, « module » désigne la mécanique d'installation. Les deux ne se
-// contredisent pas.
-// Alternative écartée : « option de pack », c'est-à-dire des droits (`freelance:*`) et un profil portés par
-// `catalogue` et `pdv`, sans manifeste (A.17 point 10 : les lignes A.7 deviendraient des droits et un profil
-// de ces deux modules et le manifeste disparaîtrait). Écartée parce que le statut des indépendants, les
-// commissions, le classement séparé et le barème d'abonnement par freelance actif encombreraient `catalogue`
-// et `pdv` chez TOUTES les sociétés, y compris celles qui n'ont aucun freelance, et que « non installé »
-// (FR-99, C4) ne serait plus exprimable : le module ne pourrait être ni installé, ni désinstallé, ni mesuré
-// à part. Le modèle économique (le freelance vend pour le compte de la société) est, lui, tranché (PO,
-// 2026-11-12) et ne dépend pas de ce choix. Si le PO tranche « option de pack », ce fichier disparaît.
+// ✅ DÉCISION DU PO (2026-11-13, D-24 du PRD distributeur, 20e séance de la salle) :
+// - MODULE INSTALLABLE (code `freelance`, gate `FREELANCE_NOT_ENTITLED`, ce manifeste), VENDU comme add-on
+//   (forfait plus prix par freelance actif). Un freelance n'est pas obligatoire dans une société (Dev B) ; FR-99
+//   le dit : « sans lui, le type de commercial FREELANCE n'est pas proposé ». Comme Odoo : la case des
+//   Paramètres que voit le client installe un module (`sale_margin`, commissions d'agents OCA).
+// - Alternative écartée : « option de pack » (droits et profil portés par `catalogue`/`pdv`) : sans code de
+//   module, ni gate, ni « non installé », ni compteur par freelance actif.
+// - HÉBERGÉ dans `pdv-service` (pas de dépôt neuf : ~13 points de socle évités) : le portefeuille d'un
+//   freelance est un portefeuille de points de vente et la révélation au départ est déjà dans pdv (AD-5).
+//   Ses collections (statut, commissions, classement) restent les SIENNES, derrière sa gate : exception au
+//   critère du §4 du contrat (« un agrégat distinct, un service distinct »), à ÉCRIRE dans la spine du
+//   distributeur, sans quoi la garde de câblage rougit.
+// - `catalogue`, `reseau` et `pdv` listent `freelance` en `enrichiPar` : sans lui, grilles et écran « Mes
+//   prix », statut indépendant et révélation sont `NON_INSTALLE`.
+// - Compteur de l'add-on : `freelance.freelance.active@1`, lu par `paiement` (facturation des abonnements
+//   Prospera, même gate que paiement) pour « prix par freelance actif ».
 //
 // Décisions du PO du 2026-11-12, déjà dans le PRD : le freelance VEND POUR LE COMPTE de la société, il
 // n'achète pas de stock ; deux prix (ex. 14 000 F société, 15 000 F freelance) ; la société voit 14 000 F et
@@ -54,7 +52,7 @@
 //   · `freelance:commission:consulter` : FREELANCE (la sienne) ; DG, DC, DAF par droit explicite (FR-8) ;
 //   · `freelance:classement:consulter` : DG, DC, RESP_VENTES ; FREELANCE (le sien) ;
 //   · `freelance:freelance:activer` : DC, DIST_ADMIN.
-// - Service porteur : `freelance-service` [À CONFIRMER, M42 : dépôt à créer].
+// - Service porteur : `pdv-service` (hôte, D-24), derrière la gate `freelance` ; pas de dépôt propre.
 // - Cloisonnement (C2) : par `organisationId` ET par freelance, le plus strict du produit ; deux freelances ne
 //   se voient pas (FR-C30). Gate : refus `FREELANCE_NOT_ENTITLED`, 403 sans donnée. Un point de vente hors
 //   portefeuille : `PDV_HORS_PERIMETRE` ; déjà affecté à un autre portefeuille : `PDV_DEJA_AFFECTE` (FR-95).
@@ -119,7 +117,7 @@ export const MANIFESTE_FREELANCE = {
   // Chaque fait d'objet porte l'identifiant stable de l'objet, l'`organisationId` et un `rang`. ⛔ Aucun fait
   // ne porte un prix freelance ni une marge. Le départ d'un freelance n'a qu'une source, `pdv.commercial.parti@1`.
   publie: [
-    'freelance.freelance.active@1', // activation d'un commercial en freelance (compte pour l'add-on) ; facturation, equipe le lisent
+    'freelance.freelance.active@1', // activation d'un commercial en freelance ; COMPTEUR de l'add-on, lu par paiement (abonnements, D-24) ; facturation, equipe le lisent
     'freelance.commission.acquise@1', // base : prix société facturé (FR-98) ; jamais le prix freelance
     'instance.journal@1', // [proposition, C13/journal d'instance, comme stock] activations, désactivations, export, effacement ; AUCUN prix freelance
   ],

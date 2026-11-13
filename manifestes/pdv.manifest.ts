@@ -58,7 +58,11 @@ export const MANIFESTE_PDV = {
   // - paiement : encours du tiers (créances ouvertes + commandes validées non facturées − crédit du tiers,
   //   FR-187, FR-247, FR-248) ; la fiche montre plafond − encours = disponible à crédit. Sans paiement (ou sans
   //   commande), encours et disponible sont `NON_INSTALLE`, jamais 0.
-  enrichiPar: ['stock', 'commande', 'facturation', 'terrain', 'recouvrement', 'catalogue', 'dashboard', 'paiement'],
+  // - freelance (décision du PO du 2026-11-13, D-24 du PRD distributeur, FR-99) : portefeuille d'un freelance et révélation de ses prix à son
+  //   départ (AD-5) ; sans lui, le départ se réduit à la réaffectation et la révélation s'écrit « non
+  //   installé ». Le module `freelance` est HÉBERGÉ dans pdv-service, derrière SA gate et avec SES collections
+  //   (exception au critère du §4 du contrat, à écrire dans la spine du distributeur).
+  enrichiPar: ['stock', 'commande', 'facturation', 'terrain', 'recouvrement', 'catalogue', 'dashboard', 'paiement', 'freelance'],
 
   referentielFamilies: [],
 

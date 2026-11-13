@@ -81,7 +81,10 @@ export const MANIFESTE_RESEAU = {
   // - stock : entrepôts et magasins propres rattachés, avec leur rôle de desserte (FR-R17).
   // Le §5 du contrat écrivait `enrichiPar: []` pour le squelette de la semaine 1 ; la couverture arrive avec
   // l'incrément 3 (EPIC-051, EPIC-052).
-  enrichiPar: ['pdv', 'stock'],
+  // - freelance (décision du PO du 2026-11-13, D-24 du PRD distributeur, FR-99) : sans lui, le statut « indépendant » d'un commercial n'est PAS
+  //   proposé (seul « salarié » l'est) ; un commercial indépendant déjà enregistré reste lisible, marqué
+  //   « module freelance non installé ».
+  enrichiPar: ['pdv', 'stock', 'freelance'],
 
   // Pas de référentiel national de localités au v1 : la résolution par localité (FR-R18b) s'appuie sur les
   // localités que l'organisation déclare sur ses zones (FR-R02, Q4 : liste de localités au v1).
