@@ -572,7 +572,7 @@ prospera-app/src/modules/
 
 - **Q-2** Qui écrit la quittance et le chèque (AD-2 : quittance = `sinistres`, chèque = `paiement`) ; la remise au guichet à deux temps (AD-5) est à confirmer par le PO et Dev A.
 - **Q-3** Produit de stockage objet de production : SeaweedFS (recommandé) ou Garage (repli), en remplacement de MinIO avant la mise en service ; décision de plateforme, en attente du PO (Stack, AD-9).
-- **Q-4** Le relais Money Vibes : service, propriétaire et date de cadrage du portail ; ouvert aussi côté microfinance.
+- ~~**Q-4** Le relais Money Vibes : service, propriétaire et date de cadrage du portail ; ouvert aussi côté microfinance.~~ **Tranchée (2026-11-13)** : le relais est `prospera-relais`, décrit par AD-44 de la spine du moteur ; propriétaire Dev A ; à cadrer avant février.
 - **Q-6** `paiement.reglement.changed@1` à la place des quatre faits proposés par l'annexe A : accord de Dev A.
 - **Q-7** Séquence `DEC-` : par exercice de l'enregistrement, sur toute l'organisation ou par guichet ? Par défaut : organisation (AD-6).
 - **Q-8** Corriger l'annexe A.1 du PRD (règlements) : par la série de PR d'AD-21.

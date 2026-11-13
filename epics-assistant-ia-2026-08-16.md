@@ -17,6 +17,8 @@ inputDocuments:
 
 # Assistant IA socle (`assistant-service`) — Découpage en épics
 
+*Amendée le 2026-11-13 : assistant-service passe à :3417 ; :3011 reste à prospera-microfinance-service (déjà codé). Les mentions de `:3011` ci-dessous sont à lire `:3417` ; le texte d'origine n'est pas réécrit.*
+
 ## Vue d'ensemble
 
 Découpage du PRD **Assistant IA socle** et de la colonne vertébrale (**AD-1 → AD-23**) en épics

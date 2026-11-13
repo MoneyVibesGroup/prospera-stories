@@ -22,6 +22,8 @@ sources:
 
 # Architecture Spine — notification-service
 
+*Amendée le 2026-11-13 : assistant-service passe à :3417 ; :3011 reste à prospera-microfinance-service (déjà codé)*
+
 ## Design Paradigm
 
 **Hexagonal (ports & adaptateurs)** autour d'un noyau métier pur, lui-même **relying-party** de l'IdP.
@@ -724,8 +726,8 @@ nouveau, chaîné.
 
 Un conteneur `notification-service` dans le `docker-compose` racine, port **`:3008`** — vérifié libre
 le 2026-08-04 (3000 `expert-comptable`, 3001 `auth`, 3002 `kyc`, 3003 `platform-catalog`, 3004
-`bilan`, 3006 `document`, 3007 `balance`, 3010 `admin-panel` ; 3005, 3011 et 3012 réservés par les
-spines `paiement`, `assistant-ia` et `fiscal`). **Deux bases** sur le réplica set `rs0` partagé :
+`bilan`, 3006 `document`, 3007 `balance`, 3010 `admin-panel` ; 3005 et 3012 réservés par les
+spines `paiement` et `fiscal` ; 3011 réservé alors à `assistant-ia`, **tenu depuis par `prospera-microfinance-service`** : `assistant-service` passe à 3417). **Deux bases** sur le réplica set `rs0` partagé :
 `notification_service` pour le métier et le journal, `notification_service_preuves` pour les
 consentements, les désabonnements et l'audit — convention de nommage constatée dans le
 `docker-compose`. File BullMQ sur le Redis partagé. Doit figurer dans l'`AUTH_AUDIENCE` de l'IdP.

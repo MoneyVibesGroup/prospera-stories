@@ -12,6 +12,8 @@ inputDocuments:
 
 # Distributeur — Découpage en épics
 
+*Amendée le 2026-11-13 : assistant-service passe à :3417 ; :3011 reste à prospera-microfinance-service (déjà codé)*
+
 ## Vue d'ensemble
 
 Découpage du **PRD Distributeur** et de sa **spine** en **épics**, comme pour la microfinance, l'assurance, le stock, le moteur et Reprise/Connecteurs : les fiches de stories ne sont **pas** écrites ici, mais par celui qui code la story, juste avant de la coder. Chaque épic porte son **backend** et ses **écrans**, et sa fin se prouve de bout en bout sur le vrai backend, sans mock. **Tous les écrans sont faits par Dev B** (règle du programme) ; le backend est proposé à Dev A, sauf décision contraire du PO. Le client de février est nommé « le distributeur ».
@@ -24,7 +26,7 @@ Découpage du **PRD Distributeur** et de sa **spine** en **épics**, comme pour 
 
 **Chemin critique.** EPIC-222 (socle) → EPIC-224 (séries sans perte, avant le premier numéro) → EPIC-231 (Créance et amendement de `paiement`, Dev A, avant `facturation`) → EPIC-227 (référentiels : `reseau`, `catalogue`, `pdv`, `stock`) et EPIC-225 (encours, saga de réservation), construits ensemble → EPIC-228 (commande) → EPIC-229 (entrepôt, livraison) → EPIC-230 (facturation) → EPIC-232 (envoi et encaissement). En parallèle dès le début : EPIC-223 (rôles), EPIC-224 (jeu de répliques, amendement du moteur) et l'amendement de `paiement` d'EPIC-231 (Dev A). La tournée suit la commande : EPIC-233 (serveur) → EPIC-234 (application, qui prouve le hors ligne) ; EPIC-235 (recouvrement) après EPIC-231 et EPIC-225 ; EPIC-244 (reprise) après EPIC-230 et EPIC-231 ; **EPIC-226 (jeu, essai, recette) se construit en même temps que les commandes publiques qu'il rejoue et clôt la tranche**. Ensuite : EPIC-236 (freelance), EPIC-237, EPIC-238, puis les épics de la partie 3 qui lisent des faits (EPIC-239 à EPIC-243).
 
-**Points ouverts qui touchent le plan.** Q-2 (Dev A écrit l'amendement de `paiement`, accord sur son contenu : EPIC-231) ; Q-7 (port 3011 de `assistant-service` : EPIC-242) ; l'amendement « profil d'instance hébergée » de la spine du moteur (jeu de répliques à trois membres, EPIC-224) ; l'essai d'une demi-journée du client d'API Dart sur un point de synchronisation à formes multiples (EPIC-234, AD-14, `[ASSUMPTION]`) ; actions du PO A-1 (mentions légales par l'expert-comptable, avant la recette de la facture, EPIC-230), A-2 (avis juridique sur la position GPS, avant la mise en service de `terrain`, EPIC-233), A-3 (taille du client, cibles de performance), A-4 (exports Sage, format du numéro de facture, EPIC-224 et EPIC-244), A-5 (gamme du jeu, EPIC-226). **Risque assumé R-1** : tout, sans ordre figé, face aux essais du 15/01 et au client de février ; la charge n'est pas chiffrée ici, la règle « bientôt » donne la marge.
+**Points ouverts qui touchent le plan.** Q-2 (tranchée le 2026-11-13 : amendement de `paiement` écrit et validé par le PO, `amendement-2026-11-13-distributeur.md` : EPIC-231) ; Q-7 (tranchée le 2026-11-13 : `assistant-service` passe à `:3417`, `:3011` reste à `prospera-microfinance-service` : EPIC-242) ; l'amendement « profil d'instance hébergée » de la spine du moteur (jeu de répliques à trois membres, EPIC-224) ; l'essai d'une demi-journée du client d'API Dart sur un point de synchronisation à formes multiples (EPIC-234, AD-14, `[ASSUMPTION]`) ; actions du PO A-1 (mentions légales par l'expert-comptable, avant la recette de la facture, EPIC-230), A-2 (avis juridique sur la position GPS, avant la mise en service de `terrain`, EPIC-233), A-3 (taille du client, cibles de performance), A-4 (exports Sage, format du numéro de facture, EPIC-224 et EPIC-244), A-5 (gamme du jeu, EPIC-226). **Risque assumé R-1** : tout, sans ordre figé, face aux essais du 15/01 et au client de février ; la charge n'est pas chiffrée ici, la règle « bientôt » donne la marge.
 
 ## Requirements Inventory
 
@@ -803,7 +805,7 @@ Le module `finance-transactions` de `prospera-pilotage-service` : écritures de 
 
 ### EPIC-242 : Les automatisations
 
-Le module `automatisations` (M26) porté par `assistant-service` : la règle est un objet enregistré, trois modes dont un mode `AUTO` qui reste sûr, garde-fous transverses, file d'arbitrage (Valider, Reporter, Ignorer), exécution réelle (jamais simulée), activer et désactiver une règle pour de vrai, journal de la nuit, badge qui compte le travail réel. Le module lit des faits et ne dépend de personne ; la règle avant le modèle et la provenance toujours (`PropositionPort`). Port 3011 réservé à `assistant-service` (Q-7 à départager par la spine du moteur).
+Le module `automatisations` (M26) porté par `assistant-service` : la règle est un objet enregistré, trois modes dont un mode `AUTO` qui reste sûr, garde-fous transverses, file d'arbitrage (Valider, Reporter, Ignorer), exécution réelle (jamais simulée), activer et désactiver une règle pour de vrai, journal de la nuit, badge qui compte le travail réel. Le module lit des faits et ne dépend de personne ; la règle avant le modèle et la provenance toujours (`PropositionPort`). Port de `assistant-service` : `:3417` (Q-7 tranchée le 2026-11-13) ; `:3011` reste à `prospera-microfinance-service`.
 
 **FRs covered:** FR-157 → FR-164
 

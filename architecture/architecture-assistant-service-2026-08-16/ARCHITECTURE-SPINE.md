@@ -26,6 +26,8 @@ companions:
 
 # Architecture Spine — assistant-service
 
+*Amendée le 2026-11-13 : assistant-service passe à :3417 ; :3011 reste à prospera-microfinance-service (déjà codé)*
+
 > **Quatre arbitrages PO du 2026-08-16 sont intégrés** (§*Arbitrages*) : le transport de la demande
 > d'exécution, l'assiette du plafond de mandat, la portée par dossier, et le portage de l'extension
 > `perms[]`. ⚡ **Le premier amende FR-IA04 du PRD** — à reporter dans le PRD, sans quoi le document
@@ -71,11 +73,11 @@ qui les contredirait est un conflit à remonter, pas une dérogation.
 | Une donnée de configuration n'est jamais un programme | `notification` AD-8 · `fiscal` AD-2 | Règles, garde-fous et scores : registre de stratégies typées, aucune expression évaluée |
 | `ReferentielVersion` (code, version, `artifactUri`, checksum) | `architecture-catalog-service` | Corpus légal et catalogue des types d'action s'y rattachent au lieu d'inventer un registre |
 | Un fournisseur de candidats expose des **faits**, jamais un jugement ni une action | `stock` AD-15 · `reseau` AD-13 | Le jugement appartient à l'assistant ; l'action, au module exécutant |
-| `:3011` réservé à `assistant-service` | spines `notification` et `fiscal` (§Déploiement) | Port acquis avant ce document |
+| ~~`:3011` réservé à `assistant-service`~~ | spines `notification` et `fiscal` (§Déploiement) | Remplacé (2026-11-13) : `assistant-service` passe à **`:3417`** ; `:3011` reste à `prospera-microfinance-service`, déjà codé |
 
 ### Réemployé de la note du 2026-07-20 (⛔ dépassée sur son principe cardinal)
 
-Survit et n'est pas re-décidé : le **placement** (service dédié, relying party, base propre, `:3011`),
+Survit et n'est pas re-décidé : le **placement** (service dédié, relying party, base propre, `:3417`),
 l'abstraction **`LlmProvider`** sur API standard du marché, le **RAG** et son **corpus déjà livré**
 (1 185 articles CGI/LPF), l'**OCR inchangé** (Tesseract reste dans `document-service` ; un modèle vision
 est hors périmètre). **Tombe** : le principe cardinal §0, le cycle de Proposition de la §5, le découpage
@@ -85,7 +87,7 @@ est hors périmètre). **Tombe** : le principe cardinal §0, le cycle de Proposi
 
 ```mermaid
 graph TD
-  AS["assistant-service :3011"]
+  AS["assistant-service :3417"]
   CAT["platform-catalog-service<br/>ReferentielVersion + Entitlement"]
   NOT["notification-service<br/>rendu + remise"]
   DET["surfaces déterministes<br/>bilan-service · balance-service · fiscal-service"]
@@ -540,8 +542,7 @@ Il n'existe **pas** d'état `EXECUTE` : l'exécution est un agrégat distinct (A
 
 ### Déploiement et exploitation
 
-Un conteneur `assistant-service` dans le `docker-compose` racine, port **`:3011`** — réservé par les
-spines `notification` et `fiscal`. **Deux bases** sur le réplica set `rs0` partagé : `assistant_service`
+Un conteneur `assistant-service` dans le `docker-compose` racine, port **`:3417`** (amendement du 2026-11-13 ; `:3011`, d'abord réservé par les spines `notification` et `fiscal`, reste à `prospera-microfinance-service`, déjà codé ; `:3417` est libre dans tout le dépôt). **Deux bases** sur le réplica set `rs0` partagé : `assistant_service`
 pour le métier, `assistant_service_audit` pour l'audit d'inférence (AD-16). Files BullMQ sur le Redis
 partagé : `assistant-evaluation`, `assistant-inference-interactive`, `assistant-inference-differee`,
 `assistant-maintenance`. Doit figurer dans l'`AUTH_AUDIENCE` de l'IdP.
