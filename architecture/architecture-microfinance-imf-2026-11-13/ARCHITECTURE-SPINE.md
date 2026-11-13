@@ -393,7 +393,7 @@ Les faits des voisins consommés ici gardent leurs noms (`paiement.creance.chang
 - **Binds:** FR-158, FR-258, FR-263, FR-268, addendum §6
 - **Prevents:** un événement du fournisseur acquitté puis perdu ; une page de lien rendue par deux unités ; un lien qui porte un nom de client ; un état de lien que le relais ne connaît pas.
 - **Rule:**
-  - Le relais est une unité de la plateforme Money Vibes (service et base à part, un propriétaire), seul écrivain de la file des événements entrants et des états de liens ; Money Vibes y est sous-traitant. `[ASSUMPTION]` nom et forme du service à fixer au cadrage du relais.
+  - Le relais est une unité de la plateforme Money Vibes (service et base à part, un propriétaire), seul écrivain de la file des événements entrants et des états de liens ; Money Vibes y est sous-traitant. ~~`[ASSUMPTION]` nom et forme du service à fixer au cadrage du relais.~~ **Tranchée (2026-11-13)** : le relais est `prospera-relais`, service de plateforme décrit par AD-44 de la spine du moteur (boîte aux lettres chiffrée, durée limitée, l'instance tire, propriétaire Dev A, à cadrer avant février).
   - L'instance **publie** vers lui (sortie 443 déclarée, AD-9 du moteur) l'état de chaque lien (jeton opaque, montant, expiration, usage unique, état) et **tire** les événements entrants ; elle n'acquitte qu'après écriture ; le relais n'acquitte le fournisseur qu'après écriture durable ; rejeu par `(fournisseur, identifiant d'événement)` ; purge à 7 jours (annexe D).
   - La page de lien est **servie par le relais**, jamais par l'instance ; le lien ne porte **aucun nom** de client.
   - Un écart avec le relevé du fournisseur entre dans la file des écarts de `paiement`. Les listes de sanctions passent par un **miroir distinct** du relais.

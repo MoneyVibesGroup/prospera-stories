@@ -6509,9 +6509,10 @@ atelier_balance_epics:
     - { id: "EPIC-023", name: "Moteur fiscal (résultat fiscal, IS=max(MFP,IS), TVA, taxes, provisions)", frs: "FR-A18..A21", stories: "STORY-091..095", status: "proposed" }
     - { id: "EPIC-024", name: "Simulation & conseil fiscal + contrôles & handoff bilan-service", frs: "FR-A22..A28", stories: "STORY-096,097,098,100 ; 099 (CORE S10)", status: "proposed" }
 
+# Amendée le 2026-11-13 : assistant-service passe à :3417 ; :3011 reste à prospera-microfinance-service (déjà codé)
 # ── Transverse : Assistant IA (analyse & proposition) — note docs/architecture-assistant-ia-2026-07-20.md ────────
 # Capacité IA TRANSVERSE (décision 2026-07-20). Principe cardinal : l'IA PROPOSE (contrat Proposition, human-in-the-loop) ;
-# les moteurs DÉTERMINISTES (bilan EPIC-011/011B, fiscal EPIC-023) CALCULENT/DÉCIDENT. Service dédié assistant-service (:3011).
+# les moteurs DÉTERMINISTES (bilan EPIC-011/011B, fiscal EPIC-023) CALCULENT/DÉCIDENT. Service dédié assistant-service (:3417 depuis le 2026-11-13 ; ex-:3011).
 # Capacité IA TRANSVERSE. ⚡ RE-CADRÉE LE 2026-08-16 : la doctrine n'est plus « l'IA propose, l'humain valide »
 # mais « l'acte est-il RÉVERSIBLE et SANS ENGAGEMENT ? » (§2 du PRD du 2026-08-02). L'IA peut donc AGIR SEULE
 # sur l'acte réversible, sous garde-fous, quota, mandat daté et journal — ce que l'ancienne note interdisait,
@@ -6524,7 +6525,7 @@ assistant_ia_epics:
   service: "assistant-service"
   epics:
     - id: "EPIC-095 → EPIC-105"
-      name: "Assistant IA socle (assistant-service :3011) — 11 épics, 142 pts"
+      name: "Assistant IA socle (assistant-service :3417, ex-:3011) — 11 épics, 142 pts"
       frs: "FR-IA01 → FR-IA52 + NFR-1 → NFR-7 (les 52 FR et 7 NFR rattachés à au moins une AD) ; débloque EPIC-024 (conseil fiscal), déjà vendu et déjà cadré"
       story_estimate: "AUCUN story_id réservé — attribution au slotting"
       status: "ready_for_slotting"  # 🆕 2026-08-16. Plage inscrite dans reserved_ranges le jour du découpage. NON SLOTTÉ : ordonnancement = décision PO. ⛔ 2 AMONTS DURS : STORY-365 (RBAC tenant, S21) pour EPIC-104 ; STORY-371 (référentiel types-action + module assistant au catalogue, S21) pour EPIC-095 et EPIC-101.

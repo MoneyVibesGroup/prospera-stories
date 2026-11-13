@@ -23,6 +23,8 @@ companions:
 
 # Architecture Spine — fiscal-service
 
+*Amendée le 2026-11-13 : assistant-service passe à :3417 ; :3011 reste à prospera-microfinance-service (déjà codé)*
+
 ## Design Paradigm
 
 **Hexagonal (ports & adaptateurs)** autour d'un noyau métier pur, lui-même **relying-party** de l'IdP.
@@ -410,7 +412,7 @@ stateDiagram-v2
 ### Déploiement et exploitation
 
 Un conteneur `fiscal-service` dans le `docker-compose` racine, port **`:3012`** — `:3005` est réservé à
-`paiement-service` et `:3011` à `assistant-service`. **Deux bases** sur le réplica set `rs0` partagé (les
+`paiement-service` ; `:3011` était réservé à `assistant-service`, qui passe à `:3417` (`:3011` reste à `prospera-microfinance-service`). **Deux bases** sur le réplica set `rs0` partagé (les
 transactions multi-documents l'exigent) : `fiscal` pour le métier, `fiscal_audit` pour le journal. File
 BullMQ sur le Redis partagé. Doit figurer dans l'`AUTH_AUDIENCE` de l'IdP.
 
