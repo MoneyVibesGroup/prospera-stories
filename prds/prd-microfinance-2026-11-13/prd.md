@@ -189,6 +189,7 @@ Le cœur de l'IMF fait foi pour l'argent (décision du PO). Prospera ne tient ja
 | Épargne, comptes, caisse du guichet, écritures, balance | **le cœur** | Prospera les lit (décision A8) |
 | Caisse des collecteurs (argent ramassé sur le terrain, remise au guichet) | **Prospera** | le cœur reçoit les encaissements |
 | Relances, promesses, recouvrement, pilotage, risque proposé | **Prospera** | le cœur reçoit ce qui change l'argent (plan d'étalement, perte) |
+| Créances (échéances de prêt) dans Prospera | **`paiement`**, seul propriétaire (PRD-D FR-247 ; décision du PO du 2026-11-13, Q2) | le cœur reste la comptabilité officielle ; l'articulation entre les deux sera analysée quand le connecteur réel sera ajouté (FR-257) |
 
 **Conséquences (testables) :**
 - Aucun écran de Prospera n'affiche un solde, un encours ou un reste dû comme officiel sans dire de quand date la dernière lecture du cœur.
@@ -2443,14 +2444,14 @@ L'IA commune propose au RCC, au RA et au DG les **zones où prospecter** et les 
 #### Exigences propres à l'IMF (recouvrement)
 #### FR-209 : Le remboursement est reçu du cœur ou saisi dans Prospera, et le cœur fait foi
 
-Le recouvrement lit du cœur, via `coeur-sfd`, ce qui touche à l'argent d'un prêt : reste dû, échéances impayées, pénalités, intérêts de retard, et les mouvements de paiement. Les remboursements saisis dans Prospera (guichet, collecte terrain, Mobile Money validé) sont renvoyés au cœur **s'il sait les recevoir** ; sinon ils figurent sur la liste « à saisir dans le cœur » (décision A1 ; FR-155, FR-156). Le registre des créances de `paiement` n'est qu'un **miroir** alimenté par le cœur, pas un propriétaire (écart avec PRD-D FR-247). Réalise UJ-7.
+Le recouvrement lit du cœur, via `coeur-sfd`, ce qui touche à l'argent d'un prêt : reste dû, échéances impayées, pénalités, intérêts de retard, et les mouvements de paiement. Les remboursements saisis dans Prospera (guichet, collecte terrain, Mobile Money validé) sont renvoyés au cœur **s'il sait les recevoir** ; sinon ils figurent sur la liste « à saisir dans le cœur » (décision A1 ; FR-155, FR-156). Les créances (échéances de prêt) appartiennent à `paiement`, **seul propriétaire** (PRD-D FR-247 ; décision du PO du 2026-11-13, Q2) ; les faits du cœur (pénalités, mouvements) alimentent ses composantes. Réalise UJ-7.
 
 **Conséquences (testables) :**
 - Le cœur calcule les pénalités et les intérêts de retard (décision A4) ; le cœur fictif les calcule pour la démo. Prospera n'en calcule aucun et n'en affiche aucun sans la date de la dernière lecture du cœur (FR-2). La convention de la démo (pénalités = 15 % de la mensualité) n'est pas reprise.
-- L'imputation est pénalités, puis intérêts, puis capital (paramétrable, décision A5). Un paiement anticipé réduit la durée ; un trop-perçu devient un crédit du client (FR-137). En cas d'écart entre l'imputation proposée par Prospera et celle du cœur, le cœur gagne et l'écart est signalé au GP.
-- Un remboursement saisi reste « en attente du cœur » tant que le cœur n'a pas renvoyé le mouvement ; il n'est jamais compté deux fois (FR-2). Le dossier de recouvrement lit le reste dû du cœur, pas la somme des saisies de Prospera.
+- L'imputation est pénalités, puis intérêts, puis capital (paramétrable, décision A5). Un paiement anticipé réduit la durée ; un trop-perçu devient un crédit du client (FR-137). Un écart entre l'imputation de `paiement` et celle du cœur est signalé au GP et au CPT dans la file des écarts (FR-159) ; la règle d'arbitrage sera fixée avec le connecteur réel (FR-257).
+- Un remboursement saisi reste « en attente du cœur » tant que le cœur n'a pas renvoyé le mouvement ; il n'est jamais compté deux fois (FR-2). Le dossier de recouvrement lit le reste dû de la Créance de `paiement`, pas la somme des saisies non confirmées.
 - Un remboursement saisi ou validé, en attente du mouvement du cœur, **suspend** la prochaine relance automatique de l'échéance concernée pendant 48 h (paramètre ; valeur du délai d'un remboursement sans mouvement du cœur, FR-159) [ASSUMPTION : suspension pendant l'attente, pour ne pas relancer un client qui a payé]. Passé le délai sans mouvement, la relance reprend et une alerte va au CPT.
-- Un remboursement partiel suspend la relance sur le solde (PRD-D FR-116) ; le reste dû affiché est celui du cœur.
+- Un remboursement partiel suspend la relance sur le solde (PRD-D FR-116) ; le reste dû affiché est celui de la Créance de `paiement`.
 
 #### FR-210 : Le Mobile Money déclaré est validé par le comptable, et le rapprochement se fait à moins de 1 %
 
@@ -2712,7 +2713,7 @@ L'IA commune propose, pour un dossier, des **scripts** d'appel et de visite adap
 | Visite à J+15, À VALIDER | Mission terrain à J+7 | Paramètre ; J+7 à valider par le GP |
 | Mise en demeure à J+30, palier « direction » | Décision du ROC, courrier signé du DG, envoi hors Prospera | Action tracée (FR-217) |
 | Contentieux proposé si probabilité sous 40 | J+90 ou score sous 20, proposé au ROC, DG pour le judiciaire | FR-219 (D2) |
-| Reste dû : `paiement` propriétaire de la créance | Le cœur fait foi | Registre de `paiement` = miroir du cœur (FR-209) |
+| Reste dû : `paiement` propriétaire de la créance | Le cœur fait foi pour l'argent | `paiement` reste **seul propriétaire** des créances (décision du PO du 2026-11-13, Q2) ; l'articulation avec le cœur est analysée à l'ajout du connecteur réel (FR-209, FR-257) |
 | Confirmation de PI-SPI sans action humaine | Mobile Money validé par le comptable | PI-SPI sans validation ; Mobile Money et virement sans référence validés (FR-210, A7) |
 | Probabilité par règle sur le score du point de vente | Score de recouvrement à facteurs, poids affichés | FR-227 (D8) |
 | PAR en tranches et PAR cumulatif (incohérence interne) | PAR 1, 30, 90 cumulatifs sur l'encours entier | Cumulatif seul (FR-173) |
@@ -3139,22 +3140,24 @@ Le DAF lit une **prévision de trésorerie à 7 jours** (entrées : échéances 
 - **Les banques** sont jointes par **PI-SPI** : le bénéficiaire d'un virement vers une autre banque est une adresse du schéma ; le virement vers un compte que le schéma ne joint pas est exécuté par le cœur [ASSUMPTION : le bac à sable PI-SPI n'expose pas l'IBAN].
 - **Encaisser.** Un remboursement par lien (J-3 : WhatsApp avec lien) ou déclaré par la collecte se rattache à l'échéance quand |payé − échéance| ÷ échéance < 1 % (décision A6) ; au-delà, il entre dans la **file de rapprochement** du CPT et n'est **jamais refusé**. La règle de 1 % remplace, pour les échéances de prêt, la tolérance d'un jour de FR-P38 [ASSUMPTION : à porter au PRD `paiement`]. L'ordre d'imputation (pénalités, intérêts, capital) est paramétrable (décision A5) ; un trop-perçu devient un crédit du client (PRD-D FR-248).
 - **Validation du comptable.** Un paiement Mobile Money **déclaré** et un virement **sans référence** restent « en attente » jusqu'à la validation du **CPT** ; un paiement PI-SPI confirmé n'en a pas besoin (irrévocable, décision A7). Le droit de valider un encaissement et le droit de préparer ou valider un ordre de décaissement sont **distincts** : on ne valide pas l'encaissement et l'ordre qui lui correspond (FR-6, FR-P66).
+- **Février (décision du PO du 2026-11-13, Q1).** `paiement` n'a pas encore d'adaptateur Mobile Money sortant : dans la démo, le décaissement Mobile Money est exécuté par le **cœur fictif** ; l'adaptateur sortant de `paiement` est chiffré au plan.
 - Un décaissement suit le **délai de coupure** de la banque (par exemple « valider avant 16 h » dans la démo ; paramètre).
 - Le statut juridique d'une initiation de paiement et du décaissement Mobile Money par un SFD est **à faire confirmer** par un juriste (PRD paiement §10 ; §12.3).
 - En espace d'essai, aucun ordre ni lien réel ne part ; les paiements sont marqués « test » (PRD-D FR-24).
 
-#### FR-257 : Le registre de Créance : un miroir du cœur, pas un registre propriétaire
+#### FR-257 : Le registre de Créance : `paiement` reste seul propriétaire
 
-**Ce qui s'applique tel quel.** La Créance a un tiers, une source, un périmètre et des composantes (principal, intérêt, pénalité, frais) ; elle publie `paiement.creance.changed@1`, `…soldee`, `…cloturee` ; l'ordre d'imputation est paramétrable ; l'argent sans créance devient un crédit du tiers (PRD-D FR-247, PRD-D FR-248). La source `ECHEANCE_DE_PRET` y est « réservée aux verticales microfinance et assurance ».
+**Ce qui s'applique tel quel.** La Créance a un tiers, une source, un périmètre et des composantes (principal, intérêt, pénalité, frais) ; elle publie `paiement.creance.changed@1`, `…soldee`, `…cloturee` ; l'ordre d'imputation est paramétrable ; l'argent sans créance devient un crédit du tiers ; `paiement` est le **propriétaire unique** de la Créance (PRD-D FR-247, PRD-D FR-248).
 
-**Écart de l'IMF, à porter au PRD `paiement` et à PRD-D FR-247.** PRD-D FR-247 pose un **propriétaire unique** de la Créance, `paiement`. Pour une échéance de prêt, **le cœur fait foi pour l'argent** (FR-2, FR-150) : le reste dû, l'échéancier officiel et les pénalités sont ceux du cœur. La Créance `ECHEANCE_DE_PRET` de `paiement` est donc un **miroir** des échéances du cœur, pas un registre propriétaire. Réalise UJ-7.
+**Décision du PO (2026-11-13, Q2).** Pour l'IMF aussi, **`paiement` est le seul propriétaire des créances**, y compris les échéances de prêt (source `ECHEANCE_DE_PRET`). Le PRD `paiement` et PRD-D FR-247 ne sont **pas** amendés. Le cœur reste la comptabilité officielle de l'IMF ; **l'articulation entre les créances de `paiement` et le compte de prêt du cœur sera analysée quand le connecteur réel sera ajouté** (§10.2). Réalise UJ-7.
 
 **Conséquences (testables) :**
-- La Créance d'une échéance **s'ouvre et se met à jour sur les faits du cœur** (`coeur-sfd.echeancier.changed@1`, `coeur-sfd.paiement.recu@1`), jamais sur la création d'un dossier par `credit`. Le module `credit` ne possède aucune Créance.
-- Quand `paiement` et le cœur divergent sur un reste dû, **le cœur l'emporte** ; la divergence est une ligne de la file des écarts (FR-159) et l'écran affiche « données du cœur du … ». Un test fait diverger un reste dû et vérifie l'affichage du montant du cœur.
-- Un remboursement saisi dans Prospera (collecte, guichet, paiement mobile validé) est un mouvement « en attente du cœur » ; il ne réduit **pas** la Créance miroir avant la confirmation du cœur et n'est jamais compté deux fois (FR-2, FR-155).
-- Les cinq capacités du noyau que PRD-D §6.0 demande de valider sont **validées ici** : composantes lues du cœur ; PAR sur l'encours entier (FR-173) ; groupe solidaire, tiers collectif (FR-129) ; blocage d'un dossier, décision du ROC seul (FR-250) ; épargne lue du cœur (FR-130).
-- Tant que l'amendement n'est pas porté, la source `ECHEANCE_DE_PRET` reste « réservée » et la balance âgée de l'IMF se lit par `coeur-sfd` (FR-151) [ASSUMPTION : l'amendement du PRD `paiement` s'écrit avant la validation du lot ; ce PRD ne le rédige pas].
+- La Créance d'une échéance s'ouvre sur l'**échéancier contractuel** du comité quand le dossier passe à EN_GESTION, et devient exigible à la confirmation du décaissement (FR-70). Le module `credit` ne possède aucune Créance ; il la fait ouvrir par `paiement`.
+- Les pénalités et intérêts de retard, calculés par le cœur (décision A4 ; le cœur fictif dans la démo), entrent dans la Créance comme composantes, avec leur source et leur date.
+- Un encaissement validé (paiement mobile, PI-SPI, collecte, guichet) réduit la Créance selon l'ordre d'imputation (décision A5) ; il n'est jamais compté deux fois (FR-2, FR-155).
+- Un écart entre la Créance de `paiement` et un montant renvoyé par le cœur ouvre une ligne de la file des écarts (FR-159), visible du GP et du CPT ; la règle d'arbitrage sera fixée avec le connecteur réel.
+- Les cinq capacités du noyau que PRD-D §6.0 demande de valider sont **validées ici** : Créance à composantes ; PAR sur l'encours entier (FR-173) ; groupe solidaire, tiers collectif (FR-129) ; blocage d'un dossier, décision du ROC seul (FR-218) ; épargne lue du cœur (FR-130).
+- La source `ECHEANCE_DE_PRET`, « réservée » dans PRD-D FR-247, est **ouverte** pour la microfinance.
 
 #### FR-258 : Notification : WhatsApp, SMS et lien de paiement, servis par le relais
 
@@ -3421,14 +3424,14 @@ Toutes les décisions sont datées et motivées dans `.memlog.md` ; les 71 quest
 
 ### 12.2 Actions qui restent au PO
 
-Ces points ne bloquent pas l'écriture du brouillon, mais chacun doit être tranché avant l'architecture ou les épics. Ils sont rangés du plus lourd au plus léger.
+Ces points ne bloquent pas l'écriture du brouillon, mais chacun doit être tranché avant l'architecture ou les épics. Ils sont rangés du plus lourd au plus léger. **Q1 à Q4 sont tranchées (2026-11-13)** ; Q5 à Q13 restent ouvertes, avec la proposition du brouillon comme valeur par défaut.
 
 | # | Question | Proposition du brouillon | Bloque |
 |---|---|---|---|
-| Q1 | **Le décaissement Mobile Money par opérateur** : `paiement` n'a aujourd'hui qu'un ordre sortant PI-SPI, sans adaptateur Mobile Money sortant ni IBAN (FR-256). D-5 suppose qu'il existe. | Février : décaissement Mobile Money par le cœur fictif dans la démo ; adaptateur sortant de `paiement` à chiffrer au plan. | architecture paiement |
-| Q2 | **Le registre de Créance de `paiement`** se dit « propriétaire unique » (PRD-D FR-247), alors que le cœur fait foi. | La Créance `ECHEANCE_DE_PRET` est un **miroir** du cœur ; amendement du PRD paiement à écrire (FR-257). | PRD paiement |
-| Q3 | **La spine Connecteurs** dit « rien pour février » (AD-32) ; D-2 met le contrat d'échange et le cœur fictif dans février. | Amender la spine : `coeur-sfd` est un module à part, hors `connecteurs-service`. | spine Connecteurs |
-| Q4 | **La charge de février** : l'IMF est le troisième client de février et Dev B est déjà au-delà de sa capacité (17-20 semaines pour 10). | Le PRD marque ★ la démo de février ; l'arbitrage se fait au plan. | plan v3 |
+| Q1 | **Le décaissement Mobile Money par opérateur** : `paiement` n'a aujourd'hui qu'un ordre sortant PI-SPI, sans adaptateur Mobile Money sortant ni IBAN (FR-256). D-5 suppose qu'il existe. | **Tranché (PO, 2026-11-13) : d'accord.** Dans la démo, le cœur fictif décaisse par Mobile Money ; l'adaptateur sortant de `paiement` est chiffré au plan (FR-256). | — |
+| Q2 | **Le registre de Créance de `paiement`** se dit « propriétaire unique » (PRD-D FR-247), alors que le cœur fait foi. | **Tranché (PO, 2026-11-13) :** pas d'amendement maintenant ; **`paiement` reste seul propriétaire des créances** ; on analysera quand le connecteur réel sera ajouté (FR-257). | — |
+| Q3 | **La spine Connecteurs** dit « rien pour février » (AD-32) ; D-2 met le contrat d'échange et le cœur fictif dans février. | **Tranché (PO, 2026-11-13) :** pour l'IMF, ce n'est pas une obligation à ce stade ; **pas d'amendement de la spine Connecteurs maintenant**. | — |
+| Q4 | **La charge de février** : l'IMF est le troisième client de février et Dev B est déjà au-delà de sa capacité (17-20 semaines pour 10). | **Tranché (PO, 2026-11-13) :** pas de souci, **rien n'est modifié** ; l'équipe tient février. | — |
 | Q5 | Codes et numéros des nouveaux modules : `produits-financiers` (M46) et `coeur-sfd` (M47). Leurs tirets attendent l'élargissement du format de droits (amendement C7). | Codes et numéros proposés. | manifestes |
 | Q6 | Le dossier de recouvrement est **par prêt** chez l'IMF, **par tiers** dans le module partagé (FR-211). | Par prêt, avec une vue par client. | module `recouvrement` |
 | Q7 | Trois lectures de tes réponses : E5 (seuils calculés sur les données après la reprise, validés, recalculés chaque trimestre) ; B3 (mises à jour liées au contrat de maintenance) ; score v0 par règles, barème 40/30/20/10. | Ces trois lectures. | — |
@@ -3517,19 +3520,18 @@ Index généré depuis le texte du PRD : chaque `[ASSUMPTION]` est une valeur ou
 | H-56 | FR-255 | à porter au PRD `reseau` |
 | H-57 | FR-256 | le bac à sable PI-SPI n'expose pas l'IBAN |
 | H-58 | FR-256 | à porter au PRD `paiement` |
-| H-59 | FR-257 | l'amendement du PRD `paiement` s'écrit avant la validation du lot ; ce PRD ne le rédige pas |
-| H-60 | FR-258 | cadre juridique des messages à un tiers ; §12.3 |
-| H-61 | FR-261 | lecture de la salle, séance 4 ; la licence ne couvre pas les évolutions |
-| H-62 | FR-262 | délai à fixer au contrat de maintenance |
-| H-63 | FR-263 | à porter au spine moteur, AD-9 |
-| H-64 | FR-263 | AD-9 ne couvre que deux noms ; liste à fixer à l'installation |
-| H-65 | FR-264 | le 443 publié par le serveur est limité au réseau interne ; nom et adresse choisis par l'IMF |
-| H-66 | FR-265 | la supervision du PRD moteur est surtout côté Money Vibes ; la lecture locale par l'équipe de l'IMF est à porter au PRD moteur |
-| H-67 | FR-266 | valeurs du cahier, à confirmer avec la taille réelle |
-| H-68 | FR-266 | règle « au-delà d'un serveur » à fixer avec la taille réelle |
-| H-69 | §8 | …concernés en moins de 5 s ; un mouvement du cœur, au plus tard une période d'échange après son arrivée (paramètre ; défaut : 15 min) |
-| H-70 | §8 | …et langue / Navigateurs récents (Chrome, Firefox, Edge, Safari iOS) ; application terrain sur téléphone Android d'entrée de gamme |
-| H-71 | §9 | horizon |
+| H-59 | FR-258 | cadre juridique des messages à un tiers ; §12.3 |
+| H-60 | FR-261 | lecture de la salle, séance 4 ; la licence ne couvre pas les évolutions |
+| H-61 | FR-262 | délai à fixer au contrat de maintenance |
+| H-62 | FR-263 | à porter au spine moteur, AD-9 |
+| H-63 | FR-263 | AD-9 ne couvre que deux noms ; liste à fixer à l'installation |
+| H-64 | FR-264 | le 443 publié par le serveur est limité au réseau interne ; nom et adresse choisis par l'IMF |
+| H-65 | FR-265 | la supervision du PRD moteur est surtout côté Money Vibes ; la lecture locale par l'équipe de l'IMF est à porter au PRD moteur |
+| H-66 | FR-266 | valeurs du cahier, à confirmer avec la taille réelle |
+| H-67 | FR-266 | règle « au-delà d'un serveur » à fixer avec la taille réelle |
+| H-68 | §8 | …concernés en moins de 5 s ; un mouvement du cœur, au plus tard une période d'échange après son arrivée (paramètre ; défaut : 15 min) |
+| H-69 | §8 | …et langue / Navigateurs récents (Chrome, Firefox, Edge, Safari iOS) ; application terrain sur téléphone Android d'entrée de gamme |
+| H-70 | §9 | horizon |
 
 ---
 
@@ -3716,7 +3718,7 @@ Même service que celui du PRD distributeur, vocabulaire en donnée. « Comme PR
 
 | Clause | Valeur pour ce module chez l'IMF |
 |---|---|
-| C1 Manifeste | Comme PRD-D A.9 (`code: 'recouvrement'`, `1.0.0`, `depends: [paiement, notification]`). `enrichiPar` précise pour l'IMF : `credit` (source `ECHEANCE_DE_PRET`, prêt EN_GESTION, blocage lu, plan d'étalement, clôture), `coeur-sfd` (reste dû, pénalités, mouvements, échéancier officiel : **le cœur fait foi**, le registre des créances de `paiement` est un miroir, FR-209), `microfinance` (clients, groupes, cautions), `terrain` (missions, FR-203), `risque-par` (PAR, classes, provisions proposées), `reseau` (agences, zones, affectation des REC), IA commune. `pdv` et `facturation` ne sont pas utilisés. |
+| C1 Manifeste | Comme PRD-D A.9 (`code: 'recouvrement'`, `1.0.0`, `depends: [paiement, notification]`). `enrichiPar` précise pour l'IMF : `credit` (source `ECHEANCE_DE_PRET`, prêt EN_GESTION, blocage lu, plan d'étalement, clôture), `coeur-sfd` (reste dû, pénalités, mouvements, échéancier officiel : **le cœur fait foi** pour l'argent ; `paiement` reste seul propriétaire des créances, FR-209, FR-257), `microfinance` (clients, groupes, cautions), `terrain` (missions, FR-203), `risque-par` (PAR, classes, provisions proposées), `reseau` (agences, zones, affectation des REC), IA commune. `pdv` et `facturation` ne sont pas utilisés. |
 | C2 Socle | Comme PRD-D A.9, avec la portée de l'IMF : ROC et DG le réseau, RA son agence, GP son portefeuille, REC ses zones affectées, CPT la file de rapprochement de son agence, AUD en lecture. Gate `RECOUVREMENT_NOT_ENTITLED`. |
 | C3 Données possédées | Comme PRD-D A.9, plus : dossiers de recouvrement **par prêt** (statut de recouvrement décidé, FR-211, FR-214), stratégies par agence et leur validation, affectations des REC par zone, actions et résultats (appel, visite, mise en demeure, saisie), plans d'étalement et leur accord signé, appels de caution, propositions de contentieux et de perte avec leurs décisions, fiches de mauvais payeur, scores de recouvrement et leurs facteurs, décisions de blocage et de déblocage avec motif. La balance âgée et les montants sont **lus** (cœur via `coeur-sfd`, puis `paiement`), jamais recopiés. |
 | C4 Emplacements vides | Comme PRD-D A.9, avec : `credit` absent : source IMF `NON_INSTALLE` ; `coeur-sfd` absent : reste dû, pénalités et mouvements `NON_INSTALLE`, aucun montant affiché ; `terrain` absent : mission = `NON_INSTALLE` ; `risque-par` absent : PAR et classe `NON_INSTALLE` ; IA commune absente : relances par règle de base, score par règle explicable v0, stratégie et analyse sans texte, scripts en gabarits, Copilot « bientôt ». Un test par dépendance. |
@@ -3817,7 +3819,7 @@ Les modules suivants ont déjà leurs treize clauses dans leur manifeste ou dans
 | Module | Manifeste ou annexe | Ce que l'IMF ajoute ou change | Point à reporter |
 |---|---|---|---|
 | `reseau` | `manifestes/reseau.manifest.ts` | quatre échelons (réseau, région, agence, zone) ; code d'agence du cœur sinon celui de Prospera ; zones et régions en polygones ; invitation SMS (STORY-900) ; zones blanches pour la prospection | FR-255 ; objets de reprise `reseau.zone@1`, `reseau.commercial@1` inchangés |
-| `paiement` | `manifestes/paiement.manifest.ts` | décaissement Mobile Money et PI-SPI par pays et par opérateur, banques par PI-SPI ; rattachement à moins de 1 % ; validation du CPT ; Créance `ECHEANCE_DE_PRET` en **miroir du cœur** | FR-256, FR-257 ; amendement du PRD `paiement` et de PRD-D FR-247 |
+| `paiement` | `manifestes/paiement.manifest.ts` | décaissement Mobile Money et PI-SPI par pays et par opérateur, banques par PI-SPI ; rattachement à moins de 1 % ; validation du CPT ; Créance `ECHEANCE_DE_PRET` ouverte, `paiement` seul propriétaire (décision du PO du 2026-11-13) | FR-256, FR-257 ; pas d'amendement du PRD `paiement` |
 | `notification` | `manifestes/notification.manifest.ts` | WhatsApp et SMS aux frais de l'IMF ; modèles approuvés avant la mise en service ; réponses et lien de paiement par le relais | FR-258 |
 | `reprise` | `manifestes/reprise.manifest.ts` | portefeuille de prêts en cours ; format de départ non tranché | FR-259, FR-196 à FR-198 |
 | `connecteurs` | `manifestes/connecteurs.manifest.ts` | le vrai connecteur du cœur est hors février ; contrat d'échange neutre en annexe C ; cœur fictif | FR-259, FR-166 |
