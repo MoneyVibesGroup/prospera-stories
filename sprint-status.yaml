@@ -5231,7 +5231,7 @@ sprints:
     end_date: "2027-06-17"
     capacity_points: 34
     committed_points: 31  # sous la capacité, délibérément : le plein régime a produit un dépassement à chaque fois (S10 40/34, S11 44/34, S18 42, S19 37/34, S20 48/34).
-    completed_points: 5  # 2026-11-14 : STORY-311 (5) done
+    completed_points: 10  # 2026-11-14 : STORY-311 (5) + STORY-312 (5) done
     status: "in_progress"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. ⚡ PÉRIMÈTRE CORRIGÉ le 2026-08-16 (la version ci-dessous était PÉRIMÉE, et elle l'était SUR LES 9 SPRINTS DU MODULE À LA FOIS — une note de périmètre recopiée ne se met pas à jour toute seule) : PRD prds/prd-fiscalite-2026-07-31/prd.md **v0.4** (et non v0.3) · découpage epics-fiscalite-2026-08-03.md **RÉALIGNÉ sur la v0.4 le 2026-08-16** — il disait encore « par salarié » et ignorait FR-F79/FR-F80 · architecture architecture/architecture-fiscal-service-2026-08-03/ARCHITECTURE-SPINE.md **AD-1→AD-21** (et non AD-19 : AD-20 agrégat de rémunération, AD-21 donnée personnelle de tiers, ajoutées le 2026-08-15).
     goal: "Le moteur de calcul est complet et explicable 🏁 EPIC-029 (barèmes, forfaits, pipeline de modificateurs, aiguillage, refus nommé hors périmètre), puis le calendrier s'ouvre."
     stories:
@@ -5249,9 +5249,10 @@ sprints:
         epic: "EPIC-029"
         points: 5
         service: "fiscal-service"
-        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) ; liste fermée, ordre du CODE (AD-3), MAXIMUM_DE = second calcul, AIGUILLAGE déclarable mais refusé au calcul jusqu'à STORY-313
+        status: "done"  # CLÔTURE 2026-11-14 — PR fiscal #35 rebase-mergée sur dev. Liste fermée de modificateurs vérifiée au chargement ; ordre d'AD-3 fixé par le CODE (même déclaration dans un autre ordre ⇒ même montant) ; MAXIMUM_DE = second calcul (IS = max(IS, MFP), taux réels) ; MINIMUM_PERCEPTION (TPU 20 000 F réels) ; AIGUILLAGE refusé au calcul jusqu'à STORY-313. 2 210 unitaires, 172 e2e, mutations 8/8.
         assigned_to: "Dev B"
         story_path: "stories/STORY-312.md"
+        completed_date: "2026-11-14"
       - story_id: "STORY-313"
         title: "Aiguillage, y compris sur l'état d'un tiers"
         epic: "EPIC-029"
