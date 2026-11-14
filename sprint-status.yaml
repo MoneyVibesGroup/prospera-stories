@@ -2645,7 +2645,7 @@ sprints:
         epic: "EPIC-024"
         points: 3
         service: "balance-service"
-        status: "done"  # ✅ 2026-11-14 — RECETTE VERTE, prospera-recette#14 fusionnée sur dev : 50 étapes, 3 todo nommés, 0 échec, sur pile construite depuis origin/dev. ⚠️ JALON SOUS RÉSERVE : TPU non éprouvée (BAREME_TPU_INDISPONIBLE, barème forfaitaire absent du paquet togo@2026) ; 409 CONTROLES_BLOQUANTS non atteignable par route publique. ⚠️ DÉFAUT PROBABLE balance-service : deux balances 2026 sage VALIDÉE en v3 (provisions numérotées sur la source, import sur son origine) — story à ouvrir. AVANT : jalon Module 1-bis
+        status: "done"  # ✅✅ 2026-11-14 (soir) — JALON ATELIER PRONONÇABLE : défaut des versions CORRIGÉ (nextVersion sur toute la lignée), barème TPU forfaitaire CGI Art. 135-5° intégré au paquet togo@2026 et calculé, 409 CONTROLES_BLOQUANTS éprouvé par un dossier CIMA — balance-service#141 + recette#15 fusionnées, recette 51/51 sans todo. AVANT : ✅ 2026-11-14 — RECETTE VERTE, prospera-recette#14 fusionnée sur dev : 50 étapes, 3 todo nommés, 0 échec, sur pile construite depuis origin/dev. ⚠️ JALON SOUS RÉSERVE : TPU non éprouvée (BAREME_TPU_INDISPONIBLE, barème forfaitaire absent du paquet togo@2026) ; 409 CONTROLES_BLOQUANTS non atteignable par route publique. ⚠️ DÉFAUT PROBABLE balance-service : deux balances 2026 sage VALIDÉE en v3 (provisions numérotées sur la source, import sur son origine) — story à ouvrir. AVANT : jalon Module 1-bis
         assigned_to: null
       # ── ⚡ Référentiels attribuables mais non servis — slotté le 2026-08-07 (décision user) :
       #    ticket `TICKET-BACKEND-referentiels-attribuables-mais-non-servis.md`.
