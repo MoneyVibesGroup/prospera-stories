@@ -5213,8 +5213,9 @@ sprints:
         epic: "EPIC-028"
         points: 3
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) ; déjà vrai dans le code (aucune lecture d'origine), la story le PROUVE et le GARDE : garde AST, lecture de liasse indifférente à la provenance, e2e sur les trois types d'entité
+        assigned_to: "Dev B"
+        story_path: "stories/STORY-309.md"
       - story_id: "STORY-310"
         title: "Registre de familles, famille proportionnelle et détail de calcul"
         epic: "EPIC-029"
