@@ -5,7 +5,7 @@
 **Découverte par :** AP-INT-0, en essayant simplement de se connecter à la console
 **Priorité :** Must Have — ⚡ **bloque toute première installation**
 **Story Points :** 2
-**Statut :** En revue (2026-11-14)
+**Statut :** Terminée (2026-11-14)
 **Créée le :** 2026-08-04
 **Sprint :** 21
 **Service :** `auth-service` (`:3001`)
@@ -75,11 +75,11 @@ Rotation ou expiration du mot de passe initial — autre question, autre story.
       seul scénario où le défaut se manifeste, et le vérifier sur une base déjà peuplée ne prouve
       rien
 - [x] La note de prérequis en tête de `e2e/integration-gate.spec.ts` est **retirée** côté console
-- [ ] Branche `MNV-178`, PR rebase-mergée sur `dev`
+- [x] Branche `MNV-178`, PR rebase-mergée sur `dev`
 
 ---
 
-## Suivi — 2026-11-14 (livrée, en revue)
+## Suivi — 2026-11-14 (livrée, fusionnée sur `dev`)
 
 **PR :** MoneyVibesGroup/prospera-auth-service#35 (code) · MoneyVibesGroup/frontend-admin-panel#25 (e2e de la console, à fusionner après #35).
 
