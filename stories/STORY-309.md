@@ -4,7 +4,7 @@ baseline_commit: c1f820b (prospera-fiscal-service)
 
 # STORY-309 : Agnosticisme de la source de balance
 
-Status: in-progress
+Status: done
 
 **Complexité :** small
 
@@ -74,27 +74,28 @@ fiscales sans développement spécifique, afin qu'une balance conforme suffise.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1** — Une liasse établie sur une balance ingérée directement (`source: direct`) et une
+- [x] **AC-1** — Une liasse établie sur une balance ingérée directement (`source: direct`) et une
   autre établie sur une balance de l'atelier ou d'un import se lisent à l'identique : seule la
   provenance diffère, et elle n'est pas lue.
-- [ ] **AC-2** — Aucune lecture ni test sur l'origine de la balance dans le code : une garde AST le
+- [x] **AC-2** — Aucune lecture ni test sur l'origine de la balance dans le code : une garde AST le
   tient, et elle rougit si on en introduit une.
-- [ ] **AC-3** — Pour chaque type d'entité d'un vertical, avec son paquet publié, les obligations
+- [x] **AC-3** — Pour chaque type d'entité d'un vertical, avec son paquet publié, les obligations
   sont dérivées par le chemin commun, sans code dédié.
 
 ## Fichiers
 
 - NEW `src/garde-agnosticisme-balance.spec.ts` — garde AST (D-309-2), scanner exporté et testé.
-- UPDATE `src/adapters/http/contrat-bilan-service.spec.ts` (ou `.contenu.spec.ts`) — preuve D-309-1 (a).
+- NEW `src/adapters/http/contrat-bilan-service.provenance.spec.ts` — preuve D-309-1 (a) (fichier
+  à part plutôt que dans les deux specs existantes : la preuve couvre les deux lectures).
 - UPDATE `test/obligations.e2e-spec.ts` — paramétrage D-309-3 (type d'entité de l'implantation et
   du rattachement mutables ; remis à `ENTREPRISE` dans le `beforeEach`).
 - Aucun code de production attendu. S'il en faut, c'est un écart à dire avant de le faire.
 
 ## Definition of Done
 
-- [ ] Branche `MNV-309` (fiscal) depuis `origin/dev`, PR fusionnée en rebase ; fiche et tracker par
+- [x] Branche `MNV-309` (fiscal) depuis `origin/dev`, PR fusionnée en rebase ; fiche et tracker par
   PR sur `main`.
-- [ ] Portes vertes (tsc, lint, unitaires, e2e) ; mutation : une lecture de `source === 'direct'`
+- [x] Portes vertes (tsc, lint, unitaires, e2e) ; mutation : une lecture de `source === 'direct'`
   glissée dans le domaine ou un adaptateur rougit la garde.
 
 ## Notes pour le développement
@@ -110,3 +111,12 @@ fiscales sans développement spécifique, afin qu'une balance conforme suffise.
 tracker (aucun arbitrage), de l'épic, de FR-F76/F77, d'AD-14/AD-15 et du code de `fiscal-service`,
 `balance-service` (contrat `balance.submitted`, `SOURCES_BALANCE`, `ORIGINES_BALANCE`),
 `bilan-service` (`SnapshotResponseDto`) et `dossier-service` (`TypeEntite`).
+
+**2026-11-14 — livrée.** fiscal-service #31, fusionnée en rebase sur `dev`. Aucun code de
+production : l'agnosticisme était déjà vrai, il est désormais gardé.
+
+- Portes : tsc, lint, 2 155 unitaires, 172 e2e.
+- Mutations 5/5 tuées : branche sur `source === 'direct'` dans le domaine, `sourceSystem` lu
+  dans un adaptateur (garde AST) ; provenance recopiée dans la liasse puis dans le contenu
+  (preuve AC-1, rouge sur l'assertion et non sur la compilation) ; dérivation qui ignore le type
+  d'entité (e2e AC-3).
