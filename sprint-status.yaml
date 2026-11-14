@@ -5140,8 +5140,9 @@ sprints:
         epic: "EPIC-027"
         points: 5
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) et code commencé sur MNV-298 ; groupe B du plan du 14/11
+        assigned_to: "Dev B"
+        story_path: "stories/STORY-298.md"
       - story_id: "STORY-300"
         title: "Habilitations graduées et séparation des natures d'accès"
         epic: "EPIC-027"
