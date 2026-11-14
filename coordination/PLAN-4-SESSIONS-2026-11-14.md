@@ -29,7 +29,7 @@
 
 | Groupe | Lot | Machine | Identifiants que lui seul peut créer |
 |:--:|---|---|---|
-| **A** | Relecture de quatre stories, transformation des restes du 14/11 en stories, puis **6 stories** (fiscalité et plateforme) | poste principal | **STORY-902 → STORY-929** |
+| **A** | Relecture de quatre stories, transformation des restes du 14/11 en stories, puis **6 stories** (fiscalité et plateforme), relecture du contrat d'état publié de B avant qu'il soit figé, et pour finir **la relecture de tout ce qu'ont fait les quatre groupes** (§3.4) | poste principal | **STORY-902 → STORY-929** |
 | **B** | **Le moteur d'installation** : 10 stories (socle, contrat d'état publié, manifestes, garde partagée) | au choix | **STORY-930 → STORY-979** |
 | **C** | **L'assurance** : 10 stories (socle, échange avec la compagnie, compagnie fictive, machine à états) | au choix | **STORY-980 → STORY-1029** |
 | **D** | **Le frontend** : 12 stories (app expert-comptable et console), pour éprouver les intégrations | au choix | **FE-112 → FE-139**, **AP-38 → AP-49** |
@@ -51,7 +51,7 @@ ne commence qu'après avoir lu cette ligne.
 | `prospera-kyc-service`, `prospera-admin-panel-service` (BFF de la console) | A | — |
 | `prospera-recette` (piles et recettes croisées) | A | les autres groupes **lancent** la pile, mais ne la modifient pas : une demande à A |
 | `prospera-auth-service` | A | **→ B** après la fusion de STORY-902 |
-| `prospera-notification-service` | A | **→ B** après la fusion de STORY-569 |
+| `prospera-notification-service` | **B** | **cédé par A le 14/11** (STORY-569 livrée ; dernier commit sur `dev` : `8916ee4`) |
 | `prospera-platform-catalog-service`, `prospera-paiement-service` | B | — |
 | `prospera-plateforme` (**neuf**, créé par B, STORY-931) | B, **par dossiers** | C écrit dans `contrats/assurance/`, `champs-sensibles/`, `classification-sante/` ; B dans tout le reste. Aucun fichier commun. |
 | `prospera-assurance-service`, `prospera-ocr-service` (= `document-service`) | C | — |
@@ -93,13 +93,38 @@ une story de la plage de A, ou dans la story déjà prévue s'il la touche.
 | # | Story | Dépôts | Note |
 |:--:|---|---|---|
 | 1 | **STORY-901** paquet Togo conforme au CGI (arrondis, minimum du MFP, zone franche) | balance, dossier, fiscal | **déjà commencée** : branches `MNV-901` avec des modifications non commitées dans `prospera-fiscal-service` et `prospera-balance-service` du poste principal |
-| 2 | **STORY-569** l'employeur invite, il ne crée pas | fiscal, auth, notification | libère `prospera-notification-service` pour B |
-| 3 | **STORY-902** droits `fiscalite:*` attribuables et rôles du cabinet ; fin du mode de compatibilité | auth, fiscal | après la réponse du PO ; libère `prospera-auth-service` pour B |
+| 2 | **STORY-345** base de rémunération par bénéficiaire et par période (salarié, dirigeant, associé) | fiscal | remplace STORY-569, **livrée le 14/11** (fiscal #39, notification #86) ; débloque le critère AC-7 de STORY-568 et STORY-348 |
+| 3 | **STORY-902** droits `fiscalite:*` attribuables et rôles du cabinet ; fin du mode de compatibilité | auth, fiscal | après la réponse du PO (§10, action 3) ; libère `prospera-auth-service` pour B |
 | 4 | **STORY-903** la vérification KYC du BFF tient quand le catalogue est injoignable | BFF, kyc | |
 | 5 | **STORY-313** aiguillage, y compris sur l'état d'un tiers | fiscal | fiche à écrire |
 | 6 | **STORY-314** familles hors périmètre : déclarables, non calculables | fiscal | fiche à écrire |
 
-**Fin du lot A :** Docker éteint ; les deux passations (auth, notification) écrites.
+**Passation de la notification :** STORY-569 étant livrée, `prospera-notification-service` est **cédé à B dès
+l'ouverture du lot** (dernier commit sur `dev` : `8916ee4`), écrit dans le journal de A.
+
+**Pendant le lot, à la demande de B :** relire le contrat d'état publié (STORY-932, puis la matrice et la route de
+STORY-936) **avant qu'il soit figé** ; tous les groupes le lisent ensuite. Verdict dans le journal de A, sous 24 heures.
+
+### 3.4 Pour finir : la relecture de tout le lot, des quatre groupes
+
+Quand le journal de A dit son lot terminé, A relit **tout ce qui a été fusionné depuis le 14/11 au soir par A, B, C et
+D**, pour s'assurer qu'il n'y a pas de trou. Il ne corrige rien dans un dépôt qu'il ne tient pas : chaque trou devient un
+**ticket** adressé au groupe qui tient le dépôt (§2), ou une story de la plage de A s'il est dans un de ses dépôts.
+
+| Ce que A vérifie | Comment |
+|---|---|
+| Chaque story fusionnée remplit **tous** ses critères d'acceptation | fiche ↔ PR de code ↔ tests ; un critère sans test qui le prouve est un trou |
+| Le tracker dit vrai | statut au tracker ↔ PR fusionnée sur GitHub ; points de sprint refaits |
+| Chaque PR de code a sa PR de docs, et inversement | `gh pr list --state merged` des dépôts ↔ `prospera-stories` |
+| Les contrats annoncés sont ceux qui ont été livrés | journal de B, section « ⚠ Contrats » ↔ code ; la matrice des neuf états rejouée |
+| Rien n'est resté en route | demandes ouvertes des journaux, tickets sans réponse, questions au PO sans réponse, migrations non jouées, passations non écrites |
+| Les piles démarrent | `docker compose up` de chaque service touché, sur des images reconstruites depuis `dev` ; la recette croisée de l'Atelier (STORY-100) toujours verte |
+| Les intégrations découvertes par D sont traitées | chaque ticket de D a une story ou une réponse |
+
+**Livrable :** `coordination/relecture-finale-groupe-A.md`, un tableau par groupe (vu, trou, ticket ou story ouvert),
+annoncé dans le journal de A.
+
+**Fin du lot A :** Docker éteint ; les deux passations (auth, notification) écrites ; relecture finale livrée.
 
 ---
 
@@ -112,7 +137,7 @@ au plus tard le 11/12** ; tout le reste du programme le lit.
 |:--:|---|---|---|---|
 | 1 | **STORY-930** le catalogue sur le socle | 155 | catalogue | `kafkajs` remplacé par `@confluentinc/kafka-javascript` 1.11 (interface de `KafkaProducerService` inchangée) ; Node 24 ; Karapace 6.2 et le client `@confluentinc/schemaregistry` dans la pile de développement ; le schéma de `entitlement.changed` enregistré, compatibilité BACKWARD vérifiée en CI ; `docker compose up` vert |
 | 2 | **STORY-931** le dépôt `prospera-plateforme` | 142 | `prospera-plateforme` (neuf) | dépôt créé (privé) ; un README qui dit **qui écrit dans quel dossier** (§2) ; contrats agent, centrale et partie A en JSON Schema, vecteurs signés par une racine de test ; paquet `point-de-decision` amorcé |
-| 3 | **STORY-932** le contrat d'état publié | 142 | catalogue | `contrat/etat-publie.openapi.json` et `contrat/matrice-etats.json`, versionnés ; **ajouts seulement** une fois figés ; annoncé dans le journal de B |
+| 3 | **STORY-932** le contrat d'état publié | 142 | catalogue | `contrat/etat-publie.openapi.json` et `contrat/matrice-etats.json`, versionnés ; **ajouts seulement** une fois figés ; annoncé dans le journal de B ; **relu par A avant d'être figé** (demande dans le journal de B) |
 | 4 | **STORY-933** Redis, BullMQ et le verrou d'outbox du catalogue | 142 | catalogue | BullMQ **émet** à l'heure dite, il ne calcule jamais un état |
 | 5 | **STORY-934** le manifeste dans `ModuleVersion` | 143 | catalogue | champs du manifeste (dont `depends`, `objetsDeReprise`, `domainesEchange`) ; refus nommés `MODULE_DEPENDANCE_MANQUANTE`, `MODULE_REQUIS_PAR`, `MANIFESTE_CYCLE`, `MANIFESTE_DEPENDANCE_MINEURE` ; garde source/copie |
 | 6 | **STORY-935** enregistrer les manifestes du cabinet et des démos | 143 | catalogue | depuis `prospera-stories/manifestes/` ; publication de `catalogue.manifeste.publie` |
@@ -165,7 +190,7 @@ plus une ligne « → A/B/C » dans le journal de D.
 
 | # | Story | App | Note |
 |:--:|---|---|---|
-| 1 | **FE-069** Integration Gate du parcours cabinet (créer un dossier, le tenir, l'archiver) | expert-comptable | sur la pile de `prospera-recette` (lancée, pas modifiée) ; la recette backend STORY-100 est verte depuis le 14/11 |
+| 1 | **FE-069** Integration Gate du parcours cabinet (créer un dossier, le tenir, l'archiver) | expert-comptable | sur la pile de `prospera-recette` (lancée, pas modifiée) ; la recette backend STORY-100 est verte depuis le 14/11. ⚠️ Une session du 14/11 l'avait prévue après STORY-569 : si une branche `FE-069` ou une PR existe déjà, D la reprend où elle en est au lieu de repartir de zéro |
 | 2 | **FE-085** l'accueil cesse de promettre ce qu'aucun code n'ouvre | expert-comptable | |
 | 3 | **FE-073** l'Atelier nomme ce qui n'y est pas encore | expert-comptable | |
 | 4 | **FE-074** export CSV et impression de la balance et du cahier du mois | expert-comptable | |
@@ -190,7 +215,9 @@ plus une ligne « → A/B/C » dans le journal de D.
 | De | Vers | Quoi | Quand |
 |---|---|---|---|
 | A | B | passation de `prospera-auth-service` | à la fusion de STORY-902 ; avant STORY-938 |
-| A | B | passation de `prospera-notification-service` | à la fusion de STORY-569 |
+| A | B | passation de `prospera-notification-service` | **dès l'ouverture du lot A** (STORY-569 livrée le 14/11) |
+| B | A | relecture du contrat d'état publié avant figeage | STORY-932, puis STORY-936 ; réponse de A sous 24 heures |
+| A, B, C, D | A | relecture finale de tout le lot | quand le journal de A dit son lot terminé (§3.4) |
 | A | D | ticket du motif par pièce (⇒ AP-38) | pendant les restes (§3.2) |
 | B | C | `prospera-plateforme` créé, README des dossiers | STORY-931 ; avant STORY-983 et 987 |
 | B | tous | contrat d'état publié figé, toute modification de contrat annoncée | STORY-932, puis au fil de l'eau |
@@ -262,11 +289,13 @@ jour **dans la PR de docs de chaque story** (donc fusionné avec elle), et au mi
 
 ---
 
-## 10. À décider par l'utilisateur avant de lancer B et C
+## 10. Trois actions à mener avant ou pendant le lancement
 
-1. **Créer quatre dépôts GitHub privés** dans `MoneyVibesGroup` : `prospera-plateforme` (B, STORY-931),
-   `prospera-sinistres-service`, `prospera-liaison-assureur-service`, `prospera-assureur-fictif` (C). Chaque session
-   demande la confirmation avant `gh repo create`.
-2. **Répartir les machines** : A (recette Docker) et C (trois services et MongoDB) sont les plus lourds ; les mettre sur
-   deux machines différentes si possible.
-3. **Le mode de compatibilité des droits fiscaux** (STORY-300) : question au PO, posée par A.
+| # | Action | Qui | Quand | Si elle n'est pas faite |
+|:--:|---|---|---|---|
+| 1 | **Créer quatre dépôts GitHub privés** dans `MoneyVibesGroup` : `prospera-plateforme` (B), `prospera-sinistres-service`, `prospera-liaison-assureur-service`, `prospera-assureur-fictif` (C). Commande : `gh repo create MoneyVibesGroup/<nom> --private`, puis une branche `main` (premier commit : README) et une branche `dev` partie de `main` ; réglages « Rebase and merge » seul. **La session demande la confirmation de l'utilisateur juste avant de créer.** | B pour `prospera-plateforme` ; C pour ses trois | B : en ouvrant STORY-931 ; C : en ouvrant STORY-980, 984 et 986 | la story qui en a besoin ne démarre pas ; la session passe à la suivante et le note dans son journal |
+| 2 | **Répartir les machines.** A et C sont les plus lourds en Docker (recettes ; trois services et MongoDB) : jamais sur la même machine. Chaque session écrit, à l'ouverture de son lot, **sur quelle machine elle tourne** dans la section « État » de son journal. | l'utilisateur ; chaque session l'inscrit | avant de lancer B et C | deux piles lourdes sur une machine : ports et mémoire saturés, recettes lentes ou fausses |
+| 3 | **Le mode de compatibilité des droits fiscaux** (STORY-300 : TENANT_ADMIN = tout, TENANT_USER = préparer) : reste-t-il, et jusqu'à quand ? | A pose la question au PO, dans son journal et à l'utilisateur | à l'ouverture du lot A | STORY-902 passe après STORY-313 et 314, en attendant la réponse |
+
+Personne ne modifie ce plan pour y inscrire sa machine : elle s'écrit dans le journal du groupe. Le plan ne change que
+par une PR demandée par l'utilisateur.
