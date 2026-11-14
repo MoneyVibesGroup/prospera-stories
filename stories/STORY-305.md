@@ -4,7 +4,7 @@ baseline_commit: 831a2f9 (prospera-fiscal-service), balance-service et dossier-s
 
 # STORY-305 : Dérivation du catalogue d'obligations
 
-Status: ready-for-dev
+Status: done
 
 **Complexité :** high
 
@@ -62,24 +62,47 @@ obligations d'un client, afin de ne plus la tenir de mémoire.
 
 ## Critères d'acceptation
 
-- [ ] **AC-1** — Une implantation renseignée : les obligations applicables sont créées avec
+- [x] **AC-1** — Une implantation renseignée : les obligations applicables sont créées avec
   assiette, périodicité, échéance, canal et base légale citée.
-- [ ] **AC-2** — Rejouée, la dérivation ne duplique rien : clé `(implantation, taxe, période)`
+- [x] **AC-2** — Rejouée, la dérivation ne duplique rien : clé `(implantation, taxe, période)`
   unique (index réel).
-- [ ] **AC-3** — Une obligation affectée et en préparation : une re-dérivation actualise échéance et
+- [x] **AC-3** — Une obligation affectée et en préparation : une re-dérivation actualise échéance et
   montant attendu, préserve statut, responsable et déclarations.
-- [ ] **AC-4** — Une entrée dont une donnée manque au paquet : obligation signalée non dérivable,
+- [x] **AC-4** — Une entrée dont une donnée manque au paquet : obligation signalée non dérivable,
   motif nommé, jamais omise.
-- [ ] **AC-5** — Le paquet régénéré est identique à l'octet chez `balance-service` et
+- [x] **AC-5** — Le paquet régénéré est identique à l'octet chez `balance-service` et
   `dossier-service` ; le schéma refuse une entrée de catalogue mal formée.
 
 ## Definition of Done
 
-- [ ] Branches `MNV-305` (balance, dossier, fiscal) depuis `origin/dev`, PR vers `dev` fusionnées en
+- [x] Branches `MNV-305` (balance, dossier, fiscal) depuis `origin/dev`, PR vers `dev` fusionnées en
   rebase dans l'ordre balance → dossier → fiscal ; fiche et tracker par PR sur `main`.
-- [ ] Portes qualité vertes sur les trois dépôts ; conformité Mongo réel ; mutations rouges.
+- [x] Portes qualité vertes sur les trois dépôts ; conformité Mongo réel ; mutations rouges.
 
 ## Progress Tracking
 
 **2026-11-14 — fiche écrite** (bmad-create-story) juste avant de coder ; décision « catalogue dans le
 paquet » prise par l'utilisateur le même jour.
+
+**2026-11-14 — implémentation et preuves.**
+- `balance-service` #138 (`025c789`) : rubrique `catalogueObligations` (6 entrées, références sans
+  recopie), schéma + règle R9 du validateur, artefact régénéré (sha256 `642c6756…`, onzième
+  régénération). `dossier-service` #45 (`78d464b`) : copie à l'octet.
+- `fiscal-service` #26 (`f652c27` → `08ded31`) : domaine `domain/obligations/` (catalogue fail-closed,
+  résolution, calendriers, applicabilité, non dérivable nommée, indéterminées, signalements de
+  validation), cas d'usage unique `DeriverObligationsService`, collection `obligations` (clé
+  d'idempotence, `$set` dérivés / `$setOnInsert` humains, traces chaînées), routes
+  `POST|GET /v1/exercices/:id/obligations[/derivation]`, régime fiscal lu chez `dossier-service`,
+  régime d'implantation aligné sur `REEL`/`SYNTHETIQUE`.
+- Sur le vrai paquet Togo 2026 (entreprise au réel) : 4 acomptes d'IS datés, 12 TVA non datées
+  (jour limite absent du paquet), DSF au réel non datée (`NON_CONSTATABLE`) ; synthétique 31/03 N+1,
+  assurance 31/05 N+1, microfinance non datée.
+- Conformité MongoDB réel 33/33 (dont : statut/responsable/déclarations posés à la main préservés,
+  re-dérivation tracée, concurrence ⇒ une obligation). Mutations M1 (+Mongo réel) à M6 rouges.
+  Unitaires fiscal 2065/2065, e2e 157/157 ; balance 5336 + e2e 1896 ; dossier 1829 + e2e 353.
+- ⚠️ Échecs d'ENVIRONNEMENT du poste, préexistants, sans lien : comparaisons aux dépôts voisins
+  (`bilan-service` en CRLF ; `fiscal-service` cherché sous ce nom) et séparateur de chemin Windows.
+- **Suite** : déclencheurs « implantation » et « publication de paquet » par la file BullMQ (AD-18) ;
+  `montantAttendu` avec EPIC-029 ; transcription verbatim des bases légales ; obligations devenues
+  obsolètes après un changement de calendrier (clé d'année ⇒ périodes) à marquer.
+
