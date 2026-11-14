@@ -5177,8 +5177,9 @@ sprints:
         epic: "EPIC-028"
         points: 8
         service: "fiscal-service"
-        status: "not_started"
-        assigned_to: null
+        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) et code commencé sur MNV-305 (balance, dossier, fiscal) ; catalogue d'obligations DANS le paquet (décision utilisateur du 2026-11-14)
+        assigned_to: "Dev B"
+        story_path: "stories/STORY-305.md"
       - story_id: "STORY-306"
         title: "Activation et désactivation manuelle d'une obligation"
         epic: "EPIC-028"
