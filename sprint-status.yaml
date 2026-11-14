@@ -5158,8 +5158,8 @@ sprints:
     end_date: "2027-06-03"
     capacity_points: 34
     committed_points: 32  # ⬆ 27→32 le 2026-08-09 : +STORY-362 (5 pts, implantations multiples) — le volet que la scission de STORY-302 avait laissé SANS PORTEUR. Le sprint reste sous la capacité (32/34). Historique : ⬇ 32→27 (STORY-303 réancrée au S20).
-    completed_points: 27  # 2026-11-14 : STORY-362 (5) + STORY-305 (8) + STORY-306 (3) + STORY-307 (5) + STORY-308 (3) + STORY-309 (3) done ; somme recalculée sur le fichier
-    status: "in_progress"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. ⚡ PÉRIMÈTRE CORRIGÉ le 2026-08-16 (la version ci-dessous était PÉRIMÉE, et elle l'était SUR LES 9 SPRINTS DU MODULE À LA FOIS — une note de périmètre recopiée ne se met pas à jour toute seule) : PRD prds/prd-fiscalite-2026-07-31/prd.md **v0.4** (et non v0.3) · découpage epics-fiscalite-2026-08-03.md **RÉALIGNÉ sur la v0.4 le 2026-08-16** — il disait encore « par salarié » et ignorait FR-F79/FR-F80 · architecture architecture/architecture-fiscal-service-2026-08-03/ARCHITECTURE-SPINE.md **AD-1→AD-21** (et non AD-19 : AD-20 agrégat de rémunération, AD-21 donnée personnelle de tiers, ajoutées le 2026-08-15).
+    completed_points: 32  # 2026-11-14 : STORY-362 (5) + STORY-305 (8) + STORY-306 (3) + STORY-307 (5) + STORY-308 (3) + STORY-309 (3) + STORY-310 (5) done — sprint clos ; somme recalculée sur le fichier
+    status: "done"  # 🆕 Module Fiscalité, créé au sprint-planning du 2026-08-03. ⚡ PÉRIMÈTRE CORRIGÉ le 2026-08-16 (la version ci-dessous était PÉRIMÉE, et elle l'était SUR LES 9 SPRINTS DU MODULE À LA FOIS — une note de périmètre recopiée ne se met pas à jour toute seule) : PRD prds/prd-fiscalite-2026-07-31/prd.md **v0.4** (et non v0.3) · découpage epics-fiscalite-2026-08-03.md **RÉALIGNÉ sur la v0.4 le 2026-08-16** — il disait encore « par salarié » et ignorait FR-F79/FR-F80 · architecture architecture/architecture-fiscal-service-2026-08-03/ARCHITECTURE-SPINE.md **AD-1→AD-21** (et non AD-19 : AD-20 agrégat de rémunération, AD-21 donnée personnelle de tiers, ajoutées le 2026-08-15).
     goal: "Le catalogue d'obligations se dérive tout seul 🏁 EPIC-028 — propriétaire unique, trois déclencheurs, clé d'idempotence — et le moteur de familles démarre."
     stories:
       - story_id: "STORY-362"
@@ -5222,9 +5222,10 @@ sprints:
         epic: "EPIC-029"
         points: 5
         service: "fiscal-service"
-        status: "in_progress"  # 2026-11-14 — fiche écrite (bmad-create-story) ; domain/familles, registre pur + provider Nest, PROPORTIONNELLE exacte en BigInt, paramètres validés au CHARGEMENT du paquet ; arrondi déclaré ou refus (D-310-5, à confirmer PO)
+        status: "done"  # CLÔTURE 2026-11-14 — PR fiscal #32 rebase-mergée sur dev. domain/familles : ensemble fermé, registre pur construit au démarrage, PROPORTIONNELLE exacte (BigInt), détail de calcul ; paramètres vérifiés au CHARGEMENT du paquet (et sur le paquet effectif d'une dérogation) ; garde AST sans eval. ⚠️ D-310-5 À CONFIRMER PO : montant fractionnaire sans arrondi déclaré ⇒ refus ARRONDI_NON_DECLARE. 2 182 unitaires, 172 e2e, mutations 8/8.
         assigned_to: "Dev B"
         story_path: "stories/STORY-310.md"
+        completed_date: "2026-11-14"
   - sprint_number: 25
     start_date: "2027-06-03"
     end_date: "2027-06-17"
@@ -6538,8 +6539,8 @@ fiscalite_epics:
   # à balance-service (EPIC-023/024), et AD-1 de l'architecture l'interdit à fiscal-service.
   epics:
     - { id: "EPIC-027", name: "Socle fiscal-service et gouvernance du paquet fiscal", frs: "FR-F67..F70, F58, F59 + AR-01..AR-08, AR-10", stories: "STORY-294..300 (+236 balance-service)", status: "proposed" }
-    - { id: "EPIC-028", name: "Dossier fiscal, implantations et catalogue d'obligations dérivé", frs: "FR-F01..F10, F57, F71..F78", stories: "STORY-301..309", status: "proposed" }
-    - { id: "EPIC-029", name: "Moteur de familles de calcul (registre de stratégies typées, pas d'interpréteur)", frs: "FR-F11..F15", stories: "STORY-310..314", status: "proposed" }
+    - { id: "EPIC-028", name: "Dossier fiscal, implantations et catalogue d'obligations dérivé", frs: "FR-F01..F10, F57, F71..F78", stories: "STORY-301..309", status: "done" }  # 2026-11-14 : 305→309 et 362 done (301-304 réancrées en EPIC-043)
+    - { id: "EPIC-029", name: "Moteur de familles de calcul (registre de stratégies typées, pas d'interpréteur)", frs: "FR-F11..F15", stories: "STORY-310..314", status: "in_progress" }  # 2026-11-14 : STORY-310 done
     - { id: "EPIC-030", name: "Calendrier fiscal et responsabilité", frs: "FR-F16..F21 + AR-09", stories: "STORY-315..319", status: "proposed" }
     - { id: "EPIC-031", name: "Chaîne déclarative — alimentation, cycle de vie, contrôles, piste d'audit 🏁 premier jalon vendable", frs: "FR-F22..F26, F33..F38, F51, F56, F62..F66", stories: "STORY-320..329", status: "proposed" }
     - { id: "EPIC-032", name: "Dépôt assisté, accusé et dossier de contrôle ⛔ jalon `format confirmé`", frs: "FR-F39..F45, F52..F55", stories: "STORY-330..339", status: "proposed" }
