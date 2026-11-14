@@ -4,7 +4,7 @@
 **Réf. architecture :** `prd-atelier-balance-2026-07-12.md` § AB-08 (contrôles & livraison) · `sprint-plan-atelier-balance-2026-07-12.md` § Coordination balance/bilan · patron e2e docker STORY-049 (chaîne KYC complète)
 **Priorité :** Must Have
 **Story Points :** 3
-**Statut :** Terminée (2026-11-14) — jalon prononçable SOUS RÉSERVE (TPU non éprouvée)
+**Statut :** Terminée (2026-11-14) — jalon Atelier PRONONÇABLE (réserves levées, défaut corrigé)
 **Assigné à :** null
 **Créée le :** 2026-07-12
 **Sprint :** 19 (EXTENDED)
@@ -91,9 +91,9 @@ C'est l'équivalent, pour le module Atelier, de **STORY-049** (e2e chaîne KYC) 
 - [x] **Stack docker racine** démarre `healthy` (auth + document + balance + bilan + mongo rs0 + kafka + minio + mailhog).
 - [x] **Scénario A (PME/cahiers-OCR)** vert de bout en bout : profil OCR → 2 axes → référentiel → cahiers/OCR → rattachement → balance stockée → rapprochement → fiscal → conseil → contrôles → validation → handoff.
 - [x] **Scénario B (cabinet/Sage)** vert de bout en bout : import Sage → reprise à-nouveaux → contrôles → fiscal → conseil → validation → handoff.
-- [ ] **Moteur fiscal** vérifié : **IS = max(MFP, IS)** (assertion sur les deux termes), TVA due, **TPU** pour le régime synthétique, provisions intégrées (44/89).
+- [x] **Moteur fiscal** vérifié : **IS = max(MFP, IS)** (assertion sur les deux termes), TVA due, **TPU** pour le régime synthétique, provisions intégrées (44/89).
 - [x] **⚠️ Garde-fous NFR-A04 assertés** : chaque levier d'optimisation est **tracé + base légale + plafonné** ; **plancher MFP respecté** ; **comparatif déposé/optimisé conserve les deux versions** (immutabilité) ; **l'e2e échoue si un levier minore l'impôt sans justification**.
-- [ ] **Contrôles** : équilibre bloquant → validation **409** ; Actif=Passif ; articulation résultat/CA/TVA ; **statut de preuve** transporté jusqu'au handoff ; `majorite_estimée` **livrable mais annotée**.
+- [x] **Contrôles** : équilibre bloquant → validation **409** ; Actif=Passif ; articulation résultat/CA/TVA ; **statut de preuve** transporté jusqu'au handoff ; `majorite_estimée` **livrable mais annotée**.
 - [x] **Handoff** : `balance.created` émis et **consommé** (round-trip Kafka) + `GET /api/v1/balance/…` retourne la `BalanceCanonique` **avec statut de preuve**.
 - [x] **Isolation tenant** (403 hors org) et **gate** (`@RequiresBalanceAccess` refuse si KYC ≠ APPROVED) vérifiées.
 - [x] **Idempotence** : ré-ingestion `orgId+exercice+source` ne crée pas de doublon.
@@ -175,13 +175,13 @@ expect(leviersNonJustifies).toHaveLength(0);
 ## Definition of Done
 
 - [x] Suite e2e docker (scénarios A **et** B) implémentée et **verte** contre le stack racine
-- [ ] IS = max(MFP, IS), TVA, TPU, provisions **vérifiés** par assertions
+- [x] IS = max(MFP, IS), TVA, TPU, provisions **vérifiés** par assertions
 - [x] **Garde-fous NFR-A04 assertés** (base légale + traçabilité + plancher MFP + double version conservée)
-- [ ] Contrôles + statut de preuve + validation 409-si-bloquant vérifiés
+- [x] Contrôles + statut de preuve + validation 409-si-bloquant vérifiés
 - [x] Handoff `balance.created` (round-trip Kafka) + API GET **avec statut de preuve**
 - [x] Isolation tenant, gate KYC, idempotence vérifiées
 - [ ] Non-régression : suites des services touchés vertes ; **CI verte**
-- [ ] Jalon **Module 1-bis (Atelier Balance) livré** prononçable
+- [x] Jalon **Module 1-bis (Atelier Balance) livré** prononçable
 
 ---
 
@@ -234,3 +234,45 @@ deux balances validées différentes. Il faut trancher : une suite de versions p
   socle lui-même. Un premier jet de la recette attendait l'inverse ; il a été corrigé.
 - ⚠️ La mise en route de la recette fait un `compose up` (reconstruction et rééquilibrage Kafka). Il ne faut pas la
   lancer en même temps qu'une autre suite lourde : on obtient sinon de faux « injoignable ».
+
+---
+
+## Suivi — 2026-11-14 (soir) : réserves LEVÉES, défaut CORRIGÉ — jalon prononçable
+
+Décision PO du même jour : corriger le défaut et intégrer les deux réserves **dans STORY-100**, sans ouvrir de story.
+
+**PR :**
+- MoneyVibesGroup/prospera-balance-service#141, fusionnée sur `dev` ;
+- MoneyVibesGroup/prospera-recette#15, fusionnée sur `dev`.
+
+### 1. Défaut des versions : corrigé
+
+`nextVersion` ne comptait que les balances sans origine. La balance provisionnée (`PROVISIONS_FISCALES`) et l'import de clôture portaient donc tous deux la v3.
+- **Correctif** : il compte désormais toute la lignée (`derniereVersionDeLaLignee`, la lecture de STORY-528).
+- **Recette** : les versions sage 2026 sont `4, 3, 2, 1`, sans doublon.
+
+### 2. TPU forfaitaire : barème intégré au paquet, calcul éprouvé
+
+**CGI Art. 135-5°** : activités commerciales et prestations non artisanales, CA ≤ 30 M, 7 tranches. Le barème est relevé à l'identique dans l'édition OTR 2025 (p. 75) et dans « CGI et LPF 2026 » (p. 77).
+- **Paquet** : il entre dans `togo@2026` (sha256 `a2238ad7…`) et se lit fail-closed. La règle **R10** du build refuse un barème à trou ou à chevauchement.
+- **Calcul**
+  - le tarif est celui de la tranche ;
+  - `taux: null` ;
+  - aucun plancher de 20 000, qui est propre au déclaratif ;
+  - l'exonération de l'Art. 128 s'applique ;
+  - l'avertissement `TARIF_SPECIFIQUE_A_VERIFIER` est émis.
+- **Hors calcul** : les autres tarifs de l'art. 135 (transporteurs, artisans, éleveurs, ambulants) dépendent d'une assiette qu'aucune balance ne porte. Ils sont nommés au paquet et le calcul avertit.
+- **Écriture de provision** : elle cite désormais la base de sa composante (elle disait « déclarative » dans tous les cas).
+- **Recette** : CA 1 000 000 FCFA ⇒ tranche n°1 ⇒ 10 000 FCFA. Le tarif attendu est recalculé depuis le texte du CGI, pas depuis le service. Les provisions passent en 641 / 441.
+
+### 3. 409 `CONTROLES_BLOQUANTS` : éprouvé par une route publique
+
+Les contrôles d'intégrité sont refusés dès le dépôt ; seul `EQUILIBRE_ACTIF_PASSIF` peut échouer à la validation, et il est réel sous **CIMA**.
+
+**Recette** : un dossier d'assurance porte un solde net sur un compte d'engagements (`000`, classe 0). La balance est équilibrée, donc acceptée au dépôt. Sa validation est refusée en 409 `EQUILIBRE_ACTIF_PASSIF`, et elle reste BROUILLON.
+
+### Résultat
+
+**Recette croisée : 51/51, plus aucun `todo`**, avec balance-service reconstruit depuis la branche du correctif.
+
+⚠️ La préparation de la recette fait un `up` sans `--build` : après un changement de service, il faut reconstruire son image.
